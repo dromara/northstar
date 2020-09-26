@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>tech.xuan-wu</groupId>
+	<artifactId>northstar</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<name>northstar</name>
+	<packaging>pom</packaging>
+	<description>北极星程序化交易平台</description>
+
+	<properties>
+		<java.version>11</java.version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<maven.compiler.source>${java.version}</maven.compiler.source>
+		<maven.compiler.target>${java.version}</maven.compiler.target>
+		<northstar-version>0.0.1-SNAPSHOT</northstar-version>
+		<springboot-version>2.1.5.RELEASE</springboot-version>
+		<lombok-version>1.18.8</lombok-version>
+		<slf4j-version>1.7.25</slf4j-version>
+		<commons-lang3-version>3.7</commons-lang3-version>
+		<commons-codec-version>1.13</commons-codec-version>
+		<commons-io-version>2.6</commons-io-version>
+		<fastjson-version>1.2.62</fastjson-version>
+		<protobuf-version>3.6.1</protobuf-version>
+		<protobuf-java-format-version>1.4</protobuf-java-format-version>
+		<disruptor-version>3.4.2</disruptor-version>
+		<jwt-version>3.5.0</jwt-version>
+		<servlet-version>3.1.0</servlet-version>
+		<netty-socketio-version>1.7.8</netty-socketio-version>
+		<socketio-client-version>1.0.0</socketio-client-version>
+		<mockito-version>3.0.0</mockito-version>
+		<hessian-version>4.0.38</hessian-version>
+		<testng-version>7.0.0</testng-version>
+	</properties>
+
+	<modules>
+		<module>northstar-common</module>
+		<module>northstar-gateway-api</module>
+		<module>northstar-gateway-impl-ctp</module>
+		<module>northstar-trader</module>
+		<module>northstar-strategy</module>
+	</modules>
+	
+	<dependencies>
+		<dependency>
+	        <groupId>org.projectlombok</groupId>
+	        <artifactId>lombok</artifactId>
+	        <version>${lombok-version}</version>
+	    </dependency>
+	    
+		<dependency>
+		    <groupId>org.slf4j</groupId>
+		    <artifactId>slf4j-api</artifactId>
+		    <version>${slf4j-version}</version>
+		</dependency>
+		
+		<dependency>
+		    <groupId>org.apache.commons</groupId>
+		    <artifactId>commons-lang3</artifactId>
+		    <version>${commons-lang3-version}</version>
+		</dependency>
+		
+		<dependency>
+		    <groupId>org.mockito</groupId>
+		    <artifactId>mockito-core</artifactId>
+		    <version>${mockito-version}</version>
+		    <scope>test</scope>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<version>${springboot-version}</version>
+			<scope>test</scope>
+		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/org.testng/testng -->
+		<dependency>
+		    <groupId>org.testng</groupId>
+		    <artifactId>testng</artifactId>
+		    <version>${testng-version}</version>
+		    <scope>test</scope>
+		</dependency>
+				
+	</dependencies>
+	
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>tech.xuan-wu</groupId>
+				<artifactId>northstar-common</artifactId>
+				<version>${northstar-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>tech.xuan-wu</groupId>
+				<artifactId>northstar-core</artifactId>
+				<version>${northstar-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>tech.xuan-wu</groupId>
+				<artifactId>northstar-gateway-api</artifactId>
+				<version>${northstar-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>tech.xuan-wu</groupId>
+				<artifactId>northstar-gateway-impl-ctp</artifactId>
+				<version>${northstar-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>tech.xuan-wu</groupId>
+				<artifactId>northstar-gateway-impl-simulate</artifactId>
+				<version>${northstar-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>tech.xuan-wu</groupId>
+				<artifactId>northstar-strategy-client</artifactId>
+				<version>${northstar-version}</version>
+			</dependency>
+			
+			
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-starter</artifactId>
+				<version>${springboot-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-starter-aop</artifactId>
+				<version>${springboot-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-starter-web</artifactId>
+				<version>${springboot-version}</version>
+			</dependency>
+			
+			<dependency>
+			    <groupId>org.springframework.boot</groupId>
+			    <artifactId>spring-boot-starter-mail</artifactId>
+			    <version>${springboot-version}</version>
+			</dependency>
+			<dependency>
+		        <groupId>org.springframework.boot</groupId>
+		        <artifactId>spring-boot-starter-actuator</artifactId>
+		        <version>${springboot-version}</version>
+		    </dependency>
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-configuration-processor</artifactId>
+				<version>${springboot-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-starter-data-mongodb</artifactId>
+				<version>${springboot-version}</version>
+			</dependency>
+			<dependency>
+			    <groupId>javax.servlet</groupId>
+			    <artifactId>javax.servlet-api</artifactId>
+			    <version>${servlet-version}</version>
+			    <scope>provided</scope>
+			</dependency>
+						
+			
+			<dependency>
+				<groupId>commons-codec</groupId>
+				<artifactId>commons-codec</artifactId>
+				<version>${commons-codec-version}</version>
+			</dependency>
+			
+			<dependency>
+			    <groupId>com.auth0</groupId>
+			    <artifactId>java-jwt</artifactId>
+			    <version>${jwt-version}</version>
+			</dependency>
+			<dependency>
+			    <groupId>commons-io</groupId>
+			    <artifactId>commons-io</artifactId>
+			    <version>${commons-io-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.google.protobuf</groupId>
+				<artifactId>protobuf-java</artifactId>
+				<version>${protobuf-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.google.protobuf</groupId>
+				<artifactId>protobuf-java-util</artifactId>
+				<version>${protobuf-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.googlecode.protobuf-java-format</groupId>
+				<artifactId>protobuf-java-format</artifactId>
+				<version>${protobuf-java-format-version}</version>
+			</dependency>
+			<dependency>
+			    <groupId>com.lmax</groupId>
+			    <artifactId>disruptor</artifactId>
+			    <version>${disruptor-version}</version>
+			</dependency>
+			<dependency>
+			    <groupId>com.corundumstudio.socketio</groupId>
+			    <artifactId>netty-socketio</artifactId>
+			    <version>${netty-socketio-version}</version>
+			</dependency>
+			<dependency>
+			    <groupId>io.socket</groupId>
+			    <artifactId>socket.io-client</artifactId>
+			    <version>${socketio-client-version}</version>
+			</dependency>
+			<dependency>
+			    <groupId>com.alibaba</groupId>
+			    <artifactId>fastjson</artifactId>
+			    <version>${fastjson-version}</version>
+			</dependency>
+			<dependency>
+			    <groupId>com.caucho</groupId>
+			    <artifactId>hessian</artifactId>
+			    <version>${hessian-version}</version>
+			</dependency>
+		</dependencies>
+		
+	</dependencyManagement>
+
+</project>
