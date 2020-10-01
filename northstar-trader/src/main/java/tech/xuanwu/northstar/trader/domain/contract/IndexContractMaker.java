@@ -50,7 +50,7 @@ public class IndexContractMaker {
 
 	public void updateTick(TickField tick) {
 		// 过滤指数合约的TICK
-		if(tick.getUnifiedSymbol().contains(CommonConstant.INDEX_SUFFIX)) {				
+		if(tick.getUnifiedSymbol().contains(CommonConstant.INDEX_SUFFIX)) {		
 			return;
 		}
 		String symbolName = resolveSymbolName(tick.getUnifiedSymbol());

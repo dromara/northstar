@@ -36,6 +36,7 @@ public class IndexContract {
 	private TickEventHandler tickHandler;
 
 	private double[] prices;
+	private TickField[] ticks;
 	private long[] volumeDeltas;
 	private long[] volumes;
 	private double[] openInterestDeltas;
@@ -71,6 +72,7 @@ public class IndexContract {
 		symbolIndexMap = new HashMap<>(contractSize);
 		memSet = new HashSet<>(contractSize);
 		prices = new double[contractSize];
+		ticks = new TickField[contractSize];
 		volumeDeltas = new long[contractSize];
 		volumes = new long[contractSize];
 		openInterestDeltas = new double[contractSize];
@@ -95,7 +97,8 @@ public class IndexContract {
 	public synchronized void updateByTick(TickField tick) {
 		Integer contractIndex = symbolIndexMap.get(tick.getUnifiedSymbol());
 		if (memSet.contains(contractIndex)) {
-			tickHandler.onTick(calculate());
+			TickField t = ticks[contractIndex];
+			tickHandler.onTick(calculate(t));
 			// 重置缓存
 			memSet.clear();
 			totalOpenInterest = 0;
@@ -105,13 +108,14 @@ public class IndexContract {
 		totalOpenInterest += tick.getOpenInterest();
 		double lastPrice = tick.getLastPrice();
 		prices[contractIndex] = lastPrice;
+		ticks[contractIndex] = tick;
 		volumeDeltas[contractIndex] = tick.getVolumeDelta();
 		volumes[contractIndex] = tick.getVolume();
 		openInterestDeltas[contractIndex] = tick.getOpenInterestDelta();
 		openInterests[contractIndex] = tick.getOpenInterest();
 	}
 
-	private TickField calculate() {
+	private TickField calculate(TickField t) {
 		// 加权均价
 		double weightedPrice = 0;
 		// 合计成交量变化
@@ -140,6 +144,10 @@ public class IndexContract {
 		if(tickBuilder.getOpenPrice()==0) {
 			tickBuilder.setOpenPrice(weightedPrice);
 		}
+		tickBuilder.setTradingDay(t.getTradingDay());
+		tickBuilder.setActionDay(t.getActionDay());
+		tickBuilder.setActionTime(t.getActionTime());
+		tickBuilder.setActionTimestamp(t.getActionTimestamp());
 		tickBuilder.setVolume(totalVolume);
 		tickBuilder.setVolumeDelta(totalVolumeDeltaInTick);
 		tickBuilder.setOpenInterestDelta(totalOpenInterestDeltaInTick);
