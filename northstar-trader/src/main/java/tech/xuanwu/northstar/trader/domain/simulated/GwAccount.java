@@ -1,5 +1,6 @@
 package tech.xuanwu.northstar.trader.domain.simulated;
 
+import xyz.redtorch.pb.CoreEnum.CurrencyEnum;
 import xyz.redtorch.pb.CoreField.AccountField;
 
 /**
@@ -12,6 +13,15 @@ public class GwAccount {
 	private volatile AccountField account;
 	private GwOrders gwOrders;
 	private GwPositions gwPositions;
+	
+	public GwAccount(String gatewayId) {
+		this.account = AccountField.newBuilder()
+				.setAccountId(gatewayId)
+				.setGatewayId(gatewayId)
+				.setDeposit(100000)
+				.setCurrency(CurrencyEnum.CNY)
+				.build();
+	}
 	
 	public GwAccount(AccountField account) {
 		this.account = account;

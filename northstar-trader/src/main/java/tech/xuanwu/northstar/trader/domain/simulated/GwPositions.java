@@ -31,6 +31,13 @@ public class GwPositions {
 	private Map<String, ContractField> contractMap;
 	private Map<String, PositionField> frozenPositionMap = new HashMap<>();
 	
+	public GwPositions() {}
+	
+	public GwPositions(ConcurrentHashMap<String, PositionField> longPositionMap, ConcurrentHashMap<String, PositionField> shortPositionMap) {
+		this.longPositionMap = longPositionMap;
+		this.shortPositionMap = shortPositionMap;
+	}
+	
 	public void setGwAccount(GwAccount gwAccount) {
 		this.gwAccount = gwAccount;
 	}

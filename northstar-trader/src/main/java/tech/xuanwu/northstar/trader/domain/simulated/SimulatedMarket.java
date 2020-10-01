@@ -3,6 +3,7 @@ package tech.xuanwu.northstar.trader.domain.simulated;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -15,10 +16,12 @@ import tech.xuanwu.northstar.gateway.FastEventEngine;
 import tech.xuanwu.northstar.gateway.FastEventEngine.EventType;
 import tech.xuanwu.northstar.gateway.FastEventEngine.FastEvent;
 import tech.xuanwu.northstar.gateway.FastEventEngine.FastEventHandler;
+import tech.xuanwu.northstar.persistance.po.Account;
+import tech.xuanwu.northstar.persistance.po.Position;
 import xyz.redtorch.pb.CoreEnum.CommonStatusEnum;
-import xyz.redtorch.pb.CoreEnum.CurrencyEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreEnum.OrderStatusEnum;
+import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
 import xyz.redtorch.pb.CoreField.AccountField;
 import xyz.redtorch.pb.CoreField.CancelOrderReqField;
 import xyz.redtorch.pb.CoreField.ContractField;
@@ -52,6 +55,8 @@ public class SimulatedMarket implements FastEventHandler {
 	private volatile long lastReportTime;
 
 	private FastEventEngine feEngine;
+	private String gatewayId;
+	private Map<String, ContractField> contractMap;
 	
 	private ScheduledExecutorService execService = Executors.newScheduledThreadPool(1);
 	
@@ -63,8 +68,9 @@ public class SimulatedMarket implements FastEventHandler {
 		this.DATA_GATEWAY = marketDataGatewayId;
 		this.feEngine = feEngine;
 		this.feEngine.addHandler(this);
+		this.gatewayId = gatewayId;
+		this.contractMap = contractMap;
 		
-		log.info("初始化模拟市场");
 		execService.scheduleAtFixedRate(() -> {
 			if(System.currentTimeMillis() - lastReportTime < REPORT_INTERVAL) {
 				// 当有行情刷新触发回报时，无需要定时回报
@@ -74,15 +80,31 @@ public class SimulatedMarket implements FastEventHandler {
 			gwPositions.getShortPositionMap().forEach((k,v) -> feEngine.emitEvent(EventType.POSITION, "", v));
 			feEngine.emitEvent(EventType.ACCOUNT, "", gwAccount.getAccount());
 		}, 20000, REPORT_INTERVAL, TimeUnit.MILLISECONDS);
+	}
+	
+	public void init(Account accountPO) {
+		log.info("初始化模拟市场");
 		
-		AccountField account = AccountField.newBuilder()
-				.setAccountId(gatewayId)
-				.setGatewayId(gatewayId)
-				.setDeposit(100000)
-				.setCurrency(CurrencyEnum.CNY)
-				.build();
-		gwAccount = new GwAccount(account);
-		gwPositions = new GwPositions();
+		if(accountPO == null) {
+			gwAccount = new GwAccount(gatewayId);
+			gwPositions = new GwPositions();
+		} else {
+			gwAccount = new GwAccount(accountPO.convertTo());
+			Map<String, Position> positionMap = accountPO.getPositionMap();
+			ConcurrentHashMap<String, PositionField> longPositionMap = new ConcurrentHashMap<>(positionMap.size());
+			ConcurrentHashMap<String, PositionField> shortPositionMap = new ConcurrentHashMap<>(positionMap.size());
+			positionMap.forEach((k, v) -> {
+				ContractField contract = contractMap.get(v.getContractUnifiedSymbol());
+				if(v.getPositionDirection() == PositionDirectionEnum.PD_Long) {
+					longPositionMap.put(k, v.convertTo(contract));
+				}
+				if(v.getPositionDirection() == PositionDirectionEnum.PD_Short) {
+					shortPositionMap.put(k, v.convertTo(contract));
+				}
+			});
+			gwPositions = new GwPositions(longPositionMap, shortPositionMap);
+		}
+		
 		gwOrders = new GwOrders();
 		
 		gwAccount.setGwOrders(gwOrders);
@@ -94,7 +116,6 @@ public class SimulatedMarket implements FastEventHandler {
 		gwOrders.setContractMap(contractMap);
 		gwOrders.setGwAccount(gwAccount);
 		gwOrders.setGwPositions(gwPositions);
-		
 	}
 	
 	/**
