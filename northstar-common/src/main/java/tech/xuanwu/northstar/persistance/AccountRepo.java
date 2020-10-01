@@ -8,4 +8,5 @@ import tech.xuanwu.northstar.persistance.po.Account;
 @Repository
 public interface AccountRepo extends MongoRepository<Account, String>{
 
+	Account findByGatewayId(String gatewayId);
 }

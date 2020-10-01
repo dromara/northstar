@@ -18,9 +18,11 @@ import org.springframework.context.annotation.Configuration;
 import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.gateway.FastEventEngine;
 import tech.xuanwu.northstar.gateway.GatewayApi;
+import tech.xuanwu.northstar.persistance.AccountRepo;
 import tech.xuanwu.northstar.persistance.CtpSettingRepo;
 import tech.xuanwu.northstar.persistance.po.CtpSetting.ConnectionType;
 import tech.xuanwu.northstar.persistance.po.CtpSetting.MarketType;
+import tech.xuanwu.northstar.persistance.po.Account;
 import tech.xuanwu.northstar.persistance.po.CtpSetting;
 import tech.xuanwu.northstar.trader.constants.Constants;
 import tech.xuanwu.northstar.trader.domain.simulated.SimulatedGateway;
@@ -45,6 +47,9 @@ public class TraderConfig implements InitializingBean{
 	
 	@Autowired
 	CtpSettingRepo ctpSettingRepo;
+	
+	@Autowired
+	AccountRepo accountRepo;
 	
 	HashMap<String, String> envMap = new HashMap<>(){
 		{
@@ -85,6 +90,7 @@ public class TraderConfig implements InitializingBean{
 			if(ctpSetting.getConnectionType() == ConnectionType.SIM_ACCOUNT) {
 				log.info("初始化CTP模拟账户：{}", gatewayId);
 				SimulatedMarket simMarket = new SimulatedMarket(gatewayId, Constants.CTP_MARKETDATA, fastEventEngine, contractMap);
+				initSimMarket(gatewayId, simMarket);
 				GatewayApi simGateway = new SimulatedGateway(fastEventEngine, ctpSetting.convertTo(), simMarket);
 				accountMap.put(gatewayId, simGateway);
 				simGateway.connect();
@@ -100,6 +106,11 @@ public class TraderConfig implements InitializingBean{
 		log.info("----------初始化账户结束----------");
 		
 		return accountMap;
+	}
+	
+	private void initSimMarket(String gatewayId, SimulatedMarket simMarket) {
+		Account account = accountRepo.findByGatewayId(gatewayId);
+		simMarket.init(account);
 	}
 	
 	/**
