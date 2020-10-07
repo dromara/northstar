@@ -1,6 +1,7 @@
 package tech.xuanwu.northstar.persistance.po;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import lombok.Data;
@@ -22,7 +23,7 @@ public class TradePair implements Serializable{
 	private static final long serialVersionUID = 6412773715116430870L;
 
 	private Trade openingTrade;
-	private List<Trade> closingTrades;
+	private List<Trade> closingTrades = new ArrayList<>();
 	private double closingProfit;
 	private int openPositionVol;
 	
@@ -43,7 +44,7 @@ public class TradePair implements Serializable{
 		if(trade.getOffsetFlag() == OffsetFlagEnum.OF_Open || trade.getOffsetFlag() == OffsetFlagEnum.OF_Unkonwn) {
 			throw new IllegalStateException("期望入参为平仓成交");
 		}
-		int dir = trade.getDirection() == DirectionEnum.D_Buy ? 1 : -1;
+		int dir = openingTrade.getDirection() == DirectionEnum.D_Buy ? 1 : -1;
 		if(trade.getVolume() <= openPositionVol) {
 			closingProfit += dir * (trade.getPrice() - openingTrade.getPrice()) * trade.getVolume() * trade.getContract().getMultiplier();
 			openPositionVol -= trade.getVolume();

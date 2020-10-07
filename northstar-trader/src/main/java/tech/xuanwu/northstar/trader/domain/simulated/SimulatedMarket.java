@@ -64,6 +64,8 @@ public class SimulatedMarket implements FastEventHandler {
 	
 	private final String DATA_GATEWAY;
 	
+	private volatile boolean hasInit;
+	
 	public SimulatedMarket(String gatewayId, String marketDataGatewayId, FastEventEngine feEngine, Map<String, ContractField> contractMap) {
 		this.DATA_GATEWAY = marketDataGatewayId;
 		this.feEngine = feEngine;
@@ -82,7 +84,7 @@ public class SimulatedMarket implements FastEventHandler {
 		}, 20000, REPORT_INTERVAL, TimeUnit.MILLISECONDS);
 	}
 	
-	public void init(Account accountPO) {
+	public Account init(Account accountPO) {
 		log.info("初始化模拟市场");
 		
 		if(accountPO == null) {
@@ -116,6 +118,9 @@ public class SimulatedMarket implements FastEventHandler {
 		gwOrders.setContractMap(contractMap);
 		gwOrders.setGwAccount(gwAccount);
 		gwOrders.setGwPositions(gwPositions);
+		
+		hasInit = true;
+		return Account.convertFrom(gwAccount.getAccount());
 	}
 	
 	/**
@@ -124,7 +129,7 @@ public class SimulatedMarket implements FastEventHandler {
 	 */
 	@Override
 	public void onEvent(FastEvent event, long sequence, boolean endOfBatch) throws Exception {
-		if (event.getEventType() != EventType.TICK) {
+		if (!hasInit || event.getEventType() != EventType.TICK) {
 			return;
 		}
 
@@ -245,4 +250,19 @@ public class SimulatedMarket implements FastEventHandler {
 		return false;
 	}
 	
+	/**
+	 * 入金
+	 * @param money
+	 */
+	public void deposit(int money) {
+		feEngine.emitEvent(EventType.BALANCE_CHANGE, "", gwAccount.deposit(money));
+	}
+	
+	/**
+	 * 出金
+	 * @param money
+	 */
+	public void withdraw(int money) {
+		feEngine.emitEvent(EventType.BALANCE_CHANGE, "", gwAccount.withdraw(money));
+	}
 }

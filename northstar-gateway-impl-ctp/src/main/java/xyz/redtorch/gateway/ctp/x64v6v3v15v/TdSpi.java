@@ -1399,19 +1399,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 				}
 				tradeBuilderCacheList.clear();
 				
-				//延迟两秒确保合约字典准备完成
-				Thread.sleep(2000);
-				
-//				NoticeInfo noticeInfo = new NoticeInfo();
-//				noticeInfo.setEvent(NoticeCode.GATEWAY_READY);
-//				noticeInfo.setMessage("网关:" + ctpGatewayImpl.getGateway().getName() + "，网关ID:" + ctpGatewayImpl.getGateway().getGatewayId() + "，可以交易");
-//				noticeInfo.setData(Base64.encodeBase64String(ctpGatewayImpl.getGateway().toByteArray()));
-//				
-//				NoticeField.Builder noticeBuilder = NoticeField.newBuilder();
-//				noticeBuilder.setContent(new Gson().toJson(noticeInfo));
-//				noticeBuilder.setStatus(CommonStatusEnum.COMS_SUCCESS);
-//				noticeBuilder.setTimestamp(System.currentTimeMillis());
-//				ctpGatewayImpl.getEventEngine().emitNotice(noticeBuilder.build());
+				ctpGatewayImpl.getEventEngine().emitEvent(EventType.LIFECYCLE, GatewayLifecycleEvent.ON_CTP_ACTION_REPLAY_DONE, null);
 			}
 		} catch (Throwable t) {
 			logger.error("{}OnRspQryInstrument Exception", logInfo, t);

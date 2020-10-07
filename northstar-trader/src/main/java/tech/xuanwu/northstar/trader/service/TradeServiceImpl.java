@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
+import tech.xuanwu.northstar.exception.NoSuchAccountException;
 import tech.xuanwu.northstar.exception.NoSuchContractException;
 import tech.xuanwu.northstar.gateway.GatewayApi;
 import tech.xuanwu.northstar.service.ITradeService;
@@ -43,13 +44,11 @@ public class TradeServiceImpl implements ITradeService{
 	@Autowired
 	ApplicationContext ctx;
 	
-	Comparator comparator = new Comparator() {
+	Comparator<ContractField> comparator = new Comparator<>() {
 
 		@Override
-		public int compare(Object o1, Object o2) {
-			ContractField c1 = (ContractField) o1;
-			ContractField c2 = (ContractField) o2;
-			return c1.getName().compareTo(c2.getName());
+		public int compare(ContractField o1, ContractField o2) {
+			return o1.getName().compareTo(o2.getName());
 		}
 		
 	};
@@ -59,6 +58,9 @@ public class TradeServiceImpl implements ITradeService{
 			OffsetFlagEnum dealType, OrderPriceTypeEnum priceType, TimeConditionEnum timeCondition) {
 		Map<String, GatewayApi> gatewayMap = ctx.getBean(Constants.TRADABLE_ACCOUNT, ConcurrentHashMap.class);
 		GatewayApi gatewayApi = gatewayMap.get(gatewayId);
+		if(gatewayApi == null) {
+			throw new NoSuchAccountException(gatewayId);
+		}
 		Map<String, ContractField> contractMap = ctx.getBean(Constants.CONTRACT_MAP, ConcurrentHashMap.class);
 		ContractField contract = contractMap.get(symbol);
 		if(contract == null) {
@@ -86,6 +88,9 @@ public class TradeServiceImpl implements ITradeService{
 	public boolean cancelOrder(String gatewayId, String orderId) {
 		Map<String, GatewayApi> gatewayMap = ctx.getBean(Constants.TRADABLE_ACCOUNT, ConcurrentHashMap.class);
 		GatewayApi gatewayApi = gatewayMap.get(gatewayId);
+		if(gatewayApi == null) {
+			throw new NoSuchAccountException(gatewayId);
+		}
 		CancelOrderReqField cancelOrderReq = CancelOrderReqField.newBuilder()
 				.setOrderId(orderId)
 				.build();

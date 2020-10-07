@@ -5,8 +5,8 @@ public class NoSuchAccountException extends NorthstarException{
 
 	public NoSuchAccountException(){}
 	
-	public NoSuchAccountException(String accountName) {
-		super("不存在ID为【" + accountName + "】的账户");
+	public NoSuchAccountException(String gatewayId) {
+		super("不存在网关ID为【" + gatewayId + "】的账户");
 	}
 	
 }

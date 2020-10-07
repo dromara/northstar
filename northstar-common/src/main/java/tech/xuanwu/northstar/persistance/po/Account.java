@@ -1,6 +1,7 @@
 package tech.xuanwu.northstar.persistance.po;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.BeanUtils;
@@ -35,7 +36,7 @@ public class Account implements Serializable{
 	private double deposit;
 	private double withdraw;
 	private String gatewayId;
-	private Map<String, Position> positionMap;
+	private Map<String, Position> positionMap = new HashMap<>();
 	
 	public static Account convertFrom(AccountField account) {
 		Account po = new Account();

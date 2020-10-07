@@ -16,9 +16,13 @@ import tech.xuanwu.northstar.gateway.FastEventEngine;
 import tech.xuanwu.northstar.gateway.FastEventEngine.EventType;
 import tech.xuanwu.northstar.gateway.FastEventEngine.FastEvent;
 import tech.xuanwu.northstar.gateway.FastEventEngine.FastEventHandler;
+import tech.xuanwu.northstar.persistance.AccountRepo;
+import tech.xuanwu.northstar.persistance.po.Account;
 import tech.xuanwu.northstar.gateway.GatewayApi;
 import tech.xuanwu.northstar.trader.constants.Constants;
 import tech.xuanwu.northstar.trader.domain.contract.IndexContractMaker;
+import tech.xuanwu.northstar.trader.domain.data.AccountInfoRecorder;
+import tech.xuanwu.northstar.trader.domain.simulated.SimulatedGateway;
 import xyz.redtorch.pb.CoreEnum.ConnectStatusEnum;
 import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
@@ -47,6 +51,12 @@ public class GatewayLifecycleHandler implements FastEventHandler{
 	@Autowired
 	@Qualifier(Constants.CONTRACT_MAP)
 	private Map<String, ContractField> contractMap;
+	
+	@Autowired
+	private AccountInfoRecorder accountInfoRecorder;
+	
+	@Autowired
+	AccountRepo accountRepo;
 	
 	@Autowired
 	private IndexContractMaker indexContractMaker;
@@ -105,6 +115,18 @@ public class GatewayLifecycleHandler implements FastEventHandler{
 				contractMap.put(c.getUnifiedSymbol(), c);
 			}
 			
+			break;
+		case GatewayLifecycleEvent.ON_CTP_ACTION_REPLAY_DONE:
+			// 初始化各个基础组件
+			accountInfoRecorder.init();
+			for(Entry<String, GatewayApi> e : gatewayApiMap.entrySet()) {
+				if(e.getValue() instanceof SimulatedGateway) {
+					Account account = accountRepo.findByGatewayId(e.getKey());
+					SimulatedGateway simGateway = (SimulatedGateway)e.getValue();
+					account = simGateway.getSimMarket().init(account);
+					accountRepo.save(account);
+				}
+			}
 			break;
 		case GatewayLifecycleEvent.ON_GATEWAY_DISCONNECTED:
 			gatewayId = (String) obj;

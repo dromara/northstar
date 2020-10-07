@@ -114,5 +114,9 @@ public class SimulatedGateway implements GatewayApi{
 	protected FastEventEngine getEventEngine() {
 		return feEngine;
 	}
+	
+	public SimulatedMarket getSimMarket() {
+		return simMarket;
+	}
 
 }

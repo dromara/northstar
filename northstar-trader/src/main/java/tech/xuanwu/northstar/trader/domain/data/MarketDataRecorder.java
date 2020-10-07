@@ -46,8 +46,7 @@ public class MarketDataRecorder implements FastEventHandler{
 		}
 		
 		TickField tick = (TickField) event.getObj();
-		
-		//由于Disruptor的线程模型是一个handler一个线程，因此不会出现线程安全问题
+		//由于Disruptor的线程模型是一个BatchEventHandler绑定一个线程，因此不会出现线程安全问题
 		String unifiedSymbol = tick.getUnifiedSymbol();
 		if(!tickMap.containsKey(unifiedSymbol)) {
 			// 一秒最多六个tick
@@ -59,8 +58,8 @@ public class MarketDataRecorder implements FastEventHandler{
 				if(unifiedSymbol.contains(CommonConstant.INDEX_SUFFIX)) {					
 					barPO.setMinTicks(tickList.stream().map(t -> Tick.convertFrom(t)).collect(Collectors.toList()));
 				}
-				tickList.clear();
 				barRepo.save(barPO);
+				tickList.clear();
 			}));
 		}
 		

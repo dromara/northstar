@@ -14,6 +14,7 @@ import com.lmax.disruptor.BatchEventProcessor;
 import com.lmax.disruptor.BlockingWaitStrategy;
 import com.lmax.disruptor.BusySpinWaitStrategy;
 import com.lmax.disruptor.EventHandler;
+import com.lmax.disruptor.ExceptionHandler;
 import com.lmax.disruptor.RingBuffer;
 import com.lmax.disruptor.SleepingWaitStrategy;
 import com.lmax.disruptor.YieldingWaitStrategy;
@@ -39,6 +40,26 @@ public class DisruptorFastEventEngine implements FastEventEngine, InitializingBe
 	@Value("${event.engine.strategy}")
 	private String waitStrategy;
 
+	private ExceptionHandler<FastEvent> commonExceptionHandler = new ExceptionHandler<>() {
+
+		@Override
+		public void handleEventException(Throwable ex, long sequence, FastEvent event) {
+			log.warn("事件异常：事件类型【"+event.getEventType()+"】", ex);
+		}
+
+		@Override
+		public void handleOnStartException(Throwable ex) {
+			log.warn("事件启动异常", ex);
+		}
+
+		@Override
+		public void handleOnShutdownException(Throwable ex) {
+			log.warn("事件中止异常", ex);			
+		}
+		
+	};
+	
+	
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		if ("BusySpinWaitStrategy".equals(waitStrategy)) {
@@ -62,6 +83,7 @@ public class DisruptorFastEventEngine implements FastEventEngine, InitializingBe
 	public synchronized void addHandler(FastEventHandler handler) {
 		BatchEventProcessor<FastEvent> processor;
 		processor = new BatchEventProcessor<FastEvent>(ringBuffer, ringBuffer.newBarrier(), handler);
+		processor.setExceptionHandler(commonExceptionHandler);
 		ringBuffer.addGatingSequences(processor.getSequence());
 		executor.execute(processor);
 		handlerProcessorMap.put(handler, processor);

@@ -1,12 +1,14 @@
 package tech.xuanwu.northstar.persistance;
 
-import org.springframework.data.mongodb.repository.MongoRepository;
-import org.springframework.stereotype.Repository;
+import java.util.List;
 
 import tech.xuanwu.northstar.persistance.po.Account;
 
-@Repository
-public interface AccountRepo extends MongoRepository<Account, String>{
+public interface AccountRepo{
 
 	Account findByGatewayId(String gatewayId);
+	
+	void save(Account account);
+	
+	List<Account> findAll();
 }

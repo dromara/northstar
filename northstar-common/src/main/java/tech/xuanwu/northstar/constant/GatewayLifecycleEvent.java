@@ -10,6 +10,8 @@ public interface GatewayLifecycleEvent {
 	
 	String ON_CTP_CONTRACT_READY = "onCtpContractReady";
 	
+	String ON_CTP_ACTION_REPLAY_DONE = "onCtpActionReplayDone";
+	
 	String ON_GATEWAY_DISCONNECTED = "onGatewayDisconnected";
 	
 }

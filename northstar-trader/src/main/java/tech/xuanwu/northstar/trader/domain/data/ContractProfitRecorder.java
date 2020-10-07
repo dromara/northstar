@@ -1,7 +1,5 @@
 package tech.xuanwu.northstar.trader.domain.data;
 
-import java.util.Iterator;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -32,13 +30,16 @@ public class ContractProfitRecorder{
 		
 		ContractProfit po = repo.findByGatewayIdAndUnifiedSymbol(gatewayId, unifiedSymbol);
 		if(po == null) {
-			po = new ContractProfit();
+			po = new ContractProfit(gatewayId, unifiedSymbol);
 		}
 		if(trade.getOffsetFlag() == OffsetFlagEnum.OF_Open) {
 			TradePair tradePair = new TradePair(trade);
 			po.getTradePairRecords().add(tradePair);
 		} else {
 			for(TradePair tradePair : po.getTradePairRecords()) {
+				if(tradePair.getOpenPositionVol() == 0) {
+					continue;
+				}
 				trade = tradePair.closeWith(trade);
 				if(trade == null) {
 					break;

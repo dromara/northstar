@@ -48,9 +48,6 @@ public class TraderConfig implements InitializingBean{
 	@Autowired
 	CtpSettingRepo ctpSettingRepo;
 	
-	@Autowired
-	AccountRepo accountRepo;
-	
 	HashMap<String, String> envMap = new HashMap<>(){
 		{
 			put("dev", "仿真行情（Simnow724）");
@@ -90,7 +87,6 @@ public class TraderConfig implements InitializingBean{
 			if(ctpSetting.getConnectionType() == ConnectionType.SIM_ACCOUNT) {
 				log.info("初始化CTP模拟账户：{}", gatewayId);
 				SimulatedMarket simMarket = new SimulatedMarket(gatewayId, Constants.CTP_MARKETDATA, fastEventEngine, contractMap);
-				initSimMarket(gatewayId, simMarket);
 				GatewayApi simGateway = new SimulatedGateway(fastEventEngine, ctpSetting.convertTo(), simMarket);
 				accountMap.put(gatewayId, simGateway);
 				simGateway.connect();
@@ -108,10 +104,6 @@ public class TraderConfig implements InitializingBean{
 		return accountMap;
 	}
 	
-	private void initSimMarket(String gatewayId, SimulatedMarket simMarket) {
-		Account account = accountRepo.findByGatewayId(gatewayId);
-		simMarket.init(account);
-	}
 	
 	/**
 	 * 网关概况

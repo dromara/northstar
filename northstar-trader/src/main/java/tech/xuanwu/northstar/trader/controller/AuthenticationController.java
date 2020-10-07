@@ -5,15 +5,19 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.google.common.hash.Hashing;
 
+import io.swagger.annotations.Api;
 import tech.xuanwu.northstar.common.ResultBean;
 import tech.xuanwu.northstar.common.ReturnCode;
 import tech.xuanwu.northstar.utils.JwtUtil;
 
+@Api(tags = "权限接口")
+@RequestMapping("/")
 @RestController
 public class AuthenticationController {
 	

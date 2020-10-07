@@ -29,7 +29,8 @@ public interface FastEventEngine {
 		ORDER,
 		NOTICE,
 		CONTRACT,
-		LIFECYCLE
+		LIFECYCLE,
+		BALANCE_CHANGE
 	}
 
 	public static class FastEvent {
