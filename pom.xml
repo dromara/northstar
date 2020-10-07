@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>tech.xuan-wu</groupId>
 	<artifactId>northstar</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<name>northstar</name>
 	<packaging>pom</packaging>
 	<description>北极星程序化交易平台</description>
@@ -14,7 +14,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>${java.version}</maven.compiler.source>
 		<maven.compiler.target>${java.version}</maven.compiler.target>
-		<northstar-version>0.0.1-SNAPSHOT</northstar-version>
+		<northstar-version>1.0.0</northstar-version>
 		<springboot-version>2.1.5.RELEASE</springboot-version>
 		<lombok-version>1.18.8</lombok-version>
 		<slf4j-version>1.7.25</slf4j-version>
@@ -105,11 +105,6 @@
 			<dependency>
 				<groupId>tech.xuan-wu</groupId>
 				<artifactId>northstar-gateway-impl-ctp</artifactId>
-				<version>${northstar-version}</version>
-			</dependency>
-			<dependency>
-				<groupId>tech.xuan-wu</groupId>
-				<artifactId>northstar-gateway-impl-simulate</artifactId>
 				<version>${northstar-version}</version>
 			</dependency>
 			<dependency>

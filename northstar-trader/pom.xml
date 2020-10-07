@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>tech.xuan-wu</groupId>
 		<artifactId>northstar</artifactId>
-		<version>0.0.1-SNAPSHOT</version>
+		<version>1.0.0</version>
 	</parent>
 	<artifactId>northstar-trader</artifactId>
 	<name>northstar-trader</name>
@@ -33,11 +33,6 @@
 		<dependency>
 			<groupId>tech.xuan-wu</groupId>
 			<artifactId>northstar-gateway-impl-ctp</artifactId>
-		</dependency>
-		
-		<dependency>
-			<groupId>tech.xuan-wu</groupId>
-			<artifactId>northstar-gateway-impl-simulate</artifactId>
 		</dependency>
 		
 		<dependency>
