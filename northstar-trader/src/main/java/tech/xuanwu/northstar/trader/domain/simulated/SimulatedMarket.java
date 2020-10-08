@@ -98,10 +98,10 @@ public class SimulatedMarket implements FastEventHandler {
 			positionMap.forEach((k, v) -> {
 				ContractField contract = contractMap.get(v.getContractUnifiedSymbol());
 				if(v.getPositionDirection() == PositionDirectionEnum.PD_Long) {
-					longPositionMap.put(k, v.convertTo(contract));
+					longPositionMap.put(contract.getUnifiedSymbol(), v.convertTo(contract));
 				}
 				if(v.getPositionDirection() == PositionDirectionEnum.PD_Short) {
-					shortPositionMap.put(k, v.convertTo(contract));
+					shortPositionMap.put(contract.getUnifiedSymbol(), v.convertTo(contract));
 				}
 			});
 			gwPositions = new GwPositions(longPositionMap, shortPositionMap);

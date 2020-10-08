@@ -123,8 +123,10 @@ public class GatewayLifecycleHandler implements FastEventHandler{
 				if(e.getValue() instanceof SimulatedGateway) {
 					Account account = accountRepo.findByGatewayId(e.getKey());
 					SimulatedGateway simGateway = (SimulatedGateway)e.getValue();
-					account = simGateway.getSimMarket().init(account);
-					accountRepo.save(account);
+					Account account1 = simGateway.getSimMarket().init(account);
+					if(account == null) {						
+						accountRepo.save(account1);
+					}
 				}
 			}
 			break;

@@ -218,14 +218,7 @@ public class GwPositions {
 	 * @param tick
 	 */
 	public synchronized PositionField updateLongPositionBy(TickField tick) {
-		ContractField contract = contractMap.get(tick.getUnifiedSymbol());
-		PositionField lp = longPositionMap.get(contract.getUnifiedSymbol());
-		if(lp != null) {
-			PositionField nlp = updatePosition(lp, contract, tick);
-			longPositionMap.compute(contract.getUnifiedSymbol(), (k, v) -> nlp);
-			return nlp;
-		}
-		return null;
+		return updatePositionBy(tick, longPositionMap);
 	}
 	
 	/**
@@ -233,11 +226,15 @@ public class GwPositions {
 	 * @param tick
 	 */
 	public synchronized PositionField updateShortPositionBy(TickField tick) {
+		return updatePositionBy(tick, shortPositionMap);
+	}
+	
+	private PositionField updatePositionBy(TickField tick, ConcurrentHashMap<String, PositionField> positionMap) {
 		ContractField contract = contractMap.get(tick.getUnifiedSymbol());
-		PositionField sp = shortPositionMap.get(contract.getUnifiedSymbol());
+		PositionField sp = positionMap.get(contract.getUnifiedSymbol());
 		if(sp != null) {
 			PositionField slp = updatePosition(sp, contract, tick);
-			shortPositionMap.compute(contract.getUnifiedSymbol(), (k, v) -> slp);
+			positionMap.compute(contract.getUnifiedSymbol(), (k, v) -> slp);
 			return slp;
 		}
 		return null;
