@@ -2,8 +2,6 @@ package tech.xuanwu.northstar.trader.config;
 
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.PostConstruct;
@@ -12,8 +10,10 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
 
 import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.gateway.FastEventEngine;
@@ -28,7 +28,6 @@ import tech.xuanwu.northstar.trader.domain.simulated.SimulatedMarket;
 import xyz.redtorch.gateway.ctp.x64v6v3v15v.CtpGatewayImpl;
 import xyz.redtorch.pb.CoreEnum.ConnectStatusEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
-import xyz.redtorch.pb.CoreField.GatewayField;
 import xyz.redtorch.pb.CoreField.GatewaySettingField;
 
 /**
@@ -38,10 +37,17 @@ import xyz.redtorch.pb.CoreField.GatewaySettingField;
  */
 @Slf4j
 @Configuration
+@PropertySource(value="classpath:ctp-${spring.profiles.active}.yml", factory=YamlPropertySourceFactory.class)
 public class TraderConfig implements InitializingBean{
 	
 	@Value("${spring.profiles.active:prod}")
 	String profile;
+	
+	@Value("${ctpUser}")
+	String ctpUser;
+	
+	@Value("${ctpPwd}")
+	String ctpPwd;
 	
 	@Autowired
 	CtpSettingRepo ctpSettingRepo;
@@ -54,10 +60,14 @@ public class TraderConfig implements InitializingBean{
 		}
 	};
 	
+	ConcurrentHashMap<String, GatewayApi> accountMap = new ConcurrentHashMap<>(); 
+	
 	@PostConstruct
 	private void printEnv() {
 		log.info("当前运行：{}", envMap.get(profile));
 	}
+	
+	
 	
 	/**
 	 * 合约字典
@@ -69,26 +79,18 @@ public class TraderConfig implements InitializingBean{
 	}
 	
 	/**
-	 * 交易账户
+	 * 真实交易账户
 	 * @return
 	 */
 	@Bean(Constants.TRADABLE_ACCOUNT)
 	public ConcurrentHashMap<String, GatewayApi> createGatewayMap(FastEventEngine fastEventEngine, 
 			@Qualifier(Constants.CONTRACT_MAP) ConcurrentHashMap<String, ContractField> contractMap){
-		ConcurrentHashMap<String, GatewayApi> accountMap = new ConcurrentHashMap<>(); 
 		Iterable<CtpSetting> ctpSettings = ctpSettingRepo.findByMarketType(getMarketType());
 		Iterator<CtpSetting> itSettings = ctpSettings.iterator();
 		log.info("----------初始化账户----------");
 		while(itSettings.hasNext()) {
 			CtpSetting ctpSetting = itSettings.next();
 			String gatewayId = ctpSetting.getGatewayId();
-			if(ctpSetting.getConnectionType() == ConnectionType.SIM_ACCOUNT) {
-				log.info("初始化CTP模拟账户：{}", gatewayId);
-				SimulatedMarket simMarket = new SimulatedMarket(gatewayId, Constants.CTP_MARKETDATA, fastEventEngine, contractMap);
-				GatewayApi simGateway = new SimulatedGateway(fastEventEngine, ctpSetting.convertTo(), simMarket);
-				accountMap.put(gatewayId, simGateway);
-				simGateway.connect();
-			}
 			if(ctpSetting.getConnectionType() == ConnectionType.ACCOUNT) {
 				log.info("初始化CTP账户：{}", gatewayId);
 				GatewayApi gateway = new CtpGatewayImpl(fastEventEngine, ctpSetting.convertTo());
@@ -102,28 +104,10 @@ public class TraderConfig implements InitializingBean{
 		return accountMap;
 	}
 	
-	
-	/**
-	 * 网关概况
-	 * @param gatewayMap
-	 * @return
-	 */
-	@Bean(Constants.TRADABLE_ACCOUNT_PROFILE)
-	public ConcurrentHashMap<String, GatewayField> createGatewayProfileMap(
-			@Qualifier(Constants.TRADABLE_ACCOUNT) Map<String, GatewayApi> gatewayMap){
-		ConcurrentHashMap<String, GatewayField> gatewayProfileMap = new ConcurrentHashMap<String, GatewayField>();
-		for(Entry<String, GatewayApi> e : gatewayMap.entrySet()) {
-			String gatewayId = e.getValue().getGateway().getGatewayId();
-			GatewayField gatewayProfile = GatewayField.newBuilder()
-					.setGatewayId(gatewayId)
-					.setName(e.getValue().getGatewaySetting().getGatewayName())
-					.setStatus(ConnectStatusEnum.CS_Disconnected)
-					.setGatewayType(e.getValue().getGatewaySetting().getGatewayType())
-					.setGatewayAdapterType(e.getValue().getGatewaySetting().getGatewayAdapterType())
-					.build();
-			gatewayProfileMap.put(gatewayId, gatewayProfile);
-		}
-		return gatewayProfileMap;
+	@Bean
+	@ConfigurationProperties(prefix="data-gateway-setting")
+	public CtpSetting createCtpSetting() {
+		return new CtpSetting();
 	}
 	
 	/**
@@ -132,21 +116,8 @@ public class TraderConfig implements InitializingBean{
 	 * @return
 	 */
 	@Bean(Constants.CTP_MARKETDATA)
-	public GatewayApi createCtpMarketDataGateway(FastEventEngine fastEventEngine) {
-		Iterable<CtpSetting> ctpSettings = ctpSettingRepo.findByMarketType(getMarketType());
-		Iterator<CtpSetting> itSettings = ctpSettings.iterator();
-		GatewaySettingField gatewaySetting = null;
-		while(itSettings.hasNext()) {
-			CtpSetting ctpSetting = itSettings.next();
-			if(ctpSetting.getConnectionType() == ConnectionType.SIM_ACCOUNT) {
-				gatewaySetting = ctpSetting.convertTo();
-				break;
-			}
-		}
-		if(gatewaySetting == null) {
-			throw new IllegalStateException("没有找到相应的行情设置");
-		}
-		
+	public GatewayApi createCtpMarketDataGateway(FastEventEngine fastEventEngine, CtpSetting ctpSetting) {
+		GatewaySettingField gatewaySetting = ctpSetting.convertTo();
 		gatewaySetting = gatewaySetting.toBuilder()
 				.setGatewayId(Constants.CTP_MARKETDATA)
 				.setGatewayName(Constants.CTP_MARKETDATA)
@@ -157,6 +128,23 @@ public class TraderConfig implements InitializingBean{
 		return gateway;
 	}
 	
+	/**
+	 * CTP模拟账户
+	 * @param fastEventEngine
+	 * @param ctpSetting
+	 * @param contractMap
+	 * @return
+	 */
+	@Bean(Constants.CTP_SIM_ACCOUNT)
+	public GatewayApi createCtpSimAccount(FastEventEngine fastEventEngine, CtpSetting ctpSetting,
+			@Qualifier(Constants.CONTRACT_MAP) ConcurrentHashMap<String, ContractField> contractMap) {
+		log.info("初始化CTP模拟账户：{}", ctpSetting.getGatewayId());
+		SimulatedMarket simMarket = new SimulatedMarket(ctpSetting.getGatewayId(), Constants.CTP_MARKETDATA, fastEventEngine, contractMap);
+		GatewayApi simGateway = new SimulatedGateway(fastEventEngine, ctpSetting.convertTo(), simMarket);
+		accountMap.put(ctpSetting.getGatewayId(), simGateway);
+		simGateway.connect();
+		return simGateway;
+	}
 	
 	protected MarketType getMarketType() {
 		MarketType type;
@@ -175,8 +163,7 @@ public class TraderConfig implements InitializingBean{
 		}
 		return type;
 	}
-
-
+	
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		log.info("设置完成");

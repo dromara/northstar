@@ -1,0 +1,13 @@
+data-gateway-setting:
+   gatewayId: Simnow724模拟账户
+   gatewayName: Simnow724模拟账户
+   userId: guest
+   password: 123456
+   brokerId: 9999
+   tdHost: 180.168.146.187
+   tdPort: 10130
+   mdHost: 180.168.146.187
+   mdPort: 10131
+   authCode: "0000000000000000"
+   userProductInfo: simnow_client_test
+   appId: simnow_client_test

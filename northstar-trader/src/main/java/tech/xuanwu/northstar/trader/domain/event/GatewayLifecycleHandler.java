@@ -37,10 +37,6 @@ public class GatewayLifecycleHandler implements FastEventHandler{
 	private FastEventEngine feEngine;
 	
 	@Autowired
-	@Qualifier(Constants.TRADABLE_ACCOUNT_PROFILE)
-	private Map<String, GatewayField> gatewayMap;
-	
-	@Autowired
 	@Qualifier(Constants.TRADABLE_ACCOUNT)
 	private Map<String, GatewayApi> gatewayApiMap;
 	
@@ -78,19 +74,9 @@ public class GatewayLifecycleHandler implements FastEventHandler{
 		String gatewayId;
 		switch(content) {
 		case GatewayLifecycleEvent.BEFORE_GATEWAY_CONNECT:
-			gatewayId = (String) obj;
-			if(!gatewayMap.containsKey(gatewayId)) {
-				return;
-			}
-			gatewayMap.put(gatewayId, gatewayMap.get(gatewayId).toBuilder().setStatus(ConnectStatusEnum.CS_Connecting).build());
 			// TODO 邮件通知
 			break;
 		case GatewayLifecycleEvent.ON_GATEWAY_CONNECTED:
-			gatewayId = (String) obj;
-			if(!gatewayMap.containsKey(gatewayId)) {
-				return;
-			}
-			gatewayMap.put(gatewayId, gatewayMap.get(gatewayId).toBuilder().setStatus(ConnectStatusEnum.CS_Connected).build());
 			// TODO 邮件通知
 			break;
 		case GatewayLifecycleEvent.ON_GATEWAY_READY:
@@ -131,8 +117,6 @@ public class GatewayLifecycleHandler implements FastEventHandler{
 			}
 			break;
 		case GatewayLifecycleEvent.ON_GATEWAY_DISCONNECTED:
-			gatewayId = (String) obj;
-			gatewayMap.put(gatewayId, gatewayMap.get(gatewayId).toBuilder().setStatus(ConnectStatusEnum.CS_Disconnected).build());
 			// TODO 邮件通知
 			break;
 		default:

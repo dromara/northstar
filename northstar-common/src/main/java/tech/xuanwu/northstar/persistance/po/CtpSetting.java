@@ -37,6 +37,8 @@ public class CtpSetting implements Serializable{
 	private MarketType marketType;
 	
 	public static enum ConnectionType {
+		//行情账户
+		DATA,
 		//模拟账户
 		SIM_ACCOUNT,
 		//真实账户

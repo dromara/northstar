@@ -12,6 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +21,7 @@ import tech.xuanwu.northstar.exception.NoSuchContractException;
 import tech.xuanwu.northstar.gateway.GatewayApi;
 import tech.xuanwu.northstar.service.ITradeService;
 import tech.xuanwu.northstar.trader.constants.Constants;
+import xyz.redtorch.pb.CoreEnum.ConnectStatusEnum;
 import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.ForceCloseReasonEnum;
@@ -42,7 +44,12 @@ import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 public class TradeServiceImpl implements ITradeService{
 	
 	@Autowired
-	ApplicationContext ctx;
+	@Qualifier(Constants.TRADABLE_ACCOUNT)
+	private Map<String, GatewayApi> gatewayApiMap;
+	
+	@Autowired
+	@Qualifier(Constants.CONTRACT_MAP)
+	private Map<String, ContractField> contractMap;
 	
 	Comparator<ContractField> comparator = new Comparator<>() {
 
@@ -56,12 +63,10 @@ public class TradeServiceImpl implements ITradeService{
 	@Override
 	public String submitOrder(String gatewayId, String symbol, double price, int volume, DirectionEnum dir,
 			OffsetFlagEnum dealType, OrderPriceTypeEnum priceType, TimeConditionEnum timeCondition) {
-		Map<String, GatewayApi> gatewayMap = ctx.getBean(Constants.TRADABLE_ACCOUNT, ConcurrentHashMap.class);
-		GatewayApi gatewayApi = gatewayMap.get(gatewayId);
+		GatewayApi gatewayApi = gatewayApiMap.get(gatewayId);
 		if(gatewayApi == null) {
 			throw new NoSuchAccountException(gatewayId);
 		}
-		Map<String, ContractField> contractMap = ctx.getBean(Constants.CONTRACT_MAP, ConcurrentHashMap.class);
 		ContractField contract = contractMap.get(symbol);
 		if(contract == null) {
 			throw new NoSuchContractException(symbol);
@@ -86,8 +91,7 @@ public class TradeServiceImpl implements ITradeService{
 
 	@Override
 	public boolean cancelOrder(String gatewayId, String orderId) {
-		Map<String, GatewayApi> gatewayMap = ctx.getBean(Constants.TRADABLE_ACCOUNT, ConcurrentHashMap.class);
-		GatewayApi gatewayApi = gatewayMap.get(gatewayId);
+		GatewayApi gatewayApi = gatewayApiMap.get(gatewayId);
 		if(gatewayApi == null) {
 			throw new NoSuchAccountException(gatewayId);
 		}
@@ -99,13 +103,19 @@ public class TradeServiceImpl implements ITradeService{
 
 	@Override
 	public List<GatewayField> getTradableAccountList() {
-		Map<String, GatewayField> accountMap = ctx.getBean(Constants.TRADABLE_ACCOUNT_PROFILE, ConcurrentHashMap.class);
-		return List.copyOf(accountMap.values());
+		List<GatewayField> resultList = new ArrayList<>();
+		gatewayApiMap.forEach((k,v) -> {
+			GatewayField gf = v.getGateway();
+			gf = gf.toBuilder()
+			.setStatus(v.isConnected() ? ConnectStatusEnum.CS_Connected : ConnectStatusEnum.CS_Disconnected)
+			.build();
+			resultList.add(gf);
+		});
+		return resultList;
 	}
 
 	@Override
 	public List<byte[]> getContracts() {
-		Map<String, ContractField> contractMap = ctx.getBean(Constants.CONTRACT_MAP, ConcurrentHashMap.class);
 		int size = contractMap.size() / 2;
 		List<byte[]> contractList = new ArrayList<>(size);
 		List<ContractField> sortList = new ArrayList<>(size);

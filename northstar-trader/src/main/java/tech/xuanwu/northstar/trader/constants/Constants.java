@@ -6,9 +6,7 @@ public interface Constants {
 	
 	String CTP_TRADING_DAY = "CtpTradingDay";
 	
-	String GLOBALVAR_MAP = "GlobalVarMap";
-	
-	String MARKETDATA_ACCOUNT = "MarketDataAccount";
+	String CTP_SIM_ACCOUNT = "CtpSimAccount";
 
 	String CONTRACT_MAP = "ContractMap";
 	

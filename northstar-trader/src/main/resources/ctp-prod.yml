@@ -1,0 +1,13 @@
+data-gateway-setting:
+   gatewayId: RealCTP模拟账户
+   gatewayName: RealCTP模拟账户
+   userId: guest
+   password: 123456
+   brokerId: 5200
+   tdHost: 140.206.242.43
+   tdPort: 41205
+   mdHost: 140.206.242.43
+   mdPort: 41213
+   authCode: "KEU1TH6FYSU4ZF27"
+   userProductInfo: client_northstar_v1.0
+   appId: client_northstar_v1.0
