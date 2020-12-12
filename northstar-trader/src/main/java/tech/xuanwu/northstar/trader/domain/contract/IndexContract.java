@@ -1,11 +1,10 @@
 package tech.xuanwu.northstar.trader.domain.contract;
 
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.ToDoubleFunction;
 
 import tech.xuanwu.northstar.constant.CommonConstant;
 import tech.xuanwu.northstar.utils.ContractNameResolver;
@@ -20,32 +19,23 @@ import xyz.redtorch.pb.CoreField.TickField;
  */
 public class IndexContract {
 
-	private ContractField self;
-
-	private TickField.Builder tickBuilder = TickField.newBuilder();
+	protected final ContractField self;
+	protected final TickField.Builder tickBuilder = TickField.newBuilder();
 	
-	private double priceTick;
-
-	/* 记录合约对应的数组下标 */
-	private Map<String, Integer> symbolIndexMap;
-	/* 记录合约的数组下标 */
-	private Set<Integer> memSet;
-
-	private int contractSize;
-
 	private TickEventHandler tickHandler;
-
-	private double[] prices;
-	private TickField[] ticks;
-	private long[] volumeDeltas;
-	private long[] volumes;
-	private double[] openInterestDeltas;
-	private double[] openInterests;
-	private volatile double totalOpenInterest;
+	
+	// 统计时间间隔（毫秒）
+	private final long TICK_INTERVAL = 300;
+	private final long PARA_THRESHOLD = 100;
+	
+	private ConcurrentHashMap<String, TickField> tickMap = new ConcurrentHashMap<>(20);
+	private ConcurrentHashMap<String, Double> weightedMap = new ConcurrentHashMap<>(20);
+	
+	private volatile long lastTickTimestamp = System.currentTimeMillis();
+	private volatile TickField lastTick = TickField.newBuilder().build();
 
 	public IndexContract(List<ContractField> seriesContracts, TickEventHandler tickHandler) {
-		contractSize = seriesContracts.size();
-		if(contractSize == 0) {
+		if(seriesContracts.isEmpty()) {
 			throw new IllegalStateException("合约个数为零");
 		}
 		this.tickHandler = tickHandler;
@@ -68,20 +58,6 @@ public class IndexContract {
 				.setContractId(contractId)
 				.build();
 		
-		priceTick = proto.getPriceTick();
-		symbolIndexMap = new HashMap<>(contractSize);
-		memSet = new HashSet<>(contractSize);
-		prices = new double[contractSize];
-		ticks = new TickField[contractSize];
-		volumeDeltas = new long[contractSize];
-		volumes = new long[contractSize];
-		openInterestDeltas = new double[contractSize];
-		openInterests = new double[contractSize];
-
-		for (int i = 0; i < seriesContracts.size(); i++) {
-			symbolIndexMap.put(seriesContracts.get(i).getUnifiedSymbol(), i);
-		}
-
 		tickBuilder.setUnifiedSymbol(unifiedSymbol);
 		tickBuilder.setGatewayId(proto.getGatewayId());
 		tickBuilder.addAllAskPrice(Arrays.asList(0D,0D,0D,0D,0D));
@@ -95,70 +71,69 @@ public class IndexContract {
 	}
 
 	public synchronized void updateByTick(TickField tick) {
-		Integer contractIndex = symbolIndexMap.get(tick.getUnifiedSymbol());
-		if (memSet.contains(contractIndex)) {
-			TickField t = ticks[contractIndex];
-			tickHandler.onTick(calculate(t));
-			// 重置缓存
-			memSet.clear();
-			totalOpenInterest = 0;
+		tickMap.compute(tick.getUnifiedSymbol(), (k, v) -> tick);
+		if(System.currentTimeMillis() - lastTickTimestamp > TICK_INTERVAL) {
+			lastTickTimestamp = System.currentTimeMillis();
+			tickBuilder.setTradingDay(tick.getTradingDay());
+			tickBuilder.setActionDay(tick.getActionDay());
+			tickBuilder.setActionTime(tick.getActionTime());
+			tickBuilder.setActionTimestamp(tick.getActionTimestamp());
+			//进行运算
+			calculate();
+			TickField t = tickBuilder.build();
+			tickHandler.onTick(t);
+			lastTick = t;
 		}
-
-		memSet.add(contractIndex);
-		totalOpenInterest += tick.getOpenInterest();
-		double lastPrice = tick.getLastPrice();
-		prices[contractIndex] = lastPrice;
-		ticks[contractIndex] = tick;
-		volumeDeltas[contractIndex] = tick.getVolumeDelta();
-		volumes[contractIndex] = tick.getVolume();
-		openInterestDeltas[contractIndex] = tick.getOpenInterestDelta();
-		openInterests[contractIndex] = tick.getOpenInterest();
 	}
 
-	private TickField calculate(TickField t) {
-		// 加权均价
-		double weightedPrice = 0;
-		// 合计成交量变化
-		long totalVolumeDeltaInTick = 0;
+	private void calculate() {
 		// 合计成交量
-		long totalVolume = 0;
-		// 合计持仓量变化
-		double totalOpenInterestDeltaInTick = 0;
+		final long totalVolume = tickMap.reduceValuesToLong(PARA_THRESHOLD, t -> t.getVolume(), 0, (a, b) -> a + b);
+		final long totalVolumeDelta = totalVolume - lastTick.getVolume();
+		// 合计持仓量
+		final double totalOpenInterest = tickMap.reduceValuesToDouble(PARA_THRESHOLD, t -> t.getOpenInterest(), 0, (a, b) -> a + b);
+		final double totalOpenInterestDelta = totalOpenInterest - lastTick.getOpenInterest();
+		// 合约权值计算
+		tickMap.forEachEntry(PARA_THRESHOLD, e -> weightedMap.compute(e.getKey(), (k,v) -> e.getValue().getOpenInterest() / totalOpenInterest));
 
-		for (int i = 0; i < contractSize; i++) {
-			weightedPrice += prices[i] * openInterests[i] / totalOpenInterest;
-			totalVolumeDeltaInTick += volumeDeltas[i];
-			totalVolume += volumes[i];
-			totalOpenInterestDeltaInTick += openInterestDeltas[i];
-		}
+		//加权均价
+		double rawWeightedLastPrice = computeWeightedValue(e -> tickMap.get(e.getKey()).getLastPrice() * e.getValue());
+		double weightedLastPrice = roundWithPriceTick(rawWeightedLastPrice);	//通过最小变动价位校准的加权均价
+		tickBuilder.setLastPrice(weightedLastPrice);
 		
-		weightedPrice = roundWithPriceTick(weightedPrice);
+		//加权最高价
+		double rawWeightedHighPrice = computeWeightedValue(e -> tickMap.get(e.getKey()).getHighPrice() * e.getValue());
+		double weightedHighPrice = roundWithPriceTick(rawWeightedHighPrice);	//通过最小变动价位校准的加权均价
+		tickBuilder.setHighPrice(weightedHighPrice);
 		
-		tickBuilder.setLastPrice(weightedPrice);
-		if (tickBuilder.getHighPrice()==0 || tickBuilder.getHighPrice() < weightedPrice) {
-			tickBuilder.setHighPrice(weightedPrice);
-		}
-		if (tickBuilder.getLowPrice()==0 || tickBuilder.getLowPrice() > weightedPrice) {
-			tickBuilder.setLowPrice(weightedPrice);
-		}
-		if(tickBuilder.getOpenPrice()==0) {
-			tickBuilder.setOpenPrice(weightedPrice);
-		}
-		tickBuilder.setTradingDay(t.getTradingDay());
-		tickBuilder.setActionDay(t.getActionDay());
-		tickBuilder.setActionTime(t.getActionTime());
-		tickBuilder.setActionTimestamp(t.getActionTimestamp());
+		//加权最低价
+		double rawWeightedLowPrice = computeWeightedValue(e -> tickMap.get(e.getKey()).getLowPrice() * e.getValue());
+		double weightedLowPrice = roundWithPriceTick(rawWeightedLowPrice);		//通过最小变动价位校准的加权均价
+		tickBuilder.setLowPrice(weightedLowPrice);
+		
+		//加权开盘价
+		double rawWeightedOpenPrice = computeWeightedValue(e -> tickMap.get(e.getKey()).getOpenPrice() * e.getValue());
+		double weightedOpenPrice = roundWithPriceTick(rawWeightedOpenPrice);	//通过最小变动价位校准的加权均价
+		tickBuilder.setOpenPrice(weightedOpenPrice);
+		
 		tickBuilder.setVolume(totalVolume);
-		tickBuilder.setVolumeDelta(totalVolumeDeltaInTick);
-		tickBuilder.setOpenInterestDelta(totalOpenInterestDeltaInTick);
+		tickBuilder.setVolumeDelta(totalVolumeDelta);
+		tickBuilder.setOpenInterestDelta(totalOpenInterestDelta);
 		tickBuilder.setOpenInterest(totalOpenInterest);
-		return tickBuilder.build();
+	}
+	
+	private double computeWeightedValue(ToDoubleFunction<Entry<String, Double>> transformer) {
+		return weightedMap.reduceEntriesToDouble(
+				PARA_THRESHOLD,
+				transformer,
+				0D, 
+				(a, b) -> a + b);
 	}
 
 	//四舍五入处理
 	private double roundWithPriceTick(double weightedPrice) {
 		int enlargePrice = (int) (weightedPrice * 1000);
-		int enlargePriceTick = (int) (priceTick * 1000);
+		int enlargePriceTick = (int) (self.getPriceTick() * 1000);
 		int numOfTicks = enlargePrice / enlargePriceTick;
 		int tickCarry = (enlargePrice % enlargePriceTick) < (enlargePriceTick / 2) ? 0 : 1;
 		  

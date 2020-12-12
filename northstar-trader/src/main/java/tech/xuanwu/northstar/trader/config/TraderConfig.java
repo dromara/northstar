@@ -43,12 +43,6 @@ public class TraderConfig implements InitializingBean{
 	@Value("${spring.profiles.active:prod}")
 	String profile;
 	
-	@Value("${ctpUser}")
-	String ctpUser;
-	
-	@Value("${ctpPwd}")
-	String ctpPwd;
-	
 	@Autowired
 	CtpSettingRepo ctpSettingRepo;
 	
@@ -66,8 +60,6 @@ public class TraderConfig implements InitializingBean{
 	private void printEnv() {
 		log.info("当前运行：{}", envMap.get(profile));
 	}
-	
-	
 	
 	/**
 	 * 合约字典
