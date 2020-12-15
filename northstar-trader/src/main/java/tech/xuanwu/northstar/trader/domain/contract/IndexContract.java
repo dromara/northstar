@@ -93,6 +93,9 @@ public class IndexContract {
 		// 合计持仓量
 		final double totalOpenInterest = tickMap.reduceValuesToDouble(PARA_THRESHOLD, t -> t.getOpenInterest(), 0, (a, b) -> a + b);
 		final double totalOpenInterestDelta = totalOpenInterest - lastTick.getOpenInterest();
+		// 合计成交额
+		final double totalTurnover = tickMap.reduceValuesToDouble(PARA_THRESHOLD, t -> t.getTurnover(), 0, (a, b) -> a + b);
+		final double totalTurnoverDelta = totalTurnover - lastTick.getTurnover();
 		// 合约权值计算
 		tickMap.forEachEntry(PARA_THRESHOLD, e -> weightedMap.compute(e.getKey(), (k,v) -> e.getValue().getOpenInterest() / totalOpenInterest));
 
@@ -120,6 +123,8 @@ public class IndexContract {
 		tickBuilder.setVolumeDelta(totalVolumeDelta);
 		tickBuilder.setOpenInterestDelta(totalOpenInterestDelta);
 		tickBuilder.setOpenInterest(totalOpenInterest);
+		tickBuilder.setTurnover(totalTurnover);
+		tickBuilder.setTurnoverDelta(totalTurnoverDelta);
 	}
 	
 	private double computeWeightedValue(ToDoubleFunction<Entry<String, Double>> transformer) {
