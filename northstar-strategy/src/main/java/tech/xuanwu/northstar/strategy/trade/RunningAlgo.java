@@ -11,9 +11,8 @@ public interface RunningAlgo {
 	/**
 	 * 初始化算法数据
 	 * @param data				数据
-	 * @param nextUpdateCursor	下一个数据的更新下标位置
 	 */
-	void init(double[] data, int nextUpdateCursor);
+	void init(double[] data);
 
 	/**
 	 * 更新数据

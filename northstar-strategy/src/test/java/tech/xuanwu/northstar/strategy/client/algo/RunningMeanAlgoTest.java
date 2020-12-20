@@ -23,7 +23,7 @@ public class RunningMeanAlgoTest {
 	
 	@BeforeClass
 	public void init() {
-		algo.init(sampleData, 0);
+		algo.init(sampleData);
 		
 	}
 

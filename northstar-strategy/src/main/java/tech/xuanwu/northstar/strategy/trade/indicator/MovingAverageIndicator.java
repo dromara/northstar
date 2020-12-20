@@ -80,7 +80,7 @@ public class MovingAverageIndicator extends BaseIndicator implements Indicator{
 			throw new IllegalStateException(e);
 		}
 		
-		algo.init(data, 0);
+		algo.init(data);
 	}
 
 	@Override

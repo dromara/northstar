@@ -18,18 +18,18 @@ public class RunningMeanAlgo implements RunningAlgo{
 	private int nextUpdateCursor;
 	private double result;
 	
-	private int sampleSize;
+	private int maxLen;
 	
-	public RunningMeanAlgo(int sampleSize) {
-		this.sampleSize = sampleSize;
-		data = new double[sampleSize];
+	public RunningMeanAlgo(int maxLen) {
+		this.maxLen = maxLen;
+		data = new double[maxLen];
 	}
 
 	@Override
-	public void init(double[] data, int nextUpdateCursor) {
-		Assert.isTrue(sampleSize == data.length, "数据样本大小不一致");
-		this.data = data;
-		this.nextUpdateCursor = nextUpdateCursor;
+	public void init(double[] data) {
+		Assert.isTrue(maxLen >= data.length, "初始化数据量超过预期");
+		System.arraycopy(data, 0, data, 0, data.length);
+		this.nextUpdateCursor = data.length;
 		result = Stats.meanOf(data);
 	}
 	
@@ -42,9 +42,9 @@ public class RunningMeanAlgo implements RunningAlgo{
 	public void update(double val) {
 		double oldVal = data[nextUpdateCursor];
 		double deltaVal = val - oldVal;
-		result += deltaVal / sampleSize;
+		result += deltaVal / maxLen;
 		data[nextUpdateCursor] = val;
-		nextUpdateCursor = (nextUpdateCursor + 1) % sampleSize;
+		nextUpdateCursor = (nextUpdateCursor + 1) % maxLen;
 	}
 
 }
