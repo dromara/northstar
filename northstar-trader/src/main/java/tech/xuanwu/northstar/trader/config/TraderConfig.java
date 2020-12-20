@@ -47,6 +47,8 @@ public class TraderConfig implements InitializingBean{
 	CtpSettingRepo ctpSettingRepo;
 	
 	HashMap<String, String> envMap = new HashMap<>(){
+		private static final long serialVersionUID = 7655899354976577760L;
+
 		{
 			put("dev", "仿真行情（Simnow724）");
 			put("test", "测试行情（Simnow）");

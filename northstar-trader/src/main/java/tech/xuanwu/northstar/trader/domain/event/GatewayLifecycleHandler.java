@@ -16,17 +16,15 @@ import tech.xuanwu.northstar.gateway.FastEventEngine;
 import tech.xuanwu.northstar.gateway.FastEventEngine.EventType;
 import tech.xuanwu.northstar.gateway.FastEventEngine.FastEvent;
 import tech.xuanwu.northstar.gateway.FastEventEngine.FastEventHandler;
+import tech.xuanwu.northstar.gateway.GatewayApi;
 import tech.xuanwu.northstar.persistance.AccountRepo;
 import tech.xuanwu.northstar.persistance.po.Account;
-import tech.xuanwu.northstar.gateway.GatewayApi;
 import tech.xuanwu.northstar.trader.constants.Constants;
 import tech.xuanwu.northstar.trader.domain.contract.IndexContractMaker;
 import tech.xuanwu.northstar.trader.domain.data.AccountInfoRecorder;
 import tech.xuanwu.northstar.trader.domain.simulated.SimulatedGateway;
-import xyz.redtorch.pb.CoreEnum.ConnectStatusEnum;
 import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
-import xyz.redtorch.pb.CoreField.GatewayField;
 
 
 @Slf4j
