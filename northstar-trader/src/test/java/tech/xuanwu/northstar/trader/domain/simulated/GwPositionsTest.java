@@ -45,7 +45,7 @@ public class GwPositionsTest {
 	
 	@Test
 	public void testTotalCloseProfit() {
-		assertThat(gwPositions.getTotalCloseProfit()).isEqualTo(0);
+		assertThat(gwPositions.gainCloseProfitThenReset()).isEqualTo(0);
 	}
 	
 	@Test

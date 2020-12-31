@@ -12,6 +12,7 @@ import org.apache.commons.codec.binary.StringUtils;
 
 import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.constant.CommonConstant;
+import tech.xuanwu.northstar.exception.TradeException;
 import tech.xuanwu.northstar.gateway.FastEventEngine;
 import tech.xuanwu.northstar.gateway.FastEventEngine.EventType;
 import tech.xuanwu.northstar.gateway.FastEventEngine.FastEvent;
@@ -73,6 +74,10 @@ public class SimulatedMarket implements FastEventHandler {
 		this.gatewayId = gatewayId;
 		this.contractMap = contractMap;
 		
+	}
+	
+	public Account init(Account accountPO) {
+		log.info("初始化模拟市场");
 		execService.scheduleAtFixedRate(() -> {
 			if(System.currentTimeMillis() - lastReportTime < REPORT_INTERVAL) {
 				// 当有行情刷新触发回报时，无需要定时回报
@@ -81,15 +86,12 @@ public class SimulatedMarket implements FastEventHandler {
 			gwPositions.getLongPositionMap().forEach((k,v) -> feEngine.emitEvent(EventType.POSITION, "", v));
 			gwPositions.getShortPositionMap().forEach((k,v) -> feEngine.emitEvent(EventType.POSITION, "", v));
 			feEngine.emitEvent(EventType.ACCOUNT, "", gwAccount.getAccount());
-		}, 20000, REPORT_INTERVAL, TimeUnit.MILLISECONDS);
-	}
-	
-	public Account init(Account accountPO) {
-		log.info("初始化模拟市场");
+		}, 1000, REPORT_INTERVAL, TimeUnit.MILLISECONDS);
 		
 		if(accountPO == null) {
 			gwAccount = new GwAccount(gatewayId);
 			gwPositions = new GwPositions();
+			log.info("创建新账户");
 		} else {
 			gwAccount = new GwAccount(accountPO.convertTo());
 			Map<String, Position> positionMap = accountPO.getPositionMap();
@@ -105,6 +107,7 @@ public class SimulatedMarket implements FastEventHandler {
 				}
 			});
 			gwPositions = new GwPositions(longPositionMap, shortPositionMap);
+			log.info("加载旧账户");
 		}
 		
 		gwOrders = new GwOrders();
@@ -120,6 +123,7 @@ public class SimulatedMarket implements FastEventHandler {
 		gwOrders.setGwPositions(gwPositions);
 		
 		hasInit = true;
+		log.info("当前账户：{}", gwAccount.getAccount());
 		return Account.convertFrom(gwAccount.getAccount());
 	}
 	
@@ -192,6 +196,11 @@ public class SimulatedMarket implements FastEventHandler {
 		
 		OrderField order = gwOrders.submitOrder(submitOrderReq);
 		feEngine.emitEvent(EventType.ORDER, "", order);
+		
+		if(order.getOrderStatus() == OrderStatusEnum.OS_Rejected) {
+			log.warn("【{}】交易异常：{}", submitOrderReq.getGatewayId(), order.getStatusMsg());
+			throw new TradeException(order.getStatusMsg());
+		}
 		
 		// 平仓委托时，需要冻结仓位
 		if(order.getOffsetFlag() != OffsetFlagEnum.OF_Open && order.getOrderStatus() == OrderStatusEnum.OS_Touched) {

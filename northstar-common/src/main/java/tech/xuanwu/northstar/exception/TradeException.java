@@ -6,7 +6,7 @@ public class TradeException extends NorthstarException{
 
 	public TradeException(){}
 	
-	public TradeException(String accountName, String message) {
-		super("账户【" + accountName + "】交易异常。原因：" + message);
+	public TradeException(String message) {
+		super(message);
 	}
 }

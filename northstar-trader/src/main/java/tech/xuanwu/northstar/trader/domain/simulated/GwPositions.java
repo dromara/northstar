@@ -246,21 +246,24 @@ public class GwPositions {
 		npb.setPriceDiff(p.getPositionDirection()==PositionDirectionEnum.PD_Long ? (tick.getLastPrice() - p.getPrice()) : (p.getPrice() - tick.getLastPrice()));
 		npb.setOpenPriceDiff(p.getPositionDirection()==PositionDirectionEnum.PD_Long ? (tick.getLastPrice() - p.getOpenPrice()) : (p.getOpenPrice() - tick.getLastPrice()));
 		npb.setPositionProfit(p.getPosition() * npb.getPriceDiff() * contract.getMultiplier());
-		npb.setPositionProfitRatio(npb.getPositionProfit() / npb.getUseMargin());
+		npb.setPositionProfitRatio(npb.getUseMargin() == 0  ? 0 : npb.getPositionProfit() / npb.getUseMargin());
 		npb.setOpenPositionProfit(npb.getPosition() * npb.getOpenPriceDiff() * contract.getMultiplier());
-		npb.setOpenPositionProfitRatio(npb.getOpenPositionProfit() / npb.getUseMargin());
+		npb.setOpenPositionProfitRatio(npb.getUseMargin() == 0  ? 0 : npb.getOpenPositionProfit() / npb.getUseMargin());
 		npb.setContractValue(tick.getLastPrice() * npb.getPosition() * contract.getMultiplier());
 		
 		return npb.build();
 	}
 	
 	/**
-	 * 当天总平仓盈亏
+	 * 结转当天总平仓盈亏
 	 * @return
 	 */
-	public double getTotalCloseProfit() {
-		return totalCloseProfit;
+	public double gainCloseProfitThenReset() {
+		double val = totalCloseProfit;
+		totalCloseProfit = 0D;
+		return val;
 	}
+	
 	
 	/**
 	 * 总持仓盈亏

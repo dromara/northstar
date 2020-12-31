@@ -1,5 +1,6 @@
 package tech.xuanwu.northstar.trader.domain.simulated;
 
+import lombok.extern.slf4j.Slf4j;
 import xyz.redtorch.pb.CoreEnum.CurrencyEnum;
 import xyz.redtorch.pb.CoreField.AccountField;
 
@@ -8,6 +9,7 @@ import xyz.redtorch.pb.CoreField.AccountField;
  * @author kevinhuangwl
  *
  */
+@Slf4j
 public class GwAccount {
 	
 	private volatile AccountField account;
@@ -21,10 +23,12 @@ public class GwAccount {
 				.setDeposit(100000)
 				.setCurrency(CurrencyEnum.CNY)
 				.build();
+		log.info("初始化账户：{}", account);
 	}
 	
 	public GwAccount(AccountField account) {
 		this.account = account;
+		log.info("加载账户：{}", account);
 	}
 	
 	public void setGwPositions(GwPositions gwPositions) {
@@ -76,9 +80,11 @@ public class GwAccount {
 		
 		AccountField.Builder ab = account.toBuilder();
 		
-		ab.setCloseProfit(gwPositions.getTotalCloseProfit());
+		double closeProfit = ab.getCloseProfit();
+		double commission = ab.getCommission();
+		ab.setCloseProfit(closeProfit + gwPositions.gainCloseProfitThenReset());
 		ab.setPositionProfit(gwPositions.getTotalPositionProfit());
-		ab.setCommission(gwOrders.getTotalCommission());
+		ab.setCommission(commission + gwOrders.gainCommissionThenReset());
 		
 		//当前权益 = 期初权益 + 当天平仓盈亏  + 持仓盈亏 - 手续费 + 入金金额 - 出金金额 
 		ab.setBalance(ab.getPreBalance() + ab.getCloseProfit() + ab.getPositionProfit() - ab.getCommission() + ab.getDeposit() - ab.getWithdraw());

@@ -88,7 +88,7 @@ public class GwOrders {
 			int vol = submitOrderReq.getVolume();
 			double price = submitOrderReq.getPrice();
 			double cost = vol * price * contract.getMultiplier() * marginRate + GwConstants.DEFAULT_FEE;
-			if(cost > gwAccount.getAccount().getAvailable() + gwAccount.getAccount().getDeposit()) {
+			if(cost > gwAccount.getAccount().getAvailable()) {
 				ob.setOrderStatus(OrderStatusEnum.OS_Rejected);
 				ob.setStatusMsg("资金不足");
 				log.warn("资金不足，无法下单");
@@ -204,8 +204,10 @@ public class GwOrders {
 		return order;
 	}
 	
-	public double getTotalCommission() {
-		return commission;
+	public double gainCommissionThenReset() {
+		double val = commission;
+		commission = 0D;
+		return val;
 	}
 
 	public double getTotalFrozenAmount() {

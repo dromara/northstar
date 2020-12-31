@@ -9,7 +9,6 @@ import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 
@@ -23,7 +22,7 @@ import tech.xuanwu.northstar.utils.JwtUtil;
  */
 @Slf4j
 @Aspect
-@Component
+//@Component
 @ConditionalOnProperty(prefix="spring.profiles", name="active", havingValue="prod")
 public class WebServiceAspect implements InitializingBean{
 

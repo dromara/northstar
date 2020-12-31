@@ -26,7 +26,7 @@ public class SwaggerConfig {
     public Docket createRestApi() {
     	log.info("启动swagger");
         return new Docket(DocumentationType.SWAGGER_2)
-        		.enable(!StringUtils.equals(profile, "prod"))
+//        		.enable(!StringUtils.equals(profile, "prod"))
                 .pathMapping("/")
                 .select()
                 .apis(RequestHandlerSelectors.basePackage("tech.xuanwu.northstar.trader.controller"))
