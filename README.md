@@ -5,7 +5,7 @@
 ### 一键安装
 在linux centOS系统下，在root用户下，输入以下命令：  
 
-	curl -L https://gitee.com/KevinHuangwl/northstar/raw/master/autobuild.sh
+	curl -L https://gitee.com/KevinHuangwl/northstar/raw/master/autobuild.sh | sh
 
 
 ### 项目仍处于快速迭代阶段，欢迎PR！

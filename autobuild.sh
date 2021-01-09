@@ -1,4 +1,4 @@
-yum install git maven && \
+yum install git maven -y && \
 git clone https://gitee.com/KevinHuangwl/northstar.git && \
 curl -sSL https://get.daocloud.io/docker | sh && \
 echo {"registry-mirrors": ["https://docker.mirrors.ustc.edu.cn"]} >/etc/docker/daemon.json && \
