@@ -9,6 +9,7 @@ systemctl restart docker
 docker pull mongo:4.0 
 docker pull nginx
 cd ~/northstar
+\cp -f settings.xml /etc/maven/settings.xml
 mvn clean install && docker build -t northstar-trader . 
 cd ~/northstar-monitor
 npm config set registry https://registry.npm.taobao.org 
