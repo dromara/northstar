@@ -13,8 +13,11 @@ docker pull nginx
 cd ~/northstar
 \cp -f settings.xml ~/apache-maven-3.6.3/conf/settings.xml
 ~/apache-maven-3.6.3/bin/mvn clean install
+mv northstar-trader/target/northstar-trader*.jar ~/northstar-trader.jar
 docker build -t northstar-trader . 
+docker run --name Trader --net=host -v ~:/root -d northstar-trader
 cd ~/northstar-monitor
 npm config set registry https://registry.npm.taobao.org 
 npm i 
+docker run --name Mongo --net=host -d mongo:4.0
 echo “安装完成”
