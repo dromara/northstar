@@ -7,6 +7,9 @@
 
 	curl -L https://gitee.com/KevinHuangwl/northstar/raw/master/autobuild.sh | sh
 
+通过mongo工具在数据库增加账户数据：
+
+
 ### 项目更新
 执行以下命令：
 

@@ -6,6 +6,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.PostConstruct;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -25,6 +26,7 @@ import tech.xuanwu.northstar.persistance.po.CtpSetting.MarketType;
 import tech.xuanwu.northstar.trader.constants.Constants;
 import tech.xuanwu.northstar.trader.domain.simulated.SimulatedGateway;
 import tech.xuanwu.northstar.trader.domain.simulated.SimulatedMarket;
+import tech.xuanwu.northstar.utils.BeanUtil;
 import xyz.redtorch.gateway.ctp.x64v6v3v15v.CtpGatewayImpl;
 import xyz.redtorch.pb.CoreEnum.ConnectStatusEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
@@ -78,16 +80,20 @@ public class TraderConfig implements InitializingBean{
 	 */
 	@Bean(Constants.TRADABLE_ACCOUNT)
 	public ConcurrentHashMap<String, GatewayApi> createGatewayMap(FastEventEngine fastEventEngine, 
-			@Qualifier(Constants.CONTRACT_MAP) ConcurrentHashMap<String, ContractField> contractMap){
+			@Qualifier(Constants.CONTRACT_MAP) ConcurrentHashMap<String, ContractField> contractMap, 
+			CtpSetting protoCtpSetting){
 		Iterable<CtpSetting> ctpSettings = ctpSettingRepo.findByMarketType(getMarketType());
 		Iterator<CtpSetting> itSettings = ctpSettings.iterator();
 		log.info("----------初始化账户----------");
 		while(itSettings.hasNext()) {
 			CtpSetting ctpSetting = itSettings.next();
-			String gatewayId = ctpSetting.getGatewayId();
-			if(ctpSetting.getConnectionType() == ConnectionType.ACCOUNT) {
+			CtpSetting mergeSetting = new CtpSetting();
+			BeanUtils.copyProperties(protoCtpSetting, mergeSetting);
+			BeanUtil.copyProperties(ctpSetting, mergeSetting, BeanUtil.CopyStrategy.ONLY_NOT_NULL);
+			String gatewayId = mergeSetting.getGatewayId();
+			if(mergeSetting.getConnectionType() == ConnectionType.ACCOUNT) {
 				log.info("初始化CTP账户：{}", gatewayId);
-				GatewayApi gateway = new CtpGatewayImpl(fastEventEngine, ctpSetting.convertTo());
+				GatewayApi gateway = new CtpGatewayImpl(fastEventEngine, mergeSetting.convertTo());
 				accountMap.put(gatewayId, gateway);
 				gateway.connect();
 			}

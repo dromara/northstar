@@ -14,8 +14,8 @@ socketio:
 event.engine.strategy: BlockingWaitStrategy
 
 auth:
-  user: ${user}
-  password: ${password}
+  user: ${user:admin}
+  password: ${password:123456}
 
 logging:
   level: 
