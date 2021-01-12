@@ -5,7 +5,7 @@
 ### 一键安装（首次环境初始化）
 在linux centOS系统下，在root用户下，输入以下命令（过程中可能会卡住一分钟左右）：  
 
-	curl -L https://gitee.com/KevinHuangwl/northstar/raw/master/autobuild.sh | sh
+	curl -L https://gitee.com/KevinHuangwl/northstar/raw/master/envbuild.sh | sh
 
 通过mongo工具在数据库增加账户数据：
 
