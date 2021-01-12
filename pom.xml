@@ -16,7 +16,7 @@
 		<maven.compiler.target>${java.version}</maven.compiler.target>
 		<northstar-version>1.0.0</northstar-version>
 		<springboot-version>2.1.5.RELEASE</springboot-version>
-		<lombok-version>1.16.18</lombok-version>
+		<lombok-version>1.18.8</lombok-version>
 		<slf4j-version>1.7.25</slf4j-version>
 		<commons-lang3-version>3.7</commons-lang3-version>
 		<commons-codec-version>1.13</commons-codec-version>
