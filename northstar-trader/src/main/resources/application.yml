@@ -24,7 +24,7 @@ logging:
   
 spring:
   profiles:
-    active: ${env:test}
+    active: ${env:prod}
   mail:
     host: smtp.126.com
     username: ${email}
