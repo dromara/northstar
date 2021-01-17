@@ -91,7 +91,7 @@
 		            </execution>
 		          </executions>
 				<configuration>
-					<outputDirectory>../target</outputDirectory>
+					<outputDirectory>../../</outputDirectory>
 				</configuration>
 			</plugin>
 		</plugins>
