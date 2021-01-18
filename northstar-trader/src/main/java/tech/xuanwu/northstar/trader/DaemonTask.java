@@ -29,7 +29,6 @@ public class DaemonTask implements CommandLineRunner{
 	
 	@Override
 	public void run(String... args) throws Exception {
-		Thread.currentThread().setDaemon(true);
 		for(;;) {
 			if(!ctpGateway.isConnected()) {
 				ctpGateway.connect();
