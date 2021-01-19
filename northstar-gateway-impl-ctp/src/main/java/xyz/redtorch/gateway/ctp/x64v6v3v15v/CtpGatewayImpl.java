@@ -249,7 +249,7 @@ public class CtpGatewayImpl extends GatewayApiAbstract {
 		//只有在工作日开市时间才会进行重连
 		//一旦重连成功则会停止线程
 		int i = 0;
-		while(unexpectedDisconnection) {
+		while(unexpectedDisconnection && isMarketOpenTime()) {
 			logger.info("尝试第{}次重连", ++i);
 			connect();
 			
@@ -274,15 +274,15 @@ public class CtpGatewayImpl extends GatewayApiAbstract {
 		if(date.getDayOfWeek() == DayOfWeek.SUNDAY) {
 			return false;
 		}
-		if(date.getDayOfWeek() == DayOfWeek.SATURDAY && time.isAfter(LocalTime.of(2, 40))) {
+		if(date.getDayOfWeek() == DayOfWeek.SATURDAY && time.isAfter(LocalTime.of(2, 30))) {
 			return false;
 		}
 		//夜盘时间
-		if(time.isBefore(LocalTime.of(2, 40)) || time.isAfter(LocalTime.of(20, 50))) {
+		if(time.isBefore(LocalTime.of(2, 30)) || time.isAfter(LocalTime.of(21, 00))) {
 			return true;
 		}
 		//白盘时间
-		if(time.isAfter(LocalTime.of(8, 50)) && time.isBefore(LocalTime.of(15, 10))) {
+		if(time.isAfter(LocalTime.of(9, 00)) && time.isBefore(LocalTime.of(15, 00))) {
 			return true;
 		}
 		return false;

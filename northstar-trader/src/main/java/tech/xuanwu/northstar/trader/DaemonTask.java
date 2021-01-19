@@ -39,19 +39,9 @@ public class DaemonTask implements CommandLineRunner{
 					gateway.connect();
 				}
 			}
-			// 开盘时间一分钟检查一次，非开盘时间十分钟检查一次
-			Thread.sleep(isTradeTime() ? 60*1000 : 60*10*1000);
+			// 十分钟检查一次
+			Thread.sleep(60*10*1000);
 		}
 	}
 	
-	private boolean isTradeTime() {
-		int hour = LocalTime.now().getHour();
-		int day = LocalDate.now().getDayOfWeek().getValue();
-		boolean dayTradeTime = hour >= 9 && hour <=16;
-		boolean nightTradeTime = hour >= 21 || hour < 3;
-		if(day < 7 && (dayTradeTime || nightTradeTime)) {
-			return true;
-		}
-		return false;
-	}
 }
