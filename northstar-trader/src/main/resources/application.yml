@@ -20,7 +20,7 @@ auth:
 logging:
   level: 
     root: info
-  path: logs/NorthstarCore/
+  path: logs/
   
 spring:
   profiles:
