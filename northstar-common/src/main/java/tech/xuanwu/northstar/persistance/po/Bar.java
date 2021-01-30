@@ -19,9 +19,9 @@ public class Bar implements Serializable {
 	private static final long serialVersionUID = 7607828493777049884L;
 	private String unifiedSymbol;
 	private String gatewayId;
-	private String tradingDay;
-	private String actionDay;
-	private String actionTime;
+	private int tradingDay;
+	private int actionDay;
+	private int actionTime;
 	private long actionTimestamp;
 	private double openPrice;
 	private double highPrice;
@@ -43,13 +43,19 @@ public class Bar implements Serializable {
 	
 	public static Bar convertFrom(BarField bar) {
 		Bar po = new Bar();
-		BeanUtils.copyProperties(bar.toBuilder(), po);
+		BeanUtils.copyProperties(bar.toBuilder(), po, "tradingDay", "actionDay", "actionTime");
+		po.setTradingDay(Integer.parseInt(bar.getTradingDay()));
+		po.setActionDay(Integer.parseInt(bar.getActionDay()));
+		po.setActionTime(Integer.parseInt(bar.getActionTime()));
 		return po;
 	}
 	
 	public BarField convertTo() {
 		BarField.Builder bb = BarField.newBuilder();
-		BeanUtils.copyProperties(this, bb);
+		BeanUtils.copyProperties(this, bb, "tradingDay", "actionDay", "actionTime");
+		bb.setActionDay(String.valueOf(actionDay));
+		bb.setActionTime(String.valueOf(actionTime));
+		bb.setTradingDay(String.valueOf(tradingDay));
 		return bb.build();
 	}
 }
