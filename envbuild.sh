@@ -1,4 +1,4 @@
-yum install git java-11 nodejs wget -y
+yum install git java-11-openjdk-devel.x86_64 nodejs wget -y
 cd ~
 wget https://mirror.bit.edu.cn/apache/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz
 tar -xvf apache-maven-3.6.3-bin.tar.gz
