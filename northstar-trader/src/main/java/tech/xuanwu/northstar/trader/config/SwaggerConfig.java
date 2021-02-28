@@ -26,17 +26,16 @@ public class SwaggerConfig {
     public Docket createRestApi() {
     	log.info("启动swagger");
         return new Docket(DocumentationType.SWAGGER_2)
-//        		.enable(!StringUtils.equals(profile, "prod"))
+        		.enable(!StringUtils.equals(profile, "prod"))
                 .pathMapping("/")
                 .select()
-                .apis(RequestHandlerSelectors.basePackage("tech.xuanwu.northstar.trader.controller"))
+                .apis(RequestHandlerSelectors.basePackage("tech.xuanwu.northstar.trader"))
                 .paths(PathSelectors.any())
                 .build().apiInfo(new ApiInfoBuilder()
-                        .title("Northstar监控端API")
+                        .title("Northstar API")
                         .version("1.0")
                         .contact(new Contact("黄伟亮","https://www.zhihu.com/people/kevinbauer","12959229@qq.com"))
                         .license("The Apache License")
-                        .licenseUrl("http://www.baidu.com")
                         .build());
     }
 }

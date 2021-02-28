@@ -95,7 +95,8 @@ public class GatewayLifecycleHandler implements FastEventHandler{
 					continue;
 				}
 				ctpMktDataGateway.subscribe(c);
-				contractMap.put(c.getSymbol(), c);
+				contractMap.put(c.getSymbol().toLowerCase(), c);
+				contractMap.put(c.getSymbol().toUpperCase(), c);
 				contractMap.put(c.getUnifiedSymbol(), c);
 			}
 			
