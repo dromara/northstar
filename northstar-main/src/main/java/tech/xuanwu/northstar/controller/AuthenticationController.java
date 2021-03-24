@@ -22,9 +22,9 @@ import tech.xuanwu.northstar.utils.JwtUtil;
 public class AuthenticationController {
 	
 	@Value("${auth.userId}")
-	private String userId;
+	protected String userId;
 	@Value("${auth.password}")
-	private String password;
+	protected String password;
 
 	@PostMapping(value="/token", produces = "application/json")
 	public String doAuth(@RequestBody NsUser user) {

@@ -1,6 +1,8 @@
 package tech.xuanwu.northstar.common.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * 用户信息
@@ -8,6 +10,8 @@ import lombok.Data;
  *
  */
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class NsUser {
 
 	private String userName;

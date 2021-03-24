@@ -32,7 +32,6 @@
 		<socketio-client-version>1.0.0</socketio-client-version>
 		<mockito-version>3.0.0</mockito-version>
 		<hessian-version>4.0.38</hessian-version>
-		<testng-version>7.0.0</testng-version>
 	</properties>
 
 	<modules>
@@ -60,14 +59,6 @@
 			<scope>test</scope>
 		</dependency>
 		
-		<!-- https://mvnrepository.com/artifact/org.testng/testng -->
-		<dependency>
-		    <groupId>org.testng</groupId>
-		    <artifactId>testng</artifactId>
-		    <version>${testng-version}</version>
-		    <scope>test</scope>
-		</dependency>
-				
 	</dependencies>
 	
 	<dependencyManagement>
