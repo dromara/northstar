@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>tech.xuan-wu</groupId>
 	<artifactId>northstar</artifactId>
-	<version>1.0.0</version>
+	<version>2.0</version>
 	<name>northstar</name>
 	<packaging>pom</packaging>
 	<description>北极星程序化交易平台</description>
@@ -14,7 +14,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>${java.version}</maven.compiler.source>
 		<maven.compiler.target>${java.version}</maven.compiler.target>
-		<northstar-version>1.0.0</northstar-version>
+		<northstar-version>2.0</northstar-version>
 		<springboot-version>2.1.5.RELEASE</springboot-version>
 		<lombok-version>1.18.8</lombok-version>
 		<slf4j-version>1.7.25</slf4j-version>
@@ -38,29 +38,13 @@
 	<modules>
 		<module>northstar-common</module>
 		<module>northstar-gateway-api</module>
-		<module>northstar-gateway-impl-ctp</module>
-		<module>northstar-trader</module>
-		<module>northstar-strategy</module>
+<!-- 		<module>northstar-gateway-ctp</module> -->
+		<module>northstar-engine</module>
+		<module>northstar-domain</module>
+		<module>northstar-main</module>
 	</modules>
 	
 	<dependencies>
-		<dependency>
-	        <groupId>org.projectlombok</groupId>
-	        <artifactId>lombok</artifactId>
-	        <version>${lombok-version}</version>
-	    </dependency>
-	    
-		<dependency>
-		    <groupId>org.slf4j</groupId>
-		    <artifactId>slf4j-api</artifactId>
-		    <version>${slf4j-version}</version>
-		</dependency>
-		
-		<dependency>
-		    <groupId>org.apache.commons</groupId>
-		    <artifactId>commons-lang3</artifactId>
-		    <version>${commons-lang3-version}</version>
-		</dependency>
 		
 		<dependency>
 		    <groupId>org.mockito</groupId>
@@ -95,7 +79,7 @@
 			</dependency>
 			<dependency>
 				<groupId>tech.xuan-wu</groupId>
-				<artifactId>northstar-core</artifactId>
+				<artifactId>northstar-engine</artifactId>
 				<version>${northstar-version}</version>
 			</dependency>
 			<dependency>
@@ -105,12 +89,12 @@
 			</dependency>
 			<dependency>
 				<groupId>tech.xuan-wu</groupId>
-				<artifactId>northstar-gateway-impl-ctp</artifactId>
+				<artifactId>northstar-gateway-ctp</artifactId>
 				<version>${northstar-version}</version>
 			</dependency>
 			<dependency>
 				<groupId>tech.xuan-wu</groupId>
-				<artifactId>northstar-strategy-client</artifactId>
+				<artifactId>northstar-main</artifactId>
 				<version>${northstar-version}</version>
 			</dependency>
 			
@@ -152,13 +136,20 @@
 				<version>${springboot-version}</version>
 			</dependency>
 			<dependency>
-			    <groupId>javax.servlet</groupId>
-			    <artifactId>javax.servlet-api</artifactId>
-			    <version>${servlet-version}</version>
-			    <scope>provided</scope>
+			    <groupId>org.apache.commons</groupId>
+			    <artifactId>commons-lang3</artifactId>
+			    <version>${commons-lang3-version}</version>
 			</dependency>
-						
-			
+			<dependency>
+		        <groupId>org.projectlombok</groupId>
+		        <artifactId>lombok</artifactId>
+		        <version>${lombok-version}</version>
+		    </dependency>
+		    <dependency>
+			    <groupId>org.slf4j</groupId>
+			    <artifactId>slf4j-api</artifactId>
+			    <version>${slf4j-version}</version>
+			</dependency>
 			<dependency>
 				<groupId>commons-codec</groupId>
 				<artifactId>commons-codec</artifactId>
