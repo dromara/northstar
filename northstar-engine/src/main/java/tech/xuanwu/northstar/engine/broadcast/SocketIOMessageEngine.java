@@ -67,6 +67,7 @@ public class SocketIOMessageEngine implements NorthstarEventHandler, Initializin
 				|| type == NorthstarEventType.LOGINED || type == NorthstarEventType.LOGINING
 				|| type == NorthstarEventType.TRADE_DATE) {
 			emitMessageEvent(event);
+			return;
 		}
 	}
 	

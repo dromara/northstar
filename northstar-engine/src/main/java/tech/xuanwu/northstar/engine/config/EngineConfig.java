@@ -36,17 +36,13 @@ public class EngineConfig {
 	@Value("${socketio.port}")
     private int port;
 
-    private int bossCount = 1;
-
-    private int workCount = 100;
-
     @Bean
     public SocketIOServer socketIOServer() throws IOException {
         com.corundumstudio.socketio.Configuration config = new com.corundumstudio.socketio.Configuration();
         config.setHostname(host);
         config.setPort(port);
-        config.setBossThreads(bossCount);
-        config.setWorkerThreads(workCount);
+        config.setBossThreads(1);
+        config.setWorkerThreads(100);
         log.info("WebSocket服务地址：{}:{}", host, port);
         SocketIOServer socketServer = new SocketIOServer(config);
         socketServer.start();

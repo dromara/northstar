@@ -2,6 +2,12 @@ server:
   port: 8888
   servlet:
     context-path: /northstar
+
+
+socketio:
+  host: 127.0.0.1
+  port: 51888
+  
   
 auth:
   userId: admin
