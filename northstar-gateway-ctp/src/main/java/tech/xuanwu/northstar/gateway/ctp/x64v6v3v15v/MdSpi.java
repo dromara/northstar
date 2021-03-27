@@ -19,7 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import tech.xuanwu.northstar.common.constant.DateTimeConstant;
-import tech.xuanwu.northstar.common.event.NorthstarEvent;
+import tech.xuanwu.northstar.common.event.NorthstarEventType;
 import tech.xuanwu.northstar.gateway.ctp.x64v6v3v15v.api.CThostFtdcDepthMarketDataField;
 import tech.xuanwu.northstar.gateway.ctp.x64v6v3v15v.api.CThostFtdcForQuoteRspField;
 import tech.xuanwu.northstar.gateway.ctp.x64v6v3v15v.api.CThostFtdcMdApi;
@@ -82,7 +82,7 @@ public class MdSpi extends CThostFtdcMdSpi {
 			return;
 		}
 
-		ctpGatewayAdapter.getEventEngine().emitEvent(NorthstarEvent.CONNECTING, gatewayId);
+		ctpGatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.CONNECTING, gatewayId);
 		
 		connectionStatus = CONNECTION_STATUS_CONNECTING;
 		loginStatus = false;
@@ -248,7 +248,7 @@ public class MdSpi extends CThostFtdcMdSpi {
 			return;
 		}
 		try {
-			ctpGatewayAdapter.getEventEngine().emitEvent(NorthstarEvent.LOGINING, gatewayId);
+			ctpGatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.LOGINING, gatewayId);
 			// 登录
 			CThostFtdcReqUserLoginField userLoginField = new CThostFtdcReqUserLoginField();
 			userLoginField.setBrokerID(brokerId);
@@ -268,7 +268,7 @@ public class MdSpi extends CThostFtdcMdSpi {
 			// 修改前置机连接状态
 			connectionStatus = CONNECTION_STATUS_CONNECTED;
 			
-			ctpGatewayAdapter.getEventEngine().emitEvent(NorthstarEvent.CONNECTED, gatewayId);
+			ctpGatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.CONNECTED, gatewayId);
 			
 			login();
 			
@@ -284,7 +284,7 @@ public class MdSpi extends CThostFtdcMdSpi {
 			logger.warn("{}行情接口前置机已断开, 原因:{}", logInfo, nReason);
 			ctpGatewayAdapter.disconnect();
 			
-			ctpGatewayAdapter.getEventEngine().emitEvent(NorthstarEvent.DISCONNECTED, gatewayId);
+			ctpGatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.DISCONNECTED, gatewayId);
 			
 			ctpGatewayAdapter.startAutoReconnect();
 		} catch (Throwable t) {
@@ -308,8 +308,8 @@ public class MdSpi extends CThostFtdcMdSpi {
 					cThostFtdcMdApi.SubscribeMarketData(symbolArray, subscribedSymbolSet.size());
 				}
 				
-				ctpGatewayAdapter.getEventEngine().emitEvent(NorthstarEvent.LOGINED, gatewayId);
-				ctpGatewayAdapter.getEventEngine().emitEvent(NorthstarEvent.TRADE_DATE, tradingDay);
+				ctpGatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.LOGINED, gatewayId);
+				ctpGatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.TRADE_DATE, tradingDay);
 			} else {
 				logger.warn("{}行情接口登录回报错误 错误ID:{},错误信息:{}", logInfo, pRspInfo.getErrorID(), pRspInfo.getErrorMsg());
 				// 不合法的登录
@@ -534,7 +534,7 @@ public class MdSpi extends CThostFtdcMdSpi {
 
 				preTickMap.put(contractId, tick);
 
-				ctpGatewayAdapter.getEventEngine().emitEvent(NorthstarEvent.TICK, tick);
+				ctpGatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.TICK, tick);
 			} catch (Throwable t) {
 				logger.error("{} OnRtnDepthMarketData Exception", logInfo, t);
 			}

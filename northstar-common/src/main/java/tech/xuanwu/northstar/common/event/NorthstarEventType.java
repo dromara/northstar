@@ -5,7 +5,7 @@ package tech.xuanwu.northstar.common.event;
  * @author KevinHuangwl
  *
  */
-public enum NorthstarEvent {
+public enum NorthstarEventType {
 	/**
 	 * 行情TICK事件
 	 */
