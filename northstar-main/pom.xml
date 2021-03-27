@@ -11,6 +11,7 @@
 	<name>northstar-main</name>
 
 	<properties>
+<!-- 		<springfox-swagger-version></springfox-swagger-version> -->
 	</properties>
 
 	<dependencies>

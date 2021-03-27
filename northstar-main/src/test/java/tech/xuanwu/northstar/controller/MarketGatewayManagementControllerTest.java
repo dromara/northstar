@@ -29,23 +29,32 @@ public class MarketGatewayManagementControllerTest {
 	public void testCreate() throws Exception {
 		mockMvc.perform(MockMvcRequestBuilders.post("/market/gateway").accept(MediaType.APPLICATION_JSON))
 				.andExpect(MockMvcResultMatchers.status().isOk())
-				.andDo(MockMvcResultHandlers.print())
-				.andReturn().getResponse().getContentAsString().equals("true");
+				.andExpect(MockMvcResultMatchers.content().string("true"))
+				.andDo(MockMvcResultHandlers.print());
 	}
 
 	@Test
-	public void testRemove() {
-		fail("Not yet implemented");
+	public void testRemove() throws Exception {
+		mockMvc.perform(MockMvcRequestBuilders.delete("/market/gateway").accept(MediaType.APPLICATION_JSON))
+				.andExpect(MockMvcResultMatchers.status().isOk())
+				.andExpect(MockMvcResultMatchers.content().string("true"))
+				.andDo(MockMvcResultHandlers.print());
 	}
 
 	@Test
-	public void testModify() {
-		fail("Not yet implemented");
+	public void testModify() throws Exception {
+		mockMvc.perform(MockMvcRequestBuilders.put("/market/gateway").accept(MediaType.APPLICATION_JSON))
+				.andExpect(MockMvcResultMatchers.status().isOk())
+				.andExpect(MockMvcResultMatchers.content().string("true"))
+				.andDo(MockMvcResultHandlers.print());
 	}
 
 	@Test
-	public void testList() {
-		fail("Not yet implemented");
+	public void testList() throws Exception {
+		mockMvc.perform(MockMvcRequestBuilders.get("/market/gateway").accept(MediaType.APPLICATION_JSON))
+				.andExpect(MockMvcResultMatchers.status().isOk())
+				.andExpect(MockMvcResultMatchers.jsonPath("$").isArray())
+				.andDo(MockMvcResultHandlers.print());
 	}
 
 }

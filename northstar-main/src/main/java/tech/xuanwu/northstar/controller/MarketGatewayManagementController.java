@@ -1,5 +1,6 @@
 package tech.xuanwu.northstar.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -33,6 +34,6 @@ public class MarketGatewayManagementController {
 	@GetMapping("/gateway")
 	public List<GatewayInfo> list() { 
 		
-		return null;
+		return new ArrayList();
 	}
 }
