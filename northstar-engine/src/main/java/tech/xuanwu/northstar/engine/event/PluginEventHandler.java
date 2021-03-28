@@ -4,7 +4,7 @@ import org.springframework.beans.factory.InitializingBean;
 
 import com.google.common.eventbus.EventBus;
 
-import tech.xuanwu.northstar.engine.event.EventEngine.Event;
+import tech.xuanwu.northstar.common.event.NorthstarEvent;
 import tech.xuanwu.northstar.engine.event.EventEngine.NorthstarEventHandler;
 
 public class PluginEventHandler implements NorthstarEventHandler, InitializingBean {
@@ -19,7 +19,7 @@ public class PluginEventHandler implements NorthstarEventHandler, InitializingBe
 	}
 	
 	@Override
-	public void onEvent(Event event, long sequence, boolean endOfBatch) throws Exception {
+	public void onEvent(NorthstarEvent event, long sequence, boolean endOfBatch) throws Exception {
 		eb.post(event);
 	}
 

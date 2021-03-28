@@ -13,9 +13,9 @@ import com.corundumstudio.socketio.annotation.OnDisconnect;
 import com.corundumstudio.socketio.annotation.OnEvent;
 
 import lombok.extern.slf4j.Slf4j;
+import tech.xuanwu.northstar.common.event.NorthstarEvent;
 import tech.xuanwu.northstar.common.event.NorthstarEventType;
 import tech.xuanwu.northstar.engine.event.EventEngine;
-import tech.xuanwu.northstar.engine.event.EventEngine.Event;
 import tech.xuanwu.northstar.engine.event.EventEngine.NorthstarEventHandler;
 import xyz.redtorch.pb.CoreField.AccountField;
 import xyz.redtorch.pb.CoreField.BarField;
@@ -54,7 +54,7 @@ public class SocketIOMessageEngine implements NorthstarEventHandler, Initializin
 	}
 	
 	@Override
-	public void onEvent(Event event, long sequence, boolean endOfBatch) throws Exception {
+	public void onEvent(NorthstarEvent event, long sequence, boolean endOfBatch) throws Exception {
 		NorthstarEventType type = event.getEvent();
 		Class<?> clz = clzMap.get(type);
 		if(clz != null) {
@@ -76,12 +76,12 @@ public class SocketIOMessageEngine implements NorthstarEventHandler, Initializin
 	/**************************************************/
 	SocketIOServer server;
 	
-	private void emitEvent(Event event, Class<?> objClz) throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+	private void emitEvent(NorthstarEvent event, Class<?> objClz) throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		Method m = objClz.getMethod("toByteArray");
 		server.getBroadcastOperations().sendEvent(event.getEvent().toString(), (byte[])m.invoke(event.getObj()));
 	}
 	
-	private void emitMessageEvent(Event event) {
+	private void emitMessageEvent(NorthstarEvent event) {
 		server.getBroadcastOperations().sendEvent(event.getEvent().toString(), event.getObj().toString());
 	}
 	

@@ -3,11 +3,7 @@ package tech.xuanwu.northstar.engine.event;
 import com.lmax.disruptor.EventFactory;
 import com.lmax.disruptor.EventHandler;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import tech.xuanwu.northstar.common.event.NorthstarEvent;
 import tech.xuanwu.northstar.common.event.NorthstarEventType;
 
 /**
@@ -22,23 +18,14 @@ public interface EventEngine {
 
 	void emitEvent(NorthstarEventType event, Object obj);
 
-	@AllArgsConstructor
-	@NoArgsConstructor
-	@Data
-	public static class Event {
-		private NorthstarEventType event;
-		private Object obj = null;
-
-	}
-
-	public static interface NorthstarEventHandler extends EventHandler<Event>{
+	public static interface NorthstarEventHandler extends EventHandler<NorthstarEvent>{
 	}
 	
-	public static class NorthstarEventFactory implements EventFactory<Event> {
+	public static class NorthstarEventFactory implements EventFactory<NorthstarEvent> {
 
 		@Override
-		public Event newInstance() {
-			return new Event();
+		public NorthstarEvent newInstance() {
+			return new NorthstarEvent();
 		}
 
 	}

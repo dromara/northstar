@@ -23,6 +23,7 @@ import com.lmax.disruptor.dsl.ProducerType;
 import com.lmax.disruptor.util.DaemonThreadFactory;
 
 import lombok.extern.slf4j.Slf4j;
+import tech.xuanwu.northstar.common.event.NorthstarEvent;
 import tech.xuanwu.northstar.common.event.NorthstarEventType;
 
 /**
@@ -35,16 +36,16 @@ public class DisruptorFastEventEngine implements EventEngine, InitializingBean, 
 
 	private static ExecutorService executor = Executors.newCachedThreadPool(DaemonThreadFactory.INSTANCE);
 
-	private final Map<EventHandler<Event>, BatchEventProcessor<Event>> handlerProcessorMap = new ConcurrentHashMap<>();
+	private final Map<EventHandler<NorthstarEvent>, BatchEventProcessor<NorthstarEvent>> handlerProcessorMap = new ConcurrentHashMap<>();
 
-	private Disruptor<Event> disruptor;
+	private Disruptor<NorthstarEvent> disruptor;
 
-	private RingBuffer<Event> ringBuffer;
+	private RingBuffer<NorthstarEvent> ringBuffer;
 
-	private ExceptionHandler<Event> commonExceptionHandler = new ExceptionHandler<>() {
+	private ExceptionHandler<NorthstarEvent> commonExceptionHandler = new ExceptionHandler<>() {
 
 		@Override
-		public void handleEventException(Throwable ex, long sequence, Event event) {
+		public void handleEventException(Throwable ex, long sequence, NorthstarEvent event) {
 			log.warn("事件异常：事件类型【"+event+"】", ex);
 		}
 
@@ -77,7 +78,7 @@ public class DisruptorFastEventEngine implements EventEngine, InitializingBean, 
 
 	@Override
 	public void addHandler(NorthstarEventHandler handler) {
-		BatchEventProcessor<Event> processor = new BatchEventProcessor<Event>(ringBuffer, ringBuffer.newBarrier(), handler);
+		BatchEventProcessor<NorthstarEvent> processor = new BatchEventProcessor<>(ringBuffer, ringBuffer.newBarrier(), handler);
 		processor.setExceptionHandler(commonExceptionHandler);
 		ringBuffer.addGatingSequences(processor.getSequence());
 		executor.execute(processor);
@@ -87,7 +88,7 @@ public class DisruptorFastEventEngine implements EventEngine, InitializingBean, 
 	@Override
 	public void removeHandler(NorthstarEventHandler handler) {
 		if (handlerProcessorMap.containsKey(handler)) {
-			BatchEventProcessor<Event> processor = handlerProcessorMap.get(handler);
+			BatchEventProcessor<NorthstarEvent> processor = handlerProcessorMap.get(handler);
 			// Remove a processor.
 			// Stop the processor
 			processor.halt();
@@ -117,7 +118,7 @@ public class DisruptorFastEventEngine implements EventEngine, InitializingBean, 
 	public void emitEvent(NorthstarEventType event, Object obj) {
 		long sequence = ringBuffer.next(); // Grab the next sequence
 		try {
-			Event fastEvent = ringBuffer.get(sequence); // Get the entry in the Disruptor for the sequence
+			NorthstarEvent fastEvent = ringBuffer.get(sequence); // Get the entry in the Disruptor for the sequence
 			fastEvent.setEvent(event);
 			fastEvent.setObj(obj);
 

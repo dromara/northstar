@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import tech.xuanwu.northstar.common.model.GatewayInfo;
+import tech.xuanwu.northstar.common.model.GatewayDescription;
 
 @RequestMapping("/market")
 @RestController
@@ -32,7 +32,7 @@ public class MarketGatewayManagementController {
 	}
 	
 	@GetMapping("/gateway")
-	public List<GatewayInfo> list() { 
+	public List<GatewayDescription> list() { 
 		
 		return new ArrayList();
 	}
