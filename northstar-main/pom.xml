@@ -43,53 +43,15 @@
 		    <groupId>com.alibaba</groupId>
 		    <artifactId>fastjson</artifactId>
 		</dependency>
-<!-- 		<dependency> -->
-<!-- 			<groupId>org.springframework.boot</groupId> -->
-<!-- 			<artifactId>spring-boot-starter-aop</artifactId> -->
-<!-- 		</dependency> -->
-<!-- 		<dependency> -->
-<!-- 		    <groupId>org.springframework.boot</groupId> -->
-<!-- 		    <artifactId>spring-boot-starter-mail</artifactId> -->
-<!-- 		</dependency> -->
 		
-<!-- 		<dependency> -->
-<!-- 		    <groupId>com.alibaba</groupId> -->
-<!-- 		    <artifactId>fastjson</artifactId> -->
-<!-- 		</dependency> -->
-
-<!-- 		<dependency> -->
-<!-- 		    <groupId>com.corundumstudio.socketio</groupId> -->
-<!-- 		    <artifactId>netty-socketio</artifactId> -->
-<!-- 		    <exclusions> -->
-<!-- 		    	<exclusion> -->
-<!-- 		    		<groupId>com.fasterxml.jackson.core</groupId> -->
-<!--     				<artifactId>jackson-databind</artifactId> -->
-<!-- 		    	</exclusion> -->
-<!-- 		    	<exclusion> -->
-<!-- 		    		<groupId>com.fasterxml.jackson.core</groupId> -->
-<!--     				<artifactId>jackson-core</artifactId> -->
-<!-- 		    	</exclusion> -->
-<!-- 		    </exclusions> -->
-<!-- 		</dependency> -->
-<!-- 		<dependency> -->
-<!-- 			<groupId>org.springframework.boot</groupId> -->
-<!-- 			<artifactId>spring-boot-configuration-processor</artifactId> -->
-<!-- 			<optional>true</optional> -->
-<!-- 		</dependency> -->
-<!-- 		<dependency> -->
-<!-- 		    <groupId>com.google.guava</groupId> -->
-<!-- 		    <artifactId>guava</artifactId> -->
-<!-- 		</dependency> -->
-<!-- 		<dependency> -->
-<!-- 		    <groupId>io.springfox</groupId> -->
-<!-- 		    <artifactId>springfox-swagger2</artifactId> -->
-<!-- 		    <version>${springfox-swagger-version}</version> -->
-<!-- 		</dependency> -->
-<!-- 		<dependency> -->
-<!-- 		    <groupId>io.springfox</groupId> -->
-<!-- 		    <artifactId>springfox-swagger-ui</artifactId> -->
-<!-- 		    <version>${springfox-swagger-version}</version> -->
-<!-- 		</dependency> -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-mongodb</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>tech.xuan-wu</groupId>
+			<artifactId>northstar-gateway-ctp</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>
