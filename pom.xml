@@ -85,6 +85,11 @@
 			</dependency>
 			<dependency>
 				<groupId>tech.xuan-wu</groupId>
+				<artifactId>northstar-domain</artifactId>
+				<version>${northstar-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>tech.xuan-wu</groupId>
 				<artifactId>northstar-main</artifactId>
 				<version>${northstar-version}</version>
 			</dependency>

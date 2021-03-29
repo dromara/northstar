@@ -2,7 +2,10 @@ package tech.xuanwu.northstar.domain;
 
 import com.google.common.eventbus.EventBus;
 
+import tech.xuanwu.northstar.common.constant.GatewayConnectionState;
 import tech.xuanwu.northstar.common.event.InternalEventBus;
+import tech.xuanwu.northstar.common.event.NorthstarEvent;
+import tech.xuanwu.northstar.common.event.NorthstarEventType;
 import tech.xuanwu.northstar.common.model.GatewayDescription;
 
 /**
@@ -10,18 +13,13 @@ import tech.xuanwu.northstar.common.model.GatewayDescription;
  * @author KevinHuangwl
  *
  */
-public class GatewayConnection {
+public abstract class GatewayConnection {
 	
 	protected GatewayDescription gwDescription;
 	protected EventBus eventBus;
 	
-	protected int connectionState;
+	protected GatewayConnectionState connectionState;
 	protected boolean errorFlag;
-	
-	protected final int DISCONNECTED = 0;
-	protected final int CONNECTING = 1;
-	protected final int DISCONNECTING = 2;
-	protected final int CONNECTED = 3;
 	
 	public GatewayConnection(GatewayDescription gwDescription, InternalEventBus eventBus) {
 		this.gwDescription = gwDescription;
@@ -29,16 +27,16 @@ public class GatewayConnection {
 	}
 	
 	public void onConnected() {
-		connectionState = CONNECTED;
+		connectionState = GatewayConnectionState.CONNECTED;
 		errorFlag = false;
 	}
 	
 	public void onDisconnected() {
-		connectionState = DISCONNECTED;
+		connectionState = GatewayConnectionState.DISCONNECTED;
 	}
 	
 	public boolean isConnected() {
-		return connectionState == CONNECTED;
+		return connectionState == GatewayConnectionState.CONNECTED;
 	}
 	
 	public void onError() {
@@ -50,13 +48,21 @@ public class GatewayConnection {
 	}
 	
 	public void connect() {
-		connectionState = CONNECTING;
-		eventBus.post(gwDescription);
+		connectionState = GatewayConnectionState.CONNECTING;
+		eventBus.post(new NorthstarEvent(NorthstarEventType.CONNECTING, gwDescription.getGatewayId()));
 	}
 	
 	public void disconnect() {
-		connectionState = DISCONNECTING;
+		connectionState = GatewayConnectionState.DISCONNECTING;
+		eventBus.post(new NorthstarEvent(NorthstarEventType.DISCONNECTING, gwDescription.getGatewayId()));
 	}
-	
+
+	public GatewayDescription getGwDescription() {
+		return gwDescription;
+	}
+
+	public void setGwDescription(GatewayDescription gwDescription) {
+		this.gwDescription = gwDescription;
+	}
 	
 }

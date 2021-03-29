@@ -11,9 +11,9 @@ import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import tech.xuanwu.northstar.common.constant.GatewayType;
+import tech.xuanwu.northstar.common.constant.GatewayUsage;
 import tech.xuanwu.northstar.persistence.po.GatewayPO;
-import tech.xuanwu.northstar.persistence.po.GatewayPO.GatewayType;
-import tech.xuanwu.northstar.persistence.po.GatewayPO.GatewayUsage;
 
 @RunWith(SpringRunner.class)
 @DataMongoTest

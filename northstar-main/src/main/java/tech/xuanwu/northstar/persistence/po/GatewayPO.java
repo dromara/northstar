@@ -7,6 +7,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import tech.xuanwu.northstar.common.constant.GatewayType;
+import tech.xuanwu.northstar.common.constant.GatewayUsage;
 
 /**
  * 网关信息
@@ -31,27 +33,10 @@ public class GatewayPO {
 	
 	private String gatewayAdapterType;
 	
+	private boolean autoConnect;
+	
 	private Object settings;
 
-	public static enum GatewayType {
-		CTP(CtpSettings.class),
-		IB(IbSettings.class);
-		
-		private Class<?> clz;
-		private GatewayType(Class<?> settingType) {
-			this.clz = settingType;
-		}
-		
-		public Class<?> getSettingType(){
-			return clz;
-		}
-	}
-	
-	public static enum GatewayUsage {
-		MARKET_DATA,
-		TRADE;
-	}
-	
 	@Data
 	public static class CtpSettings {
 		private String userId;
