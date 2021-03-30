@@ -3,6 +3,7 @@ package tech.xuanwu.northstar.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -20,10 +21,10 @@ import tech.xuanwu.northstar.service.GatewayService;
 public class TradeOperationController {
 	
 	@Autowired
-	private GatewayService gatewayService;
+	protected GatewayService gatewayService;
 
 	@PostMapping("/submit")
-	public String submitOrder(OrderRequest req) {
+	public String submitOrder(@RequestBody OrderRequest req) {
 		Assert.hasText(req.getAccountId(), "账户ID不能为空");
 		Assert.hasText(req.getContractSymbol(), "合约不能为空");
 		Assert.hasText(req.getPrice(), "价格不能为空");
@@ -33,8 +34,8 @@ public class TradeOperationController {
 	}
 	
 	@PostMapping("/cancel")
-	public boolean cancelOrder(OrderRecall recall) {
-		return gatewayService.cancelOrder();
+	public boolean cancelOrder(@RequestBody OrderRecall recall) {
+		return gatewayService.cancelOrder(recall);
 	}
 	
 }

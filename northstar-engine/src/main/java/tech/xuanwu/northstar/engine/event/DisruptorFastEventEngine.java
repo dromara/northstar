@@ -64,7 +64,7 @@ public class DisruptorFastEventEngine implements EventEngine, InitializingBean, 
 	private WaitStrategyEnum strategy;
 	
 	public DisruptorFastEventEngine(WaitStrategyEnum strategy) {
-		
+		this.strategy = strategy;
 	}
 	
 	@Override

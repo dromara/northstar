@@ -1,6 +1,9 @@
 package tech.xuanwu.northstar.common.model;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import tech.xuanwu.northstar.common.constant.GatewayConnectionState;
 import tech.xuanwu.northstar.common.constant.GatewayType;
 import tech.xuanwu.northstar.common.constant.GatewayUsage;
@@ -10,6 +13,9 @@ import tech.xuanwu.northstar.common.constant.GatewayUsage;
  * @author KevinHuangwl
  *
  */
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Data
 public class GatewayDescription {
 
@@ -25,6 +31,7 @@ public class GatewayDescription {
 	
 	private Object settings;
 	
+	@Builder.Default
 	private GatewayConnectionState connectionState = GatewayConnectionState.DISCONNECTED;
 	
 	private boolean autoConnect;

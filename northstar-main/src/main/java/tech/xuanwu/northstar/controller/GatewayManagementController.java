@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -20,10 +21,10 @@ import tech.xuanwu.northstar.service.GatewayService;
 public class GatewayManagementController {
 	
 	@Autowired
-	private GatewayService gatewayService;
+	protected GatewayService gatewayService;
 
 	@PostMapping("/gateway")
-	public boolean create(GatewayDescription gd) {
+	public boolean create(@RequestBody GatewayDescription gd) {
 		Assert.notNull(gd, "传入对象不能为空");
 		return gatewayService.createGateway(gd);
 	}
@@ -35,7 +36,7 @@ public class GatewayManagementController {
 	}
 	
 	@PutMapping("/gateway")
-	public boolean modify(GatewayDescription gd) {
+	public boolean modify(@RequestBody GatewayDescription gd) {
 		Assert.notNull(gd, "传入对象不能为空");
 		return gatewayService.updateGateway(gd);
 	}

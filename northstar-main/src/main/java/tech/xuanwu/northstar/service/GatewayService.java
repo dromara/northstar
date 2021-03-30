@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.common.model.GatewayDescription;
+import tech.xuanwu.northstar.common.model.OrderRecall;
 import tech.xuanwu.northstar.common.model.OrderRequest;
 import tech.xuanwu.northstar.domain.GatewayConnection;
 import tech.xuanwu.northstar.domain.MarketGatewayConnection;
@@ -105,7 +106,7 @@ public class GatewayService implements InitializingBean {
 	 * 撤单
 	 * @return
 	 */
-	public boolean cancelOrder() {
+	public boolean cancelOrder(OrderRecall recall) {
 		return true;
 	}
 

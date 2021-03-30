@@ -1,6 +1,8 @@
 package tech.xuanwu.northstar.controller;
 
-import static org.hamcrest.CoreMatchers.any;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -14,6 +16,13 @@ import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import com.alibaba.fastjson.JSON;
+
+import tech.xuanwu.northstar.common.model.OrderRecall;
+import tech.xuanwu.northstar.common.model.OrderRequest;
+import tech.xuanwu.northstar.common.model.OrderRequest.TradeOperation;
+import tech.xuanwu.northstar.service.GatewayService;
+
 @RunWith(SpringRunner.class)
 @WebAppConfiguration
 public class TradeOperationControllerTest {
@@ -22,20 +31,42 @@ public class TradeOperationControllerTest {
 	
 	@Before
 	public void init() {
-		mockMvc = MockMvcBuilders.standaloneSetup(new TradeOperationController()).build();
+		TradeOperationController ctl = new TradeOperationController();
+		ctl.gatewayService = mock(GatewayService.class);
+		when(ctl.gatewayService.submitOrder(any(OrderRequest.class))).thenReturn("123456");
+		when(ctl.gatewayService.cancelOrder(any(OrderRecall.class))).thenReturn(Boolean.TRUE);
+		mockMvc = MockMvcBuilders.standaloneSetup(ctl).build();
 	}
 	
 	@Test
 	public void testSubmitOrder() throws Exception {
-		mockMvc.perform(MockMvcRequestBuilders.post("/trade/submit").accept(MediaType.APPLICATION_JSON))
+		OrderRequest req = OrderRequest.builder()
+				.accountId("testAccount")
+				.contractSymbol("rb12345")
+				.price("123.45")
+				.tradeOpr(TradeOperation.BK)
+				.volume(1)
+				.build();
+		
+		mockMvc.perform(MockMvcRequestBuilders.post("/trade/submit")
+				.contentType(MediaType.APPLICATION_JSON)
+				.accept(MediaType.APPLICATION_JSON)
+				.content(JSON.toJSONString(req)))
 			.andExpect(MockMvcResultMatchers.status().isOk())
-			.andExpect(MockMvcResultMatchers.content().string(any(String.class)))
+			.andExpect(MockMvcResultMatchers.content().string("123456"))
 			.andDo(MockMvcResultHandlers.print());
 	}
 
 	@Test
 	public void testCancelOrder() throws Exception{
-		mockMvc.perform(MockMvcRequestBuilders.post("/trade/cancel").accept(MediaType.APPLICATION_JSON))
+		OrderRecall recall = OrderRecall.builder()
+				.orderId("123456789")
+				.build();
+		
+		mockMvc.perform(MockMvcRequestBuilders.post("/trade/cancel")
+				.contentType(MediaType.APPLICATION_JSON)
+				.accept(MediaType.APPLICATION_JSON)
+				.content(JSON.toJSONString(recall)))
 			.andExpect(MockMvcResultMatchers.status().isOk())
 			.andExpect(MockMvcResultMatchers.content().string("true"))
 			.andDo(MockMvcResultHandlers.print());
