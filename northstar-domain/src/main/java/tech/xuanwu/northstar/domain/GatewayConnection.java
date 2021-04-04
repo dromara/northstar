@@ -49,12 +49,12 @@ public abstract class GatewayConnection {
 	
 	public void connect() {
 		connectionState = GatewayConnectionState.CONNECTING;
-		eventBus.post(new NorthstarEvent(NorthstarEventType.CONNECTING, gwDescription.getGatewayId()));
+		eventBus.post(new NorthstarEvent(NorthstarEventType.CONNECTING, this));
 	}
 	
 	public void disconnect() {
 		connectionState = GatewayConnectionState.DISCONNECTING;
-		eventBus.post(new NorthstarEvent(NorthstarEventType.DISCONNECTING, gwDescription.getGatewayId()));
+		eventBus.post(new NorthstarEvent(NorthstarEventType.DISCONNECTING, this));
 	}
 
 	public GatewayDescription getGwDescription() {

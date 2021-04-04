@@ -4994,7 +4994,7 @@ public final class CoreField {
 
     /**
      * <pre>
-     * ID，通常是 &lt;账户代码&#64;币种&#64;网关&gt;
+     * ID，通常是 &lt;账户代码&#64;网关&gt;
      * </pre>
      *
      * <code>string accountId = 1;</code>
@@ -5002,7 +5002,7 @@ public final class CoreField {
     java.lang.String getAccountId();
     /**
      * <pre>
-     * ID，通常是 &lt;账户代码&#64;币种&#64;网关&gt;
+     * ID，通常是 &lt;账户代码&#64;网关&gt;
      * </pre>
      *
      * <code>string accountId = 1;</code>
@@ -5355,7 +5355,7 @@ public final class CoreField {
     private volatile java.lang.Object accountId_;
     /**
      * <pre>
-     * ID，通常是 &lt;账户代码&#64;币种&#64;网关&gt;
+     * ID，通常是 &lt;账户代码&#64;网关&gt;
      * </pre>
      *
      * <code>string accountId = 1;</code>
@@ -5374,7 +5374,7 @@ public final class CoreField {
     }
     /**
      * <pre>
-     * ID，通常是 &lt;账户代码&#64;币种&#64;网关&gt;
+     * ID，通常是 &lt;账户代码&#64;网关&gt;
      * </pre>
      *
      * <code>string accountId = 1;</code>
@@ -6277,7 +6277,7 @@ public final class CoreField {
       private java.lang.Object accountId_ = "";
       /**
        * <pre>
-       * ID，通常是 &lt;账户代码&#64;币种&#64;网关&gt;
+       * ID，通常是 &lt;账户代码&#64;网关&gt;
        * </pre>
        *
        * <code>string accountId = 1;</code>
@@ -6296,7 +6296,7 @@ public final class CoreField {
       }
       /**
        * <pre>
-       * ID，通常是 &lt;账户代码&#64;币种&#64;网关&gt;
+       * ID，通常是 &lt;账户代码&#64;网关&gt;
        * </pre>
        *
        * <code>string accountId = 1;</code>
@@ -6316,7 +6316,7 @@ public final class CoreField {
       }
       /**
        * <pre>
-       * ID，通常是 &lt;账户代码&#64;币种&#64;网关&gt;
+       * ID，通常是 &lt;账户代码&#64;网关&gt;
        * </pre>
        *
        * <code>string accountId = 1;</code>
@@ -6333,7 +6333,7 @@ public final class CoreField {
       }
       /**
        * <pre>
-       * ID，通常是 &lt;账户代码&#64;币种&#64;网关&gt;
+       * ID，通常是 &lt;账户代码&#64;网关&gt;
        * </pre>
        *
        * <code>string accountId = 1;</code>
@@ -6346,7 +6346,7 @@ public final class CoreField {
       }
       /**
        * <pre>
-       * ID，通常是 &lt;账户代码&#64;币种&#64;网关&gt;
+       * ID，通常是 &lt;账户代码&#64;网关&gt;
        * </pre>
        *
        * <code>string accountId = 1;</code>
@@ -32176,6 +32176,42 @@ public final class CoreField {
 
     /**
      * <pre>
+     * 网关ID
+     * </pre>
+     *
+     * <code>string gatewayId = 1;</code>
+     */
+    java.lang.String getGatewayId();
+    /**
+     * <pre>
+     * 网关ID
+     * </pre>
+     *
+     * <code>string gatewayId = 1;</code>
+     */
+    com.google.protobuf.ByteString
+        getGatewayIdBytes();
+
+    /**
+     * <pre>
+     * 定单ID
+     * </pre>
+     *
+     * <code>string orderId = 2;</code>
+     */
+    java.lang.String getOrderId();
+    /**
+     * <pre>
+     * 定单ID
+     * </pre>
+     *
+     * <code>string orderId = 2;</code>
+     */
+    com.google.protobuf.ByteString
+        getOrderIdBytes();
+
+    /**
+     * <pre>
      * 原始定单ID
      * </pre>
      *
@@ -32191,24 +32227,6 @@ public final class CoreField {
      */
     com.google.protobuf.ByteString
         getOriginOrderIdBytes();
-
-    /**
-     * <pre>
-     * 定单ID
-     * </pre>
-     *
-     * <code>string orderId = 4;</code>
-     */
-    java.lang.String getOrderId();
-    /**
-     * <pre>
-     * 定单ID
-     * </pre>
-     *
-     * <code>string orderId = 4;</code>
-     */
-    com.google.protobuf.ByteString
-        getOrderIdBytes();
   }
   /**
    * <pre>
@@ -32227,8 +32245,9 @@ public final class CoreField {
       super(builder);
     }
     private CancelOrderReqField() {
-      originOrderId_ = "";
+      gatewayId_ = "";
       orderId_ = "";
+      originOrderId_ = "";
     }
 
     @java.lang.Override
@@ -32255,16 +32274,22 @@ public final class CoreField {
             case 0:
               done = true;
               break;
+            case 10: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              gatewayId_ = s;
+              break;
+            }
+            case 18: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              orderId_ = s;
+              break;
+            }
             case 26: {
               java.lang.String s = input.readStringRequireUtf8();
 
               originOrderId_ = s;
-              break;
-            }
-            case 34: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              orderId_ = s;
               break;
             }
             default: {
@@ -32297,6 +32322,90 @@ public final class CoreField {
       return xyz.redtorch.pb.CoreField.internal_static_xyz_redtorch_pb_CancelOrderReqField_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               xyz.redtorch.pb.CoreField.CancelOrderReqField.class, xyz.redtorch.pb.CoreField.CancelOrderReqField.Builder.class);
+    }
+
+    public static final int GATEWAYID_FIELD_NUMBER = 1;
+    private volatile java.lang.Object gatewayId_;
+    /**
+     * <pre>
+     * 网关ID
+     * </pre>
+     *
+     * <code>string gatewayId = 1;</code>
+     */
+    public java.lang.String getGatewayId() {
+      java.lang.Object ref = gatewayId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        gatewayId_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * 网关ID
+     * </pre>
+     *
+     * <code>string gatewayId = 1;</code>
+     */
+    public com.google.protobuf.ByteString
+        getGatewayIdBytes() {
+      java.lang.Object ref = gatewayId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        gatewayId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int ORDERID_FIELD_NUMBER = 2;
+    private volatile java.lang.Object orderId_;
+    /**
+     * <pre>
+     * 定单ID
+     * </pre>
+     *
+     * <code>string orderId = 2;</code>
+     */
+    public java.lang.String getOrderId() {
+      java.lang.Object ref = orderId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        orderId_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * 定单ID
+     * </pre>
+     *
+     * <code>string orderId = 2;</code>
+     */
+    public com.google.protobuf.ByteString
+        getOrderIdBytes() {
+      java.lang.Object ref = orderId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        orderId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
     }
 
     public static final int ORIGINORDERID_FIELD_NUMBER = 3;
@@ -32341,48 +32450,6 @@ public final class CoreField {
       }
     }
 
-    public static final int ORDERID_FIELD_NUMBER = 4;
-    private volatile java.lang.Object orderId_;
-    /**
-     * <pre>
-     * 定单ID
-     * </pre>
-     *
-     * <code>string orderId = 4;</code>
-     */
-    public java.lang.String getOrderId() {
-      java.lang.Object ref = orderId_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        orderId_ = s;
-        return s;
-      }
-    }
-    /**
-     * <pre>
-     * 定单ID
-     * </pre>
-     *
-     * <code>string orderId = 4;</code>
-     */
-    public com.google.protobuf.ByteString
-        getOrderIdBytes() {
-      java.lang.Object ref = orderId_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        orderId_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -32397,11 +32464,14 @@ public final class CoreField {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getOriginOrderIdBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, originOrderId_);
+      if (!getGatewayIdBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, gatewayId_);
       }
       if (!getOrderIdBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, orderId_);
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, orderId_);
+      }
+      if (!getOriginOrderIdBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, originOrderId_);
       }
       unknownFields.writeTo(output);
     }
@@ -32412,11 +32482,14 @@ public final class CoreField {
       if (size != -1) return size;
 
       size = 0;
-      if (!getOriginOrderIdBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, originOrderId_);
+      if (!getGatewayIdBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, gatewayId_);
       }
       if (!getOrderIdBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, orderId_);
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, orderId_);
+      }
+      if (!getOriginOrderIdBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, originOrderId_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -32434,10 +32507,12 @@ public final class CoreField {
       xyz.redtorch.pb.CoreField.CancelOrderReqField other = (xyz.redtorch.pb.CoreField.CancelOrderReqField) obj;
 
       boolean result = true;
-      result = result && getOriginOrderId()
-          .equals(other.getOriginOrderId());
+      result = result && getGatewayId()
+          .equals(other.getGatewayId());
       result = result && getOrderId()
           .equals(other.getOrderId());
+      result = result && getOriginOrderId()
+          .equals(other.getOriginOrderId());
       result = result && unknownFields.equals(other.unknownFields);
       return result;
     }
@@ -32449,10 +32524,12 @@ public final class CoreField {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (37 * hash) + ORIGINORDERID_FIELD_NUMBER;
-      hash = (53 * hash) + getOriginOrderId().hashCode();
+      hash = (37 * hash) + GATEWAYID_FIELD_NUMBER;
+      hash = (53 * hash) + getGatewayId().hashCode();
       hash = (37 * hash) + ORDERID_FIELD_NUMBER;
       hash = (53 * hash) + getOrderId().hashCode();
+      hash = (37 * hash) + ORIGINORDERID_FIELD_NUMBER;
+      hash = (53 * hash) + getOriginOrderId().hashCode();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -32590,9 +32667,11 @@ public final class CoreField {
       @java.lang.Override
       public Builder clear() {
         super.clear();
-        originOrderId_ = "";
+        gatewayId_ = "";
 
         orderId_ = "";
+
+        originOrderId_ = "";
 
         return this;
       }
@@ -32620,8 +32699,9 @@ public final class CoreField {
       @java.lang.Override
       public xyz.redtorch.pb.CoreField.CancelOrderReqField buildPartial() {
         xyz.redtorch.pb.CoreField.CancelOrderReqField result = new xyz.redtorch.pb.CoreField.CancelOrderReqField(this);
-        result.originOrderId_ = originOrderId_;
+        result.gatewayId_ = gatewayId_;
         result.orderId_ = orderId_;
+        result.originOrderId_ = originOrderId_;
         onBuilt();
         return result;
       }
@@ -32670,12 +32750,16 @@ public final class CoreField {
 
       public Builder mergeFrom(xyz.redtorch.pb.CoreField.CancelOrderReqField other) {
         if (other == xyz.redtorch.pb.CoreField.CancelOrderReqField.getDefaultInstance()) return this;
-        if (!other.getOriginOrderId().isEmpty()) {
-          originOrderId_ = other.originOrderId_;
+        if (!other.getGatewayId().isEmpty()) {
+          gatewayId_ = other.gatewayId_;
           onChanged();
         }
         if (!other.getOrderId().isEmpty()) {
           orderId_ = other.orderId_;
+          onChanged();
+        }
+        if (!other.getOriginOrderId().isEmpty()) {
+          originOrderId_ = other.originOrderId_;
           onChanged();
         }
         this.mergeUnknownFields(other.unknownFields);
@@ -32704,6 +32788,184 @@ public final class CoreField {
             mergeFrom(parsedMessage);
           }
         }
+        return this;
+      }
+
+      private java.lang.Object gatewayId_ = "";
+      /**
+       * <pre>
+       * 网关ID
+       * </pre>
+       *
+       * <code>string gatewayId = 1;</code>
+       */
+      public java.lang.String getGatewayId() {
+        java.lang.Object ref = gatewayId_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          gatewayId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * 网关ID
+       * </pre>
+       *
+       * <code>string gatewayId = 1;</code>
+       */
+      public com.google.protobuf.ByteString
+          getGatewayIdBytes() {
+        java.lang.Object ref = gatewayId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          gatewayId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * 网关ID
+       * </pre>
+       *
+       * <code>string gatewayId = 1;</code>
+       */
+      public Builder setGatewayId(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        gatewayId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * 网关ID
+       * </pre>
+       *
+       * <code>string gatewayId = 1;</code>
+       */
+      public Builder clearGatewayId() {
+        
+        gatewayId_ = getDefaultInstance().getGatewayId();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * 网关ID
+       * </pre>
+       *
+       * <code>string gatewayId = 1;</code>
+       */
+      public Builder setGatewayIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        gatewayId_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object orderId_ = "";
+      /**
+       * <pre>
+       * 定单ID
+       * </pre>
+       *
+       * <code>string orderId = 2;</code>
+       */
+      public java.lang.String getOrderId() {
+        java.lang.Object ref = orderId_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          orderId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * 定单ID
+       * </pre>
+       *
+       * <code>string orderId = 2;</code>
+       */
+      public com.google.protobuf.ByteString
+          getOrderIdBytes() {
+        java.lang.Object ref = orderId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          orderId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * 定单ID
+       * </pre>
+       *
+       * <code>string orderId = 2;</code>
+       */
+      public Builder setOrderId(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        orderId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * 定单ID
+       * </pre>
+       *
+       * <code>string orderId = 2;</code>
+       */
+      public Builder clearOrderId() {
+        
+        orderId_ = getDefaultInstance().getOrderId();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * 定单ID
+       * </pre>
+       *
+       * <code>string orderId = 2;</code>
+       */
+      public Builder setOrderIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        orderId_ = value;
+        onChanged();
         return this;
       }
 
@@ -32792,95 +33054,6 @@ public final class CoreField {
   checkByteStringIsUtf8(value);
         
         originOrderId_ = value;
-        onChanged();
-        return this;
-      }
-
-      private java.lang.Object orderId_ = "";
-      /**
-       * <pre>
-       * 定单ID
-       * </pre>
-       *
-       * <code>string orderId = 4;</code>
-       */
-      public java.lang.String getOrderId() {
-        java.lang.Object ref = orderId_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          orderId_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <pre>
-       * 定单ID
-       * </pre>
-       *
-       * <code>string orderId = 4;</code>
-       */
-      public com.google.protobuf.ByteString
-          getOrderIdBytes() {
-        java.lang.Object ref = orderId_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          orderId_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <pre>
-       * 定单ID
-       * </pre>
-       *
-       * <code>string orderId = 4;</code>
-       */
-      public Builder setOrderId(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
-        orderId_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * 定单ID
-       * </pre>
-       *
-       * <code>string orderId = 4;</code>
-       */
-      public Builder clearOrderId() {
-        
-        orderId_ = getDefaultInstance().getOrderId();
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * 定单ID
-       * </pre>
-       *
-       * <code>string orderId = 4;</code>
-       */
-      public Builder setOrderIdBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
-        orderId_ = value;
         onChanged();
         return this;
       }
@@ -39115,32 +39288,33 @@ public final class CoreField {
       "eCloseReason\030\022 \001(\0162%.xyz.redtorch.pb.For" +
       "ceCloseReasonEnum\022\023\n\013autoSuspend\030\023 \001(\007\022\026" +
       "\n\016userForceClose\030\024 \001(\007\022\021\n\tswapOrder\030\025 \001(" +
-      "\007\"=\n\023CancelOrderReqField\022\025\n\roriginOrderI" +
-      "d\030\003 \001(\t\022\017\n\007orderId\030\004 \001(\t\"\373\005\n\023GatewaySett" +
-      "ingField\022\021\n\tgatewayId\030\001 \001(\t\022\023\n\013gatewayNa" +
-      "me\030\002 \001(\t\022\032\n\022gatewayDescription\030\004 \001(\t\022\032\n\022" +
-      "implementClassName\030\005 \001(\t\0225\n\013gatewayType\030" +
-      "\006 \001(\0162 .xyz.redtorch.pb.GatewayTypeEnum\022" +
-      "C\n\022gatewayAdapterType\030\007 \001(\0162\'.xyz.redtor" +
-      "ch.pb.GatewayAdapterTypeEnum\022N\n\rctpApiSe" +
-      "tting\030\010 \001(\01327.xyz.redtorch.pb.GatewaySet" +
-      "tingField.CtpApiSettingField\022L\n\014ibApiSet" +
-      "ting\030\t \001(\01326.xyz.redtorch.pb.GatewaySett" +
-      "ingField.IbApiSettingField\0222\n\006status\030\n \001" +
-      "(\0162\".xyz.redtorch.pb.ConnectStatusEnum\022\017" +
-      "\n\007version\030\013 \001(\006\022\035\n\025autoConnectTimeRanges" +
-      "\030\014 \001(\t\032\302\001\n\022CtpApiSettingField\022\016\n\006userId\030" +
-      "\001 \001(\t\022\020\n\010password\030\002 \001(\t\022\020\n\010brokerId\030\003 \001(" +
-      "\t\022\016\n\006tdHost\030\004 \001(\t\022\016\n\006tdPort\030\005 \001(\t\022\016\n\006mdH" +
-      "ost\030\006 \001(\t\022\016\n\006mdPort\030\007 \001(\t\022\020\n\010authCode\030\010 " +
-      "\001(\t\022\027\n\017userProductInfo\030\t \001(\t\022\r\n\005appId\030\n " +
-      "\001(\t\032A\n\021IbApiSettingField\022\014\n\004host\030\001 \001(\t\022\014" +
-      "\n\004port\030\002 \001(\007\022\020\n\010clientId\030\003 \001(\007\"_\n\010LogFie" +
-      "ld\022/\n\010logLevel\030\001 \001(\0162\035.xyz.redtorch.pb.L" +
-      "ogLevelEnum\022\021\n\ttimestamp\030\002 \001(\006\022\017\n\007conten" +
-      "t\030\003 \001(\t\"d\n\013NoticeField\0221\n\006status\030\001 \001(\0162!" +
-      ".xyz.redtorch.pb.CommonStatusEnum\022\021\n\ttim" +
-      "estamp\030\002 \001(\006\022\017\n\007content\030\003 \001(\tb\006proto3"
+      "\007\"P\n\023CancelOrderReqField\022\021\n\tgatewayId\030\001 " +
+      "\001(\t\022\017\n\007orderId\030\002 \001(\t\022\025\n\roriginOrderId\030\003 " +
+      "\001(\t\"\373\005\n\023GatewaySettingField\022\021\n\tgatewayId" +
+      "\030\001 \001(\t\022\023\n\013gatewayName\030\002 \001(\t\022\032\n\022gatewayDe" +
+      "scription\030\004 \001(\t\022\032\n\022implementClassName\030\005 " +
+      "\001(\t\0225\n\013gatewayType\030\006 \001(\0162 .xyz.redtorch." +
+      "pb.GatewayTypeEnum\022C\n\022gatewayAdapterType" +
+      "\030\007 \001(\0162\'.xyz.redtorch.pb.GatewayAdapterT" +
+      "ypeEnum\022N\n\rctpApiSetting\030\010 \001(\01327.xyz.red" +
+      "torch.pb.GatewaySettingField.CtpApiSetti" +
+      "ngField\022L\n\014ibApiSetting\030\t \001(\01326.xyz.redt" +
+      "orch.pb.GatewaySettingField.IbApiSetting" +
+      "Field\0222\n\006status\030\n \001(\0162\".xyz.redtorch.pb." +
+      "ConnectStatusEnum\022\017\n\007version\030\013 \001(\006\022\035\n\025au" +
+      "toConnectTimeRanges\030\014 \001(\t\032\302\001\n\022CtpApiSett" +
+      "ingField\022\016\n\006userId\030\001 \001(\t\022\020\n\010password\030\002 \001" +
+      "(\t\022\020\n\010brokerId\030\003 \001(\t\022\016\n\006tdHost\030\004 \001(\t\022\016\n\006" +
+      "tdPort\030\005 \001(\t\022\016\n\006mdHost\030\006 \001(\t\022\016\n\006mdPort\030\007" +
+      " \001(\t\022\020\n\010authCode\030\010 \001(\t\022\027\n\017userProductInf" +
+      "o\030\t \001(\t\022\r\n\005appId\030\n \001(\t\032A\n\021IbApiSettingFi" +
+      "eld\022\014\n\004host\030\001 \001(\t\022\014\n\004port\030\002 \001(\007\022\020\n\010clien" +
+      "tId\030\003 \001(\007\"_\n\010LogField\022/\n\010logLevel\030\001 \001(\0162" +
+      "\035.xyz.redtorch.pb.LogLevelEnum\022\021\n\ttimest" +
+      "amp\030\002 \001(\006\022\017\n\007content\030\003 \001(\t\"d\n\013NoticeFiel" +
+      "d\0221\n\006status\030\001 \001(\0162!.xyz.redtorch.pb.Comm" +
+      "onStatusEnum\022\021\n\ttimestamp\030\002 \001(\006\022\017\n\007conte" +
+      "nt\030\003 \001(\tb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -39226,7 +39400,7 @@ public final class CoreField {
     internal_static_xyz_redtorch_pb_CancelOrderReqField_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_xyz_redtorch_pb_CancelOrderReqField_descriptor,
-        new java.lang.String[] { "OriginOrderId", "OrderId", });
+        new java.lang.String[] { "GatewayId", "OrderId", "OriginOrderId", });
     internal_static_xyz_redtorch_pb_GatewaySettingField_descriptor =
       getDescriptor().getMessageTypes().get(12);
     internal_static_xyz_redtorch_pb_GatewaySettingField_fieldAccessorTable = new

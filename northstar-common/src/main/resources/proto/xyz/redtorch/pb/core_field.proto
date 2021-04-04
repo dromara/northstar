@@ -268,8 +268,9 @@ message SubmitOrderReqField {
 
 // 撤单请求
 message CancelOrderReqField {
+	string gatewayId = 1; // 网关ID
+	string orderId = 2;  // 定单ID
 	string originOrderId = 3;  // 原始定单ID
-	string orderId = 4;  // 定单ID
 }
 
 // 网关设置

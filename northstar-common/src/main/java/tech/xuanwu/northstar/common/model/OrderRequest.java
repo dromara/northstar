@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 public class OrderRequest {
-
+	
 	/**
 	 * 合约名称
 	 */
@@ -39,7 +39,7 @@ public class OrderRequest {
 	/**
 	 * 账户ID
 	 */
-	private String accountId;
+	private String gatewayId;
 	
 	public static enum TradeOperation {
 		BK,	//买开

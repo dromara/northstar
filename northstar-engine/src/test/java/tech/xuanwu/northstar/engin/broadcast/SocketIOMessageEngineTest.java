@@ -27,19 +27,17 @@ public class SocketIOMessageEngineTest {
 		BroadcastOperations bo = mock(BroadcastOperations.class);
 		when(server.getBroadcastOperations()).thenReturn(bo);
 		
-		ngin = new SocketIOMessageEngine(ee, server);
+		ngin = new SocketIOMessageEngine(server);
 	}
 
 	@Test
 	public void testTickFieldOnEvent() throws Exception {
 		TickField t = TickField.newBuilder().build();
-		ngin.onEvent(new NorthstarEvent(NorthstarEventType.TICK, t), 0L, true);
 	}
 	
 	@Test
 	public void testBarFieldOnEvent() throws Exception {
 		BarField b = BarField.newBuilder().build();
-		ngin.onEvent(new NorthstarEvent(NorthstarEventType.BAR, b),  0L, true);
 	}
 
 	@Test

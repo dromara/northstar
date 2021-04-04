@@ -37,24 +37,4 @@ public class GatewayPO {
 	
 	private Object settings;
 
-	@Data
-	public static class CtpSettings {
-		private String userId;
-		private String password;
-		private String brokerId;
-		private String tdHost;
-		private String tdPort;
-		private String mdHost;
-		private String mdPort;
-		private String authCode;
-		private String userProductInfo; 
-		private String appId;
-	}
-	
-	@Data
-	public static class IbSettings {
-		private String host;
-		private int port;
-		private int clientId;
-	}
 }

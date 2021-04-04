@@ -25,7 +25,7 @@ public interface EventEngine {
 
 		@Override
 		public NorthstarEvent newInstance() {
-			return new NorthstarEvent();
+			return new NorthstarEvent(null, null);
 		}
 
 	}

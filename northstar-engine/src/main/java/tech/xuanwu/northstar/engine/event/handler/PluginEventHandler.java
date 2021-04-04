@@ -1,10 +1,11 @@
-package tech.xuanwu.northstar.engine.event;
+package tech.xuanwu.northstar.engine.event.handler;
 
 import org.springframework.beans.factory.InitializingBean;
 
 import com.google.common.eventbus.EventBus;
 
 import tech.xuanwu.northstar.common.event.NorthstarEvent;
+import tech.xuanwu.northstar.engine.event.EventEngine;
 import tech.xuanwu.northstar.engine.event.EventEngine.NorthstarEventHandler;
 
 public class PluginEventHandler implements NorthstarEventHandler, InitializingBean {

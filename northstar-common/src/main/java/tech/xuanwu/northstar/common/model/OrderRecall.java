@@ -17,5 +17,7 @@ import lombok.NoArgsConstructor;
 public class OrderRecall {
 	
 	private String orderId;
+	
+	private String gatewayId;
 
 }

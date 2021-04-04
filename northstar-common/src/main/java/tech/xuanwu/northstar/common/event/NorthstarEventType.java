@@ -15,19 +15,19 @@ public enum NorthstarEventType {
 	 */
 	BAR,
 	/**
-	 * 账户事件
+	 * 账户回报事件
 	 */
 	ACCOUNT,
 	/**
-	 * 持仓事件
+	 * 持仓回报事件
 	 */
 	POSITION,
 	/**
-	 * 成交事件
+	 * 成交回报事件
 	 */
 	TRADE,
 	/**
-	 * 委托事件
+	 * 委托回报事件
 	 */
 	ORDER,
 	/**
@@ -69,6 +69,14 @@ public enum NorthstarEventType {
 	/**
 	 * 交易日更新事件
 	 */
-	TRADE_DATE
+	TRADE_DATE,
+	/**
+	 * 下单事件
+	 */
+	PLACE_ORDER,
+	/**
+	 * 撤单事件
+	 */
+	WITHDRAW_ORDER
 	
 }

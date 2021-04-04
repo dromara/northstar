@@ -18,10 +18,11 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import com.alibaba.fastjson.JSON;
 
+import tech.xuanwu.northstar.common.exception.TradeException;
 import tech.xuanwu.northstar.common.model.OrderRecall;
 import tech.xuanwu.northstar.common.model.OrderRequest;
 import tech.xuanwu.northstar.common.model.OrderRequest.TradeOperation;
-import tech.xuanwu.northstar.service.GatewayService;
+import tech.xuanwu.northstar.service.AccountService;
 
 @RunWith(SpringRunner.class)
 @WebAppConfiguration
@@ -30,18 +31,18 @@ public class TradeOperationControllerTest {
 	private MockMvc mockMvc;
 	
 	@Before
-	public void init() {
+	public void init() throws TradeException {
 		TradeOperationController ctl = new TradeOperationController();
-		ctl.gatewayService = mock(GatewayService.class);
-		when(ctl.gatewayService.submitOrder(any(OrderRequest.class))).thenReturn("123456");
-		when(ctl.gatewayService.cancelOrder(any(OrderRecall.class))).thenReturn(Boolean.TRUE);
+		ctl.accountService = mock(AccountService.class);
+		when(ctl.accountService.submitOrder(any(OrderRequest.class))).thenReturn(Boolean.TRUE);
+		when(ctl.accountService.cancelOrder(any(OrderRecall.class))).thenReturn(Boolean.TRUE);
 		mockMvc = MockMvcBuilders.standaloneSetup(ctl).build();
 	}
 	
 	@Test
 	public void testSubmitOrder() throws Exception {
 		OrderRequest req = OrderRequest.builder()
-				.accountId("testAccount")
+				.gatewayId("testAccount")
 				.contractSymbol("rb12345")
 				.price("123.45")
 				.tradeOpr(TradeOperation.BK)

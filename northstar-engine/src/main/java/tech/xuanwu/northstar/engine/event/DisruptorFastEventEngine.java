@@ -120,7 +120,7 @@ public class DisruptorFastEventEngine implements EventEngine, InitializingBean, 
 		try {
 			NorthstarEvent fastEvent = ringBuffer.get(sequence); // Get the entry in the Disruptor for the sequence
 			fastEvent.setEvent(event);
-			fastEvent.setObj(obj);
+			fastEvent.setData(obj);
 
 		} finally {
 			ringBuffer.publish(sequence);

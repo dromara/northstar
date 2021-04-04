@@ -7,9 +7,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import tech.xuanwu.northstar.common.exception.InsufficientException;
+import tech.xuanwu.northstar.common.exception.TradeException;
 import tech.xuanwu.northstar.common.model.OrderRecall;
 import tech.xuanwu.northstar.common.model.OrderRequest;
-import tech.xuanwu.northstar.service.GatewayService;
+import tech.xuanwu.northstar.service.AccountService;
 
 /**
  * 交易控制器
@@ -21,21 +23,21 @@ import tech.xuanwu.northstar.service.GatewayService;
 public class TradeOperationController {
 	
 	@Autowired
-	protected GatewayService gatewayService;
+	protected AccountService accountService;
 
 	@PostMapping("/submit")
-	public String submitOrder(@RequestBody OrderRequest req) {
-		Assert.hasText(req.getAccountId(), "账户ID不能为空");
+	public boolean submitOrder(@RequestBody OrderRequest req) throws InsufficientException {
+		Assert.hasText(req.getGatewayId(), "账户网关ID不能为空");
 		Assert.hasText(req.getContractSymbol(), "合约不能为空");
 		Assert.hasText(req.getPrice(), "价格不能为空");
 		Assert.isTrue(req.getVolume() > 0, "下单手数必须为正整数");
 		Assert.notNull(req.getTradeOpr(), "交易操作不能为空");
-		return gatewayService.submitOrder(req);
+		return accountService.submitOrder(req);
 	}
 	
 	@PostMapping("/cancel")
-	public boolean cancelOrder(@RequestBody OrderRecall recall) {
-		return gatewayService.cancelOrder(recall);
+	public boolean cancelOrder(@RequestBody OrderRecall recall) throws TradeException {
+		return accountService.cancelOrder(recall);
 	}
 	
 }
