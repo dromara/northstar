@@ -1,11 +1,12 @@
 package tech.xuanwu.northstar.domain;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import tech.xuanwu.northstar.common.exception.NoSuchElementException;
 import xyz.redtorch.pb.CoreEnum.OrderStatusEnum;
 import xyz.redtorch.pb.CoreField.OrderField;
 
@@ -55,6 +56,6 @@ public class TradeDayOrder {
 	public List<OrderField> getOrders(){
 		List<OrderField> result = new ArrayList<>(orderQ.size());
 		orderQ.stream().forEach(id -> result.add(orderMap.get(id)));
-		return result;
+		return Collections.unmodifiableList(result);
 	}
 }

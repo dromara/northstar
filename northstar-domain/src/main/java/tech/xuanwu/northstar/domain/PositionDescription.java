@@ -1,14 +1,17 @@
 package tech.xuanwu.northstar.domain;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.google.common.collect.Lists;
+
 import tech.xuanwu.northstar.common.exception.InsufficientException;
+import tech.xuanwu.northstar.common.exception.NoSuchElementException;
 import tech.xuanwu.northstar.common.model.OrderRequest;
 import tech.xuanwu.northstar.common.utils.OrderUtil;
 import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
@@ -36,9 +39,9 @@ public class PositionDescription {
 	 * 数据结构
 	 * symbol:	{ [0]空头持仓， [1]多头持仓 }
 	 */
-	private ConcurrentHashMap<String, PositionField[]> posMap = new ConcurrentHashMap<>();
+	protected ConcurrentHashMap<String, PositionField[]> posMap = new ConcurrentHashMap<>();
 	
-	private Map<String, ContractField> contractMap;
+	protected Map<String, ContractField> contractMap;
 	
 	public PositionDescription(Map<String, ContractField> contractMap) {
 		this.contractMap = contractMap;
@@ -129,4 +132,15 @@ public class PositionDescription {
 		return result;
 	}
 	
+	public List<PositionField> getPositions(){
+		List<PositionField> result = new ArrayList<>(posMap.size() * 2);
+		posMap.forEach((k,v) -> {
+			for(PositionField p : v) {
+				if(p != null) {
+					result.add(p);
+				}
+			}
+		});
+		return Collections.unmodifiableList(result);
+	}
 }

@@ -1,6 +1,7 @@
 package tech.xuanwu.northstar.domain;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -30,7 +31,7 @@ public class TradeDayTransaction {
 	public List<TradeField> getTransactions(){
 		List<TradeField> result = new ArrayList<>(tradeQ.size());
 		tradeQ.stream().forEach(result::add);
-		return result;
+		return Collections.unmodifiableList(result);
 	}
 	
 }

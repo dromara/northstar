@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>tech.xuan-wu</groupId>
@@ -42,25 +43,22 @@
 		<module>northstar-domain</module>
 		<module>northstar-main</module>
 	</modules>
-	
+
 	<dependencies>
-		
 		<dependency>
-		    <groupId>org.mockito</groupId>
-		    <artifactId>mockito-core</artifactId>
-		    <version>${mockito-version}</version>
-		    <scope>test</scope>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<version>${mockito-version}</version>
+			<scope>test</scope>
 		</dependency>
-		
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<version>${springboot-version}</version>
 			<scope>test</scope>
 		</dependency>
-		
 	</dependencies>
-	
+
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
@@ -93,8 +91,8 @@
 				<artifactId>northstar-main</artifactId>
 				<version>${northstar-version}</version>
 			</dependency>
-			
-			
+
+
 			<dependency>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-starter</artifactId>
@@ -110,17 +108,17 @@
 				<artifactId>spring-boot-starter-web</artifactId>
 				<version>${springboot-version}</version>
 			</dependency>
-			
+
 			<dependency>
-			    <groupId>org.springframework.boot</groupId>
-			    <artifactId>spring-boot-starter-mail</artifactId>
-			    <version>${springboot-version}</version>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-starter-mail</artifactId>
+				<version>${springboot-version}</version>
 			</dependency>
 			<dependency>
-		        <groupId>org.springframework.boot</groupId>
-		        <artifactId>spring-boot-starter-actuator</artifactId>
-		        <version>${springboot-version}</version>
-		    </dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-starter-actuator</artifactId>
+				<version>${springboot-version}</version>
+			</dependency>
 			<dependency>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-configuration-processor</artifactId>
@@ -132,19 +130,19 @@
 				<version>${springboot-version}</version>
 			</dependency>
 			<dependency>
-			    <groupId>org.apache.commons</groupId>
-			    <artifactId>commons-lang3</artifactId>
-			    <version>${commons-lang3-version}</version>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-lang3</artifactId>
+				<version>${commons-lang3-version}</version>
 			</dependency>
 			<dependency>
-		        <groupId>org.projectlombok</groupId>
-		        <artifactId>lombok</artifactId>
-		        <version>${lombok-version}</version>
-		    </dependency>
-		    <dependency>
-			    <groupId>org.slf4j</groupId>
-			    <artifactId>slf4j-api</artifactId>
-			    <version>${slf4j-version}</version>
+				<groupId>org.projectlombok</groupId>
+				<artifactId>lombok</artifactId>
+				<version>${lombok-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-api</artifactId>
+				<version>${slf4j-version}</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-codec</groupId>
@@ -152,20 +150,20 @@
 				<version>${commons-codec-version}</version>
 			</dependency>
 			<dependency>
-			    <groupId>com.google.guava</groupId>
-			    <artifactId>guava</artifactId>
-			    <version>${guava-version}</version>
+				<groupId>com.google.guava</groupId>
+				<artifactId>guava</artifactId>
+				<version>${guava-version}</version>
 			</dependency>
-						
+
 			<dependency>
-			    <groupId>com.auth0</groupId>
-			    <artifactId>java-jwt</artifactId>
-			    <version>${jwt-version}</version>
+				<groupId>com.auth0</groupId>
+				<artifactId>java-jwt</artifactId>
+				<version>${jwt-version}</version>
 			</dependency>
 			<dependency>
-			    <groupId>commons-io</groupId>
-			    <artifactId>commons-io</artifactId>
-			    <version>${commons-io-version}</version>
+				<groupId>commons-io</groupId>
+				<artifactId>commons-io</artifactId>
+				<version>${commons-io-version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.google.protobuf</groupId>
@@ -183,61 +181,76 @@
 				<version>${protobuf-java-format-version}</version>
 			</dependency>
 			<dependency>
-			    <groupId>com.lmax</groupId>
-			    <artifactId>disruptor</artifactId>
-			    <version>${disruptor-version}</version>
+				<groupId>com.lmax</groupId>
+				<artifactId>disruptor</artifactId>
+				<version>${disruptor-version}</version>
 			</dependency>
 			<dependency>
-			    <groupId>com.corundumstudio.socketio</groupId>
-			    <artifactId>netty-socketio</artifactId>
-			    <version>${netty-socketio-version}</version>
+				<groupId>com.corundumstudio.socketio</groupId>
+				<artifactId>netty-socketio</artifactId>
+				<version>${netty-socketio-version}</version>
 			</dependency>
 			<dependency>
-			    <groupId>io.socket</groupId>
-			    <artifactId>socket.io-client</artifactId>
-			    <version>${socketio-client-version}</version>
+				<groupId>io.socket</groupId>
+				<artifactId>socket.io-client</artifactId>
+				<version>${socketio-client-version}</version>
 			</dependency>
 			<dependency>
-			    <groupId>com.alibaba</groupId>
-			    <artifactId>fastjson</artifactId>
-			    <version>${fastjson-version}</version>
+				<groupId>com.alibaba</groupId>
+				<artifactId>fastjson</artifactId>
+				<version>${fastjson-version}</version>
 			</dependency>
 			<dependency>
-			    <groupId>com.caucho</groupId>
-			    <artifactId>hessian</artifactId>
-			    <version>${hessian-version}</version>
+				<groupId>com.caucho</groupId>
+				<artifactId>hessian</artifactId>
+				<version>${hessian-version}</version>
 			</dependency>
 		</dependencies>
-		
 	</dependencyManagement>
 	<build>
-        <plugins>
-            <plugin>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.7.9</version>
-                <executions>
-                    <execution>
-                        <id>default-prepare-agent</id>
-                        <goals>
-                            <goal>prepare-agent</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>default-report</id>
-                        <phase>prepare-package</phase>
-                        <goals>
-                            <goal>report</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>default-check</id>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
+		<plugins>
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.8.1</version>
+				<executions>
+					<execution>
+						<id>default-prepare-agent</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>default-report</id>
+						<goals>
+							<goal>report</goal>
+						</goals>
+						<configuration>
+							<dataFile>northstar-main/target/jacoco.exec</dataFile>
+						</configuration>
+					</execution>
+					<execution>
+						<id>default-check</id>
+						<goals>
+							<goal>check</goal>
+						</goals>
+						<configuration>
+							<rules>
+								<rule>
+									<element>BUNDLE</element>
+									<limits>
+										<limit>
+											<counter>COMPLEXITY</counter>
+											<value>COVEREDRATIO</value>
+											<minimum>0.60</minimum>
+										</limit>
+									</limits>
+								</rule>
+							</rules>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
 </project>

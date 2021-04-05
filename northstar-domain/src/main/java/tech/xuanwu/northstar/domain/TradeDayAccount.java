@@ -47,7 +47,7 @@ public class TradeDayAccount {
 	
 	private String accountId;
 	
-	private EventBus eventBus;
+	protected EventBus eventBus;
 	
 	public TradeDayAccount(String gatewayId, EventBus eventBus, Map<String, ContractField> contractMap) {
 		this.accountId = gatewayId;
@@ -82,7 +82,7 @@ public class TradeDayAccount {
 		}
 		// 检查可用资金
 		double marginRate = OrderUtil.resolveDirection(orderReq.getTradeOpr()) == DirectionEnum.D_Buy ? contract.getLongMarginRatio() : contract.getShortMarginRatio();
-		double totalCost = orderReq.getVolume() * Double.parseDouble(orderReq.getPrice()) * marginRate;
+		double totalCost = orderReq.getVolume() * Double.parseDouble(orderReq.getPrice()) * contract.getMultiplier() * marginRate;
 		if(accountInfo.getAvailable() < totalCost) {
 			throw new InsufficientException("可用资金不足，无法开仓");
 		}
@@ -124,44 +124,24 @@ public class TradeDayAccount {
 		return true;
 	}
 
-	public TradeDayTransaction getTdTransaction() {
-		return tdTransaction;
-	}
-
-	public void setTdTransaction(TradeDayTransaction tdTransaction) {
-		this.tdTransaction = tdTransaction;
-	}
-
-	public TradeDayOrder getTdOrder() {
-		return tdOrder;
-	}
-
-	public void setTdOrder(TradeDayOrder tdOrder) {
-		this.tdOrder = tdOrder;
-	}
-
-	public PositionDescription getPosDescription() {
-		return posDescription;
-	}
-
-	public void setPosDescription(PositionDescription posDescription) {
-		this.posDescription = posDescription;
-	}
-
+	
 	public AccountField getAccountInfo() {
 		return accountInfo;
-	}
-
-	public void setAccountInfo(AccountField accountInfo) {
-		this.accountInfo = accountInfo;
 	}
 
 	public String getAccountId() {
 		return accountId;
 	}
 
-	public void setAccountId(String accountId) {
-		this.accountId = accountId;
+	public List<PositionField> getPositions(){
+		return posDescription.getPositions();
 	}
 	
+	public List<TradeField> getTradeDayTransactions(){
+		return tdTransaction.getTransactions();
+	}
+	
+	public List<OrderField> getTradeDayOrders(){
+		return tdOrder.getOrders();
+	}
 }
