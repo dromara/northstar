@@ -12,6 +12,7 @@ import com.google.common.eventbus.Subscribe;
 import tech.xuanwu.northstar.common.constant.Constants;
 import tech.xuanwu.northstar.common.event.NorthstarEvent;
 import tech.xuanwu.northstar.common.event.NorthstarEventType;
+import tech.xuanwu.northstar.common.exception.NoSuchElementException;
 import tech.xuanwu.northstar.domain.GatewayConnection;
 import xyz.redtorch.pb.CoreField.ContractField;
 
@@ -25,7 +26,7 @@ public class ContractService {
 	
 	@Autowired
 	@Qualifier(Constants.GATEWAY_CONTRACT_MAP)
-	private Map<String, Map<String, ContractField>> gatewayContractMap;
+	protected Map<String, Map<String, ContractField>> gatewayContractMap;
 
 	@Subscribe
 	public void onEvent(NorthstarEvent e) {
@@ -37,6 +38,9 @@ public class ContractService {
 			ContractField contract = (ContractField) e.getData();
 			String gatewayId = contract.getGatewayId();
 			String symbol = contract.getSymbol();
+			if(!gatewayContractMap.containsKey(gatewayId)) {
+				throw new NoSuchElementException("没有注册网关：" + gatewayId);
+			}
 			gatewayContractMap.get(gatewayId).put(symbol, contract);
 		}
 	}

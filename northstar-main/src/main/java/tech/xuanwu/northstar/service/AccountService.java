@@ -34,13 +34,13 @@ import xyz.redtorch.pb.CoreField.ContractField;
 public class AccountService {
 	
 	@Autowired
-	private InternalEventBus eventBus;
+	protected InternalEventBus eventBus;
 	
 	@Autowired
 	@Qualifier(Constants.GATEWAY_CONTRACT_MAP)
-	private Map<String, Map<String, ContractField>> gatewayContractMap;
+	protected Map<String, Map<String, ContractField>> gatewayContractMap;
 	
-	private ConcurrentHashMap<String, TradeDayAccount> accountMap = new ConcurrentHashMap<>();
+	protected ConcurrentHashMap<String, TradeDayAccount> accountMap = new ConcurrentHashMap<>();
 
 	/**
 	 * 下单

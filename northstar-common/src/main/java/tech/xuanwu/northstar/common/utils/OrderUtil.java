@@ -8,15 +8,15 @@ import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
 public class OrderUtil {
 	
 	public static DirectionEnum resolveDirection(TradeOperation opr) {
-		return (opr.toString().charAt(0) & 'B') > 0 ? DirectionEnum.D_Buy : DirectionEnum.D_Sell;
+		return opr.toString().charAt(0) == 'B' ? DirectionEnum.D_Buy : DirectionEnum.D_Sell;
 	}
 	
 	public static boolean isOpenningOrder(TradeOperation opr) {
-		return (opr.toString().charAt(1) & 'K') > 0;
+		return opr.toString().charAt(1) == 'K';
 	}
 	
 	public static boolean isClosingOrder(TradeOperation opr) {
-		return (opr.toString().charAt(1) & 'P') > 0;
+		return opr.toString().charAt(1) == 'P';
 	}
 	
 	public static PositionDirectionEnum getClosingDirection(DirectionEnum dir) {

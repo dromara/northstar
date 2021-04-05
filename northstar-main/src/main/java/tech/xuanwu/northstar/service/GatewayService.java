@@ -26,10 +26,10 @@ import tech.xuanwu.northstar.domain.TraderGatewayConnection;
 import tech.xuanwu.northstar.engine.event.EventEngine;
 import tech.xuanwu.northstar.gateway.api.Gateway;
 import tech.xuanwu.northstar.gateway.api.TradeGateway;
-import tech.xuanwu.northstar.gateway.ctp.x64v6v3v15v.CtpGatewayAdapter;
 import tech.xuanwu.northstar.model.CtpSettings;
 import tech.xuanwu.northstar.persistence.GatewayRepository;
 import tech.xuanwu.northstar.persistence.po.GatewayPO;
+import xyz.redtorch.gateway.ctp.x64v6v3v15v.CtpGatewayAdapter;
 import xyz.redtorch.pb.CoreEnum.GatewayAdapterTypeEnum;
 import xyz.redtorch.pb.CoreEnum.GatewayTypeEnum;
 import xyz.redtorch.pb.CoreField.CancelOrderReqField;
@@ -46,18 +46,18 @@ import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 @Service
 public class GatewayService implements InitializingBean {
 	
-	private ConcurrentHashMap<String, GatewayConnection> marketGatewayMap = new ConcurrentHashMap<>();
-	private ConcurrentHashMap<String, GatewayConnection> traderGatewayMap = new ConcurrentHashMap<>();
-	private ConcurrentHashMap<GatewayConnection, Gateway> gatewayMap = new ConcurrentHashMap<>();
+	protected ConcurrentHashMap<String, GatewayConnection> marketGatewayMap = new ConcurrentHashMap<>();
+	protected ConcurrentHashMap<String, GatewayConnection> traderGatewayMap = new ConcurrentHashMap<>();
+	protected ConcurrentHashMap<GatewayConnection, Gateway> gatewayMap = new ConcurrentHashMap<>();
 	
 	@Autowired
-	private GatewayRepository gatewayRepo;
+	protected GatewayRepository gatewayRepo;
 	
 	@Autowired
-	private EventEngine eventEngine;
+	protected EventEngine eventEngine;
 	
 	@Autowired
-	private InternalEventBus eventBus;
+	protected InternalEventBus eventBus;
 	
 	/**
 	 * 创建网关
@@ -65,14 +65,14 @@ public class GatewayService implements InitializingBean {
 	 */
 	public boolean createGateway(GatewayDescription gatewayDescription) {
 		log.info("创建网关[{}]", gatewayDescription.getGatewayId());
-		return doCreateGateway(gatewayDescription);
-	}
-	
-	private boolean doCreateGateway(GatewayDescription gatewayDescription) {
 		GatewayPO po = new GatewayPO();
 		BeanUtils.copyProperties(gatewayDescription, po);
 		gatewayRepo.insert(po);
 		
+		return doCreateGateway(gatewayDescription);
+	}
+	
+	private boolean doCreateGateway(GatewayDescription gatewayDescription) {
 		Gateway gateway = null;
 		GatewayConnection conn = null;
 		GatewayTypeEnum gwType = null;
@@ -129,6 +129,10 @@ public class GatewayService implements InitializingBean {
 	 */
 	public boolean updateGateway(GatewayDescription gatewayDescription) {
 		log.info("更新网关[{}]", gatewayDescription.getGatewayId());
+		GatewayPO po = new GatewayPO();
+		BeanUtils.copyProperties(gatewayDescription, po);
+		gatewayRepo.save(po);
+		
 		// 先删除旧的，再重新创建新的
 		return doDeleteGateway(gatewayDescription.getGatewayId()) && doCreateGateway(gatewayDescription);
 	}
@@ -139,6 +143,7 @@ public class GatewayService implements InitializingBean {
 	 */
 	public boolean deleteGateway(String gatewayId) {
 		log.info("移除网关[{}]", gatewayId);
+		gatewayRepo.deleteById(gatewayId);
 		return doDeleteGateway(gatewayId);
 	}
 	
@@ -249,7 +254,7 @@ public class GatewayService implements InitializingBean {
 		for(GatewayPO po : result) {
 			GatewayDescription gd = new GatewayDescription();
 			BeanUtils.copyProperties(po, gd);
-			createGateway(gd);
+			doCreateGateway(gd);
 		}
 	}
 }

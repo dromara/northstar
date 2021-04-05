@@ -54,7 +54,7 @@ public class TradeOperationControllerTest {
 				.accept(MediaType.APPLICATION_JSON)
 				.content(JSON.toJSONString(req)))
 			.andExpect(MockMvcResultMatchers.status().isOk())
-			.andExpect(MockMvcResultMatchers.content().string("123456"))
+			.andExpect(MockMvcResultMatchers.content().string("true"))
 			.andDo(MockMvcResultHandlers.print());
 	}
 

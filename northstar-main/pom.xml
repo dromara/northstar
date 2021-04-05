@@ -24,6 +24,10 @@
 			<artifactId>northstar-domain</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>tech.xuan-wu</groupId>
+			<artifactId>northstar-gateway-ctp</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
@@ -52,10 +56,7 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-mongodb</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>tech.xuan-wu</groupId>
-			<artifactId>northstar-gateway-ctp</artifactId>
-		</dependency>
+		
 	</dependencies>
 
 	<build>
