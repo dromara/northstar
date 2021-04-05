@@ -8,13 +8,13 @@ import tech.xuanwu.northstar.common.event.NorthstarEvent;
 import tech.xuanwu.northstar.engine.event.EventEngine;
 import tech.xuanwu.northstar.engine.event.EventEngine.NorthstarEventHandler;
 
-public class InternalEventHandler implements NorthstarEventHandler, InitializingBean {
+public class PluginHandler implements NorthstarEventHandler, InitializingBean {
 
 	private EventEngine ee;
 	
 	private EventBus eb;
 	
-	public InternalEventHandler(EventEngine ee, EventBus eb){
+	public PluginHandler(EventEngine ee, EventBus eb){
 		this.ee = ee;
 		this.eb = eb;
 	}
@@ -28,4 +28,5 @@ public class InternalEventHandler implements NorthstarEventHandler, Initializing
 	public void afterPropertiesSet() throws Exception {
 		ee.addHandler(this);
 	}
+
 }

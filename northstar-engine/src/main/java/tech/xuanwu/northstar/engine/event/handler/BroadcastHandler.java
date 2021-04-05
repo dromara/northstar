@@ -17,7 +17,7 @@ import xyz.redtorch.pb.CoreField.PositionField;
 import xyz.redtorch.pb.CoreField.TickField;
 import xyz.redtorch.pb.CoreField.TradeField;
 
-public class BroadcastEventHandler implements NorthstarEventHandler, InitializingBean {
+public class BroadcastHandler implements NorthstarEventHandler, InitializingBean {
 	
 	private SocketIOMessageEngine msgEngine;
 	private EventEngine ee;
@@ -35,7 +35,7 @@ public class BroadcastEventHandler implements NorthstarEventHandler, Initializin
 		clzMap.put(NorthstarEventType.NOTICE, NoticeField.class);
 	}
 	
-	public BroadcastEventHandler(EventEngine ee, SocketIOMessageEngine msgEngine) {
+	public BroadcastHandler(EventEngine ee, SocketIOMessageEngine msgEngine) {
 		this.msgEngine = msgEngine;
 		this.ee = ee;
 	}
