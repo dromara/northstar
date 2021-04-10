@@ -30,8 +30,6 @@ public class AccountServiceTest {
 	@Before
 	public void prepare() {
 		service.eventBus = mock(InternalEventBus.class);
-		
-		service.gatewayContractMap = mock(ConcurrentHashMap.class);
 	}
 
 	@Test
@@ -71,29 +69,6 @@ public class AccountServiceTest {
 	@Test(expected = NoSuchElementException.class)
 	public void testCancelOrderWithException() throws TradeException {
 		service.cancelOrder(new OrderRecall("123456", "testGateway"));
-	}
-
-	@Test
-	public void testOnLogined() {
-		service.gatewayContractMap = mock(Map.class);
-		when(service.gatewayContractMap.containsKey("testGateway")).thenReturn(true);
-		when(service.gatewayContractMap.get("testGateway")).thenReturn(mock(Map.class));
-		service.onLogined(new NorthstarEvent(NorthstarEventType.LOGINED, "testGateway"));
-	}
-	
-	@Test(expected = NoSuchElementException.class)
-	public void testOnLoginedWithException() {
-		service.onLogined(new NorthstarEvent(NorthstarEventType.LOGINED, "testGateway"));
-	}
-
-	@Test
-	public void testOnLogouted() {
-		service.gatewayContractMap = mock(Map.class);
-		GatewayConnection conn = mock(GatewayConnection.class);
-		when(conn.getGwDescription()).thenReturn(mock(GatewayDescription.class));
-		when(conn.getGwDescription().getGatewayId()).thenReturn("123456");
-		
-		service.onLogouted(new NorthstarEvent(NorthstarEventType.DISCONNECTING, conn));
 	}
 
 }

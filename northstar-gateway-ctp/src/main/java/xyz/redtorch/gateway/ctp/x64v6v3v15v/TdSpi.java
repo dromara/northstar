@@ -288,8 +288,6 @@ public class TdSpi extends CThostFtdcTraderSpi {
 			return;
 		}
 		
-		ctpGatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.CONNECTING, gatewayId);
-
 		connectionStatus = CONNECTION_STATUS_CONNECTING;
 		loginStatus = false;
 		instrumentQueried = false;

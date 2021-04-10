@@ -4,10 +4,17 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.Table;
+
+import tech.xuanwu.northstar.common.constant.Constants;
+import xyz.redtorch.pb.CoreField.ContractField;
 
 /**
  * 配置转换器
@@ -15,7 +22,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  *
  */
 @Configuration
-public class MessageConvertorConfig implements WebMvcConfigurer {
+public class AppConfig implements WebMvcConfigurer {
 
 	@Override
 	public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
@@ -36,5 +43,8 @@ public class MessageConvertorConfig implements WebMvcConfigurer {
 		}
 	}
 
-	
+	@Bean(Constants.GATEWAY_CONTRACT_MAP)
+	public Table<String, String, ContractField> createContractMap(){
+		return HashBasedTable.create();
+	}
 }

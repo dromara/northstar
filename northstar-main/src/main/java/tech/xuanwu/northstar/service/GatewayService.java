@@ -10,14 +10,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
-import com.google.common.eventbus.Subscribe;
 
 import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.common.constant.GatewayType;
 import tech.xuanwu.northstar.common.constant.GatewayUsage;
 import tech.xuanwu.northstar.common.event.InternalEventBus;
-import tech.xuanwu.northstar.common.event.NorthstarEvent;
-import tech.xuanwu.northstar.common.event.NorthstarEventType;
 import tech.xuanwu.northstar.common.exception.NoSuchElementException;
 import tech.xuanwu.northstar.common.model.CtpSettings;
 import tech.xuanwu.northstar.common.model.GatewayDescription;
@@ -26,16 +23,15 @@ import tech.xuanwu.northstar.domain.MarketGatewayConnection;
 import tech.xuanwu.northstar.domain.TraderGatewayConnection;
 import tech.xuanwu.northstar.engine.event.EventEngine;
 import tech.xuanwu.northstar.gateway.api.Gateway;
-import tech.xuanwu.northstar.gateway.api.TradeGateway;
+import tech.xuanwu.northstar.handler.ConnectionEventHandler;
+import tech.xuanwu.northstar.handler.TradeEventHandler;
 import tech.xuanwu.northstar.persistence.GatewayRepository;
 import tech.xuanwu.northstar.persistence.po.GatewayPO;
 import xyz.redtorch.gateway.ctp.x64v6v3v15v.CtpGatewayAdapter;
 import xyz.redtorch.pb.CoreEnum.GatewayAdapterTypeEnum;
 import xyz.redtorch.pb.CoreEnum.GatewayTypeEnum;
-import xyz.redtorch.pb.CoreField.CancelOrderReqField;
 import xyz.redtorch.pb.CoreField.GatewaySettingField;
 import xyz.redtorch.pb.CoreField.GatewaySettingField.CtpApiSettingField;
-import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 
 /**
  * 网关服务
@@ -227,27 +223,6 @@ public class GatewayService implements InitializingBean {
 		return true;
 	}
 	
-	@Subscribe
-	private void onEvent(NorthstarEvent e) {
-		if (e.getEvent() == NorthstarEventType.PLACE_ORDER) {
-			SubmitOrderReqField submitReq = (SubmitOrderReqField) e.getData();
-			String gatewayId = submitReq.getGatewayId();
-			if(!traderGatewayMap.containsKey(gatewayId)) {
-				throw new NoSuchElementException("没有找到相关的网关：" + gatewayId);
-			}
-			TradeGateway tradeGateway = (TradeGateway) traderGatewayMap.get(gatewayId);
-			tradeGateway.submitOrder(submitReq);
-		} else if (e.getEvent() == NorthstarEventType.WITHDRAW_ORDER) {
-			CancelOrderReqField cancelReq = (CancelOrderReqField) e.getData();
-			String gatewayId = cancelReq.getGatewayId();
-			if(!traderGatewayMap.containsKey(gatewayId)) {
-				throw new NoSuchElementException("没有找到相关的网关：" + gatewayId);
-			}
-			TradeGateway tradeGateway = (TradeGateway) traderGatewayMap.get(gatewayId);
-			tradeGateway.cancelOrder(cancelReq);
-		}
-	}
-	
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		List<GatewayPO> result = gatewayRepo.findAll();
@@ -256,5 +231,8 @@ public class GatewayService implements InitializingBean {
 			BeanUtils.copyProperties(po, gd);
 			doCreateGateway(gd);
 		}
+		
+		eventBus.register(new ConnectionEventHandler(gatewayMap));
+		eventBus.register(new TradeEventHandler(traderGatewayMap, gatewayMap));
 	}
 }
