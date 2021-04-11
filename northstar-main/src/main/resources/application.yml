@@ -3,15 +3,13 @@ server:
   servlet:
     context-path: /northstar
 
-
 socketio:
   host: 127.0.0.1
   port: 51888
   
-  
 auth:
   userId: admin
-  password: ${password:123456}
+  password: 123456
 
 logging:
   level: 

@@ -1,14 +1,16 @@
 package tech.xuanwu.northstar.controller.common;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import tech.xuanwu.northstar.common.constant.ReturnCode;
 
 @Data
+@NoArgsConstructor
 public class ResultBean<T> {
 	/**
 	 * 返回码
 	 */
-	private int returnCode = ReturnCode.ERROR;
+	private int status = ReturnCode.ERROR;
 	/**
 	 * 异常信息
 	 */
@@ -19,12 +21,12 @@ public class ResultBean<T> {
 	private T data;
 	
 	public ResultBean(T t) {
-		this.returnCode = ReturnCode.SUCCESS;
+		this.status = ReturnCode.SUCCESS;
 		this.data = t;
 	}
 	
 	public ResultBean(int returnCode, String message) {
-		this.returnCode = returnCode;
+		this.status = returnCode;
 		this.message = message;
 	}
 }

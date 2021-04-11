@@ -35,6 +35,8 @@ public class GatewayPO {
 	
 	private boolean autoConnect;
 	
+	private boolean disabled;
+	
 	private Object settings;
 
 }

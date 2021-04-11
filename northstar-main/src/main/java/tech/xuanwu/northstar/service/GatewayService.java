@@ -109,7 +109,7 @@ public class GatewayService implements InitializingBean {
 			throw new NoSuchElementException("没有这种网关类型：" + gatewayDescription.getGatewayType());
 		}
 		
-		if(gatewayDescription.isAutoConnect()) {
+		if(gatewayDescription.isAutoConnect() && !gatewayDescription.isDisabled()) {
 			conn.connect();
 			gateway.connect();
 		}
@@ -196,9 +196,17 @@ public class GatewayService implements InitializingBean {
 	public boolean connect(String gatewayId) {
 		log.info("连接网关[{}]", gatewayId);
 		if(traderGatewayMap.containsKey(gatewayId)) {
-			traderGatewayMap.get(gatewayId).connect();
+			GatewayConnection gateway =  traderGatewayMap.get(gatewayId);
+			if(gateway.getGwDescription().isDisabled()) {
+				throw new IllegalStateException(gatewayId + "网关处于禁用状态，无法操作");
+			}
+			gateway.connect();
 		} else if (marketGatewayMap.containsKey(gatewayId)) {
-			marketGatewayMap.get(gatewayId).connect();
+			GatewayConnection gateway = marketGatewayMap.get(gatewayId);
+			if(gateway.getGwDescription().isDisabled()) {
+				throw new IllegalStateException(gatewayId + "网关处于禁用状态，无法操作");
+			}		
+			gateway.connect();
 		} else {
 			throw new NoSuchElementException("没有该网关记录：" +  gatewayId);
 		}

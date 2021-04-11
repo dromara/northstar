@@ -2,44 +2,41 @@ package tech.xuanwu.northstar.integrated;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.List;
 import java.util.Optional;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
 
 import com.alibaba.fastjson.JSON;
 
 import tech.xuanwu.northstar.common.constant.GatewayType;
 import tech.xuanwu.northstar.common.constant.GatewayUsage;
+import tech.xuanwu.northstar.common.constant.ReturnCode;
 import tech.xuanwu.northstar.common.model.CtpSettings;
 import tech.xuanwu.northstar.common.model.GatewayDescription;
+import tech.xuanwu.northstar.common.model.NsUser;
+import tech.xuanwu.northstar.controller.common.ResultBean;
 import tech.xuanwu.northstar.persistence.GatewayRepository;
 import tech.xuanwu.northstar.persistence.po.GatewayPO;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest
-@WebAppConfiguration
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-unittest.properties")
 public class GatewayManagementTest {
 
-	MockMvc mockMvc;
-	
-	@Autowired
-	WebApplicationContext ctx;
-	
 	GatewayDescription mktGateway;
 	GatewayDescription trdGateway;
 	CtpSettings settings;
@@ -47,10 +44,14 @@ public class GatewayManagementTest {
 	@Autowired
 	GatewayRepository gwRepo;
 	
+	@Autowired
+	TestRestTemplate restTemplate;
+	
+	HttpHeaders headers;
+	
 	@Before
 	public void prepare() {
 		gwRepo.deleteAll();
-		mockMvc = MockMvcBuilders.webAppContextSetup(ctx).build();
 		settings = new CtpSettings();
 		settings.setUserId("guest");
 		settings.setPassword("123456");
@@ -79,123 +80,105 @@ public class GatewayManagementTest {
 				.description("testing")
 				.settings(settings)
 				.build();
+		
+		ResultBean result = restTemplate.postForObject("/auth/token", new NsUser("admin","123456"), ResultBean.class);
+		String token = (String) result.getData();
+		headers = new HttpHeaders();
+		headers.add(HttpHeaders.AUTHORIZATION, token);
+	}
+	
+	@After
+	public void clear() {
+		gwRepo.deleteAll();
 	}
 	
 	@Test
-	public void testCRUD() throws Exception {
-		//新增行情网关
-		mockMvc.perform(MockMvcRequestBuilders.post("/mgt/gateway")
-				.contentType(MediaType.APPLICATION_JSON)
-				.accept(MediaType.APPLICATION_JSON)
-				.content(JSON.toJSONString(mktGateway)))
-				.andExpect(MockMvcResultMatchers.status().isOk())
-				.andExpect(MockMvcResultMatchers.jsonPath("$.returnCode").value(200))
-				.andExpect(MockMvcResultMatchers.jsonPath("$.data").value(true))
-				.andDo(MockMvcResultHandlers.print());
-		//新增交易网关
-		mockMvc.perform(MockMvcRequestBuilders.post("/mgt/gateway")
-				.contentType(MediaType.APPLICATION_JSON)
-				.accept(MediaType.APPLICATION_JSON)
-				.content(JSON.toJSONString(trdGateway)))
-				.andExpect(MockMvcResultMatchers.status().isOk())
-				.andExpect(MockMvcResultMatchers.jsonPath("$.returnCode").value(200))
-				.andExpect(MockMvcResultMatchers.jsonPath("$.data").value(true))
-				.andDo(MockMvcResultHandlers.print());
+	public void test_NS33_InvokeWithoutAuth() {
+		ResultBean result1 = restTemplate.postForObject("/mgt/gateway", mktGateway, ResultBean.class);
+		assertThat(result1.getStatus()).isEqualTo(ReturnCode.AUTH_ERR);
+	}
+	
+	@Test
+	public void test_NS37_CreateGateway() {
+		ResponseEntity<ResultBean> response = restTemplate.exchange("/mgt/gateway", HttpMethod.POST, new HttpEntity(mktGateway, headers), ResultBean.class);
+		ResultBean result = response.getBody();
+		assertThat(result.getStatus()).isEqualTo(ReturnCode.SUCCESS);
+		Optional<GatewayPO> obj = gwRepo.findById("testMarketGateway");
+		assertThat(obj).isNotNull();
+	}
+	
+	@Test
+	public void test_NS38_ModifyGateway() {
+		restTemplate.exchange("/mgt/gateway", HttpMethod.POST, new HttpEntity(mktGateway, headers), ResultBean.class);
+		Optional<GatewayPO> obj1 = gwRepo.findById("testMarketGateway");
 		
-		//连接网关
-		mockMvc.perform(MockMvcRequestBuilders.get("/mgt/connection")
-				.param("gatewayId", "testMarketGateway"))
-				.andExpect(MockMvcResultMatchers.status().isOk())
-				.andExpect(MockMvcResultMatchers.jsonPath("$.returnCode").value(200))
-				.andExpect(MockMvcResultMatchers.jsonPath("$.data").value(true))
-				.andDo(MockMvcResultHandlers.print());
-		mockMvc.perform(MockMvcRequestBuilders.get("/mgt/connection")
-				.param("gatewayId", "testTradeGateway"))
-				.andExpect(MockMvcResultMatchers.status().isOk())
-				.andExpect(MockMvcResultMatchers.jsonPath("$.returnCode").value(200))
-				.andExpect(MockMvcResultMatchers.jsonPath("$.data").value(true))
-				.andDo(MockMvcResultHandlers.print());
+		mktGateway.setDescription("changeit");
+		restTemplate.exchange("/mgt/gateway", HttpMethod.PUT, new HttpEntity(mktGateway, headers), ResultBean.class);
+		Optional<GatewayPO> obj2 = gwRepo.findById("testMarketGateway");
 		
-		//等待网关连接
-		Thread.sleep(10000);
-		
-		mockMvc.perform(MockMvcRequestBuilders.delete("/mgt/connection")
-				.param("gatewayId", "testMarketGateway"))
-				.andExpect(MockMvcResultMatchers.status().isOk())
-				.andExpect(MockMvcResultMatchers.jsonPath("$.returnCode").value(200))
-				.andExpect(MockMvcResultMatchers.jsonPath("$.data").value(true))
-				.andDo(MockMvcResultHandlers.print());
-		mockMvc.perform(MockMvcRequestBuilders.delete("/mgt/connection")
-				.param("gatewayId", "testTradeGateway"))
-				.andExpect(MockMvcResultMatchers.status().isOk())
-				.andExpect(MockMvcResultMatchers.jsonPath("$.returnCode").value(200))
-				.andExpect(MockMvcResultMatchers.jsonPath("$.data").value(true))
-				.andDo(MockMvcResultHandlers.print());
-		
-		//等待网关断开
-		Thread.sleep(10000);
-		
-		//查询全部
-		mockMvc.perform(MockMvcRequestBuilders.get("/mgt/gateway")
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(MockMvcResultMatchers.status().isOk())
-				.andExpect(MockMvcResultMatchers.jsonPath("$.data").isArray())
-				.andExpect(MockMvcResultMatchers.jsonPath("$.data.length()").value(2))
-				.andDo(MockMvcResultHandlers.print());
-		//查询行情网关
-		mockMvc.perform(MockMvcRequestBuilders.get("/mgt/gateway")
-				.param("usage", GatewayUsage.MARKET_DATA.toString())
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(MockMvcResultMatchers.status().isOk())
-				.andExpect(MockMvcResultMatchers.jsonPath("$.data").isArray())
-				.andExpect(MockMvcResultMatchers.jsonPath("$.data.length()").value(1))
-				.andDo(MockMvcResultHandlers.print());
-		//查询交易网关
-		mockMvc.perform(MockMvcRequestBuilders.get("/mgt/gateway")
-				.param("usage", GatewayUsage.TRADE.toString())
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(MockMvcResultMatchers.status().isOk())
-				.andExpect(MockMvcResultMatchers.jsonPath("$.data").isArray())
-				.andExpect(MockMvcResultMatchers.jsonPath("$.data.length()").value(1))
-				.andDo(MockMvcResultHandlers.print());
-		
-		mktGateway = GatewayDescription.builder()
-				.gatewayId("testMarketGateway")
-				.gatewayAdapterType("tech.xuanwu.northstar.gateway.ctp.x64v6v3v15v.CtpGatewayAdapter")
-				.gatewayType(GatewayType.CTP)
-				.gatewayUsage(GatewayUsage.MARKET_DATA)
-				.description("testingUpdate")
-				.settings(settings)
-				.build();
-		mockMvc.perform(MockMvcRequestBuilders.put("/mgt/gateway")
-				.contentType(MediaType.APPLICATION_JSON)
-				.accept(MediaType.APPLICATION_JSON)
-				.content(JSON.toJSONString(mktGateway)))
-				.andExpect(MockMvcResultMatchers.status().isOk())
-				.andExpect(MockMvcResultMatchers.jsonPath("$.data").value(true))
-				.andDo(MockMvcResultHandlers.print());
-		
-		Optional<GatewayPO> result = gwRepo.findById("testMarketGateway");
-		assertThat(result.get().getDescription()).isEqualTo("testingUpdate");
-		
-		//删除行情网关
-		mockMvc.perform(MockMvcRequestBuilders.delete("/mgt/gateway")
-				.contentType(MediaType.APPLICATION_JSON)
-				.accept(MediaType.APPLICATION_JSON)
-				.param("gatewayId", "testMarketGateway"))
-				.andExpect(MockMvcResultMatchers.status().isOk())
-				.andExpect(MockMvcResultMatchers.jsonPath("$.data").value(true))
-				.andDo(MockMvcResultHandlers.print());
-		//删除交易网关
-		mockMvc.perform(MockMvcRequestBuilders.delete("/mgt/gateway")
-				.contentType(MediaType.APPLICATION_JSON)
-				.accept(MediaType.APPLICATION_JSON)
-				.param("gatewayId", "testTradeGateway"))
-				.andExpect(MockMvcResultMatchers.status().isOk())
-				.andExpect(MockMvcResultMatchers.jsonPath("$.data").value(true))
-				.andDo(MockMvcResultHandlers.print());
-		
+		assertThat(obj1.get()).isNotEqualTo(obj2.get());
+		assertThat(obj1.get().getGatewayId()).isEqualTo(obj2.get().getGatewayId());
+		assertThat(gwRepo.count()).isEqualTo(1);
+	}
+	
+	@Test
+	public void test_NS39_RemoveGateway() {
+		restTemplate.exchange("/mgt/gateway", HttpMethod.PUT, new HttpEntity(mktGateway, headers), ResultBean.class);
+		assertThat(gwRepo.count()).isEqualTo(1);
+		restTemplate.exchange("/mgt/gateway?gatewayId=" + mktGateway.getGatewayId(), HttpMethod.DELETE, new HttpEntity(null, headers), ResultBean.class);
 		assertThat(gwRepo.count()).isEqualTo(0);
+	}
+	
+	@Test
+	public void test_NS40_GetAllGateway() {
+		restTemplate.exchange("/mgt/gateway", HttpMethod.POST, new HttpEntity(mktGateway, headers), ResultBean.class);
+		restTemplate.exchange("/mgt/gateway", HttpMethod.POST, new HttpEntity(trdGateway, headers), ResultBean.class);
+		assertThat(gwRepo.count()).isEqualTo(2);
+		
+		ResponseEntity<ResultBean> resp = restTemplate.exchange("/mgt/gateway", HttpMethod.GET, new HttpEntity(mktGateway, headers), ResultBean.class);
+		ResultBean result = resp.getBody();
+		List<GatewayDescription> list = JSON.parseArray(JSON.toJSONString(result.getData()), GatewayDescription.class);
+		assertThat(list.size()).isEqualTo(2);
+		
+		ResponseEntity<ResultBean> resp1 = restTemplate.exchange("/mgt/gateway?usage=MARKET_DATA", HttpMethod.GET, new HttpEntity(null, headers), ResultBean.class);
+		ResultBean result1 = resp1.getBody();
+		List<GatewayDescription> list1 = JSON.parseArray(JSON.toJSONString(result1.getData()), GatewayDescription.class);
+		assertThat(list1.get(0).getGatewayId()).isEqualTo(mktGateway.getGatewayId());
+		
+		ResponseEntity<ResultBean> resp2 = restTemplate.exchange("/mgt/gateway?usage=TRADE", HttpMethod.GET, new HttpEntity(null, headers), ResultBean.class);
+		ResultBean result2 = resp2.getBody();
+		List<GatewayDescription> list2 = JSON.parseArray(JSON.toJSONString(result2.getData()), GatewayDescription.class);
+		assertThat(list2.get(0).getGatewayId()).isEqualTo(trdGateway.getGatewayId());
+	}
+	
+	@Test
+	public void test_NS42_CreateGatewayWithDuplicatedID() {
+		ResponseEntity<ResultBean> resp1 = restTemplate.exchange("/mgt/gateway", HttpMethod.POST, new HttpEntity(mktGateway, headers), ResultBean.class);
+		ResultBean result1 = resp1.getBody();
+		assertThat(result1.getStatus()).isEqualTo(ReturnCode.SUCCESS);
+		ResponseEntity<ResultBean> resp2 = restTemplate.exchange("/mgt/gateway", HttpMethod.POST, new HttpEntity(mktGateway, headers), ResultBean.class);
+		ResultBean result2 = resp2.getBody();
+		assertThat(result2.getStatus()).isEqualTo(ReturnCode.ERROR);
+	}
+	
+	@Test
+	public void test_NS43_RemoveGatewayWithNonexistID() {
+		ResponseEntity<ResultBean> resp1 = restTemplate.exchange("/mgt/gateway?gatewayId=123", HttpMethod.DELETE, new HttpEntity(null, headers), ResultBean.class);
+		ResultBean result1 = resp1.getBody();
+		assertThat(result1.getStatus()).isEqualTo(ReturnCode.NO_SUCH_ELEMENT_EXCEPTION);
+	}
+	
+	@Test
+	public void test_NS44_DisableGateway() {
+		mktGateway.setDisabled(true);
+		ResponseEntity<ResultBean> response = restTemplate.exchange("/mgt/gateway", HttpMethod.POST, new HttpEntity(mktGateway, headers), ResultBean.class);
+		assertThat(gwRepo.findById("testMarketGateway").get().isDisabled()).isTrue();
+		
+		ResponseEntity<ResultBean> response1 = restTemplate.exchange("/mgt/connection", HttpMethod.GET, new HttpEntity(null, headers), ResultBean.class);
+		assertThat(response1.getBody().getStatus()).isNotEqualTo(ReturnCode.SUCCESS);
+		
+		ResponseEntity<ResultBean> response2 = restTemplate.exchange("/mgt/connection", HttpMethod.DELETE, new HttpEntity(null, headers), ResultBean.class);
+		assertThat(response2.getBody().getStatus()).isNotEqualTo(ReturnCode.SUCCESS);
 	}
 	
 }

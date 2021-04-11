@@ -1,7 +1,6 @@
 package tech.xuanwu.northstar.controller.common;
 
 import java.io.File;
-import java.util.NoSuchElementException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.MethodParameter;
@@ -17,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.common.constant.ReturnCode;
 import tech.xuanwu.northstar.common.exception.AuthenticationException;
 import tech.xuanwu.northstar.common.exception.InsufficientException;
+import tech.xuanwu.northstar.common.exception.NoSuchElementException;
 import tech.xuanwu.northstar.common.exception.TradeException;
 import tech.xuanwu.northstar.common.exception.ValueMismatchException;
 
@@ -33,12 +33,33 @@ public class CommonControllerAdvice implements ResponseBodyAdvice<Object>{
 	public ResultBean<?> handleException(Exception e) {
 		String msg = StringUtils.isNotBlank(e.getMessage()) ? e.getMessage() : "遇到未知异常";
 		log.error(msg, e);
-		int code = e instanceof InsufficientException ? ReturnCode.INSUFFICIENT_EXCEPTION : 
-			e instanceof ValueMismatchException ? ReturnCode.VALUE_MISMATCH_EXCEPTION :
-				e instanceof NoSuchElementException ? ReturnCode.NO_SUCH_ELEMENT_EXCEPTION :
-					e instanceof TradeException ? ReturnCode.TRADE_EXCEPTION :
-							e instanceof AuthenticationException ? ReturnCode.AUTH_ERR : ReturnCode.ERROR;
-		return new ResultBean<>(code, msg);
+		return new ResultBean<>(ReturnCode.ERROR, msg);
+	}
+	
+	@ExceptionHandler(InsufficientException.class)
+	public ResultBean<?> handleInsufficientException(Exception e){
+		log.error(e.getMessage(), e);
+		return new ResultBean<>(ReturnCode.INSUFFICIENT_EXCEPTION, e.getMessage());
+	}
+	@ExceptionHandler(ValueMismatchException.class)
+	public ResultBean<?> handleValueMismatchException(Exception e){
+		log.error(e.getMessage(), e);
+		return new ResultBean<>(ReturnCode.VALUE_MISMATCH_EXCEPTION, e.getMessage());
+	}
+	@ExceptionHandler(NoSuchElementException.class)
+	public ResultBean<?> handleNoSuchElementException(Exception e){
+		log.error(e.getMessage(), e);
+		return new ResultBean<>(ReturnCode.NO_SUCH_ELEMENT_EXCEPTION, e.getMessage());
+	}
+	@ExceptionHandler(TradeException.class)
+	public ResultBean<?> handleTradeException(Exception e){
+		log.error(e.getMessage(), e);
+		return new ResultBean<>(ReturnCode.TRADE_EXCEPTION, e.getMessage());
+	}
+	@ExceptionHandler(AuthenticationException.class)
+	public ResultBean<?> handleAuthenticationException(Exception e){
+		log.error(e.getMessage(), e);
+		return new ResultBean<>(ReturnCode.AUTH_ERR, e.getMessage());
 	}
 
 	@Override

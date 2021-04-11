@@ -8,12 +8,14 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 
 import tech.xuanwu.northstar.common.constant.Constants;
+import tech.xuanwu.northstar.interceptor.AuthorizationInterceptor;
 import xyz.redtorch.pb.CoreField.ContractField;
 
 /**
@@ -41,6 +43,11 @@ public class AppConfig implements WebMvcConfigurer {
 		for(HttpMessageConverter<?> cvt : jacksonConverters) {
 			converters.add(0, cvt);
 		}
+	}
+	
+	@Override
+	public void addInterceptors(InterceptorRegistry registry) {
+		registry.addInterceptor(new AuthorizationInterceptor()).addPathPatterns("/**").excludePathPatterns("/auth/token");
 	}
 
 	@Bean(Constants.GATEWAY_CONTRACT_MAP)
