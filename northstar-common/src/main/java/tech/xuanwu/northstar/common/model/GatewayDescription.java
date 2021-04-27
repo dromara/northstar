@@ -36,6 +36,6 @@ public class GatewayDescription {
 	
 	private boolean autoConnect;
 	
-	private boolean disabled;
+	private boolean simulated;
 	
 }

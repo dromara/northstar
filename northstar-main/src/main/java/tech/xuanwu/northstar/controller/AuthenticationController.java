@@ -1,6 +1,9 @@
 package tech.xuanwu.northstar.controller;
 
+import javax.servlet.http.HttpSession;
+
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,13 +28,18 @@ public class AuthenticationController {
 	protected String userId;
 	@Value("${auth.password}")
 	protected String password;
-
-	@PostMapping(value="/token", produces = "application/json")
+	
+	@Autowired
+	protected HttpSession session;
+	
+	@PostMapping(value="/login", produces = "application/json")
 	public String doAuth(@RequestBody NsUser user) {
 		Assert.hasText(user.getUserName(), "账户不能为空");
 		Assert.hasText(user.getPassword(), "密码不能为空");
 		if(StringUtils.equals(user.getUserName(), userId) && StringUtils.equals(user.getPassword(), password)) {
-			return JwtUtil.sign(user.getUserName(), user.getPassword());
+//			return JwtUtil.sign(user.getUserName(), user.getPassword());
+			session.setAttribute("USER", user);
+			return "OK";
 		}
 		throw new AuthenticationException("账户或密码不正确");
 	}

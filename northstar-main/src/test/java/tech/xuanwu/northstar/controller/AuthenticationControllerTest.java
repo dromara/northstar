@@ -1,6 +1,9 @@
 package tech.xuanwu.northstar.controller;
 
 import static org.hamcrest.CoreMatchers.any;
+import static org.mockito.Mockito.mock;
+
+import javax.servlet.http.HttpSession;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -29,12 +32,13 @@ public class AuthenticationControllerTest {
 		AuthenticationController ctl = new AuthenticationController();
 		ctl.userId = "admin";
 		ctl.password = "123456";
+		ctl.session = mock(HttpSession.class);
 		mockMvc = MockMvcBuilders.standaloneSetup(ctl).build();
 	}
 
 	@Test
 	public void testDoAuth() throws Exception{
-		mockMvc.perform(MockMvcRequestBuilders.post("/auth/token")
+		mockMvc.perform(MockMvcRequestBuilders.post("/auth/login")
 				.contentType(MediaType.APPLICATION_JSON_UTF8)
 				.content(JSON.toJSONString(new NsUser("admin","123456"))))
 		.andExpect(MockMvcResultMatchers.status().isOk())

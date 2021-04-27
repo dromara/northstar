@@ -81,10 +81,10 @@ public class GatewayManagementTest {
 				.settings(settings)
 				.build();
 		
-		ResultBean result = restTemplate.postForObject("/auth/token", new NsUser("admin","123456"), ResultBean.class);
-		String token = (String) result.getData();
+		ResponseEntity result = restTemplate.postForEntity("/auth/login", new NsUser("admin","123456"), ResultBean.class);
+		String cookie = result.getHeaders().get("Set-Cookie").get(0);
 		headers = new HttpHeaders();
-		headers.add(HttpHeaders.AUTHORIZATION, token);
+		headers.put(HttpHeaders.COOKIE, List.of(cookie));
 	}
 	
 	@After
@@ -168,9 +168,8 @@ public class GatewayManagementTest {
 		assertThat(result1.getStatus()).isEqualTo(ReturnCode.NO_SUCH_ELEMENT_EXCEPTION);
 	}
 	
-	@Test
+	@Deprecated
 	public void test_NS44_DisableGateway() {
-		mktGateway.setDisabled(true);
 		ResponseEntity<ResultBean> response = restTemplate.exchange("/mgt/gateway", HttpMethod.POST, new HttpEntity(mktGateway, headers), ResultBean.class);
 		assertThat(gwRepo.findById("testMarketGateway").get().isDisabled()).isTrue();
 		
