@@ -84,6 +84,7 @@ public class MdSpi extends CThostFtdcMdSpi {
 
 		connectionStatus = CONNECTION_STATUS_CONNECTING;
 		loginStatus = false;
+		ctpGatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.CONNECTING, gatewayId);
 
 		if (cThostFtdcMdApi != null) {
 			try {
@@ -161,6 +162,7 @@ public class MdSpi extends CThostFtdcMdSpi {
 			logger.warn("{}行情接口实例开始关闭并释放", logInfo);
 			loginStatus = false;
 			connectionStatus = CONNECTION_STATUS_DISCONNECTING;
+			ctpGatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.DISCONNECTING, gatewayId);
 			if (cThostFtdcMdApi != null) {
 				try {
 					CThostFtdcMdApi cThostFtdcMdApiForRelease = cThostFtdcMdApi;
@@ -184,6 +186,7 @@ public class MdSpi extends CThostFtdcMdSpi {
 				}
 			}
 			connectionStatus = CONNECTION_STATUS_DISCONNECTED;
+			ctpGatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.DISCONNECTED, gatewayId);
 			logger.warn("{}行情接口实例关闭并释放", logInfo);
 		} else {
 			logger.warn("{}行情接口实例不存在,无需关闭释放", logInfo);

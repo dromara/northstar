@@ -15,7 +15,6 @@
 	<description>北极星程序化交易平台网关API</description>
 
 	<properties>
-		<skipTests>true</skipTests>
 	</properties>
 
 	<dependencies>

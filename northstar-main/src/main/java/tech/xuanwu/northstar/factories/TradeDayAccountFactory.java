@@ -1,23 +1,21 @@
 package tech.xuanwu.northstar.factories;
 
-import com.google.common.collect.Table;
-
 import tech.xuanwu.northstar.common.event.InternalEventBus;
 import tech.xuanwu.northstar.domain.TradeDayAccount;
-import xyz.redtorch.pb.CoreField.ContractField;
+import tech.xuanwu.northstar.model.ContractManager;
 
 public class TradeDayAccountFactory {
 	
-	private Table<String, String, ContractField> contractTable;
+	private ContractManager contractMgr;
 	private InternalEventBus eventBus;
 	
-	public TradeDayAccountFactory(InternalEventBus eventBus, Table<String, String, ContractField> contractTable) {
+	public TradeDayAccountFactory(InternalEventBus eventBus, ContractManager contractMgr) {
 		this.eventBus = eventBus;
-		this.contractTable = contractTable;
+		this.contractMgr = contractMgr;
 	}
 	
 	public TradeDayAccount newInstance(String gatewayId) {
-		return new TradeDayAccount(gatewayId, eventBus, contractTable.row(gatewayId));
+		return new TradeDayAccount(gatewayId, eventBus, contractMgr.getContractMapByGateway(gatewayId));
 	}
 
 }

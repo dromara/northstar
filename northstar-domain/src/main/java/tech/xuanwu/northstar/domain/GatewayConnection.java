@@ -18,7 +18,6 @@ public abstract class GatewayConnection {
 	protected GatewayDescription gwDescription;
 	protected EventBus eventBus;
 	
-	protected GatewayConnectionState connectionState;
 	protected boolean errorFlag;
 	
 	public GatewayConnection(GatewayDescription gwDescription, InternalEventBus eventBus) {
@@ -27,16 +26,24 @@ public abstract class GatewayConnection {
 	}
 	
 	public void onConnected() {
-		connectionState = GatewayConnectionState.CONNECTED;
+		gwDescription.setConnectionState(GatewayConnectionState.CONNECTED);
 		errorFlag = false;
 	}
 	
 	public void onDisconnected() {
-		connectionState = GatewayConnectionState.DISCONNECTED;
+		gwDescription.setConnectionState(GatewayConnectionState.DISCONNECTED);
+	}
+	
+	public void onConnecting() {
+		gwDescription.setConnectionState(GatewayConnectionState.CONNECTING);
+	}
+	
+	public void onDisconnecting() {
+		gwDescription.setConnectionState(GatewayConnectionState.DISCONNECTING);
 	}
 	
 	public boolean isConnected() {
-		return connectionState == GatewayConnectionState.CONNECTED;
+		return GatewayConnectionState.CONNECTED.equals(gwDescription.getConnectionState());
 	}
 	
 	public void onError() {
@@ -48,13 +55,13 @@ public abstract class GatewayConnection {
 	}
 	
 	public void connect() {
-		connectionState = GatewayConnectionState.CONNECTING;
-		eventBus.post(new NorthstarEvent(NorthstarEventType.CONNECTING, this));
+		gwDescription.setConnectionState(GatewayConnectionState.CONNECTING);
+		eventBus.post(new NorthstarEvent(NorthstarEventType.CONNECTING, gwDescription.getGatewayId()));
 	}
 	
 	public void disconnect() {
-		connectionState = GatewayConnectionState.DISCONNECTING;
-		eventBus.post(new NorthstarEvent(NorthstarEventType.DISCONNECTING, this));
+		gwDescription.setConnectionState(GatewayConnectionState.DISCONNECTING);
+		eventBus.post(new NorthstarEvent(NorthstarEventType.DISCONNECTING, gwDescription.getGatewayId()));
 	}
 
 	public GatewayDescription getGwDescription() {

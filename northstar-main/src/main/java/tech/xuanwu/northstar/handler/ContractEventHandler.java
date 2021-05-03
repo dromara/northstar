@@ -1,25 +1,22 @@
 package tech.xuanwu.northstar.handler;
 
-import com.google.common.collect.Table;
-
 import tech.xuanwu.northstar.common.event.NorthstarEvent;
 import tech.xuanwu.northstar.common.event.NorthstarEventType;
+import tech.xuanwu.northstar.model.ContractManager;
 import xyz.redtorch.pb.CoreField.ContractField;
 
 public class ContractEventHandler extends AbstractEventHandler implements InternalEventHandler{
 
-	private Table<String, String, ContractField> gatewayContractTable;
+	private ContractManager contractMgr;
 	
-	public ContractEventHandler(Table<String, String, ContractField> gatewayContractTable) {
-		this.gatewayContractTable = gatewayContractTable;
+	public ContractEventHandler(ContractManager contractMgr) {
+		this.contractMgr = contractMgr;
 	}
 	
 	@Override
 	public void doHandle(NorthstarEvent e) {
 		ContractField contract = (ContractField) e.getData();
-		String gatewayId = contract.getGatewayId();
-		String symbol = contract.getSymbol();
-		gatewayContractTable.put(gatewayId, symbol, contract);
+		contractMgr.addContract(contract);
 	}
 
 	@Override

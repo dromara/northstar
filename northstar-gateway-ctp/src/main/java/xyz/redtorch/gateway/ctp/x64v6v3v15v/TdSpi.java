@@ -292,6 +292,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 		loginStatus = false;
 		instrumentQueried = false;
 		investorNameQueried = false;
+		ctpGatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.CONNECTING, gatewayId);
 
 		if (cThostFtdcTraderApi != null) {
 			try {
@@ -371,6 +372,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 				instrumentQueried = false;
 				investorNameQueried = false;
 				connectionStatus = CONNECTION_STATUS_DISCONNECTING;
+				ctpGatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.DISCONNECTING, gatewayId);
 				try {
 					if (cThostFtdcTraderApi != null) {
 						CThostFtdcTraderApi cThostFtdcTraderApiForRelease = cThostFtdcTraderApi;
@@ -398,6 +400,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 				}
 
 				connectionStatus = CONNECTION_STATUS_DISCONNECTED;
+				ctpGatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.DISCONNECTED, gatewayId);
 				logger.warn("{}交易接口实例关闭并异步释放", logInfo);
 			} else {
 				logger.warn("{}交易接口实例不存在或正在关闭释放,无需操作", logInfo);

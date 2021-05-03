@@ -5,7 +5,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.List;
 import java.util.Optional;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,6 +21,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import com.alibaba.fastjson.JSON;
 
+import lombok.extern.slf4j.Slf4j;
+import tech.xuanwu.northstar.common.constant.GatewayConnectionState;
 import tech.xuanwu.northstar.common.constant.GatewayType;
 import tech.xuanwu.northstar.common.constant.GatewayUsage;
 import tech.xuanwu.northstar.common.constant.ReturnCode;
@@ -32,6 +33,7 @@ import tech.xuanwu.northstar.controller.common.ResultBean;
 import tech.xuanwu.northstar.persistence.GatewayRepository;
 import tech.xuanwu.northstar.persistence.po.GatewayPO;
 
+@Slf4j
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-unittest.properties")
@@ -79,17 +81,13 @@ public class GatewayManagementTest {
 				.gatewayUsage(GatewayUsage.TRADE)
 				.description("testing")
 				.settings(settings)
+				.connectionState(GatewayConnectionState.CONNECTED)
 				.build();
 		
 		ResponseEntity result = restTemplate.postForEntity("/auth/login", new NsUser("admin","123456"), ResultBean.class);
 		String cookie = result.getHeaders().get("Set-Cookie").get(0);
 		headers = new HttpHeaders();
 		headers.put(HttpHeaders.COOKIE, List.of(cookie));
-	}
-	
-	@After
-	public void clear() {
-		gwRepo.deleteAll();
 	}
 	
 	@Test
@@ -105,6 +103,10 @@ public class GatewayManagementTest {
 		assertThat(result.getStatus()).isEqualTo(ReturnCode.SUCCESS);
 		Optional<GatewayPO> obj = gwRepo.findById("testMarketGateway");
 		assertThat(obj).isNotNull();
+		
+		ResponseEntity<ResultBean> resp1 = restTemplate.exchange("/mgt/gateway?gatewayId=testMarketGateway", HttpMethod.DELETE, new HttpEntity(null, headers), ResultBean.class);
+		ResultBean result1 = resp1.getBody();
+		assertThat(result1.getStatus()).isEqualTo(ReturnCode.SUCCESS);
 	}
 	
 	@Test
@@ -119,11 +121,15 @@ public class GatewayManagementTest {
 		assertThat(obj1.get()).isNotEqualTo(obj2.get());
 		assertThat(obj1.get().getGatewayId()).isEqualTo(obj2.get().getGatewayId());
 		assertThat(gwRepo.count()).isEqualTo(1);
+		
+		ResponseEntity<ResultBean> resp1 = restTemplate.exchange("/mgt/gateway?gatewayId=testMarketGateway", HttpMethod.DELETE, new HttpEntity(null, headers), ResultBean.class);
+		ResultBean result1 = resp1.getBody();
+		assertThat(result1.getStatus()).isEqualTo(ReturnCode.SUCCESS);
 	}
 	
 	@Test
 	public void test_NS39_RemoveGateway() {
-		restTemplate.exchange("/mgt/gateway", HttpMethod.PUT, new HttpEntity(mktGateway, headers), ResultBean.class);
+		restTemplate.exchange("/mgt/gateway", HttpMethod.POST, new HttpEntity(mktGateway, headers), ResultBean.class);
 		assertThat(gwRepo.count()).isEqualTo(1);
 		restTemplate.exchange("/mgt/gateway?gatewayId=" + mktGateway.getGatewayId(), HttpMethod.DELETE, new HttpEntity(null, headers), ResultBean.class);
 		assertThat(gwRepo.count()).isEqualTo(0);
@@ -131,6 +137,8 @@ public class GatewayManagementTest {
 	
 	@Test
 	public void test_NS40_GetAllGateway() {
+		trdGateway.setConnectionState(GatewayConnectionState.DISCONNECTED);
+		
 		restTemplate.exchange("/mgt/gateway", HttpMethod.POST, new HttpEntity(mktGateway, headers), ResultBean.class);
 		restTemplate.exchange("/mgt/gateway", HttpMethod.POST, new HttpEntity(trdGateway, headers), ResultBean.class);
 		assertThat(gwRepo.count()).isEqualTo(2);
@@ -149,6 +157,14 @@ public class GatewayManagementTest {
 		ResultBean result2 = resp2.getBody();
 		List<GatewayDescription> list2 = JSON.parseArray(JSON.toJSONString(result2.getData()), GatewayDescription.class);
 		assertThat(list2.get(0).getGatewayId()).isEqualTo(trdGateway.getGatewayId());
+		
+		ResponseEntity<ResultBean> resp3 = restTemplate.exchange("/mgt/gateway?gatewayId=testMarketGateway", HttpMethod.DELETE, new HttpEntity(null, headers), ResultBean.class);
+		ResultBean result3 = resp3.getBody();
+		assertThat(result3.getStatus()).isEqualTo(ReturnCode.SUCCESS);
+		
+		ResponseEntity<ResultBean> resp5 = restTemplate.exchange("/mgt/gateway?gatewayId=testTradeGateway", HttpMethod.DELETE, new HttpEntity(null, headers), ResultBean.class);
+		ResultBean result5 = resp5.getBody();
+		assertThat(result5.getStatus()).isEqualTo(ReturnCode.SUCCESS);
 	}
 	
 	@Test
@@ -159,6 +175,10 @@ public class GatewayManagementTest {
 		ResponseEntity<ResultBean> resp2 = restTemplate.exchange("/mgt/gateway", HttpMethod.POST, new HttpEntity(mktGateway, headers), ResultBean.class);
 		ResultBean result2 = resp2.getBody();
 		assertThat(result2.getStatus()).isEqualTo(ReturnCode.ERROR);
+		
+		ResponseEntity<ResultBean> resp3 = restTemplate.exchange("/mgt/gateway?gatewayId=testMarketGateway", HttpMethod.DELETE, new HttpEntity(null, headers), ResultBean.class);
+		ResultBean result3 = resp3.getBody();
+		assertThat(result3.getStatus()).isEqualTo(ReturnCode.SUCCESS);
 	}
 	
 	@Test
@@ -180,4 +200,15 @@ public class GatewayManagementTest {
 		assertThat(response2.getBody().getStatus()).isNotEqualTo(ReturnCode.SUCCESS);
 	}
 	
+	@Test
+	public void test_NS52_RemoveGatewayWithNonDisconnect() {
+		trdGateway.setConnectionState(GatewayConnectionState.CONNECTED);
+		ResponseEntity<ResultBean> resp1 = restTemplate.exchange("/mgt/gateway", HttpMethod.POST, new HttpEntity(trdGateway, headers), ResultBean.class);
+		ResultBean result1 = resp1.getBody();
+		assertThat(result1.getStatus()).isEqualTo(ReturnCode.SUCCESS);
+		
+		ResponseEntity<ResultBean> resp2 = restTemplate.exchange("/mgt/gateway?gatewayId=testTradeGateway", HttpMethod.DELETE, new HttpEntity(null, headers), ResultBean.class);
+		ResultBean result2 = resp2.getBody();
+		assertThat(result2.getStatus()).isEqualTo(ReturnCode.ERROR);
+	}
 }

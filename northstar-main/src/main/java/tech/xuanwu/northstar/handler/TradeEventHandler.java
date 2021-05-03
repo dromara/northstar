@@ -8,17 +8,16 @@ import tech.xuanwu.northstar.common.exception.NoSuchElementException;
 import tech.xuanwu.northstar.domain.GatewayConnection;
 import tech.xuanwu.northstar.gateway.api.Gateway;
 import tech.xuanwu.northstar.gateway.api.TradeGateway;
+import tech.xuanwu.northstar.model.GatewayAndConnectionManager;
 import xyz.redtorch.pb.CoreField.CancelOrderReqField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 
 public class TradeEventHandler extends AbstractEventHandler implements InternalEventHandler{
 	
-	protected Map<String, GatewayConnection> traderGatewayMap;
-	protected Map<GatewayConnection, Gateway> gatewayMap;
+	protected GatewayAndConnectionManager gatewayConnMgr;
 	
-	public TradeEventHandler(Map<String, GatewayConnection> traderGatewayMap, Map<GatewayConnection, Gateway> gatewayMap) {
-		this.traderGatewayMap = traderGatewayMap;
-		this.gatewayMap = gatewayMap;
+	public TradeEventHandler(GatewayAndConnectionManager gatewayConnMgr) {
+		this.gatewayConnMgr = gatewayConnMgr;
 	}
 
 	@Override
@@ -26,19 +25,19 @@ public class TradeEventHandler extends AbstractEventHandler implements InternalE
 		if (e.getEvent() == NorthstarEventType.PLACE_ORDER) {
 			SubmitOrderReqField submitReq = (SubmitOrderReqField) e.getData();
 			String gatewayId = submitReq.getGatewayId();
-			if(!traderGatewayMap.containsKey(gatewayId)) {
+			if(!gatewayConnMgr.exist(gatewayId)) {
 				throw new NoSuchElementException("没有找到相关的网关：" + gatewayId);
 			}
-			TradeGateway tradeGateway = (TradeGateway) gatewayMap.get(traderGatewayMap.get(gatewayId));
+			TradeGateway tradeGateway = (TradeGateway) gatewayConnMgr.getGatewayById(gatewayId);
 			tradeGateway.submitOrder(submitReq);
 			
 		} else if (e.getEvent() == NorthstarEventType.WITHDRAW_ORDER) {
 			CancelOrderReqField cancelReq = (CancelOrderReqField) e.getData();
 			String gatewayId = cancelReq.getGatewayId();
-			if(!traderGatewayMap.containsKey(gatewayId)) {
+			if(!gatewayConnMgr.exist(gatewayId)) {
 				throw new NoSuchElementException("没有找到相关的网关：" + gatewayId);
 			}
-			TradeGateway tradeGateway = (TradeGateway) gatewayMap.get(traderGatewayMap.get(gatewayId));
+			TradeGateway tradeGateway = (TradeGateway) gatewayConnMgr.getGatewayById(gatewayId);
 			tradeGateway.cancelOrder(cancelReq);
 		}
 	}

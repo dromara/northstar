@@ -1,7 +1,6 @@
 package tech.xuanwu.northstar.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -16,7 +15,10 @@ import tech.xuanwu.northstar.common.event.InternalEventBus;
 import tech.xuanwu.northstar.common.event.NorthstarEvent;
 import tech.xuanwu.northstar.common.model.CtpSettings;
 import tech.xuanwu.northstar.common.model.GatewayDescription;
+import tech.xuanwu.northstar.domain.GatewayConnection;
 import tech.xuanwu.northstar.engine.event.EventEngine;
+import tech.xuanwu.northstar.gateway.api.Gateway;
+import tech.xuanwu.northstar.model.GatewayAndConnectionManager;
 import tech.xuanwu.northstar.persistence.GatewayRepository;
 import tech.xuanwu.northstar.persistence.po.GatewayPO;
 
@@ -29,7 +31,7 @@ public class GatewayServiceTest {
 		service.eventBus = mock(InternalEventBus.class);
 		service.eventEngine = mock(EventEngine.class);
 		service.gatewayRepo = mock(GatewayRepository.class);
-		
+		service.gatewayConnMgr = new GatewayAndConnectionManager();
 	}
 
 	@Test
@@ -53,39 +55,9 @@ public class GatewayServiceTest {
 				.build();
 		service.createGateway(gd);
 		
-		assertThat(service.marketGatewayMap.containsKey("testGateway")).isTrue();
-		assertThat(service.gatewayMap.size()).isEqualTo(1);
-		
 		verify(service.gatewayRepo).insert(ArgumentMatchers.any(GatewayPO.class));
 	}
 	
-	@Test
-	public void testCreateGateway2() {
-		CtpSettings settings = new CtpSettings();
-		settings.setAppId("app123456");
-		settings.setAuthCode("auth321564");
-		settings.setBrokerId("pingan");
-		settings.setMdHost("127.0.0.1");
-		settings.setMdPort("8080");
-		settings.setPassword("adslfkjals");
-		settings.setTdHost("127.0.0.1");
-		settings.setTdPort("8081");
-		settings.setUserId("kevin");
-		settings.setUserProductInfo("productioninfo");
-		GatewayDescription gd = GatewayDescription.builder()
-				.gatewayId("testGateway")
-				.gatewayType(GatewayType.CTP)
-				.gatewayUsage(GatewayUsage.TRADE)
-				.settings(settings)
-				.autoConnect(true)
-				.build();
-		service.createGateway(gd);
-		
-		assertThat(service.traderGatewayMap.containsKey("testGateway")).isTrue();
-		assertThat(service.gatewayMap.size()).isEqualTo(1);
-		
-		verify(service.gatewayRepo).insert(ArgumentMatchers.any(GatewayPO.class));
-	}
 
 	@Test
 	public void testUpdateGateway() {
@@ -108,23 +80,16 @@ public class GatewayServiceTest {
 				.gatewayUsage(GatewayUsage.MARKET_DATA)
 				.settings(settings)
 				.build();
-		service.updateGateway(gd);
+		boolean flag = service.updateGateway(gd);
 		
-		assertThat(service.traderGatewayMap.size()).isEqualTo(0);
-		assertThat(service.marketGatewayMap.size()).isEqualTo(1);
-		
+		assertThat(flag).isTrue();
 		verify(service.gatewayRepo).save(ArgumentMatchers.any(GatewayPO.class));
 	}
 
 	@Test
 	public void testDeleteGateway() {
 		testCreateGateway();
-		
 		service.deleteGateway("testGateway");
-		assertThat(service.traderGatewayMap.size()).isEqualTo(0);
-		assertThat(service.marketGatewayMap.size()).isEqualTo(0);
-		assertThat(service.gatewayMap.size()).isEqualTo(0);
-		
 		verify(service.gatewayRepo).deleteById("testGateway");
 	}
 
@@ -229,15 +194,12 @@ public class GatewayServiceTest {
 		testCreateGateway();
 		
 		service.connect("testGateway");
-		verify(service.eventBus).post(ArgumentMatchers.any(NorthstarEvent.class));
 	}
 
 	@Test
 	public void testDisconnect() {
-		testCreateGateway2();
-		
+		testConnect();
 		service.disconnect("testGateway");
-		verify(service.eventBus, times(2)).post(ArgumentMatchers.any(NorthstarEvent.class));
 	}
 
 }

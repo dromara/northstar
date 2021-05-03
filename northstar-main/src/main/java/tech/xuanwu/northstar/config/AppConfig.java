@@ -8,15 +8,15 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.Table;
-
-import tech.xuanwu.northstar.common.constant.Constants;
 import tech.xuanwu.northstar.interceptor.AuthorizationInterceptor;
-import xyz.redtorch.pb.CoreField.ContractField;
+import tech.xuanwu.northstar.model.ContractManager;
+import tech.xuanwu.northstar.model.GatewayAndConnectionManager;
 
 /**
  * 配置转换器
@@ -45,13 +45,38 @@ public class AppConfig implements WebMvcConfigurer {
 		}
 	}
 	
+	@Bean
+    public CorsFilter corsFilter() {
+
+        CorsConfiguration config = new CorsConfiguration();
+        // 设置允许跨域请求的域名
+        config.addAllowedOrigin("*");
+        // 是否允许证书 不再默认开启
+         config.setAllowCredentials(true);
+        // 设置允许的方法
+        config.addAllowedMethod("*");
+        // 允许任何头
+        config.addAllowedHeader("*");
+        config.addExposedHeader("token");
+        UrlBasedCorsConfigurationSource configSource = new UrlBasedCorsConfigurationSource();
+        configSource.registerCorsConfiguration("/**", config);
+        return new CorsFilter(configSource);
+    }
+	
 	@Override
 	public void addInterceptors(InterceptorRegistry registry) {
-		registry.addInterceptor(new AuthorizationInterceptor()).addPathPatterns("/**").excludePathPatterns("/auth/token");
+		registry.addInterceptor(new AuthorizationInterceptor()).addPathPatterns("/**").excludePathPatterns("/auth/login");
 	}
 
-	@Bean(Constants.GATEWAY_CONTRACT_MAP)
-	public Table<String, String, ContractField> createContractMap(){
-		return HashBasedTable.create();
+	@Bean
+	public GatewayAndConnectionManager createGatewayAndConnectionManager() {
+		return new GatewayAndConnectionManager();
 	}
+	
+	@Bean
+	public ContractManager createContractManager() {
+		return new ContractManager();
+	}
+	
+	
 }

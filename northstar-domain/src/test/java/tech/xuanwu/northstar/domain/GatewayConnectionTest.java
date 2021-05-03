@@ -43,7 +43,7 @@ public class GatewayConnectionTest {
 	@Test
 	public void testOnConnected() {
 		conn.onConnected();
-		assertThat(conn.connectionState).isEqualTo(GatewayConnectionState.CONNECTED);
+		assertThat(conn.gwDescription.getConnectionState()).isEqualTo(GatewayConnectionState.CONNECTED);
 	}
 
 	@Test
@@ -51,7 +51,7 @@ public class GatewayConnectionTest {
 		testOnConnected();
 		
 		conn.onDisconnected();
-		assertThat(conn.connectionState).isEqualTo(GatewayConnectionState.DISCONNECTED);
+		assertThat(conn.gwDescription.getConnectionState()).isEqualTo(GatewayConnectionState.DISCONNECTED);
 	}
 
 	@Test
@@ -75,14 +75,14 @@ public class GatewayConnectionTest {
 	@Test
 	public void testConnect() {
 		conn.connect();
-		assertThat(conn.connectionState).isEqualTo(GatewayConnectionState.CONNECTING);
+		assertThat(conn.gwDescription.getConnectionState()).isEqualTo(GatewayConnectionState.CONNECTING);
 	}
 
 	@Test
 	public void testDisconnect() {
 		testConnect();
 		conn.disconnect();
-		assertThat(conn.connectionState).isEqualTo(GatewayConnectionState.DISCONNECTING);
+		assertThat(conn.gwDescription.getConnectionState()).isEqualTo(GatewayConnectionState.DISCONNECTING);
 	}
 
 }

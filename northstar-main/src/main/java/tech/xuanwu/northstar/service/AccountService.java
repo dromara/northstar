@@ -4,13 +4,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import com.google.common.collect.Table;
-
 import lombok.extern.slf4j.Slf4j;
-import tech.xuanwu.northstar.common.constant.Constants;
 import tech.xuanwu.northstar.common.event.InternalEventBus;
 import tech.xuanwu.northstar.common.exception.InsufficientException;
 import tech.xuanwu.northstar.common.exception.NoSuchElementException;
@@ -22,7 +18,7 @@ import tech.xuanwu.northstar.domain.TradeDayAccount;
 import tech.xuanwu.northstar.factories.TradeDayAccountFactory;
 import tech.xuanwu.northstar.handler.AccountEventHandler;
 import tech.xuanwu.northstar.handler.ContractEventHandler;
-import xyz.redtorch.pb.CoreField.ContractField;
+import tech.xuanwu.northstar.model.ContractManager;
 
 /**
  * 账户服务
@@ -31,14 +27,13 @@ import xyz.redtorch.pb.CoreField.ContractField;
  */
 @Slf4j
 @Service
-public class AccountService implements InitializingBean{
+public class AccountService extends BaseService implements InitializingBean{
 	
 	@Autowired
 	protected InternalEventBus eventBus;
 	
 	@Autowired
-	@Qualifier(Constants.GATEWAY_CONTRACT_MAP)
-	protected Table<String, String, ContractField> gatewayContractTable;
+	protected ContractManager contractMgr;
 	
 	protected ConcurrentHashMap<String, TradeDayAccount> accountMap = new ConcurrentHashMap<>();
 	
@@ -48,7 +43,7 @@ public class AccountService implements InitializingBean{
 	 * @throws InsufficientException 
 	 */
 	public boolean submitOrder(OrderRequest req) throws InsufficientException {
-		log.info("下单委托");
+		log.info("用户：[{}]，下单委托", getUserName());
 		String gatewayId = req.getGatewayId();
 		TradeDayAccount account = accountMap.get(gatewayId);
 		if(account == null) {
@@ -69,7 +64,7 @@ public class AccountService implements InitializingBean{
 	 * @throws TradeException 
 	 */
 	public boolean cancelOrder(OrderRecall recall) throws TradeException {
-		log.info("撤单委托");
+		log.info("用户：[{}]，撤单委托", getUserName());
 		String gatewayId = recall.getGatewayId();
 		TradeDayAccount account = accountMap.get(gatewayId);
 		if(account == null) {
@@ -81,7 +76,7 @@ public class AccountService implements InitializingBean{
 	
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		eventBus.register(new ContractEventHandler(gatewayContractTable));
-		eventBus.register(new AccountEventHandler(accountMap, new TradeDayAccountFactory(eventBus, gatewayContractTable)));
+		eventBus.register(new ContractEventHandler(contractMgr));
+		eventBus.register(new AccountEventHandler(accountMap, new TradeDayAccountFactory(eventBus, contractMgr)));
 	}
 }

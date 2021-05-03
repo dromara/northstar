@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import tech.xuanwu.northstar.common.constant.Constants;
 import tech.xuanwu.northstar.common.exception.AuthenticationException;
 import tech.xuanwu.northstar.common.model.NsUser;
 import tech.xuanwu.northstar.utils.JwtUtil;
@@ -38,9 +39,10 @@ public class AuthenticationController {
 		Assert.hasText(user.getPassword(), "密码不能为空");
 		if(StringUtils.equals(user.getUserName(), userId) && StringUtils.equals(user.getPassword(), password)) {
 //			return JwtUtil.sign(user.getUserName(), user.getPassword());
-			session.setAttribute("USER", user);
+			session.setAttribute(Constants.KEY_USER, user);
 			return "OK";
 		}
 		throw new AuthenticationException("账户或密码不正确");
 	}
+	
 }

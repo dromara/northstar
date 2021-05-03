@@ -3,6 +3,7 @@ package tech.xuanwu.northstar.service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.InitializingBean;
@@ -25,6 +26,7 @@ import tech.xuanwu.northstar.engine.event.EventEngine;
 import tech.xuanwu.northstar.gateway.api.Gateway;
 import tech.xuanwu.northstar.handler.ConnectionEventHandler;
 import tech.xuanwu.northstar.handler.TradeEventHandler;
+import tech.xuanwu.northstar.model.GatewayAndConnectionManager;
 import tech.xuanwu.northstar.persistence.GatewayRepository;
 import tech.xuanwu.northstar.persistence.po.GatewayPO;
 import xyz.redtorch.gateway.ctp.x64v6v3v15v.CtpGatewayAdapter;
@@ -40,11 +42,10 @@ import xyz.redtorch.pb.CoreField.GatewaySettingField.CtpApiSettingField;
  */
 @Slf4j
 @Service
-public class GatewayService implements InitializingBean {
+public class GatewayService extends BaseService implements InitializingBean {
 	
-	protected ConcurrentHashMap<String, GatewayConnection> marketGatewayMap = new ConcurrentHashMap<>();
-	protected ConcurrentHashMap<String, GatewayConnection> traderGatewayMap = new ConcurrentHashMap<>();
-	protected ConcurrentHashMap<GatewayConnection, Gateway> gatewayMap = new ConcurrentHashMap<>();
+	@Autowired
+	protected GatewayAndConnectionManager gatewayConnMgr;
 	
 	@Autowired
 	protected GatewayRepository gatewayRepo;
@@ -60,7 +61,7 @@ public class GatewayService implements InitializingBean {
 	 * @return
 	 */
 	public boolean createGateway(GatewayDescription gatewayDescription) {
-		log.info("创建网关[{}]", gatewayDescription.getGatewayId());
+		log.info("用户：[{}]，创建网关[{}]", getUserName(), gatewayDescription.getGatewayId());
 		GatewayPO po = new GatewayPO();
 		BeanUtils.copyProperties(gatewayDescription, po);
 		gatewayRepo.insert(po);
@@ -75,11 +76,9 @@ public class GatewayService implements InitializingBean {
 		if(gatewayDescription.getGatewayUsage() == GatewayUsage.MARKET_DATA) {
 			gwType = GatewayTypeEnum.GTE_MarketData;
 			conn = new MarketGatewayConnection(gatewayDescription, eventBus);
-			marketGatewayMap.put(gatewayDescription.getGatewayId(), conn);
 		} else {
 			gwType = GatewayTypeEnum.GTE_Trade;
 			conn = new TraderGatewayConnection(gatewayDescription, eventBus);
-			traderGatewayMap.put(gatewayDescription.getGatewayId(), conn);
 		}
 		
 		if(gatewayDescription.getGatewayType() == GatewayType.CTP) {
@@ -109,12 +108,12 @@ public class GatewayService implements InitializingBean {
 			throw new NoSuchElementException("没有这种网关类型：" + gatewayDescription.getGatewayType());
 		}
 		
+		gatewayConnMgr.createPair(conn, gateway);
 		if(gatewayDescription.isAutoConnect()) {
 			conn.connect();
 			gateway.connect();
 		}
 		
-		gatewayMap.put(conn, gateway);
 		log.info("创建成功");
 		return true;
 	}
@@ -124,7 +123,7 @@ public class GatewayService implements InitializingBean {
 	 * @return
 	 */
 	public boolean updateGateway(GatewayDescription gatewayDescription) {
-		log.info("更新网关[{}]", gatewayDescription.getGatewayId());
+		log.info("用户：[{}]，更新网关[{}]", getUserName(), gatewayDescription.getGatewayId());
 		GatewayPO po = new GatewayPO();
 		BeanUtils.copyProperties(gatewayDescription, po);
 		gatewayRepo.save(po);
@@ -138,22 +137,23 @@ public class GatewayService implements InitializingBean {
 	 * @return
 	 */
 	public boolean deleteGateway(String gatewayId) {
-		log.info("移除网关[{}]", gatewayId);
+		log.info("用户：[{}]，移除网关[{}]", getUserName(), gatewayId);
+		boolean flag = doDeleteGateway(gatewayId);
 		gatewayRepo.deleteById(gatewayId);
-		return doDeleteGateway(gatewayId);
+		return flag;
 	}
 	
 	private boolean doDeleteGateway(String gatewayId) {
 		GatewayConnection conn = null;
-		if(marketGatewayMap.containsKey(gatewayId)) {
-			conn = marketGatewayMap.remove(gatewayId);
-		} else if (traderGatewayMap.containsKey(gatewayId)) {
-			conn = traderGatewayMap.remove(gatewayId);
+		if(gatewayConnMgr.exist(gatewayId)) {
+			conn = gatewayConnMgr.getGatewayConnectionById(gatewayId);
 		} else {
 			throw new NoSuchElementException("没有该网关记录：" +  gatewayId);
 		}
-		conn.disconnect();
-		gatewayMap.remove(conn).disconnect();
+		if(conn.isConnected()) {
+			throw new IllegalStateException("非断开状态的网关不能删除");
+		}
+		gatewayConnMgr.removePair(conn);
 		log.info("移除成功");
 		return true;
 	}
@@ -163,10 +163,9 @@ public class GatewayService implements InitializingBean {
 	 * @return
 	 */
 	public List<GatewayDescription> findAllGateway(){
-		List<GatewayDescription> resultList = new ArrayList<>(marketGatewayMap.size() + traderGatewayMap.size());
-		marketGatewayMap.forEach((k, v) -> resultList.add(v.getGwDescription()));
-		traderGatewayMap.forEach((k, v) -> resultList.add(v.getGwDescription()));
-		return resultList;
+		return gatewayConnMgr.getAllConnections().stream()
+				.map(conn -> conn.getGwDescription())
+				.collect(Collectors.toList());
 	}
 	
 	/**
@@ -174,9 +173,10 @@ public class GatewayService implements InitializingBean {
 	 * @return
 	 */
 	public List<GatewayDescription> findAllMarketGateway(){
-		List<GatewayDescription> resultList = new ArrayList<>(marketGatewayMap.size());
-		marketGatewayMap.forEach((k, v) -> resultList.add(v.getGwDescription()));
-		return resultList;
+		return gatewayConnMgr.getAllConnections().stream()
+				.map(conn -> conn.getGwDescription())
+				.filter(gwDescription -> gwDescription.getGatewayUsage() == GatewayUsage.MARKET_DATA)
+				.collect(Collectors.toList());
 	}
 	
 	/**
@@ -184,9 +184,10 @@ public class GatewayService implements InitializingBean {
 	 * @return
 	 */
 	public List<GatewayDescription> findAllTraderGateway(){
-		List<GatewayDescription> resultList = new ArrayList<>(traderGatewayMap.size());
-		traderGatewayMap.forEach((k, v) -> resultList.add(v.getGwDescription()));
-		return resultList;
+		return gatewayConnMgr.getAllConnections().stream()
+				.map(conn -> conn.getGwDescription())
+				.filter(gwDescription -> gwDescription.getGatewayUsage() == GatewayUsage.TRADE)
+				.collect(Collectors.toList());
 	}
 	
 	/**
@@ -194,13 +195,9 @@ public class GatewayService implements InitializingBean {
 	 * @return
 	 */
 	public boolean connect(String gatewayId) {
-		log.info("连接网关[{}]", gatewayId);
-		if(traderGatewayMap.containsKey(gatewayId)) {
-			GatewayConnection gateway =  traderGatewayMap.get(gatewayId);
-			gateway.connect();
-		} else if (marketGatewayMap.containsKey(gatewayId)) {
-			GatewayConnection gateway = marketGatewayMap.get(gatewayId);
-			gateway.connect();
+		log.info("用户：[{}]，连接网关[{}]", getUserName(), gatewayId);
+		if(gatewayConnMgr.exist(gatewayId)) {
+			gatewayConnMgr.getGatewayById(gatewayId).connect();
 		} else {
 			throw new NoSuchElementException("没有该网关记录：" +  gatewayId);
 		}
@@ -213,11 +210,9 @@ public class GatewayService implements InitializingBean {
 	 * @return
 	 */
 	public boolean disconnect(String gatewayId) {
-		log.info("断开网关[{}]", gatewayId);
-		if(traderGatewayMap.containsKey(gatewayId)) {
-			traderGatewayMap.get(gatewayId).disconnect();
-		} else if (marketGatewayMap.containsKey(gatewayId)) {
-			marketGatewayMap.get(gatewayId).disconnect();
+		log.info("用户：[{}]，断开网关[{}]", getUserName(), gatewayId);
+		if(gatewayConnMgr.exist(gatewayId)) {
+			gatewayConnMgr.getGatewayById(gatewayId).disconnect();
 		} else {
 			throw new NoSuchElementException("没有该网关记录：" +  gatewayId);
 		}
@@ -234,7 +229,7 @@ public class GatewayService implements InitializingBean {
 			doCreateGateway(gd);
 		}
 		
-		eventBus.register(new ConnectionEventHandler(gatewayMap));
-		eventBus.register(new TradeEventHandler(traderGatewayMap, gatewayMap));
+		eventBus.register(new ConnectionEventHandler(gatewayConnMgr));
+		eventBus.register(new TradeEventHandler(gatewayConnMgr));
 	}
 }

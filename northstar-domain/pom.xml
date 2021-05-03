@@ -19,6 +19,10 @@
 			<artifactId>northstar-common</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>tech.xuan-wu</groupId>
+			<artifactId>northstar-gateway-api</artifactId>
+		</dependency>
+		<dependency>
 		    <groupId>org.apache.commons</groupId>
 		    <artifactId>commons-lang3</artifactId>
 		</dependency>

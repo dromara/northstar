@@ -1,39 +1,53 @@
 package tech.xuanwu.northstar.handler;
 
-import java.util.Map;
-
+import tech.xuanwu.northstar.common.constant.GatewayConnectionState;
 import tech.xuanwu.northstar.common.event.NorthstarEvent;
 import tech.xuanwu.northstar.common.event.NorthstarEventType;
 import tech.xuanwu.northstar.common.exception.NoSuchElementException;
 import tech.xuanwu.northstar.domain.GatewayConnection;
 import tech.xuanwu.northstar.gateway.api.Gateway;
+import tech.xuanwu.northstar.model.GatewayAndConnectionManager;
 
 public class ConnectionEventHandler extends AbstractEventHandler implements InternalEventHandler{
 	
-	protected Map<GatewayConnection, Gateway> gatewayMap;
+	protected GatewayAndConnectionManager gatewayConnMgr;
 	
-	public ConnectionEventHandler(Map<GatewayConnection, Gateway> gatewayMap) {
-		this.gatewayMap = gatewayMap;
+	public ConnectionEventHandler(GatewayAndConnectionManager gatewayConnMgr) {
+		this.gatewayConnMgr = gatewayConnMgr;
 	}
 
 	@Override
 	public void doHandle(NorthstarEvent e) {
-		GatewayConnection conn = (GatewayConnection) e.getData();
-		if(!gatewayMap.containsKey(conn)) {
-			throw new NoSuchElementException("没有找到相关的网关：" + conn.getGwDescription().getGatewayId());
+		String gatewayId = (String) e.getData();
+		
+		
+		if(!gatewayConnMgr.exist(gatewayId)) {
+			throw new NoSuchElementException("没有找到相关的网关：" + gatewayId);
 		}
-		Gateway gateway = gatewayMap.get(conn);
+		Gateway gateway = gatewayConnMgr.getGatewayById(gatewayId);
+		GatewayConnection conn = gatewayConnMgr.getGatewayConnectionById(gatewayId);
 		if(e.getEvent() == NorthstarEventType.CONNECTING) {
-			gateway.connect();
+			if(conn.getGwDescription().getConnectionState() != GatewayConnectionState.CONNECTING) {				
+				gateway.connect();
+			}
+			conn.onConnecting();
 		} else if(e.getEvent() == NorthstarEventType.DISCONNECTING) {
-			gateway.disconnect();
+			if(conn.getGwDescription().getConnectionState() != GatewayConnectionState.DISCONNECTING) {				
+				gateway.disconnect();
+			}
+			conn.onDisconnecting();
+		} else if(e.getEvent() == NorthstarEventType.CONNECTED) {
+			conn.onConnected();
+		} else if(e.getEvent() == NorthstarEventType.DISCONNECTED) {
+			conn.onDisconnected();
 		}
 		
 	}
 
 	@Override
 	public boolean canHandle(NorthstarEventType eventType) {
-		return eventType == NorthstarEventType.CONNECTING || eventType == NorthstarEventType.DISCONNECTING;
+		return eventType == NorthstarEventType.CONNECTING || eventType == NorthstarEventType.DISCONNECTING 
+				|| eventType == NorthstarEventType.CONNECTED || eventType == NorthstarEventType.DISCONNECTED;
 	}
 
 }
