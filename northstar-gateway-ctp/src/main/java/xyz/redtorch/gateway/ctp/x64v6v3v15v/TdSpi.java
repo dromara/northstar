@@ -373,6 +373,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 				investorNameQueried = false;
 				connectionStatus = CONNECTION_STATUS_DISCONNECTING;
 				ctpGatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.DISCONNECTING, gatewayId);
+				ctpGatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.LOGGING_OUT, gatewayId);
 				try {
 					if (cThostFtdcTraderApi != null) {
 						CThostFtdcTraderApi cThostFtdcTraderApiForRelease = cThostFtdcTraderApi;
@@ -687,7 +688,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 		}
 
 		try {
-			ctpGatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.LOGINING, gatewayId);
+			ctpGatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.LOGGING_IN, gatewayId);
 			CThostFtdcReqAuthenticateField authenticateField = new CThostFtdcReqAuthenticateField();
 			authenticateField.setAppID(appId);
 			authenticateField.setAuthCode(authCode);
@@ -726,6 +727,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 			ctpGatewayAdapter.disconnect();
 			
 			ctpGatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.DISCONNECTED, gatewayId);
+			ctpGatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.LOGGED_OUT, gatewayId);
 			
 			ctpGatewayAdapter.startAutoReconnect();
 		} catch (Throwable t) {
@@ -758,7 +760,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 					return;
 				}
 
-				ctpGatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.LOGINED, gatewayId);
+				ctpGatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.LOGGED_IN, gatewayId);
 				ctpGatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.TRADE_DATE, tradingDay);
 			} else {
 				logger.error("{}交易接口登录回报错误 错误ID:{},错误信息:{}", logInfo, pRspInfo.getErrorID(), pRspInfo.getErrorMsg());

@@ -249,7 +249,6 @@ public class MdSpi extends CThostFtdcMdSpi {
 			return;
 		}
 		try {
-			ctpGatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.LOGINING, gatewayId);
 			// 登录
 			CThostFtdcReqUserLoginField userLoginField = new CThostFtdcReqUserLoginField();
 			userLoginField.setBrokerID(brokerId);
@@ -268,8 +267,6 @@ public class MdSpi extends CThostFtdcMdSpi {
 			logger.warn(logInfo + "行情接口前置机已连接");
 			// 修改前置机连接状态
 			connectionStatus = CONNECTION_STATUS_CONNECTED;
-			
-			ctpGatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.CONNECTED, gatewayId);
 			
 			login();
 			
@@ -309,7 +306,7 @@ public class MdSpi extends CThostFtdcMdSpi {
 					cThostFtdcMdApi.SubscribeMarketData(symbolArray, subscribedSymbolSet.size());
 				}
 				
-				ctpGatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.LOGINED, gatewayId);
+				ctpGatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.CONNECTED, gatewayId);
 				ctpGatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.TRADE_DATE, tradingDay);
 			} else {
 				logger.warn("{}行情接口登录回报错误 错误ID:{},错误信息:{}", logInfo, pRspInfo.getErrorID(), pRspInfo.getErrorMsg());

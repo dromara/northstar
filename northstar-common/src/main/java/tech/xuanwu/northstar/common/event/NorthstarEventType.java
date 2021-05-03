@@ -53,11 +53,19 @@ public enum NorthstarEventType {
 	/**
 	 * 登陆中
 	 */
-	LOGINING,
+	LOGGING_IN,
 	/**
 	 * 登陆成功
 	 */
-	LOGINED,
+	LOGGED_IN,
+	/**
+	 * 登出中
+	 */
+	LOGGING_OUT,
+	/**
+	 * 登出成功
+	 */
+	LOGGED_OUT,
 	/**
 	 * 断开中
 	 */

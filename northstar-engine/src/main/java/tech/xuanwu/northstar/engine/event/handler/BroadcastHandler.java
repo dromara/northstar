@@ -51,7 +51,8 @@ public class BroadcastHandler implements NorthstarEventHandler, InitializingBean
 		
 		if(type == NorthstarEventType.CONNECTED || type == NorthstarEventType.CONNECTING
 				|| type == NorthstarEventType.DISCONNECTED || type == NorthstarEventType.DISCONNECTING
-				|| type == NorthstarEventType.LOGINED || type == NorthstarEventType.LOGINING
+				|| type == NorthstarEventType.LOGGED_IN || type == NorthstarEventType.LOGGING_IN
+				|| type == NorthstarEventType.LOGGED_OUT || type == NorthstarEventType.LOGGING_OUT
 				|| type == NorthstarEventType.TRADE_DATE) {
 			msgEngine.emitMessageEvent(event);
 			return;

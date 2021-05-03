@@ -1,12 +1,8 @@
 package tech.xuanwu.northstar.handler;
 
-import java.util.Map;
-
 import tech.xuanwu.northstar.common.event.NorthstarEvent;
 import tech.xuanwu.northstar.common.event.NorthstarEventType;
 import tech.xuanwu.northstar.common.exception.NoSuchElementException;
-import tech.xuanwu.northstar.domain.GatewayConnection;
-import tech.xuanwu.northstar.gateway.api.Gateway;
 import tech.xuanwu.northstar.gateway.api.TradeGateway;
 import tech.xuanwu.northstar.model.GatewayAndConnectionManager;
 import xyz.redtorch.pb.CoreField.CancelOrderReqField;

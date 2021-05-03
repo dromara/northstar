@@ -5,7 +5,6 @@ import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.common.event.NorthstarEvent;
 import tech.xuanwu.northstar.common.event.NorthstarEventType;
-import tech.xuanwu.northstar.domain.GatewayConnection;
 import tech.xuanwu.northstar.domain.TradeDayAccount;
 import tech.xuanwu.northstar.factories.TradeDayAccountFactory;
 
@@ -22,16 +21,17 @@ public class AccountEventHandler extends AbstractEventHandler implements Interna
 	
 	@Override
 	public void doHandle(NorthstarEvent e) {
-		if(e.getEvent() == NorthstarEventType.LOGINED) {
+		if(e.getEvent() == NorthstarEventType.LOGGED_IN) {
 			onLogined(e);
-		} else if (e.getEvent() == NorthstarEventType.DISCONNECTING) {
+		} else if (e.getEvent() == NorthstarEventType.LOGGED_OUT) {
 			onLogouted(e);
 		}
 	}
 
 	@Override
 	public boolean canHandle(NorthstarEventType eventType) {
-		return eventType == NorthstarEventType.LOGINED || eventType == NorthstarEventType.DISCONNECTING;
+		return eventType == NorthstarEventType.LOGGED_IN || eventType == NorthstarEventType.LOGGING_IN 
+				|| eventType == NorthstarEventType.LOGGED_OUT || eventType == NorthstarEventType.LOGGING_OUT;
 	}
 	
 	private void onLogined(NorthstarEvent e) {
@@ -41,8 +41,7 @@ public class AccountEventHandler extends AbstractEventHandler implements Interna
 	}
 	
 	private void onLogouted(NorthstarEvent e) {
-		GatewayConnection conn = (GatewayConnection) e.getData();
-		String gatewayId = conn.getGwDescription().getGatewayId();
+		String gatewayId = (String) e.getData();
 		accountMap.remove(gatewayId);
 		log.info("账户登出：{}", gatewayId);
 	}
