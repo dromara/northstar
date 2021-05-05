@@ -6,6 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.Assert;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -45,4 +46,8 @@ public class AuthenticationController {
 		throw new AuthenticationException("账户或密码不正确");
 	}
 	
+	@GetMapping("/test")
+	public boolean testAuth() {
+		return true;
+	}
 }

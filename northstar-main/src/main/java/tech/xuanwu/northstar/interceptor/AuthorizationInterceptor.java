@@ -15,7 +15,7 @@ public class AuthorizationInterceptor implements HandlerInterceptor{
 			throws Exception {
 		HttpServletRequest req = (HttpServletRequest) request;
 		String path = req.getServletPath();
-		if(path.startsWith("/auth")) {
+		if(path.startsWith("/auth/login")) {
 			return true;
 		}
 		
