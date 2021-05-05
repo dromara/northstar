@@ -1,6 +1,6 @@
 package tech.xuanwu.northstar.handler;
 
-import tech.xuanwu.northstar.common.constant.GatewayConnectionState;
+import tech.xuanwu.northstar.common.constant.ConnectionState;
 import tech.xuanwu.northstar.common.event.NorthstarEvent;
 import tech.xuanwu.northstar.common.event.NorthstarEventType;
 import tech.xuanwu.northstar.common.exception.NoSuchElementException;
@@ -27,12 +27,12 @@ public class ConnectionEventHandler extends AbstractEventHandler implements Inte
 		Gateway gateway = gatewayConnMgr.getGatewayById(gatewayId);
 		GatewayConnection conn = gatewayConnMgr.getGatewayConnectionById(gatewayId);
 		if(e.getEvent() == NorthstarEventType.CONNECTING) {
-			if(conn.getGwDescription().getConnectionState() != GatewayConnectionState.CONNECTING) {				
+			if(conn.getGwDescription().getConnectionState() != ConnectionState.CONNECTING) {				
 				gateway.connect();
 			}
 			conn.onConnecting();
 		} else if(e.getEvent() == NorthstarEventType.DISCONNECTING) {
-			if(conn.getGwDescription().getConnectionState() != GatewayConnectionState.DISCONNECTING) {				
+			if(conn.getGwDescription().getConnectionState() != ConnectionState.DISCONNECTING) {				
 				gateway.disconnect();
 			}
 			conn.onDisconnecting();

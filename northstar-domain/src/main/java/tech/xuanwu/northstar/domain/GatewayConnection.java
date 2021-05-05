@@ -2,7 +2,7 @@ package tech.xuanwu.northstar.domain;
 
 import com.google.common.eventbus.EventBus;
 
-import tech.xuanwu.northstar.common.constant.GatewayConnectionState;
+import tech.xuanwu.northstar.common.constant.ConnectionState;
 import tech.xuanwu.northstar.common.event.InternalEventBus;
 import tech.xuanwu.northstar.common.event.NorthstarEvent;
 import tech.xuanwu.northstar.common.event.NorthstarEventType;
@@ -26,24 +26,24 @@ public abstract class GatewayConnection {
 	}
 	
 	public void onConnected() {
-		gwDescription.setConnectionState(GatewayConnectionState.CONNECTED);
+		gwDescription.setConnectionState(ConnectionState.CONNECTED);
 		errorFlag = false;
 	}
 	
 	public void onDisconnected() {
-		gwDescription.setConnectionState(GatewayConnectionState.DISCONNECTED);
+		gwDescription.setConnectionState(ConnectionState.DISCONNECTED);
 	}
 	
 	public void onConnecting() {
-		gwDescription.setConnectionState(GatewayConnectionState.CONNECTING);
+		gwDescription.setConnectionState(ConnectionState.CONNECTING);
 	}
 	
 	public void onDisconnecting() {
-		gwDescription.setConnectionState(GatewayConnectionState.DISCONNECTING);
+		gwDescription.setConnectionState(ConnectionState.DISCONNECTING);
 	}
 	
 	public boolean isConnected() {
-		return GatewayConnectionState.CONNECTED.equals(gwDescription.getConnectionState());
+		return ConnectionState.CONNECTED.equals(gwDescription.getConnectionState());
 	}
 	
 	public void onError() {
@@ -55,12 +55,12 @@ public abstract class GatewayConnection {
 	}
 	
 	public void connect() {
-		gwDescription.setConnectionState(GatewayConnectionState.CONNECTING);
+		gwDescription.setConnectionState(ConnectionState.CONNECTING);
 		eventBus.post(new NorthstarEvent(NorthstarEventType.CONNECTING, gwDescription.getGatewayId()));
 	}
 	
 	public void disconnect() {
-		gwDescription.setConnectionState(GatewayConnectionState.DISCONNECTING);
+		gwDescription.setConnectionState(ConnectionState.DISCONNECTING);
 		eventBus.post(new NorthstarEvent(NorthstarEventType.DISCONNECTING, gwDescription.getGatewayId()));
 	}
 

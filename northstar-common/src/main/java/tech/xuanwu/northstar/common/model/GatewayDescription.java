@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import tech.xuanwu.northstar.common.constant.GatewayConnectionState;
+import tech.xuanwu.northstar.common.constant.ConnectionState;
 import tech.xuanwu.northstar.common.constant.GatewayType;
 import tech.xuanwu.northstar.common.constant.GatewayUsage;
 
@@ -13,8 +13,8 @@ import tech.xuanwu.northstar.common.constant.GatewayUsage;
  * @author KevinHuangwl
  *
  */
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @Builder
 @Data
 public class GatewayDescription {
@@ -29,13 +29,13 @@ public class GatewayDescription {
 	
 	private String gatewayAdapterType;
 	
-	private Object settings;
-	
-	@Builder.Default
-	private GatewayConnectionState connectionState = GatewayConnectionState.DISCONNECTED;
-	
 	private boolean autoConnect;
 	
-	private boolean simulated;
+	private Object settings;
+
+	private String relativeGatewayId;
+	
+	@Builder.Default
+	private ConnectionState connectionState = ConnectionState.DISCONNECTED;
 	
 }

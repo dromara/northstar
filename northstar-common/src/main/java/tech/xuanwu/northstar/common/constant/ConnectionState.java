@@ -1,6 +1,6 @@
 package tech.xuanwu.northstar.common.constant;
 
-public enum GatewayConnectionState {
+public enum ConnectionState {
 	
 	CONNECTING,
 	CONNECTED,

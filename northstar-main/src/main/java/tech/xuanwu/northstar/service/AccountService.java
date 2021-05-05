@@ -19,6 +19,7 @@ import tech.xuanwu.northstar.factories.TradeDayAccountFactory;
 import tech.xuanwu.northstar.handler.AccountEventHandler;
 import tech.xuanwu.northstar.handler.ContractEventHandler;
 import tech.xuanwu.northstar.model.ContractManager;
+import tech.xuanwu.northstar.model.GatewayAndConnectionManager;
 
 /**
  * 账户服务
@@ -34,6 +35,9 @@ public class AccountService extends BaseService implements InitializingBean{
 	
 	@Autowired
 	protected ContractManager contractMgr;
+	
+	@Autowired
+	protected GatewayAndConnectionManager gatewayConnMgr;
 	
 	protected ConcurrentHashMap<String, TradeDayAccount> accountMap = new ConcurrentHashMap<>();
 	
@@ -76,7 +80,7 @@ public class AccountService extends BaseService implements InitializingBean{
 	
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		eventBus.register(new ContractEventHandler(contractMgr));
+		eventBus.register(new ContractEventHandler(contractMgr, gatewayConnMgr));
 		eventBus.register(new AccountEventHandler(accountMap, new TradeDayAccountFactory(eventBus, contractMgr)));
 	}
 }

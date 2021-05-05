@@ -22,7 +22,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import com.alibaba.fastjson.JSON;
 
 import lombok.extern.slf4j.Slf4j;
-import tech.xuanwu.northstar.common.constant.GatewayConnectionState;
+import tech.xuanwu.northstar.common.constant.ConnectionState;
 import tech.xuanwu.northstar.common.constant.GatewayType;
 import tech.xuanwu.northstar.common.constant.GatewayUsage;
 import tech.xuanwu.northstar.common.constant.ReturnCode;
@@ -81,7 +81,7 @@ public class GatewayManagementTest {
 				.gatewayUsage(GatewayUsage.TRADE)
 				.description("testing")
 				.settings(settings)
-				.connectionState(GatewayConnectionState.CONNECTED)
+				.connectionState(ConnectionState.CONNECTED)
 				.build();
 		
 		ResponseEntity result = restTemplate.postForEntity("/auth/login", new NsUser("admin","123456"), ResultBean.class);
@@ -137,7 +137,7 @@ public class GatewayManagementTest {
 	
 	@Test
 	public void test_NS40_GetAllGateway() {
-		trdGateway.setConnectionState(GatewayConnectionState.DISCONNECTED);
+		trdGateway.setConnectionState(ConnectionState.DISCONNECTED);
 		
 		restTemplate.exchange("/mgt/gateway", HttpMethod.POST, new HttpEntity(mktGateway, headers), ResultBean.class);
 		restTemplate.exchange("/mgt/gateway", HttpMethod.POST, new HttpEntity(trdGateway, headers), ResultBean.class);
@@ -191,7 +191,6 @@ public class GatewayManagementTest {
 	@Deprecated
 	public void test_NS44_DisableGateway() {
 		ResponseEntity<ResultBean> response = restTemplate.exchange("/mgt/gateway", HttpMethod.POST, new HttpEntity(mktGateway, headers), ResultBean.class);
-		assertThat(gwRepo.findById("testMarketGateway").get().isDisabled()).isTrue();
 		
 		ResponseEntity<ResultBean> response1 = restTemplate.exchange("/mgt/connection", HttpMethod.GET, new HttpEntity(null, headers), ResultBean.class);
 		assertThat(response1.getBody().getStatus()).isNotEqualTo(ReturnCode.SUCCESS);
@@ -202,7 +201,7 @@ public class GatewayManagementTest {
 	
 	@Test
 	public void test_NS52_RemoveGatewayWithNonDisconnect() {
-		trdGateway.setConnectionState(GatewayConnectionState.CONNECTED);
+		trdGateway.setConnectionState(ConnectionState.CONNECTED);
 		ResponseEntity<ResultBean> resp1 = restTemplate.exchange("/mgt/gateway", HttpMethod.POST, new HttpEntity(trdGateway, headers), ResultBean.class);
 		ResultBean result1 = resp1.getBody();
 		assertThat(result1.getStatus()).isEqualTo(ReturnCode.SUCCESS);

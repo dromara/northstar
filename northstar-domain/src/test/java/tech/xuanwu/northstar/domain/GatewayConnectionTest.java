@@ -6,7 +6,7 @@ import static org.mockito.Mockito.mock;
 import org.junit.Before;
 import org.junit.Test;
 
-import tech.xuanwu.northstar.common.constant.GatewayConnectionState;
+import tech.xuanwu.northstar.common.constant.ConnectionState;
 import tech.xuanwu.northstar.common.constant.GatewayType;
 import tech.xuanwu.northstar.common.constant.GatewayUsage;
 import tech.xuanwu.northstar.common.event.InternalEventBus;
@@ -43,7 +43,7 @@ public class GatewayConnectionTest {
 	@Test
 	public void testOnConnected() {
 		conn.onConnected();
-		assertThat(conn.gwDescription.getConnectionState()).isEqualTo(GatewayConnectionState.CONNECTED);
+		assertThat(conn.gwDescription.getConnectionState()).isEqualTo(ConnectionState.CONNECTED);
 	}
 
 	@Test
@@ -51,7 +51,7 @@ public class GatewayConnectionTest {
 		testOnConnected();
 		
 		conn.onDisconnected();
-		assertThat(conn.gwDescription.getConnectionState()).isEqualTo(GatewayConnectionState.DISCONNECTED);
+		assertThat(conn.gwDescription.getConnectionState()).isEqualTo(ConnectionState.DISCONNECTED);
 	}
 
 	@Test
@@ -75,14 +75,14 @@ public class GatewayConnectionTest {
 	@Test
 	public void testConnect() {
 		conn.connect();
-		assertThat(conn.gwDescription.getConnectionState()).isEqualTo(GatewayConnectionState.CONNECTING);
+		assertThat(conn.gwDescription.getConnectionState()).isEqualTo(ConnectionState.CONNECTING);
 	}
 
 	@Test
 	public void testDisconnect() {
 		testConnect();
 		conn.disconnect();
-		assertThat(conn.gwDescription.getConnectionState()).isEqualTo(GatewayConnectionState.DISCONNECTING);
+		assertThat(conn.gwDescription.getConnectionState()).isEqualTo(ConnectionState.DISCONNECTING);
 	}
 
 }
