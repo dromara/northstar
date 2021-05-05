@@ -184,7 +184,7 @@ public class GatewayService extends BaseService implements InitializingBean {
 	public List<GatewayDescription> findAllTraderGateway(){
 		return gatewayConnMgr.getAllConnections().stream()
 				.map(conn -> conn.getGwDescription())
-				.filter(gwDescription -> gwDescription.getGatewayUsage() == GatewayUsage.TRADE)
+				.filter(gwDescription -> gwDescription.getGatewayUsage() != GatewayUsage.MARKET_DATA)
 				.collect(Collectors.toList());
 	}
 	

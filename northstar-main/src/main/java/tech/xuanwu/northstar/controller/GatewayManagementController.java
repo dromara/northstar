@@ -2,9 +2,9 @@ package tech.xuanwu.northstar.controller;
 
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -43,13 +43,14 @@ public class GatewayManagementController {
 	}
 	
 	@GetMapping("/gateway")
-	public List<GatewayDescription> list(GatewayUsage usage) { 
-		if(usage == GatewayUsage.MARKET_DATA) {
-			return gatewayService.findAllMarketGateway();
-		} else if (usage == GatewayUsage.TRADE) {
-			return gatewayService.findAllTraderGateway();
+	public List<GatewayDescription> list(String usage) { 
+		if(StringUtils.isBlank(usage)) {
+			return gatewayService.findAllGateway();
 		}
-		return gatewayService.findAllGateway();
+		if(GatewayUsage.valueOf(usage) == GatewayUsage.MARKET_DATA) {
+			return gatewayService.findAllMarketGateway();
+		}
+		return gatewayService.findAllTraderGateway();
 	}
 	
 	@GetMapping("/connection")
