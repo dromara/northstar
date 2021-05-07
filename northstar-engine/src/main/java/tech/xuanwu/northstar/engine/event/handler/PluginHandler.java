@@ -1,15 +1,14 @@
 package tech.xuanwu.northstar.engine.event.handler;
 
-import com.google.common.eventbus.EventBus;
-
 import tech.xuanwu.northstar.common.event.NorthstarEvent;
+import tech.xuanwu.northstar.common.event.PluginEventBus;
 import tech.xuanwu.northstar.engine.event.EventEngine.NorthstarEventHandler;
 
 public class PluginHandler implements NorthstarEventHandler {
 
-	private EventBus eb;
+	private PluginEventBus eb;
 	
-	public PluginHandler(EventBus eb){
+	public PluginHandler(PluginEventBus eb){
 		this.eb = eb;
 	}
 	

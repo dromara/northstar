@@ -72,17 +72,4 @@ public class GatewayConnectionTest {
 		assertThat(conn.hasConnectionError()).isTrue();
 	}
 
-	@Test
-	public void testConnect() {
-		conn.connect();
-		assertThat(conn.gwDescription.getConnectionState()).isEqualTo(ConnectionState.CONNECTING);
-	}
-
-	@Test
-	public void testDisconnect() {
-		testConnect();
-		conn.disconnect();
-		assertThat(conn.gwDescription.getConnectionState()).isEqualTo(ConnectionState.DISCONNECTING);
-	}
-
 }

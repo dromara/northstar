@@ -54,16 +54,6 @@ public abstract class GatewayConnection {
 		return errorFlag;
 	}
 	
-	public void connect() {
-		gwDescription.setConnectionState(ConnectionState.CONNECTING);
-		eventBus.post(new NorthstarEvent(NorthstarEventType.CONNECTING, gwDescription.getGatewayId()));
-	}
-	
-	public void disconnect() {
-		gwDescription.setConnectionState(ConnectionState.DISCONNECTING);
-		eventBus.post(new NorthstarEvent(NorthstarEventType.DISCONNECTING, gwDescription.getGatewayId()));
-	}
-
 	public GatewayDescription getGwDescription() {
 		return gwDescription;
 	}

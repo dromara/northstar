@@ -109,7 +109,6 @@ public class GatewayService extends BaseService implements InitializingBean {
 		
 		gatewayConnMgr.createPair(conn, gateway);
 		if(gatewayDescription.isAutoConnect()) {
-			conn.connect();
 			gateway.connect();
 		}
 		

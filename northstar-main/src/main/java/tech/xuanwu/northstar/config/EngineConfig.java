@@ -2,7 +2,6 @@ package tech.xuanwu.northstar.config;
 
 import java.io.IOException;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,6 +10,8 @@ import com.corundumstudio.socketio.SocketIOServer;
 
 import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.common.event.InternalEventBus;
+import tech.xuanwu.northstar.common.event.PluginEventBus;
+import tech.xuanwu.northstar.common.event.StrategyEventBus;
 import tech.xuanwu.northstar.engine.broadcast.SocketIOMessageEngine;
 import tech.xuanwu.northstar.engine.event.DisruptorFastEventEngine;
 import tech.xuanwu.northstar.engine.event.DisruptorFastEventEngine.WaitStrategyEnum;
@@ -57,9 +58,20 @@ public class EngineConfig {
 	}
 	
 	@Bean
-	public InternalEventBus createEventBus() {
+	public InternalEventBus createInternalEventBus() {
 		log.info("创建InternalEventBus");
 		return new InternalEventBus();
 	}
 	
+	@Bean
+	public PluginEventBus createPluginEventBus() {
+		log.info("创建PluginEventBus");
+		return new PluginEventBus();
+	}
+	
+	@Bean
+	public StrategyEventBus createStrategyEventBus() {
+		log.info("创建StrategyEventBus");
+		return new StrategyEventBus();
+	}
 }

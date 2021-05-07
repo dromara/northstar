@@ -16,8 +16,8 @@ import tech.xuanwu.northstar.service.GatewayService;
 
 @DependsOn({
 	"createInternalHandler",
-	"createPluginHandler",
-	"createStrategyHandler",
+//	"createPluginHandler",
+//	"createStrategyHandler",
 	"createBroadcastEventHandler",
 	"createAccountEventHandler",
 	"createContractEventHandler",
