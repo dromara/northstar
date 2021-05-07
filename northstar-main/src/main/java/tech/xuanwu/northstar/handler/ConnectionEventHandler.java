@@ -4,12 +4,10 @@ import java.util.HashSet;
 import java.util.Set;
 
 import lombok.extern.slf4j.Slf4j;
-import tech.xuanwu.northstar.common.constant.ConnectionState;
 import tech.xuanwu.northstar.common.event.NorthstarEvent;
 import tech.xuanwu.northstar.common.event.NorthstarEventType;
 import tech.xuanwu.northstar.common.exception.NoSuchElementException;
 import tech.xuanwu.northstar.domain.GatewayConnection;
-import tech.xuanwu.northstar.gateway.api.Gateway;
 import tech.xuanwu.northstar.model.GatewayAndConnectionManager;
 
 @Slf4j
@@ -37,19 +35,12 @@ public class ConnectionEventHandler extends AbstractEventHandler implements Inte
 		if(!gatewayConnMgr.exist(gatewayId)) {
 			throw new NoSuchElementException("没有找到相关的网关：" + gatewayId);
 		}
-		Gateway gateway = gatewayConnMgr.getGatewayById(gatewayId);
 		GatewayConnection conn = gatewayConnMgr.getGatewayConnectionById(gatewayId);
 		if(e.getEvent() == NorthstarEventType.CONNECTING) {
 			log.info("[{}]-连接中", gatewayId);
-			if(conn.getGwDescription().getConnectionState() != ConnectionState.CONNECTING) {				
-				gateway.connect();
-			}
 			conn.onConnecting();
 		} else if(e.getEvent() == NorthstarEventType.DISCONNECTING) {
 			log.info("[{}]-断开中", gatewayId);
-			if(conn.getGwDescription().getConnectionState() != ConnectionState.DISCONNECTING) {				
-				gateway.disconnect();
-			}
 			conn.onDisconnecting();
 		} else if(e.getEvent() == NorthstarEventType.CONNECTED) {
 			log.info("[{}]-已连接", gatewayId);

@@ -12,7 +12,6 @@ import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.common.constant.GatewayType;
 import tech.xuanwu.northstar.common.constant.GatewayUsage;
 import tech.xuanwu.northstar.common.event.InternalEventBus;
-import tech.xuanwu.northstar.common.event.NorthstarEventType;
 import tech.xuanwu.northstar.common.exception.NoSuchElementException;
 import tech.xuanwu.northstar.common.model.CtpSettings;
 import tech.xuanwu.northstar.common.model.GatewayDescription;
@@ -29,7 +28,6 @@ import xyz.redtorch.pb.CoreEnum.GatewayAdapterTypeEnum;
 import xyz.redtorch.pb.CoreEnum.GatewayTypeEnum;
 import xyz.redtorch.pb.CoreField.GatewaySettingField;
 import xyz.redtorch.pb.CoreField.GatewaySettingField.CtpApiSettingField;
-import xyz.redtorch.pb.CoreField.NoticeField;
 
 /**
  * 网关服务
@@ -112,7 +110,6 @@ public class GatewayService extends BaseService implements InitializingBean {
 			gateway.connect();
 		}
 		
-		log.info("创建成功");
 		return true;
 	}
 	
@@ -152,7 +149,6 @@ public class GatewayService extends BaseService implements InitializingBean {
 			throw new IllegalStateException("非断开状态的网关不能删除");
 		}
 		gatewayConnMgr.removePair(conn);
-		log.info("移除成功");
 		return true;
 	}
 	
