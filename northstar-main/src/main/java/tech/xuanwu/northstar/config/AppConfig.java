@@ -15,8 +15,6 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import tech.xuanwu.northstar.interceptor.AuthorizationInterceptor;
-import tech.xuanwu.northstar.model.ContractManager;
-import tech.xuanwu.northstar.model.GatewayAndConnectionManager;
 
 /**
  * 配置转换器
@@ -68,15 +66,4 @@ public class AppConfig implements WebMvcConfigurer {
 		registry.addInterceptor(new AuthorizationInterceptor()).addPathPatterns("/**").excludePathPatterns("/auth/login");
 	}
 
-	@Bean
-	public GatewayAndConnectionManager createGatewayAndConnectionManager() {
-		return new GatewayAndConnectionManager();
-	}
-	
-	@Bean
-	public ContractManager createContractManager() {
-		return new ContractManager();
-	}
-	
-	
 }

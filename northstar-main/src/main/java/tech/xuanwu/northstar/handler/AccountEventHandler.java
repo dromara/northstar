@@ -1,6 +1,8 @@
 package tech.xuanwu.northstar.handler;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.common.event.NorthstarEvent;
@@ -13,6 +15,16 @@ public class AccountEventHandler extends AbstractEventHandler implements Interna
 
 	private Map<String, TradeDayAccount> accountMap;
 	private TradeDayAccountFactory factory;
+	
+	private final Set<NorthstarEventType> TARGET_TYPE = new HashSet<>() {
+		private static final long serialVersionUID = 6418831877479036414L;
+		{
+			this.add(NorthstarEventType.LOGGED_IN);
+			this.add(NorthstarEventType.LOGGING_IN);
+			this.add(NorthstarEventType.LOGGED_OUT);
+			this.add(NorthstarEventType.LOGGING_OUT);
+		}
+	};
 	
 	public AccountEventHandler(Map<String, TradeDayAccount> accountMap, TradeDayAccountFactory factory) {
 		this.accountMap = accountMap;
@@ -30,8 +42,7 @@ public class AccountEventHandler extends AbstractEventHandler implements Interna
 
 	@Override
 	public boolean canHandle(NorthstarEventType eventType) {
-		return eventType == NorthstarEventType.LOGGED_IN || eventType == NorthstarEventType.LOGGING_IN 
-				|| eventType == NorthstarEventType.LOGGED_OUT || eventType == NorthstarEventType.LOGGING_OUT;
+		return TARGET_TYPE.contains(eventType);
 	}
 	
 	private void onLogined(NorthstarEvent e) {

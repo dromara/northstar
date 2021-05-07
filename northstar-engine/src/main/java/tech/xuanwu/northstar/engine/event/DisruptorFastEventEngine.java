@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -41,7 +42,7 @@ public class DisruptorFastEventEngine implements EventEngine, InitializingBean, 
 	private Disruptor<NorthstarEvent> disruptor;
 
 	private RingBuffer<NorthstarEvent> ringBuffer;
-
+	
 	private ExceptionHandler<NorthstarEvent> commonExceptionHandler = new ExceptionHandler<>() {
 
 		@Override
@@ -78,6 +79,7 @@ public class DisruptorFastEventEngine implements EventEngine, InitializingBean, 
 
 	@Override
 	public void addHandler(NorthstarEventHandler handler) {
+		log.info("加载：{}", handler);
 		BatchEventProcessor<NorthstarEvent> processor = new BatchEventProcessor<>(ringBuffer, ringBuffer.newBarrier(), handler);
 		processor.setExceptionHandler(commonExceptionHandler);
 		ringBuffer.addGatingSequences(processor.getSequence());

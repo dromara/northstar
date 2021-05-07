@@ -5,8 +5,6 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
 
@@ -14,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.common.constant.GatewayType;
 import tech.xuanwu.northstar.common.constant.GatewayUsage;
 import tech.xuanwu.northstar.common.event.InternalEventBus;
+import tech.xuanwu.northstar.common.event.NorthstarEventType;
 import tech.xuanwu.northstar.common.exception.NoSuchElementException;
 import tech.xuanwu.northstar.common.model.CtpSettings;
 import tech.xuanwu.northstar.common.model.GatewayDescription;
@@ -22,8 +21,6 @@ import tech.xuanwu.northstar.domain.MarketGatewayConnection;
 import tech.xuanwu.northstar.domain.TraderGatewayConnection;
 import tech.xuanwu.northstar.engine.event.EventEngine;
 import tech.xuanwu.northstar.gateway.api.Gateway;
-import tech.xuanwu.northstar.handler.ConnectionEventHandler;
-import tech.xuanwu.northstar.handler.TradeEventHandler;
 import tech.xuanwu.northstar.model.GatewayAndConnectionManager;
 import tech.xuanwu.northstar.persistence.GatewayRepository;
 import tech.xuanwu.northstar.persistence.po.GatewayPO;
@@ -32,6 +29,7 @@ import xyz.redtorch.pb.CoreEnum.GatewayAdapterTypeEnum;
 import xyz.redtorch.pb.CoreEnum.GatewayTypeEnum;
 import xyz.redtorch.pb.CoreField.GatewaySettingField;
 import xyz.redtorch.pb.CoreField.GatewaySettingField.CtpApiSettingField;
+import xyz.redtorch.pb.CoreField.NoticeField;
 
 /**
  * 网关服务
@@ -39,20 +37,23 @@ import xyz.redtorch.pb.CoreField.GatewaySettingField.CtpApiSettingField;
  *
  */
 @Slf4j
-@Service
 public class GatewayService extends BaseService implements InitializingBean {
 	
-	@Autowired
 	protected GatewayAndConnectionManager gatewayConnMgr;
 	
-	@Autowired
 	protected GatewayRepository gatewayRepo;
 	
-	@Autowired
 	protected EventEngine eventEngine;
 	
-	@Autowired
 	protected InternalEventBus eventBus;
+	
+	public GatewayService(GatewayAndConnectionManager gatewayConnMgr, GatewayRepository gatewayRepo,
+			EventEngine eventEngine, InternalEventBus eventBus) {
+		this.gatewayConnMgr = gatewayConnMgr;
+		this.gatewayRepo = gatewayRepo;
+		this.eventEngine = eventEngine;
+		this.eventBus = eventBus;
+	}
 	
 	/**
 	 * 创建网关
@@ -226,8 +227,5 @@ public class GatewayService extends BaseService implements InitializingBean {
 			BeanUtils.copyProperties(po, gd);
 			doCreateGateway(gd);
 		}
-		
-		eventBus.register(new ConnectionEventHandler(gatewayConnMgr));
-		eventBus.register(new TradeEventHandler(gatewayConnMgr));
 	}
 }

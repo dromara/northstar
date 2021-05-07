@@ -1,2 +1,0 @@
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=tech.xuanwu.northstar.engine.config.EngineConfig, \
-tech.xuanwu.northstar.engine.config.HandlerConfig

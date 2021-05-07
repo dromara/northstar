@@ -1,6 +1,5 @@
-package tech.xuanwu.northstar.engine.config;
+package tech.xuanwu.northstar.config;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -19,29 +18,33 @@ import tech.xuanwu.northstar.engine.event.handler.StrategyHandler;
  *
  */
 @Configuration
-public class HandlerConfig {
+public class EventHandlerConfig {
 
 	@Bean
-	@Autowired
 	public NorthstarEventHandler createInternalHandler(EventEngine ee, InternalEventBus eb) {
-		return new InternalHandler(ee, eb);	
+		NorthstarEventHandler handler = new InternalHandler(eb);
+		ee.addHandler(handler);
+		return handler;
 	}
 	
 	@Bean
-	@Autowired
 	public NorthstarEventHandler createPluginHandler(EventEngine ee, InternalEventBus eb) {
-		return new PluginHandler(ee, eb);
+		NorthstarEventHandler handler = new PluginHandler(eb);
+		ee.addHandler(handler);
+		return handler;
 	}
 	
 	@Bean
-	@Autowired
 	public NorthstarEventHandler createStrategyHandler(EventEngine ee, InternalEventBus eb) {
-		return new StrategyHandler(ee, eb);
+		NorthstarEventHandler handler = new StrategyHandler(eb);
+		ee.addHandler(handler);
+		return handler;
 	}
 	
 	@Bean
-	@Autowired
 	public NorthstarEventHandler createBroadcastEventHandler(EventEngine ee, SocketIOMessageEngine msgEngine) {
-		return new BroadcastHandler(ee, msgEngine);
+		NorthstarEventHandler handler = new BroadcastHandler(msgEngine);
+		ee.addHandler(handler);
+		return handler;
 	}
 }

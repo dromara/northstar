@@ -13,8 +13,7 @@ public class BaseService {
 	protected HttpSession session;
 	
 	protected String getUserName() {
-//		NsUser user = (NsUser) session.getAttribute(Constants.KEY_USER);
-//		return user.getUserName();
-		return "admin";
+		NsUser user = (NsUser) session.getAttribute(Constants.KEY_USER);
+		return user.getUserName();
 	}
 }

@@ -1,4 +1,4 @@
-package tech.xuanwu.northstar.engine.config;
+package tech.xuanwu.northstar.config;
 
 import java.io.IOException;
 
@@ -44,19 +44,21 @@ public class EngineConfig {
         return socketServer;
     }
 	
-	@Autowired
 	@Bean
 	public SocketIOMessageEngine createMessageEngine(SocketIOServer server) {
+		log.info("创建SocketIOMessageEngine");
 		return new SocketIOMessageEngine(server);
 	}
 	
 	@Bean
 	public EventEngine createEventEngine() {
+		log.info("创建EventEngine");
 		return new DisruptorFastEventEngine(WaitStrategyEnum.BlockingWaitStrategy);
 	}
 	
 	@Bean
 	public InternalEventBus createEventBus() {
+		log.info("创建InternalEventBus");
 		return new InternalEventBus();
 	}
 	

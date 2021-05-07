@@ -2,12 +2,9 @@ package tech.xuanwu.northstar.engine.event.handler;
 
 import java.util.EnumMap;
 
-import org.springframework.beans.factory.InitializingBean;
-
 import tech.xuanwu.northstar.common.event.NorthstarEvent;
 import tech.xuanwu.northstar.common.event.NorthstarEventType;
 import tech.xuanwu.northstar.engine.broadcast.SocketIOMessageEngine;
-import tech.xuanwu.northstar.engine.event.EventEngine;
 import tech.xuanwu.northstar.engine.event.EventEngine.NorthstarEventHandler;
 import xyz.redtorch.pb.CoreField.AccountField;
 import xyz.redtorch.pb.CoreField.BarField;
@@ -17,27 +14,26 @@ import xyz.redtorch.pb.CoreField.PositionField;
 import xyz.redtorch.pb.CoreField.TickField;
 import xyz.redtorch.pb.CoreField.TradeField;
 
-public class BroadcastHandler implements NorthstarEventHandler, InitializingBean {
+public class BroadcastHandler implements NorthstarEventHandler {
 	
 	private SocketIOMessageEngine msgEngine;
-	private EventEngine ee;
 	
-	private static EnumMap<NorthstarEventType, Class<?>> clzMap = new EnumMap<>(NorthstarEventType.class);
+	private static EnumMap<NorthstarEventType, Class<?>> clzMap = new EnumMap<>(NorthstarEventType.class) {
+		private static final long serialVersionUID = 1L;
+		{
+			put(NorthstarEventType.TICK, TickField.class);
+			put(NorthstarEventType.BAR, BarField.class);
+			put(NorthstarEventType.ACCOUNT, AccountField.class);
+			put(NorthstarEventType.BALANCE, AccountField.class);
+			put(NorthstarEventType.ORDER, OrderField.class);
+			put(NorthstarEventType.POSITION, PositionField.class);
+			put(NorthstarEventType.TRADE, TradeField.class);
+			put(NorthstarEventType.NOTICE, NoticeField.class);
+		}
+	};
 	
-	static {
-		clzMap.put(NorthstarEventType.TICK, TickField.class);
-		clzMap.put(NorthstarEventType.BAR, BarField.class);
-		clzMap.put(NorthstarEventType.ACCOUNT, AccountField.class);
-		clzMap.put(NorthstarEventType.BALANCE, AccountField.class);
-		clzMap.put(NorthstarEventType.ORDER, OrderField.class);
-		clzMap.put(NorthstarEventType.POSITION, PositionField.class);
-		clzMap.put(NorthstarEventType.TRADE, TradeField.class);
-		clzMap.put(NorthstarEventType.NOTICE, NoticeField.class);
-	}
-	
-	public BroadcastHandler(EventEngine ee, SocketIOMessageEngine msgEngine) {
+	public BroadcastHandler(SocketIOMessageEngine msgEngine) {
 		this.msgEngine = msgEngine;
-		this.ee = ee;
 	}
 
 	@Override
@@ -49,19 +45,7 @@ public class BroadcastHandler implements NorthstarEventHandler, InitializingBean
 			return;
 		}
 		
-		if(type == NorthstarEventType.CONNECTED || type == NorthstarEventType.CONNECTING
-				|| type == NorthstarEventType.DISCONNECTED || type == NorthstarEventType.DISCONNECTING
-				|| type == NorthstarEventType.LOGGED_IN || type == NorthstarEventType.LOGGING_IN
-				|| type == NorthstarEventType.LOGGED_OUT || type == NorthstarEventType.LOGGING_OUT
-				|| type == NorthstarEventType.TRADE_DATE) {
-			msgEngine.emitMessageEvent(event);
-			return;
-		}
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception {
-		ee.addHandler(this);
+		msgEngine.emitMessageEvent(event);
 	}
 
 }

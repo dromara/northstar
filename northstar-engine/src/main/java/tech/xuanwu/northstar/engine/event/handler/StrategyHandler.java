@@ -1,21 +1,15 @@
 package tech.xuanwu.northstar.engine.event.handler;
 
-import org.springframework.beans.factory.InitializingBean;
-
 import com.google.common.eventbus.EventBus;
 
 import tech.xuanwu.northstar.common.event.NorthstarEvent;
-import tech.xuanwu.northstar.engine.event.EventEngine;
 import tech.xuanwu.northstar.engine.event.EventEngine.NorthstarEventHandler;
 
-public class StrategyHandler implements NorthstarEventHandler, InitializingBean {
+public class StrategyHandler implements NorthstarEventHandler {
 
-	private EventEngine ee;
-	
 	private EventBus eb;
 	
-	public StrategyHandler(EventEngine ee, EventBus eb){
-		this.ee = ee;
+	public StrategyHandler(EventBus eb){
 		this.eb = eb;
 	}
 	
@@ -24,8 +18,4 @@ public class StrategyHandler implements NorthstarEventHandler, InitializingBean 
 		eb.post(event);
 	}
 
-	@Override
-	public void afterPropertiesSet() throws Exception {
-		ee.addHandler(this);
-	}
 }

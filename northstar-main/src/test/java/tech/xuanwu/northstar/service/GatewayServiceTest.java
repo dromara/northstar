@@ -2,7 +2,6 @@ package tech.xuanwu.northstar.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import org.junit.Before;
@@ -12,26 +11,21 @@ import org.mockito.ArgumentMatchers;
 import tech.xuanwu.northstar.common.constant.GatewayType;
 import tech.xuanwu.northstar.common.constant.GatewayUsage;
 import tech.xuanwu.northstar.common.event.InternalEventBus;
-import tech.xuanwu.northstar.common.event.NorthstarEvent;
 import tech.xuanwu.northstar.common.model.CtpSettings;
 import tech.xuanwu.northstar.common.model.GatewayDescription;
-import tech.xuanwu.northstar.domain.GatewayConnection;
 import tech.xuanwu.northstar.engine.event.EventEngine;
-import tech.xuanwu.northstar.gateway.api.Gateway;
 import tech.xuanwu.northstar.model.GatewayAndConnectionManager;
 import tech.xuanwu.northstar.persistence.GatewayRepository;
 import tech.xuanwu.northstar.persistence.po.GatewayPO;
 
 public class GatewayServiceTest {
 	
-	GatewayService service = new GatewayService();
+	GatewayService service;
 	
 	@Before
 	public void prepare() {
-		service.eventBus = mock(InternalEventBus.class);
-		service.eventEngine = mock(EventEngine.class);
-		service.gatewayRepo = mock(GatewayRepository.class);
-		service.gatewayConnMgr = new GatewayAndConnectionManager();
+		service = new GatewayService(new GatewayAndConnectionManager(), mock(GatewayRepository.class),
+				mock(EventEngine.class), mock(InternalEventBus.class));
 	}
 
 	@Test

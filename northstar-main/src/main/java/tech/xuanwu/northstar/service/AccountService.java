@@ -2,12 +2,7 @@ package tech.xuanwu.northstar.service;
 
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import lombok.extern.slf4j.Slf4j;
-import tech.xuanwu.northstar.common.event.InternalEventBus;
 import tech.xuanwu.northstar.common.exception.InsufficientException;
 import tech.xuanwu.northstar.common.exception.NoSuchElementException;
 import tech.xuanwu.northstar.common.exception.TradeException;
@@ -15,11 +10,6 @@ import tech.xuanwu.northstar.common.model.OrderRecall;
 import tech.xuanwu.northstar.common.model.OrderRequest;
 import tech.xuanwu.northstar.common.utils.OrderUtil;
 import tech.xuanwu.northstar.domain.TradeDayAccount;
-import tech.xuanwu.northstar.factories.TradeDayAccountFactory;
-import tech.xuanwu.northstar.handler.AccountEventHandler;
-import tech.xuanwu.northstar.handler.ContractEventHandler;
-import tech.xuanwu.northstar.model.ContractManager;
-import tech.xuanwu.northstar.model.GatewayAndConnectionManager;
 
 /**
  * 账户服务
@@ -27,19 +17,13 @@ import tech.xuanwu.northstar.model.GatewayAndConnectionManager;
  *
  */
 @Slf4j
-@Service
-public class AccountService extends BaseService implements InitializingBean{
+public class AccountService extends BaseService {
 	
-	@Autowired
-	protected InternalEventBus eventBus;
+	protected ConcurrentHashMap<String, TradeDayAccount> accountMap;
 	
-	@Autowired
-	protected ContractManager contractMgr;
-	
-	@Autowired
-	protected GatewayAndConnectionManager gatewayConnMgr;
-	
-	protected ConcurrentHashMap<String, TradeDayAccount> accountMap = new ConcurrentHashMap<>();
+	public AccountService(ConcurrentHashMap<String, TradeDayAccount> accountMap) {
+		this.accountMap = accountMap;
+	}
 	
 	/**
 	 * 下单
@@ -78,9 +62,4 @@ public class AccountService extends BaseService implements InitializingBean{
 		return true;
 	}
 	
-	@Override
-	public void afterPropertiesSet() throws Exception {
-		eventBus.register(new ContractEventHandler(contractMgr, gatewayConnMgr));
-		eventBus.register(new AccountEventHandler(accountMap, new TradeDayAccountFactory(eventBus, contractMgr)));
-	}
 }
