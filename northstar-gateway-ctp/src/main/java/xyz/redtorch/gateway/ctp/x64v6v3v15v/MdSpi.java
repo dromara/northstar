@@ -64,7 +64,7 @@ public class MdSpi extends CThostFtdcMdSpi {
 		this.userId = ctpGatewayAdapter.getGatewaySetting().getCtpApiSetting().getUserId();
 		this.password = ctpGatewayAdapter.getGatewaySetting().getCtpApiSetting().getPassword();
 		this.gatewayId = ctpGatewayAdapter.getGateway().getGatewayId();
-		this.logInfo = "网关ID-[" + this.gatewayId + "] 名称-[" + ctpGatewayAdapter.getGateway().getName() + "] [→] ";
+		this.logInfo = "行情网关ID-[" + this.gatewayId + "] [→] ";
 	}
 
 	private CThostFtdcMdApi cThostFtdcMdApi;

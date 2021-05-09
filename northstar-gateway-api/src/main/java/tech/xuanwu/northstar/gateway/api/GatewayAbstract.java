@@ -2,6 +2,7 @@ package tech.xuanwu.northstar.gateway.api;
 
 import lombok.extern.slf4j.Slf4j;
 import xyz.redtorch.pb.CoreEnum.ConnectStatusEnum;
+import xyz.redtorch.pb.CoreEnum.GatewayTypeEnum;
 import xyz.redtorch.pb.CoreField.GatewayField;
 import xyz.redtorch.pb.CoreField.GatewaySettingField;
 
@@ -24,7 +25,7 @@ public abstract class GatewayAbstract implements Gateway {
 		this.gatewaySetting = gatewaySetting;
 		this.gatewayId = gatewaySetting.getGatewayId();
 		this.gatewayName = gatewaySetting.getGatewayName();
-		this.logInfo = "网关ID-[" + gatewayId + "] 名称-[" + gatewayName + "] [→] ";
+		this.logInfo = (gatewaySetting.getGatewayType() == GatewayTypeEnum.GTE_MarketData ? "行情" : "交易") + "网关ID-[" + gatewayId + "] [→] ";
 
 		GatewayField.Builder gatewayBuilder = GatewayField.newBuilder();
 		gatewayBuilder.setDescription(gatewaySetting.getGatewayDescription());
