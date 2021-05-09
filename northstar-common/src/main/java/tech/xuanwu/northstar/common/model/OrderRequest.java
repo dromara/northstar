@@ -19,7 +19,7 @@ public class OrderRequest {
 	/**
 	 * 合约名称
 	 */
-	private String contractSymbol;
+	private String contractUnifiedSymbol;
 	/**
 	 * 委托价
 	 */

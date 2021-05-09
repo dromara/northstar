@@ -105,7 +105,7 @@ public class TradeDayAccountTest {
 	public void testOpenPosition() throws InsufficientException {
 		testOnAccountUpdate();
 		OrderRequest orderReq = OrderRequest.builder()
-				.contractSymbol("rb2102")
+				.contractUnifiedSymbol("rb2102")
 				.price("4000")
 				.volume(1)
 				.tradeOpr(TradeOperation.BK)
@@ -118,7 +118,7 @@ public class TradeDayAccountTest {
 	public void testOpenPositionWithException() throws InsufficientException {
 		testOnAccountUpdate();
 		OrderRequest orderReq = OrderRequest.builder()
-				.contractSymbol("rb2102")
+				.contractUnifiedSymbol("rb2102")
 				.price("7000")
 				.volume(1)
 				.tradeOpr(TradeOperation.BK)
@@ -131,7 +131,7 @@ public class TradeDayAccountTest {
 	public void testClosePosition() throws InsufficientException {
 		testOnPositionUpdate();
 		OrderRequest orderReq = OrderRequest.builder()
-				.contractSymbol("rb2102")
+				.contractUnifiedSymbol("rb2102")
 				.price("7000")
 				.volume(2)
 				.tradeOpr(TradeOperation.SP)
@@ -145,7 +145,7 @@ public class TradeDayAccountTest {
 	public void testClosePositionWithException() throws InsufficientException {
 		testOnPositionUpdate();
 		OrderRequest orderReq = OrderRequest.builder()
-				.contractSymbol("rb2102")
+				.contractUnifiedSymbol("rb2102")
 				.price("7000")
 				.volume(3)
 				.tradeOpr(TradeOperation.SP)

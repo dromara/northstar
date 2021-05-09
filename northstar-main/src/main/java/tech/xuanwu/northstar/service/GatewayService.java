@@ -1,5 +1,6 @@
 package tech.xuanwu.northstar.service;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -12,20 +13,26 @@ import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.common.constant.GatewayType;
 import tech.xuanwu.northstar.common.constant.GatewayUsage;
 import tech.xuanwu.northstar.common.event.InternalEventBus;
+import tech.xuanwu.northstar.common.event.NorthstarEvent;
+import tech.xuanwu.northstar.common.event.NorthstarEventType;
 import tech.xuanwu.northstar.common.exception.NoSuchElementException;
 import tech.xuanwu.northstar.common.model.CtpSettings;
 import tech.xuanwu.northstar.common.model.GatewayDescription;
 import tech.xuanwu.northstar.domain.GatewayConnection;
 import tech.xuanwu.northstar.domain.MarketGatewayConnection;
 import tech.xuanwu.northstar.domain.TraderGatewayConnection;
+import tech.xuanwu.northstar.engine.broadcast.SocketIOMessageEngine;
 import tech.xuanwu.northstar.engine.event.EventEngine;
+import tech.xuanwu.northstar.engine.event.handler.BroadcastHandler;
 import tech.xuanwu.northstar.gateway.api.Gateway;
+import tech.xuanwu.northstar.model.ContractManager;
 import tech.xuanwu.northstar.model.GatewayAndConnectionManager;
 import tech.xuanwu.northstar.persistence.GatewayRepository;
 import tech.xuanwu.northstar.persistence.po.GatewayPO;
 import xyz.redtorch.gateway.ctp.x64v6v3v15v.CtpGatewayAdapter;
 import xyz.redtorch.pb.CoreEnum.GatewayAdapterTypeEnum;
 import xyz.redtorch.pb.CoreEnum.GatewayTypeEnum;
+import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.GatewaySettingField;
 import xyz.redtorch.pb.CoreField.GatewaySettingField.CtpApiSettingField;
 
@@ -211,6 +218,22 @@ public class GatewayService extends BaseService implements InitializingBean {
 			throw new NoSuchElementException("没有该网关记录：" +  gatewayId);
 		}
 		
+		return true;
+	}
+	
+	/**
+	 * 异步更新合约
+	 * @return
+	 * @throws Exception 
+	 */
+	public boolean asyncUpdateContracts(ContractManager contractMgr, SocketIOMessageEngine msgEngine) throws Exception {
+		log.info("用户：[{}]，异步更新合约", getUserName());
+		NorthstarEvent event = new NorthstarEvent(null, null);
+		for(ContractField c : contractMgr.getAllContracts()) {
+			event.setData(c);
+			event.setEvent(NorthstarEventType.CONTRACT);
+			msgEngine.emitEvent(event, ContractField.class);
+		}
 		return true;
 	}
 	

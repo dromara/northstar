@@ -24,7 +24,6 @@ public class BroadcastHandler implements NorthstarEventHandler {
 			put(NorthstarEventType.TICK, TickField.class);
 			put(NorthstarEventType.BAR, BarField.class);
 			put(NorthstarEventType.ACCOUNT, AccountField.class);
-			put(NorthstarEventType.BALANCE, AccountField.class);
 			put(NorthstarEventType.ORDER, OrderField.class);
 			put(NorthstarEventType.POSITION, PositionField.class);
 			put(NorthstarEventType.TRADE, TradeField.class);
@@ -40,12 +39,10 @@ public class BroadcastHandler implements NorthstarEventHandler {
 	public void onEvent(NorthstarEvent event, long sequence, boolean endOfBatch) throws Exception {
 		NorthstarEventType type = event.getEvent();
 		Class<?> clz = clzMap.get(type);
-		if(clz != null) {
-			msgEngine.emitEvent(event, clz);
+		if(clz == null) {
 			return;
 		}
-		
-		msgEngine.emitMessageEvent(event);
+		msgEngine.emitEvent(event, clz);
 	}
 
 }

@@ -2,8 +2,6 @@ package xyz.redtorch.gateway.ctp.x64v6v3v15v;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.channels.ReadableByteChannel;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -13,7 +11,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
@@ -23,9 +20,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 
 import tech.xuanwu.northstar.common.constant.DateTimeConstant;
 import tech.xuanwu.northstar.common.event.NorthstarEventType;
@@ -204,7 +198,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 		this.authCode = ctpGatewayAdapter.getGatewaySetting().getCtpApiSetting().getAuthCode();
 		this.userProductInfo = ctpGatewayAdapter.getGatewaySetting().getCtpApiSetting().getUserProductInfo();
 		this.gatewayId = ctpGatewayAdapter.getGateway().getGatewayId();
-		this.logInfo = "网关ID-[" + this.gatewayId + "] 名称-[" + ctpGatewayAdapter.getGateway().getName() + "] [→] ";
+		this.logInfo = "交易网关ID-[" + this.gatewayId + "] [→] ";
 	}
 	
 	
@@ -800,20 +794,19 @@ public class TdSpi extends CThostFtdcTraderSpi {
 			logger.error("{}交易接口错误回报!错误ID:{},错误信息:{},请求ID:{}", logInfo, pRspInfo.getErrorID(), pRspInfo.getErrorMsg(), nRequestID);
 			if (instrumentQueried) {
 				if (pRspInfo.getErrorID() == 0) {
-					NoticeField.Builder noticeBuilder = NoticeField.newBuilder();
-					noticeBuilder
-							.setContent("交易网关ID:" + ctpGatewayAdapter.getGateway().getGatewayId() + ",交易接口错误回报:" + pRspInfo.getErrorMsg() + ",错误ID:" + pRspInfo.getErrorID());
-					noticeBuilder.setStatus(CommonStatusEnum.COMS_INFO);
-					noticeBuilder.setTimestamp(System.currentTimeMillis());
-					ctpGatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.NOTICE, noticeBuilder.build());
+					NoticeField notice  = NoticeField.newBuilder()
+						.setContent(logInfo + "交易接口错误回报:" + pRspInfo.getErrorMsg() + "，错误ID:" + pRspInfo.getErrorID())
+						.setStatus(CommonStatusEnum.COMS_INFO)
+						.setTimestamp(System.currentTimeMillis())
+						.build();
+					ctpGatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.NOTICE, notice);
 				} else {
-
-					NoticeField.Builder noticeBuilder = NoticeField.newBuilder();
-					noticeBuilder
-							.setContent("交易网关ID:" + ctpGatewayAdapter.getGateway().getGatewayId() + ",交易接口错误回报:" + pRspInfo.getErrorMsg() + ",错误ID:" + pRspInfo.getErrorID());
-					noticeBuilder.setStatus(CommonStatusEnum.COMS_ERROR);
-					noticeBuilder.setTimestamp(System.currentTimeMillis());
-					ctpGatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.NOTICE, noticeBuilder.build());
+					NoticeField notice = NoticeField.newBuilder()
+							.setContent(logInfo + "交易接口错误回报:" + pRspInfo.getErrorMsg() + "，错误ID:" + pRspInfo.getErrorID())
+							.setStatus(CommonStatusEnum.COMS_ERROR)
+							.setTimestamp(System.currentTimeMillis())
+							.build();
+					ctpGatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.NOTICE, notice);
 				}
 			}
 			// CTP查询尚未就绪,断开
@@ -958,11 +951,12 @@ public class TdSpi extends CThostFtdcTraderSpi {
 			if (pRspInfo != null) {
 				logger.error("{}交易接口发单错误回报(OnRspOrderInsert) 错误ID:{},错误信息:{}", logInfo, pRspInfo.getErrorID(), pRspInfo.getErrorMsg());
 				if (instrumentQueried) {
-					NoticeField.Builder noticeBuilder = NoticeField.newBuilder();
-					noticeBuilder.setContent(logInfo + "交易接口发单错误回报(OnRspOrderInsert) 错误ID:" + pRspInfo.getErrorID() + ",错误信息:" + pRspInfo.getErrorMsg());
-					noticeBuilder.setStatus(CommonStatusEnum.COMS_ERROR);
-					noticeBuilder.setTimestamp(System.currentTimeMillis());
-					ctpGatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.NOTICE, noticeBuilder.build());
+					NoticeField notice  = NoticeField.newBuilder()
+						.setContent(logInfo + "交易接口发单错误回报，错误ID:" + pRspInfo.getErrorID() + "，错误信息:" + pRspInfo.getErrorMsg())
+						.setStatus(CommonStatusEnum.COMS_ERROR)
+						.setTimestamp(System.currentTimeMillis())
+						.build();
+					ctpGatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.NOTICE, notice);
 				}
 			} else {
 				logger.error("{}处理交易接口发单错误回报(OnRspOrderInsert)错误,回报信息为空", logInfo);
@@ -985,11 +979,12 @@ public class TdSpi extends CThostFtdcTraderSpi {
 		if (pRspInfo != null) {
 			logger.error("{}交易接口撤单错误回报(OnRspOrderAction) 错误ID:{},错误信息:{}", logInfo, pRspInfo.getErrorID(), pRspInfo.getErrorMsg());
 			if (instrumentQueried) {
-				NoticeField.Builder noticeBuilder = NoticeField.newBuilder();
-				noticeBuilder.setContent(logInfo + "交易接口撤单错误回报(OnRspOrderAction) 错误ID:" + pRspInfo.getErrorID() + ",错误信息:" + pRspInfo.getErrorMsg());
-				noticeBuilder.setStatus(CommonStatusEnum.COMS_ERROR);
-				noticeBuilder.setTimestamp(System.currentTimeMillis());
-				ctpGatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.NOTICE, noticeBuilder.build());
+				NoticeField notice  = NoticeField.newBuilder()
+					.setContent(logInfo + "交易接口撤单错误回报，错误ID:" + pRspInfo.getErrorID() + "，错误信息:" + pRspInfo.getErrorMsg())
+					.setStatus(CommonStatusEnum.COMS_ERROR)
+					.setTimestamp(System.currentTimeMillis())
+					.build();
+				ctpGatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.NOTICE, notice);
 			}
 		} else {
 			logger.error("{}处理交易接口撤单错误回报(OnRspOrderAction)错误,无有效信息", logInfo);
@@ -1291,8 +1286,13 @@ public class TdSpi extends CThostFtdcTraderSpi {
 
 			if (bIsLast) {
 				if (StringUtils.isBlank(investorName)) {
-					logger.warn("{}交易接口未能获取到投资者名,准备断开", logInfo);
-					ctpGatewayAdapter.disconnect();
+					logger.warn("{}交易接口未能获取到投资者名", logInfo);
+					NoticeField notice = NoticeField.newBuilder()
+							.setContent(logInfo + "交易接口投资者名为空")
+							.setStatus(CommonStatusEnum.COMS_WARN)
+							.setTimestamp(System.currentTimeMillis())
+							.build();
+					ctpGatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.NOTICE, notice);
 				}
 				investorNameQueried = true;
 				// 防止被限流
@@ -1737,11 +1737,11 @@ public class TdSpi extends CThostFtdcTraderSpi {
 					pInputOrder.getStopPrice());
 
 			if (instrumentQueried) {
-				NoticeField.Builder noticeBuilder = NoticeField.newBuilder();
-				noticeBuilder.setContent(logInfo + "}交易接口发单错误回报（OnErrRtnOrderInsert） 错误ID:" + pRspInfo.getErrorID() + ",错误信息:" + pRspInfo.getErrorMsg());
-				noticeBuilder.setStatus(CommonStatusEnum.COMS_ERROR);
-				noticeBuilder.setTimestamp(System.currentTimeMillis());
-				ctpGatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.NOTICE, noticeBuilder.build());
+				NoticeField notice = NoticeField.newBuilder()
+					.setContent(logInfo + "交易接口发单错误回报，错误ID:" + pRspInfo.getErrorID() + "，错误信息:" + pRspInfo.getErrorMsg())
+					.setStatus(CommonStatusEnum.COMS_ERROR)
+					.setTimestamp(System.currentTimeMillis()).build();
+				ctpGatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.NOTICE, notice);
 			}
 		} catch (Throwable t) {
 			logger.error("{}OnErrRtnOrderInsert Exception", logInfo, t);
@@ -1754,11 +1754,12 @@ public class TdSpi extends CThostFtdcTraderSpi {
 		if (pRspInfo != null) {
 			logger.error("{}交易接口撤单错误(OnErrRtnOrderAction) 错误ID:{},错误信息:{}", logInfo, pRspInfo.getErrorID(), pRspInfo.getErrorMsg());
 			if (instrumentQueried) {
-				NoticeField.Builder noticeBuilder = NoticeField.newBuilder();
-				noticeBuilder.setContent(logInfo + "交易接口撤单错误回报(OnErrRtnOrderAction) 错误ID:" + pRspInfo.getErrorID() + ",错误信息:" + pRspInfo.getErrorMsg());
-				noticeBuilder.setStatus(CommonStatusEnum.COMS_ERROR);
-				noticeBuilder.setTimestamp(System.currentTimeMillis());
-				ctpGatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.NOTICE, noticeBuilder.build());
+				NoticeField notice = NoticeField.newBuilder()
+					.setContent(logInfo + "交易接口撤单错误回报，错误ID:" + pRspInfo.getErrorID() + "，错误信息:" + pRspInfo.getErrorMsg())
+					.setStatus(CommonStatusEnum.COMS_ERROR)
+					.setTimestamp(System.currentTimeMillis())
+					.build();
+				ctpGatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.NOTICE, notice);
 			}
 		} else {
 			logger.error("{}处理交易接口撤单错误(OnErrRtnOrderAction)错误,无有效信息", logInfo);

@@ -76,9 +76,9 @@ public class TradeDayAccount {
 	}
 	
 	public boolean openPosition(OrderRequest orderReq) throws InsufficientException {
-		ContractField contract = contractMap.get(orderReq.getContractSymbol());
+		ContractField contract = contractMap.get(orderReq.getContractUnifiedSymbol());
 		if(contract == null) {
-			throw new NoSuchElementException("不存在此合约：" + orderReq.getContractSymbol());
+			throw new NoSuchElementException("不存在此合约：" + orderReq.getContractUnifiedSymbol());
 		}
 		// 检查可用资金
 		double marginRate = OrderUtil.resolveDirection(orderReq.getTradeOpr()) == DirectionEnum.D_Buy ? contract.getLongMarginRatio() : contract.getShortMarginRatio();

@@ -90,7 +90,7 @@ public class PositionDescriptionTest {
 		testUpdate();
 		
 		OrderRequest orderReq = OrderRequest.builder()
-				.contractSymbol("rb2102")
+				.contractUnifiedSymbol("rb2102")
 				.gatewayId("testGateway")
 				.price("1234")
 				.volume(1)
@@ -107,7 +107,7 @@ public class PositionDescriptionTest {
 		testUpdate();
 		
 		OrderRequest orderReq = OrderRequest.builder()
-				.contractSymbol("rb2102")
+				.contractUnifiedSymbol("rb2102")
 				.gatewayId("testGateway")
 				.price("1234")
 				.volume(3)
@@ -125,7 +125,7 @@ public class PositionDescriptionTest {
 		testUpdate();
 		
 		OrderRequest orderReq = OrderRequest.builder()
-				.contractSymbol("AP2102")
+				.contractUnifiedSymbol("AP2102")
 				.gatewayId("testGateway")
 				.price("1234")
 				.volume(1)
@@ -142,7 +142,7 @@ public class PositionDescriptionTest {
 		testUpdate();
 		
 		OrderRequest orderReq = OrderRequest.builder()
-				.contractSymbol("AP2102")
+				.contractUnifiedSymbol("AP2102")
 				.gatewayId("testGateway")
 				.price("1234")
 				.volume(3)
@@ -159,7 +159,7 @@ public class PositionDescriptionTest {
 		testUpdate();
 		
 		OrderRequest orderReq = OrderRequest.builder()
-				.contractSymbol("rb2102")
+				.contractUnifiedSymbol("rb2102")
 				.gatewayId("testGateway")
 				.price("1234")
 				.volume(4)

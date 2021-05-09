@@ -1,6 +1,7 @@
 package tech.xuanwu.northstar.model;
 
 import java.lang.ref.WeakReference;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -8,9 +9,11 @@ import java.util.Map.Entry;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 
+import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.common.exception.NoSuchElementException;
 import xyz.redtorch.pb.CoreField.ContractField;
 
+@Slf4j
 public class ContractManager {
 	
 	private Table<String, String, ContractField> contractTbl = HashBasedTable.create();
@@ -20,6 +23,7 @@ public class ContractManager {
 		String gatewayId = contract.getGatewayId();
 		String symbol = contract.getSymbol();
 		String unifiedSymbol = contract.getUnifiedSymbol();
+		log.info("加入合约：网关{}, 合约{}", gatewayId, symbol);
 		contractMap.put(unifiedSymbol, new WeakReference<>(contract));
 		contractTbl.put(gatewayId, symbol, contract);
 	}
@@ -38,6 +42,10 @@ public class ContractManager {
 			throw new NoSuchElementException("找不到合约：" + unifiedSymbol);
 		}
 		return result;
+	}
+	
+	public Collection<ContractField> getAllContracts(){
+		return contractTbl.values();
 	}
 	
 	public Map<String, ContractField> getContractMapByGateway(String gatewayId){

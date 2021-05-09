@@ -70,10 +70,10 @@ public class PositionDescription {
 		DirectionEnum orderDir = OrderUtil.resolveDirection(orderReq.getTradeOpr());
 		PositionDirectionEnum targetPosDir = OrderUtil.getClosingDirection(orderDir);
 		int i = targetPosDir == PositionDirectionEnum.PD_Long ? 1 : targetPosDir == PositionDirectionEnum.PD_Short ? 0 : -1;
-		if(!posMap.containsKey(orderReq.getContractSymbol()) || posMap.get(orderReq.getContractSymbol())[i] == null) {
+		if(!posMap.containsKey(orderReq.getContractUnifiedSymbol()) || posMap.get(orderReq.getContractUnifiedSymbol())[i] == null) {
 			throw new NoSuchElementException("找不到可平仓的持仓");
 		}
-		return posMap.get(orderReq.getContractSymbol())[i];
+		return posMap.get(orderReq.getContractUnifiedSymbol())[i];
 	}
 	
 	/**
@@ -83,9 +83,9 @@ public class PositionDescription {
 	 * @throws InsufficientException 
 	 */
 	public List<SubmitOrderReqField> generateCloseOrderReq(OrderRequest orderReq) throws InsufficientException{
-		ContractField contract = contractMap.get(orderReq.getContractSymbol());
+		ContractField contract = contractMap.get(orderReq.getContractUnifiedSymbol());
 		if(contract == null) {
-			throw new NoSuchElementException("不存在此合约：" + orderReq.getContractSymbol());
+			throw new NoSuchElementException("不存在此合约：" + orderReq.getContractUnifiedSymbol());
 		}
 		PositionField pos = acquireTargetPosition(orderReq);
 		int totalAvailable = pos.getPosition() - pos.getFrozen();

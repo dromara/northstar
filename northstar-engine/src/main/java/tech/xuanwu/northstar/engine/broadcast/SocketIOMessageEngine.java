@@ -25,23 +25,18 @@ public class SocketIOMessageEngine {
 		this.server = server;
 	}
 	
-	/**************************************************/
-	/*					消息发送端						  */
-	/**************************************************/
+	/****************************************************/
+	/*					消息发送端					  	*/
+	/****************************************************/
 	
 	public void emitEvent(NorthstarEvent event, Class<?> objClz) throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		Method m = objClz.getMethod("toByteArray");
 		server.getBroadcastOperations().sendEvent(event.getEvent().toString(), (byte[])m.invoke(event.getData()));
 	}
 	
-	public void emitMessageEvent(NorthstarEvent event) {
-		server.getBroadcastOperations().sendEvent(event.getEvent().toString(), event.getData().toString());
-	}
-	
-	
-	/**************************************************/
-	/*					消息接收端						  */
-	/**************************************************/
+	/****************************************************/
+	/*					消息接收端						*/
+	/****************************************************/
 	@OnConnect  
     private void onConnect(final SocketIOClient client) {
     	log.info("【客户端连接】-[{}],建立连接", client.getSessionId());
