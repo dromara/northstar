@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import tech.xuanwu.northstar.common.constant.Constants;
 import tech.xuanwu.northstar.common.exception.AuthenticationException;
 import tech.xuanwu.northstar.common.model.NsUser;
-import tech.xuanwu.northstar.utils.JwtUtil;
+import tech.xuanwu.northstar.controller.common.ResultBean;
 
 /**
  * 身份认证
@@ -35,19 +35,18 @@ public class AuthenticationController {
 	protected HttpSession session;
 	
 	@PostMapping(value="/login", produces = "application/json")
-	public String doAuth(@RequestBody NsUser user) {
+	public ResultBean<String> doAuth(@RequestBody NsUser user) {
 		Assert.hasText(user.getUserName(), "账户不能为空");
 		Assert.hasText(user.getPassword(), "密码不能为空");
 		if(StringUtils.equals(user.getUserName(), userId) && StringUtils.equals(user.getPassword(), password)) {
-//			return JwtUtil.sign(user.getUserName(), user.getPassword());
 			session.setAttribute(Constants.KEY_USER, user);
-			return "OK";
+			return new ResultBean<>("OK");
 		}
 		throw new AuthenticationException("账户或密码不正确");
 	}
 	
 	@GetMapping("/test")
-	public boolean testAuth() {
-		return true;
+	public ResultBean<Boolean> testAuth() {
+		return new ResultBean<>(Boolean.TRUE);
 	}
 }

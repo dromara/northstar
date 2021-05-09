@@ -15,6 +15,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import tech.xuanwu.northstar.common.constant.GatewayUsage;
 import tech.xuanwu.northstar.common.model.GatewayDescription;
+import tech.xuanwu.northstar.controller.common.ResultBean;
+import tech.xuanwu.northstar.engine.broadcast.SocketIOMessageEngine;
+import tech.xuanwu.northstar.model.ContractManager;
 import tech.xuanwu.northstar.service.GatewayService;
 
 @RequestMapping("/mgt")
@@ -25,43 +28,48 @@ public class GatewayManagementController {
 	protected GatewayService gatewayService;
 
 	@PostMapping("/gateway")
-	public boolean create(@RequestBody GatewayDescription gd) {
+	public ResultBean<Boolean> create(@RequestBody GatewayDescription gd) {
 		Assert.notNull(gd, "传入对象不能为空");
-		return gatewayService.createGateway(gd);
+		return new ResultBean<>(gatewayService.createGateway(gd));
 	}
 	
 	@DeleteMapping("/gateway")
-	public boolean remove(String gatewayId) {
+	public ResultBean<Boolean> remove(String gatewayId) {
 		Assert.notNull(gatewayId, "网关ID不能为空");
-		return gatewayService.deleteGateway(gatewayId);
+		return new ResultBean<>(gatewayService.deleteGateway(gatewayId));
 	}
 	
 	@PutMapping("/gateway")
-	public boolean modify(@RequestBody GatewayDescription gd) {
+	public ResultBean<Boolean> modify(@RequestBody GatewayDescription gd) {
 		Assert.notNull(gd, "传入对象不能为空");
-		return gatewayService.updateGateway(gd);
+		return new ResultBean<>(gatewayService.updateGateway(gd));
 	}
 	
 	@GetMapping("/gateway")
-	public List<GatewayDescription> list(String usage) { 
+	public ResultBean<List<GatewayDescription>> list(String usage) { 
 		if(StringUtils.isBlank(usage)) {
-			return gatewayService.findAllGateway();
+			return new ResultBean<>(gatewayService.findAllGateway());
 		}
 		if(GatewayUsage.valueOf(usage) == GatewayUsage.MARKET_DATA) {
-			return gatewayService.findAllMarketGateway();
+			return new ResultBean<>(gatewayService.findAllMarketGateway());
 		}
-		return gatewayService.findAllTraderGateway();
+		return new ResultBean<>(gatewayService.findAllTraderGateway());
 	}
 	
 	@GetMapping("/connection")
-	public boolean connect(String gatewayId) {
+	public ResultBean<Boolean> connect(String gatewayId) {
 		Assert.notNull(gatewayId, "网关ID不能为空");
-		return gatewayService.connect(gatewayId);
+		return new ResultBean<>(gatewayService.connect(gatewayId));
 	}
 	
 	@DeleteMapping("/connection")
-	public boolean disconnect(String gatewayId) {
+	public ResultBean<Boolean> disconnect(String gatewayId) {
 		Assert.notNull(gatewayId, "网关ID不能为空");
-		return gatewayService.disconnect(gatewayId);
+		return new ResultBean<>(gatewayService.disconnect(gatewayId));
+	}
+	
+	@GetMapping("/contracts/async")
+	public ResultBean<Boolean> syncContracts(ContractManager contractMgr, SocketIOMessageEngine msgEngine) throws Exception {
+		return new ResultBean<>(gatewayService.asyncUpdateContracts(contractMgr, msgEngine));
 	}
 }

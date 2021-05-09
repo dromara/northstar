@@ -11,6 +11,7 @@ import tech.xuanwu.northstar.common.exception.InsufficientException;
 import tech.xuanwu.northstar.common.exception.TradeException;
 import tech.xuanwu.northstar.common.model.OrderRecall;
 import tech.xuanwu.northstar.common.model.OrderRequest;
+import tech.xuanwu.northstar.controller.common.ResultBean;
 import tech.xuanwu.northstar.service.AccountService;
 
 /**
@@ -26,18 +27,18 @@ public class TradeOperationController {
 	protected AccountService accountService;
 
 	@PostMapping("/submit")
-	public boolean submitOrder(@RequestBody OrderRequest req) throws InsufficientException {
+	public ResultBean<Boolean> submitOrder(@RequestBody OrderRequest req) throws InsufficientException {
 		Assert.hasText(req.getGatewayId(), "账户网关ID不能为空");
-		Assert.hasText(req.getContractSymbol(), "合约不能为空");
+		Assert.hasText(req.getContractUnifiedSymbol(), "合约不能为空");
 		Assert.hasText(req.getPrice(), "价格不能为空");
 		Assert.isTrue(req.getVolume() > 0, "下单手数必须为正整数");
 		Assert.notNull(req.getTradeOpr(), "交易操作不能为空");
-		return accountService.submitOrder(req);
+		return new ResultBean<>(accountService.submitOrder(req));
 	}
 	
 	@PostMapping("/cancel")
-	public boolean cancelOrder(@RequestBody OrderRecall recall) throws TradeException {
-		return accountService.cancelOrder(recall);
+	public ResultBean<Boolean> cancelOrder(@RequestBody OrderRecall recall) throws TradeException {
+		return new ResultBean<>(accountService.cancelOrder(recall));
 	}
 	
 }

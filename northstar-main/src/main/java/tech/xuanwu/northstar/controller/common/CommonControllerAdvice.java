@@ -1,16 +1,8 @@
 package tech.xuanwu.northstar.controller.common;
 
-import java.io.File;
-
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.core.MethodParameter;
-import org.springframework.http.MediaType;
-import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.server.ServerHttpRequest;
-import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
 import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.common.constant.ReturnCode;
@@ -27,7 +19,7 @@ import tech.xuanwu.northstar.common.exception.ValueMismatchException;
  */
 @Slf4j
 @RestControllerAdvice
-public class CommonControllerAdvice implements ResponseBodyAdvice<Object>{
+public class CommonControllerAdvice {
 
 	@ExceptionHandler
 	public ResultBean<?> handleException(Exception e) {
@@ -60,22 +52,6 @@ public class CommonControllerAdvice implements ResponseBodyAdvice<Object>{
 	public ResultBean<?> handleAuthenticationException(Exception e){
 		log.error(e.getMessage(), e);
 		return new ResultBean<>(ReturnCode.AUTH_ERR, e.getMessage());
-	}
-
-	@Override
-	public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
-		return true;
-	}
-
-	@Override
-	public Object beforeBodyWrite(Object body, MethodParameter returnType, MediaType selectedContentType,
-			Class<? extends HttpMessageConverter<?>> selectedConverterType, ServerHttpRequest request,
-			ServerHttpResponse response) {
-		if (body == null || body instanceof ResultBean || body instanceof File) {
-            return body;
-        }
-
-        return new ResultBean<>(body);
 	}
 
 }

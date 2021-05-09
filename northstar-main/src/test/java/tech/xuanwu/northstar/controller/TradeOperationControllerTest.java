@@ -43,7 +43,7 @@ public class TradeOperationControllerTest {
 	public void testSubmitOrder() throws Exception {
 		OrderRequest req = OrderRequest.builder()
 				.gatewayId("testAccount")
-				.contractSymbol("rb12345")
+				.contractUnifiedSymbol("rb12345")
 				.price("123.45")
 				.tradeOpr(TradeOperation.BK)
 				.volume(1)
