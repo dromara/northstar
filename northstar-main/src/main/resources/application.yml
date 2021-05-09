@@ -6,10 +6,13 @@ server:
 socketio:
   host: 127.0.0.1
   port: 51888
-  
-auth:
-  userId: admin
-  password: 123456
+
+northstar: 
+  auth:
+    userId: admin
+    password: 123456
+  contracts:
+    canHandle: FUTURES
 
 logging:
   level: 
@@ -22,3 +25,6 @@ spring:
   data:
       mongodb:
         uri: mongodb://127.0.0.1:27017/DB_ADMIN
+
+        
+        

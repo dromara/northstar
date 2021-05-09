@@ -1366,12 +1366,10 @@ public class TdSpi extends CThostFtdcTraderSpi {
 
 			ContractField contract = contractBuilder.build();
 			ctpGatewayAdapter.contractMap.put(contractBuilder.getSymbol(), contract);
-			
+			ctpGatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.CONTRACT, contract);
 			if (bIsLast) {
 				
 				logger.warn("{}交易接口合约信息获取完成!共计{}条", logInfo, ctpGatewayAdapter.contractMap.size());
-				
-//				ctpGatewayAdapter.getEventEngine().emitEvent(EventType.LIFECYCLE, GatewayLifecycleEvent.ON_CTP_CONTRACT_READY, ctpGatewayAdapter.contractMap);
 				
 				instrumentQueried = true;
 				this.startIntervalQuery();

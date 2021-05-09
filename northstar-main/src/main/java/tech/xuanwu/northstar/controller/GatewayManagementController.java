@@ -26,6 +26,12 @@ public class GatewayManagementController {
 	
 	@Autowired
 	protected GatewayService gatewayService;
+	
+	@Autowired
+	protected ContractManager contractMgr;
+	
+	@Autowired
+	protected SocketIOMessageEngine msgEngine;
 
 	@PostMapping("/gateway")
 	public ResultBean<Boolean> create(@RequestBody GatewayDescription gd) {
@@ -69,7 +75,7 @@ public class GatewayManagementController {
 	}
 	
 	@GetMapping("/contracts/async")
-	public ResultBean<Boolean> syncContracts(ContractManager contractMgr, SocketIOMessageEngine msgEngine) throws Exception {
+	public ResultBean<Boolean> syncContracts() throws Exception {
 		return new ResultBean<>(gatewayService.asyncUpdateContracts(contractMgr, msgEngine));
 	}
 }

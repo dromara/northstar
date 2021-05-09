@@ -1,6 +1,5 @@
 package tech.xuanwu.northstar.service;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,7 +22,6 @@ import tech.xuanwu.northstar.domain.MarketGatewayConnection;
 import tech.xuanwu.northstar.domain.TraderGatewayConnection;
 import tech.xuanwu.northstar.engine.broadcast.SocketIOMessageEngine;
 import tech.xuanwu.northstar.engine.event.EventEngine;
-import tech.xuanwu.northstar.engine.event.handler.BroadcastHandler;
 import tech.xuanwu.northstar.gateway.api.Gateway;
 import tech.xuanwu.northstar.model.ContractManager;
 import tech.xuanwu.northstar.model.GatewayAndConnectionManager;

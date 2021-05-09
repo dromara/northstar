@@ -26,9 +26,9 @@ import tech.xuanwu.northstar.controller.common.ResultBean;
 @RequestMapping("/auth")
 public class AuthenticationController {
 	
-	@Value("${auth.userId}")
+	@Value("${northstar.auth.userId}")
 	protected String userId;
-	@Value("${auth.password}")
+	@Value("${northstar.auth.password}")
 	protected String password;
 	
 	@Autowired
