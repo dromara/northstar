@@ -1,9 +1,8 @@
 package tech.xuanwu.northstar.handler;
 
-import org.apache.commons.lang3.StringUtils;
-
 import tech.xuanwu.northstar.common.event.NorthstarEvent;
 import tech.xuanwu.northstar.common.event.NorthstarEventType;
+import tech.xuanwu.northstar.gateway.api.MarketGateway;
 import tech.xuanwu.northstar.model.ContractManager;
 import tech.xuanwu.northstar.model.GatewayAndConnectionManager;
 import xyz.redtorch.pb.CoreField.ContractField;
@@ -25,10 +24,15 @@ public class ContractEventHandler extends AbstractEventHandler implements Intern
 		String originalGatewayId = contract.getGatewayId();
 		String relativeGatewayId = gatewayConnMgr.getGatewayConnectionById(originalGatewayId).getGwDescription().getRelativeGatewayId();
 		
-		contractMgr.addContract(contract.toBuilder()
-				.setGatewayId(StringUtils.isNotBlank(relativeGatewayId) ? relativeGatewayId : originalGatewayId)
-				.build()
-			);
+		ContractField contractNew = contract.toBuilder()
+				.setGatewayId(relativeGatewayId)
+				.build();
+		if(contractMgr.addContract(contractNew)) {			
+			MarketGateway gateway = (MarketGateway) gatewayConnMgr.getGatewayById(relativeGatewayId);
+			if(gateway.isConnected()) {				
+				gateway.subscribe(contractNew);
+			}
+		}
 	}
 
 	@Override

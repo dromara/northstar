@@ -43,12 +43,12 @@ public class GatewayAndConnectionManager {
 		gatewayMap.get(gatewayId).conn = conn;
 	}
 
-	public Gateway getGatewayByConnection(Gateway gateway) {
-		return getGatewayById(gateway.getGateway().getGatewayId());
+	public Gateway getGatewayByConnection(GatewayConnection conn) {
+		return getGatewayById(conn.getGwDescription().getGatewayId());
 	}
 
-	public GatewayConnection getConnectionByGateway(GatewayConnection conn) {
-		return getGatewayConnectionById(conn.getGwDescription().getGatewayId());
+	public GatewayConnection getConnectionByGateway(Gateway gateway) {
+		return getGatewayConnectionById(gateway.getGateway().getGatewayId());
 	}
 
 	public Gateway getGatewayById(String gatewayId) {

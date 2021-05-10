@@ -54,8 +54,9 @@ public class InternalEventHandlerConfig {
 	}
 	
 	@Bean
-	public ConnectionEventHandler createConnectionEventHandler(InternalEventBus eventBus, GatewayAndConnectionManager gatewayConnMgr) {
-		ConnectionEventHandler handler = new ConnectionEventHandler(gatewayConnMgr);
+	public ConnectionEventHandler createConnectionEventHandler(InternalEventBus eventBus, GatewayAndConnectionManager gatewayConnMgr,
+			ContractManager contractMgr) {
+		ConnectionEventHandler handler = new ConnectionEventHandler(gatewayConnMgr, contractMgr);
 		eventBus.register(handler);
 		return handler;
 	}

@@ -34,17 +34,19 @@ public class ContractManager {
 		}
 	}
 	
-	public void addContract(ContractField contract) {
+	public boolean addContract(ContractField contract) {
 		String gatewayId = contract.getGatewayId();
 		String symbol = contract.getSymbol();
 		String unifiedSymbol = contract.getUnifiedSymbol();
 		if(!canHandleTypes.contains(contract.getProductClass())) {
-			return;
+			return false;
 		}
-		contractMap.put(unifiedSymbol, new WeakReference<>(contract));
+		WeakReference<ContractField> ref = new WeakReference<>(contract);
+		contractMap.put(unifiedSymbol, ref);
 		contractTbl.put(gatewayId, symbol, contract);
-		contractList.add(new WeakReference<>(contract));
+		contractList.add(ref);
 		log.info("加入合约：网关{}, 合约{}, 累计总合约数{}个", gatewayId, symbol, contractList.size());
+		return true;
 	}
 	
 	public ContractField getContract(String gatewayId, String symbol) {
