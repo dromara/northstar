@@ -19,10 +19,6 @@ public class AuthorizationInterceptor implements HandlerInterceptor{
 			return true;
 		}
 		
-//		String token = req.getHeader("Authorization");
-//		if(StringUtils.isNotBlank(token) && JwtUtil.verity(token)) {
-//			return true;
-//		}
 		Object user = req.getSession().getAttribute(Constants.KEY_USER);
 		if(user != null) {
 			return true;

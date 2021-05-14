@@ -42,7 +42,8 @@ public class AuthenticationControllerTest {
 				.contentType(MediaType.APPLICATION_JSON_UTF8)
 				.content(JSON.toJSONString(new NsUser("admin","123456"))))
 		.andExpect(MockMvcResultMatchers.status().isOk())
-		.andExpect(MockMvcResultMatchers.content().string(any(String.class)))
+		.andExpect(MockMvcResultMatchers.jsonPath("$.status").value("200"))
+		.andExpect(MockMvcResultMatchers.jsonPath("$.data").value(any(String.class)))
 		.andDo(MockMvcResultHandlers.print());
 		
 	}

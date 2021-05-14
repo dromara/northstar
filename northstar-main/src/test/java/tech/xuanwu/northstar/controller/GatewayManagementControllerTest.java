@@ -54,7 +54,7 @@ public class GatewayManagementControllerTest {
 				.accept(MediaType.APPLICATION_JSON)
 				.content(JSON.toJSONString(gd)))
 				.andExpect(MockMvcResultMatchers.status().isOk())
-				.andExpect(MockMvcResultMatchers.content().string("true"))
+				.andExpect(MockMvcResultMatchers.jsonPath("$.status").value("200"))
 				.andDo(MockMvcResultHandlers.print());
 	}
 
@@ -65,7 +65,7 @@ public class GatewayManagementControllerTest {
 				.accept(MediaType.APPLICATION_JSON)
 				.param("gatewayId", "testGateway"))
 				.andExpect(MockMvcResultMatchers.status().isOk())
-				.andExpect(MockMvcResultMatchers.content().string("true"))
+				.andExpect(MockMvcResultMatchers.jsonPath("$.status").value("200"))
 				.andDo(MockMvcResultHandlers.print());
 	}
 
@@ -83,7 +83,7 @@ public class GatewayManagementControllerTest {
 				.accept(MediaType.APPLICATION_JSON)
 				.content(JSON.toJSONString(gd)))
 				.andExpect(MockMvcResultMatchers.status().isOk())
-				.andExpect(MockMvcResultMatchers.content().string("true"))
+				.andExpect(MockMvcResultMatchers.jsonPath("$.status").value("200"))
 				.andDo(MockMvcResultHandlers.print());
 	}
 
@@ -91,7 +91,8 @@ public class GatewayManagementControllerTest {
 	public void testList() throws Exception {
 		mockMvc.perform(MockMvcRequestBuilders.get("/mgt/gateway").accept(MediaType.APPLICATION_JSON))
 				.andExpect(MockMvcResultMatchers.status().isOk())
-				.andExpect(MockMvcResultMatchers.jsonPath("$").isArray())
+				.andExpect(MockMvcResultMatchers.jsonPath("$.status").value("200"))
+				.andExpect(MockMvcResultMatchers.jsonPath("$.data").isArray())
 				.andDo(MockMvcResultHandlers.print());
 	}
 
