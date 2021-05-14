@@ -120,6 +120,7 @@ public class TradeDayAccount {
 		}
 		CancelOrderReqField order = CancelOrderReqField.newBuilder()
 				.setOrderId(orderRecall.getOrderId())
+				.setGatewayId(orderRecall.getGatewayId())
 				.build();
 		eventBus.post(new NorthstarEvent(NorthstarEventType.WITHDRAW_ORDER, order));
 		return true;

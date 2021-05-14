@@ -53,14 +53,14 @@ public class PositionDescription {
 	 * @param pos
 	 */
 	public void update(PositionField pos) {
-		String symbol = pos.getContract().getSymbol();
-		if(!posMap.containsKey(symbol)) {
-			posMap.put(symbol, new PositionField[2]);			
+		String unifiedSymbol = pos.getContract().getUnifiedSymbol();
+		if(!posMap.containsKey(unifiedSymbol)) {
+			posMap.put(unifiedSymbol, new PositionField[2]);			
 		}
 		if(pos.getPositionDirection() == PositionDirectionEnum.PD_Long) {
-			posMap.get(symbol)[1] = pos;
+			posMap.get(unifiedSymbol)[1] = pos;
 		} else if(pos.getPositionDirection() == PositionDirectionEnum.PD_Short) {
-			posMap.get(symbol)[0] = pos;
+			posMap.get(unifiedSymbol)[0] = pos;
 		}
 	}
 	
