@@ -9,10 +9,10 @@ import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.common.event.NorthstarEvent;
 import tech.xuanwu.northstar.common.event.NorthstarEventType;
 import tech.xuanwu.northstar.common.exception.NoSuchElementException;
+import tech.xuanwu.northstar.common.model.ContractManager;
 import tech.xuanwu.northstar.domain.GatewayConnection;
 import tech.xuanwu.northstar.gateway.api.Gateway;
 import tech.xuanwu.northstar.gateway.api.MarketGateway;
-import tech.xuanwu.northstar.model.ContractManager;
 import tech.xuanwu.northstar.model.GatewayAndConnectionManager;
 import xyz.redtorch.pb.CoreField.ContractField;
 
@@ -55,9 +55,8 @@ public class ConnectionEventHandler extends AbstractEventHandler implements Inte
 			conn.onConnected();
 			Gateway gateway = gatewayConnMgr.getGatewayByConnection(conn);
 			if(gateway instanceof MarketGateway) {
-				Map<String, ContractField> contractMap = contractMgr.getContractMapByGateway(gatewayId);
-				for(Entry<String, ContractField> entry : contractMap.entrySet()) {
-					((MarketGateway) gateway).subscribe(entry.getValue());
+				for(ContractField c : contractMgr.getAllContracts()) {
+					((MarketGateway) gateway).subscribe(c);
 				}
 			}
 		} else if(e.getEvent() == NorthstarEventType.DISCONNECTED) {

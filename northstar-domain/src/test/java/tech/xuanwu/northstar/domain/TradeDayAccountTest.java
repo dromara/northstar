@@ -18,6 +18,7 @@ import tech.xuanwu.northstar.common.event.NorthstarEvent;
 import tech.xuanwu.northstar.common.exception.InsufficientException;
 import tech.xuanwu.northstar.common.exception.NoSuchElementException;
 import tech.xuanwu.northstar.common.exception.TradeException;
+import tech.xuanwu.northstar.common.model.ContractManager;
 import tech.xuanwu.northstar.common.model.OrderRecall;
 import tech.xuanwu.northstar.common.model.OrderRequest;
 import tech.xuanwu.northstar.common.model.OrderRequest.TradeOperation;
@@ -47,9 +48,9 @@ public class TradeDayAccountTest {
 	@Before
 	public void prepare() {
 		InternalEventBus eventBus = mock(InternalEventBus.class);
-		Map<String, ContractField> contractMap = mock(Map.class);
-		when(contractMap.get("rb2102")).thenReturn(contract);
-		tda = new TradeDayAccount("testGateway", eventBus, contractMap);
+		ContractManager contractMgr = mock(ContractManager.class);
+		when(contractMgr.getContract("rb2102")).thenReturn(contract);
+		tda = new TradeDayAccount("testGateway", eventBus, contractMgr);
 	}
 	
 

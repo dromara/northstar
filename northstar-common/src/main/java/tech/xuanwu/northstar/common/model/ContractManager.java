@@ -1,4 +1,4 @@
-package tech.xuanwu.northstar.model;
+package tech.xuanwu.northstar.common.model;
 
 import java.lang.ref.WeakReference;
 import java.util.Collection;
@@ -72,7 +72,7 @@ public class ContractManager {
 				.collect(Collectors.toList());
 	}
 	
-	public Map<String, ContractField> getContractMapByGateway(String gatewayId){
+	private Map<String, ContractField> getContractMapByGateway(String gatewayId){
 		return contractTbl.row(gatewayId);
 	}
 	

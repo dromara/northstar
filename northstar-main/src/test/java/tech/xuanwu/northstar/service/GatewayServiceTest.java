@@ -22,9 +22,12 @@ public class GatewayServiceTest {
 	
 	GatewayService service;
 	
+	GatewayRepository gatewayRepo;
+	
 	@Before
 	public void prepare() {
-		service = new GatewayService(new GatewayAndConnectionManager(), mock(GatewayRepository.class),
+		gatewayRepo = mock(GatewayRepository.class);
+		service = new GatewayService(new GatewayAndConnectionManager(), gatewayRepo,
 				mock(EventEngine.class), mock(InternalEventBus.class));
 	}
 
@@ -49,7 +52,7 @@ public class GatewayServiceTest {
 				.build();
 		service.createGateway(gd);
 		
-		verify(service.gatewayRepo).insert(ArgumentMatchers.any(GatewayPO.class));
+		verify(gatewayRepo).insert(ArgumentMatchers.any(GatewayPO.class));
 	}
 	
 
@@ -77,14 +80,14 @@ public class GatewayServiceTest {
 		boolean flag = service.updateGateway(gd);
 		
 		assertThat(flag).isTrue();
-		verify(service.gatewayRepo).save(ArgumentMatchers.any(GatewayPO.class));
+		verify(gatewayRepo).save(ArgumentMatchers.any(GatewayPO.class));
 	}
 
 	@Test
 	public void testDeleteGateway() {
 		testCreateGateway();
 		service.deleteGateway("testGateway");
-		verify(service.gatewayRepo).deleteById("testGateway");
+		verify(gatewayRepo).deleteById("testGateway");
 	}
 
 	@Test

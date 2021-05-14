@@ -12,6 +12,7 @@ import tech.xuanwu.northstar.common.event.NorthstarEvent;
 import tech.xuanwu.northstar.common.event.NorthstarEventType;
 import tech.xuanwu.northstar.common.exception.InsufficientException;
 import tech.xuanwu.northstar.common.exception.TradeException;
+import tech.xuanwu.northstar.common.model.ContractManager;
 import tech.xuanwu.northstar.common.model.OrderRecall;
 import tech.xuanwu.northstar.common.model.OrderRequest;
 import tech.xuanwu.northstar.common.utils.OrderUtil;
@@ -43,17 +44,17 @@ public class TradeDayAccount {
 	protected PositionDescription posDescription;
 	
 	private volatile AccountField accountInfo;
-	private Map<String, ContractField> contractMap;
+	private ContractManager contractMgr;
 	
 	private String accountId;
 	
 	protected EventBus eventBus;
 	
-	public TradeDayAccount(String gatewayId, EventBus eventBus, Map<String, ContractField> contractMap) {
+	public TradeDayAccount(String gatewayId, EventBus eventBus, ContractManager contractMgr) {
 		this.accountId = gatewayId;
 		this.eventBus = eventBus;
-		this.contractMap = contractMap;
-		this.posDescription = new PositionDescription(contractMap);
+		this.contractMgr = contractMgr;
+		this.posDescription = new PositionDescription(contractMgr);
 		this.accountInfo = AccountField.newBuilder()
 				.setAccountId(gatewayId)
 				.build();
@@ -76,7 +77,7 @@ public class TradeDayAccount {
 	}
 	
 	public boolean openPosition(OrderRequest orderReq) throws InsufficientException {
-		ContractField contract = contractMap.get(orderReq.getContractUnifiedSymbol());
+		ContractField contract = contractMgr.getContract(orderReq.getContractUnifiedSymbol());
 		if(contract == null) {
 			throw new NoSuchElementException("不存在此合约：" + orderReq.getContractUnifiedSymbol());
 		}

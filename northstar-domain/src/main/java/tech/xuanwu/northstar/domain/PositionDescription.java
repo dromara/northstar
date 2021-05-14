@@ -12,6 +12,7 @@ import com.google.common.collect.Lists;
 
 import tech.xuanwu.northstar.common.exception.InsufficientException;
 import tech.xuanwu.northstar.common.exception.NoSuchElementException;
+import tech.xuanwu.northstar.common.model.ContractManager;
 import tech.xuanwu.northstar.common.model.OrderRequest;
 import tech.xuanwu.northstar.common.utils.OrderUtil;
 import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
@@ -41,10 +42,10 @@ public class PositionDescription {
 	 */
 	protected ConcurrentHashMap<String, PositionField[]> posMap = new ConcurrentHashMap<>();
 	
-	protected Map<String, ContractField> contractMap;
+	protected ContractManager contractMgr;
 	
-	public PositionDescription(Map<String, ContractField> contractMap) {
-		this.contractMap = contractMap;
+	public PositionDescription(ContractManager contractMgr) {
+		this.contractMgr = contractMgr;
 	}
 	
 	/**
@@ -83,7 +84,7 @@ public class PositionDescription {
 	 * @throws InsufficientException 
 	 */
 	public List<SubmitOrderReqField> generateCloseOrderReq(OrderRequest orderReq) throws InsufficientException{
-		ContractField contract = contractMap.get(orderReq.getContractUnifiedSymbol());
+		ContractField contract = contractMgr.getContract(orderReq.getContractUnifiedSymbol());
 		if(contract == null) {
 			throw new NoSuchElementException("不存在此合约：" + orderReq.getContractUnifiedSymbol());
 		}

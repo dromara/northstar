@@ -7,11 +7,14 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 
 import tech.xuanwu.northstar.common.event.InternalEventBus;
+import tech.xuanwu.northstar.common.model.ContractManager;
 import tech.xuanwu.northstar.domain.TradeDayAccount;
+import tech.xuanwu.northstar.engine.broadcast.SocketIOMessageEngine;
 import tech.xuanwu.northstar.engine.event.EventEngine;
 import tech.xuanwu.northstar.model.GatewayAndConnectionManager;
 import tech.xuanwu.northstar.persistence.GatewayRepository;
 import tech.xuanwu.northstar.service.AccountService;
+import tech.xuanwu.northstar.service.DataSyncService;
 import tech.xuanwu.northstar.service.GatewayService;
 
 @DependsOn({
@@ -36,5 +39,11 @@ public class ServiceConfig {
 	public GatewayService createGatewayService(GatewayAndConnectionManager gatewayConnMgr, GatewayRepository gatewayRepo,
 			EventEngine eventEngine, InternalEventBus eventBus) {
 		return new GatewayService(gatewayConnMgr, gatewayRepo, eventEngine, eventBus);
+	}
+	
+	@Bean
+	public DataSyncService createDataSyncService(ContractManager contractMgr, SocketIOMessageEngine msgEngine, 
+			ConcurrentHashMap<String, TradeDayAccount> accountMap) {
+		return new DataSyncService(contractMgr, msgEngine, accountMap);
 	}
 }

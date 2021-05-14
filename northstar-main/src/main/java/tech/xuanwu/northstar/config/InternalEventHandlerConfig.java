@@ -7,13 +7,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import tech.xuanwu.northstar.common.event.InternalEventBus;
+import tech.xuanwu.northstar.common.model.ContractManager;
 import tech.xuanwu.northstar.domain.TradeDayAccount;
 import tech.xuanwu.northstar.factories.TradeDayAccountFactory;
 import tech.xuanwu.northstar.handler.AccountEventHandler;
 import tech.xuanwu.northstar.handler.ConnectionEventHandler;
 import tech.xuanwu.northstar.handler.ContractEventHandler;
 import tech.xuanwu.northstar.handler.TradeEventHandler;
-import tech.xuanwu.northstar.model.ContractManager;
 import tech.xuanwu.northstar.model.GatewayAndConnectionManager;
 
 @Configuration

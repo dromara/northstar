@@ -1,8 +1,8 @@
 package tech.xuanwu.northstar.factories;
 
 import tech.xuanwu.northstar.common.event.InternalEventBus;
+import tech.xuanwu.northstar.common.model.ContractManager;
 import tech.xuanwu.northstar.domain.TradeDayAccount;
-import tech.xuanwu.northstar.model.ContractManager;
 
 public class TradeDayAccountFactory {
 	
@@ -15,7 +15,7 @@ public class TradeDayAccountFactory {
 	}
 	
 	public TradeDayAccount newInstance(String gatewayId) {
-		return new TradeDayAccount(gatewayId, eventBus, contractMgr.getContractMapByGateway(gatewayId));
+		return new TradeDayAccount(gatewayId, eventBus, contractMgr);
 	}
 
 }

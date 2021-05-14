@@ -5,13 +5,12 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.junit.Before;
 import org.junit.Test;
 
 import tech.xuanwu.northstar.common.exception.InsufficientException;
+import tech.xuanwu.northstar.common.model.ContractManager;
 import tech.xuanwu.northstar.common.model.OrderRequest;
 import tech.xuanwu.northstar.common.model.OrderRequest.TradeOperation;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
@@ -45,10 +44,9 @@ public class PositionDescriptionTest {
 	
 	@Before
 	public void prepare() {
-		pd = new PositionDescription(new ConcurrentHashMap<>());
-		pd.contractMap = mock(Map.class);
-		when(pd.contractMap.get("AP2102")).thenReturn(contract2);
-		when(pd.contractMap.get("rb2102")).thenReturn(contract);
+		pd = new PositionDescription(mock(ContractManager.class));
+		when(pd.contractMgr.getContract("AP2102")).thenReturn(contract2);
+		when(pd.contractMgr.getContract("rb2102")).thenReturn(contract);
 	}
 
 	@Test
