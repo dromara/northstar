@@ -17,7 +17,7 @@ import xyz.redtorch.pb.CoreField.PositionField;
 import xyz.redtorch.pb.CoreField.TradeField;
 
 @Slf4j
-public class DataSyncService extends BaseService{
+public class DataSyncService {
 
 	private ContractManager contractMgr;
 	
@@ -37,7 +37,7 @@ public class DataSyncService extends BaseService{
 	 * @throws Exception 
 	 */
 	public void asyncUpdateContracts() throws Exception {
-		log.info("用户：[{}]，异步更新合约", getUserName());
+		log.info("异步更新合约");
 		NorthstarEvent event = new NorthstarEvent(null, null);
 		for(ContractField c : contractMgr.getAllContracts()) {
 			event.setData(c);
@@ -55,7 +55,7 @@ public class DataSyncService extends BaseService{
 	 * 
 	 */
 	public void asyncUpdateTradeAccount() throws Exception {
-		log.info("用户：[{}]，异步更新账户信息", getUserName());
+		log.info("异步更新账户信息");
 		NorthstarEvent event = new NorthstarEvent(null, null);
 		for(Entry<String, TradeDayAccount> e : accountMap.entrySet()) {
 			TradeDayAccount account = e.getValue();

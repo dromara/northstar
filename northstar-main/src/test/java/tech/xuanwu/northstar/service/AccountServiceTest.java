@@ -6,6 +6,9 @@ import static org.mockito.Mockito.when;
 
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.servlet.http.HttpSession;
+
+import org.junit.Before;
 import org.junit.Test;
 
 import tech.xuanwu.northstar.common.exception.InsufficientException;
@@ -20,10 +23,16 @@ public class AccountServiceTest {
 	
 	AccountService service;
 	
+	@Before
+	public void prepare() {
+		service = new AccountService(mock(ConcurrentHashMap.class));
+		HttpSession session = mock(HttpSession.class);
+	}
+	
 
 	@Test
 	public void testSubmitOrder() throws InsufficientException {
-		service = new AccountService(mock(ConcurrentHashMap.class));
+		
 		TradeDayAccount account = mock(TradeDayAccount.class);
 		when(service.accountMap.get("testGateway")).thenReturn(account);
 		

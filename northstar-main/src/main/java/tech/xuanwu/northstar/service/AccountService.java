@@ -17,7 +17,7 @@ import tech.xuanwu.northstar.domain.TradeDayAccount;
  *
  */
 @Slf4j
-public class AccountService extends BaseService {
+public class AccountService {
 	
 	protected ConcurrentHashMap<String, TradeDayAccount> accountMap;
 	
@@ -31,7 +31,7 @@ public class AccountService extends BaseService {
 	 * @throws InsufficientException 
 	 */
 	public boolean submitOrder(OrderRequest req) throws InsufficientException {
-		log.info("用户：[{}]，下单委托", getUserName());
+		log.info("下单委托");
 		String gatewayId = req.getGatewayId();
 		TradeDayAccount account = accountMap.get(gatewayId);
 		if(account == null) {
@@ -52,7 +52,7 @@ public class AccountService extends BaseService {
 	 * @throws TradeException 
 	 */
 	public boolean cancelOrder(OrderRecall recall) throws TradeException {
-		log.info("用户：[{}]，撤单委托", getUserName());
+		log.info("撤单委托");
 		String gatewayId = recall.getGatewayId();
 		TradeDayAccount account = accountMap.get(gatewayId);
 		if(account == null) {

@@ -35,7 +35,7 @@ import xyz.redtorch.pb.CoreField.GatewaySettingField.CtpApiSettingField;
  *
  */
 @Slf4j
-public class GatewayService extends BaseService implements InitializingBean {
+public class GatewayService implements InitializingBean {
 	
 	private GatewayAndConnectionManager gatewayConnMgr;
 	
@@ -58,7 +58,7 @@ public class GatewayService extends BaseService implements InitializingBean {
 	 * @return
 	 */
 	public boolean createGateway(GatewayDescription gatewayDescription) {
-		log.info("用户：[{}]，创建网关[{}]", getUserName(), gatewayDescription.getGatewayId());
+		log.info("创建网关[{}]", gatewayDescription.getGatewayId());
 		GatewayPO po = new GatewayPO();
 		BeanUtils.copyProperties(gatewayDescription, po);
 		gatewayRepo.insert(po);
@@ -118,7 +118,7 @@ public class GatewayService extends BaseService implements InitializingBean {
 	 * @return
 	 */
 	public boolean updateGateway(GatewayDescription gatewayDescription) {
-		log.info("用户：[{}]，更新网关[{}]", getUserName(), gatewayDescription.getGatewayId());
+		log.info("更新网关[{}]", gatewayDescription.getGatewayId());
 		GatewayPO po = new GatewayPO();
 		BeanUtils.copyProperties(gatewayDescription, po);
 		gatewayRepo.save(po);
@@ -132,7 +132,7 @@ public class GatewayService extends BaseService implements InitializingBean {
 	 * @return
 	 */
 	public boolean deleteGateway(String gatewayId) {
-		log.info("用户：[{}]，移除网关[{}]", getUserName(), gatewayId);
+		log.info("移除网关[{}]", gatewayId);
 		boolean flag = doDeleteGateway(gatewayId);
 		gatewayRepo.deleteById(gatewayId);
 		return flag;
@@ -189,7 +189,7 @@ public class GatewayService extends BaseService implements InitializingBean {
 	 * @return
 	 */
 	public boolean connect(String gatewayId) {
-		log.info("用户：[{}]，连接网关[{}]", getUserName(), gatewayId);
+		log.info("连接网关[{}]", gatewayId);
 		if(gatewayConnMgr.exist(gatewayId)) {
 			gatewayConnMgr.getGatewayById(gatewayId).connect();
 		} else {
@@ -204,7 +204,7 @@ public class GatewayService extends BaseService implements InitializingBean {
 	 * @return
 	 */
 	public boolean disconnect(String gatewayId) {
-		log.info("用户：[{}]，断开网关[{}]", getUserName(), gatewayId);
+		log.info("断开网关[{}]", gatewayId);
 		if(gatewayConnMgr.exist(gatewayId)) {
 			gatewayConnMgr.getGatewayById(gatewayId).disconnect();
 		} else {
