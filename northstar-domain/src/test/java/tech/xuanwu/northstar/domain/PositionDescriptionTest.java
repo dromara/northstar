@@ -28,6 +28,7 @@ public class PositionDescriptionTest {
 			.setExchange(ExchangeEnum.SHFE)
 			.setGatewayId("testGateway")
 			.setSymbol("rb2102")
+			.setUnifiedSymbol("rb2102@SHFE")
 			.setMultiplier(10)
 			.setLongMarginRatio(0.08)
 			.setShortMarginRatio(0.08)
@@ -37,6 +38,7 @@ public class PositionDescriptionTest {
 			.setExchange(ExchangeEnum.CZCE)
 			.setGatewayId("testGateway")
 			.setSymbol("AP2102")
+			.setUnifiedSymbol("AP2102@CZCE")
 			.setMultiplier(10)
 			.setLongMarginRatio(0.08)
 			.setShortMarginRatio(0.08)
@@ -45,8 +47,8 @@ public class PositionDescriptionTest {
 	@Before
 	public void prepare() {
 		pd = new PositionDescription(mock(ContractManager.class));
-		when(pd.contractMgr.getContract("AP2102")).thenReturn(contract2);
-		when(pd.contractMgr.getContract("rb2102")).thenReturn(contract);
+		when(pd.contractMgr.getContract("AP2102@CZCE")).thenReturn(contract2);
+		when(pd.contractMgr.getContract("rb2102@SHFE")).thenReturn(contract);
 	}
 
 	@Test
@@ -88,7 +90,7 @@ public class PositionDescriptionTest {
 		testUpdate();
 		
 		OrderRequest orderReq = OrderRequest.builder()
-				.contractUnifiedSymbol("rb2102")
+				.contractUnifiedSymbol("rb2102@SHFE")
 				.gatewayId("testGateway")
 				.price("1234")
 				.volume(1)
@@ -105,7 +107,7 @@ public class PositionDescriptionTest {
 		testUpdate();
 		
 		OrderRequest orderReq = OrderRequest.builder()
-				.contractUnifiedSymbol("rb2102")
+				.contractUnifiedSymbol("rb2102@SHFE")
 				.gatewayId("testGateway")
 				.price("1234")
 				.volume(3)
@@ -123,7 +125,7 @@ public class PositionDescriptionTest {
 		testUpdate();
 		
 		OrderRequest orderReq = OrderRequest.builder()
-				.contractUnifiedSymbol("AP2102")
+				.contractUnifiedSymbol("AP2102@CZCE")
 				.gatewayId("testGateway")
 				.price("1234")
 				.volume(1)
@@ -140,7 +142,7 @@ public class PositionDescriptionTest {
 		testUpdate();
 		
 		OrderRequest orderReq = OrderRequest.builder()
-				.contractUnifiedSymbol("AP2102")
+				.contractUnifiedSymbol("AP2102@CZCE")
 				.gatewayId("testGateway")
 				.price("1234")
 				.volume(3)
@@ -157,7 +159,7 @@ public class PositionDescriptionTest {
 		testUpdate();
 		
 		OrderRequest orderReq = OrderRequest.builder()
-				.contractUnifiedSymbol("rb2102")
+				.contractUnifiedSymbol("rb2102@SHFE")
 				.gatewayId("testGateway")
 				.price("1234")
 				.volume(4)

@@ -40,6 +40,7 @@ public class TradeDayAccountTest {
 			.setExchange(ExchangeEnum.SHFE)
 			.setGatewayId("testGateway")
 			.setSymbol("rb2102")
+			.setUnifiedSymbol("rb2102@SHFE")
 			.setMultiplier(10)
 			.setLongMarginRatio(0.08)
 			.setShortMarginRatio(0.08)
@@ -49,7 +50,7 @@ public class TradeDayAccountTest {
 	public void prepare() {
 		InternalEventBus eventBus = mock(InternalEventBus.class);
 		ContractManager contractMgr = mock(ContractManager.class);
-		when(contractMgr.getContract("rb2102")).thenReturn(contract);
+		when(contractMgr.getContract("rb2102@SHFE")).thenReturn(contract);
 		tda = new TradeDayAccount("testGateway", eventBus, contractMgr);
 	}
 	
@@ -106,7 +107,7 @@ public class TradeDayAccountTest {
 	public void testOpenPosition() throws InsufficientException {
 		testOnAccountUpdate();
 		OrderRequest orderReq = OrderRequest.builder()
-				.contractUnifiedSymbol("rb2102")
+				.contractUnifiedSymbol("rb2102@SHFE")
 				.price("4000")
 				.volume(1)
 				.tradeOpr(TradeOperation.BK)
@@ -119,7 +120,7 @@ public class TradeDayAccountTest {
 	public void testOpenPositionWithException() throws InsufficientException {
 		testOnAccountUpdate();
 		OrderRequest orderReq = OrderRequest.builder()
-				.contractUnifiedSymbol("rb2102")
+				.contractUnifiedSymbol("rb2102@SHFE")
 				.price("7000")
 				.volume(1)
 				.tradeOpr(TradeOperation.BK)
@@ -132,7 +133,7 @@ public class TradeDayAccountTest {
 	public void testClosePosition() throws InsufficientException {
 		testOnPositionUpdate();
 		OrderRequest orderReq = OrderRequest.builder()
-				.contractUnifiedSymbol("rb2102")
+				.contractUnifiedSymbol("rb2102@SHFE")
 				.price("7000")
 				.volume(2)
 				.tradeOpr(TradeOperation.SP)
@@ -146,7 +147,7 @@ public class TradeDayAccountTest {
 	public void testClosePositionWithException() throws InsufficientException {
 		testOnPositionUpdate();
 		OrderRequest orderReq = OrderRequest.builder()
-				.contractUnifiedSymbol("rb2102")
+				.contractUnifiedSymbol("rb2102@SHFE")
 				.price("7000")
 				.volume(3)
 				.tradeOpr(TradeOperation.SP)
