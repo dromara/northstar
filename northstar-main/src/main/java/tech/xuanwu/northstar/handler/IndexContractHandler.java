@@ -1,16 +1,21 @@
 package tech.xuanwu.northstar.handler;
 
+import java.lang.reflect.InvocationTargetException;
+import java.util.List;
+
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 
 import tech.xuanwu.northstar.common.event.NorthstarEvent;
 import tech.xuanwu.northstar.common.event.NorthstarEventType;
+import tech.xuanwu.northstar.common.utils.ContractNameResolver;
 import tech.xuanwu.northstar.domain.ContractManager;
 import tech.xuanwu.northstar.domain.GatewayConnection;
 import tech.xuanwu.northstar.domain.IndexContract;
 import tech.xuanwu.northstar.engine.broadcast.SocketIOMessageEngine;
 import tech.xuanwu.northstar.engine.event.FastEventEngine;
 import tech.xuanwu.northstar.model.GatewayAndConnectionManager;
+import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.TickField;
 
 
@@ -24,6 +29,9 @@ public class IndexContractHandler extends AbstractEventHandler implements Intern
 	
 	private SocketIOMessageEngine msgEngine;
 	
+	/**
+	 * gateway -> symbolGroup -> idxContract
+	 */
 	private Table<String, String, IndexContract> idxContractTbl = HashBasedTable.create();
 	
 	public IndexContractHandler(GatewayAndConnectionManager gatewayConnMgr, ContractManager contractMgr,
@@ -52,9 +60,34 @@ public class IndexContractHandler extends AbstractEventHandler implements Intern
 	}
 	
 	private void generateIndexContract(String gatewayId) {
-		
+		NorthstarEvent event = new NorthstarEvent(NorthstarEventType.CONTRACT, null);
+		for(String symbolGroup : contractMgr.getContractGroup(gatewayId)) {
+			List<ContractField> groupContracts = contractMgr.getContractsByGroup(gatewayId, symbolGroup);
+			//构造指数合约
+			IndexContract idxContract = new IndexContract(groupContracts, (tick)->{
+				feEngine.emitEvent(NorthstarEventType.TICK, tick);
+			});
+			idxContractTbl.put(gatewayId, symbolGroup, idxContract);
+			ContractField contract = idxContract.getContract();
+			if(contractMgr.addContract(contract)) {
+				event.setData(contract);
+				try {
+					msgEngine.emitEvent(event, ContractField.class);
+				} catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
+						| InvocationTargetException e) {
+					throw new IllegalStateException(e);
+				}
+			}
+		}
 	}
 	
-	private void handleIndexContractUpdate(TickField tick) {}
+	private void handleIndexContractUpdate(TickField tick) {
+		String gatewayId = tick.getGatewayId();
+		String unifiedSymbol = tick.getUnifiedSymbol();
+		String symbolGroup = ContractNameResolver.unifiedSymbolToSymbolGroup(unifiedSymbol);
+		if(idxContractTbl.contains(gatewayId, symbolGroup)) {
+			idxContractTbl.get(gatewayId, symbolGroup).updateByTick(tick);
+		}
+	}
 
 }

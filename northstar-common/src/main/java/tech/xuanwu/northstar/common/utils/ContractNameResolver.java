@@ -2,13 +2,18 @@ package tech.xuanwu.northstar.common.utils;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.regex.Pattern;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 public abstract class ContractNameResolver {
 
-	static JSONObject contractNameDict;
+	private static JSONObject contractNameDict;
+	
+	private static final Pattern futureNamePtn = Pattern.compile("([A-z]+)(\\d+)");
+	private static final Pattern unifiedSymbolPtn = Pattern.compile("(\\w+)@\\w+@\\w+");
+	private static final String DEFAULT_GROUP = "default";
 	
 	static {
 		//加载合约中文解释
@@ -35,7 +40,16 @@ public abstract class ContractNameResolver {
 		return symbol.replace(contract, cname);
 	}
 	
-	public static void main(String[] args) {
-		System.out.println(getCNSymbolName("rb2102"));
+	public static String symbolToSymbolGroup(String symbol) {
+		if(futureNamePtn.matcher(symbol).matches()) {			
+			return symbol.replaceAll(futureNamePtn.pattern(), "$1");
+		}
+		return DEFAULT_GROUP;
 	}
+	
+	public static String unifiedSymbolToSymbolGroup(String unifiedSymbol) {
+		String symbol = unifiedSymbol.replaceAll(unifiedSymbolPtn.pattern(), "$1");
+		return symbolToSymbolGroup(symbol);
+	}
+	
 }

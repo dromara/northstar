@@ -9,10 +9,13 @@ import org.springframework.context.annotation.Configuration;
 import tech.xuanwu.northstar.common.event.InternalEventBus;
 import tech.xuanwu.northstar.domain.ContractManager;
 import tech.xuanwu.northstar.domain.TradeDayAccount;
+import tech.xuanwu.northstar.engine.broadcast.SocketIOMessageEngine;
+import tech.xuanwu.northstar.engine.event.FastEventEngine;
 import tech.xuanwu.northstar.factories.TradeDayAccountFactory;
 import tech.xuanwu.northstar.handler.AccountHandler;
 import tech.xuanwu.northstar.handler.ConnectionHandler;
 import tech.xuanwu.northstar.handler.ContractHandler;
+import tech.xuanwu.northstar.handler.IndexContractHandler;
 import tech.xuanwu.northstar.handler.TradeHandler;
 import tech.xuanwu.northstar.model.GatewayAndConnectionManager;
 
@@ -64,6 +67,14 @@ public class InternalEventHandlerConfig {
 	@Bean
 	public TradeHandler createTradeEventHandler(InternalEventBus eventBus, GatewayAndConnectionManager gatewayConnMgr) {
 		TradeHandler handler = new TradeHandler(gatewayConnMgr);
+		eventBus.register(handler);
+		return handler;
+	}
+	
+	@Bean
+	public IndexContractHandler createIndexContractHandler(InternalEventBus eventBus, GatewayAndConnectionManager gatewayConnMgr,
+			ContractManager contractMgr, FastEventEngine fastEventEngine, SocketIOMessageEngine msgEngine) {
+		IndexContractHandler handler = new IndexContractHandler(gatewayConnMgr, contractMgr, fastEventEngine, msgEngine);
 		eventBus.register(handler);
 		return handler;
 	}

@@ -1,11 +1,7 @@
 package tech.xuanwu.northstar.domain;
 
-import com.google.common.eventbus.EventBus;
-
 import tech.xuanwu.northstar.common.constant.ConnectionState;
 import tech.xuanwu.northstar.common.event.InternalEventBus;
-import tech.xuanwu.northstar.common.event.NorthstarEvent;
-import tech.xuanwu.northstar.common.event.NorthstarEventType;
 import tech.xuanwu.northstar.common.model.GatewayDescription;
 
 /**
