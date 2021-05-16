@@ -3,7 +3,7 @@ package tech.xuanwu.northstar.common.model;
 import lombok.Data;
 
 @Data
-public class CtpSettings {
+public class CtpSettings implements GatewaySettings{
 
 	private String userId;
 	private String password;

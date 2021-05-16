@@ -1,8 +1,6 @@
 package tech.xuanwu.northstar.handler;
 
 import java.util.HashSet;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +15,7 @@ import tech.xuanwu.northstar.model.GatewayAndConnectionManager;
 import xyz.redtorch.pb.CoreField.ContractField;
 
 @Slf4j
-public class ConnectionEventHandler extends AbstractEventHandler implements InternalEventHandler{
+public class ConnectionHandler extends AbstractEventHandler implements InternalEventHandler{
 	
 	protected GatewayAndConnectionManager gatewayConnMgr;
 	protected ContractManager contractMgr;
@@ -32,7 +30,7 @@ public class ConnectionEventHandler extends AbstractEventHandler implements Inte
 		}
 	};
 	
-	public ConnectionEventHandler(GatewayAndConnectionManager gatewayConnMgr, ContractManager contractMgr) {
+	public ConnectionHandler(GatewayAndConnectionManager gatewayConnMgr, ContractManager contractMgr) {
 		this.gatewayConnMgr = gatewayConnMgr;
 		this.contractMgr = contractMgr;
 	}

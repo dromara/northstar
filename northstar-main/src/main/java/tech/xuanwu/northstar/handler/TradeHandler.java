@@ -8,11 +8,11 @@ import tech.xuanwu.northstar.model.GatewayAndConnectionManager;
 import xyz.redtorch.pb.CoreField.CancelOrderReqField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 
-public class TradeEventHandler extends AbstractEventHandler implements InternalEventHandler{
+public class TradeHandler extends AbstractEventHandler implements InternalEventHandler{
 	
 	protected GatewayAndConnectionManager gatewayConnMgr;
 	
-	public TradeEventHandler(GatewayAndConnectionManager gatewayConnMgr) {
+	public TradeHandler(GatewayAndConnectionManager gatewayConnMgr) {
 		this.gatewayConnMgr = gatewayConnMgr;
 	}
 

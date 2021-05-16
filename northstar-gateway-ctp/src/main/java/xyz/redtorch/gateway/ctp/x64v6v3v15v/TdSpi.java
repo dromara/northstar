@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 
 import tech.xuanwu.northstar.common.constant.DateTimeConstant;
 import tech.xuanwu.northstar.common.event.NorthstarEventType;
+import tech.xuanwu.northstar.common.utils.ContractNameResolver;
 import xyz.redtorch.gateway.ctp.x64v6v3v15v.api.CThostFtdcAccountregisterField;
 import xyz.redtorch.gateway.ctp.x64v6v3v15v.api.CThostFtdcBatchOrderActionField;
 import xyz.redtorch.gateway.ctp.x64v6v3v15v.api.CThostFtdcBrokerTradingAlgosField;
@@ -121,7 +122,6 @@ import xyz.redtorch.gateway.ctp.x64v6v3v15v.api.CThostFtdcTransferSerialField;
 import xyz.redtorch.gateway.ctp.x64v6v3v15v.api.CThostFtdcUserLogoutField;
 import xyz.redtorch.gateway.ctp.x64v6v3v15v.api.CThostFtdcUserPasswordUpdateField;
 import xyz.redtorch.gateway.ctp.x64v6v3v15v.api.jctpv6v3v15x64apiConstants;
-import xyz.redtorch.gateway.ctp.x64v6v3v15v.utils.ContractNameResolver;
 import xyz.redtorch.pb.CoreEnum.CommonStatusEnum;
 import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
 import xyz.redtorch.pb.CoreEnum.CurrencyEnum;
@@ -811,7 +811,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 			}
 			// CTP查询尚未就绪,断开
 			if (pRspInfo.getErrorID() == 90) {
-				ctpGatewayAdapter.disconnect();
+//				ctpGatewayAdapter.disconnect();
 			}
 		} catch (Throwable t) {
 			logger.error("{}OnRspError Exception", logInfo, t);

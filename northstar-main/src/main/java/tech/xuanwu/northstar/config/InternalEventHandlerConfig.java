@@ -10,10 +10,10 @@ import tech.xuanwu.northstar.common.event.InternalEventBus;
 import tech.xuanwu.northstar.common.model.ContractManager;
 import tech.xuanwu.northstar.domain.TradeDayAccount;
 import tech.xuanwu.northstar.factories.TradeDayAccountFactory;
-import tech.xuanwu.northstar.handler.AccountEventHandler;
-import tech.xuanwu.northstar.handler.ConnectionEventHandler;
-import tech.xuanwu.northstar.handler.ContractEventHandler;
-import tech.xuanwu.northstar.handler.TradeEventHandler;
+import tech.xuanwu.northstar.handler.AccountHandler;
+import tech.xuanwu.northstar.handler.ConnectionHandler;
+import tech.xuanwu.northstar.handler.ContractHandler;
+import tech.xuanwu.northstar.handler.TradeHandler;
 import tech.xuanwu.northstar.model.GatewayAndConnectionManager;
 
 @Configuration
@@ -38,32 +38,32 @@ public class InternalEventHandlerConfig {
 	}
 
 	@Bean
-	public AccountEventHandler createAccountEventHandler(InternalEventBus eventBus, ContractManager contractMgr,
+	public AccountHandler createAccountEventHandler(InternalEventBus eventBus, ContractManager contractMgr,
 			ConcurrentHashMap<String, TradeDayAccount> accountMap) {
-		AccountEventHandler handler = new AccountEventHandler(accountMap, new TradeDayAccountFactory(eventBus, contractMgr));
+		AccountHandler handler = new AccountHandler(accountMap, new TradeDayAccountFactory(eventBus, contractMgr));
 		eventBus.register(handler);
 		return handler;
 	}
 	
 	@Bean
-	public ContractEventHandler createContractEventHandler(InternalEventBus eventBus, GatewayAndConnectionManager gatewayConnMgr,
+	public ContractHandler createContractEventHandler(InternalEventBus eventBus, GatewayAndConnectionManager gatewayConnMgr,
 			ContractManager contractMgr) {
-		ContractEventHandler handler = new ContractEventHandler(contractMgr, gatewayConnMgr);
+		ContractHandler handler = new ContractHandler(contractMgr, gatewayConnMgr);
 		eventBus.register(handler);
 		return handler;
 	}
 	
 	@Bean
-	public ConnectionEventHandler createConnectionEventHandler(InternalEventBus eventBus, GatewayAndConnectionManager gatewayConnMgr,
+	public ConnectionHandler createConnectionEventHandler(InternalEventBus eventBus, GatewayAndConnectionManager gatewayConnMgr,
 			ContractManager contractMgr) {
-		ConnectionEventHandler handler = new ConnectionEventHandler(gatewayConnMgr, contractMgr);
+		ConnectionHandler handler = new ConnectionHandler(gatewayConnMgr, contractMgr);
 		eventBus.register(handler);
 		return handler;
 	}
 	
 	@Bean
-	public TradeEventHandler createTradeEventHandler(InternalEventBus eventBus, GatewayAndConnectionManager gatewayConnMgr) {
-		TradeEventHandler handler = new TradeEventHandler(gatewayConnMgr);
+	public TradeHandler createTradeEventHandler(InternalEventBus eventBus, GatewayAndConnectionManager gatewayConnMgr) {
+		TradeHandler handler = new TradeHandler(gatewayConnMgr);
 		eventBus.register(handler);
 		return handler;
 	}

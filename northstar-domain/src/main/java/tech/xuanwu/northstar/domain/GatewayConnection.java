@@ -16,13 +16,11 @@ import tech.xuanwu.northstar.common.model.GatewayDescription;
 public abstract class GatewayConnection {
 	
 	protected GatewayDescription gwDescription;
-	protected EventBus eventBus;
 	
 	protected boolean errorFlag;
 	
 	public GatewayConnection(GatewayDescription gwDescription, InternalEventBus eventBus) {
 		this.gwDescription = gwDescription;
-		this.eventBus = eventBus;
 	}
 	
 	public void onConnected() {

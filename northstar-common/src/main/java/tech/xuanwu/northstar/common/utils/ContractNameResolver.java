@@ -1,4 +1,4 @@
-package xyz.redtorch.gateway.ctp.x64v6v3v15v.utils;
+package tech.xuanwu.northstar.common.utils;
 
 import java.io.IOException;
 import java.io.InputStream;

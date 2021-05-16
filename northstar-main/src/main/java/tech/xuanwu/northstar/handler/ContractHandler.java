@@ -7,13 +7,13 @@ import tech.xuanwu.northstar.gateway.api.MarketGateway;
 import tech.xuanwu.northstar.model.GatewayAndConnectionManager;
 import xyz.redtorch.pb.CoreField.ContractField;
 
-public class ContractEventHandler extends AbstractEventHandler implements InternalEventHandler{
+public class ContractHandler extends AbstractEventHandler implements InternalEventHandler{
 
 	private ContractManager contractMgr;
 	
 	private GatewayAndConnectionManager gatewayConnMgr;
 	
-	public ContractEventHandler(ContractManager contractMgr, GatewayAndConnectionManager gatewayConnMgr) {
+	public ContractHandler(ContractManager contractMgr, GatewayAndConnectionManager gatewayConnMgr) {
 		this.contractMgr = contractMgr;
 		this.gatewayConnMgr = gatewayConnMgr;
 	}

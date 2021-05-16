@@ -15,7 +15,7 @@ import xyz.redtorch.pb.CoreField.PositionField;
 import xyz.redtorch.pb.CoreField.TradeField;
 
 @Slf4j
-public class AccountEventHandler extends AbstractEventHandler implements InternalEventHandler{
+public class AccountHandler extends AbstractEventHandler implements InternalEventHandler{
 
 	private Map<String, TradeDayAccount> accountMap;
 	private TradeDayAccountFactory factory;
@@ -34,7 +34,7 @@ public class AccountEventHandler extends AbstractEventHandler implements Interna
 		}
 	};
 	
-	public AccountEventHandler(Map<String, TradeDayAccount> accountMap, TradeDayAccountFactory factory) {
+	public AccountHandler(Map<String, TradeDayAccount> accountMap, TradeDayAccountFactory factory) {
 		this.accountMap = accountMap;
 		this.factory = factory;
 	}
