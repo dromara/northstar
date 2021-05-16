@@ -13,7 +13,7 @@ import tech.xuanwu.northstar.common.constant.GatewayUsage;
 import tech.xuanwu.northstar.common.event.InternalEventBus;
 import tech.xuanwu.northstar.common.model.CtpSettings;
 import tech.xuanwu.northstar.common.model.GatewayDescription;
-import tech.xuanwu.northstar.engine.event.EventEngine;
+import tech.xuanwu.northstar.engine.event.FastEventEngine;
 import tech.xuanwu.northstar.model.GatewayAndConnectionManager;
 import tech.xuanwu.northstar.persistence.GatewayRepository;
 import tech.xuanwu.northstar.persistence.po.GatewayPO;
@@ -28,7 +28,7 @@ public class GatewayServiceTest {
 	public void prepare() {
 		gatewayRepo = mock(GatewayRepository.class);
 		service = new GatewayService(new GatewayAndConnectionManager(), gatewayRepo,
-				mock(EventEngine.class), mock(InternalEventBus.class));
+				mock(FastEventEngine.class), mock(InternalEventBus.class));
 	}
 
 	@Test

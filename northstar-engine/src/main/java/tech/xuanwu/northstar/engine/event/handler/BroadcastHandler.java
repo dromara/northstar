@@ -5,7 +5,7 @@ import java.util.EnumMap;
 import tech.xuanwu.northstar.common.event.NorthstarEvent;
 import tech.xuanwu.northstar.common.event.NorthstarEventType;
 import tech.xuanwu.northstar.engine.broadcast.SocketIOMessageEngine;
-import tech.xuanwu.northstar.engine.event.EventEngine.NorthstarEventHandler;
+import tech.xuanwu.northstar.engine.event.FastEventEngine.NorthstarEventHandler;
 import xyz.redtorch.pb.CoreField.AccountField;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.NoticeField;

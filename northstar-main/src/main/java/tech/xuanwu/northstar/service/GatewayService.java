@@ -18,7 +18,7 @@ import tech.xuanwu.northstar.common.model.GatewayDescription;
 import tech.xuanwu.northstar.domain.GatewayConnection;
 import tech.xuanwu.northstar.domain.MarketGatewayConnection;
 import tech.xuanwu.northstar.domain.TraderGatewayConnection;
-import tech.xuanwu.northstar.engine.event.EventEngine;
+import tech.xuanwu.northstar.engine.event.FastEventEngine;
 import tech.xuanwu.northstar.gateway.api.Gateway;
 import tech.xuanwu.northstar.model.GatewayAndConnectionManager;
 import tech.xuanwu.northstar.persistence.GatewayRepository;
@@ -41,15 +41,15 @@ public class GatewayService implements InitializingBean {
 	
 	private GatewayRepository gatewayRepo;
 	
-	private EventEngine eventEngine;
+	private FastEventEngine fastEventEngine;
 	
 	private InternalEventBus eventBus;
 	
 	public GatewayService(GatewayAndConnectionManager gatewayConnMgr, GatewayRepository gatewayRepo,
-			EventEngine eventEngine, InternalEventBus eventBus) {
+			FastEventEngine fastEventEngine, InternalEventBus eventBus) {
 		this.gatewayConnMgr = gatewayConnMgr;
 		this.gatewayRepo = gatewayRepo;
-		this.eventEngine = eventEngine;
+		this.fastEventEngine = fastEventEngine;
 		this.eventBus = eventBus;
 	}
 	
@@ -92,7 +92,7 @@ public class GatewayService implements InitializingBean {
 					.setUserId(settings.getUserId())
 					.setUserProductInfo(settings.getUserProductInfo())
 					.build();
-			gateway = new CtpGatewayAdapter(eventEngine, GatewaySettingField.newBuilder()
+			gateway = new CtpGatewayAdapter(fastEventEngine, GatewaySettingField.newBuilder()
 					.setGatewayAdapterType(GatewayAdapterTypeEnum.GAT_CTP)
 					.setGatewayId(gatewayDescription.getGatewayId())
 					.setGatewayName(gatewayDescription.getGatewayId())

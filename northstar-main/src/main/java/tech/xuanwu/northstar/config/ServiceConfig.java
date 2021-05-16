@@ -10,7 +10,7 @@ import tech.xuanwu.northstar.common.event.InternalEventBus;
 import tech.xuanwu.northstar.common.model.ContractManager;
 import tech.xuanwu.northstar.domain.TradeDayAccount;
 import tech.xuanwu.northstar.engine.broadcast.SocketIOMessageEngine;
-import tech.xuanwu.northstar.engine.event.EventEngine;
+import tech.xuanwu.northstar.engine.event.FastEventEngine;
 import tech.xuanwu.northstar.model.GatewayAndConnectionManager;
 import tech.xuanwu.northstar.persistence.GatewayRepository;
 import tech.xuanwu.northstar.service.AccountService;
@@ -37,8 +37,8 @@ public class ServiceConfig {
 	
 	@Bean
 	public GatewayService createGatewayService(GatewayAndConnectionManager gatewayConnMgr, GatewayRepository gatewayRepo,
-			EventEngine eventEngine, InternalEventBus eventBus) {
-		return new GatewayService(gatewayConnMgr, gatewayRepo, eventEngine, eventBus);
+			FastEventEngine fastEventEngine, InternalEventBus eventBus) {
+		return new GatewayService(gatewayConnMgr, gatewayRepo, fastEventEngine, eventBus);
 	}
 	
 	@Bean

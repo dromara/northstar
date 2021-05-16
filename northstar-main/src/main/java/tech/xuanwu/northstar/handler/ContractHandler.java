@@ -34,10 +34,10 @@ public class ContractHandler extends AbstractEventHandler implements InternalEve
 			}
 		}
 	}
-
+	
 	@Override
 	public boolean canHandle(NorthstarEventType eventType) {
-		return eventType == NorthstarEventType.CONTRACT;
+		return NorthstarEventType.CONTRACT == eventType;
 	}
 
 }

@@ -10,7 +10,7 @@ import tech.xuanwu.northstar.common.event.NorthstarEventType;
  * 事件引擎
  * 负责第三方网关的事件
  */
-public interface EventEngine {
+public interface FastEventEngine {
 
 	void addHandler(NorthstarEventHandler handler);
 

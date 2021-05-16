@@ -13,7 +13,7 @@ import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import tech.xuanwu.northstar.engine.event.EventEngine;
+import tech.xuanwu.northstar.engine.event.FastEventEngine;
 import tech.xuanwu.northstar.gateway.api.GatewayAbstract;
 import tech.xuanwu.northstar.gateway.api.MarketGateway;
 import tech.xuanwu.northstar.gateway.api.TradeGateway;
@@ -75,13 +75,13 @@ public class CtpGatewayAdapter extends GatewayAbstract implements MarketGateway,
 
 	private MdSpi mdSpi = null;
 	private TdSpi tdSpi = null;
-	private EventEngine eventEngine;
+	private FastEventEngine fastEventEngine;
 	
 	public Map<String, ContractField> contractMap = new HashMap<>();
 	
 	private volatile boolean unexpectedDisconnection = false;
 
-	public CtpGatewayAdapter(EventEngine fastEventEngine, GatewaySettingField gatewaySetting) {
+	public CtpGatewayAdapter(FastEventEngine fastEventEngine, GatewaySettingField gatewaySetting) {
 		super(gatewaySetting);
 
 		if (gatewaySetting.getGatewayType() == GatewayTypeEnum.GTE_Trade) {
@@ -93,11 +93,11 @@ public class CtpGatewayAdapter extends GatewayAbstract implements MarketGateway,
 			tdSpi = new TdSpi(this);
 		}
 		
-		eventEngine = fastEventEngine;
+		this.fastEventEngine = fastEventEngine;
 	}
 	
-	protected EventEngine getEventEngine() {
-		return this.eventEngine;
+	protected FastEventEngine getEventEngine() {
+		return this.fastEventEngine;
 	}
 	
 	protected void setAuthErrorFlag(boolean flag) {

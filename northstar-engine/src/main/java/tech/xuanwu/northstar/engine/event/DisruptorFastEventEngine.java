@@ -33,7 +33,7 @@ import tech.xuanwu.northstar.common.event.NorthstarEventType;
  *
  */
 @Slf4j
-public class DisruptorFastEventEngine implements EventEngine, InitializingBean, DisposableBean {
+public class DisruptorFastEventEngine implements FastEventEngine, InitializingBean, DisposableBean {
 
 	private static ExecutorService executor = Executors.newCachedThreadPool(DaemonThreadFactory.INSTANCE);
 

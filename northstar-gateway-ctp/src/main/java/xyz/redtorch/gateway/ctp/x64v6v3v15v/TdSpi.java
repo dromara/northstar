@@ -1370,6 +1370,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 			if (bIsLast) {
 				
 				logger.warn("{}交易接口合约信息获取完成!共计{}条", logInfo, ctpGatewayAdapter.contractMap.size());
+				ctpGatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.CONTRACT_LOADED, gatewayId);
 				
 				instrumentQueried = true;
 				this.startIntervalQuery();

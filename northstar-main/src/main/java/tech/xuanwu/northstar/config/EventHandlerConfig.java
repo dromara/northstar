@@ -7,8 +7,8 @@ import tech.xuanwu.northstar.common.event.InternalEventBus;
 import tech.xuanwu.northstar.common.event.PluginEventBus;
 import tech.xuanwu.northstar.common.event.StrategyEventBus;
 import tech.xuanwu.northstar.engine.broadcast.SocketIOMessageEngine;
-import tech.xuanwu.northstar.engine.event.EventEngine;
-import tech.xuanwu.northstar.engine.event.EventEngine.NorthstarEventHandler;
+import tech.xuanwu.northstar.engine.event.FastEventEngine;
+import tech.xuanwu.northstar.engine.event.FastEventEngine.NorthstarEventHandler;
 import tech.xuanwu.northstar.engine.event.handler.BroadcastHandler;
 import tech.xuanwu.northstar.engine.event.handler.InternalHandler;
 import tech.xuanwu.northstar.engine.event.handler.PluginHandler;
@@ -23,7 +23,7 @@ import tech.xuanwu.northstar.engine.event.handler.StrategyHandler;
 public class EventHandlerConfig {
 
 	@Bean
-	public NorthstarEventHandler createInternalHandler(EventEngine ee, InternalEventBus eb) {
+	public NorthstarEventHandler createInternalHandler(FastEventEngine ee, InternalEventBus eb) {
 		NorthstarEventHandler handler = new InternalHandler(eb);
 		ee.addHandler(handler);
 		return handler;
@@ -44,7 +44,7 @@ public class EventHandlerConfig {
 //	}
 	
 	@Bean
-	public NorthstarEventHandler createBroadcastEventHandler(EventEngine ee, SocketIOMessageEngine msgEngine) {
+	public NorthstarEventHandler createBroadcastEventHandler(FastEventEngine ee, SocketIOMessageEngine msgEngine) {
 		NorthstarEventHandler handler = new BroadcastHandler(msgEngine);
 		ee.addHandler(handler);
 		return handler;
