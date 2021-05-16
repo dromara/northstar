@@ -7,7 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.common.event.NorthstarEvent;
 import tech.xuanwu.northstar.common.event.NorthstarEventType;
 import tech.xuanwu.northstar.common.exception.NoSuchElementException;
-import tech.xuanwu.northstar.common.model.ContractManager;
+import tech.xuanwu.northstar.domain.ContractManager;
 import tech.xuanwu.northstar.domain.GatewayConnection;
 import tech.xuanwu.northstar.gateway.api.Gateway;
 import tech.xuanwu.northstar.gateway.api.MarketGateway;

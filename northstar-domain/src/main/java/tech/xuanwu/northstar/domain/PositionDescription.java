@@ -12,7 +12,6 @@ import com.google.common.collect.Lists;
 
 import tech.xuanwu.northstar.common.exception.InsufficientException;
 import tech.xuanwu.northstar.common.exception.NoSuchElementException;
-import tech.xuanwu.northstar.common.model.ContractManager;
 import tech.xuanwu.northstar.common.model.OrderRequest;
 import tech.xuanwu.northstar.common.utils.OrderUtil;
 import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;

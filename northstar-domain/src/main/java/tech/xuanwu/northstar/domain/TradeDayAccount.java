@@ -11,7 +11,6 @@ import tech.xuanwu.northstar.common.event.NorthstarEvent;
 import tech.xuanwu.northstar.common.event.NorthstarEventType;
 import tech.xuanwu.northstar.common.exception.InsufficientException;
 import tech.xuanwu.northstar.common.exception.TradeException;
-import tech.xuanwu.northstar.common.model.ContractManager;
 import tech.xuanwu.northstar.common.model.OrderRecall;
 import tech.xuanwu.northstar.common.model.OrderRequest;
 import tech.xuanwu.northstar.common.utils.OrderUtil;

@@ -1,4 +1,4 @@
-package tech.xuanwu.northstar.common.model;
+package tech.xuanwu.northstar.domain;
 
 import java.lang.ref.WeakReference;
 import java.util.Collection;

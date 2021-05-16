@@ -10,7 +10,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import tech.xuanwu.northstar.common.exception.InsufficientException;
-import tech.xuanwu.northstar.common.model.ContractManager;
 import tech.xuanwu.northstar.common.model.OrderRequest;
 import tech.xuanwu.northstar.common.model.OrderRequest.TradeOperation;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;

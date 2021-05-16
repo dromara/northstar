@@ -7,7 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.common.event.NorthstarEvent;
 import tech.xuanwu.northstar.common.event.NorthstarEventType;
-import tech.xuanwu.northstar.common.model.ContractManager;
+import tech.xuanwu.northstar.domain.ContractManager;
 import tech.xuanwu.northstar.domain.TradeDayAccount;
 import tech.xuanwu.northstar.engine.broadcast.SocketIOMessageEngine;
 import xyz.redtorch.pb.CoreField.AccountField;

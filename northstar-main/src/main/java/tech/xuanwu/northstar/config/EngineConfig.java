@@ -1,14 +1,8 @@
 package tech.xuanwu.northstar.config;
 
-import java.io.IOException;
-
-import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.corundumstudio.socketio.SocketConfig;
 import com.corundumstudio.socketio.SocketIOServer;
 
 import lombok.extern.slf4j.Slf4j;

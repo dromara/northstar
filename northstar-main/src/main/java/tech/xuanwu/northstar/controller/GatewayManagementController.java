@@ -14,9 +14,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import tech.xuanwu.northstar.common.constant.GatewayUsage;
-import tech.xuanwu.northstar.common.model.ContractManager;
 import tech.xuanwu.northstar.common.model.GatewayDescription;
 import tech.xuanwu.northstar.controller.common.ResultBean;
+import tech.xuanwu.northstar.domain.ContractManager;
 import tech.xuanwu.northstar.engine.broadcast.SocketIOMessageEngine;
 import tech.xuanwu.northstar.service.GatewayService;
 

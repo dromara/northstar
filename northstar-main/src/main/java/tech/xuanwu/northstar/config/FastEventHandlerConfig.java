@@ -4,15 +4,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import tech.xuanwu.northstar.common.event.InternalEventBus;
-import tech.xuanwu.northstar.common.event.PluginEventBus;
-import tech.xuanwu.northstar.common.event.StrategyEventBus;
 import tech.xuanwu.northstar.engine.broadcast.SocketIOMessageEngine;
 import tech.xuanwu.northstar.engine.event.FastEventEngine;
 import tech.xuanwu.northstar.engine.event.FastEventEngine.NorthstarEventHandler;
 import tech.xuanwu.northstar.engine.event.handler.BroadcastHandler;
 import tech.xuanwu.northstar.engine.event.handler.InternalHandler;
-import tech.xuanwu.northstar.engine.event.handler.PluginHandler;
-import tech.xuanwu.northstar.engine.event.handler.StrategyHandler;
 
 /**
  * 事件处理器配置
@@ -20,7 +16,7 @@ import tech.xuanwu.northstar.engine.event.handler.StrategyHandler;
  *
  */
 @Configuration
-public class EventHandlerConfig {
+public class FastEventHandlerConfig {
 
 	@Bean
 	public NorthstarEventHandler createInternalHandler(FastEventEngine ee, InternalEventBus eb) {
