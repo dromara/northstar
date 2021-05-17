@@ -499,12 +499,12 @@ public class MdSpi extends CThostFtdcMdSpi {
 				tickBuilder.setActionTimestamp(localDateTimeMillisec);
 				tickBuilder.setAvgPrice(averagePrice);
 
-				tickBuilder.setHighPrice(highPrice);
-				tickBuilder.setLowPrice(lowPrice);
-				tickBuilder.setOpenPrice(openPrice);
+				tickBuilder.setHighPrice(isReasonable(upperLimit, lowerLimit, highPrice) ? highPrice : preClosePrice);
+				tickBuilder.setLowPrice(isReasonable(upperLimit, lowerLimit, lowPrice) ? lowPrice : preClosePrice);
+				tickBuilder.setOpenPrice(isReasonable(upperLimit, lowerLimit, openPrice) ? openPrice : preClosePrice);
 				tickBuilder.setLastPrice(lastPrice);
 
-				tickBuilder.setSettlePrice(settlePrice);
+				tickBuilder.setSettlePrice(isReasonable(upperLimit, lowerLimit, settlePrice) ? settlePrice : preSettlePrice);
 
 				tickBuilder.setOpenInterest(openInterest);
 				tickBuilder.setOpenInterestDelta(openInterestDelta);
@@ -540,6 +540,10 @@ public class MdSpi extends CThostFtdcMdSpi {
 		} else {
 			logger.warn("{}行情接口收到行情数据为空", logInfo);
 		}
+	}
+	
+	private boolean isReasonable(double upperLimit, double lowerLimit, double actual) {
+		return upperLimit >= actual && actual >= lowerLimit;
 	}
 
 	// 订阅期权询价

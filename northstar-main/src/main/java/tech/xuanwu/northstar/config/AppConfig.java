@@ -14,7 +14,10 @@ import org.springframework.web.filter.CorsFilter;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import com.mongodb.MongoClient;
+
 import tech.xuanwu.northstar.interceptor.AuthorizationInterceptor;
+import tech.xuanwu.northstar.utils.MongoClientAdapter;
 
 /**
  * 配置转换器
@@ -66,4 +69,8 @@ public class AppConfig implements WebMvcConfigurer {
 		registry.addInterceptor(new AuthorizationInterceptor()).addPathPatterns("/**").excludePathPatterns("/auth/login");
 	}
 
+	@Bean
+	public MongoClientAdapter createMongoClientAdapter(MongoClient mongo) {
+		return new MongoClientAdapter(mongo);
+	}
 }

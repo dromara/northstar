@@ -16,8 +16,10 @@ import tech.xuanwu.northstar.handler.AccountHandler;
 import tech.xuanwu.northstar.handler.ConnectionHandler;
 import tech.xuanwu.northstar.handler.ContractHandler;
 import tech.xuanwu.northstar.handler.IndexContractHandler;
+import tech.xuanwu.northstar.handler.MarketDataHandler;
 import tech.xuanwu.northstar.handler.TradeHandler;
 import tech.xuanwu.northstar.model.GatewayAndConnectionManager;
+import tech.xuanwu.northstar.persistence.MarketDataRepository;
 
 @Configuration
 public class InternalEventHandlerConfig {
@@ -75,6 +77,13 @@ public class InternalEventHandlerConfig {
 	public IndexContractHandler createIndexContractHandler(InternalEventBus eventBus, GatewayAndConnectionManager gatewayConnMgr,
 			ContractManager contractMgr, FastEventEngine fastEventEngine, SocketIOMessageEngine msgEngine) {
 		IndexContractHandler handler = new IndexContractHandler(gatewayConnMgr, contractMgr, fastEventEngine, msgEngine);
+		eventBus.register(handler);
+		return handler;
+	}
+	
+	@Bean
+	public MarketDataHandler createMarketDataHandler(InternalEventBus eventBus, FastEventEngine feEngine, MarketDataRepository mdRepo) {
+		MarketDataHandler handler = new MarketDataHandler(feEngine, mdRepo);
 		eventBus.register(handler);
 		return handler;
 	}

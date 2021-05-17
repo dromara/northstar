@@ -8,6 +8,11 @@ import tech.xuanwu.northstar.model.GatewayAndConnectionManager;
 import xyz.redtorch.pb.CoreField.CancelOrderReqField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 
+/**
+ * 处理交易相关操作
+ * @author KevinHuangwl
+ *
+ */
 public class TradeHandler extends AbstractEventHandler implements InternalEventHandler{
 	
 	protected GatewayAndConnectionManager gatewayConnMgr;

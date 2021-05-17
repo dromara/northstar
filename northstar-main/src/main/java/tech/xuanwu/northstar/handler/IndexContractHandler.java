@@ -18,7 +18,11 @@ import tech.xuanwu.northstar.model.GatewayAndConnectionManager;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.TickField;
 
-
+/**
+ * 处理指数合约相关操作
+ * @author KevinHuangwl
+ *
+ */
 public class IndexContractHandler extends AbstractEventHandler implements InternalEventHandler{
 	
 	private ContractManager contractMgr;
@@ -39,6 +43,7 @@ public class IndexContractHandler extends AbstractEventHandler implements Intern
 		this.contractMgr = contractMgr;
 		this.feEngine = fastEventEngine;
 		this.msgEngine = msgEngine;
+		this.gatewayConnMgr = gatewayConnMgr;
 	}
 
 	@Override
@@ -65,7 +70,7 @@ public class IndexContractHandler extends AbstractEventHandler implements Intern
 			List<ContractField> groupContracts = contractMgr.getContractsByGroup(gatewayId, symbolGroup);
 			//构造指数合约
 			IndexContract idxContract = new IndexContract(groupContracts, (tick)->{
-				feEngine.emitEvent(NorthstarEventType.TICK, tick);
+				feEngine.emitEvent(NorthstarEventType.IDX_TICK, tick);
 			});
 			idxContractTbl.put(gatewayId, symbolGroup, idxContract);
 			ContractField contract = idxContract.getContract();

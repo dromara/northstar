@@ -6,11 +6,15 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.ToDoubleFunction;
 
+import com.alibaba.fastjson.JSON;
+
+import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.common.constant.Constants;
 import tech.xuanwu.northstar.common.utils.ContractNameResolver;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.TickField;
 
+@Slf4j
 public class IndexContract {
 	protected final ContractField self;
 	protected final TickField.Builder tickBuilder = TickField.newBuilder();

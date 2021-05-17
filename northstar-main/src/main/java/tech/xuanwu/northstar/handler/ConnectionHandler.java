@@ -14,6 +14,11 @@ import tech.xuanwu.northstar.gateway.api.MarketGateway;
 import tech.xuanwu.northstar.model.GatewayAndConnectionManager;
 import xyz.redtorch.pb.CoreField.ContractField;
 
+/**
+ * 处理连接相关操作
+ * @author KevinHuangwl
+ *
+ */
 @Slf4j
 public class ConnectionHandler extends AbstractEventHandler implements InternalEventHandler{
 	

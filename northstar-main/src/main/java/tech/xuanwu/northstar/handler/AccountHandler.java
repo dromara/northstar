@@ -14,6 +14,11 @@ import xyz.redtorch.pb.CoreField.OrderField;
 import xyz.redtorch.pb.CoreField.PositionField;
 import xyz.redtorch.pb.CoreField.TradeField;
 
+/**
+ * 处理账户相关操作
+ * @author KevinHuangwl
+ *
+ */
 @Slf4j
 public class AccountHandler extends AbstractEventHandler implements InternalEventHandler{
 

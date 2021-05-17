@@ -7,6 +7,11 @@ import tech.xuanwu.northstar.gateway.api.MarketGateway;
 import tech.xuanwu.northstar.model.GatewayAndConnectionManager;
 import xyz.redtorch.pb.CoreField.ContractField;
 
+/**
+ * 处理普通合约相关操作
+ * @author KevinHuangwl
+ *
+ */
 public class ContractHandler extends AbstractEventHandler implements InternalEventHandler{
 
 	private ContractManager contractMgr;

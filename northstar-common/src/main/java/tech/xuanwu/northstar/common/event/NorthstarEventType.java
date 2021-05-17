@@ -11,6 +11,10 @@ public enum NorthstarEventType {
 	 */
 	TICK,
 	/**
+	 * 指数TICK事件
+	 */
+	IDX_TICK,
+	/**
 	 * K线BAR事件
 	 */
 	BAR,
