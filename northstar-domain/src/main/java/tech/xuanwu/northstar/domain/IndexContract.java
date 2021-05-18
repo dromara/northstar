@@ -75,6 +75,9 @@ public class IndexContract {
 			tickBuilder.setActionDay(tick.getActionDay());
 			tickBuilder.setActionTime(tick.getActionTime());
 			tickBuilder.setActionTimestamp(tick.getActionTimestamp());
+			tickBuilder.setPreClosePrice(tick.getPreClosePrice());
+			tickBuilder.setPreOpenInterest(tick.getPreOpenInterest());
+			tickBuilder.setPreSettlePrice(tick.getPreSettlePrice());
 			//进行运算
 			calculate();
 			TickField t = tickBuilder.build();
@@ -146,4 +149,5 @@ public class IndexContract {
 
 		void onTick(TickField tick);
 	}
+	
 }

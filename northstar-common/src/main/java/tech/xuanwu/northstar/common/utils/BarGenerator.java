@@ -3,13 +3,7 @@ package tech.xuanwu.northstar.common.utils;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoField;
 import java.util.Collection;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.gson.Gson;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.common.constant.DateTimeConstant;
@@ -36,10 +30,9 @@ public class BarGenerator {
 	public BarGenerator(String unifiedSymbol, CommonBarCallBack commonBarCallBack) {
 		this.commonBarCallBack = commonBarCallBack;
 		this.barUnifiedSymbol = unifiedSymbol;
-		log.info("初始化 {} Bar生成器", unifiedSymbol);
 	}
 	
-	private ConcurrentHashMap<String, TickField> bufTickMap = new ConcurrentHashMap<String, TickField>(400);
+	private ConcurrentLinkedQueue<TickField> bufTickList = new ConcurrentLinkedQueue<>();
 
 	/**
 	 * 更新Tick数据
@@ -47,7 +40,6 @@ public class BarGenerator {
 	 * @param tick
 	 */
 	public void updateTick(TickField tick) {
-
 		// 如果tick为空或者合约不匹配则返回
 		if (tick == null) {
 			log.warn("输入的Tick数据为空,当前Bar合约{}",barUnifiedSymbol);
@@ -63,19 +55,6 @@ public class BarGenerator {
 
 		LocalDateTime tickLocalDateTime = CommonUtils.millsToLocalDateTime(tick.getActionTimestamp());
 		
-		if(bufTickMap.containsKey(tick.getActionTime())) {
-			if(log.isDebugEnabled()) {
-				log.debug("Tick已记录，{}", barUnifiedSymbol);
-				TickField oldTick = bufTickMap.get(tick.getActionTime());
-				if(!oldTick.equals(tick)) {
-					Gson gson = new Gson();
-					log.info("原有Tick: {}", gson.toJson(oldTick));
-					log.info("现有Tick: {}", gson.toJson(tick));
-				}
-			}
-			return;
-		}
-
 		if (preTick != null) {
 			// 如果切换交易日
 			if (!preTick.getTradingDay().equals(tick.getTradingDay())) {
@@ -139,12 +118,13 @@ public class BarGenerator {
 			barBuilder.setTurnoverDelta(tick.getTurnover() - preTick.getTurnover() + barBuilder.getTurnoverDelta());
 			barBuilder.setOpenInterestDelta(tick.getOpenInterest() - preTick.getOpenInterest() + barBuilder.getOpenInterestDelta());
 		} else {
-			barBuilder.setVolumeDelta(tick.getVolume());
-			barBuilder.setTurnoverDelta(tick.getTurnover());
+			barBuilder.setVolumeDelta(0);
+			barBuilder.setTurnoverDelta(0);
 			barBuilder.setOpenInterestDelta(tick.getOpenInterest()-tick.getPreOpenInterest());
 		}
 
 		preTick = tick;
+		bufTickList.add(tick);
 	}
 
 	public void finish() {
@@ -152,16 +132,12 @@ public class BarGenerator {
 			barLocalDateTime = barLocalDateTime.withSecond(0).withNano(0);
 			barBuilder.setActionTimestamp(CommonUtils.localDateTimeToMills(barLocalDateTime));
 			barBuilder.setActionTime(barLocalDateTime.format(DateTimeConstant.T_FORMAT_WITH_MS_INT_FORMATTER));
-
-			Collection<TickField> ticks = bufTickMap.values()
-					.stream()
-					.sorted((a, b)-> a.getActionTimestamp() < b.getActionTimestamp() ? -1 : 1)
-					.collect(Collectors.toList());
+			
 			// 回调OnBar方法
-			commonBarCallBack.call(barBuilder.build(), ticks);
+			commonBarCallBack.call(barBuilder.build(), bufTickList);
 
 			// 清空当前Tick缓存
-			bufTickMap.clear();
+			bufTickList.clear();
 			
 		}
 		

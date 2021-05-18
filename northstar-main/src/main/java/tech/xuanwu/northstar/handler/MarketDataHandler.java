@@ -7,6 +7,7 @@ import java.util.List;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 
+import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.common.event.NorthstarEvent;
 import tech.xuanwu.northstar.common.event.NorthstarEventType;
 import tech.xuanwu.northstar.common.utils.BarGenerator;
@@ -23,6 +24,7 @@ import xyz.redtorch.pb.CoreField.TickField;
  * @author KevinHuangwl
  *
  */
+@Slf4j
 public class MarketDataHandler extends AbstractEventHandler implements InternalEventHandler {
 
 	/**
@@ -66,7 +68,7 @@ public class MarketDataHandler extends AbstractEventHandler implements InternalE
 				}
 			}));
 		}
-
+		
 		generatorTbl.get(gatewayId, unifiedSymbol).updateTick(tick);
 	}
 

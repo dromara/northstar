@@ -6,6 +6,9 @@ import com.google.gson.Gson;
 import com.google.protobuf.Message;
 import com.google.protobuf.util.JsonFormat;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class ProtoBeanUtils {
 	
 	private ProtoBeanUtils() {}
@@ -29,7 +32,12 @@ public class ProtoBeanUtils {
             throw new IllegalArgumentException("No source message specified");
         }
         String json = JsonFormat.printer().print(sourceMessage);
-        return new Gson().fromJson(json, destPojoClass);
+        try {        	
+        	return new Gson().fromJson(json, destPojoClass);
+        } catch (Exception e) {
+        	log.warn("问题对象：{}", sourceMessage.toString());
+        	throw e;
+        }
     }
 
     /**
