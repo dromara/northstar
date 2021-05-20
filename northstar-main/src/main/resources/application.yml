@@ -24,7 +24,7 @@ spring:
     active: ${env:prod}
   data:
       mongodb:
-        uri: mongodb://127.0.0.1:27017/DB_ADMIN
+        uri: mongodb://127.0.0.1:27017/NS_DB
 
         
         

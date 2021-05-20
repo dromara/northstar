@@ -1,4 +1,4 @@
-package tech.xuanwu.northstar.handler;
+package tech.xuanwu.northstar.handler.internal;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -9,6 +9,8 @@ import tech.xuanwu.northstar.common.event.NorthstarEvent;
 import tech.xuanwu.northstar.common.event.NorthstarEventType;
 import tech.xuanwu.northstar.domain.TradeDayAccount;
 import tech.xuanwu.northstar.factories.TradeDayAccountFactory;
+import tech.xuanwu.northstar.handler.AbstractEventHandler;
+import tech.xuanwu.northstar.handler.GenericEventHandler;
 import xyz.redtorch.pb.CoreField.AccountField;
 import xyz.redtorch.pb.CoreField.OrderField;
 import xyz.redtorch.pb.CoreField.PositionField;
@@ -20,7 +22,7 @@ import xyz.redtorch.pb.CoreField.TradeField;
  *
  */
 @Slf4j
-public class AccountHandler extends AbstractEventHandler implements InternalEventHandler{
+public class AccountHandler extends AbstractEventHandler implements GenericEventHandler{
 
 	private Map<String, TradeDayAccount> accountMap;
 	private TradeDayAccountFactory factory;
@@ -28,14 +30,14 @@ public class AccountHandler extends AbstractEventHandler implements InternalEven
 	private final Set<NorthstarEventType> TARGET_TYPE = new HashSet<>() {
 		private static final long serialVersionUID = 6418831877479036414L;
 		{
-			this.add(NorthstarEventType.LOGGED_IN);
-			this.add(NorthstarEventType.LOGGING_IN);
-			this.add(NorthstarEventType.LOGGED_OUT);
-			this.add(NorthstarEventType.LOGGING_OUT);
-			this.add(NorthstarEventType.ACCOUNT);
-			this.add(NorthstarEventType.POSITION);
-			this.add(NorthstarEventType.TRADE);
-			this.add(NorthstarEventType.ORDER);
+			add(NorthstarEventType.LOGGED_IN);
+			add(NorthstarEventType.LOGGING_IN);
+			add(NorthstarEventType.LOGGED_OUT);
+			add(NorthstarEventType.LOGGING_OUT);
+			add(NorthstarEventType.ACCOUNT);
+			add(NorthstarEventType.POSITION);
+			add(NorthstarEventType.TRADE);
+			add(NorthstarEventType.ORDER);
 		}
 	};
 	

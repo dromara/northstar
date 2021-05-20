@@ -5,7 +5,7 @@ import java.util.EnumMap;
 import tech.xuanwu.northstar.common.event.NorthstarEvent;
 import tech.xuanwu.northstar.common.event.NorthstarEventType;
 import tech.xuanwu.northstar.engine.broadcast.SocketIOMessageEngine;
-import tech.xuanwu.northstar.engine.event.FastEventEngine.NorthstarEventHandler;
+import tech.xuanwu.northstar.engine.event.FastEventEngine.NorthstarEventDispatcher;
 import xyz.redtorch.pb.CoreField.AccountField;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.NoticeField;
@@ -14,7 +14,7 @@ import xyz.redtorch.pb.CoreField.PositionField;
 import xyz.redtorch.pb.CoreField.TickField;
 import xyz.redtorch.pb.CoreField.TradeField;
 
-public class BroadcastHandler implements NorthstarEventHandler {
+public class BroadcastDispatcher implements NorthstarEventDispatcher {
 	
 	private SocketIOMessageEngine msgEngine;
 	
@@ -32,7 +32,7 @@ public class BroadcastHandler implements NorthstarEventHandler {
 		}
 	};
 	
-	public BroadcastHandler(SocketIOMessageEngine msgEngine) {
+	public BroadcastDispatcher(SocketIOMessageEngine msgEngine) {
 		this.msgEngine = msgEngine;
 	}
 

@@ -2,13 +2,13 @@ package tech.xuanwu.northstar.engine.event.handler;
 
 import tech.xuanwu.northstar.common.event.NorthstarEvent;
 import tech.xuanwu.northstar.common.event.PluginEventBus;
-import tech.xuanwu.northstar.engine.event.FastEventEngine.NorthstarEventHandler;
+import tech.xuanwu.northstar.engine.event.FastEventEngine.NorthstarEventDispatcher;
 
-public class PluginHandler implements NorthstarEventHandler {
+public class PluginDispatcher implements NorthstarEventDispatcher {
 
 	private PluginEventBus eb;
 	
-	public PluginHandler(PluginEventBus eb){
+	public PluginDispatcher(PluginEventBus eb){
 		this.eb = eb;
 	}
 	

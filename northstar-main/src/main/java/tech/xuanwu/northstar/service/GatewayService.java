@@ -22,6 +22,7 @@ import tech.xuanwu.northstar.engine.event.FastEventEngine;
 import tech.xuanwu.northstar.gateway.api.Gateway;
 import tech.xuanwu.northstar.model.GatewayAndConnectionManager;
 import tech.xuanwu.northstar.persistence.GatewayRepository;
+import tech.xuanwu.northstar.persistence.MarketDataRepository;
 import tech.xuanwu.northstar.persistence.po.GatewayPO;
 import xyz.redtorch.gateway.ctp.x64v6v3v15v.CtpGatewayAdapter;
 import xyz.redtorch.pb.CoreEnum.GatewayAdapterTypeEnum;
@@ -41,14 +42,17 @@ public class GatewayService implements InitializingBean {
 	
 	private GatewayRepository gatewayRepo;
 	
+	private MarketDataRepository mdRepo;
+	
 	private FastEventEngine fastEventEngine;
 	
 	private InternalEventBus eventBus;
 	
-	public GatewayService(GatewayAndConnectionManager gatewayConnMgr, GatewayRepository gatewayRepo,
+	public GatewayService(GatewayAndConnectionManager gatewayConnMgr, GatewayRepository gatewayRepo, MarketDataRepository mdRepo,
 			FastEventEngine fastEventEngine, InternalEventBus eventBus) {
 		this.gatewayConnMgr = gatewayConnMgr;
 		this.gatewayRepo = gatewayRepo;
+		this.mdRepo = mdRepo;
 		this.fastEventEngine = fastEventEngine;
 		this.eventBus = eventBus;
 	}
@@ -62,6 +66,9 @@ public class GatewayService implements InitializingBean {
 		GatewayPO po = new GatewayPO();
 		BeanUtils.copyProperties(gatewayDescription, po);
 		gatewayRepo.insert(po);
+		if(gatewayDescription.getGatewayUsage() == GatewayUsage.MARKET_DATA) {
+			mdRepo.init(gatewayDescription.getGatewayId());
+		}
 		
 		return doCreateGateway(gatewayDescription);
 	}

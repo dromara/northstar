@@ -1,12 +1,21 @@
 package tech.xuanwu.northstar.persistence;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.bson.Document;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.index.CompoundIndexDefinition;
+import org.springframework.data.mongodb.core.index.IndexDefinition;
 import org.springframework.stereotype.Repository;
 
+import com.mongodb.client.ListIndexesIterable;
+import com.mongodb.client.MongoCollection;
+
+import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.persistence.po.MinBarDataPO;
 import tech.xuanwu.northstar.utils.MongoClientAdapter;
 import tech.xuanwu.northstar.utils.MongoUtils;
@@ -19,22 +28,47 @@ import tech.xuanwu.northstar.utils.MongoUtils;
  * 
  * @author KevinHuangwl
  */
+@Slf4j
 @Repository
-public class MarketDataRepository {
+public class MarketDataRepository implements InitializingBean{
 
 	@Autowired
 	private MongoClientAdapter client;
 	
-	private static final String DB_PREFIX = "DB_DATA_";
+	@Autowired
+	private MongoTemplate mongo;
+	
+	private static final String DB = "NS_DB";
+	private static final String COLLECTION_PREFIX = "DATA_";
+	
+	/**
+	 * 初始化表
+	 * @param gatewayId
+	 */
+	public void init(String gatewayId) {
+		String collectionName = COLLECTION_PREFIX + gatewayId;
+		mongo.createCollection(collectionName);
+		IndexDefinition indexDefinition = new CompoundIndexDefinition(new Document().append("symbol", 1).append("tradingDay", 1));
+		mongo.indexOps(collectionName).ensureIndex(indexDefinition);
+	}
 	
 	/**
 	 * 保存数据
 	 * @param bar
 	 */
 	public void insert(MinBarDataPO bar) {
-		String collection = bar.getUnifiedSymbol();
-		String db = DB_PREFIX + bar.getGatewayId();
-		client.insert(db, collection, MongoUtils.beanToDocument(bar));
+		client.insert(DB, COLLECTION_PREFIX + bar.getGatewayId(), MongoUtils.beanToDocument(bar));
+	}
+	
+	/**
+	 * 批量保存数据
+	 * @param barList
+	 */
+	public void insertMany(List<MinBarDataPO> barList) {
+		List<Document> data = barList.stream()
+				.map(bar -> MongoUtils.beanToDocument(bar))
+				.collect(Collectors.toList());
+		client.insertMany(DB, COLLECTION_PREFIX + barList.get(0).getGatewayId(), data);
 	}
 	
 	/**
@@ -45,10 +79,24 @@ public class MarketDataRepository {
 	 * @return
 	 */
 	public List<MinBarDataPO> loadDataByDate(String gatewayId, String unifiedSymbol, String tradeDay) {
-		String db = DB_PREFIX + gatewayId;
-		String collection = unifiedSymbol;
-		List<Document> resultList = client.find(db, collection, new Document().append("tradingDay", tradeDay));
+		List<Document> resultList = client.find(DB, COLLECTION_PREFIX + gatewayId, new Document()
+				.append("unifiedSymbol", unifiedSymbol)
+				.append("tradingDay", tradeDay));
 		return resultList.stream().map(doc -> MongoUtils.documentToBean(doc, MinBarDataPO.class)).collect(Collectors.toList());
 	}
+
+	@Override
+	public void afterPropertiesSet() throws Exception {
+		Set<String> names = mongo.getCollectionNames();
+		for(String name : names) {
+			if(!name.startsWith(COLLECTION_PREFIX)) {
+				return;
+			}
+			MongoCollection<Document> col = mongo.getCollection(name);
+			ListIndexesIterable<Document> idxes = col.listIndexes();
+			log.info(idxes.first().toJson());
+		}
+	}
+
 	
 }

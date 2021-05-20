@@ -1,20 +1,22 @@
-package tech.xuanwu.northstar.handler;
+package tech.xuanwu.northstar.handler.data;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedList;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 
-import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.common.event.NorthstarEvent;
 import tech.xuanwu.northstar.common.event.NorthstarEventType;
 import tech.xuanwu.northstar.common.utils.BarGenerator;
 import tech.xuanwu.northstar.engine.event.FastEventEngine;
+import tech.xuanwu.northstar.handler.AbstractEventHandler;
+import tech.xuanwu.northstar.handler.GenericEventHandler;
 import tech.xuanwu.northstar.persistence.MarketDataRepository;
 import tech.xuanwu.northstar.persistence.po.MinBarDataPO;
-import tech.xuanwu.northstar.persistence.po.TickDataPO;
 import tech.xuanwu.northstar.utils.ProtoBeanUtils;
 import xyz.redtorch.pb.CoreField.TickField;
 
@@ -24,8 +26,7 @@ import xyz.redtorch.pb.CoreField.TickField;
  * @author KevinHuangwl
  *
  */
-@Slf4j
-public class MarketDataHandler extends AbstractEventHandler implements InternalEventHandler {
+public class MarketDataHandler extends AbstractEventHandler implements GenericEventHandler {
 
 	/**
 	 * gateway -> unifiedSymbol -> generator
@@ -35,10 +36,19 @@ public class MarketDataHandler extends AbstractEventHandler implements InternalE
 	private FastEventEngine feEngine;
 	
 	private MarketDataRepository mdRepo;
-
+	private volatile LinkedList<MinBarDataPO> bufData = new LinkedList<>();
+	
+	private ScheduledExecutorService execService = Executors.newScheduledThreadPool(1);
+	
 	public MarketDataHandler(FastEventEngine feEngine, MarketDataRepository mdRepo) {
 		this.feEngine = feEngine;
 		this.mdRepo = mdRepo;
+		this.execService.scheduleWithFixedDelay(()->{
+			LinkedList<MinBarDataPO> bufDataNew = new LinkedList<>();
+			LinkedList<MinBarDataPO> bufDataTemp = bufData;
+			bufData = bufDataNew;
+			this.mdRepo.insertMany(bufDataTemp);
+		}, 30, 30, TimeUnit.SECONDS);
 	}
 
 	@Override
@@ -56,13 +66,8 @@ public class MarketDataHandler extends AbstractEventHandler implements InternalE
 				feEngine.emitEvent(NorthstarEventType.BAR, bar);
 				try {					
 					MinBarDataPO barPO = ProtoBeanUtils.toPojoBean(MinBarDataPO.class, bar);
-					List<TickDataPO> minTicks = new ArrayList<>(ticks.size());
-					for(TickField t : ticks) {
-						TickDataPO tickPO = ProtoBeanUtils.toPojoBean(TickDataPO.class, t);
-						minTicks.add(tickPO);
-					}
-					barPO.setMinuteTickData(minTicks);
-					mdRepo.insert(barPO);
+					barPO.setNumOfTicks(ticks.size());
+					bufData.add(barPO);
 				}catch(IOException ex) {
 					throw new IllegalStateException(ex);
 				}

@@ -13,19 +13,21 @@ import tech.xuanwu.northstar.engine.broadcast.SocketIOMessageEngine;
 import tech.xuanwu.northstar.engine.event.FastEventEngine;
 import tech.xuanwu.northstar.model.GatewayAndConnectionManager;
 import tech.xuanwu.northstar.persistence.GatewayRepository;
+import tech.xuanwu.northstar.persistence.MarketDataRepository;
 import tech.xuanwu.northstar.service.AccountService;
 import tech.xuanwu.northstar.service.DataSyncService;
 import tech.xuanwu.northstar.service.GatewayService;
 
 @DependsOn({
-	"createInternalHandler",
+	"createInternalDispatcher",
+	"createBroadcastEventDispatcher",
 //	"createPluginHandler",
 //	"createStrategyHandler",
-	"createBroadcastEventHandler",
 	"createAccountEventHandler",
 	"createContractEventHandler",
 	"createConnectionEventHandler",
-	"createTradeEventHandler"})
+	"createTradeEventHandler"
+	})
 @Configuration
 public class ServiceConfig {
 
@@ -37,8 +39,8 @@ public class ServiceConfig {
 	
 	@Bean
 	public GatewayService createGatewayService(GatewayAndConnectionManager gatewayConnMgr, GatewayRepository gatewayRepo,
-			FastEventEngine fastEventEngine, InternalEventBus eventBus) {
-		return new GatewayService(gatewayConnMgr, gatewayRepo, fastEventEngine, eventBus);
+			MarketDataRepository mdRepo, FastEventEngine fastEventEngine, InternalEventBus eventBus) {
+		return new GatewayService(gatewayConnMgr, gatewayRepo, mdRepo, fastEventEngine, eventBus);
 	}
 	
 	@Bean

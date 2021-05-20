@@ -4,8 +4,10 @@ import java.util.List;
 
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * 1分钟BAR数据
@@ -15,6 +17,8 @@ import lombok.Data;
 @Document
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class MinBarDataPO {
 	private String unifiedSymbol ;  // 统一合约标识
 	private String gatewayId ; // 网关ID
@@ -37,6 +41,5 @@ public class MinBarDataPO {
 	private double preOpenInterest ;// 昨持仓
 	private double preClosePrice ;  // 前收盘价
 	private double preSettlePrice ;  // 昨结算价
-	//Bar内Tick数据
-	private List<TickDataPO> minuteTickData;
+	private int numOfTicks;
 }

@@ -1,9 +1,11 @@
-package tech.xuanwu.northstar.handler;
+package tech.xuanwu.northstar.handler.internal;
 
 import tech.xuanwu.northstar.common.event.NorthstarEvent;
 import tech.xuanwu.northstar.common.event.NorthstarEventType;
 import tech.xuanwu.northstar.domain.ContractManager;
 import tech.xuanwu.northstar.gateway.api.MarketGateway;
+import tech.xuanwu.northstar.handler.AbstractEventHandler;
+import tech.xuanwu.northstar.handler.GenericEventHandler;
 import tech.xuanwu.northstar.model.GatewayAndConnectionManager;
 import xyz.redtorch.pb.CoreField.ContractField;
 
@@ -12,7 +14,7 @@ import xyz.redtorch.pb.CoreField.ContractField;
  * @author KevinHuangwl
  *
  */
-public class ContractHandler extends AbstractEventHandler implements InternalEventHandler{
+public class ContractHandler extends AbstractEventHandler implements GenericEventHandler{
 
 	private ContractManager contractMgr;
 	

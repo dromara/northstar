@@ -1,4 +1,4 @@
-package tech.xuanwu.northstar.handler;
+package tech.xuanwu.northstar.handler.data;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
@@ -14,6 +14,8 @@ import tech.xuanwu.northstar.domain.GatewayConnection;
 import tech.xuanwu.northstar.domain.IndexContract;
 import tech.xuanwu.northstar.engine.broadcast.SocketIOMessageEngine;
 import tech.xuanwu.northstar.engine.event.FastEventEngine;
+import tech.xuanwu.northstar.handler.AbstractEventHandler;
+import tech.xuanwu.northstar.handler.GenericEventHandler;
 import tech.xuanwu.northstar.model.GatewayAndConnectionManager;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.TickField;
@@ -23,7 +25,7 @@ import xyz.redtorch.pb.CoreField.TickField;
  * @author KevinHuangwl
  *
  */
-public class IndexContractHandler extends AbstractEventHandler implements InternalEventHandler{
+public class IndexContractHandler extends AbstractEventHandler implements GenericEventHandler{
 	
 	private ContractManager contractMgr;
 	

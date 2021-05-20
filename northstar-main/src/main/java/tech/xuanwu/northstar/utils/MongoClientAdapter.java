@@ -180,7 +180,7 @@ public class MongoClientAdapter {
 		if (documentList != null) {
 			Long startTimestamp = System.currentTimeMillis();
 			mongoClient.getDatabase(dbName).getCollection(collectionName).insertMany(documentList);
-			log.info("MongoDB插入" + collectionName + "共" + documentList.size() + "条,耗时"
+			log.debug("MongoDB插入" + collectionName + "共" + documentList.size() + "条,耗时"
 					+ (System.currentTimeMillis() - startTimestamp) + "ms");
 			return true;
 		}

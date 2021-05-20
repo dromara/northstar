@@ -77,7 +77,7 @@ public class DisruptorFastEventEngine implements FastEventEngine, InitializingBe
 	}
 
 	@Override
-	public void addHandler(NorthstarEventHandler handler) {
+	public void addHandler(NorthstarEventDispatcher handler) {
 		log.info("加载：{}", handler);
 		BatchEventProcessor<NorthstarEvent> processor = new BatchEventProcessor<>(ringBuffer, ringBuffer.newBarrier(), handler);
 		processor.setExceptionHandler(commonExceptionHandler);
@@ -87,7 +87,7 @@ public class DisruptorFastEventEngine implements FastEventEngine, InitializingBe
 	}
 
 	@Override
-	public void removeHandler(NorthstarEventHandler handler) {
+	public void removeHandler(NorthstarEventDispatcher handler) {
 		if (handlerProcessorMap.containsKey(handler)) {
 			BatchEventProcessor<NorthstarEvent> processor = handlerProcessorMap.get(handler);
 			// Remove a processor.

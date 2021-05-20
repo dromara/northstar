@@ -2,12 +2,16 @@ package tech.xuanwu.northstar.persistence.po;
 
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Document
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class TickDataPO {
 
 	private String unifiedSymbol ;  // 统一合约标识

@@ -12,13 +12,13 @@ import tech.xuanwu.northstar.common.event.NorthstarEventType;
  */
 public interface FastEventEngine {
 
-	void addHandler(NorthstarEventHandler handler);
+	void addHandler(NorthstarEventDispatcher handler);
 
-	void removeHandler(NorthstarEventHandler handler);
+	void removeHandler(NorthstarEventDispatcher handler);
 
 	void emitEvent(NorthstarEventType event, Object obj);
 
-	public static interface NorthstarEventHandler extends EventHandler<NorthstarEvent>{
+	public static interface NorthstarEventDispatcher extends EventHandler<NorthstarEvent>{
 	}
 	
 	public static class NorthstarEventFactory implements EventFactory<NorthstarEvent> {

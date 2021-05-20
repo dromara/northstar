@@ -497,7 +497,7 @@ public class MdSpi extends CThostFtdcMdSpi {
 				tickBuilder.setActionTime(actionTime);
 				long localDateTimeMillisec = dateTime.toInstant(OffsetDateTime.now().getOffset()).toEpochMilli();
 				tickBuilder.setActionTimestamp(localDateTimeMillisec);
-				tickBuilder.setAvgPrice(averagePrice);
+				tickBuilder.setAvgPrice(isReasonable(upperLimit, lowerLimit, averagePrice) ? averagePrice : preClosePrice);
 
 				tickBuilder.setHighPrice(isReasonable(upperLimit, lowerLimit, highPrice) ? highPrice : preClosePrice);
 				tickBuilder.setLowPrice(isReasonable(upperLimit, lowerLimit, lowPrice) ? lowPrice : preClosePrice);
@@ -509,7 +509,7 @@ public class MdSpi extends CThostFtdcMdSpi {
 				tickBuilder.setOpenInterest(openInterest);
 				tickBuilder.setOpenInterestDelta(openInterestDelta);
 				tickBuilder.setVolume(volume);
-				tickBuilder.setVolumeDelta(volumeDelta);
+				tickBuilder.setVolumeDelta(isReasonable(volume, 0, volumeDelta) ? volumeDelta : 0);
 				tickBuilder.setTurnover(turnover);
 				tickBuilder.setTurnoverDelta(turnoverDelta);
 

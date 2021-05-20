@@ -1,9 +1,11 @@
-package tech.xuanwu.northstar.handler;
+package tech.xuanwu.northstar.handler.internal;
 
 import tech.xuanwu.northstar.common.event.NorthstarEvent;
 import tech.xuanwu.northstar.common.event.NorthstarEventType;
 import tech.xuanwu.northstar.common.exception.NoSuchElementException;
 import tech.xuanwu.northstar.gateway.api.TradeGateway;
+import tech.xuanwu.northstar.handler.AbstractEventHandler;
+import tech.xuanwu.northstar.handler.GenericEventHandler;
 import tech.xuanwu.northstar.model.GatewayAndConnectionManager;
 import xyz.redtorch.pb.CoreField.CancelOrderReqField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
@@ -13,7 +15,7 @@ import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
  * @author KevinHuangwl
  *
  */
-public class TradeHandler extends AbstractEventHandler implements InternalEventHandler{
+public class TradeHandler extends AbstractEventHandler implements GenericEventHandler{
 	
 	protected GatewayAndConnectionManager gatewayConnMgr;
 	

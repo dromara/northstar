@@ -1,4 +1,4 @@
-package tech.xuanwu.northstar.handler;
+package tech.xuanwu.northstar.handler.internal;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -11,6 +11,8 @@ import tech.xuanwu.northstar.domain.ContractManager;
 import tech.xuanwu.northstar.domain.GatewayConnection;
 import tech.xuanwu.northstar.gateway.api.Gateway;
 import tech.xuanwu.northstar.gateway.api.MarketGateway;
+import tech.xuanwu.northstar.handler.AbstractEventHandler;
+import tech.xuanwu.northstar.handler.GenericEventHandler;
 import tech.xuanwu.northstar.model.GatewayAndConnectionManager;
 import xyz.redtorch.pb.CoreField.ContractField;
 
@@ -20,7 +22,7 @@ import xyz.redtorch.pb.CoreField.ContractField;
  *
  */
 @Slf4j
-public class ConnectionHandler extends AbstractEventHandler implements InternalEventHandler{
+public class ConnectionHandler extends AbstractEventHandler implements GenericEventHandler{
 	
 	protected GatewayAndConnectionManager gatewayConnMgr;
 	protected ContractManager contractMgr;
@@ -28,10 +30,10 @@ public class ConnectionHandler extends AbstractEventHandler implements InternalE
 	private final Set<NorthstarEventType> TARGET_TYPE = new HashSet<>() {
 		private static final long serialVersionUID = 6418831877479036414L;
 		{
-			this.add(NorthstarEventType.CONNECTING);
-			this.add(NorthstarEventType.CONNECTED);
-			this.add(NorthstarEventType.DISCONNECTED);
-			this.add(NorthstarEventType.DISCONNECTING);
+			add(NorthstarEventType.CONNECTING);
+			add(NorthstarEventType.CONNECTED);
+			add(NorthstarEventType.DISCONNECTED);
+			add(NorthstarEventType.DISCONNECTING);
 		}
 	};
 	

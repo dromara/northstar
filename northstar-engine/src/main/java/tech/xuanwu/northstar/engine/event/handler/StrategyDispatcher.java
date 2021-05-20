@@ -2,13 +2,13 @@ package tech.xuanwu.northstar.engine.event.handler;
 
 import tech.xuanwu.northstar.common.event.NorthstarEvent;
 import tech.xuanwu.northstar.common.event.StrategyEventBus;
-import tech.xuanwu.northstar.engine.event.FastEventEngine.NorthstarEventHandler;
+import tech.xuanwu.northstar.engine.event.FastEventEngine.NorthstarEventDispatcher;
 
-public class StrategyHandler implements NorthstarEventHandler {
+public class StrategyDispatcher implements NorthstarEventDispatcher {
 
 	private StrategyEventBus eb;
 	
-	public StrategyHandler(StrategyEventBus eb){
+	public StrategyDispatcher(StrategyEventBus eb){
 		this.eb = eb;
 	}
 	

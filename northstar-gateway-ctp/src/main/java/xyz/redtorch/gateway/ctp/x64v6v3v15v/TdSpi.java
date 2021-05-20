@@ -811,7 +811,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 			}
 			// CTP查询尚未就绪,断开
 			if (pRspInfo.getErrorID() == 90) {
-//				ctpGatewayAdapter.disconnect();
+				ctpGatewayAdapter.disconnect();
 			}
 		} catch (Throwable t) {
 			logger.error("{}OnRspError Exception", logInfo, t);

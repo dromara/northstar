@@ -4,7 +4,7 @@ import com.google.common.eventbus.Subscribe;
 
 import tech.xuanwu.northstar.common.event.NorthstarEvent;
 
-public abstract class AbstractEventHandler implements InternalEventHandler{
+public abstract class AbstractEventHandler implements GenericEventHandler{
 
 	@Subscribe
 	@Override
