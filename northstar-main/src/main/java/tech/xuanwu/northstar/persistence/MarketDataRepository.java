@@ -1,21 +1,15 @@
 package tech.xuanwu.northstar.persistence;
 
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.bson.Document;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.index.CompoundIndexDefinition;
 import org.springframework.data.mongodb.core.index.IndexDefinition;
 import org.springframework.stereotype.Repository;
 
-import com.mongodb.client.ListIndexesIterable;
-import com.mongodb.client.MongoCollection;
-
-import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.persistence.po.MinBarDataPO;
 import tech.xuanwu.northstar.utils.MongoClientAdapter;
 import tech.xuanwu.northstar.utils.MongoUtils;
@@ -28,9 +22,8 @@ import tech.xuanwu.northstar.utils.MongoUtils;
  * 
  * @author KevinHuangwl
  */
-@Slf4j
 @Repository
-public class MarketDataRepository implements InitializingBean{
+public class MarketDataRepository {
 
 	@Autowired
 	private MongoClientAdapter client;
@@ -48,8 +41,9 @@ public class MarketDataRepository implements InitializingBean{
 	public void init(String gatewayId) {
 		String collectionName = COLLECTION_PREFIX + gatewayId;
 		mongo.createCollection(collectionName);
-		IndexDefinition indexDefinition = new CompoundIndexDefinition(new Document().append("symbol", 1).append("tradingDay", 1));
+		IndexDefinition indexDefinition = new CompoundIndexDefinition(new Document().append("unifiedSymbol", 1).append("tradingDay", 1));
 		mongo.indexOps(collectionName).ensureIndex(indexDefinition);
+		
 	}
 	
 	/**
@@ -85,18 +79,4 @@ public class MarketDataRepository implements InitializingBean{
 		return resultList.stream().map(doc -> MongoUtils.documentToBean(doc, MinBarDataPO.class)).collect(Collectors.toList());
 	}
 
-	@Override
-	public void afterPropertiesSet() throws Exception {
-		Set<String> names = mongo.getCollectionNames();
-		for(String name : names) {
-			if(!name.startsWith(COLLECTION_PREFIX)) {
-				return;
-			}
-			MongoCollection<Document> col = mongo.getCollection(name);
-			ListIndexesIterable<Document> idxes = col.listIndexes();
-			log.info(idxes.first().toJson());
-		}
-	}
-
-	
 }

@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.List;
 import java.util.Optional;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -12,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -45,6 +47,9 @@ public class GatewayManagementTest {
 	
 	@Autowired
 	GatewayRepository gwRepo;
+	
+	@Autowired
+	MongoTemplate mongo;
 	
 	@Autowired
 	TestRestTemplate restTemplate;
@@ -88,6 +93,13 @@ public class GatewayManagementTest {
 		String cookie = result.getHeaders().get("Set-Cookie").get(0);
 		headers = new HttpHeaders();
 		headers.put(HttpHeaders.COOKIE, List.of(cookie));
+	}
+	
+	@After
+	public void clear() {
+		for(String name : mongo.getCollectionNames()) {
+			mongo.dropCollection(name);
+		}
 	}
 	
 	@Test
