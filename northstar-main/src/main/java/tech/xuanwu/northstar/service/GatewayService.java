@@ -24,6 +24,7 @@ import tech.xuanwu.northstar.model.GatewayAndConnectionManager;
 import tech.xuanwu.northstar.persistence.GatewayRepository;
 import tech.xuanwu.northstar.persistence.MarketDataRepository;
 import tech.xuanwu.northstar.persistence.po.GatewayPO;
+import tech.xuanwu.northstar.utils.CodecUtils;
 import xyz.redtorch.gateway.ctp.x64v6v3v15v.CtpGatewayAdapter;
 import xyz.redtorch.pb.CoreEnum.GatewayAdapterTypeEnum;
 import xyz.redtorch.pb.CoreEnum.GatewayTypeEnum;
@@ -60,11 +61,13 @@ public class GatewayService implements InitializingBean {
 	/**
 	 * 创建网关
 	 * @return
+	 * @throws Exception 
 	 */
-	public boolean createGateway(GatewayDescription gatewayDescription) {
+	public boolean createGateway(GatewayDescription gatewayDescription) throws Exception {
 		log.info("创建网关[{}]", gatewayDescription.getGatewayId());
 		GatewayPO po = new GatewayPO();
 		BeanUtils.copyProperties(gatewayDescription, po);
+		po.setSettings(CodecUtils.encrypt(JSON.toJSONString(gatewayDescription.getSettings())));
 		gatewayRepo.insert(po);
 		if(gatewayDescription.getGatewayUsage() == GatewayUsage.MARKET_DATA) {
 			mdRepo.init(gatewayDescription.getGatewayId());
@@ -123,11 +126,13 @@ public class GatewayService implements InitializingBean {
 	/**
 	 * 更新网关
 	 * @return
+	 * @throws Exception 
 	 */
-	public boolean updateGateway(GatewayDescription gatewayDescription) {
+	public boolean updateGateway(GatewayDescription gatewayDescription) throws Exception {
 		log.info("更新网关[{}]", gatewayDescription.getGatewayId());
 		GatewayPO po = new GatewayPO();
 		BeanUtils.copyProperties(gatewayDescription, po);
+		po.setSettings(CodecUtils.encrypt(JSON.toJSONString(gatewayDescription.getSettings())));
 		gatewayRepo.save(po);
 		
 		// 先删除旧的，再重新创建新的
@@ -162,9 +167,14 @@ public class GatewayService implements InitializingBean {
 	/**
 	 * 查询所有网关
 	 * @return
+	 * @throws Exception 
 	 */
-	public List<GatewayDescription> findAllGateway(){
-		return gatewayConnMgr.getAllConnections().stream()
+	public List<GatewayDescription> findAllGateway() throws Exception{
+		List<GatewayConnection> listConn = gatewayConnMgr.getAllConnections();
+		for(GatewayConnection conn : listConn) {			
+			conn.getGwDescription().setSettings(CodecUtils.decrypt((String) conn.getGwDescription().getSettings()));
+		}
+		return listConn.stream()
 				.map(conn -> conn.getGwDescription())
 				.collect(Collectors.toList());
 	}
@@ -172,9 +182,14 @@ public class GatewayService implements InitializingBean {
 	/**
 	 * 查询所有行情网关
 	 * @return
+	 * @throws Exception 
 	 */
-	public List<GatewayDescription> findAllMarketGateway(){
-		return gatewayConnMgr.getAllConnections().stream()
+	public List<GatewayDescription> findAllMarketGateway() throws Exception{
+		List<GatewayConnection> listConn = gatewayConnMgr.getAllConnections();
+		for(GatewayConnection conn : listConn) {			
+			conn.getGwDescription().setSettings(CodecUtils.decrypt((String) conn.getGwDescription().getSettings()));
+		}
+		return listConn.stream()
 				.map(conn -> conn.getGwDescription())
 				.filter(gwDescription -> gwDescription.getGatewayUsage() == GatewayUsage.MARKET_DATA)
 				.collect(Collectors.toList());
@@ -183,9 +198,14 @@ public class GatewayService implements InitializingBean {
 	/**
 	 * 查询所有交易网关
 	 * @return
+	 * @throws Exception 
 	 */
-	public List<GatewayDescription> findAllTraderGateway(){
-		return gatewayConnMgr.getAllConnections().stream()
+	public List<GatewayDescription> findAllTraderGateway() throws Exception{
+		List<GatewayConnection> listConn = gatewayConnMgr.getAllConnections();
+		for(GatewayConnection conn : listConn) {			
+			conn.getGwDescription().setSettings(CodecUtils.decrypt((String) conn.getGwDescription().getSettings()));
+		}
+		return listConn.stream()
 				.map(conn -> conn.getGwDescription())
 				.filter(gwDescription -> gwDescription.getGatewayUsage() != GatewayUsage.MARKET_DATA)
 				.collect(Collectors.toList());
@@ -227,6 +247,7 @@ public class GatewayService implements InitializingBean {
 		for(GatewayPO po : result) {
 			GatewayDescription gd = new GatewayDescription();
 			BeanUtils.copyProperties(po, gd);
+			gd.setSettings(CodecUtils.decrypt((String) po.getSettings()));
 			doCreateGateway(gd);
 		}
 	}

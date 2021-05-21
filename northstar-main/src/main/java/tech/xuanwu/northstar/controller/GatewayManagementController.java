@@ -34,7 +34,7 @@ public class GatewayManagementController {
 	protected SocketIOMessageEngine msgEngine;
 
 	@PostMapping("/gateway")
-	public ResultBean<Boolean> create(@RequestBody GatewayDescription gd) {
+	public ResultBean<Boolean> create(@RequestBody GatewayDescription gd) throws Exception {
 		Assert.notNull(gd, "传入对象不能为空");
 		return new ResultBean<>(gatewayService.createGateway(gd));
 	}
@@ -46,13 +46,13 @@ public class GatewayManagementController {
 	}
 	
 	@PutMapping("/gateway")
-	public ResultBean<Boolean> modify(@RequestBody GatewayDescription gd) {
+	public ResultBean<Boolean> modify(@RequestBody GatewayDescription gd) throws Exception {
 		Assert.notNull(gd, "传入对象不能为空");
 		return new ResultBean<>(gatewayService.updateGateway(gd));
 	}
 	
 	@GetMapping("/gateway")
-	public ResultBean<List<GatewayDescription>> list(String usage) { 
+	public ResultBean<List<GatewayDescription>> list(String usage) throws Exception { 
 		if(StringUtils.isBlank(usage)) {
 			return new ResultBean<>(gatewayService.findAllGateway());
 		}

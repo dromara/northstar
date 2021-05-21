@@ -34,7 +34,7 @@ public class GatewayServiceTest {
 	}
 
 	@Test
-	public void testCreateGateway() {
+	public void testCreateGateway() throws Exception {
 		CtpSettings settings = new CtpSettings();
 		settings.setAppId("app123456");
 		settings.setAuthCode("auth321564");
@@ -59,7 +59,7 @@ public class GatewayServiceTest {
 	
 
 	@Test
-	public void testUpdateGateway() {
+	public void testUpdateGateway() throws Exception {
 		testCreateGateway();
 		
 		CtpSettings settings = new CtpSettings();
@@ -86,14 +86,14 @@ public class GatewayServiceTest {
 	}
 
 	@Test
-	public void testDeleteGateway() {
+	public void testDeleteGateway() throws Exception {
 		testCreateGateway();
 		service.deleteGateway("testGateway");
 		verify(gatewayRepo).deleteById("testGateway");
 	}
 
 	@Test
-	public void testFindAllGateway() {
+	public void testFindAllGateway() throws Exception {
 		CtpSettings settings = new CtpSettings();
 		settings.setAppId("app123456");
 		settings.setAuthCode("auth321564");
@@ -125,7 +125,7 @@ public class GatewayServiceTest {
 	}
 
 	@Test
-	public void testFindAllMarketGateway() {
+	public void testFindAllMarketGateway() throws Exception {
 		CtpSettings settings = new CtpSettings();
 		settings.setAppId("app123456");
 		settings.setAuthCode("auth321564");
@@ -157,7 +157,7 @@ public class GatewayServiceTest {
 	}
 
 	@Test
-	public void testFindAllTraderGateway() {
+	public void testFindAllTraderGateway() throws Exception {
 		CtpSettings settings = new CtpSettings();
 		settings.setAppId("app123456");
 		settings.setAuthCode("auth321564");
@@ -189,14 +189,14 @@ public class GatewayServiceTest {
 	}
 
 	@Test
-	public void testConnect() {
+	public void testConnect() throws Exception {
 		testCreateGateway();
 		
 		service.connect("testGateway");
 	}
 
 	@Test
-	public void testDisconnect() {
+	public void testDisconnect() throws Exception {
 		testConnect();
 		service.disconnect("testGateway");
 	}

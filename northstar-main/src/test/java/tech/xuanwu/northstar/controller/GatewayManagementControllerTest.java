@@ -31,7 +31,7 @@ public class GatewayManagementControllerTest {
 	private MockMvc mockMvc;
 
 	@Before
-	public void init() {
+	public void init() throws Exception {
 		GatewayManagementController ctl = new GatewayManagementController();
 		ctl.gatewayService = mock(GatewayService.class);
 		when(ctl.gatewayService.createGateway(any(GatewayDescription.class))).thenReturn(Boolean.TRUE);
