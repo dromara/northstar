@@ -1,5 +1,6 @@
 package tech.xuanwu.northstar.service;
 
+import java.io.File;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,6 +34,8 @@ import xyz.redtorch.pb.CoreField.GatewaySettingField.CtpApiSettingField;
 
 /**
  * 网关服务
+ * 注意：GatewaySetting为了防止数据库被攻破，因此对其做了对称加密，并且会在部署的机器上写入一段随机盐。
+ * 只有在代码、数据库、服务器随机盐同时被攻破时，才有可能对GatewaySetting信息进行解码
  * @author KevinHuangwl
  *
  */
@@ -170,11 +173,7 @@ public class GatewayService implements InitializingBean {
 	 * @throws Exception 
 	 */
 	public List<GatewayDescription> findAllGateway() throws Exception{
-		List<GatewayConnection> listConn = gatewayConnMgr.getAllConnections();
-		for(GatewayConnection conn : listConn) {			
-			conn.getGwDescription().setSettings(CodecUtils.decrypt((String) conn.getGwDescription().getSettings()));
-		}
-		return listConn.stream()
+		return gatewayConnMgr.getAllConnections().stream()
 				.map(conn -> conn.getGwDescription())
 				.collect(Collectors.toList());
 	}
@@ -185,11 +184,7 @@ public class GatewayService implements InitializingBean {
 	 * @throws Exception 
 	 */
 	public List<GatewayDescription> findAllMarketGateway() throws Exception{
-		List<GatewayConnection> listConn = gatewayConnMgr.getAllConnections();
-		for(GatewayConnection conn : listConn) {			
-			conn.getGwDescription().setSettings(CodecUtils.decrypt((String) conn.getGwDescription().getSettings()));
-		}
-		return listConn.stream()
+		return gatewayConnMgr.getAllConnections().stream()
 				.map(conn -> conn.getGwDescription())
 				.filter(gwDescription -> gwDescription.getGatewayUsage() == GatewayUsage.MARKET_DATA)
 				.collect(Collectors.toList());
@@ -201,11 +196,7 @@ public class GatewayService implements InitializingBean {
 	 * @throws Exception 
 	 */
 	public List<GatewayDescription> findAllTraderGateway() throws Exception{
-		List<GatewayConnection> listConn = gatewayConnMgr.getAllConnections();
-		for(GatewayConnection conn : listConn) {			
-			conn.getGwDescription().setSettings(CodecUtils.decrypt((String) conn.getGwDescription().getSettings()));
-		}
-		return listConn.stream()
+		return gatewayConnMgr.getAllConnections().stream()
 				.map(conn -> conn.getGwDescription())
 				.filter(gwDescription -> gwDescription.getGatewayUsage() != GatewayUsage.MARKET_DATA)
 				.collect(Collectors.toList());
@@ -247,7 +238,15 @@ public class GatewayService implements InitializingBean {
 		for(GatewayPO po : result) {
 			GatewayDescription gd = new GatewayDescription();
 			BeanUtils.copyProperties(po, gd);
-			gd.setSettings(CodecUtils.decrypt((String) po.getSettings()));
+			String decodeStr = CodecUtils.decrypt((String) po.getSettings());
+			if(!JSON.isValid(decodeStr)) {
+				throw new IllegalStateException("解码字符串非法，很可能是临时文件夹" + System.getProperty("java.io.tmpdir") + File.separator
+						+ "NorthstarRandomSalt这个盐文件与加密时的不一致导致无法解码。解决办法：手动移除旧的Gateway数据，重新录入，并确保盐文件不会丢失。");
+			}
+			if(gd.getGatewayType() == GatewayType.CTP) {
+				CtpSettings settings = JSON.parseObject(decodeStr, CtpSettings.class);
+				gd.setSettings(settings);
+			}
 			doCreateGateway(gd);
 		}
 	}

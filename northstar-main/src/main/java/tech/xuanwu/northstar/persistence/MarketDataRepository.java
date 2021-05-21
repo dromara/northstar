@@ -40,6 +40,9 @@ public class MarketDataRepository {
 	 */
 	public void init(String gatewayId) {
 		String collectionName = COLLECTION_PREFIX + gatewayId;
+		if(mongo.collectionExists(collectionName)) {
+			return;
+		}
 		mongo.createCollection(collectionName);
 		IndexDefinition indexDefinition = new CompoundIndexDefinition(new Document().append("unifiedSymbol", 1).append("tradingDay", 1));
 		mongo.indexOps(collectionName).ensureIndex(indexDefinition);

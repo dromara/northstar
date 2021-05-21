@@ -33,7 +33,7 @@
 		<socketio-client-version>1.0.0</socketio-client-version>
 		<mockito-version>3.0.0</mockito-version>
 		<hessian-version>4.0.38</hessian-version>
-		<common-codec-version>1.10</common-codec-version>
+		<hutool-version>5.6.3</hutool-version>
 	</properties>
 
 	<modules>
@@ -206,11 +206,13 @@
 				<artifactId>hessian</artifactId>
 				<version>${hessian-version}</version>
 			</dependency>
+			<!-- https://mvnrepository.com/artifact/cn.hutool/hutool-crypto -->
 			<dependency>
-			    <groupId>commons-codec</groupId>
-			    <artifactId>commons-codec</artifactId>
-			    <version>${common-codec-version}</version>
+			    <groupId>cn.hutool</groupId>
+			    <artifactId>hutool-crypto</artifactId>
+			    <version>${hutool-version}</version>
 			</dependency>
+
 						
 		</dependencies>
 	</dependencyManagement>
