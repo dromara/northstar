@@ -1,17 +1,9 @@
 package tech.xuanwu.northstar.gateway.api;
 
-import xyz.redtorch.pb.CoreField.GatewayField;
 import xyz.redtorch.pb.CoreField.GatewaySettingField;
 
 public interface Gateway {
 
-	/**
-	 * 获取网关
-	 * 
-	 * @return
-	 */
-	GatewayField getGateway();
-	
 	/**
 	 * 获取网关配置
 	 * 

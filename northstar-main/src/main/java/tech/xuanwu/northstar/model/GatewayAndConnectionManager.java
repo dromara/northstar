@@ -18,7 +18,7 @@ public class GatewayAndConnectionManager {
 	private Map<String, Entry> gatewayMap = new ConcurrentHashMap<>();
 
 	public void createPair(GatewayConnection conn, Gateway gateway) {
-		Assert.isTrue(StringUtils.equals(conn.getGwDescription().getGatewayId(), gateway.getGateway().getGatewayId()),
+		Assert.isTrue(StringUtils.equals(conn.getGwDescription().getGatewayId(), gateway.getGatewaySetting().getGatewayId()),
 				"网关名称不一致");
 		gatewayMap.put(conn.getGwDescription().getGatewayId(), new Entry(conn, gateway));
 	}
@@ -28,11 +28,11 @@ public class GatewayAndConnectionManager {
 	}
 
 	public void removePair(Gateway gateway) {
-		gatewayMap.remove(gateway.getGateway().getGatewayId());
+		gatewayMap.remove(gateway.getGatewaySetting().getGatewayId());
 	}
 
 	public void onGatewayUpdate(Gateway gateway) {
-		String gatewayId = gateway.getGateway().getGatewayId();
+		String gatewayId = gateway.getGatewaySetting().getGatewayId();
 		checkExist(gatewayId);
 		gatewayMap.get(gatewayId).gw = gateway;
 	}
@@ -48,7 +48,7 @@ public class GatewayAndConnectionManager {
 	}
 
 	public GatewayConnection getConnectionByGateway(Gateway gateway) {
-		return getGatewayConnectionById(gateway.getGateway().getGatewayId());
+		return getGatewayConnectionById(gateway.getGatewaySetting().getGatewayId());
 	}
 
 	public Gateway getGatewayById(String gatewayId) {

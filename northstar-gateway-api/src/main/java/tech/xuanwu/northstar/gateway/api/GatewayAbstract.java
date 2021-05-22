@@ -53,9 +53,4 @@ public abstract class GatewayAbstract implements Gateway {
 		return this.logInfo;
 	}
 
-	@Override
-	public GatewayField getGateway() {
-		return gateway;
-	}
-	
 }
