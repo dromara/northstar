@@ -49,9 +49,13 @@ public class AccountHandler extends AbstractEventHandler implements GenericEvent
 	@Override
 	public void doHandle(NorthstarEvent e) {
 		if(e.getEvent() == NorthstarEventType.LOGGED_IN) {
-			onLogined(e);
+			String gatewayId = (String) e.getData();
+			accountMap.put(gatewayId, factory.newInstance(gatewayId));
+			log.info("账户登陆：{}", gatewayId);
 		} else if (e.getEvent() == NorthstarEventType.LOGGED_OUT) {
-			onLogouted(e);
+			String gatewayId = (String) e.getData();
+			accountMap.remove(gatewayId);
+			log.info("账户登出：{}", gatewayId);
 		} else if (e.getEvent() == NorthstarEventType.ACCOUNT) {
 			AccountField af = (AccountField) e.getData();
 			TradeDayAccount account = accountMap.get(af.getGatewayId());
@@ -76,16 +80,4 @@ public class AccountHandler extends AbstractEventHandler implements GenericEvent
 		return TARGET_TYPE.contains(eventType);
 	}
 	
-	private void onLogined(NorthstarEvent e) {
-		String gatewayId = (String) e.getData();
-		accountMap.put(gatewayId, factory.newInstance(gatewayId));
-		log.info("账户登陆：{}", gatewayId);
-	}
-	
-	private void onLogouted(NorthstarEvent e) {
-		String gatewayId = (String) e.getData();
-		accountMap.remove(gatewayId);
-		log.info("账户登出：{}", gatewayId);
-	}
-
 }

@@ -2,7 +2,6 @@ package tech.xuanwu.northstar.config;
 
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -26,24 +25,6 @@ import tech.xuanwu.northstar.persistence.MarketDataRepository;
 @Slf4j
 @Configuration
 public class InternalEventHandlerConfig {
-	
-	@Value("${northstar.contracts.canHandle}")
-	private String[] productClassTypes;
-	
-	@Bean
-	public GatewayAndConnectionManager createGatewayAndConnectionManager() {
-		return new GatewayAndConnectionManager();
-	}
-	
-	@Bean
-	public ContractManager createContractManager() {
-		return new ContractManager(productClassTypes);
-	}
-	
-	@Bean
-	public ConcurrentHashMap<String, TradeDayAccount> createAccountMap(){
-		return new ConcurrentHashMap<>();
-	}
 	
 	///////////////////
 	/* Internal类事件 */
