@@ -5,7 +5,7 @@ package tech.xuanwu.northstar.common.exception;
  * @author KevinHuangwl
  *
  */
-public class TradeException extends Exception{
+public class TradeException extends RuntimeException{
 
 	/**
 	 * 
