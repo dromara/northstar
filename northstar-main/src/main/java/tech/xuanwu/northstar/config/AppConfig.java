@@ -20,6 +20,7 @@ import com.mongodb.MongoClient;
 
 import tech.xuanwu.northstar.domain.ContractManager;
 import tech.xuanwu.northstar.domain.TradeDayAccount;
+import tech.xuanwu.northstar.gateway.sim.SimMarket;
 import tech.xuanwu.northstar.interceptor.AuthorizationInterceptor;
 import tech.xuanwu.northstar.model.GatewayAndConnectionManager;
 import tech.xuanwu.northstar.utils.MongoClientAdapter;
@@ -95,5 +96,10 @@ public class AppConfig implements WebMvcConfigurer {
 	@Bean
 	public ConcurrentHashMap<String, TradeDayAccount> createAccountMap(){
 		return new ConcurrentHashMap<>();
+	}
+	
+	@Bean
+	public SimMarket createSimMarket() {
+		return new SimMarket();
 	}
 }

@@ -3,6 +3,7 @@ package tech.xuanwu.northstar.engine.config;
 import java.io.IOException;
 
 import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -16,7 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Configuration
-public class SocketIOServerAutoConfiguration implements DisposableBean {
+public class SocketIOServerAutoConfiguration implements DisposableBean, InitializingBean {
 
 	@Value("${socketio.host}")
     private String host;
@@ -51,5 +52,10 @@ public class SocketIOServerAutoConfiguration implements DisposableBean {
 	@Override
 	public void destroy() throws Exception {
 		socketServer.stop();
+	}
+
+	@Override
+	public void afterPropertiesSet() throws Exception {
+		log.info("自动装配SocketIOServerAutoConfiguration");
 	}
 }

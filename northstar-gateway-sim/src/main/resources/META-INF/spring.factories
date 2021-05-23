@@ -1,1 +1,0 @@
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=tech.xuanwu.northstar.gateway.sim.config.SimAccountRepositoryAutoConfiguration

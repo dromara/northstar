@@ -40,6 +40,7 @@
 		<module>northstar-common</module>
 		<module>northstar-gateway-api</module>
 		<module>northstar-gateway-ctp</module>
+		<module>northstar-gateway-sim</module>
 		<module>northstar-engine</module>
 		<module>northstar-domain</module>
 		<module>northstar-main</module>
@@ -80,6 +81,11 @@
 			<dependency>
 				<groupId>tech.xuan-wu</groupId>
 				<artifactId>northstar-gateway-ctp</artifactId>
+				<version>${northstar-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>tech.xuan-wu</groupId>
+				<artifactId>northstar-gateway-sim</artifactId>
 				<version>${northstar-version}</version>
 			</dependency>
 			<dependency>

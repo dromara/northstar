@@ -107,7 +107,7 @@ public class ContractManager {
 				.collect(Collectors.toList());
 	}
 	
-	private Map<String, ContractField> getContractMapByGateway(String gatewayId){
+	public Map<String, ContractField> getContractMapByGateway(String gatewayId){
 		return contractTbl.row(gatewayId);
 	}
 	

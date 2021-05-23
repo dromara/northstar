@@ -11,6 +11,8 @@ import tech.xuanwu.northstar.domain.ContractManager;
 import tech.xuanwu.northstar.domain.TradeDayAccount;
 import tech.xuanwu.northstar.engine.broadcast.SocketIOMessageEngine;
 import tech.xuanwu.northstar.engine.event.FastEventEngine;
+import tech.xuanwu.northstar.gateway.sim.SimMarket;
+import tech.xuanwu.northstar.gateway.sim.persistence.SimAccountRepository;
 import tech.xuanwu.northstar.model.GatewayAndConnectionManager;
 import tech.xuanwu.northstar.persistence.GatewayRepository;
 import tech.xuanwu.northstar.persistence.MarketDataRepository;
@@ -39,8 +41,9 @@ public class ServiceConfig {
 	
 	@Bean
 	public GatewayService createGatewayService(GatewayAndConnectionManager gatewayConnMgr, GatewayRepository gatewayRepo,
-			MarketDataRepository mdRepo, FastEventEngine fastEventEngine, InternalEventBus eventBus) {
-		return new GatewayService(gatewayConnMgr, gatewayRepo, mdRepo, fastEventEngine, eventBus);
+			MarketDataRepository mdRepo, FastEventEngine fastEventEngine, InternalEventBus eventBus, SimMarket simMarket,
+			SimAccountRepository simAccRepo, ContractManager contractMgr) {
+		return new GatewayService(gatewayConnMgr, gatewayRepo, mdRepo, fastEventEngine, eventBus, simMarket, simAccRepo, contractMgr);
 	}
 	
 	@Bean

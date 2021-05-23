@@ -5,31 +5,28 @@ import java.util.Map;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 
-import tech.xuanwu.northstar.gateway.api.Gateway;
 import xyz.redtorch.pb.CoreField.TickField;
 
 public class SimMarket {
 
 	/**
-	 * dataSrcGatewayId -> simGatewayId -> simGateway
+	 * mdGatewayId -> simGatewayId -> simGateway
 	 */
-	private Table<String, String, SimGatewayLocalImpl> simGatewayMap = HashBasedTable.create();
+	private Table<String, String, SimGateway> simGatewayMap = HashBasedTable.create();
 	
 	
-	public synchronized void addGateway(Gateway dataSrcGateway, SimGatewayLocalImpl accountGateway) {
-		String dataSrcGatewayId = dataSrcGateway.getGatewaySetting().getGatewayId();
+	public synchronized void addGateway(String mdGatewayId, SimGateway accountGateway) {
 		String simGatewayId = accountGateway.getGatewaySetting().getGatewayId();
-		simGatewayMap.put(dataSrcGatewayId, simGatewayId, accountGateway);
+		simGatewayMap.put(mdGatewayId, simGatewayId, accountGateway);
 	}
 	
-	public synchronized void removeGateway(Gateway dataSrcGateway, SimGatewayLocalImpl accountGateway) {
-		String dataSrcGatewayId = dataSrcGateway.getGatewaySetting().getGatewayId();
+	public synchronized void removeGateway(String mdGatewayId, SimGateway accountGateway) {
 		String simGatewayId = accountGateway.getGatewaySetting().getGatewayId();
-		simGatewayMap.remove(dataSrcGatewayId, simGatewayId);
+		simGatewayMap.remove(mdGatewayId, simGatewayId);
 	}
 	
 	public void update(TickField tick) {
-		Map<String, SimGatewayLocalImpl> simGateways = simGatewayMap.row(tick.getGatewayId());
+		Map<String, SimGateway> simGateways = simGatewayMap.row(tick.getGatewayId());
 		simGateways.forEach((k, gw) -> {
 			gw.update(tick);
 		});

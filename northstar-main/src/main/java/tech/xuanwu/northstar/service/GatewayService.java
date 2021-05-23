@@ -16,11 +16,18 @@ import tech.xuanwu.northstar.common.event.InternalEventBus;
 import tech.xuanwu.northstar.common.exception.NoSuchElementException;
 import tech.xuanwu.northstar.common.model.CtpSettings;
 import tech.xuanwu.northstar.common.model.GatewayDescription;
+import tech.xuanwu.northstar.common.model.SimSettings;
+import tech.xuanwu.northstar.domain.ContractManager;
 import tech.xuanwu.northstar.domain.GatewayConnection;
 import tech.xuanwu.northstar.domain.MarketGatewayConnection;
 import tech.xuanwu.northstar.domain.TraderGatewayConnection;
 import tech.xuanwu.northstar.engine.event.FastEventEngine;
 import tech.xuanwu.northstar.gateway.api.Gateway;
+import tech.xuanwu.northstar.gateway.sim.SimFactory;
+import tech.xuanwu.northstar.gateway.sim.SimGateway;
+import tech.xuanwu.northstar.gateway.sim.SimGatewayLocalImpl;
+import tech.xuanwu.northstar.gateway.sim.SimMarket;
+import tech.xuanwu.northstar.gateway.sim.persistence.SimAccountRepository;
 import tech.xuanwu.northstar.model.GatewayAndConnectionManager;
 import tech.xuanwu.northstar.persistence.GatewayRepository;
 import tech.xuanwu.northstar.persistence.MarketDataRepository;
@@ -52,13 +59,23 @@ public class GatewayService implements InitializingBean {
 	
 	private InternalEventBus eventBus;
 	
+	private SimMarket simMarket;
+	
+	private SimAccountRepository simAccRepo;
+	
+	private ContractManager contractMgr;
+	
 	public GatewayService(GatewayAndConnectionManager gatewayConnMgr, GatewayRepository gatewayRepo, MarketDataRepository mdRepo,
-			FastEventEngine fastEventEngine, InternalEventBus eventBus) {
+			FastEventEngine fastEventEngine, InternalEventBus eventBus, SimMarket simMarket, SimAccountRepository simAccRepo,
+			ContractManager contractMgr) {
 		this.gatewayConnMgr = gatewayConnMgr;
 		this.gatewayRepo = gatewayRepo;
 		this.mdRepo = mdRepo;
 		this.fastEventEngine = fastEventEngine;
 		this.eventBus = eventBus;
+		this.simMarket = simMarket;
+		this.simAccRepo = simAccRepo;
+		this.contractMgr = contractMgr;
 	}
 	
 	/**
@@ -112,6 +129,17 @@ public class GatewayService implements InitializingBean {
 					.setCtpApiSetting(ctpSetting)
 					.setGatewayType(gwType)
 					.build());
+		} else if(gatewayDescription.getGatewayType() == GatewayType.SIMULATION) {
+			String mdGatewayId = gatewayDescription.getRelativeGatewayId();
+			SimSettings settings = JSON.toJavaObject((JSON)JSON.toJSON(gatewayDescription.getSettings()), SimSettings.class);
+			GatewaySettingField gwSettings = GatewaySettingField.newBuilder()
+					.setGatewayId(gatewayDescription.getGatewayId())
+					.setGatewayType(GatewayTypeEnum.GTE_Trade)
+					.build();
+			SimFactory simFactory = new SimFactory(gatewayDescription.getGatewayId(), fastEventEngine, settings.getTicksOfCommission(),
+					contractMgr.getContractMapByGateway(mdGatewayId));
+			gateway = new SimGatewayLocalImpl(fastEventEngine, gwSettings, simAccRepo, simFactory);
+			simMarket.addGateway(mdGatewayId, (SimGateway) gateway);
 		} else if(gatewayDescription.getGatewayType() == GatewayType.IB) {
 			// TODO IB网关
 		} else {
@@ -155,8 +183,10 @@ public class GatewayService implements InitializingBean {
 	
 	private boolean doDeleteGateway(String gatewayId) {
 		GatewayConnection conn = null;
+		Gateway gateway = null;
 		if(gatewayConnMgr.exist(gatewayId)) {
 			conn = gatewayConnMgr.getGatewayConnectionById(gatewayId);
+			gateway = gatewayConnMgr.getGatewayByConnection(conn);
 		} else {
 			throw new NoSuchElementException("没有该网关记录：" +  gatewayId);
 		}
@@ -164,6 +194,10 @@ public class GatewayService implements InitializingBean {
 			throw new IllegalStateException("非断开状态的网关不能删除");
 		}
 		gatewayConnMgr.removePair(conn);
+		if(gateway instanceof SimGateway) {
+			String mdGatewayId = conn.getGwDescription().getRelativeGatewayId();
+			simMarket.removeGateway(mdGatewayId, (SimGateway) gateway);
+		}
 		return true;
 	}
 	
