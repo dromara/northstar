@@ -32,13 +32,18 @@ class GwAccountHolder {
 
 	private int ticksOfCommission;
 	
-	public GwAccountHolder(String gatewayId, FastEventEngine feEngine, int ticksOfCommission, SimFactory factory) {
+	private SimGateway simGateway;
+	
+	public GwAccountHolder(String gatewayId, FastEventEngine feEngine, int ticksOfCommission, SimFactory factory,
+			SimGateway simGateway) {
 		this.feEngine = feEngine;
 		this.accBuilder = AccountField.newBuilder().setAccountId(gatewayId).setName(gatewayId + "模拟账户")
 				.setGatewayId(gatewayId);
 		this.orderHolder = factory.newGwOrderHolder();
 		this.posHolder = factory.newGwPositionHolder();
 		this.ticksOfCommission = ticksOfCommission;
+		this.simGateway = simGateway;
+		simGateway.save();
 	}
 
 	protected void updateTick(TickField tick) {
@@ -58,6 +63,9 @@ class GwAccountHolder {
 			}
 			feEngine.emitEvent(NorthstarEventType.ORDER, order);
 		});
+		if(tfs.size() > 0) {
+			simGateway.save();
+		}
 		posHolder.updatePositionBy(tick);
 		double frozenMargin = orderHolder.getFrozenMargin();
 		double useMargin = posHolder.getTotalUseMargin();
@@ -91,6 +99,7 @@ class GwAccountHolder {
 		}
 		accBuilder.setDeposit(accBuilder.getDeposit() + money);
 		refreshAccount();
+		simGateway.save();
 	}
 
 	/**
@@ -104,6 +113,7 @@ class GwAccountHolder {
 		}
 		accBuilder.setWithdraw(accBuilder.getWithdraw() + money);
 		refreshAccount();
+		simGateway.save();
 	}
 
 	/**
@@ -126,7 +136,7 @@ class GwAccountHolder {
 		feEngine.emitEvent(NorthstarEventType.POSITION, pf);
 		feEngine.emitEvent(NorthstarEventType.ORDER, order);
 		refreshAccount();
-		
+		simGateway.save();
 		return order.getOrderId();
 	}
 
@@ -144,6 +154,7 @@ class GwAccountHolder {
 		feEngine.emitEvent(NorthstarEventType.POSITION, pf);
 		feEngine.emitEvent(NorthstarEventType.ORDER, order);
 		refreshAccount();
+		simGateway.save();
 		return true;
 	}
 	
@@ -167,6 +178,7 @@ class GwAccountHolder {
 	 */
 	protected void dailySettlement() {
 
+		simGateway.save();
 	}
 
 }

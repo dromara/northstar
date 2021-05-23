@@ -19,8 +19,8 @@ public class SimFactory {
 		this.contractMap = contractMap;
 	}
 
-	public GwAccountHolder newGwAccountHolder() {
-		return new GwAccountHolder(gatewayId, feEngine, ticksOfCommission, this);
+	public GwAccountHolder newGwAccountHolder(SimGateway simGateway) {
+		return new GwAccountHolder(gatewayId, feEngine, ticksOfCommission, this, simGateway);
 	}
 	
 	public GwPositionHolder newGwPositionHolder() {

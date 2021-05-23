@@ -32,7 +32,7 @@ public class SimGatewayLocalImpl implements SimGateway{
 			SimAccountRepository simAccRepo, SimFactory factory) {
 		this.feEngine = feEngine;
 		this.gatewaySetting = gatewaySetting;
-		this.accountHolder = factory.newGwAccountHolder();
+		this.accountHolder = factory.newGwAccountHolder(this);
 	}
 
 	@Override
