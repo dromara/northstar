@@ -43,12 +43,14 @@ public class SimGatewayLocalImpl implements SimGateway{
 	@Override
 	public void connect() {
 		connected = true;
+		feEngine.emitEvent(NorthstarEventType.CONNECTED, gatewaySetting.getGatewayId());
 		feEngine.emitEvent(NorthstarEventType.LOGGED_IN, gatewaySetting.getGatewayId());
 	}
 
 	@Override
 	public void disconnect() {
 		connected = false;
+		feEngine.emitEvent(NorthstarEventType.DISCONNECTED, gatewaySetting.getGatewayId());
 		feEngine.emitEvent(NorthstarEventType.LOGGED_OUT, gatewaySetting.getGatewayId());
 	}
 
