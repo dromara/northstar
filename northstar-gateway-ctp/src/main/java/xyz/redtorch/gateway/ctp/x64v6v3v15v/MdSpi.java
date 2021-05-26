@@ -529,6 +529,9 @@ public class MdSpi extends CThostFtdcMdSpi {
 				tickBuilder.setGatewayId(gatewayId);
 
 				TickField tick = tickBuilder.build();
+				if(volumeDelta > volume) {
+					logger.warn("异常Tick数据：{}", tick.toString());
+				}
 
 				preTickMap.put(contractId, tick);
 
