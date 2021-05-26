@@ -1,6 +1,9 @@
 package tech.xuanwu.northstar.gateway.sim;
 
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -34,6 +37,10 @@ class GwAccountHolder {
 	
 	private SimGateway simGateway;
 	
+	private volatile long lastAccountEventTime;
+	
+	private ScheduledExecutorService exeService = Executors.newScheduledThreadPool(1);
+	
 	public GwAccountHolder(String gatewayId, FastEventEngine feEngine, int ticksOfCommission, SimFactory factory,
 			SimGateway simGateway) {
 		this.feEngine = feEngine;
@@ -43,6 +50,11 @@ class GwAccountHolder {
 		this.posHolder = factory.newGwPositionHolder();
 		this.ticksOfCommission = ticksOfCommission;
 		this.simGateway = simGateway;
+		exeService.scheduleWithFixedDelay(()->{
+			if(System.currentTimeMillis() - lastAccountEventTime > 2000) {
+				refreshAccount();
+			}
+		}, 30, 1, TimeUnit.SECONDS);
 	}
 
 	protected void updateTick(TickField tick) {
@@ -85,6 +97,7 @@ class GwAccountHolder {
 		accBuilder.setAvailable(accBuilder.getBalance() - accBuilder.getMargin());
 
 		feEngine.emitEvent(NorthstarEventType.ACCOUNT, accBuilder.build());
+		lastAccountEventTime = System.currentTimeMillis();
 	}
 
 	/**
@@ -176,7 +189,7 @@ class GwAccountHolder {
 	 * 日结算
 	 */
 	protected void dailySettlement() {
-
+		// FIXME Not done
 		simGateway.save();
 	}
 

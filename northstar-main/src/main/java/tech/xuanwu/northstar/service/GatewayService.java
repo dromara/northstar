@@ -266,6 +266,21 @@ public class GatewayService implements InitializingBean {
 		return true;
 	}
 	
+	/**
+	 * 模拟出入金
+	 * @param money
+	 * @return
+	 */
+	public boolean simMoneyIO(String gatewayId, int money) {
+		if(money == 0 ) {
+			return false;
+		}
+		log.info("模拟账户[{}]，{}金：{}", gatewayId, money>0 ? "入": "出", Math.abs(money));
+		SimGateway gateway = (SimGateway) gatewayConnMgr.getGatewayById(gatewayId);
+		gateway.moneyIO(money);
+		return true;
+	}
+	
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		List<GatewayPO> result = gatewayRepo.findAll();

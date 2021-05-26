@@ -74,4 +74,9 @@ public class GatewayManagementController {
 		return new ResultBean<>(gatewayService.disconnect(gatewayId));
 	}
 	
+	@PostMapping("/moneyio")
+	public ResultBean<Boolean> simMoneyIO(String gatewayId, int money){
+		Assert.notNull(gatewayId, "网关ID不能为空");
+		return new ResultBean<>(gatewayService.simMoneyIO(gatewayId, money));
+	}
 }
