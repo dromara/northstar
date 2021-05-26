@@ -18,14 +18,15 @@ public class CodecUtils {
 	private static final String UTF8 = "UTF-8";
 	private static String salt = "";
 	static {
-		String javaIoTmpdir = System.getProperty("java.io.tmpdir");
-		File tempSalt = new File(javaIoTmpdir, "NorthstarRandomSalt");
+		String homeDir = System.getProperty("user.home");
+		File tempSalt = new File(homeDir, "NorthstarRandomSalt");
 		try {
 			if (tempSalt.exists()) {
 				salt = FileUtils.readFileToString(tempSalt, UTF8);
 
 			} else {
 				if (tempSalt.createNewFile()) {
+					log.info("创建随机盐文件：{}", homeDir);
 					Random r = new Random();
 					salt = String.format("%08d", r.nextInt(100000000));
 					FileUtils.write(tempSalt, salt, UTF8);

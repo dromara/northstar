@@ -129,7 +129,7 @@ public class GatewayService implements InitializingBean {
 					.setCtpApiSetting(ctpSetting)
 					.setGatewayType(gwType)
 					.build());
-		} else if(gatewayDescription.getGatewayType() == GatewayType.SIMULATION) {
+		} else if(gatewayDescription.getGatewayType() == GatewayType.SIM) {
 			String mdGatewayId = gatewayDescription.getRelativeGatewayId();
 			SimSettings settings = JSON.toJavaObject((JSON)JSON.toJSON(gatewayDescription.getSettings()), SimSettings.class);
 			GatewaySettingField gwSettings = GatewaySettingField.newBuilder()
@@ -274,11 +274,15 @@ public class GatewayService implements InitializingBean {
 			BeanUtils.copyProperties(po, gd);
 			String decodeStr = CodecUtils.decrypt((String) po.getSettings());
 			if(!JSON.isValid(decodeStr)) {
-				throw new IllegalStateException("解码字符串非法，很可能是临时文件夹" + System.getProperty("java.io.tmpdir") + File.separator
+				throw new IllegalStateException("解码字符串非法，很可能是临时文件夹" + System.getProperty("user.home") + File.separator
 						+ "NorthstarRandomSalt这个盐文件与加密时的不一致导致无法解码。解决办法：手动移除旧的Gateway数据，重新录入，并确保盐文件不会丢失。");
 			}
 			if(gd.getGatewayType() == GatewayType.CTP) {
 				CtpSettings settings = JSON.parseObject(decodeStr, CtpSettings.class);
+				gd.setSettings(settings);
+			}
+			if(gd.getGatewayType() == GatewayType.SIM) {
+				SimSettings settings = JSON.parseObject(decodeStr, SimSettings.class);
 				gd.setSettings(settings);
 			}
 			doCreateGateway(gd);

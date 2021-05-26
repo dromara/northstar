@@ -43,7 +43,6 @@ class GwAccountHolder {
 		this.posHolder = factory.newGwPositionHolder();
 		this.ticksOfCommission = ticksOfCommission;
 		this.simGateway = simGateway;
-		simGateway.save();
 	}
 
 	protected void updateTick(TickField tick) {
