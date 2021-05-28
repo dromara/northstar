@@ -47,8 +47,8 @@ public class ServiceConfig {
 	}
 	
 	@Bean
-	public DataSyncService createDataSyncService(ContractManager contractMgr, SocketIOMessageEngine msgEngine, 
+	public DataSyncService createDataSyncService(ContractManager contractMgr, SocketIOMessageEngine msgEngine, MarketDataRepository mdRepo,
 			ConcurrentHashMap<String, TradeDayAccount> accountMap) {
-		return new DataSyncService(contractMgr, msgEngine, accountMap);
+		return new DataSyncService(contractMgr, msgEngine, mdRepo, accountMap);
 	}
 }

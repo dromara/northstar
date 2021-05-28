@@ -1,16 +1,22 @@
 package tech.xuanwu.northstar.service;
 
-import java.lang.reflect.InvocationTargetException;
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 import lombok.extern.slf4j.Slf4j;
+import tech.xuanwu.northstar.common.constant.DateTimeConstant;
 import tech.xuanwu.northstar.common.event.NorthstarEvent;
 import tech.xuanwu.northstar.common.event.NorthstarEventType;
 import tech.xuanwu.northstar.domain.ContractManager;
 import tech.xuanwu.northstar.domain.TradeDayAccount;
 import tech.xuanwu.northstar.engine.broadcast.SocketIOMessageEngine;
+import tech.xuanwu.northstar.persistence.MarketDataRepository;
+import tech.xuanwu.northstar.persistence.po.MinBarDataPO;
+import tech.xuanwu.northstar.utils.ProtoBeanUtils;
 import xyz.redtorch.pb.CoreField.AccountField;
+import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.OrderField;
 import xyz.redtorch.pb.CoreField.PositionField;
@@ -25,11 +31,14 @@ public class DataSyncService {
 	
 	private ConcurrentHashMap<String, TradeDayAccount> accountMap;
 	
-	public DataSyncService(ContractManager contractMgr, SocketIOMessageEngine msgEngine,
+	private MarketDataRepository mdRepo;
+	
+	public DataSyncService(ContractManager contractMgr, SocketIOMessageEngine msgEngine, MarketDataRepository mdRepo,
 			ConcurrentHashMap<String, TradeDayAccount> accountMap) {
 		this.contractMgr = contractMgr;
 		this.msgEngine = msgEngine;
 		this.accountMap = accountMap;
+		this.mdRepo = mdRepo;
 	}
 	
 	/**
@@ -47,11 +56,8 @@ public class DataSyncService {
 	}
 	
 	/**
-	 * @throws InvocationTargetException 
-	 * @throws IllegalArgumentException 
-	 * @throws IllegalAccessException 
-	 * @throws SecurityException 
-	 * @throws NoSuchMethodException 
+	 * 异步更新账户信息
+	 * @throws Exception 
 	 * 
 	 */
 	public void asyncUpdateTradeAccount() throws Exception {
@@ -82,4 +88,40 @@ public class DataSyncService {
 			}
 		}
 	}
+	
+	/**
+	 * 异步加载历史Bar数据
+	 * @throws Exception 
+	 */
+	public void asyncLoadHistoryBarData(String gatewayId, String unifiedSymbol, LocalDate startDate, LocalDate endDate) throws Exception {
+		// 自动处理起止日期反转的情况
+		if(startDate.isAfter(endDate)) {
+			LocalDate tmpDate = startDate;
+			startDate = endDate;
+			endDate = tmpDate;
+		}
+		LocalDate curDate = startDate;
+		NorthstarEvent ne = new NorthstarEvent(NorthstarEventType.HIS_BAR, null);
+		while(!curDate.isAfter(endDate)) {
+			String date = curDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER);
+			List<MinBarDataPO> dayBars = mdRepo.loadDataByDate(gatewayId, unifiedSymbol, date);
+			for(MinBarDataPO po : dayBars) {
+				BarField.Builder bb = BarField.newBuilder();
+				ProtoBeanUtils.toProtoBean(bb, po);
+				ne.setData(bb.build());
+				msgEngine.emitEvent(ne, BarField.class);
+			}
+			
+			curDate = curDate.plusDays(1);
+		}
+		
+		// 历史行情结束信号
+		BarField bf = BarField.newBuilder()
+				.setGatewayId(gatewayId)
+				.setUnifiedSymbol(unifiedSymbol)
+				.build();
+		ne.setData(bf);
+		msgEngine.emitEvent(ne, BarField.class);
+	}
+	
 }
