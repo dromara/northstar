@@ -432,10 +432,10 @@ public class MdSpi extends CThostFtdcMdSpi {
 				String contractId = contract.getContractId();
 				String actionTime = dateTime.format(DateTimeConstant.T_FORMAT_WITH_MS_INT_FORMATTER);
 				double lastPrice = pDepthMarketData.getLastPrice();
-				int volume = pDepthMarketData.getVolume();
-				int volumeDelta = 0;
+				long volume = pDepthMarketData.getVolume();
+				long volumeDelta = 0;
 				if (preTickMap.containsKey(contractId)) {
-					volumeDelta = (int) (volume - preTickMap.get(contractId).getVolume());
+					volumeDelta = volume - preTickMap.get(contractId).getVolume();
 				}
 
 				Double turnover = pDepthMarketData.getTurnover();
@@ -530,6 +530,8 @@ public class MdSpi extends CThostFtdcMdSpi {
 
 				TickField tick = tickBuilder.build();
 				if(volumeDelta > volume) {
+					logger.warn("数据有效性检测：{}", isReasonable(volume, 0, volumeDelta));
+					logger.warn("异常值：{}", volumeDelta);
 					logger.warn("异常Tick数据：{}", tick.toString());
 				}
 

@@ -44,7 +44,9 @@ class GwAccountHolder {
 	public GwAccountHolder(String gatewayId, FastEventEngine feEngine, int ticksOfCommission, SimFactory factory,
 			SimGateway simGateway) {
 		this.feEngine = feEngine;
-		this.accBuilder = AccountField.newBuilder().setAccountId(gatewayId).setName(gatewayId + "模拟账户")
+		this.accBuilder = AccountField.newBuilder()
+				.setName(gatewayId + "模拟账户")
+				.setAccountId(gatewayId)
 				.setGatewayId(gatewayId);
 		this.orderHolder = factory.newGwOrderHolder();
 		this.posHolder = factory.newGwPositionHolder();
@@ -172,6 +174,7 @@ class GwAccountHolder {
 	
 	protected SimAccountPO convertTo() {
 		SimAccountPO po = new SimAccountPO();
+		po.setGatewayId(accBuilder.getGatewayId());
 		po.setAccountData(accBuilder.build().toByteArray());
 		po.setPositionData(posHolder.getPositions()
 				.stream()

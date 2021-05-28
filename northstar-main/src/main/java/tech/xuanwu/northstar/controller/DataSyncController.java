@@ -37,8 +37,8 @@ public class DataSyncController {
 		if(StringUtils.isEmpty(endDate)) {
 			endDate = LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER);
 		}
-		LocalDate dateStart = LocalDate.parse(startDate);
-		LocalDate dateEnd = LocalDate.parse(endDate);
+		LocalDate dateStart = LocalDate.parse(startDate, DateTimeConstant.D_FORMAT_INT_FORMATTER);
+		LocalDate dateEnd = LocalDate.parse(endDate, DateTimeConstant.D_FORMAT_INT_FORMATTER);
 		service.asyncLoadHistoryBarData(gatewayId, unifiedSymbol, dateStart, dateEnd);
 		return new ResultBean<>(null);
 	}

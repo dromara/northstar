@@ -33,7 +33,13 @@ public class SimGatewayLocalImpl implements SimGateway{
 		this.feEngine = feEngine;
 		this.gatewaySetting = gatewaySetting;
 		this.simAccRepo = simAccRepo;
-		this.accountHolder = factory.newGwAccountHolder(this);
+		this.accountHolder = factory.newGwAccountHolder(this);	
+		if(load()) {
+			log.info("加载已有的模拟账户：{}", gatewaySetting.getGatewayId());
+		}else {
+			log.info("新建模拟账户：{}", gatewaySetting.getGatewayId());
+		}
+		
 	}
 
 	@Override
