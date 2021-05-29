@@ -3,7 +3,6 @@ package tech.xuanwu.northstar.handler.internal;
 import tech.xuanwu.northstar.common.event.NorthstarEvent;
 import tech.xuanwu.northstar.common.event.NorthstarEventType;
 import tech.xuanwu.northstar.common.exception.NoSuchElementException;
-import tech.xuanwu.northstar.common.exception.TradeException;
 import tech.xuanwu.northstar.gateway.api.TradeGateway;
 import tech.xuanwu.northstar.handler.AbstractEventHandler;
 import tech.xuanwu.northstar.handler.GenericEventHandler;

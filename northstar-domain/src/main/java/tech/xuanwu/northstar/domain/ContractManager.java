@@ -16,7 +16,6 @@ import com.google.common.collect.Table;
 
 import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.common.exception.NoSuchElementException;
-import tech.xuanwu.northstar.common.utils.ContractNameResolver;
 import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
 

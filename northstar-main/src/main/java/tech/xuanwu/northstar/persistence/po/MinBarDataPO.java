@@ -1,8 +1,5 @@
 package tech.xuanwu.northstar.persistence.po;
 
-import java.util.List;
-
-import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import lombok.AllArgsConstructor;
