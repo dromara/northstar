@@ -14,6 +14,7 @@ import tech.xuanwu.northstar.engine.broadcast.SocketIOMessageEngine;
 import tech.xuanwu.northstar.engine.event.DisruptorFastEventEngine;
 import tech.xuanwu.northstar.engine.event.DisruptorFastEventEngine.WaitStrategyEnum;
 import tech.xuanwu.northstar.engine.event.FastEventEngine;
+import tech.xuanwu.northstar.engine.index.IndexEngine;
 
 /**
  * 引擎配置
@@ -34,6 +35,12 @@ public class EngineConfig {
 	public FastEventEngine createEventEngine() {
 		log.info("创建EventEngine");
 		return new DisruptorFastEventEngine(WaitStrategyEnum.BlockingWaitStrategy);
+	}
+	
+	@Bean
+	public IndexEngine createIndexEngine(FastEventEngine feEngine) {
+		log.info("创建IndexEngine");
+		return new IndexEngine(feEngine);
 	}
 	
 	@Bean

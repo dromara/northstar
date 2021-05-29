@@ -26,7 +26,7 @@ import xyz.redtorch.pb.CoreField.TickField;
  * @author KevinHuangwl
  *
  */
-public class MarketDataHandler extends AbstractEventHandler implements GenericEventHandler {
+public class MarketBarDataHandler extends AbstractEventHandler implements GenericEventHandler {
 
 	/**
 	 * gateway -> unifiedSymbol -> generator
@@ -40,7 +40,7 @@ public class MarketDataHandler extends AbstractEventHandler implements GenericEv
 	
 	private ScheduledExecutorService execService = Executors.newScheduledThreadPool(1);
 	
-	public MarketDataHandler(FastEventEngine feEngine, MarketDataRepository mdRepo) {
+	public MarketBarDataHandler(FastEventEngine feEngine, MarketDataRepository mdRepo) {
 		this.feEngine = feEngine;
 		this.mdRepo = mdRepo;
 		this.execService.scheduleWithFixedDelay(()->{

@@ -1,4 +1,4 @@
-package tech.xuanwu.northstar.engine.config;
+package tech.xuanwu.northstar.config;
 
 import java.io.IOException;
 
@@ -17,7 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Configuration
-public class SocketIOServerAutoConfiguration implements DisposableBean, InitializingBean {
+public class SocketIOServerConfig implements DisposableBean, InitializingBean {
 
 	@Value("${socketio.host}")
     private String host;

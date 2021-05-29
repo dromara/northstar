@@ -10,6 +10,7 @@ import org.springframework.data.mongodb.core.index.CompoundIndexDefinition;
 import org.springframework.data.mongodb.core.index.IndexDefinition;
 import org.springframework.stereotype.Repository;
 
+import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.persistence.po.MinBarDataPO;
 import tech.xuanwu.northstar.utils.MongoClientAdapter;
 import tech.xuanwu.northstar.utils.MongoUtils;
@@ -22,6 +23,7 @@ import tech.xuanwu.northstar.utils.MongoUtils;
  * 
  * @author KevinHuangwl
  */
+@Slf4j
 @Repository
 public class MarketDataRepository {
 
@@ -43,6 +45,7 @@ public class MarketDataRepository {
 		if(mongo.collectionExists(collectionName)) {
 			return;
 		}
+		log.info("初始化表：{}", collectionName);
 		mongo.createCollection(collectionName);
 		IndexDefinition indexDefinition = new CompoundIndexDefinition(new Document().append("unifiedSymbol", 1).append("tradingDay", 1));
 		mongo.indexOps(collectionName).ensureIndex(indexDefinition);
@@ -54,6 +57,7 @@ public class MarketDataRepository {
 	 * @param bar
 	 */
 	public void insert(MinBarDataPO bar) {
+		log.info("保存Bar数据：{}", bar.getUnifiedSymbol());
 		client.insert(DB, COLLECTION_PREFIX + bar.getGatewayId(), MongoUtils.beanToDocument(bar));
 	}
 	
@@ -62,6 +66,7 @@ public class MarketDataRepository {
 	 * @param barList
 	 */
 	public void insertMany(List<MinBarDataPO> barList) {
+		log.info("批量保存Bar数据：{}条", barList.size());
 		List<Document> data = barList.stream()
 				.map(bar -> MongoUtils.beanToDocument(bar))
 				.collect(Collectors.toList());
@@ -79,6 +84,7 @@ public class MarketDataRepository {
 		List<Document> resultList = client.find(DB, COLLECTION_PREFIX + gatewayId, new Document()
 				.append("unifiedSymbol", unifiedSymbol)
 				.append("tradingDay", tradeDay));
+		log.info("[{}]-[{}]-[{}] 加载历史数据：{}条", gatewayId, unifiedSymbol, tradeDay, resultList.size());
 		return resultList.stream().map(doc -> MongoUtils.documentToBean(doc, MinBarDataPO.class)).collect(Collectors.toList());
 	}
 

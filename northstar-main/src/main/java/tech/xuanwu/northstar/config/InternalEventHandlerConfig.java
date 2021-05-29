@@ -10,11 +10,11 @@ import tech.xuanwu.northstar.common.event.InternalEventBus;
 import tech.xuanwu.northstar.common.event.MarketDataEventBus;
 import tech.xuanwu.northstar.domain.ContractManager;
 import tech.xuanwu.northstar.domain.TradeDayAccount;
-import tech.xuanwu.northstar.engine.broadcast.SocketIOMessageEngine;
 import tech.xuanwu.northstar.engine.event.FastEventEngine;
+import tech.xuanwu.northstar.engine.index.IndexEngine;
 import tech.xuanwu.northstar.factories.TradeDayAccountFactory;
 import tech.xuanwu.northstar.handler.data.IndexContractHandler;
-import tech.xuanwu.northstar.handler.data.MarketDataHandler;
+import tech.xuanwu.northstar.handler.data.MarketBarDataHandler;
 import tech.xuanwu.northstar.handler.internal.AccountHandler;
 import tech.xuanwu.northstar.handler.internal.ConnectionHandler;
 import tech.xuanwu.northstar.handler.internal.ContractHandler;
@@ -40,8 +40,8 @@ public class InternalEventHandlerConfig {
 	
 	@Bean
 	public ContractHandler createContractEventHandler(InternalEventBus eventBus, GatewayAndConnectionManager gatewayConnMgr,
-			ContractManager contractMgr) {
-		ContractHandler handler = new ContractHandler(contractMgr, gatewayConnMgr);
+			ContractManager contractMgr, IndexEngine idxEngine) {
+		ContractHandler handler = new ContractHandler(contractMgr, gatewayConnMgr, idxEngine);
 		log.info("注册：ContractHandler");
 		eventBus.register(handler);
 		return handler;
@@ -71,17 +71,16 @@ public class InternalEventHandlerConfig {
 	/* MarketData类事件 */
 	/////////////////////
 	@Bean
-	public IndexContractHandler createIndexContractHandler(MarketDataEventBus eventBus, GatewayAndConnectionManager gatewayConnMgr,
-			ContractManager contractMgr, FastEventEngine fastEventEngine, SocketIOMessageEngine msgEngine) {
-		IndexContractHandler handler = new IndexContractHandler(gatewayConnMgr, contractMgr, fastEventEngine, msgEngine);
+	public IndexContractHandler createIndexContractHandler(MarketDataEventBus eventBus, IndexEngine idxEngine) {
+		IndexContractHandler handler = new IndexContractHandler(idxEngine);
 		log.info("注册：IndexContractHandler");
 		eventBus.register(handler);
 		return handler;
 	}
 	
 	@Bean
-	public MarketDataHandler createMarketDataHandler(MarketDataEventBus eventBus, FastEventEngine feEngine, MarketDataRepository mdRepo) {
-		MarketDataHandler handler = new MarketDataHandler(feEngine, mdRepo);
+	public MarketBarDataHandler createMarketDataHandler(MarketDataEventBus eventBus, FastEventEngine feEngine, MarketDataRepository mdRepo) {
+		MarketBarDataHandler handler = new MarketBarDataHandler(feEngine, mdRepo);
 		log.info("注册：MarketDataHandler");
 		eventBus.register(handler);
 		return handler;

@@ -47,6 +47,10 @@ public enum NorthstarEventType {
 	 */
 	CONTRACT,
 	/**
+	 * 指数合约事件
+	 */
+	IDX_CONTRACT,
+	/**
 	 * 合约加载完成事件
 	 */
 	CONTRACT_LOADED,

@@ -1,7 +1,7 @@
-package tech.xuanwu.northstar.domain;
+package tech.xuanwu.northstar.engine.index;
 
 import java.util.Arrays;
-import java.util.List;
+import java.util.Collection;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.ToDoubleFunction;
@@ -27,12 +27,12 @@ public class IndexContract {
 	private volatile long lastTickTimestamp = System.currentTimeMillis();
 	private volatile TickField lastTick = TickField.newBuilder().build();
 
-	public IndexContract(List<ContractField> seriesContracts, TickEventHandler tickHandler) {
+	public IndexContract(Collection<ContractField> seriesContracts, TickEventHandler tickHandler) {
 		if(seriesContracts.isEmpty()) {
 			throw new IllegalStateException("合约个数为零");
 		}
 		this.tickHandler = tickHandler;
-		ContractField proto = seriesContracts.get(0);
+		ContractField proto = seriesContracts.iterator().next();
 		
 		String symbolName = proto.getSymbol().replaceAll("\\d+", "");
 		String chnName = ContractNameResolver.getCNSymbolName(symbolName);

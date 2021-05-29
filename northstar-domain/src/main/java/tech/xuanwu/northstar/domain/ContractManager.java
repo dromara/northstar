@@ -29,10 +29,10 @@ public class ContractManager {
 	 * gateway -> symbol -> contract
 	 */
 	private Table<String, String, ContractField> contractTbl = HashBasedTable.create();
-	/**
-	 * gateway -> symbolGroup -> contractList
-	 */
-	private Table<String, String, List<ContractField>> contractGroupTbl = HashBasedTable.create();
+//	/**
+//	 * gateway -> symbolGroup -> contractList
+//	 */
+//	private Table<String, String, List<ContractField>> contractGroupTbl = HashBasedTable.create();
 	/**
 	 * unifiedSymbol -> contract
 	 */
@@ -54,7 +54,7 @@ public class ContractManager {
 		String gatewayId = contract.getGatewayId();
 		String symbol = contract.getSymbol();
 		String unifiedSymbol = contract.getUnifiedSymbol();
-		groupContract(contract);
+//		groupContract(contract);
 		WeakReference<ContractField> ref = new WeakReference<>(contract);
 		contractMap.put(unifiedSymbol, ref);
 		contractTbl.put(gatewayId, symbol, contract);
@@ -63,26 +63,26 @@ public class ContractManager {
 		return true;
 	}
 	
-	private void groupContract(ContractField contract) {
-		String gatewayId = contract.getGatewayId();
-		String symbol = contract.getSymbol();
-		String symbolGroup = ContractNameResolver.symbolToSymbolGroup(symbol);
-		if(!contractGroupTbl.contains(gatewayId, symbolGroup)) {
-			contractGroupTbl.put(gatewayId, symbolGroup, new LinkedList<>());
-		}
-		contractGroupTbl.get(gatewayId, symbolGroup).add(contract);
-	}
+//	private void groupContract(ContractField contract) {
+//		String gatewayId = contract.getGatewayId();
+//		String symbol = contract.getSymbol();
+//		String symbolGroup = ContractNameResolver.symbolToSymbolGroup(symbol);
+//		if(!contractGroupTbl.contains(gatewayId, symbolGroup)) {
+//			contractGroupTbl.put(gatewayId, symbolGroup, new LinkedList<>());
+//		}
+//		contractGroupTbl.get(gatewayId, symbolGroup).add(contract);
+//	}
 	
-	public List<ContractField> getContractsByGroup(String gatewayId, String symbolGroup){
-		return contractGroupTbl.get(gatewayId, symbolGroup);
-	}
-	
-	public List<String> getContractGroup(String gatewayId){
-		return contractGroupTbl.row(gatewayId)
-				.keySet()
-				.stream()
-				.collect(Collectors.toList());
-	}
+//	public List<ContractField> getContractsByGroup(String gatewayId, String symbolGroup){
+//		return contractGroupTbl.get(gatewayId, symbolGroup);
+//	}
+//	
+//	public List<String> getContractGroup(String gatewayId){
+//		return contractGroupTbl.row(gatewayId)
+//				.keySet()
+//				.stream()
+//				.collect(Collectors.toList());
+//	}
 	
 	public ContractField getContract(String gatewayId, String symbol) {
 		ContractField result = contractTbl.get(gatewayId, symbol);
