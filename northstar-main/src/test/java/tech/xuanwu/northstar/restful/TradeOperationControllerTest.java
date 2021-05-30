@@ -22,7 +22,6 @@ import tech.xuanwu.northstar.common.exception.TradeException;
 import tech.xuanwu.northstar.common.model.OrderRecall;
 import tech.xuanwu.northstar.common.model.OrderRequest;
 import tech.xuanwu.northstar.common.model.OrderRequest.TradeOperation;
-import tech.xuanwu.northstar.restful.TradeOperationController;
 import tech.xuanwu.northstar.service.AccountService;
 
 @RunWith(SpringRunner.class)

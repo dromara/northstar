@@ -15,9 +15,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import tech.xuanwu.northstar.common.constant.GatewayUsage;
 import tech.xuanwu.northstar.common.model.GatewayDescription;
+import tech.xuanwu.northstar.common.model.ResultBean;
 import tech.xuanwu.northstar.domain.ContractManager;
 import tech.xuanwu.northstar.engine.broadcast.SocketIOMessageEngine;
-import tech.xuanwu.northstar.restful.common.ResultBean;
 import tech.xuanwu.northstar.service.GatewayService;
 
 @RequestMapping("/mgt")

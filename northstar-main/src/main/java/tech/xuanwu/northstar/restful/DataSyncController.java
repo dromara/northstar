@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import cn.hutool.core.lang.Assert;
 import tech.xuanwu.northstar.common.constant.DateTimeConstant;
-import tech.xuanwu.northstar.restful.common.ResultBean;
+import tech.xuanwu.northstar.common.model.ResultBean;
 import tech.xuanwu.northstar.service.DataSyncService;
 
 @RequestMapping("/data")

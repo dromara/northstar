@@ -11,7 +11,7 @@ import tech.xuanwu.northstar.common.exception.InsufficientException;
 import tech.xuanwu.northstar.common.exception.TradeException;
 import tech.xuanwu.northstar.common.model.OrderRecall;
 import tech.xuanwu.northstar.common.model.OrderRequest;
-import tech.xuanwu.northstar.restful.common.ResultBean;
+import tech.xuanwu.northstar.common.model.ResultBean;
 import tech.xuanwu.northstar.service.AccountService;
 
 /**

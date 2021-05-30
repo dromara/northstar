@@ -14,7 +14,7 @@ import org.springframework.util.StringUtils;
 
 import tech.xuanwu.northstar.common.constant.ReturnCode;
 import tech.xuanwu.northstar.common.model.NsUser;
-import tech.xuanwu.northstar.restful.common.ResultBean;
+import tech.xuanwu.northstar.common.model.ResultBean;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)

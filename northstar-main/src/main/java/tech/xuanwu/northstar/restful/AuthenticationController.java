@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import tech.xuanwu.northstar.common.constant.Constants;
 import tech.xuanwu.northstar.common.exception.AuthenticationException;
 import tech.xuanwu.northstar.common.model.NsUser;
-import tech.xuanwu.northstar.restful.common.ResultBean;
+import tech.xuanwu.northstar.common.model.ResultBean;
 
 /**
  * 身份认证

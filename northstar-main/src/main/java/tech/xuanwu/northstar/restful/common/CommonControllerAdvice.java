@@ -11,6 +11,7 @@ import tech.xuanwu.northstar.common.exception.InsufficientException;
 import tech.xuanwu.northstar.common.exception.NoSuchElementException;
 import tech.xuanwu.northstar.common.exception.TradeException;
 import tech.xuanwu.northstar.common.exception.ValueMismatchException;
+import tech.xuanwu.northstar.common.model.ResultBean;
 
 /**
  * 统一处理器

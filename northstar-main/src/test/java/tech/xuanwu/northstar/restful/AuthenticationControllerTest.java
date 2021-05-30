@@ -20,7 +20,6 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import com.alibaba.fastjson.JSON;
 
 import tech.xuanwu.northstar.common.model.NsUser;
-import tech.xuanwu.northstar.restful.AuthenticationController;
 
 @RunWith(SpringRunner.class)
 @WebAppConfiguration

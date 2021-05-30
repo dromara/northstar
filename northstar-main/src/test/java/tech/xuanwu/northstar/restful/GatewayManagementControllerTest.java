@@ -22,7 +22,6 @@ import com.alibaba.fastjson.JSON;
 import tech.xuanwu.northstar.common.constant.GatewayType;
 import tech.xuanwu.northstar.common.constant.GatewayUsage;
 import tech.xuanwu.northstar.common.model.GatewayDescription;
-import tech.xuanwu.northstar.restful.GatewayManagementController;
 import tech.xuanwu.northstar.service.GatewayService;
 
 @RunWith(SpringRunner.class)
