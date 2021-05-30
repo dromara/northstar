@@ -1,4 +1,4 @@
-package tech.xuanwu.northstar.controller;
+package tech.xuanwu.northstar.restful;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
@@ -11,7 +11,7 @@ import tech.xuanwu.northstar.common.exception.InsufficientException;
 import tech.xuanwu.northstar.common.exception.TradeException;
 import tech.xuanwu.northstar.common.model.OrderRecall;
 import tech.xuanwu.northstar.common.model.OrderRequest;
-import tech.xuanwu.northstar.controller.common.ResultBean;
+import tech.xuanwu.northstar.restful.common.ResultBean;
 import tech.xuanwu.northstar.service.AccountService;
 
 /**

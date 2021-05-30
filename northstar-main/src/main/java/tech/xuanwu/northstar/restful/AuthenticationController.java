@@ -1,4 +1,4 @@
-package tech.xuanwu.northstar.controller;
+package tech.xuanwu.northstar.restful;
 
 import javax.servlet.http.HttpSession;
 
@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import tech.xuanwu.northstar.common.constant.Constants;
 import tech.xuanwu.northstar.common.exception.AuthenticationException;
 import tech.xuanwu.northstar.common.model.NsUser;
-import tech.xuanwu.northstar.controller.common.ResultBean;
+import tech.xuanwu.northstar.restful.common.ResultBean;
 
 /**
  * 身份认证

@@ -31,9 +31,9 @@ import tech.xuanwu.northstar.common.constant.ReturnCode;
 import tech.xuanwu.northstar.common.model.CtpSettings;
 import tech.xuanwu.northstar.common.model.GatewayDescription;
 import tech.xuanwu.northstar.common.model.NsUser;
-import tech.xuanwu.northstar.controller.common.ResultBean;
 import tech.xuanwu.northstar.persistence.GatewayRepository;
 import tech.xuanwu.northstar.persistence.po.GatewayPO;
+import tech.xuanwu.northstar.restful.common.ResultBean;
 
 @Slf4j
 @RunWith(SpringRunner.class)

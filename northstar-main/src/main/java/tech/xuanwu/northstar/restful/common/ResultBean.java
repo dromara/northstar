@@ -1,4 +1,4 @@
-package tech.xuanwu.northstar.controller.common;
+package tech.xuanwu.northstar.restful.common;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

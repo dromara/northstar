@@ -1,4 +1,4 @@
-package tech.xuanwu.northstar.controller.common;
+package tech.xuanwu.northstar.restful.common;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.ExceptionHandler;

@@ -1,4 +1,4 @@
-package tech.xuanwu.northstar.controller;
+package tech.xuanwu.northstar.restful;
 
 import java.time.LocalDate;
 
@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import cn.hutool.core.lang.Assert;
 import tech.xuanwu.northstar.common.constant.DateTimeConstant;
-import tech.xuanwu.northstar.controller.common.ResultBean;
+import tech.xuanwu.northstar.restful.common.ResultBean;
 import tech.xuanwu.northstar.service.DataSyncService;
 
 @RequestMapping("/data")

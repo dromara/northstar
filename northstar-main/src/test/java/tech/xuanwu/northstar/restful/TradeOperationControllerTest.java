@@ -1,4 +1,4 @@
-package tech.xuanwu.northstar.controller;
+package tech.xuanwu.northstar.restful;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -22,6 +22,7 @@ import tech.xuanwu.northstar.common.exception.TradeException;
 import tech.xuanwu.northstar.common.model.OrderRecall;
 import tech.xuanwu.northstar.common.model.OrderRequest;
 import tech.xuanwu.northstar.common.model.OrderRequest.TradeOperation;
+import tech.xuanwu.northstar.restful.TradeOperationController;
 import tech.xuanwu.northstar.service.AccountService;
 
 @RunWith(SpringRunner.class)

@@ -1,4 +1,4 @@
-package tech.xuanwu.northstar.controller;
+package tech.xuanwu.northstar.restful;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -22,6 +22,7 @@ import com.alibaba.fastjson.JSON;
 import tech.xuanwu.northstar.common.constant.GatewayType;
 import tech.xuanwu.northstar.common.constant.GatewayUsage;
 import tech.xuanwu.northstar.common.model.GatewayDescription;
+import tech.xuanwu.northstar.restful.GatewayManagementController;
 import tech.xuanwu.northstar.service.GatewayService;
 
 @RunWith(SpringRunner.class)

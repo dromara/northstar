@@ -1,4 +1,4 @@
-package tech.xuanwu.northstar.controller;
+package tech.xuanwu.northstar.restful;
 
 import static org.hamcrest.CoreMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -20,6 +20,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import com.alibaba.fastjson.JSON;
 
 import tech.xuanwu.northstar.common.model.NsUser;
+import tech.xuanwu.northstar.restful.AuthenticationController;
 
 @RunWith(SpringRunner.class)
 @WebAppConfiguration
