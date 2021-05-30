@@ -9,6 +9,7 @@ import java.util.concurrent.TimeUnit;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 
+import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.common.event.NorthstarEvent;
 import tech.xuanwu.northstar.common.event.NorthstarEventType;
 import tech.xuanwu.northstar.common.utils.BarGenerator;
@@ -26,6 +27,7 @@ import xyz.redtorch.pb.CoreField.TickField;
  * @author KevinHuangwl
  *
  */
+@Slf4j
 public class MarketBarDataHandler extends AbstractEventHandler implements GenericEventHandler {
 
 	/**
@@ -44,6 +46,10 @@ public class MarketBarDataHandler extends AbstractEventHandler implements Generi
 		this.feEngine = feEngine;
 		this.mdRepo = mdRepo;
 		this.execService.scheduleWithFixedDelay(()->{
+			if(bufData.size() == 0) {
+				log.debug("没有数据需要保存");
+				return;
+			}
 			LinkedList<MinBarDataPO> bufDataNew = new LinkedList<>();
 			LinkedList<MinBarDataPO> bufDataTemp = bufData;
 			bufData = bufDataNew;
