@@ -102,7 +102,9 @@ public class MarketDataRepository {
 		}
 		log.info("网关-[{}] 保存合约：{}条", contracts.get(0).getGatewayId(), contracts.size());
 		long start = System.currentTimeMillis();
-		mongo.insertAll(contracts);
+		for(ContractPO po : contracts) {
+			mongo.save(po);
+		}
 		log.info("合约保存成功，耗时{}毫秒", System.currentTimeMillis() - start);
 	}
 
