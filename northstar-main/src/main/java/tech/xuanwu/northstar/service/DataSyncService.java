@@ -4,15 +4,18 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.common.constant.DateTimeConstant;
 import tech.xuanwu.northstar.common.event.NorthstarEvent;
 import tech.xuanwu.northstar.common.event.NorthstarEventType;
+import tech.xuanwu.northstar.common.model.SimpleContractInfo;
 import tech.xuanwu.northstar.domain.ContractManager;
 import tech.xuanwu.northstar.domain.TradeDayAccount;
 import tech.xuanwu.northstar.engine.broadcast.SocketIOMessageEngine;
 import tech.xuanwu.northstar.persistence.MarketDataRepository;
+import tech.xuanwu.northstar.persistence.po.ContractPO;
 import tech.xuanwu.northstar.persistence.po.MinBarDataPO;
 import tech.xuanwu.northstar.utils.ProtoBeanUtils;
 import xyz.redtorch.pb.CoreField.AccountField;
@@ -124,4 +127,14 @@ public class DataSyncService {
 		msgEngine.emitEvent(ne, BarField.class);
 	}
 	
+	/**
+	 * 获取可用合约
+	 * @return
+	 */
+	public List<SimpleContractInfo> getAvailableContracts(){
+		List<ContractPO> resultList = mdRepo.getAvailableContracts();
+		return resultList.stream()
+				.map(po -> new SimpleContractInfo(po.getUnifiedSymbol(), po.getName(), po.getGatewayId()))
+				.collect(Collectors.toList());
+	}
 }

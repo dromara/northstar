@@ -1,6 +1,7 @@
 package tech.xuanwu.northstar.persistence;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.bson.Document;
@@ -8,9 +9,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.index.CompoundIndexDefinition;
 import org.springframework.data.mongodb.core.index.IndexDefinition;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Repository;
 
 import lombok.extern.slf4j.Slf4j;
+import tech.xuanwu.northstar.persistence.po.ContractPO;
 import tech.xuanwu.northstar.persistence.po.MinBarDataPO;
 import tech.xuanwu.northstar.utils.MongoClientAdapter;
 import tech.xuanwu.northstar.utils.MongoUtils;
@@ -87,5 +91,30 @@ public class MarketDataRepository {
 		log.info("[{}]-[{}]-[{}] 加载历史数据：{}条", gatewayId, unifiedSymbol, tradeDay, resultList.size());
 		return resultList.stream().map(doc -> MongoUtils.documentToBean(doc, MinBarDataPO.class)).collect(Collectors.toList());
 	}
+	
+	/**
+	 * 批量保存合约信息
+	 * @param contracts
+	 */
+	public void batchSaveContracts(List<ContractPO> contracts) {
+		if(contracts.size() < 1) {
+			return;
+		}
+		log.info("网关-[{}] 保存合约：{}条", contracts.get(0).getGatewayId(), contracts.size());
+		long start = System.currentTimeMillis();
+		mongo.insertAll(contracts);
+		log.info("合约保存成功，耗时{}毫秒", System.currentTimeMillis() - start);
+	}
 
+	private static final long DAY14MILLISEC = TimeUnit.DAYS.toMillis(14);
+	
+	/**
+	 * 查询有效合约列表
+	 * @return
+	 */
+	public List<ContractPO> getAvailableContracts(){
+		// 查询十四天内的数据集
+		long day14Ago = System.currentTimeMillis() - DAY14MILLISEC;
+		return mongo.find(Query.query(Criteria.where("recordTimestamp").gt(day14Ago)), ContractPO.class);
+	}
 }

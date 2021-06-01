@@ -40,8 +40,8 @@ public class InternalEventHandlerConfig {
 	
 	@Bean
 	public ContractHandler createContractEventHandler(InternalEventBus eventBus, GatewayAndConnectionManager gatewayConnMgr,
-			ContractManager contractMgr, IndexEngine idxEngine) {
-		ContractHandler handler = new ContractHandler(contractMgr, gatewayConnMgr, idxEngine);
+			ContractManager contractMgr, IndexEngine idxEngine, MarketDataRepository mdRepo) {
+		ContractHandler handler = new ContractHandler(contractMgr, gatewayConnMgr, idxEngine, mdRepo);
 		log.info("注册：ContractHandler");
 		eventBus.register(handler);
 		return handler;

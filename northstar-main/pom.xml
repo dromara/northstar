@@ -36,6 +36,10 @@
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>tech.xuan-wu</groupId>
+			<artifactId>northstar-strategy-cta</artifactId>
+		</dependency>
+		<dependency>
 	        <groupId>org.projectlombok</groupId>
 	        <artifactId>lombok</artifactId>
 	    </dependency>
