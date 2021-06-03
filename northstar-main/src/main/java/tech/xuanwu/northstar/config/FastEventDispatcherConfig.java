@@ -21,14 +21,14 @@ import tech.xuanwu.northstar.engine.event.handler.MarketDataDispatcher;
 public class FastEventDispatcherConfig {
 
 	@Bean
-	public NorthstarEventDispatcher createInternalDispatcher(FastEventEngine ee, InternalEventBus eb) {
+	public NorthstarEventDispatcher internalDispatcher(FastEventEngine ee, InternalEventBus eb) {
 		NorthstarEventDispatcher handler = new InternalDispatcher(eb);
 		ee.addHandler(handler);
 		return handler;
 	}
 	
 	@Bean
-	public NorthstarEventDispatcher createMarketDataDispatcher(FastEventEngine ee, MarketDataEventBus mdeb) {
+	public NorthstarEventDispatcher marketDataDispatcher(FastEventEngine ee, MarketDataEventBus mdeb) {
 		NorthstarEventDispatcher handler = new MarketDataDispatcher(mdeb);
 		ee.addHandler(handler);
 		return handler;
@@ -49,7 +49,7 @@ public class FastEventDispatcherConfig {
 //	}
 	
 	@Bean
-	public NorthstarEventDispatcher createBroadcastEventDispatcher(FastEventEngine ee, SocketIOMessageEngine msgEngine) {
+	public NorthstarEventDispatcher broadcastEventDispatcher(FastEventEngine ee, SocketIOMessageEngine msgEngine) {
 		NorthstarEventDispatcher handler = new BroadcastDispatcher(msgEngine);
 		ee.addHandler(handler);
 		return handler;

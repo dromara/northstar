@@ -30,7 +30,7 @@ public class InternalEventHandlerConfig {
 	/* Internal类事件 */
 	///////////////////
 	@Bean
-	public AccountHandler createAccountEventHandler(InternalEventBus eventBus, ContractManager contractMgr,
+	public AccountHandler accountEventHandler(InternalEventBus eventBus, ContractManager contractMgr,
 			ConcurrentHashMap<String, TradeDayAccount> accountMap) {
 		AccountHandler handler = new AccountHandler(accountMap, new TradeDayAccountFactory(eventBus, contractMgr));
 		log.info("注册：AccountHandler");
@@ -39,7 +39,7 @@ public class InternalEventHandlerConfig {
 	}
 	
 	@Bean
-	public ContractHandler createContractEventHandler(InternalEventBus eventBus, GatewayAndConnectionManager gatewayConnMgr,
+	public ContractHandler contractEventHandler(InternalEventBus eventBus, GatewayAndConnectionManager gatewayConnMgr,
 			ContractManager contractMgr, IndexEngine idxEngine, MarketDataRepository mdRepo) {
 		ContractHandler handler = new ContractHandler(contractMgr, gatewayConnMgr, idxEngine, mdRepo);
 		log.info("注册：ContractHandler");
@@ -48,7 +48,7 @@ public class InternalEventHandlerConfig {
 	}
 	
 	@Bean
-	public ConnectionHandler createConnectionEventHandler(InternalEventBus eventBus, GatewayAndConnectionManager gatewayConnMgr,
+	public ConnectionHandler connectionEventHandler(InternalEventBus eventBus, GatewayAndConnectionManager gatewayConnMgr,
 			ContractManager contractMgr) {
 		ConnectionHandler handler = new ConnectionHandler(gatewayConnMgr, contractMgr);
 		log.info("注册：ConnectionHandler");
@@ -57,7 +57,7 @@ public class InternalEventHandlerConfig {
 	}
 	
 	@Bean
-	public TradeHandler createTradeEventHandler(InternalEventBus eventBus, GatewayAndConnectionManager gatewayConnMgr) {
+	public TradeHandler tradeEventHandler(InternalEventBus eventBus, GatewayAndConnectionManager gatewayConnMgr) {
 		TradeHandler handler = new TradeHandler(gatewayConnMgr);
 		log.info("注册：TradeHandler");
 		eventBus.register(handler);
@@ -71,7 +71,7 @@ public class InternalEventHandlerConfig {
 	/* MarketData类事件 */
 	/////////////////////
 	@Bean
-	public IndexContractHandler createIndexContractHandler(MarketDataEventBus eventBus, IndexEngine idxEngine) {
+	public IndexContractHandler indexContractHandler(MarketDataEventBus eventBus, IndexEngine idxEngine) {
 		IndexContractHandler handler = new IndexContractHandler(idxEngine);
 		log.info("注册：IndexContractHandler");
 		eventBus.register(handler);
@@ -79,7 +79,7 @@ public class InternalEventHandlerConfig {
 	}
 	
 	@Bean
-	public MarketBarDataHandler createMarketDataHandler(MarketDataEventBus eventBus, FastEventEngine feEngine, MarketDataRepository mdRepo) {
+	public MarketBarDataHandler marketDataHandler(MarketDataEventBus eventBus, FastEventEngine feEngine, MarketDataRepository mdRepo) {
 		MarketBarDataHandler handler = new MarketBarDataHandler(feEngine, mdRepo);
 		log.info("注册：MarketDataHandler");
 		eventBus.register(handler);
