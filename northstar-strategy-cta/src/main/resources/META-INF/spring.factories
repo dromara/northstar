@@ -1,0 +1,1 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=tech.xuanwu.northstar.strategy.cta.config.CtaMetaAutoConfiguration
