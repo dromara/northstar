@@ -20,14 +20,13 @@ public class TimeExceededRule implements RiskControlRule, DynamicParamsAware{
 
 	@Override
 	public DynamicParams getDynamicParams() {
-		// TODO Auto-generated method stub
-		return null;
+		return new InitParams();
 	}
 
 	@Override
 	public void initWithParams(DynamicParams params) {
-		// TODO Auto-generated method stub
-		
+		InitParams initParams = (InitParams) params;
+		this.timeoutInterval = initParams.timeoutSeconds;
 	}
 	
 	public class InitParams extends DynamicParams{

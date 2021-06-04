@@ -20,14 +20,13 @@ public class PriceExceededRule implements RiskControlRule, DynamicParamsAware{
 
 	@Override
 	public DynamicParams getDynamicParams() {
-		// TODO Auto-generated method stub
-		return null;
+		return new InitParams();
 	}
 
 	@Override
 	public void initWithParams(DynamicParams params) {
-		// TODO Auto-generated method stub
-		
+		InitParams initParams = (InitParams) params;
+		this.priceDifTolleranceInTick = initParams.priceDifTolleranceInTick;
 	}
 	
 	public class InitParams extends DynamicParams{

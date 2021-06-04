@@ -9,7 +9,7 @@ public class CtaStrategyModule {
 
 	private ComponentAndParamsPair signalPolicy;
 	
-	private List<ComponentAndParamsPair> riskControlPolicyList;
+	private List<ComponentAndParamsPair> riskControlRules;
 	
 	private ComponentAndParamsPair dealer;
 	

@@ -25,8 +25,7 @@ public class UseMarginExceededRule implements RiskControlRule, DynamicParamsAwar
 
 	@Override
 	public DynamicParams getDynamicParams() {
-		// TODO Auto-generated method stub
-		return null;
+		return new InitParams();
 	}
 
 	@Override

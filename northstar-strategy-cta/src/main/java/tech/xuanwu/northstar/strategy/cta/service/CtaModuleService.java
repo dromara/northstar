@@ -9,6 +9,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 
 import tech.xuanwu.northstar.strategy.common.Dealer;
+import tech.xuanwu.northstar.strategy.common.DynamicParamsAware;
 import tech.xuanwu.northstar.strategy.common.RiskControlRule;
 import tech.xuanwu.northstar.strategy.common.SignalPolicy;
 import tech.xuanwu.northstar.strategy.common.annotation.StrategicComponent;
@@ -53,14 +54,13 @@ public class CtaModuleService implements InitializingBean{
 		return getComponentMeta(Dealer.class);
 	}
 	
-	private List<ComponentMetaInfo> getComponentMeta(Class<?> componentClass){
+	private List<ComponentMetaInfo> getComponentMeta(Class<?> clz){
 		Map<String, Object> objMap = ctx.getBeansWithAnnotation(StrategicComponent.class);
 		List<ComponentMetaInfo> result = new ArrayList<>(objMap.size());
 		for(Entry<String, Object> e : objMap.entrySet()) {
-			if(e.getValue().getClass().isAssignableFrom(componentClass)) {
-				SignalPolicy policy = (SignalPolicy) e.getValue();
-				StrategicComponent anno = policy.getClass().getAnnotation(StrategicComponent.class);
-				result.add(new ComponentMetaInfo(anno.value(), policy.getClass()));
+			if(clz.isAssignableFrom(e.getValue().getClass())) {
+				StrategicComponent anno = e.getValue().getClass().getAnnotation(StrategicComponent.class);
+				result.add(new ComponentMetaInfo(anno.value(), e.getValue().getClass()));
 			}
 		}
 		return result;
@@ -72,8 +72,8 @@ public class CtaModuleService implements InitializingBean{
 	 * @return
 	 */
 	public Map<String, ComponentField> getComponentParams(ComponentMetaInfo info){
-		SignalPolicy policy = (SignalPolicy) ctx.getBean(info.getClz());
-		DynamicParams params = policy.getDynamicParams();
+		DynamicParamsAware aware = (DynamicParamsAware) ctx.getBean(info.getClz());
+		DynamicParams params = aware.getDynamicParams();
 		return params.getMetaInfo();
 	}
 
