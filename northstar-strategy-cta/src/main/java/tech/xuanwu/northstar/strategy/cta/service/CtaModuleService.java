@@ -1,15 +1,21 @@
 package tech.xuanwu.northstar.strategy.cta.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.Map.Entry;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 
-import tech.xuanwu.northstar.strategy.common.DynamicParams;
+import tech.xuanwu.northstar.strategy.common.Dealer;
+import tech.xuanwu.northstar.strategy.common.RiskControlRule;
 import tech.xuanwu.northstar.strategy.common.SignalPolicy;
-import tech.xuanwu.northstar.strategy.cta.model.CtaStrategyModule;
+import tech.xuanwu.northstar.strategy.common.annotation.StrategicComponent;
+import tech.xuanwu.northstar.strategy.common.model.ComponentField;
+import tech.xuanwu.northstar.strategy.common.model.ComponentMetaInfo;
+import tech.xuanwu.northstar.strategy.common.model.CtaStrategyModule;
+import tech.xuanwu.northstar.strategy.common.model.DynamicParams;
 import tech.xuanwu.northstar.strategy.cta.persistence.StrategyModuleRepository;
 
 public class CtaModuleService implements InitializingBean{
@@ -27,27 +33,37 @@ public class CtaModuleService implements InitializingBean{
 	 * 查询可选的信号策略
 	 * @return
 	 */
-	public List<String> getRegisteredSignalPolicies(){
-		Map<String, SignalPolicy> policies = ctx.getBeansOfType(SignalPolicy.class);
-		return policies.values().stream()
-				.map(i -> i.name())
-				.collect(Collectors.toList());
+	public List<ComponentMetaInfo> getRegisteredSignalPolicies(){
+		return getComponentMeta(SignalPolicy.class);
+	}
+	
+	/**
+	 * 查询可选的风控规则
+	 * @return
+	 */
+	public List<ComponentMetaInfo> getRegisteredRiskControlRules(){
+		return getComponentMeta(RiskControlRule.class);
 	}
 	
 	/**
 	 * 查询可选的交易策略
 	 * @return
 	 */
-	public List<String> getRegisteredDealers(){
-		return null;
+	public List<ComponentMetaInfo> getRegisteredDealers(){
+		return getComponentMeta(Dealer.class);
 	}
 	
-	/**
-	 * 查询可选的风控策略
-	 * @return
-	 */
-	public List<String> getRegisteredRiskControlPolicies(){
-		return null;
+	private List<ComponentMetaInfo> getComponentMeta(Class<?> componentClass){
+		Map<String, Object> objMap = ctx.getBeansWithAnnotation(StrategicComponent.class);
+		List<ComponentMetaInfo> result = new ArrayList<>(objMap.size());
+		for(Entry<String, Object> e : objMap.entrySet()) {
+			if(e.getValue().getClass().isAssignableFrom(componentClass)) {
+				SignalPolicy policy = (SignalPolicy) e.getValue();
+				StrategicComponent anno = policy.getClass().getAnnotation(StrategicComponent.class);
+				result.add(new ComponentMetaInfo(anno.value(), policy.getClass()));
+			}
+		}
+		return result;
 	}
 	
 	/**
@@ -55,11 +71,10 @@ public class CtaModuleService implements InitializingBean{
 	 * @param name
 	 * @return
 	 */
-	public DynamicParams<?> getComponentParams(String name){
-		SignalPolicy policy = (SignalPolicy) ctx.getBean(name);
-		DynamicParams<?> params = policy.getDynamicParams();
-		params.metaToSource();
-		return params;
+	public Map<String, ComponentField> getComponentParams(ComponentMetaInfo info){
+		SignalPolicy policy = (SignalPolicy) ctx.getBean(info.getClz());
+		DynamicParams params = policy.getDynamicParams();
+		return params.getMetaInfo();
 	}
 
 	/**

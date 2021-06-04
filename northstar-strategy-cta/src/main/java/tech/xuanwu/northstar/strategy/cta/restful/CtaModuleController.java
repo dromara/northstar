@@ -2,12 +2,8 @@ package tech.xuanwu.northstar.strategy.cta.restful;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,9 +14,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import tech.xuanwu.northstar.common.model.ResultBean;
-import tech.xuanwu.northstar.strategy.common.DynamicParams;
-import tech.xuanwu.northstar.strategy.common.SignalPolicy;
-import tech.xuanwu.northstar.strategy.cta.model.CtaStrategyModule;
+import tech.xuanwu.northstar.strategy.common.model.ComponentField;
+import tech.xuanwu.northstar.strategy.common.model.ComponentMetaInfo;
+import tech.xuanwu.northstar.strategy.common.model.CtaStrategyModule;
 import tech.xuanwu.northstar.strategy.cta.service.CtaModuleService;
 
 @RestController
@@ -31,15 +27,26 @@ public class CtaModuleController {
 	private CtaModuleService service;
 	
 	@GetMapping("/signal/policies")
-	public ResultBean<List<String>> getRegisteredSignalPolicies(){
+	public ResultBean<List<ComponentMetaInfo>> getRegisteredSignalPolicies(){
 		
 		return new ResultBean<>(service.getRegisteredSignalPolicies());
 	}
 	
-	@GetMapping("/component/params")
-	public ResultBean<DynamicParams<?>> getComponentParams(String name){
-		Assert.hasText(name, "组件名称不能为空");
-		return new ResultBean<>(service.getComponentParams(name));
+	@GetMapping("/riskControl/rules")
+	public ResultBean<List<ComponentMetaInfo>> getRegisteredRiskControlRules(){
+		return new ResultBean<>(service.getRegisteredRiskControlRules());
+	}
+	
+	@GetMapping("/trade/dealers")
+	public ResultBean<List<ComponentMetaInfo>> getRegisteredDealers(){
+		return new ResultBean<>(service.getRegisteredDealers());
+	}
+	
+	@PostMapping("/component/params")
+	public ResultBean<Map<String, ComponentField>> getComponentParams(@RequestBody ComponentMetaInfo info){
+		Assert.notNull(info, "组件不能为空");
+		Assert.notNull(info.getClz(), "组件类信息不能为空");
+		return new ResultBean<>(service.getComponentParams(info));
 	}
 	
 	@PostMapping("/module")

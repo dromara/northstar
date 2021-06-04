@@ -1,4 +1,4 @@
-package tech.xuanwu.northstar.strategy.common;
+package tech.xuanwu.northstar.strategy.common.model;
 
 /**
  * 序列数据

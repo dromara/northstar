@@ -1,16 +1,14 @@
-package tech.xuanwu.northstar.strategy.common;
+package tech.xuanwu.northstar.strategy.common.annotation;
 
-import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 @Retention(RUNTIME)
-@Target(FIELD)
-public @interface Label {
+@Target(TYPE)
+public @interface StrategicComponent {
 
 	String value() default "";
-	
-	int order() default 0;
 }
