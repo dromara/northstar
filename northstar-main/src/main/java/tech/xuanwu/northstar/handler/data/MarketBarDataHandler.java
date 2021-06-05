@@ -1,6 +1,5 @@
 package tech.xuanwu.northstar.handler.data;
 
-import java.io.IOException;
 import java.util.LinkedList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -74,7 +73,13 @@ public class MarketBarDataHandler extends AbstractEventHandler implements Generi
 					MinBarDataPO barPO = ProtoBeanUtils.toPojoBean(MinBarDataPO.class, bar);
 					barPO.setNumOfTicks(ticks.size());
 					bufData.add(barPO);
-				}catch(IOException ex) {
+				}catch(Exception ex) {
+					log.warn("############ 详细Tick数据 ###########");
+					for(TickField t : ticks) {
+						log.info("[tick] - time:{}, vol:{}, volDelta:{}", t.getActionTime(), t.getVolume(), t.getVolumeDelta());
+					}
+					log.info("[bar] - vol:{}, volDelta:{}", bar.getVolume(), bar.getVolumeDelta());
+					log.warn("#######################");
 					throw new IllegalStateException(ex);
 				}
 			}));
@@ -82,5 +87,4 @@ public class MarketBarDataHandler extends AbstractEventHandler implements Generi
 		
 		generatorTbl.get(gatewayId, unifiedSymbol).updateTick(tick);
 	}
-
 }

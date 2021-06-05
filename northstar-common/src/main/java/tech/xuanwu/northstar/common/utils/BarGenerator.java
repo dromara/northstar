@@ -114,7 +114,8 @@ public class BarGenerator {
 		barBuilder.setTurnover(tick.getTurnover());
 
 		if (preTick != null) {
-			barBuilder.setVolumeDelta(tick.getVolume() - preTick.getVolume() + barBuilder.getVolumeDelta());
+			long volDelta = tick.getVolume() - preTick.getVolume() + barBuilder.getVolumeDelta();
+			barBuilder.setVolumeDelta(Math.max(volDelta, 0));
 			barBuilder.setTurnoverDelta(tick.getTurnover() - preTick.getTurnover() + barBuilder.getTurnoverDelta());
 			barBuilder.setOpenInterestDelta(tick.getOpenInterest() - preTick.getOpenInterest() + barBuilder.getOpenInterestDelta());
 		} else {

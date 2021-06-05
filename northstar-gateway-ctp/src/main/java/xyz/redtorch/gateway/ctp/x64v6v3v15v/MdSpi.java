@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 
 import tech.xuanwu.northstar.common.constant.DateTimeConstant;
 import tech.xuanwu.northstar.common.event.NorthstarEventType;
+import tech.xuanwu.northstar.common.utils.CommonUtils;
 import xyz.redtorch.gateway.ctp.x64v6v3v15v.api.CThostFtdcDepthMarketDataField;
 import xyz.redtorch.gateway.ctp.x64v6v3v15v.api.CThostFtdcForQuoteRspField;
 import xyz.redtorch.gateway.ctp.x64v6v3v15v.api.CThostFtdcMdApi;
@@ -436,6 +437,7 @@ public class MdSpi extends CThostFtdcMdSpi {
 				long volumeDelta = 0;
 				if (preTickMap.containsKey(contractId)) {
 					volumeDelta = volume - preTickMap.get(contractId).getVolume();
+					volumeDelta = Math.max(0, volumeDelta);	//防止数据异常时为负数
 				}
 
 				Double turnover = pDepthMarketData.getTurnover();
@@ -461,11 +463,12 @@ public class MdSpi extends CThostFtdcMdSpi {
 				Double lowerLimit = pDepthMarketData.getLowerLimitPrice();
 
 				List<Double> bidPriceList = new ArrayList<>();
-				bidPriceList.add(pDepthMarketData.getBidPrice1());
-				bidPriceList.add(pDepthMarketData.getBidPrice2());
-				bidPriceList.add(pDepthMarketData.getBidPrice3());
-				bidPriceList.add(pDepthMarketData.getBidPrice4());
-				bidPriceList.add(pDepthMarketData.getBidPrice5());
+				
+				bidPriceList.add(!CommonUtils.isEquals(pDepthMarketData.getBidPrice1(), Double.MAX_VALUE) ? pDepthMarketData.getBidPrice1() : lowerLimit);
+				bidPriceList.add(!CommonUtils.isEquals(pDepthMarketData.getBidPrice2(), Double.MAX_VALUE) ? pDepthMarketData.getBidPrice2() : lowerLimit);
+				bidPriceList.add(!CommonUtils.isEquals(pDepthMarketData.getBidPrice3(), Double.MAX_VALUE) ? pDepthMarketData.getBidPrice3() : lowerLimit);
+				bidPriceList.add(!CommonUtils.isEquals(pDepthMarketData.getBidPrice4(), Double.MAX_VALUE) ? pDepthMarketData.getBidPrice4() : lowerLimit);
+				bidPriceList.add(!CommonUtils.isEquals(pDepthMarketData.getBidPrice5(), Double.MAX_VALUE) ? pDepthMarketData.getBidPrice5() : lowerLimit);
 				List<Integer> bidVolumeList = new ArrayList<>();
 				bidVolumeList.add(pDepthMarketData.getBidVolume1());
 				bidVolumeList.add(pDepthMarketData.getBidVolume2());
@@ -474,11 +477,11 @@ public class MdSpi extends CThostFtdcMdSpi {
 				bidVolumeList.add(pDepthMarketData.getBidVolume5());
 
 				List<Double> askPriceList = new ArrayList<>();
-				askPriceList.add(pDepthMarketData.getAskPrice1());
-				askPriceList.add(pDepthMarketData.getAskPrice2());
-				askPriceList.add(pDepthMarketData.getAskPrice3());
-				askPriceList.add(pDepthMarketData.getAskPrice4());
-				askPriceList.add(pDepthMarketData.getAskPrice5());
+				askPriceList.add(Math.min(pDepthMarketData.getAskPrice1(), upperLimit));
+				askPriceList.add(Math.min(pDepthMarketData.getAskPrice2(), upperLimit));
+				askPriceList.add(Math.min(pDepthMarketData.getAskPrice3(), upperLimit));
+				askPriceList.add(Math.min(pDepthMarketData.getAskPrice4(), upperLimit));
+				askPriceList.add(Math.min(pDepthMarketData.getAskPrice5(), upperLimit));
 				List<Integer> askVolumeList = new ArrayList<>();
 				askVolumeList.add(pDepthMarketData.getAskVolume1());
 				askVolumeList.add(pDepthMarketData.getAskVolume2());
