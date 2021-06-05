@@ -7,10 +7,10 @@ import tech.xuanwu.northstar.strategy.common.annotation.StrategicComponent;
 import tech.xuanwu.northstar.strategy.common.constants.Signal;
 import tech.xuanwu.northstar.strategy.common.model.DynamicParams;
 
-@StrategicComponent("日内交易次数限制")
+@StrategicComponent("日内开仓次数限制")
 public class DailyDealLimitedRule implements RiskControlRule, DynamicParamsAware {
 	
-	private int priceDifTolleranceInTick;
+	private int dailyDealLimit;
 
 	@Override
 	public boolean canDeal(Signal signal) {
@@ -26,13 +26,13 @@ public class DailyDealLimitedRule implements RiskControlRule, DynamicParamsAware
 	@Override
 	public void initWithParams(DynamicParams params) {
 		InitParams initParams = (InitParams) params;
-		this.priceDifTolleranceInTick = initParams.priceDifTolleranceInTick;
+		this.dailyDealLimit = initParams.dailyDealLimit;
 	}
 	
 	public class InitParams extends DynamicParams{
 		
-		@Label(value="超价限制", unit="Tick")
-		private int priceDifTolleranceInTick;
+		@Label(value="日内开仓限制", unit="次")
+		private int dailyDealLimit;
 		
 	}
 }

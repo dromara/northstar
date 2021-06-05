@@ -60,7 +60,7 @@ public class CtaModuleService implements InitializingBean{
 		for(Entry<String, Object> e : objMap.entrySet()) {
 			if(clz.isAssignableFrom(e.getValue().getClass())) {
 				StrategicComponent anno = e.getValue().getClass().getAnnotation(StrategicComponent.class);
-				result.add(new ComponentMetaInfo(anno.value(), e.getValue().getClass()));
+				result.add(new ComponentMetaInfo(anno.value(), e.getValue().getClass().getName()));
 			}
 		}
 		return result;
@@ -70,9 +70,12 @@ public class CtaModuleService implements InitializingBean{
 	 * 获取组件参数
 	 * @param name
 	 * @return
+	 * @throws ClassNotFoundException 
 	 */
-	public Map<String, ComponentField> getComponentParams(ComponentMetaInfo info){
-		DynamicParamsAware aware = (DynamicParamsAware) ctx.getBean(info.getClz());
+	public Map<String, ComponentField> getComponentParams(ComponentMetaInfo info) throws ClassNotFoundException{
+		String className = info.getClassName();
+		Class<?> clz = Class.forName(className);
+		DynamicParamsAware aware = (DynamicParamsAware) ctx.getBean(clz);
 		DynamicParams params = aware.getDynamicParams();
 		return params.getMetaInfo();
 	}
@@ -117,4 +120,5 @@ public class CtaModuleService implements InitializingBean{
 	public void afterPropertiesSet() throws Exception {
 		// 加载已有模组
 	}
+	
 }

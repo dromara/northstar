@@ -11,5 +11,5 @@ public class ComponentMetaInfo {
 
 	private String name;
 	
-	private Class<?> clz;
+	private String className;
 }

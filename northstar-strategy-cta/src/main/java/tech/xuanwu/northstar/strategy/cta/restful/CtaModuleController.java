@@ -43,9 +43,9 @@ public class CtaModuleController {
 	}
 	
 	@PostMapping("/component/params")
-	public ResultBean<Map<String, ComponentField>> getComponentParams(@RequestBody ComponentMetaInfo info){
+	public ResultBean<Map<String, ComponentField>> getComponentParams(@RequestBody ComponentMetaInfo info) throws ClassNotFoundException{
 		Assert.notNull(info, "组件不能为空");
-		Assert.notNull(info.getClz(), "组件类信息不能为空");
+		Assert.notNull(info.getClassName(), "组件类信息不能为空");
 		return new ResultBean<>(service.getComponentParams(info));
 	}
 	
