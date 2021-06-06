@@ -1,6 +1,8 @@
-package tech.xuanwu.northstar.strategy.common.constants;
+package tech.xuanwu.northstar.strategy.common.model;
 
 import lombok.Data;
+import tech.xuanwu.northstar.strategy.common.SignalPolicy;
+import tech.xuanwu.northstar.strategy.common.constants.SignalState;
 
 @Data
 public class Signal {
@@ -8,7 +10,7 @@ public class Signal {
 	/**
 	 * 信号所关联的合约
 	 */
-	private String bindingUnifiedSymbol;
+	private String bindedUnifiedSymbol;
 	/**
 	 * 信号状态
 	 */
@@ -32,6 +34,6 @@ public class Signal {
 	/**
 	 * 关联信号策略
 	 */
-	private Class<?> signalClass;
+	private Class<? extends SignalPolicy> signalClass;
 	
 }

@@ -4,8 +4,8 @@ import tech.xuanwu.northstar.strategy.common.DynamicParamsAware;
 import tech.xuanwu.northstar.strategy.common.RiskControlRule;
 import tech.xuanwu.northstar.strategy.common.annotation.Label;
 import tech.xuanwu.northstar.strategy.common.annotation.StrategicComponent;
-import tech.xuanwu.northstar.strategy.common.constants.Signal;
 import tech.xuanwu.northstar.strategy.common.model.DynamicParams;
+import tech.xuanwu.northstar.strategy.common.model.Signal;
 
 @StrategicComponent("日内开仓次数限制")
 public class DailyDealLimitedRule implements RiskControlRule, DynamicParamsAware {

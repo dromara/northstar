@@ -3,9 +3,9 @@ package tech.xuanwu.northstar.strategy.cta.module.signal;
 import tech.xuanwu.northstar.strategy.common.SignalPolicy;
 import tech.xuanwu.northstar.strategy.common.annotation.Label;
 import tech.xuanwu.northstar.strategy.common.annotation.StrategicComponent;
-import tech.xuanwu.northstar.strategy.common.constants.Signal;
 import tech.xuanwu.northstar.strategy.common.model.BarData;
 import tech.xuanwu.northstar.strategy.common.model.DynamicParams;
+import tech.xuanwu.northstar.strategy.common.model.Signal;
 import xyz.redtorch.pb.CoreField.TickField;
 
 @StrategicComponent("示例策略2")

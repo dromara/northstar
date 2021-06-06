@@ -1,6 +1,6 @@
 package tech.xuanwu.northstar.strategy.common;
 
-import tech.xuanwu.northstar.strategy.common.constants.Signal;
+import tech.xuanwu.northstar.strategy.common.model.Signal;
 
 public interface RiskControlRule {
 

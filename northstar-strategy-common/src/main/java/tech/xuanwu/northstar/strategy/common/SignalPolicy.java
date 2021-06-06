@@ -1,7 +1,7 @@
 package tech.xuanwu.northstar.strategy.common;
 
-import tech.xuanwu.northstar.strategy.common.constants.Signal;
 import tech.xuanwu.northstar.strategy.common.model.BarData;
+import tech.xuanwu.northstar.strategy.common.model.Signal;
 import xyz.redtorch.pb.CoreField.TickField;
 
 public interface SignalPolicy extends DynamicParamsAware{
