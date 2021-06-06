@@ -1,4 +1,4 @@
-package tech.xuanwu.northstar.domain;
+package tech.xuanwu.northstar.domain.account;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -11,6 +11,7 @@ import tech.xuanwu.northstar.common.exception.InsufficientException;
 import tech.xuanwu.northstar.common.exception.NoSuchElementException;
 import tech.xuanwu.northstar.common.model.OrderRequest;
 import tech.xuanwu.northstar.common.utils.OrderUtil;
+import tech.xuanwu.northstar.domain.ContractManager;
 import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;

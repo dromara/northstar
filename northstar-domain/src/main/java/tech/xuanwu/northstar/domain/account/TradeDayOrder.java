@@ -1,4 +1,4 @@
-package tech.xuanwu.northstar.domain;
+package tech.xuanwu.northstar.domain.account;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -57,5 +57,10 @@ public class TradeDayOrder {
 		List<OrderField> result = new ArrayList<>(orderQ.size());
 		orderQ.stream().forEach(id -> result.add(orderMap.get(id)));
 		return Collections.unmodifiableList(result);
+	}
+	
+	
+	public void dailySettlement() {
+		
 	}
 }

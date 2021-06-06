@@ -1,4 +1,4 @@
-package tech.xuanwu.northstar.domain;
+package tech.xuanwu.northstar.domain.account;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -12,6 +12,8 @@ import org.junit.Test;
 import tech.xuanwu.northstar.common.exception.InsufficientException;
 import tech.xuanwu.northstar.common.model.OrderRequest;
 import tech.xuanwu.northstar.common.model.OrderRequest.TradeOperation;
+import tech.xuanwu.northstar.domain.ContractManager;
+import tech.xuanwu.northstar.domain.account.PositionDescription;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;

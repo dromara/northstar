@@ -1,4 +1,4 @@
-package tech.xuanwu.northstar.domain;
+package tech.xuanwu.northstar.domain.account;
 
 import java.util.ArrayList;
 import java.util.Collections;

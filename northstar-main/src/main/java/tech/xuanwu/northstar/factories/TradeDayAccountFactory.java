@@ -2,7 +2,7 @@ package tech.xuanwu.northstar.factories;
 
 import tech.xuanwu.northstar.common.event.InternalEventBus;
 import tech.xuanwu.northstar.domain.ContractManager;
-import tech.xuanwu.northstar.domain.TradeDayAccount;
+import tech.xuanwu.northstar.domain.account.TradeDayAccount;
 
 public class TradeDayAccountFactory {
 	

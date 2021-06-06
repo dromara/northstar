@@ -7,7 +7,7 @@ import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.common.event.NorthstarEvent;
 import tech.xuanwu.northstar.common.event.NorthstarEventType;
-import tech.xuanwu.northstar.domain.TradeDayAccount;
+import tech.xuanwu.northstar.domain.account.TradeDayAccount;
 import tech.xuanwu.northstar.factories.TradeDayAccountFactory;
 import tech.xuanwu.northstar.handler.AbstractEventHandler;
 import tech.xuanwu.northstar.handler.GenericEventHandler;

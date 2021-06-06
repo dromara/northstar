@@ -9,7 +9,7 @@ import org.springframework.context.annotation.DependsOn;
 
 import tech.xuanwu.northstar.common.event.InternalEventBus;
 import tech.xuanwu.northstar.domain.ContractManager;
-import tech.xuanwu.northstar.domain.TradeDayAccount;
+import tech.xuanwu.northstar.domain.account.TradeDayAccount;
 import tech.xuanwu.northstar.engine.broadcast.SocketIOMessageEngine;
 import tech.xuanwu.northstar.engine.event.FastEventEngine;
 import tech.xuanwu.northstar.gateway.sim.SimMarket;

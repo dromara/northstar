@@ -17,7 +17,7 @@ import tech.xuanwu.northstar.common.exception.TradeException;
 import tech.xuanwu.northstar.common.model.OrderRecall;
 import tech.xuanwu.northstar.common.model.OrderRequest;
 import tech.xuanwu.northstar.common.model.OrderRequest.TradeOperation;
-import tech.xuanwu.northstar.domain.TradeDayAccount;
+import tech.xuanwu.northstar.domain.account.TradeDayAccount;
 
 public class AccountServiceTest {
 	

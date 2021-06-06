@@ -1,9 +1,10 @@
-package tech.xuanwu.northstar.domain;
+package tech.xuanwu.northstar.domain.account;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.Test;
 
+import tech.xuanwu.northstar.domain.account.TradeDayOrder;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreEnum.OrderStatusEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
