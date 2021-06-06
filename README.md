@@ -42,6 +42,16 @@ bash build.sh
 nohup java -jar -DwsHost=<这里填云服务器内网IP> -Duser=<登陆用户名> -Dpwd=<登陆密码> ～/northstar.jar &
 ```
 
+查询日志
+```
+cd ~/logs/
+```
+
+终止程序
+```
+kill `pgrep java`
+```
+
 
 ## 注意事项
 - 服务器时间校正
