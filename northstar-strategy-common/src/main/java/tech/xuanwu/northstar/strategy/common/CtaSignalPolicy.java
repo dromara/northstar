@@ -4,7 +4,7 @@ import tech.xuanwu.northstar.strategy.common.model.BarData;
 import tech.xuanwu.northstar.strategy.common.model.Signal;
 import xyz.redtorch.pb.CoreField.TickField;
 
-public interface SignalPolicy extends DynamicParamsAware{
+public interface CtaSignalPolicy extends DynamicParamsAware{
 
 	/**
 	 * 每Tick更新

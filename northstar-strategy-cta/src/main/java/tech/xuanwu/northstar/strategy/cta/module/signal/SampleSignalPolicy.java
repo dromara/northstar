@@ -1,6 +1,6 @@
 package tech.xuanwu.northstar.strategy.cta.module.signal;
 
-import tech.xuanwu.northstar.strategy.common.SignalPolicy;
+import tech.xuanwu.northstar.strategy.common.CtaSignalPolicy;
 import tech.xuanwu.northstar.strategy.common.annotation.Label;
 import tech.xuanwu.northstar.strategy.common.annotation.StrategicComponent;
 import tech.xuanwu.northstar.strategy.common.model.BarData;
@@ -9,7 +9,7 @@ import tech.xuanwu.northstar.strategy.common.model.Signal;
 import xyz.redtorch.pb.CoreField.TickField;
 
 @StrategicComponent("示例策略")
-public class SampleSignalPolicy implements SignalPolicy{
+public class SampleSignalPolicy implements CtaSignalPolicy{
 	
 	/**
 	 * 绑定合约
