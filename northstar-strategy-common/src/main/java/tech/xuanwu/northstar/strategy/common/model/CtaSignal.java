@@ -1,11 +1,11 @@
 package tech.xuanwu.northstar.strategy.common.model;
 
 import lombok.Data;
-import tech.xuanwu.northstar.strategy.common.SignalPolicy;
+import tech.xuanwu.northstar.strategy.common.CtaSignalPolicy;
 import tech.xuanwu.northstar.strategy.common.constants.SignalState;
 
 @Data
-public class Signal {
+public class CtaSignal {
 	
 	/**
 	 * 信号所关联的合约
@@ -34,6 +34,6 @@ public class Signal {
 	/**
 	 * 关联信号策略
 	 */
-	private Class<? extends SignalPolicy> signalClass;
+	private Class<? extends CtaSignalPolicy> signalClass;
 	
 }

@@ -1,10 +1,10 @@
 package tech.xuanwu.northstar.strategy.common;
 
 import tech.xuanwu.northstar.strategy.common.model.BarData;
-import tech.xuanwu.northstar.strategy.common.model.Signal;
+import tech.xuanwu.northstar.strategy.common.model.CtaSignal;
 import xyz.redtorch.pb.CoreField.TickField;
 
-public interface SignalPolicy extends DynamicParamsAware{
+public interface CtaSignalPolicy extends DynamicParamsAware{
 
 	/**
 	 * 每Tick更新
@@ -12,5 +12,5 @@ public interface SignalPolicy extends DynamicParamsAware{
 	 * @param barData	K线序列数据（已包含Tick更新数据）
 	 * @return			信号
 	 */
-	Signal updateTick(TickField tick, BarData barData);
+	CtaSignal updateTick(TickField tick, BarData barData);
 }

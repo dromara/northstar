@@ -12,7 +12,7 @@ import tech.xuanwu.northstar.persistence.StrategyModuleRepository;
 import tech.xuanwu.northstar.strategy.common.Dealer;
 import tech.xuanwu.northstar.strategy.common.DynamicParamsAware;
 import tech.xuanwu.northstar.strategy.common.RiskControlRule;
-import tech.xuanwu.northstar.strategy.common.SignalPolicy;
+import tech.xuanwu.northstar.strategy.common.CtaSignalPolicy;
 import tech.xuanwu.northstar.strategy.common.annotation.StrategicComponent;
 import tech.xuanwu.northstar.strategy.common.model.ComponentField;
 import tech.xuanwu.northstar.strategy.common.model.ComponentMetaInfo;
@@ -35,7 +35,7 @@ public class CtaModuleService implements InitializingBean{
 	 * @return
 	 */
 	public List<ComponentMetaInfo> getRegisteredSignalPolicies(){
-		return getComponentMeta(SignalPolicy.class);
+		return getComponentMeta(CtaSignalPolicy.class);
 	}
 	
 	/**

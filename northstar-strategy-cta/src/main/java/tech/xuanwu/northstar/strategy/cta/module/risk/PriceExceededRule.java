@@ -5,7 +5,7 @@ import tech.xuanwu.northstar.strategy.common.RiskControlRule;
 import tech.xuanwu.northstar.strategy.common.annotation.Label;
 import tech.xuanwu.northstar.strategy.common.annotation.StrategicComponent;
 import tech.xuanwu.northstar.strategy.common.model.DynamicParams;
-import tech.xuanwu.northstar.strategy.common.model.Signal;
+import tech.xuanwu.northstar.strategy.common.model.CtaSignal;
 
 @StrategicComponent("委托超价限制")
 public class PriceExceededRule implements RiskControlRule, DynamicParamsAware{
@@ -13,7 +13,7 @@ public class PriceExceededRule implements RiskControlRule, DynamicParamsAware{
 	private int priceDifTolleranceInTick;
 	
 	@Override
-	public boolean canDeal(Signal signal) {
+	public boolean canDeal(CtaSignal ctaSignal) {
 		// TODO Auto-generated method stub
 		return false;
 	}
