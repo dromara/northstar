@@ -17,11 +17,11 @@ import tech.xuanwu.northstar.gateway.sim.persistence.SimAccountRepository;
 import tech.xuanwu.northstar.model.GatewayAndConnectionManager;
 import tech.xuanwu.northstar.persistence.GatewayRepository;
 import tech.xuanwu.northstar.persistence.MarketDataRepository;
+import tech.xuanwu.northstar.persistence.StrategyModuleRepository;
 import tech.xuanwu.northstar.service.AccountService;
+import tech.xuanwu.northstar.service.CtaModuleService;
 import tech.xuanwu.northstar.service.DataSyncService;
 import tech.xuanwu.northstar.service.GatewayService;
-import tech.xuanwu.northstar.strategy.cta.persistence.StrategyModuleRepository;
-import tech.xuanwu.northstar.strategy.cta.service.CtaModuleService;
 
 @DependsOn({
 	"internalDispatcher",

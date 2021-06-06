@@ -1,4 +1,4 @@
-package tech.xuanwu.northstar.strategy.cta.persistence;
+package tech.xuanwu.northstar.persistence;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;

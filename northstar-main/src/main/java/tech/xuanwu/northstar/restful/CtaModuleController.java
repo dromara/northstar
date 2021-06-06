@@ -1,4 +1,4 @@
-package tech.xuanwu.northstar.strategy.cta.restful;
+package tech.xuanwu.northstar.restful;
 
 import java.util.List;
 import java.util.Map;
@@ -14,10 +14,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import tech.xuanwu.northstar.common.model.ResultBean;
+import tech.xuanwu.northstar.service.CtaModuleService;
 import tech.xuanwu.northstar.strategy.common.model.ComponentField;
 import tech.xuanwu.northstar.strategy.common.model.ComponentMetaInfo;
 import tech.xuanwu.northstar.strategy.common.model.CtaStrategyModule;
-import tech.xuanwu.northstar.strategy.cta.service.CtaModuleService;
 
 @RestController
 @RequestMapping("/cta")

@@ -1,4 +1,4 @@
-package tech.xuanwu.northstar.strategy.cta.service;
+package tech.xuanwu.northstar.service;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,6 +8,7 @@ import java.util.Map.Entry;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 
+import tech.xuanwu.northstar.persistence.StrategyModuleRepository;
 import tech.xuanwu.northstar.strategy.common.Dealer;
 import tech.xuanwu.northstar.strategy.common.DynamicParamsAware;
 import tech.xuanwu.northstar.strategy.common.RiskControlRule;
@@ -17,7 +18,6 @@ import tech.xuanwu.northstar.strategy.common.model.ComponentField;
 import tech.xuanwu.northstar.strategy.common.model.ComponentMetaInfo;
 import tech.xuanwu.northstar.strategy.common.model.CtaStrategyModule;
 import tech.xuanwu.northstar.strategy.common.model.DynamicParams;
-import tech.xuanwu.northstar.strategy.cta.persistence.StrategyModuleRepository;
 
 public class CtaModuleService implements InitializingBean{
 	
