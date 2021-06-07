@@ -3,6 +3,7 @@ package tech.xuanwu.northstar.engine.index;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.ToDoubleFunction;
 
@@ -35,9 +36,9 @@ public class IndexContract {
 		ContractField proto = seriesContracts.iterator().next();
 		
 		String symbolName = proto.getSymbol().replaceAll("\\d+", "");
-		String chnName = ContractNameResolver.getCNSymbolName(symbolName);
+		Optional<String> chnNameOpt = Optional.ofNullable(ContractNameResolver.getCNSymbolName(symbolName));
 		String symbol = symbolName + Constants.INDEX_SUFFIX; // 代码
-		String name = chnName + "指数"; // 简称
+		String name = chnNameOpt.orElse(symbolName) + "指数"; // 简称
 		String fullName = name; // 全称
 		String unifiedSymbol = String.format("%s@%s@%s", symbol, proto.getExchange(), proto.getProductClass()); // 统一ID，通常是<合约代码@交易所代码@产品类型>
 		String contractId = unifiedSymbol + proto.getGatewayId();
