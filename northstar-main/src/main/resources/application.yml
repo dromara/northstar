@@ -4,7 +4,7 @@ server:
     context-path: /northstar
 
 socketio:
-  host: 127.0.0.1
+  host: ${wsHost:127.0.0.1}
   port: 51888
 
 northstar: 
