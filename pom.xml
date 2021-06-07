@@ -44,6 +44,8 @@
 		<module>northstar-gateway-sim</module>
 		<module>northstar-engine</module>
 		<module>northstar-domain</module>
+		<module>northstar-strategy-common</module>
+		<module>northstar-strategy-cta</module>
 		<module>northstar-main</module>
 	</modules>
 
