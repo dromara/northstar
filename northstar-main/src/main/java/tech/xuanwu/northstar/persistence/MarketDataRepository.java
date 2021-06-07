@@ -108,6 +108,14 @@ public class MarketDataRepository {
 		log.info("合约保存成功，耗时{}毫秒", System.currentTimeMillis() - start);
 	}
 
+	/**
+	 * 保存合约信息
+	 * @param contract
+	 */
+	public void saveContract(ContractPO contract) {
+		mongo.save(contract);
+	}
+
 	private static final long DAY14MILLISEC = TimeUnit.DAYS.toMillis(14);
 	
 	/**

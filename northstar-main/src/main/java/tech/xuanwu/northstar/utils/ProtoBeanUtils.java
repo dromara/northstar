@@ -22,8 +22,7 @@ public class ProtoBeanUtils {
      * @return
      * @throws IOException
      */
-    public static <PojoType> PojoType toPojoBean(Class<PojoType> destPojoClass, Message sourceMessage)
-        throws IOException {
+    public static <PojoType> PojoType toPojoBean(Class<PojoType> destPojoClass, Message sourceMessage) {
         if (destPojoClass == null) {
             throw new IllegalArgumentException
                 ("No destination pojo class specified");
@@ -31,12 +30,12 @@ public class ProtoBeanUtils {
         if (sourceMessage == null) {
             throw new IllegalArgumentException("No source message specified");
         }
-        String json = JsonFormat.printer().print(sourceMessage);
         try {        	
+        	String json = JsonFormat.printer().print(sourceMessage);
         	return new Gson().fromJson(json, destPojoClass);
         } catch (Exception e) {
         	log.warn("问题对象：{}", sourceMessage.toString());
-        	throw e;
+        	throw new IllegalStateException(e);
         }
     }
 

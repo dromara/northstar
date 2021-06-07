@@ -17,6 +17,7 @@ import tech.xuanwu.northstar.handler.GenericEventHandler;
 import tech.xuanwu.northstar.model.GatewayAndConnectionManager;
 import tech.xuanwu.northstar.persistence.MarketDataRepository;
 import tech.xuanwu.northstar.persistence.po.ContractPO;
+import tech.xuanwu.northstar.utils.ProtoBeanUtils;
 import xyz.redtorch.pb.CoreField.ContractField;
 
 /**
@@ -44,19 +45,15 @@ public class ContractHandler extends AbstractEventHandler implements GenericEven
 	
 	@Override
 	public void doHandle(NorthstarEvent e) {
+		long curTime = System.currentTimeMillis();
 		if(NorthstarEventType.CONTRACT_LOADED == e.getEvent()) {
 			idxEngine.start();
 			String accountId = (String) e.getData();
 			GatewayConnection conn = gatewayConnMgr.getGatewayConnectionById(accountId);
 			Map<String, ContractField> gatewayContractMap = contractMgr.getContractMapByGateway(conn.getGwDescription().getRelativeGatewayId());
 			List<ContractPO> contractList = new ArrayList<>(gatewayContractMap.size());
-			long curTime = System.currentTimeMillis();
 			for(Entry<String, ContractField> entry : gatewayContractMap.entrySet()) {
-				ContractPO contract = new ContractPO();
-				contract.setFullName(entry.getValue().getFullName());
-				contract.setGatewayId(entry.getValue().getGatewayId());
-				contract.setName(entry.getValue().getName());
-				contract.setUnifiedSymbol(entry.getValue().getUnifiedSymbol());
+				ContractPO contract = ProtoBeanUtils.toPojoBean(ContractPO.class, entry.getValue());
 				contract.setRecordTimestamp(curTime);
 				contractList.add(contract);
 			}
@@ -66,6 +63,9 @@ public class ContractHandler extends AbstractEventHandler implements GenericEven
 		ContractField contract = (ContractField) e.getData();
 		
 		if(NorthstarEventType.IDX_CONTRACT == e.getEvent()) {
+			ContractPO c = ProtoBeanUtils.toPojoBean(ContractPO.class, contract);
+			c.setRecordTimestamp(curTime);
+			mdRepo.saveContract(c);
 			contractMgr.addContract(contract);
 			return;
 		}
