@@ -1,5 +1,8 @@
 package tech.xuanwu.northstar.persistence;
 
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -114,6 +117,15 @@ public class MarketDataRepository {
 	 */
 	public void saveContract(ContractPO contract) {
 		mongo.save(contract);
+	}
+	
+	/**
+	 * 清理特定时间的行情
+	 * @param startTime
+	 * @param endTime
+	 */
+	public void clearDataByTime(String gatewayId, long startTime, long endTime) {
+		mongo.remove(Query.query(Criteria.where("actionTimestamp").gte(startTime).lte(endTime)), COLLECTION_PREFIX + gatewayId);
 	}
 
 	private static final long DAY14MILLISEC = TimeUnit.DAYS.toMillis(14);

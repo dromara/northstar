@@ -1,10 +1,5 @@
 package tech.xuanwu.northstar.handler.data;
 
-import java.util.LinkedList;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 
@@ -15,7 +10,7 @@ import tech.xuanwu.northstar.common.utils.BarGenerator;
 import tech.xuanwu.northstar.engine.event.FastEventEngine;
 import tech.xuanwu.northstar.handler.AbstractEventHandler;
 import tech.xuanwu.northstar.handler.GenericEventHandler;
-import tech.xuanwu.northstar.persistence.MarketDataRepository;
+import tech.xuanwu.northstar.model.BarBufferManager;
 import tech.xuanwu.northstar.persistence.po.MinBarDataPO;
 import tech.xuanwu.northstar.utils.ProtoBeanUtils;
 import xyz.redtorch.pb.CoreField.TickField;
@@ -36,26 +31,14 @@ public class MarketBarDataHandler extends AbstractEventHandler implements Generi
 
 	private FastEventEngine feEngine;
 	
-	private MarketDataRepository mdRepo;
-	private volatile LinkedList<MinBarDataPO> bufData = new LinkedList<>();
+	private BarBufferManager bbMgr;
 	
-	private ScheduledExecutorService execService = Executors.newScheduledThreadPool(1);
-	
-	public MarketBarDataHandler(FastEventEngine feEngine, MarketDataRepository mdRepo) {
+	public MarketBarDataHandler(FastEventEngine feEngine, BarBufferManager bbMgr) {
 		this.feEngine = feEngine;
-		this.mdRepo = mdRepo;
-		this.execService.scheduleWithFixedDelay(()->{
-			if(bufData.size() == 0) {
-				log.debug("没有数据需要保存");
-				return;
-			}
-			LinkedList<MinBarDataPO> bufDataNew = new LinkedList<>();
-			LinkedList<MinBarDataPO> bufDataTemp = bufData;
-			bufData = bufDataNew;
-			this.mdRepo.insertMany(bufDataTemp);
-		}, 30, 30, TimeUnit.SECONDS);
+		this.bbMgr = bbMgr;
 	}
-
+	
+	
 	@Override
 	public boolean canHandle(NorthstarEventType eventType) {
 		return NorthstarEventType.TICK == eventType || NorthstarEventType.IDX_TICK == eventType;
@@ -72,7 +55,7 @@ public class MarketBarDataHandler extends AbstractEventHandler implements Generi
 				try {					
 					MinBarDataPO barPO = ProtoBeanUtils.toPojoBean(MinBarDataPO.class, bar);
 					barPO.setNumOfTicks(ticks.size());
-					bufData.add(barPO);
+					bbMgr.addBar(barPO);
 				}catch(Exception ex) {
 					log.warn("############ 详细Tick数据 ###########");
 					for(TickField t : ticks) {

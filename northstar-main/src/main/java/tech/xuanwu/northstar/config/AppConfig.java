@@ -22,7 +22,9 @@ import tech.xuanwu.northstar.domain.ContractManager;
 import tech.xuanwu.northstar.domain.account.TradeDayAccount;
 import tech.xuanwu.northstar.gateway.sim.SimMarket;
 import tech.xuanwu.northstar.interceptor.AuthorizationInterceptor;
+import tech.xuanwu.northstar.model.BarBufferManager;
 import tech.xuanwu.northstar.model.GatewayAndConnectionManager;
+import tech.xuanwu.northstar.persistence.MarketDataRepository;
 import tech.xuanwu.northstar.utils.MongoClientAdapter;
 
 /**
@@ -83,6 +85,11 @@ public class AppConfig implements WebMvcConfigurer {
 	@Bean
 	public GatewayAndConnectionManager createGatewayAndConnectionManager() {
 		return new GatewayAndConnectionManager();
+	}
+	
+	@Bean
+	public BarBufferManager barBufferManager(MarketDataRepository mdRepo) {
+		return new BarBufferManager(mdRepo);
 	}
 	
 	@Value("${northstar.contracts.canHandle}")

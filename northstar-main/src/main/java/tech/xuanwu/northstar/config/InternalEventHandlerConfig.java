@@ -19,6 +19,7 @@ import tech.xuanwu.northstar.handler.internal.AccountHandler;
 import tech.xuanwu.northstar.handler.internal.ConnectionHandler;
 import tech.xuanwu.northstar.handler.internal.ContractHandler;
 import tech.xuanwu.northstar.handler.internal.TradeHandler;
+import tech.xuanwu.northstar.model.BarBufferManager;
 import tech.xuanwu.northstar.model.GatewayAndConnectionManager;
 import tech.xuanwu.northstar.persistence.MarketDataRepository;
 
@@ -79,8 +80,8 @@ public class InternalEventHandlerConfig {
 	}
 	
 	@Bean
-	public MarketBarDataHandler marketDataHandler(MarketDataEventBus eventBus, FastEventEngine feEngine, MarketDataRepository mdRepo) {
-		MarketBarDataHandler handler = new MarketBarDataHandler(feEngine, mdRepo);
+	public MarketBarDataHandler marketDataHandler(MarketDataEventBus eventBus, FastEventEngine feEngine, BarBufferManager bbMgr) {
+		MarketBarDataHandler handler = new MarketBarDataHandler(feEngine, bbMgr);
 		log.info("注册：MarketDataHandler");
 		eventBus.register(handler);
 		return handler;
