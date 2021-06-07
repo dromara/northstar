@@ -1,4 +1,6 @@
 #!/bin/bash
+echo "设置服务器时区"
+
 echo "准备环境依赖..."
 yum install git java-11-openjdk-devel.x86_64 nodejs wget -y
 cd ~
