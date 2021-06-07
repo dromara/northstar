@@ -39,7 +39,7 @@ bash build.sh
 
 运行程序
 ```
-nohup java -jar -DwsHost=<这里填云服务器内网IP> -Duser=<登陆用户名> -Dpwd=<登陆密码> ～/northstar.jar &
+nohup java -jar -DwsHost=<这里填云服务器内网IP> -Dnsuser=<登陆用户名> -Dnspwd=<登陆密码> ～/northstar.jar &
 ```
 
 查询日志

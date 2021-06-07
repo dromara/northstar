@@ -9,8 +9,8 @@ socketio:
 
 northstar: 
   auth:
-    userId: ${user:admin}
-    password: ${pwd:123456}
+    userId: ${nsuser:admin}
+    password: ${nspwd:123456}
   contracts:
     canHandle: FUTURES
   holidays: 20210614,20210920,20210921
