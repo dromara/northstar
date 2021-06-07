@@ -248,53 +248,6 @@ public class CtpGatewayAdapter extends GatewayAbstract implements MarketGateway,
 	}
 	
 	/**
-	 * 自动重连
-	 */
-	public void startAutoReconnect() {
-		unexpectedDisconnection = true;
-		//只有在工作日开市时间才会进行重连
-		//一旦重连成功则会停止线程
-		int i = 0;
-		while(unexpectedDisconnection && isMarketOpenTime()) {
-			logger.info("尝试第{}次重连", ++i);
-			connect();
-			
-			try {
-				Thread.sleep(30000);
-			} catch (InterruptedException e) {
-			}
-		}
-		
-	}
-	
-	/**
-	 * 停止重连
-	 */
-	public void stopAutoReconnect() {
-		unexpectedDisconnection = false;
-	}
-	
-	private boolean isMarketOpenTime() {
-		LocalDate date = LocalDate.now();
-		LocalTime time = LocalTime.now();
-		if(date.getDayOfWeek() == DayOfWeek.SUNDAY) {
-			return false;
-		}
-		if(date.getDayOfWeek() == DayOfWeek.SATURDAY && time.isAfter(LocalTime.of(2, 30))) {
-			return false;
-		}
-		//夜盘时间
-		if(time.isBefore(LocalTime.of(2, 30)) || time.isAfter(LocalTime.of(21, 00))) {
-			return true;
-		}
-		//白盘时间
-		if(time.isAfter(LocalTime.of(9, 00)) && time.isBefore(LocalTime.of(15, 00))) {
-			return true;
-		}
-		return false;
-	}
-	
-	/**
 	 * 复制URL到临时文件夹,例如从war包中
 	 * 
 	 * @param targetDir

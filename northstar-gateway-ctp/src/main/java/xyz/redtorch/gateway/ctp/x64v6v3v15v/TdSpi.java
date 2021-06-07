@@ -708,7 +708,6 @@ public class TdSpi extends CThostFtdcTraderSpi {
 			
 			reqAuth();
 			
-			ctpGatewayAdapter.stopAutoReconnect();
 		} catch (Throwable t) {
 			logger.error("{}OnFrontConnected Exception", logInfo, t);
 		}
@@ -723,7 +722,6 @@ public class TdSpi extends CThostFtdcTraderSpi {
 			ctpGatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.DISCONNECTED, gatewayId);
 			ctpGatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.LOGGED_OUT, gatewayId);
 			
-			ctpGatewayAdapter.startAutoReconnect();
 		} catch (Throwable t) {
 			logger.error("{}OnFrontDisconnected Exception", logInfo, t);
 		}

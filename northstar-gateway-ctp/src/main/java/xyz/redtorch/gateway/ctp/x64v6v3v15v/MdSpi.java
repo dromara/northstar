@@ -271,7 +271,6 @@ public class MdSpi extends CThostFtdcMdSpi {
 			
 			login();
 			
-			ctpGatewayAdapter.stopAutoReconnect();
 		} catch (Throwable t) {
 			logger.error("{} OnFrontConnected Exception", logInfo, t);
 		}
@@ -285,7 +284,6 @@ public class MdSpi extends CThostFtdcMdSpi {
 			
 			ctpGatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.DISCONNECTED, gatewayId);
 			
-			ctpGatewayAdapter.startAutoReconnect();
 		} catch (Throwable t) {
 			logger.error("{} OnFrontDisconnected Exception", logInfo, t);
 		}
