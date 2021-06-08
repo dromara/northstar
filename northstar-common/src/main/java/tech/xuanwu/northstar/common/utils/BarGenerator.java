@@ -92,20 +92,8 @@ public class BarGenerator {
 
 			barLocalDateTime = tickLocalDateTime;
 		} else {
-			// 当日最高价发生变动
-			if (preTick != null && !CommonUtils.isEquals(tick.getHighPrice(), preTick.getHighPrice())) {
-				barBuilder.setHighPrice(tick.getHighPrice());
-			} else {
-				barBuilder.setHighPrice(Math.max(barBuilder.getHighPrice(), tick.getLastPrice()));
-			}
-
-			// 当日最低价发生变动
-			if (preTick != null && !CommonUtils.isEquals(tick.getLowPrice(), preTick.getLowPrice())) {
-				barBuilder.setLowPrice(tick.getLowPrice());
-			} else {
-				barBuilder.setLowPrice(Math.min(barBuilder.getLowPrice(), tick.getLastPrice()));
-			}
-
+			barBuilder.setHighPrice(Math.max(tick.getLastPrice(), barBuilder.getHighPrice()));
+			barBuilder.setLowPrice(Math.min(tick.getLastPrice(), barBuilder.getLowPrice()));
 		}
 
 		barBuilder.setClosePrice(tick.getLastPrice());
