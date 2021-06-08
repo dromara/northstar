@@ -40,13 +40,13 @@ public class CtpScheduleTask {
 			return;
 		}
 		connectIfNotConnected();
-		log.info("开盘时间连线巡检");
+		log.debug("开盘时间连线巡检");
 	}
 	
 	@Scheduled(cron="0 55 8,20 ? * 1-5")
 	public void dailyCheckConnection() {
 		if(holidayMgr.isHoliday(LocalDate.now())) {
-			log.info("当前为假期，不进行连线");
+			log.debug("当前为假期，不进行连线");
 			return;
 		}
 		connectIfNotConnected();
