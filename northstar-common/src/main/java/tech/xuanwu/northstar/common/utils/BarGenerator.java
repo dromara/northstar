@@ -104,14 +104,21 @@ public class BarGenerator {
 		barBuilder.setTurnover(tick.getTurnover());
 
 		if (preBarBuilder != null) {
-			long volDelta = tick.getVolume() - preBarBuilder.getVolume();
-			barBuilder.setVolumeDelta(Math.max(volDelta, 0));
-			barBuilder.setTurnoverDelta(tick.getTurnover() - preBarBuilder.getTurnover());
-			barBuilder.setOpenInterestDelta(tick.getOpenInterest() - preBarBuilder.getOpenInterest());
+			if(preBarBuilder.getTradingDay().equals(tick.getTradingDay())) {
+				long volDelta = tick.getVolume() - preBarBuilder.getVolume();
+				barBuilder.setVolumeDelta(Math.max(volDelta, 0));
+				barBuilder.setTurnoverDelta(tick.getTurnover() - preBarBuilder.getTurnover());
+				barBuilder.setOpenInterestDelta(tick.getOpenInterest() - preBarBuilder.getOpenInterest());				
+			} else {
+				barBuilder.setVolumeDelta(tick.getVolume());
+				barBuilder.setTurnoverDelta(tick.getVolume() * tick.getLowPrice());
+				barBuilder.setOpenInterestDelta(tick.getOpenInterest() - tick.getPreOpenInterest());
+			}
+			
 		} else {
 			barBuilder.setVolumeDelta(0);
 			barBuilder.setTurnoverDelta(0);
-			barBuilder.setOpenInterestDelta(tick.getOpenInterest()-tick.getPreOpenInterest());
+			barBuilder.setOpenInterestDelta(0);
 		}
 
 		preTick = tick;
@@ -119,11 +126,7 @@ public class BarGenerator {
 	}
 
 	public void finish() {
-		boolean abnormalBar = bufTickList.size() < 10;
-		if(abnormalBar) {
-			log.warn("当前Bar-[{}] 数据为异常数据，Tick数仅为：{}", barUnifiedSymbol, bufTickList.size());
-		}
-		if(barBuilder!=null && barLocalDateTime!=null && !abnormalBar) {
+		if(barBuilder!=null && barLocalDateTime!=null) {
 			barLocalDateTime = barLocalDateTime.withSecond(0).withNano(0);
 			barBuilder.setActionTimestamp(CommonUtils.localDateTimeToMills(barLocalDateTime));
 			barBuilder.setActionTime(barLocalDateTime.format(DateTimeConstant.T_FORMAT_WITH_MS_INT_FORMATTER));
