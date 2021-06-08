@@ -46,6 +46,7 @@ public class CtpScheduleTask {
 	@Scheduled(cron="0 55 8,20 ? * 1/5")
 	public void dailyCheckConnection() {
 		if(holidayMgr.isHoliday(LocalDate.now())) {
+			log.info("当前为假期，不进行连线");
 			return;
 		}
 		connectIfNotConnected();
