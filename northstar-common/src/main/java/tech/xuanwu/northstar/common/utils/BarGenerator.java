@@ -16,14 +16,16 @@ import xyz.redtorch.pb.CoreField.TickField;
 @Slf4j
 public class BarGenerator {
 	
-	private BarField.Builder barBuilder = null;
-	private LocalDateTime barLocalDateTime = null;
+	private BarField.Builder barBuilder;
+	private LocalDateTime barLocalDateTime;
 
-	private TickField preTick = null;
+	private TickField preTick;
 
 	private boolean newFlag = false;
 
-	private String barUnifiedSymbol = null;
+	private String barUnifiedSymbol;
+	
+	private BarField.Builder preBarBuilder;
 	
 	CommonBarCallBack commonBarCallBack;
 
@@ -101,11 +103,11 @@ public class BarGenerator {
 		barBuilder.setVolume(tick.getVolume());
 		barBuilder.setTurnover(tick.getTurnover());
 
-		if (preTick != null) {
-			long volDelta = tick.getVolume() - preTick.getVolume() + barBuilder.getVolumeDelta();
+		if (preBarBuilder != null) {
+			long volDelta = tick.getVolume() - preBarBuilder.getVolume();
 			barBuilder.setVolumeDelta(Math.max(volDelta, 0));
-			barBuilder.setTurnoverDelta(tick.getTurnover() - preTick.getTurnover() + barBuilder.getTurnoverDelta());
-			barBuilder.setOpenInterestDelta(tick.getOpenInterest() - preTick.getOpenInterest() + barBuilder.getOpenInterestDelta());
+			barBuilder.setTurnoverDelta(tick.getTurnover() - preBarBuilder.getTurnover());
+			barBuilder.setOpenInterestDelta(tick.getOpenInterest() - preBarBuilder.getOpenInterest());
 		} else {
 			barBuilder.setVolumeDelta(0);
 			barBuilder.setTurnoverDelta(0);
@@ -117,18 +119,23 @@ public class BarGenerator {
 	}
 
 	public void finish() {
-		if(barBuilder!=null&&barLocalDateTime!=null) {
+		boolean abnormalBar = bufTickList.size() < 10;
+		if(abnormalBar) {
+			log.warn("当前Bar-[{}] 数据为异常数据，Tick数仅为：{}", barUnifiedSymbol, bufTickList.size());
+		}
+		if(barBuilder!=null && barLocalDateTime!=null && !abnormalBar) {
 			barLocalDateTime = barLocalDateTime.withSecond(0).withNano(0);
 			barBuilder.setActionTimestamp(CommonUtils.localDateTimeToMills(barLocalDateTime));
 			barBuilder.setActionTime(barLocalDateTime.format(DateTimeConstant.T_FORMAT_WITH_MS_INT_FORMATTER));
 			
 			// 回调OnBar方法
 			commonBarCallBack.call(barBuilder.build(), bufTickList);
-
-			// 清空当前Tick缓存
-			bufTickList.clear();
 			
+			preBarBuilder = barBuilder;
+
 		}
+		// 清空当前Tick缓存
+		bufTickList.clear();
 		
 		barLocalDateTime = null;
 		barBuilder = null;
