@@ -1,8 +1,6 @@
-package tech.xuanwu.northstar.handler;
+package tech.xuanwu.northstar.common.event;
 
 import com.google.common.eventbus.Subscribe;
-
-import tech.xuanwu.northstar.common.event.NorthstarEvent;
 
 public abstract class AbstractEventHandler implements GenericEventHandler{
 

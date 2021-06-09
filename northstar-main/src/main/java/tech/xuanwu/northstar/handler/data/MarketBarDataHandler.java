@@ -4,12 +4,12 @@ import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 
 import lombok.extern.slf4j.Slf4j;
+import tech.xuanwu.northstar.common.event.AbstractEventHandler;
+import tech.xuanwu.northstar.common.event.GenericEventHandler;
 import tech.xuanwu.northstar.common.event.NorthstarEvent;
 import tech.xuanwu.northstar.common.event.NorthstarEventType;
 import tech.xuanwu.northstar.common.utils.BarGenerator;
 import tech.xuanwu.northstar.engine.event.FastEventEngine;
-import tech.xuanwu.northstar.handler.AbstractEventHandler;
-import tech.xuanwu.northstar.handler.GenericEventHandler;
 import tech.xuanwu.northstar.model.BarBufferManager;
 import tech.xuanwu.northstar.persistence.po.MinBarDataPO;
 import tech.xuanwu.northstar.utils.ProtoBeanUtils;

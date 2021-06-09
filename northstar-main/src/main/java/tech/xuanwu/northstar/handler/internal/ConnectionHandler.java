@@ -4,6 +4,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 import lombok.extern.slf4j.Slf4j;
+import tech.xuanwu.northstar.common.event.AbstractEventHandler;
+import tech.xuanwu.northstar.common.event.GenericEventHandler;
 import tech.xuanwu.northstar.common.event.NorthstarEvent;
 import tech.xuanwu.northstar.common.event.NorthstarEventType;
 import tech.xuanwu.northstar.common.exception.NoSuchElementException;
@@ -11,8 +13,6 @@ import tech.xuanwu.northstar.domain.ContractManager;
 import tech.xuanwu.northstar.domain.GatewayConnection;
 import tech.xuanwu.northstar.gateway.api.Gateway;
 import tech.xuanwu.northstar.gateway.api.MarketGateway;
-import tech.xuanwu.northstar.handler.AbstractEventHandler;
-import tech.xuanwu.northstar.handler.GenericEventHandler;
 import tech.xuanwu.northstar.model.GatewayAndConnectionManager;
 import xyz.redtorch.pb.CoreField.ContractField;
 

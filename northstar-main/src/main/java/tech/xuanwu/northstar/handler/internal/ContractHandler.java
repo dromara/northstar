@@ -6,14 +6,14 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
 
+import tech.xuanwu.northstar.common.event.AbstractEventHandler;
+import tech.xuanwu.northstar.common.event.GenericEventHandler;
 import tech.xuanwu.northstar.common.event.NorthstarEvent;
 import tech.xuanwu.northstar.common.event.NorthstarEventType;
 import tech.xuanwu.northstar.domain.ContractManager;
 import tech.xuanwu.northstar.domain.GatewayConnection;
 import tech.xuanwu.northstar.engine.index.IndexEngine;
 import tech.xuanwu.northstar.gateway.api.MarketGateway;
-import tech.xuanwu.northstar.handler.AbstractEventHandler;
-import tech.xuanwu.northstar.handler.GenericEventHandler;
 import tech.xuanwu.northstar.model.GatewayAndConnectionManager;
 import tech.xuanwu.northstar.persistence.MarketDataRepository;
 import tech.xuanwu.northstar.persistence.po.ContractPO;
