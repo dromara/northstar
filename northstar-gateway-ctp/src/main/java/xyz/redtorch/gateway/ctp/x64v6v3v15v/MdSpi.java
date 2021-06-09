@@ -462,11 +462,11 @@ public class MdSpi extends CThostFtdcMdSpi {
 
 				List<Double> bidPriceList = new ArrayList<>();
 				
-				bidPriceList.add(!CommonUtils.isEquals(pDepthMarketData.getBidPrice1(), Double.MAX_VALUE) ? pDepthMarketData.getBidPrice1() : lowerLimit);
-				bidPriceList.add(!CommonUtils.isEquals(pDepthMarketData.getBidPrice2(), Double.MAX_VALUE) ? pDepthMarketData.getBidPrice2() : lowerLimit);
-				bidPriceList.add(!CommonUtils.isEquals(pDepthMarketData.getBidPrice3(), Double.MAX_VALUE) ? pDepthMarketData.getBidPrice3() : lowerLimit);
-				bidPriceList.add(!CommonUtils.isEquals(pDepthMarketData.getBidPrice4(), Double.MAX_VALUE) ? pDepthMarketData.getBidPrice4() : lowerLimit);
-				bidPriceList.add(!CommonUtils.isEquals(pDepthMarketData.getBidPrice5(), Double.MAX_VALUE) ? pDepthMarketData.getBidPrice5() : lowerLimit);
+				bidPriceList.add(!CommonUtils.isEquals(pDepthMarketData.getBidPrice1(), Double.MAX_VALUE) ? pDepthMarketData.getBidPrice1() : 0);
+				bidPriceList.add(!CommonUtils.isEquals(pDepthMarketData.getBidPrice2(), Double.MAX_VALUE) ? pDepthMarketData.getBidPrice2() : 0);
+				bidPriceList.add(!CommonUtils.isEquals(pDepthMarketData.getBidPrice3(), Double.MAX_VALUE) ? pDepthMarketData.getBidPrice3() : 0);
+				bidPriceList.add(!CommonUtils.isEquals(pDepthMarketData.getBidPrice4(), Double.MAX_VALUE) ? pDepthMarketData.getBidPrice4() : 0);
+				bidPriceList.add(!CommonUtils.isEquals(pDepthMarketData.getBidPrice5(), Double.MAX_VALUE) ? pDepthMarketData.getBidPrice5() : 0);
 				List<Integer> bidVolumeList = new ArrayList<>();
 				bidVolumeList.add(pDepthMarketData.getBidVolume1());
 				bidVolumeList.add(pDepthMarketData.getBidVolume2());
@@ -475,11 +475,11 @@ public class MdSpi extends CThostFtdcMdSpi {
 				bidVolumeList.add(pDepthMarketData.getBidVolume5());
 
 				List<Double> askPriceList = new ArrayList<>();
-				askPriceList.add(Math.min(pDepthMarketData.getAskPrice1(), upperLimit));
-				askPriceList.add(Math.min(pDepthMarketData.getAskPrice2(), upperLimit));
-				askPriceList.add(Math.min(pDepthMarketData.getAskPrice3(), upperLimit));
-				askPriceList.add(Math.min(pDepthMarketData.getAskPrice4(), upperLimit));
-				askPriceList.add(Math.min(pDepthMarketData.getAskPrice5(), upperLimit));
+				askPriceList.add(!CommonUtils.isEquals(pDepthMarketData.getAskPrice1(), Double.MAX_VALUE) ? pDepthMarketData.getAskPrice1(): 0);
+				askPriceList.add(!CommonUtils.isEquals(pDepthMarketData.getAskPrice2(), Double.MAX_VALUE) ? pDepthMarketData.getAskPrice2(): 0);
+				askPriceList.add(!CommonUtils.isEquals(pDepthMarketData.getAskPrice3(), Double.MAX_VALUE) ? pDepthMarketData.getAskPrice3(): 0);
+				askPriceList.add(!CommonUtils.isEquals(pDepthMarketData.getAskPrice4(), Double.MAX_VALUE) ? pDepthMarketData.getAskPrice4(): 0);
+				askPriceList.add(!CommonUtils.isEquals(pDepthMarketData.getAskPrice5(), Double.MAX_VALUE) ? pDepthMarketData.getAskPrice5(): 0);
 				List<Integer> askVolumeList = new ArrayList<>();
 				askVolumeList.add(pDepthMarketData.getAskVolume1());
 				askVolumeList.add(pDepthMarketData.getAskVolume2());

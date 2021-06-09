@@ -25,8 +25,6 @@ public class BarGenerator {
 
 	private String barUnifiedSymbol;
 	
-	private BarField.Builder preBarBuilder;
-	
 	CommonBarCallBack commonBarCallBack;
 
 	public BarGenerator(String unifiedSymbol, CommonBarCallBack commonBarCallBack) {
@@ -103,23 +101,10 @@ public class BarGenerator {
 		barBuilder.setVolume(tick.getVolume());
 		barBuilder.setTurnover(tick.getTurnover());
 
-		if (preBarBuilder != null) {
-			if(preBarBuilder.getTradingDay().equals(tick.getTradingDay())) {
-				long volDelta = tick.getVolume() - preBarBuilder.getVolume();
-				barBuilder.setVolumeDelta(Math.max(volDelta, 0));
-				barBuilder.setTurnoverDelta(tick.getTurnover() - preBarBuilder.getTurnover());
-				barBuilder.setOpenInterestDelta(tick.getOpenInterest() - preBarBuilder.getOpenInterest());				
-			} else {
-				barBuilder.setVolumeDelta(tick.getVolume());
-				barBuilder.setTurnoverDelta(tick.getVolume() * tick.getLowPrice());
-				barBuilder.setOpenInterestDelta(tick.getOpenInterest() - tick.getPreOpenInterest());
-			}
-			
-		} else {
-			barBuilder.setVolumeDelta(0);
-			barBuilder.setTurnoverDelta(0);
-			barBuilder.setOpenInterestDelta(0);
-		}
+		barBuilder.setVolumeDelta(tick.getVolumeDelta() + barBuilder.getVolumeDelta());
+		barBuilder.setVolumeDelta(Math.max(0, barBuilder.getVolumeDelta()));	// 防止volDelta为负数
+		barBuilder.setTurnoverDelta(tick.getTurnoverDelta() + barBuilder.getTurnoverDelta());
+		barBuilder.setOpenInterestDelta(tick.getOpenInterestDelta() + barBuilder.getOpenInterestDelta());
 
 		preTick = tick;
 		bufTickList.add(tick);
@@ -134,8 +119,6 @@ public class BarGenerator {
 			// 回调OnBar方法
 			commonBarCallBack.call(barBuilder.build(), bufTickList);
 			
-			preBarBuilder = barBuilder;
-
 		}
 		// 清空当前Tick缓存
 		bufTickList.clear();
