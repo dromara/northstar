@@ -26,6 +26,24 @@ spring:
   data:
       mongodb:
         uri: mongodb://127.0.0.1:27017/NS_DB
-
+  mail:
+    host: smtp.126.com
+    username: ${email}
+    password: UQNXPDZJIYQTRFRW
+    default-encoding: UTF-8
+    subscribed: ${sub_email}
+    port: 465
+    protocol: smtp
+    properties:
+      mail:
+        imap.ssl.socketFactory.fallback: false
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          ssl:
+            enable: true
+            socketFactory.class: com.fintech.modules.base.util.mail.MailSSLSocketFactory
         
         

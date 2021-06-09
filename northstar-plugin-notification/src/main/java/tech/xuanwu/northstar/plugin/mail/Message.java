@@ -14,6 +14,12 @@ public class Message {
 	
 	private String content;
 
+	public Message(String title, String content) {
+		this.title = title;
+		this.content = content;
+		dateTime = LocalDateTime.now();
+	}
+	
 	public Message(NoticeField notice) {
 		dateTime = LocalDateTime.now();
 		content = notice.getContent();

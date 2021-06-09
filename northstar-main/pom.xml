@@ -25,6 +25,10 @@
 		</dependency>
 		<dependency>
 			<groupId>tech.xuan-wu</groupId>
+			<artifactId>northstar-plugin-notification</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>tech.xuan-wu</groupId>
 			<artifactId>northstar-gateway-ctp</artifactId>
 		</dependency>
 		<dependency>
