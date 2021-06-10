@@ -7,6 +7,8 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.ToDoubleFunction;
 
+import org.springframework.util.StringUtils;
+
 import tech.xuanwu.northstar.common.constant.Constants;
 import tech.xuanwu.northstar.common.utils.ContractNameResolver;
 import xyz.redtorch.pb.CoreField.ContractField;
@@ -24,6 +26,8 @@ public class IndexContract {
 	
 	private ConcurrentHashMap<String, TickField> tickMap = new ConcurrentHashMap<>(20);
 	private ConcurrentHashMap<String, Double> weightedMap = new ConcurrentHashMap<>(20);
+	
+	private String weightedUpdateDate;
 	
 	private volatile long lastTickTimestamp = System.currentTimeMillis();
 
@@ -82,6 +86,14 @@ public class IndexContract {
 	}
 
 	private void calculate() {
+		//每天只对权重更新一次
+		if(!tickBuilder.getTradingDay().equals(weightedUpdateDate)) {
+			double preTotalOpenInterest = tickMap.reduceValuesToDouble(PARA_THRESHOLD, t -> t.getPreOpenInterest(), 0, (a, b) -> a + b);;
+			// 合约权值计算
+			tickMap.forEachEntry(PARA_THRESHOLD, e -> weightedMap.compute(e.getKey(), (k,v) -> e.getValue().getPreOpenInterest() * 1.0 / preTotalOpenInterest));
+			weightedUpdateDate = tickBuilder.getTradingDay();
+		}
+		
 		// 合计成交量
 		final long totalVolume = tickMap.reduceValuesToLong(PARA_THRESHOLD, t -> t.getVolume(), 0, (a, b) -> a + b);
 		final long totalVolumeDelta = tickMap.reduceValuesToLong(PARA_THRESHOLD, t -> t.getVolumeDelta(), 0, (a, b) -> a + b);
@@ -91,9 +103,7 @@ public class IndexContract {
 		// 合计成交额
 		final double totalTurnover = tickMap.reduceValuesToDouble(PARA_THRESHOLD, t -> t.getTurnover(), 0, (a, b) -> a + b);
 		final double totalTurnoverDelta = tickMap.reduceValuesToDouble(PARA_THRESHOLD, t -> t.getTurnoverDelta(), 0, (a, b) -> a + b);
-		// 合约权值计算
-		tickMap.forEachEntry(PARA_THRESHOLD, e -> weightedMap.compute(e.getKey(), (k,v) -> e.getValue().getOpenInterest() / totalOpenInterest));
-
+		
 		//加权均价
 		double rawWeightedLastPrice = computeWeightedValue(e -> tickMap.get(e.getKey()).getLastPrice() * e.getValue());
 		double weightedLastPrice = roundWithPriceTick(rawWeightedLastPrice);	//通过最小变动价位校准的加权均价
