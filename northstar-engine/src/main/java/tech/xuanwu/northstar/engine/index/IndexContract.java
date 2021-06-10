@@ -26,7 +26,6 @@ public class IndexContract {
 	private ConcurrentHashMap<String, Double> weightedMap = new ConcurrentHashMap<>(20);
 	
 	private volatile long lastTickTimestamp = System.currentTimeMillis();
-	private volatile TickField lastTick;
 
 	public IndexContract(Collection<ContractField> seriesContracts, TickEventHandler tickHandler) {
 		if(seriesContracts.isEmpty()) {
@@ -79,20 +78,19 @@ public class IndexContract {
 			calculate();
 			TickField t = tickBuilder.build();
 			tickHandler.onTick(t);
-			lastTick = t;
 		}
 	}
 
 	private void calculate() {
 		// 合计成交量
 		final long totalVolume = tickMap.reduceValuesToLong(PARA_THRESHOLD, t -> t.getVolume(), 0, (a, b) -> a + b);
-		final long totalVolumeDelta = lastTick == null ? 0 : totalVolume - lastTick.getVolume();
+		final long totalVolumeDelta = tickMap.reduceValuesToLong(PARA_THRESHOLD, t -> t.getVolumeDelta(), 0, (a, b) -> a + b);
 		// 合计持仓量
 		final double totalOpenInterest = tickMap.reduceValuesToDouble(PARA_THRESHOLD, t -> t.getOpenInterest(), 0, (a, b) -> a + b);
-		final double totalOpenInterestDelta = lastTick == null ? 0 : totalOpenInterest - lastTick.getOpenInterest();
+		final double totalOpenInterestDelta = tickMap.reduceValuesToDouble(PARA_THRESHOLD, t -> t.getOpenInterestDelta(), 0, (a, b) -> a + b);
 		// 合计成交额
 		final double totalTurnover = tickMap.reduceValuesToDouble(PARA_THRESHOLD, t -> t.getTurnover(), 0, (a, b) -> a + b);
-		final double totalTurnoverDelta = lastTick == null ? 0 : totalTurnover - lastTick.getTurnover();
+		final double totalTurnoverDelta = tickMap.reduceValuesToDouble(PARA_THRESHOLD, t -> t.getTurnoverDelta(), 0, (a, b) -> a + b);
 		// 合约权值计算
 		tickMap.forEachEntry(PARA_THRESHOLD, e -> weightedMap.compute(e.getKey(), (k,v) -> e.getValue().getOpenInterest() / totalOpenInterest));
 
