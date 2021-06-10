@@ -18,14 +18,12 @@ public class IndexContract {
 	
 	private TickEventHandler tickHandler;
 	
-	// 统计时间间隔（毫秒）
-	private final long TICK_INTERVAL = 700;
 	private final long PARA_THRESHOLD = 100;
 	
 	private ConcurrentHashMap<String, TickField> tickMap = new ConcurrentHashMap<>(20);
 	private ConcurrentHashMap<String, Double> weightedMap = new ConcurrentHashMap<>(20);
 	
-	private volatile long lastTickTimestamp = System.currentTimeMillis();
+	private volatile long lastTickTimestamp = -1;
 
 	public IndexContract(Collection<ContractField> seriesContracts, TickEventHandler tickHandler) {
 		if(seriesContracts.isEmpty()) {
@@ -64,9 +62,16 @@ public class IndexContract {
 	}
 
 	public synchronized void updateByTick(TickField tick) {
-		tickMap.compute(tick.getUnifiedSymbol(), (k, v) -> tick);
-		if(System.currentTimeMillis() - lastTickTimestamp > TICK_INTERVAL) {
-			lastTickTimestamp = System.currentTimeMillis();
+		if (lastTickTimestamp != tick.getActionTimestamp()) {
+			if(lastTickTimestamp > 0) {
+				//进行运算
+				calculate();
+				TickField t = tickBuilder.build();
+				tickHandler.onTick(t);
+			}
+			
+			// 新一个指数Tick
+			lastTickTimestamp = tick.getActionTimestamp();
 			tickBuilder.setTradingDay(tick.getTradingDay());
 			tickBuilder.setActionDay(tick.getActionDay());
 			tickBuilder.setActionTime(tick.getActionTime());
@@ -74,24 +79,21 @@ public class IndexContract {
 			tickBuilder.setPreClosePrice(tick.getPreClosePrice());
 			tickBuilder.setPreOpenInterest(tick.getPreOpenInterest());
 			tickBuilder.setPreSettlePrice(tick.getPreSettlePrice());
-			//进行运算
-			calculate();
-			TickField t = tickBuilder.build();
-			tickHandler.onTick(t);
 		}
+		// 同一个指数Tick
+		tickMap.compute(tick.getUnifiedSymbol(), (k, v) -> tick);
 	}
 
 	private void calculate() {
+		// 合计持仓量
+		final double totalOpenInterest = tickMap.reduceValuesToDouble(PARA_THRESHOLD, t -> t.getOpenInterest(), 0, (a, b) -> a + b);
+		final double totalOpenInterestDelta = tickMap.reduceValuesToDouble(PARA_THRESHOLD, t -> t.getOpenInterestDelta(), 0, (a, b) -> a + b);
 		// 合约权值计算
-		double preTotalOpenInterest = tickMap.reduceValuesToDouble(PARA_THRESHOLD, t -> t.getPreOpenInterest(), 0, (a, b) -> a + b);;
-		tickMap.forEachEntry(PARA_THRESHOLD, e -> weightedMap.compute(e.getKey(), (k,v) -> e.getValue().getPreOpenInterest() * 1.0 / preTotalOpenInterest));
+		tickMap.forEachEntry(PARA_THRESHOLD, e -> weightedMap.compute(e.getKey(), (k,v) -> e.getValue().getOpenInterest() * 1.0 / totalOpenInterest));
 		
 		// 合计成交量
 		final long totalVolume = tickMap.reduceValuesToLong(PARA_THRESHOLD, t -> t.getVolume(), 0, (a, b) -> a + b);
 		final long totalVolumeDelta = tickMap.reduceValuesToLong(PARA_THRESHOLD, t -> t.getVolumeDelta(), 0, (a, b) -> a + b);
-		// 合计持仓量
-		final double totalOpenInterest = tickMap.reduceValuesToDouble(PARA_THRESHOLD, t -> t.getOpenInterest(), 0, (a, b) -> a + b);
-		final double totalOpenInterestDelta = tickMap.reduceValuesToDouble(PARA_THRESHOLD, t -> t.getOpenInterestDelta(), 0, (a, b) -> a + b);
 		// 合计成交额
 		final double totalTurnover = tickMap.reduceValuesToDouble(PARA_THRESHOLD, t -> t.getTurnover(), 0, (a, b) -> a + b);
 		final double totalTurnoverDelta = tickMap.reduceValuesToDouble(PARA_THRESHOLD, t -> t.getTurnoverDelta(), 0, (a, b) -> a + b);
