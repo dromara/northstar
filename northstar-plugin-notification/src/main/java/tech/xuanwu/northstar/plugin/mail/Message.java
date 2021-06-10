@@ -23,7 +23,7 @@ public class Message {
 	public Message(NoticeField notice) {
 		dateTime = LocalDateTime.now();
 		content = notice.getContent();
-		title = String.format("Northstar消息通知 - [{}]", notice.getStatus().toString());
+		title = String.format("Northstar消息通知 - [%s]", notice.getStatus().toString());
 	}
 	
 }
