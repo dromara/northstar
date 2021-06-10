@@ -7,8 +7,6 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.ToDoubleFunction;
 
-import org.springframework.util.StringUtils;
-
 import tech.xuanwu.northstar.common.constant.Constants;
 import tech.xuanwu.northstar.common.utils.ContractNameResolver;
 import xyz.redtorch.pb.CoreField.ContractField;
@@ -21,13 +19,11 @@ public class IndexContract {
 	private TickEventHandler tickHandler;
 	
 	// 统计时间间隔（毫秒）
-	private final long TICK_INTERVAL = 300;
+	private final long TICK_INTERVAL = 700;
 	private final long PARA_THRESHOLD = 100;
 	
 	private ConcurrentHashMap<String, TickField> tickMap = new ConcurrentHashMap<>(20);
 	private ConcurrentHashMap<String, Double> weightedMap = new ConcurrentHashMap<>(20);
-	
-	private String weightedUpdateDate;
 	
 	private volatile long lastTickTimestamp = System.currentTimeMillis();
 
@@ -86,13 +82,9 @@ public class IndexContract {
 	}
 
 	private void calculate() {
-		//每天只对权重更新一次
-		if(!tickBuilder.getTradingDay().equals(weightedUpdateDate)) {
-			double preTotalOpenInterest = tickMap.reduceValuesToDouble(PARA_THRESHOLD, t -> t.getPreOpenInterest(), 0, (a, b) -> a + b);;
-			// 合约权值计算
-			tickMap.forEachEntry(PARA_THRESHOLD, e -> weightedMap.compute(e.getKey(), (k,v) -> e.getValue().getPreOpenInterest() * 1.0 / preTotalOpenInterest));
-			weightedUpdateDate = tickBuilder.getTradingDay();
-		}
+		// 合约权值计算
+		double preTotalOpenInterest = tickMap.reduceValuesToDouble(PARA_THRESHOLD, t -> t.getPreOpenInterest(), 0, (a, b) -> a + b);;
+		tickMap.forEachEntry(PARA_THRESHOLD, e -> weightedMap.compute(e.getKey(), (k,v) -> e.getValue().getPreOpenInterest() * 1.0 / preTotalOpenInterest));
 		
 		// 合计成交量
 		final long totalVolume = tickMap.reduceValuesToLong(PARA_THRESHOLD, t -> t.getVolume(), 0, (a, b) -> a + b);
