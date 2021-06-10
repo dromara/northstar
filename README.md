@@ -25,6 +25,23 @@ cd ~
 git clone https://gitee.com/KevinHuangwl/northstar.git
 ```
 
+修改配置文件中的邮箱代理配置
+```
+spring:
+  ...
+
+  mail:
+    host: smtp.126.com              //不同的邮箱配置不同
+    username: ${email}              //为了不上传git，采用启动参数配置
+    password: UQNXPDZJIYQTRFRW      //在邮箱网站获取
+    default-encoding: UTF-8
+    subscribed: ${sub_email}        //为了不上传git，采用启动参数配置
+    port: 465
+    protocol: smtp
+    
+    ...
+```
+
 准备环境（只需要运行一次）
 ```
 cd ~/northstar
@@ -39,8 +56,33 @@ bash build.sh
 
 运行程序
 ```
-nohup java -jar -DwsHost=<这里填云服务器内网IP> -Dnsuser=<登陆用户名> -Dnspwd=<登陆密码> ～/northstar.jar &
+nohup java -jar -DwsHost=<这里填云服务器内网IP> -Dnsuser=<登陆用户名> -Dnspwd=<登陆密码> -Demail=<代理邮箱名> -Dsub_email=<订阅邮箱名> ～/northstar.jar &
 ```
+
+如果嫌以上命名过于复杂，可以通过以下方法简化启动命令  
+方法一： 把以上命令写成脚本  
+方法二： 在.bashrc中加入以上启动参数（对参数的隐藏比方法一要好）  
+```
+vim ~/.bashrc
+```
+在文末加入以下设置
+```
+...
+export WSHOST=<这里填云服务器内网IP>
+export NSUSER=<登陆用户名>
+export NSPWD=<登陆密码>
+export EMAIL=<代理邮箱名> 
+export SUB_EMAIL=<订阅邮箱名>
+```
+保存并退出，然后让配置生效
+```
+source ~/.bashrc
+```
+再启动程序
+```
+nohup java -jar ～/northstar.jar &
+```
+
 
 查询日志
 ```
