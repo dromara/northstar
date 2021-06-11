@@ -1,8 +1,11 @@
 # Northstar程序化交易平台
-基于JAVA的程序化交易平台: Northstar  
+这是一个类似文华、MC的开源量化交易平台。
+
+![Image text](https://images.gitee.com/uploads/images/2021/0609/223845_f3942e1e_1676852.png)
+
 本项目基于github上另一个知名的同类项目redtorch演化而来，感谢redtorch项目作者的启发。  
 本人几乎从头到尾90%重构了两次，深感开源不易。  
-详细文档请参考wiki  
+详细文档请参考wiki： https://gitee.com/KevinHuangwl/northstar/wikis/%E6%A0%B8%E5%BF%83%E8%AE%BE%E8%AE%A1%E8%AF%B4%E6%98%8E  
 
 ## 运行环境
 建议使用Linux云服务器
@@ -99,3 +102,5 @@ kill `pgrep java`
 - 服务器时间校正
 - 本项目为量化爱好者及JAVA开发者搭建，对交易行为并不负责
 - 当前项目只能进行手工交易，若要开发量化策略，需要一定的JAVA编程基础
+
+## 参考项目
