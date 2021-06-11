@@ -32,7 +32,7 @@ public class NotificationDispatcher extends AbstractEventHandler implements Init
 		{
 			add(NorthstarEventType.NOTICE);
 			add(NorthstarEventType.CONNECTED);
-			add(NorthstarEventType.DISCONNECTING);
+			add(NorthstarEventType.DISCONNECTED);
 			add(NorthstarEventType.ORDER);
 			add(NorthstarEventType.TRADE);
 		}
@@ -59,12 +59,14 @@ public class NotificationDispatcher extends AbstractEventHandler implements Init
 		case CONNECTED:
 			handleConnection((String) e.getData());
 			break;
-		case DISCONNECTING:
+		case DISCONNECTED:
 			handleDisconnection((String) e.getData());
 			break;
 		case ORDER:
+			handleOrder((OrderField) e.getData());
 			break;
 		case TRADE:
+			handleTrade((TradeField) e.getData());
 			break;
 		default:
 			throw new IllegalArgumentException("未定义处理类型：" + e.getEvent());
@@ -74,31 +76,33 @@ public class NotificationDispatcher extends AbstractEventHandler implements Init
 	
 	private void handleNotice(NoticeField notice) {
 		Message msg = new Message(notice);
-		for(MessageSender sender : senderList) {
-			sender.send(msg);
-		}
+		doSend(msg);
 	}
 	
 	private void handleConnection(String gatewayId) {
 		Message msg = new Message(String.format("[%s] - 连线", gatewayId), "");
-		for(MessageSender sender : senderList) {
-			sender.send(msg);
-		}
+		doSend(msg);
 	}
 	
 	private void handleDisconnection(String gatewayId) {
 		Message msg = new Message(String.format("[%s] - 离线", gatewayId), "");
-		for(MessageSender sender : senderList) {
-			sender.send(msg);
-		}
+		doSend(msg);
 	}
 	
 	private void handleOrder(OrderField order) {
-		
+		Message msg = new Message(order);
+		doSend(msg);
 	}
 	
 	private void handleTrade(TradeField trade) {
-		
+		Message msg = new Message(trade);
+		doSend(msg);
+	}
+	
+	private void doSend(Message msg) {
+		for(MessageSender sender : senderList) {
+			sender.send(msg);
+		}
 	}
 
 }
