@@ -11,7 +11,7 @@
 
 
 项目架构采用事件驱动+插件式开发
-![Image](https://images.gitee.com/uploads/images/2021/0610/224021_73333706_1676852.png)
+![Image](https://images.gitee.com/uploads/images/2021/0611/094207_e5a77d26_1676852.png)
 
 
 本项目基于github上另一个知名的同类项目redtorch演化而来，感谢redtorch项目作者的启发。  
