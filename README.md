@@ -3,6 +3,16 @@
 
 ![Image text](https://images.gitee.com/uploads/images/2021/0609/223845_f3942e1e_1676852.png)
 
+通过JAVA后台来编写程序化的交易策略，并提供页面监控界面
+
+![Image](https://images.gitee.com/uploads/images/2021/0606/220710_eeab5dd9_1676852.png)
+![Image](https://images.gitee.com/uploads/images/2021/0606/220728_32ef6b37_1676852.png)
+
+
+项目架构采用事件驱动+插件式开发
+![Image](https://images.gitee.com/uploads/images/2021/0610/224021_73333706_1676852.png)
+
+
 本项目基于github上另一个知名的同类项目redtorch演化而来，感谢redtorch项目作者的启发。  
 本人几乎从头到尾90%重构了两次，深感开源不易。  
 详细文档请参考wiki： https://gitee.com/KevinHuangwl/northstar/wikis/%E6%A0%B8%E5%BF%83%E8%AE%BE%E8%AE%A1%E8%AF%B4%E6%98%8E  
