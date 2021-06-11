@@ -1,6 +1,7 @@
 # Northstar程序化交易平台
 这是一个类似文华、MC的开源量化交易平台。
 
+![Image](https://images.gitee.com/uploads/images/2021/0606/215002_e2a95b42_1676852.png)
 ![Image text](https://images.gitee.com/uploads/images/2021/0609/223845_f3942e1e_1676852.png)
 
 通过JAVA后台来编写程序化的交易策略，并提供页面监控界面
