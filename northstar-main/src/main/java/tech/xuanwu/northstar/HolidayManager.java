@@ -1,8 +1,8 @@
 package tech.xuanwu.northstar;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
@@ -35,7 +35,18 @@ public class HolidayManager implements InitializingBean{
 		}
 	}
 	
-	public boolean isHoliday(LocalDate date) {
-		return holidaySet.contains(date) || date.getDayOfWeek().getValue() > 5;
+	public boolean isHoliday(LocalDateTime dateTime) {
+		LocalDate date = LocalDate.from(dateTime);
+		boolean isWeekend = dateTime.getDayOfWeek().getValue() > 5;
+		// 当天就是假期
+		if(isWeekend || holidaySet.contains(date)) {
+			return true;
+		}
+		// 当天不是假期的夜盘判断
+		if(dateTime.getHour() >= 20) {
+			boolean isFriday = dateTime.getDayOfWeek().getValue() == 5;
+			date = LocalDate.from(dateTime.plusHours(isFriday ? 54 : 6));
+		}
+		return holidaySet.contains(date);
 	}
 }

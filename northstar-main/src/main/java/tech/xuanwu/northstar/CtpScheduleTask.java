@@ -1,6 +1,5 @@
 package tech.xuanwu.northstar;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
@@ -36,7 +35,7 @@ public class CtpScheduleTask {
 
 	@Scheduled(cron="0 0/1 0-1,9-14,21-23 ? * 1-5")
 	public void timelyCheckConnection() {
-		if(holidayMgr.isHoliday(LocalDate.now())) {
+		if(holidayMgr.isHoliday(LocalDateTime.now())) {
 			return;
 		}
 		connectIfNotConnected();
@@ -45,7 +44,7 @@ public class CtpScheduleTask {
 	
 	@Scheduled(cron="0 55 8,20 ? * 1-5")
 	public void dailyCheckConnection() {
-		if(holidayMgr.isHoliday(LocalDate.now())) {
+		if(holidayMgr.isHoliday(LocalDateTime.now())) {
 			log.debug("当前为假期，不进行连线");
 			return;
 		}
@@ -66,9 +65,6 @@ public class CtpScheduleTask {
 	
 	@Scheduled(cron="58 0 9,21 ? * 1-5")
 	public void dataCleaning() {
-		if(holidayMgr.isHoliday(LocalDate.now())) {
-			return;
-		}
 		LocalDateTime now = LocalDateTime.now();
 		if(now.getHour() == 9) {
 			// 早盘，清洗凌晨2:30至9点的数据记录,共390分钟
@@ -101,7 +97,7 @@ public class CtpScheduleTask {
 	 */
 	@Scheduled(cron="55 0/1 0-2,9-14,21-23 ? * 1-5")
 	public void timelySaveBar() {
-		if(holidayMgr.isHoliday(LocalDate.now())) {
+		if(holidayMgr.isHoliday(LocalDateTime.now())) {
 			return;
 		}
 		bbMgr.saveAndClear();
@@ -113,7 +109,7 @@ public class CtpScheduleTask {
 	 */
 	@Scheduled(cron="10 0 3,15 ? * 1-5")
 	public void saveBarAfterMarketClose() {
-		if(holidayMgr.isHoliday(LocalDate.now())) {
+		if(holidayMgr.isHoliday(LocalDateTime.now())) {
 			return;
 		}
 		bbMgr.saveAndClear();
@@ -122,7 +118,8 @@ public class CtpScheduleTask {
 	
 	@Scheduled(cron="0 1 15 ? * 1-5")
 	public void dailySettlement() {
-		if(holidayMgr.isHoliday(LocalDate.now())) {
+		if(holidayMgr.isHoliday(LocalDateTime.now())) {
+			log.debug("当前为假期，没有结算任务");
 			return;
 		}
 		log.info("日结算定时任务");
