@@ -20,13 +20,13 @@ import tech.xuanwu.northstar.strategy.common.model.meta.ComponentField;
 import tech.xuanwu.northstar.strategy.common.model.meta.ComponentMetaInfo;
 import tech.xuanwu.northstar.strategy.common.model.meta.DynamicParams;
 
-public class CtaModuleService implements InitializingBean{
+public class ModuleService implements InitializingBean{
 	
 	private ApplicationContext ctx;
 	
 	private ModuleRepository moduleRepo;
 	
-	public CtaModuleService(ApplicationContext ctx, ModuleRepository moduleRepo) {
+	public ModuleService(ApplicationContext ctx, ModuleRepository moduleRepo) {
 		this.ctx = ctx;
 		this.moduleRepo = moduleRepo;
 	}

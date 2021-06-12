@@ -19,7 +19,7 @@ import tech.xuanwu.northstar.persistence.GatewayRepository;
 import tech.xuanwu.northstar.persistence.MarketDataRepository;
 import tech.xuanwu.northstar.persistence.ModuleRepository;
 import tech.xuanwu.northstar.service.AccountService;
-import tech.xuanwu.northstar.service.CtaModuleService;
+import tech.xuanwu.northstar.service.ModuleService;
 import tech.xuanwu.northstar.service.DataSyncService;
 import tech.xuanwu.northstar.service.GatewayService;
 
@@ -56,7 +56,7 @@ public class ServiceConfig {
 	}
 	
 	@Bean
-	public CtaModuleService ctaModuleService(ApplicationContext ctx, ModuleRepository moduleRepo) {
-		return new CtaModuleService(ctx, moduleRepo);
+	public ModuleService moduleService(ApplicationContext ctx, ModuleRepository moduleRepo) {
+		return new ModuleService(ctx, moduleRepo);
 	}
 }

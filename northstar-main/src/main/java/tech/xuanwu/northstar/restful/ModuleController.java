@@ -14,17 +14,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import tech.xuanwu.northstar.common.model.ResultBean;
-import tech.xuanwu.northstar.service.CtaModuleService;
+import tech.xuanwu.northstar.service.ModuleService;
 import tech.xuanwu.northstar.strategy.common.model.ModuleInfo;
 import tech.xuanwu.northstar.strategy.common.model.meta.ComponentField;
 import tech.xuanwu.northstar.strategy.common.model.meta.ComponentMetaInfo;
 
 @RestController
 @RequestMapping("/cta")
-public class CtaModuleController {
+public class ModuleController {
 	
 	@Autowired
-	private CtaModuleService service;
+	private ModuleService service;
 	
 	@GetMapping("/signal/policies")
 	public ResultBean<List<ComponentMetaInfo>> getRegisteredSignalPolicies(){
