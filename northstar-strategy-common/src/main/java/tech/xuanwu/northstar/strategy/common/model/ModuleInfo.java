@@ -5,12 +5,14 @@ import java.util.List;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+
 import lombok.Data;
+import tech.xuanwu.northstar.strategy.common.constants.ModuleType;
 import tech.xuanwu.northstar.strategy.common.model.meta.ComponentAndParamsPair;
 
 @Document
 @Data
-public class CtaModuleInfo {
+public class ModuleInfo {
 
 	private ComponentAndParamsPair signalPolicy;
 	
@@ -26,5 +28,7 @@ public class CtaModuleInfo {
 	private double allocatedAccountShare;
 	
 	private boolean enabled;
+	
+	private ModuleType type;
 	
 }

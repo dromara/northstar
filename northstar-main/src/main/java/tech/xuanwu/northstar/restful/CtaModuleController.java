@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import tech.xuanwu.northstar.common.model.ResultBean;
 import tech.xuanwu.northstar.service.CtaModuleService;
-import tech.xuanwu.northstar.strategy.common.model.CtaModuleInfo;
+import tech.xuanwu.northstar.strategy.common.model.ModuleInfo;
 import tech.xuanwu.northstar.strategy.common.model.meta.ComponentField;
 import tech.xuanwu.northstar.strategy.common.model.meta.ComponentMetaInfo;
 
@@ -50,21 +50,21 @@ public class CtaModuleController {
 	}
 	
 	@PostMapping("/module")
-	public ResultBean<Void> createModule(@RequestBody CtaModuleInfo module){
+	public ResultBean<Void> createModule(@RequestBody ModuleInfo module){
 		Assert.notNull(module, "模组信息不能为空");
-		service.createModule(module, true);
+		service.createModule(module);
 		return new ResultBean<>(null);
 	}
 	
 	@PutMapping("/module")
-	public ResultBean<Void> updateModule(@RequestBody CtaModuleInfo module){
+	public ResultBean<Void> updateModule(@RequestBody ModuleInfo module){
 		Assert.notNull(module, "模组信息不能为空");
 		service.updateModule(module);
 		return new ResultBean<>(null);
 	}
 	
 	@GetMapping("/module")
-	public ResultBean<List<CtaModuleInfo>> getAllModules(){
+	public ResultBean<List<ModuleInfo>> getAllModules(){
 		return new ResultBean<>(service.getCurrentModules());
 	}
 	

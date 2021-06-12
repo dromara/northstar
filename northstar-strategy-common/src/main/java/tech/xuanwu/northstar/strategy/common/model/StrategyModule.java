@@ -1,7 +1,10 @@
 package tech.xuanwu.northstar.strategy.common.model;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
+import lombok.Builder;
+import tech.xuanwu.northstar.gateway.api.Gateway;
 import tech.xuanwu.northstar.strategy.common.Dealer;
 import tech.xuanwu.northstar.strategy.common.ModuleAccount;
 import tech.xuanwu.northstar.strategy.common.ModuleOrder;
@@ -17,6 +20,7 @@ import xyz.redtorch.pb.CoreField.OrderField;
 import xyz.redtorch.pb.CoreField.TickField;
 import xyz.redtorch.pb.CoreField.TradeField;
 
+@Builder
 public class StrategyModule {
 	
 	private BarData barData;
@@ -31,11 +35,15 @@ public class StrategyModule {
 	
 	private SignalPolicy signalPolicy;
 	
-	private List<RiskControlRule> riskControlRuls;
+	private List<RiskControlRule> riskControlRules;
 	
 	private Dealer dealer;
 	
 	private ModuleState state;
+	
+	private Gateway gateway;
+	
+	private String name;
 	
 	public void onTick(TickField tick) {
 		
@@ -55,5 +63,16 @@ public class StrategyModule {
 	
 	public void onAccount(AccountField account) {
 		
+	}
+	
+	public ModuleStatus getStatus() {
+		ModuleStatus status = new ModuleStatus();
+		status.setModuleName(name);
+		status.setState(state);
+		List<TradeField> trades = mPosition.getOpenningTrade();
+		if(trades.size() > 0) {
+			status.setLastOpenTrade(trades.stream().map(trade -> trade.toByteArray()).collect(Collectors.toList()));
+		}
+		return status;
 	}
 }

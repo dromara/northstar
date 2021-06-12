@@ -8,13 +8,14 @@ import java.util.Map.Entry;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 
-import tech.xuanwu.northstar.persistence.StrategyModuleRepository;
+import tech.xuanwu.northstar.persistence.ModuleRepository;
 import tech.xuanwu.northstar.strategy.common.Dealer;
 import tech.xuanwu.northstar.strategy.common.DynamicParamsAware;
 import tech.xuanwu.northstar.strategy.common.RiskControlRule;
 import tech.xuanwu.northstar.strategy.common.SignalPolicy;
 import tech.xuanwu.northstar.strategy.common.annotation.StrategicComponent;
-import tech.xuanwu.northstar.strategy.common.model.CtaModuleInfo;
+import tech.xuanwu.northstar.strategy.common.model.ModuleInfo;
+import tech.xuanwu.northstar.strategy.common.model.ModuleStatus;
 import tech.xuanwu.northstar.strategy.common.model.meta.ComponentField;
 import tech.xuanwu.northstar.strategy.common.model.meta.ComponentMetaInfo;
 import tech.xuanwu.northstar.strategy.common.model.meta.DynamicParams;
@@ -23,9 +24,9 @@ public class CtaModuleService implements InitializingBean{
 	
 	private ApplicationContext ctx;
 	
-	private StrategyModuleRepository moduleRepo;
+	private ModuleRepository moduleRepo;
 	
-	public CtaModuleService(ApplicationContext ctx, StrategyModuleRepository moduleRepo) {
+	public CtaModuleService(ApplicationContext ctx, ModuleRepository moduleRepo) {
 		this.ctx = ctx;
 		this.moduleRepo = moduleRepo;
 	}
@@ -85,27 +86,35 @@ public class CtaModuleService implements InitializingBean{
 	 * @param module
 	 * @param shouldSave
 	 */
-	public void createModule(CtaModuleInfo module, boolean shouldSave) {
+	public void createModule(ModuleInfo module) {
 		
-		if(shouldSave) {
-			moduleRepo.save(module);
-		}
+		moduleRepo.saveModuleInfo(module);
+	}
+	
+	/**
+	 * 加载模组
+	 * @param module
+	 * @param status
+	 */
+	public void loadModule(ModuleInfo module, ModuleStatus status) {
+		
+		
 	}
 	
 	/**
 	 * 更新模组
 	 * @param module
 	 */
-	public void updateModule(CtaModuleInfo module) {
-		moduleRepo.save(module);
+	public void updateModule(ModuleInfo module) {
+		moduleRepo.saveModuleInfo(module);
 	}
 	
 	/**
 	 * 查询所有模组
 	 * @return
 	 */
-	public List<CtaModuleInfo> getCurrentModules(){
-		return moduleRepo.findAll();
+	public List<ModuleInfo> getCurrentModules(){
+		return moduleRepo.findAllModuleInfo();
 	}
 	
 	/**
@@ -113,13 +122,18 @@ public class CtaModuleService implements InitializingBean{
 	 * @param moduleName
 	 */
 	public void removeModule(String moduleName) {
-		moduleRepo.deleteById(moduleName);
+		moduleRepo.deleteModuleInfoById(moduleName);
 	}
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		for(CtaModuleInfo m : getCurrentModules()) {
-			createModule(m, false);
+		Map<String, ModuleStatus> statusMap = moduleRepo.loadModuleStatus();
+		for(ModuleInfo m : getCurrentModules()) {
+			ModuleStatus status = statusMap.get(m.getModuleName());
+			if(status == null) {
+				throw new IllegalStateException("找不到模组的状态信息");
+			}
+			loadModule(m, status);
 		}
 	}
 	
