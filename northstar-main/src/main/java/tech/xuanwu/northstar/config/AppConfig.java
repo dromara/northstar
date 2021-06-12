@@ -24,6 +24,7 @@ import tech.xuanwu.northstar.gateway.sim.SimMarket;
 import tech.xuanwu.northstar.interceptor.AuthorizationInterceptor;
 import tech.xuanwu.northstar.manager.BarBufferManager;
 import tech.xuanwu.northstar.manager.GatewayAndConnectionManager;
+import tech.xuanwu.northstar.manager.ModuleManager;
 import tech.xuanwu.northstar.persistence.MarketDataRepository;
 import tech.xuanwu.northstar.utils.MongoClientAdapter;
 
@@ -83,7 +84,7 @@ public class AppConfig implements WebMvcConfigurer {
 	}
 	
 	@Bean
-	public GatewayAndConnectionManager createGatewayAndConnectionManager() {
+	public GatewayAndConnectionManager gatewayAndConnectionManager() {
 		return new GatewayAndConnectionManager();
 	}
 	
@@ -96,17 +97,22 @@ public class AppConfig implements WebMvcConfigurer {
 	private String[] productClassTypes;
 	
 	@Bean
-	public ContractManager createContractManager() {
+	public ContractManager contractManager() {
 		return new ContractManager(productClassTypes);
 	}
 	
 	@Bean
-	public ConcurrentHashMap<String, TradeDayAccount> createAccountMap(){
+	public ModuleManager moduleManager() {
+		return new ModuleManager();
+	}
+	
+	@Bean
+	public ConcurrentHashMap<String, TradeDayAccount> accountMap(){
 		return new ConcurrentHashMap<>();
 	}
 	
 	@Bean
-	public SimMarket createSimMarket() {
+	public SimMarket simMarket() {
 		return new SimMarket();
 	}
 }

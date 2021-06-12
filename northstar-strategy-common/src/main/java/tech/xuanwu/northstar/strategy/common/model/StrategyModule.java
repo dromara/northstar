@@ -65,6 +65,14 @@ public class StrategyModule {
 		
 	}
 	
+	public String getName() {
+		return name;
+	}
+	
+	public ModuleState getState() {
+		return state;
+	}
+	
 	public ModuleStatus getStatus() {
 		ModuleStatus status = new ModuleStatus();
 		status.setModuleName(name);

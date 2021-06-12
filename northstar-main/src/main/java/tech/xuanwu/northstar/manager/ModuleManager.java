@@ -1,8 +1,12 @@
 package tech.xuanwu.northstar.manager;
 
+import java.util.concurrent.ConcurrentHashMap;
+
 import tech.xuanwu.northstar.common.event.AbstractEventHandler;
 import tech.xuanwu.northstar.common.event.NorthstarEvent;
 import tech.xuanwu.northstar.common.event.NorthstarEventType;
+import tech.xuanwu.northstar.strategy.common.constants.ModuleState;
+import tech.xuanwu.northstar.strategy.common.model.StrategyModule;
 import xyz.redtorch.pb.CoreField.AccountField;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.OrderField;
@@ -15,11 +19,20 @@ import xyz.redtorch.pb.CoreField.TradeField;
  *
  */
 public class ModuleManager extends AbstractEventHandler {
+	
+	private ConcurrentHashMap<String, StrategyModule> moduleMap = new ConcurrentHashMap<>(50);
 
 	
-	public void addModule() {}
+	public void addModule(StrategyModule module) {
+		moduleMap.put(module.getName(), module);
+	}
 	
-	public void removeModule() {}
+	public void removeModule(String name) {
+		if(moduleMap.get(name).getState() != ModuleState.EMPTY) {
+			throw new IllegalStateException("模组并非处于空仓状态，不允许移除");
+		}
+		moduleMap.remove(name);
+	}
 	
 	public void onTick(TickField tick) {
 		

@@ -39,14 +39,14 @@ public class FastEventDispatcherConfig {
 	}
 	
 	@Bean
-	public NorthstarEventDispatcher createPluginHandler(FastEventEngine ee, PluginEventBus eb) {
+	public NorthstarEventDispatcher pluginDispatcher(FastEventEngine ee, PluginEventBus eb) {
 		NorthstarEventDispatcher handler = new PluginDispatcher(eb);
 		ee.addHandler(handler);
 		return handler;
 	}
 	
 	@Bean
-	public NorthstarEventDispatcher createStrategyHandler(FastEventEngine ee, StrategyEventBus eb) {
+	public NorthstarEventDispatcher strategyDispatcher(FastEventEngine ee, StrategyEventBus eb) {
 		NorthstarEventDispatcher handler = new StrategyDispatcher(eb);
 		ee.addHandler(handler);
 		return handler;

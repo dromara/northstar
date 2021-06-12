@@ -15,6 +15,7 @@ import tech.xuanwu.northstar.engine.event.FastEventEngine;
 import tech.xuanwu.northstar.gateway.sim.SimMarket;
 import tech.xuanwu.northstar.gateway.sim.persistence.SimAccountRepository;
 import tech.xuanwu.northstar.manager.GatewayAndConnectionManager;
+import tech.xuanwu.northstar.manager.ModuleManager;
 import tech.xuanwu.northstar.persistence.GatewayRepository;
 import tech.xuanwu.northstar.persistence.MarketDataRepository;
 import tech.xuanwu.northstar.persistence.ModuleRepository;
@@ -26,8 +27,8 @@ import tech.xuanwu.northstar.service.GatewayService;
 @DependsOn({
 	"internalDispatcher",
 	"broadcastEventDispatcher",
-//	"createPluginHandler",
-//	"createStrategyHandler",
+	"pluginDispatcher",
+	"strategyDispatcher",
 	"accountEventHandler",
 	"contractEventHandler",
 	"connectionEventHandler",
@@ -56,7 +57,7 @@ public class ServiceConfig {
 	}
 	
 	@Bean
-	public ModuleService moduleService(ApplicationContext ctx, ModuleRepository moduleRepo) {
-		return new ModuleService(ctx, moduleRepo);
+	public ModuleService moduleService(ApplicationContext ctx, ModuleRepository moduleRepo, ModuleManager mdlMgr) {
+		return new ModuleService(ctx, moduleRepo, mdlMgr);
 	}
 }

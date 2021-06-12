@@ -8,6 +8,7 @@ import java.util.Map.Entry;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 
+import tech.xuanwu.northstar.manager.ModuleManager;
 import tech.xuanwu.northstar.persistence.ModuleRepository;
 import tech.xuanwu.northstar.strategy.common.Dealer;
 import tech.xuanwu.northstar.strategy.common.DynamicParamsAware;
@@ -26,9 +27,12 @@ public class ModuleService implements InitializingBean{
 	
 	private ModuleRepository moduleRepo;
 	
-	public ModuleService(ApplicationContext ctx, ModuleRepository moduleRepo) {
+	private ModuleManager mdlMgr;
+	
+	public ModuleService(ApplicationContext ctx, ModuleRepository moduleRepo, ModuleManager mdlMgr) {
 		this.ctx = ctx;
 		this.moduleRepo = moduleRepo;
+		this.mdlMgr = mdlMgr;
 	}
 	
 	/**
@@ -88,6 +92,7 @@ public class ModuleService implements InitializingBean{
 	 */
 	public void createModule(ModuleInfo module) {
 		
+		
 		moduleRepo.saveModuleInfo(module);
 	}
 	
@@ -114,6 +119,7 @@ public class ModuleService implements InitializingBean{
 	 * @param moduleName
 	 */
 	public void removeModule(String moduleName) {
+		mdlMgr.removeModule(moduleName);
 		moduleRepo.deleteModuleInfoById(moduleName);
 	}
 
