@@ -1,15 +1,17 @@
 package tech.xuanwu.northstar.strategy.cta.module.signal;
 
-import tech.xuanwu.northstar.strategy.common.CtaSignalPolicy;
+import java.util.Optional;
+
+import tech.xuanwu.northstar.strategy.common.Signal;
+import tech.xuanwu.northstar.strategy.common.SignalPolicy;
 import tech.xuanwu.northstar.strategy.common.annotation.Label;
 import tech.xuanwu.northstar.strategy.common.annotation.StrategicComponent;
-import tech.xuanwu.northstar.strategy.common.model.BarData;
-import tech.xuanwu.northstar.strategy.common.model.DynamicParams;
-import tech.xuanwu.northstar.strategy.common.model.CtaSignal;
+import tech.xuanwu.northstar.strategy.common.model.data.BarData;
+import tech.xuanwu.northstar.strategy.common.model.meta.DynamicParams;
 import xyz.redtorch.pb.CoreField.TickField;
 
 @StrategicComponent("示例策略2")
-public class SampleSignalPolicy2 implements CtaSignalPolicy{
+public class SampleSignalPolicy2 implements SignalPolicy{
 	
 	/**
 	 * 绑定合约
@@ -17,7 +19,7 @@ public class SampleSignalPolicy2 implements CtaSignalPolicy{
 	private String bindedUnifiedSymbol;
 
 	@Override
-	public CtaSignal updateTick(TickField tick, BarData barData) {
+	public Optional<Signal> updateTick(TickField tick, BarData barData) {
 		return null;
 	}
 	

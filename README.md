@@ -18,6 +18,9 @@
 本人几乎从头到尾90%重构了两次，深感开源不易。  
 详细文档请参考wiki： https://gitee.com/KevinHuangwl/northstar/wikis/%E6%A0%B8%E5%BF%83%E8%AE%BE%E8%AE%A1%E8%AF%B4%E6%98%8E  
 
+## 适用人群
+全栈技术爱好者、小型私募技术团队
+
 ## 运行环境
 建议使用Linux云服务器
 

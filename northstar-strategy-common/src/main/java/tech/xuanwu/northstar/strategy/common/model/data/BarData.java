@@ -1,4 +1,4 @@
-package tech.xuanwu.northstar.strategy.common.model;
+package tech.xuanwu.northstar.strategy.common.model.data;
 
 import java.util.List;
 
@@ -41,7 +41,7 @@ public class BarData {
 	 * 为了防止数据计算不一致，Bar更新才会对数列进行插入
 	 * @param bar
 	 */
-	public void update(BarField bar) {
+	public synchronized void update(BarField bar) {
 		if(StringUtils.equals(lastBar.getUnifiedSymbol(), bar.getUnifiedSymbol())) {
 			return;
 		}
@@ -67,7 +67,7 @@ public class BarData {
 	 * Tick更新
 	 * @param tick
 	 */
-	public void update(TickField tick) {
+	public synchronized void update(TickField tick) {
 		if(StringUtils.equals(lastBar.getUnifiedSymbol(), tick.getUnifiedSymbol())) {
 			return;
 		}

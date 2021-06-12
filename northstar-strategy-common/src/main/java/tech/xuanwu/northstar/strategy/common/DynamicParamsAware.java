@@ -1,6 +1,6 @@
 package tech.xuanwu.northstar.strategy.common;
 
-import tech.xuanwu.northstar.strategy.common.model.DynamicParams;
+import tech.xuanwu.northstar.strategy.common.model.meta.DynamicParams;
 
 public interface DynamicParamsAware {
 

@@ -4,7 +4,7 @@ import tech.xuanwu.northstar.strategy.common.Dealer;
 import tech.xuanwu.northstar.strategy.common.DynamicParamsAware;
 import tech.xuanwu.northstar.strategy.common.annotation.Label;
 import tech.xuanwu.northstar.strategy.common.annotation.StrategicComponent;
-import tech.xuanwu.northstar.strategy.common.model.DynamicParams;
+import tech.xuanwu.northstar.strategy.common.model.meta.DynamicParams;
 
 @StrategicComponent("CTA交易策略")
 public class CtaDealer implements Dealer, DynamicParamsAware{

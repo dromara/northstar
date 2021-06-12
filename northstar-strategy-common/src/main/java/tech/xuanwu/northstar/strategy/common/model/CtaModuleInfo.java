@@ -6,10 +6,11 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import lombok.Data;
+import tech.xuanwu.northstar.strategy.common.model.meta.ComponentAndParamsPair;
 
 @Document
 @Data
-public class CtaStrategyModule {
+public class CtaModuleInfo {
 
 	private ComponentAndParamsPair signalPolicy;
 	
