@@ -1,5 +1,6 @@
 package tech.xuanwu.northstar.strategy.common;
 
+import java.util.List;
 import java.util.Optional;
 
 import tech.xuanwu.northstar.strategy.common.model.data.BarData;
@@ -14,4 +15,7 @@ public interface SignalPolicy extends DynamicParamsAware{
 	 * @return			信号(不一定有)
 	 */
 	Optional<Signal> updateTick(TickField tick, BarData barData);
+	
+	List<String> bindedUnifiedSymbols();
+	
 }

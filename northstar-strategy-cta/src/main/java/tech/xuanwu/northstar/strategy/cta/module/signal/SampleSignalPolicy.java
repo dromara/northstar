@@ -1,5 +1,6 @@
 package tech.xuanwu.northstar.strategy.cta.module.signal;
 
+import java.util.List;
 import java.util.Optional;
 
 import tech.xuanwu.northstar.strategy.common.Signal;
@@ -41,5 +42,11 @@ public class SampleSignalPolicy implements SignalPolicy{
 		@Label(value="绑定合约", order=1)
 		private String unifiedSymbol;
 		
+	}
+
+	@Override
+	public List<String> bindedUnifiedSymbols() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

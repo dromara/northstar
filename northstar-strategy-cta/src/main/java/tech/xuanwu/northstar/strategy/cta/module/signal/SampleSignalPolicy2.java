@@ -1,5 +1,6 @@
 package tech.xuanwu.northstar.strategy.cta.module.signal;
 
+import java.util.List;
 import java.util.Optional;
 
 import tech.xuanwu.northstar.strategy.common.Signal;
@@ -45,5 +46,11 @@ public class SampleSignalPolicy2 implements SignalPolicy{
 		@Label(value="长周期", order=30, unit="天")
 		private int longPeriod;
 
+	}
+
+	@Override
+	public List<String> bindedUnifiedSymbols() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

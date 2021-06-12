@@ -14,21 +14,42 @@ import tech.xuanwu.northstar.strategy.common.model.meta.ComponentAndParamsPair;
 @Data
 public class ModuleInfo {
 
+	/**
+	 * 信号策略
+	 */
 	private ComponentAndParamsPair signalPolicy;
-	
+	/**
+	 * 风控规则
+	 */
 	private List<ComponentAndParamsPair> riskControlRules;
-	
+	/**
+	 * 交易策略
+	 */
 	private ComponentAndParamsPair dealer;
-	
+	/**
+	 * 账户ID
+	 */
 	private String accountGatewayId;
-	
+	/**
+	 * 模组名称
+	 */
 	@Id
 	private String moduleName;
-	
+	/**
+	 * 账户比例
+	 */
 	private double allocatedAccountShare;
-	
+	/**
+	 * 是否启用
+	 */
 	private boolean enabled;
-	
+	/**
+	 * 策略类型
+	 */
 	private ModuleType type;
+	/**
+	 * 数据回潮天数
+	 */
+	private int daysOfRefData;
 	
 }

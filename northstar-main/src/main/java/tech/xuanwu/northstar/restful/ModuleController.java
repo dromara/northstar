@@ -8,7 +8,6 @@ import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -50,7 +49,7 @@ public class ModuleController {
 	}
 	
 	@PostMapping("/module")
-	public ResultBean<Void> createModule(@RequestBody ModuleInfo module){
+	public ResultBean<Void> createModule(@RequestBody ModuleInfo module) throws Exception{
 		Assert.notNull(module, "模组信息不能为空");
 		service.createModule(module);
 		return new ResultBean<>(null);

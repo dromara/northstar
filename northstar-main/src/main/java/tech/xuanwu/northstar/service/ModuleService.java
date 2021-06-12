@@ -1,6 +1,7 @@
 package tech.xuanwu.northstar.service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -8,6 +9,8 @@ import java.util.Map.Entry;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 
+import tech.xuanwu.northstar.gateway.api.Gateway;
+import tech.xuanwu.northstar.manager.GatewayAndConnectionManager;
 import tech.xuanwu.northstar.manager.ModuleManager;
 import tech.xuanwu.northstar.persistence.ModuleRepository;
 import tech.xuanwu.northstar.strategy.common.Dealer;
@@ -15,8 +18,11 @@ import tech.xuanwu.northstar.strategy.common.DynamicParamsAware;
 import tech.xuanwu.northstar.strategy.common.RiskControlRule;
 import tech.xuanwu.northstar.strategy.common.SignalPolicy;
 import tech.xuanwu.northstar.strategy.common.annotation.StrategicComponent;
+import tech.xuanwu.northstar.strategy.common.constants.ModuleState;
 import tech.xuanwu.northstar.strategy.common.model.ModuleInfo;
 import tech.xuanwu.northstar.strategy.common.model.ModuleStatus;
+import tech.xuanwu.northstar.strategy.common.model.StrategyModule;
+import tech.xuanwu.northstar.strategy.common.model.meta.ComponentAndParamsPair;
 import tech.xuanwu.northstar.strategy.common.model.meta.ComponentField;
 import tech.xuanwu.northstar.strategy.common.model.meta.ComponentMetaInfo;
 import tech.xuanwu.northstar.strategy.common.model.meta.DynamicParams;
@@ -29,10 +35,14 @@ public class ModuleService implements InitializingBean{
 	
 	private ModuleManager mdlMgr;
 	
-	public ModuleService(ApplicationContext ctx, ModuleRepository moduleRepo, ModuleManager mdlMgr) {
+	private GatewayAndConnectionManager gatewayConnMgr;
+	
+	public ModuleService(ApplicationContext ctx, ModuleRepository moduleRepo, ModuleManager mdlMgr,
+			GatewayAndConnectionManager gatewayConnMgr) {
 		this.ctx = ctx;
 		this.moduleRepo = moduleRepo;
 		this.mdlMgr = mdlMgr;
+		this.gatewayConnMgr = gatewayConnMgr;
 	}
 	
 	/**
@@ -89,11 +99,11 @@ public class ModuleService implements InitializingBean{
 	 * 新增模组
 	 * @param module
 	 * @param shouldSave
+	 * @throws Exception 
 	 */
-	public void createModule(ModuleInfo module) {
-		
-		
-		moduleRepo.saveModuleInfo(module);
+	public void createModule(ModuleInfo info) throws Exception {
+		loadModule(info, null);
+		moduleRepo.saveModuleInfo(info);
 	}
 	
 	/**
@@ -101,9 +111,30 @@ public class ModuleService implements InitializingBean{
 	 * @param module
 	 * @param status
 	 */
-	public void loadModule(ModuleInfo module, ModuleStatus status) {
+	private void loadModule(ModuleInfo info, ModuleStatus status) throws Exception {
+		SignalPolicy signalPolicy =  resolveComponent(info.getSignalPolicy(), SignalPolicy.class);
+		Dealer dealer = resolveComponent(info.getDealer(), Dealer.class);
+		List<RiskControlRule> riskRules = new ArrayList<>();
+		for(ComponentAndParamsPair pair : info.getRiskControlRules()) {
+			riskRules.add(resolveComponent(pair, RiskControlRule.class));
+		}
 		
+		String gatewayId = info.getAccountGatewayId();
+		Gateway gateway = gatewayConnMgr.getGatewayById(gatewayId);
 		
+		// TODO 未完
+		
+		ModuleState state = status == null ? ModuleState.EMPTY : status.getState();
+		
+		StrategyModule module = StrategyModule.builder()
+				.name(info.getModuleName())
+				.signalPolicy(signalPolicy)
+				.dealer(dealer)
+				.riskControlRules(riskRules)
+				.gateway(gateway)
+				.state(state)
+				.build();
+		mdlMgr.addModule(module);
 	}
 	
 	/**
@@ -121,6 +152,23 @@ public class ModuleService implements InitializingBean{
 	public void removeModule(String moduleName) {
 		mdlMgr.removeModule(moduleName);
 		moduleRepo.deleteModuleInfoById(moduleName);
+	}
+	
+	
+	private <T> T resolveComponent(ComponentAndParamsPair metaInfo, Class<T> clz) throws Exception {
+		Map<String, ComponentField> fieldMap = new HashMap<>();
+		for(ComponentField cf : metaInfo.getInitParams()) {
+			fieldMap.put(cf.getName(), cf);
+		}
+		String clzName = metaInfo.getComponentMeta().getClassName();
+		String paramClzName = clzName + ".InitParams";
+		Class<?> type = Class.forName(clzName);
+		Class<?> paramType = Class.forName(paramClzName);
+		DynamicParamsAware obj = (DynamicParamsAware) type.getDeclaredConstructor().newInstance();
+		DynamicParams paramObj = (DynamicParams) paramType.getDeclaredConstructor().newInstance();
+		paramObj.resolveFromSource(fieldMap);
+		obj.initWithParams(paramObj);
+		return (T) obj;
 	}
 
 	@Override
