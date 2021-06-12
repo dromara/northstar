@@ -56,13 +56,6 @@ public class CtaModuleController {
 		return new ResultBean<>(null);
 	}
 	
-	@PutMapping("/module")
-	public ResultBean<Void> updateModule(@RequestBody ModuleInfo module){
-		Assert.notNull(module, "模组信息不能为空");
-		service.updateModule(module);
-		return new ResultBean<>(null);
-	}
-	
 	@GetMapping("/module")
 	public ResultBean<List<ModuleInfo>> getAllModules(){
 		return new ResultBean<>(service.getCurrentModules());

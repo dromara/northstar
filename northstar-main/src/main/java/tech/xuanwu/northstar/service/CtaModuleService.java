@@ -102,14 +102,6 @@ public class CtaModuleService implements InitializingBean{
 	}
 	
 	/**
-	 * 更新模组
-	 * @param module
-	 */
-	public void updateModule(ModuleInfo module) {
-		moduleRepo.saveModuleInfo(module);
-	}
-	
-	/**
 	 * 查询所有模组
 	 * @return
 	 */
