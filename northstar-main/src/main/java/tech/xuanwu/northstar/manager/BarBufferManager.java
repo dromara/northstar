@@ -1,4 +1,4 @@
-package tech.xuanwu.northstar.model;
+package tech.xuanwu.northstar.manager;
 
 import java.util.LinkedList;
 

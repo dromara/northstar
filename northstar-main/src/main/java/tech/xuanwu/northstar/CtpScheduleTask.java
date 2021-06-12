@@ -13,8 +13,8 @@ import tech.xuanwu.northstar.common.constant.GatewayType;
 import tech.xuanwu.northstar.common.constant.GatewayUsage;
 import tech.xuanwu.northstar.domain.GatewayConnection;
 import tech.xuanwu.northstar.gateway.api.Gateway;
-import tech.xuanwu.northstar.model.BarBufferManager;
-import tech.xuanwu.northstar.model.GatewayAndConnectionManager;
+import tech.xuanwu.northstar.manager.BarBufferManager;
+import tech.xuanwu.northstar.manager.GatewayAndConnectionManager;
 import tech.xuanwu.northstar.persistence.MarketDataRepository;
 
 @Slf4j

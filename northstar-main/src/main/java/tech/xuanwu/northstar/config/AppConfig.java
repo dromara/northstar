@@ -22,8 +22,8 @@ import tech.xuanwu.northstar.domain.ContractManager;
 import tech.xuanwu.northstar.domain.account.TradeDayAccount;
 import tech.xuanwu.northstar.gateway.sim.SimMarket;
 import tech.xuanwu.northstar.interceptor.AuthorizationInterceptor;
-import tech.xuanwu.northstar.model.BarBufferManager;
-import tech.xuanwu.northstar.model.GatewayAndConnectionManager;
+import tech.xuanwu.northstar.manager.BarBufferManager;
+import tech.xuanwu.northstar.manager.GatewayAndConnectionManager;
 import tech.xuanwu.northstar.persistence.MarketDataRepository;
 import tech.xuanwu.northstar.utils.MongoClientAdapter;
 

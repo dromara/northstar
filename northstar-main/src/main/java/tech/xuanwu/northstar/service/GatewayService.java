@@ -28,7 +28,7 @@ import tech.xuanwu.northstar.gateway.sim.SimGateway;
 import tech.xuanwu.northstar.gateway.sim.SimGatewayLocalImpl;
 import tech.xuanwu.northstar.gateway.sim.SimMarket;
 import tech.xuanwu.northstar.gateway.sim.persistence.SimAccountRepository;
-import tech.xuanwu.northstar.model.GatewayAndConnectionManager;
+import tech.xuanwu.northstar.manager.GatewayAndConnectionManager;
 import tech.xuanwu.northstar.persistence.GatewayRepository;
 import tech.xuanwu.northstar.persistence.MarketDataRepository;
 import tech.xuanwu.northstar.persistence.po.GatewayPO;

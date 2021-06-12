@@ -14,7 +14,7 @@ import tech.xuanwu.northstar.engine.broadcast.SocketIOMessageEngine;
 import tech.xuanwu.northstar.engine.event.FastEventEngine;
 import tech.xuanwu.northstar.gateway.sim.SimMarket;
 import tech.xuanwu.northstar.gateway.sim.persistence.SimAccountRepository;
-import tech.xuanwu.northstar.model.GatewayAndConnectionManager;
+import tech.xuanwu.northstar.manager.GatewayAndConnectionManager;
 import tech.xuanwu.northstar.persistence.GatewayRepository;
 import tech.xuanwu.northstar.persistence.MarketDataRepository;
 import tech.xuanwu.northstar.persistence.StrategyModuleRepository;

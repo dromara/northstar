@@ -13,7 +13,7 @@ import tech.xuanwu.northstar.domain.ContractManager;
 import tech.xuanwu.northstar.domain.GatewayConnection;
 import tech.xuanwu.northstar.gateway.api.Gateway;
 import tech.xuanwu.northstar.gateway.api.MarketGateway;
-import tech.xuanwu.northstar.model.GatewayAndConnectionManager;
+import tech.xuanwu.northstar.manager.GatewayAndConnectionManager;
 import xyz.redtorch.pb.CoreField.ContractField;
 
 /**

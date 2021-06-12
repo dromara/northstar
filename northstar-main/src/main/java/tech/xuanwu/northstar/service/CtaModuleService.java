@@ -12,12 +12,12 @@ import tech.xuanwu.northstar.persistence.StrategyModuleRepository;
 import tech.xuanwu.northstar.strategy.common.Dealer;
 import tech.xuanwu.northstar.strategy.common.DynamicParamsAware;
 import tech.xuanwu.northstar.strategy.common.RiskControlRule;
-import tech.xuanwu.northstar.strategy.common.CtaSignalPolicy;
+import tech.xuanwu.northstar.strategy.common.SignalPolicy;
 import tech.xuanwu.northstar.strategy.common.annotation.StrategicComponent;
-import tech.xuanwu.northstar.strategy.common.model.ComponentField;
-import tech.xuanwu.northstar.strategy.common.model.ComponentMetaInfo;
-import tech.xuanwu.northstar.strategy.common.model.CtaStrategyModule;
-import tech.xuanwu.northstar.strategy.common.model.DynamicParams;
+import tech.xuanwu.northstar.strategy.common.model.CtaModuleInfo;
+import tech.xuanwu.northstar.strategy.common.model.meta.ComponentField;
+import tech.xuanwu.northstar.strategy.common.model.meta.ComponentMetaInfo;
+import tech.xuanwu.northstar.strategy.common.model.meta.DynamicParams;
 
 public class CtaModuleService implements InitializingBean{
 	
@@ -35,7 +35,7 @@ public class CtaModuleService implements InitializingBean{
 	 * @return
 	 */
 	public List<ComponentMetaInfo> getRegisteredSignalPolicies(){
-		return getComponentMeta(CtaSignalPolicy.class);
+		return getComponentMeta(SignalPolicy.class);
 	}
 	
 	/**
@@ -85,7 +85,7 @@ public class CtaModuleService implements InitializingBean{
 	 * @param module
 	 * @param shouldSave
 	 */
-	public void createModule(CtaStrategyModule module, boolean shouldSave) {
+	public void createModule(CtaModuleInfo module, boolean shouldSave) {
 		
 		if(shouldSave) {
 			moduleRepo.save(module);
@@ -96,7 +96,7 @@ public class CtaModuleService implements InitializingBean{
 	 * 更新模组
 	 * @param module
 	 */
-	public void updateModule(CtaStrategyModule module) {
+	public void updateModule(CtaModuleInfo module) {
 		moduleRepo.save(module);
 	}
 	
@@ -104,7 +104,7 @@ public class CtaModuleService implements InitializingBean{
 	 * 查询所有模组
 	 * @return
 	 */
-	public List<CtaStrategyModule> getCurrentModules(){
+	public List<CtaModuleInfo> getCurrentModules(){
 		return moduleRepo.findAll();
 	}
 	
@@ -118,7 +118,9 @@ public class CtaModuleService implements InitializingBean{
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		// 加载已有模组
+		for(CtaModuleInfo m : getCurrentModules()) {
+			createModule(m, false);
+		}
 	}
 	
 }

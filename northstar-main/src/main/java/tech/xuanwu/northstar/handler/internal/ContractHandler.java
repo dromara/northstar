@@ -14,7 +14,7 @@ import tech.xuanwu.northstar.domain.ContractManager;
 import tech.xuanwu.northstar.domain.GatewayConnection;
 import tech.xuanwu.northstar.engine.index.IndexEngine;
 import tech.xuanwu.northstar.gateway.api.MarketGateway;
-import tech.xuanwu.northstar.model.GatewayAndConnectionManager;
+import tech.xuanwu.northstar.manager.GatewayAndConnectionManager;
 import tech.xuanwu.northstar.persistence.MarketDataRepository;
 import tech.xuanwu.northstar.persistence.po.ContractPO;
 import tech.xuanwu.northstar.utils.ProtoBeanUtils;

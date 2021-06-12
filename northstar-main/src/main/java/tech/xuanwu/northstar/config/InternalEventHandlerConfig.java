@@ -19,8 +19,8 @@ import tech.xuanwu.northstar.handler.internal.AccountHandler;
 import tech.xuanwu.northstar.handler.internal.ConnectionHandler;
 import tech.xuanwu.northstar.handler.internal.ContractHandler;
 import tech.xuanwu.northstar.handler.internal.TradeHandler;
-import tech.xuanwu.northstar.model.BarBufferManager;
-import tech.xuanwu.northstar.model.GatewayAndConnectionManager;
+import tech.xuanwu.northstar.manager.BarBufferManager;
+import tech.xuanwu.northstar.manager.GatewayAndConnectionManager;
 import tech.xuanwu.northstar.persistence.MarketDataRepository;
 
 @Slf4j
