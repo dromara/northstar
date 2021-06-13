@@ -130,7 +130,7 @@ public class GatewayService implements InitializingBean {
 					.setGatewayType(gwType)
 					.build());
 		} else if(gatewayDescription.getGatewayType() == GatewayType.SIM) {
-			String mdGatewayId = gatewayDescription.getRelativeGatewayId();
+			String mdGatewayId = gatewayDescription.getBindedMktGatewayId();
 			SimSettings settings = JSON.toJavaObject((JSON)JSON.toJSON(gatewayDescription.getSettings()), SimSettings.class);
 			GatewaySettingField gwSettings = GatewaySettingField.newBuilder()
 					.setGatewayId(gatewayDescription.getGatewayId())
@@ -195,7 +195,7 @@ public class GatewayService implements InitializingBean {
 		}
 		gatewayConnMgr.removePair(conn);
 		if(gateway instanceof SimGateway) {
-			String mdGatewayId = conn.getGwDescription().getRelativeGatewayId();
+			String mdGatewayId = conn.getGwDescription().getBindedMktGatewayId();
 			simMarket.removeGateway(mdGatewayId, (SimGateway) gateway);
 		}
 		return true;

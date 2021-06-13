@@ -50,7 +50,7 @@ public class ContractHandler extends AbstractEventHandler implements GenericEven
 			idxEngine.start();
 			String accountId = (String) e.getData();
 			GatewayConnection conn = gatewayConnMgr.getGatewayConnectionById(accountId);
-			Map<String, ContractField> gatewayContractMap = contractMgr.getContractMapByGateway(conn.getGwDescription().getRelativeGatewayId());
+			Map<String, ContractField> gatewayContractMap = contractMgr.getContractMapByGateway(conn.getGwDescription().getBindedMktGatewayId());
 			List<ContractPO> contractList = new ArrayList<>(gatewayContractMap.size());
 			for(Entry<String, ContractField> entry : gatewayContractMap.entrySet()) {
 				ContractPO contract = ProtoBeanUtils.toPojoBean(ContractPO.class, entry.getValue());
@@ -72,7 +72,7 @@ public class ContractHandler extends AbstractEventHandler implements GenericEven
 		
 		// 把合约的账户gatewayId替换为行情gatewayId
 		String originalGatewayId = contract.getGatewayId();
-		String relativeGatewayId = gatewayConnMgr.getGatewayConnectionById(originalGatewayId).getGwDescription().getRelativeGatewayId();
+		String relativeGatewayId = gatewayConnMgr.getGatewayConnectionById(originalGatewayId).getGwDescription().getBindedMktGatewayId();
 		
 		ContractField contractNew = contract.toBuilder()
 				.setGatewayId(relativeGatewayId)

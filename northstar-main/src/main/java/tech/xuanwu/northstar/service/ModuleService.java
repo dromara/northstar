@@ -1,5 +1,6 @@
 package tech.xuanwu.northstar.service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -9,23 +10,38 @@ import java.util.Map.Entry;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 
+import tech.xuanwu.northstar.common.constant.DateTimeConstant;
+import tech.xuanwu.northstar.domain.GatewayConnection;
 import tech.xuanwu.northstar.gateway.api.Gateway;
 import tech.xuanwu.northstar.manager.GatewayAndConnectionManager;
 import tech.xuanwu.northstar.manager.ModuleManager;
+import tech.xuanwu.northstar.persistence.MarketDataRepository;
 import tech.xuanwu.northstar.persistence.ModuleRepository;
+import tech.xuanwu.northstar.persistence.po.MinBarDataPO;
+import tech.xuanwu.northstar.strategy.common.AbstractModuleFactory;
 import tech.xuanwu.northstar.strategy.common.Dealer;
 import tech.xuanwu.northstar.strategy.common.DynamicParamsAware;
+import tech.xuanwu.northstar.strategy.common.ModuleAccount;
+import tech.xuanwu.northstar.strategy.common.ModuleOrder;
+import tech.xuanwu.northstar.strategy.common.ModulePosition;
+import tech.xuanwu.northstar.strategy.common.ModuleTrade;
 import tech.xuanwu.northstar.strategy.common.RiskControlRule;
 import tech.xuanwu.northstar.strategy.common.SignalPolicy;
 import tech.xuanwu.northstar.strategy.common.annotation.StrategicComponent;
 import tech.xuanwu.northstar.strategy.common.constants.ModuleState;
+import tech.xuanwu.northstar.strategy.common.constants.ModuleType;
 import tech.xuanwu.northstar.strategy.common.model.ModuleInfo;
+import tech.xuanwu.northstar.strategy.common.model.ModulePerformance;
 import tech.xuanwu.northstar.strategy.common.model.ModuleStatus;
 import tech.xuanwu.northstar.strategy.common.model.StrategyModule;
+import tech.xuanwu.northstar.strategy.common.model.data.BarData;
 import tech.xuanwu.northstar.strategy.common.model.meta.ComponentAndParamsPair;
 import tech.xuanwu.northstar.strategy.common.model.meta.ComponentField;
 import tech.xuanwu.northstar.strategy.common.model.meta.ComponentMetaInfo;
 import tech.xuanwu.northstar.strategy.common.model.meta.DynamicParams;
+import tech.xuanwu.northstar.strategy.cta.CtaModuleFactory;
+import tech.xuanwu.northstar.utils.ProtoBeanUtils;
+import xyz.redtorch.pb.CoreField.BarField;
 
 public class ModuleService implements InitializingBean{
 	
@@ -33,14 +49,17 @@ public class ModuleService implements InitializingBean{
 	
 	private ModuleRepository moduleRepo;
 	
+	private MarketDataRepository mdRepo;
+	
 	private ModuleManager mdlMgr;
 	
 	private GatewayAndConnectionManager gatewayConnMgr;
 	
-	public ModuleService(ApplicationContext ctx, ModuleRepository moduleRepo, ModuleManager mdlMgr,
-			GatewayAndConnectionManager gatewayConnMgr) {
+	public ModuleService(ApplicationContext ctx, ModuleRepository moduleRepo, MarketDataRepository mdRepo,
+			ModuleManager mdlMgr, GatewayAndConnectionManager gatewayConnMgr) {
 		this.ctx = ctx;
 		this.moduleRepo = moduleRepo;
+		this.mdRepo = mdRepo;
 		this.mdlMgr = mdlMgr;
 		this.gatewayConnMgr = gatewayConnMgr;
 	}
@@ -120,11 +139,40 @@ public class ModuleService implements InitializingBean{
 		}
 		
 		String gatewayId = info.getAccountGatewayId();
+		GatewayConnection conn = gatewayConnMgr.getGatewayConnectionById(gatewayId);
 		Gateway gateway = gatewayConnMgr.getGatewayById(gatewayId);
+		String mktGatewayId = conn.getGwDescription().getBindedMktGatewayId();
 		
-		// TODO 未完
+		AbstractModuleFactory factory = null;
+		if(info.getType() == ModuleType.CTA) {
+			factory = new CtaModuleFactory();
+		} else {
+			// TODO 不同的策略模式采用不同的工厂实现
+		}
+		
+		ModuleAccount mAccount = factory.newModuleAccount(info.getAllocatedAccountShare());
+		ModulePosition mPosition = status == null ? factory.newModulePosition() : factory.loadModulePosition(status);
+		ModuleOrder mOrder = factory.newModuleOrder();
+		ModuleTrade mTrade = factory.newModuleTrade();
 		
 		ModuleState state = status == null ? ModuleState.EMPTY : status.getState();
+		Map<String, BarData> barDataMap = new HashMap<>();
+		for(String unifiedSymbol : signalPolicy.bindedUnifiedSymbols()) {
+			int daysOfRefData = info.getDaysOfRefData();
+			LocalDateTime now = LocalDateTime.now();
+			LocalDateTime currentTradeDay = now.plusHours(now.getDayOfWeek().getValue() == 5 ? 54 : 6);
+			List<BarField> refBarList = new ArrayList<>(daysOfRefData * 500);
+			for(int i=daysOfRefData; i>=0; i--) {
+				String dayStr = currentTradeDay.minusDays(i).format(DateTimeConstant.D_FORMAT_INT_FORMATTER);
+				List<MinBarDataPO> dataBarPOList = mdRepo.loadDataByDate(mktGatewayId, unifiedSymbol, dayStr);
+				for(MinBarDataPO po : dataBarPOList) {
+					BarField.Builder bb = BarField.newBuilder();
+					ProtoBeanUtils.toProtoBean(bb, po);
+					refBarList.add(bb.build());
+				}
+			}
+			barDataMap.put(unifiedSymbol, new BarData(refBarList));
+		}
 		
 		StrategyModule module = StrategyModule.builder()
 				.name(info.getModuleName())
@@ -132,6 +180,11 @@ public class ModuleService implements InitializingBean{
 				.dealer(dealer)
 				.riskControlRules(riskRules)
 				.gateway(gateway)
+				.mAccount(mAccount)
+				.mPosition(mPosition)
+				.mOrder(mOrder)
+				.mTrade(mTrade)
+				.barDataMap(barDataMap)
 				.state(state)
 				.build();
 		mdlMgr.addModule(module);
@@ -141,8 +194,17 @@ public class ModuleService implements InitializingBean{
 	 * 查询所有模组
 	 * @return
 	 */
-	public List<ModuleInfo> getCurrentModules(){
+	public List<ModuleInfo> getCurrentModuleInfos(){
 		return moduleRepo.findAllModuleInfo();
+	}
+	
+	/**
+	 * 获取模组绩效
+	 * @param moduleName
+	 * @return
+	 */
+	public ModulePerformance getModulePerformance(String moduleName) {
+		return mdlMgr.getModulePerformance(moduleName);
 	}
 	
 	/**
@@ -155,7 +217,7 @@ public class ModuleService implements InitializingBean{
 	}
 	
 	
-	private <T> T resolveComponent(ComponentAndParamsPair metaInfo, Class<T> clz) throws Exception {
+	private <T extends DynamicParamsAware> T resolveComponent(ComponentAndParamsPair metaInfo, Class<T> clz) throws Exception {
 		Map<String, ComponentField> fieldMap = new HashMap<>();
 		for(ComponentField cf : metaInfo.getInitParams()) {
 			fieldMap.put(cf.getName(), cf);
@@ -174,7 +236,7 @@ public class ModuleService implements InitializingBean{
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		Map<String, ModuleStatus> statusMap = moduleRepo.loadModuleStatus();
-		for(ModuleInfo m : getCurrentModules()) {
+		for(ModuleInfo m : getCurrentModuleInfos()) {
 			ModuleStatus status = statusMap.get(m.getModuleName());
 			if(status == null) {
 				throw new IllegalStateException("找不到模组的状态信息");

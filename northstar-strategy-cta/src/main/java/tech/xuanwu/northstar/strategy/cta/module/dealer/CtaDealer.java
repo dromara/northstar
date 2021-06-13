@@ -4,7 +4,6 @@ import java.util.List;
 
 import tech.xuanwu.northstar.gateway.api.Gateway;
 import tech.xuanwu.northstar.strategy.common.Dealer;
-import tech.xuanwu.northstar.strategy.common.DynamicParamsAware;
 import tech.xuanwu.northstar.strategy.common.RiskControlRule;
 import tech.xuanwu.northstar.strategy.common.annotation.Label;
 import tech.xuanwu.northstar.strategy.common.annotation.StrategicComponent;
@@ -12,7 +11,7 @@ import tech.xuanwu.northstar.strategy.common.model.meta.DynamicParams;
 import xyz.redtorch.pb.CoreField.TickField;
 
 @StrategicComponent("CTA交易策略")
-public class CtaDealer implements Dealer, DynamicParamsAware{
+public class CtaDealer implements Dealer {
 	
 	private String bindedUnifiedSymbol;
 	

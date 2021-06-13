@@ -6,6 +6,7 @@ import tech.xuanwu.northstar.common.event.AbstractEventHandler;
 import tech.xuanwu.northstar.common.event.NorthstarEvent;
 import tech.xuanwu.northstar.common.event.NorthstarEventType;
 import tech.xuanwu.northstar.strategy.common.constants.ModuleState;
+import tech.xuanwu.northstar.strategy.common.model.ModulePerformance;
 import tech.xuanwu.northstar.strategy.common.model.StrategyModule;
 import xyz.redtorch.pb.CoreField.AccountField;
 import xyz.redtorch.pb.CoreField.BarField;
@@ -32,6 +33,10 @@ public class ModuleManager extends AbstractEventHandler {
 			throw new IllegalStateException("模组并非处于空仓状态，不允许移除");
 		}
 		moduleMap.remove(name);
+	}
+	
+	public ModulePerformance getModulePerformance(String name) {
+		return moduleMap.get(name).getPerformance();
 	}
 	
 	public void onTick(TickField tick) {

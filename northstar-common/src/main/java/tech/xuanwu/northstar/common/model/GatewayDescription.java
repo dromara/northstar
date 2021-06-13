@@ -33,7 +33,7 @@ public class GatewayDescription {
 	
 	private Object settings;
 
-	private String relativeGatewayId;
+	private String bindedMktGatewayId;
 	
 	@Builder.Default
 	private ConnectionState connectionState = ConnectionState.DISCONNECTED;

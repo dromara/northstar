@@ -57,8 +57,8 @@ public class ServiceConfig {
 	}
 	
 	@Bean
-	public ModuleService moduleService(ApplicationContext ctx, ModuleRepository moduleRepo, ModuleManager mdlMgr,
-			GatewayAndConnectionManager gatewayConnMgr) {
-		return new ModuleService(ctx, moduleRepo, mdlMgr, gatewayConnMgr);
+	public ModuleService moduleService(ApplicationContext ctx, ModuleRepository moduleRepo, MarketDataRepository mdRepo,
+			ModuleManager mdlMgr, GatewayAndConnectionManager gatewayConnMgr) {
+		return new ModuleService(ctx, moduleRepo, mdRepo, mdlMgr, gatewayConnMgr);
 	}
 }

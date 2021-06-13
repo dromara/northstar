@@ -36,6 +36,10 @@ public class BarData {
 		lastBar = sourceBars.get(sourceBars.size() - 1);
 	}
 	
+	public BarData(List<BarField> sourceBars) {
+		this(sourceBars.size(), sourceBars);
+	}
+	
 	/**
 	 * Bar更新
 	 * 为了防止数据计算不一致，Bar更新才会对数列进行插入

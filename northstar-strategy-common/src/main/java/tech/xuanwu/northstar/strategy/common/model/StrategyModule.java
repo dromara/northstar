@@ -1,6 +1,7 @@
 package tech.xuanwu.northstar.strategy.common.model;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import lombok.Builder;
@@ -22,8 +23,10 @@ import xyz.redtorch.pb.CoreField.TradeField;
 
 @Builder
 public class StrategyModule {
-	
-	private BarData barData;
+	/**
+	 * unifiedSymbol -> barData
+	 */
+	private Map<String,BarData> barDataMap;
 	
 	private ModuleAccount mAccount;
 	
@@ -82,5 +85,9 @@ public class StrategyModule {
 			status.setLastOpenTrade(trades.stream().map(trade -> trade.toByteArray()).collect(Collectors.toList()));
 		}
 		return status;
+	}
+	
+	public ModulePerformance getPerformance() {
+		return null;
 	}
 }

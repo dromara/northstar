@@ -1,5 +1,7 @@
 package tech.xuanwu.northstar.strategy.common.model.data;
 
+import lombok.Data;
+
 /**
  * 序列数据
  * 对数组进行封装，方便回溯访问
