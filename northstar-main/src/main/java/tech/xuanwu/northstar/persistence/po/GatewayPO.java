@@ -37,5 +37,5 @@ public class GatewayPO {
 	
 	private Object settings;
 
-	private String relativeGatewayId;
+	private String bindedMktGatewayId;
 }
