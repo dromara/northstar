@@ -5,4 +5,8 @@ import xyz.redtorch.pb.CoreField.AccountField;
 public interface ModuleAccount {
 
 	void updateAccount(AccountField account);
+	
+	AccountField getAccount();
+	
+	double getAccountShare();
 }

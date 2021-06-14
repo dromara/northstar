@@ -61,15 +61,17 @@ public class StrategyModule {
 	}
 	
 	public void onOrder(OrderField order) {
-		
+		mOrder.updateOrder(order);
+		mPosition.onOrder(order);
 	}
 	
 	public void onTrade(TradeField trade) {
-		
+		mTrade.updateTrade(trade);
+		mPosition.onTrade(trade);
 	}
 	
 	public void onAccount(AccountField account) {
-		
+		mAccount.updateAccount(account);
 	}
 	
 	public String getName() {
@@ -103,7 +105,14 @@ public class StrategyModule {
 			byteMap.put(e.getKey(), e.getValue().getRefBarList().stream().map(bar -> bar.toByteArray()).collect(Collectors.toList()));
 		}
 		mp.setRefBarDataMap(byteMap);
-		mp.setTotalProfit(mTrade.getTotalProfit());
+		AccountField account = mAccount.getAccount();
+		if(account != null) {			
+			mp.setAccount(account.toByteArray());
+		}
+		mp.setAccountShare(mAccount.getAccountShare());
+		mp.setModuleState(state);
+		mp.setTotalPositionProfit(mPosition.getPositionProfit());
+		mp.setTotalCloseProfit(mTrade.getTotalCloseProfit());
 		mp.setDealRecords(mTrade.getDealRecords());
 		return mp;
 	}

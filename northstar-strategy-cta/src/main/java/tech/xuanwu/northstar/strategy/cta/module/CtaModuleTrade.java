@@ -16,15 +16,15 @@ public class CtaModuleTrade implements ModuleTrade{
 	}
 
 	@Override
-	public int getTotalProfit() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
 	public void updateTrade(TradeField trade) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	public int getTotalCloseProfit() {
+		// TODO Auto-generated method stub
+		return 456123;
 	}
 
 }

@@ -21,6 +21,9 @@ public interface ModulePosition {
 	 */
 	Duration getPositionDuration();
 	
+	
+	int getPositionProfit();
+	
 	/**
 	 * 获取持仓数量
 	 * @return

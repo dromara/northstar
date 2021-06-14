@@ -1,5 +1,8 @@
 package tech.xuanwu.northstar.strategy.cta;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import tech.xuanwu.northstar.strategy.common.AbstractModuleFactory;
 import tech.xuanwu.northstar.strategy.common.ModuleAccount;
 import tech.xuanwu.northstar.strategy.common.ModuleOrder;
@@ -10,6 +13,7 @@ import tech.xuanwu.northstar.strategy.cta.module.CtaModuleAccount;
 import tech.xuanwu.northstar.strategy.cta.module.CtaModuleOrder;
 import tech.xuanwu.northstar.strategy.cta.module.CtaModulePosition;
 import tech.xuanwu.northstar.strategy.cta.module.CtaModuleTrade;
+import xyz.redtorch.pb.CoreField.TradeField;
 
 public class CtaModuleFactory extends AbstractModuleFactory{
 
@@ -25,7 +29,16 @@ public class CtaModuleFactory extends AbstractModuleFactory{
 
 	@Override
 	public ModulePosition loadModulePosition(ModuleStatus status) {
-		return null;
+		List<byte[]> tradeData = status.getLastOpenTrade();
+		List<TradeField> tradeList = new ArrayList<>();
+		for(byte[] data : tradeData) {
+			try {
+				tradeList.add(TradeField.parseFrom(data));
+			} catch(Exception e) {
+				throw new IllegalStateException(e);
+			}
+		}
+		return new CtaModulePosition(tradeList);
 	}
 
 	@Override

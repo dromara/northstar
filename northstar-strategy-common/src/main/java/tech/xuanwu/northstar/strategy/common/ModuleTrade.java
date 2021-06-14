@@ -16,7 +16,7 @@ public interface ModuleTrade {
 	 * 获取交易总盈亏
 	 * @return
 	 */
-	int getTotalProfit();
+	int getTotalCloseProfit();
 	/**
 	 * 更新交易记录
 	 * @param trade

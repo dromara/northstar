@@ -17,4 +17,16 @@ public class CtaModuleAccount implements ModuleAccount{
 	public void updateAccount(AccountField account) {
 		this.account = account;
 	}
+
+	@Override
+	public AccountField getAccount() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public double getAccountShare() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
 }
