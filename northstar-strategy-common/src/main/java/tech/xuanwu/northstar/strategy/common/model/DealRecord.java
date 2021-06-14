@@ -10,6 +10,8 @@ public class DealRecord {
 	
 	private PositionDirectionEnum direction;
 	
+	private long dealTimestamp;
+	
 	private int volume;
 	
 	private double openPrice;
@@ -17,6 +19,5 @@ public class DealRecord {
 	private double closePrice;
 	
 	private double closeProfit;
-	
 	
 }

@@ -188,6 +188,7 @@ public class ModuleService implements InitializingBean{
 				.state(state)
 				.build();
 		mdlMgr.addModule(module);
+		moduleRepo.saveModuleStatus(module.getModuleStatus());
 	}
 	
 	/**
@@ -223,7 +224,7 @@ public class ModuleService implements InitializingBean{
 			fieldMap.put(cf.getName(), cf);
 		}
 		String clzName = metaInfo.getComponentMeta().getClassName();
-		String paramClzName = clzName + ".InitParams";
+		String paramClzName = clzName + "$InitParams";
 		Class<?> type = Class.forName(clzName);
 		Class<?> paramType = Class.forName(paramClzName);
 		DynamicParamsAware obj = (DynamicParamsAware) type.getDeclaredConstructor().newInstance();
@@ -231,6 +232,16 @@ public class ModuleService implements InitializingBean{
 		paramObj.resolveFromSource(fieldMap);
 		obj.initWithParams(paramObj);
 		return (T) obj;
+	}
+	
+	/**
+	 * 切换模组状态
+	 */
+	public void toggleState(String moduleName) {
+		mdlMgr.toggleState(moduleName);
+		ModuleInfo info = moduleRepo.findModuleInfo(moduleName);
+		info.setEnabled(!info.isEnabled());
+		moduleRepo.saveModuleInfo(info);
 	}
 
 	@Override

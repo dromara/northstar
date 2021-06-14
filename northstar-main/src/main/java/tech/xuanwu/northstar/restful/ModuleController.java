@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import tech.xuanwu.northstar.common.model.ResultBean;
@@ -20,7 +19,6 @@ import tech.xuanwu.northstar.strategy.common.model.meta.ComponentField;
 import tech.xuanwu.northstar.strategy.common.model.meta.ComponentMetaInfo;
 
 @RestController
-@RequestMapping("/cta")
 public class ModuleController {
 	
 	@Autowired
@@ -63,7 +61,15 @@ public class ModuleController {
 	
 	@GetMapping("/module/perf")
 	public ResultBean<ModulePerformance> getModulePerformance(String name){
+		Assert.hasText(name, "模组名称不能为空");
 		return new ResultBean<>(service.getModulePerformance(name));
+	}
+	
+	@GetMapping("/module/toggle")
+	public ResultBean<Void> toggleModuleState(String name){
+		Assert.hasText(name, "模组名称不能为空");
+		service.toggleState(name);
+		return new ResultBean<>(null);
 	}
 	
 	@DeleteMapping("/module")

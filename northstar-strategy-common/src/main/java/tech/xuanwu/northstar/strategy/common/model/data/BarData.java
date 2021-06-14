@@ -1,5 +1,7 @@
 package tech.xuanwu.northstar.strategy.common.model.data;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -26,14 +28,25 @@ public class BarData {
 	private TickField lastTick;
 	private BarField lastBar;
 	
+	private final int windowSize;
+	
+	private LinkedList<BarField> barFieldList = new LinkedList<>();
+	
 	public BarData(int windowSize, List<BarField> sourceBars) {
-		sHigh = new SeriesData<>(windowSize, sourceBars.stream().mapToDouble(bar -> bar.getHighPrice()).toArray());
-		sLow = new SeriesData<>(windowSize, sourceBars.stream().mapToDouble(bar -> bar.getLowPrice()).toArray());
-		sOpen = new SeriesData<>(windowSize, sourceBars.stream().mapToDouble(bar -> bar.getOpenPrice()).toArray());
-		sClose = new SeriesData<>(windowSize, sourceBars.stream().mapToDouble(bar -> bar.getClosePrice()).toArray());
-		sVol = new SeriesData<>(windowSize, sourceBars.stream().mapToDouble(bar -> bar.getVolumeDelta()).toArray());
-		sOpenIntest = new SeriesData<>(windowSize, sourceBars.stream().mapToDouble(bar -> bar.getOpenInterestDelta()).toArray());
-		lastBar = sourceBars.get(sourceBars.size() - 1);
+//		sHigh = new SeriesData<>(windowSize, sourceBars.stream().mapToDouble(bar -> bar.getHighPrice()).toArray());
+//		sLow = new SeriesData<>(windowSize, sourceBars.stream().mapToDouble(bar -> bar.getLowPrice()).toArray());
+//		sOpen = new SeriesData<>(windowSize, sourceBars.stream().mapToDouble(bar -> bar.getOpenPrice()).toArray());
+//		sClose = new SeriesData<>(windowSize, sourceBars.stream().mapToDouble(bar -> bar.getClosePrice()).toArray());
+//		sVol = new SeriesData<>(windowSize, sourceBars.stream().mapToDouble(bar -> bar.getVolumeDelta()).toArray());
+//		sOpenIntest = new SeriesData<>(windowSize, sourceBars.stream().mapToDouble(bar -> bar.getOpenInterestDelta()).toArray());
+//		lastBar = sourceBars.get(sourceBars.size() - 1);
+		
+		this.windowSize = windowSize;
+		if(sourceBars.size() <= windowSize) {
+			barFieldList.addAll(sourceBars);
+		} else {
+			barFieldList.addAll(sourceBars.subList(sourceBars.size() - windowSize, sourceBars.size()));
+		}
 	}
 	
 	public BarData(List<BarField> sourceBars) {
@@ -65,6 +78,10 @@ public class BarData {
 		sVol.offer(0D);
 		sOpenIntest.offer(0D);
 		
+		barFieldList.offerLast(bar);
+		if(barFieldList.size() > windowSize) {
+			barFieldList.peekFirst();
+		}
 	}
 	
 	/**
@@ -85,6 +102,16 @@ public class BarData {
 		sVol.update(tick.getVolume() - lastBar.getVolume());
 		sOpenIntest.update(tick.getOpenInterest() - lastBar.getOpenInterest());
 		
+	}
+	
+	/**
+	 * 获取引用数据
+	 * @return
+	 */
+	public List<BarField> getRefBarList(){
+		List<BarField> result = new ArrayList<>(barFieldList.size());
+		result.addAll(barFieldList);
+		return result;
 	}
 	
 }

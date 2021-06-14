@@ -1,7 +1,9 @@
 package tech.xuanwu.northstar.strategy.common.model;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import lombok.Builder;
@@ -48,6 +50,8 @@ public class StrategyModule {
 	
 	private String name;
 	
+	private boolean enabled;
+	
 	public void onTick(TickField tick) {
 		
 	}
@@ -76,7 +80,11 @@ public class StrategyModule {
 		return state;
 	}
 	
-	public ModuleStatus getStatus() {
+	public void toggleRunningState() {
+		enabled = !enabled;
+	}
+	
+	public ModuleStatus getModuleStatus() {
 		ModuleStatus status = new ModuleStatus();
 		status.setModuleName(name);
 		status.setState(state);
@@ -88,6 +96,15 @@ public class StrategyModule {
 	}
 	
 	public ModulePerformance getPerformance() {
-		return null;
+		ModulePerformance mp = new ModulePerformance();
+		mp.setModuleName(name);
+		Map<String, List<byte[]>> byteMap = new HashMap<>();
+		for(Entry<String, BarData> e : barDataMap.entrySet()) {
+			byteMap.put(e.getKey(), e.getValue().getRefBarList().stream().map(bar -> bar.toByteArray()).collect(Collectors.toList()));
+		}
+		mp.setRefBarDataMap(byteMap);
+		mp.setTotalProfit(mTrade.getTotalProfit());
+		mp.setDealRecords(mTrade.getDealRecords());
+		return mp;
 	}
 }

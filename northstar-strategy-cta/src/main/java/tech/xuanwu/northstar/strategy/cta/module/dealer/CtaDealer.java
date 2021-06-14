@@ -26,7 +26,7 @@ public class CtaDealer implements Dealer {
 		this.bindedUnifiedSymbol = initParams.bindedUnifiedSymbol;
 	}
 	
-	public class InitParams extends DynamicParams{
+	public static class InitParams extends DynamicParams{
 
 		@Label(value="绑定合约")
 		private String bindedUnifiedSymbol;

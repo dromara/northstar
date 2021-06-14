@@ -12,7 +12,6 @@ import tech.xuanwu.northstar.strategy.cta.module.risk.PriceExceededRule;
 import tech.xuanwu.northstar.strategy.cta.module.risk.TimeExceededRule;
 import tech.xuanwu.northstar.strategy.cta.module.risk.UseMarginExceededRule;
 import tech.xuanwu.northstar.strategy.cta.module.signal.SampleSignalPolicy;
-import tech.xuanwu.northstar.strategy.cta.module.signal.SampleSignalPolicy2;
 
 @Configuration
 public class CtaMetaAutoConfiguration {
@@ -53,9 +52,4 @@ public class CtaMetaAutoConfiguration {
 		return new SampleSignalPolicy();
 	}
 	
-	@Bean
-	// @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-	public SignalPolicy demoPolicy2() {
-		return new SampleSignalPolicy2();
-	}
 }

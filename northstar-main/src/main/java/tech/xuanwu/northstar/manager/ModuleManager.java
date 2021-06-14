@@ -39,6 +39,10 @@ public class ModuleManager extends AbstractEventHandler {
 		return moduleMap.get(name).getPerformance();
 	}
 	
+	public void toggleState(String name) {
+		moduleMap.get(name).toggleRunningState();
+	}
+	
 	public void onTick(TickField tick) {
 		
 	}

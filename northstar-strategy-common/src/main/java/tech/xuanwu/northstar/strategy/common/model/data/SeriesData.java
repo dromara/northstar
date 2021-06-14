@@ -38,7 +38,7 @@ public class SeriesData<T extends Number> {
 	public SeriesData(int windowSize, double[] sourceData) {
 		ringBuf = new double[windowSize];
 		int validLength = Math.min(windowSize, sourceData.length);
-		System.arraycopy(sourceData, 0, ringBuf, 0, validLength);
+		System.arraycopy(sourceData, sourceData.length - validLength, ringBuf, 0, validLength);
 		nextIndex = (validLength + windowSize) % windowSize;
 	}
 	

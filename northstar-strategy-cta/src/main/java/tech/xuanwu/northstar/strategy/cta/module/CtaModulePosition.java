@@ -1,6 +1,7 @@
 package tech.xuanwu.northstar.strategy.cta.module;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 
 import tech.xuanwu.northstar.strategy.common.ModulePosition;
@@ -12,8 +13,7 @@ public class CtaModulePosition implements ModulePosition{
 
 	@Override
 	public List<TradeField> getOpenningTrade() {
-		// TODO Auto-generated method stub
-		return null;
+		return new ArrayList<>();
 	}
 
 	@Override

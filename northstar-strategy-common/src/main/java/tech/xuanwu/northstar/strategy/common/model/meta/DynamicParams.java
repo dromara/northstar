@@ -20,8 +20,25 @@ public abstract class DynamicParams {
 		
 		for(Entry<String, ComponentField> e : fieldMap.entrySet()) {
 			Field f = this.getClass().getDeclaredField(e.getKey());
+			ComponentField cf = e.getValue();
 			boolean flag = f.canAccess(this);
-			f.set(this, e.getValue().getValue());
+			f.setAccessible(true);
+			if("Number".equals(cf.getType())) {
+				if(f.getType() == int.class) {
+					f.setInt(this, cf.getValue() instanceof String ? Integer.parseInt((String) cf.getValue()) : (int)cf.getValue());
+				} else if (f.getType() == long.class) {
+					f.setLong(this, cf.getValue() instanceof String ? Long.parseLong((String) cf.getValue()) : (long)cf.getValue());
+				} else if (f.getType() == float.class) {
+					f.setFloat(this, cf.getValue() instanceof String ? Float.parseFloat((String) cf.getValue()) : (float)cf.getValue());
+				} else if (f.getType() == double.class) {
+					f.setDouble(this, cf.getValue() instanceof String ? Double.parseDouble((String) cf.getValue()) : (double)cf.getValue());
+				} else if (f.getType() == short.class) {
+					f.setShort(this, cf.getValue() instanceof String ? Short.parseShort((String) cf.getValue()) : (short)cf.getValue());
+				}
+			} else {
+				f.set(this, cf.getValue());
+			}
+			
 			f.setAccessible(flag);
 		}
 		

@@ -1,5 +1,6 @@
 package tech.xuanwu.northstar.strategy.common.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -18,9 +19,9 @@ public class ModuleStatus {
 	/**
 	 * 
 	 */
-	private ModuleState state;
+	private ModuleState state = ModuleState.EMPTY;
 	
-	private List<byte[]> lastOpenTrade;
+	private List<byte[]> lastOpenTrade = new ArrayList<>();
 	
 	private String moduleName;
 }

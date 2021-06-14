@@ -6,37 +6,36 @@ import tech.xuanwu.northstar.strategy.common.ModuleOrder;
 import tech.xuanwu.northstar.strategy.common.ModulePosition;
 import tech.xuanwu.northstar.strategy.common.ModuleTrade;
 import tech.xuanwu.northstar.strategy.common.model.ModuleStatus;
+import tech.xuanwu.northstar.strategy.cta.module.CtaModuleAccount;
+import tech.xuanwu.northstar.strategy.cta.module.CtaModuleOrder;
+import tech.xuanwu.northstar.strategy.cta.module.CtaModulePosition;
+import tech.xuanwu.northstar.strategy.cta.module.CtaModuleTrade;
 
 public class CtaModuleFactory extends AbstractModuleFactory{
 
 	@Override
 	public ModuleAccount newModuleAccount(double share) {
-		// TODO Auto-generated method stub
-		return null;
+		return new CtaModuleAccount(share);
 	}
 
 	@Override
 	public ModulePosition newModulePosition() {
-		// TODO Auto-generated method stub
-		return null;
+		return new CtaModulePosition();
 	}
 
 	@Override
 	public ModulePosition loadModulePosition(ModuleStatus status) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public ModuleOrder newModuleOrder() {
-		// TODO Auto-generated method stub
-		return null;
+		return new CtaModuleOrder();
 	}
 
 	@Override
 	public ModuleTrade newModuleTrade() {
-		// TODO Auto-generated method stub
-		return null;
+		return new CtaModuleTrade();
 	}
 
 }

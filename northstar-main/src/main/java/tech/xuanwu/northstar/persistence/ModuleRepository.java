@@ -30,6 +30,10 @@ public class ModuleRepository {
 		return mongo.findAll(ModuleInfo.class);
 	}
 	
+	public ModuleInfo findModuleInfo(String moduleId){
+		return mongo.findById(moduleId, ModuleInfo.class);
+	}
+	
 	public void deleteModuleInfoById(String moduleId) {
 		mongo.remove(Query.query(Criteria.where("moduleName").is(moduleId)), ModuleInfo.class);
 	}
