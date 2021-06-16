@@ -7,6 +7,11 @@ import xyz.redtorch.pb.CoreField.OrderField;
 import xyz.redtorch.pb.CoreField.TickField;
 import xyz.redtorch.pb.CoreField.TradeField;
 
+/**
+ * 用于记录模组持仓状态,以计算持仓盈亏,持仓状态,持仓时间
+ * @author KevinHuangwl
+ *
+ */
 public interface ModulePosition {
 
 	/**
@@ -21,25 +26,17 @@ public interface ModulePosition {
 	 */
 	Duration getPositionDuration();
 	
-	
-	int getPositionProfit();
-	
 	/**
-	 * 获取持仓数量
+	 * 获取仓位手数
 	 * @return
 	 */
-	int getNonfronzenVolume();
-
+	int getPositionProfit();
+	
 	/**
 	 * 更新行情
 	 * @param tick
 	 */
 	void onTick(TickField tick);
-	
-	/**
-	 * 更新订单（用于计算冻结仓位）
-	 */
-	void onOrder(OrderField order);
 	
 	/**
 	 * 更新成交

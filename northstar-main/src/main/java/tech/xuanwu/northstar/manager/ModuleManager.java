@@ -1,5 +1,7 @@
 package tech.xuanwu.northstar.manager;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import tech.xuanwu.northstar.common.event.AbstractEventHandler;
@@ -23,6 +25,19 @@ public class ModuleManager extends AbstractEventHandler {
 	
 	private ConcurrentHashMap<String, StrategyModule> moduleMap = new ConcurrentHashMap<>(50);
 
+	private Set<NorthstarEventType> eventSet = new HashSet<>() {
+		private static final long serialVersionUID = 1L;
+
+		{
+			add(NorthstarEventType.ACCOUNT);
+			add(NorthstarEventType.TRADE);
+			add(NorthstarEventType.ORDER);
+			add(NorthstarEventType.TICK);
+			add(NorthstarEventType.IDX_TICK);
+			add(NorthstarEventType.BAR);
+		}
+	};
+	
 	
 	public void addModule(StrategyModule module) {
 		moduleMap.put(module.getName(), module);
@@ -44,36 +59,52 @@ public class ModuleManager extends AbstractEventHandler {
 	}
 	
 	public void onTick(TickField tick) {
-		
+		moduleMap.values().forEach(m -> m.onTick(tick));
 	}
 	
 	public void onBar(BarField bar) {
-		
+		moduleMap.values().forEach(m -> m.onBar(bar));
 	}
 	
 	public void onOrder(OrderField order) {
-		
+		moduleMap.values().forEach(m -> m.onOrder(order));
 	}
 	
 	public void onTrade(TradeField trade) {
-		
+		moduleMap.values().forEach(m -> m.onTrade(trade));
 	}
 	
 	public void onAccount(AccountField account) {
-		
+		moduleMap.values().forEach(m -> m.onAccount(account));
 	}
 
 	@Override
 	public boolean canHandle(NorthstarEventType eventType) {
-		// TODO Auto-generated method stub
-		return false;
+		return eventSet.contains(eventType);
 	}
 
 	@Override
 	protected void doHandle(NorthstarEvent e) {
-		// TODO Auto-generated method stub
-		
+		switch(e.getEvent()){
+		case TICK:
+		case IDX_TICK:
+			onTick((TickField) e.getData());
+			break;
+		case BAR:
+			onBar((BarField) e.getData());
+			break;
+		case ORDER:
+			onOrder((OrderField) e.getData());
+			break;
+		case TRADE:
+			onTrade((TradeField) e.getData());
+			break;
+		case ACCOUNT:
+			onAccount((AccountField) e.getData());
+			break;
+		default:
+			throw new IllegalStateException("未定义该事件-[" + e.getEvent() + "] 的处理方案");
+		}
 	}
-	
 	
 }

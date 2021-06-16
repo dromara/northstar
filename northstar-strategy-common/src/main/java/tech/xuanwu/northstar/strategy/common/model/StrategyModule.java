@@ -62,7 +62,6 @@ public class StrategyModule {
 	
 	public void onOrder(OrderField order) {
 		mOrder.updateOrder(order);
-		mPosition.onOrder(order);
 	}
 	
 	public void onTrade(TradeField trade) {
@@ -109,7 +108,7 @@ public class StrategyModule {
 		if(account != null) {			
 			mp.setAccount(account.toByteArray());
 		}
-		mp.setAccountShare(mAccount.getAccountShare());
+		mp.setAccountShare(mAccount.getAccountShareInPercentage());
 		mp.setModuleState(state);
 		mp.setTotalPositionProfit(mPosition.getPositionProfit());
 		mp.setTotalCloseProfit(mTrade.getTotalCloseProfit());
