@@ -1,6 +1,7 @@
 package tech.xuanwu.northstar.strategy.cta.module.signal;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import tech.xuanwu.northstar.strategy.common.Signal;
@@ -32,10 +33,10 @@ public class SampleSignalPolicy
 	private int longPeriod;
 
 	@Override
-	public Optional<Signal> updateTick(TickField tick, BarData barData) {
+	public Optional<Signal> updateTick(TickField tick, Map<String, BarData> barDataMap) {
+		// TODO Auto-generated method stub
 		return null;
 	}
-	
 	/**
 	 * 获取策略的动态参数对象
 	 */
@@ -74,5 +75,7 @@ public class SampleSignalPolicy
 	public List<String> bindedUnifiedSymbols() {
 		return List.of(bindedUnifiedSymbol);
 	}
+
+	
 	
 }

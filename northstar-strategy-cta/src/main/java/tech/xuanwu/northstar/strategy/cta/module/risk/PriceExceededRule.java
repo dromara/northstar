@@ -2,6 +2,7 @@ package tech.xuanwu.northstar.strategy.cta.module.risk;
 
 import tech.xuanwu.northstar.strategy.common.DynamicParamsAware;
 import tech.xuanwu.northstar.strategy.common.RiskControlRule;
+import tech.xuanwu.northstar.strategy.common.Signal;
 import tech.xuanwu.northstar.strategy.common.annotation.Label;
 import tech.xuanwu.northstar.strategy.common.annotation.StrategicComponent;
 import tech.xuanwu.northstar.strategy.common.model.CtaSignal;
@@ -13,7 +14,7 @@ public class PriceExceededRule implements RiskControlRule, DynamicParamsAware{
 	private int priceDifTolleranceInTick;
 	
 	@Override
-	public boolean canDeal(CtaSignal ctaSignal) {
+	public boolean canDeal(Signal signal) {
 		// TODO Auto-generated method stub
 		return false;
 	}

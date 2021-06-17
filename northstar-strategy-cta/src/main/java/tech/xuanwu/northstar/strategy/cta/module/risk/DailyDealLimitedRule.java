@@ -1,9 +1,9 @@
 package tech.xuanwu.northstar.strategy.cta.module.risk;
 
 import tech.xuanwu.northstar.strategy.common.RiskControlRule;
+import tech.xuanwu.northstar.strategy.common.Signal;
 import tech.xuanwu.northstar.strategy.common.annotation.Label;
 import tech.xuanwu.northstar.strategy.common.annotation.StrategicComponent;
-import tech.xuanwu.northstar.strategy.common.model.CtaSignal;
 import tech.xuanwu.northstar.strategy.common.model.meta.DynamicParams;
 
 @StrategicComponent("日内开仓次数限制")
@@ -12,11 +12,11 @@ public class DailyDealLimitedRule implements RiskControlRule {
 	private int dailyDealLimit;
 
 	@Override
-	public boolean canDeal(CtaSignal ctaSignal) {
+	public boolean canDeal(Signal signal) {
 		// TODO Auto-generated method stub
 		return false;
 	}
-
+	
 	@Override
 	public DynamicParams getDynamicParams() {
 		return new InitParams();
@@ -34,4 +34,6 @@ public class DailyDealLimitedRule implements RiskControlRule {
 		private int dailyDealLimit;
 		
 	}
+
+	
 }

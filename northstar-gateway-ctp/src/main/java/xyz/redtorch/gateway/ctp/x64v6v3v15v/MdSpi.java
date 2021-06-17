@@ -392,7 +392,7 @@ public class MdSpi extends CThostFtdcMdSpi {
 		if (pDepthMarketData != null) {
 			try {
 				String symbol = pDepthMarketData.getInstrumentID();
-
+				
 				if (!ctpGatewayAdapter.contractMap.containsKey(symbol)) {
 					logger.warn("{}行情接口收到合约{}数据,但尚未获取到合约信息,丢弃", logInfo, symbol);
 					return;
@@ -408,6 +408,15 @@ public class MdSpi extends CThostFtdcMdSpi {
 				updateTimeStr = StringUtils.isEmpty(updateTimeStr) ? LocalTime.now().format(DateTimeConstant.T_FORMAT_INT_FORMATTER) : updateTimeStr;
 				Long updateTime = Long.valueOf(updateTimeStr);
 				Long updateMillisec = StringUtils.isEmpty(updateTimeStr) ? System.currentTimeMillis() % 1000 : (long) pDepthMarketData.getUpdateMillisec();
+				
+				//排查TICK时间问题,用于查看单个日志的Tick,一个活跃合约,一个不活跃合约
+				if(StringUtils.equals(symbol, "rb2110") || StringUtils.equals(symbol, "WH201")) {
+					logger.info("{}, millisec: {},  time: {}, vol: {}", 
+							symbol,
+							pDepthMarketData.getUpdateMillisec(), 
+							pDepthMarketData.getUpdateTime(), 
+							pDepthMarketData.getVolume());
+				}
 				/*
 				 * 大商所获取的ActionDay可能是不正确的,因此这里采用本地时间修正 1.请注意，本地时间应该准确 2.使用 SimNow 7x24
 				 * 服务器获取行情时,这个修正方式可能会导致问题

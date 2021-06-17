@@ -24,10 +24,6 @@ public enum SignalState {
 	/**
 	 * 反手空
 	 */
-	ReversingSell,
-	/**
-	 * 无
-	 */
-	None;
+	ReversingSell;
 
 }

@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import lombok.Builder;
@@ -14,6 +15,7 @@ import tech.xuanwu.northstar.strategy.common.ModuleOrder;
 import tech.xuanwu.northstar.strategy.common.ModulePosition;
 import tech.xuanwu.northstar.strategy.common.ModuleTrade;
 import tech.xuanwu.northstar.strategy.common.RiskControlRule;
+import tech.xuanwu.northstar.strategy.common.Signal;
 import tech.xuanwu.northstar.strategy.common.SignalPolicy;
 import tech.xuanwu.northstar.strategy.common.constants.ModuleState;
 import tech.xuanwu.northstar.strategy.common.model.data.BarData;
@@ -53,11 +55,17 @@ public class StrategyModule {
 	private boolean enabled;
 	
 	public void onTick(TickField tick) {
-		
+		mPosition.onTick(tick);
+		barDataMap.get(tick.getUnifiedSymbol()).update(tick);
+		if(!enabled) {
+			return;
+		}
+		Optional<Signal> signal = signalPolicy.updateTick(tick, barDataMap);
+		dealer.onTick(tick, riskControlRules, gateway);
 	}
 	
 	public void onBar(BarField bar) {
-		
+		barDataMap.get(bar.getUnifiedSymbol()).update(bar);
 	}
 	
 	public void onOrder(OrderField order) {

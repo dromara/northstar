@@ -1,12 +1,19 @@
 package tech.xuanwu.northstar.strategy.common.model;
 
+import java.util.UUID;
+
 import lombok.Data;
+import tech.xuanwu.northstar.strategy.common.Signal;
 import tech.xuanwu.northstar.strategy.common.SignalPolicy;
 import tech.xuanwu.northstar.strategy.common.constants.SignalState;
 
 @Data
-public class CtaSignal {
+public class CtaSignal implements Signal{
 	
+	/**
+	 * 信号ID
+	 */
+	private UUID id;
 	/**
 	 * 信号所关联的合约
 	 */
@@ -19,10 +26,6 @@ public class CtaSignal {
 	 * 信号价格
 	 */
 	private double signalPrice;
-	/**
-	 * 当前价格
-	 */
-	private double currentPrice;
 	/**
 	 * 信号产生时间
 	 */
