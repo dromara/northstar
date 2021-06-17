@@ -1,11 +1,11 @@
 package tech.xuanwu.northstar.common.utils;
 
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoField;
 import java.util.Collection;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import lombok.extern.slf4j.Slf4j;
+import tech.xuanwu.northstar.common.constant.Constants;
 import tech.xuanwu.northstar.common.constant.DateTimeConstant;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.TickField;
@@ -72,8 +72,7 @@ public class BarGenerator {
 		if (barBuilder == null) {
 			barBuilder = BarField.newBuilder();
 			newFlag = true;
-		} else if (barLocalDateTime.get(ChronoField.MINUTE_OF_DAY) != tickLocalDateTime.get(ChronoField.MINUTE_OF_DAY) 
-				|| (preTick != null && !preTick.getTradingDay().equals(tick.getTradingDay()))) {
+		} else if (tick.getStatus() == Constants.END_OF_MIN) {
 			finish();
 			barBuilder = BarField.newBuilder();
 		} else {
@@ -112,7 +111,6 @@ public class BarGenerator {
 
 	public void finish() {
 		if(barBuilder!=null && barLocalDateTime!=null) {
-			barLocalDateTime = barLocalDateTime.withSecond(0).withNano(0);
 			barBuilder.setActionTimestamp(CommonUtils.localDateTimeToMills(barLocalDateTime));
 			barBuilder.setActionTime(barLocalDateTime.format(DateTimeConstant.T_FORMAT_WITH_MS_INT_FORMATTER));
 			

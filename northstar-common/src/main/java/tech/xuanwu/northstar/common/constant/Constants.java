@@ -7,4 +7,6 @@ public interface Constants {
 	String GATEWAY_CONTRACT_MAP = "GatewayContractMap";
 	
 	String KEY_USER = "USER";
+	
+	int END_OF_MIN = 6060;
 }

@@ -18,6 +18,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import tech.xuanwu.northstar.common.constant.Constants;
 import tech.xuanwu.northstar.common.constant.DateTimeConstant;
 import tech.xuanwu.northstar.common.event.NorthstarEventType;
 import tech.xuanwu.northstar.common.utils.CommonUtils;
@@ -409,14 +410,6 @@ public class MdSpi extends CThostFtdcMdSpi {
 				Long updateTime = Long.valueOf(updateTimeStr);
 				Long updateMillisec = StringUtils.isEmpty(updateTimeStr) ? System.currentTimeMillis() % 1000 : (long) pDepthMarketData.getUpdateMillisec();
 				
-				//排查TICK时间问题,用于查看单个日志的Tick,一个活跃合约,一个不活跃合约
-				if(StringUtils.equals(symbol, "rb2110") || StringUtils.equals(symbol, "WH201")) {
-					logger.info("{}, millisec: {},  time: {}, vol: {}", 
-							symbol,
-							pDepthMarketData.getUpdateMillisec(), 
-							pDepthMarketData.getUpdateTime(), 
-							pDepthMarketData.getVolume());
-				}
 				/*
 				 * 大商所获取的ActionDay可能是不正确的,因此这里采用本地时间修正 1.请注意，本地时间应该准确 2.使用 SimNow 7x24
 				 * 服务器获取行情时,这个修正方式可能会导致问题
@@ -522,6 +515,7 @@ public class MdSpi extends CThostFtdcMdSpi {
 				tickBuilder.setVolumeDelta(isReasonable(volume, 0, volumeDelta) ? volumeDelta : 0);
 				tickBuilder.setTurnover(turnover);
 				tickBuilder.setTurnoverDelta(turnoverDelta);
+				tickBuilder.setStatus(localDateTimeMillisec % 60000 == 0 ? Constants.END_OF_MIN : -1);
 
 				tickBuilder.setTradingDay(tradingDay);
 
@@ -548,6 +542,16 @@ public class MdSpi extends CThostFtdcMdSpi {
 				preTickMap.put(contractId, tick);
 
 				ctpGatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.TICK, tick);
+				
+				//排查TICK时间问题,用于查看单个日志的Tick,一个活跃合约,一个不活跃合约
+				if(StringUtils.equals(symbol, "jd2109") || StringUtils.equals(symbol, "AP203")) {
+					logger.info("{}, millisec: {},  time: {}, vol: {}, 分钟整点：{}", 
+							symbol,
+							pDepthMarketData.getUpdateMillisec(), 
+							pDepthMarketData.getUpdateTime(), 
+							pDepthMarketData.getVolume(),
+							localDateTimeMillisec % 60000 == 0);
+				}
 			} catch (Throwable t) {
 				logger.error("{} OnRtnDepthMarketData Exception", logInfo, t);
 			}
