@@ -1,8 +1,11 @@
 package tech.xuanwu.northstar.strategy.common;
 
 import java.util.List;
+import java.util.Optional;
 
 import tech.xuanwu.northstar.gateway.api.Gateway;
+import tech.xuanwu.northstar.strategy.common.model.OrderID;
+import xyz.redtorch.pb.CoreField.AccountField;
 import xyz.redtorch.pb.CoreField.OrderField;
 import xyz.redtorch.pb.CoreField.TickField;
 import xyz.redtorch.pb.CoreField.TradeField;
@@ -20,8 +23,9 @@ public interface Dealer extends DynamicParamsAware{
 	 * @param signal
 	 * @param riskRules
 	 * @param gateway
+	 * @return 				如果有成交则返回orderId
 	 */
-	void tryDeal(Signal signal, List<RiskControlRule> riskRules, Gateway gateway);
+	Optional<OrderID> tryDeal(Signal signal, List<RiskControlRule> riskRules, Gateway gateway);
 	
 	/**
 	 * 监听信号执行结果
@@ -30,10 +34,28 @@ public interface Dealer extends DynamicParamsAware{
 	void onOrder(OrderField order);
 	
 	/**
-	 * 
+	 * 监听信号执行结果
 	 * @param trade
 	 */
 	void onTrade(TradeField trade);
 	
+	/**
+	 * 监听账户变动
+	 * @param account
+	 */
+	void onAccount(AccountField account);
+	
+	/**
+	 * 监听行情变动,根据情况判断撤单或者追单
+	 * @param tick
+	 * @param riskRules
+	 * @param gateway
+	 */
 	void onTick(TickField tick, List<RiskControlRule> riskRules, Gateway gateway);
+	
+	/**
+	 * 获取交易策略所绑定的合约列表
+	 * @return
+	 */
+	List<String> bindedUnifiedSymbols();
 }

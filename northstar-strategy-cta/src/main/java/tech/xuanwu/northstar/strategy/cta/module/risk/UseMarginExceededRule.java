@@ -5,7 +5,9 @@ import tech.xuanwu.northstar.strategy.common.RiskControlRule;
 import tech.xuanwu.northstar.strategy.common.Signal;
 import tech.xuanwu.northstar.strategy.common.annotation.Label;
 import tech.xuanwu.northstar.strategy.common.annotation.StrategicComponent;
+import tech.xuanwu.northstar.strategy.common.model.StrategyModule;
 import tech.xuanwu.northstar.strategy.common.model.meta.DynamicParams;
+import xyz.redtorch.pb.CoreField.TickField;
 
 /**
  * 
@@ -18,7 +20,7 @@ public class UseMarginExceededRule implements RiskControlRule, DynamicParamsAwar
 	private double limitedPercentageOfTotalBalance;
 
 	@Override
-	public boolean canDeal(Signal signal) {
+	public boolean canDeal(TickField tick, StrategyModule module) {
 		// TODO Auto-generated method stub
 		return false;
 	}

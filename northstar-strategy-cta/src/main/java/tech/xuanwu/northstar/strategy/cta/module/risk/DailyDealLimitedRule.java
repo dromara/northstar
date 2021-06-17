@@ -4,7 +4,9 @@ import tech.xuanwu.northstar.strategy.common.RiskControlRule;
 import tech.xuanwu.northstar.strategy.common.Signal;
 import tech.xuanwu.northstar.strategy.common.annotation.Label;
 import tech.xuanwu.northstar.strategy.common.annotation.StrategicComponent;
+import tech.xuanwu.northstar.strategy.common.model.StrategyModule;
 import tech.xuanwu.northstar.strategy.common.model.meta.DynamicParams;
+import xyz.redtorch.pb.CoreField.TickField;
 
 @StrategicComponent("日内开仓次数限制")
 public class DailyDealLimitedRule implements RiskControlRule {
@@ -12,7 +14,7 @@ public class DailyDealLimitedRule implements RiskControlRule {
 	private int dailyDealLimit;
 
 	@Override
-	public boolean canDeal(Signal signal) {
+	public boolean canDeal(TickField tick, StrategyModule module) {
 		// TODO Auto-generated method stub
 		return false;
 	}
@@ -35,5 +37,4 @@ public class DailyDealLimitedRule implements RiskControlRule {
 		
 	}
 
-	
 }

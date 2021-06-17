@@ -1,6 +1,7 @@
 package tech.xuanwu.northstar.strategy.cta.module.dealer;
 
 import java.util.List;
+import java.util.Optional;
 
 import tech.xuanwu.northstar.gateway.api.Gateway;
 import tech.xuanwu.northstar.strategy.common.Dealer;
@@ -8,7 +9,9 @@ import tech.xuanwu.northstar.strategy.common.RiskControlRule;
 import tech.xuanwu.northstar.strategy.common.Signal;
 import tech.xuanwu.northstar.strategy.common.annotation.Label;
 import tech.xuanwu.northstar.strategy.common.annotation.StrategicComponent;
+import tech.xuanwu.northstar.strategy.common.model.OrderID;
 import tech.xuanwu.northstar.strategy.common.model.meta.DynamicParams;
+import xyz.redtorch.pb.CoreField.AccountField;
 import xyz.redtorch.pb.CoreField.OrderField;
 import xyz.redtorch.pb.CoreField.TickField;
 import xyz.redtorch.pb.CoreField.TradeField;
@@ -25,9 +28,9 @@ public class CtaDealer implements Dealer {
 	}
 
 	@Override
-	public void tryDeal(Signal signal, List<RiskControlRule> riskRules, Gateway gateway) {
+	public Optional<OrderID> tryDeal(Signal signal, List<RiskControlRule> riskRules, Gateway gateway) {
 		// TODO Auto-generated method stub
-		
+		return null;
 	}
 
 	@Override
@@ -38,6 +41,12 @@ public class CtaDealer implements Dealer {
 
 	@Override
 	public void onTrade(TradeField trade) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	@Override
+	public void onAccount(AccountField account) {
 		// TODO Auto-generated method stub
 		
 	}
@@ -59,5 +68,10 @@ public class CtaDealer implements Dealer {
 		private String bindedUnifiedSymbol;
 	}
 
-	
+	@Override
+	public List<String> bindedUnifiedSymbols() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

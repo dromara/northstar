@@ -9,7 +9,7 @@ import xyz.redtorch.pb.CoreField.AccountField;
  *
  */
 public interface ModuleAccount {
-
+	
 	/**
 	 * 更新账户
 	 * @param account

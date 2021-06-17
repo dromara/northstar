@@ -174,19 +174,9 @@ public class ModuleService implements InitializingBean{
 			barDataMap.put(unifiedSymbol, new BarData(refBarList));
 		}
 		
-		StrategyModule module = StrategyModule.builder()
-				.name(info.getModuleName())
-				.signalPolicy(signalPolicy)
-				.dealer(dealer)
-				.riskControlRules(riskRules)
-				.gateway(gateway)
-				.mAccount(mAccount)
-				.mPosition(mPosition)
-				.mOrder(mOrder)
-				.mTrade(mTrade)
-				.barDataMap(barDataMap)
-				.state(state)
-				.build();
+		StrategyModule module = new StrategyModule(info.getModuleName(), info.getAccountGatewayId(),
+				barDataMap, mAccount, mPosition, mOrder, mTrade, signalPolicy, riskRules, dealer, state,
+				gateway, info.isEnabled());
 		mdlMgr.addModule(module);
 		moduleRepo.saveModuleStatus(module.getModuleStatus());
 	}
