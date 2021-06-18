@@ -544,7 +544,9 @@ public class MdSpi extends CThostFtdcMdSpi {
 				ctpGatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.TICK, tick);
 				
 				//排查TICK时间问题,用于查看单个日志的Tick,一个活跃合约,一个不活跃合约
-				if(StringUtils.equals(symbol, "jd2109") || StringUtils.equals(symbol, "AP203")) {
+				if(StringUtils.equals(symbol, "jd2109") 
+						|| StringUtils.equals(symbol, "rb2110")
+						|| StringUtils.equals(symbol, "AP203")) {
 					logger.info("{}, millisec: {},  time: {}, vol: {}, 分钟整点：{}", 
 							symbol,
 							pDepthMarketData.getUpdateMillisec(), 
