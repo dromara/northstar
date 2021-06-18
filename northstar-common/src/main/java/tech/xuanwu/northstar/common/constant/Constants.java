@@ -8,5 +8,4 @@ public interface Constants {
 	
 	String KEY_USER = "USER";
 	
-	int END_OF_MIN = 6060;
 }

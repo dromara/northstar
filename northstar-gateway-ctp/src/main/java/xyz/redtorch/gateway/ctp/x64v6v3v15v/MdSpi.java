@@ -22,6 +22,7 @@ import tech.xuanwu.northstar.common.constant.Constants;
 import tech.xuanwu.northstar.common.constant.DateTimeConstant;
 import tech.xuanwu.northstar.common.event.NorthstarEventType;
 import tech.xuanwu.northstar.common.utils.CommonUtils;
+import tech.xuanwu.northstar.common.utils.MarketTimeUtil;
 import xyz.redtorch.gateway.ctp.x64v6v3v15v.api.CThostFtdcDepthMarketDataField;
 import xyz.redtorch.gateway.ctp.x64v6v3v15v.api.CThostFtdcForQuoteRspField;
 import xyz.redtorch.gateway.ctp.x64v6v3v15v.api.CThostFtdcMdApi;
@@ -57,6 +58,8 @@ public class MdSpi extends CThostFtdcMdSpi {
 	private Map<String, TickField> preTickMap = new HashMap<>();
 
 	private Set<String> subscribedSymbolSet = ConcurrentHashMap.newKeySet();
+	
+	private MarketTimeUtil mktTimeUtil = new CtpMarketTimeUtil();
 
 	MdSpi(CtpGatewayAdapter ctpGatewayAdapter) {
 		this.ctpGatewayAdapter = ctpGatewayAdapter;
@@ -515,7 +518,9 @@ public class MdSpi extends CThostFtdcMdSpi {
 				tickBuilder.setVolumeDelta(isReasonable(volume, 0, volumeDelta) ? volumeDelta : 0);
 				tickBuilder.setTurnover(turnover);
 				tickBuilder.setTurnoverDelta(turnoverDelta);
-				tickBuilder.setStatus(localDateTimeMillisec % 60000 == 0 ? Constants.END_OF_MIN : -1);
+				
+				LocalTime time = LocalTime.from(dateTime);
+				tickBuilder.setStatus(mktTimeUtil.resolveTickType(time).getCode());
 
 				tickBuilder.setTradingDay(tradingDay);
 
@@ -544,15 +549,15 @@ public class MdSpi extends CThostFtdcMdSpi {
 				ctpGatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.TICK, tick);
 				
 				//排查TICK时间问题,用于查看单个日志的Tick,一个活跃合约,一个不活跃合约
-				if(StringUtils.equals(symbol, "jd2109") 
+				if(StringUtils.equals(symbol, "a2205") 
 						|| StringUtils.equals(symbol, "rb2110")
-						|| StringUtils.equals(symbol, "AP203")) {
-					logger.info("{}, millisec: {},  time: {}, vol: {}, 分钟整点：{}", 
+						|| StringUtils.equals(symbol, "CF203")) {
+					logger.info("{}, millisec: {},  time: {}, vol: {}, type：{}", 
 							symbol,
 							pDepthMarketData.getUpdateMillisec(), 
 							pDepthMarketData.getUpdateTime(), 
 							pDepthMarketData.getVolume(),
-							localDateTimeMillisec % 60000 == 0);
+							mktTimeUtil.resolveTickType(time));
 				}
 			} catch (Throwable t) {
 				logger.error("{} OnRtnDepthMarketData Exception", logInfo, t);

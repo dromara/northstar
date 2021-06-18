@@ -7,6 +7,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.common.constant.Constants;
 import tech.xuanwu.northstar.common.constant.DateTimeConstant;
+import tech.xuanwu.northstar.common.constant.TickType;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.TickField;
 
@@ -45,6 +46,10 @@ public class BarGenerator {
 			log.warn("输入的Tick数据为空,当前Bar合约{}",barUnifiedSymbol);
 			return;
 		}
+		
+		if(tick.getStatus() == TickType.NON_OPENING_TICK.getCode()) {
+			return;
+		}
 
 		if (barUnifiedSymbol == null) {
 			barUnifiedSymbol = tick.getUnifiedSymbol();
@@ -72,7 +77,8 @@ public class BarGenerator {
 		if (barBuilder == null) {
 			barBuilder = BarField.newBuilder();
 			newFlag = true;
-		} else if (tick.getStatus() == Constants.END_OF_MIN) {
+		} else if (tick.getStatus() == TickType.CLOSING_TICK.getCode() 
+				|| tick.getStatus() == TickType.END_OF_MIN_TICK.getCode()) {
 			finish();
 			barBuilder = BarField.newBuilder();
 		} else {
