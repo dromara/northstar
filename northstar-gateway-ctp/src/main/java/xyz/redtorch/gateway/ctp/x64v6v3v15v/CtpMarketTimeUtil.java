@@ -14,12 +14,12 @@ public class CtpMarketTimeUtil implements MarketTimeUtil{
 	
 	LocalTime nightMarketStartTime = LocalTime.of(20, 58, 59, 999999999);
 	LocalTime nightMarketOpenTime = LocalTime.of(21, 0, 1);
-	LocalTime nightMarketEndTime = LocalTime.of(2, 30, 1);
+	LocalTime nightMarketEndTime = LocalTime.of(2, 30, 0, 999999);
 	LocalTime dayMarketStartTime = LocalTime.of(8, 58, 59, 999999999);
 	LocalTime dayMarketOpenTime = LocalTime.of(9, 0, 1);
 	LocalTime dayMarketClosingTime1 = LocalTime.of(15, 0, 0);
 	LocalTime dayMarketClosingTime2 = LocalTime.of(15, 15, 0);
-	LocalTime dayMarketEndTime = LocalTime.of(15, 15, 1);
+	LocalTime dayMarketEndTime = LocalTime.of(15, 15, 0, 999999);
 	
 	long LESS_THEN_HALF_SEC_IN_NANO = 400000000;
 	/**
@@ -39,8 +39,8 @@ public class CtpMarketTimeUtil implements MarketTimeUtil{
 		if(time.getSecond() == 0 && time.getNano() == 0) {
 			return TickType.END_OF_MIN_TICK;
 		}
-		if(dayMarketClosingTime1.toNanoOfDay() - time.toNanoOfDay() < LESS_THEN_HALF_SEC_IN_NANO
-				|| dayMarketClosingTime2.toNanoOfDay() - time.toNanoOfDay() < LESS_THEN_HALF_SEC_IN_NANO) {
+		if(Math.abs(dayMarketClosingTime1.toNanoOfDay() - time.toNanoOfDay()) < LESS_THEN_HALF_SEC_IN_NANO
+				|| Math.abs(dayMarketClosingTime2.toNanoOfDay() - time.toNanoOfDay()) < LESS_THEN_HALF_SEC_IN_NANO) {
 			return TickType.CLOSING_TICK;
 		}
 		return TickType.NORMAL_TICK;
