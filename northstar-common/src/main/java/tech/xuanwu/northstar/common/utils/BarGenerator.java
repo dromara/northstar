@@ -78,14 +78,15 @@ public class BarGenerator {
 			barBuilder = BarField.newBuilder();
 			newFlag = true;
 		} else if (tick.getStatus() == TickType.CLOSING_TICK.getCode() 
-				|| tick.getStatus() == TickType.END_OF_MIN_TICK.getCode()
+				|| tick.getStatus() == TickType.END_OF_MIN_TICK.getCode()) {
+			finish();
+			return;
+		} else if (tick.getStatus() == TickType.NORMAL_TICK.getCode() 
+				&& barLocalDateTime.get(ChronoField.MINUTE_OF_DAY) != tickLocalDateTime.get(ChronoField.MINUTE_OF_DAY)
 				|| !barBuilder.getActionDay().equals(tick.getActionDay())) {
 			finish();
 			barBuilder = BarField.newBuilder();
-		} else if (tick.getStatus() == TickType.NORMAL_TICK.getCode() 
-				&& barLocalDateTime.get(ChronoField.MINUTE_OF_DAY) != tickLocalDateTime.get(ChronoField.MINUTE_OF_DAY)) {
-			finish();
-			barBuilder = BarField.newBuilder();
+			newFlag = true;
 		} else {
 			if(tick.getStatus() == TickType.PRE_OPENING_TICK.getCode()) {
 				barLocalDateTime = tickLocalDateTime;
@@ -137,7 +138,6 @@ public class BarGenerator {
 		
 		barLocalDateTime = null;
 		barBuilder = null;
-		newFlag = true;
 	}
 
 	public interface CommonBarCallBack {
