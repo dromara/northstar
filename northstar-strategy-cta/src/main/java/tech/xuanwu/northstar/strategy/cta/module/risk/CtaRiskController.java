@@ -35,6 +35,7 @@ public class CtaRiskController implements RiskController{
 	public void onEvent(ModuleEvent event) {
 		if(event.getEventType() == ModuleEventType.ORDER_REQ_CREATED) {
 			currentOrderReq = (SubmitOrderReqField) event.getData();
+			rules.stream().forEach(rule -> rule.onSubmitOrderReq(currentOrderReq));
 		}
 	}
 

@@ -15,12 +15,6 @@ import xyz.redtorch.pb.CoreField.TickField;
 public interface Dealer extends DynamicParamsAware, EventDrivenComponent {
 	
 	/**
-	 * 更新信号
-	 * @param signal
-	 */
-	void onSignal(Signal signal);
-	
-	/**
 	 * 监听行情变动,根据信号下单、撤单或者追单
 	 * @param tick
 	 * @param riskRules
