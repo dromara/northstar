@@ -30,19 +30,22 @@ public class ModulePerformance {
 	private double totalPositionProfit;
 	
 	/**
-	 * AccountField byte array
+	 * 模组账户总额
 	 */
-	private byte[] account;
-	
-	/**
-	 * 模组占用账户比例(单位:%)
-	 */
-	private double accountShare;
+	private int accountBalance;
 	
 	/**
 	 * 模组状态
 	 */
 	private ModuleState moduleState;
 	
+	/**
+	 * 模组名称
+	 */
 	private String moduleName;
+	
+	/**
+	 * 账户ID
+	 */
+	private String accountId;
 }

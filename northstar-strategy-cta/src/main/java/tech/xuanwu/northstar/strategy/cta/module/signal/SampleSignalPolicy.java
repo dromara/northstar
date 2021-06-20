@@ -3,13 +3,17 @@ package tech.xuanwu.northstar.strategy.cta.module.signal;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import tech.xuanwu.northstar.strategy.common.Signal;
 import tech.xuanwu.northstar.strategy.common.SignalPolicy;
 import tech.xuanwu.northstar.strategy.common.annotation.Label;
 import tech.xuanwu.northstar.strategy.common.annotation.StrategicComponent;
+import tech.xuanwu.northstar.strategy.common.event.ModuleEvent;
+import tech.xuanwu.northstar.strategy.common.event.ModuleEventBus;
 import tech.xuanwu.northstar.strategy.common.model.data.BarData;
 import tech.xuanwu.northstar.strategy.common.model.meta.DynamicParams;
+import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.TickField;
 
 /**
@@ -32,11 +36,6 @@ public class SampleSignalPolicy
 	
 	private int longPeriod;
 
-	@Override
-	public Optional<Signal> updateTick(TickField tick, Map<String, BarData> barDataMap) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 	/**
 	 * 获取策略的动态参数对象
 	 */
@@ -72,10 +71,48 @@ public class SampleSignalPolicy
 	}
 
 	@Override
-	public List<String> bindedUnifiedSymbols() {
-		return List.of(bindedUnifiedSymbol);
+	public Set<String> bindedUnifiedSymbols() {
+		return Set.of(bindedUnifiedSymbol);
+	}
+	
+	@Override
+	public void onEvent(ModuleEvent event) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	@Override
+	public void setEventBus(ModuleEventBus moduleEventBus) {
+		// TODO Auto-generated method stub
+		
 	}
 
-	
+
+	@Override
+	public Optional<Signal> updateTick(TickField tick) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+	@Override
+	public void updateBar(BarField bar) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public BarData getRefBarData(String unifiedSymbol) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+	@Override
+	public void setRefBarData(Map<String, BarData> barDataMap) {
+		// TODO Auto-generated method stub
+		
+	}
 	
 }

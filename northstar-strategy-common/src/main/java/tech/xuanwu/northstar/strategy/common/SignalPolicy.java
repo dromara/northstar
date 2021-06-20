@@ -3,8 +3,11 @@ package tech.xuanwu.northstar.strategy.common;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
+import tech.xuanwu.northstar.strategy.common.event.EventDrivenComponent;
 import tech.xuanwu.northstar.strategy.common.model.data.BarData;
+import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.TickField;
 
 /**
@@ -12,7 +15,7 @@ import xyz.redtorch.pb.CoreField.TickField;
  * @author KevinHuangwl
  *
  */
-public interface SignalPolicy extends DynamicParamsAware{
+public interface SignalPolicy extends DynamicParamsAware, EventDrivenComponent {
 
 	/**
 	 * 每Tick更新
@@ -20,12 +23,31 @@ public interface SignalPolicy extends DynamicParamsAware{
 	 * @param barData	K线序列数据（已包含Tick更新数据）
 	 * @return			信号(不一定有)
 	 */
-	Optional<Signal> updateTick(TickField tick, Map<String,BarData> barDataMap);
+	Optional<Signal> updateTick(TickField tick);
+	
+	/**
+	 * 更新引用Bar数据
+	 * @param bar
+	 */
+	void updateBar(BarField bar);
+	
+	/**
+	 * 获取引用Bar数据
+	 * @param unifiedSymbol
+	 * @return
+	 */
+	BarData getRefBarData(String unifiedSymbol);
 	
 	/**
 	 * 获取信号策略所绑定的合约列表
 	 * @return
 	 */
-	List<String> bindedUnifiedSymbols();
+	Set<String> bindedUnifiedSymbols();
+	
+	/**
+	 * 设置信号策略的引用数据
+	 * @param barDataMap
+	 */
+	void setRefBarData(Map<String, BarData> barDataMap);
 	
 }

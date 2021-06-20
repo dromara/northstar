@@ -16,15 +16,11 @@ public enum ModuleState {
 	 */
 	HOLDING,
 	/**
-	 * 开仓委托中
+	 * 下单中
 	 */
-	OPENNING,
+	PLACING_ORDER,
 	/**
-	 * 平仓委托中
+	 * 追单中
 	 */
-	CLOSING, 
-	/**
-	 * 撤单中
-	 */
-	CANCELING_ORDER;
+	TRACING_ORDER;
 }

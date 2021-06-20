@@ -7,15 +7,9 @@ import xyz.redtorch.pb.CoreField.TradeField;
 
 public abstract class AbstractModuleFactory {
 
-	public ModuleAccount newModuleAccount(int shareInPercentage) {
-		return new GenericModuleAccount(shareInPercentage);
-	}
-	
 	public abstract ModulePosition newModulePosition();
 	
 	public abstract ModulePosition loadModulePosition(ModuleStatus status);
-	
-	public abstract ModuleOrder newModuleOrder();
 	
 	public abstract ModuleTrade newModuleTrade();
 	

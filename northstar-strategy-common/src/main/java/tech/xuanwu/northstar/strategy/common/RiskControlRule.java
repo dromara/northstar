@@ -1,6 +1,7 @@
 package tech.xuanwu.northstar.strategy.common;
 
-import tech.xuanwu.northstar.strategy.common.model.StrategyModule;
+import tech.xuanwu.northstar.strategy.common.model.ModuleAgent;
+import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TickField;
 
 /**
@@ -8,8 +9,9 @@ import xyz.redtorch.pb.CoreField.TickField;
  * @author KevinHuangwl
  *
  */
-public interface RiskControlRule extends DynamicParamsAware{
+public interface RiskControlRule extends DynamicParamsAware {
 
-	boolean canDeal(TickField tick, StrategyModule module);
+	short canDeal(TickField tick, ModuleAgent agent);
 	
+	RiskControlRule onSubmitOrderReq(SubmitOrderReqField orderReq);
 }

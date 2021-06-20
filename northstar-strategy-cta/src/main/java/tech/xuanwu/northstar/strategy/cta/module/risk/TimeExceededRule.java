@@ -2,11 +2,12 @@ package tech.xuanwu.northstar.strategy.cta.module.risk;
 
 import tech.xuanwu.northstar.strategy.common.DynamicParamsAware;
 import tech.xuanwu.northstar.strategy.common.RiskControlRule;
-import tech.xuanwu.northstar.strategy.common.Signal;
 import tech.xuanwu.northstar.strategy.common.annotation.Label;
 import tech.xuanwu.northstar.strategy.common.annotation.StrategicComponent;
-import tech.xuanwu.northstar.strategy.common.model.StrategyModule;
+import tech.xuanwu.northstar.strategy.common.constants.RiskAuditResult;
+import tech.xuanwu.northstar.strategy.common.model.ModuleAgent;
 import tech.xuanwu.northstar.strategy.common.model.meta.DynamicParams;
+import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TickField;
 
 @StrategicComponent("委托超时限制")
@@ -14,10 +15,20 @@ public class TimeExceededRule implements RiskControlRule, DynamicParamsAware{
 	
 	private long timeoutInterval;
 
+	private long lastUpdateTime;
+
 	@Override
-	public boolean canDeal(TickField tick, StrategyModule module) {
-		// TODO Auto-generated method stub
-		return false;
+	public short canDeal(TickField tick, ModuleAgent agent) {
+		if(tick.getActionTimestamp() - lastUpdateTime > timeoutInterval) {
+			return RiskAuditResult.RETRY;
+		}
+		return RiskAuditResult.ACCEPTED;
+	}
+	
+	@Override
+	public RiskControlRule onSubmitOrderReq(SubmitOrderReqField orderReq) {
+		this.lastUpdateTime = System.currentTimeMillis();
+		return this;
 	}
 
 	@Override

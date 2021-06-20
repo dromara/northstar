@@ -5,8 +5,12 @@ import tech.xuanwu.northstar.strategy.common.RiskControlRule;
 import tech.xuanwu.northstar.strategy.common.Signal;
 import tech.xuanwu.northstar.strategy.common.annotation.Label;
 import tech.xuanwu.northstar.strategy.common.annotation.StrategicComponent;
+import tech.xuanwu.northstar.strategy.common.model.ModuleAgent;
 import tech.xuanwu.northstar.strategy.common.model.StrategyModule;
 import tech.xuanwu.northstar.strategy.common.model.meta.DynamicParams;
+import xyz.redtorch.pb.CoreEnum.DirectionEnum;
+import xyz.redtorch.pb.CoreField.ContractField;
+import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TickField;
 
 /**
@@ -14,15 +18,27 @@ import xyz.redtorch.pb.CoreField.TickField;
  * @author KevinHuangwl
  *
  */
-@StrategicComponent("保证金额度限制")
+@StrategicComponent("模组占用账户资金限制")
 public class UseMarginExceededRule implements RiskControlRule, DynamicParamsAware{
 
 	private double limitedPercentageOfTotalBalance;
 
+	private double totalCost;
+
 	@Override
-	public boolean canDeal(TickField tick, StrategyModule module) {
-		// TODO Auto-generated method stub
-		return false;
+	public short canDeal(TickField tick, ModuleAgent agent) {
+		if(totalCost > limitedPercentageOfTotalBalance) {
+			
+		}
+		return 0;
+	}
+	
+	@Override
+	public RiskControlRule onSubmitOrderReq(SubmitOrderReqField orderReq) {
+		ContractField contract = orderReq.getContract();
+		double marginRatio = orderReq.getDirection() == DirectionEnum.D_Buy ? contract.getLongMarginRatio() : contract.getShortMarginRatio();
+		totalCost = contract.getMultiplier() * orderReq.getPrice() * orderReq.getVolume() * marginRatio;
+		return this;
 	}
 
 	@Override
@@ -39,7 +55,7 @@ public class UseMarginExceededRule implements RiskControlRule, DynamicParamsAwar
 	
 	public class InitParams extends DynamicParams{
 		
-		@Label(value="保证金上限", unit="%")
+		@Label(value="账户分配比例", unit="%")
 		private double limitedPercentageOfTotalBalance;
 		
 	}

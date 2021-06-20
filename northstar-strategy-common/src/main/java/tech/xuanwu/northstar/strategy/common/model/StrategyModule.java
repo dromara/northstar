@@ -4,24 +4,18 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
-import tech.xuanwu.northstar.gateway.api.Gateway;
 import tech.xuanwu.northstar.strategy.common.Dealer;
-import tech.xuanwu.northstar.strategy.common.ModuleAccount;
-import tech.xuanwu.northstar.strategy.common.ModuleOrder;
 import tech.xuanwu.northstar.strategy.common.ModulePosition;
 import tech.xuanwu.northstar.strategy.common.ModuleTrade;
-import tech.xuanwu.northstar.strategy.common.RiskControlRule;
-import tech.xuanwu.northstar.strategy.common.Signal;
+import tech.xuanwu.northstar.strategy.common.RiskController;
 import tech.xuanwu.northstar.strategy.common.SignalPolicy;
 import tech.xuanwu.northstar.strategy.common.constants.ModuleState;
-import tech.xuanwu.northstar.strategy.common.model.data.BarData;
+import tech.xuanwu.northstar.strategy.common.event.ModuleEventBus;
 import xyz.redtorch.pb.CoreField.AccountField;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.OrderField;
@@ -29,128 +23,98 @@ import xyz.redtorch.pb.CoreField.TickField;
 import xyz.redtorch.pb.CoreField.TradeField;
 
 public class StrategyModule {
-	/**
-	 * unifiedSymbol -> barData
-	 */
-	private Map<String,BarData> barDataMap;
 	
-	private ModuleAccount mAccount;
+	protected ModulePosition mPosition;
 	
-	private ModulePosition mPosition;
+	protected ModuleTrade mTrade;
 	
-	private ModuleOrder mOrder;
+	protected SignalPolicy signalPolicy;
 	
-	private ModuleTrade mTrade;
+	protected RiskController riskController;
 	
-	private SignalPolicy signalPolicy;
+	protected Dealer dealer;
 	
-	private List<RiskControlRule> riskControlRules;
+	protected ModuleAgent agent;
 	
-	private Dealer dealer;
-	
-	private ModuleState state;
-	
-	private Gateway gateway;
-	
-	private String name;
-	
-	private String accountGatewayId;
-	
-	private boolean enabled;
+	private ModuleEventBus moduleEventBus = new ModuleEventBus();
 	
 	/**
 	 * 用于记录模组关联的合约名称
 	 */
-	private Set<String> symbolSet = new HashSet<>();
-	/**
-	 * 用于记录模组发出的订单
-	 */
-	private Set<String> orderIdSet = new HashSet<>();
+	protected Set<String> symbolSet = new HashSet<>();
 	
-	public StrategyModule(String name, String accountGatewayId, Map<String, BarData> barDataMap, ModuleAccount mAccount, ModulePosition mPosition,
-			ModuleOrder mOrder, ModuleTrade mTrade, SignalPolicy signalPolicy, List<RiskControlRule> riskControlRules,
-			Dealer dealer, ModuleState state, Gateway gateway, boolean enabled) {
-		this.barDataMap = barDataMap;
-		this.mAccount = mAccount;
+	public StrategyModule(ModuleAgent agent, SignalPolicy signalPolicy, RiskController riskController, Dealer dealer, 
+			ModulePosition mPosition, ModuleTrade mTrade) {
+		this.agent = agent;
 		this.mPosition = mPosition;
-		this.mOrder = mOrder;
 		this.mTrade = mTrade;
 		this.signalPolicy = signalPolicy;
-		this.riskControlRules = riskControlRules;
+		this.riskController = riskController;
 		this.dealer = dealer;
-		this.state = state;
-		this.gateway = gateway;
-		this.name = name;
-		this.accountGatewayId = accountGatewayId;
-		this.enabled = enabled;
 		symbolSet.addAll(dealer.bindedUnifiedSymbols());
 		symbolSet.addAll(signalPolicy.bindedUnifiedSymbols());
+		
+		moduleEventBus.register(signalPolicy);
+		moduleEventBus.register(riskController);
+		moduleEventBus.register(dealer);
+		moduleEventBus.register(agent);
+		
+		riskController.setModuleAgent(agent);
 	}
 	
 	public void onTick(TickField tick) {
-		if(!symbolSet.contains(tick.getUnifiedSymbol())) {
-			return;
+		if(signalPolicy.bindedUnifiedSymbols().contains(tick.getUnifiedSymbol())) {			
+			agent.updateTradingDay(tick.getTradingDay());
+			signalPolicy.updateTick(tick);
 		}
-		mPosition.onTick(tick);
-		barDataMap.get(tick.getUnifiedSymbol()).update(tick);
-		if(!enabled) {
-			return;
+		if(dealer.bindedUnifiedSymbols().contains(tick.getUnifiedSymbol())) {
+			dealer.onTick(tick);
+			riskController.onTick(tick);
 		}
-		Optional<Signal> signalOpt = signalPolicy.updateTick(tick, barDataMap);
-		if(signalOpt.isPresent()) {
-			//TODO 未完成
-		}
-		dealer.onTick(tick, riskControlRules, gateway);
 	}
 	
 	public void onBar(BarField bar) {
-		if(!symbolSet.contains(bar.getUnifiedSymbol())) {
-			return;
+		if(signalPolicy.bindedUnifiedSymbols().contains(bar.getUnifiedSymbol())) {			
+			signalPolicy.getRefBarData(bar.getUnifiedSymbol()).update(bar);
 		}
-		barDataMap.get(bar.getUnifiedSymbol()).update(bar);
 	}
 	
 	public void onOrder(OrderField order) {
-		if(!orderIdSet.contains(order.getOrderId())) {
-			return;
+		if(agent.hasOrderRecord(order.getOriginOrderId())) {
+			agent.onOrder(order);
 		}
-		mOrder.updateOrder(order);
-		dealer.onOrder(order);
 	}
 	
 	public void onTrade(TradeField trade) {
-		if(!orderIdSet.contains(trade.getOrderId())) {
-			return;
+		if(agent.hasOrderRecord(trade.getOrderId())) {
+			mTrade.updateTrade(trade);
+			mPosition.onTrade(trade);
+			agent.onTrade(trade);
 		}
-		mTrade.updateTrade(trade);
-		mPosition.onTrade(trade);
-		dealer.onTrade(trade);
 	}
 	
 	public void onAccount(AccountField account) {
-		if(!StringUtils.equals(account.getGatewayId(), accountGatewayId)) {
-			return;
+		if(StringUtils.equals(account.getGatewayId(), agent.getAccountGatewayId())) {
+			agent.updateAccount(account);
 		}
-		mAccount.updateAccount(account);
-		dealer.onAccount(account);
 	}
 	
 	public String getName() {
-		return name;
+		return agent.getName();
 	}
 	
 	public ModuleState getState() {
-		return state;
+		return agent.getModuleState();
 	}
 	
 	public void toggleRunningState() {
-		enabled = !enabled;
+		agent.toggleRunningState();
 	}
 	
 	public ModuleStatus getModuleStatus() {
 		ModuleStatus status = new ModuleStatus();
-		status.setModuleName(name);
-		status.setState(state);
+		status.setModuleName(agent.getName());
+		status.setState(agent.getModuleState());
 		List<TradeField> trades = mPosition.getOpenningTrade();
 		if(trades.size() > 0) {
 			status.setLastOpenTrade(trades.stream().map(trade -> trade.toByteArray()).collect(Collectors.toList()));
@@ -160,18 +124,19 @@ public class StrategyModule {
 	
 	public ModulePerformance getPerformance() {
 		ModulePerformance mp = new ModulePerformance();
-		mp.setModuleName(name);
+		mp.setModuleName(agent.getName());
 		Map<String, List<byte[]>> byteMap = new HashMap<>();
-		for(Entry<String, BarData> e : barDataMap.entrySet()) {
-			byteMap.put(e.getKey(), e.getValue().getRefBarList().stream().map(bar -> bar.toByteArray()).collect(Collectors.toList()));
+		for(String unifiedSymbol : signalPolicy.bindedUnifiedSymbols()) {
+			byteMap.put(unifiedSymbol, 
+				signalPolicy.getRefBarData(unifiedSymbol)
+					.getRefBarList()
+					.stream()
+					.map(bar -> bar.toByteArray())
+					.collect(Collectors.toList()));
 		}
 		mp.setRefBarDataMap(byteMap);
-		AccountField account = mAccount.getAccount();
-		if(account != null) {			
-			mp.setAccount(account.toByteArray());
-		}
-		mp.setAccountShare(mAccount.getAccountShareInPercentage());
-		mp.setModuleState(state);
+		mp.setAccountBalance(agent.getAccountBalance());
+		mp.setModuleState(agent.getModuleState());
 		mp.setTotalPositionProfit(mPosition.getPositionProfit());
 		mp.setTotalCloseProfit(mTrade.getTotalCloseProfit());
 		mp.setDealRecords(mTrade.getDealRecords());

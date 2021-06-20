@@ -36,10 +36,6 @@ public class ModuleInfo {
 	@Id
 	private String moduleName;
 	/**
-	 * 账户比例(单位:%)
-	 */
-	private int allocatedAccountShare;
-	/**
 	 * 是否启用
 	 */
 	private boolean enabled;

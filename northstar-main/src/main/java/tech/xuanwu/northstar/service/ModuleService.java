@@ -13,6 +13,7 @@ import org.springframework.context.ApplicationContext;
 import tech.xuanwu.northstar.common.constant.DateTimeConstant;
 import tech.xuanwu.northstar.domain.GatewayConnection;
 import tech.xuanwu.northstar.gateway.api.Gateway;
+import tech.xuanwu.northstar.gateway.api.TradeGateway;
 import tech.xuanwu.northstar.manager.GatewayAndConnectionManager;
 import tech.xuanwu.northstar.manager.ModuleManager;
 import tech.xuanwu.northstar.persistence.MarketDataRepository;
@@ -21,15 +22,15 @@ import tech.xuanwu.northstar.persistence.po.MinBarDataPO;
 import tech.xuanwu.northstar.strategy.common.AbstractModuleFactory;
 import tech.xuanwu.northstar.strategy.common.Dealer;
 import tech.xuanwu.northstar.strategy.common.DynamicParamsAware;
-import tech.xuanwu.northstar.strategy.common.ModuleAccount;
-import tech.xuanwu.northstar.strategy.common.ModuleOrder;
 import tech.xuanwu.northstar.strategy.common.ModulePosition;
 import tech.xuanwu.northstar.strategy.common.ModuleTrade;
 import tech.xuanwu.northstar.strategy.common.RiskControlRule;
+import tech.xuanwu.northstar.strategy.common.RiskController;
 import tech.xuanwu.northstar.strategy.common.SignalPolicy;
 import tech.xuanwu.northstar.strategy.common.annotation.StrategicComponent;
 import tech.xuanwu.northstar.strategy.common.constants.ModuleState;
 import tech.xuanwu.northstar.strategy.common.constants.ModuleType;
+import tech.xuanwu.northstar.strategy.common.model.ModuleAgent;
 import tech.xuanwu.northstar.strategy.common.model.ModuleInfo;
 import tech.xuanwu.northstar.strategy.common.model.ModulePerformance;
 import tech.xuanwu.northstar.strategy.common.model.ModuleStatus;
@@ -40,6 +41,7 @@ import tech.xuanwu.northstar.strategy.common.model.meta.ComponentField;
 import tech.xuanwu.northstar.strategy.common.model.meta.ComponentMetaInfo;
 import tech.xuanwu.northstar.strategy.common.model.meta.DynamicParams;
 import tech.xuanwu.northstar.strategy.cta.CtaModuleFactory;
+import tech.xuanwu.northstar.strategy.cta.module.risk.CtaRiskController;
 import tech.xuanwu.northstar.utils.ProtoBeanUtils;
 import xyz.redtorch.pb.CoreField.BarField;
 
@@ -144,15 +146,15 @@ public class ModuleService implements InitializingBean{
 		String mktGatewayId = conn.getGwDescription().getBindedMktGatewayId();
 		
 		AbstractModuleFactory factory = null;
+		RiskController riskController = null;
 		if(info.getType() == ModuleType.CTA) {
 			factory = new CtaModuleFactory();
+			riskController = new CtaRiskController(riskRules);
 		} else {
 			// TODO 不同的策略模式采用不同的工厂实现
 		}
 		
-		ModuleAccount mAccount = factory.newModuleAccount(info.getAllocatedAccountShare());
 		ModulePosition mPosition = status == null ? factory.newModulePosition() : factory.loadModulePosition(status);
-		ModuleOrder mOrder = factory.newModuleOrder();
 		ModuleTrade mTrade = factory.newModuleTrade();
 		
 		ModuleState state = status == null ? ModuleState.EMPTY : status.getState();
@@ -174,9 +176,17 @@ public class ModuleService implements InitializingBean{
 			barDataMap.put(unifiedSymbol, new BarData(refBarList));
 		}
 		
-		StrategyModule module = new StrategyModule(info.getModuleName(), info.getAccountGatewayId(),
-				barDataMap, mAccount, mPosition, mOrder, mTrade, signalPolicy, riskRules, dealer, state,
-				gateway, info.isEnabled());
+		ModuleAgent agent = ModuleAgent.builder()
+				.name(info.getModuleName())
+				.accountGatewayId(info.getAccountGatewayId())
+				.gateway((TradeGateway)gateway)
+				.enabled(info.isEnabled())
+				.state(state)
+				.mPosition(mPosition)
+				.build();
+		
+		signalPolicy.setRefBarData(barDataMap);
+		StrategyModule module = new StrategyModule(agent, signalPolicy, riskController, dealer, mPosition, mTrade);
 		mdlMgr.addModule(module);
 		moduleRepo.saveModuleStatus(module.getModuleStatus());
 	}
