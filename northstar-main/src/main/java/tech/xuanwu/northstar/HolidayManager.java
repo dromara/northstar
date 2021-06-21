@@ -31,7 +31,7 @@ public class HolidayManager implements InitializingBean{
 			if(StringUtils.isEmpty(date)) {
 				continue;
 			}
-			holidaySet.add(LocalDate.parse(date, DateTimeConstant.D_FORMAT_INT_FORMATTER));
+			addHoliday(date);
 		}
 	}
 	
@@ -51,5 +51,9 @@ public class HolidayManager implements InitializingBean{
 			date = LocalDate.from(dateTime.minusHours(4));
 		}
 		return holidaySet.contains(date);
+	}
+	
+	public void addHoliday(String dateStr) {
+		holidaySet.add(LocalDate.parse(dateStr, DateTimeConstant.D_FORMAT_INT_FORMATTER));
 	}
 }
