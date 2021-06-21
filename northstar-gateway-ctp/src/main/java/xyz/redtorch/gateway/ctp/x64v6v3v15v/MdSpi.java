@@ -18,7 +18,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import tech.xuanwu.northstar.common.constant.Constants;
 import tech.xuanwu.northstar.common.constant.DateTimeConstant;
 import tech.xuanwu.northstar.common.event.NorthstarEventType;
 import tech.xuanwu.northstar.common.utils.CommonUtils;
@@ -548,17 +547,6 @@ public class MdSpi extends CThostFtdcMdSpi {
 
 				ctpGatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.TICK, tick);
 				
-				//排查TICK时间问题,用于查看单个日志的Tick,一个活跃合约,一个不活跃合约
-				if(StringUtils.equals(symbol, "a2205") 
-						|| StringUtils.equals(symbol, "rb2110")
-						|| StringUtils.equals(symbol, "CF203")) {
-					logger.info("{}, millisec: {},  time: {}, vol: {}, type：{}", 
-							symbol,
-							pDepthMarketData.getUpdateMillisec(), 
-							pDepthMarketData.getUpdateTime(), 
-							pDepthMarketData.getVolume(),
-							mktTimeUtil.resolveTickType(time));
-				}
 			} catch (Throwable t) {
 				logger.error("{} OnRtnDepthMarketData Exception", logInfo, t);
 			}

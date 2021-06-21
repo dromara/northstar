@@ -79,6 +79,7 @@ public class IndexContract {
 			tickBuilder.setPreClosePrice(tick.getPreClosePrice());
 			tickBuilder.setPreOpenInterest(tick.getPreOpenInterest());
 			tickBuilder.setPreSettlePrice(tick.getPreSettlePrice());
+			tickBuilder.setStatus(tick.getStatus());
 		}
 		// 同一个指数Tick
 		tickMap.compute(tick.getUnifiedSymbol(), (k, v) -> tick);
