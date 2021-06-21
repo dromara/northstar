@@ -21,9 +21,9 @@ import tech.xuanwu.northstar.common.constant.DateTimeConstant;
 public class HolidayManager implements InitializingBean{
 
 	@Value("${northstar.holidays}")
-	private String[] holidayStrs;
+	protected String[] holidayStrs;
 	
-	private Set<LocalDate> holidaySet = new HashSet<>();
+	protected Set<LocalDate> holidaySet = new HashSet<>();
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
@@ -46,6 +46,9 @@ public class HolidayManager implements InitializingBean{
 		if(dateTime.getHour() >= 20) {
 			boolean isFriday = dateTime.getDayOfWeek().getValue() == 5;
 			date = LocalDate.from(dateTime.plusHours(isFriday ? 54 : 6));
+		}
+		if(dateTime.getHour() < 3) {
+			date = LocalDate.from(dateTime.minusHours(4));
 		}
 		return holidaySet.contains(date);
 	}
