@@ -57,29 +57,14 @@ public class CtpScheduleTask {
 	
 	/**
 	 * 开盘时间定时持久化
-	 * 这里挑了每分钟的第55秒持久化，主要是考虑配置数据清洗动作。
-	 * 正常来讲，开盘第一分钟的bar数据会在至少一分钟后才会生成成bar并提交到BarBufferManager，
-	 * 那么，如果未满足一分钟却有数据在buffer中，那么这些数据肯定是垃圾数据
 	 */
-	@Scheduled(cron="55 0/1 0-2,9-14,21-23 ? * 1-5")
+	@Scheduled(cron="10 0/1 0-2,9-15,21-23 ? * 1-5")
 	public void timelySaveBar() {
 		if(holidayMgr.isHoliday(LocalDateTime.now())) {
 			return;
 		}
 		bbMgr.saveAndClear();
 		log.info("交易时间定时持久化Bar数据任务");
-	}
-	
-	/**
-	 * 收盘时间定时持久化
-	 */
-	@Scheduled(cron="10 0 3,15 ? * 1-5")
-	public void saveBarAfterMarketClose() {
-		if(holidayMgr.isHoliday(LocalDateTime.now())) {
-			return;
-		}
-		bbMgr.saveAndClear();
-		log.info("收盘时间定时持久化Bar数据任务");
 	}
 	
 	@Scheduled(cron="0 1 15 ? * 1-5")
