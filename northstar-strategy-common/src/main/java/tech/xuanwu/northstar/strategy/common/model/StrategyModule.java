@@ -74,9 +74,7 @@ public class StrategyModule {
 	}
 	
 	public void onBar(BarField bar) {
-		if(signalPolicy.bindedUnifiedSymbols().contains(bar.getUnifiedSymbol())) {			
-			signalPolicy.getRefBarData(bar.getUnifiedSymbol()).update(bar);
-		}
+		signalPolicy.updateBar(bar);
 	}
 	
 	public void onOrder(OrderField order) {
@@ -135,6 +133,7 @@ public class StrategyModule {
 					.collect(Collectors.toList()));
 		}
 		mp.setRefBarDataMap(byteMap);
+		mp.setAccountId(agent.getAccountGatewayId());
 		mp.setAccountBalance(agent.getAccountBalance());
 		mp.setModuleState(agent.getModuleState());
 		mp.setTotalPositionProfit(mPosition.getPositionProfit());

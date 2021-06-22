@@ -1,8 +1,6 @@
 package tech.xuanwu.northstar.strategy.common;
 
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 import tech.xuanwu.northstar.strategy.common.event.EventDrivenComponent;
@@ -21,9 +19,8 @@ public interface SignalPolicy extends DynamicParamsAware, EventDrivenComponent {
 	 * 每Tick更新
 	 * @param tick		保留Tick数据，因为可能会用到一些Bar没有的信息，例如涨跌停价、日内均价等
 	 * @param barData	K线序列数据（已包含Tick更新数据）
-	 * @return			信号(不一定有)
 	 */
-	Optional<Signal> updateTick(TickField tick);
+	void updateTick(TickField tick);
 	
 	/**
 	 * 更新引用Bar数据

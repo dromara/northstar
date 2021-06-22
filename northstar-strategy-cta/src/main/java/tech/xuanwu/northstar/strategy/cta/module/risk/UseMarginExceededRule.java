@@ -2,11 +2,9 @@ package tech.xuanwu.northstar.strategy.cta.module.risk;
 
 import tech.xuanwu.northstar.strategy.common.DynamicParamsAware;
 import tech.xuanwu.northstar.strategy.common.RiskControlRule;
-import tech.xuanwu.northstar.strategy.common.Signal;
 import tech.xuanwu.northstar.strategy.common.annotation.Label;
 import tech.xuanwu.northstar.strategy.common.annotation.StrategicComponent;
 import tech.xuanwu.northstar.strategy.common.model.ModuleAgent;
-import tech.xuanwu.northstar.strategy.common.model.StrategyModule;
 import tech.xuanwu.northstar.strategy.common.model.meta.DynamicParams;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
@@ -53,7 +51,7 @@ public class UseMarginExceededRule implements RiskControlRule, DynamicParamsAwar
 	}
 	
 	
-	public class InitParams extends DynamicParams{
+	public static class InitParams extends DynamicParams{
 		
 		@Label(value="账户分配比例", unit="%")
 		private double limitedPercentageOfTotalBalance;

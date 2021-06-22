@@ -1,20 +1,11 @@
 package tech.xuanwu.northstar.strategy.cta.module.signal;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.time.LocalTime;
 
-import tech.xuanwu.northstar.strategy.common.Signal;
 import tech.xuanwu.northstar.strategy.common.SignalPolicy;
 import tech.xuanwu.northstar.strategy.common.annotation.Label;
 import tech.xuanwu.northstar.strategy.common.annotation.StrategicComponent;
-import tech.xuanwu.northstar.strategy.common.event.ModuleEvent;
-import tech.xuanwu.northstar.strategy.common.event.ModuleEventBus;
-import tech.xuanwu.northstar.strategy.common.model.data.BarData;
 import tech.xuanwu.northstar.strategy.common.model.meta.DynamicParams;
-import xyz.redtorch.pb.CoreField.BarField;
-import xyz.redtorch.pb.CoreField.TickField;
 
 /**
  * 本示例用于展示写一个策略的必要元素
@@ -23,18 +14,14 @@ import xyz.redtorch.pb.CoreField.TickField;
  *
  */
 @StrategicComponent("示例策略")	// 该注解是用于给策略命名用的
-public class SampleSignalPolicy 
+public class SampleSignalPolicy extends AbstractSignalPolicy
 	implements SignalPolicy //	所有的策略都应该是DynamicParamsAware的实现类
 {
-	
-	/**
-	 * 绑定合约
-	 */
-	private String bindedUnifiedSymbol;
 	
 	private int shortPeriod;
 	
 	private int longPeriod;
+	
 
 	/**
 	 * 获取策略的动态参数对象
@@ -44,7 +31,9 @@ public class SampleSignalPolicy
 		return new InitParams();
 	}
 
-
+	/**
+	 * 策略的所有参数初始化逻辑
+	 */
 	@Override
 	public void initWithParams(DynamicParams params) {
 		InitParams initParams = (InitParams) params;
@@ -70,47 +59,25 @@ public class SampleSignalPolicy
 
 	}
 
-	@Override
-	public Set<String> bindedUnifiedSymbols() {
-		return Set.of(bindedUnifiedSymbol);
-	}
 	
+	/**********************************************************************************/
+	/**            多数情况下，要么选择onTick作为入口，要么选择onMin作为入口                **/
+	/**            当两个入口同时使用的话，要谨慎处理，以免重复计算			                 **/
+	/**********************************************************************************/
+	/**
+	 * 策略逻辑驱动入口
+	 */
 	@Override
-	public void onEvent(ModuleEvent event) {
-		// TODO Auto-generated method stub
-		
-	}
-	
-	@Override
-	public void setEventBus(ModuleEventBus moduleEventBus) {
-		// TODO Auto-generated method stub
-		
-	}
-
-
-	@Override
-	public Optional<Signal> updateTick(TickField tick) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-
-	@Override
-	public void updateBar(BarField bar) {
+	protected void onTick(int millicSecOfMin) {
 		// TODO Auto-generated method stub
 		
 	}
 
-
+	/**
+	 * 策略逻辑驱动入口
+	 */
 	@Override
-	public BarData getRefBarData(String unifiedSymbol) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-
-	@Override
-	public void setRefBarData(Map<String, BarData> barDataMap) {
+	protected void onMin(LocalTime time) {
 		// TODO Auto-generated method stub
 		
 	}

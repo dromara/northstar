@@ -43,7 +43,7 @@ public class DailyDealLimitedRule implements RiskControlRule {
 		this.dailyDealLimit = initParams.dailyDealLimit;
 	}
 	
-	public class InitParams extends DynamicParams{
+	public static class InitParams extends DynamicParams{
 		
 		@Label(value="日内开仓限制", unit="次")
 		private int dailyDealLimit;

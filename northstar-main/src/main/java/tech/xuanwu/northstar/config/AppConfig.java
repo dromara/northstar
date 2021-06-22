@@ -102,11 +102,6 @@ public class AppConfig implements WebMvcConfigurer {
 	}
 	
 	@Bean
-	public ModuleManager moduleManager() {
-		return new ModuleManager();
-	}
-	
-	@Bean
 	public ConcurrentHashMap<String, TradeDayAccount> accountMap(){
 		return new ConcurrentHashMap<>();
 	}

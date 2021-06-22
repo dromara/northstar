@@ -42,7 +42,7 @@ public class TimeExceededRule implements RiskControlRule, DynamicParamsAware{
 		this.timeoutInterval = initParams.timeoutSeconds;
 	}
 	
-	public class InitParams extends DynamicParams{
+	public static class InitParams extends DynamicParams{
 		
 		@Label(value="超时时间", unit="秒")
 		private int timeoutSeconds;
