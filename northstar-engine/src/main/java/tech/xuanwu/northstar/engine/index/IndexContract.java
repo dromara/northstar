@@ -62,7 +62,8 @@ public class IndexContract {
 	}
 
 	public synchronized void updateByTick(TickField tick) {
-		if (lastTickTimestamp != tick.getActionTimestamp()) {
+		// 如果有过期的TICK数据(例如不活跃的合约),则并入下个K线
+		if (lastTickTimestamp < tick.getActionTimestamp()) {
 			if(lastTickTimestamp > 0) {
 				//进行运算
 				calculate();
