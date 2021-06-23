@@ -10,9 +10,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import tech.xuanwu.northstar.common.exception.InsufficientException;
+import tech.xuanwu.northstar.common.model.ContractManager;
 import tech.xuanwu.northstar.common.model.OrderRequest;
 import tech.xuanwu.northstar.common.model.OrderRequest.TradeOperation;
-import tech.xuanwu.northstar.domain.ContractManager;
 import tech.xuanwu.northstar.domain.account.PositionDescription;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;

@@ -18,7 +18,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.mongodb.MongoClient;
 
-import tech.xuanwu.northstar.domain.ContractManager;
+import tech.xuanwu.northstar.common.model.ContractManager;
 import tech.xuanwu.northstar.domain.account.TradeDayAccount;
 import tech.xuanwu.northstar.gateway.sim.SimMarket;
 import tech.xuanwu.northstar.interceptor.AuthorizationInterceptor;

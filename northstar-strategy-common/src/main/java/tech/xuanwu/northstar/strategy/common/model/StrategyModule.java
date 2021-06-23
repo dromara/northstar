@@ -60,6 +60,8 @@ public class StrategyModule {
 		moduleEventBus.register(agent);
 		
 		riskController.setModuleAgent(agent);
+		dealer.setModuleAgent(agent);
+		signalPolicy.setModuleAgent(agent);
 	}
 	
 	public void onTick(TickField tick) {

@@ -1,4 +1,4 @@
-package tech.xuanwu.northstar.domain;
+package tech.xuanwu.northstar.common.model;
 
 import java.lang.ref.WeakReference;
 import java.util.Collection;
@@ -28,10 +28,6 @@ public class ContractManager {
 	 * gateway -> symbol -> contract
 	 */
 	private Table<String, String, ContractField> contractTbl = HashBasedTable.create();
-//	/**
-//	 * gateway -> symbolGroup -> contractList
-//	 */
-//	private Table<String, String, List<ContractField>> contractGroupTbl = HashBasedTable.create();
 	/**
 	 * unifiedSymbol -> contract
 	 */
@@ -61,27 +57,6 @@ public class ContractManager {
 		log.info("加入合约：网关{}, 合约{}, 累计总合约数{}个", gatewayId, symbol, contractList.size());
 		return true;
 	}
-	
-//	private void groupContract(ContractField contract) {
-//		String gatewayId = contract.getGatewayId();
-//		String symbol = contract.getSymbol();
-//		String symbolGroup = ContractNameResolver.symbolToSymbolGroup(symbol);
-//		if(!contractGroupTbl.contains(gatewayId, symbolGroup)) {
-//			contractGroupTbl.put(gatewayId, symbolGroup, new LinkedList<>());
-//		}
-//		contractGroupTbl.get(gatewayId, symbolGroup).add(contract);
-//	}
-	
-//	public List<ContractField> getContractsByGroup(String gatewayId, String symbolGroup){
-//		return contractGroupTbl.get(gatewayId, symbolGroup);
-//	}
-//	
-//	public List<String> getContractGroup(String gatewayId){
-//		return contractGroupTbl.row(gatewayId)
-//				.keySet()
-//				.stream()
-//				.collect(Collectors.toList());
-//	}
 	
 	public ContractField getContract(String gatewayId, String symbol) {
 		ContractField result = contractTbl.get(gatewayId, symbol);

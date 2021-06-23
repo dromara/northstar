@@ -10,7 +10,7 @@ import tech.xuanwu.northstar.common.event.AbstractEventHandler;
 import tech.xuanwu.northstar.common.event.GenericEventHandler;
 import tech.xuanwu.northstar.common.event.NorthstarEvent;
 import tech.xuanwu.northstar.common.event.NorthstarEventType;
-import tech.xuanwu.northstar.domain.ContractManager;
+import tech.xuanwu.northstar.common.model.ContractManager;
 import tech.xuanwu.northstar.domain.GatewayConnection;
 import tech.xuanwu.northstar.engine.index.IndexEngine;
 import tech.xuanwu.northstar.gateway.api.MarketGateway;

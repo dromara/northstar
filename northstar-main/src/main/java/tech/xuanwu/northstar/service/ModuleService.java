@@ -11,6 +11,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 
 import tech.xuanwu.northstar.common.constant.DateTimeConstant;
+import tech.xuanwu.northstar.common.model.ContractManager;
 import tech.xuanwu.northstar.domain.GatewayConnection;
 import tech.xuanwu.northstar.gateway.api.Gateway;
 import tech.xuanwu.northstar.gateway.api.TradeGateway;
@@ -57,13 +58,16 @@ public class ModuleService implements InitializingBean{
 	
 	private GatewayAndConnectionManager gatewayConnMgr;
 	
+	private ContractManager contractMgr;
+	
 	public ModuleService(ApplicationContext ctx, ModuleRepository moduleRepo, MarketDataRepository mdRepo,
-			ModuleManager mdlMgr, GatewayAndConnectionManager gatewayConnMgr) {
+			ModuleManager mdlMgr, GatewayAndConnectionManager gatewayConnMgr, ContractManager contractMgr) {
 		this.ctx = ctx;
 		this.moduleRepo = moduleRepo;
 		this.mdRepo = mdRepo;
 		this.mdlMgr = mdlMgr;
 		this.gatewayConnMgr = gatewayConnMgr;
+		this.contractMgr = contractMgr;
 	}
 	
 	/**
@@ -185,6 +189,7 @@ public class ModuleService implements InitializingBean{
 				.build();
 		
 		signalPolicy.setRefBarData(barDataMap);
+		dealer.setContractManager(contractMgr);
 		StrategyModule module = new StrategyModule(agent, signalPolicy, riskController, dealer, mPosition, mTrade);
 		mdlMgr.addModule(module);
 		moduleRepo.saveModuleStatus(module.getModuleStatus());

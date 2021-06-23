@@ -2,11 +2,13 @@ package tech.xuanwu.northstar.strategy.common.model;
 
 import java.util.UUID;
 
+import lombok.Builder;
 import lombok.Data;
 import tech.xuanwu.northstar.strategy.common.Signal;
 import tech.xuanwu.northstar.strategy.common.SignalPolicy;
 import tech.xuanwu.northstar.strategy.common.constants.SignalState;
 
+@Builder
 @Data
 public class CtaSignal implements Signal{
 	

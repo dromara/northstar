@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 
 import tech.xuanwu.northstar.common.event.InternalEventBus;
-import tech.xuanwu.northstar.domain.ContractManager;
+import tech.xuanwu.northstar.common.model.ContractManager;
 import tech.xuanwu.northstar.domain.account.TradeDayAccount;
 import tech.xuanwu.northstar.engine.broadcast.SocketIOMessageEngine;
 import tech.xuanwu.northstar.engine.event.FastEventEngine;
@@ -58,7 +58,7 @@ public class ServiceConfig {
 	
 	@Bean
 	public ModuleService moduleService(ApplicationContext ctx, ModuleRepository moduleRepo, MarketDataRepository mdRepo,
-			ModuleManager mdlMgr, GatewayAndConnectionManager gatewayConnMgr) {
-		return new ModuleService(ctx, moduleRepo, mdRepo, mdlMgr, gatewayConnMgr);
+			ModuleManager mdlMgr, GatewayAndConnectionManager gatewayConnMgr, ContractManager contractMgr) {
+		return new ModuleService(ctx, moduleRepo, mdRepo, mdlMgr, gatewayConnMgr, contractMgr);
 	}
 }

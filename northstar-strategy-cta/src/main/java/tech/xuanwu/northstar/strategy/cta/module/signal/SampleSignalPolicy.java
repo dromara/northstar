@@ -1,10 +1,15 @@
 package tech.xuanwu.northstar.strategy.cta.module.signal;
 
 import java.time.LocalTime;
+import java.util.UUID;
 
 import tech.xuanwu.northstar.strategy.common.SignalPolicy;
 import tech.xuanwu.northstar.strategy.common.annotation.Label;
 import tech.xuanwu.northstar.strategy.common.annotation.StrategicComponent;
+import tech.xuanwu.northstar.strategy.common.constants.ModuleState;
+import tech.xuanwu.northstar.strategy.common.constants.SignalState;
+import tech.xuanwu.northstar.strategy.common.model.CtaSignal;
+import tech.xuanwu.northstar.strategy.common.model.ModuleAgent;
 import tech.xuanwu.northstar.strategy.common.model.meta.DynamicParams;
 
 /**
@@ -21,7 +26,8 @@ public class SampleSignalPolicy extends AbstractSignalPolicy
 	private int shortPeriod;
 	
 	private int longPeriod;
-	
+
+	private ModuleAgent agent;
 
 	/**
 	 * 获取策略的动态参数对象
@@ -69,17 +75,38 @@ public class SampleSignalPolicy extends AbstractSignalPolicy
 	 */
 	@Override
 	protected void onTick(int millicSecOfMin) {
-		// TODO Auto-generated method stub
 		
 	}
 
 	/**
 	 * 策略逻辑驱动入口
+	 * 示例策略的逻辑很简单，单数分钟发出开仓信号，双数分钟发出平仓信号
 	 */
 	@Override
 	protected void onMin(LocalTime time) {
-		// TODO Auto-generated method stub
-		
+		CtaSignal.CtaSignalBuilder signal = CtaSignal.builder()
+				.bindedUnifiedSymbol(bindedUnifiedSymbol)
+				.id(UUID.randomUUID())
+				.signalClass(this.getClass())
+				.signalPrice(barDataMap.get(bindedUnifiedSymbol).getSClose().ref(0))
+				.timestamp(System.currentTimeMillis())
+				.tradingDay(barDataMap.get(bindedUnifiedSymbol).getLastBar().getTradingDay());
+		if((time.getMinute() & 1) == 1) {
+			// 单数分钟
+			if(agent.getModuleState() == ModuleState.EMPTY) {
+				emitSignal(signal.state(SignalState.BuyOpen).build());
+			}
+		} else {
+			// 双数分钟
+			if(agent.getModuleState() == ModuleState.HOLDING) {				
+				emitSignal(signal.state(SignalState.SellClose).build());
+			}
+		}
+	}
+
+	@Override
+	public void setModuleAgent(ModuleAgent agent) {
+		this.agent = agent;
 	}
 	
 }

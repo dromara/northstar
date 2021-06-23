@@ -1,20 +1,29 @@
 package tech.xuanwu.northstar.strategy.cta.module.dealer;
 
-import java.util.Optional;
 import java.util.Set;
 
 import com.alibaba.fastjson.JSON;
 
 import lombok.extern.slf4j.Slf4j;
+import tech.xuanwu.northstar.common.model.ContractManager;
 import tech.xuanwu.northstar.strategy.common.Dealer;
-import tech.xuanwu.northstar.strategy.common.Signal;
 import tech.xuanwu.northstar.strategy.common.annotation.Label;
 import tech.xuanwu.northstar.strategy.common.annotation.StrategicComponent;
+import tech.xuanwu.northstar.strategy.common.constants.ModuleState;
 import tech.xuanwu.northstar.strategy.common.event.ModuleEvent;
 import tech.xuanwu.northstar.strategy.common.event.ModuleEventBus;
 import tech.xuanwu.northstar.strategy.common.event.ModuleEventType;
 import tech.xuanwu.northstar.strategy.common.model.CtaSignal;
+import tech.xuanwu.northstar.strategy.common.model.ModuleAgent;
 import tech.xuanwu.northstar.strategy.common.model.meta.DynamicParams;
+import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
+import xyz.redtorch.pb.CoreEnum.DirectionEnum;
+import xyz.redtorch.pb.CoreEnum.ForceCloseReasonEnum;
+import xyz.redtorch.pb.CoreEnum.HedgeFlagEnum;
+import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
+import xyz.redtorch.pb.CoreEnum.OrderPriceTypeEnum;
+import xyz.redtorch.pb.CoreEnum.TimeConditionEnum;
+import xyz.redtorch.pb.CoreEnum.VolumeConditionEnum;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TickField;
 
@@ -29,6 +38,17 @@ public class CtaDealer implements Dealer {
 	private CtaSignal currentSignal;
 	
 	private SubmitOrderReqField currentOrderReq;
+	
+	private ModuleAgent agent;
+	
+	private ContractManager contractMgr;
+	
+	private int openVol;
+	
+	@Override
+	public void setModuleAgent(ModuleAgent agent) {
+		this.agent = agent;
+	}
 	
 	@Override
 	public Set<String> bindedUnifiedSymbols() {
@@ -53,10 +73,46 @@ public class CtaDealer implements Dealer {
 		this.moduleEventBus = moduleEventBus;
 	}
 
+	//注意防止重复下单
 	@Override
-	public Optional<SubmitOrderReqField> onTick(TickField tick) {
-		// TODO Auto-generated method stub
-		return Optional.ofNullable(null);
+	public void onTick(TickField tick) {
+		if(currentSignal != null && agent.getModuleState() == ModuleState.PLACING_ORDER) {
+			DirectionEnum direction = currentSignal.getState().isBuy() ? DirectionEnum.D_Buy : DirectionEnum.D_Sell;
+			OffsetFlagEnum offsetFlag = currentSignal.getState().isOpen() ? OffsetFlagEnum.OF_Open : OffsetFlagEnum.OF_Close;
+			// FIXME 未考虑反手处理
+			// 按信号下单
+			currentOrderReq = SubmitOrderReqField.newBuilder(currentOrderReq)
+					.setContract(contractMgr.getContract(tick.getUnifiedSymbol()))
+					.setDirection(direction)
+					.setOffsetFlag(offsetFlag)
+					.setOrderPriceType(OrderPriceTypeEnum.OPT_LimitPrice)
+					.setVolume(openVol)
+					.setHedgeFlag(HedgeFlagEnum.HF_Speculation)
+					.setTimeCondition(TimeConditionEnum.TC_GFD)
+					.setVolumeCondition(VolumeConditionEnum.VC_AV)
+					.setForceCloseReason(ForceCloseReasonEnum.FCR_NotForceClose)
+					.setContingentCondition(ContingentConditionEnum.CC_Immediately)
+					.setMinVolume(1)
+					.setGatewayId(agent.getAccountGatewayId())
+					.setPrice(tick.getLastPrice())
+					.build();
+			currentSignal = null;
+			emitOrder();
+			
+		} else if(agent.getModuleState() == ModuleState.TRACING_ORDER) {
+			// 按前订单改价
+			currentOrderReq = SubmitOrderReqField.newBuilder(currentOrderReq)
+					.setPrice(tick.getLastPrice())
+					.build();
+			emitOrder();
+		}
+	}
+	
+	private void emitOrder() {
+		moduleEventBus.post(ModuleEvent.builder()
+				.eventType(ModuleEventType.ORDER_REQ_CREATED)
+				.data(currentOrderReq)
+				.build());
 	}
 	
 	@Override
@@ -68,12 +124,21 @@ public class CtaDealer implements Dealer {
 	public void initWithParams(DynamicParams params) {
 		InitParams initParams = (InitParams) params;
 		this.bindedUnifiedSymbol = initParams.bindedUnifiedSymbol;
+		this.openVol = initParams.openVol;
 	}
 	
 	public static class InitParams extends DynamicParams{
 
-		@Label(value="绑定合约")
+		@Label(value="绑定合约", order = 10)
 		private String bindedUnifiedSymbol;
+		
+		@Label(value="开仓手数", order = 20)
+		private int openVol = 1;
+	}
+
+	@Override
+	public void setContractManager(ContractManager contractMgr) {
+		this.contractMgr = contractMgr;
 	}
 
 }

@@ -13,7 +13,7 @@ import xyz.redtorch.pb.CoreField.TickField;
  * @author KevinHuangwl
  *
  */
-public interface SignalPolicy extends DynamicParamsAware, EventDrivenComponent {
+public interface SignalPolicy extends DynamicParamsAware, EventDrivenComponent, ModuleAware{
 
 	/**
 	 * 每Tick更新

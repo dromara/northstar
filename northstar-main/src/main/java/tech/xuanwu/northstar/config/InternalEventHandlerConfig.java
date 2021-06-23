@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Configuration;
 
 import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.common.event.InternalEventBus;
-import tech.xuanwu.northstar.domain.ContractManager;
+import tech.xuanwu.northstar.common.model.ContractManager;
 import tech.xuanwu.northstar.domain.account.TradeDayAccount;
 import tech.xuanwu.northstar.engine.index.IndexEngine;
 import tech.xuanwu.northstar.factories.TradeDayAccountFactory;
