@@ -1,4 +1,4 @@
-package tech.xuanwu.northstar.strategy.cta.module.risk;
+package tech.xuanwu.northstar.strategy.common.model;
 
 import java.util.List;
 
@@ -11,13 +11,12 @@ import tech.xuanwu.northstar.strategy.common.constants.RiskAuditResult;
 import tech.xuanwu.northstar.strategy.common.event.ModuleEvent;
 import tech.xuanwu.northstar.strategy.common.event.ModuleEventBus;
 import tech.xuanwu.northstar.strategy.common.event.ModuleEventType;
-import tech.xuanwu.northstar.strategy.common.model.ModuleAgent;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TickField;
 
 @Slf4j
-public class CtaRiskController implements RiskController{
+public class GenericRiskController implements RiskController{
 	
 	private ModuleAgent agent;
 	
@@ -27,7 +26,7 @@ public class CtaRiskController implements RiskController{
 	
 	private SubmitOrderReqField currentOrderReq;
 	
-	public CtaRiskController(List<RiskControlRule> rules) {
+	public GenericRiskController(List<RiskControlRule> rules) {
 		this.rules = rules;
 	}
 

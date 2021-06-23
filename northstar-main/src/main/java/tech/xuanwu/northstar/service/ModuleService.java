@@ -30,6 +30,7 @@ import tech.xuanwu.northstar.strategy.common.SignalPolicy;
 import tech.xuanwu.northstar.strategy.common.annotation.StrategicComponent;
 import tech.xuanwu.northstar.strategy.common.constants.ModuleState;
 import tech.xuanwu.northstar.strategy.common.constants.ModuleType;
+import tech.xuanwu.northstar.strategy.common.model.GenericRiskController;
 import tech.xuanwu.northstar.strategy.common.model.ModuleAgent;
 import tech.xuanwu.northstar.strategy.common.model.ModuleInfo;
 import tech.xuanwu.northstar.strategy.common.model.ModulePerformance;
@@ -41,7 +42,6 @@ import tech.xuanwu.northstar.strategy.common.model.meta.ComponentField;
 import tech.xuanwu.northstar.strategy.common.model.meta.ComponentMetaInfo;
 import tech.xuanwu.northstar.strategy.common.model.meta.DynamicParams;
 import tech.xuanwu.northstar.strategy.cta.CtaModuleFactory;
-import tech.xuanwu.northstar.strategy.cta.module.risk.CtaRiskController;
 import tech.xuanwu.northstar.utils.ProtoBeanUtils;
 import xyz.redtorch.pb.CoreField.BarField;
 
@@ -149,7 +149,7 @@ public class ModuleService implements InitializingBean{
 		RiskController riskController = null;
 		if(info.getType() == ModuleType.CTA) {
 			factory = new CtaModuleFactory();
-			riskController = new CtaRiskController(riskRules);
+			riskController = new GenericRiskController(riskRules);
 		} else {
 			// TODO 不同的策略模式采用不同的工厂实现
 		}
