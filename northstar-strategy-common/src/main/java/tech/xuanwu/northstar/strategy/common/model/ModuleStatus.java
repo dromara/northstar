@@ -3,6 +3,7 @@ package tech.xuanwu.northstar.strategy.common.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import lombok.Data;
@@ -23,5 +24,6 @@ public class ModuleStatus {
 	
 	private List<byte[]> lastOpenTrade = new ArrayList<>();
 	
+	@Id
 	private String moduleName;
 }

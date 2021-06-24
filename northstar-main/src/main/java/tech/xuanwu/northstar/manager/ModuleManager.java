@@ -7,6 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import tech.xuanwu.northstar.common.event.AbstractEventHandler;
 import tech.xuanwu.northstar.common.event.NorthstarEvent;
 import tech.xuanwu.northstar.common.event.NorthstarEventType;
+import tech.xuanwu.northstar.persistence.ModuleRepository;
 import tech.xuanwu.northstar.strategy.common.constants.ModuleState;
 import tech.xuanwu.northstar.strategy.common.model.ModulePerformance;
 import tech.xuanwu.northstar.strategy.common.model.StrategyModule;
@@ -38,6 +39,11 @@ public class ModuleManager extends AbstractEventHandler {
 		}
 	};
 	
+	private ModuleRepository moduleRepo;
+	
+	public ModuleManager(ModuleRepository moduleRepo) {
+		this.moduleRepo = moduleRepo;
+	}
 	
 	public void addModule(StrategyModule module) {
 		moduleMap.put(module.getName(), module);
@@ -71,7 +77,9 @@ public class ModuleManager extends AbstractEventHandler {
 	}
 	
 	public void onTrade(TradeField trade) {
-		moduleMap.values().forEach(m -> m.onTrade(trade));
+		moduleMap.values().stream()
+			.map(m -> m.onTrade(trade))
+			.forEach(m -> moduleRepo.saveModuleStatus(m.getModuleStatus()));
 	}
 	
 	public void onAccount(AccountField account) {

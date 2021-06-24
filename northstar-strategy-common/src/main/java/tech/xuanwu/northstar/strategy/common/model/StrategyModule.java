@@ -69,7 +69,7 @@ public class StrategyModule {
 		
 	}
 	
-	public void onTick(TickField tick) {
+	public StrategyModule onTick(TickField tick) {
 		if(signalPolicy.bindedUnifiedSymbols().contains(tick.getUnifiedSymbol())) {			
 			agent.updateTradingDay(tick.getTradingDay());
 			signalPolicy.updateTick(tick);
@@ -78,30 +78,35 @@ public class StrategyModule {
 			dealer.onTick(tick);
 			riskController.onTick(tick);
 		}
+		return this;
 	}
 	
-	public void onBar(BarField bar) {
+	public StrategyModule onBar(BarField bar) {
 		signalPolicy.updateBar(bar);
+		return this;
 	}
 	
-	public void onOrder(OrderField order) {
+	public StrategyModule onOrder(OrderField order) {
 		if(agent.hasOrderRecord(order.getOriginOrderId())) {
 			agent.onOrder(order);
 		}
+		return this;
 	}
 	
-	public void onTrade(TradeField trade) {
+	public StrategyModule onTrade(TradeField trade) {
 		if(agent.hasOrderRecord(trade.getOrderId())) {
 			mTrade.updateTrade(trade);
 			mPosition.onTrade(trade);
 			agent.onTrade(trade);
 		}
+		return this;
 	}
 	
-	public void onAccount(AccountField account) {
+	public StrategyModule onAccount(AccountField account) {
 		if(StringUtils.equals(account.getGatewayId(), agent.getAccountGatewayId())) {
 			agent.updateAccount(account);
 		}
+		return this;
 	}
 	
 	public String getName() {
