@@ -116,6 +116,14 @@ public class ModuleAgent implements EventDrivenComponent{
 	}
 	
 	/**
+	 * 获取账户可用余额
+	 * @return
+	 */
+	public int getAccountAvailable() {
+		return (int) (account == null ? 0 : account.getAvailable());
+	}
+	
+	/**
 	 * 切换模组状态
 	 */
 	public void toggleRunningState() {

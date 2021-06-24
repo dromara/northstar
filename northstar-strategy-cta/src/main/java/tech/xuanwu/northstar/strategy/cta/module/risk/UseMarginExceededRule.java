@@ -1,5 +1,6 @@
 package tech.xuanwu.northstar.strategy.cta.module.risk;
 
+import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.strategy.common.DynamicParamsAware;
 import tech.xuanwu.northstar.strategy.common.RiskControlRule;
 import tech.xuanwu.northstar.strategy.common.annotation.Label;
@@ -17,6 +18,7 @@ import xyz.redtorch.pb.CoreField.TickField;
  * @author KevinHuangwl
  *
  */
+@Slf4j
 @StrategicComponent("模组占用账户资金限制")
 public class UseMarginExceededRule implements RiskControlRule, DynamicParamsAware{
 
@@ -26,7 +28,10 @@ public class UseMarginExceededRule implements RiskControlRule, DynamicParamsAwar
 
 	@Override
 	public short canDeal(TickField tick, ModuleAgent agent) {
-		if(totalCost > limitedPercentageOfTotalBalance) {
+		int moduleAvailable = (int) Math.min(limitedPercentageOfTotalBalance * agent.getAccountBalance(), agent.getAccountAvailable());
+		if(totalCost > moduleAvailable) {
+			log.info("开仓成本超过风控限制。成本金额：{}, 当前模组占用比例：{}, 当前模组可用资金：{}",
+					totalCost, (int)(limitedPercentageOfTotalBalance * 100), moduleAvailable);
 			return RiskAuditResult.REJECTED;
 		}
 		return RiskAuditResult.ACCEPTED;

@@ -46,7 +46,7 @@ public class PriceExceededRule implements RiskControlRule, DynamicParamsAware{
 	
 	public static class InitParams extends DynamicParams{
 		
-		@Label(value="超价限制", unit="Tick")
+		@Label(value="超价限制")
 		private int priceDifToleranceInTick;
 		
 	}

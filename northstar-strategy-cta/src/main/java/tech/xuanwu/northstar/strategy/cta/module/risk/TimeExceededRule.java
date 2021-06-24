@@ -39,7 +39,7 @@ public class TimeExceededRule implements RiskControlRule, DynamicParamsAware{
 	@Override
 	public void initWithParams(DynamicParams params) {
 		InitParams initParams = (InitParams) params;
-		this.timeoutInterval = initParams.timeoutSeconds;
+		this.timeoutInterval = initParams.timeoutSeconds * 1000;
 	}
 	
 	public static class InitParams extends DynamicParams{
