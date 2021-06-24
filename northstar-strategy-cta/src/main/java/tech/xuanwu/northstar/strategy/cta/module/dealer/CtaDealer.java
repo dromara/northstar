@@ -1,6 +1,7 @@
 package tech.xuanwu.northstar.strategy.cta.module.dealer;
 
 import java.util.Set;
+import java.util.UUID;
 
 import com.alibaba.fastjson.JSON;
 
@@ -76,12 +77,13 @@ public class CtaDealer implements Dealer {
 	//注意防止重复下单
 	@Override
 	public void onTick(TickField tick) {
-		if(currentSignal != null && agent.getModuleState() == ModuleState.PLACING_ORDER) {
+		if(currentSignal != null) {
 			DirectionEnum direction = currentSignal.getState().isBuy() ? DirectionEnum.D_Buy : DirectionEnum.D_Sell;
 			OffsetFlagEnum offsetFlag = currentSignal.getState().isOpen() ? OffsetFlagEnum.OF_Open : OffsetFlagEnum.OF_Close;
 			// FIXME 未考虑反手处理
 			// 按信号下单
-			currentOrderReq = SubmitOrderReqField.newBuilder(currentOrderReq)
+			currentOrderReq = SubmitOrderReqField.newBuilder()
+					.setOriginOrderId(UUID.randomUUID().toString())
 					.setContract(contractMgr.getContract(tick.getUnifiedSymbol()))
 					.setDirection(direction)
 					.setOffsetFlag(offsetFlag)

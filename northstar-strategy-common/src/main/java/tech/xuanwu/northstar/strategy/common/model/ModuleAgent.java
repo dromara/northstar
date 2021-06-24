@@ -45,7 +45,8 @@ public class ModuleAgent implements EventDrivenComponent{
 
 	private AccountField account;
 	
-	private ModuleState state;
+	@Builder.Default
+	private ModuleState state = ModuleState.EMPTY;
 	
 	private TradeGateway gateway;
 	
@@ -197,6 +198,10 @@ public class ModuleAgent implements EventDrivenComponent{
 					.build();
 			gateway.cancelOrder(cancelReq);	
 			state = ModuleState.TRACING_ORDER;
+			
+		} else if(ModuleEventType.ORDER_REQ_REJECTED == event.getEventType()) {
+			state = ModuleState.EMPTY;
+			
 		}
 	}
 

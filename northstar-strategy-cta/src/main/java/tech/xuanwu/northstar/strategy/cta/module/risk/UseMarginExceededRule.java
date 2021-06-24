@@ -4,6 +4,7 @@ import tech.xuanwu.northstar.strategy.common.DynamicParamsAware;
 import tech.xuanwu.northstar.strategy.common.RiskControlRule;
 import tech.xuanwu.northstar.strategy.common.annotation.Label;
 import tech.xuanwu.northstar.strategy.common.annotation.StrategicComponent;
+import tech.xuanwu.northstar.strategy.common.constants.RiskAuditResult;
 import tech.xuanwu.northstar.strategy.common.model.ModuleAgent;
 import tech.xuanwu.northstar.strategy.common.model.meta.DynamicParams;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
@@ -26,9 +27,9 @@ public class UseMarginExceededRule implements RiskControlRule, DynamicParamsAwar
 	@Override
 	public short canDeal(TickField tick, ModuleAgent agent) {
 		if(totalCost > limitedPercentageOfTotalBalance) {
-			
+			return RiskAuditResult.REJECTED;
 		}
-		return 0;
+		return RiskAuditResult.ACCEPTED;
 	}
 	
 	@Override

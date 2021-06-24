@@ -53,19 +53,25 @@ public class GenericRiskController implements RiskController{
 					result |= rule.canDeal(tick, agent);
 				}
 			}
-			if((result & RiskAuditResult.REJECTED) == 1) {
+			if((result & RiskAuditResult.REJECTED) > 0) {
 				rejectOrder();
-			} else if((result & RiskAuditResult.RETRY) == 1) {
+				explain(tick, result);
+			} else if((result & RiskAuditResult.RETRY) > 0) {
 				retryOrder();
+				explain(tick, result);
 			} else if(result == RiskAuditResult.ACCEPTED) {
 				approveOrder();
 			} else {
-				log.warn("模组-[{}]，风控状态码为{}", agent.getName(), result);
-				for(RiskControlRule rule : rules) {
-					String name = rule.getClass().getAnnotation(StrategicComponent.class).value();
-					log.warn("风控规则-[{}]，状态码为{}", name, rule.canDeal(tick, agent));
-				}
+				explain(tick, result);
 			}
+		}
+	}
+	
+	private void explain(TickField tick, short result) {
+		log.warn("模组-[{}]，风控状态码为{}", agent.getName(), result);
+		for(RiskControlRule rule : rules) {
+			String name = rule.getClass().getAnnotation(StrategicComponent.class).value();
+			log.warn("风控规则-[{}]，状态码为{}", name, rule.canDeal(tick, agent));
 		}
 	}
 
@@ -80,6 +86,10 @@ public class GenericRiskController implements RiskController{
 	@Override
 	public void rejectOrder() {
 		log.warn("模组-[{}]，下单请求被风控拒绝：{}", agent.getName(), currentOrderReq);
+		moduleEventBus.post(ModuleEvent.builder()
+				.eventType(ModuleEventType.ORDER_REQ_REJECTED)
+				.data(currentOrderReq)
+				.build());
 	}
 
 	@Override
