@@ -147,7 +147,9 @@ class GwAccountHolder {
 			order = orderHolder.tryOrder(submitOrderReq, pf);
 		}
 		PositionField pf = posHolder.updatePositionBy(order);
-		feEngine.emitEvent(NorthstarEventType.POSITION, pf);
+		if(pf != null) {			
+			feEngine.emitEvent(NorthstarEventType.POSITION, pf);
+		}
 		feEngine.emitEvent(NorthstarEventType.ORDER, order);
 		refreshAccount();
 		simGateway.save();
@@ -165,7 +167,9 @@ class GwAccountHolder {
 			return false;
 		}
 		PositionField pf = posHolder.updatePositionBy(order);
-		feEngine.emitEvent(NorthstarEventType.POSITION, pf);
+		if(pf != null){			
+			feEngine.emitEvent(NorthstarEventType.POSITION, pf);
+		}
 		feEngine.emitEvent(NorthstarEventType.ORDER, order);
 		refreshAccount();
 		simGateway.save();

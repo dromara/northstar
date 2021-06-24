@@ -112,9 +112,7 @@ class GwPositionHolder {
 		}
 		// 开仓订单对应的持仓更新
 		if(order.getOffsetFlag() == OffsetFlagEnum.OF_Open) {
-			String unifiedSymbol = order.getContract().getUnifiedSymbol();
-			Map<String, PositionField.Builder> posMap = getPositionMapBy(order);
-			return posMap.get(unifiedSymbol).build();
+			return null;
 		}
 		
 		// 平仓订单对应的持仓更新

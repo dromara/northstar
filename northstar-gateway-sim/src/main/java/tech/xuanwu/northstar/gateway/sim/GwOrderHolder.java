@@ -135,6 +135,7 @@ class GwOrderHolder {
 		OrderField.Builder ob = order.toBuilder();
 		ob.setOrderStatus(OrderStatusEnum.OS_Canceled);
 		ob.setCancelTime(LocalDateTime.now().format(DateTimeConstant.DT_FORMAT_FORMATTER));
+		log.info("成功撤单：{}", ob.toString());
 		return ob.build();
 	}
 	
