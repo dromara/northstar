@@ -33,13 +33,13 @@ public class BarData {
 	private LinkedList<BarField> barFieldList = new LinkedList<>();
 	
 	public BarData(int windowSize, List<BarField> sourceBars) {
-//		sHigh = new SeriesData<>(windowSize, sourceBars.stream().mapToDouble(bar -> bar.getHighPrice()).toArray());
-//		sLow = new SeriesData<>(windowSize, sourceBars.stream().mapToDouble(bar -> bar.getLowPrice()).toArray());
-//		sOpen = new SeriesData<>(windowSize, sourceBars.stream().mapToDouble(bar -> bar.getOpenPrice()).toArray());
-//		sClose = new SeriesData<>(windowSize, sourceBars.stream().mapToDouble(bar -> bar.getClosePrice()).toArray());
-//		sVol = new SeriesData<>(windowSize, sourceBars.stream().mapToDouble(bar -> bar.getVolumeDelta()).toArray());
-//		sOpenIntest = new SeriesData<>(windowSize, sourceBars.stream().mapToDouble(bar -> bar.getOpenInterestDelta()).toArray());
-//		lastBar = sourceBars.get(sourceBars.size() - 1);
+		sHigh = new SeriesData<>(windowSize, sourceBars.stream().mapToDouble(bar -> bar.getHighPrice()).toArray());
+		sLow = new SeriesData<>(windowSize, sourceBars.stream().mapToDouble(bar -> bar.getLowPrice()).toArray());
+		sOpen = new SeriesData<>(windowSize, sourceBars.stream().mapToDouble(bar -> bar.getOpenPrice()).toArray());
+		sClose = new SeriesData<>(windowSize, sourceBars.stream().mapToDouble(bar -> bar.getClosePrice()).toArray());
+		sVol = new SeriesData<>(windowSize, sourceBars.stream().mapToDouble(bar -> bar.getVolumeDelta()).toArray());
+		sOpenIntest = new SeriesData<>(windowSize, sourceBars.stream().mapToDouble(bar -> bar.getOpenInterestDelta()).toArray());
+		lastBar = sourceBars.get(sourceBars.size() - 1);
 		
 		this.windowSize = windowSize;
 		if(sourceBars.size() <= windowSize) {
