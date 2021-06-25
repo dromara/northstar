@@ -27,12 +27,17 @@ public class BarData {
 	
 	private TickField lastTick;
 	private BarField lastBar;
+	private final String unifiedSymbol;
 	
 	private final int windowSize;
 	
 	private LinkedList<BarField> barFieldList = new LinkedList<>();
 	
-	public BarData(int windowSize, List<BarField> sourceBars) {
+	public BarData(String unifiedSymbol, int windowSize, List<BarField> sourceBars) {
+		if(sourceBars.size() == 0) {
+			throw new IllegalArgumentException("历史数据不能为空");
+		}
+		this.unifiedSymbol = unifiedSymbol;
 		sHigh = new SeriesData<>(windowSize, sourceBars.stream().mapToDouble(bar -> bar.getHighPrice()).toArray());
 		sLow = new SeriesData<>(windowSize, sourceBars.stream().mapToDouble(bar -> bar.getLowPrice()).toArray());
 		sOpen = new SeriesData<>(windowSize, sourceBars.stream().mapToDouble(bar -> bar.getOpenPrice()).toArray());
@@ -49,8 +54,8 @@ public class BarData {
 		}
 	}
 	
-	public BarData(List<BarField> sourceBars) {
-		this(sourceBars.size(), sourceBars);
+	public BarData(String unifiedSymbol, List<BarField> sourceBars) {
+		this(unifiedSymbol, sourceBars.size(), sourceBars);
 	}
 	
 	/**
@@ -59,7 +64,7 @@ public class BarData {
 	 * @param bar
 	 */
 	public synchronized void update(BarField bar) {
-		if(StringUtils.equals(lastBar.getUnifiedSymbol(), bar.getUnifiedSymbol())) {
+		if(StringUtils.equals(unifiedSymbol, bar.getUnifiedSymbol())) {
 			return;
 		}
 		sHigh.update(bar.getHighPrice());
@@ -89,7 +94,7 @@ public class BarData {
 	 * @param tick
 	 */
 	public synchronized void update(TickField tick) {
-		if(StringUtils.equals(lastBar.getUnifiedSymbol(), tick.getUnifiedSymbol())) {
+		if(StringUtils.equals(unifiedSymbol, tick.getUnifiedSymbol())) {
 			return;
 		}
 		if(lastTick != null && tick.getActionTimestamp() == lastTick.getActionTimestamp()) {
@@ -99,8 +104,8 @@ public class BarData {
 		sHigh.update(Math.max(sHigh.ref(0), tick.getLastPrice()));
 		sLow.update(Math.min(sLow.ref(0), tick.getLastPrice()));
 		sClose.update(tick.getLastPrice());
-		sVol.update(tick.getVolume() - lastBar.getVolume());
-		sOpenIntest.update(tick.getOpenInterest() - lastBar.getOpenInterest());
+		sVol.update(lastBar != null ? tick.getVolume() - lastBar.getVolume() : 0);
+		sOpenIntest.update(lastBar != null ? tick.getOpenInterest() - lastBar.getOpenInterest() : 0);
 		
 	}
 	

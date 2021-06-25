@@ -182,15 +182,19 @@ public class ModuleAgent implements EventDrivenComponent{
 		if(ModuleEventType.ORDER_REQ_ACCEPTED == event.getEventType()) {
 			SubmitOrderReqField orderReq = (SubmitOrderReqField) event.getData();
 			if(!StringUtils.isNotBlank(orderReq.getOriginOrderId())) {
+				state = ModuleState.EMPTY;
 				throw new IllegalArgumentException("缺少必要的订单ID");
 			}
 			if(orderReq.getOffsetFlag() == OffsetFlagEnum.OF_Unkonwn) {
+				state = ModuleState.EMPTY;
 				throw new IllegalArgumentException("未定义开平仓类型：" + orderReq) ;
 			}
 			if(orderReq.getOffsetFlag() != OffsetFlagEnum.OF_Open && state != ModuleState.HOLDING) {
+				state = ModuleState.EMPTY;
 				log.info("没有对应的模组持仓，所以忽略平仓请求");
 				return;
 			}
+			state = ModuleState.PENDING_ORDER;
 			originOrderIdSet.add(orderReq.getOriginOrderId());
 			gateway.submitOrder(orderReq);	
 			

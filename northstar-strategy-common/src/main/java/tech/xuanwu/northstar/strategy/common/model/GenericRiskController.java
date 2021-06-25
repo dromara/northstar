@@ -45,7 +45,7 @@ public class GenericRiskController implements RiskController{
 
 	@Override
 	public void onTick(TickField tick) {
-		if(agent.getModuleState() == ModuleState.PLACING_ORDER || agent.getModuleState() == ModuleState.TRACING_ORDER) {
+		if(agent.getModuleState() == ModuleState.PLACING_ORDER) {
 			short result = RiskAuditResult.ACCEPTED;
 			// 只有开仓请求才需要风控审核
 			if(currentOrderReq.getOffsetFlag() == OffsetFlagEnum.OF_Open) {				

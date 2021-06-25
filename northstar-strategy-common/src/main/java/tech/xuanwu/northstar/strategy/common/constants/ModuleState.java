@@ -20,6 +20,10 @@ public enum ModuleState {
 	 */
 	PLACING_ORDER,
 	/**
+	 * 等待订单反馈
+	 */
+	PENDING_ORDER,
+	/**
 	 * 追单中
 	 */
 	TRACING_ORDER;

@@ -168,7 +168,7 @@ public class ModuleService implements InitializingBean{
 			LocalDateTime now = LocalDateTime.now();
 			LocalDateTime currentTradeDay = now.plusHours(now.getDayOfWeek().getValue() == 5 ? 54 : 6);
 			List<BarField> refBarList = new ArrayList<>(daysOfRefData * 500);
-			for(int i=daysOfRefData; i>=0; i--) {
+			for(int i=0; i<=daysOfRefData; i++) {
 				String dayStr = currentTradeDay.minusDays(i).format(DateTimeConstant.D_FORMAT_INT_FORMATTER);
 				List<MinBarDataPO> dataBarPOList = mdRepo.loadDataByDate(mktGatewayId, unifiedSymbol, dayStr);
 				for(MinBarDataPO po : dataBarPOList) {
@@ -177,7 +177,7 @@ public class ModuleService implements InitializingBean{
 					refBarList.add(bb.build());
 				}
 			}
-			barDataMap.put(unifiedSymbol, new BarData(refBarList));
+			barDataMap.put(unifiedSymbol, new BarData(unifiedSymbol, refBarList));
 		}
 		
 		ModuleAgent agent = ModuleAgent.builder()

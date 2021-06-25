@@ -104,6 +104,7 @@ public class CtaDealer implements Dealer {
 		} else if(agent.getModuleState() == ModuleState.TRACING_ORDER) {
 			// 按前订单改价
 			currentOrderReq = SubmitOrderReqField.newBuilder(currentOrderReq)
+					.setOriginOrderId(UUID.randomUUID().toString())
 					.setPrice(tick.getLastPrice())
 					.build();
 			emitOrder();
