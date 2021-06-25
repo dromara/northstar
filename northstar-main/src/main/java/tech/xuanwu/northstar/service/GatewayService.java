@@ -27,7 +27,6 @@ import tech.xuanwu.northstar.gateway.sim.SimFactory;
 import tech.xuanwu.northstar.gateway.sim.SimGateway;
 import tech.xuanwu.northstar.gateway.sim.SimGatewayLocalImpl;
 import tech.xuanwu.northstar.gateway.sim.SimMarket;
-import tech.xuanwu.northstar.gateway.sim.persistence.SimAccountRepository;
 import tech.xuanwu.northstar.manager.GatewayAndConnectionManager;
 import tech.xuanwu.northstar.persistence.GatewayRepository;
 import tech.xuanwu.northstar.persistence.MarketDataRepository;
@@ -61,20 +60,16 @@ public class GatewayService implements InitializingBean {
 	
 	private SimMarket simMarket;
 	
-	private SimAccountRepository simAccRepo;
-	
 	private ContractManager contractMgr;
 	
 	public GatewayService(GatewayAndConnectionManager gatewayConnMgr, GatewayRepository gatewayRepo, MarketDataRepository mdRepo,
-			FastEventEngine fastEventEngine, InternalEventBus eventBus, SimMarket simMarket, SimAccountRepository simAccRepo,
-			ContractManager contractMgr) {
+			FastEventEngine fastEventEngine, InternalEventBus eventBus, SimMarket simMarket, ContractManager contractMgr) {
 		this.gatewayConnMgr = gatewayConnMgr;
 		this.gatewayRepo = gatewayRepo;
 		this.mdRepo = mdRepo;
 		this.fastEventEngine = fastEventEngine;
 		this.eventBus = eventBus;
 		this.simMarket = simMarket;
-		this.simAccRepo = simAccRepo;
 		this.contractMgr = contractMgr;
 	}
 	
@@ -138,7 +133,7 @@ public class GatewayService implements InitializingBean {
 					.build();
 			SimFactory simFactory = new SimFactory(gatewayDescription.getGatewayId(), fastEventEngine, settings.getTicksOfCommission(),
 					contractMgr.getContractMapByGateway(mdGatewayId));
-			gateway = new SimGatewayLocalImpl(fastEventEngine, gwSettings, simAccRepo, simFactory);
+			gateway = new SimGatewayLocalImpl(fastEventEngine, gwSettings, simFactory.newGwAccountHolder());
 			simMarket.addGateway(mdGatewayId, (SimGateway) gateway);
 		} else if(gatewayDescription.getGatewayType() == GatewayType.IB) {
 			// TODO IB网关

@@ -16,7 +16,6 @@ import tech.xuanwu.northstar.common.model.CtpSettings;
 import tech.xuanwu.northstar.common.model.GatewayDescription;
 import tech.xuanwu.northstar.engine.event.FastEventEngine;
 import tech.xuanwu.northstar.gateway.sim.SimMarket;
-import tech.xuanwu.northstar.gateway.sim.persistence.SimAccountRepository;
 import tech.xuanwu.northstar.manager.GatewayAndConnectionManager;
 import tech.xuanwu.northstar.persistence.GatewayRepository;
 import tech.xuanwu.northstar.persistence.MarketDataRepository;
@@ -32,10 +31,9 @@ public class GatewayServiceTest {
 	public void prepare() {
 		gatewayRepo = mock(GatewayRepository.class);
 		SimMarket simMarket = mock(SimMarket.class);
-		SimAccountRepository simAccRepo = mock(SimAccountRepository.class);
 		ContractManager contractMgr = mock(ContractManager.class);
 		service = new GatewayService(new GatewayAndConnectionManager(), gatewayRepo, mock(MarketDataRepository.class),
-				mock(FastEventEngine.class), mock(InternalEventBus.class), simMarket, simAccRepo, contractMgr);
+				mock(FastEventEngine.class), mock(InternalEventBus.class), simMarket, contractMgr);
 	}
 
 	@Test

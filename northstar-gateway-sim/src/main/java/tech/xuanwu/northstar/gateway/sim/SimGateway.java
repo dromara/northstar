@@ -15,20 +15,11 @@ public interface SimGateway extends TradeGateway{
 	 * 行情刷新
 	 * @param tick
 	 */
-	void update(TickField tick);
+	void onTick(TickField tick);
 	
 	/**
-	 * 保存模拟账户
+	 * 获取账户
+	 * @return
 	 */
-	void save();
-	
-	/**
-	 * 载入模拟账户
-	 */
-	boolean load();
-	
-	/**
-	 * 移除模拟账户
-	 */
-	void remove();
+	GwAccountHolder getAccount();
 }

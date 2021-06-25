@@ -6,6 +6,7 @@ import tech.xuanwu.northstar.common.event.NorthstarEvent;
 import tech.xuanwu.northstar.common.event.NorthstarEventType;
 import tech.xuanwu.northstar.gateway.sim.SimMarket;
 import xyz.redtorch.pb.CoreField.TickField;
+import xyz.redtorch.pb.CoreField.TradeField;
 
 public class SimMarketHandler extends AbstractEventHandler implements GenericEventHandler{
 
@@ -17,13 +18,18 @@ public class SimMarketHandler extends AbstractEventHandler implements GenericEve
 	
 	@Override
 	public boolean canHandle(NorthstarEventType eventType) {
-		return NorthstarEventType.TICK == eventType;
+		return NorthstarEventType.TICK == eventType || NorthstarEventType.TRADE == eventType;
 	}
 
 	@Override
 	protected void doHandle(NorthstarEvent e) {
-		TickField tick = (TickField) e.getData();
-		market.update(tick);
+		if(NorthstarEventType.TICK == e.getEvent()) {			
+			TickField tick = (TickField) e.getData();
+			market.onTick(tick);
+		} else if(NorthstarEventType.TRADE == e.getEvent()) {
+			TradeField trade = (TradeField) e.getData();
+			market.onTrade(trade);
+		}
 	}
 
 }

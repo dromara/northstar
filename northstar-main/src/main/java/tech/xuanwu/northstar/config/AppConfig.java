@@ -21,6 +21,7 @@ import com.mongodb.MongoClient;
 import tech.xuanwu.northstar.common.model.ContractManager;
 import tech.xuanwu.northstar.domain.account.TradeDayAccount;
 import tech.xuanwu.northstar.gateway.sim.SimMarket;
+import tech.xuanwu.northstar.gateway.sim.persistence.SimAccountRepository;
 import tech.xuanwu.northstar.interceptor.AuthorizationInterceptor;
 import tech.xuanwu.northstar.manager.BarBufferManager;
 import tech.xuanwu.northstar.manager.GatewayAndConnectionManager;
@@ -107,7 +108,7 @@ public class AppConfig implements WebMvcConfigurer {
 	}
 	
 	@Bean
-	public SimMarket simMarket() {
-		return new SimMarket();
+	public SimMarket simMarket(SimAccountRepository simAccRepo) {
+		return new SimMarket(simAccRepo);
 	}
 }

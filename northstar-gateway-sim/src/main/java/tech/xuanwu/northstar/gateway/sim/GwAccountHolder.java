@@ -35,14 +35,11 @@ class GwAccountHolder {
 
 	private int ticksOfCommission;
 	
-	private SimGateway simGateway;
-	
 	private volatile long lastAccountEventTime;
 	
 	private ScheduledExecutorService exeService = Executors.newScheduledThreadPool(1);
 	
-	public GwAccountHolder(String gatewayId, FastEventEngine feEngine, int ticksOfCommission, SimFactory factory,
-			SimGateway simGateway) {
+	public GwAccountHolder(String gatewayId, FastEventEngine feEngine, int ticksOfCommission, SimFactory factory) {
 		this.feEngine = feEngine;
 		this.accBuilder = AccountField.newBuilder()
 				.setName(gatewayId + "模拟账户")
@@ -51,7 +48,6 @@ class GwAccountHolder {
 		this.orderHolder = factory.newGwOrderHolder();
 		this.posHolder = factory.newGwPositionHolder();
 		this.ticksOfCommission = ticksOfCommission;
-		this.simGateway = simGateway;
 		exeService.scheduleWithFixedDelay(()->{
 			if(System.currentTimeMillis() - lastAccountEventTime > 2000) {
 				refreshAccount();
@@ -76,9 +72,6 @@ class GwAccountHolder {
 			}
 			feEngine.emitEvent(NorthstarEventType.ORDER, order);
 		});
-		if(tfs.size() > 0) {
-			simGateway.save();
-		}
 		posHolder.updatePositionBy(tick);
 		double frozenMargin = orderHolder.getFrozenMargin();
 		double useMargin = posHolder.getTotalUseMargin();
@@ -113,7 +106,6 @@ class GwAccountHolder {
 		}
 		accBuilder.setDeposit(accBuilder.getDeposit() + money);
 		refreshAccount();
-		simGateway.save();
 	}
 
 	/**
@@ -127,7 +119,6 @@ class GwAccountHolder {
 		}
 		accBuilder.setWithdraw(accBuilder.getWithdraw() + money);
 		refreshAccount();
-		simGateway.save();
 	}
 
 	/**
@@ -152,7 +143,6 @@ class GwAccountHolder {
 		}
 		feEngine.emitEvent(NorthstarEventType.ORDER, order);
 		refreshAccount();
-		simGateway.save();
 		return order.getOrderId();
 	}
 
@@ -172,7 +162,6 @@ class GwAccountHolder {
 		}
 		feEngine.emitEvent(NorthstarEventType.ORDER, order);
 		refreshAccount();
-		simGateway.save();
 		return true;
 	}
 	
@@ -197,7 +186,6 @@ class GwAccountHolder {
 	 */
 	protected void dailySettlement() {
 		// FIXME Not done
-		simGateway.save();
 	}
 
 }
