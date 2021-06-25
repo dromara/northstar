@@ -16,6 +16,7 @@ public class InternalDispatcher implements NorthstarEventDispatcher {
 		private static final long serialVersionUID = 1L;
 
 		{
+			add(NorthstarEventType.TICK);
 			add(NorthstarEventType.LOGGED_IN);
 			add(NorthstarEventType.LOGGING_IN);
 			add(NorthstarEventType.LOGGED_OUT);
