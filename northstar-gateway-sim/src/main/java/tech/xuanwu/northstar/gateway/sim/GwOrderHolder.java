@@ -35,7 +35,14 @@ class GwOrderHolder {
 	
 	private int ticksOfCommission;
 	
+	/**
+	 * orderId --> order
+	 */
 	private ConcurrentHashMap<String, OrderField> orderIdMap = new ConcurrentHashMap<>(100);
+	/**
+	 * originOrderId --> orderId
+	 */
+	private ConcurrentHashMap<String, String> originOrderIdMap = new ConcurrentHashMap<>(100);
 	private ConcurrentHashMap<TradeField, OrderField> doneOrderMap = new ConcurrentHashMap<>();
 	
 	private volatile String tradingDay = "";
@@ -91,6 +98,7 @@ class GwOrderHolder {
 		
 		OrderField of = ob.build();
 		orderIdMap.put(of.getOrderId(), of);
+		originOrderIdMap.put(of.getOriginOrderId(), of.getOrderId());
 		log.info("成功下单：{}", of.toString());
 		return of;
 	}
@@ -117,20 +125,26 @@ class GwOrderHolder {
 		
 		OrderField of = ob.build();
 		orderIdMap.put(of.getOrderId(), of);
+		originOrderIdMap.put(of.getOriginOrderId(), of.getOrderId());
 		log.info("成功下单：{}", of.toString());
 		return of;
 	}
 	
 	protected OrderField cancelOrder(CancelOrderReqField cancelOrderReq) {
-		boolean hasOrderId = cancelOrderReq.getOrderId() != null && orderIdMap.containsKey(cancelOrderReq.getOrderId());
-		if(!hasOrderId) {
-			return null;
+		OrderField order = null;
+		if(StringUtils.isEmpty(cancelOrderReq.getOrderId()) && StringUtils.isEmpty(cancelOrderReq.getOriginOrderId())) {
+			throw new IllegalArgumentException("未提供要撤单的订单号");
+		} else if(StringUtils.isEmpty(cancelOrderReq.getOriginOrderId())) {
+			order = orderIdMap.remove(cancelOrderReq.getOrderId());
+			originOrderIdMap.remove(order.getOriginOrderId());
+			
+		} else if(StringUtils.isEmpty(cancelOrderReq.getOrderId())) {
+			String orderId = originOrderIdMap.remove(cancelOrderReq.getOriginOrderId());
+			order = orderIdMap.remove(orderId);
+			
 		}
 		
-		OrderField order = orderIdMap.remove(cancelOrderReq.getOrderId());
-		if(order.getOrderStatus() == OrderStatusEnum.OS_AllTraded) {
-			return order;
-		}
+		// TODO 已成交的订单还会不会在orderIdMap中？暂时假设不会
 		
 		OrderField.Builder ob = order.toBuilder();
 		ob.setOrderStatus(OrderStatusEnum.OS_Canceled);
@@ -172,7 +186,7 @@ class GwOrderHolder {
 							.setOffsetFlag(order.getOffsetFlag())
 							.setOrderId(order.getOrderId())
 							.setOriginOrderId(order.getOriginOrderId())
-							.setPrice(order.getPrice())
+							.setPrice(order.getDirection() == DirectionEnum.D_Buy ? tick.getAskPrice(0) : tick.getBidPrice(0))
 							.setPriceSource(PriceSourceEnum.PSRC_LastPrice)
 							.setTradeDate(tradingDay)
 							.setTradeTime(LocalTime.now().format(DateTimeConstant.T_FORMAT_FORMATTER))

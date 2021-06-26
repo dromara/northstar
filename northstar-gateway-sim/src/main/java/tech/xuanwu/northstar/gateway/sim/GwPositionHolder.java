@@ -3,11 +3,16 @@ package tech.xuanwu.northstar.gateway.sim;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.StringUtils;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 
@@ -79,9 +84,10 @@ class GwPositionHolder {
 	 * 行情更新
 	 * @param tick
 	 */
-	protected void updatePositionBy(TickField tick) {
-		updatePositionBy(tick, longPositionMap);
-		updatePositionBy(tick, shortPositionMap);
+	protected List<Optional<PositionField>> updatePositionBy(TickField tick) {
+		return List.of(
+				updatePositionBy(tick, longPositionMap), 
+				updatePositionBy(tick, shortPositionMap));
 	}
 	
 	/**
@@ -99,7 +105,7 @@ class GwPositionHolder {
 		} 
 		PositionField pf = reducePosition(trade);
 		double priceDiff = (trade.getPrice() - pf.getPrice()) * (pf.getPositionDirection() == PositionDirectionEnum.PD_Long ? 1 : -1);
-		return priceDiff * pf.getContract().getMultiplier();
+		return priceDiff * pf.getContract().getMultiplier() * trade.getVolume();
 	}
 	
 	/**
@@ -279,6 +285,8 @@ class GwPositionHolder {
 		PositionField.Builder pb = posMap.get(contract.getUnifiedSymbol());
 		PositionField.Builder frozenPosition = PositionField.newBuilder();
 		frozenPosition.setPositionId(pb.getPositionId());
+		frozenPosition.setContract(contract);
+		frozenPosition.setPositionDirection(pb.getPositionDirection());
 		if(order.getOffsetFlag() == OffsetFlagEnum.OF_CloseToday) {
 			frozenPosition.setTdFrozen(order.getTotalVolume());
 			frozenPosition.setFrozen(order.getTotalVolume());
@@ -294,7 +302,7 @@ class GwPositionHolder {
 		}
 		
 		frozenPositionMap.put(order.getOrderId(), frozenPosition);
-		updateFrozen();
+		pb = updateFrozen(pb, frozenPosition, 1);
 		return pb.build();
 	}
 	
@@ -317,7 +325,7 @@ class GwPositionHolder {
 			frozenPosition.setTdFrozen(tdFrozen);
 		}
 		
-		updateFrozen();
+		pb = updateFrozen(pb, frozenPosition, 1);
 		return pb.build();
 	}
 	
@@ -330,36 +338,45 @@ class GwPositionHolder {
 	private PositionField unfrozenPosition(OrderField order) {
 		ContractField contract = order.getContract();
 		
-		if(order.getOrderStatus() == OrderStatusEnum.OS_AllTraded || order.getOrderStatus() == OrderStatusEnum.OS_Canceled) {
-			// 撤单或全部成交时
-			frozenPositionMap.remove(order.getOrderId());			
-		}
-		updateFrozen();
-		
 		Map<String, PositionField.Builder> posMap = getPositionMapBy(order);
 		PositionField.Builder pb = posMap.get(contract.getUnifiedSymbol());
 		if(pb == null) {
 			throw new IllegalStateException("持仓状态与期望不一致");
 		}
+		if(order.getOrderStatus() == OrderStatusEnum.OS_AllTraded || order.getOrderStatus() == OrderStatusEnum.OS_Canceled) {
+			// 撤单或全部成交时
+			PositionField.Builder frozenPos = frozenPositionMap.remove(order.getOrderId());			
+			pb = updateFrozen(pb, frozenPos, -1);
+		}
 		
 		return pb.build();
 	}
 	
-	private void updateFrozen() {
-		
+	private PositionField.Builder updateFrozen(PositionField.Builder srcPos, PositionField.Builder frozenPos, int addOrMinus) {
+		srcPos.setFrozen(srcPos.getFrozen() + addOrMinus * frozenPos.getFrozen());
+		srcPos.setTdFrozen(srcPos.getTdFrozen() + addOrMinus * frozenPos.getTdFrozen());
+		srcPos.setYdFrozen(srcPos.getYdFrozen() + addOrMinus * frozenPos.getYdFrozen());
+		return srcPos;
 	}
 	
-	private void updatePositionBy(TickField tick, ConcurrentHashMap<String, PositionField.Builder> positionMap) {
+	private Optional<PositionField> updatePositionBy(TickField tick, ConcurrentHashMap<String, PositionField.Builder> positionMap) {
 		ContractField contract = contractMap.get(tick.getUnifiedSymbol());
 		PositionField.Builder sp = positionMap.get(contract.getUnifiedSymbol());
 		if(sp != null) {
 			PositionField.Builder slp = updatePosition(sp, contract, tick);
 			positionMap.compute(contract.getUnifiedSymbol(), (k, v) -> slp);
+			return Optional.of(slp.build());
 		}
+		return Optional.empty();
 	}
 	
 	private PositionField.Builder updatePosition(PositionField.Builder pb, ContractField contract, TickField tick) {
 		pb.setLastPrice(tick.getLastPrice());
+		// TODO 准确化持仓占用保证金额度的计算
+//		double marginRatio = pb.getPositionDirection() == PositionDirectionEnum.PD_Long ? contract.getLongMarginRatio() : contract.getShortMarginRatio();
+//		double margin = pb.getOpenPrice() * pb.getPosition() * contract.getMultiplier() * marginRatio;
+//		pb.setExchangeMargin(margin);
+//		pb.setUseMargin(margin);
 		pb.setPriceDiff(pb.getPositionDirection()==PositionDirectionEnum.PD_Long ? (tick.getLastPrice() - pb.getPrice()) : (pb.getPrice() - tick.getLastPrice()));
 		pb.setOpenPriceDiff(pb.getPositionDirection()==PositionDirectionEnum.PD_Long ? (tick.getLastPrice() - pb.getOpenPrice()) : (pb.getOpenPrice() - tick.getLastPrice()));
 		pb.setPositionProfit(pb.getPosition() * pb.getPriceDiff() * contract.getMultiplier());

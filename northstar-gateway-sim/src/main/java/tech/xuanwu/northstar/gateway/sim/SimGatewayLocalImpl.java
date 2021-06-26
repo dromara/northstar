@@ -69,7 +69,7 @@ public class SimGatewayLocalImpl implements SimGateway{
 		if(money > 0) {			
 			accountHolder.deposit(money);
 		} else if(money < 0) {
-			accountHolder.withdraw(money);
+			accountHolder.withdraw(Math.abs(money));
 		}
 	}
 

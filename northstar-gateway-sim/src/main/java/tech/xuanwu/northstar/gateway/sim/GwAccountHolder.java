@@ -1,11 +1,8 @@
 package tech.xuanwu.northstar.gateway.sim;
 
-import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import com.google.common.util.concurrent.AtomicDouble;
 import com.google.protobuf.InvalidProtocolBufferException;
 
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +17,6 @@ import xyz.redtorch.pb.CoreField.OrderField;
 import xyz.redtorch.pb.CoreField.PositionField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TickField;
-import xyz.redtorch.pb.CoreField.TradeField;
 
 @Slf4j
 class GwAccountHolder {
@@ -35,10 +31,6 @@ class GwAccountHolder {
 
 	private int ticksOfCommission;
 	
-	private volatile long lastAccountEventTime;
-	
-	private ScheduledExecutorService exeService = Executors.newScheduledThreadPool(1);
-	
 	public GwAccountHolder(String gatewayId, FastEventEngine feEngine, int ticksOfCommission, SimFactory factory) {
 		this.feEngine = feEngine;
 		this.accBuilder = AccountField.newBuilder()
@@ -48,36 +40,35 @@ class GwAccountHolder {
 		this.orderHolder = factory.newGwOrderHolder();
 		this.posHolder = factory.newGwPositionHolder();
 		this.ticksOfCommission = ticksOfCommission;
-		exeService.scheduleWithFixedDelay(()->{
-			if(System.currentTimeMillis() - lastAccountEventTime > 2000) {
-				refreshAccount();
-			}
-		}, 30, 1, TimeUnit.SECONDS);
 	}
 
 	protected void updateTick(TickField tick) {
-		List<TradeField> tfs = orderHolder.tryDeal(tick);
-		double commission = tfs.stream().reduce(0D,
-				(acc, tf) -> acc + tf.getContract().getPriceTick() * ticksOfCommission, 
-				(acc, tf) -> 0D);
-		double closeProfit = tfs.stream()
-				.map(tf -> posHolder.updatePositionBy(tf))
-				.reduce(0D, (a, b) -> a + b);
-		tfs.stream().forEach(tf -> {
-			OrderField order = orderHolder.confirmWith(tf);
-			if(order == null) {
-				//正常情况下不应该为空
-				log.warn("没有对应的订单记录对应交易：{}", tf.toString());
-				return;
-			}
-			feEngine.emitEvent(NorthstarEventType.ORDER, order);
-		});
-		posHolder.updatePositionBy(tick);
+		AtomicDouble commission = new AtomicDouble();
+		AtomicDouble closeProfit = new AtomicDouble();
+		orderHolder.tryDeal(tick)
+			.stream()
+			.forEach(trade -> {
+				commission.addAndGet(trade.getContract().getPriceTick() * ticksOfCommission * trade.getVolume());
+				closeProfit.addAndGet(posHolder.updatePositionBy(trade));
+				OrderField order = orderHolder.confirmWith(trade);
+				if(order == null) {
+					//正常情况下不应该为空
+					log.warn("没有对应的订单记录对应交易：{}", trade.toString());
+					return;
+				}
+				posHolder.updatePositionBy(order);
+				feEngine.emitEvent(NorthstarEventType.ORDER, order);
+				feEngine.emitEvent(NorthstarEventType.TRADE, trade);
+			});
+		posHolder.updatePositionBy(tick)
+			.stream()
+			.filter(opt -> opt.isPresent())
+			.forEach(opt -> feEngine.emitEvent(NorthstarEventType.POSITION, opt.get()));
 		double frozenMargin = orderHolder.getFrozenMargin();
 		double useMargin = posHolder.getTotalUseMargin();
 		double positionProfit = posHolder.getTotalPositionProfit();
-		accBuilder.setCloseProfit(accBuilder.getCloseProfit() + closeProfit);
-		accBuilder.setCommission(accBuilder.getCommission() + commission);
+		accBuilder.setCloseProfit(accBuilder.getCloseProfit() + closeProfit.get());
+		accBuilder.setCommission(accBuilder.getCommission() + commission.get());
 		accBuilder.setPositionProfit(positionProfit);
 		accBuilder.setMargin(frozenMargin + useMargin);
 		refreshAccount();
@@ -92,7 +83,6 @@ class GwAccountHolder {
 		accBuilder.setAvailable(accBuilder.getBalance() - accBuilder.getMargin());
 
 		feEngine.emitEvent(NorthstarEventType.ACCOUNT, accBuilder.build());
-		lastAccountEventTime = System.currentTimeMillis();
 	}
 
 	/**
