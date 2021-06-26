@@ -1,4 +1,4 @@
-package tech.xuanwu.northstar.gateway.sim;
+package tech.xuanwu.northstar.integrated.gateway.sim;
 
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.argThat;
@@ -16,6 +16,9 @@ import org.junit.Test;
 
 import tech.xuanwu.northstar.common.event.NorthstarEventType;
 import tech.xuanwu.northstar.engine.event.FastEventEngine;
+import tech.xuanwu.northstar.gateway.sim.SimFactory;
+import tech.xuanwu.northstar.gateway.sim.SimGateway;
+import tech.xuanwu.northstar.gateway.sim.SimGatewayLocalImpl;
 import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.ForceCloseReasonEnum;
