@@ -36,6 +36,42 @@
 ## 启动步骤
 假设当前环境是全新的服务器  
 
+初始化系统环境（只需要运行一次）
+```
+curl https://gitee.com/KevinHuangwl/northstar/raw/master/env.sh | sh
+```
+
+初始化数据库（如果使用外部数据库的可以忽略）
+```
+curl -o mongo.repo https://gitee.com/KevinHuangwl/northstar/raw/master/mongo.repo
+curl https://gitee.com/KevinHuangwl/northstar/raw/master/mongo.sh | sh
+```
+安装成功后验证mongoDB 是否安装成功
+```
+systemctl status mongod
+```
+如果成功的话，屏幕输出如下，注意第三行Active的状态是active(running)：
+```
+● mongod.service - MongoDB Database Server
+   Loaded: loaded (/usr/lib/systemd/system/mongod.service; enabled; vendor preset: disabled)
+   Active: active (running) since Sun 2021-06-27 17:30:14 CST; 56s ago
+     Docs: https://docs.mongodb.org/manual
+  Process: 5932 ExecStart=/usr/bin/mongod $OPTIONS (code=exited, status=0/SUCCESS)
+  Process: 5929 ExecStartPre=/usr/bin/chmod 0755 /var/run/mongodb (code=exited, status=0/SUCCESS)
+  Process: 5926 ExecStartPre=/usr/bin/chown mongod:mongod /var/run/mongodb (code=exited, status=0>
+  Process: 5923 ExecStartPre=/usr/bin/mkdir -p /var/run/mongodb (code=exited, status=0/SUCCESS)
+ Main PID: 5934 (mongod)
+   Memory: 53.2M
+   CGroup: /system.slice/mongod.service
+           └─5934 /usr/bin/mongod -f /etc/mongod.conf
+
+Jun 27 17:30:13 ai-trader-hw systemd[1]: Starting MongoDB Database Server...
+Jun 27 17:30:13 ai-trader-hw mongod[5932]: about to fork child process, waiting until server is r>
+Jun 27 17:30:13 ai-trader-hw mongod[5932]: forked process: 5934
+Jun 27 17:30:14 ai-trader-hw mongod[5932]: child process started successfully, parent exiting
+Jun 27 17:30:14 ai-trader-hw systemd[1]: Started MongoDB Database Server.
+```
+
 下载项目
 ```
 cd ~
@@ -59,26 +95,13 @@ spring:
     ...
 ```
 
-准备环境（只需要运行一次）
-```
-cd ~/northstar
-bash env.sh
-```
-
 构建程序（每次代码更新后运行）
 ```
 cd ~/northstar
 bash build.sh
 ```
 
-运行程序
-```
-nohup java -jar -DwsHost=<这里填云服务器内网IP> -Dnsuser=<登陆用户名> -Dnspwd=<登陆密码> -Demail=<代理邮箱名> -Dsub_email=<订阅邮箱名> ～/northstar.jar &
-```
-
-如果嫌以上命名过于复杂，可以通过以下方法简化启动命令  
-方法一： 把以上命令写成脚本  
-方法二： 在.bashrc中加入以上启动参数（对参数的隐藏比方法一要好）  
+在.bashrc中加入以上启动参数（这样做能隐藏启动参数）  
 ```
 vim ~/.bashrc
 ```
