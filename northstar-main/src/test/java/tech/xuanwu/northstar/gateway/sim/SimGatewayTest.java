@@ -1,4 +1,4 @@
-package tech.xuanwu.northstar.integrated.gateway.sim;
+package tech.xuanwu.northstar.gateway.sim;
 
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.argThat;
