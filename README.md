@@ -141,3 +141,4 @@ kill `pgrep java`
 - 当前项目只能进行手工交易，若要开发量化策略，需要一定的JAVA编程基础
 
 ## 参考项目
+https://github.com/sun0x00/redtorch
