@@ -5,7 +5,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 
 import com.alibaba.fastjson.JSON;
 
@@ -14,29 +17,23 @@ import tech.xuanwu.northstar.common.constant.GatewayType;
 import tech.xuanwu.northstar.common.constant.GatewayUsage;
 import tech.xuanwu.northstar.common.event.InternalEventBus;
 import tech.xuanwu.northstar.common.exception.NoSuchElementException;
-import tech.xuanwu.northstar.common.model.ContractManager;
 import tech.xuanwu.northstar.common.model.CtpSettings;
 import tech.xuanwu.northstar.common.model.GatewayDescription;
 import tech.xuanwu.northstar.common.model.SimSettings;
 import tech.xuanwu.northstar.domain.GatewayConnection;
 import tech.xuanwu.northstar.domain.MarketGatewayConnection;
 import tech.xuanwu.northstar.domain.TraderGatewayConnection;
-import tech.xuanwu.northstar.engine.event.FastEventEngine;
+import tech.xuanwu.northstar.factories.AbstractGatewayFactory;
+import tech.xuanwu.northstar.factories.CtpGatewayFactory;
+import tech.xuanwu.northstar.factories.SimGatewayFactory;
 import tech.xuanwu.northstar.gateway.api.Gateway;
-import tech.xuanwu.northstar.gateway.sim.SimFactory;
 import tech.xuanwu.northstar.gateway.sim.SimGateway;
-import tech.xuanwu.northstar.gateway.sim.SimGatewayLocalImpl;
 import tech.xuanwu.northstar.gateway.sim.SimMarket;
 import tech.xuanwu.northstar.manager.GatewayAndConnectionManager;
 import tech.xuanwu.northstar.persistence.GatewayRepository;
 import tech.xuanwu.northstar.persistence.MarketDataRepository;
 import tech.xuanwu.northstar.persistence.po.GatewayPO;
 import tech.xuanwu.northstar.utils.CodecUtils;
-import xyz.redtorch.gateway.ctp.x64v6v3v15v.CtpGatewayAdapter;
-import xyz.redtorch.pb.CoreEnum.GatewayAdapterTypeEnum;
-import xyz.redtorch.pb.CoreEnum.GatewayTypeEnum;
-import xyz.redtorch.pb.CoreField.GatewaySettingField;
-import xyz.redtorch.pb.CoreField.GatewaySettingField.CtpApiSettingField;
 
 /**
  * 网关服务
@@ -46,7 +43,7 @@ import xyz.redtorch.pb.CoreField.GatewaySettingField.CtpApiSettingField;
  *
  */
 @Slf4j
-public class GatewayService implements InitializingBean {
+public class GatewayService implements InitializingBean, ApplicationContextAware{
 	
 	private GatewayAndConnectionManager gatewayConnMgr;
 	
@@ -54,23 +51,19 @@ public class GatewayService implements InitializingBean {
 	
 	private MarketDataRepository mdRepo;
 	
-	private FastEventEngine fastEventEngine;
-	
 	private InternalEventBus eventBus;
 	
 	private SimMarket simMarket;
 	
-	private ContractManager contractMgr;
+	private ApplicationContext ctx;
 	
 	public GatewayService(GatewayAndConnectionManager gatewayConnMgr, GatewayRepository gatewayRepo, MarketDataRepository mdRepo,
-			FastEventEngine fastEventEngine, InternalEventBus eventBus, SimMarket simMarket, ContractManager contractMgr) {
+			InternalEventBus eventBus, SimMarket simMarket) {
 		this.gatewayConnMgr = gatewayConnMgr;
 		this.gatewayRepo = gatewayRepo;
 		this.mdRepo = mdRepo;
-		this.fastEventEngine = fastEventEngine;
 		this.eventBus = eventBus;
 		this.simMarket = simMarket;
-		this.contractMgr = contractMgr;
 	}
 	
 	/**
@@ -93,54 +86,20 @@ public class GatewayService implements InitializingBean {
 	
 	private boolean doCreateGateway(GatewayDescription gatewayDescription) {
 		Gateway gateway = null;
-		GatewayConnection conn = null;
-		GatewayTypeEnum gwType = null;
-		if(gatewayDescription.getGatewayUsage() == GatewayUsage.MARKET_DATA) {
-			gwType = GatewayTypeEnum.GTE_MarketData;
-			conn = new MarketGatewayConnection(gatewayDescription, eventBus);
-		} else {
-			gwType = GatewayTypeEnum.GTE_Trade;
-			conn = new TraderGatewayConnection(gatewayDescription, eventBus);
-		}
-		
+		GatewayConnection conn = gatewayDescription.getGatewayUsage() == GatewayUsage.MARKET_DATA
+				? new MarketGatewayConnection(gatewayDescription, eventBus)
+				: new TraderGatewayConnection(gatewayDescription, eventBus);
+		AbstractGatewayFactory factory = null;
 		if(gatewayDescription.getGatewayType() == GatewayType.CTP) {
-			CtpSettings settings = JSON.toJavaObject((JSON)JSON.toJSON(gatewayDescription.getSettings()), CtpSettings.class);
-			CtpApiSettingField ctpSetting = CtpApiSettingField.newBuilder()
-					.setAppId(settings.getAppId())
-					.setAuthCode(settings.getAuthCode())
-					.setBrokerId(settings.getBrokerId())
-					.setMdHost(settings.getMdHost())
-					.setMdPort(settings.getMdPort())
-					.setTdHost(settings.getTdHost())
-					.setTdPort(settings.getTdPort())
-					.setPassword(settings.getPassword())
-					.setUserId(settings.getUserId())
-					.setUserProductInfo(settings.getUserProductInfo())
-					.build();
-			gateway = new CtpGatewayAdapter(fastEventEngine, GatewaySettingField.newBuilder()
-					.setGatewayAdapterType(GatewayAdapterTypeEnum.GAT_CTP)
-					.setGatewayId(gatewayDescription.getGatewayId())
-					.setGatewayName(gatewayDescription.getGatewayId())
-					.setCtpApiSetting(ctpSetting)
-					.setGatewayType(gwType)
-					.build());
+			factory = ctx.getBean(CtpGatewayFactory.class);
 		} else if(gatewayDescription.getGatewayType() == GatewayType.SIM) {
-			String mdGatewayId = gatewayDescription.getBindedMktGatewayId();
-			SimSettings settings = JSON.toJavaObject((JSON)JSON.toJSON(gatewayDescription.getSettings()), SimSettings.class);
-			GatewaySettingField gwSettings = GatewaySettingField.newBuilder()
-					.setGatewayId(gatewayDescription.getGatewayId())
-					.setGatewayType(GatewayTypeEnum.GTE_Trade)
-					.build();
-			SimFactory simFactory = new SimFactory(gatewayDescription.getGatewayId(), fastEventEngine, settings.getTicksOfCommission(),
-					contractMgr.getContractMapByGateway(mdGatewayId));
-			gateway = new SimGatewayLocalImpl(fastEventEngine, gwSettings, simFactory.newGwAccountHolder());
-			simMarket.addGateway(mdGatewayId, (SimGateway) gateway);
+			factory = ctx.getBean(SimGatewayFactory.class);
 		} else if(gatewayDescription.getGatewayType() == GatewayType.IB) {
 			// TODO IB网关
 		} else {
 			throw new NoSuchElementException("没有这种网关类型：" + gatewayDescription.getGatewayType());
 		}
-		
+		gateway = factory.newInstance(gatewayDescription);
 		gatewayConnMgr.createPair(conn, gateway);
 		if(gatewayDescription.isAutoConnect()) {
 			gateway.connect();
@@ -297,5 +256,10 @@ public class GatewayService implements InitializingBean {
 			}
 			doCreateGateway(gd);
 		}
+	}
+
+	@Override
+	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+		this.ctx = applicationContext;
 	}
 }

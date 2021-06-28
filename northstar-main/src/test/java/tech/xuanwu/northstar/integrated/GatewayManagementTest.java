@@ -32,6 +32,7 @@ import tech.xuanwu.northstar.common.model.CtpSettings;
 import tech.xuanwu.northstar.common.model.GatewayDescription;
 import tech.xuanwu.northstar.common.model.NsUser;
 import tech.xuanwu.northstar.common.model.ResultBean;
+import tech.xuanwu.northstar.common.model.SimSettings;
 import tech.xuanwu.northstar.persistence.GatewayRepository;
 import tech.xuanwu.northstar.persistence.po.GatewayPO;
 
@@ -43,6 +44,7 @@ public class GatewayManagementTest {
 
 	GatewayDescription mktGateway;
 	GatewayDescription trdGateway;
+	GatewayDescription simGateway;
 	CtpSettings settings;
 	
 	@Autowired
@@ -89,6 +91,16 @@ public class GatewayManagementTest {
 				.connectionState(ConnectionState.CONNECTED)
 				.build();
 		
+		simGateway = GatewayDescription.builder()
+				.gatewayId("testSimGateway")
+				.gatewayAdapterType("tech.xuanwu.northstar.gateway.sim.SimGatewayLocalImpl")
+				.gatewayType(GatewayType.SIM)
+				.gatewayUsage(GatewayUsage.TRADE)
+				.description("testing")
+				.settings(new SimSettings())
+				.connectionState(ConnectionState.CONNECTED)
+				.build();
+		
 		ResponseEntity result = restTemplate.postForEntity("/auth/login", new NsUser("admin","123456"), ResultBean.class);
 		String cookie = result.getHeaders().get("Set-Cookie").get(0);
 		headers = new HttpHeaders();
@@ -120,6 +132,8 @@ public class GatewayManagementTest {
 		ResultBean result1 = resp1.getBody();
 		assertThat(result1.getStatus()).isEqualTo(ReturnCode.SUCCESS);
 	}
+	
+	
 	
 	@Test
 	public void test_NS38_ModifyGateway() {
