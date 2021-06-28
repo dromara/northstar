@@ -25,6 +25,8 @@ public class HolidayManagerTest {
 		
 		assertThat(mgr.isHoliday(LocalDateTime.of(2021, 6, 15, 8, 30))).isFalse();
 		
+		assertThat(mgr.isHoliday(LocalDateTime.of(2021, 6, 28, 01, 0))).isTrue();
+		
 		assertThat(mgr.isHoliday(LocalDateTime.of(2021, 9, 17, 21, 0))).isTrue();
 		
 		assertThat(mgr.isHoliday(LocalDateTime.of(2021, 9, 21, 21, 0))).isTrue();

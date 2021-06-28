@@ -50,7 +50,7 @@ public class HolidayManager implements InitializingBean{
 		if(dateTime.getHour() < 3) {
 			date = LocalDate.from(dateTime.minusHours(4));
 		}
-		return holidaySet.contains(date);
+		return holidaySet.contains(date) || date.getDayOfWeek().getValue() > 5;
 	}
 	
 	public void addHoliday(String dateStr) {
