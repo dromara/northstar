@@ -17,7 +17,7 @@ public abstract class ContractNameResolver {
 	
 	static {
 		//加载合约中文解释
-		InputStream is = ContractNameResolver.class.getClassLoader().getResourceAsStream("CTP期货合约中文对照表.json");
+		InputStream is = ContractNameResolver.class.getClassLoader().getResourceAsStream("CTPSymbolNameMapping.json");
 		try {
 			byte[] buf = new byte[1024*3];
 			StringBuilder sb = new StringBuilder();
