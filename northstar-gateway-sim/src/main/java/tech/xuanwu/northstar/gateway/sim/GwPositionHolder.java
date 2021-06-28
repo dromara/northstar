@@ -357,6 +357,9 @@ class GwPositionHolder {
 	
 	private Optional<PositionField> updatePositionBy(TickField tick, ConcurrentHashMap<String, PositionField.Builder> positionMap) {
 		ContractField contract = contractMap.get(tick.getUnifiedSymbol());
+		if(contract == null) {
+			return Optional.empty();
+		}
 		PositionField.Builder sp = positionMap.get(contract.getUnifiedSymbol());
 		if(sp != null) {
 			PositionField.Builder slp = updatePosition(sp, contract, tick);
