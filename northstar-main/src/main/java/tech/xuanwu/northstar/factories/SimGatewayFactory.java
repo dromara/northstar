@@ -2,7 +2,6 @@ package tech.xuanwu.northstar.factories;
 
 import com.alibaba.fastjson.JSON;
 
-import tech.xuanwu.northstar.common.constant.GatewayType;
 import tech.xuanwu.northstar.common.model.ContractManager;
 import tech.xuanwu.northstar.common.model.GatewayDescription;
 import tech.xuanwu.northstar.common.model.SimSettings;
@@ -43,7 +42,7 @@ public class SimGatewayFactory extends AbstractGatewayFactory{
 				.setGatewayType(GatewayTypeEnum.GTE_Trade)
 				.build();
 		SimFactory simFactory = new SimFactory(gatewayDescription.getGatewayId(), fastEventEngine, settings.getTicksOfCommission(),
-				contractMgr.getContractMapByGateway(mdGatewayId));
+				contractMgr);
 		SimGateway gateway = new SimGatewayLocalImpl(fastEventEngine, gwSettings, simFactory.newGwAccountHolder());
 		simMarket.addGateway(mdGatewayId, gateway);
 		return gateway;

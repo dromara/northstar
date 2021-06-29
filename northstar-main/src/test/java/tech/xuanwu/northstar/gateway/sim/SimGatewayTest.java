@@ -1,6 +1,5 @@
 package tech.xuanwu.northstar.gateway.sim;
 
-import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -9,16 +8,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
-import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
 
 import tech.xuanwu.northstar.common.event.NorthstarEventType;
+import tech.xuanwu.northstar.common.model.ContractManager;
 import tech.xuanwu.northstar.engine.event.FastEventEngine;
-import tech.xuanwu.northstar.gateway.sim.SimFactory;
-import tech.xuanwu.northstar.gateway.sim.SimGateway;
-import tech.xuanwu.northstar.gateway.sim.SimGatewayLocalImpl;
 import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.ForceCloseReasonEnum;
@@ -92,11 +88,11 @@ public class SimGatewayTest {
 				.setGatewayId("testGateway")
 				.setGatewayType(GatewayTypeEnum.GTE_Trade)
 				.build();
-		Map<String, ContractField> contractMap = mock(Map.class);
-		when(contractMap.get("rb2110@SHFE@FUTURES")).thenReturn(contract);
+		ContractManager contractMgr = mock(ContractManager.class);
+		when(contractMgr.getContract("rb2110@SHFE@FUTURES")).thenReturn(contract);
 		
 		int costOfCommission = 1;
-		SimFactory simFactory = new SimFactory("testGateway", feEngine, costOfCommission, contractMap);
+		SimFactory simFactory = new SimFactory("testGateway", feEngine, costOfCommission, contractMgr);
 		gateway = new SimGatewayLocalImpl(feEngine, gwSettings, simFactory.newGwAccountHolder());
 	}
 

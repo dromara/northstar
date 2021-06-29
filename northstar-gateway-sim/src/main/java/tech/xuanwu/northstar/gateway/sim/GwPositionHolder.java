@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import com.google.protobuf.InvalidProtocolBufferException;
 
 import tech.xuanwu.northstar.common.exception.TradeException;
+import tech.xuanwu.northstar.common.model.ContractManager;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.HedgeFlagEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
@@ -29,7 +30,7 @@ class GwPositionHolder {
 
 	private String gatewayId;
 	
-	private Map<String, ContractField> contractMap;
+	private ContractManager contractMgr;
 	
 	/**
 	 * unifiedSymbol -> positionBuilder
@@ -71,9 +72,9 @@ class GwPositionHolder {
 		}
 	};
 	
-	protected GwPositionHolder(String gatewayId, Map<String, ContractField> contractMap) {
+	protected GwPositionHolder(String gatewayId, ContractManager contractMgr) {
 		this.gatewayId = gatewayId;
-		this.contractMap = contractMap;
+		this.contractMgr = contractMgr;
 	}
 	
 	/**
@@ -356,7 +357,7 @@ class GwPositionHolder {
 	}
 	
 	private Optional<PositionField> updatePositionBy(TickField tick, ConcurrentHashMap<String, PositionField.Builder> positionMap) {
-		ContractField contract = contractMap.get(tick.getUnifiedSymbol());
+		ContractField contract = contractMgr.getContract(tick.getUnifiedSymbol());
 		if(contract == null) {
 			return Optional.empty();
 		}

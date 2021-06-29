@@ -1,22 +1,20 @@
 package tech.xuanwu.northstar.gateway.sim;
 
-import java.util.Map;
-
+import tech.xuanwu.northstar.common.model.ContractManager;
 import tech.xuanwu.northstar.engine.event.FastEventEngine;
-import xyz.redtorch.pb.CoreField.ContractField;
 
 public class SimFactory {
 	
 	private String gatewayId;
 	private FastEventEngine feEngine;
 	private int ticksOfCommission;
-	private Map<String, ContractField> contractMap;
+	private ContractManager contractMgr;
 	
-	public SimFactory(String gatewayId, FastEventEngine feEngine, int ticksOfCommission, Map<String, ContractField> contractMap) {
+	public SimFactory(String gatewayId, FastEventEngine feEngine, int ticksOfCommission, ContractManager contractMgr) {
 		this.gatewayId = gatewayId;
 		this.feEngine = feEngine;
 		this.ticksOfCommission = ticksOfCommission;
-		this.contractMap = contractMap;
+		this.contractMgr = contractMgr;
 	}
 
 	public GwAccountHolder newGwAccountHolder() {
@@ -24,11 +22,11 @@ public class SimFactory {
 	}
 	
 	public GwPositionHolder newGwPositionHolder() {
-		return new GwPositionHolder(gatewayId, contractMap);
+		return new GwPositionHolder(gatewayId, contractMgr);
 	}
 	
 	public GwOrderHolder newGwOrderHolder() {
-		return new GwOrderHolder(gatewayId, ticksOfCommission, contractMap);
+		return new GwOrderHolder(gatewayId, ticksOfCommission, contractMgr);
 	}
 	
 }

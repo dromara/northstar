@@ -13,6 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.common.constant.DateTimeConstant;
+import tech.xuanwu.northstar.common.model.ContractManager;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreEnum.OrderStatusEnum;
@@ -31,7 +32,7 @@ class GwOrderHolder {
 	
 	private String gatewayId;
 	
-	private Map<String, ContractField> contractMap;
+	private ContractManager contractMgr;
 	
 	private int ticksOfCommission;
 	
@@ -47,10 +48,10 @@ class GwOrderHolder {
 	
 	private volatile String tradingDay = "";
 	
-	public GwOrderHolder (String gatewayId, int ticksOfCommission, Map<String, ContractField> contractMap) {
+	public GwOrderHolder (String gatewayId, int ticksOfCommission, ContractManager contractMgr) {
 		this.gatewayId = gatewayId;
 		this.ticksOfCommission = ticksOfCommission;
-		this.contractMap = contractMap;
+		this.contractMgr = contractMgr;
 	}
 	
 	private OrderField.Builder makeOrder(SubmitOrderReqField submitOrderReq){
@@ -173,7 +174,7 @@ class GwOrderHolder {
 					
 					OrderField of = ob.build();
 					
-					ContractField contract = contractMap.get(unifiedSymbol);
+					ContractField contract = contractMgr.getContract(unifiedSymbol);
 					// 计算成交
 					TradeField trade = TradeField.newBuilder()
 							.setTradeId(System.currentTimeMillis()+"")
