@@ -30,7 +30,9 @@ import tech.xuanwu.northstar.service.ModuleService;
 	"accountEventHandler",
 	"contractEventHandler",
 	"connectionEventHandler",
-	"tradeEventHandler"
+	"tradeEventHandler",
+	"ctpGatewayFactory",
+	"simGatewayFactory"
 	})
 @Configuration
 public class ServiceConfig {
