@@ -93,7 +93,9 @@ public class SimGatewayTest {
 		
 		int costOfCommission = 1;
 		SimFactory simFactory = new SimFactory("testGateway", feEngine, costOfCommission, contractMgr);
-		gateway = new SimGatewayLocalImpl(feEngine, gwSettings, simFactory.newGwAccountHolder());
+		GwAccountHolder accHolder = simFactory.newGwAccountHolder();
+		accHolder.testFlag = true;
+		gateway = new SimGatewayLocalImpl(feEngine, gwSettings, accHolder);
 	}
 
 	// 出入金验证
