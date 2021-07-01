@@ -31,6 +31,8 @@ class GwAccountHolder {
 
 	private int ticksOfCommission;
 	
+	private long lastEmitTime;
+	
 	public GwAccountHolder(String gatewayId, FastEventEngine feEngine, int ticksOfCommission, SimFactory factory) {
 		this.feEngine = feEngine;
 		this.accBuilder = AccountField.newBuilder()
@@ -82,7 +84,10 @@ class GwAccountHolder {
 		// 可用资金 = 当前权益 - 持仓保证金 - 委托单保证金
 		accBuilder.setAvailable(accBuilder.getBalance() - accBuilder.getMargin());
 
-		feEngine.emitEvent(NorthstarEventType.ACCOUNT, accBuilder.build());
+		if(System.currentTimeMillis() - lastEmitTime > 1000) {			
+			lastEmitTime = System.currentTimeMillis();
+			feEngine.emitEvent(NorthstarEventType.ACCOUNT, accBuilder.build());
+		}
 	}
 
 	/**
