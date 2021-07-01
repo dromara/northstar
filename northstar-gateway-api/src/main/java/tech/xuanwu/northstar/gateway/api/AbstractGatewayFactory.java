@@ -1,7 +1,6 @@
-package tech.xuanwu.northstar.factories;
+package tech.xuanwu.northstar.gateway.api;
 
 import tech.xuanwu.northstar.common.model.GatewayDescription;
-import tech.xuanwu.northstar.gateway.api.Gateway;
 
 public abstract class AbstractGatewayFactory {
 	

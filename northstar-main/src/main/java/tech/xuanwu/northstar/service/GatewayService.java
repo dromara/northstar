@@ -23,17 +23,17 @@ import tech.xuanwu.northstar.common.model.SimSettings;
 import tech.xuanwu.northstar.domain.GatewayConnection;
 import tech.xuanwu.northstar.domain.MarketGatewayConnection;
 import tech.xuanwu.northstar.domain.TraderGatewayConnection;
-import tech.xuanwu.northstar.factories.AbstractGatewayFactory;
-import tech.xuanwu.northstar.factories.CtpGatewayFactory;
-import tech.xuanwu.northstar.factories.SimGatewayFactory;
+import tech.xuanwu.northstar.gateway.api.AbstractGatewayFactory;
 import tech.xuanwu.northstar.gateway.api.Gateway;
 import tech.xuanwu.northstar.gateway.sim.SimGateway;
+import tech.xuanwu.northstar.gateway.sim.SimGatewayFactory;
 import tech.xuanwu.northstar.gateway.sim.SimMarket;
 import tech.xuanwu.northstar.manager.GatewayAndConnectionManager;
 import tech.xuanwu.northstar.persistence.GatewayRepository;
 import tech.xuanwu.northstar.persistence.MarketDataRepository;
 import tech.xuanwu.northstar.persistence.po.GatewayPO;
 import tech.xuanwu.northstar.utils.CodecUtils;
+import xyz.redtorch.gateway.ctp.x64v6v3v15v.CtpGatewayFactory;
 
 /**
  * 网关服务

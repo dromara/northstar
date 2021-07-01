@@ -21,9 +21,8 @@ import com.mongodb.MongoClient;
 import tech.xuanwu.northstar.common.model.ContractManager;
 import tech.xuanwu.northstar.domain.account.TradeDayAccount;
 import tech.xuanwu.northstar.engine.event.FastEventEngine;
-import tech.xuanwu.northstar.factories.AbstractGatewayFactory;
-import tech.xuanwu.northstar.factories.CtpGatewayFactory;
-import tech.xuanwu.northstar.factories.SimGatewayFactory;
+import tech.xuanwu.northstar.gateway.api.AbstractGatewayFactory;
+import tech.xuanwu.northstar.gateway.sim.SimGatewayFactory;
 import tech.xuanwu.northstar.gateway.sim.SimMarket;
 import tech.xuanwu.northstar.gateway.sim.persistence.SimAccountRepository;
 import tech.xuanwu.northstar.interceptor.AuthorizationInterceptor;
@@ -31,6 +30,7 @@ import tech.xuanwu.northstar.manager.BarBufferManager;
 import tech.xuanwu.northstar.manager.GatewayAndConnectionManager;
 import tech.xuanwu.northstar.persistence.MarketDataRepository;
 import tech.xuanwu.northstar.utils.MongoClientAdapter;
+import xyz.redtorch.gateway.ctp.x64v6v3v15v.CtpGatewayFactory;
 
 /**
  * 配置转换器
@@ -121,9 +121,8 @@ public class AppConfig implements WebMvcConfigurer {
 	}
 	
 	@Bean
-	public AbstractGatewayFactory simGatewayFactory(FastEventEngine fastEventEngine, SimMarket simMarket, ContractManager contractMgr,
-			SimAccountRepository simAccRepo) {
-		return new SimGatewayFactory(fastEventEngine, simMarket, contractMgr, simAccRepo);
+	public AbstractGatewayFactory simGatewayFactory(FastEventEngine fastEventEngine, SimMarket simMarket, ContractManager contractMgr) {
+		return new SimGatewayFactory(fastEventEngine, simMarket, contractMgr);
 	}
 	
 }
