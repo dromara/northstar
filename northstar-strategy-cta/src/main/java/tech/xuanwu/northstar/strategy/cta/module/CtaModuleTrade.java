@@ -121,9 +121,11 @@ public class CtaModuleTrade implements ModuleTrade {
 		}
 		String unifiedSymbol = trade.getContract().getUnifiedSymbol();
 		if(trade.getOffsetFlag() == OffsetFlagEnum.OF_Open) {
-			openingTradeMap.putIfAbsent(unifiedSymbol, new LinkedList<>()).add(trade);
+			openingTradeMap.putIfAbsent(unifiedSymbol, new LinkedList<>());
+			openingTradeMap.get(unifiedSymbol).add(trade);
 		} else {
-			closingTradeMap.putIfAbsent(unifiedSymbol, new LinkedList<>()).add(trade);
+			closingTradeMap.putIfAbsent(unifiedSymbol, new LinkedList<>());
+			closingTradeMap.get(unifiedSymbol).add(trade);
 		}
 	}
 

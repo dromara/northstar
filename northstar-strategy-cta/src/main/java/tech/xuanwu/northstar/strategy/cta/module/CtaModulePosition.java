@@ -45,7 +45,8 @@ public class CtaModulePosition implements ModulePosition{
 		for(TradeField t : openTrades) {
 			if(t.getOffsetFlag() == OffsetFlagEnum.OF_Open) {
 				String unifiedSymbol = t.getContract().getUnifiedSymbol();
-				this.openTradeMap.putIfAbsent(unifiedSymbol, new LinkedList<>()).add(t);
+				this.openTradeMap.putIfAbsent(unifiedSymbol, new LinkedList<>());
+				this.openTradeMap.get(unifiedSymbol).add(t);
 				this.positionProfitMap.put(t, new AtomicInteger(0));
 				if(lastOpeningTime == null) {
 					lastOpeningTime = LocalDateTime.ofEpochSecond(t.getTradeTimestamp() / 1000, 0, ZoneOffset.ofHours(8));
@@ -92,7 +93,8 @@ public class CtaModulePosition implements ModulePosition{
 		String unifiedSymbol = trade.getContract().getUnifiedSymbol();
 		if(trade.getOffsetFlag() == OffsetFlagEnum.OF_Open) {
 			//开仓成交
-			openTradeMap.putIfAbsent(unifiedSymbol, new LinkedList<>()).add(trade);
+			openTradeMap.putIfAbsent(unifiedSymbol, new LinkedList<>());
+			openTradeMap.get(unifiedSymbol).add(trade);
 			positionProfitMap.putIfAbsent(trade, new AtomicInteger(0));
 			if(lastOpeningTime == null) {
 				lastOpeningTime = LocalDateTime.ofEpochSecond(trade.getTradeTimestamp() / 1000, 0, ZoneOffset.ofHours(8));
