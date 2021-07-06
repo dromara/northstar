@@ -1,7 +1,6 @@
 package tech.xuanwu.northstar.strategy.cta.module;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.*;
 
 import org.junit.Test;
 
@@ -29,12 +28,14 @@ public class CtaModuleTradeTest {
 										.setOffsetFlag(OffsetFlagEnum.OF_Open)
 										.setContract(contract)
 										.setPrice(1234)
+										.setVolume(1)
 										.build();
 	private TradeField closeTrade = TradeField.newBuilder()
-										.setDirection(DirectionEnum.D_Buy)
-										.setOffsetFlag(OffsetFlagEnum.OF_Open)
+										.setDirection(DirectionEnum.D_Sell)
+										.setOffsetFlag(OffsetFlagEnum.OF_Close)
 										.setContract(contract)
 										.setPrice(1204)
+										.setVolume(1)
 										.build();
 	
 	

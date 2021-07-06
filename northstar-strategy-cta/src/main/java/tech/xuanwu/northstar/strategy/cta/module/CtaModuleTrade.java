@@ -48,8 +48,8 @@ public class CtaModuleTrade implements ModuleTrade {
 			tempOpeningTrade.addAll(openingTradeMap.get(curSymbol));
 			
 			while(tempClosingTrade.size() > 0) {
-				TradeField closingDeal = tempClosingTrade.peekFirst();
-				TradeField openingDeal = tempOpeningTrade.peekFirst();
+				TradeField closingDeal = tempClosingTrade.pollFirst();
+				TradeField openingDeal = tempOpeningTrade.pollFirst();
 				if(closingDeal == null || openingDeal == null 
 						|| closingDeal.getTradeTimestamp() < openingDeal.getTradeTimestamp()) {
 					throw new IllegalStateException("存在异常的平仓合约找不到对应的开仓合约");
