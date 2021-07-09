@@ -70,6 +70,10 @@ public class StrategyModule {
 	}
 	
 	public StrategyModule onTick(TickField tick) {
+		if(!agent.isEnabled()) {
+			//停用期间忽略TICK数据更新
+			return this;
+		}
 		if(signalPolicy.bindedUnifiedSymbols().contains(tick.getUnifiedSymbol())) {			
 			agent.updateTradingDay(tick.getTradingDay());
 			signalPolicy.updateTick(tick);
@@ -82,6 +86,10 @@ public class StrategyModule {
 	}
 	
 	public StrategyModule onBar(BarField bar) {
+		if(!agent.isEnabled()) {
+			//停用期间忽略TICK数据更新
+			return this;
+		}
 		signalPolicy.updateBar(bar);
 		return this;
 	}
@@ -115,6 +123,10 @@ public class StrategyModule {
 	
 	public ModuleState getState() {
 		return agent.getModuleState();
+	}
+	
+	public boolean isEnabled() {
+		return agent.isEnabled();
 	}
 	
 	public void toggleRunningState() {

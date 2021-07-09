@@ -131,6 +131,14 @@ public class ModuleAgent implements EventDrivenComponent{
 	}
 	
 	/**
+	 * 是否启用
+	 * @return
+	 */
+	public boolean isEnabled() {
+		return enabled;
+	}
+	
+	/**
 	 * 是否有下单记录
 	 * @param orderId
 	 * @return
