@@ -29,7 +29,7 @@ public class ModuleAgent implements EventDrivenComponent{
 	
 	/**
 	 * 用于记录模组发出的订单
-	 * orderId --> order
+	 * originalOrderId --> order
 	 */
 	private final Map<String, OrderField> orderMap = new HashMap<>();
 	/**
@@ -72,6 +72,8 @@ public class ModuleAgent implements EventDrivenComponent{
 		if(!StringUtils.equals(this.tradingDay, tradingDay)) {
 			this.tradingDay = tradingDay;
 			currentDayTrade.clear();
+			originOrderIdSet.clear();
+			orderMap.clear();
 		}
 	}
 	
@@ -143,16 +145,18 @@ public class ModuleAgent implements EventDrivenComponent{
 	 * @param orderId
 	 * @return
 	 */
-	public boolean hasOrderRecord(String orderId) {
-		return orderMap.containsKey(orderId) || originOrderIdSet.contains(orderId);
+	public boolean hasOrderRecord(String originalOrderId) {
+		return orderMap.containsKey(originalOrderId) || originOrderIdSet.contains(originalOrderId);
 	}
 	
 	/**
 	 * 获取当天开仓次数
 	 * @return
 	 */
-	public int numOfOpeningForToday(){
-		return 0;
+	public long numOfOpeningForToday(){
+		return currentDayTrade.stream()
+				.filter(t -> t.getOffsetFlag() == OffsetFlagEnum.OF_Open)
+				.count();
 	}
 	
 	/**
@@ -160,11 +164,19 @@ public class ModuleAgent implements EventDrivenComponent{
 	 * @param order
 	 */
 	public void onOrder(OrderField order) {
+		if(!originOrderIdSet.contains(order.getOriginOrderId())) {
+			log.warn("该订单并不在模组的登记列表中，忽略不处理：{}", order);
+			return;
+		}
 		if(order.getOrderStatus() == OrderStatusEnum.OS_Canceled
 				|| order.getOrderStatus() == OrderStatusEnum.OS_Rejected) {
+			orderMap.remove(order.getOriginOrderId());
 			orderMap.remove(order.getOrderId());
+			state = ModuleState.EMPTY;
 		}else {
+			orderMap.put(order.getOriginOrderId(), order);
 			orderMap.put(order.getOrderId(), order);
+			state = ModuleState.PENDING_ORDER;
 		}
 	}
 	
@@ -173,7 +185,8 @@ public class ModuleAgent implements EventDrivenComponent{
 	 * @param trade
 	 */
 	public void onTrade(TradeField trade) {
-		OrderField order = orderMap.remove(trade.getOrderId());
+		OrderField order = orderMap.remove(trade.getOriginOrderId());
+		orderMap.remove(trade.getOrderId());
 		if(order != null) {
 			originOrderIdSet.remove(order.getOriginOrderId());
 			currentDayTrade.add(trade);
@@ -202,9 +215,9 @@ public class ModuleAgent implements EventDrivenComponent{
 				log.info("没有对应的模组持仓，所以忽略平仓请求");
 				return;
 			}
-			state = ModuleState.PENDING_ORDER;
 			originOrderIdSet.add(orderReq.getOriginOrderId());
 			gateway.submitOrder(orderReq);	
+			state = ModuleState.PLACING_ORDER;	
 			
 		} else if(ModuleEventType.ORDER_REQ_CREATED == event.getEventType()) {
 			state = ModuleState.PLACING_ORDER;	

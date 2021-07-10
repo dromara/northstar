@@ -102,7 +102,7 @@ public class StrategyModule {
 	}
 	
 	public StrategyModule onTrade(TradeField trade) {
-		if(agent.hasOrderRecord(trade.getOrderId())) {
+		if(agent.hasOrderRecord(trade.getOriginOrderId())) {
 			mTrade.updateTrade(trade);
 			mPosition.onTrade(trade);
 			agent.onTrade(trade);
