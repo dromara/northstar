@@ -35,6 +35,7 @@ import tech.xuanwu.northstar.persistence.MarketDataRepository;
 import tech.xuanwu.northstar.persistence.po.GatewayPO;
 import tech.xuanwu.northstar.utils.CodecUtils;
 import xyz.redtorch.gateway.ctp.x64v6v3v15v.CtpGatewayFactory;
+import xyz.redtorch.gateway.ctp.x64v6v3v15v.CtpTradeNowFactory;
 
 /**
  * 网关服务
@@ -95,6 +96,8 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 			factory = ctx.getBean(CtpGatewayFactory.class);
 		} else if(gatewayDescription.getGatewayType() == GatewayType.SIM) {
 			factory = ctx.getBean(SimGatewayFactory.class);
+		} else if(gatewayDescription.getGatewayType() == GatewayType.TradeNow) {
+			factory = ctx.getBean(CtpTradeNowFactory.class);
 		} else if(gatewayDescription.getGatewayType() == GatewayType.IB) {
 			// TODO IB网关
 		} else {
@@ -131,18 +134,9 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 	 */
 	public boolean deleteGateway(String gatewayId) {
 		log.info("移除网关[{}]", gatewayId);
-		boolean flag = doDeleteGateway(gatewayId);
-		gatewayRepo.deleteById(gatewayId);
-		mdRepo.dropGatewayData(gatewayId);
-		return flag;
-	}
-	
-	private boolean doDeleteGateway(String gatewayId) {
 		GatewayConnection conn = null;
-		Gateway gateway = null;
 		if(gatewayConnMgr.exist(gatewayId)) {
 			conn = gatewayConnMgr.getGatewayConnectionById(gatewayId);
-			gateway = gatewayConnMgr.getGatewayByConnection(conn);
 		} else {
 			throw new NoSuchElementException("没有该网关记录：" +  gatewayId);
 		}
@@ -156,6 +150,15 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 				}
 			}
 		}
+		boolean flag = doDeleteGateway(gatewayId);
+		gatewayRepo.deleteById(gatewayId);
+		mdRepo.dropGatewayData(gatewayId);
+		return flag;
+	}
+	
+	private boolean doDeleteGateway(String gatewayId) {
+		GatewayConnection conn = gatewayConnMgr.getGatewayConnectionById(gatewayId);
+		Gateway gateway = gatewayConnMgr.getGatewayByConnection(conn);
 		gatewayConnMgr.removePair(conn);
 		if(gateway instanceof SimGateway) {
 			String mdGatewayId = conn.getGwDescription().getBindedMktGatewayId();
@@ -255,7 +258,7 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 				throw new IllegalStateException("解码字符串非法，很可能是临时文件夹" + System.getProperty("user.home") + File.separator
 						+ "NorthstarRandomSalt这个盐文件与加密时的不一致导致无法解码。解决办法：手动移除旧的Gateway数据，重新录入，并确保盐文件不会丢失。");
 			}
-			if(gd.getGatewayType() == GatewayType.CTP) {
+			if(gd.getGatewayType() == GatewayType.CTP || gd.getGatewayType() == GatewayType.TradeNow) {
 				CtpSettings settings = JSON.parseObject(decodeStr, CtpSettings.class);
 				gd.setSettings(settings);
 			}
