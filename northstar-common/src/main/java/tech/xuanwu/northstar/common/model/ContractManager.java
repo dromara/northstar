@@ -4,8 +4,6 @@ import java.lang.ref.WeakReference;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -32,7 +30,6 @@ public class ContractManager {
 	 * unifiedSymbol -> contract
 	 */
 	private Map<String, WeakReference<ContractField>> contractMap = new HashMap<>(DEFAULT_SIZE);
-	private List<WeakReference<ContractField>> contractList = new LinkedList<>();
 	
 	
 	private Set<ProductClassEnum> canHandleTypes = new HashSet<>();
@@ -53,8 +50,7 @@ public class ContractManager {
 		WeakReference<ContractField> ref = new WeakReference<>(contract);
 		contractMap.put(unifiedSymbol, ref);
 		contractTbl.put(gatewayId, symbol, contract);
-		contractList.add(ref);
-		log.info("加入合约：网关{}, 合约{}, 累计总合约数{}个", gatewayId, symbol, contractList.size());
+		log.info("加入合约：网关{}, 合约{}, 网关累计总合约数{}个", gatewayId, symbol, contractTbl.row(gatewayId).size());
 		return true;
 	}
 	
@@ -75,7 +71,7 @@ public class ContractManager {
 	}
 	
 	public Collection<ContractField> getAllContracts(){
-		return contractList.stream()
+		return contractMap.values().stream()
 				.filter(i -> i.get() != null)
 				.map(i -> i.get())
 				.collect(Collectors.toList());
