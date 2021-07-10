@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
@@ -132,6 +133,7 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 		log.info("移除网关[{}]", gatewayId);
 		boolean flag = doDeleteGateway(gatewayId);
 		gatewayRepo.deleteById(gatewayId);
+		mdRepo.dropGatewayData(gatewayId);
 		return flag;
 	}
 	
@@ -146,6 +148,13 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 		}
 		if(conn.isConnected()) {
 			throw new IllegalStateException("非断开状态的网关不能删除");
+		}
+		if(conn.getGwDescription().getGatewayUsage() == GatewayUsage.MARKET_DATA) {			
+			for(GatewayConnection gc : gatewayConnMgr.getAllConnections()) {
+				if(StringUtils.equals(gc.getGwDescription().getBindedMktGatewayId(), gatewayId)) {
+					throw new IllegalStateException("仍有账户网关与本行情网关存在绑定关系，请先解除绑定！");
+				}
+			}
 		}
 		gatewayConnMgr.removePair(conn);
 		if(gateway instanceof SimGateway) {

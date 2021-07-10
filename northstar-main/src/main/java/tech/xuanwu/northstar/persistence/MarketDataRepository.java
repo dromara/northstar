@@ -55,6 +55,17 @@ public class MarketDataRepository {
 		mongo.indexOps(collectionName).ensureIndex(indexDefinition);
 		
 	}
+
+	/**
+	 * 移除行情表
+	 * @param gatewayId
+	 */
+	public void dropGatewayData(String gatewayId) {
+		String collectionName = COLLECTION_PREFIX + gatewayId;
+		if(mongo.collectionExists(collectionName)) {
+			mongo.dropCollection(collectionName);
+		}
+	}
 	
 	/**
 	 * 保存数据
