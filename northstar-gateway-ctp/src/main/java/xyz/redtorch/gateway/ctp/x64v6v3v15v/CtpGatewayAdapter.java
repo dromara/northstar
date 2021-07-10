@@ -69,6 +69,10 @@ public class CtpGatewayAdapter extends GatewayAbstract implements MarketGateway,
 			logger.warn("加载运行库失败", e);
 		}
 	}
+	
+	public static void main(String[] args) {
+		System.out.println("done");
+	}
 
 	private MdSpi mdSpi = null;
 	private TdSpi tdSpi = null;
