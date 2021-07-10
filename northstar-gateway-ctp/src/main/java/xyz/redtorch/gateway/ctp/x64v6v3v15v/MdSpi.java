@@ -22,6 +22,7 @@ import tech.xuanwu.northstar.common.constant.DateTimeConstant;
 import tech.xuanwu.northstar.common.event.NorthstarEventType;
 import tech.xuanwu.northstar.common.utils.CommonUtils;
 import tech.xuanwu.northstar.common.utils.MarketTimeUtil;
+import tech.xuanwu.northstar.gateway.api.GatewayAbstract;
 import xyz.redtorch.gateway.ctp.x64v6v3v15v.api.CThostFtdcDepthMarketDataField;
 import xyz.redtorch.gateway.ctp.x64v6v3v15v.api.CThostFtdcForQuoteRspField;
 import xyz.redtorch.gateway.ctp.x64v6v3v15v.api.CThostFtdcMdApi;
@@ -44,7 +45,7 @@ public class MdSpi extends CThostFtdcMdSpi {
 
 	private static final Logger logger = LoggerFactory.getLogger(MdSpi.class);
 
-	private CtpGatewayAdapter ctpGatewayAdapter;
+	private GatewayAbstract gatewayAdapter;
 	private String mdHost;
 	private String mdPort;
 	private String brokerId;
@@ -60,14 +61,14 @@ public class MdSpi extends CThostFtdcMdSpi {
 	
 	private MarketTimeUtil mktTimeUtil = new CtpMarketTimeUtil();
 
-	MdSpi(CtpGatewayAdapter ctpGatewayAdapter) {
-		this.ctpGatewayAdapter = ctpGatewayAdapter;
-		this.mdHost = ctpGatewayAdapter.getGatewaySetting().getCtpApiSetting().getMdHost();
-		this.mdPort = ctpGatewayAdapter.getGatewaySetting().getCtpApiSetting().getMdPort();
-		this.brokerId = ctpGatewayAdapter.getGatewaySetting().getCtpApiSetting().getBrokerId();
-		this.userId = ctpGatewayAdapter.getGatewaySetting().getCtpApiSetting().getUserId();
-		this.password = ctpGatewayAdapter.getGatewaySetting().getCtpApiSetting().getPassword();
-		this.gatewayId = ctpGatewayAdapter.getGatewaySetting().getGatewayId();
+	MdSpi(GatewayAbstract gatewayAdapter) {
+		this.gatewayAdapter = gatewayAdapter;
+		this.mdHost = gatewayAdapter.getGatewaySetting().getCtpApiSetting().getMdHost();
+		this.mdPort = gatewayAdapter.getGatewaySetting().getCtpApiSetting().getMdPort();
+		this.brokerId = gatewayAdapter.getGatewaySetting().getCtpApiSetting().getBrokerId();
+		this.userId = gatewayAdapter.getGatewaySetting().getCtpApiSetting().getUserId();
+		this.password = gatewayAdapter.getGatewaySetting().getCtpApiSetting().getPassword();
+		this.gatewayId = gatewayAdapter.getGatewaySetting().getGatewayId();
 		this.logInfo = "行情网关ID-[" + this.gatewayId + "] [→] ";
 	}
 
@@ -88,7 +89,7 @@ public class MdSpi extends CThostFtdcMdSpi {
 
 		connectionStatus = CONNECTION_STATUS_CONNECTING;
 		loginStatus = false;
-		ctpGatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.CONNECTING, gatewayId);
+		gatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.CONNECTING, gatewayId);
 
 		if (cThostFtdcMdApi != null) {
 			try {
@@ -148,7 +149,7 @@ public class MdSpi extends CThostFtdcMdSpi {
 					Thread.sleep(15 * 1000);
 					if (!isConnected()) {
 						logger.error("{}行情接口连接超时,尝试断开", logInfo);
-						ctpGatewayAdapter.disconnect();
+						gatewayAdapter.disconnect();
 					}
 
 				} catch (Throwable t) {
@@ -166,7 +167,7 @@ public class MdSpi extends CThostFtdcMdSpi {
 			logger.warn("{}行情接口实例开始关闭并释放", logInfo);
 			loginStatus = false;
 			connectionStatus = CONNECTION_STATUS_DISCONNECTING;
-			ctpGatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.DISCONNECTING, gatewayId);
+			gatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.DISCONNECTING, gatewayId);
 			if (cThostFtdcMdApi != null) {
 				try {
 					CThostFtdcMdApi cThostFtdcMdApiForRelease = cThostFtdcMdApi;
@@ -190,7 +191,7 @@ public class MdSpi extends CThostFtdcMdSpi {
 				}
 			}
 			connectionStatus = CONNECTION_STATUS_DISCONNECTED;
-			ctpGatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.DISCONNECTED, gatewayId);
+			gatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.DISCONNECTED, gatewayId);
 			logger.warn("{}行情接口实例关闭并释放", logInfo);
 		} else {
 			logger.warn("{}行情接口实例不存在,无需关闭释放", logInfo);
@@ -283,9 +284,9 @@ public class MdSpi extends CThostFtdcMdSpi {
 	public void OnFrontDisconnected(int nReason) {
 		try {
 			logger.warn("{}行情接口前置机已断开, 原因:{}", logInfo, nReason);
-			ctpGatewayAdapter.disconnect();
+			gatewayAdapter.disconnect();
 			
-			ctpGatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.DISCONNECTED, gatewayId);
+			gatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.DISCONNECTED, gatewayId);
 			
 		} catch (Throwable t) {
 			logger.error("{} OnFrontDisconnected Exception", logInfo, t);
@@ -308,13 +309,13 @@ public class MdSpi extends CThostFtdcMdSpi {
 					cThostFtdcMdApi.SubscribeMarketData(symbolArray, subscribedSymbolSet.size());
 				}
 				
-				ctpGatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.CONNECTED, gatewayId);
-				ctpGatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.TRADE_DATE, tradingDay);
+				gatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.CONNECTED, gatewayId);
+				gatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.TRADE_DATE, tradingDay);
 			} else {
 				logger.warn("{}行情接口登录回报错误 错误ID:{},错误信息:{}", logInfo, pRspInfo.getErrorID(), pRspInfo.getErrorMsg());
 				// 不合法的登录
 				if (pRspInfo.getErrorID() == 3) {
-					ctpGatewayAdapter.setAuthErrorFlag(true);
+					gatewayAdapter.setAuthErrorFlag(true);
 				}
 			}
 
@@ -396,12 +397,12 @@ public class MdSpi extends CThostFtdcMdSpi {
 			try {
 				String symbol = pDepthMarketData.getInstrumentID();
 				
-				if (!ctpGatewayAdapter.contractMap.containsKey(symbol)) {
+				if (!gatewayAdapter.contractMap.containsKey(symbol)) {
 					logger.warn("{}行情接口收到合约{}数据,但尚未获取到合约信息,丢弃", logInfo, symbol);
 					return;
 				}
 
-				ContractField contract = ctpGatewayAdapter.contractMap.get(symbol);
+				ContractField contract = gatewayAdapter.contractMap.get(symbol);
 
 				String actionDay = pDepthMarketData.getActionDay();
 				actionDay = StringUtils.isEmpty(actionDay) ? LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER) : actionDay;
@@ -545,7 +546,7 @@ public class MdSpi extends CThostFtdcMdSpi {
 
 				preTickMap.put(contractId, tick);
 
-				ctpGatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.TICK, tick);
+				gatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.TICK, tick);
 				
 			} catch (Throwable t) {
 				logger.error("{} OnRtnDepthMarketData Exception", logInfo, t);

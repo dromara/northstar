@@ -1,7 +1,12 @@
 package tech.xuanwu.northstar.gateway.api;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import lombok.extern.slf4j.Slf4j;
+import tech.xuanwu.northstar.engine.event.FastEventEngine;
 import xyz.redtorch.pb.CoreEnum.GatewayTypeEnum;
+import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.GatewaySettingField;
 
 @Slf4j
@@ -16,6 +21,10 @@ public abstract class GatewayAbstract implements Gateway {
 	protected String gatewayTradingDay;
 
 	protected GatewaySettingField gatewaySetting;
+	
+	protected FastEventEngine fastEventEngine;
+	
+	public Map<String, ContractField> contractMap = new HashMap<>();
 
 	public GatewayAbstract(GatewaySettingField gatewaySetting) {
 		this.gatewaySetting = gatewaySetting;
@@ -37,7 +46,14 @@ public abstract class GatewayAbstract implements Gateway {
 	}
 
 	protected String getLogInfo() {
-		return this.logInfo;
+		return logInfo;
 	}
 
+	public FastEventEngine getEventEngine() {
+		return fastEventEngine;
+	}
+	
+	public void setAuthErrorFlag(boolean flag){
+		autoErrorFlag = flag;
+	}
 }

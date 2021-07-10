@@ -32,6 +32,7 @@ import tech.xuanwu.northstar.service.ModuleService;
 	"connectionEventHandler",
 	"tradeEventHandler",
 	"ctpGatewayFactory",
+	"ctpTradeNowFactory",
 	"simGatewayFactory"
 	})
 @Configuration

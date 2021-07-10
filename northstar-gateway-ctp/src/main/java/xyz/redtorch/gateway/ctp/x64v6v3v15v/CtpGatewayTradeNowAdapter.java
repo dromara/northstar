@@ -20,9 +20,9 @@ import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.GatewaySettingField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 
-public class CtpGatewayAdapter extends GatewayAbstract implements MarketGateway, TradeGateway {
+public class CtpGatewayTradeNowAdapter extends GatewayAbstract implements MarketGateway, TradeGateway {
 
-	private static final Logger logger = LoggerFactory.getLogger(CtpGatewayAdapter.class);
+	private static final Logger logger = LoggerFactory.getLogger(CtpGatewayTradeNowAdapter.class);
 
 	static {
 		String envTmpDir = "";
@@ -35,19 +35,19 @@ public class CtpGatewayAdapter extends GatewayAbstract implements MarketGateway,
 				tempLibPath = envTmpDir + File.separator + "xyz" + File.separator + "redtorch" + File.separator + "api" + File.separator + "jctp" + File.separator + "lib" + File.separator
 						+ "jctpv6v3v15x64api" + File.separator;
 
-				copyURLToFileForTmp(tempLibPath, CtpGatewayAdapter.class.getResource("/assembly/libiconv.dll"));
-				copyURLToFileForTmp(tempLibPath, CtpGatewayAdapter.class.getResource("/assembly/jctpv6v3v15x64api/thostmduserapi_se.dll"));
-				copyURLToFileForTmp(tempLibPath, CtpGatewayAdapter.class.getResource("/assembly/jctpv6v3v15x64api/thosttraderapi_se.dll"));
-				copyURLToFileForTmp(tempLibPath, CtpGatewayAdapter.class.getResource("/assembly/jctpv6v3v15x64api/jctpv6v3v15x64api.dll"));
+				copyURLToFileForTmp(tempLibPath, CtpGatewayTradeNowAdapter.class.getResource("/tradenow/libiconv.dll"));
+				copyURLToFileForTmp(tempLibPath, CtpGatewayTradeNowAdapter.class.getResource("/tradenow/jctpv6v3v15x64api/thostmduserapi_se.dll"));
+				copyURLToFileForTmp(tempLibPath, CtpGatewayTradeNowAdapter.class.getResource("/tradenow/jctpv6v3v15x64api/thosttraderapi_se.dll"));
+				copyURLToFileForTmp(tempLibPath, CtpGatewayTradeNowAdapter.class.getResource("/tradenow/jctpv6v3v15x64api/jctpv6v3v15x64api.dll"));
 			} else {
 
 				envTmpDir = "/tmp";
 				tempLibPath = envTmpDir + File.separator + "xyz" + File.separator + "redtorch" + File.separator + "api" + File.separator + "jctp" + File.separator + "lib" + File.separator
 						+ "jctpv6v3v15x64api" + File.separator;
 
-				copyURLToFileForTmp(tempLibPath, CtpGatewayAdapter.class.getResource("/assembly/jctpv6v3v15x64api/libthostmduserapi_se.so"));
-				copyURLToFileForTmp(tempLibPath, CtpGatewayAdapter.class.getResource("/assembly/jctpv6v3v15x64api/libthosttraderapi_se.so"));
-				copyURLToFileForTmp(tempLibPath, CtpGatewayAdapter.class.getResource("/assembly/jctpv6v3v15x64api/libjctpv6v3v15x64api.so"));
+				copyURLToFileForTmp(tempLibPath, CtpGatewayTradeNowAdapter.class.getResource("/tradenow/jctpv6v3v15x64api/thostmduserapi_se.so"));
+				copyURLToFileForTmp(tempLibPath, CtpGatewayTradeNowAdapter.class.getResource("/tradenow/jctpv6v3v15x64api/thosttraderapi_se.so"));
+				copyURLToFileForTmp(tempLibPath, CtpGatewayTradeNowAdapter.class.getResource("/tradenow/jctpv6v3v15x64api/libjctpv6v3v15x64api.so"));
 			}
 		} catch (Exception e) {
 			logger.warn("复制运行库失败", e);
@@ -61,8 +61,8 @@ public class CtpGatewayAdapter extends GatewayAbstract implements MarketGateway,
 				System.load(tempLibPath + File.separator + "thosttraderapi_se.dll");
 				System.load(tempLibPath + File.separator + "jctpv6v3v15x64api.dll");
 			} else {
-				System.load(tempLibPath + File.separator + "libthostmduserapi_se.so");
-				System.load(tempLibPath + File.separator + "libthosttraderapi_se.so");
+				System.load(tempLibPath + File.separator + "thostmduserapi_se.so");
+				System.load(tempLibPath + File.separator + "thosttraderapi_se.so");
 				System.load(tempLibPath + File.separator + "libjctpv6v3v15x64api.so");
 			}
 		} catch (Exception e) {
@@ -73,10 +73,9 @@ public class CtpGatewayAdapter extends GatewayAbstract implements MarketGateway,
 	private MdSpi mdSpi = null;
 	private TdSpi tdSpi = null;
 	
+	public Map<String, ContractField> contractMap = new HashMap<>();
 	
-	
-	
-	public CtpGatewayAdapter(FastEventEngine fastEventEngine, GatewaySettingField gatewaySetting) {
+	public CtpGatewayTradeNowAdapter(FastEventEngine fastEventEngine, GatewaySettingField gatewaySetting) {
 		super(gatewaySetting);
 
 		if (gatewaySetting.getGatewayType() == GatewayTypeEnum.GTE_Trade) {
