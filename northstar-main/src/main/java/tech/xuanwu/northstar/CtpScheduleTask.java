@@ -2,7 +2,9 @@ package tech.xuanwu.northstar;
 
 import java.time.LocalDateTime;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -24,6 +26,9 @@ public class CtpScheduleTask {
 	
 	@Autowired
 	private BarBufferManager bbMgr;
+	
+	@Value("${spring.profiles.active}")
+	private String profile;
 
 	@Scheduled(cron="0 0/1 0-1,9-14,21-23 ? * 1-5")
 	public void timelyCheckConnection() {
@@ -76,4 +81,12 @@ public class CtpScheduleTask {
 		log.info("日结算定时任务");
 	}
 
+	@Scheduled(cron="10 0/1 * * * *")
+	public void timelySaveDevBar() {
+		if(StringUtils.equals(profile, "prod")) {
+			return;
+		}
+		bbMgr.saveAndClear();
+		log.info("开发时间定时持久化Bar数据任务");
+	}
 }
