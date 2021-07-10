@@ -42,5 +42,5 @@ public interface ModulePosition {
 	 * 更新成交
 	 * @param order
 	 */
-	void onTrade(TradeField order);
+	void onTrade(TradeField trade);
 }

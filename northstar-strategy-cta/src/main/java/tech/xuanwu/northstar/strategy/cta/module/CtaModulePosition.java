@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +14,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.lang3.StringUtils;
 
+import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.strategy.common.ModulePosition;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
@@ -21,18 +23,22 @@ import xyz.redtorch.pb.CoreField.TradeField;
 
 /**
  * 用于记录模组持仓状态,以计算持仓盈亏,持仓状态,持仓时间,以及冻结仓位情况
+ * 注意：对于CTA策略而言，其持仓在任意时间只应该有且仅有一个合约品种持仓
+ * 若多于一个合约品种，属于异常情况
  * @author KevinHuangwl
  *
  */
+@Slf4j
 public class CtaModulePosition implements ModulePosition{
 	
-	/**
-	 * 暂存开仓成交,用于计算持仓盈亏,以及计算持仓状态
-	 * unifiedSymbol --> trade
-	 */
-	private Map<String, LinkedList<TradeField>> openTradeMap = new HashMap<>();
-	
 	private LocalDateTime lastOpeningTime;
+	
+	/**
+	 * 当前持仓合约
+	 */
+	private String currentUnifiedSymbolInPosition;
+	
+	private LinkedList<TradeField> tradeList = new LinkedList<>();
 	
 	/**
 	 * TradeField --> Profit
@@ -44,10 +50,8 @@ public class CtaModulePosition implements ModulePosition{
 	public CtaModulePosition(List<TradeField> openTrades) {
 		for(TradeField t : openTrades) {
 			if(t.getOffsetFlag() == OffsetFlagEnum.OF_Open) {
-				String unifiedSymbol = t.getContract().getUnifiedSymbol();
-				this.openTradeMap.putIfAbsent(unifiedSymbol, new LinkedList<>());
-				this.openTradeMap.get(unifiedSymbol).add(t);
-				this.positionProfitMap.put(t, new AtomicInteger(0));
+				currentUnifiedSymbolInPosition = t.getContract().getUnifiedSymbol();
+				positionProfitMap.put(t, new AtomicInteger(0));
 				if(lastOpeningTime == null) {
 					lastOpeningTime = LocalDateTime.ofEpochSecond(t.getTradeTimestamp() / 1000, 0, ZoneOffset.ofHours(8));
 				}
@@ -58,9 +62,7 @@ public class CtaModulePosition implements ModulePosition{
 	@Override
 	public List<TradeField> getOpenningTrade() {
 		List<TradeField> result = new ArrayList<>();
-		for(Entry<String, LinkedList<TradeField>> e : openTradeMap.entrySet()) {
-			result.addAll(e.getValue());
-		}
+		result.addAll(positionProfitMap.keySet());
 		return result;
 	}
 
@@ -87,15 +89,19 @@ public class CtaModulePosition implements ModulePosition{
 	// TODO 以后再考虑锁仓情况
 	@Override
 	public void onTrade(TradeField trade) {
+		if(StringUtils.isNotBlank(currentUnifiedSymbolInPosition) 
+				&& !StringUtils.equals(trade.getContract().getUnifiedSymbol(), currentUnifiedSymbolInPosition)) {
+			log.warn("持仓合约 - [{}] 与成交合约 - [{}] 不一致，忽略更新", currentUnifiedSymbolInPosition, trade.getContract().getUnifiedSymbol());
+			return;
+		}
+		currentUnifiedSymbolInPosition = trade.getContract().getUnifiedSymbol();
 		if(trade.getOffsetFlag() == OffsetFlagEnum.OF_Unkonwn) {
 			throw new IllegalStateException("未定义成交类型");
 		}
-		String unifiedSymbol = trade.getContract().getUnifiedSymbol();
 		if(trade.getOffsetFlag() == OffsetFlagEnum.OF_Open) {
 			//开仓成交
-			openTradeMap.putIfAbsent(unifiedSymbol, new LinkedList<>());
-			openTradeMap.get(unifiedSymbol).add(trade);
 			positionProfitMap.putIfAbsent(trade, new AtomicInteger(0));
+			tradeList.add(trade);
 			if(lastOpeningTime == null) {
 				lastOpeningTime = LocalDateTime.ofEpochSecond(trade.getTradeTimestamp() / 1000, 0, ZoneOffset.ofHours(8));
 			}
@@ -103,19 +109,23 @@ public class CtaModulePosition implements ModulePosition{
 			//平仓成交
 			int targetConsume = trade.getVolume();
 			while(targetConsume > 0) {
-				TradeField openingDeal = openTradeMap.get(unifiedSymbol).peekFirst();
+				TradeField openingDeal = tradeList.pollFirst();
 				positionProfitMap.remove(openingDeal);
-				if(openingDeal.getVolume() < targetConsume) {
+				if(openingDeal.getVolume() <= targetConsume) {
 					targetConsume -= openingDeal.getVolume();
 				} else if(openingDeal.getVolume() > targetConsume) {
 					int volDif = openingDeal.getVolume() - targetConsume;
 					targetConsume = 0;
 					TradeField restTrade = TradeField.newBuilder(openingDeal).setVolume(volDif).build();
-					openTradeMap.get(unifiedSymbol).offerFirst(restTrade);
-				} else {					
-					lastOpeningTime = null;
+					tradeList.offerFirst(restTrade);
+					positionProfitMap.put(restTrade, new AtomicInteger(0));
 				}
 			}
+		}
+		
+		if(positionProfitMap.size() == 0) {
+			currentUnifiedSymbolInPosition = null;
+			lastOpeningTime = null;
 		}
 	}
 
