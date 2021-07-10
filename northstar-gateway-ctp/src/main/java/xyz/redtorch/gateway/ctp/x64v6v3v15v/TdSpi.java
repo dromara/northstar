@@ -1014,7 +1014,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 			cThostFtdcTraderApi.ReqQryInvestor(pQryInvestor, reqId.addAndGet(1));
 		} catch (Throwable t) {
 			logger.error("{}处理结算单确认回报错误", logInfo, t);
-			gatewayAdapter.disconnect();
+//			gatewayAdapter.disconnect();
 		}
 	}
 
