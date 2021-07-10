@@ -28,7 +28,7 @@ public class BarBufferManager {
 	
 	public synchronized void saveAndClear() {
 		if(bufData.size() == 0) {
-			log.debug("没有数据需要保存");
+			log.info("没有数据需要保存");
 			return;
 		}
 		LinkedList<MinBarDataPO> bufDataTemp = bufData;

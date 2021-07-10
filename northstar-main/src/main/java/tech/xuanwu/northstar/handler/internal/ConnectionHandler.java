@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import lombok.extern.slf4j.Slf4j;
+import tech.xuanwu.northstar.common.constant.Constants;
 import tech.xuanwu.northstar.common.event.AbstractEventHandler;
 import tech.xuanwu.northstar.common.event.GenericEventHandler;
 import tech.xuanwu.northstar.common.event.NorthstarEvent;
@@ -61,6 +62,10 @@ public class ConnectionHandler extends AbstractEventHandler implements GenericEv
 			Gateway gateway = gatewayConnMgr.getGatewayByConnection(conn);
 			if(gateway instanceof MarketGateway) {
 				for(ContractField c : contractMgr.getAllContracts()) {
+					if(c.getSymbol().contains(Constants.INDEX_SUFFIX)) {
+						//跳过指数合约
+						continue;
+					}
 					((MarketGateway) gateway).subscribe(c);
 				}
 			}
