@@ -46,7 +46,6 @@ public class ContractManager {
 		String gatewayId = contract.getGatewayId();
 		String symbol = contract.getSymbol();
 		String unifiedSymbol = contract.getUnifiedSymbol();
-//		groupContract(contract);
 		WeakReference<ContractField> ref = new WeakReference<>(contract);
 		contractMap.put(unifiedSymbol, ref);
 		contractTbl.put(gatewayId, symbol, contract);

@@ -31,6 +31,7 @@ import xyz.redtorch.gateway.ctp.x64v6v3v15v.api.CThostFtdcReqUserLoginField;
 import xyz.redtorch.gateway.ctp.x64v6v3v15v.api.CThostFtdcRspInfoField;
 import xyz.redtorch.gateway.ctp.x64v6v3v15v.api.CThostFtdcRspUserLoginField;
 import xyz.redtorch.gateway.ctp.x64v6v3v15v.api.CThostFtdcSpecificInstrumentField;
+import xyz.redtorch.gateway.ctp.x64v6v3v15v.api.CThostFtdcTraderApi;
 import xyz.redtorch.gateway.ctp.x64v6v3v15v.api.CThostFtdcUserLogoutField;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
@@ -70,6 +71,7 @@ public class MdSpi extends CThostFtdcMdSpi {
 		this.password = gatewayAdapter.getGatewaySetting().getCtpApiSetting().getPassword();
 		this.gatewayId = gatewayAdapter.getGatewaySetting().getGatewayId();
 		this.logInfo = "行情网关ID-[" + this.gatewayId + "] [→] ";
+		logger.info("当前MdApi版本号：{}", CThostFtdcMdApi.GetApiVersion());
 	}
 
 	private CThostFtdcMdApi cThostFtdcMdApi;

@@ -200,6 +200,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 		this.userProductInfo = gatewayAdapter.getGatewaySetting().getCtpApiSetting().getUserProductInfo();
 		this.gatewayId = gatewayAdapter.getGatewaySetting().getGatewayId();
 		this.logInfo = "交易网关ID-[" + this.gatewayId + "] [→] ";
+		logger.info("当前TdApi版本号：{}", CThostFtdcTraderApi.GetApiVersion());
 	}
 	
 	
@@ -344,7 +345,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 		new Thread() {
 			public void run() {
 				try {
-					Thread.sleep(15 * 1000);
+					Thread.sleep(45 * 1000);
 					if (!(isConnected() && investorNameQueried && instrumentQueried)) {
 						logger.error("{}交易接口连接超时,尝试断开", logInfo);
 						gatewayAdapter.disconnect();
@@ -996,7 +997,9 @@ public class TdSpi extends CThostFtdcTraderSpi {
 	// 确认结算信息回报
 	public void OnRspSettlementInfoConfirm(CThostFtdcSettlementInfoConfirmField pSettlementInfoConfirm, CThostFtdcRspInfoField pRspInfo, int nRequestID, boolean bIsLast) {
 		try {
-			if (pRspInfo.getErrorID() == 0) {
+			if(pRspInfo == null) {
+				logger.warn("交易结算信息为空");
+			} else if (pRspInfo.getErrorID() == 0) {
 				logger.warn("{}交易接口结算信息确认完成", logInfo);
 			} else {
 				logger.error("{}交易接口结算信息确认出错 错误ID:{},错误信息:{}", logInfo, pRspInfo.getErrorID(), pRspInfo.getErrorMsg());
