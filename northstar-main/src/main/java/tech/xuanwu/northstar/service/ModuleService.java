@@ -186,6 +186,7 @@ public class ModuleService implements InitializingBean{
 				.gateway((TradeGateway)gateway)
 				.enabled(info.isEnabled())
 				.state(state)
+				.modulePosition(mPosition)
 				.build();
 		
 		signalPolicy.setRefBarData(barDataMap);

@@ -14,8 +14,6 @@ import tech.xuanwu.northstar.common.event.NorthstarEvent;
 import tech.xuanwu.northstar.common.event.NorthstarEventType;
 import tech.xuanwu.northstar.common.event.PluginEventBus;
 import xyz.redtorch.pb.CoreField.NoticeField;
-import xyz.redtorch.pb.CoreField.OrderField;
-import xyz.redtorch.pb.CoreField.TradeField;
 
 @Component
 public class NotificationDispatcher extends AbstractEventHandler implements InitializingBean, GenericEventHandler{
@@ -33,8 +31,6 @@ public class NotificationDispatcher extends AbstractEventHandler implements Init
 			add(NorthstarEventType.NOTICE);
 			add(NorthstarEventType.CONNECTED);
 			add(NorthstarEventType.DISCONNECTED);
-			add(NorthstarEventType.ORDER);
-			add(NorthstarEventType.TRADE);
 		}
 	};
 	
@@ -62,12 +58,6 @@ public class NotificationDispatcher extends AbstractEventHandler implements Init
 		case DISCONNECTED:
 			handleDisconnection((String) e.getData());
 			break;
-		case ORDER:
-			handleOrder((OrderField) e.getData());
-			break;
-		case TRADE:
-			handleTrade((TradeField) e.getData());
-			break;
 		default:
 			throw new IllegalArgumentException("未定义处理类型：" + e.getEvent());
 		}
@@ -86,16 +76,6 @@ public class NotificationDispatcher extends AbstractEventHandler implements Init
 	
 	private void handleDisconnection(String gatewayId) {
 		Message msg = new Message(String.format("[%s] - 离线", gatewayId), "");
-		doSend(msg);
-	}
-	
-	private void handleOrder(OrderField order) {
-		Message msg = new Message(order);
-		doSend(msg);
-	}
-	
-	private void handleTrade(TradeField trade) {
-		Message msg = new Message(trade);
 		doSend(msg);
 	}
 	

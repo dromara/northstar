@@ -9,6 +9,9 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Component;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Component
 public class MailMessageSender implements MessageSender{
 	
@@ -31,7 +34,11 @@ public class MailMessageSender implements MessageSender{
 		mail.setSubject(message.getTitle());
 		mail.setText(message.getContent());
 		
-		mailSender.send(mail);
+		try {			
+			mailSender.send(mail);
+		} catch(Exception e) {
+			log.warn("邮件发送异常：{} -> {}", message.getTitle(), message.getContent());
+		}
 	}
 
 }
