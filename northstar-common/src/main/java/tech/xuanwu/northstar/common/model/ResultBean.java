@@ -1,11 +1,9 @@
 package tech.xuanwu.northstar.common.model;
 
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import tech.xuanwu.northstar.common.constant.ReturnCode;
 
 @Data
-@NoArgsConstructor
 public class ResultBean<T> {
 	/**
 	 * 返回码

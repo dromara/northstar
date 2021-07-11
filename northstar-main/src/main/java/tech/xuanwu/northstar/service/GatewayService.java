@@ -18,6 +18,7 @@ import tech.xuanwu.northstar.common.constant.GatewayType;
 import tech.xuanwu.northstar.common.constant.GatewayUsage;
 import tech.xuanwu.northstar.common.event.InternalEventBus;
 import tech.xuanwu.northstar.common.exception.NoSuchElementException;
+import tech.xuanwu.northstar.common.model.ContractManager;
 import tech.xuanwu.northstar.common.model.CtpSettings;
 import tech.xuanwu.northstar.common.model.GatewayDescription;
 import tech.xuanwu.northstar.common.model.SimSettings;
@@ -26,6 +27,7 @@ import tech.xuanwu.northstar.domain.MarketGatewayConnection;
 import tech.xuanwu.northstar.domain.TraderGatewayConnection;
 import tech.xuanwu.northstar.gateway.api.AbstractGatewayFactory;
 import tech.xuanwu.northstar.gateway.api.Gateway;
+import tech.xuanwu.northstar.gateway.api.MarketGateway;
 import tech.xuanwu.northstar.gateway.sim.SimGateway;
 import tech.xuanwu.northstar.gateway.sim.SimGatewayFactory;
 import tech.xuanwu.northstar.gateway.sim.SimMarket;
@@ -59,13 +61,16 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 	
 	private ApplicationContext ctx;
 	
+	private ContractManager contractMgr;
+	
 	public GatewayService(GatewayAndConnectionManager gatewayConnMgr, GatewayRepository gatewayRepo, MarketDataRepository mdRepo,
-			InternalEventBus eventBus, SimMarket simMarket) {
+			InternalEventBus eventBus, SimMarket simMarket, ContractManager contractMgr) {
 		this.gatewayConnMgr = gatewayConnMgr;
 		this.gatewayRepo = gatewayRepo;
 		this.mdRepo = mdRepo;
 		this.eventBus = eventBus;
 		this.simMarket = simMarket;
+		this.contractMgr = contractMgr;
 	}
 	
 	/**
@@ -245,6 +250,16 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 		SimGateway gateway = (SimGateway) gatewayConnMgr.getGatewayById(gatewayId);
 		gateway.moneyIO(money);
 		return true;
+	}
+	
+	/**
+	 * 手工订阅合约
+	 * @param gatewayId
+	 * @param symbol
+	 */
+	public void subcribeContract(String gatewayId, String symbol) {
+		MarketGateway gateway = (MarketGateway) gatewayConnMgr.getGatewayById(gatewayId);
+		gateway.subscribe(contractMgr.getContract(gatewayId, symbol));
 	}
 	
 	@Override
