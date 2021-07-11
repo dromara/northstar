@@ -3,6 +3,8 @@ package tech.xuanwu.northstar.plugin.mail;
 import java.time.ZoneOffset;
 import java.util.Date;
 
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
@@ -13,7 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
-public class MailMessageSender implements MessageSender{
+public class MailMessageSender implements MessageSender, InitializingBean{
 	
 	@Autowired
 	private JavaMailSender mailSender; 
@@ -26,6 +28,9 @@ public class MailMessageSender implements MessageSender{
 
 	@Override
 	public void send(Message message) {
+		if(StringUtils.isEmpty(senderMail) || StringUtils.isEmpty(subscriber)) {
+			return;
+		}
 		
 		SimpleMailMessage mail = new SimpleMailMessage();
 		mail.setFrom(senderMail);
@@ -38,6 +43,13 @@ public class MailMessageSender implements MessageSender{
 			mailSender.send(mail);
 		} catch(Exception e) {
 			log.warn("邮件发送异常：{} -> {}", message.getTitle(), message.getContent());
+		}
+	}
+
+	@Override
+	public void afterPropertiesSet() throws Exception {
+		if(StringUtils.isEmpty(senderMail) || StringUtils.isEmpty(subscriber)) {
+			log.warn("未设置邮件收发方，邮件通知将不生效");
 		}
 	}
 

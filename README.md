@@ -78,7 +78,8 @@ cd ~
 git clone https://gitee.com/KevinHuangwl/northstar.git
 ```
 
-修改配置文件中的邮箱代理配置
+修改northstar/northstar-main/src/main/resources/application.yml配置文件中的邮箱代理配置  
+(若不使用邮件通知功能，可以忽略此步)
 ```
 spring:
   ...
@@ -133,6 +134,8 @@ cd ~/logs/
 ```
 kill `pgrep java`
 ```
+
+
 
 
 ## 注意事项
