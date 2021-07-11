@@ -249,4 +249,8 @@ public class ModuleAgent implements EventDrivenComponent{
 	public void setEventBus(ModuleEventBus moduleEventBus) {
 		// DO NOTHING
 	}
+	
+	public OffsetFlagEnum getClosingOffsetFlag() {
+		return modulePosition.getClosingOffsetFlag(tradingDay);
+	}
 }

@@ -5,7 +5,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +16,7 @@ import org.apache.commons.lang3.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.strategy.common.ModulePosition;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
+import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreField.TickField;
 import xyz.redtorch.pb.CoreField.TradeField;
@@ -50,6 +50,7 @@ public class CtaModulePosition implements ModulePosition{
 	public CtaModulePosition(List<TradeField> openTrades) {
 		for(TradeField t : openTrades) {
 			if(t.getOffsetFlag() == OffsetFlagEnum.OF_Open) {
+				tradeList.add(t);
 				currentUnifiedSymbolInPosition = t.getContract().getUnifiedSymbol();
 				positionProfitMap.put(t, new AtomicInteger(0));
 				if(lastOpeningTime == null) {
@@ -134,5 +135,20 @@ public class CtaModulePosition implements ModulePosition{
 		return positionProfitMap.values()
 				.stream()
 				.reduce(0, (i, item) -> i + item.get(), (a, b) -> a + b);
+	}
+
+	@Override
+	public OffsetFlagEnum getClosingOffsetFlag(String tradingDay) {
+		TradeField trade = tradeList.peekFirst();
+		// 非上期合约，直接用Close
+		if(trade.getContract().getExchange() != ExchangeEnum.SHFE) {
+			return OffsetFlagEnum.OF_Close;
+		}
+		
+		// 对于上期合约，根据开仓时间计算
+		if(StringUtils.equals(tradingDay, trade.getTradingDay())) {
+			return OffsetFlagEnum.OF_CloseToday;
+		}
+		return OffsetFlagEnum.OF_CloseYesterday;
 	}
 }

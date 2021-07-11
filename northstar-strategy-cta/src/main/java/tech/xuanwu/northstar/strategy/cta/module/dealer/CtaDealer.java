@@ -80,7 +80,7 @@ public class CtaDealer implements Dealer {
 		if(currentSignal != null) {
 			log.info("交易策略生成订单");
 			DirectionEnum direction = currentSignal.getState().isBuy() ? DirectionEnum.D_Buy : DirectionEnum.D_Sell;
-			OffsetFlagEnum offsetFlag = currentSignal.getState().isOpen() ? OffsetFlagEnum.OF_Open : OffsetFlagEnum.OF_Close;
+			OffsetFlagEnum offsetFlag = currentSignal.getState().isOpen() ? OffsetFlagEnum.OF_Open : agent.getClosingOffsetFlag();
 			// FIXME 未考虑反手处理
 			// 按信号下单
 			currentOrderReq = SubmitOrderReqField.newBuilder()

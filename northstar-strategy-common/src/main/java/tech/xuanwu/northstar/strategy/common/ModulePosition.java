@@ -3,6 +3,7 @@ package tech.xuanwu.northstar.strategy.common;
 import java.time.Duration;
 import java.util.List;
 
+import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreField.TickField;
 import xyz.redtorch.pb.CoreField.TradeField;
 
@@ -42,4 +43,10 @@ public interface ModulePosition {
 	 * @param order
 	 */
 	void onTrade(TradeField trade);
+	
+	/**
+	 * 获取平仓指令
+	 * @return
+	 */
+	OffsetFlagEnum getClosingOffsetFlag(String tradingDay);
 }
