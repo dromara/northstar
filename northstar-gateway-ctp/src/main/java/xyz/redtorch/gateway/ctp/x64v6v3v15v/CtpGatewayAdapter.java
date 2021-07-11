@@ -200,14 +200,14 @@ public class CtpGatewayAdapter extends GatewayAbstract implements MarketGateway,
 				tdSpi = new TdSpi(this);
 			}
 		} else if (gatewaySetting.getGatewayType() == GatewayTypeEnum.GTE_MarketData) {
-			if (tdSpi == null) {
+			if (mdSpi == null) {
 				mdSpi = new MdSpi(this);
 			}
 		} else {
 			if (tdSpi == null) {
 				tdSpi = new TdSpi(this);
 			}
-			if (tdSpi == null) {
+			if (mdSpi == null) {
 				mdSpi = new MdSpi(this);
 			}
 		}
