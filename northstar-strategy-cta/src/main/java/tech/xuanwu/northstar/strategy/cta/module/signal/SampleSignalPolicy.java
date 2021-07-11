@@ -3,6 +3,7 @@ package tech.xuanwu.northstar.strategy.cta.module.signal;
 import java.time.LocalTime;
 import java.util.UUID;
 
+import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.strategy.common.SignalPolicy;
 import tech.xuanwu.northstar.strategy.common.annotation.Label;
 import tech.xuanwu.northstar.strategy.common.annotation.StrategicComponent;
@@ -18,6 +19,7 @@ import tech.xuanwu.northstar.strategy.common.model.meta.DynamicParams;
  * @author KevinHuangwl
  *
  */
+@Slf4j
 @StrategicComponent("示例策略")	// 该注解是用于给策略命名用的
 public class SampleSignalPolicy extends AbstractSignalPolicy
 	implements SignalPolicy //	所有的策略都应该是DynamicParamsAware的实现类
@@ -84,6 +86,7 @@ public class SampleSignalPolicy extends AbstractSignalPolicy
 	 */
 	@Override
 	protected void onMin(LocalTime time) {
+		log.info("策略每分钟触发");
 		CtaSignal.CtaSignalBuilder signal = CtaSignal.builder()
 				.bindedUnifiedSymbol(bindedUnifiedSymbol)
 				.id(UUID.randomUUID())

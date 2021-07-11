@@ -4,6 +4,9 @@ import java.time.LocalTime;
 import java.util.Map;
 import java.util.Set;
 
+import com.alibaba.fastjson.JSON;
+
+import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.common.constant.DateTimeConstant;
 import tech.xuanwu.northstar.strategy.common.SignalPolicy;
 import tech.xuanwu.northstar.strategy.common.event.ModuleEvent;
@@ -14,6 +17,7 @@ import tech.xuanwu.northstar.strategy.common.model.data.BarData;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.TickField;
 
+@Slf4j
 public abstract class AbstractSignalPolicy implements SignalPolicy {
 	
 	/**
@@ -77,6 +81,7 @@ public abstract class AbstractSignalPolicy implements SignalPolicy {
 	 * @param signal
 	 */
 	protected void emitSignal(CtaSignal signal) {
+		log.info("信号策略生成交易信号");
 		meb.post(ModuleEvent.builder()
 				.eventType(ModuleEventType.SIGNAL_CREATED)
 				.data(signal)

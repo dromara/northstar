@@ -10,6 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.gateway.api.TradeGateway;
+import tech.xuanwu.northstar.strategy.common.ModulePosition;
 import tech.xuanwu.northstar.strategy.common.constants.ModuleState;
 import tech.xuanwu.northstar.strategy.common.event.EventDrivenComponent;
 import tech.xuanwu.northstar.strategy.common.event.ModuleEvent;
@@ -55,6 +56,8 @@ public class ModuleAgent implements EventDrivenComponent{
 	private boolean enabled;
 	
 	private String tradingDay;
+	
+	private ModulePosition modulePosition;
 	
 	/**
 	 * 更新账户
@@ -173,10 +176,12 @@ public class ModuleAgent implements EventDrivenComponent{
 			orderMap.remove(order.getOriginOrderId());
 			orderMap.remove(order.getOrderId());
 			state = ModuleState.EMPTY;
+			log.info("模组[{}]撤单成功", name);
 		}else {
 			orderMap.put(order.getOriginOrderId(), order);
 			orderMap.put(order.getOrderId(), order);
 			state = ModuleState.PENDING_ORDER;
+			log.info("模组[{}]下单成功", name);
 		}
 	}
 	
@@ -192,8 +197,10 @@ public class ModuleAgent implements EventDrivenComponent{
 			currentDayTrade.add(trade);
 			if(trade.getOffsetFlag() == OffsetFlagEnum.OF_Open) {
 				state = ModuleState.HOLDING;
+				log.info("模组[{}]转为持仓", name);
 			} else {
 				state = ModuleState.EMPTY;
+				log.info("模组[{}]转为空仓", name);
 			}
 		}
 	}
@@ -210,7 +217,7 @@ public class ModuleAgent implements EventDrivenComponent{
 				state = ModuleState.EMPTY;
 				throw new IllegalArgumentException("未定义开平仓类型：" + orderReq) ;
 			}
-			if(orderReq.getOffsetFlag() != OffsetFlagEnum.OF_Open && state != ModuleState.HOLDING) {
+			if(orderReq.getOffsetFlag() != OffsetFlagEnum.OF_Open && modulePosition.getOpenningTrade().size() == 0) {
 				state = ModuleState.EMPTY;
 				log.info("没有对应的模组持仓，所以忽略平仓请求");
 				return;

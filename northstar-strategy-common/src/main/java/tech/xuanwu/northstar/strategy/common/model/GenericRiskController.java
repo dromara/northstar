@@ -45,7 +45,7 @@ public class GenericRiskController implements RiskController{
 
 	@Override
 	public void onTick(TickField tick) {
-		if(agent.getModuleState() == ModuleState.PENDING_ORDER) {
+		if(agent.getModuleState() == ModuleState.PLACING_ORDER) {
 			short result = RiskAuditResult.ACCEPTED;
 			// 只有开仓请求才需要风控审核
 			if(currentOrderReq.getOffsetFlag() == OffsetFlagEnum.OF_Open) {				
@@ -77,6 +77,7 @@ public class GenericRiskController implements RiskController{
 
 	@Override
 	public void approveOrder() {
+		log.info("通过风控审核，转发下单请求");
 		moduleEventBus.post(ModuleEvent.builder()
 				.eventType(ModuleEventType.ORDER_REQ_ACCEPTED)
 				.data(currentOrderReq)
@@ -94,6 +95,7 @@ public class GenericRiskController implements RiskController{
 
 	@Override
 	public void retryOrder() {
+		log.info("风控模块发出追单信号");
 		moduleEventBus.post(ModuleEvent.builder()
 				.eventType(ModuleEventType.ORDER_RETRY)
 				.data(currentOrderReq)

@@ -3,7 +3,6 @@ package tech.xuanwu.northstar.strategy.common;
 import java.time.Duration;
 import java.util.List;
 
-import xyz.redtorch.pb.CoreField.OrderField;
 import xyz.redtorch.pb.CoreField.TickField;
 import xyz.redtorch.pb.CoreField.TradeField;
 

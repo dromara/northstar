@@ -12,6 +12,7 @@ import tech.xuanwu.northstar.gateway.api.TradeGateway;
 import tech.xuanwu.northstar.strategy.common.constants.ModuleState;
 import tech.xuanwu.northstar.strategy.common.event.ModuleEvent;
 import tech.xuanwu.northstar.strategy.common.event.ModuleEventType;
+import tech.xuanwu.northstar.strategy.cta.module.CtaModulePosition;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
@@ -21,7 +22,8 @@ import xyz.redtorch.pb.CoreField.TradeField;
 
 public class ModuleAgentTest {
 
-	private ModuleAgent agent = new ModuleAgent("testModule", null, ModuleState.EMPTY, mock(TradeGateway.class), "testGateway", true, "20210711");
+	private ModuleAgent agent = new ModuleAgent("testModule", null, ModuleState.EMPTY,
+			mock(TradeGateway.class), "testGateway", true, "20210711",new CtaModulePosition());
 	
 	private ContractField contract = ContractField.newBuilder()
 			.setUnifiedSymbol("rb2110@SHFE@FUTURES")

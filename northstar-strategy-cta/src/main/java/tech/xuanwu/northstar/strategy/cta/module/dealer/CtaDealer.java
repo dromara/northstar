@@ -60,7 +60,7 @@ public class CtaDealer implements Dealer {
 	public void onEvent(ModuleEvent event) {
 		if(event.getEventType() == ModuleEventType.SIGNAL_CREATED) {
 			currentSignal = (CtaSignal) event.getData();
-			log.info("收到来自信号策略-[{}] 的信号：{}", currentSignal.getSignalClass().getName(), JSON.toJSONString(currentSignal));
+			log.info("收到来自信号策略-[{}] 的交易信号：{}", currentSignal.getSignalClass().getSimpleName(), JSON.toJSONString(currentSignal));
 			
 		} else if(event.getEventType() == ModuleEventType.ORDER_RETRY) {
 			currentOrderReq = (SubmitOrderReqField) event.getData();
@@ -68,7 +68,7 @@ public class CtaDealer implements Dealer {
 			
 		}
 	}
-
+	
 	@Override
 	public void setEventBus(ModuleEventBus moduleEventBus) {
 		this.moduleEventBus = moduleEventBus;
@@ -78,6 +78,7 @@ public class CtaDealer implements Dealer {
 	@Override
 	public void onTick(TickField tick) {
 		if(currentSignal != null) {
+			log.info("交易策略生成订单");
 			DirectionEnum direction = currentSignal.getState().isBuy() ? DirectionEnum.D_Buy : DirectionEnum.D_Sell;
 			OffsetFlagEnum offsetFlag = currentSignal.getState().isOpen() ? OffsetFlagEnum.OF_Open : OffsetFlagEnum.OF_Close;
 			// FIXME 未考虑反手处理
@@ -102,6 +103,7 @@ public class CtaDealer implements Dealer {
 			emitOrder();
 			
 		} else if(agent.getModuleState() == ModuleState.TRACING_ORDER) {
+			log.info("交易策略改价追单");
 			// 按前订单改价
 			currentOrderReq = SubmitOrderReqField.newBuilder(currentOrderReq)
 					.setOriginOrderId(UUID.randomUUID().toString())
@@ -112,6 +114,7 @@ public class CtaDealer implements Dealer {
 	}
 	
 	private void emitOrder() {
+		log.info("交易策略把交易信号转成下单请求");
 		moduleEventBus.post(ModuleEvent.builder()
 				.eventType(ModuleEventType.ORDER_REQ_CREATED)
 				.data(currentOrderReq)
