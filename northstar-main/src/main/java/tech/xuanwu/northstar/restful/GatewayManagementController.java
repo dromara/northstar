@@ -80,11 +80,4 @@ public class GatewayManagementController {
 		return new ResultBean<>(gatewayService.simMoneyIO(gatewayId, money));
 	}
 	
-	@GetMapping("/gateway/sub")
-	public ResultBean<Boolean> subscribeContract(String gatewayId, String symbol){
-		Assert.notNull(gatewayId, "网关ID不能为空");
-		Assert.notNull(symbol, "合约ID不能为空");
-		gatewayService.subcribeContract(gatewayId, symbol);
-		return new ResultBean<>(true);
-	}
 }
