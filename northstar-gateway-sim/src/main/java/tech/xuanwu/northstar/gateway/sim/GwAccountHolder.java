@@ -104,6 +104,8 @@ class GwAccountHolder {
 		}
 		accBuilder.setDeposit(accBuilder.getDeposit() + money);
 		refreshAccount();
+		//需要立即更新账户
+		feEngine.emitEvent(NorthstarEventType.ACCOUNT, accBuilder.build());
 	}
 
 	/**
@@ -117,6 +119,8 @@ class GwAccountHolder {
 		}
 		accBuilder.setWithdraw(accBuilder.getWithdraw() + money);
 		refreshAccount();
+		//需要立即更新账户
+		feEngine.emitEvent(NorthstarEventType.ACCOUNT, accBuilder.build());
 	}
 
 	/**
