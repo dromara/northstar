@@ -5,7 +5,6 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -93,7 +92,7 @@ class GwOrderHolder {
 		if(cost > af.getAvailable()) {
 			ob.setOrderStatus(OrderStatusEnum.OS_Rejected);
 			ob.setStatusMsg("资金不足");
-			log.warn("资金不足，无法下单");
+			log.warn("资金不足，无法下单。当前可用资金：{}，下单成本：{}，订单：{}", af.getAvailable(), cost, submitOrderReq);
 			return ob.build();
 		}
 		
@@ -109,7 +108,7 @@ class GwOrderHolder {
 		if(pf == null) {
 			ob.setOrderStatus(OrderStatusEnum.OS_Rejected);
 			ob.setStatusMsg("仓位不足");
-			log.warn("仓位不足，无法下单");
+			log.warn("仓位不足，无法下单：{}", submitOrderReq);
 			return ob.build();
 		}
 		int totalAvailable = pf.getPosition() - pf.getFrozen();
@@ -120,7 +119,7 @@ class GwOrderHolder {
 				|| totalAvailable < submitOrderReq.getVolume()) {
 			ob.setOrderStatus(OrderStatusEnum.OS_Rejected);
 			ob.setStatusMsg("仓位不足");
-			log.warn("仓位不足，无法下单");
+			log.warn("仓位不足，无法下单：{}", submitOrderReq);
 			return ob.build();
 		}
 		
@@ -189,7 +188,8 @@ class GwOrderHolder {
 							.setOriginOrderId(order.getOriginOrderId())
 							.setPrice(order.getDirection() == DirectionEnum.D_Buy ? tick.getAskPrice(0) : tick.getBidPrice(0))
 							.setPriceSource(PriceSourceEnum.PSRC_LastPrice)
-							.setTradeDate(tradingDay)
+							.setTradeDate(LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
+							.setTradingDay(tradingDay)
 							.setTradeTime(LocalTime.now().format(DateTimeConstant.T_FORMAT_FORMATTER))
 							.setVolume(order.getTotalVolume())
 							.build();

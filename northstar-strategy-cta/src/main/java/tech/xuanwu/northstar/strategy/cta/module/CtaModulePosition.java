@@ -144,7 +144,7 @@ public class CtaModulePosition implements ModulePosition{
 		if(trade.getContract().getExchange() != ExchangeEnum.SHFE) {
 			return OffsetFlagEnum.OF_Close;
 		}
-		
+		log.info("开仓日期：{}, 当前交易日：{}", trade.getTradingDay(), tradingDay);
 		// 对于上期合约，根据开仓时间计算
 		if(StringUtils.equals(tradingDay, trade.getTradingDay())) {
 			return OffsetFlagEnum.OF_CloseToday;

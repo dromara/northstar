@@ -7,6 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.eventbus.EventBus;
 
+import tech.xuanwu.northstar.common.event.InternalEventBus;
 import tech.xuanwu.northstar.common.event.NorthstarEvent;
 import tech.xuanwu.northstar.common.event.NorthstarEventType;
 import tech.xuanwu.northstar.common.exception.InsufficientException;
@@ -47,9 +48,9 @@ public class TradeDayAccount {
 	
 	private String accountId;
 	
-	protected EventBus eventBus;
+	protected InternalEventBus eventBus;
 	
-	public TradeDayAccount(String gatewayId, EventBus eventBus, ContractManager contractMgr) {
+	public TradeDayAccount(String gatewayId, InternalEventBus eventBus, ContractManager contractMgr) {
 		this.accountId = gatewayId;
 		this.eventBus = eventBus;
 		this.contractMgr = contractMgr;
