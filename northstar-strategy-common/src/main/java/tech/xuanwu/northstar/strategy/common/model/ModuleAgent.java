@@ -231,6 +231,7 @@ public class ModuleAgent implements EventDrivenComponent{
 			
 		} else if(ModuleEventType.ORDER_RETRY == event.getEventType()) {
 			SubmitOrderReqField orderReq = (SubmitOrderReqField) event.getData();
+			originOrderIdSet.remove(orderReq.getOriginOrderId());
 			CancelOrderReqField cancelReq = CancelOrderReqField.newBuilder()
 					.setGatewayId(accountGatewayId)
 					.setOriginOrderId(orderReq.getOriginOrderId())
