@@ -45,8 +45,8 @@ public class GenericRiskController implements RiskController{
 
 	@Override
 	public void onTick(TickField tick) {
+		short result = RiskAuditResult.ACCEPTED;
 		if(agent.getModuleState() == ModuleState.PLACING_ORDER) {
-			short result = RiskAuditResult.ACCEPTED;
 			// 只有开仓请求才需要风控审核
 			if(currentOrderReq.getOffsetFlag() == OffsetFlagEnum.OF_Open) {				
 				for(RiskControlRule rule : rules) {
@@ -56,14 +56,20 @@ public class GenericRiskController implements RiskController{
 			if((result & RiskAuditResult.REJECTED) > 0) {
 				rejectOrder();
 				explain(tick, result);
-			} else if((result & RiskAuditResult.RETRY) > 0) {
-				retryOrder();
-				explain(tick, result);
 			} else if(result == RiskAuditResult.ACCEPTED) {
 				approveOrder();
 			} else {
 				explain(tick, result);
 			}
+		} else if(agent.getModuleState() == ModuleState.PENDING_ORDER) {
+			// 不管开仓还是平仓都需要检查是否需要追单
+			for(RiskControlRule rule : rules) {
+				result |= rule.canDeal(tick, agent);
+			}
+			if((result & RiskAuditResult.RETRY) > 0) {
+				retryOrder();
+				explain(tick, result);
+			} 
 		}
 	}
 	
