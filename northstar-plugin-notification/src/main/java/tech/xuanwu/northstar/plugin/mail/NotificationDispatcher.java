@@ -13,6 +13,8 @@ import tech.xuanwu.northstar.common.event.GenericEventHandler;
 import tech.xuanwu.northstar.common.event.NorthstarEvent;
 import tech.xuanwu.northstar.common.event.NorthstarEventType;
 import tech.xuanwu.northstar.common.event.PluginEventBus;
+import xyz.redtorch.pb.CoreEnum.DirectionEnum;
+import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreEnum.OrderStatusEnum;
 import xyz.redtorch.pb.CoreField.NoticeField;
 import xyz.redtorch.pb.CoreField.OrderField;
@@ -107,16 +109,25 @@ public class NotificationDispatcher extends AbstractEventHandler implements Init
 		if(!interestedOrderStatus.contains(order.getOrderStatus())) {
 			return;
 		}
-		Message msg = new Message(String.format("[%s] - 订单：%s，合约：%s %d手", 
-				gatewayId, order.getOrderStatus(), order.getContract().getName(), order.getTotalVolume()), 
-				String.format("合约：%s\n手数：%d\n已成交：%d\n价钱：%0.2f", 
+		String dir = order.getDirection() == DirectionEnum.D_Buy ? "多" :  order.getDirection() == DirectionEnum.D_Sell ? "空" : "无";
+		String offset = order.getOffsetFlag() == OffsetFlagEnum.OF_Open ? "开" : order.getOffsetFlag() == OffsetFlagEnum.OF_Unkonwn ? "无" : "平";
+		String status = order.getOrderStatus() == OrderStatusEnum.OS_AllTraded ? "全成" :
+			order.getOrderStatus() == OrderStatusEnum.OS_Canceled ? "已撤" :
+				order.getOrderStatus() == OrderStatusEnum.OS_Touched ? "已挂" :
+					order.getOrderStatus() == OrderStatusEnum.OS_Rejected ? "拒绝" : "";
+		Message msg = new Message(String.format("[%s] - 订单：%s，合约：%s %s %d手", 
+				gatewayId, status, order.getContract().getName(), dir+offset, order.getTotalVolume()), 
+				String.format("合约：%s\n手数：%d\n已成交：%d\n价钱：%.2f", 
 						order.getContract().getName(), order.getTotalVolume(), order.getTradedVolume(), order.getPrice()));
 		doSend(msg);
 	}
 	
 	private void handleTrade(TradeField trade) {
 		String gatewayId = trade.getGatewayId();
-		Message msg = new Message(String.format("[%s] - 成交合约：%s %d手", gatewayId, trade.getContract().getName(), trade.getVolume()),
+		String dir = trade.getDirection() == DirectionEnum.D_Buy ? "多" :  trade.getDirection() == DirectionEnum.D_Sell ? "空" : "无";
+		String offset = trade.getOffsetFlag() == OffsetFlagEnum.OF_Open ? "开" : trade.getOffsetFlag() == OffsetFlagEnum.OF_Unkonwn ? "无" : "平";
+		Message msg = new Message(String.format("[%s] - 成交合约：%s %s %d手", gatewayId, trade.getContract().getName(),
+				dir+offset, trade.getVolume()),
 				"");
 		doSend(msg);
 	}

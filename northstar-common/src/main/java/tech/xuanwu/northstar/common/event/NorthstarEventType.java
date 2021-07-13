@@ -43,6 +43,10 @@ public enum NorthstarEventType {
 	 */
 	NOTICE,
 	/**
+	 * 外部消息事件
+	 */
+	EXT_MSG,
+	/**
 	 * 合约事件
 	 */
 	CONTRACT,
