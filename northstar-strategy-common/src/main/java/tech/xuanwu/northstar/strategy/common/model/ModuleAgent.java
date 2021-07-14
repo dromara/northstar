@@ -175,7 +175,6 @@ public class ModuleAgent implements EventDrivenComponent{
 				|| order.getOrderStatus() == OrderStatusEnum.OS_Rejected) {
 			orderMap.remove(order.getOriginOrderId());
 			orderMap.remove(order.getOrderId());
-			state = ModuleState.EMPTY;
 			log.info("模组[{}]撤单成功", name);
 		}else {
 			orderMap.put(order.getOriginOrderId(), order);
@@ -239,6 +238,14 @@ public class ModuleAgent implements EventDrivenComponent{
 			state = ModuleState.TRACING_ORDER;
 			
 		} else if(ModuleEventType.ORDER_REQ_REJECTED == event.getEventType()) {
+			if(state == ModuleState.PENDING_ORDER) {				
+				SubmitOrderReqField orderReq = (SubmitOrderReqField) event.getData();
+				CancelOrderReqField cancelReq = CancelOrderReqField.newBuilder()
+						.setGatewayId(accountGatewayId)
+						.setOriginOrderId(orderReq.getOriginOrderId())
+						.build();
+				gateway.cancelOrder(cancelReq);	
+			}
 			state = ModuleState.EMPTY;
 			
 		}
