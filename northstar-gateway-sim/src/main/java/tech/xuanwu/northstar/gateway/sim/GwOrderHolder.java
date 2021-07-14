@@ -4,7 +4,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -44,8 +47,10 @@ class GwOrderHolder {
 	 */
 	private ConcurrentHashMap<String, String> originOrderIdMap = new ConcurrentHashMap<>(100);
 	private ConcurrentHashMap<TradeField, OrderField> doneOrderMap = new ConcurrentHashMap<>();
-	
-	private volatile String tradingDay = "";
+	/**
+	 * unifiedSymbol --> tradingDay
+	 */
+	private final Map<String,String> tradingDayMap = new HashMap<>(1000);
 	
 	public GwOrderHolder (String gatewayId, int ticksOfCommission, ContractManager contractMgr) {
 		this.gatewayId = gatewayId;
@@ -65,7 +70,7 @@ class GwOrderHolder {
 		ob.setOriginOrderId(originOrderId);
 		ob.setGatewayId(gatewayId);
 		ob.setVolumeCondition(submitOrderReq.getVolumeCondition());
-		ob.setTradingDay(tradingDay);
+		ob.setTradingDay(Optional.ofNullable(tradingDayMap.get(submitOrderReq.getContract().getUnifiedSymbol())).orElse(""));
 		ob.setOrderDate(LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
 		ob.setOrderTime(LocalTime.now().format(DateTimeConstant.T_FORMAT_FORMATTER));
 		ob.setAccountId(gatewayId);
@@ -100,7 +105,7 @@ class GwOrderHolder {
 		orderIdMap.put(of.getOrderId(), of);
 		originOrderIdMap.put(of.getOriginOrderId(), of.getOrderId());
 		log.info("成功下单：{}, {}, {}, {}, {}手, {}", of.getOriginOrderId(), of.getContract().getName(), of.getDirection(),
-				of.getOffsetFlag(), of.getTradedVolume(), of.getPrice());
+				of.getOffsetFlag(), of.getTotalVolume(), of.getPrice());
 		return of;
 	}
 	
@@ -130,7 +135,7 @@ class GwOrderHolder {
 		orderIdMap.put(of.getOrderId(), of);
 		originOrderIdMap.put(of.getOriginOrderId(), of.getOrderId());
 		log.info("成功下单：{}, {}, {}, {}, {}手, {}", of.getOriginOrderId(), of.getContract().getName(), of.getDirection(),
-				of.getOffsetFlag(), of.getTradedVolume(), of.getPrice());
+				of.getOffsetFlag(), of.getTotalVolume(), of.getPrice());
 		return of;
 	}
 	
@@ -158,7 +163,7 @@ class GwOrderHolder {
 	}
 	
 	protected List<TradeField> tryDeal(TickField tick) {
-		tradingDay = tick.getTradingDay();
+		tradingDayMap.put(tick.getUnifiedSymbol(), tick.getTradingDay());
 		final String unifiedSymbol = tick.getUnifiedSymbol();
 		List<TradeField> tradeList = new ArrayList<>();
 		orderIdMap.forEach((k, order) -> {
@@ -193,7 +198,7 @@ class GwOrderHolder {
 							.setPrice(order.getDirection() == DirectionEnum.D_Buy ? tick.getAskPrice(0) : tick.getBidPrice(0))
 							.setPriceSource(PriceSourceEnum.PSRC_LastPrice)
 							.setTradeDate(LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
-							.setTradingDay(tradingDay)
+							.setTradingDay(Optional.ofNullable(tradingDayMap.get(unifiedSymbol)).orElse(""))
 							.setTradeTime(LocalTime.now().format(DateTimeConstant.T_FORMAT_FORMATTER))
 							.setVolume(order.getTotalVolume())
 							.build();
@@ -201,6 +206,9 @@ class GwOrderHolder {
 					tradeList.add(trade);
 					doneOrderMap.put(trade, of);
 					orderIdMap.remove(of.getOrderId());
+					
+					log.info("模拟成交：{}，{}，{}，{}，{}手，{}，{}", trade.getOriginOrderId(), trade.getContract().getName(), 
+							trade.getDirection(), trade.getOffsetFlag(), trade.getVolume(), trade.getPrice(), trade.getTradingDay());
 				}
 			}
 		});
