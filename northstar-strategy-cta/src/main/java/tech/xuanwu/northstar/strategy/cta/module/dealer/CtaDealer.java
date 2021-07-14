@@ -98,7 +98,7 @@ public class CtaDealer implements Dealer {
 					.setContingentCondition(ContingentConditionEnum.CC_Immediately)
 					.setMinVolume(1)
 					.setGatewayId(agent.getAccountGatewayId())
-					.setPrice(tick.getLastPrice())
+					.setPrice(currentSignal.getState().isBuy() ? tick.getAskPrice(0) : tick.getBidPrice(0))
 					.build();
 			currentSignal = null;
 			emitOrder();
