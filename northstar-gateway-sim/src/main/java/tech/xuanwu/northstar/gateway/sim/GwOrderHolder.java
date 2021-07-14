@@ -99,7 +99,8 @@ class GwOrderHolder {
 		OrderField of = ob.build();
 		orderIdMap.put(of.getOrderId(), of);
 		originOrderIdMap.put(of.getOriginOrderId(), of.getOrderId());
-		log.info("成功下单：{}", of.toString());
+		log.info("成功下单：{}, {}, {}, {}, {}手, {}", of.getOriginOrderId(), of.getContract().getName(), of.getDirection(),
+				of.getOffsetFlag(), of.getTradedVolume(), of.getPrice());
 		return of;
 	}
 	
@@ -108,7 +109,8 @@ class GwOrderHolder {
 		if(pf == null) {
 			ob.setOrderStatus(OrderStatusEnum.OS_Rejected);
 			ob.setStatusMsg("仓位不足");
-			log.warn("仓位不足，无法下单：{}", submitOrderReq);
+			log.warn("仓位不足，无法下单：{}, {}, {}, {}, {}手, {}", submitOrderReq.getOriginOrderId(), submitOrderReq.getContract().getName(),
+					submitOrderReq.getDirection(), submitOrderReq.getOffsetFlag(), submitOrderReq.getVolume(), submitOrderReq.getPrice());
 			return ob.build();
 		}
 		int totalAvailable = pf.getPosition() - pf.getFrozen();
@@ -119,14 +121,16 @@ class GwOrderHolder {
 				|| totalAvailable < submitOrderReq.getVolume()) {
 			ob.setOrderStatus(OrderStatusEnum.OS_Rejected);
 			ob.setStatusMsg("仓位不足");
-			log.warn("仓位不足，无法下单：{}", submitOrderReq);
+			log.warn("仓位不足，无法下单：{}, {}, {}, {}, {}手, {}", submitOrderReq.getOriginOrderId(), submitOrderReq.getContract().getName(),
+					submitOrderReq.getDirection(), submitOrderReq.getOffsetFlag(), submitOrderReq.getVolume(), submitOrderReq.getPrice());
 			return ob.build();
 		}
 		
 		OrderField of = ob.build();
 		orderIdMap.put(of.getOrderId(), of);
 		originOrderIdMap.put(of.getOriginOrderId(), of.getOrderId());
-		log.info("成功下单：{}", of.toString());
+		log.info("成功下单：{}, {}, {}, {}, {}手, {}", of.getOriginOrderId(), of.getContract().getName(), of.getDirection(),
+				of.getOffsetFlag(), of.getTradedVolume(), of.getPrice());
 		return of;
 	}
 	
