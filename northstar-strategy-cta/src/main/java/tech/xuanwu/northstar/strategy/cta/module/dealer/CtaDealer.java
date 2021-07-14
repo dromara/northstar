@@ -64,7 +64,8 @@ public class CtaDealer implements Dealer {
 			
 		} else if(event.getEventType() == ModuleEventType.ORDER_RETRY) {
 			currentOrderReq = (SubmitOrderReqField) event.getData();
-			log.info("模组追单：{}", currentOrderReq);
+			log.info("模组追单：{}，{}, {}, {}, {}手, {}", currentOrderReq.getOriginOrderId(), currentOrderReq.getContract().getName(),
+					currentOrderReq.getDirection(), currentOrderReq.getOffsetFlag(), currentOrderReq.getVolume(), currentOrderReq.getPrice());
 			
 		}
 	}
