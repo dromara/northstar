@@ -18,7 +18,6 @@ import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreEnum.OrderStatusEnum;
 import xyz.redtorch.pb.CoreField.NoticeField;
 import xyz.redtorch.pb.CoreField.OrderField;
-import xyz.redtorch.pb.CoreField.TradeField;
 
 @Component
 public class NotificationDispatcher extends AbstractEventHandler implements InitializingBean, GenericEventHandler{
@@ -36,7 +35,6 @@ public class NotificationDispatcher extends AbstractEventHandler implements Init
 			add(NorthstarEventType.NOTICE);
 			add(NorthstarEventType.CONNECTED);
 			add(NorthstarEventType.DISCONNECTED);
-			add(NorthstarEventType.TRADE);
 			add(NorthstarEventType.ORDER);
 		}
 	};
@@ -79,9 +77,6 @@ public class NotificationDispatcher extends AbstractEventHandler implements Init
 		case ORDER:
 			handleOrder((OrderField) e.getData());
 			break;
-		case TRADE:
-			handleTrade((TradeField) e.getData());
-			break;
 		default:
 			throw new IllegalArgumentException("未定义处理类型：" + e.getEvent());
 		}
@@ -119,16 +114,6 @@ public class NotificationDispatcher extends AbstractEventHandler implements Init
 				gatewayId, status, order.getContract().getName(), dir+offset, order.getTotalVolume()), 
 				String.format("合约：%s\n手数：%d\n已成交：%d\n价钱：%.2f", 
 						order.getContract().getName(), order.getTotalVolume(), order.getTradedVolume(), order.getPrice()));
-		doSend(msg);
-	}
-	
-	private void handleTrade(TradeField trade) {
-		String gatewayId = trade.getGatewayId();
-		String dir = trade.getDirection() == DirectionEnum.D_Buy ? "多" :  trade.getDirection() == DirectionEnum.D_Sell ? "空" : "无";
-		String offset = trade.getOffsetFlag() == OffsetFlagEnum.OF_Open ? "开" : trade.getOffsetFlag() == OffsetFlagEnum.OF_Unkonwn ? "无" : "平";
-		Message msg = new Message(String.format("[%s] - 成交合约：%s %s %d手", gatewayId, trade.getContract().getName(),
-				dir+offset, trade.getVolume()),
-				"");
 		doSend(msg);
 	}
 	
