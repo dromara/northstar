@@ -110,7 +110,7 @@ public class NotificationDispatcher extends AbstractEventHandler implements Init
 			order.getOrderStatus() == OrderStatusEnum.OS_Canceled ? "已撤" :
 				order.getOrderStatus() == OrderStatusEnum.OS_Touched ? "已挂" :
 					order.getOrderStatus() == OrderStatusEnum.OS_Rejected ? "拒绝" : "";
-		Message msg = new Message(String.format("[%s] - 订单：%s，合约：%s %s %d手", 
+		Message msg = new Message(String.format("[%s]订单：%s，%s %s %d手", 
 				gatewayId, status, order.getContract().getName(), dir+offset, order.getTotalVolume()), 
 				String.format("合约：%s\n手数：%d\n已成交：%d\n价钱：%.2f", 
 						order.getContract().getName(), order.getTotalVolume(), order.getTradedVolume(), order.getPrice()));
