@@ -110,7 +110,8 @@ public class CtaModulePosition implements ModulePosition{
 			//平仓成交
 			int targetConsume = trade.getVolume();
 			while(targetConsume > 0) {
-				TradeField openingDeal = tradeList.pollFirst();
+				// 优先平新仓，确保优先平今
+				TradeField openingDeal = tradeList.pollLast();
 				positionProfitMap.remove(openingDeal);
 				if(openingDeal.getVolume() <= targetConsume) {
 					targetConsume -= openingDeal.getVolume();
@@ -118,7 +119,7 @@ public class CtaModulePosition implements ModulePosition{
 					int volDif = openingDeal.getVolume() - targetConsume;
 					targetConsume = 0;
 					TradeField restTrade = TradeField.newBuilder(openingDeal).setVolume(volDif).build();
-					tradeList.offerFirst(restTrade);
+					tradeList.offerLast(restTrade);
 					positionProfitMap.put(restTrade, new AtomicInteger(0));
 				}
 			}
