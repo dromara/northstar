@@ -159,7 +159,7 @@ public class ModuleService implements InitializingBean{
 		}
 		
 		ModulePosition mPosition = status == null ? factory.newModulePosition() : factory.loadModulePosition(status);
-		ModuleTrade mTrade = factory.newModuleTrade();
+		ModuleTrade mTrade = status == null ? factory.newModuleTrade() : factory.loadModuleTrade(moduleRepo.findTradeDescription(info.getModuleName()));
 		
 		ModuleState state = status == null ? ModuleState.EMPTY : status.getState();
 		Map<String, BarData> barDataMap = new HashMap<>();
@@ -220,6 +220,8 @@ public class ModuleService implements InitializingBean{
 	public void removeModule(String moduleName) {
 		mdlMgr.removeModule(moduleName);
 		moduleRepo.deleteModuleInfoById(moduleName);
+		moduleRepo.removeModuleStatus(moduleName);
+		moduleRepo.removeTradeDescription(moduleName);
 	}
 	
 	

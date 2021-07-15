@@ -7,6 +7,7 @@ import tech.xuanwu.northstar.strategy.common.AbstractModuleFactory;
 import tech.xuanwu.northstar.strategy.common.ModulePosition;
 import tech.xuanwu.northstar.strategy.common.ModuleTrade;
 import tech.xuanwu.northstar.strategy.common.model.ModuleStatus;
+import tech.xuanwu.northstar.strategy.common.model.TradeDescription;
 import tech.xuanwu.northstar.strategy.cta.module.CtaModulePosition;
 import tech.xuanwu.northstar.strategy.cta.module.CtaModuleTrade;
 import xyz.redtorch.pb.CoreField.TradeField;
@@ -38,7 +39,7 @@ public class CtaModuleFactory extends AbstractModuleFactory{
 	}
 
 	@Override
-	public ModuleTrade loadModuleTrade(List<TradeField> originTradeList) {
+	public ModuleTrade loadModuleTrade(List<TradeDescription> originTradeList) {
 		return new CtaModuleTrade(originTradeList);
 	}
 	

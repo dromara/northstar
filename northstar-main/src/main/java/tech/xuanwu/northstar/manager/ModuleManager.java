@@ -1,6 +1,7 @@
 package tech.xuanwu.northstar.manager;
 
 import java.util.HashSet;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -10,8 +11,8 @@ import tech.xuanwu.northstar.common.event.NorthstarEventType;
 import tech.xuanwu.northstar.persistence.ModuleRepository;
 import tech.xuanwu.northstar.strategy.common.constants.ModuleState;
 import tech.xuanwu.northstar.strategy.common.model.ModulePerformance;
-import tech.xuanwu.northstar.strategy.common.model.ModuleStatus;
 import tech.xuanwu.northstar.strategy.common.model.StrategyModule;
+import tech.xuanwu.northstar.strategy.common.model.TradeDescription;
 import xyz.redtorch.pb.CoreField.AccountField;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.OrderField;
@@ -80,10 +81,13 @@ public class ModuleManager extends AbstractEventHandler {
 	
 	public void onTrade(TradeField trade) {
 		// 只对持仓状态变化做持久化，不对下单状态作反应
-		moduleMap.values().stream()
-			.map(m -> m.onTrade(trade))
-			.filter(m -> m.getState() == ModuleState.EMPTY || m.getState() == ModuleState.HOLDING)
-			.forEach(m -> moduleRepo.saveModuleStatus(m.getModuleStatus()));
+		for(Entry<String, StrategyModule> e : moduleMap.entrySet()) {
+			StrategyModule m = e.getValue();
+			if(m.onTrade(trade)) {
+				moduleRepo.saveTradeDescription(TradeDescription.convertFrom(m.getName(), trade));
+				moduleRepo.saveModuleStatus(m.getModuleStatus());
+			}
+		}
 	}
 	
 	public void onAccount(AccountField account) {

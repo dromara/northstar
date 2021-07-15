@@ -101,13 +101,14 @@ public class StrategyModule {
 		return this;
 	}
 	
-	public StrategyModule onTrade(TradeField trade) {
+	public boolean onTrade(TradeField trade) {
 		if(agent.hasOrderRecord(trade.getOriginOrderId())) {
-			mTrade.updateTrade(trade);
+			mTrade.updateTrade(TradeDescription.convertFrom(getName(), trade));
 			mPosition.onTrade(trade);
 			agent.onTrade(trade);
+			return true;
 		}
-		return this;
+		return false;
 	}
 	
 	public StrategyModule onAccount(AccountField account) {
@@ -140,6 +141,7 @@ public class StrategyModule {
 		List<TradeField> trades = mPosition.getOpenningTrade();
 		if(trades.size() > 0) {
 			status.setLastOpenTrade(trades.stream().map(trade -> trade.toByteArray()).collect(Collectors.toList()));
+			status.setTradeDescrptions(trades.stream().map(trade -> TradeDescription.convertFrom(agent.getName(), trade)).collect(Collectors.toList()));
 		}
 		return status;
 	}

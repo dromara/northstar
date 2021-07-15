@@ -24,6 +24,9 @@ public class ModuleStatus {
 	
 	private List<byte[]> lastOpenTrade = new ArrayList<>();
 	
+	private List<TradeDescription> tradeDescrptions = new ArrayList<>();
+	
 	@Id
 	private String moduleName;
+	
 }

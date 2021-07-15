@@ -8,9 +8,11 @@ import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
 @Data
 public class DealRecord {
 	
-	private String unifiedSymbol;
+	private String contractName;
 	
 	private PositionDirectionEnum direction;
+	
+	private String tradingDay;
 	
 	private long dealTimestamp;
 	
