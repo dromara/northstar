@@ -102,10 +102,10 @@ public class SimGatewayTest {
 	@Test
 	public void testMoneyIO() {
 		gateway.moneyIO(20000);
-		verify(feEngine).emitEvent(eq(NorthstarEventType.ACCOUNT), argThat(acc -> ((AccountField)acc).getBalance() == 20000));
+		verify(feEngine, times(2)).emitEvent(eq(NorthstarEventType.ACCOUNT), argThat(acc -> ((AccountField)acc).getBalance() == 20000));
 		
 		gateway.moneyIO(-100);
-		verify(feEngine).emitEvent(eq(NorthstarEventType.ACCOUNT), argThat(acc -> ((AccountField)acc).getBalance() == 19900));
+		verify(feEngine, times(2)).emitEvent(eq(NorthstarEventType.ACCOUNT), argThat(acc -> ((AccountField)acc).getBalance() == 19900));
 	}
 
 	// 行情更新验证
@@ -160,7 +160,7 @@ public class SimGatewayTest {
 	public void testSubmitAndCancelOrder() {
 		gateway.moneyIO(20000);
 		gateway.submitOrder(submitOrderReq);
-		verify(feEngine, times(2)).emitEvent(eq(NorthstarEventType.ACCOUNT), argThat(acc -> acc instanceof AccountField));
+		verify(feEngine, times(3)).emitEvent(eq(NorthstarEventType.ACCOUNT), argThat(acc -> acc instanceof AccountField));
 		verify(feEngine).emitEvent(eq(NorthstarEventType.ORDER), argThat(order -> ((OrderField)order).getOffsetFlag() == OffsetFlagEnum.OF_Open));
 		
 		CancelOrderReqField cancelOrderReq = CancelOrderReqField.newBuilder()
@@ -169,7 +169,7 @@ public class SimGatewayTest {
 				.build();
 		gateway.cancelOrder(cancelOrderReq);
 		verify(feEngine).emitEvent(eq(NorthstarEventType.ORDER), argThat(order -> ((OrderField)order).getOrderStatus() == OrderStatusEnum.OS_Canceled));
-		verify(feEngine, times(3)).emitEvent(eq(NorthstarEventType.ACCOUNT), argThat(acc -> acc instanceof AccountField));
+		verify(feEngine, times(4)).emitEvent(eq(NorthstarEventType.ACCOUNT), argThat(acc -> acc instanceof AccountField));
 	}
 	
 	// 持仓状态下的委托与撤单

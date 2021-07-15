@@ -9,6 +9,7 @@ import java.time.ZoneOffset;
 import org.junit.Test;
 
 import tech.xuanwu.northstar.gateway.api.TradeGateway;
+import tech.xuanwu.northstar.strategy.common.ModulePosition;
 import tech.xuanwu.northstar.strategy.common.constants.ModuleState;
 import tech.xuanwu.northstar.strategy.common.event.ModuleEvent;
 import tech.xuanwu.northstar.strategy.common.event.ModuleEventType;
@@ -101,6 +102,9 @@ public class ModuleAgentTest {
 
 	@Test
 	public void testModuleState() {
+		ModulePosition mPos = new CtaModulePosition();
+		agent = new ModuleAgent("testModule", null, ModuleState.EMPTY,
+				mock(TradeGateway.class), "testGateway", true, "20210711", mPos);
 		assertThat(agent.getModuleState()).isEqualTo(ModuleState.EMPTY);
 		agent.onEvent(ModuleEvent.builder()
 				.eventType(ModuleEventType.ORDER_REQ_ACCEPTED)
@@ -115,6 +119,7 @@ public class ModuleAgentTest {
 				.build());
 		assertThat(agent.getModuleState()).isEqualTo(ModuleState.PENDING_ORDER);
 		
+		mPos.onTrade(openTrade);
 		agent.onTrade(openTrade);
 		assertThat(agent.getModuleState()).isEqualTo(ModuleState.HOLDING);
 		

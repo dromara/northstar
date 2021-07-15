@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.Test;
 
 import tech.xuanwu.northstar.strategy.common.ModuleTrade;
+import tech.xuanwu.northstar.strategy.common.model.TradeDescription;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
@@ -53,8 +54,8 @@ public class CtaModuleTradeTest {
 	@Test
 	public void testGetDealRecordsAsEvenBuyAndSell() {
 		assertThat(mt.getDealRecords()).isEmpty();
-		mt.updateTrade(openTrade);
-		mt.updateTrade(closeTrade);
+		mt.updateTrade(TradeDescription.convertFrom("testModule", openTrade));
+		mt.updateTrade(TradeDescription.convertFrom("testModule", closeTrade));
 
 		assertThat(mt.getDealRecords()).hasSize(1);
 	}
@@ -62,9 +63,9 @@ public class CtaModuleTradeTest {
 	@Test
 	public void testGetDealRecordsAsBigBuyAndSmallSell() {
 		assertThat(mt.getDealRecords()).isEmpty();
-		mt.updateTrade(openTrade2);
-		mt.updateTrade(closeTrade);
-		mt.updateTrade(closeTrade);
+		mt.updateTrade(TradeDescription.convertFrom("testModule", openTrade2));
+		mt.updateTrade(TradeDescription.convertFrom("testModule", closeTrade));
+		mt.updateTrade(TradeDescription.convertFrom("testModule", closeTrade));
 
 		assertThat(mt.getDealRecords()).hasSize(2);
 	}
@@ -72,9 +73,9 @@ public class CtaModuleTradeTest {
 	@Test
 	public void testGetDealRecordsAsSmallBuyAndBigSell() {
 		assertThat(mt.getDealRecords()).isEmpty();
-		mt.updateTrade(openTrade);
-		mt.updateTrade(openTrade);
-		mt.updateTrade(closeTrade2);
+		mt.updateTrade(TradeDescription.convertFrom("testModule", openTrade));
+		mt.updateTrade(TradeDescription.convertFrom("testModule", openTrade));
+		mt.updateTrade(TradeDescription.convertFrom("testModule", closeTrade2));
 
 		assertThat(mt.getDealRecords()).hasSize(2);
 	}
@@ -82,20 +83,10 @@ public class CtaModuleTradeTest {
 	@Test
 	public void testGetTotalCloseProfit() {
 		assertThat(mt.getTotalCloseProfit()).isEqualTo(0);
-		mt.updateTrade(openTrade);
-		mt.updateTrade(closeTrade);
+		mt.updateTrade(TradeDescription.convertFrom("testModule", openTrade));
+		mt.updateTrade(TradeDescription.convertFrom("testModule", closeTrade));
 
 		assertThat(mt.getTotalCloseProfit()).isEqualTo(-300);
-	}
-
-	@Test
-	public void testGetOriginRecords() {
-		assertThat(mt.getOriginRecords()).isEmpty();
-		mt.updateTrade(openTrade);
-		mt.updateTrade(closeTrade);
-
-		assertThat(mt.getOriginRecords()).hasSize(2);
-
 	}
 
 }
