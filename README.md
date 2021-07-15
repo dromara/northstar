@@ -109,7 +109,6 @@ vim ~/.bashrc
 在文末加入以下设置
 ```
 ...
-export WSHOST=<这里填云服务器内网IP>
 export NSUSER=<登陆用户名>
 export NSPWD=<登陆密码>
 export EMAIL=<代理邮箱名> 
