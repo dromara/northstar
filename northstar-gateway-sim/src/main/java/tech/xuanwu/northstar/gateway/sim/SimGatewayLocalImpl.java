@@ -66,7 +66,7 @@ public class SimGatewayLocalImpl implements SimGateway{
 
 	@Override
 	public void moneyIO(int money) {
-		if(money > 0) {			
+		if(money >= 0) {			
 			accountHolder.deposit(money);
 		} else if(money < 0) {
 			accountHolder.withdraw(Math.abs(money));
