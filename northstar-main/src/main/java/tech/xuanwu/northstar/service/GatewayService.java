@@ -18,7 +18,6 @@ import tech.xuanwu.northstar.common.constant.GatewayType;
 import tech.xuanwu.northstar.common.constant.GatewayUsage;
 import tech.xuanwu.northstar.common.event.InternalEventBus;
 import tech.xuanwu.northstar.common.exception.NoSuchElementException;
-import tech.xuanwu.northstar.common.model.ContractManager;
 import tech.xuanwu.northstar.common.model.CtpSettings;
 import tech.xuanwu.northstar.common.model.GatewayDescription;
 import tech.xuanwu.northstar.common.model.SimSettings;
@@ -40,8 +39,8 @@ import xyz.redtorch.gateway.ctp.x64v6v3v15v.CtpTradeNowFactory;
 
 /**
  * 网关服务
- * 注意：GatewaySetting为了防止数据库被攻破，因此对其做了对称加密，并且会在部署的机器上写入一段随机盐。
- * 只有在代码、数据库、服务器随机盐同时被攻破时，才有可能对GatewaySetting信息进行解码
+ * 注意：GatewaySetting为了防止数据库被攻破，因此对其做了对称加密，并且会在部署的机器上写入一段随机密码。
+ * 只有在代码、数据库、服务器随机密码同时被攻破时，才有可能对GatewaySetting信息进行解码
  * @author KevinHuangwl
  *
  */
@@ -60,16 +59,13 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 	
 	private ApplicationContext ctx;
 	
-	private ContractManager contractMgr;
-	
 	public GatewayService(GatewayAndConnectionManager gatewayConnMgr, GatewayRepository gatewayRepo, MarketDataRepository mdRepo,
-			InternalEventBus eventBus, SimMarket simMarket, ContractManager contractMgr) {
+			InternalEventBus eventBus, SimMarket simMarket) {
 		this.gatewayConnMgr = gatewayConnMgr;
 		this.gatewayRepo = gatewayRepo;
 		this.mdRepo = mdRepo;
 		this.eventBus = eventBus;
 		this.simMarket = simMarket;
-		this.contractMgr = contractMgr;
 	}
 	
 	/**
@@ -248,6 +244,7 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 		log.info("模拟账户[{}]，{}金：{}", gatewayId, money>0 ? "入": "出", Math.abs(money));
 		SimGateway gateway = (SimGateway) gatewayConnMgr.getGatewayById(gatewayId);
 		gateway.moneyIO(money);
+		simMarket.save(gateway.getAccount());
 		return true;
 	}
 	
