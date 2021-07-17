@@ -83,10 +83,9 @@ public class CtpScheduleTask {
 
 	@Scheduled(cron="10 0/1 * * * *")
 	public void timelySaveDevBar() {
-		if(StringUtils.equals(profile, "prod")) {
-			return;
+		if(StringUtils.equals(profile, "dev")) {
+			bbMgr.saveAndClear();
+			log.info("开发时间定时持久化Bar数据任务");
 		}
-		bbMgr.saveAndClear();
-		log.info("开发时间定时持久化Bar数据任务");
 	}
 }
