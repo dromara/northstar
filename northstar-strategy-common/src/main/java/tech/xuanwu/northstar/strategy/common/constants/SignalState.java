@@ -56,4 +56,8 @@ public enum SignalState {
 	public boolean isBuy() {
 		return (val & 0b0101) > 0;
 	}
+	
+	public int code() {
+		return val;
+	}
 }

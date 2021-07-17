@@ -17,10 +17,6 @@ public class CtaSignal implements Signal{
 	 */
 	private UUID id;
 	/**
-	 * 信号所关联的合约
-	 */
-	private String bindedUnifiedSymbol;
-	/**
 	 * 信号状态
 	 */
 	private SignalState state;
@@ -32,10 +28,6 @@ public class CtaSignal implements Signal{
 	 * 信号产生时间
 	 */
 	private long timestamp;
-	/**
-	 * 信号所属交易日
-	 */
-	private String tradingDay;
 	/**
 	 * 关联信号策略
 	 */

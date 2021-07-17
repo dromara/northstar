@@ -10,7 +10,6 @@ import tech.xuanwu.northstar.strategy.common.annotation.StrategicComponent;
 import tech.xuanwu.northstar.strategy.common.constants.ModuleState;
 import tech.xuanwu.northstar.strategy.common.constants.SignalState;
 import tech.xuanwu.northstar.strategy.common.model.CtaSignal;
-import tech.xuanwu.northstar.strategy.common.model.ModuleAgent;
 import tech.xuanwu.northstar.strategy.common.model.meta.DynamicParams;
 
 /**
@@ -85,12 +84,10 @@ public class SampleSignalPolicy extends AbstractSignalPolicy
 	protected void onMin(LocalTime time) {
 		log.info("策略每分钟触发");
 		CtaSignal.CtaSignalBuilder signal = CtaSignal.builder()
-				.bindedUnifiedSymbol(bindedUnifiedSymbol)
 				.id(UUID.randomUUID())
 				.signalClass(this.getClass())
 				.signalPrice(barDataMap.get(bindedUnifiedSymbol).getSClose().ref(0))
-				.timestamp(System.currentTimeMillis())
-				.tradingDay(barDataMap.get(bindedUnifiedSymbol).getLastBar().getTradingDay());
+				.timestamp(System.currentTimeMillis());
 		if((time.getMinute() & 1) == 1) {
 			// 单数分钟
 			if(agent.getModuleState() == ModuleState.EMPTY) {

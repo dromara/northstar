@@ -83,6 +83,9 @@ public abstract class AbstractSignalPolicy implements SignalPolicy {
 	 * @param signal
 	 */
 	protected void emitSignal(CtaSignal signal) {
+		if(signal == null) {
+			return;
+		}
 		log.info("信号策略生成交易信号");
 		meb.post(ModuleEvent.builder()
 				.eventType(ModuleEventType.SIGNAL_CREATED)
