@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 
 import tech.xuanwu.northstar.strategy.common.Dealer;
+import tech.xuanwu.northstar.strategy.common.ExternalSignalPolicy;
 import tech.xuanwu.northstar.strategy.common.ModulePosition;
 import tech.xuanwu.northstar.strategy.common.ModuleTrade;
 import tech.xuanwu.northstar.strategy.common.RiskController;
@@ -109,6 +110,12 @@ public class StrategyModule {
 			return true;
 		}
 		return false;
+	}
+	
+	public void onExternalMessage(String text) {
+		if(signalPolicy instanceof ExternalSignalPolicy) {
+			((ExternalSignalPolicy)signalPolicy).onExtMsg(text);
+		}
 	}
 	
 	public StrategyModule onAccount(AccountField account) {

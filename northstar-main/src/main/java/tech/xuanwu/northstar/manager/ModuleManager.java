@@ -38,6 +38,7 @@ public class ModuleManager extends AbstractEventHandler {
 			add(NorthstarEventType.TICK);
 			add(NorthstarEventType.IDX_TICK);
 			add(NorthstarEventType.BAR);
+			add(NorthstarEventType.EXT_MSG);
 		}
 	};
 	
@@ -93,6 +94,10 @@ public class ModuleManager extends AbstractEventHandler {
 	public void onAccount(AccountField account) {
 		moduleMap.values().forEach(m -> m.onAccount(account));
 	}
+	
+	private void onExtMsg(String message) {
+		moduleMap.values().forEach(m -> m.onExternalMessage(message));
+	}
 
 	@Override
 	public boolean canHandle(NorthstarEventType eventType) {
@@ -118,9 +123,12 @@ public class ModuleManager extends AbstractEventHandler {
 		case ACCOUNT:
 			onAccount((AccountField) e.getData());
 			break;
+		case EXT_MSG:
+			onExtMsg((String) e.getData());
+			break;
 		default:
 			throw new IllegalStateException("未定义该事件-[" + e.getEvent() + "] 的处理方案");
 		}
 	}
-	
+
 }

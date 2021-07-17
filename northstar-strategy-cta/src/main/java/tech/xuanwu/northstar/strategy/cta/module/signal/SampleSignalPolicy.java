@@ -24,12 +24,9 @@ import tech.xuanwu.northstar.strategy.common.model.meta.DynamicParams;
 public class SampleSignalPolicy extends AbstractSignalPolicy
 	implements SignalPolicy //	所有的策略都应该是DynamicParamsAware的实现类
 {
-	
+	//这两变量在这例子里没有实质作用，仅用于演示不同的参数赋值
 	private int shortPeriod;
-	
 	private int longPeriod;
-
-	private ModuleAgent agent;
 
 	/**
 	 * 获取策略的动态参数对象
@@ -107,9 +104,6 @@ public class SampleSignalPolicy extends AbstractSignalPolicy
 		}
 	}
 
-	@Override
-	public void setModuleAgent(ModuleAgent agent) {
-		this.agent = agent;
-	}
+	
 	
 }

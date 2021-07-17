@@ -4,8 +4,6 @@ import java.time.LocalTime;
 import java.util.Map;
 import java.util.Set;
 
-import com.alibaba.fastjson.JSON;
-
 import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.common.constant.DateTimeConstant;
 import tech.xuanwu.northstar.strategy.common.SignalPolicy;
@@ -13,6 +11,7 @@ import tech.xuanwu.northstar.strategy.common.event.ModuleEvent;
 import tech.xuanwu.northstar.strategy.common.event.ModuleEventBus;
 import tech.xuanwu.northstar.strategy.common.event.ModuleEventType;
 import tech.xuanwu.northstar.strategy.common.model.CtaSignal;
+import tech.xuanwu.northstar.strategy.common.model.ModuleAgent;
 import tech.xuanwu.northstar.strategy.common.model.data.BarData;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.TickField;
@@ -28,6 +27,9 @@ public abstract class AbstractSignalPolicy implements SignalPolicy {
 	protected ModuleEventBus meb;
 	
 	protected Map<String, BarData> barDataMap;
+	
+	protected ModuleAgent agent;
+	
 	
 	@Override
 	public Set<String> bindedUnifiedSymbols() {
@@ -97,5 +99,10 @@ public abstract class AbstractSignalPolicy implements SignalPolicy {
 	@Override
 	public void setRefBarData(Map<String, BarData> barDataMap) {
 		this.barDataMap = barDataMap;
+	}
+	
+	@Override
+	public void setModuleAgent(ModuleAgent agent) {
+		this.agent = agent;
 	}
 }
