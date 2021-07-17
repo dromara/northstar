@@ -33,7 +33,9 @@ import tech.xuanwu.northstar.gateway.sim.SimMarket;
 import tech.xuanwu.northstar.manager.GatewayAndConnectionManager;
 import tech.xuanwu.northstar.persistence.GatewayRepository;
 import tech.xuanwu.northstar.persistence.MarketDataRepository;
+import tech.xuanwu.northstar.persistence.ModuleRepository;
 import tech.xuanwu.northstar.persistence.po.GatewayPO;
+import tech.xuanwu.northstar.strategy.common.model.ModuleInfo;
 import tech.xuanwu.northstar.utils.CodecUtils;
 import xyz.redtorch.gateway.ctp.x64v6v3v15v.CtpGatewayFactory;
 import xyz.redtorch.gateway.ctp.x64v6v3v15v.CtpTradeNowFactory;
@@ -60,11 +62,14 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 	
 	private ApplicationContext ctx;
 	
+	private ModuleRepository moduleRepo;
+	
 	public GatewayService(GatewayAndConnectionManager gatewayConnMgr, GatewayRepository gatewayRepo, MarketDataRepository mdRepo,
-			InternalEventBus eventBus, SimMarket simMarket) {
+			ModuleRepository moduleRepo, InternalEventBus eventBus, SimMarket simMarket) {
 		this.gatewayConnMgr = gatewayConnMgr;
 		this.gatewayRepo = gatewayRepo;
 		this.mdRepo = mdRepo;
+		this.moduleRepo = moduleRepo;
 		this.eventBus = eventBus;
 		this.simMarket = simMarket;
 	}
@@ -148,6 +153,12 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 			for(GatewayConnection gc : gatewayConnMgr.getAllConnections()) {
 				if(StringUtils.equals(gc.getGwDescription().getBindedMktGatewayId(), gatewayId)) {
 					throw new IllegalStateException("仍有账户网关与本行情网关存在绑定关系，请先解除绑定！");
+				}
+			}
+		} else {
+			for(ModuleInfo info : moduleRepo.findAllModuleInfo()) {
+				if(StringUtils.equals(info.getAccountGatewayId(), gatewayId)) {
+					throw new IllegalStateException("仍有模组与本账户网关存在绑定关系，请先解除绑定！");
 				}
 			}
 		}

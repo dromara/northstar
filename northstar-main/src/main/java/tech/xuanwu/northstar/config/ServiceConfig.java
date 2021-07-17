@@ -47,8 +47,8 @@ public class ServiceConfig {
 	
 	@Bean
 	public GatewayService gatewayService(GatewayAndConnectionManager gatewayConnMgr, GatewayRepository gatewayRepo,
-			MarketDataRepository mdRepo, InternalEventBus eventBus, SimMarket simMarket) {
-		return new GatewayService(gatewayConnMgr, gatewayRepo, mdRepo, eventBus, simMarket);
+			MarketDataRepository mdRepo, ModuleRepository moduleRepo, InternalEventBus eventBus, SimMarket simMarket) {
+		return new GatewayService(gatewayConnMgr, gatewayRepo, mdRepo, moduleRepo, eventBus, simMarket);
 	}
 	
 	@Bean
