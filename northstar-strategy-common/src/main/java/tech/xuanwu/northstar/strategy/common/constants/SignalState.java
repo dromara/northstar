@@ -2,9 +2,6 @@ package tech.xuanwu.northstar.strategy.common.constants;
 
 /**
  * 使用四位二进制数表达六个状态
- * 	0	0	| 	0	0
- * 四位二进制可以看作是两个两位二进制的组合
- * 其中左边位，1代表多，0代表空；右边位，1代表开，0代表平
  * 
  * 反手本质上是两组运作的叠加，例如反手多=多平+多开
  * 因此由该二进制编码可得规律，并总结成枚举方法如下
@@ -16,27 +13,31 @@ public enum SignalState {
 	/**
 	 * 多开
 	 */
-	BuyOpen(0b0011),
+	BuyOpen(0b0001),
 	/**
 	 * 空开
 	 */
-	SellOpen(0b0001),
+	SellOpen(0b0010),
 	/**
 	 * 多平
 	 */
-	BuyClose(0b0010),
+	BuyClose(0b0100),
 	/**
 	 * 空平
 	 */
-	SellClose(0b0000),
+	SellClose(0b1000),
 	/**
 	 * 反手多
 	 */
-	ReversingBuy(0b1110),
+	ReversingBuy(0b0101),
 	/**
 	 * 反手空
 	 */
-	ReversingSell(0b0100);
+	ReversingSell(0b1010),
+	/**
+	 * 无信号
+	 */
+	None(0b0000);
 
 	
 	private int val;
@@ -45,14 +46,14 @@ public enum SignalState {
 	}
 	
 	public boolean isOpen() {
-		return (val & 5) > 0;
+		return (val & 3) > 0;
 	}
 	
 	public boolean isReverse() {
-		return val > 3;
+		return val == 5 || val == 10;
 	}
 	
 	public boolean isBuy() {
-		return (val & 2) > 0;
+		return (val & 0b0101) > 0;
 	}
 }
