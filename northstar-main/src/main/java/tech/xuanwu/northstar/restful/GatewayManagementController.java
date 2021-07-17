@@ -62,6 +62,12 @@ public class GatewayManagementController {
 		return new ResultBean<>(gatewayService.findAllTraderGateway());
 	}
 	
+	@GetMapping("/gateway/active")
+	public ResultBean<Boolean> getGatewayActive(String gatewayId){
+		Assert.notNull(gatewayId, "网关ID不能为空");
+		return new ResultBean<>(gatewayService.isActive(gatewayId));
+	}
+	
 	@GetMapping("/connection")
 	public ResultBean<Boolean> connect(String gatewayId) {
 		Assert.notNull(gatewayId, "网关ID不能为空");

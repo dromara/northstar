@@ -1,9 +1,15 @@
 package tech.xuanwu.northstar.gateway.sim;
 
+import java.time.LocalDate;
+
 import tech.xuanwu.northstar.common.event.NorthstarEventType;
 import tech.xuanwu.northstar.common.exception.TradeException;
 import tech.xuanwu.northstar.engine.event.FastEventEngine;
+import xyz.redtorch.pb.CoreEnum.CurrencyEnum;
+import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
+import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
 import xyz.redtorch.pb.CoreField.CancelOrderReqField;
+import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.GatewaySettingField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TickField;
@@ -35,6 +41,30 @@ public class SimGatewayLocalImpl implements SimGateway{
 		connected = true;
 		feEngine.emitEvent(NorthstarEventType.CONNECTED, gatewaySetting.getGatewayId());
 		feEngine.emitEvent(NorthstarEventType.LOGGED_IN, gatewaySetting.getGatewayId());
+		
+		// 模拟返回合约
+		LocalDate date = LocalDate.now().plusDays(45);
+		String year = date.getYear() % 100 + "";
+		String month = String.format("%02d", date.getMonth().getValue());
+		String symbol = "ni" + year + month;
+		String name = "沪镍" + year + month;
+		feEngine.emitEvent(NorthstarEventType.CONTRACT, ContractField.newBuilder()
+				.setGatewayId(gatewaySetting.getGatewayId())
+				.setContractId(symbol + "@SHFE@FUTURES@" + gatewaySetting.getGatewayId())
+				.setCurrency(CurrencyEnum.CNY)
+				.setExchange(ExchangeEnum.SHFE)
+				.setFullName(name)
+				.setName(name)
+				.setUnifiedSymbol(symbol + "@SHFE@FUTURES")
+				.setSymbol(symbol)
+				.setProductClass(ProductClassEnum.FUTURES)
+				.setThirdPartyId(symbol)
+				.setMultiplier(10)
+				.setPriceTick(10)
+				.setLongMarginRatio(0.08)
+				.setShortMarginRatio(0.08)
+				.build());
+		feEngine.emitEvent(NorthstarEventType.CONTRACT_LOADED, gatewaySetting.getGatewayId());
 	}
 
 	@Override

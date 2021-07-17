@@ -26,6 +26,7 @@ import tech.xuanwu.northstar.domain.MarketGatewayConnection;
 import tech.xuanwu.northstar.domain.TraderGatewayConnection;
 import tech.xuanwu.northstar.gateway.api.AbstractGatewayFactory;
 import tech.xuanwu.northstar.gateway.api.Gateway;
+import tech.xuanwu.northstar.gateway.api.MarketGateway;
 import tech.xuanwu.northstar.gateway.sim.SimGateway;
 import tech.xuanwu.northstar.gateway.sim.SimGatewayFactory;
 import tech.xuanwu.northstar.gateway.sim.SimMarket;
@@ -245,6 +246,15 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 			log.info("模拟账户[{}]，{}金：{}", gatewayId, money>0 ? "入": "出", Math.abs(money));
 		}
 		return true;
+	}
+	
+	public boolean isActive(String gatewayId) {
+		try {
+			MarketGateway gateway = (MarketGateway) gatewayConnMgr.getGatewayById(gatewayId);
+			return gateway.isActive();
+		} catch (ClassCastException e) {
+			throw new IllegalStateException(gatewayId + "不是一个行情网关", e);
+		}
 	}
 	
 	@Override

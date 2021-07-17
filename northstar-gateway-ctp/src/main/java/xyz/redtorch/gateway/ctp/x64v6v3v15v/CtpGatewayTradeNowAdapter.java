@@ -233,6 +233,14 @@ public class CtpGatewayTradeNowAdapter extends GatewayAbstract implements Market
 		return false;
 	}
 	
+	@Override
+	public boolean isActive() {
+		if(mdSpi == null) {
+			return false;
+		}
+		return mdSpi.isActive();
+	}
+	
 	/**
 	 * 复制URL到临时文件夹,例如从war包中
 	 * 

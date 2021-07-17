@@ -3,8 +3,6 @@ package xyz.redtorch.gateway.ctp.x64v6v3v15v;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
@@ -238,6 +236,14 @@ public class CtpGatewayAdapter extends GatewayAbstract implements MarketGateway,
 		return false;
 	}
 	
+	@Override
+	public boolean isActive() {
+		if(mdSpi == null) {
+			return false;
+		}
+		return mdSpi.isActive();
+	}
+	
 	/**
 	 * 复制URL到临时文件夹,例如从war包中
 	 * 
@@ -258,4 +264,5 @@ public class CtpGatewayAdapter extends GatewayAbstract implements MarketGateway,
 
 		targetFile.deleteOnExit();
 	}
+
 }

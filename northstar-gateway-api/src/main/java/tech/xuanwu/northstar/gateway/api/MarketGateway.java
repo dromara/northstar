@@ -17,4 +17,10 @@ public interface MarketGateway extends Gateway {
 	 * @param subscribeReq
 	 */
 	boolean unsubscribe(ContractField contract);
+	
+	/**
+	 * 检测是否有行情数据
+	 * @return
+	 */
+	boolean isActive();
 }

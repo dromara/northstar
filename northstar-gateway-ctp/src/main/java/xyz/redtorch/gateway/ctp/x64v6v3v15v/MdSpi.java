@@ -55,6 +55,8 @@ public class MdSpi extends CThostFtdcMdSpi {
 	private String logInfo;
 	private String gatewayId;
 	private String tradingDay;
+	
+	private volatile long lastUpdateTickTime = System.currentTimeMillis();
 
 	private Map<String, TickField> preTickMap = new HashMap<>();
 
@@ -549,6 +551,7 @@ public class MdSpi extends CThostFtdcMdSpi {
 				preTickMap.put(contractId, tick);
 
 				gatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.TICK, tick);
+				lastUpdateTickTime = System.currentTimeMillis();
 				
 			} catch (Throwable t) {
 				logger.error("{} OnRtnDepthMarketData Exception", logInfo, t);
@@ -576,6 +579,10 @@ public class MdSpi extends CThostFtdcMdSpi {
 	// 期权询价推送
 	public void OnRtnForQuoteRsp(CThostFtdcForQuoteRspField pForQuoteRsp) {
 		logger.info("{}OnRspUnSubForQuoteRsp", logInfo);
+	}
+	
+	public boolean isActive() {
+		return System.currentTimeMillis() - lastUpdateTickTime < 1000;
 	}
 
 }
