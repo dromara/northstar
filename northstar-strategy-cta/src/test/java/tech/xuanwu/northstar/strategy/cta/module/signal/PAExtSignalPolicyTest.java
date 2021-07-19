@@ -21,7 +21,7 @@ public class PAExtSignalPolicyTest {
 	@Test
 	public void testOnExtMsg() {
 		PAExtSignalPolicy.InitParams initParam = new PAExtSignalPolicy.InitParams();
-		initParam.symbol = "RB2110";
+		initParam.unifiedSymbol = "rb2110@SHFE@FUTURES";
 		policy.initWithParams(initParam);
 		ModuleEventBus meb = mock(ModuleEventBus.class);
 		policy.setEventBus(meb);
