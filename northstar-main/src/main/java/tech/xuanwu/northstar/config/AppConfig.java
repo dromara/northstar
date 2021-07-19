@@ -86,7 +86,7 @@ public class AppConfig implements WebMvcConfigurer {
 	
 	@Bean
 	public MongoClientOptions mongoClientOptions() {
-		return MongoClientOptions.builder().maxConnectionIdleTime(60000).build();
+		return MongoClientOptions.builder().maxConnectionIdleTime(120000).build();
 	}
 
 	@Bean
