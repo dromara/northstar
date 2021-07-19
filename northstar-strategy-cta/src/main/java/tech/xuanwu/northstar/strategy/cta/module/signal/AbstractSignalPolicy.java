@@ -4,6 +4,8 @@ import java.time.LocalTime;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
+
 import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.common.constant.DateTimeConstant;
 import tech.xuanwu.northstar.strategy.common.SignalPolicy;
@@ -33,6 +35,9 @@ public abstract class AbstractSignalPolicy implements SignalPolicy {
 	
 	@Override
 	public Set<String> bindedUnifiedSymbols() {
+		if(StringUtils.isEmpty(bindedUnifiedSymbol)) {
+			return Set.of();
+		}
 		return Set.of(bindedUnifiedSymbol);
 	}
 	
