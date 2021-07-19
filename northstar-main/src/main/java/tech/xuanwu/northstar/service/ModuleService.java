@@ -132,6 +132,18 @@ public class ModuleService implements InitializingBean{
 	}
 	
 	/**
+	 * 更新模组
+	 * @param info
+	 * @throws Exception 
+	 */
+	public void updateModule(ModuleInfo info) throws Exception {
+		StrategyModule module = mdlMgr.removeModule(info.getModuleName());
+		moduleRepo.deleteModuleInfoById(info.getModuleName());
+		moduleRepo.saveModuleInfo(info);
+		loadModule(info, module.getModuleStatus());
+	}
+	
+	/**
 	 * 加载模组
 	 * @param module
 	 * @param status
