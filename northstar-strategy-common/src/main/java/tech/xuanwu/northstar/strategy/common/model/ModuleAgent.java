@@ -171,8 +171,12 @@ public class ModuleAgent implements EventDrivenComponent{
 			log.warn("该订单并不在模组的登记列表中，忽略不处理：{}", order);
 			return;
 		}
-		if(order.getOrderStatus() == OrderStatusEnum.OS_Canceled
-				|| order.getOrderStatus() == OrderStatusEnum.OS_Rejected) {
+		if(order.getOrderStatus() == OrderStatusEnum.OS_Rejected) {
+			orderMap.remove(order.getOriginOrderId());
+			orderMap.remove(order.getOrderId());
+			state = modulePosition.getOpenningTrade().size() > 0 ? ModuleState.HOLDING : ModuleState.EMPTY;
+			log.info("模组[{}]收到废单反馈", name);
+		} else if(order.getOrderStatus() == OrderStatusEnum.OS_Canceled) {
 			orderMap.remove(order.getOriginOrderId());
 			orderMap.remove(order.getOrderId());
 			log.info("模组[{}]撤单成功", name);
