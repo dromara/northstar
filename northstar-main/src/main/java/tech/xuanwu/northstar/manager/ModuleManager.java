@@ -52,12 +52,12 @@ public class ModuleManager extends AbstractEventHandler {
 		moduleMap.put(module.getName(), module);
 	}
 	
-	public void removeModule(String name) {
+	public StrategyModule removeModule(String name) {
 		StrategyModule module = moduleMap.get(name);
 		if(module.isEnabled() && module.getState() != ModuleState.EMPTY) {
 			throw new IllegalStateException("模组并非处于空仓状态，不允许移除");
 		}
-		moduleMap.remove(name);
+		return moduleMap.remove(name);
 	}
 	
 	public ModulePerformance getModulePerformance(String name) {

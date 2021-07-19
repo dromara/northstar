@@ -17,6 +17,7 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.mongodb.MongoClient;
+import com.mongodb.MongoClientOptions;
 
 import tech.xuanwu.northstar.common.model.ContractManager;
 import tech.xuanwu.northstar.domain.account.TradeDayAccount;
@@ -81,6 +82,11 @@ public class AppConfig implements WebMvcConfigurer {
 	@Override
 	public void addInterceptors(InterceptorRegistry registry) {
 		registry.addInterceptor(new AuthorizationInterceptor()).addPathPatterns("/**").excludePathPatterns("/auth/login");
+	}
+	
+	@Bean
+	public MongoClientOptions mongoClientOptions() {
+		return MongoClientOptions.builder().maxConnectionIdleTime(60000).build();
 	}
 
 	@Bean
