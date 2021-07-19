@@ -20,7 +20,7 @@ public class DailyDealLimitedRule implements RiskControlRule {
 
 	@Override
 	public short canDeal(TickField tick, ModuleAgent agent) {
-		if(agent.numOfOpeningForToday() <= dailyDealLimit) {
+		if(agent.numOfOpeningForToday() < dailyDealLimit) {
 			return RiskAuditResult.ACCEPTED;
 		}
 		return RiskAuditResult.REJECTED;
