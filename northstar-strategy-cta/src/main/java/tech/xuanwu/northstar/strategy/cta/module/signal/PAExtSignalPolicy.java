@@ -59,7 +59,8 @@ public class PAExtSignalPolicy extends AbstractSignalPolicy implements ExternalS
 		if(StringUtils.isEmpty(initParams.unifiedSymbol)) {
 			throw new IllegalArgumentException("合约入参为空");
 		}
-		symbol = initParams.unifiedSymbol.split("@")[0].toUpperCase();
+		bindedUnifiedSymbol = initParams.unifiedSymbol;
+		symbol = bindedUnifiedSymbol.split("@")[0].toUpperCase();
 		log.info("绑定合约：{}", symbol);
 		textPtn = Pattern.compile("[^：]+：" + symbol + ".+，仅供参考。");
 	}
