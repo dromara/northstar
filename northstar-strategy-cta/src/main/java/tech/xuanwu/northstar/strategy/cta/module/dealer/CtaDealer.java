@@ -11,7 +11,6 @@ import tech.xuanwu.northstar.strategy.common.Dealer;
 import tech.xuanwu.northstar.strategy.common.annotation.Label;
 import tech.xuanwu.northstar.strategy.common.annotation.StrategicComponent;
 import tech.xuanwu.northstar.strategy.common.constants.ModuleState;
-import tech.xuanwu.northstar.strategy.common.constants.SignalState;
 import tech.xuanwu.northstar.strategy.common.event.ModuleEvent;
 import tech.xuanwu.northstar.strategy.common.event.ModuleEventBus;
 import tech.xuanwu.northstar.strategy.common.event.ModuleEventType;
