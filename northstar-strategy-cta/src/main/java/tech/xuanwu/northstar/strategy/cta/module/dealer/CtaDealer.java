@@ -11,6 +11,7 @@ import tech.xuanwu.northstar.strategy.common.Dealer;
 import tech.xuanwu.northstar.strategy.common.annotation.Label;
 import tech.xuanwu.northstar.strategy.common.annotation.StrategicComponent;
 import tech.xuanwu.northstar.strategy.common.constants.ModuleState;
+import tech.xuanwu.northstar.strategy.common.constants.SignalState;
 import tech.xuanwu.northstar.strategy.common.event.ModuleEvent;
 import tech.xuanwu.northstar.strategy.common.event.ModuleEventBus;
 import tech.xuanwu.northstar.strategy.common.event.ModuleEventType;
@@ -59,8 +60,17 @@ public class CtaDealer implements Dealer {
 	@Override
 	public void onEvent(ModuleEvent event) {
 		if(event.getEventType() == ModuleEventType.SIGNAL_CREATED) {
-			currentSignal = (CtaSignal) event.getData();
+			CtaSignal signal = (CtaSignal) event.getData();
 			log.info("收到来自信号策略-[{}] 的交易信号：{}", currentSignal.getSignalClass().getSimpleName(), JSON.toJSONString(currentSignal));
+			if(signal.getState().isOpen() && agent.getModuleState() != ModuleState.EMPTY) {				
+				log.warn("模组并非空仓状态，忽略该信号");
+				return;
+			}
+			if(!signal.getState().isOpen() && agent.getModuleState() != ModuleState.HOLDING) {
+				log.warn("模组并非持仓状态，忽略该信号");
+				return;
+			}
+			currentSignal = signal;
 			
 		} else if(event.getEventType() == ModuleEventType.ORDER_RETRY) {
 			currentOrderReq = (SubmitOrderReqField) event.getData();
