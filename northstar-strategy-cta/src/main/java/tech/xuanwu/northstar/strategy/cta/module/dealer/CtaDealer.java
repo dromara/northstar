@@ -60,7 +60,7 @@ public class CtaDealer implements Dealer {
 	public void onEvent(ModuleEvent event) {
 		if(event.getEventType() == ModuleEventType.SIGNAL_CREATED) {
 			CtaSignal signal = (CtaSignal) event.getData();
-			log.info("收到来自信号策略-[{}] 的交易信号：{}", currentSignal.getSignalClass().getSimpleName(), JSON.toJSONString(currentSignal));
+			log.info("收到来自信号策略-[{}] 的交易信号：{}", signal.getSignalClass().getSimpleName(), JSON.toJSONString(signal));
 			if(signal.getState().isOpen() && agent.getModuleState() != ModuleState.EMPTY) {				
 				log.warn("模组并非空仓状态，忽略该信号");
 				return;
