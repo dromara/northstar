@@ -20,7 +20,7 @@
 
 
 
-本人几乎从头到尾90%重构了两次，深感开源不易。  
+开源不易，感谢点赞关注加收藏！  
 详细文档请参考wiki： https://gitee.com/dromara/northstar/wikis/  
 
 ## 适用人群
@@ -43,13 +43,13 @@
 
 初始化系统环境（只需要运行一次）
 ```
-curl https://gitee.com/KevinHuangwl/northstar/raw/master/env.sh | sh
+curl https://gitee.com/dromara/northstar/raw/master/env.sh | sh
 ```
 
 初始化数据库（如果使用外部数据库的可以忽略）
 ```
-curl -o mongo.repo https://gitee.com/KevinHuangwl/northstar/raw/master/mongo.repo
-curl https://gitee.com/KevinHuangwl/northstar/raw/master/mongo.sh | sh
+curl -o mongo.repo https://gitee.com/dromara/northstar/raw/master/mongo.repo
+curl https://gitee.com/dromara/northstar/raw/master/mongo.sh | sh
 ```
 安装成功后验证mongoDB 是否安装成功
 ```
@@ -80,7 +80,7 @@ Jun 27 17:30:14 ai-trader-hw systemd[1]: Started MongoDB Database Server.
 下载项目
 ```
 cd ~
-git clone https://gitee.com/KevinHuangwl/northstar.git
+git clone https://gitee.com/dromara/northstar.git
 ```
 
 修改northstar/northstar-main/src/main/resources/application.yml配置文件中的邮箱代理配置  
@@ -151,5 +151,5 @@ kill `pgrep java`
 对于仅为了满足交易需求的朋友而言，如果市场上现成的产品可以满足您的策略需求的话，请尽量使用市场上的付费产品例如文华、MC、金字塔等。因为开源项目存在大量的学习与调试成本，除非有成熟的技术背景以及存在付费产品无法实现的策略方案，才建议使用开源方案。
 
 ## 参考项目
-本项目基于github上另一个知名的同类项目redtorch演化而来，感谢redtorch项目作者的启发。  
+本项目基于github上另一个知名的同类项目redtorch演化而来，代码上仍保留部分其源码，感谢redtorch项目作者的启发。  
 https://github.com/sun0x00/redtorch
