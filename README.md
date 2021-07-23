@@ -1,4 +1,9 @@
 # Northstar程序化交易平台
+
+**开源声明：**  
+**本项目归入dromara开源组织运营的初心，是希望可以有更多志同道合的朋友一起参与项目的开发，并且能借其在交易市场上有所收获！**  
+**借用组织的口号：一个人或许能走的更快，但一群人会走的更远。**  
+
 这是一个面向程序员的开源量化交易平台。用于期货、股票、外汇、炒币等多种投机场景，实现程序化投机。暂时只对接了国内期货交易所，理论上可以对接任意交易所。
 
 ![Image](https://images.gitee.com/uploads/images/2021/0606/215002_e2a95b42_1676852.png)
@@ -16,7 +21,7 @@
 
 
 本人几乎从头到尾90%重构了两次，深感开源不易。  
-详细文档请参考wiki： https://gitee.com/KevinHuangwl/northstar/wikis/%E6%A0%B8%E5%BF%83%E8%AE%BE%E8%AE%A1%E8%AF%B4%E6%98%8E  
+详细文档请参考wiki： https://gitee.com/dromara/northstar/wikis/  
 
 ## 适用人群
 全栈技术爱好者、小型私募技术团队
