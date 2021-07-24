@@ -876,7 +876,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 				String orderId = gatewayId + "@" + adapterOrderId;
 
 				DirectionEnum direction = CtpConstant.directionMapReverse.getOrDefault(pInputOrder.getDirection(), DirectionEnum.D_Unknown);
-				OffsetFlagEnum offsetflag = CtpConstant.offsetMapReverse.getOrDefault(pInputOrder.getCombOffsetFlag().toCharArray()[0], OffsetFlagEnum.OF_Unkonwn);
+				OffsetFlagEnum offsetflag = CtpConstant.offsetMapReverse.getOrDefault(pInputOrder.getCombOffsetFlag().toCharArray()[0], OffsetFlagEnum.OF_Unknown);
 
 				double price = pInputOrder.getLimitPrice();
 				int totalVolume = pInputOrder.getVolumeTotalOriginal();
@@ -885,14 +885,14 @@ public class TdSpi extends CThostFtdcTraderSpi {
 				OrderStatusEnum orderStatus = OrderStatusEnum.OS_Rejected;
 
 				HedgeFlagEnum hedgeFlag = CtpConstant.hedgeFlagMapReverse.getOrDefault(pInputOrder.getCombHedgeFlag(), HedgeFlagEnum.HF_Unknown);
-				ContingentConditionEnum contingentCondition = CtpConstant.contingentConditionMapReverse.getOrDefault(pInputOrder.getContingentCondition(), ContingentConditionEnum.CC_Unkonwn);
-				ForceCloseReasonEnum forceCloseReason = CtpConstant.forceCloseReasonMapReverse.getOrDefault(pInputOrder.getForceCloseReason(), ForceCloseReasonEnum.FCR_Unkonwn);
-				TimeConditionEnum timeCondition = CtpConstant.timeConditionMapReverse.getOrDefault(pInputOrder.getTimeCondition(), TimeConditionEnum.TC_Unkonwn);
+				ContingentConditionEnum contingentCondition = CtpConstant.contingentConditionMapReverse.getOrDefault(pInputOrder.getContingentCondition(), ContingentConditionEnum.CC_Unknown);
+				ForceCloseReasonEnum forceCloseReason = CtpConstant.forceCloseReasonMapReverse.getOrDefault(pInputOrder.getForceCloseReason(), ForceCloseReasonEnum.FCR_Unknown);
+				TimeConditionEnum timeCondition = CtpConstant.timeConditionMapReverse.getOrDefault(pInputOrder.getTimeCondition(), TimeConditionEnum.TC_Unknown);
 				String gtdDate = pInputOrder.getGTDDate();
 				int autoSuspend = pInputOrder.getIsAutoSuspend();
 				int userForceClose = pInputOrder.getUserForceClose();
 				int swapOrder = pInputOrder.getIsSwapOrder();
-				VolumeConditionEnum volumeCondition = CtpConstant.volumeConditionMapReverse.getOrDefault(pInputOrder.getVolumeCondition(), VolumeConditionEnum.VC_Unkonwn);
+				VolumeConditionEnum volumeCondition = CtpConstant.volumeConditionMapReverse.getOrDefault(pInputOrder.getVolumeCondition(), VolumeConditionEnum.VC_Unknown);
 				OrderPriceTypeEnum orderPriceType = CtpConstant.orderPriceTypeMapReverse.getOrDefault(pInputOrder.getOrderPriceType(), OrderPriceTypeEnum.OPT_Unknown);
 
 				int minVolume = pInputOrder.getMinVolume();
@@ -1527,7 +1527,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 			orderIdToAdapterOrderIdMap.put(orderId, adapterOrderId);
 
 			DirectionEnum direction = CtpConstant.directionMapReverse.getOrDefault(pOrder.getDirection(), DirectionEnum.D_Unknown);
-			OffsetFlagEnum offsetFlag = CtpConstant.offsetMapReverse.getOrDefault(pOrder.getCombOffsetFlag().toCharArray()[0], OffsetFlagEnum.OF_Unkonwn);
+			OffsetFlagEnum offsetFlag = CtpConstant.offsetMapReverse.getOrDefault(pOrder.getCombOffsetFlag().toCharArray()[0], OffsetFlagEnum.OF_Unknown);
 
 			double price = pOrder.getLimitPrice();
 
@@ -1547,16 +1547,16 @@ public class TdSpi extends CThostFtdcTraderSpi {
 			String suspendTime = pOrder.getSuspendTime();
 
 			HedgeFlagEnum hedgeFlag = CtpConstant.hedgeFlagMapReverse.getOrDefault(pOrder.getCombHedgeFlag(), HedgeFlagEnum.HF_Unknown);
-			ContingentConditionEnum contingentCondition = CtpConstant.contingentConditionMapReverse.getOrDefault(pOrder.getContingentCondition(), ContingentConditionEnum.CC_Unkonwn);
-			ForceCloseReasonEnum forceCloseReason = CtpConstant.forceCloseReasonMapReverse.getOrDefault(pOrder.getForceCloseReason(), ForceCloseReasonEnum.FCR_Unkonwn);
-			TimeConditionEnum timeCondition = CtpConstant.timeConditionMapReverse.getOrDefault(pOrder.getTimeCondition(), TimeConditionEnum.TC_Unkonwn);
+			ContingentConditionEnum contingentCondition = CtpConstant.contingentConditionMapReverse.getOrDefault(pOrder.getContingentCondition(), ContingentConditionEnum.CC_Unknown);
+			ForceCloseReasonEnum forceCloseReason = CtpConstant.forceCloseReasonMapReverse.getOrDefault(pOrder.getForceCloseReason(), ForceCloseReasonEnum.FCR_Unknown);
+			TimeConditionEnum timeCondition = CtpConstant.timeConditionMapReverse.getOrDefault(pOrder.getTimeCondition(), TimeConditionEnum.TC_Unknown);
 
 			int userForceClose = pOrder.getUserForceClose();
 			String gtdDate = pOrder.getGTDDate();
 			int autoSuspend = pOrder.getIsAutoSuspend();
 			int swapOrder = pOrder.getIsSwapOrder();
 
-			VolumeConditionEnum volumeCondition = CtpConstant.volumeConditionMapReverse.getOrDefault(pOrder.getVolumeCondition(), VolumeConditionEnum.VC_Unkonwn);
+			VolumeConditionEnum volumeCondition = CtpConstant.volumeConditionMapReverse.getOrDefault(pOrder.getVolumeCondition(), VolumeConditionEnum.VC_Unknown);
 			OrderPriceTypeEnum orderPriceType = CtpConstant.orderPriceTypeMapReverse.getOrDefault(pOrder.getOrderPriceType(), OrderPriceTypeEnum.OPT_Unknown);
 
 			int minVolume = pOrder.getMinVolume();
@@ -1641,7 +1641,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 			DirectionEnum direction = CtpConstant.directionMapReverse.getOrDefault(pTrade.getDirection(), DirectionEnum.D_Unknown);
 			String adapterTradeId = adapterOrderId + "@" + direction.getValueDescriptor().getName() + "@" + StringUtils.trim(pTrade.getTradeID());
 			String tradeId = gatewayId + "@" + adapterTradeId;
-			OffsetFlagEnum offsetFlag = CtpConstant.offsetMapReverse.getOrDefault(pTrade.getOffsetFlag(), OffsetFlagEnum.OF_Unkonwn);
+			OffsetFlagEnum offsetFlag = CtpConstant.offsetMapReverse.getOrDefault(pTrade.getOffsetFlag(), OffsetFlagEnum.OF_Unknown);
 			double price = pTrade.getPrice();
 			int volume = pTrade.getVolume();
 			String tradeDate = pTrade.getTradeDate();
@@ -1650,8 +1650,8 @@ public class TdSpi extends CThostFtdcTraderSpi {
 			long tradeTimestamp = tradeDatetime.atZone(ZoneId.systemDefault()).toInstant().getEpochSecond();
 
 			HedgeFlagEnum hedgeFlag = CtpConstant.hedgeFlagMapReverse.getOrDefault(String.valueOf(pTrade.getHedgeFlag()), HedgeFlagEnum.HF_Unknown);
-			TradeTypeEnum tradeType = CtpConstant.tradeTypeMapReverse.getOrDefault(pTrade.getTradeType(), TradeTypeEnum.TT_Unkonwn);
-			PriceSourceEnum priceSource = CtpConstant.priceSourceMapReverse.getOrDefault(pTrade.getPriceSource(), PriceSourceEnum.PSRC_Unkonwn);
+			TradeTypeEnum tradeType = CtpConstant.tradeTypeMapReverse.getOrDefault(pTrade.getTradeType(), TradeTypeEnum.TT_Unknown);
+			PriceSourceEnum priceSource = CtpConstant.priceSourceMapReverse.getOrDefault(pTrade.getPriceSource(), PriceSourceEnum.PSRC_Unknown);
 
 			String orderLocalId = StringUtils.trim(pTrade.getOrderLocalID());
 			String orderSysId = StringUtils.trim(pTrade.getOrderSysID());

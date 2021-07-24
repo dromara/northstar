@@ -105,7 +105,7 @@ public class NotificationDispatcher extends AbstractEventHandler implements Init
 			return;
 		}
 		String dir = order.getDirection() == DirectionEnum.D_Buy ? "多" :  order.getDirection() == DirectionEnum.D_Sell ? "空" : "无";
-		String offset = order.getOffsetFlag() == OffsetFlagEnum.OF_Open ? "开" : order.getOffsetFlag() == OffsetFlagEnum.OF_Unkonwn ? "无" : "平";
+		String offset = order.getOffsetFlag() == OffsetFlagEnum.OF_Open ? "开" : order.getOffsetFlag() == OffsetFlagEnum.OF_Unknown ? "无" : "平";
 		String status = order.getOrderStatus() == OrderStatusEnum.OS_AllTraded ? "全成" :
 			order.getOrderStatus() == OrderStatusEnum.OS_Canceled ? "已撤" :
 				order.getOrderStatus() == OrderStatusEnum.OS_Touched ? "已挂" :

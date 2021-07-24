@@ -498,7 +498,7 @@ public final class CoreField {
       if (gatewayAdapterType_ != xyz.redtorch.pb.CoreEnum.GatewayAdapterTypeEnum.GAT_CTP.getNumber()) {
         output.writeEnum(5, gatewayAdapterType_);
       }
-      if (status_ != xyz.redtorch.pb.CoreEnum.ConnectStatusEnum.CS_Unkonwn.getNumber()) {
+      if (status_ != xyz.redtorch.pb.CoreEnum.ConnectStatusEnum.CS_Unknown.getNumber()) {
         output.writeEnum(6, status_);
       }
       if (authErrorFlag_ != false) {
@@ -530,7 +530,7 @@ public final class CoreField {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(5, gatewayAdapterType_);
       }
-      if (status_ != xyz.redtorch.pb.CoreEnum.ConnectStatusEnum.CS_Unkonwn.getNumber()) {
+      if (status_ != xyz.redtorch.pb.CoreEnum.ConnectStatusEnum.CS_Unknown.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(6, status_);
       }
@@ -9297,7 +9297,7 @@ public final class CoreField {
       if (direction_ != xyz.redtorch.pb.CoreEnum.DirectionEnum.D_Unknown.getNumber()) {
         output.writeEnum(9, direction_);
       }
-      if (offsetFlag_ != xyz.redtorch.pb.CoreEnum.OffsetFlagEnum.OF_Unkonwn.getNumber()) {
+      if (offsetFlag_ != xyz.redtorch.pb.CoreEnum.OffsetFlagEnum.OF_Unknown.getNumber()) {
         output.writeEnum(10, offsetFlag_);
       }
       if (hedgeFlag_ != xyz.redtorch.pb.CoreEnum.HedgeFlagEnum.HF_Unknown.getNumber()) {
@@ -9318,25 +9318,25 @@ public final class CoreField {
       if (tradedVolume_ != 0) {
         output.writeFixed32(16, tradedVolume_);
       }
-      if (timeCondition_ != xyz.redtorch.pb.CoreEnum.TimeConditionEnum.TC_Unkonwn.getNumber()) {
+      if (timeCondition_ != xyz.redtorch.pb.CoreEnum.TimeConditionEnum.TC_Unknown.getNumber()) {
         output.writeEnum(17, timeCondition_);
       }
       if (!getGtdDateBytes().isEmpty()) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 18, gtdDate_);
       }
-      if (volumeCondition_ != xyz.redtorch.pb.CoreEnum.VolumeConditionEnum.VC_Unkonwn.getNumber()) {
+      if (volumeCondition_ != xyz.redtorch.pb.CoreEnum.VolumeConditionEnum.VC_Unknown.getNumber()) {
         output.writeEnum(19, volumeCondition_);
       }
       if (minVolume_ != 0) {
         output.writeFixed32(20, minVolume_);
       }
-      if (contingentCondition_ != xyz.redtorch.pb.CoreEnum.ContingentConditionEnum.CC_Unkonwn.getNumber()) {
+      if (contingentCondition_ != xyz.redtorch.pb.CoreEnum.ContingentConditionEnum.CC_Unknown.getNumber()) {
         output.writeEnum(21, contingentCondition_);
       }
       if (stopPrice_ != 0D) {
         output.writeDouble(22, stopPrice_);
       }
-      if (forceCloseReason_ != xyz.redtorch.pb.CoreEnum.ForceCloseReasonEnum.FCR_Unkonwn.getNumber()) {
+      if (forceCloseReason_ != xyz.redtorch.pb.CoreEnum.ForceCloseReasonEnum.FCR_Unknown.getNumber()) {
         output.writeEnum(23, forceCloseReason_);
       }
       if (autoSuspend_ != 0) {
@@ -9421,7 +9421,7 @@ public final class CoreField {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(9, direction_);
       }
-      if (offsetFlag_ != xyz.redtorch.pb.CoreEnum.OffsetFlagEnum.OF_Unkonwn.getNumber()) {
+      if (offsetFlag_ != xyz.redtorch.pb.CoreEnum.OffsetFlagEnum.OF_Unknown.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(10, offsetFlag_);
       }
@@ -9449,14 +9449,14 @@ public final class CoreField {
         size += com.google.protobuf.CodedOutputStream
           .computeFixed32Size(16, tradedVolume_);
       }
-      if (timeCondition_ != xyz.redtorch.pb.CoreEnum.TimeConditionEnum.TC_Unkonwn.getNumber()) {
+      if (timeCondition_ != xyz.redtorch.pb.CoreEnum.TimeConditionEnum.TC_Unknown.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(17, timeCondition_);
       }
       if (!getGtdDateBytes().isEmpty()) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(18, gtdDate_);
       }
-      if (volumeCondition_ != xyz.redtorch.pb.CoreEnum.VolumeConditionEnum.VC_Unkonwn.getNumber()) {
+      if (volumeCondition_ != xyz.redtorch.pb.CoreEnum.VolumeConditionEnum.VC_Unknown.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(19, volumeCondition_);
       }
@@ -9464,7 +9464,7 @@ public final class CoreField {
         size += com.google.protobuf.CodedOutputStream
           .computeFixed32Size(20, minVolume_);
       }
-      if (contingentCondition_ != xyz.redtorch.pb.CoreEnum.ContingentConditionEnum.CC_Unkonwn.getNumber()) {
+      if (contingentCondition_ != xyz.redtorch.pb.CoreEnum.ContingentConditionEnum.CC_Unknown.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(21, contingentCondition_);
       }
@@ -9472,7 +9472,7 @@ public final class CoreField {
         size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(22, stopPrice_);
       }
-      if (forceCloseReason_ != xyz.redtorch.pb.CoreEnum.ForceCloseReasonEnum.FCR_Unkonwn.getNumber()) {
+      if (forceCloseReason_ != xyz.redtorch.pb.CoreEnum.ForceCloseReasonEnum.FCR_Unknown.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(23, forceCloseReason_);
       }
@@ -14508,7 +14508,7 @@ public final class CoreField {
       if (direction_ != xyz.redtorch.pb.CoreEnum.DirectionEnum.D_Unknown.getNumber()) {
         output.writeEnum(12, direction_);
       }
-      if (offsetFlag_ != xyz.redtorch.pb.CoreEnum.OffsetFlagEnum.OF_Unkonwn.getNumber()) {
+      if (offsetFlag_ != xyz.redtorch.pb.CoreEnum.OffsetFlagEnum.OF_Unknown.getNumber()) {
         output.writeEnum(13, offsetFlag_);
       }
       if (hedgeFlag_ != xyz.redtorch.pb.CoreEnum.HedgeFlagEnum.HF_Unknown.getNumber()) {
@@ -14520,10 +14520,10 @@ public final class CoreField {
       if (volume_ != 0) {
         output.writeFixed32(16, volume_);
       }
-      if (tradeType_ != xyz.redtorch.pb.CoreEnum.TradeTypeEnum.TT_Unkonwn.getNumber()) {
+      if (tradeType_ != xyz.redtorch.pb.CoreEnum.TradeTypeEnum.TT_Unknown.getNumber()) {
         output.writeEnum(17, tradeType_);
       }
-      if (priceSource_ != xyz.redtorch.pb.CoreEnum.PriceSourceEnum.PSRC_Unkonwn.getNumber()) {
+      if (priceSource_ != xyz.redtorch.pb.CoreEnum.PriceSourceEnum.PSRC_Unknown.getNumber()) {
         output.writeEnum(18, priceSource_);
       }
       if (!getTradingDayBytes().isEmpty()) {
@@ -14590,7 +14590,7 @@ public final class CoreField {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(12, direction_);
       }
-      if (offsetFlag_ != xyz.redtorch.pb.CoreEnum.OffsetFlagEnum.OF_Unkonwn.getNumber()) {
+      if (offsetFlag_ != xyz.redtorch.pb.CoreEnum.OffsetFlagEnum.OF_Unknown.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(13, offsetFlag_);
       }
@@ -14606,11 +14606,11 @@ public final class CoreField {
         size += com.google.protobuf.CodedOutputStream
           .computeFixed32Size(16, volume_);
       }
-      if (tradeType_ != xyz.redtorch.pb.CoreEnum.TradeTypeEnum.TT_Unkonwn.getNumber()) {
+      if (tradeType_ != xyz.redtorch.pb.CoreEnum.TradeTypeEnum.TT_Unknown.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(17, tradeType_);
       }
-      if (priceSource_ != xyz.redtorch.pb.CoreEnum.PriceSourceEnum.PSRC_Unkonwn.getNumber()) {
+      if (priceSource_ != xyz.redtorch.pb.CoreEnum.PriceSourceEnum.PSRC_Unknown.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(18, priceSource_);
       }
@@ -30142,31 +30142,31 @@ public final class CoreField {
       if (direction_ != xyz.redtorch.pb.CoreEnum.DirectionEnum.D_Unknown.getNumber()) {
         output.writeEnum(9, direction_);
       }
-      if (offsetFlag_ != xyz.redtorch.pb.CoreEnum.OffsetFlagEnum.OF_Unkonwn.getNumber()) {
+      if (offsetFlag_ != xyz.redtorch.pb.CoreEnum.OffsetFlagEnum.OF_Unknown.getNumber()) {
         output.writeEnum(10, offsetFlag_);
       }
       if (hedgeFlag_ != xyz.redtorch.pb.CoreEnum.HedgeFlagEnum.HF_Unknown.getNumber()) {
         output.writeEnum(11, hedgeFlag_);
       }
-      if (timeCondition_ != xyz.redtorch.pb.CoreEnum.TimeConditionEnum.TC_Unkonwn.getNumber()) {
+      if (timeCondition_ != xyz.redtorch.pb.CoreEnum.TimeConditionEnum.TC_Unknown.getNumber()) {
         output.writeEnum(12, timeCondition_);
       }
       if (!getGtdDateBytes().isEmpty()) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 13, gtdDate_);
       }
-      if (volumeCondition_ != xyz.redtorch.pb.CoreEnum.VolumeConditionEnum.VC_Unkonwn.getNumber()) {
+      if (volumeCondition_ != xyz.redtorch.pb.CoreEnum.VolumeConditionEnum.VC_Unknown.getNumber()) {
         output.writeEnum(14, volumeCondition_);
       }
       if (minVolume_ != 0) {
         output.writeFixed32(15, minVolume_);
       }
-      if (contingentCondition_ != xyz.redtorch.pb.CoreEnum.ContingentConditionEnum.CC_Unkonwn.getNumber()) {
+      if (contingentCondition_ != xyz.redtorch.pb.CoreEnum.ContingentConditionEnum.CC_Unknown.getNumber()) {
         output.writeEnum(16, contingentCondition_);
       }
       if (stopPrice_ != 0D) {
         output.writeDouble(17, stopPrice_);
       }
-      if (forceCloseReason_ != xyz.redtorch.pb.CoreEnum.ForceCloseReasonEnum.FCR_Unkonwn.getNumber()) {
+      if (forceCloseReason_ != xyz.redtorch.pb.CoreEnum.ForceCloseReasonEnum.FCR_Unknown.getNumber()) {
         output.writeEnum(18, forceCloseReason_);
       }
       if (autoSuspend_ != 0) {
@@ -30220,7 +30220,7 @@ public final class CoreField {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(9, direction_);
       }
-      if (offsetFlag_ != xyz.redtorch.pb.CoreEnum.OffsetFlagEnum.OF_Unkonwn.getNumber()) {
+      if (offsetFlag_ != xyz.redtorch.pb.CoreEnum.OffsetFlagEnum.OF_Unknown.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(10, offsetFlag_);
       }
@@ -30228,14 +30228,14 @@ public final class CoreField {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(11, hedgeFlag_);
       }
-      if (timeCondition_ != xyz.redtorch.pb.CoreEnum.TimeConditionEnum.TC_Unkonwn.getNumber()) {
+      if (timeCondition_ != xyz.redtorch.pb.CoreEnum.TimeConditionEnum.TC_Unknown.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(12, timeCondition_);
       }
       if (!getGtdDateBytes().isEmpty()) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(13, gtdDate_);
       }
-      if (volumeCondition_ != xyz.redtorch.pb.CoreEnum.VolumeConditionEnum.VC_Unkonwn.getNumber()) {
+      if (volumeCondition_ != xyz.redtorch.pb.CoreEnum.VolumeConditionEnum.VC_Unknown.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(14, volumeCondition_);
       }
@@ -30243,7 +30243,7 @@ public final class CoreField {
         size += com.google.protobuf.CodedOutputStream
           .computeFixed32Size(15, minVolume_);
       }
-      if (contingentCondition_ != xyz.redtorch.pb.CoreEnum.ContingentConditionEnum.CC_Unkonwn.getNumber()) {
+      if (contingentCondition_ != xyz.redtorch.pb.CoreEnum.ContingentConditionEnum.CC_Unknown.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(16, contingentCondition_);
       }
@@ -30251,7 +30251,7 @@ public final class CoreField {
         size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(17, stopPrice_);
       }
-      if (forceCloseReason_ != xyz.redtorch.pb.CoreEnum.ForceCloseReasonEnum.FCR_Unkonwn.getNumber()) {
+      if (forceCloseReason_ != xyz.redtorch.pb.CoreEnum.ForceCloseReasonEnum.FCR_Unknown.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(18, forceCloseReason_);
       }
@@ -36250,7 +36250,7 @@ public final class CoreField {
       if (ibApiSetting_ != null) {
         output.writeMessage(9, getIbApiSetting());
       }
-      if (status_ != xyz.redtorch.pb.CoreEnum.ConnectStatusEnum.CS_Unkonwn.getNumber()) {
+      if (status_ != xyz.redtorch.pb.CoreEnum.ConnectStatusEnum.CS_Unknown.getNumber()) {
         output.writeEnum(10, status_);
       }
       if (version_ != 0L) {
@@ -36296,7 +36296,7 @@ public final class CoreField {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(9, getIbApiSetting());
       }
-      if (status_ != xyz.redtorch.pb.CoreEnum.ConnectStatusEnum.CS_Unkonwn.getNumber()) {
+      if (status_ != xyz.redtorch.pb.CoreEnum.ConnectStatusEnum.CS_Unknown.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(10, status_);
       }

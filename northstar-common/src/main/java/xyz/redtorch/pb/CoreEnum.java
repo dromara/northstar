@@ -918,9 +918,9 @@ public final class CoreEnum {
      * 未知
      * </pre>
      *
-     * <code>CS_Unkonwn = 0;</code>
+     * <code>CS_Unknown = 0;</code>
      */
-    CS_Unkonwn(0),
+    CS_Unknown(0),
     /**
      * <pre>
      * 已经断开
@@ -961,9 +961,9 @@ public final class CoreEnum {
      * 未知
      * </pre>
      *
-     * <code>CS_Unkonwn = 0;</code>
+     * <code>CS_Unknown = 0;</code>
      */
-    public static final int CS_Unkonwn_VALUE = 0;
+    public static final int CS_Unknown_VALUE = 0;
     /**
      * <pre>
      * 已经断开
@@ -1016,7 +1016,7 @@ public final class CoreEnum {
 
     public static ConnectStatusEnum forNumber(int value) {
       switch (value) {
-        case 0: return CS_Unkonwn;
+        case 0: return CS_Unknown;
         case 1: return CS_Disconnected;
         case 2: return CS_Connected;
         case 3: return CS_Disconnecting;
@@ -1087,9 +1087,9 @@ public final class CoreEnum {
      * 未知
      * </pre>
      *
-     * <code>OAS_Unkonwn = 0;</code>
+     * <code>OAS_Unknown = 0;</code>
      */
-    OAS_Unkonwn(0),
+    OAS_Unknown(0),
     /**
      * <pre>
      * 已经提交
@@ -1122,9 +1122,9 @@ public final class CoreEnum {
      * 未知
      * </pre>
      *
-     * <code>OAS_Unkonwn = 0;</code>
+     * <code>OAS_Unknown = 0;</code>
      */
-    public static final int OAS_Unkonwn_VALUE = 0;
+    public static final int OAS_Unknown_VALUE = 0;
     /**
      * <pre>
      * 已经提交
@@ -1169,7 +1169,7 @@ public final class CoreEnum {
 
     public static OrderActionStatusTyp forNumber(int value) {
       switch (value) {
-        case 0: return OAS_Unkonwn;
+        case 0: return OAS_Unknown;
         case 1: return OAS_Submitted;
         case 2: return OAS_Accepted;
         case 3: return OAS_Rejected;
@@ -3063,9 +3063,9 @@ public final class CoreEnum {
      * 未知
      * </pre>
      *
-     * <code>OF_Unkonwn = 0;</code>
+     * <code>OF_Unknown = 0;</code>
      */
-    OF_Unkonwn(0),
+    OF_Unknown(0),
     /**
      * <pre>
      * 开仓
@@ -3130,9 +3130,9 @@ public final class CoreEnum {
      * 未知
      * </pre>
      *
-     * <code>OF_Unkonwn = 0;</code>
+     * <code>OF_Unknown = 0;</code>
      */
-    public static final int OF_Unkonwn_VALUE = 0;
+    public static final int OF_Unknown_VALUE = 0;
     /**
      * <pre>
      * 开仓
@@ -3209,7 +3209,7 @@ public final class CoreEnum {
 
     public static OffsetFlagEnum forNumber(int value) {
       switch (value) {
-        case 0: return OF_Unkonwn;
+        case 0: return OF_Unknown;
         case 1: return OF_Open;
         case 2: return OF_Close;
         case 3: return OF_ForceClose;
@@ -3283,9 +3283,9 @@ public final class CoreEnum {
      * 未知
      * </pre>
      *
-     * <code>FCR_Unkonwn = 0;</code>
+     * <code>FCR_Unknown = 0;</code>
      */
-    FCR_Unkonwn(0),
+    FCR_Unknown(0),
     /**
      * <pre>
      * 非强平
@@ -3358,9 +3358,9 @@ public final class CoreEnum {
      * 未知
      * </pre>
      *
-     * <code>FCR_Unkonwn = 0;</code>
+     * <code>FCR_Unknown = 0;</code>
      */
-    public static final int FCR_Unkonwn_VALUE = 0;
+    public static final int FCR_Unknown_VALUE = 0;
     /**
      * <pre>
      * 非强平
@@ -3445,7 +3445,7 @@ public final class CoreEnum {
 
     public static ForceCloseReasonEnum forNumber(int value) {
       switch (value) {
-        case 0: return FCR_Unkonwn;
+        case 0: return FCR_Unknown;
         case 1: return FCR_NotForceClose;
         case 2: return FCR_LackDeposit;
         case 3: return FCR_ClientOverPositionLimit;
@@ -3520,9 +3520,9 @@ public final class CoreEnum {
      * 未知
      * </pre>
      *
-     * <code>OT_Unkonwn = 0;</code>
+     * <code>OT_Unknown = 0;</code>
      */
-    OT_Unkonwn(0),
+    OT_Unknown(0),
     /**
      * <pre>
      * 正常
@@ -3579,9 +3579,9 @@ public final class CoreEnum {
      * 未知
      * </pre>
      *
-     * <code>OT_Unkonwn = 0;</code>
+     * <code>OT_Unknown = 0;</code>
      */
-    public static final int OT_Unkonwn_VALUE = 0;
+    public static final int OT_Unknown_VALUE = 0;
     /**
      * <pre>
      * 正常
@@ -3650,7 +3650,7 @@ public final class CoreEnum {
 
     public static OrderTypeEnum forNumber(int value) {
       switch (value) {
-        case 0: return OT_Unkonwn;
+        case 0: return OT_Unknown;
         case 1: return OT_Normal;
         case 2: return OT_DeriveFromQuote;
         case 3: return OT_DeriveFromCombination;
@@ -3723,9 +3723,9 @@ public final class CoreEnum {
      * 未知
      * </pre>
      *
-     * <code>TC_Unkonwn = 0;</code>
+     * <code>TC_Unknown = 0;</code>
      */
-    TC_Unkonwn(0),
+    TC_Unknown(0),
     /**
      * <pre>
      * 立即完成，否则撤销
@@ -3782,9 +3782,9 @@ public final class CoreEnum {
      * 未知
      * </pre>
      *
-     * <code>TC_Unkonwn = 0;</code>
+     * <code>TC_Unknown = 0;</code>
      */
-    public static final int TC_Unkonwn_VALUE = 0;
+    public static final int TC_Unknown_VALUE = 0;
     /**
      * <pre>
      * 立即完成，否则撤销
@@ -3853,7 +3853,7 @@ public final class CoreEnum {
 
     public static TimeConditionEnum forNumber(int value) {
       switch (value) {
-        case 0: return TC_Unkonwn;
+        case 0: return TC_Unknown;
         case 1: return TC_IOC;
         case 2: return TC_GFS;
         case 3: return TC_GFD;
@@ -3926,9 +3926,9 @@ public final class CoreEnum {
      * 未知
      * </pre>
      *
-     * <code>VC_Unkonwn = 0;</code>
+     * <code>VC_Unknown = 0;</code>
      */
-    VC_Unkonwn(0),
+    VC_Unknown(0),
     /**
      * <pre>
      * 任何数量
@@ -3961,9 +3961,9 @@ public final class CoreEnum {
      * 未知
      * </pre>
      *
-     * <code>VC_Unkonwn = 0;</code>
+     * <code>VC_Unknown = 0;</code>
      */
-    public static final int VC_Unkonwn_VALUE = 0;
+    public static final int VC_Unknown_VALUE = 0;
     /**
      * <pre>
      * 任何数量
@@ -4008,7 +4008,7 @@ public final class CoreEnum {
 
     public static VolumeConditionEnum forNumber(int value) {
       switch (value) {
-        case 0: return VC_Unkonwn;
+        case 0: return VC_Unknown;
         case 1: return VC_AV;
         case 2: return VC_MV;
         case 3: return VC_CV;
@@ -4078,9 +4078,9 @@ public final class CoreEnum {
      * 未知
      * </pre>
      *
-     * <code>CC_Unkonwn = 0;</code>
+     * <code>CC_Unknown = 0;</code>
      */
-    CC_Unkonwn(0),
+    CC_Unknown(0),
     /**
      * <pre>
      * 立即
@@ -4233,9 +4233,9 @@ public final class CoreEnum {
      * 未知
      * </pre>
      *
-     * <code>CC_Unkonwn = 0;</code>
+     * <code>CC_Unknown = 0;</code>
      */
-    public static final int CC_Unkonwn_VALUE = 0;
+    public static final int CC_Unknown_VALUE = 0;
     /**
      * <pre>
      * 立即
@@ -4400,7 +4400,7 @@ public final class CoreEnum {
 
     public static ContingentConditionEnum forNumber(int value) {
       switch (value) {
-        case 0: return CC_Unkonwn;
+        case 0: return CC_Unknown;
         case 1: return CC_Immediately;
         case 2: return CC_Touch;
         case 3: return CC_TouchProfit;
@@ -4485,9 +4485,9 @@ public final class CoreEnum {
      * 未知
      * </pre>
      *
-     * <code>AF_Unkonwn = 0;</code>
+     * <code>AF_Unknown = 0;</code>
      */
-    AF_Unkonwn(0),
+    AF_Unknown(0),
     /**
      * <pre>
      * 删除
@@ -4512,9 +4512,9 @@ public final class CoreEnum {
      * 未知
      * </pre>
      *
-     * <code>AF_Unkonwn = 0;</code>
+     * <code>AF_Unknown = 0;</code>
      */
-    public static final int AF_Unkonwn_VALUE = 0;
+    public static final int AF_Unknown_VALUE = 0;
     /**
      * <pre>
      * 删除
@@ -4551,7 +4551,7 @@ public final class CoreEnum {
 
     public static ActionFlagEnum forNumber(int value) {
       switch (value) {
-        case 0: return AF_Unkonwn;
+        case 0: return AF_Unknown;
         case 1: return AF_Delete;
         case 2: return AF_Modify;
         default: return null;
@@ -4620,9 +4620,9 @@ public final class CoreEnum {
      * 未知
      * </pre>
      *
-     * <code>TR_Unkonwn = 0;</code>
+     * <code>TR_Unknown = 0;</code>
      */
-    TR_Unkonwn(0),
+    TR_Unknown(0),
     /**
      * <pre>
      * 可以交易
@@ -4655,9 +4655,9 @@ public final class CoreEnum {
      * 未知
      * </pre>
      *
-     * <code>TR_Unkonwn = 0;</code>
+     * <code>TR_Unknown = 0;</code>
      */
-    public static final int TR_Unkonwn_VALUE = 0;
+    public static final int TR_Unknown_VALUE = 0;
     /**
      * <pre>
      * 可以交易
@@ -4702,7 +4702,7 @@ public final class CoreEnum {
 
     public static TradingRightEnum forNumber(int value) {
       switch (value) {
-        case 0: return TR_Unkonwn;
+        case 0: return TR_Unknown;
         case 1: return TR_Allow;
         case 2: return TR_CloseOnly;
         case 3: return TR_Forbidden;
@@ -4772,9 +4772,9 @@ public final class CoreEnum {
      * 未知
      * </pre>
      *
-     * <code>ODS_Unkonwn = 0;</code>
+     * <code>ODS_Unknown = 0;</code>
      */
-    ODS_Unkonwn(0),
+    ODS_Unknown(0),
     /**
      * <pre>
      * 来自参与者
@@ -4799,9 +4799,9 @@ public final class CoreEnum {
      * 未知
      * </pre>
      *
-     * <code>ODS_Unkonwn = 0;</code>
+     * <code>ODS_Unknown = 0;</code>
      */
-    public static final int ODS_Unkonwn_VALUE = 0;
+    public static final int ODS_Unknown_VALUE = 0;
     /**
      * <pre>
      * 来自参与者
@@ -4838,7 +4838,7 @@ public final class CoreEnum {
 
     public static OrderSourceEnum forNumber(int value) {
       switch (value) {
-        case 0: return ODS_Unkonwn;
+        case 0: return ODS_Unknown;
         case 1: return ODS_Participant;
         case 2: return ODS_Administrator;
         default: return null;
@@ -4907,9 +4907,9 @@ public final class CoreEnum {
      * 未知
      * </pre>
      *
-     * <code>TT_Unkonwn = 0;</code>
+     * <code>TT_Unknown = 0;</code>
      */
-    TT_Unkonwn(0),
+    TT_Unknown(0),
     /**
      * <pre>
      * 组合持仓拆分为单一持仓,初始化不应包含该类型的持仓
@@ -4974,9 +4974,9 @@ public final class CoreEnum {
      * 未知
      * </pre>
      *
-     * <code>TT_Unkonwn = 0;</code>
+     * <code>TT_Unknown = 0;</code>
      */
-    public static final int TT_Unkonwn_VALUE = 0;
+    public static final int TT_Unknown_VALUE = 0;
     /**
      * <pre>
      * 组合持仓拆分为单一持仓,初始化不应包含该类型的持仓
@@ -5053,7 +5053,7 @@ public final class CoreEnum {
 
     public static TradeTypeEnum forNumber(int value) {
       switch (value) {
-        case 0: return TT_Unkonwn;
+        case 0: return TT_Unknown;
         case 1: return TT_SplitCombination;
         case 2: return TT_Common;
         case 3: return TT_OptionsExecution;
@@ -5127,9 +5127,9 @@ public final class CoreEnum {
      * 未知
      * </pre>
      *
-     * <code>PSRC_Unkonwn = 0;</code>
+     * <code>PSRC_Unknown = 0;</code>
      */
-    PSRC_Unkonwn(0),
+    PSRC_Unknown(0),
     /**
      * <pre>
      * 前成交价
@@ -5170,9 +5170,9 @@ public final class CoreEnum {
      * 未知
      * </pre>
      *
-     * <code>PSRC_Unkonwn = 0;</code>
+     * <code>PSRC_Unknown = 0;</code>
      */
-    public static final int PSRC_Unkonwn_VALUE = 0;
+    public static final int PSRC_Unknown_VALUE = 0;
     /**
      * <pre>
      * 前成交价
@@ -5225,7 +5225,7 @@ public final class CoreEnum {
 
     public static PriceSourceEnum forNumber(int value) {
       switch (value) {
-        case 0: return PSRC_Unkonwn;
+        case 0: return PSRC_Unknown;
         case 1: return PSRC_LastPrice;
         case 2: return PSRC_Buy;
         case 3: return PSRC_Sell;
@@ -6916,10 +6916,10 @@ public final class CoreEnum {
       "HIST\020\002*W\n\014BarCycleEnum\022\n\n\006B_5Sec\020\000\022\n\n\006B_" +
       "1Min\020\001\022\n\n\006B_3Min\020\002\022\n\n\006B_5Min\020\003\022\013\n\007B_15Mi" +
       "n\020\004\022\n\n\006B_1Day\020\005*s\n\021ConnectStatusEnum\022\016\n\n" +
-      "CS_Unkonwn\020\000\022\023\n\017CS_Disconnected\020\001\022\020\n\014CS_" +
+      "CS_Unknown\020\000\022\023\n\017CS_Disconnected\020\001\022\020\n\014CS_" +
       "Connected\020\002\022\024\n\020CS_Disconnecting\020\003\022\021\n\rCS_" +
       "Connecting\020\004*^\n\024OrderActionStatusTyp\022\017\n\013" +
-      "OAS_Unkonwn\020\000\022\021\n\rOAS_Submitted\020\001\022\020\n\014OAS_" +
+      "OAS_Unknown\020\000\022\021\n\rOAS_Submitted\020\001\022\020\n\014OAS_" +
       "Accepted\020\002\022\020\n\014OAS_Rejected\020\003*\344\001\n\017OrderSt" +
       "atusEnum\022\016\n\nOS_Unknown\020\000\022\020\n\014OS_AllTraded" +
       "\020\001\022\031\n\025OS_PartTradedQueueing\020\002\022\034\n\030OS_Part" +
@@ -6958,25 +6958,25 @@ public final class CoreEnum {
       "ks\020\r\022\035\n\031OPT_BidPrice1PlusTwoTicks\020\016\022\037\n\033O" +
       "PT_BidPrice1PlusThreeTicks\020\017\022\026\n\022OPT_Five" +
       "LevelPrice\020\020*\241\001\n\016OffsetFlagEnum\022\016\n\nOF_Un" +
-      "konwn\020\000\022\013\n\007OF_Open\020\001\022\014\n\010OF_Close\020\002\022\021\n\rOF" +
+      "known\020\000\022\013\n\007OF_Open\020\001\022\014\n\010OF_Close\020\002\022\021\n\rOF" +
       "_ForceClose\020\003\022\021\n\rOF_CloseToday\020\004\022\025\n\021OF_C" +
       "loseYesterday\020\005\022\017\n\013OF_ForceOff\020\006\022\026\n\022OF_L" +
       "ocalForceClose\020\007*\343\001\n\024ForceCloseReasonEnu" +
-      "m\022\017\n\013FCR_Unkonwn\020\000\022\025\n\021FCR_NotForceClose\020" +
+      "m\022\017\n\013FCR_Unknown\020\000\022\025\n\021FCR_NotForceClose\020" +
       "\001\022\023\n\017FCR_LackDeposit\020\002\022\037\n\033FCR_ClientOver" +
       "PositionLimit\020\003\022\037\n\033FCR_MemberOverPositio" +
       "nLimit\020\004\022\023\n\017FCR_NotMultiple\020\005\022\021\n\rFCR_Vio" +
       "lation\020\006\022\r\n\tFCR_Other\020\007\022\025\n\021FCR_PersonDel" +
-      "iver\020\010*\236\001\n\rOrderTypeEnum\022\016\n\nOT_Unkonwn\020\000" +
+      "iver\020\010*\236\001\n\rOrderTypeEnum\022\016\n\nOT_Unknown\020\000" +
       "\022\r\n\tOT_Normal\020\001\022\026\n\022OT_DeriveFromQuote\020\002\022" +
       "\034\n\030OT_DeriveFromCombination\020\003\022\022\n\016OT_Comb" +
       "ination\020\004\022\027\n\023OT_ConditionalOrder\020\005\022\013\n\007OT" +
       "_Swap\020\006*k\n\021TimeConditionEnum\022\016\n\nTC_Unkon" +
       "wn\020\000\022\n\n\006TC_IOC\020\001\022\n\n\006TC_GFS\020\002\022\n\n\006TC_GFD\020\003" +
       "\022\n\n\006TC_GTD\020\004\022\n\n\006TC_GTC\020\005\022\n\n\006TC_GFA\020\006*F\n\023" +
-      "VolumeConditionEnum\022\016\n\nVC_Unkonwn\020\000\022\t\n\005V" +
+      "VolumeConditionEnum\022\016\n\nVC_Unknown\020\000\022\t\n\005V" +
       "C_AV\020\001\022\t\n\005VC_MV\020\002\022\t\n\005VC_CV\020\003*\212\005\n\027Conting" +
-      "entConditionEnum\022\016\n\nCC_Unkonwn\020\000\022\022\n\016CC_I" +
+      "entConditionEnum\022\016\n\nCC_Unknown\020\000\022\022\n\016CC_I" +
       "mmediately\020\001\022\014\n\010CC_Touch\020\002\022\022\n\016CC_TouchPr" +
       "ofit\020\003\022\022\n\016CC_ParkedOrder\020\004\022$\n CC_LastPri" +
       "ceGreaterThanStopPrice\020\005\022%\n!CC_LastPrice" +
@@ -6992,13 +6992,13 @@ public final class CoreEnum {
       "\037CC_BidPriceLesserEqualStopPrice\020\020\022)\n%CC" +
       "_LocalLastPriceLesserEqualStopPrice\020\021\022*\n" +
       "&CC_LocalLastPriceGreaterEqualStopPrice\020" +
-      "\022*>\n\016ActionFlagEnum\022\016\n\nAF_Unkonwn\020\000\022\r\n\tA" +
+      "\022*>\n\016ActionFlagEnum\022\016\n\nAF_Unknown\020\000\022\r\n\tA" +
       "F_Delete\020\001\022\r\n\tAF_Modify\020\002*T\n\020TradingRigh" +
-      "tEnum\022\016\n\nTR_Unkonwn\020\000\022\014\n\010TR_Allow\020\001\022\020\n\014T" +
+      "tEnum\022\016\n\nTR_Unknown\020\000\022\014\n\010TR_Allow\020\001\022\020\n\014T" +
       "R_CloseOnly\020\002\022\020\n\014TR_Forbidden\020\003*N\n\017Order" +
-      "SourceEnum\022\017\n\013ODS_Unkonwn\020\000\022\023\n\017ODS_Parti" +
+      "SourceEnum\022\017\n\013ODS_Unknown\020\000\022\023\n\017ODS_Parti" +
       "cipant\020\001\022\025\n\021ODS_Administrator\020\002*\255\001\n\rTrad" +
-      "eTypeEnum\022\016\n\nTT_Unkonwn\020\000\022\027\n\023TT_SplitCom" +
+      "eTypeEnum\022\016\n\nTT_Unknown\020\000\022\027\n\023TT_SplitCom" +
       "bination\020\001\022\r\n\tTT_Common\020\002\022\027\n\023TT_OptionsE" +
       "xecution\020\003\022\n\n\006TT_OTC\020\004\022\021\n\rTT_EFPDerived\020" +
       "\005\022\031\n\025TT_CombinationDerived\020\006\022\021\n\rTT_Block" +

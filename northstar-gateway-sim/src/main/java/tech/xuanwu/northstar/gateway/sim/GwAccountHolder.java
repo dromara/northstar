@@ -129,7 +129,7 @@ class GwAccountHolder {
 	 * @return
 	 */
 	protected String submitOrder(SubmitOrderReqField submitOrderReq) {
-		if(submitOrderReq.getOffsetFlag() == OffsetFlagEnum.OF_Unkonwn) {
+		if(submitOrderReq.getOffsetFlag() == OffsetFlagEnum.OF_Unknown) {
 			throw new TradeException("未定义委托操作");
 		}
 		OrderField order;

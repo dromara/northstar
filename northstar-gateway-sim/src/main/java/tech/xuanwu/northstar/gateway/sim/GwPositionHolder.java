@@ -93,7 +93,7 @@ class GwPositionHolder {
 	 * @return			平仓盈亏
 	 */
 	protected double updatePositionBy(TradeField trade) {
-		if(trade.getOffsetFlag() == OffsetFlagEnum.OF_Unkonwn) {
+		if(trade.getOffsetFlag() == OffsetFlagEnum.OF_Unknown) {
 			throw new TradeException("未定义开平仓类型");
 		}
 		if(trade.getOffsetFlag() == OffsetFlagEnum.OF_Open) {
@@ -110,7 +110,7 @@ class GwPositionHolder {
 	 * @param order
 	 */
 	protected PositionField updatePositionBy(OrderField order) {
-		if(order.getOffsetFlag() == OffsetFlagEnum.OF_Unkonwn) {
+		if(order.getOffsetFlag() == OffsetFlagEnum.OF_Unknown) {
 			throw new TradeException("未定义开平仓操作");
 		}
 		// 开仓订单对应的持仓更新
@@ -417,7 +417,7 @@ class GwPositionHolder {
 	private Map<String, PositionField.Builder> getPositionMapBy(TradeField trade) {
 		DirectionEnum direction = trade.getDirection();
 		OffsetFlagEnum kpType = trade.getOffsetFlag();
-		if(kpType == OffsetFlagEnum.OF_Unkonwn) {
+		if(kpType == OffsetFlagEnum.OF_Unknown) {
 			throw new IllegalStateException("未知开平仓类型");
 		}
 		Map<String, PositionField.Builder> posMap = 
@@ -429,7 +429,7 @@ class GwPositionHolder {
 	private Map<String, PositionField.Builder> getPositionMapBy(OrderField order) {
 		DirectionEnum direction = order.getDirection();
 		OffsetFlagEnum kpType = order.getOffsetFlag(); 
-		if(kpType == OffsetFlagEnum.OF_Unkonwn) {
+		if(kpType == OffsetFlagEnum.OF_Unknown) {
 			throw new IllegalStateException("未知开平仓类型");
 		}
 		Map<String, PositionField.Builder> posMap = 
