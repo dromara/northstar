@@ -96,7 +96,7 @@ public class CtaModulePosition implements ModulePosition{
 			return;
 		}
 		currentUnifiedSymbolInPosition = trade.getContract().getUnifiedSymbol();
-		if(trade.getOffsetFlag() == OffsetFlagEnum.OF_Unkonwn) {
+		if(trade.getOffsetFlag() == OffsetFlagEnum.OF_Unknown) {
 			throw new IllegalStateException("未定义成交类型");
 		}
 		if(trade.getOffsetFlag() == OffsetFlagEnum.OF_Open) {

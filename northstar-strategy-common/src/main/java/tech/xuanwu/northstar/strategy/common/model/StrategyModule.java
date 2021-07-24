@@ -2,27 +2,43 @@ package tech.xuanwu.northstar.strategy.common.model;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
+import lombok.Builder;
+import tech.xuanwu.northstar.gateway.api.TradeGateway;
 import tech.xuanwu.northstar.strategy.common.Dealer;
 import tech.xuanwu.northstar.strategy.common.ExternalSignalPolicy;
 import tech.xuanwu.northstar.strategy.common.ModulePosition;
 import tech.xuanwu.northstar.strategy.common.ModuleTrade;
 import tech.xuanwu.northstar.strategy.common.RiskController;
+import tech.xuanwu.northstar.strategy.common.Signal;
 import tech.xuanwu.northstar.strategy.common.SignalPolicy;
 import tech.xuanwu.northstar.strategy.common.constants.ModuleState;
-import tech.xuanwu.northstar.strategy.common.event.ModuleEventBus;
+import tech.xuanwu.northstar.strategy.common.constants.RiskAuditResult;
+import tech.xuanwu.northstar.strategy.common.event.ModuleEventType;
+import tech.xuanwu.northstar.strategy.common.model.state.ModuleStateMachine;
+import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreField.AccountField;
 import xyz.redtorch.pb.CoreField.BarField;
+import xyz.redtorch.pb.CoreField.CancelOrderReqField;
 import xyz.redtorch.pb.CoreField.OrderField;
+import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TickField;
 import xyz.redtorch.pb.CoreField.TradeField;
 
+/**
+ * 主要负责组装各部件，并控制模组状态流程
+ * @author KevinHuangwl
+ *
+ */
+@Builder
 public class StrategyModule {
 	
 	protected ModulePosition mPosition;
@@ -35,78 +51,117 @@ public class StrategyModule {
 	
 	protected Dealer dealer;
 	
-	protected ModuleAgent agent;
+	protected ModuleStateMachine stateMachine;
 	
-	private ModuleEventBus moduleEventBus = new ModuleEventBus();
+	protected TradeGateway gateway;
 	
-	/**
-	 * 用于记录模组关联的合约名称
-	 */
-	protected Set<String> symbolSet = new HashSet<>();
+	protected String name;
+
+	protected AccountField account;
 	
-	public StrategyModule(ModuleAgent agent, SignalPolicy signalPolicy, RiskController riskController, Dealer dealer, 
-			ModulePosition mPosition, ModuleTrade mTrade) {
-		this.agent = agent;
-		this.mPosition = mPosition;
-		this.mTrade = mTrade;
-		this.signalPolicy = signalPolicy;
-		this.riskController = riskController;
-		this.dealer = dealer;
-		symbolSet.addAll(dealer.bindedUnifiedSymbols());
-		symbolSet.addAll(signalPolicy.bindedUnifiedSymbols());
-		
-		moduleEventBus.register(signalPolicy);
-		moduleEventBus.register(riskController);
-		moduleEventBus.register(dealer);
-		moduleEventBus.register(agent);
-		
-		riskController.setModuleAgent(agent);
-		riskController.setEventBus(moduleEventBus);
-		dealer.setModuleAgent(agent);
-		dealer.setEventBus(moduleEventBus);
-		signalPolicy.setModuleAgent(agent);
-		signalPolicy.setEventBus(moduleEventBus);
-		
-		
-	}
+	protected boolean disabled;
+	
+	protected String tradingDay;
+	
+	@Builder.Default
+	private Set<String> originOrderIdSet = new HashSet<>();
 	
 	public StrategyModule onTick(TickField tick) {
-		if(!agent.isEnabled()) {
-			//停用期间忽略TICK数据更新
+		if(disabled) {
+			//停用期间忽略数据更新
 			return this;
 		}
-		if(signalPolicy.bindedUnifiedSymbols().contains(tick.getUnifiedSymbol())) {			
-			agent.updateTradingDay(tick.getTradingDay());
-			signalPolicy.updateTick(tick);
+		if(signalPolicy.bindedUnifiedSymbols().contains(tick.getUnifiedSymbol())) {		
+			tradingDay = tick.getTradingDay();
+			if(stateMachine.getState() == ModuleState.EMPTY 
+					|| stateMachine.getState() == ModuleState.HOLDING) {				
+				Optional<Signal> signal = signalPolicy.updateTick(tick);
+				if(signal.isPresent()) {
+					stateMachine.transformForm(ModuleEventType.SIGNAL_CREATED);
+					dealer.onSignal(signal.get(), this);
+				}
+			}
 		}
 		if(dealer.bindedUnifiedSymbols().contains(tick.getUnifiedSymbol())) {
-			dealer.onTick(tick);
-			riskController.onTick(tick);
+			if(stateMachine.getState() == ModuleState.PLACING_ORDER) {
+				Optional<SubmitOrderReqField> submitOrder = dealer.onTick(tick);
+				if(submitOrder.isEmpty()) {
+					return this;
+				}
+				if(submitOrder.get().getOffsetFlag() == OffsetFlagEnum.OF_Unknown) {
+					throw new IllegalStateException("未定义开平操作");
+				}
+				if(submitOrder.get().getOffsetFlag() == OffsetFlagEnum.OF_Open) {
+					if(riskController.testReject(submitOrder.get())) {
+						stateMachine.transformForm(ModuleEventType.SIGNAL_RETAINED);
+						return this;
+					}
+				}
+				originOrderIdSet.add(submitOrder.get().getOriginOrderId());
+				gateway.submitOrder(submitOrder.get());
+			}
+			
+			if(stateMachine.getState() == ModuleState.PENDING_ORDER) {
+				short riskCode = riskController.onTick(tick, this);
+				if(riskCode == RiskAuditResult.ACCEPTED) {
+					return this;
+				}
+				
+				stateMachine.transformForm(ModuleEventType.RISK_ALERTED);
+				Iterator<String> itOrder = originOrderIdSet.iterator();
+				while(itOrder.hasNext()) {
+					String originOrderId = itOrder.next();
+					CancelOrderReqField cancelOrder = CancelOrderReqField.newBuilder()
+							.setGatewayId(gateway.getGatewaySetting().getGatewayId())
+							.setOriginOrderId(originOrderId)
+							.build();
+					gateway.cancelOrder(cancelOrder);
+				}
+			}
 		}
 		return this;
 	}
 	
 	public StrategyModule onBar(BarField bar) {
-		if(!agent.isEnabled()) {
-			//停用期间忽略TICK数据更新
+		if(disabled) {
+			//停用期间忽略数据更新
 			return this;
 		}
-		signalPolicy.updateBar(bar);
+		if(signalPolicy.bindedUnifiedSymbols().contains(bar.getUnifiedSymbol())) {			
+			if(stateMachine.getState() == ModuleState.EMPTY 
+					|| stateMachine.getState() == ModuleState.HOLDING) {				
+				Optional<Signal> signal = signalPolicy.updateBar(bar);
+				if(signal.isPresent()) {
+					stateMachine.transformForm(ModuleEventType.SIGNAL_CREATED);
+					dealer.onSignal(signal.get(), this);
+				}
+			}
+		}
 		return this;
 	}
 	
 	public StrategyModule onOrder(OrderField order) {
-		if(agent.hasOrderRecord(order.getOriginOrderId())) {
-			agent.onOrder(order);
+		if(originOrderIdSet.contains(order.getOriginOrderId())) {
+			switch(order.getOrderStatus()) {
+			case OS_AllTraded:
+				stateMachine.transformForm(ModuleEventType.ORDER_TRADED);
+				break;
+			case OS_Rejected:
+			case OS_Canceled:
+				stateMachine.transformForm(ModuleEventType.ORDER_CANCELLED);
+				originOrderIdSet.remove(order.getOriginOrderId());
+				break;
+			default:
+				stateMachine.transformForm(ModuleEventType.ORDER_SUBMITTED);
+			}
 		}
 		return this;
 	}
 	
 	public boolean onTrade(TradeField trade) {
-		if(agent.hasOrderRecord(trade.getOriginOrderId())) {
+		if(originOrderIdSet.contains(trade.getOriginOrderId())) {
 			mTrade.updateTrade(TradeDescription.convertFrom(getName(), trade));
 			mPosition.onTrade(trade);
-			agent.onTrade(trade);
 			return true;
 		}
 		return false;
@@ -119,43 +174,63 @@ public class StrategyModule {
 	}
 	
 	public StrategyModule onAccount(AccountField account) {
-		if(StringUtils.equals(account.getGatewayId(), agent.getAccountGatewayId())) {
-			agent.updateAccount(account);
+		if(StringUtils.equals(account.getGatewayId(), gateway.getGatewaySetting().getGatewayId())) {
+			this.account = account;
 		}
 		return this;
 	}
 	
+	public AccountField getAccount() {
+		return account;
+	}
+	
 	public String getName() {
-		return agent.getName();
+		return name;
 	}
 	
 	public ModuleState getState() {
-		return agent.getModuleState();
+		return stateMachine.getState();
 	}
 	
 	public boolean isEnabled() {
-		return agent.isEnabled();
+		return !disabled;
 	}
 	
 	public void toggleRunningState() {
-		agent.toggleRunningState();
+		disabled = !disabled;
+	}
+	
+	public String getTradingDay() {
+		return tradingDay;
+	}
+	
+	public ModuleTrade getModuleTrade() {
+		return mTrade;
+	}
+	
+	public ModulePosition getModulePosition() {
+		return mPosition;
+	}
+	
+	public TradeGateway getGateway() {
+		return gateway;
 	}
 	
 	public ModuleStatus getModuleStatus() {
 		ModuleStatus status = new ModuleStatus();
-		status.setModuleName(agent.getName());
-		status.setState(agent.getModuleState());
+		status.setModuleName(name);
+		status.setState(getState());
 		List<TradeField> trades = mPosition.getOpenningTrade();
 		if(trades.size() > 0) {
 			status.setLastOpenTrade(trades.stream().map(trade -> trade.toByteArray()).collect(Collectors.toList()));
-			status.setTradeDescrptions(trades.stream().map(trade -> TradeDescription.convertFrom(agent.getName(), trade)).collect(Collectors.toList()));
+			status.setTradeDescrptions(trades.stream().map(trade -> TradeDescription.convertFrom(getName(), trade)).collect(Collectors.toList()));
 		}
 		return status;
 	}
 	
 	public ModulePerformance getPerformance() {
 		ModulePerformance mp = new ModulePerformance();
-		mp.setModuleName(agent.getName());
+		mp.setModuleName(getName());
 		Map<String, List<byte[]>> byteMap = new HashMap<>();
 		for(String unifiedSymbol : signalPolicy.bindedUnifiedSymbols()) {
 			byteMap.put(unifiedSymbol, 
@@ -166,9 +241,9 @@ public class StrategyModule {
 					.collect(Collectors.toList()));
 		}
 		mp.setRefBarDataMap(byteMap);
-		mp.setAccountId(agent.getAccountGatewayId());
-		mp.setAccountBalance(agent.getAccountBalance());
-		mp.setModuleState(agent.getModuleState());
+		mp.setAccountId(gateway.getGatewaySetting().getGatewayId());
+		mp.setAccountBalance(account == null ? 0 : (int)account.getBalance());
+		mp.setModuleState(getState());
 		mp.setTotalPositionProfit(mPosition.getPositionProfit());
 		mp.setTotalCloseProfit(mTrade.getTotalCloseProfit());
 		mp.setDealRecords(mTrade.getDealRecords());

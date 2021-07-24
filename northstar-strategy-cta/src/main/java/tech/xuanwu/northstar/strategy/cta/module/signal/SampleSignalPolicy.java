@@ -1,16 +1,18 @@
 package tech.xuanwu.northstar.strategy.cta.module.signal;
 
 import java.time.LocalTime;
+import java.util.Optional;
 import java.util.UUID;
 
 import lombok.extern.slf4j.Slf4j;
+import tech.xuanwu.northstar.strategy.common.Signal;
 import tech.xuanwu.northstar.strategy.common.SignalPolicy;
 import tech.xuanwu.northstar.strategy.common.annotation.Label;
 import tech.xuanwu.northstar.strategy.common.annotation.StrategicComponent;
-import tech.xuanwu.northstar.strategy.common.constants.ModuleState;
-import tech.xuanwu.northstar.strategy.common.constants.SignalState;
+import tech.xuanwu.northstar.strategy.common.constants.SignalOperation;
 import tech.xuanwu.northstar.strategy.common.model.CtaSignal;
 import tech.xuanwu.northstar.strategy.common.model.meta.DynamicParams;
+import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
 
 /**
  * 本示例用于展示写一个策略的必要元素
@@ -72,8 +74,8 @@ public class SampleSignalPolicy extends AbstractSignalPolicy
 	 * 策略逻辑驱动入口
 	 */
 	@Override
-	protected void onTick(int millicSecOfMin) {
-		
+	protected Optional<Signal> onTick(int millicSecOfMin) {
+		return Optional.empty();
 	}
 
 	/**
@@ -81,7 +83,7 @@ public class SampleSignalPolicy extends AbstractSignalPolicy
 	 * 示例策略的逻辑很简单，单数分钟发出开仓信号，双数分钟发出平仓信号
 	 */
 	@Override
-	protected void onMin(LocalTime time) {
+	protected Optional<Signal> onMin(LocalTime time) {
 		log.info("策略每分钟触发");
 		CtaSignal.CtaSignalBuilder signal = CtaSignal.builder()
 				.id(UUID.randomUUID())
@@ -90,15 +92,16 @@ public class SampleSignalPolicy extends AbstractSignalPolicy
 				.timestamp(System.currentTimeMillis());
 		if((time.getMinute() & 1) == 1) {
 			// 单数分钟
-			if(agent.getModuleState() == ModuleState.EMPTY) {
-				emitSignal(signal.state(SignalState.BuyOpen).build());
+			if(currentPositionDir == PositionDirectionEnum.PD_Unknown) {
+				return Optional.of(signal.state(SignalOperation.BuyOpen).build());
 			}
 		} else {
 			// 双数分钟
-			if(agent.getModuleState() == ModuleState.HOLDING) {				
-				emitSignal(signal.state(SignalState.SellClose).build());
+			if(currentPositionDir == PositionDirectionEnum.PD_Long) {				
+				return Optional.of(signal.state(SignalOperation.SellClose).build());
 			}
 		}
+		return Optional.empty();
 	}
 
 	

@@ -6,7 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import tech.xuanwu.northstar.strategy.common.Signal;
 import tech.xuanwu.northstar.strategy.common.SignalPolicy;
-import tech.xuanwu.northstar.strategy.common.constants.SignalState;
+import tech.xuanwu.northstar.strategy.common.constants.SignalOperation;
 
 @Builder
 @Data
@@ -19,7 +19,7 @@ public class CtaSignal implements Signal{
 	/**
 	 * 信号状态
 	 */
-	private SignalState state;
+	private SignalOperation state;
 	/**
 	 * 信号价格
 	 */

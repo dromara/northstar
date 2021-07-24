@@ -2,19 +2,18 @@ package tech.xuanwu.northstar.strategy.cta.module.signal;
 
 import java.time.LocalTime;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 
 import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.common.constant.DateTimeConstant;
+import tech.xuanwu.northstar.strategy.common.Signal;
 import tech.xuanwu.northstar.strategy.common.SignalPolicy;
-import tech.xuanwu.northstar.strategy.common.event.ModuleEvent;
 import tech.xuanwu.northstar.strategy.common.event.ModuleEventBus;
-import tech.xuanwu.northstar.strategy.common.event.ModuleEventType;
-import tech.xuanwu.northstar.strategy.common.model.CtaSignal;
-import tech.xuanwu.northstar.strategy.common.model.ModuleAgent;
 import tech.xuanwu.northstar.strategy.common.model.data.BarData;
+import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.TickField;
 
@@ -30,7 +29,13 @@ public abstract class AbstractSignalPolicy implements SignalPolicy {
 	
 	protected Map<String, BarData> barDataMap;
 	
-	protected ModuleAgent agent;
+	/**
+	 * 信号策略自身记录理论持仓状态
+	 * PD_Unknown： 无持仓
+	 * PD_Long: 多头持仓
+	 * PD_Short： 空头持仓
+	 */
+	protected PositionDirectionEnum currentPositionDir = PositionDirectionEnum.PD_Unknown;
 	
 	
 	@Override
@@ -42,60 +47,53 @@ public abstract class AbstractSignalPolicy implements SignalPolicy {
 	}
 	
 	@Override
-	public void onEvent(ModuleEvent event) {
-		// 信号策略属于最上流的流程，可以不用响应下游事件
-	}
-	
-	@Override
-	public void setEventBus(ModuleEventBus moduleEventBus) {
-		meb = moduleEventBus;
-	}
-
-
-	@Override
-	public void updateTick(TickField tick) {
+	public Optional<Signal> updateTick(TickField tick) {
 		// 先更新行情
 		if(bindedUnifiedSymbols().contains(tick.getUnifiedSymbol())) {
 			barDataMap.get(tick.getUnifiedSymbol()).update(tick);
 			long timestamp = tick.getActionTimestamp();
-			onTick((int) (timestamp % 60000));
+			// 整分钟时不触发，避免onTick与onMin逻辑重复，导致重复触发
+			int secondOfMin = (int) (timestamp % 60000);
+			if(secondOfMin == 0) {
+				return Optional.empty();
+			}
+			Optional<Signal> result = onTick(secondOfMin);
+			if(result == null) {
+				return Optional.empty();
+			}
+			return result;
 		}
+		return Optional.empty();
 	}
 	
 	@Override
-	public void updateBar(BarField bar) {
+	public Optional<Signal> updateBar(BarField bar) {
+		// 先更新行情
 		if(bindedUnifiedSymbols().contains(bar.getUnifiedSymbol())) {
 			barDataMap.get(bar.getUnifiedSymbol()).update(bar);
 			String actionTime = bar.getActionTime();
 			LocalTime time = LocalTime.parse(actionTime, DateTimeConstant.T_FORMAT_WITH_MS_INT_FORMATTER);
-			onMin(time);
+			Optional<Signal> result = onMin(time);
+			if(result == null) {
+				return Optional.empty();
+			}
+			return result;
 		}
-		
+		return Optional.empty();
 	}
 	
 	/**
 	 * 每TICK刷新用来驱动逻辑计算，所有的数据均已刷新在barDataMap中
 	 */
-	protected abstract void onTick(int millicSecOfMin);
+	protected Optional<Signal> onTick(int millicSecOfMin){
+		return Optional.empty();
+	}
 	
 	/**
 	 * 每分钟刷新用来驱动逻辑计算，所有的数据均已刷新在barDataMap中
 	 */
-	protected abstract void onMin(LocalTime time);
-
-	/**
-	 * 子类可以直接调用这个发信号
-	 * @param signal
-	 */
-	protected void emitSignal(CtaSignal signal) {
-		if(signal == null) {
-			return;
-		}
-		log.info("信号策略生成交易信号");
-		meb.post(ModuleEvent.builder()
-				.eventType(ModuleEventType.SIGNAL_CREATED)
-				.data(signal)
-				.build());
+	protected Optional<Signal> onMin(LocalTime time){
+		return Optional.empty();
 	}
 
 	@Override
@@ -103,14 +101,14 @@ public abstract class AbstractSignalPolicy implements SignalPolicy {
 		return barDataMap.get(unifiedSymbol);
 	}
 
-
 	@Override
 	public void setRefBarData(Map<String, BarData> barDataMap) {
 		this.barDataMap = barDataMap;
 	}
 	
 	@Override
-	public void setModuleAgent(ModuleAgent agent) {
-		this.agent = agent;
+	public void setPositionState(PositionDirectionEnum posDir) {
+		this.currentPositionDir = posDir;
 	}
+	
 }

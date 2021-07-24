@@ -9,32 +9,32 @@ public class SignalStateTest {
 
 	@Test
 	public void testIsOpen() {
-		assertThat(SignalState.BuyClose.isOpen()).isFalse();
-		assertThat(SignalState.SellClose.isOpen()).isFalse();
-		assertThat(SignalState.BuyOpen.isOpen()).isTrue();
-		assertThat(SignalState.SellOpen.isOpen()).isTrue();
-		assertThat(SignalState.ReversingBuy.isOpen()).isTrue();
-		assertThat(SignalState.ReversingSell.isOpen()).isTrue();
+		assertThat(SignalOperation.BuyClose.isOpen()).isFalse();
+		assertThat(SignalOperation.SellClose.isOpen()).isFalse();
+		assertThat(SignalOperation.BuyOpen.isOpen()).isTrue();
+		assertThat(SignalOperation.SellOpen.isOpen()).isTrue();
+		assertThat(SignalOperation.ReversingBuy.isOpen()).isTrue();
+		assertThat(SignalOperation.ReversingSell.isOpen()).isTrue();
 	}
 
 	@Test
 	public void testIsReverse() {
-		assertThat(SignalState.BuyClose.isReverse()).isFalse();
-		assertThat(SignalState.SellClose.isReverse()).isFalse();
-		assertThat(SignalState.BuyOpen.isReverse()).isFalse();
-		assertThat(SignalState.SellOpen.isReverse()).isFalse();
-		assertThat(SignalState.ReversingBuy.isReverse()).isTrue();
-		assertThat(SignalState.ReversingSell.isReverse()).isTrue();
+		assertThat(SignalOperation.BuyClose.isReverse()).isFalse();
+		assertThat(SignalOperation.SellClose.isReverse()).isFalse();
+		assertThat(SignalOperation.BuyOpen.isReverse()).isFalse();
+		assertThat(SignalOperation.SellOpen.isReverse()).isFalse();
+		assertThat(SignalOperation.ReversingBuy.isReverse()).isTrue();
+		assertThat(SignalOperation.ReversingSell.isReverse()).isTrue();
 	}
 
 	@Test
 	public void testIsBuy() {
-		assertThat(SignalState.BuyClose.isBuy()).isTrue();
-		assertThat(SignalState.SellClose.isBuy()).isFalse();
-		assertThat(SignalState.BuyOpen.isBuy()).isTrue();
-		assertThat(SignalState.SellOpen.isBuy()).isFalse();
-		assertThat(SignalState.ReversingBuy.isBuy()).isTrue();
-		assertThat(SignalState.ReversingSell.isBuy()).isFalse();
+		assertThat(SignalOperation.BuyClose.isBuy()).isTrue();
+		assertThat(SignalOperation.SellClose.isBuy()).isFalse();
+		assertThat(SignalOperation.BuyOpen.isBuy()).isTrue();
+		assertThat(SignalOperation.SellOpen.isBuy()).isFalse();
+		assertThat(SignalOperation.ReversingBuy.isBuy()).isTrue();
+		assertThat(SignalOperation.ReversingSell.isBuy()).isFalse();
 	}
 
 }

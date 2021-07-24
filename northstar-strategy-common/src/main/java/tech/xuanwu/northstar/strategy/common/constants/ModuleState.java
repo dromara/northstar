@@ -24,7 +24,7 @@ public enum ModuleState {
 	 */
 	PENDING_ORDER,
 	/**
-	 * 追单中
+	 * 撤单中
 	 */
-	TRACING_ORDER;
+	RETRIEVING_ORDER;
 }

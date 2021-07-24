@@ -32,7 +32,6 @@ import tech.xuanwu.northstar.strategy.common.annotation.StrategicComponent;
 import tech.xuanwu.northstar.strategy.common.constants.ModuleState;
 import tech.xuanwu.northstar.strategy.common.constants.ModuleType;
 import tech.xuanwu.northstar.strategy.common.model.GenericRiskController;
-import tech.xuanwu.northstar.strategy.common.model.ModuleAgent;
 import tech.xuanwu.northstar.strategy.common.model.ModuleInfo;
 import tech.xuanwu.northstar.strategy.common.model.ModulePerformance;
 import tech.xuanwu.northstar.strategy.common.model.ModuleStatus;
@@ -42,6 +41,7 @@ import tech.xuanwu.northstar.strategy.common.model.meta.ComponentAndParamsPair;
 import tech.xuanwu.northstar.strategy.common.model.meta.ComponentField;
 import tech.xuanwu.northstar.strategy.common.model.meta.ComponentMetaInfo;
 import tech.xuanwu.northstar.strategy.common.model.meta.DynamicParams;
+import tech.xuanwu.northstar.strategy.common.model.state.ModuleStateMachine;
 import tech.xuanwu.northstar.strategy.cta.CtaModuleFactory;
 import tech.xuanwu.northstar.utils.ProtoBeanUtils;
 import xyz.redtorch.pb.CoreField.BarField;
@@ -192,18 +192,19 @@ public class ModuleService implements InitializingBean{
 			barDataMap.put(unifiedSymbol, new BarData(unifiedSymbol, refBarList));
 		}
 		
-		ModuleAgent agent = ModuleAgent.builder()
-				.name(info.getModuleName())
-				.accountGatewayId(info.getAccountGatewayId())
-				.gateway((TradeGateway)gateway)
-				.enabled(info.isEnabled())
-				.state(state)
-				.modulePosition(mPosition)
-				.build();
-		
 		signalPolicy.setRefBarData(barDataMap);
 		dealer.setContractManager(contractMgr);
-		StrategyModule module = new StrategyModule(agent, signalPolicy, riskController, dealer, mPosition, mTrade);
+		StrategyModule module = StrategyModule.builder()
+				.name(info.getModuleName())
+				.gateway((TradeGateway)gateway)
+				.disabled(!info.isEnabled())
+				.stateMachine(new ModuleStateMachine(state))
+				.dealer(dealer)
+				.signalPolicy(signalPolicy)
+				.riskController(riskController)
+				.mPosition(mPosition)
+				.mTrade(mTrade)
+				.build();
 		mdlMgr.addModule(module);
 		moduleRepo.saveModuleStatus(module.getModuleStatus());
 	}

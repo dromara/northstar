@@ -6,19 +6,27 @@ public enum ModuleEventType {
 	 */
 	SIGNAL_CREATED,
 	/**
-	 * 订单请求生成
+	 * 信号受限（风控限制）
 	 */
-	ORDER_REQ_CREATED,
+	SIGNAL_RETAINED,
 	/**
-	 * 订单请求通过风控审核
+	 * 订单提交
 	 */
-	ORDER_REQ_ACCEPTED,
+	ORDER_SUBMITTED,
 	/**
-	 * 订单请求被风控拒绝
+	 * 挂单成交
 	 */
-	ORDER_REQ_REJECTED,
+	ORDER_TRADED,
 	/**
-	 * 风控指引
+	 * 风控预警
 	 */
-	ORDER_RETRY;
+	RISK_ALERTED,
+	/**
+	 * 挂单撤销
+	 */
+	ORDER_CANCELLED,
+	/**
+	 * 追单重试
+	 */
+	ORDER_RETRY,
 }

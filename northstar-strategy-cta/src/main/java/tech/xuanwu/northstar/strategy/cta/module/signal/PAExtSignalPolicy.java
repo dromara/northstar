@@ -1,8 +1,8 @@
 package tech.xuanwu.northstar.strategy.cta.module.signal;
 
-import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -11,9 +11,10 @@ import org.apache.commons.lang3.StringUtils;
 
 import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.strategy.common.ExternalSignalPolicy;
+import tech.xuanwu.northstar.strategy.common.Signal;
 import tech.xuanwu.northstar.strategy.common.annotation.Label;
 import tech.xuanwu.northstar.strategy.common.annotation.StrategicComponent;
-import tech.xuanwu.northstar.strategy.common.constants.SignalState;
+import tech.xuanwu.northstar.strategy.common.constants.SignalOperation;
 import tech.xuanwu.northstar.strategy.common.model.CtaSignal;
 import tech.xuanwu.northstar.strategy.common.model.meta.DynamicParams;
 
@@ -33,20 +34,22 @@ public class PAExtSignalPolicy extends AbstractSignalPolicy implements ExternalS
 	private Pattern bkOprPtn = Pattern.compile("在([0-9\\.]+)的价格开多单，止损价：([0-9\\.]+)");
 	private Pattern skOprPtn = Pattern.compile("在([0-9\\.]+)的价格开空单，止损价：([0-9\\.]+)");
 	
-	private Map<Integer, SignalState> signalStateMap = new HashMap<>() {
+	private Map<Integer, SignalOperation> signalStateMap = new HashMap<>() {
 		private static final long serialVersionUID = 1L;
 
 		{
-			put(SignalState.BuyClose.code(), SignalState.BuyClose);
-			put(SignalState.SellClose.code(), SignalState.SellClose);
-			put(SignalState.BuyOpen.code(), SignalState.BuyOpen);
-			put(SignalState.SellOpen.code(), SignalState.SellOpen);
-			put(SignalState.ReversingBuy.code(), SignalState.ReversingBuy);
-			put(SignalState.ReversingSell.code(), SignalState.ReversingSell);
+			put(SignalOperation.BuyClose.code(), SignalOperation.BuyClose);
+			put(SignalOperation.SellClose.code(), SignalOperation.SellClose);
+			put(SignalOperation.BuyOpen.code(), SignalOperation.BuyOpen);
+			put(SignalOperation.SellOpen.code(), SignalOperation.SellOpen);
+			put(SignalOperation.ReversingBuy.code(), SignalOperation.ReversingBuy);
+			put(SignalOperation.ReversingSell.code(), SignalOperation.ReversingSell);
 		}
 	};
 	
 	private String symbol;
+	
+	private volatile String externalText;
 	
 	@Override
 	public DynamicParams getDynamicParams() {
@@ -66,13 +69,13 @@ public class PAExtSignalPolicy extends AbstractSignalPolicy implements ExternalS
 	}
 
 	@Override
-	protected void onTick(int millicSecOfMin) {
-		// Do Nothing
-	}
-
-	@Override
-	protected void onMin(LocalTime time) {
-		// Do Nothing		
+	protected Optional<Signal> onTick(int millicSecOfMin) {
+		if(StringUtils.isNotBlank(externalText)) {
+			Optional<Signal> signal = Optional.of(resolveSignal(externalText));
+			externalText = null;
+			return signal;
+		}
+		return Optional.empty();
 	}
 
 	@Override
@@ -81,35 +84,35 @@ public class PAExtSignalPolicy extends AbstractSignalPolicy implements ExternalS
 			return;
 		}
 		log.info("收到外部指令：{}", text);
-		emitSignal(resolveSignal(text));
+		externalText = text;
 	}
 	
 	private CtaSignal resolveSignal(String text) {
 		Matcher m1 = spOprPtn.matcher(text);
 		Matcher m2 = bpOprPtn.matcher(text);
 		String closePrice = "";
-		SignalState closeState = SignalState.None;
+		SignalOperation closeState = SignalOperation.None;
 		if(m1.find()) {
-			closeState = SignalState.SellClose;
+			closeState = SignalOperation.SellClose;
 			closePrice = m1.group(1);
 		} else if(m2.find()) {
-			closeState = SignalState.BuyClose;
+			closeState = SignalOperation.BuyClose;
 			closePrice = m2.group(1);
 		}
 		
 		Matcher m3 = bkOprPtn.matcher(text);
 		Matcher m4 = skOprPtn.matcher(text);
 		String openPrice = "";
-		SignalState openState = SignalState.None;
+		SignalOperation openState = SignalOperation.None;
 		if(m3.find()) {
-			openState = SignalState.BuyOpen;
+			openState = SignalOperation.BuyOpen;
 			openPrice = m3.group(1);
 		}else if(m4.find()) {
-			openState = SignalState.SellOpen;
+			openState = SignalOperation.SellOpen;
 			openPrice = m4.group(1);
 		}
 		
-		SignalState finalState = signalStateMap.get(openState.code() | closeState.code());
+		SignalOperation finalState = signalStateMap.get(openState.code() | closeState.code());
 		if(finalState == null) {
 			return null;
 		}

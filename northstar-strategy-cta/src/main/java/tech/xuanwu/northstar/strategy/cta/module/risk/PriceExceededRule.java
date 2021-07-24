@@ -5,7 +5,7 @@ import tech.xuanwu.northstar.strategy.common.RiskControlRule;
 import tech.xuanwu.northstar.strategy.common.annotation.Label;
 import tech.xuanwu.northstar.strategy.common.annotation.StrategicComponent;
 import tech.xuanwu.northstar.strategy.common.constants.RiskAuditResult;
-import tech.xuanwu.northstar.strategy.common.model.ModuleAgent;
+import tech.xuanwu.northstar.strategy.common.model.StrategyModule;
 import tech.xuanwu.northstar.strategy.common.model.meta.DynamicParams;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
@@ -19,7 +19,7 @@ public class PriceExceededRule implements RiskControlRule, DynamicParamsAware{
 	private SubmitOrderReqField orderReq;
 	
 	@Override
-	public short canDeal(TickField tick, ModuleAgent agent) {
+	public short canDeal(TickField tick, StrategyModule module) {
 		int factor = orderReq.getDirection() == DirectionEnum.D_Buy ? 1 : -1;
 		if(factor * (tick.getLastPrice() - orderReq.getPrice()) > priceDifToleranceInTick) {
 			return RiskAuditResult.REJECTED;
@@ -28,7 +28,7 @@ public class PriceExceededRule implements RiskControlRule, DynamicParamsAware{
 	}
 	
 	@Override
-	public RiskControlRule onSubmitOrderReq(SubmitOrderReqField orderReq) {
+	public RiskControlRule onSubmitOrder(SubmitOrderReqField orderReq) {
 		this.orderReq = orderReq;
 		return this;
 	}

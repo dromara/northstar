@@ -1,11 +1,14 @@
 package tech.xuanwu.northstar.strategy.cta.module.risk;
 
+import org.apache.commons.lang3.StringUtils;
+
+import tech.xuanwu.northstar.strategy.common.ModuleTrade;
 import tech.xuanwu.northstar.strategy.common.RiskControlRule;
 import tech.xuanwu.northstar.strategy.common.Signal;
 import tech.xuanwu.northstar.strategy.common.annotation.Label;
 import tech.xuanwu.northstar.strategy.common.annotation.StrategicComponent;
 import tech.xuanwu.northstar.strategy.common.constants.RiskAuditResult;
-import tech.xuanwu.northstar.strategy.common.model.ModuleAgent;
+import tech.xuanwu.northstar.strategy.common.model.StrategyModule;
 import tech.xuanwu.northstar.strategy.common.model.meta.DynamicParams;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TickField;
@@ -19,15 +22,21 @@ public class DailyDealLimitedRule implements RiskControlRule {
 	
 
 	@Override
-	public short canDeal(TickField tick, ModuleAgent agent) {
-		if(agent.numOfOpeningForToday() < dailyDealLimit) {
+	public short canDeal(TickField tick, StrategyModule module) {
+		String tradingDay = module.getTradingDay();
+		ModuleTrade mTrade = module.getModuleTrade();
+		long numberOfOpeningTradeToday = mTrade.getDealRecords()
+				.stream()
+				.filter(r -> StringUtils.equals(tradingDay, r.getTradingDay()))
+				.count();
+		if(numberOfOpeningTradeToday < dailyDealLimit) {
 			return RiskAuditResult.ACCEPTED;
 		}
 		return RiskAuditResult.REJECTED;
 	}
 	
 	@Override
-	public RiskControlRule onSubmitOrderReq(SubmitOrderReqField orderReq) {
+	public RiskControlRule onSubmitOrder(SubmitOrderReqField orderReq) {
 		//该风控规则不需要参考订单状态，不需要做任何处理
 		return this;
 	}

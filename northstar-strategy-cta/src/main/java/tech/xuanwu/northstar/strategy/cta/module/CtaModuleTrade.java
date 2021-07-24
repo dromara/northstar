@@ -106,7 +106,7 @@ public class CtaModuleTrade implements ModuleTrade {
 	}
 
 	private void handleTrade(TradeDescription trade) {
-		if(trade.getOffsetFlag() == OffsetFlagEnum.OF_Unkonwn) {
+		if(trade.getOffsetFlag() == OffsetFlagEnum.OF_Unknown) {
 			log.warn("未定义开平方向, {}", trade.toString());
 			return;
 		}

@@ -1,18 +1,24 @@
 package tech.xuanwu.northstar.strategy.common;
 
-import tech.xuanwu.northstar.strategy.common.event.EventDrivenComponent;
-import tech.xuanwu.northstar.strategy.common.model.ModuleAgent;
+import tech.xuanwu.northstar.strategy.common.model.StrategyModule;
+import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TickField;
 
-public interface RiskController extends EventDrivenComponent, ModuleAware{
+public interface RiskController {
 	
-	void setModuleAgent(ModuleAgent agent);
-
-	void onTick(TickField tick);
+	/**
+	 * 风控测试
+	 * @param tick
+	 * @return		风控码
+	 */
+	short onTick(TickField tick, StrategyModule module);
 	
-	void approveOrder();
+	/**
+	 * 下单风控测试
+	 * @param orderReq
+	 * @return		是否拒绝
+	 */
+	boolean testReject(SubmitOrderReqField orderReq);
 	
-	void rejectOrder();
 	
-	void retryOrder();
 }

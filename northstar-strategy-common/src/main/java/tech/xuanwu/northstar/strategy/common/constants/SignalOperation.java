@@ -9,7 +9,7 @@ package tech.xuanwu.northstar.strategy.common.constants;
  * @author KevinHuangwl
  *
  */
-public enum SignalState {
+public enum SignalOperation {
 	/**
 	 * 多开
 	 */
@@ -41,7 +41,7 @@ public enum SignalState {
 
 	
 	private int val;
-	private SignalState(int val) {
+	private SignalOperation(int val) {
 		this.val = val;
 	}
 	

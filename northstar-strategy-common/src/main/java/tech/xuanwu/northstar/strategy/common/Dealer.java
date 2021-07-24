@@ -1,9 +1,11 @@
 package tech.xuanwu.northstar.strategy.common;
 
+import java.util.Optional;
 import java.util.Set;
 
 import tech.xuanwu.northstar.common.model.ContractManager;
-import tech.xuanwu.northstar.strategy.common.event.EventDrivenComponent;
+import tech.xuanwu.northstar.strategy.common.model.StrategyModule;
+import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TickField;
 
 /**
@@ -11,7 +13,7 @@ import xyz.redtorch.pb.CoreField.TickField;
  * @author KevinHuangwl
  *
  */
-public interface Dealer extends DynamicParamsAware, EventDrivenComponent, ModuleAware {
+public interface Dealer extends DynamicParamsAware {
 	
 	/**
 	 * 监听行情变动,根据信号下单、撤单或者追单
@@ -19,7 +21,13 @@ public interface Dealer extends DynamicParamsAware, EventDrivenComponent, Module
 	 * @param riskRules
 	 * @param gateway
 	 */
-	void onTick(TickField tick);
+	Optional<SubmitOrderReqField> onTick(TickField tick);
+	
+	/**
+	 * 收到信号
+	 * @param signal
+	 */
+	void onSignal(Signal signal, StrategyModule module);
 	
 	/**
 	 * 获取交易策略所绑定的合约列表

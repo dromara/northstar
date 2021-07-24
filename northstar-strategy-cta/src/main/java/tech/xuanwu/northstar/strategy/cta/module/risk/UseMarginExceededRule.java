@@ -6,9 +6,10 @@ import tech.xuanwu.northstar.strategy.common.RiskControlRule;
 import tech.xuanwu.northstar.strategy.common.annotation.Label;
 import tech.xuanwu.northstar.strategy.common.annotation.StrategicComponent;
 import tech.xuanwu.northstar.strategy.common.constants.RiskAuditResult;
-import tech.xuanwu.northstar.strategy.common.model.ModuleAgent;
+import tech.xuanwu.northstar.strategy.common.model.StrategyModule;
 import tech.xuanwu.northstar.strategy.common.model.meta.DynamicParams;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
+import xyz.redtorch.pb.CoreField.AccountField;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TickField;
@@ -27,8 +28,9 @@ public class UseMarginExceededRule implements RiskControlRule, DynamicParamsAwar
 	private double totalCost;
 
 	@Override
-	public short canDeal(TickField tick, ModuleAgent agent) {
-		int moduleAvailable = (int) Math.min(limitedPercentageOfTotalBalance * agent.getAccountBalance(), agent.getAccountAvailable());
+	public short canDeal(TickField tick, StrategyModule module) {
+		AccountField account = module.getAccount();
+		int moduleAvailable = (int) Math.min(limitedPercentageOfTotalBalance * account.getBalance(), account.getAvailable());
 		if(totalCost > moduleAvailable) {
 			log.info("开仓成本超过风控限制。成本金额：{}, 当前模组占用比例：{}, 当前模组可用资金：{}",
 					totalCost, (int)(limitedPercentageOfTotalBalance * 100), moduleAvailable);
@@ -38,7 +40,7 @@ public class UseMarginExceededRule implements RiskControlRule, DynamicParamsAwar
 	}
 	
 	@Override
-	public RiskControlRule onSubmitOrderReq(SubmitOrderReqField orderReq) {
+	public RiskControlRule onSubmitOrder(SubmitOrderReqField orderReq) {
 		ContractField contract = orderReq.getContract();
 		double marginRatio = orderReq.getDirection() == DirectionEnum.D_Buy ? contract.getLongMarginRatio() : contract.getShortMarginRatio();
 		totalCost = contract.getMultiplier() * orderReq.getPrice() * orderReq.getVolume() * marginRatio;

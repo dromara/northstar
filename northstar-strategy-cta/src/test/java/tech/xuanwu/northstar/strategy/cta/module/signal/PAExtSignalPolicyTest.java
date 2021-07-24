@@ -8,7 +8,7 @@ import org.junit.Test;
 import org.mockito.ArgumentMatcher;
 
 import tech.xuanwu.northstar.common.utils.CommonUtils;
-import tech.xuanwu.northstar.strategy.common.constants.SignalState;
+import tech.xuanwu.northstar.strategy.common.constants.SignalOperation;
 import tech.xuanwu.northstar.strategy.common.event.ModuleEvent;
 import tech.xuanwu.northstar.strategy.common.event.ModuleEventBus;
 import tech.xuanwu.northstar.strategy.common.event.ModuleEventType;
@@ -24,7 +24,6 @@ public class PAExtSignalPolicyTest {
 		initParam.unifiedSymbol = "rb2110@SHFE@FUTURES";
 		policy.initWithParams(initParam);
 		ModuleEventBus meb = mock(ModuleEventBus.class);
-		policy.setEventBus(meb);
 		
 		String textReverse = "【XX期货】：RB2110在5314.0的价格平空单，在5314.0的价格开多单，止损价：5271.0，目前持有多单1手（+1），仅供参考。";
 		policy.onExtMsg(textReverse);
@@ -33,7 +32,7 @@ public class PAExtSignalPolicyTest {
 			public boolean matches(ModuleEvent event) {
 				CtaSignal signal = (CtaSignal) event.getData();
 				return event.getEventType() == ModuleEventType.SIGNAL_CREATED 
-						&& signal.getState() == SignalState.ReversingBuy && CommonUtils.isEquals(signal.getSignalPrice(), 5314.0);
+						&& signal.getState() == SignalOperation.ReversingBuy && CommonUtils.isEquals(signal.getSignalPrice(), 5314.0);
 			}
 		}));
 		
@@ -44,7 +43,7 @@ public class PAExtSignalPolicyTest {
 			public boolean matches(ModuleEvent event) {
 				CtaSignal signal = (CtaSignal) event.getData();
 				return event.getEventType() == ModuleEventType.SIGNAL_CREATED 
-						&& signal.getState() == SignalState.BuyClose && CommonUtils.isEquals(signal.getSignalPrice(), 5314.0);
+						&& signal.getState() == SignalOperation.BuyClose && CommonUtils.isEquals(signal.getSignalPrice(), 5314.0);
 			}
 		}));
 		
@@ -55,7 +54,7 @@ public class PAExtSignalPolicyTest {
 			public boolean matches(ModuleEvent event) {
 				CtaSignal signal = (CtaSignal) event.getData();
 				return event.getEventType() == ModuleEventType.SIGNAL_CREATED 
-						&& signal.getState() == SignalState.BuyOpen && CommonUtils.isEquals(signal.getSignalPrice(), 5314.0);
+						&& signal.getState() == SignalOperation.BuyOpen && CommonUtils.isEquals(signal.getSignalPrice(), 5314.0);
 			}
 		}));
 	}
