@@ -50,14 +50,15 @@ public abstract class AbstractSignalPolicy implements SignalPolicy {
 	public Optional<Signal> updateTick(TickField tick) {
 		// 先更新行情
 		if(bindedUnifiedSymbols().contains(tick.getUnifiedSymbol())) {
-			barDataMap.get(tick.getUnifiedSymbol()).update(tick);
+			BarData barData = barDataMap.get(tick.getUnifiedSymbol());
+			barData.update(tick);
 			long timestamp = tick.getActionTimestamp();
 			// 整分钟时不触发，避免onTick与onMin逻辑重复，导致重复触发
 			int secondOfMin = (int) (timestamp % 60000);
 			if(secondOfMin == 0) {
 				return Optional.empty();
 			}
-			Optional<Signal> result = onTick(secondOfMin);
+			Optional<Signal> result = onTick(secondOfMin, barData);
 			if(result == null) {
 				return Optional.empty();
 			}
@@ -70,10 +71,11 @@ public abstract class AbstractSignalPolicy implements SignalPolicy {
 	public Optional<Signal> updateBar(BarField bar) {
 		// 先更新行情
 		if(bindedUnifiedSymbols().contains(bar.getUnifiedSymbol())) {
-			barDataMap.get(bar.getUnifiedSymbol()).update(bar);
+			BarData barData = barDataMap.get(bar.getUnifiedSymbol());
+			barData.update(bar);
 			String actionTime = bar.getActionTime();
 			LocalTime time = LocalTime.parse(actionTime, DateTimeConstant.T_FORMAT_WITH_MS_INT_FORMATTER);
-			Optional<Signal> result = onMin(time);
+			Optional<Signal> result = onMin(time, barData);
 			if(result == null) {
 				return Optional.empty();
 			}
@@ -85,14 +87,14 @@ public abstract class AbstractSignalPolicy implements SignalPolicy {
 	/**
 	 * 每TICK刷新用来驱动逻辑计算，所有的数据均已刷新在barDataMap中
 	 */
-	protected Optional<Signal> onTick(int millicSecOfMin){
+	protected Optional<Signal> onTick(int millicSecOfMin, BarData barData){
 		return Optional.empty();
 	}
 	
 	/**
 	 * 每分钟刷新用来驱动逻辑计算，所有的数据均已刷新在barDataMap中
 	 */
-	protected Optional<Signal> onMin(LocalTime time){
+	protected Optional<Signal> onMin(LocalTime time, BarData barData){
 		return Optional.empty();
 	}
 

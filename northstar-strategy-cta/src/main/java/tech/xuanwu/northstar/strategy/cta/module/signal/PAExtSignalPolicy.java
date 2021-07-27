@@ -16,6 +16,7 @@ import tech.xuanwu.northstar.strategy.common.annotation.Label;
 import tech.xuanwu.northstar.strategy.common.annotation.StrategicComponent;
 import tech.xuanwu.northstar.strategy.common.constants.SignalOperation;
 import tech.xuanwu.northstar.strategy.common.model.CtaSignal;
+import tech.xuanwu.northstar.strategy.common.model.data.BarData;
 import tech.xuanwu.northstar.strategy.common.model.meta.DynamicParams;
 
 /**
@@ -69,7 +70,7 @@ public class PAExtSignalPolicy extends AbstractSignalPolicy implements ExternalS
 	}
 
 	@Override
-	protected Optional<Signal> onTick(int millicSecOfMin) {
+	protected Optional<Signal> onTick(int millicSecOfMin, BarData barData) {
 		if(StringUtils.isNotBlank(externalText)) {
 			Optional<Signal> signal = Optional.of(resolveSignal(externalText));
 			externalText = null;

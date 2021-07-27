@@ -11,6 +11,7 @@ import tech.xuanwu.northstar.strategy.common.annotation.Label;
 import tech.xuanwu.northstar.strategy.common.annotation.StrategicComponent;
 import tech.xuanwu.northstar.strategy.common.constants.SignalOperation;
 import tech.xuanwu.northstar.strategy.common.model.CtaSignal;
+import tech.xuanwu.northstar.strategy.common.model.data.BarData;
 import tech.xuanwu.northstar.strategy.common.model.meta.DynamicParams;
 import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
 
@@ -72,9 +73,10 @@ public class SampleSignalPolicy extends AbstractSignalPolicy
 	/**********************************************************************************/
 	/**
 	 * 策略逻辑驱动入口
+	 * 模组可引用的历史数据在barData中
 	 */
 	@Override
-	protected Optional<Signal> onTick(int millicSecOfMin) {
+	protected Optional<Signal> onTick(int millicSecOfMin, BarData barData) {
 		return Optional.empty();
 	}
 
@@ -83,7 +85,7 @@ public class SampleSignalPolicy extends AbstractSignalPolicy
 	 * 示例策略的逻辑很简单，单数分钟发出开仓信号，双数分钟发出平仓信号
 	 */
 	@Override
-	protected Optional<Signal> onMin(LocalTime time) {
+	protected Optional<Signal> onMin(LocalTime time, BarData barData) {
 		log.info("策略每分钟触发");
 		CtaSignal.CtaSignalBuilder signal = CtaSignal.builder()
 				.id(UUID.randomUUID())
