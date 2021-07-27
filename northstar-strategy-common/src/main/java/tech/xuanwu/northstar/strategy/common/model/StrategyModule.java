@@ -77,7 +77,7 @@ public class StrategyModule {
 					|| stateMachine.getState() == ModuleState.HOLDING) {				
 				Optional<Signal> signal = signalPolicy.updateTick(tick);
 				if(signal.isPresent()) {
-					stateMachine.transformForm(ModuleEventType.SIGNAL_CREATED);
+					stateMachine.transformForm(signal.get().isOpening() ? ModuleEventType.OPENING_SIGNAL_CREATED : ModuleEventType.CLOSING_SIGNAL_CREATED);
 					dealer.onSignal(signal.get(), this);
 				}
 			}
@@ -91,8 +91,9 @@ public class StrategyModule {
 				if(submitOrder.get().getOffsetFlag() == OffsetFlagEnum.OF_Unknown) {
 					throw new IllegalStateException("未定义开平操作");
 				}
+				boolean testFlag = riskController.testReject(tick, this, submitOrder.get());
 				if(submitOrder.get().getOffsetFlag() == OffsetFlagEnum.OF_Open) {
-					if(riskController.testReject(submitOrder.get())) {
+					if(testFlag) {
 						stateMachine.transformForm(ModuleEventType.SIGNAL_RETAINED);
 						return this;
 					}
@@ -132,7 +133,7 @@ public class StrategyModule {
 					|| stateMachine.getState() == ModuleState.HOLDING) {				
 				Optional<Signal> signal = signalPolicy.updateBar(bar);
 				if(signal.isPresent()) {
-					stateMachine.transformForm(ModuleEventType.SIGNAL_CREATED);
+					stateMachine.transformForm(signal.get().isOpening() ? ModuleEventType.OPENING_SIGNAL_CREATED : ModuleEventType.CLOSING_SIGNAL_CREATED);
 					dealer.onSignal(signal.get(), this);
 				}
 			}
@@ -160,6 +161,7 @@ public class StrategyModule {
 	
 	public boolean onTrade(TradeField trade) {
 		if(originOrderIdSet.contains(trade.getOriginOrderId())) {
+			stateMachine.transformForm(ModuleEventType.ORDER_TRADED);
 			mTrade.updateTrade(TradeDescription.convertFrom(getName(), trade));
 			mPosition.onTrade(trade);
 			return true;

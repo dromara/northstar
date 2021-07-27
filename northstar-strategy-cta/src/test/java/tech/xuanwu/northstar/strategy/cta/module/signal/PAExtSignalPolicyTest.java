@@ -1,18 +1,17 @@
 package tech.xuanwu.northstar.strategy.cta.module.signal;
 
-import static org.mockito.ArgumentMatchers.argThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+
+import java.util.Optional;
 
 import org.junit.Test;
-import org.mockito.ArgumentMatcher;
 
 import tech.xuanwu.northstar.common.utils.CommonUtils;
+import tech.xuanwu.northstar.strategy.common.Signal;
 import tech.xuanwu.northstar.strategy.common.constants.SignalOperation;
-import tech.xuanwu.northstar.strategy.common.event.ModuleEvent;
-import tech.xuanwu.northstar.strategy.common.event.ModuleEventBus;
-import tech.xuanwu.northstar.strategy.common.event.ModuleEventType;
 import tech.xuanwu.northstar.strategy.common.model.CtaSignal;
+import tech.xuanwu.northstar.strategy.common.model.data.BarData;
 
 public class PAExtSignalPolicyTest {
 	
@@ -23,40 +22,27 @@ public class PAExtSignalPolicyTest {
 		PAExtSignalPolicy.InitParams initParam = new PAExtSignalPolicy.InitParams();
 		initParam.unifiedSymbol = "rb2110@SHFE@FUTURES";
 		policy.initWithParams(initParam);
-		ModuleEventBus meb = mock(ModuleEventBus.class);
 		
 		String textReverse = "【XX期货】：RB2110在5314.0的价格平空单，在5314.0的价格开多单，止损价：5271.0，目前持有多单1手（+1），仅供参考。";
 		policy.onExtMsg(textReverse);
-		verify(meb).post(argThat(new ArgumentMatcher<ModuleEvent>() {
-			@Override
-			public boolean matches(ModuleEvent event) {
-				CtaSignal signal = (CtaSignal) event.getData();
-				return event.getEventType() == ModuleEventType.SIGNAL_CREATED 
-						&& signal.getState() == SignalOperation.ReversingBuy && CommonUtils.isEquals(signal.getSignalPrice(), 5314.0);
-			}
-		}));
+		Optional<Signal> signal = policy.onTick(5000, mock(BarData.class));
+		assertThat(signal.get().isOpening()).isTrue();
+		assertThat(((CtaSignal)signal.get()).getState()).isEqualTo(SignalOperation.ReversingBuy);
+		assertThat(CommonUtils.isEquals(((CtaSignal)signal.get()).getSignalPrice(), 5314)).isTrue();
 		
 		String textClose = "【XX期货】：RB2110在5314.0的价格平空单，仅供参考。";
 		policy.onExtMsg(textClose);
-		verify(meb).post(argThat(new ArgumentMatcher<ModuleEvent>() {
-			@Override
-			public boolean matches(ModuleEvent event) {
-				CtaSignal signal = (CtaSignal) event.getData();
-				return event.getEventType() == ModuleEventType.SIGNAL_CREATED 
-						&& signal.getState() == SignalOperation.BuyClose && CommonUtils.isEquals(signal.getSignalPrice(), 5314.0);
-			}
-		}));
+		Optional<Signal> signal2 = policy.onTick(5000, mock(BarData.class));
+		assertThat(signal2.get().isOpening()).isFalse();
+		assertThat(((CtaSignal)signal2.get()).getState()).isEqualTo(SignalOperation.BuyClose);
+		assertThat(CommonUtils.isEquals(((CtaSignal)signal2.get()).getSignalPrice(), 5314)).isTrue();
 		
 		String textOpen = "【XX期货】：RB2110在5314.0的价格开多单，止损价：5271.0，目前持有多单1手（+1），仅供参考。";
 		policy.onExtMsg(textOpen);
-		verify(meb).post(argThat(new ArgumentMatcher<ModuleEvent>() {
-			@Override
-			public boolean matches(ModuleEvent event) {
-				CtaSignal signal = (CtaSignal) event.getData();
-				return event.getEventType() == ModuleEventType.SIGNAL_CREATED 
-						&& signal.getState() == SignalOperation.BuyOpen && CommonUtils.isEquals(signal.getSignalPrice(), 5314.0);
-			}
-		}));
+		Optional<Signal> signal3 = policy.onTick(5000, mock(BarData.class));
+		assertThat(signal3.get().isOpening()).isTrue();
+		assertThat(((CtaSignal)signal3.get()).getState()).isEqualTo(SignalOperation.BuyOpen);
+		assertThat(CommonUtils.isEquals(((CtaSignal)signal3.get()).getSignalPrice(), 5314)).isTrue();
 	}
 
 }

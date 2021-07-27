@@ -18,12 +18,20 @@ public class ModuleStateMachine {
 	
 	public ModuleStateMachine(ModuleState state) {
 		this.originState = state;
+		this.curState = state;
 	}
 	
 	public void transformForm(ModuleEventType eventType) {
 		switch(eventType) {
-		case SIGNAL_CREATED:
-			if(curState != ModuleState.EMPTY && curState != ModuleState.HOLDING) {
+		case OPENING_SIGNAL_CREATED:
+			if(curState != ModuleState.EMPTY) {
+				throw new IllegalStateException("当前状态异常：" + curState);
+			}
+			originState = curState;
+			setState(ModuleState.PLACING_ORDER);
+			break;
+		case CLOSING_SIGNAL_CREATED:
+			if(curState != ModuleState.HOLDING) {
 				throw new IllegalStateException("当前状态异常：" + curState);
 			}
 			originState = curState;
@@ -42,7 +50,7 @@ public class ModuleStateMachine {
 			setState(ModuleState.PENDING_ORDER);
 			break;
 		case ORDER_TRADED:
-			if(curState != ModuleState.PENDING_ORDER) {
+			if(curState != ModuleState.PENDING_ORDER && curState != ModuleState.RETRIEVING_ORDER) {
 				throw new IllegalStateException("当前状态异常：" + curState);
 			}
 			setState(originState == ModuleState.EMPTY ? ModuleState.HOLDING : ModuleState.EMPTY);
@@ -54,7 +62,7 @@ public class ModuleStateMachine {
 			setState(ModuleState.RETRIEVING_ORDER);
 			break;
 		case ORDER_CANCELLED:
-			if(curState != ModuleState.RETRIEVING_ORDER && curState != ModuleState.PENDING_ORDER) {
+			if(curState == ModuleState.HOLDING || curState == ModuleState.EMPTY) {
 				throw new IllegalStateException("当前状态异常：" + curState);
 			}
 			setState(originState);

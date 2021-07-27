@@ -18,7 +18,7 @@ public interface RiskController {
 	 * @param orderReq
 	 * @return		是否拒绝
 	 */
-	boolean testReject(SubmitOrderReqField orderReq);
+	boolean testReject(TickField tick, StrategyModule module, SubmitOrderReqField orderReq);
 	
 	
 }

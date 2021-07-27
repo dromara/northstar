@@ -1,5 +1,6 @@
 package tech.xuanwu.northstar.strategy.cta.module.risk;
 
+import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.strategy.common.DynamicParamsAware;
 import tech.xuanwu.northstar.strategy.common.RiskControlRule;
 import tech.xuanwu.northstar.strategy.common.annotation.Label;
@@ -10,6 +11,7 @@ import tech.xuanwu.northstar.strategy.common.model.meta.DynamicParams;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TickField;
 
+@Slf4j
 @StrategicComponent("委托超时限制")
 public class TimeExceededRule implements RiskControlRule, DynamicParamsAware{
 	
@@ -20,6 +22,7 @@ public class TimeExceededRule implements RiskControlRule, DynamicParamsAware{
 	@Override
 	public short canDeal(TickField tick, StrategyModule module) {
 		if(tick.getActionTimestamp() - lastUpdateTime > timeoutInterval) {
+			log.info("挂单超时，撤单追单");
 			return RiskAuditResult.RETRY;
 		}
 		return RiskAuditResult.ACCEPTED;

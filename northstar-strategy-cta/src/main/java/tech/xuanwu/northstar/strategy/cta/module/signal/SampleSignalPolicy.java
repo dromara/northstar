@@ -77,6 +77,7 @@ public class SampleSignalPolicy extends AbstractSignalPolicy
 	 */
 	@Override
 	protected Optional<Signal> onTick(int millicSecOfMin, BarData barData) {
+		log.info("策略每个TICK触发: {}", millicSecOfMin);
 		return Optional.empty();
 	}
 

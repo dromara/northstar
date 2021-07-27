@@ -2,9 +2,13 @@ package tech.xuanwu.northstar.strategy.common.event;
 
 public enum ModuleEventType {
 	/**
-	 * 信号生成
+	 * 开仓信号生成
 	 */
-	SIGNAL_CREATED,
+	OPENING_SIGNAL_CREATED,
+	/**
+	 * 平仓信号生成
+	 */
+	CLOSING_SIGNAL_CREATED,
 	/**
 	 * 信号受限（风控限制）
 	 */

@@ -33,4 +33,10 @@ public class CtaSignal implements Signal{
 	 */
 	private Class<? extends SignalPolicy> signalClass;
 	
+	
+	@Override
+	public boolean isOpening() {
+		return state.isOpen();
+	}
+	
 }

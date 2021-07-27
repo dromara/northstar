@@ -2,6 +2,7 @@ package tech.xuanwu.northstar.strategy.cta.module.risk;
 
 import org.apache.commons.lang3.StringUtils;
 
+import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.strategy.common.ModuleTrade;
 import tech.xuanwu.northstar.strategy.common.RiskControlRule;
 import tech.xuanwu.northstar.strategy.common.Signal;
@@ -13,6 +14,7 @@ import tech.xuanwu.northstar.strategy.common.model.meta.DynamicParams;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TickField;
 
+@Slf4j
 @StrategicComponent("日内开仓次数限制")
 public class DailyDealLimitedRule implements RiskControlRule {
 	
@@ -32,6 +34,7 @@ public class DailyDealLimitedRule implements RiskControlRule {
 		if(numberOfOpeningTradeToday < dailyDealLimit) {
 			return RiskAuditResult.ACCEPTED;
 		}
+		log.info("日内开仓次数限制，拒绝订单");
 		return RiskAuditResult.REJECTED;
 	}
 	
