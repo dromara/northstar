@@ -12,9 +12,13 @@ public enum ModuleState {
 	 */
 	EMPTY,
 	/**
-	 * 持仓
+	 * 持多仓
 	 */
-	HOLDING,
+	HOLDING_LONG,
+	/**
+	 * 持空仓
+	 */
+	HOLDING_SHORT,
 	/**
 	 * 下单中
 	 */

@@ -192,13 +192,15 @@ public class ModuleService implements InitializingBean{
 			barDataMap.put(unifiedSymbol, new BarData(unifiedSymbol, refBarList));
 		}
 		
+		ModuleStateMachine stateMachine = new ModuleStateMachine(state);
 		signalPolicy.setRefBarData(barDataMap);
+		signalPolicy.setStateMachine(stateMachine);
 		dealer.setContractManager(contractMgr);
 		StrategyModule module = StrategyModule.builder()
 				.name(info.getModuleName())
 				.gateway((TradeGateway)gateway)
 				.disabled(!info.isEnabled())
-				.stateMachine(new ModuleStateMachine(state))
+				.stateMachine(stateMachine)
 				.dealer(dealer)
 				.signalPolicy(signalPolicy)
 				.riskController(riskController)

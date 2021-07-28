@@ -13,6 +13,7 @@ import tech.xuanwu.northstar.strategy.common.Signal;
 import tech.xuanwu.northstar.strategy.common.SignalPolicy;
 import tech.xuanwu.northstar.strategy.common.event.ModuleEventBus;
 import tech.xuanwu.northstar.strategy.common.model.data.BarData;
+import tech.xuanwu.northstar.strategy.common.model.state.ModuleStateMachine;
 import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.TickField;
@@ -29,13 +30,7 @@ public abstract class AbstractSignalPolicy implements SignalPolicy {
 	
 	protected Map<String, BarData> barDataMap;
 	
-	/**
-	 * 信号策略自身记录理论持仓状态
-	 * PD_Unknown： 无持仓
-	 * PD_Long: 多头持仓
-	 * PD_Short： 空头持仓
-	 */
-	protected PositionDirectionEnum currentPositionDir = PositionDirectionEnum.PD_Unknown;
+	protected ModuleStateMachine stateMachine;
 	
 	
 	@Override
@@ -109,8 +104,8 @@ public abstract class AbstractSignalPolicy implements SignalPolicy {
 	}
 	
 	@Override
-	public void setPositionState(PositionDirectionEnum posDir) {
-		this.currentPositionDir = posDir;
+	public void setStateMachine(ModuleStateMachine stateMachine) {
+		this.stateMachine = stateMachine;
 	}
 	
 }

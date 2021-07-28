@@ -31,7 +31,7 @@ public class ModuleStateMachine {
 			setState(ModuleState.PLACING_ORDER);
 			break;
 		case CLOSING_SIGNAL_CREATED:
-			if(curState != ModuleState.HOLDING) {
+			if(curState != ModuleState.HOLDING_LONG && curState != ModuleState.HOLDING_SHORT) {
 				throw new IllegalStateException("当前状态异常：" + curState);
 			}
 			originState = curState;
@@ -49,11 +49,17 @@ public class ModuleStateMachine {
 			}
 			setState(ModuleState.PENDING_ORDER);
 			break;
-		case ORDER_TRADED:
+		case BUY_TRADED:
 			if(curState != ModuleState.PENDING_ORDER && curState != ModuleState.RETRIEVING_ORDER) {
 				throw new IllegalStateException("当前状态异常：" + curState);
 			}
-			setState(originState == ModuleState.EMPTY ? ModuleState.HOLDING : ModuleState.EMPTY);
+			setState(originState == ModuleState.EMPTY ? ModuleState.HOLDING_LONG : ModuleState.EMPTY);
+			break;
+		case SELL_TRADED:
+			if(curState != ModuleState.PENDING_ORDER && curState != ModuleState.RETRIEVING_ORDER) {
+				throw new IllegalStateException("当前状态异常：" + curState);
+			}
+			setState(originState == ModuleState.EMPTY ? ModuleState.HOLDING_SHORT : ModuleState.EMPTY);
 			break;
 		case RISK_ALERTED:
 			if(curState != ModuleState.PENDING_ORDER) {
@@ -62,7 +68,9 @@ public class ModuleStateMachine {
 			setState(ModuleState.RETRIEVING_ORDER);
 			break;
 		case ORDER_CANCELLED:
-			if(curState == ModuleState.HOLDING || curState == ModuleState.EMPTY) {
+			if(curState != ModuleState.PLACING_ORDER 
+			&& curState != ModuleState.PENDING_ORDER 
+			&& curState != ModuleState.RETRIEVING_ORDER) {
 				throw new IllegalStateException("当前状态异常：" + curState);
 			}
 			setState(originState);

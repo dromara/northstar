@@ -5,6 +5,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import tech.xuanwu.northstar.strategy.common.model.data.BarData;
+import tech.xuanwu.northstar.strategy.common.model.state.ModuleStateMachine;
 import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.TickField;
@@ -49,9 +50,9 @@ public interface SignalPolicy extends DynamicParamsAware {
 	void setRefBarData(Map<String, BarData> barDataMap);
 	
 	/**
-	 * 设置理论持仓状态
-	 * @param posDir
+	 * 设置状态机
+	 * @param stateMachine
 	 */
-	void setPositionState(PositionDirectionEnum posDir);
+	void setStateMachine(ModuleStateMachine stateMachine);
 	
 }

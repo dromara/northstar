@@ -9,6 +9,7 @@ import tech.xuanwu.northstar.strategy.common.Signal;
 import tech.xuanwu.northstar.strategy.common.SignalPolicy;
 import tech.xuanwu.northstar.strategy.common.annotation.Label;
 import tech.xuanwu.northstar.strategy.common.annotation.StrategicComponent;
+import tech.xuanwu.northstar.strategy.common.constants.ModuleState;
 import tech.xuanwu.northstar.strategy.common.constants.SignalOperation;
 import tech.xuanwu.northstar.strategy.common.model.CtaSignal;
 import tech.xuanwu.northstar.strategy.common.model.data.BarData;
@@ -95,12 +96,12 @@ public class SampleSignalPolicy extends AbstractSignalPolicy
 				.timestamp(System.currentTimeMillis());
 		if((time.getMinute() & 1) == 1) {
 			// 单数分钟
-			if(currentPositionDir == PositionDirectionEnum.PD_Unknown) {
+			if(stateMachine.getState() == ModuleState.EMPTY) {
 				return Optional.of(signal.state(SignalOperation.BuyOpen).build());
 			}
 		} else {
 			// 双数分钟
-			if(currentPositionDir == PositionDirectionEnum.PD_Long) {				
+			if(stateMachine.getState() == ModuleState.HOLDING_LONG) {				
 				return Optional.of(signal.state(SignalOperation.SellClose).build());
 			}
 		}

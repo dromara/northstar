@@ -18,9 +18,13 @@ public enum ModuleEventType {
 	 */
 	ORDER_SUBMITTED,
 	/**
-	 * 挂单成交
+	 * 多单成交
 	 */
-	ORDER_TRADED,
+	BUY_TRADED,
+	/**
+	 * 空单成交
+	 */
+	SELL_TRADED,
 	/**
 	 * 风控预警
 	 */

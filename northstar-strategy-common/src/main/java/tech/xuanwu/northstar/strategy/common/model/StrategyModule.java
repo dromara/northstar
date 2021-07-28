@@ -24,6 +24,7 @@ import tech.xuanwu.northstar.strategy.common.constants.ModuleState;
 import tech.xuanwu.northstar.strategy.common.constants.RiskAuditResult;
 import tech.xuanwu.northstar.strategy.common.event.ModuleEventType;
 import tech.xuanwu.northstar.strategy.common.model.state.ModuleStateMachine;
+import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreField.AccountField;
 import xyz.redtorch.pb.CoreField.BarField;
@@ -74,7 +75,8 @@ public class StrategyModule {
 		if(signalPolicy.bindedUnifiedSymbols().contains(tick.getUnifiedSymbol())) {		
 			tradingDay = tick.getTradingDay();
 			if(stateMachine.getState() == ModuleState.EMPTY 
-					|| stateMachine.getState() == ModuleState.HOLDING) {				
+					|| stateMachine.getState() == ModuleState.HOLDING_LONG
+					|| stateMachine.getState() == ModuleState.HOLDING_SHORT) {				
 				Optional<Signal> signal = signalPolicy.updateTick(tick);
 				if(signal.isPresent()) {
 					stateMachine.transformForm(signal.get().isOpening() ? ModuleEventType.OPENING_SIGNAL_CREATED : ModuleEventType.CLOSING_SIGNAL_CREATED);
@@ -130,7 +132,8 @@ public class StrategyModule {
 		}
 		if(signalPolicy.bindedUnifiedSymbols().contains(bar.getUnifiedSymbol())) {			
 			if(stateMachine.getState() == ModuleState.EMPTY 
-					|| stateMachine.getState() == ModuleState.HOLDING) {				
+					|| stateMachine.getState() == ModuleState.HOLDING_LONG
+					|| stateMachine.getState() == ModuleState.HOLDING_SHORT) {				
 				Optional<Signal> signal = signalPolicy.updateBar(bar);
 				if(signal.isPresent()) {
 					stateMachine.transformForm(signal.get().isOpening() ? ModuleEventType.OPENING_SIGNAL_CREATED : ModuleEventType.CLOSING_SIGNAL_CREATED);
@@ -145,7 +148,7 @@ public class StrategyModule {
 		if(originOrderIdSet.contains(order.getOriginOrderId())) {
 			switch(order.getOrderStatus()) {
 			case OS_AllTraded:
-				stateMachine.transformForm(ModuleEventType.ORDER_TRADED);
+				// DO NOTHING
 				break;
 			case OS_Rejected:
 			case OS_Canceled:
@@ -161,7 +164,7 @@ public class StrategyModule {
 	
 	public boolean onTrade(TradeField trade) {
 		if(originOrderIdSet.contains(trade.getOriginOrderId())) {
-			stateMachine.transformForm(ModuleEventType.ORDER_TRADED);
+			stateMachine.transformForm(trade.getDirection() == DirectionEnum.D_Buy ? ModuleEventType.BUY_TRADED : ModuleEventType.SELL_TRADED);
 			mTrade.updateTrade(TradeDescription.convertFrom(getName(), trade));
 			mPosition.onTrade(trade);
 			return true;
