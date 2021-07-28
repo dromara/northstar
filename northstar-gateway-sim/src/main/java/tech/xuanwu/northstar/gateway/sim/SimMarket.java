@@ -31,7 +31,8 @@ public class SimMarket {
 	
 	public synchronized void removeGateway(String mdGatewayId, SimGateway accountGateway) {
 		String simGatewayId = accountGateway.getGatewaySetting().getGatewayId();
-		simGatewayMap.remove(mdGatewayId, simGatewayId);
+		SimGateway simGateway = simGatewayMap.remove(mdGatewayId, simGatewayId);
+		remove(simGateway.getGatewaySetting().getGatewayId());
 	}
 	
 	public void onTick(TickField tick) {
