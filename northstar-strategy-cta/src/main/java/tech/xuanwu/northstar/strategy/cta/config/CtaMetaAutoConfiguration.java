@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Configuration;
 import tech.xuanwu.northstar.strategy.common.Dealer;
 import tech.xuanwu.northstar.strategy.common.RiskControlRule;
 import tech.xuanwu.northstar.strategy.common.SignalPolicy;
-import tech.xuanwu.northstar.strategy.cta.module.dealer.CtaDealer;
+import tech.xuanwu.northstar.strategy.cta.module.dealer.SampleDealer;
 import tech.xuanwu.northstar.strategy.cta.module.risk.DailyDealLimitedRule;
 import tech.xuanwu.northstar.strategy.cta.module.risk.PriceExceededRule;
 import tech.xuanwu.northstar.strategy.cta.module.risk.TimeExceededRule;
@@ -20,7 +20,7 @@ public class CtaMetaAutoConfiguration {
 	@Bean
 	// @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 	public Dealer ctaDealer() {
-		return new CtaDealer();
+		return new SampleDealer();
 	}
 	
 	@Bean

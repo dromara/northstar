@@ -36,9 +36,5 @@ public enum ModuleEventType {
 	/**
 	 * 挂单撤销
 	 */
-	ORDER_CANCELLED,
-	/**
-	 * 追单重试
-	 */
-	ORDER_RETRY,
+	ORDER_CANCELLED;
 }

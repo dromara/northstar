@@ -148,6 +148,7 @@ public class StrategyModule {
 	}
 	
 	public StrategyModule onOrder(OrderField order) {
+		
 		if(originOrderIdSet.contains(order.getOriginOrderId())) {
 			switch(order.getOrderStatus()) {
 			case OS_AllTraded:
@@ -167,6 +168,7 @@ public class StrategyModule {
 	
 	public boolean onTrade(TradeField trade) {
 		if(originOrderIdSet.contains(trade.getOriginOrderId())) {
+			originOrderIdSet.remove(trade.getOriginOrderId());
 			stateMachine.transformForm(trade.getDirection() == DirectionEnum.D_Buy ? ModuleEventType.BUY_TRADED : ModuleEventType.SELL_TRADED);
 			mTrade.updateTrade(TradeDescription.convertFrom(getName(), trade));
 			mPosition.onTrade(trade);

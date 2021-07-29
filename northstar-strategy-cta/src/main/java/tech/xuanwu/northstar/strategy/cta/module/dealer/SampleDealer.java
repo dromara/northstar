@@ -3,6 +3,7 @@ package tech.xuanwu.northstar.strategy.cta.module.dealer;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 
 import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.common.model.ContractManager;
@@ -21,12 +22,13 @@ import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreEnum.OrderPriceTypeEnum;
 import xyz.redtorch.pb.CoreEnum.TimeConditionEnum;
 import xyz.redtorch.pb.CoreEnum.VolumeConditionEnum;
+import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TickField;
 
 @Slf4j
-@StrategicComponent("CTA交易策略")
-public class CtaDealer implements Dealer {
+@StrategicComponent("示例交易策略")
+public class SampleDealer implements Dealer {
 	
 	private String bindedUnifiedSymbol;
 	
@@ -58,11 +60,12 @@ public class CtaDealer implements Dealer {
 			log.info("交易策略生成订单");
 			DirectionEnum direction = currentSignal.getState().isBuy() ? DirectionEnum.D_Buy : DirectionEnum.D_Sell;
 			OffsetFlagEnum offsetFlag = currentSignal.getState().isOpen() ? OffsetFlagEnum.OF_Open : module.getModulePosition().getClosingOffsetFlag(module.getTradingDay());
+			ContractField contract = contractMgr.getContract(tick.getUnifiedSymbol());
 			// FIXME 未考虑反手处理
 			// 按信号下单
 			currentOrderReq = SubmitOrderReqField.newBuilder()
 					.setOriginOrderId(UUID.randomUUID().toString())
-					.setContract(contractMgr.getContract(tick.getUnifiedSymbol()))
+					.setContract(contract)
 					.setDirection(direction)
 					.setOffsetFlag(offsetFlag)
 					.setOrderPriceType(OrderPriceTypeEnum.OPT_LimitPrice)
@@ -74,7 +77,7 @@ public class CtaDealer implements Dealer {
 					.setContingentCondition(ContingentConditionEnum.CC_Immediately)
 					.setMinVolume(1)
 					.setGatewayId(module.getGateway().getGatewaySetting().getGatewayId())
-					.setPrice(currentSignal.getState().isBuy() ? tick.getAskPrice(0) : tick.getBidPrice(0))
+					.setPrice(currentSignal.getState().isBuy() ? tick.getBidPrice(0) : tick.getAskPrice(0))
 					.build();
 			currentSignal = null;
 			return Optional.of(currentOrderReq);

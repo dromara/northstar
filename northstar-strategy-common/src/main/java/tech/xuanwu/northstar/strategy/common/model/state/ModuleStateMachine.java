@@ -77,13 +77,7 @@ public class ModuleStateMachine {
 			if(!curState.isOrdering()) {
 				throw new IllegalStateException("当前状态异常：" + curState);
 			}
-			setState(originState);
-			break;
-		case ORDER_RETRY:
-			if(!curState.isWaiting()) {
-				throw new IllegalStateException("当前状态异常：" + curState);
-			}
-			setState(ModuleState.PLACING_ORDER);
+			setState(curState == ModuleState.RETRIEVING_FOR_RETRY ? ModuleState.PLACING_ORDER : originState);
 			break;
 		default:
 			throw new IllegalStateException("未有" + eventType + "事件处理逻辑");
