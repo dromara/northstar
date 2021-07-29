@@ -3,6 +3,7 @@ package tech.xuanwu.northstar.strategy.cta.module.signal;
 import java.time.LocalTime;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 
 import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.strategy.common.Signal;
@@ -14,7 +15,6 @@ import tech.xuanwu.northstar.strategy.common.constants.SignalOperation;
 import tech.xuanwu.northstar.strategy.common.model.CtaSignal;
 import tech.xuanwu.northstar.strategy.common.model.data.BarData;
 import tech.xuanwu.northstar.strategy.common.model.meta.DynamicParams;
-import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
 
 /**
  * 本示例用于展示写一个策略的必要元素
@@ -77,8 +77,25 @@ public class SampleSignalPolicy extends AbstractSignalPolicy
 	 * 模组可引用的历史数据在barData中
 	 */
 	@Override
-	protected Optional<Signal> onTick(int millicSecOfMin, BarData barData) {
-		log.info("策略每个TICK触发: {}", millicSecOfMin);
+	protected Optional<Signal> onTick(int milliSecOfMin, BarData barData) {
+		log.info("策略每个TICK触发: {}", milliSecOfMin);
+		CtaSignal.CtaSignalBuilder signal = CtaSignal.builder()
+				.id(UUID.randomUUID())
+				.signalClass(this.getClass())
+				.signalPrice(barDataMap.get(bindedUnifiedSymbol).getSClose().ref(0))
+				.timestamp(System.currentTimeMillis());
+		if(milliSecOfMin % 10000 == 0) {
+			if(stateMachine.getState() == ModuleState.EMPTY) {
+				boolean flag = ThreadLocalRandom.current().nextBoolean();
+				return Optional.of(signal.state(flag ? SignalOperation.BuyOpen : SignalOperation.SellOpen).build());
+			}
+			if(stateMachine.getState() == ModuleState.HOLDING_LONG) {				
+				return Optional.of(signal.state(SignalOperation.SellClose).build());
+			}
+			if(stateMachine.getState() == ModuleState.HOLDING_SHORT) {				
+				return Optional.of(signal.state(SignalOperation.BuyClose).build());
+			}
+		}
 		return Optional.empty();
 	}
 
@@ -89,22 +106,6 @@ public class SampleSignalPolicy extends AbstractSignalPolicy
 	@Override
 	protected Optional<Signal> onMin(LocalTime time, BarData barData) {
 		log.info("策略每分钟触发");
-		CtaSignal.CtaSignalBuilder signal = CtaSignal.builder()
-				.id(UUID.randomUUID())
-				.signalClass(this.getClass())
-				.signalPrice(barDataMap.get(bindedUnifiedSymbol).getSClose().ref(0))
-				.timestamp(System.currentTimeMillis());
-		if((time.getMinute() & 1) == 1) {
-			// 单数分钟
-			if(stateMachine.getState() == ModuleState.EMPTY) {
-				return Optional.of(signal.state(SignalOperation.BuyOpen).build());
-			}
-		} else {
-			// 双数分钟
-			if(stateMachine.getState() == ModuleState.HOLDING_LONG) {				
-				return Optional.of(signal.state(SignalOperation.SellClose).build());
-			}
-		}
 		return Optional.empty();
 	}
 

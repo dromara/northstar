@@ -82,7 +82,7 @@ public abstract class AbstractSignalPolicy implements SignalPolicy {
 	/**
 	 * 每TICK刷新用来驱动逻辑计算，所有的数据均已刷新在barDataMap中
 	 */
-	protected Optional<Signal> onTick(int millicSecOfMin, BarData barData){
+	protected Optional<Signal> onTick(int milliSecOfMin, BarData barData){
 		return Optional.empty();
 	}
 	

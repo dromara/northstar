@@ -143,18 +143,17 @@ class GwOrderHolder {
 		OrderField order = null;
 		if(StringUtils.isEmpty(cancelOrderReq.getOrderId()) && StringUtils.isEmpty(cancelOrderReq.getOriginOrderId())) {
 			throw new IllegalArgumentException("未提供要撤单的订单号");
-		} else if(StringUtils.isEmpty(cancelOrderReq.getOriginOrderId())) {
+		} else if(StringUtils.isNotEmpty(cancelOrderReq.getOrderId())) {
 			order = orderIdMap.remove(cancelOrderReq.getOrderId());
 			originOrderIdMap.remove(order.getOriginOrderId());
 			
-		} else if(StringUtils.isEmpty(cancelOrderReq.getOrderId())) {
+		} else if(StringUtils.isNotEmpty(cancelOrderReq.getOriginOrderId())) {
 			String orderId = originOrderIdMap.remove(cancelOrderReq.getOriginOrderId());
 			order = orderIdMap.remove(orderId);
 			
 		}
 		
 		// TODO 已成交的订单还会不会在orderIdMap中？暂时假设不会
-		
 		OrderField.Builder ob = order.toBuilder();
 		ob.setOrderStatus(OrderStatusEnum.OS_Canceled);
 		ob.setCancelTime(LocalDateTime.now().format(DateTimeConstant.DT_FORMAT_FORMATTER));

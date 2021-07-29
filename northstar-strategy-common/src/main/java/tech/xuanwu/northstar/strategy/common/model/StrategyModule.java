@@ -73,6 +73,7 @@ public class StrategyModule {
 			return this;
 		}
 		if(signalPolicy.bindedUnifiedSymbols().contains(tick.getUnifiedSymbol())) {		
+			mPosition.onTick(tick);
 			tradingDay = tick.getTradingDay();
 			if(stateMachine.getState() == ModuleState.EMPTY 
 					|| stateMachine.getState() == ModuleState.HOLDING_LONG
@@ -110,7 +111,9 @@ public class StrategyModule {
 					return this;
 				}
 				
-				stateMachine.transformForm(ModuleEventType.RISK_ALERTED);
+				stateMachine.transformForm((riskCode & RiskAuditResult.REJECTED) > 0 
+						? ModuleEventType.REJECT_RISK_ALERTED 
+						: ModuleEventType.RETRY_RISK_ALERTED);
 				Iterator<String> itOrder = originOrderIdSet.iterator();
 				while(itOrder.hasNext()) {
 					String originOrderId = itOrder.next();

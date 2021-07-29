@@ -26,9 +26,13 @@ public enum ModuleEventType {
 	 */
 	SELL_TRADED,
 	/**
-	 * 风控预警
+	 * 风控重试
 	 */
-	RISK_ALERTED,
+	RETRY_RISK_ALERTED,
+	/**
+	 * 风控拒绝
+	 */
+	REJECT_RISK_ALERTED,
 	/**
 	 * 挂单撤销
 	 */
