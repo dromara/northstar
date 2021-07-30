@@ -223,9 +223,11 @@ class GwOrderHolder {
 	
 	protected double getFrozenMargin() {
 		double totalFrozenAmount = 0;
-		Double r1 = originOrderIdMap.reduce(100, 
-			(k, v) -> (v.getTotalVolume() - v.getTradedVolume()) * v.getContract().getMultiplier() * v.getPrice() * v.getContract().getLongMarginRatio(),
-			(a, b) -> a + b);
+		Double r1 = originOrderIdMap.values().stream()
+				.filter(order -> order.getOffsetFlag() == OffsetFlagEnum.OF_Open)
+				.map(order -> (order.getTotalVolume() - order.getTradedVolume()) * order.getContract().getMultiplier() * order.getPrice() * order.getContract().getLongMarginRatio())
+				.reduce(0D, (a, b) -> a + b);
+				
 		totalFrozenAmount += r1 == null ? 0 : r1.doubleValue();
 		return totalFrozenAmount;
 	}
