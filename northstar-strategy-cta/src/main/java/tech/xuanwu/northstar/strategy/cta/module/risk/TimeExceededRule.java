@@ -3,7 +3,7 @@ package tech.xuanwu.northstar.strategy.cta.module.risk;
 import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.strategy.common.DynamicParamsAware;
 import tech.xuanwu.northstar.strategy.common.RiskControlRule;
-import tech.xuanwu.northstar.strategy.common.annotation.Label;
+import tech.xuanwu.northstar.strategy.common.annotation.Setting;
 import tech.xuanwu.northstar.strategy.common.annotation.StrategicComponent;
 import tech.xuanwu.northstar.strategy.common.constants.RiskAuditResult;
 import tech.xuanwu.northstar.strategy.common.model.StrategyModule;
@@ -47,7 +47,7 @@ public class TimeExceededRule implements RiskControlRule, DynamicParamsAware{
 	
 	public static class InitParams extends DynamicParams{
 		
-		@Label(value="超时时间", unit="秒")
+		@Setting(value="超时时间", unit="秒")
 		private int timeoutSeconds;
 		
 	}

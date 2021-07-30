@@ -3,13 +3,12 @@ package tech.xuanwu.northstar.strategy.cta.module.dealer;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.ThreadLocalRandom;
 
 import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.common.model.ContractManager;
 import tech.xuanwu.northstar.strategy.common.Dealer;
 import tech.xuanwu.northstar.strategy.common.Signal;
-import tech.xuanwu.northstar.strategy.common.annotation.Label;
+import tech.xuanwu.northstar.strategy.common.annotation.Setting;
 import tech.xuanwu.northstar.strategy.common.annotation.StrategicComponent;
 import tech.xuanwu.northstar.strategy.common.model.CtaSignal;
 import tech.xuanwu.northstar.strategy.common.model.StrategyModule;
@@ -107,11 +106,17 @@ public class SampleDealer implements Dealer {
 	
 	public static class InitParams extends DynamicParams{
 
-		@Label(value="绑定合约", order = 10)
+		@Setting(value="绑定合约", order = 10)
 		private String bindedUnifiedSymbol;
 		
-		@Label(value="开仓手数", order = 20)
+		@Setting(value="开仓手数", order = 20)
 		private int openVol = 1;
+		
+		@Setting(value="价格类型", order = 30, options = {"对手价", "市价", "最新价", "排队价"})
+		private String priceTypeStr;
+		
+		@Setting(value="超价", order = 40, unit = "Tick")
+		private int overprice;
 	}
 
 	@Override

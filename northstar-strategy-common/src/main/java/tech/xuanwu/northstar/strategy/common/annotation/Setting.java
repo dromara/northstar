@@ -8,11 +8,13 @@ import java.lang.annotation.Target;
 
 @Retention(RUNTIME)
 @Target(FIELD)
-public @interface Label {
+public @interface Setting {
 
 	String value() default "";
 	
 	String unit() default "";
 	
 	int order() default 0;
+	
+	String[] options() default {};
 }

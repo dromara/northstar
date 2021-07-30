@@ -6,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.strategy.common.ModuleTrade;
 import tech.xuanwu.northstar.strategy.common.RiskControlRule;
 import tech.xuanwu.northstar.strategy.common.Signal;
-import tech.xuanwu.northstar.strategy.common.annotation.Label;
+import tech.xuanwu.northstar.strategy.common.annotation.Setting;
 import tech.xuanwu.northstar.strategy.common.annotation.StrategicComponent;
 import tech.xuanwu.northstar.strategy.common.constants.RiskAuditResult;
 import tech.xuanwu.northstar.strategy.common.model.StrategyModule;
@@ -57,7 +57,7 @@ public class DailyDealLimitedRule implements RiskControlRule {
 	
 	public static class InitParams extends DynamicParams{
 		
-		@Label(value="日内开仓限制", unit="次")
+		@Setting(value="日内开仓限制", unit="次")
 		private int dailyDealLimit;
 		
 	}

@@ -3,7 +3,7 @@ package tech.xuanwu.northstar.strategy.cta.module.risk;
 import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.strategy.common.DynamicParamsAware;
 import tech.xuanwu.northstar.strategy.common.RiskControlRule;
-import tech.xuanwu.northstar.strategy.common.annotation.Label;
+import tech.xuanwu.northstar.strategy.common.annotation.Setting;
 import tech.xuanwu.northstar.strategy.common.annotation.StrategicComponent;
 import tech.xuanwu.northstar.strategy.common.constants.RiskAuditResult;
 import tech.xuanwu.northstar.strategy.common.model.StrategyModule;
@@ -61,7 +61,7 @@ public class UseMarginExceededRule implements RiskControlRule, DynamicParamsAwar
 	
 	public static class InitParams extends DynamicParams{
 		
-		@Label(value="账户分配比例", unit="%")
+		@Setting(value="账户分配比例", unit="%")
 		private double limitedPercentageOfTotalBalance;
 		
 	}

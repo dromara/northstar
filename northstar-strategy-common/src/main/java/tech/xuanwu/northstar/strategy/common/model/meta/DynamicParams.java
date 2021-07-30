@@ -7,7 +7,7 @@ import java.util.Map.Entry;
 
 import lombok.Getter;
 import lombok.Setter;
-import tech.xuanwu.northstar.strategy.common.annotation.Label;
+import tech.xuanwu.northstar.strategy.common.annotation.Setting;
 
 @Getter
 @Setter
@@ -49,18 +49,20 @@ public abstract class DynamicParams {
 		Field[] fs = this.getClass().getDeclaredFields();
 		Map<String, ComponentField> fieldMap = new HashMap<>();
 		for(Field f : fs) {
-			if(f.isAnnotationPresent(Label.class)) {
+			if(f.isAnnotationPresent(Setting.class)) {
+				Setting anno = f.getAnnotation(Setting.class);
 				String fieldName = f.getName();
-				String label = f.getAnnotation(Label.class).value();
-				int order = f.getAnnotation(Label.class).order();
-				String unit = f.getAnnotation(Label.class).unit();
+				String label = anno.value();
+				int order = anno.order();
+				String unit = anno.unit();
+				String[] options = anno.options();
 				boolean isNum = f.getType().isAssignableFrom(Number.class) 
 						|| f.getType().equals(int.class)
 						|| f.getType().equals(long.class)
 						|| f.getType().equals(double.class)
 						|| f.getType().equals(float.class);
-				String type = isNum ? "Number" : "String";
-				fieldMap.put(fieldName, new ComponentField(label,fieldName, order, type, null, unit));
+				String type = options.length > 0 ? "Options" : isNum ? "Number" : "String";
+				fieldMap.put(fieldName, new ComponentField(label,fieldName, order, type, null, unit, options));
 			}
 		}
 		return fieldMap;

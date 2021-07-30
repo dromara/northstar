@@ -12,7 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.strategy.common.ExternalSignalPolicy;
 import tech.xuanwu.northstar.strategy.common.Signal;
-import tech.xuanwu.northstar.strategy.common.annotation.Label;
+import tech.xuanwu.northstar.strategy.common.annotation.Setting;
 import tech.xuanwu.northstar.strategy.common.annotation.StrategicComponent;
 import tech.xuanwu.northstar.strategy.common.constants.SignalOperation;
 import tech.xuanwu.northstar.strategy.common.model.CtaSignal;
@@ -142,7 +142,7 @@ public class PAExtSignalPolicy extends AbstractSignalPolicy implements ExternalS
 	
 	public static class InitParams extends DynamicParams{
 
-		@Label(value="绑定合约", order=10)	// Label注解用于定义属性的元信息
+		@Setting(value="绑定合约", order=10)	// Label注解用于定义属性的元信息
 		protected String unifiedSymbol;		// 属性可以为任意多个，当元素为多个时order值用于控制前端的显示顺序	
 	}
 

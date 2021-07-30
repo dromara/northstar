@@ -8,7 +8,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.strategy.common.Signal;
 import tech.xuanwu.northstar.strategy.common.SignalPolicy;
-import tech.xuanwu.northstar.strategy.common.annotation.Label;
+import tech.xuanwu.northstar.strategy.common.annotation.Setting;
 import tech.xuanwu.northstar.strategy.common.annotation.StrategicComponent;
 import tech.xuanwu.northstar.strategy.common.constants.ModuleState;
 import tech.xuanwu.northstar.strategy.common.constants.SignalOperation;
@@ -56,13 +56,13 @@ public class SampleSignalPolicy extends AbstractSignalPolicy
 	 */
 	public static class InitParams extends DynamicParams{
 		
-		@Label(value="绑定合约", order=10)	// Label注解用于定义属性的元信息
+		@Setting(value="绑定合约", order=10)	// Label注解用于定义属性的元信息
 		private String unifiedSymbol;		// 属性可以为任意多个，当元素为多个时order值用于控制前端的显示顺序
 		
-		@Label(value="短周期", order=20, unit="天")	// 可以声明单位
+		@Setting(value="短周期", order=20, unit="天")	// 可以声明单位
 		private int shortPeriod;
 		
-		@Label(value="长周期", order=30, unit="天")
+		@Setting(value="长周期", order=30, unit="天")
 		private int longPeriod;
 
 	}

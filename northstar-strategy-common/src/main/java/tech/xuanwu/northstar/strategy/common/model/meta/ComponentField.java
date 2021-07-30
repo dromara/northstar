@@ -21,4 +21,6 @@ public class ComponentField {
 	
 	private String unit;
 	
+	private String[] options;
+	
 }
