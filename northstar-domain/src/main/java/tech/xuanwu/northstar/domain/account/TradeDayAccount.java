@@ -2,10 +2,9 @@ package tech.xuanwu.northstar.domain.account;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
-
-import com.google.common.eventbus.EventBus;
 
 import tech.xuanwu.northstar.common.event.InternalEventBus;
 import tech.xuanwu.northstar.common.event.NorthstarEvent;
@@ -89,6 +88,7 @@ public class TradeDayAccount {
 		}
 		DirectionEnum orderDir = OrderUtil.resolveDirection(orderReq.getTradeOpr());
 		SubmitOrderReqField req = SubmitOrderReqField.newBuilder()
+				.setOriginOrderId(UUID.randomUUID().toString())
 				.setContract(contract)
 				.setPrice(Double.parseDouble(orderReq.getPrice()))
 				.setStopPrice(StringUtils.isNotBlank(orderReq.getStopPrice()) ? Double.parseDouble(orderReq.getStopPrice()) : 0D)
@@ -115,11 +115,11 @@ public class TradeDayAccount {
 	}
 	
 	public boolean cancelOrder(OrderRecall orderRecall) throws TradeException {
-		if(!tdOrder.canCancelOrder(orderRecall.getOrderId())) {
+		if(!tdOrder.canCancelOrder(orderRecall.getOriginOrderId())) {
 			throw new TradeException("没有可撤订单");
 		}
 		CancelOrderReqField order = CancelOrderReqField.newBuilder()
-				.setOrderId(orderRecall.getOrderId())
+				.setOriginOrderId(orderRecall.getOriginOrderId())
 				.setGatewayId(orderRecall.getGatewayId())
 				.build();
 		eventBus.post(new NorthstarEvent(NorthstarEventType.WITHDRAW_ORDER, order));

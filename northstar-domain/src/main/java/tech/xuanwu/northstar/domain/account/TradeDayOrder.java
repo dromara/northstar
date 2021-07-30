@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 import tech.xuanwu.northstar.common.exception.NoSuchElementException;
 import xyz.redtorch.pb.CoreEnum.OrderStatusEnum;
@@ -17,9 +16,10 @@ import xyz.redtorch.pb.CoreField.OrderField;
  */
 public class TradeDayOrder {
 
+	/**
+	 * originOrderId --> order
+	 */
 	private ConcurrentHashMap<String, OrderField> orderMap = new ConcurrentHashMap<>();
-	
-	private ConcurrentLinkedQueue<String> orderQ = new ConcurrentLinkedQueue<>();
 	
 	
 	/**
@@ -27,21 +27,18 @@ public class TradeDayOrder {
 	 * @param order
 	 */
 	public void update(OrderField order) {
-		if(!orderMap.containsKey(order.getOrderId())) {
-			orderQ.offer(order.getOrderId());
-		}
-		orderMap.put(order.getOrderId(), order);
+		orderMap.put(order.getOriginOrderId(), order);
 	}
 	
 	/**
 	 * 是否可以撤单
-	 * @param orderId
+	 * @param originOrderId
 	 * @return
 	 */
-	public boolean canCancelOrder(String orderId) {
-		OrderField order = orderMap.get(orderId);
+	public boolean canCancelOrder(String originOrderId) {
+		OrderField order = orderMap.get(originOrderId);
 		if(order == null) {
-			throw new NoSuchElementException("不存在相关订单：" + orderId);
+			throw new NoSuchElementException("不存在相关订单：" + originOrderId);
 		}
 		
 		return order.getOrderStatus() != OrderStatusEnum.OS_AllTraded 
@@ -54,9 +51,9 @@ public class TradeDayOrder {
 	 * @return
 	 */
 	public List<OrderField> getOrders(){
-		List<OrderField> result = new ArrayList<>(orderQ.size());
-		orderQ.stream().forEach(id -> result.add(orderMap.get(id)));
-		return Collections.unmodifiableList(result);
+		List<OrderField> list = new ArrayList<>(orderMap.size());
+		list.addAll(orderMap.values());
+		return Collections.unmodifiableList(list);
 	}
 	
 	

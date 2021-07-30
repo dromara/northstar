@@ -3,6 +3,7 @@ package tech.xuanwu.northstar.domain.account;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.lang3.StringUtils;
@@ -95,6 +96,7 @@ public class PositionDescription {
 		List<SubmitOrderReqField> result = new ArrayList<>();
 		SubmitOrderReqField.Builder sb = SubmitOrderReqField.newBuilder();
 		sb.setContract(contract)
+		.setOriginOrderId(UUID.randomUUID().toString())
 		.setPrice(Double.parseDouble(orderReq.getPrice()))
 		.setStopPrice(StringUtils.isNotBlank(orderReq.getStopPrice()) ? Double.parseDouble(orderReq.getStopPrice()) : 0D)
 		.setOrderPriceType(OrderPriceTypeEnum.OPT_LimitPrice)

@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 @Data
 public class OrderRecall {
 	
-	private String orderId;
+	private String originOrderId;
 	
 	private String gatewayId;
 

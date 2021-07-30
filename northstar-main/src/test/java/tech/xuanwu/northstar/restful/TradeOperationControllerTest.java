@@ -61,7 +61,7 @@ public class TradeOperationControllerTest {
 	@Test
 	public void testCancelOrder() throws Exception{
 		OrderRecall recall = OrderRecall.builder()
-				.orderId("123456789")
+				.originOrderId("123456789")
 				.build();
 		
 		mockMvc.perform(MockMvcRequestBuilders.post("/trade/cancel")

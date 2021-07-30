@@ -160,7 +160,7 @@ public class TradeDayAccountTest {
 		testOnOrderUpdate();
 		OrderRecall recall = OrderRecall.builder()
 				.gatewayId("testGateway")
-				.orderId("adfskal")
+				.originOrderId("adfskal")
 				.build();
 		tda.cancelOrder(recall);
 		verify(tda.eventBus).post(ArgumentMatchers.any(NorthstarEvent.class));
@@ -177,7 +177,7 @@ public class TradeDayAccountTest {
 		
 		OrderRecall recall = OrderRecall.builder()
 				.gatewayId("testGateway")
-				.orderId("adfskal")
+				.originOrderId("adfskal")
 				.build();
 		tda.cancelOrder(recall);
 	}
@@ -187,7 +187,7 @@ public class TradeDayAccountTest {
 		testOnOrderUpdate();
 		OrderRecall recall = OrderRecall.builder()
 				.gatewayId("testGateway")
-				.orderId("324234")
+				.originOrderId("324234")
 				.build();
 		tda.cancelOrder(recall);
 	}
