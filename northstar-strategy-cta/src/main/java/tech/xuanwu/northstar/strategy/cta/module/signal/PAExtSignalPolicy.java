@@ -1,8 +1,8 @@
 package tech.xuanwu.northstar.strategy.cta.module.signal;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.LinkedList;
 import java.util.Optional;
+import java.util.Queue;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -35,22 +35,9 @@ public class PAExtSignalPolicy extends AbstractSignalPolicy implements ExternalS
 	private Pattern bkOprPtn = Pattern.compile("在([0-9\\.]+)的价格开多单，止损价：([0-9\\.]+)");
 	private Pattern skOprPtn = Pattern.compile("在([0-9\\.]+)的价格开空单，止损价：([0-9\\.]+)");
 	
-	private Map<Integer, SignalOperation> signalStateMap = new HashMap<>() {
-		private static final long serialVersionUID = 1L;
-
-		{
-			put(SignalOperation.BuyClose.code(), SignalOperation.BuyClose);
-			put(SignalOperation.SellClose.code(), SignalOperation.SellClose);
-			put(SignalOperation.BuyOpen.code(), SignalOperation.BuyOpen);
-			put(SignalOperation.SellOpen.code(), SignalOperation.SellOpen);
-			put(SignalOperation.ReversingBuy.code(), SignalOperation.ReversingBuy);
-			put(SignalOperation.ReversingSell.code(), SignalOperation.ReversingSell);
-		}
-	};
-	
 	private String symbol;
 	
-	private volatile String externalText;
+	private Queue<Signal> signalQ = new LinkedList<>();
 	
 	@Override
 	public DynamicParams getDynamicParams() {
@@ -71,10 +58,13 @@ public class PAExtSignalPolicy extends AbstractSignalPolicy implements ExternalS
 
 	@Override
 	protected Optional<Signal> onTick(int millicSecOfMin, BarData barData) {
-		if(StringUtils.isNotBlank(externalText)) {
-			Optional<Signal> signal = Optional.of(resolveSignal(externalText));
-			externalText = null;
-			return signal;
+		if(signalQ.size() > 0) {
+			Signal signal = signalQ.poll();
+			// 当信号为平仓且当前仓位无持仓时，抛弃该信号
+			if(!signal.isOpening() && !stateMachine.getState().isHolding()) {
+				signal = signalQ.poll();
+			}
+			return Optional.ofNullable(signal);
 		}
 		return Optional.empty();
 	}
@@ -85,59 +75,56 @@ public class PAExtSignalPolicy extends AbstractSignalPolicy implements ExternalS
 			return;
 		}
 		log.info("收到外部指令：{}", text);
-		externalText = text;
+		resolveSignal(text);
 	}
 	
-	private CtaSignal resolveSignal(String text) {
+	private void resolveSignal(String text) {
 		Matcher m1 = spOprPtn.matcher(text);
 		Matcher m2 = bpOprPtn.matcher(text);
 		String closePrice = "";
-		SignalOperation closeState = SignalOperation.None;
 		if(m1.find()) {
-			closeState = SignalOperation.SellClose;
 			closePrice = m1.group(1);
+			signalQ.offer(CtaSignal.builder()
+				.id(UUID.randomUUID())
+				.signalClass(this.getClass())
+				.signalPrice(Double.parseDouble(closePrice))
+				.state(SignalOperation.SellClose)
+				.timestamp(System.currentTimeMillis())
+				.build());
 		} else if(m2.find()) {
-			closeState = SignalOperation.BuyClose;
 			closePrice = m2.group(1);
+			signalQ.offer(CtaSignal.builder()
+					.id(UUID.randomUUID())
+					.signalClass(this.getClass())
+					.signalPrice(Double.parseDouble(closePrice))
+					.state(SignalOperation.BuyClose)
+					.timestamp(System.currentTimeMillis())
+					.build());
 		}
+		
 		
 		Matcher m3 = bkOprPtn.matcher(text);
 		Matcher m4 = skOprPtn.matcher(text);
 		String openPrice = "";
-		SignalOperation openState = SignalOperation.None;
 		if(m3.find()) {
-			openState = SignalOperation.BuyOpen;
 			openPrice = m3.group(1);
+			signalQ.offer(CtaSignal.builder()
+					.id(UUID.randomUUID())
+					.signalClass(this.getClass())
+					.signalPrice(Double.parseDouble(openPrice))
+					.state(SignalOperation.BuyOpen)
+					.timestamp(System.currentTimeMillis())
+					.build());
 		}else if(m4.find()) {
-			openState = SignalOperation.SellOpen;
 			openPrice = m4.group(1);
+			signalQ.offer(CtaSignal.builder()
+					.id(UUID.randomUUID())
+					.signalClass(this.getClass())
+					.signalPrice(Double.parseDouble(openPrice))
+					.state(SignalOperation.SellOpen)
+					.timestamp(System.currentTimeMillis())
+					.build());
 		}
-		
-		SignalOperation finalState = signalStateMap.get(openState.code() | closeState.code());
-		if(finalState == null) {
-			return null;
-		}
-		
-		return CtaSignal.builder()
-				.id(UUID.randomUUID())
-				.signalClass(this.getClass())
-				.signalPrice(choosePrice(finalState.isBuy(), openPrice, closePrice))
-				.state(finalState)
-				.timestamp(System.currentTimeMillis())
-				.build();
-	}
-	
-	public double choosePrice(boolean isBuy, String p1, String p2) {
-		if(StringUtils.isAllBlank(p1, p2)) {
-			throw new IllegalArgumentException("价格为空");
-		}
-		if(StringUtils.isEmpty(p1)) {
-			return Double.parseDouble(p2);
-		}
-		if(StringUtils.isEmpty(p2)) {
-			return Double.parseDouble(p1);
-		}
-		return isBuy ? Math.max(Double.parseDouble(p1), Double.parseDouble(p2)) : Math.min(Double.parseDouble(p1), Double.parseDouble(p2));
 	}
 	
 	public static class InitParams extends DynamicParams{

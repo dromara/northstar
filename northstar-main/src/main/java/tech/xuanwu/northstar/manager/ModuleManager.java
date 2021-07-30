@@ -5,6 +5,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.common.event.AbstractEventHandler;
 import tech.xuanwu.northstar.common.event.NorthstarEvent;
 import tech.xuanwu.northstar.common.event.NorthstarEventType;
@@ -24,6 +25,7 @@ import xyz.redtorch.pb.CoreField.TradeField;
  * @author KevinHuangwl
  *
  */
+@Slf4j
 public class ModuleManager extends AbstractEventHandler {
 	
 	private ConcurrentHashMap<String, StrategyModule> moduleMap = new ConcurrentHashMap<>(50);
@@ -96,6 +98,7 @@ public class ModuleManager extends AbstractEventHandler {
 	}
 	
 	private void onExtMsg(String message) {
+		log.info("模组管理器分发外部信息");
 		moduleMap.values().forEach(m -> m.onExternalMessage(message));
 	}
 
