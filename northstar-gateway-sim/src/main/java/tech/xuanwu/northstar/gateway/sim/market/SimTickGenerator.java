@@ -5,6 +5,7 @@ import java.time.ZoneOffset;
 import java.util.Random;
 
 import tech.xuanwu.northstar.common.constant.DateTimeConstant;
+import tech.xuanwu.northstar.common.constant.TickType;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.TickField;
 
@@ -45,6 +46,7 @@ public class SimTickGenerator {
 			.setOpenInterestDelta(deltaInterest)
 			.setVolume(tb.getVolume() + deltaVol)
 			.setVolumeDelta(deltaVol)
+			.setStatus(ldt.getSecond() == 59 && System.currentTimeMillis() % 1000 > 500 ? TickType.END_OF_MIN_TICK.getCode() : TickType.NORMAL_TICK.getCode())
 			.setLastPrice(lastestPrice);
 		
 		ins.setLastTick(tb);

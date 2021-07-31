@@ -1,7 +1,9 @@
 package tech.xuanwu.northstar.gateway.sim.trade;
 
 import java.time.LocalDate;
+import java.util.concurrent.CompletableFuture;
 
+import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.common.event.NorthstarEventType;
 import tech.xuanwu.northstar.common.exception.TradeException;
 import tech.xuanwu.northstar.engine.event.FastEventEngine;
@@ -14,6 +16,7 @@ import xyz.redtorch.pb.CoreField.GatewaySettingField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TickField;
 
+@Slf4j
 public class SimTradeGatewayLocal implements SimTradeGateway{
 	
 	private FastEventEngine feEngine;
@@ -43,28 +46,36 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 		feEngine.emitEvent(NorthstarEventType.LOGGED_IN, gatewaySetting.getGatewayId());
 		
 		// 模拟返回合约
-		LocalDate date = LocalDate.now().plusDays(45);
-		String year = date.getYear() % 100 + "";
-		String month = String.format("%02d", date.getMonth().getValue());
-		String symbol = "ni" + year + month;
-		String name = "沪镍模拟" + year + month;
-		feEngine.emitEvent(NorthstarEventType.CONTRACT, ContractField.newBuilder()
-				.setGatewayId(gatewaySetting.getGatewayId())
-				.setContractId(symbol + "@SHFE@FUTURES@" + gatewaySetting.getGatewayId())
-				.setCurrency(CurrencyEnum.CNY)
-				.setExchange(ExchangeEnum.SHFE)
-				.setFullName(name)
-				.setName(name)
-				.setUnifiedSymbol(symbol + "@SHFE@FUTURES")
-				.setSymbol(symbol)
-				.setProductClass(ProductClassEnum.FUTURES)
-				.setThirdPartyId(symbol)
-				.setMultiplier(10)
-				.setPriceTick(10)
-				.setLongMarginRatio(0.08)
-				.setShortMarginRatio(0.08)
-				.build());
-		feEngine.emitEvent(NorthstarEventType.CONTRACT_LOADED, gatewaySetting.getGatewayId());
+		CompletableFuture.runAsync(()->{
+			try {
+				//模拟异步返回合约
+				Thread.sleep(3000);
+			} catch (InterruptedException e) {
+				log.warn("", e);
+			}
+			LocalDate date = LocalDate.now().plusDays(45);
+			String year = date.getYear() % 100 + "";
+			String month = String.format("%02d", date.getMonth().getValue());
+			String symbol = "ni" + year + month;
+			String name = "沪镍模拟" + year + month;
+			feEngine.emitEvent(NorthstarEventType.CONTRACT, ContractField.newBuilder()
+					.setGatewayId(gatewaySetting.getGatewayId())
+					.setContractId(symbol + "@SHFE@FUTURES@" + gatewaySetting.getGatewayId())
+					.setCurrency(CurrencyEnum.CNY)
+					.setExchange(ExchangeEnum.SHFE)
+					.setFullName(name)
+					.setName(name)
+					.setUnifiedSymbol(symbol + "@SHFE@FUTURES")
+					.setSymbol(symbol)
+					.setProductClass(ProductClassEnum.FUTURES)
+					.setThirdPartyId(symbol)
+					.setMultiplier(10)
+					.setPriceTick(10)
+					.setLongMarginRatio(0.08)
+					.setShortMarginRatio(0.08)
+					.build());
+			feEngine.emitEvent(NorthstarEventType.CONTRACT_LOADED, gatewaySetting.getGatewayId());
+		});
 	}
 
 	@Override

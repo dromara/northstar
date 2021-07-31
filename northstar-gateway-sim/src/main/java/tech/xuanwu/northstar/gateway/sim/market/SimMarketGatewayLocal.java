@@ -4,6 +4,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import lombok.extern.slf4j.Slf4j;
@@ -18,11 +19,13 @@ public class SimMarketGatewayLocal implements MarketGateway{
 	
 	private FastEventEngine feEngine;
 	
-	private ScheduledExecutorService scheduleExec = Executors.newScheduledThreadPool(1);
+	private ScheduledExecutorService scheduleExec = Executors.newScheduledThreadPool(0);
 	
 	private long lastActiveTime;
 	
 	private GatewaySettingField settings;
+	
+	private ScheduledFuture<?> task;
 	
 	private SimTickGenerator tickGen = new SimTickGenerator();
 	
@@ -31,6 +34,7 @@ public class SimMarketGatewayLocal implements MarketGateway{
 	public SimMarketGatewayLocal(GatewaySettingField settings, FastEventEngine feEngine) {
 		this.feEngine = feEngine;
 		this.settings = settings;
+		
 	}
 
 	@Override
@@ -63,10 +67,14 @@ public class SimMarketGatewayLocal implements MarketGateway{
 			return;
 		}
 		log.info("模拟行情连线");
-		scheduleExec.scheduleAtFixedRate(()->{
+		task = scheduleExec.scheduleAtFixedRate(()->{
 			lastActiveTime = System.currentTimeMillis();
-			for(Entry<ContractField, InstrumentHolder> e: cache.entrySet()) {
-				feEngine.emitEvent(NorthstarEventType.TICK, tickGen.generateNextTick(e.getValue()));
+			try {				
+				for(Entry<ContractField, InstrumentHolder> e: cache.entrySet()) {
+					feEngine.emitEvent(NorthstarEventType.TICK, tickGen.generateNextTick(e.getValue()));
+				}
+			} catch (Exception e) {
+				log.error("模拟行情TICK生成异常", e);
 			}
 		}, 500, 500, TimeUnit.MILLISECONDS);
 		feEngine.emitEvent(NorthstarEventType.CONNECTED, settings.getGatewayId());
@@ -74,7 +82,7 @@ public class SimMarketGatewayLocal implements MarketGateway{
 
 	@Override
 	public void disconnect() {
-		scheduleExec.shutdown();
+		task.cancel(false);
 		log.info("模拟行情断开");
 		feEngine.emitEvent(NorthstarEventType.DISCONNECTED, settings.getGatewayId());
 	}
