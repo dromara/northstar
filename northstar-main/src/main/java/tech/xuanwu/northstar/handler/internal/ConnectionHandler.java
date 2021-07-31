@@ -61,7 +61,8 @@ public class ConnectionHandler extends AbstractEventHandler implements GenericEv
 			conn.onConnected();
 			Gateway gateway = gatewayConnMgr.getGatewayByConnection(conn);
 			if(gateway instanceof MarketGateway) {
-				for(ContractField c : contractMgr.getAllContracts()) {
+				
+				for(ContractField c : contractMgr.getContractMapByGateway(gatewayId).values()) {
 					if(c.getSymbol().contains(Constants.INDEX_SUFFIX)) {
 						//跳过指数合约
 						continue;

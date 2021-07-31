@@ -5,12 +5,14 @@ import java.util.Optional;
 import com.alibaba.fastjson.JSON;
 import com.google.protobuf.InvalidProtocolBufferException;
 
+import tech.xuanwu.northstar.common.constant.GatewayUsage;
 import tech.xuanwu.northstar.common.model.ContractManager;
 import tech.xuanwu.northstar.common.model.GatewayDescription;
 import tech.xuanwu.northstar.common.model.SimSettings;
 import tech.xuanwu.northstar.engine.event.FastEventEngine;
 import tech.xuanwu.northstar.gateway.api.AbstractGatewayFactory;
 import tech.xuanwu.northstar.gateway.api.Gateway;
+import tech.xuanwu.northstar.gateway.sim.market.SimMarketGatewayLocal;
 import tech.xuanwu.northstar.gateway.sim.persistence.SimAccountPO;
 import xyz.redtorch.pb.CoreEnum.GatewayTypeEnum;
 import xyz.redtorch.pb.CoreField.GatewaySettingField;
@@ -31,6 +33,21 @@ public class SimGatewayFactory extends AbstractGatewayFactory{
 
 	@Override
 	public Gateway newInstance(GatewayDescription gatewayDescription) {
+		if(gatewayDescription.getGatewayUsage() == GatewayUsage.MARKET_DATA) {
+			return getMarketGateway(gatewayDescription);
+		}
+		return getTradeGateway(gatewayDescription);
+	}
+	
+	private Gateway getMarketGateway(GatewayDescription gatewayDescription) {
+		GatewaySettingField gwSettings = GatewaySettingField.newBuilder()
+				.setGatewayId(gatewayDescription.getGatewayId())
+				.setGatewayType(GatewayTypeEnum.GTE_MarketData)
+				.build();
+		return new SimMarketGatewayLocal(gwSettings, fastEventEngine);
+	}
+	
+	private Gateway getTradeGateway(GatewayDescription gatewayDescription) {
 		String mdGatewayId = gatewayDescription.getBindedMktGatewayId();
 		String accGatewayId = gatewayDescription.getGatewayId();
 		Optional<SimAccountPO> opt = simMarket.load(accGatewayId);
