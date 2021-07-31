@@ -38,7 +38,7 @@ public class IndexContract {
 		String name = chnNameOpt.orElse(symbolName) + "指数"; // 简称
 		String fullName = name; // 全称
 		String unifiedSymbol = String.format("%s@%s@%s", symbol, proto.getExchange(), proto.getProductClass()); // 统一ID，通常是<合约代码@交易所代码@产品类型>
-		String contractId = unifiedSymbol + proto.getGatewayId();
+		String contractId = unifiedSymbol + "@" + proto.getGatewayId();
 		
 		self = proto.toBuilder()
 				.setSymbol(symbol)

@@ -10,6 +10,8 @@ import lombok.Data;
 public class ContractPO {
 
 	@Id
+	private String contractId;
+
 	private String unifiedSymbol;
 	
 	private String name;
