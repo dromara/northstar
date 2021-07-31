@@ -17,8 +17,8 @@ import tech.xuanwu.northstar.common.model.ContractManager;
 import tech.xuanwu.northstar.engine.event.FastEventEngine;
 import tech.xuanwu.northstar.gateway.sim.trade.GwAccountHolder;
 import tech.xuanwu.northstar.gateway.sim.trade.SimFactory;
-import tech.xuanwu.northstar.gateway.sim.trade.SimGateway;
-import tech.xuanwu.northstar.gateway.sim.trade.SimGatewayLocalImpl;
+import tech.xuanwu.northstar.gateway.sim.trade.SimTradeGateway;
+import tech.xuanwu.northstar.gateway.sim.trade.SimTradeGatewayLocal;
 import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.ForceCloseReasonEnum;
@@ -40,9 +40,9 @@ import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TickField;
 import xyz.redtorch.pb.CoreField.TradeField;
 
-public class SimGatewayTest {
+public class SimTradeGatewayTest {
 	
-	private SimGateway gateway;
+	private SimTradeGateway gateway;
 	private FastEventEngine feEngine = mock(FastEventEngine.class);
 	private ContractField contract = ContractField.newBuilder()
 				.setUnifiedSymbol("rb2110@SHFE@FUTURES")
@@ -99,7 +99,7 @@ public class SimGatewayTest {
 		SimFactory simFactory = new SimFactory("testGateway", feEngine, costOfCommission, contractMgr);
 		GwAccountHolder accHolder = simFactory.newGwAccountHolder();
 		accHolder.testFlag = true;
-		gateway = new SimGatewayLocalImpl(feEngine, gwSettings, accHolder);
+		gateway = new SimTradeGatewayLocal(feEngine, gwSettings, accHolder);
 	}
 
 	// 出入金验证

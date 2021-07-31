@@ -27,7 +27,7 @@ import tech.xuanwu.northstar.domain.TraderGatewayConnection;
 import tech.xuanwu.northstar.gateway.api.AbstractGatewayFactory;
 import tech.xuanwu.northstar.gateway.api.Gateway;
 import tech.xuanwu.northstar.gateway.api.MarketGateway;
-import tech.xuanwu.northstar.gateway.sim.trade.SimGateway;
+import tech.xuanwu.northstar.gateway.sim.trade.SimTradeGateway;
 import tech.xuanwu.northstar.gateway.sim.trade.SimGatewayFactory;
 import tech.xuanwu.northstar.gateway.sim.trade.SimMarket;
 import tech.xuanwu.northstar.manager.GatewayAndConnectionManager;
@@ -172,9 +172,9 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 		GatewayConnection conn = gatewayConnMgr.getGatewayConnectionById(gatewayId);
 		Gateway gateway = gatewayConnMgr.getGatewayByConnection(conn);
 		gatewayConnMgr.removePair(conn);
-		if(gateway instanceof SimGateway) {
+		if(gateway instanceof SimTradeGateway) {
 			String mdGatewayId = conn.getGwDescription().getBindedMktGatewayId();
-			simMarket.removeGateway(mdGatewayId, (SimGateway) gateway);
+			simMarket.removeGateway(mdGatewayId, (SimTradeGateway) gateway);
 		}
 		return true;
 	}
@@ -250,7 +250,7 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 	 * @return
 	 */
 	public boolean simMoneyIO(String gatewayId, int money) {
-		SimGateway gateway = (SimGateway) gatewayConnMgr.getGatewayById(gatewayId);
+		SimTradeGateway gateway = (SimTradeGateway) gatewayConnMgr.getGatewayById(gatewayId);
 		gateway.moneyIO(money);
 		simMarket.save(gateway.getAccount());
 		if(money != 0) {			

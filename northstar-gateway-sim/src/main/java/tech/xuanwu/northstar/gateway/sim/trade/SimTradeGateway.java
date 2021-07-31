@@ -3,7 +3,7 @@ package tech.xuanwu.northstar.gateway.sim.trade;
 import tech.xuanwu.northstar.gateway.api.TradeGateway;
 import xyz.redtorch.pb.CoreField.TickField;
 
-public interface SimGateway extends TradeGateway{
+public interface SimTradeGateway extends TradeGateway{
 
 	/**
 	 * 出入金

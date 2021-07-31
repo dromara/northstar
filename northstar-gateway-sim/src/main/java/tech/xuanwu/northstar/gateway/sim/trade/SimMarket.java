@@ -16,7 +16,7 @@ public class SimMarket {
 	/**
 	 * mdGatewayId -> simGatewayId -> simGateway
 	 */
-	private Table<String, String, SimGateway> simGatewayMap = HashBasedTable.create();
+	private Table<String, String, SimTradeGateway> simGatewayMap = HashBasedTable.create();
 	
 	private SimAccountRepository simAccRepo;
 	
@@ -24,26 +24,26 @@ public class SimMarket {
 		this.simAccRepo = simAccRepo;
 	}
 	
-	public synchronized void addGateway(String mdGatewayId, SimGateway accountGateway) {
+	public synchronized void addGateway(String mdGatewayId, SimTradeGateway accountGateway) {
 		String simGatewayId = accountGateway.getGatewaySetting().getGatewayId();
 		simGatewayMap.put(mdGatewayId, simGatewayId, accountGateway);
 	}
 	
-	public synchronized void removeGateway(String mdGatewayId, SimGateway accountGateway) {
+	public synchronized void removeGateway(String mdGatewayId, SimTradeGateway accountGateway) {
 		String simGatewayId = accountGateway.getGatewaySetting().getGatewayId();
-		SimGateway simGateway = simGatewayMap.remove(mdGatewayId, simGatewayId);
-		remove(simGateway.getGatewaySetting().getGatewayId());
+		SimTradeGateway simTradeGateway = simGatewayMap.remove(mdGatewayId, simGatewayId);
+		remove(simTradeGateway.getGatewaySetting().getGatewayId());
 	}
 	
 	public void onTick(TickField tick) {
-		Map<String, SimGateway> simGateways = simGatewayMap.row(tick.getGatewayId());
+		Map<String, SimTradeGateway> simGateways = simGatewayMap.row(tick.getGatewayId());
 		simGateways.forEach((k, gw) -> {
 			gw.onTick(tick);
 		});
 	}
 	
 	public void onTrade(TradeField trade) {
-		Map<String, SimGateway> simGateways = simGatewayMap.column(trade.getGatewayId());
+		Map<String, SimTradeGateway> simGateways = simGatewayMap.column(trade.getGatewayId());
 		simGateways.forEach((k, gw) -> {
 			save(gw.getAccount());
 		});

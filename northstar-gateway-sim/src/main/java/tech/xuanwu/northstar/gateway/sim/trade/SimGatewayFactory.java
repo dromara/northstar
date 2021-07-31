@@ -49,7 +49,7 @@ public class SimGatewayFactory extends AbstractGatewayFactory{
 				throw new IllegalStateException(e);
 			}
 		}
-		SimGateway gateway = new SimGatewayLocalImpl(fastEventEngine, gwSettings, accHolder);
+		SimTradeGateway gateway = new SimTradeGatewayLocal(fastEventEngine, gwSettings, accHolder);
 		simMarket.addGateway(mdGatewayId, gateway);
 		return gateway;
 	}

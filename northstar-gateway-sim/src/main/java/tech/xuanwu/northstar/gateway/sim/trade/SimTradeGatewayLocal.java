@@ -14,7 +14,7 @@ import xyz.redtorch.pb.CoreField.GatewaySettingField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TickField;
 
-public class SimGatewayLocalImpl implements SimGateway{
+public class SimTradeGatewayLocal implements SimTradeGateway{
 	
 	private FastEventEngine feEngine;
 	
@@ -25,7 +25,7 @@ public class SimGatewayLocalImpl implements SimGateway{
 	private GwAccountHolder accountHolder;
 	
 	
-	public SimGatewayLocalImpl(FastEventEngine feEngine, GatewaySettingField gatewaySetting, GwAccountHolder accountHolder) {
+	public SimTradeGatewayLocal(FastEventEngine feEngine, GatewaySettingField gatewaySetting, GwAccountHolder accountHolder) {
 		this.feEngine = feEngine;
 		this.gatewaySetting = gatewaySetting;
 		this.accountHolder = accountHolder;	
