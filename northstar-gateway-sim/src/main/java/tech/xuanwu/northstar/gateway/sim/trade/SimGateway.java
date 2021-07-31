@@ -1,4 +1,4 @@
-package tech.xuanwu.northstar.gateway.sim;
+package tech.xuanwu.northstar.gateway.sim.trade;
 
 import tech.xuanwu.northstar.gateway.api.TradeGateway;
 import xyz.redtorch.pb.CoreField.TickField;

@@ -1,4 +1,4 @@
-package tech.xuanwu.northstar.gateway.sim;
+package tech.xuanwu.northstar.gateway.sim.trade;
 
 import java.util.Map;
 import java.util.Optional;

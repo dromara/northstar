@@ -4,7 +4,7 @@ import tech.xuanwu.northstar.common.event.AbstractEventHandler;
 import tech.xuanwu.northstar.common.event.GenericEventHandler;
 import tech.xuanwu.northstar.common.event.NorthstarEvent;
 import tech.xuanwu.northstar.common.event.NorthstarEventType;
-import tech.xuanwu.northstar.gateway.sim.SimMarket;
+import tech.xuanwu.northstar.gateway.sim.trade.SimMarket;
 import xyz.redtorch.pb.CoreField.TickField;
 import xyz.redtorch.pb.CoreField.TradeField;
 

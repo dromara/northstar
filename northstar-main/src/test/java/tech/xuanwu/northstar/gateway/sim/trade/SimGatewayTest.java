@@ -1,4 +1,4 @@
-package tech.xuanwu.northstar.gateway.sim;
+package tech.xuanwu.northstar.gateway.sim.trade;
 
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -15,6 +15,10 @@ import org.junit.Test;
 import tech.xuanwu.northstar.common.event.NorthstarEventType;
 import tech.xuanwu.northstar.common.model.ContractManager;
 import tech.xuanwu.northstar.engine.event.FastEventEngine;
+import tech.xuanwu.northstar.gateway.sim.trade.GwAccountHolder;
+import tech.xuanwu.northstar.gateway.sim.trade.SimFactory;
+import tech.xuanwu.northstar.gateway.sim.trade.SimGateway;
+import tech.xuanwu.northstar.gateway.sim.trade.SimGatewayLocalImpl;
 import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.ForceCloseReasonEnum;

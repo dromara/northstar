@@ -11,7 +11,7 @@ import tech.xuanwu.northstar.common.model.ContractManager;
 import tech.xuanwu.northstar.domain.account.TradeDayAccount;
 import tech.xuanwu.northstar.engine.index.IndexEngine;
 import tech.xuanwu.northstar.factories.TradeDayAccountFactory;
-import tech.xuanwu.northstar.gateway.sim.SimMarket;
+import tech.xuanwu.northstar.gateway.sim.trade.SimMarket;
 import tech.xuanwu.northstar.handler.internal.AccountHandler;
 import tech.xuanwu.northstar.handler.internal.ConnectionHandler;
 import tech.xuanwu.northstar.handler.internal.ContractHandler;

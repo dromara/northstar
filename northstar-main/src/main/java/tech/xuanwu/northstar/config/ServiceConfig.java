@@ -12,7 +12,7 @@ import tech.xuanwu.northstar.common.model.ContractManager;
 import tech.xuanwu.northstar.domain.account.TradeDayAccount;
 import tech.xuanwu.northstar.engine.broadcast.SocketIOMessageEngine;
 import tech.xuanwu.northstar.engine.event.FastEventEngine;
-import tech.xuanwu.northstar.gateway.sim.SimMarket;
+import tech.xuanwu.northstar.gateway.sim.trade.SimMarket;
 import tech.xuanwu.northstar.manager.GatewayAndConnectionManager;
 import tech.xuanwu.northstar.manager.ModuleManager;
 import tech.xuanwu.northstar.persistence.GatewayRepository;
