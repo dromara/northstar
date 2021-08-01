@@ -68,15 +68,8 @@ public class CtpGatewayAdapter extends GatewayAbstract implements MarketGateway,
 		}
 	}
 	
-	public static void main(String[] args) {
-		System.out.println("done");
-	}
-
 	private MdSpi mdSpi = null;
 	private TdSpi tdSpi = null;
-	
-	
-	
 	
 	public CtpGatewayAdapter(FastEventEngine fastEventEngine, GatewaySettingField gatewaySetting) {
 		super(gatewaySetting);

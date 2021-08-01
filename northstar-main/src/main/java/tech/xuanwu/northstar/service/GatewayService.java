@@ -27,9 +27,9 @@ import tech.xuanwu.northstar.domain.TraderGatewayConnection;
 import tech.xuanwu.northstar.gateway.api.AbstractGatewayFactory;
 import tech.xuanwu.northstar.gateway.api.Gateway;
 import tech.xuanwu.northstar.gateway.api.MarketGateway;
-import tech.xuanwu.northstar.gateway.sim.trade.SimTradeGateway;
 import tech.xuanwu.northstar.gateway.sim.trade.SimGatewayFactory;
 import tech.xuanwu.northstar.gateway.sim.trade.SimMarket;
+import tech.xuanwu.northstar.gateway.sim.trade.SimTradeGateway;
 import tech.xuanwu.northstar.manager.GatewayAndConnectionManager;
 import tech.xuanwu.northstar.persistence.GatewayRepository;
 import tech.xuanwu.northstar.persistence.MarketDataRepository;
@@ -38,7 +38,6 @@ import tech.xuanwu.northstar.persistence.po.GatewayPO;
 import tech.xuanwu.northstar.strategy.common.model.ModuleInfo;
 import tech.xuanwu.northstar.utils.CodecUtils;
 import xyz.redtorch.gateway.ctp.x64v6v3v15v.CtpGatewayFactory;
-import xyz.redtorch.gateway.ctp.x64v6v3v15v.CtpTradeNowFactory;
 
 /**
  * 网关服务
@@ -102,8 +101,6 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 			factory = ctx.getBean(CtpGatewayFactory.class);
 		} else if(gatewayDescription.getGatewayType() == GatewayType.SIM) {
 			factory = ctx.getBean(SimGatewayFactory.class);
-		} else if(gatewayDescription.getGatewayType() == GatewayType.TradeNow) {
-			factory = ctx.getBean(CtpTradeNowFactory.class);
 		} else if(gatewayDescription.getGatewayType() == GatewayType.IB) {
 			// TODO IB网关
 		} else {
