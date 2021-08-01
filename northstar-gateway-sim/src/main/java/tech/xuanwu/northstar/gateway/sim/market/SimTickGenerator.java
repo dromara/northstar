@@ -34,7 +34,7 @@ public class SimTickGenerator {
 		double latestPrice = (lastNumberOfTick + deltaTick) * priceTick;
 		double bidPrice = (lastNumberOfTick + deltaTick - 1) * priceTick;
 		double askPrice = (lastNumberOfTick + deltaTick + 1) * priceTick;
-		int deltaVol = generateDeltaVol();
+		int deltaVol = generateDeltaVol(seed);
 		int deltaInterest = generateDeltaOpenInterest();
 		
 		LocalDateTime ldt = LocalDateTime.now();
@@ -70,8 +70,8 @@ public class SimTickGenerator {
 		return (int) (dirFactor * (Math.abs(gaussianVal) + 0.5));		//根据高斯值算变动TICK
 	}
 	
-	private int generateDeltaVol() {
-		return (int) (rand.nextInt(100) * (Math.abs(rand.nextGaussian()) + 0.5)); 
+	private int generateDeltaVol(double seed) {
+		return (int) (rand.nextInt(100) * Math.abs(Math.sin(seed)) * (Math.abs(rand.nextGaussian()) + 0.5)); 
 	}
 	
 	private int generateDeltaOpenInterest() {
