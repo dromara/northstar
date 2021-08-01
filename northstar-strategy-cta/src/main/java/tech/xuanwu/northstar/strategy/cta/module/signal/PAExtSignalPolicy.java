@@ -61,7 +61,7 @@ public class PAExtSignalPolicy extends AbstractSignalPolicy implements ExternalS
 		if(signalQ.size() > 0) {
 			Signal signal = signalQ.poll();
 			// 当信号为平仓且当前仓位无持仓时，抛弃该信号
-			if(!signal.isOpening() && !stateMachine.getState().isHolding()) {
+			if(signal != null && !signal.isOpening() && !stateMachine.getState().isHolding()) {
 				signal = signalQ.poll();
 			}
 			return Optional.ofNullable(signal);
