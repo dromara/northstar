@@ -52,7 +52,7 @@ curl https://gitee.com/dromara/northstar/raw/master/env.sh | sh
 curl -o mongo.repo https://gitee.com/dromara/northstar/raw/master/mongo.repo
 curl https://gitee.com/dromara/northstar/raw/master/mongo.sh | sh
 ```
-安装成功后验证mongoDB 是否安装成功
+安装成功后验证mongoDB 是否安装成功（如果使用外部数据库的可以忽略）
 ```
 systemctl status mongod
 ```
@@ -102,12 +102,6 @@ spring:
     ...
 ```
 
-构建程序（每次代码更新后运行）
-```
-cd ~/northstar
-bash build.sh
-```
-
 在.bashrc中加入以上启动参数（这样做能隐藏启动参数）  
 ```
 vim ~/.bashrc
@@ -124,9 +118,11 @@ export SUB_EMAIL=<订阅邮箱名>
 ```
 source ~/.bashrc
 ```
-再启动程序
+
+部署程序（每次代码更新后运行）
 ```
-nohup java -jar ～/northstar.jar &
+cd ~/northstar
+bash deploy.sh
 ```
 
 
@@ -149,7 +145,7 @@ kill `pgrep java`
 - 当前项目只包含一个示例策略，若要开发其他量化策略，需要自行开发并需要一定的JAVA基础
 
 ## 温馨提示
-对于仅为了满足交易需求的朋友而言，如果市场上现成的产品可以满足您的策略需求的话，请尽量使用市场上的付费产品例如文华、MC、金字塔等。因为开源项目存在大量的学习与调试成本，除非有成熟的技术背景以及存在付费产品无法实现的策略方案，才建议使用开源方案。
+对于仅为了满足交易需求的朋友而言，如果市场上现成的产品可以满足您的策略需求的话，请尽���使用市场上的付费产品例如文华、MC、金字塔等。因为开源项目存在大量的学习与调试成本，除非有成熟的技术背景以及存在付费产品无法实现的策略方案，才建议使用开源方案。
 
 ## 参考项目
 本项目基于github上另一个知名的同类项目redtorch演化而来，代码上仍保留部分其源码，感谢redtorch项目作者的启发。  
