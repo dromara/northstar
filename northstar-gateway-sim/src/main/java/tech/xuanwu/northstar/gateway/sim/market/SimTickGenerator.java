@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Random;
 
+import org.apache.commons.lang3.StringUtils;
+
 import tech.xuanwu.northstar.common.constant.DateTimeConstant;
 import tech.xuanwu.northstar.common.constant.TickType;
 import xyz.redtorch.pb.CoreField.ContractField;
@@ -29,15 +31,20 @@ public class SimTickGenerator {
 		double lastPrice = tb.getLastPrice();
 		int lastNumberOfTick = (int) (lastPrice * 100) / (int)(priceTick * 100);
 		int deltaTick = generateDeltaTick(seed);
-		double lastestPrice = (lastNumberOfTick + deltaTick) * priceTick;
+		double latestPrice = (lastNumberOfTick + deltaTick) * priceTick;
 		double bidPrice = (lastNumberOfTick + deltaTick - 1) * priceTick;
 		double askPrice = (lastNumberOfTick + deltaTick + 1) * priceTick;
 		int deltaVol = generateDeltaVol();
 		int deltaInterest = generateDeltaOpenInterest();
 		
 		LocalDateTime ldt = LocalDateTime.now();
+		String newActionDay = ldt.format(DateTimeConstant.D_FORMAT_INT_FORMATTER);
+		String oldActionDay = tb.getActionDay();
+		double high = StringUtils.equals(newActionDay, oldActionDay) ? Math.max(tb.getHighPrice(), latestPrice) : Math.max(0, latestPrice);
+		double low = StringUtils.equals(newActionDay, oldActionDay) ? Math.min(tb.getLowPrice(), latestPrice) : Math.min(Integer.MAX_VALUE, latestPrice);
 		
 		tb.setActionDay(ldt.format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
+			.setTradingDay(ldt.format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
 			.setActionTime(ldt.format(DateTimeConstant.T_FORMAT_WITH_MS_INT_FORMATTER))
 			.setActionTimestamp(ldt.toInstant(ZoneOffset.ofHours(8)).toEpochMilli())
 			.setAskPrice(0, askPrice)
@@ -46,8 +53,10 @@ public class SimTickGenerator {
 			.setOpenInterestDelta(deltaInterest)
 			.setVolume(tb.getVolume() + deltaVol)
 			.setVolumeDelta(deltaVol)
+			.setHighPrice(high)
+			.setLowPrice(low)
 			.setStatus(ldt.getSecond() == 59 && System.currentTimeMillis() % 1000 > 500 ? TickType.END_OF_MIN_TICK.getCode() : TickType.NORMAL_TICK.getCode())
-			.setLastPrice(lastestPrice);
+			.setLastPrice(latestPrice);
 		
 		ins.setLastTick(tb);
 		return tb.build();
