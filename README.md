@@ -10,7 +10,7 @@
 ![Image](https://images.gitee.com/uploads/images/2021/0606/215002_e2a95b42_1676852.png)
 ![Image text](https://images.gitee.com/uploads/images/2021/0609/223845_f3942e1e_1676852.png)
 
-通过JAVA后台来编写程序化的交易策略，并提供页面监控界面
+通过JAVA后台来编写程序化的交易策略，并提供页面监控界面。详细请参考监控端项目https://gitee.com/dromara/northstar-monitor
 
 ![Image](https://images.gitee.com/uploads/images/2021/0606/220710_eeab5dd9_1676852.png)
 ![Image](https://images.gitee.com/uploads/images/2021/0606/220728_32ef6b37_1676852.png)
