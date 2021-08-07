@@ -32,6 +32,10 @@ public class CtaSignal implements Signal{
 	 * 关联信号策略
 	 */
 	private Class<? extends SignalPolicy> signalClass;
+	/**
+	 * 信号源合约
+	 */
+	private String sourceUnifiedSymbol;
 	
 	
 	@Override

@@ -4,6 +4,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
+import org.apache.commons.lang3.StringUtils;
+
 import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.common.model.ContractManager;
 import tech.xuanwu.northstar.strategy.common.Dealer;
@@ -41,6 +43,10 @@ public class SampleDealer implements Dealer {
 	
 	private StrategyModule module;
 	
+	private String priceTypeStr;
+	
+	private int overprice;
+	
 	@Override
 	public Set<String> bindedUnifiedSymbols() {
 		return Set.of(bindedUnifiedSymbol);
@@ -60,7 +66,6 @@ public class SampleDealer implements Dealer {
 			DirectionEnum direction = currentSignal.getState().isBuy() ? DirectionEnum.D_Buy : DirectionEnum.D_Sell;
 			OffsetFlagEnum offsetFlag = currentSignal.getState().isOpen() ? OffsetFlagEnum.OF_Open : module.getModulePosition().getClosingOffsetFlag(module.getTradingDay());
 			ContractField contract = contractMgr.getContract(tick.getUnifiedSymbol());
-			// FIXME 未考虑反手处理
 			// 按信号下单
 			currentOrderReq = SubmitOrderReqField.newBuilder()
 					.setOriginOrderId(UUID.randomUUID().toString())
@@ -76,20 +81,60 @@ public class SampleDealer implements Dealer {
 					.setContingentCondition(ContingentConditionEnum.CC_Immediately)
 					.setMinVolume(1)
 					.setGatewayId(module.getGateway().getGatewaySetting().getGatewayId())
-					.setPrice(currentSignal.getState().isBuy() ? tick.getBidPrice(0) : tick.getAskPrice(0))
+					.setPrice(resolvePrice(currentSignal, tick))
 					.build();
 			currentSignal = null;
 			return Optional.of(currentOrderReq);
 			
 		} else {
 			log.info("交易策略改价追单");
+			int factor = currentSignal.getState().isBuy() ? 1 : -1;
+			ContractField contract = contractMgr.getContract(tick.getUnifiedSymbol());
+			double priceTick = contract.getPriceTick();
 			// 按前订单改价
 			currentOrderReq = SubmitOrderReqField.newBuilder(currentOrderReq)
 					.setOriginOrderId(UUID.randomUUID().toString())
-					.setPrice(tick.getLastPrice())
+					.setPrice(tick.getLastPrice() + factor * priceTick * overprice)
 					.build();
 			return Optional.of(currentOrderReq);
 		}
+	}
+	
+	public double resolvePrice(CtaSignal currentSignal, TickField tick) {
+		int factor = currentSignal.getState().isBuy() ? 1 : -1;
+		ContractField contract = contractMgr.getContract(tick.getUnifiedSymbol());
+		double priceTick = contract.getPriceTick();
+		double orderPrice = 0;
+		switch(priceTypeStr) {
+		case "对手价":
+			double oppPrice = currentSignal.getState().isBuy() ? tick.getAskPrice(0) : tick.getBidPrice(0);
+			orderPrice = oppPrice + factor * priceTick * overprice;
+			log.info("当前使用[对手价]成交，基础价为：{}，超价：{} Tick，最终下单价：{}", oppPrice, overprice, orderPrice);
+			break;
+		case "市价":
+			orderPrice = currentSignal.getState().isBuy() ? tick.getUpperLimit() : tick.getLowerLimit();
+			log.info("当前使用[市价]成交，最终下单价：{}", orderPrice);
+			break;
+		case "最新价":
+			orderPrice = tick.getLastPrice() + factor * priceTick * overprice;
+			log.info("当前使用[最新价]成交，基础价为：{}，超价：{} Tick，最终下单价：{}", tick.getLastPrice(), overprice, orderPrice);
+			break;
+		case "排队价":
+			orderPrice = currentSignal.getState().isBuy() ? tick.getBidPrice(0) : tick.getAskPrice(0);
+			log.info("当前使用[排队价]成交，基础价为：{}，忽略超价，最终下单价：{}", orderPrice, orderPrice);
+			break;
+		case "限阶":
+			if(!StringUtils.equals(currentSignal.getSourceUnifiedSymbol(), bindedUnifiedSymbol)) {
+				log.warn("限价会根据信号价格来计算，当信号源合约与下单合约不一致时，有可能会导致下单价格异常。当前信号源合约为：{}，下单合约为：{}", 
+						currentSignal.getSourceUnifiedSymbol(), bindedUnifiedSymbol);
+			}
+			orderPrice = currentSignal.getSignalPrice() + factor * priceTick * overprice;
+			log.info("当前使用[限价]成交，基础价为：{}，超价：{} Tick，最终下单价：{}", currentSignal.getSignalPrice(), overprice, orderPrice);
+			break;
+		default:
+			throw new IllegalStateException("未知下单价格类型：" + priceTypeStr);
+		}
+		return orderPrice;
 	}
 	
 	@Override
@@ -102,6 +147,8 @@ public class SampleDealer implements Dealer {
 		InitParams initParams = (InitParams) params;
 		this.bindedUnifiedSymbol = initParams.bindedUnifiedSymbol;
 		this.openVol = initParams.openVol;
+		this.priceTypeStr = initParams.priceTypeStr;
+		this.overprice = initParams.overprice;
 	}
 	
 	public static class InitParams extends DynamicParams{
@@ -112,7 +159,7 @@ public class SampleDealer implements Dealer {
 		@Setting(value="开仓手数", order = 20)
 		private int openVol = 1;
 		
-		@Setting(value="价格类型", order = 30, options = {"对手价", "市价", "最新价", "排队价"})
+		@Setting(value="价格类型", order = 30, options = {"对手价", "市价", "最新价", "排队价", "限价"})
 		private String priceTypeStr;
 		
 		@Setting(value="超价", order = 40, unit = "Tick")
