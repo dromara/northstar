@@ -64,7 +64,7 @@ public class BarData {
 	 * @param bar
 	 */
 	public synchronized void update(BarField bar) {
-		if(StringUtils.equals(unifiedSymbol, bar.getUnifiedSymbol())) {
+		if(!StringUtils.equals(unifiedSymbol, bar.getUnifiedSymbol())) {
 			return;
 		}
 		sHigh.update(bar.getHighPrice());
@@ -94,7 +94,7 @@ public class BarData {
 	 * @param tick
 	 */
 	public synchronized void update(TickField tick) {
-		if(StringUtils.equals(unifiedSymbol, tick.getUnifiedSymbol())) {
+		if(!StringUtils.equals(unifiedSymbol, tick.getUnifiedSymbol())) {
 			return;
 		}
 		if(lastTick != null && tick.getActionTimestamp() == lastTick.getActionTimestamp()) {
