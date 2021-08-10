@@ -23,6 +23,7 @@ import tech.xuanwu.northstar.strategy.common.SignalPolicy;
 import tech.xuanwu.northstar.strategy.common.constants.ModuleState;
 import tech.xuanwu.northstar.strategy.common.constants.RiskAuditResult;
 import tech.xuanwu.northstar.strategy.common.event.ModuleEventType;
+import tech.xuanwu.northstar.strategy.common.model.data.BarData;
 import tech.xuanwu.northstar.strategy.common.model.state.ModuleStateMachine;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
@@ -68,11 +69,15 @@ public class StrategyModule {
 	private Set<String> originOrderIdSet = new HashSet<>();
 	
 	public StrategyModule onTick(TickField tick) {
+		BarData barData = signalPolicy.getRefBarData(tick.getUnifiedSymbol());
+		if(barData != null) {
+			signalPolicy.getRefBarData(tick.getUnifiedSymbol()).update(tick);
+		}
 		if(disabled) {
 			//停用期间忽略数据更新
 			return this;
 		}
-		if(signalPolicy.bindedUnifiedSymbols().contains(tick.getUnifiedSymbol())) {		
+		if(signalPolicy.bindedUnifiedSymbols().contains(tick.getUnifiedSymbol())) {	
 			mPosition.onTick(tick);
 			tradingDay = tick.getTradingDay();
 			if(stateMachine.getState() == ModuleState.EMPTY 
@@ -129,6 +134,10 @@ public class StrategyModule {
 	}
 	
 	public StrategyModule onBar(BarField bar) {
+		BarData barData = signalPolicy.getRefBarData(bar.getUnifiedSymbol());
+		if(barData != null) {
+			signalPolicy.getRefBarData(bar.getUnifiedSymbol()).update(bar);
+		}
 		if(disabled) {
 			//停用期间忽略数据更新
 			return this;

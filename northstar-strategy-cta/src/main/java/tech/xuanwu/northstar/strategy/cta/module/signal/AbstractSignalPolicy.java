@@ -14,7 +14,6 @@ import tech.xuanwu.northstar.strategy.common.SignalPolicy;
 import tech.xuanwu.northstar.strategy.common.event.ModuleEventBus;
 import tech.xuanwu.northstar.strategy.common.model.data.BarData;
 import tech.xuanwu.northstar.strategy.common.model.state.ModuleStateMachine;
-import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.TickField;
 
@@ -46,7 +45,6 @@ public abstract class AbstractSignalPolicy implements SignalPolicy {
 		// 先更新行情
 		if(bindedUnifiedSymbols().contains(tick.getUnifiedSymbol())) {
 			BarData barData = barDataMap.get(tick.getUnifiedSymbol());
-			barData.update(tick);
 			long timestamp = tick.getActionTimestamp();
 			// 整分钟时不触发，避免onTick与onMin逻辑重复，导致重复触发
 			int secondOfMin = (int) (timestamp % 60000);
@@ -67,7 +65,6 @@ public abstract class AbstractSignalPolicy implements SignalPolicy {
 		// 先更新行情
 		if(bindedUnifiedSymbols().contains(bar.getUnifiedSymbol())) {
 			BarData barData = barDataMap.get(bar.getUnifiedSymbol());
-			barData.update(bar);
 			String actionTime = bar.getActionTime();
 			LocalTime time = LocalTime.parse(actionTime, DateTimeConstant.T_FORMAT_WITH_MS_INT_FORMATTER);
 			Optional<Signal> result = onMin(time, barData);
