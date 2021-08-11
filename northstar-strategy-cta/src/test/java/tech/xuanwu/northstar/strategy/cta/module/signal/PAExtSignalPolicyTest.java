@@ -33,7 +33,8 @@ public class PAExtSignalPolicyTest {
 		assertThat(((CtaSignal)signal.get()).getState()).isEqualTo(SignalOperation.BuyClose);
 		Optional<Signal> signal2 = policy.onTick(5000, mock(BarData.class));
 		assertThat(((CtaSignal)signal2.get()).getState()).isEqualTo(SignalOperation.BuyOpen);
-		assertThat(CommonUtils.isEquals(((CtaSignal)signal.get()).getSignalPrice(), 5314)).isTrue();
+		assertThat(CommonUtils.isEquals(((CtaSignal)signal2.get()).getSignalPrice(), 5314)).isTrue();
+		assertThat(CommonUtils.isEquals(((CtaSignal)signal2.get()).getStopPrice(), 5271)).isTrue();
 		
 		policy.setStateMachine(new ModuleStateMachine(ModuleState.EMPTY));
 		policy.onExtMsg(textReverse);
@@ -58,6 +59,7 @@ public class PAExtSignalPolicyTest {
 		assertThat(signal6.get().isOpening()).isTrue();
 		assertThat(((CtaSignal)signal6.get()).getState()).isEqualTo(SignalOperation.BuyOpen);
 		assertThat(CommonUtils.isEquals(((CtaSignal)signal6.get()).getSignalPrice(), 5314)).isTrue();
+		assertThat(CommonUtils.isEquals(((CtaSignal)signal6.get()).getStopPrice(), 5271)).isTrue();
 	}
 
 }

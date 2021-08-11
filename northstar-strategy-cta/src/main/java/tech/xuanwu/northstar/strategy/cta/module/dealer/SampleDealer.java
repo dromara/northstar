@@ -81,6 +81,7 @@ public class SampleDealer implements Dealer {
 					.setContingentCondition(ContingentConditionEnum.CC_Immediately)
 					.setMinVolume(1)
 					.setGatewayId(module.getGateway().getGatewaySetting().getGatewayId())
+					.setStopPrice(currentSignal.getStopPrice())
 					.setPrice(resolvePrice(currentSignal, tick))
 					.build();
 			currentSignal = null;
@@ -123,7 +124,7 @@ public class SampleDealer implements Dealer {
 			orderPrice = currentSignal.getState().isBuy() ? tick.getBidPrice(0) : tick.getAskPrice(0);
 			log.info("当前使用[排队价]成交，基础价为：{}，忽略超价，最终下单价：{}", orderPrice, orderPrice);
 			break;
-		case "限阶":
+		case "信号价":
 			if(!StringUtils.equals(currentSignal.getSourceUnifiedSymbol(), bindedUnifiedSymbol)) {
 				log.warn("限价会根据信号价格来计算，当信号源合约与下单合约不一致时，有可能会导致下单价格异常。当前信号源合约为：{}，下单合约为：{}", 
 						currentSignal.getSourceUnifiedSymbol(), bindedUnifiedSymbol);
@@ -159,7 +160,7 @@ public class SampleDealer implements Dealer {
 		@Setting(value="开仓手数", order = 20)
 		private int openVol = 1;
 		
-		@Setting(value="价格类型", order = 30, options = {"对手价", "市价", "最新价", "排队价", "限价"})
+		@Setting(value="价格类型", order = 30, options = {"对手价", "市价", "最新价", "排队价", "信号价"})
 		private String priceTypeStr;
 		
 		@Setting(value="超价", order = 40, unit = "Tick")

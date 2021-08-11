@@ -106,12 +106,15 @@ public class PAExtSignalPolicy extends AbstractSignalPolicy implements ExternalS
 		Matcher m3 = bkOprPtn.matcher(text);
 		Matcher m4 = skOprPtn.matcher(text);
 		String openPrice = "";
+		String stopPrice = "";
 		if(m3.find()) {
 			openPrice = m3.group(1);
+			stopPrice = m3.group(2);
 			signalQ.offer(CtaSignal.builder()
 					.id(UUID.randomUUID())
 					.signalClass(this.getClass())
 					.signalPrice(Double.parseDouble(openPrice))
+					.stopPrice(Double.parseDouble(stopPrice))
 					.state(SignalOperation.BuyOpen)
 					.timestamp(System.currentTimeMillis())
 					.build());
@@ -121,6 +124,7 @@ public class PAExtSignalPolicy extends AbstractSignalPolicy implements ExternalS
 					.id(UUID.randomUUID())
 					.signalClass(this.getClass())
 					.signalPrice(Double.parseDouble(openPrice))
+					.stopPrice(Double.parseDouble(stopPrice))
 					.state(SignalOperation.SellOpen)
 					.timestamp(System.currentTimeMillis())
 					.build());

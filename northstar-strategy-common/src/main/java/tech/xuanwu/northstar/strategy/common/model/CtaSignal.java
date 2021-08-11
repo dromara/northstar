@@ -25,6 +25,10 @@ public class CtaSignal implements Signal{
 	 */
 	private double signalPrice;
 	/**
+	 * 止损价
+	 */
+	private double stopPrice;
+	/**
 	 * 信号产生时间
 	 */
 	private long timestamp;
