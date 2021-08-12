@@ -11,7 +11,6 @@ import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.common.constant.DateTimeConstant;
 import tech.xuanwu.northstar.strategy.common.Signal;
 import tech.xuanwu.northstar.strategy.common.SignalPolicy;
-import tech.xuanwu.northstar.strategy.common.event.ModuleEventBus;
 import tech.xuanwu.northstar.strategy.common.model.data.BarData;
 import tech.xuanwu.northstar.strategy.common.model.state.ModuleStateMachine;
 import xyz.redtorch.pb.CoreField.BarField;
@@ -25,8 +24,6 @@ public abstract class AbstractSignalPolicy implements SignalPolicy {
 	 */
 	protected String bindedUnifiedSymbol; 
 
-	protected ModuleEventBus meb;
-	
 	protected Map<String, BarData> barDataMap;
 	
 	protected ModuleStateMachine stateMachine;
