@@ -53,7 +53,7 @@ class GwAccountHolder {
 		orderHolder.tryDeal(tick)
 			.stream()
 			.forEach(trade -> {
-				commission.addAndGet(trade.getContract().getPriceTick() * ticksOfCommission * trade.getVolume());
+				commission.addAndGet(trade.getContract().getMultiplier() * ticksOfCommission * trade.getVolume());
 				closeProfit.addAndGet(posHolder.updatePositionBy(trade));
 				OrderField order = orderHolder.confirmWith(trade);
 				if(order == null) {
@@ -116,6 +116,9 @@ class GwAccountHolder {
 	protected void withdraw(int money) {
 		if (money < 0) {
 			throw new IllegalArgumentException("出金金额不能少于零");
+		}
+		if(money > accBuilder.getAvailable()) {
+			throw new IllegalStateException("没有足够余额出金");
 		}
 		accBuilder.setWithdraw(accBuilder.getWithdraw() + money);
 		refreshAccount();
