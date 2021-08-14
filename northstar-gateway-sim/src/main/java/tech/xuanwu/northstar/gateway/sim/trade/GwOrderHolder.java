@@ -10,7 +10,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.lang3.StringUtils;
 
 import lombok.extern.slf4j.Slf4j;
-import tech.xuanwu.northstar.common.model.ContractManager;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreField.AccountField;
@@ -25,10 +24,6 @@ import xyz.redtorch.pb.CoreField.TradeField;
 @Slf4j
 class GwOrderHolder {
 	
-	private String gatewayId;
-	
-	private ContractManager contractMgr;
-	
 	private int ticksOfCommission;
 	
 	/**
@@ -40,10 +35,8 @@ class GwOrderHolder {
 	 */
 	private final Map<String,String> tradingDayMap = new HashMap<>(1000);
 	
-	public GwOrderHolder (String gatewayId, int ticksOfCommission, ContractManager contractMgr) {
-		this.gatewayId = gatewayId;
+	public GwOrderHolder (int ticksOfCommission) {
 		this.ticksOfCommission = ticksOfCommission;
-		this.contractMgr = contractMgr;
 	}
 	
 	protected OrderField tryOrder(SubmitOrderReqField submitOrderReq, AccountField af) {
@@ -55,7 +48,7 @@ class GwOrderHolder {
 		int vol = submitOrderReq.getVolume();
 		double price = submitOrderReq.getPrice();
 		double cost = vol * price * contract.getMultiplier() * marginRate + contract.getPriceTick() * ticksOfCommission;
-		TradeIntent tradeIntent = new TradeIntent(submitOrderReq);
+		TradeIntent tradeIntent = new TradeIntent(submitOrderReq, originOrderIdMap);
 		String tradingDay = Optional.ofNullable(tradingDayMap.get(contract.getUnifiedSymbol())).orElse("");
 		if(cost > af.getAvailable()) {
 			log.warn("资金不足，无法下单。当前可用资金：{}，下单成本：{}，订单：{}", af.getAvailable(), cost, submitOrderReq);
@@ -73,7 +66,7 @@ class GwOrderHolder {
 		if(StringUtils.isEmpty(submitOrderReq.getOriginOrderId())) {
 			throw new IllegalArgumentException("originOrderId不能为空");
 		}
-		TradeIntent tradeIntent = new TradeIntent(submitOrderReq);
+		TradeIntent tradeIntent = new TradeIntent(submitOrderReq, originOrderIdMap);
 		ContractField contract = submitOrderReq.getContract();
 		String tradingDay = Optional.ofNullable(tradingDayMap.get(contract.getUnifiedSymbol())).orElse("");
 		if(pf == null) {
@@ -118,7 +111,6 @@ class GwOrderHolder {
 		List<OrderField> tradeList = new ArrayList<>();
 		originOrderIdMap.forEach((k, intent) -> {
 			if(intent.isContractMatch(unifiedSymbol) && !intent.isTerminated()) {
-				// TODO Intent对象什么时候从Map中移除
 				if(intent.isTerminated()) {
 					return;
 				}

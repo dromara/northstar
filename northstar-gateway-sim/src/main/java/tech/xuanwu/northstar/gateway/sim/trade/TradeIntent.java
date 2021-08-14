@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.lang3.StringUtils;
@@ -37,6 +38,8 @@ public class TradeIntent {
 	
 	private TradeField.Builder trade = TradeField.newBuilder();
 	
+	private ConcurrentHashMap<String, TradeIntent> intentMap;
+	
 	// 0:委托请求，1:订单，2:成交(持仓)，3:止损，9:终结
 	private static final int STATE_REQ = 0;
 	private static final int STATE_ORDER = 1;
@@ -46,8 +49,9 @@ public class TradeIntent {
 	private static final int STATE_TERMINATED = 9;
 	private AtomicInteger state = new AtomicInteger(0);
 
-	public TradeIntent(SubmitOrderReqField orderReq) {
+	public TradeIntent(SubmitOrderReqField orderReq, ConcurrentHashMap<String, TradeIntent> intentMap) {
 		this.orderReq = orderReq;
+		this.intentMap = intentMap;
 	}
 
 	public OrderField transformOrder(String tradingDay) {
@@ -83,7 +87,7 @@ public class TradeIntent {
 		if (state.get() != STATE_REQ) {
 			throw new IllegalStateException("当前状态不匹配：" + state.get());
 		}
-		state.set(STATE_TERMINATED);
+		terminated();
 		return order.setActiveTime(String.valueOf(System.currentTimeMillis()))
 				.setOrderId(orderReq.getGatewayId() + "_" + UUID.randomUUID().toString())
 				.setContract(orderReq.getContract())
@@ -112,7 +116,7 @@ public class TradeIntent {
 		if (state.get() != STATE_ORDER) {
 			return order.build();
 		}
-		state.set(STATE_TERMINATED);
+		terminated();
 		log.info("成功撤单：{}，合约：{}", order.getOriginOrderId(), order.getContract().getName());
 		return order.setOrderStatus(OrderStatusEnum.OS_Canceled).setStatusMsg("已撤单").build();
 	}
@@ -157,7 +161,7 @@ public class TradeIntent {
 	
 	public TradeField transformTrade() {
 		if(state.get() == STATE_STOP_TRADED) {
-			state.set(STATE_TERMINATED);
+			terminated();
 			return trade.build();
 		}
 		if(state.get() != STATE_TRADED) {
@@ -230,6 +234,11 @@ public class TradeIntent {
 	
 	public boolean isOpen() {
 		return orderReq.getOffsetFlag() == OffsetFlagEnum.OF_Open;
+	}
+	
+	private void terminated() {
+		intentMap.remove(orderReq.getOriginOrderId());
+		state.set(STATE_TERMINATED);
 	}
 	
 	public boolean isContractMatch(String unifiedSymbol) {

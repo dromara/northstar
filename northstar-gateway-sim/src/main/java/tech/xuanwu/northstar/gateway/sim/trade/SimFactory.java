@@ -26,7 +26,7 @@ public class SimFactory {
 	}
 	
 	public GwOrderHolder newGwOrderHolder() {
-		return new GwOrderHolder(gatewayId, ticksOfCommission, contractMgr);
+		return new GwOrderHolder(ticksOfCommission);
 	}
 	
 }
