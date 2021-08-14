@@ -10,7 +10,11 @@ import tech.xuanwu.northstar.gateway.sim.persistence.SimAccountPO;
 import tech.xuanwu.northstar.gateway.sim.persistence.SimAccountRepository;
 import xyz.redtorch.pb.CoreField.TickField;
 import xyz.redtorch.pb.CoreField.TradeField;
-
+/**
+ * 用于管理Gateway实例及模拟账户持久化操作
+ * @author KevinHuangwl
+ *
+ */
 public class SimMarket {
 
 	/**
