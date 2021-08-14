@@ -1,6 +1,5 @@
 package module.gateway.sim;
 
-import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -25,11 +24,11 @@ import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreEnum.OrderStatusEnum;
 import xyz.redtorch.pb.CoreField.AccountField;
-import xyz.redtorch.pb.CoreField.PositionField;
 import xyz.redtorch.pb.CoreField.CancelOrderReqField;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.GatewaySettingField;
 import xyz.redtorch.pb.CoreField.OrderField;
+import xyz.redtorch.pb.CoreField.PositionField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TradeField;
 

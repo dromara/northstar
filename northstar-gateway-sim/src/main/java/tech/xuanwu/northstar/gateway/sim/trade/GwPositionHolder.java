@@ -39,7 +39,7 @@ class GwPositionHolder {
 	private ConcurrentHashMap<String, PositionField.Builder> shortPositionMap = new ConcurrentHashMap<>(100);
 	
 	/**
-	 * orderId -> positionBuilder
+	 * originOrderId -> positionBuilder
 	 */
 	private Map<String, PositionField.Builder> frozenPositionMap = new HashMap<>();
 	
@@ -123,7 +123,7 @@ class GwPositionHolder {
 			return frozenPosition(order);
 		} else if(partialTradeStates.contains(order.getOrderStatus())) {
 			return refrozenPosition(order);
-		} else if(validStatesToUnfrozen.contains(order.getOrderStatus())) {
+		} else if(validStatesToUnfrozen.contains(order.getOrderStatus()) && frozenPositionMap.containsKey(order.getOriginOrderId())) {
 			return unfrozenPosition(order);
 		}
 		
@@ -298,7 +298,7 @@ class GwPositionHolder {
 			frozenPosition.setTdFrozen(tdFrozen);
 		}
 		
-		frozenPositionMap.put(order.getOrderId(), frozenPosition);
+		frozenPositionMap.put(order.getOriginOrderId(), frozenPosition);
 		pb = updateFrozen(pb, frozenPosition, 1);
 		return pb.build();
 	}
@@ -307,7 +307,7 @@ class GwPositionHolder {
 		ContractField contract = order.getContract();
 		Map<String, PositionField.Builder> posMap = getPositionMapBy(order);
 		PositionField.Builder pb = posMap.get(contract.getUnifiedSymbol());
-		PositionField.Builder frozenPosition = frozenPositionMap.get(order.getOrderId());
+		PositionField.Builder frozenPosition = frozenPositionMap.get(order.getOriginOrderId());
 		if(order.getOffsetFlag() == OffsetFlagEnum.OF_CloseToday) {
 			frozenPosition.setTdFrozen(order.getTotalVolume() - order.getTradedVolume());
 			frozenPosition.setFrozen(order.getTotalVolume() - order.getTradedVolume());
@@ -342,7 +342,7 @@ class GwPositionHolder {
 		}
 		if(order.getOrderStatus() == OrderStatusEnum.OS_AllTraded || order.getOrderStatus() == OrderStatusEnum.OS_Canceled) {
 			// 撤单或全部成交时
-			PositionField.Builder frozenPos = frozenPositionMap.remove(order.getOrderId());			
+			PositionField.Builder frozenPos = frozenPositionMap.remove(order.getOriginOrderId());			
 			pb = updateFrozen(pb, frozenPos, -1);
 		}
 		

@@ -1,25 +1,18 @@
 package tech.xuanwu.northstar.gateway.sim.trade;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.lang3.StringUtils;
 
 import lombok.extern.slf4j.Slf4j;
-import tech.xuanwu.northstar.common.constant.DateTimeConstant;
 import tech.xuanwu.northstar.common.model.ContractManager;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
-import xyz.redtorch.pb.CoreEnum.OrderStatusEnum;
-import xyz.redtorch.pb.CoreEnum.PriceSourceEnum;
 import xyz.redtorch.pb.CoreField.AccountField;
 import xyz.redtorch.pb.CoreField.CancelOrderReqField;
 import xyz.redtorch.pb.CoreField.ContractField;
@@ -39,10 +32,9 @@ class GwOrderHolder {
 	private int ticksOfCommission;
 	
 	/**
-	 * originOrderId --> orderId
+	 * originOrderId --> TradeIntent
 	 */
-	private ConcurrentHashMap<String, OrderField> originOrderIdMap = new ConcurrentHashMap<>(100);
-	private ConcurrentHashMap<TradeField, OrderField> doneOrderMap = new ConcurrentHashMap<>();
+	private ConcurrentHashMap<String, TradeIntent> originOrderIdMap = new ConcurrentHashMap<>(100);
 	/**
 	 * unifiedSymbol --> tradingDay
 	 */
@@ -54,70 +46,40 @@ class GwOrderHolder {
 		this.contractMgr = contractMgr;
 	}
 	
-	private OrderField.Builder makeOrder(SubmitOrderReqField submitOrderReq){
-		String orderId = gatewayId + "_" + UUID.randomUUID().toString();
-		String originOrderId = submitOrderReq.getOriginOrderId();
-		OrderField.Builder ob = OrderField.newBuilder();
-		ob.setActiveTime(String.valueOf(System.currentTimeMillis()));
-		ob.setOrderId(orderId);
-		ob.setContract(submitOrderReq.getContract());
-		ob.setPrice(submitOrderReq.getPrice());
-		ob.setDirection(submitOrderReq.getDirection());
-		ob.setOriginOrderId(originOrderId);
-		ob.setGatewayId(gatewayId);
-		ob.setVolumeCondition(submitOrderReq.getVolumeCondition());
-		ob.setTradingDay(Optional.ofNullable(tradingDayMap.get(submitOrderReq.getContract().getUnifiedSymbol())).orElse(""));
-		ob.setOrderDate(LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
-		ob.setOrderTime(LocalTime.now().format(DateTimeConstant.T_FORMAT_FORMATTER));
-		ob.setAccountId(gatewayId);
-		ob.setTotalVolume(submitOrderReq.getVolume());
-		ob.setOffsetFlag(submitOrderReq.getOffsetFlag());
-		ob.setOrderPriceType(submitOrderReq.getOrderPriceType());
-		ob.setGtdDate(submitOrderReq.getGtdDate());
-		ob.setMinVolume(submitOrderReq.getMinVolume());
-		ob.setStopPrice(submitOrderReq.getStopPrice());
-		ob.setSequenceNo("1");
-		ob.setOrderStatus(OrderStatusEnum.OS_Touched);
-		ob.setStatusMsg("报单已提交");
-		
-		return ob;
-	}
-	
 	protected OrderField tryOrder(SubmitOrderReqField submitOrderReq, AccountField af) {
 		if(StringUtils.isEmpty(submitOrderReq.getOriginOrderId())) {
 			throw new IllegalArgumentException("originOrderId不能为空");
 		}
-		OrderField.Builder ob = makeOrder(submitOrderReq);
 		ContractField contract = submitOrderReq.getContract();
 		double marginRate = submitOrderReq.getDirection() == DirectionEnum.D_Buy ? contract.getLongMarginRatio() : contract.getShortMarginRatio();
 		int vol = submitOrderReq.getVolume();
 		double price = submitOrderReq.getPrice();
 		double cost = vol * price * contract.getMultiplier() * marginRate + contract.getPriceTick() * ticksOfCommission;
+		TradeIntent tradeIntent = new TradeIntent(submitOrderReq);
+		String tradingDay = Optional.ofNullable(tradingDayMap.get(contract.getUnifiedSymbol())).orElse("");
 		if(cost > af.getAvailable()) {
-			ob.setOrderStatus(OrderStatusEnum.OS_Rejected);
-			ob.setStatusMsg("资金不足");
 			log.warn("资金不足，无法下单。当前可用资金：{}，下单成本：{}，订单：{}", af.getAvailable(), cost, submitOrderReq);
-			return ob.build();
+			return tradeIntent.rejectOrder(tradingDay, "资金不足");
 		}
 		
-		OrderField of = ob.build();
-		originOrderIdMap.put(of.getOriginOrderId(), of);
-		log.info("成功下单：{}, {}, {}, {}, {}手, {}", of.getOriginOrderId(), of.getContract().getName(), of.getDirection(),
-				of.getOffsetFlag(), of.getTotalVolume(), of.getPrice());
-		return of;
+		OrderField order = tradeIntent.transformOrder(tradingDay);
+		originOrderIdMap.put(submitOrderReq.getOriginOrderId(), tradeIntent);
+		log.info("成功下单：{}, {}, {}, {}, {}手, {}", submitOrderReq.getOriginOrderId(), submitOrderReq.getContract().getName(), submitOrderReq.getDirection(),
+				submitOrderReq.getOffsetFlag(), submitOrderReq.getVolume(), submitOrderReq.getPrice());
+		return order;
 	}
 	
 	protected OrderField tryOrder(SubmitOrderReqField submitOrderReq, PositionField pf) {
 		if(StringUtils.isEmpty(submitOrderReq.getOriginOrderId())) {
 			throw new IllegalArgumentException("originOrderId不能为空");
 		}
-		OrderField.Builder ob = makeOrder(submitOrderReq);
+		TradeIntent tradeIntent = new TradeIntent(submitOrderReq);
+		ContractField contract = submitOrderReq.getContract();
+		String tradingDay = Optional.ofNullable(tradingDayMap.get(contract.getUnifiedSymbol())).orElse("");
 		if(pf == null) {
-			ob.setOrderStatus(OrderStatusEnum.OS_Rejected);
-			ob.setStatusMsg("仓位不足");
 			log.warn("仓位不足，无法下单：{}, {}, {}, {}, {}手, {}", submitOrderReq.getOriginOrderId(), submitOrderReq.getContract().getName(),
 					submitOrderReq.getDirection(), submitOrderReq.getOffsetFlag(), submitOrderReq.getVolume(), submitOrderReq.getPrice());
-			return ob.build();
+			return tradeIntent.rejectOrder(tradingDay, "仓位不足");
 		}
 		int totalAvailable = pf.getPosition() - pf.getFrozen();
 		int tdAvailable = pf.getTdPosition() - pf.getTdFrozen();
@@ -125,91 +87,46 @@ class GwOrderHolder {
 		if(submitOrderReq.getOffsetFlag() == OffsetFlagEnum.OF_CloseToday && tdAvailable < submitOrderReq.getVolume()
 				|| submitOrderReq.getOffsetFlag() == OffsetFlagEnum.OF_CloseYesterday && ydAvailable < submitOrderReq.getVolume()
 				|| totalAvailable < submitOrderReq.getVolume()) {
-			ob.setOrderStatus(OrderStatusEnum.OS_Rejected);
-			ob.setStatusMsg("仓位不足");
 			log.warn("仓位不足，无法下单：{}, {}, {}, {}, {}手, {}", submitOrderReq.getOriginOrderId(), submitOrderReq.getContract().getName(),
 					submitOrderReq.getDirection(), submitOrderReq.getOffsetFlag(), submitOrderReq.getVolume(), submitOrderReq.getPrice());
-			return ob.build();
+			return tradeIntent.rejectOrder(tradingDay, "仓位不足");
 		}
 		
-		OrderField of = ob.build();
-		originOrderIdMap.put(of.getOriginOrderId(), of);
-		log.info("成功下单：{}, {}, {}, {}, {}手, {}", of.getOriginOrderId(), of.getContract().getName(), of.getDirection(),
-				of.getOffsetFlag(), of.getTotalVolume(), of.getPrice());
-		return of;
+		OrderField order = tradeIntent.transformOrder(tradingDay);
+		originOrderIdMap.put(submitOrderReq.getOriginOrderId(), tradeIntent);
+		log.info("成功下单：{}, {}, {}, {}, {}手, {}", submitOrderReq.getOriginOrderId(), submitOrderReq.getContract().getName(), submitOrderReq.getDirection(),
+				submitOrderReq.getOffsetFlag(), submitOrderReq.getVolume(), submitOrderReq.getPrice());
+		return order;
 	}
 	
 	protected OrderField cancelOrder(CancelOrderReqField cancelOrderReq) {
 		if(StringUtils.isEmpty(cancelOrderReq.getOriginOrderId())) {
 			throw new IllegalArgumentException("originOrderId不能为空");
 		}
-		OrderField order = null;
 		if(StringUtils.isEmpty(cancelOrderReq.getOrderId()) && StringUtils.isEmpty(cancelOrderReq.getOriginOrderId())) {
 			throw new IllegalArgumentException("未提供要撤单的订单号");
 		} 
 		if(StringUtils.isNotEmpty(cancelOrderReq.getOriginOrderId())) {
-			order = originOrderIdMap.remove(cancelOrderReq.getOriginOrderId());
+			return originOrderIdMap.remove(cancelOrderReq.getOriginOrderId()).cancelOrder();
 		}
-		if(order == null) {
-			log.warn("{}撤单失败", cancelOrderReq.getOriginOrderId());
-			return null;
-		}
-		
-		// TODO 已成交的订单还会不会在orderIdMap中？暂时假设不会
-		OrderField.Builder ob = order.toBuilder();
-		ob.setOrderStatus(OrderStatusEnum.OS_Canceled);
-		ob.setCancelTime(LocalDateTime.now().format(DateTimeConstant.DT_FORMAT_FORMATTER));
-		log.info("成功撤单：{}，合约：{}", ob.getOrderId(), ob.getContract().getName());
-		return ob.build();
+		return null;
 	}
 	
-	protected List<TradeField> tryDeal(TickField tick) {
+	protected List<OrderField> tryDeal(TickField tick) {
 		tradingDayMap.put(tick.getUnifiedSymbol(), tick.getTradingDay());
 		final String unifiedSymbol = tick.getUnifiedSymbol();
-		List<TradeField> tradeList = new ArrayList<>();
-		originOrderIdMap.forEach((k, order) -> {
-			boolean untrade = order.getOrderStatus() != OrderStatusEnum.OS_AllTraded 
-					&& order.getOrderStatus() != OrderStatusEnum.OS_Canceled
-					&& order.getOrderStatus() != OrderStatusEnum.OS_Rejected;
-			if(StringUtils.equals(order.getContract().getUnifiedSymbol(), unifiedSymbol) && untrade) {
-				// TODO 该模拟撮合逻辑属于简单实现，没有考虑价格深度
-				if(order.getDirection() == DirectionEnum.D_Buy && tick.getAskPrice(0) <= order.getPrice()
-						|| order.getDirection() == DirectionEnum.D_Sell && tick.getBidPrice(0) >= order.getPrice()) {
-					// 修改挂单状态
-					OrderField.Builder ob = order.toBuilder();
-					ob.setTradedVolume(ob.getTotalVolume());
-					ob.setOrderStatus(OrderStatusEnum.OS_AllTraded);
-					ob.setStatusMsg("挂单全部成交");
-					
-					OrderField of = ob.build();
-					
-					ContractField contract = contractMgr.getContract(unifiedSymbol);
-					// 计算成交
-					TradeField trade = TradeField.newBuilder()
-							.setTradeId(System.currentTimeMillis()+"")
-							.setAccountId(gatewayId)
-							.setAdapterOrderId("")
-							.setContract(contract)
-							.setDirection(order.getDirection())
-							.setGatewayId(gatewayId)
-							.setHedgeFlag(order.getHedgeFlag())
-							.setOffsetFlag(order.getOffsetFlag())
-							.setOrderId(order.getOrderId())
-							.setOriginOrderId(order.getOriginOrderId())
-							.setPrice(order.getDirection() == DirectionEnum.D_Buy ? tick.getAskPrice(0) : tick.getBidPrice(0))
-							.setPriceSource(PriceSourceEnum.PSRC_LastPrice)
-							.setTradeDate(LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
-							.setTradingDay(Optional.ofNullable(tradingDayMap.get(unifiedSymbol)).orElse(""))
-							.setTradeTime(LocalTime.now().format(DateTimeConstant.T_FORMAT_FORMATTER))
-							.setVolume(order.getTotalVolume())
-							.build();
-					
-					tradeList.add(trade);
-					doneOrderMap.put(trade, of);
-					originOrderIdMap.remove(of.getOriginOrderId());
-					
-					log.info("模拟成交：{}，{}，{}，{}，{}手，{}，{}", trade.getOriginOrderId(), trade.getContract().getName(), 
-							trade.getDirection(), trade.getOffsetFlag(), trade.getVolume(), trade.getPrice(), trade.getTradingDay());
+		List<OrderField> tradeList = new ArrayList<>();
+		originOrderIdMap.forEach((k, intent) -> {
+			if(intent.isContractMatch(unifiedSymbol) && !intent.isTerminated()) {
+				// TODO Intent对象什么时候从Map中移除
+				if(intent.isTerminated()) {
+					return;
+				}
+				Optional<OrderField> order = intent.tryDeal(tick);
+				if(order.isPresent()) {		
+					tradeList.add(order.get());
+					log.info("模拟成交：{}，{}，{}，{}，{}手，{}，{}", order.get().getOriginOrderId(), order.get().getContract().getName(), 
+							order.get().getDirection(), order.get().getOffsetFlag(), order.get().getTradedVolume(), order.get().getPrice(), order.get().getTradingDay());
 				}
 			}
 		});
@@ -217,18 +134,17 @@ class GwOrderHolder {
 		return tradeList;
 	}
 	
-	protected OrderField confirmWith(TradeField trade) {
-		return doneOrderMap.remove(trade);
+	protected TradeField transform(OrderField order) {
+		if(!originOrderIdMap.containsKey(order.getOriginOrderId())) {
+			throw new IllegalArgumentException("找不到订单对应的成交");
+		}
+		return originOrderIdMap.get(order.getOriginOrderId()).transformTrade();
 	}
 	
 	protected double getFrozenMargin() {
-		double totalFrozenAmount = 0;
-		Double r1 = originOrderIdMap.values().stream()
-				.filter(order -> order.getOffsetFlag() == OffsetFlagEnum.OF_Open)
-				.map(order -> (order.getTotalVolume() - order.getTradedVolume()) * order.getContract().getMultiplier() * order.getPrice() * order.getContract().getLongMarginRatio())
+		Double totalFrozenAmount = originOrderIdMap.values().stream()
+				.map(intent -> intent.getFrozenMargin())
 				.reduce(0D, (a, b) -> a + b);
-				
-		totalFrozenAmount += r1 == null ? 0 : r1.doubleValue();
 		return totalFrozenAmount;
 	}
 	

@@ -17,6 +17,7 @@ import xyz.redtorch.pb.CoreField.OrderField;
 import xyz.redtorch.pb.CoreField.PositionField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TickField;
+import xyz.redtorch.pb.CoreField.TradeField;
 
 @Slf4j
 class GwAccountHolder {
@@ -52,15 +53,10 @@ class GwAccountHolder {
 		AtomicDouble closeProfit = new AtomicDouble();
 		orderHolder.tryDeal(tick)
 			.stream()
-			.forEach(trade -> {
+			.forEach(order -> {
+				TradeField trade = orderHolder.transform(order);
 				commission.addAndGet(trade.getContract().getMultiplier() * ticksOfCommission * trade.getVolume());
 				closeProfit.addAndGet(posHolder.updatePositionBy(trade));
-				OrderField order = orderHolder.confirmWith(trade);
-				if(order == null) {
-					//正常情况下不应该为空
-					log.warn("没有对应的订单记录对应交易：{}", trade.toString());
-					return;
-				}
 				posHolder.updatePositionBy(order);
 				feEngine.emitEvent(NorthstarEventType.ORDER, order);
 				feEngine.emitEvent(NorthstarEventType.TRADE, trade);
