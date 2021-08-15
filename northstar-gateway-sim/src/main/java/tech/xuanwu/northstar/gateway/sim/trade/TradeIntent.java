@@ -216,6 +216,7 @@ public class TradeIntent {
 					.setTradingDay(tick.getTradingDay())
 					.setTradeTime(LocalTime.now().format(DateTimeConstant.T_FORMAT_FORMATTER))
 					.setVolume(stopOrder.getTotalVolume());
+			log.info("止损触发{}手，合约：{}，成本价：{}，止损价：{}", trade.getVolume(), contract.getFullName(), order.getPrice(), stopOrder.getPrice());
 			return Optional.of(stopOrder.build());
 		}
 		return Optional.empty();
