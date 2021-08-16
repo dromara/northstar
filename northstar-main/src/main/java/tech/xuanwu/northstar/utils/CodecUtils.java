@@ -19,7 +19,7 @@ public class CodecUtils {
 	private static String salt = "";
 	static {
 		String homeDir = System.getProperty("user.home");
-		File tempSalt = new File(homeDir, "NorthstarRandomSalt");
+		File tempSalt = new File(homeDir, ".northstar-salt");
 		try {
 			if (tempSalt.exists()) {
 				salt = FileUtils.readFileToString(tempSalt, UTF8);

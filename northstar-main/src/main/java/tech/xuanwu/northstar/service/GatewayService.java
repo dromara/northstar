@@ -274,7 +274,7 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 			String decodeStr = CodecUtils.decrypt((String) po.getSettings());
 			if(!JSON.isValid(decodeStr)) {
 				throw new IllegalStateException("解码字符串非法，很可能是临时文件夹" + System.getProperty("user.home") + File.separator
-						+ "NorthstarRandomSalt这个盐文件与加密时的不一致导致无法解码。解决办法：手动移除旧的Gateway数据，重新录入，并确保盐文件不会丢失。");
+						+ ".northstar-salt这个盐文件与加密时的不一致导致无法解码。解决办法：手动移除旧的Gateway数据，重新录入，并确保盐文件不会丢失。");
 			}
 			if(gd.getGatewayType() == GatewayType.CTP || gd.getGatewayType() == GatewayType.TradeNow) {
 				CtpSettings settings = JSON.parseObject(decodeStr, CtpSettings.class);
