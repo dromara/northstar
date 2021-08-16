@@ -89,7 +89,7 @@ public class SampleDealer implements Dealer {
 			
 		} else {
 			log.info("交易策略改价追单");
-			int factor = currentSignal.getState().isBuy() ? 1 : -1;
+			int factor = currentOrderReq.getDirection() == DirectionEnum.D_Buy ? 1 : -1;
 			ContractField contract = contractMgr.getContract(tick.getUnifiedSymbol());
 			double priceTick = contract.getPriceTick();
 			// 按前订单改价
