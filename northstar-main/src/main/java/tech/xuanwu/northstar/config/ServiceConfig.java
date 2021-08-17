@@ -34,7 +34,8 @@ import tech.xuanwu.northstar.service.SMSTradeService;
 	"connectionEventHandler",
 	"tradeEventHandler",
 	"ctpGatewayFactory",
-	"simGatewayFactory"
+	"simGatewayFactory",
+	"ctpSimGatewayFactory"
 	})
 @Configuration
 public class ServiceConfig {
