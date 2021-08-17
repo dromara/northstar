@@ -38,6 +38,7 @@ import tech.xuanwu.northstar.persistence.po.GatewayPO;
 import tech.xuanwu.northstar.strategy.common.model.ModuleInfo;
 import tech.xuanwu.northstar.utils.CodecUtils;
 import xyz.redtorch.gateway.ctp.x64v6v3v15v.CtpGatewayFactory;
+import xyz.redtorch.gateway.ctp.x64v6v5v1cpv.CtpSimGatewayFactory;
 
 /**
  * 网关服务
@@ -101,6 +102,8 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 			factory = ctx.getBean(CtpGatewayFactory.class);
 		} else if(gatewayDescription.getGatewayType() == GatewayType.SIM) {
 			factory = ctx.getBean(SimGatewayFactory.class);
+		} else if(gatewayDescription.getGatewayType() == GatewayType.CTP_SIM) {
+			factory = ctx.getBean(CtpSimGatewayFactory.class);
 		} else if(gatewayDescription.getGatewayType() == GatewayType.IB) {
 			// TODO IB网关
 		} else {
@@ -276,7 +279,7 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 				throw new IllegalStateException("解码字符串非法，很可能是临时文件夹" + System.getProperty("user.home") + File.separator
 						+ ".northstar-salt这个盐文件与加密时的不一致导致无法解码。解决办法：手动移除旧的Gateway数据，重新录入，并确保盐文件不会丢失。");
 			}
-			if(gd.getGatewayType() == GatewayType.CTP || gd.getGatewayType() == GatewayType.TradeNow) {
+			if(gd.getGatewayType() == GatewayType.CTP || gd.getGatewayType() == GatewayType.CTP_SIM) {
 				CtpSettings settings = JSON.parseObject(decodeStr, CtpSettings.class);
 				gd.setSettings(settings);
 			}

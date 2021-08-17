@@ -32,6 +32,7 @@ import tech.xuanwu.northstar.manager.GatewayAndConnectionManager;
 import tech.xuanwu.northstar.persistence.MarketDataRepository;
 import tech.xuanwu.northstar.utils.MongoClientAdapter;
 import xyz.redtorch.gateway.ctp.x64v6v3v15v.CtpGatewayFactory;
+import xyz.redtorch.gateway.ctp.x64v6v5v1cpv.CtpSimGatewayFactory;
 
 /**
  * 配置转换器
@@ -124,6 +125,11 @@ public class AppConfig implements WebMvcConfigurer {
 	@Bean
 	public AbstractGatewayFactory ctpGatewayFactory(FastEventEngine fastEventEngine) {
 		return new CtpGatewayFactory(fastEventEngine);
+	}
+	
+	@Bean
+	public AbstractGatewayFactory ctpSimGatewayFactory(FastEventEngine fastEventEngine) {
+		return new CtpSimGatewayFactory(fastEventEngine);
 	}
 	
 	@Bean

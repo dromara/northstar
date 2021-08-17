@@ -13,7 +13,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import tech.xuanwu.northstar.common.constant.DateTimeConstant;
-import xyz.redtorch.gateway.ctp.x64v6v3v15v.CtpMarketTimeUtil;
+import xyz.redtorch.gateway.ctp.common.CtpMarketTimeUtil;
 import xyz.redtorch.pb.CoreField.TickField;
 
 public class BarGeneratorTest {
