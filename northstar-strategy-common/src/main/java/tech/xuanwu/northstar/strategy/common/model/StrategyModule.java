@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 
 import lombok.Builder;
+import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.gateway.api.TradeGateway;
 import tech.xuanwu.northstar.strategy.common.Dealer;
 import tech.xuanwu.northstar.strategy.common.ExternalSignalPolicy;
@@ -40,6 +41,7 @@ import xyz.redtorch.pb.CoreField.TradeField;
  * @author KevinHuangwl
  *
  */
+@Slf4j
 @Builder
 public class StrategyModule {
 	
@@ -65,6 +67,8 @@ public class StrategyModule {
 	
 	protected String tradingDay;
 	
+	private long lastWarningTime;
+	
 	@Builder.Default
 	private Set<String> originOrderIdSet = new HashSet<>();
 	
@@ -75,6 +79,14 @@ public class StrategyModule {
 		}
 		if(disabled) {
 			//停用期间忽略数据更新
+			return this;
+		}
+		if(!gateway.isConnected()) {
+			long now = System.currentTimeMillis();
+			if(now - lastWarningTime > 60000) {
+				log.warn("网关[{}]未连接，无法执行策略", gateway.getGatewaySetting().getGatewayId());
+				lastWarningTime = now;
+			}
 			return this;
 		}
 		if(signalPolicy.bindedUnifiedSymbols().contains(tick.getUnifiedSymbol())) {	
