@@ -57,6 +57,8 @@ public class StrategyModule {
 	
 	protected ModuleStateMachine stateMachine;
 	
+	protected String mktGatewayId;
+	
 	protected TradeGateway gateway;
 	
 	protected String name;
@@ -73,6 +75,9 @@ public class StrategyModule {
 	private Set<String> originOrderIdSet = new HashSet<>();
 	
 	public StrategyModule onTick(TickField tick) {
+		if(!StringUtils.equals(mktGatewayId, tick.getGatewayId())) {
+			return this;
+		}
 		BarData barData = signalPolicy.getRefBarData(tick.getUnifiedSymbol());
 		if(barData != null) {
 			signalPolicy.getRefBarData(tick.getUnifiedSymbol()).update(tick);
@@ -146,6 +151,9 @@ public class StrategyModule {
 	}
 	
 	public StrategyModule onBar(BarField bar) {
+		if(!StringUtils.equals(mktGatewayId, bar.getGatewayId())) {
+			return this;
+		}
 		BarData barData = signalPolicy.getRefBarData(bar.getUnifiedSymbol());
 		if(barData != null) {
 			signalPolicy.getRefBarData(bar.getUnifiedSymbol()).update(bar);
@@ -169,7 +177,6 @@ public class StrategyModule {
 	}
 	
 	public StrategyModule onOrder(OrderField order) {
-		
 		if(originOrderIdSet.contains(order.getOriginOrderId())) {
 			switch(order.getOrderStatus()) {
 			case OS_AllTraded:

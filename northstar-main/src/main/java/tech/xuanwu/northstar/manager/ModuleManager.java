@@ -27,9 +27,11 @@ import xyz.redtorch.pb.CoreField.TradeField;
  */
 @Slf4j
 public class ModuleManager extends AbstractEventHandler {
-	
+	/**
+	 * moduleName --> module
+	 */
 	private ConcurrentHashMap<String, StrategyModule> moduleMap = new ConcurrentHashMap<>(50);
-
+	
 	private Set<NorthstarEventType> eventSet = new HashSet<>() {
 		private static final long serialVersionUID = 1L;
 

@@ -199,6 +199,7 @@ public class ModuleService implements InitializingBean{
 		StrategyModule module = StrategyModule.builder()
 				.name(info.getModuleName())
 				.gateway((TradeGateway)gateway)
+				.mktGatewayId(mktGatewayId)
 				.disabled(!info.isEnabled())
 				.stateMachine(stateMachine)
 				.dealer(dealer)
