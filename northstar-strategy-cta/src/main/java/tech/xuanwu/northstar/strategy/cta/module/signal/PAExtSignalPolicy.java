@@ -106,7 +106,7 @@ public class PAExtSignalPolicy extends AbstractSignalPolicy implements ExternalS
 		Matcher m3 = bkOprPtn.matcher(text);
 		Matcher m4 = skOprPtn.matcher(text);
 		String openPrice = "";
-		String stopPrice = "";
+		String stopPrice = "0";
 		if(m3.find()) {
 			openPrice = m3.group(1);
 			stopPrice = m3.group(2);
@@ -120,6 +120,7 @@ public class PAExtSignalPolicy extends AbstractSignalPolicy implements ExternalS
 					.build());
 		}else if(m4.find()) {
 			openPrice = m4.group(1);
+			stopPrice = m4.group(2);
 			signalQ.offer(CtaSignal.builder()
 					.id(UUID.randomUUID())
 					.signalClass(this.getClass())
