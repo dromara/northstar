@@ -319,7 +319,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 
 		logger.warn("{}交易接口实例初始化", logInfo);
 		String envTmpDir = System.getProperty("java.io.tmpdir");
-		String tempFilePath = envTmpDir + File.separator + "xyz" + File.separator + "redtorch" + File.separator + "gateway" + File.separator + "ctp" + File.separator + "jctpv6v3v15x64api"
+		String tempFilePath = envTmpDir + File.separator + "xyz" + File.separator + "redtorch" + File.separator + "gateway" + File.separator + "ctp" + File.separator + "jctpv6v5v1cpx64api"
 				+ File.separator + "CTP_FLOW_TEMP" + File.separator + "TD_" + gatewayAdapter.getGatewaySetting().getGatewayId();
 		File tempFile = new File(tempFilePath);
 		if (!tempFile.getParentFile().exists()) {

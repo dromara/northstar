@@ -124,7 +124,7 @@ public class MdSpi extends CThostFtdcMdSpi {
 		logger.warn("{}行情接口实例初始化", logInfo);
 
 		String envTmpDir = System.getProperty("java.io.tmpdir");
-		String tempFilePath = envTmpDir + File.separator + "xyz" + File.separator + "redtorch" + File.separator + "gateway" + File.separator + "ctp" + File.separator + "jctpv6v3v15x64api"
+		String tempFilePath = envTmpDir + File.separator + "xyz" + File.separator + "redtorch" + File.separator + "gateway" + File.separator + "ctp" + File.separator + "jctpv6v5v1cpx64api"
 				+ File.separator + "CTP_FLOW_TEMP" + File.separator + "MD_" + this.gatewayId;
 		File tempFile = new File(tempFilePath);
 		if (!tempFile.getParentFile().exists()) {
