@@ -15,10 +15,10 @@ public class SMSTradeService {
 	}
 	
 	public void dispatchMsg(String text) {
+		log.info("收到消息：{}", text);
 		if(!text.contains("期货")) {
 			return;	
 		}
-		log.info("收到消息：{}", text);
 		feEngine.emitEvent(NorthstarEventType.EXT_MSG, text);
 	}
 }
