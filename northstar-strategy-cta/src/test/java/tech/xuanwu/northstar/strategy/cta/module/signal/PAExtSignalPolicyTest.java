@@ -29,7 +29,7 @@ public class PAExtSignalPolicyTest {
 	}
 
 	@Test
-	public void shouldGetTwoSignalsForSelling() {
+	public void shouldGetSellCloseAndSellOpenSignal() {
 		policy.setStateMachine(new ModuleStateMachine(ModuleState.HOLDING_LONG));
 		
 		String textReverse = "【XX期货】：RB2110在2859.0的价格平多单，在2859.0的价格开空单，止损价：2904.0，目前持有空单1手（-1），仅供参考。";
@@ -44,7 +44,7 @@ public class PAExtSignalPolicyTest {
 	}
 	
 	@Test
-	public void shouldGetOneSignalForBuying() {
+	public void shouldGetBuyOpenSignal() {
 		policy.setStateMachine(new ModuleStateMachine(ModuleState.EMPTY));
 		String textOpen = "【XX期货】：RB2110在5314.0的价格开多单，止损价：5271.0，目前持有多单1手（+1），仅供参考。";
 		policy.onExtMsg(textOpen);
@@ -56,7 +56,7 @@ public class PAExtSignalPolicyTest {
 	}
 
 	@Test
-	public void shouldGetOneSignal() {
+	public void shouldGetSellOpenSignal() {
 		policy.setStateMachine(new ModuleStateMachine(ModuleState.EMPTY));
 		String textReverse = "【XX期货】：RB2110在2859.0的价格平多单，在2859.0的价格开空单，止损价：2904.0，目前持有空单1手（-1），仅供参考。";
 		policy.onExtMsg(textReverse);
