@@ -25,7 +25,6 @@ import tech.xuanwu.northstar.common.constant.DateTimeConstant;
 import tech.xuanwu.northstar.common.event.NorthstarEventType;
 import tech.xuanwu.northstar.common.utils.ContractNameResolver;
 import tech.xuanwu.northstar.gateway.api.GatewayAbstract;
-import xyz.redtorch.gateway.ctp.common.CtpConstant;
 import xyz.redtorch.gateway.ctp.x64v6v5v1cpv.api.CThostFtdcAccountregisterField;
 import xyz.redtorch.gateway.ctp.x64v6v5v1cpv.api.CThostFtdcBatchOrderActionField;
 import xyz.redtorch.gateway.ctp.x64v6v5v1cpv.api.CThostFtdcBrokerTradingAlgosField;
