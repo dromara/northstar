@@ -2,7 +2,6 @@ package tech.xuanwu.northstar.strategy.cta.module.signal;
 
 import java.time.LocalTime;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 import lombok.extern.slf4j.Slf4j;
@@ -12,7 +11,6 @@ import tech.xuanwu.northstar.strategy.common.annotation.Setting;
 import tech.xuanwu.northstar.strategy.common.annotation.StrategicComponent;
 import tech.xuanwu.northstar.strategy.common.constants.ModuleState;
 import tech.xuanwu.northstar.strategy.common.constants.SignalOperation;
-import tech.xuanwu.northstar.strategy.common.model.CtaSignal;
 import tech.xuanwu.northstar.strategy.common.model.data.BarData;
 import tech.xuanwu.northstar.strategy.common.model.meta.DynamicParams;
 
@@ -79,21 +77,17 @@ public class SampleSignalPolicy extends AbstractSignalPolicy
 	@Override
 	protected Optional<Signal> onTick(int milliSecOfMin, BarData barData) {
 		log.info("策略每个TICK触发: {}", milliSecOfMin);
-		CtaSignal.CtaSignalBuilder signal = CtaSignal.builder()
-				.id(UUID.randomUUID())
-				.signalClass(this.getClass())
-				.signalPrice(barDataMap.get(bindedUnifiedSymbol).getSClose().ref(0))
-				.timestamp(System.currentTimeMillis());
+		double price = barDataMap.get(bindedUnifiedSymbol).getSClose().ref(0);
 		if(milliSecOfMin % 10000 == 0) {
 			if(stateMachine.getState() == ModuleState.EMPTY) {
 				boolean flag = ThreadLocalRandom.current().nextBoolean();
-				return Optional.of(signal.state(flag ? SignalOperation.BuyOpen : SignalOperation.SellOpen).build());
+				return Optional.of(genSignal(flag ? SignalOperation.BuyOpen : SignalOperation.SellOpen, price));
 			}
 			if(stateMachine.getState() == ModuleState.HOLDING_LONG) {				
-				return Optional.of(signal.state(SignalOperation.SellClose).build());
+				return Optional.of(genSignal(SignalOperation.SellClose, price));
 			}
 			if(stateMachine.getState() == ModuleState.HOLDING_SHORT) {				
-				return Optional.of(signal.state(SignalOperation.BuyClose).build());
+				return Optional.of(genSignal(SignalOperation.BuyClose, price));
 			}
 		}
 		return Optional.empty();
