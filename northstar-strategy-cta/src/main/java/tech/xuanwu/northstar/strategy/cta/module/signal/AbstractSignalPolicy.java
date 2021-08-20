@@ -110,7 +110,8 @@ public abstract class AbstractSignalPolicy implements SignalPolicy {
 			.id(UUID.randomUUID())
 			.signalClass(this.getClass())
 			.signalPrice(price)
-			.state(SignalOperation.SellClose)
+			.state(signalOperation)
+			.stopPrice(stopPrice)
 			.sourceUnifiedSymbol(bindedUnifiedSymbol)
 			.timestamp(System.currentTimeMillis())
 			.build();
