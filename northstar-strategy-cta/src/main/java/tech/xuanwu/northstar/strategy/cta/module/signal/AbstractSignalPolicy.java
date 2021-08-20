@@ -4,6 +4,7 @@ import java.time.LocalTime;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -11,6 +12,8 @@ import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.common.constant.DateTimeConstant;
 import tech.xuanwu.northstar.strategy.common.Signal;
 import tech.xuanwu.northstar.strategy.common.SignalPolicy;
+import tech.xuanwu.northstar.strategy.common.constants.SignalOperation;
+import tech.xuanwu.northstar.strategy.common.model.CtaSignal;
 import tech.xuanwu.northstar.strategy.common.model.data.BarData;
 import tech.xuanwu.northstar.strategy.common.model.state.ModuleStateMachine;
 import xyz.redtorch.pb.CoreField.BarField;
@@ -102,4 +105,18 @@ public abstract class AbstractSignalPolicy implements SignalPolicy {
 		this.stateMachine = stateMachine;
 	}
 	
+	protected Signal genSignal(SignalOperation signalOperation, double price, double stopPrice) {
+		return CtaSignal.builder()
+			.id(UUID.randomUUID())
+			.signalClass(this.getClass())
+			.signalPrice(price)
+			.state(SignalOperation.SellClose)
+			.sourceUnifiedSymbol(bindedUnifiedSymbol)
+			.timestamp(System.currentTimeMillis())
+			.build();
+	}
+	
+	protected Signal genSignal(SignalOperation signalOperation, double price) {
+		return genSignal(signalOperation, price, 0);
+	}
 }

@@ -3,7 +3,6 @@ package tech.xuanwu.northstar.strategy.cta.module.signal;
 import java.util.LinkedList;
 import java.util.Optional;
 import java.util.Queue;
-import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -15,7 +14,6 @@ import tech.xuanwu.northstar.strategy.common.Signal;
 import tech.xuanwu.northstar.strategy.common.annotation.Setting;
 import tech.xuanwu.northstar.strategy.common.annotation.StrategicComponent;
 import tech.xuanwu.northstar.strategy.common.constants.SignalOperation;
-import tech.xuanwu.northstar.strategy.common.model.CtaSignal;
 import tech.xuanwu.northstar.strategy.common.model.data.BarData;
 import tech.xuanwu.northstar.strategy.common.model.meta.DynamicParams;
 
@@ -84,22 +82,10 @@ public class PAExtSignalPolicy extends AbstractSignalPolicy implements ExternalS
 		String closePrice = "";
 		if(m1.find()) {
 			closePrice = m1.group(1);
-			signalQ.offer(CtaSignal.builder()
-				.id(UUID.randomUUID())
-				.signalClass(this.getClass())
-				.signalPrice(Double.parseDouble(closePrice))
-				.state(SignalOperation.SellClose)
-				.timestamp(System.currentTimeMillis())
-				.build());
+			signalQ.offer(genSignal(SignalOperation.SellClose, Double.parseDouble(closePrice)));
 		} else if(m2.find()) {
 			closePrice = m2.group(1);
-			signalQ.offer(CtaSignal.builder()
-					.id(UUID.randomUUID())
-					.signalClass(this.getClass())
-					.signalPrice(Double.parseDouble(closePrice))
-					.state(SignalOperation.BuyClose)
-					.timestamp(System.currentTimeMillis())
-					.build());
+			signalQ.offer(genSignal(SignalOperation.BuyClose, Double.parseDouble(closePrice)));
 		}
 		
 		
@@ -110,25 +96,11 @@ public class PAExtSignalPolicy extends AbstractSignalPolicy implements ExternalS
 		if(m3.find()) {
 			openPrice = m3.group(1);
 			stopPrice = m3.group(2);
-			signalQ.offer(CtaSignal.builder()
-					.id(UUID.randomUUID())
-					.signalClass(this.getClass())
-					.signalPrice(Double.parseDouble(openPrice))
-					.stopPrice(Double.parseDouble(stopPrice))
-					.state(SignalOperation.BuyOpen)
-					.timestamp(System.currentTimeMillis())
-					.build());
+			signalQ.offer(genSignal(SignalOperation.BuyOpen, Double.parseDouble(openPrice), Double.parseDouble(stopPrice)));
 		}else if(m4.find()) {
 			openPrice = m4.group(1);
 			stopPrice = m4.group(2);
-			signalQ.offer(CtaSignal.builder()
-					.id(UUID.randomUUID())
-					.signalClass(this.getClass())
-					.signalPrice(Double.parseDouble(openPrice))
-					.stopPrice(Double.parseDouble(stopPrice))
-					.state(SignalOperation.SellOpen)
-					.timestamp(System.currentTimeMillis())
-					.build());
+			signalQ.offer(genSignal(SignalOperation.SellOpen, Double.parseDouble(openPrice), Double.parseDouble(stopPrice)));
 		}
 	}
 	
