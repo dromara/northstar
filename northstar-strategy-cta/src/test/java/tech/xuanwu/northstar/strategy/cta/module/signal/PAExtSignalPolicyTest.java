@@ -70,11 +70,12 @@ public class PAExtSignalPolicyTest {
 	@Test
 	public void shouldGetBuyCloseSignal() {
 		policy.setStateMachine(new ModuleStateMachine(ModuleState.HOLDING_SHORT));
-		String textClose = "【XX期货】：RB2110在5314.0的价格平空单，仅供参考。";
+		String textClose = "赢家信息：RB2110在5314.0的价格平空单，仅供参考。";
 		policy.onExtMsg(textClose);
 		Optional<Signal> signal5 = policy.onTick(5000, mock(BarData.class));
 		assertThat(signal5.get().isOpening()).isFalse();
 		assertThat(((CtaSignal)signal5.get()).getState()).isEqualTo(SignalOperation.BuyClose);
 		assertThat(CommonUtils.isEquals(((CtaSignal)signal5.get()).getSignalPrice(), 5314)).isTrue();
 	}
+	
 }
