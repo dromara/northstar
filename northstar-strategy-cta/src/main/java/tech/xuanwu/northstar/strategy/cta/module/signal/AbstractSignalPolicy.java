@@ -1,6 +1,7 @@
 package tech.xuanwu.northstar.strategy.cta.module.signal;
 
 import java.time.LocalTime;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -8,7 +9,6 @@ import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
 
-import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.common.constant.DateTimeConstant;
 import tech.xuanwu.northstar.strategy.common.Signal;
 import tech.xuanwu.northstar.strategy.common.SignalPolicy;
@@ -19,18 +19,20 @@ import tech.xuanwu.northstar.strategy.common.model.state.ModuleStateMachine;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.TickField;
 
-@Slf4j
 public abstract class AbstractSignalPolicy implements SignalPolicy {
 	
 	/**
 	 * 绑定合约
 	 */
 	protected String bindedUnifiedSymbol; 
+	/**
+	 * 回溯数据引用周期长度（默认至少有1个周期）
+	 */
+	protected int refDataLength = 1;
 
-	protected Map<String, BarData> barDataMap;
+	protected Map<String, BarData> barDataMap = new HashMap<>();
 	
 	protected ModuleStateMachine stateMachine;
-	
 	
 	@Override
 	public Set<String> bindedUnifiedSymbols() {
@@ -41,39 +43,55 @@ public abstract class AbstractSignalPolicy implements SignalPolicy {
 	}
 	
 	@Override
-	public Optional<Signal> updateTick(TickField tick) {
-		// 先更新行情
+	public Optional<Signal> onTick(TickField tick){
 		if(bindedUnifiedSymbols().contains(tick.getUnifiedSymbol())) {
 			BarData barData = barDataMap.get(tick.getUnifiedSymbol());
 			long timestamp = tick.getActionTimestamp();
 			// 整分钟时不触发，避免onTick与onMin逻辑重复，导致重复触发
 			int secondOfMin = (int) (timestamp % 60000);
 			if(secondOfMin == 0) {
-				return Optional.empty();
+				LocalTime time = LocalTime.parse(tick.getActionTime(), DateTimeConstant.T_FORMAT_WITH_MS_INT_FORMATTER);
+				return onMin(time, barData);
 			}
-			Optional<Signal> result = onTick(secondOfMin, barData);
-			if(result == null) {
-				return Optional.empty();
-			}
-			return result;
+			return onTick(secondOfMin, barData);
 		}
 		return Optional.empty();
 	}
 	
 	@Override
-	public Optional<Signal> updateBar(BarField bar) {
-		// 先更新行情
+	public void updateTick(TickField tick) {
+		// 更新行情
+		if(bindedUnifiedSymbols().contains(tick.getUnifiedSymbol())) {
+			BarData barData = barDataMap.get(tick.getUnifiedSymbol());
+			barData.update(tick);
+		}
+	}
+	
+	@Override
+	public void updateBar(BarField bar) {
+		// 更新行情
 		if(bindedUnifiedSymbols().contains(bar.getUnifiedSymbol())) {
 			BarData barData = barDataMap.get(bar.getUnifiedSymbol());
-			String actionTime = bar.getActionTime();
-			LocalTime time = LocalTime.parse(actionTime, DateTimeConstant.T_FORMAT_WITH_MS_INT_FORMATTER);
-			Optional<Signal> result = onMin(time, barData);
-			if(result == null) {
-				return Optional.empty();
-			}
-			return result;
+			barData.update(bar);
 		}
-		return Optional.empty();
+	}
+	
+	@Override
+	public BarData getRefBarData(String unifiedSymbol) {
+		if(!barDataMap.containsKey(unifiedSymbol)) {
+			throw new IllegalStateException("没有找到[" + unifiedSymbol + "]相应的引用数据");
+		}
+		return barDataMap.get(unifiedSymbol);
+	}
+	
+	@Override
+	public int getBarDataMaxRefLength() {
+		return refDataLength;
+	}
+	
+	@Override
+	public void setBarData(BarData barData) {
+		barDataMap.put(barData.getUnifiedSymbol(), barData);
 	}
 	
 	/**
@@ -90,16 +108,6 @@ public abstract class AbstractSignalPolicy implements SignalPolicy {
 		return Optional.empty();
 	}
 
-	@Override
-	public BarData getRefBarData(String unifiedSymbol) {
-		return barDataMap.get(unifiedSymbol);
-	}
-
-	@Override
-	public void setRefBarData(Map<String, BarData> barDataMap) {
-		this.barDataMap = barDataMap;
-	}
-	
 	@Override
 	public void setStateMachine(ModuleStateMachine stateMachine) {
 		this.stateMachine = stateMachine;

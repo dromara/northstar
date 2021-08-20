@@ -324,7 +324,24 @@ public class MongoClientAdapter {
 
 		return resultList;
 	}
-
+	
+	/**
+	 * 聚合查询
+	 * @param dbName
+	 * @param collectionName
+	 * @param pipeline
+	 * @return
+	 */
+	public List<Document> aggregate(String dbName, String collectionName, List<Bson> pipeline){
+		List<Document> resultList = new ArrayList<Document>();
+		MongoCollection<Document> mongoCol = mongoClient.getDatabase(dbName).getCollection(collectionName);
+		MongoCursor<Document> mongoCursor = mongoCol.aggregate(pipeline).iterator();
+		while (mongoCursor.hasNext()) {
+			resultList.add(mongoCursor.next());
+		}
+		return resultList;
+	}
+	
 	/**
 	 * 通过_id查找
 	 * 

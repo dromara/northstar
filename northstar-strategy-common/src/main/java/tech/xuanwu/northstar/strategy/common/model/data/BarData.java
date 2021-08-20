@@ -35,7 +35,7 @@ public class BarData {
 	
 	public BarData(String unifiedSymbol, int windowSize, List<BarField> sourceBars) {
 		if(sourceBars.size() == 0) {
-			throw new IllegalArgumentException("历史数据不能为空");
+			windowSize = Math.max(1, windowSize);
 		}
 		this.unifiedSymbol = unifiedSymbol;
 		sHigh = new SeriesData<>(windowSize, sourceBars.stream().mapToDouble(bar -> bar.getHighPrice()).toArray());
@@ -44,7 +44,7 @@ public class BarData {
 		sClose = new SeriesData<>(windowSize, sourceBars.stream().mapToDouble(bar -> bar.getClosePrice()).toArray());
 		sVol = new SeriesData<>(windowSize, sourceBars.stream().mapToDouble(bar -> bar.getVolumeDelta()).toArray());
 		sOpenIntest = new SeriesData<>(windowSize, sourceBars.stream().mapToDouble(bar -> bar.getOpenInterestDelta()).toArray());
-		lastBar = sourceBars.get(sourceBars.size() - 1);
+		lastBar = sourceBars.size() > 0 ? sourceBars.get(sourceBars.size() - 1) : null;
 		
 		this.windowSize = windowSize;
 		if(sourceBars.size() <= windowSize) {

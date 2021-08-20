@@ -110,4 +110,6 @@ public class PAExtSignalPolicy extends AbstractSignalPolicy implements ExternalS
 		protected String unifiedSymbol;		// 属性可以为任意多个，当元素为多个时order值用于控制前端的显示顺序	
 	}
 
+	
+
 }

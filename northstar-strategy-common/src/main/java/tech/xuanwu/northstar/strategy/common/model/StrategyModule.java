@@ -24,7 +24,6 @@ import tech.xuanwu.northstar.strategy.common.SignalPolicy;
 import tech.xuanwu.northstar.strategy.common.constants.ModuleState;
 import tech.xuanwu.northstar.strategy.common.constants.RiskAuditResult;
 import tech.xuanwu.northstar.strategy.common.event.ModuleEventType;
-import tech.xuanwu.northstar.strategy.common.model.data.BarData;
 import tech.xuanwu.northstar.strategy.common.model.state.ModuleStateMachine;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
@@ -78,10 +77,7 @@ public class StrategyModule {
 		if(!StringUtils.equals(mktGatewayId, tick.getGatewayId())) {
 			return this;
 		}
-		BarData barData = signalPolicy.getRefBarData(tick.getUnifiedSymbol());
-		if(barData != null) {
-			signalPolicy.getRefBarData(tick.getUnifiedSymbol()).update(tick);
-		}
+		signalPolicy.updateTick(tick);
 		if(disabled) {
 			//停用期间忽略数据更新
 			return this;
@@ -100,7 +96,7 @@ public class StrategyModule {
 			if(stateMachine.getState() == ModuleState.EMPTY 
 					|| stateMachine.getState() == ModuleState.HOLDING_LONG
 					|| stateMachine.getState() == ModuleState.HOLDING_SHORT) {				
-				Optional<Signal> signal = signalPolicy.updateTick(tick);
+				Optional<Signal> signal = signalPolicy.onTick(tick);
 				if(signal.isPresent()) {
 					stateMachine.transformForm(signal.get().isOpening() ? ModuleEventType.OPENING_SIGNAL_CREATED : ModuleEventType.CLOSING_SIGNAL_CREATED);
 					dealer.onSignal(signal.get(), this);
@@ -154,25 +150,7 @@ public class StrategyModule {
 		if(!StringUtils.equals(mktGatewayId, bar.getGatewayId())) {
 			return this;
 		}
-		BarData barData = signalPolicy.getRefBarData(bar.getUnifiedSymbol());
-		if(barData != null) {
-			signalPolicy.getRefBarData(bar.getUnifiedSymbol()).update(bar);
-		}
-		if(disabled) {
-			//停用期间忽略数据更新
-			return this;
-		}
-		if(signalPolicy.bindedUnifiedSymbols().contains(bar.getUnifiedSymbol())) {			
-			if(stateMachine.getState() == ModuleState.EMPTY 
-					|| stateMachine.getState() == ModuleState.HOLDING_LONG
-					|| stateMachine.getState() == ModuleState.HOLDING_SHORT) {				
-				Optional<Signal> signal = signalPolicy.updateBar(bar);
-				if(signal.isPresent()) {
-					stateMachine.transformForm(signal.get().isOpening() ? ModuleEventType.OPENING_SIGNAL_CREATED : ModuleEventType.CLOSING_SIGNAL_CREATED);
-					dealer.onSignal(signal.get(), this);
-				}
-			}
-		}
+		signalPolicy.updateBar(bar);
 		return this;
 	}
 	

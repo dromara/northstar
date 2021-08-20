@@ -5,6 +5,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.bson.Document;
+import org.bson.conversions.Bson;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.index.CompoundIndexDefinition;
@@ -101,6 +102,20 @@ public class MarketDataRepository {
 				.append("tradingDay", tradeDay));
 		log.info("[{}]-[{}]-[{}] 加载历史数据：{}条", gatewayId, unifiedSymbol, tradeDay, resultList.size());
 		return resultList.stream().map(doc -> MongoUtils.documentToBean(doc, MinBarDataPO.class)).collect(Collectors.toList());
+	}
+	
+	/**
+	 * 查询行情数据可用日期
+	 * @param gatewayId
+	 * @param unifiedSymbol
+	 * @return
+	 */
+	public List<String> findDataAvailableDates(String gatewayId, String unifiedSymbol, boolean isAsc){
+		Bson filter = new Document().append("$match", new Document().append("unifiedSymbol", unifiedSymbol));
+		Bson aggregator = new Document().append("$group", new Document().append("_id", "tradingDay"));
+		Bson sorter = new Document().append("$sort", new Document().append("_id", isAsc ? 1 : -1));
+		List<Document> resultList = client.aggregate(DB, COLLECTION_PREFIX + gatewayId, List.of(filter, aggregator, sorter));
+		return resultList.stream().map(doc -> doc.get("_id").toString()).collect(Collectors.toList());
 	}
 	
 	/**

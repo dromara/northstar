@@ -43,9 +43,5 @@ public class ModuleInfo {
 	 * 策略类型
 	 */
 	private ModuleType type;
-	/**
-	 * 数据回潮天数
-	 */
-	private int daysOfRefData;
 	
 }

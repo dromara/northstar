@@ -1,8 +1,8 @@
 package tech.xuanwu.northstar.service;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -10,7 +10,6 @@ import java.util.Map.Entry;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 
-import tech.xuanwu.northstar.common.constant.DateTimeConstant;
 import tech.xuanwu.northstar.common.model.ContractManager;
 import tech.xuanwu.northstar.domain.GatewayConnection;
 import tech.xuanwu.northstar.gateway.api.Gateway;
@@ -174,26 +173,30 @@ public class ModuleService implements InitializingBean{
 		ModuleTrade mTrade = status == null ? factory.newModuleTrade() : factory.loadModuleTrade(moduleRepo.findTradeDescription(info.getModuleName()));
 		
 		ModuleState state = status == null ? ModuleState.EMPTY : status.getState();
-		Map<String, BarData> barDataMap = new HashMap<>();
+		int refLength = signalPolicy.getBarDataMaxRefLength();
+		LinkedList<BarField> barList = new LinkedList<>();
+		ModuleStateMachine stateMachine = new ModuleStateMachine(state);
+		
 		for(String unifiedSymbol : signalPolicy.bindedUnifiedSymbols()) {
-			int daysOfRefData = info.getDaysOfRefData();
-			LocalDateTime now = LocalDateTime.now();
-			LocalDateTime currentTradeDay = now.plusHours(now.getDayOfWeek().getValue() == 5 ? 54 : 6);
-			List<BarField> refBarList = new ArrayList<>(daysOfRefData * 500);
-			for(int i=daysOfRefData; i>=0; i--) {
-				String dayStr = currentTradeDay.minusDays(i).format(DateTimeConstant.D_FORMAT_INT_FORMATTER);
-				List<MinBarDataPO> dataBarPOList = mdRepo.loadDataByDate(mktGatewayId, unifiedSymbol, dayStr);
-				for(MinBarDataPO po : dataBarPOList) {
+			List<String> availableDates = mdRepo.findDataAvailableDates(mktGatewayId, unifiedSymbol, false);
+			for(String date : availableDates) {
+				List<MinBarDataPO> dataBarPOList = mdRepo.loadDataByDate(mktGatewayId, unifiedSymbol, date);
+				for(int i=dataBarPOList.size() - 1; i > -1; i--) {
+					MinBarDataPO po = dataBarPOList.get(i);
 					BarField.Builder bb = BarField.newBuilder();
 					ProtoBeanUtils.toProtoBean(bb, po);
-					refBarList.add(bb.build());
+					barList.addFirst(bb.build());
+					if(barList.size() >= refLength) {
+						break;
+					}
+				}
+				if(barList.size() >= refLength) {
+					break;
 				}
 			}
-			barDataMap.put(unifiedSymbol, new BarData(unifiedSymbol, refBarList));
+			signalPolicy.setBarData(new BarData(unifiedSymbol, barList));
 		}
 		
-		ModuleStateMachine stateMachine = new ModuleStateMachine(state);
-		signalPolicy.setRefBarData(barDataMap);
 		signalPolicy.setStateMachine(stateMachine);
 		dealer.setContractManager(contractMgr);
 		StrategyModule module = StrategyModule.builder()
