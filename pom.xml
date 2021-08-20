@@ -48,6 +48,7 @@
 		<module>northstar-strategy-cta</module>
 		<module>northstar-plugin-notification</module>
 		<module>northstar-main</module>
+		<module>northstar-test</module>
 	</modules>
 
 	<dependencies>
