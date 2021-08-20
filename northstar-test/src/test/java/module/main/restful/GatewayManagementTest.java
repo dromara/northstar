@@ -1,4 +1,4 @@
-package tech.xuanwu.northstar.integrated;
+package module.main.restful;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -12,6 +12,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.HttpEntity;
@@ -22,8 +23,10 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import com.alibaba.fastjson.JSON;
+import com.corundumstudio.socketio.SocketIOServer;
 
 import lombok.extern.slf4j.Slf4j;
+import tech.xuanwu.northstar.NorthstarApplication;
 import tech.xuanwu.northstar.common.constant.ConnectionState;
 import tech.xuanwu.northstar.common.constant.GatewayType;
 import tech.xuanwu.northstar.common.constant.GatewayUsage;
@@ -35,10 +38,12 @@ import tech.xuanwu.northstar.common.model.ResultBean;
 import tech.xuanwu.northstar.common.model.SimSettings;
 import tech.xuanwu.northstar.persistence.GatewayRepository;
 import tech.xuanwu.northstar.persistence.po.GatewayPO;
+import tech.xuanwu.northstar.plugin.mail.MailMessageSender;
+import tech.xuanwu.northstar.plugin.mail.MessageSender;
 
 @Slf4j
 @RunWith(SpringRunner.class)
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+@SpringBootTest(classes=NorthstarApplication.class, webEnvironment = WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-unittest.properties")
 public class GatewayManagementTest {
 
@@ -57,6 +62,12 @@ public class GatewayManagementTest {
 	TestRestTemplate restTemplate;
 	
 	HttpHeaders headers;
+	
+	@MockBean
+	private MailMessageSender sender;
+	
+	@MockBean
+	private SocketIOServer socketServer;
 	
 	@Before
 	public void prepare() {
