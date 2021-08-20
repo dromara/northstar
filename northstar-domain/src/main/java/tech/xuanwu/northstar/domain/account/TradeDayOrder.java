@@ -38,7 +38,7 @@ public class TradeDayOrder {
 	public boolean canCancelOrder(String originOrderId) {
 		OrderField order = orderMap.get(originOrderId);
 		if(order == null) {
-			throw new NoSuchElementException("不存在相关订单：" + originOrderId);
+			return false;
 		}
 		
 		return order.getOrderStatus() != OrderStatusEnum.OS_AllTraded 

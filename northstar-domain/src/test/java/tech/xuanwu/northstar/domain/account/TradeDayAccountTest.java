@@ -94,7 +94,7 @@ public class TradeDayAccountTest {
 	@Test
 	public void testOnOrderUpdate() {
 		OrderField of = OrderField.newBuilder()
-				.setOrderId("adfskal")
+				.setOriginOrderId("adfskal")
 				.setTotalVolume(2)
 				.setOrderStatus(OrderStatusEnum.OS_Touched)
 				.build();
@@ -182,13 +182,4 @@ public class TradeDayAccountTest {
 		tda.cancelOrder(recall);
 	}
 
-	@Test(expected = NoSuchElementException.class)
-	public void testCancelOrderWithException2() throws TradeException {
-		testOnOrderUpdate();
-		OrderRecall recall = OrderRecall.builder()
-				.gatewayId("testGateway")
-				.originOrderId("324234")
-				.build();
-		tda.cancelOrder(recall);
-	}
 }

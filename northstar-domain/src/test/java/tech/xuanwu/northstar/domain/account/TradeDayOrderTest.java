@@ -29,14 +29,14 @@ public class TradeDayOrderTest {
 	public void testUpdate() {
 		OrderField order1 = OrderField.newBuilder()
 				.setAccountId("testGateway")
-				.setOrderId("123")
+				.setOriginOrderId("123")
 				.setContract(contract)
 				.setOrderStatus(OrderStatusEnum.OS_Unknown)
 				.build();
 		
 		OrderField order2 = OrderField.newBuilder()
 				.setAccountId("testGateway")
-				.setOrderId("456")
+				.setOriginOrderId("456")
 				.setContract(contract)
 				.setOrderStatus(OrderStatusEnum.OS_Rejected)
 				.build();
