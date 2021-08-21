@@ -1,4 +1,4 @@
-package module.main.restful;
+package integration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

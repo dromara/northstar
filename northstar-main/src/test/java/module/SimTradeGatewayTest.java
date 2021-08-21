@@ -1,4 +1,4 @@
-package module.gateway.sim;
+package module;
 
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
