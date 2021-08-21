@@ -1,11 +1,10 @@
 package tech.xuanwu.northstar.strategy.common.constants;
 
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.Test;
 
-public class SignalStateTest {
+public class SignalOperationTest {
 
 	@Test
 	public void testIsOpen() {

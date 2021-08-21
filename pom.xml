@@ -412,10 +412,15 @@
 					<configuration>
 						<excludes>
 							<exclude>**/tech/xuanwu/northstar/common/**/*</exclude>
+							<exclude>**/tech/xuanwu/northstar/config/**/*</exclude>
+							<exclude>**/tech/xuanwu/northstar/factories/**/*</exclude>
 							<exclude>**/tech/xuanwu/northstar/gateway/api/**/*</exclude>
 							<exclude>**/xyz/redtorch/pb/**/*</exclude>
 							<exclude>**/xyz/redtorch/gateway/ctp/**/*</exclude>
 						</excludes>
+						<includes>
+							<include>**/tech/xuanwu/northstar/common/utils/*</include>
+						</includes>
 					</configuration>
 					<executions>
 						<execution>
