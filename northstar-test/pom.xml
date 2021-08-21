@@ -6,12 +6,10 @@
     <version>2.0</version>
   </parent>
   <artifactId>northstar-test</artifactId>
-  <packaging>pom</packaging>
   <dependencies>
   	<dependency>
   		<groupId>tech.xuan-wu</groupId>
 		<artifactId>northstar-main</artifactId>
-		<version>2.0</version>
   	</dependency>
   </dependencies>
 </project>
