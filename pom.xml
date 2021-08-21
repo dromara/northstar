@@ -411,16 +411,16 @@
 					<version>0.8.5</version>
 					<configuration>
 						<excludes>
-							<exclude>**/tech/xuanwu/northstar/common/**/*</exclude>
+							<exclude>**/tech/xuanwu/northstar/common/constant/**/*</exclude>
+							<exclude>**/tech/xuanwu/northstar/common/event/**/*</exclude>
+							<exclude>**/tech/xuanwu/northstar/common/exception/**/*</exclude>
+							<exclude>**/tech/xuanwu/northstar/common/model/**/*</exclude>
 							<exclude>**/tech/xuanwu/northstar/config/**/*</exclude>
 							<exclude>**/tech/xuanwu/northstar/factories/**/*</exclude>
 							<exclude>**/tech/xuanwu/northstar/gateway/api/**/*</exclude>
 							<exclude>**/xyz/redtorch/pb/**/*</exclude>
 							<exclude>**/xyz/redtorch/gateway/ctp/**/*</exclude>
 						</excludes>
-						<includes>
-							<include>**/tech/xuanwu/northstar/common/utils/*</include>
-						</includes>
 					</configuration>
 					<executions>
 						<execution>
@@ -467,7 +467,7 @@
 											<limit>
 												<counter>COMPLEXITY</counter>
 												<value>COVEREDRATIO</value>
-												<minimum>0.1</minimum>
+												<minimum>0</minimum>
 											</limit>
 										</limits>
 									</rule>
