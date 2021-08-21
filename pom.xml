@@ -409,6 +409,14 @@
 					<groupId>org.jacoco</groupId>
 					<artifactId>jacoco-maven-plugin</artifactId>
 					<version>0.8.5</version>
+					<configuration>
+						<excludes>
+							<exclude>**/tech/xuanwu/northstar/common/**/*</exclude>
+							<exclude>**/tech/xuanwu/northstar/gateway/api/**/*</exclude>
+							<exclude>**/xyz/redtorch/pb/**/*</exclude>
+							<exclude>**/xyz/redtorch/gateway/ctp/**/*</exclude>
+						</excludes>
+					</configuration>
 					<executions>
 						<execution>
 							<id>default-prepare-agent</id>
