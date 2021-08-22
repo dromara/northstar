@@ -35,10 +35,10 @@ public class TestGatewayFactory {
 		return null;
 	}
 	
-	public static GatewayDescription makeMktGateway(String id, GatewayType type, Object settings, boolean connected) {
+	public static GatewayDescription makeMktGateway(String id, GatewayType type, Object settings, boolean autoConnect) {
 		return GatewayDescription.builder()
 				.gatewayId(id)
-				.connectionState(connected ? ConnectionState.CONNECTED : ConnectionState.DISCONNECTED)
+				.autoConnect(autoConnect)
 				.gatewayType(type)
 				.gatewayAdapterType(RandomStringUtils.random(100))
 				.settings(settings)
@@ -46,10 +46,10 @@ public class TestGatewayFactory {
 				.build();
 	}
 	
-	public static GatewayDescription makeTrdGateway(String id, String bindGateway, GatewayType type, Object settings, boolean connected) {
+	public static GatewayDescription makeTrdGateway(String id, String bindGateway, GatewayType type, Object settings, boolean autoConnect) {
 		return GatewayDescription.builder()
 				.gatewayId(id)
-				.connectionState(connected ? ConnectionState.CONNECTED : ConnectionState.DISCONNECTED)
+				.autoConnect(autoConnect)
 				.gatewayType(type)
 				.gatewayAdapterType(RandomStringUtils.random(100))
 				.settings(settings)

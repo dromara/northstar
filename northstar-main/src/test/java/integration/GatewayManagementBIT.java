@@ -42,7 +42,6 @@ public class GatewayManagementBIT {
 	public void setUp() {
 		ResponseEntity<ResultBean> result = rest.postForEntity("/auth/login", new NsUser("admin","123456"), ResultBean.class);
 		cookie = result.getHeaders().getFirst(HttpHeaders.SET_COOKIE);
-		System.out.println("cookie: " + cookie);
 		header = new HttpHeaders();
 		header.add("Cookie", cookie);
 	}
