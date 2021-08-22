@@ -12,7 +12,6 @@ import java.util.concurrent.ThreadLocalRandom;
 import org.junit.Before;
 import org.junit.Test;
 
-import common.TestFieldFactory;
 import tech.xuanwu.northstar.common.event.NorthstarEventType;
 import tech.xuanwu.northstar.common.model.ContractManager;
 import tech.xuanwu.northstar.common.utils.CommonUtils;
