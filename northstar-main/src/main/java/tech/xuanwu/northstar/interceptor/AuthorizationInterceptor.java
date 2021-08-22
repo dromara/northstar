@@ -3,11 +3,14 @@ package tech.xuanwu.northstar.interceptor;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.web.servlet.HandlerInterceptor;
 
+import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.common.constant.Constants;
 import tech.xuanwu.northstar.common.exception.AuthenticationException;
 
+@Slf4j
 public class AuthorizationInterceptor implements HandlerInterceptor{
 
 	@Override
@@ -23,7 +26,11 @@ public class AuthorizationInterceptor implements HandlerInterceptor{
 		if(user != null) {
 			return true;
 		}
-		throw new AuthenticationException("token校验失败");
+		
+		String msg = "token校验失败";
+		response.sendError(HttpStatus.UNAUTHORIZED.value(), msg);
+		log.warn(msg);
+		return false;
 	}
 
 	

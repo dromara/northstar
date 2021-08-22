@@ -23,7 +23,7 @@ import xyz.redtorch.pb.CoreField.GatewaySettingField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TickField;
 
-public class TestFieldUtil {
+public class TestFieldFactory {
 	
 	private static final String GATEWAY_ID = "testGateway";
 	

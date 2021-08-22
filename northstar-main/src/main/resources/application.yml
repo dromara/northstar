@@ -21,17 +21,12 @@ logging:
   path: logs/
   
 spring:
-  profiles:
-    active: ${env:prod}
-  data:
-      mongodb:
-        uri: mongodb://127.0.0.1:27017/NS_DB
   mail:
     host: smtp.126.com
-    username: ${email}
+    username: ${email:somemail@126.com}
     password: UQNXPDZJIYQTRFRW
     default-encoding: UTF-8
-    subscribed: ${sub_email}
+    subscribed: ${sub_email:somemail@126.com}
     port: 465
     protocol: smtp
     properties:
@@ -45,5 +40,16 @@ spring:
           ssl:
             enable: true
             socketFactory.class: com.fintech.modules.base.util.mail.MailSSLSocketFactory
-        
-        
+  profiles:
+    active: prod
+  data:
+    mongodb:
+      uri: mongodb://127.0.0.1:27017/NS_DB
+  
+---
+spring:
+  profiles:
+    active: dev
+  data:
+    mongodb:
+      uri: mongodb://127.0.0.1:27017/TEST_NS_DB

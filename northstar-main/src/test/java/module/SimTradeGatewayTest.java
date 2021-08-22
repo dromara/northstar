@@ -12,7 +12,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import org.junit.Before;
 import org.junit.Test;
 
-import common.TestFieldUtil;
+import common.TestFieldFactory;
 import tech.xuanwu.northstar.common.event.NorthstarEventType;
 import tech.xuanwu.northstar.common.model.ContractManager;
 import tech.xuanwu.northstar.common.utils.CommonUtils;
@@ -47,8 +47,8 @@ public class SimTradeGatewayTest {
 	
 	@Before
 	public void prepare() {
-		GatewaySettingField setting = TestFieldUtil.makeGatewaySetting();
-		ContractField contract = TestFieldUtil.makeContract(RB);
+		GatewaySettingField setting = TestFieldFactory.makeGatewaySetting();
+		ContractField contract = TestFieldFactory.makeContract(RB);
 		ContractManager contractMgr = mock(ContractManager.class);
 		when(contractMgr.getContract(contract.getUnifiedSymbol())).thenReturn(contract);
 		SimFactory factory = new SimFactory(setting.getGatewayId(), feEngine, 1, contractMgr);
@@ -92,7 +92,7 @@ public class SimTradeGatewayTest {
 	public void testTickUpdate() throws InterruptedException {
 		for(int i=0; i<3; i++) {
 			int price = ThreadLocalRandom.current().nextInt(2000, 20000);
-			gateway.onTick(TestFieldUtil.makeTickField(RB, price));
+			gateway.onTick(TestFieldFactory.makeTickField(RB, price));
 			verify(feEngine, times(i + 1)).emitEvent(eq(NorthstarEventType.ACCOUNT), argThat(acc -> ((AccountField)acc).getBalance() == 0));
 			Thread.sleep(1200);
 		}
@@ -104,9 +104,9 @@ public class SimTradeGatewayTest {
 	@Test
 	public void testTickUpdateOnHolding() {
 		testOpeningTrade();
-		gateway.onTick(TestFieldUtil.makeTickField(RB, 1230));
+		gateway.onTick(TestFieldFactory.makeTickField(RB, 1230));
 		verify(feEngine).emitEvent(eq(NorthstarEventType.POSITION), argThat(pos -> ((PositionField)pos).getPriceDiff() == 29));
-		gateway.onTick(TestFieldUtil.makeTickField(RB, 1150));
+		gateway.onTick(TestFieldFactory.makeTickField(RB, 1150));
 		verify(feEngine).emitEvent(eq(NorthstarEventType.POSITION), argThat(pos -> ((PositionField)pos).getPriceDiff() == -51));
 	}
 	
@@ -116,7 +116,7 @@ public class SimTradeGatewayTest {
 	@Test
 	public void testOpeningSubmitOrder() {
 		gateway.moneyIO(10000);
-		gateway.submitOrder(TestFieldUtil.makeOrderReq(RB, DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open, 1, 1234, 1000));
+		gateway.submitOrder(TestFieldFactory.makeOrderReq(RB, DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open, 1, 1234, 1000));
 		verify(feEngine).emitEvent(eq(NorthstarEventType.ORDER), argThat(order -> ((OrderField)order).getOffsetFlag() == OffsetFlagEnum.OF_Open
 				&& ((OrderField)order).getOrderStatus() == OrderStatusEnum.OS_Touched));
 	}
@@ -126,7 +126,7 @@ public class SimTradeGatewayTest {
 	 */
 	@Test
 	public void testOpeningSubmitOrderFail() {
-		gateway.submitOrder(TestFieldUtil.makeOrderReq(RB, DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open, 1, 1234, 0));
+		gateway.submitOrder(TestFieldFactory.makeOrderReq(RB, DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open, 1, 1234, 0));
 		verify(feEngine).emitEvent(eq(NorthstarEventType.ORDER), argThat(order -> ((OrderField)order).getOffsetFlag() == OffsetFlagEnum.OF_Open 
 				&& ((OrderField)order).getOrderStatus() == OrderStatusEnum.OS_Rejected));
 	}
@@ -138,7 +138,7 @@ public class SimTradeGatewayTest {
 	public void testClosingSubmitOrder() {
 		testOpeningTrade();
 		
-		SubmitOrderReqField orderReq = TestFieldUtil.makeOrderReq(RB, DirectionEnum.D_Sell, OffsetFlagEnum.OF_CloseToday, 1, 1234, 1000);
+		SubmitOrderReqField orderReq = TestFieldFactory.makeOrderReq(RB, DirectionEnum.D_Sell, OffsetFlagEnum.OF_CloseToday, 1, 1234, 1000);
 		gateway.submitOrder(orderReq);
 		verify(feEngine).emitEvent(eq(NorthstarEventType.ORDER), argThat(order -> ((OrderField)order).getOffsetFlag() == OffsetFlagEnum.OF_CloseToday
 				&& ((OrderField)order).getOrderStatus() == OrderStatusEnum.OS_Touched));
@@ -153,7 +153,7 @@ public class SimTradeGatewayTest {
 	public void testClosingSubmitOrderFail() {
 		testOpeningTrade();
 		
-		SubmitOrderReqField orderReq = TestFieldUtil.makeOrderReq(RB, DirectionEnum.D_Sell, OffsetFlagEnum.OF_CloseToday, 2, 1234, 1000);
+		SubmitOrderReqField orderReq = TestFieldFactory.makeOrderReq(RB, DirectionEnum.D_Sell, OffsetFlagEnum.OF_CloseToday, 2, 1234, 1000);
 		gateway.submitOrder(orderReq);
 		verify(feEngine).emitEvent(eq(NorthstarEventType.ORDER), argThat(order -> ((OrderField)order).getOffsetFlag() == OffsetFlagEnum.OF_CloseToday
 				&& ((OrderField)order).getOrderStatus() == OrderStatusEnum.OS_Rejected));
@@ -166,9 +166,9 @@ public class SimTradeGatewayTest {
 	public void testIncreasingPosition() {
 		testOpeningTrade();
 		
-		SubmitOrderReqField orderReq = TestFieldUtil.makeOrderReq(RB, DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open, 2, 1234, 1000);
+		SubmitOrderReqField orderReq = TestFieldFactory.makeOrderReq(RB, DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open, 2, 1234, 1000);
 		gateway.submitOrder(orderReq);
-		gateway.onTick(TestFieldUtil.makeTickField(RB, 1111));
+		gateway.onTick(TestFieldFactory.makeTickField(RB, 1111));
 		verify(feEngine).emitEvent(eq(NorthstarEventType.TRADE), argThat(trade -> ((TradeField)trade).getPrice() == 1112));
 		verify(feEngine).emitEvent(eq(NorthstarEventType.POSITION), argThat(pos -> ((PositionField)pos).getPosition() == 3
 				&& CommonUtils.isEquals(((PositionField)pos).getOpenPrice(), 1141.66666666)));
@@ -182,9 +182,9 @@ public class SimTradeGatewayTest {
 	public void testDecreasingPosition() {
 		testIncreasingPosition();
 		
-		SubmitOrderReqField orderReq = TestFieldUtil.makeOrderReq(RB, DirectionEnum.D_Sell, OffsetFlagEnum.OF_CloseToday, 1, 1234, 1000);
+		SubmitOrderReqField orderReq = TestFieldFactory.makeOrderReq(RB, DirectionEnum.D_Sell, OffsetFlagEnum.OF_CloseToday, 1, 1234, 1000);
 		gateway.submitOrder(orderReq);
-		gateway.onTick(TestFieldUtil.makeTickField(RB, 1235));
+		gateway.onTick(TestFieldFactory.makeTickField(RB, 1235));
 		verify(feEngine).emitEvent(eq(NorthstarEventType.TRADE), argThat(trade -> ((TradeField)trade).getPrice() == 1234));
 		verify(feEngine).emitEvent(eq(NorthstarEventType.POSITION), argThat(pos -> ((PositionField)pos).getPosition() == 2
 				&& CommonUtils.isEquals(((PositionField)pos).getOpenPrice(), 1141.66666666)));
@@ -198,11 +198,11 @@ public class SimTradeGatewayTest {
 	public void testStopLoss() throws InterruptedException {
 		testOpeningTrade();
 		
-		gateway.onTick(TestFieldUtil.makeTickField(RB, 1000));
+		gateway.onTick(TestFieldFactory.makeTickField(RB, 1000));
 		verify(feEngine).emitEvent(eq(NorthstarEventType.TRADE), argThat(trade -> ((TradeField)trade).getPrice() == 1000));
 		verify(feEngine).emitEvent(eq(NorthstarEventType.POSITION), argThat(pos -> ((PositionField)pos).getPosition() == 0));
 		Thread.sleep(1200);
-		gateway.onTick(TestFieldUtil.makeTickField(RB, 1000));
+		gateway.onTick(TestFieldFactory.makeTickField(RB, 1000));
 		verify(feEngine).emitEvent(eq(NorthstarEventType.ACCOUNT), argThat(acc -> ((AccountField)acc).getMargin() == 0
 				&& ((AccountField)acc).getCloseProfit() == -2010 && ((AccountField)acc).getCommission() == 20));
 	}
@@ -213,8 +213,8 @@ public class SimTradeGatewayTest {
 	@Test
 	public void testCancelOrder() {
 		gateway.moneyIO(10000);
-		SubmitOrderReqField orderReq = TestFieldUtil.makeOrderReq(RB, DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open, 1, 1234, 1000);
-		CancelOrderReqField cancelReq = TestFieldUtil.makeCancelReq(orderReq);
+		SubmitOrderReqField orderReq = TestFieldFactory.makeOrderReq(RB, DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open, 1, 1234, 1000);
+		CancelOrderReqField cancelReq = TestFieldFactory.makeCancelReq(orderReq);
 		gateway.submitOrder(orderReq);
 		verify(feEngine).emitEvent(eq(NorthstarEventType.ORDER), argThat(order -> ((OrderField)order).getOffsetFlag() == OffsetFlagEnum.OF_Open
 				&& ((OrderField)order).getOrderStatus() == OrderStatusEnum.OS_Touched));
@@ -230,8 +230,8 @@ public class SimTradeGatewayTest {
 	public void testCancelOrderOnHolding() {
 		testOpeningTrade();
 		
-		SubmitOrderReqField orderReq = TestFieldUtil.makeOrderReq(RB, DirectionEnum.D_Sell, OffsetFlagEnum.OF_CloseToday, 1, 1234, 1000);
-		CancelOrderReqField cancelReq = TestFieldUtil.makeCancelReq(orderReq);
+		SubmitOrderReqField orderReq = TestFieldFactory.makeOrderReq(RB, DirectionEnum.D_Sell, OffsetFlagEnum.OF_CloseToday, 1, 1234, 1000);
+		CancelOrderReqField cancelReq = TestFieldFactory.makeCancelReq(orderReq);
 		gateway.submitOrder(orderReq);
 		verify(feEngine).emitEvent(eq(NorthstarEventType.ORDER), argThat(order -> ((OrderField)order).getOffsetFlag() == OffsetFlagEnum.OF_CloseToday
 				&& ((OrderField)order).getOrderStatus() == OrderStatusEnum.OS_Touched));
@@ -247,7 +247,7 @@ public class SimTradeGatewayTest {
 	public void testOpeningTrade() {
 		testOpeningSubmitOrder();
 		
-		gateway.onTick(TestFieldUtil.makeTickField(RB, 1200));
+		gateway.onTick(TestFieldFactory.makeTickField(RB, 1200));
 		verify(feEngine).emitEvent(eq(NorthstarEventType.ORDER), argThat(order -> ((OrderField)order).getOffsetFlag() == OffsetFlagEnum.OF_Open 
 				&& ((OrderField)order).getOrderStatus() == OrderStatusEnum.OS_AllTraded));
 		verify(feEngine).emitEvent(eq(NorthstarEventType.TRADE), argThat(trade -> ((TradeField)trade).getPrice() == 1201));
@@ -262,13 +262,13 @@ public class SimTradeGatewayTest {
 	public void testClosingTrade() throws InterruptedException {
 		testOpeningTrade();
 		
-		SubmitOrderReqField orderReq = TestFieldUtil.makeOrderReq(RB, DirectionEnum.D_Sell, OffsetFlagEnum.OF_CloseToday, 1, 1234, 1000);
+		SubmitOrderReqField orderReq = TestFieldFactory.makeOrderReq(RB, DirectionEnum.D_Sell, OffsetFlagEnum.OF_CloseToday, 1, 1234, 1000);
 		gateway.submitOrder(orderReq);
-		gateway.onTick(TestFieldUtil.makeTickField(RB, 1235));
+		gateway.onTick(TestFieldFactory.makeTickField(RB, 1235));
 		verify(feEngine).emitEvent(eq(NorthstarEventType.TRADE), argThat(trade -> ((TradeField)trade).getPrice() == 1234));
 		verify(feEngine).emitEvent(eq(NorthstarEventType.POSITION), argThat(pos -> ((PositionField)pos).getPosition() == 0));
 		Thread.sleep(1200);
-		gateway.onTick(TestFieldUtil.makeTickField(RB, 1235));
+		gateway.onTick(TestFieldFactory.makeTickField(RB, 1235));
 		verify(feEngine).emitEvent(eq(NorthstarEventType.ACCOUNT), argThat(acc -> ((AccountField)acc).getMargin() == 0
 				&& ((AccountField)acc).getCloseProfit() == 330 && ((AccountField)acc).getCommission() == 20));
 	}
