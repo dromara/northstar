@@ -25,9 +25,13 @@ import xyz.redtorch.pb.CoreField.TickField;
 
 public class TestFieldFactory {
 	
-	private static final String GATEWAY_ID = "testGateway";
+	private String gatewayId;
 	
-	public static SubmitOrderReqField makeOrderReq(String symbol, DirectionEnum direction, OffsetFlagEnum offsetFlag, int openVol, double price, double stopPrice) {
+	public TestFieldFactory(String gatewayId) {
+		this.gatewayId = gatewayId;
+	}
+	
+	public SubmitOrderReqField makeOrderReq(String symbol, DirectionEnum direction, OffsetFlagEnum offsetFlag, int openVol, double price, double stopPrice) {
 		return SubmitOrderReqField.newBuilder()
 				.setOriginOrderId(UUID.randomUUID().toString())
 				.setContract(makeContract(symbol))
@@ -41,24 +45,24 @@ public class TestFieldFactory {
 				.setForceCloseReason(ForceCloseReasonEnum.FCR_NotForceClose)
 				.setContingentCondition(ContingentConditionEnum.CC_Immediately)
 				.setMinVolume(1)
-				.setGatewayId(GATEWAY_ID)
+				.setGatewayId(gatewayId)
 				.setStopPrice(stopPrice)
 				.setPrice(price)
 				.build();
 	}
 	
-	public static CancelOrderReqField makeCancelReq(SubmitOrderReqField orderReq) {
+	public CancelOrderReqField makeCancelReq(SubmitOrderReqField orderReq) {
 		return CancelOrderReqField.newBuilder()
 				.setGatewayId(orderReq.getGatewayId())
 				.setOriginOrderId(orderReq.getOriginOrderId())
 				.build();
 	}
 	
-	public static ContractField makeContract(String symbol) {
+	public ContractField makeContract(String symbol) {
 		return ContractField.newBuilder()
-				.setGatewayId(GATEWAY_ID)
+				.setGatewayId(gatewayId)
 				.setCurrency(CurrencyEnum.CNY)
-				.setContractId(symbol + "@SHFE@FUTURES@" + GATEWAY_ID)
+				.setContractId(symbol + "@SHFE@FUTURES@" + gatewayId)
 				.setExchange(ExchangeEnum.SHFE)
 				.setFullName(symbol)
 				.setLongMarginRatio(0.08)
@@ -71,8 +75,9 @@ public class TestFieldFactory {
 				.build();
 	}
 	
-	public static TickField makeTickField(String symbol, double price) {
+	public TickField makeTickField(String symbol, double price) {
 		return TickField.newBuilder()
+				.setGatewayId(gatewayId)
 				.setUnifiedSymbol(symbol + "@SHFE@FUTURES")
 				.setActionDay(LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
 				.setActionTime(LocalTime.now().format(DateTimeConstant.T_FORMAT_FORMATTER))
@@ -83,9 +88,9 @@ public class TestFieldFactory {
 				.build();
 	}
 	
-	public static GatewaySettingField makeGatewaySetting() {
+	public GatewaySettingField makeGatewaySetting() {
 		return GatewaySettingField.newBuilder()
-				.setGatewayId(GATEWAY_ID)
+				.setGatewayId(gatewayId)
 				.build();
 	}
 

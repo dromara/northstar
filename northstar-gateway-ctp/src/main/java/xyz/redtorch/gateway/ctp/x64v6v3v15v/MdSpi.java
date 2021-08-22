@@ -56,7 +56,7 @@ public class MdSpi extends CThostFtdcMdSpi {
 	private String gatewayId;
 	private String tradingDay;
 	
-	private volatile long lastUpdateTickTime = System.currentTimeMillis();
+	private volatile long lastUpdateTickTime;
 
 	private Map<String, TickField> preTickMap = new HashMap<>();
 

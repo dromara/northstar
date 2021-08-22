@@ -83,6 +83,9 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 		log.info("创建网关[{}]", gatewayDescription.getGatewayId());
 		GatewayPO po = new GatewayPO();
 		BeanUtils.copyProperties(gatewayDescription, po);
+		if(null == gatewayDescription.getSettings()) {
+			throw new IllegalArgumentException("网关设置不能为空");
+		}
 		po.setSettings(CodecUtils.encrypt(JSON.toJSONString(gatewayDescription.getSettings())));
 		gatewayRepo.insert(po);
 		if(gatewayDescription.getGatewayUsage() == GatewayUsage.MARKET_DATA) {

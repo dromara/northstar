@@ -1,12 +1,6 @@
-/**
- * 
- */
 package integration;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
-import java.util.LinkedHashMap;
-import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
@@ -15,6 +9,7 @@ import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
@@ -23,6 +18,7 @@ import common.TestGatewayFactory;
 import common.TestMongoUtils;
 import tech.xuanwu.northstar.common.constant.GatewayType;
 import tech.xuanwu.northstar.common.constant.GatewayUsage;
+import tech.xuanwu.northstar.common.constant.ReturnCode;
 import tech.xuanwu.northstar.common.model.CtpSettings;
 import tech.xuanwu.northstar.common.model.GatewayDescription;
 import tech.xuanwu.northstar.common.model.NsUser;
@@ -30,7 +26,8 @@ import tech.xuanwu.northstar.common.model.ResultBean;
 import tech.xuanwu.northstar.common.model.SimSettings;
 
 /**
- * @author kevin
+ * GatewayManagement接口黑盒测试类
+ * @author KevinHuangwl
  *
  */
 public class GatewayManagementBIT {
@@ -70,28 +67,16 @@ public class GatewayManagementBIT {
 				TestGatewayFactory.makeMktGateway("TG1", GatewayType.CTP, TestGatewayFactory.makeGatewaySettings(CtpSettings.class),false),
 				HttpHeaders.readOnlyHttpHeaders(header));
 		ResultBean<Boolean> result = rest.postForObject("/mgt/gateway", entity, ResultBean.class);
-		assertThat(result.getData()).isTrue();
-		
-		entity = new HttpEntity<GatewayDescription>(
-				TestGatewayFactory.makeTrdGateway("TG2", "TG1", GatewayType.SIM, TestGatewayFactory.makeGatewaySettings(SimSettings.class),false),
-				HttpHeaders.readOnlyHttpHeaders(header));
-		result = rest.postForObject("/mgt/gateway", entity, ResultBean.class);
-		assertThat(result.getData()).isTrue();
+		assertThat(result.getStatus()).isEqualTo(ReturnCode.SUCCESS);
 	}
 	
 	@Test
 	public void shouldFindCreatedGateway() {
 		shouldCreateGateway();
 		
-		ResponseEntity<ResultBean> result1 = rest.exchange("/mgt/gateway?usage={1}", HttpMethod.GET, new HttpEntity(HttpHeaders.readOnlyHttpHeaders(header)), ResultBean.class, GatewayUsage.MARKET_DATA);
-		List<LinkedHashMap<String, Object>> list1 = (List<LinkedHashMap<String, Object>>) result1.getBody().getData();
-		assertThat(list1.size()).isEqualTo(1);
-		assertThat(list1.get(0).get("gatewayId")).isEqualTo("TG1");
-		
-		ResponseEntity<ResultBean> result2 = rest.exchange("/mgt/gateway?usage={1}", HttpMethod.GET, new HttpEntity(HttpHeaders.readOnlyHttpHeaders(header)), ResultBean.class, GatewayUsage.TRADE);
-		List<LinkedHashMap<String, Object>> list2 = (List<LinkedHashMap<String, Object>>) result2.getBody().getData();
-		assertThat(list2.size()).isEqualTo(1);
-		assertThat(list2.get(0).get("gatewayId")).isEqualTo("TG2");
+		ResponseEntity<ResultBean> result = rest.exchange("/mgt/gateway?usage={1}", HttpMethod.GET, new HttpEntity(HttpHeaders.readOnlyHttpHeaders(header)), ResultBean.class, GatewayUsage.MARKET_DATA);
+		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(result.getBody().getStatus()).isEqualTo(ReturnCode.SUCCESS);
 	}
 
 	@Test
@@ -99,15 +84,11 @@ public class GatewayManagementBIT {
 		shouldCreateGateway();
 		
 		HttpEntity entity = new HttpEntity<GatewayDescription>(
-				TestGatewayFactory.makeTrdGateway("TG2", "TG1", GatewayType.CTP, TestGatewayFactory.makeGatewaySettings(CtpSettings.class),false),
+				TestGatewayFactory.makeMktGateway("TG1", GatewayType.SIM, TestGatewayFactory.makeGatewaySettings(SimSettings.class),false),
 				HttpHeaders.readOnlyHttpHeaders(header));
-		rest.put("/mgt/gateway", entity);
-		
-		ResponseEntity<ResultBean> result2 = rest.exchange("/mgt/gateway?usage={1}", HttpMethod.GET, new HttpEntity(HttpHeaders.readOnlyHttpHeaders(header)), ResultBean.class, GatewayUsage.TRADE);
-		List<LinkedHashMap<String, Object>> list2 = (List<LinkedHashMap<String, Object>>) result2.getBody().getData();
-		assertThat(list2.size()).isEqualTo(1);
-		assertThat(list2.get(0).get("gatewayId")).isEqualTo("TG2");
-		assertThat(list2.get(0).get("gatewayType")).isEqualTo("CTP");
+		ResponseEntity<ResultBean> result = rest.exchange("/mgt/gateway", HttpMethod.PUT, entity, ResultBean.class);
+		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(result.getBody().getStatus()).isEqualTo(ReturnCode.SUCCESS);
 	}
 	
 	
@@ -115,32 +96,91 @@ public class GatewayManagementBIT {
 	public void shouldRemoveGateway() {
 		shouldCreateGateway();
 		
+		ResponseEntity<ResultBean> result = rest.exchange("/mgt/gateway?gatewayId=TG1", HttpMethod.DELETE, new HttpEntity(HttpHeaders.readOnlyHttpHeaders(header)), ResultBean.class);
+		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(result.getBody().getStatus()).isEqualTo(ReturnCode.SUCCESS);
 	}
 	
 	@Test
-	public void shouldFailIfNotProvidingSetting() {}
+	public void shouldFailIfNotProvidingSetting() {
+		HttpEntity<GatewayDescription> entity = new HttpEntity<GatewayDescription>(
+				TestGatewayFactory.makeMktGateway("TG1", GatewayType.CTP, null,false),
+				HttpHeaders.readOnlyHttpHeaders(header));
+		ResultBean<Boolean> result = rest.postForObject("/mgt/gateway", entity, ResultBean.class);
+		assertThat(result.getStatus()).isEqualTo(ReturnCode.ERROR);
+	}
+	
+	@Test(expected = HttpClientErrorException.class)
+	public void shouldFailIfNoInfoProvided() {
+		rest.postForObject("/mgt/gateway", null, ResultBean.class);
+	}
 	
 	@Test
-	public void shouldFailIfNoInfoProvided() {}
+	public void shouldSuccessWhenGettingActiveState() {
+		shouldCreateGateway();
+		
+		ResponseEntity<ResultBean> result = rest.exchange("/mgt/gateway/active?gatewayId=TG1", HttpMethod.GET, new HttpEntity(HttpHeaders.readOnlyHttpHeaders(header)), ResultBean.class);
+		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(result.getBody().getStatus()).isEqualTo(ReturnCode.SUCCESS);
+	}
 	
 	@Test
-	public void shouldSuccessWhenGettingState() {}
+	public void shouldSuccessWhenConnecting() {
+		shouldCreateGateway();
+		
+		ResponseEntity<ResultBean> result = rest.exchange("/mgt/connection?gatewayId=TG1", HttpMethod.GET, new HttpEntity(HttpHeaders.readOnlyHttpHeaders(header)), ResultBean.class);
+		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(result.getBody().getStatus()).isEqualTo(ReturnCode.SUCCESS);
+	}
 	
 	@Test
-	public void shouldSuccessWhenConnecting() {}
+	public void shouldSuccessWhenDisconnecting() {
+		shouldCreateGateway();
+		
+		ResponseEntity<ResultBean> result = rest.exchange("/mgt/connection?gatewayId=TG1", HttpMethod.DELETE, new HttpEntity(HttpHeaders.readOnlyHttpHeaders(header)), ResultBean.class);
+		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(result.getBody().getStatus()).isEqualTo(ReturnCode.SUCCESS);
+	}
 	
 	@Test
-	public void shouldFailIfGatewayNotFound() {}
+	public void shouldFailIfGatewayNotFound() {
+		ResponseEntity<ResultBean> result = rest.exchange("/mgt/connection?gatewayId=ANY", HttpMethod.GET, new HttpEntity(HttpHeaders.readOnlyHttpHeaders(header)), ResultBean.class);
+		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(result.getBody().getStatus()).isEqualTo(ReturnCode.NO_SUCH_ELEMENT_EXCEPTION);
+		ResponseEntity<ResultBean> result2 = rest.exchange("/mgt/connection?gatewayId=ANY", HttpMethod.DELETE, new HttpEntity(HttpHeaders.readOnlyHttpHeaders(header)), ResultBean.class);
+		assertThat(result2.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(result2.getBody().getStatus()).isEqualTo(ReturnCode.NO_SUCH_ELEMENT_EXCEPTION);
+	}
 	
 	@Test
-	public void shouldSuccessWhenDisconnecting() {}
+	public void shouldIncreaseBalance() {
+		shouldCreateGateway();
+		
+		HttpEntity<GatewayDescription> entity = new HttpEntity<GatewayDescription>(
+				TestGatewayFactory.makeTrdGateway("TG2", "", GatewayType.SIM, TestGatewayFactory.makeGatewaySettings(SimSettings.class), false),
+				HttpHeaders.readOnlyHttpHeaders(header));
+		rest.postForObject("/mgt/gateway", entity, ResultBean.class);
+		
+		ResponseEntity<ResultBean> result = rest.exchange("/mgt/moneyio?gatewayId=TG2&money=10000", HttpMethod.POST, new HttpEntity(HttpHeaders.readOnlyHttpHeaders(header)), ResultBean.class);
+		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(result.getBody().getStatus()).isEqualTo(ReturnCode.SUCCESS);
+	}
 	
 	@Test
-	public void shouldIncreaseBalance() {}
+	public void shouldDecreaseBalance() {
+		shouldIncreaseBalance();
+		
+		ResponseEntity<ResultBean> result = rest.exchange("/mgt/moneyio?gatewayId=TG2&money=-10000", HttpMethod.POST, new HttpEntity(HttpHeaders.readOnlyHttpHeaders(header)), ResultBean.class);
+		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(result.getBody().getStatus()).isEqualTo(ReturnCode.SUCCESS);
+	}
 	
 	@Test
-	public void shouldDecreaseBalance() {}
-	
-	@Test
-	public void shouldFailIfNotSimGateway() {}
+	public void shouldFailIfNotSimGateway() {
+		shouldCreateGateway();
+		
+		ResponseEntity<ResultBean> result = rest.exchange("/mgt/moneyio?gatewayId=TG1&money=10000", HttpMethod.POST, new HttpEntity(HttpHeaders.readOnlyHttpHeaders(header)), ResultBean.class);
+		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(result.getBody().getStatus()).isEqualTo(ReturnCode.ERROR);
+	}
 }

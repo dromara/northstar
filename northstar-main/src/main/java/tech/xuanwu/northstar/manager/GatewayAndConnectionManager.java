@@ -36,18 +36,6 @@ public class GatewayAndConnectionManager {
 		gatewayMap.remove(gateway.getGatewaySetting().getGatewayId());
 	}
 
-	public void onGatewayUpdate(Gateway gateway) {
-		String gatewayId = gateway.getGatewaySetting().getGatewayId();
-		checkExist(gatewayId);
-		gatewayMap.get(gatewayId).gw = gateway;
-	}
-
-	public void onGatewayConnectionUpdate(GatewayConnection conn) {
-		String gatewayId = conn.getGwDescription().getGatewayId();
-		checkExist(gatewayId);
-		gatewayMap.get(gatewayId).conn = conn;
-	}
-
 	public Gateway getGatewayByConnection(GatewayConnection conn) {
 		return getGatewayById(conn.getGwDescription().getGatewayId());
 	}

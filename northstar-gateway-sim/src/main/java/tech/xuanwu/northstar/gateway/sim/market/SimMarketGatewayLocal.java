@@ -82,7 +82,9 @@ public class SimMarketGatewayLocal implements MarketGateway{
 
 	@Override
 	public void disconnect() {
-		task.cancel(false);
+		if(task != null) {			
+			task.cancel(false);
+		}
 		log.info("模拟行情断开");
 		feEngine.emitEvent(NorthstarEventType.DISCONNECTED, settings.getGatewayId());
 	}
