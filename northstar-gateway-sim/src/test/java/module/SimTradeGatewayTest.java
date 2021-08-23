@@ -141,8 +141,7 @@ public class SimTradeGatewayTest {
 		
 		SubmitOrderReqField orderReq = ff.makeOrderReq(RB, DirectionEnum.D_Sell, OffsetFlagEnum.OF_CloseToday, 1, 1234, 1000);
 		gateway.submitOrder(orderReq);
-		verify(feEngine).emitEvent(eq(NorthstarEventType.ORDER), argThat(order -> ((OrderField)order).getOffsetFlag() == OffsetFlagEnum.OF_CloseToday
-				&& ((OrderField)order).getOrderStatus() == OrderStatusEnum.OS_Touched));
+		verify(feEngine, times(2)).emitEvent(eq(NorthstarEventType.ORDER), argThat(order -> ((OrderField)order).getOrderStatus() == OrderStatusEnum.OS_Touched));
 		verify(feEngine).emitEvent(eq(NorthstarEventType.POSITION), argThat(pos -> ((PositionField)pos).getPosition() == 1
 				&& ((PositionField)pos).getFrozen() == 1 && ((PositionField)pos).getTdFrozen() == 1));
 	}
@@ -234,8 +233,7 @@ public class SimTradeGatewayTest {
 		SubmitOrderReqField orderReq = ff.makeOrderReq(RB, DirectionEnum.D_Sell, OffsetFlagEnum.OF_CloseToday, 1, 1234, 1000);
 		CancelOrderReqField cancelReq = ff.makeCancelReq(orderReq);
 		gateway.submitOrder(orderReq);
-		verify(feEngine).emitEvent(eq(NorthstarEventType.ORDER), argThat(order -> ((OrderField)order).getOffsetFlag() == OffsetFlagEnum.OF_CloseToday
-				&& ((OrderField)order).getOrderStatus() == OrderStatusEnum.OS_Touched));
+		verify(feEngine, times(2)).emitEvent(eq(NorthstarEventType.ORDER), argThat(order -> ((OrderField)order).getOrderStatus() == OrderStatusEnum.OS_Touched));
 		gateway.cancelOrder(cancelReq);
 		verify(feEngine, times(2)).emitEvent(eq(NorthstarEventType.POSITION), argThat(pos -> ((PositionField)pos).getPosition() == 1
 				&& ((PositionField)pos).getFrozen() == 0 && ((PositionField)pos).getTdFrozen() == 0));
