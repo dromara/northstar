@@ -21,6 +21,8 @@ logging:
   path: logs/
   
 spring:
+  profiles:
+    active: ${env:prod}
   mail:
     host: smtp.126.com
     username: ${email:somemail@126.com}
@@ -40,16 +42,16 @@ spring:
           ssl:
             enable: true
             socketFactory.class: com.fintech.modules.base.util.mail.MailSSLSocketFactory
-  profiles:
-    active: prod
+---
+spring:
+  profiles: prod
   data:
     mongodb:
       uri: mongodb://127.0.0.1:27017/NS_DB
-  
+
 ---
 spring:
-  profiles:
-    active: dev
+  profiles: dev
   data:
     mongodb:
       uri: mongodb://127.0.0.1:27017/TEST_NS_DB
