@@ -74,12 +74,9 @@ class GwOrderHolder {
 					submitOrderReq.getDirection(), submitOrderReq.getOffsetFlag(), submitOrderReq.getVolume(), submitOrderReq.getPrice());
 			return tradeIntent.rejectOrder(tradingDay, "仓位不足");
 		}
+		// TODO 由于模拟盘没有日结算，所以暂时不考虑今仓昨仓问题
 		int totalAvailable = pf.getPosition() - pf.getFrozen();
-		int tdAvailable = pf.getTdPosition() - pf.getTdFrozen();
-		int ydAvailable = pf.getYdPosition() - pf.getYdFrozen();
-		if(submitOrderReq.getOffsetFlag() == OffsetFlagEnum.OF_CloseToday && tdAvailable < submitOrderReq.getVolume()
-				|| submitOrderReq.getOffsetFlag() == OffsetFlagEnum.OF_CloseYesterday && ydAvailable < submitOrderReq.getVolume()
-				|| totalAvailable < submitOrderReq.getVolume()) {
+		if(totalAvailable < submitOrderReq.getVolume()) {
 			log.warn("仓位不足，无法下单：{}, {}, {}, {}, {}手, {}", submitOrderReq.getOriginOrderId(), submitOrderReq.getContract().getName(),
 					submitOrderReq.getDirection(), submitOrderReq.getOffsetFlag(), submitOrderReq.getVolume(), submitOrderReq.getPrice());
 			return tradeIntent.rejectOrder(tradingDay, "仓位不足");

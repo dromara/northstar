@@ -139,6 +139,7 @@ public class MarketDataRepository {
 	 * @param contract
 	 */
 	public void saveContract(ContractPO contract) {
+		log.info("保存合约：{}", contract.getFullName());
 		mongo.save(contract);
 	}
 	
@@ -158,7 +159,7 @@ public class MarketDataRepository {
 	 * @return
 	 */
 	public List<ContractPO> getAvailableContracts(){
-		// 查询十四天内的数据集
+		log.info("查询十四天内登记过的有效合约");
 		long day14Ago = System.currentTimeMillis() - DAY14MILLISEC;
 		return mongo.find(Query.query(Criteria.where("recordTimestamp").gt(day14Ago)), ContractPO.class);
 	}

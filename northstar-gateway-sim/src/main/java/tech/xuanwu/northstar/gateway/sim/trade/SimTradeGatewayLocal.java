@@ -47,12 +47,6 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 		
 		// 模拟返回合约
 		CompletableFuture.runAsync(()->{
-			try {
-				//模拟异步返回合约
-				Thread.sleep(3000);
-			} catch (InterruptedException e) {
-				log.warn("", e);
-			}
 			LocalDate date = LocalDate.now().plusDays(45);
 			String year = date.getYear() % 100 + "";
 			String month = String.format("%02d", date.getMonth().getValue());

@@ -65,29 +65,20 @@ public class DataSyncService {
 	 */
 	public void asyncUpdateTradeAccount() throws Exception {
 		log.info("异步更新账户信息");
-		NorthstarEvent event = new NorthstarEvent(null, null);
 		for(Entry<String, TradeDayAccount> e : accountMap.entrySet()) {
 			TradeDayAccount account = e.getValue();
-			event.setData(account.getAccountInfo());
-			event.setEvent(NorthstarEventType.ACCOUNT);
-			msgEngine.emitEvent(event, AccountField.class);
+			msgEngine.emitEvent(new NorthstarEvent(NorthstarEventType.ACCOUNT, account.getAccountInfo()), AccountField.class);
 			
-			event.setEvent(NorthstarEventType.POSITION);
 			for(PositionField pf : account.getPositions()) {
-				event.setData(pf);
-				msgEngine.emitEvent(event, PositionField.class);
+				msgEngine.emitEvent(new NorthstarEvent(NorthstarEventType.POSITION, pf), PositionField.class);
 			}
 			
-			event.setEvent(NorthstarEventType.ORDER);
 			for(OrderField of : account.getTradeDayOrders()) {
-				event.setData(of);
-				msgEngine.emitEvent(event, OrderField.class);
+				msgEngine.emitEvent(new NorthstarEvent(NorthstarEventType.ORDER, of), OrderField.class);
 			}
 			
-			event.setEvent(NorthstarEventType.TRADE);
 			for(TradeField tf : account.getTradeDayTransactions()) {
-				event.setData(tf);
-				msgEngine.emitEvent(event, TradeField.class);
+				msgEngine.emitEvent(new NorthstarEvent(NorthstarEventType.TRADE, tf), TradeField.class);
 			}
 		}
 	}

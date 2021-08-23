@@ -59,6 +59,9 @@ public class TradeIntent {
 			throw new IllegalStateException("当前状态不匹配：" + state.get());
 		}
 		state.incrementAndGet();
+		OffsetFlagEnum offsetFlag = orderReq.getOffsetFlag() != OffsetFlagEnum.OF_Open && orderReq.getOffsetFlag() != OffsetFlagEnum.OF_Unknown 
+				? OffsetFlagEnum.OF_Close 
+				: orderReq.getOffsetFlag();
 		return order.setActiveTime(String.valueOf(System.currentTimeMillis()))
 				.setOrderId(orderReq.getGatewayId() + "_" + UUID.randomUUID().toString())
 				.setContract(orderReq.getContract())
@@ -72,7 +75,7 @@ public class TradeIntent {
 				.setOrderTime(LocalTime.now().format(DateTimeConstant.T_FORMAT_FORMATTER))
 				.setAccountId(orderReq.getGatewayId())
 				.setTotalVolume(orderReq.getVolume())
-				.setOffsetFlag(orderReq.getOffsetFlag())
+				.setOffsetFlag(offsetFlag)
 				.setOrderPriceType(orderReq.getOrderPriceType())
 				.setGtdDate(orderReq.getGtdDate())
 				.setMinVolume(orderReq.getMinVolume())
