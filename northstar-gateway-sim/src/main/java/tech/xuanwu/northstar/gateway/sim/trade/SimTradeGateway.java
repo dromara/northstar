@@ -8,8 +8,9 @@ public interface SimTradeGateway extends TradeGateway{
 	/**
 	 * 出入金
 	 * @param money
+	 * @return 		最新余额
 	 */
-	void moneyIO(int money);
+	int moneyIO(int money);
 	
 	/**
 	 * 行情刷新

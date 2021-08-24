@@ -57,8 +57,8 @@ class GwOrderHolder {
 		
 		OrderField order = tradeIntent.transformOrder(tradingDay);
 		originOrderIdMap.put(submitOrderReq.getOriginOrderId(), tradeIntent);
-		log.info("成功下单：{}, {}, {}, {}, {}手, {}", submitOrderReq.getOriginOrderId(), submitOrderReq.getContract().getName(), submitOrderReq.getDirection(),
-				submitOrderReq.getOffsetFlag(), submitOrderReq.getVolume(), submitOrderReq.getPrice());
+		log.info("成功下单：{}, {}, {}, {}, {}手, 委托价：{}, 止损价：{}", submitOrderReq.getOriginOrderId(), submitOrderReq.getContract().getName(), submitOrderReq.getDirection(),
+				submitOrderReq.getOffsetFlag(), submitOrderReq.getVolume(), submitOrderReq.getPrice(), submitOrderReq.getStopPrice());
 		return order;
 	}
 	

@@ -1,5 +1,6 @@
 package module;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -36,7 +37,7 @@ import xyz.redtorch.pb.CoreField.TradeField;
  * @author KevinHuangwl
  *
  */
-public class SimTradeGatewayTest {
+public class SimTradeGatewayWIT {
 	
 	private SimTradeGateway gateway;
 	
@@ -61,8 +62,7 @@ public class SimTradeGatewayTest {
 	 */
 	@Test
 	public void testMoneyIn() {
-		gateway.moneyIO(20000);
-		verify(feEngine, times(2)).emitEvent(eq(NorthstarEventType.ACCOUNT), argThat(acc -> ((AccountField)acc).getBalance() == 20000));
+		assertThat(gateway.moneyIO(20000)).isEqualTo(20000);
 	}
 
 	/**
@@ -71,10 +71,8 @@ public class SimTradeGatewayTest {
 	 */
 	@Test
 	public void testMoneyOut() throws InterruptedException {
-		gateway.moneyIO(20000);
-		Thread.sleep(1200);
-		gateway.moneyIO(-100);
-		verify(feEngine,times(2)).emitEvent(eq(NorthstarEventType.ACCOUNT), argThat(acc -> ((AccountField)acc).getBalance() == 19900));
+		assertThat(gateway.moneyIO(20000)).isEqualTo(20000);
+		assertThat(gateway.moneyIO(-1000)).isEqualTo(19000);
 	}
 	
 	/**
