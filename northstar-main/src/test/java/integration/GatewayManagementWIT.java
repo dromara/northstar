@@ -1,14 +1,15 @@
 package integration;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import java.util.List;
 
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +39,7 @@ import xyz.redtorch.pb.CoreField.AccountField;
  *
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = NorthstarApplication.class, value="spring.profiles.active=dev")
+@SpringBootTest(classes = NorthstarApplication.class, value="spring.profiles.active=test")
 public class GatewayManagementWIT {
 	
 	@MockBean
@@ -49,6 +50,11 @@ public class GatewayManagementWIT {
 	
 	@MockBean
 	private FastEventEngine feEngine;
+	
+	@Before
+	public void SetupContext() {
+		TestMongoUtils.clearDB();
+	}
 	
 	@After
 	public void tearDown() {

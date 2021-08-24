@@ -21,7 +21,7 @@ public class ModuleStateMachine {
 		this.curState = state;
 	}
 	
-	public void transformForm(ModuleEventType eventType) {
+	public ModuleState transformForm(ModuleEventType eventType) {
 		switch(eventType) {
 		case OPENING_SIGNAL_CREATED:
 			if(curState != ModuleState.EMPTY) {
@@ -79,9 +79,16 @@ public class ModuleStateMachine {
 			}
 			setState(curState == ModuleState.RETRIEVING_FOR_RETRY ? ModuleState.PLACING_ORDER : originState);
 			break;
+		case STOP_LOSS:
+			if(!curState.isHolding()) {
+				throw new IllegalStateException("当前状态异常：" + curState);
+			}
+			setState(ModuleState.EMPTY);
+			break;
 		default:
 			throw new IllegalStateException("未有" + eventType + "事件处理逻辑");
 		}
+		return curState;
 	}
 	
 	private void setState(ModuleState newState) {
