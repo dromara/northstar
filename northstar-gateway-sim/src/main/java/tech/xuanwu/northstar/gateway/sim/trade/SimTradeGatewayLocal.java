@@ -100,12 +100,11 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 	}
 
 	@Override
-	public void moneyIO(int money) {
+	public int moneyIO(int money) {
 		if(money >= 0) {			
-			accountHolder.deposit(money);
-		} else if(money < 0) {
-			accountHolder.withdraw(Math.abs(money));
+			return accountHolder.deposit(money);
 		}
+		return accountHolder.withdraw(Math.abs(money));
 	}
 
 	@Override

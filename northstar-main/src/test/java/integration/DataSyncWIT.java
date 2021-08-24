@@ -33,7 +33,7 @@ import xyz.redtorch.pb.CoreField.AccountField;
 import xyz.redtorch.pb.CoreField.BarField;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = NorthstarApplication.class, value="spring.profiles.active=dev")
+@SpringBootTest(classes = NorthstarApplication.class, value="spring.profiles.active=test")
 public class DataSyncWIT {
 	
 	@MockBean

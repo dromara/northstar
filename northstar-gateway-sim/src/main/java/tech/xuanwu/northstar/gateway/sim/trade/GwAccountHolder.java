@@ -94,7 +94,7 @@ class GwAccountHolder {
 	 * 
 	 * @param money
 	 */
-	protected void deposit(int money) {
+	protected int deposit(int money) {
 		if (money < 0) {
 			throw new IllegalArgumentException("入金金额不能少于零");
 		}
@@ -102,6 +102,7 @@ class GwAccountHolder {
 		refreshAccount();
 		//需要立即更新账户
 		feEngine.emitEvent(NorthstarEventType.ACCOUNT, accBuilder.build());
+		return (int) accBuilder.getBalance();
 	}
 
 	/**
@@ -109,7 +110,7 @@ class GwAccountHolder {
 	 * 
 	 * @param money
 	 */
-	protected void withdraw(int money) {
+	protected int withdraw(int money) {
 		if (money < 0) {
 			throw new IllegalArgumentException("出金金额不能少于零");
 		}
@@ -120,6 +121,7 @@ class GwAccountHolder {
 		refreshAccount();
 		//需要立即更新账户
 		feEngine.emitEvent(NorthstarEventType.ACCOUNT, accBuilder.build());
+		return (int) accBuilder.getBalance();
 	}
 
 	/**
