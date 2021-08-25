@@ -178,7 +178,10 @@ public class TradeIntent {
 		if (state.get() != STATE_HOLDING) {
 			return Optional.empty();
 		}
-		if(orderReq.getOffsetFlag() == OffsetFlagEnum.OF_Open && tick.getLastPrice() <= orderReq.getStopPrice()) {
+		boolean stopLossValid = orderReq.getOffsetFlag() == OffsetFlagEnum.OF_Open && orderReq.getStopPrice() > 0;
+		boolean stopLossTriggered = orderReq.getDirection() == DirectionEnum.D_Buy && tick.getLastPrice() <= orderReq.getStopPrice()
+				|| orderReq.getDirection() == DirectionEnum.D_Sell && tick.getLastPrice() >= orderReq.getStopPrice();
+		if(stopLossValid && stopLossTriggered) {
 			state.incrementAndGet();
 			ContractField contract = orderReq.getContract();
 			int factor = orderReq.getDirection() == DirectionEnum.D_Buy ? 1 : -1;
