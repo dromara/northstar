@@ -1,7 +1,7 @@
 package tech.xuanwu.northstar.gateway.api;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.engine.event.FastEventEngine;
@@ -24,7 +24,7 @@ public abstract class GatewayAbstract implements Gateway {
 	
 	protected FastEventEngine fastEventEngine;
 	
-	public Map<String, ContractField> contractMap = new HashMap<>();
+	public Map<String, ContractField> contractMap = new ConcurrentHashMap<>();
 
 	public GatewayAbstract(GatewaySettingField gatewaySetting) {
 		this.gatewaySetting = gatewaySetting;

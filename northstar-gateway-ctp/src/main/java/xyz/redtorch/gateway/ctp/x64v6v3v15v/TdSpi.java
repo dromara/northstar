@@ -345,7 +345,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 		new Thread() {
 			public void run() {
 				try {
-					Thread.sleep(15 * 1000);
+					Thread.sleep(60 * 1000);
 					if (!(isConnected() && investorNameQueried && instrumentQueried)) {
 						logger.error("{}交易接口连接超时,尝试断开", logInfo);
 						gatewayAdapter.disconnect();
@@ -524,27 +524,9 @@ public class TdSpi extends CThostFtdcTraderSpi {
 
 			cThostFtdcInputOrderField.setOrderRef(orderRef + "");
 
-			logger.info("{}交易接口发单记录->{\n" //
-					+ "InstrumentID:{},\n" //
-					+ "LimitPrice:{},\n" //
-					+ "VolumeTotalOriginal:{},\n" //
-					+ "OrderPriceType:{},\n" //
-					+ "Direction:{},\n" //
-					+ "CombOffsetFlag:{},\n" //
-					+ "OrderRef:{},\n" //
-					+ "InvestorID:{},\n" //
-					+ "UserID:{},\n" //
-					+ "BrokerID:{},\n" //
-					+ "ExchangeID:{},\n" //
-					+ "CombHedgeFlag:{},\n" //
-					+ "ContingentCondition:{},\n" //
-					+ "ForceCloseReason:{},\n" //
-					+ "IsAutoSuspend:{},\n" //
-					+ "IsSwapOrder:{},\n" //
-					+ "MinVolume:{},\n" //
-					+ "TimeCondition:{},\n" //
-					+ "VolumeCondition:{},\n" //
-					+ "StopPrice:{}}", //
+			logger.info("{}交易接口发单记录：InstrumentID:{}, LimitPrice:{}, VolumeTotalOriginal:{}, OrderPriceType:{}, Direction:{}, CombOffsetFlag:{},\n" //
+					+ "OrderRef:{}, InvestorID:{}, UserID:{}, BrokerID:{}, ExchangeID:{}, CombHedgeFlag:{}, ContingentCondition:{}, ForceCloseReason:{},\n" //
+					+ "IsAutoSuspend:{}, IsSwapOrder:{}, MinVolume:{}, TimeCondition:{}, VolumeCondition:{}, StopPrice:{}", //
 					logInfo, //
 					cThostFtdcInputOrderField.getInstrumentID(), //
 					cThostFtdcInputOrderField.getLimitPrice(), //
@@ -1623,6 +1605,8 @@ public class TdSpi extends CThostFtdcTraderSpi {
 				orderBuilder.setContract(contractBuilder);
 				orderBuilderCacheList.add(orderBuilder);
 			}
+			logger.info("{}委托回报：合约{}，单号{}，方向{}，开平{}，价格{}，止损{}，手数{}，交易日{}，类型{} & {}，状态{}", logInfo, 
+					symbol, originalOrderId, direction, offsetFlag, price, stopPrice, tradedVolume, tradingDay, hedgeFlag, timeCondition, orderStatus);
 		} catch (Throwable t) {
 			logger.error("{}OnRtnOrder Exception", logInfo, t);
 		}
@@ -1702,7 +1686,8 @@ public class TdSpi extends CThostFtdcTraderSpi {
 				tradeBuilder.setContract(contractBuilder);
 				tradeBuilderCacheList.add(tradeBuilder);
 			}
-
+			logger.info("{}成交回报：合约{}，单号{}，方向{}，开平{}，价格{}，手数{}，交易日{}，类型{} & {}", logInfo, 
+					symbol, originalOrderId, direction, offsetFlag, price, volume, tradingDay, hedgeFlag, tradeType);
 		} catch (Throwable t) {
 			logger.error("{}OnRtnTrade Exception", logInfo, t);
 		}
