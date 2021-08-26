@@ -189,23 +189,6 @@ public class SimTradeGatewayWIT {
 	}
 	
 	/**
-	 * 止损测试
-	 * @throws InterruptedException 
-	 */
-	@Test
-	public void testStopLoss() throws InterruptedException {
-		testOpeningTrade();
-		
-		gateway.onTick(ff.makeTickField(RB, 1000));
-		verify(feEngine).emitEvent(eq(NorthstarEventType.TRADE), argThat(trade -> ((TradeField)trade).getPrice() == 1000));
-		verify(feEngine).emitEvent(eq(NorthstarEventType.POSITION), argThat(pos -> ((PositionField)pos).getPosition() == 0));
-		Thread.sleep(1200);
-		gateway.onTick(ff.makeTickField(RB, 1000));
-		verify(feEngine).emitEvent(eq(NorthstarEventType.ACCOUNT), argThat(acc -> ((AccountField)acc).getMargin() == 0
-				&& ((AccountField)acc).getCloseProfit() == -2010 && ((AccountField)acc).getCommission() == 20));
-	}
-	
-	/**
 	 * 无持仓状态下撤单测试
 	 */
 	@Test

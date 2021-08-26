@@ -34,8 +34,6 @@ public class TradeIntent {
 
 	private OrderField.Builder order = OrderField.newBuilder();
 
-	private OrderField.Builder stopOrder = OrderField.newBuilder();
-	
 	private TradeField.Builder trade = TradeField.newBuilder();
 	
 	private ConcurrentHashMap<String, TradeIntent> intentMap;
@@ -128,9 +126,6 @@ public class TradeIntent {
 		if(!isContractMatch(tick.getUnifiedSymbol())) {
 			throw new IllegalArgumentException("合约不匹配");
 		}
-		if (state.get() == STATE_HOLDING) {
-			return tryStopLoss(tick);
-		}
 		ContractField contract = orderReq.getContract();
 		if(state.get() == STATE_ORDER 
 				&& (order.getDirection() == DirectionEnum.D_Buy && tick.getAskPrice(0) <= order.getPrice()
@@ -174,57 +169,6 @@ public class TradeIntent {
 		return trade.build();
 	}
 
-	public Optional<OrderField> tryStopLoss(TickField tick) {
-		if (state.get() != STATE_HOLDING) {
-			return Optional.empty();
-		}
-		if(orderReq.getOffsetFlag() == OffsetFlagEnum.OF_Open && tick.getLastPrice() <= orderReq.getStopPrice()) {
-			state.incrementAndGet();
-			ContractField contract = orderReq.getContract();
-			int factor = orderReq.getDirection() == DirectionEnum.D_Buy ? 1 : -1;
-			stopOrder
-				.setOrderId(orderReq.getGatewayId() + "_" + UUID.randomUUID().toString())
-				.setContract(orderReq.getContract())
-				.setPrice(tick.getLastPrice())
-				.setDirection(factor > 0 ? DirectionEnum.D_Sell : DirectionEnum.D_Buy)
-				.setOffsetFlag(OffsetFlagEnum.OF_CloseToday)
-				.setOriginOrderId(orderReq.getOriginOrderId())
-				.setGatewayId(orderReq.getGatewayId())
-				.setVolumeCondition(orderReq.getVolumeCondition())
-				.setTradingDay(tick.getTradingDay())
-				.setOrderDate(LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
-				.setOrderTime(LocalTime.now().format(DateTimeConstant.T_FORMAT_FORMATTER))
-				.setAccountId(orderReq.getGatewayId())
-				.setTotalVolume(order.getTradedVolume())
-				.setOrderPriceType(orderReq.getOrderPriceType())
-				.setGtdDate(orderReq.getGtdDate())
-				.setMinVolume(orderReq.getMinVolume())
-				.setSequenceNo("1")
-				.setOrderStatus(OrderStatusEnum.OS_AllTraded)
-				.setStatusMsg("止损单已成交");
-			trade = TradeField.newBuilder()
-					.setTradeId(System.currentTimeMillis()+"")
-					.setAccountId(stopOrder.getGatewayId())
-					.setAdapterOrderId("")
-					.setContract(contract)
-					.setDirection(stopOrder.getDirection())
-					.setGatewayId(stopOrder.getGatewayId())
-					.setHedgeFlag(stopOrder.getHedgeFlag())
-					.setOffsetFlag(stopOrder.getOffsetFlag())
-					.setOrderId(stopOrder.getOrderId())
-					.setOriginOrderId(stopOrder.getOriginOrderId())
-					.setPrice(tick.getLastPrice())
-					.setPriceSource(PriceSourceEnum.PSRC_LastPrice)
-					.setTradeDate(LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
-					.setTradingDay(tick.getTradingDay())
-					.setTradeTime(LocalTime.now().format(DateTimeConstant.T_FORMAT_FORMATTER))
-					.setVolume(stopOrder.getTotalVolume());
-			log.info("止损触发{}手，合约：{}，成本价：{}，止损价：{}", trade.getVolume(), contract.getFullName(), order.getPrice(), stopOrder.getPrice());
-			return Optional.of(stopOrder.build());
-		}
-		return Optional.empty();
-	}
-	
 	public double getFrozenMargin() {
 		if(isOpen() && state.get() == STATE_ORDER) {
 			return (order.getTotalVolume() - order.getTradedVolume()) * order.getContract().getMultiplier() * order.getPrice() * order.getContract().getLongMarginRatio();

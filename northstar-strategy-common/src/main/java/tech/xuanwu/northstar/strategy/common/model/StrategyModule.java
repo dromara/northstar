@@ -1,12 +1,12 @@
 package tech.xuanwu.northstar.strategy.common.model;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -40,6 +40,7 @@ import xyz.redtorch.pb.CoreField.TradeField;
  * @author KevinHuangwl
  *
  */
+// FIXME 未考虑模组发出的订单分多次成交的情况
 @Slf4j
 @Builder
 public class StrategyModule {
@@ -71,7 +72,10 @@ public class StrategyModule {
 	private long lastWarningTime;
 	
 	@Builder.Default
-	private Set<String> originOrderIdSet = new HashSet<>();
+	private Map<String, OrderField> originOrderIdMap = new HashMap<>();
+	//FIXME 未考虑重启程序可能出现的止损丢失问题
+	@Builder.Default
+	private LinkedList<StopLossItem> stopLossItemRegistry = new LinkedList<>();
 	
 	public StrategyModule onTick(TickField tick) {
 		if(!StringUtils.equals(mktGatewayId, tick.getGatewayId())) {
@@ -104,6 +108,17 @@ public class StrategyModule {
 			}
 		}
 		if(dealer.bindedUnifiedSymbols().contains(tick.getUnifiedSymbol())) {
+			//遍历止损记录，检查止损触发
+			Iterator<StopLossItem> itItem = stopLossItemRegistry.iterator();
+			while(itItem.hasNext()) {
+				StopLossItem item = itItem.next();
+				Optional<SubmitOrderReqField> stopLossOrder = item.onTick(tick);
+				if(stopLossOrder.isPresent()) {
+					gateway.submitOrder(stopLossOrder.get());
+					itItem.remove();
+				}
+			}
+			
 			if(stateMachine.getState() == ModuleState.PLACING_ORDER) {
 				Optional<SubmitOrderReqField> submitOrder = dealer.onTick(tick);
 				if(submitOrder.isEmpty()) {
@@ -119,7 +134,7 @@ public class StrategyModule {
 						return this;
 					}
 				}
-				originOrderIdSet.add(submitOrder.get().getOriginOrderId());
+				originOrderIdMap.put(submitOrder.get().getOriginOrderId(), OrderField.newBuilder().build());	// 用空的订单对象占位
 				gateway.submitOrder(submitOrder.get());
 			}
 			
@@ -132,9 +147,8 @@ public class StrategyModule {
 				stateMachine.transformForm((riskCode & RiskAuditResult.REJECTED) > 0 
 						? ModuleEventType.REJECT_RISK_ALERTED 
 						: ModuleEventType.RETRY_RISK_ALERTED);
-				Iterator<String> itOrder = originOrderIdSet.iterator();
-				while(itOrder.hasNext()) {
-					String originOrderId = itOrder.next();
+				for(Entry<String, OrderField> e : originOrderIdMap.entrySet()) {
+					String originOrderId = e.getKey();
 					CancelOrderReqField cancelOrder = CancelOrderReqField.newBuilder()
 							.setGatewayId(gateway.getGatewaySetting().getGatewayId())
 							.setOriginOrderId(originOrderId)
@@ -155,7 +169,8 @@ public class StrategyModule {
 	}
 	
 	public StrategyModule onOrder(OrderField order) {
-		if(originOrderIdSet.contains(order.getOriginOrderId())) {
+		if(originOrderIdMap.containsKey(order.getOriginOrderId())) {
+			originOrderIdMap.put(order.getOriginOrderId(), order); //更新
 			switch(order.getOrderStatus()) {
 			case OS_AllTraded:
 				// DO NOTHING
@@ -163,7 +178,7 @@ public class StrategyModule {
 			case OS_Rejected:
 			case OS_Canceled:
 				stateMachine.transformForm(ModuleEventType.ORDER_CANCELLED);
-				originOrderIdSet.remove(order.getOriginOrderId());
+				originOrderIdMap.remove(order.getOriginOrderId());
 				break;
 			default:
 				stateMachine.transformForm(ModuleEventType.ORDER_SUBMITTED);
@@ -173,9 +188,22 @@ public class StrategyModule {
 	}
 	
 	public boolean onTrade(TradeField trade) {
-		if(originOrderIdSet.contains(trade.getOriginOrderId())) {
-			originOrderIdSet.remove(trade.getOriginOrderId());
-			stateMachine.transformForm(trade.getDirection() == DirectionEnum.D_Buy ? ModuleEventType.BUY_TRADED : ModuleEventType.SELL_TRADED);
+		if(originOrderIdMap.containsKey(trade.getOriginOrderId())) {
+			OrderField order = originOrderIdMap.remove(trade.getOriginOrderId());
+			Optional<StopLossItem> stopLossItem = StopLossItem.generateFrom(trade, order);
+			if(stopLossItem.isPresent()) {
+				stopLossItemRegistry.add(stopLossItem.get());
+			}
+			// 考虑一个order分多次成交的情况
+			if(trade.getVolume() < order.getTradedVolume()) {
+				log.info("订单{}分可能多次成交", order.getOriginOrderId());
+				OrderField restOrder = OrderField.newBuilder(order)
+						.setTradedVolume(order.getTradedVolume() - trade.getVolume())
+						.build();
+				originOrderIdMap.put(restOrder.getOriginOrderId(), restOrder);
+			} else {				
+				stateMachine.transformForm(trade.getDirection() == DirectionEnum.D_Buy ? ModuleEventType.BUY_TRADED : ModuleEventType.SELL_TRADED);
+			}
 			mTrade.updateTrade(TradeDescription.convertFrom(getName(), trade));
 			mPosition.onTrade(trade);
 			return true;
