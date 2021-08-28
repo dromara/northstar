@@ -17,6 +17,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import com.corundumstudio.socketio.SocketIOServer;
+
 import common.TestMongoUtils;
 import tech.xuanwu.northstar.NorthstarApplication;
 import tech.xuanwu.northstar.common.model.GatewayDescription;
@@ -38,6 +40,9 @@ public class ModuleWIT {
 
 	@MockBean
 	private GatewayAndConnectionManager gatewayConnMgr;
+	
+	@MockBean
+	private SocketIOServer server;
 	
 	@Before
 	public void setUp() throws Exception {
