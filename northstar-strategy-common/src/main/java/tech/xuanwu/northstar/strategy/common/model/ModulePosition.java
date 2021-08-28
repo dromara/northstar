@@ -2,7 +2,7 @@ package tech.xuanwu.northstar.strategy.common.model;
 
 import org.apache.commons.lang3.StringUtils;
 
-import tech.xuanwu.northstar.common.model.ModulePositionEntity;
+import tech.xuanwu.northstar.strategy.common.model.entity.ModulePositionEntity;
 import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
 import xyz.redtorch.pb.CoreField.TickField;
 

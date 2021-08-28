@@ -6,8 +6,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import tech.xuanwu.northstar.common.model.ModulePositionEntity;
 import tech.xuanwu.northstar.strategy.common.TestFieldFactory;
+import tech.xuanwu.northstar.strategy.common.model.entity.ModulePositionEntity;
 import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
 
 public class ModulePositionTest {
