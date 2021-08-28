@@ -5,11 +5,16 @@ import java.util.List;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import tech.xuanwu.northstar.strategy.common.constants.ModuleType;
 import tech.xuanwu.northstar.strategy.common.model.meta.ComponentAndParamsPair;
 
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Document
 @Data
 public class ModuleInfo {

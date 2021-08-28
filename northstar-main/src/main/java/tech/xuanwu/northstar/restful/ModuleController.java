@@ -49,17 +49,15 @@ public class ModuleController {
 	}
 	
 	@PostMapping("/module")
-	public ResultBean<Void> createModule(@RequestBody ModuleInfo module) throws Exception{
+	public ResultBean<Boolean> createModule(@RequestBody ModuleInfo module) throws Exception{
 		Assert.notNull(module, "模组信息不能为空");
-		service.createModule(module);
-		return new ResultBean<>(null);
+		return new ResultBean<>(service.createModule(module));
 	}
 	
 	@PutMapping("/module")
-	public ResultBean<Void> updateModule(@RequestBody ModuleInfo module) throws Exception{
+	public ResultBean<Boolean> updateModule(@RequestBody ModuleInfo module) throws Exception{
 		Assert.notNull(module, "模组信息不能为空");
-		service.updateModule(module);
-		return new ResultBean<>(null);
+		return new ResultBean<>(service.updateModule(module));
 	}
 	
 	@GetMapping("/module")

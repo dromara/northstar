@@ -23,8 +23,9 @@ public class ModuleRepository {
 	/*************/
 	/**	模组信息	**/
 	/*************/
-	public void saveModuleInfo(ModuleInfo info) {
+	public boolean saveModuleInfo(ModuleInfo info) {
 		mongo.save(info);
+		return true;
 	}
 	
 	public List<ModuleInfo> findAllModuleInfo(){

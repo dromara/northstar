@@ -125,9 +125,9 @@ public class ModuleService implements InitializingBean{
 	 * @param shouldSave
 	 * @throws Exception 
 	 */
-	public void createModule(ModuleInfo info) throws Exception {
+	public boolean createModule(ModuleInfo info) throws Exception {
 		loadModule(info, null);
-		moduleRepo.saveModuleInfo(info);
+		return moduleRepo.saveModuleInfo(info);
 	}
 	
 	/**
@@ -135,11 +135,11 @@ public class ModuleService implements InitializingBean{
 	 * @param info
 	 * @throws Exception 
 	 */
-	public void updateModule(ModuleInfo info) throws Exception {
+	public boolean updateModule(ModuleInfo info) throws Exception {
 		StrategyModule module = mdlMgr.removeModule(info.getModuleName());
 		moduleRepo.deleteModuleInfoById(info.getModuleName());
-		moduleRepo.saveModuleInfo(info);
 		loadModule(info, module.getModuleStatus());
+		return moduleRepo.saveModuleInfo(info);
 	}
 	
 	/**
