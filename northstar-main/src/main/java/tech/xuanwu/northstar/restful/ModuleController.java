@@ -65,6 +65,13 @@ public class ModuleController {
 		return new ResultBean<>(service.getCurrentModuleInfos());
 	}
 	
+	@DeleteMapping("/module")
+	public ResultBean<Void> removeModule(String name){
+		Assert.hasText(name, "模组名称不能为空");
+		service.removeModule(name);
+		return new ResultBean<>(null);
+	}
+	
 	@GetMapping("/module/perf")
 	public ResultBean<ModulePerformance> getModulePerformance(String name){
 		Assert.hasText(name, "模组名称不能为空");
@@ -78,10 +85,5 @@ public class ModuleController {
 		return new ResultBean<>(null);
 	}
 	
-	@DeleteMapping("/module")
-	public ResultBean<Void> removeModule(String name){
-		Assert.hasText(name, "模组名称不能为空");
-		service.removeModule(name);
-		return new ResultBean<>(null);
-	}
+	
 }
