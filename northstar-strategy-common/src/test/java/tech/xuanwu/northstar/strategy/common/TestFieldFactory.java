@@ -22,6 +22,7 @@ import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.GatewaySettingField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TickField;
+import xyz.redtorch.pb.CoreField.TradeField;
 
 public class TestFieldFactory {
 	
@@ -91,6 +92,17 @@ public class TestFieldFactory {
 	public GatewaySettingField makeGatewaySetting() {
 		return GatewaySettingField.newBuilder()
 				.setGatewayId(gatewayId)
+				.build();
+	}
+	
+	public TradeField makeTradeField(String symbol, double price, int vol, DirectionEnum dir, OffsetFlagEnum offset) {
+		return TradeField.newBuilder()
+				.setOriginOrderId(UUID.randomUUID().toString())
+				.setContract(makeContract(symbol))
+				.setPrice(price)
+				.setVolume(vol)
+				.setDirection(dir)
+				.setOffsetFlag(offset)
 				.build();
 	}
 

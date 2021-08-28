@@ -2,25 +2,29 @@ package tech.xuanwu.northstar.strategy.common.model;
 
 import org.apache.commons.lang3.StringUtils;
 
+import tech.xuanwu.northstar.common.EntityAware;
 import tech.xuanwu.northstar.strategy.common.model.entity.ModulePositionEntity;
+import xyz.redtorch.pb.CoreEnum.DirectionEnum;
+import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
 import xyz.redtorch.pb.CoreField.TickField;
+import xyz.redtorch.pb.CoreField.TradeField;
 
-public class ModulePosition {
+public class ModulePosition implements EntityAware<ModulePositionEntity>{
 
-	private String unifiedSymbol;
+	protected String unifiedSymbol;
 
-	private PositionDirectionEnum positionDir;
+	protected PositionDirectionEnum positionDir;
 	
-	private double openPrice;
+	protected double openPrice;
 	
-	private double stopLossPrice;
+	protected double stopLossPrice;
 	
-	private int volume;
+	protected int volume;
 	
-	private int multiplier;
+	protected double multiplier;
 	
-	private double holdingProfit;
+	protected double holdingProfit;
 	
 	public ModulePosition(ModulePositionEntity e) {
 		this.unifiedSymbol = e.getUnifiedSymbol();
@@ -32,14 +36,14 @@ public class ModulePosition {
 	}
 	
 	public double onUpdate(TickField tick) {
-		checkValidTick(tick);
+		checkMatch(tick.getUnifiedSymbol());
 		int factor = positionDir == PositionDirectionEnum.PD_Long ? 1 : -1;
 		holdingProfit = factor * (tick.getLastPrice() - openPrice) * volume * multiplier;
 		return holdingProfit;
 	}
 	
 	public boolean triggerStopLoss(TickField tick) {
-		checkValidTick(tick);
+		checkMatch(tick.getUnifiedSymbol());
 		if(stopLossPrice == 0) {
 			return false;
 		}
@@ -47,12 +51,43 @@ public class ModulePosition {
 				|| positionDir == PositionDirectionEnum.PD_Short && tick.getLastPrice() >= stopLossPrice;
 	}
 	
-	private void checkValidTick(TickField tick) {
-		if(!StringUtils.equals(unifiedSymbol, tick.getUnifiedSymbol())) {
-			throw new IllegalStateException(unifiedSymbol + "与不匹配的数据更新：" + tick.getUnifiedSymbol());
+	public boolean onTrade(TradeField trade) {
+		checkMatch(trade.getContract().getUnifiedSymbol());
+		if(OffsetFlagEnum.OF_Open == trade.getOffsetFlag()) {
+			// 开仓成交
+			if(positionDir == PositionDirectionEnum.PD_Long && trade.getDirection() == DirectionEnum.D_Buy
+					|| positionDir == PositionDirectionEnum.PD_Short && trade.getDirection() == DirectionEnum.D_Sell) {
+				double originCost = openPrice * volume;
+				double newCost = trade.getPrice() * trade.getVolume();
+				openPrice = (originCost + newCost) / (volume + trade.getVolume());
+				volume += trade.getVolume();
+				return true;
+			}
+		} else {
+			// 平仓成交
+			if(positionDir == PositionDirectionEnum.PD_Long && trade.getDirection() == DirectionEnum.D_Sell
+					|| positionDir == PositionDirectionEnum.PD_Short && trade.getDirection() == DirectionEnum.D_Buy) {
+				if(volume < trade.getVolume()) {
+					throw new IllegalStateException("成交数量大于持仓数量");
+				}
+				volume -= trade.getVolume();
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public boolean isEmpty() {
+		return volume == 0;
+	}
+	
+	private void checkMatch(String input) {
+		if(!StringUtils.equals(unifiedSymbol, input)) {
+			throw new IllegalStateException(unifiedSymbol + "与不匹配的数据更新：" + input);
 		}
 	}
 	
+	@Override
 	public ModulePositionEntity convertToEntity() {
 		return ModulePositionEntity.builder()
 				.unifiedSymbol(unifiedSymbol)

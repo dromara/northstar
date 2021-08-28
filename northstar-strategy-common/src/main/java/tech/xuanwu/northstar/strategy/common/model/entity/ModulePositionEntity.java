@@ -22,6 +22,6 @@ public class ModulePositionEntity {
 	
 	private int volume;
 	
-	private int multiplier;
+	private double multiplier;
 	
 }
