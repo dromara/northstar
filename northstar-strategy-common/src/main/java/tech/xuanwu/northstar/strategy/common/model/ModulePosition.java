@@ -35,7 +35,7 @@ public class ModulePosition implements EntityAware<ModulePositionEntity>{
 		this.multiplier = e.getMultiplier();
 	}
 	
-	public double onUpdate(TickField tick) {
+	public double updateProfit(TickField tick) {
 		checkMatch(tick.getUnifiedSymbol());
 		int factor = positionDir == PositionDirectionEnum.PD_Long ? 1 : -1;
 		holdingProfit = factor * (tick.getLastPrice() - openPrice) * volume * multiplier;

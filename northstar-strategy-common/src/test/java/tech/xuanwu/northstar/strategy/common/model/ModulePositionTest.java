@@ -36,10 +36,10 @@ public class ModulePositionTest {
 	@Test
 	public void testOnUpdate() {
 		ModulePosition pos = new ModulePosition(proto.build());
-		assertThat(pos.onUpdate(factory.makeTickField("rb2210", 2000))).isEqualTo(15320);
+		assertThat(pos.updateProfit(factory.makeTickField("rb2210", 2000))).isEqualTo(15320);
 		
 		ModulePosition pos2 = new ModulePosition(proto.positionDir(PositionDirectionEnum.PD_Short).build());
-		assertThat(pos2.onUpdate(factory.makeTickField("rb2210", 2000))).isEqualTo(-15320);
+		assertThat(pos2.updateProfit(factory.makeTickField("rb2210", 2000))).isEqualTo(-15320);
 	}
 	
 	@Test
@@ -71,7 +71,7 @@ public class ModulePositionTest {
 	@Test(expected = IllegalStateException.class)
 	public void shouldThrowExceptionWhenMatchFail() {
 		ModulePosition pos = new ModulePosition(proto.build());
-		pos.onUpdate(factory.makeTickField("rb2109", 2000));
+		pos.updateProfit(factory.makeTickField("rb2109", 2000));
 	}
 	
 	@Test
