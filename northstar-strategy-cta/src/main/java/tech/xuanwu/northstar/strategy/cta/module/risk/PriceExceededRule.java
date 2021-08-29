@@ -6,6 +6,7 @@ import tech.xuanwu.northstar.strategy.common.RiskControlRule;
 import tech.xuanwu.northstar.strategy.common.annotation.Setting;
 import tech.xuanwu.northstar.strategy.common.annotation.StrategicComponent;
 import tech.xuanwu.northstar.strategy.common.constants.RiskAuditResult;
+import tech.xuanwu.northstar.strategy.common.model.ModuleStatus;
 import tech.xuanwu.northstar.strategy.common.model.StrategyModule;
 import tech.xuanwu.northstar.strategy.common.model.meta.DynamicParams;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
@@ -21,7 +22,7 @@ public class PriceExceededRule implements RiskControlRule, DynamicParamsAware{
 	private SubmitOrderReqField orderReq;
 	
 	@Override
-	public short canDeal(TickField tick, StrategyModule module) {
+	public short canDeal(TickField tick, ModuleStatus moduleStatus) {
 		int factor = orderReq.getDirection() == DirectionEnum.D_Buy ? 1 : -1;
 		if(factor * (tick.getLastPrice() - orderReq.getPrice()) > priceDifTolerance) {
 			log.info("委托超价限制：限制为{}，期望价为{}，实际价为{}", priceDifTolerance, orderReq.getPrice(), tick.getLastPrice());

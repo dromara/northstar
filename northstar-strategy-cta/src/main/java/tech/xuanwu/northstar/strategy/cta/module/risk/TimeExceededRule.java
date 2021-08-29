@@ -6,6 +6,7 @@ import tech.xuanwu.northstar.strategy.common.RiskControlRule;
 import tech.xuanwu.northstar.strategy.common.annotation.Setting;
 import tech.xuanwu.northstar.strategy.common.annotation.StrategicComponent;
 import tech.xuanwu.northstar.strategy.common.constants.RiskAuditResult;
+import tech.xuanwu.northstar.strategy.common.model.ModuleStatus;
 import tech.xuanwu.northstar.strategy.common.model.StrategyModule;
 import tech.xuanwu.northstar.strategy.common.model.meta.DynamicParams;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
@@ -20,7 +21,7 @@ public class TimeExceededRule implements RiskControlRule, DynamicParamsAware{
 	private long lastUpdateTime;
 
 	@Override
-	public short canDeal(TickField tick, StrategyModule module) {
+	public short canDeal(TickField tick, ModuleStatus moduleStatus) {
 		if(tick.getActionTimestamp() - lastUpdateTime > timeoutInterval) {
 			log.info("挂单超时，撤单追单");
 			return RiskAuditResult.RETRY;
