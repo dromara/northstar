@@ -152,7 +152,7 @@ public class ModuleStatusTest {
 	
 	@Test
 	public void shouldBeAbleToGetAndSetAccountAvailable() {
-		assertThat(ms.getAccountAvailable()).isZero();
+		ms = new ModuleStatus("testModule", contractMgr);
 		ms.setAccountAvailable(1000);
 		assertThat(ms.getAccountAvailable()).isEqualTo(1000);
 	}

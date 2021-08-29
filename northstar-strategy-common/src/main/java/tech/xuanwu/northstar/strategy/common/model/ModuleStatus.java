@@ -1,5 +1,6 @@
 package tech.xuanwu.northstar.strategy.common.model;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -46,6 +47,13 @@ public class ModuleStatus implements EntityAware<ModuleStatusEntity>{
 	protected String holdingTradingDay;
 	
 	protected int countOfOpeningToday;
+	
+	public ModuleStatus(String name, ContractManager contractMgr) {
+		this.moduleName = name;
+		this.contractMgr = contractMgr;
+		this.stateMachine = new ModuleStateMachine(ModuleState.EMPTY);
+		this.positions = new ArrayList<>();
+	}
 
 	public ModuleStatus(ModuleStatusEntity entity, ContractManager contractMgr) {
 		this.contractMgr = contractMgr;

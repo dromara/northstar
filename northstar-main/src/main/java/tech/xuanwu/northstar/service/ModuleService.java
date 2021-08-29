@@ -19,29 +19,23 @@ import tech.xuanwu.northstar.manager.ModuleManager;
 import tech.xuanwu.northstar.persistence.MarketDataRepository;
 import tech.xuanwu.northstar.persistence.ModuleRepository;
 import tech.xuanwu.northstar.persistence.po.MinBarDataPO;
-import tech.xuanwu.northstar.strategy.common.AbstractModuleFactory;
 import tech.xuanwu.northstar.strategy.common.Dealer;
 import tech.xuanwu.northstar.strategy.common.DynamicParamsAware;
-import tech.xuanwu.northstar.strategy.common.ModulePosition;
-import tech.xuanwu.northstar.strategy.common.ModuleTrade;
 import tech.xuanwu.northstar.strategy.common.RiskControlRule;
 import tech.xuanwu.northstar.strategy.common.RiskController;
 import tech.xuanwu.northstar.strategy.common.SignalPolicy;
 import tech.xuanwu.northstar.strategy.common.annotation.StrategicComponent;
-import tech.xuanwu.northstar.strategy.common.constants.ModuleState;
-import tech.xuanwu.northstar.strategy.common.constants.ModuleType;
 import tech.xuanwu.northstar.strategy.common.model.GenericRiskController;
 import tech.xuanwu.northstar.strategy.common.model.ModuleInfo;
 import tech.xuanwu.northstar.strategy.common.model.ModulePerformance;
 import tech.xuanwu.northstar.strategy.common.model.ModuleStatus;
 import tech.xuanwu.northstar.strategy.common.model.StrategyModule;
 import tech.xuanwu.northstar.strategy.common.model.data.BarData;
+import tech.xuanwu.northstar.strategy.common.model.entity.ModuleStatusEntity;
 import tech.xuanwu.northstar.strategy.common.model.meta.ComponentAndParamsPair;
 import tech.xuanwu.northstar.strategy.common.model.meta.ComponentField;
 import tech.xuanwu.northstar.strategy.common.model.meta.ComponentMetaInfo;
 import tech.xuanwu.northstar.strategy.common.model.meta.DynamicParams;
-import tech.xuanwu.northstar.strategy.common.model.state.ModuleStateMachine;
-import tech.xuanwu.northstar.strategy.cta.CtaModuleFactory;
 import tech.xuanwu.northstar.utils.ProtoBeanUtils;
 import xyz.redtorch.pb.CoreField.BarField;
 
@@ -126,7 +120,7 @@ public class ModuleService implements InitializingBean{
 	 * @throws Exception 
 	 */
 	public boolean createModule(ModuleInfo info) throws Exception {
-		loadModule(info, null);
+		loadModule(info, new ModuleStatus(info.getModuleName(), contractMgr));
 		return moduleRepo.saveModuleInfo(info);
 	}
 	
@@ -136,9 +130,10 @@ public class ModuleService implements InitializingBean{
 	 * @throws Exception 
 	 */
 	public boolean updateModule(ModuleInfo info) throws Exception {
-		StrategyModule module = mdlMgr.removeModule(info.getModuleName());
+		mdlMgr.removeModule(info.getModuleName());
+		ModuleStatusEntity mse = moduleRepo.loadModuleStatus(info.getModuleName());
 		moduleRepo.deleteModuleInfoById(info.getModuleName());
-		loadModule(info, module.getModuleStatus());
+		loadModule(info, new ModuleStatus(mse, contractMgr));
 		return moduleRepo.saveModuleInfo(info);
 	}
 	
@@ -147,12 +142,12 @@ public class ModuleService implements InitializingBean{
 	 * @param module
 	 * @param status
 	 */
-	private void loadModule(ModuleInfo info, ModuleStatus status) throws Exception {
-		SignalPolicy signalPolicy =  resolveComponent(info.getSignalPolicy(), SignalPolicy.class);
-		Dealer dealer = resolveComponent(info.getDealer(), Dealer.class);
+	private void loadModule(ModuleInfo info, ModuleStatus moduleStatus) throws Exception {
+		SignalPolicy signalPolicy =  resolveComponent(info.getSignalPolicy());
+		Dealer dealer = resolveComponent(info.getDealer());
 		List<RiskControlRule> riskRules = new ArrayList<>();
 		for(ComponentAndParamsPair pair : info.getRiskControlRules()) {
-			riskRules.add(resolveComponent(pair, RiskControlRule.class));
+			riskRules.add(resolveComponent(pair));
 		}
 		
 		String gatewayId = info.getAccountGatewayId();
@@ -160,22 +155,9 @@ public class ModuleService implements InitializingBean{
 		Gateway gateway = gatewayConnMgr.getGatewayById(gatewayId);
 		String mktGatewayId = conn.getGwDescription().getBindedMktGatewayId();
 		
-		AbstractModuleFactory factory = null;
-		RiskController riskController = null;
-		if(info.getType() == ModuleType.CTA) {
-			factory = new CtaModuleFactory();
-			riskController = new GenericRiskController(riskRules);
-		} else {
-			// TODO 不同的策略模式采用不同的工厂实现
-		}
-		
-		ModulePosition mPosition = status == null ? factory.newModulePosition() : factory.loadModulePosition(status);
-		ModuleTrade mTrade = status == null ? factory.newModuleTrade() : factory.loadModuleTrade(moduleRepo.findTradeDescription(info.getModuleName()));
-		
-		ModuleState state = status == null ? ModuleState.EMPTY : status.getState();
+		RiskController riskController = new GenericRiskController(riskRules);
 		int refLength = signalPolicy.getBarDataMaxRefLength();
 		LinkedList<BarField> barList = new LinkedList<>();
-		ModuleStateMachine stateMachine = new ModuleStateMachine(state);
 		
 		for(String unifiedSymbol : signalPolicy.bindedUnifiedSymbols()) {
 			List<String> availableDates = mdRepo.findDataAvailableDates(mktGatewayId, unifiedSymbol, false);
@@ -197,22 +179,17 @@ public class ModuleService implements InitializingBean{
 			signalPolicy.setBarData(new BarData(unifiedSymbol, barList));
 		}
 		
-		signalPolicy.setStateMachine(stateMachine);
 		dealer.setContractManager(contractMgr);
 		StrategyModule module = StrategyModule.builder()
-				.name(info.getModuleName())
 				.gateway((TradeGateway)gateway)
 				.mktGatewayId(mktGatewayId)
+				.status(moduleStatus)
 				.disabled(!info.isEnabled())
-				.stateMachine(stateMachine)
 				.dealer(dealer)
 				.signalPolicy(signalPolicy)
 				.riskController(riskController)
-				.mPosition(mPosition)
-				.mTrade(mTrade)
 				.build();
 		mdlMgr.addModule(module);
-		moduleRepo.saveModuleStatus(module.getModuleStatus());
 	}
 	
 	/**
@@ -244,7 +221,7 @@ public class ModuleService implements InitializingBean{
 	}
 	
 	
-	private <T extends DynamicParamsAware> T resolveComponent(ComponentAndParamsPair metaInfo, Class<T> clz) throws Exception {
+	private <T extends DynamicParamsAware> T resolveComponent(ComponentAndParamsPair metaInfo) throws Exception {
 		Map<String, ComponentField> fieldMap = new HashMap<>();
 		for(ComponentField cf : metaInfo.getInitParams()) {
 			fieldMap.put(cf.getName(), cf);
@@ -272,11 +249,13 @@ public class ModuleService implements InitializingBean{
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		Map<String, ModuleStatus> statusMap = moduleRepo.loadModuleStatus();
 		for(ModuleInfo m : getCurrentModuleInfos()) {
-			ModuleStatus status = statusMap.get(m.getModuleName());
-			if(status == null) {
-				throw new IllegalStateException("找不到模组的状态信息");
+			ModuleStatusEntity entity = moduleRepo.loadModuleStatus(m.getModuleName());
+			ModuleStatus status;
+			if(entity == null) {
+				status = new ModuleStatus(m.getModuleName(), contractMgr);
+			} else {
+				status = new ModuleStatus(entity, contractMgr);
 			}
 			loadModule(m, status);
 		}

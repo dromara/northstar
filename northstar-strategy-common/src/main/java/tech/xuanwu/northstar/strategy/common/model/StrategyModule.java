@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -23,6 +22,7 @@ import tech.xuanwu.northstar.strategy.common.SignalPolicy;
 import tech.xuanwu.northstar.strategy.common.constants.ModuleState;
 import tech.xuanwu.northstar.strategy.common.constants.RiskAuditResult;
 import tech.xuanwu.northstar.strategy.common.event.ModuleEventType;
+import tech.xuanwu.northstar.strategy.common.model.entity.ModuleStatusEntity;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreField.AccountField;
@@ -54,15 +54,13 @@ public class StrategyModule {
 	
 	protected TradeGateway gateway;
 	
-	protected AccountField account;
-	
 	protected boolean disabled;
-	
-	protected Supplier<ModuleStatus> statusChangeListener;
 	
 	private long lastWarningTime;
 	
 	private String tradingDay;
+	
+	private double balance;
 	
 	@Builder.Default
 	private Map<String, OrderField> originOrderIdMap = new HashMap<>();
@@ -120,7 +118,7 @@ public class StrategyModule {
 				if(submitOrder.get().getOffsetFlag() == OffsetFlagEnum.OF_Unknown) {
 					throw new IllegalStateException("未定义开平操作");
 				}
-				boolean isRisky = riskController.testReject(tick, this, submitOrder.get());
+				boolean isRisky = riskController.testReject(tick, status, submitOrder.get());
 				if(isRisky && submitOrder.get().getOffsetFlag() == OffsetFlagEnum.OF_Open) {
 					status.transform(ModuleEventType.SIGNAL_RETAINED);
 					return this;
@@ -130,7 +128,7 @@ public class StrategyModule {
 			}
 			
 			if(status.at(ModuleState.PENDING_ORDER)) {
-				short riskCode = riskController.onTick(tick, this);
+				short riskCode = riskController.onTick(tick, status);
 				if(riskCode == RiskAuditResult.ACCEPTED) {
 					return this;
 				}
@@ -178,7 +176,7 @@ public class StrategyModule {
 		return this;
 	}
 	
-	public boolean onTrade(TradeField trade) {
+	public Optional<ModuleStatusEntity> onTrade(TradeField trade) {
 		if(originOrderIdMap.containsKey(trade.getOriginOrderId())) {
 			OrderField order = originOrderIdMap.remove(trade.getOriginOrderId());
 			Optional<StopLossItem> stopLossItem = StopLossItem.generateFrom(trade, order);
@@ -195,9 +193,9 @@ public class StrategyModule {
 			} else {				
 				status.transform(trade.getDirection() == DirectionEnum.D_Buy ? ModuleEventType.BUY_TRADED : ModuleEventType.SELL_TRADED);
 			}
-			return true;
+			return Optional.of(status.convertToEntity());
 		}
-		return false;
+		return Optional.empty();
 	}
 	
 	public void onExternalMessage(String text) {
@@ -208,17 +206,22 @@ public class StrategyModule {
 	
 	public StrategyModule onAccount(AccountField account) {
 		if(StringUtils.equals(account.getGatewayId(), gateway.getGatewaySetting().getGatewayId())) {
-			this.account = account;
+			status.accountAvailable = account.getAvailable();
+			status.setAccountAvailable(account.getBalance());
 		}
 		return this;
 	}
 	
-	public AccountField getAccount() {
-		return account;
-	}
-	
 	public boolean isEnabled() {
 		return !disabled;
+	}
+	
+	public boolean removable() {
+		return status.at(ModuleState.EMPTY) && disabled;
+	}
+	
+	public String getName() {
+		return status.getModuleName();
 	}
 	
 	public void toggleRunningState() {
@@ -247,25 +250,10 @@ public class StrategyModule {
 		}
 		mp.setRefBarDataMap(byteMap);
 		mp.setAccountId(gateway.getGatewaySetting().getGatewayId());
-		mp.setAccountBalance(account == null ? 0 : (int)account.getBalance());
+		mp.setAccountBalance((int)balance);
 		mp.setModuleState(status.getCurrentState());
 		mp.setTotalPositionProfit(status.getHoldingProfit());
 		return mp;
 	}
 	
-//	private TradeDescriptionEntity convertFrom(String moduleName, TradeField trade) {
-//		return TradeDescriptionEntity.builder()
-//				.moduleName(moduleName)
-//				.symbol(trade.getContract().getSymbol())
-//				.gatewayId(trade.getGatewayId())
-//				.direction(trade.getDirection())
-//				.offsetFlag(trade.getOffsetFlag())
-//				.contractMultiplier(trade.getContract().getMultiplier())
-//				.volume(trade.getVolume())
-//				.price(trade.getPrice())
-//				.tradingDay(trade.getTradingDay())
-//				.tradeTimestamp(trade.getTradeTimestamp())
-//				.build();
-//	}
-
 }

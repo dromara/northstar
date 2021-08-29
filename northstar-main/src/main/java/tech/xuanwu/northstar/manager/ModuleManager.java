@@ -2,6 +2,7 @@ package tech.xuanwu.northstar.manager;
 
 import java.util.HashSet;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -10,10 +11,10 @@ import tech.xuanwu.northstar.common.event.AbstractEventHandler;
 import tech.xuanwu.northstar.common.event.NorthstarEvent;
 import tech.xuanwu.northstar.common.event.NorthstarEventType;
 import tech.xuanwu.northstar.persistence.ModuleRepository;
-import tech.xuanwu.northstar.strategy.common.constants.ModuleState;
 import tech.xuanwu.northstar.strategy.common.model.ModulePerformance;
 import tech.xuanwu.northstar.strategy.common.model.StrategyModule;
-import tech.xuanwu.northstar.strategy.common.model.TradeDescription;
+import tech.xuanwu.northstar.strategy.common.model.entity.ModuleStatusEntity;
+import tech.xuanwu.northstar.strategy.common.model.entity.TradeDescriptionEntity;
 import xyz.redtorch.pb.CoreField.AccountField;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.OrderField;
@@ -32,19 +33,7 @@ public class ModuleManager extends AbstractEventHandler {
 	 */
 	private ConcurrentHashMap<String, StrategyModule> moduleMap = new ConcurrentHashMap<>(50);
 	
-	private Set<NorthstarEventType> eventSet = new HashSet<>() {
-		private static final long serialVersionUID = 1L;
-
-		{
-			add(NorthstarEventType.ACCOUNT);
-			add(NorthstarEventType.TRADE);
-			add(NorthstarEventType.ORDER);
-			add(NorthstarEventType.TICK);
-			add(NorthstarEventType.IDX_TICK);
-			add(NorthstarEventType.BAR);
-			add(NorthstarEventType.EXT_MSG);
-		}
-	};
+	private Set<NorthstarEventType> eventSet = new HashSet<>();
 	
 	private ModuleRepository moduleRepo;
 	
@@ -54,11 +43,18 @@ public class ModuleManager extends AbstractEventHandler {
 	
 	public void addModule(StrategyModule module) {
 		moduleMap.put(module.getName(), module);
+		eventSet.add(NorthstarEventType.ACCOUNT);
+		eventSet.add(NorthstarEventType.TRADE);
+		eventSet.add(NorthstarEventType.ORDER);
+		eventSet.add(NorthstarEventType.TICK);
+		eventSet.add(NorthstarEventType.IDX_TICK);
+		eventSet.add(NorthstarEventType.BAR);
+		eventSet.add(NorthstarEventType.EXT_MSG);
 	}
 	
 	public StrategyModule removeModule(String name) {
 		StrategyModule module = moduleMap.get(name);
-		if(module.isEnabled() && module.getState() != ModuleState.EMPTY) {
+		if(!module.removable()) {
 			throw new IllegalStateException("模组并非处于空仓状态，不允许移除");
 		}
 		return moduleMap.remove(name);
@@ -88,11 +84,28 @@ public class ModuleManager extends AbstractEventHandler {
 		// 只对持仓状态变化做持久化，不对下单状态作反应
 		for(Entry<String, StrategyModule> e : moduleMap.entrySet()) {
 			StrategyModule m = e.getValue();
-			if(m.onTrade(trade)) {
-				moduleRepo.saveTradeDescription(TradeDescription.convertFrom(m.getName(), trade));
-				moduleRepo.saveModuleStatus(m.getModuleStatus());
+			Optional<ModuleStatusEntity> result = m.onTrade(trade);
+			if(result.isPresent()) {
+				moduleRepo.saveTradeDescription(convertFrom(m.getName(), trade));
+				moduleRepo.saveModuleStatus(result.get());
+				return;
 			}
 		}
+	}
+	
+	private TradeDescriptionEntity convertFrom(String moduleName, TradeField trade) {
+		return TradeDescriptionEntity.builder()
+				.moduleName(moduleName)
+				.symbol(trade.getContract().getSymbol())
+				.gatewayId(trade.getGatewayId())
+				.direction(trade.getDirection())
+				.offsetFlag(trade.getOffsetFlag())
+				.contractMultiplier(trade.getContract().getMultiplier())
+				.volume(trade.getVolume())
+				.price(trade.getPrice())
+				.tradingDay(trade.getTradingDay())
+				.tradeTimestamp(trade.getTradeTimestamp())
+				.build();
 	}
 	
 	public void onAccount(AccountField account) {
