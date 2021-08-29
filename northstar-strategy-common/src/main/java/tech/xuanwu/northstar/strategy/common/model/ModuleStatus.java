@@ -12,6 +12,8 @@ import com.google.common.collect.Lists;
 
 import tech.xuanwu.northstar.common.EntityAware;
 import tech.xuanwu.northstar.common.model.ContractManager;
+import tech.xuanwu.northstar.strategy.common.constants.ModuleState;
+import tech.xuanwu.northstar.strategy.common.event.ModuleEventType;
 import tech.xuanwu.northstar.strategy.common.model.entity.ModulePositionEntity;
 import tech.xuanwu.northstar.strategy.common.model.entity.ModuleStatusEntity;
 import tech.xuanwu.northstar.strategy.common.model.state.ModuleStateMachine;
@@ -33,16 +35,24 @@ public class ModuleStatus implements EntityAware<ModuleStatusEntity>{
 
 	protected String moduleName;
 	
+	protected double accountAvailable;
+	
 	protected ModuleStateMachine stateMachine;
 	
 	protected List<ModulePosition> positions;
 	
 	protected ContractManager contractMgr;
+	
+	protected String holdingTradingDay;
+	
+	protected int countOfOpeningToday;
 
 	public ModuleStatus(ModuleStatusEntity entity, ContractManager contractMgr) {
 		this.contractMgr = contractMgr;
 		this.moduleName = entity.getModuleName();
 		this.stateMachine = new ModuleStateMachine(entity.getState());
+		this.countOfOpeningToday = entity.getCountOfOpeningToday();
+		this.holdingTradingDay = entity.getHoldingTradingDay();
 		this.positions = Lists.newArrayList(entity.getPositions().stream().map(ModulePosition::new).collect(Collectors.toList()));
 	}
 	
@@ -78,11 +88,55 @@ public class ModuleStatus implements EntityAware<ModuleStatusEntity>{
 		}
 		if(trade.getOffsetFlag() == OffsetFlagEnum.OF_Open) {
 			opening(trade, order);
+			if(StringUtils.equals(holdingTradingDay, trade.getTradingDay())) {
+				countOfOpeningToday++;
+			} else {
+				countOfOpeningToday = 0;
+				holdingTradingDay = trade.getTradingDay();
+			}
 		}else {
 			closing(trade);
 		}
 		
 		return this;
+	}
+	
+	public boolean at(ModuleState state) {
+		return stateMachine.getState() == state;
+	}
+	
+	public ModuleState transform(ModuleEventType event) {
+		return stateMachine.transformForm(event);
+	}
+	
+	public String getModuleName() {
+		return moduleName;
+	}
+	
+	public double getHoldingProfit() {
+		return positions.stream()
+				.map(p -> p.holdingProfit)
+				.reduce(0D, (a, b) -> a + b);
+	}
+	
+	public ModuleState getCurrentState() {
+		return stateMachine.getState();
+	}
+	
+	public int getCountOfOpeningToday() {
+		return countOfOpeningToday;
+	}
+	
+	public boolean isSameDay(String currentTradingDay) {
+		return StringUtils.equals(currentTradingDay, holdingTradingDay);
+	}
+	
+	public void setAccountAvailable(double mount) {
+		this.accountAvailable = mount;
+	}
+	
+	public double getAccountAvailable() {
+		return accountAvailable;
 	}
 	
 	private void opening(TradeField trade, OrderField order) {
@@ -117,6 +171,7 @@ public class ModuleStatus implements EntityAware<ModuleStatusEntity>{
 				.moduleName(moduleName)
 				.state(stateMachine.getState())
 				.positions(positions.stream().map(ModulePosition::convertToEntity).collect(Collectors.toList()))
+				.holdingTradingDay(holdingTradingDay)
 				.build();
 	}
 }

@@ -24,4 +24,8 @@ public class ModuleStatusEntity {
 	private List<ModulePositionEntity> positions;
 	
 	private ModuleState state;
+	
+	private String holdingTradingDay;
+	
+	private int countOfOpeningToday;
 }

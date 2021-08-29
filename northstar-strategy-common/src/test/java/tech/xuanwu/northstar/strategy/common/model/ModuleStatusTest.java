@@ -12,6 +12,8 @@ import com.google.common.collect.Lists;
 
 import tech.xuanwu.northstar.common.model.ContractManager;
 import tech.xuanwu.northstar.strategy.common.TestFieldFactory;
+import tech.xuanwu.northstar.strategy.common.constants.ModuleState;
+import tech.xuanwu.northstar.strategy.common.event.ModuleEventType;
 import tech.xuanwu.northstar.strategy.common.model.entity.ModulePositionEntity;
 import tech.xuanwu.northstar.strategy.common.model.entity.ModuleStatusEntity;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
@@ -48,7 +50,10 @@ public class ModuleStatusTest {
 		when(contractMgr.getContract(SYMBOL)).thenReturn(ContractField.newBuilder().build());
 		mse = ModuleStatusEntity.builder()
 				.moduleName("testModuule")
+				.state(ModuleState.HOLDING_LONG)
 				.positions(Lists.newArrayList(proto.build(), proto.unifiedSymbol(SYMBOL2).build()))
+				.holdingTradingDay("20210606")
+				.countOfOpeningToday(3)
 				.build();
 		ms = new ModuleStatus(mse, contractMgr);
 	}
@@ -83,6 +88,10 @@ public class ModuleStatusTest {
 		TradeField trade2 = factory.makeTradeField("rb2210", 1240, 2, DirectionEnum.D_Sell, OffsetFlagEnum.OF_Open);
 		ms.onTrade(trade2, OrderField.newBuilder().setOriginOrderId(trade2.getOriginOrderId()).build());
 		assertThat(ms.positions.size()).isEqualTo(3);
+		
+		TradeField trade3 = factory.makeTradeField("rb2201", 1240, 2, DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open);
+		ms.onTrade(trade3, OrderField.newBuilder().setOriginOrderId(trade3.getOriginOrderId()).build());
+		assertThat(ms.positions.size()).isEqualTo(4);
 	}
 	
 	@Test
@@ -112,5 +121,50 @@ public class ModuleStatusTest {
 				.build();
 		ms = new ModuleStatus(mse, contractMgr);
 		assertThat(ms.convertToEntity()).isEqualTo(mse);
+	}
+	
+	@Test
+	public void shouldGetState() {
+		assertThat(ms.at(ModuleState.HOLDING_LONG)).isTrue();
+		assertThat(ms.getCurrentState()).isEqualTo(ModuleState.HOLDING_LONG);
+		assertThat(ms.at(ModuleState.EMPTY)).isFalse();
+	}
+	
+	@Test
+	public void shouldGetStateChange() {
+		assertThat(ms.transform(ModuleEventType.CLOSING_SIGNAL_CREATED)).isEqualTo(ModuleState.PLACING_ORDER);
+	}
+	
+	@Test
+	public void shouldGetName() {
+		assertThat(ms.getModuleName()).isEqualTo("testModuule");
+	}
+	
+	@Test
+	public void shouldBeTheSameTradingDay() {
+		assertThat(ms.isSameDay("20210606")).isTrue();
+	}
+	
+	@Test
+	public void shouldNotBeTheSameTradingDay() {
+		assertThat(ms.isSameDay("20210607")).isFalse();
+	}
+	
+	@Test
+	public void shouldBeAbleToGetAndSetAccountAvailable() {
+		assertThat(ms.getAccountAvailable()).isZero();
+		ms.setAccountAvailable(1000);
+		assertThat(ms.getAccountAvailable()).isEqualTo(1000);
+	}
+	
+	@Test
+	public void shouldGetCountOfOpeningToday() {
+		assertThat(ms.getCountOfOpeningToday()).isEqualTo(3);
+	}
+	
+	@Test
+	public void shouldGetHoldingProfit() {
+		ms.updateHoldingProfit(factory.makeTickField("rb2210", 1240));
+		assertThat(ms.getHoldingProfit()).isEqualTo(120);
 	}
 }
