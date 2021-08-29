@@ -11,11 +11,11 @@ import org.junit.Test;
 import com.google.common.collect.Lists;
 
 import tech.xuanwu.northstar.common.model.ContractManager;
-import tech.xuanwu.northstar.strategy.common.TestFieldFactory;
 import tech.xuanwu.northstar.strategy.common.constants.ModuleState;
 import tech.xuanwu.northstar.strategy.common.event.ModuleEventType;
 import tech.xuanwu.northstar.strategy.common.model.entity.ModulePositionEntity;
 import tech.xuanwu.northstar.strategy.common.model.entity.ModuleStatusEntity;
+import test.common.TestFieldFactory;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;

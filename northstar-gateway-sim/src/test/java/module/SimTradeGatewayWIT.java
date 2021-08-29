@@ -21,6 +21,7 @@ import tech.xuanwu.northstar.engine.event.FastEventEngine;
 import tech.xuanwu.northstar.gateway.sim.trade.SimFactory;
 import tech.xuanwu.northstar.gateway.sim.trade.SimTradeGateway;
 import tech.xuanwu.northstar.gateway.sim.trade.SimTradeGatewayLocal;
+import test.common.TestFieldFactory;
 import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.ForceCloseReasonEnum;

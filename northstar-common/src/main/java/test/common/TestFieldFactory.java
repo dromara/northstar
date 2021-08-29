@@ -1,4 +1,4 @@
-package tech.xuanwu.northstar.strategy.common;
+package test.common;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
