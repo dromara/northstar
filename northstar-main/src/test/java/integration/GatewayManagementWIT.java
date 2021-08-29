@@ -21,7 +21,6 @@ import com.corundumstudio.socketio.SocketIOServer;
 
 import common.TestGatewayFactory;
 import common.TestMongoUtils;
-import tech.xuanwu.northstar.NorthstarApplication;
 import tech.xuanwu.northstar.common.constant.GatewayType;
 import tech.xuanwu.northstar.common.constant.GatewayUsage;
 import tech.xuanwu.northstar.common.event.NorthstarEventType;
@@ -30,7 +29,8 @@ import tech.xuanwu.northstar.common.model.GatewayDescription;
 import tech.xuanwu.northstar.common.model.ResultBean;
 import tech.xuanwu.northstar.common.model.SimSettings;
 import tech.xuanwu.northstar.engine.event.FastEventEngine;
-import tech.xuanwu.northstar.restful.GatewayManagementController;
+import tech.xuanwu.northstar.main.NorthstarApplication;
+import tech.xuanwu.northstar.main.restful.GatewayManagementController;
 import xyz.redtorch.pb.CoreField.AccountField;
 
 /**

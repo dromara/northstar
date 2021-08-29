@@ -20,12 +20,12 @@ import org.springframework.test.context.junit4.SpringRunner;
 import com.corundumstudio.socketio.SocketIOServer;
 
 import common.TestMongoUtils;
-import tech.xuanwu.northstar.NorthstarApplication;
 import tech.xuanwu.northstar.common.model.GatewayDescription;
 import tech.xuanwu.northstar.domain.GatewayConnection;
 import tech.xuanwu.northstar.gateway.api.TradeGateway;
-import tech.xuanwu.northstar.manager.GatewayAndConnectionManager;
-import tech.xuanwu.northstar.restful.ModuleController;
+import tech.xuanwu.northstar.main.NorthstarApplication;
+import tech.xuanwu.northstar.main.manager.GatewayAndConnectionManager;
+import tech.xuanwu.northstar.main.restful.ModuleController;
 import tech.xuanwu.northstar.strategy.common.constants.ModuleType;
 import tech.xuanwu.northstar.strategy.common.model.ModuleInfo;
 import tech.xuanwu.northstar.strategy.common.model.meta.ComponentAndParamsPair;
