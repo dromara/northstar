@@ -81,9 +81,13 @@ public class ModulePosition implements EntityAware<ModulePositionEntity>{
 		return volume == 0;
 	}
 	
-	private void checkMatch(String input) {
-		if(!StringUtils.equals(unifiedSymbol, input)) {
-			throw new IllegalStateException(unifiedSymbol + "与不匹配的数据更新：" + input);
+	public boolean isMatch(String unifiedSymbol) {
+		return StringUtils.equals(unifiedSymbol, this.unifiedSymbol);
+	}
+	
+	private void checkMatch(String unifiedSymbol) {
+		if(!StringUtils.equals(this.unifiedSymbol, unifiedSymbol)) {
+			throw new IllegalStateException(this.unifiedSymbol + "与不匹配的数据更新：" + unifiedSymbol);
 		}
 	}
 	

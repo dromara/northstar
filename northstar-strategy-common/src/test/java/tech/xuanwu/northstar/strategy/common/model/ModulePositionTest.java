@@ -124,4 +124,15 @@ public class ModulePositionTest {
 		assertThat(pos.onTrade(factory.makeTradeField("rb2210", 1311, 3, DirectionEnum.D_Sell, OffsetFlagEnum.OF_Close))).isTrue();
 	}
 	
+	@Test
+	public void shouldMatchPosition() {
+		ModulePosition pos = new ModulePosition(proto.build());
+		assertThat(pos.isMatch(SYMBOL)).isTrue();
+	}
+	
+	@Test
+	public void shouldNotMatchPosition() {
+		ModulePosition pos = new ModulePosition(proto.build());
+		assertThat(pos.isMatch(SYMBOL + "S")).isFalse();
+	}
 }
