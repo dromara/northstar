@@ -17,7 +17,6 @@ import org.springframework.stereotype.Repository;
 import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.main.persistence.po.ContractPO;
 import tech.xuanwu.northstar.main.persistence.po.MinBarDataPO;
-import tech.xuanwu.northstar.main.utils.MongoClientAdapter;
 import tech.xuanwu.northstar.main.utils.MongoUtils;
 
 /**

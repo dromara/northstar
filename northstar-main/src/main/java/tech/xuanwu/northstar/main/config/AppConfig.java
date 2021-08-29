@@ -30,7 +30,7 @@ import tech.xuanwu.northstar.main.interceptor.AuthorizationInterceptor;
 import tech.xuanwu.northstar.main.manager.BarBufferManager;
 import tech.xuanwu.northstar.main.manager.GatewayAndConnectionManager;
 import tech.xuanwu.northstar.main.persistence.MarketDataRepository;
-import tech.xuanwu.northstar.main.utils.MongoClientAdapter;
+import tech.xuanwu.northstar.main.persistence.MongoClientAdapter;
 import xyz.redtorch.gateway.ctp.x64v6v3v15v.CtpGatewayFactory;
 import xyz.redtorch.gateway.ctp.x64v6v5v1cpv.CtpSimGatewayFactory;
 
