@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.common.constant.DateTimeConstant;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
+import xyz.redtorch.pb.CoreEnum.OrderPriceTypeEnum;
 import xyz.redtorch.pb.CoreEnum.OrderStatusEnum;
 import xyz.redtorch.pb.CoreEnum.PriceSourceEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
@@ -127,8 +128,10 @@ public class TradeIntent {
 			throw new IllegalArgumentException("合约不匹配");
 		}
 		ContractField contract = orderReq.getContract();
+		
 		if(state.get() == STATE_ORDER 
-				&& (order.getDirection() == DirectionEnum.D_Buy && tick.getAskPrice(0) <= order.getPrice()
+				&& (order.getOrderPriceType() == OrderPriceTypeEnum.OPT_AnyPrice
+				|| order.getDirection() == DirectionEnum.D_Buy && tick.getAskPrice(0) <= order.getPrice()
 				|| order.getDirection() == DirectionEnum.D_Sell && tick.getBidPrice(0) >= order.getPrice())) {			
 			state.incrementAndGet();
 			trade = TradeField.newBuilder()
