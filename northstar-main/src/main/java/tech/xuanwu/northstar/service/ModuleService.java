@@ -132,8 +132,15 @@ public class ModuleService implements InitializingBean{
 	public boolean updateModule(ModuleInfo info) throws Exception {
 		mdlMgr.removeModule(info.getModuleName());
 		ModuleStatusEntity mse = moduleRepo.loadModuleStatus(info.getModuleName());
+		ModuleStatus status;
+		if(mse == null) {
+			status = new ModuleStatus(info.getModuleName(), contractMgr);
+		} else {
+			status = new ModuleStatus(mse, contractMgr);
+		}
+		
 		moduleRepo.deleteModuleInfoById(info.getModuleName());
-		loadModule(info, new ModuleStatus(mse, contractMgr));
+		loadModule(info, status);
 		return moduleRepo.saveModuleInfo(info);
 	}
 	

@@ -55,7 +55,7 @@ public class ModuleManager extends AbstractEventHandler {
 	public StrategyModule removeModule(String name) {
 		StrategyModule module = moduleMap.get(name);
 		if(!module.removable()) {
-			throw new IllegalStateException("模组并非处于空仓状态，不允许移除");
+			throw new IllegalStateException("模组处于启用或非空仓状态，不允许移除");
 		}
 		return moduleMap.remove(name);
 	}

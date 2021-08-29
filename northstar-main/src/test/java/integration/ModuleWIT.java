@@ -129,7 +129,7 @@ public class ModuleWIT {
 				.build();
 		ModuleInfo info = ModuleInfo.builder()
 				.moduleName("testModule")
-				.enabled(true)
+				.enabled(false)
 				.type(ModuleType.CTA)
 				.accountGatewayId("testGateway")
 				.signalPolicy(signalPolicyMeta)
@@ -138,7 +138,7 @@ public class ModuleWIT {
 				.build();
 		
 		ctrlr.createModule(info);
-		info.setEnabled(false);
+		info.setEnabled(true);
 		assertThat(ctrlr.updateModule(info).getData()).isTrue();
 	}
 	
