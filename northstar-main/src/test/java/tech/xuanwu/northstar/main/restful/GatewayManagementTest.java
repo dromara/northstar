@@ -1,4 +1,4 @@
-package integration;
+package tech.xuanwu.northstar.main.restful;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.argThat;
@@ -40,7 +40,7 @@ import xyz.redtorch.pb.CoreField.AccountField;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = NorthstarApplication.class, value="spring.profiles.active=test")
-public class GatewayManagementWIT {
+public class GatewayManagementTest {
 	
 	@MockBean
 	private SocketIOServer server;

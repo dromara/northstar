@@ -1,4 +1,4 @@
-package integration;
+package tech.xuanwu.northstar.main.restful;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.argThat;
@@ -34,7 +34,7 @@ import xyz.redtorch.pb.CoreField.BarField;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = NorthstarApplication.class, value="spring.profiles.active=test")
-public class DataSyncWIT {
+public class DataSyncTest {
 	
 	@MockBean
 	private SocketIOServer server;

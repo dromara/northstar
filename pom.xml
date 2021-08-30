@@ -18,7 +18,7 @@
 		<maven.compiler.target>${java.version}</maven.compiler.target>
 		<northstar-version>2.0</northstar-version>
 		<springboot-version>2.1.5.RELEASE</springboot-version>
-		<lombok-version>1.18.8</lombok-version>
+		<lombok-version>1.18.12</lombok-version>
 		<slf4j-version>1.7.25</slf4j-version>
 		<commons-lang3-version>3.7</commons-lang3-version>
 		<commons-codec-version>1.13</commons-codec-version>
@@ -409,19 +409,6 @@
 					<groupId>org.jacoco</groupId>
 					<artifactId>jacoco-maven-plugin</artifactId>
 					<version>0.8.5</version>
-					<configuration>
-						<excludes>
-							<exclude>**/tech/xuanwu/northstar/common/constant/**/*</exclude>
-							<exclude>**/tech/xuanwu/northstar/common/event/**/*</exclude>
-							<exclude>**/tech/xuanwu/northstar/common/exception/**/*</exclude>
-							<exclude>**/tech/xuanwu/northstar/common/model/**/*</exclude>
-							<exclude>**/tech/xuanwu/northstar/config/**/*</exclude>
-							<exclude>**/tech/xuanwu/northstar/factories/**/*</exclude>
-							<exclude>**/tech/xuanwu/northstar/gateway/api/**/*</exclude>
-							<exclude>**/xyz/redtorch/pb/**/*</exclude>
-							<exclude>**/xyz/redtorch/gateway/ctp/**/*</exclude>
-						</excludes>
-					</configuration>
 					<executions>
 						<execution>
 							<id>default-prepare-agent</id>
@@ -449,7 +436,7 @@
 						</execution>
 						<execution>
 							<id>report-aggregation</id>
-							<phase>post-integration-test</phase>
+							<phase>verify</phase>
 							<goals>
 								<goal>report-aggregate</goal>
 							</goals>
@@ -465,9 +452,9 @@
 										<element>BUNDLE</element>
 										<limits>
 											<limit>
-												<counter>COMPLEXITY</counter>
+												<counter>LINE</counter>
 												<value>COVEREDRATIO</value>
-												<minimum>0</minimum>
+												<minimum>0.2</minimum>
 											</limit>
 										</limits>
 									</rule>

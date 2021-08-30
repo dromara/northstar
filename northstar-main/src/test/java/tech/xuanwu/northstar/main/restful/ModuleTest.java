@@ -1,4 +1,4 @@
-package integration;
+package tech.xuanwu.northstar.main.restful;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -33,7 +33,7 @@ import tech.xuanwu.northstar.strategy.common.model.meta.ComponentMetaInfo;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = NorthstarApplication.class, value="spring.profiles.active=test")
-public class ModuleWIT {
+public class ModuleTest {
 	
 	@Autowired
 	private ModuleController ctrlr;

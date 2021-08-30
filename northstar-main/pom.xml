@@ -119,19 +119,14 @@
 				<artifactId>jacoco-maven-plugin</artifactId>
 				<configuration>
 					<excludes>
-						<exclude>**/tech/xuanwu/northstar/common/constant/**/*</exclude>
-						<exclude>**/tech/xuanwu/northstar/common/event/**/*</exclude>
-						<exclude>**/tech/xuanwu/northstar/common/exception/**/*</exclude>
-						<exclude>**/tech/xuanwu/northstar/common/model/**/*</exclude>
-						<exclude>**/tech/xuanwu/northstar/config/**/*</exclude>
-						<exclude>**/tech/xuanwu/northstar/factories/**/*</exclude>
-						<exclude>**/tech/xuanwu/northstar/gateway/api/**/*</exclude>
-						<exclude>**/xyz/redtorch/pb/**/*</exclude>
-						<exclude>**/xyz/redtorch/gateway/ctp/**/*</exclude>
+						<exclude>**/tech/xuanwu/northstar/main/*</exclude>
+						<exclude>**/tech/xuanwu/northstar/main/config/*</exclude>
+						<exclude>**/tech/xuanwu/northstar/main/factories/*</exclude>
+						<exclude>**/tech/xuanwu/northstar/main/interceptor/*</exclude>
+						<exclude>**/tech/xuanwu/northstar/main/handler/**/*</exclude>
+						<exclude>**/tech/xuanwu/northstar/main/persistence/**/*</exclude>
+						<exclude>**/tech/xuanwu/northstar/main/*</exclude>
 					</excludes>
-					<includes>
-						<include></include>
-					</includes>
 				</configuration>
 			</plugin>
 		</plugins>
