@@ -10,7 +10,7 @@ import tech.xuanwu.northstar.common.event.NorthstarEvent;
 import tech.xuanwu.northstar.common.event.NorthstarEventType;
 import tech.xuanwu.northstar.common.utils.BarGenerator;
 import tech.xuanwu.northstar.engine.event.FastEventEngine;
-import tech.xuanwu.northstar.main.manager.BarBufferManager;
+import tech.xuanwu.northstar.main.persistence.BarBufferManager;
 import tech.xuanwu.northstar.main.persistence.po.MinBarDataPO;
 import tech.xuanwu.northstar.main.utils.ProtoBeanUtils;
 import xyz.redtorch.pb.CoreField.TickField;

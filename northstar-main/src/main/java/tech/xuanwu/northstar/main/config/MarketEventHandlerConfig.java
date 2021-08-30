@@ -9,7 +9,7 @@ import tech.xuanwu.northstar.engine.event.FastEventEngine;
 import tech.xuanwu.northstar.engine.index.IndexEngine;
 import tech.xuanwu.northstar.main.handler.data.IndexContractHandler;
 import tech.xuanwu.northstar.main.handler.data.MarketBarDataHandler;
-import tech.xuanwu.northstar.main.manager.BarBufferManager;
+import tech.xuanwu.northstar.main.persistence.BarBufferManager;
 
 @Slf4j
 @Configuration

@@ -39,10 +39,6 @@ public class ModuleManager extends AbstractEventHandler {
 	
 	public ModuleManager(ModuleRepository moduleRepo) {
 		this.moduleRepo = moduleRepo;
-	}
-	
-	public void addModule(StrategyModule module) {
-		moduleMap.put(module.getName(), module);
 		eventSet.add(NorthstarEventType.ACCOUNT);
 		eventSet.add(NorthstarEventType.TRADE);
 		eventSet.add(NorthstarEventType.ORDER);
@@ -50,6 +46,10 @@ public class ModuleManager extends AbstractEventHandler {
 		eventSet.add(NorthstarEventType.IDX_TICK);
 		eventSet.add(NorthstarEventType.BAR);
 		eventSet.add(NorthstarEventType.EXT_MSG);
+	}
+	
+	public void addModule(StrategyModule module) {
+		moduleMap.put(module.getName(), module);
 	}
 	
 	public StrategyModule removeModule(String name) {

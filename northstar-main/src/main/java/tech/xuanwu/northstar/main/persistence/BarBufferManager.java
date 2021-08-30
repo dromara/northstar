@@ -1,9 +1,8 @@
-package tech.xuanwu.northstar.main.manager;
+package tech.xuanwu.northstar.main.persistence;
 
 import java.util.LinkedList;
 
 import lombok.extern.slf4j.Slf4j;
-import tech.xuanwu.northstar.main.persistence.MarketDataRepository;
 import tech.xuanwu.northstar.main.persistence.po.MinBarDataPO;
 
 /**
@@ -27,7 +26,7 @@ public class BarBufferManager {
 	}
 	
 	public synchronized void saveAndClear() {
-		if(bufData.size() == 0) {
+		if(bufData.isEmpty()) {
 			log.info("没有数据需要保存");
 			return;
 		}
