@@ -7,8 +7,6 @@ import java.time.LocalDateTime;
 import org.junit.Before;
 import org.junit.Test;
 
-import tech.xuanwu.northstar.main.utils.HolidayManager;
-
 public class HolidayManagerTest {
 	
 	private HolidayManager mgr = new HolidayManager();

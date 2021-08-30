@@ -1,4 +1,4 @@
-package tech.xuanwu.northstar.main.utils;
+package tech.xuanwu.northstar.main;
 
 import java.time.LocalDateTime;
 
@@ -13,6 +13,7 @@ import tech.xuanwu.northstar.domain.GatewayConnection;
 import tech.xuanwu.northstar.gateway.api.Gateway;
 import tech.xuanwu.northstar.main.manager.GatewayAndConnectionManager;
 import tech.xuanwu.northstar.main.persistence.BarBufferManager;
+import tech.xuanwu.northstar.main.utils.HolidayManager;
 
 @Slf4j
 @Component
