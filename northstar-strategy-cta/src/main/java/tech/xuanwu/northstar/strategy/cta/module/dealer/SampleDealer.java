@@ -13,7 +13,6 @@ import tech.xuanwu.northstar.strategy.common.Signal;
 import tech.xuanwu.northstar.strategy.common.annotation.Setting;
 import tech.xuanwu.northstar.strategy.common.annotation.StrategicComponent;
 import tech.xuanwu.northstar.strategy.common.model.CtaSignal;
-import tech.xuanwu.northstar.strategy.common.model.StrategyModule;
 import tech.xuanwu.northstar.strategy.common.model.meta.DynamicParams;
 import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
@@ -42,8 +41,6 @@ public class SampleDealer implements Dealer {
 	private ContractManager contractMgr;
 	
 	private int openVol;
-	
-	private StrategyModule module;
 	
 	private String priceTypeStr;
 	
@@ -81,7 +78,6 @@ public class SampleDealer implements Dealer {
 					.setForceCloseReason(ForceCloseReasonEnum.FCR_NotForceClose)
 					.setContingentCondition(ContingentConditionEnum.CC_Immediately)
 					.setMinVolume(1)
-					.setGatewayId(module.getGateway().getGatewaySetting().getGatewayId())
 					.setStopPrice(currentSignal.getStopPrice())
 					.setPrice(resolvePrice(currentSignal, tick))
 					.build();

@@ -14,8 +14,8 @@ import tech.xuanwu.northstar.strategy.common.Signal;
 import tech.xuanwu.northstar.strategy.common.SignalPolicy;
 import tech.xuanwu.northstar.strategy.common.constants.SignalOperation;
 import tech.xuanwu.northstar.strategy.common.model.CtaSignal;
+import tech.xuanwu.northstar.strategy.common.model.ModuleStatus;
 import tech.xuanwu.northstar.strategy.common.model.data.BarData;
-import tech.xuanwu.northstar.strategy.common.model.state.ModuleStateMachine;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.TickField;
 
@@ -32,7 +32,7 @@ public abstract class AbstractSignalPolicy implements SignalPolicy {
 
 	protected Map<String, BarData> barDataMap = new HashMap<>();
 	
-	protected ModuleStateMachine stateMachine;
+	protected ModuleStatus moduleStatus;
 	
 	@Override
 	public Set<String> bindedUnifiedSymbols() {
@@ -109,8 +109,8 @@ public abstract class AbstractSignalPolicy implements SignalPolicy {
 	}
 
 	@Override
-	public void setStateMachine(ModuleStateMachine stateMachine) {
-		this.stateMachine = stateMachine;
+	public void setModuleStatus(ModuleStatus status) {
+		this.moduleStatus = status;
 	}
 	
 	protected Signal genSignal(SignalOperation signalOperation, double price, double stopPrice) {

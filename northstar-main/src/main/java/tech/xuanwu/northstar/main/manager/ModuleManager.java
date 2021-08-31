@@ -11,8 +11,8 @@ import tech.xuanwu.northstar.common.event.AbstractEventHandler;
 import tech.xuanwu.northstar.common.event.NorthstarEvent;
 import tech.xuanwu.northstar.common.event.NorthstarEventType;
 import tech.xuanwu.northstar.main.persistence.ModuleRepository;
-import tech.xuanwu.northstar.strategy.common.model.ModulePerformance;
 import tech.xuanwu.northstar.strategy.common.model.StrategyModule;
+import tech.xuanwu.northstar.strategy.common.model.data.ModuleCurrentPerformance;
 import tech.xuanwu.northstar.strategy.common.model.entity.ModuleStatusEntity;
 import tech.xuanwu.northstar.strategy.common.model.entity.TradeDescriptionEntity;
 import xyz.redtorch.pb.CoreField.AccountField;
@@ -60,7 +60,7 @@ public class ModuleManager extends AbstractEventHandler {
 		return moduleMap.remove(name);
 	}
 	
-	public ModulePerformance getModulePerformance(String name) {
+	public ModuleCurrentPerformance getModulePerformance(String name) {
 		return moduleMap.get(name).getPerformance();
 	}
 	

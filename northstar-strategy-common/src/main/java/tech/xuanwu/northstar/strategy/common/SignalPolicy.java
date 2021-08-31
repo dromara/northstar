@@ -3,6 +3,7 @@ package tech.xuanwu.northstar.strategy.common;
 import java.util.Optional;
 import java.util.Set;
 
+import tech.xuanwu.northstar.strategy.common.model.ModuleStatus;
 import tech.xuanwu.northstar.strategy.common.model.data.BarData;
 import tech.xuanwu.northstar.strategy.common.model.state.ModuleStateMachine;
 import xyz.redtorch.pb.CoreField.BarField;
@@ -58,9 +59,9 @@ public interface SignalPolicy extends DynamicParamsAware {
 	Set<String> bindedUnifiedSymbols();
 	
 	/**
-	 * 设置状态机
+	 * 设置模组状态
 	 * @param stateMachine
 	 */
-	void setStateMachine(ModuleStateMachine stateMachine);
+	void setModuleStatus(ModuleStatus status);
 	
 }

@@ -22,6 +22,7 @@ import tech.xuanwu.northstar.strategy.common.SignalPolicy;
 import tech.xuanwu.northstar.strategy.common.constants.ModuleState;
 import tech.xuanwu.northstar.strategy.common.constants.RiskAuditResult;
 import tech.xuanwu.northstar.strategy.common.event.ModuleEventType;
+import tech.xuanwu.northstar.strategy.common.model.data.ModuleCurrentPerformance;
 import tech.xuanwu.northstar.strategy.common.model.entity.ModuleStatusEntity;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
@@ -236,8 +237,8 @@ public class StrategyModule {
 		return gateway;
 	}
 	
-	public ModulePerformance getPerformance() {
-		ModulePerformance mp = new ModulePerformance();
+	public ModuleCurrentPerformance getPerformance() {
+		ModuleCurrentPerformance mp = new ModuleCurrentPerformance();
 		mp.setModuleName(status.getModuleName());
 		Map<String, List<byte[]>> byteMap = new HashMap<>();
 		for(String unifiedSymbol : signalPolicy.bindedUnifiedSymbols()) {

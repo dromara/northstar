@@ -1,4 +1,4 @@
-package tech.xuanwu.northstar.strategy.common.model;
+package tech.xuanwu.northstar.strategy.common.model.data;
 
 import lombok.Builder;
 import lombok.Data;

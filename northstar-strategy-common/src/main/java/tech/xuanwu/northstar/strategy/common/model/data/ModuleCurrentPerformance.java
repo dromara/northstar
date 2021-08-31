@@ -1,4 +1,4 @@
-package tech.xuanwu.northstar.strategy.common.model;
+package tech.xuanwu.northstar.strategy.common.model.data;
 
 import java.util.List;
 import java.util.Map;
@@ -7,22 +7,12 @@ import lombok.Data;
 import tech.xuanwu.northstar.strategy.common.constants.ModuleState;
 
 @Data
-public class ModulePerformance {
+public class ModuleCurrentPerformance {
 
 	/**
 	 * BarField byte array list
 	 */
 	private Map<String, List<byte[]>> refBarDataMap;
-	
-	/**
-	 * 模组交易记录列表
-	 */
-	private List<DealRecord> dealRecords;
-	
-	/**
-	 * 模组平仓总盈亏
-	 */
-	private double totalCloseProfit;
 	
 	/**
 	 * 模组持仓总盈亏
