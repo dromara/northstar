@@ -79,14 +79,14 @@ public class SampleSignalPolicy extends AbstractSignalPolicy
 		log.info("策略每个TICK触发: {}", milliSecOfMin);
 		double price = barDataMap.get(bindedUnifiedSymbol).getSClose().ref(0);
 		if(milliSecOfMin % 10000 == 0) {
-			if(stateMachine.getState() == ModuleState.EMPTY) {
+			if(moduleStatus.at(ModuleState.EMPTY)) {
 				boolean flag = ThreadLocalRandom.current().nextBoolean();
 				return Optional.of(genSignal(flag ? SignalOperation.BuyOpen : SignalOperation.SellOpen, price));
 			}
-			if(stateMachine.getState() == ModuleState.HOLDING_LONG) {				
+			if(moduleStatus.at(ModuleState.HOLDING_LONG)) {				
 				return Optional.of(genSignal(SignalOperation.SellClose, price));
 			}
-			if(stateMachine.getState() == ModuleState.HOLDING_SHORT) {				
+			if(moduleStatus.at(ModuleState.HOLDING_SHORT)) {				
 				return Optional.of(genSignal(SignalOperation.BuyClose, price));
 			}
 		}

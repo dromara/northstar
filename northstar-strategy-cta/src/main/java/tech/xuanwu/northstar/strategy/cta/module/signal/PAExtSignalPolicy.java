@@ -13,6 +13,7 @@ import tech.xuanwu.northstar.strategy.common.ExternalSignalPolicy;
 import tech.xuanwu.northstar.strategy.common.Signal;
 import tech.xuanwu.northstar.strategy.common.annotation.Setting;
 import tech.xuanwu.northstar.strategy.common.annotation.StrategicComponent;
+import tech.xuanwu.northstar.strategy.common.constants.ModuleState;
 import tech.xuanwu.northstar.strategy.common.constants.SignalOperation;
 import tech.xuanwu.northstar.strategy.common.model.data.BarData;
 import tech.xuanwu.northstar.strategy.common.model.meta.DynamicParams;
@@ -59,7 +60,7 @@ public class PAExtSignalPolicy extends AbstractSignalPolicy implements ExternalS
 		if(signalQ.size() > 0) {
 			Signal signal = signalQ.poll();
 			// 当信号为平仓且当前仓位无持仓时，抛弃该信号
-			if(signal != null && !signal.isOpening() && !stateMachine.getState().isHolding()) {
+			if(signal != null && !signal.isOpening() && moduleStatus.at(ModuleState.EMPTY)) {
 				signal = signalQ.poll();
 			}
 			return Optional.ofNullable(signal);

@@ -19,20 +19,20 @@ public class GenericRiskController implements RiskController{
 	}
 
 	@Override
-	public short onTick(TickField tick, StrategyModule module) {
+	public short onTick(TickField tick, ModuleStatus moduleStatus) {
 		short result = RiskAuditResult.ACCEPTED;
 		for(RiskControlRule rule : rules) {
-			result |= rule.canDeal(tick, module);
+			result |= rule.canDeal(tick, moduleStatus);
 		}
 		return result;
 	}
 
 	@Override
-	public boolean testReject(TickField tick, StrategyModule module, SubmitOrderReqField orderReq) {
+	public boolean testReject(TickField tick, ModuleStatus moduleStatus, SubmitOrderReqField orderReq) {
 		for(RiskControlRule rule : rules) {
 			rule.onSubmitOrder(orderReq);
 		}
-		return (onTick(tick, module) & RiskAuditResult.REJECTED) > 0;
+		return (onTick(tick, moduleStatus) & RiskAuditResult.REJECTED) > 0;
 	}
 
 }

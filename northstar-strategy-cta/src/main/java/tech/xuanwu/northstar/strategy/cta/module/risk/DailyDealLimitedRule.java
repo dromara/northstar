@@ -1,15 +1,12 @@
 package tech.xuanwu.northstar.strategy.cta.module.risk;
 
-import org.apache.commons.lang3.StringUtils;
-
 import lombok.extern.slf4j.Slf4j;
-import tech.xuanwu.northstar.strategy.common.ModuleTrade;
 import tech.xuanwu.northstar.strategy.common.RiskControlRule;
 import tech.xuanwu.northstar.strategy.common.Signal;
 import tech.xuanwu.northstar.strategy.common.annotation.Setting;
 import tech.xuanwu.northstar.strategy.common.annotation.StrategicComponent;
 import tech.xuanwu.northstar.strategy.common.constants.RiskAuditResult;
-import tech.xuanwu.northstar.strategy.common.model.StrategyModule;
+import tech.xuanwu.northstar.strategy.common.model.ModuleStatus;
 import tech.xuanwu.northstar.strategy.common.model.meta.DynamicParams;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TickField;
@@ -24,13 +21,8 @@ public class DailyDealLimitedRule implements RiskControlRule {
 	
 
 	@Override
-	public short canDeal(TickField tick, StrategyModule module) {
-		String tradingDay = module.getTradingDay();
-		ModuleTrade mTrade = module.getModuleTrade();
-		long numberOfOpeningTradeToday = mTrade.getDealRecords()
-				.stream()
-				.filter(r -> StringUtils.equals(tradingDay, r.getTradingDay()))
-				.count();
+	public short canDeal(TickField tick, ModuleStatus moduleStatus) {
+		long numberOfOpeningTradeToday = moduleStatus.getCountOfOpeningToday();
 		if(numberOfOpeningTradeToday < dailyDealLimit) {
 			return RiskAuditResult.ACCEPTED;
 		}

@@ -40,7 +40,7 @@ private TickField.Builder proto;
 		List<String> timeList = List.of("2100");
 		BarGenerator bg = new BarGenerator("rb2101", (bar, tickList) -> {
 			assertThat(bar.getActionTime().substring(0, 4)).isEqualTo(timeList.get(cnt.getAndIncrement()));
-			assertThat(tickList.size()).isEqualTo(240);
+			assertThat(tickList).hasSize(240);
 		});
 		LocalDateTime ldt = LocalDateTime.of(2021, 6, 18, 20, 59, 0, 0);
 		LocalDateTime endTime = LocalDateTime.of(2021, 6, 18, 21, 1, 0, 1);
@@ -58,7 +58,7 @@ private TickField.Builder proto;
 		BarGenerator bg = new BarGenerator("rb2101", (bar, tickList) -> {
 			assertThat(bar.getActionTime().substring(0, 4)).isEqualTo(timeList.get(cnt.getAndIncrement()));
 			if(cnt.get() == 1) {
-				assertThat(tickList.size()).isEqualTo(240);
+				assertThat(tickList).hasSize(240);
 			}else {
 				assertThat(tickList.size()).isCloseTo(120, Offset.offset(1));
 			}

@@ -13,7 +13,6 @@ import tech.xuanwu.northstar.strategy.common.Signal;
 import tech.xuanwu.northstar.strategy.common.annotation.Setting;
 import tech.xuanwu.northstar.strategy.common.annotation.StrategicComponent;
 import tech.xuanwu.northstar.strategy.common.model.CtaSignal;
-import tech.xuanwu.northstar.strategy.common.model.StrategyModule;
 import tech.xuanwu.northstar.strategy.common.model.meta.DynamicParams;
 import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
@@ -35,13 +34,13 @@ public class SampleDealer implements Dealer {
 	
 	private CtaSignal currentSignal;
 	
+	private OffsetFlagEnum currentOffset;
+	
 	private SubmitOrderReqField currentOrderReq;
 	
 	private ContractManager contractMgr;
 	
 	private int openVol;
-	
-	private StrategyModule module;
 	
 	private String priceTypeStr;
 	
@@ -53,9 +52,9 @@ public class SampleDealer implements Dealer {
 	}
 	
 	@Override
-	public void onSignal(Signal signal, StrategyModule module) {
+	public void onSignal(Signal signal, OffsetFlagEnum offsetFlag) {
 		currentSignal = (CtaSignal) signal;
-		this.module = module;
+		currentOffset = offsetFlag;
 	}
 
 	//注意防止重复下单
@@ -64,14 +63,13 @@ public class SampleDealer implements Dealer {
 		if(currentSignal != null) {
 			log.info("交易策略生成订单");
 			DirectionEnum direction = currentSignal.getState().isBuy() ? DirectionEnum.D_Buy : DirectionEnum.D_Sell;
-			OffsetFlagEnum offsetFlag = currentSignal.getState().isOpen() ? OffsetFlagEnum.OF_Open : module.getModulePosition().getClosingOffsetFlag(module.getTradingDay());
 			ContractField contract = contractMgr.getContract(tick.getUnifiedSymbol());
 			// 按信号下单
 			currentOrderReq = SubmitOrderReqField.newBuilder()
 					.setOriginOrderId(UUID.randomUUID().toString())
 					.setContract(contract)
 					.setDirection(direction)
-					.setOffsetFlag(offsetFlag)
+					.setOffsetFlag(currentOffset)
 					.setOrderPriceType(OrderPriceTypeEnum.OPT_LimitPrice)
 					.setVolume(openVol)
 					.setHedgeFlag(HedgeFlagEnum.HF_Speculation)
@@ -80,11 +78,11 @@ public class SampleDealer implements Dealer {
 					.setForceCloseReason(ForceCloseReasonEnum.FCR_NotForceClose)
 					.setContingentCondition(ContingentConditionEnum.CC_Immediately)
 					.setMinVolume(1)
-					.setGatewayId(module.getGateway().getGatewaySetting().getGatewayId())
 					.setStopPrice(currentSignal.getStopPrice())
 					.setPrice(resolvePrice(currentSignal, tick))
 					.build();
 			currentSignal = null;
+			currentOffset = null;
 			return Optional.of(currentOrderReq);
 			
 		} else {

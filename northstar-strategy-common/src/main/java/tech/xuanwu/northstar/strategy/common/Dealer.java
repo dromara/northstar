@@ -5,6 +5,7 @@ import java.util.Set;
 
 import tech.xuanwu.northstar.common.model.ContractManager;
 import tech.xuanwu.northstar.strategy.common.model.StrategyModule;
+import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TickField;
 
@@ -26,8 +27,9 @@ public interface Dealer extends DynamicParamsAware {
 	/**
 	 * 收到信号
 	 * @param signal
+	 * @param offsetFlag	实操明细
 	 */
-	void onSignal(Signal signal, StrategyModule module);
+	void onSignal(Signal signal, OffsetFlagEnum offsetFlag);
 	
 	/**
 	 * 获取交易策略所绑定的合约列表

@@ -22,7 +22,7 @@ public class BarGenerator {
 
 	private TickField preTick;
 
-	private boolean newFlag = false;
+	private boolean newFlag;
 
 	private String barUnifiedSymbol;
 	

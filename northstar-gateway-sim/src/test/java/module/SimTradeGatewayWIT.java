@@ -8,6 +8,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 import org.junit.Before;
@@ -20,9 +21,16 @@ import tech.xuanwu.northstar.engine.event.FastEventEngine;
 import tech.xuanwu.northstar.gateway.sim.trade.SimFactory;
 import tech.xuanwu.northstar.gateway.sim.trade.SimTradeGateway;
 import tech.xuanwu.northstar.gateway.sim.trade.SimTradeGatewayLocal;
+import test.common.TestFieldFactory;
+import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
+import xyz.redtorch.pb.CoreEnum.ForceCloseReasonEnum;
+import xyz.redtorch.pb.CoreEnum.HedgeFlagEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
+import xyz.redtorch.pb.CoreEnum.OrderPriceTypeEnum;
 import xyz.redtorch.pb.CoreEnum.OrderStatusEnum;
+import xyz.redtorch.pb.CoreEnum.TimeConditionEnum;
+import xyz.redtorch.pb.CoreEnum.VolumeConditionEnum;
 import xyz.redtorch.pb.CoreField.AccountField;
 import xyz.redtorch.pb.CoreField.CancelOrderReqField;
 import xyz.redtorch.pb.CoreField.ContractField;
@@ -218,6 +226,32 @@ public class SimTradeGatewayWIT {
 		gateway.cancelOrder(cancelReq);
 		verify(feEngine, times(2)).emitEvent(eq(NorthstarEventType.POSITION), argThat(pos -> ((PositionField)pos).getPosition() == 1
 				&& ((PositionField)pos).getFrozen() == 0 && ((PositionField)pos).getTdFrozen() == 0));
+	}
+	
+	/**
+	 * 止损测试
+	 */
+	@Test
+	public void testStopLoss() {
+		gateway.moneyIO(10000);
+		SubmitOrderReqField req = SubmitOrderReqField.newBuilder()
+			.setOriginOrderId(UUID.randomUUID().toString())
+			.setContract(ff.makeContract(RB))
+			.setDirection(DirectionEnum.D_Sell)
+			.setOffsetFlag(OffsetFlagEnum.OF_Open)
+			.setOrderPriceType(OrderPriceTypeEnum.OPT_AnyPrice)
+			.setVolume(1)
+			.setHedgeFlag(HedgeFlagEnum.HF_Speculation)
+			.setTimeCondition(TimeConditionEnum.TC_GFD)
+			.setVolumeCondition(VolumeConditionEnum.VC_AV)
+			.setForceCloseReason(ForceCloseReasonEnum.FCR_NotForceClose)
+			.setContingentCondition(ContingentConditionEnum.CC_Immediately)
+			.setMinVolume(1)
+			.setGatewayId("testGateway")
+			.build();
+		gateway.submitOrder(req);
+		gateway.onTick(ff.makeTickField(RB, 1200));
+		verify(feEngine).emitEvent(eq(NorthstarEventType.ORDER), argThat(order -> ((OrderField)order).getOrderStatus() == OrderStatusEnum.OS_AllTraded));
 	}
 	
 	/**
