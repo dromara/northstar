@@ -91,7 +91,8 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 
 	@Override
 	public String submitOrder(SubmitOrderReqField submitOrderReq) throws TradeException {
-		return accountHolder.submitOrder(submitOrderReq);
+		SubmitOrderReqField orderReq = SubmitOrderReqField.newBuilder(submitOrderReq).setGatewayId(gatewaySetting.getGatewayId()).build();
+		return accountHolder.submitOrder(orderReq);
 	}
 
 	@Override
