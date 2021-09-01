@@ -94,4 +94,17 @@ private String cookie;
 		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(result.getBody().getStatus()).isEqualTo(ReturnCode.SUCCESS);
 	}
+	
+//	@Test
+//	public void shouldSuccessfullyGetModuleCurrentPerformance() {
+//		
+//	}
+//	
+//	@Test
+//	public void shouldSuccessfullyGetModuleHistoryPerformance() {}
+//	
+//	@Test
+//	public void shouldSuccessfullyToggleModuleState() {}
+//	
+	
 }

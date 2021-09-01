@@ -10,8 +10,8 @@ import org.junit.Test;
 import com.google.common.collect.Lists;
 
 import tech.xuanwu.northstar.strategy.common.constants.ModuleState;
-import tech.xuanwu.northstar.strategy.common.model.entity.ModulePositionEntity;
-import tech.xuanwu.northstar.strategy.common.model.entity.ModuleStatusEntity;
+import tech.xuanwu.northstar.strategy.common.model.persistence.ModulePositionPO;
+import tech.xuanwu.northstar.strategy.common.model.persistence.ModuleStatusPO;
 
 public class MongoUtilsTest {
 
@@ -25,15 +25,15 @@ public class MongoUtilsTest {
 
 	@Test
 	public void test() {
-		ModuleStatusEntity e = ModuleStatusEntity.builder()
+		ModuleStatusPO e = ModuleStatusPO.builder()
 				.moduleName("test")
 				.holdingTradingDay("20210608")
 				.state(ModuleState.EMPTY)
-				.positions(Lists.newArrayList(new ModulePositionEntity()))
+				.positions(Lists.newArrayList(new ModulePositionPO()))
 				.build();
 		
 		assertThat(MongoUtils.beanToDocument(e)).isOfAnyClassIn(Document.class);
-		assertThat(MongoUtils.documentToBean(MongoUtils.beanToDocument(e), ModuleStatusEntity.class)).isEqualTo(e);
+		assertThat(MongoUtils.documentToBean(MongoUtils.beanToDocument(e), ModuleStatusPO.class)).isEqualTo(e);
 	}
 
 }

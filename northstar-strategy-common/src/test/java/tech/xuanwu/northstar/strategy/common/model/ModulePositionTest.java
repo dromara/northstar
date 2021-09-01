@@ -6,7 +6,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import tech.xuanwu.northstar.strategy.common.model.entity.ModulePositionEntity;
+import tech.xuanwu.northstar.strategy.common.model.persistence.ModulePositionPO;
 import test.common.TestFieldFactory;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
@@ -26,7 +26,7 @@ public class ModulePositionTest {
 	
 	private TestFieldFactory factory = new TestFieldFactory("testGateway");
 	
-	private ModulePositionEntity.ModulePositionEntityBuilder proto = ModulePositionEntity.builder()
+	private ModulePositionPO.ModulePositionPOBuilder proto = ModulePositionPO.builder()
 			.unifiedSymbol(SYMBOL)
 			.multiplier(10)
 			.volume(2)
@@ -76,7 +76,7 @@ public class ModulePositionTest {
 	
 	@Test
 	public void shouldGetTheSameObject() {
-		ModulePositionEntity e = proto.build();
+		ModulePositionPO e = proto.build();
 		ModulePosition pos = new ModulePosition(e);
 		assertThat(pos.convertToEntity()).isEqualTo(e);
 	}

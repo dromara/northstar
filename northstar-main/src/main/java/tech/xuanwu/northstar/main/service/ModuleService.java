@@ -34,12 +34,12 @@ import tech.xuanwu.northstar.strategy.common.model.StrategyModule;
 import tech.xuanwu.northstar.strategy.common.model.data.BarData;
 import tech.xuanwu.northstar.strategy.common.model.data.DealRecord;
 import tech.xuanwu.northstar.strategy.common.model.data.ModuleCurrentPerformance;
-import tech.xuanwu.northstar.strategy.common.model.entity.ModuleStatusEntity;
-import tech.xuanwu.northstar.strategy.common.model.entity.TradeDescriptionEntity;
 import tech.xuanwu.northstar.strategy.common.model.meta.ComponentAndParamsPair;
 import tech.xuanwu.northstar.strategy.common.model.meta.ComponentField;
 import tech.xuanwu.northstar.strategy.common.model.meta.ComponentMetaInfo;
 import tech.xuanwu.northstar.strategy.common.model.meta.DynamicParams;
+import tech.xuanwu.northstar.strategy.common.model.persistence.ModuleStatusPO;
+import tech.xuanwu.northstar.strategy.common.model.persistence.TradeDescriptionPO;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
@@ -137,7 +137,7 @@ public class ModuleService implements InitializingBean{
 	 */
 	public boolean updateModule(ModuleInfo info) throws Exception {
 		mdlMgr.removeModule(info.getModuleName());
-		ModuleStatusEntity mse = moduleRepo.loadModuleStatus(info.getModuleName());
+		ModuleStatusPO mse = moduleRepo.loadModuleStatus(info.getModuleName());
 		ModuleStatus status;
 		if(mse == null) {
 			status = new ModuleStatus(info.getModuleName(), contractMgr);
@@ -230,10 +230,10 @@ public class ModuleService implements InitializingBean{
 	 */
 	public List<DealRecord> getHistoryRecords(String moduleName) {
 		List<DealRecord> result = new ArrayList<>();
-		Map<String, List<TradeDescriptionEntity>> openingTradeMap = new HashMap<>();
-		Map<String, List<TradeDescriptionEntity>> closingTradeMap = new HashMap<>();
-		List<TradeDescriptionEntity> totalRecords = moduleRepo.findTradeDescription(moduleName);
-		for(TradeDescriptionEntity trade : totalRecords) {			
+		Map<String, List<TradeDescriptionPO>> openingTradeMap = new HashMap<>();
+		Map<String, List<TradeDescriptionPO>> closingTradeMap = new HashMap<>();
+		List<TradeDescriptionPO> totalRecords = moduleRepo.findTradeDescription(moduleName);
+		for(TradeDescriptionPO trade : totalRecords) {			
 			String symbol = trade.getSymbol();
 			if(trade.getOffsetFlag() == OffsetFlagEnum.OF_Open) {
 				openingTradeMap.putIfAbsent(symbol, new LinkedList<>());
@@ -244,17 +244,17 @@ public class ModuleService implements InitializingBean{
 			}
 		}
 		
-		for(Entry<String, List<TradeDescriptionEntity>> e : closingTradeMap.entrySet()) {
+		for(Entry<String, List<TradeDescriptionPO>> e : closingTradeMap.entrySet()) {
 			String curSymbol = e.getKey();
-			LinkedList<TradeDescriptionEntity> tempClosingTrade = new LinkedList<>();
+			LinkedList<TradeDescriptionPO> tempClosingTrade = new LinkedList<>();
 			tempClosingTrade.addAll(e.getValue());
 			
-			LinkedList<TradeDescriptionEntity> tempOpeningTrade = new LinkedList<>();
+			LinkedList<TradeDescriptionPO> tempOpeningTrade = new LinkedList<>();
 			tempOpeningTrade.addAll(openingTradeMap.get(curSymbol));
 			
 			while(tempClosingTrade.size() > 0) {
-				TradeDescriptionEntity closingDeal = tempClosingTrade.pollFirst();
-				TradeDescriptionEntity openingDeal = tempOpeningTrade.pollFirst();
+				TradeDescriptionPO closingDeal = tempClosingTrade.pollFirst();
+				TradeDescriptionPO openingDeal = tempOpeningTrade.pollFirst();
 				if(closingDeal == null || openingDeal == null 
 						|| closingDeal.getTradeTimestamp() < openingDeal.getTradeTimestamp()) {
 					throw new IllegalStateException("存在异常的平仓合约找不到对应的开仓合约");
@@ -280,7 +280,7 @@ public class ModuleService implements InitializingBean{
 						.build();
 				result.add(deal);
 				int volDiff = Math.abs(closingDeal.getVolume() - openingDeal.getVolume());
-				TradeDescriptionEntity restTrade = new TradeDescriptionEntity();
+				TradeDescriptionPO restTrade = new TradeDescriptionPO();
 				BeanUtils.copyProperties(closingDeal, restTrade);
 				restTrade.setVolume(volDiff);
 				// 平仓手数多于开仓手数,则需要拆分平仓成交
@@ -337,7 +337,7 @@ public class ModuleService implements InitializingBean{
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		for(ModuleInfo m : getCurrentModuleInfos()) {
-			ModuleStatusEntity entity = moduleRepo.loadModuleStatus(m.getModuleName());
+			ModuleStatusPO entity = moduleRepo.loadModuleStatus(m.getModuleName());
 			ModuleStatus status;
 			if(entity == null) {
 				status = new ModuleStatus(m.getModuleName(), contractMgr);

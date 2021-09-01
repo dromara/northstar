@@ -74,7 +74,7 @@ class GwOrderHolder {
 					submitOrderReq.getDirection(), submitOrderReq.getOffsetFlag(), submitOrderReq.getVolume(), submitOrderReq.getPrice());
 			return tradeIntent.rejectOrder(tradingDay, "仓位不足");
 		}
-		// TODO 由于模拟盘没有日结算，所以暂时不考虑今仓昨仓问题
+		// 由于模拟盘没有日结算，所以暂时不考虑今仓昨仓问题
 		int totalAvailable = pf.getPosition() - pf.getFrozen();
 		if(totalAvailable < submitOrderReq.getVolume()) {
 			log.warn("仓位不足，无法下单：{}, {}, {}, {}, {}手, {}", submitOrderReq.getOriginOrderId(), submitOrderReq.getContract().getName(),
@@ -114,8 +114,6 @@ class GwOrderHolder {
 				Optional<OrderField> order = intent.tryDeal(tick);
 				if(order.isPresent()) {		
 					tradeList.add(order.get());
-					log.info("模拟成交：{}，{}，{}，{}，{}手，{}，{}", order.get().getOriginOrderId(), order.get().getContract().getName(), 
-							order.get().getDirection(), order.get().getOffsetFlag(), order.get().getTradedVolume(), order.get().getPrice(), order.get().getTradingDay());
 				}
 			}
 		});
@@ -127,7 +125,10 @@ class GwOrderHolder {
 		if(!originOrderIdMap.containsKey(order.getOriginOrderId())) {
 			throw new IllegalArgumentException("找不到订单对应的成交");
 		}
-		return originOrderIdMap.get(order.getOriginOrderId()).transformTrade();
+		TradeField trade = originOrderIdMap.get(order.getOriginOrderId()).transformTrade();
+		log.info("模拟成交：{}，{}，{}，{}，{}手，{}，{}", trade.getOriginOrderId(), trade.getContract().getName(), 
+				trade.getDirection(), trade.getOffsetFlag(), trade.getVolume(), trade.getPrice(), trade.getTradingDay());
+		return trade;
 	}
 	
 	protected double getFrozenMargin() {

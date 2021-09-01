@@ -34,6 +34,8 @@ public abstract class AbstractSignalPolicy implements SignalPolicy {
 	
 	protected ModuleStatus moduleStatus;
 	
+	protected TickField currentTick;
+	
 	@Override
 	public Set<String> bindedUnifiedSymbols() {
 		if(StringUtils.isEmpty(bindedUnifiedSymbol)) {
@@ -62,6 +64,7 @@ public abstract class AbstractSignalPolicy implements SignalPolicy {
 	public void updateTick(TickField tick) {
 		// 更新行情
 		if(bindedUnifiedSymbols().contains(tick.getUnifiedSymbol())) {
+			currentTick = tick;
 			BarData barData = barDataMap.get(tick.getUnifiedSymbol());
 			barData.update(tick);
 		}

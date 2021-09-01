@@ -15,8 +15,8 @@ import tech.xuanwu.northstar.common.EntityAware;
 import tech.xuanwu.northstar.common.model.ContractManager;
 import tech.xuanwu.northstar.strategy.common.constants.ModuleState;
 import tech.xuanwu.northstar.strategy.common.event.ModuleEventType;
-import tech.xuanwu.northstar.strategy.common.model.entity.ModulePositionEntity;
-import tech.xuanwu.northstar.strategy.common.model.entity.ModuleStatusEntity;
+import tech.xuanwu.northstar.strategy.common.model.persistence.ModulePositionPO;
+import tech.xuanwu.northstar.strategy.common.model.persistence.ModuleStatusPO;
 import tech.xuanwu.northstar.strategy.common.model.state.ModuleStateMachine;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
@@ -32,7 +32,7 @@ import xyz.redtorch.pb.CoreField.TradeField;
  * @author KevinHuangwl
  *
  */
-public class ModuleStatus implements EntityAware<ModuleStatusEntity>{
+public class ModuleStatus implements EntityAware<ModuleStatusPO>{
 
 	protected String moduleName;
 	
@@ -55,7 +55,7 @@ public class ModuleStatus implements EntityAware<ModuleStatusEntity>{
 		this.positions = new ArrayList<>();
 	}
 
-	public ModuleStatus(ModuleStatusEntity entity, ContractManager contractMgr) {
+	public ModuleStatus(ModuleStatusPO entity, ContractManager contractMgr) {
 		this.contractMgr = contractMgr;
 		this.moduleName = entity.getModuleName();
 		this.stateMachine = new ModuleStateMachine(entity.getState());
@@ -151,7 +151,7 @@ public class ModuleStatus implements EntityAware<ModuleStatusEntity>{
 		if(positions.stream().filter(p -> p.isMatch(trade.getContract().getUnifiedSymbol())).anyMatch(p -> p.onTrade(trade))) {
 			return;
 		}
-		ModulePositionEntity e = ModulePositionEntity.builder()
+		ModulePositionPO e = ModulePositionPO.builder()
 				.openPrice(trade.getPrice())
 				.stopLossPrice(order.getStopPrice())
 				.positionDir(trade.getDirection() == DirectionEnum.D_Buy ? PositionDirectionEnum.PD_Long : PositionDirectionEnum.PD_Short)
@@ -174,8 +174,8 @@ public class ModuleStatus implements EntityAware<ModuleStatusEntity>{
 	}
 	
 	@Override
-	public ModuleStatusEntity convertToEntity() {
-		return ModuleStatusEntity.builder()
+	public ModuleStatusPO convertToEntity() {
+		return ModuleStatusPO.builder()
 				.moduleName(moduleName)
 				.state(stateMachine.getState())
 				.positions(positions.stream().map(ModulePosition::convertToEntity).collect(Collectors.toList()))
