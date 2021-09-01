@@ -1,4 +1,4 @@
-package tech.xuanwu.northstar.strategy.common.model.entity;
+package tech.xuanwu.northstar.strategy.common.model.persistence;
 
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -14,7 +14,7 @@ import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 @NoArgsConstructor
 @Document
 @Data
-public class TradeDescriptionEntity {
+public class TradeDescriptionPO {
 	
 	private String moduleName;
 

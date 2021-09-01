@@ -3,14 +3,14 @@ package tech.xuanwu.northstar.strategy.common.model;
 import org.apache.commons.lang3.StringUtils;
 
 import tech.xuanwu.northstar.common.EntityAware;
-import tech.xuanwu.northstar.strategy.common.model.entity.ModulePositionEntity;
+import tech.xuanwu.northstar.strategy.common.model.persistence.ModulePositionPO;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
 import xyz.redtorch.pb.CoreField.TickField;
 import xyz.redtorch.pb.CoreField.TradeField;
 
-public class ModulePosition implements EntityAware<ModulePositionEntity>{
+public class ModulePosition implements EntityAware<ModulePositionPO>{
 
 	protected String unifiedSymbol;
 
@@ -26,7 +26,7 @@ public class ModulePosition implements EntityAware<ModulePositionEntity>{
 	
 	protected double holdingProfit;
 	
-	public ModulePosition(ModulePositionEntity e) {
+	public ModulePosition(ModulePositionPO e) {
 		this.unifiedSymbol = e.getUnifiedSymbol();
 		this.positionDir = e.getPositionDir();
 		this.openPrice = e.getOpenPrice();
@@ -92,8 +92,8 @@ public class ModulePosition implements EntityAware<ModulePositionEntity>{
 	}
 	
 	@Override
-	public ModulePositionEntity convertToEntity() {
-		return ModulePositionEntity.builder()
+	public ModulePositionPO convertToEntity() {
+		return ModulePositionPO.builder()
 				.unifiedSymbol(unifiedSymbol)
 				.positionDir(positionDir)
 				.openPrice(openPrice)

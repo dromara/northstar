@@ -13,8 +13,8 @@ import tech.xuanwu.northstar.common.event.NorthstarEventType;
 import tech.xuanwu.northstar.main.persistence.ModuleRepository;
 import tech.xuanwu.northstar.strategy.common.model.StrategyModule;
 import tech.xuanwu.northstar.strategy.common.model.data.ModuleCurrentPerformance;
-import tech.xuanwu.northstar.strategy.common.model.entity.ModuleStatusEntity;
-import tech.xuanwu.northstar.strategy.common.model.entity.TradeDescriptionEntity;
+import tech.xuanwu.northstar.strategy.common.model.persistence.ModuleStatusPO;
+import tech.xuanwu.northstar.strategy.common.model.persistence.TradeDescriptionPO;
 import xyz.redtorch.pb.CoreField.AccountField;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.OrderField;
@@ -84,7 +84,7 @@ public class ModuleManager extends AbstractEventHandler {
 		// 只对持仓状态变化做持久化，不对下单状态作反应
 		for(Entry<String, StrategyModule> e : moduleMap.entrySet()) {
 			StrategyModule m = e.getValue();
-			Optional<ModuleStatusEntity> result = m.onTrade(trade);
+			Optional<ModuleStatusPO> result = m.onTrade(trade);
 			if(result.isPresent()) {
 				moduleRepo.saveTradeDescription(convertFrom(m.getName(), trade));
 				moduleRepo.saveModuleStatus(result.get());
@@ -93,8 +93,8 @@ public class ModuleManager extends AbstractEventHandler {
 		}
 	}
 	
-	private TradeDescriptionEntity convertFrom(String moduleName, TradeField trade) {
-		return TradeDescriptionEntity.builder()
+	private TradeDescriptionPO convertFrom(String moduleName, TradeField trade) {
+		return TradeDescriptionPO.builder()
 				.moduleName(moduleName)
 				.symbol(trade.getContract().getSymbol())
 				.gatewayId(trade.getGatewayId())

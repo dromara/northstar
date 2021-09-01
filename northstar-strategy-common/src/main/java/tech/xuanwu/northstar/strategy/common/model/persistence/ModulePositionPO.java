@@ -1,4 +1,4 @@
-package tech.xuanwu.northstar.strategy.common.model.entity;
+package tech.xuanwu.northstar.strategy.common.model.persistence;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,7 +10,7 @@ import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class ModulePositionEntity {
+public class ModulePositionPO {
 
 	private PositionDirectionEnum positionDir;
 	

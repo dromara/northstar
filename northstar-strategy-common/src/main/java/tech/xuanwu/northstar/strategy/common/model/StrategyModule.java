@@ -23,7 +23,7 @@ import tech.xuanwu.northstar.strategy.common.constants.ModuleState;
 import tech.xuanwu.northstar.strategy.common.constants.RiskAuditResult;
 import tech.xuanwu.northstar.strategy.common.event.ModuleEventType;
 import tech.xuanwu.northstar.strategy.common.model.data.ModuleCurrentPerformance;
-import tech.xuanwu.northstar.strategy.common.model.entity.ModuleStatusEntity;
+import tech.xuanwu.northstar.strategy.common.model.persistence.ModuleStatusPO;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreField.AccountField;
@@ -60,8 +60,6 @@ public class StrategyModule {
 	private long lastWarningTime;
 	
 	private String tradingDay;
-	
-	private double balance;
 	
 	@Builder.Default
 	private Map<String, OrderField> originOrderIdMap = new HashMap<>();
@@ -177,7 +175,7 @@ public class StrategyModule {
 		return this;
 	}
 	
-	public Optional<ModuleStatusEntity> onTrade(TradeField trade) {
+	public Optional<ModuleStatusPO> onTrade(TradeField trade) {
 		if(originOrderIdMap.containsKey(trade.getOriginOrderId())) {
 			OrderField order = originOrderIdMap.remove(trade.getOriginOrderId());
 			Optional<StopLossItem> stopLossItem = StopLossItem.generateFrom(trade, order);
@@ -207,8 +205,7 @@ public class StrategyModule {
 	
 	public StrategyModule onAccount(AccountField account) {
 		if(StringUtils.equals(account.getGatewayId(), gateway.getGatewaySetting().getGatewayId())) {
-			status.accountAvailable = account.getAvailable();
-			status.setAccountAvailable(account.getBalance());
+			status.setAccountAvailable(account.getAvailable());
 		}
 		return this;
 	}
@@ -251,7 +248,7 @@ public class StrategyModule {
 		}
 		mp.setRefBarDataMap(byteMap);
 		mp.setAccountId(gateway.getGatewaySetting().getGatewayId());
-		mp.setAccountBalance((int)balance);
+		mp.setAccountBalance((int)status.getAccountAvailable());
 		mp.setModuleState(status.getCurrentState());
 		mp.setTotalPositionProfit(status.getHoldingProfit());
 		return mp;
