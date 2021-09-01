@@ -178,7 +178,7 @@ public class StrategyModule {
 	public Optional<ModuleStatusPO> onTrade(TradeField trade) {
 		if(originOrderIdMap.containsKey(trade.getOriginOrderId())) {
 			OrderField order = originOrderIdMap.remove(trade.getOriginOrderId());
-			Optional<StopLossItem> stopLossItem = StopLossItem.generateFrom(trade, order);
+			Optional<StopLossItem> stopLossItem = StopLossItem.generateFrom(mktGatewayId, trade, order);
 			if(stopLossItem.isPresent()) {
 				stopLossItemRegistry.add(stopLossItem.get());
 			}
