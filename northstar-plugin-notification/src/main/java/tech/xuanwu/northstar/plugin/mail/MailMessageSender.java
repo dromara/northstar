@@ -51,6 +51,7 @@ public class MailMessageSender implements MessageSender, InitializingBean{
 		if(StringUtils.isEmpty(senderMail) || StringUtils.isEmpty(subscriber)) {
 			log.warn("未设置邮件收发方，邮件通知将不生效");
 		}
+		send(new Message("程序启动", "邮件测试"));
 	}
 
 }

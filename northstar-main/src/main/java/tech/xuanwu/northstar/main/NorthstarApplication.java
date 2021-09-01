@@ -8,7 +8,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 @EnableScheduling
 @EnableAutoConfiguration
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = "tech.xuanwu.northstar")
 @EnableMongoRepositories("tech.xuanwu.northstar")
 public class NorthstarApplication {
 	
