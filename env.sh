@@ -7,7 +7,7 @@ echo "安装Maven"
 wget https://mirrors.bfsu.edu.cn/apache/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz
 tar -xvf apache-maven-3.6.3-bin.tar.gz
 ln -s ~/apache-maven-3.6.3/bin/mvn /usr/local/bin/
-wget https://gitee.com/KevinHuangwl/northstar/raw/master/settings.xml
+wget https://gitee.com/dromara/northstar/raw/master/settings.xml
 \cp -f settings.xml ~/apache-maven-3.6.3/conf/settings.xml
 
 echo “环境安装完成”
