@@ -81,7 +81,7 @@ public class SampleSignalPolicy extends AbstractSignalPolicy
 		if(milliSecOfMin % 30000 == 0) {
 			if(moduleStatus.at(ModuleState.EMPTY)) {
 				boolean flag = ThreadLocalRandom.current().nextBoolean();
-				double priceTick = currentTick.getLastPrice() - currentTick.getBidPrice(0);
+				double priceTick = Math.max(currentTick.getAskPrice(0) - currentTick.getLastPrice(), currentTick.getLastPrice() - currentTick.getBidPrice(0));
 				double stopPrice = flag ? price - priceTick * 2 : price + priceTick * 2;
 				return Optional.of(genSignal(flag ? SignalOperation.BuyOpen : SignalOperation.SellOpen, price, stopPrice));
 			}
