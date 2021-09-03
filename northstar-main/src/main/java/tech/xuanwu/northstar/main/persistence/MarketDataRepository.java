@@ -122,7 +122,7 @@ public class MarketDataRepository {
 	 * @param contracts
 	 */
 	public void batchSaveContracts(List<ContractPO> contracts) {
-		if(contracts.size() < 1) {
+		if(contracts.isEmpty()) {
 			return;
 		}
 		log.info("网关-[{}] 保存合约：{}条", contracts.get(0).getGatewayId(), contracts.size());
@@ -140,6 +140,15 @@ public class MarketDataRepository {
 	public void saveContract(ContractPO contract) {
 		log.info("保存合约：{}", contract.getFullName());
 		mongo.save(contract);
+	}
+	
+	/**
+	 * 清理网关合约
+	 * @param gatewayId
+	 */
+	public void clearGatewayContract(String gatewayId) {
+		log.info("清理网关[{}]的所有合约", gatewayId);
+		mongo.remove(Query.query(Criteria.where("gatewayId").is(gatewayId)), ContractPO.class);
 	}
 	
 	/**
