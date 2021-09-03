@@ -1,15 +1,28 @@
 package tech.xuanwu.northstar.strategy.common.model;
 
+import java.util.Optional;
+import java.util.UUID;
+
 import org.apache.commons.lang3.StringUtils;
 
+import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.common.EntityAware;
+import tech.xuanwu.northstar.common.model.ContractManager;
 import tech.xuanwu.northstar.strategy.common.model.persistence.ModulePositionPO;
+import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
+import xyz.redtorch.pb.CoreEnum.ForceCloseReasonEnum;
+import xyz.redtorch.pb.CoreEnum.HedgeFlagEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
+import xyz.redtorch.pb.CoreEnum.OrderPriceTypeEnum;
 import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
+import xyz.redtorch.pb.CoreEnum.TimeConditionEnum;
+import xyz.redtorch.pb.CoreEnum.VolumeConditionEnum;
+import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TickField;
 import xyz.redtorch.pb.CoreField.TradeField;
 
+@Slf4j
 public class ModulePosition implements EntityAware<ModulePositionPO>{
 
 	protected String unifiedSymbol;
@@ -26,13 +39,19 @@ public class ModulePosition implements EntityAware<ModulePositionPO>{
 	
 	protected double holdingProfit;
 	
-	public ModulePosition(ModulePositionPO e) {
+	protected String openTradingDay;
+	
+	protected ContractManager contractMgr;
+	
+	public ModulePosition(ModulePositionPO e, ContractManager contractMgr) {
 		this.unifiedSymbol = e.getUnifiedSymbol();
 		this.positionDir = e.getPositionDir();
 		this.openPrice = e.getOpenPrice();
 		this.stopLossPrice = e.getStopLossPrice();
 		this.volume = e.getVolume();
 		this.multiplier = e.getMultiplier();
+		this.openTradingDay = e.getOpenTradingDay();
+		this.contractMgr = contractMgr;
 	}
 	
 	public double updateProfit(TickField tick) {
@@ -42,11 +61,37 @@ public class ModulePosition implements EntityAware<ModulePositionPO>{
 		return holdingProfit;
 	}
 	
-	public boolean triggerStopLoss(TickField tick) {
+	public Optional<SubmitOrderReqField> triggerStopLoss(TickField tick) {
 		checkMatch(tick.getUnifiedSymbol());
 		if(stopLossPrice == 0) {
-			return false;
+			return Optional.empty();
 		}
+		if(triggeredStopLoss(tick)) {
+			SubmitOrderReqField orderReq = SubmitOrderReqField.newBuilder()
+					.setOriginOrderId(UUID.randomUUID().toString())
+					.setContract(contractMgr.getContract(unifiedSymbol))
+					.setDirection(getClosingDirection())
+					.setVolume(volume)
+					.setPrice(0) 											//市价专用
+					.setOrderPriceType(OrderPriceTypeEnum.OPT_AnyPrice)	//市价专用
+					.setTimeCondition(TimeConditionEnum.TC_IOC)				//市价专用
+					.setOffsetFlag(StringUtils.equals(tick.getTradingDay(), openTradingDay) ? OffsetFlagEnum.OF_CloseToday : OffsetFlagEnum.OF_CloseYesterday)
+					.setVolumeCondition(VolumeConditionEnum.VC_AV)
+					.setContingentCondition(ContingentConditionEnum.CC_Immediately)
+					.setHedgeFlag(HedgeFlagEnum.HF_Speculation)
+					.setForceCloseReason(ForceCloseReasonEnum.FCR_NotForceClose)
+					.build();
+			log.info("生成止损单：{}，{}，{}，{}手", orderReq.getContract().getSymbol(), orderReq.getDirection(), orderReq.getOffsetFlag(), orderReq.getVolume());
+			return Optional.of(orderReq);
+		}
+		return Optional.empty();
+	}
+	
+	private DirectionEnum getClosingDirection() {
+		return positionDir == PositionDirectionEnum.PD_Long ? DirectionEnum.D_Sell : DirectionEnum.D_Buy;
+	}
+	
+	private boolean triggeredStopLoss(TickField tick) {
 		return positionDir == PositionDirectionEnum.PD_Long && tick.getLastPrice() <= stopLossPrice
 				|| positionDir == PositionDirectionEnum.PD_Short && tick.getLastPrice() >= stopLossPrice;
 	}
@@ -86,7 +131,7 @@ public class ModulePosition implements EntityAware<ModulePositionPO>{
 	}
 	
 	private void checkMatch(String unifiedSymbol) {
-		if(!StringUtils.equals(this.unifiedSymbol, unifiedSymbol)) {
+		if(!isMatch(unifiedSymbol)) {
 			throw new IllegalStateException(this.unifiedSymbol + "与不匹配的数据更新：" + unifiedSymbol);
 		}
 	}

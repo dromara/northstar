@@ -168,6 +168,7 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 		boolean flag = doDeleteGateway(gatewayId);
 		gatewayRepo.deleteById(gatewayId);
 		mdRepo.dropGatewayData(gatewayId);
+		mdRepo.clearGatewayContract(gatewayId);
 		return flag;
 	}
 	

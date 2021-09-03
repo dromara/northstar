@@ -1,8 +1,6 @@
 package tech.xuanwu.northstar.strategy.common.model;
 
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -63,8 +61,6 @@ public class StrategyModule {
 	
 	@Builder.Default
 	private Map<String, OrderField> originOrderIdMap = new HashMap<>();
-	@Builder.Default
-	private LinkedList<StopLossItem> stopLossItemRegistry = new LinkedList<>();
 	
 	public StrategyModule onTick(TickField tick) {
 		if(!StringUtils.equals(mktGatewayId, tick.getGatewayId())) {
@@ -84,8 +80,9 @@ public class StrategyModule {
 			return this;
 		}
 		if(signalPolicy.bindedUnifiedSymbols().contains(tick.getUnifiedSymbol())) {	
-			status.updateHoldingProfit(tick);
 			tradingDay = tick.getTradingDay();
+			status.updateHoldingProfit(tick);
+			
 			if(status.at(ModuleState.EMPTY) 
 					|| status.at(ModuleState.HOLDING_LONG)
 					|| status.at(ModuleState.HOLDING_SHORT)) {				
@@ -98,15 +95,11 @@ public class StrategyModule {
 			}
 		}
 		if(dealer.bindedUnifiedSymbols().contains(tick.getUnifiedSymbol())) {
-			//遍历止损记录，检查止损触发
-			Iterator<StopLossItem> itItem = stopLossItemRegistry.iterator();
-			while(itItem.hasNext()) {
-				StopLossItem item = itItem.next();
-				Optional<SubmitOrderReqField> stopLossOrder = item.onTick(tick);
-				if(stopLossOrder.isPresent()) {
-					gateway.submitOrder(stopLossOrder.get());
-					itItem.remove();
-				}
+			Optional<SubmitOrderReqField> stopLossReq = status.triggerStopLoss(tick);
+			if(stopLossReq.isPresent()) {
+				status.transform(ModuleEventType.STOP_LOSS);
+				gateway.submitOrder(stopLossReq.get());
+				return this;
 			}
 			
 			if(status.at(ModuleState.PLACING_ORDER)) {
@@ -178,10 +171,6 @@ public class StrategyModule {
 	public Optional<ModuleStatusPO> onTrade(TradeField trade) {
 		if(originOrderIdMap.containsKey(trade.getOriginOrderId())) {
 			OrderField order = originOrderIdMap.remove(trade.getOriginOrderId());
-			Optional<StopLossItem> stopLossItem = StopLossItem.generateFrom(mktGatewayId, trade, order);
-			if(stopLossItem.isPresent()) {
-				stopLossItemRegistry.add(stopLossItem.get());
-			}
 			// 考虑一个order分多次成交的情况
 			if(trade.getVolume() < order.getTradedVolume()) {
 				log.info("订单{}分可能多次成交", order.getOriginOrderId());
@@ -192,6 +181,7 @@ public class StrategyModule {
 			} else {				
 				status.transform(trade.getDirection() == DirectionEnum.D_Buy ? ModuleEventType.BUY_TRADED : ModuleEventType.SELL_TRADED);
 			}
+			status.onTrade(trade, order);
 			return Optional.of(status.convertToEntity());
 		}
 		return Optional.empty();
@@ -212,10 +202,6 @@ public class StrategyModule {
 	
 	public boolean isEnabled() {
 		return !disabled;
-	}
-	
-	public boolean removable() {
-		return status.at(ModuleState.EMPTY) && disabled;
 	}
 	
 	public String getName() {

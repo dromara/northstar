@@ -24,4 +24,6 @@ public class ModulePositionPO {
 	
 	private double multiplier;
 	
+	private String openTradingDay;
+	
 }
