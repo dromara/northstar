@@ -101,7 +101,7 @@ public class ModuleStatusTest {
 		assertThat(ms.longPositions).hasSize(1);
 	}
 	
-	@Test(expected = IllegalArgumentException.class)
+	@Test(expected = IllegalStateException.class)
 	public void shouldFailIfOriginIdMismatch() {
 		TradeField trade = factory.makeTradeField("rb2209", 1240, 2, DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open);
 		ms.onTrade(trade, OrderField.newBuilder().setContract(trade.getContract()).build());
