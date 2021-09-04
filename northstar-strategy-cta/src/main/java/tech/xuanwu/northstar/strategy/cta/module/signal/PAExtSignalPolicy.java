@@ -34,8 +34,6 @@ public class PAExtSignalPolicy extends AbstractSignalPolicy implements ExternalS
 	private Pattern bkOprPtn = Pattern.compile("在([0-9\\.]+)的价格开多单，止损价：([0-9\\.]+)");
 	private Pattern skOprPtn = Pattern.compile("在([0-9\\.]+)的价格开空单，止损价：([0-9\\.]+)");
 	
-	private String symbol;
-	
 	private Queue<Signal> signalQ = new LinkedList<>();
 	
 	@Override
@@ -50,22 +48,22 @@ public class PAExtSignalPolicy extends AbstractSignalPolicy implements ExternalS
 			throw new IllegalArgumentException("合约入参为空");
 		}
 		bindedUnifiedSymbol = initParams.unifiedSymbol;
-		symbol = bindedUnifiedSymbol.split("@")[0].toUpperCase();
+		String symbol = bindedUnifiedSymbol.split("@")[0].toUpperCase();
 		log.info("绑定合约：{}", symbol);
 		textPtn = Pattern.compile("[^：]+：" + symbol + ".+，仅供参考。");
 	}
 
 	@Override
 	protected Optional<Signal> onTick(int millicSecOfMin, BarData barData) {
-		if(signalQ.size() > 0) {
-			Signal signal = signalQ.poll();
-			// 当信号为平仓且当前仓位无持仓时，抛弃该信号
-			if(signal != null && !signal.isOpening() && moduleStatus.at(ModuleState.EMPTY)) {
-				signal = signalQ.poll();
-			}
-			return Optional.ofNullable(signal);
+		if(signalQ.isEmpty()) {
+			return Optional.empty();
 		}
-		return Optional.empty();
+		Signal signal = signalQ.poll();
+		// 当信号为平仓且当前仓位无持仓时，抛弃该信号
+		if(signal != null && !signal.isOpening() && moduleStatus.at(ModuleState.EMPTY)) {
+			signal = signalQ.poll();
+		}
+		return Optional.ofNullable(signal);
 	}
 
 	@Override
@@ -93,7 +91,7 @@ public class PAExtSignalPolicy extends AbstractSignalPolicy implements ExternalS
 		Matcher m3 = bkOprPtn.matcher(text);
 		Matcher m4 = skOprPtn.matcher(text);
 		String openPrice = "";
-		String stopPrice = "0";
+		String stopPrice;
 		if(m3.find()) {
 			openPrice = m3.group(1);
 			stopPrice = m3.group(2);
