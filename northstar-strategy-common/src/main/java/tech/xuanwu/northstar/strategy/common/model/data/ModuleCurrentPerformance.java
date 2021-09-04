@@ -20,9 +20,9 @@ public class ModuleCurrentPerformance {
 	private double totalPositionProfit;
 	
 	/**
-	 * 模组账户总额
+	 * 模组可用金额
 	 */
-	private int accountBalance;
+	private int moduleAvailable;
 	
 	/**
 	 * 模组状态

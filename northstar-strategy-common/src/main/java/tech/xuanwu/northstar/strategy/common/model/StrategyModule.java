@@ -234,7 +234,7 @@ public class StrategyModule {
 		}
 		mp.setRefBarDataMap(byteMap);
 		mp.setAccountId(gateway.getGatewaySetting().getGatewayId());
-		mp.setAccountBalance((int)status.getAccountAvailable());
+		mp.setModuleAvailable((int)status.getAccountAvailable());
 		mp.setModuleState(status.getCurrentState());
 		mp.setTotalPositionProfit(status.getHoldingProfit());
 		return mp;
