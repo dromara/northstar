@@ -13,8 +13,8 @@ import tech.xuanwu.northstar.common.event.NorthstarEventType;
 import tech.xuanwu.northstar.main.persistence.ModuleRepository;
 import tech.xuanwu.northstar.strategy.common.model.StrategyModule;
 import tech.xuanwu.northstar.strategy.common.model.data.ModuleCurrentPerformance;
+import tech.xuanwu.northstar.strategy.common.model.persistence.DealRecordPO;
 import tech.xuanwu.northstar.strategy.common.model.persistence.ModuleStatusPO;
-import tech.xuanwu.northstar.strategy.common.model.persistence.TradeDescriptionPO;
 import xyz.redtorch.pb.CoreField.AccountField;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.OrderField;
@@ -86,26 +86,14 @@ public class ModuleManager extends AbstractEventHandler {
 			StrategyModule m = e.getValue();
 			Optional<ModuleStatusPO> result = m.onTrade(trade);
 			if(result.isPresent()) {
-				moduleRepo.saveTradeDescription(convertFrom(m.getName(), trade));
 				moduleRepo.saveModuleStatus(result.get());
+				Optional<DealRecordPO> dealRecord = m.consumeDealRecord();
+				if(dealRecord.isPresent()) {	
+					moduleRepo.saveDealRecord(dealRecord.get());
+				}
 				return;
 			}
 		}
-	}
-	
-	private TradeDescriptionPO convertFrom(String moduleName, TradeField trade) {
-		return TradeDescriptionPO.builder()
-				.moduleName(moduleName)
-				.symbol(trade.getContract().getSymbol())
-				.gatewayId(trade.getGatewayId())
-				.direction(trade.getDirection())
-				.offsetFlag(trade.getOffsetFlag())
-				.contractMultiplier(trade.getContract().getMultiplier())
-				.volume(trade.getVolume())
-				.price(trade.getPrice())
-				.tradingDay(trade.getTradingDay())
-				.tradeTimestamp(trade.getTradeTimestamp())
-				.build();
 	}
 	
 	public void onAccount(AccountField account) {

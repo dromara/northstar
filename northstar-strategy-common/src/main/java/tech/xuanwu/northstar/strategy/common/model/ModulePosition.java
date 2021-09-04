@@ -27,25 +27,25 @@ import xyz.redtorch.pb.CoreField.TradeField;
 @Slf4j
 public class ModulePosition implements EntityAware<ModulePositionPO>{
 
-	protected final String unifiedSymbol;
+	private final String unifiedSymbol;
 
-	protected final PositionDirectionEnum positionDir;
+	private final PositionDirectionEnum positionDir;
 	
-	protected final String openTradingDay;
+	private final String openTradingDay;
 	
-	protected final long openTime;
+	private final long openTime;
 	
-	protected final double multiplier;
+	private final double multiplier;
 	
-	protected final ContractManager contractMgr;
+	private final ContractManager contractMgr;
 	
-	protected double openPrice;
+	private double openPrice;
 	
-	protected double stopLossPrice;
+	private double stopLossPrice;
 	
-	protected int volume;
+	private int volume;
 	
-	protected double holdingProfit;
+	private double holdingProfit;
 	
 	public ModulePosition(TradeField trade, OrderField order, ContractManager contractMgr) {
 		if(!StringUtils.equals(trade.getOriginOrderId(), order.getOriginOrderId())) {

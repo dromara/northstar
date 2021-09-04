@@ -83,7 +83,7 @@ public class ModuleStatusTest {
 		TradeField trade = factory.makeTradeField("rb2210", 1240, 2, DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open);
 		ms.onTrade(trade, OrderField.newBuilder().setOriginOrderId(trade.getOriginOrderId()).build());
 		assertThat(ms.longPositions).hasSize(2);
-		assertThat(ms.longPositions.get(SYMBOL).volume).isEqualTo(4);
+		assertThat(ms.longPositions.get(SYMBOL).convertToEntity().getVolume()).isEqualTo(4);
 		
 		TradeField trade2 = factory.makeTradeField("rb2210", 1240, 2, DirectionEnum.D_Sell, OffsetFlagEnum.OF_Open);
 		ms.onTrade(trade2, OrderField.newBuilder().setOriginOrderId(trade2.getOriginOrderId()).build());

@@ -14,6 +14,7 @@ import tech.xuanwu.northstar.common.EntityAware;
 import tech.xuanwu.northstar.common.model.ContractManager;
 import tech.xuanwu.northstar.strategy.common.constants.ModuleState;
 import tech.xuanwu.northstar.strategy.common.event.ModuleEventType;
+import tech.xuanwu.northstar.strategy.common.model.persistence.DealRecordPO;
 import tech.xuanwu.northstar.strategy.common.model.persistence.ModulePositionPO;
 import tech.xuanwu.northstar.strategy.common.model.persistence.ModuleStatusPO;
 import tech.xuanwu.northstar.strategy.common.model.state.ModuleStateMachine;
@@ -32,21 +33,23 @@ import xyz.redtorch.pb.CoreField.TradeField;
 @Slf4j
 public class ModuleStatus implements EntityAware<ModuleStatusPO>{
 
-	protected String moduleName;
+	private final String moduleName;
 	
-	protected double accountAvailable;
+	private final ModuleStateMachine stateMachine;
 	
-	protected ModuleStateMachine stateMachine;
+	protected final Map<String, ModulePosition> longPositions = new HashMap<>();
 	
-	protected Map<String, ModulePosition> longPositions = new HashMap<>();
+	protected final Map<String, ModulePosition> shortPositions = new HashMap<>();
 	
-	protected Map<String, ModulePosition> shortPositions = new HashMap<>();
+	private final ContractManager contractMgr;
 	
-	protected ContractManager contractMgr;
+	private String holdingTradingDay;
 	
-	protected String holdingTradingDay;
+	private int countOfOpeningToday;
 	
-	protected int countOfOpeningToday;
+	private double accountAvailable;
+	
+	private Optional<DealRecordPO> dealRecord;
 	
 	public ModuleStatus(String name, ContractManager contractMgr) {
 		this.moduleName = name;
@@ -98,10 +101,7 @@ public class ModuleStatus implements EntityAware<ModuleStatusPO>{
 		return result;
 	}
 	
-	public ModuleStatus onTrade(TradeField trade, OrderField order) {
-		if(!StringUtils.equals(trade.getOriginOrderId(), order.getOriginOrderId())) {
-			throw new IllegalArgumentException("传入的成交与订单不匹配");
-		}
+	public Optional<ModuleStatusPO> onTrade(TradeField trade, OrderField order) {
 		if(trade.getOffsetFlag() == OffsetFlagEnum.OF_Unknown) {
 			throw new IllegalStateException("未知开平仓状态");
 		}
@@ -117,7 +117,13 @@ public class ModuleStatus implements EntityAware<ModuleStatusPO>{
 			closing(trade);
 		}
 		
-		return this;
+		return Optional.of(convertToEntity());
+	}
+	
+	public Optional<DealRecordPO> consumeDealRecord(){
+		Optional<DealRecordPO> result = dealRecord;
+		dealRecord = Optional.empty();
+		return result;
 	}
 	
 	
@@ -175,7 +181,7 @@ public class ModuleStatus implements EntityAware<ModuleStatusPO>{
 			throw new IllegalStateException("不存在对应的持仓");
 		}
 		ModulePosition mp = positions.get(trade.getContract().getUnifiedSymbol());
-		mp.onCloseTrade(trade);
+		dealRecord = mp.onCloseTrade(trade);
 		if(mp.isEmpty()) {
 			positions.remove(trade.getContract().getUnifiedSymbol());
 			log.info("模组平仓{}", trade.getContract().getSymbol());

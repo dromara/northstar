@@ -21,6 +21,7 @@ import tech.xuanwu.northstar.strategy.common.constants.ModuleState;
 import tech.xuanwu.northstar.strategy.common.constants.RiskAuditResult;
 import tech.xuanwu.northstar.strategy.common.event.ModuleEventType;
 import tech.xuanwu.northstar.strategy.common.model.data.ModuleCurrentPerformance;
+import tech.xuanwu.northstar.strategy.common.model.persistence.DealRecordPO;
 import tech.xuanwu.northstar.strategy.common.model.persistence.ModuleStatusPO;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
@@ -41,19 +42,19 @@ import xyz.redtorch.pb.CoreField.TradeField;
 @Builder
 public class StrategyModule {
 	
-	protected ModuleStatus status;
+	private final ModuleStatus status;
 	
-	protected SignalPolicy signalPolicy;
+	private final SignalPolicy signalPolicy;
 	
-	protected RiskController riskController;
+	private final RiskController riskController;
 	
-	protected Dealer dealer;
+	private final Dealer dealer;
 	
-	protected String mktGatewayId;
+	private final String mktGatewayId;
 	
-	protected TradeGateway gateway;
+	private final TradeGateway gateway;
 	
-	protected boolean disabled;
+	private boolean disabled;
 	
 	private long lastWarningTime;
 	
@@ -173,7 +174,7 @@ public class StrategyModule {
 			OrderField order = originOrderIdMap.remove(trade.getOriginOrderId());
 			// 考虑一个order分多次成交的情况
 			if(trade.getVolume() < order.getTradedVolume()) {
-				log.info("订单{}分可能多次成交", order.getOriginOrderId());
+				log.info("订单[{}]分可能多次成交", order.getOriginOrderId());
 				OrderField restOrder = OrderField.newBuilder(order)
 						.setTradedVolume(order.getTradedVolume() - trade.getVolume())
 						.build();
@@ -181,10 +182,13 @@ public class StrategyModule {
 			} else {				
 				status.transform(trade.getDirection() == DirectionEnum.D_Buy ? ModuleEventType.BUY_TRADED : ModuleEventType.SELL_TRADED);
 			}
-			status.onTrade(trade, order);
-			return Optional.of(status.convertToEntity());
+			return status.onTrade(trade, order);
 		}
 		return Optional.empty();
+	}
+	
+	public Optional<DealRecordPO> consumeDealRecord() {
+		return status.consumeDealRecord();
 	}
 	
 	public void onExternalMessage(String text) {

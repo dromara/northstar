@@ -9,8 +9,8 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Repository;
 
 import tech.xuanwu.northstar.strategy.common.model.ModuleInfo;
+import tech.xuanwu.northstar.strategy.common.model.persistence.DealRecordPO;
 import tech.xuanwu.northstar.strategy.common.model.persistence.ModuleStatusPO;
-import tech.xuanwu.northstar.strategy.common.model.persistence.TradeDescriptionPO;
 
 @Repository
 public class ModuleRepository {
@@ -58,16 +58,16 @@ public class ModuleRepository {
 	/*************/
 	/**	模组成交	**/
 	/*************/
-	public void saveTradeDescription(TradeDescriptionPO tradeDescription) {
-		mongo.save(tradeDescription);
+	public void saveDealRecord(DealRecordPO dealRecord) {
+		mongo.save(dealRecord);
 	}
 	
-	public List<TradeDescriptionPO> findTradeDescription(String moduleName) {
-		return mongo.find(Query.query(Criteria.where(MODULE_NAME).is(moduleName)), TradeDescriptionPO.class);
+	public List<DealRecordPO> findDealRecords(String moduleName) {
+		return mongo.find(Query.query(Criteria.where(MODULE_NAME).is(moduleName)), DealRecordPO.class);
 	}
 	
-	public void removeTradeDescription(String moduleName) {
-		mongo.remove(Query.query(Criteria.where(MODULE_NAME).is(moduleName)), TradeDescriptionPO.class);
+	public void removeDealRecords(String moduleName) {
+		mongo.remove(Query.query(Criteria.where(MODULE_NAME).is(moduleName)), DealRecordPO.class);
 	}
 	
 }
