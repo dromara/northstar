@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.common.EntityAware;
 import tech.xuanwu.northstar.common.model.ContractManager;
+import tech.xuanwu.northstar.strategy.common.model.persistence.DealRecordPO;
 import tech.xuanwu.northstar.strategy.common.model.persistence.ModulePositionPO;
 import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
@@ -26,9 +27,17 @@ import xyz.redtorch.pb.CoreField.TradeField;
 @Slf4j
 public class ModulePosition implements EntityAware<ModulePositionPO>{
 
-	protected String unifiedSymbol;
+	protected final String unifiedSymbol;
 
-	protected PositionDirectionEnum positionDir;
+	protected final PositionDirectionEnum positionDir;
+	
+	protected final String openTradingDay;
+	
+	protected final long openTime;
+	
+	protected final double multiplier;
+	
+	protected final ContractManager contractMgr;
 	
 	protected double openPrice;
 	
@@ -36,15 +45,7 @@ public class ModulePosition implements EntityAware<ModulePositionPO>{
 	
 	protected int volume;
 	
-	protected double multiplier;
-	
 	protected double holdingProfit;
-	
-	protected String openTradingDay;
-	
-	protected long openTime;
-	
-	protected ContractManager contractMgr;
 	
 	public ModulePosition(TradeField trade, OrderField order, ContractManager contractMgr) {
 		if(!StringUtils.equals(trade.getOriginOrderId(), order.getOriginOrderId())) {
@@ -117,30 +118,49 @@ public class ModulePosition implements EntityAware<ModulePositionPO>{
 				|| positionDir == PositionDirectionEnum.PD_Short && tick.getLastPrice() >= stopLossPrice;
 	}
 	
-	public boolean onTrade(TradeField trade) {
+	public Optional<ModulePositionPO> onOpenTrade(TradeField trade) {
 		checkMatch(trade.getContract().getUnifiedSymbol());
-		if(OffsetFlagEnum.OF_Open == trade.getOffsetFlag()) {
-			// 开仓成交
-			if(positionDir == PositionDirectionEnum.PD_Long && trade.getDirection() == DirectionEnum.D_Buy
-					|| positionDir == PositionDirectionEnum.PD_Short && trade.getDirection() == DirectionEnum.D_Sell) {
-				double originCost = openPrice * volume;
-				double newCost = trade.getPrice() * trade.getVolume();
-				openPrice = (originCost + newCost) / (volume + trade.getVolume());
-				volume += trade.getVolume();
-				return true;
-			}
-		} else {
-			// 平仓成交
-			if(positionDir == PositionDirectionEnum.PD_Long && trade.getDirection() == DirectionEnum.D_Sell
-					|| positionDir == PositionDirectionEnum.PD_Short && trade.getDirection() == DirectionEnum.D_Buy) {
-				if(volume < trade.getVolume()) {
-					throw new IllegalStateException("成交数量大于持仓数量");
-				}
-				volume -= trade.getVolume();
-				return true;
-			}
+		if(OffsetFlagEnum.OF_Open != trade.getOffsetFlag()) {
+			throw new IllegalStateException("传入了非开仓成交：" + trade.toString());
 		}
-		return false;
+		// 确保是同向开仓成交，忽略反向锁仓成交
+		if(positionDir == PositionDirectionEnum.PD_Long && trade.getDirection() == DirectionEnum.D_Buy
+				|| positionDir == PositionDirectionEnum.PD_Short && trade.getDirection() == DirectionEnum.D_Sell) {
+			double originCost = openPrice * volume;
+			double newCost = trade.getPrice() * trade.getVolume();
+			openPrice = (originCost + newCost) / (volume + trade.getVolume());
+			volume += trade.getVolume();
+			return Optional.of(convertToEntity());
+		}
+		return Optional.empty();
+	}
+	
+	public Optional<DealRecordPO> onCloseTrade(TradeField trade){
+		checkMatch(trade.getContract().getUnifiedSymbol());
+		if(OffsetFlagEnum.OF_Open == trade.getOffsetFlag() || OffsetFlagEnum.OF_Unknown == trade.getOffsetFlag()) {
+			throw new IllegalStateException("传入了非平仓成交：" + trade.toString());
+		}
+		// 确保是反向平仓
+		if(positionDir == PositionDirectionEnum.PD_Long && trade.getDirection() == DirectionEnum.D_Sell
+				|| positionDir == PositionDirectionEnum.PD_Short && trade.getDirection() == DirectionEnum.D_Buy) {
+			if(volume < trade.getVolume()) {
+				throw new IllegalStateException("成交数量大于持仓数量");
+			}
+			volume -= trade.getVolume();
+			int factor = positionDir == PositionDirectionEnum.PD_Long ? 1 : -1;
+			double closeProfit = factor * (trade.getPrice() - openPrice) * trade.getVolume() * multiplier;
+			return Optional.of(DealRecordPO.builder()
+					.contractName(trade.getContract().getSymbol())
+					.direction(positionDir)
+					.tradingDay(openTradingDay)
+					.dealTimestamp(openTime)
+					.openPrice(openPrice)
+					.closePrice(trade.getPrice())
+					.volume(trade.getVolume())
+					.closeProfit((int)closeProfit)
+					.build());
+		}
+		return Optional.empty();
 	}
 	
 	public boolean isLongPosition() {

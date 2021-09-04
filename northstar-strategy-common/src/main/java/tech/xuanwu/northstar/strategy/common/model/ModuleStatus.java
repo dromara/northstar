@@ -120,6 +120,7 @@ public class ModuleStatus implements EntityAware<ModuleStatusPO>{
 		return this;
 	}
 	
+	
 	public boolean at(ModuleState state) {
 		return stateMachine.getState() == state;
 	}
@@ -161,7 +162,7 @@ public class ModuleStatus implements EntityAware<ModuleStatusPO>{
 	private void opening(TradeField trade, OrderField order) {
 		Map<String, ModulePosition> positions = trade.getDirection() == DirectionEnum.D_Buy ? longPositions : shortPositions;
 		if(positions.containsKey(trade.getContract().getUnifiedSymbol())) {
-			positions.get(trade.getContract().getUnifiedSymbol()).onTrade(trade);
+			positions.get(trade.getContract().getUnifiedSymbol()).onOpenTrade(trade);
 		} else {
 			positions.put(trade.getContract().getUnifiedSymbol(), new ModulePosition(trade, order, contractMgr));
 		}
@@ -174,7 +175,7 @@ public class ModuleStatus implements EntityAware<ModuleStatusPO>{
 			throw new IllegalStateException("不存在对应的持仓");
 		}
 		ModulePosition mp = positions.get(trade.getContract().getUnifiedSymbol());
-		mp.onTrade(trade);
+		mp.onCloseTrade(trade);
 		if(mp.isEmpty()) {
 			positions.remove(trade.getContract().getUnifiedSymbol());
 			log.info("模组平仓{}", trade.getContract().getSymbol());
