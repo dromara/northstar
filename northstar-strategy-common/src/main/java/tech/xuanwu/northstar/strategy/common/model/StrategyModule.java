@@ -11,6 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
+import tech.xuanwu.northstar.common.model.ContractManager;
 import tech.xuanwu.northstar.gateway.api.TradeGateway;
 import tech.xuanwu.northstar.strategy.common.Dealer;
 import tech.xuanwu.northstar.strategy.common.ExternalSignalPolicy;
@@ -22,7 +23,6 @@ import tech.xuanwu.northstar.strategy.common.constants.RiskAuditResult;
 import tech.xuanwu.northstar.strategy.common.event.ModuleEventType;
 import tech.xuanwu.northstar.strategy.common.model.data.ModuleCurrentPerformance;
 import tech.xuanwu.northstar.strategy.common.model.entity.DealRecordEntity;
-import tech.xuanwu.northstar.strategy.common.model.entity.ModuleStatusEntity;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreField.AccountField;
@@ -60,6 +60,8 @@ public class StrategyModule {
 	
 	private String tradingDay;
 	
+	private ContractManager contractMgr;
+	
 	@Builder.Default
 	private Map<String, OrderField> originOrderIdMap = new HashMap<>();
 	
@@ -96,7 +98,7 @@ public class StrategyModule {
 			}
 		}
 		if(dealer.bindedUnifiedSymbols().contains(tick.getUnifiedSymbol())) {
-			Optional<SubmitOrderReqField> stopLossReq = status.triggerStopLoss(tick);
+			Optional<SubmitOrderReqField> stopLossReq = status.triggerStopLoss(tick, contractMgr.getContract(tick.getUnifiedSymbol()));
 			if(stopLossReq.isPresent()) {
 				status.transform(ModuleEventType.STOP_LOSS);
 				gateway.submitOrder(stopLossReq.get());
@@ -169,7 +171,7 @@ public class StrategyModule {
 		return this;
 	}
 	
-	public Optional<ModuleStatusEntity> onTrade(TradeField trade) {
+	public Optional<ModuleStatus> onTrade(TradeField trade) {
 		if(originOrderIdMap.containsKey(trade.getOriginOrderId())) {
 			OrderField order = originOrderIdMap.remove(trade.getOriginOrderId());
 			// 考虑一个order分多次成交的情况
@@ -182,7 +184,7 @@ public class StrategyModule {
 			} else {				
 				status.transform(trade.getDirection() == DirectionEnum.D_Buy ? ModuleEventType.BUY_TRADED : ModuleEventType.SELL_TRADED);
 			}
-			return status.onTrade(trade, order);
+			return Optional.of(status.onTrade(trade, order));
 		}
 		return Optional.empty();
 	}

@@ -33,7 +33,6 @@ import tech.xuanwu.northstar.strategy.common.model.StrategyModule;
 import tech.xuanwu.northstar.strategy.common.model.data.BarData;
 import tech.xuanwu.northstar.strategy.common.model.data.ModuleCurrentPerformance;
 import tech.xuanwu.northstar.strategy.common.model.entity.DealRecordEntity;
-import tech.xuanwu.northstar.strategy.common.model.entity.ModuleStatusEntity;
 import tech.xuanwu.northstar.strategy.common.model.meta.ComponentAndParamsPair;
 import tech.xuanwu.northstar.strategy.common.model.meta.ComponentField;
 import tech.xuanwu.northstar.strategy.common.model.meta.ComponentMetaInfo;
@@ -121,7 +120,7 @@ public class ModuleService implements InitializingBean{
 	 * @throws Exception 
 	 */
 	public boolean createModule(ModuleInfo info) throws Exception {
-		loadModule(info, new ModuleStatus(info.getModuleName(), contractMgr));
+		loadModule(info, new ModuleStatus(info.getModuleName()));
 		return moduleRepo.saveModuleInfo(info);
 	}
 	
@@ -132,12 +131,9 @@ public class ModuleService implements InitializingBean{
 	 */
 	public boolean updateModule(ModuleInfo info) throws Exception {
 		mdlMgr.removeModule(info.getModuleName());
-		ModuleStatusEntity mse = moduleRepo.loadModuleStatus(info.getModuleName());
-		ModuleStatus status;
-		if(mse == null) {
-			status = new ModuleStatus(info.getModuleName(), contractMgr);
-		} else {
-			status = new ModuleStatus(mse, contractMgr);
+		ModuleStatus status = moduleRepo.loadModuleStatus(info.getModuleName());
+		if(status == null) {
+			status = new ModuleStatus(info.getModuleName());
 		}
 		
 		moduleRepo.deleteModuleInfoById(info.getModuleName());
@@ -197,6 +193,7 @@ public class ModuleService implements InitializingBean{
 				.dealer(dealer)
 				.signalPolicy(signalPolicy)
 				.riskController(riskController)
+				.contractMgr(contractMgr)
 				.build();
 		mdlMgr.addModule(module);
 	}
@@ -268,12 +265,9 @@ public class ModuleService implements InitializingBean{
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		for(ModuleInfo m : getCurrentModuleInfos()) {
-			ModuleStatusEntity entity = moduleRepo.loadModuleStatus(m.getModuleName());
-			ModuleStatus status;
-			if(entity == null) {
-				status = new ModuleStatus(m.getModuleName(), contractMgr);
-			} else {
-				status = new ModuleStatus(entity, contractMgr);
+			ModuleStatus status = moduleRepo.loadModuleStatus(m.getModuleName());
+			if(status == null) {
+				status = new ModuleStatus(m.getModuleName());
 			}
 			loadModule(m, status);
 		}

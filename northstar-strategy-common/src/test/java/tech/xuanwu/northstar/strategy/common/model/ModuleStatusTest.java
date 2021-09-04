@@ -2,60 +2,54 @@ package tech.xuanwu.northstar.strategy.common.model;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+
+import java.util.HashMap;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.google.common.collect.Lists;
-
 import tech.xuanwu.northstar.common.model.ContractManager;
 import tech.xuanwu.northstar.strategy.common.constants.ModuleState;
 import tech.xuanwu.northstar.strategy.common.event.ModuleEventType;
-import tech.xuanwu.northstar.strategy.common.model.entity.ModulePositionEntity;
-import tech.xuanwu.northstar.strategy.common.model.entity.ModuleStatusEntity;
+import tech.xuanwu.northstar.strategy.common.model.state.ModuleStateMachine;
 import test.common.TestFieldFactory;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
-import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.OrderField;
 import xyz.redtorch.pb.CoreField.TradeField;
 
 public class ModuleStatusTest {
 	
-	private ContractManager contractMgr = mock(ContractManager.class);
-	
 	private ModuleStatus ms;
 	
 	private final String SYMBOL = "rb2210@SHFE@FUTURES";
 	
-	private final String SYMBOL2 = "rb2110@SHFE@FUTURES";
-	
-	private ModulePositionEntity.ModulePositionEntityBuilder proto = ModulePositionEntity.builder()
-			.unifiedSymbol(SYMBOL)
-			.multiplier(10)
-			.volume(2)
-			.openPrice(1234)
-			.stopLossPrice(1200)
-			.positionDir(PositionDirectionEnum.PD_Long);
-	
-	private ModuleStatusEntity mse;
-	
 	private TestFieldFactory factory = new TestFieldFactory("testGateway");
+	
+	private ModulePosition.ModulePositionBuilder mpb = ModulePosition.builder()
+								.unifiedSymbol(SYMBOL)
+								.multiplier(10)
+								.volume(2)
+								.openPrice(1234)
+								.stopLossPrice(1200)
+								.positionDir(PositionDirectionEnum.PD_Long);
+	
+	private ModuleStatus.ModuleStatusBuilder msb = ModuleStatus.builder()
+								.moduleName("testModuule")
+								.stateMachine(new ModuleStateMachine(ModuleState.HOLDING_LONG))
+								.holdingTradingDay("20210606")
+								.countOfOpeningToday(3);
 
 	@Before
 	public void setUp() throws Exception {
-		when(contractMgr.getContract(SYMBOL)).thenReturn(ContractField.newBuilder().build());
-		mse = ModuleStatusEntity.builder()
-				.moduleName("testModuule")
-				.state(ModuleState.HOLDING_LONG)
-				.positions(Lists.newArrayList(proto.build(), proto.unifiedSymbol(SYMBOL2).build()))
-				.holdingTradingDay("20210606")
-				.countOfOpeningToday(3)
-				.build();
-		ms = new ModuleStatus(mse, contractMgr);
+		HashMap<String, ModulePosition> longPosition = new HashMap<>();
+		HashMap<String, ModulePosition> shortPosition = new HashMap<>();
+		longPosition.put(SYMBOL, mpb.build());
+		msb.longPositions(longPosition);
+		msb.shortPositions(shortPosition);
+		ms = msb.build();
 	}
 
 	@After
@@ -70,20 +64,19 @@ public class ModuleStatusTest {
 	
 	@Test
 	public void shouldTriggerStopLoss() {
-		assertThat(ms.triggerStopLoss(factory.makeTickField("rb2210", 1200))).isPresent();
+		assertThat(ms.triggerStopLoss(factory.makeTickField("rb2210", 1200), factory.makeContract("rb2210"))).isPresent();
 	}
 	
 	@Test
 	public void shouldNotTriggerStopLoss() {
-		assertThat(ms.triggerStopLoss(factory.makeTickField("rb2210", 1201))).isNotPresent();
+		assertThat(ms.triggerStopLoss(factory.makeTickField("rb2210", 1201), factory.makeContract("rb2210"))).isNotPresent();
 	}
 
 	@Test
 	public void shouldUpdateOpeningTrade() {
 		TradeField trade = factory.makeTradeField("rb2210", 1240, 2, DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open);
 		ms.onTrade(trade, OrderField.newBuilder().setOriginOrderId(trade.getOriginOrderId()).build());
-		assertThat(ms.longPositions).hasSize(2);
-		assertThat(ms.longPositions.get(SYMBOL).convertToEntity().getVolume()).isEqualTo(4);
+		assertThat(ms.longPositions).hasSize(1);
 		
 		TradeField trade2 = factory.makeTradeField("rb2210", 1240, 2, DirectionEnum.D_Sell, OffsetFlagEnum.OF_Open);
 		ms.onTrade(trade2, OrderField.newBuilder().setOriginOrderId(trade2.getOriginOrderId()).build());
@@ -91,14 +84,14 @@ public class ModuleStatusTest {
 		
 		TradeField trade3 = factory.makeTradeField("rb2201", 1240, 2, DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open);
 		ms.onTrade(trade3, OrderField.newBuilder().setOriginOrderId(trade3.getOriginOrderId()).build());
-		assertThat(ms.longPositions).hasSize(3);
+		assertThat(ms.longPositions).hasSize(2);
 	}
 	
 	@Test
 	public void shouldUpdateClosingTrade() {
 		TradeField trade = factory.makeTradeField("rb2210", 1240, 2, DirectionEnum.D_Sell, OffsetFlagEnum.OF_Close);
 		ms.onTrade(trade, OrderField.newBuilder().setOriginOrderId(trade.getOriginOrderId()).build());
-		assertThat(ms.longPositions).hasSize(1);
+		assertThat(ms.longPositions).isEmpty();
 	}
 	
 	@Test(expected = IllegalStateException.class)
@@ -113,11 +106,6 @@ public class ModuleStatusTest {
 		ms.onTrade(trade, OrderField.newBuilder().setOriginOrderId(trade.getOriginOrderId()).build());
 	}
 	
-	@Test
-	public void shouldGetTheSameEntity() {
-		mse.getPositions().sort((a,b)-> a.getUnifiedSymbol().compareTo(b.getUnifiedSymbol()));
-		assertThat(ms.convertToEntity()).isEqualTo(mse);
-	}
 	
 	@Test
 	public void shouldGetState() {
@@ -148,7 +136,7 @@ public class ModuleStatusTest {
 	
 	@Test
 	public void shouldBeAbleToGetAndSetAccountAvailable() {
-		ms = new ModuleStatus("testModule", contractMgr);
+		ms = new ModuleStatus("testModule");
 		ms.setAccountAvailable(1000);
 		assertThat(ms.getAccountAvailable()).isEqualTo(1000);
 	}

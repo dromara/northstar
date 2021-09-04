@@ -4,12 +4,14 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.annotation.Transient;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import tech.xuanwu.northstar.common.EntityAware;
-import tech.xuanwu.northstar.common.model.ContractManager;
 import tech.xuanwu.northstar.strategy.common.model.entity.DealRecordEntity;
-import tech.xuanwu.northstar.strategy.common.model.entity.ModulePositionEntity;
 import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.ForceCloseReasonEnum;
@@ -19,35 +21,38 @@ import xyz.redtorch.pb.CoreEnum.OrderPriceTypeEnum;
 import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
 import xyz.redtorch.pb.CoreEnum.TimeConditionEnum;
 import xyz.redtorch.pb.CoreEnum.VolumeConditionEnum;
+import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.OrderField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TickField;
 import xyz.redtorch.pb.CoreField.TradeField;
 
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+@Data
 @Slf4j
-public class ModulePosition implements EntityAware<ModulePositionEntity>{
+public class ModulePosition {
 
-	private final String unifiedSymbol;
+	private String unifiedSymbol;
 
-	private final PositionDirectionEnum positionDir;
+	private PositionDirectionEnum positionDir;
 	
-	private final String openTradingDay;
+	private String openTradingDay;
 	
-	private final long openTime;
+	private long openTime;
 	
-	private final double multiplier;
-	
-	private final ContractManager contractMgr;
+	private double multiplier;
 	
 	private double openPrice;
 	
 	private double stopLossPrice;
 	
 	private int volume;
-	
+	@Transient
 	private double holdingProfit;
 	
-	public ModulePosition(TradeField trade, OrderField order, ContractManager contractMgr) {
+	public ModulePosition(TradeField trade, OrderField order) {
 		if(!StringUtils.equals(trade.getOriginOrderId(), order.getOriginOrderId())) {
 			log.warn("委托明细：{}", order.toString());
 			log.warn("成交明细：{}", trade.toString());
@@ -61,19 +66,6 @@ public class ModulePosition implements EntityAware<ModulePositionEntity>{
 		this.multiplier = trade.getContract().getMultiplier();
 		this.openTradingDay = trade.getTradingDay();
 		this.openTime = trade.getTradeTimestamp();
-		this.contractMgr = contractMgr;
-	}
-	
-	public ModulePosition(ModulePositionEntity e, ContractManager contractMgr) {
-		this.unifiedSymbol = e.getUnifiedSymbol();
-		this.positionDir = e.getPositionDir();
-		this.openPrice = e.getOpenPrice();
-		this.stopLossPrice = e.getStopLossPrice();
-		this.volume = e.getVolume();
-		this.multiplier = e.getMultiplier();
-		this.openTradingDay = e.getOpenTradingDay();
-		this.openTime = e.getOpenTime();
-		this.contractMgr = contractMgr;
 	}
 	
 	public double updateProfit(TickField tick) {
@@ -83,7 +75,7 @@ public class ModulePosition implements EntityAware<ModulePositionEntity>{
 		return holdingProfit;
 	}
 	
-	public Optional<SubmitOrderReqField> triggerStopLoss(TickField tick) {
+	public Optional<SubmitOrderReqField> triggerStopLoss(TickField tick, ContractField contract) {
 		checkMatch(tick.getUnifiedSymbol());
 		if(stopLossPrice == 0) {
 			return Optional.empty();
@@ -91,7 +83,7 @@ public class ModulePosition implements EntityAware<ModulePositionEntity>{
 		if(triggeredStopLoss(tick)) {
 			SubmitOrderReqField orderReq = SubmitOrderReqField.newBuilder()
 					.setOriginOrderId(UUID.randomUUID().toString())
-					.setContract(contractMgr.getContract(unifiedSymbol))
+					.setContract(contract)
 					.setDirection(getClosingDirection())
 					.setVolume(volume)
 					.setPrice(0) 											//市价专用
@@ -118,7 +110,7 @@ public class ModulePosition implements EntityAware<ModulePositionEntity>{
 				|| positionDir == PositionDirectionEnum.PD_Short && tick.getLastPrice() >= stopLossPrice;
 	}
 	
-	public Optional<ModulePositionEntity> onOpenTrade(TradeField trade) {
+	public Optional<ModulePosition> onOpenTrade(TradeField trade) {
 		checkMatch(trade.getContract().getUnifiedSymbol());
 		if(OffsetFlagEnum.OF_Open != trade.getOffsetFlag()) {
 			throw new IllegalStateException("传入了非开仓成交：" + trade.toString());
@@ -130,7 +122,7 @@ public class ModulePosition implements EntityAware<ModulePositionEntity>{
 			double newCost = trade.getPrice() * trade.getVolume();
 			openPrice = (originCost + newCost) / (volume + trade.getVolume());
 			volume += trade.getVolume();
-			return Optional.of(convertToEntity());
+			return Optional.of(this);
 		}
 		return Optional.empty();
 	}
@@ -193,15 +185,4 @@ public class ModulePosition implements EntityAware<ModulePositionEntity>{
 		}
 	}
 	
-	@Override
-	public ModulePositionEntity convertToEntity() {
-		return ModulePositionEntity.builder()
-				.unifiedSymbol(unifiedSymbol)
-				.positionDir(positionDir)
-				.openPrice(openPrice)
-				.stopLossPrice(stopLossPrice)
-				.volume(volume)
-				.multiplier(multiplier)
-				.build();
-	}
 }

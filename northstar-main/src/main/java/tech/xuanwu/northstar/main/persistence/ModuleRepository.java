@@ -9,14 +9,14 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Repository;
 
 import tech.xuanwu.northstar.strategy.common.model.ModuleInfo;
+import tech.xuanwu.northstar.strategy.common.model.ModuleStatus;
 import tech.xuanwu.northstar.strategy.common.model.entity.DealRecordEntity;
-import tech.xuanwu.northstar.strategy.common.model.entity.ModuleStatusEntity;
 
 @Repository
 public class ModuleRepository {
 
 	@Autowired
-	private MongoTemplate mongo;
+	protected MongoTemplate mongo;
 	
 	private static final String MODULE_NAME = "moduleName";
 	
@@ -43,16 +43,16 @@ public class ModuleRepository {
 	/*************/
 	/**	模组状态	**/
 	/*************/
-	public ModuleStatusEntity loadModuleStatus(String moduleName){
-		return mongo.findOne(Query.query(Criteria.where(MODULE_NAME).is(moduleName)), ModuleStatusEntity.class);
+	public ModuleStatus loadModuleStatus(String moduleName){
+		return mongo.findOne(Query.query(Criteria.where(MODULE_NAME).is(moduleName)), ModuleStatus.class);
 	}
 	
-	public void saveModuleStatus(ModuleStatusEntity status) {
+	public void saveModuleStatus(ModuleStatus status) {
 		mongo.save(status);
 	}
 	
 	public void removeModuleStatus(String moduleName) {
-		mongo.remove(Query.query(Criteria.where(MODULE_NAME).is(moduleName)), ModuleStatusEntity.class);
+		mongo.remove(Query.query(Criteria.where(MODULE_NAME).is(moduleName)), ModuleStatus.class);
 	}
 	
 	/*************/

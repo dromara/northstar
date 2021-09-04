@@ -1,25 +1,23 @@
 package tech.xuanwu.northstar.strategy.common.model;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import tech.xuanwu.northstar.common.EntityAware;
-import tech.xuanwu.northstar.common.model.ContractManager;
 import tech.xuanwu.northstar.strategy.common.constants.ModuleState;
 import tech.xuanwu.northstar.strategy.common.event.ModuleEventType;
 import tech.xuanwu.northstar.strategy.common.model.entity.DealRecordEntity;
-import tech.xuanwu.northstar.strategy.common.model.entity.ModulePositionEntity;
-import tech.xuanwu.northstar.strategy.common.model.entity.ModuleStatusEntity;
 import tech.xuanwu.northstar.strategy.common.model.state.ModuleStateMachine;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
+import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.OrderField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TickField;
@@ -31,17 +29,19 @@ import xyz.redtorch.pb.CoreField.TradeField;
  *
  */
 @Slf4j
-public class ModuleStatus implements EntityAware<ModuleStatusEntity>{
+@Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+public class ModuleStatus {
 
-	private final String moduleName;
+	private String moduleName;
 	
-	private final ModuleStateMachine stateMachine;
+	private ModuleStateMachine stateMachine;
 	
-	protected final Map<String, ModulePosition> longPositions = new HashMap<>();
+	protected Map<String, ModulePosition> longPositions;
 	
-	protected final Map<String, ModulePosition> shortPositions = new HashMap<>();
-	
-	private final ContractManager contractMgr;
+	protected Map<String, ModulePosition> shortPositions;
 	
 	private String holdingTradingDay;
 	
@@ -51,31 +51,13 @@ public class ModuleStatus implements EntityAware<ModuleStatusEntity>{
 	
 	private Optional<DealRecordEntity> dealRecord;
 	
-	public ModuleStatus(String name, ContractManager contractMgr) {
+	public ModuleStatus(String name) {
 		this.moduleName = name;
-		this.contractMgr = contractMgr;
 		this.stateMachine = new ModuleStateMachine(ModuleState.EMPTY);
+		this.longPositions = new HashMap<>();
+		this.shortPositions = new HashMap<>();
 	}
 
-	public ModuleStatus(ModuleStatusEntity entity, ContractManager contractMgr) {
-		this.contractMgr = contractMgr;
-		this.moduleName = entity.getModuleName();
-		this.stateMachine = new ModuleStateMachine(entity.getState());
-		this.countOfOpeningToday = entity.getCountOfOpeningToday();
-		this.holdingTradingDay = entity.getHoldingTradingDay();
-		entity.getPositions()
-			.stream()
-			.map(p -> new ModulePosition(p, contractMgr))
-			.forEach(mp -> {
-				if(mp.isLongPosition()) {
-					longPositions.put(mp.getUnifiedSymbol(), mp);
-				}
-				if(mp.isShortPosition()) {
-					shortPositions.put(mp.getUnifiedSymbol(), mp);
-				}
-			});
-	}
-	
 	public double updateHoldingProfit(TickField tick) {
 		if(longPositions.containsKey(tick.getUnifiedSymbol())) {
 			longPositions.get(tick.getUnifiedSymbol()).updateProfit(tick);
@@ -83,25 +65,23 @@ public class ModuleStatus implements EntityAware<ModuleStatusEntity>{
 		if(shortPositions.containsKey(tick.getUnifiedSymbol())) {
 			shortPositions.get(tick.getUnifiedSymbol()).updateProfit(tick);
 		}
-		double p1 = longPositions.values().stream().mapToDouble(ModulePosition::getHoldingProfit).reduce(0D, (a,b) -> a+b);
-		double p2 = shortPositions.values().stream().mapToDouble(ModulePosition::getHoldingProfit).reduce(0D, (a,b) -> a+b);
-		return p1 + p2;
+		return getHoldingProfit();
 	}
 	
-	public Optional<SubmitOrderReqField> triggerStopLoss(TickField tick){
+	public Optional<SubmitOrderReqField> triggerStopLoss(TickField tick, ContractField contract){
 		Optional<SubmitOrderReqField> result = Optional.empty();
 		if(longPositions.containsKey(tick.getUnifiedSymbol())) {
-			result = longPositions.get(tick.getUnifiedSymbol()).triggerStopLoss(tick);
+			result = longPositions.get(tick.getUnifiedSymbol()).triggerStopLoss(tick, contract);
 			if(result.isPresent()) return result;
 		}
 		if(shortPositions.containsKey(tick.getUnifiedSymbol())) {
-			result = shortPositions.get(tick.getUnifiedSymbol()).triggerStopLoss(tick);
+			result = shortPositions.get(tick.getUnifiedSymbol()).triggerStopLoss(tick, contract);
 			if(result.isPresent()) return result;
 		}
 		return result;
 	}
 	
-	public Optional<ModuleStatusEntity> onTrade(TradeField trade, OrderField order) {
+	public ModuleStatus onTrade(TradeField trade, OrderField order) {
 		if(trade.getOffsetFlag() == OffsetFlagEnum.OF_Unknown) {
 			throw new IllegalStateException("未知开平仓状态");
 		}
@@ -117,7 +97,7 @@ public class ModuleStatus implements EntityAware<ModuleStatusEntity>{
 			closing(trade);
 		}
 		
-		return Optional.of(convertToEntity());
+		return this;
 	}
 	
 	public Optional<DealRecordEntity> consumeDealRecord(){
@@ -135,10 +115,6 @@ public class ModuleStatus implements EntityAware<ModuleStatusEntity>{
 		return stateMachine.transformForm(event);
 	}
 	
-	public String getModuleName() {
-		return moduleName;
-	}
-	
 	public double getHoldingProfit() {
 		double p1 = longPositions.values().stream().mapToDouble(ModulePosition::getHoldingProfit).reduce(0D, (a,b) -> a+b);
 		double p2 = shortPositions.values().stream().mapToDouble(ModulePosition::getHoldingProfit).reduce(0D, (a,b) -> a+b);
@@ -149,20 +125,8 @@ public class ModuleStatus implements EntityAware<ModuleStatusEntity>{
 		return stateMachine.getState();
 	}
 	
-	public int getCountOfOpeningToday() {
-		return countOfOpeningToday;
-	}
-	
 	public boolean isSameDay(String currentTradingDay) {
 		return StringUtils.equals(currentTradingDay, holdingTradingDay);
-	}
-	
-	public void setAccountAvailable(double mount) {
-		this.accountAvailable = mount;
-	}
-	
-	public double getAccountAvailable() {
-		return accountAvailable;
 	}
 	
 	private void opening(TradeField trade, OrderField order) {
@@ -170,7 +134,7 @@ public class ModuleStatus implements EntityAware<ModuleStatusEntity>{
 		if(positions.containsKey(trade.getContract().getUnifiedSymbol())) {
 			positions.get(trade.getContract().getUnifiedSymbol()).onOpenTrade(trade);
 		} else {
-			positions.put(trade.getContract().getUnifiedSymbol(), new ModulePosition(trade, order, contractMgr));
+			positions.put(trade.getContract().getUnifiedSymbol(), new ModulePosition(trade, order));
 		}
 		log.info("模组开仓{}", trade.getContract().getSymbol());
 	}
@@ -186,24 +150,5 @@ public class ModuleStatus implements EntityAware<ModuleStatusEntity>{
 			positions.remove(trade.getContract().getUnifiedSymbol());
 			log.info("模组平仓{}", trade.getContract().getSymbol());
 		}
-	}
-	
-	@Override
-	public ModuleStatusEntity convertToEntity() {
-		return ModuleStatusEntity.builder()
-				.moduleName(moduleName)
-				.state(stateMachine.getState())
-				.positions(getPositionEntitys())
-				.holdingTradingDay(holdingTradingDay)
-				.countOfOpeningToday(countOfOpeningToday)
-				.build();
-	}
-	
-	private List<ModulePositionEntity> getPositionEntitys(){
-		List<ModulePositionEntity> result = new ArrayList<>(longPositions.size() + shortPositions.size());
-		result.addAll(longPositions.values().stream().map(ModulePosition::convertToEntity).collect(Collectors.toList()));
-		result.addAll(shortPositions.values().stream().map(ModulePosition::convertToEntity).collect(Collectors.toList()));
-		result.sort((a, b) -> a.getUnifiedSymbol().compareTo(b.getUnifiedSymbol()));
-		return result;
 	}
 }

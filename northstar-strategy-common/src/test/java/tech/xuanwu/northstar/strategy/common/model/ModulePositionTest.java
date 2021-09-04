@@ -12,7 +12,6 @@ import org.junit.Test;
 
 import tech.xuanwu.northstar.common.constant.DateTimeConstant;
 import tech.xuanwu.northstar.common.model.ContractManager;
-import tech.xuanwu.northstar.strategy.common.model.entity.ModulePositionEntity;
 import test.common.TestFieldFactory;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
@@ -38,7 +37,7 @@ public class ModulePositionTest {
 	
 	private ContractManager contractMgr;
 	
-	private ModulePositionEntity.ModulePositionEntityBuilder proto = ModulePositionEntity.builder()
+	private ModulePosition.ModulePositionBuilder proto = ModulePosition.builder()
 			.unifiedSymbol(SYMBOL)
 			.multiplier(10)
 			.volume(2)
@@ -47,156 +46,149 @@ public class ModulePositionTest {
 
 	@Test
 	public void testOnUpdate() {
-		ModulePosition pos = new ModulePosition(proto.build(), contractMgr);
+		ModulePosition pos = proto.build();
 		assertThat(pos.updateProfit(factory.makeTickField("rb2210", 2000))).isEqualTo(15320);
 		
-		ModulePosition pos2 = new ModulePosition(proto.positionDir(PositionDirectionEnum.PD_Short).build(), contractMgr);
+		ModulePosition pos2 = proto.positionDir(PositionDirectionEnum.PD_Short).build();
 		assertThat(pos2.updateProfit(factory.makeTickField("rb2210", 2000))).isEqualTo(-15320);
 	}
 	
 	@Test
 	public void shouldNotTriggerStopLoss() {
-		ModulePosition pos = new ModulePosition(proto.build(), contractMgr);
-		assertThat(pos.triggerStopLoss(factory.makeTickField("rb2210", Integer.MIN_VALUE))).isEmpty();
+		ModulePosition pos = proto.build();
+		assertThat(pos.triggerStopLoss(factory.makeTickField("rb2210", Integer.MIN_VALUE), factory.makeContract("rb2210"))).isEmpty();
 		
-		ModulePosition pos2 = new ModulePosition(proto.positionDir(PositionDirectionEnum.PD_Short).build(), contractMgr);
-		assertThat(pos2.triggerStopLoss(factory.makeTickField("rb2210", Integer.MAX_VALUE))).isEmpty();
+		ModulePosition pos2 = proto.positionDir(PositionDirectionEnum.PD_Short).build();
+		assertThat(pos2.triggerStopLoss(factory.makeTickField("rb2210", Integer.MAX_VALUE), factory.makeContract("rb2210"))).isEmpty();
 		
-		ModulePosition pos3 = new ModulePosition(proto.positionDir(PositionDirectionEnum.PD_Short).stopLossPrice(1500).build(), contractMgr);
-		assertThat(pos3.triggerStopLoss(factory.makeTickField("rb2210", 1499))).isEmpty();
+		ModulePosition pos3 = proto.positionDir(PositionDirectionEnum.PD_Short).stopLossPrice(1500).build();
+		assertThat(pos3.triggerStopLoss(factory.makeTickField("rb2210", 1499), factory.makeContract("rb2210"))).isEmpty();
 		
-		ModulePosition pos4 = new ModulePosition(proto.positionDir(PositionDirectionEnum.PD_Long).stopLossPrice(1000).build(), contractMgr);
-		assertThat(pos4.triggerStopLoss(factory.makeTickField("rb2210", 1001))).isEmpty();
+		ModulePosition pos4 = proto.positionDir(PositionDirectionEnum.PD_Long).stopLossPrice(1000).build();
+		assertThat(pos4.triggerStopLoss(factory.makeTickField("rb2210", 1001), factory.makeContract("rb2210"))).isEmpty();
 	}
 	
 	
 	@Test
 	public void shouldTriggerStopLoss() {
-		ModulePosition pos = new ModulePosition(proto.stopLossPrice(1000).build(), contractMgr);
-		assertThat(pos.triggerStopLoss(factory.makeTickField("rb2210", 1000))).isPresent();
+		ModulePosition pos = proto.stopLossPrice(1000).build();
+		assertThat(pos.triggerStopLoss(factory.makeTickField("rb2210", 1000), factory.makeContract("rb2210"))).isPresent();
 		
-		ModulePosition pos2 = new ModulePosition(proto.positionDir(PositionDirectionEnum.PD_Short).stopLossPrice(1300).build(), contractMgr);
-		assertThat(pos2.triggerStopLoss(factory.makeTickField("rb2210", 1300))).isPresent();
+		ModulePosition pos2 = proto.positionDir(PositionDirectionEnum.PD_Short).stopLossPrice(1300).build();
+		assertThat(pos2.triggerStopLoss(factory.makeTickField("rb2210", 1300), factory.makeContract("rb2210"))).isPresent();
 		
-		ModulePosition pos3 = new ModulePosition(proto.openTradingDay(LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER)).positionDir(PositionDirectionEnum.PD_Short).stopLossPrice(1300).build(), contractMgr);
-		assertThat(pos3.triggerStopLoss(factory.makeTickField("rb2210", 1300))).isPresent();
+		ModulePosition pos3 = proto.openTradingDay(LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER)).positionDir(PositionDirectionEnum.PD_Short).stopLossPrice(1300).build();
+		assertThat(pos3.triggerStopLoss(factory.makeTickField("rb2210", 1300), factory.makeContract("rb2210"))).isPresent();
 	}
 	
 	
 	@Test(expected = IllegalStateException.class)
 	public void shouldThrowExceptionWhenMatchFail() {
-		ModulePosition pos = new ModulePosition(proto.build(), contractMgr);
+		ModulePosition pos = proto.build();
 		pos.updateProfit(factory.makeTickField("rb2109", 2000));
 	}
 	
 	@Test
-	public void shouldGetTheSameObject() {
-		ModulePositionEntity e = proto.build();
-		ModulePosition pos = new ModulePosition(e, contractMgr);
-		assertThat(pos.convertToEntity()).isEqualTo(e);
-	}
-	
-	@Test
 	public void shouldGetEmptyState() {
-		ModulePosition pos = new ModulePosition(proto.volume(0).build(), contractMgr);
+		ModulePosition pos = proto.volume(0).build();
 		assertThat(pos.isEmpty()).isTrue();
 	}
 	
 	@Test
 	public void shouldGetNonEmptyState() {
-		ModulePosition pos = new ModulePosition(proto.build(), contractMgr);
+		ModulePosition pos = proto.build();
 		assertThat(pos.isEmpty()).isFalse();
 	}
 	
 	@Test
 	public void shouldIncreasePosition() {
-		ModulePosition pos = new ModulePosition(proto.build(), contractMgr);
+		ModulePosition pos = proto.build();
 		assertThat(pos.onOpenTrade(factory.makeTradeField("rb2210", 1311, 3, DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open))).isPresent();
 		
-		ModulePosition pos2 = new ModulePosition(proto.positionDir(PositionDirectionEnum.PD_Short).build(), contractMgr);
+		ModulePosition pos2 = proto.positionDir(PositionDirectionEnum.PD_Short).build();
 		assertThat(pos2.onOpenTrade(factory.makeTradeField("rb2210", 1311, 3, DirectionEnum.D_Sell, OffsetFlagEnum.OF_Open))).isPresent();
 	}
 	
 	@Test
 	public void shouldDecreasePosition() {
-		ModulePosition pos = new ModulePosition(proto.build(), contractMgr);
+		ModulePosition pos = proto.build();
 		assertThat(pos.onCloseTrade(factory.makeTradeField("rb2210", 1311, 2, DirectionEnum.D_Sell, OffsetFlagEnum.OF_Close))).isPresent();
 		
-		ModulePosition pos2 = new ModulePosition(proto.positionDir(PositionDirectionEnum.PD_Short).build(), contractMgr);
+		ModulePosition pos2 = proto.positionDir(PositionDirectionEnum.PD_Short).build();
 		assertThat(pos2.onCloseTrade(factory.makeTradeField("rb2210", 1311, 2, DirectionEnum.D_Buy, OffsetFlagEnum.OF_Close))).isPresent();
 	}
 	
 	@Test
 	public void shouldHaveNoEffectOnPosition() {
-		ModulePosition pos = new ModulePosition(proto.build(), contractMgr);
+		ModulePosition pos = proto.build();
 		assertThat(pos.onCloseTrade(factory.makeTradeField("rb2210", 1311, 2, DirectionEnum.D_Buy, OffsetFlagEnum.OF_Close))).isEmpty();
 		assertThat(pos.onOpenTrade(factory.makeTradeField("rb2210", 1311, 2, DirectionEnum.D_Sell, OffsetFlagEnum.OF_Open))).isEmpty();
 	}
 	
 	@Test(expected = IllegalStateException.class)
 	public void shouldGetException() {
-		ModulePosition pos = new ModulePosition(proto.build(), contractMgr);
+		ModulePosition pos = proto.build();
 		pos.onCloseTrade(factory.makeTradeField("rb2210", 1311, 3, DirectionEnum.D_Sell, OffsetFlagEnum.OF_Close));
 	}
 	
 	@Test
 	public void shouldBeLongPosition() {
-		ModulePosition pos = new ModulePosition(proto.build(), contractMgr);
+		ModulePosition pos = proto.build();
 		assertThat(pos.isLongPosition()).isTrue();
 	}
 	
 	@Test
 	public void shouldNotBeLongPosition() {
-		ModulePosition pos = new ModulePosition(proto.positionDir(PositionDirectionEnum.PD_Net).build(), contractMgr);
+		ModulePosition pos = proto.positionDir(PositionDirectionEnum.PD_Net).build();
 		assertThat(pos.isLongPosition()).isFalse();
 	}
 	
 	@Test
 	public void shouldBeShortPosition() {
-		ModulePosition pos = new ModulePosition(proto.positionDir(PositionDirectionEnum.PD_Short).build(), contractMgr);
+		ModulePosition pos = proto.positionDir(PositionDirectionEnum.PD_Short).build();
 		assertThat(pos.isShortPosition()).isTrue();
 	}
 	
 	@Test
 	public void shouldNotBeShortPosition() {
-		ModulePosition pos = new ModulePosition(proto.positionDir(PositionDirectionEnum.PD_Net).build(), contractMgr);
+		ModulePosition pos = proto.positionDir(PositionDirectionEnum.PD_Net).build();
 		assertThat(pos.isShortPosition()).isFalse();
 	}
 	
 	@Test
 	public void shouldGetUnifiedSymbol() {
-		ModulePosition pos = new ModulePosition(proto.build(), contractMgr);
+		ModulePosition pos = proto.build();
 		assertThat(pos.getUnifiedSymbol()).isEqualTo(SYMBOL);
 	}
 	
 	@Test
 	public void shouldGetHoldingProfit() {
-		ModulePosition pos = new ModulePosition(proto.build(), contractMgr);
+		ModulePosition pos = proto.build();
 		assertThat(pos.updateProfit(factory.makeTickField("rb2210", 2000))).isEqualTo(15320);
 		assertThat(pos.getHoldingProfit()).isEqualTo(15320);
 	}
 	
 	@Test(expected = IllegalStateException.class)
 	public void shouldFailIfWrongStateForClosingLong() {
-		ModulePosition pos = new ModulePosition(proto.build(), contractMgr);
+		ModulePosition pos = proto.build();
 		assertThat(pos.onCloseTrade(factory.makeTradeField("rb2210", 1311, 2, DirectionEnum.D_Sell, OffsetFlagEnum.OF_Open))).isPresent();
 	}
 	
 	@Test(expected = IllegalStateException.class)
 	public void shouldFailIfWrongStateForClosingShort() {
-		ModulePosition pos = new ModulePosition(proto.positionDir(PositionDirectionEnum.PD_Short).build(), contractMgr);
+		ModulePosition pos = proto.positionDir(PositionDirectionEnum.PD_Short).build();
 		assertThat(pos.onCloseTrade(factory.makeTradeField("rb2210", 1311, 2, DirectionEnum.D_Sell, OffsetFlagEnum.OF_Open))).isPresent();
 	}
 	
 	@Test(expected = IllegalStateException.class)
 	public void shouldFailIfWrongStateForOpeningLong() {
-		ModulePosition pos = new ModulePosition(proto.build(), contractMgr);
+		ModulePosition pos = proto.build();
 		assertThat(pos.onOpenTrade(factory.makeTradeField("rb2210", 1311, 2, DirectionEnum.D_Sell, OffsetFlagEnum.OF_Close))).isPresent();
 	}
 	
 	@Test(expected = IllegalStateException.class)
 	public void shouldFailIfWrongStateForOpeningShort() {
-		ModulePosition pos = new ModulePosition(proto.positionDir(PositionDirectionEnum.PD_Short).build(), contractMgr);
+		ModulePosition pos = proto.positionDir(PositionDirectionEnum.PD_Short).build();
 		assertThat(pos.onOpenTrade(factory.makeTradeField("rb2210", 1311, 2, DirectionEnum.D_Sell, OffsetFlagEnum.OF_Close))).isPresent();
 	}
 	
@@ -210,7 +202,7 @@ public class ModulePositionTest {
 				.setOffsetFlag(trade.getOffsetFlag())
 				.setPrice(trade.getPrice())
 				.build();
-		assertThat(new ModulePosition(trade,  order, contractMgr)).isNotNull();
+		assertThat(new ModulePosition(trade,  order)).isNotNull();
 		
 		TradeField trade2 = factory.makeTradeField("rb2210", 1234, 2, DirectionEnum.D_Sell, OffsetFlagEnum.OF_Open);
 		OrderField order2 = OrderField.newBuilder()
@@ -220,7 +212,7 @@ public class ModulePositionTest {
 				.setOffsetFlag(trade2.getOffsetFlag())
 				.setPrice(trade2.getPrice())
 				.build();
-		assertThat(new ModulePosition(trade2,  order2, contractMgr)).isNotNull();
+		assertThat(new ModulePosition(trade2,  order2)).isNotNull();
 	}
 	
 	@Test(expected = IllegalStateException.class)
@@ -232,18 +224,18 @@ public class ModulePositionTest {
 				.setOffsetFlag(trade.getOffsetFlag())
 				.setPrice(trade.getPrice())
 				.build();
-		new ModulePosition(trade,  order, contractMgr);
+		new ModulePosition(trade,  order);
 	}
 	
 	@Test
 	public void shouldMatchPosition() {
-		ModulePosition pos = new ModulePosition(proto.build(), contractMgr);
+		ModulePosition pos = proto.build();
 		assertThat(pos.isMatch(SYMBOL)).isTrue();
 	}
 	
 	@Test
 	public void shouldNotMatchPosition() {
-		ModulePosition pos = new ModulePosition(proto.build(), contractMgr);
+		ModulePosition pos = proto.build();
 		assertThat(pos.isMatch(SYMBOL + "S")).isFalse();
 	}
 }
