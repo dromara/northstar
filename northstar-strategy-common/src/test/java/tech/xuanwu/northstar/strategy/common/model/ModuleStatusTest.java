@@ -82,23 +82,23 @@ public class ModuleStatusTest {
 	public void shouldUpdateOpeningTrade() {
 		TradeField trade = factory.makeTradeField("rb2210", 1240, 2, DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open);
 		ms.onTrade(trade, OrderField.newBuilder().setOriginOrderId(trade.getOriginOrderId()).build());
-		assertThat(ms.positions.size()).isEqualTo(2);
-		assertThat(ms.positions.get(0).volume).isEqualTo(4);
+		assertThat(ms.longPositions).hasSize(2);
+		assertThat(ms.longPositions.get(SYMBOL).volume).isEqualTo(4);
 		
 		TradeField trade2 = factory.makeTradeField("rb2210", 1240, 2, DirectionEnum.D_Sell, OffsetFlagEnum.OF_Open);
 		ms.onTrade(trade2, OrderField.newBuilder().setOriginOrderId(trade2.getOriginOrderId()).build());
-		assertThat(ms.positions.size()).isEqualTo(3);
+		assertThat(ms.shortPositions).hasSize(1);
 		
 		TradeField trade3 = factory.makeTradeField("rb2201", 1240, 2, DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open);
 		ms.onTrade(trade3, OrderField.newBuilder().setOriginOrderId(trade3.getOriginOrderId()).build());
-		assertThat(ms.positions.size()).isEqualTo(4);
+		assertThat(ms.longPositions).hasSize(3);
 	}
 	
 	@Test
 	public void shouldUpdateClosingTrade() {
 		TradeField trade = factory.makeTradeField("rb2210", 1240, 2, DirectionEnum.D_Sell, OffsetFlagEnum.OF_Close);
 		ms.onTrade(trade, OrderField.newBuilder().setOriginOrderId(trade.getOriginOrderId()).build());
-		assertThat(ms.positions.size()).isEqualTo(1);
+		assertThat(ms.longPositions).hasSize(1);
 	}
 	
 	@Test(expected = IllegalArgumentException.class)
@@ -115,11 +115,7 @@ public class ModuleStatusTest {
 	
 	@Test
 	public void shouldGetTheSameEntity() {
-		mse = ModuleStatusPO.builder()
-				.moduleName("testModuule")
-				.positions(Lists.newArrayList(proto.build(), proto.unifiedSymbol(SYMBOL2).build()))
-				.build();
-		ms = new ModuleStatus(mse, contractMgr);
+		mse.getPositions().sort((a,b)-> a.getUnifiedSymbol().compareTo(b.getUnifiedSymbol()));
 		assertThat(ms.convertToEntity()).isEqualTo(mse);
 	}
 	

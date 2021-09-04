@@ -18,6 +18,7 @@ import xyz.redtorch.pb.CoreEnum.OrderPriceTypeEnum;
 import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
 import xyz.redtorch.pb.CoreEnum.TimeConditionEnum;
 import xyz.redtorch.pb.CoreEnum.VolumeConditionEnum;
+import xyz.redtorch.pb.CoreField.OrderField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TickField;
 import xyz.redtorch.pb.CoreField.TradeField;
@@ -41,7 +42,26 @@ public class ModulePosition implements EntityAware<ModulePositionPO>{
 	
 	protected String openTradingDay;
 	
+	protected long openTime;
+	
 	protected ContractManager contractMgr;
+	
+	public ModulePosition(TradeField trade, OrderField order, ContractManager contractMgr) {
+		if(!StringUtils.equals(trade.getOriginOrderId(), order.getOriginOrderId())) {
+			log.warn("委托明细：{}", order.toString());
+			log.warn("成交明细：{}", trade.toString());
+			throw new IllegalStateException("成交与委托不匹配");
+		}
+		this.unifiedSymbol = trade.getContract().getUnifiedSymbol();
+		this.positionDir = trade.getDirection() == DirectionEnum.D_Buy ? PositionDirectionEnum.PD_Long : PositionDirectionEnum.PD_Short;
+		this.openPrice = trade.getPrice();
+		this.stopLossPrice = order.getStopPrice();
+		this.volume = trade.getVolume();
+		this.multiplier = trade.getContract().getMultiplier();
+		this.openTradingDay = trade.getTradingDay();
+		this.openTime = trade.getTradeTimestamp();
+		this.contractMgr = contractMgr;
+	}
 	
 	public ModulePosition(ModulePositionPO e, ContractManager contractMgr) {
 		this.unifiedSymbol = e.getUnifiedSymbol();
@@ -51,6 +71,7 @@ public class ModulePosition implements EntityAware<ModulePositionPO>{
 		this.volume = e.getVolume();
 		this.multiplier = e.getMultiplier();
 		this.openTradingDay = e.getOpenTradingDay();
+		this.openTime = e.getOpenTime();
 		this.contractMgr = contractMgr;
 	}
 	
@@ -120,6 +141,22 @@ public class ModulePosition implements EntityAware<ModulePositionPO>{
 			}
 		}
 		return false;
+	}
+	
+	public boolean isLongPosition() {
+		return positionDir == PositionDirectionEnum.PD_Long;
+	}
+	
+	public boolean isShortPosition() {
+		return positionDir == PositionDirectionEnum.PD_Short;
+	}
+	
+	public String getUnifiedSymbol() {
+		return unifiedSymbol;
+	}
+	
+	public double getHoldingProfit() {
+		return holdingProfit;
 	}
 	
 	public boolean isEmpty() {

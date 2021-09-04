@@ -1,14 +1,13 @@
 package tech.xuanwu.northstar.strategy.common.model;
 
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-
-import com.google.common.collect.Lists;
 
 import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.common.EntityAware;
@@ -20,7 +19,6 @@ import tech.xuanwu.northstar.strategy.common.model.persistence.ModuleStatusPO;
 import tech.xuanwu.northstar.strategy.common.model.state.ModuleStateMachine;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
-import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
 import xyz.redtorch.pb.CoreField.OrderField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TickField;
@@ -40,7 +38,9 @@ public class ModuleStatus implements EntityAware<ModuleStatusPO>{
 	
 	protected ModuleStateMachine stateMachine;
 	
-	protected List<ModulePosition> positions;
+	protected Map<String, ModulePosition> longPositions = new HashMap<>();
+	
+	protected Map<String, ModulePosition> shortPositions = new HashMap<>();
 	
 	protected ContractManager contractMgr;
 	
@@ -52,7 +52,6 @@ public class ModuleStatus implements EntityAware<ModuleStatusPO>{
 		this.moduleName = name;
 		this.contractMgr = contractMgr;
 		this.stateMachine = new ModuleStateMachine(ModuleState.EMPTY);
-		this.positions = new ArrayList<>();
 	}
 
 	public ModuleStatus(ModuleStatusPO entity, ContractManager contractMgr) {
@@ -61,31 +60,42 @@ public class ModuleStatus implements EntityAware<ModuleStatusPO>{
 		this.stateMachine = new ModuleStateMachine(entity.getState());
 		this.countOfOpeningToday = entity.getCountOfOpeningToday();
 		this.holdingTradingDay = entity.getHoldingTradingDay();
-		this.positions = Lists.newArrayList(entity.getPositions().stream().map(p -> new ModulePosition(p, contractMgr)).collect(Collectors.toList()));
+		entity.getPositions()
+			.stream()
+			.map(p -> new ModulePosition(p, contractMgr))
+			.forEach(mp -> {
+				if(mp.isLongPosition()) {
+					longPositions.put(mp.getUnifiedSymbol(), mp);
+				}
+				if(mp.isShortPosition()) {
+					shortPositions.put(mp.getUnifiedSymbol(), mp);
+				}
+			});
 	}
 	
 	public double updateHoldingProfit(TickField tick) {
-		return positions.stream()
-				.filter(p -> p.isMatch(tick.getUnifiedSymbol()))
-				.map(p -> p.updateProfit(tick))
-				.reduce(0D, (a, b) -> a + b);
+		if(longPositions.containsKey(tick.getUnifiedSymbol())) {
+			longPositions.get(tick.getUnifiedSymbol()).updateProfit(tick);
+		}
+		if(shortPositions.containsKey(tick.getUnifiedSymbol())) {
+			shortPositions.get(tick.getUnifiedSymbol()).updateProfit(tick);
+		}
+		double p1 = longPositions.values().stream().mapToDouble(ModulePosition::getHoldingProfit).reduce(0D, (a,b) -> a+b);
+		double p2 = shortPositions.values().stream().mapToDouble(ModulePosition::getHoldingProfit).reduce(0D, (a,b) -> a+b);
+		return p1 + p2;
 	}
 	
 	public Optional<SubmitOrderReqField> triggerStopLoss(TickField tick){
-		Iterator<ModulePosition> itPos = positions.iterator();
-		while(itPos.hasNext()) {
-			ModulePosition p = itPos.next();
-			if(!p.isMatch(tick.getUnifiedSymbol())) {
-				continue;
-			}
-			Optional<SubmitOrderReqField> orderReq = p.triggerStopLoss(tick);
-			if(orderReq.isPresent()) {
-				itPos.remove();
-				log.info("模组止损{}", orderReq.get().getContract().getSymbol());
-			}
-			return orderReq;
+		Optional<SubmitOrderReqField> result = Optional.empty();
+		if(longPositions.containsKey(tick.getUnifiedSymbol())) {
+			result = longPositions.get(tick.getUnifiedSymbol()).triggerStopLoss(tick);
+			if(result.isPresent()) return result;
 		}
-		return Optional.empty();
+		if(shortPositions.containsKey(tick.getUnifiedSymbol())) {
+			result = shortPositions.get(tick.getUnifiedSymbol()).triggerStopLoss(tick);
+			if(result.isPresent()) return result;
+		}
+		return result;
 	}
 	
 	public ModuleStatus onTrade(TradeField trade, OrderField order) {
@@ -123,9 +133,9 @@ public class ModuleStatus implements EntityAware<ModuleStatusPO>{
 	}
 	
 	public double getHoldingProfit() {
-		return positions.stream()
-				.map(p -> p.holdingProfit)
-				.reduce(0D, (a, b) -> a + b);
+		double p1 = longPositions.values().stream().mapToDouble(ModulePosition::getHoldingProfit).reduce(0D, (a,b) -> a+b);
+		double p2 = shortPositions.values().stream().mapToDouble(ModulePosition::getHoldingProfit).reduce(0D, (a,b) -> a+b);
+		return p1 + p2;
 	}
 	
 	public ModuleState getCurrentState() {
@@ -149,31 +159,25 @@ public class ModuleStatus implements EntityAware<ModuleStatusPO>{
 	}
 	
 	private void opening(TradeField trade, OrderField order) {
-		if(positions.stream().filter(p -> p.isMatch(trade.getContract().getUnifiedSymbol())).anyMatch(p -> p.onTrade(trade))) {
-			return;
+		Map<String, ModulePosition> positions = trade.getDirection() == DirectionEnum.D_Buy ? longPositions : shortPositions;
+		if(positions.containsKey(trade.getContract().getUnifiedSymbol())) {
+			positions.get(trade.getContract().getUnifiedSymbol()).onTrade(trade);
+		} else {
+			positions.put(trade.getContract().getUnifiedSymbol(), new ModulePosition(trade, order, contractMgr));
 		}
-		ModulePositionPO e = ModulePositionPO.builder()
-				.openPrice(trade.getPrice())
-				.stopLossPrice(order.getStopPrice())
-				.positionDir(trade.getDirection() == DirectionEnum.D_Buy ? PositionDirectionEnum.PD_Long : PositionDirectionEnum.PD_Short)
-				.unifiedSymbol(trade.getContract().getUnifiedSymbol())
-				.volume(trade.getVolume())
-				.openTradingDay(trade.getTradingDay())
-				.multiplier(trade.getContract().getMultiplier())
-				.build();
-		positions.add(new ModulePosition(e, contractMgr));
 		log.info("模组开仓{}", trade.getContract().getSymbol());
 	}
 	
 	private void closing(TradeField trade) {
-		if(positions.stream().filter(p -> p.isMatch(trade.getContract().getUnifiedSymbol())).anyMatch(e -> e.onTrade(trade))) {
-			Iterator<ModulePosition> itPos = positions.iterator();
-			while(itPos.hasNext()) {
-				if(itPos.next().isEmpty()) {					
-					itPos.remove();
-					log.info("模组平仓{}", trade.getContract().getSymbol());
-				}
-			}
+		Map<String, ModulePosition> positions = trade.getDirection() == DirectionEnum.D_Sell ? longPositions : shortPositions;
+		if(!positions.containsKey(trade.getContract().getUnifiedSymbol())) {
+			throw new IllegalStateException("不存在对应的持仓");
+		}
+		ModulePosition mp = positions.get(trade.getContract().getUnifiedSymbol());
+		mp.onTrade(trade);
+		if(mp.isEmpty()) {
+			positions.remove(trade.getContract().getUnifiedSymbol());
+			log.info("模组平仓{}", trade.getContract().getSymbol());
 		}
 	}
 	
@@ -182,8 +186,17 @@ public class ModuleStatus implements EntityAware<ModuleStatusPO>{
 		return ModuleStatusPO.builder()
 				.moduleName(moduleName)
 				.state(stateMachine.getState())
-				.positions(positions.stream().map(ModulePosition::convertToEntity).collect(Collectors.toList()))
+				.positions(getPositionEntitys())
 				.holdingTradingDay(holdingTradingDay)
+				.countOfOpeningToday(countOfOpeningToday)
 				.build();
+	}
+	
+	private List<ModulePositionPO> getPositionEntitys(){
+		List<ModulePositionPO> result = new ArrayList<>(longPositions.size() + shortPositions.size());
+		result.addAll(longPositions.values().stream().map(ModulePosition::convertToEntity).collect(Collectors.toList()));
+		result.addAll(shortPositions.values().stream().map(ModulePosition::convertToEntity).collect(Collectors.toList()));
+		result.sort((a, b) -> a.getUnifiedSymbol().compareTo(b.getUnifiedSymbol()));
+		return result;
 	}
 }

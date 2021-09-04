@@ -26,4 +26,6 @@ public class ModulePositionPO {
 	
 	private String openTradingDay;
 	
+	private long openTime;
+	
 }
