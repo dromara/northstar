@@ -14,9 +14,9 @@ import tech.xuanwu.northstar.common.EntityAware;
 import tech.xuanwu.northstar.common.model.ContractManager;
 import tech.xuanwu.northstar.strategy.common.constants.ModuleState;
 import tech.xuanwu.northstar.strategy.common.event.ModuleEventType;
-import tech.xuanwu.northstar.strategy.common.model.persistence.DealRecordPO;
-import tech.xuanwu.northstar.strategy.common.model.persistence.ModulePositionPO;
-import tech.xuanwu.northstar.strategy.common.model.persistence.ModuleStatusPO;
+import tech.xuanwu.northstar.strategy.common.model.entity.DealRecordEntity;
+import tech.xuanwu.northstar.strategy.common.model.entity.ModulePositionEntity;
+import tech.xuanwu.northstar.strategy.common.model.entity.ModuleStatusEntity;
 import tech.xuanwu.northstar.strategy.common.model.state.ModuleStateMachine;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
@@ -31,7 +31,7 @@ import xyz.redtorch.pb.CoreField.TradeField;
  *
  */
 @Slf4j
-public class ModuleStatus implements EntityAware<ModuleStatusPO>{
+public class ModuleStatus implements EntityAware<ModuleStatusEntity>{
 
 	private final String moduleName;
 	
@@ -49,7 +49,7 @@ public class ModuleStatus implements EntityAware<ModuleStatusPO>{
 	
 	private double accountAvailable;
 	
-	private Optional<DealRecordPO> dealRecord;
+	private Optional<DealRecordEntity> dealRecord;
 	
 	public ModuleStatus(String name, ContractManager contractMgr) {
 		this.moduleName = name;
@@ -57,7 +57,7 @@ public class ModuleStatus implements EntityAware<ModuleStatusPO>{
 		this.stateMachine = new ModuleStateMachine(ModuleState.EMPTY);
 	}
 
-	public ModuleStatus(ModuleStatusPO entity, ContractManager contractMgr) {
+	public ModuleStatus(ModuleStatusEntity entity, ContractManager contractMgr) {
 		this.contractMgr = contractMgr;
 		this.moduleName = entity.getModuleName();
 		this.stateMachine = new ModuleStateMachine(entity.getState());
@@ -101,7 +101,7 @@ public class ModuleStatus implements EntityAware<ModuleStatusPO>{
 		return result;
 	}
 	
-	public Optional<ModuleStatusPO> onTrade(TradeField trade, OrderField order) {
+	public Optional<ModuleStatusEntity> onTrade(TradeField trade, OrderField order) {
 		if(trade.getOffsetFlag() == OffsetFlagEnum.OF_Unknown) {
 			throw new IllegalStateException("未知开平仓状态");
 		}
@@ -120,8 +120,8 @@ public class ModuleStatus implements EntityAware<ModuleStatusPO>{
 		return Optional.of(convertToEntity());
 	}
 	
-	public Optional<DealRecordPO> consumeDealRecord(){
-		Optional<DealRecordPO> result = dealRecord;
+	public Optional<DealRecordEntity> consumeDealRecord(){
+		Optional<DealRecordEntity> result = dealRecord;
 		dealRecord = Optional.empty();
 		return result;
 	}
@@ -189,8 +189,8 @@ public class ModuleStatus implements EntityAware<ModuleStatusPO>{
 	}
 	
 	@Override
-	public ModuleStatusPO convertToEntity() {
-		return ModuleStatusPO.builder()
+	public ModuleStatusEntity convertToEntity() {
+		return ModuleStatusEntity.builder()
 				.moduleName(moduleName)
 				.state(stateMachine.getState())
 				.positions(getPositionEntitys())
@@ -199,8 +199,8 @@ public class ModuleStatus implements EntityAware<ModuleStatusPO>{
 				.build();
 	}
 	
-	private List<ModulePositionPO> getPositionEntitys(){
-		List<ModulePositionPO> result = new ArrayList<>(longPositions.size() + shortPositions.size());
+	private List<ModulePositionEntity> getPositionEntitys(){
+		List<ModulePositionEntity> result = new ArrayList<>(longPositions.size() + shortPositions.size());
 		result.addAll(longPositions.values().stream().map(ModulePosition::convertToEntity).collect(Collectors.toList()));
 		result.addAll(shortPositions.values().stream().map(ModulePosition::convertToEntity).collect(Collectors.toList()));
 		result.sort((a, b) -> a.getUnifiedSymbol().compareTo(b.getUnifiedSymbol()));

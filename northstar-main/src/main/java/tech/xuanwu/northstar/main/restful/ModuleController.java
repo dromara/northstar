@@ -16,9 +16,9 @@ import tech.xuanwu.northstar.common.model.ResultBean;
 import tech.xuanwu.northstar.main.service.ModuleService;
 import tech.xuanwu.northstar.strategy.common.model.ModuleInfo;
 import tech.xuanwu.northstar.strategy.common.model.data.ModuleCurrentPerformance;
+import tech.xuanwu.northstar.strategy.common.model.entity.DealRecordEntity;
 import tech.xuanwu.northstar.strategy.common.model.meta.ComponentField;
 import tech.xuanwu.northstar.strategy.common.model.meta.ComponentMetaInfo;
-import tech.xuanwu.northstar.strategy.common.model.persistence.DealRecordPO;
 
 @RestController
 public class ModuleController {
@@ -80,7 +80,7 @@ public class ModuleController {
 	}
 	
 	@GetMapping("/module/records")
-	public ResultBean<List<DealRecordPO>> getHistoryRecords(String name){
+	public ResultBean<List<DealRecordEntity>> getHistoryRecords(String name){
 		Assert.hasText(name, "模组名称不能为空");
 		return new ResultBean<>(service.getHistoryRecords(name));
 	}

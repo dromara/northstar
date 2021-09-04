@@ -13,8 +13,8 @@ import com.google.common.collect.Lists;
 import tech.xuanwu.northstar.common.model.ContractManager;
 import tech.xuanwu.northstar.strategy.common.constants.ModuleState;
 import tech.xuanwu.northstar.strategy.common.event.ModuleEventType;
-import tech.xuanwu.northstar.strategy.common.model.persistence.ModulePositionPO;
-import tech.xuanwu.northstar.strategy.common.model.persistence.ModuleStatusPO;
+import tech.xuanwu.northstar.strategy.common.model.entity.ModulePositionEntity;
+import tech.xuanwu.northstar.strategy.common.model.entity.ModuleStatusEntity;
 import test.common.TestFieldFactory;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
@@ -33,7 +33,7 @@ public class ModuleStatusTest {
 	
 	private final String SYMBOL2 = "rb2110@SHFE@FUTURES";
 	
-	private ModulePositionPO.ModulePositionPOBuilder proto = ModulePositionPO.builder()
+	private ModulePositionEntity.ModulePositionEntityBuilder proto = ModulePositionEntity.builder()
 			.unifiedSymbol(SYMBOL)
 			.multiplier(10)
 			.volume(2)
@@ -41,14 +41,14 @@ public class ModuleStatusTest {
 			.stopLossPrice(1200)
 			.positionDir(PositionDirectionEnum.PD_Long);
 	
-	private ModuleStatusPO mse;
+	private ModuleStatusEntity mse;
 	
 	private TestFieldFactory factory = new TestFieldFactory("testGateway");
 
 	@Before
 	public void setUp() throws Exception {
 		when(contractMgr.getContract(SYMBOL)).thenReturn(ContractField.newBuilder().build());
-		mse = ModuleStatusPO.builder()
+		mse = ModuleStatusEntity.builder()
 				.moduleName("testModuule")
 				.state(ModuleState.HOLDING_LONG)
 				.positions(Lists.newArrayList(proto.build(), proto.unifiedSymbol(SYMBOL2).build()))

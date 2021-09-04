@@ -9,8 +9,8 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Repository;
 
 import tech.xuanwu.northstar.strategy.common.model.ModuleInfo;
-import tech.xuanwu.northstar.strategy.common.model.persistence.DealRecordPO;
-import tech.xuanwu.northstar.strategy.common.model.persistence.ModuleStatusPO;
+import tech.xuanwu.northstar.strategy.common.model.entity.DealRecordEntity;
+import tech.xuanwu.northstar.strategy.common.model.entity.ModuleStatusEntity;
 
 @Repository
 public class ModuleRepository {
@@ -43,31 +43,31 @@ public class ModuleRepository {
 	/*************/
 	/**	模组状态	**/
 	/*************/
-	public ModuleStatusPO loadModuleStatus(String moduleName){
-		return mongo.findOne(Query.query(Criteria.where(MODULE_NAME).is(moduleName)), ModuleStatusPO.class);
+	public ModuleStatusEntity loadModuleStatus(String moduleName){
+		return mongo.findOne(Query.query(Criteria.where(MODULE_NAME).is(moduleName)), ModuleStatusEntity.class);
 	}
 	
-	public void saveModuleStatus(ModuleStatusPO status) {
+	public void saveModuleStatus(ModuleStatusEntity status) {
 		mongo.save(status);
 	}
 	
 	public void removeModuleStatus(String moduleName) {
-		mongo.remove(Query.query(Criteria.where(MODULE_NAME).is(moduleName)), ModuleStatusPO.class);
+		mongo.remove(Query.query(Criteria.where(MODULE_NAME).is(moduleName)), ModuleStatusEntity.class);
 	}
 	
 	/*************/
 	/**	模组成交	**/
 	/*************/
-	public void saveDealRecord(DealRecordPO dealRecord) {
+	public void saveDealRecord(DealRecordEntity dealRecord) {
 		mongo.save(dealRecord);
 	}
 	
-	public List<DealRecordPO> findDealRecords(String moduleName) {
-		return mongo.find(Query.query(Criteria.where(MODULE_NAME).is(moduleName)), DealRecordPO.class);
+	public List<DealRecordEntity> findDealRecords(String moduleName) {
+		return mongo.find(Query.query(Criteria.where(MODULE_NAME).is(moduleName)), DealRecordEntity.class);
 	}
 	
 	public void removeDealRecords(String moduleName) {
-		mongo.remove(Query.query(Criteria.where(MODULE_NAME).is(moduleName)), DealRecordPO.class);
+		mongo.remove(Query.query(Criteria.where(MODULE_NAME).is(moduleName)), DealRecordEntity.class);
 	}
 	
 }

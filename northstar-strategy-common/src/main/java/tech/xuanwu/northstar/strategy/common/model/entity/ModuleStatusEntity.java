@@ -1,4 +1,4 @@
-package tech.xuanwu.northstar.strategy.common.model.persistence;
+package tech.xuanwu.northstar.strategy.common.model.entity;
 
 import java.util.List;
 
@@ -16,12 +16,12 @@ import tech.xuanwu.northstar.strategy.common.constants.ModuleState;
 @AllArgsConstructor
 @Data
 @Document
-public class ModuleStatusPO {
+public class ModuleStatusEntity {
 
 	@Id
 	private String moduleName;
 	
-	private List<ModulePositionPO> positions;
+	private List<ModulePositionEntity> positions;
 	
 	private ModuleState state;
 	

@@ -13,8 +13,8 @@ import tech.xuanwu.northstar.common.event.NorthstarEventType;
 import tech.xuanwu.northstar.main.persistence.ModuleRepository;
 import tech.xuanwu.northstar.strategy.common.model.StrategyModule;
 import tech.xuanwu.northstar.strategy.common.model.data.ModuleCurrentPerformance;
-import tech.xuanwu.northstar.strategy.common.model.persistence.DealRecordPO;
-import tech.xuanwu.northstar.strategy.common.model.persistence.ModuleStatusPO;
+import tech.xuanwu.northstar.strategy.common.model.entity.DealRecordEntity;
+import tech.xuanwu.northstar.strategy.common.model.entity.ModuleStatusEntity;
 import xyz.redtorch.pb.CoreField.AccountField;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.OrderField;
@@ -84,10 +84,10 @@ public class ModuleManager extends AbstractEventHandler {
 		// 只对持仓状态变化做持久化，不对下单状态作反应
 		for(Entry<String, StrategyModule> e : moduleMap.entrySet()) {
 			StrategyModule m = e.getValue();
-			Optional<ModuleStatusPO> result = m.onTrade(trade);
+			Optional<ModuleStatusEntity> result = m.onTrade(trade);
 			if(result.isPresent()) {
 				moduleRepo.saveModuleStatus(result.get());
-				Optional<DealRecordPO> dealRecord = m.consumeDealRecord();
+				Optional<DealRecordEntity> dealRecord = m.consumeDealRecord();
 				if(dealRecord.isPresent()) {	
 					moduleRepo.saveDealRecord(dealRecord.get());
 				}

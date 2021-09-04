@@ -32,12 +32,12 @@ import tech.xuanwu.northstar.strategy.common.model.ModuleStatus;
 import tech.xuanwu.northstar.strategy.common.model.StrategyModule;
 import tech.xuanwu.northstar.strategy.common.model.data.BarData;
 import tech.xuanwu.northstar.strategy.common.model.data.ModuleCurrentPerformance;
+import tech.xuanwu.northstar.strategy.common.model.entity.DealRecordEntity;
+import tech.xuanwu.northstar.strategy.common.model.entity.ModuleStatusEntity;
 import tech.xuanwu.northstar.strategy.common.model.meta.ComponentAndParamsPair;
 import tech.xuanwu.northstar.strategy.common.model.meta.ComponentField;
 import tech.xuanwu.northstar.strategy.common.model.meta.ComponentMetaInfo;
 import tech.xuanwu.northstar.strategy.common.model.meta.DynamicParams;
-import tech.xuanwu.northstar.strategy.common.model.persistence.DealRecordPO;
-import tech.xuanwu.northstar.strategy.common.model.persistence.ModuleStatusPO;
 import xyz.redtorch.pb.CoreField.BarField;
 
 public class ModuleService implements InitializingBean{
@@ -132,7 +132,7 @@ public class ModuleService implements InitializingBean{
 	 */
 	public boolean updateModule(ModuleInfo info) throws Exception {
 		mdlMgr.removeModule(info.getModuleName());
-		ModuleStatusPO mse = moduleRepo.loadModuleStatus(info.getModuleName());
+		ModuleStatusEntity mse = moduleRepo.loadModuleStatus(info.getModuleName());
 		ModuleStatus status;
 		if(mse == null) {
 			status = new ModuleStatus(info.getModuleName(), contractMgr);
@@ -223,7 +223,7 @@ public class ModuleService implements InitializingBean{
 	 * @param moduleName
 	 * @return
 	 */
-	public List<DealRecordPO> getHistoryRecords(String moduleName) {
+	public List<DealRecordEntity> getHistoryRecords(String moduleName) {
 		return moduleRepo.findDealRecords(moduleName);
 	}
 	
@@ -268,7 +268,7 @@ public class ModuleService implements InitializingBean{
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		for(ModuleInfo m : getCurrentModuleInfos()) {
-			ModuleStatusPO entity = moduleRepo.loadModuleStatus(m.getModuleName());
+			ModuleStatusEntity entity = moduleRepo.loadModuleStatus(m.getModuleName());
 			ModuleStatus status;
 			if(entity == null) {
 				status = new ModuleStatus(m.getModuleName(), contractMgr);

@@ -12,7 +12,7 @@ import org.junit.Test;
 
 import tech.xuanwu.northstar.common.constant.DateTimeConstant;
 import tech.xuanwu.northstar.common.model.ContractManager;
-import tech.xuanwu.northstar.strategy.common.model.persistence.ModulePositionPO;
+import tech.xuanwu.northstar.strategy.common.model.entity.ModulePositionEntity;
 import test.common.TestFieldFactory;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
@@ -38,7 +38,7 @@ public class ModulePositionTest {
 	
 	private ContractManager contractMgr;
 	
-	private ModulePositionPO.ModulePositionPOBuilder proto = ModulePositionPO.builder()
+	private ModulePositionEntity.ModulePositionEntityBuilder proto = ModulePositionEntity.builder()
 			.unifiedSymbol(SYMBOL)
 			.multiplier(10)
 			.volume(2)
@@ -91,7 +91,7 @@ public class ModulePositionTest {
 	
 	@Test
 	public void shouldGetTheSameObject() {
-		ModulePositionPO e = proto.build();
+		ModulePositionEntity e = proto.build();
 		ModulePosition pos = new ModulePosition(e, contractMgr);
 		assertThat(pos.convertToEntity()).isEqualTo(e);
 	}

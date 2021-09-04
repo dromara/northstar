@@ -21,8 +21,8 @@ import tech.xuanwu.northstar.strategy.common.constants.ModuleState;
 import tech.xuanwu.northstar.strategy.common.constants.RiskAuditResult;
 import tech.xuanwu.northstar.strategy.common.event.ModuleEventType;
 import tech.xuanwu.northstar.strategy.common.model.data.ModuleCurrentPerformance;
-import tech.xuanwu.northstar.strategy.common.model.persistence.DealRecordPO;
-import tech.xuanwu.northstar.strategy.common.model.persistence.ModuleStatusPO;
+import tech.xuanwu.northstar.strategy.common.model.entity.DealRecordEntity;
+import tech.xuanwu.northstar.strategy.common.model.entity.ModuleStatusEntity;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreField.AccountField;
@@ -169,7 +169,7 @@ public class StrategyModule {
 		return this;
 	}
 	
-	public Optional<ModuleStatusPO> onTrade(TradeField trade) {
+	public Optional<ModuleStatusEntity> onTrade(TradeField trade) {
 		if(originOrderIdMap.containsKey(trade.getOriginOrderId())) {
 			OrderField order = originOrderIdMap.remove(trade.getOriginOrderId());
 			// 考虑一个order分多次成交的情况
@@ -187,7 +187,7 @@ public class StrategyModule {
 		return Optional.empty();
 	}
 	
-	public Optional<DealRecordPO> consumeDealRecord() {
+	public Optional<DealRecordEntity> consumeDealRecord() {
 		return status.consumeDealRecord();
 	}
 	
