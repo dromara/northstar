@@ -43,7 +43,7 @@ public class SampleSignalPolicy extends AbstractSignalPolicy
 	@Override
 	public void initWithParams(DynamicParams params) {
 		InitParams initParams = (InitParams) params;
-		this.bindedUnifiedSymbol = initParams.unifiedSymbol;
+		this.bindedUnifiedSymbol = initParams.bindedUnifiedSymbol;
 		this.longPeriod = initParams.longPeriod;
 		this.shortPeriod = initParams.shortPeriod;
 	}
@@ -55,7 +55,7 @@ public class SampleSignalPolicy extends AbstractSignalPolicy
 	public static class InitParams extends DynamicParams{
 		
 		@Setting(value="绑定合约", order=10)	// Label注解用于定义属性的元信息
-		private String unifiedSymbol;		// 属性可以为任意多个，当元素为多个时order值用于控制前端的显示顺序
+		private String bindedUnifiedSymbol;		// 属性可以为任意多个，当元素为多个时order值用于控制前端的显示顺序
 		
 		@Setting(value="短周期", order=20, unit="天")	// 可以声明单位
 		private int shortPeriod;

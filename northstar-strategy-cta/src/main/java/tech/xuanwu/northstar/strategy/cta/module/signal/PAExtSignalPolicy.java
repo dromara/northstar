@@ -44,10 +44,10 @@ public class PAExtSignalPolicy extends AbstractSignalPolicy implements ExternalS
 	@Override
 	public void initWithParams(DynamicParams params) {
 		InitParams initParams = (InitParams) params;
-		if(StringUtils.isEmpty(initParams.unifiedSymbol)) {
+		if(StringUtils.isEmpty(initParams.bindedUnifiedSymbol)) {
 			throw new IllegalArgumentException("合约入参为空");
 		}
-		bindedUnifiedSymbol = initParams.unifiedSymbol;
+		bindedUnifiedSymbol = initParams.bindedUnifiedSymbol;
 		String symbol = bindedUnifiedSymbol.split("@")[0].toUpperCase();
 		log.info("绑定合约：{}", symbol);
 		textPtn = Pattern.compile("[^：]+：" + symbol + ".+，仅供参考。");
@@ -106,7 +106,7 @@ public class PAExtSignalPolicy extends AbstractSignalPolicy implements ExternalS
 	public static class InitParams extends DynamicParams{
 
 		@Setting(value="绑定合约", order=10)	// Label注解用于定义属性的元信息
-		protected String unifiedSymbol;		// 属性可以为任意多个，当元素为多个时order值用于控制前端的显示顺序	
+		protected String bindedUnifiedSymbol;		// 属性可以为任意多个，当元素为多个时order值用于控制前端的显示顺序	
 	}
 
 	

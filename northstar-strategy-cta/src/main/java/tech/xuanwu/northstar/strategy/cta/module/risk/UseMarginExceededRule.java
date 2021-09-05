@@ -28,10 +28,10 @@ public class UseMarginExceededRule implements RiskControlRule, DynamicParamsAwar
 
 	@Override
 	public short canDeal(TickField tick, ModuleStatus moduleStatus) {
-		int moduleAvailable = (int) (limitedPercentageOfTotalBalance * moduleStatus.getAccountAvailable());
+		int moduleAvailable = (int) (limitedPercentageOfTotalBalance/100.0 * moduleStatus.getAccountAvailable());
 		if(totalCost > moduleAvailable) {
 			log.info("开仓成本超过风控限制。成本金额：{}, 当前模组占用比例：{}, 当前模组可用资金：{}",
-					totalCost, (int)(limitedPercentageOfTotalBalance * 100), moduleAvailable);
+					totalCost, limitedPercentageOfTotalBalance, moduleAvailable);
 			return RiskAuditResult.REJECTED;
 		}
 		return RiskAuditResult.ACCEPTED;
@@ -53,7 +53,7 @@ public class UseMarginExceededRule implements RiskControlRule, DynamicParamsAwar
 	@Override
 	public void initWithParams(DynamicParams params) {
 		InitParams initParams = (InitParams) params;
-		this.limitedPercentageOfTotalBalance = initParams.limitedPercentageOfTotalBalance / 100.0;
+		this.limitedPercentageOfTotalBalance = initParams.limitedPercentageOfTotalBalance;
 	}
 	
 	

@@ -7,7 +7,6 @@ import tech.xuanwu.northstar.strategy.common.annotation.Setting;
 import tech.xuanwu.northstar.strategy.common.annotation.StrategicComponent;
 import tech.xuanwu.northstar.strategy.common.constants.RiskAuditResult;
 import tech.xuanwu.northstar.strategy.common.model.ModuleStatus;
-import tech.xuanwu.northstar.strategy.common.model.StrategyModule;
 import tech.xuanwu.northstar.strategy.common.model.meta.DynamicParams;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TickField;
@@ -16,13 +15,13 @@ import xyz.redtorch.pb.CoreField.TickField;
 @StrategicComponent("委托超时限制")
 public class TimeExceededRule implements RiskControlRule, DynamicParamsAware{
 	
-	private long timeoutInterval;
+	private long timeoutSeconds;
 
 	private long lastUpdateTime;
 
 	@Override
 	public short canDeal(TickField tick, ModuleStatus moduleStatus) {
-		if(tick.getActionTimestamp() - lastUpdateTime > timeoutInterval) {
+		if(tick.getActionTimestamp() - lastUpdateTime > timeoutSeconds * 1000) {
 			log.info("挂单超时，撤单追单");
 			return RiskAuditResult.RETRY;
 		}
@@ -43,7 +42,7 @@ public class TimeExceededRule implements RiskControlRule, DynamicParamsAware{
 	@Override
 	public void initWithParams(DynamicParams params) {
 		InitParams initParams = (InitParams) params;
-		this.timeoutInterval = initParams.timeoutSeconds * 1000;
+		this.timeoutSeconds = initParams.timeoutSeconds;
 	}
 	
 	public static class InitParams extends DynamicParams{

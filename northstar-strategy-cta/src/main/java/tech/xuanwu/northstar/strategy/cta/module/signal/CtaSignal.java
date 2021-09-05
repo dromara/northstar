@@ -4,6 +4,7 @@ import java.util.UUID;
 
 import lombok.Builder;
 import lombok.Data;
+import tech.xuanwu.northstar.strategy.common.PriceResolver.PriceType;
 import tech.xuanwu.northstar.strategy.common.Signal;
 import tech.xuanwu.northstar.strategy.common.SignalPolicy;
 import tech.xuanwu.northstar.strategy.common.constants.SignalOperation;
@@ -46,5 +47,20 @@ public class CtaSignal implements Signal{
 	public boolean isOpening() {
 		return state.isOpen();
 	}
-	
+
+	@Override
+	public boolean isBuy() {
+		return state.isBuy();
+	}
+
+	@Override
+	public double price() {
+		return signalPrice;
+	}
+
+	@Override
+	public double stopPrice() {
+		return stopPrice;
+	}
+
 }
