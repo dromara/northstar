@@ -11,9 +11,9 @@
 	<description>北极星程序化交易平台</description>
 	
 	<scm>
-		<connection>scm:git:https://gitee.com/dromara/northstar.git</connection>
-		<url>https://gitee.com/dromara/northstar</url>
-		<developerConnection>scm:git:git@gitee.com:dromara/northstar.git</developerConnection>
+		<connection>scm:git:https://gitee.com/NorthstarQuan/northstar.git</connection>
+		<url>https://gitee.com/NorthstarQuan/northstar</url>
+		<developerConnection>scm:git:git@gitee.com:NorthstarQuan/northstar.git</developerConnection>
 	</scm>
 
 	<properties>
@@ -22,7 +22,7 @@
 		<maven.compiler.encoding>UTF-8</maven.compiler.encoding>
 		<maven.compiler.source>${java.version}</maven.compiler.source>
 		<maven.compiler.target>${java.version}</maven.compiler.target>
-		<northstar-version>${project.version}</northstar-version>
+		<northstar-version>2.0.0-SNAPSHOT</northstar-version>
 		<springboot-version>2.1.5.RELEASE</springboot-version>
 		<lombok-version>1.18.12</lombok-version>
 		<slf4j-version>1.7.25</slf4j-version>
