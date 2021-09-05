@@ -5,23 +5,19 @@
 	<parent>
 		<groupId>tech.xuan-wu</groupId>
 		<artifactId>northstar</artifactId>
-		<version>2.0.0-SNAPSHOT</version>
+		<version>2.0</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 	
-	<artifactId>northstar-strategy-common</artifactId>
+	<artifactId>northstar-gateway-sim</artifactId>
 
-	<name>northstar-strategy-common</name>
-	<description>北极星程序化交易策略通用库</description>
+	<name>northstar-gateway-sim</name>
+	<description>北极星程序化交易平台模拟网关</description>
 
 	<properties>
 	</properties>
 
 	<dependencies>
-		<dependency>
-			<groupId>tech.xuan-wu</groupId>
-			<artifactId>northstar-common</artifactId>
-		</dependency>
 		<dependency>
 			<groupId>tech.xuan-wu</groupId>
 			<artifactId>northstar-gateway-api</artifactId>
@@ -31,12 +27,12 @@
 			<artifactId>northstar-engine</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-data-mongodb</artifactId>
-		</dependency>
-		<dependency>
 		    <groupId>com.alibaba</groupId>
 		    <artifactId>fastjson</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-mongodb</artifactId>
 		</dependency>
 		<dependency>
 		    <groupId>commons-io</groupId>
