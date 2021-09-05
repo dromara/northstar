@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>tech.xuan-wu</groupId>
 	<artifactId>northstar</artifactId>
-	<version>2.0.0</version>
+	<version>2.0.0-SNAPSHOT</version>
 	<name>northstar</name>
 	<packaging>pom</packaging>
 	<description>北极星程序化交易平台</description>
@@ -12,8 +14,7 @@
 		<connection>scm:git:https://gitee.com/dromara/northstar.git</connection>
 		<url>https://gitee.com/dromara/northstar</url>
 		<developerConnection>scm:git:git@gitee.com:dromara/northstar.git</developerConnection>
-	  <tag>v2.0.0</tag>
-  </scm>
+	</scm>
 
 	<properties>
 		<java.version>11</java.version>
@@ -21,7 +22,7 @@
 		<maven.compiler.encoding>UTF-8</maven.compiler.encoding>
 		<maven.compiler.source>${java.version}</maven.compiler.source>
 		<maven.compiler.target>${java.version}</maven.compiler.target>
-		<northstar-version>2.0.0</northstar-version>
+		<northstar-version>${project.version}</northstar-version>
 		<springboot-version>2.1.5.RELEASE</springboot-version>
 		<lombok-version>1.18.12</lombok-version>
 		<slf4j-version>1.7.25</slf4j-version>
@@ -269,13 +270,6 @@
 			    <groupId>org.apache.maven.plugins</groupId>
 			    <artifactId>maven-release-plugin</artifactId>
 			    <version>2.5.3</version>
-			    <dependencies>
-		            <dependency>
-		              <groupId>org.apache.maven.shared</groupId>
-		              <artifactId>maven-invoker</artifactId>
-		              <version>2.2</version>
-		            </dependency>
-		          </dependencies>
 				<configuration>
 					<tagNameFormat>v@{project.version}</tagNameFormat>
 					<autoVersionSubmodules>true</autoVersionSubmodules>
@@ -410,17 +404,22 @@
 							</goals>
 							<configuration>
 								<transformers>
-									<transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+									<transformer
+										implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
 										<resource>META-INF/spring.handlers</resource>
 									</transformer>
-									<transformer implementation="org.springframework.boot.maven.PropertiesMergingResourceTransformer">
+									<transformer
+										implementation="org.springframework.boot.maven.PropertiesMergingResourceTransformer">
 										<resource>META-INF/spring.factories</resource>
 									</transformer>
-									<transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+									<transformer
+										implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
 										<resource>META-INF/spring.schemas</resource>
 									</transformer>
-									<transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
-									<transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+									<transformer
+										implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
+									<transformer
+										implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
 										<mainClass>${start-class}</mainClass>
 									</transformer>
 								</transformers>
