@@ -11,6 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
+import tech.xuanwu.northstar.common.model.ContractManager;
 import tech.xuanwu.northstar.gateway.api.TradeGateway;
 import tech.xuanwu.northstar.strategy.common.Dealer;
 import tech.xuanwu.northstar.strategy.common.ExternalSignalPolicy;
@@ -21,7 +22,7 @@ import tech.xuanwu.northstar.strategy.common.constants.ModuleState;
 import tech.xuanwu.northstar.strategy.common.constants.RiskAuditResult;
 import tech.xuanwu.northstar.strategy.common.event.ModuleEventType;
 import tech.xuanwu.northstar.strategy.common.model.data.ModuleCurrentPerformance;
-import tech.xuanwu.northstar.strategy.common.model.persistence.ModuleStatusPO;
+import tech.xuanwu.northstar.strategy.common.model.entity.DealRecordEntity;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreField.AccountField;
@@ -41,23 +42,25 @@ import xyz.redtorch.pb.CoreField.TradeField;
 @Builder
 public class StrategyModule {
 	
-	protected ModuleStatus status;
+	private final ModuleStatus status;
 	
-	protected SignalPolicy signalPolicy;
+	private final SignalPolicy signalPolicy;
 	
-	protected RiskController riskController;
+	private final RiskController riskController;
 	
-	protected Dealer dealer;
+	private final Dealer dealer;
 	
-	protected String mktGatewayId;
+	private final String mktGatewayId;
 	
-	protected TradeGateway gateway;
+	private final TradeGateway gateway;
 	
-	protected boolean disabled;
+	private boolean disabled;
 	
 	private long lastWarningTime;
 	
 	private String tradingDay;
+	
+	private ContractManager contractMgr;
 	
 	@Builder.Default
 	private Map<String, OrderField> originOrderIdMap = new HashMap<>();
@@ -95,7 +98,7 @@ public class StrategyModule {
 			}
 		}
 		if(dealer.bindedUnifiedSymbols().contains(tick.getUnifiedSymbol())) {
-			Optional<SubmitOrderReqField> stopLossReq = status.triggerStopLoss(tick);
+			Optional<SubmitOrderReqField> stopLossReq = status.triggerStopLoss(tick, contractMgr.getContract(tick.getUnifiedSymbol()));
 			if(stopLossReq.isPresent()) {
 				status.transform(ModuleEventType.STOP_LOSS);
 				gateway.submitOrder(stopLossReq.get());
@@ -168,12 +171,12 @@ public class StrategyModule {
 		return this;
 	}
 	
-	public Optional<ModuleStatusPO> onTrade(TradeField trade) {
+	public Optional<ModuleStatus> onTrade(TradeField trade) {
 		if(originOrderIdMap.containsKey(trade.getOriginOrderId())) {
 			OrderField order = originOrderIdMap.remove(trade.getOriginOrderId());
 			// 考虑一个order分多次成交的情况
 			if(trade.getVolume() < order.getTradedVolume()) {
-				log.info("订单{}分可能多次成交", order.getOriginOrderId());
+				log.info("订单[{}]分可能多次成交", order.getOriginOrderId());
 				OrderField restOrder = OrderField.newBuilder(order)
 						.setTradedVolume(order.getTradedVolume() - trade.getVolume())
 						.build();
@@ -181,10 +184,13 @@ public class StrategyModule {
 			} else {				
 				status.transform(trade.getDirection() == DirectionEnum.D_Buy ? ModuleEventType.BUY_TRADED : ModuleEventType.SELL_TRADED);
 			}
-			status.onTrade(trade, order);
-			return Optional.of(status.convertToEntity());
+			return Optional.of(status.onTrade(trade, order));
 		}
 		return Optional.empty();
+	}
+	
+	public Optional<DealRecordEntity> consumeDealRecord() {
+		return status.consumeDealRecord();
 	}
 	
 	public void onExternalMessage(String text) {
@@ -234,7 +240,7 @@ public class StrategyModule {
 		}
 		mp.setRefBarDataMap(byteMap);
 		mp.setAccountId(gateway.getGatewaySetting().getGatewayId());
-		mp.setAccountBalance((int)status.getAccountAvailable());
+		mp.setModuleAvailable((int)status.getAccountAvailable());
 		mp.setModuleState(status.getCurrentState());
 		mp.setTotalPositionProfit(status.getHoldingProfit());
 		return mp;

@@ -4,11 +4,14 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.annotation.Transient;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import tech.xuanwu.northstar.common.EntityAware;
-import tech.xuanwu.northstar.common.model.ContractManager;
-import tech.xuanwu.northstar.strategy.common.model.persistence.ModulePositionPO;
+import tech.xuanwu.northstar.strategy.common.model.entity.DealRecordEntity;
 import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.ForceCloseReasonEnum;
@@ -18,40 +21,51 @@ import xyz.redtorch.pb.CoreEnum.OrderPriceTypeEnum;
 import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
 import xyz.redtorch.pb.CoreEnum.TimeConditionEnum;
 import xyz.redtorch.pb.CoreEnum.VolumeConditionEnum;
+import xyz.redtorch.pb.CoreField.ContractField;
+import xyz.redtorch.pb.CoreField.OrderField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TickField;
 import xyz.redtorch.pb.CoreField.TradeField;
 
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+@Data
 @Slf4j
-public class ModulePosition implements EntityAware<ModulePositionPO>{
+public class ModulePosition {
 
-	protected String unifiedSymbol;
+	private String unifiedSymbol;
 
-	protected PositionDirectionEnum positionDir;
+	private PositionDirectionEnum positionDir;
 	
-	protected double openPrice;
+	private String openTradingDay;
 	
-	protected double stopLossPrice;
+	private long openTime;
 	
-	protected int volume;
+	private double multiplier;
 	
-	protected double multiplier;
+	private double openPrice;
 	
-	protected double holdingProfit;
+	private double stopLossPrice;
 	
-	protected String openTradingDay;
+	private int volume;
+	@Transient
+	private double holdingProfit;
 	
-	protected ContractManager contractMgr;
-	
-	public ModulePosition(ModulePositionPO e, ContractManager contractMgr) {
-		this.unifiedSymbol = e.getUnifiedSymbol();
-		this.positionDir = e.getPositionDir();
-		this.openPrice = e.getOpenPrice();
-		this.stopLossPrice = e.getStopLossPrice();
-		this.volume = e.getVolume();
-		this.multiplier = e.getMultiplier();
-		this.openTradingDay = e.getOpenTradingDay();
-		this.contractMgr = contractMgr;
+	public ModulePosition(TradeField trade, OrderField order) {
+		if(!StringUtils.equals(trade.getOriginOrderId(), order.getOriginOrderId())) {
+			log.warn("委托明细：{}", order.toString());
+			log.warn("成交明细：{}", trade.toString());
+			throw new IllegalStateException("成交与委托不匹配");
+		}
+		this.unifiedSymbol = trade.getContract().getUnifiedSymbol();
+		this.positionDir = trade.getDirection() == DirectionEnum.D_Buy ? PositionDirectionEnum.PD_Long : PositionDirectionEnum.PD_Short;
+		this.openPrice = trade.getPrice();
+		this.stopLossPrice = order.getStopPrice();
+		this.volume = trade.getVolume();
+		this.multiplier = trade.getContract().getMultiplier();
+		this.openTradingDay = trade.getTradingDay();
+		this.openTime = trade.getTradeTimestamp();
 	}
 	
 	public double updateProfit(TickField tick) {
@@ -61,7 +75,7 @@ public class ModulePosition implements EntityAware<ModulePositionPO>{
 		return holdingProfit;
 	}
 	
-	public Optional<SubmitOrderReqField> triggerStopLoss(TickField tick) {
+	public Optional<SubmitOrderReqField> triggerStopLoss(TickField tick, ContractField contract) {
 		checkMatch(tick.getUnifiedSymbol());
 		if(stopLossPrice == 0) {
 			return Optional.empty();
@@ -69,7 +83,7 @@ public class ModulePosition implements EntityAware<ModulePositionPO>{
 		if(triggeredStopLoss(tick)) {
 			SubmitOrderReqField orderReq = SubmitOrderReqField.newBuilder()
 					.setOriginOrderId(UUID.randomUUID().toString())
-					.setContract(contractMgr.getContract(unifiedSymbol))
+					.setContract(contract)
 					.setDirection(getClosingDirection())
 					.setVolume(volume)
 					.setPrice(0) 											//市价专用
@@ -96,30 +110,65 @@ public class ModulePosition implements EntityAware<ModulePositionPO>{
 				|| positionDir == PositionDirectionEnum.PD_Short && tick.getLastPrice() >= stopLossPrice;
 	}
 	
-	public boolean onTrade(TradeField trade) {
+	public Optional<ModulePosition> onOpenTrade(TradeField trade) {
 		checkMatch(trade.getContract().getUnifiedSymbol());
-		if(OffsetFlagEnum.OF_Open == trade.getOffsetFlag()) {
-			// 开仓成交
-			if(positionDir == PositionDirectionEnum.PD_Long && trade.getDirection() == DirectionEnum.D_Buy
-					|| positionDir == PositionDirectionEnum.PD_Short && trade.getDirection() == DirectionEnum.D_Sell) {
-				double originCost = openPrice * volume;
-				double newCost = trade.getPrice() * trade.getVolume();
-				openPrice = (originCost + newCost) / (volume + trade.getVolume());
-				volume += trade.getVolume();
-				return true;
-			}
-		} else {
-			// 平仓成交
-			if(positionDir == PositionDirectionEnum.PD_Long && trade.getDirection() == DirectionEnum.D_Sell
-					|| positionDir == PositionDirectionEnum.PD_Short && trade.getDirection() == DirectionEnum.D_Buy) {
-				if(volume < trade.getVolume()) {
-					throw new IllegalStateException("成交数量大于持仓数量");
-				}
-				volume -= trade.getVolume();
-				return true;
-			}
+		if(OffsetFlagEnum.OF_Open != trade.getOffsetFlag()) {
+			throw new IllegalStateException("传入了非开仓成交：" + trade.toString());
 		}
-		return false;
+		// 确保是同向开仓成交，忽略反向锁仓成交
+		if(positionDir == PositionDirectionEnum.PD_Long && trade.getDirection() == DirectionEnum.D_Buy
+				|| positionDir == PositionDirectionEnum.PD_Short && trade.getDirection() == DirectionEnum.D_Sell) {
+			double originCost = openPrice * volume;
+			double newCost = trade.getPrice() * trade.getVolume();
+			openPrice = (originCost + newCost) / (volume + trade.getVolume());
+			volume += trade.getVolume();
+			return Optional.of(this);
+		}
+		return Optional.empty();
+	}
+	
+	public Optional<DealRecordEntity> onCloseTrade(TradeField trade){
+		checkMatch(trade.getContract().getUnifiedSymbol());
+		if(OffsetFlagEnum.OF_Open == trade.getOffsetFlag() || OffsetFlagEnum.OF_Unknown == trade.getOffsetFlag()) {
+			throw new IllegalStateException("传入了非平仓成交：" + trade.toString());
+		}
+		// 确保是反向平仓
+		if(positionDir == PositionDirectionEnum.PD_Long && trade.getDirection() == DirectionEnum.D_Sell
+				|| positionDir == PositionDirectionEnum.PD_Short && trade.getDirection() == DirectionEnum.D_Buy) {
+			if(volume < trade.getVolume()) {
+				throw new IllegalStateException("成交数量大于持仓数量");
+			}
+			volume -= trade.getVolume();
+			int factor = positionDir == PositionDirectionEnum.PD_Long ? 1 : -1;
+			double closeProfit = factor * (trade.getPrice() - openPrice) * trade.getVolume() * multiplier;
+			return Optional.of(DealRecordEntity.builder()
+					.contractName(trade.getContract().getSymbol())
+					.direction(positionDir)
+					.tradingDay(openTradingDay)
+					.dealTimestamp(openTime)
+					.openPrice(openPrice)
+					.closePrice(trade.getPrice())
+					.volume(trade.getVolume())
+					.closeProfit((int)closeProfit)
+					.build());
+		}
+		return Optional.empty();
+	}
+	
+	public boolean isLongPosition() {
+		return positionDir == PositionDirectionEnum.PD_Long;
+	}
+	
+	public boolean isShortPosition() {
+		return positionDir == PositionDirectionEnum.PD_Short;
+	}
+	
+	public String getUnifiedSymbol() {
+		return unifiedSymbol;
+	}
+	
+	public double getHoldingProfit() {
+		return holdingProfit;
 	}
 	
 	public boolean isEmpty() {
@@ -136,15 +185,4 @@ public class ModulePosition implements EntityAware<ModulePositionPO>{
 		}
 	}
 	
-	@Override
-	public ModulePositionPO convertToEntity() {
-		return ModulePositionPO.builder()
-				.unifiedSymbol(unifiedSymbol)
-				.positionDir(positionDir)
-				.openPrice(openPrice)
-				.stopLossPrice(stopLossPrice)
-				.volume(volume)
-				.multiplier(multiplier)
-				.build();
-	}
 }

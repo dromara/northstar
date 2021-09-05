@@ -13,7 +13,6 @@ import tech.xuanwu.northstar.common.constant.DateTimeConstant;
 import tech.xuanwu.northstar.strategy.common.Signal;
 import tech.xuanwu.northstar.strategy.common.SignalPolicy;
 import tech.xuanwu.northstar.strategy.common.constants.SignalOperation;
-import tech.xuanwu.northstar.strategy.common.model.CtaSignal;
 import tech.xuanwu.northstar.strategy.common.model.ModuleStatus;
 import tech.xuanwu.northstar.strategy.common.model.data.BarData;
 import xyz.redtorch.pb.CoreField.BarField;

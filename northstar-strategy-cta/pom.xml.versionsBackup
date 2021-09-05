@@ -1,17 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>tech.xuan-wu</groupId>
 		<artifactId>northstar</artifactId>
-		<version>2.0.2-SNAPSHOT</version>
+		<version>2.0</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 	
-	<artifactId>northstar-plugin-notification</artifactId>
+	<artifactId>northstar-strategy-cta</artifactId>
 
-	<name>northstar-plugin-notification</name>
-	<description>北极星程序化交易消息告知插件</description>
+	<name>northstar-strategy-cta</name>
+	<description>北极星程序化交易CTA策略</description>
 
 	<properties>
 	</properties>
@@ -19,15 +20,11 @@
 	<dependencies>
 		<dependency>
 			<groupId>tech.xuan-wu</groupId>
-			<artifactId>northstar-common</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>tech.xuan-wu</groupId>
-			<artifactId>northstar-engine</artifactId>
+			<artifactId>northstar-strategy-common</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-mail</artifactId>
+			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 		<dependency>
 		    <groupId>com.alibaba</groupId>
@@ -60,6 +57,11 @@
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
+				<configuration>
+					<excludes>
+						<exclude>**/tech/xuanwu/northstar/strategy/cta/config/*</exclude>
+					</excludes>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>

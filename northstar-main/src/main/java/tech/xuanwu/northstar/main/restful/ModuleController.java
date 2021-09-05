@@ -15,8 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 import tech.xuanwu.northstar.common.model.ResultBean;
 import tech.xuanwu.northstar.main.service.ModuleService;
 import tech.xuanwu.northstar.strategy.common.model.ModuleInfo;
-import tech.xuanwu.northstar.strategy.common.model.data.DealRecord;
 import tech.xuanwu.northstar.strategy.common.model.data.ModuleCurrentPerformance;
+import tech.xuanwu.northstar.strategy.common.model.entity.DealRecordEntity;
 import tech.xuanwu.northstar.strategy.common.model.meta.ComponentField;
 import tech.xuanwu.northstar.strategy.common.model.meta.ComponentMetaInfo;
 
@@ -80,7 +80,7 @@ public class ModuleController {
 	}
 	
 	@GetMapping("/module/records")
-	public ResultBean<List<DealRecord>> getHistoryRecords(String name){
+	public ResultBean<List<DealRecordEntity>> getHistoryRecords(String name){
 		Assert.hasText(name, "模组名称不能为空");
 		return new ResultBean<>(service.getHistoryRecords(name));
 	}

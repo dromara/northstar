@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 
@@ -32,17 +31,12 @@ import tech.xuanwu.northstar.strategy.common.model.ModuleInfo;
 import tech.xuanwu.northstar.strategy.common.model.ModuleStatus;
 import tech.xuanwu.northstar.strategy.common.model.StrategyModule;
 import tech.xuanwu.northstar.strategy.common.model.data.BarData;
-import tech.xuanwu.northstar.strategy.common.model.data.DealRecord;
 import tech.xuanwu.northstar.strategy.common.model.data.ModuleCurrentPerformance;
+import tech.xuanwu.northstar.strategy.common.model.entity.DealRecordEntity;
 import tech.xuanwu.northstar.strategy.common.model.meta.ComponentAndParamsPair;
 import tech.xuanwu.northstar.strategy.common.model.meta.ComponentField;
 import tech.xuanwu.northstar.strategy.common.model.meta.ComponentMetaInfo;
 import tech.xuanwu.northstar.strategy.common.model.meta.DynamicParams;
-import tech.xuanwu.northstar.strategy.common.model.persistence.ModuleStatusPO;
-import tech.xuanwu.northstar.strategy.common.model.persistence.TradeDescriptionPO;
-import xyz.redtorch.pb.CoreEnum.DirectionEnum;
-import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
-import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
 import xyz.redtorch.pb.CoreField.BarField;
 
 public class ModuleService implements InitializingBean{
@@ -126,7 +120,7 @@ public class ModuleService implements InitializingBean{
 	 * @throws Exception 
 	 */
 	public boolean createModule(ModuleInfo info) throws Exception {
-		loadModule(info, new ModuleStatus(info.getModuleName(), contractMgr));
+		loadModule(info, new ModuleStatus(info.getModuleName()));
 		return moduleRepo.saveModuleInfo(info);
 	}
 	
@@ -137,12 +131,9 @@ public class ModuleService implements InitializingBean{
 	 */
 	public boolean updateModule(ModuleInfo info) throws Exception {
 		mdlMgr.removeModule(info.getModuleName());
-		ModuleStatusPO mse = moduleRepo.loadModuleStatus(info.getModuleName());
-		ModuleStatus status;
-		if(mse == null) {
-			status = new ModuleStatus(info.getModuleName(), contractMgr);
-		} else {
-			status = new ModuleStatus(mse, contractMgr);
+		ModuleStatus status = moduleRepo.loadModuleStatus(info.getModuleName());
+		if(status == null) {
+			status = new ModuleStatus(info.getModuleName());
 		}
 		
 		moduleRepo.deleteModuleInfoById(info.getModuleName());
@@ -202,6 +193,7 @@ public class ModuleService implements InitializingBean{
 				.dealer(dealer)
 				.signalPolicy(signalPolicy)
 				.riskController(riskController)
+				.contractMgr(contractMgr)
 				.build();
 		mdlMgr.addModule(module);
 	}
@@ -228,72 +220,8 @@ public class ModuleService implements InitializingBean{
 	 * @param moduleName
 	 * @return
 	 */
-	public List<DealRecord> getHistoryRecords(String moduleName) {
-		List<DealRecord> result = new ArrayList<>();
-		Map<String, List<TradeDescriptionPO>> openingTradeMap = new HashMap<>();
-		Map<String, List<TradeDescriptionPO>> closingTradeMap = new HashMap<>();
-		List<TradeDescriptionPO> totalRecords = moduleRepo.findTradeDescription(moduleName);
-		for(TradeDescriptionPO trade : totalRecords) {			
-			String symbol = trade.getSymbol();
-			if(trade.getOffsetFlag() == OffsetFlagEnum.OF_Open) {
-				openingTradeMap.putIfAbsent(symbol, new LinkedList<>());
-				openingTradeMap.get(symbol).add(trade);
-			} else {
-				closingTradeMap.putIfAbsent(symbol, new LinkedList<>());
-				closingTradeMap.get(symbol).add(trade);
-			}
-		}
-		
-		for(Entry<String, List<TradeDescriptionPO>> e : closingTradeMap.entrySet()) {
-			String curSymbol = e.getKey();
-			LinkedList<TradeDescriptionPO> tempClosingTrade = new LinkedList<>();
-			tempClosingTrade.addAll(e.getValue());
-			
-			LinkedList<TradeDescriptionPO> tempOpeningTrade = new LinkedList<>();
-			tempOpeningTrade.addAll(openingTradeMap.get(curSymbol));
-			
-			while(tempClosingTrade.size() > 0) {
-				TradeDescriptionPO closingDeal = tempClosingTrade.pollFirst();
-				TradeDescriptionPO openingDeal = tempOpeningTrade.pollFirst();
-				if(closingDeal == null || openingDeal == null 
-						|| closingDeal.getTradeTimestamp() < openingDeal.getTradeTimestamp()) {
-					throw new IllegalStateException("存在异常的平仓合约找不到对应的开仓合约");
-				}
-				PositionDirectionEnum dir = openingDeal.getDirection() == DirectionEnum.D_Buy ? PositionDirectionEnum.PD_Long 
-						: openingDeal.getDirection() == DirectionEnum.D_Sell ? PositionDirectionEnum.PD_Short : PositionDirectionEnum.PD_Unknown;
-				if(PositionDirectionEnum.PD_Unknown == dir) {
-					throw new IllegalStateException("持仓方向不能确定");
-				}
-				int factor = PositionDirectionEnum.PD_Long == dir ? 1 : -1;
-				double priceDiff = factor * (closingDeal.getPrice() - openingDeal.getPrice());
-				int vol = Math.min(closingDeal.getVolume(), openingDeal.getVolume());
-				int profit = (int) (priceDiff * closingDeal.getContractMultiplier() * vol);
-				DealRecord deal = DealRecord.builder()
-						.contractName(closingDeal.getSymbol())
-						.direction(dir)
-						.dealTimestamp(closingDeal.getTradeTimestamp())
-						.openPrice(openingDeal.getPrice())
-						.closePrice(closingDeal.getPrice())
-						.tradingDay(closingDeal.getTradingDay())
-						.volume(vol)
-						.closeProfit(profit)
-						.build();
-				result.add(deal);
-				int volDiff = Math.abs(closingDeal.getVolume() - openingDeal.getVolume());
-				TradeDescriptionPO restTrade = new TradeDescriptionPO();
-				BeanUtils.copyProperties(closingDeal, restTrade);
-				restTrade.setVolume(volDiff);
-				// 平仓手数多于开仓手数,则需要拆分平仓成交
-				if(closingDeal.getVolume() > openingDeal.getVolume()) {
-					tempClosingTrade.offerFirst(restTrade);
-				}
-				// 平仓手数少于开仓手数,则需要拆分开仓成交
-				else if(closingDeal.getVolume() < openingDeal.getVolume()) {
-					tempOpeningTrade.offerFirst(restTrade);
-				}
-			}
-		}
-		return result;
+	public List<DealRecordEntity> getHistoryRecords(String moduleName) {
+		return moduleRepo.findDealRecords(moduleName);
 	}
 	
 	/**
@@ -304,7 +232,7 @@ public class ModuleService implements InitializingBean{
 		mdlMgr.removeModule(moduleName);
 		moduleRepo.deleteModuleInfoById(moduleName);
 		moduleRepo.removeModuleStatus(moduleName);
-		moduleRepo.removeTradeDescription(moduleName);
+		moduleRepo.removeDealRecords(moduleName);
 	}
 	
 	
@@ -337,12 +265,9 @@ public class ModuleService implements InitializingBean{
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		for(ModuleInfo m : getCurrentModuleInfos()) {
-			ModuleStatusPO entity = moduleRepo.loadModuleStatus(m.getModuleName());
-			ModuleStatus status;
-			if(entity == null) {
-				status = new ModuleStatus(m.getModuleName(), contractMgr);
-			} else {
-				status = new ModuleStatus(entity, contractMgr);
+			ModuleStatus status = moduleRepo.loadModuleStatus(m.getModuleName());
+			if(status == null) {
+				status = new ModuleStatus(m.getModuleName());
 			}
 			loadModule(m, status);
 		}

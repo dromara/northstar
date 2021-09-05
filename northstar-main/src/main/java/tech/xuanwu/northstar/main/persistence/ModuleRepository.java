@@ -9,14 +9,14 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Repository;
 
 import tech.xuanwu.northstar.strategy.common.model.ModuleInfo;
-import tech.xuanwu.northstar.strategy.common.model.persistence.ModuleStatusPO;
-import tech.xuanwu.northstar.strategy.common.model.persistence.TradeDescriptionPO;
+import tech.xuanwu.northstar.strategy.common.model.ModuleStatus;
+import tech.xuanwu.northstar.strategy.common.model.entity.DealRecordEntity;
 
 @Repository
 public class ModuleRepository {
 
 	@Autowired
-	private MongoTemplate mongo;
+	protected MongoTemplate mongo;
 	
 	private static final String MODULE_NAME = "moduleName";
 	
@@ -43,31 +43,31 @@ public class ModuleRepository {
 	/*************/
 	/**	模组状态	**/
 	/*************/
-	public ModuleStatusPO loadModuleStatus(String moduleName){
-		return mongo.findOne(Query.query(Criteria.where(MODULE_NAME).is(moduleName)), ModuleStatusPO.class);
+	public ModuleStatus loadModuleStatus(String moduleName){
+		return mongo.findOne(Query.query(Criteria.where(MODULE_NAME).is(moduleName)), ModuleStatus.class);
 	}
 	
-	public void saveModuleStatus(ModuleStatusPO status) {
+	public void saveModuleStatus(ModuleStatus status) {
 		mongo.save(status);
 	}
 	
 	public void removeModuleStatus(String moduleName) {
-		mongo.remove(Query.query(Criteria.where(MODULE_NAME).is(moduleName)), ModuleStatusPO.class);
+		mongo.remove(Query.query(Criteria.where(MODULE_NAME).is(moduleName)), ModuleStatus.class);
 	}
 	
 	/*************/
 	/**	模组成交	**/
 	/*************/
-	public void saveTradeDescription(TradeDescriptionPO tradeDescription) {
-		mongo.save(tradeDescription);
+	public void saveDealRecord(DealRecordEntity dealRecord) {
+		mongo.save(dealRecord);
 	}
 	
-	public List<TradeDescriptionPO> findTradeDescription(String moduleName) {
-		return mongo.find(Query.query(Criteria.where(MODULE_NAME).is(moduleName)), TradeDescriptionPO.class);
+	public List<DealRecordEntity> findDealRecords(String moduleName) {
+		return mongo.find(Query.query(Criteria.where(MODULE_NAME).is(moduleName)), DealRecordEntity.class);
 	}
 	
-	public void removeTradeDescription(String moduleName) {
-		mongo.remove(Query.query(Criteria.where(MODULE_NAME).is(moduleName)), TradeDescriptionPO.class);
+	public void removeDealRecords(String moduleName) {
+		mongo.remove(Query.query(Criteria.where(MODULE_NAME).is(moduleName)), DealRecordEntity.class);
 	}
 	
 }

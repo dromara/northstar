@@ -11,10 +11,10 @@ import tech.xuanwu.northstar.common.event.AbstractEventHandler;
 import tech.xuanwu.northstar.common.event.NorthstarEvent;
 import tech.xuanwu.northstar.common.event.NorthstarEventType;
 import tech.xuanwu.northstar.main.persistence.ModuleRepository;
+import tech.xuanwu.northstar.strategy.common.model.ModuleStatus;
 import tech.xuanwu.northstar.strategy.common.model.StrategyModule;
 import tech.xuanwu.northstar.strategy.common.model.data.ModuleCurrentPerformance;
-import tech.xuanwu.northstar.strategy.common.model.persistence.ModuleStatusPO;
-import tech.xuanwu.northstar.strategy.common.model.persistence.TradeDescriptionPO;
+import tech.xuanwu.northstar.strategy.common.model.entity.DealRecordEntity;
 import xyz.redtorch.pb.CoreField.AccountField;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.OrderField;
@@ -84,28 +84,16 @@ public class ModuleManager extends AbstractEventHandler {
 		// 只对持仓状态变化做持久化，不对下单状态作反应
 		for(Entry<String, StrategyModule> e : moduleMap.entrySet()) {
 			StrategyModule m = e.getValue();
-			Optional<ModuleStatusPO> result = m.onTrade(trade);
+			Optional<ModuleStatus> result = m.onTrade(trade);
 			if(result.isPresent()) {
-				moduleRepo.saveTradeDescription(convertFrom(m.getName(), trade));
 				moduleRepo.saveModuleStatus(result.get());
+				Optional<DealRecordEntity> dealRecord = m.consumeDealRecord();
+				if(dealRecord.isPresent()) {	
+					moduleRepo.saveDealRecord(dealRecord.get());
+				}
 				return;
 			}
 		}
-	}
-	
-	private TradeDescriptionPO convertFrom(String moduleName, TradeField trade) {
-		return TradeDescriptionPO.builder()
-				.moduleName(moduleName)
-				.symbol(trade.getContract().getSymbol())
-				.gatewayId(trade.getGatewayId())
-				.direction(trade.getDirection())
-				.offsetFlag(trade.getOffsetFlag())
-				.contractMultiplier(trade.getContract().getMultiplier())
-				.volume(trade.getVolume())
-				.price(trade.getPrice())
-				.tradingDay(trade.getTradingDay())
-				.tradeTimestamp(trade.getTradeTimestamp())
-				.build();
 	}
 	
 	public void onAccount(AccountField account) {

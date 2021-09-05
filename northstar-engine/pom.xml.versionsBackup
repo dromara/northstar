@@ -1,45 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>tech.xuan-wu</groupId>
 		<artifactId>northstar</artifactId>
-		<version>2.0.2-SNAPSHOT</version>
+		<version>2.0</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
-	
-	<artifactId>northstar-plugin-notification</artifactId>
-
-	<name>northstar-plugin-notification</name>
-	<description>北极星程序化交易消息告知插件</description>
+	<artifactId>northstar-engine</artifactId>
+	<name>northstar-engine</name>
 
 	<properties>
+
 	</properties>
 
 	<dependencies>
-		<dependency>
-			<groupId>tech.xuan-wu</groupId>
-			<artifactId>northstar-common</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>tech.xuan-wu</groupId>
-			<artifactId>northstar-engine</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-mail</artifactId>
-		</dependency>
 		<dependency>
 		    <groupId>com.alibaba</groupId>
 		    <artifactId>fastjson</artifactId>
 		</dependency>
 		<dependency>
-		    <groupId>commons-io</groupId>
-		    <artifactId>commons-io</artifactId>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter</artifactId>
 		</dependency>
 		<dependency>
-		    <groupId>org.apache.commons</groupId>
-		    <artifactId>commons-lang3</artifactId>
+			<groupId>tech.xuan-wu</groupId>
+			<artifactId>northstar-common</artifactId>
+		</dependency>
+		<dependency>
+		    <groupId>com.lmax</groupId>
+		    <artifactId>disruptor</artifactId>
 		</dependency>
 		<dependency>
 	        <groupId>org.projectlombok</groupId>
@@ -48,6 +39,11 @@
 	    <dependency>
 		    <groupId>org.slf4j</groupId>
 		    <artifactId>slf4j-api</artifactId>
+		</dependency>
+		
+		<dependency>
+		    <groupId>com.corundumstudio.socketio</groupId>
+		    <artifactId>netty-socketio</artifactId>
 		</dependency>
 	</dependencies>
 
