@@ -3,6 +3,9 @@ target/
 **/.mvn/**
 !**/src/main/**
 !**/src/test/**
+release.properties
+*.releaseBackup
+**/*.releaseBackup
 
 ### STS ###
 .apt_generated
