@@ -77,13 +77,25 @@ public class ModuleStatus {
 		Optional<SubmitOrderReqField> result = Optional.empty();
 		if(longPositions.containsKey(tick.getUnifiedSymbol())) {
 			result = longPositions.get(tick.getUnifiedSymbol()).triggerStopLoss(tick, contract);
-			if(result.isPresent()) return result;
+			if(result.isPresent()) return result;	
 		}
 		if(shortPositions.containsKey(tick.getUnifiedSymbol())) {
 			result = shortPositions.get(tick.getUnifiedSymbol()).triggerStopLoss(tick, contract);
 			if(result.isPresent()) return result;
 		}
 		return result;
+	}
+	
+	public Optional<DealRecordEntity> handleStopLoss(SubmitOrderReqField orderReq, TickField tick){
+		if(orderReq.getDirection() == DirectionEnum.D_Sell) {
+			dealRecord = longPositions.remove(tick.getUnifiedSymbol()).onStopLoss(orderReq, tick);
+			return dealRecord;
+		}
+		if(orderReq.getDirection() == DirectionEnum.D_Buy) {
+			dealRecord = shortPositions.remove(tick.getUnifiedSymbol()).onStopLoss(orderReq, tick);
+			return dealRecord;
+		}
+		return Optional.empty();
 	}
 	
 	public ModuleStatus onTrade(TradeField trade, OrderField order) {

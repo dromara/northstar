@@ -148,6 +148,7 @@ public class ModuleStatusTest {
 	
 	@Test
 	public void shouldGetHoldingProfit() {
+		assertThat(ms.getHoldingProfit()).isZero();
 		ms.updateHoldingProfit(factory.makeTickField("rb2210", 1240));
 		assertThat(ms.getHoldingProfit()).isEqualTo(120);
 	}

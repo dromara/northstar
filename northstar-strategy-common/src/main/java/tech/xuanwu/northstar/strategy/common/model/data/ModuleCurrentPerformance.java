@@ -5,6 +5,7 @@ import java.util.Map;
 
 import lombok.Data;
 import tech.xuanwu.northstar.strategy.common.constants.ModuleState;
+import tech.xuanwu.northstar.strategy.common.model.ModulePosition;
 
 @Data
 public class ModuleCurrentPerformance {
@@ -38,4 +39,14 @@ public class ModuleCurrentPerformance {
 	 * 账户ID
 	 */
 	private String accountId;
+	
+	/**
+	 * 多头仓位
+	 */
+	private Map<String, ModulePosition> longPositions;
+	
+	/**
+	 * 空头仓位
+	 */
+	private Map<String, ModulePosition> shortPositions;
 }
