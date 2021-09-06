@@ -51,6 +51,8 @@ public class ModulePosition {
 	private int volume;
 	@Transient
 	private double holdingProfit;
+	@Transient
+	private boolean hasTriggeredStopLoss;
 	
 	public ModulePosition(TradeField trade, OrderField order) {
 		if(!StringUtils.equals(trade.getOriginOrderId(), order.getOriginOrderId())) {
@@ -80,7 +82,8 @@ public class ModulePosition {
 		if(stopLossPrice == 0) {
 			return Optional.empty();
 		}
-		if(triggeredStopLoss(tick)) {
+		if(!hasTriggeredStopLoss && triggeredStopLoss(tick)) {
+			hasTriggeredStopLoss = true;
 			SubmitOrderReqField orderReq = SubmitOrderReqField.newBuilder()
 					.setOriginOrderId(UUID.randomUUID().toString())
 					.setContract(contract)
