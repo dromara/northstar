@@ -1,5 +1,7 @@
 package tech.xuanwu.northstar.strategy.common.model.state;
 
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.strategy.common.constants.ModuleState;
 import tech.xuanwu.northstar.strategy.common.event.ModuleEventType;
@@ -10,6 +12,8 @@ import tech.xuanwu.northstar.strategy.common.event.ModuleEventType;
  *
  */
 @Slf4j
+@Data
+@NoArgsConstructor
 public class ModuleStateMachine {
 
 	private ModuleState curState;

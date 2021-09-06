@@ -48,8 +48,8 @@ public class ModuleStatus {
 	private int countOfOpeningToday;
 	
 	private double accountAvailable;
-	
-	private Optional<DealRecordEntity> dealRecord;
+	@Builder.Default
+	private Optional<DealRecordEntity> dealRecord = Optional.empty();
 	
 	public ModuleStatus(String name) {
 		this.moduleName = name;

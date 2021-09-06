@@ -151,4 +151,9 @@ public class ModuleStatusTest {
 		ms.updateHoldingProfit(factory.makeTickField("rb2210", 1240));
 		assertThat(ms.getHoldingProfit()).isEqualTo(120);
 	}
+	
+	@Test
+	public void shouldNotBeNullWhenAnyTimeConsumeDealRecord() {
+		assertThat(ms.consumeDealRecord()).isNotNull();
+	}
 }
