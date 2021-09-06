@@ -9,7 +9,6 @@ import org.apache.commons.lang3.StringUtils;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.strategy.common.constants.ModuleState;
 import tech.xuanwu.northstar.strategy.common.event.ModuleEventType;
@@ -32,7 +31,6 @@ import xyz.redtorch.pb.CoreField.TradeField;
 @Data
 @Builder
 @AllArgsConstructor
-@NoArgsConstructor
 public class ModuleStatus {
 
 	private String moduleName;
@@ -49,9 +47,16 @@ public class ModuleStatus {
 	
 	private double accountAvailable;
 	
-	private Optional<DealRecordEntity> dealRecord;
+	@Builder.Default
+	private Optional<DealRecordEntity> dealRecord = Optional.empty();
+	
+	// 由于lombok使用无参构造器时，默认值不会自动加上，所以要手动实现无参构造器
+	public ModuleStatus() {
+		this.dealRecord = Optional.empty();
+	}
 	
 	public ModuleStatus(String name) {
+		this();
 		this.moduleName = name;
 		this.stateMachine = new ModuleStateMachine(ModuleState.EMPTY);
 		this.longPositions = new HashMap<>();
@@ -72,13 +77,25 @@ public class ModuleStatus {
 		Optional<SubmitOrderReqField> result = Optional.empty();
 		if(longPositions.containsKey(tick.getUnifiedSymbol())) {
 			result = longPositions.get(tick.getUnifiedSymbol()).triggerStopLoss(tick, contract);
-			if(result.isPresent()) return result;
+			if(result.isPresent()) return result;	
 		}
 		if(shortPositions.containsKey(tick.getUnifiedSymbol())) {
 			result = shortPositions.get(tick.getUnifiedSymbol()).triggerStopLoss(tick, contract);
 			if(result.isPresent()) return result;
 		}
 		return result;
+	}
+	
+	public Optional<DealRecordEntity> handleStopLoss(SubmitOrderReqField orderReq, TickField tick){
+		if(orderReq.getDirection() == DirectionEnum.D_Sell) {
+			dealRecord = longPositions.remove(tick.getUnifiedSymbol()).onStopLoss(orderReq, tick);
+			return dealRecord;
+		}
+		if(orderReq.getDirection() == DirectionEnum.D_Buy) {
+			dealRecord = shortPositions.remove(tick.getUnifiedSymbol()).onStopLoss(orderReq, tick);
+			return dealRecord;
+		}
+		return Optional.empty();
 	}
 	
 	public ModuleStatus onTrade(TradeField trade, OrderField order) {

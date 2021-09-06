@@ -69,7 +69,13 @@ public class ModuleManager extends AbstractEventHandler {
 	}
 	
 	public void onTick(TickField tick) {
-		moduleMap.values().forEach(m -> m.onTick(tick));
+		moduleMap.values().forEach(m -> {
+			m.onTick(tick);
+			Optional<DealRecordEntity> dealRecord = m.consumeDealRecord();
+			if(dealRecord.isPresent()) {
+				moduleRepo.saveDealRecord(dealRecord.get());
+			}
+		});
 	}
 	
 	public void onBar(BarField bar) {

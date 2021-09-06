@@ -51,6 +51,8 @@ public class ModulePosition {
 	private int volume;
 	@Transient
 	private double holdingProfit;
+	@Transient
+	private boolean hasTriggeredStopLoss;
 	
 	public ModulePosition(TradeField trade, OrderField order) {
 		if(!StringUtils.equals(trade.getOriginOrderId(), order.getOriginOrderId())) {
@@ -80,7 +82,8 @@ public class ModulePosition {
 		if(stopLossPrice == 0) {
 			return Optional.empty();
 		}
-		if(triggeredStopLoss(tick)) {
+		if(!hasTriggeredStopLoss && triggeredStopLoss(tick)) {
+			hasTriggeredStopLoss = true;
 			SubmitOrderReqField orderReq = SubmitOrderReqField.newBuilder()
 					.setOriginOrderId(UUID.randomUUID().toString())
 					.setContract(contract)
@@ -155,6 +158,30 @@ public class ModulePosition {
 		return Optional.empty();
 	}
 	
+	public Optional<DealRecordEntity> onStopLoss(SubmitOrderReqField orderReq, TickField tick){
+		checkMatch(orderReq.getContract().getUnifiedSymbol());
+		if(OffsetFlagEnum.OF_Open == orderReq.getOffsetFlag() || OffsetFlagEnum.OF_Unknown == orderReq.getOffsetFlag()) {
+			throw new IllegalStateException("传入了非平仓成交：" + orderReq.toString());
+		}
+		if(orderReq.getOrderPriceType() == OrderPriceTypeEnum.OPT_AnyPrice) {
+			int tradeVol = volume;
+			volume = 0;
+			int factor = positionDir == PositionDirectionEnum.PD_Long ? 1 : -1;
+			double closeProfit = factor * (tick.getLastPrice() - openPrice) * tradeVol * multiplier;
+			return Optional.of(DealRecordEntity.builder()
+					.contractName(orderReq.getContract().getSymbol())
+					.direction(positionDir)
+					.tradingDay(openTradingDay)
+					.dealTimestamp(openTime)
+					.openPrice(openPrice)
+					.closePrice(tick.getLastPrice())
+					.volume(tradeVol)
+					.closeProfit((int)closeProfit)
+					.build());
+		}
+		return Optional.empty();
+	}
+	
 	public boolean isLongPosition() {
 		return positionDir == PositionDirectionEnum.PD_Long;
 	}
@@ -172,7 +199,7 @@ public class ModulePosition {
 	}
 	
 	public boolean isEmpty() {
-		return volume == 0;
+		return volume == 0 || hasTriggeredStopLoss;
 	}
 	
 	public boolean isMatch(String unifiedSymbol) {

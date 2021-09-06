@@ -101,6 +101,7 @@ public class StrategyModule {
 			Optional<SubmitOrderReqField> stopLossReq = status.triggerStopLoss(tick, contractMgr.getContract(tick.getUnifiedSymbol()));
 			if(stopLossReq.isPresent()) {
 				status.transform(ModuleEventType.STOP_LOSS);
+				status.handleStopLoss(stopLossReq.get(), tick);
 				gateway.submitOrder(stopLossReq.get());
 				return this;
 			}
@@ -243,6 +244,8 @@ public class StrategyModule {
 		mp.setModuleAvailable((int)status.getAccountAvailable());
 		mp.setModuleState(status.getCurrentState());
 		mp.setTotalPositionProfit(status.getHoldingProfit());
+		mp.setLongPositions(status.getLongPositions());
+		mp.setShortPositions(status.getShortPositions());
 		return mp;
 	}
 	
