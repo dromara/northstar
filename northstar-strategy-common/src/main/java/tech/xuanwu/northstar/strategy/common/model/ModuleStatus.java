@@ -89,10 +89,12 @@ public class ModuleStatus {
 	public Optional<DealRecordEntity> handleStopLoss(SubmitOrderReqField orderReq, TickField tick){
 		if(orderReq.getDirection() == DirectionEnum.D_Sell) {
 			dealRecord = longPositions.remove(tick.getUnifiedSymbol()).onStopLoss(orderReq, tick);
+			dealRecord.get().setModuleName(moduleName);
 			return dealRecord;
 		}
 		if(orderReq.getDirection() == DirectionEnum.D_Buy) {
 			dealRecord = shortPositions.remove(tick.getUnifiedSymbol()).onStopLoss(orderReq, tick);
+			dealRecord.get().setModuleName(moduleName);
 			return dealRecord;
 		}
 		return Optional.empty();
@@ -163,6 +165,7 @@ public class ModuleStatus {
 		}
 		ModulePosition mp = positions.get(trade.getContract().getUnifiedSymbol());
 		dealRecord = mp.onCloseTrade(trade);
+		dealRecord.get().setModuleName(moduleName);
 		if(mp.isEmpty()) {
 			positions.remove(trade.getContract().getUnifiedSymbol());
 			log.info("模组平仓{}", trade.getContract().getSymbol());
