@@ -12,7 +12,6 @@ import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
 @Data
 public class DealRecordEntity {
 	
-	
 	private String moduleName;
 
 	private String contractName;
