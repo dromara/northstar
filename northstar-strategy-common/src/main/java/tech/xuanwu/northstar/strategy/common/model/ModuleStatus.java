@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.annotation.Id;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -33,6 +34,7 @@ import xyz.redtorch.pb.CoreField.TradeField;
 @AllArgsConstructor
 public class ModuleStatus {
 
+	@Id
 	private String moduleName;
 	
 	private ModuleStateMachine stateMachine;
