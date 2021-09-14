@@ -115,7 +115,7 @@ public class ModuleController {
 	 * @return
 	 */
 	@GetMapping("/module/info")
-	public ResultBean<ModuleRealTimeInfo> getModulePerformance(@NotNull String name){
+	public ResultBean<ModuleRealTimeInfo> getModuleRealTimeInfo(@NotNull String name){
 		return new ResultBean<>(service.getModuleRealTimeInfo(name));
 	}
 	

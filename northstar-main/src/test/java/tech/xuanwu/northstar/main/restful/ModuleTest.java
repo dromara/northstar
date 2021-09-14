@@ -20,6 +20,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import com.corundumstudio.socketio.SocketIOServer;
 
 import common.TestMongoUtils;
+import tech.xuanwu.northstar.common.constant.ReturnCode;
 import tech.xuanwu.northstar.common.model.GatewayDescription;
 import tech.xuanwu.northstar.domain.GatewayConnection;
 import tech.xuanwu.northstar.gateway.api.TradeGateway;
@@ -30,6 +31,7 @@ import tech.xuanwu.northstar.strategy.common.constants.ModuleType;
 import tech.xuanwu.northstar.strategy.common.model.ModuleInfo;
 import tech.xuanwu.northstar.strategy.common.model.meta.ComponentAndParamsPair;
 import tech.xuanwu.northstar.strategy.common.model.meta.ComponentMetaInfo;
+import xyz.redtorch.pb.CoreField.GatewaySettingField;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = NorthstarApplication.class, value="spring.profiles.active=test")
@@ -83,7 +85,9 @@ public class ModuleTest {
 		when(gwDes.getBindedMktGatewayId()).thenReturn("testGw");
 		when(conn.getGwDescription()).thenReturn(gwDes);
 		when(gatewayConnMgr.getGatewayConnectionById("testGateway")).thenReturn(conn);
-		when(gatewayConnMgr.getGatewayById("testGateway")).thenReturn(mock(TradeGateway.class));
+		TradeGateway gateway = mock(TradeGateway.class);
+		when(gateway.getGatewaySetting()).thenReturn(GatewaySettingField.newBuilder().build());
+		when(gatewayConnMgr.getGatewayById("testGateway")).thenReturn(gateway);
 		ComponentMetaInfo dealer = ctrlr.getRegisteredDealers().getData().stream().filter(c -> c.getName().equals("示例交易策略")).findAny().get();
 		ComponentMetaInfo signalPolicy = ctrlr.getRegisteredSignalPolicies().getData().stream().filter(c -> c.getName().equals("示例策略")).findAny().get();
 		ComponentAndParamsPair signalPolicyMeta = ComponentAndParamsPair.builder()
@@ -146,6 +150,20 @@ public class ModuleTest {
 	@Test
 	public void shouldFindModule() {
 		assertThat(ctrlr.getAllModules().getData()).isNotNull();
+	}
+	
+	// 查询模组引用数据
+	@Test
+	public void shouldGetModuleDataRef() throws Exception {
+		shouldSuccessfullyCreate();
+		assertThat(ctrlr.getModuleDataRef("testModule").getStatus()).isEqualTo(ReturnCode.SUCCESS);
+	}
+	
+	
+	@Test
+	public void shouldGetModuleInfo() throws Exception {
+		shouldSuccessfullyCreate();
+		assertThat(ctrlr.getModuleRealTimeInfo("testModule").getStatus()).isEqualTo(ReturnCode.SUCCESS);
 	}
 	
 	// 查询模组历史
