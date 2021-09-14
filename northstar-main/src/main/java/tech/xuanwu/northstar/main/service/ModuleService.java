@@ -31,8 +31,9 @@ import tech.xuanwu.northstar.strategy.common.model.ModuleInfo;
 import tech.xuanwu.northstar.strategy.common.model.ModuleStatus;
 import tech.xuanwu.northstar.strategy.common.model.StrategyModule;
 import tech.xuanwu.northstar.strategy.common.model.data.BarData;
-import tech.xuanwu.northstar.strategy.common.model.data.ModuleCurrentPerformance;
-import tech.xuanwu.northstar.strategy.common.model.entity.DealRecordEntity;
+import tech.xuanwu.northstar.strategy.common.model.entity.ModuleDataRef;
+import tech.xuanwu.northstar.strategy.common.model.entity.ModuleDealRecord;
+import tech.xuanwu.northstar.strategy.common.model.entity.ModuleRealTimeInfo;
 import tech.xuanwu.northstar.strategy.common.model.meta.ComponentAndParamsPair;
 import tech.xuanwu.northstar.strategy.common.model.meta.ComponentField;
 import tech.xuanwu.northstar.strategy.common.model.meta.ComponentMetaInfo;
@@ -207,12 +208,21 @@ public class ModuleService implements InitializingBean{
 	}
 	
 	/**
-	 * 获取模组当前绩效
+	 * 获取模组实时信息
 	 * @param moduleName
 	 * @return
 	 */
-	public ModuleCurrentPerformance getCurrentPerformance(String moduleName) {
-		return mdlMgr.getModulePerformance(moduleName);
+	public ModuleRealTimeInfo getModuleRealTimeInfo(String moduleName) {
+		return mdlMgr.getModule(moduleName).getRealTimeInfo();
+	}
+	
+	/**
+	 * 获取模组引用数据
+	 * @param moduleName
+	 * @return
+	 */
+	public ModuleDataRef getModuleDataRef(String moduleName) {
+		return mdlMgr.getModule(moduleName).getDataRef();
 	}
 	
 	/**
@@ -220,7 +230,7 @@ public class ModuleService implements InitializingBean{
 	 * @param moduleName
 	 * @return
 	 */
-	public List<DealRecordEntity> getHistoryRecords(String moduleName) {
+	public List<ModuleDealRecord> getHistoryRecords(String moduleName) {
 		return moduleRepo.findDealRecords(moduleName);
 	}
 	

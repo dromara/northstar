@@ -21,8 +21,9 @@ import tech.xuanwu.northstar.strategy.common.SignalPolicy;
 import tech.xuanwu.northstar.strategy.common.constants.ModuleState;
 import tech.xuanwu.northstar.strategy.common.constants.RiskAuditResult;
 import tech.xuanwu.northstar.strategy.common.event.ModuleEventType;
-import tech.xuanwu.northstar.strategy.common.model.data.ModuleCurrentPerformance;
-import tech.xuanwu.northstar.strategy.common.model.entity.DealRecordEntity;
+import tech.xuanwu.northstar.strategy.common.model.entity.ModuleDataRef;
+import tech.xuanwu.northstar.strategy.common.model.entity.ModuleDealRecord;
+import tech.xuanwu.northstar.strategy.common.model.entity.ModuleRealTimeInfo;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreField.AccountField;
@@ -190,7 +191,7 @@ public class StrategyModule {
 		return Optional.empty();
 	}
 	
-	public Optional<DealRecordEntity> consumeDealRecord() {
+	public Optional<ModuleDealRecord> consumeDealRecord() {
 		return status.consumeDealRecord();
 	}
 	
@@ -227,9 +228,19 @@ public class StrategyModule {
 		return gateway;
 	}
 	
-	public ModuleCurrentPerformance getPerformance() {
-		ModuleCurrentPerformance mp = new ModuleCurrentPerformance();
+	public ModuleRealTimeInfo getRealTimeInfo() {
+		ModuleRealTimeInfo mp = new ModuleRealTimeInfo();
 		mp.setModuleName(status.getModuleName());
+		mp.setAccountId(gateway.getGatewaySetting().getGatewayId());
+		mp.setModuleAvailable((int)status.getAccountAvailable());
+		mp.setModuleState(status.getCurrentState());
+		mp.setTotalPositionProfit(status.getHoldingProfit());
+		mp.setLongPositions(status.getLongPositions());
+		mp.setShortPositions(status.getShortPositions());
+		return mp;
+	}
+	
+	public ModuleDataRef getDataRef() {
 		Map<String, List<byte[]>> byteMap = new HashMap<>();
 		for(String unifiedSymbol : signalPolicy.bindedUnifiedSymbols()) {
 			byteMap.put(unifiedSymbol, 
@@ -239,14 +250,9 @@ public class StrategyModule {
 					.map(BarField::toByteArray)
 					.collect(Collectors.toList()));
 		}
-		mp.setRefBarDataMap(byteMap);
-		mp.setAccountId(gateway.getGatewaySetting().getGatewayId());
-		mp.setModuleAvailable((int)status.getAccountAvailable());
-		mp.setModuleState(status.getCurrentState());
-		mp.setTotalPositionProfit(status.getHoldingProfit());
-		mp.setLongPositions(status.getLongPositions());
-		mp.setShortPositions(status.getShortPositions());
-		return mp;
+		return ModuleDataRef.builder()
+				.refBarDataMap(byteMap)
+				.build();
 	}
 	
 }

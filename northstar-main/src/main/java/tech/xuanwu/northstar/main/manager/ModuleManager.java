@@ -13,8 +13,7 @@ import tech.xuanwu.northstar.common.event.NorthstarEventType;
 import tech.xuanwu.northstar.main.persistence.ModuleRepository;
 import tech.xuanwu.northstar.strategy.common.model.ModuleStatus;
 import tech.xuanwu.northstar.strategy.common.model.StrategyModule;
-import tech.xuanwu.northstar.strategy.common.model.data.ModuleCurrentPerformance;
-import tech.xuanwu.northstar.strategy.common.model.entity.DealRecordEntity;
+import tech.xuanwu.northstar.strategy.common.model.entity.ModuleDealRecord;
 import xyz.redtorch.pb.CoreField.AccountField;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.OrderField;
@@ -60,8 +59,11 @@ public class ModuleManager extends AbstractEventHandler {
 		return moduleMap.remove(name);
 	}
 	
-	public ModuleCurrentPerformance getModulePerformance(String name) {
-		return moduleMap.get(name).getPerformance();
+	public StrategyModule getModule(String name) {
+		if(!moduleMap.containsKey(name)) {
+			throw new IllegalStateException("没有找到模组：" + name);
+		}
+		return moduleMap.get(name);
 	}
 	
 	public void toggleState(String name) {
@@ -71,7 +73,7 @@ public class ModuleManager extends AbstractEventHandler {
 	public void onTick(TickField tick) {
 		moduleMap.values().forEach(m -> {
 			m.onTick(tick);
-			Optional<DealRecordEntity> dealRecord = m.consumeDealRecord();
+			Optional<ModuleDealRecord> dealRecord = m.consumeDealRecord();
 			if(dealRecord.isPresent()) {
 				moduleRepo.saveDealRecord(dealRecord.get());
 			}
@@ -93,7 +95,7 @@ public class ModuleManager extends AbstractEventHandler {
 			Optional<ModuleStatus> result = m.onTrade(trade);
 			if(result.isPresent()) {
 				moduleRepo.saveModuleStatus(result.get());
-				Optional<DealRecordEntity> dealRecord = m.consumeDealRecord();
+				Optional<ModuleDealRecord> dealRecord = m.consumeDealRecord();
 				if(dealRecord.isPresent()) {	
 					moduleRepo.saveDealRecord(dealRecord.get());
 				}

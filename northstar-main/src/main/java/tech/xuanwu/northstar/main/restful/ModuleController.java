@@ -16,8 +16,9 @@ import org.springframework.web.bind.annotation.RestController;
 import tech.xuanwu.northstar.common.model.ResultBean;
 import tech.xuanwu.northstar.main.service.ModuleService;
 import tech.xuanwu.northstar.strategy.common.model.ModuleInfo;
-import tech.xuanwu.northstar.strategy.common.model.data.ModuleCurrentPerformance;
-import tech.xuanwu.northstar.strategy.common.model.entity.DealRecordEntity;
+import tech.xuanwu.northstar.strategy.common.model.entity.ModuleDataRef;
+import tech.xuanwu.northstar.strategy.common.model.entity.ModuleDealRecord;
+import tech.xuanwu.northstar.strategy.common.model.entity.ModuleRealTimeInfo;
 import tech.xuanwu.northstar.strategy.common.model.meta.ComponentField;
 import tech.xuanwu.northstar.strategy.common.model.meta.ComponentMetaInfo;
 
@@ -113,9 +114,19 @@ public class ModuleController {
 	 * @param name
 	 * @return
 	 */
-	@GetMapping("/module/perf")
-	public ResultBean<ModuleCurrentPerformance> getModulePerformance(@NotNull String name){
-		return new ResultBean<>(service.getCurrentPerformance(name));
+	@GetMapping("/module/info")
+	public ResultBean<ModuleRealTimeInfo> getModulePerformance(@NotNull String name){
+		return new ResultBean<>(service.getModuleRealTimeInfo(name));
+	}
+	
+	/**
+	 * 获取模组引用数据
+	 * @param name
+	 * @return
+	 */
+	@GetMapping("/module/refdata")
+	public ResultBean<ModuleDataRef> getModuleDataRef(@NotNull String name){
+		return new ResultBean<>(service.getModuleDataRef(name));
 	}
 	
 	/**
@@ -124,7 +135,7 @@ public class ModuleController {
 	 * @return
 	 */
 	@GetMapping("/module/records")
-	public ResultBean<List<DealRecordEntity>> getHistoryRecords(@NotNull String name){
+	public ResultBean<List<ModuleDealRecord>> getHistoryRecords(@NotNull String name){
 		return new ResultBean<>(service.getHistoryRecords(name));
 	}
 	

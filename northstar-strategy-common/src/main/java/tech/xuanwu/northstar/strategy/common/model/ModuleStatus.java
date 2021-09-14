@@ -13,7 +13,7 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.strategy.common.constants.ModuleState;
 import tech.xuanwu.northstar.strategy.common.event.ModuleEventType;
-import tech.xuanwu.northstar.strategy.common.model.entity.DealRecordEntity;
+import tech.xuanwu.northstar.strategy.common.model.entity.ModuleDealRecord;
 import tech.xuanwu.northstar.strategy.common.model.state.ModuleStateMachine;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
@@ -50,7 +50,7 @@ public class ModuleStatus {
 	private double accountAvailable;
 	
 	@Builder.Default
-	private Optional<DealRecordEntity> dealRecord = Optional.empty();
+	private Optional<ModuleDealRecord> dealRecord = Optional.empty();
 	
 	// 由于lombok使用无参构造器时，默认值不会自动加上，所以要手动实现无参构造器
 	public ModuleStatus() {
@@ -88,7 +88,7 @@ public class ModuleStatus {
 		return result;
 	}
 	
-	public Optional<DealRecordEntity> handleStopLoss(SubmitOrderReqField orderReq, TickField tick){
+	public Optional<ModuleDealRecord> handleStopLoss(SubmitOrderReqField orderReq, TickField tick){
 		if(orderReq.getDirection() == DirectionEnum.D_Sell) {
 			dealRecord = longPositions.remove(tick.getUnifiedSymbol()).onStopLoss(orderReq, tick);
 			dealRecord.get().setModuleName(moduleName);
@@ -121,8 +121,8 @@ public class ModuleStatus {
 		return this;
 	}
 	
-	public Optional<DealRecordEntity> consumeDealRecord(){
-		Optional<DealRecordEntity> result = dealRecord;
+	public Optional<ModuleDealRecord> consumeDealRecord(){
+		Optional<ModuleDealRecord> result = dealRecord;
 		dealRecord = Optional.empty();
 		return result;
 	}

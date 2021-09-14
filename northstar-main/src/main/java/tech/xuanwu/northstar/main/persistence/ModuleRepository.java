@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository;
 
 import tech.xuanwu.northstar.strategy.common.model.ModuleInfo;
 import tech.xuanwu.northstar.strategy.common.model.ModuleStatus;
-import tech.xuanwu.northstar.strategy.common.model.entity.DealRecordEntity;
+import tech.xuanwu.northstar.strategy.common.model.entity.ModuleDealRecord;
 
 @Repository
 public class ModuleRepository {
@@ -58,16 +58,16 @@ public class ModuleRepository {
 	/*************/
 	/**	模组成交	**/
 	/*************/
-	public void saveDealRecord(DealRecordEntity dealRecord) {
+	public void saveDealRecord(ModuleDealRecord dealRecord) {
 		mongo.save(dealRecord);
 	}
 	
-	public List<DealRecordEntity> findDealRecords(String moduleName) {
-		return mongo.find(Query.query(Criteria.where(MODULE_NAME).is(moduleName)), DealRecordEntity.class);
+	public List<ModuleDealRecord> findDealRecords(String moduleName) {
+		return mongo.find(Query.query(Criteria.where(MODULE_NAME).is(moduleName)), ModuleDealRecord.class);
 	}
 	
 	public void removeDealRecords(String moduleName) {
-		mongo.remove(Query.query(Criteria.where(MODULE_NAME).is(moduleName)), DealRecordEntity.class);
+		mongo.remove(Query.query(Criteria.where(MODULE_NAME).is(moduleName)), ModuleDealRecord.class);
 	}
 	
 }

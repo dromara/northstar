@@ -11,7 +11,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import tech.xuanwu.northstar.strategy.common.model.entity.DealRecordEntity;
+import tech.xuanwu.northstar.strategy.common.model.entity.ModuleDealRecord;
 import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.ForceCloseReasonEnum;
@@ -130,7 +130,7 @@ public class ModulePosition {
 		return Optional.empty();
 	}
 	
-	public Optional<DealRecordEntity> onCloseTrade(TradeField trade){
+	public Optional<ModuleDealRecord> onCloseTrade(TradeField trade){
 		checkMatch(trade.getContract().getUnifiedSymbol());
 		if(OffsetFlagEnum.OF_Open == trade.getOffsetFlag() || OffsetFlagEnum.OF_Unknown == trade.getOffsetFlag()) {
 			throw new IllegalStateException("传入了非平仓成交：" + trade.toString());
@@ -144,7 +144,7 @@ public class ModulePosition {
 			volume -= trade.getVolume();
 			int factor = positionDir == PositionDirectionEnum.PD_Long ? 1 : -1;
 			double closeProfit = factor * (trade.getPrice() - openPrice) * trade.getVolume() * multiplier;
-			return Optional.of(DealRecordEntity.builder()
+			return Optional.of(ModuleDealRecord.builder()
 					.contractName(trade.getContract().getSymbol())
 					.direction(positionDir)
 					.tradingDay(openTradingDay)
@@ -158,7 +158,7 @@ public class ModulePosition {
 		return Optional.empty();
 	}
 	
-	public Optional<DealRecordEntity> onStopLoss(SubmitOrderReqField orderReq, TickField tick){
+	public Optional<ModuleDealRecord> onStopLoss(SubmitOrderReqField orderReq, TickField tick){
 		checkMatch(orderReq.getContract().getUnifiedSymbol());
 		if(OffsetFlagEnum.OF_Open == orderReq.getOffsetFlag() || OffsetFlagEnum.OF_Unknown == orderReq.getOffsetFlag()) {
 			throw new IllegalStateException("传入了非平仓成交：" + orderReq.toString());
@@ -168,7 +168,7 @@ public class ModulePosition {
 			volume = 0;
 			int factor = positionDir == PositionDirectionEnum.PD_Long ? 1 : -1;
 			double closeProfit = factor * (tick.getLastPrice() - openPrice) * tradeVol * multiplier;
-			return Optional.of(DealRecordEntity.builder()
+			return Optional.of(ModuleDealRecord.builder()
 					.contractName(orderReq.getContract().getSymbol())
 					.direction(positionDir)
 					.tradingDay(openTradingDay)

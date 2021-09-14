@@ -10,7 +10,7 @@ import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class DealRecordEntity {
+public class ModuleDealRecord {
 	
 	private String moduleName;
 
