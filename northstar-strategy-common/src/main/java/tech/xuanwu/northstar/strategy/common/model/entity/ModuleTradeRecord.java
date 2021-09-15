@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
+import xyz.redtorch.pb.CoreField.TradeField;
 
 @Builder
 @AllArgsConstructor
@@ -26,4 +27,15 @@ public class ModuleTradeRecord {
 	
 	private double price;
 	
+	public static ModuleTradeRecord convertFrom(String moduleName, TradeField trade) {
+		return ModuleTradeRecord.builder()
+				.moduleName(moduleName)
+				.contractName(trade.getContract().getSymbol())
+				.direction(trade.getDirection())
+				.tradingDay(trade.getTradingDay())
+				.actionTime(trade.getTradeTimestamp())
+				.volume(trade.getVolume())
+				.price(trade.getPrice())
+				.build();
+	}
 }

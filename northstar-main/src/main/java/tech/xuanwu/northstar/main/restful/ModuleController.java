@@ -19,6 +19,7 @@ import tech.xuanwu.northstar.strategy.common.model.ModuleInfo;
 import tech.xuanwu.northstar.strategy.common.model.entity.ModuleDataRef;
 import tech.xuanwu.northstar.strategy.common.model.entity.ModuleDealRecord;
 import tech.xuanwu.northstar.strategy.common.model.entity.ModuleRealTimeInfo;
+import tech.xuanwu.northstar.strategy.common.model.entity.ModuleTradeRecord;
 import tech.xuanwu.northstar.strategy.common.model.meta.ComponentField;
 import tech.xuanwu.northstar.strategy.common.model.meta.ComponentMetaInfo;
 
@@ -135,8 +136,18 @@ public class ModuleController {
 	 * @return
 	 */
 	@GetMapping("/module/records")
-	public ResultBean<List<ModuleDealRecord>> getHistoryRecords(@NotNull String name){
-		return new ResultBean<>(service.getHistoryRecords(name));
+	public ResultBean<List<ModuleDealRecord>> getDealRecords(@NotNull String name){
+		return new ResultBean<>(service.getDealRecords(name));
+	}
+	
+	/**
+	 * 获取模组成交记录
+	 * @param name
+	 * @return
+	 */
+	@GetMapping("/module/records/trade")
+	public ResultBean<List<ModuleTradeRecord>> getTradeRecords(@NotNull String name){
+		return new ResultBean<>(service.getTradeRecords(name));
 	}
 	
 	/**

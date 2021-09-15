@@ -34,6 +34,7 @@ import tech.xuanwu.northstar.strategy.common.model.data.BarData;
 import tech.xuanwu.northstar.strategy.common.model.entity.ModuleDataRef;
 import tech.xuanwu.northstar.strategy.common.model.entity.ModuleDealRecord;
 import tech.xuanwu.northstar.strategy.common.model.entity.ModuleRealTimeInfo;
+import tech.xuanwu.northstar.strategy.common.model.entity.ModuleTradeRecord;
 import tech.xuanwu.northstar.strategy.common.model.meta.ComponentAndParamsPair;
 import tech.xuanwu.northstar.strategy.common.model.meta.ComponentField;
 import tech.xuanwu.northstar.strategy.common.model.meta.ComponentMetaInfo;
@@ -226,12 +227,21 @@ public class ModuleService implements InitializingBean{
 	}
 	
 	/**
+	 * 获取模组交易历史
+	 * @param moduleName
+	 * @return
+	 */
+	public List<ModuleDealRecord> getDealRecords(String moduleName) {
+		return moduleRepo.findDealRecords(moduleName);
+	}
+	
+	/**
 	 * 获取模组成交历史
 	 * @param moduleName
 	 * @return
 	 */
-	public List<ModuleDealRecord> getHistoryRecords(String moduleName) {
-		return moduleRepo.findDealRecords(moduleName);
+	public List<ModuleTradeRecord> getTradeRecords(String moduleName){
+		return moduleRepo.findTradeRecords(moduleName);
 	}
 	
 	/**
@@ -243,6 +253,7 @@ public class ModuleService implements InitializingBean{
 		moduleRepo.deleteModuleInfoById(moduleName);
 		moduleRepo.removeModuleStatus(moduleName);
 		moduleRepo.removeDealRecords(moduleName);
+		moduleRepo.removeTradeRecords(moduleName);
 	}
 	
 	

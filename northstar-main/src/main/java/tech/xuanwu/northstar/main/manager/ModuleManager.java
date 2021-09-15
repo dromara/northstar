@@ -14,6 +14,7 @@ import tech.xuanwu.northstar.main.persistence.ModuleRepository;
 import tech.xuanwu.northstar.strategy.common.model.ModuleStatus;
 import tech.xuanwu.northstar.strategy.common.model.StrategyModule;
 import tech.xuanwu.northstar.strategy.common.model.entity.ModuleDealRecord;
+import tech.xuanwu.northstar.strategy.common.model.entity.ModuleTradeRecord;
 import xyz.redtorch.pb.CoreField.AccountField;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.OrderField;
@@ -95,6 +96,7 @@ public class ModuleManager extends AbstractEventHandler {
 			Optional<ModuleStatus> result = m.onTrade(trade);
 			if(result.isPresent()) {
 				moduleRepo.saveModuleStatus(result.get());
+				moduleRepo.saveTradeRecord(ModuleTradeRecord.convertFrom(m.getName(), trade));
 				Optional<ModuleDealRecord> dealRecord = m.consumeDealRecord();
 				if(dealRecord.isPresent()) {	
 					moduleRepo.saveDealRecord(dealRecord.get());
