@@ -56,6 +56,7 @@ public class ContractHandler extends AbstractEventHandler implements GenericEven
 				ContractPO contract = ProtoBeanUtils.toPojoBean(ContractPO.class, entry.getValue());
 				contract.setRecordTimestamp(curTime);
 				contract.setGatewayId(conn.getGwDescription().getBindedMktGatewayId());
+				contract.setContractId(contract.getUnifiedSymbol() + "@" + contract.getGatewayId());
 				contractList.add(contract);
 			}
 			CompletableFuture.runAsync(() -> mdRepo.batchSaveContracts(contractList));
