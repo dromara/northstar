@@ -8,6 +8,7 @@ import javax.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -16,12 +17,14 @@ import org.springframework.web.bind.annotation.RestController;
 import tech.xuanwu.northstar.common.model.ResultBean;
 import tech.xuanwu.northstar.main.service.ModuleService;
 import tech.xuanwu.northstar.strategy.common.model.ModuleInfo;
+import tech.xuanwu.northstar.strategy.common.model.ModulePosition;
 import tech.xuanwu.northstar.strategy.common.model.entity.ModuleDataRef;
 import tech.xuanwu.northstar.strategy.common.model.entity.ModuleDealRecord;
 import tech.xuanwu.northstar.strategy.common.model.entity.ModuleRealTimeInfo;
 import tech.xuanwu.northstar.strategy.common.model.entity.ModuleTradeRecord;
 import tech.xuanwu.northstar.strategy.common.model.meta.ComponentField;
 import tech.xuanwu.northstar.strategy.common.model.meta.ComponentMetaInfo;
+import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
 
 @RestController
 public class ModuleController {
@@ -156,10 +159,41 @@ public class ModuleController {
 	 * @return
 	 */
 	@GetMapping("/module/toggle")
-	public ResultBean<Void> toggleModuleState(@NotNull String name){
-		service.toggleState(name);
-		return new ResultBean<>(null);
+	public ResultBean<Boolean> toggleModuleState(@NotNull String name){
+		return new ResultBean<>(service.toggleState(name));
 	}
 	
+	/**
+	 * 增加模组持仓
+	 * @param moduleName
+	 * @param position
+	 * @return
+	 */
+	@PostMapping("/module/{moduleName}/position")
+	public ResultBean<Boolean> createPosition(@PathVariable String moduleName, @RequestBody ModulePosition position){
+		return new ResultBean<>(service.updatePosition(moduleName, position));
+	}
 	
+	/**
+	 * 修改模组持仓
+	 * @param moduleName
+	 * @param position
+	 * @return
+	 */
+	@PutMapping("/module/{moduleName}/position")
+	public ResultBean<Boolean> updatePosition(@PathVariable String moduleName, @RequestBody ModulePosition position){
+		return new ResultBean<>(service.updatePosition(moduleName, position));
+	}
+	
+	/**
+	 * 移除模组持仓
+	 * @param moduleName
+	 * @param unifiedSymbol
+	 * @param dir
+	 * @return
+	 */
+	@DeleteMapping("/module/{moduleName}/position")
+	public ResultBean<Boolean> removePosition(@PathVariable String moduleName, String unifiedSymbol, PositionDirectionEnum dir){
+		return new ResultBean<>(service.removePosition(moduleName, unifiedSymbol, dir));
+	}
 }

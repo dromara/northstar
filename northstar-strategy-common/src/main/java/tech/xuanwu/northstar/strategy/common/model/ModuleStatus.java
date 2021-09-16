@@ -17,6 +17,7 @@ import tech.xuanwu.northstar.strategy.common.model.entity.ModuleDealRecord;
 import tech.xuanwu.northstar.strategy.common.model.state.ModuleStateMachine;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
+import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.OrderField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
@@ -127,6 +128,15 @@ public class ModuleStatus {
 		return result;
 	}
 	
+	public void manuallyUpdatePosition(ModulePosition position) {
+		Map<String, ModulePosition> positionMap = getPositionMap(position.getPositionDir());
+		positionMap.put(position.getUnifiedSymbol(), position);
+	}
+	
+	public void manuallyRemovePosition(String unifiedSymbol, PositionDirectionEnum dir) {
+		Map<String, ModulePosition> positionMap = getPositionMap(dir);
+		positionMap.remove(unifiedSymbol);
+	}
 	
 	public boolean at(ModuleState state) {
 		return stateMachine.getState() == state;
@@ -172,5 +182,15 @@ public class ModuleStatus {
 			positions.remove(trade.getContract().getUnifiedSymbol());
 			log.info("模组平仓{}", trade.getContract().getSymbol());
 		}
+	}
+	
+	private Map<String, ModulePosition> getPositionMap(PositionDirectionEnum dir){
+		if(dir == PositionDirectionEnum.PD_Long) {
+			return longPositions;
+		}
+		if(dir == PositionDirectionEnum.PD_Short) {
+			return shortPositions;
+		}
+		throw new IllegalArgumentException("非法持仓方向：" + dir);
 	}
 }

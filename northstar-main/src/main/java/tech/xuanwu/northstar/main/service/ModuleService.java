@@ -28,6 +28,7 @@ import tech.xuanwu.northstar.strategy.common.SignalPolicy;
 import tech.xuanwu.northstar.strategy.common.annotation.StrategicComponent;
 import tech.xuanwu.northstar.strategy.common.model.GenericRiskController;
 import tech.xuanwu.northstar.strategy.common.model.ModuleInfo;
+import tech.xuanwu.northstar.strategy.common.model.ModulePosition;
 import tech.xuanwu.northstar.strategy.common.model.ModuleStatus;
 import tech.xuanwu.northstar.strategy.common.model.StrategyModule;
 import tech.xuanwu.northstar.strategy.common.model.data.BarData;
@@ -39,6 +40,7 @@ import tech.xuanwu.northstar.strategy.common.model.meta.ComponentAndParamsPair;
 import tech.xuanwu.northstar.strategy.common.model.meta.ComponentField;
 import tech.xuanwu.northstar.strategy.common.model.meta.ComponentMetaInfo;
 import tech.xuanwu.northstar.strategy.common.model.meta.DynamicParams;
+import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
 import xyz.redtorch.pb.CoreField.BarField;
 
 public class ModuleService implements InitializingBean{
@@ -276,11 +278,24 @@ public class ModuleService implements InitializingBean{
 	/**
 	 * 切换模组状态
 	 */
-	public void toggleState(String moduleName) {
+	public boolean toggleState(String moduleName) {
 		mdlMgr.toggleState(moduleName);
 		ModuleInfo info = moduleRepo.findModuleInfo(moduleName);
 		info.setEnabled(!info.isEnabled());
 		moduleRepo.saveModuleInfo(info);
+		return true;
+	}
+	
+	public boolean updatePosition(String moduleName, ModulePosition position) {
+		ModuleStatus status = mdlMgr.getModule(moduleName).updatePosition(position);
+		moduleRepo.saveModuleStatus(status);
+		return true;
+	}
+	
+	public boolean removePosition(String moduleName, String unifiedSymbol, PositionDirectionEnum dir) {
+		ModuleStatus status = mdlMgr.getModule(moduleName).removePosition(unifiedSymbol, dir);
+		moduleRepo.saveModuleStatus(status);
+		return true;
 	}
 
 	@Override

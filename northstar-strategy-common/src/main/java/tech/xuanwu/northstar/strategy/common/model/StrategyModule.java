@@ -26,6 +26,7 @@ import tech.xuanwu.northstar.strategy.common.model.entity.ModuleDealRecord;
 import tech.xuanwu.northstar.strategy.common.model.entity.ModuleRealTimeInfo;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
+import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
 import xyz.redtorch.pb.CoreField.AccountField;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.CancelOrderReqField;
@@ -255,4 +256,13 @@ public class StrategyModule {
 				.build();
 	}
 	
+	public ModuleStatus updatePosition(ModulePosition position) {
+		status.manuallyUpdatePosition(position);
+		return status;
+	}
+	
+	public ModuleStatus removePosition(String unifiedSymbol, PositionDirectionEnum dir) {
+		status.manuallyRemovePosition(unifiedSymbol, dir);
+		return status;
+	}
 }
