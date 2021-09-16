@@ -286,12 +286,25 @@ public class ModuleService implements InitializingBean{
 		return true;
 	}
 	
+	/**
+	 * 更新模组持仓
+	 * @param moduleName
+	 * @param position
+	 * @return
+	 */
 	public boolean updatePosition(String moduleName, ModulePosition position) {
 		ModuleStatus status = mdlMgr.getModule(moduleName).updatePosition(position);
 		moduleRepo.saveModuleStatus(status);
 		return true;
 	}
 	
+	/**
+	 * 移除模组持仓
+	 * @param moduleName
+	 * @param unifiedSymbol
+	 * @param dir
+	 * @return
+	 */
 	public boolean removePosition(String moduleName, String unifiedSymbol, PositionDirectionEnum dir) {
 		ModuleStatus status = mdlMgr.getModule(moduleName).removePosition(unifiedSymbol, dir);
 		moduleRepo.saveModuleStatus(status);
