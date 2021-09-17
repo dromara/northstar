@@ -29,8 +29,10 @@ import tech.xuanwu.northstar.main.manager.GatewayAndConnectionManager;
 import tech.xuanwu.northstar.main.restful.ModuleController;
 import tech.xuanwu.northstar.strategy.common.constants.ModuleType;
 import tech.xuanwu.northstar.strategy.common.model.ModuleInfo;
+import tech.xuanwu.northstar.strategy.common.model.ModulePosition;
 import tech.xuanwu.northstar.strategy.common.model.meta.ComponentAndParamsPair;
 import tech.xuanwu.northstar.strategy.common.model.meta.ComponentMetaInfo;
+import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
 import xyz.redtorch.pb.CoreField.GatewaySettingField;
 
 @RunWith(SpringRunner.class)
@@ -166,6 +168,38 @@ public class ModuleTest {
 		assertThat(ctrlr.getModuleRealTimeInfo("testModule").getStatus()).isEqualTo(ReturnCode.SUCCESS);
 	}
 	
-	// 查询模组历史
+	@Test
+	public void shouldCreateModulePosition() throws Exception {
+		shouldSuccessfullyCreate();
+		ModulePosition position = ModulePosition.builder()
+				.unifiedSymbol("rb2210@SHFE@FUTURES")
+				.multiplier(10)
+				.openTime(System.currentTimeMillis())
+				.openPrice(1234)
+				.openTradingDay("20210609")
+				.positionDir(PositionDirectionEnum.PD_Long)
+				.build();
+		assertThat(ctrlr.createPosition("testModule", position).getStatus()).isEqualTo(ReturnCode.SUCCESS);
+	}
+	
+	@Test
+	public void shouldUpdateModulePosition() throws Exception {
+		shouldCreateModulePosition();
+		ModulePosition position = ModulePosition.builder()
+				.unifiedSymbol("rb2210@SHFE@FUTURES")
+				.multiplier(10)
+				.openTime(System.currentTimeMillis())
+				.openPrice(2000)
+				.openTradingDay("20210609")
+				.positionDir(PositionDirectionEnum.PD_Long)
+				.build();
+		assertThat(ctrlr.updatePosition("testModule", position).getStatus()).isEqualTo(ReturnCode.SUCCESS);
+	}
+	
+	@Test
+	public void shouldRemoveModulePosition() throws Exception {
+		shouldCreateModulePosition();
+		assertThat(ctrlr.removePosition("testModule", "rb2210@SHFE@FUTURES", PositionDirectionEnum.PD_Long).getStatus()).isEqualTo(ReturnCode.SUCCESS);
+	}
 	
 }

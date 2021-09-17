@@ -25,6 +25,8 @@ import tech.xuanwu.northstar.common.model.GatewayDescription;
 import tech.xuanwu.northstar.common.model.NsUser;
 import tech.xuanwu.northstar.common.model.ResultBean;
 import tech.xuanwu.northstar.common.model.SimSettings;
+import tech.xuanwu.northstar.strategy.common.model.ModulePosition;
+import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
 
 public class ModuleBIT {
 
@@ -91,6 +93,54 @@ private String cookie;
 		HttpEntity entity = new HttpEntity<>(
 				HttpHeaders.readOnlyHttpHeaders(header));
 		ResponseEntity<ResultBean> result = rest.exchange("/module?name=TEST", HttpMethod.DELETE, entity, ResultBean.class);
+		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(result.getBody().getStatus()).isEqualTo(ReturnCode.SUCCESS);
+	}
+	
+	@Test
+	public void shouldCreateModulePosition() {
+		shouldSuccessfullyCreate();
+		ModulePosition position = ModulePosition.builder()
+				.unifiedSymbol("rb2210@SHFE@FUTURES")
+				.multiplier(10)
+				.openTime(System.currentTimeMillis())
+				.openPrice(1234)
+				.openTradingDay("20210609")
+				.positionDir(PositionDirectionEnum.PD_Long)
+				.build();
+		HttpEntity entity = new HttpEntity<>(
+				position,
+				HttpHeaders.readOnlyHttpHeaders(header));
+		ResponseEntity<ResultBean> result = rest.exchange("/module/TEST/position", HttpMethod.POST, entity, ResultBean.class);
+		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(result.getBody().getStatus()).isEqualTo(ReturnCode.SUCCESS);
+	}
+	
+	@Test
+	public void shouldUpdateModulePosition() {
+		shouldSuccessfullyCreate();
+		ModulePosition position = ModulePosition.builder()
+				.unifiedSymbol("rb2210@SHFE@FUTURES")
+				.multiplier(10)
+				.openTime(System.currentTimeMillis())
+				.openPrice(1234)
+				.openTradingDay("20210609")
+				.positionDir(PositionDirectionEnum.PD_Long)
+				.build();
+		HttpEntity entity = new HttpEntity<>(
+				position,
+				HttpHeaders.readOnlyHttpHeaders(header));
+		ResponseEntity<ResultBean> result = rest.exchange("/module/TEST/position", HttpMethod.PUT, entity, ResultBean.class);
+		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(result.getBody().getStatus()).isEqualTo(ReturnCode.SUCCESS);
+	}
+	
+	@Test
+	public void shouldRemoveModulePosition() {
+		shouldCreateModulePosition();
+		HttpEntity entity = new HttpEntity<>(
+				HttpHeaders.readOnlyHttpHeaders(header));
+		ResponseEntity<ResultBean> result = rest.exchange("/module/TEST/position?unifiedSymbol=rb2210@SHFE@FUTURES&dir=PD_Long", HttpMethod.DELETE, entity, ResultBean.class);
 		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(result.getBody().getStatus()).isEqualTo(ReturnCode.SUCCESS);
 	}
