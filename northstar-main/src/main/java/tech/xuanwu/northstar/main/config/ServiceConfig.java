@@ -1,6 +1,6 @@
 package tech.xuanwu.northstar.main.config;
 
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -41,7 +41,7 @@ import tech.xuanwu.northstar.main.service.SMSTradeService;
 public class ServiceConfig {
 
 	@Bean
-	public AccountService accountService(ConcurrentHashMap<String, TradeDayAccount> accountMap) {
+	public AccountService accountService(ConcurrentMap<String, TradeDayAccount> accountMap) {
 		return new AccountService(accountMap);
 	}
 	
@@ -53,7 +53,7 @@ public class ServiceConfig {
 	
 	@Bean
 	public DataSyncService dataSyncService(ContractManager contractMgr, SocketIOMessageEngine msgEngine, MarketDataRepository mdRepo,
-			ConcurrentHashMap<String, TradeDayAccount> accountMap) {
+			ConcurrentMap<String, TradeDayAccount> accountMap) {
 		return new DataSyncService(contractMgr, msgEngine, mdRepo, accountMap);
 	}
 	
