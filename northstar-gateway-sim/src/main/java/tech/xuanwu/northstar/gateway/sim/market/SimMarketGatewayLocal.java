@@ -29,7 +29,10 @@ public class SimMarketGatewayLocal implements MarketGateway{
 	
 	private SimTickGenerator tickGen = new SimTickGenerator();
 	
-	private ConcurrentHashMap<ContractField, InstrumentHolder> cache = new ConcurrentHashMap<>();
+	/**
+	 * unifiedSymbol --> InstrumentHolder
+	 */
+	private ConcurrentHashMap<String, InstrumentHolder> cache = new ConcurrentHashMap<>();
 	
 	public SimMarketGatewayLocal(GatewaySettingField settings, FastEventEngine feEngine) {
 		this.feEngine = feEngine;
@@ -39,14 +42,14 @@ public class SimMarketGatewayLocal implements MarketGateway{
 
 	@Override
 	public boolean subscribe(ContractField contract) {
-		cache.putIfAbsent(contract, new InstrumentHolder(contract));
+		cache.putIfAbsent(contract.getUnifiedSymbol(), new InstrumentHolder(contract));
 		log.info("模拟订阅合约：{}", contract.getSymbol());
 		return true;
 	}
 
 	@Override
 	public boolean unsubscribe(ContractField contract) {
-		cache.remove(contract);
+		cache.remove(contract.getUnifiedSymbol());
 		log.info("模拟退订合约：{}", contract.getSymbol());
 		return true;
 	}
@@ -70,7 +73,7 @@ public class SimMarketGatewayLocal implements MarketGateway{
 		task = scheduleExec.scheduleAtFixedRate(()->{
 			lastActiveTime = System.currentTimeMillis();
 			try {				
-				for(Entry<ContractField, InstrumentHolder> e: cache.entrySet()) {
+				for(Entry<String, InstrumentHolder> e: cache.entrySet()) {
 					feEngine.emitEvent(NorthstarEventType.TICK, tickGen.generateNextTick(e.getValue()));
 				}
 			} catch (Exception e) {
