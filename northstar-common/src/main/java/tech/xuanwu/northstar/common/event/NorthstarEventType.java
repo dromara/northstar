@@ -87,6 +87,10 @@ public enum NorthstarEventType {
 	 */
 	LOGGED_OUT,
 	/**
+	 * 网关就绪
+	 */
+	GATEWAY_READY,
+	/**
 	 * 断开中
 	 */
 	DISCONNECTING,

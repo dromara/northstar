@@ -13,8 +13,7 @@ import tech.xuanwu.northstar.common.event.GenericEventHandler;
 import tech.xuanwu.northstar.common.event.NorthstarEvent;
 import tech.xuanwu.northstar.common.event.NorthstarEventType;
 import tech.xuanwu.northstar.common.event.PluginEventBus;
-import xyz.redtorch.pb.CoreEnum.DirectionEnum;
-import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
+import tech.xuanwu.northstar.common.utils.FieldUtils;
 import xyz.redtorch.pb.CoreEnum.OrderStatusEnum;
 import xyz.redtorch.pb.CoreField.NoticeField;
 import xyz.redtorch.pb.CoreField.OrderField;
@@ -35,6 +34,7 @@ public class NotificationDispatcher extends AbstractEventHandler implements Init
 			add(NorthstarEventType.NOTICE);
 			add(NorthstarEventType.CONNECTED);
 			add(NorthstarEventType.DISCONNECTED);
+			add(NorthstarEventType.GATEWAY_READY);
 			add(NorthstarEventType.ORDER);
 		}
 	};
@@ -74,6 +74,9 @@ public class NotificationDispatcher extends AbstractEventHandler implements Init
 		case DISCONNECTED:
 			handleDisconnection((String) e.getData());
 			break;
+		case GATEWAY_READY:
+			handleReady((String) e.getData());
+			break;
 		case ORDER:
 			handleOrder((OrderField) e.getData());
 			break;
@@ -81,6 +84,11 @@ public class NotificationDispatcher extends AbstractEventHandler implements Init
 			throw new IllegalArgumentException("未定义处理类型：" + e.getEvent());
 		}
 		
+	}
+	
+	private void handleReady(String gatewayId) {
+		Message msg = new Message(String.format("[%s] - 账户就绪", gatewayId), "");
+		doSend(msg);
 	}
 	
 	private void handleNotice(NoticeField notice) {
@@ -104,16 +112,13 @@ public class NotificationDispatcher extends AbstractEventHandler implements Init
 		if(!interestedOrderStatus.contains(order.getOrderStatus())) {
 			return;
 		}
-		String dir = order.getDirection() == DirectionEnum.D_Buy ? "多" :  order.getDirection() == DirectionEnum.D_Sell ? "空" : "无";
-		String offset = order.getOffsetFlag() == OffsetFlagEnum.OF_Open ? "开" : order.getOffsetFlag() == OffsetFlagEnum.OF_Unknown ? "无" : "平";
-		String status = order.getOrderStatus() == OrderStatusEnum.OS_AllTraded ? "全成" :
-			order.getOrderStatus() == OrderStatusEnum.OS_Canceled ? "已撤" :
-				order.getOrderStatus() == OrderStatusEnum.OS_Touched ? "已挂" :
-					order.getOrderStatus() == OrderStatusEnum.OS_Rejected ? "拒绝" : "";
+		String dir = FieldUtils.chn(order.getDirection());
+		String offset = FieldUtils.chn(order.getOffsetFlag());
+		String status = FieldUtils.chn(order.getOrderStatus());
+		String content = String.format("合约：%s%n手数：%d%n已成交：%d%n价钱：%.2f", 
+				order.getContract().getName(), order.getTotalVolume(), order.getTradedVolume(), order.getPrice());
 		Message msg = new Message(String.format("[%s]订单：%s，%s %s %d手", 
-				gatewayId, status, order.getContract().getName(), dir+offset, order.getTotalVolume()), 
-				String.format("合约：%s\n手数：%d\n已成交：%d\n价钱：%.2f", 
-						order.getContract().getName(), order.getTotalVolume(), order.getTradedVolume(), order.getPrice()));
+				gatewayId, status, order.getContract().getName(), dir+offset, order.getTotalVolume()), content);
 		doSend(msg);
 	}
 	
