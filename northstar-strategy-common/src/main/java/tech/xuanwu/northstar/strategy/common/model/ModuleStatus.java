@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -50,6 +51,7 @@ public class ModuleStatus {
 	
 	private double accountAvailable;
 	
+	@Transient
 	@Builder.Default
 	private Optional<ModuleDealRecord> dealRecord = Optional.empty();
 	
