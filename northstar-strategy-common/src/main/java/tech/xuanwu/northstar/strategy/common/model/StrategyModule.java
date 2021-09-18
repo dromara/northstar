@@ -103,7 +103,7 @@ public class StrategyModule {
 			Optional<SubmitOrderReqField> stopLossReq = status.triggerStopLoss(tick, contractMgr.getContract(tick.getUnifiedSymbol()));
 			if(stopLossReq.isPresent()) {
 				status.transform(ModuleEventType.STOP_LOSS);
-				status.handleStopLoss(stopLossReq.get(), tick);
+				originOrderIdMap.put(stopLossReq.get().getOriginOrderId(), OrderField.newBuilder().build()); // 用空的订单对象占位
 				gateway.submitOrder(stopLossReq.get());
 				return this;
 			}
@@ -186,6 +186,7 @@ public class StrategyModule {
 				originOrderIdMap.put(restOrder.getOriginOrderId(), restOrder);
 			} else {				
 				status.transform(trade.getDirection() == DirectionEnum.D_Buy ? ModuleEventType.BUY_TRADED : ModuleEventType.SELL_TRADED);
+				dealer.doneTrade(trade);
 			}
 			return Optional.of(status.onTrade(trade, order));
 		}

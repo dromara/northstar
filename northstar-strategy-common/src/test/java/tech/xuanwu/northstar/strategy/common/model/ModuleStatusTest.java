@@ -69,14 +69,11 @@ public class ModuleStatusTest {
 		TickField tick = factory.makeTickField("rb2210", 1200);
 		Optional<SubmitOrderReqField> orderReq = ms.triggerStopLoss(tick, factory.makeContract("rb2210"));
 		assertThat(orderReq).isPresent();
-		assertThat(ms.handleStopLoss(orderReq.get(), tick)).isPresent();
 		
 		TickField tick2 = factory.makeTickField("rb2210", 1250);
 		Optional<SubmitOrderReqField> orderReq2 = ms.triggerStopLoss(tick2, factory.makeContract("rb2210"));
 		assertThat(orderReq2).isPresent();
-		assertThat(ms.handleStopLoss(orderReq2.get(), tick2)).isPresent();
 		
-		assertThat(ms.handleStopLoss(SubmitOrderReqField.newBuilder().build(), tick2)).isNotPresent();
 	}
 	
 	@Test

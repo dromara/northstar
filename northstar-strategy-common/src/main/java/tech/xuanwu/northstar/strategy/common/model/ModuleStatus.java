@@ -89,20 +89,6 @@ public class ModuleStatus {
 		return result;
 	}
 	
-	public Optional<ModuleDealRecord> handleStopLoss(SubmitOrderReqField orderReq, TickField tick){
-		if(orderReq.getDirection() == DirectionEnum.D_Sell) {
-			dealRecord = longPositions.remove(tick.getUnifiedSymbol()).onStopLoss(orderReq, tick);
-			dealRecord.get().setModuleName(moduleName);
-			return dealRecord;
-		}
-		if(orderReq.getDirection() == DirectionEnum.D_Buy) {
-			dealRecord = shortPositions.remove(tick.getUnifiedSymbol()).onStopLoss(orderReq, tick);
-			dealRecord.get().setModuleName(moduleName);
-			return dealRecord;
-		}
-		return Optional.empty();
-	}
-	
 	public ModuleStatus onTrade(TradeField trade, OrderField order) {
 		if(trade.getOffsetFlag() == OffsetFlagEnum.OF_Unknown) {
 			throw new IllegalStateException("未知开平仓状态");

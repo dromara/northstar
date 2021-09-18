@@ -84,7 +84,8 @@ public class ModuleStateMachine {
 			setState(curState == ModuleState.RETRIEVING_FOR_RETRY ? ModuleState.PLACING_ORDER : originState);
 			break;
 		case STOP_LOSS:
-			setState(ModuleState.EMPTY);
+			originState = curState;
+			setState(ModuleState.PLACING_ORDER);
 			break;
 		default:
 			throw new IllegalStateException("未有" + eventType + "事件处理逻辑");

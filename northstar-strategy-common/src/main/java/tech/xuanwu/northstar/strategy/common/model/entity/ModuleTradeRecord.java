@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import xyz.redtorch.pb.CoreEnum.DirectionEnum;
+import tech.xuanwu.northstar.common.utils.FieldUtils;
 import xyz.redtorch.pb.CoreField.TradeField;
 
 @Builder
@@ -17,7 +17,7 @@ public class ModuleTradeRecord {
 
 	private String contractName;
 	
-	private DirectionEnum direction;
+	private String operation;
 	
 	private String tradingDay;
 	
@@ -31,7 +31,7 @@ public class ModuleTradeRecord {
 		return ModuleTradeRecord.builder()
 				.moduleName(moduleName)
 				.contractName(trade.getContract().getSymbol())
-				.direction(trade.getDirection())
+				.operation(FieldUtils.chn(trade.getDirection()) + FieldUtils.chn(trade.getOffsetFlag()))
 				.tradingDay(trade.getTradingDay())
 				.actionTime(trade.getTradeTimestamp())
 				.volume(trade.getVolume())
