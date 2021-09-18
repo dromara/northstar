@@ -1,7 +1,10 @@
 package tech.xuanwu.northstar.gateway.sim.market;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.util.Date;
 import java.util.Random;
 
 import org.apache.commons.lang3.StringUtils;
@@ -37,7 +40,9 @@ public class SimTickGenerator {
 		int deltaVol = generateDeltaVol(seed);
 		int deltaInterest = generateDeltaOpenInterest();
 		
-		LocalDateTime ldt = LocalDateTime.now();
+		long rawMillisec = System.currentTimeMillis();
+		long adjustMillisec = rawMillisec - rawMillisec % 500;
+		LocalDateTime ldt = LocalDateTime.from(Instant.ofEpochMilli(adjustMillisec).atZone(ZoneId.systemDefault()));
 		String newActionDay = ldt.format(DateTimeConstant.D_FORMAT_INT_FORMATTER);
 		String oldActionDay = tb.getActionDay();
 		double high = StringUtils.equals(newActionDay, oldActionDay) ? Math.max(tb.getHighPrice(), latestPrice) : Math.max(0, latestPrice);
