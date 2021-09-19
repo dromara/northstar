@@ -3,6 +3,7 @@ package tech.xuanwu.northstar.strategy.common.model;
 import java.util.Optional;
 import java.util.UUID;
 
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
 import org.apache.commons.lang3.StringUtils;
@@ -47,10 +48,12 @@ public class ModulePosition {
 	
 	private double multiplier;
 	@NotNull
+	@Min(value=1, message="开仓价格应该为正数")
 	private double openPrice;
-	
+	@Min(value=0, message="止损价不能为负数")
 	private double stopLossPrice;
 	@NotNull
+	@Min(value=1, message="手数应该为大于零的整数")
 	private int volume;
 	@Transient
 	private double holdingProfit;
@@ -82,7 +85,7 @@ public class ModulePosition {
 	
 	public Optional<SubmitOrderReqField> triggerStopLoss(TickField tick, ContractField contract) {
 		checkMatch(tick.getUnifiedSymbol());
-		if(stopLossPrice == 0) {
+		if(stopLossPrice <= 0) {
 			return Optional.empty();
 		}
 		if(!hasTriggeredStopLoss && triggeredStopLoss(tick)) {
