@@ -171,7 +171,7 @@ public class ModuleController {
 	 */
 	@PostMapping("/module/{moduleName}/position")
 	public ResultBean<Boolean> createPosition(@PathVariable String moduleName, @RequestBody ModulePosition position){
-		return new ResultBean<>(service.updatePosition(moduleName, position));
+		return new ResultBean<>(service.createPosition(moduleName, position));
 	}
 	
 	/**
