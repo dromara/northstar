@@ -258,6 +258,9 @@ public class StrategyModule {
 	}
 	
 	public ModuleStatus updatePosition(ModulePosition position) {
+		if(!dealer.bindedUnifiedSymbols().contains(position.getUnifiedSymbol())) {
+			throw new IllegalArgumentException("手工更新的合约与交易策略绑定合约不一致");
+		}
 		status.manuallyUpdatePosition(position);
 		return status;
 	}
