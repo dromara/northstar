@@ -12,6 +12,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import tech.xuanwu.northstar.common.utils.FieldUtils;
 import tech.xuanwu.northstar.strategy.common.constants.ModuleState;
 import tech.xuanwu.northstar.strategy.common.event.ModuleEventType;
 import tech.xuanwu.northstar.strategy.common.model.entity.ModuleDealRecord;
@@ -119,11 +120,18 @@ public class ModuleStatus {
 	public void manuallyUpdatePosition(ModulePosition position) {
 		Map<String, ModulePosition> positionMap = getPositionMap(position.getPositionDir());
 		positionMap.put(position.getUnifiedSymbol(), position);
+		ModuleState state = FieldUtils.isLong(position.getPositionDir()) ? ModuleState.HOLDING_LONG : ModuleState.HOLDING_SHORT;
+		log.info("手动变更模组状态：[{}]", state);
+		stateMachine.setCurState(state);
+		stateMachine.setOriginState(state);
 	}
 	
 	public void manuallyRemovePosition(String unifiedSymbol, PositionDirectionEnum dir) {
 		Map<String, ModulePosition> positionMap = getPositionMap(dir);
 		positionMap.remove(unifiedSymbol);
+		log.info("手动变更模组状态：[{}]", ModuleState.EMPTY);
+		stateMachine.setCurState(ModuleState.EMPTY);
+		stateMachine.setOriginState(ModuleState.EMPTY);
 	}
 	
 	public boolean at(ModuleState state) {

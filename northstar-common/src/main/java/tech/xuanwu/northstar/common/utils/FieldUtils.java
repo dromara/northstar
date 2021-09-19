@@ -3,6 +3,7 @@ package tech.xuanwu.northstar.common.utils;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreEnum.OrderStatusEnum;
+import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
 
 public class FieldUtils {
 
@@ -56,5 +57,21 @@ public class FieldUtils {
 		default:
 			return "未知";
 		}
+	}
+	
+	public static boolean isLong(PositionDirectionEnum position) {
+		return position == PositionDirectionEnum.PD_Long;
+	}
+	
+	public static boolean isShort(PositionDirectionEnum position) {
+		return position == PositionDirectionEnum.PD_Short;
+	}
+	
+	public static boolean isBuy(DirectionEnum dir) {
+		return dir == DirectionEnum.D_Buy;
+	}
+	
+	public static boolean isSell(DirectionEnum dir) {
+		return dir == DirectionEnum.D_Sell;
 	}
 }

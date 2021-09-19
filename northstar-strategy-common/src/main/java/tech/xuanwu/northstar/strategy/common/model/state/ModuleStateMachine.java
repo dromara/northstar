@@ -93,7 +93,7 @@ public class ModuleStateMachine {
 		return curState;
 	}
 	
-	private void setState(ModuleState newState) {
+	public void setState(ModuleState newState) {
 		log.info("状态机切换：[{}] => [{}]", curState, newState);
 		curState = newState;
 	}
