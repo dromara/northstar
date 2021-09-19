@@ -62,17 +62,16 @@ public class ContractManager {
 	}
 	
 	public ContractField getContract(String unifiedSymbol) {
-		ContractField result = contractMap.get(unifiedSymbol).get();
-		if(result == null) {
+		if(!contractMap.containsKey(unifiedSymbol)) {
 			throw new NoSuchElementException("找不到合约：" + unifiedSymbol);
 		}
-		return result;
+		return contractMap.get(unifiedSymbol).get();
 	}
 	
 	public Collection<ContractField> getAllContracts(){
 		return contractMap.values().stream()
 				.filter(i -> i.get() != null)
-				.map(i -> i.get())
+				.map(WeakReference::get)
 				.collect(Collectors.toList());
 	}
 	
