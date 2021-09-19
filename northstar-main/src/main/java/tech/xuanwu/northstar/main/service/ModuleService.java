@@ -1,5 +1,6 @@
 package tech.xuanwu.northstar.main.service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -10,6 +11,7 @@ import java.util.Map.Entry;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 
+import tech.xuanwu.northstar.common.constant.DateTimeConstant;
 import tech.xuanwu.northstar.common.model.ContractManager;
 import tech.xuanwu.northstar.domain.GatewayConnection;
 import tech.xuanwu.northstar.gateway.api.Gateway;
@@ -42,6 +44,7 @@ import tech.xuanwu.northstar.strategy.common.model.meta.ComponentMetaInfo;
 import tech.xuanwu.northstar.strategy.common.model.meta.DynamicParams;
 import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
 import xyz.redtorch.pb.CoreField.BarField;
+import xyz.redtorch.pb.CoreField.ContractField;
 
 public class ModuleService implements InitializingBean{
 	
@@ -287,6 +290,18 @@ public class ModuleService implements InitializingBean{
 	}
 	
 	/**
+	 * 新建模组持仓
+	 * @param moduleName
+	 * @param position
+	 * @return
+	 */
+	public boolean createPosition(String moduleName, ModulePosition position) {
+		position.setOpenTime(System.currentTimeMillis());
+		position.setOpenTradingDay(LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
+		return updatePosition(moduleName, position);
+	}
+	
+	/**
 	 * 更新模组持仓
 	 * @param moduleName
 	 * @param position
@@ -294,6 +309,8 @@ public class ModuleService implements InitializingBean{
 	 */
 	public boolean updatePosition(String moduleName, ModulePosition position) {
 		ModuleStatus status = mdlMgr.getModule(moduleName).updatePosition(position);
+		ContractField contract = contractMgr.getContract(position.getUnifiedSymbol());
+		position.setMultiplier(contract.getMultiplier());
 		moduleRepo.saveModuleStatus(status);
 		return true;
 	}

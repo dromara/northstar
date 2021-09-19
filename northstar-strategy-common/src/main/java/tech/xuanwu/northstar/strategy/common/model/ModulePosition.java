@@ -3,6 +3,8 @@ package tech.xuanwu.northstar.strategy.common.model;
 import java.util.Optional;
 import java.util.UUID;
 
+import javax.validation.constraints.NotNull;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.annotation.Transient;
 
@@ -34,8 +36,9 @@ import xyz.redtorch.pb.CoreField.TradeField;
 @Slf4j
 public class ModulePosition {
 
+	@NotNull
 	private String unifiedSymbol;
-
+	@NotNull
 	private PositionDirectionEnum positionDir;
 	
 	private String openTradingDay;
@@ -43,11 +46,11 @@ public class ModulePosition {
 	private long openTime;
 	
 	private double multiplier;
-	
+	@NotNull
 	private double openPrice;
 	
 	private double stopLossPrice;
-	
+	@NotNull
 	private int volume;
 	@Transient
 	private double holdingProfit;
