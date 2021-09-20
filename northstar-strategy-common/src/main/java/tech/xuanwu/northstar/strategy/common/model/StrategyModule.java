@@ -9,6 +9,8 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.alibaba.fastjson.JSON;
+
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.common.model.ContractManager;
@@ -259,7 +261,8 @@ public class StrategyModule {
 	
 	public ModuleStatus updatePosition(ModulePosition position) {
 		if(!dealer.bindedUnifiedSymbols().contains(position.getUnifiedSymbol())) {
-			throw new IllegalArgumentException("手工更新的合约与交易策略绑定合约不一致");
+			String errMsg = String.format("手工更新的合约与交易策略绑定合约不一致。期望[%s]，实际[%s]", JSON.toJSONString(dealer.bindedUnifiedSymbols()), position.getUnifiedSymbol());
+			throw new IllegalArgumentException(errMsg);
 		}
 		status.manuallyUpdatePosition(position);
 		return status;

@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.junit.After;
@@ -21,18 +22,20 @@ import com.corundumstudio.socketio.SocketIOServer;
 
 import common.TestMongoUtils;
 import tech.xuanwu.northstar.common.constant.ReturnCode;
+import tech.xuanwu.northstar.common.model.ContractManager;
 import tech.xuanwu.northstar.common.model.GatewayDescription;
 import tech.xuanwu.northstar.domain.GatewayConnection;
 import tech.xuanwu.northstar.gateway.api.TradeGateway;
 import tech.xuanwu.northstar.main.NorthstarApplication;
 import tech.xuanwu.northstar.main.manager.GatewayAndConnectionManager;
-import tech.xuanwu.northstar.main.restful.ModuleController;
 import tech.xuanwu.northstar.strategy.common.constants.ModuleType;
 import tech.xuanwu.northstar.strategy.common.model.ModuleInfo;
 import tech.xuanwu.northstar.strategy.common.model.ModulePosition;
 import tech.xuanwu.northstar.strategy.common.model.meta.ComponentAndParamsPair;
+import tech.xuanwu.northstar.strategy.common.model.meta.ComponentField;
 import tech.xuanwu.northstar.strategy.common.model.meta.ComponentMetaInfo;
 import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
+import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.GatewaySettingField;
 
 @RunWith(SpringRunner.class)
@@ -48,8 +51,12 @@ public class ModuleTest {
 	@MockBean
 	private SocketIOServer server;
 	
+	@MockBean
+	private ContractManager contractMgr;
+	
 	@Before
 	public void setUp() throws Exception {
+		when(contractMgr.getContract("rb2210@SHFE@FUTURES")).thenReturn(ContractField.newBuilder().setUnifiedSymbol("rb2210@SHFE@FUTURES").build());
 	}
 
 	@After
@@ -92,13 +99,15 @@ public class ModuleTest {
 		when(gatewayConnMgr.getGatewayById("testGateway")).thenReturn(gateway);
 		ComponentMetaInfo dealer = ctrlr.getRegisteredDealers().getData().stream().filter(c -> c.getName().equals("示例交易策略")).findAny().get();
 		ComponentMetaInfo signalPolicy = ctrlr.getRegisteredSignalPolicies().getData().stream().filter(c -> c.getName().equals("示例策略")).findAny().get();
+		Map<String, ComponentField> paramsMap = ctrlr.getComponentParams(dealer).getData();
+		paramsMap.get("bindedUnifiedSymbol").setValue("rb2210@SHFE@FUTURES");
 		ComponentAndParamsPair signalPolicyMeta = ComponentAndParamsPair.builder()
 				.componentMeta(signalPolicy)
 				.initParams(ctrlr.getComponentParams(signalPolicy).getData().values().stream().collect(Collectors.toList()))
 				.build();
 		ComponentAndParamsPair dealerMeta = ComponentAndParamsPair.builder()
 				.componentMeta(dealer)
-				.initParams(ctrlr.getComponentParams(dealer).getData().values().stream().collect(Collectors.toList()))
+				.initParams(paramsMap.values().stream().collect(Collectors.toList()))
 				.build();
 		ModuleInfo info = ModuleInfo.builder()
 				.moduleName("testModule")
