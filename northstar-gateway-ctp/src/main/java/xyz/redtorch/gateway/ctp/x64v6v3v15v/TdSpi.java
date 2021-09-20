@@ -1382,6 +1382,8 @@ public class TdSpi extends CThostFtdcTraderSpi {
 					}
 				}
 				tradeBuilderCacheList.clear();
+				
+				gatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.GATEWAY_READY, gatewayId);
 			}
 		} catch (Throwable t) {
 			logger.error("{}OnRspQryInstrument Exception", logInfo, t);

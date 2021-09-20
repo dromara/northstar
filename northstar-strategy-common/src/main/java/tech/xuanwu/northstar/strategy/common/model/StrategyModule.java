@@ -9,6 +9,8 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.alibaba.fastjson.JSON;
+
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.common.model.ContractManager;
@@ -21,10 +23,12 @@ import tech.xuanwu.northstar.strategy.common.SignalPolicy;
 import tech.xuanwu.northstar.strategy.common.constants.ModuleState;
 import tech.xuanwu.northstar.strategy.common.constants.RiskAuditResult;
 import tech.xuanwu.northstar.strategy.common.event.ModuleEventType;
-import tech.xuanwu.northstar.strategy.common.model.data.ModuleCurrentPerformance;
-import tech.xuanwu.northstar.strategy.common.model.entity.DealRecordEntity;
+import tech.xuanwu.northstar.strategy.common.model.entity.ModuleDataRef;
+import tech.xuanwu.northstar.strategy.common.model.entity.ModuleDealRecord;
+import tech.xuanwu.northstar.strategy.common.model.entity.ModuleRealTimeInfo;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
+import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
 import xyz.redtorch.pb.CoreField.AccountField;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.CancelOrderReqField;
@@ -101,7 +105,7 @@ public class StrategyModule {
 			Optional<SubmitOrderReqField> stopLossReq = status.triggerStopLoss(tick, contractMgr.getContract(tick.getUnifiedSymbol()));
 			if(stopLossReq.isPresent()) {
 				status.transform(ModuleEventType.STOP_LOSS);
-				status.handleStopLoss(stopLossReq.get(), tick);
+				originOrderIdMap.put(stopLossReq.get().getOriginOrderId(), OrderField.newBuilder().build()); // 用空的订单对象占位
 				gateway.submitOrder(stopLossReq.get());
 				return this;
 			}
@@ -184,13 +188,14 @@ public class StrategyModule {
 				originOrderIdMap.put(restOrder.getOriginOrderId(), restOrder);
 			} else {				
 				status.transform(trade.getDirection() == DirectionEnum.D_Buy ? ModuleEventType.BUY_TRADED : ModuleEventType.SELL_TRADED);
+				dealer.doneTrade(trade);
 			}
 			return Optional.of(status.onTrade(trade, order));
 		}
 		return Optional.empty();
 	}
 	
-	public Optional<DealRecordEntity> consumeDealRecord() {
+	public Optional<ModuleDealRecord> consumeDealRecord() {
 		return status.consumeDealRecord();
 	}
 	
@@ -227,19 +232,9 @@ public class StrategyModule {
 		return gateway;
 	}
 	
-	public ModuleCurrentPerformance getPerformance() {
-		ModuleCurrentPerformance mp = new ModuleCurrentPerformance();
+	public ModuleRealTimeInfo getRealTimeInfo() {
+		ModuleRealTimeInfo mp = new ModuleRealTimeInfo();
 		mp.setModuleName(status.getModuleName());
-		Map<String, List<byte[]>> byteMap = new HashMap<>();
-		for(String unifiedSymbol : signalPolicy.bindedUnifiedSymbols()) {
-			byteMap.put(unifiedSymbol, 
-				signalPolicy.getRefBarData(unifiedSymbol)
-					.getRefBarList()
-					.stream()
-					.map(BarField::toByteArray)
-					.collect(Collectors.toList()));
-		}
-		mp.setRefBarDataMap(byteMap);
 		mp.setAccountId(gateway.getGatewaySetting().getGatewayId());
 		mp.setModuleAvailable((int)status.getAccountAvailable());
 		mp.setModuleState(status.getCurrentState());
@@ -249,4 +244,32 @@ public class StrategyModule {
 		return mp;
 	}
 	
+	public ModuleDataRef getDataRef() {
+		Map<String, List<byte[]>> byteMap = new HashMap<>();
+		for(String unifiedSymbol : signalPolicy.bindedUnifiedSymbols()) {
+			byteMap.put(unifiedSymbol, 
+				signalPolicy.getRefBarData(unifiedSymbol)
+					.getRefBarList()
+					.stream()
+					.map(BarField::toByteArray)
+					.collect(Collectors.toList()));
+		}
+		return ModuleDataRef.builder()
+				.refBarDataMap(byteMap)
+				.build();
+	}
+	
+	public ModuleStatus updatePosition(ModulePosition position) {
+		if(!dealer.bindedUnifiedSymbols().contains(position.getUnifiedSymbol())) {
+			String errMsg = String.format("手工更新的合约与交易策略绑定合约不一致。期望[%s]，实际[%s]", JSON.toJSONString(dealer.bindedUnifiedSymbols()), position.getUnifiedSymbol());
+			throw new IllegalArgumentException(errMsg);
+		}
+		status.manuallyUpdatePosition(position);
+		return status;
+	}
+	
+	public ModuleStatus removePosition(String unifiedSymbol, PositionDirectionEnum dir) {
+		status.manuallyRemovePosition(unifiedSymbol, dir);
+		return status;
+	}
 }

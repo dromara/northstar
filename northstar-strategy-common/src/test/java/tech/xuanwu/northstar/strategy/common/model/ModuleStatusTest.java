@@ -1,15 +1,14 @@
 package tech.xuanwu.northstar.strategy.common.model;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
 
 import java.util.HashMap;
+import java.util.Optional;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import tech.xuanwu.northstar.common.model.ContractManager;
 import tech.xuanwu.northstar.strategy.common.constants.ModuleState;
 import tech.xuanwu.northstar.strategy.common.event.ModuleEventType;
 import tech.xuanwu.northstar.strategy.common.model.state.ModuleStateMachine;
@@ -18,6 +17,8 @@ import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
 import xyz.redtorch.pb.CoreField.OrderField;
+import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
+import xyz.redtorch.pb.CoreField.TickField;
 import xyz.redtorch.pb.CoreField.TradeField;
 
 public class ModuleStatusTest {
@@ -47,6 +48,7 @@ public class ModuleStatusTest {
 		HashMap<String, ModulePosition> longPosition = new HashMap<>();
 		HashMap<String, ModulePosition> shortPosition = new HashMap<>();
 		longPosition.put(SYMBOL, mpb.build());
+		shortPosition.put(SYMBOL, mpb.positionDir(PositionDirectionEnum.PD_Short).openPrice(1240).stopLossPrice(1250).build());
 		msb.longPositions(longPosition);
 		msb.shortPositions(shortPosition);
 		ms = msb.build();
@@ -64,7 +66,14 @@ public class ModuleStatusTest {
 	
 	@Test
 	public void shouldTriggerStopLoss() {
-		assertThat(ms.triggerStopLoss(factory.makeTickField("rb2210", 1200), factory.makeContract("rb2210"))).isPresent();
+		TickField tick = factory.makeTickField("rb2210", 1200);
+		Optional<SubmitOrderReqField> orderReq = ms.triggerStopLoss(tick, factory.makeContract("rb2210"));
+		assertThat(orderReq).isPresent();
+		
+		TickField tick2 = factory.makeTickField("rb2210", 1250);
+		Optional<SubmitOrderReqField> orderReq2 = ms.triggerStopLoss(tick2, factory.makeContract("rb2210"));
+		assertThat(orderReq2).isPresent();
+		
 	}
 	
 	@Test
@@ -95,6 +104,12 @@ public class ModuleStatusTest {
 	}
 	
 	@Test(expected = IllegalStateException.class)
+	public void shouldThrowIfClosingUnexistPosition() {
+		TradeField trade = factory.makeTradeField("rb2201", 1240, 2, DirectionEnum.D_Sell, OffsetFlagEnum.OF_Close);
+		ms.onTrade(trade, OrderField.newBuilder().setOriginOrderId(trade.getOriginOrderId()).build());
+	}
+	
+	@Test(expected = IllegalStateException.class)
 	public void shouldFailIfOriginIdMismatch() {
 		TradeField trade = factory.makeTradeField("rb2209", 1240, 2, DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open);
 		ms.onTrade(trade, OrderField.newBuilder().setContract(trade.getContract()).build());
@@ -105,7 +120,6 @@ public class ModuleStatusTest {
 		TradeField trade = factory.makeTradeField("rb2210", 1240, 2, DirectionEnum.D_Buy, OffsetFlagEnum.OF_Unknown);
 		ms.onTrade(trade, OrderField.newBuilder().setOriginOrderId(trade.getOriginOrderId()).build());
 	}
-	
 	
 	@Test
 	public void shouldGetState() {
@@ -157,4 +171,41 @@ public class ModuleStatusTest {
 	public void shouldNotBeNullWhenAnyTimeConsumeDealRecord() {
 		assertThat(ms.consumeDealRecord()).isNotNull();
 	}
+	
+	@Test
+	public void shouldUpdatePosition() {
+		ModulePosition position = ModulePosition.builder()
+				.unifiedSymbol(SYMBOL)
+				.multiplier(10)
+				.openTime(System.currentTimeMillis())
+				.openPrice(2000)
+				.openTradingDay("20210609")
+				.positionDir(PositionDirectionEnum.PD_Long)
+				.build();
+		ms.manuallyUpdatePosition(position);
+		assertThat(ms.longPositions.get(SYMBOL)).isSameAs(position);
+		
+		ModulePosition position2 = ModulePosition.builder()
+				.unifiedSymbol(SYMBOL)
+				.multiplier(10)
+				.openTime(System.currentTimeMillis())
+				.openPrice(2000)
+				.openTradingDay("20210609")
+				.positionDir(PositionDirectionEnum.PD_Short)
+				.build();
+		ms.manuallyUpdatePosition(position2);
+		assertThat(ms.shortPositions.get(SYMBOL)).isSameAs(position2);
+	}
+	
+	@Test
+	public void shouldRemovePosition() {
+		ms.manuallyRemovePosition(SYMBOL, PositionDirectionEnum.PD_Long);
+		assertThat(ms.longPositions).isEmpty();
+	}
+	
+	@Test(expected = IllegalArgumentException.class)
+	public void shouldFailWithWrongPositionDirection() {
+		ms.manuallyRemovePosition(SYMBOL, PositionDirectionEnum.PD_Net);
+	}
+	
 }

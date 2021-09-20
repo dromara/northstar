@@ -1,6 +1,6 @@
 package tech.xuanwu.northstar.main.config;
 
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -29,7 +29,7 @@ public class InternalEventHandlerConfig {
 	///////////////////
 	@Bean
 	public AccountHandler accountEventHandler(InternalEventBus eventBus, ContractManager contractMgr,
-			ConcurrentHashMap<String, TradeDayAccount> accountMap) {
+			ConcurrentMap<String, TradeDayAccount> accountMap) {
 		AccountHandler handler = new AccountHandler(accountMap, new TradeDayAccountFactory(eventBus, contractMgr));
 		log.info("注册：AccountHandler");
 		eventBus.register(handler);

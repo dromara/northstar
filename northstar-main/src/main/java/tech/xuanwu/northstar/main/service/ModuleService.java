@@ -1,5 +1,6 @@
 package tech.xuanwu.northstar.main.service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -10,6 +11,7 @@ import java.util.Map.Entry;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 
+import tech.xuanwu.northstar.common.constant.DateTimeConstant;
 import tech.xuanwu.northstar.common.model.ContractManager;
 import tech.xuanwu.northstar.domain.GatewayConnection;
 import tech.xuanwu.northstar.gateway.api.Gateway;
@@ -28,16 +30,21 @@ import tech.xuanwu.northstar.strategy.common.SignalPolicy;
 import tech.xuanwu.northstar.strategy.common.annotation.StrategicComponent;
 import tech.xuanwu.northstar.strategy.common.model.GenericRiskController;
 import tech.xuanwu.northstar.strategy.common.model.ModuleInfo;
+import tech.xuanwu.northstar.strategy.common.model.ModulePosition;
 import tech.xuanwu.northstar.strategy.common.model.ModuleStatus;
 import tech.xuanwu.northstar.strategy.common.model.StrategyModule;
 import tech.xuanwu.northstar.strategy.common.model.data.BarData;
-import tech.xuanwu.northstar.strategy.common.model.data.ModuleCurrentPerformance;
-import tech.xuanwu.northstar.strategy.common.model.entity.DealRecordEntity;
+import tech.xuanwu.northstar.strategy.common.model.entity.ModuleDataRef;
+import tech.xuanwu.northstar.strategy.common.model.entity.ModuleDealRecord;
+import tech.xuanwu.northstar.strategy.common.model.entity.ModuleRealTimeInfo;
+import tech.xuanwu.northstar.strategy.common.model.entity.ModuleTradeRecord;
 import tech.xuanwu.northstar.strategy.common.model.meta.ComponentAndParamsPair;
 import tech.xuanwu.northstar.strategy.common.model.meta.ComponentField;
 import tech.xuanwu.northstar.strategy.common.model.meta.ComponentMetaInfo;
 import tech.xuanwu.northstar.strategy.common.model.meta.DynamicParams;
+import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
 import xyz.redtorch.pb.CoreField.BarField;
+import xyz.redtorch.pb.CoreField.ContractField;
 
 public class ModuleService implements InitializingBean{
 	
@@ -207,12 +214,30 @@ public class ModuleService implements InitializingBean{
 	}
 	
 	/**
-	 * 获取模组当前绩效
+	 * 获取模组实时信息
 	 * @param moduleName
 	 * @return
 	 */
-	public ModuleCurrentPerformance getCurrentPerformance(String moduleName) {
-		return mdlMgr.getModulePerformance(moduleName);
+	public ModuleRealTimeInfo getModuleRealTimeInfo(String moduleName) {
+		return mdlMgr.getModule(moduleName).getRealTimeInfo();
+	}
+	
+	/**
+	 * 获取模组引用数据
+	 * @param moduleName
+	 * @return
+	 */
+	public ModuleDataRef getModuleDataRef(String moduleName) {
+		return mdlMgr.getModule(moduleName).getDataRef();
+	}
+	
+	/**
+	 * 获取模组交易历史
+	 * @param moduleName
+	 * @return
+	 */
+	public List<ModuleDealRecord> getDealRecords(String moduleName) {
+		return moduleRepo.findDealRecords(moduleName);
 	}
 	
 	/**
@@ -220,8 +245,8 @@ public class ModuleService implements InitializingBean{
 	 * @param moduleName
 	 * @return
 	 */
-	public List<DealRecordEntity> getHistoryRecords(String moduleName) {
-		return moduleRepo.findDealRecords(moduleName);
+	public List<ModuleTradeRecord> getTradeRecords(String moduleName){
+		return moduleRepo.findTradeRecords(moduleName);
 	}
 	
 	/**
@@ -233,6 +258,7 @@ public class ModuleService implements InitializingBean{
 		moduleRepo.deleteModuleInfoById(moduleName);
 		moduleRepo.removeModuleStatus(moduleName);
 		moduleRepo.removeDealRecords(moduleName);
+		moduleRepo.removeTradeRecords(moduleName);
 	}
 	
 	
@@ -255,11 +281,51 @@ public class ModuleService implements InitializingBean{
 	/**
 	 * 切换模组状态
 	 */
-	public void toggleState(String moduleName) {
+	public boolean toggleState(String moduleName) {
 		mdlMgr.toggleState(moduleName);
 		ModuleInfo info = moduleRepo.findModuleInfo(moduleName);
 		info.setEnabled(!info.isEnabled());
 		moduleRepo.saveModuleInfo(info);
+		return true;
+	}
+	
+	/**
+	 * 新建模组持仓
+	 * @param moduleName
+	 * @param position
+	 * @return
+	 */
+	public boolean createPosition(String moduleName, ModulePosition position) {
+		position.setOpenTime(System.currentTimeMillis());
+		position.setOpenTradingDay(LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
+		return updatePosition(moduleName, position);
+	}
+	
+	/**
+	 * 更新模组持仓
+	 * @param moduleName
+	 * @param position
+	 * @return
+	 */
+	public boolean updatePosition(String moduleName, ModulePosition position) {
+		ModuleStatus status = mdlMgr.getModule(moduleName).updatePosition(position);
+		ContractField contract = contractMgr.getContract(position.getUnifiedSymbol());
+		position.setMultiplier(contract.getMultiplier());
+		moduleRepo.saveModuleStatus(status);
+		return true;
+	}
+	
+	/**
+	 * 移除模组持仓
+	 * @param moduleName
+	 * @param unifiedSymbol
+	 * @param dir
+	 * @return
+	 */
+	public boolean removePosition(String moduleName, String unifiedSymbol, PositionDirectionEnum dir) {
+		ModuleStatus status = mdlMgr.getModule(moduleName).removePosition(unifiedSymbol, dir);
+		moduleRepo.saveModuleStatus(status);
+		return true;
 	}
 
 	@Override

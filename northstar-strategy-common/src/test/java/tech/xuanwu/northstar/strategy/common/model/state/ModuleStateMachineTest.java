@@ -126,13 +126,13 @@ public class ModuleStateMachineTest {
 	@Test
 	public void testLongPositionStopLoss() {
 		ModuleStateMachine state = new ModuleStateMachine(ModuleState.HOLDING_LONG);
-		assertThat(state.transformForm(ModuleEventType.STOP_LOSS)).isEqualTo(ModuleState.EMPTY);
+		assertThat(state.transformForm(ModuleEventType.STOP_LOSS)).isEqualTo(ModuleState.PLACING_ORDER);
 	}
 	
 	@Test
 	public void testShortPositionStopLoss() {
 		ModuleStateMachine state = new ModuleStateMachine(ModuleState.HOLDING_SHORT);
-		assertThat(state.transformForm(ModuleEventType.STOP_LOSS)).isEqualTo(ModuleState.EMPTY);
+		assertThat(state.transformForm(ModuleEventType.STOP_LOSS)).isEqualTo(ModuleState.PLACING_ORDER);
 	}
 	
 	/****************/

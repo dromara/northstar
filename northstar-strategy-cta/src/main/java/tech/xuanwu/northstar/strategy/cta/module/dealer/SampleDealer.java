@@ -25,6 +25,7 @@ import xyz.redtorch.pb.CoreEnum.VolumeConditionEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TickField;
+import xyz.redtorch.pb.CoreField.TradeField;
 
 @Slf4j
 @StrategicComponent("示例交易策略")
@@ -61,7 +62,6 @@ public class SampleDealer implements Dealer {
 	@Override
 	public Optional<SubmitOrderReqField> onTick(TickField tick) {
 		if(currentSignal != null) {
-			log.info("交易策略生成订单");
 			DirectionEnum direction = currentSignal.getState().isBuy() ? DirectionEnum.D_Buy : DirectionEnum.D_Sell;
 			ContractField contract = contractMgr.getContract(tick.getUnifiedSymbol());
 			// 按信号下单
@@ -83,10 +83,10 @@ public class SampleDealer implements Dealer {
 					.build();
 			currentSignal = null;
 			currentOffset = null;
+			log.info("交易策略生成订单,订单号[{}]", currentOrderReq.getOriginOrderId());
 			return Optional.of(currentOrderReq);
 			
 		} else {
-			log.info("交易策略改价追单");
 			int factor = currentOrderReq.getDirection() == DirectionEnum.D_Buy ? 1 : -1;
 			ContractField contract = contractMgr.getContract(tick.getUnifiedSymbol());
 			double priceTick = contract.getPriceTick();
@@ -95,6 +95,7 @@ public class SampleDealer implements Dealer {
 					.setOriginOrderId(UUID.randomUUID().toString())
 					.setPrice(tick.getLastPrice() + factor * priceTick * overprice)
 					.build();
+			log.info("交易策略改价追单，订单号[{}]", currentOrderReq.getOriginOrderId());
 			return Optional.of(currentOrderReq);
 		}
 	}
@@ -168,6 +169,14 @@ public class SampleDealer implements Dealer {
 	@Override
 	public void setContractManager(ContractManager contractMgr) {
 		this.contractMgr = contractMgr;
+	}
+
+	@Override
+	public void doneTrade(TradeField trade) {
+		if(currentOrderReq != null && StringUtils.equals(trade.getOriginOrderId(), currentOrderReq.getOriginOrderId())) {
+			currentOrderReq = null;
+			log.info("交易完成，订单号[{}]", trade.getOriginOrderId());
+		}
 	}
 
 }

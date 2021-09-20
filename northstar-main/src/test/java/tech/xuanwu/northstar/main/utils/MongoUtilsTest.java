@@ -7,7 +7,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import tech.xuanwu.northstar.strategy.common.model.entity.DealRecordEntity;
+import tech.xuanwu.northstar.strategy.common.model.entity.ModuleDealRecord;
 import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
 
 public class MongoUtilsTest {
@@ -22,7 +22,7 @@ public class MongoUtilsTest {
 
 	@Test
 	public void test() {
-		DealRecordEntity e = DealRecordEntity.builder()
+		ModuleDealRecord e = ModuleDealRecord.builder()
 				.openPrice(100)
 				.closePrice(1000)
 				.contractName("test")
@@ -30,7 +30,7 @@ public class MongoUtilsTest {
 				.build();
 		
 		assertThat(MongoUtils.beanToDocument(e)).isOfAnyClassIn(Document.class);
-		assertThat(MongoUtils.documentToBean(MongoUtils.beanToDocument(e), DealRecordEntity.class)).isEqualTo(e);
+		assertThat(MongoUtils.documentToBean(MongoUtils.beanToDocument(e), ModuleDealRecord.class)).isEqualTo(e);
 	}
 
 }

@@ -45,31 +45,23 @@ public class ContractHandler extends AbstractEventHandler implements GenericEven
 	
 	@Override
 	public void doHandle(NorthstarEvent e) {
-		long curTime = System.currentTimeMillis();
-		if(NorthstarEventType.CONTRACT_LOADED == e.getEvent()) {
-			idxEngine.start();
-			String accountId = (String) e.getData();
-			GatewayConnection conn = gatewayConnMgr.getGatewayConnectionById(accountId);
-			Map<String, ContractField> gatewayContractMap = contractMgr.getContractMapByGateway(conn.getGwDescription().getBindedMktGatewayId());
-			List<ContractPO> contractList = new ArrayList<>(gatewayContractMap.size());
-			for(Entry<String, ContractField> entry : gatewayContractMap.entrySet()) {
-				ContractPO contract = ProtoBeanUtils.toPojoBean(ContractPO.class, entry.getValue());
-				contract.setRecordTimestamp(curTime);
-				contractList.add(contract);
-			}
-			CompletableFuture.runAsync(() -> mdRepo.batchSaveContracts(contractList));
-			return;
-		}
-		ContractField contract = (ContractField) e.getData();
-		
-		if(NorthstarEventType.IDX_CONTRACT == e.getEvent()) {
-			ContractPO c = ProtoBeanUtils.toPojoBean(ContractPO.class, contract);
-			c.setRecordTimestamp(curTime);
-			mdRepo.saveContract(c);
-			contractMgr.addContract(contract);
-			return;
+		switch(e.getEvent()) {
+		case CONTRACT:
+			handleContractEvent((ContractField) e.getData());
+			break;
+		case IDX_CONTRACT:
+			handleIdxContractEvent((ContractField) e.getData());
+			break;
+		case CONTRACT_LOADED:
+			handleContractLoadedEvent((String) e.getData());
+			break;
+		default:
+			throw new IllegalArgumentException("未定义该事件的处理:" + e.getEvent());
 		}
 		
+	}
+	
+	private void handleContractEvent(ContractField contract) {
 		// 把合约的账户gatewayId替换为行情gatewayId
 		String originalGatewayId = contract.getGatewayId();
 		String relativeGatewayId = gatewayConnMgr.getGatewayConnectionById(originalGatewayId).getGwDescription().getBindedMktGatewayId();
@@ -84,6 +76,30 @@ public class ContractHandler extends AbstractEventHandler implements GenericEven
 				gateway.subscribe(contractNew);
 			}
 		}
+	}
+	
+	private void handleIdxContractEvent(ContractField contract) {
+		long curTime = System.currentTimeMillis();
+		ContractPO c = ProtoBeanUtils.toPojoBean(ContractPO.class, contract);
+		c.setRecordTimestamp(curTime);
+		mdRepo.saveContract(c);
+		contractMgr.addContract(contract);
+	}
+	
+	private void handleContractLoadedEvent(String accountId) {
+		idxEngine.start();
+		long curTime = System.currentTimeMillis();
+		GatewayConnection conn = gatewayConnMgr.getGatewayConnectionById(accountId);
+		Map<String, ContractField> gatewayContractMap = contractMgr.getContractMapByGateway(conn.getGwDescription().getBindedMktGatewayId());
+		List<ContractPO> contractList = new ArrayList<>(gatewayContractMap.size());
+		for(Entry<String, ContractField> entry : gatewayContractMap.entrySet()) {
+			ContractPO contract = ProtoBeanUtils.toPojoBean(ContractPO.class, entry.getValue());
+			contract.setRecordTimestamp(curTime);
+			contract.setGatewayId(conn.getGwDescription().getBindedMktGatewayId());
+			contract.setContractId(contract.getUnifiedSymbol() + "@" + contract.getGatewayId());
+			contractList.add(contract);
+		}
+		CompletableFuture.runAsync(() -> mdRepo.batchSaveContracts(contractList));
 	}
 	
 	@Override

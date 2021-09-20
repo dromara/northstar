@@ -1,6 +1,6 @@
 package tech.xuanwu.northstar.main.service;
 
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.common.exception.InsufficientException;
@@ -19,9 +19,9 @@ import tech.xuanwu.northstar.domain.account.TradeDayAccount;
 @Slf4j
 public class AccountService {
 	
-	protected ConcurrentHashMap<String, TradeDayAccount> accountMap;
+	protected ConcurrentMap<String, TradeDayAccount> accountMap;
 	
-	public AccountService(ConcurrentHashMap<String, TradeDayAccount> accountMap) {
+	public AccountService(ConcurrentMap<String, TradeDayAccount> accountMap) {
 		this.accountMap = accountMap;
 	}
 	

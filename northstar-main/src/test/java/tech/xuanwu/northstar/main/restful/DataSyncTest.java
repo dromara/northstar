@@ -21,6 +21,7 @@ import com.corundumstudio.socketio.SocketIOServer;
 import common.TestGatewayFactory;
 import common.TestMongoUtils;
 import tech.xuanwu.northstar.common.constant.GatewayType;
+import tech.xuanwu.northstar.common.constant.ReturnCode;
 import tech.xuanwu.northstar.common.event.NorthstarEventType;
 import tech.xuanwu.northstar.common.model.ResultBean;
 import tech.xuanwu.northstar.common.model.SimSettings;
@@ -86,7 +87,7 @@ public class DataSyncTest {
 	public void shouldGetAvailableContracts() throws Exception {
 		Thread.sleep(1000);
 		ResultBean<List<SimpleContractInfo>> result = ctrlr.availableContracts();
-		assertThat(result.getData().size()>0).isTrue();
+		assertThat(result.getStatus()).isEqualTo(ReturnCode.SUCCESS);
 	}
 
 }

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -113,7 +114,7 @@ public class AppConfig implements WebMvcConfigurer {
 	}
 	
 	@Bean
-	public ConcurrentHashMap<String, TradeDayAccount> accountMap(){
+	public ConcurrentMap<String, TradeDayAccount> accountMap(){
 		return new ConcurrentHashMap<>();
 	}
 	

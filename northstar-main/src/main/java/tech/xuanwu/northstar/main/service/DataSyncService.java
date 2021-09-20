@@ -3,7 +3,7 @@ package tech.xuanwu.northstar.main.service;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
@@ -32,12 +32,12 @@ public class DataSyncService {
 	
 	private SocketIOMessageEngine msgEngine;
 	
-	private ConcurrentHashMap<String, TradeDayAccount> accountMap;
+	private ConcurrentMap<String, TradeDayAccount> accountMap;
 	
 	private MarketDataRepository mdRepo;
 	
 	public DataSyncService(ContractManager contractMgr, SocketIOMessageEngine msgEngine, MarketDataRepository mdRepo,
-			ConcurrentHashMap<String, TradeDayAccount> accountMap) {
+			ConcurrentMap<String, TradeDayAccount> accountMap) {
 		this.contractMgr = contractMgr;
 		this.msgEngine = msgEngine;
 		this.accountMap = accountMap;

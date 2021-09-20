@@ -4,10 +4,10 @@ import java.util.Optional;
 import java.util.Set;
 
 import tech.xuanwu.northstar.common.model.ContractManager;
-import tech.xuanwu.northstar.strategy.common.model.StrategyModule;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TickField;
+import xyz.redtorch.pb.CoreField.TradeField;
 
 /**
  * 交易策略负责执行信号,以及监听执行结果,并维护交易状态(例如之前的信号是成功执行,还是失败)
@@ -30,6 +30,12 @@ public interface Dealer extends DynamicParamsAware {
 	 * @param offsetFlag	实操明细
 	 */
 	void onSignal(Signal signal, OffsetFlagEnum offsetFlag);
+	
+	/**
+	 * 完成交易
+	 * @param trade
+	 */
+	void doneTrade(TradeField trade);
 	
 	/**
 	 * 获取交易策略所绑定的合约列表

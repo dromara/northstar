@@ -5,6 +5,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 import org.junit.After;
 import org.junit.Before;
@@ -17,6 +18,7 @@ import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
 import xyz.redtorch.pb.CoreField.OrderField;
+import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TradeField;
 
 public class ModulePositionTest {
@@ -72,13 +74,38 @@ public class ModulePositionTest {
 	@Test
 	public void shouldTriggerStopLoss() {
 		ModulePosition pos = proto.stopLossPrice(1000).build();
-		assertThat(pos.triggerStopLoss(factory.makeTickField("rb2210", 1000), factory.makeContract("rb2210"))).isPresent();
+		Optional<SubmitOrderReqField> orderReq = pos.triggerStopLoss(factory.makeTickField("rb2210", 1000), factory.makeContract("rb2210"));
+		assertThat(orderReq).isPresent();
+		assertThat(pos.onStopLoss(orderReq.get(), factory.makeTickField("rb2210", 1000))).isPresent();
 		
 		ModulePosition pos2 = proto.positionDir(PositionDirectionEnum.PD_Short).stopLossPrice(1300).build();
-		assertThat(pos2.triggerStopLoss(factory.makeTickField("rb2210", 1300), factory.makeContract("rb2210"))).isPresent();
+		Optional<SubmitOrderReqField> orderReq2 = pos2.triggerStopLoss(factory.makeTickField("rb2210", 1300), factory.makeContract("rb2210"));
+		assertThat(orderReq2).isPresent();
+		assertThat(pos.onStopLoss(orderReq2.get(), factory.makeTickField("rb2210", 1300))).isPresent();
 		
 		ModulePosition pos3 = proto.openTradingDay(LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER)).positionDir(PositionDirectionEnum.PD_Short).stopLossPrice(1300).build();
-		assertThat(pos3.triggerStopLoss(factory.makeTickField("rb2210", 1300), factory.makeContract("rb2210"))).isPresent();
+		Optional<SubmitOrderReqField> orderReq3 = pos3.triggerStopLoss(factory.makeTickField("rb2210", 1300), factory.makeContract("rb2210"));
+		assertThat(orderReq3).isPresent();
+		assertThat(pos3.onStopLoss(orderReq3.get(), factory.makeTickField("rb2210", 1300))).isPresent();
+		
+	}
+	
+	@Test(expected = IllegalStateException.class)
+	public void shouldThrowWhenPassNotCloseOrderReq() {
+		ModulePosition pos = proto.build();
+		pos.onStopLoss(factory.makeOrderReq("rb2210", DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open, 0, 0, 0), factory.makeTickField("rb2109", 2000));
+	}
+	
+	@Test(expected = IllegalStateException.class)
+	public void shouldThrowWhenPassNotCloseOrderReq2() {
+		ModulePosition pos = proto.build();
+		pos.onStopLoss(factory.makeOrderReq("rb2210", DirectionEnum.D_Buy, OffsetFlagEnum.OF_Unknown, 0, 0, 0), factory.makeTickField("rb2109", 2000));
+	}
+	
+	@Test
+	public void shouldGetNothingIfItsNonMktPriceOrder() {
+		ModulePosition pos = proto.build();
+		assertThat(pos.onStopLoss(factory.makeOrderReq("rb2210", DirectionEnum.D_Buy, OffsetFlagEnum.OF_Close, 0, 0, 0), factory.makeTickField("rb2109", 2000))).isNotPresent();
 	}
 	
 	

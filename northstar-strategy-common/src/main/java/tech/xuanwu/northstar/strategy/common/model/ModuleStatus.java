@@ -5,17 +5,21 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import tech.xuanwu.northstar.common.utils.FieldUtils;
 import tech.xuanwu.northstar.strategy.common.constants.ModuleState;
 import tech.xuanwu.northstar.strategy.common.event.ModuleEventType;
-import tech.xuanwu.northstar.strategy.common.model.entity.DealRecordEntity;
+import tech.xuanwu.northstar.strategy.common.model.entity.ModuleDealRecord;
 import tech.xuanwu.northstar.strategy.common.model.state.ModuleStateMachine;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
+import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.OrderField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
@@ -33,6 +37,7 @@ import xyz.redtorch.pb.CoreField.TradeField;
 @AllArgsConstructor
 public class ModuleStatus {
 
+	@Id
 	private String moduleName;
 	
 	private ModuleStateMachine stateMachine;
@@ -47,8 +52,9 @@ public class ModuleStatus {
 	
 	private double accountAvailable;
 	
+	@Transient
 	@Builder.Default
-	private Optional<DealRecordEntity> dealRecord = Optional.empty();
+	private Optional<ModuleDealRecord> dealRecord = Optional.empty();
 	
 	// 由于lombok使用无参构造器时，默认值不会自动加上，所以要手动实现无参构造器
 	public ModuleStatus() {
@@ -86,20 +92,6 @@ public class ModuleStatus {
 		return result;
 	}
 	
-	public Optional<DealRecordEntity> handleStopLoss(SubmitOrderReqField orderReq, TickField tick){
-		if(orderReq.getDirection() == DirectionEnum.D_Sell) {
-			dealRecord = longPositions.remove(tick.getUnifiedSymbol()).onStopLoss(orderReq, tick);
-			dealRecord.get().setModuleName(moduleName);
-			return dealRecord;
-		}
-		if(orderReq.getDirection() == DirectionEnum.D_Buy) {
-			dealRecord = shortPositions.remove(tick.getUnifiedSymbol()).onStopLoss(orderReq, tick);
-			dealRecord.get().setModuleName(moduleName);
-			return dealRecord;
-		}
-		return Optional.empty();
-	}
-	
 	public ModuleStatus onTrade(TradeField trade, OrderField order) {
 		if(trade.getOffsetFlag() == OffsetFlagEnum.OF_Unknown) {
 			throw new IllegalStateException("未知开平仓状态");
@@ -119,12 +111,28 @@ public class ModuleStatus {
 		return this;
 	}
 	
-	public Optional<DealRecordEntity> consumeDealRecord(){
-		Optional<DealRecordEntity> result = dealRecord;
+	public Optional<ModuleDealRecord> consumeDealRecord(){
+		Optional<ModuleDealRecord> result = dealRecord;
 		dealRecord = Optional.empty();
 		return result;
 	}
 	
+	public void manuallyUpdatePosition(ModulePosition position) {
+		Map<String, ModulePosition> positionMap = getPositionMap(position.getPositionDir());
+		positionMap.put(position.getUnifiedSymbol(), position);
+		ModuleState state = FieldUtils.isLong(position.getPositionDir()) ? ModuleState.HOLDING_LONG : ModuleState.HOLDING_SHORT;
+		log.info("手动变更模组状态：[{}]", state);
+		stateMachine.setCurState(state);
+		stateMachine.setOriginState(state);
+	}
+	
+	public void manuallyRemovePosition(String unifiedSymbol, PositionDirectionEnum dir) {
+		Map<String, ModulePosition> positionMap = getPositionMap(dir);
+		positionMap.remove(unifiedSymbol);
+		log.info("手动变更模组状态：[{}]", ModuleState.EMPTY);
+		stateMachine.setCurState(ModuleState.EMPTY);
+		stateMachine.setOriginState(ModuleState.EMPTY);
+	}
 	
 	public boolean at(ModuleState state) {
 		return stateMachine.getState() == state;
@@ -170,5 +178,15 @@ public class ModuleStatus {
 			positions.remove(trade.getContract().getUnifiedSymbol());
 			log.info("模组平仓{}", trade.getContract().getSymbol());
 		}
+	}
+	
+	private Map<String, ModulePosition> getPositionMap(PositionDirectionEnum dir){
+		if(dir == PositionDirectionEnum.PD_Long) {
+			return longPositions;
+		}
+		if(dir == PositionDirectionEnum.PD_Short) {
+			return shortPositions;
+		}
+		throw new IllegalArgumentException("非法持仓方向：" + dir);
 	}
 }
