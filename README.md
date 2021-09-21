@@ -147,6 +147,5 @@ kill `pgrep java`
 ## 温馨提示
 对于仅为了满足交易需求的朋友而言，如果市场上现成的产品可以满足您的策略需求的话，请尽量使用市场上的付费产品例如文华、MC、金字塔等。因为开源项目存在大量的学习与调试成本，除非有成熟的技术背景以及存在付费产品无法实现的策略方案，才建议使用开源方案。
 
-## 参考项目
-本项目基于github上另一个知名的同类项目redtorch演化而来，代码上仍保留部分其源码，感谢redtorch项目作者的启发。  
-https://github.com/sun0x00/redtorch
+## 特别鸣谢
+[redtorch项目](https://github.com/sun0x00/redtorch)作者。本项目演化自redtorch，并保留了小部分其源码，同时感谢redtorch作者的技术分享。
