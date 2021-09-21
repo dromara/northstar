@@ -57,6 +57,9 @@ class GwAccountHolder {
 			if(now - this.lastEmitTime > 1000) {
 				this.lastEmitTime = now; 
 				feEngine.emitEvent(NorthstarEventType.ACCOUNT, accBuilder.build());
+				for(PositionField pf : posHolder.getPositions()) {					
+					feEngine.emitEvent(NorthstarEventType.POSITION, pf);
+				}
 			}
 		}, 2, 2, TimeUnit.SECONDS);
 	}
