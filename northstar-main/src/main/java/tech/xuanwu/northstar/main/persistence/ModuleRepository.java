@@ -8,9 +8,9 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Repository;
 
-import tech.xuanwu.northstar.strategy.common.model.ModuleInfo;
 import tech.xuanwu.northstar.strategy.common.model.ModuleStatus;
 import tech.xuanwu.northstar.strategy.common.model.entity.ModuleDealRecord;
+import tech.xuanwu.northstar.strategy.common.model.entity.ModuleInfo;
 import tech.xuanwu.northstar.strategy.common.model.entity.ModuleTradeRecord;
 
 @Repository

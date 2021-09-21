@@ -1,5 +1,9 @@
 package tech.xuanwu.northstar.strategy.cta.module.risk;
 
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.Assert;
+
 import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.strategy.common.DynamicParamsAware;
 import tech.xuanwu.northstar.strategy.common.RiskControlRule;
@@ -7,12 +11,17 @@ import tech.xuanwu.northstar.strategy.common.annotation.Setting;
 import tech.xuanwu.northstar.strategy.common.annotation.StrategicComponent;
 import tech.xuanwu.northstar.strategy.common.constants.RiskAuditResult;
 import tech.xuanwu.northstar.strategy.common.model.ModuleStatus;
-import tech.xuanwu.northstar.strategy.common.model.StrategyModule;
 import tech.xuanwu.northstar.strategy.common.model.meta.DynamicParams;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TickField;
 
+
+/**
+ * 当价格超过限制时，会拒绝继续下单
+ * @author kevin
+ *
+ */
 @Slf4j
 @StrategicComponent("委托超价限制")
 public class PriceExceededRule implements RiskControlRule, DynamicParamsAware{
@@ -23,6 +32,7 @@ public class PriceExceededRule implements RiskControlRule, DynamicParamsAware{
 	
 	@Override
 	public short canDeal(TickField tick, ModuleStatus moduleStatus) {
+		Assert.isTrue(StringUtils.equals(tick.getUnifiedSymbol(), orderReq.getContract().getUnifiedSymbol()), "行情合约与订单不一致");
 		int factor = orderReq.getDirection() == DirectionEnum.D_Buy ? 1 : -1;
 		if(factor * (tick.getLastPrice() - orderReq.getPrice()) > priceDifTolerance) {
 			log.info("委托超价限制：限制为{}，期望价为{}，实际价为{}", priceDifTolerance, orderReq.getPrice(), tick.getLastPrice());

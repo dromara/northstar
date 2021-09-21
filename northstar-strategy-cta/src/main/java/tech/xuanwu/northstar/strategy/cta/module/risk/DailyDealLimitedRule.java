@@ -2,7 +2,6 @@ package tech.xuanwu.northstar.strategy.cta.module.risk;
 
 import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.strategy.common.RiskControlRule;
-import tech.xuanwu.northstar.strategy.common.Signal;
 import tech.xuanwu.northstar.strategy.common.annotation.Setting;
 import tech.xuanwu.northstar.strategy.common.annotation.StrategicComponent;
 import tech.xuanwu.northstar.strategy.common.constants.RiskAuditResult;
@@ -11,15 +10,17 @@ import tech.xuanwu.northstar.strategy.common.model.meta.DynamicParams;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TickField;
 
+/**
+ * 当日内交易次数超过限制时，会拒绝继续下单
+ * @author kevin
+ *
+ */
 @Slf4j
 @StrategicComponent("日内开仓次数限制")
 public class DailyDealLimitedRule implements RiskControlRule {
 	
 	protected int dailyDealLimit;
 	
-	protected Signal curSignal;
-	
-
 	@Override
 	public short canDeal(TickField tick, ModuleStatus moduleStatus) {
 		long numberOfOpeningTradeToday = moduleStatus.getCountOfOpeningToday();

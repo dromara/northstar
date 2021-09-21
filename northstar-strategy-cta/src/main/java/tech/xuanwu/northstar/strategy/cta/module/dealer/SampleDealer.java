@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
 
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.common.model.ContractManager;
 import tech.xuanwu.northstar.strategy.common.Dealer;
@@ -31,21 +32,22 @@ import xyz.redtorch.pb.CoreField.TradeField;
 @StrategicComponent("示例交易策略")
 public class SampleDealer implements Dealer {
 	
-	private String bindedUnifiedSymbol;
-	
 	private CtaSignal currentSignal;
 	
 	private OffsetFlagEnum currentOffset;
 	
 	private SubmitOrderReqField currentOrderReq;
 	
-	private ContractManager contractMgr;
+	@Setter
+	private ContractManager contractManager;
 	
-	private int openVol;
+	protected String bindedUnifiedSymbol;
 	
-	private String priceTypeStr;
+	protected int openVol;
 	
-	private int overprice;
+	protected String priceTypeStr;
+	
+	protected int overprice;
 	
 	@Override
 	public Set<String> bindedUnifiedSymbols() {
@@ -63,7 +65,7 @@ public class SampleDealer implements Dealer {
 	public Optional<SubmitOrderReqField> onTick(TickField tick) {
 		if(currentSignal != null) {
 			DirectionEnum direction = currentSignal.getState().isBuy() ? DirectionEnum.D_Buy : DirectionEnum.D_Sell;
-			ContractField contract = contractMgr.getContract(tick.getUnifiedSymbol());
+			ContractField contract = contractManager.getContract(tick.getUnifiedSymbol());
 			// 按信号下单
 			currentOrderReq = SubmitOrderReqField.newBuilder()
 					.setOriginOrderId(UUID.randomUUID().toString())
@@ -88,7 +90,7 @@ public class SampleDealer implements Dealer {
 			
 		} else {
 			int factor = currentOrderReq.getDirection() == DirectionEnum.D_Buy ? 1 : -1;
-			ContractField contract = contractMgr.getContract(tick.getUnifiedSymbol());
+			ContractField contract = contractManager.getContract(tick.getUnifiedSymbol());
 			double priceTick = contract.getPriceTick();
 			// 按前订单改价
 			currentOrderReq = SubmitOrderReqField.newBuilder(currentOrderReq)
@@ -100,9 +102,9 @@ public class SampleDealer implements Dealer {
 		}
 	}
 	
-	public double resolvePrice(CtaSignal currentSignal, TickField tick) {
+	protected double resolvePrice(CtaSignal currentSignal, TickField tick) {
 		int factor = currentSignal.getState().isBuy() ? 1 : -1;
-		ContractField contract = contractMgr.getContract(tick.getUnifiedSymbol());
+		ContractField contract = contractManager.getContract(tick.getUnifiedSymbol());
 		double priceTick = contract.getPriceTick();
 		double orderPrice = 0;
 		switch(priceTypeStr) {
@@ -164,11 +166,6 @@ public class SampleDealer implements Dealer {
 		
 		@Setting(value="超价", order = 40, unit = "Tick")
 		private int overprice;
-	}
-
-	@Override
-	public void setContractManager(ContractManager contractMgr) {
-		this.contractMgr = contractMgr;
 	}
 
 	@Override

@@ -16,10 +16,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import tech.xuanwu.northstar.common.model.ResultBean;
 import tech.xuanwu.northstar.main.service.ModuleService;
-import tech.xuanwu.northstar.strategy.common.model.ModuleInfo;
 import tech.xuanwu.northstar.strategy.common.model.ModulePosition;
 import tech.xuanwu.northstar.strategy.common.model.entity.ModuleDataRef;
 import tech.xuanwu.northstar.strategy.common.model.entity.ModuleDealRecord;
+import tech.xuanwu.northstar.strategy.common.model.entity.ModuleInfo;
 import tech.xuanwu.northstar.strategy.common.model.entity.ModuleRealTimeInfo;
 import tech.xuanwu.northstar.strategy.common.model.entity.ModuleTradeRecord;
 import tech.xuanwu.northstar.strategy.common.model.meta.ComponentField;
