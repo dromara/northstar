@@ -68,6 +68,17 @@
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
+				<configuration>
+					<excludes>
+						<exclude>**/tech/xuanwu/northstar/strategy/common/*</exclude>
+						<exclude>**/tech/xuanwu/northstar/strategy/common/constants/*</exclude>
+						<exclude>**/tech/xuanwu/northstar/strategy/common/event/*</exclude>
+						<exclude>**/tech/xuanwu/northstar/strategy/common/annotation/*</exclude>
+						<exclude>**/tech/xuanwu/northstar/strategy/common/model/data/*</exclude>
+						<exclude>**/tech/xuanwu/northstar/strategy/common/model/entity/*</exclude>
+						<exclude>**/tech/xuanwu/northstar/strategy/common/model/meta/*</exclude>
+					</excludes>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>

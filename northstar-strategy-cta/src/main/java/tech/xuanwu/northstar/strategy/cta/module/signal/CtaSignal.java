@@ -4,7 +4,6 @@ import java.util.UUID;
 
 import lombok.Builder;
 import lombok.Data;
-import tech.xuanwu.northstar.strategy.common.PriceResolver.PriceType;
 import tech.xuanwu.northstar.strategy.common.Signal;
 import tech.xuanwu.northstar.strategy.common.SignalPolicy;
 import tech.xuanwu.northstar.strategy.common.constants.SignalOperation;

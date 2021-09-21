@@ -11,13 +11,18 @@ import tech.xuanwu.northstar.strategy.common.model.meta.DynamicParams;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TickField;
 
+/**
+ * 当下单超时时，会撤单
+ * @author kevin
+ *
+ */
 @Slf4j
 @StrategicComponent("委托超时限制")
 public class TimeExceededRule implements RiskControlRule, DynamicParamsAware{
 	
-	private long timeoutSeconds;
+	protected long timeoutSeconds;
 
-	private long lastUpdateTime;
+	protected long lastUpdateTime;
 
 	@Override
 	public short canDeal(TickField tick, ModuleStatus moduleStatus) {

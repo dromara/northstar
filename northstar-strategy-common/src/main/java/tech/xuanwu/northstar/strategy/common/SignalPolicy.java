@@ -5,7 +5,6 @@ import java.util.Set;
 
 import tech.xuanwu.northstar.strategy.common.model.ModuleStatus;
 import tech.xuanwu.northstar.strategy.common.model.data.BarData;
-import tech.xuanwu.northstar.strategy.common.model.state.ModuleStateMachine;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.TickField;
 

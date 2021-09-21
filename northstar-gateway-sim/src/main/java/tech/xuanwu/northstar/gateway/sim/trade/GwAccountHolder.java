@@ -1,5 +1,8 @@
 package tech.xuanwu.northstar.gateway.sim.trade;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import com.google.common.util.concurrent.AtomicDouble;
@@ -34,6 +37,8 @@ class GwAccountHolder {
 	
 	private long lastEmitTime;
 	
+	private ScheduledExecutorService execService = Executors.newScheduledThreadPool(1);
+	
 	//测试用的后门开关
 	public boolean testFlag;
 	
@@ -46,6 +51,14 @@ class GwAccountHolder {
 		this.orderHolder = factory.newGwOrderHolder();
 		this.posHolder = factory.newGwPositionHolder();
 		this.ticksOfCommission = ticksOfCommission;
+		
+		execService.scheduleAtFixedRate(()->{
+			long now = System.currentTimeMillis();
+			if(now - this.lastEmitTime > 1000) {
+				this.lastEmitTime = now; 
+				feEngine.emitEvent(NorthstarEventType.ACCOUNT, accBuilder.build());
+			}
+		}, 2, 2, TimeUnit.SECONDS);
 	}
 
 	protected void updateTick(TickField tick) {
