@@ -14,7 +14,7 @@ import tech.xuanwu.northstar.common.exception.TradeException;
 import tech.xuanwu.northstar.common.model.ContractManager;
 import tech.xuanwu.northstar.common.model.OrderRecall;
 import tech.xuanwu.northstar.common.model.OrderRequest;
-import tech.xuanwu.northstar.common.utils.OrderUtil;
+import tech.xuanwu.northstar.common.utils.OrderUtils;
 import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.ForceCloseReasonEnum;
@@ -81,12 +81,12 @@ public class TradeDayAccount {
 			throw new NoSuchElementException("不存在此合约：" + orderReq.getContractUnifiedSymbol());
 		}
 		// 检查可用资金
-		double marginRate = OrderUtil.resolveDirection(orderReq.getTradeOpr()) == DirectionEnum.D_Buy ? contract.getLongMarginRatio() : contract.getShortMarginRatio();
+		double marginRate = OrderUtils.resolveDirection(orderReq.getTradeOpr()) == DirectionEnum.D_Buy ? contract.getLongMarginRatio() : contract.getShortMarginRatio();
 		double totalCost = orderReq.getVolume() * Double.parseDouble(orderReq.getPrice()) * contract.getMultiplier() * marginRate;
 		if(accountInfo.getAvailable() < totalCost) {
 			throw new InsufficientException("可用资金不足，无法开仓");
 		}
-		DirectionEnum orderDir = OrderUtil.resolveDirection(orderReq.getTradeOpr());
+		DirectionEnum orderDir = OrderUtils.resolveDirection(orderReq.getTradeOpr());
 		SubmitOrderReqField req = SubmitOrderReqField.newBuilder()
 				.setOriginOrderId(UUID.randomUUID().toString())
 				.setContract(contract)

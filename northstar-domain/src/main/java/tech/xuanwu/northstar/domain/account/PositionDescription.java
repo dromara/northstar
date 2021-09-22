@@ -12,7 +12,7 @@ import tech.xuanwu.northstar.common.exception.InsufficientException;
 import tech.xuanwu.northstar.common.exception.NoSuchElementException;
 import tech.xuanwu.northstar.common.model.ContractManager;
 import tech.xuanwu.northstar.common.model.OrderRequest;
-import tech.xuanwu.northstar.common.utils.OrderUtil;
+import tech.xuanwu.northstar.common.utils.OrderUtils;
 import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
@@ -63,11 +63,11 @@ public class PositionDescription {
 	}
 	
 	private PositionField acquireTargetPosition(OrderRequest orderReq) {
-		if(!OrderUtil.isClosingOrder(orderReq.getTradeOpr())) {
+		if(!OrderUtils.isClosingOrder(orderReq.getTradeOpr())) {
 			throw new IllegalStateException("该委托并非平仓委托");
 		}
-		DirectionEnum orderDir = OrderUtil.resolveDirection(orderReq.getTradeOpr());
-		PositionDirectionEnum targetPosDir = OrderUtil.getClosingDirection(orderDir);
+		DirectionEnum orderDir = OrderUtils.resolveDirection(orderReq.getTradeOpr());
+		PositionDirectionEnum targetPosDir = OrderUtils.getClosingDirection(orderDir);
 		int i = targetPosDir == PositionDirectionEnum.PD_Long ? 1 : targetPosDir == PositionDirectionEnum.PD_Short ? 0 : -1;
 		if(!posMap.containsKey(orderReq.getContractUnifiedSymbol()) || posMap.get(orderReq.getContractUnifiedSymbol())[i] == null) {
 			throw new NoSuchElementException("找不到可平仓的持仓");
@@ -92,7 +92,7 @@ public class PositionDescription {
 		if(totalAvailable < orderReq.getVolume()) {
 			throw new InsufficientException("持仓不足，无法平仓");
 		}
-		DirectionEnum orderDir = OrderUtil.resolveDirection(orderReq.getTradeOpr());
+		DirectionEnum orderDir = OrderUtils.resolveDirection(orderReq.getTradeOpr());
 		List<SubmitOrderReqField> result = new ArrayList<>();
 		SubmitOrderReqField.Builder sb = SubmitOrderReqField.newBuilder();
 		sb.setContract(contract)

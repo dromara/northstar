@@ -8,7 +8,7 @@ import tech.xuanwu.northstar.common.exception.NoSuchElementException;
 import tech.xuanwu.northstar.common.exception.TradeException;
 import tech.xuanwu.northstar.common.model.OrderRecall;
 import tech.xuanwu.northstar.common.model.OrderRequest;
-import tech.xuanwu.northstar.common.utils.OrderUtil;
+import tech.xuanwu.northstar.common.utils.OrderUtils;
 import tech.xuanwu.northstar.domain.account.TradeDayAccount;
 
 /**
@@ -37,9 +37,9 @@ public class AccountService {
 		if(account == null) {
 			throw new NoSuchElementException("没有找到该账户实例：" + gatewayId);
 		}
-		if(OrderUtil.isOpenningOrder(req.getTradeOpr())) {			
+		if(OrderUtils.isOpenningOrder(req.getTradeOpr())) {			
 			account.openPosition(req);
-		} else if(OrderUtil.isClosingOrder(req.getTradeOpr())) {
+		} else if(OrderUtils.isClosingOrder(req.getTradeOpr())) {
 			account.closePosition(req);
 		}
 		

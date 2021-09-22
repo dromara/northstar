@@ -5,11 +5,9 @@ import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreEnum.OrderStatusEnum;
 import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
 
-public class FieldUtils {
+public interface FieldUtils {
 
-	private FieldUtils () {}
-	
-	public static String chn(DirectionEnum dir) {
+	static String chn(DirectionEnum dir) {
 		switch(dir) {
 		case D_Buy:
 			return "买";
@@ -20,7 +18,7 @@ public class FieldUtils {
 		}
 	}
 	
-	public static String chn(OffsetFlagEnum offset) {
+	static String chn(OffsetFlagEnum offset) {
 		switch (offset) {
 		case OF_Open:
 			return "开";
@@ -37,7 +35,7 @@ public class FieldUtils {
 		}
 	}
 	
-	public static String chn(OrderStatusEnum status) {
+	static String chn(OrderStatusEnum status) {
 		switch(status) {
 		case OS_AllTraded:
 			return "全成";
@@ -59,19 +57,19 @@ public class FieldUtils {
 		}
 	}
 	
-	public static boolean isLong(PositionDirectionEnum position) {
+	static boolean isLong(PositionDirectionEnum position) {
 		return position == PositionDirectionEnum.PD_Long;
 	}
 	
-	public static boolean isShort(PositionDirectionEnum position) {
+	static boolean isShort(PositionDirectionEnum position) {
 		return position == PositionDirectionEnum.PD_Short;
 	}
 	
-	public static boolean isBuy(DirectionEnum dir) {
+	static boolean isBuy(DirectionEnum dir) {
 		return dir == DirectionEnum.D_Buy;
 	}
 	
-	public static boolean isSell(DirectionEnum dir) {
+	static boolean isSell(DirectionEnum dir) {
 		return dir == DirectionEnum.D_Sell;
 	}
 }
