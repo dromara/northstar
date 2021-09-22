@@ -1,4 +1,4 @@
-package tech.xuanwu.northstar.strategy.common.model;
+package tech.xuanwu.northstar.strategy.common;
 
 import java.util.HashMap;
 import java.util.List;
@@ -15,14 +15,11 @@ import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.common.model.ContractManager;
 import tech.xuanwu.northstar.gateway.api.TradeGateway;
-import tech.xuanwu.northstar.strategy.common.Dealer;
-import tech.xuanwu.northstar.strategy.common.ExternalSignalPolicy;
-import tech.xuanwu.northstar.strategy.common.RiskController;
-import tech.xuanwu.northstar.strategy.common.Signal;
-import tech.xuanwu.northstar.strategy.common.SignalPolicy;
 import tech.xuanwu.northstar.strategy.common.constants.ModuleState;
 import tech.xuanwu.northstar.strategy.common.constants.RiskAuditResult;
 import tech.xuanwu.northstar.strategy.common.event.ModuleEventType;
+import tech.xuanwu.northstar.strategy.common.model.ModulePosition;
+import tech.xuanwu.northstar.strategy.common.model.ModuleStatus;
 import tech.xuanwu.northstar.strategy.common.model.entity.ModuleDataRef;
 import tech.xuanwu.northstar.strategy.common.model.entity.ModuleDealRecord;
 import tech.xuanwu.northstar.strategy.common.model.entity.ModuleRealTimeInfo;
