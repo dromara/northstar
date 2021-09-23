@@ -25,9 +25,9 @@ import tech.xuanwu.northstar.strategy.common.model.meta.DynamicParams;
 public class SampleSignalPolicy extends AbstractSignalPolicy
 	implements SignalPolicy //	所有的策略都应该是DynamicParamsAware的实现类
 {
-	//这两变量在这例子里没有实质作用，仅用于演示不同的参数赋值
-	private int shortPeriod;
-	private int longPeriod;
+	private int actionInterval;
+	//至少等30秒后才会开仓
+	private long lastActionTime = System.currentTimeMillis() + 30000;
 
 	/**
 	 * 获取策略的动态参数对象
@@ -44,8 +44,7 @@ public class SampleSignalPolicy extends AbstractSignalPolicy
 	public void initWithParams(DynamicParams params) {
 		InitParams initParams = (InitParams) params;
 		this.bindedUnifiedSymbol = initParams.bindedUnifiedSymbol;
-		this.longPeriod = initParams.longPeriod;
-		this.shortPeriod = initParams.shortPeriod;
+		this.actionInterval = initParams.actionInterval;
 	}
 	
 	/**
@@ -57,12 +56,9 @@ public class SampleSignalPolicy extends AbstractSignalPolicy
 		@Setting(value="绑定合约", order=10)	// Label注解用于定义属性的元信息
 		private String bindedUnifiedSymbol;		// 属性可以为任意多个，当元素为多个时order值用于控制前端的显示顺序
 		
-		@Setting(value="短周期", order=20, unit="天")	// 可以声明单位
-		private int shortPeriod;
+		@Setting(value="操作间隔", order=20, unit="秒")	// 可以声明单位
+		private int actionInterval;
 		
-		@Setting(value="长周期", order=30, unit="天")
-		private int longPeriod;
-
 	}
 
 	
@@ -78,7 +74,9 @@ public class SampleSignalPolicy extends AbstractSignalPolicy
 	protected Optional<Signal> onTick(int milliSecOfMin, BarData barData) {
 		log.info("策略每个TICK触发: {}", milliSecOfMin);
 		double price = barDataMap.get(bindedUnifiedSymbol).getSClose().ref(0);
-		if(milliSecOfMin % 30000 == 0) {
+		long now = System.currentTimeMillis();
+		if(now - lastActionTime > actionInterval) {
+			lastActionTime = now;
 			if(moduleStatus.at(ModuleState.EMPTY)) {
 				boolean flag = ThreadLocalRandom.current().nextBoolean();
 				boolean noStop = ThreadLocalRandom.current().nextBoolean();
