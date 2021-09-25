@@ -26,8 +26,8 @@ public class SampleSignalPolicy extends AbstractSignalPolicy
 	implements SignalPolicy //	所有的策略都应该是DynamicParamsAware的实现类
 {
 	private int actionInterval;
-	//至少等30秒后才会开仓
-	private long nextActionTime = System.currentTimeMillis() + 30000;
+	//至少等15秒后才会开仓
+	private long nextActionTime = System.currentTimeMillis() + 15000;
 	
 	private int stopLossTick;
 	
