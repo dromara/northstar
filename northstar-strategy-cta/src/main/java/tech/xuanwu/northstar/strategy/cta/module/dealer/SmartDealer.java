@@ -11,8 +11,16 @@ import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TickField;
 import xyz.redtorch.pb.CoreField.TradeField;
 
+/**
+ * 智能交易策略不以交易信号作为下单操作的驱动事件，
+ * 交易信号仅仅作为入场基线
+ * 下单操作会根据TICK与基线的关系作出多空操作，基线之上做多，基线之下做空
+ * 入场基线还会根据实际入场点位与价位变动而变动
+ * @author KevinHuangwl
+ *
+ */
 @Slf4j
-@StrategicComponent("智盈交易策略")
+@StrategicComponent("智能交易策略")
 public class SmartDealer extends AbstractDealer implements Dealer {
 
 	

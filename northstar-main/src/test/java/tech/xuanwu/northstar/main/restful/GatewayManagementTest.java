@@ -34,7 +34,7 @@ import xyz.redtorch.pb.CoreField.AccountField;
 
 /**
  * GatewayManagement接口白盒测试类
- * @author kevin
+ * @author KevinHuangwl
  *
  */
 @RunWith(SpringRunner.class)

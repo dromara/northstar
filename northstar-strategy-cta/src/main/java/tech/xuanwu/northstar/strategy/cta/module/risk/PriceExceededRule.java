@@ -19,7 +19,7 @@ import xyz.redtorch.pb.CoreField.TickField;
 
 /**
  * 当价格超过限制时，会拒绝继续下单
- * @author kevin
+ * @author KevinHuangwl
  *
  */
 @Slf4j
