@@ -2,7 +2,6 @@ package tech.xuanwu.northstar.strategy.common;
 
 import java.util.Optional;
 
-import tech.xuanwu.northstar.common.model.ContractManager;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TickField;
@@ -13,7 +12,7 @@ import xyz.redtorch.pb.CoreField.TradeField;
  * @author KevinHuangwl
  *
  */
-public interface Dealer extends DynamicParamsAware, SymbolAware, StatusAware {
+public interface Dealer extends DynamicParamsAware, SymbolAware, StatusAware, ContractManagerAware {
 	
 	/**
 	 * 监听行情变动,生成相应的委托单
@@ -36,9 +35,4 @@ public interface Dealer extends DynamicParamsAware, SymbolAware, StatusAware {
 	 */
 	void onTrade(TradeField trade);
 	
-	/**
-	 * 设置合约管理器
-	 * @param contractMgr
-	 */
-	void setContractManager(ContractManager contractMgr);
 }

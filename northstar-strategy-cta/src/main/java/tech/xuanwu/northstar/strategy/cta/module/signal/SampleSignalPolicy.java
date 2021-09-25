@@ -28,7 +28,9 @@ public class SampleSignalPolicy extends AbstractSignalPolicy
 	private int actionInterval;
 	//至少等30秒后才会开仓
 	private long lastActionTime = System.currentTimeMillis() + 30000;
-
+	
+	private int stopLossTick;
+	
 	/**
 	 * 获取策略的动态参数对象
 	 */
@@ -45,6 +47,7 @@ public class SampleSignalPolicy extends AbstractSignalPolicy
 		InitParams initParams = (InitParams) params;
 		this.bindedUnifiedSymbol = initParams.bindedUnifiedSymbol;
 		this.actionInterval = initParams.actionInterval;
+		this.stopLossTick = initParams.stopLossTick;
 	}
 	
 	/**
@@ -58,6 +61,9 @@ public class SampleSignalPolicy extends AbstractSignalPolicy
 		
 		@Setting(value="操作间隔", order=20, unit="秒")	// 可以声明单位
 		private int actionInterval;
+		
+		@Setting(value="止损位", order=30, unit="TICK")
+		private int stopLossTick;
 		
 	}
 
@@ -79,10 +85,9 @@ public class SampleSignalPolicy extends AbstractSignalPolicy
 			lastActionTime = now;
 			if(moduleStatus.at(ModuleState.EMPTY)) {
 				boolean flag = ThreadLocalRandom.current().nextBoolean();
-				boolean noStop = ThreadLocalRandom.current().nextBoolean();
-				double priceTick = Math.max(currentTick.getAskPrice(0) - currentTick.getLastPrice(), currentTick.getLastPrice() - currentTick.getBidPrice(0));
-				double stopPrice = flag ? price - priceTick * 2 : price + priceTick * 2;
-				return Optional.of(genSignal(flag ? SignalOperation.BuyOpen : SignalOperation.SellOpen, price, noStop ? 0 : stopPrice));
+				double priceTick = contractManager.getContract(bindedUnifiedSymbol).getPriceTick();
+				double stopPrice = flag ? price - priceTick * stopLossTick : price + priceTick * stopLossTick;
+				return Optional.of(genSignal(flag ? SignalOperation.BuyOpen : SignalOperation.SellOpen, price, stopPrice));
 			}
 			if(moduleStatus.at(ModuleState.HOLDING_LONG)) {				
 				return Optional.of(genSignal(SignalOperation.SellClose, price));
@@ -103,7 +108,5 @@ public class SampleSignalPolicy extends AbstractSignalPolicy
 		log.info("策略每分钟触发");
 		return Optional.empty();
 	}
-
-	
 	
 }

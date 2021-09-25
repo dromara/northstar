@@ -191,6 +191,7 @@ public class ModuleService implements InitializingBean{
 		}
 		
 		signalPolicy.setModuleStatus(moduleStatus);
+		signalPolicy.setContractManager(contractMgr);
 		dealer.setModuleStatus(moduleStatus);
 		dealer.setContractManager(contractMgr);
 		StrategyModule module = StrategyModule.builder()

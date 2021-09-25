@@ -11,7 +11,7 @@ import xyz.redtorch.pb.CoreField.TickField;
  * @author KevinHuangwl
  *
  */
-public interface SignalPolicy extends DynamicParamsAware, SymbolAware, StatusAware {
+public interface SignalPolicy extends DynamicParamsAware, SymbolAware, StatusAware, ContractManagerAware {
 	/**
 	 * 触发策略
 	 * @param tick
