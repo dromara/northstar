@@ -27,7 +27,7 @@ public class SampleSignalPolicy extends AbstractSignalPolicy
 {
 	private int actionInterval;
 	//至少等30秒后才会开仓
-	private long lastActionTime = System.currentTimeMillis() + 30000;
+	private long nextActionTime = System.currentTimeMillis() + 30000;
 	
 	private int stopLossTick;
 	
@@ -81,8 +81,8 @@ public class SampleSignalPolicy extends AbstractSignalPolicy
 		log.info("策略每个TICK触发: {}", milliSecOfMin);
 		double price = barDataMap.get(bindedUnifiedSymbol).getSClose().ref(0);
 		long now = System.currentTimeMillis();
-		if(now - lastActionTime > actionInterval * 1000) {
-			lastActionTime = now;
+		if(now > nextActionTime) {
+			nextActionTime = now + actionInterval * 1000;
 			if(moduleStatus.at(ModuleState.EMPTY)) {
 				boolean flag = ThreadLocalRandom.current().nextBoolean();
 				double priceTick = contractManager.getContract(bindedUnifiedSymbol).getPriceTick();
