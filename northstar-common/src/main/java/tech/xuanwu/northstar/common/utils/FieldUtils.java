@@ -72,4 +72,12 @@ public interface FieldUtils {
 	static boolean isSell(DirectionEnum dir) {
 		return dir == DirectionEnum.D_Sell;
 	}
+	
+	static boolean isOpen(OffsetFlagEnum offsetFlag) {
+		return offsetFlag == OffsetFlagEnum.OF_Open;
+	}
+	
+	static boolean isClose(OffsetFlagEnum offsetFlag) {
+		return offsetFlag != OffsetFlagEnum.OF_Unknown && offsetFlag != OffsetFlagEnum.OF_Open;
+	}
 }

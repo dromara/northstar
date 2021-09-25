@@ -75,7 +75,7 @@ public class SampleSignalPolicy extends AbstractSignalPolicy
 		log.info("策略每个TICK触发: {}", milliSecOfMin);
 		double price = barDataMap.get(bindedUnifiedSymbol).getSClose().ref(0);
 		long now = System.currentTimeMillis();
-		if(now - lastActionTime > actionInterval) {
+		if(now - lastActionTime > actionInterval * 1000) {
 			lastActionTime = now;
 			if(moduleStatus.at(ModuleState.EMPTY)) {
 				boolean flag = ThreadLocalRandom.current().nextBoolean();

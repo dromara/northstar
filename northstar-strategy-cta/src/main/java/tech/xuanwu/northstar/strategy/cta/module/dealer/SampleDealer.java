@@ -63,6 +63,9 @@ public class SampleDealer implements Dealer {
 	//注意防止重复下单
 	@Override
 	public Optional<SubmitOrderReqField> onTick(TickField tick) {
+		if(currentSignal == null && currentOrderReq == null) {
+			return Optional.empty();
+		}
 		if(currentSignal != null) {
 			DirectionEnum direction = currentSignal.getState().isBuy() ? DirectionEnum.D_Buy : DirectionEnum.D_Sell;
 			ContractField contract = contractManager.getContract(tick.getUnifiedSymbol());
