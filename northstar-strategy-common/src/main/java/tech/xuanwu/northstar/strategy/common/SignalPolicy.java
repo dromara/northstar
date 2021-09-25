@@ -1,9 +1,7 @@
 package tech.xuanwu.northstar.strategy.common;
 
 import java.util.Optional;
-import java.util.Set;
 
-import tech.xuanwu.northstar.strategy.common.model.ModuleStatus;
 import tech.xuanwu.northstar.strategy.common.model.data.BarData;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.TickField;
@@ -13,7 +11,7 @@ import xyz.redtorch.pb.CoreField.TickField;
  * @author KevinHuangwl
  *
  */
-public interface SignalPolicy extends DynamicParamsAware {
+public interface SignalPolicy extends DynamicParamsAware, SymbolAware, StatusAware {
 	/**
 	 * 触发策略
 	 * @param tick
@@ -50,17 +48,5 @@ public interface SignalPolicy extends DynamicParamsAware {
 	 * @return
 	 */
 	BarData getRefBarData(String unifiedSymbol);
-	
-	/**
-	 * 获取信号策略所绑定的合约列表
-	 * @return
-	 */
-	Set<String> bindedUnifiedSymbols();
-	
-	/**
-	 * 设置模组状态
-	 * @param stateMachine
-	 */
-	void setModuleStatus(ModuleStatus status);
 	
 }
