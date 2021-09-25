@@ -185,7 +185,7 @@ public class StrategyModule {
 				originOrderIdMap.put(restOrder.getOriginOrderId(), restOrder);
 			} else {				
 				status.transform(trade.getDirection() == DirectionEnum.D_Buy ? ModuleEventType.BUY_TRADED : ModuleEventType.SELL_TRADED);
-				dealer.doneTrade(trade);
+				dealer.onTrade(trade);
 			}
 			return Optional.of(status.onTrade(trade, order));
 		}

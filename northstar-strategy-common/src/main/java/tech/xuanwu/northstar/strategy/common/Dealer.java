@@ -10,14 +10,14 @@ import xyz.redtorch.pb.CoreField.TickField;
 import xyz.redtorch.pb.CoreField.TradeField;
 
 /**
- * 交易策略负责执行信号,以及监听执行结果,并维护交易状态(例如之前的信号是成功执行,还是失败)
+ * 交易策略负责交易管理，例如接收信号、监听止损触发、及实现其他下单逻辑
  * @author KevinHuangwl
  *
  */
 public interface Dealer extends DynamicParamsAware {
 	
 	/**
-	 * 监听行情变动,根据信号下单、撤单或者追单
+	 * 监听行情变动,生成相应的委托单
 	 * @param tick
 	 * @param riskRules
 	 * @param gateway
@@ -32,10 +32,10 @@ public interface Dealer extends DynamicParamsAware {
 	void onSignal(Signal signal, OffsetFlagEnum offsetFlag);
 	
 	/**
-	 * 完成交易
+	 * 收到交易回报
 	 * @param trade
 	 */
-	void doneTrade(TradeField trade);
+	void onTrade(TradeField trade);
 	
 	/**
 	 * 获取交易策略所绑定的合约列表

@@ -169,7 +169,7 @@ public class SampleDealer implements Dealer {
 	}
 
 	@Override
-	public void doneTrade(TradeField trade) {
+	public void onTrade(TradeField trade) {
 		if(currentOrderReq != null && StringUtils.equals(trade.getOriginOrderId(), currentOrderReq.getOriginOrderId())) {
 			currentOrderReq = null;
 			log.info("交易完成，订单号[{}]", trade.getOriginOrderId());
