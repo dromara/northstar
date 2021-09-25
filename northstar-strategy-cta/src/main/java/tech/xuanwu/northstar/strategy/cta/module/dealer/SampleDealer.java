@@ -9,15 +9,8 @@ import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.strategy.common.Dealer;
 import tech.xuanwu.northstar.strategy.common.annotation.Setting;
 import tech.xuanwu.northstar.strategy.common.annotation.StrategicComponent;
-import tech.xuanwu.northstar.strategy.common.model.ModuleStatus;
 import tech.xuanwu.northstar.strategy.common.model.meta.DynamicParams;
-import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
-import xyz.redtorch.pb.CoreEnum.ForceCloseReasonEnum;
-import xyz.redtorch.pb.CoreEnum.HedgeFlagEnum;
-import xyz.redtorch.pb.CoreEnum.OrderPriceTypeEnum;
-import xyz.redtorch.pb.CoreEnum.TimeConditionEnum;
-import xyz.redtorch.pb.CoreEnum.VolumeConditionEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TickField;
@@ -39,22 +32,7 @@ public class SampleDealer extends AbstractDealer implements Dealer {
 			DirectionEnum direction = currentSignal.getState().isBuy() ? DirectionEnum.D_Buy : DirectionEnum.D_Sell;
 			ContractField contract = contractManager.getContract(tick.getUnifiedSymbol());
 			// 按信号下单
-			currentOrderReq = SubmitOrderReqField.newBuilder()
-					.setOriginOrderId(UUID.randomUUID().toString())
-					.setContract(contract)
-					.setDirection(direction)
-					.setOffsetFlag(currentOffset)
-					.setOrderPriceType(OrderPriceTypeEnum.OPT_LimitPrice)
-					.setVolume(openVol)
-					.setHedgeFlag(HedgeFlagEnum.HF_Speculation)
-					.setTimeCondition(TimeConditionEnum.TC_GFD)
-					.setVolumeCondition(VolumeConditionEnum.VC_AV)
-					.setForceCloseReason(ForceCloseReasonEnum.FCR_NotForceClose)
-					.setContingentCondition(ContingentConditionEnum.CC_Immediately)
-					.setMinVolume(1)
-					.setStopPrice(currentSignal.getStopPrice())
-					.setPrice(resolvePrice(currentSignal, tick))
-					.build();
+			currentOrderReq = genSubmitOrder(contract, direction, currentOffset, openVol, resolvePrice(currentSignal, tick), currentSignal.getStopPrice());
 			currentSignal = null;
 			currentOffset = null;
 			log.info("交易策略生成订单,订单号[{}]", currentOrderReq.getOriginOrderId());

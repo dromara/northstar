@@ -1,6 +1,7 @@
 package tech.xuanwu.northstar.strategy.cta.module.dealer;
 
 import java.util.Set;
+import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -11,8 +12,16 @@ import tech.xuanwu.northstar.strategy.common.Dealer;
 import tech.xuanwu.northstar.strategy.common.Signal;
 import tech.xuanwu.northstar.strategy.common.model.ModuleStatus;
 import tech.xuanwu.northstar.strategy.cta.module.signal.CtaSignal;
+import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
+import xyz.redtorch.pb.CoreEnum.DirectionEnum;
+import xyz.redtorch.pb.CoreEnum.ForceCloseReasonEnum;
+import xyz.redtorch.pb.CoreEnum.HedgeFlagEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
+import xyz.redtorch.pb.CoreEnum.OrderPriceTypeEnum;
+import xyz.redtorch.pb.CoreEnum.TimeConditionEnum;
+import xyz.redtorch.pb.CoreEnum.VolumeConditionEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
+import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TickField;
 
 @Slf4j
@@ -63,7 +72,7 @@ public abstract class AbstractDealer implements Dealer{
 			log.info("当前使用[对手价]成交，基础价为：{}，超价：{} Tick，最终下单价：{}", oppPrice, overprice, orderPrice);
 			break;
 		case "市价":
-			orderPrice = currentSignal.getState().isBuy() ? tick.getUpperLimit() : tick.getLowerLimit();
+			orderPrice = 0;
 			log.info("当前使用[市价]成交，最终下单价：{}", orderPrice);
 			break;
 		case "最新价":
@@ -86,5 +95,25 @@ public abstract class AbstractDealer implements Dealer{
 			throw new IllegalStateException("未知下单价格类型：" + priceTypeStr);
 		}
 		return orderPrice;
+	}
+	
+	protected SubmitOrderReqField genSubmitOrder(ContractField contract, DirectionEnum direction, OffsetFlagEnum offsetFlag, 
+			int vol, double price, double stopPrice) {
+		return SubmitOrderReqField.newBuilder()
+				.setOriginOrderId(UUID.randomUUID().toString())
+				.setContract(contract)
+				.setDirection(direction)
+				.setOffsetFlag(offsetFlag)
+				.setOrderPriceType(price == 0 ? OrderPriceTypeEnum.OPT_AnyPrice : OrderPriceTypeEnum.OPT_LimitPrice)
+				.setVolume(vol)
+				.setHedgeFlag(HedgeFlagEnum.HF_Speculation)
+				.setTimeCondition(price == 0 ? TimeConditionEnum.TC_IOC : TimeConditionEnum.TC_GFD)
+				.setVolumeCondition(VolumeConditionEnum.VC_AV)
+				.setForceCloseReason(ForceCloseReasonEnum.FCR_NotForceClose)
+				.setContingentCondition(ContingentConditionEnum.CC_Immediately)
+				.setMinVolume(1)
+				.setStopPrice(stopPrice)
+				.setPrice(price)
+				.build();
 	}
 }
