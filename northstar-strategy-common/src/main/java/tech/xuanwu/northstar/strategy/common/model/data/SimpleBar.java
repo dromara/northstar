@@ -1,5 +1,8 @@
 package tech.xuanwu.northstar.strategy.common.model.data;
 
+import lombok.Getter;
+
+@Getter
 public class SimpleBar {
 
 	protected double open;
@@ -25,6 +28,10 @@ public class SimpleBar {
 	
 	public double barRange() {
 		return high - low;
+	}
+	
+	public double actualDiff() {
+		return close - open;
 	}
 	
 	public double upperShadow() {

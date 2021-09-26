@@ -54,4 +54,10 @@ public class SimpleBarTest {
 		assertThat(bar.isPositive()).isTrue();
 	}
 
+	@Test
+	public void testActualDiff() {
+		bar.update(1500);
+		bar.update(1200);
+		assertThat(bar.actualDiff()).isEqualTo(200);
+	}
 }

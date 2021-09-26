@@ -1,12 +1,26 @@
 package tech.xuanwu.northstar.strategy.cta.module.dealer;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Optional;
 
 import lombok.extern.slf4j.Slf4j;
+import tech.xuanwu.northstar.common.utils.BarGenerator;
+import tech.xuanwu.northstar.common.utils.FieldUtils;
 import tech.xuanwu.northstar.strategy.common.Dealer;
+import tech.xuanwu.northstar.strategy.common.Signal;
 import tech.xuanwu.northstar.strategy.common.annotation.Setting;
 import tech.xuanwu.northstar.strategy.common.annotation.StrategicComponent;
+import tech.xuanwu.northstar.strategy.common.constants.ModuleState;
+import tech.xuanwu.northstar.strategy.common.constants.PriceType;
+import tech.xuanwu.northstar.strategy.common.model.data.SimpleBar;
 import tech.xuanwu.northstar.strategy.common.model.meta.DynamicParams;
+import tech.xuanwu.northstar.strategy.cta.module.signal.CtaSignal;
+import xyz.redtorch.pb.CoreEnum.DirectionEnum;
+import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
+import xyz.redtorch.pb.CoreField.BarField;
+import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TickField;
 import xyz.redtorch.pb.CoreField.TradeField;
@@ -14,28 +28,169 @@ import xyz.redtorch.pb.CoreField.TradeField;
 /**
  * 智能交易策略不以交易信号作为下单操作的驱动事件，
  * 交易信号仅仅作为入场基线
- * 下单操作会根据TICK与基线的关系作出多空操作，基线之上做多，基线之下做空
- * 入场基线还会根据实际入场点位与价位变动而变动
+ * 本策略默认采用最新价计算
+ * 
+ * 智能入场条件：
+ * 把信号作为交易基线，当行情与信号同向，并穿过基线时入场；
+ * 当自行裁量时间超时后，按最新价发单，由风控策略决定是否接受入场价；
+ * 当最近信号为开仓信号，且模组因智能出场条件触发已出场，当行情与信号同向，并穿过基线时入场；
+ * 
+ * 智能出场条件：
+ * 当收到出场信号时，马上出场；
+ * 当入场后一定时间内，盈利没有突破安全区，且浮盈为负，出场；
+ * 当入场后盈利突破安全区，当盈亏上影达到盈亏总波幅一定比例时出场；
+ * 
+ * 基线变更条件：
+ * 开仓信号价更新；
+ * 盈亏总波幅更新；
+ * 
  * @author KevinHuangwl
  *
  */
 @Slf4j
 @StrategicComponent("智能交易策略")
 public class SmartDealer extends AbstractDealer implements Dealer {
-
+	
+	protected double baseline;
+	
+	//智能策略收到信号后可自行裁量的时长（秒）
+	protected int signalAccordanceTimeout;
+	
+	protected long actionDeadline;
+	
+	protected int numberOfTickForSafeZoon;
+	
+	protected int periodToleranceInDangerZoon;
+	
+	protected SubmitOrderReqField currentOrderReq;
+	
+	protected TickField lastTick;
+	
+	protected CtaSignal lastSignal;
+	
+	protected BarField lastMinBar;
+	
+	protected SimpleBar holdingProfitBar;
+	
+	protected long toleranceDeadline;
+	
+	private BarGenerator barGen = new BarGenerator(bindedUnifiedSymbol, (bar, minTick) -> lastMinBar = bar);
 	
 	@Override
 	public Optional<SubmitOrderReqField> onTick(TickField tick) {
-		// TODO Auto-generated method stub
-		return null;
+		lastTick = tick;
+		barGen.updateTick(tick);
+		if(currentSignal == lastSignal) {
+			return Optional.empty();
+		}
+		
+		CtaSignal signal = getSignal();
+		DirectionEnum direction = signal.getState().isBuy() ? DirectionEnum.D_Buy : DirectionEnum.D_Sell;
+		ContractField contract = contractManager.getContract(tick.getUnifiedSymbol());
+		if(moduleStatus.at(ModuleState.EMPTY)) {
+			//当模组无持仓时，等待超时后，按最新价生成订单
+			if(currentSignal != null && System.currentTimeMillis() > actionDeadline) {
+				log.info("[{}] 自行裁量时间结束，按信号触发开仓", moduleStatus.getModuleName());
+				currentOrderReq = genSubmitOrder(contract, direction, OffsetFlagEnum.OF_Open, openVol, tick.getLastPrice(), currentSignal.getStopPrice());
+				lastSignal = currentSignal;
+				currentSignal = null;
+				return Optional.of(currentOrderReq);
+			}
+			// 当模组无持仓时，等待TICK穿越基线触发市价开单
+			if(triggerSmartOpening()) {
+				log.info("[{}] 智能触发开仓", moduleStatus.getModuleName());
+				currentOrderReq = genSubmitOrder(contract, direction, OffsetFlagEnum.OF_Open, openVol, 0, signal.getStopPrice());
+				lastSignal = signal;
+				currentSignal = null;
+				return Optional.of(currentOrderReq);
+			}
+		} else if (moduleStatus.at(ModuleState.HOLDING_LONG) || moduleStatus.at(ModuleState.HOLDING_SHORT)) {
+			// 当模组为持仓时，按信号平仓
+			if(!signal.getState().isOpen()) {
+				log.info("[{}] 信号触发平仓", moduleStatus.getModuleName());
+				OffsetFlagEnum offset = moduleStatus.isSameDayHolding(tick.getTradingDay()) ? OffsetFlagEnum.OF_CloseToday : OffsetFlagEnum.OF_CloseYesterday;
+				currentOrderReq = genSubmitOrder(contract, direction, offset, openVol, 0, 0);
+				lastSignal = null;
+				currentSignal = null;
+				return Optional.of(currentOrderReq);
+			}
+			if(triggerSmartClosingByTimeout() || triggerSmartClosingByRange()) {
+				log.info("[{}] 智能触发平仓", moduleStatus.getModuleName());
+				OffsetFlagEnum offset = moduleStatus.isSameDayHolding(tick.getTradingDay()) ? OffsetFlagEnum.OF_CloseToday : OffsetFlagEnum.OF_CloseYesterday;
+				currentOrderReq = genSubmitOrder(contract, direction, offset, openVol, 0, 0);
+				return Optional.of(currentOrderReq);
+			}
+		}
+		
+		return Optional.empty();
 	}
 
 	@Override
 	public void onTrade(TradeField trade) {
-		// TODO Auto-generated method stub
-		
+		if(FieldUtils.isOpen(trade.getOffsetFlag())) {
+			holdingProfitBar = new SimpleBar(0);
+		}
 	}
 	
+	private boolean triggerSmartClosingByTimeout() {
+		holdingProfitBar.update(moduleStatus.getHoldingProfit());
+		if(System.currentTimeMillis() > toleranceDeadline && holdingProfitBar.actualDiff() < 0) {
+			log.info("[{}] 限定时间内浮盈没有达到安全边际，触发智能平仓", moduleStatus.getModuleName());
+			return true;
+		}
+		return false;
+	}
+	
+	private boolean triggerSmartClosingByRange() {
+		holdingProfitBar.update(moduleStatus.getHoldingProfit());
+		ContractField contract = contractManager.getContract(lastTick.getUnifiedSymbol());
+		double safeProft = contract.getMultiplier() * openVol * numberOfTickForSafeZoon;
+		if(holdingProfitBar.getHigh() > safeProft && (holdingProfitBar.upperShadow() * 1.0 / holdingProfitBar.barRange()) > 0.25) {
+			log.info("[{}] 回撤幅度超过额定幅度，触发智能平仓", moduleStatus.getModuleName());
+			updateBaseline(lastTick.getLastPrice());
+			return true;
+		}
+		return false;
+	}
+	
+	private boolean triggerSmartOpening() {
+		if(lastMinBar == null) {
+			return false;
+		}
+		CtaSignal signal = getSignal();
+		return (signal.isBuy() && lastMinBar.getClosePrice() < baseline && lastTick.getLastPrice() >= baseline) 
+				|| (!signal.isBuy() && lastMinBar.getClosePrice() > baseline && lastTick.getLastPrice() <= baseline);
+	}
+	
+	private CtaSignal getSignal() {
+		CtaSignal signal = currentSignal != null ? currentSignal : lastSignal;
+		if(signal == null) {
+			throw new IllegalStateException("没有信号记录");
+		}
+		return signal;
+	}
+	
+	private void updateBaseline(double val) {
+		log.info("[{}] 基线值更新：[{}]->[{}]", moduleStatus.getModuleName(), baseline, val);
+		baseline = val;
+	}
+	
+	@Override
+	public void onSignal(Signal signal) {
+		super.onSignal(signal);
+		if(signal.isOpening()) {
+			updateBaseline(resolvePrice((CtaSignal) signal, lastTick));
+			actionDeadline = System.currentTimeMillis() + signalAccordanceTimeout * 1000;
+			toleranceDeadline = System.currentTimeMillis() + periodToleranceInDangerZoon * 1000;
+			log.info("[{}] 收到开仓信号：操作{}，价格{}，止损{}", moduleStatus.getModuleName(), ((CtaSignal)signal).getState(), signal.price(), signal.stopPrice());
+			log.info("[{}] 当前价格基线：{}", moduleStatus.getModuleName(), baseline);
+			log.info("[{}] 自由裁量时间：{}秒", moduleStatus.getModuleName(), signalAccordanceTimeout);
+			log.info("[{}] 自行裁量截止时间：{}", moduleStatus.getModuleName(), LocalDateTime.ofInstant(Instant.ofEpochMilli(actionDeadline), ZoneId.systemDefault()));
+		} else {
+			log.info("[{}] 收到平仓信号：操作{}，价格{}", moduleStatus.getModuleName(), ((CtaSignal)signal).getState(), signal.price());
+		}
+	}
+
 	@Override
 	public DynamicParams getDynamicParams() {
 		return new InitParams();
@@ -46,8 +201,10 @@ public class SmartDealer extends AbstractDealer implements Dealer {
 		InitParams initParams = (InitParams) params;
 		this.bindedUnifiedSymbol = initParams.bindedUnifiedSymbol;
 		this.openVol = initParams.openVol;
+		this.signalAccordanceTimeout = initParams.signalAccordanceTimeout;
+		this.numberOfTickForSafeZoon = initParams.numberOfTickForSafeZoon;
+		this.periodToleranceInDangerZoon = initParams.periodToleranceInDangerZoon;
 		this.priceTypeStr = initParams.priceTypeStr;
-		this.overprice = initParams.overprice;
 	}
 
 	public static class InitParams extends DynamicParams{
@@ -58,11 +215,17 @@ public class SmartDealer extends AbstractDealer implements Dealer {
 		@Setting(value="开仓手数", order = 20)
 		private int openVol;
 		
-		@Setting(value="价格类型", order = 30, options = {"对手价", "市价", "最新价", "排队价", "信号价"})
-		private String priceTypeStr;
+		@Setting(value="自行裁量时长", order = 30, unit="秒")
+		private int signalAccordanceTimeout;
 		
-		@Setting(value="超价", order = 40, unit = "Tick")
-		private int overprice;
+		@Setting(value="安全边界", order = 40, unit="TICK")
+		private int numberOfTickForSafeZoon;
+		
+		@Setting(value="危险区时长", order = 50, unit="秒")
+		private int periodToleranceInDangerZoon;
+		
+		@Setting(value="价格类型", order = 60, options = {PriceType.OPP_PRICE, PriceType.ANY_PRICE, PriceType.LAST_PRICE, PriceType.QUEUE_PRICE, PriceType.SIGNAL_PRICE})
+		private String priceTypeStr;
 	}
 	
 }
