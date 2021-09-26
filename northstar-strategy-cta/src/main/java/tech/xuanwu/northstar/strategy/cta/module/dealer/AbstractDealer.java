@@ -66,19 +66,19 @@ public abstract class AbstractDealer implements Dealer{
 		case "对手价":
 			double oppPrice = currentSignal.getState().isBuy() ? tick.getAskPrice(0) : tick.getBidPrice(0);
 			orderPrice = oppPrice + factor * priceTick * overprice;
-			log.info("当前使用[对手价]成交，基础价为：{}，超价：{} Tick，最终下单价：{}", oppPrice, overprice, orderPrice);
+			log.info("当前使用[对手价]为基准，基础价为：{}，超价：{} Tick，最终下单价：{}", oppPrice, overprice, orderPrice);
 			break;
 		case "市价":
 			orderPrice = 0;
-			log.info("当前使用[市价]成交，最终下单价：{}", orderPrice);
+			log.info("当前使用[市价]为基准，最终下单价：{}", orderPrice);
 			break;
 		case "最新价":
 			orderPrice = tick.getLastPrice() + factor * priceTick * overprice;
-			log.info("当前使用[最新价]成交，基础价为：{}，超价：{} Tick，最终下单价：{}", tick.getLastPrice(), overprice, orderPrice);
+			log.info("当前使用[最新价]为基准，基础价为：{}，超价：{} Tick，最终下单价：{}", tick.getLastPrice(), overprice, orderPrice);
 			break;
 		case "排队价":
 			orderPrice = currentSignal.getState().isBuy() ? tick.getBidPrice(0) : tick.getAskPrice(0);
-			log.info("当前使用[排队价]成交，基础价为：{}，忽略超价，最终下单价：{}", orderPrice, orderPrice);
+			log.info("当前使用[排队价]为基准，基础价为：{}，忽略超价，最终下单价：{}", orderPrice, orderPrice);
 			break;
 		case "信号价":
 			if(!StringUtils.equals(currentSignal.getSourceUnifiedSymbol(), bindedUnifiedSymbol)) {
@@ -86,7 +86,7 @@ public abstract class AbstractDealer implements Dealer{
 						currentSignal.getSourceUnifiedSymbol(), bindedUnifiedSymbol);
 			}
 			orderPrice = currentSignal.getSignalPrice() + factor * priceTick * overprice;
-			log.info("当前使用[限价]成交，基础价为：{}，超价：{} Tick，最终下单价：{}", currentSignal.getSignalPrice(), overprice, orderPrice);
+			log.info("当前使用[限价]为基准，基础价为：{}，超价：{} Tick，最终下单价：{}", currentSignal.getSignalPrice(), overprice, orderPrice);
 			break;
 		default:
 			throw new IllegalStateException("未知下单价格类型：" + priceTypeStr);

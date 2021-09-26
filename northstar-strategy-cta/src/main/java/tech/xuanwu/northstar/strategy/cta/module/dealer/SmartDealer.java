@@ -85,6 +85,9 @@ public class SmartDealer extends AbstractDealer implements Dealer {
 		}
 		
 		CtaSignal signal = getSignal();
+		if(baseline == 0) {			
+			updateBaseline(resolvePrice(signal, lastTick));
+		}
 		DirectionEnum direction = signal.getState().isBuy() ? DirectionEnum.D_Buy : DirectionEnum.D_Sell;
 		ContractField contract = contractManager.getContract(tick.getUnifiedSymbol());
 		if(moduleStatus.at(ModuleState.EMPTY)) {
@@ -179,7 +182,7 @@ public class SmartDealer extends AbstractDealer implements Dealer {
 	public void onSignal(Signal signal) {
 		super.onSignal(signal);
 		if(signal.isOpening()) {
-			updateBaseline(resolvePrice((CtaSignal) signal, lastTick));
+			updateBaseline(0);
 			actionDeadline = System.currentTimeMillis() + signalAccordanceTimeout * 1000;
 			toleranceDeadline = System.currentTimeMillis() + periodToleranceInDangerZoon * 1000;
 			log.info("[{}] 收到开仓信号：操作{}，价格{}，止损{}", moduleStatus.getModuleName(), ((CtaSignal)signal).getState(), signal.price(), signal.stopPrice());

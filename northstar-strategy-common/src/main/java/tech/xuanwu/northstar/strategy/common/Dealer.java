@@ -2,7 +2,6 @@ package tech.xuanwu.northstar.strategy.common;
 
 import java.util.Optional;
 
-import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TickField;
 import xyz.redtorch.pb.CoreField.TradeField;
