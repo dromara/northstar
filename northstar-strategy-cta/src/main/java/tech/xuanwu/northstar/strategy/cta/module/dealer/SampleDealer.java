@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.strategy.common.Dealer;
 import tech.xuanwu.northstar.strategy.common.annotation.Setting;
 import tech.xuanwu.northstar.strategy.common.annotation.StrategicComponent;
+import tech.xuanwu.northstar.strategy.common.constants.PriceType;
 import tech.xuanwu.northstar.strategy.common.model.meta.DynamicParams;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
@@ -80,7 +81,7 @@ public class SampleDealer extends AbstractDealer implements Dealer {
 		@Setting(value="开仓手数", order = 20)
 		private int openVol;
 		
-		@Setting(value="价格类型", order = 30, options = {"对手价", "市价", "最新价", "排队价", "信号价"})
+		@Setting(value="价格类型", order = 30, options = {PriceType.OPP_PRICE, PriceType.ANY_PRICE, PriceType.LAST_PRICE, PriceType.QUEUE_PRICE, PriceType.SIGNAL_PRICE})
 		private String priceTypeStr;
 		
 		@Setting(value="超价", order = 40, unit = "Tick")
