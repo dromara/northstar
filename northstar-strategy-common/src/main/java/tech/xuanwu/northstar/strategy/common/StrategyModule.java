@@ -112,8 +112,7 @@ public class StrategyModule {
 				if(submitOrder.get().getOffsetFlag() == OffsetFlagEnum.OF_Unknown) {
 					throw new IllegalStateException("未定义开平操作");
 				}
-				if(FieldUtils.isOpen(submitOrder.get().getOffsetFlag()) 
-						&& riskController.testReject(tick, status, submitOrder.get())) {
+				if(riskController.testReject(tick, status, submitOrder.get()) && FieldUtils.isOpen(submitOrder.get().getOffsetFlag())) {
 					status.transform(ModuleEventType.SIGNAL_RETAINED);
 					return this;
 				}
