@@ -81,7 +81,7 @@ public class SampleDealer extends AbstractDealer implements Dealer {
 		@Setting(value="开仓手数", order = 20)
 		private int openVol;
 		
-		@Setting(value="价格类型", order = 30, options = {PriceType.OPP_PRICE, PriceType.ANY_PRICE, PriceType.LAST_PRICE, PriceType.QUEUE_PRICE, PriceType.SIGNAL_PRICE})
+		@Setting(value="开仓价格类型", order = 30, options = {PriceType.OPP_PRICE, PriceType.ANY_PRICE, PriceType.LAST_PRICE, PriceType.QUEUE_PRICE, PriceType.SIGNAL_PRICE})
 		private String priceTypeStr;
 		
 		@Setting(value="超价", order = 40, unit = "Tick")

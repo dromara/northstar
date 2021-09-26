@@ -224,7 +224,7 @@ public class SmartDealer extends AbstractDealer implements Dealer {
 		@Setting(value="危险区时长", order = 50, unit="秒")
 		private int periodToleranceInDangerZoon;
 		
-		@Setting(value="价格类型", order = 60, options = {PriceType.OPP_PRICE, PriceType.ANY_PRICE, PriceType.LAST_PRICE, PriceType.QUEUE_PRICE, PriceType.SIGNAL_PRICE})
+		@Setting(value="基线价格类型", order = 60, options = {PriceType.OPP_PRICE, PriceType.ANY_PRICE, PriceType.LAST_PRICE, PriceType.QUEUE_PRICE, PriceType.SIGNAL_PRICE})
 		private String priceTypeStr;
 	}
 	
