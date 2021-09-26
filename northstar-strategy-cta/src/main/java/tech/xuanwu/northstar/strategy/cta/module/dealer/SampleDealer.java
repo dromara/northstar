@@ -11,6 +11,7 @@ import tech.xuanwu.northstar.strategy.common.annotation.Setting;
 import tech.xuanwu.northstar.strategy.common.annotation.StrategicComponent;
 import tech.xuanwu.northstar.strategy.common.model.meta.DynamicParams;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
+import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TickField;
@@ -31,10 +32,15 @@ public class SampleDealer extends AbstractDealer implements Dealer {
 		if(currentSignal != null) {
 			DirectionEnum direction = currentSignal.getState().isBuy() ? DirectionEnum.D_Buy : DirectionEnum.D_Sell;
 			ContractField contract = contractManager.getContract(tick.getUnifiedSymbol());
+			OffsetFlagEnum offset;
+			if(currentSignal.getState().isOpen()) {
+				offset = OffsetFlagEnum.OF_Open;
+			} else {
+				offset = moduleStatus.isSameDayHolding(tick.getTradingDay()) ? OffsetFlagEnum.OF_CloseToday : OffsetFlagEnum.OF_CloseYesterday;
+			}
 			// 按信号下单
-			currentOrderReq = genSubmitOrder(contract, direction, currentOffset, openVol, resolvePrice(currentSignal, tick), currentSignal.getStopPrice());
+			currentOrderReq = genSubmitOrder(contract, direction, offset, openVol, resolvePrice(currentSignal, tick), currentSignal.getStopPrice());
 			currentSignal = null;
-			currentOffset = null;
 			log.info("交易策略生成订单,订单号[{}]", currentOrderReq.getOriginOrderId());
 			return Optional.of(currentOrderReq);
 			

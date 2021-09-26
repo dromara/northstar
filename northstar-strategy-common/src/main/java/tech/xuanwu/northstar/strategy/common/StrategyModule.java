@@ -93,9 +93,8 @@ public class StrategyModule {
 					|| status.at(ModuleState.HOLDING_SHORT)) {				
 				Optional<Signal> signal = signalPolicy.onTick(tick);
 				if(signal.isPresent()) {
-					OffsetFlagEnum closingOffset = status.isSameDay(tradingDay) ? OffsetFlagEnum.OF_CloseToday : OffsetFlagEnum.OF_Close;
 					status.transform(signal.get().isOpening() ? ModuleEventType.OPENING_SIGNAL_CREATED : ModuleEventType.CLOSING_SIGNAL_CREATED);
-					dealer.onSignal(signal.get(), signal.get().isOpening() ? OffsetFlagEnum.OF_Open : closingOffset);
+					dealer.onSignal(signal.get());
 				}
 			}
 		}

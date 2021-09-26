@@ -27,7 +27,7 @@ public interface Dealer extends DynamicParamsAware, SymbolAware, StatusAware, Co
 	 * @param signal
 	 * @param offsetFlag	实操明细
 	 */
-	void onSignal(Signal signal, OffsetFlagEnum offsetFlag);
+	void onSignal(Signal signal);
 	
 	/**
 	 * 收到交易回报

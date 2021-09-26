@@ -29,8 +29,6 @@ public abstract class AbstractDealer implements Dealer{
 
 	protected CtaSignal currentSignal;
 	
-	protected OffsetFlagEnum currentOffset;
-	
 	@Setter
 	protected ContractManager contractManager;
 	
@@ -50,9 +48,8 @@ public abstract class AbstractDealer implements Dealer{
 	}
 	
 	@Override
-	public void onSignal(Signal signal, OffsetFlagEnum offsetFlag) {
+	public void onSignal(Signal signal) {
 		currentSignal = (CtaSignal) signal;
-		currentOffset = offsetFlag;
 	}
 	
 	@Override

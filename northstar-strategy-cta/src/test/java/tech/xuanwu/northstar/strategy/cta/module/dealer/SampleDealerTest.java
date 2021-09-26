@@ -94,7 +94,7 @@ public class SampleDealerTest extends CommonParamTest {
 	@Test
 	public void shouldGetSubmitOrderReqWhenReceivingSignal() {
 		dealer.priceTypeStr = "信号价";
-		dealer.onSignal(signal, OffsetFlagEnum.OF_Close);
+		dealer.onSignal(signal);
 		assertThat(dealer.onTick(factory.makeTickField("rb2210", 1234))).isPresent();
 	}
 	
