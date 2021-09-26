@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.strategy.common.Dealer;
 import tech.xuanwu.northstar.strategy.common.annotation.Setting;
 import tech.xuanwu.northstar.strategy.common.annotation.StrategicComponent;
+import tech.xuanwu.northstar.strategy.common.constants.ModuleState;
 import tech.xuanwu.northstar.strategy.common.constants.PriceType;
 import tech.xuanwu.northstar.strategy.common.model.meta.DynamicParams;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
@@ -45,7 +46,7 @@ public class SampleDealer extends AbstractDealer implements Dealer {
 			log.info("交易策略生成订单,订单号[{}]", currentOrderReq.getOriginOrderId());
 			return Optional.of(currentOrderReq);
 			
-		} else {
+		} else if(moduleStatus.at(ModuleState.PLACING_ORDER)) {
 			int factor = currentOrderReq.getDirection() == DirectionEnum.D_Buy ? 1 : -1;
 			ContractField contract = contractManager.getContract(tick.getUnifiedSymbol());
 			double priceTick = contract.getPriceTick();
@@ -57,6 +58,7 @@ public class SampleDealer extends AbstractDealer implements Dealer {
 			log.info("交易策略改价追单，订单号[{}]", currentOrderReq.getOriginOrderId());
 			return Optional.of(currentOrderReq);
 		}
+		return Optional.empty();
 	}
 	
 	@Override

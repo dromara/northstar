@@ -174,4 +174,6 @@ public class SmartDealerTest extends CommonParamTest {
 		assertThat(dealer.onTick(factory.makeTickField(SYMBOL, 1245))).isEmpty();
 	}
 	
+	
+	//当自行裁量期超时时，如果未触发信号止损价，应该发单，否则不发单
 }

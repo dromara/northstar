@@ -107,6 +107,20 @@ public class StrategyModule {
 				return this;
 			}
 			
+			Optional<SubmitOrderReqField> submitOrder = dealer.onTick(tick);
+			if(submitOrder.isPresent()) {
+				if(submitOrder.get().getOffsetFlag() == OffsetFlagEnum.OF_Unknown) {
+					throw new IllegalStateException("未定义开平操作");
+				}
+				if(FieldUtils.isOpen(submitOrder.get().getOffsetFlag()) 
+						&& riskController.testReject(tick, status, submitOrder.get())) {
+					status.transform(ModuleEventType.SIGNAL_RETAINED);
+					return this;
+				}
+				originOrderIdMap.put(submitOrder.get().getOriginOrderId(), OrderField.newBuilder().build());	// 用空的订单对象占位
+				gateway.submitOrder(submitOrder.get());
+			}
+			
 			if(status.at(ModuleState.PENDING_ORDER)) {
 				short riskCode = riskController.onTick(tick, status);
 				if(riskCode == RiskAuditResult.ACCEPTED) {
@@ -123,22 +137,6 @@ public class StrategyModule {
 							.setOriginOrderId(originOrderId)
 							.build();
 					gateway.cancelOrder(cancelOrder);
-				}
-			}
-			
-			if(status.at(ModuleState.PLACING_ORDER) || status.at(ModuleState.HOLDING_LONG) || status.at(ModuleState.HOLDING_SHORT)) {
-				Optional<SubmitOrderReqField> submitOrder = dealer.onTick(tick);
-				if(submitOrder.isPresent()) {
-					if(submitOrder.get().getOffsetFlag() == OffsetFlagEnum.OF_Unknown) {
-						throw new IllegalStateException("未定义开平操作");
-					}
-					if(FieldUtils.isOpen(submitOrder.get().getOffsetFlag()) 
-							&& riskController.testReject(tick, status, submitOrder.get())) {
-						status.transform(ModuleEventType.SIGNAL_RETAINED);
-						return this;
-					}
-					originOrderIdMap.put(submitOrder.get().getOriginOrderId(), OrderField.newBuilder().build());	// 用空的订单对象占位
-					gateway.submitOrder(submitOrder.get());
 				}
 			}
 		}

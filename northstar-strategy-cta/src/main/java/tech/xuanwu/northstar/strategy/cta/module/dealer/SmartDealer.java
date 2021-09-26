@@ -80,10 +80,11 @@ public class SmartDealer extends AbstractDealer implements Dealer {
 	public Optional<SubmitOrderReqField> onTick(TickField tick) {
 		lastTick = tick;
 		barGen.updateTick(tick);
-		if(currentSignal == lastSignal) {
+		if(currentSignal == lastSignal || lastMinBar == null) {
 			return Optional.empty();
 		}
 		
+		log.info("{} 最新价：{}", tick.getUnifiedSymbol(), tick.getLastPrice());
 		CtaSignal signal = getSignal();
 		if(baseline == 0) {			
 			updateBaseline(resolvePrice(signal, lastTick));
