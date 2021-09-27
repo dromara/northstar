@@ -118,6 +118,13 @@ public class SmartDealer extends AbstractDealer implements Dealer {
 				currentSignal = null;
 				return Optional.of(currentOrderReq);
 			}
+			//当价格已经触及止损时，不应该再开仓
+			if(signal.isOpening() && 
+					(signal.isBuy() && lastTick.getLastPrice() < signal.getStopPrice() || !signal.isBuy() && lastTick.getLastPrice() > signal.getStopPrice())) {
+				log.info("[{}] 智能终止开仓", moduleStatus.getModuleName());
+				moduleStatus.transform(ModuleEventType.SIGNAL_RETAINED);
+				return Optional.empty();
+			}
 			//当模组无持仓时，等待超时后，按最新价生成订单
 			if(currentSignal != null && currentSignal.isOpening() && System.currentTimeMillis() > actionDeadline) {
 				log.info("[{}] 自行裁量时间结束，信号触发开仓", moduleStatus.getModuleName());
