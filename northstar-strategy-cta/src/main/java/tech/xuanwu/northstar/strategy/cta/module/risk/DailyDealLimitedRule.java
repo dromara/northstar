@@ -12,7 +12,7 @@ import xyz.redtorch.pb.CoreField.TickField;
 
 /**
  * 当日内交易次数超过限制时，会拒绝继续下单
- * @author kevin
+ * @author KevinHuangwl
  *
  */
 @Slf4j

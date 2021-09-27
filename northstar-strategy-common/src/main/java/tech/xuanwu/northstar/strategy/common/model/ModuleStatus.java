@@ -152,7 +152,7 @@ public class ModuleStatus {
 		return stateMachine.getState();
 	}
 	
-	public boolean isSameDay(String currentTradingDay) {
+	public boolean isSameDayHolding(String currentTradingDay) {
 		return StringUtils.equals(currentTradingDay, holdingTradingDay);
 	}
 	

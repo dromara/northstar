@@ -30,12 +30,11 @@ import tech.xuanwu.northstar.common.model.ResultBean;
 import tech.xuanwu.northstar.common.model.SimSettings;
 import tech.xuanwu.northstar.engine.event.FastEventEngine;
 import tech.xuanwu.northstar.main.NorthstarApplication;
-import tech.xuanwu.northstar.main.restful.GatewayManagementController;
 import xyz.redtorch.pb.CoreField.AccountField;
 
 /**
  * GatewayManagement接口白盒测试类
- * @author kevin
+ * @author KevinHuangwl
  *
  */
 @RunWith(SpringRunner.class)

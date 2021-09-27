@@ -13,6 +13,7 @@ import tech.xuanwu.northstar.strategy.common.model.ModuleStatus;
 import test.common.TestFieldFactory;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
+import xyz.redtorch.pb.CoreEnum.OrderPriceTypeEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 
@@ -48,6 +49,7 @@ public class PriceExceededRuleTest extends CommonParamTest {
 				.setContract(contract)
 				.setDirection(DirectionEnum.D_Buy)
 				.setOffsetFlag(OffsetFlagEnum.OF_Open)
+				.setOrderPriceType(OrderPriceTypeEnum.OPT_LimitPrice)
 				.setPrice(1234)
 				.setVolume(1)
 				.build();
@@ -63,6 +65,7 @@ public class PriceExceededRuleTest extends CommonParamTest {
 				.setContract(contract)
 				.setDirection(DirectionEnum.D_Sell)
 				.setOffsetFlag(OffsetFlagEnum.OF_Open)
+				.setOrderPriceType(OrderPriceTypeEnum.OPT_LimitPrice)
 				.setPrice(1234)
 				.setVolume(1)
 				.build();

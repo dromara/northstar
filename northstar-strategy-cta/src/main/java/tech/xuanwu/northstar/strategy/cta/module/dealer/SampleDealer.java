@@ -1,28 +1,19 @@
 package tech.xuanwu.northstar.strategy.cta.module.dealer;
 
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
 
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import tech.xuanwu.northstar.common.model.ContractManager;
 import tech.xuanwu.northstar.strategy.common.Dealer;
-import tech.xuanwu.northstar.strategy.common.Signal;
 import tech.xuanwu.northstar.strategy.common.annotation.Setting;
 import tech.xuanwu.northstar.strategy.common.annotation.StrategicComponent;
+import tech.xuanwu.northstar.strategy.common.constants.ModuleState;
+import tech.xuanwu.northstar.strategy.common.constants.PriceType;
 import tech.xuanwu.northstar.strategy.common.model.meta.DynamicParams;
-import tech.xuanwu.northstar.strategy.cta.module.signal.CtaSignal;
-import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
-import xyz.redtorch.pb.CoreEnum.ForceCloseReasonEnum;
-import xyz.redtorch.pb.CoreEnum.HedgeFlagEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
-import xyz.redtorch.pb.CoreEnum.OrderPriceTypeEnum;
-import xyz.redtorch.pb.CoreEnum.TimeConditionEnum;
-import xyz.redtorch.pb.CoreEnum.VolumeConditionEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TickField;
@@ -30,65 +21,32 @@ import xyz.redtorch.pb.CoreField.TradeField;
 
 @Slf4j
 @StrategicComponent("示例交易策略")
-public class SampleDealer implements Dealer {
-	
-	private CtaSignal currentSignal;
-	
-	private OffsetFlagEnum currentOffset;
+public class SampleDealer extends AbstractDealer implements Dealer {
 	
 	private SubmitOrderReqField currentOrderReq;
-	
-	@Setter
-	private ContractManager contractManager;
-	
-	protected String bindedUnifiedSymbol;
-	
-	protected int openVol;
-	
-	protected String priceTypeStr;
-	
-	protected int overprice;
-	
-	@Override
-	public Set<String> bindedUnifiedSymbols() {
-		return Set.of(bindedUnifiedSymbol);
-	}
-	
-	@Override
-	public void onSignal(Signal signal, OffsetFlagEnum offsetFlag) {
-		currentSignal = (CtaSignal) signal;
-		currentOffset = offsetFlag;
-	}
 
 	//注意防止重复下单
 	@Override
 	public Optional<SubmitOrderReqField> onTick(TickField tick) {
+		if(currentSignal == null && currentOrderReq == null) {
+			return Optional.empty();
+		}
 		if(currentSignal != null) {
 			DirectionEnum direction = currentSignal.getState().isBuy() ? DirectionEnum.D_Buy : DirectionEnum.D_Sell;
 			ContractField contract = contractManager.getContract(tick.getUnifiedSymbol());
+			OffsetFlagEnum offset;
+			if(currentSignal.getState().isOpen()) {
+				offset = OffsetFlagEnum.OF_Open;
+			} else {
+				offset = moduleStatus.isSameDayHolding(tick.getTradingDay()) ? OffsetFlagEnum.OF_CloseToday : OffsetFlagEnum.OF_CloseYesterday;
+			}
 			// 按信号下单
-			currentOrderReq = SubmitOrderReqField.newBuilder()
-					.setOriginOrderId(UUID.randomUUID().toString())
-					.setContract(contract)
-					.setDirection(direction)
-					.setOffsetFlag(currentOffset)
-					.setOrderPriceType(OrderPriceTypeEnum.OPT_LimitPrice)
-					.setVolume(openVol)
-					.setHedgeFlag(HedgeFlagEnum.HF_Speculation)
-					.setTimeCondition(TimeConditionEnum.TC_GFD)
-					.setVolumeCondition(VolumeConditionEnum.VC_AV)
-					.setForceCloseReason(ForceCloseReasonEnum.FCR_NotForceClose)
-					.setContingentCondition(ContingentConditionEnum.CC_Immediately)
-					.setMinVolume(1)
-					.setStopPrice(currentSignal.getStopPrice())
-					.setPrice(resolvePrice(currentSignal, tick))
-					.build();
+			currentOrderReq = genSubmitOrder(contract, direction, offset, openVol, resolvePrice(currentSignal, tick), currentSignal.getStopPrice());
 			currentSignal = null;
-			currentOffset = null;
 			log.info("交易策略生成订单,订单号[{}]", currentOrderReq.getOriginOrderId());
 			return Optional.of(currentOrderReq);
 			
-		} else {
+		} else if(moduleStatus.at(ModuleState.PLACING_ORDER)) {
 			int factor = currentOrderReq.getDirection() == DirectionEnum.D_Buy ? 1 : -1;
 			ContractField contract = contractManager.getContract(tick.getUnifiedSymbol());
 			double priceTick = contract.getPriceTick();
@@ -100,43 +58,7 @@ public class SampleDealer implements Dealer {
 			log.info("交易策略改价追单，订单号[{}]", currentOrderReq.getOriginOrderId());
 			return Optional.of(currentOrderReq);
 		}
-	}
-	
-	protected double resolvePrice(CtaSignal currentSignal, TickField tick) {
-		int factor = currentSignal.getState().isBuy() ? 1 : -1;
-		ContractField contract = contractManager.getContract(tick.getUnifiedSymbol());
-		double priceTick = contract.getPriceTick();
-		double orderPrice = 0;
-		switch(priceTypeStr) {
-		case "对手价":
-			double oppPrice = currentSignal.getState().isBuy() ? tick.getAskPrice(0) : tick.getBidPrice(0);
-			orderPrice = oppPrice + factor * priceTick * overprice;
-			log.info("当前使用[对手价]成交，基础价为：{}，超价：{} Tick，最终下单价：{}", oppPrice, overprice, orderPrice);
-			break;
-		case "市价":
-			orderPrice = currentSignal.getState().isBuy() ? tick.getUpperLimit() : tick.getLowerLimit();
-			log.info("当前使用[市价]成交，最终下单价：{}", orderPrice);
-			break;
-		case "最新价":
-			orderPrice = tick.getLastPrice() + factor * priceTick * overprice;
-			log.info("当前使用[最新价]成交，基础价为：{}，超价：{} Tick，最终下单价：{}", tick.getLastPrice(), overprice, orderPrice);
-			break;
-		case "排队价":
-			orderPrice = currentSignal.getState().isBuy() ? tick.getBidPrice(0) : tick.getAskPrice(0);
-			log.info("当前使用[排队价]成交，基础价为：{}，忽略超价，最终下单价：{}", orderPrice, orderPrice);
-			break;
-		case "信号价":
-			if(!StringUtils.equals(currentSignal.getSourceUnifiedSymbol(), bindedUnifiedSymbol)) {
-				log.warn("限价会根据信号价格来计算，当信号源合约与下单合约不一致时，有可能会导致下单价格异常。当前信号源合约为：{}，下单合约为：{}", 
-						currentSignal.getSourceUnifiedSymbol(), bindedUnifiedSymbol);
-			}
-			orderPrice = currentSignal.getSignalPrice() + factor * priceTick * overprice;
-			log.info("当前使用[限价]成交，基础价为：{}，超价：{} Tick，最终下单价：{}", currentSignal.getSignalPrice(), overprice, orderPrice);
-			break;
-		default:
-			throw new IllegalStateException("未知下单价格类型：" + priceTypeStr);
-		}
-		return orderPrice;
+		return Optional.empty();
 	}
 	
 	@Override
@@ -159,9 +81,9 @@ public class SampleDealer implements Dealer {
 		private String bindedUnifiedSymbol;
 		
 		@Setting(value="开仓手数", order = 20)
-		private int openVol = 1;
+		private int openVol;
 		
-		@Setting(value="价格类型", order = 30, options = {"对手价", "市价", "最新价", "排队价", "信号价"})
+		@Setting(value="开仓价格类型", order = 30, options = {PriceType.OPP_PRICE, PriceType.ANY_PRICE, PriceType.LAST_PRICE, PriceType.QUEUE_PRICE, PriceType.SIGNAL_PRICE})
 		private String priceTypeStr;
 		
 		@Setting(value="超价", order = 40, unit = "Tick")
@@ -169,7 +91,7 @@ public class SampleDealer implements Dealer {
 	}
 
 	@Override
-	public void doneTrade(TradeField trade) {
+	public void onTrade(TradeField trade) {
 		if(currentOrderReq != null && StringUtils.equals(trade.getOriginOrderId(), currentOrderReq.getOriginOrderId())) {
 			currentOrderReq = null;
 			log.info("交易完成，订单号[{}]", trade.getOriginOrderId());

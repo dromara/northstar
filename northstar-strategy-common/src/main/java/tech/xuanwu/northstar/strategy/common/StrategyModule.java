@@ -1,4 +1,4 @@
-package tech.xuanwu.northstar.strategy.common.model;
+package tech.xuanwu.northstar.strategy.common;
 
 import java.util.HashMap;
 import java.util.List;
@@ -14,15 +14,13 @@ import com.alibaba.fastjson.JSON;
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.common.model.ContractManager;
+import tech.xuanwu.northstar.common.utils.FieldUtils;
 import tech.xuanwu.northstar.gateway.api.TradeGateway;
-import tech.xuanwu.northstar.strategy.common.Dealer;
-import tech.xuanwu.northstar.strategy.common.ExternalSignalPolicy;
-import tech.xuanwu.northstar.strategy.common.RiskController;
-import tech.xuanwu.northstar.strategy.common.Signal;
-import tech.xuanwu.northstar.strategy.common.SignalPolicy;
 import tech.xuanwu.northstar.strategy.common.constants.ModuleState;
 import tech.xuanwu.northstar.strategy.common.constants.RiskAuditResult;
 import tech.xuanwu.northstar.strategy.common.event.ModuleEventType;
+import tech.xuanwu.northstar.strategy.common.model.ModulePosition;
+import tech.xuanwu.northstar.strategy.common.model.ModuleStatus;
 import tech.xuanwu.northstar.strategy.common.model.entity.ModuleDataRef;
 import tech.xuanwu.northstar.strategy.common.model.entity.ModuleDealRecord;
 import tech.xuanwu.northstar.strategy.common.model.entity.ModuleRealTimeInfo;
@@ -95,9 +93,8 @@ public class StrategyModule {
 					|| status.at(ModuleState.HOLDING_SHORT)) {				
 				Optional<Signal> signal = signalPolicy.onTick(tick);
 				if(signal.isPresent()) {
-					OffsetFlagEnum closingOffset = status.isSameDay(tradingDay) ? OffsetFlagEnum.OF_CloseToday : OffsetFlagEnum.OF_Close;
 					status.transform(signal.get().isOpening() ? ModuleEventType.OPENING_SIGNAL_CREATED : ModuleEventType.CLOSING_SIGNAL_CREATED);
-					dealer.onSignal(signal.get(), signal.get().isOpening() ? OffsetFlagEnum.OF_Open : closingOffset);
+					dealer.onSignal(signal.get());
 				}
 			}
 		}
@@ -110,16 +107,12 @@ public class StrategyModule {
 				return this;
 			}
 			
-			if(status.at(ModuleState.PLACING_ORDER)) {
-				Optional<SubmitOrderReqField> submitOrder = dealer.onTick(tick);
-				if(submitOrder.isEmpty()) {
-					return this;
-				}
+			Optional<SubmitOrderReqField> submitOrder = dealer.onTick(tick);
+			if(submitOrder.isPresent()) {
 				if(submitOrder.get().getOffsetFlag() == OffsetFlagEnum.OF_Unknown) {
 					throw new IllegalStateException("未定义开平操作");
 				}
-				boolean isRisky = riskController.testReject(tick, status, submitOrder.get());
-				if(isRisky && submitOrder.get().getOffsetFlag() == OffsetFlagEnum.OF_Open) {
+				if(riskController.testReject(tick, status, submitOrder.get()) && FieldUtils.isOpen(submitOrder.get().getOffsetFlag())) {
 					status.transform(ModuleEventType.SIGNAL_RETAINED);
 					return this;
 				}
@@ -188,7 +181,7 @@ public class StrategyModule {
 				originOrderIdMap.put(restOrder.getOriginOrderId(), restOrder);
 			} else {				
 				status.transform(trade.getDirection() == DirectionEnum.D_Buy ? ModuleEventType.BUY_TRADED : ModuleEventType.SELL_TRADED);
-				dealer.doneTrade(trade);
+				dealer.onTrade(trade);
 			}
 			return Optional.of(status.onTrade(trade, order));
 		}

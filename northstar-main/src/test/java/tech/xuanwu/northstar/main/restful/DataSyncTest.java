@@ -28,8 +28,6 @@ import tech.xuanwu.northstar.common.model.SimSettings;
 import tech.xuanwu.northstar.common.model.SimpleContractInfo;
 import tech.xuanwu.northstar.engine.broadcast.SocketIOMessageEngine;
 import tech.xuanwu.northstar.main.NorthstarApplication;
-import tech.xuanwu.northstar.main.restful.DataSyncController;
-import tech.xuanwu.northstar.main.restful.GatewayManagementController;
 import xyz.redtorch.pb.CoreField.AccountField;
 import xyz.redtorch.pb.CoreField.BarField;
 

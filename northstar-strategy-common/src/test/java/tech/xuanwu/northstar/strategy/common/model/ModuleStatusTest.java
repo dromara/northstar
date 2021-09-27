@@ -140,12 +140,12 @@ public class ModuleStatusTest {
 	
 	@Test
 	public void shouldBeTheSameTradingDay() {
-		assertThat(ms.isSameDay("20210606")).isTrue();
+		assertThat(ms.isSameDayHolding("20210606")).isTrue();
 	}
 	
 	@Test
 	public void shouldNotBeTheSameTradingDay() {
-		assertThat(ms.isSameDay("20210607")).isFalse();
+		assertThat(ms.isSameDayHolding("20210607")).isFalse();
 	}
 	
 	@Test

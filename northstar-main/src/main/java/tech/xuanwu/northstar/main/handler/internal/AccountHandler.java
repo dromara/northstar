@@ -9,6 +9,7 @@ import tech.xuanwu.northstar.common.event.AbstractEventHandler;
 import tech.xuanwu.northstar.common.event.GenericEventHandler;
 import tech.xuanwu.northstar.common.event.NorthstarEvent;
 import tech.xuanwu.northstar.common.event.NorthstarEventType;
+import tech.xuanwu.northstar.common.exception.NoSuchElementException;
 import tech.xuanwu.northstar.domain.account.TradeDayAccount;
 import tech.xuanwu.northstar.main.factories.TradeDayAccountFactory;
 import xyz.redtorch.pb.CoreField.AccountField;
@@ -58,20 +59,30 @@ public class AccountHandler extends AbstractEventHandler implements GenericEvent
 			log.info("账户登出：{}", gatewayId);
 		} else if (e.getEvent() == NorthstarEventType.ACCOUNT) {
 			AccountField af = (AccountField) e.getData();
+			checkAccount(af.getGatewayId());
 			TradeDayAccount account = accountMap.get(af.getGatewayId());
 			account.onAccountUpdate(af);
 		} else if (e.getEvent() == NorthstarEventType.POSITION) {
 			PositionField pf = (PositionField) e.getData();
+			checkAccount(pf.getGatewayId());
 			TradeDayAccount account = accountMap.get(pf.getGatewayId());
 			account.onPositionUpdate(pf);
 		} else if (e.getEvent() == NorthstarEventType.TRADE) {
 			TradeField tf = (TradeField) e.getData();
+			checkAccount(tf.getGatewayId());
 			TradeDayAccount account = accountMap.get(tf.getGatewayId());
 			account.onTradeUpdate(tf);
 		} else if (e.getEvent() == NorthstarEventType.ORDER) {
 			OrderField of = (OrderField) e.getData();
+			checkAccount(of.getGatewayId());
 			TradeDayAccount account = accountMap.get(of.getGatewayId());
 			account.onOrderUpdate(of);
+		}
+	}
+	
+	private void checkAccount(String gatewayId) {
+		if(!accountMap.containsKey(gatewayId)) {
+			throw new NoSuchElementException("找不到网关：" + gatewayId);
 		}
 	}
 

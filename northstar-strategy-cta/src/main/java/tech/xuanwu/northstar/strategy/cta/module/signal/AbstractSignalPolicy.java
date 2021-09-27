@@ -10,6 +10,7 @@ import java.util.UUID;
 import org.apache.commons.lang3.StringUtils;
 
 import tech.xuanwu.northstar.common.constant.DateTimeConstant;
+import tech.xuanwu.northstar.common.model.ContractManager;
 import tech.xuanwu.northstar.strategy.common.Signal;
 import tech.xuanwu.northstar.strategy.common.SignalPolicy;
 import tech.xuanwu.northstar.strategy.common.constants.SignalOperation;
@@ -35,6 +36,8 @@ public abstract class AbstractSignalPolicy implements SignalPolicy {
 	
 	protected TickField currentTick;
 	
+	protected ContractManager contractManager;
+	
 	@Override
 	public Set<String> bindedUnifiedSymbols() {
 		if(StringUtils.isEmpty(bindedUnifiedSymbol)) {
@@ -43,6 +46,11 @@ public abstract class AbstractSignalPolicy implements SignalPolicy {
 		return Set.of(bindedUnifiedSymbol);
 	}
 	
+	@Override
+	public void setContractManager(ContractManager contractMgr) {
+		contractManager = contractMgr;
+	}
+
 	@Override
 	public Optional<Signal> onTick(TickField tick){
 		if(bindedUnifiedSymbols().contains(tick.getUnifiedSymbol())) {
