@@ -2,6 +2,7 @@ package tech.xuanwu.northstar.strategy.cta.module.dealer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
@@ -15,6 +16,7 @@ import tech.xuanwu.northstar.common.model.ContractManager;
 import tech.xuanwu.northstar.strategy.common.constants.ModuleState;
 import tech.xuanwu.northstar.strategy.common.constants.PriceType;
 import tech.xuanwu.northstar.strategy.common.constants.SignalOperation;
+import tech.xuanwu.northstar.strategy.common.event.ModuleEventType;
 import tech.xuanwu.northstar.strategy.common.model.ModuleStatus;
 import tech.xuanwu.northstar.strategy.common.model.data.SimpleBar;
 import tech.xuanwu.northstar.strategy.cta.module.signal.CtaSignal;
@@ -38,7 +40,7 @@ public class SmartDealerTest extends CommonParamTest {
 		dealer.bindedUnifiedSymbol = USYMBOL;
 		dealer.openVol = 1;
 		dealer.signalAccordanceTimeout = 1; //1秒
-		dealer.numberOfTickForSafeZoon = 10; //10TICK
+		dealer.stopProfitThresholdInTick = 10; //10TICK
 		dealer.periodToleranceInDangerZoon = 1; //1秒
 		dealer.priceTypeStr = PriceType.SIGNAL_PRICE;
 		dealer.lastMinBar = BarField.newBuilder().build();
@@ -90,7 +92,7 @@ public class SmartDealerTest extends CommonParamTest {
 	}
 	
 	@Test
-	public void shouldGetOpenOrderIfLastSignalExist() {
+	public void shouldChangeStateIfLastSignalExist() {
 		when(dealer.moduleStatus.at(ModuleState.EMPTY)).thenReturn(true);
 		dealer.baseline = 1234;
 		dealer.lastSignal = CtaSignal.builder()
@@ -99,9 +101,8 @@ public class SmartDealerTest extends CommonParamTest {
 				.build();
 		dealer.lastMinBar = BarField.newBuilder().setClosePrice(1233).build();
 		Optional<SubmitOrderReqField> orderReq = dealer.onTick(factory.makeTickField(SYMBOL, 1234));
-		assertThat(orderReq).isPresent();
-		assertThat(orderReq.get().getOffsetFlag()).isEqualTo(OffsetFlagEnum.OF_Open);
-		assertThat(orderReq.get().getPrice()).isZero(); // 市价单
+		assertThat(orderReq).isEmpty();
+		verify(dealer.moduleStatus).transform(ModuleEventType.OPENING_SIGNAL_CREATED);
 	}
 	
 	@Test

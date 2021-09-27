@@ -59,7 +59,7 @@ public class SmartDealer extends AbstractDealer implements Dealer {
 	
 	protected long actionDeadline;
 	
-	protected int numberOfTickForSafeZoon;
+	protected int stopProfitThresholdInTick;
 	
 	protected int periodToleranceInDangerZoon;
 	
@@ -76,6 +76,8 @@ public class SmartDealer extends AbstractDealer implements Dealer {
 	protected long toleranceDeadline;
 	
 	private BarGenerator barGen = new BarGenerator(bindedUnifiedSymbol, (bar, minTick) -> lastMinBar = bar);
+	
+	private long lastSmartCloseTime;
 	
 	@Override
 	public Optional<SubmitOrderReqField> onTick(TickField tick) {
@@ -95,16 +97,13 @@ public class SmartDealer extends AbstractDealer implements Dealer {
 		if(moduleStatus.at(ModuleState.EMPTY)) {
 			// 当模组无持仓时，等待TICK穿越基线触发市价开单
 			if(triggerSmartOpening()) {
-				log.info("[{}] 智能触发开仓", moduleStatus.getModuleName());
-				currentOrderReq = genSubmitOrder(contract, direction, OffsetFlagEnum.OF_Open, openVol, 0, signal.getStopPrice());
-				lastSignal = signal;
-				currentSignal = null;
-				return Optional.of(currentOrderReq);
+				moduleStatus.transform(ModuleEventType.OPENING_SIGNAL_CREATED);
 			}
 		} else if (moduleStatus.at(ModuleState.HOLDING_LONG) || moduleStatus.at(ModuleState.HOLDING_SHORT)) {
 			if(triggerSmartClosingByTimeout() || triggerSmartClosingByRange()) {
 				log.info("[{}] 智能触发平仓", moduleStatus.getModuleName());
 				moduleStatus.transform(ModuleEventType.STOP_LOSS);
+				lastSmartCloseTime = System.currentTimeMillis();
 				OffsetFlagEnum offset = moduleStatus.isSameDayHolding(tick.getTradingDay()) ? OffsetFlagEnum.OF_CloseToday : OffsetFlagEnum.OF_CloseYesterday;
 				DirectionEnum dir = moduleStatus.at(ModuleState.HOLDING_LONG) ? DirectionEnum.D_Sell : DirectionEnum.D_Buy;
 				currentOrderReq = genSubmitOrder(contract, dir, offset, openVol, 0, 0);
@@ -113,7 +112,7 @@ public class SmartDealer extends AbstractDealer implements Dealer {
 		} else if (moduleStatus.at(ModuleState.PLACING_ORDER)) {
 			// 自行裁量期触发
 			if(triggerSmartOpening()) {
-				log.info("[{}] 自行裁量时间，智能触发开仓", moduleStatus.getModuleName());
+				log.info("[{}] 智能触发开仓", moduleStatus.getModuleName());
 				currentOrderReq = genSubmitOrder(contract, direction, OffsetFlagEnum.OF_Open, openVol, 0, signal.getStopPrice());
 				lastSignal = signal;
 				currentSignal = null;
@@ -163,8 +162,8 @@ public class SmartDealer extends AbstractDealer implements Dealer {
 	private boolean triggerSmartClosingByRange() {
 		holdingProfitBar.update(moduleStatus.getHoldingProfit());
 		ContractField contract = contractManager.getContract(lastTick.getUnifiedSymbol());
-		double safeProft = contract.getMultiplier() * openVol * numberOfTickForSafeZoon;
-		if(holdingProfitBar.getHigh() > safeProft && (holdingProfitBar.upperShadow() * 1.0 / holdingProfitBar.barRange()) > 0.25) {
+		double stopProfitThresholdInProfit = contract.getMultiplier() * openVol * stopProfitThresholdInTick;
+		if(holdingProfitBar.getHigh() > stopProfitThresholdInProfit && (holdingProfitBar.upperShadow() * 1.0 / holdingProfitBar.barRange()) > 0.25) {
 			log.info("[{}] 回撤幅度超过额定幅度，触发智能平仓", moduleStatus.getModuleName());
 			updateBaseline(lastTick.getLastPrice());
 			return true;
@@ -173,7 +172,8 @@ public class SmartDealer extends AbstractDealer implements Dealer {
 	}
 	
 	private boolean triggerSmartOpening() {
-		if(lastMinBar == null) {
+		// 180秒冷静时间，防止无序开仓
+		if(lastMinBar == null || System.currentTimeMillis() - lastSmartCloseTime < 180000) {
 			return false;
 		}
 		CtaSignal signal = getSignal();
@@ -220,7 +220,7 @@ public class SmartDealer extends AbstractDealer implements Dealer {
 		this.bindedUnifiedSymbol = initParams.bindedUnifiedSymbol;
 		this.openVol = initParams.openVol;
 		this.signalAccordanceTimeout = initParams.signalAccordanceTimeout;
-		this.numberOfTickForSafeZoon = initParams.numberOfTickForSafeZoon;
+		this.stopProfitThresholdInTick = initParams.stopProfitThresholdInTick;
 		this.periodToleranceInDangerZoon = initParams.periodToleranceInDangerZoon;
 		this.priceTypeStr = initParams.priceTypeStr;
 	}
@@ -236,8 +236,8 @@ public class SmartDealer extends AbstractDealer implements Dealer {
 		@Setting(value="自行裁量时长", order = 30, unit="秒")
 		private int signalAccordanceTimeout;
 		
-		@Setting(value="安全边界", order = 40, unit="TICK")
-		private int numberOfTickForSafeZoon;
+		@Setting(value="止盈区阀值", order = 40, unit="TICK")
+		private int stopProfitThresholdInTick;
 		
 		@Setting(value="危险区时长", order = 50, unit="秒")
 		private int periodToleranceInDangerZoon;
