@@ -11,7 +11,9 @@ import org.junit.Test;
 
 import common.CommonParamTest;
 import tech.xuanwu.northstar.common.model.ContractManager;
+import tech.xuanwu.northstar.strategy.common.constants.ModuleState;
 import tech.xuanwu.northstar.strategy.common.constants.SignalOperation;
+import tech.xuanwu.northstar.strategy.common.model.ModuleStatus;
 import tech.xuanwu.northstar.strategy.cta.module.signal.CtaSignal;
 import test.common.TestFieldFactory;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
@@ -101,6 +103,8 @@ public class SampleDealerTest extends CommonParamTest {
 	@Test
 	public void shouldModifyOrderReq() {
 		shouldGetSubmitOrderReqWhenReceivingSignal();
+		dealer.moduleStatus = mock(ModuleStatus.class);
+		when(dealer.moduleStatus.at(ModuleState.PLACING_ORDER)).thenReturn(true);
 		assertThat(dealer.onTick(factory.makeTickField("rb2210", 1234))).isPresent();
 	}
 }
