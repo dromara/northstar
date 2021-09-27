@@ -39,6 +39,8 @@ class GwAccountHolder {
 	
 	private ScheduledExecutorService execService = Executors.newScheduledThreadPool(1);
 	
+	private TickField lastTick;
+	
 	//测试用的后门开关
 	public boolean testFlag;
 	
@@ -65,6 +67,7 @@ class GwAccountHolder {
 	}
 
 	protected void updateTick(TickField tick) {
+		lastTick = tick;
 		AtomicDouble commission = new AtomicDouble();
 		AtomicDouble closeProfit = new AtomicDouble();
 		orderHolder.tryDeal(tick)
@@ -151,7 +154,7 @@ class GwAccountHolder {
 		}
 		OrderField order;
 		if(submitOrderReq.getOffsetFlag() == OffsetFlagEnum.OF_Open) {
-			order = orderHolder.tryOrder(submitOrderReq, accBuilder.build());
+			order = orderHolder.tryOrder(submitOrderReq, accBuilder.build(), lastTick);
 		} else {
 			PositionField pf = posHolder.getPositionByReq(submitOrderReq);
 			order = orderHolder.tryOrder(submitOrderReq, pf);

@@ -12,6 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
+import xyz.redtorch.pb.CoreEnum.OrderPriceTypeEnum;
 import xyz.redtorch.pb.CoreField.AccountField;
 import xyz.redtorch.pb.CoreField.CancelOrderReqField;
 import xyz.redtorch.pb.CoreField.ContractField;
@@ -39,14 +40,14 @@ class GwOrderHolder {
 		this.ticksOfCommission = ticksOfCommission;
 	}
 	
-	protected OrderField tryOrder(SubmitOrderReqField submitOrderReq, AccountField af) {
+	protected OrderField tryOrder(SubmitOrderReqField submitOrderReq, AccountField af, TickField lastTick) {
 		if(StringUtils.isEmpty(submitOrderReq.getOriginOrderId())) {
 			throw new IllegalArgumentException("originOrderId不能为空");
 		}
 		ContractField contract = submitOrderReq.getContract();
 		double marginRate = submitOrderReq.getDirection() == DirectionEnum.D_Buy ? contract.getLongMarginRatio() : contract.getShortMarginRatio();
 		int vol = submitOrderReq.getVolume();
-		double price = submitOrderReq.getPrice();
+		double price =  submitOrderReq.getOrderPriceType() == OrderPriceTypeEnum.OPT_AnyPrice ? lastTick.getLastPrice() : submitOrderReq.getPrice();
 		double cost = vol * price * contract.getMultiplier() * marginRate + contract.getPriceTick() * ticksOfCommission;
 		TradeIntent tradeIntent = new TradeIntent(submitOrderReq, originOrderIdMap);
 		String tradingDay = Optional.ofNullable(tradingDayMap.get(contract.getUnifiedSymbol())).orElse("");
