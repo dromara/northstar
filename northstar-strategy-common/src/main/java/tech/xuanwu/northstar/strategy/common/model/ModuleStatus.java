@@ -121,7 +121,7 @@ public class ModuleStatus {
 		Map<String, ModulePosition> positionMap = getPositionMap(position.getPositionDir());
 		positionMap.put(position.getUnifiedSymbol(), position);
 		ModuleState state = FieldUtils.isLong(position.getPositionDir()) ? ModuleState.HOLDING_LONG : ModuleState.HOLDING_SHORT;
-		log.info("手动变更模组状态：[{}]", state);
+		log.info("[{}] 手动变更模组状态：[{}]", getModuleName(), state);
 		stateMachine.setCurState(state);
 		stateMachine.setOriginState(state);
 	}
@@ -129,7 +129,7 @@ public class ModuleStatus {
 	public void manuallyRemovePosition(String unifiedSymbol, PositionDirectionEnum dir) {
 		Map<String, ModulePosition> positionMap = getPositionMap(dir);
 		positionMap.remove(unifiedSymbol);
-		log.info("手动变更模组状态：[{}]", ModuleState.EMPTY);
+		log.info("[{}] 手动变更模组状态：[{}]", getModuleName(), ModuleState.EMPTY);
 		stateMachine.setCurState(ModuleState.EMPTY);
 		stateMachine.setOriginState(ModuleState.EMPTY);
 	}
@@ -163,7 +163,7 @@ public class ModuleStatus {
 		} else {
 			positions.put(trade.getContract().getUnifiedSymbol(), new ModulePosition(trade, order));
 		}
-		log.info("模组开仓{}", trade.getContract().getSymbol());
+		log.info("[{}] 模组开仓{}", getModuleName(), trade.getContract().getSymbol());
 	}
 	
 	private void closing(TradeField trade) {
@@ -176,7 +176,7 @@ public class ModuleStatus {
 		dealRecord.get().setModuleName(moduleName);
 		if(mp.isEmpty()) {
 			positions.remove(trade.getContract().getUnifiedSymbol());
-			log.info("模组平仓{}", trade.getContract().getSymbol());
+			log.info("[{}] 模组平仓{}", getModuleName(), trade.getContract().getSymbol());
 		}
 	}
 	
