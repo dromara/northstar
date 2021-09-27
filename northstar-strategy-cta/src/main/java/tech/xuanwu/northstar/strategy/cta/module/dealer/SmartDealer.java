@@ -14,6 +14,7 @@ import tech.xuanwu.northstar.strategy.common.annotation.Setting;
 import tech.xuanwu.northstar.strategy.common.annotation.StrategicComponent;
 import tech.xuanwu.northstar.strategy.common.constants.ModuleState;
 import tech.xuanwu.northstar.strategy.common.constants.PriceType;
+import tech.xuanwu.northstar.strategy.common.event.ModuleEventType;
 import tech.xuanwu.northstar.strategy.common.model.data.SimpleBar;
 import tech.xuanwu.northstar.strategy.common.model.meta.DynamicParams;
 import tech.xuanwu.northstar.strategy.cta.module.signal.CtaSignal;
@@ -92,14 +93,6 @@ public class SmartDealer extends AbstractDealer implements Dealer {
 		DirectionEnum direction = signal.getState().isBuy() ? DirectionEnum.D_Buy : DirectionEnum.D_Sell;
 		ContractField contract = contractManager.getContract(tick.getUnifiedSymbol());
 		if(moduleStatus.at(ModuleState.EMPTY)) {
-			//当模组无持仓时，等待超时后，按最新价生成订单
-			if(currentSignal != null && System.currentTimeMillis() > actionDeadline) {
-				log.info("[{}] 自行裁量时间结束，按信号触发开仓", moduleStatus.getModuleName());
-				currentOrderReq = genSubmitOrder(contract, direction, OffsetFlagEnum.OF_Open, openVol, tick.getLastPrice(), currentSignal.getStopPrice());
-				lastSignal = currentSignal;
-				currentSignal = null;
-				return Optional.of(currentOrderReq);
-			}
 			// 当模组无持仓时，等待TICK穿越基线触发市价开单
 			if(triggerSmartOpening()) {
 				log.info("[{}] 智能触发开仓", moduleStatus.getModuleName());
@@ -109,19 +102,38 @@ public class SmartDealer extends AbstractDealer implements Dealer {
 				return Optional.of(currentOrderReq);
 			}
 		} else if (moduleStatus.at(ModuleState.HOLDING_LONG) || moduleStatus.at(ModuleState.HOLDING_SHORT)) {
+			if(triggerSmartClosingByTimeout() || triggerSmartClosingByRange()) {
+				log.info("[{}] 智能触发平仓", moduleStatus.getModuleName());
+				moduleStatus.transform(ModuleEventType.STOP_LOSS);
+				OffsetFlagEnum offset = moduleStatus.isSameDayHolding(tick.getTradingDay()) ? OffsetFlagEnum.OF_CloseToday : OffsetFlagEnum.OF_CloseYesterday;
+				DirectionEnum dir = moduleStatus.at(ModuleState.HOLDING_LONG) ? DirectionEnum.D_Sell : DirectionEnum.D_Buy;
+				currentOrderReq = genSubmitOrder(contract, dir, offset, openVol, 0, 0);
+				return Optional.of(currentOrderReq);
+			}
+		} else if (moduleStatus.at(ModuleState.PLACING_ORDER)) {
+			// 自行裁量期触发
+			if(triggerSmartOpening()) {
+				log.info("[{}] 自行裁量时间，智能触发开仓", moduleStatus.getModuleName());
+				currentOrderReq = genSubmitOrder(contract, direction, OffsetFlagEnum.OF_Open, openVol, 0, signal.getStopPrice());
+				lastSignal = signal;
+				currentSignal = null;
+				return Optional.of(currentOrderReq);
+			}
+			//当模组无持仓时，等待超时后，按最新价生成订单
+			if(currentSignal != null && currentSignal.isOpening() && System.currentTimeMillis() > actionDeadline) {
+				log.info("[{}] 自行裁量时间结束，信号触发开仓", moduleStatus.getModuleName());
+				currentOrderReq = genSubmitOrder(contract, direction, OffsetFlagEnum.OF_Open, openVol, tick.getLastPrice(), currentSignal.getStopPrice());
+				lastSignal = currentSignal;
+				currentSignal = null;
+				return Optional.of(currentOrderReq);
+			}
 			// 当模组为持仓时，按信号平仓
-			if(!signal.getState().isOpen()) {
+			if(currentSignal != null && !currentSignal.isOpening()) {
 				log.info("[{}] 信号触发平仓", moduleStatus.getModuleName());
 				OffsetFlagEnum offset = moduleStatus.isSameDayHolding(tick.getTradingDay()) ? OffsetFlagEnum.OF_CloseToday : OffsetFlagEnum.OF_CloseYesterday;
 				currentOrderReq = genSubmitOrder(contract, direction, offset, openVol, 0, 0);
 				lastSignal = null;
 				currentSignal = null;
-				return Optional.of(currentOrderReq);
-			}
-			if(triggerSmartClosingByTimeout() || triggerSmartClosingByRange()) {
-				log.info("[{}] 智能触发平仓", moduleStatus.getModuleName());
-				OffsetFlagEnum offset = moduleStatus.isSameDayHolding(tick.getTradingDay()) ? OffsetFlagEnum.OF_CloseToday : OffsetFlagEnum.OF_CloseYesterday;
-				currentOrderReq = genSubmitOrder(contract, direction, offset, openVol, 0, 0);
 				return Optional.of(currentOrderReq);
 			}
 		}
@@ -133,6 +145,9 @@ public class SmartDealer extends AbstractDealer implements Dealer {
 	public void onTrade(TradeField trade) {
 		if(FieldUtils.isOpen(trade.getOffsetFlag())) {
 			holdingProfitBar = new SimpleBar(0);
+			toleranceDeadline = System.currentTimeMillis() + periodToleranceInDangerZoon * 1000;
+		} else {
+			holdingProfitBar = null;
 		}
 	}
 	
@@ -183,11 +198,10 @@ public class SmartDealer extends AbstractDealer implements Dealer {
 	public void onSignal(Signal signal) {
 		super.onSignal(signal);
 		if(signal.isOpening()) {
-			updateBaseline(0);
+			baseline = 0;
 			actionDeadline = System.currentTimeMillis() + signalAccordanceTimeout * 1000;
-			toleranceDeadline = System.currentTimeMillis() + periodToleranceInDangerZoon * 1000;
 			log.info("[{}] 收到开仓信号：操作{}，价格{}，止损{}", moduleStatus.getModuleName(), ((CtaSignal)signal).getState(), signal.price(), signal.stopPrice());
-			log.info("[{}] 当前价格基线：{}", moduleStatus.getModuleName(), baseline);
+			log.info("[{}] 当前价格基线已重置", moduleStatus.getModuleName());
 			log.info("[{}] 自由裁量时间：{}秒", moduleStatus.getModuleName(), signalAccordanceTimeout);
 			log.info("[{}] 自行裁量截止时间：{}", moduleStatus.getModuleName(), LocalDateTime.ofInstant(Instant.ofEpochMilli(actionDeadline), ZoneId.systemDefault()));
 		} else {

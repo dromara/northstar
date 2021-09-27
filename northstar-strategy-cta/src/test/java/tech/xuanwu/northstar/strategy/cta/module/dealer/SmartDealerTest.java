@@ -41,6 +41,9 @@ public class SmartDealerTest extends CommonParamTest {
 		dealer.numberOfTickForSafeZoon = 10; //10TICK
 		dealer.periodToleranceInDangerZoon = 1; //1秒
 		dealer.priceTypeStr = PriceType.SIGNAL_PRICE;
+		dealer.lastMinBar = BarField.newBuilder().build();
+		dealer.moduleStatus = mock(ModuleStatus.class);
+		when(dealer.moduleStatus.getModuleName()).thenReturn("testModule");
 		ContractManager contractMgr = mock(ContractManager.class);
 		when(contractMgr.getContract(USYMBOL)).thenReturn(ContractField.newBuilder()
 				.setUnifiedSymbol(USYMBOL)
@@ -56,10 +59,8 @@ public class SmartDealerTest extends CommonParamTest {
 	}
 	
 	@Test
-	public void shouldGetOpenOrderReqIfAcrossAfterSignal() {
-		dealer.moduleStatus = mock(ModuleStatus.class);
-		when(dealer.moduleStatus.getModuleName()).thenReturn("testModule");
-		when(dealer.moduleStatus.at(ModuleState.EMPTY)).thenReturn(true);
+	public void shouldGetOpenOrderReqIfAcrossAfterSignal() throws InterruptedException {
+		when(dealer.moduleStatus.at(ModuleState.PLACING_ORDER)).thenReturn(true);
 		dealer.lastTick = factory.makeTickField(SYMBOL, 1234);
 		dealer.onSignal(CtaSignal.builder()
 				.state(SignalOperation.BuyOpen)
@@ -74,10 +75,9 @@ public class SmartDealerTest extends CommonParamTest {
 	
 	@Test
 	public void shouldGetOpenOrderReqIfTimeoutAfterSignal() throws InterruptedException {
-		dealer.moduleStatus = mock(ModuleStatus.class);
-		when(dealer.moduleStatus.getModuleName()).thenReturn("testModule");
-		when(dealer.moduleStatus.at(ModuleState.EMPTY)).thenReturn(true);
+		when(dealer.moduleStatus.at(ModuleState.PLACING_ORDER)).thenReturn(true);
 		dealer.lastTick = factory.makeTickField(SYMBOL, 1234);
+		dealer.lastMinBar = BarField.newBuilder().setClosePrice(1240).build();
 		dealer.onSignal(CtaSignal.builder()
 				.state(SignalOperation.BuyOpen)
 				.signalPrice(1234)
@@ -91,8 +91,6 @@ public class SmartDealerTest extends CommonParamTest {
 	
 	@Test
 	public void shouldGetOpenOrderIfLastSignalExist() {
-		dealer.moduleStatus = mock(ModuleStatus.class);
-		when(dealer.moduleStatus.getModuleName()).thenReturn("testModule");
 		when(dealer.moduleStatus.at(ModuleState.EMPTY)).thenReturn(true);
 		dealer.baseline = 1234;
 		dealer.lastSignal = CtaSignal.builder()
@@ -108,11 +106,8 @@ public class SmartDealerTest extends CommonParamTest {
 	
 	@Test
 	public void shouldGetCloseOrderIfReceivedCloseSignal() {
-		dealer.moduleStatus = mock(ModuleStatus.class);
-		when(dealer.moduleStatus.at(ModuleState.HOLDING_LONG)).thenReturn(true);
-		when(dealer.moduleStatus.getModuleName()).thenReturn("testModule");
+		when(dealer.moduleStatus.at(ModuleState.PLACING_ORDER)).thenReturn(true);
 		when(dealer.moduleStatus.isSameDayHolding(ArgumentMatchers.anyString())).thenReturn(true);
-		
 		dealer.onSignal(CtaSignal.builder()
 				.state(SignalOperation.SellClose)
 				.signalPrice(1234)
@@ -125,10 +120,9 @@ public class SmartDealerTest extends CommonParamTest {
 	
 	@Test
 	public void shouldGetCloseOrderIfTimeoutInDangerZoon() throws InterruptedException {
-		dealer.moduleStatus = mock(ModuleStatus.class);
 		when(dealer.moduleStatus.at(ModuleState.HOLDING_LONG)).thenReturn(true);
-		when(dealer.moduleStatus.getModuleName()).thenReturn("testModule");
 		when(dealer.moduleStatus.isSameDayHolding(ArgumentMatchers.anyString())).thenReturn(true);
+		
 		dealer.lastSignal = CtaSignal.builder()
 				.state(SignalOperation.BuyOpen)
 				.signalPrice(1234)
@@ -142,9 +136,7 @@ public class SmartDealerTest extends CommonParamTest {
 	
 	@Test
 	public void shouldGetCloseOrderIfProfitRetrieve() throws InterruptedException {
-		dealer.moduleStatus = mock(ModuleStatus.class);
 		when(dealer.moduleStatus.at(ModuleState.HOLDING_LONG)).thenReturn(true);
-		when(dealer.moduleStatus.getModuleName()).thenReturn("testModule");
 		when(dealer.moduleStatus.isSameDayHolding(ArgumentMatchers.anyString())).thenReturn(true);
 		dealer.lastSignal = CtaSignal.builder()
 				.state(SignalOperation.BuyOpen)
@@ -159,9 +151,7 @@ public class SmartDealerTest extends CommonParamTest {
 
 	@Test
 	public void shouldGetNothingIfTimeoutInSafeZoon() throws InterruptedException {
-		dealer.moduleStatus = mock(ModuleStatus.class);
 		when(dealer.moduleStatus.at(ModuleState.HOLDING_LONG)).thenReturn(true);
-		when(dealer.moduleStatus.getModuleName()).thenReturn("testModule");
 		when(dealer.moduleStatus.isSameDayHolding(ArgumentMatchers.anyString())).thenReturn(true);
 		when(dealer.moduleStatus.getHoldingProfit()).thenReturn(110D);
 		dealer.holdingProfitBar = new SimpleBar(0);
