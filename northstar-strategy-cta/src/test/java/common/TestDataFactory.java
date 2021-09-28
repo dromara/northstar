@@ -14,7 +14,7 @@ public class TestDataFactory {
 	
 	public ModuleStatus makeModuleStatus(ModuleState state) {
 		return ModuleStatus.builder()
-				.stateMachine(new ModuleStateMachine(state))
+				.stateMachine(new ModuleStateMachine(name, state))
 				.build();
 	}
 }
