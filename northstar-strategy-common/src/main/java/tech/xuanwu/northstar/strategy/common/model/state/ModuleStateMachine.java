@@ -20,7 +20,10 @@ public class ModuleStateMachine {
 	
 	private ModuleState originState;
 	
-	public ModuleStateMachine(ModuleState state) {
+	private String moduleName;
+	
+	public ModuleStateMachine(String moduleName, ModuleState state) {
+		this.moduleName = moduleName;
 		this.originState = state;
 		this.curState = state;
 	}
@@ -94,7 +97,7 @@ public class ModuleStateMachine {
 	}
 	
 	public void setState(ModuleState newState) {
-		log.info("状态机切换：[{}] => [{}]", curState, newState);
+		log.info("[{}] 状态机切换：[{}] => [{}]", moduleName, curState, newState);
 		curState = newState;
 	}
 

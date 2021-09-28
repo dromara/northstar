@@ -22,6 +22,13 @@ public interface Dealer extends DynamicParamsAware, SymbolAware, StatusAware, Co
 	Optional<SubmitOrderReqField> onTick(TickField tick);
 	
 	/**
+	 * 测试止损触发
+	 * @param tick
+	 * @return
+	 */
+	Optional<SubmitOrderReqField> tryStopLoss(TickField tick);
+	
+	/**
 	 * 收到信号
 	 * @param signal
 	 * @param offsetFlag	实操明细

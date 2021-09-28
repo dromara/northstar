@@ -64,7 +64,7 @@ public class ModuleStatus {
 	public ModuleStatus(String name) {
 		this();
 		this.moduleName = name;
-		this.stateMachine = new ModuleStateMachine(ModuleState.EMPTY);
+		this.stateMachine = new ModuleStateMachine(name, ModuleState.EMPTY);
 		this.longPositions = new HashMap<>();
 		this.shortPositions = new HashMap<>();
 	}

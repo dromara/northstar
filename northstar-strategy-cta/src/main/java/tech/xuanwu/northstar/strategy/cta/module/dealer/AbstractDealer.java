@@ -1,5 +1,6 @@
 package tech.xuanwu.northstar.strategy.cta.module.dealer;
 
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -10,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.common.model.ContractManager;
 import tech.xuanwu.northstar.strategy.common.Dealer;
 import tech.xuanwu.northstar.strategy.common.Signal;
+import tech.xuanwu.northstar.strategy.common.event.ModuleEventType;
 import tech.xuanwu.northstar.strategy.common.model.ModuleStatus;
 import tech.xuanwu.northstar.strategy.cta.module.signal.CtaSignal;
 import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
@@ -112,5 +114,12 @@ public abstract class AbstractDealer implements Dealer{
 				.setStopPrice(stopPrice)
 				.setPrice(price)
 				.build();
+	}
+	
+	public Optional<SubmitOrderReqField> tryStopLoss(TickField tick){
+		Optional<SubmitOrderReqField> orderReq = moduleStatus.triggerStopLoss(tick, contractManager.getContract(tick.getUnifiedSymbol()));
+		if(orderReq.isPresent()) 
+			moduleStatus.transform(ModuleEventType.STOP_LOSS);
+		return orderReq;
 	}
 }

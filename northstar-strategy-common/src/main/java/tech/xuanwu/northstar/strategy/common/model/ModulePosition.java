@@ -58,7 +58,7 @@ public class ModulePosition {
 	@Transient
 	private double holdingProfit;
 	@Transient
-	private boolean hasTriggeredStopLoss;
+	private long lastTriggerTime;
 	
 	public ModulePosition(TradeField trade, OrderField order) {
 		if(!StringUtils.equals(trade.getOriginOrderId(), order.getOriginOrderId())) {
@@ -88,8 +88,10 @@ public class ModulePosition {
 		if(stopLossPrice <= 0) {
 			return Optional.empty();
 		}
-		if(!hasTriggeredStopLoss && triggeredStopLoss(tick)) {
-			hasTriggeredStopLoss = true;
+		long now = System.currentTimeMillis();
+		// 如果三秒后该持仓还没被清理，证明市价挂单无成交，则需要再次发单
+		if(now - lastTriggerTime > 3000 && triggeredStopLoss(tick)) {
+			lastTriggerTime = now;
 			SubmitOrderReqField orderReq = SubmitOrderReqField.newBuilder()
 					.setOriginOrderId(UUID.randomUUID().toString())
 					.setContract(contract)
@@ -205,7 +207,7 @@ public class ModulePosition {
 	}
 	
 	public boolean isEmpty() {
-		return volume == 0 || hasTriggeredStopLoss;
+		return volume == 0;
 	}
 	
 	public boolean isMatch(String unifiedSymbol) {

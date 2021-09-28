@@ -1,8 +1,5 @@
 package tech.xuanwu.northstar.strategy.cta.module.dealer;
 
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.Optional;
 
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +9,7 @@ import tech.xuanwu.northstar.strategy.common.Dealer;
 import tech.xuanwu.northstar.strategy.common.Signal;
 import tech.xuanwu.northstar.strategy.common.annotation.Setting;
 import tech.xuanwu.northstar.strategy.common.annotation.StrategicComponent;
+import tech.xuanwu.northstar.strategy.common.constants.Bool;
 import tech.xuanwu.northstar.strategy.common.constants.ModuleState;
 import tech.xuanwu.northstar.strategy.common.constants.PriceType;
 import tech.xuanwu.northstar.strategy.common.event.ModuleEventType;
@@ -57,8 +55,6 @@ public class SmartDealer extends AbstractDealer implements Dealer {
 	//智能策略收到信号后可自行裁量的时长（秒）
 	protected int signalAccordanceTimeout;
 	
-	protected long actionDeadline;
-	
 	protected int stopProfitThresholdInTick;
 	
 	protected int periodToleranceInDangerZoon;
@@ -73,9 +69,16 @@ public class SmartDealer extends AbstractDealer implements Dealer {
 	
 	protected SimpleBar holdingProfitBar;
 	
-	protected long toleranceDeadline;
+	private int minBarCount;
 	
-	private BarGenerator barGen = new BarGenerator(bindedUnifiedSymbol, (bar, minTick) -> lastMinBar = bar);
+	private int startNumOfBar;
+	
+	private boolean showTick;
+	
+	private BarGenerator barGen = new BarGenerator(bindedUnifiedSymbol, (bar, minTick) -> {
+		lastMinBar = bar;
+		minBarCount++;
+	});
 	
 	private long lastSmartCloseTime;
 	
@@ -87,7 +90,9 @@ public class SmartDealer extends AbstractDealer implements Dealer {
 			return Optional.empty();
 		}
 		
-		log.info("{} 最新价：{}", tick.getUnifiedSymbol(), tick.getLastPrice());
+		if(showTick) {			
+			log.info("[{}] {} 最新价：{}", moduleStatus.getModuleName(), tick.getUnifiedSymbol(), tick.getLastPrice());
+		}
 		CtaSignal signal = getSignal();
 		if(baseline == 0) {			
 			updateBaseline(resolvePrice(signal, lastTick));
@@ -126,7 +131,7 @@ public class SmartDealer extends AbstractDealer implements Dealer {
 				return Optional.empty();
 			}
 			//当模组无持仓时，等待超时后，按最新价生成订单
-			if(currentSignal != null && currentSignal.isOpening() && System.currentTimeMillis() > actionDeadline) {
+			if(currentSignal != null && currentSignal.isOpening() && minBarCount - startNumOfBar >= signalAccordanceTimeout) {
 				log.info("[{}] 自行裁量时间结束，信号触发开仓", moduleStatus.getModuleName());
 				currentOrderReq = genSubmitOrder(contract, direction, OffsetFlagEnum.OF_Open, openVol, tick.getLastPrice(), currentSignal.getStopPrice());
 				lastSignal = currentSignal;
@@ -151,7 +156,7 @@ public class SmartDealer extends AbstractDealer implements Dealer {
 	public void onTrade(TradeField trade) {
 		if(FieldUtils.isOpen(trade.getOffsetFlag())) {
 			holdingProfitBar = new SimpleBar(0);
-			toleranceDeadline = System.currentTimeMillis() + periodToleranceInDangerZoon * 1000;
+			startNumOfBar = minBarCount;
 		} else {
 			holdingProfitBar = null;
 		}
@@ -159,7 +164,7 @@ public class SmartDealer extends AbstractDealer implements Dealer {
 	
 	private boolean triggerSmartClosingByTimeout() {
 		holdingProfitBar.update(moduleStatus.getHoldingProfit());
-		if(System.currentTimeMillis() > toleranceDeadline && holdingProfitBar.actualDiff() < 0) {
+		if(minBarCount - startNumOfBar >= periodToleranceInDangerZoon && holdingProfitBar.actualDiff() < 0) {
 			log.info("[{}] 限定时间内浮盈没有达到安全边际，触发智能平仓", moduleStatus.getModuleName());
 			return true;
 		}
@@ -206,11 +211,10 @@ public class SmartDealer extends AbstractDealer implements Dealer {
 		super.onSignal(signal);
 		if(signal.isOpening()) {
 			baseline = 0;
-			actionDeadline = System.currentTimeMillis() + signalAccordanceTimeout * 1000;
+			startNumOfBar = minBarCount;
 			log.info("[{}] 收到开仓信号：操作{}，价格{}，止损{}", moduleStatus.getModuleName(), ((CtaSignal)signal).getState(), signal.price(), signal.stopPrice());
 			log.info("[{}] 当前价格基线已重置", moduleStatus.getModuleName());
-			log.info("[{}] 自由裁量时间：{}秒", moduleStatus.getModuleName(), signalAccordanceTimeout);
-			log.info("[{}] 自行裁量截止时间：{}", moduleStatus.getModuleName(), LocalDateTime.ofInstant(Instant.ofEpochMilli(actionDeadline), ZoneId.systemDefault()));
+			log.info("[{}] 自由裁量时间：约{}分钟", moduleStatus.getModuleName(), signalAccordanceTimeout);
 		} else {
 			log.info("[{}] 收到平仓信号：操作{}，价格{}", moduleStatus.getModuleName(), ((CtaSignal)signal).getState(), signal.price());
 		}
@@ -230,6 +234,7 @@ public class SmartDealer extends AbstractDealer implements Dealer {
 		this.stopProfitThresholdInTick = initParams.stopProfitThresholdInTick;
 		this.periodToleranceInDangerZoon = initParams.periodToleranceInDangerZoon;
 		this.priceTypeStr = initParams.priceTypeStr;
+		this.showTick = initParams.showTick;
 	}
 
 	public static class InitParams extends DynamicParams{
@@ -240,17 +245,20 @@ public class SmartDealer extends AbstractDealer implements Dealer {
 		@Setting(value="开仓手数", order = 20)
 		private int openVol;
 		
-		@Setting(value="自行裁量时长", order = 30, unit="秒")
+		@Setting(value="自行裁量时长", order = 30, unit="分钟")
 		private int signalAccordanceTimeout;
 		
 		@Setting(value="止盈区阀值", order = 40, unit="TICK")
 		private int stopProfitThresholdInTick;
 		
-		@Setting(value="危险区时长", order = 50, unit="秒")
+		@Setting(value="危险区时长", order = 50, unit="分钟")
 		private int periodToleranceInDangerZoon;
 		
 		@Setting(value="基线价格类型", order = 60, options = {PriceType.OPP_PRICE, PriceType.ANY_PRICE, PriceType.LAST_PRICE, PriceType.QUEUE_PRICE, PriceType.SIGNAL_PRICE})
 		private String priceTypeStr;
+		
+		@Setting(value="打印行情日志", order = 100, options = {Bool.TRUE, Bool.FALSE})
+		private boolean showTick;
 	}
 	
 }

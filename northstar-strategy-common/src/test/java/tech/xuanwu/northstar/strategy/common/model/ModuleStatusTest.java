@@ -39,7 +39,7 @@ public class ModuleStatusTest {
 	
 	private ModuleStatus.ModuleStatusBuilder msb = ModuleStatus.builder()
 								.moduleName("testModuule")
-								.stateMachine(new ModuleStateMachine(ModuleState.HOLDING_LONG))
+								.stateMachine(new ModuleStateMachine("testModuule", ModuleState.HOLDING_LONG))
 								.holdingTradingDay("20210606")
 								.countOfOpeningToday(3);
 
