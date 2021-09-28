@@ -35,6 +35,8 @@ public abstract class DynamicParams {
 				} else if (f.getType() == short.class) {
 					f.setShort(this, cf.getValue() == null ? 0 : cf.getValue() instanceof String ? Short.parseShort((String) cf.getValue()) : (short)cf.getValue());
 				}
+			} else if(f.getType() == boolean.class) {
+				f.set(this, Boolean.parseBoolean((String) cf.getValue()));
 			} else {
 				f.set(this, cf.getValue());
 			}
