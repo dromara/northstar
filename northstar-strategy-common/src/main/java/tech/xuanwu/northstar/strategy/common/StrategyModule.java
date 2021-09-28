@@ -13,7 +13,6 @@ import com.alibaba.fastjson.JSON;
 
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
-import tech.xuanwu.northstar.common.model.ContractManager;
 import tech.xuanwu.northstar.common.utils.FieldUtils;
 import tech.xuanwu.northstar.gateway.api.TradeGateway;
 import tech.xuanwu.northstar.strategy.common.constants.ModuleState;
@@ -62,8 +61,6 @@ public class StrategyModule {
 	
 	private String tradingDay;
 	
-	private ContractManager contractMgr;
-	
 	@Builder.Default
 	private Map<String, OrderField> originOrderIdMap = new HashMap<>();
 	
@@ -99,15 +96,8 @@ public class StrategyModule {
 			}
 		}
 		if(dealer.bindedUnifiedSymbols().contains(tick.getUnifiedSymbol())) {
-			Optional<SubmitOrderReqField> stopLossReq = status.triggerStopLoss(tick, contractMgr.getContract(tick.getUnifiedSymbol()));
-			if(stopLossReq.isPresent()) {
-				status.transform(ModuleEventType.STOP_LOSS);
-				originOrderIdMap.put(stopLossReq.get().getOriginOrderId(), OrderField.newBuilder().build()); // 用空的订单对象占位
-				gateway.submitOrder(stopLossReq.get());
-				return this;
-			}
-			
-			Optional<SubmitOrderReqField> submitOrder = dealer.onTick(tick);
+			Optional<SubmitOrderReqField> stopLossOrder = dealer.tryStopLoss(tick);
+			Optional<SubmitOrderReqField> submitOrder = stopLossOrder.isPresent() ? stopLossOrder : dealer.onTick(tick);
 			if(submitOrder.isPresent()) {
 				if(submitOrder.get().getOffsetFlag() == OffsetFlagEnum.OF_Unknown) {
 					throw new IllegalStateException("未定义开平操作");

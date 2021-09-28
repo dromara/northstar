@@ -202,7 +202,6 @@ public class ModuleService implements InitializingBean{
 				.dealer(dealer)
 				.signalPolicy(signalPolicy)
 				.riskController(riskController)
-				.contractMgr(contractMgr)
 				.build();
 		mdlMgr.addModule(module);
 	}
