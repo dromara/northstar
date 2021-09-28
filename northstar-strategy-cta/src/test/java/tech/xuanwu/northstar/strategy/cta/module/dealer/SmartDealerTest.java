@@ -39,9 +39,7 @@ public class SmartDealerTest extends CommonParamTest {
 	public void setUp() throws Exception {
 		dealer.bindedUnifiedSymbol = USYMBOL;
 		dealer.openVol = 1;
-		dealer.signalAccordanceTimeout = 1; //1秒
 		dealer.stopProfitThresholdInTick = 10; //10TICK
-		dealer.periodToleranceInDangerZoon = 1; //1秒
 		dealer.priceTypeStr = PriceType.SIGNAL_PRICE;
 		dealer.lastMinBar = BarField.newBuilder().build();
 		dealer.moduleStatus = mock(ModuleStatus.class);
@@ -61,7 +59,7 @@ public class SmartDealerTest extends CommonParamTest {
 	}
 	
 	@Test
-	public void shouldGetOpenOrderReqIfAcrossAfterSignal() throws InterruptedException {
+	public void shouldGetOpenOrderReqIfAcrossAfterSignal()  {
 		when(dealer.moduleStatus.at(ModuleState.PLACING_ORDER)).thenReturn(true);
 		dealer.lastTick = factory.makeTickField(SYMBOL, 1234);
 		dealer.onSignal(CtaSignal.builder()
@@ -76,7 +74,7 @@ public class SmartDealerTest extends CommonParamTest {
 	}
 	
 	@Test
-	public void shouldGetOpenOrderReqIfTimeoutAfterSignal() throws InterruptedException {
+	public void shouldGetOpenOrderReqIfTimeoutAfterSignal()  {
 		when(dealer.moduleStatus.at(ModuleState.PLACING_ORDER)).thenReturn(true);
 		dealer.lastTick = factory.makeTickField(SYMBOL, 1234);
 		dealer.lastMinBar = BarField.newBuilder().setClosePrice(1240).build();
@@ -84,7 +82,6 @@ public class SmartDealerTest extends CommonParamTest {
 				.state(SignalOperation.BuyOpen)
 				.signalPrice(1234)
 				.build());
-		Thread.sleep(1100);
 		Optional<SubmitOrderReqField> orderReq = dealer.onTick(factory.makeTickField(SYMBOL, 1260));
 		assertThat(orderReq).isPresent();
 		assertThat(orderReq.get().getOffsetFlag()).isEqualTo(OffsetFlagEnum.OF_Open);
@@ -120,7 +117,7 @@ public class SmartDealerTest extends CommonParamTest {
 	}
 	
 	@Test
-	public void shouldGetCloseOrderIfTimeoutInDangerZoon() throws InterruptedException {
+	public void shouldGetCloseOrderIfTimeoutInDangerZoon()  {
 		when(dealer.moduleStatus.at(ModuleState.HOLDING_LONG)).thenReturn(true);
 		when(dealer.moduleStatus.isSameDayHolding(ArgumentMatchers.anyString())).thenReturn(true);
 		
@@ -131,12 +128,11 @@ public class SmartDealerTest extends CommonParamTest {
 		
 		dealer.holdingProfitBar = mock(SimpleBar.class);
 		when(dealer.holdingProfitBar.actualDiff()).thenReturn(-1D);
-		Thread.sleep(1100);
 		assertThat(dealer.onTick(factory.makeTickField(SYMBOL, 1243))).isPresent();
 	}
 	
 	@Test
-	public void shouldGetCloseOrderIfProfitRetrieve() throws InterruptedException {
+	public void shouldGetCloseOrderIfProfitRetrieve()  {
 		when(dealer.moduleStatus.at(ModuleState.HOLDING_LONG)).thenReturn(true);
 		when(dealer.moduleStatus.isSameDayHolding(ArgumentMatchers.anyString())).thenReturn(true);
 		dealer.lastSignal = CtaSignal.builder()
@@ -151,7 +147,7 @@ public class SmartDealerTest extends CommonParamTest {
 	}
 
 	@Test
-	public void shouldGetNothingIfTimeoutInSafeZoon() throws InterruptedException {
+	public void shouldGetNothingIfTimeoutInSafeZoon()  {
 		when(dealer.moduleStatus.at(ModuleState.HOLDING_LONG)).thenReturn(true);
 		when(dealer.moduleStatus.isSameDayHolding(ArgumentMatchers.anyString())).thenReturn(true);
 		when(dealer.moduleStatus.getHoldingProfit()).thenReturn(110D);
@@ -161,7 +157,6 @@ public class SmartDealerTest extends CommonParamTest {
 				.signalPrice(1234)
 				.build();
 		dealer.baseline = 1234;
-		Thread.sleep(1100);
 		assertThat(dealer.onTick(factory.makeTickField(SYMBOL, 1245))).isEmpty();
 	}
 	
