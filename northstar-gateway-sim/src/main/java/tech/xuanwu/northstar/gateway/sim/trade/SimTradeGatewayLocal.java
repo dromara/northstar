@@ -2,6 +2,10 @@ package tech.xuanwu.northstar.gateway.sim.trade;
 
 import java.time.LocalDate;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.common.event.NorthstarEventType;
@@ -27,11 +31,16 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 	
 	private GwAccountHolder accountHolder;
 	
+	private ScheduledExecutorService execService = Executors.newScheduledThreadPool(1);
+	
+	private ScheduledFuture<?> job;
 	
 	public SimTradeGatewayLocal(FastEventEngine feEngine, GatewaySettingField gatewaySetting, GwAccountHolder accountHolder) {
 		this.feEngine = feEngine;
 		this.gatewaySetting = gatewaySetting;
 		this.accountHolder = accountHolder;	
+		
+		
 	}
 
 	@Override
@@ -44,6 +53,11 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 		connected = true;
 		feEngine.emitEvent(NorthstarEventType.CONNECTED, gatewaySetting.getGatewayId());
 		feEngine.emitEvent(NorthstarEventType.LOGGED_IN, gatewaySetting.getGatewayId());
+		
+		job = execService.scheduleAtFixedRate(()->{
+			log.info("定时状态回报");
+			accountHolder.emitStatus();
+		}, 2, 2, TimeUnit.SECONDS);
 		
 		// 模拟返回合约
 		CompletableFuture.runAsync(()->{
@@ -82,6 +96,8 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 		connected = false;
 		feEngine.emitEvent(NorthstarEventType.DISCONNECTED, gatewaySetting.getGatewayId());
 		feEngine.emitEvent(NorthstarEventType.LOGGED_OUT, gatewaySetting.getGatewayId());
+		
+		job.cancel(false);
 	}
 
 	@Override
@@ -115,6 +131,7 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 
 	@Override
 	public void onTick(TickField tick) {
+		if(!connected) return;
 		accountHolder.updateTick(tick);
 	}
 

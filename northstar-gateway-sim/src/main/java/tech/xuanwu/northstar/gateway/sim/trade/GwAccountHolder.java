@@ -1,14 +1,10 @@
 package tech.xuanwu.northstar.gateway.sim.trade;
 
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import com.google.common.util.concurrent.AtomicDouble;
 import com.google.protobuf.InvalidProtocolBufferException;
 
-import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.common.event.NorthstarEventType;
 import tech.xuanwu.northstar.common.exception.TradeException;
 import tech.xuanwu.northstar.engine.event.FastEventEngine;
@@ -22,7 +18,6 @@ import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TickField;
 import xyz.redtorch.pb.CoreField.TradeField;
 
-@Slf4j
 class GwAccountHolder {
 
 	private AccountField.Builder accBuilder;
@@ -35,11 +30,9 @@ class GwAccountHolder {
 
 	private int ticksOfCommission;
 	
-	private long lastEmitTime;
-	
-	private ScheduledExecutorService execService = Executors.newScheduledThreadPool(1);
-	
 	private TickField lastTick;
+	
+	private long lastEmitTime;
 	
 	//测试用的后门开关
 	public boolean testFlag;
@@ -53,17 +46,6 @@ class GwAccountHolder {
 		this.orderHolder = factory.newGwOrderHolder();
 		this.posHolder = factory.newGwPositionHolder();
 		this.ticksOfCommission = ticksOfCommission;
-		
-		execService.scheduleAtFixedRate(()->{
-			long now = System.currentTimeMillis();
-			if(now - this.lastEmitTime > 1000) {
-				this.lastEmitTime = now; 
-				feEngine.emitEvent(NorthstarEventType.ACCOUNT, accBuilder.build());
-				for(PositionField pf : posHolder.getPositions()) {					
-					feEngine.emitEvent(NorthstarEventType.POSITION, pf);
-				}
-			}
-		}, 2, 2, TimeUnit.SECONDS);
 	}
 
 	protected void updateTick(TickField tick) {
@@ -201,6 +183,13 @@ class GwAccountHolder {
 	protected void convertFrom(SimAccountPO po) throws InvalidProtocolBufferException {
 		accBuilder = AccountField.newBuilder().mergeFrom(po.getAccountData());
 		posHolder.restore(po.getPositionData());
+	}
+	
+	protected void emitStatus() {
+		feEngine.emitEvent(NorthstarEventType.ACCOUNT, accBuilder.build());
+		for(PositionField pf : posHolder.getPositions()) {					
+			feEngine.emitEvent(NorthstarEventType.POSITION, pf);
+		}
 	}
 
 	/**
