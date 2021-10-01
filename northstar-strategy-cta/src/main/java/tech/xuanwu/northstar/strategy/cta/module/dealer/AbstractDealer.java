@@ -44,6 +44,8 @@ public abstract class AbstractDealer implements Dealer{
 	
 	protected ModuleStatus moduleStatus;
 	
+	protected int numOfBarsForCurrentDay;
+	
 	@Override
 	public Set<String> bindedUnifiedSymbols() {
 		return Set.of(bindedUnifiedSymbol);
