@@ -70,7 +70,7 @@ public class SmartDealer extends AbstractDealer implements Dealer {
 	});
 	
 	@Override
-	public Optional<SubmitOrderReqField> onTick(TickField tick) {
+	public Optional<SubmitOrderReqField> handleTick(TickField tick) {
 		lastTick = tick;
 		barGen.updateTick(tick);
 		if(baseline == 0 || lastMinBar == null) {

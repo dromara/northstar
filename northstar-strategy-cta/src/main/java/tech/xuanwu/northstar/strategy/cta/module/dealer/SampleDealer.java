@@ -27,7 +27,7 @@ public class SampleDealer extends AbstractDealer implements Dealer {
 
 	//注意防止重复下单
 	@Override
-	public Optional<SubmitOrderReqField> onTick(TickField tick) {
+	public Optional<SubmitOrderReqField> handleTick(TickField tick) {
 		if(currentSignal == null && currentOrderReq == null) {
 			return Optional.empty();
 		}
