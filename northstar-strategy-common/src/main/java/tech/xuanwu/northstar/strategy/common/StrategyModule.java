@@ -96,8 +96,7 @@ public class StrategyModule {
 			}
 		}
 		if(dealer.bindedUnifiedSymbols().contains(tick.getUnifiedSymbol())) {
-			Optional<SubmitOrderReqField> stopLossOrder = dealer.tryStopLoss(tick);
-			Optional<SubmitOrderReqField> submitOrder = stopLossOrder.isPresent() ? stopLossOrder : dealer.onTick(tick);
+			Optional<SubmitOrderReqField> submitOrder = dealer.onTick(tick);
 			if(submitOrder.isPresent()) {
 				if(submitOrder.get().getOffsetFlag() == OffsetFlagEnum.OF_Unknown) {
 					throw new IllegalStateException("未定义开平操作");

@@ -44,6 +44,8 @@ public abstract class AbstractDealer implements Dealer{
 	
 	protected ModuleStatus moduleStatus;
 	
+	protected int numOfBarsForCurrentDay;
+	
 	@Override
 	public Set<String> bindedUnifiedSymbols() {
 		return Set.of(bindedUnifiedSymbol);
@@ -116,10 +118,22 @@ public abstract class AbstractDealer implements Dealer{
 				.build();
 	}
 	
-	public Optional<SubmitOrderReqField> tryStopLoss(TickField tick){
+	
+	
+	private Optional<SubmitOrderReqField> tryStopLoss(TickField tick){
 		Optional<SubmitOrderReqField> orderReq = moduleStatus.triggerStopLoss(tick, contractManager.getContract(tick.getUnifiedSymbol()));
 		if(orderReq.isPresent()) 
 			moduleStatus.transform(ModuleEventType.STOP_LOSS);
 		return orderReq;
 	}
+
+	@Override
+	public Optional<SubmitOrderReqField> onTick(TickField tick) {
+		Optional<SubmitOrderReqField> stopLossReq = tryStopLoss(tick);
+		if(stopLossReq.isPresent())
+			return stopLossReq;
+		return handleTick(tick);
+	}
+	
+	protected abstract Optional<SubmitOrderReqField> handleTick(TickField tick);
 }

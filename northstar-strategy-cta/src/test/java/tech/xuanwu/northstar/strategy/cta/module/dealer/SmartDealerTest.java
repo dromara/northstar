@@ -2,29 +2,23 @@ package tech.xuanwu.northstar.strategy.cta.module.dealer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
-import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentMatchers;
 
 import common.CommonParamTest;
 import tech.xuanwu.northstar.common.model.ContractManager;
+import tech.xuanwu.northstar.strategy.common.Signal;
 import tech.xuanwu.northstar.strategy.common.constants.ModuleState;
 import tech.xuanwu.northstar.strategy.common.constants.PriceType;
 import tech.xuanwu.northstar.strategy.common.constants.SignalOperation;
-import tech.xuanwu.northstar.strategy.common.event.ModuleEventType;
 import tech.xuanwu.northstar.strategy.common.model.ModuleStatus;
-import tech.xuanwu.northstar.strategy.common.model.data.SimpleBar;
 import tech.xuanwu.northstar.strategy.cta.module.signal.CtaSignal;
 import test.common.TestFieldFactory;
-import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.ContractField;
-import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
+import xyz.redtorch.pb.CoreField.TradeField;
 
 public class SmartDealerTest extends CommonParamTest {
 	
@@ -39,9 +33,9 @@ public class SmartDealerTest extends CommonParamTest {
 	public void setUp() throws Exception {
 		dealer.bindedUnifiedSymbol = USYMBOL;
 		dealer.openVol = 1;
-		dealer.stopProfitThresholdInTick = 10; //10TICK
 		dealer.priceTypeStr = PriceType.SIGNAL_PRICE;
 		dealer.lastMinBar = BarField.newBuilder().build();
+		dealer.lossToleranceInTick = 20;
 		dealer.moduleStatus = mock(ModuleStatus.class);
 		when(dealer.moduleStatus.getModuleName()).thenReturn("testModule");
 		ContractManager contractMgr = mock(ContractManager.class);
@@ -55,111 +49,141 @@ public class SmartDealerTest extends CommonParamTest {
 	
 	@Test
 	public void shouldGetNothingIfNoSignal() {
-		assertThat(dealer.onTick(factory.makeTickField(SYMBOL, 0))).isEmpty();
-	}
-	
-	@Test
-	public void shouldGetOpenOrderReqIfAcrossAfterSignal()  {
-		when(dealer.moduleStatus.at(ModuleState.PLACING_ORDER)).thenReturn(true);
-		dealer.lastTick = factory.makeTickField(SYMBOL, 1234);
-		dealer.onSignal(CtaSignal.builder()
-				.state(SignalOperation.BuyOpen)
-				.signalPrice(1234)
-				.build());
-		dealer.lastMinBar = BarField.newBuilder().setClosePrice(1233).build();
-		Optional<SubmitOrderReqField> orderReq = dealer.onTick(factory.makeTickField(SYMBOL, 1234));
-		assertThat(orderReq).isPresent();
-		assertThat(orderReq.get().getOffsetFlag()).isEqualTo(OffsetFlagEnum.OF_Open);
-		assertThat(orderReq.get().getPrice()).isZero(); //市价单
-	}
-	
-	@Test
-	public void shouldGetOpenOrderReqIfTimeoutAfterSignal()  {
-		when(dealer.moduleStatus.at(ModuleState.PLACING_ORDER)).thenReturn(true);
-		dealer.lastTick = factory.makeTickField(SYMBOL, 1234);
-		dealer.lastMinBar = BarField.newBuilder().setClosePrice(1240).build();
-		dealer.onSignal(CtaSignal.builder()
-				.state(SignalOperation.BuyOpen)
-				.signalPrice(1234)
-				.build());
-		Optional<SubmitOrderReqField> orderReq = dealer.onTick(factory.makeTickField(SYMBOL, 1260));
-		assertThat(orderReq).isPresent();
-		assertThat(orderReq.get().getOffsetFlag()).isEqualTo(OffsetFlagEnum.OF_Open);
-		assertThat(orderReq.get().getPrice()).isEqualTo(1260); // 限价单
-	}
-	
-	@Test
-	public void shouldChangeStateIfLastSignalExist() {
+		dealer.moduleStatus = mock(ModuleStatus.class);
 		when(dealer.moduleStatus.at(ModuleState.EMPTY)).thenReturn(true);
+		when(dealer.moduleStatus.getCurrentState()).thenReturn(ModuleState.EMPTY);
+		dealer.baseline = 0;
+		assertThat(dealer.onTick(factory.makeTickField(SYMBOL, 1234))).isEmpty();
+	}
+	
+	@Test
+	public void shouldGetBuyOpenReqWhenEmptyIfAcrossBaseline() {
+		dealer.moduleStatus = mock(ModuleStatus.class);
+		when(dealer.moduleStatus.at(ModuleState.EMPTY)).thenReturn(true);
+		when(dealer.moduleStatus.getCurrentState()).thenReturn(ModuleState.EMPTY);
 		dealer.baseline = 1234;
-		dealer.lastSignal = CtaSignal.builder()
-				.state(SignalOperation.BuyOpen)
-				.signalPrice(1234)
-				.build();
-		dealer.lastMinBar = BarField.newBuilder().setClosePrice(1233).build();
-		Optional<SubmitOrderReqField> orderReq = dealer.onTick(factory.makeTickField(SYMBOL, 1234));
-		assertThat(orderReq).isEmpty();
-		verify(dealer.moduleStatus).transform(ModuleEventType.OPENING_SIGNAL_CREATED);
+		dealer.lastMinBar = BarField.newBuilder().setClosePrice(1230).setOpenPrice(1232).build();
+		assertThat(dealer.onTick(factory.makeTickField(SYMBOL, 1234))).isPresent();
 	}
 	
 	@Test
-	public void shouldGetCloseOrderIfReceivedCloseSignal() {
-		when(dealer.moduleStatus.at(ModuleState.PLACING_ORDER)).thenReturn(true);
-		when(dealer.moduleStatus.isSameDayHolding(ArgumentMatchers.anyString())).thenReturn(true);
-		dealer.onSignal(CtaSignal.builder()
-				.state(SignalOperation.SellClose)
-				.signalPrice(1234)
-				.build());
-		Optional<SubmitOrderReqField> orderReq = dealer.onTick(factory.makeTickField(SYMBOL, 1260));
-		assertThat(orderReq).isPresent();
-		assertThat(orderReq.get().getOffsetFlag()).isEqualTo(OffsetFlagEnum.OF_CloseToday);
-		assertThat(orderReq.get().getPrice()).isZero();
-	}
-	
-	@Test
-	public void shouldGetCloseOrderIfTimeoutInDangerZoon()  {
-		when(dealer.moduleStatus.at(ModuleState.HOLDING_LONG)).thenReturn(true);
-		when(dealer.moduleStatus.isSameDayHolding(ArgumentMatchers.anyString())).thenReturn(true);
-		
-		dealer.lastSignal = CtaSignal.builder()
-				.state(SignalOperation.BuyOpen)
-				.signalPrice(1234)
-				.build();
-		
-		dealer.holdingProfitBar = mock(SimpleBar.class);
-		when(dealer.holdingProfitBar.actualDiff()).thenReturn(-1D);
-		assertThat(dealer.onTick(factory.makeTickField(SYMBOL, 1243))).isPresent();
-	}
-	
-	@Test
-	public void shouldGetCloseOrderIfProfitRetrieve()  {
-		when(dealer.moduleStatus.at(ModuleState.HOLDING_LONG)).thenReturn(true);
-		when(dealer.moduleStatus.isSameDayHolding(ArgumentMatchers.anyString())).thenReturn(true);
-		dealer.lastSignal = CtaSignal.builder()
-				.state(SignalOperation.BuyOpen)
-				.signalPrice(1234)
-				.build();
-		dealer.holdingProfitBar = mock(SimpleBar.class);
-		when(dealer.holdingProfitBar.upperShadow()).thenReturn(26D);
-		when(dealer.holdingProfitBar.barRange()).thenReturn(100D);
-		when(dealer.holdingProfitBar.getHigh()).thenReturn(50D);
-		assertThat(dealer.onTick(factory.makeTickField(SYMBOL, 1300))).isPresent();
-	}
-
-	@Test
-	public void shouldGetNothingIfTimeoutInSafeZoon()  {
-		when(dealer.moduleStatus.at(ModuleState.HOLDING_LONG)).thenReturn(true);
-		when(dealer.moduleStatus.isSameDayHolding(ArgumentMatchers.anyString())).thenReturn(true);
-		when(dealer.moduleStatus.getHoldingProfit()).thenReturn(110D);
-		dealer.holdingProfitBar = new SimpleBar(0);
-		dealer.lastSignal = CtaSignal.builder()
-				.state(SignalOperation.BuyOpen)
-				.signalPrice(1234)
-				.build();
+	public void shouldGetSellOpenReqWhenEmptyIfAcrossBaseline() {
+		dealer.moduleStatus = mock(ModuleStatus.class);
+		when(dealer.moduleStatus.at(ModuleState.EMPTY)).thenReturn(true);
+		when(dealer.moduleStatus.getCurrentState()).thenReturn(ModuleState.EMPTY);
 		dealer.baseline = 1234;
-		assertThat(dealer.onTick(factory.makeTickField(SYMBOL, 1245))).isEmpty();
+		dealer.lastMinBar = BarField.newBuilder().setClosePrice(1250).setOpenPrice(1240).build();
+		assertThat(dealer.onTick(factory.makeTickField(SYMBOL, 1234))).isPresent();
 	}
 	
+	@Test
+	public void shouldGetNothingWhenNotEmptyIfAcrossBaseline() {
+		dealer.moduleStatus = mock(ModuleStatus.class);
+		when(dealer.moduleStatus.at(ModuleState.EMPTY)).thenReturn(false);
+		when(dealer.moduleStatus.getCurrentState()).thenReturn(ModuleState.PENDING_ORDER);
+		dealer.baseline = 1234;
+		dealer.lastMinBar = BarField.newBuilder().setClosePrice(1250).build();
+		assertThat(dealer.onTick(factory.makeTickField(SYMBOL, 1234))).isEmpty();
+	}
 	
-	//当自行裁量期超时时，如果未触发信号止损价，应该发单，否则不发单
+	@Test
+	public void shouldGetBuyCloseReqWhenHoldingShortIfAcrossBaseline() {
+		dealer.moduleStatus = mock(ModuleStatus.class);
+		when(dealer.moduleStatus.at(ModuleState.HOLDING_SHORT)).thenReturn(true);
+		when(dealer.moduleStatus.getCurrentState()).thenReturn(ModuleState.HOLDING_SHORT);
+		dealer.baseline = 1234;
+		dealer.numOfBarsForCurrentDay = 100;
+		assertThat(dealer.onTick(factory.makeTickField(SYMBOL, 1234))).isPresent();
+	}
+	
+	@Test
+	public void shouldGetSellCloseReqWhenHoldingLongIfAcrossBaseline() {
+		dealer.moduleStatus = mock(ModuleStatus.class);
+		when(dealer.moduleStatus.at(ModuleState.HOLDING_LONG)).thenReturn(true);
+		when(dealer.moduleStatus.getCurrentState()).thenReturn(ModuleState.HOLDING_LONG);
+		dealer.baseline = 1234;
+		dealer.numOfBarsForCurrentDay = 100;
+		assertThat(dealer.onTick(factory.makeTickField(SYMBOL, 1234))).isPresent();
+	}
+	
+	@Test
+	public void shouldGetBuyCloseReqWhenWithinColdDownPeriodIfTriggerStopLoss() {
+		dealer.moduleStatus = mock(ModuleStatus.class);
+		when(dealer.moduleStatus.at(ModuleState.HOLDING_SHORT)).thenReturn(true);
+		when(dealer.moduleStatus.getCurrentState()).thenReturn(ModuleState.HOLDING_SHORT);
+		dealer.baseline = 1234;
+		assertThat(dealer.onTick(factory.makeTickField(SYMBOL, 1255))).isPresent();
+	}
+	
+	@Test
+	public void shouldGetSellCloseReqWhenWithinColdDownPeriodIfTriggerStopLoss() {
+		dealer.moduleStatus = mock(ModuleStatus.class);
+		when(dealer.moduleStatus.at(ModuleState.HOLDING_LONG)).thenReturn(true);
+		when(dealer.moduleStatus.getCurrentState()).thenReturn(ModuleState.HOLDING_LONG);
+		dealer.baseline = 1234;
+		assertThat(dealer.onTick(factory.makeTickField(SYMBOL, 1213))).isPresent();
+	}
+	
+	@Test
+	public void shouldGetNothingWhenWithinColdDownPeriodEvenAcrossBaseline() {
+		dealer.moduleStatus = mock(ModuleStatus.class);
+		when(dealer.moduleStatus.at(ModuleState.HOLDING_SHORT)).thenReturn(true);
+		when(dealer.moduleStatus.getCurrentState()).thenReturn(ModuleState.HOLDING_SHORT);
+		dealer.baseline = 1234;
+		assertThat(dealer.onTick(factory.makeTickField(SYMBOL, 1253))).isEmpty();
+	}
+	
+	@Test
+	public void shouldGetNothingWhenWithinColdDownPeriodEvenAcrossBaseline2() {
+		dealer.moduleStatus = mock(ModuleStatus.class);
+		when(dealer.moduleStatus.at(ModuleState.HOLDING_LONG)).thenReturn(true);
+		when(dealer.moduleStatus.getCurrentState()).thenReturn(ModuleState.HOLDING_LONG);
+		dealer.baseline = 1234;
+		assertThat(dealer.onTick(factory.makeTickField(SYMBOL, 1215))).isEmpty();
+	}
+	
+	@Test
+	public void shouldNotGetBuyCloseReqWhenWithinColdDownPeriodIfAcrossBaseline() {
+		dealer.moduleStatus = mock(ModuleStatus.class);
+		when(dealer.moduleStatus.at(ModuleState.HOLDING_SHORT)).thenReturn(true);
+		when(dealer.moduleStatus.getCurrentState()).thenReturn(ModuleState.HOLDING_SHORT);
+		dealer.baseline = 1234;
+		dealer.lastMinBar = BarField.newBuilder().setClosePrice(1230).build();
+		assertThat(dealer.onTick(factory.makeTickField(SYMBOL, 1234))).isEmpty();
+	}
+	
+	@Test
+	public void shouldNotGetSellCloseReqWhenWithinColdDownPeriodIfAcrossBaseline() {
+		dealer.moduleStatus = mock(ModuleStatus.class);
+		when(dealer.moduleStatus.at(ModuleState.HOLDING_LONG)).thenReturn(true);
+		when(dealer.moduleStatus.getCurrentState()).thenReturn(ModuleState.HOLDING_LONG);
+		dealer.baseline = 1234;
+		dealer.lastMinBar = BarField.newBuilder().setClosePrice(1250).build();
+		assertThat(dealer.onTick(factory.makeTickField(SYMBOL, 1234))).isEmpty();
+	}
+	
+	@Test
+	public void shouldUpdateBarCount() {
+		dealer.numOfBarsForCurrentDay = 100;
+		dealer.onTrade(TradeField.newBuilder().build());
+		assertThat(dealer.barNumOfLastAction).isEqualTo(100);
+	}
+	
+	@Test
+	public void shouldUpdateBaseline() {
+		CtaSignal signal = CtaSignal.builder().state(SignalOperation.BuyOpen).signalPrice(3234D).build();
+		dealer.lastTick = factory.makeTickField(SYMBOL, 1234);
+		dealer.onSignal(signal);
+		assertThat(dealer.baseline).isEqualTo(3234D);
+	}
+	
+	@Test
+	public void shouldGetNotThingIfNotAnySignal() {
+		dealer.moduleStatus = mock(ModuleStatus.class);
+		when(dealer.moduleStatus.at(ModuleState.EMPTY)).thenReturn(true);
+		when(dealer.moduleStatus.getCurrentState()).thenReturn(ModuleState.EMPTY);
+		dealer.lastMinBar = BarField.newBuilder().setClosePrice(1230).setOpenPrice(1232).build();
+		assertThat(dealer.onTick(factory.makeTickField(SYMBOL, 1234))).isEmpty();
+	}
+	
 }
