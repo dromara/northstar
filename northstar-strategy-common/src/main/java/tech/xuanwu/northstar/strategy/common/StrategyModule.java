@@ -90,7 +90,6 @@ public class StrategyModule {
 					|| status.at(ModuleState.HOLDING_SHORT)) {				
 				Optional<Signal> signal = signalPolicy.onTick(tick);
 				if(signal.isPresent()) {
-					status.transform(signal.get().isOpening() ? ModuleEventType.OPENING_SIGNAL_CREATED : ModuleEventType.CLOSING_SIGNAL_CREATED);
 					dealer.onSignal(signal.get());
 				}
 			}

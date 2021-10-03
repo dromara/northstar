@@ -82,7 +82,7 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 					.setSymbol(symbol)
 					.setProductClass(ProductClassEnum.FUTURES)
 					.setThirdPartyId(symbol)
-					.setMultiplier(10)
+					.setMultiplier(1)
 					.setPriceTick(10)
 					.setLongMarginRatio(0.08)
 					.setShortMarginRatio(0.08)
