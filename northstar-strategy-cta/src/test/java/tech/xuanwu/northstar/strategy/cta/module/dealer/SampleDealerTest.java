@@ -95,6 +95,9 @@ public class SampleDealerTest extends CommonParamTest {
 	
 	@Test
 	public void shouldGetSubmitOrderReqWhenReceivingSignal() {
+		dealer.moduleStatus = mock(ModuleStatus.class);
+		when(dealer.moduleStatus.at(ModuleState.EMPTY)).thenReturn(true);
+		when(dealer.moduleStatus.getCurrentState()).thenReturn(ModuleState.EMPTY);
 		dealer.priceTypeStr = "信号价";
 		dealer.onSignal(signal);
 		assertThat(dealer.onTick(factory.makeTickField("rb2210", 1234))).isPresent();
