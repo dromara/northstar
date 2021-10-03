@@ -53,6 +53,7 @@ public abstract class AbstractDealer implements Dealer{
 	
 	@Override
 	public void onSignal(Signal signal) {
+		moduleStatus.transform(signal.isOpening() ? ModuleEventType.OPENING_SIGNAL_CREATED : ModuleEventType.CLOSING_SIGNAL_CREATED);
 		currentSignal = (CtaSignal) signal;
 	}
 	
