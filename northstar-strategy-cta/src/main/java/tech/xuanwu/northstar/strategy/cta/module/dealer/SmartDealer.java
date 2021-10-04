@@ -84,10 +84,13 @@ public class SmartDealer extends AbstractDealer implements Dealer {
 		ContractField contract = contractManager.getContract(tick.getUnifiedSymbol());
 		if(ifTriggeredLossTolerance() || triggerSmartClose()) {
 			// 满足出场条件
-			moduleStatus.transform(ModuleEventType.STOP_LOSS);
+			if(!moduleStatus.getCurrentState().isHolding()) {
+				throw new IllegalStateException("模组持仓状态异常，无法平仓：" + moduleStatus.getCurrentState());
+			}
 			OffsetFlagEnum offset = moduleStatus.isSameDayHolding(tick.getTradingDay()) ? OffsetFlagEnum.OF_CloseToday : OffsetFlagEnum.OF_CloseYesterday;
 			DirectionEnum dir = moduleStatus.at(ModuleState.HOLDING_LONG) ? DirectionEnum.D_Sell : DirectionEnum.D_Buy;
 			currentOrderReq = genSubmitOrder(contract, dir, offset, openVol, 0, 0);
+			moduleStatus.transform(ModuleEventType.STOP_LOSS);
 			return Optional.of(currentOrderReq);
 		}
 		
