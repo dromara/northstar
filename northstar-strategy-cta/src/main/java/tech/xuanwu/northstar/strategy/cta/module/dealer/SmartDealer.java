@@ -84,10 +84,13 @@ public class SmartDealer extends AbstractDealer implements Dealer {
 		ContractField contract = contractManager.getContract(tick.getUnifiedSymbol());
 		if(ifTriggeredLossTolerance() || triggerSmartClose()) {
 			// 满足出场条件
-			moduleStatus.transform(ModuleEventType.STOP_LOSS);
+			if(!moduleStatus.getCurrentState().isHolding()) {
+				throw new IllegalStateException("模组持仓状态异常，无法平仓：" + moduleStatus.getCurrentState());
+			}
 			OffsetFlagEnum offset = moduleStatus.isSameDayHolding(tick.getTradingDay()) ? OffsetFlagEnum.OF_CloseToday : OffsetFlagEnum.OF_CloseYesterday;
 			DirectionEnum dir = moduleStatus.at(ModuleState.HOLDING_LONG) ? DirectionEnum.D_Sell : DirectionEnum.D_Buy;
 			currentOrderReq = genSubmitOrder(contract, dir, offset, openVol, 0, 0);
+			moduleStatus.transform(ModuleEventType.STOP_LOSS);
 			return Optional.of(currentOrderReq);
 		}
 		
@@ -113,7 +116,9 @@ public class SmartDealer extends AbstractDealer implements Dealer {
 	
 	private boolean ifTriggeredLossTolerance() {
 		int factor = moduleStatus.at(ModuleState.HOLDING_LONG) ? 1 : moduleStatus.at(ModuleState.HOLDING_SHORT) ? -1 : 0;
-		if(moduleStatus.getCurrentState().isHolding() && withinColdDownPeriod() && factor * (baseline - lastTick.getLastPrice()) > lossToleranceInTick) {
+		ContractField contract = contractManager.getContract(lastTick.getUnifiedSymbol());
+		if(moduleStatus.getCurrentState().isHolding() && withinColdDownPeriod() 
+				&& factor * (baseline - lastTick.getLastPrice()) > lossToleranceInTick * contract.getPriceTick()) {
 			log.info("[{}] 观察期触发止损", moduleStatus.getModuleName());
 			return true;
 		}
