@@ -113,7 +113,9 @@ public class SmartDealer extends AbstractDealer implements Dealer {
 	
 	private boolean ifTriggeredLossTolerance() {
 		int factor = moduleStatus.at(ModuleState.HOLDING_LONG) ? 1 : moduleStatus.at(ModuleState.HOLDING_SHORT) ? -1 : 0;
-		if(moduleStatus.getCurrentState().isHolding() && withinColdDownPeriod() && factor * (baseline - lastTick.getLastPrice()) > lossToleranceInTick) {
+		ContractField contract = contractManager.getContract(lastTick.getUnifiedSymbol());
+		if(moduleStatus.getCurrentState().isHolding() && withinColdDownPeriod() 
+				&& factor * (baseline - lastTick.getLastPrice()) > lossToleranceInTick * contract.getPriceTick()) {
 			log.info("[{}] 观察期触发止损", moduleStatus.getModuleName());
 			return true;
 		}
