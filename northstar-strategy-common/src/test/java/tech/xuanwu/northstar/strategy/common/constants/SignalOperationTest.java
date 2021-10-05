@@ -42,4 +42,12 @@ public class SignalOperationTest {
 		assertThat(SignalOperation.None.isClose()).isFalse();
 	}
 
+	@Test
+	public void testParse() {
+		assertThat(SignalOperation.parse("多平")).isEqualTo(SignalOperation.BuyClose);
+		assertThat(SignalOperation.parse("空平")).isEqualTo(SignalOperation.SellClose);
+		assertThat(SignalOperation.parse("多开")).isEqualTo(SignalOperation.BuyOpen);
+		assertThat(SignalOperation.parse("空开")).isEqualTo(SignalOperation.SellOpen);
+		assertThat(SignalOperation.parse("")).isEqualTo(SignalOperation.None);
+	}
 }

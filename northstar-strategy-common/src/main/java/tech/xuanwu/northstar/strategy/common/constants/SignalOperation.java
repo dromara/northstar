@@ -1,5 +1,8 @@
 package tech.xuanwu.northstar.strategy.common.constants;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * 使用四位二进制数表达六个状态
  * 
@@ -13,47 +16,60 @@ public enum SignalOperation {
 	/**
 	 * 多开
 	 */
-	BuyOpen(0b0001),
+	BuyOpen("多开"),
 	/**
 	 * 空开
 	 */
-	SellOpen(0b0010),
+	SellOpen("空开"),
 	/**
 	 * 多平
 	 */
-	BuyClose(0b0100),
+	BuyClose("多平"),
 	/**
 	 * 空平
 	 */
-	SellClose(0b1000),
+	SellClose("空平"),
 	/**
 	 * 无信号
 	 */
-	None(0b0000);
+	None("");
 
 	
-	private int val;
-	private SignalOperation(int val) {
-		this.val = val;
+	private String val;
+	private SignalOperation(String text) {
+		this.val = text;
 	}
 	
 	public boolean isOpen() {
-		return (val & 0b0011) > 0;
+		return this == BuyOpen || this == SellOpen;
 	}
 	
 	public boolean isSell() {
-		return (val & 0b1010) > 0;
+		return this == SellOpen || this == SellClose;
 	}
 	
 	public boolean isBuy() {
-		return (val & 0b0101) > 0;
+		return this == BuyOpen || this == BuyClose;
 	}
 	
 	public boolean isClose() {
-		return (val & 0b1100) > 0;
+		return this == BuyClose || this == SellClose;
 	}
 	
-	public int code() {
-		return val;
+	private static final Map<String, SignalOperation> enumMap = new HashMap<>();
+	
+	static {
+		enumMap.put("多开", BuyOpen);
+		enumMap.put("空开", SellOpen);
+		enumMap.put("多平", BuyClose);
+		enumMap.put("空平", SellClose);
 	}
+	
+	public static SignalOperation parse(String val) {
+		if(enumMap.containsKey(val)) {
+			return enumMap.get(val);
+		}
+		return None;
+	}
+	
 }
