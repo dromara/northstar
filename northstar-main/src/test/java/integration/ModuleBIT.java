@@ -16,6 +16,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -31,6 +32,7 @@ import tech.xuanwu.northstar.common.model.CtpSettings;
 import tech.xuanwu.northstar.common.model.GatewayDescription;
 import tech.xuanwu.northstar.common.model.NsUser;
 import tech.xuanwu.northstar.common.model.SimSettings;
+import tech.xuanwu.northstar.engine.broadcast.SocketIOMessageEngine;
 import tech.xuanwu.northstar.main.NorthstarApplication;
 import tech.xuanwu.northstar.strategy.common.model.ModulePosition;
 import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
@@ -46,6 +48,9 @@ public class ModuleBIT {
 	private MockMvc mockMvc;
 	
 	private MockHttpSession session;
+	
+	@MockBean
+	private SocketIOMessageEngine msgEngine;
 	
 	@Before
 	public void setUp() throws Exception {
@@ -164,16 +169,40 @@ public class ModuleBIT {
 		Thread.sleep(1000);
 	}
 	
-//	@Test
-//	public void shouldSuccessfullyGetModuleCurrentPerformance() {
-//		
-//	}
-//	
-//	@Test
-//	public void shouldSuccessfullyGetModuleHistoryPerformance() {}
-//	
-//	@Test
-//	public void shouldSuccessfullyToggleModuleState() {}
-//	
+	@Test
+	public void shouldSuccessfullyGetModuleCurrentPerformance() throws Exception {
+		shouldCreateModulePosition();
+		mockMvc.perform(get("/module/info?name=TEST").session(session))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
+	}
+	
+	@Test
+	public void shouldSuccessfullyGetModuleDealRecords() throws Exception {
+		shouldCreateModulePosition();
+		
+		mockMvc.perform(get("/module/records?name=TEST").session(session))
+		.andExpect(status().isOk())
+		.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
+	}
+	
+	@Test
+	public void shouldSuccessfullyGetModuleTradeRecords() throws Exception {
+		shouldCreateModulePosition();
+		
+		mockMvc.perform(get("/module/records/trade?name=TEST").session(session))
+		.andExpect(status().isOk())
+		.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
+	}
+	
+	@Test
+	public void shouldSuccessfullyToggleModuleState() throws Exception {
+		shouldCreateModulePosition();
+		
+		mockMvc.perform(get("/module/toggle?name=TEST").session(session))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
+	}
+	
 	
 }

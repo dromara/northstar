@@ -14,6 +14,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -30,6 +31,7 @@ import tech.xuanwu.northstar.common.model.CtpSettings;
 import tech.xuanwu.northstar.common.model.GatewayDescription;
 import tech.xuanwu.northstar.common.model.NsUser;
 import tech.xuanwu.northstar.common.model.SimSettings;
+import tech.xuanwu.northstar.engine.broadcast.SocketIOMessageEngine;
 import tech.xuanwu.northstar.main.NorthstarApplication;
 
 /**
@@ -46,6 +48,9 @@ public class GatewayManagementBIT {
 	private MockMvc mockMvc;
 	
 	private MockHttpSession session;
+	
+	@MockBean
+	private SocketIOMessageEngine msgEngine;
 	
 	@Before
 	public void setUp() throws Exception {
