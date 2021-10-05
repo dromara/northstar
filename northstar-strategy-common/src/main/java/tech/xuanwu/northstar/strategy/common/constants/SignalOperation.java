@@ -27,14 +27,6 @@ public enum SignalOperation {
 	 */
 	SellClose(0b1000),
 	/**
-	 * 反手多
-	 */
-	ReversingBuy(0b0101),
-	/**
-	 * 反手空
-	 */
-	ReversingSell(0b1010),
-	/**
 	 * 无信号
 	 */
 	None(0b0000);
@@ -46,15 +38,19 @@ public enum SignalOperation {
 	}
 	
 	public boolean isOpen() {
-		return (val & 3) > 0;
+		return (val & 0b0011) > 0;
 	}
 	
-	public boolean isReverse() {
-		return val == 5 || val == 10;
+	public boolean isSell() {
+		return (val & 0b1010) > 0;
 	}
 	
 	public boolean isBuy() {
 		return (val & 0b0101) > 0;
+	}
+	
+	public boolean isClose() {
+		return (val & 0b1100) > 0;
 	}
 	
 	public int code() {
