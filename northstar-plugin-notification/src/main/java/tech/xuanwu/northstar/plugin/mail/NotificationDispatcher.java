@@ -17,6 +17,7 @@ import tech.xuanwu.northstar.common.utils.FieldUtils;
 import xyz.redtorch.pb.CoreEnum.OrderStatusEnum;
 import xyz.redtorch.pb.CoreField.NoticeField;
 import xyz.redtorch.pb.CoreField.OrderField;
+import xyz.redtorch.pb.CoreField.TradeField;
 
 @Component
 public class NotificationDispatcher extends AbstractEventHandler implements InitializingBean, GenericEventHandler{
@@ -36,6 +37,7 @@ public class NotificationDispatcher extends AbstractEventHandler implements Init
 			add(NorthstarEventType.DISCONNECTED);
 			add(NorthstarEventType.GATEWAY_READY);
 			add(NorthstarEventType.ORDER);
+			add(NorthstarEventType.TRADE);
 		}
 	};
 	
@@ -43,7 +45,6 @@ public class NotificationDispatcher extends AbstractEventHandler implements Init
 		private static final long serialVersionUID = 1L;
 
 		{
-			add(OrderStatusEnum.OS_AllTraded);
 			add(OrderStatusEnum.OS_Canceled);
 			add(OrderStatusEnum.OS_Rejected);
 			add(OrderStatusEnum.OS_Touched);
@@ -79,6 +80,9 @@ public class NotificationDispatcher extends AbstractEventHandler implements Init
 			break;
 		case ORDER:
 			handleOrder((OrderField) e.getData());
+			break;
+		case TRADE:
+			handleTrade((TradeField)e.getData());
 			break;
 		default:
 			throw new IllegalArgumentException("未定义处理类型：" + e.getEvent());
@@ -119,6 +123,16 @@ public class NotificationDispatcher extends AbstractEventHandler implements Init
 				order.getContract().getName(), order.getTotalVolume(), order.getTradedVolume(), order.getPrice());
 		Message msg = new Message(String.format("[%s]订单：%s，%s %s %d手", 
 				gatewayId, status, order.getContract().getName(), dir+offset, order.getTotalVolume()), content);
+		doSend(msg);
+	}
+	
+	private void handleTrade(TradeField trade) {
+		String dir = FieldUtils.chn(trade.getDirection());
+		String offset = FieldUtils.chn(trade.getOffsetFlag());
+		String content = String.format("合约：%s%n手数：%d%n价钱：%.2f", 
+				trade.getContract().getName(), trade.getVolume(), trade.getPrice());
+		Message msg = new Message(String.format("[%s]成交：%s，%s %d手", 
+				trade.getGatewayId(), trade.getContract().getName(), dir+offset, trade.getVolume()), content);
 		doSend(msg);
 	}
 	
