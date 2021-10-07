@@ -10,7 +10,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentMatchers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -20,6 +19,7 @@ import tech.xuanwu.northstar.common.event.NorthstarEventType;
 import tech.xuanwu.northstar.common.model.OrderRequest;
 import tech.xuanwu.northstar.common.model.OrderRequest.TradeOperation;
 import tech.xuanwu.northstar.domain.account.TradeDayAccount;
+import tech.xuanwu.northstar.engine.broadcast.SocketIOMessageEngine;
 import tech.xuanwu.northstar.engine.event.FastEventEngine;
 import tech.xuanwu.northstar.main.NorthstarApplication;
 
@@ -41,6 +41,9 @@ public class TradeOperationTest {
 	FastEventEngine feEngine;
 	
 	OrderRequest orderReq;
+	
+	@MockBean
+	private SocketIOMessageEngine msgEngine;
 
 	@Before
 	public void setUp() throws Exception {

@@ -1,214 +1,208 @@
 package tech.xuanwu.northstar.main.restful;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.time.LocalDate;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.web.servlet.MockMvc;
 
-import com.corundumstudio.socketio.SocketIOServer;
+import com.alibaba.fastjson.JSON;
 
+import common.TestGatewayFactory;
 import common.TestMongoUtils;
+import tech.xuanwu.northstar.common.constant.GatewayType;
 import tech.xuanwu.northstar.common.constant.ReturnCode;
-import tech.xuanwu.northstar.common.model.ContractManager;
+import tech.xuanwu.northstar.common.model.CtpSettings;
 import tech.xuanwu.northstar.common.model.GatewayDescription;
-import tech.xuanwu.northstar.domain.GatewayConnection;
-import tech.xuanwu.northstar.gateway.api.TradeGateway;
+import tech.xuanwu.northstar.common.model.NsUser;
+import tech.xuanwu.northstar.common.model.SimSettings;
+import tech.xuanwu.northstar.engine.broadcast.SocketIOMessageEngine;
 import tech.xuanwu.northstar.main.NorthstarApplication;
-import tech.xuanwu.northstar.main.manager.GatewayAndConnectionManager;
-import tech.xuanwu.northstar.strategy.common.constants.ModuleType;
 import tech.xuanwu.northstar.strategy.common.model.ModulePosition;
-import tech.xuanwu.northstar.strategy.common.model.entity.ModuleInfo;
-import tech.xuanwu.northstar.strategy.common.model.meta.ComponentAndParamsPair;
-import tech.xuanwu.northstar.strategy.common.model.meta.ComponentField;
-import tech.xuanwu.northstar.strategy.common.model.meta.ComponentMetaInfo;
 import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
-import xyz.redtorch.pb.CoreField.ContractField;
-import xyz.redtorch.pb.CoreField.GatewaySettingField;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = NorthstarApplication.class, value="spring.profiles.active=test")
+@AutoConfigureMockMvc
 public class ModuleTest {
+
+	private String symbol;
 	
 	@Autowired
-	private ModuleController ctrlr;
-
-	@MockBean
-	private GatewayAndConnectionManager gatewayConnMgr;
+	private MockMvc mockMvc;
+	
+	private MockHttpSession session;
 	
 	@MockBean
-	private SocketIOServer server;
-	
-	@MockBean
-	private ContractManager contractMgr;
+	private SocketIOMessageEngine msgEngine;
 	
 	@Before
 	public void setUp() throws Exception {
-		when(contractMgr.getContract("rb2210@SHFE@FUTURES")).thenReturn(ContractField.newBuilder().setUnifiedSymbol("rb2210@SHFE@FUTURES").build());
+		LocalDate date = LocalDate.now().plusDays(45);
+		String year = date.getYear() % 100 + "";
+		String month = String.format("%02d", date.getMonth().getValue());
+		symbol = "ni" + year + month;
+		
+		session = new MockHttpSession();
+		mockMvc.perform(post("/auth/login").contentType(MediaType.APPLICATION_JSON_UTF8).content(JSON.toJSONString(new NsUser("admin","123456"))).session(session))
+			.andExpect(status().isOk());
+		
+		String json = JSON.toJSONString(TestGatewayFactory.makeTrdGateway("TG1", "TG2",  GatewayType.CTP, TestGatewayFactory.makeGatewaySettings(CtpSettings.class),false));
+		mockMvc.perform(post("/mgt/gateway").contentType(MediaType.APPLICATION_JSON_UTF8).content(json).session(session))
+			.andExpect(status().isOk());
 	}
-
+	
 	@After
-	public void tearDown() throws Exception {
+	public void tearDown() throws InterruptedException {
 		TestMongoUtils.clearDB();
 	}
 	
-	// 获取模组交易策略元配置
-	@Test
-	public void shouldHaveSampleDealer() {
-		List<ComponentMetaInfo> dealers = ctrlr.getRegisteredDealers().getData();
-		assertThat(dealers.stream().filter(c -> c.getName().equals("示例交易策略")).findAny().isPresent()).isTrue();
-	}
-	// 获取模组信号策略元配置
-	@Test
-	public void shouldHaveSamplePolicy() {
-		List<ComponentMetaInfo> signalPolicies = ctrlr.getRegisteredSignalPolicies().getData();
-		assertThat(signalPolicies.stream().filter(c -> c.getName().equals("示例策略")).findAny().isPresent()).isTrue();
-	}
-	// 获取模组风控策略元配置
-	@Test
-	public void shouldHaveBasicRiskRules() {
-		List<ComponentMetaInfo> rules = ctrlr.getRegisteredRiskControlRules().getData();
-		assertThat(rules.stream().filter(c -> c.getName().equals("模组占用账户资金限制")).findAny().isPresent()).isTrue();
-		assertThat(rules.stream().filter(c -> c.getName().equals("日内开仓次数限制")).findAny().isPresent()).isTrue();
-		assertThat(rules.stream().filter(c -> c.getName().equals("委托超价限制")).findAny().isPresent()).isTrue();
-		assertThat(rules.stream().filter(c -> c.getName().equals("委托超时限制")).findAny().isPresent()).isTrue();
-	}
-
-	// 新增模组
 	@Test
 	public void shouldSuccessfullyCreate() throws Exception {
-		GatewayConnection conn = mock(GatewayConnection.class);
-		GatewayDescription gwDes = mock(GatewayDescription.class);
-		when(gwDes.getBindedMktGatewayId()).thenReturn("testGw");
-		when(conn.getGwDescription()).thenReturn(gwDes);
-		when(gatewayConnMgr.getGatewayConnectionById("testGateway")).thenReturn(conn);
-		TradeGateway gateway = mock(TradeGateway.class);
-		when(gateway.getGatewaySetting()).thenReturn(GatewaySettingField.newBuilder().build());
-		when(gatewayConnMgr.getGatewayById("testGateway")).thenReturn(gateway);
-		ComponentMetaInfo dealer = ctrlr.getRegisteredDealers().getData().stream().filter(c -> c.getName().equals("示例交易策略")).findAny().get();
-		ComponentMetaInfo signalPolicy = ctrlr.getRegisteredSignalPolicies().getData().stream().filter(c -> c.getName().equals("示例策略")).findAny().get();
-		Map<String, ComponentField> paramsMap = ctrlr.getComponentParams(dealer).getData();
-		paramsMap.get("bindedUnifiedSymbol").setValue("rb2210@SHFE@FUTURES");
-		ComponentAndParamsPair signalPolicyMeta = ComponentAndParamsPair.builder()
-				.componentMeta(signalPolicy)
-				.initParams(ctrlr.getComponentParams(signalPolicy).getData().values().stream().collect(Collectors.toList()))
-				.build();
-		ComponentAndParamsPair dealerMeta = ComponentAndParamsPair.builder()
-				.componentMeta(dealer)
-				.initParams(paramsMap.values().stream().collect(Collectors.toList()))
-				.build();
-		ModuleInfo info = ModuleInfo.builder()
-				.moduleName("testModule")
-				.enabled(true)
-				.type(ModuleType.CTA)
-				.accountGatewayId("testGateway")
-				.signalPolicy(signalPolicyMeta)
-				.dealer(dealerMeta)
-				.riskControlRules(Collections.EMPTY_LIST)
-				.build();
+		String demoStr = "{\"moduleName\":\"TEST\",\"accountGatewayId\":\"TG1\",\"signalPolicy\":{\"componentMeta\":{\"name\":\"示例策略\",\"className\":\"tech.xuanwu.northstar.strategy.cta.module.signal.SampleSignalPolicy\"},\"initParams\":[{\"label\":\"绑定合约\",\"name\":\"bindedUnifiedSymbol\",\"order\":10,\"type\":\"String\",\"value\":\""+symbol+"@SHFE@FUTURES\",\"unit\":\"\",\"options\":[]},{\"label\":\"长周期\",\"name\":\"actionInterval\",\"order\":30,\"type\":\"Number\",\"value\":\"3\",\"unit\":\"秒\",\"options\":[]}]},\"riskControlRules\":[{\"componentMeta\":{\"name\":\"委托超时限制\",\"className\":\"tech.xuanwu.northstar.strategy.cta.module.risk.TimeExceededRule\"},\"initParams\":[{\"label\":\"超时时间\",\"name\":\"timeoutSeconds\",\"order\":0,\"type\":\"Number\",\"value\":\"23\",\"unit\":\"秒\",\"options\":[]}]}],\"dealer\":{\"componentMeta\":{\"name\":\"示例交易策略\",\"className\":\"tech.xuanwu.northstar.strategy.cta.module.dealer.SampleDealer\"},\"initParams\":[{\"label\":\"绑定合约\",\"name\":\"bindedUnifiedSymbol\",\"order\":10,\"type\":\"String\",\"value\":\""+symbol+"@SHFE@FUTURES\",\"unit\":\"\",\"options\":[]},{\"label\":\"开仓手数\",\"name\":\"openVol\",\"order\":20,\"type\":\"Number\",\"value\":\"2\",\"unit\":\"\",\"options\":[]},{\"label\":\"价格类型\",\"name\":\"priceTypeStr\",\"order\":30,\"type\":\"Options\",\"value\":\"市价\",\"unit\":\"\",\"options\":[\"对手价\",\"市价\",\"最新价\",\"排队价\",\"信号价\"]},{\"label\":\"超价\",\"name\":\"overprice\",\"order\":40,\"type\":\"Number\",\"value\":\"2\",\"unit\":\"Tick\",\"options\":[]}]},\"enabled\":false,\"type\":\"CTA\"}";
 		
-		assertThat(ctrlr.createModule(info).getData()).isTrue();
+		mockMvc.perform(post("/module").contentType(MediaType.APPLICATION_JSON_UTF8).content(demoStr).session(session))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
 	}
 	
-	
-	// 修改模组
 	@Test
-	public void shouldSuccessfullyModify() throws Exception {
-		GatewayConnection conn = mock(GatewayConnection.class);
-		GatewayDescription gwDes = mock(GatewayDescription.class);
-		when(gwDes.getBindedMktGatewayId()).thenReturn("testGw");
-		when(conn.getGwDescription()).thenReturn(gwDes);
-		when(gatewayConnMgr.getGatewayConnectionById("testGateway")).thenReturn(conn);
-		when(gatewayConnMgr.getGatewayById("testGateway")).thenReturn(mock(TradeGateway.class));
-		ComponentMetaInfo dealer = ctrlr.getRegisteredDealers().getData().stream().filter(c -> c.getName().equals("示例交易策略")).findAny().get();
-		ComponentMetaInfo signalPolicy = ctrlr.getRegisteredSignalPolicies().getData().stream().filter(c -> c.getName().equals("示例策略")).findAny().get();
-		ComponentAndParamsPair signalPolicyMeta = ComponentAndParamsPair.builder()
-				.componentMeta(signalPolicy)
-				.initParams(ctrlr.getComponentParams(signalPolicy).getData().values().stream().collect(Collectors.toList()))
-				.build();
-		ComponentAndParamsPair dealerMeta = ComponentAndParamsPair.builder()
-				.componentMeta(dealer)
-				.initParams(ctrlr.getComponentParams(dealer).getData().values().stream().collect(Collectors.toList()))
-				.build();
-		ModuleInfo info = ModuleInfo.builder()
-				.moduleName("testModule")
-				.enabled(false)
-				.type(ModuleType.CTA)
-				.accountGatewayId("testGateway")
-				.signalPolicy(signalPolicyMeta)
-				.dealer(dealerMeta)
-				.riskControlRules(Collections.EMPTY_LIST)
-				.build();
+	public void shouldSuccessfullyUpdate() throws Exception {
+		shouldSuccessfullyCreate();
+		String demoStr = "{\"moduleName\":\"TEST\",\"accountGatewayId\":\"TG1\",\"signalPolicy\":{\"componentMeta\":{\"name\":\"示例策略\",\"className\":\"tech.xuanwu.northstar.strategy.cta.module.signal.SampleSignalPolicy\"},\"initParams\":[{\"label\":\"绑定合约\",\"name\":\"bindedUnifiedSymbol\",\"order\":10,\"type\":\"String\",\"value\":\""+symbol+"@SHFE@FUTURES\",\"unit\":\"\",\"options\":[]},{\"label\":\"长周期\",\"name\":\"actionInterval\",\"order\":30,\"type\":\"Number\",\"value\":\"3\",\"unit\":\"秒\",\"options\":[]}]},\"riskControlRules\":[{\"componentMeta\":{\"name\":\"委托超时限制\",\"className\":\"tech.xuanwu.northstar.strategy.cta.module.risk.TimeExceededRule\"},\"initParams\":[{\"label\":\"超时时间\",\"name\":\"timeoutSeconds\",\"order\":0,\"type\":\"Number\",\"value\":\"23\",\"unit\":\"秒\",\"options\":[]}]}],\"dealer\":{\"componentMeta\":{\"name\":\"示例交易策略\",\"className\":\"tech.xuanwu.northstar.strategy.cta.module.dealer.SampleDealer\"},\"initParams\":[{\"label\":\"绑定合约\",\"name\":\"bindedUnifiedSymbol\",\"order\":10,\"type\":\"String\",\"value\":\""+symbol+"@SHFE@FUTURES\",\"unit\":\"\",\"options\":[]},{\"label\":\"开仓手数\",\"name\":\"openVol\",\"order\":20,\"type\":\"Number\",\"value\":\"2\",\"unit\":\"\",\"options\":[]},{\"label\":\"价格类型\",\"name\":\"priceTypeStr\",\"order\":30,\"type\":\"Options\",\"value\":\"市价\",\"unit\":\"\",\"options\":[\"对手价\",\"市价\",\"最新价\",\"排队价\",\"信号价\"]},{\"label\":\"超价\",\"name\":\"overprice\",\"order\":40,\"type\":\"Number\",\"value\":\"2\",\"unit\":\"Tick\",\"options\":[]}]},\"enabled\":true,\"type\":\"CTA\"}";
 		
-		ctrlr.createModule(info);
-		info.setEnabled(true);
-		assertThat(ctrlr.updateModule(info).getData()).isTrue();
+		mockMvc.perform(put("/module").contentType(MediaType.APPLICATION_JSON_UTF8).content(demoStr).session(session))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
 	}
 	
-	// 查询模组
 	@Test
-	public void shouldFindModule() {
-		assertThat(ctrlr.getAllModules().getData()).isNotNull();
+	public void shouldFindModules() throws Exception {
+		mockMvc.perform(get("/module").session(session))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
 	}
 	
-	// 查询模组引用数据
 	@Test
-	public void shouldGetModuleDataRef() throws Exception {
+	public void shouldSuccessfullyRemove() throws Exception {
 		shouldSuccessfullyCreate();
-		assertThat(ctrlr.getModuleDataRef("testModule").getStatus()).isEqualTo(ReturnCode.SUCCESS);
-	}
-	
-	
-	@Test
-	public void shouldGetModuleInfo() throws Exception {
-		shouldSuccessfullyCreate();
-		assertThat(ctrlr.getModuleRealTimeInfo("testModule").getStatus()).isEqualTo(ReturnCode.SUCCESS);
+		
+		mockMvc.perform(delete("/module?name=TEST").session(session))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
 	}
 	
 	@Test
 	public void shouldCreateModulePosition() throws Exception {
+		prepareGateway();
+		System.out.println("等待gateway初始化");
+		Thread.sleep(2000);
 		shouldSuccessfullyCreate();
 		ModulePosition position = ModulePosition.builder()
-				.unifiedSymbol("rb2210@SHFE@FUTURES")
+				.unifiedSymbol(symbol+"@SHFE@FUTURES")
 				.multiplier(10)
 				.openTime(System.currentTimeMillis())
 				.openPrice(1234)
 				.openTradingDay("20210609")
 				.positionDir(PositionDirectionEnum.PD_Long)
 				.build();
-		assertThat(ctrlr.createPosition("testModule", position).getStatus()).isEqualTo(ReturnCode.SUCCESS);
+		
+		mockMvc.perform(post("/module/TEST/position").contentType(MediaType.APPLICATION_JSON_UTF8).content(JSON.toJSONString(position)).session(session))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
 	}
 	
 	@Test
 	public void shouldUpdateModulePosition() throws Exception {
-		shouldCreateModulePosition();
+		prepareGateway();
+		shouldSuccessfullyCreate();
 		ModulePosition position = ModulePosition.builder()
-				.unifiedSymbol("rb2210@SHFE@FUTURES")
+				.unifiedSymbol(symbol+"@SHFE@FUTURES")
 				.multiplier(10)
 				.openTime(System.currentTimeMillis())
-				.openPrice(2000)
+				.openPrice(1234)
 				.openTradingDay("20210609")
 				.positionDir(PositionDirectionEnum.PD_Long)
 				.build();
-		assertThat(ctrlr.updatePosition("testModule", position).getStatus()).isEqualTo(ReturnCode.SUCCESS);
+		
+		mockMvc.perform(put("/module/TEST/position").contentType(MediaType.APPLICATION_JSON_UTF8).content(JSON.toJSONString(position)).session(session))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
 	}
 	
 	@Test
 	public void shouldRemoveModulePosition() throws Exception {
 		shouldCreateModulePosition();
-		assertThat(ctrlr.removePosition("testModule", "rb2210@SHFE@FUTURES", PositionDirectionEnum.PD_Long).getStatus()).isEqualTo(ReturnCode.SUCCESS);
+		
+		mockMvc.perform(delete("/module/TEST/position?unifiedSymbol="+symbol+"@SHFE@FUTURES&dir=PD_Long").session(session))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
 	}
+	
+	private void prepareGateway() throws Exception {
+		GatewayDescription gateway = TestGatewayFactory.makeMktGateway("TG5", GatewayType.SIM, TestGatewayFactory.makeGatewaySettings(SimSettings.class),false);
+		mockMvc.perform(post("/mgt/gateway").contentType(MediaType.APPLICATION_JSON_UTF8).content(JSON.toJSONString(gateway)).session(session))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
+		
+		GatewayDescription gateway2 = TestGatewayFactory.makeTrdGateway("TG5Account", "TG5", GatewayType.SIM, TestGatewayFactory.makeGatewaySettings(SimSettings.class),true);
+		mockMvc.perform(post("/mgt/gateway").contentType(MediaType.APPLICATION_JSON_UTF8).content(JSON.toJSONString(gateway2)).session(session))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
+		
+		Thread.sleep(1000);
+	}
+	
+	@Test
+	public void shouldSuccessfullyGetModuleCurrentPerformance() throws Exception {
+		shouldCreateModulePosition();
+		mockMvc.perform(get("/module/info?name=TEST").session(session))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
+	}
+	
+	@Test
+	public void shouldSuccessfullyGetModuleDealRecords() throws Exception {
+		shouldCreateModulePosition();
+		
+		mockMvc.perform(get("/module/records?name=TEST").session(session))
+		.andExpect(status().isOk())
+		.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
+	}
+	
+	@Test
+	public void shouldSuccessfullyGetModuleTradeRecords() throws Exception {
+		shouldCreateModulePosition();
+		
+		mockMvc.perform(get("/module/records/trade?name=TEST").session(session))
+		.andExpect(status().isOk())
+		.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
+	}
+	
+	@Test
+	public void shouldSuccessfullyToggleModuleState() throws Exception {
+		shouldCreateModulePosition();
+		
+		mockMvc.perform(get("/module/toggle?name=TEST").session(session))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
+	}
+	
 	
 }

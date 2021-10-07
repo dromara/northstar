@@ -28,5 +28,26 @@ public class ProtoBeanUtilsTest {
 		ContractField contract = factory.makeContract("rb2210");
 		assertThat(ProtoBeanUtils.toPojoBean(ContractPO.class, contract)).isOfAnyClassIn(ContractPO.class);
 	}
+	
+	@Test(expected = IllegalArgumentException.class)
+	public void testException() {
+		ProtoBeanUtils.toPojoBean(ContractPO.class, null);
+	}
 
+	@Test(expected = IllegalArgumentException.class)
+	public void testException2() {
+		TestFieldFactory factory = new TestFieldFactory("testGateway");
+		ContractField contract = factory.makeContract("rb2210");
+		ProtoBeanUtils.toPojoBean(null, contract);
+	}
+	
+	@Test(expected = IllegalArgumentException.class)
+	public void testException3() throws IOException {
+		ProtoBeanUtils.toProtoBean(null, getClass());
+	}
+	
+	@Test(expected = IllegalArgumentException.class)
+	public void testException4() throws IOException {
+		ProtoBeanUtils.toProtoBean(ContractField.newBuilder(), null);
+	}
 }

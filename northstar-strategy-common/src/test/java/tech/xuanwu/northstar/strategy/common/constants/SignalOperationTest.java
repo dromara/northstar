@@ -12,18 +12,7 @@ public class SignalOperationTest {
 		assertThat(SignalOperation.SellClose.isOpen()).isFalse();
 		assertThat(SignalOperation.BuyOpen.isOpen()).isTrue();
 		assertThat(SignalOperation.SellOpen.isOpen()).isTrue();
-		assertThat(SignalOperation.ReversingBuy.isOpen()).isTrue();
-		assertThat(SignalOperation.ReversingSell.isOpen()).isTrue();
-	}
-
-	@Test
-	public void testIsReverse() {
-		assertThat(SignalOperation.BuyClose.isReverse()).isFalse();
-		assertThat(SignalOperation.SellClose.isReverse()).isFalse();
-		assertThat(SignalOperation.BuyOpen.isReverse()).isFalse();
-		assertThat(SignalOperation.SellOpen.isReverse()).isFalse();
-		assertThat(SignalOperation.ReversingBuy.isReverse()).isTrue();
-		assertThat(SignalOperation.ReversingSell.isReverse()).isTrue();
+		assertThat(SignalOperation.None.isOpen()).isFalse();
 	}
 
 	@Test
@@ -32,8 +21,33 @@ public class SignalOperationTest {
 		assertThat(SignalOperation.SellClose.isBuy()).isFalse();
 		assertThat(SignalOperation.BuyOpen.isBuy()).isTrue();
 		assertThat(SignalOperation.SellOpen.isBuy()).isFalse();
-		assertThat(SignalOperation.ReversingBuy.isBuy()).isTrue();
-		assertThat(SignalOperation.ReversingSell.isBuy()).isFalse();
+		assertThat(SignalOperation.None.isOpen()).isFalse();
+	}
+	
+	@Test
+	public void testIsSell() {
+		assertThat(SignalOperation.BuyClose.isSell()).isFalse();
+		assertThat(SignalOperation.SellClose.isSell()).isTrue();
+		assertThat(SignalOperation.BuyOpen.isSell()).isFalse();
+		assertThat(SignalOperation.SellOpen.isSell()).isTrue();
+		assertThat(SignalOperation.None.isSell()).isFalse();
+	}
+	
+	@Test
+	public void testIsClose() {
+		assertThat(SignalOperation.BuyClose.isClose()).isTrue();
+		assertThat(SignalOperation.SellClose.isClose()).isTrue();
+		assertThat(SignalOperation.BuyOpen.isClose()).isFalse();
+		assertThat(SignalOperation.SellOpen.isClose()).isFalse();
+		assertThat(SignalOperation.None.isClose()).isFalse();
 	}
 
+	@Test
+	public void testParse() {
+		assertThat(SignalOperation.parse("多平")).isEqualTo(SignalOperation.BuyClose);
+		assertThat(SignalOperation.parse("空平")).isEqualTo(SignalOperation.SellClose);
+		assertThat(SignalOperation.parse("多开")).isEqualTo(SignalOperation.BuyOpen);
+		assertThat(SignalOperation.parse("空开")).isEqualTo(SignalOperation.SellOpen);
+		assertThat(SignalOperation.parse("")).isEqualTo(SignalOperation.None);
+	}
 }

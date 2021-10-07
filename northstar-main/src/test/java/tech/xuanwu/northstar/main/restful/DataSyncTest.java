@@ -1,91 +1,77 @@
 package tech.xuanwu.northstar.main.restful;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-
-import java.util.List;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.web.servlet.MockMvc;
 
-import com.corundumstudio.socketio.SocketIOServer;
+import com.alibaba.fastjson.JSON;
 
-import common.TestGatewayFactory;
 import common.TestMongoUtils;
-import tech.xuanwu.northstar.common.constant.GatewayType;
 import tech.xuanwu.northstar.common.constant.ReturnCode;
-import tech.xuanwu.northstar.common.event.NorthstarEventType;
-import tech.xuanwu.northstar.common.model.ResultBean;
-import tech.xuanwu.northstar.common.model.SimSettings;
-import tech.xuanwu.northstar.common.model.SimpleContractInfo;
+import tech.xuanwu.northstar.common.model.NsUser;
 import tech.xuanwu.northstar.engine.broadcast.SocketIOMessageEngine;
 import tech.xuanwu.northstar.main.NorthstarApplication;
-import xyz.redtorch.pb.CoreField.AccountField;
-import xyz.redtorch.pb.CoreField.BarField;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = NorthstarApplication.class, value="spring.profiles.active=test")
+@AutoConfigureMockMvc
 public class DataSyncTest {
-	
-	@MockBean
-	private SocketIOServer server;
-	
+
 	@Autowired
-	private DataSyncController ctrlr;
+	private MockMvc mockMvc;
 	
-	@Autowired
-	private GatewayManagementController gatewayCtrlr;
+	private MockHttpSession session;
 	
 	@MockBean
 	private SocketIOMessageEngine msgEngine;
 	
-	
-	
 	@Before
 	public void setUp() throws Exception {
-		gatewayCtrlr.create(TestGatewayFactory.makeMktGateway("TG1", GatewayType.SIM, TestGatewayFactory.makeGatewaySettings(SimSettings.class), true));
-		gatewayCtrlr.create(TestGatewayFactory.makeTrdGateway("TG2", "TG1", GatewayType.SIM, TestGatewayFactory.makeGatewaySettings(SimSettings.class), true));
-		Thread.sleep(100);
-		
+		session = new MockHttpSession();
+		mockMvc.perform(post("/auth/login").contentType(MediaType.APPLICATION_JSON_UTF8).content(JSON.toJSONString(new NsUser("admin","123456"))).session(session))
+			.andExpect(status().isOk());
 	}
-
+	
 	@After
 	public void tearDown() throws Exception {
-		gatewayCtrlr.disconnect("TG2");
-		gatewayCtrlr.disconnect("TG1");
-		Thread.sleep(100);
-		gatewayCtrlr.remove("TG2");
-		gatewayCtrlr.remove("TG1");
 		TestMongoUtils.clearDB();
 	}
+	
+	@Test
+	public void shouldSync() throws Exception {
+		mockMvc.perform(get("/data/sync").session(session))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
+	}
+
 
 	@Test
-	public void testDataSync() throws Exception {
-		ctrlr.sync();
-		Thread.sleep(100);
-		verify(msgEngine).emitEvent(argThat(e -> e.getEvent() == NorthstarEventType.ACCOUNT), eq(AccountField.class));
+	public void shouldGetHistoryBar() throws Exception {
+		mockMvc.perform(get("/data/his/bar?gatewayId=test&unifiedSymbol=rb2201@SHFE@FUTURES&startDate=20210808&endDate=20210810").session(session))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
 	}
 	
 	@Test
-	public void testGetHistoryBar() throws Exception {
-		ctrlr.historyBars("TG1", "rb2110@SHFE@FUTURES", null, null);
-		Thread.sleep(100);
-		verify(msgEngine).emitEvent(argThat(e -> e.getEvent() == NorthstarEventType.HIS_BAR), eq(BarField.class));
+	public void shouldGetAvailableContract() throws Exception {
+		mockMvc.perform(get("/data/contracts").session(session))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
 	}
 	
-	@Test
-	public void shouldGetAvailableContracts() throws Exception {
-		Thread.sleep(1000);
-		ResultBean<List<SimpleContractInfo>> result = ctrlr.availableContracts();
-		assertThat(result.getStatus()).isEqualTo(ReturnCode.SUCCESS);
-	}
-
+	
 }
