@@ -202,6 +202,11 @@ public class ModuleService implements InitializingBean{
 				.dealer(dealer)
 				.signalPolicy(signalPolicy)
 				.riskController(riskController)
+				.runningStateChangeListener((isEnabled, strategyModule)->{
+					ModuleInfo moduleInfo = moduleRepo.findModuleInfo(strategyModule.getName());
+					moduleInfo.setEnabled(isEnabled);
+					moduleRepo.saveModuleInfo(moduleInfo);
+				})			
 				.build();
 		mdlMgr.addModule(module);
 	}
@@ -284,9 +289,6 @@ public class ModuleService implements InitializingBean{
 	 */
 	public boolean toggleState(String moduleName) {
 		mdlMgr.toggleState(moduleName);
-		ModuleInfo info = moduleRepo.findModuleInfo(moduleName);
-		info.setEnabled(!info.isEnabled());
-		moduleRepo.saveModuleInfo(info);
 		return true;
 	}
 	

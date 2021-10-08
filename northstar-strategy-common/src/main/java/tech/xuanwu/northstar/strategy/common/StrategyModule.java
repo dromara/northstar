@@ -61,6 +61,12 @@ public class StrategyModule {
 	
 	private String tradingDay;
 	
+	private long lastRejectTime;
+	
+	private int rejectCount;
+	
+	private RunningStateChangeListener runningStateChangeListener;
+	
 	@Builder.Default
 	private Map<String, OrderField> originOrderIdMap = new HashMap<>();
 	
@@ -146,6 +152,10 @@ public class StrategyModule {
 				// DO NOTHING
 				break;
 			case OS_Rejected:
+				handleReject();
+				status.transform(ModuleEventType.ORDER_CANCELLED);
+				originOrderIdMap.remove(order.getOriginOrderId());
+				break;
 			case OS_Canceled:
 				status.transform(ModuleEventType.ORDER_CANCELLED);
 				originOrderIdMap.remove(order.getOriginOrderId());
@@ -155,6 +165,20 @@ public class StrategyModule {
 			}
 		}
 		return this;
+	}
+	
+	private void handleReject() {
+		long now = System.currentTimeMillis();
+		if(now - lastRejectTime < 60000) {
+			if(++rejectCount > 3) {				
+				disabled = true;
+				log.info("[{}] 一分钟内订单拒绝次数超过熔断阀值，模组自动停止运行", status.getModuleName());
+				runningStateChangeListener.onChange(false, this);
+			}
+		} else {
+			rejectCount = 0;
+			lastRejectTime = now;
+		}
 	}
 	
 	public Optional<ModuleStatus> onTrade(TradeField trade) {
@@ -203,6 +227,7 @@ public class StrategyModule {
 	
 	public void toggleRunningState() {
 		disabled = !disabled;
+		runningStateChangeListener.onChange(!disabled, this);
 	}
 	
 	public String getTradingDay() {
@@ -252,5 +277,10 @@ public class StrategyModule {
 	public ModuleStatus removePosition(String unifiedSymbol, PositionDirectionEnum dir) {
 		status.manuallyRemovePosition(unifiedSymbol, dir);
 		return status;
+	}
+	
+	public interface RunningStateChangeListener{
+		
+		void onChange(boolean isEnable, StrategyModule module);
 	}
 }
