@@ -65,14 +65,17 @@ public class StrategyModule {
 	private Map<String, OrderField> originOrderIdMap = new HashMap<>();
 	
 	public StrategyModule onTick(TickField tick) {
-		if(!StringUtils.equals(mktGatewayId, tick.getGatewayId())) {
+		boolean isInterest = signalPolicy.bindedUnifiedSymbols().contains(tick.getUnifiedSymbol()) || dealer.bindedUnifiedSymbols().contains(tick.getUnifiedSymbol());
+		if(!StringUtils.equals(mktGatewayId, tick.getGatewayId()) || !isInterest) {
 			return this;
 		}
-		signalPolicy.updateTick(tick);
-		if(disabled) {
-			//停用期间忽略数据更新
-			return this;
-		}
+		
+		signalPolicy.updateTick(tick);	// 更新引用行情数据
+		status.updateHoldingProfit(tick);	// 更新持仓盈亏
+		
+		//停用期间忽略数据更新
+		if(disabled) return this;
+		
 		if(!gateway.isConnected()) {
 			long now = System.currentTimeMillis();
 			if(now - lastWarningTime > 60000) {
@@ -81,50 +84,45 @@ public class StrategyModule {
 			}
 			return this;
 		}
-		if(signalPolicy.bindedUnifiedSymbols().contains(tick.getUnifiedSymbol())) {	
-			tradingDay = tick.getTradingDay();
-			status.updateHoldingProfit(tick);
-			
-			if(status.at(ModuleState.EMPTY) 
-					|| status.at(ModuleState.HOLDING_LONG)
-					|| status.at(ModuleState.HOLDING_SHORT)) {				
-				Optional<Signal> signal = signalPolicy.onTick(tick);
-				if(signal.isPresent()) {
-					dealer.onSignal(signal.get());
-				}
+		tradingDay = tick.getTradingDay();
+		
+		if(status.at(ModuleState.EMPTY) 
+				|| status.at(ModuleState.HOLDING_LONG)
+				|| status.at(ModuleState.HOLDING_SHORT)) {				
+			Optional<Signal> signal = signalPolicy.onTick(tick);
+			if(signal.isPresent()) {
+				dealer.onSignal(signal.get());
 			}
 		}
-		if(dealer.bindedUnifiedSymbols().contains(tick.getUnifiedSymbol())) {
-			Optional<SubmitOrderReqField> submitOrder = dealer.onTick(tick);
-			if(submitOrder.isPresent()) {
-				if(submitOrder.get().getOffsetFlag() == OffsetFlagEnum.OF_Unknown) {
-					throw new IllegalStateException("未定义开平操作");
-				}
-				if(riskController.testReject(tick, status, submitOrder.get()) && FieldUtils.isOpen(submitOrder.get().getOffsetFlag())) {
-					status.transform(ModuleEventType.SIGNAL_RETAINED);
-					return this;
-				}
-				originOrderIdMap.put(submitOrder.get().getOriginOrderId(), OrderField.newBuilder().build());	// 用空的订单对象占位
-				gateway.submitOrder(submitOrder.get());
+		Optional<SubmitOrderReqField> submitOrder = dealer.onTick(tick);
+		if(submitOrder.isPresent()) {
+			if(submitOrder.get().getOffsetFlag() == OffsetFlagEnum.OF_Unknown) {
+				throw new IllegalStateException("未定义开平操作");
+			}
+			if(riskController.testReject(tick, status, submitOrder.get()) && FieldUtils.isOpen(submitOrder.get().getOffsetFlag())) {
+				status.transform(ModuleEventType.SIGNAL_RETAINED);
+				return this;
+			}
+			originOrderIdMap.put(submitOrder.get().getOriginOrderId(), OrderField.newBuilder().build());	// 用空的订单对象占位
+			gateway.submitOrder(submitOrder.get());
+		}
+		
+		if(status.at(ModuleState.PENDING_ORDER)) {
+			short riskCode = riskController.onTick(tick, status);
+			if(riskCode == RiskAuditResult.ACCEPTED) {
+				return this;
 			}
 			
-			if(status.at(ModuleState.PENDING_ORDER)) {
-				short riskCode = riskController.onTick(tick, status);
-				if(riskCode == RiskAuditResult.ACCEPTED) {
-					return this;
-				}
-				
-				status.transform((riskCode & RiskAuditResult.REJECTED) > 0 
-						? ModuleEventType.REJECT_RISK_ALERTED 
-						: ModuleEventType.RETRY_RISK_ALERTED);
-				for(Entry<String, OrderField> e : originOrderIdMap.entrySet()) {
-					String originOrderId = e.getKey();
-					CancelOrderReqField cancelOrder = CancelOrderReqField.newBuilder()
-							.setGatewayId(gateway.getGatewaySetting().getGatewayId())
-							.setOriginOrderId(originOrderId)
-							.build();
-					gateway.cancelOrder(cancelOrder);
-				}
+			status.transform((riskCode & RiskAuditResult.REJECTED) > 0 
+					? ModuleEventType.REJECT_RISK_ALERTED 
+					: ModuleEventType.RETRY_RISK_ALERTED);
+			for(Entry<String, OrderField> e : originOrderIdMap.entrySet()) {
+				String originOrderId = e.getKey();
+				CancelOrderReqField cancelOrder = CancelOrderReqField.newBuilder()
+						.setGatewayId(gateway.getGatewaySetting().getGatewayId())
+						.setOriginOrderId(originOrderId)
+						.build();
+				gateway.cancelOrder(cancelOrder);
 			}
 		}
 		return this;
