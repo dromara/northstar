@@ -9,9 +9,9 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import lombok.extern.slf4j.Slf4j;
+import tech.xuanwu.northstar.domain.GatewayAndConnectionManager;
 import tech.xuanwu.northstar.domain.GatewayConnection;
 import tech.xuanwu.northstar.gateway.api.Gateway;
-import tech.xuanwu.northstar.main.manager.GatewayAndConnectionManager;
 import tech.xuanwu.northstar.main.persistence.BarBufferManager;
 import tech.xuanwu.northstar.main.utils.HolidayManager;
 

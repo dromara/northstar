@@ -9,11 +9,11 @@ import org.springframework.context.annotation.DependsOn;
 
 import tech.xuanwu.northstar.common.event.InternalEventBus;
 import tech.xuanwu.northstar.common.model.ContractManager;
+import tech.xuanwu.northstar.domain.GatewayAndConnectionManager;
 import tech.xuanwu.northstar.domain.account.TradeDayAccount;
 import tech.xuanwu.northstar.engine.broadcast.SocketIOMessageEngine;
 import tech.xuanwu.northstar.engine.event.FastEventEngine;
 import tech.xuanwu.northstar.gateway.sim.trade.SimMarket;
-import tech.xuanwu.northstar.main.manager.GatewayAndConnectionManager;
 import tech.xuanwu.northstar.main.manager.ModuleManager;
 import tech.xuanwu.northstar.main.persistence.GatewayRepository;
 import tech.xuanwu.northstar.main.persistence.MarketDataRepository;

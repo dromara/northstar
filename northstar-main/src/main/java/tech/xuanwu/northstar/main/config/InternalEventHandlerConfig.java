@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.common.event.InternalEventBus;
 import tech.xuanwu.northstar.common.model.ContractManager;
+import tech.xuanwu.northstar.domain.GatewayAndConnectionManager;
 import tech.xuanwu.northstar.domain.account.TradeDayAccount;
 import tech.xuanwu.northstar.engine.index.IndexEngine;
 import tech.xuanwu.northstar.gateway.sim.trade.SimMarket;
@@ -17,7 +18,6 @@ import tech.xuanwu.northstar.main.handler.internal.ConnectionHandler;
 import tech.xuanwu.northstar.main.handler.internal.ContractHandler;
 import tech.xuanwu.northstar.main.handler.internal.SimMarketHandler;
 import tech.xuanwu.northstar.main.handler.internal.TradeHandler;
-import tech.xuanwu.northstar.main.manager.GatewayAndConnectionManager;
 import tech.xuanwu.northstar.main.persistence.MarketDataRepository;
 
 @Slf4j
