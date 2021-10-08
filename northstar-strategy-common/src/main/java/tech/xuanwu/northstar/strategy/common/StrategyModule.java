@@ -83,7 +83,6 @@ public class StrategyModule {
 		}
 		if(signalPolicy.bindedUnifiedSymbols().contains(tick.getUnifiedSymbol())) {	
 			tradingDay = tick.getTradingDay();
-			status.updateHoldingProfit(tick);
 			
 			if(status.at(ModuleState.EMPTY) 
 					|| status.at(ModuleState.HOLDING_LONG)
@@ -95,6 +94,7 @@ public class StrategyModule {
 			}
 		}
 		if(dealer.bindedUnifiedSymbols().contains(tick.getUnifiedSymbol())) {
+			status.updateHoldingProfit(tick);
 			Optional<SubmitOrderReqField> submitOrder = dealer.onTick(tick);
 			if(submitOrder.isPresent()) {
 				if(submitOrder.get().getOffsetFlag() == OffsetFlagEnum.OF_Unknown) {
