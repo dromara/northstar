@@ -83,7 +83,7 @@ public class StrategyModule {
 		if(!getGateway().isConnected()) {
 			long now = System.currentTimeMillis();
 			if(now - lastWarningTime > 60000) {
-				log.warn("网关[{}]未连接，无法执行策略", getGateway().getGatewaySetting().getGatewayId());
+				log.warn("网关[{}]未连接，[{}]无法执行策略", getGateway().getGatewaySetting().getGatewayId(), status.getModuleName());
 				lastWarningTime = now;
 			}
 			return this;
@@ -187,7 +187,7 @@ public class StrategyModule {
 			OrderField order = originOrderIdMap.remove(trade.getOriginOrderId());
 			// 考虑一个order分多次成交的情况
 			if(trade.getVolume() < order.getTradedVolume()) {
-				log.info("订单[{}]分可能多次成交", order.getOriginOrderId());
+				log.info("[{}] 订单[{}]分可能多次成交", status.getModuleName(), order.getOriginOrderId());
 				OrderField restOrder = OrderField.newBuilder(order)
 						.setTradedVolume(order.getTradedVolume() - trade.getVolume())
 						.build();
