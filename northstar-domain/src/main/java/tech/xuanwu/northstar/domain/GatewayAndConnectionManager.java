@@ -1,4 +1,4 @@
-package tech.xuanwu.northstar.main.manager;
+package tech.xuanwu.northstar.domain;
 
 import java.util.Collections;
 import java.util.List;
@@ -10,7 +10,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.Assert;
 
 import tech.xuanwu.northstar.common.exception.NoSuchElementException;
-import tech.xuanwu.northstar.domain.GatewayConnection;
 import tech.xuanwu.northstar.gateway.api.Gateway;
 
 /**

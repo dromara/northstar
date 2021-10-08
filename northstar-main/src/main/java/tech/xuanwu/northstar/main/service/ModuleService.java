@@ -13,10 +13,8 @@ import org.springframework.context.ApplicationContext;
 
 import tech.xuanwu.northstar.common.constant.DateTimeConstant;
 import tech.xuanwu.northstar.common.model.ContractManager;
+import tech.xuanwu.northstar.domain.GatewayAndConnectionManager;
 import tech.xuanwu.northstar.domain.GatewayConnection;
-import tech.xuanwu.northstar.gateway.api.Gateway;
-import tech.xuanwu.northstar.gateway.api.TradeGateway;
-import tech.xuanwu.northstar.main.manager.GatewayAndConnectionManager;
 import tech.xuanwu.northstar.main.manager.ModuleManager;
 import tech.xuanwu.northstar.main.persistence.MarketDataRepository;
 import tech.xuanwu.northstar.main.persistence.ModuleRepository;
@@ -163,7 +161,6 @@ public class ModuleService implements InitializingBean{
 		
 		String gatewayId = info.getAccountGatewayId();
 		GatewayConnection conn = gatewayConnMgr.getGatewayConnectionById(gatewayId);
-		Gateway gateway = gatewayConnMgr.getGatewayById(gatewayId);
 		String mktGatewayId = conn.getGwDescription().getBindedMktGatewayId();
 		
 		RiskController riskController = new GenericRiskController(riskRules);
@@ -195,13 +192,18 @@ public class ModuleService implements InitializingBean{
 		dealer.setModuleStatus(moduleStatus);
 		dealer.setContractManager(contractMgr);
 		StrategyModule module = StrategyModule.builder()
-				.gateway((TradeGateway)gateway)
-				.mktGatewayId(mktGatewayId)
+				.accountId(gatewayId)
+				.gatewayConnMgr(gatewayConnMgr)
 				.status(moduleStatus)
 				.disabled(!info.isEnabled())
 				.dealer(dealer)
 				.signalPolicy(signalPolicy)
 				.riskController(riskController)
+				.runningStateChangeListener((isEnabled, strategyModule)->{
+					ModuleInfo moduleInfo = moduleRepo.findModuleInfo(strategyModule.getName());
+					moduleInfo.setEnabled(isEnabled);
+					moduleRepo.saveModuleInfo(moduleInfo);
+				})			
 				.build();
 		mdlMgr.addModule(module);
 	}
@@ -284,9 +286,6 @@ public class ModuleService implements InitializingBean{
 	 */
 	public boolean toggleState(String moduleName) {
 		mdlMgr.toggleState(moduleName);
-		ModuleInfo info = moduleRepo.findModuleInfo(moduleName);
-		info.setEnabled(!info.isEnabled());
-		moduleRepo.saveModuleInfo(info);
 		return true;
 	}
 	

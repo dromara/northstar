@@ -14,6 +14,7 @@ import com.alibaba.fastjson.JSON;
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.common.utils.FieldUtils;
+import tech.xuanwu.northstar.domain.GatewayAndConnectionManager;
 import tech.xuanwu.northstar.gateway.api.TradeGateway;
 import tech.xuanwu.northstar.strategy.common.constants.ModuleState;
 import tech.xuanwu.northstar.strategy.common.constants.RiskAuditResult;
@@ -51,9 +52,9 @@ public class StrategyModule {
 	
 	private final Dealer dealer;
 	
-	private final String mktGatewayId;
+	private final GatewayAndConnectionManager gatewayConnMgr;
 	
-	private final TradeGateway gateway;
+	private final String accountId;
 	
 	private boolean disabled;
 	
@@ -61,11 +62,17 @@ public class StrategyModule {
 	
 	private String tradingDay;
 	
+	private long lastRejectTime;
+	
+	private int rejectCount;
+	
+	private RunningStateChangeListener runningStateChangeListener;
+	
 	@Builder.Default
 	private Map<String, OrderField> originOrderIdMap = new HashMap<>();
 	
 	public StrategyModule onTick(TickField tick) {
-		if(!StringUtils.equals(mktGatewayId, tick.getGatewayId())) {
+		if(!StringUtils.equals(gatewayConnMgr.getGatewayConnectionById(accountId).getGwDescription().getBindedMktGatewayId(), tick.getGatewayId())) {
 			return this;
 		}
 		signalPolicy.updateTick(tick);
@@ -73,10 +80,10 @@ public class StrategyModule {
 			//停用期间忽略数据更新
 			return this;
 		}
-		if(!gateway.isConnected()) {
+		if(!getGateway().isConnected()) {
 			long now = System.currentTimeMillis();
 			if(now - lastWarningTime > 60000) {
-				log.warn("网关[{}]未连接，无法执行策略", gateway.getGatewaySetting().getGatewayId());
+				log.warn("网关[{}]未连接，无法执行策略", getGateway().getGatewaySetting().getGatewayId());
 				lastWarningTime = now;
 			}
 			return this;
@@ -105,7 +112,7 @@ public class StrategyModule {
 					return this;
 				}
 				originOrderIdMap.put(submitOrder.get().getOriginOrderId(), OrderField.newBuilder().build());	// 用空的订单对象占位
-				gateway.submitOrder(submitOrder.get());
+				getGateway().submitOrder(submitOrder.get());
 			}
 			
 			if(status.at(ModuleState.PENDING_ORDER)) {
@@ -120,10 +127,10 @@ public class StrategyModule {
 				for(Entry<String, OrderField> e : originOrderIdMap.entrySet()) {
 					String originOrderId = e.getKey();
 					CancelOrderReqField cancelOrder = CancelOrderReqField.newBuilder()
-							.setGatewayId(gateway.getGatewaySetting().getGatewayId())
+							.setGatewayId(getGateway().getGatewaySetting().getGatewayId())
 							.setOriginOrderId(originOrderId)
 							.build();
-					gateway.cancelOrder(cancelOrder);
+					getGateway().cancelOrder(cancelOrder);
 				}
 			}
 		}
@@ -131,7 +138,7 @@ public class StrategyModule {
 	}
 	
 	public StrategyModule onBar(BarField bar) {
-		if(!StringUtils.equals(mktGatewayId, bar.getGatewayId())) {
+		if(!StringUtils.equals(gatewayConnMgr.getGatewayConnectionById(accountId).getGwDescription().getBindedMktGatewayId(), bar.getGatewayId())) {
 			return this;
 		}
 		signalPolicy.updateBar(bar);
@@ -146,6 +153,10 @@ public class StrategyModule {
 				// DO NOTHING
 				break;
 			case OS_Rejected:
+				handleReject();
+				status.transform(ModuleEventType.ORDER_CANCELLED);
+				originOrderIdMap.remove(order.getOriginOrderId());
+				break;
 			case OS_Canceled:
 				status.transform(ModuleEventType.ORDER_CANCELLED);
 				originOrderIdMap.remove(order.getOriginOrderId());
@@ -155,6 +166,20 @@ public class StrategyModule {
 			}
 		}
 		return this;
+	}
+	
+	private void handleReject() {
+		long now = System.currentTimeMillis();
+		if(now - lastRejectTime < 60000) {
+			if(++rejectCount > 3) {				
+				disabled = true;
+				log.info("[{}] 一分钟内订单拒绝次数超过熔断阀值，模组自动停止运行", status.getModuleName());
+				runningStateChangeListener.onChange(false, this);
+			}
+		} else {
+			rejectCount = 0;
+			lastRejectTime = now;
+		}
 	}
 	
 	public Optional<ModuleStatus> onTrade(TradeField trade) {
@@ -187,7 +212,7 @@ public class StrategyModule {
 	}
 	
 	public StrategyModule onAccount(AccountField account) {
-		if(StringUtils.equals(account.getGatewayId(), gateway.getGatewaySetting().getGatewayId())) {
+		if(StringUtils.equals(account.getGatewayId(), getGateway().getGatewaySetting().getGatewayId())) {
 			status.setAccountAvailable(account.getAvailable());
 		}
 		return this;
@@ -203,6 +228,7 @@ public class StrategyModule {
 	
 	public void toggleRunningState() {
 		disabled = !disabled;
+		runningStateChangeListener.onChange(!disabled, this);
 	}
 	
 	public String getTradingDay() {
@@ -210,13 +236,13 @@ public class StrategyModule {
 	}
 	
 	public TradeGateway getGateway() {
-		return gateway;
+		return (TradeGateway) gatewayConnMgr.getGatewayById(accountId);
 	}
 	
 	public ModuleRealTimeInfo getRealTimeInfo() {
 		ModuleRealTimeInfo mp = new ModuleRealTimeInfo();
 		mp.setModuleName(status.getModuleName());
-		mp.setAccountId(gateway.getGatewaySetting().getGatewayId());
+		mp.setAccountId(accountId);
 		mp.setModuleAvailable((int)status.getAccountAvailable());
 		mp.setModuleState(status.getCurrentState());
 		mp.setTotalPositionProfit(status.getHoldingProfit());
@@ -252,5 +278,10 @@ public class StrategyModule {
 	public ModuleStatus removePosition(String unifiedSymbol, PositionDirectionEnum dir) {
 		status.manuallyRemovePosition(unifiedSymbol, dir);
 		return status;
+	}
+	
+	public interface RunningStateChangeListener{
+		
+		void onChange(boolean isEnable, StrategyModule module);
 	}
 }
