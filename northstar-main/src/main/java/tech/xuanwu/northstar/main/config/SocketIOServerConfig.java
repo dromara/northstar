@@ -1,7 +1,5 @@
 package tech.xuanwu.northstar.main.config;
 
-import java.io.IOException;
-
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +16,6 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Configuration
-@ConditionalOnProperty(value = "spring.profiles.active", havingValue = "prod")
 public class SocketIOServerConfig implements DisposableBean, InitializingBean {
 
 	@Value("${socketio.host}")
@@ -31,8 +28,19 @@ public class SocketIOServerConfig implements DisposableBean, InitializingBean {
 	private SocketIOServer socketServer;
 	
 	@Bean
-    public SocketIOServer socketIOServer() throws IOException {
-        com.corundumstudio.socketio.Configuration config = new com.corundumstudio.socketio.Configuration();
+	@ConditionalOnProperty(value = "spring.profiles.active", havingValue = "prod")
+    public SocketIOServer socketIOServer()  {
+		return makeServer();
+    }
+	
+	@Bean
+	@ConditionalOnProperty(value = "spring.profiles.active", havingValue = "dev")
+	public SocketIOServer socketIOServer2() {
+        return makeServer();
+    }
+	
+	private SocketIOServer makeServer() {
+		com.corundumstudio.socketio.Configuration config = new com.corundumstudio.socketio.Configuration();
         config.setHostname(host);
         config.setPort(port);
         config.setBossThreads(1);
@@ -44,7 +52,7 @@ public class SocketIOServerConfig implements DisposableBean, InitializingBean {
         SocketIOServer socketServer = new SocketIOServer(config);
         socketServer.start();
         return socketServer;
-    }
+	}
 	
 	@Bean
 	public SpringAnnotationScanner springAnnotationScanner(SocketIOServer socketServer) {

@@ -1,5 +1,8 @@
 package tech.xuanwu.northstar.main.handler.data;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 
@@ -12,6 +15,7 @@ import tech.xuanwu.northstar.common.utils.BarGenerator;
 import tech.xuanwu.northstar.engine.event.FastEventEngine;
 import tech.xuanwu.northstar.main.persistence.BarBufferManager;
 import tech.xuanwu.northstar.main.persistence.po.MinBarDataPO;
+import tech.xuanwu.northstar.main.persistence.po.TickDataPO;
 import tech.xuanwu.northstar.main.utils.ProtoBeanUtils;
 import xyz.redtorch.pb.CoreField.TickField;
 
@@ -54,7 +58,9 @@ public class MarketBarDataHandler extends AbstractEventHandler implements Generi
 				feEngine.emitEvent(NorthstarEventType.BAR, bar);
 				try {					
 					MinBarDataPO barPO = ProtoBeanUtils.toPojoBean(MinBarDataPO.class, bar);
+					List<TickDataPO> tickPOs = ticks.stream().map(t -> ProtoBeanUtils.toPojoBean(TickDataPO.class, t)).collect(Collectors.toList());
 					barPO.setNumOfTicks(ticks.size());
+					barPO.setTicksOfMin(tickPOs);
 					bbMgr.addBar(barPO);
 				}catch(Exception ex) {
 					log.warn("############ 详细Tick数据 ###########");
