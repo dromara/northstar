@@ -74,6 +74,12 @@ public class SmartDealer extends AbstractDealer implements Dealer {
 		lastTick = tick;
 		barGen.updateTick(tick);
 		if(baseline == 0 || lastMinBar == null) {
+			if(showTick && isPrintoutWindow() && lastMinBar == null) {
+				log.warn("[{}] 正在预热，估计时间1分钟", moduleStatus.getModuleName());
+			}
+			if(showTick && isPrintoutWindow() && baseline == 0) {
+				log.warn("[{}] 未设置基线水平");
+			}
 			return Optional.empty();
 		}
 		
@@ -107,6 +113,11 @@ public class SmartDealer extends AbstractDealer implements Dealer {
 		}
 		
 		return Optional.empty();
+	}
+	
+	//防止大量打印日志，故限制打印的时间窗口，每分钟可以打印两秒
+	private boolean isPrintoutWindow() {
+		return (System.currentTimeMillis() % 60000) < 2000; 
 	}
 
 	@Override
