@@ -21,6 +21,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.alibaba.fastjson.JSON;
+import com.corundumstudio.socketio.SocketIOServer;
 
 import common.TestGatewayFactory;
 import common.TestMongoUtils;
@@ -51,6 +52,9 @@ public class GatewayManagementTest {
 	
 	@MockBean
 	private SocketIOMessageEngine msgEngine;
+	
+	@MockBean
+	private SocketIOServer socketServer;
 	
 	@Before
 	public void setUp() throws Exception {

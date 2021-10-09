@@ -100,6 +100,9 @@ public class DataSyncService {
 			String date = curDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER);
 			List<MinBarDataPO> dayBars = mdRepo.loadDataByDate(gatewayId, unifiedSymbol, date);
 			for(MinBarDataPO po : dayBars) {
+				// 清空冗余属性，避免转换异常
+				po.setTicksOfMin(null);
+				po.setNumOfTicks(null);
 				BarField.Builder bb = BarField.newBuilder();
 				ProtoBeanUtils.toProtoBean(bb, po);
 				ne.setData(bb.build());

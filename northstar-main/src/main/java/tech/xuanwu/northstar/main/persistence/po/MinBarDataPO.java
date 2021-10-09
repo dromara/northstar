@@ -1,5 +1,7 @@
 package tech.xuanwu.northstar.main.persistence.po;
 
+import java.util.List;
+
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import lombok.AllArgsConstructor;
@@ -39,5 +41,6 @@ public class MinBarDataPO {
 	private double preOpenInterest ;// 昨持仓
 	private double preClosePrice ;  // 前收盘价
 	private double preSettlePrice ;  // 昨结算价
-	private transient int numOfTicks;
+	private List<TickDataPO> ticksOfMin;	// 分钟内的TICK数据
+	private Integer numOfTicks;
 }
