@@ -139,6 +139,7 @@ public class TradeIntent {
 					.setAccountId(orderReq.getGatewayId())
 					.setAdapterOrderId("")
 					.setContract(contract)
+					.setTradeTimestamp(System.currentTimeMillis())
 					.setDirection(order.getDirection())
 					.setGatewayId(orderReq.getGatewayId())
 					.setHedgeFlag(order.getHedgeFlag())
