@@ -550,7 +550,10 @@ public class MdSpi extends CThostFtdcMdSpi {
 
 				preTickMap.put(contractId, tick);
 
-				gatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.TICK, tick);
+				// 当成交量变化为0时，此TICK为无效数据，丢弃
+				if(tick.getVolumeDelta() > 0) {					
+					gatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.TICK, tick);
+				}
 				lastUpdateTickTime = System.currentTimeMillis();
 				
 			} catch (Throwable t) {
