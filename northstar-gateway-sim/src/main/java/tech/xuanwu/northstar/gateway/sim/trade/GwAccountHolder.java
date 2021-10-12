@@ -10,7 +10,6 @@ import tech.xuanwu.northstar.common.exception.TradeException;
 import tech.xuanwu.northstar.engine.event.FastEventEngine;
 import tech.xuanwu.northstar.gateway.sim.persistence.SimAccountPO;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
-import xyz.redtorch.pb.CoreEnum.OrderPriceTypeEnum;
 import xyz.redtorch.pb.CoreField.AccountField;
 import xyz.redtorch.pb.CoreField.CancelOrderReqField;
 import xyz.redtorch.pb.CoreField.OrderField;
@@ -60,9 +59,7 @@ class GwAccountHolder {
 				commission.addAndGet(trade.getContract().getMultiplier() * ticksOfCommission * trade.getVolume());
 				closeProfit.addAndGet(posHolder.updatePositionBy(trade));
 				posHolder.updatePositionBy(order);
-				if(order.getOrderPriceType() != OrderPriceTypeEnum.OPT_AnyPrice) {					
-					feEngine.emitEvent(NorthstarEventType.ORDER, order);
-				}
+				feEngine.emitEvent(NorthstarEventType.ORDER, order);
 				feEngine.emitEvent(NorthstarEventType.TRADE, trade);
 			});
 		posHolder.updatePositionBy(tick)
@@ -148,9 +145,7 @@ class GwAccountHolder {
 		if(pf != null) {			
 			feEngine.emitEvent(NorthstarEventType.POSITION, pf);
 		}
-		if(order.getOrderPriceType() != OrderPriceTypeEnum.OPT_AnyPrice) {			
-			feEngine.emitEvent(NorthstarEventType.ORDER, order);
-		}
+		feEngine.emitEvent(NorthstarEventType.ORDER, order);
 		refreshAccount();
 		return order.getOrderId();
 	}
