@@ -39,8 +39,6 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 		this.feEngine = feEngine;
 		this.gatewaySetting = gatewaySetting;
 		this.accountHolder = accountHolder;	
-		
-		
 	}
 
 	@Override

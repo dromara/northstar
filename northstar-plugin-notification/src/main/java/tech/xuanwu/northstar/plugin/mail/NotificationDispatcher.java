@@ -50,6 +50,7 @@ public class NotificationDispatcher extends AbstractEventHandler implements Init
 			add(OrderStatusEnum.OS_Canceled);
 			add(OrderStatusEnum.OS_Rejected);
 			add(OrderStatusEnum.OS_Touched);
+			add(OrderStatusEnum.OS_Unknown);
 		}
 	};
 	
