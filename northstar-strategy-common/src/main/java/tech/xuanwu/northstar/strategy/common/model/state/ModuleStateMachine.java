@@ -51,6 +51,9 @@ public class ModuleStateMachine {
 			setState(ModuleState.EMPTY);
 			break;
 		case ORDER_SUBMITTED:
+			if(curState == ModuleState.PENDING_ORDER) {
+				return curState;
+			}
 			if(curState != ModuleState.PLACING_ORDER) {
 				throw new IllegalStateException("当前状态异常：" + curState);
 			}
