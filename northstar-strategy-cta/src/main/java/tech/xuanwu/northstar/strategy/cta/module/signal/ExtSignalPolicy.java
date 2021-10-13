@@ -25,6 +25,8 @@ import tech.xuanwu.northstar.strategy.common.model.meta.DynamicParams;
  * 开仓示例：rb2210:多开3124,止损3100
  * 平仓示例：rb2210:空平4000
  * 反手示例：rb2210:反手开多
+ * 
+ * ## 风险提示：该策略仅作技术分享，据此交易，风险自担 ##
  * @author KevinHuangwl
  *
  */

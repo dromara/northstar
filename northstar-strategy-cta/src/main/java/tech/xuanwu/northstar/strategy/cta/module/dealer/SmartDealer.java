@@ -38,6 +38,8 @@ import xyz.redtorch.pb.CoreField.TradeField;
  * 基线变更条件：
  * 开仓信号更新；
  * 
+ * ## 风险提示：该策略仅作技术分享，据此交易，风险自担 ##
+ * 
  * @author KevinHuangwl
  *
  */

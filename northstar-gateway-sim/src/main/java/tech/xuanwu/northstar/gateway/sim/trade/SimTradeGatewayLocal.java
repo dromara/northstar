@@ -66,8 +66,8 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 			LocalDate date = LocalDate.now().plusDays(45);
 			String year = date.getYear() % 100 + "";
 			String month = String.format("%02d", date.getMonth().getValue());
-			String symbol = "ni" + year + month;
-			String name = "沪镍模拟" + year + month;
+			String symbol = "sim" + year + month;
+			String name = "模拟品种" + year + month;
 			feEngine.emitEvent(NorthstarEventType.CONTRACT, ContractField.newBuilder()
 					.setGatewayId(gatewaySetting.getGatewayId())
 					.setContractId(symbol + "@SHFE@FUTURES@" + gatewaySetting.getGatewayId())

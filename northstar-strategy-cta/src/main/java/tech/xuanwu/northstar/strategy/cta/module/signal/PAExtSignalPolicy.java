@@ -20,6 +20,8 @@ import tech.xuanwu.northstar.strategy.common.model.meta.DynamicParams;
 
 /**
  * 该策略通过解析外部传入的一段文本来生成一个交易信号
+ * 
+ * ## 风险提示：该策略仅作技术分享，据此交易，风险自担 ##
  * @author KevinHuangwl
  *
  */
