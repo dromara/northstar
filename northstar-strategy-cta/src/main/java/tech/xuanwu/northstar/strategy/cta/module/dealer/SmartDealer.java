@@ -183,7 +183,7 @@ public class SmartDealer extends AbstractDealer implements Dealer {
 	@Override
 	public void onSignal(Signal signal) {
 		currentSignal = (CtaSignal) signal;
-		log.info("[{}] 收到信号：价格{}", moduleStatus.getModuleName(), signal.price());
+		log.info("[{}] 收到信号：{} 价格{}", moduleStatus.getModuleName(), currentSignal.getState(),  signal.price());
 		updateBaseline(resolvePrice((CtaSignal) signal, lastTick));
 	}
 
