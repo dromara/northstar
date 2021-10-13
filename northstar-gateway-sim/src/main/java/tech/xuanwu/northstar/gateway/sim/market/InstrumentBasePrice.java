@@ -8,13 +8,14 @@ import tech.xuanwu.northstar.common.utils.ContractNameResolver;
 import xyz.redtorch.pb.CoreField.ContractField;
 
 public class InstrumentBasePrice {
+	
+	private InstrumentBasePrice() {}
 
 	private static Map<String, Double> priceMap = new HashMap<>() {
 
 		private static final long serialVersionUID = 1L;
 		{
-			put("ni", 144960D);
-			put("rb", 5422D);
+			put("sim", 150000D);
 		}
 	};
 	
