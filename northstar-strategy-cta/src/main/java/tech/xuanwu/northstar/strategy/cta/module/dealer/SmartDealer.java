@@ -103,13 +103,15 @@ public class SmartDealer extends AbstractDealer implements Dealer {
 		
 		if(triggerSmartBuyOpen()) {
 			moduleStatus.transform(ModuleEventType.OPENING_SIGNAL_CREATED);
-			double stopLossPrice = lastTick.getBidPrice(0) - stopLossInTick * contract.getPriceTick();
+			stopLossInTick = Math.max(stopLossInTick, 0);	// 纠正止损价，避免出现频繁止损问题
+			double stopLossPrice = stopLossInTick > 0 ? lastTick.getBidPrice(0) - stopLossInTick * contract.getPriceTick() : 0;
 			return Optional.of(genSubmitOrder(contract, DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open, openVol, 0, stopLossPrice));
 		}
 		
 		if(triggerSmartSellOpen()) {
 			moduleStatus.transform(ModuleEventType.OPENING_SIGNAL_CREATED);
-			double stopLossPrice = lastTick.getAskPrice(0) + stopLossInTick * contract.getPriceTick();
+			stopLossInTick = Math.max(stopLossInTick, 0);	// 纠正止损价，避免出现频繁止损问题
+			double stopLossPrice = stopLossInTick > 0 ? lastTick.getAskPrice(0) + stopLossInTick * contract.getPriceTick() : 0;
 			return Optional.of(genSubmitOrder(contract, DirectionEnum.D_Sell, OffsetFlagEnum.OF_Open, openVol, 0, stopLossPrice));
 		}
 		
