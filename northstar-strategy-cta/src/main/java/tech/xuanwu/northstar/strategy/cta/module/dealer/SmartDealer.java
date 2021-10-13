@@ -28,7 +28,7 @@ import xyz.redtorch.pb.CoreField.TradeField;
  * 本策略默认采用最新价计算
  * 
  * 智能入场条件：
- * 空仓时，且基线大于零，当行情穿过基线时入场；
+ * 空仓时，且基线大于零，当行情穿过基线时，如果与信号方向相同则入场；
  * 
  * 智能出场条件：
  * 在开仓观察期内，当行情达到止损位则出场；
@@ -157,7 +157,8 @@ public class SmartDealer extends AbstractDealer implements Dealer {
 	
 	private boolean triggerSmartBuyOpen() {
 		if(moduleStatus.at(ModuleState.EMPTY) && lastMinBar.getClosePrice() < baseline 
-				&& lastMinBar.getOpenPrice() < baseline && lastTick.getLastPrice() >= baseline) {
+				&& lastMinBar.getOpenPrice() < baseline && lastTick.getLastPrice() >= baseline
+				&& currentSignal.isBuy()) {
 			log.info("[{}] 基线触发开多仓", moduleStatus.getModuleName());
 			return true;
 		}
@@ -166,7 +167,8 @@ public class SmartDealer extends AbstractDealer implements Dealer {
 	
 	private boolean triggerSmartSellOpen() {
 		if(moduleStatus.at(ModuleState.EMPTY) && lastMinBar.getClosePrice() > baseline 
-				&& lastMinBar.getOpenPrice() > baseline && lastTick.getLastPrice() <= baseline) {
+				&& lastMinBar.getOpenPrice() > baseline && lastTick.getLastPrice() <= baseline
+				&& !currentSignal.isBuy()) {
 			log.info("[{}] 基线触发开空仓", moduleStatus.getModuleName());
 			return true;
 		}
