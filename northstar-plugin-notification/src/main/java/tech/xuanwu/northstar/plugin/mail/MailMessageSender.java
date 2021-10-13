@@ -38,6 +38,7 @@ public class MailMessageSender implements MessageSender, InitializingBean{
 		mail.setTo(subscriber);
 		mail.setSubject(message.getTitle());
 		mail.setText(message.getContent());
+		mail.setSentDate(new Date());
 		
 		try {			
 			mailSender.send(mail);
