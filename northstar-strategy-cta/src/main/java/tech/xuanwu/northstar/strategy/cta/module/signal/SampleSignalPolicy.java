@@ -17,6 +17,8 @@ import tech.xuanwu.northstar.strategy.common.model.meta.DynamicParams;
 /**
  * 本示例用于展示写一个策略的必要元素
  * 注意：定义完一个类后，需要注册成spring bean。因为项目依赖了spring bean机制来管理，而不是直接的类扫描
+ * 
+ * ## 风险提示：该策略仅作技术分享，据此交易，风险自担 ##
  * @author KevinHuangwl
  *
  */

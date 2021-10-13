@@ -18,7 +18,12 @@ import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TickField;
 import xyz.redtorch.pb.CoreField.TradeField;
-
+/**
+ * 
+ * ## 风险提示：该策略仅作技术分享，据此交易，风险自担 ##
+ * @author KevinHuangwl
+ *
+ */
 @Slf4j
 @StrategicComponent("示例交易策略")
 public class SampleDealer extends AbstractDealer implements Dealer {
