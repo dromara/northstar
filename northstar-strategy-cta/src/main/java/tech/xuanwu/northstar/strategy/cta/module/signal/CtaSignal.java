@@ -62,4 +62,9 @@ public class CtaSignal implements Signal{
 		return stopPrice;
 	}
 
+	@Override
+	public boolean isSell() {
+		return state.isSell();
+	}
+
 }

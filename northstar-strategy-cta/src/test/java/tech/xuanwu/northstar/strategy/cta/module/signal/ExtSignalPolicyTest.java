@@ -27,43 +27,43 @@ public class ExtSignalPolicyTest extends CommonParamTest{
 	@Test
 	public void shouldConvertBuyOpenSignal() {
 		policy.onExtMsg("RB2210：多开3124，止损3100");
-		assertThat(policy.signalQ).hasSize(1);
-		assertThat(policy.signalQ.peek().price()).isEqualTo(3124);
-		assertThat(policy.signalQ.peek().stopPrice()).isEqualTo(3100);
+		assertThat(policy.immedidateSignalQ).hasSize(1);
+		assertThat(policy.immedidateSignalQ.peek().price()).isEqualTo(3124);
+		assertThat(policy.immedidateSignalQ.peek().stopPrice()).isEqualTo(3100);
+		assertThat(policy.immedidateSignalQ.peek().isBuy()).isTrue();
 	}
 
 	@Test
 	public void shouldConvertSellOpenSignal() {
 		policy.onExtMsg("rb2210:空开3124,止损4000");
-		assertThat(policy.signalQ).hasSize(1);
+		assertThat(policy.immedidateSignalQ).hasSize(1);
+		assertThat(policy.immedidateSignalQ.peek().isSell()).isTrue();
 	}
 	
 	@Test
 	public void shouldConvertBuyCloseSignal() {
 		policy.onExtMsg("rb2210:多平3124");
-		assertThat(policy.signalQ).hasSize(1);
-		assertThat(policy.signalQ.peek().price()).isEqualTo(3124);
-		assertThat(policy.signalQ.peek().stopPrice()).isZero();
+		assertThat(policy.immedidateSignalQ).hasSize(1);
+		assertThat(policy.immedidateSignalQ.peek().price()).isEqualTo(3124);
+		assertThat(policy.immedidateSignalQ.peek().stopPrice()).isZero();
+		assertThat(policy.immedidateSignalQ.peek().isBuy()).isTrue();
 	}
 	
 	@Test
 	public void shouldConvertSellCloseSignal() {
 		policy.onExtMsg("rb2210：空平3124");
-		assertThat(policy.signalQ).hasSize(1);
+		assertThat(policy.immedidateSignalQ).hasSize(1);
+		assertThat(policy.immedidateSignalQ.peek().isSell()).isTrue();
 	}
 	
 	@Test
-	public void shouldConvertReverseBuySignal() {
-		policy.onExtMsg("rb2210：反手开多4123");
-		assertThat(policy.signalQ).hasSize(2);
+	public void shouldConvertStopProfitSignal() {
+		policy.onExtMsg("rb2210:止盈3125");
+		assertThat(policy.delaySignalQ).hasSize(1);
+		assertThat(policy.delaySignalQ.peek().isBuy()).isFalse();
+		assertThat(policy.delaySignalQ.peek().isSell()).isFalse();
+		assertThat(policy.delaySignalQ.peek().price()).isEqualTo(3125);
 	}
-	
-	@Test
-	public void shouldConvertReverseSellSignal() {
-		policy.onExtMsg("rb2210:反手开空5214");
-		assertThat(policy.signalQ).hasSize(2);
-	}
-	
 	
 
 }

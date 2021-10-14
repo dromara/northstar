@@ -6,6 +6,8 @@ public interface Signal {
 	
 	boolean isBuy();
 	
+	boolean isSell();
+	
 	double price();
 	
 	double stopPrice();

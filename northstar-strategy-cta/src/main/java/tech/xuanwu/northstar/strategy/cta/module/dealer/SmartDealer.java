@@ -168,7 +168,7 @@ public class SmartDealer extends AbstractDealer implements Dealer {
 	private boolean triggerSmartSellOpen() {
 		if(moduleStatus.at(ModuleState.EMPTY) && lastMinBar.getClosePrice() > baseline 
 				&& lastMinBar.getOpenPrice() > baseline && lastTick.getLastPrice() <= baseline
-				&& !currentSignal.isBuy()) {
+				&& currentSignal.isSell()) {
 			log.info("[{}] 基线触发开空仓", moduleStatus.getModuleName());
 			return true;
 		}

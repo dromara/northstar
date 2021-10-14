@@ -34,12 +34,16 @@ import tech.xuanwu.northstar.strategy.common.model.meta.DynamicParams;
 @StrategicComponent("通用消息策略")
 public class ExtSignalPolicy extends AbstractSignalPolicy implements ExternalSignalPolicy{
 	
-	protected Queue<Signal> signalQ = new LinkedList<>();
+	protected Queue<Signal> immedidateSignalQ = new LinkedList<>();
+	
+	protected Queue<Signal> delaySignalQ = new LinkedList<>();
 	
 	private Pattern textPtn;
 	
 	private Pattern oprPtn = Pattern.compile("[:|：](..)([0-9\\.]+)([,|，]止损([0-9\\.]+))?");
-	private Pattern revPtn = Pattern.compile("[:|：]反手(开.)([0-9\\\\.]+)");
+	private Pattern revPtn = Pattern.compile("[:|：]止盈([0-9\\\\.]+)");
+	
+	private Signal lastSignal;
 	
 	@Override
 	public void onExtMsg(String text) {
@@ -49,10 +53,8 @@ public class ExtSignalPolicy extends AbstractSignalPolicy implements ExternalSig
 			String stopPrice = "0";
 			Matcher revMatcher = revPtn.matcher(text);
 			if(revMatcher.find()) {
-				action = revMatcher.group(1);
-				price = revMatcher.group(2);
-				signalQ.offer(makeSignal(action.replace("开", "平"), price, stopPrice));
-				signalQ.offer(makeSignal(action, price, stopPrice));
+				price = revMatcher.group(1);
+				delaySignalQ.offer(makeSignal(action, price, stopPrice));
 				return;
 			}
 			Matcher oprMatcher = oprPtn.matcher(text);
@@ -61,7 +63,8 @@ public class ExtSignalPolicy extends AbstractSignalPolicy implements ExternalSig
 				price = oprMatcher.group(2);
 				stopPrice = oprMatcher.group(4);
 				stopPrice = StringUtils.isEmpty(stopPrice) ? "0" : stopPrice;
-				signalQ.offer(makeSignal(action, price, stopPrice));
+				lastSignal = makeSignal(action, price, stopPrice);
+				immedidateSignalQ.offer(lastSignal);
 			}
 		}
 	}
@@ -79,15 +82,22 @@ public class ExtSignalPolicy extends AbstractSignalPolicy implements ExternalSig
 	
 	@Override
 	protected Optional<Signal> onTick(int millicSecOfMin, BarData barData) {
-		if(signalQ.isEmpty()) {
-			return Optional.empty();
+		if(!immedidateSignalQ.isEmpty()) {
+			Signal signal = immedidateSignalQ.poll();
+			// 当信号为平仓且当前仓位无持仓时，抛弃该信号
+			if(!signal.isOpening() && moduleStatus.at(ModuleState.EMPTY)) {
+				signal = immedidateSignalQ.poll();
+			}
+			return Optional.ofNullable(signal);
 		}
-		Signal signal = signalQ.poll();
-		// 当信号为平仓且当前仓位无持仓时，抛弃该信号
-		if(signal != null && !signal.isOpening() && moduleStatus.at(ModuleState.EMPTY)) {
-			signal = signalQ.poll();
+		if(!delaySignalQ.isEmpty() && lastSignal != null) {
+			Signal delaySignal = delaySignalQ.peek();
+			if((lastSignal.isBuy() && currentTick.getLastPrice() > delaySignal.price())
+					|| (lastSignal.isSell() && currentTick.getLastPrice() < delaySignal.price())) {				
+				return Optional.ofNullable(delaySignalQ.poll());
+			}
 		}
-		return Optional.ofNullable(signal);
+		return Optional.empty();
 	}
 
 	

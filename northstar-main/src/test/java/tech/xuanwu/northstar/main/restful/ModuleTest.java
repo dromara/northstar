@@ -61,7 +61,7 @@ public class ModuleTest {
 		LocalDate date = LocalDate.now().plusDays(45);
 		String year = date.getYear() % 100 + "";
 		String month = String.format("%02d", date.getMonth().getValue());
-		symbol = "ni" + year + month;
+		symbol = "sim" + year + month;
 		
 		session = new MockHttpSession();
 		mockMvc.perform(post("/auth/login").contentType(MediaType.APPLICATION_JSON_UTF8).content(JSON.toJSONString(new NsUser("admin","123456"))).session(session))
