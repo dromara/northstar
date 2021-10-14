@@ -63,7 +63,21 @@ public class SmartDealerTest extends CommonParamTest {
 		when(dealer.moduleStatus.getCurrentState()).thenReturn(ModuleState.EMPTY);
 		dealer.baseline = 1234;
 		dealer.lastMinBar = BarField.newBuilder().setClosePrice(1230).setOpenPrice(1232).build();
+		dealer.currentSignal = mock(CtaSignal.class);
+		when(dealer.currentSignal.isBuy()).thenReturn(true);
 		assertThat(dealer.onTick(factory.makeTickField(SYMBOL, 1234))).isPresent();
+	}
+	
+	@Test
+	public void shouldNotGetBuyOpenReqWhenEmptyIfAcrossBaseline() {
+		dealer.moduleStatus = mock(ModuleStatus.class);
+		when(dealer.moduleStatus.at(ModuleState.EMPTY)).thenReturn(true);
+		when(dealer.moduleStatus.getCurrentState()).thenReturn(ModuleState.EMPTY);
+		dealer.baseline = 1234;
+		dealer.lastMinBar = BarField.newBuilder().setClosePrice(1230).setOpenPrice(1232).build();
+		dealer.currentSignal = mock(CtaSignal.class);
+		when(dealer.currentSignal.isSell()).thenReturn(true);
+		assertThat(dealer.onTick(factory.makeTickField(SYMBOL, 1234))).isEmpty();
 	}
 	
 	@Test
@@ -73,7 +87,21 @@ public class SmartDealerTest extends CommonParamTest {
 		when(dealer.moduleStatus.getCurrentState()).thenReturn(ModuleState.EMPTY);
 		dealer.baseline = 1234;
 		dealer.lastMinBar = BarField.newBuilder().setClosePrice(1250).setOpenPrice(1240).build();
+		dealer.currentSignal = mock(CtaSignal.class);
+		when(dealer.currentSignal.isSell()).thenReturn(true);
 		assertThat(dealer.onTick(factory.makeTickField(SYMBOL, 1234))).isPresent();
+	}
+	
+	@Test
+	public void shouldNotGetSellOpenReqWhenEmptyIfAcrossBaseline() {
+		dealer.moduleStatus = mock(ModuleStatus.class);
+		when(dealer.moduleStatus.at(ModuleState.EMPTY)).thenReturn(true);
+		when(dealer.moduleStatus.getCurrentState()).thenReturn(ModuleState.EMPTY);
+		dealer.baseline = 1234;
+		dealer.lastMinBar = BarField.newBuilder().setClosePrice(1250).setOpenPrice(1240).build();
+		dealer.currentSignal = mock(CtaSignal.class);
+		when(dealer.currentSignal.isBuy()).thenReturn(true);
+		assertThat(dealer.onTick(factory.makeTickField(SYMBOL, 1234))).isEmpty();
 	}
 	
 	@Test
