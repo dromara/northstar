@@ -2,6 +2,10 @@ package tech.xuanwu.northstar.common.constant;
 
 public enum TickType {
 	/**
+	 * 回测行情
+	 */
+	PLAYBACK_TICK(-1),
+	/**
 	 * 非开市行情
 	 */
 	NON_OPENING_TICK(0),
@@ -9,10 +13,6 @@ public enum TickType {
 	 * 开市前非连续交易行情
 	 */
 	PRE_OPENING_TICK(1),
-//	/**
-//	 * 开市第一秒的TICK
-//	 */
-//	OPENING_TICK(2),
 	/**
 	 * 开市行情
 	 */
