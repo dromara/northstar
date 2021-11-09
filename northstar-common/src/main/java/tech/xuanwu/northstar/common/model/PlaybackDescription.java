@@ -1,0 +1,41 @@
+package tech.xuanwu.northstar.common.model;
+
+import java.util.List;
+
+import lombok.Data;
+import tech.xuanwu.northstar.common.constant.PlaybackPrecision;
+
+/**
+ * 回测请求描述
+ * @author KevinHuangwl
+ *
+ */
+@Data
+public class PlaybackDescription {
+	/**
+	 * 开始时间
+	 * 格式：YYYYMMDD
+	 */
+	private String startDate;
+	/**
+	 * 结束时间
+	 * 格式：YYYYMMDD
+	 */
+	private String endDate;
+	/**
+	 * 回测精度
+	 */
+	private PlaybackPrecision precision;
+	/**
+	 * 回测模组列表
+	 */
+	private List<String> moduleNames;
+	/**
+	 * 回测账户初始金额
+	 */
+	private int playbackAccountInitialBalance;
+	/**
+	 * 回测手续费（以TICK为单位）
+	 */
+	private int tickOfFee;
+}

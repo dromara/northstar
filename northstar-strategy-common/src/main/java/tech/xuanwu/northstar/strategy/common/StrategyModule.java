@@ -1,10 +1,12 @@
 package tech.xuanwu.northstar.strategy.common;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -237,6 +239,17 @@ public class StrategyModule {
 	
 	public TradeGateway getGateway() {
 		return (TradeGateway) gatewayConnMgr.getGatewayById(accountId);
+	}
+	
+	public String getBindedMarketGatewayId() {
+		return gatewayConnMgr.getGatewayConnectionById(accountId).getGwDescription().getBindedMktGatewayId();
+	}
+	
+	public Set<String> getInterestContractUnifiedSymbol(){
+		Set<String> result = new HashSet<>();
+		result.addAll(dealer.bindedUnifiedSymbols());
+		result.addAll(signalPolicy.bindedUnifiedSymbols());
+		return result;
 	}
 	
 	public ModuleRealTimeInfo getRealTimeInfo() {

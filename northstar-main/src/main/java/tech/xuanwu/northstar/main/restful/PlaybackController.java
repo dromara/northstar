@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import tech.xuanwu.northstar.common.constant.PlaybackPrecision;
+import tech.xuanwu.northstar.common.model.PlaybackDescription;
 import tech.xuanwu.northstar.common.model.PlaybackRecord;
 import tech.xuanwu.northstar.common.model.ResultBean;
 
@@ -25,8 +26,7 @@ public class PlaybackController {
 	 * @return
 	 */
 	@PostMapping("/play")
-	public ResultBean<List<String>> play(@NotNull String startDate, @NotNull String endDate, @NotNull PlaybackPrecision precision,
-			@RequestBody @NotNull List<String> moduleNames){
+	public ResultBean<List<String>> play(@RequestBody PlaybackDescription playbackDescription){
 		return null;
 	}
 	
