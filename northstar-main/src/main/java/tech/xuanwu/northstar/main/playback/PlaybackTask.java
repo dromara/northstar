@@ -1,6 +1,5 @@
 package tech.xuanwu.northstar.main.playback;
 
-import java.time.Duration;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.LinkedList;
@@ -59,7 +58,7 @@ public class PlaybackTask {
 	}
 	
 	private long restOfDays() {
-		return Duration.between(curDate, endDate.plusDays(1)).get(ChronoUnit.DAYS);
+		return curDate.until(endDate.plusDays(1), ChronoUnit.DAYS);
 	}
 	
 	public boolean isDone() {

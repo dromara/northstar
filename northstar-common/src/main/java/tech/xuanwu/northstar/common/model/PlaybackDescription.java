@@ -2,7 +2,10 @@ package tech.xuanwu.northstar.common.model;
 
 import java.util.List;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import tech.xuanwu.northstar.common.constant.PlaybackPrecision;
 
 /**
@@ -11,6 +14,9 @@ import tech.xuanwu.northstar.common.constant.PlaybackPrecision;
  *
  */
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class PlaybackDescription {
 	/**
 	 * 开始时间
