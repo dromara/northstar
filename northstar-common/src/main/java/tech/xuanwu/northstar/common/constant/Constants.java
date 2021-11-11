@@ -8,4 +8,5 @@ public interface Constants {
 	
 	String KEY_USER = "USER";
 	
+	String PLAYBACK_GATEWAY = "PlaybackGateway";
 }

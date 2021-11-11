@@ -2,8 +2,10 @@ package tech.xuanwu.northstar.main.playback;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.LinkedList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import tech.xuanwu.northstar.common.constant.DateTimeConstant;
@@ -41,20 +43,20 @@ public class PlaybackTask {
 		this.totalNumOfDays = restOfDays();
 	}
 	
-	public List<MinBarDataPO> nextBatchData(){
+	public Map<String, Iterator<MinBarDataPO>> nextBatchData(){
 		if(isDone()) {
 			throw new IllegalStateException("超出回测范围");
 		}
-		List<MinBarDataPO> result = new LinkedList<>();
+		Map<String, Iterator<MinBarDataPO>> resultMap = new HashMap<>();
 		for(StrategyModule module : playbackModules) {
 			Set<String> interestContracts = module.getInterestContractUnifiedSymbol();
 			for(String unifiedSymbol : interestContracts) {				
 				List<MinBarDataPO> data = mdRepo.loadDataByDate(module.getBindedMarketGatewayId(), unifiedSymbol, curDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
-				result.addAll(data);
+				resultMap.put(unifiedSymbol, data.iterator());
 			}
 		}
 		curDate = curDate.plusDays(1);
-		return result;
+		return resultMap;
 	}
 	
 	private long restOfDays() {
@@ -71,5 +73,9 @@ public class PlaybackTask {
 	
 	public double ratioOfProcess() {
 		return 1.0 * (totalNumOfDays - restOfDays()) / totalNumOfDays;
+	}
+	
+	public List<StrategyModule> getPlaybackModules(){
+		return playbackModules;
 	}
 }
