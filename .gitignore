@@ -6,6 +6,8 @@ target/
 release.properties
 *.releaseBackup
 **/*.releaseBackup
+*.versionsBackup
+**/*.versionsBackup
 
 ### STS ###
 .apt_generated

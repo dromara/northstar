@@ -139,7 +139,7 @@ public class TradeIntent {
 					.setAccountId(orderReq.getGatewayId())
 					.setAdapterOrderId("")
 					.setContract(contract)
-					.setTradeTimestamp(System.currentTimeMillis())
+					.setTradeTimestamp(tick.getActionTimestamp())
 					.setDirection(order.getDirection())
 					.setGatewayId(orderReq.getGatewayId())
 					.setHedgeFlag(order.getHedgeFlag())
@@ -148,9 +148,9 @@ public class TradeIntent {
 					.setOriginOrderId(order.getOriginOrderId())
 					.setPrice(order.getDirection() == DirectionEnum.D_Buy ? tick.getAskPrice(0) : tick.getBidPrice(0))
 					.setPriceSource(PriceSourceEnum.PSRC_LastPrice)
-					.setTradeDate(LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
+					.setTradeDate(tick.getActionDay())
 					.setTradingDay(tick.getTradingDay())
-					.setTradeTime(LocalTime.now().format(DateTimeConstant.T_FORMAT_FORMATTER))
+					.setTradeTime(tick.getActionTime())
 					.setVolume(order.getTotalVolume());
 			return Optional.of(order
 					.setTradedVolume(order.getTotalVolume())

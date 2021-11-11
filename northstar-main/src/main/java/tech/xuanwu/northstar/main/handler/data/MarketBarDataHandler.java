@@ -58,7 +58,7 @@ public class MarketBarDataHandler extends AbstractEventHandler implements Generi
 				feEngine.emitEvent(NorthstarEventType.BAR, bar);
 				try {					
 					MinBarDataPO barPO = ProtoBeanUtils.toPojoBean(MinBarDataPO.class, bar);
-					List<TickDataPO> tickPOs = ticks.stream().map(t -> ProtoBeanUtils.toPojoBean(TickDataPO.class, t)).collect(Collectors.toList());
+					List<TickDataPO> tickPOs = ticks.stream().map(TickDataPO::convertFrom).collect(Collectors.toList());
 					barPO.setNumOfTicks(ticks.size());
 					barPO.setTicksOfMin(tickPOs);
 					bbMgr.addBar(barPO);
