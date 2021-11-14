@@ -36,7 +36,7 @@ public class PlaybackController {
 	 * @return
 	 */
 	@GetMapping("/play/process")
-	public ResultBean<Integer> playProcess(@NotNull String playId){
+	public ResultBean<Integer> playProcess(){
 		return null;
 	}
 	
