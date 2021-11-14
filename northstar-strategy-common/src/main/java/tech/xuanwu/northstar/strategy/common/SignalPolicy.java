@@ -34,7 +34,7 @@ public interface SignalPolicy extends DynamicParamsAware, SymbolAware, StatusAwa
 	 * 设置Bar数据
 	 * @param barData
 	 */
-	void setBarData(BarData barData);
+	void addBarData(BarData barData);
 	
 	/**
 	 * 获取Bar数据最大回溯长度

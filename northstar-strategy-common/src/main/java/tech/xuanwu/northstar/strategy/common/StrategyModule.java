@@ -14,6 +14,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.alibaba.fastjson.JSON;
 
 import lombok.Builder;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.common.utils.FieldUtils;
 import tech.xuanwu.northstar.domain.GatewayAndConnectionManager;
@@ -23,6 +24,7 @@ import tech.xuanwu.northstar.strategy.common.constants.RiskAuditResult;
 import tech.xuanwu.northstar.strategy.common.event.ModuleEventType;
 import tech.xuanwu.northstar.strategy.common.model.ModulePosition;
 import tech.xuanwu.northstar.strategy.common.model.ModuleStatus;
+import tech.xuanwu.northstar.strategy.common.model.data.BarData;
 import tech.xuanwu.northstar.strategy.common.model.entity.ModuleDataRef;
 import tech.xuanwu.northstar.strategy.common.model.entity.ModuleDealRecord;
 import tech.xuanwu.northstar.strategy.common.model.entity.ModuleRealTimeInfo;
@@ -68,10 +70,17 @@ public class StrategyModule {
 	
 	private int rejectCount;
 	
+	@Setter
 	private RunningStateChangeListener runningStateChangeListener;
 	
 	@Builder.Default
 	private Map<String, OrderField> originOrderIdMap = new HashMap<>();
+	
+	public void initMarketDataRef(List<BarData> barDataRefList) {
+		for(BarData barData : barDataRefList) {
+			signalPolicy.addBarData(barData);
+		}
+	}
 	
 	public StrategyModule onTick(TickField tick) {
 		if(!StringUtils.equals(gatewayConnMgr.getGatewayConnectionById(accountId).getGwDescription().getBindedMktGatewayId(), tick.getGatewayId())) {
@@ -176,7 +185,9 @@ public class StrategyModule {
 			if(++rejectCount > 3) {				
 				disabled = true;
 				log.info("[{}] 一分钟内订单拒绝次数超过熔断阀值，模组自动停止运行", status.getModuleName());
-				runningStateChangeListener.onChange(false, this);
+				if(runningStateChangeListener != null) {					
+					runningStateChangeListener.onChange(false, this);
+				}
 			}
 		} else {
 			rejectCount = 0;
@@ -230,7 +241,9 @@ public class StrategyModule {
 	
 	public void toggleRunningState() {
 		disabled = !disabled;
-		runningStateChangeListener.onChange(!disabled, this);
+		if(runningStateChangeListener != null) {			
+			runningStateChangeListener.onChange(!disabled, this);
+		}
 	}
 	
 	public String getTradingDay() {

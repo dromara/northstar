@@ -2,11 +2,11 @@ package tech.xuanwu.northstar.main.service;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
@@ -23,11 +23,10 @@ import tech.xuanwu.northstar.main.utils.ProtoBeanUtils;
 import tech.xuanwu.northstar.strategy.common.Dealer;
 import tech.xuanwu.northstar.strategy.common.DynamicParamsAware;
 import tech.xuanwu.northstar.strategy.common.RiskControlRule;
-import tech.xuanwu.northstar.strategy.common.RiskController;
 import tech.xuanwu.northstar.strategy.common.SignalPolicy;
 import tech.xuanwu.northstar.strategy.common.StrategyModule;
+import tech.xuanwu.northstar.strategy.common.StrategyModuleFactory;
 import tech.xuanwu.northstar.strategy.common.annotation.StrategicComponent;
-import tech.xuanwu.northstar.strategy.common.model.GenericRiskController;
 import tech.xuanwu.northstar.strategy.common.model.ModulePosition;
 import tech.xuanwu.northstar.strategy.common.model.ModuleStatus;
 import tech.xuanwu.northstar.strategy.common.model.data.BarData;
@@ -36,7 +35,6 @@ import tech.xuanwu.northstar.strategy.common.model.entity.ModuleDealRecord;
 import tech.xuanwu.northstar.strategy.common.model.entity.ModuleInfo;
 import tech.xuanwu.northstar.strategy.common.model.entity.ModuleRealTimeInfo;
 import tech.xuanwu.northstar.strategy.common.model.entity.ModuleTradeRecord;
-import tech.xuanwu.northstar.strategy.common.model.meta.ComponentAndParamsPair;
 import tech.xuanwu.northstar.strategy.common.model.meta.ComponentField;
 import tech.xuanwu.northstar.strategy.common.model.meta.ComponentMetaInfo;
 import tech.xuanwu.northstar.strategy.common.model.meta.DynamicParams;
@@ -58,6 +56,8 @@ public class ModuleService implements InitializingBean{
 	
 	private ContractManager contractMgr;
 	
+	private StrategyModuleFactory moduleFactory;
+	
 	public ModuleService(ApplicationContext ctx, ModuleRepository moduleRepo, MarketDataRepository mdRepo,
 			ModuleManager mdlMgr, GatewayAndConnectionManager gatewayConnMgr, ContractManager contractMgr) {
 		this.ctx = ctx;
@@ -66,6 +66,7 @@ public class ModuleService implements InitializingBean{
 		this.mdlMgr = mdlMgr;
 		this.gatewayConnMgr = gatewayConnMgr;
 		this.contractMgr = contractMgr;
+		this.moduleFactory = new StrategyModuleFactory(contractMgr, gatewayConnMgr);
 	}
 	
 	/**
@@ -152,60 +153,35 @@ public class ModuleService implements InitializingBean{
 	 * @param status
 	 */
 	private void loadModule(ModuleInfo info, ModuleStatus moduleStatus) throws Exception {
-		SignalPolicy signalPolicy =  resolveComponent(info.getSignalPolicy());
-		Dealer dealer = resolveComponent(info.getDealer());
-		List<RiskControlRule> riskRules = new ArrayList<>();
-		for(ComponentAndParamsPair pair : info.getRiskControlRules()) {
-			riskRules.add(resolveComponent(pair));
-		}
+		StrategyModule strategyModule = moduleFactory.makeModule(info, moduleStatus);
+		Set<String> interestSymbols = strategyModule.getInterestContractUnifiedSymbol();
+		List<BarData> barDataList = new ArrayList<>();
+		LinkedList<BarField> barList = new LinkedList<>();
 		
 		String gatewayId = info.getAccountGatewayId();
 		GatewayConnection conn = gatewayConnMgr.getGatewayConnectionById(gatewayId);
 		String mktGatewayId = conn.getGwDescription().getBindedMktGatewayId();
 		
-		RiskController riskController = new GenericRiskController(riskRules);
-		int refLength = signalPolicy.getBarDataMaxRefLength();
-		LinkedList<BarField> barList = new LinkedList<>();
-		
-		for(String unifiedSymbol : signalPolicy.bindedUnifiedSymbols()) {
-			List<String> availableDates = mdRepo.findDataAvailableDates(mktGatewayId, unifiedSymbol, false);
-			for(String date : availableDates) {
+		for(String unifiedSymbol : interestSymbols) {
+			List<String> availableDates = mdRepo.findDataAvailableDates(mktGatewayId, unifiedSymbol, true);
+			for(String date : availableDates.subList(availableDates.size() - info.getNumOfDaysOfDataRef(), availableDates.size())) {
 				List<MinBarDataPO> dataBarPOList = mdRepo.loadDataByDate(mktGatewayId, unifiedSymbol, date);
-				for(int i=dataBarPOList.size() - 1; i > -1; i--) {
-					MinBarDataPO po = dataBarPOList.get(i);
+				for(MinBarDataPO po : dataBarPOList) {
 					BarField.Builder bb = BarField.newBuilder();
 					ProtoBeanUtils.toProtoBean(bb, po);
-					barList.addFirst(bb.build());
-					if(barList.size() >= refLength) {
-						break;
-					}
-				}
-				if(barList.size() >= refLength) {
-					break;
+					barList.add(bb.build());
 				}
 			}
-			signalPolicy.setBarData(new BarData(unifiedSymbol, barList));
+			barDataList.add(new BarData(unifiedSymbol, barList));
 		}
 		
-		signalPolicy.setModuleStatus(moduleStatus);
-		signalPolicy.setContractManager(contractMgr);
-		dealer.setModuleStatus(moduleStatus);
-		dealer.setContractManager(contractMgr);
-		StrategyModule module = StrategyModule.builder()
-				.accountId(gatewayId)
-				.gatewayConnMgr(gatewayConnMgr)
-				.status(moduleStatus)
-				.disabled(!info.isEnabled())
-				.dealer(dealer)
-				.signalPolicy(signalPolicy)
-				.riskController(riskController)
-				.runningStateChangeListener((isEnabled, strategyModule)->{
-					ModuleInfo moduleInfo = moduleRepo.findModuleInfo(strategyModule.getName());
-					moduleInfo.setEnabled(isEnabled);
-					moduleRepo.saveModuleInfo(moduleInfo);
-				})			
-				.build();
-		mdlMgr.addModule(module);
+		strategyModule.setRunningStateChangeListener((isEnabled, module)->{
+			ModuleInfo moduleInfo = moduleRepo.findModuleInfo(module.getName());
+			moduleInfo.setEnabled(isEnabled);
+			moduleRepo.saveModuleInfo(moduleInfo);
+		});
+		
+		mdlMgr.addModule(strategyModule);
 	}
 	
 	/**
@@ -264,22 +240,6 @@ public class ModuleService implements InitializingBean{
 		moduleRepo.removeTradeRecords(moduleName);
 	}
 	
-	
-	private <T extends DynamicParamsAware> T resolveComponent(ComponentAndParamsPair metaInfo) throws Exception {
-		Map<String, ComponentField> fieldMap = new HashMap<>();
-		for(ComponentField cf : metaInfo.getInitParams()) {
-			fieldMap.put(cf.getName(), cf);
-		}
-		String clzName = metaInfo.getComponentMeta().getClassName();
-		String paramClzName = clzName + "$InitParams";
-		Class<?> type = Class.forName(clzName);
-		Class<?> paramType = Class.forName(paramClzName);
-		DynamicParamsAware obj = (DynamicParamsAware) type.getDeclaredConstructor().newInstance();
-		DynamicParams paramObj = (DynamicParams) paramType.getDeclaredConstructor().newInstance();
-		paramObj.resolveFromSource(fieldMap);
-		obj.initWithParams(paramObj);
-		return (T) obj;
-	}
 	
 	/**
 	 * 切换模组状态

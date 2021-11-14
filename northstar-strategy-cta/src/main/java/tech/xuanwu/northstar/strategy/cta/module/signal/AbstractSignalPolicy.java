@@ -100,7 +100,7 @@ public abstract class AbstractSignalPolicy implements SignalPolicy {
 	}
 	
 	@Override
-	public void setBarData(BarData barData) {
+	public void addBarData(BarData barData) {
 		barDataMap.put(barData.getUnifiedSymbol(), barData);
 	}
 	
