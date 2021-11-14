@@ -14,14 +14,17 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
 
+import tech.xuanwu.northstar.gateway.sim.trade.SimMarket;
 import tech.xuanwu.northstar.gateway.sim.trade.SimTradeGateway;
+import tech.xuanwu.northstar.main.manager.ModuleManager;
+import tech.xuanwu.northstar.main.persistence.ModuleRepository;
 import tech.xuanwu.northstar.main.persistence.po.MinBarDataPO;
 import tech.xuanwu.northstar.main.persistence.po.TickDataPO;
 import tech.xuanwu.northstar.strategy.common.StrategyModule;
 
 public class PlaybackEngineTest {
 
-	PlaybackEngine engine = new PlaybackEngine();
+	PlaybackEngine engine;
 	StrategyModule module = mock(StrategyModule.class);
 	PlaybackTask task = mock(PlaybackTask.class);
 	Map<String, Iterator<MinBarDataPO>> batchData = new HashMap<>();
@@ -109,11 +112,13 @@ public class PlaybackEngineTest {
 	
 	@Test
 	public void test() {
-		SimTradeGateway gateway = mock(SimTradeGateway.class);
-		engine.play(task, gateway);
+		SimMarket market = mock(SimMarket.class);
+		ModuleManager moduleMgr = mock(ModuleManager.class);
+		engine = new PlaybackEngine(market, moduleMgr);
+		engine.play(task);
 		
-		verify(module, times(12)).onTick(ArgumentMatchers.any());
-		verify(module, times(4)).onBar(ArgumentMatchers.any());
+		verify(moduleMgr, times(12)).onTick(ArgumentMatchers.any());
+		verify(moduleMgr, times(4)).onBar(ArgumentMatchers.any());
 	}
 
 }

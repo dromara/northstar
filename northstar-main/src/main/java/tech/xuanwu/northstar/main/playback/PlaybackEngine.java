@@ -6,7 +6,8 @@ import java.util.Map.Entry;
 import java.util.PriorityQueue;
 
 import tech.xuanwu.northstar.common.constant.Constants;
-import tech.xuanwu.northstar.gateway.sim.trade.SimTradeGateway;
+import tech.xuanwu.northstar.gateway.sim.trade.SimMarket;
+import tech.xuanwu.northstar.main.manager.ModuleManager;
 import tech.xuanwu.northstar.main.persistence.po.MinBarDataPO;
 import tech.xuanwu.northstar.main.persistence.po.TickDataPO;
 import xyz.redtorch.pb.CoreField.BarField;
@@ -18,8 +19,17 @@ import xyz.redtorch.pb.CoreField.TickField;
  *
  */
 public class PlaybackEngine {
+	
+	private SimMarket simMarket;
+	
+	private ModuleManager moduleMgr;
+	
+	public PlaybackEngine(SimMarket simMarket, ModuleManager moduleMgr) {
+		this.simMarket = simMarket;
+		this.moduleMgr = moduleMgr;
+	}
 
-	public void play(PlaybackTask task, SimTradeGateway gateway) {
+	public void play(PlaybackTask task) {
 		while(!task.isDone()) {
 			Map<String, Iterator<MinBarDataPO>> symbolBatchDataMap = task.nextBatchData();
 			PriorityQueue<TickField> tickQ = new PriorityQueue<>(100000, (t1, t2) -> t1.getActionTimestamp() < t2.getActionTimestamp() ? -1 : 1 );
@@ -42,10 +52,10 @@ public class PlaybackEngine {
 				BarField bar = barQ.poll();
 				while(!tickQ.isEmpty() && tickQ.peek().getActionTimestamp() < bar.getActionTimestamp() + 60000) {					
 					TickField tick = tickQ.poll();
-					gateway.onTick(tick);
-					task.getPlaybackModules().forEach(module -> module.onTick(tick));
+					simMarket.onTick(tick);
+					moduleMgr.onTick(tick);
 				}
-				task.getPlaybackModules().forEach(module -> module.onBar(bar));
+				moduleMgr.onBar(bar);
 			}
 		}
 	}

@@ -175,6 +175,7 @@ public class ModuleService implements InitializingBean{
 			barDataList.add(new BarData(unifiedSymbol, barList));
 		}
 		
+		strategyModule.initMarketDataRef(barDataList);
 		strategyModule.setRunningStateChangeListener((isEnabled, module)->{
 			ModuleInfo moduleInfo = moduleRepo.findModuleInfo(module.getName());
 			moduleInfo.setEnabled(isEnabled);
