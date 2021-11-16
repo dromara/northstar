@@ -2,7 +2,6 @@ package tech.xuanwu.northstar.gateway.sim.market;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 import tech.xuanwu.northstar.common.utils.ContractNameResolver;
 import xyz.redtorch.pb.CoreField.ContractField;
@@ -22,6 +21,9 @@ public class InstrumentBasePrice {
 	public static Double getBasePrice(ContractField contract) {
 		String symbol = contract.getSymbol();
 		String symbolGroup = ContractNameResolver.symbolToSymbolGroup(symbol);
-		return Optional.of(priceMap.get(symbolGroup)).get();
+		if(priceMap.containsKey(symbolGroup)) {			
+			return priceMap.get(symbolGroup);
+		}
+		return 5000D;
 	}
 }

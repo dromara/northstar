@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.PriorityQueue;
 
+import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.common.constant.Constants;
 import tech.xuanwu.northstar.gateway.sim.trade.SimMarket;
 import tech.xuanwu.northstar.main.manager.ModuleManager;
@@ -18,6 +19,7 @@ import xyz.redtorch.pb.CoreField.TickField;
  * @author KevinHuangwl
  *
  */
+@Slf4j
 public class PlaybackEngine {
 	
 	private SimMarket simMarket;
@@ -30,6 +32,7 @@ public class PlaybackEngine {
 	}
 
 	public void play(PlaybackTask task) {
+		log.info("################# 开始回测 #################");
 		while(!task.isDone()) {
 			Map<String, Iterator<MinBarDataPO>> symbolBatchDataMap = task.nextBatchData();
 			PriorityQueue<TickField> tickQ = new PriorityQueue<>(100000, (t1, t2) -> t1.getActionTimestamp() < t2.getActionTimestamp() ? -1 : 1 );
@@ -50,6 +53,7 @@ public class PlaybackEngine {
 			
 			while(!barQ.isEmpty()) {
 				BarField bar = barQ.poll();
+				log.info("开始回放数据：{} {} {}", bar.getUnifiedSymbol(), bar.getActionDay(), bar.getActionTime());
 				while(!tickQ.isEmpty() && tickQ.peek().getActionTimestamp() < bar.getActionTimestamp() + 60000) {					
 					TickField tick = tickQ.poll();
 					simMarket.onTick(tick);
@@ -58,6 +62,7 @@ public class PlaybackEngine {
 				moduleMgr.onBar(bar);
 			}
 		}
+		log.info("################# 回测结束 #################");
 	}
 	
 	private BarField restorePlaybackBar(MinBarDataPO barData) {

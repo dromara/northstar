@@ -28,7 +28,7 @@ public class SimTickGenerator {
 		double seed = ins.getSeed() + Math.random();
 		ins.setSeed(seed);
 		ContractField contract = ins.getContract();
-		double priceTick = contract.getPriceTick();
+		double priceTick = contract.getPriceTick() == 0 ? 1 : contract.getPriceTick();
 		TickField.Builder tb = ins.getLastTick();
 		double lastPrice = tb.getLastPrice();
 		int lastNumberOfTick = (int) (lastPrice * 100) / (int)(priceTick * 100);

@@ -11,23 +11,29 @@ import org.springframework.web.bind.annotation.RestController;
 
 import tech.xuanwu.northstar.common.model.PlaybackDescription;
 import tech.xuanwu.northstar.common.model.ResultBean;
+import tech.xuanwu.northstar.main.manager.ModuleManager;
 import tech.xuanwu.northstar.main.service.PlaybackService;
 
 @RestController
 @RequestMapping("/pb")
 public class PlaybackController {
 	
-//	@Autowired
+	@Autowired
 	private PlaybackService playbackService;
+	
+	@Autowired 
+	private ModuleManager moduleMgr;
 
 	/**
 	 * 开始回测
 	 * @param startDate
 	 * @param endDate
 	 * @return
+	 * @throws Exception 
 	 */
 	@PostMapping("/play")
-	public ResultBean<Void> play(@RequestBody PlaybackDescription playbackDescription){
+	public ResultBean<Void> play(@RequestBody PlaybackDescription playbackDescription) throws Exception{
+		playbackService.play(playbackDescription, moduleMgr);
 		return new ResultBean<>(null);
 	}
 	
