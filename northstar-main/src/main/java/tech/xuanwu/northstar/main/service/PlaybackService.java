@@ -3,6 +3,8 @@ package tech.xuanwu.northstar.main.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.common.collect.Lists;
+
 import cn.hutool.core.lang.UUID;
 import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.common.constant.Constants;
@@ -31,6 +33,7 @@ import tech.xuanwu.northstar.main.playback.PlaybackTask;
 import tech.xuanwu.northstar.strategy.common.StrategyModule;
 import tech.xuanwu.northstar.strategy.common.StrategyModuleFactory;
 import tech.xuanwu.northstar.strategy.common.model.ModuleStatus;
+import tech.xuanwu.northstar.strategy.common.model.data.BarData;
 import tech.xuanwu.northstar.strategy.common.model.entity.ModuleInfo;
 
 @Slf4j
@@ -96,6 +99,11 @@ public class PlaybackService {
 			moduleInfo.setAccountGatewayId(gwDescription.getGatewayId());
 			
 			StrategyModule module = moduleFactory.makeModule(moduleInfo, new ModuleStatus(moduleInfo.getModuleName()));
+			List<BarData> barDataList = new ArrayList<>();
+			for(String unifiedSymbol : originModule.getInterestContractUnifiedSymbol()) {
+				barDataList.add(new BarData(unifiedSymbol, 100, new ArrayList<>(100)));
+			}
+			module.initMarketDataRef(barDataList);
 			playbackModules.add(module);
 			sandboxMgr.addModule(module);
 			

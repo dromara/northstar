@@ -15,9 +15,7 @@ import org.junit.Test;
 import org.mockito.ArgumentMatchers;
 
 import tech.xuanwu.northstar.gateway.sim.trade.SimMarket;
-import tech.xuanwu.northstar.gateway.sim.trade.SimTradeGateway;
-import tech.xuanwu.northstar.main.manager.ModuleManager;
-import tech.xuanwu.northstar.main.persistence.ModuleRepository;
+import tech.xuanwu.northstar.main.manager.SandboxModuleManager;
 import tech.xuanwu.northstar.main.persistence.po.MinBarDataPO;
 import tech.xuanwu.northstar.main.persistence.po.TickDataPO;
 import tech.xuanwu.northstar.strategy.common.StrategyModule;
@@ -113,7 +111,7 @@ public class PlaybackEngineTest {
 	@Test
 	public void test() {
 		SimMarket market = mock(SimMarket.class);
-		ModuleManager moduleMgr = mock(ModuleManager.class);
+		SandboxModuleManager moduleMgr = mock(SandboxModuleManager.class);
 		engine = new PlaybackEngine(market, moduleMgr);
 		engine.play(task);
 		

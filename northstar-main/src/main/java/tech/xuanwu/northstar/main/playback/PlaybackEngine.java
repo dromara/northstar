@@ -6,9 +6,8 @@ import java.util.Map.Entry;
 import java.util.PriorityQueue;
 
 import lombok.extern.slf4j.Slf4j;
-import tech.xuanwu.northstar.common.constant.Constants;
 import tech.xuanwu.northstar.gateway.sim.trade.SimMarket;
-import tech.xuanwu.northstar.main.manager.ModuleManager;
+import tech.xuanwu.northstar.main.manager.SandboxModuleManager;
 import tech.xuanwu.northstar.main.persistence.po.MinBarDataPO;
 import tech.xuanwu.northstar.main.persistence.po.TickDataPO;
 import xyz.redtorch.pb.CoreField.BarField;
@@ -24,20 +23,19 @@ public class PlaybackEngine {
 	
 	private SimMarket simMarket;
 	
-	private ModuleManager moduleMgr;
+	private SandboxModuleManager moduleMgr;
 	
-	public PlaybackEngine(SimMarket simMarket, ModuleManager moduleMgr) {
+	public PlaybackEngine(SimMarket simMarket, SandboxModuleManager moduleMgr) {
 		this.simMarket = simMarket;
 		this.moduleMgr = moduleMgr;
 	}
 
 	public void play(PlaybackTask task) {
 		log.info("################# 开始回测 #################");
+		PriorityQueue<TickField> tickQ = new PriorityQueue<>(100000, (t1, t2) -> t1.getActionTimestamp() < t2.getActionTimestamp() ? -1 : 1 );
+		PriorityQueue<BarField> barQ = new PriorityQueue<>(3000, (b1, b2) -> b1.getActionTimestamp() < b2.getActionTimestamp() ? -1 : 1 );
 		while(!task.isDone()) {
 			Map<String, Iterator<MinBarDataPO>> symbolBatchDataMap = task.nextBatchData();
-			PriorityQueue<TickField> tickQ = new PriorityQueue<>(100000, (t1, t2) -> t1.getActionTimestamp() < t2.getActionTimestamp() ? -1 : 1 );
-			
-			PriorityQueue<BarField> barQ = new PriorityQueue<>(3000, (b1, b2) -> b1.getActionTimestamp() < b2.getActionTimestamp() ? -1 : 1 );
 			
 			// 先把三维的TICK数据转成一维
 			for(Entry<String, Iterator<MinBarDataPO>> e : symbolBatchDataMap.entrySet()) {
@@ -71,7 +69,7 @@ public class PlaybackEngine {
 				.setActionTime(barData.getActionTime())
 				.setActionTimestamp(barData.getActionTimestamp())
 				.setTradingDay(barData.getTradingDay())
-				.setGatewayId(Constants.PLAYBACK_GATEWAY)
+				.setGatewayId(barData.getGatewayId())
 				.setUnifiedSymbol(barData.getUnifiedSymbol())
 				.setHighPrice(barData.getHighPrice())
 				.setLowPrice(barData.getLowPrice())
@@ -99,7 +97,7 @@ public class PlaybackEngine {
 				.setTradingDay(barData.getTradingDay())
 				.addAskPrice(tickData.getAskPrice1())
 				.addBidPrice(tickData.getBidPrice1())
-				.setGatewayId(Constants.PLAYBACK_GATEWAY)
+				.setGatewayId(barData.getGatewayId())
 				.setLastPrice(tickData.getLastPrice())
 				.setAvgPrice(tickData.getAvgPrice())
 				.setUnifiedSymbol(barData.getUnifiedSymbol())
