@@ -3,8 +3,6 @@ package tech.xuanwu.northstar.main.service;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.common.collect.Lists;
-
 import cn.hutool.core.lang.UUID;
 import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.common.constant.Constants;
@@ -80,6 +78,8 @@ public class PlaybackService {
 		for(String name : moduleNames) {
 			// 获取原有模组
 			StrategyModule originModule = moduleMgr.getModule(name);
+			clearOutPlaybackRecord(name);
+			
 			// 构造一个回测专用的账户网关
 			int tickOfFee = playbackDescription.getTickOfFee();
 			GatewayDescription gwDescription = GatewayDescription.builder()
@@ -116,30 +116,39 @@ public class PlaybackService {
 		
 		new Thread(()->{			
 			pbEngine.play(task);
+			task = null;
 			// 清理回测网关与模组副本
 			for(StrategyModule module : playbackModules) {
 				Gateway gateway = module.getGateway();
 				gateway.disconnect();
-				try {
-					Thread.sleep(200);
-				} catch (InterruptedException e) {
-					log.error("", e);
-				}
 				module.toggleRunningState();
 				sandboxMgr.removeModule(module.getName());
 				gatewayConnMgr.removePair(gateway);
 			}
 			isRunning = false;
+			log.info("回测模组副本已清理");
 		}).start();
+	}
+	
+	private void clearOutPlaybackRecord(String moduleName) {
+		moduleRepo.removeModuleStatus(moduleName + Constants.PLAYBACK_MODULE_SUFFIX);
+		moduleRepo.removeDealRecords(moduleName + Constants.PLAYBACK_MODULE_SUFFIX);
+		moduleRepo.removeTradeRecords(moduleName + Constants.PLAYBACK_MODULE_SUFFIX);
 	}
 	
 	
 	public int playProcess(){
-		return (int)task.ratioOfProcess() * 100;
+		if(task == null) {
+			throw new IllegalStateException("回测未开始");
+		}
+		return (int)(task.ratioOfProcess() * 100);
 	}
 	
 	public int playbackBalance(String moduleName) {
-		return ((SimTradeGateway)sandboxMgr.getModule(moduleName).getGateway()).moneyIO(0);
+		if(task == null) {
+			throw new IllegalStateException("回测未开始");
+		}
+		return ((SimTradeGateway)sandboxMgr.getModule(moduleName + Constants.PLAYBACK_MODULE_SUFFIX).getGateway()).moneyIO(0);
 	}
 	
 	public PlaybackRecord playbackRecord(String moduleName){

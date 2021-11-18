@@ -6,106 +6,112 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.PriorityQueue;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentMatcher;
 import org.mockito.ArgumentMatchers;
 
 import tech.xuanwu.northstar.gateway.sim.trade.SimMarket;
 import tech.xuanwu.northstar.main.manager.SandboxModuleManager;
-import tech.xuanwu.northstar.main.persistence.po.MinBarDataPO;
-import tech.xuanwu.northstar.main.persistence.po.TickDataPO;
+import tech.xuanwu.northstar.main.playback.PlaybackTask.DataType;
 import tech.xuanwu.northstar.strategy.common.StrategyModule;
+import xyz.redtorch.pb.CoreField.BarField;
+import xyz.redtorch.pb.CoreField.TickField;
 
 public class PlaybackEngineTest {
 
 	PlaybackEngine engine;
 	StrategyModule module = mock(StrategyModule.class);
 	PlaybackTask task = mock(PlaybackTask.class);
-	Map<String, Iterator<MinBarDataPO>> batchData = new HashMap<>();
+	Map<DataType, PriorityQueue<?>> batchData = new HashMap<>();
 	
+	PriorityQueue<TickField> tickQ = new PriorityQueue<>(100000, (t1, t2) -> t1.getActionTimestamp() < t2.getActionTimestamp() ? -1 : 1 );
+	PriorityQueue<BarField> barQ = new PriorityQueue<>(3000, (b1, b2) -> b1.getActionTimestamp() < b2.getActionTimestamp() ? -1 : 1 );
 	
-	TickDataPO tck1 = TickDataPO.builder()
-			.actionTime("1")
-			.actionTimestamp(1634087280000L + 1000)
+	TickField tck1 = TickField.newBuilder()
+			.setActionTime("1")
+			.setActionTimestamp(1634087280000L + 1000)
 			.build();
 	
-	TickDataPO tck2 = TickDataPO.builder()
-			.actionTime("2")
-			.actionTimestamp(1634087280000L + 2000)
+	TickField tck2 = TickField.newBuilder()
+			.setActionTime("2")
+			.setActionTimestamp(1634087280000L + 2000)
 			.build();
 	
-	TickDataPO tck3 = TickDataPO.builder()
-			.actionTime("3")
-			.actionTimestamp(1634087280000L + 3000)
+	TickField tck3 = TickField.newBuilder()
+			.setActionTime("3")
+			.setActionTimestamp(1634087280000L + 3000)
 			.build();
 	
-	TickDataPO tck4 = TickDataPO.builder()
-			.actionTime("4")
-			.actionTimestamp(1634087340000L + 1000)
+	TickField tck4 = TickField.newBuilder()
+			.setActionTime("4")
+			.setActionTimestamp(1634087340000L + 1000)
 			.build();
 	
-	TickDataPO tck5 = TickDataPO.builder()
-			.actionTime("5")
-			.actionTimestamp(1634087340000L + 2000)
+	TickField tck5 = TickField.newBuilder()
+			.setActionTime("5")
+			.setActionTimestamp(1634087340000L + 2000)
 			.build();
 	
-	TickDataPO tck6 = TickDataPO.builder()
-			.actionTime("6")
-			.actionTimestamp(1634087340000L + 3000)
+	TickField tck6 = TickField.newBuilder()
+			.setActionTime("6")
+			.setActionTimestamp(1634087340000L + 3000)
 			.build();
 	
-	MinBarDataPO po1 = MinBarDataPO.builder()
-			.unifiedSymbol("rb2205@SHFE@FUTURES")
-			.gatewayId("testGateway")
-			.actionDay("20211111")
-			.tradingDay("20211111")
-			.actionTime("225500")
-			.actionTimestamp(1634087280000L)
-			.ticksOfMin(List.of(tck1, tck2, tck3))
+	BarField bar1 = BarField.newBuilder()
+			.setUnifiedSymbol("rb2205@SHFE@FUTURES")
+			.setGatewayId("testGateway")
+			.setActionDay("20211111")
+			.setTradingDay("20211111")
+			.setActionTime("225500")
+			.setActionTimestamp(1634087280000L)
 			.build();
 	
-	MinBarDataPO po2 = MinBarDataPO.builder()
-			.unifiedSymbol("rb2205@SHFE@FUTURES")
-			.gatewayId("testGateway")
-			.actionDay("20211111")
-			.tradingDay("20211111")
-			.actionTime("225600")
-			.actionTimestamp(1634087340000L)
-			.ticksOfMin(List.of(tck4, tck5, tck6))
+	BarField bar2 = BarField.newBuilder()
+			.setUnifiedSymbol("rb2205@SHFE@FUTURES")
+			.setGatewayId("testGateway")
+			.setActionDay("20211111")
+			.setTradingDay("20211111")
+			.setActionTime("225600")
+			.setActionTimestamp(1634087340000L)
 			.build();
 	
-	MinBarDataPO po3 = MinBarDataPO.builder()
-			.unifiedSymbol("rb2210@SHFE@FUTURES")
-			.gatewayId("testGateway")
-			.actionDay("20211111")
-			.tradingDay("20211111")
-			.actionTime("225500")
-			.actionTimestamp(1634087280000L)
-			.ticksOfMin(List.of(tck1, tck2, tck3))
+	BarField bar3 = BarField.newBuilder()
+			.setUnifiedSymbol("rb2210@SHFE@FUTURES")
+			.setGatewayId("testGateway")
+			.setActionDay("20211111")
+			.setTradingDay("20211111")
+			.setActionTime("225500")
+			.setActionTimestamp(1634087280000L)
 			.build();
 	
-	MinBarDataPO po4 = MinBarDataPO.builder()
-			.unifiedSymbol("rb2210@SHFE@FUTURES")
-			.gatewayId("testGateway")
-			.actionDay("20211111")
-			.tradingDay("20211111")
-			.actionTime("225600")
-			.actionTimestamp(1634087340000L)
-			.ticksOfMin(List.of(tck4, tck5, tck6))
+	BarField bar4 = BarField.newBuilder()
+			.setUnifiedSymbol("rb2210@SHFE@FUTURES")
+			.setGatewayId("testGateway")
+			.setActionDay("20211111")
+			.setTradingDay("20211111")
+			.setActionTime("225600")
+			.setActionTimestamp(1634087340000L)
 			.build();
 	
 	@Before
 	public void prepare() {
-		when(task.isDone()).thenReturn(false, false, true);
+		when(task.isDone()).thenReturn(false, true);
 		when(task.nextBatchData()).thenReturn(batchData);
-		when(task.getPlaybackModules()).thenReturn(List.of(module));
 		
-		batchData.put("rb2205@SHFE@FUTURES", List.of(po1, po2).iterator());
-		batchData.put("rb2210@SHFE@FUTURES", List.of(po3, po4).iterator());
+		batchData.put(DataType.BAR, barQ);
+		batchData.put(DataType.TICK, tickQ);
+		
+		for(TickField t : List.of(tck6, tck5, tck4, tck3, tck2, tck1)) {
+			tickQ.offer(t);
+		}
+		for(BarField b : List.of(bar2, bar1, bar3, bar4)) {
+			barQ.offer(b);
+		}
 	}
 	
 	@Test
@@ -115,8 +121,20 @@ public class PlaybackEngineTest {
 		engine = new PlaybackEngine(market, moduleMgr);
 		engine.play(task);
 		
-		verify(moduleMgr, times(12)).onTick(ArgumentMatchers.any());
-		verify(moduleMgr, times(4)).onBar(ArgumentMatchers.any());
+		verify(moduleMgr, times(6)).onTick(ArgumentMatchers.argThat(new ArgumentMatcher<TickField>() {
+			@Override
+			public boolean matches(TickField t) {
+				System.out.println(t.getActionTime());
+				return true;
+			}
+		}));
+		verify(moduleMgr, times(4)).onBar(ArgumentMatchers.argThat(new ArgumentMatcher<BarField>() {
+			@Override
+			public boolean matches(BarField b) {
+				System.out.println(b.getActionTime());
+				return true;
+			}
+		}));
 	}
 
 }
