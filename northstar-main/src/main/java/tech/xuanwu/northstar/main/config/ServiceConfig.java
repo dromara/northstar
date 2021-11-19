@@ -15,6 +15,7 @@ import tech.xuanwu.northstar.engine.broadcast.SocketIOMessageEngine;
 import tech.xuanwu.northstar.engine.event.FastEventEngine;
 import tech.xuanwu.northstar.gateway.sim.trade.SimMarket;
 import tech.xuanwu.northstar.main.manager.ModuleManager;
+import tech.xuanwu.northstar.main.manager.SandboxModuleManager;
 import tech.xuanwu.northstar.main.persistence.GatewayRepository;
 import tech.xuanwu.northstar.main.persistence.MarketDataRepository;
 import tech.xuanwu.northstar.main.persistence.ModuleRepository;
@@ -22,6 +23,7 @@ import tech.xuanwu.northstar.main.service.AccountService;
 import tech.xuanwu.northstar.main.service.DataSyncService;
 import tech.xuanwu.northstar.main.service.GatewayService;
 import tech.xuanwu.northstar.main.service.ModuleService;
+import tech.xuanwu.northstar.main.service.PlaybackService;
 import tech.xuanwu.northstar.main.service.SMSTradeService;
 
 @DependsOn({
@@ -66,5 +68,11 @@ public class ServiceConfig {
 	@Bean
 	public SMSTradeService smsTradeService(FastEventEngine feEngine) {
 		return new SMSTradeService(feEngine);
+	}
+	
+	@Bean
+	public PlaybackService playbackService(FastEventEngine feEngine, SandboxModuleManager moduleMgr, GatewayAndConnectionManager gatewayConnMgr, 
+			ContractManager contractMgr, ModuleRepository moduleRepo, MarketDataRepository mdRepo, SimMarket simMarket, InternalEventBus eventBus) {
+		return new PlaybackService(feEngine, moduleMgr, gatewayConnMgr, contractMgr, moduleRepo, mdRepo, simMarket, eventBus);
 	}
 }

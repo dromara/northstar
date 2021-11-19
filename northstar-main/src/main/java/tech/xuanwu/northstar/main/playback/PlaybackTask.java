@@ -2,10 +2,10 @@ package tech.xuanwu.northstar.main.playback;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.HashMap;
-import java.util.Iterator;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.PriorityQueue;
 import java.util.Set;
 
 import tech.xuanwu.northstar.common.constant.DateTimeConstant;
@@ -13,10 +13,13 @@ import tech.xuanwu.northstar.common.constant.PlaybackPrecision;
 import tech.xuanwu.northstar.common.model.PlaybackDescription;
 import tech.xuanwu.northstar.main.persistence.MarketDataRepository;
 import tech.xuanwu.northstar.main.persistence.po.MinBarDataPO;
+import tech.xuanwu.northstar.main.persistence.po.TickDataPO;
 import tech.xuanwu.northstar.strategy.common.StrategyModule;
+import xyz.redtorch.pb.CoreField.BarField;
+import xyz.redtorch.pb.CoreField.TickField;
 
 /**
- * 负责提供回测批数据
+ * 负责提供回测数据
  * @author KevinHuangwl
  *
  */
@@ -26,11 +29,17 @@ public class PlaybackTask {
 	
 	private List<StrategyModule> playbackModules;
 	
-	private long totalNumOfDays;
+	protected long totalNumOfDays;
 	
-	private LocalDate curDate;
+	protected long totalNumOfData;
 	
-	private LocalDate endDate;
+	protected LocalDate curDate;
+	
+	protected LocalDate endDate;
+	
+	protected PriorityQueue<TickField> tickQ;
+	
+	protected PriorityQueue<BarField> barQ;
 	
 	private MarketDataRepository mdRepo;
 
@@ -43,18 +52,35 @@ public class PlaybackTask {
 		this.totalNumOfDays = restOfDays();
 	}
 	
-	public Map<String, Iterator<MinBarDataPO>> nextBatchData(){
+	public Map<DataType, PriorityQueue<?>> nextBatchData(){
 		if(isDone()) {
 			throw new IllegalStateException("超出回测范围");
 		}
-		Map<String, Iterator<MinBarDataPO>> resultMap = new HashMap<>();
+		Map<DataType, PriorityQueue<?>> resultMap = new EnumMap<>(DataType.class);
+		tickQ = new PriorityQueue<>(100000, (t1, t2) -> t1.getActionTimestamp() < t2.getActionTimestamp() ? -1 : 1 );
+		barQ = new PriorityQueue<>(3000, (b1, b2) -> b1.getActionTimestamp() < b2.getActionTimestamp() ? -1 : 1 );
+		// 先把高维的TICK与BAR数据转成一维
 		for(StrategyModule module : playbackModules) {
 			Set<String> interestContracts = module.getInterestContractUnifiedSymbol();
 			for(String unifiedSymbol : interestContracts) {				
 				List<MinBarDataPO> data = mdRepo.loadDataByDate(module.getBindedMarketGatewayId(), unifiedSymbol, curDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
-				resultMap.put(unifiedSymbol, data.iterator());
+				for(MinBarDataPO po : data) {
+					if(precision == PlaybackPrecision.TICK) {						
+						for(TickDataPO tickData : po.getTicksOfMin()) {
+							tickQ.offer(restorePlaybackTick(po, tickData));
+						}
+					} else if (precision == PlaybackPrecision.BAR) {
+						// 在回测模式为BAR模式时，TICK数据仅选取每分钟最后一个TICK，以免确保模拟计算时更准确
+						List<TickDataPO> list = po.getTicksOfMin();
+						tickQ.offer(restorePlaybackTick(po, list.get(list.size() - 1)));
+					}
+					barQ.offer(restorePlaybackBar(po));
+				}
 			}
 		}
+		totalNumOfData = barQ.size();
+		resultMap.put(DataType.BAR, barQ);
+		resultMap.put(DataType.TICK, tickQ);
 		curDate = curDate.plusDays(1);
 		return resultMap;
 	}
@@ -67,15 +93,73 @@ public class PlaybackTask {
 		return curDate.isAfter(endDate);
 	}
 	
-	public PlaybackPrecision getPrecision() {
-		return precision;
+	private double ratioOfDay() {
+		if(totalNumOfData == 0 || barQ == null || barQ.isEmpty()) {
+			return totalNumOfData;
+		}
+		return 1.0 * (totalNumOfData - barQ.size()) / totalNumOfData; 
 	}
 	
 	public double ratioOfProcess() {
-		return 1.0 * (totalNumOfDays - restOfDays()) / totalNumOfDays;
+		return 1.0 * (totalNumOfDays - restOfDays()) / totalNumOfDays + ratioOfDay() / totalNumOfDays;
 	}
 	
-	public List<StrategyModule> getPlaybackModules(){
-		return playbackModules;
+	private BarField restorePlaybackBar(MinBarDataPO barData) {
+		return BarField.newBuilder()
+				.setActionDay(barData.getActionDay())
+				.setActionTime(barData.getActionTime())
+				.setActionTimestamp(barData.getActionTimestamp())
+				.setTradingDay(barData.getTradingDay())
+				.setGatewayId(barData.getGatewayId())
+				.setUnifiedSymbol(barData.getUnifiedSymbol())
+				.setHighPrice(barData.getHighPrice())
+				.setLowPrice(barData.getLowPrice())
+				.setOpenPrice(barData.getOpenPrice())
+				.setClosePrice(barData.getClosePrice())
+				.setPreClosePrice(barData.getPreClosePrice())
+				.setPreOpenInterest(barData.getPreOpenInterest())
+				.setPreSettlePrice(barData.getPreSettlePrice())
+				.setVolume(barData.getVolume())
+				.setVolumeDelta(barData.getVolumeDelta())
+				.setOpenInterest(barData.getOpenInterest())
+				.setOpenInterestDelta(barData.getOpenInterestDelta())
+				.setNumTrades(barData.getNumTrades())
+				.setNumTradesDelta(barData.getNumTradesDelta())
+				.setTurnover(barData.getTurnover())
+				.setTurnoverDelta(barData.getTurnoverDelta())
+				.build();
+	}
+	
+	private TickField restorePlaybackTick(MinBarDataPO barData, TickDataPO tickData) {
+		return TickField.newBuilder()
+				.setActionDay(barData.getActionDay())
+				.setActionTime(tickData.getActionTime())
+				.setActionTimestamp(tickData.getActionTimestamp())
+				.setTradingDay(barData.getTradingDay())
+				.addAskPrice(tickData.getAskPrice1())
+				.addBidPrice(tickData.getBidPrice1())
+				.setGatewayId(barData.getGatewayId())
+				.setLastPrice(tickData.getLastPrice())
+				.setAvgPrice(tickData.getAvgPrice())
+				.setUnifiedSymbol(barData.getUnifiedSymbol())
+				.setTurnover(tickData.getTurnover())
+				.setTurnoverDelta(tickData.getTurnoverDelta())
+				.addAskVolume(tickData.getAskVol1())
+				.addBidVolume(tickData.getBidVol1())
+				.setVolume(tickData.getVolume())
+				.setVolumeDelta(tickData.getVolumeDelta())
+				.setNumTrades(tickData.getNumTrades())
+				.setNumTradesDelta(tickData.getNumTradesDelta())
+				.setOpenInterest(tickData.getOpenInterest())
+				.setOpenInterestDelta(tickData.getOpenInterestDelta())
+				.setPreClosePrice(barData.getPreClosePrice())
+				.setPreOpenInterest(barData.getPreOpenInterest())
+				.setPreSettlePrice(barData.getPreSettlePrice())
+				.build();
+	}
+	
+	public enum DataType {
+		BAR,
+		TICK
 	}
 }

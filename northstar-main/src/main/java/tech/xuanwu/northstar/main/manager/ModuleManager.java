@@ -31,11 +31,11 @@ public class ModuleManager extends AbstractEventHandler {
 	/**
 	 * moduleName --> module
 	 */
-	private ConcurrentHashMap<String, StrategyModule> moduleMap = new ConcurrentHashMap<>(50);
+	protected ConcurrentHashMap<String, StrategyModule> moduleMap = new ConcurrentHashMap<>(50);
 	
 	private Set<NorthstarEventType> eventSet = new HashSet<>();
 	
-	private ModuleRepository moduleRepo;
+	protected ModuleRepository moduleRepo;
 	
 	public ModuleManager(ModuleRepository moduleRepo) {
 		this.moduleRepo = moduleRepo;
@@ -146,5 +146,5 @@ public class ModuleManager extends AbstractEventHandler {
 			throw new IllegalStateException("未定义该事件-[" + e.getEvent() + "] 的处理方案");
 		}
 	}
-
+	
 }

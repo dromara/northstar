@@ -28,7 +28,7 @@ public class SimTickGenerator {
 		double seed = ins.getSeed() + Math.random();
 		ins.setSeed(seed);
 		ContractField contract = ins.getContract();
-		double priceTick = contract.getPriceTick();
+		double priceTick = contract.getPriceTick() == 0 ? 1 : contract.getPriceTick();
 		TickField.Builder tb = ins.getLastTick();
 		double lastPrice = tb.getLastPrice();
 		int lastNumberOfTick = (int) (lastPrice * 100) / (int)(priceTick * 100);
@@ -51,8 +51,10 @@ public class SimTickGenerator {
 			.setTradingDay(ldt.format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
 			.setActionTime(ldt.format(DateTimeConstant.T_FORMAT_WITH_MS_INT_FORMATTER))
 			.setActionTimestamp(ldt.toInstant(ZoneOffset.ofHours(8)).toEpochMilli())
-			.setAskPrice(0, askPrice)
-			.setBidPrice(0, bidPrice)
+			.addAskPrice(askPrice)
+			.addBidPrice(bidPrice)
+			.addAskVolume(0)
+			.addBidVolume(0)
 			.setOpenInterest(tb.getOpenInterest() + deltaInterest)
 			.setOpenInterestDelta(deltaInterest)
 			.setVolume(tb.getVolume() + deltaVol)

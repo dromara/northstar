@@ -20,4 +20,5 @@ public interface TradeGateway extends Gateway {
 	 * @return
 	 */
 	boolean cancelOrder(CancelOrderReqField cancelOrderReq);
+	
 }
