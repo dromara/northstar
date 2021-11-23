@@ -239,6 +239,12 @@
 				<artifactId>hutool-crypto</artifactId>
 				<version>${hutool-version}</version>
 			</dependency>
+			<!--用于数据计算的数学工具包 拟合函数，聚类函数，矩阵，积分等-->
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-math3</artifactId>
+				<version>3.5</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 
