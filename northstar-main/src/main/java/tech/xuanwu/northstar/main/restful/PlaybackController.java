@@ -1,5 +1,7 @@
 package tech.xuanwu.northstar.main.restful;
 
+import java.util.List;
+
 import javax.validation.constraints.NotNull;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,10 +11,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import tech.xuanwu.northstar.common.constant.Constants;
 import tech.xuanwu.northstar.common.model.PlaybackDescription;
 import tech.xuanwu.northstar.common.model.ResultBean;
 import tech.xuanwu.northstar.main.manager.ModuleManager;
+import tech.xuanwu.northstar.main.service.ModuleService;
 import tech.xuanwu.northstar.main.service.PlaybackService;
+import tech.xuanwu.northstar.strategy.common.model.entity.ModuleDealRecord;
+import tech.xuanwu.northstar.strategy.common.model.entity.ModuleTradeRecord;
 
 @RestController
 @RequestMapping("/pb")
@@ -20,6 +26,9 @@ public class PlaybackController {
 	
 	@Autowired
 	private PlaybackService playbackService;
+	
+	@Autowired
+	private ModuleService moduleService;
 	
 	@Autowired 
 	private ModuleManager moduleMgr;
@@ -57,14 +66,25 @@ public class PlaybackController {
 		return new ResultBean<>(playbackService.playbackBalance(moduleName));
 	}
 	
-//	/**
-//	 * 查询回测记录
-//	 * @return
-//	 */
-//	@GetMapping("/record")
-//	public ResultBean<PlaybackRecord> playbackRecord(@NotNull String moduleName){
-//		return new Result;
-//	}
+	/**
+	 * 查询回测成交记录
+	 * @return
+	 */
+	@GetMapping("/records/trade")
+	public ResultBean<List<ModuleTradeRecord>> playbackTradeRecords(@NotNull String moduleName){
+		return new ResultBean<>(moduleService.getTradeRecords(moduleName + Constants.PLAYBACK_MODULE_SUFFIX));
+	}
+	
+	/**
+	 * 查询回测交易记录
+	 * @param moduleName
+	 * @return
+	 */
+	@GetMapping("/records/deal")
+	public ResultBean<List<ModuleDealRecord>> playbackDealRecords(@NotNull String moduleName){
+		return new ResultBean<>(moduleService.getDealRecords(moduleName + Constants.PLAYBACK_MODULE_SUFFIX));
+	}
+	
 	
 	/**
 	 * 查询回测就绪状态
