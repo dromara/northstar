@@ -41,7 +41,7 @@ public class PlaybackDescription {
 	 */
 	private int playbackAccountInitialBalance;
 	/**
-	 * 回测手续费（以TICK为单位）
+	 * 回测交易手续费（以元为单位）
 	 */
-	private int tickOfFee;
+	private int fee;
 }

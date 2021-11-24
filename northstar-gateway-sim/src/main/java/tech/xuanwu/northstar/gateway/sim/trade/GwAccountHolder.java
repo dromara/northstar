@@ -28,7 +28,7 @@ class GwAccountHolder {
 
 	private GwPositionHolder posHolder;
 
-	private int ticksOfCommission;
+	private int fee;
 	
 	private TickField lastTick;
 	
@@ -37,7 +37,7 @@ class GwAccountHolder {
 	//测试用的后门开关
 	public boolean testFlag;
 	
-	public GwAccountHolder(String gatewayId, FastEventEngine feEngine, int ticksOfCommission, SimFactory factory) {
+	public GwAccountHolder(String gatewayId, FastEventEngine feEngine, int fee, SimFactory factory) {
 		this.feEngine = feEngine;
 		this.accBuilder = AccountField.newBuilder()
 				.setName(gatewayId + "模拟账户")
@@ -45,7 +45,7 @@ class GwAccountHolder {
 				.setGatewayId(gatewayId);
 		this.orderHolder = factory.newGwOrderHolder();
 		this.posHolder = factory.newGwPositionHolder();
-		this.ticksOfCommission = ticksOfCommission;
+		this.fee = fee;
 	}
 
 	protected void updateTick(TickField tick) {
@@ -56,7 +56,10 @@ class GwAccountHolder {
 			.stream()
 			.forEach(order -> {
 				TradeField trade = orderHolder.transform(order);
-				commission.addAndGet(trade.getContract().getMultiplier() * ticksOfCommission * trade.getVolume());
+				if(order.getOffsetFlag() == OffsetFlagEnum.OF_Open) {
+					//手续费只按单边计算
+					commission.addAndGet(fee * trade.getVolume());
+				}
 				closeProfit.addAndGet(posHolder.updatePositionBy(trade));
 				posHolder.updatePositionBy(order);
 				feEngine.emitEvent(NorthstarEventType.ORDER, order);
