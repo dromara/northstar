@@ -11,11 +11,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import tech.xuanwu.northstar.common.constant.Constants;
+import tech.xuanwu.northstar.common.event.InternalEventBus;
 import tech.xuanwu.northstar.common.model.PlaybackDescription;
 import tech.xuanwu.northstar.common.model.ResultBean;
 import tech.xuanwu.northstar.main.manager.ModuleManager;
-import tech.xuanwu.northstar.main.service.ModuleService;
+import tech.xuanwu.northstar.main.playback.PlaybackStatRecord;
 import tech.xuanwu.northstar.main.service.PlaybackService;
 import tech.xuanwu.northstar.strategy.common.model.entity.ModuleDealRecord;
 import tech.xuanwu.northstar.strategy.common.model.entity.ModuleTradeRecord;
@@ -27,11 +27,11 @@ public class PlaybackController {
 	@Autowired
 	private PlaybackService playbackService;
 	
-	@Autowired
-	private ModuleService moduleService;
-	
 	@Autowired 
 	private ModuleManager moduleMgr;
+	
+	@Autowired
+	private InternalEventBus eventBus;
 
 	/**
 	 * 开始回测
@@ -42,7 +42,7 @@ public class PlaybackController {
 	 */
 	@PostMapping("/play")
 	public ResultBean<Void> play(@RequestBody PlaybackDescription playbackDescription) throws Exception{
-		playbackService.play(playbackDescription, moduleMgr);
+		playbackService.play(playbackDescription, moduleMgr, eventBus);
 		return new ResultBean<>(null);
 	}
 	
@@ -72,7 +72,7 @@ public class PlaybackController {
 	 */
 	@GetMapping("/records/trade")
 	public ResultBean<List<ModuleTradeRecord>> playbackTradeRecords(@NotNull String moduleName){
-		return new ResultBean<>(moduleService.getTradeRecords(moduleName + Constants.PLAYBACK_MODULE_SUFFIX));
+		return new ResultBean<>(playbackService.getTradeRecords(moduleName));
 	}
 	
 	/**
@@ -82,7 +82,17 @@ public class PlaybackController {
 	 */
 	@GetMapping("/records/deal")
 	public ResultBean<List<ModuleDealRecord>> playbackDealRecords(@NotNull String moduleName){
-		return new ResultBean<>(moduleService.getDealRecords(moduleName + Constants.PLAYBACK_MODULE_SUFFIX));
+		return new ResultBean<>(playbackService.getDealRecords(moduleName));
+	}
+	
+	/**
+	 * 查询回测统计结果
+	 * @param moduleName
+	 * @return
+	 */
+	@GetMapping("/records/stat")
+	public ResultBean<PlaybackStatRecord> playbackStatRecord(@NotNull String moduleName){
+		return new ResultBean<>(playbackService.getPlaybackStatRecord(moduleName));
 	}
 	
 	

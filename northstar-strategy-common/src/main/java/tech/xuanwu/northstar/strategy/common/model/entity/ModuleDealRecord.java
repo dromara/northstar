@@ -29,4 +29,6 @@ public class ModuleDealRecord {
 	private double closePrice;
 	
 	private int closeProfit;
+	
+	private double estimatedOccupiedMoney;
 }

@@ -8,6 +8,7 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Repository;
 
+import tech.xuanwu.northstar.main.playback.PlaybackStatRecord;
 import tech.xuanwu.northstar.strategy.common.model.ModuleStatus;
 import tech.xuanwu.northstar.strategy.common.model.entity.ModuleDealRecord;
 import tech.xuanwu.northstar.strategy.common.model.entity.ModuleInfo;
@@ -86,5 +87,15 @@ public class ModuleRepository {
 		mongo.remove(Query.query(Criteria.where(MODULE_NAME).is(moduleName)), ModuleTradeRecord.class);
 	}
 	
+	/*************/
+	/**	模组回测	**/
+	/*************/
+	public void savePlaybackStatRecord(PlaybackStatRecord playbackRecord) {
+		mongo.save(playbackRecord);
+	}
+	
+	public PlaybackStatRecord getPlaybackStatRecord(String moduleName) {
+		return mongo.findOne(Query.query(Criteria.where(MODULE_NAME).is(moduleName)), PlaybackStatRecord.class);
+	}
 	
 }
