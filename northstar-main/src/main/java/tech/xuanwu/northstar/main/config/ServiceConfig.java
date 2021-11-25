@@ -72,7 +72,7 @@ public class ServiceConfig {
 	
 	@Bean
 	public PlaybackService playbackService(FastEventEngine feEngine, SandboxModuleManager moduleMgr, GatewayAndConnectionManager gatewayConnMgr, 
-			ContractManager contractMgr, ModuleRepository moduleRepo, MarketDataRepository mdRepo, SimMarket simMarket, InternalEventBus eventBus) {
-		return new PlaybackService(feEngine, moduleMgr, gatewayConnMgr, contractMgr, moduleRepo, mdRepo, simMarket, eventBus);
+			ContractManager contractMgr, ModuleRepository moduleRepo, MarketDataRepository mdRepo, SimMarket simMarket) {
+		return new PlaybackService(feEngine, moduleMgr, gatewayConnMgr, contractMgr, moduleRepo, mdRepo, simMarket);
 	}
 }
