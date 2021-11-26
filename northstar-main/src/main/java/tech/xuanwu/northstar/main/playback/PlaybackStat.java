@@ -75,10 +75,15 @@ public class PlaybackStat {
 	 * @return
 	 */
 	public double yearlyEarningRate() {
-		// 加权平均交易占用资金
-		double weightedOccupiedMoney = StatUtils.mean(dealRecords.stream().mapToDouble(ModuleDealRecord::getEstimatedOccupiedMoney).toArray());
-		// 年化收益率
-		return 365.0 * (sumOfProfit() - sumOfCommission()) / (duration() * weightedOccupiedMoney); 
+		return 365.0 * (sumOfProfit() - sumOfCommission()) / (duration() * meanOfOccupiedMoney()); 
+	}
+	
+	/**
+	 * 计算平均占用资金
+	 * @return
+	 */
+	public double meanOfOccupiedMoney() {
+		return StatUtils.mean(dealRecords.stream().mapToDouble(ModuleDealRecord::getEstimatedOccupiedMoney).toArray());
 	}
 	
 	/**
@@ -87,7 +92,7 @@ public class PlaybackStat {
 	 */
 	public double stdOfPlaybackProfits() {
 		double[] closeProfits = dealRecords.stream().mapToDouble(ModuleDealRecord::getCloseProfit).toArray();
-		return StatUtils.variance(closeProfits);
+		return Math.sqrt(StatUtils.variance(closeProfits));
 	}
 
 	/**
@@ -107,7 +112,7 @@ public class PlaybackStat {
 	 */
 	public double stdOfNTransactionsAvgProfit(int n) {
 		double[] sampleOfAvgProfit = Stream.of(sampling(n, ModuleDealRecord::getCloseProfit)).mapToDouble(StatUtils::mean).toArray();
-		return StatUtils.variance(sampleOfAvgProfit) / Math.sqrt(n);
+		return Math.sqrt(StatUtils.variance(sampleOfAvgProfit)) / Math.sqrt(n);
 	}
 	
 	/**
@@ -131,7 +136,7 @@ public class PlaybackStat {
 		double[] sampleOfWinningRate = Stream.of(sampling(n, ModuleDealRecord::getCloseProfit))
 				.mapToDouble(sampleProfits -> DoubleStream.of(sampleProfits).filter(profit -> profit > 0).count() * 1.0 / sampleProfits.length)
 				.toArray();
-		return StatUtils.variance(sampleOfWinningRate);
+		return Math.sqrt(StatUtils.variance(sampleOfWinningRate)) / Math.sqrt(n);
 	}
 	
 	private double[][] sampling(int sampleSize, ToDoubleFunction<ModuleDealRecord> samplingFunc){
@@ -151,21 +156,19 @@ public class PlaybackStat {
 	}
 	
 	/**
-	 * 计算最大回撤幅度
+	 * 计算最大回撤金额
 	 * @return
 	 */
-	public double maxFallbackRatio() {
+	public double maxFallback() {
 		double maxProfit = Double.MIN_VALUE;
 		double maxFallback = 0;
 		double accProfit = 0;
-		double maxFallbackRate = 0;
 		for(ModuleDealRecord rec : dealRecords) {
 			accProfit += rec.getCloseProfit();
 			maxProfit = Math.max(maxProfit, accProfit);
 			maxFallback = Math.max(maxProfit - accProfit, maxFallback);
-			maxFallbackRate = Math.max(maxFallback / maxProfit, maxFallbackRate);
 		}
-		return maxFallbackRate;
+		return maxFallback;
 	}
 	
 }

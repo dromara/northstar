@@ -74,7 +74,11 @@ public class PlaybackStatRecord {
 	 */
 	private double stdOf5TransactionsAvgWinningRate;
 	/**
-	 * 最大回撤比例
+	 * 最大回撤金额
 	 */
-	private double maxFallbackRatio;
+	private double maxFallback;
+	/**
+	 * 平均资金占用
+	 */
+	private double meanOfOccupiedMoney;
 }

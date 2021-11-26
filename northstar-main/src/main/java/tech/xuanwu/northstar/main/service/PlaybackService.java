@@ -154,7 +154,8 @@ public class PlaybackService {
 						.stdOf5TransactionsAvgProfit(stat.stdOfNTransactionsAvgProfit(5))
 						.meanOf5TransactionsAvgWinningRate(stat.meanOfNTransactionsAvgWinningRate(5))
 						.stdOf5TransactionsAvgWinningRate(stat.stdOfNTransactionsAvgWinningRate(5))
-						.maxFallbackRatio(stat.maxFallbackRatio())
+						.maxFallback(stat.maxFallback())
+						.meanOfOccupiedMoney(stat.meanOfOccupiedMoney())
 						.build());
 			}
 			log.info("完成回测统计结果计算");
