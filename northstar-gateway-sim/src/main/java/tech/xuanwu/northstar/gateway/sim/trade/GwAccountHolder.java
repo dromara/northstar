@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 import com.google.common.util.concurrent.AtomicDouble;
 import com.google.protobuf.InvalidProtocolBufferException;
 
+import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.common.event.NorthstarEventType;
 import tech.xuanwu.northstar.common.exception.TradeException;
 import tech.xuanwu.northstar.engine.event.FastEventEngine;
@@ -18,6 +19,7 @@ import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TickField;
 import xyz.redtorch.pb.CoreField.TradeField;
 
+@Slf4j
 class GwAccountHolder {
 
 	private AccountField.Builder accBuilder;
@@ -64,6 +66,12 @@ class GwAccountHolder {
 				posHolder.updatePositionBy(order);
 				feEngine.emitEvent(NorthstarEventType.ORDER, order);
 				feEngine.emitEvent(NorthstarEventType.TRADE, trade);
+				try {
+					// 阻塞一下，好让模组收到成交事件
+					Thread.sleep(50);
+				} catch (InterruptedException e) {
+					log.warn("", e);
+				}
 			});
 		posHolder.updatePositionBy(tick)
 			.stream()
