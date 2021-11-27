@@ -26,6 +26,9 @@ public class TimeExceededRule implements RiskControlRule, DynamicParamsAware{
 
 	@Override
 	public short canDeal(TickField tick, ModuleStatus moduleStatus) {
+		if(lastUpdateTime == Long.MAX_VALUE) {
+			lastUpdateTime = tick.getActionTimestamp();
+		}
 		if(tick.getActionTimestamp() - lastUpdateTime > timeoutSeconds * 1000) {
 			log.info("挂单超时，撤单追单");
 			return RiskAuditResult.RETRY;
@@ -35,7 +38,7 @@ public class TimeExceededRule implements RiskControlRule, DynamicParamsAware{
 	
 	@Override
 	public RiskControlRule onSubmitOrder(SubmitOrderReqField orderReq) {
-		this.lastUpdateTime = System.currentTimeMillis();
+		this.lastUpdateTime = Long.MAX_VALUE;
 		return this;
 	}
 

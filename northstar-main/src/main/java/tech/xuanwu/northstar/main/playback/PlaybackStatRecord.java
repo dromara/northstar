@@ -81,4 +81,8 @@ public class PlaybackStatRecord {
 	 * 平均资金占用
 	 */
 	private double meanOfOccupiedMoney;
+	/**
+	 * 异常信息
+	 */
+	private String exceptionMessage;
 }

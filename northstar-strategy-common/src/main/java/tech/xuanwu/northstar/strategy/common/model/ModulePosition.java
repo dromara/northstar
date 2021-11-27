@@ -88,7 +88,7 @@ public class ModulePosition {
 		if(stopLossPrice <= 0) {
 			return Optional.empty();
 		}
-		long now = System.currentTimeMillis();
+		long now = tick.getActionTimestamp();
 		// 如果三秒后该持仓还没被清理，证明市价挂单无成交，则需要再次发单
 		if(now - lastTriggerTime > 3000 && triggeredStopLoss(tick)) {
 			lastTriggerTime = now;

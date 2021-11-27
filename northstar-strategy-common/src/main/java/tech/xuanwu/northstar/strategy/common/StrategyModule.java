@@ -92,7 +92,7 @@ public class StrategyModule {
 			return this;
 		}
 		if(!getGateway().isConnected()) {
-			long now = System.currentTimeMillis();
+			long now = tick.getActionTimestamp();
 			if(now - lastWarningTime > 60000) {
 				log.warn("网关[{}]未连接，[{}]无法执行策略", getGateway().getGatewaySetting().getGatewayId(), status.getModuleName());
 				lastWarningTime = now;

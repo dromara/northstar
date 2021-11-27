@@ -2,6 +2,8 @@ package tech.xuanwu.northstar.main.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 import cn.hutool.core.lang.UUID;
 import lombok.extern.slf4j.Slf4j;
@@ -82,9 +84,10 @@ public class PlaybackService {
 		List<SimTradeGateway> simGateways = new ArrayList<>();
 		
 		for(String name : moduleNames) {
+			// 清理模组旧有回测记录
+			clearOutPlaybackRecord(name);
 			// 获取原有模组
 			StrategyModule originModule = moduleMgr.getModule(name);
-			clearOutPlaybackRecord(name);
 			
 			// 构造一个回测专用的账户网关
 			int fee = playbackDescription.getFee();
@@ -122,23 +125,26 @@ public class PlaybackService {
 		
 		new Thread(()->{			
 			pbEngine.play(task);
-			task = null;
 			// 清理回测网关与模组副本
 			for(StrategyModule module : playbackModules) {
 				Gateway gateway = module.getGateway();
 				gateway.disconnect();
-				module.toggleRunningState();
-				sandboxMgr.removeModule(module.getName());
-				gatewayConnMgr.removePair(gateway);
+				if(module.isEnabled()) {					
+					module.toggleRunningState();
+				}
+				CompletableFuture.delayedExecutor(10, TimeUnit.SECONDS).execute(() -> {					
+					sandboxMgr.removeModule(module.getName());
+					gatewayConnMgr.removePair(gateway);
+					log.info("回测模组副本已清理");
+				});
 			}
 			isRunning = false;
-			log.info("回测模组副本已清理");
 			
 			// 计算回测统计结果
 			for(String name : moduleNames) {				
 				List<ModuleDealRecord> dealRecords = getDealRecords(name);
 				PlaybackStat stat = new PlaybackStat(playbackDescription, dealRecords);
-				moduleRepo.savePlaybackStatRecord(PlaybackStatRecord.builder()
+				PlaybackStatRecord.PlaybackStatRecordBuilder statRecordBuilder = PlaybackStatRecord.builder()
 						.moduleName(name)
 						.sumOfProfit(stat.sumOfProfit())
 						.sumOfCommission(stat.sumOfCommission())
@@ -146,17 +152,21 @@ public class PlaybackService {
 						.duration(stat.duration())
 						.yearlyEarningRate(stat.yearlyEarningRate())
 						.stdOfProfit(stat.stdOfPlaybackProfits())
-						.meanOf10TransactionsAvgProfit(stat.meanOfNTransactionsAvgProfit(10))
+						.maxFallback(stat.maxFallback())
+						.meanOfOccupiedMoney(stat.meanOfOccupiedMoney());
+				try {
+					statRecordBuilder.meanOf10TransactionsAvgProfit(stat.meanOfNTransactionsAvgProfit(10))
 						.stdOf10TransactionsAvgProfit(stat.stdOfNTransactionsAvgProfit(10))
 						.meanOf10TransactionsAvgWinningRate(stat.meanOfNTransactionsAvgWinningRate(10))
 						.stdOf10TransactionsAvgWinningRate(stat.stdOfNTransactionsAvgWinningRate(10))
 						.meanOf5TransactionsAvgProfit(stat.meanOfNTransactionsAvgProfit(5))
 						.stdOf5TransactionsAvgProfit(stat.stdOfNTransactionsAvgProfit(5))
 						.meanOf5TransactionsAvgWinningRate(stat.meanOfNTransactionsAvgWinningRate(5))
-						.stdOf5TransactionsAvgWinningRate(stat.stdOfNTransactionsAvgWinningRate(5))
-						.maxFallback(stat.maxFallback())
-						.meanOfOccupiedMoney(stat.meanOfOccupiedMoney())
-						.build());
+						.stdOf5TransactionsAvgWinningRate(stat.stdOfNTransactionsAvgWinningRate(5));
+				}catch(Exception e) {
+					statRecordBuilder.exceptionMessage("样本不足，部分统计值无法计算");
+				}
+				moduleRepo.savePlaybackStatRecord(statRecordBuilder.build());
 			}
 			log.info("完成回测统计结果计算");
 		}).start();
