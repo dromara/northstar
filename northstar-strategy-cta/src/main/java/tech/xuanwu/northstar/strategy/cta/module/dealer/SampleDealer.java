@@ -76,7 +76,8 @@ public class SampleDealer extends AbstractDealer implements Dealer {
 		InitParams initParams = (InitParams) params;
 		this.bindedUnifiedSymbol = initParams.bindedUnifiedSymbol;
 		this.openVol = initParams.openVol;
-		this.priceTypeStr = initParams.priceTypeStr;
+		this.openPriceTypeStr = initParams.openPriceTypeStr;
+		this.closePriceTypeStr = initParams.closePriceTypeStr;
 		this.overprice = initParams.overprice;
 	}
 	
@@ -89,7 +90,10 @@ public class SampleDealer extends AbstractDealer implements Dealer {
 		private int openVol;
 		
 		@Setting(value="开仓价格类型", order = 30, options = {PriceType.OPP_PRICE, PriceType.ANY_PRICE, PriceType.LAST_PRICE, PriceType.QUEUE_PRICE, PriceType.SIGNAL_PRICE})
-		private String priceTypeStr;
+		private String openPriceTypeStr;
+		
+		@Setting(value="平仓价格类型", order = 31, options = {PriceType.OPP_PRICE, PriceType.ANY_PRICE, PriceType.LAST_PRICE, PriceType.QUEUE_PRICE, PriceType.SIGNAL_PRICE})
+		private String closePriceTypeStr;
 		
 		@Setting(value="超价", order = 40, unit = "Tick")
 		private int overprice;

@@ -51,19 +51,19 @@ public class SampleDealerTest extends CommonParamTest {
 
 	@Test
 	public void resolveOpponentPrice() {
-		dealer.priceTypeStr = "对手价";
+		dealer.openPriceTypeStr = "对手价";
 		assertThat(dealer.resolvePrice(signal, factory.makeTickField("rb2210", 1234))).isCloseTo(1235D, Offset.offset(1e-6));
 	}
 	
 	@Test
 	public void resolveAnyPrice() {
-		dealer.priceTypeStr = "市价";
+		dealer.openPriceTypeStr = "市价";
 		assertThat(dealer.resolvePrice(signal, factory.makeTickField("rb2210", 1234))).isCloseTo(0, Offset.offset(1e-6));
 	}
 	
 	@Test
 	public void resolveLastPrice() {
-		dealer.priceTypeStr = "最新价";
+		dealer.openPriceTypeStr = "最新价";
 		assertThat(dealer.resolvePrice(signal, factory.makeTickField("rb2210", 1234))).isCloseTo(1234D, Offset.offset(1e-6));
 		
 		dealer.overprice = 3;
@@ -72,19 +72,19 @@ public class SampleDealerTest extends CommonParamTest {
 	
 	@Test
 	public void resolveQueuePrice() {
-		dealer.priceTypeStr = "排队价";
+		dealer.openPriceTypeStr = "排队价";
 		assertThat(dealer.resolvePrice(signal, factory.makeTickField("rb2210", 1234))).isCloseTo(1233D, Offset.offset(1e-6));
 	}
 	
 	@Test
 	public void resolveSignalPrice() {
-		dealer.priceTypeStr = "信号价";
+		dealer.openPriceTypeStr = "信号价";
 		assertThat(dealer.resolvePrice(signal, factory.makeTickField("rb2210", 1234))).isCloseTo(1100, Offset.offset(1e-6));
 	}
 	
 	@Test(expected = IllegalStateException.class)
 	public void shouldThrowIfPriceTypeUnidentified() {
-		dealer.priceTypeStr = "未知价";
+		dealer.openPriceTypeStr = "未知价";
 		assertThat(dealer.resolvePrice(signal, factory.makeTickField("rb2210", 1234))).isCloseTo(1100, Offset.offset(1e-6));
 	}
 	
@@ -98,7 +98,7 @@ public class SampleDealerTest extends CommonParamTest {
 		dealer.moduleStatus = mock(ModuleStatus.class);
 		when(dealer.moduleStatus.at(ModuleState.EMPTY)).thenReturn(true);
 		when(dealer.moduleStatus.getCurrentState()).thenReturn(ModuleState.EMPTY);
-		dealer.priceTypeStr = "信号价";
+		dealer.openPriceTypeStr = "信号价";
 		dealer.onSignal(signal);
 		assertThat(dealer.onTick(factory.makeTickField("rb2210", 1234))).isPresent();
 	}

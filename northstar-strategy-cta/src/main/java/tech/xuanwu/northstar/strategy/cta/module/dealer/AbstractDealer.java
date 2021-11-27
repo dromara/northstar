@@ -38,7 +38,9 @@ public abstract class AbstractDealer implements Dealer{
 	
 	protected int openVol;
 	
-	protected String priceTypeStr;
+	protected String openPriceTypeStr;
+	
+	protected String closePriceTypeStr;
 	
 	protected int overprice;
 	
@@ -67,6 +69,7 @@ public abstract class AbstractDealer implements Dealer{
 		ContractField contract = contractManager.getContract(tick.getUnifiedSymbol());
 		double priceTick = contract.getPriceTick();
 		double orderPrice = 0;
+		String priceTypeStr = currentSignal.isOpening() ? openPriceTypeStr : closePriceTypeStr;
 		switch(priceTypeStr) {
 		case "对手价":
 			double oppPrice = currentSignal.getState().isBuy() ? tick.getAskPrice(0) : tick.getBidPrice(0);
