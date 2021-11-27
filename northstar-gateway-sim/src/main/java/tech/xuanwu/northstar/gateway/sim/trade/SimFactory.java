@@ -7,18 +7,18 @@ public class SimFactory {
 	
 	private String gatewayId;
 	private FastEventEngine feEngine;
-	private int ticksOfCommission;
+	private int fee;
 	private ContractManager contractMgr;
 	
-	public SimFactory(String gatewayId, FastEventEngine feEngine, int ticksOfCommission, ContractManager contractMgr) {
+	public SimFactory(String gatewayId, FastEventEngine feEngine, int fee, ContractManager contractMgr) {
 		this.gatewayId = gatewayId;
 		this.feEngine = feEngine;
-		this.ticksOfCommission = ticksOfCommission;
+		this.fee = fee;
 		this.contractMgr = contractMgr;
 	}
 
 	public GwAccountHolder newGwAccountHolder() {
-		return new GwAccountHolder(gatewayId, feEngine, ticksOfCommission, this);
+		return new GwAccountHolder(gatewayId, feEngine, fee, this);
 	}
 	
 	public GwPositionHolder newGwPositionHolder() {
@@ -26,7 +26,7 @@ public class SimFactory {
 	}
 	
 	public GwOrderHolder newGwOrderHolder() {
-		return new GwOrderHolder(ticksOfCommission);
+		return new GwOrderHolder(fee);
 	}
 	
 }

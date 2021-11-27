@@ -94,7 +94,11 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 		feEngine.emitEvent(NorthstarEventType.DISCONNECTED, gatewaySetting.getGatewayId());
 		feEngine.emitEvent(NorthstarEventType.LOGGED_OUT, gatewaySetting.getGatewayId());
 		
-		job.cancel(false);
+		if(job.cancel(true)) {
+			log.info("模拟账户定时回报任务结束");
+		} else {
+			log.info("模拟账户定时回报任务已经结束");
+		}
 	}
 
 	@Override

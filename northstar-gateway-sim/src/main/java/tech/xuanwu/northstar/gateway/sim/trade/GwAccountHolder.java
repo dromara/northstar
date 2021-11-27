@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 import com.google.common.util.concurrent.AtomicDouble;
 import com.google.protobuf.InvalidProtocolBufferException;
 
+import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.common.event.NorthstarEventType;
 import tech.xuanwu.northstar.common.exception.TradeException;
 import tech.xuanwu.northstar.engine.event.FastEventEngine;
@@ -18,6 +19,7 @@ import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TickField;
 import xyz.redtorch.pb.CoreField.TradeField;
 
+@Slf4j
 class GwAccountHolder {
 
 	private AccountField.Builder accBuilder;
@@ -28,7 +30,7 @@ class GwAccountHolder {
 
 	private GwPositionHolder posHolder;
 
-	private int ticksOfCommission;
+	private int fee;
 	
 	private TickField lastTick;
 	
@@ -37,7 +39,7 @@ class GwAccountHolder {
 	//测试用的后门开关
 	public boolean testFlag;
 	
-	public GwAccountHolder(String gatewayId, FastEventEngine feEngine, int ticksOfCommission, SimFactory factory) {
+	public GwAccountHolder(String gatewayId, FastEventEngine feEngine, int fee, SimFactory factory) {
 		this.feEngine = feEngine;
 		this.accBuilder = AccountField.newBuilder()
 				.setName(gatewayId + "模拟账户")
@@ -45,7 +47,7 @@ class GwAccountHolder {
 				.setGatewayId(gatewayId);
 		this.orderHolder = factory.newGwOrderHolder();
 		this.posHolder = factory.newGwPositionHolder();
-		this.ticksOfCommission = ticksOfCommission;
+		this.fee = fee;
 	}
 
 	protected void updateTick(TickField tick) {
@@ -56,11 +58,20 @@ class GwAccountHolder {
 			.stream()
 			.forEach(order -> {
 				TradeField trade = orderHolder.transform(order);
-				commission.addAndGet(trade.getContract().getMultiplier() * ticksOfCommission * trade.getVolume());
+				if(order.getOffsetFlag() == OffsetFlagEnum.OF_Open) {
+					//手续费只按单边计算
+					commission.addAndGet(fee * trade.getVolume());
+				}
 				closeProfit.addAndGet(posHolder.updatePositionBy(trade));
 				posHolder.updatePositionBy(order);
 				feEngine.emitEvent(NorthstarEventType.ORDER, order);
 				feEngine.emitEvent(NorthstarEventType.TRADE, trade);
+				try {
+					// 阻塞一下，好让模组收到成交事件
+					Thread.sleep(50);
+				} catch (InterruptedException e) {
+					log.warn("", e);
+				}
 			});
 		posHolder.updatePositionBy(tick)
 			.stream()

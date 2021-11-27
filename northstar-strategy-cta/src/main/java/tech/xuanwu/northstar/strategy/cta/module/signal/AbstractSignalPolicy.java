@@ -131,7 +131,7 @@ public abstract class AbstractSignalPolicy implements SignalPolicy {
 			.state(signalOperation)
 			.stopPrice(stopPrice)
 			.sourceUnifiedSymbol(bindedUnifiedSymbol)
-			.timestamp(System.currentTimeMillis())
+			.timestamp(currentTick.getActionTimestamp())
 			.build();
 	}
 	

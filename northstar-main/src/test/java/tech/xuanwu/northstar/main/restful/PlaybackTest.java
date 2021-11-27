@@ -1,8 +1,6 @@
 package tech.xuanwu.northstar.main.restful;
 
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -16,7 +14,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentMatcher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -41,8 +38,6 @@ import tech.xuanwu.northstar.engine.broadcast.SocketIOMessageEngine;
 import tech.xuanwu.northstar.main.NorthstarApplication;
 import tech.xuanwu.northstar.main.persistence.MarketDataRepository;
 import tech.xuanwu.northstar.main.persistence.ModuleRepository;
-import tech.xuanwu.northstar.main.playback.PlaybackEngine;
-import tech.xuanwu.northstar.main.playback.PlaybackTask;
 import tech.xuanwu.northstar.strategy.common.model.entity.ModuleInfo;
 
 @RunWith(SpringRunner.class)
@@ -127,7 +122,7 @@ public class PlaybackTest {
 
 	@Test
 	public void shouldThrowIfNotPlayAndGetTheBalance() throws Exception {
-		mockMvc.perform(get("/pb/balance?moduleName=TEST").session(session))
+		mockMvc.perform(get("/pb/balance?moduleName=TESTM").session(session))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.status").value(ReturnCode.ERROR));
 	}

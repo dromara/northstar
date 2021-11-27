@@ -16,6 +16,7 @@ import tech.xuanwu.northstar.strategy.common.constants.ModuleState;
 import tech.xuanwu.northstar.strategy.common.constants.SignalOperation;
 import tech.xuanwu.northstar.strategy.common.model.data.BarData;
 import tech.xuanwu.northstar.strategy.common.model.meta.DynamicParams;
+import xyz.redtorch.pb.CoreField.TickField;
 
 public class PAExtSignalPolicyTest extends CommonParamTest{
 	
@@ -30,6 +31,7 @@ public class PAExtSignalPolicyTest extends CommonParamTest{
 		policy.initWithParams(initParam);
 		policy.setModuleStatus(factory.makeModuleStatus(ModuleState.HOLDING_LONG));
 		target = policy;
+		policy.currentTick = TickField.newBuilder().build();
 	}
 
 	@Test

@@ -2,6 +2,8 @@ package tech.xuanwu.northstar.main.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 import cn.hutool.core.lang.UUID;
 import lombok.extern.slf4j.Slf4j;
@@ -12,7 +14,6 @@ import tech.xuanwu.northstar.common.event.InternalEventBus;
 import tech.xuanwu.northstar.common.model.ContractManager;
 import tech.xuanwu.northstar.common.model.GatewayDescription;
 import tech.xuanwu.northstar.common.model.PlaybackDescription;
-import tech.xuanwu.northstar.common.model.PlaybackRecord;
 import tech.xuanwu.northstar.common.model.SimSettings;
 import tech.xuanwu.northstar.domain.GatewayAndConnectionManager;
 import tech.xuanwu.northstar.domain.GatewayConnection;
@@ -27,12 +28,16 @@ import tech.xuanwu.northstar.main.manager.SandboxModuleManager;
 import tech.xuanwu.northstar.main.persistence.MarketDataRepository;
 import tech.xuanwu.northstar.main.persistence.ModuleRepository;
 import tech.xuanwu.northstar.main.playback.PlaybackEngine;
+import tech.xuanwu.northstar.main.playback.PlaybackStat;
+import tech.xuanwu.northstar.main.playback.PlaybackStatRecord;
 import tech.xuanwu.northstar.main.playback.PlaybackTask;
 import tech.xuanwu.northstar.strategy.common.StrategyModule;
 import tech.xuanwu.northstar.strategy.common.StrategyModuleFactory;
 import tech.xuanwu.northstar.strategy.common.model.ModuleStatus;
 import tech.xuanwu.northstar.strategy.common.model.data.BarData;
+import tech.xuanwu.northstar.strategy.common.model.entity.ModuleDealRecord;
 import tech.xuanwu.northstar.strategy.common.model.entity.ModuleInfo;
+import tech.xuanwu.northstar.strategy.common.model.entity.ModuleTradeRecord;
 
 @Slf4j
 public class PlaybackService {
@@ -51,43 +56,47 @@ public class PlaybackService {
 	
 	private SandboxModuleManager sandboxMgr;
 	
-	private InternalEventBus eventBus;
-	
 	private GatewayAndConnectionManager gatewayConnMgr;
 	
 	private boolean isRunning;
 	
 	public PlaybackService(FastEventEngine feEngine, SandboxModuleManager sandboxMgr, GatewayAndConnectionManager gatewayConnMgr,
-			ContractManager contractMgr, ModuleRepository moduleRepo, MarketDataRepository mdRepo, SimMarket simMarket, InternalEventBus eventBus) {
+			ContractManager contractMgr, ModuleRepository moduleRepo, MarketDataRepository mdRepo, SimMarket simMarket) {
 		simGatewayFactory = new SimGatewayFactory(feEngine, simMarket, contractMgr);
 		moduleFactory = new StrategyModuleFactory(contractMgr, gatewayConnMgr);
 		pbEngine = new PlaybackEngine(simMarket, sandboxMgr);
 		this.sandboxMgr = sandboxMgr;
 		this.gatewayConnMgr = gatewayConnMgr;
-		this.eventBus = eventBus;
 		this.mdRepo = mdRepo;
 		this.moduleRepo = moduleRepo;
 	}
 
-	public void play(PlaybackDescription playbackDescription, ModuleManager moduleMgr) throws Exception{
+	/**
+	 * 开始回测
+	 * @param playbackDescription
+	 * @param moduleMgr
+	 * @throws Exception
+	 */
+	public void play(PlaybackDescription playbackDescription, ModuleManager moduleMgr, InternalEventBus eventBus) throws Exception{
 		isRunning = true;
 		List<String> moduleNames = playbackDescription.getModuleNames();
 		List<StrategyModule> playbackModules = new ArrayList<>();
 		List<SimTradeGateway> simGateways = new ArrayList<>();
 		
 		for(String name : moduleNames) {
+			// 清理模组旧有回测记录
+			clearOutPlaybackRecord(name);
 			// 获取原有模组
 			StrategyModule originModule = moduleMgr.getModule(name);
-			clearOutPlaybackRecord(name);
 			
 			// 构造一个回测专用的账户网关
-			int tickOfFee = playbackDescription.getTickOfFee();
+			int fee = playbackDescription.getFee();
 			GatewayDescription gwDescription = GatewayDescription.builder()
 					.gatewayId(Constants.PLAYBACK_GATEWAY + "_" + UUID.randomUUID().toString().substring(0, 4))
 					.gatewayType(GatewayType.SIM)
 					.gatewayUsage(GatewayUsage.TRADE)
 					.bindedMktGatewayId(originModule.getBindedMarketGatewayId())
-					.settings(SimSettings.builder().ticksOfCommission(tickOfFee).build())
+					.settings(SimSettings.builder().fee(fee).build())
 					.build();
 			SimTradeGateway simTradeGateway = (SimTradeGateway) simGatewayFactory.newInstance(gwDescription);
 			GatewayConnection conn = new TraderGatewayConnection(gwDescription, eventBus);
@@ -116,17 +125,50 @@ public class PlaybackService {
 		
 		new Thread(()->{			
 			pbEngine.play(task);
-			task = null;
 			// 清理回测网关与模组副本
 			for(StrategyModule module : playbackModules) {
 				Gateway gateway = module.getGateway();
 				gateway.disconnect();
-				module.toggleRunningState();
-				sandboxMgr.removeModule(module.getName());
-				gatewayConnMgr.removePair(gateway);
+				if(module.isEnabled()) {					
+					module.toggleRunningState();
+				}
+				CompletableFuture.delayedExecutor(10, TimeUnit.SECONDS).execute(() -> {					
+					sandboxMgr.removeModule(module.getName());
+					gatewayConnMgr.removePair(gateway);
+					log.info("回测模组副本已清理");
+				});
 			}
 			isRunning = false;
-			log.info("回测模组副本已清理");
+			
+			// 计算回测统计结果
+			for(String name : moduleNames) {				
+				List<ModuleDealRecord> dealRecords = getDealRecords(name);
+				PlaybackStat stat = new PlaybackStat(playbackDescription, dealRecords);
+				PlaybackStatRecord.PlaybackStatRecordBuilder statRecordBuilder = PlaybackStatRecord.builder()
+						.moduleName(name)
+						.sumOfProfit(stat.sumOfProfit())
+						.sumOfCommission(stat.sumOfCommission())
+						.timesOfTransaction(stat.timesOfTransaction())
+						.duration(stat.duration())
+						.yearlyEarningRate(stat.yearlyEarningRate())
+						.stdOfProfit(stat.stdOfPlaybackProfits())
+						.maxFallback(stat.maxFallback())
+						.meanOfOccupiedMoney(stat.meanOfOccupiedMoney());
+				try {
+					statRecordBuilder.meanOf10TransactionsAvgProfit(stat.meanOfNTransactionsAvgProfit(10))
+						.stdOf10TransactionsAvgProfit(stat.stdOfNTransactionsAvgProfit(10))
+						.meanOf10TransactionsAvgWinningRate(stat.meanOfNTransactionsAvgWinningRate(10))
+						.stdOf10TransactionsAvgWinningRate(stat.stdOfNTransactionsAvgWinningRate(10))
+						.meanOf5TransactionsAvgProfit(stat.meanOfNTransactionsAvgProfit(5))
+						.stdOf5TransactionsAvgProfit(stat.stdOfNTransactionsAvgProfit(5))
+						.meanOf5TransactionsAvgWinningRate(stat.meanOfNTransactionsAvgWinningRate(5))
+						.stdOf5TransactionsAvgWinningRate(stat.stdOfNTransactionsAvgWinningRate(5));
+				}catch(Exception e) {
+					statRecordBuilder.exceptionMessage("样本不足，部分统计值无法计算");
+				}
+				moduleRepo.savePlaybackStatRecord(statRecordBuilder.build());
+			}
+			log.info("完成回测统计结果计算");
 		}).start();
 	}
 	
@@ -136,7 +178,10 @@ public class PlaybackService {
 		moduleRepo.removeTradeRecords(moduleName + Constants.PLAYBACK_MODULE_SUFFIX);
 	}
 	
-	
+	/**
+	 * 查询回测进度
+	 * @return
+	 */
 	public int playProcess(){
 		if(task == null) {
 			throw new IllegalStateException("回测未开始");
@@ -144,6 +189,11 @@ public class PlaybackService {
 		return (int)(task.ratioOfProcess() * 100);
 	}
 	
+	/**
+	 * 查询回测账户总额
+	 * @param moduleName
+	 * @return
+	 */
 	public int playbackBalance(String moduleName) {
 		if(task == null) {
 			throw new IllegalStateException("回测未开始");
@@ -151,11 +201,38 @@ public class PlaybackService {
 		return ((SimTradeGateway)sandboxMgr.getModule(moduleName + Constants.PLAYBACK_MODULE_SUFFIX).getGateway()).moneyIO(0);
 	}
 	
-	public PlaybackRecord playbackRecord(String moduleName){
-		throw new UnsupportedOperationException("Not implemented");
+	/**
+	 * 获取模组回测交易历史
+	 * @param moduleName
+	 * @return
+	 */
+	public List<ModuleDealRecord> getDealRecords(String moduleName) {
+		return moduleRepo.findDealRecords(moduleName + Constants.PLAYBACK_MODULE_SUFFIX);
 	}
 	
+	/**
+	 * 获取模组回测成交历史
+	 * @param moduleName
+	 * @return
+	 */
+	public List<ModuleTradeRecord> getTradeRecords(String moduleName){
+		return moduleRepo.findTradeRecords(moduleName + Constants.PLAYBACK_MODULE_SUFFIX);
+	}
+	
+	/**
+	 * 查询回测就绪状态
+	 * @return
+	 */
 	public boolean getPlaybackReadiness(){
 		return !isRunning;
+	}
+
+	/**
+	 * 查询回测统计结果
+	 * @param moduleName
+	 * @return
+	 */
+	public PlaybackStatRecord getPlaybackStatRecord(String moduleName) {
+		return moduleRepo.getPlaybackStatRecord(moduleName);
 	}
 }

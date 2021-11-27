@@ -25,7 +25,7 @@ import xyz.redtorch.pb.CoreField.TradeField;
 @Slf4j
 class GwOrderHolder {
 	
-	private int ticksOfCommission;
+	private int fee;
 	
 	/**
 	 * originOrderId --> TradeIntent
@@ -36,8 +36,8 @@ class GwOrderHolder {
 	 */
 	private final Map<String,String> tradingDayMap = new HashMap<>(1000);
 	
-	public GwOrderHolder (int ticksOfCommission) {
-		this.ticksOfCommission = ticksOfCommission;
+	public GwOrderHolder (int fee) {
+		this.fee = fee;
 	}
 	
 	protected OrderField tryOrder(SubmitOrderReqField submitOrderReq, AccountField af, TickField lastTick) {
@@ -48,7 +48,8 @@ class GwOrderHolder {
 		double marginRate = submitOrderReq.getDirection() == DirectionEnum.D_Buy ? contract.getLongMarginRatio() : contract.getShortMarginRatio();
 		int vol = submitOrderReq.getVolume();
 		double price =  submitOrderReq.getOrderPriceType() == OrderPriceTypeEnum.OPT_AnyPrice ? lastTick.getLastPrice() : submitOrderReq.getPrice();
-		double cost = vol * price * contract.getMultiplier() * marginRate + contract.getPriceTick() * ticksOfCommission;
+		double transactionFee = submitOrderReq.getOffsetFlag() == OffsetFlagEnum.OF_Open ? vol * fee : 0;
+		double cost = vol * price * contract.getMultiplier() * marginRate + transactionFee;
 		TradeIntent tradeIntent = new TradeIntent(submitOrderReq, originOrderIdMap);
 		String tradingDay = Optional.ofNullable(tradingDayMap.get(contract.getUnifiedSymbol())).orElse("");
 		if(cost > af.getAvailable()) {

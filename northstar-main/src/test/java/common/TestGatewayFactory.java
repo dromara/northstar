@@ -2,7 +2,6 @@ package common;
 
 import org.apache.commons.lang3.RandomStringUtils;
 
-import tech.xuanwu.northstar.common.constant.ConnectionState;
 import tech.xuanwu.northstar.common.constant.GatewayType;
 import tech.xuanwu.northstar.common.constant.GatewayUsage;
 import tech.xuanwu.northstar.common.model.CtpSettings;
@@ -29,7 +28,7 @@ public class TestGatewayFactory {
 		}
 		if(type == SimSettings.class) {
 			return SimSettings.builder()
-					.ticksOfCommission(1)
+					.fee(1)
 					.build();
 		}
 		return null;

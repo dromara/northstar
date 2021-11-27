@@ -88,7 +88,7 @@ public class ModulePosition {
 		if(stopLossPrice <= 0) {
 			return Optional.empty();
 		}
-		long now = System.currentTimeMillis();
+		long now = tick.getActionTimestamp();
 		// 如果三秒后该持仓还没被清理，证明市价挂单无成交，则需要再次发单
 		if(now - lastTriggerTime > 3000 && triggeredStopLoss(tick)) {
 			lastTriggerTime = now;
@@ -152,6 +152,8 @@ public class ModulePosition {
 			volume -= trade.getVolume();
 			int factor = positionDir == PositionDirectionEnum.PD_Long ? 1 : -1;
 			double closeProfit = factor * (trade.getPrice() - openPrice) * trade.getVolume() * multiplier;
+			double occupiedMoney = Math.max(openPrice, trade.getPrice()) * trade.getVolume() * multiplier
+					* (factor > 0 ? trade.getContract().getLongMarginRatio() : trade.getContract().getShortMarginRatio()) * 1.5;
 			return Optional.of(ModuleDealRecord.builder()
 					.contractName(trade.getContract().getSymbol())
 					.direction(positionDir)
@@ -161,6 +163,7 @@ public class ModulePosition {
 					.closePrice(trade.getPrice())
 					.volume(trade.getVolume())
 					.closeProfit((int)closeProfit)
+					.estimatedOccupiedMoney(occupiedMoney)
 					.build());
 		}
 		return Optional.empty();

@@ -28,8 +28,8 @@ public class SampleSignalPolicy extends AbstractSignalPolicy
 	implements SignalPolicy //	所有的策略都应该是DynamicParamsAware的实现类
 {
 	private int actionInterval;
-	//至少等10秒后才会开仓
-	private long nextActionTime = System.currentTimeMillis() + 10000;
+	
+	private long nextActionTime = -1;
 	
 	private int stopLossTick;
 	
@@ -82,7 +82,11 @@ public class SampleSignalPolicy extends AbstractSignalPolicy
 	protected Optional<Signal> onTick(int milliSecOfMin, BarData barData) {
 		log.info("策略每个TICK触发: {}", milliSecOfMin);
 		double price = barDataMap.get(bindedUnifiedSymbol).getSClose().ref(0);
-		long now = System.currentTimeMillis();
+		long now = currentTick.getActionTimestamp();
+		//初始状态下，等待10秒才开始交易
+		if(nextActionTime < 0) {
+			nextActionTime = now + 10000;
+		}
 		if(now > nextActionTime) {
 			nextActionTime = now + actionInterval * 1000;
 			if(moduleStatus.at(ModuleState.EMPTY)) {

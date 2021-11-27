@@ -56,7 +56,7 @@ public class SimGatewayFactory extends AbstractGatewayFactory{
 				.setGatewayId(gatewayDescription.getGatewayId())
 				.setGatewayType(GatewayTypeEnum.GTE_Trade)
 				.build();
-		SimFactory simFactory = new SimFactory(gatewayDescription.getGatewayId(), fastEventEngine, settings.getTicksOfCommission(),
+		SimFactory simFactory = new SimFactory(gatewayDescription.getGatewayId(), fastEventEngine, settings.getFee(),
 				contractMgr);
 		GwAccountHolder accHolder = simFactory.newGwAccountHolder();
 		if(opt.isPresent()) {

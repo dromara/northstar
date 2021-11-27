@@ -14,5 +14,5 @@ public class SimSettings implements GatewaySettings{
 	/**
 	 * 交易手续费
 	 */
-	private int ticksOfCommission;
+	private int fee;
 }
