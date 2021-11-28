@@ -179,6 +179,8 @@ public class ModulePosition {
 			volume = 0;
 			int factor = positionDir == PositionDirectionEnum.PD_Long ? 1 : -1;
 			double closeProfit = factor * (tick.getLastPrice() - openPrice) * tradeVol * multiplier;
+			double occupiedMoney = tick.getLastPrice() * orderReq.getVolume() * multiplier
+					* (factor > 0 ? orderReq.getContract().getLongMarginRatio() : orderReq.getContract().getShortMarginRatio()) * 1.5;
 			return Optional.of(ModuleDealRecord.builder()
 					.contractName(orderReq.getContract().getSymbol())
 					.direction(positionDir)
@@ -188,6 +190,7 @@ public class ModulePosition {
 					.closePrice(tick.getLastPrice())
 					.volume(tradeVol)
 					.closeProfit((int)closeProfit)
+					.estimatedOccupiedMoney(occupiedMoney)
 					.build());
 		}
 		return Optional.empty();
