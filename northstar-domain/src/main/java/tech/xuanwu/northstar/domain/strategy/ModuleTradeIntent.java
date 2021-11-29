@@ -5,6 +5,7 @@ import java.util.function.Consumer;
 
 import org.apache.commons.lang3.StringUtils;
 
+import tech.xuanwu.northstar.common.constant.Constants;
 import tech.xuanwu.northstar.common.utils.FieldUtils;
 import tech.xuanwu.northstar.strategy.api.model.ModuleDealRecord;
 import xyz.redtorch.pb.CoreEnum.OrderStatusEnum;
@@ -33,15 +34,16 @@ public class ModuleTradeIntent {
 	
 	private String moduleName;
 	
-	public ModuleTradeIntent(SubmitOrderReqField submitOrderReq, Consumer<Optional<ModulePosition>> onDoneOpen) {
+	public ModuleTradeIntent(String moduleName, SubmitOrderReqField submitOrderReq, Consumer<Optional<ModulePosition>> onDoneOpen) {
 		if(!FieldUtils.isOpen(submitOrderReq.getOffsetFlag())) {
 			throw new IllegalStateException("该构造方法仅适用于开仓操作");
 		}
 		this.submitOrderReq = submitOrderReq;
 		this.openCallback = onDoneOpen;
+		this.moduleName = moduleName;
 	}
 	
-	public ModuleTradeIntent(SubmitOrderReqField submitOrderReq, Consumer<Optional<ModuleDealRecord>> onDoneClose, String moduleName, ModulePosition position) {
+	public ModuleTradeIntent(String moduleName, SubmitOrderReqField submitOrderReq, Consumer<Optional<ModuleDealRecord>> onDoneClose, ModulePosition position) {
 		if(!FieldUtils.isClose(submitOrderReq.getOffsetFlag())) {
 			throw new IllegalStateException("该构造方法仅适用于平仓操作");
 		}
@@ -139,7 +141,7 @@ public class ModuleTradeIntent {
 		int factor = FieldUtils.isLong(currentPosition.getDirection()) ? 1 : -1;
 		double closeProfit = factor * (latestTrade.getPrice() - openPrice) * latestTrade.getVolume() * multiplier;
 		double occupiedMoney = Math.max(openPrice, latestTrade.getPrice()) * latestTrade.getVolume() * multiplier
-				* (factor > 0 ? latestTrade.getContract().getLongMarginRatio() : latestTrade.getContract().getShortMarginRatio()) * 1.5;
+				* (factor > 0 ? latestTrade.getContract().getLongMarginRatio() : latestTrade.getContract().getShortMarginRatio()) * Constants.ESTIMATED_FROZEN_FACTOR;
 		return ModuleDealRecord.builder()
 				.moduleName(moduleName)
 				.contractName(latestTrade.getContract().getFullName())

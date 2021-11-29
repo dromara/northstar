@@ -44,7 +44,7 @@ public class ModulePosition implements TickDataAware, TransactionAware, ModuleEv
 	
 	private StopLoss stopLoss;
 	
-	private ModuleEventBus meb;
+	protected ModuleEventBus meb;
 	
 	@Getter
 	private double profit;
@@ -52,7 +52,7 @@ public class ModulePosition implements TickDataAware, TransactionAware, ModuleEv
 	@Getter
 	private int volume;
 	
-	private int availableVol;
+	protected int availableVol;
 	
 	@Getter
 	private PositionDirectionEnum direction;
@@ -61,7 +61,7 @@ public class ModulePosition implements TickDataAware, TransactionAware, ModuleEv
 	
 	private int factor;
 	
-	private TickField lastTick;
+	protected TickField lastTick;
 	
 	private Map<String, Frozen> frozenMap = new HashMap<>();
 	
@@ -79,6 +79,7 @@ public class ModulePosition implements TickDataAware, TransactionAware, ModuleEv
 		this.factor = FieldUtils.isLong(direction) ? 1 : -1;
 		this.volume = trade.getVolume();
 		this.availableVol = trade.getVolume();
+		this.clearoutCallback = clearoutCallback;
 	}
 
 	@Override
@@ -86,12 +87,12 @@ public class ModulePosition implements TickDataAware, TransactionAware, ModuleEv
 		if(!StringUtils.equals(tick.getUnifiedSymbol(), openTrade.getContract().getUnifiedSymbol())) {
 			return;
 		}
+		lastTick = tick;
 		// 更新持仓盈亏
 		profit = factor * (tick.getLastPrice() - openTrade.getPrice()) * volume * openTrade.getContract().getMultiplier();
 		// 监听止损
 		if(availableVol > 0 && stopLoss.isTriggered(tick)) {
 			meb.post(new ModuleEvent<>(ModuleEventType.STOP_LOSS, closePosition(availableVol, 0)));
-			
 		}
 	}
 	
@@ -101,7 +102,6 @@ public class ModulePosition implements TickDataAware, TransactionAware, ModuleEv
 				&& order.getOrderStatus() == OrderStatusEnum.OS_Canceled) {
 			// 处理全部撤单与部分撤单
 			Frozen fzn = frozenMap.remove(order.getOriginOrderId());
-			volume += fzn.vol - order.getTradedVolume();
 			availableVol += fzn.vol - order.getTradedVolume();
 		}
 	}
@@ -119,7 +119,6 @@ public class ModulePosition implements TickDataAware, TransactionAware, ModuleEv
 			} 
 			// 部分成交情况
 			else {
-				frozenMap.get(trade.getOriginOrderId()).vol -= trade.getVolume();
 				volume -= trade.getVolume();
 			}
 		}

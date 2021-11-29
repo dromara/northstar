@@ -104,6 +104,7 @@ public class TestFieldFactory {
 				.setVolume(vol)
 				.setDirection(dir)
 				.setOffsetFlag(offset)
+				.setTradingDay(LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
 				.build();
 	}
 
