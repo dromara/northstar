@@ -78,6 +78,11 @@
 			</dependency>
 			<dependency>
 				<groupId>tech.xuan-wu</groupId>
+				<artifactId>northstar-strategy-api</artifactId>
+				<version>${northstar-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>tech.xuan-wu</groupId>
 				<artifactId>northstar-strategy-common</artifactId>
 				<version>${northstar-version}</version>
 			</dependency>
