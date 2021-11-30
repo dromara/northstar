@@ -12,11 +12,15 @@ public enum ModuleEventType {
 	/**
 	 * 订单生成
 	 */
-	ORDER_CREATED,
+	ORDER_REQ_CREATED,
 	/**
 	 * 订单受限（风控限制）
 	 */
-	ORDER_RETAINED,
+	ORDER_REQ_RETAINED,
+	/**
+	 * 订单通过审核
+	 */
+	ORDER_REQ_PASSED,
 	/**
 	 * 订单确认
 	 */

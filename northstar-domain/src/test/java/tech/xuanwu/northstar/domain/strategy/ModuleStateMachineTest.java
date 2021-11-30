@@ -62,7 +62,7 @@ public class ModuleStateMachineTest {
 		state.addStateChangeListener(listener);
 		state.transformForm(ModuleEventType.OPENING_SIGNAL_CREATED);
 		verify(listener).onChange(ModuleState.PLACING_ORDER);
-		state.transformForm(ModuleEventType.ORDER_RETAINED);
+		state.transformForm(ModuleEventType.ORDER_REQ_RETAINED);
 		verify(listener).onChange(ModuleState.EMPTY);
 		
 		state.transformForm(ModuleEventType.OPENING_SIGNAL_CREATED);

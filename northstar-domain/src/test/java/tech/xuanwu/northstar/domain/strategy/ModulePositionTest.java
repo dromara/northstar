@@ -2,6 +2,7 @@ package tech.xuanwu.northstar.domain.strategy;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -9,9 +10,11 @@ import static org.mockito.Mockito.verify;
 import java.util.function.Consumer;
 
 import org.junit.Test;
+import org.mockito.ArgumentMatcher;
 
 import tech.xuanwu.northstar.strategy.api.event.ModuleEvent;
 import tech.xuanwu.northstar.strategy.api.event.ModuleEventBus;
+import tech.xuanwu.northstar.strategy.api.event.ModuleEventType;
 import test.common.TestFieldFactory;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
@@ -131,5 +134,91 @@ public class ModulePositionTest {
 		ModuleEventBus meb = mock(ModuleEventBus.class);
 		p1.setEventBus(meb);
 		assertThat(p1.meb).isEqualTo(meb);
+	}
+	
+	@Test
+	public void shouldSkipTheEvent() {
+		ModulePosition p1 = new ModulePosition(sellTrade, 2100);
+		ModuleEventBus meb = mock(ModuleEventBus.class);
+		p1.setEventBus(meb);
+		
+		p1.onEvent(new ModuleEvent<>(ModuleEventType.ORDER_REQ_CREATED, SubmitOrderReqField.newBuilder()
+				.setContract(sellTrade.getContract())
+				.setDirection(DirectionEnum.D_Sell)
+				.setOffsetFlag(OffsetFlagEnum.OF_Open)
+				.build()));
+		verify(meb, times(0)).post(any());
+		
+		p1.onEvent(new ModuleEvent<>(ModuleEventType.ORDER_REQ_CREATED, SubmitOrderReqField.newBuilder()
+				.setContract(sellTrade.getContract())
+				.setDirection(DirectionEnum.D_Buy)
+				.setOffsetFlag(OffsetFlagEnum.OF_Open)
+				.build()));
+		verify(meb, times(0)).post(any());
+	}
+	
+	@Test
+	public void shouldEmitOrderPassed() {
+		ModulePosition p1 = new ModulePosition(sellTrade, 2100);
+		p1.lastTick = TickField.newBuilder().setTradingDay(sellTrade.getTradingDay()).build();
+		ModuleEventBus meb = mock(ModuleEventBus.class);
+		p1.setEventBus(meb);
+		
+		p1.onEvent(new ModuleEvent<>(ModuleEventType.ORDER_REQ_CREATED, SubmitOrderReqField.newBuilder()
+				.setContract(sellTrade.getContract())
+				.setDirection(DirectionEnum.D_Buy)
+				.setOffsetFlag(OffsetFlagEnum.OF_CloseYesterday)
+				.build()));
+		verify(meb).post(argThat(new ArgumentMatcher<ModuleEvent>() {
+			@Override
+			public boolean matches(ModuleEvent argument) {
+				return argument.getEventType() == ModuleEventType.ORDER_REQ_PASSED;
+			}
+		}));
+		
+		p1.onEvent(new ModuleEvent<>(ModuleEventType.ORDER_REQ_CREATED, SubmitOrderReqField.newBuilder()
+				.setContract(sellTrade.getContract())
+				.setDirection(DirectionEnum.D_Buy)
+				.setOffsetFlag(OffsetFlagEnum.OF_CloseToday)
+				.build()));
+		verify(meb, times(2)).post(argThat(new ArgumentMatcher<ModuleEvent>() {
+			@Override
+			public boolean matches(ModuleEvent argument) {
+				return argument.getEventType() == ModuleEventType.ORDER_REQ_PASSED;
+			}
+		}));
+		
+		p1.onEvent(new ModuleEvent<>(ModuleEventType.ORDER_REQ_CREATED, SubmitOrderReqField.newBuilder()
+				.setContract(sellTrade.getContract())
+				.setDirection(DirectionEnum.D_Buy)
+				.setOffsetFlag(OffsetFlagEnum.OF_Close)
+				.build()));
+		verify(meb, times(3)).post(argThat(new ArgumentMatcher<ModuleEvent>() {
+			@Override
+			public boolean matches(ModuleEvent argument) {
+				return argument.getEventType() == ModuleEventType.ORDER_REQ_PASSED;
+			}
+		}));
+	}
+	
+	@Test
+	public void shouldEmitOrderRetained() {
+		ModulePosition p1 = new ModulePosition(sellTrade, 2100);
+		p1.lastTick = TickField.newBuilder().setTradingDay(sellTrade.getTradingDay()).build();
+		ModuleEventBus meb = mock(ModuleEventBus.class);
+		p1.setEventBus(meb);
+		
+		p1.onEvent(new ModuleEvent<>(ModuleEventType.ORDER_REQ_CREATED, SubmitOrderReqField.newBuilder()
+				.setContract(sellTrade.getContract())
+				.setDirection(DirectionEnum.D_Buy)
+				.setOffsetFlag(OffsetFlagEnum.OF_CloseYesterday)
+				.setVolume(sellTrade.getVolume() + 1)
+				.build()));
+		verify(meb).post(argThat(new ArgumentMatcher<ModuleEvent>() {
+			@Override
+			public boolean matches(ModuleEvent argument) {
+				return argument.getEventType() == ModuleEventType.ORDER_REQ_RETAINED;
+			}
+		}));
 	}
 }

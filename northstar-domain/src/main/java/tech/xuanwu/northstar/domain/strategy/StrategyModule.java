@@ -16,6 +16,7 @@ import tech.xuanwu.northstar.strategy.api.event.ModuleEvent;
 import tech.xuanwu.northstar.strategy.api.event.ModuleEventBus;
 import tech.xuanwu.northstar.strategy.api.event.ModuleEventType;
 import tech.xuanwu.northstar.strategy.api.model.ModuleDealRecord;
+import xyz.redtorch.pb.CoreEnum.OrderStatusEnum;
 import xyz.redtorch.pb.CoreField.OrderField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TradeField;
@@ -95,15 +96,30 @@ public class StrategyModule implements EventDrivenComponent{
 	 */
 	public void onEvent(NorthstarEvent event) {
 		meb.post(event.getData());
-		if(event.getEvent() == NorthstarEventType.TRADE && moduleStatusChangeHandler != null) {
+		if(event.getEvent() == NorthstarEventType.TRADE) 
+			handleTrade((TradeField) event.getData());
+		if(event.getEvent() == NorthstarEventType.ORDER) 
+			handleOrder((OrderField) event.getData());
+	}
+	
+	private void handleOrder(OrderField order) {
+		if(order.getOrderStatus() == OrderStatusEnum.OS_Unknown || order.getOrderStatus() == OrderStatusEnum.OS_Touched)
+			moduleStatus.getStateMachine().transformForm(ModuleEventType.ORDER_CONFIRMED);
+		if(order.getOrderStatus() == OrderStatusEnum.OS_Canceled)
+			moduleStatus.getStateMachine().transformForm(ModuleEventType.ORDER_CANCELLED);
+		if(ti != null)
+			ti.onOrder(order);
+	}
+	
+	private void handleTrade(TradeField trade) {
+		if(FieldUtils.isBuy(trade.getDirection()))
+			moduleStatus.getStateMachine().transformForm(ModuleEventType.BUY_TRADED);
+		if(FieldUtils.isSell(trade.getDirection()))
+			moduleStatus.getStateMachine().transformForm(ModuleEventType.SELL_TRADED);
+		if(moduleStatusChangeHandler != null)	
 			moduleStatusChangeHandler.accept(moduleStatus);
-		}
-		if(event.getEvent() == NorthstarEventType.TRADE && ti != null) {
-			ti.onTrade((TradeField) event.getData());
-		}
-		if(event.getEvent() == NorthstarEventType.ORDER && ti != null) {
-			ti.onOrder((OrderField) event.getData());
-		}
+		if(ti != null)	
+			ti.onTrade(trade);
 	}
 
 	/**
@@ -145,6 +161,11 @@ public class StrategyModule implements EventDrivenComponent{
 			return new ModuleTradeIntent(getName(), mp, submitOrder, mdro -> mdro.ifPresent(dealRecordGenHandler));
 		}
 		throw new IllegalArgumentException("订单方向不明确");
+	}
+
+	@Override
+	public void setEventBus(ModuleEventBus moduleEventBus) {
+		throw new UnsupportedOperationException("该方法不支持");
 	}
 
 }

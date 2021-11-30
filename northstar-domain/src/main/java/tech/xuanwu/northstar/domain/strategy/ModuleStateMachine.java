@@ -55,7 +55,7 @@ public class ModuleStateMachine {
 			originState = curState;
 			setState(ModuleState.PLACING_ORDER);
 			break;
-		case ORDER_RETAINED:
+		case ORDER_REQ_RETAINED:
 			if(curState != ModuleState.PLACING_ORDER) {
 				throw new IllegalStateException(ERR_MSG + curState);
 			}

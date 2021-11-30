@@ -9,8 +9,9 @@ import org.apache.commons.lang3.StringUtils;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.common.utils.FieldUtils;
-import tech.xuanwu.northstar.strategy.api.ModuleEventBusAware;
+import tech.xuanwu.northstar.strategy.api.EventDrivenComponent;
 import tech.xuanwu.northstar.strategy.api.TickDataAware;
 import tech.xuanwu.northstar.strategy.api.TransactionAware;
 import tech.xuanwu.northstar.strategy.api.event.ModuleEvent;
@@ -40,7 +41,8 @@ import xyz.redtorch.pb.CoreField.TradeField;
  * @author KevinHuangwl
  *
  */
-public class ModulePosition implements TickDataAware, TransactionAware, ModuleEventBusAware{
+@Slf4j
+public class ModulePosition implements TickDataAware, TransactionAware, EventDrivenComponent{
 	
 	private StopLoss stopLoss;
 	
@@ -121,6 +123,23 @@ public class ModulePosition implements TickDataAware, TransactionAware, ModuleEv
 			// 部分成交情况
 			else {
 				volume -= trade.getVolume();
+			}
+		}
+	}
+	
+	@Override
+	public void onEvent(ModuleEvent<?> moduleEvent) {
+		if(moduleEvent.getEventType() == ModuleEventType.ORDER_REQ_CREATED) {
+			SubmitOrderReqField orderReq = (SubmitOrderReqField) moduleEvent.getData();
+			if(StringUtils.equals(openTrade.getContract().getUnifiedSymbol(), orderReq.getContract().getUnifiedSymbol()) 
+					&& closingDirection() == orderReq.getDirection() && FieldUtils.isClose(orderReq.getOffsetFlag())) {
+				//校验并冻结持仓
+				if(availableVol < orderReq.getVolume()) {
+					log.warn("模组可用持仓不足，订单被否决。可用数量[{}]，订单数量[{}]", availableVol, orderReq.getVolume());
+					meb.post(new ModuleEvent<>(ModuleEventType.ORDER_REQ_RETAINED, orderReq));
+				} else {					
+					meb.post(new ModuleEvent<>(ModuleEventType.ORDER_REQ_PASSED, closePosition(orderReq.getVolume(), orderReq.getPrice())));
+				}
 			}
 		}
 	}
