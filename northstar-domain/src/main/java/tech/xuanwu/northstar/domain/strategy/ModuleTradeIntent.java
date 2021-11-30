@@ -14,7 +14,7 @@ import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TradeField;
 
 /**
- * 交易意图，用于管理下单的整个过程
+ * 模组交易意图，用于管理下单的整个过程
  * @author KevinHuangwl
  *
  */
@@ -43,7 +43,7 @@ public class ModuleTradeIntent {
 		this.moduleName = moduleName;
 	}
 	
-	public ModuleTradeIntent(String moduleName, SubmitOrderReqField submitOrderReq, Consumer<Optional<ModuleDealRecord>> onDoneClose, ModulePosition position) {
+	public ModuleTradeIntent(String moduleName, ModulePosition position, SubmitOrderReqField submitOrderReq, Consumer<Optional<ModuleDealRecord>> onDoneClose) {
 		if(!FieldUtils.isClose(submitOrderReq.getOffsetFlag())) {
 			throw new IllegalStateException("该构造方法仅适用于平仓操作");
 		}

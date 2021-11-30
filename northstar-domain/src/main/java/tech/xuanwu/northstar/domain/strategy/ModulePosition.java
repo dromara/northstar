@@ -102,7 +102,8 @@ public class ModulePosition implements TickDataAware, TransactionAware, ModuleEv
 				&& order.getOrderStatus() == OrderStatusEnum.OS_Canceled) {
 			// 处理全部撤单与部分撤单
 			Frozen fzn = frozenMap.remove(order.getOriginOrderId());
-			availableVol += fzn.vol - order.getTradedVolume();
+			fzn.consume(order);
+			availableVol += fzn.vol;
 		}
 	}
 
@@ -143,7 +144,7 @@ public class ModulePosition implements TickDataAware, TransactionAware, ModuleEv
 	
 	public SubmitOrderReqField closePosition(int vol, double price) {
 		String id = UUID.randomUUID().toString();
-		frozenMap.put(id, new Frozen(id, vol));
+		frozenMap.put(id, new Frozen(vol));
 		availableVol -= vol;
 		return SubmitOrderReqField.newBuilder()
 				.setOriginOrderId(id)
@@ -168,8 +169,10 @@ public class ModulePosition implements TickDataAware, TransactionAware, ModuleEv
 	@AllArgsConstructor
 	class Frozen{
 		
-		private String originOrderId;
-		
 		private int vol;
+		
+		public void consume(OrderField order) {
+			vol -= order.getTradedVolume();
+		}
 	}
 }

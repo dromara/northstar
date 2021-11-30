@@ -47,21 +47,25 @@ public class ModuleStatusHolder {
 		this.shortPositions = new ConcurrentHashMap<>();
 	}
 
-	public void manuallyUpdatePosition(ModulePosition position) {
+	public void addPosition(ModulePosition position) {
 		Map<String, ModulePosition> positionMap = getPositionMap(position.getDirection());
 		positionMap.put(position.contract().getUnifiedSymbol(), position);
-		ModuleState state = FieldUtils.isLong(position.getDirection()) ? ModuleState.HOLDING_LONG : ModuleState.HOLDING_SHORT;
-		log.info("[{}] 手动变更模组状态：[{}]", getModuleName(), state);
-		stateMachine.setCurState(state);
-		stateMachine.setOriginState(state);
+		if(at(ModuleState.EMPTY)) {			
+			ModuleState state = FieldUtils.isLong(position.getDirection()) ? ModuleState.HOLDING_LONG : ModuleState.HOLDING_SHORT;
+			log.info("[{}] 手动变更模组状态：[{}]", getModuleName(), state);
+			stateMachine.setCurState(state);
+			stateMachine.setOriginState(state);
+		}
 	}
 	
-	public void manuallyRemovePosition(String unifiedSymbol, PositionDirectionEnum dir) {
+	public void removePosition(String unifiedSymbol, PositionDirectionEnum dir) {
 		Map<String, ModulePosition> positionMap = getPositionMap(dir);
 		positionMap.remove(unifiedSymbol);
-		log.info("[{}] 手动变更模组状态：[{}]", getModuleName(), ModuleState.EMPTY);
-		stateMachine.setCurState(ModuleState.EMPTY);
-		stateMachine.setOriginState(ModuleState.EMPTY);
+		if(at(ModuleState.HOLDING_LONG) || at(ModuleState.HOLDING_SHORT)) {			
+			log.info("[{}] 手动变更模组状态：[{}]", getModuleName(), ModuleState.EMPTY);
+			stateMachine.setCurState(ModuleState.EMPTY);
+			stateMachine.setOriginState(ModuleState.EMPTY);
+		}
 	}
 	
 	public boolean at(ModuleState state) {
