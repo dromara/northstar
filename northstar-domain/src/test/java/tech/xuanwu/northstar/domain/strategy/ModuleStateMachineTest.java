@@ -8,6 +8,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import tech.xuanwu.northstar.strategy.api.StateChangeListener;
 import tech.xuanwu.northstar.strategy.api.constant.ModuleState;
 import tech.xuanwu.northstar.strategy.api.event.ModuleEventType;
 
@@ -28,9 +29,9 @@ public class ModuleStateMachineTest {
 	@Test
 	public void testBuyOpen() {
 		ModuleStateMachine state = new ModuleStateMachine("test", ModuleState.EMPTY);
-		ModuleStateMachine.StateChangeListener listener = mock(ModuleStateMachine.StateChangeListener.class);
+		StateChangeListener listener = mock(StateChangeListener.class);
 		state.addStateChangeListener(listener);
-		state.transformForm(ModuleEventType.OPENING_SIGNAL_CREATED);
+		state.transformForm(ModuleEventType.SIGNAL_CREATED);
 		verify(listener).onChange(ModuleState.PLACING_ORDER);
 		state.transformForm(ModuleEventType.ORDER_CONFIRMED);
 		verify(listener).onChange(ModuleState.PENDING_ORDER);
@@ -42,9 +43,9 @@ public class ModuleStateMachineTest {
 	@Test
 	public void testSellOpen() {
 		ModuleStateMachine state = new ModuleStateMachine("test", ModuleState.EMPTY);
-		ModuleStateMachine.StateChangeListener listener = mock(ModuleStateMachine.StateChangeListener.class);
+		StateChangeListener listener = mock(StateChangeListener.class);
 		state.addStateChangeListener(listener);
-		state.transformForm(ModuleEventType.OPENING_SIGNAL_CREATED);
+		state.transformForm(ModuleEventType.SIGNAL_CREATED);
 		verify(listener).onChange(ModuleState.PLACING_ORDER);
 		state.transformForm(ModuleEventType.ORDER_CONFIRMED);
 		verify(listener).onChange(ModuleState.PENDING_ORDER);
@@ -58,14 +59,14 @@ public class ModuleStateMachineTest {
 	@Test
 	public void testOpenFallback() {
 		ModuleStateMachine state = new ModuleStateMachine("test", ModuleState.EMPTY);
-		ModuleStateMachine.StateChangeListener listener = mock(ModuleStateMachine.StateChangeListener.class);
+		StateChangeListener listener = mock(StateChangeListener.class);
 		state.addStateChangeListener(listener);
-		state.transformForm(ModuleEventType.OPENING_SIGNAL_CREATED);
+		state.transformForm(ModuleEventType.SIGNAL_CREATED);
 		verify(listener).onChange(ModuleState.PLACING_ORDER);
 		state.transformForm(ModuleEventType.ORDER_REQ_RETAINED);
 		verify(listener).onChange(ModuleState.EMPTY);
 		
-		state.transformForm(ModuleEventType.OPENING_SIGNAL_CREATED);
+		state.transformForm(ModuleEventType.SIGNAL_CREATED);
 		verify(listener, times(2)).onChange(ModuleState.PLACING_ORDER);
 		state.transformForm(ModuleEventType.ORDER_CONFIRMED);
 		verify(listener).onChange(ModuleState.PENDING_ORDER);
@@ -74,7 +75,7 @@ public class ModuleStateMachineTest {
 		state.transformForm(ModuleEventType.ORDER_CANCELLED);
 		verify(listener, times(2)).onChange(ModuleState.EMPTY);
 		
-		state.transformForm(ModuleEventType.OPENING_SIGNAL_CREATED);
+		state.transformForm(ModuleEventType.SIGNAL_CREATED);
 		verify(listener, times(3)).onChange(ModuleState.PLACING_ORDER);
 		state.transformForm(ModuleEventType.ORDER_CONFIRMED);
 		verify(listener, times(2)).onChange(ModuleState.PENDING_ORDER);
@@ -96,9 +97,9 @@ public class ModuleStateMachineTest {
 	@Test
 	public void testBuyClose() {
 		ModuleStateMachine state = new ModuleStateMachine("test", ModuleState.HOLDING_SHORT);
-		ModuleStateMachine.StateChangeListener listener = mock(ModuleStateMachine.StateChangeListener.class);
+		StateChangeListener listener = mock(StateChangeListener.class);
 		state.addStateChangeListener(listener);
-		state.transformForm(ModuleEventType.CLOSING_SIGNAL_CREATED);
+		state.transformForm(ModuleEventType.SIGNAL_CREATED);
 		verify(listener).onChange(ModuleState.PLACING_ORDER);
 		state.transformForm(ModuleEventType.ORDER_CONFIRMED);
 		verify(listener).onChange(ModuleState.PENDING_ORDER);
@@ -110,9 +111,9 @@ public class ModuleStateMachineTest {
 	@Test
 	public void testSellClose() {
 		ModuleStateMachine state = new ModuleStateMachine("test", ModuleState.HOLDING_LONG);
-		ModuleStateMachine.StateChangeListener listener = mock(ModuleStateMachine.StateChangeListener.class);
+		StateChangeListener listener = mock(StateChangeListener.class);
 		state.addStateChangeListener(listener);
-		state.transformForm(ModuleEventType.CLOSING_SIGNAL_CREATED);
+		state.transformForm(ModuleEventType.SIGNAL_CREATED);
 		verify(listener).onChange(ModuleState.PLACING_ORDER);
 		state.transformForm(ModuleEventType.ORDER_CONFIRMED);
 		verify(listener).onChange(ModuleState.PENDING_ORDER);
@@ -127,9 +128,9 @@ public class ModuleStateMachineTest {
 	@Test
 	public void testBuyCloseFallback() {
 		ModuleStateMachine state = new ModuleStateMachine("test", ModuleState.HOLDING_SHORT);
-		ModuleStateMachine.StateChangeListener listener = mock(ModuleStateMachine.StateChangeListener.class);
+		StateChangeListener listener = mock(StateChangeListener.class);
 		state.addStateChangeListener(listener);
-		state.transformForm(ModuleEventType.CLOSING_SIGNAL_CREATED);
+		state.transformForm(ModuleEventType.SIGNAL_CREATED);
 		verify(listener).onChange(ModuleState.PLACING_ORDER);
 		state.transformForm(ModuleEventType.ORDER_CONFIRMED);
 		verify(listener).onChange(ModuleState.PENDING_ORDER);
@@ -138,7 +139,7 @@ public class ModuleStateMachineTest {
 		state.transformForm(ModuleEventType.ORDER_CANCELLED);
 		verify(listener).onChange(ModuleState.HOLDING_SHORT);
 		
-		state.transformForm(ModuleEventType.CLOSING_SIGNAL_CREATED);
+		state.transformForm(ModuleEventType.SIGNAL_CREATED);
 		verify(listener, times(2)).onChange(ModuleState.PLACING_ORDER);
 		state.transformForm(ModuleEventType.ORDER_CONFIRMED);
 		verify(listener, times(2)).onChange(ModuleState.PENDING_ORDER);
@@ -156,9 +157,9 @@ public class ModuleStateMachineTest {
 	@Test
 	public void testSellCloseFallback() {
 		ModuleStateMachine state = new ModuleStateMachine("test", ModuleState.HOLDING_LONG);
-		ModuleStateMachine.StateChangeListener listener = mock(ModuleStateMachine.StateChangeListener.class);
+		StateChangeListener listener = mock(StateChangeListener.class);
 		state.addStateChangeListener(listener);
-		state.transformForm(ModuleEventType.CLOSING_SIGNAL_CREATED);
+		state.transformForm(ModuleEventType.SIGNAL_CREATED);
 		verify(listener).onChange(ModuleState.PLACING_ORDER);
 		state.transformForm(ModuleEventType.ORDER_CONFIRMED);
 		verify(listener).onChange(ModuleState.PENDING_ORDER);
@@ -167,7 +168,7 @@ public class ModuleStateMachineTest {
 		state.transformForm(ModuleEventType.ORDER_CANCELLED);
 		verify(listener).onChange(ModuleState.HOLDING_LONG);
 		
-		state.transformForm(ModuleEventType.CLOSING_SIGNAL_CREATED);
+		state.transformForm(ModuleEventType.SIGNAL_CREATED);
 		verify(listener, times(2)).onChange(ModuleState.PLACING_ORDER);
 		state.transformForm(ModuleEventType.ORDER_CONFIRMED);
 		verify(listener, times(2)).onChange(ModuleState.PENDING_ORDER);
@@ -188,7 +189,7 @@ public class ModuleStateMachineTest {
 	@Test
 	public void testLongPositionStopLoss() {
 		ModuleStateMachine state = new ModuleStateMachine("test", ModuleState.HOLDING_LONG);
-		ModuleStateMachine.StateChangeListener listener = mock(ModuleStateMachine.StateChangeListener.class);
+		StateChangeListener listener = mock(StateChangeListener.class);
 		state.addStateChangeListener(listener);
 		state.transformForm(ModuleEventType.STOP_LOSS);
 		verify(listener).onChange(ModuleState.PLACING_ORDER);
@@ -197,7 +198,7 @@ public class ModuleStateMachineTest {
 	@Test
 	public void testShortPositionStopLoss() {
 		ModuleStateMachine state = new ModuleStateMachine("test", ModuleState.HOLDING_SHORT);
-		ModuleStateMachine.StateChangeListener listener = mock(ModuleStateMachine.StateChangeListener.class);
+		StateChangeListener listener = mock(StateChangeListener.class);
 		state.addStateChangeListener(listener);
 		state.transformForm(ModuleEventType.STOP_LOSS);
 		verify(listener).onChange(ModuleState.PLACING_ORDER);

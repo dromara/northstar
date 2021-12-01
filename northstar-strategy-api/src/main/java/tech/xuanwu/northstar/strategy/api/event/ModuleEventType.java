@@ -2,13 +2,9 @@ package tech.xuanwu.northstar.strategy.api.event;
 
 public enum ModuleEventType {
 	/**
-	 * 开仓信号生成
+	 * 信号生成
 	 */
-	OPENING_SIGNAL_CREATED,
-	/**
-	 * 平仓信号生成
-	 */
-	CLOSING_SIGNAL_CREATED,
+	SIGNAL_CREATED,
 	/**
 	 * 订单生成
 	 */
@@ -20,7 +16,11 @@ public enum ModuleEventType {
 	/**
 	 * 订单通过审核
 	 */
-	ORDER_REQ_PASSED,
+	ORDER_REQ_ACCEPTED,
+	/**
+	 * 撤单
+	 */
+	ORDER_REQ_CANCELLED,
 	/**
 	 * 订单确认
 	 */

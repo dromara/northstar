@@ -5,6 +5,7 @@ import java.util.function.Consumer;
 
 import org.apache.commons.lang3.StringUtils;
 
+import lombok.Getter;
 import tech.xuanwu.northstar.common.constant.Constants;
 import tech.xuanwu.northstar.common.utils.FieldUtils;
 import tech.xuanwu.northstar.strategy.api.model.ModuleDealRecord;
@@ -33,6 +34,9 @@ public class ModuleTradeIntent {
 	private TradeField latestTrade;
 	
 	private String moduleName;
+	
+	@Getter
+	private boolean isDone;
 	
 	public ModuleTradeIntent(String moduleName, SubmitOrderReqField submitOrderReq, Consumer<Optional<ModulePosition>> onDoneOpen) {
 		if(!FieldUtils.isOpen(submitOrderReq.getOffsetFlag())) {
@@ -94,6 +98,7 @@ public class ModuleTradeIntent {
 		// 处理情况四
 		if(partiallyTraded && latestTrade != null) {
 			openCallback.accept(Optional.of(new ModulePosition(latestTrade, submitOrderReq.getStopPrice())));
+			isDone = true;
 		}
 		// 处理情况三、情况五
 		if(order.getOrderStatus() == OrderStatusEnum.OS_Rejected ||
@@ -101,6 +106,7 @@ public class ModuleTradeIntent {
 				&& order.getTotalVolume() == submitOrderReq.getVolume() 
 				&& order.getTradedVolume() == 0) {
 			openCallback.accept(Optional.empty());
+			isDone = true;
 		}
 	}
 	
@@ -108,6 +114,7 @@ public class ModuleTradeIntent {
 		// 处理情况四
 		if(partiallyTraded && latestTrade != null) {
 			closeCallback.accept(Optional.of(genDealRecord()));
+			isDone = true;
 		}
 		// 处理情况三、情况五
 		if(order.getOrderStatus() == OrderStatusEnum.OS_Rejected ||
@@ -115,6 +122,7 @@ public class ModuleTradeIntent {
 				&& order.getTotalVolume() == submitOrderReq.getVolume() 
 				&& order.getTradedVolume() == 0) {
 			closeCallback.accept(Optional.empty());
+			isDone = true;
 		}
 	}
 	
@@ -124,6 +132,7 @@ public class ModuleTradeIntent {
 		// 处理情况一、二。如果是多次成交，trade的成交数量可能会变，但originOrderId不会变，所以只要核对总量即可
 		if(partiallyTraded || trade.getVolume() == submitOrderReq.getVolume()) {
 			openCallback.accept(Optional.of(new ModulePosition(trade, submitOrderReq.getStopPrice())));
+			isDone = true;
 		}
 	}
 	
@@ -132,6 +141,7 @@ public class ModuleTradeIntent {
 		// 处理情况一、二。如果是多次成交，trade的成交数量可能会变，但originOrderId不会变，所以只要核对总量即可
 		if(partiallyTraded || trade.getVolume() == submitOrderReq.getVolume()) {
 			closeCallback.accept(Optional.of(genDealRecord()));
+			isDone = true;
 		}
 	}
 	

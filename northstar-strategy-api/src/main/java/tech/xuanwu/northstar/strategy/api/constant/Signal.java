@@ -12,64 +12,59 @@ import java.util.Map;
  * @author KevinHuangwl
  *
  */
-public enum SignalOperation {
+public enum Signal {
 	/**
 	 * 多开
 	 */
-	BuyOpen("多开"),
+	BUY_OPEN("多开"),
 	/**
 	 * 空开
 	 */
-	SellOpen("空开"),
+	SELL_OPEN("空开"),
 	/**
 	 * 多平
 	 */
-	BuyClose("多平"),
+	BUY_CLOSE("多平"),
 	/**
 	 * 空平
 	 */
-	SellClose("空平"),
-	/**
-	 * 无信号
-	 */
-	None("");
-
+	SELL_CLOSE("空平");
 	
 	private String val;
-	private SignalOperation(String text) {
+	private Signal(String text) {
 		this.val = text;
 	}
 	
 	public boolean isOpen() {
-		return this == BuyOpen || this == SellOpen;
+		return this == BUY_OPEN || this == SELL_OPEN;
 	}
 	
 	public boolean isSell() {
-		return this == SellOpen || this == SellClose;
+		return this == SELL_OPEN || this == SELL_CLOSE;
 	}
 	
 	public boolean isBuy() {
-		return this == BuyOpen || this == BuyClose;
+		return this == BUY_OPEN || this == BUY_CLOSE;
 	}
 	
 	public boolean isClose() {
-		return this == BuyClose || this == SellClose;
+		return this == BUY_CLOSE || this == SELL_CLOSE;
 	}
 	
-	private static final Map<String, SignalOperation> enumMap = new HashMap<>();
+	private static final Map<String, Signal> enumMap = new HashMap<>();
 	
 	static {
-		enumMap.put("多开", BuyOpen);
-		enumMap.put("空开", SellOpen);
-		enumMap.put("多平", BuyClose);
-		enumMap.put("空平", SellClose);
+		enumMap.put("多开", BUY_OPEN);
+		enumMap.put("空开", SELL_OPEN);
+		enumMap.put("多平", BUY_CLOSE);
+		enumMap.put("空平", SELL_CLOSE);
 	}
 	
-	public static SignalOperation parse(String val) {
+	public static Signal parse(String val) {
 		if(enumMap.containsKey(val)) {
 			return enumMap.get(val);
 		}
-		return None;
+		throw new IllegalArgumentException("未知信号：" + val);
 	}
 	
 }

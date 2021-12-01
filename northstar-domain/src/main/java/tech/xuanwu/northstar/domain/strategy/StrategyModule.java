@@ -3,6 +3,8 @@ package tech.xuanwu.northstar.domain.strategy;
 import java.util.Set;
 import java.util.function.Consumer;
 
+import org.apache.commons.lang3.StringUtils;
+
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +19,7 @@ import tech.xuanwu.northstar.strategy.api.event.ModuleEventBus;
 import tech.xuanwu.northstar.strategy.api.event.ModuleEventType;
 import tech.xuanwu.northstar.strategy.api.model.ModuleDealRecord;
 import xyz.redtorch.pb.CoreEnum.OrderStatusEnum;
+import xyz.redtorch.pb.CoreField.CancelOrderReqField;
 import xyz.redtorch.pb.CoreField.OrderField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TradeField;
@@ -42,7 +45,10 @@ public class StrategyModule implements EventDrivenComponent{
 	protected boolean enabled;
 	
 	@Setter
-	protected Consumer<SubmitOrderReqField> tradeIntentHandler;
+	protected Consumer<SubmitOrderReqField> submitOrderHandler;
+	
+	@Setter
+	protected Consumer<CancelOrderReqField> cancelOrderHandler;
 	
 	@Setter
 	protected Consumer<ModuleStatusHolder> moduleStatusChangeHandler;
@@ -66,6 +72,8 @@ public class StrategyModule implements EventDrivenComponent{
 	 */
 	public void addComponent(EventDrivenComponent component) {
 		components.add(component);
+		meb.register(component);
+		
 		if(component instanceof ModuleStatusAware) {
 			ModuleStatusAware aware = (ModuleStatusAware) component;
 			aware.setModuleStatus((ModuleStatus) moduleStatus);
@@ -103,10 +111,12 @@ public class StrategyModule implements EventDrivenComponent{
 	}
 	
 	private void handleOrder(OrderField order) {
+		if(order.getOrderStatus() == OrderStatusEnum.OS_Canceled) {			
+			moduleStatus.getStateMachine().transformForm(ModuleEventType.ORDER_CANCELLED);
+			meb.post(new ModuleEvent<>(ModuleEventType.ORDER_CANCELLED, order));
+		}
 		if(order.getOrderStatus() == OrderStatusEnum.OS_Unknown || order.getOrderStatus() == OrderStatusEnum.OS_Touched)
 			moduleStatus.getStateMachine().transformForm(ModuleEventType.ORDER_CONFIRMED);
-		if(order.getOrderStatus() == OrderStatusEnum.OS_Canceled)
-			moduleStatus.getStateMachine().transformForm(ModuleEventType.ORDER_CANCELLED);
 		if(ti != null)
 			ti.onOrder(order);
 	}
@@ -132,20 +142,27 @@ public class StrategyModule implements EventDrivenComponent{
 			SubmitOrderReqField orderReq = (SubmitOrderReqField) moduleEvent.getData();
 			log.info("[{}] 生成止损单{}：{}，{}，{}，{}手", getName(), orderReq.getOriginOrderId(), orderReq.getContract().getSymbol(),
 					orderReq.getDirection(), orderReq.getOffsetFlag(), orderReq.getVolume());
-			tradeIntentHandler.accept(orderReq);
+			submitOrderHandler.accept(orderReq);
 			ti = genTradeIndent(orderReq);
 		} else if(moduleEvent.getEventType() == ModuleEventType.ORDER_CONFIRMED) {
 			SubmitOrderReqField orderReq = (SubmitOrderReqField) moduleEvent.getData();
 			log.info("[{}] 生成订单{}：{}，{}，{}，{}手，价格{}，止损{}", getName(), orderReq.getOriginOrderId(), orderReq.getContract().getSymbol(),
 					orderReq.getDirection(), orderReq.getOffsetFlag(), orderReq.getVolume(), orderReq.getPrice(), orderReq.getStopPrice());
-			tradeIntentHandler.accept(orderReq);
+			submitOrderHandler.accept(orderReq);
 			ti = genTradeIndent(orderReq);
+		} else if(moduleEvent.getEventType() == ModuleEventType.ORDER_REQ_CANCELLED) {
+			CancelOrderReqField cancelOrderReq = (CancelOrderReqField) moduleEvent.getData();
+			log.info("[{}] 撤单：{}", getName(), cancelOrderReq.getOriginOrderId());
+			cancelOrderHandler.accept(cancelOrderReq);
 		}
 	}
 	
 	private ModuleTradeIntent genTradeIndent(SubmitOrderReqField submitOrder) {
 		if(FieldUtils.isOpen(submitOrder.getOffsetFlag())) {
-			return new ModuleTradeIntent(getName(), submitOrder, mpo -> mpo.ifPresent(mp -> moduleStatus.addPosition(mp)));
+			return new ModuleTradeIntent(getName(), submitOrder, mpo -> mpo.ifPresent(mp -> {
+				moduleStatus.addPosition(mp);
+				meb.register(mp);
+			}));
 		}
 		if(FieldUtils.isClose(submitOrder.getOffsetFlag())) {
 			ModulePosition mp = null;

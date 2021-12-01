@@ -4,8 +4,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import org.apache.commons.lang3.StringUtils;
-
 import lombok.Data;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -15,8 +13,6 @@ import tech.xuanwu.northstar.strategy.api.constant.ModuleState;
 import tech.xuanwu.northstar.strategy.api.event.ModuleEvent;
 import tech.xuanwu.northstar.strategy.api.event.ModuleEventBus;
 import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
-import xyz.redtorch.pb.CoreField.OrderField;
-import xyz.redtorch.pb.CoreField.TradeField;
 
 /**
  * 模组状态

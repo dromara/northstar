@@ -138,7 +138,7 @@ public class ModulePosition implements TickDataAware, TransactionAware, EventDri
 					log.warn("模组可用持仓不足，订单被否决。可用数量[{}]，订单数量[{}]", availableVol, orderReq.getVolume());
 					meb.post(new ModuleEvent<>(ModuleEventType.ORDER_REQ_RETAINED, orderReq));
 				} else {					
-					meb.post(new ModuleEvent<>(ModuleEventType.ORDER_REQ_PASSED, closePosition(orderReq.getVolume(), orderReq.getPrice())));
+					meb.post(new ModuleEvent<>(ModuleEventType.ORDER_REQ_ACCEPTED, closePosition(orderReq.getVolume(), orderReq.getPrice())));
 				}
 			}
 		}

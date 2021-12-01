@@ -172,7 +172,7 @@ public class ModulePositionTest {
 		verify(meb).post(argThat(new ArgumentMatcher<ModuleEvent>() {
 			@Override
 			public boolean matches(ModuleEvent argument) {
-				return argument.getEventType() == ModuleEventType.ORDER_REQ_PASSED;
+				return argument.getEventType() == ModuleEventType.ORDER_REQ_ACCEPTED;
 			}
 		}));
 		
@@ -184,7 +184,7 @@ public class ModulePositionTest {
 		verify(meb, times(2)).post(argThat(new ArgumentMatcher<ModuleEvent>() {
 			@Override
 			public boolean matches(ModuleEvent argument) {
-				return argument.getEventType() == ModuleEventType.ORDER_REQ_PASSED;
+				return argument.getEventType() == ModuleEventType.ORDER_REQ_ACCEPTED;
 			}
 		}));
 		
@@ -196,7 +196,7 @@ public class ModulePositionTest {
 		verify(meb, times(3)).post(argThat(new ArgumentMatcher<ModuleEvent>() {
 			@Override
 			public boolean matches(ModuleEvent argument) {
-				return argument.getEventType() == ModuleEventType.ORDER_REQ_PASSED;
+				return argument.getEventType() == ModuleEventType.ORDER_REQ_ACCEPTED;
 			}
 		}));
 	}

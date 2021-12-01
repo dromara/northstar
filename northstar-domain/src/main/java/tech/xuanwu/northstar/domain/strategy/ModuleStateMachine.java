@@ -6,6 +6,7 @@ import java.util.List;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import tech.xuanwu.northstar.strategy.api.StateChangeListener;
 import tech.xuanwu.northstar.strategy.api.constant.ModuleState;
 import tech.xuanwu.northstar.strategy.api.event.ModuleEventType;
 
@@ -41,15 +42,8 @@ public class ModuleStateMachine {
 	
 	public void transformForm(ModuleEventType eventType) {
 		switch(eventType) {
-		case OPENING_SIGNAL_CREATED:
-			if(curState != ModuleState.EMPTY) {
-				throw new IllegalStateException(ERR_MSG + curState);
-			}
-			originState = curState;
-			setState(ModuleState.PLACING_ORDER);
-			break;
-		case CLOSING_SIGNAL_CREATED:
-			if(!curState.isHolding()) {
+		case SIGNAL_CREATED:
+			if(curState != ModuleState.EMPTY && !curState.isHolding()) {
 				throw new IllegalStateException(ERR_MSG + curState);
 			}
 			originState = curState;
@@ -117,11 +111,6 @@ public class ModuleStateMachine {
 
 	public ModuleState getState() {
 		return curState;
-	}
-	
-	interface StateChangeListener {
-		
-		void onChange(ModuleState state);
 	}
 	
 }

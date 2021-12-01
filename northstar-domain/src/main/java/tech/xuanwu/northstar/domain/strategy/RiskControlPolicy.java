@@ -1,11 +1,14 @@
 package tech.xuanwu.northstar.domain.strategy;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import tech.xuanwu.northstar.strategy.api.EventDrivenComponent;
 import tech.xuanwu.northstar.strategy.api.ModuleStatus;
 import tech.xuanwu.northstar.strategy.api.RiskControlRule;
 import tech.xuanwu.northstar.strategy.api.TickDataAware;
+import tech.xuanwu.northstar.strategy.api.constant.RiskAuditResult;
 import tech.xuanwu.northstar.strategy.api.event.ModuleEvent;
 import tech.xuanwu.northstar.strategy.api.event.ModuleEventBus;
 import tech.xuanwu.northstar.strategy.api.event.ModuleEventType;
@@ -36,7 +39,15 @@ public class RiskControlPolicy implements TickDataAware, EventDrivenComponent{
 				if(lastTick == null) {
 					meb.post(new ModuleEvent<>(ModuleEventType.ORDER_REQ_RETAINED, orderReq));
 				}
-				rules.stream().forEach(rule -> rule.checkRisk(orderReq, lastTick, moduleStatus));
+				Set<RiskAuditResult> results = new HashSet<>();
+				for(RiskControlRule rule : rules) {
+					results.add(rule.checkRisk(orderReq, lastTick, moduleStatus));
+				}
+				if(results.contains(RiskAuditResult.REJECTED) || results.contains(RiskAuditResult.RETRY)) {					
+					meb.post(new ModuleEvent<>(ModuleEventType.ORDER_REQ_RETAINED, orderReq));
+				} else if(results.contains(RiskAuditResult.ACCEPTED)) {
+					meb.post(new ModuleEvent<>(ModuleEventType.ORDER_REQ_ACCEPTED, orderReq));
+				}
 			}
 		}
 	}
