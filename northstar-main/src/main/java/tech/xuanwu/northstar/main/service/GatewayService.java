@@ -36,7 +36,7 @@ import tech.xuanwu.northstar.main.persistence.MarketDataRepository;
 import tech.xuanwu.northstar.main.persistence.ModuleRepository;
 import tech.xuanwu.northstar.main.persistence.po.GatewayPO;
 import tech.xuanwu.northstar.main.utils.CodecUtils;
-import tech.xuanwu.northstar.strategy.common.model.entity.ModuleInfo;
+import tech.xuanwu.northstar.strategy.api.model.ModuleInfo;
 import xyz.redtorch.gateway.ctp.x64v6v3v15v.CtpGatewayFactory;
 import xyz.redtorch.gateway.ctp.x64v6v5v1cpv.CtpSimGatewayFactory;
 

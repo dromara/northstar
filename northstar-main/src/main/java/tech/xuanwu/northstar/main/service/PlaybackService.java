@@ -18,26 +18,22 @@ import tech.xuanwu.northstar.common.model.SimSettings;
 import tech.xuanwu.northstar.domain.GatewayAndConnectionManager;
 import tech.xuanwu.northstar.domain.GatewayConnection;
 import tech.xuanwu.northstar.domain.TraderGatewayConnection;
+import tech.xuanwu.northstar.domain.strategy.ModuleManager;
+import tech.xuanwu.northstar.domain.strategy.SandboxModuleManager;
+import tech.xuanwu.northstar.domain.strategy.StrategyModule;
 import tech.xuanwu.northstar.engine.event.FastEventEngine;
 import tech.xuanwu.northstar.gateway.api.Gateway;
 import tech.xuanwu.northstar.gateway.sim.trade.SimGatewayFactory;
 import tech.xuanwu.northstar.gateway.sim.trade.SimMarket;
 import tech.xuanwu.northstar.gateway.sim.trade.SimTradeGateway;
-import tech.xuanwu.northstar.main.manager.ModuleManager;
-import tech.xuanwu.northstar.main.manager.SandboxModuleManager;
 import tech.xuanwu.northstar.main.persistence.MarketDataRepository;
 import tech.xuanwu.northstar.main.persistence.ModuleRepository;
 import tech.xuanwu.northstar.main.playback.PlaybackEngine;
 import tech.xuanwu.northstar.main.playback.PlaybackStat;
 import tech.xuanwu.northstar.main.playback.PlaybackStatRecord;
 import tech.xuanwu.northstar.main.playback.PlaybackTask;
-import tech.xuanwu.northstar.strategy.common.StrategyModule;
-import tech.xuanwu.northstar.strategy.common.StrategyModuleFactory;
-import tech.xuanwu.northstar.strategy.common.model.ModuleStatus;
-import tech.xuanwu.northstar.strategy.common.model.data.BarData;
-import tech.xuanwu.northstar.strategy.common.model.entity.ModuleDealRecord;
-import tech.xuanwu.northstar.strategy.common.model.entity.ModuleInfo;
-import tech.xuanwu.northstar.strategy.common.model.entity.ModuleTradeRecord;
+import tech.xuanwu.northstar.strategy.api.model.ModuleDealRecord;
+import tech.xuanwu.northstar.strategy.api.model.ModuleTradeRecord;
 
 @Slf4j
 public class PlaybackService {

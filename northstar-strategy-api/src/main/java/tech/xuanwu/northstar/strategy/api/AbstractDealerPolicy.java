@@ -24,6 +24,8 @@ public abstract class AbstractDealerPolicy implements DealerPolicy {
 	
 	protected TickField lastTick;
 	
+	protected String bindedUnifiedSymbol;
+	
 	@Override
 	public void onChange(ModuleState state) {
 		currentState = state;
@@ -87,6 +89,11 @@ public abstract class AbstractDealerPolicy implements DealerPolicy {
 		lastTick = tick;
 	}
 	
+	@Override
+	public String getBindedContractSymbol() {
+		return bindedUnifiedSymbol;
+	}
+
 	private CancelOrderReqField genCancelReq() {
 		return CancelOrderReqField.newBuilder()
 				.setGatewayId(currentOrderReq.getGatewayId())

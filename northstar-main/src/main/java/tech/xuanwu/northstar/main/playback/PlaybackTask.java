@@ -11,10 +11,10 @@ import java.util.Set;
 import tech.xuanwu.northstar.common.constant.DateTimeConstant;
 import tech.xuanwu.northstar.common.constant.PlaybackPrecision;
 import tech.xuanwu.northstar.common.model.PlaybackDescription;
+import tech.xuanwu.northstar.domain.strategy.StrategyModule;
 import tech.xuanwu.northstar.main.persistence.MarketDataRepository;
 import tech.xuanwu.northstar.main.persistence.po.MinBarDataPO;
 import tech.xuanwu.northstar.main.persistence.po.TickDataPO;
-import tech.xuanwu.northstar.strategy.common.StrategyModule;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.TickField;
 
@@ -61,9 +61,9 @@ public class PlaybackTask {
 		barQ = new PriorityQueue<>(3000, (b1, b2) -> b1.getActionTimestamp() < b2.getActionTimestamp() ? -1 : 1 );
 		// 先把高维的TICK与BAR数据转成一维
 		for(StrategyModule module : playbackModules) {
-			Set<String> interestContracts = module.getInterestContractUnifiedSymbol();
+			Set<String> interestContracts = module.bindedContractUnifiedSymbols();
 			for(String unifiedSymbol : interestContracts) {				
-				List<MinBarDataPO> data = mdRepo.loadDataByDate(module.getBindedMarketGatewayId(), unifiedSymbol, curDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
+				List<MinBarDataPO> data = mdRepo.loadDataByDate(module.bindedMarketGatewayId(), unifiedSymbol, curDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
 				for(MinBarDataPO po : data) {
 					if(precision == PlaybackPrecision.TICK) {						
 						for(TickDataPO tickData : po.getTicksOfMin()) {

@@ -35,7 +35,7 @@ import tech.xuanwu.northstar.common.model.NsUser;
 import tech.xuanwu.northstar.common.model.SimSettings;
 import tech.xuanwu.northstar.engine.broadcast.SocketIOMessageEngine;
 import tech.xuanwu.northstar.main.NorthstarApplication;
-import tech.xuanwu.northstar.strategy.common.model.ModulePosition;
+import tech.xuanwu.northstar.strategy.api.model.ModulePositionInfo;
 import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
 
 @RunWith(SpringRunner.class)
@@ -118,7 +118,7 @@ public class ModuleTest {
 		System.out.println("等待gateway初始化");
 		Thread.sleep(2000);
 		shouldSuccessfullyCreate();
-		ModulePosition position = ModulePosition.builder()
+		ModulePositionInfo position = ModulePositionInfo.builder()
 				.unifiedSymbol(symbol+"@SHFE@FUTURES")
 				.multiplier(10)
 				.openTime(System.currentTimeMillis())
@@ -136,7 +136,7 @@ public class ModuleTest {
 	public void shouldUpdateModulePosition() throws Exception {
 		prepareGateway();
 		shouldSuccessfullyCreate();
-		ModulePosition position = ModulePosition.builder()
+		ModulePositionInfo position = ModulePositionInfo.builder()
 				.unifiedSymbol(symbol+"@SHFE@FUTURES")
 				.multiplier(10)
 				.openTime(System.currentTimeMillis())

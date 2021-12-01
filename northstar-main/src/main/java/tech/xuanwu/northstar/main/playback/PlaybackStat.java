@@ -12,7 +12,7 @@ import org.apache.commons.math3.stat.StatUtils;
 import lombok.Setter;
 import tech.xuanwu.northstar.common.constant.DateTimeConstant;
 import tech.xuanwu.northstar.common.model.PlaybackDescription;
-import tech.xuanwu.northstar.strategy.common.model.entity.ModuleDealRecord;
+import tech.xuanwu.northstar.strategy.api.model.ModuleDealRecord;
 
 /**
  * 回测统计计算

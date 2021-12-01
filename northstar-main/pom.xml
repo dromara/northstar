@@ -40,7 +40,7 @@
 		</dependency>
 		<dependency>
 			<groupId>tech.xuan-wu</groupId>
-			<artifactId>northstar-strategy-cta</artifactId>
+			<artifactId>northstar-strategy-cta-demo</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.projectlombok</groupId>

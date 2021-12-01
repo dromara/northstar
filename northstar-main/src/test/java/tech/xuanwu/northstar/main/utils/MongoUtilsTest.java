@@ -7,7 +7,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import tech.xuanwu.northstar.strategy.common.model.entity.ModuleDealRecord;
+import tech.xuanwu.northstar.strategy.api.model.ModuleDealRecord;
 import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
 
 public class MongoUtilsTest {

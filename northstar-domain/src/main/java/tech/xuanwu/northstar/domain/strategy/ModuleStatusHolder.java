@@ -1,5 +1,7 @@
 package tech.xuanwu.northstar.domain.strategy;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -8,11 +10,10 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.common.utils.FieldUtils;
-import tech.xuanwu.northstar.strategy.api.EventDrivenComponent;
+import tech.xuanwu.northstar.strategy.api.ModuleStatus;
 import tech.xuanwu.northstar.strategy.api.constant.ModuleState;
-import tech.xuanwu.northstar.strategy.api.event.ModuleEvent;
-import tech.xuanwu.northstar.strategy.api.event.ModuleEventBus;
 import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
+import xyz.redtorch.pb.CoreField.AccountField;
 
 /**
  * 模组状态
@@ -21,7 +22,7 @@ import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
  */
 @Slf4j
 @Data
-public class ModuleStatusHolder implements EventDrivenComponent{
+public class ModuleStatusHolder implements ModuleStatus{
 
 	@Getter
 	private String moduleName;
@@ -33,9 +34,7 @@ public class ModuleStatusHolder implements EventDrivenComponent{
 	
 	protected ConcurrentMap<String, ModulePosition> shortPositions;
 	
-	private int countOfOpeningToday;
-	
-	private double accountAvailable;
+	private AccountField account;
 	
 	public ModuleStatusHolder(String name) {
 		this.moduleName = name;
@@ -43,7 +42,7 @@ public class ModuleStatusHolder implements EventDrivenComponent{
 		this.longPositions = new ConcurrentHashMap<>();
 		this.shortPositions = new ConcurrentHashMap<>();
 	}
-
+	
 	public void addPosition(ModulePosition position) {
 		Map<String, ModulePosition> positionMap = getPositionMap(position.getDirection());
 		positionMap.put(position.contract().getUnifiedSymbol(), position);
@@ -69,12 +68,6 @@ public class ModuleStatusHolder implements EventDrivenComponent{
 		return stateMachine.getState() == state;
 	}
 	
-	public double getHoldingProfit() {
-		double p1 = longPositions.values().stream().mapToDouble(ModulePosition::getProfit).reduce(0D, (a,b) -> a+b);
-		double p2 = shortPositions.values().stream().mapToDouble(ModulePosition::getProfit).reduce(0D, (a,b) -> a+b);
-		return p1 + p2;
-	}
-	
 	private Map<String, ModulePosition> getPositionMap(PositionDirectionEnum dir){
 		if(dir == PositionDirectionEnum.PD_Long) {
 			return longPositions;
@@ -84,16 +77,41 @@ public class ModuleStatusHolder implements EventDrivenComponent{
 		}
 		throw new IllegalArgumentException("非法持仓方向：" + dir);
 	}
-
-	@Override
-	public void onEvent(ModuleEvent<?> moduleEvent) {
-		// TODO Auto-generated method stub
-		
+	
+	public double holdingProfit() {
+		double p1 = longPositions.values().stream().mapToDouble(ModulePosition::getProfit).reduce(0D, (a,b) -> a+b);
+		double p2 = shortPositions.values().stream().mapToDouble(ModulePosition::getProfit).reduce(0D, (a,b) -> a+b);
+		return p1 + p2;
+	}
+	
+	public double closedProfit() {
+		return 0;
 	}
 
 	@Override
-	public void setEventBus(ModuleEventBus moduleEventBus) {
-		// TODO Auto-generated method stub
-		
+	public void onAccount(AccountField account) {
+		this.account = account;
+	}
+
+	@Override
+	public double accountBalance() {
+		return account.getBalance();
+	}
+
+	@Override
+	public double accountAvailable() {
+		return account.getAvailable();
+	}
+	
+	@Override
+	public ModuleState state() {
+		return stateMachine.getCurState();
+	}
+
+	public List<ModulePosition> getAllPositions(){
+		List<ModulePosition> resultList = new ArrayList<>(longPositions.size() + shortPositions.size());
+		resultList.addAll(longPositions.values());
+		resultList.addAll(shortPositions.values());
+		return resultList;
 	}
 }

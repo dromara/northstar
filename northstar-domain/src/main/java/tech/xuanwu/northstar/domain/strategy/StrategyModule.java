@@ -11,7 +11,6 @@ import tech.xuanwu.northstar.common.event.NorthstarEventType;
 import tech.xuanwu.northstar.common.utils.FieldUtils;
 import tech.xuanwu.northstar.strategy.api.EventDrivenComponent;
 import tech.xuanwu.northstar.strategy.api.ModuleStatus;
-import tech.xuanwu.northstar.strategy.api.ModuleStatusAware;
 import tech.xuanwu.northstar.strategy.api.event.ModuleEvent;
 import tech.xuanwu.northstar.strategy.api.event.ModuleEventBus;
 import tech.xuanwu.northstar.strategy.api.event.ModuleEventType;
@@ -62,6 +61,7 @@ public class StrategyModule implements EventDrivenComponent{
 	public StrategyModule(ModuleStatus status) {
 		this.moduleStatus = (ModuleStatusHolder) status;
 		this.stateMachine = moduleStatus.getStateMachine();
+		this.meb.register(status);
 	}
 	
 	/**
@@ -71,11 +71,6 @@ public class StrategyModule implements EventDrivenComponent{
 	public void addComponent(EventDrivenComponent component) {
 		components.add(component);
 		meb.register(component);
-		
-		if(component instanceof ModuleStatusAware) {
-			ModuleStatusAware aware = (ModuleStatusAware) component;
-			aware.setModuleStatus((ModuleStatus) moduleStatus);
-		}
 	}
 	
 	/**
@@ -183,4 +178,11 @@ public class StrategyModule implements EventDrivenComponent{
 		throw new UnsupportedOperationException("该方法不支持");
 	}
 
+	public Set<String> bindedContractUnifiedSymbols(){
+		return null;
+	}
+	
+	public String bindedMarketGatewayId() {
+		return null;
+	}
 }

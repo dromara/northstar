@@ -9,7 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import tech.xuanwu.northstar.common.model.PlaybackDescription;
-import tech.xuanwu.northstar.strategy.common.model.entity.ModuleDealRecord;
+import tech.xuanwu.northstar.strategy.api.model.ModuleDealRecord;
 
 public class PlaybackStatTest {
 	

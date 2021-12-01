@@ -43,8 +43,7 @@
 		<module>northstar-gateway-sim</module>
 		<module>northstar-engine</module>
 		<module>northstar-domain</module>
-		<module>northstar-strategy-common</module>
-		<module>northstar-strategy-cta</module>
+		<module>northstar-strategy-api</module>
 		<module>northstar-plugin-notification</module>
 		<module>northstar-main</module>
 	</modules>
@@ -83,12 +82,7 @@
 			</dependency>
 			<dependency>
 				<groupId>tech.xuan-wu</groupId>
-				<artifactId>northstar-strategy-common</artifactId>
-				<version>${northstar-version}</version>
-			</dependency>
-			<dependency>
-				<groupId>tech.xuan-wu</groupId>
-				<artifactId>northstar-strategy-cta</artifactId>
+				<artifactId>northstar-strategy-cta-demo</artifactId>
 				<version>${northstar-version}</version>
 			</dependency>
 			<dependency>

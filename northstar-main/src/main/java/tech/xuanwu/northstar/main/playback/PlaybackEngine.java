@@ -4,8 +4,10 @@ import java.util.Map;
 import java.util.PriorityQueue;
 
 import lombok.extern.slf4j.Slf4j;
+import tech.xuanwu.northstar.common.event.NorthstarEvent;
+import tech.xuanwu.northstar.common.event.NorthstarEventType;
+import tech.xuanwu.northstar.domain.strategy.SandboxModuleManager;
 import tech.xuanwu.northstar.gateway.sim.trade.SimMarket;
-import tech.xuanwu.northstar.main.manager.SandboxModuleManager;
 import tech.xuanwu.northstar.main.playback.PlaybackTask.DataType;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.TickField;
@@ -42,9 +44,9 @@ public class PlaybackEngine {
 				while(!tickQ.isEmpty() && tickQ.peek().getActionTimestamp() < bar.getActionTimestamp() + 60000) {					
 					TickField tick = tickQ.poll();
 					simMarket.onTick(tick);
-					moduleMgr.onTick(tick);
+					moduleMgr.onEvent(new NorthstarEvent(NorthstarEventType.TICK, tick));
 				}
-				moduleMgr.onBar(bar);
+				moduleMgr.onEvent(new NorthstarEvent(NorthstarEventType.BAR, bar));
 			}
 		}
 		log.info("################# 回测结束 #################");

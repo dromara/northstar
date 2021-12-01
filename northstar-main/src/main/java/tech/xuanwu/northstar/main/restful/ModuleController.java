@@ -16,14 +16,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import tech.xuanwu.northstar.common.model.ResultBean;
 import tech.xuanwu.northstar.main.service.ModuleService;
-import tech.xuanwu.northstar.strategy.common.model.ModulePosition;
-import tech.xuanwu.northstar.strategy.common.model.entity.ModuleDataRef;
-import tech.xuanwu.northstar.strategy.common.model.entity.ModuleDealRecord;
-import tech.xuanwu.northstar.strategy.common.model.entity.ModuleInfo;
-import tech.xuanwu.northstar.strategy.common.model.entity.ModuleRealTimeInfo;
-import tech.xuanwu.northstar.strategy.common.model.entity.ModuleTradeRecord;
-import tech.xuanwu.northstar.strategy.common.model.meta.ComponentField;
-import tech.xuanwu.northstar.strategy.common.model.meta.ComponentMetaInfo;
+import tech.xuanwu.northstar.strategy.api.model.ComponentField;
+import tech.xuanwu.northstar.strategy.api.model.ComponentMetaInfo;
+import tech.xuanwu.northstar.strategy.api.model.ModuleDealRecord;
+import tech.xuanwu.northstar.strategy.api.model.ModuleInfo;
+import tech.xuanwu.northstar.strategy.api.model.ModulePositionInfo;
+import tech.xuanwu.northstar.strategy.api.model.ModuleRealTimeInfo;
+import tech.xuanwu.northstar.strategy.api.model.ModuleTradeRecord;
 import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
 
 @RestController
@@ -128,10 +127,10 @@ public class ModuleController {
 	 * @param name
 	 * @return
 	 */
-	@GetMapping("/module/refdata")
-	public ResultBean<ModuleDataRef> getModuleDataRef(@NotNull String name){
-		return new ResultBean<>(service.getModuleDataRef(name));
-	}
+//	@GetMapping("/module/refdata")
+//	public ResultBean<ModuleDataRef> getModuleDataRef(@NotNull String name){
+//		return new ResultBean<>(service.getModuleDataRef(name));
+//	}
 	
 	/**
 	 * 获取模组交易记录
@@ -170,7 +169,7 @@ public class ModuleController {
 	 * @return
 	 */
 	@PostMapping("/module/{moduleName}/position")
-	public ResultBean<Boolean> createPosition(@PathVariable String moduleName, @RequestBody ModulePosition position){
+	public ResultBean<Boolean> createPosition(@PathVariable String moduleName, @RequestBody ModulePositionInfo position){
 		return new ResultBean<>(service.createPosition(moduleName, position));
 	}
 	
@@ -181,7 +180,7 @@ public class ModuleController {
 	 * @return
 	 */
 	@PutMapping("/module/{moduleName}/position")
-	public ResultBean<Boolean> updatePosition(@PathVariable String moduleName, @RequestBody ModulePosition position){
+	public ResultBean<Boolean> updatePosition(@PathVariable String moduleName, @RequestBody ModulePositionInfo position){
 		return new ResultBean<>(service.updatePosition(moduleName, position));
 	}
 	

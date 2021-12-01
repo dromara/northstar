@@ -1,5 +1,6 @@
 package tech.xuanwu.northstar.main.playback;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -15,10 +16,11 @@ import org.junit.Test;
 import org.mockito.ArgumentMatcher;
 import org.mockito.ArgumentMatchers;
 
+import tech.xuanwu.northstar.common.event.NorthstarEvent;
+import tech.xuanwu.northstar.domain.strategy.SandboxModuleManager;
+import tech.xuanwu.northstar.domain.strategy.StrategyModule;
 import tech.xuanwu.northstar.gateway.sim.trade.SimMarket;
-import tech.xuanwu.northstar.main.manager.SandboxModuleManager;
 import tech.xuanwu.northstar.main.playback.PlaybackTask.DataType;
-import tech.xuanwu.northstar.strategy.common.StrategyModule;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.TickField;
 
@@ -121,20 +123,7 @@ public class PlaybackEngineTest {
 		engine = new PlaybackEngine(market, moduleMgr);
 		engine.play(task);
 		
-		verify(moduleMgr, times(6)).onTick(ArgumentMatchers.argThat(new ArgumentMatcher<TickField>() {
-			@Override
-			public boolean matches(TickField t) {
-				System.out.println(t.getActionTime());
-				return true;
-			}
-		}));
-		verify(moduleMgr, times(4)).onBar(ArgumentMatchers.argThat(new ArgumentMatcher<BarField>() {
-			@Override
-			public boolean matches(BarField b) {
-				System.out.println(b.getActionTime());
-				return true;
-			}
-		}));
+		verify(moduleMgr, times(10)).onEvent(any(NorthstarEvent.class));
 	}
 
 }

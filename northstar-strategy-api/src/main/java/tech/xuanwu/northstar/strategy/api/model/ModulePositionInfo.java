@@ -3,11 +3,26 @@ package tech.xuanwu.northstar.strategy.api.model;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
 
+@Document
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class ModulePositionInfo {
+	
+	@Id
+	private String positionId;
+	
+	private String moduleName;
 
 	@NotNull
 	private String unifiedSymbol;

@@ -15,29 +15,24 @@ import tech.xuanwu.northstar.common.constant.DateTimeConstant;
 import tech.xuanwu.northstar.common.model.ContractManager;
 import tech.xuanwu.northstar.domain.GatewayAndConnectionManager;
 import tech.xuanwu.northstar.domain.GatewayConnection;
-import tech.xuanwu.northstar.main.manager.ModuleManager;
+import tech.xuanwu.northstar.domain.strategy.ModuleManager;
 import tech.xuanwu.northstar.main.persistence.MarketDataRepository;
 import tech.xuanwu.northstar.main.persistence.ModuleRepository;
 import tech.xuanwu.northstar.main.persistence.po.MinBarDataPO;
 import tech.xuanwu.northstar.main.utils.ProtoBeanUtils;
-import tech.xuanwu.northstar.strategy.common.Dealer;
-import tech.xuanwu.northstar.strategy.common.DynamicParamsAware;
-import tech.xuanwu.northstar.strategy.common.RiskControlRule;
-import tech.xuanwu.northstar.strategy.common.SignalPolicy;
-import tech.xuanwu.northstar.strategy.common.StrategyModule;
-import tech.xuanwu.northstar.strategy.common.StrategyModuleFactory;
-import tech.xuanwu.northstar.strategy.common.annotation.StrategicComponent;
-import tech.xuanwu.northstar.strategy.common.model.ModulePosition;
-import tech.xuanwu.northstar.strategy.common.model.ModuleStatus;
-import tech.xuanwu.northstar.strategy.common.model.data.BarData;
-import tech.xuanwu.northstar.strategy.common.model.entity.ModuleDataRef;
-import tech.xuanwu.northstar.strategy.common.model.entity.ModuleDealRecord;
-import tech.xuanwu.northstar.strategy.common.model.entity.ModuleInfo;
-import tech.xuanwu.northstar.strategy.common.model.entity.ModuleRealTimeInfo;
-import tech.xuanwu.northstar.strategy.common.model.entity.ModuleTradeRecord;
-import tech.xuanwu.northstar.strategy.common.model.meta.ComponentField;
-import tech.xuanwu.northstar.strategy.common.model.meta.ComponentMetaInfo;
-import tech.xuanwu.northstar.strategy.common.model.meta.DynamicParams;
+import tech.xuanwu.northstar.strategy.api.DealerPolicy;
+import tech.xuanwu.northstar.strategy.api.DynamicParamsAware;
+import tech.xuanwu.northstar.strategy.api.RiskControlRule;
+import tech.xuanwu.northstar.strategy.api.SignalPolicy;
+import tech.xuanwu.northstar.strategy.api.annotation.StrategicComponent;
+import tech.xuanwu.northstar.strategy.api.model.ComponentField;
+import tech.xuanwu.northstar.strategy.api.model.ComponentMetaInfo;
+import tech.xuanwu.northstar.strategy.api.model.DynamicParams;
+import tech.xuanwu.northstar.strategy.api.model.ModuleDealRecord;
+import tech.xuanwu.northstar.strategy.api.model.ModuleInfo;
+import tech.xuanwu.northstar.strategy.api.model.ModulePositionInfo;
+import tech.xuanwu.northstar.strategy.api.model.ModuleRealTimeInfo;
+import tech.xuanwu.northstar.strategy.api.model.ModuleTradeRecord;
 import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.ContractField;
@@ -90,7 +85,7 @@ public class ModuleService implements InitializingBean{
 	 * @return
 	 */
 	public List<ComponentMetaInfo> getRegisteredDealers(){
-		return getComponentMeta(Dealer.class);
+		return getComponentMeta(DealerPolicy.class);
 	}
 	
 	private List<ComponentMetaInfo> getComponentMeta(Class<?> clz){
@@ -246,7 +241,7 @@ public class ModuleService implements InitializingBean{
 	 * 切换模组状态
 	 */
 	public boolean toggleState(String moduleName) {
-		mdlMgr.toggleState(moduleName);
+		mdlMgr.getModule(moduleName).toggleRunningState();
 		return true;
 	}
 	
@@ -256,7 +251,7 @@ public class ModuleService implements InitializingBean{
 	 * @param position
 	 * @return
 	 */
-	public boolean createPosition(String moduleName, ModulePosition position) {
+	public boolean createPosition(String moduleName, ModulePositionInfo position) {
 		position.setOpenTime(System.currentTimeMillis());
 		position.setOpenTradingDay(LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
 		return updatePosition(moduleName, position);
@@ -268,8 +263,8 @@ public class ModuleService implements InitializingBean{
 	 * @param position
 	 * @return
 	 */
-	public boolean updatePosition(String moduleName, ModulePosition position) {
-		ModuleStatus status = mdlMgr.getModule(moduleName).updatePosition(position);
+	public boolean updatePosition(String moduleName, ModulePositionInfo position) {
+		ModuleStatus status = mdlMgr.getModule(moduleName).addPosition(position);
 		ContractField contract = contractMgr.getContract(position.getUnifiedSymbol());
 		position.setMultiplier(contract.getMultiplier());
 		moduleRepo.saveModuleStatus(status);

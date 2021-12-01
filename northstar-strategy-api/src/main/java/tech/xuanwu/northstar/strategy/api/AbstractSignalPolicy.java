@@ -14,6 +14,8 @@ public abstract class AbstractSignalPolicy implements SignalPolicy {
 	
 	protected ModuleState currentState;
 	
+	protected String bindedUnifiedSymbol;
+	
 	protected void emit(Signal signal) {
 		if(!isActive()) {
 			throw new IllegalStateException("当前状态下 [" + currentState + "] 不能发交易信号。");
@@ -38,4 +40,10 @@ public abstract class AbstractSignalPolicy implements SignalPolicy {
 	public void onChange(ModuleState state) {
 		currentState = state;
 	}
+
+	@Override
+	public String getBindedContractSymbol() {
+		return bindedUnifiedSymbol;
+	}
+	
 }

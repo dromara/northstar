@@ -5,24 +5,23 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
 import tech.xuanwu.northstar.common.event.StrategyEventBus;
-import tech.xuanwu.northstar.main.manager.ModuleManager;
-import tech.xuanwu.northstar.main.manager.SandboxModuleManager;
-import tech.xuanwu.northstar.main.persistence.ModuleRepository;
+import tech.xuanwu.northstar.domain.strategy.ModuleManager;
+import tech.xuanwu.northstar.domain.strategy.SandboxModuleManager;
 
 @Configuration
 public class StrategyEventHandlerConfig {
 
 	@Primary
 	@Bean
-	public ModuleManager moduleManager(StrategyEventBus seb, ModuleRepository moduleRepo) {
-		ModuleManager mm = new ModuleManager(moduleRepo);
+	public ModuleManager moduleManager(StrategyEventBus seb) {
+		ModuleManager mm = new ModuleManager();
 		seb.register(mm);
 		return mm;
 	}
 	
 	@Bean
-	public SandboxModuleManager sandboxModuleManager(StrategyEventBus seb, ModuleRepository moduleRepo) {
-		SandboxModuleManager smm = new SandboxModuleManager(moduleRepo);
+	public SandboxModuleManager sandboxModuleManager(StrategyEventBus seb) {
+		SandboxModuleManager smm = new SandboxModuleManager();
 		seb.register(smm);
 		return smm;
 	}

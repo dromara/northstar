@@ -38,7 +38,7 @@ import tech.xuanwu.northstar.engine.broadcast.SocketIOMessageEngine;
 import tech.xuanwu.northstar.main.NorthstarApplication;
 import tech.xuanwu.northstar.main.persistence.MarketDataRepository;
 import tech.xuanwu.northstar.main.persistence.ModuleRepository;
-import tech.xuanwu.northstar.strategy.common.model.entity.ModuleInfo;
+import tech.xuanwu.northstar.strategy.api.model.ModuleInfo;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = NorthstarApplication.class, value="spring.profiles.active=test")

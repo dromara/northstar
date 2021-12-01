@@ -15,10 +15,10 @@ import org.junit.Test;
 
 import tech.xuanwu.northstar.common.constant.PlaybackPrecision;
 import tech.xuanwu.northstar.common.model.PlaybackDescription;
+import tech.xuanwu.northstar.domain.strategy.StrategyModule;
 import tech.xuanwu.northstar.main.persistence.MarketDataRepository;
 import tech.xuanwu.northstar.main.persistence.po.MinBarDataPO;
 import tech.xuanwu.northstar.main.persistence.po.TickDataPO;
-import tech.xuanwu.northstar.strategy.common.StrategyModule;
 
 public class PlaybackTaskTest {
 	
@@ -95,8 +95,8 @@ public class PlaybackTaskTest {
 	@Test
 	public void test() {
 		StrategyModule module = mock(StrategyModule.class);
-		when(module.getInterestContractUnifiedSymbol()).thenReturn(Set.of("rb2210@SHFE@FUTURES"));
-		when(module.getBindedMarketGatewayId()).thenReturn("testGateway");
+		when(module.bindedContractUnifiedSymbols()).thenReturn(Set.of("rb2210@SHFE@FUTURES"));
+		when(module.bindedMarketGatewayId()).thenReturn("testGateway");
 		PlaybackDescription description = PlaybackDescription.builder()
 				.startDate("20210101")
 				.endDate("20210131")
@@ -118,8 +118,8 @@ public class PlaybackTaskTest {
 	@Test(expected = IllegalStateException.class)
 	public void testException() {
 		StrategyModule module = mock(StrategyModule.class);
-		when(module.getInterestContractUnifiedSymbol()).thenReturn(Set.of("rb2210@SHFE@FUTURES"));
-		when(module.getBindedMarketGatewayId()).thenReturn("testGateway");
+		when(module.bindedContractUnifiedSymbols()).thenReturn(Set.of("rb2210@SHFE@FUTURES"));
+		when(module.bindedMarketGatewayId()).thenReturn("testGateway");
 		PlaybackDescription description = PlaybackDescription.builder()
 				.startDate("20210102")
 				.endDate("20210101")
@@ -135,8 +135,8 @@ public class PlaybackTaskTest {
 	@Test
 	public void testProcess() {
 		StrategyModule module = mock(StrategyModule.class);
-		when(module.getInterestContractUnifiedSymbol()).thenReturn(Set.of("rb2210@SHFE@FUTURES"));
-		when(module.getBindedMarketGatewayId()).thenReturn("testGateway");
+		when(module.bindedContractUnifiedSymbols()).thenReturn(Set.of("rb2210@SHFE@FUTURES"));
+		when(module.bindedMarketGatewayId()).thenReturn("testGateway");
 		PlaybackDescription description = PlaybackDescription.builder()
 				.startDate("20210101")
 				.endDate("20210110")

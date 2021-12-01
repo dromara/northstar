@@ -14,11 +14,11 @@ import org.springframework.web.bind.annotation.RestController;
 import tech.xuanwu.northstar.common.event.InternalEventBus;
 import tech.xuanwu.northstar.common.model.PlaybackDescription;
 import tech.xuanwu.northstar.common.model.ResultBean;
-import tech.xuanwu.northstar.main.manager.ModuleManager;
+import tech.xuanwu.northstar.domain.strategy.ModuleManager;
 import tech.xuanwu.northstar.main.playback.PlaybackStatRecord;
 import tech.xuanwu.northstar.main.service.PlaybackService;
-import tech.xuanwu.northstar.strategy.common.model.entity.ModuleDealRecord;
-import tech.xuanwu.northstar.strategy.common.model.entity.ModuleTradeRecord;
+import tech.xuanwu.northstar.strategy.api.model.ModuleDealRecord;
+import tech.xuanwu.northstar.strategy.api.model.ModuleTradeRecord;
 
 @RestController
 @RequestMapping("/pb")
