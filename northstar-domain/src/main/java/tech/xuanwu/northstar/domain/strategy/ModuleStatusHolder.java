@@ -10,7 +10,10 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.common.utils.FieldUtils;
+import tech.xuanwu.northstar.strategy.api.EventDrivenComponent;
 import tech.xuanwu.northstar.strategy.api.constant.ModuleState;
+import tech.xuanwu.northstar.strategy.api.event.ModuleEvent;
+import tech.xuanwu.northstar.strategy.api.event.ModuleEventBus;
 import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
 import xyz.redtorch.pb.CoreField.OrderField;
 import xyz.redtorch.pb.CoreField.TradeField;
@@ -22,7 +25,7 @@ import xyz.redtorch.pb.CoreField.TradeField;
  */
 @Slf4j
 @Data
-public class ModuleStatusHolder {
+public class ModuleStatusHolder implements EventDrivenComponent{
 
 	@Getter
 	private String moduleName;
@@ -33,8 +36,6 @@ public class ModuleStatusHolder {
 	protected ConcurrentMap<String, ModulePosition> longPositions;
 	
 	protected ConcurrentMap<String, ModulePosition> shortPositions;
-	
-	private String holdingTradingDay;
 	
 	private int countOfOpeningToday;
 	
@@ -78,18 +79,6 @@ public class ModuleStatusHolder {
 		return p1 + p2;
 	}
 	
-	public boolean isSameDayHolding(String currentTradingDay) {
-		return StringUtils.equals(currentTradingDay, holdingTradingDay);
-	}
-	
-	private void opening(TradeField trade, OrderField order) {
-		log.info("[{}] 模组开仓{}", getModuleName(), trade.getContract().getSymbol());
-	}
-	
-	private void closing(TradeField trade) {
-		log.info("[{}] 模组平仓{}", getModuleName(), trade.getContract().getSymbol());
-	}
-	
 	private Map<String, ModulePosition> getPositionMap(PositionDirectionEnum dir){
 		if(dir == PositionDirectionEnum.PD_Long) {
 			return longPositions;
@@ -98,5 +87,17 @@ public class ModuleStatusHolder {
 			return shortPositions;
 		}
 		throw new IllegalArgumentException("非法持仓方向：" + dir);
+	}
+
+	@Override
+	public void onEvent(ModuleEvent<?> moduleEvent) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void setEventBus(ModuleEventBus moduleEventBus) {
+		// TODO Auto-generated method stub
+		
 	}
 }
