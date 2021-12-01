@@ -20,12 +20,14 @@
 ![Image](https://images.gitee.com/uploads/images/2021/0611/094207_e5a77d26_1676852.png)
 
 
-
 开源不易，感谢点赞关注加收藏！  
 详细文档请参考wiki： https://gitee.com/dromara/northstar/wikis/  
 
 ## 适用人群
 全栈技术爱好者、小型私募技术团队
+
+## 社群支持
+详情可私聊
 
 ## 使用注意
 请勿直接使用master分支的最新代码，应该使用最新的tag来作为开发基线
@@ -138,7 +140,6 @@ cd ~/logs/
 ```
 kill `pgrep java`
 ```
-
 
 
 ## 注意事项
