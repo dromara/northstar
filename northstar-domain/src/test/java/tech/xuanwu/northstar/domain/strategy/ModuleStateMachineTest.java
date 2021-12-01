@@ -1,5 +1,6 @@
 package tech.xuanwu.northstar.domain.strategy;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -207,5 +208,59 @@ public class ModuleStateMachineTest {
 	/****************/
 	/**	其他异常情况 **/
 	/****************/
-	//
+	@Test(expected = IllegalStateException.class)
+	public void testCreateSignal() {
+		ModuleStateMachine state = new ModuleStateMachine("test", ModuleState.PENDING_ORDER);
+		state.transformForm(ModuleEventType.SIGNAL_CREATED);
+	}
+	
+	@Test
+	public void testOrderReqCreated() {
+		ModuleStateMachine state = new ModuleStateMachine("test", ModuleState.PENDING_ORDER);
+		state.transformForm(ModuleEventType.ORDER_CONFIRMED);
+		state.transformForm(ModuleEventType.ORDER_REQ_CREATED);
+		assertThat(state.getState()).isEqualTo(ModuleState.PENDING_ORDER);
+	}
+	
+	@Test(expected = IllegalStateException.class)
+	public void testOrderReqRetained() {
+		ModuleStateMachine state = new ModuleStateMachine("test", ModuleState.EMPTY);
+		state.transformForm(ModuleEventType.ORDER_REQ_RETAINED);
+	}
+	
+	@Test(expected = IllegalStateException.class)
+	public void testSellTraded() {
+		ModuleStateMachine state = new ModuleStateMachine("test", ModuleState.EMPTY);
+		state.transformForm(ModuleEventType.SELL_TRADED);
+	}
+	
+	@Test(expected = IllegalStateException.class)
+	public void testBuyTraded() {
+		ModuleStateMachine state = new ModuleStateMachine("test", ModuleState.EMPTY);
+		state.transformForm(ModuleEventType.BUY_TRADED);
+	}
+	
+	@Test(expected = IllegalStateException.class)
+	public void testOrderConfirmed() {
+		ModuleStateMachine state = new ModuleStateMachine("test", ModuleState.EMPTY);
+		state.transformForm(ModuleEventType.ORDER_CONFIRMED);
+	}
+	
+	@Test(expected = IllegalStateException.class)
+	public void testRetryRiskAlerted() {
+		ModuleStateMachine state = new ModuleStateMachine("test", ModuleState.EMPTY);
+		state.transformForm(ModuleEventType.RETRY_RISK_ALERTED);
+	}
+	
+	@Test(expected = IllegalStateException.class)
+	public void testRejectRiskAlerted() {
+		ModuleStateMachine state = new ModuleStateMachine("test", ModuleState.EMPTY);
+		state.transformForm(ModuleEventType.REJECT_RISK_ALERTED);
+	}
+	
+	@Test(expected = IllegalStateException.class)
+	public void testOrderCancelled() {
+		ModuleStateMachine state = new ModuleStateMachine("test", ModuleState.EMPTY);
+		state.transformForm(ModuleEventType.ORDER_CANCELLED);
+	}
 }
