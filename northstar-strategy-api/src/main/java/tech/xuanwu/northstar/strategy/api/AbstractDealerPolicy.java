@@ -90,7 +90,7 @@ public abstract class AbstractDealerPolicy implements DealerPolicy {
 	}
 	
 	@Override
-	public String getBindedContractSymbol() {
+	public String bindedContractSymbol() {
 		return bindedUnifiedSymbol;
 	}
 

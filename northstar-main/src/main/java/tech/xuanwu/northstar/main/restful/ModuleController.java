@@ -168,31 +168,31 @@ public class ModuleController {
 	 * @param position
 	 * @return
 	 */
-	@PostMapping("/module/{moduleName}/position")
-	public ResultBean<Boolean> createPosition(@PathVariable String moduleName, @RequestBody ModulePositionInfo position){
-		return new ResultBean<>(service.createPosition(moduleName, position));
-	}
-	
-	/**
-	 * 修改模组持仓
-	 * @param moduleName
-	 * @param position
-	 * @return
-	 */
-	@PutMapping("/module/{moduleName}/position")
-	public ResultBean<Boolean> updatePosition(@PathVariable String moduleName, @RequestBody ModulePositionInfo position){
-		return new ResultBean<>(service.updatePosition(moduleName, position));
-	}
-	
-	/**
-	 * 移除模组持仓
-	 * @param moduleName
-	 * @param unifiedSymbol
-	 * @param dir
-	 * @return
-	 */
-	@DeleteMapping("/module/{moduleName}/position")
-	public ResultBean<Boolean> removePosition(@PathVariable String moduleName, String unifiedSymbol, PositionDirectionEnum dir){
-		return new ResultBean<>(service.removePosition(moduleName, unifiedSymbol, dir));
-	}
+//	@PostMapping("/module/{moduleName}/position")
+//	public ResultBean<Boolean> createPosition(@PathVariable String moduleName, @RequestBody ModulePositionInfo position){
+//		return new ResultBean<>(service.createPosition(moduleName, position));
+//	}
+//	
+//	/**
+//	 * 修改模组持仓
+//	 * @param moduleName
+//	 * @param position
+//	 * @return
+//	 */
+//	@PutMapping("/module/{moduleName}/position")
+//	public ResultBean<Boolean> updatePosition(@PathVariable String moduleName, @RequestBody ModulePositionInfo position){
+//		return new ResultBean<>(service.updatePosition(moduleName, position));
+//	}
+//	
+//	/**
+//	 * 移除模组持仓
+//	 * @param moduleName
+//	 * @param unifiedSymbol
+//	 * @param dir
+//	 * @return
+//	 */
+//	@DeleteMapping("/module/{moduleName}/position")
+//	public ResultBean<Boolean> removePosition(@PathVariable String moduleName, String unifiedSymbol, PositionDirectionEnum dir){
+//		return new ResultBean<>(service.removePosition(moduleName, unifiedSymbol, dir));
+//	}
 }

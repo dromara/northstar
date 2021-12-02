@@ -1,6 +1,7 @@
 package tech.xuanwu.northstar.main.service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -21,6 +22,7 @@ import tech.xuanwu.northstar.domain.TraderGatewayConnection;
 import tech.xuanwu.northstar.domain.strategy.ModuleManager;
 import tech.xuanwu.northstar.domain.strategy.SandboxModuleManager;
 import tech.xuanwu.northstar.domain.strategy.StrategyModule;
+import tech.xuanwu.northstar.domain.strategy.StrategyModuleFactory;
 import tech.xuanwu.northstar.engine.event.FastEventEngine;
 import tech.xuanwu.northstar.gateway.api.Gateway;
 import tech.xuanwu.northstar.gateway.sim.trade.SimGatewayFactory;
@@ -33,6 +35,7 @@ import tech.xuanwu.northstar.main.playback.PlaybackStat;
 import tech.xuanwu.northstar.main.playback.PlaybackStatRecord;
 import tech.xuanwu.northstar.main.playback.PlaybackTask;
 import tech.xuanwu.northstar.strategy.api.model.ModuleDealRecord;
+import tech.xuanwu.northstar.strategy.api.model.ModuleInfo;
 import tech.xuanwu.northstar.strategy.api.model.ModuleTradeRecord;
 
 @Slf4j
@@ -59,7 +62,7 @@ public class PlaybackService {
 	public PlaybackService(FastEventEngine feEngine, SandboxModuleManager sandboxMgr, GatewayAndConnectionManager gatewayConnMgr,
 			ContractManager contractMgr, ModuleRepository moduleRepo, MarketDataRepository mdRepo, SimMarket simMarket) {
 		simGatewayFactory = new SimGatewayFactory(feEngine, simMarket, contractMgr);
-		moduleFactory = new StrategyModuleFactory(contractMgr, gatewayConnMgr);
+		moduleFactory = new StrategyModuleFactory(gatewayConnMgr);
 		pbEngine = new PlaybackEngine(simMarket, sandboxMgr);
 		this.sandboxMgr = sandboxMgr;
 		this.gatewayConnMgr = gatewayConnMgr;
@@ -91,7 +94,7 @@ public class PlaybackService {
 					.gatewayId(Constants.PLAYBACK_GATEWAY + "_" + UUID.randomUUID().toString().substring(0, 4))
 					.gatewayType(GatewayType.SIM)
 					.gatewayUsage(GatewayUsage.TRADE)
-					.bindedMktGatewayId(originModule.getBindedMarketGatewayId())
+					.bindedMktGatewayId(originModule.getBindedMktGatewayId())
 					.settings(SimSettings.builder().fee(fee).build())
 					.build();
 			SimTradeGateway simTradeGateway = (SimTradeGateway) simGatewayFactory.newInstance(gwDescription);
@@ -103,12 +106,12 @@ public class PlaybackService {
 			moduleInfo.setModuleName(moduleInfo.getModuleName() + Constants.PLAYBACK_MODULE_SUFFIX);
 			moduleInfo.setAccountGatewayId(gwDescription.getGatewayId());
 			
-			StrategyModule module = moduleFactory.makeModule(moduleInfo, new ModuleStatus(moduleInfo.getModuleName()));
-			List<BarData> barDataList = new ArrayList<>();
-			for(String unifiedSymbol : originModule.getInterestContractUnifiedSymbol()) {
-				barDataList.add(new BarData(unifiedSymbol, 100, new ArrayList<>(100)));
-			}
-			module.initMarketDataRef(barDataList);
+			StrategyModule module = moduleFactory.makeModule(moduleInfo, Collections.emptyList());
+//			List<BarData> barDataList = new ArrayList<>();
+//			for(String unifiedSymbol : originModule.bindedContractUnifiedSymbols()) {
+//				barDataList.add(new BarData(unifiedSymbol, 100, new ArrayList<>(100)));
+//			}
+//			module.initMarketDataRef(barDataList);
 			playbackModules.add(module);
 			sandboxMgr.addModule(module);
 			
@@ -169,7 +172,7 @@ public class PlaybackService {
 	}
 	
 	private void clearOutPlaybackRecord(String moduleName) {
-		moduleRepo.removeModuleStatus(moduleName + Constants.PLAYBACK_MODULE_SUFFIX);
+		moduleRepo.removeModulePosition(moduleName + Constants.PLAYBACK_MODULE_SUFFIX);
 		moduleRepo.removeDealRecords(moduleName + Constants.PLAYBACK_MODULE_SUFFIX);
 		moduleRepo.removeTradeRecords(moduleName + Constants.PLAYBACK_MODULE_SUFFIX);
 	}

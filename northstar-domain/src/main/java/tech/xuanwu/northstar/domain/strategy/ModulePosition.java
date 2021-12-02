@@ -9,6 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.common.utils.FieldUtils;
 import tech.xuanwu.northstar.strategy.api.EventDrivenComponent;
@@ -68,6 +69,7 @@ public class ModulePosition implements TickDataAware, TransactionAware, EventDri
 	private Map<String, Frozen> frozenMap = new HashMap<>();
 	
 	// 清仓回调
+	@Setter
 	private Consumer<ModulePosition> clearoutCallback;
 	
 	public ModulePosition(TradeField trade, double stopPrice) {

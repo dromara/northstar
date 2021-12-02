@@ -8,6 +8,7 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Repository;
 
+import tech.xuanwu.northstar.main.persistence.po.ModulePositionPO;
 import tech.xuanwu.northstar.main.playback.PlaybackStatRecord;
 import tech.xuanwu.northstar.strategy.api.model.ModuleDealRecord;
 import tech.xuanwu.northstar.strategy.api.model.ModuleInfo;
@@ -42,18 +43,18 @@ public class ModuleRepository {
 	}
 
 	/*************/
-	/** 模组状态 **/
+	/**  模组持仓  **/
 	/*************/
-	public ModuleStatus loadModuleStatus(String moduleName) {
-		return mongo.findOne(Query.query(Criteria.where(MODULE_NAME).is(moduleName)), ModuleStatus.class);
+	public ModulePositionPO loadModulePosition(String moduleName) {
+		return mongo.findOne(Query.query(Criteria.where(MODULE_NAME).is(moduleName)), ModulePositionPO.class);
 	}
 
-	public void saveModuleStatus(ModuleStatus status) {
+	public void saveModulePosition(ModulePositionPO status) {
 		mongo.save(status);
 	}
 
-	public void removeModuleStatus(String moduleName) {
-		mongo.remove(Query.query(Criteria.where(MODULE_NAME).is(moduleName)), ModuleStatus.class);
+	public void removeModulePosition(String moduleName) {
+		mongo.remove(Query.query(Criteria.where(MODULE_NAME).is(moduleName)), ModulePositionPO.class);
 	}
 
 	/*************/

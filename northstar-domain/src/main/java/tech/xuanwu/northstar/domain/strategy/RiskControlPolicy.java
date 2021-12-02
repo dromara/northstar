@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Set;
 
 import tech.xuanwu.northstar.strategy.api.EventDrivenComponent;
-import tech.xuanwu.northstar.strategy.api.ModuleStatus;
 import tech.xuanwu.northstar.strategy.api.RiskControlRule;
 import tech.xuanwu.northstar.strategy.api.TickDataAware;
 import tech.xuanwu.northstar.strategy.api.constant.RiskAuditResult;
@@ -22,13 +21,10 @@ public class RiskControlPolicy implements TickDataAware, EventDrivenComponent{
 	
 	private TickField lastTick;
 	
-	private ModuleStatus moduleStatus;
-	
 	private ModuleEventBus meb;
 	
-	public RiskControlPolicy(ModuleStatus moduleStatus, List<RiskControlRule> rules) {
+	public RiskControlPolicy(List<RiskControlRule> rules) {
 		this.rules = rules;
-		this.moduleStatus = moduleStatus;
 	}
 
 	@Override
@@ -41,7 +37,7 @@ public class RiskControlPolicy implements TickDataAware, EventDrivenComponent{
 				}
 				Set<RiskAuditResult> results = new HashSet<>();
 				for(RiskControlRule rule : rules) {
-					results.add(rule.checkRisk(orderReq, lastTick, moduleStatus));
+					results.add(rule.checkRisk(orderReq, lastTick));
 				}
 				if(results.contains(RiskAuditResult.REJECTED) || results.contains(RiskAuditResult.RETRY)) {					
 					meb.post(new ModuleEvent<>(ModuleEventType.ORDER_REQ_RETAINED, orderReq));

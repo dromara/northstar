@@ -1,5 +1,6 @@
 package tech.xuanwu.northstar.domain.strategy;
 
+import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -9,8 +10,9 @@ import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.common.event.NorthstarEvent;
 import tech.xuanwu.northstar.common.event.NorthstarEventType;
 import tech.xuanwu.northstar.common.utils.FieldUtils;
+import tech.xuanwu.northstar.gateway.api.TradeGateway;
+import tech.xuanwu.northstar.strategy.api.ContractBindedAware;
 import tech.xuanwu.northstar.strategy.api.EventDrivenComponent;
-import tech.xuanwu.northstar.strategy.api.ModuleStatus;
 import tech.xuanwu.northstar.strategy.api.event.ModuleEvent;
 import tech.xuanwu.northstar.strategy.api.event.ModuleEventBus;
 import tech.xuanwu.northstar.strategy.api.event.ModuleEventType;
@@ -31,7 +33,8 @@ public class StrategyModule implements EventDrivenComponent{
 	
 	protected ModuleEventBus meb = new ModuleEventBus();
 	
-	protected ModuleStatusHolder moduleStatus;
+	@Getter
+	protected ModuleStatus moduleStatus;
 	
 	protected ModuleStateMachine stateMachine;
 	
@@ -48,7 +51,7 @@ public class StrategyModule implements EventDrivenComponent{
 	protected Consumer<CancelOrderReqField> cancelOrderHandler;
 	
 	@Setter
-	protected Consumer<ModuleStatusHolder> moduleStatusChangeHandler;
+	protected Consumer<ModuleStatus> moduleStatusChangeHandler;
 	
 	@Setter
 	protected Consumer<StrategyModule> runningStateChangeListener;
@@ -58,10 +61,17 @@ public class StrategyModule implements EventDrivenComponent{
 	
 	private ModuleTradeIntent ti;
 	
-	public StrategyModule(ModuleStatus status) {
-		this.moduleStatus = (ModuleStatusHolder) status;
+	@Getter
+	private String bindedMktGatewayId;
+	@Getter
+	private TradeGateway gateway;
+	
+	public StrategyModule(String bindedMktGatewayId, TradeGateway gateway, ModuleStatus status) {
+		this.moduleStatus = status;
 		this.stateMachine = moduleStatus.getStateMachine();
 		this.meb.register(status);
+		this.bindedMktGatewayId = bindedMktGatewayId;
+		this.gateway = gateway;
 	}
 	
 	/**
@@ -153,6 +163,7 @@ public class StrategyModule implements EventDrivenComponent{
 	private ModuleTradeIntent genTradeIndent(SubmitOrderReqField submitOrder) {
 		if(FieldUtils.isOpen(submitOrder.getOffsetFlag())) {
 			return new ModuleTradeIntent(getName(), submitOrder, mpo -> mpo.ifPresent(mp -> {
+				mp.setClearoutCallback(p -> moduleStatus.removePostion(p));
 				moduleStatus.addPosition(mp);
 				meb.register(mp);
 			}));
@@ -179,10 +190,13 @@ public class StrategyModule implements EventDrivenComponent{
 	}
 
 	public Set<String> bindedContractUnifiedSymbols(){
-		return null;
+		Set<String> bindedSymbols = new HashSet<>();
+		for(EventDrivenComponent component : components) {
+			if(component instanceof ContractBindedAware) {
+				bindedSymbols.add(((ContractBindedAware)component).bindedContractSymbol());
+			}
+		}
+		return bindedSymbols;
 	}
 	
-	public String bindedMarketGatewayId() {
-		return null;
-	}
 }

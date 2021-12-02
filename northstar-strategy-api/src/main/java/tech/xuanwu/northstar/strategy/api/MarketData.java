@@ -1,5 +1,10 @@
 package tech.xuanwu.northstar.strategy.api;
 
-public interface MarketData extends TickDataAware, BarDataAware{
+/**
+ * 一段行情数据
+ * @author KevinHuangwl
+ *
+ */
+public interface MarketData extends TickDataAware, BarDataAware, ContractBindedAware{
 
 }

@@ -63,7 +63,7 @@ public class PlaybackTask {
 		for(StrategyModule module : playbackModules) {
 			Set<String> interestContracts = module.bindedContractUnifiedSymbols();
 			for(String unifiedSymbol : interestContracts) {				
-				List<MinBarDataPO> data = mdRepo.loadDataByDate(module.bindedMarketGatewayId(), unifiedSymbol, curDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
+				List<MinBarDataPO> data = mdRepo.loadDataByDate(module.getBindedMktGatewayId(), unifiedSymbol, curDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
 				for(MinBarDataPO po : data) {
 					if(precision == PlaybackPrecision.TICK) {						
 						for(TickDataPO tickData : po.getTicksOfMin()) {

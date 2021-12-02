@@ -96,7 +96,7 @@ public class PlaybackTaskTest {
 	public void test() {
 		StrategyModule module = mock(StrategyModule.class);
 		when(module.bindedContractUnifiedSymbols()).thenReturn(Set.of("rb2210@SHFE@FUTURES"));
-		when(module.bindedMarketGatewayId()).thenReturn("testGateway");
+		when(module.getBindedMktGatewayId()).thenReturn("testGateway");
 		PlaybackDescription description = PlaybackDescription.builder()
 				.startDate("20210101")
 				.endDate("20210131")
@@ -119,7 +119,7 @@ public class PlaybackTaskTest {
 	public void testException() {
 		StrategyModule module = mock(StrategyModule.class);
 		when(module.bindedContractUnifiedSymbols()).thenReturn(Set.of("rb2210@SHFE@FUTURES"));
-		when(module.bindedMarketGatewayId()).thenReturn("testGateway");
+		when(module.getBindedMktGatewayId()).thenReturn("testGateway");
 		PlaybackDescription description = PlaybackDescription.builder()
 				.startDate("20210102")
 				.endDate("20210101")
@@ -136,7 +136,7 @@ public class PlaybackTaskTest {
 	public void testProcess() {
 		StrategyModule module = mock(StrategyModule.class);
 		when(module.bindedContractUnifiedSymbols()).thenReturn(Set.of("rb2210@SHFE@FUTURES"));
-		when(module.bindedMarketGatewayId()).thenReturn("testGateway");
+		when(module.getBindedMktGatewayId()).thenReturn("testGateway");
 		PlaybackDescription description = PlaybackDescription.builder()
 				.startDate("20210101")
 				.endDate("20210110")

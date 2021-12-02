@@ -2,6 +2,7 @@ package tech.xuanwu.northstar.main.service;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -11,14 +12,20 @@ import java.util.Set;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 
+import com.google.common.collect.Lists;
+
 import tech.xuanwu.northstar.common.constant.DateTimeConstant;
 import tech.xuanwu.northstar.common.model.ContractManager;
 import tech.xuanwu.northstar.domain.GatewayAndConnectionManager;
 import tech.xuanwu.northstar.domain.GatewayConnection;
 import tech.xuanwu.northstar.domain.strategy.ModuleManager;
+import tech.xuanwu.northstar.domain.strategy.ModuleStatus;
+import tech.xuanwu.northstar.domain.strategy.StrategyModule;
+import tech.xuanwu.northstar.domain.strategy.StrategyModuleFactory;
 import tech.xuanwu.northstar.main.persistence.MarketDataRepository;
 import tech.xuanwu.northstar.main.persistence.ModuleRepository;
 import tech.xuanwu.northstar.main.persistence.po.MinBarDataPO;
+import tech.xuanwu.northstar.main.persistence.po.ModulePositionPO;
 import tech.xuanwu.northstar.main.utils.ProtoBeanUtils;
 import tech.xuanwu.northstar.strategy.api.DealerPolicy;
 import tech.xuanwu.northstar.strategy.api.DynamicParamsAware;
@@ -61,7 +68,7 @@ public class ModuleService implements InitializingBean{
 		this.mdlMgr = mdlMgr;
 		this.gatewayConnMgr = gatewayConnMgr;
 		this.contractMgr = contractMgr;
-		this.moduleFactory = new StrategyModuleFactory(contractMgr, gatewayConnMgr);
+		this.moduleFactory = new StrategyModuleFactory(gatewayConnMgr);
 	}
 	
 	/**
@@ -121,7 +128,7 @@ public class ModuleService implements InitializingBean{
 	 * @throws Exception 
 	 */
 	public boolean createModule(ModuleInfo info) throws Exception {
-		loadModule(info, new ModuleStatus(info.getModuleName()));
+		loadModule(info, Collections.emptyList());
 		return moduleRepo.saveModuleInfo(info);
 	}
 	
@@ -132,13 +139,9 @@ public class ModuleService implements InitializingBean{
 	 */
 	public boolean updateModule(ModuleInfo info) throws Exception {
 		mdlMgr.removeModule(info.getModuleName());
-		ModuleStatus status = moduleRepo.loadModuleStatus(info.getModuleName());
-		if(status == null) {
-			status = new ModuleStatus(info.getModuleName());
-		}
-		
+		ModulePositionPO po = moduleRepo.loadModulePosition(info.getModuleName());
 		moduleRepo.deleteModuleInfoById(info.getModuleName());
-		loadModule(info, status);
+		loadModule(info, po.getPositions());
 		return moduleRepo.saveModuleInfo(info);
 	}
 	
@@ -147,37 +150,37 @@ public class ModuleService implements InitializingBean{
 	 * @param module
 	 * @param status
 	 */
-	private void loadModule(ModuleInfo info, ModuleStatus moduleStatus) throws Exception {
-		StrategyModule strategyModule = moduleFactory.makeModule(info, moduleStatus);
-		Set<String> interestSymbols = strategyModule.getInterestContractUnifiedSymbol();
-		List<BarData> barDataList = new ArrayList<>();
-		LinkedList<BarField> barList = new LinkedList<>();
-		
-		String gatewayId = info.getAccountGatewayId();
-		GatewayConnection conn = gatewayConnMgr.getGatewayConnectionById(gatewayId);
-		String mktGatewayId = conn.getGwDescription().getBindedMktGatewayId();
-		
-		for(String unifiedSymbol : interestSymbols) {
-			List<String> availableDates = mdRepo.findDataAvailableDates(mktGatewayId, unifiedSymbol, true);
-			for(String date : availableDates.subList(availableDates.size() - info.getNumOfDaysOfDataRef(), availableDates.size())) {
-				List<MinBarDataPO> dataBarPOList = mdRepo.loadDataByDate(mktGatewayId, unifiedSymbol, date);
-				for(MinBarDataPO po : dataBarPOList) {
-					BarField.Builder bb = BarField.newBuilder();
-					ProtoBeanUtils.toProtoBean(bb, po);
-					barList.add(bb.build());
-				}
-			}
-			barDataList.add(new BarData(unifiedSymbol, barList));
-		}
-		
-		strategyModule.initMarketDataRef(barDataList);
-		strategyModule.setRunningStateChangeListener((isEnabled, module)->{
-			ModuleInfo moduleInfo = moduleRepo.findModuleInfo(module.getName());
-			moduleInfo.setEnabled(isEnabled);
-			moduleRepo.saveModuleInfo(moduleInfo);
-		});
-		
-		mdlMgr.addModule(strategyModule);
+	private void loadModule(ModuleInfo info, List<ModulePositionInfo> positionInfos) throws Exception {
+		StrategyModule strategyModule = moduleFactory.makeModule(info, positionInfos);
+		Set<String> interestSymbols = strategyModule.bindedContractUnifiedSymbols();
+//		List<BarData> barDataList = new ArrayList<>();
+//		LinkedList<BarField> barList = new LinkedList<>();
+//		
+//		String gatewayId = info.getAccountGatewayId();
+//		GatewayConnection conn = gatewayConnMgr.getGatewayConnectionById(gatewayId);
+//		String mktGatewayId = conn.getGwDescription().getBindedMktGatewayId();
+//		
+//		for(String unifiedSymbol : interestSymbols) {
+//			List<String> availableDates = mdRepo.findDataAvailableDates(mktGatewayId, unifiedSymbol, true);
+//			for(String date : availableDates.subList(availableDates.size() - info.getNumOfDaysOfDataRef(), availableDates.size())) {
+//				List<MinBarDataPO> dataBarPOList = mdRepo.loadDataByDate(mktGatewayId, unifiedSymbol, date);
+//				for(MinBarDataPO po : dataBarPOList) {
+//					BarField.Builder bb = BarField.newBuilder();
+//					ProtoBeanUtils.toProtoBean(bb, po);
+//					barList.add(bb.build());
+//				}
+//			}
+//			barDataList.add(new BarData(unifiedSymbol, barList));
+//		}
+//		
+//		strategyModule.initMarketDataRef(barDataList);
+//		strategyModule.setRunningStateChangeListener((isEnabled, module)->{
+//			ModuleInfo moduleInfo = moduleRepo.findModuleInfo(module.getName());
+//			moduleInfo.setEnabled(isEnabled);
+//			moduleRepo.saveModuleInfo(moduleInfo);
+//		});
+//		
+//		mdlMgr.addModule(strategyModule);
 	}
 	
 	/**
@@ -194,17 +197,17 @@ public class ModuleService implements InitializingBean{
 	 * @return
 	 */
 	public ModuleRealTimeInfo getModuleRealTimeInfo(String moduleName) {
-		return mdlMgr.getModule(moduleName).getRealTimeInfo();
+		return null;
 	}
 	
-	/**
-	 * 获取模组引用数据
-	 * @param moduleName
-	 * @return
-	 */
-	public ModuleDataRef getModuleDataRef(String moduleName) {
-		return mdlMgr.getModule(moduleName).getDataRef();
-	}
+//	/**
+//	 * 获取模组引用数据
+//	 * @param moduleName
+//	 * @return
+//	 */
+//	public ModuleDataRef getModuleDataRef(String moduleName) {
+//		return mdlMgr.getModule(moduleName).getDataRef();
+//	}
 	
 	/**
 	 * 获取模组交易历史
@@ -231,7 +234,7 @@ public class ModuleService implements InitializingBean{
 	public void removeModule(String moduleName) {
 		mdlMgr.removeModule(moduleName);
 		moduleRepo.deleteModuleInfoById(moduleName);
-		moduleRepo.removeModuleStatus(moduleName);
+		moduleRepo.removeModulePosition(moduleName);
 		moduleRepo.removeDealRecords(moduleName);
 		moduleRepo.removeTradeRecords(moduleName);
 	}
@@ -245,53 +248,51 @@ public class ModuleService implements InitializingBean{
 		return true;
 	}
 	
-	/**
-	 * 新建模组持仓
-	 * @param moduleName
-	 * @param position
-	 * @return
-	 */
-	public boolean createPosition(String moduleName, ModulePositionInfo position) {
-		position.setOpenTime(System.currentTimeMillis());
-		position.setOpenTradingDay(LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
-		return updatePosition(moduleName, position);
-	}
+//	/**
+//	 * 新建模组持仓
+//	 * @param moduleName
+//	 * @param position
+//	 * @return
+//	 */
+//	public boolean createPosition(String moduleName, ModulePositionInfo position) {
+//		position.setOpenTime(System.currentTimeMillis());
+//		position.setOpenTradingDay(LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
+//		return updatePosition(moduleName, position);
+//	}
 	
-	/**
-	 * 更新模组持仓
-	 * @param moduleName
-	 * @param position
-	 * @return
-	 */
-	public boolean updatePosition(String moduleName, ModulePositionInfo position) {
-		ModuleStatus status = mdlMgr.getModule(moduleName).addPosition(position);
-		ContractField contract = contractMgr.getContract(position.getUnifiedSymbol());
-		position.setMultiplier(contract.getMultiplier());
-		moduleRepo.saveModuleStatus(status);
-		return true;
-	}
-	
-	/**
-	 * 移除模组持仓
-	 * @param moduleName
-	 * @param unifiedSymbol
-	 * @param dir
-	 * @return
-	 */
-	public boolean removePosition(String moduleName, String unifiedSymbol, PositionDirectionEnum dir) {
-		ModuleStatus status = mdlMgr.getModule(moduleName).removePosition(unifiedSymbol, dir);
-		moduleRepo.saveModuleStatus(status);
-		return true;
-	}
+//	/**
+//	 * 更新模组持仓
+//	 * @param moduleName
+//	 * @param position
+//	 * @return
+//	 */
+//	public boolean updatePosition(String moduleName, ModulePositionInfo position) {
+//		mdlMgr.getModule(moduleName).getModuleStatus().addPosition(position);
+//		ContractField contract = contractMgr.getContract(position.getUnifiedSymbol());
+//		position.setMultiplier(contract.getMultiplier());
+//		moduleRepo.saveModuleStatus(status);
+//		return true;
+//	}
+//	
+//	/**
+//	 * 移除模组持仓
+//	 * @param moduleName
+//	 * @param unifiedSymbol
+//	 * @param dir
+//	 * @return
+//	 */
+//	public boolean removePosition(String moduleName, String unifiedSymbol, PositionDirectionEnum dir) {
+//		mdlMgr.getModule(moduleName).getModuleStatus().removePosition(unifiedSymbol, dir);
+//		
+//		moduleRepo.saveModuleStatus(status);
+//		return true;
+//	}
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		for(ModuleInfo m : getCurrentModuleInfos()) {
-			ModuleStatus status = moduleRepo.loadModuleStatus(m.getModuleName());
-			if(status == null) {
-				status = new ModuleStatus(m.getModuleName());
-			}
-			loadModule(m, status);
+			ModulePositionPO po = moduleRepo.loadModulePosition(m.getModuleName());
+			loadModule(m, po.getPositions());
 		}
 	}
 	

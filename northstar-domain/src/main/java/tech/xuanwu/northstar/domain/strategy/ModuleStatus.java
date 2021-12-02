@@ -10,10 +10,8 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.common.utils.FieldUtils;
-import tech.xuanwu.northstar.strategy.api.ModuleStatus;
 import tech.xuanwu.northstar.strategy.api.constant.ModuleState;
 import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
-import xyz.redtorch.pb.CoreField.AccountField;
 
 /**
  * 模组状态
@@ -22,7 +20,7 @@ import xyz.redtorch.pb.CoreField.AccountField;
  */
 @Slf4j
 @Data
-public class ModuleStatusHolder implements ModuleStatus{
+public class ModuleStatus {
 
 	@Getter
 	private String moduleName;
@@ -34,9 +32,7 @@ public class ModuleStatusHolder implements ModuleStatus{
 	
 	protected ConcurrentMap<String, ModulePosition> shortPositions;
 	
-	private AccountField account;
-	
-	public ModuleStatusHolder(String name) {
+	public ModuleStatus(String name) {
 		this.moduleName = name;
 		this.stateMachine = new ModuleStateMachine(name, ModuleState.EMPTY);
 		this.longPositions = new ConcurrentHashMap<>();
@@ -44,21 +40,27 @@ public class ModuleStatusHolder implements ModuleStatus{
 	}
 	
 	public void addPosition(ModulePosition position) {
+		log.info("[{}] 加入持仓，{} {} {}", getModuleName(), position.contract().getUnifiedSymbol(), position.getDirection(), position.getVolume());
 		Map<String, ModulePosition> positionMap = getPositionMap(position.getDirection());
 		positionMap.put(position.contract().getUnifiedSymbol(), position);
 		if(at(ModuleState.EMPTY)) {			
 			ModuleState state = FieldUtils.isLong(position.getDirection()) ? ModuleState.HOLDING_LONG : ModuleState.HOLDING_SHORT;
-			log.info("[{}] 手动变更模组状态：[{}]", getModuleName(), state);
+			log.info("[{}] 变更模组状态：[{}]", getModuleName(), state);
 			stateMachine.setCurState(state);
 			stateMachine.setOriginState(state);
 		}
 	}
 	
+	public void removePostion(ModulePosition position) {
+		removePosition(position.contract().getUnifiedSymbol(), position.getDirection());
+	}
+	
 	public void removePosition(String unifiedSymbol, PositionDirectionEnum dir) {
+		log.info("[{}] 移除持仓，{} {}", getModuleName(), unifiedSymbol, dir);
 		Map<String, ModulePosition> positionMap = getPositionMap(dir);
 		positionMap.remove(unifiedSymbol);
 		if(at(ModuleState.HOLDING_LONG) || at(ModuleState.HOLDING_SHORT)) {			
-			log.info("[{}] 手动变更模组状态：[{}]", getModuleName(), ModuleState.EMPTY);
+			log.info("[{}] 变更模组状态：[{}]", getModuleName(), ModuleState.EMPTY);
 			stateMachine.setCurState(ModuleState.EMPTY);
 			stateMachine.setOriginState(ModuleState.EMPTY);
 		}
@@ -84,26 +86,6 @@ public class ModuleStatusHolder implements ModuleStatus{
 		return p1 + p2;
 	}
 	
-	public double closedProfit() {
-		return 0;
-	}
-
-	@Override
-	public void onAccount(AccountField account) {
-		this.account = account;
-	}
-
-	@Override
-	public double accountBalance() {
-		return account.getBalance();
-	}
-
-	@Override
-	public double accountAvailable() {
-		return account.getAvailable();
-	}
-	
-	@Override
 	public ModuleState state() {
 		return stateMachine.getCurState();
 	}

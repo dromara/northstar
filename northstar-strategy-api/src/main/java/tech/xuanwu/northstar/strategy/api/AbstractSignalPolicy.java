@@ -42,7 +42,7 @@ public abstract class AbstractSignalPolicy implements SignalPolicy {
 	}
 
 	@Override
-	public String getBindedContractSymbol() {
+	public String bindedContractSymbol() {
 		return bindedUnifiedSymbol;
 	}
 	

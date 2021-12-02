@@ -1,14 +1,13 @@
 package tech.xuanwu.northstar.strategy.cta.module.risk;
 
 import lombok.extern.slf4j.Slf4j;
-import tech.xuanwu.northstar.strategy.api.ModuleStatus;
 import tech.xuanwu.northstar.strategy.api.RiskControlRule;
 import tech.xuanwu.northstar.strategy.api.annotation.Setting;
 import tech.xuanwu.northstar.strategy.api.annotation.StrategicComponent;
+import tech.xuanwu.northstar.strategy.api.constant.ModuleState;
 import tech.xuanwu.northstar.strategy.api.constant.RiskAuditResult;
 import tech.xuanwu.northstar.strategy.api.model.DynamicParams;
-import xyz.redtorch.pb.CoreEnum.DirectionEnum;
-import xyz.redtorch.pb.CoreField.ContractField;
+import xyz.redtorch.pb.CoreField.AccountField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TickField;
 
@@ -64,8 +63,32 @@ public class UseMarginExceededRule implements RiskControlRule {
 	}
 
 	@Override
-	public RiskAuditResult checkRisk(SubmitOrderReqField orderReq, TickField tick, ModuleStatus moduleStatus) {
+	public RiskAuditResult checkRisk(SubmitOrderReqField orderReq, TickField tick) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public void onChange(ModuleState state) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onAccount(AccountField account) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public double accountBalance() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public double accountAvailable() {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 }
