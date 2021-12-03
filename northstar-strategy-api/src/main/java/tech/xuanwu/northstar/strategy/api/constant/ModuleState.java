@@ -12,6 +12,10 @@ public enum ModuleState {
 	 */
 	EMPTY,
 	/**
+	 * 净空仓（锁仓）
+	 */
+	NET_EMPTY,
+	/**
 	 * 持多仓
 	 */
 	HOLDING_LONG,
@@ -47,5 +51,9 @@ public enum ModuleState {
 	
 	public boolean isOrdering() {
 		return this == PLACING_ORDER || isWaiting();
+	}
+	
+	public boolean isEmpty() {
+		return this ==  EMPTY || this == NET_EMPTY;
 	}
 }

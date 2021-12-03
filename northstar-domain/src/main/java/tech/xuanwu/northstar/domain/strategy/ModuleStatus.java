@@ -2,19 +2,16 @@ package tech.xuanwu.northstar.domain.strategy;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 import lombok.Data;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.common.utils.FieldUtils;
 import tech.xuanwu.northstar.strategy.api.constant.ModuleState;
-import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
 
 /**
  * 模组状态
+ * 模组持仓理论上只能支持一个合约的单向持仓或双向持仓；(暂不考虑套利模型)
  * @author KevinHuangwl
  *
  */
@@ -28,72 +25,86 @@ public class ModuleStatus {
 	@Getter
 	private ModuleStateMachine stateMachine;
 	
-	protected ConcurrentMap<String, ModulePosition> longPositions;
+	@Getter
+	protected ModulePosition longPosition;
 	
-	protected ConcurrentMap<String, ModulePosition> shortPositions;
+	@Getter
+	protected ModulePosition shortPosition;
 	
 	public ModuleStatus(String name) {
 		this.moduleName = name;
 		this.stateMachine = new ModuleStateMachine(name, ModuleState.EMPTY);
-		this.longPositions = new ConcurrentHashMap<>();
-		this.shortPositions = new ConcurrentHashMap<>();
 	}
 	
+	/**
+	 * 增加持仓
+	 * @param position
+	 */
 	public void addPosition(ModulePosition position) {
-		log.info("[{}] 加入持仓，{} {} {}", getModuleName(), position.contract().getUnifiedSymbol(), position.getDirection(), position.getVolume());
-		Map<String, ModulePosition> positionMap = getPositionMap(position.getDirection());
-		positionMap.put(position.contract().getUnifiedSymbol(), position);
-		if(at(ModuleState.EMPTY)) {			
-			ModuleState state = FieldUtils.isLong(position.getDirection()) ? ModuleState.HOLDING_LONG : ModuleState.HOLDING_SHORT;
-			log.info("[{}] 变更模组状态：[{}]", getModuleName(), state);
-			stateMachine.setCurState(state);
-			stateMachine.setOriginState(state);
+		log.info("[{}] 持仓增加，{} {} {}", getModuleName(), position.contract().getUnifiedSymbol(), position.getDirection(), position.getVolume());
+		if(FieldUtils.isLong(position.getDirection())) {
+			longPosition = position;
 		}
+		if(FieldUtils.isShort(position.getDirection())) {
+			shortPosition = position;
+		}
+		
+		ModuleState state = getMergedState();
+		int longVol = longPosition == null ? 0 : longPosition.getVolume();
+		int shortVol = shortPosition == null ? 0 : shortPosition.getVolume();
+		log.info("[{}] 变更模组状态：[{}]，多头{}手，空头{}手", getModuleName(), state, longVol, shortVol);
+		stateMachine.setCurState(state);
+		stateMachine.setOriginState(state);
 	}
 	
+	/**
+	 * 移除持仓
+	 * @param position
+	 */
 	public void removePostion(ModulePosition position) {
-		removePosition(position.contract().getUnifiedSymbol(), position.getDirection());
-	}
-	
-	public void removePosition(String unifiedSymbol, PositionDirectionEnum dir) {
-		log.info("[{}] 移除持仓，{} {}", getModuleName(), unifiedSymbol, dir);
-		Map<String, ModulePosition> positionMap = getPositionMap(dir);
-		positionMap.remove(unifiedSymbol);
-		if(at(ModuleState.HOLDING_LONG) || at(ModuleState.HOLDING_SHORT)) {			
-			log.info("[{}] 变更模组状态：[{}]", getModuleName(), ModuleState.EMPTY);
-			stateMachine.setCurState(ModuleState.EMPTY);
-			stateMachine.setOriginState(ModuleState.EMPTY);
+		log.info("[{}] 移除持仓，{} {} {}", getModuleName(), position.contract().getUnifiedSymbol(), position.getDirection());
+		if(FieldUtils.isLong(position.getDirection())) {
+			longPosition = null;
 		}
+		if(FieldUtils.isShort(position.getDirection())) {
+			shortPosition = null;
+		}
+		ModuleState state = getMergedState();
+		log.info("[{}] 变更模组状态：[{}]", getModuleName(), state);
+		stateMachine.setCurState(state);
+		stateMachine.setOriginState(state);
 	}
 	
 	public boolean at(ModuleState state) {
 		return stateMachine.getState() == state;
 	}
 	
-	private Map<String, ModulePosition> getPositionMap(PositionDirectionEnum dir){
-		if(dir == PositionDirectionEnum.PD_Long) {
-			return longPositions;
-		}
-		if(dir == PositionDirectionEnum.PD_Short) {
-			return shortPositions;
-		}
-		throw new IllegalArgumentException("非法持仓方向：" + dir);
-	}
-	
 	public double holdingProfit() {
-		double p1 = longPositions.values().stream().mapToDouble(ModulePosition::getProfit).reduce(0D, (a,b) -> a+b);
-		double p2 = shortPositions.values().stream().mapToDouble(ModulePosition::getProfit).reduce(0D, (a,b) -> a+b);
+		double p1 = longPosition != null ? longPosition.getProfit() : 0;
+		double p2 = shortPosition != null ? shortPosition.getProfit() : 0;
 		return p1 + p2;
 	}
 	
-	public ModuleState state() {
-		return stateMachine.getCurState();
+	private ModuleState getMergedState() {
+		if(longPosition == shortPosition)
+			return ModuleState.EMPTY;
+		if(longPosition == null)
+			return ModuleState.HOLDING_SHORT;
+		if(shortPosition == null)
+			return ModuleState.HOLDING_LONG;
+		if(longPosition.getVolume() > shortPosition.getVolume())
+			return ModuleState.HOLDING_LONG;
+		if(longPosition.getVolume() < shortPosition.getVolume())
+			return ModuleState.HOLDING_SHORT;
+		return ModuleState.NET_EMPTY;
 	}
-
+	
 	public List<ModulePosition> getAllPositions(){
-		List<ModulePosition> resultList = new ArrayList<>(longPositions.size() + shortPositions.size());
-		resultList.addAll(longPositions.values());
-		resultList.addAll(shortPositions.values());
+		List<ModulePosition> resultList = new ArrayList<>(2);
+		if(longPosition != null) 
+			resultList.add(longPosition);
+		if(shortPosition != null)
+			resultList.add(shortPosition);
 		return resultList;
 	}
 }

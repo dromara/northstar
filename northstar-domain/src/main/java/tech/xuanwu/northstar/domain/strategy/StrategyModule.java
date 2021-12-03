@@ -171,10 +171,10 @@ public class StrategyModule implements EventDrivenComponent{
 		if(FieldUtils.isClose(submitOrder.getOffsetFlag())) {
 			ModulePosition mp = null;
 			if(FieldUtils.isBuy(submitOrder.getDirection())) {
-				mp = moduleStatus.getShortPositions().get(submitOrder.getContract().getUnifiedSymbol());
+				mp = moduleStatus.getShortPosition();
 			} 
 			if(FieldUtils.isSell(submitOrder.getDirection())) {
-				mp = moduleStatus.getLongPositions().get(submitOrder.getContract().getUnifiedSymbol());
+				mp = moduleStatus.getLongPosition();
 			}
 			if(mp == null) {
 				throw new IllegalStateException("订单买卖方向不明确");
