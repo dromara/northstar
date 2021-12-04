@@ -18,6 +18,7 @@ import tech.xuanwu.northstar.strategy.api.TransactionAware;
 import tech.xuanwu.northstar.strategy.api.event.ModuleEvent;
 import tech.xuanwu.northstar.strategy.api.event.ModuleEventBus;
 import tech.xuanwu.northstar.strategy.api.event.ModuleEventType;
+import tech.xuanwu.northstar.strategy.api.model.ModulePositionInfo;
 import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.ForceCloseReasonEnum;
@@ -68,15 +69,29 @@ public class ModulePosition implements TickDataAware, TransactionAware, EventDri
 	
 	private Map<String, Frozen> frozenMap = new HashMap<>();
 	
+	private String governedByModule;
+	
 	// 清仓回调
 	@Setter
 	private Consumer<ModulePosition> clearoutCallback;
 	
-	public ModulePosition(TradeField trade, double stopPrice) {
-		this(trade, stopPrice, null);
+	public ModulePosition(ModulePositionInfo info, ContractField contract) {
+		this(info.getModuleName(), TradeField.newBuilder()
+				.setContract(contract)
+				.setPrice(info.getOpenPrice())
+				.setTradeTimestamp(info.getOpenTime())
+				.setTradingDay(info.getOpenTradingDay())
+				.setDirection(FieldUtils.isLong(info.getPositionDir()) ? DirectionEnum.D_Buy : DirectionEnum.D_Sell)
+				.setVolume(info.getVolume())
+				.build(), info.getStopLossPrice());
 	}
 	
-	public ModulePosition(TradeField trade, double stopPrice, Consumer<ModulePosition> clearoutCallback) {
+	public ModulePosition(String moduleName, TradeField trade, double stopPrice) {
+		this(moduleName, trade, stopPrice, null);
+	}
+	
+	public ModulePosition(String moduleName, TradeField trade, double stopPrice, Consumer<ModulePosition> clearoutCallback) {
+		this.governedByModule = moduleName;
 		this.direction = trade.getDirection() == DirectionEnum.D_Buy ? PositionDirectionEnum.PD_Long : PositionDirectionEnum.PD_Short;
 		this.stopLoss = new StopLoss(direction, stopPrice);
 		this.openTrade = trade;
@@ -185,6 +200,20 @@ public class ModulePosition implements TickDataAware, TransactionAware, EventDri
 
 	public double openPrice() {
 		return openTrade.getPrice();
+	}
+	
+	public ModulePositionInfo convertTo() {
+		return ModulePositionInfo.builder()
+				.moduleName(governedByModule)
+				.multiplier(contract().getMultiplier())
+				.openPrice(openTrade.getPrice())
+				.openTime(openTrade.getTradeTimestamp())
+				.openTradingDay(openTrade.getTradingDay())
+				.positionDir(direction)
+				.stopLossPrice(stopLoss.getStopPrice())
+				.unifiedSymbol(contract().getUnifiedSymbol())
+				.volume(volume)
+				.build();
 	}
 	
 	@AllArgsConstructor

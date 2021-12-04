@@ -97,7 +97,7 @@ public class ModuleTradeIntent {
 	private void onOpenOrder(OrderField order) {
 		// 处理情况四
 		if(partiallyTraded && latestTrade != null) {
-			openCallback.accept(Optional.of(new ModulePosition(latestTrade, submitOrderReq.getStopPrice())));
+			openCallback.accept(Optional.of(new ModulePosition(moduleName, latestTrade, submitOrderReq.getStopPrice())));
 			isDone = true;
 		}
 		// 处理情况三、情况五
@@ -131,7 +131,7 @@ public class ModuleTradeIntent {
 		// 处理情况四，不确定trade回报与order回报哪个先到达
 		// 处理情况一、二。如果是多次成交，trade的成交数量可能会变，但originOrderId不会变，所以只要核对总量即可
 		if(partiallyTraded || trade.getVolume() == submitOrderReq.getVolume()) {
-			openCallback.accept(Optional.of(new ModulePosition(trade, submitOrderReq.getStopPrice())));
+			openCallback.accept(Optional.of(new ModulePosition(moduleName, trade, submitOrderReq.getStopPrice())));
 			isDone = true;
 		}
 	}

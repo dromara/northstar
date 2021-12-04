@@ -28,6 +28,8 @@ public class ModulePositionTest {
 	
 	TestFieldFactory factory = new TestFieldFactory("test");
 	
+	String NAME = "MODULE";
+	
 	String SYMBOL = "rb2210";
 	TradeField buyTrade = factory.makeTradeField(SYMBOL, 2000, 10, DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open);
 	TradeField sellTrade = factory.makeTradeField(SYMBOL, 2000, 10, DirectionEnum.D_Sell, OffsetFlagEnum.OF_Open);
@@ -36,18 +38,18 @@ public class ModulePositionTest {
 	TickField tick2 = factory.makeTickField("rb2110", 2100);
 	@Test
 	public void shouldUpdateProfit() {
-		ModulePosition p1 = new ModulePosition(buyTrade, 0);
+		ModulePosition p1 = new ModulePosition(NAME, buyTrade, 0);
 		p1.onTick(tick);
 		assertThat(p1.getProfit()).isEqualTo(10000);
 		
-		ModulePosition p2 = new ModulePosition(sellTrade, 0);
+		ModulePosition p2 = new ModulePosition(NAME, sellTrade, 0);
 		p2.onTick(tick);
 		assertThat(p2.getProfit()).isEqualTo(-10000);
 	}
 	
 	@Test
 	public void shouldNotUpdateProfit() {
-		ModulePosition p1 = new ModulePosition(buyTrade, 0);
+		ModulePosition p1 = new ModulePosition(NAME, buyTrade, 0);
 		p1.onTick(tick2);
 		assertThat(p1.getProfit()).isEqualTo(0);
 	}
@@ -56,7 +58,7 @@ public class ModulePositionTest {
 	@Test
 	public void shouldTriggerStopLoss() {
 		Consumer<ModulePosition> callback = mock(Consumer.class);
-		ModulePosition p1 = new ModulePosition(sellTrade, 2100, callback);
+		ModulePosition p1 = new ModulePosition(NAME, sellTrade, 2100, callback);
 		p1.meb = mock(ModuleEventBus.class);
 		p1.onTick(tick);
 		verify(p1.meb).post(any(ModuleEvent.class));
@@ -65,7 +67,7 @@ public class ModulePositionTest {
 	
 	@Test
 	public void shouldNotTriggerStopLoss() {
-		ModulePosition p1 = new ModulePosition(sellTrade, 2200);
+		ModulePosition p1 = new ModulePosition(NAME, sellTrade, 2200);
 		p1.meb = mock(ModuleEventBus.class);
 		p1.onTick(tick);
 		verify(p1.meb, times(0)).post(any(ModuleEvent.class));
@@ -75,7 +77,7 @@ public class ModulePositionTest {
 	@Test
 	public void testClosePositionAndOrderTraded() {
 		Consumer<ModulePosition> callback = mock(Consumer.class);
-		ModulePosition p1 = new ModulePosition(sellTrade, 2100, callback);
+		ModulePosition p1 = new ModulePosition(NAME, sellTrade, 2100, callback);
 		p1.lastTick = tick;
 		SubmitOrderReqField submitOrderReq = p1.closePosition(10, 1900);
 		p1.onTrade(TradeField.newBuilder()
@@ -89,7 +91,7 @@ public class ModulePositionTest {
 	
 	@Test
 	public void testClosePositionAndOrderPartiallyTraded() {
-		ModulePosition p1 = new ModulePosition(sellTrade, 2100);
+		ModulePosition p1 = new ModulePosition(NAME, sellTrade, 2100);
 		p1.lastTick = tick;
 		SubmitOrderReqField submitOrderReq = p1.closePosition(10, 1900);
 		p1.onTrade(TradeField.newBuilder()
@@ -111,7 +113,7 @@ public class ModulePositionTest {
 	
 	@Test
 	public void testClosePositionAndOrderCancelled() {
-		ModulePosition p1 = new ModulePosition(sellTrade, 2100);
+		ModulePosition p1 = new ModulePosition(NAME, sellTrade, 2100);
 		p1.lastTick = tick;
 		SubmitOrderReqField submitOrderReq = p1.closePosition(8, 1900);
 		p1.onOrder(OrderField.newBuilder()
@@ -126,13 +128,13 @@ public class ModulePositionTest {
 	
 	@Test
 	public void testOpenPrice() {
-		ModulePosition p1 = new ModulePosition(sellTrade, 2100);
+		ModulePosition p1 = new ModulePosition(NAME, sellTrade, 2100);
 		assertThat(p1.openPrice()).isEqualTo(2000);
 	}
 	
 	@Test
 	public void testSetEventBus() {
-		ModulePosition p1 = new ModulePosition(sellTrade, 2100);
+		ModulePosition p1 = new ModulePosition(NAME, sellTrade, 2100);
 		ModuleEventBus meb = mock(ModuleEventBus.class);
 		p1.setEventBus(meb);
 		assertThat(p1.meb).isEqualTo(meb);
@@ -140,7 +142,7 @@ public class ModulePositionTest {
 	
 	@Test
 	public void shouldSkipTheEvent() {
-		ModulePosition p1 = new ModulePosition(sellTrade, 2100);
+		ModulePosition p1 = new ModulePosition(NAME, sellTrade, 2100);
 		ModuleEventBus meb = mock(ModuleEventBus.class);
 		p1.setEventBus(meb);
 		
@@ -161,7 +163,7 @@ public class ModulePositionTest {
 	
 	@Test
 	public void shouldEmitOrderPassed() {
-		ModulePosition p1 = new ModulePosition(sellTrade, 2100);
+		ModulePosition p1 = new ModulePosition(NAME, sellTrade, 2100);
 		p1.lastTick = TickField.newBuilder().setTradingDay(sellTrade.getTradingDay()).build();
 		ModuleEventBus meb = mock(ModuleEventBus.class);
 		p1.setEventBus(meb);
@@ -205,7 +207,7 @@ public class ModulePositionTest {
 	
 	@Test
 	public void shouldEmitOrderRetained() {
-		ModulePosition p1 = new ModulePosition(sellTrade, 2100);
+		ModulePosition p1 = new ModulePosition(NAME, sellTrade, 2100);
 		p1.lastTick = TickField.newBuilder().setTradingDay(sellTrade.getTradingDay()).build();
 		ModuleEventBus meb = mock(ModuleEventBus.class);
 		p1.setEventBus(meb);
