@@ -2,12 +2,12 @@ package common;
 
 import org.apache.commons.lang3.RandomStringUtils;
 
-import tech.xuanwu.northstar.common.constant.GatewayType;
-import tech.xuanwu.northstar.common.constant.GatewayUsage;
-import tech.xuanwu.northstar.common.model.CtpSettings;
-import tech.xuanwu.northstar.common.model.GatewayDescription;
-import tech.xuanwu.northstar.common.model.GatewaySettings;
-import tech.xuanwu.northstar.common.model.SimSettings;
+import tech.quantit.northstar.common.constant.GatewayType;
+import tech.quantit.northstar.common.constant.GatewayUsage;
+import tech.quantit.northstar.common.model.CtpSettings;
+import tech.quantit.northstar.common.model.GatewayDescription;
+import tech.quantit.northstar.common.model.GatewaySettings;
+import tech.quantit.northstar.common.model.SimSettings;
 
 public class TestGatewayFactory {
 

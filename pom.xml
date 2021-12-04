@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>tech.xuan-wu</groupId>
+	<groupId>tech.quantit</groupId>
 	<artifactId>northstar</artifactId>
-	<version>2.1.0</version>
+	<version>3.0.0</version>
 	<name>northstar</name>
 	<packaging>pom</packaging>
 	<description>北极星程序化交易平台</description>
 	
 	<properties>
-		<java.version>11</java.version>
+		<java.version>17</java.version>
 		<argLine>-Dfile.encoding=UTF-8</argLine>		
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.encoding>UTF-8</maven.compiler.encoding>
 		<maven.compiler.source>${java.version}</maven.compiler.source>
 		<maven.compiler.target>${java.version}</maven.compiler.target>
-		<northstar-version>2.1.0</northstar-version>
+		<northstar-version>3.0.0</northstar-version>
 		<springboot-version>2.1.5.RELEASE</springboot-version>
 		<lombok-version>1.18.12</lombok-version>
 		<slf4j-version>1.7.25</slf4j-version>
@@ -34,6 +34,7 @@
 		<mockito-version>3.0.0</mockito-version>
 		<hessian-version>4.0.38</hessian-version>
 		<hutool-version>5.6.3</hutool-version>
+		<jackson-version>2.9.8</jackson-version>
 	</properties>
 
 	<modules>
@@ -41,11 +42,8 @@
 		<module>northstar-gateway-api</module>
 		<module>northstar-gateway-ctp</module>
 		<module>northstar-gateway-sim</module>
-		<module>northstar-engine</module>
 		<module>northstar-domain</module>
-		<module>northstar-strategy-common</module>
-		<module>northstar-strategy-cta</module>
-		<module>northstar-plugin-notification</module>
+		<module>northstar-strategy-api</module>
 		<module>northstar-main</module>
 	</modules>
 
@@ -67,53 +65,38 @@
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
-				<groupId>tech.xuan-wu</groupId>
+				<groupId>tech.quantit</groupId>
 				<artifactId>northstar-common</artifactId>
 				<version>${northstar-version}</version>
 			</dependency>
 			<dependency>
-				<groupId>tech.xuan-wu</groupId>
-				<artifactId>northstar-engine</artifactId>
+				<groupId>tech.quantit</groupId>
+				<artifactId>northstar-strategy-api</artifactId>
 				<version>${northstar-version}</version>
 			</dependency>
 			<dependency>
-				<groupId>tech.xuan-wu</groupId>
-				<artifactId>northstar-strategy-common</artifactId>
-				<version>${northstar-version}</version>
-			</dependency>
-			<dependency>
-				<groupId>tech.xuan-wu</groupId>
-				<artifactId>northstar-strategy-cta</artifactId>
-				<version>${northstar-version}</version>
-			</dependency>
-			<dependency>
-				<groupId>tech.xuan-wu</groupId>
+				<groupId>tech.quantit</groupId>
 				<artifactId>northstar-gateway-api</artifactId>
 				<version>${northstar-version}</version>
 			</dependency>
 			<dependency>
-				<groupId>tech.xuan-wu</groupId>
+				<groupId>tech.quantit</groupId>
 				<artifactId>northstar-gateway-ctp</artifactId>
 				<version>${northstar-version}</version>
 			</dependency>
 			<dependency>
-				<groupId>tech.xuan-wu</groupId>
+				<groupId>tech.quantit</groupId>
 				<artifactId>northstar-gateway-sim</artifactId>
 				<version>${northstar-version}</version>
 			</dependency>
 			<dependency>
-				<groupId>tech.xuan-wu</groupId>
+				<groupId>tech.quantit</groupId>
 				<artifactId>northstar-domain</artifactId>
 				<version>${northstar-version}</version>
 			</dependency>
 			<dependency>
-				<groupId>tech.xuan-wu</groupId>
+				<groupId>tech.quantit</groupId>
 				<artifactId>northstar-main</artifactId>
-				<version>${northstar-version}</version>
-			</dependency>
-			<dependency>
-				<groupId>tech.xuan-wu</groupId>
-				<artifactId>northstar-plugin-notification</artifactId>
 				<version>${northstar-version}</version>
 			</dependency>
 
@@ -186,8 +169,13 @@
 			<dependency>
 			    <groupId>com.fasterxml.jackson.core</groupId>
 			    <artifactId>jackson-core</artifactId>
-			    <version>2.9.8</version>
-			</dependency>			
+			    <version>${jackson-version}</version>
+			</dependency>
+			<dependency>
+			    <groupId>com.fasterxml.jackson.core</groupId>
+			    <artifactId>jackson-databind</artifactId>
+			    <version>${jackson-version}</version>
+			</dependency>				
 			<dependency>
 				<groupId>com.auth0</groupId>
 				<artifactId>java-jwt</artifactId>

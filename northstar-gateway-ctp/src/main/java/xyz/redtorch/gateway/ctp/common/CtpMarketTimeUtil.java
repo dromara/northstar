@@ -2,8 +2,8 @@ package xyz.redtorch.gateway.ctp.common;
 
 import java.time.LocalTime;
 
-import tech.xuanwu.northstar.common.constant.TickType;
-import tech.xuanwu.northstar.common.utils.MarketTimeUtil;
+import tech.quantit.northstar.common.constant.TickType;
+import tech.quantit.northstar.common.utils.MarketTimeUtil;
 
 /**
  * CTP市场行情解析

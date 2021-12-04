@@ -2,9 +2,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>tech.xuan-wu</groupId>
+		<groupId>tech.quantit</groupId>
 		<artifactId>northstar</artifactId>
-		<version>2.1.0</version>
+		<version>3.0.0</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 	
@@ -18,12 +18,8 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>tech.xuan-wu</groupId>
+			<groupId>tech.quantit</groupId>
 			<artifactId>northstar-common</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>tech.xuan-wu</groupId>
-			<artifactId>northstar-engine</artifactId>
 		</dependency>
 		<dependency>
 	        <groupId>org.projectlombok</groupId>
