@@ -1,6 +1,9 @@
 package tech.xuanwu.northstar.domain.strategy;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -13,14 +16,18 @@ import tech.xuanwu.northstar.common.utils.FieldUtils;
 import tech.xuanwu.northstar.gateway.api.TradeGateway;
 import tech.xuanwu.northstar.strategy.api.ContractBindedAware;
 import tech.xuanwu.northstar.strategy.api.EventDrivenComponent;
+import tech.xuanwu.northstar.strategy.api.SignalPolicy;
 import tech.xuanwu.northstar.strategy.api.event.ModuleEvent;
 import tech.xuanwu.northstar.strategy.api.event.ModuleEventBus;
 import tech.xuanwu.northstar.strategy.api.event.ModuleEventType;
 import tech.xuanwu.northstar.strategy.api.model.ModuleDealRecord;
+import tech.xuanwu.northstar.strategy.api.model.TimeSeriesData;
 import xyz.redtorch.pb.CoreEnum.OrderStatusEnum;
+import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.CancelOrderReqField;
 import xyz.redtorch.pb.CoreField.OrderField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
+import xyz.redtorch.pb.CoreField.TickField;
 import xyz.redtorch.pb.CoreField.TradeField;
 
 /**
@@ -65,6 +72,8 @@ public class StrategyModule implements EventDrivenComponent{
 	private String bindedMktGatewayId;
 	@Getter
 	private TradeGateway gateway;
+	@Getter
+	private SignalPolicy signalPolicy;
 	
 	public StrategyModule(String bindedMktGatewayId, TradeGateway gateway, ModuleStatus status) {
 		this.moduleStatus = status;
@@ -82,6 +91,9 @@ public class StrategyModule implements EventDrivenComponent{
 	public void addComponent(EventDrivenComponent component) {
 		components.add(component);
 		meb.register(component);
+		if(component instanceof SignalPolicy) {
+			signalPolicy = (SignalPolicy) component;
+		}
 	}
 	
 	/**
@@ -134,6 +146,20 @@ public class StrategyModule implements EventDrivenComponent{
 			moduleStatusChangeHandler.accept(moduleStatus);
 		if(ti != null)	
 			ti.onTrade(trade);
+	}
+	
+	/**
+	 * 获取绑定合约
+	 * @return
+	 */
+	public Set<String> bindedContractUnifiedSymbols(){
+		Set<String> bindedSymbols = new HashSet<>();
+		for(EventDrivenComponent component : components) {
+			if(component instanceof ContractBindedAware) {
+				bindedSymbols.add(((ContractBindedAware)component).bindedContractSymbol());
+			}
+		}
+		return bindedSymbols;
 	}
 
 	/**
@@ -190,14 +216,4 @@ public class StrategyModule implements EventDrivenComponent{
 		throw new UnsupportedOperationException("该方法不支持");
 	}
 
-	public Set<String> bindedContractUnifiedSymbols(){
-		Set<String> bindedSymbols = new HashSet<>();
-		for(EventDrivenComponent component : components) {
-			if(component instanceof ContractBindedAware) {
-				bindedSymbols.add(((ContractBindedAware)component).bindedContractSymbol());
-			}
-		}
-		return bindedSymbols;
-	}
-	
 }

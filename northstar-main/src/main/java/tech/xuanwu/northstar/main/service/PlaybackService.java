@@ -107,11 +107,6 @@ public class PlaybackService {
 			moduleInfo.setAccountGatewayId(gwDescription.getGatewayId());
 			
 			StrategyModule module = moduleFactory.makeModule(moduleInfo, Collections.emptyList());
-//			List<BarData> barDataList = new ArrayList<>();
-//			for(String unifiedSymbol : originModule.bindedContractUnifiedSymbols()) {
-//				barDataList.add(new BarData(unifiedSymbol, 100, new ArrayList<>(100)));
-//			}
-//			module.initMarketDataRef(barDataList);
 			playbackModules.add(module);
 			sandboxMgr.addModule(module);
 			

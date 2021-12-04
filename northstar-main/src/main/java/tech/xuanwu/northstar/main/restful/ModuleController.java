@@ -23,6 +23,7 @@ import tech.xuanwu.northstar.strategy.api.model.ModuleInfo;
 import tech.xuanwu.northstar.strategy.api.model.ModulePositionInfo;
 import tech.xuanwu.northstar.strategy.api.model.ModuleRealTimeInfo;
 import tech.xuanwu.northstar.strategy.api.model.ModuleTradeRecord;
+import tech.xuanwu.northstar.strategy.api.model.TimeSeriesData;
 import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
 
 @RestController
@@ -123,14 +124,14 @@ public class ModuleController {
 	}
 	
 	/**
-	 * 获取模组引用数据
+	 * 透视模组引用数据
 	 * @param name
 	 * @return
 	 */
-//	@GetMapping("/module/refdata")
-//	public ResultBean<ModuleDataRef> getModuleDataRef(@NotNull String name){
-//		return new ResultBean<>(service.getModuleDataRef(name));
-//	}
+	@GetMapping("/module/refdata")
+	public ResultBean<List<TimeSeriesData>> inspectModuleDataRef(@NotNull String name){
+		return new ResultBean<>(service.getModuleDataRef(name));
+	}
 	
 	/**
 	 * 获取模组交易记录

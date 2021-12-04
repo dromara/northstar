@@ -4,8 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import tech.xuanwu.northstar.common.utils.FieldUtils;
-import xyz.redtorch.pb.CoreField.TradeField;
 
 @Builder
 @AllArgsConstructor
@@ -27,15 +25,4 @@ public class ModuleTradeRecord {
 	
 	private double price;
 	
-	public static ModuleTradeRecord convertFrom(String moduleName, TradeField trade) {
-		return ModuleTradeRecord.builder()
-				.moduleName(moduleName)
-				.contractName(trade.getContract().getSymbol())
-				.operation(FieldUtils.chn(trade.getDirection()) + FieldUtils.chn(trade.getOffsetFlag()))
-				.tradingDay(trade.getTradingDay())
-				.actionTime(trade.getTradeTimestamp())
-				.volume(trade.getVolume())
-				.price(trade.getPrice())
-				.build();
-	}
 }

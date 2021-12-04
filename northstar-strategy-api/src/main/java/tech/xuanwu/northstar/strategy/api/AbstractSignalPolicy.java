@@ -1,11 +1,19 @@
 package tech.xuanwu.northstar.strategy.api;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.strategy.api.constant.ModuleState;
 import tech.xuanwu.northstar.strategy.api.constant.Signal;
 import tech.xuanwu.northstar.strategy.api.event.ModuleEvent;
 import tech.xuanwu.northstar.strategy.api.event.ModuleEventBus;
 import tech.xuanwu.northstar.strategy.api.event.ModuleEventType;
+import tech.xuanwu.northstar.strategy.api.model.TimeSeriesData;
+import xyz.redtorch.pb.CoreField.BarField;
+import xyz.redtorch.pb.CoreField.TickField;
 
 @Slf4j
 public abstract class AbstractSignalPolicy implements SignalPolicy {
@@ -15,6 +23,8 @@ public abstract class AbstractSignalPolicy implements SignalPolicy {
 	protected ModuleState currentState;
 	
 	protected String bindedUnifiedSymbol;
+	
+	protected List<MarketDataReceiver> mdrList = new ArrayList<>();
 	
 	protected void emit(Signal signal) {
 		if(!isActive()) {
@@ -44,6 +54,33 @@ public abstract class AbstractSignalPolicy implements SignalPolicy {
 	@Override
 	public String bindedContractSymbol() {
 		return bindedUnifiedSymbol;
+	}
+	
+	
+	protected void registerDataReceiver(MarketDataReceiver marketDataReceiver) {
+		moduleEventBus.register(marketDataReceiver);
+		mdrList.add(marketDataReceiver);
+	}
+
+	@Override
+	public List<TimeSeriesData> inspectRefData() {
+		if(mdrList.isEmpty()) 
+			return Collections.emptyList();
+		return mdrList.stream().map(MarketDataReceiver::inspection).collect(Collectors.toList());
+	}
+	
+	@Override
+	public void initByTick(Iterable<TickField> ticks) {
+		for(MarketDataReceiver mdr : mdrList) {
+			mdr.initByTick(ticks);
+		}
+	}
+
+	@Override
+	public void initByBar(Iterable<BarField> bars) {
+		for(MarketDataReceiver mdr : mdrList) {
+			mdr.initByBar(bars);
+		}
 	}
 	
 }

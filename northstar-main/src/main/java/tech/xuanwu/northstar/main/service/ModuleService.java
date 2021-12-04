@@ -3,10 +3,10 @@ package tech.xuanwu.northstar.main.service;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.InitializingBean;
@@ -15,6 +15,7 @@ import org.springframework.context.ApplicationContext;
 import tech.xuanwu.northstar.common.constant.DateTimeConstant;
 import tech.xuanwu.northstar.common.model.ContractManager;
 import tech.xuanwu.northstar.domain.GatewayAndConnectionManager;
+import tech.xuanwu.northstar.domain.GatewayConnection;
 import tech.xuanwu.northstar.domain.strategy.ModuleManager;
 import tech.xuanwu.northstar.domain.strategy.ModulePosition;
 import tech.xuanwu.northstar.domain.strategy.ModuleStatus;
@@ -23,7 +24,10 @@ import tech.xuanwu.northstar.gateway.api.TradeGateway;
 import tech.xuanwu.northstar.main.factories.StrategyModuleFactory;
 import tech.xuanwu.northstar.main.persistence.MarketDataRepository;
 import tech.xuanwu.northstar.main.persistence.ModuleRepository;
+import tech.xuanwu.northstar.main.persistence.po.MinBarDataPO;
 import tech.xuanwu.northstar.main.persistence.po.ModulePositionPO;
+import tech.xuanwu.northstar.main.persistence.po.TickDataPO;
+import tech.xuanwu.northstar.main.utils.ProtoBeanUtils;
 import tech.xuanwu.northstar.strategy.api.DealerPolicy;
 import tech.xuanwu.northstar.strategy.api.DynamicParamsAware;
 import tech.xuanwu.northstar.strategy.api.RiskControlRule;
@@ -37,7 +41,10 @@ import tech.xuanwu.northstar.strategy.api.model.ModuleInfo;
 import tech.xuanwu.northstar.strategy.api.model.ModulePositionInfo;
 import tech.xuanwu.northstar.strategy.api.model.ModuleRealTimeInfo;
 import tech.xuanwu.northstar.strategy.api.model.ModuleTradeRecord;
+import tech.xuanwu.northstar.strategy.api.model.TimeSeriesData;
 import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
+import xyz.redtorch.pb.CoreField.BarField;
+import xyz.redtorch.pb.CoreField.TickField;
 
 public class ModuleService implements InitializingBean{
 	
@@ -135,8 +142,9 @@ public class ModuleService implements InitializingBean{
 	public boolean updateModule(ModuleInfo info) throws Exception {
 		mdlMgr.removeModule(info.getModuleName());
 		ModulePositionPO po = moduleRepo.loadModulePosition(info.getModuleName());
+		List<ModulePositionInfo> posInfos = po == null ? Collections.emptyList() : po.getPositions();
 		moduleRepo.deleteModuleInfoById(info.getModuleName());
-		loadModule(info, po.getPositions());
+		loadModule(info, posInfos);
 		return moduleRepo.saveModuleInfo(info);
 	}
 	
@@ -156,29 +164,59 @@ public class ModuleService implements InitializingBean{
 			moduleInfo.setEnabled(isEnabled);
 			moduleRepo.saveModuleInfo(moduleInfo);
 		});
-		Set<String> interestSymbols = strategyModule.bindedContractUnifiedSymbols();
-//		List<BarData> barDataList = new ArrayList<>();
-//		LinkedList<BarField> barList = new LinkedList<>();
-//		
-//		String gatewayId = info.getAccountGatewayId();
-//		GatewayConnection conn = gatewayConnMgr.getGatewayConnectionById(gatewayId);
-//		String mktGatewayId = conn.getGwDescription().getBindedMktGatewayId();
-//		
-//		for(String unifiedSymbol : interestSymbols) {
-//			List<String> availableDates = mdRepo.findDataAvailableDates(mktGatewayId, unifiedSymbol, true);
-//			for(String date : availableDates.subList(availableDates.size() - info.getNumOfDaysOfDataRef(), availableDates.size())) {
-//				List<MinBarDataPO> dataBarPOList = mdRepo.loadDataByDate(mktGatewayId, unifiedSymbol, date);
-//				for(MinBarDataPO po : dataBarPOList) {
-//					BarField.Builder bb = BarField.newBuilder();
-//					ProtoBeanUtils.toProtoBean(bb, po);
-//					barList.add(bb.build());
-//				}
-//			}
-//			barDataList.add(new BarData(unifiedSymbol, barList));
-//		}
-//		
+
+		// 初始化策略数据
+		SignalPolicy signalPolicy = strategyModule.getSignalPolicy(); 
+		String unifiedSymbol = signalPolicy.bindedContractSymbol();
+		String gatewayId = info.getAccountGatewayId();
+		GatewayConnection conn = gatewayConnMgr.getGatewayConnectionById(gatewayId);
+		String mktGatewayId = conn.getGwDescription().getBindedMktGatewayId();
 		
+		LinkedList<BarField> barList = new LinkedList<>();
+		LinkedList<TickField> tickList = new LinkedList<>();
+		List<String> availableDates = mdRepo.findDataAvailableDates(mktGatewayId, unifiedSymbol, true);
+		for(String date : availableDates.subList(availableDates.size() - info.getNumOfDaysOfDataRef(), availableDates.size())) {
+			List<MinBarDataPO> dataBarPOList = mdRepo.loadDataByDate(mktGatewayId, unifiedSymbol, date);
+			for(MinBarDataPO po : dataBarPOList) {
+				BarField.Builder bb = BarField.newBuilder();
+				ProtoBeanUtils.toProtoBean(bb, po);
+				barList.add(bb.build());
+				for(TickDataPO tpo : po.getTicksOfMin()) {
+					tickList.add(restoreTick(po, tpo));
+				}
+			}
+		}
+		signalPolicy.initByTick(tickList);
+		signalPolicy.initByBar(barList);
 		mdlMgr.addModule(strategyModule);
+	}
+	
+	private TickField restoreTick(MinBarDataPO barData, TickDataPO tickData) {
+		return TickField.newBuilder()
+				.setActionDay(barData.getActionDay())
+				.setActionTime(tickData.getActionTime())
+				.setActionTimestamp(tickData.getActionTimestamp())
+				.setTradingDay(barData.getTradingDay())
+				.addAskPrice(tickData.getAskPrice1())
+				.addBidPrice(tickData.getBidPrice1())
+				.setGatewayId(barData.getGatewayId())
+				.setLastPrice(tickData.getLastPrice())
+				.setAvgPrice(tickData.getAvgPrice())
+				.setUnifiedSymbol(barData.getUnifiedSymbol())
+				.setTurnover(tickData.getTurnover())
+				.setTurnoverDelta(tickData.getTurnoverDelta())
+				.addAskVolume(tickData.getAskVol1())
+				.addBidVolume(tickData.getBidVol1())
+				.setVolume(tickData.getVolume())
+				.setVolumeDelta(tickData.getVolumeDelta())
+				.setNumTrades(tickData.getNumTrades())
+				.setNumTradesDelta(tickData.getNumTradesDelta())
+				.setOpenInterest(tickData.getOpenInterest())
+				.setOpenInterestDelta(tickData.getOpenInterestDelta())
+				.setPreClosePrice(barData.getPreClosePrice())
+				.setPreOpenInterest(barData.getPreOpenInterest())
+				.setPreSettlePrice(barData.getPreSettlePrice())
+				.build();
 	}
 	
 	/**
@@ -198,14 +236,14 @@ public class ModuleService implements InitializingBean{
 		return null;
 	}
 	
-//	/**
-//	 * 获取模组引用数据
-//	 * @param moduleName
-//	 * @return
-//	 */
-//	public ModuleDataRef getModuleDataRef(String moduleName) {
-//		return mdlMgr.getModule(moduleName).getDataRef();
-//	}
+	/**
+	 * 获取模组引用数据
+	 * @param moduleName
+	 * @return
+	 */
+	public List<TimeSeriesData> getModuleDataRef(String moduleName) {
+		return mdlMgr.getModule(moduleName).getSignalPolicy().inspectRefData();
+	}
 	
 	/**
 	 * 获取模组交易历史
