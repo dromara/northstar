@@ -3,7 +3,6 @@ package tech.xuanwu.northstar.main.service;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -13,22 +12,18 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 
-import com.google.common.collect.Lists;
-
 import tech.xuanwu.northstar.common.constant.DateTimeConstant;
 import tech.xuanwu.northstar.common.model.ContractManager;
 import tech.xuanwu.northstar.domain.GatewayAndConnectionManager;
-import tech.xuanwu.northstar.domain.GatewayConnection;
 import tech.xuanwu.northstar.domain.strategy.ModuleManager;
 import tech.xuanwu.northstar.domain.strategy.ModulePosition;
 import tech.xuanwu.northstar.domain.strategy.ModuleStatus;
 import tech.xuanwu.northstar.domain.strategy.StrategyModule;
-import tech.xuanwu.northstar.domain.strategy.StrategyModuleFactory;
+import tech.xuanwu.northstar.gateway.api.TradeGateway;
+import tech.xuanwu.northstar.main.factories.StrategyModuleFactory;
 import tech.xuanwu.northstar.main.persistence.MarketDataRepository;
 import tech.xuanwu.northstar.main.persistence.ModuleRepository;
-import tech.xuanwu.northstar.main.persistence.po.MinBarDataPO;
 import tech.xuanwu.northstar.main.persistence.po.ModulePositionPO;
-import tech.xuanwu.northstar.main.utils.ProtoBeanUtils;
 import tech.xuanwu.northstar.strategy.api.DealerPolicy;
 import tech.xuanwu.northstar.strategy.api.DynamicParamsAware;
 import tech.xuanwu.northstar.strategy.api.RiskControlRule;
@@ -43,8 +38,6 @@ import tech.xuanwu.northstar.strategy.api.model.ModulePositionInfo;
 import tech.xuanwu.northstar.strategy.api.model.ModuleRealTimeInfo;
 import tech.xuanwu.northstar.strategy.api.model.ModuleTradeRecord;
 import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
-import xyz.redtorch.pb.CoreField.BarField;
-import xyz.redtorch.pb.CoreField.ContractField;
 
 public class ModuleService implements InitializingBean{
 	
@@ -154,6 +147,15 @@ public class ModuleService implements InitializingBean{
 	 */
 	private void loadModule(ModuleInfo info, List<ModulePositionInfo> positionInfos) throws Exception {
 		StrategyModule strategyModule = moduleFactory.makeModule(info, positionInfos);
+		TradeGateway gateway = (TradeGateway) gatewayConnMgr.getGatewayById(info.getAccountGatewayId());
+		strategyModule.setCancelOrderHandler(gateway::cancelOrder);
+		strategyModule.setSubmitOrderHandler(gateway::submitOrder);
+		strategyModule.setDealRecordGenHandler(moduleRepo::saveDealRecord);
+		strategyModule.setRunningStateChangeListener((isEnabled) -> {
+			ModuleInfo moduleInfo = moduleRepo.findModuleInfo(info.getModuleName());
+			moduleInfo.setEnabled(isEnabled);
+			moduleRepo.saveModuleInfo(moduleInfo);
+		});
 		Set<String> interestSymbols = strategyModule.bindedContractUnifiedSymbols();
 //		List<BarData> barDataList = new ArrayList<>();
 //		LinkedList<BarField> barList = new LinkedList<>();
@@ -175,14 +177,8 @@ public class ModuleService implements InitializingBean{
 //			barDataList.add(new BarData(unifiedSymbol, barList));
 //		}
 //		
-//		strategyModule.initMarketDataRef(barDataList);
-//		strategyModule.setRunningStateChangeListener((isEnabled, module)->{
-//			ModuleInfo moduleInfo = moduleRepo.findModuleInfo(module.getName());
-//			moduleInfo.setEnabled(isEnabled);
-//			moduleRepo.saveModuleInfo(moduleInfo);
-//		});
-//		
-//		mdlMgr.addModule(strategyModule);
+		
+		mdlMgr.addModule(strategyModule);
 	}
 	
 	/**

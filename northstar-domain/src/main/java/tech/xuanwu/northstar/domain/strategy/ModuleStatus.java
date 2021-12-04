@@ -5,9 +5,11 @@ import java.util.List;
 
 import lombok.Data;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.common.utils.FieldUtils;
 import tech.xuanwu.northstar.strategy.api.constant.ModuleState;
+import tech.xuanwu.northstar.strategy.api.event.ModuleEventBus;
 import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
 
 /**
@@ -24,13 +26,16 @@ public class ModuleStatus {
 	private String moduleName;
 	
 	@Getter
-	private ModuleStateMachine stateMachine;
+	protected ModuleStateMachine stateMachine;
 	
 	@Getter
 	protected ModulePosition longPosition;
 	
 	@Getter
 	protected ModulePosition shortPosition;
+	
+	@Setter
+	private ModuleEventBus moduleEventBus;
 	
 	public ModuleStatus(String name) {
 		this.moduleName = name;
@@ -43,6 +48,7 @@ public class ModuleStatus {
 	 */
 	public void addPosition(ModulePosition position) {
 		log.info("[{}] 持仓增加，{} {} {}", getModuleName(), position.contract().getUnifiedSymbol(), position.getDirection(), position.getVolume());
+		position.setEventBus(moduleEventBus);
 		if(FieldUtils.isLong(position.getDirection())) {
 			longPosition = position;
 		}

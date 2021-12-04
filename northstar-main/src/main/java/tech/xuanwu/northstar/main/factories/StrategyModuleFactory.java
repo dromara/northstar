@@ -1,4 +1,4 @@
-package tech.xuanwu.northstar.domain.strategy;
+package tech.xuanwu.northstar.main.factories;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -9,6 +9,10 @@ import java.util.Map;
 import tech.xuanwu.northstar.common.model.ContractManager;
 import tech.xuanwu.northstar.domain.GatewayAndConnectionManager;
 import tech.xuanwu.northstar.domain.GatewayConnection;
+import tech.xuanwu.northstar.domain.strategy.ModulePosition;
+import tech.xuanwu.northstar.domain.strategy.ModuleStatus;
+import tech.xuanwu.northstar.domain.strategy.RiskControlPolicy;
+import tech.xuanwu.northstar.domain.strategy.StrategyModule;
 import tech.xuanwu.northstar.gateway.api.TradeGateway;
 import tech.xuanwu.northstar.strategy.api.DealerPolicy;
 import tech.xuanwu.northstar.strategy.api.DynamicParamsAware;

@@ -38,7 +38,7 @@ public class StrategyModule implements EventDrivenComponent{
 	
 	protected ModuleStateMachine stateMachine;
 	
-	protected Set<EventDrivenComponent> components;
+	protected Set<EventDrivenComponent> components = new HashSet<>();
 	
 	@Getter
 	@Setter
@@ -54,12 +54,12 @@ public class StrategyModule implements EventDrivenComponent{
 	protected Consumer<ModuleStatus> moduleStatusChangeHandler;
 	
 	@Setter
-	protected Consumer<StrategyModule> runningStateChangeListener;
+	protected Consumer<Boolean> runningStateChangeListener;
 	
 	@Setter
 	protected Consumer<ModuleDealRecord> dealRecordGenHandler;
 	
-	private ModuleTradeIntent ti;
+	protected ModuleTradeIntent ti;
 	
 	@Getter
 	private String bindedMktGatewayId;
@@ -68,8 +68,9 @@ public class StrategyModule implements EventDrivenComponent{
 	
 	public StrategyModule(String bindedMktGatewayId, TradeGateway gateway, ModuleStatus status) {
 		this.moduleStatus = status;
-		this.stateMachine = moduleStatus.getStateMachine();
+		this.moduleStatus.setModuleEventBus(meb);
 		this.meb.register(status);
+		this.stateMachine = moduleStatus.getStateMachine();
 		this.bindedMktGatewayId = bindedMktGatewayId;
 		this.gateway = gateway;
 	}
@@ -97,7 +98,7 @@ public class StrategyModule implements EventDrivenComponent{
 	public void toggleRunningState() {
 		enabled = !enabled;
 		if(runningStateChangeListener != null) {			
-			runningStateChangeListener.accept(this);
+			runningStateChangeListener.accept(isEnabled());
 		}
 	}
 	
@@ -177,7 +178,7 @@ public class StrategyModule implements EventDrivenComponent{
 				mp = moduleStatus.getLongPosition();
 			}
 			if(mp == null) {
-				throw new IllegalStateException("订单买卖方向不明确");
+				throw new IllegalStateException("没有持仓信息");
 			}
 			return new ModuleTradeIntent(getName(), mp, submitOrder, mdro -> mdro.ifPresent(dealRecordGenHandler));
 		}
