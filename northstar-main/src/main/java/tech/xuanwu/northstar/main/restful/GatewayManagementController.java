@@ -17,7 +17,7 @@ import tech.xuanwu.northstar.common.constant.GatewayUsage;
 import tech.xuanwu.northstar.common.model.ContractManager;
 import tech.xuanwu.northstar.common.model.GatewayDescription;
 import tech.xuanwu.northstar.common.model.ResultBean;
-import tech.xuanwu.northstar.engine.broadcast.SocketIOMessageEngine;
+import tech.xuanwu.northstar.main.engine.broadcast.SocketIOMessageEngine;
 import tech.xuanwu.northstar.main.service.GatewayService;
 
 @RequestMapping("/mgt")

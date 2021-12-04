@@ -32,8 +32,8 @@ import tech.xuanwu.northstar.common.model.CtpSettings;
 import tech.xuanwu.northstar.common.model.GatewayDescription;
 import tech.xuanwu.northstar.common.model.NsUser;
 import tech.xuanwu.northstar.common.model.SimSettings;
-import tech.xuanwu.northstar.engine.broadcast.SocketIOMessageEngine;
 import tech.xuanwu.northstar.main.NorthstarApplication;
+import tech.xuanwu.northstar.main.engine.broadcast.SocketIOMessageEngine;
 
 /**
  * GatewayManagement接口黑盒测试类

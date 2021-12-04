@@ -22,10 +22,6 @@
 			<artifactId>northstar-common</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>tech.xuan-wu</groupId>
-			<artifactId>northstar-engine</artifactId>
-		</dependency>
-		<dependency>
 	        <groupId>org.projectlombok</groupId>
 	        <artifactId>lombok</artifactId>
 	    </dependency>

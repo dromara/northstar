@@ -7,15 +7,15 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 
+import tech.xuanwu.northstar.common.event.FastEventEngine;
 import tech.xuanwu.northstar.common.event.InternalEventBus;
 import tech.xuanwu.northstar.common.model.ContractManager;
 import tech.xuanwu.northstar.domain.GatewayAndConnectionManager;
 import tech.xuanwu.northstar.domain.account.TradeDayAccount;
 import tech.xuanwu.northstar.domain.strategy.ModuleManager;
 import tech.xuanwu.northstar.domain.strategy.SandboxModuleManager;
-import tech.xuanwu.northstar.engine.broadcast.SocketIOMessageEngine;
-import tech.xuanwu.northstar.engine.event.FastEventEngine;
 import tech.xuanwu.northstar.gateway.sim.trade.SimMarket;
+import tech.xuanwu.northstar.main.engine.broadcast.SocketIOMessageEngine;
 import tech.xuanwu.northstar.main.persistence.GatewayRepository;
 import tech.xuanwu.northstar.main.persistence.MarketDataRepository;
 import tech.xuanwu.northstar.main.persistence.ModuleRepository;

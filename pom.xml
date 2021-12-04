@@ -34,6 +34,7 @@
 		<mockito-version>3.0.0</mockito-version>
 		<hessian-version>4.0.38</hessian-version>
 		<hutool-version>5.6.3</hutool-version>
+		<jackson-version>2.9.8</jackson-version>
 	</properties>
 
 	<modules>
@@ -41,10 +42,8 @@
 		<module>northstar-gateway-api</module>
 		<module>northstar-gateway-ctp</module>
 		<module>northstar-gateway-sim</module>
-		<module>northstar-engine</module>
 		<module>northstar-domain</module>
 		<module>northstar-strategy-api</module>
-		<module>northstar-plugin-notification</module>
 		<module>northstar-main</module>
 	</modules>
 
@@ -72,17 +71,7 @@
 			</dependency>
 			<dependency>
 				<groupId>tech.xuan-wu</groupId>
-				<artifactId>northstar-engine</artifactId>
-				<version>${northstar-version}</version>
-			</dependency>
-			<dependency>
-				<groupId>tech.xuan-wu</groupId>
 				<artifactId>northstar-strategy-api</artifactId>
-				<version>${northstar-version}</version>
-			</dependency>
-			<dependency>
-				<groupId>tech.xuan-wu</groupId>
-				<artifactId>northstar-strategy-cta-demo</artifactId>
 				<version>${northstar-version}</version>
 			</dependency>
 			<dependency>
@@ -108,11 +97,6 @@
 			<dependency>
 				<groupId>tech.xuan-wu</groupId>
 				<artifactId>northstar-main</artifactId>
-				<version>${northstar-version}</version>
-			</dependency>
-			<dependency>
-				<groupId>tech.xuan-wu</groupId>
-				<artifactId>northstar-plugin-notification</artifactId>
 				<version>${northstar-version}</version>
 			</dependency>
 
@@ -185,8 +169,13 @@
 			<dependency>
 			    <groupId>com.fasterxml.jackson.core</groupId>
 			    <artifactId>jackson-core</artifactId>
-			    <version>2.9.8</version>
-			</dependency>			
+			    <version>${jackson-version}</version>
+			</dependency>
+			<dependency>
+			    <groupId>com.fasterxml.jackson.core</groupId>
+			    <artifactId>jackson-databind</artifactId>
+			    <version>${jackson-version}</version>
+			</dependency>				
 			<dependency>
 				<groupId>com.auth0</groupId>
 				<artifactId>java-jwt</artifactId>

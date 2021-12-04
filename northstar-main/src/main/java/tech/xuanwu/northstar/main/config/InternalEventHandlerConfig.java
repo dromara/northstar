@@ -10,7 +10,6 @@ import tech.xuanwu.northstar.common.event.InternalEventBus;
 import tech.xuanwu.northstar.common.model.ContractManager;
 import tech.xuanwu.northstar.domain.GatewayAndConnectionManager;
 import tech.xuanwu.northstar.domain.account.TradeDayAccount;
-import tech.xuanwu.northstar.engine.index.IndexEngine;
 import tech.xuanwu.northstar.gateway.sim.trade.SimMarket;
 import tech.xuanwu.northstar.main.factories.TradeDayAccountFactory;
 import tech.xuanwu.northstar.main.handler.internal.AccountHandler;
@@ -19,6 +18,7 @@ import tech.xuanwu.northstar.main.handler.internal.ContractHandler;
 import tech.xuanwu.northstar.main.handler.internal.SimMarketHandler;
 import tech.xuanwu.northstar.main.handler.internal.TradeHandler;
 import tech.xuanwu.northstar.main.persistence.MarketDataRepository;
+import xyz.redtorch.gateway.ctp.index.IndexEngine;
 
 @Slf4j
 @Configuration

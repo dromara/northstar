@@ -24,8 +24,8 @@ import com.corundumstudio.socketio.SocketIOServer;
 import common.TestMongoUtils;
 import tech.xuanwu.northstar.common.constant.ReturnCode;
 import tech.xuanwu.northstar.common.model.NsUser;
-import tech.xuanwu.northstar.engine.broadcast.SocketIOMessageEngine;
 import tech.xuanwu.northstar.main.NorthstarApplication;
+import tech.xuanwu.northstar.main.engine.broadcast.SocketIOMessageEngine;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = NorthstarApplication.class, value="spring.profiles.active=test")

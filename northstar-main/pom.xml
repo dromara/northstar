@@ -24,10 +24,6 @@
 		</dependency>
 		<dependency>
 			<groupId>tech.xuan-wu</groupId>
-			<artifactId>northstar-plugin-notification</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>tech.xuan-wu</groupId>
 			<artifactId>northstar-gateway-ctp</artifactId>
 		</dependency>
 		<dependency>
@@ -41,6 +37,14 @@
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-mail</artifactId>
+		</dependency>
+		<dependency>
+		    <groupId>com.corundumstudio.socketio</groupId>
+		    <artifactId>netty-socketio</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>

@@ -17,13 +17,13 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import com.corundumstudio.socketio.SocketIOServer;
 
+import tech.xuanwu.northstar.common.event.FastEventEngine;
 import tech.xuanwu.northstar.common.event.NorthstarEventType;
 import tech.xuanwu.northstar.common.model.OrderRequest;
 import tech.xuanwu.northstar.common.model.OrderRequest.TradeOperation;
 import tech.xuanwu.northstar.domain.account.TradeDayAccount;
-import tech.xuanwu.northstar.engine.broadcast.SocketIOMessageEngine;
-import tech.xuanwu.northstar.engine.event.FastEventEngine;
 import tech.xuanwu.northstar.main.NorthstarApplication;
+import tech.xuanwu.northstar.main.engine.broadcast.SocketIOMessageEngine;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = NorthstarApplication.class, value="spring.profiles.active=test")

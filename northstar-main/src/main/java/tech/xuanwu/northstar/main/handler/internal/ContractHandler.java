@@ -13,11 +13,11 @@ import tech.xuanwu.northstar.common.event.NorthstarEventType;
 import tech.xuanwu.northstar.common.model.ContractManager;
 import tech.xuanwu.northstar.domain.GatewayAndConnectionManager;
 import tech.xuanwu.northstar.domain.GatewayConnection;
-import tech.xuanwu.northstar.engine.index.IndexEngine;
 import tech.xuanwu.northstar.gateway.api.MarketGateway;
 import tech.xuanwu.northstar.main.persistence.MarketDataRepository;
 import tech.xuanwu.northstar.main.persistence.po.ContractPO;
 import tech.xuanwu.northstar.main.utils.ProtoBeanUtils;
+import xyz.redtorch.gateway.ctp.index.IndexEngine;
 import xyz.redtorch.pb.CoreField.ContractField;
 
 /**

@@ -1,8 +1,8 @@
 package tech.xuanwu.northstar.main.service;
 
 import lombok.extern.slf4j.Slf4j;
+import tech.xuanwu.northstar.common.event.FastEventEngine;
 import tech.xuanwu.northstar.common.event.NorthstarEventType;
-import tech.xuanwu.northstar.engine.event.FastEventEngine;
 
 @Slf4j
 public class SMSTradeService {

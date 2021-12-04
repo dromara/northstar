@@ -8,7 +8,7 @@ import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import tech.xuanwu.northstar.engine.event.FastEventEngine;
+import tech.xuanwu.northstar.common.event.FastEventEngine;
 import tech.xuanwu.northstar.gateway.api.GatewayAbstract;
 import tech.xuanwu.northstar.gateway.api.MarketGateway;
 import tech.xuanwu.northstar.gateway.api.TradeGateway;

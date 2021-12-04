@@ -4,12 +4,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import lombok.extern.slf4j.Slf4j;
+import tech.xuanwu.northstar.common.event.FastEventEngine;
 import tech.xuanwu.northstar.common.event.MarketDataEventBus;
-import tech.xuanwu.northstar.engine.event.FastEventEngine;
-import tech.xuanwu.northstar.engine.index.IndexEngine;
 import tech.xuanwu.northstar.main.handler.data.IndexContractHandler;
 import tech.xuanwu.northstar.main.handler.data.MarketBarDataHandler;
 import tech.xuanwu.northstar.main.persistence.BarBufferManager;
+import xyz.redtorch.gateway.ctp.index.IndexEngine;
 
 @Slf4j
 @Configuration

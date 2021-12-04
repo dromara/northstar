@@ -1,7 +1,7 @@
 package tech.xuanwu.northstar.gateway.sim.trade;
 
 import tech.xuanwu.northstar.common.model.ContractManager;
-import tech.xuanwu.northstar.engine.event.FastEventEngine;
+import tech.xuanwu.northstar.common.event.FastEventEngine;
 
 public class SimFactory {
 	

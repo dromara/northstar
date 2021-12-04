@@ -3,18 +3,18 @@ package tech.xuanwu.northstar.main.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import tech.xuanwu.northstar.common.event.FastEventEngine;
 import tech.xuanwu.northstar.common.event.InternalEventBus;
 import tech.xuanwu.northstar.common.event.MarketDataEventBus;
 import tech.xuanwu.northstar.common.event.PluginEventBus;
 import tech.xuanwu.northstar.common.event.StrategyEventBus;
-import tech.xuanwu.northstar.engine.broadcast.SocketIOMessageEngine;
-import tech.xuanwu.northstar.engine.event.FastEventEngine;
-import tech.xuanwu.northstar.engine.event.FastEventEngine.NorthstarEventDispatcher;
-import tech.xuanwu.northstar.engine.event.handler.BroadcastDispatcher;
-import tech.xuanwu.northstar.engine.event.handler.InternalDispatcher;
-import tech.xuanwu.northstar.engine.event.handler.MarketDataDispatcher;
-import tech.xuanwu.northstar.engine.event.handler.PluginDispatcher;
-import tech.xuanwu.northstar.engine.event.handler.StrategyDispatcher;
+import tech.xuanwu.northstar.common.event.FastEventEngine.NorthstarEventDispatcher;
+import tech.xuanwu.northstar.main.engine.broadcast.SocketIOMessageEngine;
+import tech.xuanwu.northstar.main.engine.event.handler.BroadcastDispatcher;
+import tech.xuanwu.northstar.main.engine.event.handler.InternalDispatcher;
+import tech.xuanwu.northstar.main.engine.event.handler.MarketDataDispatcher;
+import tech.xuanwu.northstar.main.engine.event.handler.PluginDispatcher;
+import tech.xuanwu.northstar.main.engine.event.handler.StrategyDispatcher;
 
 /**
  * 事件处理器配置
