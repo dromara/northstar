@@ -52,6 +52,7 @@ public class ModulePositionTest {
 		assertThat(p1.getProfit()).isEqualTo(0);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void shouldTriggerStopLoss() {
 		Consumer<ModulePosition> callback = mock(Consumer.class);
@@ -70,6 +71,7 @@ public class ModulePositionTest {
 		verify(p1.meb, times(0)).post(any(ModuleEvent.class));
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Test
 	public void testClosePositionAndOrderTraded() {
 		Consumer<ModulePosition> callback = mock(Consumer.class);
@@ -169,9 +171,9 @@ public class ModulePositionTest {
 				.setDirection(DirectionEnum.D_Buy)
 				.setOffsetFlag(OffsetFlagEnum.OF_CloseYesterday)
 				.build()));
-		verify(meb).post(argThat(new ArgumentMatcher<ModuleEvent>() {
+		verify(meb).post(argThat(new ArgumentMatcher<ModuleEvent<?>>() {
 			@Override
-			public boolean matches(ModuleEvent argument) {
+			public boolean matches(ModuleEvent<?> argument) {
 				return argument.getEventType() == ModuleEventType.ORDER_REQ_ACCEPTED;
 			}
 		}));
@@ -181,9 +183,9 @@ public class ModulePositionTest {
 				.setDirection(DirectionEnum.D_Buy)
 				.setOffsetFlag(OffsetFlagEnum.OF_CloseToday)
 				.build()));
-		verify(meb, times(2)).post(argThat(new ArgumentMatcher<ModuleEvent>() {
+		verify(meb, times(2)).post(argThat(new ArgumentMatcher<ModuleEvent<?>>() {
 			@Override
-			public boolean matches(ModuleEvent argument) {
+			public boolean matches(ModuleEvent<?> argument) {
 				return argument.getEventType() == ModuleEventType.ORDER_REQ_ACCEPTED;
 			}
 		}));
@@ -193,9 +195,9 @@ public class ModulePositionTest {
 				.setDirection(DirectionEnum.D_Buy)
 				.setOffsetFlag(OffsetFlagEnum.OF_Close)
 				.build()));
-		verify(meb, times(3)).post(argThat(new ArgumentMatcher<ModuleEvent>() {
+		verify(meb, times(3)).post(argThat(new ArgumentMatcher<ModuleEvent<?>>() {
 			@Override
-			public boolean matches(ModuleEvent argument) {
+			public boolean matches(ModuleEvent<?> argument) {
 				return argument.getEventType() == ModuleEventType.ORDER_REQ_ACCEPTED;
 			}
 		}));
@@ -214,9 +216,9 @@ public class ModulePositionTest {
 				.setOffsetFlag(OffsetFlagEnum.OF_CloseYesterday)
 				.setVolume(sellTrade.getVolume() + 1)
 				.build()));
-		verify(meb).post(argThat(new ArgumentMatcher<ModuleEvent>() {
+		verify(meb).post(argThat(new ArgumentMatcher<ModuleEvent<?>>() {
 			@Override
-			public boolean matches(ModuleEvent argument) {
+			public boolean matches(ModuleEvent<?> argument) {
 				return argument.getEventType() == ModuleEventType.ORDER_REQ_RETAINED;
 			}
 		}));

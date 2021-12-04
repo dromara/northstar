@@ -1,6 +1,5 @@
 package tech.xuanwu.northstar.domain.strategy;
 
-import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.mock;
@@ -13,8 +12,6 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentMatcher;
-
-import com.google.common.collect.Lists;
 
 import tech.xuanwu.northstar.strategy.api.RiskControlRule;
 import tech.xuanwu.northstar.strategy.api.constant.ModuleState;
@@ -65,10 +62,10 @@ public class RiskControlPolicyTest {
 		p.onTick(tick);
 		p.onEvent(event);
 		
-		verify(meb).post(argThat(new ArgumentMatcher<ModuleEvent>() {
+		verify(meb).post(argThat(new ArgumentMatcher<ModuleEvent<?>>() {
 
 			@Override
-			public boolean matches(ModuleEvent arg) {
+			public boolean matches(ModuleEvent<?> arg) {
 				return arg.getEventType() == ModuleEventType.ORDER_REQ_RETAINED;
 			}
 		}));
@@ -77,15 +74,14 @@ public class RiskControlPolicyTest {
 	@Test
 	public void shouldGetRetain2() {
 		ModuleEvent<?> event = new ModuleEvent<>(ModuleEventType.ORDER_REQ_CREATED, factory.makeOrderReq("rb2210", DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open, 1, 1000, 0));
-		TickField tick = factory.makeTickField("rb2210", 1000);
 		RiskControlPolicy p = new RiskControlPolicy(name, List.of(r1, r2, r3));
 		p.setEventBus(meb);
 		p.onEvent(event);
 		
-		verify(meb).post(argThat(new ArgumentMatcher<ModuleEvent>() {
+		verify(meb).post(argThat(new ArgumentMatcher<ModuleEvent<?>>() {
 
 			@Override
-			public boolean matches(ModuleEvent arg) {
+			public boolean matches(ModuleEvent<?> arg) {
 				return arg.getEventType() == ModuleEventType.ORDER_REQ_RETAINED;
 			}
 		}));
@@ -100,10 +96,10 @@ public class RiskControlPolicyTest {
 		p.onTick(tick);
 		p.onEvent(event);
 		
-		verify(meb).post(argThat(new ArgumentMatcher<ModuleEvent>() {
+		verify(meb).post(argThat(new ArgumentMatcher<ModuleEvent<?>>() {
 
 			@Override
-			public boolean matches(ModuleEvent arg) {
+			public boolean matches(ModuleEvent<?> arg) {
 				return arg.getEventType() == ModuleEventType.ORDER_REQ_RETAINED;
 			}
 		}));
@@ -118,10 +114,10 @@ public class RiskControlPolicyTest {
 		p.onTick(tick);
 		p.onEvent(event);
 		
-		verify(meb).post(argThat(new ArgumentMatcher<ModuleEvent>() {
+		verify(meb).post(argThat(new ArgumentMatcher<ModuleEvent<?>>() {
 
 			@Override
-			public boolean matches(ModuleEvent arg) {
+			public boolean matches(ModuleEvent<?> arg) {
 				return arg.getEventType() == ModuleEventType.ORDER_REQ_ACCEPTED;
 			}
 		}));
@@ -129,17 +125,16 @@ public class RiskControlPolicyTest {
 	
 	@Test
 	public void shouldGetRejectOrder() {
-		ModuleEvent<?> event = new ModuleEvent<>(ModuleEventType.ORDER_REQ_CREATED, factory.makeOrderReq("rb2210", DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open, 1, 1000, 0));
 		TickField tick = factory.makeTickField("rb2210", 1000);
 		RiskControlPolicy p = new RiskControlPolicy(name, List.of(r2));
 		p.setEventBus(meb);
 		p.onChange(ModuleState.PENDING_ORDER);
 		p.onTick(tick);
 		
-		verify(meb).post(argThat(new ArgumentMatcher<ModuleEvent>() {
+		verify(meb).post(argThat(new ArgumentMatcher<ModuleEvent<?>>() {
 
 			@Override
-			public boolean matches(ModuleEvent arg) {
+			public boolean matches(ModuleEvent<?> arg) {
 				return arg.getEventType() == ModuleEventType.REJECT_RISK_ALERTED;
 			}
 		}));
@@ -147,17 +142,16 @@ public class RiskControlPolicyTest {
 	
 	@Test
 	public void shouldGetRetryOrder() {
-		ModuleEvent<?> event = new ModuleEvent<>(ModuleEventType.ORDER_REQ_CREATED, factory.makeOrderReq("rb2210", DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open, 1, 1000, 0));
 		TickField tick = factory.makeTickField("rb2210", 1000);
 		RiskControlPolicy p = new RiskControlPolicy(name, List.of(r3));
 		p.setEventBus(meb);
 		p.onChange(ModuleState.PENDING_ORDER);
 		p.onTick(tick);
 		
-		verify(meb).post(argThat(new ArgumentMatcher<ModuleEvent>() {
+		verify(meb).post(argThat(new ArgumentMatcher<ModuleEvent<?>>() {
 
 			@Override
-			public boolean matches(ModuleEvent arg) {
+			public boolean matches(ModuleEvent<?> arg) {
 				return arg.getEventType() == ModuleEventType.RETRY_RISK_ALERTED;
 			}
 		}));

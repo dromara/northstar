@@ -1,7 +1,6 @@
 package tech.xuanwu.northstar.domain.strategy;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -28,7 +27,9 @@ public class ModuleTradeIntentTest {
 	String NAME = "testModule";
 	String SYMBOL = "rb2210";
 	
+	@SuppressWarnings("unchecked")
 	Consumer<Optional<ModulePosition>> openCallback = mock(Consumer.class);
+	@SuppressWarnings("unchecked")
 	Consumer<Optional<ModuleDealRecord>> closeCallback = mock(Consumer.class);
 
 	@SuppressWarnings("unchecked")
@@ -206,13 +207,13 @@ public class ModuleTradeIntentTest {
 	@Test(expected = IllegalStateException.class)
 	public void shouldThrowIfUseWrongConstuction() {
 		SubmitOrderReqField orderReq = factory.makeOrderReq(SYMBOL, DirectionEnum.D_Sell, OffsetFlagEnum.OF_CloseToday, 4, 1000, 0);
-		ModuleTradeIntent mti = new ModuleTradeIntent(NAME, orderReq, openCallback);
+		new ModuleTradeIntent(NAME, orderReq, openCallback);
 	}
 	
 	@Test(expected = IllegalStateException.class)
 	public void shouldThrowIfUseWrongConstuction2() {
 		SubmitOrderReqField orderReq = factory.makeOrderReq(SYMBOL, DirectionEnum.D_Sell, OffsetFlagEnum.OF_Open, 4, 1000, 0);
 		ModulePosition mp = mock(ModulePosition.class);
-		ModuleTradeIntent mti = new ModuleTradeIntent(NAME, mp, orderReq, closeCallback);
+		new ModuleTradeIntent(NAME, mp, orderReq, closeCallback);
 	}
 }
