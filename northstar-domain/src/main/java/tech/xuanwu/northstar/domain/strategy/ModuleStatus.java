@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import tech.xuanwu.northstar.common.utils.FieldUtils;
 import tech.xuanwu.northstar.strategy.api.constant.ModuleState;
+import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
 
 /**
  * 模组状态
@@ -62,11 +63,15 @@ public class ModuleStatus {
 	 * @param position
 	 */
 	public void removePostion(ModulePosition position) {
-		log.info("[{}] 移除持仓，{} {} {}", getModuleName(), position.contract().getUnifiedSymbol(), position.getDirection());
-		if(FieldUtils.isLong(position.getDirection())) {
+		removePosition(position.contract().getUnifiedSymbol(), position.getDirection());
+	}
+	
+	public void removePosition(String unifiedSymbol, PositionDirectionEnum dir) {
+		log.info("[{}] 移除持仓，{} {} {}", getModuleName(), unifiedSymbol, dir);
+		if(FieldUtils.isLong(dir)) {
 			longPosition = null;
 		}
-		if(FieldUtils.isShort(position.getDirection())) {
+		if(FieldUtils.isShort(dir)) {
 			shortPosition = null;
 		}
 		ModuleState state = getMergedState();

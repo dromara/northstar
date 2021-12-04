@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
@@ -19,6 +20,7 @@ import tech.xuanwu.northstar.common.model.ContractManager;
 import tech.xuanwu.northstar.domain.GatewayAndConnectionManager;
 import tech.xuanwu.northstar.domain.GatewayConnection;
 import tech.xuanwu.northstar.domain.strategy.ModuleManager;
+import tech.xuanwu.northstar.domain.strategy.ModulePosition;
 import tech.xuanwu.northstar.domain.strategy.ModuleStatus;
 import tech.xuanwu.northstar.domain.strategy.StrategyModule;
 import tech.xuanwu.northstar.domain.strategy.StrategyModuleFactory;
@@ -248,45 +250,53 @@ public class ModuleService implements InitializingBean{
 		return true;
 	}
 	
-//	/**
-//	 * 新建模组持仓
-//	 * @param moduleName
-//	 * @param position
-//	 * @return
-//	 */
-//	public boolean createPosition(String moduleName, ModulePositionInfo position) {
-//		position.setOpenTime(System.currentTimeMillis());
-//		position.setOpenTradingDay(LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
-//		return updatePosition(moduleName, position);
-//	}
+	/**
+	 * 新建模组持仓
+	 * @param moduleName
+	 * @param position
+	 * @return
+	 */
+	public boolean createPosition(String moduleName, ModulePositionInfo position) {
+		position.setOpenTime(System.currentTimeMillis());
+		position.setOpenTradingDay(LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
+		return updatePosition(moduleName, position);
+	}
 	
-//	/**
-//	 * 更新模组持仓
-//	 * @param moduleName
-//	 * @param position
-//	 * @return
-//	 */
-//	public boolean updatePosition(String moduleName, ModulePositionInfo position) {
-//		mdlMgr.getModule(moduleName).getModuleStatus().addPosition(position);
-//		ContractField contract = contractMgr.getContract(position.getUnifiedSymbol());
-//		position.setMultiplier(contract.getMultiplier());
-//		moduleRepo.saveModuleStatus(status);
-//		return true;
-//	}
-//	
-//	/**
-//	 * 移除模组持仓
-//	 * @param moduleName
-//	 * @param unifiedSymbol
-//	 * @param dir
-//	 * @return
-//	 */
-//	public boolean removePosition(String moduleName, String unifiedSymbol, PositionDirectionEnum dir) {
-//		mdlMgr.getModule(moduleName).getModuleStatus().removePosition(unifiedSymbol, dir);
-//		
-//		moduleRepo.saveModuleStatus(status);
-//		return true;
-//	}
+	/**
+	 * 更新模组持仓
+	 * @param moduleName
+	 * @param position
+	 * @return
+	 */
+	public boolean updatePosition(String moduleName, ModulePositionInfo position) {
+		ModulePosition mp = new ModulePosition(position, contractMgr.getContract(position.getUnifiedSymbol()));
+		ModuleStatus moduleStatus = mdlMgr.getModule(moduleName).getModuleStatus();
+		moduleStatus.addPosition(mp);
+		List<ModulePositionInfo> posList = moduleStatus.getAllPositions().stream().map(ModulePosition::convertTo).collect(Collectors.toList());
+		moduleRepo.saveModulePosition(ModulePositionPO.builder()
+				.moduleName(moduleName)
+				.positions(posList)
+				.build());
+		return true;
+	}
+	
+	/**
+	 * 移除模组持仓
+	 * @param moduleName
+	 * @param unifiedSymbol
+	 * @param dir
+	 * @return
+	 */
+	public boolean removePosition(String moduleName, String unifiedSymbol, PositionDirectionEnum dir) {
+		ModuleStatus moduleStatus = mdlMgr.getModule(moduleName).getModuleStatus();
+		moduleStatus.removePosition(unifiedSymbol, dir);
+		List<ModulePositionInfo> posList = moduleStatus.getAllPositions().stream().map(ModulePosition::convertTo).collect(Collectors.toList());
+		moduleRepo.saveModulePosition(ModulePositionPO.builder()
+				.moduleName(moduleName)
+				.positions(posList)
+				.build());
+		return true;
+	}
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
