@@ -7,8 +7,8 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.ToDoubleFunction;
 
-import tech.xuanwu.northstar.common.constant.Constants;
-import tech.xuanwu.northstar.common.utils.ContractNameResolver;
+import tech.quantit.northstar.common.constant.Constants;
+import tech.quantit.northstar.common.utils.ContractNameResolver;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.TickField;
 

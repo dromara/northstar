@@ -7,9 +7,9 @@ import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import com.google.common.collect.Table.Cell;
 
-import tech.xuanwu.northstar.common.event.NorthstarEventType;
-import tech.xuanwu.northstar.common.utils.ContractNameResolver;
-import tech.xuanwu.northstar.common.event.FastEventEngine;
+import tech.quantit.northstar.common.event.FastEventEngine;
+import tech.quantit.northstar.common.event.NorthstarEventType;
+import tech.quantit.northstar.common.utils.ContractNameResolver;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.TickField;
 
