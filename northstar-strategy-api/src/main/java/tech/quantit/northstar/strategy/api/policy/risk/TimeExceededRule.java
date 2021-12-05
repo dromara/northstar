@@ -1,13 +1,20 @@
 package tech.quantit.northstar.strategy.api.policy.risk;
 
+import java.time.Instant;
+import java.time.LocalTime;
+import java.time.ZoneId;
+
 import lombok.extern.slf4j.Slf4j;
+import tech.quantit.northstar.strategy.api.EventDrivenComponent;
 import tech.quantit.northstar.strategy.api.RiskControlRule;
+import tech.quantit.northstar.strategy.api.TickDataAware;
 import tech.quantit.northstar.strategy.api.annotation.Setting;
 import tech.quantit.northstar.strategy.api.annotation.StrategicComponent;
-import tech.quantit.northstar.strategy.api.constant.ModuleState;
 import tech.quantit.northstar.strategy.api.constant.RiskAuditResult;
+import tech.quantit.northstar.strategy.api.event.ModuleEvent;
+import tech.quantit.northstar.strategy.api.event.ModuleEventBus;
+import tech.quantit.northstar.strategy.api.event.ModuleEventType;
 import tech.quantit.northstar.strategy.api.model.DynamicParams;
-import xyz.redtorch.pb.CoreField.AccountField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TickField;
 
@@ -18,30 +25,35 @@ import xyz.redtorch.pb.CoreField.TickField;
  */
 @Slf4j
 @StrategicComponent("委托超时限制")
-public class TimeExceededRule implements RiskControlRule {
+public class TimeExceededRule implements RiskControlRule, TickDataAware, EventDrivenComponent {
 	
 	protected long timeoutSeconds;
 
 	protected long lastUpdateTime;
+	
+	protected SubmitOrderReqField orderReq;
+	
+	protected ModuleEventBus meb;
 
-//	@Override
-//	public short canDeal(TickField tick, ModuleStatus moduleStatus) {
-//		if(lastUpdateTime == Long.MAX_VALUE) {
-//			lastUpdateTime = tick.getActionTimestamp();
-//		}
-//		if(tick.getActionTimestamp() - lastUpdateTime > timeoutSeconds * 1000) {
-//			log.info("挂单超时，撤单追单");
-//			return RiskAuditResult.RETRY;
-//		}
-//		return RiskAuditResult.ACCEPTED;
-//	}
-//	
-//	@Override
-//	public RiskControlRule onSubmitOrder(SubmitOrderReqField orderReq) {
-//		this.lastUpdateTime = Long.MAX_VALUE;
-//		return this;
-//	}
+	@Override
+	public RiskAuditResult checkRisk(SubmitOrderReqField orderReq, TickField tick) {
+		this.orderReq = orderReq;
+		this.lastUpdateTime = tick.getActionTimestamp();
+		return RiskAuditResult.ACCEPTED;
+	}
 
+	@Override
+	public void onTick(TickField tick) {
+		if(orderReq != null && tick.getUnifiedSymbol().equals(orderReq.getContract().getUnifiedSymbol())
+				&& tick.getActionTimestamp() - lastUpdateTime > timeoutSeconds * 1000) {
+			LocalTime submitTime = LocalTime.ofInstant(Instant.ofEpochMilli(lastUpdateTime), ZoneId.systemDefault());
+			LocalTime curTime = LocalTime.ofInstant(Instant.ofEpochMilli(tick.getActionTimestamp()), ZoneId.systemDefault());
+			log.warn("委托超时，撤单重试：下单时间{}，当前时间{}，超时设置{}秒", submitTime, curTime, timeoutSeconds);
+			meb.post(new ModuleEvent<>(ModuleEventType.RETRY_RISK_ALERTED, orderReq));
+			orderReq = null;
+		}
+	}
+	
 	@Override
 	public DynamicParams getDynamicParams() {
 		return new InitParams();
@@ -61,9 +73,13 @@ public class TimeExceededRule implements RiskControlRule {
 	}
 
 	@Override
-	public RiskAuditResult checkRisk(SubmitOrderReqField orderReq, TickField tick) {
-		// TODO Auto-generated method stub
-		return null;
+	public void onEvent(ModuleEvent<?> moduleEvent) {
+		// 不处理
+	}
+
+	@Override
+	public void setEventBus(ModuleEventBus moduleEventBus) {
+		meb = moduleEventBus;
 	}
 
 }

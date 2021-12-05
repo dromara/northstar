@@ -2,17 +2,14 @@ package tech.quantit.northstar.strategy.api.policy.risk;
 
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.strategy.api.RiskControlRule;
-import tech.quantit.northstar.strategy.api.TransactionAware;
+import tech.quantit.northstar.strategy.api.StateChangeListener;
 import tech.quantit.northstar.strategy.api.annotation.Setting;
 import tech.quantit.northstar.strategy.api.annotation.StrategicComponent;
 import tech.quantit.northstar.strategy.api.constant.ModuleState;
 import tech.quantit.northstar.strategy.api.constant.RiskAuditResult;
 import tech.quantit.northstar.strategy.api.model.DynamicParams;
-import xyz.redtorch.pb.CoreField.AccountField;
-import xyz.redtorch.pb.CoreField.OrderField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TickField;
-import xyz.redtorch.pb.CoreField.TradeField;
 
 /**
  * 当日内交易次数超过限制时，会拒绝继续下单
@@ -21,24 +18,25 @@ import xyz.redtorch.pb.CoreField.TradeField;
  */
 @Slf4j
 @StrategicComponent("日内开仓次数限制")
-public class DailyDealLimitedRule implements RiskControlRule, TransactionAware {
+public class DailyDealLimitedRule implements RiskControlRule, StateChangeListener{
 	
 	protected int dailyDealLimit;
 	
-//	@Override
-//	public short canDeal(TickField tick, ModuleStatus moduleStatus) {
-//		long numberOfOpeningTradeToday = moduleStatus.getCountOfOpeningToday();
-//		if(numberOfOpeningTradeToday < dailyDealLimit) {
-//			return RiskAuditResult.ACCEPTED;
-//		}
-//		log.info("日内开仓次数限制，拒绝订单");
-//		return RiskAuditResult.REJECTED;
-//	}
+	private int countOfTrade;
+	
+	private String currentTradingDay;
 	
 	@Override
 	public RiskAuditResult checkRisk(SubmitOrderReqField orderReq, TickField tick) {
-		// TODO Auto-generated method stub
-		return null;
+		if(!tick.getTradingDay().equals(currentTradingDay)) {
+			countOfTrade = 0;
+			currentTradingDay = tick.getTradingDay();
+		}
+		if(countOfTrade >= dailyDealLimit) {
+			log.warn("日内开仓次数到达上限，日内开仓次数限制为{}次", dailyDealLimit);
+			return RiskAuditResult.REJECTED;
+		}
+		return RiskAuditResult.ACCEPTED;
 	}
 
 	
@@ -61,16 +59,10 @@ public class DailyDealLimitedRule implements RiskControlRule, TransactionAware {
 	}
 
 	@Override
-	public void onOrder(OrderField order) {
-		// TODO Auto-generated method stub
-		
-	}
-
-
-	@Override
-	public void onTrade(TradeField trade) {
-		// TODO Auto-generated method stub
-		
+	public void onChange(ModuleState curState) {
+		if(curState.isHolding()) {
+			dailyDealLimit++;
+		}		
 	}
 
 	

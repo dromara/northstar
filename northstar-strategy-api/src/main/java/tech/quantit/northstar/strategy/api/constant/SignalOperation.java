@@ -12,7 +12,7 @@ import java.util.Map;
  * @author KevinHuangwl
  *
  */
-public enum Signal {
+public enum SignalOperation {
 	/**
 	 * 多开
 	 */
@@ -31,7 +31,7 @@ public enum Signal {
 	SELL_CLOSE("空平");
 	
 	private String val;
-	private Signal(String text) {
+	private SignalOperation(String text) {
 		this.val = text;
 	}
 	
@@ -51,7 +51,7 @@ public enum Signal {
 		return this == BUY_CLOSE || this == SELL_CLOSE;
 	}
 	
-	private static final Map<String, Signal> enumMap = new HashMap<>();
+	private static final Map<String, SignalOperation> enumMap = new HashMap<>();
 	
 	static {
 		enumMap.put("多开", BUY_OPEN);
@@ -60,7 +60,7 @@ public enum Signal {
 		enumMap.put("空平", SELL_CLOSE);
 	}
 	
-	public static Signal parse(String val) {
+	public static SignalOperation parse(String val) {
 		if(enumMap.containsKey(val)) {
 			return enumMap.get(val);
 		}

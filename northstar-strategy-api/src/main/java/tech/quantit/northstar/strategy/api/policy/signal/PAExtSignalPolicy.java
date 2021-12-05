@@ -13,7 +13,7 @@ import tech.quantit.northstar.strategy.api.AbstractSignalPolicy;
 import tech.quantit.northstar.strategy.api.ExternalSignalPolicy;
 import tech.quantit.northstar.strategy.api.annotation.Setting;
 import tech.quantit.northstar.strategy.api.annotation.StrategicComponent;
-import tech.quantit.northstar.strategy.api.constant.Signal;
+import tech.quantit.northstar.strategy.api.constant.SignalOperation;
 import tech.quantit.northstar.strategy.api.model.DynamicParams;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.TickField;
@@ -36,7 +36,7 @@ public class PAExtSignalPolicy extends AbstractSignalPolicy implements ExternalS
 	private Pattern bkOprPtn = Pattern.compile("在([0-9\\.]+)的价格开多单，止损价：([0-9\\.]+)");
 	private Pattern skOprPtn = Pattern.compile("在([0-9\\.]+)的价格开空单，止损价：([0-9\\.]+)");
 	
-	private Queue<Signal> signalQ = new LinkedList<>();
+	private Queue<SignalOperation> signalQ = new LinkedList<>();
 	
 	@Override
 	public DynamicParams getDynamicParams() {

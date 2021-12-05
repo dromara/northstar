@@ -2,10 +2,10 @@ package tech.quantit.northstar.strategy.api;
 
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.strategy.api.constant.ModuleState;
-import tech.quantit.northstar.strategy.api.constant.Signal;
 import tech.quantit.northstar.strategy.api.event.ModuleEvent;
 import tech.quantit.northstar.strategy.api.event.ModuleEventBus;
 import tech.quantit.northstar.strategy.api.event.ModuleEventType;
+import tech.quantit.northstar.strategy.api.model.Signal;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreField.CancelOrderReqField;
@@ -56,7 +56,7 @@ public abstract class AbstractDealerPolicy implements DealerPolicy {
 			Signal signal = (Signal) moduleEvent.getData();
 			OffsetFlagEnum offsetFlag;
 			DirectionEnum direction;
-			switch(signal) {
+			switch(signal.getSignalOperation()) {
 			case BUY_OPEN:
 				offsetFlag = OffsetFlagEnum.OF_Open;
 				direction = DirectionEnum.D_Buy;
@@ -77,7 +77,7 @@ public abstract class AbstractDealerPolicy implements DealerPolicy {
 				throw new IllegalStateException("未知信号：" + signal);
 			}
 			
-			moduleEventBus.post(new ModuleEvent<>(ModuleEventType.ORDER_REQ_CREATED, genOrderReq(direction, offsetFlag)));
+			moduleEventBus.post(new ModuleEvent<>(ModuleEventType.ORDER_REQ_CREATED, genOrderReq(direction, offsetFlag, signal.getSignalPrice(), signal.getTicksToStop())));
 			log.info("[{}] 生成订单", name());
 		}
 	}
@@ -111,7 +111,7 @@ public abstract class AbstractDealerPolicy implements DealerPolicy {
 				.build();
 	}
 
-	protected abstract SubmitOrderReqField genOrderReq(DirectionEnum direction, OffsetFlagEnum offsetFlag);
+	protected abstract SubmitOrderReqField genOrderReq(DirectionEnum direction, OffsetFlagEnum offsetFlag, double price, int ticksToStop);
 	
 	protected abstract SubmitOrderReqField genTracingOrderReq(SubmitOrderReqField originOrderReq);
 }

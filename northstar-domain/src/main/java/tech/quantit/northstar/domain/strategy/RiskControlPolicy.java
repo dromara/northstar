@@ -58,6 +58,9 @@ public class RiskControlPolicy implements TickDataAware, EventDrivenComponent, S
 					log.warn("[{}] 风控限制，无法继续下单", moduleName);
 				} else if(results.contains(RiskAuditResult.ACCEPTED)) {
 					meb.post(new ModuleEvent<>(ModuleEventType.ORDER_REQ_ACCEPTED, currentOrderReq));
+					log.info("[{}] 订单过审 单号{} 合约{} 方向{} 手数{} 价格{} 止损{}", moduleName, currentOrderReq.getOriginOrderId(),
+							currentOrderReq.getContract().getUnifiedSymbol(), currentOrderReq.getDirection(),
+							currentOrderReq.getVolume(), currentOrderReq.getPrice(), currentOrderReq.getStopPrice());
 				}
 			}
 		}
@@ -99,6 +102,11 @@ public class RiskControlPolicy implements TickDataAware, EventDrivenComponent, S
 		curState = state;
 		if(curState.isEmpty() || curState.isHolding()) {
 			currentOrderReq = null;
+		}
+		for(RiskControlRule rule : rules) {
+			if(rule instanceof StateChangeListener) {
+				((StateChangeListener) rule).onChange(state);
+			}
 		}
 	}
 	

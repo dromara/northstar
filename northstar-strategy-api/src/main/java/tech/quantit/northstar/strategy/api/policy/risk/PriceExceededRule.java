@@ -2,13 +2,16 @@ package tech.quantit.northstar.strategy.api.policy.risk;
 
 
 import lombok.extern.slf4j.Slf4j;
+import tech.quantit.northstar.strategy.api.EventDrivenComponent;
 import tech.quantit.northstar.strategy.api.RiskControlRule;
+import tech.quantit.northstar.strategy.api.TickDataAware;
 import tech.quantit.northstar.strategy.api.annotation.Setting;
 import tech.quantit.northstar.strategy.api.annotation.StrategicComponent;
-import tech.quantit.northstar.strategy.api.constant.ModuleState;
 import tech.quantit.northstar.strategy.api.constant.RiskAuditResult;
+import tech.quantit.northstar.strategy.api.event.ModuleEvent;
+import tech.quantit.northstar.strategy.api.event.ModuleEventBus;
+import tech.quantit.northstar.strategy.api.event.ModuleEventType;
 import tech.quantit.northstar.strategy.api.model.DynamicParams;
-import xyz.redtorch.pb.CoreField.AccountField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TickField;
 
@@ -20,35 +23,30 @@ import xyz.redtorch.pb.CoreField.TickField;
  */
 @Slf4j
 @StrategicComponent("委托超价限制")
-public class PriceExceededRule implements RiskControlRule{
+public class PriceExceededRule implements RiskControlRule, TickDataAware, EventDrivenComponent {
 
 	protected int priceDifTolerance;
 	
 	private SubmitOrderReqField orderReq;
 	
-//	@Override
-//	public short canDeal(TickField tick, ModuleStatus moduleStatus) {
-//		Assert.isTrue(StringUtils.equals(tick.getUnifiedSymbol(), orderReq.getContract().getUnifiedSymbol()), "行情合约与订单不一致");
-//		int factor = orderReq.getDirection() == DirectionEnum.D_Buy ? 1 : -1;
-//		if(orderReq.getOrderPriceType() == OrderPriceTypeEnum.OPT_LimitPrice && factor * (tick.getLastPrice() - orderReq.getPrice()) > priceDifTolerance) {
-//			log.info("委托超价限制：限制为{}，期望价为{}，实际价为{}", priceDifTolerance, orderReq.getPrice(), tick.getLastPrice());
-//			return RiskAuditResult.REJECTED;
-//		}
-//		return RiskAuditResult.ACCEPTED;
-//	}
-//	
-//	@Override
-//	public RiskControlRule onSubmitOrder(SubmitOrderReqField orderReq) {
-//		this.orderReq = orderReq;
-//		return this;
-//	}
+	private ModuleEventBus meb;
 	
 	@Override
 	public RiskAuditResult checkRisk(SubmitOrderReqField orderReq, TickField tick) {
-		// TODO Auto-generated method stub
-		return null;
+		this.orderReq = orderReq;
+		return RiskAuditResult.ACCEPTED;
 	}
-
+	
+	@Override
+	public void onTick(TickField tick) {
+		if(orderReq != null && tick.getUnifiedSymbol().equals(orderReq.getContract().getUnifiedSymbol()) 
+				&& Math.abs(tick.getLastPrice() - orderReq.getPrice()) > priceDifTolerance) {
+			log.warn("当前市价 [{}] 距离委托价 [{}] 超过风控限制 [{}]，放弃订单", tick.getLastPrice(), orderReq.getPrice(), priceDifTolerance);
+			meb.post(new ModuleEvent<>(ModuleEventType.REJECT_RISK_ALERTED, orderReq));
+			orderReq = null;
+		}
+	}
+	
 	@Override
 	public DynamicParams getDynamicParams() {
 		return new InitParams();
@@ -65,6 +63,16 @@ public class PriceExceededRule implements RiskControlRule{
 		@Setting(value="超价限制")
 		private int priceDifTolerance;
 		
+	}
+
+	@Override
+	public void onEvent(ModuleEvent<?> moduleEvent) {
+		// 不处理
+	}
+
+	@Override
+	public void setEventBus(ModuleEventBus moduleEventBus) {
+		meb = moduleEventBus;
 	}
 
 }
