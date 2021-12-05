@@ -128,4 +128,16 @@ public class PAExtSignalPolicy extends AbstractSignalPolicy implements ExternalS
 		
 	}
 
+	@Override
+	protected void handleTick(TickField tick) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void handleBar(BarField bar) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

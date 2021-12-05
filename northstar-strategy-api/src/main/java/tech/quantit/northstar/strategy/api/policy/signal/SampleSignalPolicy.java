@@ -64,12 +64,33 @@ public class SampleSignalPolicy extends AbstractSignalPolicy
 		
 	}
 	
+	@Override
+	public String name() {
+		return "示例策略";
+	}
+
+	/**
+	 * 数据初始化入口
+	 */
+	@Override
+	public void initByTick(Iterable<TickField> ticks) {
+		// 示例代码不需要初始化数据
+	}
+
+	/**
+	 * 数据初始化入口
+	 */
+	@Override
+	public void initByBar(Iterable<BarField> bars) {
+		// 示例代码不需要初始化数据
+	}
+
 	/**
 	 * 策略逻辑驱动入口
 	 * 每个TICK触发
 	 */
 	@Override
-	public void onTick(TickField tick) {
+	protected void handleTick(TickField tick) {
 		log.info("策略每个TICK触发: {} {}", tick.getUnifiedSymbol(), tick.getActionTime());
 		long now = tick.getActionTimestamp();
 		//初始状态下，等待10秒才开始交易
@@ -96,29 +117,8 @@ public class SampleSignalPolicy extends AbstractSignalPolicy
 	 * 每分钟触发
 	 */
 	@Override
-	public void onBar(BarField bar) {
+	protected void handleBar(BarField bar) {
 		log.info("策略每分钟触发");
-	}
-
-	@Override
-	public String name() {
-		return "示例策略";
-	}
-
-	/**
-	 * 数据初始化入口
-	 */
-	@Override
-	public void initByTick(Iterable<TickField> ticks) {
-		// 示例代码不需要初始化数据
-	}
-
-	/**
-	 * 数据初始化入口
-	 */
-	@Override
-	public void initByBar(Iterable<BarField> bars) {
-		// 示例代码不需要初始化数据
 	}
 	
 }

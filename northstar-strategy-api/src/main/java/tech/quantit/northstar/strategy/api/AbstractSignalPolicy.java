@@ -82,5 +82,31 @@ public abstract class AbstractSignalPolicy implements SignalPolicy {
 			mdr.initByBar(bars);
 		}
 	}
+
+	@Override
+	public void onTick(TickField tick) {
+		if(tick.getUnifiedSymbol().equals(bindedUnifiedSymbol)) {
+			handleTick(tick);
+		}
+	}
+
+	@Override
+	public void onBar(BarField bar) {
+		if(bar.getUnifiedSymbol().equals(bindedUnifiedSymbol)) {
+			handleBar(bar);
+		}
+	}
+	
+	/**
+	 * 
+	 * @param tick
+	 */
+	protected abstract void handleTick(TickField tick);
+	
+	/**
+	 * 
+	 * @param bar
+	 */
+	protected abstract void handleBar(BarField bar);
 	
 }

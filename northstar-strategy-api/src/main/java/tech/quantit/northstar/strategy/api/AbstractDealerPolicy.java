@@ -86,7 +86,9 @@ public abstract class AbstractDealerPolicy implements DealerPolicy {
 
 	@Override
 	public void onTick(TickField tick) {
-		lastTick = tick;
+		if(tick.getUnifiedSymbol().equals(bindedUnifiedSymbol)) {			
+			lastTick = tick;
+		}
 	}
 	
 	@Override

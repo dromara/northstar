@@ -64,6 +64,9 @@ public class RiskControlPolicy implements TickDataAware, EventDrivenComponent, S
 
 	@Override
 	public void onTick(TickField tick) {
+		if(currentOrderReq == null || !tick.getUnifiedSymbol().equals(currentOrderReq.getContract().getUnifiedSymbol())) {
+			return;
+		}
 		lastTick = tick;
 		if(curState == ModuleState.PENDING_ORDER) {
 			Set<RiskAuditResult> results = new HashSet<>();
