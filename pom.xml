@@ -9,7 +9,7 @@
 	<description>北极星程序化交易平台</description>
 	
 	<properties>
-		<java.version>11</java.version>
+		<java.version>17</java.version>
 		<argLine>-Dfile.encoding=UTF-8</argLine>		
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.encoding>UTF-8</maven.compiler.encoding>

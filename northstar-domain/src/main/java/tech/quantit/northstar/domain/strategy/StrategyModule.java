@@ -92,14 +92,14 @@ public class StrategyModule implements EventDrivenComponent{
 		components.add(component);
 		meb.register(component);
 		component.setEventBus(meb);
-		if(component instanceof StateChangeListener) {			
-			moduleStatus.getStateMachine().addStateChangeListener((StateChangeListener) component);
+		if(component instanceof StateChangeListener listener) {			
+			moduleStatus.getStateMachine().addStateChangeListener(listener);
 		}
-		if(component instanceof SignalPolicy) {
-			signalPolicy = (SignalPolicy) component;
+		if(component instanceof SignalPolicy policy) {
+			signalPolicy = policy;
 		}
-		if(component instanceof ContractBindedAware) {
-			bindedSymbols.add(((ContractBindedAware)component).bindedContractSymbol());
+		if(component instanceof ContractBindedAware aware) {
+			bindedSymbols.add(aware.bindedContractSymbol());
 		}
 	}
 	

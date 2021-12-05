@@ -104,8 +104,8 @@ public class RiskControlPolicy implements TickDataAware, EventDrivenComponent, S
 			currentOrderReq = null;
 		}
 		for(RiskControlRule rule : rules) {
-			if(rule instanceof StateChangeListener) {
-				((StateChangeListener) rule).onChange(state);
+			if(rule instanceof StateChangeListener listener) {
+				listener.onChange(state);
 			}
 		}
 	}

@@ -176,9 +176,9 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 		GatewayConnection conn = gatewayConnMgr.getGatewayConnectionById(gatewayId);
 		Gateway gateway = gatewayConnMgr.getGatewayByConnection(conn);
 		gatewayConnMgr.removePair(conn);
-		if(gateway instanceof SimTradeGateway) {
+		if(gateway instanceof SimTradeGateway simGateway) {
 			String mdGatewayId = conn.getGwDescription().getBindedMktGatewayId();
-			simMarket.removeGateway(mdGatewayId, (SimTradeGateway) gateway);
+			simMarket.removeGateway(mdGatewayId, simGateway);
 		}
 		return true;
 	}
@@ -199,11 +199,11 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 	 * @return
 	 * @throws Exception 
 	 */
-	public List<GatewayDescription> findAllMarketGateway() throws Exception{
+	public List<GatewayDescription> findAllMarketGateway() {
 		return gatewayConnMgr.getAllConnections().stream()
-				.map(conn -> conn.getGwDescription())
+				.map(GatewayConnection::getGwDescription)
 				.filter(gwDescription -> gwDescription.getGatewayUsage() == GatewayUsage.MARKET_DATA)
-				.collect(Collectors.toList());
+				.toList();
 	}
 	
 	/**
