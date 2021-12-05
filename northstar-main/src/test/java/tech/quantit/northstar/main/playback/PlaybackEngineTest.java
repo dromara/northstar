@@ -22,7 +22,7 @@ import tech.quantit.northstar.main.playback.PlaybackTask.DataType;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.TickField;
 
-class PlaybackEngineTest {
+public class PlaybackEngineTest {
 
 	PlaybackEngine engine;
 	StrategyModule module = mock(StrategyModule.class);
@@ -99,7 +99,7 @@ class PlaybackEngineTest {
 			.build();
 	
 	@BeforeEach
-	void prepare() {
+	public void prepare() {
 		when(task.isDone()).thenReturn(false, true);
 		when(task.nextBatchData()).thenReturn(batchData);
 		
@@ -115,7 +115,7 @@ class PlaybackEngineTest {
 	}
 	
 	@Test
-	void test() {
+	public void test() {
 		SimMarket market = mock(SimMarket.class);
 		SandboxModuleManager moduleMgr = mock(SandboxModuleManager.class);
 		engine = new PlaybackEngine(market, moduleMgr);

@@ -29,6 +29,7 @@ import common.TestMongoUtils;
 import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.common.constant.PlaybackPrecision;
 import tech.quantit.northstar.common.constant.ReturnCode;
+import tech.quantit.northstar.common.model.ContractManager;
 import tech.quantit.northstar.common.model.CtpSettings;
 import tech.quantit.northstar.common.model.NsUser;
 import tech.quantit.northstar.common.model.PlaybackDescription;
@@ -37,10 +38,11 @@ import tech.quantit.northstar.main.engine.broadcast.SocketIOMessageEngine;
 import tech.quantit.northstar.main.persistence.MarketDataRepository;
 import tech.quantit.northstar.main.persistence.ModuleRepository;
 import tech.quantit.northstar.strategy.api.model.ModuleInfo;
+import test.common.TestFieldFactory;
 
 @SpringBootTest(classes = NorthstarApplication.class, value="spring.profiles.active=test")
 @AutoConfigureMockMvc
-class PlaybackTest {
+public class PlaybackTest {
 
 	@Autowired
 	private MockMvc mockMvc;
@@ -59,8 +61,13 @@ class PlaybackTest {
 	@MockBean
 	private MarketDataRepository mdRepo;
 	
+	@MockBean
+	private ContractManager contractMgr;
+	
+	TestFieldFactory factory = new TestFieldFactory("test");
+	
 	@BeforeEach
-	void setUp() throws Exception {
+	public void setUp() throws Exception {
 		session = new MockHttpSession();
 		mockMvc.perform(post("/auth/login").contentType(MediaType.APPLICATION_JSON_UTF8).content(JSON.toJSONString(new NsUser("admin","123456"))).session(session))
 			.andExpect(status().isOk());
@@ -78,15 +85,17 @@ class PlaybackTest {
 		
 		String moduleStr = "{\"moduleName\":\"TESTM\",\"signalPolicy\":{\"componentMeta\":{\"name\":\"示例策略\",\"className\":\"tech.quantit.northstar.strategy.api.policy.signal.SampleSignalPolicy\"},\"initParams\":[{\"label\":\"绑定合约\",\"name\":\"bindedUnifiedSymbol\",\"order\":10,\"type\":\"String\",\"value\":\"rb2201@SHFE@FUTURES\",\"unit\":\"\",\"options\":[]},{\"label\":\"操作间隔\",\"name\":\"actionInterval\",\"order\":20,\"type\":\"Number\",\"value\":\"600\",\"unit\":\"秒\",\"options\":[]}]},\"riskControlRules\":[],\"dealer\":{\"componentMeta\":{\"name\":\"示例交易策略\",\"className\":\"tech.quantit.northstar.strategy.api.policy.dealer.SampleDealer\"},\"initParams\":[{\"label\":\"绑定合约\",\"name\":\"bindedUnifiedSymbol\",\"order\":10,\"type\":\"String\",\"value\":\"rb2201@SHFE@FUTURES\",\"unit\":\"\",\"options\":[]},{\"label\":\"开仓手数\",\"name\":\"openVol\",\"order\":20,\"type\":\"Number\",\"value\":\"1\",\"unit\":\"\",\"options\":[]},{\"label\":\"开仓价格类型\",\"name\":\"openPriceTypeStr\",\"order\":30,\"type\":\"Options\",\"value\":\"市价\",\"unit\":\"\",\"options\":[\"对手价\",\"市价\",\"最新价\",\"排队价\",\"信号价\"]},{\"label\":\"超价\",\"name\":\"overprice\",\"order\":40,\"type\":\"Number\",\"value\":\"0\",\"unit\":\"Tick\",\"options\":[]}]},\"accountGatewayId\":\"SIM账户\",\"enabled\":false,\"type\":\"CTA\",\"numOfDaysOfDataRef\":0}";
 		when(moduleRepo.findModuleInfo(anyString())).thenReturn(JSON.parseObject(moduleStr, ModuleInfo.class));
+		
+		when(contractMgr.getContract(anyString())).thenReturn(factory.makeContract("rb2210@SHFE@FUTURES"));
 	}
 	
 	@AfterEach
-	void tearDown() throws InterruptedException {
+	public void tearDown() throws InterruptedException {
 		TestMongoUtils.clearDB();
 	}
 	
 	@Test
-	void shouldSuccessfullyPlay() throws Exception {
+	public void shouldSuccessfullyPlay() throws Exception {
 		PlaybackDescription playbackDescription = PlaybackDescription.builder()
 				.startDate("20211111")
 				.endDate("20211122")
@@ -102,7 +111,7 @@ class PlaybackTest {
 	}
 
 	@Test
-	void shouldGetPlayProcess() throws Exception {
+	public void shouldGetPlayProcess() throws Exception {
 		shouldSuccessfullyPlay();
 		
 		mockMvc.perform(get("/pb/play/process").session(session))
@@ -111,21 +120,21 @@ class PlaybackTest {
 	}
 	
 	@Test
-	void shouldThrowIfNotPlayAndGetTheProcess() throws Exception {
+	public void shouldThrowIfNotPlayAndGetTheProcess() throws Exception {
 		mockMvc.perform(get("/pb/play/process").session(session))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.status").value(ReturnCode.ERROR));
 	}
 
 	@Test
-	void shouldThrowIfNotPlayAndGetTheBalance() throws Exception {
+	public void shouldThrowIfNotPlayAndGetTheBalance() throws Exception {
 		mockMvc.perform(get("/pb/balance?moduleName=TESTM").session(session))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.status").value(ReturnCode.ERROR));
 	}
 	
 	@Test
-	void shouldGetPlaybackBalance() throws Exception {
+	public void shouldGetPlaybackBalance() throws Exception {
 		shouldSuccessfullyPlay();
 		
 		mockMvc.perform(get("/pb/balance?moduleName=TESTM").session(session))
@@ -134,7 +143,7 @@ class PlaybackTest {
 	}
 
 	@Test
-	void shouldGetReadyStateIfNotPlay() throws Exception {
+	public void shouldGetReadyStateIfNotPlay() throws Exception {
 		Thread.sleep(500);
 		mockMvc.perform(get("/pb/readiness").session(session))
 			.andExpect(status().isOk())
@@ -142,14 +151,4 @@ class PlaybackTest {
 			.andExpect(jsonPath("$.data").value(true));
 	}
 	
-	@Test
-	void shouldGetBusyStateIfPlaying() throws Exception {
-		shouldSuccessfullyPlay();
-		
-		mockMvc.perform(get("/pb/readiness").session(session))
-			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS))
-			.andExpect(jsonPath("$.data").value(false));
-	}
-
 }

@@ -8,10 +8,10 @@ import tech.quantit.northstar.common.model.OrderRequest.TradeOperation;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
 
-class OrderUtilsTest {
+public class OrderUtilsTest {
 
 	@Test
-	void testResolveDirection() {
+	public void testResolveDirection() {
 		assertThat(OrderUtils.resolveDirection(TradeOperation.BK)).isEqualTo(DirectionEnum.D_Buy);
 		assertThat(OrderUtils.resolveDirection(TradeOperation.BP)).isEqualTo(DirectionEnum.D_Buy);
 		assertThat(OrderUtils.resolveDirection(TradeOperation.SK)).isEqualTo(DirectionEnum.D_Sell);
@@ -19,7 +19,7 @@ class OrderUtilsTest {
 	}
 
 	@Test
-	void testIsOpenningOrder() {
+	public void testIsOpenningOrder() {
 		assertThat(OrderUtils.isOpenningOrder(TradeOperation.BK)).isTrue();
 		assertThat(OrderUtils.isOpenningOrder(TradeOperation.SK)).isTrue();
 		assertThat(OrderUtils.isOpenningOrder(TradeOperation.BP)).isFalse();
@@ -27,7 +27,7 @@ class OrderUtilsTest {
 	}
 
 	@Test
-	void testIsClosingOrder() {
+	public void testIsClosingOrder() {
 		assertThat(OrderUtils.isClosingOrder(TradeOperation.BK)).isFalse();
 		assertThat(OrderUtils.isClosingOrder(TradeOperation.SK)).isFalse();
 		assertThat(OrderUtils.isClosingOrder(TradeOperation.BP)).isTrue();
@@ -35,7 +35,7 @@ class OrderUtilsTest {
 	}
 
 	@Test
-	void testGetClosingDirection() {
+	public void testGetClosingDirection() {
 		assertThat(OrderUtils.getClosingDirection(DirectionEnum.D_Buy)).isEqualTo(PositionDirectionEnum.PD_Short);
 		assertThat(OrderUtils.getClosingDirection(DirectionEnum.D_Sell)).isEqualTo(PositionDirectionEnum.PD_Long);
 	}

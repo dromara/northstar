@@ -17,7 +17,7 @@ northstar:
 
 logging:  level: 
     '[tech.quantit.northstar]': info
-  file:    path: log/
+  file:    path: logs/
   
 spring:
   profiles:

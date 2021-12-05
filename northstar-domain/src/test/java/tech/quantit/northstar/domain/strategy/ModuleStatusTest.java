@@ -12,7 +12,7 @@ import test.common.TestFieldFactory;
 import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
 
-class ModuleStatusTest {
+public class ModuleStatusTest {
 	
 	TestFieldFactory factory = new TestFieldFactory("gateway");
 	ContractField contract = factory.makeContract("rb2201");
@@ -20,7 +20,7 @@ class ModuleStatusTest {
 	ModulePosition p1, p2, p3, p4;
 	
 	@BeforeEach
-	void prepare() {
+	public void prepare() {
 		p1 = mock(ModulePosition.class);
 		p2 = mock(ModulePosition.class);
 		p3 = mock(ModulePosition.class);
@@ -47,27 +47,27 @@ class ModuleStatusTest {
 	}
 	
 	@Test
-	void initStateShouldBeEmpty() {
+	public void initStateShouldBeEmpty() {
 		ModuleStatus ms = new ModuleStatus("test");
 		assertThat(ms.at(ModuleState.EMPTY)).isTrue();
 	}
 
 	@Test
-	void shouldGetLongWhenAddPosition() {
+	public void shouldGetLongWhenAddPosition() {
 		ModuleStatus ms = new ModuleStatus("test");
 		ms.addPosition(p1);
 		assertThat(ms.at(ModuleState.HOLDING_LONG)).isTrue();
 	}
 	
 	@Test
-	void shouldGetShortWhenAddPosition() {
+	public void shouldGetShortWhenAddPosition() {
 		ModuleStatus ms = new ModuleStatus("test");
 		ms.addPosition(p2);
 		assertThat(ms.at(ModuleState.HOLDING_SHORT)).isTrue();
 	}
 	
 	@Test
-	void shouldGetEmptyWhenRemovePosition() {
+	public void shouldGetEmptyWhenRemovePosition() {
 		ModuleStatus ms = new ModuleStatus("test");
 		ms.addPosition(p1);
 		ms.removePostion(p1);
@@ -77,7 +77,7 @@ class ModuleStatusTest {
 	}
 	
 	@Test
-	void shouldGetLongWhenHedging() {
+	public void shouldGetLongWhenHedging() {
 		ModuleStatus ms = new ModuleStatus("test");
 		ms.addPosition(p1);
 		ms.addPosition(p2);
@@ -85,7 +85,7 @@ class ModuleStatusTest {
 	}
 	
 	@Test
-	void shouldGetShortWhenHedging() {
+	public void shouldGetShortWhenHedging() {
 		ModuleStatus ms = new ModuleStatus("test");
 		ms.addPosition(p3);
 		ms.addPosition(p4);
@@ -93,7 +93,7 @@ class ModuleStatusTest {
 	}
 	
 	@Test
-	void shouldGetNetEmptyWhenHedging() {
+	public void shouldGetNetEmptyWhenHedging() {
 		ModuleStatus ms = new ModuleStatus("test");
 		ms.addPosition(p1);
 		ms.addPosition(p3);
@@ -101,7 +101,7 @@ class ModuleStatusTest {
 	}
 	
 	@Test
-	void shouldGetAllPositions() {
+	public void shouldGetAllPositions() {
 		ModuleStatus ms = new ModuleStatus("test");
 		ms.addPosition(p1);
 		ms.addPosition(p3);
@@ -109,7 +109,7 @@ class ModuleStatusTest {
 	}
 
 	@Test
-	void shouldGetTotalHoldingProfit() {
+	public void shouldGetTotalHoldingProfit() {
 		ModuleStatus ms = new ModuleStatus("test");
 		ms.addPosition(p1);
 		ms.addPosition(p3);

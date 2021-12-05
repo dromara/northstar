@@ -13,12 +13,12 @@ import tech.quantit.northstar.common.event.InternalEventBus;
 import tech.quantit.northstar.common.model.CtpSettings;
 import tech.quantit.northstar.common.model.GatewayDescription;
 
-class GatewayConnectionTest {
+public class GatewayConnectionTest {
 	
 	GatewayConnection conn;
 	
 	@BeforeEach
-	void prepare() {
+	public void prepare() {
 		CtpSettings settings = new CtpSettings();
 		settings.setAppId("app123456");
 		settings.setAuthCode("auth321564");
@@ -41,13 +41,13 @@ class GatewayConnectionTest {
 	
 
 	@Test
-	void testOnConnected() {
+	public void testOnConnected() {
 		conn.onConnected();
 		assertThat(conn.gwDescription.getConnectionState()).isEqualTo(ConnectionState.CONNECTED);
 	}
 
 	@Test
-	void testOnDisconnected() {
+	public void testOnDisconnected() {
 		testOnConnected();
 		
 		conn.onDisconnected();
@@ -55,19 +55,19 @@ class GatewayConnectionTest {
 	}
 
 	@Test
-	void testIsConnected() {
+	public void testIsConnected() {
 		testOnConnected();
 		assertThat(conn.isConnected()).isTrue();
 	}
 
 	@Test
-	void testOnError() {
+	public void testOnError() {
 		conn.onError();
 		assertThat(conn.errorFlag).isTrue();
 	}
 
 	@Test
-	void testHasConnectionError() {
+	public void testHasConnectionError() {
 		conn.onError();
 		assertThat(conn.hasConnectionError()).isTrue();
 	}

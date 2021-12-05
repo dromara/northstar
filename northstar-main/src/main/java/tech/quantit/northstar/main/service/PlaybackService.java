@@ -57,7 +57,7 @@ public class PlaybackService {
 	
 	private GatewayAndConnectionManager gatewayConnMgr;
 	
-	private boolean isRunning;
+	private volatile boolean isRunning;
 	
 	public PlaybackService(FastEventEngine feEngine, SandboxModuleManager sandboxMgr, GatewayAndConnectionManager gatewayConnMgr,
 			ContractManager contractMgr, ModuleRepository moduleRepo, MarketDataRepository mdRepo, SimMarket simMarket) {

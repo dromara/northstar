@@ -9,7 +9,7 @@ import xyz.redtorch.pb.CoreEnum.OrderStatusEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.OrderField;
 
-class TradeDayOrderTest {
+public class TradeDayOrderTest {
 	
 	TradeDayOrder tdo = new TradeDayOrder();
 	
@@ -25,7 +25,7 @@ class TradeDayOrderTest {
 	
 
 	@Test
-	void testUpdate() {
+	public void testUpdate() {
 		OrderField order1 = OrderField.newBuilder()
 				.setAccountId("testGateway")
 				.setOriginOrderId("123")
@@ -46,7 +46,7 @@ class TradeDayOrderTest {
 	}
 
 	@Test
-	void testCanCancelOrder() {
+	public void testCanCancelOrder() {
 		testUpdate();
 		assertThat(tdo.canCancelOrder("123")).isTrue();
 		assertThat(tdo.canCancelOrder("456")).isFalse();

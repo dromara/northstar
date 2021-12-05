@@ -8,7 +8,6 @@ import java.util.Random;
 
 import org.apache.commons.lang3.StringUtils;
 
-import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.constant.DateTimeConstant;
 import tech.quantit.northstar.common.constant.TickType;
 import xyz.redtorch.pb.CoreField.ContractField;
@@ -21,7 +20,6 @@ import xyz.redtorch.pb.CoreField.TickField;
  * @author KevinHuangwl
  *
  */
-@Slf4j
 public class SimTickGenerator {
 	
 	private Random rand = new Random();

@@ -10,7 +10,7 @@ import tech.quantit.northstar.strategy.api.StateChangeListener;
 import tech.quantit.northstar.strategy.api.constant.ModuleState;
 import tech.quantit.northstar.strategy.api.event.ModuleEventType;
 
-class ModuleStateMachineTest {
+public class ModuleStateMachineTest {
 
 
 	/****************/ 
@@ -18,7 +18,7 @@ class ModuleStateMachineTest {
 	/****************/
 	//多开
 	@Test
-	void testBuyOpen() {
+	public void testBuyOpen() {
 		ModuleStateMachine state = new ModuleStateMachine("test", ModuleState.EMPTY);
 		StateChangeListener listener = mock(StateChangeListener.class);
 		state.addStateChangeListener(listener);
@@ -32,7 +32,7 @@ class ModuleStateMachineTest {
 	
 	//空开
 	@Test
-	void testSellOpen() {
+	public void testSellOpen() {
 		ModuleStateMachine state = new ModuleStateMachine("test", ModuleState.EMPTY);
 		StateChangeListener listener = mock(StateChangeListener.class);
 		state.addStateChangeListener(listener);
@@ -48,7 +48,7 @@ class ModuleStateMachineTest {
 	/** 开仓失败场景 **/
 	/****************/
 	@Test
-	void testOpenFallback() {
+	public void testOpenFallback() {
 		ModuleStateMachine state = new ModuleStateMachine("test", ModuleState.EMPTY);
 		StateChangeListener listener = mock(StateChangeListener.class);
 		state.addStateChangeListener(listener);
@@ -86,7 +86,7 @@ class ModuleStateMachineTest {
 	/****************/
 	//多平成功
 	@Test
-	void testBuyClose() {
+	public void testBuyClose() {
 		ModuleStateMachine state = new ModuleStateMachine("test", ModuleState.HOLDING_SHORT);
 		StateChangeListener listener = mock(StateChangeListener.class);
 		state.addStateChangeListener(listener);
@@ -100,7 +100,7 @@ class ModuleStateMachineTest {
 	
 	//空平成功
 	@Test
-	void testSellClose() {
+	public void testSellClose() {
 		ModuleStateMachine state = new ModuleStateMachine("test", ModuleState.HOLDING_LONG);
 		StateChangeListener listener = mock(StateChangeListener.class);
 		state.addStateChangeListener(listener);
@@ -117,7 +117,7 @@ class ModuleStateMachineTest {
 	/****************/
 	//多平失败
 	@Test
-	void testBuyCloseFallback() {
+	public void testBuyCloseFallback() {
 		ModuleStateMachine state = new ModuleStateMachine("test", ModuleState.HOLDING_SHORT);
 		StateChangeListener listener = mock(StateChangeListener.class);
 		state.addStateChangeListener(listener);
@@ -146,7 +146,7 @@ class ModuleStateMachineTest {
 	
 	//空平失败
 	@Test
-	void testSellCloseFallback() {
+	public void testSellCloseFallback() {
 		ModuleStateMachine state = new ModuleStateMachine("test", ModuleState.HOLDING_LONG);
 		StateChangeListener listener = mock(StateChangeListener.class);
 		state.addStateChangeListener(listener);
@@ -178,7 +178,7 @@ class ModuleStateMachineTest {
 	/**  止损场景  **/
 	/***************/
 	@Test
-	void testLongPositionStopLoss() {
+	public void testLongPositionStopLoss() {
 		ModuleStateMachine state = new ModuleStateMachine("test", ModuleState.HOLDING_LONG);
 		StateChangeListener listener = mock(StateChangeListener.class);
 		state.addStateChangeListener(listener);
@@ -187,7 +187,7 @@ class ModuleStateMachineTest {
 	}
 	
 	@Test
-	void testShortPositionStopLoss() {
+	public void testShortPositionStopLoss() {
 		ModuleStateMachine state = new ModuleStateMachine("test", ModuleState.HOLDING_SHORT);
 		StateChangeListener listener = mock(StateChangeListener.class);
 		state.addStateChangeListener(listener);
@@ -199,7 +199,7 @@ class ModuleStateMachineTest {
 	/**	其他异常情况 **/
 	/****************/
 	@Test
-	void testCreateSignal() {
+	public void testCreateSignal() {
 		ModuleStateMachine state = new ModuleStateMachine("test", ModuleState.PENDING_ORDER);
 		assertThrows(IllegalStateException.class, ()->{			
 			state.transformForm(ModuleEventType.SIGNAL_CREATED);
@@ -207,7 +207,7 @@ class ModuleStateMachineTest {
 	}
 	
 	@Test
-	void testOrderReqCreated() {
+	public void testOrderReqCreated() {
 		ModuleStateMachine state = new ModuleStateMachine("test", ModuleState.PENDING_ORDER);
 		state.transformForm(ModuleEventType.ORDER_CONFIRMED);
 		state.transformForm(ModuleEventType.ORDER_REQ_CREATED);
@@ -215,7 +215,7 @@ class ModuleStateMachineTest {
 	}
 	
 	@Test
-	void testOrderReqRetained() {
+	public void testOrderReqRetained() {
 		ModuleStateMachine state = new ModuleStateMachine("test", ModuleState.EMPTY);
 		assertThrows(IllegalStateException.class, ()->{			
 			state.transformForm(ModuleEventType.ORDER_REQ_RETAINED);
@@ -223,7 +223,7 @@ class ModuleStateMachineTest {
 	}
 	
 	@Test
-	void testSellTraded() {
+	public void testSellTraded() {
 		ModuleStateMachine state = new ModuleStateMachine("test", ModuleState.EMPTY);
 		assertThrows(IllegalStateException.class, ()->{
 			state.transformForm(ModuleEventType.SELL_TRADED);
@@ -231,7 +231,7 @@ class ModuleStateMachineTest {
 	}
 	
 	@Test
-	void testBuyTraded() {
+	public void testBuyTraded() {
 		ModuleStateMachine state = new ModuleStateMachine("test", ModuleState.EMPTY);
 		assertThrows(IllegalStateException.class, ()->{			
 			state.transformForm(ModuleEventType.BUY_TRADED);
@@ -239,7 +239,7 @@ class ModuleStateMachineTest {
 	}
 	
 	@Test
-	void testOrderConfirmed() {
+	public void testOrderConfirmed() {
 		ModuleStateMachine state = new ModuleStateMachine("test", ModuleState.EMPTY);
 		assertThrows(IllegalStateException.class, ()->{			
 			state.transformForm(ModuleEventType.ORDER_CONFIRMED);
@@ -247,7 +247,7 @@ class ModuleStateMachineTest {
 	}
 	
 	@Test
-	void testRetryRiskAlerted() {
+	public void testRetryRiskAlerted() {
 		ModuleStateMachine state = new ModuleStateMachine("test", ModuleState.EMPTY);
 		assertThrows(IllegalStateException.class, ()->{			
 			state.transformForm(ModuleEventType.RETRY_RISK_ALERTED);
@@ -255,7 +255,7 @@ class ModuleStateMachineTest {
 	}
 	
 	@Test
-	void testRejectRiskAlerted() {
+	public void testRejectRiskAlerted() {
 		ModuleStateMachine state = new ModuleStateMachine("test", ModuleState.EMPTY);
 		assertThrows(IllegalStateException.class, ()->{			
 			state.transformForm(ModuleEventType.REJECT_RISK_ALERTED);
@@ -263,7 +263,7 @@ class ModuleStateMachineTest {
 	}
 	
 	@Test
-	void testOrderCancelled() {
+	public void testOrderCancelled() {
 		ModuleStateMachine state = new ModuleStateMachine("test", ModuleState.EMPTY);
 		assertThrows(IllegalStateException.class, ()->{			
 			state.transformForm(ModuleEventType.ORDER_CANCELLED);

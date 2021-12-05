@@ -39,7 +39,7 @@ public class CodecUtils {
 		}
 		log.info("随机盐：{}", salt);
 	}
-	private static DES des = new DES(Mode.CTS, Padding.PKCS5Padding, KEY.getBytes(), salt.getBytes());
+	private static DES des = new DES(Mode.CBC, Padding.PKCS5Padding, KEY.getBytes(), salt.getBytes());
 
 	public static String decrypt(String encodeStr) {
 		return des.decryptStr(encodeStr);

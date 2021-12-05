@@ -31,7 +31,7 @@ import xyz.redtorch.pb.CoreField.AccountField;
 import xyz.redtorch.pb.CoreField.OrderField;
 import xyz.redtorch.pb.CoreField.TradeField;
 
-class StrategyModuleTest {
+public class StrategyModuleTest {
 	
 	StrategyModule module;
 	
@@ -40,12 +40,12 @@ class StrategyModuleTest {
 	TestFieldFactory factory = new TestFieldFactory("test");
 	
 	@BeforeEach
-	void prepare() {
+	public void prepare() {
 		module = new StrategyModule("mktGateway", tradeGateway, new ModuleStatus("module"));
 	}
 
 	@Test
-	void testAddComponent() {
+	public void testAddComponent() {
 		module.meb = mock(ModuleEventBus.class);
 		module.addComponent(mock(EventDrivenComponent.class));
 		verify(module.meb).register(any());
@@ -54,7 +54,7 @@ class StrategyModuleTest {
 
 	@SuppressWarnings("unchecked")
 	@Test
-	void testToggleRunningState() {
+	public void testToggleRunningState() {
 		Consumer<Boolean> callback = mock(Consumer.class);
 		module.setRunningStateChangeListener(callback);
 		module.toggleRunningState();
@@ -62,19 +62,19 @@ class StrategyModuleTest {
 	}
 	
 	@Test
-	void testGetName() {
+	public void testGetName() {
 		assertThat(module.getName()).isEqualTo("module");
 	}
 
 	@Test
-	void testOnEventNorthstarEventOfAny() {
+	public void testOnEventNorthstarEventOfAny() {
 		module.meb = mock(ModuleEventBus.class);
 		module.onEvent(new NorthstarEvent(NorthstarEventType.ACCOUNT, AccountField.newBuilder().build()));
 		verify(module.meb).post(any());
 	}
 	
 	@Test
-	void testOnEventNorthstarEventOfOrderWhenCancelling() {
+	public void testOnEventNorthstarEventOfOrderWhenCancelling() {
 		ModuleStatus moduleStatus = new ModuleStatus("module");
 		moduleStatus.stateMachine = new ModuleStateMachine("module", ModuleState.PENDING_ORDER);
 		module = new StrategyModule("mktGateway", tradeGateway, moduleStatus);
@@ -89,7 +89,7 @@ class StrategyModuleTest {
 	}
 	
 	@Test
-	void testOnEventNorthstarEventOfOrderWhenOrdering() {
+	public void testOnEventNorthstarEventOfOrderWhenOrdering() {
 		ModuleStatus moduleStatus = new ModuleStatus("module");
 		moduleStatus.stateMachine = new ModuleStateMachine("module", ModuleState.PLACING_ORDER);
 		module = new StrategyModule("mktGateway", tradeGateway, moduleStatus);
@@ -105,7 +105,7 @@ class StrategyModuleTest {
 	}
 	
 	@Test
-	void testOnEventNorthstarEventOfBuyTrade() {
+	public void testOnEventNorthstarEventOfBuyTrade() {
 		ModuleStatus moduleStatus = new ModuleStatus("module");
 		moduleStatus.stateMachine = new ModuleStateMachine("module", ModuleState.PENDING_ORDER);
 		module = new StrategyModule("mktGateway", tradeGateway, moduleStatus);
@@ -117,7 +117,7 @@ class StrategyModuleTest {
 	
 	@SuppressWarnings("unchecked")
 	@Test
-	void testOnEventNorthstarEventOfSellTrade() {
+	public void testOnEventNorthstarEventOfSellTrade() {
 		ModuleStatus moduleStatus = new ModuleStatus("module");
 		moduleStatus.stateMachine = new ModuleStateMachine("module", ModuleState.PENDING_ORDER);
 		module = new StrategyModule("mktGateway", tradeGateway, moduleStatus);
@@ -132,7 +132,7 @@ class StrategyModuleTest {
 
 	@SuppressWarnings("unchecked")
 	@Test
-	void testOnEventModuleEventOfStopLoss() {
+	public void testOnEventModuleEventOfStopLoss() {
 		ModuleStatus moduleStatus = new ModuleStatus("module");
 		moduleStatus.addPosition(new ModulePosition("sss", factory.makeTradeField("test", 1000, 1, DirectionEnum.D_Sell, OffsetFlagEnum.OF_Open), 0));
 		module = new StrategyModule("mktGateway", tradeGateway, moduleStatus);
@@ -145,7 +145,7 @@ class StrategyModuleTest {
 	
 	@SuppressWarnings("unchecked")
 	@Test
-	void testOnEventModuleEventOfOrderConfirm() {
+	public void testOnEventModuleEventOfOrderConfirm() {
 		ModuleStatus moduleStatus = new ModuleStatus("module");
 		moduleStatus.stateMachine = new ModuleStateMachine("module", ModuleState.PENDING_ORDER);
 		module = new StrategyModule("mktGateway", tradeGateway, moduleStatus);
@@ -158,7 +158,7 @@ class StrategyModuleTest {
 	
 	@SuppressWarnings("unchecked")
 	@Test
-	void testOnEventModuleEventOfOrderReqCancel() {
+	public void testOnEventModuleEventOfOrderReqCancel() {
 		ModuleStatus moduleStatus = new ModuleStatus("module");
 		moduleStatus.stateMachine = new ModuleStateMachine("module", ModuleState.PENDING_ORDER);
 		module = new StrategyModule("mktGateway", tradeGateway, moduleStatus);
@@ -170,14 +170,14 @@ class StrategyModuleTest {
 	}
 
 	@Test
-	void testSetEventBus() {
+	public void testSetEventBus() {
 		assertThrows(UnsupportedOperationException.class, ()->{			
 			module.setEventBus(mock(ModuleEventBus.class));
 		});
 	}
 	
 	@Test
-	void testBindedSymbols() {
+	public void testBindedSymbols() {
 		SignalPolicy signal = mock(SignalPolicy.class);
 		DealerPolicy dealer = mock(DealerPolicy.class);
 		when(signal.bindedContractSymbol()).thenReturn("rb2210");

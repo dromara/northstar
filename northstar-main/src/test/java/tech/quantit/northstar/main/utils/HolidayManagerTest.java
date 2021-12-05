@@ -7,18 +7,18 @@ import java.time.LocalDateTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-class HolidayManagerTest {
+public class HolidayManagerTest {
 	
 	private HolidayManager mgr = new HolidayManager();
 	
 	@BeforeEach
-	void prepare() throws Exception {
+	public void prepare() throws Exception {
 		mgr.holidayStrs = new String[] {"20210614", "20210920", "20210921"};
 		mgr.afterPropertiesSet();
 	}
 
 	@Test
-	void testIsHoliday() {
+	public void testIsHoliday() {
 		assertThat(mgr.isHoliday(LocalDateTime.of(2021, 6, 11, 21, 0))).isTrue();
 		
 		assertThat(mgr.isHoliday(LocalDateTime.of(2021, 6, 15, 0, 0))).isTrue();

@@ -1,4 +1,4 @@
-package tech.quantit.northstar.common.utils;
+package xyz.redtorch.gateway.ctp;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoField;
@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.constant.DateTimeConstant;
 import tech.quantit.northstar.common.constant.TickType;
+import tech.quantit.northstar.common.utils.CommonUtils;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.TickField;
 

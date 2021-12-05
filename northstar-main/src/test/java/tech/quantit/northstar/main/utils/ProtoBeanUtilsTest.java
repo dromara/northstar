@@ -13,32 +13,32 @@ import tech.quantit.northstar.main.persistence.po.ContractPO;
 import test.common.TestFieldFactory;
 import xyz.redtorch.pb.CoreField.ContractField;
 
-class ProtoBeanUtilsTest {
+public class ProtoBeanUtilsTest {
 
 	@BeforeEach
-	void setUp() throws Exception {
+	public void setUp() throws Exception {
 	}
 
 	@AfterEach
-	void tearDown() throws Exception {
+	public void tearDown() throws Exception {
 	}
 
 	@Test
-	void test() throws IOException {
+	public void test() throws IOException {
 		TestFieldFactory factory = new TestFieldFactory("testGateway");
 		ContractField contract = factory.makeContract("rb2210");
 		assertThat(ProtoBeanUtils.toPojoBean(ContractPO.class, contract)).isOfAnyClassIn(ContractPO.class);
 	}
 	
 	@Test
-	void testException() {
+	public void testException() {
 		assertThrows(IllegalArgumentException.class, ()->{			
 			ProtoBeanUtils.toPojoBean(ContractPO.class, null);
 		});
 	}
 
 	@Test
-	void testException2() {
+	public void testException2() {
 		TestFieldFactory factory = new TestFieldFactory("testGateway");
 		ContractField contract = factory.makeContract("rb2210");
 		assertThrows(IllegalArgumentException.class, ()->{			
@@ -47,14 +47,14 @@ class ProtoBeanUtilsTest {
 	}
 	
 	@Test
-	void testException3() throws IOException {
+	public void testException3() throws IOException {
 		assertThrows(IllegalArgumentException.class, ()->{			
 			ProtoBeanUtils.toProtoBean(null, getClass());
 		});
 	}
 	
 	@Test
-	void testException4() throws IOException {
+	public void testException4() throws IOException {
 		assertThrows(IllegalArgumentException.class, ()->{			
 			ProtoBeanUtils.toProtoBean(ContractField.newBuilder(), null);
 		});

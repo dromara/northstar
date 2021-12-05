@@ -25,7 +25,7 @@ import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TickField;
 
-class RiskControlPolicyTest {
+public class RiskControlPolicyTest {
 	
 	RiskControlRule r1 = mock(RiskControlRule.class);
 	RiskControlRule r2 = mock(RiskControlRule.class);
@@ -36,14 +36,14 @@ class RiskControlPolicyTest {
 	String name = "module";
 
 	@BeforeEach
-	void prepare() {
+	public void prepare() {
 		when(r1.checkRisk(any(), any())).thenReturn(RiskAuditResult.ACCEPTED);
 		when(r2.checkRisk(any(), any())).thenReturn(RiskAuditResult.REJECTED);
 		when(r3.checkRisk(any(), any())).thenReturn(RiskAuditResult.RETRY);
 	}
 	
 	@Test
-	void shouldNotGetAnything() {
+	public void shouldNotGetAnything() {
 		ModuleEvent<?> event = new ModuleEvent<>(ModuleEventType.SIGNAL_CREATED, factory.makeOrderReq("rb2210", DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open, 1, 1000, 0));
 		TickField tick = factory.makeTickField("rb2210", 1000);
 		RiskControlPolicy p = new RiskControlPolicy(name, List.of(r1, r2, r3));
@@ -55,7 +55,7 @@ class RiskControlPolicyTest {
 	}
 
 	@Test
-	void shouldGetRetain() {
+	public void shouldGetRetain() {
 		ModuleEvent<?> event = new ModuleEvent<>(ModuleEventType.ORDER_REQ_CREATED, factory.makeOrderReq("rb2210", DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open, 1, 1000, 0));
 		TickField tick = factory.makeTickField("rb2210", 1000);
 		RiskControlPolicy p = new RiskControlPolicy(name, List.of(r1, r2, r3));
@@ -73,7 +73,7 @@ class RiskControlPolicyTest {
 	}
 	
 	@Test
-	void shouldGetRetain2() {
+	public void shouldGetRetain2() {
 		ModuleEvent<?> event = new ModuleEvent<>(ModuleEventType.ORDER_REQ_CREATED, factory.makeOrderReq("rb2210", DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open, 1, 1000, 0));
 		RiskControlPolicy p = new RiskControlPolicy(name, List.of(r1, r2, r3));
 		p.setEventBus(meb);
@@ -89,7 +89,7 @@ class RiskControlPolicyTest {
 	}
 	
 	@Test
-	void shouldGetRetry() {
+	public void shouldGetRetry() {
 		ModuleEvent<?> event = new ModuleEvent<>(ModuleEventType.ORDER_REQ_CREATED, factory.makeOrderReq("rb2210", DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open, 1, 1000, 0));
 		TickField tick = factory.makeTickField("rb2210", 1000);
 		RiskControlPolicy p = new RiskControlPolicy(name, List.of(r1, r3));
@@ -107,7 +107,7 @@ class RiskControlPolicyTest {
 	}
 	
 	@Test
-	void shouldGetAccept() {
+	public void shouldGetAccept() {
 		ModuleEvent<?> event = new ModuleEvent<>(ModuleEventType.ORDER_REQ_CREATED, factory.makeOrderReq("rb2210", DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open, 1, 1000, 0));
 		TickField tick = factory.makeTickField("rb2210", 1000);
 		RiskControlPolicy p = new RiskControlPolicy(name, List.of(r1));
@@ -125,7 +125,7 @@ class RiskControlPolicyTest {
 	}
 	
 	@Test
-	void shouldGetRejectOrder() {
+	public void shouldGetRejectOrder() {
 		TickField tick = factory.makeTickField("rb2210", 1000);
 		SubmitOrderReqField orderReq = factory.makeOrderReq("rb2210", DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open, 0, 0, 0);
 		RiskControlPolicy p = new RiskControlPolicy(name, List.of(r2));
@@ -144,7 +144,7 @@ class RiskControlPolicyTest {
 	}
 	
 	@Test
-	void shouldGetRetryOrder() {
+	public void shouldGetRetryOrder() {
 		TickField tick = factory.makeTickField("rb2210", 1000);
 		SubmitOrderReqField orderReq = factory.makeOrderReq("rb2210", DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open, 0, 0, 0);
 		RiskControlPolicy p = new RiskControlPolicy(name, List.of(r3));

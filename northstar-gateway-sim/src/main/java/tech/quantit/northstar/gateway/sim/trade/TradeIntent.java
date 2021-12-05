@@ -43,7 +43,6 @@ public class TradeIntent {
 	private static final int STATE_REQ = 0;
 	private static final int STATE_ORDER = 1;
 	private static final int STATE_TRADED = 2;
-	private static final int STATE_HOLDING = 3;
 	private static final int STATE_STOP_TRADED = 4;
 	private static final int STATE_TERMINATED = 9;
 	private AtomicInteger state = new AtomicInteger(0);

@@ -21,9 +21,9 @@ import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.PositionField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 
-class PositionDescriptionTest {
+public class PositionDescriptionTest {
 	
-	PositionDescription pd;
+	private PositionDescription pd = new PositionDescription(mock(ContractManager.class));;
 	ContractField contract = ContractField.newBuilder()
 			.setContractId("rb2102@SHFE")
 			.setExchange(ExchangeEnum.SHFE)
@@ -46,14 +46,13 @@ class PositionDescriptionTest {
 			.build();
 	
 	@BeforeEach
-	void prepare() {
-		pd = new PositionDescription(mock(ContractManager.class));
+	public void setup() {
 		when(pd.contractMgr.getContract("AP2102@CZCE")).thenReturn(contract2);
 		when(pd.contractMgr.getContract("rb2102@SHFE")).thenReturn(contract);
 	}
 
 	@Test
-	void testUpdate() {
+	public void testUpdate() {
 		
 		PositionField pf = PositionField.newBuilder()
 				.setAccountId("testGateway")
@@ -87,7 +86,7 @@ class PositionDescriptionTest {
 	}
 
 	@Test
-	void testGenerateCloseOrderReqForSHFE() throws InsufficientException {
+	public void testGenerateCloseOrderReqForSHFE() throws InsufficientException {
 		testUpdate();
 		
 		OrderRequest orderReq = OrderRequest.builder()
@@ -104,7 +103,7 @@ class PositionDescriptionTest {
 	}
 	
 	@Test
-	void testGenerateCloseOrderReqForSHFE2() throws InsufficientException {
+	public void testGenerateCloseOrderReqForSHFE2() throws InsufficientException {
 		testUpdate();
 		
 		OrderRequest orderReq = OrderRequest.builder()
@@ -122,7 +121,7 @@ class PositionDescriptionTest {
 	}
 	
 	@Test
-	void testGenerateCloseOrderReq() throws InsufficientException {
+	public void testGenerateCloseOrderReq() throws InsufficientException {
 		testUpdate();
 		
 		OrderRequest orderReq = OrderRequest.builder()
@@ -139,7 +138,7 @@ class PositionDescriptionTest {
 	}
 	
 	@Test
-	void testGenerateCloseOrderReq2() throws InsufficientException {
+	public void testGenerateCloseOrderReq2() throws InsufficientException {
 		testUpdate();
 		
 		OrderRequest orderReq = OrderRequest.builder()
@@ -156,7 +155,7 @@ class PositionDescriptionTest {
 	}
 
 	@Test
-	void testGenerateCloseOrderReqWithException1() throws InsufficientException {
+	public void testGenerateCloseOrderReqWithException1() throws InsufficientException {
 		testUpdate();
 		
 		OrderRequest orderReq = OrderRequest.builder()

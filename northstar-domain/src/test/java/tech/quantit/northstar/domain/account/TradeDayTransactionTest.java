@@ -6,13 +6,13 @@ import org.junit.jupiter.api.Test;
 
 import xyz.redtorch.pb.CoreField.TradeField;
 
-class TradeDayTransactionTest {
+public class TradeDayTransactionTest {
 	
 	TradeDayTransaction tdt = new TradeDayTransaction();
 	
 
 	@Test
-	void testUpdate() {
+	public void testUpdate() {
 		TradeField trade1 = TradeField.newBuilder()
 				.setTradeId("123")
 				.build();

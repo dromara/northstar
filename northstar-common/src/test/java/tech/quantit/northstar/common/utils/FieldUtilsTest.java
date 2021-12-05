@@ -9,17 +9,17 @@ import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreEnum.OrderStatusEnum;
 import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
 
-class FieldUtilsTest {
+public class FieldUtilsTest {
 
 	@Test
-	void testChnDirectionEnum() {
+	public void testChnDirectionEnum() {
 		assertThat(FieldUtils.chn(DirectionEnum.D_Buy)).isEqualTo("买");
 		assertThat(FieldUtils.chn(DirectionEnum.D_Sell)).isEqualTo("卖");
 		assertThat(FieldUtils.chn(DirectionEnum.D_Unknown)).isEqualTo("未知");
 	}
 
 	@Test
-	void testChnOffsetFlagEnum() {
+	public void testChnOffsetFlagEnum() {
 		assertThat(FieldUtils.chn(OffsetFlagEnum.OF_Open)).isEqualTo("开");
 		assertThat(FieldUtils.chn(OffsetFlagEnum.OF_Close)).isEqualTo("平");
 		assertThat(FieldUtils.chn(OffsetFlagEnum.OF_CloseToday)).isEqualTo("平今");
@@ -31,7 +31,7 @@ class FieldUtilsTest {
 	}
 
 	@Test
-	void testChnOrderStatusEnum() {
+	public void testChnOrderStatusEnum() {
 		assertThat(FieldUtils.chn(OrderStatusEnum.OS_AllTraded)).isEqualTo("全成");
 		assertThat(FieldUtils.chn(OrderStatusEnum.OS_Canceled)).isEqualTo("已撤单");
 		assertThat(FieldUtils.chn(OrderStatusEnum.OS_NoTradeNotQueueing)).isEqualTo("未排队");
@@ -45,7 +45,7 @@ class FieldUtilsTest {
 	}
 
 	@Test
-	void testIsLong() {
+	public void testIsLong() {
 		assertThat(FieldUtils.isLong(PositionDirectionEnum.PD_Long)).isTrue();
 		assertThat(FieldUtils.isLong(PositionDirectionEnum.PD_Short)).isFalse();
 		assertThat(FieldUtils.isLong(PositionDirectionEnum.PD_Net)).isFalse();
@@ -53,7 +53,7 @@ class FieldUtilsTest {
 	}
 
 	@Test
-	void testIsShort() {
+	public void testIsShort() {
 		assertThat(FieldUtils.isShort(PositionDirectionEnum.PD_Short)).isTrue();
 		assertThat(FieldUtils.isShort(PositionDirectionEnum.PD_Long)).isFalse();
 		assertThat(FieldUtils.isShort(PositionDirectionEnum.PD_Net)).isFalse();
@@ -61,14 +61,14 @@ class FieldUtilsTest {
 	}
 
 	@Test
-	void testIsBuy() {
+	public void testIsBuy() {
 		assertThat(FieldUtils.isBuy(DirectionEnum.D_Buy)).isTrue();
 		assertThat(FieldUtils.isBuy(DirectionEnum.D_Sell)).isFalse();
 		assertThat(FieldUtils.isBuy(DirectionEnum.D_Unknown)).isFalse();
 	}
 
 	@Test
-	void testIsSell() {
+	public void testIsSell() {
 		assertThat(FieldUtils.isSell(DirectionEnum.D_Buy)).isFalse();
 		assertThat(FieldUtils.isSell(DirectionEnum.D_Sell)).isTrue();
 		assertThat(FieldUtils.isSell(DirectionEnum.D_Unknown)).isFalse();

@@ -10,18 +10,18 @@ import org.junit.jupiter.api.Test;
 import tech.quantit.northstar.strategy.api.model.ModuleDealRecord;
 import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
 
-class MongoUtilsTest {
+public class MongoUtilsTest {
 
 	@BeforeEach
-	void setUp() throws Exception {
+	public void setUp() throws Exception {
 	}
 
 	@AfterEach
-	void tearDown() throws Exception {
+	public void tearDown() throws Exception {
 	}
 
 	@Test
-	void test() {
+	public void test() {
 		ModuleDealRecord e = ModuleDealRecord.builder()
 				.openPrice(100)
 				.closePrice(1000)

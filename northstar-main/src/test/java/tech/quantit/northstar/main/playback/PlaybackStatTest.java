@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 import tech.quantit.northstar.common.model.PlaybackDescription;
 import tech.quantit.northstar.strategy.api.model.ModuleDealRecord;
 
-class PlaybackStatTest {
+public class PlaybackStatTest {
 	
 	List<ModuleDealRecord> dealRecords;
 	
@@ -20,7 +20,7 @@ class PlaybackStatTest {
 	PlaybackStat stat;
 	
 	@BeforeEach
-	void prepare() {
+	public void prepare() {
 		playbackDescription = PlaybackDescription.builder()
 				.fee(1)
 				.startDate("20211101")
@@ -91,62 +91,62 @@ class PlaybackStatTest {
 	}
 
 	@Test
-	void testSumOfProfit() {
+	public void testSumOfProfit() {
 		assertThat(stat.sumOfProfit()).isEqualTo(530);
 	}
 
 	@Test
-	void testSumOfCommission() {
+	public void testSumOfCommission() {
 		assertThat(stat.sumOfCommission()).isEqualTo(18);
 	}
 
 	@Test
-	void testTimesOfTransaction() {
+	public void testTimesOfTransaction() {
 		assertThat(stat.timesOfTransaction()).isEqualTo(10);
 	}
 
 	@Test
-	void testDuration() {
+	public void testDuration() {
 		assertThat(stat.duration()).isEqualTo(92);
 	}
 
 	@Test
-	void testYearlyEarningRate() {
+	public void testYearlyEarningRate() {
 		assertThat(stat.yearlyEarningRate()).isCloseTo(1.898415, offset(1e-6));
 	}
 	
 	@Test
-	void testStdOfPlaybackProfits() {
+	public void testStdOfPlaybackProfits() {
 		assertThat(stat.stdOfPlaybackProfits()).isCloseTo(211.505188, offset(1e-6));
 	}
 
 	@Test
-	void testMeanOfNTransactionsAvgProfit() {
+	public void testMeanOfNTransactionsAvgProfit() {
 		assertThat(stat.meanOfNTransactionsAvgProfit(3)).isCloseTo(70.416667, offset(1e-6));
 	}
 
 	@Test
-	void testStdOfNTransactionsAvgProfit() {
+	public void testStdOfNTransactionsAvgProfit() {
 		assertThat(stat.stdOfNTransactionsAvgProfit(3)).isCloseTo(58.783411, offset(1e-6));
 	}
 
 	@Test
-	void testMeanOfNTransactionsAvgWinningRate() {
+	public void testMeanOfNTransactionsAvgWinningRate() {
 		assertThat(stat.meanOfNTransactionsAvgWinningRate(3)).isCloseTo(0.625, offset(1e-6));
 	}
 
 	@Test
-	void testStdOfNTransactionsAvgWinningRate() {
+	public void testStdOfNTransactionsAvgWinningRate() {
 		assertThat(stat.stdOfNTransactionsAvgWinningRate(3)).isCloseTo(0.160604, offset(1e-6));
 	}
 
 	@Test
-	void testMaxFallback() {
+	public void testMaxFallback() {
 		assertThat(stat.maxFallback()).isEqualTo(310);
 	}
 
 	@Test
-	void testMeanOfOccupiedMoney() {
+	public void testMeanOfOccupiedMoney() {
 		assertThat(stat.meanOfOccupiedMoney()).isEqualTo(1070);
 	}
 }

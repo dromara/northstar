@@ -29,7 +29,7 @@ import xyz.redtorch.pb.CoreField.OrderField;
 import xyz.redtorch.pb.CoreField.PositionField;
 import xyz.redtorch.pb.CoreField.TradeField;
 
-class TradeDayAccountTest {
+public class TradeDayAccountTest {
 	
 	TradeDayAccount tda;
 	
@@ -45,7 +45,7 @@ class TradeDayAccountTest {
 			.build();
 	
 	@BeforeEach
-	void prepare() {
+	public void prepare() {
 		InternalEventBus eventBus = mock(InternalEventBus.class);
 		ContractManager contractMgr = mock(ContractManager.class);
 		when(contractMgr.getContract("rb2102@SHFE")).thenReturn(contract);
@@ -54,7 +54,7 @@ class TradeDayAccountTest {
 	
 
 	@Test
-	void testOnAccountUpdate() {
+	public void testOnAccountUpdate() {
 		AccountField af = AccountField.newBuilder()
 				.setAccountId("testAccount")
 				.setBalance(10022)
@@ -67,7 +67,7 @@ class TradeDayAccountTest {
 	}
 
 	@Test
-	void testOnPositionUpdate() {
+	public void testOnPositionUpdate() {
 		PositionField pf = PositionField.newBuilder()
 				.setPositionId("123456")
 				.setPositionDirection(PositionDirectionEnum.PD_Long)
@@ -82,7 +82,7 @@ class TradeDayAccountTest {
 	}
 
 	@Test
-	void testOnTradeUpdate() {
+	public void testOnTradeUpdate() {
 		TradeField tf = TradeField.newBuilder()
 				.setTradeId("456789")
 				.build();
@@ -91,7 +91,7 @@ class TradeDayAccountTest {
 	}
 
 	@Test
-	void testOnOrderUpdate() {
+	public void testOnOrderUpdate() {
 		OrderField of = OrderField.newBuilder()
 				.setOriginOrderId("adfskal")
 				.setTotalVolume(2)
@@ -102,7 +102,7 @@ class TradeDayAccountTest {
 	}
 
 	@Test
-	void testOpenPosition() throws InsufficientException {
+	public void testOpenPosition() throws InsufficientException {
 		testOnAccountUpdate();
 		OrderRequest orderReq = OrderRequest.builder()
 				.contractUnifiedSymbol("rb2102@SHFE")
@@ -115,7 +115,7 @@ class TradeDayAccountTest {
 	}
 	
 	@Test
-	void testOpenPositionWithException() throws InsufficientException {
+	public void testOpenPositionWithException() throws InsufficientException {
 		testOnAccountUpdate();
 		OrderRequest orderReq = OrderRequest.builder()
 				.contractUnifiedSymbol("rb2102@SHFE")
@@ -131,7 +131,7 @@ class TradeDayAccountTest {
 	}
 
 	@Test
-	void testClosePosition() throws InsufficientException {
+	public void testClosePosition() throws InsufficientException {
 		testOnPositionUpdate();
 		OrderRequest orderReq = OrderRequest.builder()
 				.contractUnifiedSymbol("rb2102@SHFE")
@@ -145,7 +145,7 @@ class TradeDayAccountTest {
 	}
 	
 	@Test
-	void testClosePositionWithException() throws InsufficientException {
+	public void testClosePositionWithException() throws InsufficientException {
 		testOnPositionUpdate();
 		OrderRequest orderReq = OrderRequest.builder()
 				.contractUnifiedSymbol("rb2102@SHFE")
@@ -160,7 +160,7 @@ class TradeDayAccountTest {
 	}
 
 	@Test
-	void testCancelOrder() throws TradeException {
+	public void testCancelOrder() throws TradeException {
 		testOnOrderUpdate();
 		OrderRecall recall = OrderRecall.builder()
 				.gatewayId("testGateway")
@@ -171,7 +171,7 @@ class TradeDayAccountTest {
 	}
 	
 	@Test
-	void testCancelOrderWithException() throws TradeException {
+	public void testCancelOrderWithException() throws TradeException {
 		OrderField of = OrderField.newBuilder()
 				.setOrderId("adfskal")
 				.setTotalVolume(2)

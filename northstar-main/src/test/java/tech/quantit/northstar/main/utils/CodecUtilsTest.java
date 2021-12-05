@@ -6,18 +6,18 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-class CodecUtilsTest {
+public class CodecUtilsTest {
 
 	@BeforeEach
-	void setUp() throws Exception {
+	public void setUp() throws Exception {
 	}
 
 	@AfterEach
-	void tearDown() throws Exception {
+	public void tearDown() throws Exception {
 	}
 
 	@Test
-	void test() {
+	public void test() {
 		String message = "hello world";
 		assertThat(CodecUtils.encrypt(message)).isNotEqualTo(message);
 		assertThat(CodecUtils.decrypt(CodecUtils.encrypt(message))).isEqualTo(message);

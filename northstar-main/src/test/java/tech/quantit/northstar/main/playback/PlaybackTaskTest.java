@@ -21,7 +21,7 @@ import tech.quantit.northstar.main.persistence.MarketDataRepository;
 import tech.quantit.northstar.main.persistence.po.MinBarDataPO;
 import tech.quantit.northstar.main.persistence.po.TickDataPO;
 
-class PlaybackTaskTest {
+public class PlaybackTaskTest {
 	
 	TickDataPO tck1 = TickDataPO.builder()
 			.actionTime("1")
@@ -94,7 +94,7 @@ class PlaybackTaskTest {
 			.build();
 
 	@Test
-	void test() {
+	public void test() {
 		StrategyModule module = mock(StrategyModule.class);
 		when(module.bindedContractUnifiedSymbols()).thenReturn(Set.of("rb2210@SHFE@FUTURES"));
 		when(module.getBindedMktGatewayId()).thenReturn("testGateway");
@@ -117,7 +117,7 @@ class PlaybackTaskTest {
 	}
 	
 	@Test
-	void testException() {
+	public void testException() {
 		StrategyModule module = mock(StrategyModule.class);
 		when(module.bindedContractUnifiedSymbols()).thenReturn(Set.of("rb2210@SHFE@FUTURES"));
 		when(module.getBindedMktGatewayId()).thenReturn("testGateway");
@@ -137,7 +137,7 @@ class PlaybackTaskTest {
 	
 	@SuppressWarnings("unchecked")
 	@Test
-	void testProcess() {
+	public void testProcess() {
 		StrategyModule module = mock(StrategyModule.class);
 		when(module.bindedContractUnifiedSymbols()).thenReturn(Set.of("rb2210@SHFE@FUTURES"));
 		when(module.getBindedMktGatewayId()).thenReturn("testGateway");

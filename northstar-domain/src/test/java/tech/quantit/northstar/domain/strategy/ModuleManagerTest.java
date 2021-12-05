@@ -15,7 +15,7 @@ import tech.quantit.northstar.common.event.NorthstarEvent;
 import tech.quantit.northstar.common.event.NorthstarEventType;
 import test.common.TestFieldFactory;
 
-class ModuleManagerTest {
+public class ModuleManagerTest {
 
 	ModuleManager mdlMgr;
 	
@@ -26,7 +26,7 @@ class ModuleManagerTest {
 	TestFieldFactory factory = new TestFieldFactory("testGateway");
 	
 	@BeforeEach
-	void setUp() {
+	public void setUp() {
 		mdlMgr = new ModuleManager();
 		
 		module = mock(StrategyModule.class);
@@ -35,19 +35,19 @@ class ModuleManagerTest {
 	}
 
 	@Test
-	void shouldAddSuccessfully() {
+	public void shouldAddSuccessfully() {
 		mdlMgr.addModule(module);
 		assertThat(mdlMgr.getModule(NAME)).isEqualTo(module);
 	}
 	
 	@Test
-	void shouldRemoveSuccessfully() {
+	public void shouldRemoveSuccessfully() {
 		mdlMgr.addModule(module);
 		assertThat(mdlMgr.removeModule(NAME)).isEqualTo(module);
 	}
 	
 	@Test
-	void shouldThrowIfModuleEnableWhenRemoving() {
+	public void shouldThrowIfModuleEnableWhenRemoving() {
 		when(module.isEnabled()).thenReturn(true);
 		mdlMgr.addModule(module);
 		assertThrows(IllegalStateException.class, ()->{			
@@ -56,14 +56,14 @@ class ModuleManagerTest {
 	}
 	
 	@Test
-	void shouldThrowIfNotExist() {
+	public void shouldThrowIfNotExist() {
 		assertThrows(IllegalStateException.class, ()->{			
 			mdlMgr.getModule("any");
 		});
 	}
 	
 	@Test
-	void testCanHandle() {
+	public void testCanHandle() {
 		assertThat(mdlMgr.canHandle(NorthstarEventType.TICK)).isTrue();
 		assertThat(mdlMgr.canHandle(NorthstarEventType.BAR)).isTrue();
 		assertThat(mdlMgr.canHandle(NorthstarEventType.ORDER)).isTrue();
@@ -74,7 +74,7 @@ class ModuleManagerTest {
 	}
 
 	@Test
-	void testDoHandle() {
+	public void testDoHandle() {
 		mdlMgr.addModule(module);
 		mdlMgr.doHandle(mock(NorthstarEvent.class));
 		verify(module).onEvent(ArgumentMatchers.any(NorthstarEvent.class));

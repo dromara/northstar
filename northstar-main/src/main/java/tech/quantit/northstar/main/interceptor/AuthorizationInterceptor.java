@@ -8,7 +8,6 @@ import org.springframework.web.servlet.HandlerInterceptor;
 
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.constant.Constants;
-import tech.quantit.northstar.common.exception.AuthenticationException;
 
 @Slf4j
 public class AuthorizationInterceptor implements HandlerInterceptor{
