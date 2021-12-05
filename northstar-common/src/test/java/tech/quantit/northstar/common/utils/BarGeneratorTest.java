@@ -9,23 +9,21 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.assertj.core.data.Offset;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import tech.quantit.northstar.common.constant.DateTimeConstant;
 import tech.quantit.northstar.common.constant.TickType;
-import tech.quantit.northstar.common.utils.BarGenerator;
-import tech.quantit.northstar.common.utils.MarketTimeUtil;
 import xyz.redtorch.pb.CoreField.TickField;
 
-public class BarGeneratorTest {
+class BarGeneratorTest {
 
 private TickField.Builder proto;
 	
 	private MarketTimeUtil util = new CtpMarketTimeUtil();
 	
-	@Before
-	public void prepare() {
+	@BeforeEach
+	void prepare() {
 		proto = TickField.newBuilder()
 				.setUnifiedSymbol("rb2101")
 				.setGatewayId("testGateway")
@@ -37,7 +35,7 @@ private TickField.Builder proto;
 	 * 验证开盘时段
 	 */
 	@Test
-	public void testOpeningScene() {
+	void testOpeningScene() {
 		AtomicInteger cnt = new AtomicInteger();
 		List<String> timeList = List.of("2100");
 		BarGenerator bg = new BarGenerator("rb2101", (bar, tickList) -> {
@@ -54,7 +52,7 @@ private TickField.Builder proto;
 	 * 验证一般时段
 	 */
 	@Test
-	public void testNormalScene() {
+	void testNormalScene() {
 		AtomicInteger cnt = new AtomicInteger();
 		List<String> timeList = List.of("2100", "2101", "2102");
 		BarGenerator bg = new BarGenerator("rb2101", (bar, tickList) -> {
@@ -75,7 +73,7 @@ private TickField.Builder proto;
 	 * 验证跨小节时段0
 	 */
 	@Test
-	public void testCrossSectionScene0() {
+	void testCrossSectionScene0() {
 		AtomicInteger cnt = new AtomicInteger();
 		List<String> timeList = List.of("2255", "2256", "2257", "2258", "2259", "0900", "0901");
 		BarGenerator bg = new BarGenerator("rb2101", (bar, tickList) -> {
@@ -96,7 +94,7 @@ private TickField.Builder proto;
 	 * 验证跨小节时段1
 	 */
 	@Test
-	public void testCrossSectionScene1() {
+	void testCrossSectionScene1() {
 		AtomicInteger cnt = new AtomicInteger();
 		List<String> timeList = List.of("2255", "2256", "2257", "2258", "2259", "0900", "0901");
 		BarGenerator bg = new BarGenerator("rb2101", (bar, tickList) -> {
@@ -117,7 +115,7 @@ private TickField.Builder proto;
 	 * 验证跨小节时段2
 	 */
 	@Test
-	public void testCrossSectionScene2() {
+	void testCrossSectionScene2() {
 		AtomicInteger cnt = new AtomicInteger();
 		List<String> timeList = List.of("1128", "1129", "1330", "1331", "1332");
 		BarGenerator bg = new BarGenerator("rb2101", (bar, tickList) -> {
@@ -138,7 +136,7 @@ private TickField.Builder proto;
 	 * 验证跨小节时段3
 	 */
 	@Test
-	public void testCrossSectionScene3() {
+	void testCrossSectionScene3() {
 		AtomicInteger cnt = new AtomicInteger();
 		List<String> timeList = List.of("1128", "1129", "1330", "1331", "1332");
 		BarGenerator bg = new BarGenerator("rb2101", (bar, tickList) -> {
@@ -159,7 +157,7 @@ private TickField.Builder proto;
 	 * 验证收盘时段
 	 */
 	@Test
-	public void testClosingScene() {
+	void testClosingScene() {
 		AtomicInteger cnt = new AtomicInteger();
 		List<String> timeList = List.of("1455", "1456", "1457", "1458", "1459");
 		BarGenerator bg = new BarGenerator("rb2101", (bar, tickList) -> {
@@ -176,7 +174,7 @@ private TickField.Builder proto;
 	 * 验证收盘时段2
 	 */
 	@Test
-	public void testClosingScene2() {
+	void testClosingScene2() {
 		AtomicInteger cnt = new AtomicInteger();
 		List<String> timeList = List.of("1455", "1456", "1457", "1458", "1459", "1500",
 				"1501", "1502", "1503", "1504", "1505", "1506", "1507", "1508",

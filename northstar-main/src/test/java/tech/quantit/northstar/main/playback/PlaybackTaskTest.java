@@ -2,6 +2,7 @@ package tech.quantit.northstar.main.playback;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.offset;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -11,7 +12,7 @@ import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Set;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import tech.quantit.northstar.common.constant.PlaybackPrecision;
 import tech.quantit.northstar.common.model.PlaybackDescription;
@@ -19,9 +20,8 @@ import tech.quantit.northstar.domain.strategy.StrategyModule;
 import tech.quantit.northstar.main.persistence.MarketDataRepository;
 import tech.quantit.northstar.main.persistence.po.MinBarDataPO;
 import tech.quantit.northstar.main.persistence.po.TickDataPO;
-import tech.quantit.northstar.main.playback.PlaybackTask;
 
-public class PlaybackTaskTest {
+class PlaybackTaskTest {
 	
 	TickDataPO tck1 = TickDataPO.builder()
 			.actionTime("1")
@@ -94,7 +94,7 @@ public class PlaybackTaskTest {
 			.build();
 
 	@Test
-	public void test() {
+	void test() {
 		StrategyModule module = mock(StrategyModule.class);
 		when(module.bindedContractUnifiedSymbols()).thenReturn(Set.of("rb2210@SHFE@FUTURES"));
 		when(module.getBindedMktGatewayId()).thenReturn("testGateway");
@@ -116,8 +116,8 @@ public class PlaybackTaskTest {
 		assertThat(task.ratioOfProcess()).isEqualTo(1);
 	}
 	
-	@Test(expected = IllegalStateException.class)
-	public void testException() {
+	@Test
+	void testException() {
 		StrategyModule module = mock(StrategyModule.class);
 		when(module.bindedContractUnifiedSymbols()).thenReturn(Set.of("rb2210@SHFE@FUTURES"));
 		when(module.getBindedMktGatewayId()).thenReturn("testGateway");
@@ -130,11 +130,14 @@ public class PlaybackTaskTest {
 		when(mdRepo.loadDataByDate(anyString(), anyString(), anyString())).thenReturn(List.of(mock(MinBarDataPO.class)));
 		PlaybackTask task = new PlaybackTask(description, List.of(module), mdRepo);
 		
-		task.nextBatchData();
+		assertThrows(IllegalStateException.class, ()->{			
+			task.nextBatchData();
+		});
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Test
-	public void testProcess() {
+	void testProcess() {
 		StrategyModule module = mock(StrategyModule.class);
 		when(module.bindedContractUnifiedSymbols()).thenReturn(Set.of("rb2210@SHFE@FUTURES"));
 		when(module.getBindedMktGatewayId()).thenReturn("testGateway");

@@ -24,13 +24,13 @@ public class RiskControlPolicy implements TickDataAware, EventDrivenComponent, S
 	
 	private List<RiskControlRule> rules;
 	
-	private TickField lastTick;
+	protected TickField lastTick;
 	
 	private ModuleEventBus meb;
 	
 	private ModuleState curState;
 	
-	private SubmitOrderReqField currentOrderReq;
+	protected SubmitOrderReqField currentOrderReq;
 	
 	private String moduleName;
 	

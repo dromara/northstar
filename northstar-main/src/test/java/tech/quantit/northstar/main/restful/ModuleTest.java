@@ -9,17 +9,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.time.LocalDate;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.alibaba.fastjson.JSON;
@@ -38,10 +36,9 @@ import tech.quantit.northstar.main.engine.broadcast.SocketIOMessageEngine;
 import tech.quantit.northstar.strategy.api.model.ModulePositionInfo;
 import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = NorthstarApplication.class, value="spring.profiles.active=test")
 @AutoConfigureMockMvc
-public class ModuleTest {
+class ModuleTest {
 
 	private String symbol;
 	
@@ -56,8 +53,8 @@ public class ModuleTest {
 	@MockBean
 	private SocketIOServer socketServer;
 	
-	@Before
-	public void setUp() throws Exception {
+	@BeforeEach
+	void setUp() throws Exception {
 		LocalDate date = LocalDate.now().plusDays(45);
 		String year = date.getYear() % 100 + "";
 		String month = String.format("%02d", date.getMonth().getValue());
@@ -72,13 +69,13 @@ public class ModuleTest {
 			.andExpect(status().isOk());
 	}
 	
-	@After
-	public void tearDown() throws InterruptedException {
+	@AfterEach
+	void tearDown() throws InterruptedException {
 		TestMongoUtils.clearDB();
 	}
 	
 	@Test
-	public void shouldSuccessfullyCreate() throws Exception {
+	void shouldSuccessfullyCreate() throws Exception {
 		String demoStr = "{\"moduleName\":\"TEST\",\"accountGatewayId\":\"TG1\",\"signalPolicy\":{\"componentMeta\":{\"name\":\"示例策略\",\"className\":\"tech.quantit.northstar.strategy.api.policy.signal.SampleSignalPolicy\"},\"initParams\":[{\"label\":\"绑定合约\",\"name\":\"bindedUnifiedSymbol\",\"order\":10,\"type\":\"String\",\"value\":\""+symbol+"@SHFE@FUTURES\",\"unit\":\"\",\"options\":[]},{\"label\":\"长周期\",\"name\":\"actionInterval\",\"order\":30,\"type\":\"Number\",\"value\":\"3\",\"unit\":\"秒\",\"options\":[]}]},\"riskControlRules\":[{\"componentMeta\":{\"name\":\"委托超时限制\",\"className\":\"tech.quantit.northstar.strategy.api.policy.risk.TimeExceededRule\"},\"initParams\":[{\"label\":\"超时时间\",\"name\":\"timeoutSeconds\",\"order\":0,\"type\":\"Number\",\"value\":\"23\",\"unit\":\"秒\",\"options\":[]}]}],\"dealer\":{\"componentMeta\":{\"name\":\"示例交易策略\",\"className\":\"tech.quantit.northstar.strategy.api.policy.dealer.SampleDealer\"},\"initParams\":[{\"label\":\"绑定合约\",\"name\":\"bindedUnifiedSymbol\",\"order\":10,\"type\":\"String\",\"value\":\""+symbol+"@SHFE@FUTURES\",\"unit\":\"\",\"options\":[]},{\"label\":\"开仓手数\",\"name\":\"openVol\",\"order\":20,\"type\":\"Number\",\"value\":\"2\",\"unit\":\"\",\"options\":[]},{\"label\":\"价格类型\",\"name\":\"openPriceTypeStr\",\"order\":30,\"type\":\"Options\",\"value\":\"市价\",\"unit\":\"\",\"options\":[\"对手价\",\"市价\",\"最新价\",\"排队价\",\"信号价\"]},{\"label\":\"超价\",\"name\":\"overprice\",\"order\":40,\"type\":\"Number\",\"value\":\"2\",\"unit\":\"Tick\",\"options\":[]}]},\"enabled\":false,\"type\":\"CTA\"}";
 		
 		mockMvc.perform(post("/module").contentType(MediaType.APPLICATION_JSON_UTF8).content(demoStr).session(session))
@@ -87,7 +84,7 @@ public class ModuleTest {
 	}
 	
 	@Test
-	public void shouldSuccessfullyUpdate() throws Exception {
+	void shouldSuccessfullyUpdate() throws Exception {
 		shouldSuccessfullyCreate();
 		String demoStr = "{\"moduleName\":\"TEST\",\"accountGatewayId\":\"TG1\",\"signalPolicy\":{\"componentMeta\":{\"name\":\"示例策略\",\"className\":\"tech.quantit.northstar.strategy.api.policy.signal.SampleSignalPolicy\"},\"initParams\":[{\"label\":\"绑定合约\",\"name\":\"bindedUnifiedSymbol\",\"order\":10,\"type\":\"String\",\"value\":\""+symbol+"@SHFE@FUTURES\",\"unit\":\"\",\"options\":[]},{\"label\":\"长周期\",\"name\":\"actionInterval\",\"order\":30,\"type\":\"Number\",\"value\":\"3\",\"unit\":\"秒\",\"options\":[]}]},\"riskControlRules\":[{\"componentMeta\":{\"name\":\"委托超时限制\",\"className\":\"tech.quantit.northstar.strategy.api.policy.risk.TimeExceededRule\"},\"initParams\":[{\"label\":\"超时时间\",\"name\":\"timeoutSeconds\",\"order\":0,\"type\":\"Number\",\"value\":\"23\",\"unit\":\"秒\",\"options\":[]}]}],\"dealer\":{\"componentMeta\":{\"name\":\"示例交易策略\",\"className\":\"tech.quantit.northstar.strategy.api.policy.dealer.SampleDealer\"},\"initParams\":[{\"label\":\"绑定合约\",\"name\":\"bindedUnifiedSymbol\",\"order\":10,\"type\":\"String\",\"value\":\""+symbol+"@SHFE@FUTURES\",\"unit\":\"\",\"options\":[]},{\"label\":\"开仓手数\",\"name\":\"openVol\",\"order\":20,\"type\":\"Number\",\"value\":\"2\",\"unit\":\"\",\"options\":[]},{\"label\":\"价格类型\",\"name\":\"openPriceTypeStr\",\"order\":30,\"type\":\"Options\",\"value\":\"市价\",\"unit\":\"\",\"options\":[\"对手价\",\"市价\",\"最新价\",\"排队价\",\"信号价\"]},{\"label\":\"超价\",\"name\":\"overprice\",\"order\":40,\"type\":\"Number\",\"value\":\"2\",\"unit\":\"Tick\",\"options\":[]}]},\"enabled\":true,\"type\":\"CTA\"}";
 		
@@ -97,14 +94,14 @@ public class ModuleTest {
 	}
 	
 	@Test
-	public void shouldFindModules() throws Exception {
+	void shouldFindModules() throws Exception {
 		mockMvc.perform(get("/module").session(session))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
 	}
 	
 	@Test
-	public void shouldSuccessfullyRemove() throws Exception {
+	void shouldSuccessfullyRemove() throws Exception {
 		shouldSuccessfullyCreate();
 		
 		mockMvc.perform(delete("/module?name=TEST").session(session))
@@ -113,7 +110,7 @@ public class ModuleTest {
 	}
 	
 	@Test
-	public void shouldCreateModulePosition() throws Exception {
+	void shouldCreateModulePosition() throws Exception {
 		prepareGateway();
 		System.out.println("等待gateway初始化");
 		Thread.sleep(2000);
@@ -133,7 +130,7 @@ public class ModuleTest {
 	}
 	
 	@Test
-	public void shouldUpdateModulePosition() throws Exception {
+	void shouldUpdateModulePosition() throws Exception {
 		prepareGateway();
 		shouldSuccessfullyCreate();
 		ModulePositionInfo position = ModulePositionInfo.builder()
@@ -151,7 +148,7 @@ public class ModuleTest {
 	}
 	
 	@Test
-	public void shouldRemoveModulePosition() throws Exception {
+	void shouldRemoveModulePosition() throws Exception {
 		shouldCreateModulePosition();
 		
 		mockMvc.perform(delete("/module/TEST/position?unifiedSymbol="+symbol+"@SHFE@FUTURES&dir=PD_Long").session(session))
@@ -174,7 +171,7 @@ public class ModuleTest {
 	}
 	
 	@Test
-	public void shouldSuccessfullyGetModuleCurrentPerformance() throws Exception {
+	void shouldSuccessfullyGetModuleCurrentPerformance() throws Exception {
 		shouldCreateModulePosition();
 		mockMvc.perform(get("/module/info?name=TEST").session(session))
 			.andExpect(status().isOk())
@@ -182,7 +179,7 @@ public class ModuleTest {
 	}
 	
 	@Test
-	public void shouldSuccessfullyGetModuleDealRecords() throws Exception {
+	void shouldSuccessfullyGetModuleDealRecords() throws Exception {
 		shouldCreateModulePosition();
 		
 		mockMvc.perform(get("/module/records?name=TEST").session(session))
@@ -191,7 +188,7 @@ public class ModuleTest {
 	}
 	
 	@Test
-	public void shouldSuccessfullyGetModuleTradeRecords() throws Exception {
+	void shouldSuccessfullyGetModuleTradeRecords() throws Exception {
 		shouldCreateModulePosition();
 		
 		mockMvc.perform(get("/module/records/trade?name=TEST").session(session))
@@ -200,7 +197,7 @@ public class ModuleTest {
 	}
 	
 	@Test
-	public void shouldSuccessfullyToggleModuleState() throws Exception {
+	void shouldSuccessfullyToggleModuleState() throws Exception {
 		shouldCreateModulePosition();
 		
 		mockMvc.perform(get("/module/toggle?name=TEST").session(session))

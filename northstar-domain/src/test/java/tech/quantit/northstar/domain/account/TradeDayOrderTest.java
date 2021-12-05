@@ -2,15 +2,14 @@ package tech.quantit.northstar.domain.account;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import tech.quantit.northstar.domain.account.TradeDayOrder;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreEnum.OrderStatusEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.OrderField;
 
-public class TradeDayOrderTest {
+class TradeDayOrderTest {
 	
 	TradeDayOrder tdo = new TradeDayOrder();
 	
@@ -26,7 +25,7 @@ public class TradeDayOrderTest {
 	
 
 	@Test
-	public void testUpdate() {
+	void testUpdate() {
 		OrderField order1 = OrderField.newBuilder()
 				.setAccountId("testGateway")
 				.setOriginOrderId("123")
@@ -47,7 +46,7 @@ public class TradeDayOrderTest {
 	}
 
 	@Test
-	public void testCanCancelOrder() {
+	void testCanCancelOrder() {
 		testUpdate();
 		assertThat(tdo.canCancelOrder("123")).isTrue();
 		assertThat(tdo.canCancelOrder("456")).isFalse();

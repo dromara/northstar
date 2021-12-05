@@ -2,25 +2,24 @@ package tech.quantit.northstar.domain.account;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.offset;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 
 import tech.quantit.northstar.common.event.InternalEventBus;
 import tech.quantit.northstar.common.event.NorthstarEvent;
 import tech.quantit.northstar.common.exception.InsufficientException;
-import tech.quantit.northstar.common.exception.NoSuchElementException;
 import tech.quantit.northstar.common.exception.TradeException;
 import tech.quantit.northstar.common.model.ContractManager;
 import tech.quantit.northstar.common.model.OrderRecall;
 import tech.quantit.northstar.common.model.OrderRequest;
 import tech.quantit.northstar.common.model.OrderRequest.TradeOperation;
-import tech.quantit.northstar.domain.account.TradeDayAccount;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreEnum.OrderStatusEnum;
 import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
@@ -30,7 +29,7 @@ import xyz.redtorch.pb.CoreField.OrderField;
 import xyz.redtorch.pb.CoreField.PositionField;
 import xyz.redtorch.pb.CoreField.TradeField;
 
-public class TradeDayAccountTest {
+class TradeDayAccountTest {
 	
 	TradeDayAccount tda;
 	
@@ -45,8 +44,8 @@ public class TradeDayAccountTest {
 			.setShortMarginRatio(0.08)
 			.build();
 	
-	@Before
-	public void prepare() {
+	@BeforeEach
+	void prepare() {
 		InternalEventBus eventBus = mock(InternalEventBus.class);
 		ContractManager contractMgr = mock(ContractManager.class);
 		when(contractMgr.getContract("rb2102@SHFE")).thenReturn(contract);
@@ -55,7 +54,7 @@ public class TradeDayAccountTest {
 	
 
 	@Test
-	public void testOnAccountUpdate() {
+	void testOnAccountUpdate() {
 		AccountField af = AccountField.newBuilder()
 				.setAccountId("testAccount")
 				.setBalance(10022)
@@ -68,7 +67,7 @@ public class TradeDayAccountTest {
 	}
 
 	@Test
-	public void testOnPositionUpdate() {
+	void testOnPositionUpdate() {
 		PositionField pf = PositionField.newBuilder()
 				.setPositionId("123456")
 				.setPositionDirection(PositionDirectionEnum.PD_Long)
@@ -83,7 +82,7 @@ public class TradeDayAccountTest {
 	}
 
 	@Test
-	public void testOnTradeUpdate() {
+	void testOnTradeUpdate() {
 		TradeField tf = TradeField.newBuilder()
 				.setTradeId("456789")
 				.build();
@@ -92,7 +91,7 @@ public class TradeDayAccountTest {
 	}
 
 	@Test
-	public void testOnOrderUpdate() {
+	void testOnOrderUpdate() {
 		OrderField of = OrderField.newBuilder()
 				.setOriginOrderId("adfskal")
 				.setTotalVolume(2)
@@ -103,7 +102,7 @@ public class TradeDayAccountTest {
 	}
 
 	@Test
-	public void testOpenPosition() throws InsufficientException {
+	void testOpenPosition() throws InsufficientException {
 		testOnAccountUpdate();
 		OrderRequest orderReq = OrderRequest.builder()
 				.contractUnifiedSymbol("rb2102@SHFE")
@@ -115,8 +114,8 @@ public class TradeDayAccountTest {
 		tda.openPosition(orderReq);
 	}
 	
-	@Test(expected = InsufficientException.class)
-	public void testOpenPositionWithException() throws InsufficientException {
+	@Test
+	void testOpenPositionWithException() throws InsufficientException {
 		testOnAccountUpdate();
 		OrderRequest orderReq = OrderRequest.builder()
 				.contractUnifiedSymbol("rb2102@SHFE")
@@ -125,11 +124,14 @@ public class TradeDayAccountTest {
 				.tradeOpr(TradeOperation.BK)
 				.gatewayId("testGateway")
 				.build();
-		tda.openPosition(orderReq);
+		assertThrows(InsufficientException.class, ()->{
+			tda.openPosition(orderReq);
+		});
+		
 	}
 
 	@Test
-	public void testClosePosition() throws InsufficientException {
+	void testClosePosition() throws InsufficientException {
 		testOnPositionUpdate();
 		OrderRequest orderReq = OrderRequest.builder()
 				.contractUnifiedSymbol("rb2102@SHFE")
@@ -142,8 +144,8 @@ public class TradeDayAccountTest {
 		verify(tda.eventBus, times(2)).post(ArgumentMatchers.any(NorthstarEvent.class));
 	}
 	
-	@Test(expected = InsufficientException.class)
-	public void testClosePositionWithException() throws InsufficientException {
+	@Test
+	void testClosePositionWithException() throws InsufficientException {
 		testOnPositionUpdate();
 		OrderRequest orderReq = OrderRequest.builder()
 				.contractUnifiedSymbol("rb2102@SHFE")
@@ -152,11 +154,13 @@ public class TradeDayAccountTest {
 				.tradeOpr(TradeOperation.SP)
 				.gatewayId("testGateway")
 				.build();
-		tda.closePosition(orderReq);
+		assertThrows(InsufficientException.class, ()->{			
+			tda.closePosition(orderReq);
+		});
 	}
 
 	@Test
-	public void testCancelOrder() throws TradeException {
+	void testCancelOrder() throws TradeException {
 		testOnOrderUpdate();
 		OrderRecall recall = OrderRecall.builder()
 				.gatewayId("testGateway")
@@ -166,8 +170,8 @@ public class TradeDayAccountTest {
 		verify(tda.eventBus).post(ArgumentMatchers.any(NorthstarEvent.class));
 	}
 	
-	@Test(expected = TradeException.class)
-	public void testCancelOrderWithException() throws TradeException {
+	@Test
+	void testCancelOrderWithException() throws TradeException {
 		OrderField of = OrderField.newBuilder()
 				.setOrderId("adfskal")
 				.setTotalVolume(2)
@@ -179,7 +183,9 @@ public class TradeDayAccountTest {
 				.gatewayId("testGateway")
 				.originOrderId("adfskal")
 				.build();
-		tda.cancelOrder(recall);
+		assertThrows(TradeException.class, ()->{			
+			tda.cancelOrder(recall);
+		});
 	}
 
 }

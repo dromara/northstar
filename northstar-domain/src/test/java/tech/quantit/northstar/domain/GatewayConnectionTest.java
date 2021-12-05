@@ -3,8 +3,8 @@ package tech.quantit.northstar.domain;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import tech.quantit.northstar.common.constant.ConnectionState;
 import tech.quantit.northstar.common.constant.GatewayType;
@@ -12,15 +12,13 @@ import tech.quantit.northstar.common.constant.GatewayUsage;
 import tech.quantit.northstar.common.event.InternalEventBus;
 import tech.quantit.northstar.common.model.CtpSettings;
 import tech.quantit.northstar.common.model.GatewayDescription;
-import tech.quantit.northstar.domain.GatewayConnection;
-import tech.quantit.northstar.domain.TraderGatewayConnection;
 
-public class GatewayConnectionTest {
+class GatewayConnectionTest {
 	
 	GatewayConnection conn;
 	
-	@Before
-	public void prepare() {
+	@BeforeEach
+	void prepare() {
 		CtpSettings settings = new CtpSettings();
 		settings.setAppId("app123456");
 		settings.setAuthCode("auth321564");
@@ -43,13 +41,13 @@ public class GatewayConnectionTest {
 	
 
 	@Test
-	public void testOnConnected() {
+	void testOnConnected() {
 		conn.onConnected();
 		assertThat(conn.gwDescription.getConnectionState()).isEqualTo(ConnectionState.CONNECTED);
 	}
 
 	@Test
-	public void testOnDisconnected() {
+	void testOnDisconnected() {
 		testOnConnected();
 		
 		conn.onDisconnected();
@@ -57,19 +55,19 @@ public class GatewayConnectionTest {
 	}
 
 	@Test
-	public void testIsConnected() {
+	void testIsConnected() {
 		testOnConnected();
 		assertThat(conn.isConnected()).isTrue();
 	}
 
 	@Test
-	public void testOnError() {
+	void testOnError() {
 		conn.onError();
 		assertThat(conn.errorFlag).isTrue();
 	}
 
 	@Test
-	public void testHasConnectionError() {
+	void testHasConnectionError() {
 		conn.onError();
 		assertThat(conn.hasConnectionError()).isTrue();
 	}

@@ -10,17 +10,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.alibaba.fastjson.JSON;
@@ -40,10 +38,9 @@ import tech.quantit.northstar.main.persistence.MarketDataRepository;
 import tech.quantit.northstar.main.persistence.ModuleRepository;
 import tech.quantit.northstar.strategy.api.model.ModuleInfo;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = NorthstarApplication.class, value="spring.profiles.active=test")
 @AutoConfigureMockMvc
-public class PlaybackTest {
+class PlaybackTest {
 
 	@Autowired
 	private MockMvc mockMvc;
@@ -62,8 +59,8 @@ public class PlaybackTest {
 	@MockBean
 	private MarketDataRepository mdRepo;
 	
-	@Before
-	public void setUp() throws Exception {
+	@BeforeEach
+	void setUp() throws Exception {
 		session = new MockHttpSession();
 		mockMvc.perform(post("/auth/login").contentType(MediaType.APPLICATION_JSON_UTF8).content(JSON.toJSONString(new NsUser("admin","123456"))).session(session))
 			.andExpect(status().isOk());
@@ -83,13 +80,13 @@ public class PlaybackTest {
 		when(moduleRepo.findModuleInfo(anyString())).thenReturn(JSON.parseObject(moduleStr, ModuleInfo.class));
 	}
 	
-	@After
-	public void tearDown() throws InterruptedException {
+	@AfterEach
+	void tearDown() throws InterruptedException {
 		TestMongoUtils.clearDB();
 	}
 	
 	@Test
-	public void shouldSuccessfullyPlay() throws Exception {
+	void shouldSuccessfullyPlay() throws Exception {
 		PlaybackDescription playbackDescription = PlaybackDescription.builder()
 				.startDate("20211111")
 				.endDate("20211122")
@@ -105,7 +102,7 @@ public class PlaybackTest {
 	}
 
 	@Test
-	public void shouldGetPlayProcess() throws Exception {
+	void shouldGetPlayProcess() throws Exception {
 		shouldSuccessfullyPlay();
 		
 		mockMvc.perform(get("/pb/play/process").session(session))
@@ -114,21 +111,21 @@ public class PlaybackTest {
 	}
 	
 	@Test
-	public void shouldThrowIfNotPlayAndGetTheProcess() throws Exception {
+	void shouldThrowIfNotPlayAndGetTheProcess() throws Exception {
 		mockMvc.perform(get("/pb/play/process").session(session))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.status").value(ReturnCode.ERROR));
 	}
 
 	@Test
-	public void shouldThrowIfNotPlayAndGetTheBalance() throws Exception {
+	void shouldThrowIfNotPlayAndGetTheBalance() throws Exception {
 		mockMvc.perform(get("/pb/balance?moduleName=TESTM").session(session))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.status").value(ReturnCode.ERROR));
 	}
 	
 	@Test
-	public void shouldGetPlaybackBalance() throws Exception {
+	void shouldGetPlaybackBalance() throws Exception {
 		shouldSuccessfullyPlay();
 		
 		mockMvc.perform(get("/pb/balance?moduleName=TESTM").session(session))
@@ -137,7 +134,7 @@ public class PlaybackTest {
 	}
 
 	@Test
-	public void shouldGetReadyStateIfNotPlay() throws Exception {
+	void shouldGetReadyStateIfNotPlay() throws Exception {
 		Thread.sleep(500);
 		mockMvc.perform(get("/pb/readiness").session(session))
 			.andExpect(status().isOk())
@@ -146,7 +143,7 @@ public class PlaybackTest {
 	}
 	
 	@Test
-	public void shouldGetBusyStateIfPlaying() throws Exception {
+	void shouldGetBusyStateIfPlaying() throws Exception {
 		shouldSuccessfullyPlay();
 		
 		mockMvc.perform(get("/pb/readiness").session(session))

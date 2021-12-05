@@ -9,13 +9,13 @@ import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
 
 import com.mongodb.BasicDBObject;
-import com.mongodb.MongoClient;
-import com.mongodb.MongoClientOptions;
+import com.mongodb.MongoClientSettings;
 import com.mongodb.MongoCredential;
 import com.mongodb.MongoException;
 import com.mongodb.ServerAddress;
 import com.mongodb.WriteConcern;
 import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
@@ -56,40 +56,43 @@ public class MongoClientAdapter {
 	 * @param authdb
 	 * @throws Exception
 	 */
-	public MongoClientAdapter(String host, int port, String username, String password, String authdb) throws Exception {
-		log.info("连接MongoDB Host:{} Port:{}", host, port);
-		MongoClientOptions.Builder build = new MongoClientOptions.Builder();
-		/*
-		 * 一个线程访问数据库的时候,在成功获取到一个可用数据库连接之前的最长等待时间为2分钟
-		 * 这里比较危险,如果超过maxWaitTime都没有获取到这个连接的话,该线程就会抛出Exception
-		 * 故这里设置的maxWaitTime应该足够大,以免由于排队线程过多造成的数据库访问失败
-		 */
-		build.maxWaitTime(1000 * 60 * 2);
-		build.connectTimeout(1000 * 60 * 1); // 与数据库建立连接的timeout设置为1分钟
-		build.socketTimeout(0);// 套接字超时时间,0无限制
-		build.maxConnectionIdleTime(60000);
-		build.maxConnectionIdleTime(0);
-		build.retryWrites(true);
-		build.connectionsPerHost(300); // 连接池设置为300个连接,默认为100
-		build.threadsAllowedToBlockForConnectionMultiplier(1000);// 线程队列数,如果连接线程排满了队列就会抛出“Out of semaphores to get db" 错误
-		build.writeConcern(WriteConcern.ACKNOWLEDGED); // 写操作需要得到确认
-
-		MongoClientOptions myOptions = build.build();
-		try {
-			if (StringUtils.isBlank(username) || StringUtils.isBlank(password) || StringUtils.isBlank(authdb)) {
-				log.info("使用无认证方式连接MongoDB");
-				mongoClient = new MongoClient(new ServerAddress(host, port), myOptions);
-			} else {
-				log.info("使用认证方式连接MongoDB");
-				MongoCredential mongoCredential = MongoCredential.createScramSha1Credential(username, authdb,
-						password.toCharArray());
-				// 数据库连接实例
-				mongoClient = new MongoClient(new ServerAddress(host, port), mongoCredential, myOptions);
-			}
-		} catch (MongoException e) {
-			throw new Exception("MongoDB连接失败", e);
-		}
-	}
+//	public MongoClientAdapter(String host, int port, String username, String password, String authdb) throws Exception {
+//		log.info("连接MongoDB Host:{} Port:{}", host, port);
+//		MongoClientOptions.Builder build = new MongoClientOptions.Builder();
+//		MongoClientSettings settings = MongoClientSettings.builder()
+//				.
+//				.build();
+//		/*
+//		 * 一个线程访问数据库的时候,在成功获取到一个可用数据库连接之前的最长等待时间为2分钟
+//		 * 这里比较危险,如果超过maxWaitTime都没有获取到这个连接的话,该线程就会抛出Exception
+//		 * 故这里设置的maxWaitTime应该足够大,以免由于排队线程过多造成的数据库访问失败
+//		 */
+//		build.maxWaitTime(1000 * 60 * 2);
+//		build.connectTimeout(1000 * 60 * 1); // 与数据库建立连接的timeout设置为1分钟
+//		build.socketTimeout(0);// 套接字超时时间,0无限制
+//		build.maxConnectionIdleTime(60000);
+//		build.maxConnectionIdleTime(0);
+//		build.retryWrites(true);
+//		build.connectionsPerHost(300); // 连接池设置为300个连接,默认为100
+//		build.threadsAllowedToBlockForConnectionMultiplier(1000);// 线程队列数,如果连接线程排满了队列就会抛出“Out of semaphores to get db" 错误
+//		build.writeConcern(WriteConcern.ACKNOWLEDGED); // 写操作需要得到确认
+//
+//		MongoClientOptions myOptions = build.build();
+//		try {
+//			if (StringUtils.isBlank(username) || StringUtils.isBlank(password) || StringUtils.isBlank(authdb)) {
+//				log.info("使用无认证方式连接MongoDB");
+//				mongoClient = new MongoClient(new ServerAddress(host, port), myOptions);
+//			} else {
+//				log.info("使用认证方式连接MongoDB");
+//				MongoCredential mongoCredential = MongoCredential.createScramSha1Credential(username, authdb,
+//						password.toCharArray());
+//				// 数据库连接实例
+//				mongoClient = new MongoClient(new ServerAddress(host, port), mongoCredential, myOptions);
+//			}
+//		} catch (MongoException e) {
+//			throw new Exception("MongoDB连接失败", e);
+//		}
+//	}
 
 	/**
 	 * 判断数据是否存在

@@ -2,6 +2,7 @@ package tech.quantit.northstar.main.utils;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Random;
 
 import org.apache.commons.io.FileUtils;
@@ -15,21 +16,20 @@ import lombok.extern.slf4j.Slf4j;
 public class CodecUtils {
 
 	private static final String KEY = "NORTHSTA";
-	private static final String UTF8 = "UTF-8";
 	private static String salt = "";
 	static {
 		String homeDir = System.getProperty("user.home");
 		File tempSalt = new File(homeDir, ".northstar-salt");
 		try {
 			if (tempSalt.exists()) {
-				salt = FileUtils.readFileToString(tempSalt, UTF8);
+				salt = FileUtils.readFileToString(tempSalt, StandardCharsets.UTF_8);
 
 			} else {
 				if (tempSalt.createNewFile()) {
 					log.info("创建随机盐文件：{}", homeDir);
 					Random r = new Random();
 					salt = String.format("%08d", r.nextInt(100000000));
-					FileUtils.write(tempSalt, salt, UTF8);
+					FileUtils.write(tempSalt, salt, StandardCharsets.UTF_8);
 				} else {
 					log.warn("无法创建加密临时文件");
 				}

@@ -15,10 +15,9 @@ northstar:
     canHandle: FUTURES
   holidays: 20210614,20210920,20210921,20211001,20211004,20211005,20211006,20211007
 
-logging:
-  level: 
-    root: info
-  path: logs/
+logging:  level: 
+    '[tech.quantit.northstar]': info
+  file:    path: log/
   
 spring:
   profiles:
@@ -44,21 +43,18 @@ spring:
             socketFactory.class: com.fintech.modules.base.util.mail.MailSSLSocketFactory
 ---
 spring:
-  profiles: prod
   data:
     mongodb:
-      uri: mongodb://127.0.0.1:27017/NS_DB
+      uri: mongodb://127.0.0.1:27017/NS_DB  config:    activate:      on-profile: prod
       
 ---
 spring:
-  profiles: dev
   data:
     mongodb:
-      uri: mongodb://127.0.0.1:27017/NS_DB
+      uri: mongodb://127.0.0.1:27017/NS_DB  config:    activate:      on-profile: dev
 
 ---
 spring:
-  profiles: test
   data:
     mongodb:
-      uri: mongodb://127.0.0.1:27017/TEST_NS_DB
+      uri: mongodb://127.0.0.1:27017/TEST_NS_DB  config:    activate:      on-profile: test

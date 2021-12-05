@@ -4,25 +4,23 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import tech.quantit.northstar.domain.strategy.ModulePosition;
-import tech.quantit.northstar.domain.strategy.ModuleStatus;
 import tech.quantit.northstar.strategy.api.constant.ModuleState;
 import test.common.TestFieldFactory;
 import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
 
-public class ModuleStatusTest {
+class ModuleStatusTest {
 	
 	TestFieldFactory factory = new TestFieldFactory("gateway");
 	ContractField contract = factory.makeContract("rb2201");
 	
 	ModulePosition p1, p2, p3, p4;
 	
-	@Before
-	public void prepare() {
+	@BeforeEach
+	void prepare() {
 		p1 = mock(ModulePosition.class);
 		p2 = mock(ModulePosition.class);
 		p3 = mock(ModulePosition.class);
@@ -49,27 +47,27 @@ public class ModuleStatusTest {
 	}
 	
 	@Test
-	public void initStateShouldBeEmpty() {
+	void initStateShouldBeEmpty() {
 		ModuleStatus ms = new ModuleStatus("test");
 		assertThat(ms.at(ModuleState.EMPTY)).isTrue();
 	}
 
 	@Test
-	public void shouldGetLongWhenAddPosition() {
+	void shouldGetLongWhenAddPosition() {
 		ModuleStatus ms = new ModuleStatus("test");
 		ms.addPosition(p1);
 		assertThat(ms.at(ModuleState.HOLDING_LONG)).isTrue();
 	}
 	
 	@Test
-	public void shouldGetShortWhenAddPosition() {
+	void shouldGetShortWhenAddPosition() {
 		ModuleStatus ms = new ModuleStatus("test");
 		ms.addPosition(p2);
 		assertThat(ms.at(ModuleState.HOLDING_SHORT)).isTrue();
 	}
 	
 	@Test
-	public void shouldGetEmptyWhenRemovePosition() {
+	void shouldGetEmptyWhenRemovePosition() {
 		ModuleStatus ms = new ModuleStatus("test");
 		ms.addPosition(p1);
 		ms.removePostion(p1);
@@ -79,7 +77,7 @@ public class ModuleStatusTest {
 	}
 	
 	@Test
-	public void shouldGetLongWhenHedging() {
+	void shouldGetLongWhenHedging() {
 		ModuleStatus ms = new ModuleStatus("test");
 		ms.addPosition(p1);
 		ms.addPosition(p2);
@@ -87,7 +85,7 @@ public class ModuleStatusTest {
 	}
 	
 	@Test
-	public void shouldGetShortWhenHedging() {
+	void shouldGetShortWhenHedging() {
 		ModuleStatus ms = new ModuleStatus("test");
 		ms.addPosition(p3);
 		ms.addPosition(p4);
@@ -95,7 +93,7 @@ public class ModuleStatusTest {
 	}
 	
 	@Test
-	public void shouldGetNetEmptyWhenHedging() {
+	void shouldGetNetEmptyWhenHedging() {
 		ModuleStatus ms = new ModuleStatus("test");
 		ms.addPosition(p1);
 		ms.addPosition(p3);
@@ -103,7 +101,7 @@ public class ModuleStatusTest {
 	}
 	
 	@Test
-	public void shouldGetAllPositions() {
+	void shouldGetAllPositions() {
 		ModuleStatus ms = new ModuleStatus("test");
 		ms.addPosition(p1);
 		ms.addPosition(p3);
@@ -111,7 +109,7 @@ public class ModuleStatusTest {
 	}
 
 	@Test
-	public void shouldGetTotalHoldingProfit() {
+	void shouldGetTotalHoldingProfit() {
 		ModuleStatus ms = new ModuleStatus("test");
 		ms.addPosition(p1);
 		ms.addPosition(p3);

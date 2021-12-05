@@ -5,14 +5,13 @@ import static org.assertj.core.api.Assertions.offset;
 
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import tech.quantit.northstar.common.model.PlaybackDescription;
-import tech.quantit.northstar.main.playback.PlaybackStat;
 import tech.quantit.northstar.strategy.api.model.ModuleDealRecord;
 
-public class PlaybackStatTest {
+class PlaybackStatTest {
 	
 	List<ModuleDealRecord> dealRecords;
 	
@@ -20,8 +19,8 @@ public class PlaybackStatTest {
 	
 	PlaybackStat stat;
 	
-	@Before
-	public void prepare() {
+	@BeforeEach
+	void prepare() {
 		playbackDescription = PlaybackDescription.builder()
 				.fee(1)
 				.startDate("20211101")
@@ -92,62 +91,62 @@ public class PlaybackStatTest {
 	}
 
 	@Test
-	public void testSumOfProfit() {
+	void testSumOfProfit() {
 		assertThat(stat.sumOfProfit()).isEqualTo(530);
 	}
 
 	@Test
-	public void testSumOfCommission() {
+	void testSumOfCommission() {
 		assertThat(stat.sumOfCommission()).isEqualTo(18);
 	}
 
 	@Test
-	public void testTimesOfTransaction() {
+	void testTimesOfTransaction() {
 		assertThat(stat.timesOfTransaction()).isEqualTo(10);
 	}
 
 	@Test
-	public void testDuration() {
+	void testDuration() {
 		assertThat(stat.duration()).isEqualTo(92);
 	}
 
 	@Test
-	public void testYearlyEarningRate() {
+	void testYearlyEarningRate() {
 		assertThat(stat.yearlyEarningRate()).isCloseTo(1.898415, offset(1e-6));
 	}
 	
 	@Test
-	public void testStdOfPlaybackProfits() {
+	void testStdOfPlaybackProfits() {
 		assertThat(stat.stdOfPlaybackProfits()).isCloseTo(211.505188, offset(1e-6));
 	}
 
 	@Test
-	public void testMeanOfNTransactionsAvgProfit() {
+	void testMeanOfNTransactionsAvgProfit() {
 		assertThat(stat.meanOfNTransactionsAvgProfit(3)).isCloseTo(70.416667, offset(1e-6));
 	}
 
 	@Test
-	public void testStdOfNTransactionsAvgProfit() {
+	void testStdOfNTransactionsAvgProfit() {
 		assertThat(stat.stdOfNTransactionsAvgProfit(3)).isCloseTo(58.783411, offset(1e-6));
 	}
 
 	@Test
-	public void testMeanOfNTransactionsAvgWinningRate() {
+	void testMeanOfNTransactionsAvgWinningRate() {
 		assertThat(stat.meanOfNTransactionsAvgWinningRate(3)).isCloseTo(0.625, offset(1e-6));
 	}
 
 	@Test
-	public void testStdOfNTransactionsAvgWinningRate() {
+	void testStdOfNTransactionsAvgWinningRate() {
 		assertThat(stat.stdOfNTransactionsAvgWinningRate(3)).isCloseTo(0.160604, offset(1e-6));
 	}
 
 	@Test
-	public void testMaxFallback() {
+	void testMaxFallback() {
 		assertThat(stat.maxFallback()).isEqualTo(310);
 	}
 
 	@Test
-	public void testMeanOfOccupiedMoney() {
+	void testMeanOfOccupiedMoney() {
 		assertThat(stat.meanOfOccupiedMoney()).isEqualTo(1070);
 	}
 }

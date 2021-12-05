@@ -6,14 +6,12 @@ import static org.mockito.Mockito.when;
 
 import java.util.concurrent.ConcurrentMap;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import com.corundumstudio.socketio.SocketIOServer;
 
@@ -25,7 +23,6 @@ import tech.quantit.northstar.domain.account.TradeDayAccount;
 import tech.quantit.northstar.main.NorthstarApplication;
 import tech.quantit.northstar.main.engine.broadcast.SocketIOMessageEngine;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = NorthstarApplication.class, value="spring.profiles.active=test")
 public class TradeOperationTest {
 	
@@ -50,14 +47,14 @@ public class TradeOperationTest {
 	@MockBean
 	private SocketIOServer socketServer;
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		account = mock(TradeDayAccount.class);
 		when(accountMap.get(NAME)).thenReturn(account);
 		
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() throws Exception {
 	}
 

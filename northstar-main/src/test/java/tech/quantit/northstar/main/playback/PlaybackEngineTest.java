@@ -11,22 +11,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.ArgumentMatcher;
-import org.mockito.ArgumentMatchers;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import tech.quantit.northstar.common.event.NorthstarEvent;
 import tech.quantit.northstar.domain.strategy.SandboxModuleManager;
 import tech.quantit.northstar.domain.strategy.StrategyModule;
 import tech.quantit.northstar.gateway.sim.trade.SimMarket;
-import tech.quantit.northstar.main.playback.PlaybackEngine;
-import tech.quantit.northstar.main.playback.PlaybackTask;
 import tech.quantit.northstar.main.playback.PlaybackTask.DataType;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.TickField;
 
-public class PlaybackEngineTest {
+class PlaybackEngineTest {
 
 	PlaybackEngine engine;
 	StrategyModule module = mock(StrategyModule.class);
@@ -102,8 +98,8 @@ public class PlaybackEngineTest {
 			.setActionTimestamp(1634087340000L)
 			.build();
 	
-	@Before
-	public void prepare() {
+	@BeforeEach
+	void prepare() {
 		when(task.isDone()).thenReturn(false, true);
 		when(task.nextBatchData()).thenReturn(batchData);
 		
@@ -119,7 +115,7 @@ public class PlaybackEngineTest {
 	}
 	
 	@Test
-	public void test() {
+	void test() {
 		SimMarket market = mock(SimMarket.class);
 		SandboxModuleManager moduleMgr = mock(SandboxModuleManager.class);
 		engine = new PlaybackEngine(market, moduleMgr);

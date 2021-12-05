@@ -17,8 +17,7 @@ import org.springframework.web.filter.CorsFilter;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import com.mongodb.MongoClient;
-import com.mongodb.MongoClientOptions;
+import com.mongodb.client.MongoClient;
 
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.model.ContractManager;
@@ -86,16 +85,6 @@ public class AppConfig implements WebMvcConfigurer {
 	}
 	
 	@Bean
-	public MongoClientOptions mongoClientOptions() {
-		return MongoClientOptions.builder().maxConnectionIdleTime(120000).build();
-	}
-
-	@Bean
-	public MongoClientAdapter createMongoClientAdapter(MongoClient mongo) {
-		return new MongoClientAdapter(mongo);
-	}
-	
-	@Bean
 	public GatewayAndConnectionManager gatewayAndConnectionManager() {
 		return new GatewayAndConnectionManager();
 	}
@@ -138,4 +127,8 @@ public class AppConfig implements WebMvcConfigurer {
 		return new SimGatewayFactory(fastEventEngine, simMarket, contractMgr);
 	}
 	
+	@Bean 
+	public MongoClientAdapter mongoClientAdapter(MongoClient mongoClient) {
+		return new MongoClientAdapter(mongoClient);
+	}
 }

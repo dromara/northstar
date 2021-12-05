@@ -1,6 +1,7 @@
 package module;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -11,8 +12,8 @@ import static org.mockito.Mockito.when;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.event.NorthstarEventType;
@@ -45,7 +46,7 @@ import xyz.redtorch.pb.CoreField.TradeField;
  * @author KevinHuangwl
  *
  */
-public class SimTradeGatewayWIT {
+class SimTradeGatewayWIT {
 	
 	private SimTradeGateway gateway;
 	
@@ -55,8 +56,8 @@ public class SimTradeGatewayWIT {
 	
 	private TestFieldFactory ff = new TestFieldFactory("testGateway");
 	
-	@Before
-	public void prepare() {
+	@BeforeEach
+	void prepare() {
 		GatewaySettingField setting = ff.makeGatewaySetting();
 		ContractField contract = ff.makeContract(RB);
 		ContractManager contractMgr = mock(ContractManager.class);
@@ -69,7 +70,7 @@ public class SimTradeGatewayWIT {
 	 * 入金验证
 	 */
 	@Test
-	public void testMoneyIn() {
+	void testMoneyIn() {
 		assertThat(gateway.moneyIO(20000)).isEqualTo(20000);
 	}
 
@@ -78,7 +79,7 @@ public class SimTradeGatewayWIT {
 	 * @throws InterruptedException 
 	 */
 	@Test
-	public void testMoneyOut() throws InterruptedException {
+	void testMoneyOut() throws InterruptedException {
 		assertThat(gateway.moneyIO(20000)).isEqualTo(20000);
 		assertThat(gateway.moneyIO(-1000)).isEqualTo(19000);
 	}
@@ -86,9 +87,11 @@ public class SimTradeGatewayWIT {
 	/**
 	 * 出金异常验证
 	 */
-	@Test(expected = IllegalStateException.class)
-	public void testMoneyOutException() throws InterruptedException {
-		gateway.moneyIO(-100);
+	@Test
+	void testMoneyOutException() throws InterruptedException {
+		assertThrows(IllegalStateException.class, ()->{			
+			gateway.moneyIO(-100);
+		});
 	}
 	
 	/**
@@ -96,7 +99,7 @@ public class SimTradeGatewayWIT {
 	 * @throws InterruptedException 
 	 */
 	@Test
-	public void testTickUpdate() throws InterruptedException {
+	void testTickUpdate() throws InterruptedException {
 		for(int i=0; i<3; i++) {
 			int price = ThreadLocalRandom.current().nextInt(2000, 20000);
 			gateway.onTick(ff.makeTickField(RB, price));
@@ -109,7 +112,7 @@ public class SimTradeGatewayWIT {
 	 * 有持仓状态下行情更新验证
 	 */
 	@Test
-	public void testTickUpdateOnHolding() {
+	void testTickUpdateOnHolding() {
 		testOpeningTrade();
 		gateway.onTick(ff.makeTickField(RB, 1230));
 		verify(feEngine).emitEvent(eq(NorthstarEventType.POSITION), argThat(pos -> ((PositionField)pos).getPriceDiff() == 29));
@@ -121,7 +124,7 @@ public class SimTradeGatewayWIT {
 	 * 无持仓条件下委托测试
 	 */
 	@Test
-	public void testOpeningSubmitOrder() {
+	void testOpeningSubmitOrder() {
 		gateway.moneyIO(10000);
 		gateway.submitOrder(ff.makeOrderReq(RB, DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open, 1, 1234, 1000));
 		verify(feEngine).emitEvent(eq(NorthstarEventType.ORDER), argThat(order -> ((OrderField)order).getOffsetFlag() == OffsetFlagEnum.OF_Open
@@ -132,7 +135,7 @@ public class SimTradeGatewayWIT {
 	 * 无持仓条件下资金不足委托测试
 	 */
 	@Test
-	public void testOpeningSubmitOrderFail() {
+	void testOpeningSubmitOrderFail() {
 		gateway.submitOrder(ff.makeOrderReq(RB, DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open, 1, 1234, 0));
 		verify(feEngine).emitEvent(eq(NorthstarEventType.ORDER), argThat(order -> ((OrderField)order).getOffsetFlag() == OffsetFlagEnum.OF_Open 
 				&& ((OrderField)order).getOrderStatus() == OrderStatusEnum.OS_Rejected));
@@ -142,7 +145,7 @@ public class SimTradeGatewayWIT {
 	 * 持仓条件下委托测试
 	 */
 	@Test
-	public void testClosingSubmitOrder() {
+	void testClosingSubmitOrder() {
 		testOpeningTrade();
 		
 		SubmitOrderReqField orderReq = ff.makeOrderReq(RB, DirectionEnum.D_Sell, OffsetFlagEnum.OF_CloseToday, 1, 1234, 1000);
@@ -156,7 +159,7 @@ public class SimTradeGatewayWIT {
 	 * 持仓条件下持仓不足委托测试
 	 */
 	@Test
-	public void testClosingSubmitOrderFail() {
+	void testClosingSubmitOrderFail() {
 		testOpeningTrade();
 		
 		SubmitOrderReqField orderReq = ff.makeOrderReq(RB, DirectionEnum.D_Sell, OffsetFlagEnum.OF_CloseToday, 2, 1234, 1000);
@@ -169,7 +172,7 @@ public class SimTradeGatewayWIT {
 	 * 加仓测试
 	 */
 	@Test
-	public void testIncreasingPosition() {
+	void testIncreasingPosition() {
 		testOpeningTrade();
 		
 		SubmitOrderReqField orderReq = ff.makeOrderReq(RB, DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open, 2, 1234, 1000);
@@ -185,7 +188,7 @@ public class SimTradeGatewayWIT {
 	 * 减仓测试
 	 */
 	@Test
-	public void testDecreasingPosition() {
+	void testDecreasingPosition() {
 		testIncreasingPosition();
 		
 		SubmitOrderReqField orderReq = ff.makeOrderReq(RB, DirectionEnum.D_Sell, OffsetFlagEnum.OF_CloseToday, 1, 1234, 1000);
@@ -200,7 +203,7 @@ public class SimTradeGatewayWIT {
 	 * 无持仓状态下撤单测试
 	 */
 	@Test
-	public void testCancelOrder() {
+	void testCancelOrder() {
 		gateway.moneyIO(10000);
 		SubmitOrderReqField orderReq = ff.makeOrderReq(RB, DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open, 1, 1234, 1000);
 		CancelOrderReqField cancelReq = ff.makeCancelReq(orderReq);
@@ -216,7 +219,7 @@ public class SimTradeGatewayWIT {
 	 * 持仓状态下撤单测试
 	 */
 	@Test
-	public void testCancelOrderOnHolding() {
+	void testCancelOrderOnHolding() {
 		testOpeningTrade();
 		
 		SubmitOrderReqField orderReq = ff.makeOrderReq(RB, DirectionEnum.D_Sell, OffsetFlagEnum.OF_CloseToday, 1, 1234, 1000);
@@ -232,7 +235,7 @@ public class SimTradeGatewayWIT {
 	 * 止损测试
 	 */
 	@Test
-	public void testStopLoss() {
+	void testStopLoss() {
 		gateway.moneyIO(10000);
 		SubmitOrderReqField req = SubmitOrderReqField.newBuilder()
 			.setOriginOrderId(UUID.randomUUID().toString())
@@ -258,7 +261,7 @@ public class SimTradeGatewayWIT {
 	 * 开仓委托成交测试
 	 */
 	@Test
-	public void testOpeningTrade() {
+	void testOpeningTrade() {
 		testOpeningSubmitOrder();
 		
 		gateway.onTick(ff.makeTickField(RB, 1200));
@@ -273,7 +276,7 @@ public class SimTradeGatewayWIT {
 	 * @throws InterruptedException 
 	 */
 	@Test
-	public void testClosingTrade() throws InterruptedException {
+	void testClosingTrade() throws InterruptedException {
 		testOpeningTrade();
 		
 		SubmitOrderReqField orderReq = ff.makeOrderReq(RB, DirectionEnum.D_Sell, OffsetFlagEnum.OF_CloseToday, 1, 1234, 1000);

@@ -7,17 +7,15 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.alibaba.fastjson.JSON;
@@ -40,10 +38,9 @@ import tech.quantit.northstar.main.engine.broadcast.SocketIOMessageEngine;
  * @author KevinHuangwl
  *
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = NorthstarApplication.class, value="spring.profiles.active=test")
 @AutoConfigureMockMvc
-public class GatewayManagementTest {
+class GatewayManagementTest {
 	
 	@Autowired
 	private MockMvc mockMvc;
@@ -56,27 +53,27 @@ public class GatewayManagementTest {
 	@MockBean
 	private SocketIOServer socketServer;
 	
-	@Before
-	public void setUp() throws Exception {
+	@BeforeEach
+	void setUp() throws Exception {
 		session = new MockHttpSession();
 		mockMvc.perform(post("/auth/login").contentType(MediaType.APPLICATION_JSON_UTF8).content(JSON.toJSONString(new NsUser("admin","123456"))).session(session))
 			.andExpect(status().isOk());
 	}
 	
-	@After
-	public void tearDown() {
+	@AfterEach
+	void tearDown() {
 		TestMongoUtils.clearDB();
 	}
 	
 	@Test
-	public void shouldFailWithoutAuth() throws Exception {
+	void shouldFailWithoutAuth() throws Exception {
 		GatewayDescription gatewayDes = TestGatewayFactory.makeMktGateway("testGateway", GatewayType.CTP, TestGatewayFactory.makeGatewaySettings(CtpSettings.class), false);
 		mockMvc.perform(post("/mgt/gateway").contentType(MediaType.APPLICATION_JSON_UTF8).content(JSON.toJSONString(gatewayDes)))
 			.andExpect(status().is(401));
 	}
 
 	@Test
-	public void shouldCreateGateway() throws Exception {
+	void shouldCreateGateway() throws Exception {
 		GatewayDescription gatewayDes = TestGatewayFactory.makeMktGateway("TG1", GatewayType.CTP, TestGatewayFactory.makeGatewaySettings(CtpSettings.class),false);
 		mockMvc.perform(post("/mgt/gateway").contentType(MediaType.APPLICATION_JSON_UTF8).content(JSON.toJSONString(gatewayDes)).session(session))
 			.andExpect(status().isOk())
@@ -84,7 +81,7 @@ public class GatewayManagementTest {
 	}
 	
 	@Test
-	public void shouldFindCreatedGateway() throws Exception {
+	void shouldFindCreatedGateway() throws Exception {
 		shouldCreateGateway();
 		
 		mockMvc.perform(get("/mgt/gateway?usage=" + GatewayUsage.MARKET_DATA).session(session))
@@ -93,7 +90,7 @@ public class GatewayManagementTest {
 	}
 
 	@Test
-	public void shouldUpdateGateway() throws Exception {
+	void shouldUpdateGateway() throws Exception {
 		shouldCreateGateway();
 		
 		GatewayDescription gatewayDes = TestGatewayFactory.makeMktGateway("TG1", GatewayType.CTP, TestGatewayFactory.makeGatewaySettings(CtpSettings.class),false);
@@ -103,7 +100,7 @@ public class GatewayManagementTest {
 	}
 	
 	@Test
-	public void shouldRemoveGateway() throws Exception {
+	void shouldRemoveGateway() throws Exception {
 		shouldCreateGateway();
 		
 		mockMvc.perform(delete("/mgt/gateway?gatewayId=TG1").session(session))
@@ -112,7 +109,7 @@ public class GatewayManagementTest {
 	}
 	
 	@Test
-	public void shouldFailIfNotProvidingSetting() throws Exception {
+	void shouldFailIfNotProvidingSetting() throws Exception {
 		GatewayDescription gwDes = TestGatewayFactory.makeMktGateway("TG1", GatewayType.CTP, null,false);
 		mockMvc.perform(post("/mgt/gateway").contentType(MediaType.APPLICATION_JSON).content(JSON.toJSONString(gwDes)).session(session))
 			.andExpect(status().isOk())
@@ -120,7 +117,7 @@ public class GatewayManagementTest {
 	}
 	
 	// @Test
-	public void shouldSuccessWhenGettingActiveState() throws Exception {
+	void shouldSuccessWhenGettingActiveState() throws Exception {
 		shouldCreateGateway();
 		
 		mockMvc.perform(get("/mgt/gateway/active?gatewayId=TG1").session(session))
@@ -129,7 +126,7 @@ public class GatewayManagementTest {
 	}
 	
 	@Test
-	public void shouldSuccessWhenConnecting() throws Exception {
+	void shouldSuccessWhenConnecting() throws Exception {
 		shouldCreateGateway();
 		
 		mockMvc.perform(get("/mgt/connection?gatewayId=TG1").session(session))
@@ -138,7 +135,7 @@ public class GatewayManagementTest {
 	}
 	
 	@Test
-	public void shouldSuccessWhenDisconnecting() throws Exception {
+	void shouldSuccessWhenDisconnecting() throws Exception {
 		shouldCreateGateway();
 		
 		mockMvc.perform(delete("/mgt/connection?gatewayId=TG1").session(session))
@@ -147,7 +144,7 @@ public class GatewayManagementTest {
 	}
 	
 	@Test
-	public void shouldFailIfGatewayNotFound() throws Exception {
+	void shouldFailIfGatewayNotFound() throws Exception {
 		mockMvc.perform(get("/mgt/connection?gatewayId=ANY").session(session))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.status").value(ReturnCode.NO_SUCH_ELEMENT_EXCEPTION));
@@ -158,7 +155,7 @@ public class GatewayManagementTest {
 	}
 	
 	@Test
-	public void shouldIncreaseBalance() throws Exception {
+	void shouldIncreaseBalance() throws Exception {
 		shouldCreateGateway();
 		
 		GatewayDescription gwDes = TestGatewayFactory.makeTrdGateway("TG2", "", GatewayType.SIM, TestGatewayFactory.makeGatewaySettings(SimSettings.class), false);
@@ -173,7 +170,7 @@ public class GatewayManagementTest {
 	}
 	
 	@Test
-	public void shouldDecreaseBalance() throws Exception {
+	void shouldDecreaseBalance() throws Exception {
 		shouldIncreaseBalance();
 		
 		mockMvc.perform(post("/mgt/moneyio?gatewayId=TG2&money=-10000").session(session))
@@ -182,7 +179,7 @@ public class GatewayManagementTest {
 	}
 	
 	@Test
-	public void shouldFailIfNotSimGateway() throws Exception {
+	void shouldFailIfNotSimGateway() throws Exception {
 		shouldCreateGateway();
 		
 		mockMvc.perform(post("/mgt/moneyio?gatewayId=TG1&money=10000").session(session))

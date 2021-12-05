@@ -1,6 +1,7 @@
 package tech.quantit.northstar.domain.strategy;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -8,11 +9,9 @@ import static org.mockito.Mockito.when;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
-import tech.quantit.northstar.domain.strategy.ModulePosition;
-import tech.quantit.northstar.domain.strategy.ModuleTradeIntent;
 import tech.quantit.northstar.strategy.api.model.ModuleDealRecord;
 import test.common.TestFieldFactory;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
@@ -23,7 +22,7 @@ import xyz.redtorch.pb.CoreField.OrderField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TradeField;
 
-public class ModuleTradeIntentTest {
+class ModuleTradeIntentTest {
 	
 	TestFieldFactory factory = new TestFieldFactory("test");
 	String NAME = "testModule";
@@ -36,7 +35,7 @@ public class ModuleTradeIntentTest {
 
 	@SuppressWarnings("unchecked")
 	@Test
-	public void testAllTradedForOpenOrder() {
+	void testAllTradedForOpenOrder() {
 		SubmitOrderReqField orderReq = factory.makeOrderReq(SYMBOL, DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open, 4, 1000, 0);
 		ModuleTradeIntent mti = new ModuleTradeIntent(NAME, orderReq, openCallback);
 		
@@ -59,7 +58,7 @@ public class ModuleTradeIntentTest {
 	
 	@SuppressWarnings("unchecked")
 	@Test
-	public void testPartiallyTradedForOpenOrder() {
+	void testPartiallyTradedForOpenOrder() {
 		SubmitOrderReqField orderReq = factory.makeOrderReq(SYMBOL, DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open, 4, 1000, 0);
 		ModuleTradeIntent mti = new ModuleTradeIntent(NAME, orderReq, openCallback);
 		
@@ -83,7 +82,7 @@ public class ModuleTradeIntentTest {
 	
 	@SuppressWarnings("unchecked")
 	@Test
-	public void testPartiallyTradedForOpenOrder2() {
+	void testPartiallyTradedForOpenOrder2() {
 		SubmitOrderReqField orderReq = factory.makeOrderReq(SYMBOL, DirectionEnum.D_Sell, OffsetFlagEnum.OF_Open, 4, 1000, 0);
 		ModuleTradeIntent mti = new ModuleTradeIntent(NAME, orderReq, openCallback);
 		
@@ -107,7 +106,7 @@ public class ModuleTradeIntentTest {
 	
 	@SuppressWarnings("unchecked")
 	@Test
-	public void testNonTradedForOpenOrder() {
+	void testNonTradedForOpenOrder() {
 		SubmitOrderReqField orderReq = factory.makeOrderReq(SYMBOL, DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open, 4, 1000, 0);
 		ModuleTradeIntent mti = new ModuleTradeIntent(NAME, orderReq, openCallback);
 		
@@ -126,7 +125,7 @@ public class ModuleTradeIntentTest {
 	
 	@SuppressWarnings("unchecked")
 	@Test
-	public void testAllTradedForCloseOrder() {
+	void testAllTradedForCloseOrder() {
 		SubmitOrderReqField orderReq = factory.makeOrderReq(SYMBOL, DirectionEnum.D_Sell, OffsetFlagEnum.OF_CloseToday, 4, 1000, 0);
 		ModulePosition mp = mock(ModulePosition.class);
 		when(mp.openPrice()).thenReturn(1010D);
@@ -152,7 +151,7 @@ public class ModuleTradeIntentTest {
 
 	@SuppressWarnings("unchecked")
 	@Test
-	public void testPartiallyTradedForCloseOrder() {
+	void testPartiallyTradedForCloseOrder() {
 		SubmitOrderReqField orderReq = factory.makeOrderReq(SYMBOL, DirectionEnum.D_Sell, OffsetFlagEnum.OF_CloseToday, 4, 1000, 0);
 		ModulePosition mp = mock(ModulePosition.class);
 		when(mp.openPrice()).thenReturn(1010D);
@@ -186,7 +185,7 @@ public class ModuleTradeIntentTest {
 	
 	@SuppressWarnings("unchecked")
 	@Test
-	public void testNonTradedForCloseOrder() {
+	void testNonTradedForCloseOrder() {
 		SubmitOrderReqField orderReq = factory.makeOrderReq(SYMBOL, DirectionEnum.D_Sell, OffsetFlagEnum.OF_CloseToday, 4, 1000, 0);
 		ModulePosition mp = mock(ModulePosition.class);
 		when(mp.openPrice()).thenReturn(1010D);
@@ -206,16 +205,20 @@ public class ModuleTradeIntentTest {
 		assertThat(arg.getValue()).isEmpty();
 	}
 	
-	@Test(expected = IllegalStateException.class)
-	public void shouldThrowIfUseWrongConstuction() {
+	@Test
+	void shouldThrowIfUseWrongConstuction() {
 		SubmitOrderReqField orderReq = factory.makeOrderReq(SYMBOL, DirectionEnum.D_Sell, OffsetFlagEnum.OF_CloseToday, 4, 1000, 0);
-		new ModuleTradeIntent(NAME, orderReq, openCallback);
+		assertThrows(IllegalStateException.class, ()->{			
+			new ModuleTradeIntent(NAME, orderReq, openCallback);
+		});
 	}
 	
-	@Test(expected = IllegalStateException.class)
-	public void shouldThrowIfUseWrongConstuction2() {
+	@Test
+	void shouldThrowIfUseWrongConstuction2() {
 		SubmitOrderReqField orderReq = factory.makeOrderReq(SYMBOL, DirectionEnum.D_Sell, OffsetFlagEnum.OF_Open, 4, 1000, 0);
 		ModulePosition mp = mock(ModulePosition.class);
-		new ModuleTradeIntent(NAME, mp, orderReq, closeCallback);
+		assertThrows(IllegalStateException.class, ()->{			
+			new ModuleTradeIntent(NAME, mp, orderReq, closeCallback);
+		});
 	}
 }

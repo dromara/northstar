@@ -2,18 +2,17 @@ package tech.quantit.northstar.domain.account;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import tech.quantit.northstar.domain.account.TradeDayTransaction;
 import xyz.redtorch.pb.CoreField.TradeField;
 
-public class TradeDayTransactionTest {
+class TradeDayTransactionTest {
 	
 	TradeDayTransaction tdt = new TradeDayTransaction();
 	
 
 	@Test
-	public void testUpdate() {
+	void testUpdate() {
 		TradeField trade1 = TradeField.newBuilder()
 				.setTradeId("123")
 				.build();
