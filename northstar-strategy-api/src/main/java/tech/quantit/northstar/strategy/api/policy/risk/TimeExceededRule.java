@@ -25,7 +25,7 @@ import xyz.redtorch.pb.CoreField.TickField;
  */
 @Slf4j
 @StrategicComponent("委托超时限制")
-public class TimeExceededRule implements RiskControlRule, TickDataAware, EventDrivenComponent {
+public class TimeExceededRule extends AbstractRule implements RiskControlRule, TickDataAware, EventDrivenComponent {
 	
 	protected long timeoutSeconds;
 
@@ -48,7 +48,7 @@ public class TimeExceededRule implements RiskControlRule, TickDataAware, EventDr
 				&& tick.getActionTimestamp() - lastUpdateTime > timeoutSeconds * 1000) {
 			LocalTime submitTime = LocalTime.ofInstant(Instant.ofEpochMilli(lastUpdateTime), ZoneId.systemDefault());
 			LocalTime curTime = LocalTime.ofInstant(Instant.ofEpochMilli(tick.getActionTimestamp()), ZoneId.systemDefault());
-			log.warn("委托超时，撤单重试：下单时间{}，当前时间{}，超时设置{}秒", submitTime, curTime, timeoutSeconds);
+			log.warn("[{}] 委托超时，撤单重试：下单时间{}，当前时间{}，超时设置{}秒", getModuleName(), submitTime, curTime, timeoutSeconds);
 			meb.post(new ModuleEvent<>(ModuleEventType.RETRY_RISK_ALERTED, orderReq));
 			orderReq = null;
 		}

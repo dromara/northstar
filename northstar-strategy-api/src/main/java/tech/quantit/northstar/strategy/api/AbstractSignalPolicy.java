@@ -29,13 +29,19 @@ public abstract class AbstractSignalPolicy implements SignalPolicy {
 	protected ContractField bindedContract;
 	
 	protected List<MarketDataReceiver> mdrList = new ArrayList<>();
+
+	private String moduleName;
+	
+	protected void emit(SignalOperation signalOperation) {
+		emit(signalOperation, 0, 0);
+	}
 	
 	protected void emit(SignalOperation signalOperation, double price, int ticksOfStopLoss) {
 		if(!isActive()) {
 			throw new IllegalStateException("当前状态下 [" + currentState + "] 不能发交易信号。");
 		}
 		moduleEventBus.post(new ModuleEvent<>(ModuleEventType.SIGNAL_CREATED, new Signal(signalOperation, price, ticksOfStopLoss)));
-		log.info("[{}] 发出交易信号：{} {} 止损{}个TICK", name(), signalOperation, price, ticksOfStopLoss);
+		log.info("[{}->{}] 发出交易信号：{} {} 止损{}个TICK", getModuleName(), name(), signalOperation, price, ticksOfStopLoss);
 	}
 	
 	@Override
@@ -105,6 +111,16 @@ public abstract class AbstractSignalPolicy implements SignalPolicy {
 		}
 	}
 	
+	@Override
+	public void setModuleName(String name) {
+		this.moduleName = name;
+	}
+
+	@Override
+	public String getModuleName() {
+		return moduleName;
+	}
+
 	/**
 	 * 
 	 * @param tick

@@ -28,6 +28,8 @@ public abstract class AbstractDealerPolicy implements DealerPolicy {
 	protected String bindedUnifiedSymbol;
 	
 	protected ContractField bindedContract;
+
+	private String moduleName;
 	
 	@Override
 	public void onChange(ModuleState state) {
@@ -41,16 +43,16 @@ public abstract class AbstractDealerPolicy implements DealerPolicy {
 			if(currentOrderReq != null && orderField.getOriginOrderId().equals(currentOrderReq.getOriginOrderId()) 
 					&& currentState == ModuleState.PENDING_ORDER) {
 				moduleEventBus.post(new ModuleEvent<>(ModuleEventType.ORDER_REQ_CREATED, genTracingOrderReq(currentOrderReq)));
-				log.info("[{}] 追单", name());
+				log.info("[{}->{}] 追单", getModuleName(), name());
 			}
 		}
 		if(moduleEvent.getEventType() == ModuleEventType.ORDER_CONFIRMED) {
 			currentOrderReq = (SubmitOrderReqField) moduleEvent.getData();
-			log.info("[{}] 订单确认", name());
+			log.info("[{}->{}] 订单确认", getModuleName(), name());
 		}
 		if(moduleEvent.getEventType() == ModuleEventType.RETRY_RISK_ALERTED) {
 			moduleEventBus.post(new ModuleEvent<>(ModuleEventType.ORDER_REQ_CANCELLED, genCancelReq()));
-			log.info("[{}] 撤单", name());
+			log.info("[{}->{}] 撤单", getModuleName(), name());
 		}
 		if(moduleEvent.getEventType() == ModuleEventType.SIGNAL_CREATED) {
 			Signal signal = (Signal) moduleEvent.getData();
@@ -78,7 +80,7 @@ public abstract class AbstractDealerPolicy implements DealerPolicy {
 			}
 			
 			moduleEventBus.post(new ModuleEvent<>(ModuleEventType.ORDER_REQ_CREATED, genOrderReq(direction, offsetFlag, signal.getSignalPrice(), signal.getTicksToStop())));
-			log.info("[{}] 生成订单", name());
+			log.info("[{}->{}] 生成订单", getModuleName(), name());
 		}
 	}
 
@@ -102,6 +104,16 @@ public abstract class AbstractDealerPolicy implements DealerPolicy {
 	@Override
 	public void setBindedContract(ContractField contract) {
 		bindedContract = contract;
+	}
+	
+	@Override
+	public void setModuleName(String name) {
+		this.moduleName = name;
+	}
+
+	@Override
+	public String getModuleName() {
+		return moduleName;
 	}
 
 	private CancelOrderReqField genCancelReq() {

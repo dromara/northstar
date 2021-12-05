@@ -18,7 +18,7 @@ import xyz.redtorch.pb.CoreField.TickField;
  */
 @Slf4j
 @StrategicComponent("日内开仓次数限制")
-public class DailyDealLimitedRule implements RiskControlRule, StateChangeListener{
+public class DailyDealLimitedRule extends AbstractRule implements RiskControlRule, StateChangeListener{
 	
 	protected int dailyDealLimit;
 	
@@ -33,7 +33,7 @@ public class DailyDealLimitedRule implements RiskControlRule, StateChangeListene
 			currentTradingDay = tick.getTradingDay();
 		}
 		if(countOfTrade >= dailyDealLimit) {
-			log.warn("日内开仓次数到达上限，日内开仓次数限制为{}次", dailyDealLimit);
+			log.warn("[{}] 日内开仓次数到达上限，日内开仓次数限制为{}次", getModuleName(), dailyDealLimit);
 			return RiskAuditResult.REJECTED;
 		}
 		return RiskAuditResult.ACCEPTED;

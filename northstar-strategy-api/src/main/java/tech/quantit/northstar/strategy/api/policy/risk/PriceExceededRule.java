@@ -23,7 +23,7 @@ import xyz.redtorch.pb.CoreField.TickField;
  */
 @Slf4j
 @StrategicComponent("委托超价限制")
-public class PriceExceededRule implements RiskControlRule, TickDataAware, EventDrivenComponent {
+public class PriceExceededRule extends AbstractRule implements RiskControlRule, TickDataAware, EventDrivenComponent {
 
 	protected int priceDifTolerance;
 	
@@ -41,7 +41,7 @@ public class PriceExceededRule implements RiskControlRule, TickDataAware, EventD
 	public void onTick(TickField tick) {
 		if(orderReq != null && tick.getUnifiedSymbol().equals(orderReq.getContract().getUnifiedSymbol()) 
 				&& Math.abs(tick.getLastPrice() - orderReq.getPrice()) > priceDifTolerance) {
-			log.warn("当前市价 [{}] 距离委托价 [{}] 超过风控限制 [{}]，放弃订单", tick.getLastPrice(), orderReq.getPrice(), priceDifTolerance);
+			log.warn("[{}] 当前市价 [{}] 距离委托价 [{}] 超过风控限制 [{}]，放弃订单", getModuleName(), tick.getLastPrice(), orderReq.getPrice(), priceDifTolerance);
 			meb.post(new ModuleEvent<>(ModuleEventType.REJECT_RISK_ALERTED, orderReq));
 			orderReq = null;
 		}

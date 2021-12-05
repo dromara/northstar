@@ -7,11 +7,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 
+import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.constant.DateTimeConstant;
 import tech.quantit.northstar.common.model.ContractManager;
 import tech.quantit.northstar.domain.GatewayAndConnectionManager;
@@ -46,22 +49,23 @@ import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.TickField;
 
-public class ModuleService implements InitializingBean{
-	
+@Slf4j
+public class ModuleService implements InitializingBean {
+
 	private ApplicationContext ctx;
-	
+
 	private ModuleRepository moduleRepo;
-	
+
 	private MarketDataRepository mdRepo;
-	
+
 	private ModuleManager mdlMgr;
-	
+
 	private GatewayAndConnectionManager gatewayConnMgr;
-	
+
 	private ContractManager contractMgr;
-	
+
 	private StrategyModuleFactory moduleFactory;
-	
+
 	public ModuleService(ApplicationContext ctx, ModuleRepository moduleRepo, MarketDataRepository mdRepo,
 			ModuleManager mdlMgr, GatewayAndConnectionManager gatewayConnMgr, ContractManager contractMgr) {
 		this.ctx = ctx;
@@ -72,50 +76,54 @@ public class ModuleService implements InitializingBean{
 		this.contractMgr = contractMgr;
 		this.moduleFactory = new StrategyModuleFactory(gatewayConnMgr, contractMgr);
 	}
-	
+
 	/**
 	 * 查询可选的信号策略
+	 * 
 	 * @return
 	 */
-	public List<ComponentMetaInfo> getRegisteredSignalPolicies(){
+	public List<ComponentMetaInfo> getRegisteredSignalPolicies() {
 		return getComponentMeta(SignalPolicy.class);
 	}
-	
+
 	/**
 	 * 查询可选的风控规则
+	 * 
 	 * @return
 	 */
-	public List<ComponentMetaInfo> getRegisteredRiskControlRules(){
+	public List<ComponentMetaInfo> getRegisteredRiskControlRules() {
 		return getComponentMeta(RiskControlRule.class);
 	}
-	
+
 	/**
 	 * 查询可选的交易策略
+	 * 
 	 * @return
 	 */
-	public List<ComponentMetaInfo> getRegisteredDealers(){
+	public List<ComponentMetaInfo> getRegisteredDealers() {
 		return getComponentMeta(DealerPolicy.class);
 	}
-	
-	private List<ComponentMetaInfo> getComponentMeta(Class<?> clz){
+
+	private List<ComponentMetaInfo> getComponentMeta(Class<?> clz) {
 		Map<String, Object> objMap = ctx.getBeansWithAnnotation(StrategicComponent.class);
 		List<ComponentMetaInfo> result = new ArrayList<>(objMap.size());
-		for(Entry<String, Object> e : objMap.entrySet()) {
-			if(clz.isAssignableFrom(e.getValue().getClass())) {
+		for (Entry<String, Object> e : objMap.entrySet()) {
+			if (clz.isAssignableFrom(e.getValue().getClass())) {
 				StrategicComponent anno = e.getValue().getClass().getAnnotation(StrategicComponent.class);
 				result.add(new ComponentMetaInfo(anno.value(), e.getValue().getClass().getName()));
 			}
 		}
 		return result;
 	}
-	
+
 	/**
 	 * 获取组件参数
+	 * 
 	 * @param name
 	 * @return
-	 * @throws ClassNotFoundException 
+	 * @throws ClassNotFoundException
 	 */
-	public Map<String, ComponentField> getComponentParams(ComponentMetaInfo info) throws ClassNotFoundException{
+	public Map<String, ComponentField> getComponentParams(ComponentMetaInfo info) throws ClassNotFoundException {
 		String className = info.getClassName();
 		Class<?> clz = Class.forName(className);
 		DynamicParamsAware aware = (DynamicParamsAware) ctx.getBean(clz);
@@ -125,19 +133,21 @@ public class ModuleService implements InitializingBean{
 
 	/**
 	 * 新增模组
+	 * 
 	 * @param module
 	 * @param shouldSave
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	public boolean createModule(ModuleInfo info) throws Exception {
 		loadModule(info, Collections.emptyList());
 		return moduleRepo.saveModuleInfo(info);
 	}
-	
+
 	/**
 	 * 更新模组
+	 * 
 	 * @param info
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	public boolean updateModule(ModuleInfo info) throws Exception {
 		mdlMgr.removeModule(info.getModuleName());
@@ -147,9 +157,10 @@ public class ModuleService implements InitializingBean{
 		loadModule(info, posInfos);
 		return moduleRepo.saveModuleInfo(info);
 	}
-	
+
 	/**
 	 * 加载模组
+	 * 
 	 * @param module
 	 * @param status
 	 */
@@ -159,29 +170,30 @@ public class ModuleService implements InitializingBean{
 		strategyModule.setCancelOrderHandler(gateway::cancelOrder);
 		strategyModule.setSubmitOrderHandler(gateway::submitOrder);
 		strategyModule.setDealRecordGenHandler(moduleRepo::saveDealRecord);
-		strategyModule.setRunningStateChangeListener((isEnabled) -> {
+		strategyModule.setRunningStateChangeListener(isEnabled -> {
 			ModuleInfo moduleInfo = moduleRepo.findModuleInfo(info.getModuleName());
 			moduleInfo.setEnabled(isEnabled);
 			moduleRepo.saveModuleInfo(moduleInfo);
 		});
 
 		// 初始化策略数据
-		SignalPolicy signalPolicy = strategyModule.getSignalPolicy(); 
+		SignalPolicy signalPolicy = strategyModule.getSignalPolicy();
 		String unifiedSymbol = signalPolicy.bindedContractSymbol();
 		String gatewayId = info.getAccountGatewayId();
 		GatewayConnection conn = gatewayConnMgr.getGatewayConnectionById(gatewayId);
 		String mktGatewayId = conn.getGwDescription().getBindedMktGatewayId();
-		
+
 		LinkedList<BarField> barList = new LinkedList<>();
 		LinkedList<TickField> tickList = new LinkedList<>();
 		List<String> availableDates = mdRepo.findDataAvailableDates(mktGatewayId, unifiedSymbol, true);
-		for(String date : availableDates.subList(availableDates.size() - info.getNumOfDaysOfDataRef(), availableDates.size())) {
+		for (String date : availableDates.subList(availableDates.size() - info.getNumOfDaysOfDataRef(),
+				availableDates.size())) {
 			List<MinBarDataPO> dataBarPOList = mdRepo.loadDataByDate(mktGatewayId, unifiedSymbol, date);
-			for(MinBarDataPO po : dataBarPOList) {
+			for (MinBarDataPO po : dataBarPOList) {
 				BarField.Builder bb = BarField.newBuilder();
 				ProtoBeanUtils.toProtoBean(bb, po);
 				barList.add(bb.build());
-				for(TickDataPO tpo : po.getTicksOfMin()) {
+				for (TickDataPO tpo : po.getTicksOfMin()) {
 					tickList.add(restoreTick(po, tpo));
 				}
 			}
@@ -190,81 +202,75 @@ public class ModuleService implements InitializingBean{
 		signalPolicy.initByBar(barList);
 		mdlMgr.addModule(strategyModule);
 	}
-	
+
 	private TickField restoreTick(MinBarDataPO barData, TickDataPO tickData) {
-		return TickField.newBuilder()
-				.setActionDay(barData.getActionDay())
-				.setActionTime(tickData.getActionTime())
-				.setActionTimestamp(tickData.getActionTimestamp())
-				.setTradingDay(barData.getTradingDay())
-				.addAskPrice(tickData.getAskPrice1())
-				.addBidPrice(tickData.getBidPrice1())
-				.setGatewayId(barData.getGatewayId())
-				.setLastPrice(tickData.getLastPrice())
-				.setAvgPrice(tickData.getAvgPrice())
-				.setUnifiedSymbol(barData.getUnifiedSymbol())
-				.setTurnover(tickData.getTurnover())
-				.setTurnoverDelta(tickData.getTurnoverDelta())
-				.addAskVolume(tickData.getAskVol1())
-				.addBidVolume(tickData.getBidVol1())
-				.setVolume(tickData.getVolume())
-				.setVolumeDelta(tickData.getVolumeDelta())
-				.setNumTrades(tickData.getNumTrades())
-				.setNumTradesDelta(tickData.getNumTradesDelta())
-				.setOpenInterest(tickData.getOpenInterest())
-				.setOpenInterestDelta(tickData.getOpenInterestDelta())
-				.setPreClosePrice(barData.getPreClosePrice())
-				.setPreOpenInterest(barData.getPreOpenInterest())
-				.setPreSettlePrice(barData.getPreSettlePrice())
+		return TickField.newBuilder().setActionDay(barData.getActionDay()).setActionTime(tickData.getActionTime())
+				.setActionTimestamp(tickData.getActionTimestamp()).setTradingDay(barData.getTradingDay())
+				.addAskPrice(tickData.getAskPrice1()).addBidPrice(tickData.getBidPrice1())
+				.setGatewayId(barData.getGatewayId()).setLastPrice(tickData.getLastPrice())
+				.setAvgPrice(tickData.getAvgPrice()).setUnifiedSymbol(barData.getUnifiedSymbol())
+				.setTurnover(tickData.getTurnover()).setTurnoverDelta(tickData.getTurnoverDelta())
+				.addAskVolume(tickData.getAskVol1()).addBidVolume(tickData.getBidVol1()).setVolume(tickData.getVolume())
+				.setVolumeDelta(tickData.getVolumeDelta()).setNumTrades(tickData.getNumTrades())
+				.setNumTradesDelta(tickData.getNumTradesDelta()).setOpenInterest(tickData.getOpenInterest())
+				.setOpenInterestDelta(tickData.getOpenInterestDelta()).setPreClosePrice(barData.getPreClosePrice())
+				.setPreOpenInterest(barData.getPreOpenInterest()).setPreSettlePrice(barData.getPreSettlePrice())
 				.build();
 	}
-	
+
 	/**
 	 * 查询所有模组
+	 * 
 	 * @return
 	 */
-	public List<ModuleInfo> getCurrentModuleInfos(){
+	public List<ModuleInfo> getCurrentModuleInfos() {
 		return moduleRepo.findAllModuleInfo();
 	}
-	
+
 	/**
 	 * 获取模组实时信息
+	 * 
 	 * @param moduleName
 	 * @return
 	 */
 	public ModuleRealTimeInfo getModuleRealTimeInfo(String moduleName) {
+		// TODO
 		return null;
 	}
-	
+
 	/**
 	 * 获取模组引用数据
+	 * 
 	 * @param moduleName
 	 * @return
 	 */
 	public List<TimeSeriesData> getModuleDataRef(String moduleName) {
 		return mdlMgr.getModule(moduleName).getSignalPolicy().inspectRefData();
 	}
-	
+
 	/**
 	 * 获取模组交易历史
+	 * 
 	 * @param moduleName
 	 * @return
 	 */
 	public List<ModuleDealRecord> getDealRecords(String moduleName) {
 		return moduleRepo.findDealRecords(moduleName);
 	}
-	
+
 	/**
 	 * 获取模组成交历史
+	 * 
 	 * @param moduleName
 	 * @return
 	 */
-	public List<ModuleTradeRecord> getTradeRecords(String moduleName){
+	public List<ModuleTradeRecord> getTradeRecords(String moduleName) {
 		return moduleRepo.findTradeRecords(moduleName);
 	}
-	
+
 	/**
 	 * 移除模组
+	 * 
 	 * @param moduleName
 	 */
 	public void removeModule(String moduleName) {
@@ -274,8 +280,7 @@ public class ModuleService implements InitializingBean{
 		moduleRepo.removeDealRecords(moduleName);
 		moduleRepo.removeTradeRecords(moduleName);
 	}
-	
-	
+
 	/**
 	 * 切换模组状态
 	 */
@@ -283,9 +288,10 @@ public class ModuleService implements InitializingBean{
 		mdlMgr.getModule(moduleName).toggleRunningState();
 		return true;
 	}
-	
+
 	/**
 	 * 新建模组持仓
+	 * 
 	 * @param moduleName
 	 * @param position
 	 * @return
@@ -295,9 +301,10 @@ public class ModuleService implements InitializingBean{
 		position.setOpenTradingDay(LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
 		return updatePosition(moduleName, position);
 	}
-	
+
 	/**
 	 * 更新模组持仓
+	 * 
 	 * @param moduleName
 	 * @param position
 	 * @return
@@ -306,16 +313,14 @@ public class ModuleService implements InitializingBean{
 		ModulePosition mp = new ModulePosition(position, contractMgr.getContract(position.getUnifiedSymbol()));
 		ModuleStatus moduleStatus = mdlMgr.getModule(moduleName).getModuleStatus();
 		moduleStatus.addPosition(mp);
-		List<ModulePositionInfo> posList = moduleStatus.getAllPositions().stream().map(ModulePosition::convertTo).collect(Collectors.toList());
-		moduleRepo.saveModulePosition(ModulePositionPO.builder()
-				.moduleName(moduleName)
-				.positions(posList)
-				.build());
+		List<ModulePositionInfo> posList = moduleStatus.getAllPositions().stream().map(ModulePosition::convertTo).toList();
+		moduleRepo.saveModulePosition(ModulePositionPO.builder().moduleName(moduleName).positions(posList).build());
 		return true;
 	}
-	
+
 	/**
 	 * 移除模组持仓
+	 * 
 	 * @param moduleName
 	 * @param unifiedSymbol
 	 * @param dir
@@ -324,21 +329,25 @@ public class ModuleService implements InitializingBean{
 	public boolean removePosition(String moduleName, String unifiedSymbol, PositionDirectionEnum dir) {
 		ModuleStatus moduleStatus = mdlMgr.getModule(moduleName).getModuleStatus();
 		moduleStatus.removePosition(unifiedSymbol, dir);
-		List<ModulePositionInfo> posList = moduleStatus.getAllPositions().stream().map(ModulePosition::convertTo).collect(Collectors.toList());
-		moduleRepo.saveModulePosition(ModulePositionPO.builder()
-				.moduleName(moduleName)
-				.positions(posList)
-				.build());
+		List<ModulePositionInfo> posList = moduleStatus.getAllPositions().stream().map(ModulePosition::convertTo).toList();
+		moduleRepo.saveModulePosition(ModulePositionPO.builder().moduleName(moduleName).positions(posList).build());
 		return true;
 	}
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		for(ModuleInfo m : getCurrentModuleInfos()) {
-			ModulePositionPO po = moduleRepo.loadModulePosition(m.getModuleName());
-			List<ModulePositionInfo> list = po == null ? Collections.emptyList() : po.getPositions();
-			loadModule(m, list);
-		}
+		CompletableFuture.runAsync(() -> {
+			try {
+				log.info("开始加载模组信息");
+				for (ModuleInfo m : getCurrentModuleInfos()) {
+					ModulePositionPO po = moduleRepo.loadModulePosition(m.getModuleName());
+					List<ModulePositionInfo> list = po == null ? Collections.emptyList() : po.getPositions();
+					loadModule(m, list);
+				}
+			} catch (Exception e) {
+				log.error("模组加载异常", e);
+			}
+		}, CompletableFuture.delayedExecutor(5, TimeUnit.SECONDS));
 	}
-	
+
 }

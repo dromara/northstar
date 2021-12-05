@@ -6,7 +6,8 @@ import tech.quantit.northstar.strategy.api.model.TimeSeriesData;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.TickField;
 
-public interface SignalPolicy extends TickDataAware, BarDataAware, EventDrivenComponent, StateChangeListener, DynamicParamsAware, ContractBindedAware {
+public interface SignalPolicy extends TickDataAware, BarDataAware, EventDrivenComponent, StateChangeListener,
+	DynamicParamsAware, ContractBindedAware, ModuleNamingAware {
 
 	/**
 	 * 策略名称

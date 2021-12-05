@@ -66,7 +66,7 @@ public class AppConfig implements WebMvcConfigurer {
 
         CorsConfiguration config = new CorsConfiguration();
         // 设置允许跨域请求的域名
-        config.addAllowedOrigin("*");
+        config.addAllowedOriginPattern("*");
         // 是否允许证书 不再默认开启
          config.setAllowCredentials(true);
         // 设置允许的方法

@@ -20,7 +20,7 @@ import xyz.redtorch.pb.CoreField.TickField;
  */
 @Slf4j
 @StrategicComponent("模组占用账户资金限制")
-public class UseMarginExceededRule implements RiskControlRule, AccountAware {
+public class UseMarginExceededRule extends AbstractRule implements RiskControlRule, AccountAware {
 
 	protected double limitedPercentageOfTotalBalance;
 
@@ -33,8 +33,8 @@ public class UseMarginExceededRule implements RiskControlRule, AccountAware {
 		double totalCost = contract.getMultiplier() * orderReq.getPrice() * orderReq.getVolume() * marginRatio;
 		int moduleAvailable = (int) Math.min(accountBalance() * limitedPercentageOfTotalBalance / 100.0, accountAvailable());
 		if(totalCost > moduleAvailable) {
-			log.info("开仓成本超过风控限制。成本金额：{}, 当前模组占用比例：{}, 当前模组可用资金：{}",
-					totalCost, limitedPercentageOfTotalBalance, moduleAvailable);
+			log.info("[{}] 开仓成本超过风控限制。成本金额：{}, 当前模组占用比例：{}, 当前模组可用资金：{}", getModuleName(), totalCost,
+					limitedPercentageOfTotalBalance, moduleAvailable);
 			return RiskAuditResult.REJECTED;
 		}
 		return RiskAuditResult.ACCEPTED;

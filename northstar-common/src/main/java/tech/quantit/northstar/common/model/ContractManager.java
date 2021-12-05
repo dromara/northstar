@@ -53,7 +53,7 @@ public class ContractManager {
 		return true;
 	}
 	
-	public ContractField getContract(String gatewayId, String symbol) {
+	public synchronized ContractField getContract(String gatewayId, String symbol) {
 		ContractField result = contractTbl.get(gatewayId, symbol);
 		if(result == null) {
 			throw new NoSuchElementException("找不到合约：" + gatewayId + "_" + symbol);
@@ -61,25 +61,25 @@ public class ContractManager {
 		return result;
 	}
 	
-	public ContractField getContract(String unifiedSymbol) {
+	public synchronized ContractField getContract(String unifiedSymbol) {
 		if(!contractMap.containsKey(unifiedSymbol)) {
 			throw new NoSuchElementException("找不到合约：" + unifiedSymbol);
 		}
 		return contractMap.get(unifiedSymbol).get();
 	}
 	
-	public Collection<ContractField> getAllContracts(){
+	public synchronized Collection<ContractField> getAllContracts(){
 		return contractMap.values().stream()
 				.filter(i -> i.get() != null)
 				.map(WeakReference::get)
 				.collect(Collectors.toList());
 	}
 	
-	public Map<String, ContractField> getContractMapByGateway(String gatewayId){
+	public synchronized Map<String, ContractField> getContractMapByGateway(String gatewayId){
 		return contractTbl.row(gatewayId);
 	}
 	
-	public void clear(String gatewayId) {
+	public synchronized void clear(String gatewayId) {
 		Map<String, ContractField> gatewayContractMap = getContractMapByGateway(gatewayId);
 		for(Entry<String, ContractField> e : gatewayContractMap.entrySet()) {
 			contractTbl.remove(gatewayId, e.getKey());

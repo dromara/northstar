@@ -9,8 +9,6 @@ import tech.quantit.northstar.strategy.api.annotation.Setting;
 import tech.quantit.northstar.strategy.api.annotation.StrategicComponent;
 import tech.quantit.northstar.strategy.api.constant.ModuleState;
 import tech.quantit.northstar.strategy.api.constant.SignalOperation;
-import tech.quantit.northstar.strategy.api.event.ModuleEvent;
-import tech.quantit.northstar.strategy.api.event.ModuleEventType;
 import tech.quantit.northstar.strategy.api.model.DynamicParams;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.TickField;
@@ -101,14 +99,14 @@ public class SampleSignalPolicy extends AbstractSignalPolicy
 			nextActionTime = now + actionInterval * 1000;
 			log.info("开始交易");
 			if(currentState == ModuleState.EMPTY) {
-				boolean flag = ThreadLocalRandom.current().nextBoolean();
-				moduleEventBus.post(new ModuleEvent<>(ModuleEventType.SIGNAL_CREATED, flag ? SignalOperation.SELL_OPEN : SignalOperation.BUY_OPEN));
+				SignalOperation op = ThreadLocalRandom.current().nextBoolean() ? SignalOperation.BUY_OPEN : SignalOperation.SELL_OPEN;
+				emit(op);
 			}
 			if(currentState == ModuleState.HOLDING_LONG) {	
-				moduleEventBus.post(new ModuleEvent<>(ModuleEventType.SIGNAL_CREATED, SignalOperation.SELL_CLOSE));
+				emit(SignalOperation.SELL_CLOSE);
 			}
 			if(currentState == ModuleState.HOLDING_SHORT) {			
-				moduleEventBus.post(new ModuleEvent<>(ModuleEventType.SIGNAL_CREATED, SignalOperation.BUY_CLOSE));
+				emit(SignalOperation.BUY_CLOSE);
 			}
 		}
 	}
