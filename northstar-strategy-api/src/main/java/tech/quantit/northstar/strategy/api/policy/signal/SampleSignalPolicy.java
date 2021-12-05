@@ -70,7 +70,7 @@ public class SampleSignalPolicy extends AbstractSignalPolicy
 	 */
 	@Override
 	public void onTick(TickField tick) {
-		log.info("策略每个TICK触发: {}", tick.getActionTime());
+		log.info("策略每个TICK触发: {} {}", tick.getUnifiedSymbol(), tick.getActionTime());
 		long now = tick.getActionTimestamp();
 		//初始状态下，等待10秒才开始交易
 		if(nextActionTime < 0) {

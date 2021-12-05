@@ -1,9 +1,6 @@
 package tech.quantit.northstar.domain.strategy;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -21,8 +18,8 @@ import tech.quantit.northstar.strategy.api.event.ModuleEvent;
 import tech.quantit.northstar.strategy.api.event.ModuleEventBus;
 import tech.quantit.northstar.strategy.api.event.ModuleEventType;
 import tech.quantit.northstar.strategy.api.model.ModuleDealRecord;
-import tech.quantit.northstar.strategy.api.model.TimeSeriesData;
 import xyz.redtorch.pb.CoreEnum.OrderStatusEnum;
+import xyz.redtorch.pb.CoreField.AccountField;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.CancelOrderReqField;
 import xyz.redtorch.pb.CoreField.OrderField;
@@ -75,6 +72,8 @@ public class StrategyModule implements EventDrivenComponent{
 	@Getter
 	private SignalPolicy signalPolicy;
 	
+	private Set<String> bindedSymbols = new HashSet<>();
+	
 	public StrategyModule(String bindedMktGatewayId, TradeGateway gateway, ModuleStatus status) {
 		this.moduleStatus = status;
 		this.moduleStatus.setModuleEventBus(meb);
@@ -93,6 +92,9 @@ public class StrategyModule implements EventDrivenComponent{
 		meb.register(component);
 		if(component instanceof SignalPolicy) {
 			signalPolicy = (SignalPolicy) component;
+		}
+		if(component instanceof ContractBindedAware) {
+			bindedSymbols.add(((ContractBindedAware)component).bindedContractSymbol());
 		}
 	}
 	
@@ -126,6 +128,25 @@ public class StrategyModule implements EventDrivenComponent{
 			handleOrder((OrderField) event.getData());
 	}
 	
+	/**
+	 * 过滤多余事件
+	 * @param event
+	 * @return
+	 */
+	public boolean canHandle(NorthstarEvent event) {
+		if(event.getEvent() == NorthstarEventType.TICK || event.getEvent() == NorthstarEventType.IDX_TICK)
+			return bindedSymbols.contains(((TickField)event.getData()).getUnifiedSymbol());
+		if(event.getEvent() == NorthstarEventType.BAR)
+			return bindedSymbols.contains(((BarField)event.getData()).getUnifiedSymbol());
+		if(event.getEvent() == NorthstarEventType.ORDER) 
+			return ti != null && ((OrderField)event.getData()).getOriginOrderId().equals(ti.originOrderId());
+		if(event.getEvent() == NorthstarEventType.TRADE) 
+			return ti != null && ((TradeField)event.getData()).getOriginOrderId().equals(ti.originOrderId());
+		if(event.getEvent() == NorthstarEventType.ACCOUNT)
+			return ((AccountField)event.getData()).getGatewayId().equals(gateway.getGatewaySetting().getGatewayId());
+		return true;
+	}
+	
 	private void handleOrder(OrderField order) {
 		if(order.getOrderStatus() == OrderStatusEnum.OS_Canceled) {			
 			moduleStatus.getStateMachine().transformForm(ModuleEventType.ORDER_CANCELLED);
@@ -153,12 +174,6 @@ public class StrategyModule implements EventDrivenComponent{
 	 * @return
 	 */
 	public Set<String> bindedContractUnifiedSymbols(){
-		Set<String> bindedSymbols = new HashSet<>();
-		for(EventDrivenComponent component : components) {
-			if(component instanceof ContractBindedAware) {
-				bindedSymbols.add(((ContractBindedAware)component).bindedContractSymbol());
-			}
-		}
 		return bindedSymbols;
 	}
 

@@ -336,7 +336,8 @@ public class ModuleService implements InitializingBean{
 	public void afterPropertiesSet() throws Exception {
 		for(ModuleInfo m : getCurrentModuleInfos()) {
 			ModulePositionPO po = moduleRepo.loadModulePosition(m.getModuleName());
-			loadModule(m, po.getPositions());
+			List<ModulePositionInfo> list = po == null ? Collections.emptyList() : po.getPositions();
+			loadModule(m, list);
 		}
 	}
 	

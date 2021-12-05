@@ -63,7 +63,6 @@ public class SimTickGenerator {
 			.setLowPrice(low)
 			.setStatus(ldt.getSecond() == 59 && System.currentTimeMillis() % 1000 > 500 ? TickType.END_OF_MIN_TICK.getCode() : TickType.NORMAL_TICK.getCode())
 			.setLastPrice(latestPrice);
-		log.info("模拟行情 {} {} {}", latestPrice, askPrice, bidPrice);
 		ins.setLastTick(tb);
 		return tb.build();
 	}

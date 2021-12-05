@@ -59,6 +59,8 @@ public class ModuleManager extends AbstractEventHandler{
 
 	@Override
 	protected void doHandle(NorthstarEvent e) {
-		moduleMap.values().parallelStream().forEach(sm -> sm.onEvent(e));
+		moduleMap.values().parallelStream()
+			.filter(sm -> sm.canHandle(e))
+			.forEach(sm -> sm.onEvent(e));
 	}
 }

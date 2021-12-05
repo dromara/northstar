@@ -57,6 +57,10 @@ public class ModuleTradeIntent {
 		this.closeCallback = onDoneClose;
 	}
 	
+	public String originOrderId() {
+		return submitOrderReq.getOriginOrderId();
+	}
+	
 	// Order反馈可能是多次
 	// 情况一：一次性成交
 	// 情况二：分多次成交
