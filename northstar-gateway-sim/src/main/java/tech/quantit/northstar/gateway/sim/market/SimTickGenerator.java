@@ -8,6 +8,7 @@ import java.util.Random;
 
 import org.apache.commons.lang3.StringUtils;
 
+import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.constant.DateTimeConstant;
 import tech.quantit.northstar.common.constant.TickType;
 import xyz.redtorch.pb.CoreField.ContractField;
@@ -20,6 +21,7 @@ import xyz.redtorch.pb.CoreField.TickField;
  * @author KevinHuangwl
  *
  */
+@Slf4j
 public class SimTickGenerator {
 	
 	private Random rand = new Random();
@@ -51,10 +53,8 @@ public class SimTickGenerator {
 			.setTradingDay(ldt.format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
 			.setActionTime(ldt.format(DateTimeConstant.T_FORMAT_WITH_MS_INT_FORMATTER))
 			.setActionTimestamp(ldt.toInstant(ZoneOffset.ofHours(8)).toEpochMilli())
-			.addAskPrice(askPrice)
-			.addBidPrice(bidPrice)
-			.addAskVolume(0)
-			.addBidVolume(0)
+			.setAskPrice(0, askPrice)
+			.setBidPrice(0, bidPrice)
 			.setOpenInterest(tb.getOpenInterest() + deltaInterest)
 			.setOpenInterestDelta(deltaInterest)
 			.setVolume(tb.getVolume() + deltaVol)
@@ -63,7 +63,7 @@ public class SimTickGenerator {
 			.setLowPrice(low)
 			.setStatus(ldt.getSecond() == 59 && System.currentTimeMillis() % 1000 > 500 ? TickType.END_OF_MIN_TICK.getCode() : TickType.NORMAL_TICK.getCode())
 			.setLastPrice(latestPrice);
-		
+		log.info("模拟行情 {} {} {}", latestPrice, askPrice, bidPrice);
 		ins.setLastTick(tb);
 		return tb.build();
 	}

@@ -21,6 +21,10 @@ public class InstrumentHolder {
 		tb
 		.setLastPrice(InstrumentBasePrice.getBasePrice(contract))
 		.setGatewayId(contract.getGatewayId())
+		.addAskPrice(0)
+		.addBidPrice(0)
+		.addAskVolume(0)
+		.addBidVolume(0)
 		.setUnifiedSymbol(contract.getUnifiedSymbol())
 		.setActionDay(ldt.format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
 		.setActionTime(ldt.format(DateTimeConstant.T_FORMAT_WITH_MS_INT_FORMATTER))
