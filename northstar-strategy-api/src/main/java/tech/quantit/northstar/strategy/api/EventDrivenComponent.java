@@ -5,7 +5,7 @@ import com.google.common.eventbus.Subscribe;
 import tech.quantit.northstar.strategy.api.event.ModuleEvent;
 import tech.quantit.northstar.strategy.api.event.ModuleEventBus;
 
-public interface EventDrivenComponent {
+public interface EventDrivenComponent extends Subscribable {
 
 	@Subscribe
 	void onEvent(ModuleEvent<?> moduleEvent);

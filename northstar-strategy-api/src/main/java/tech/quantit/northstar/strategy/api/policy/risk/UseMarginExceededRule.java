@@ -1,6 +1,7 @@
 package tech.quantit.northstar.strategy.api.policy.risk;
 
 import lombok.extern.slf4j.Slf4j;
+import tech.quantit.northstar.strategy.api.AccountAware;
 import tech.quantit.northstar.strategy.api.RiskControlRule;
 import tech.quantit.northstar.strategy.api.annotation.Setting;
 import tech.quantit.northstar.strategy.api.annotation.StrategicComponent;
@@ -18,7 +19,7 @@ import xyz.redtorch.pb.CoreField.TickField;
  */
 @Slf4j
 @StrategicComponent("模组占用账户资金限制")
-public class UseMarginExceededRule implements RiskControlRule {
+public class UseMarginExceededRule implements RiskControlRule, AccountAware {
 
 	protected double limitedPercentageOfTotalBalance;
 
@@ -66,12 +67,6 @@ public class UseMarginExceededRule implements RiskControlRule {
 	public RiskAuditResult checkRisk(SubmitOrderReqField orderReq, TickField tick) {
 		// TODO Auto-generated method stub
 		return null;
-	}
-
-	@Override
-	public void onChange(ModuleState state) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override

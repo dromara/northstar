@@ -13,6 +13,7 @@ import tech.quantit.northstar.strategy.api.event.ModuleEventBus;
 import tech.quantit.northstar.strategy.api.event.ModuleEventType;
 import tech.quantit.northstar.strategy.api.model.TimeSeriesData;
 import xyz.redtorch.pb.CoreField.BarField;
+import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.TickField;
 
 @Slf4j
@@ -23,6 +24,8 @@ public abstract class AbstractSignalPolicy implements SignalPolicy {
 	protected ModuleState currentState;
 	
 	protected String bindedUnifiedSymbol;
+	
+	protected ContractField bindedContract;
 	
 	protected List<MarketDataReceiver> mdrList = new ArrayList<>();
 	
@@ -56,7 +59,11 @@ public abstract class AbstractSignalPolicy implements SignalPolicy {
 		return bindedUnifiedSymbol;
 	}
 	
-	
+	@Override
+	public void setBindedContract(ContractField contract) {
+		bindedContract = contract;
+	}
+
 	protected void registerDataReceiver(MarketDataReceiver marketDataReceiver) {
 		moduleEventBus.register(marketDataReceiver);
 		mdrList.add(marketDataReceiver);

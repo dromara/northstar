@@ -66,27 +66,4 @@ public class TimeExceededRule implements RiskControlRule {
 		return null;
 	}
 
-	@Override
-	public void onChange(ModuleState state) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void onAccount(AccountField account) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public double accountBalance() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public double accountAvailable() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
 }

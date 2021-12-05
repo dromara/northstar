@@ -9,7 +9,7 @@ import xyz.redtorch.pb.CoreField.TickField;
  * @author KevinHuangwl
  *
  */
-public interface TickDataAware {
+public interface TickDataAware extends Subscribable {
 
 	@Subscribe
 	void onTick(TickField tick);

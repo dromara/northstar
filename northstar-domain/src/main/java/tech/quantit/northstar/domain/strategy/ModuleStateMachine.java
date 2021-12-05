@@ -38,6 +38,8 @@ public class ModuleStateMachine {
 	
 	public void addStateChangeListener(StateChangeListener listener) {
 		changeListeners.add(listener);
+		// 设置初始状态
+		listener.onChange(curState);
 	}
 	
 	public void transformForm(ModuleEventType eventType) {

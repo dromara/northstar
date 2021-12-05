@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.strategy.api.EventDrivenComponent;
 import tech.quantit.northstar.strategy.api.RiskControlRule;
 import tech.quantit.northstar.strategy.api.StateChangeListener;
+import tech.quantit.northstar.strategy.api.Subscribable;
 import tech.quantit.northstar.strategy.api.TickDataAware;
 import tech.quantit.northstar.strategy.api.constant.ModuleState;
 import tech.quantit.northstar.strategy.api.constant.RiskAuditResult;
@@ -86,6 +87,11 @@ public class RiskControlPolicy implements TickDataAware, EventDrivenComponent, S
 	@Override
 	public void setEventBus(ModuleEventBus moduleEventBus) {
 		meb = moduleEventBus;
+		for(RiskControlRule rule : rules) {
+			if(rule instanceof Subscribable) {				
+				meb.register(moduleEventBus);
+			}
+		}
 	}
 
 	@Override

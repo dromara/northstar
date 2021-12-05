@@ -9,7 +9,7 @@ import xyz.redtorch.pb.CoreField.BarField;
  * @author KevinHuangwl
  *
  */
-public interface BarDataAware {
+public interface BarDataAware extends Subscribable {
 	
 	@Subscribe
 	void onBar(BarField bar);

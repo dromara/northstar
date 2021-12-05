@@ -9,6 +9,7 @@ import tech.quantit.northstar.strategy.api.event.ModuleEventType;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreField.CancelOrderReqField;
+import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.OrderField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TickField;
@@ -25,6 +26,8 @@ public abstract class AbstractDealerPolicy implements DealerPolicy {
 	protected TickField lastTick;
 	
 	protected String bindedUnifiedSymbol;
+	
+	protected ContractField bindedContract;
 	
 	@Override
 	public void onChange(ModuleState state) {
@@ -94,6 +97,11 @@ public abstract class AbstractDealerPolicy implements DealerPolicy {
 	@Override
 	public String bindedContractSymbol() {
 		return bindedUnifiedSymbol;
+	}
+	
+	@Override
+	public void setBindedContract(ContractField contract) {
+		bindedContract = contract;
 	}
 
 	private CancelOrderReqField genCancelReq() {

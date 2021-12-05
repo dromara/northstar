@@ -14,6 +14,7 @@ import tech.quantit.northstar.gateway.api.TradeGateway;
 import tech.quantit.northstar.strategy.api.ContractBindedAware;
 import tech.quantit.northstar.strategy.api.EventDrivenComponent;
 import tech.quantit.northstar.strategy.api.SignalPolicy;
+import tech.quantit.northstar.strategy.api.StateChangeListener;
 import tech.quantit.northstar.strategy.api.event.ModuleEvent;
 import tech.quantit.northstar.strategy.api.event.ModuleEventBus;
 import tech.quantit.northstar.strategy.api.event.ModuleEventType;
@@ -90,6 +91,10 @@ public class StrategyModule implements EventDrivenComponent{
 	public void addComponent(EventDrivenComponent component) {
 		components.add(component);
 		meb.register(component);
+		component.setEventBus(meb);
+		if(component instanceof StateChangeListener) {			
+			moduleStatus.getStateMachine().addStateChangeListener((StateChangeListener) component);
+		}
 		if(component instanceof SignalPolicy) {
 			signalPolicy = (SignalPolicy) component;
 		}

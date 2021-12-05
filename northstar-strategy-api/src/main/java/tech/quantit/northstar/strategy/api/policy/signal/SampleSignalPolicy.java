@@ -24,7 +24,7 @@ import xyz.redtorch.pb.CoreField.TickField;
  *
  */
 @Slf4j
-@StrategicComponent("示例策略")	// 该注解是用于给策略命名用的
+@StrategicComponent("示例信号策略")	// 该注解是用于给策略命名用的
 public class SampleSignalPolicy extends AbstractSignalPolicy
 	implements SignalPolicy //	所有的策略都应该是DynamicParamsAware的实现类
 {
@@ -66,7 +66,7 @@ public class SampleSignalPolicy extends AbstractSignalPolicy
 	
 	@Override
 	public String name() {
-		return "示例策略";
+		return "示例信号策略";
 	}
 
 	/**
@@ -99,6 +99,7 @@ public class SampleSignalPolicy extends AbstractSignalPolicy
 		}
 		if(now > nextActionTime) {
 			nextActionTime = now + actionInterval * 1000;
+			log.info("开始交易");
 			if(currentState == ModuleState.EMPTY) {
 				boolean flag = ThreadLocalRandom.current().nextBoolean();
 				moduleEventBus.post(new ModuleEvent<>(ModuleEventType.SIGNAL_CREATED, flag ? Signal.SELL_OPEN : Signal.BUY_OPEN));

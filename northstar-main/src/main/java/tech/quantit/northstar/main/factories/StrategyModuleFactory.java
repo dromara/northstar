@@ -77,6 +77,8 @@ public class StrategyModuleFactory {
 		RiskControlPolicy riskController = new RiskControlPolicy(moduleInfo.getModuleName(), riskRules);
 		SignalPolicy signalPolicy =  resolveComponent(moduleInfo.getSignalPolicy());
 		DealerPolicy dealer = resolveComponent(moduleInfo.getDealer());
+		signalPolicy.setBindedContract(contractMgr.getContract(signalPolicy.bindedContractSymbol()));
+		dealer.setBindedContract(contractMgr.getContract(dealer.bindedContractSymbol()));
 		
 		return List.of(riskController, signalPolicy, dealer);
 	}
