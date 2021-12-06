@@ -14,6 +14,7 @@ import tech.quantit.northstar.domain.strategy.ModuleStatus;
 import tech.quantit.northstar.domain.strategy.RiskControlPolicy;
 import tech.quantit.northstar.domain.strategy.StrategyModule;
 import tech.quantit.northstar.gateway.api.TradeGateway;
+import tech.quantit.northstar.main.persistence.ModuleRepository;
 import tech.quantit.northstar.strategy.api.DealerPolicy;
 import tech.quantit.northstar.strategy.api.DynamicParamsAware;
 import tech.quantit.northstar.strategy.api.EventDrivenComponent;
@@ -37,9 +38,12 @@ public class StrategyModuleFactory {
 	
 	private ContractManager contractMgr;
 	
-	public StrategyModuleFactory(GatewayAndConnectionManager gatewayConnMgr, ContractManager contractMgr) {
+	private ModuleRepository moduleRepo;
+	
+	public StrategyModuleFactory(GatewayAndConnectionManager gatewayConnMgr, ContractManager contractMgr, ModuleRepository moduleRepo) {
 		this.gatewayConnMgr = gatewayConnMgr;
 		this.contractMgr = contractMgr;
+		this.moduleRepo = moduleRepo;
 	}
 	
 	public StrategyModule makeModule(ModuleInfo moduleInfo) throws Exception {
@@ -63,7 +67,7 @@ public class StrategyModuleFactory {
 		ModuleStatus status = new ModuleStatus(moduleInfo.getModuleName());
 		for(ModulePositionInfo mpi : positionInfos) {
 			ContractField contract = contractMgr.getContract(mpi.getUnifiedSymbol());
-			status.addPosition(new ModulePosition(mpi, contract));
+			status.addPosition(new ModulePosition(mpi, contract, dealRecord -> moduleRepo.saveDealRecord(dealRecord)));
 		}
 		return status;
 	}
@@ -71,15 +75,21 @@ public class StrategyModuleFactory {
 	private List<EventDrivenComponent> convertComponents(ModuleInfo moduleInfo) throws Exception{
 		List<RiskControlRule> riskRules = new ArrayList<>();
 		for(ComponentAndParamsPair pair : moduleInfo.getRiskControlRules()) {
-			riskRules.add(resolveComponent(pair));
+			RiskControlRule rule = resolveComponent(pair);
+			rule.setModuleName(moduleInfo.getModuleName());
+			riskRules.add(rule);
 		}
 		
 		RiskControlPolicy riskController = new RiskControlPolicy(moduleInfo.getModuleName(), riskRules);
 		SignalPolicy signalPolicy =  resolveComponent(moduleInfo.getSignalPolicy());
 		DealerPolicy dealer = resolveComponent(moduleInfo.getDealer());
+		
+		signalPolicy.setModuleName(moduleInfo.getModuleName());
+		dealer.setModuleName(moduleInfo.getModuleName());
+		
 		signalPolicy.setBindedContract(contractMgr.getContract(signalPolicy.bindedContractSymbol()));
 		dealer.setBindedContract(contractMgr.getContract(dealer.bindedContractSymbol()));
-		
+		riskController.setBindedContract(contractMgr.getContract(dealer.bindedContractSymbol()));
 		return List.of(riskController, signalPolicy, dealer);
 	}
 	

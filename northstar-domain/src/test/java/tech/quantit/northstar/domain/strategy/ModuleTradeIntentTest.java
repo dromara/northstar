@@ -1,16 +1,14 @@
 package tech.quantit.northstar.domain.strategy;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.Optional;
 import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
 
 import tech.quantit.northstar.strategy.api.model.ModuleDealRecord;
 import test.common.TestFieldFactory;
@@ -28,16 +26,20 @@ public class ModuleTradeIntentTest {
 	String NAME = "testModule";
 	String SYMBOL = "rb2210";
 	
+	
 	@SuppressWarnings("unchecked")
-	Consumer<Optional<ModulePosition>> openCallback = mock(Consumer.class);
+	Consumer<ModulePosition> openCallback = mock(Consumer.class);
+	
 	@SuppressWarnings("unchecked")
-	Consumer<Optional<ModuleDealRecord>> closeCallback = mock(Consumer.class);
+	Consumer<ModuleDealRecord> closeCallback = mock(Consumer.class);
 
 	@SuppressWarnings("unchecked")
+	Consumer<Boolean> fallback = mock(Consumer.class);
+	
 	@Test
 	public void testAllTradedForOpenOrder() {
 		SubmitOrderReqField orderReq = factory.makeOrderReq(SYMBOL, DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open, 4, 1000, 0);
-		ModuleTradeIntent mti = new ModuleTradeIntent(NAME, orderReq, openCallback);
+		ModuleTradeIntent mti = new ModuleTradeIntent(NAME, orderReq, openCallback, closeCallback, fallback);
 		
 		mti.onOrder(OrderField.newBuilder()
 				.setOriginOrderId(orderReq.getOriginOrderId())
@@ -51,16 +53,14 @@ public class ModuleTradeIntentTest {
 				.setOffsetFlag(orderReq.getOffsetFlag())
 				.build());
 		
-		ArgumentCaptor<Optional<ModulePosition>> arg = ArgumentCaptor.forClass(Optional.class);
-		verify(openCallback).accept(arg.capture());
-		assertThat(arg.getValue()).isNotEmpty();
+		verify(openCallback).accept(any(ModulePosition.class));
 	}
 	
-	@SuppressWarnings("unchecked")
+	
 	@Test
 	public void testPartiallyTradedForOpenOrder() {
 		SubmitOrderReqField orderReq = factory.makeOrderReq(SYMBOL, DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open, 4, 1000, 0);
-		ModuleTradeIntent mti = new ModuleTradeIntent(NAME, orderReq, openCallback);
+		ModuleTradeIntent mti = new ModuleTradeIntent(NAME, orderReq, openCallback, closeCallback, fallback);
 		
 		mti.onOrder(OrderField.newBuilder()
 				.setOriginOrderId(orderReq.getOriginOrderId())
@@ -75,16 +75,14 @@ public class ModuleTradeIntentTest {
 				.setOffsetFlag(orderReq.getOffsetFlag())
 				.build());
 		
-		ArgumentCaptor<Optional<ModulePosition>> arg = ArgumentCaptor.forClass(Optional.class);
-		verify(openCallback).accept(arg.capture());
-		assertThat(arg.getValue()).isNotEmpty();
+		verify(openCallback).accept(any(ModulePosition.class));
 	}
 	
-	@SuppressWarnings("unchecked")
+	
 	@Test
 	public void testPartiallyTradedForOpenOrder2() {
 		SubmitOrderReqField orderReq = factory.makeOrderReq(SYMBOL, DirectionEnum.D_Sell, OffsetFlagEnum.OF_Open, 4, 1000, 0);
-		ModuleTradeIntent mti = new ModuleTradeIntent(NAME, orderReq, openCallback);
+		ModuleTradeIntent mti = new ModuleTradeIntent(NAME, orderReq, openCallback, closeCallback, fallback);
 		
 		mti.onTrade(TradeField.newBuilder()
 				.setOriginOrderId(orderReq.getOriginOrderId())
@@ -99,16 +97,14 @@ public class ModuleTradeIntentTest {
 				.setOffsetFlag(orderReq.getOffsetFlag())
 				.build());
 		
-		ArgumentCaptor<Optional<ModulePosition>> arg = ArgumentCaptor.forClass(Optional.class);
-		verify(openCallback).accept(arg.capture());
-		assertThat(arg.getValue()).isNotEmpty();
+		verify(openCallback).accept(any(ModulePosition.class));
 	}
 	
-	@SuppressWarnings("unchecked")
+	
 	@Test
 	public void testNonTradedForOpenOrder() {
 		SubmitOrderReqField orderReq = factory.makeOrderReq(SYMBOL, DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open, 4, 1000, 0);
-		ModuleTradeIntent mti = new ModuleTradeIntent(NAME, orderReq, openCallback);
+		ModuleTradeIntent mti = new ModuleTradeIntent(NAME, orderReq, openCallback, closeCallback, fallback);
 		
 		mti.onOrder(OrderField.newBuilder()
 				.setOriginOrderId(orderReq.getOriginOrderId())
@@ -118,19 +114,17 @@ public class ModuleTradeIntentTest {
 				.setOffsetFlag(orderReq.getOffsetFlag())
 				.build());
 		
-		ArgumentCaptor<Optional<ModulePosition>> arg = ArgumentCaptor.forClass(Optional.class);
-		verify(openCallback).accept(arg.capture());
-		assertThat(arg.getValue()).isEmpty();
+		verify(fallback).accept(any());
 	}
 	
-	@SuppressWarnings("unchecked")
+	
 	@Test
 	public void testAllTradedForCloseOrder() {
 		SubmitOrderReqField orderReq = factory.makeOrderReq(SYMBOL, DirectionEnum.D_Sell, OffsetFlagEnum.OF_CloseToday, 4, 1000, 0);
 		ModulePosition mp = mock(ModulePosition.class);
 		when(mp.openPrice()).thenReturn(1010D);
 		when(mp.getDirection()).thenReturn(PositionDirectionEnum.PD_Long);
-		ModuleTradeIntent mti = new ModuleTradeIntent(NAME, mp, orderReq, closeCallback);
+		ModuleTradeIntent mti = new ModuleTradeIntent(NAME, mp, orderReq, closeCallback, fallback);
 		
 		mti.onOrder(OrderField.newBuilder()
 				.setOriginOrderId(orderReq.getOriginOrderId())
@@ -144,19 +138,16 @@ public class ModuleTradeIntentTest {
 				.setOffsetFlag(orderReq.getOffsetFlag())
 				.build());
 		
-		ArgumentCaptor<Optional<ModuleDealRecord>> arg = ArgumentCaptor.forClass(Optional.class);
-		verify(closeCallback).accept(arg.capture());
-		assertThat(arg.getValue()).isNotEmpty();
+		verify(closeCallback).accept(any(ModuleDealRecord.class));
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testPartiallyTradedForCloseOrder() {
 		SubmitOrderReqField orderReq = factory.makeOrderReq(SYMBOL, DirectionEnum.D_Sell, OffsetFlagEnum.OF_CloseToday, 4, 1000, 0);
 		ModulePosition mp = mock(ModulePosition.class);
 		when(mp.openPrice()).thenReturn(1010D);
 		when(mp.getDirection()).thenReturn(PositionDirectionEnum.PD_Long);
-		ModuleTradeIntent mti = new ModuleTradeIntent(NAME, mp, orderReq, closeCallback);
+		ModuleTradeIntent mti = new ModuleTradeIntent(NAME, mp, orderReq, closeCallback, fallback);
 		
 		mti.onOrder(OrderField.newBuilder()
 				.setOriginOrderId(orderReq.getOriginOrderId())
@@ -178,19 +169,16 @@ public class ModuleTradeIntentTest {
 				.setOrderStatus(OrderStatusEnum.OS_Canceled)
 				.build());
 		
-		ArgumentCaptor<Optional<ModuleDealRecord>> arg = ArgumentCaptor.forClass(Optional.class);
-		verify(closeCallback).accept(arg.capture());
-		assertThat(arg.getValue()).isNotEmpty();
+		verify(closeCallback).accept(any(ModuleDealRecord.class));
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testNonTradedForCloseOrder() {
 		SubmitOrderReqField orderReq = factory.makeOrderReq(SYMBOL, DirectionEnum.D_Sell, OffsetFlagEnum.OF_CloseToday, 4, 1000, 0);
 		ModulePosition mp = mock(ModulePosition.class);
 		when(mp.openPrice()).thenReturn(1010D);
 		when(mp.getDirection()).thenReturn(PositionDirectionEnum.PD_Long);
-		ModuleTradeIntent mti = new ModuleTradeIntent(NAME, mp, orderReq, closeCallback);
+		ModuleTradeIntent mti = new ModuleTradeIntent(NAME, mp, orderReq, closeCallback, fallback);
 		
 		mti.onOrder(OrderField.newBuilder()
 				.setOriginOrderId(orderReq.getOriginOrderId())
@@ -200,16 +188,14 @@ public class ModuleTradeIntentTest {
 				.setOrderStatus(OrderStatusEnum.OS_Canceled)
 				.build());
 		
-		ArgumentCaptor<Optional<ModuleDealRecord>> arg = ArgumentCaptor.forClass(Optional.class);
-		verify(closeCallback).accept(arg.capture());
-		assertThat(arg.getValue()).isEmpty();
+		verify(fallback).accept(any());
 	}
 	
 	@Test
 	public void shouldThrowIfUseWrongConstuction() {
 		SubmitOrderReqField orderReq = factory.makeOrderReq(SYMBOL, DirectionEnum.D_Sell, OffsetFlagEnum.OF_CloseToday, 4, 1000, 0);
 		assertThrows(IllegalStateException.class, ()->{			
-			new ModuleTradeIntent(NAME, orderReq, openCallback);
+			new ModuleTradeIntent(NAME, orderReq, openCallback, closeCallback, fallback);
 		});
 	}
 	
@@ -218,7 +204,7 @@ public class ModuleTradeIntentTest {
 		SubmitOrderReqField orderReq = factory.makeOrderReq(SYMBOL, DirectionEnum.D_Sell, OffsetFlagEnum.OF_Open, 4, 1000, 0);
 		ModulePosition mp = mock(ModulePosition.class);
 		assertThrows(IllegalStateException.class, ()->{			
-			new ModuleTradeIntent(NAME, mp, orderReq, closeCallback);
+			new ModuleTradeIntent(NAME, mp, orderReq, closeCallback, fallback);
 		});
 	}
 }

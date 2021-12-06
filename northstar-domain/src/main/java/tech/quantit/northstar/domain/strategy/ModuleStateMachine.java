@@ -101,11 +101,11 @@ public class ModuleStateMachine {
 			setState(ModuleState.PLACING_ORDER);
 			break;
 		default:
-			log.info("事件{}不需要处理", eventType);
+			log.debug("[{}] 事件{}不需要处理", moduleName, eventType);
 		}
 	}
 	
-	protected void setState(ModuleState newState) {
+	public void setState(ModuleState newState) {
 		log.info("[{}] 状态机切换：[{}] => [{}]", moduleName, curState, newState);
 		curState = newState;
 		changeListeners.stream().forEach(listener -> listener.onChange(curState));

@@ -1,6 +1,5 @@
 package tech.quantit.northstar.domain.strategy;
 
-import java.util.Optional;
 import java.util.function.Consumer;
 
 import org.apache.commons.lang3.StringUtils;
@@ -20,34 +19,32 @@ import xyz.redtorch.pb.CoreField.TradeField;
  *
  */
 public class ModuleTradeIntent {
-
+	@Getter
 	private SubmitOrderReqField submitOrderReq;
 	
 	private ModulePosition currentPosition;
-	
-	private Consumer<Optional<ModulePosition>> openCallback;
-	
-	private Consumer<Optional<ModuleDealRecord>> closeCallback; 
-	
-	private boolean partiallyTraded;
-	
-	private TradeField latestTrade;
+	// 开仓回调
+	private Consumer<ModulePosition> openCallback;
+	// 平仓回调
+	private Consumer<ModuleDealRecord> closeCallback; 
+	// 撤单回调，返回是否部分成交标识 
+	private Consumer<Boolean> fallback;
 	
 	private String moduleName;
 	
-	@Getter
-	private boolean isDone;
-	
-	public ModuleTradeIntent(String moduleName, SubmitOrderReqField submitOrderReq, Consumer<Optional<ModulePosition>> onDoneOpen) {
+	public ModuleTradeIntent(String moduleName, SubmitOrderReqField submitOrderReq, Consumer<ModulePosition> onDoneOpen,
+			Consumer<ModuleDealRecord> onDoneClose, Consumer<Boolean> fallback) {
 		if(!FieldUtils.isOpen(submitOrderReq.getOffsetFlag())) {
 			throw new IllegalStateException("该构造方法仅适用于开仓操作");
 		}
 		this.submitOrderReq = submitOrderReq;
 		this.openCallback = onDoneOpen;
+		this.closeCallback = onDoneClose;
 		this.moduleName = moduleName;
+		this.fallback = fallback;
 	}
 	
-	public ModuleTradeIntent(String moduleName, ModulePosition position, SubmitOrderReqField submitOrderReq, Consumer<Optional<ModuleDealRecord>> onDoneClose) {
+	public ModuleTradeIntent(String moduleName, ModulePosition position, SubmitOrderReqField submitOrderReq, Consumer<ModuleDealRecord> onDoneClose, Consumer<Boolean> fallback) {
 		if(!FieldUtils.isClose(submitOrderReq.getOffsetFlag())) {
 			throw new IllegalStateException("该构造方法仅适用于平仓操作");
 		}
@@ -55,6 +52,7 @@ public class ModuleTradeIntent {
 		this.currentPosition = position;
 		this.moduleName = moduleName;
 		this.closeCallback = onDoneClose;
+		this.fallback = fallback;
 	}
 	
 	public String originOrderId() {
@@ -72,14 +70,15 @@ public class ModuleTradeIntent {
 		if(!StringUtils.equals(order.getOriginOrderId(), submitOrderReq.getOriginOrderId())) 
 			return;
 		
-		partiallyTraded = order.getOrderStatus() == OrderStatusEnum.OS_Canceled 
+		boolean partiallyTraded = order.getOrderStatus() == OrderStatusEnum.OS_Canceled 
 				&& order.getTotalVolume() == submitOrderReq.getVolume() 
 				&& order.getTradedVolume() > 0;
 		
-		if(FieldUtils.isOpen(order.getOffsetFlag())) {
-			onOpenOrder(order);
-		} else if(FieldUtils.isClose(order.getOffsetFlag())) {
-			onCloseOrder(order);
+		// 处理情况三、四、五
+		if(partiallyTraded) {
+			fallback.accept(true);
+		} else if(order.getOrderStatus() == OrderStatusEnum.OS_Canceled || order.getOrderStatus() == OrderStatusEnum.OS_Rejected) {
+			fallback.accept(false);
 		}
 	}
 	
@@ -89,67 +88,19 @@ public class ModuleTradeIntent {
 		if(!StringUtils.equals(trade.getOriginOrderId(), submitOrderReq.getOriginOrderId())) 
 			return;
 		
-		latestTrade = trade;
+		// 处理情况一、二、四
 		if(FieldUtils.isOpen(trade.getOffsetFlag())) {
-			onOpenTrade(trade);
+			openCallback.accept(new ModulePosition(moduleName, trade, submitOrderReq.getStopPrice(), closeCallback));
 		} else if(FieldUtils.isClose(trade.getOffsetFlag())) {
-			onCloseTrade(trade);
+			closeCallback.accept(genDealRecord(trade));
 		}
 	}
 	
-	
-	private void onOpenOrder(OrderField order) {
-		// 处理情况四
-		if(partiallyTraded && latestTrade != null) {
-			openCallback.accept(Optional.of(new ModulePosition(moduleName, latestTrade, submitOrderReq.getStopPrice())));
-			isDone = true;
-		}
-		// 处理情况三、情况五
-		if(order.getOrderStatus() == OrderStatusEnum.OS_Rejected ||
-				order.getOrderStatus() == OrderStatusEnum.OS_Canceled 
-				&& order.getTotalVolume() == submitOrderReq.getVolume() 
-				&& order.getTradedVolume() == 0) {
-			openCallback.accept(Optional.empty());
-			isDone = true;
-		}
+	public int volume() {
+		return submitOrderReq.getVolume();
 	}
 	
-	private void onCloseOrder(OrderField order) {
-		// 处理情况四
-		if(partiallyTraded && latestTrade != null) {
-			closeCallback.accept(Optional.of(genDealRecord()));
-			isDone = true;
-		}
-		// 处理情况三、情况五
-		if(order.getOrderStatus() == OrderStatusEnum.OS_Rejected ||
-				order.getOrderStatus() == OrderStatusEnum.OS_Canceled 
-				&& order.getTotalVolume() == submitOrderReq.getVolume() 
-				&& order.getTradedVolume() == 0) {
-			closeCallback.accept(Optional.empty());
-			isDone = true;
-		}
-	}
-	
-	
-	private void onOpenTrade(TradeField trade) {
-		// 处理情况四，不确定trade回报与order回报哪个先到达
-		// 处理情况一、二。如果是多次成交，trade的成交数量可能会变，但originOrderId不会变，所以只要核对总量即可
-		if(partiallyTraded || trade.getVolume() == submitOrderReq.getVolume()) {
-			openCallback.accept(Optional.of(new ModulePosition(moduleName, trade, submitOrderReq.getStopPrice())));
-			isDone = true;
-		}
-	}
-	
-	private void onCloseTrade(TradeField trade) {
-		// 处理情况四，不确定trade回报与order回报哪个先到达
-		// 处理情况一、二。如果是多次成交，trade的成交数量可能会变，但originOrderId不会变，所以只要核对总量即可
-		if(partiallyTraded || trade.getVolume() == submitOrderReq.getVolume()) {
-			closeCallback.accept(Optional.of(genDealRecord()));
-			isDone = true;
-		}
-	}
-	
-	private ModuleDealRecord genDealRecord() {
+	private ModuleDealRecord genDealRecord(TradeField latestTrade) {
 		double openPrice = currentPosition.openPrice();
 		double multiplier = latestTrade.getContract().getMultiplier();
 		int factor = FieldUtils.isLong(currentPosition.getDirection()) ? 1 : -1;

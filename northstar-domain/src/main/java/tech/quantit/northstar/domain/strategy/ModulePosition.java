@@ -1,23 +1,19 @@
 package tech.quantit.northstar.domain.strategy;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
 
 import org.apache.commons.lang3.StringUtils;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.utils.FieldUtils;
 import tech.quantit.northstar.strategy.api.EventDrivenComponent;
 import tech.quantit.northstar.strategy.api.TickDataAware;
-import tech.quantit.northstar.strategy.api.TransactionAware;
 import tech.quantit.northstar.strategy.api.event.ModuleEvent;
 import tech.quantit.northstar.strategy.api.event.ModuleEventBus;
 import tech.quantit.northstar.strategy.api.event.ModuleEventType;
+import tech.quantit.northstar.strategy.api.model.ModuleDealRecord;
 import tech.quantit.northstar.strategy.api.model.ModulePositionInfo;
 import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
@@ -25,12 +21,10 @@ import xyz.redtorch.pb.CoreEnum.ForceCloseReasonEnum;
 import xyz.redtorch.pb.CoreEnum.HedgeFlagEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreEnum.OrderPriceTypeEnum;
-import xyz.redtorch.pb.CoreEnum.OrderStatusEnum;
 import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
 import xyz.redtorch.pb.CoreEnum.TimeConditionEnum;
 import xyz.redtorch.pb.CoreEnum.VolumeConditionEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
-import xyz.redtorch.pb.CoreField.OrderField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TickField;
 import xyz.redtorch.pb.CoreField.TradeField;
@@ -44,7 +38,7 @@ import xyz.redtorch.pb.CoreField.TradeField;
  *
  */
 @Slf4j
-public class ModulePosition implements TickDataAware, TransactionAware, EventDrivenComponent{
+public class ModulePosition implements TickDataAware, EventDrivenComponent{
 	
 	private StopLoss stopLoss;
 	
@@ -56,26 +50,23 @@ public class ModulePosition implements TickDataAware, TransactionAware, EventDri
 	@Getter
 	private int volume;
 	
-	protected int availableVol;
-	
 	@Getter
-	private PositionDirectionEnum direction;
+	private final PositionDirectionEnum direction;
 	
-	private TradeField openTrade;
+	private TradeField trade;
 	
-	private int factor;
+	private final int factor;
 	
 	protected TickField lastTick;
 	
-	private Map<String, Frozen> frozenMap = new HashMap<>();
+	private final String governedByModule;
 	
-	private String governedByModule;
+	private ModuleTradeIntent ti;
 	
 	// 清仓回调
-	@Setter
-	private Consumer<ModulePosition> clearoutCallback;
+	private Consumer<ModuleDealRecord> clearoutCallback;
 	
-	public ModulePosition(ModulePositionInfo info, ContractField contract) {
+	public ModulePosition(ModulePositionInfo info, ContractField contract, Consumer<ModuleDealRecord> clearoutCallback) {
 		this(info.getModuleName(), TradeField.newBuilder()
 				.setContract(contract)
 				.setPrice(info.getOpenPrice())
@@ -83,64 +74,75 @@ public class ModulePosition implements TickDataAware, TransactionAware, EventDri
 				.setTradingDay(info.getOpenTradingDay())
 				.setDirection(FieldUtils.isLong(info.getPositionDir()) ? DirectionEnum.D_Buy : DirectionEnum.D_Sell)
 				.setVolume(info.getVolume())
-				.build(), info.getStopLossPrice());
+				.build(), info.getStopLossPrice(), clearoutCallback);
 	}
 	
-	public ModulePosition(String moduleName, TradeField trade, double stopPrice) {
-		this(moduleName, trade, stopPrice, null);
-	}
-	
-	public ModulePosition(String moduleName, TradeField trade, double stopPrice, Consumer<ModulePosition> clearoutCallback) {
+	public ModulePosition(String moduleName, TradeField trade, double stopPrice, Consumer<ModuleDealRecord> clearoutCallback) {
 		this.governedByModule = moduleName;
 		this.direction = trade.getDirection() == DirectionEnum.D_Buy ? PositionDirectionEnum.PD_Long : PositionDirectionEnum.PD_Short;
 		this.stopLoss = new StopLoss(direction, stopPrice);
-		this.openTrade = trade;
+		this.trade = trade;
 		this.factor = FieldUtils.isLong(direction) ? 1 : -1;
 		this.volume = trade.getVolume();
-		this.availableVol = trade.getVolume();
 		this.clearoutCallback = clearoutCallback;
 	}
+	
+	public ModulePosition merge(ModulePosition mp){
+		if(!StringUtils.equals(trade.getContract().getUnifiedSymbol(), mp.trade.getContract().getUnifiedSymbol())) {
+			String errMsg = String.format("持仓不匹配，不能叠加: %s | %s", trade.getContract().getUnifiedSymbol(), mp.trade.getContract().getUnifiedSymbol());
+			throw new IllegalStateException(errMsg);
+		}
+		// 加仓情况
+		if(trade.getDirection() == mp.trade.getDirection() && trade.getOffsetFlag() == mp.trade.getOffsetFlag()) {
+			double mergePrice = (volume * trade.getPrice() + mp.volume * mp.trade.getPrice()) / (volume + mp.volume); 
+			volume += mp.trade.getVolume();
+			trade = trade.toBuilder()
+					.setVolume(volume)
+					.setPrice(mergePrice)
+					.build();
+			return this;
+		}
+		
+		// 减仓情况
+		if(trade.getDirection() != mp.trade.getDirection() && trade.getOffsetFlag() != mp.trade.getOffsetFlag()) {
+			volume -= mp.trade.getVolume();
+			trade = trade.toBuilder()
+					.setVolume(volume)
+					.build();
+			return this;
+		}
 
+		String thisInfo = String.format("当时仓位成交信息：方向%s，开平%s； ", trade.getDirection(), trade.getOffsetFlag());
+		String otherInfo = String.format("合并仓位成交信息：方向%s，开平%s", mp.trade.getDirection(), mp.trade.getOffsetFlag());
+		throw new IllegalStateException("未知异常情况：" + thisInfo + otherInfo);
+	}
+	
 	@Override
 	public void onTick(TickField tick) {
-		if(!StringUtils.equals(tick.getUnifiedSymbol(), openTrade.getContract().getUnifiedSymbol())) {
+		if(!StringUtils.equals(tick.getUnifiedSymbol(), trade.getContract().getUnifiedSymbol())) {
 			return;
 		}
 		lastTick = tick;
 		// 更新持仓盈亏
-		profit = factor * (tick.getLastPrice() - openTrade.getPrice()) * volume * openTrade.getContract().getMultiplier();
+		profit = factor * (tick.getLastPrice() - trade.getPrice()) * volume * trade.getContract().getMultiplier();
 		// 监听止损
-		if(availableVol > 0 && stopLoss.isTriggered(tick)) {
-			meb.post(new ModuleEvent<>(ModuleEventType.STOP_LOSS, closePosition(availableVol, 0)));
-		}
-	}
-	
-	@Override
-	public void onOrder(OrderField order) {
-		if(frozenMap.keySet().contains(order.getOriginOrderId()) && order.getTotalVolume() == frozenMap.get(order.getOriginOrderId()).vol
-				&& order.getOrderStatus() == OrderStatusEnum.OS_Canceled) {
-			// 处理全部撤单与部分撤单
-			Frozen fzn = frozenMap.remove(order.getOriginOrderId());
-			fzn.consume(order);
-			availableVol += fzn.vol;
-		}
-	}
-
-	@Override
-	public void onTrade(TradeField trade) {
-		if(frozenMap.keySet().contains(trade.getOriginOrderId())) {
-			// 全部成交情况
-			if(trade.getVolume() == frozenMap.get(trade.getOriginOrderId()).vol) {
-				frozenMap.remove(trade.getOriginOrderId());
-				volume -= trade.getVolume();
-				if(clearoutCallback != null) {
-					clearoutCallback.accept(this);
-				}
-			} 
-			// 部分成交情况
-			else {
-				volume -= trade.getVolume();
-			}
+		if(available() > 0 && stopLoss.isTriggered(tick)) {
+			SubmitOrderReqField orderReq = SubmitOrderReqField.newBuilder()
+					.setOriginOrderId(UUID.randomUUID().toString())
+					.setContract(contract())
+					.setDirection(closingDirection())
+					.setVolume(available())
+					.setPrice(0) 											
+					.setOrderPriceType(OrderPriceTypeEnum.OPT_AnyPrice)	
+					.setTimeCondition(TimeConditionEnum.TC_IOC)				
+					.setOffsetFlag(closeOffset())
+					.setVolumeCondition(VolumeConditionEnum.VC_AV)
+					.setContingentCondition(ContingentConditionEnum.CC_Immediately)
+					.setHedgeFlag(HedgeFlagEnum.HF_Speculation)
+					.setForceCloseReason(ForceCloseReasonEnum.FCR_NotForceClose)
+					.build();
+			ti = new ModuleTradeIntent(governedByModule, this, orderReq, clearoutCallback, partiallyTraded -> ti = null);
+			meb.post(new ModuleEvent<>(ModuleEventType.STOP_LOSS, ti));
 		}
 	}
 	
@@ -148,14 +150,19 @@ public class ModulePosition implements TickDataAware, TransactionAware, EventDri
 	public void onEvent(ModuleEvent<?> moduleEvent) {
 		if(moduleEvent.getEventType() == ModuleEventType.ORDER_REQ_CREATED) {
 			SubmitOrderReqField orderReq = (SubmitOrderReqField) moduleEvent.getData();
-			if(StringUtils.equals(openTrade.getContract().getUnifiedSymbol(), orderReq.getContract().getUnifiedSymbol()) 
+			if(StringUtils.equals(trade.getContract().getUnifiedSymbol(), orderReq.getContract().getUnifiedSymbol()) 
 					&& closingDirection() == orderReq.getDirection() && FieldUtils.isClose(orderReq.getOffsetFlag())) {
 				//校验并冻结持仓
-				if(availableVol < orderReq.getVolume()) {
-					log.warn("模组可用持仓不足，订单被否决。可用数量[{}]，订单数量[{}]", availableVol, orderReq.getVolume());
+				if(available() < orderReq.getVolume()) {
+					log.warn("模组可用持仓不足，订单被否决。可用数量[{}]，订单数量[{}]", available(), orderReq.getVolume());
 					meb.post(new ModuleEvent<>(ModuleEventType.ORDER_REQ_RETAINED, orderReq));
 				} else {					
-					meb.post(new ModuleEvent<>(ModuleEventType.ORDER_REQ_ACCEPTED, closePosition(orderReq.getVolume(), orderReq.getPrice())));
+					SubmitOrderReqField submitReq = orderReq.toBuilder()
+							.setOffsetFlag(closeOffset())
+							.setDirection(closingDirection())
+							.build();
+					ti = new ModuleTradeIntent(governedByModule, this, submitReq, clearoutCallback, partiallyTraded -> ti = null );
+					meb.post(new ModuleEvent<>(ModuleEventType.ORDER_REQ_ACCEPTED, ti));
 				}
 			}
 		}
@@ -167,48 +174,32 @@ public class ModulePosition implements TickDataAware, TransactionAware, EventDri
 	}
 	
 	public ContractField contract() {
-		return openTrade.getContract();
+		return trade.getContract();
 	}
 	
 	private OffsetFlagEnum closeOffset() {
-		return StringUtils.equals(lastTick.getTradingDay(), openTrade.getTradingDay()) ? OffsetFlagEnum.OF_CloseToday : OffsetFlagEnum.OF_Close;
+		return StringUtils.equals(lastTick.getTradingDay(), trade.getTradingDay()) ? OffsetFlagEnum.OF_CloseToday : OffsetFlagEnum.OF_Close;
 	}
 	
 	private DirectionEnum closingDirection() {
 		return FieldUtils.isLong(direction) ? DirectionEnum.D_Sell : DirectionEnum.D_Buy;
 	}
 	
-	public SubmitOrderReqField closePosition(int vol, double price) {
-		String id = UUID.randomUUID().toString();
-		frozenMap.put(id, new Frozen(vol));
-		availableVol -= vol;
-		return SubmitOrderReqField.newBuilder()
-				.setOriginOrderId(id)
-				.setContract(contract())
-				.setDirection(closingDirection())
-				.setVolume(vol)
-				.setPrice(price) 											
-				.setOrderPriceType(price==0 ? OrderPriceTypeEnum.OPT_AnyPrice : OrderPriceTypeEnum.OPT_LimitPrice)	
-				.setTimeCondition(price==0 ? TimeConditionEnum.TC_IOC : TimeConditionEnum.TC_GFD)				
-				.setOffsetFlag(closeOffset())
-				.setVolumeCondition(VolumeConditionEnum.VC_AV)
-				.setContingentCondition(ContingentConditionEnum.CC_Immediately)
-				.setHedgeFlag(HedgeFlagEnum.HF_Speculation)
-				.setForceCloseReason(ForceCloseReasonEnum.FCR_NotForceClose)
-				.build();
+	public int available() {
+		return ti == null ? volume : volume - ti.volume();
 	}
 
 	public double openPrice() {
-		return openTrade.getPrice();
+		return trade.getPrice();
 	}
 	
 	public ModulePositionInfo convertTo() {
 		return ModulePositionInfo.builder()
 				.moduleName(governedByModule)
 				.multiplier(contract().getMultiplier())
-				.openPrice(openTrade.getPrice())
-				.openTime(openTrade.getTradeTimestamp())
-				.openTradingDay(openTrade.getTradingDay())
+				.openPrice(trade.getPrice())
+				.openTime(trade.getTradeTimestamp())
+				.openTradingDay(trade.getTradingDay())
 				.positionDir(direction)
 				.stopLossPrice(stopLoss.getStopPrice())
 				.unifiedSymbol(contract().getUnifiedSymbol())
@@ -216,13 +207,4 @@ public class ModulePosition implements TickDataAware, TransactionAware, EventDri
 				.build();
 	}
 	
-	@AllArgsConstructor
-	class Frozen{
-		
-		private int vol;
-		
-		public void consume(OrderField order) {
-			vol -= order.getTradedVolume();
-		}
-	}
 }

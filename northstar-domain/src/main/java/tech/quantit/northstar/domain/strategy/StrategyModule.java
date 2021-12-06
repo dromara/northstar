@@ -9,7 +9,6 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.event.NorthstarEvent;
 import tech.quantit.northstar.common.event.NorthstarEventType;
-import tech.quantit.northstar.common.utils.FieldUtils;
 import tech.quantit.northstar.gateway.api.TradeGateway;
 import tech.quantit.northstar.strategy.api.ContractBindedAware;
 import tech.quantit.northstar.strategy.api.EventDrivenComponent;
@@ -56,15 +55,19 @@ public class StrategyModule implements EventDrivenComponent{
 	protected Consumer<CancelOrderReqField> cancelOrderHandler;
 	
 	@Setter
-	protected Consumer<ModuleStatus> moduleStatusChangeHandler;
-	
-	@Setter
 	protected Consumer<Boolean> runningStateChangeListener;
 	
 	@Setter
 	protected Consumer<ModuleDealRecord> dealRecordGenHandler;
 	
 	protected ModuleTradeIntent ti;
+	
+	protected Consumer<ModulePosition> openTradeIntentSuccessCallback = mp -> {
+		moduleStatus.addPosition(mp);
+		meb.register(mp);
+	};
+	
+	protected Consumer<Boolean> tradeIntentFallback = partiallyTraded -> ti = null;
 	
 	@Getter
 	private String bindedMktGatewayId;
@@ -78,10 +81,11 @@ public class StrategyModule implements EventDrivenComponent{
 	public StrategyModule(String bindedMktGatewayId, TradeGateway gateway, ModuleStatus status) {
 		this.moduleStatus = status;
 		this.moduleStatus.setModuleEventBus(meb);
-		this.meb.register(status);
 		this.stateMachine = moduleStatus.getStateMachine();
 		this.bindedMktGatewayId = bindedMktGatewayId;
 		this.gateway = gateway;
+		this.meb.register(status);
+		this.meb.register(this);
 	}
 	
 	/**
@@ -127,10 +131,10 @@ public class StrategyModule implements EventDrivenComponent{
 	 */
 	public void onEvent(NorthstarEvent event) {
 		meb.post(event.getData());
-		if(event.getEvent() == NorthstarEventType.TRADE) 
-			handleTrade((TradeField) event.getData());
-		if(event.getEvent() == NorthstarEventType.ORDER) 
-			handleOrder((OrderField) event.getData());
+		if(event.getData() instanceof TradeField trade && ti != null) 
+			ti.onTrade(trade);
+		if(event.getData() instanceof OrderField order) 
+			handleOrder(order);
 	}
 	
 	/**
@@ -147,8 +151,8 @@ public class StrategyModule implements EventDrivenComponent{
 			return ti != null && ((OrderField)event.getData()).getOriginOrderId().equals(ti.originOrderId());
 		if(event.getEvent() == NorthstarEventType.TRADE) 
 			return ti != null && ((TradeField)event.getData()).getOriginOrderId().equals(ti.originOrderId());
-		if(event.getEvent() == NorthstarEventType.ACCOUNT)
-			return ((AccountField)event.getData()).getGatewayId().equals(gateway.getGatewaySetting().getGatewayId());
+		if(event.getData() instanceof AccountField account) 		
+			return account.getGatewayId().equals(gateway.getGatewaySetting().getGatewayId());
 		return true;
 	}
 	
@@ -161,17 +165,6 @@ public class StrategyModule implements EventDrivenComponent{
 			moduleStatus.getStateMachine().transformForm(ModuleEventType.ORDER_CONFIRMED);
 		if(ti != null)
 			ti.onOrder(order);
-	}
-	
-	private void handleTrade(TradeField trade) {
-		if(FieldUtils.isBuy(trade.getDirection()))
-			moduleStatus.getStateMachine().transformForm(ModuleEventType.BUY_TRADED);
-		if(FieldUtils.isSell(trade.getDirection()))
-			moduleStatus.getStateMachine().transformForm(ModuleEventType.SELL_TRADED);
-		if(moduleStatusChangeHandler != null)	
-			moduleStatusChangeHandler.accept(moduleStatus);
-		if(ti != null)	
-			ti.onTrade(trade);
 	}
 	
 	/**
@@ -189,17 +182,23 @@ public class StrategyModule implements EventDrivenComponent{
 	public void onEvent(ModuleEvent<?> moduleEvent) {
 		stateMachine.transformForm(moduleEvent.getEventType());
 		if(moduleEvent.getEventType() == ModuleEventType.STOP_LOSS) {
-			SubmitOrderReqField orderReq = (SubmitOrderReqField) moduleEvent.getData();
+			ti = (ModuleTradeIntent) moduleEvent.getData();
+			SubmitOrderReqField orderReq = ti.getSubmitOrderReq();
 			log.info("[{}] 生成止损单{}：{}，{}，{}，{}手", getName(), orderReq.getOriginOrderId(), orderReq.getContract().getSymbol(),
 					orderReq.getDirection(), orderReq.getOffsetFlag(), orderReq.getVolume());
 			submitOrderHandler.accept(orderReq);
-			ti = genTradeIndent(orderReq);
-		} else if(moduleEvent.getEventType() == ModuleEventType.ORDER_CONFIRMED) {
-			SubmitOrderReqField orderReq = (SubmitOrderReqField) moduleEvent.getData();
+		} else if(moduleEvent.getEventType() == ModuleEventType.ORDER_REQ_ACCEPTED) {
+			SubmitOrderReqField orderReq;
+			if(moduleEvent.getData() instanceof ModuleTradeIntent mti) {
+				ti = mti;
+				orderReq = mti.getSubmitOrderReq();
+			} else {
+				orderReq = (SubmitOrderReqField) moduleEvent.getData();				
+				ti = new ModuleTradeIntent(getName(), orderReq, openTradeIntentSuccessCallback, dealRecordGenHandler, tradeIntentFallback);
+			}
 			log.info("[{}] 生成订单{}：{}，{}，{}，{}手，价格{}，止损{}", getName(), orderReq.getOriginOrderId(), orderReq.getContract().getSymbol(),
 					orderReq.getDirection(), orderReq.getOffsetFlag(), orderReq.getVolume(), orderReq.getPrice(), orderReq.getStopPrice());
 			submitOrderHandler.accept(orderReq);
-			ti = genTradeIndent(orderReq);
 		} else if(moduleEvent.getEventType() == ModuleEventType.ORDER_REQ_CANCELLED) {
 			CancelOrderReqField cancelOrderReq = (CancelOrderReqField) moduleEvent.getData();
 			log.info("[{}] 撤单：{}", getName(), cancelOrderReq.getOriginOrderId());
@@ -207,30 +206,6 @@ public class StrategyModule implements EventDrivenComponent{
 		}
 	}
 	
-	private ModuleTradeIntent genTradeIndent(SubmitOrderReqField submitOrder) {
-		if(FieldUtils.isOpen(submitOrder.getOffsetFlag())) {
-			return new ModuleTradeIntent(getName(), submitOrder, mpo -> mpo.ifPresent(mp -> {
-				mp.setClearoutCallback(p -> moduleStatus.removePostion(p));
-				moduleStatus.addPosition(mp);
-				meb.register(mp);
-			}));
-		}
-		if(FieldUtils.isClose(submitOrder.getOffsetFlag())) {
-			ModulePosition mp = null;
-			if(FieldUtils.isBuy(submitOrder.getDirection())) {
-				mp = moduleStatus.getShortPosition();
-			} 
-			if(FieldUtils.isSell(submitOrder.getDirection())) {
-				mp = moduleStatus.getLongPosition();
-			}
-			if(mp == null) {
-				throw new IllegalStateException("没有持仓信息");
-			}
-			return new ModuleTradeIntent(getName(), mp, submitOrder, mdro -> mdro.ifPresent(dealRecordGenHandler));
-		}
-		throw new IllegalArgumentException("订单方向不明确");
-	}
-
 	@Override
 	public void setEventBus(ModuleEventBus moduleEventBus) {
 		throw new UnsupportedOperationException("该方法不支持");

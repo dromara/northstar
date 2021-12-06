@@ -83,13 +83,14 @@ public class SampleSignalPolicy extends AbstractSignalPolicy
 		// 示例代码不需要初始化数据
 	}
 
+	int seed = ThreadLocalRandom.current().nextInt(10);
 	/**
 	 * 策略逻辑驱动入口
 	 * 每个TICK触发
 	 */
 	@Override
 	protected void handleTick(TickField tick) {
-		log.info("策略每个TICK触发: {} {}", tick.getUnifiedSymbol(), tick.getActionTime());
+		log.debug("策略每个TICK触发: {} {} {}", tick.getUnifiedSymbol(), tick.getActionTime(), tick.getLastPrice());
 		long now = tick.getActionTimestamp();
 		//初始状态下，等待10秒才开始交易
 		if(nextActionTime < 0) {
@@ -99,7 +100,7 @@ public class SampleSignalPolicy extends AbstractSignalPolicy
 			nextActionTime = now + actionInterval * 1000;
 			log.info("开始交易");
 			if(currentState == ModuleState.EMPTY) {
-				SignalOperation op = ThreadLocalRandom.current().nextBoolean() ? SignalOperation.BUY_OPEN : SignalOperation.SELL_OPEN;
+				SignalOperation op = (++seed & 1) > 0 ? SignalOperation.BUY_OPEN : SignalOperation.SELL_OPEN;
 				emit(op);
 			}
 			if(currentState == ModuleState.HOLDING_LONG) {	
@@ -117,7 +118,7 @@ public class SampleSignalPolicy extends AbstractSignalPolicy
 	 */
 	@Override
 	protected void handleBar(BarField bar) {
-		log.info("策略每分钟触发");
+		log.debug("策略每分钟触发");
 	}
 	
 }

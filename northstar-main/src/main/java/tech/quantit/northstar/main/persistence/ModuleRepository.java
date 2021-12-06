@@ -8,12 +8,14 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Repository;
 
+import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.main.persistence.po.ModulePositionPO;
 import tech.quantit.northstar.main.playback.PlaybackStatRecord;
 import tech.quantit.northstar.strategy.api.model.ModuleDealRecord;
 import tech.quantit.northstar.strategy.api.model.ModuleInfo;
 import tech.quantit.northstar.strategy.api.model.ModuleTradeRecord;
 
+@Slf4j
 @Repository
 public class ModuleRepository {
 
@@ -26,6 +28,9 @@ public class ModuleRepository {
 	/** 模组信息 **/
 	/*************/
 	public boolean saveModuleInfo(ModuleInfo info) {
+		if(log.isDebugEnabled()) {			
+			log.debug("[{}] 保存模组信息", info.getModuleName());
+		}
 		mongo.save(info);
 		return true;
 	}
@@ -38,8 +43,11 @@ public class ModuleRepository {
 		return mongo.findById(moduleId, ModuleInfo.class);
 	}
 
-	public void deleteModuleInfoById(String moduleId) {
-		mongo.remove(Query.query(Criteria.where(MODULE_NAME).is(moduleId)), ModuleInfo.class);
+	public void deleteModuleInfoById(String moduleName) {
+		if(log.isDebugEnabled()) {			
+			log.debug("[{}] 删除模组信息", moduleName);
+		}
+		mongo.remove(Query.query(Criteria.where(MODULE_NAME).is(moduleName)), ModuleInfo.class);
 	}
 
 	/*************/
@@ -50,10 +58,16 @@ public class ModuleRepository {
 	}
 
 	public void saveModulePosition(ModulePositionPO status) {
+		if(log.isDebugEnabled()) {			
+			log.debug("[{}] 保存持仓记录", status.getModuleName());
+		}
 		mongo.save(status);
 	}
 
 	public void removeModulePosition(String moduleName) {
+		if(log.isDebugEnabled()) {			
+			log.debug("[{}] 清除持仓记录", moduleName);
+		}
 		mongo.remove(Query.query(Criteria.where(MODULE_NAME).is(moduleName)), ModulePositionPO.class);
 	}
 
@@ -61,6 +75,9 @@ public class ModuleRepository {
 	/** 模组交易 **/
 	/*************/
 	public void saveDealRecord(ModuleDealRecord dealRecord) {
+		if(log.isDebugEnabled()) {			
+			log.debug("[{}] 保存交易记录", dealRecord.getModuleName());
+		}
 		mongo.save(dealRecord);
 	}
 
@@ -69,6 +86,9 @@ public class ModuleRepository {
 	}
 
 	public void removeDealRecords(String moduleName) {
+		if(log.isDebugEnabled()) {			
+			log.debug("[{}] 清除交易记录", moduleName);
+		}
 		mongo.remove(Query.query(Criteria.where(MODULE_NAME).is(moduleName)), ModuleDealRecord.class);
 	}
 
@@ -76,6 +96,9 @@ public class ModuleRepository {
 	/** 模组成交 **/
 	/*************/
 	public void saveTradeRecord(ModuleTradeRecord tradeRecord) {
+		if(log.isDebugEnabled()) {			
+			log.debug("[{}] 保存模组成交", tradeRecord.getModuleName());
+		}
 		mongo.save(tradeRecord);
 	}
 
@@ -84,6 +107,9 @@ public class ModuleRepository {
 	}
 
 	public void removeTradeRecords(String moduleName) {
+		if(log.isDebugEnabled()) {			
+			log.debug("[{}] 清除成交记录", moduleName);
+		}
 		mongo.remove(Query.query(Criteria.where(MODULE_NAME).is(moduleName)), ModuleTradeRecord.class);
 	}
 
@@ -91,6 +117,9 @@ public class ModuleRepository {
 	/** 模组回测 **/
 	/*************/
 	public void savePlaybackStatRecord(PlaybackStatRecord playbackRecord) {
+		if(log.isDebugEnabled()) {			
+			log.debug("[{}] 保存模组回测信息", playbackRecord.getModuleName());
+		}
 		mongo.save(playbackRecord);
 	}
 

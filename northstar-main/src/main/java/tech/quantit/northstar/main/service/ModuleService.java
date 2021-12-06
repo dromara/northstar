@@ -74,7 +74,7 @@ public class ModuleService implements InitializingBean {
 		this.mdlMgr = mdlMgr;
 		this.gatewayConnMgr = gatewayConnMgr;
 		this.contractMgr = contractMgr;
-		this.moduleFactory = new StrategyModuleFactory(gatewayConnMgr, contractMgr);
+		this.moduleFactory = new StrategyModuleFactory(gatewayConnMgr, contractMgr, moduleRepo);
 	}
 
 	/**
@@ -310,7 +310,7 @@ public class ModuleService implements InitializingBean {
 	 * @return
 	 */
 	public boolean updatePosition(String moduleName, ModulePositionInfo position) {
-		ModulePosition mp = new ModulePosition(position, contractMgr.getContract(position.getUnifiedSymbol()));
+		ModulePosition mp = new ModulePosition(position, contractMgr.getContract(position.getUnifiedSymbol()), dealRecord -> moduleRepo.saveDealRecord(dealRecord));
 		ModuleStatus moduleStatus = mdlMgr.getModule(moduleName).getModuleStatus();
 		moduleStatus.addPosition(mp);
 		List<ModulePositionInfo> posList = moduleStatus.getAllPositions().stream().map(ModulePosition::convertTo).toList();

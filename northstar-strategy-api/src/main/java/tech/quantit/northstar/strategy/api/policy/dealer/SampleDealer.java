@@ -1,7 +1,5 @@
 package tech.quantit.northstar.strategy.api.policy.dealer;
 
-import java.util.UUID;
-
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.utils.FieldUtils;
 import tech.quantit.northstar.strategy.api.AbstractDealerPolicy;
@@ -10,15 +8,7 @@ import tech.quantit.northstar.strategy.api.annotation.Setting;
 import tech.quantit.northstar.strategy.api.annotation.StrategicComponent;
 import tech.quantit.northstar.strategy.api.constant.PriceType;
 import tech.quantit.northstar.strategy.api.model.DynamicParams;
-import tech.quantit.northstar.strategy.api.utils.PriceResolver;
-import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
-import xyz.redtorch.pb.CoreEnum.ForceCloseReasonEnum;
-import xyz.redtorch.pb.CoreEnum.HedgeFlagEnum;
-import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
-import xyz.redtorch.pb.CoreEnum.OrderPriceTypeEnum;
-import xyz.redtorch.pb.CoreEnum.TimeConditionEnum;
-import xyz.redtorch.pb.CoreEnum.VolumeConditionEnum;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 /**
  * 
@@ -37,6 +27,8 @@ public class SampleDealer extends AbstractDealerPolicy implements DealerPolicy {
 	private String closePriceTypeStr;
 	
 	private int overprice;
+	
+	private int stopPriceTick;
 
 	@Override
 	public String name() {
@@ -44,45 +36,47 @@ public class SampleDealer extends AbstractDealerPolicy implements DealerPolicy {
 	}
 
 	@Override
-	protected SubmitOrderReqField genOrderReq(DirectionEnum direction, OffsetFlagEnum offsetFlag, double signalPrice, int ticksToStop) {
-		int factor = FieldUtils.isBuy(direction) ? 1 : -1;
-		String priceType = FieldUtils.isClose(offsetFlag) ? closePriceTypeStr : openPriceTypeStr;
-		double price = PriceResolver.getPrice(PriceType.parse(priceType), signalPrice, lastTick, FieldUtils.isBuy(direction));
-		double stopPrice = price - factor * ticksToStop * bindedContract.getPriceTick();
-		
-		return SubmitOrderReqField.newBuilder()
-				.setOriginOrderId(UUID.randomUUID().toString())
-				.setContract(bindedContract)
-				.setDirection(direction)
-				.setOffsetFlag(offsetFlag)
-				.setStopPrice(stopPrice)
-				.setPrice(price)
-				.setVolume(openVol)
-				.setHedgeFlag(HedgeFlagEnum.HF_Speculation)
-				.setTimeCondition(price == 0 ? TimeConditionEnum.TC_IOC : TimeConditionEnum.TC_GFD)
-				.setOrderPriceType(price == 0 ? OrderPriceTypeEnum.OPT_AnyPrice : OrderPriceTypeEnum.OPT_LimitPrice)
-				.setVolumeCondition(VolumeConditionEnum.VC_AV)
-				.setForceCloseReason(ForceCloseReasonEnum.FCR_NotForceClose)
-				.setContingentCondition(ContingentConditionEnum.CC_Immediately)
-				.setMinVolume(1)
-				.build();
+	protected PriceType openPriceType() {
+		return PriceType.parse(openPriceTypeStr);
 	}
 
+
 	@Override
-	protected SubmitOrderReqField genTracingOrderReq(SubmitOrderReqField originOrderReq) {
-		int factor = FieldUtils.isBuy(originOrderReq.getDirection()) ? 1 : -1;
-		String priceType = FieldUtils.isClose(originOrderReq.getOffsetFlag()) ? closePriceTypeStr : openPriceTypeStr;
-		double basePrice = PriceResolver.getPrice(PriceType.parse(priceType), originOrderReq.getPrice(), lastTick, factor > 0);
-		double tracePrice = basePrice == 0 ? 0 : basePrice + overprice * bindedContract.getPriceTick();
-		log.info("追单采用基础价{}，超价{}个Tick", basePrice, overprice);
-		return SubmitOrderReqField.newBuilder(originOrderReq)
-				.setPrice(tracePrice)
-				.build();
+	protected PriceType closePriceType() {
+		return PriceType.parse(closePriceTypeStr);
+	}
+
+
+	@Override
+	protected int tradeVolume() {
+		return openVol;
+	}
+
+	/**
+	 * 可以根据需要设置固定止损，甚至更复杂的止损逻辑
+	 */
+	@Override
+	protected double stopLossPrice(double orderPrice, DirectionEnum direction) {
+		int factor = FieldUtils.isBuy(direction) ? 1 : -1;
+		return orderPrice - factor * stopPriceTick * bindedContract.getPriceTick();
 	}
 	
 	@Override
 	public DynamicParams getDynamicParams() {
 		return new InitParams();
+	}
+	
+	/**
+	 * 实现追价逻辑
+	 */
+	@Override
+	protected SubmitOrderReqField genTracingOrderReq(SubmitOrderReqField originOrderReq) {
+		int factor = FieldUtils.isBuy(originOrderReq.getDirection()) ? 1 : -1;
+		double originPrice = originOrderReq.getPrice();
+		double tracingPrice = originPrice + factor * overprice * originOrderReq.getContract().getPriceTick();
+		return SubmitOrderReqField.newBuilder()
+				.setPrice(tracingPrice)
+				.build();
 	}
 
 	@Override
@@ -93,6 +87,7 @@ public class SampleDealer extends AbstractDealerPolicy implements DealerPolicy {
 		this.openPriceTypeStr = initParams.openPriceTypeStr;
 		this.closePriceTypeStr = initParams.closePriceTypeStr;
 		this.overprice = initParams.overprice;
+		this.stopPriceTick = initParams.stopPriceTick;
 	}
 	
 	public static class InitParams extends DynamicParams{
@@ -111,6 +106,9 @@ public class SampleDealer extends AbstractDealerPolicy implements DealerPolicy {
 		
 		@Setting(value="追单超价", order = 40, unit = "Tick")
 		private int overprice;
+		
+		@Setting(value="固定止损", order = 50, unit = "Tick")
+		private int stopPriceTick;
 	}
 
 }

@@ -44,10 +44,12 @@ public class RiskControlPolicyTest {
 	
 	@Test
 	public void shouldNotGetAnything() {
-		ModuleEvent<?> event = new ModuleEvent<>(ModuleEventType.SIGNAL_CREATED, factory.makeOrderReq("rb2210", DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open, 1, 1000, 0));
+		SubmitOrderReqField orderReq = factory.makeOrderReq("rb2210", DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open, 1, 1000, 0);
+		ModuleEvent<?> event = new ModuleEvent<>(ModuleEventType.SIGNAL_CREATED, orderReq);
 		TickField tick = factory.makeTickField("rb2210", 1000);
 		RiskControlPolicy p = new RiskControlPolicy(name, List.of(r1, r2, r3));
 		p.setEventBus(meb);
+		p.setBindedContract(orderReq.getContract());
 		p.onTick(tick);
 		p.onEvent(event);
 		
@@ -56,10 +58,12 @@ public class RiskControlPolicyTest {
 
 	@Test
 	public void shouldGetRetain() {
-		ModuleEvent<?> event = new ModuleEvent<>(ModuleEventType.ORDER_REQ_CREATED, factory.makeOrderReq("rb2210", DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open, 1, 1000, 0));
+		SubmitOrderReqField orderReq = factory.makeOrderReq("rb2210", DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open, 1, 1000, 0);
+		ModuleEvent<?> event = new ModuleEvent<>(ModuleEventType.ORDER_REQ_CREATED, orderReq);
 		TickField tick = factory.makeTickField("rb2210", 1000);
 		RiskControlPolicy p = new RiskControlPolicy(name, List.of(r1, r2, r3));
 		p.setEventBus(meb);
+		p.setBindedContract(orderReq.getContract());
 		p.onTick(tick);
 		p.onEvent(event);
 		
@@ -90,10 +94,12 @@ public class RiskControlPolicyTest {
 	
 	@Test
 	public void shouldGetRetry() {
-		ModuleEvent<?> event = new ModuleEvent<>(ModuleEventType.ORDER_REQ_CREATED, factory.makeOrderReq("rb2210", DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open, 1, 1000, 0));
+		SubmitOrderReqField orderReq = factory.makeOrderReq("rb2210", DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open, 1, 1000, 0);
+		ModuleEvent<?> event = new ModuleEvent<>(ModuleEventType.ORDER_REQ_CREATED, orderReq);
 		TickField tick = factory.makeTickField("rb2210", 1000);
 		RiskControlPolicy p = new RiskControlPolicy(name, List.of(r1, r3));
 		p.setEventBus(meb);
+		p.setBindedContract(orderReq.getContract());
 		p.onTick(tick);
 		p.onEvent(event);
 		
@@ -131,6 +137,7 @@ public class RiskControlPolicyTest {
 		RiskControlPolicy p = new RiskControlPolicy(name, List.of(r2));
 		p.setEventBus(meb);
 		p.currentOrderReq = orderReq;
+		p.setBindedContract(orderReq.getContract());
 		p.onChange(ModuleState.PENDING_ORDER);
 		p.onTick(tick);
 		
@@ -150,6 +157,7 @@ public class RiskControlPolicyTest {
 		RiskControlPolicy p = new RiskControlPolicy(name, List.of(r3));
 		p.currentOrderReq = orderReq;
 		p.setEventBus(meb);
+		p.setBindedContract(orderReq.getContract());
 		p.onChange(ModuleState.PENDING_ORDER);
 		p.onTick(tick);
 		

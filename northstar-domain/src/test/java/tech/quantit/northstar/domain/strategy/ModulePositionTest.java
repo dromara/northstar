@@ -1,6 +1,8 @@
 package tech.quantit.northstar.domain.strategy;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.offset;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.mock;
@@ -15,11 +17,11 @@ import org.mockito.ArgumentMatcher;
 import tech.quantit.northstar.strategy.api.event.ModuleEvent;
 import tech.quantit.northstar.strategy.api.event.ModuleEventBus;
 import tech.quantit.northstar.strategy.api.event.ModuleEventType;
+import tech.quantit.northstar.strategy.api.model.ModuleDealRecord;
 import test.common.TestFieldFactory;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
-import xyz.redtorch.pb.CoreEnum.OrderStatusEnum;
-import xyz.redtorch.pb.CoreField.OrderField;
+import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TickField;
 import xyz.redtorch.pb.CoreField.TradeField;
@@ -32,24 +34,28 @@ public class ModulePositionTest {
 	
 	String SYMBOL = "rb2210";
 	TradeField buyTrade = factory.makeTradeField(SYMBOL, 2000, 10, DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open);
+	TradeField buyTrade2 = factory.makeTradeField(SYMBOL, 1800, 8, DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open);
+	TradeField buyTrade3 = factory.makeTradeField("rb2110", 1800, 8, DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open);
 	TradeField sellTrade = factory.makeTradeField(SYMBOL, 2000, 10, DirectionEnum.D_Sell, OffsetFlagEnum.OF_Open);
-	TradeField closeTrade = factory.makeTradeField(SYMBOL, 2000, 10, DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open);
+	TradeField sellTrade2 = factory.makeTradeField(SYMBOL, 2000, 8, DirectionEnum.D_Sell, OffsetFlagEnum.OF_Close);
 	TickField tick = factory.makeTickField(SYMBOL, 2100);
 	TickField tick2 = factory.makeTickField("rb2110", 2100);
+	
+	@SuppressWarnings("unchecked")
 	@Test
 	public void shouldUpdateProfit() {
-		ModulePosition p1 = new ModulePosition(NAME, buyTrade, 0);
+		ModulePosition p1 = new ModulePosition(NAME, buyTrade, 0, mock(Consumer.class));
 		p1.onTick(tick);
 		assertThat(p1.getProfit()).isEqualTo(10000);
 		
-		ModulePosition p2 = new ModulePosition(NAME, sellTrade, 0);
+		ModulePosition p2 = new ModulePosition(NAME, sellTrade, 0, mock(Consumer.class));
 		p2.onTick(tick);
 		assertThat(p2.getProfit()).isEqualTo(-10000);
 	}
 	
 	@Test
 	public void shouldNotUpdateProfit() {
-		ModulePosition p1 = new ModulePosition(NAME, buyTrade, 0);
+		ModulePosition p1 = new ModulePosition(NAME, buyTrade, 0, mock(Consumer.class));
 		p1.onTick(tick2);
 		assertThat(p1.getProfit()).isEqualTo(0);
 	}
@@ -57,84 +63,31 @@ public class ModulePositionTest {
 	@SuppressWarnings("unchecked")
 	@Test
 	public void shouldTriggerStopLoss() {
-		Consumer<ModulePosition> callback = mock(Consumer.class);
+		Consumer<ModuleDealRecord> callback = mock(Consumer.class);
 		ModulePosition p1 = new ModulePosition(NAME, sellTrade, 2100, callback);
 		p1.meb = mock(ModuleEventBus.class);
 		p1.onTick(tick);
 		verify(p1.meb).post(any(ModuleEvent.class));
-		verify(callback, times(0)).accept(any(ModulePosition.class));
+		verify(callback, times(0)).accept(any(ModuleDealRecord.class));
 	}
 	
 	@Test
 	public void shouldNotTriggerStopLoss() {
-		ModulePosition p1 = new ModulePosition(NAME, sellTrade, 2200);
+		ModulePosition p1 = new ModulePosition(NAME, sellTrade, 2200, mock(Consumer.class));
 		p1.meb = mock(ModuleEventBus.class);
 		p1.onTick(tick);
 		verify(p1.meb, times(0)).post(any(ModuleEvent.class));
 	}
 	
-	@SuppressWarnings("unchecked")
-	@Test
-	public void testClosePositionAndOrderTraded() {
-		Consumer<ModulePosition> callback = mock(Consumer.class);
-		ModulePosition p1 = new ModulePosition(NAME, sellTrade, 2100, callback);
-		p1.lastTick = tick;
-		SubmitOrderReqField submitOrderReq = p1.closePosition(10, 1900);
-		p1.onTrade(TradeField.newBuilder()
-				.setOriginOrderId(submitOrderReq.getOriginOrderId())
-				.setVolume(submitOrderReq.getVolume())
-				.build());
-		assertThat(p1.getVolume()).isZero();
-		assertThat(p1.availableVol).isZero();
-		verify(callback).accept(any(ModulePosition.class));
-	}
-	
-	@Test
-	public void testClosePositionAndOrderPartiallyTraded() {
-		ModulePosition p1 = new ModulePosition(NAME, sellTrade, 2100);
-		p1.lastTick = tick;
-		SubmitOrderReqField submitOrderReq = p1.closePosition(10, 1900);
-		p1.onTrade(TradeField.newBuilder()
-				.setOriginOrderId(submitOrderReq.getOriginOrderId())
-				.setVolume(4)
-				.build());
-		assertThat(p1.getVolume()).isEqualTo(6);
-		assertThat(p1.availableVol).isZero();
-		
-		p1.onOrder(OrderField.newBuilder()
-				.setOriginOrderId(submitOrderReq.getOriginOrderId())
-				.setTradedVolume(4)
-				.setTotalVolume(10)
-				.setOrderStatus(OrderStatusEnum.OS_Canceled)
-				.build());
-		assertThat(p1.getVolume()).isEqualTo(6);
-		assertThat(p1.availableVol).isEqualTo(6);
-	}
-	
-	@Test
-	public void testClosePositionAndOrderCancelled() {
-		ModulePosition p1 = new ModulePosition(NAME, sellTrade, 2100);
-		p1.lastTick = tick;
-		SubmitOrderReqField submitOrderReq = p1.closePosition(8, 1900);
-		p1.onOrder(OrderField.newBuilder()
-				.setOriginOrderId(submitOrderReq.getOriginOrderId())
-				.setTradedVolume(0)
-				.setTotalVolume(8)
-				.setOrderStatus(OrderStatusEnum.OS_Canceled)
-				.build());
-		assertThat(p1.getVolume()).isEqualTo(10);
-		assertThat(p1.availableVol).isEqualTo(10);
-	}
-	
 	@Test
 	public void testOpenPrice() {
-		ModulePosition p1 = new ModulePosition(NAME, sellTrade, 2100);
+		ModulePosition p1 = new ModulePosition(NAME, sellTrade, 2100, mock(Consumer.class));
 		assertThat(p1.openPrice()).isEqualTo(2000);
 	}
 	
 	@Test
 	public void testSetEventBus() {
-		ModulePosition p1 = new ModulePosition(NAME, sellTrade, 2100);
+		ModulePosition p1 = new ModulePosition(NAME, sellTrade, 2100, mock(Consumer.class));
 		ModuleEventBus meb = mock(ModuleEventBus.class);
 		p1.setEventBus(meb);
 		assertThat(p1.meb).isEqualTo(meb);
@@ -142,7 +95,7 @@ public class ModulePositionTest {
 	
 	@Test
 	public void shouldSkipTheEvent() {
-		ModulePosition p1 = new ModulePosition(NAME, sellTrade, 2100);
+		ModulePosition p1 = new ModulePosition(NAME, sellTrade, 2100, mock(Consumer.class));
 		ModuleEventBus meb = mock(ModuleEventBus.class);
 		p1.setEventBus(meb);
 		
@@ -163,7 +116,7 @@ public class ModulePositionTest {
 	
 	@Test
 	public void shouldEmitOrderPassed() {
-		ModulePosition p1 = new ModulePosition(NAME, sellTrade, 2100);
+		ModulePosition p1 = new ModulePosition(NAME, sellTrade, 2100, mock(Consumer.class));
 		p1.lastTick = TickField.newBuilder().setTradingDay(sellTrade.getTradingDay()).build();
 		ModuleEventBus meb = mock(ModuleEventBus.class);
 		p1.setEventBus(meb);
@@ -207,7 +160,7 @@ public class ModulePositionTest {
 	
 	@Test
 	public void shouldEmitOrderRetained() {
-		ModulePosition p1 = new ModulePosition(NAME, sellTrade, 2100);
+		ModulePosition p1 = new ModulePosition(NAME, sellTrade, 2100, mock(Consumer.class));
 		p1.lastTick = TickField.newBuilder().setTradingDay(sellTrade.getTradingDay()).build();
 		ModuleEventBus meb = mock(ModuleEventBus.class);
 		p1.setEventBus(meb);
@@ -224,5 +177,55 @@ public class ModulePositionTest {
 				return argument.getEventType() == ModuleEventType.ORDER_REQ_RETAINED;
 			}
 		}));
+	}
+	
+	@Test
+	public void testConvertAndConstruction() {
+		ModulePosition mp1 = new ModulePosition(NAME, sellTrade, 2100, mock(Consumer.class));
+		ModulePosition mp2 = new ModulePosition(mp1.convertTo(), sellTrade.getContract(), mock(Consumer.class));
+		assertThat(mp1.getDirection()).isEqualTo(mp2.getDirection());
+		assertThat(mp1.getVolume()).isEqualTo(mp2.getVolume());
+		assertThat(mp1.contract()).isEqualTo(mp2.contract());
+		assertThat(mp1.openPrice()).isCloseTo(mp2.openPrice(), offset(1e-6));
+	}
+	
+	@Test
+	public void shouldAddPosition() {
+		ModulePosition mp1 = new ModulePosition(NAME, buyTrade, 0, mock(Consumer.class));
+		ModulePosition mp2 = new ModulePosition(NAME, buyTrade2, 0, mock(Consumer.class));
+		ModulePosition mp = mp1.merge(mp2);
+		assertThat(mp.getDirection()).isEqualTo(PositionDirectionEnum.PD_Long);
+		assertThat(mp.getVolume()).isEqualTo(18);
+		assertThat(mp.contract()).isEqualTo(mp2.contract());
+		assertThat(mp.openPrice()).isCloseTo(1911.111111, offset(1e-6));
+	}
+	
+	@Test
+	public void shouldReducePosition() {
+		ModulePosition mp1 = new ModulePosition(NAME, buyTrade, 0, mock(Consumer.class));
+		ModulePosition mp2 = new ModulePosition(NAME, sellTrade2, 0, mock(Consumer.class));
+		ModulePosition mp = mp1.merge(mp2);
+		assertThat(mp.getDirection()).isEqualTo(PositionDirectionEnum.PD_Long);
+		assertThat(mp.getVolume()).isEqualTo(2);
+		assertThat(mp.contract()).isEqualTo(mp2.contract());
+		assertThat(mp.openPrice()).isCloseTo(2000, offset(1e-6));
+	}
+	
+	@Test
+	public void shouldThrowIfNotMatchSymbol() {
+		ModulePosition mp1 = new ModulePosition(NAME, buyTrade, 0, mock(Consumer.class));
+		ModulePosition mp2 = new ModulePosition(NAME, buyTrade3, 0, mock(Consumer.class));
+		assertThrows(IllegalStateException.class, ()->{			
+			mp1.merge(mp2);
+		});
+	}
+	
+	@Test
+	public void shouldThrowIfNotMatchDirection() {
+		ModulePosition mp1 = new ModulePosition(NAME, buyTrade, 0, mock(Consumer.class));
+		ModulePosition mp2 = new ModulePosition(NAME, sellTrade, 0, mock(Consumer.class));
+		assertThrows(IllegalStateException.class, ()->{			
+			mp1.merge(mp2);
+		});
 	}
 }

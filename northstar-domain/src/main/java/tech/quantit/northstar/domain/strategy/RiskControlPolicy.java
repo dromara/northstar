@@ -4,7 +4,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
+
 import lombok.extern.slf4j.Slf4j;
+import tech.quantit.northstar.strategy.api.ContractBindedAware;
 import tech.quantit.northstar.strategy.api.EventDrivenComponent;
 import tech.quantit.northstar.strategy.api.RiskControlRule;
 import tech.quantit.northstar.strategy.api.StateChangeListener;
@@ -16,11 +19,12 @@ import tech.quantit.northstar.strategy.api.event.ModuleEvent;
 import tech.quantit.northstar.strategy.api.event.ModuleEventBus;
 import tech.quantit.northstar.strategy.api.event.ModuleEventType;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
+import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TickField;
 
 @Slf4j
-public class RiskControlPolicy implements TickDataAware, EventDrivenComponent, StateChangeListener{
+public class RiskControlPolicy implements TickDataAware, EventDrivenComponent, StateChangeListener, ContractBindedAware{
 	
 	private List<RiskControlRule> rules;
 	
@@ -33,6 +37,10 @@ public class RiskControlPolicy implements TickDataAware, EventDrivenComponent, S
 	protected SubmitOrderReqField currentOrderReq;
 	
 	private String moduleName;
+	
+	private ContractField bindedContract;
+	
+	private Set<RiskAuditResult> riskCheckResults = new HashSet<>();
 	
 	public RiskControlPolicy(String moduleName, List<RiskControlRule> rules) {
 		this.rules = rules;
@@ -68,19 +76,19 @@ public class RiskControlPolicy implements TickDataAware, EventDrivenComponent, S
 
 	@Override
 	public void onTick(TickField tick) {
-		if(currentOrderReq == null || !tick.getUnifiedSymbol().equals(currentOrderReq.getContract().getUnifiedSymbol())) {
+		if(!tick.getUnifiedSymbol().equals(bindedContractSymbol())) {
 			return;
 		}
 		lastTick = tick;
-		if(curState == ModuleState.PENDING_ORDER) {
-			Set<RiskAuditResult> results = new HashSet<>();
+		if(curState == ModuleState.PENDING_ORDER && currentOrderReq != null 
+				&& StringUtils.equals(tick.getUnifiedSymbol(), currentOrderReq.getContract().getUnifiedSymbol())) {
 			for(RiskControlRule rule : rules) {
-				results.add(rule.checkRisk(currentOrderReq, lastTick));
+				riskCheckResults.add(rule.checkRisk(currentOrderReq, lastTick));
 			}
-			if(results.contains(RiskAuditResult.REJECTED)) {					
+			if(riskCheckResults.contains(RiskAuditResult.REJECTED)) {					
 				meb.post(new ModuleEvent<>(ModuleEventType.REJECT_RISK_ALERTED, currentOrderReq));
 				log.warn("[{}] 风控限制，需要撤单取消交易", moduleName);
-			} else if(results.contains(RiskAuditResult.RETRY)) {
+			} else if(riskCheckResults.contains(RiskAuditResult.RETRY)) {
 				meb.post(new ModuleEvent<>(ModuleEventType.RETRY_RISK_ALERTED, currentOrderReq));
 				log.warn("[{}] 风控限制，需要撤单重试交易", moduleName);
 			}
@@ -91,23 +99,35 @@ public class RiskControlPolicy implements TickDataAware, EventDrivenComponent, S
 	public void setEventBus(ModuleEventBus moduleEventBus) {
 		meb = moduleEventBus;
 		for(RiskControlRule rule : rules) {
-			if(rule instanceof Subscribable) {				
-				meb.register(moduleEventBus);
-			}
+			if(rule instanceof Subscribable sub) 				
+				meb.register(sub);
+			if(rule instanceof EventDrivenComponent edc) 
+				edc.setEventBus(meb);
 		}
 	}
 
 	@Override
 	public void onChange(ModuleState state) {
 		curState = state;
-		if(curState.isEmpty() || curState.isHolding()) {
+		if(curState.isEmpty() || curState.isHolding()) {			
 			currentOrderReq = null;
+			riskCheckResults.clear();
 		}
+		
 		for(RiskControlRule rule : rules) {
-			if(rule instanceof StateChangeListener listener) {
+			if(rule instanceof StateChangeListener listener) 
 				listener.onChange(state);
-			}
 		}
+	}
+
+	@Override
+	public String bindedContractSymbol() {
+		return bindedContract.getUnifiedSymbol();
+	}
+
+	@Override
+	public void setBindedContract(ContractField contract) {
+		bindedContract = contract;
 	}
 	
 }

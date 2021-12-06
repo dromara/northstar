@@ -115,7 +115,6 @@ public class StrategyModuleTest {
 		verify(module.meb, times(0)).post(any(ModuleEvent.class));
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testOnEventNorthstarEventOfSellTrade() {
 		ModuleStatus moduleStatus = new ModuleStatus("module");
@@ -123,23 +122,23 @@ public class StrategyModuleTest {
 		module = new StrategyModule("mktGateway", tradeGateway, moduleStatus);
 		module.meb = mock(ModuleEventBus.class);
 		module.ti = mock(ModuleTradeIntent.class);
-		module.setModuleStatusChangeHandler(mock(Consumer.class));
 		module.onEvent(new NorthstarEvent(NorthstarEventType.TRADE, TradeField.newBuilder().setDirection(DirectionEnum.D_Buy).build()));
 		verify(module.meb).post(any());
 		verify(module.meb, times(0)).post(any(ModuleEvent.class));
-		verify(module.moduleStatusChangeHandler).accept(any());
 	}
 
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testOnEventModuleEventOfStopLoss() {
 		ModuleStatus moduleStatus = new ModuleStatus("module");
-		moduleStatus.addPosition(new ModulePosition("sss", factory.makeTradeField("test", 1000, 1, DirectionEnum.D_Sell, OffsetFlagEnum.OF_Open), 0));
+		moduleStatus.addPosition(new ModulePosition("sss", factory.makeTradeField("test", 1000, 1, DirectionEnum.D_Sell, OffsetFlagEnum.OF_Open), 0, mock(Consumer.class)));
 		module = new StrategyModule("mktGateway", tradeGateway, moduleStatus);
 		module.meb = mock(ModuleEventBus.class);
 		module.ti = mock(ModuleTradeIntent.class);
 		module.setSubmitOrderHandler(mock(Consumer.class));
-		module.onEvent(new ModuleEvent<>(ModuleEventType.STOP_LOSS, factory.makeOrderReq("test", DirectionEnum.D_Buy, OffsetFlagEnum.OF_Close, 0, 0, 0)));
+		ModuleTradeIntent mti = mock(ModuleTradeIntent.class);
+		when(mti.getSubmitOrderReq()).thenReturn(factory.makeOrderReq("test", DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open, 0, 0, 0));
+		module.onEvent(new ModuleEvent<>(ModuleEventType.STOP_LOSS, mti));
 		verify(module.submitOrderHandler).accept(any());
 	}
 	
@@ -152,7 +151,7 @@ public class StrategyModuleTest {
 		module.meb = mock(ModuleEventBus.class);
 		module.ti = mock(ModuleTradeIntent.class);
 		module.setSubmitOrderHandler(mock(Consumer.class));
-		module.onEvent(new ModuleEvent<>(ModuleEventType.ORDER_CONFIRMED, factory.makeOrderReq("test", DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open, 0, 0, 0)));
+		module.onEvent(new ModuleEvent<>(ModuleEventType.ORDER_REQ_ACCEPTED, factory.makeOrderReq("test", DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open, 0, 0, 0)));
 		verify(module.submitOrderHandler).accept(any());
 	}
 	

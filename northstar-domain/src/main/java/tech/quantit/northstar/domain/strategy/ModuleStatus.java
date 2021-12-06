@@ -59,9 +59,8 @@ public class ModuleStatus {
 		ModuleState state = getMergedState();
 		int longVol = longPosition == null ? 0 : longPosition.getVolume();
 		int shortVol = shortPosition == null ? 0 : shortPosition.getVolume();
+		stateMachine.setState(state);
 		log.info("[{}] 变更模组状态：[{}]，多头{}手，空头{}手", getModuleName(), state, longVol, shortVol);
-		stateMachine.setCurState(state);
-		stateMachine.setOriginState(state);
 	}
 	
 	/**
@@ -73,7 +72,7 @@ public class ModuleStatus {
 	}
 	
 	public void removePosition(String unifiedSymbol, PositionDirectionEnum dir) {
-		log.info("[{}] 移除持仓，{} {} {}", getModuleName(), unifiedSymbol, dir);
+		log.info("[{}] 移除持仓，{} {}", getModuleName(), unifiedSymbol, dir);
 		if(FieldUtils.isLong(dir)) {
 			longPosition = null;
 		}
@@ -81,9 +80,8 @@ public class ModuleStatus {
 			shortPosition = null;
 		}
 		ModuleState state = getMergedState();
+		stateMachine.setState(state);
 		log.info("[{}] 变更模组状态：[{}]", getModuleName(), state);
-		stateMachine.setCurState(state);
-		stateMachine.setOriginState(state);
 	}
 	
 	public boolean at(ModuleState state) {
