@@ -1,8 +1,5 @@
 package tech.quantit.northstar.domain.strategy;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
@@ -28,11 +25,9 @@ public class ModuleStatus {
 	@Getter
 	protected ModuleStateMachine stateMachine;
 	
+	// 模组的逻辑净持仓
 	@Getter
-	protected ModulePosition longPosition;
-	
-	@Getter
-	protected ModulePosition shortPosition;
+	protected ModulePosition logicalPosition;
 	
 	@Setter
 	private ModuleEventBus moduleEventBus;
@@ -43,42 +38,32 @@ public class ModuleStatus {
 	}
 	
 	/**
-	 * 增加持仓
+	 * 更新持仓
 	 * @param position
 	 */
-	public void addPosition(ModulePosition position) {
-		log.info("[{}] 持仓增加，{} {} {}", getModuleName(), position.contract().getUnifiedSymbol(), position.getDirection(), position.getVolume());
+	public void updatePosition(ModulePosition position) {
+		log.info("[{}] 持仓更新，{} {} {}", getModuleName(), position.contract().getUnifiedSymbol(), position.getDirection(), position.getVolume());
 		position.setEventBus(moduleEventBus);
-		if(FieldUtils.isLong(position.getDirection())) {
-			longPosition = position;
-		}
-		if(FieldUtils.isShort(position.getDirection())) {
-			shortPosition = position;
+		if(logicalPosition == null) {
+			logicalPosition = position;
+		} else {
+			logicalPosition.merge(position);
 		}
 		
 		ModuleState state = getMergedState();
-		int longVol = longPosition == null ? 0 : longPosition.getVolume();
-		int shortVol = shortPosition == null ? 0 : shortPosition.getVolume();
 		stateMachine.setState(state);
-		log.info("[{}] 变更模组状态：[{}]，多头{}手，空头{}手", getModuleName(), state, longVol, shortVol);
+		
+		log.info("[{}] 变更模组状态：[{}]，{}手", getModuleName(), state, logicalPosition == null ? 0 : logicalPosition.getVolume());
 	}
 	
 	/**
 	 * 移除持仓
-	 * @param position
+	 * @param unifiedSymbol
+	 * @param dir
 	 */
-	public void removePostion(ModulePosition position) {
-		removePosition(position.contract().getUnifiedSymbol(), position.getDirection());
-	}
-	
 	public void removePosition(String unifiedSymbol, PositionDirectionEnum dir) {
 		log.info("[{}] 移除持仓，{} {}", getModuleName(), unifiedSymbol, dir);
-		if(FieldUtils.isLong(dir)) {
-			longPosition = null;
-		}
-		if(FieldUtils.isShort(dir)) {
-			shortPosition = null;
-		}
+		logicalPosition = null;
 		ModuleState state = getMergedState();
 		stateMachine.setState(state);
 		log.info("[{}] 变更模组状态：[{}]", getModuleName(), state);
@@ -89,31 +74,17 @@ public class ModuleStatus {
 	}
 	
 	public double holdingProfit() {
-		double p1 = longPosition != null ? longPosition.getProfit() : 0;
-		double p2 = shortPosition != null ? shortPosition.getProfit() : 0;
-		return p1 + p2;
+		return logicalPosition.getProfit();
 	}
 	
 	private ModuleState getMergedState() {
-		if(longPosition == shortPosition)
+		if(logicalPosition == null || logicalPosition.getVolume() == 0)
 			return ModuleState.EMPTY;
-		if(longPosition == null)
-			return ModuleState.HOLDING_SHORT;
-		if(shortPosition == null)
+		if(FieldUtils.isLong(logicalPosition.getDirection()))
 			return ModuleState.HOLDING_LONG;
-		if(longPosition.getVolume() > shortPosition.getVolume())
-			return ModuleState.HOLDING_LONG;
-		if(longPosition.getVolume() < shortPosition.getVolume())
+		if(FieldUtils.isShort(logicalPosition.getDirection()))
 			return ModuleState.HOLDING_SHORT;
-		return ModuleState.NET_EMPTY;
+		throw new IllegalStateException("未知状态");
 	}
 	
-	public List<ModulePosition> getAllPositions(){
-		List<ModulePosition> resultList = new ArrayList<>(2);
-		if(longPosition != null) 
-			resultList.add(longPosition);
-		if(shortPosition != null)
-			resultList.add(shortPosition);
-		return resultList;
-	}
 }

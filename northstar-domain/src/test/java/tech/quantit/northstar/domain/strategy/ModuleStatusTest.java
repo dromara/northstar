@@ -53,66 +53,43 @@ public class ModuleStatusTest {
 	}
 
 	@Test
-	public void shouldGetLongWhenAddPosition() {
+	public void shouldGetLongWhenupdatePosition() {
 		ModuleStatus ms = new ModuleStatus("test");
-		ms.addPosition(p1);
+		ms.updatePosition(p1);
 		assertThat(ms.at(ModuleState.HOLDING_LONG)).isTrue();
 	}
 	
 	@Test
-	public void shouldGetShortWhenAddPosition() {
+	public void shouldGetShortWhenupdatePosition() {
 		ModuleStatus ms = new ModuleStatus("test");
-		ms.addPosition(p2);
+		ms.updatePosition(p2);
 		assertThat(ms.at(ModuleState.HOLDING_SHORT)).isTrue();
 	}
 	
 	@Test
 	public void shouldGetEmptyWhenRemovePosition() {
 		ModuleStatus ms = new ModuleStatus("test");
-		ms.addPosition(p1);
-		ms.removePostion(p1);
-		ms.addPosition(p2);
-		ms.removePostion(p2);
+		ms.updatePosition(p1);
+		ms.removePosition(p1.contract().getUnifiedSymbol(), p1.getDirection());
+		ms.updatePosition(p2);
+		ms.removePosition(p2.contract().getUnifiedSymbol(), p2.getDirection());
 		assertThat(ms.at(ModuleState.EMPTY)).isTrue();
 	}
 	
 	@Test
 	public void shouldGetLongWhenHedging() {
 		ModuleStatus ms = new ModuleStatus("test");
-		ms.addPosition(p1);
-		ms.addPosition(p2);
+		ms.updatePosition(p1);
+		ms.updatePosition(p2);
 		assertThat(ms.at(ModuleState.HOLDING_LONG)).isTrue();
 	}
 	
 	@Test
 	public void shouldGetShortWhenHedging() {
 		ModuleStatus ms = new ModuleStatus("test");
-		ms.addPosition(p3);
-		ms.addPosition(p4);
+		ms.updatePosition(p3);
+		ms.updatePosition(p4);
 		assertThat(ms.at(ModuleState.HOLDING_SHORT)).isTrue();
 	}
 	
-	@Test
-	public void shouldGetNetEmptyWhenHedging() {
-		ModuleStatus ms = new ModuleStatus("test");
-		ms.addPosition(p1);
-		ms.addPosition(p3);
-		assertThat(ms.at(ModuleState.NET_EMPTY)).isTrue();
-	}
-	
-	@Test
-	public void shouldGetAllPositions() {
-		ModuleStatus ms = new ModuleStatus("test");
-		ms.addPosition(p1);
-		ms.addPosition(p3);
-		assertThat(ms.getAllPositions()).hasSize(2);
-	}
-
-	@Test
-	public void shouldGetTotalHoldingProfit() {
-		ModuleStatus ms = new ModuleStatus("test");
-		ms.addPosition(p1);
-		ms.addPosition(p3);
-		assertThat(ms.holdingProfit()).isEqualTo(215);
-	}
 }

@@ -310,10 +310,10 @@ public class ModuleService implements InitializingBean {
 	 * @return
 	 */
 	public boolean updatePosition(String moduleName, ModulePositionInfo position) {
-		ModulePosition mp = new ModulePosition(position, contractMgr.getContract(position.getUnifiedSymbol()), dealRecord -> moduleRepo.saveDealRecord(dealRecord));
 		ModuleStatus moduleStatus = mdlMgr.getModule(moduleName).getModuleStatus();
-		moduleStatus.addPosition(mp);
-		List<ModulePositionInfo> posList = moduleStatus.getAllPositions().stream().map(ModulePosition::convertTo).toList();
+		ModulePosition mp = new ModulePosition(position, contractMgr.getContract(position.getUnifiedSymbol()), moduleStatus::updatePosition, dealRecord -> moduleRepo.saveDealRecord(dealRecord));
+		moduleStatus.updatePosition(mp);
+		List<ModulePositionInfo> posList = List.of(moduleStatus.getLogicalPosition().convertTo());
 		moduleRepo.saveModulePosition(ModulePositionPO.builder().moduleName(moduleName).positions(posList).build());
 		return true;
 	}
@@ -329,8 +329,7 @@ public class ModuleService implements InitializingBean {
 	public boolean removePosition(String moduleName, String unifiedSymbol, PositionDirectionEnum dir) {
 		ModuleStatus moduleStatus = mdlMgr.getModule(moduleName).getModuleStatus();
 		moduleStatus.removePosition(unifiedSymbol, dir);
-		List<ModulePositionInfo> posList = moduleStatus.getAllPositions().stream().map(ModulePosition::convertTo).toList();
-		moduleRepo.saveModulePosition(ModulePositionPO.builder().moduleName(moduleName).positions(posList).build());
+		moduleRepo.removeModulePosition(moduleName);
 		return true;
 	}
 

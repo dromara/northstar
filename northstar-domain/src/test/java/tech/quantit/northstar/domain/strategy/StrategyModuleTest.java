@@ -100,8 +100,8 @@ public class StrategyModuleTest {
 				.setOrderStatus(OrderStatusEnum.OS_Unknown)
 				.build();
 		module.onEvent(new NorthstarEvent(NorthstarEventType.ORDER, order));
-		verify(module.meb).post(any());
-		verify(module.meb, times(0)).post(any(ModuleEvent.class));
+		verify(module.meb, times(2)).post(any());
+		verify(module.meb, times(1)).post(any(ModuleEvent.class));
 	}
 	
 	@Test
@@ -131,7 +131,7 @@ public class StrategyModuleTest {
 	@Test
 	public void testOnEventModuleEventOfStopLoss() {
 		ModuleStatus moduleStatus = new ModuleStatus("module");
-		moduleStatus.addPosition(new ModulePosition("sss", factory.makeTradeField("test", 1000, 1, DirectionEnum.D_Sell, OffsetFlagEnum.OF_Open), 0, mock(Consumer.class)));
+		moduleStatus.updatePosition(new ModulePosition("sss", factory.makeTradeField("test", 1000, 1, DirectionEnum.D_Sell, OffsetFlagEnum.OF_Open), 0, mock(Consumer.class), mock(Consumer.class)));
 		module = new StrategyModule("mktGateway", tradeGateway, moduleStatus);
 		module.meb = mock(ModuleEventBus.class);
 		module.ti = mock(ModuleTradeIntent.class);

@@ -124,7 +124,7 @@ public class ModuleTradeIntentTest {
 		ModulePosition mp = mock(ModulePosition.class);
 		when(mp.openPrice()).thenReturn(1010D);
 		when(mp.getDirection()).thenReturn(PositionDirectionEnum.PD_Long);
-		ModuleTradeIntent mti = new ModuleTradeIntent(NAME, mp, orderReq, closeCallback, fallback);
+		ModuleTradeIntent mti = new ModuleTradeIntent(NAME, mp, orderReq, mock(Consumer.class), closeCallback, fallback);
 		
 		mti.onOrder(OrderField.newBuilder()
 				.setOriginOrderId(orderReq.getOriginOrderId())
@@ -147,7 +147,7 @@ public class ModuleTradeIntentTest {
 		ModulePosition mp = mock(ModulePosition.class);
 		when(mp.openPrice()).thenReturn(1010D);
 		when(mp.getDirection()).thenReturn(PositionDirectionEnum.PD_Long);
-		ModuleTradeIntent mti = new ModuleTradeIntent(NAME, mp, orderReq, closeCallback, fallback);
+		ModuleTradeIntent mti = new ModuleTradeIntent(NAME, mp, orderReq, mock(Consumer.class), closeCallback, fallback);
 		
 		mti.onOrder(OrderField.newBuilder()
 				.setOriginOrderId(orderReq.getOriginOrderId())
@@ -178,7 +178,7 @@ public class ModuleTradeIntentTest {
 		ModulePosition mp = mock(ModulePosition.class);
 		when(mp.openPrice()).thenReturn(1010D);
 		when(mp.getDirection()).thenReturn(PositionDirectionEnum.PD_Long);
-		ModuleTradeIntent mti = new ModuleTradeIntent(NAME, mp, orderReq, closeCallback, fallback);
+		ModuleTradeIntent mti = new ModuleTradeIntent(NAME, mp, orderReq, mock(Consumer.class), closeCallback, fallback);
 		
 		mti.onOrder(OrderField.newBuilder()
 				.setOriginOrderId(orderReq.getOriginOrderId())
@@ -191,20 +191,4 @@ public class ModuleTradeIntentTest {
 		verify(fallback).accept(any());
 	}
 	
-	@Test
-	public void shouldThrowIfUseWrongConstuction() {
-		SubmitOrderReqField orderReq = factory.makeOrderReq(SYMBOL, DirectionEnum.D_Sell, OffsetFlagEnum.OF_CloseToday, 4, 1000, 0);
-		assertThrows(IllegalStateException.class, ()->{			
-			new ModuleTradeIntent(NAME, orderReq, openCallback, closeCallback, fallback);
-		});
-	}
-	
-	@Test
-	public void shouldThrowIfUseWrongConstuction2() {
-		SubmitOrderReqField orderReq = factory.makeOrderReq(SYMBOL, DirectionEnum.D_Sell, OffsetFlagEnum.OF_Open, 4, 1000, 0);
-		ModulePosition mp = mock(ModulePosition.class);
-		assertThrows(IllegalStateException.class, ()->{			
-			new ModuleTradeIntent(NAME, mp, orderReq, closeCallback, fallback);
-		});
-	}
 }

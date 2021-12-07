@@ -68,13 +68,14 @@ public class SampleDealer extends AbstractDealerPolicy implements DealerPolicy {
 	
 	/**
 	 * 实现追价逻辑
+	 * 这个方法扩展有一定危机性，容易出错而不好排查
 	 */
 	@Override
 	protected SubmitOrderReqField genTracingOrderReq(SubmitOrderReqField originOrderReq) {
 		int factor = FieldUtils.isBuy(originOrderReq.getDirection()) ? 1 : -1;
 		double originPrice = originOrderReq.getPrice();
 		double tracingPrice = originPrice + factor * overprice * originOrderReq.getContract().getPriceTick();
-		return SubmitOrderReqField.newBuilder()
+		return SubmitOrderReqField.newBuilder(originOrderReq)
 				.setPrice(tracingPrice)
 				.build();
 	}

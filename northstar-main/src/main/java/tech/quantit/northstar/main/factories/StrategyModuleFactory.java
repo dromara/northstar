@@ -67,7 +67,7 @@ public class StrategyModuleFactory {
 		ModuleStatus status = new ModuleStatus(moduleInfo.getModuleName());
 		for(ModulePositionInfo mpi : positionInfos) {
 			ContractField contract = contractMgr.getContract(mpi.getUnifiedSymbol());
-			status.addPosition(new ModulePosition(mpi, contract, dealRecord -> moduleRepo.saveDealRecord(dealRecord)));
+			status.updatePosition(new ModulePosition(mpi, contract, status::updatePosition, dealRecord -> moduleRepo.saveDealRecord(dealRecord)));
 		}
 		return status;
 	}

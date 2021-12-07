@@ -51,25 +51,26 @@ public class RiskControlPolicy implements TickDataAware, EventDrivenComponent, S
 	public void onEvent(ModuleEvent<?> moduleEvent) {
 		if(moduleEvent.getEventType() == ModuleEventType.ORDER_REQ_CREATED) {
 			currentOrderReq = (SubmitOrderReqField) moduleEvent.getData();
+			log.debug("[{}] 收到新建订单", moduleName);
 			if(currentOrderReq.getOffsetFlag() == OffsetFlagEnum.OF_Open) {
 				if(lastTick == null) {
 					meb.post(new ModuleEvent<>(ModuleEventType.ORDER_REQ_RETAINED, currentOrderReq));
 					log.warn("[{}] 当前行情为空，无法计算风控", moduleName);
 					return;
 				}
-				Set<RiskAuditResult> results = new HashSet<>();
 				for(RiskControlRule rule : rules) {
-					results.add(rule.checkRisk(currentOrderReq, lastTick));
+					riskCheckResults.add(rule.checkRisk(currentOrderReq, lastTick));
 				}
-				if(results.contains(RiskAuditResult.REJECTED) || results.contains(RiskAuditResult.RETRY)) {					
+				if(riskCheckResults.contains(RiskAuditResult.REJECTED) || riskCheckResults.contains(RiskAuditResult.RETRY)) {					
 					meb.post(new ModuleEvent<>(ModuleEventType.ORDER_REQ_RETAINED, currentOrderReq));
 					log.warn("[{}] 风控限制，无法继续下单", moduleName);
-				} else if(results.contains(RiskAuditResult.ACCEPTED)) {
+				} else if(riskCheckResults.contains(RiskAuditResult.ACCEPTED)) {
 					meb.post(new ModuleEvent<>(ModuleEventType.ORDER_REQ_ACCEPTED, currentOrderReq));
 					log.info("[{}] 订单过审 单号{} 合约{} 方向{} 手数{} 价格{} 止损{}", moduleName, currentOrderReq.getOriginOrderId(),
 							currentOrderReq.getContract().getUnifiedSymbol(), currentOrderReq.getDirection(),
 							currentOrderReq.getVolume(), currentOrderReq.getPrice(), currentOrderReq.getStopPrice());
 				}
+				riskCheckResults.clear();
 			}
 		}
 	}
@@ -92,6 +93,7 @@ public class RiskControlPolicy implements TickDataAware, EventDrivenComponent, S
 				meb.post(new ModuleEvent<>(ModuleEventType.RETRY_RISK_ALERTED, currentOrderReq));
 				log.warn("[{}] 风控限制，需要撤单重试交易", moduleName);
 			}
+			riskCheckResults.clear();
 		}
 	}
 
@@ -111,7 +113,6 @@ public class RiskControlPolicy implements TickDataAware, EventDrivenComponent, S
 		curState = state;
 		if(curState.isEmpty() || curState.isHolding()) {			
 			currentOrderReq = null;
-			riskCheckResults.clear();
 		}
 		
 		for(RiskControlRule rule : rules) {

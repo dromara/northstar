@@ -23,8 +23,8 @@ public class ModuleTradeIntent {
 	private SubmitOrderReqField submitOrderReq;
 	
 	private ModulePosition currentPosition;
-	// 开仓回调
-	private Consumer<ModulePosition> openCallback;
+	// 持仓变动回调
+	private Consumer<ModulePosition> positionChangeCallback;
 	// 平仓回调
 	private Consumer<ModuleDealRecord> closeCallback; 
 	// 撤单回调，返回是否部分成交标识 
@@ -32,26 +32,22 @@ public class ModuleTradeIntent {
 	
 	private String moduleName;
 	
-	public ModuleTradeIntent(String moduleName, SubmitOrderReqField submitOrderReq, Consumer<ModulePosition> onDoneOpen,
-			Consumer<ModuleDealRecord> onDoneClose, Consumer<Boolean> fallback) {
-		if(!FieldUtils.isOpen(submitOrderReq.getOffsetFlag())) {
-			throw new IllegalStateException("该构造方法仅适用于开仓操作");
-		}
+	public ModuleTradeIntent(String moduleName, SubmitOrderReqField submitOrderReq, Consumer<ModulePosition> positionChangeCallback,
+			Consumer<ModuleDealRecord> closeCallback, Consumer<Boolean> fallback) {
 		this.submitOrderReq = submitOrderReq;
-		this.openCallback = onDoneOpen;
-		this.closeCallback = onDoneClose;
+		this.positionChangeCallback = positionChangeCallback;
+		this.closeCallback = closeCallback;
 		this.moduleName = moduleName;
 		this.fallback = fallback;
 	}
 	
-	public ModuleTradeIntent(String moduleName, ModulePosition position, SubmitOrderReqField submitOrderReq, Consumer<ModuleDealRecord> onDoneClose, Consumer<Boolean> fallback) {
-		if(!FieldUtils.isClose(submitOrderReq.getOffsetFlag())) {
-			throw new IllegalStateException("该构造方法仅适用于平仓操作");
-		}
+	public ModuleTradeIntent(String moduleName, ModulePosition position, SubmitOrderReqField submitOrderReq,
+			Consumer<ModulePosition> positionChangeCallback, Consumer<ModuleDealRecord> closeCallback, Consumer<Boolean> fallback) {
 		this.submitOrderReq = submitOrderReq;
 		this.currentPosition = position;
 		this.moduleName = moduleName;
-		this.closeCallback = onDoneClose;
+		this.positionChangeCallback = positionChangeCallback;
+		this.closeCallback = closeCallback;
 		this.fallback = fallback;
 	}
 	
@@ -89,9 +85,8 @@ public class ModuleTradeIntent {
 			return;
 		
 		// 处理情况一、二、四
-		if(FieldUtils.isOpen(trade.getOffsetFlag())) {
-			openCallback.accept(new ModulePosition(moduleName, trade, submitOrderReq.getStopPrice(), closeCallback));
-		} else if(FieldUtils.isClose(trade.getOffsetFlag())) {
+		positionChangeCallback.accept(new ModulePosition(moduleName, trade, submitOrderReq.getStopPrice(), positionChangeCallback, closeCallback));
+		if(FieldUtils.isClose(trade.getOffsetFlag())) {
 			closeCallback.accept(genDealRecord(trade));
 		}
 	}

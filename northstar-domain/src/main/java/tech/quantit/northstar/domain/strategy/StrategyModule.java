@@ -63,7 +63,7 @@ public class StrategyModule implements EventDrivenComponent{
 	protected ModuleTradeIntent ti;
 	
 	protected Consumer<ModulePosition> openTradeIntentSuccessCallback = mp -> {
-		moduleStatus.addPosition(mp);
+		moduleStatus.updatePosition(mp);
 		meb.register(mp);
 	};
 	
@@ -158,11 +158,10 @@ public class StrategyModule implements EventDrivenComponent{
 	
 	private void handleOrder(OrderField order) {
 		if(order.getOrderStatus() == OrderStatusEnum.OS_Canceled) {			
-			moduleStatus.getStateMachine().transformForm(ModuleEventType.ORDER_CANCELLED);
 			meb.post(new ModuleEvent<>(ModuleEventType.ORDER_CANCELLED, order));
 		}
 		if(order.getOrderStatus() == OrderStatusEnum.OS_Unknown || order.getOrderStatus() == OrderStatusEnum.OS_Touched)
-			moduleStatus.getStateMachine().transformForm(ModuleEventType.ORDER_CONFIRMED);
+			meb.post(new ModuleEvent<>(ModuleEventType.ORDER_CONFIRMED, order));
 		if(ti != null)
 			ti.onOrder(order);
 	}
