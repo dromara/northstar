@@ -4,6 +4,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Consumer;
 
+import org.apache.commons.lang3.StringUtils;
+
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -128,10 +130,19 @@ public class StrategyModule implements EventDrivenComponent{
 	 */
 	public void onEvent(NorthstarEvent event) {
 		meb.post(event.getData());
-		if(event.getData() instanceof TradeField trade && ti != null) 
+		if(event.getData() instanceof TradeField trade) {			
+			log.debug("[{}] 收到成交回报，订单号:{}", moduleStatus.getModuleName(), trade.getOriginOrderId());
 			ti.onTrade(trade);
-		if(event.getData() instanceof OrderField order) 
-			handleOrder(order);
+		} 
+		if(event.getData() instanceof OrderField order) {			
+			log.debug("[{}] 收到订单回报，订单号：{}，订单状态{}", moduleStatus.getModuleName(), order.getOriginOrderId(), order.getOrderStatus());
+			if(order.getOrderStatus() == OrderStatusEnum.OS_Canceled || order.getOrderStatus() == OrderStatusEnum.OS_Rejected) {
+				meb.post(new ModuleEvent<>(ModuleEventType.ORDER_CANCELLED, order));
+			}else {			
+				meb.post(new ModuleEvent<>(ModuleEventType.ORDER_CONFIRMED, order));
+			}
+			ti.onOrder(order);
+		}
 	}
 	
 	/**
@@ -151,16 +162,6 @@ public class StrategyModule implements EventDrivenComponent{
 		if(event.getData() instanceof AccountField account) 		
 			return account.getGatewayId().equals(gateway.getGatewaySetting().getGatewayId());
 		return true;
-	}
-	
-	private void handleOrder(OrderField order) {
-		if(order.getOrderStatus() == OrderStatusEnum.OS_Canceled) {			
-			meb.post(new ModuleEvent<>(ModuleEventType.ORDER_CANCELLED, order));
-		}
-		if(order.getOrderStatus() == OrderStatusEnum.OS_Unknown || order.getOrderStatus() == OrderStatusEnum.OS_Touched)
-			meb.post(new ModuleEvent<>(ModuleEventType.ORDER_CONFIRMED, order));
-		if(ti != null)
-			ti.onOrder(order);
 	}
 	
 	/**

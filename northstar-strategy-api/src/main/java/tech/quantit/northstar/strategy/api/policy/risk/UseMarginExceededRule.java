@@ -28,6 +28,10 @@ public class UseMarginExceededRule extends AbstractRule implements RiskControlRu
 
 	@Override
 	public RiskAuditResult checkRisk(SubmitOrderReqField orderReq, TickField tick) {
+		// 只对开仓请求做一次审查
+		if(orderReq.getActionTimestamp() != tick.getActionTimestamp()) {
+			return RiskAuditResult.ACCEPTED;
+		}
 		ContractField contract = orderReq.getContract();
 		double marginRatio = orderReq.getDirection() == DirectionEnum.D_Buy ? contract.getLongMarginRatio() : contract.getShortMarginRatio();
 		double totalCost = contract.getMultiplier() * orderReq.getPrice() * orderReq.getVolume() * marginRatio;

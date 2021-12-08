@@ -54,7 +54,10 @@ public abstract class AbstractDealerPolicy implements DealerPolicy {
 			if(currentOrderReq != null && orderField.getOriginOrderId().equals(currentOrderReq.getOriginOrderId()) 
 					&& currentState == ModuleState.PLACING_ORDER) {
 				currentOrderReq = genTracingOrderReq(currentOrderReq);
-				currentOrderReq = currentOrderReq.toBuilder().setActionTimestamp(lastTick.getActionTimestamp()).build();
+				currentOrderReq = currentOrderReq.toBuilder()
+						.setOriginOrderId(UUID.randomUUID().toString())
+						.setActionTimestamp(lastTick.getActionTimestamp())
+						.build();
 				moduleEventBus.post(new ModuleEvent<>(ModuleEventType.ORDER_REQ_CREATED, currentOrderReq));
 				log.info("[{}->{}] 追单", getModuleName(), name());
 			}
