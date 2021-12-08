@@ -1,6 +1,5 @@
 package tech.quantit.northstar.gateway.sim.trade;
 
-import java.time.LocalDate;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -11,11 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.event.NorthstarEventType;
 import tech.quantit.northstar.common.exception.TradeException;
-import xyz.redtorch.pb.CoreEnum.CurrencyEnum;
-import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
-import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
 import xyz.redtorch.pb.CoreField.CancelOrderReqField;
-import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.GatewaySettingField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TickField;
@@ -34,6 +29,8 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 	private ScheduledExecutorService execService = Executors.newScheduledThreadPool(1);
 	
 	private ScheduledFuture<?> job;
+	
+	private SimContractGenerator contractGen = new SimContractGenerator();
 	
 	public SimTradeGatewayLocal(FastEventEngine feEngine, GatewaySettingField gatewaySetting, GwAccountHolder accountHolder) {
 		this.feEngine = feEngine;
@@ -63,27 +60,8 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 			} catch (InterruptedException e) {
 				log.error("", e);
 			}
-			LocalDate date = LocalDate.now().plusDays(45);
-			String year = date.getYear() % 100 + "";
-			String month = String.format("%02d", date.getMonth().getValue());
-			String symbol = "sim" + year + month;
-			String name = "模拟品种" + year + month;
-			feEngine.emitEvent(NorthstarEventType.CONTRACT, ContractField.newBuilder()
-					.setGatewayId(gatewaySetting.getGatewayId())
-					.setContractId(symbol + "@SHFE@FUTURES@" + gatewaySetting.getGatewayId())
-					.setCurrency(CurrencyEnum.CNY)
-					.setExchange(ExchangeEnum.SHFE)
-					.setFullName(name)
-					.setName(name)
-					.setUnifiedSymbol(symbol + "@SHFE@FUTURES")
-					.setSymbol(symbol)
-					.setProductClass(ProductClassEnum.FUTURES)
-					.setThirdPartyId(symbol)
-					.setMultiplier(1)
-					.setPriceTick(10)
-					.setLongMarginRatio(0.08)
-					.setShortMarginRatio(0.08)
-					.build());
+			
+			feEngine.emitEvent(NorthstarEventType.CONTRACT, contractGen.getContract(gatewaySetting.getGatewayId()));
 			feEngine.emitEvent(NorthstarEventType.CONTRACT_LOADED, gatewaySetting.getGatewayId());
 		});
 	}

@@ -1,4 +1,4 @@
-package tech.quantit.northstar.strategy.api;
+package tech.quantit.northstar.common;
 
 import xyz.redtorch.pb.CoreField.ContractField;
 

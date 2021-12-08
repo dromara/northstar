@@ -2,6 +2,7 @@ package tech.quantit.northstar.strategy.api;
 
 import com.google.common.eventbus.Subscribe;
 
+import tech.quantit.northstar.common.Subscribable;
 import tech.quantit.northstar.strategy.api.event.ModuleEvent;
 import tech.quantit.northstar.strategy.api.event.ModuleEventBus;
 
