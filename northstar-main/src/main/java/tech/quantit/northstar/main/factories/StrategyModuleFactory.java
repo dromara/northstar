@@ -12,6 +12,7 @@ import tech.quantit.northstar.domain.GatewayConnection;
 import tech.quantit.northstar.domain.strategy.ModulePosition;
 import tech.quantit.northstar.domain.strategy.ModuleStatus;
 import tech.quantit.northstar.domain.strategy.RiskControlPolicy;
+import tech.quantit.northstar.domain.strategy.StopLoss;
 import tech.quantit.northstar.domain.strategy.StrategyModule;
 import tech.quantit.northstar.gateway.api.TradeGateway;
 import tech.quantit.northstar.main.persistence.ModuleRepository;
@@ -67,7 +68,20 @@ public class StrategyModuleFactory {
 		ModuleStatus status = new ModuleStatus(moduleInfo.getModuleName());
 		for(ModulePositionInfo mpi : positionInfos) {
 			ContractField contract = contractMgr.getContract(mpi.getUnifiedSymbol());
-			status.updatePosition(new ModulePosition(mpi, contract, status::updatePosition, dealRecord -> moduleRepo.saveDealRecord(dealRecord)));
+			ModulePosition mp = ModulePosition.builder()
+					.moduleName(moduleInfo.getModuleName())
+					.meb(status.getModuleEventBus())
+					.openTime(mpi.getOpenTime())
+					.openPrice(mpi.getOpenPrice())
+					.stopLoss(new StopLoss(mpi.getPositionDir(), mpi.getStopLossPrice()))
+					.openTradingDay(mpi.getOpenTradingDay())
+					.volume(mpi.getVolume())
+					.contract(contract)
+					.clearoutCallback(dealRecord -> moduleRepo.saveDealRecord(dealRecord))
+					.direction(mpi.getPositionDir())
+					.positionChangeCallback(trade -> status.updatePosition(trade))
+					.build();
+			status.setLogicalPosition(mp);
 		}
 		return status;
 	}

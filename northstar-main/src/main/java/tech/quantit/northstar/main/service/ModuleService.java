@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
@@ -22,6 +21,7 @@ import tech.quantit.northstar.domain.GatewayConnection;
 import tech.quantit.northstar.domain.strategy.ModuleManager;
 import tech.quantit.northstar.domain.strategy.ModulePosition;
 import tech.quantit.northstar.domain.strategy.ModuleStatus;
+import tech.quantit.northstar.domain.strategy.StopLoss;
 import tech.quantit.northstar.domain.strategy.StrategyModule;
 import tech.quantit.northstar.gateway.api.TradeGateway;
 import tech.quantit.northstar.main.factories.StrategyModuleFactory;
@@ -311,8 +311,20 @@ public class ModuleService implements InitializingBean {
 	 */
 	public boolean updatePosition(String moduleName, ModulePositionInfo position) {
 		ModuleStatus moduleStatus = mdlMgr.getModule(moduleName).getModuleStatus();
-		ModulePosition mp = new ModulePosition(position, contractMgr.getContract(position.getUnifiedSymbol()), moduleStatus::updatePosition, dealRecord -> moduleRepo.saveDealRecord(dealRecord));
-		moduleStatus.updatePosition(mp);
+		ModulePosition mp = ModulePosition.builder()
+				.moduleName(moduleName)
+				.meb(moduleStatus.getModuleEventBus())
+				.openTime(position.getOpenTime())
+				.openPrice(position.getOpenPrice())
+				.stopLoss(new StopLoss(position.getPositionDir(), position.getStopLossPrice()))
+				.openTradingDay(position.getOpenTradingDay())
+				.volume(position.getVolume())
+				.contract(contractMgr.getContract(position.getUnifiedSymbol()))
+				.clearoutCallback(dealRecord -> moduleRepo.saveDealRecord(dealRecord))
+				.direction(position.getPositionDir())
+				.positionChangeCallback(trade -> moduleStatus.updatePosition(trade))
+				.build();
+		moduleStatus.setLogicalPosition(mp);
 		List<ModulePositionInfo> posList = List.of(moduleStatus.getLogicalPosition().convertTo());
 		moduleRepo.saveModulePosition(ModulePositionPO.builder().moduleName(moduleName).positions(posList).build());
 		return true;
@@ -326,9 +338,9 @@ public class ModuleService implements InitializingBean {
 	 * @param dir
 	 * @return
 	 */
-	public boolean removePosition(String moduleName, String unifiedSymbol, PositionDirectionEnum dir) {
+	public boolean removePosition(String moduleName) {
 		ModuleStatus moduleStatus = mdlMgr.getModule(moduleName).getModuleStatus();
-		moduleStatus.removePosition(unifiedSymbol, dir);
+		moduleStatus.removePosition();
 		moduleRepo.removeModulePosition(moduleName);
 		return true;
 	}

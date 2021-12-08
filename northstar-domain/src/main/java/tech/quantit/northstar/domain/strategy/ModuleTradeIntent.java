@@ -24,31 +24,31 @@ public class ModuleTradeIntent {
 	
 	private ModulePosition currentPosition;
 	// 持仓变动回调
-	private Consumer<ModulePosition> positionChangeCallback;
+	private Consumer<TradeField> positionChangeCallback;
 	// 平仓回调
 	private Consumer<ModuleDealRecord> closeCallback; 
-	// 撤单回调，返回是否部分成交标识 
-	private Consumer<Boolean> fallback;
+	// 意图结束回调，返回是否部分成交标识 
+	private Consumer<Boolean> doneCallback;
 	
 	private String moduleName;
 	
-	public ModuleTradeIntent(String moduleName, SubmitOrderReqField submitOrderReq, Consumer<ModulePosition> positionChangeCallback,
-			Consumer<ModuleDealRecord> closeCallback, Consumer<Boolean> fallback) {
+	public ModuleTradeIntent(String moduleName, SubmitOrderReqField submitOrderReq, Consumer<TradeField> positionChangeCallback,
+			Consumer<ModuleDealRecord> closeCallback, Consumer<Boolean> doneCallback) {
 		this.submitOrderReq = submitOrderReq;
 		this.positionChangeCallback = positionChangeCallback;
 		this.closeCallback = closeCallback;
 		this.moduleName = moduleName;
-		this.fallback = fallback;
+		this.doneCallback = doneCallback;
 	}
 	
 	public ModuleTradeIntent(String moduleName, ModulePosition position, SubmitOrderReqField submitOrderReq,
-			Consumer<ModulePosition> positionChangeCallback, Consumer<ModuleDealRecord> closeCallback, Consumer<Boolean> fallback) {
+			Consumer<TradeField> positionChangeCallback, Consumer<ModuleDealRecord> closeCallback, Consumer<Boolean> doneCallback) {
 		this.submitOrderReq = submitOrderReq;
 		this.currentPosition = position;
 		this.moduleName = moduleName;
 		this.positionChangeCallback = positionChangeCallback;
 		this.closeCallback = closeCallback;
-		this.fallback = fallback;
+		this.doneCallback = doneCallback;
 	}
 	
 	public String originOrderId() {
@@ -71,10 +71,10 @@ public class ModuleTradeIntent {
 				&& order.getTradedVolume() > 0;
 		
 		// 处理情况三、四、五
-		if(partiallyTraded) {
-			fallback.accept(true);
+		if(partiallyTraded || order.getOrderStatus() == OrderStatusEnum.OS_AllTraded) {
+			doneCallback.accept(true);
 		} else if(order.getOrderStatus() == OrderStatusEnum.OS_Canceled || order.getOrderStatus() == OrderStatusEnum.OS_Rejected) {
-			fallback.accept(false);
+			doneCallback.accept(false);
 		}
 	}
 	
@@ -85,7 +85,7 @@ public class ModuleTradeIntent {
 			return;
 		
 		// 处理情况一、二、四
-		positionChangeCallback.accept(new ModulePosition(moduleName, trade, submitOrderReq.getStopPrice(), positionChangeCallback, closeCallback));
+		positionChangeCallback.accept(trade);
 		if(FieldUtils.isClose(trade.getOffsetFlag())) {
 			closeCallback.accept(genDealRecord(trade));
 		}
@@ -96,7 +96,7 @@ public class ModuleTradeIntent {
 	}
 	
 	private ModuleDealRecord genDealRecord(TradeField latestTrade) {
-		double openPrice = currentPosition.openPrice();
+		double openPrice = currentPosition.getOpenPrice();
 		double multiplier = latestTrade.getContract().getMultiplier();
 		int factor = FieldUtils.isLong(currentPosition.getDirection()) ? 1 : -1;
 		double closeProfit = factor * (latestTrade.getPrice() - openPrice) * latestTrade.getVolume() * multiplier;

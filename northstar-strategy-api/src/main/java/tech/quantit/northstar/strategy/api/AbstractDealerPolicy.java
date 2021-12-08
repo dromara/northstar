@@ -62,7 +62,7 @@ public abstract class AbstractDealerPolicy implements DealerPolicy {
 		if(moduleEvent.getEventType() == ModuleEventType.ORDER_CONFIRMED) {
 			log.info("[{}->{}] 订单确认", getModuleName(), name());
 		}
-		if(moduleEvent.getEventType() == ModuleEventType.RETRY_RISK_ALERTED) {
+		if(moduleEvent.getEventType() == ModuleEventType.RETRY_RISK_ALERTED || moduleEvent.getEventType() == ModuleEventType.REJECT_RISK_ALERTED) {
 			moduleEventBus.post(new ModuleEvent<>(ModuleEventType.ORDER_REQ_CANCELLED, genCancelReq()));
 			log.info("[{}->{}] 撤单", getModuleName(), name());
 		}

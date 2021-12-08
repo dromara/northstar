@@ -1,13 +1,12 @@
 package tech.quantit.northstar.domain.strategy;
 
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.utils.FieldUtils;
 import tech.quantit.northstar.strategy.api.constant.ModuleState;
 import tech.quantit.northstar.strategy.api.event.ModuleEventBus;
-import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
+import xyz.redtorch.pb.CoreField.TradeField;
 
 /**
  * 模组状态
@@ -16,7 +15,6 @@ import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
  *
  */
 @Slf4j
-@Data
 public class ModuleStatus {
 
 	@Getter
@@ -27,33 +25,35 @@ public class ModuleStatus {
 	
 	// 模组的逻辑净持仓
 	@Getter
+	@Setter
 	protected ModulePosition logicalPosition;
 	
 	@Setter
+	@Getter
 	private ModuleEventBus moduleEventBus;
 	
 	public ModuleStatus(String name) {
 		this.moduleName = name;
 		this.stateMachine = new ModuleStateMachine(name, ModuleState.EMPTY);
+		this.logicalPosition = ModulePosition.builder().moduleName(moduleName).build();
+	}
+	
+	public ModuleStatus(String name, ModulePosition modulePosition) {
+		this(name);
+		this.logicalPosition = modulePosition;
+		stateMachine.setState(getMergedState());
 	}
 	
 	/**
 	 * 更新持仓
 	 * @param position
 	 */
-	public void updatePosition(ModulePosition position) {
-		log.info("[{}] 持仓更新，{} {} {}", getModuleName(), position.contract().getUnifiedSymbol(), position.getDirection(), position.getVolume());
-		position.setEventBus(moduleEventBus);
-		if(logicalPosition == null) {
-			logicalPosition = position;
-		} else {
-			logicalPosition.merge(position);
-		}
-		
+	public void updatePosition(TradeField trade) {
+		logicalPosition.merge(trade);
 		ModuleState state = getMergedState();
 		stateMachine.setState(state);
 		
-		log.info("[{}] 变更模组状态：[{}]，{}手", getModuleName(), state, logicalPosition == null ? 0 : logicalPosition.getVolume());
+		log.info("[{}] 变更模组状态：[{}]，{}手", getModuleName(), state, logicalPosition.getVolume());
 	}
 	
 	/**
@@ -61,9 +61,9 @@ public class ModuleStatus {
 	 * @param unifiedSymbol
 	 * @param dir
 	 */
-	public void removePosition(String unifiedSymbol, PositionDirectionEnum dir) {
-		log.info("[{}] 移除持仓，{} {}", getModuleName(), unifiedSymbol, dir);
-		logicalPosition = null;
+	public void removePosition() {
+		log.info("[{}] 移除持仓", getModuleName());
+		logicalPosition.clearout();
 		ModuleState state = getMergedState();
 		stateMachine.setState(state);
 		log.info("[{}] 变更模组状态：[{}]", getModuleName(), state);

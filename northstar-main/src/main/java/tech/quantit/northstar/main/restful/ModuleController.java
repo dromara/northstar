@@ -193,7 +193,7 @@ public class ModuleController {
 	 * @return
 	 */
 	@DeleteMapping("/module/{moduleName}/position")
-	public ResultBean<Boolean> removePosition(@PathVariable String moduleName, String unifiedSymbol, PositionDirectionEnum dir){
-		return new ResultBean<>(service.removePosition(moduleName, unifiedSymbol, dir));
+	public ResultBean<Boolean> removePosition(@PathVariable String moduleName){
+		return new ResultBean<>(service.removePosition(moduleName));
 	}
 }

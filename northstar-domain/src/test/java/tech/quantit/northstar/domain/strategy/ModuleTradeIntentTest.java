@@ -1,6 +1,5 @@
 package tech.quantit.northstar.domain.strategy;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -28,7 +27,7 @@ public class ModuleTradeIntentTest {
 	
 	
 	@SuppressWarnings("unchecked")
-	Consumer<ModulePosition> openCallback = mock(Consumer.class);
+	Consumer<TradeField> openCallback = mock(Consumer.class);
 	
 	@SuppressWarnings("unchecked")
 	Consumer<ModuleDealRecord> closeCallback = mock(Consumer.class);
@@ -53,7 +52,7 @@ public class ModuleTradeIntentTest {
 				.setOffsetFlag(orderReq.getOffsetFlag())
 				.build());
 		
-		verify(openCallback).accept(any(ModulePosition.class));
+		verify(openCallback).accept(any(TradeField.class));
 	}
 	
 	
@@ -75,7 +74,7 @@ public class ModuleTradeIntentTest {
 				.setOffsetFlag(orderReq.getOffsetFlag())
 				.build());
 		
-		verify(openCallback).accept(any(ModulePosition.class));
+		verify(openCallback).accept(any(TradeField.class));
 	}
 	
 	
@@ -97,7 +96,7 @@ public class ModuleTradeIntentTest {
 				.setOffsetFlag(orderReq.getOffsetFlag())
 				.build());
 		
-		verify(openCallback).accept(any(ModulePosition.class));
+		verify(openCallback).accept(any(TradeField.class));
 	}
 	
 	
@@ -122,7 +121,7 @@ public class ModuleTradeIntentTest {
 	public void testAllTradedForCloseOrder() {
 		SubmitOrderReqField orderReq = factory.makeOrderReq(SYMBOL, DirectionEnum.D_Sell, OffsetFlagEnum.OF_CloseToday, 4, 1000, 0);
 		ModulePosition mp = mock(ModulePosition.class);
-		when(mp.openPrice()).thenReturn(1010D);
+		when(mp.getOpenPrice()).thenReturn(1010D);
 		when(mp.getDirection()).thenReturn(PositionDirectionEnum.PD_Long);
 		ModuleTradeIntent mti = new ModuleTradeIntent(NAME, mp, orderReq, mock(Consumer.class), closeCallback, fallback);
 		
@@ -145,7 +144,7 @@ public class ModuleTradeIntentTest {
 	public void testPartiallyTradedForCloseOrder() {
 		SubmitOrderReqField orderReq = factory.makeOrderReq(SYMBOL, DirectionEnum.D_Sell, OffsetFlagEnum.OF_CloseToday, 4, 1000, 0);
 		ModulePosition mp = mock(ModulePosition.class);
-		when(mp.openPrice()).thenReturn(1010D);
+		when(mp.getOpenPrice()).thenReturn(1010D);
 		when(mp.getDirection()).thenReturn(PositionDirectionEnum.PD_Long);
 		ModuleTradeIntent mti = new ModuleTradeIntent(NAME, mp, orderReq, mock(Consumer.class), closeCallback, fallback);
 		
@@ -176,7 +175,7 @@ public class ModuleTradeIntentTest {
 	public void testNonTradedForCloseOrder() {
 		SubmitOrderReqField orderReq = factory.makeOrderReq(SYMBOL, DirectionEnum.D_Sell, OffsetFlagEnum.OF_CloseToday, 4, 1000, 0);
 		ModulePosition mp = mock(ModulePosition.class);
-		when(mp.openPrice()).thenReturn(1010D);
+		when(mp.getOpenPrice()).thenReturn(1010D);
 		when(mp.getDirection()).thenReturn(PositionDirectionEnum.PD_Long);
 		ModuleTradeIntent mti = new ModuleTradeIntent(NAME, mp, orderReq, mock(Consumer.class), closeCallback, fallback);
 		

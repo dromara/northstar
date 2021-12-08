@@ -7,6 +7,7 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 
 import lombok.extern.slf4j.Slf4j;
+import tech.quantit.northstar.common.utils.FieldUtils;
 import tech.quantit.northstar.strategy.api.ContractBindedAware;
 import tech.quantit.northstar.strategy.api.EventDrivenComponent;
 import tech.quantit.northstar.strategy.api.RiskControlRule;
@@ -51,8 +52,8 @@ public class RiskControlPolicy implements TickDataAware, EventDrivenComponent, S
 	public void onEvent(ModuleEvent<?> moduleEvent) {
 		if(moduleEvent.getEventType() == ModuleEventType.ORDER_REQ_CREATED) {
 			currentOrderReq = (SubmitOrderReqField) moduleEvent.getData();
-			log.debug("[{}] 收到新建订单", moduleName);
-			if(currentOrderReq.getOffsetFlag() == OffsetFlagEnum.OF_Open) {
+			if(FieldUtils.isOpen(currentOrderReq.getOffsetFlag())) {
+				log.debug("[{}] 收到新建开仓订单", moduleName);
 				if(lastTick == null) {
 					meb.post(new ModuleEvent<>(ModuleEventType.ORDER_REQ_RETAINED, currentOrderReq));
 					log.warn("[{}] 当前行情为空，无法计算风控", moduleName);

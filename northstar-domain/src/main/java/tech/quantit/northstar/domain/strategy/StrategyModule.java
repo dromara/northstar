@@ -62,10 +62,7 @@ public class StrategyModule implements EventDrivenComponent{
 	
 	protected ModuleTradeIntent ti;
 	
-	protected Consumer<ModulePosition> openTradeIntentSuccessCallback = mp -> {
-		moduleStatus.updatePosition(mp);
-		meb.register(mp);
-	};
+	protected Consumer<TradeField> openTradeIntentSuccessCallback = trade -> moduleStatus.updatePosition(trade);
 	
 	protected Consumer<Boolean> tradeIntentFallback = partiallyTraded -> ti = null;
 	
