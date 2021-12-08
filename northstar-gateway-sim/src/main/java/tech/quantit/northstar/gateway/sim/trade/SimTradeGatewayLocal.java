@@ -113,12 +113,14 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 
 	@Override
 	public String submitOrder(SubmitOrderReqField submitOrderReq) throws TradeException {
+		log.debug("[{}] 模拟网关收到下单请求", gatewaySetting.getGatewayId());
 		SubmitOrderReqField orderReq = SubmitOrderReqField.newBuilder(submitOrderReq).setGatewayId(gatewaySetting.getGatewayId()).build();
 		return accountHolder.submitOrder(orderReq);
 	}
 
 	@Override
 	public boolean cancelOrder(CancelOrderReqField cancelOrderReq) {
+		log.debug("[{}] 模拟网关收到撤单请求", gatewaySetting.getGatewayId());
 		return accountHolder.cancelOrder(cancelOrderReq);
 	}
 
