@@ -109,7 +109,7 @@ public class AppConfig implements WebMvcConfigurer {
 	
 	@Bean
 	public SimMarket simMarket(SimAccountRepository simAccRepo) {
-		return new SimMarket(simAccRepo);
+		return new SimMarket();
 	}
 	
 	@Bean
@@ -123,8 +123,8 @@ public class AppConfig implements WebMvcConfigurer {
 	}
 	
 	@Bean
-	public AbstractGatewayFactory simGatewayFactory(FastEventEngine fastEventEngine, SimMarket simMarket, ContractManager contractMgr) {
-		return new SimGatewayFactory(fastEventEngine, simMarket, contractMgr);
+	public AbstractGatewayFactory simGatewayFactory(FastEventEngine fastEventEngine, SimMarket simMarket, SimAccountRepository accRepo) {
+		return new SimGatewayFactory(fastEventEngine, simMarket, accRepo);
 	}
 	
 	@Bean 

@@ -1,7 +1,6 @@
 package tech.quantit.northstar.gateway.sim.trade;
 
 import tech.quantit.northstar.gateway.api.TradeGateway;
-import xyz.redtorch.pb.CoreField.TickField;
 
 public interface SimTradeGateway extends TradeGateway{
 
@@ -12,15 +11,4 @@ public interface SimTradeGateway extends TradeGateway{
 	 */
 	int moneyIO(int money);
 	
-	/**
-	 * 行情刷新
-	 * @param tick
-	 */
-	void onTick(TickField tick);
-	
-	/**
-	 * 获取账户
-	 * @return
-	 */
-	GwAccountHolder getAccount();
 }

@@ -32,6 +32,8 @@ public abstract class AbstractSignalPolicy implements SignalPolicy {
 
 	private String moduleName;
 	
+	private boolean moduleEnabled = true;
+	
 	protected void emit(SignalOperation signalOperation) {
 		emit(signalOperation, 0, 0);
 	}
@@ -45,7 +47,12 @@ public abstract class AbstractSignalPolicy implements SignalPolicy {
 	}
 	
 	@Override
-	public void onEvent(ModuleEvent<?> moduleEvent) {/* 不作处理 */}
+	public void onEvent(ModuleEvent<?> moduleEvent) {
+		if(moduleEvent.getEventType() == ModuleEventType.MODULE_TOGGLE) {
+			moduleEnabled = (boolean) moduleEvent.getData();
+			log.info("[{}] 模组当前状态:[{}]", moduleName, moduleEnabled ? "启用" : "停用");
+		}
+	}
 
 	@Override
 	public void setEventBus(ModuleEventBus moduleEventBus) {
@@ -99,14 +106,14 @@ public abstract class AbstractSignalPolicy implements SignalPolicy {
 
 	@Override
 	public void onTick(TickField tick) {
-		if(tick.getUnifiedSymbol().equals(bindedUnifiedSymbol)) {
+		if(tick.getUnifiedSymbol().equals(bindedUnifiedSymbol) && moduleEnabled) {
 			handleTick(tick);
 		}
 	}
 
 	@Override
 	public void onBar(BarField bar) {
-		if(bar.getUnifiedSymbol().equals(bindedUnifiedSymbol)) {
+		if(bar.getUnifiedSymbol().equals(bindedUnifiedSymbol) && moduleEnabled) {
 			handleBar(bar);
 		}
 	}

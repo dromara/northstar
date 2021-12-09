@@ -256,7 +256,6 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 	public boolean simMoneyIO(String gatewayId, int money) {
 		SimTradeGateway gateway = (SimTradeGateway) gatewayConnMgr.getGatewayById(gatewayId);
 		gateway.moneyIO(money);
-		simMarket.save(gateway.getAccount());
 		if(money != 0) {			
 			log.info("模拟账户[{}]，{}金：{}", gatewayId, money>0 ? "入": "出", Math.abs(money));
 		}

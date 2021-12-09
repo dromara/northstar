@@ -34,6 +34,7 @@ import tech.quantit.northstar.common.model.ContractManager;
 import tech.quantit.northstar.common.model.CtpSettings;
 import tech.quantit.northstar.common.model.NsUser;
 import tech.quantit.northstar.common.model.PlaybackDescription;
+import tech.quantit.northstar.gateway.sim.persistence.SimAccountRepository;
 import tech.quantit.northstar.main.NorthstarApplication;
 import tech.quantit.northstar.main.engine.broadcast.SocketIOMessageEngine;
 import tech.quantit.northstar.main.persistence.MarketDataRepository;
@@ -61,6 +62,9 @@ public class PlaybackTest {
 	
 	@MockBean
 	private ModuleRepository moduleRepo;
+	
+	@MockBean
+	private SimAccountRepository simAccountRepo;
 	
 	@MockBean
 	private MarketDataRepository mdRepo;

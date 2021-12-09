@@ -122,6 +122,7 @@ public class StrategyModule implements EventDrivenComponent{
 		if(runningStateChangeListener != null) {			
 			runningStateChangeListener.accept(isEnabled());
 		}
+		meb.post(new ModuleEvent<>(ModuleEventType.MODULE_TOGGLE, enabled));
 	}
 	
 	/**

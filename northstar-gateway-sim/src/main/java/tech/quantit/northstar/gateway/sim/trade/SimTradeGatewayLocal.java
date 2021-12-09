@@ -6,6 +6,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.event.NorthstarEventType;
@@ -13,18 +14,18 @@ import tech.quantit.northstar.common.exception.TradeException;
 import xyz.redtorch.pb.CoreField.CancelOrderReqField;
 import xyz.redtorch.pb.CoreField.GatewaySettingField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
-import xyz.redtorch.pb.CoreField.TickField;
 
 @Slf4j
 public class SimTradeGatewayLocal implements SimTradeGateway{
 	
-	private FastEventEngine feEngine;
+	protected FastEventEngine feEngine;
 	
+	@Getter
 	private GatewaySettingField gatewaySetting;
-	
+	@Getter
 	private boolean connected;
-	
-	private GwAccountHolder accountHolder;
+	@Getter
+	protected SimAccount account;
 	
 	private ScheduledExecutorService execService = Executors.newScheduledThreadPool(1);
 	
@@ -32,15 +33,10 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 	
 	private SimContractGenerator contractGen = new SimContractGenerator();
 	
-	public SimTradeGatewayLocal(FastEventEngine feEngine, GatewaySettingField gatewaySetting, GwAccountHolder accountHolder) {
+	public SimTradeGatewayLocal(FastEventEngine feEngine, GatewaySettingField gatewaySetting, SimAccount account) {
 		this.feEngine = feEngine;
 		this.gatewaySetting = gatewaySetting;
-		this.accountHolder = accountHolder;	
-	}
-
-	@Override
-	public GatewaySettingField getGatewaySetting() {
-		return gatewaySetting;
+		this.account = account;	
 	}
 
 	@Override
@@ -50,7 +46,7 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 		feEngine.emitEvent(NorthstarEventType.LOGGED_IN, gatewaySetting.getGatewayId());
 		
 		job = execService.scheduleAtFixedRate(()->{
-			accountHolder.emitStatus();
+			feEngine.emitEvent(NorthstarEventType.ACCOUNT, account.accountField());
 		}, 2, 2, TimeUnit.SECONDS);
 		
 		// 模拟返回合约
@@ -80,8 +76,28 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 	}
 
 	@Override
-	public boolean isConnected() {
-		return connected;
+	public String submitOrder(SubmitOrderReqField submitOrderReq) throws TradeException {
+		log.debug("[{}] 模拟网关收到下单请求", gatewaySetting.getGatewayId());
+		SubmitOrderReqField orderReq = SubmitOrderReqField.newBuilder(submitOrderReq).setGatewayId(gatewaySetting.getGatewayId()).build();
+		account.onSubmitOrder(orderReq);
+		return orderReq.getOriginOrderId();
+	}
+
+	@Override
+	public boolean cancelOrder(CancelOrderReqField cancelOrderReq) {
+		log.debug("[{}] 模拟网关收到撤单请求", gatewaySetting.getGatewayId());
+		account.onCancelOrder(cancelOrderReq);
+		return true;
+	}
+
+	@Override
+	public int moneyIO(int money) {
+		if(money >= 0) {			
+			account.depositMoney(money);
+		} else {
+			account.withdrawMoney(Math.abs(money));
+		}
+		return (int) account.balance();
 	}
 
 	@Override
@@ -89,36 +105,4 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 		return false;
 	}
 
-	@Override
-	public String submitOrder(SubmitOrderReqField submitOrderReq) throws TradeException {
-		log.debug("[{}] 模拟网关收到下单请求", gatewaySetting.getGatewayId());
-		SubmitOrderReqField orderReq = SubmitOrderReqField.newBuilder(submitOrderReq).setGatewayId(gatewaySetting.getGatewayId()).build();
-		return accountHolder.submitOrder(orderReq);
-	}
-
-	@Override
-	public boolean cancelOrder(CancelOrderReqField cancelOrderReq) {
-		log.debug("[{}] 模拟网关收到撤单请求", gatewaySetting.getGatewayId());
-		return accountHolder.cancelOrder(cancelOrderReq);
-	}
-
-	@Override
-	public int moneyIO(int money) {
-		if(money >= 0) {			
-			return accountHolder.deposit(money);
-		}
-		return accountHolder.withdraw(Math.abs(money));
-	}
-
-	@Override
-	public void onTick(TickField tick) {
-		if(!connected) return;
-		accountHolder.updateTick(tick);
-	}
-
-	@Override
-	public GwAccountHolder getAccount() {
-		return accountHolder;
-	}
-	
 }

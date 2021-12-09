@@ -24,6 +24,7 @@ import tech.quantit.northstar.domain.strategy.ModuleManager;
 import tech.quantit.northstar.domain.strategy.SandboxModuleManager;
 import tech.quantit.northstar.domain.strategy.StrategyModule;
 import tech.quantit.northstar.gateway.api.Gateway;
+import tech.quantit.northstar.gateway.sim.persistence.SimAccountRepository;
 import tech.quantit.northstar.gateway.sim.trade.SimGatewayFactory;
 import tech.quantit.northstar.gateway.sim.trade.SimMarket;
 import tech.quantit.northstar.gateway.sim.trade.SimTradeGateway;
@@ -60,8 +61,8 @@ public class PlaybackService {
 	private volatile boolean isRunning;
 	
 	public PlaybackService(FastEventEngine feEngine, SandboxModuleManager sandboxMgr, GatewayAndConnectionManager gatewayConnMgr,
-			ContractManager contractMgr, ModuleRepository moduleRepo, MarketDataRepository mdRepo, SimMarket simMarket) {
-		simGatewayFactory = new SimGatewayFactory(feEngine, simMarket, contractMgr);
+			ContractManager contractMgr, ModuleRepository moduleRepo, MarketDataRepository mdRepo, SimMarket simMarket, SimAccountRepository simAccRepo) {
+		simGatewayFactory = new SimGatewayFactory(feEngine, simMarket, simAccRepo);
 		moduleFactory = new StrategyModuleFactory(gatewayConnMgr, contractMgr, moduleRepo);
 		pbEngine = new PlaybackEngine(simMarket, sandboxMgr);
 		this.sandboxMgr = sandboxMgr;

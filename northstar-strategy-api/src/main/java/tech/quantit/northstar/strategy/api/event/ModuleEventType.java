@@ -2,6 +2,10 @@ package tech.quantit.northstar.strategy.api.event;
 
 public enum ModuleEventType {
 	/**
+	 * 模组状态切换
+	 */
+	MODULE_TOGGLE,
+	/**
 	 * 信号生成
 	 */
 	SIGNAL_CREATED,

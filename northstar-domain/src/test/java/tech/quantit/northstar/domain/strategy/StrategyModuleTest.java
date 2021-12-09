@@ -79,6 +79,7 @@ public class StrategyModuleTest {
 		moduleStatus.stateMachine = new ModuleStateMachine("module", ModuleState.PENDING_ORDER);
 		module = new StrategyModule("mktGateway", tradeGateway, moduleStatus);
 		module.meb = mock(ModuleEventBus.class);
+		module.ti = mock(ModuleTradeIntent.class);
 		OrderField order = OrderField.newBuilder()
 				.setOffsetFlag(OffsetFlagEnum.OF_Open)
 				.setOrderStatus(OrderStatusEnum.OS_Canceled)
@@ -110,6 +111,7 @@ public class StrategyModuleTest {
 		moduleStatus.stateMachine = new ModuleStateMachine("module", ModuleState.PENDING_ORDER);
 		module = new StrategyModule("mktGateway", tradeGateway, moduleStatus);
 		module.meb = mock(ModuleEventBus.class);
+		module.ti = mock(ModuleTradeIntent.class);
 		module.onEvent(new NorthstarEvent(NorthstarEventType.TRADE, TradeField.newBuilder().setDirection(DirectionEnum.D_Sell).build()));
 		verify(module.meb).post(any());
 		verify(module.meb, times(0)).post(any(ModuleEvent.class));
