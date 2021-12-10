@@ -1,9 +1,14 @@
 package tech.quantit.northstar.gateway.sim.trade;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
@@ -11,18 +16,19 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import com.google.common.collect.Sets;
 import com.google.common.eventbus.EventBus;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import tech.quantit.northstar.common.event.FastEventEngine;
+import tech.quantit.northstar.common.event.NorthstarEventType;
 import tech.quantit.northstar.common.utils.FieldUtils;
 import xyz.redtorch.pb.CoreEnum.CurrencyEnum;
+import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreField.AccountField;
 import xyz.redtorch.pb.CoreField.CancelOrderReqField;
-import xyz.redtorch.pb.CoreField.ContractField;
+import xyz.redtorch.pb.CoreField.PositionField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TradeField;
 
@@ -36,12 +42,12 @@ public class SimAccount {
 
 	// 委托请求不需要持久化
 	@Transient
-	protected Set<OpenTradeRequest> openReqSet = Sets.newConcurrentHashSet();
+	protected Set<OpenTradeRequest> openReqSet = new HashSet<>();
 	@Transient
-	protected Set<CloseTradeRequest> closeReqSet = Sets.newConcurrentHashSet();
-	
-	protected ConcurrentMap<String, SimPosition> longMap = new ConcurrentHashMap<>();
-	protected ConcurrentMap<String, SimPosition> shortMap = new ConcurrentHashMap<>();
+	protected Set<CloseTradeRequest> closeReqSet = new HashSet<>();
+
+	protected Map<String, SimPosition> longMap = new HashMap<>();
+	protected Map<String, SimPosition> shortMap = new HashMap<>();
 	
 	protected double totalCloseProfit;
 	
@@ -56,31 +62,27 @@ public class SimAccount {
 	@Transient
 	protected Runnable savingCallback;
 	@Transient
-	@Setter
 	private EventBus eventBus;
 	@Transient
 	@Setter
 	private FastEventEngine feEngine;
-	
+	@Transient
 	protected Consumer<TradeRequest> openCallback = req -> {
 		if(req.isDone()) {			
 			eventBus.unregister(req);
 			// 延迟十秒再移除，以免撤单异常
 			CompletableFuture.runAsync(() -> openReqSet.remove(req), CompletableFuture.delayedExecutor(10, TimeUnit.SECONDS));
 		}
-		if(req.isTraded()) {
-			TradeField trade = req.tradeField().get();
-			ContractField contract = trade.getContract();
-			if(FieldUtils.isBuy(trade.getDirection())) {
-				longMap.put(contract.getUnifiedSymbol(), new SimPosition(trade));
-			}
-			if(FieldUtils.isSell(trade.getDirection())) {
-				shortMap.put(contract.getUnifiedSymbol(), new SimPosition(trade));
-			}
-			if(savingCallback != null) {				
-				savingCallback.run();
-			}
+		savingCallback.run();
+	};
+	@Transient
+	Consumer<TradeRequest> closeCallback = req -> {
+		if(req.isDone()) {			
+			eventBus.unregister(req);
+			// 延迟十秒再移除，以免撤单异常
+			CompletableFuture.runAsync(() -> closeReqSet.remove(req), CompletableFuture.delayedExecutor(10, TimeUnit.SECONDS));
 		}
+		savingCallback.run();
 	};
 	
 	public SimAccount(String gatewayId,  int fee) {
@@ -120,6 +122,7 @@ public class SimAccount {
 		}
 		totalDeposit += money;
 		savingCallback.run();
+		feEngine.emitEvent(NorthstarEventType.ACCOUNT, accountField());
 	}
 	
 	public void withdrawMoney(int money) {
@@ -131,6 +134,7 @@ public class SimAccount {
 		}
 		totalWithdraw += money;
 		savingCallback.run();
+		feEngine.emitEvent(NorthstarEventType.ACCOUNT, accountField());
 	}
 
 	public AccountField accountField() {
@@ -150,6 +154,41 @@ public class SimAccount {
 				.build();
 	}
 	
+	public List<PositionField> positionFields(){
+		int size = longMap.size() + shortMap.size();
+		if(size == 0)
+			return Collections.emptyList();
+		List<PositionField> list = new ArrayList<>(size);
+		list.addAll(longMap.values().stream().map(SimPosition::positionField).toList());
+		list.addAll(shortMap.values().stream().map(SimPosition::positionField).toList());
+		return list;
+	}
+	
+	public void addPosition(SimPosition position, TradeField trade) {
+		Map<String, SimPosition> posMap = FieldUtils.isLong(position.getDirection()) ? longMap : shortMap;
+		if(posMap.containsKey(position.getUnifiedSymbol())) {
+			SimPosition originPosition = posMap.get(position.getUnifiedSymbol());
+			originPosition.merge(trade);
+		} else {			
+			posMap.put(position.getUnifiedSymbol(), position);
+			eventBus.register(position);
+		}
+	}
+	
+	public void removeEmptyPosition() {
+		removeEmptyPosition(longMap);
+		removeEmptyPosition(shortMap);
+	}
+	
+	private void removeEmptyPosition(Map<String, SimPosition> positionMap) {
+		for(Entry<String, SimPosition> e : positionMap.entrySet()) {
+			if(e.getValue().getVolume() == 0) {
+				SimPosition position = positionMap.remove(e.getKey());
+				eventBus.unregister(position);
+			}
+		}
+	}
+	
 	public void onSubmitOrder(SubmitOrderReqField orderReq) {
 		if(FieldUtils.isOpen(orderReq.getOffsetFlag())) {
 			OpenTradeRequest tradeReq = new OpenTradeRequest(this, feEngine, orderReq, openCallback);
@@ -162,19 +201,7 @@ public class SimAccount {
 		
 		if(FieldUtils.isClose(orderReq.getOffsetFlag())) {
 			SimPosition position = getClosingPositionByReq(orderReq);
-			Consumer<TradeRequest> closeCallback = req -> {
-				if(req.isDone()) {			
-					eventBus.unregister(req);
-					// 延迟十秒再移除，以免撤单异常
-					CompletableFuture.runAsync(() -> closeReqSet.remove(req), CompletableFuture.delayedExecutor(10, TimeUnit.SECONDS));
-				}
-				if(!req.isTraded()) {
-					position.setCloseReq(null);
-				} else if(savingCallback != null) {
-					savingCallback.run();
-				}
-			};
-			CloseTradeRequest tradeReq = new CloseTradeRequest(position, feEngine, orderReq, closeCallback);
+			CloseTradeRequest tradeReq = new CloseTradeRequest(this, position, feEngine, orderReq, closeCallback);
 			if(!tradeReq.isValid()) {
 				return;
 			}
@@ -184,12 +211,16 @@ public class SimAccount {
 		}
 	}
 	
+	private Map<String, SimPosition> getClosingMap(DirectionEnum direction){
+		if(FieldUtils.isBuy(direction)) 
+			return shortMap;
+		if(FieldUtils.isSell(direction))
+			return longMap;
+		throw new IllegalStateException("平仓方向不明确");
+	}
+	
 	private SimPosition getClosingPositionByReq(SubmitOrderReqField orderReq) {
-		SimPosition pos = null;
-		if(FieldUtils.isBuy(orderReq.getDirection())) 
-			pos = shortMap.get(orderReq.getContract().getUnifiedSymbol());
-		if(FieldUtils.isSell(orderReq.getDirection()))
-			pos = longMap.get(orderReq.getContract().getUnifiedSymbol());
+		SimPosition pos = getClosingMap(orderReq.getDirection()).get(orderReq.getContract().getUnifiedSymbol());
 		if(pos == null)
 			throw new IllegalStateException("没有找到可以平仓的合约");
 		return pos;
@@ -203,5 +234,19 @@ public class SimAccount {
 		this.savingCallback = savingCallback;
 		longMap.values().stream().forEach(pos -> pos.setSavingCallback(savingCallback));
 		shortMap.values().stream().forEach(pos -> pos.setSavingCallback(savingCallback));
+	}
+	
+	public void setEventBus(EventBus eventBus) {
+		this.eventBus = eventBus;
+		longMap.values().stream().forEach(eventBus::register);
+		shortMap.values().stream().forEach(eventBus::register);
+	}
+
+	public void addCommission(int volume) {
+		totalCommission += volume * transactionFee;
+	}
+
+	public void addCloseProfit(double profit) {
+		totalCloseProfit += profit;
 	}
 }

@@ -32,7 +32,6 @@ class TradeRequestTest {
 		verify(req.feEngine, times(2)).emitEvent(eq(NorthstarEventType.ORDER), any(OrderField.class));
 		verify(req.doneCallback).accept(any());
 		assertThat(req.isDone()).isTrue();
-		assertThat(req.isTraded()).isFalse();
 	}
 
 	@Test
@@ -43,7 +42,6 @@ class TradeRequestTest {
 		verify(req.feEngine, times(2)).emitEvent(eq(NorthstarEventType.ORDER), any(OrderField.class));
 		verify(req.doneCallback).accept(any());
 		assertThat(req.isDone()).isTrue();
-		assertThat(req.isTraded()).isTrue();
 	}
 	
 	@Test
@@ -54,36 +52,33 @@ class TradeRequestTest {
 		verify(req.feEngine, times(1)).emitEvent(eq(NorthstarEventType.ORDER), any(OrderField.class));
 		verify(req.doneCallback, times(0)).accept(any());
 		assertThat(req.isDone()).isFalse();
-		assertThat(req.isTraded()).isFalse();
 	}
 	
 	@Test
 	void testCloseOrderOnCancel() {
 		SubmitOrderReqField orderReq = factory.makeOrderReq("rb2210", DirectionEnum.D_Buy, OffsetFlagEnum.OF_Close, 1, 2000, 0);
-		CloseTradeRequest req = new CloseTradeRequest(mock(SimPosition.class), mock(FastEventEngine.class), orderReq, mock(Consumer.class));
+		CloseTradeRequest req = new CloseTradeRequest(mock(SimAccount.class), mock(SimPosition.class), mock(FastEventEngine.class), orderReq, mock(Consumer.class));
 		req.onCancal(factory.makeCancelReq(orderReq));
 		verify(req.feEngine, times(2)).emitEvent(eq(NorthstarEventType.ORDER), any(OrderField.class));
 		verify(req.doneCallback).accept(any());
 		assertThat(req.isDone()).isTrue();
-		assertThat(req.isTraded()).isFalse();
 	}
 	
 	@Test
 	void testCloseOrderOnTickNotTraded() {
 		SubmitOrderReqField orderReq = factory.makeOrderReq("rb2210", DirectionEnum.D_Buy, OffsetFlagEnum.OF_Close, 1, 2000, 0);
-		CloseTradeRequest req = new CloseTradeRequest(mock(SimPosition.class), mock(FastEventEngine.class), orderReq, mock(Consumer.class));
+		CloseTradeRequest req = new CloseTradeRequest(mock(SimAccount.class), mock(SimPosition.class), mock(FastEventEngine.class), orderReq, mock(Consumer.class));
 		req.onTick(factory.makeTickField("rb2210", 2000));
 		verify(req.feEngine, times(1)).emitEvent(eq(NorthstarEventType.ORDER), any(OrderField.class));
 		verify(req.doneCallback, times(0)).accept(any());
 		assertThat(req.isDone()).isFalse();
-		assertThat(req.isTraded()).isFalse();
 	}
 	
 	@Test
 	void shouldThrowIfNotMatch() {
 		assertThrows(IllegalArgumentException.class, ()->{
 			SubmitOrderReqField orderReq = factory.makeOrderReq("rb2210", DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open, 1, 2000, 0);
-			new CloseTradeRequest(mock(SimPosition.class), mock(FastEventEngine.class), orderReq, mock(Consumer.class));
+			new CloseTradeRequest(mock(SimAccount.class), mock(SimPosition.class), mock(FastEventEngine.class), orderReq, mock(Consumer.class));
 		});
 		
 		assertThrows(IllegalArgumentException.class, ()->{

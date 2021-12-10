@@ -6,6 +6,7 @@ import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.utils.FieldUtils;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
+import xyz.redtorch.pb.CoreField.TradeField;
 
 public class OpenTradeRequest extends TradeRequest {
 	
@@ -32,6 +33,12 @@ public class OpenTradeRequest extends TradeRequest {
 	@Override
 	protected boolean canMakeOrder() {
 		return frozenAmount() < this.account.available();
+	}
+
+	@Override
+	public void onTrade(TradeField trade) {
+		account.addPosition(new SimPosition(trade), trade);
+		account.addCommission(trade.getVolume());
 	}
 	
 }

@@ -11,8 +11,10 @@ import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.event.NorthstarEventType;
 import tech.quantit.northstar.common.exception.TradeException;
+import xyz.redtorch.pb.CoreField.AccountField;
 import xyz.redtorch.pb.CoreField.CancelOrderReqField;
 import xyz.redtorch.pb.CoreField.GatewaySettingField;
+import xyz.redtorch.pb.CoreField.PositionField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 
 @Slf4j
@@ -46,7 +48,22 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 		feEngine.emitEvent(NorthstarEventType.LOGGED_IN, gatewaySetting.getGatewayId());
 		
 		job = execService.scheduleAtFixedRate(()->{
-			feEngine.emitEvent(NorthstarEventType.ACCOUNT, account.accountField());
+			log.debug("模拟账户定时回报");
+			AccountField af = account.accountField();
+			feEngine.emitEvent(NorthstarEventType.ACCOUNT, af);
+			log.trace("账户信息：{}", af);
+			boolean shouldClear = false;
+			for(PositionField pf : account.positionFields()) {
+				feEngine.emitEvent(NorthstarEventType.POSITION, pf);
+				log.trace("持仓信息：{}", pf);
+				if(pf.getPosition() == 0) {
+					shouldClear = true;
+				}
+			}
+			if(shouldClear) {
+				account.removeEmptyPosition();
+			}
+			
 		}, 2, 2, TimeUnit.SECONDS);
 		
 		// 模拟返回合约

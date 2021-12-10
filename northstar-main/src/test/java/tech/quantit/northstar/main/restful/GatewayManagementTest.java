@@ -30,7 +30,6 @@ import tech.quantit.northstar.common.model.CtpSettings;
 import tech.quantit.northstar.common.model.GatewayDescription;
 import tech.quantit.northstar.common.model.NsUser;
 import tech.quantit.northstar.common.model.SimSettings;
-import tech.quantit.northstar.gateway.sim.persistence.SimAccountRepository;
 import tech.quantit.northstar.main.NorthstarApplication;
 import tech.quantit.northstar.main.engine.broadcast.SocketIOMessageEngine;
 
@@ -50,9 +49,6 @@ public class GatewayManagementTest {
 	
 	@MockBean
 	private SocketIOMessageEngine msgEngine;
-	
-	@MockBean
-	private SimAccountRepository simAccountRepo;
 	
 	@MockBean
 	private SocketIOServer socketServer;
@@ -120,7 +116,7 @@ public class GatewayManagementTest {
 			.andExpect(jsonPath("$.status").value(ReturnCode.ERROR));
 	}
 	
-	// @Test
+	@Test
 	public void shouldSuccessWhenGettingActiveState() throws Exception {
 		shouldCreateGateway();
 		

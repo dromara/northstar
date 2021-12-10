@@ -45,5 +45,26 @@ class SimPositionTest {
 		pos.onTick(factory.makeTickField("rb2210", 2200));
 		assertThat(pos.profit()).isCloseTo(16000, offset(1e-6));
 	}
+	
+	@Test
+	void testIncreasePosition() {
+		SimPosition pos = new SimPosition(factory.makeTradeField("rb2210", 2000, 8, DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open));
+		pos.merge(factory.makeTradeField("rb2210", 2200, 8, DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open));
+		assertThat(pos.getOpenPrice()).isCloseTo(2100, offset(1e-6));
+		assertThat(pos.getVolume()).isEqualTo(16);
+	}
+	
+	@Test
+	void testDecreasePosition() {
+		SimPosition pos = new SimPosition(factory.makeTradeField("rb2210", 2000, 8, DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open));
+		pos.merge(factory.makeTradeField("rb2210", 2200, 3, DirectionEnum.D_Sell, OffsetFlagEnum.OF_Close));
+		assertThat(pos.getOpenPrice()).isCloseTo(2000, offset(1e-6));
+		assertThat(pos.getVolume()).isEqualTo(5);
+	}
 
+	@Test
+	void testPositionField() {
+		SimPosition pos = new SimPosition(factory.makeTradeField("rb2210", 2000, 8, DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open));
+		assertThat(pos.positionField()).isNotNull();
+	}
 }

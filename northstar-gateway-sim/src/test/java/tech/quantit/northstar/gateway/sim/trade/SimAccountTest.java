@@ -106,6 +106,8 @@ class SimAccountTest {
 		SimAccount account = new SimAccount("test", 3);
 		Runnable savingCallback = mock(Runnable.class);
 		account.setSavingCallback(savingCallback);
+		account.setFeEngine(mock(FastEventEngine.class));
+		account.setEventBus(mock(EventBus.class));
 		account.depositMoney(666);
 		assertThat(account.totalDeposit).isEqualTo(666);
 		verify(savingCallback).run();
@@ -124,6 +126,8 @@ class SimAccountTest {
 	void testWithdraw() {
 		SimAccount account = new SimAccount("test", 3);
 		Runnable savingCallback = mock(Runnable.class);
+		account.setEventBus(mock(EventBus.class));
+		account.setFeEngine(mock(FastEventEngine.class));
 		account.setSavingCallback(savingCallback);
 		account.depositMoney(666);
 		account.withdrawMoney(333);

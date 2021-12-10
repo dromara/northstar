@@ -2,7 +2,6 @@ package tech.quantit.northstar.gateway.sim.trade;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
 
@@ -34,6 +33,7 @@ import xyz.redtorch.pb.CoreField.TradeField;
 public abstract class TradeRequest implements TickDataAware, Cancellable {
 
 	protected FastEventEngine feEngine;
+	@Getter
 	protected SubmitOrderReqField submitOrderReq;
 	protected Consumer<TradeRequest> doneCallback;
 	
@@ -44,8 +44,6 @@ public abstract class TradeRequest implements TickDataAware, Cancellable {
 	protected boolean isDone;
 	@Getter
 	protected boolean isValid = true;
-	@Getter
-	protected boolean isTraded;
 	
 	protected TradeRequest(FastEventEngine feEngine, SubmitOrderReqField submitOrderReq, Consumer<TradeRequest> doneCallback) {
 		this.feEngine = feEngine;
@@ -139,14 +137,11 @@ public abstract class TradeRequest implements TickDataAware, Cancellable {
 			log.info("模拟成交：{}，{}，{}，{}，{}手，{}，{}", trade.getOriginOrderId(), trade.getContract().getName(), 
 					trade.getDirection(), trade.getOffsetFlag(), trade.getVolume(), trade.getPrice(), trade.getTradingDay());
 			feEngine.emitEvent(NorthstarEventType.TRADE, trade);
-			isTraded = true;
+			onTrade(trade);
 			isDone = true;
 			doneCallback.accept(this);
 		}
 	}
 	
-	public Optional<TradeField> tradeField() {
-		return isTraded ? Optional.of(tradeBuilder.build()) : Optional.empty(); 
-	}
-
+	public abstract void onTrade(TradeField trade);
 }
