@@ -122,11 +122,11 @@ public class StrategyModule implements EventDrivenComponent{
 	 */
 	public void onEvent(NorthstarEvent event) {
 		meb.post(event.getData());
-		if(event.getData() instanceof TradeField trade && trade.getOriginOrderId().equals(ti.getSubmitOrderReq().getOriginOrderId())) {			
+		if(ti != null && event.getData() instanceof TradeField trade && trade.getOriginOrderId().equals(ti.getSubmitOrderReq().getOriginOrderId())) {			
 			log.debug("[{}] 收到成交回报，订单号:{}", moduleStatus.getModuleName(), trade.getOriginOrderId());
 			ti.onTrade(trade);
 		} 
-		if(event.getData() instanceof OrderField order && order.getOriginOrderId().equals(ti.getSubmitOrderReq().getOriginOrderId())) {			
+		if(ti !=null && event.getData() instanceof OrderField order && order.getOriginOrderId().equals(ti.getSubmitOrderReq().getOriginOrderId())) {			
 			log.debug("[{}] 收到订单回报，订单号：{}，订单状态{}", moduleStatus.getModuleName(), order.getOriginOrderId(), order.getOrderStatus());
 			if(order.getOrderStatus() == OrderStatusEnum.OS_Canceled || order.getOrderStatus() == OrderStatusEnum.OS_Rejected) {
 				meb.post(new ModuleEvent<>(ModuleEventType.ORDER_CANCELLED, order));
