@@ -106,6 +106,8 @@ public class ModuleStateMachine {
 	}
 	
 	public void setState(ModuleState newState) {
+		if(curState == newState)	
+			return;
 		log.info("[{}] 状态机切换：[{}] => [{}]", moduleName, curState, newState);
 		curState = newState;
 		changeListeners.stream().forEach(listener -> listener.onChange(curState));

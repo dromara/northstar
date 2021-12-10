@@ -29,6 +29,7 @@ import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreEnum.OrderStatusEnum;
 import xyz.redtorch.pb.CoreField.AccountField;
 import xyz.redtorch.pb.CoreField.OrderField;
+import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TradeField;
 
 public class StrategyModuleTest {
@@ -41,7 +42,7 @@ public class StrategyModuleTest {
 	
 	@BeforeEach
 	public void prepare() {
-		module = new StrategyModule("mktGateway", tradeGateway, new ModuleStatus("module"));
+		module = new StrategyModule("mktGateway", tradeGateway, new ModuleStatus("module", mock(ModulePosition.class)));
 	}
 
 	@Test
@@ -75,12 +76,15 @@ public class StrategyModuleTest {
 	
 	@Test
 	public void testOnEventNorthstarEventOfOrderWhenCancelling() {
-		ModuleStatus moduleStatus = new ModuleStatus("module");
+		ModuleStatus moduleStatus = new ModuleStatus("module", mock(ModulePosition.class));
 		moduleStatus.stateMachine = new ModuleStateMachine("module", ModuleState.PENDING_ORDER);
 		module = new StrategyModule("mktGateway", tradeGateway, moduleStatus);
 		module.meb = mock(ModuleEventBus.class);
+		SubmitOrderReqField req = factory.makeOrderReq("rb2210", DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open, 1, 2000, 0);
 		module.ti = mock(ModuleTradeIntent.class);
+		when(module.ti.getSubmitOrderReq()).thenReturn(req);
 		OrderField order = OrderField.newBuilder()
+				.setOriginOrderId(req.getOriginOrderId())
 				.setOffsetFlag(OffsetFlagEnum.OF_Open)
 				.setOrderStatus(OrderStatusEnum.OS_Canceled)
 				.build();
@@ -91,12 +95,15 @@ public class StrategyModuleTest {
 	
 	@Test
 	public void testOnEventNorthstarEventOfOrderWhenOrdering() {
-		ModuleStatus moduleStatus = new ModuleStatus("module");
+		ModuleStatus moduleStatus = new ModuleStatus("module", mock(ModulePosition.class));
 		moduleStatus.stateMachine = new ModuleStateMachine("module", ModuleState.PLACING_ORDER);
 		module = new StrategyModule("mktGateway", tradeGateway, moduleStatus);
 		module.meb = mock(ModuleEventBus.class);
+		SubmitOrderReqField req = factory.makeOrderReq("rb2210", DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open, 1, 2000, 0);
 		module.ti = mock(ModuleTradeIntent.class);
+		when(module.ti.getSubmitOrderReq()).thenReturn(req);
 		OrderField order = OrderField.newBuilder()
+				.setOriginOrderId(req.getOriginOrderId())
 				.setOffsetFlag(OffsetFlagEnum.OF_Open)
 				.setOrderStatus(OrderStatusEnum.OS_Unknown)
 				.build();
@@ -107,24 +114,30 @@ public class StrategyModuleTest {
 	
 	@Test
 	public void testOnEventNorthstarEventOfBuyTrade() {
-		ModuleStatus moduleStatus = new ModuleStatus("module");
+		ModuleStatus moduleStatus = new ModuleStatus("module", mock(ModulePosition.class));
 		moduleStatus.stateMachine = new ModuleStateMachine("module", ModuleState.PENDING_ORDER);
 		module = new StrategyModule("mktGateway", tradeGateway, moduleStatus);
 		module.meb = mock(ModuleEventBus.class);
+		SubmitOrderReqField req = factory.makeOrderReq("rb2210", DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open, 1, 2000, 0);
 		module.ti = mock(ModuleTradeIntent.class);
-		module.onEvent(new NorthstarEvent(NorthstarEventType.TRADE, TradeField.newBuilder().setDirection(DirectionEnum.D_Sell).build()));
+		when(module.ti.getSubmitOrderReq()).thenReturn(req);
+		module.onEvent(new NorthstarEvent(NorthstarEventType.TRADE, 
+				TradeField.newBuilder().setOriginOrderId(req.getOriginOrderId()).setDirection(DirectionEnum.D_Sell).build()));
 		verify(module.meb).post(any());
 		verify(module.meb, times(0)).post(any(ModuleEvent.class));
 	}
 	
 	@Test
 	public void testOnEventNorthstarEventOfSellTrade() {
-		ModuleStatus moduleStatus = new ModuleStatus("module");
+		ModuleStatus moduleStatus = new ModuleStatus("module", mock(ModulePosition.class));
 		moduleStatus.stateMachine = new ModuleStateMachine("module", ModuleState.PENDING_ORDER);
 		module = new StrategyModule("mktGateway", tradeGateway, moduleStatus);
 		module.meb = mock(ModuleEventBus.class);
+		SubmitOrderReqField req = factory.makeOrderReq("rb2210", DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open, 1, 2000, 0);
 		module.ti = mock(ModuleTradeIntent.class);
-		module.onEvent(new NorthstarEvent(NorthstarEventType.TRADE, TradeField.newBuilder().setDirection(DirectionEnum.D_Buy).build()));
+		when(module.ti.getSubmitOrderReq()).thenReturn(req);
+		module.onEvent(new NorthstarEvent(NorthstarEventType.TRADE, 
+				TradeField.newBuilder().setOriginOrderId(req.getOriginOrderId()).setDirection(DirectionEnum.D_Buy).build()));
 		verify(module.meb).post(any());
 		verify(module.meb, times(0)).post(any(ModuleEvent.class));
 	}
@@ -132,7 +145,7 @@ public class StrategyModuleTest {
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testOnEventModuleEventOfStopLoss() {
-		ModuleStatus moduleStatus = new ModuleStatus("module");
+		ModuleStatus moduleStatus = new ModuleStatus("module", mock(ModulePosition.class));
 		moduleStatus.updatePosition(factory.makeTradeField("test", 1000, 1, DirectionEnum.D_Sell, OffsetFlagEnum.OF_Open));
 		module = new StrategyModule("mktGateway", tradeGateway, moduleStatus);
 		module.meb = mock(ModuleEventBus.class);
@@ -147,7 +160,7 @@ public class StrategyModuleTest {
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testOnEventModuleEventOfOrderConfirm() {
-		ModuleStatus moduleStatus = new ModuleStatus("module");
+		ModuleStatus moduleStatus = new ModuleStatus("module", mock(ModulePosition.class));
 		moduleStatus.stateMachine = new ModuleStateMachine("module", ModuleState.PENDING_ORDER);
 		module = new StrategyModule("mktGateway", tradeGateway, moduleStatus);
 		module.meb = mock(ModuleEventBus.class);
@@ -160,7 +173,7 @@ public class StrategyModuleTest {
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testOnEventModuleEventOfOrderReqCancel() {
-		ModuleStatus moduleStatus = new ModuleStatus("module");
+		ModuleStatus moduleStatus = new ModuleStatus("module", mock(ModulePosition.class));
 		moduleStatus.stateMachine = new ModuleStateMachine("module", ModuleState.PENDING_ORDER);
 		module = new StrategyModule("mktGateway", tradeGateway, moduleStatus);
 		module.meb = mock(ModuleEventBus.class);

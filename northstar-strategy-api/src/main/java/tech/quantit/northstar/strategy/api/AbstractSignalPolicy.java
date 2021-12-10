@@ -32,7 +32,7 @@ public abstract class AbstractSignalPolicy implements SignalPolicy {
 
 	private String moduleName;
 	
-	private boolean moduleEnabled = true;
+	private boolean moduleEnabled;
 	
 	protected void emit(SignalOperation signalOperation) {
 		emit(signalOperation, 0, 0);

@@ -27,13 +27,13 @@ public class ModuleTradeIntent {
 	private Consumer<TradeField> positionChangeCallback;
 	// 平仓回调
 	private Consumer<ModuleDealRecord> closeCallback; 
-	// 意图结束回调，返回是否部分成交标识 
-	private Consumer<Boolean> doneCallback;
+	// 意图结束回调
+	private Runnable doneCallback;
 	
 	private String moduleName;
 	
 	public ModuleTradeIntent(String moduleName, SubmitOrderReqField submitOrderReq, Consumer<TradeField> positionChangeCallback,
-			Consumer<ModuleDealRecord> closeCallback, Consumer<Boolean> doneCallback) {
+			Consumer<ModuleDealRecord> closeCallback, Runnable doneCallback) {
 		this.submitOrderReq = submitOrderReq;
 		this.positionChangeCallback = positionChangeCallback;
 		this.closeCallback = closeCallback;
@@ -42,7 +42,7 @@ public class ModuleTradeIntent {
 	}
 	
 	public ModuleTradeIntent(String moduleName, ModulePosition position, SubmitOrderReqField submitOrderReq,
-			Consumer<TradeField> positionChangeCallback, Consumer<ModuleDealRecord> closeCallback, Consumer<Boolean> doneCallback) {
+			Consumer<TradeField> positionChangeCallback, Consumer<ModuleDealRecord> closeCallback, Runnable doneCallback) {
 		this.submitOrderReq = submitOrderReq;
 		this.currentPosition = position;
 		this.moduleName = moduleName;
@@ -66,15 +66,9 @@ public class ModuleTradeIntent {
 		if(!StringUtils.equals(order.getOriginOrderId(), submitOrderReq.getOriginOrderId())) 
 			return;
 		
-		boolean partiallyTraded = order.getOrderStatus() == OrderStatusEnum.OS_Canceled 
-				&& order.getTotalVolume() == submitOrderReq.getVolume() 
-				&& order.getTradedVolume() > 0;
-		
 		// 处理情况三、四、五
-		if(partiallyTraded || order.getOrderStatus() == OrderStatusEnum.OS_AllTraded) {
-			doneCallback.accept(true);
-		} else if(order.getOrderStatus() == OrderStatusEnum.OS_Canceled || order.getOrderStatus() == OrderStatusEnum.OS_Rejected) {
-			doneCallback.accept(false);
+		if(order.getOrderStatus() == OrderStatusEnum.OS_Canceled || order.getOrderStatus() == OrderStatusEnum.OS_Rejected) {
+			doneCallback.run();
 		}
 	}
 	
@@ -88,6 +82,9 @@ public class ModuleTradeIntent {
 		positionChangeCallback.accept(trade);
 		if(FieldUtils.isClose(trade.getOffsetFlag())) {
 			closeCallback.accept(genDealRecord(trade));
+		}
+		if(trade.getVolume() == submitOrderReq.getVolume()) {
+			doneCallback.run();
 		}
 	}
 	

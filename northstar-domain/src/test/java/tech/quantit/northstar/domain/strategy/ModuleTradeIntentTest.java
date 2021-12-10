@@ -33,7 +33,7 @@ public class ModuleTradeIntentTest {
 	Consumer<ModuleDealRecord> closeCallback = mock(Consumer.class);
 
 	@SuppressWarnings("unchecked")
-	Consumer<Boolean> fallback = mock(Consumer.class);
+	Runnable fallback = mock(Runnable.class);
 	
 	@Test
 	public void testAllTradedForOpenOrder() {
@@ -113,7 +113,7 @@ public class ModuleTradeIntentTest {
 				.setOffsetFlag(orderReq.getOffsetFlag())
 				.build());
 		
-		verify(fallback).accept(any());
+		verify(fallback).run();
 	}
 	
 	
@@ -187,7 +187,7 @@ public class ModuleTradeIntentTest {
 				.setOrderStatus(OrderStatusEnum.OS_Canceled)
 				.build());
 		
-		verify(fallback).accept(any());
+		verify(fallback).run();
 	}
 	
 }

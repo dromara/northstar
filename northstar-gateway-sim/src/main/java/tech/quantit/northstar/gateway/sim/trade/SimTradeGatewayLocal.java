@@ -48,7 +48,7 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 		feEngine.emitEvent(NorthstarEventType.LOGGED_IN, gatewaySetting.getGatewayId());
 		
 		job = execService.scheduleAtFixedRate(()->{
-			log.debug("模拟账户定时回报");
+			log.trace("模拟账户定时回报");
 			AccountField af = account.accountField();
 			feEngine.emitEvent(NorthstarEventType.ACCOUNT, af);
 			log.trace("账户信息：{}", af);

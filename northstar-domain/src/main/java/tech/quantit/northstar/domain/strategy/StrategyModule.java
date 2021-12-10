@@ -4,14 +4,11 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Consumer;
 
-import org.apache.commons.lang3.StringUtils;
-
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.ContractBindedAware;
 import tech.quantit.northstar.common.event.NorthstarEvent;
-import tech.quantit.northstar.common.event.NorthstarEventType;
 import tech.quantit.northstar.gateway.api.TradeGateway;
 import tech.quantit.northstar.strategy.api.EventDrivenComponent;
 import tech.quantit.northstar.strategy.api.SignalPolicy;
@@ -21,12 +18,9 @@ import tech.quantit.northstar.strategy.api.event.ModuleEventBus;
 import tech.quantit.northstar.strategy.api.event.ModuleEventType;
 import tech.quantit.northstar.strategy.api.model.ModuleDealRecord;
 import xyz.redtorch.pb.CoreEnum.OrderStatusEnum;
-import xyz.redtorch.pb.CoreField.AccountField;
-import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.CancelOrderReqField;
 import xyz.redtorch.pb.CoreField.OrderField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
-import xyz.redtorch.pb.CoreField.TickField;
 import xyz.redtorch.pb.CoreField.TradeField;
 
 /**
@@ -47,7 +41,6 @@ public class StrategyModule implements EventDrivenComponent{
 	protected Set<EventDrivenComponent> components = new HashSet<>();
 	
 	@Getter
-	@Setter
 	protected boolean enabled;
 	
 	@Setter
@@ -65,8 +58,6 @@ public class StrategyModule implements EventDrivenComponent{
 	protected ModuleTradeIntent ti;
 	
 	protected Consumer<TradeField> openTradeIntentSuccessCallback = trade -> moduleStatus.updatePosition(trade);
-	
-	protected Consumer<Boolean> tradeIntentFallback = partiallyTraded -> ti = null;
 	
 	@Getter
 	private String bindedMktGatewayId;
@@ -131,11 +122,11 @@ public class StrategyModule implements EventDrivenComponent{
 	 */
 	public void onEvent(NorthstarEvent event) {
 		meb.post(event.getData());
-		if(event.getData() instanceof TradeField trade) {			
+		if(event.getData() instanceof TradeField trade && trade.getOriginOrderId().equals(ti.getSubmitOrderReq().getOriginOrderId())) {			
 			log.debug("[{}] 收到成交回报，订单号:{}", moduleStatus.getModuleName(), trade.getOriginOrderId());
 			ti.onTrade(trade);
 		} 
-		if(event.getData() instanceof OrderField order) {			
+		if(event.getData() instanceof OrderField order && order.getOriginOrderId().equals(ti.getSubmitOrderReq().getOriginOrderId())) {			
 			log.debug("[{}] 收到订单回报，订单号：{}，订单状态{}", moduleStatus.getModuleName(), order.getOriginOrderId(), order.getOrderStatus());
 			if(order.getOrderStatus() == OrderStatusEnum.OS_Canceled || order.getOrderStatus() == OrderStatusEnum.OS_Rejected) {
 				meb.post(new ModuleEvent<>(ModuleEventType.ORDER_CANCELLED, order));
@@ -144,25 +135,6 @@ public class StrategyModule implements EventDrivenComponent{
 			}
 			ti.onOrder(order);
 		}
-	}
-	
-	/**
-	 * 过滤多余事件
-	 * @param event
-	 * @return
-	 */
-	public boolean canHandle(NorthstarEvent event) {
-		if(event.getEvent() == NorthstarEventType.TICK || event.getEvent() == NorthstarEventType.IDX_TICK)
-			return bindedSymbols.contains(((TickField)event.getData()).getUnifiedSymbol());
-		if(event.getEvent() == NorthstarEventType.BAR)
-			return bindedSymbols.contains(((BarField)event.getData()).getUnifiedSymbol());
-		if(event.getEvent() == NorthstarEventType.ORDER) 
-			return ti != null && ((OrderField)event.getData()).getOriginOrderId().equals(ti.originOrderId());
-		if(event.getEvent() == NorthstarEventType.TRADE) 
-			return ti != null && ((TradeField)event.getData()).getOriginOrderId().equals(ti.originOrderId());
-		if(event.getData() instanceof AccountField account) 		
-			return account.getGatewayId().equals(gateway.getGatewaySetting().getGatewayId());
-		return true;
 	}
 	
 	/**
@@ -192,7 +164,7 @@ public class StrategyModule implements EventDrivenComponent{
 				orderReq = mti.getSubmitOrderReq();
 			} else {
 				orderReq = (SubmitOrderReqField) moduleEvent.getData();				
-				ti = new ModuleTradeIntent(getName(), orderReq, openTradeIntentSuccessCallback, dealRecordGenHandler, tradeIntentFallback);
+				ti = new ModuleTradeIntent(getName(), orderReq, openTradeIntentSuccessCallback, dealRecordGenHandler, () -> ti = null);
 			}
 			log.info("[{}] 生成订单{}：{}，{}，{}，{}手，价格{}，止损{}", getName(), orderReq.getOriginOrderId(), orderReq.getContract().getSymbol(),
 					orderReq.getDirection(), orderReq.getOffsetFlag(), orderReq.getVolume(), orderReq.getPrice(), orderReq.getStopPrice());
@@ -207,6 +179,11 @@ public class StrategyModule implements EventDrivenComponent{
 	@Override
 	public void setEventBus(ModuleEventBus moduleEventBus) {
 		throw new UnsupportedOperationException("该方法不支持");
+	}
+
+	public void setEnabled(boolean enabled) {
+		this.enabled = enabled;
+		meb.post(new ModuleEvent<>(ModuleEventType.MODULE_TOGGLE, enabled));
 	}
 
 }

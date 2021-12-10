@@ -1,7 +1,6 @@
 package tech.quantit.northstar.domain.strategy;
 
 import lombok.Getter;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.utils.FieldUtils;
 import tech.quantit.northstar.strategy.api.constant.ModuleState;
@@ -25,22 +24,17 @@ public class ModuleStatus {
 	
 	// 模组的逻辑净持仓
 	@Getter
-	@Setter
 	protected ModulePosition logicalPosition;
 	
-	@Setter
 	@Getter
 	private ModuleEventBus moduleEventBus;
 	
-	public ModuleStatus(String name) {
-		this.moduleName = name;
-		this.stateMachine = new ModuleStateMachine(name, ModuleState.EMPTY);
-		this.logicalPosition = ModulePosition.builder().moduleName(moduleName).build();
-	}
 	
 	public ModuleStatus(String name, ModulePosition modulePosition) {
-		this(name);
-		this.logicalPosition = modulePosition;
+		moduleName = name;
+		logicalPosition = modulePosition;
+		logicalPosition.setPositionChangeCallback(this::updatePosition);
+		stateMachine = new ModuleStateMachine(name, ModuleState.EMPTY);
 		stateMachine.setState(getMergedState());
 	}
 	
@@ -85,6 +79,16 @@ public class ModuleStatus {
 		if(FieldUtils.isShort(logicalPosition.getDirection()))
 			return ModuleState.HOLDING_SHORT;
 		throw new IllegalStateException("未知状态");
+	}
+
+	public void setModuleEventBus(ModuleEventBus moduleEventBus) {
+		this.moduleEventBus = moduleEventBus;
+		logicalPosition.setEventBus(moduleEventBus);
+		moduleEventBus.register(logicalPosition);
+	}
+
+	public void setLogicalPosition(ModulePosition position) {
+		logicalPosition = position;
 	}
 	
 }

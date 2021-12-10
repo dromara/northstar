@@ -21,6 +21,7 @@ import tech.quantit.northstar.strategy.api.DynamicParamsAware;
 import tech.quantit.northstar.strategy.api.EventDrivenComponent;
 import tech.quantit.northstar.strategy.api.RiskControlRule;
 import tech.quantit.northstar.strategy.api.SignalPolicy;
+import tech.quantit.northstar.strategy.api.event.ModuleEventBus;
 import tech.quantit.northstar.strategy.api.model.ComponentAndParamsPair;
 import tech.quantit.northstar.strategy.api.model.ComponentField;
 import tech.quantit.northstar.strategy.api.model.DynamicParams;
@@ -55,7 +56,8 @@ public class StrategyModuleFactory {
 		TradeGateway tradeGateway = (TradeGateway) gatewayConnMgr.getGatewayById(moduleInfo.getAccountGatewayId());
 		GatewayConnection gatewayConn = gatewayConnMgr.getConnectionByGateway(tradeGateway);
 		String bindedMktGatewayId = gatewayConn.getGwDescription().getBindedMktGatewayId();
-		ModuleStatus moduleStatus = convertStatus(moduleInfo, positionInfos);
+		ModuleEventBus meb = new ModuleEventBus();
+		ModuleStatus moduleStatus = convertStatus(moduleInfo, positionInfos, meb);
 		StrategyModule module = new StrategyModule(bindedMktGatewayId, tradeGateway, moduleStatus);
 		for(EventDrivenComponent component : convertComponents(moduleInfo)) {
 			module.addComponent(component);
@@ -64,13 +66,20 @@ public class StrategyModuleFactory {
 		return module;
 	}
 	
-	private ModuleStatus convertStatus(ModuleInfo moduleInfo, List<ModulePositionInfo> positionInfos) {
-		ModuleStatus status = new ModuleStatus(moduleInfo.getModuleName());
-		for(ModulePositionInfo mpi : positionInfos) {
+	private ModuleStatus convertStatus(ModuleInfo moduleInfo, List<ModulePositionInfo> positionInfos, ModuleEventBus meb) {
+		if(positionInfos.isEmpty()) {
+			ModulePosition mp = ModulePosition.builder()
+					.moduleName(moduleInfo.getModuleName())
+					.meb(meb)
+					.clearoutCallback(dealRecord -> moduleRepo.saveDealRecord(dealRecord))
+					.build();
+			return new ModuleStatus(moduleInfo.getModuleName(), mp);
+		} else {
+			ModulePositionInfo mpi = positionInfos.get(0);
 			ContractField contract = contractMgr.getContract(mpi.getUnifiedSymbol());
 			ModulePosition mp = ModulePosition.builder()
 					.moduleName(moduleInfo.getModuleName())
-					.meb(status.getModuleEventBus())
+					.meb(meb)
 					.openTime(mpi.getOpenTime())
 					.openPrice(mpi.getOpenPrice())
 					.stopLoss(new StopLoss(mpi.getPositionDir(), mpi.getStopLossPrice()))
@@ -79,11 +88,9 @@ public class StrategyModuleFactory {
 					.contract(contract)
 					.clearoutCallback(dealRecord -> moduleRepo.saveDealRecord(dealRecord))
 					.direction(mpi.getPositionDir())
-					.positionChangeCallback(trade -> status.updatePosition(trade))
 					.build();
-			status.setLogicalPosition(mp);
+			return new ModuleStatus(moduleInfo.getModuleName(), mp);
 		}
-		return status;
 	}
 	
 	private List<EventDrivenComponent> convertComponents(ModuleInfo moduleInfo) throws Exception{
