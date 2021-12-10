@@ -54,7 +54,6 @@ class SimPosition implements TickDataAware{
 		}
 		openPrice = trade.getPrice();
 		lastPrice = trade.getPrice();
-		settlePrice = trade.getPrice();
 		direction = FieldUtils.isBuy(trade.getDirection()) ? PositionDirectionEnum.PD_Long : PositionDirectionEnum.PD_Short;
 		contractSymbol = trade.getContract().getSymbol();
 		contractName = trade.getContract().getFullName();
@@ -69,7 +68,6 @@ class SimPosition implements TickDataAware{
 	@Override
 	public void onTick(TickField tick) {
 		lastPrice = tick.getLastPrice();
-		settlePrice = tick.getSettlePrice();
 	}
 
 	public int availableVol() {
@@ -77,7 +75,7 @@ class SimPosition implements TickDataAware{
 	}
 	
 	public double frozenMargin() {
-		return settlePrice * volume * multipler * marginRatio;
+		return openPrice * volume * multipler * marginRatio;
 	}
 	
 	public double profit() {

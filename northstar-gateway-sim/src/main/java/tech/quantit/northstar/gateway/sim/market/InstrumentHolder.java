@@ -20,6 +20,8 @@ public class InstrumentHolder {
 		LocalDateTime ldt = LocalDateTime.now();
 		tb
 		.setLastPrice(InstrumentBasePrice.getBasePrice(contract))
+		.setSettlePrice(InstrumentBasePrice.getBasePrice(contract))
+		.setPreSettlePrice(InstrumentBasePrice.getBasePrice(contract))
 		.setGatewayId(contract.getGatewayId())
 		.addAskPrice(0)
 		.addBidPrice(0)

@@ -70,8 +70,7 @@ public class SimAccount {
 	protected Consumer<TradeRequest> openCallback = req -> {
 		if(req.isDone()) {			
 			eventBus.unregister(req);
-			// 延迟十秒再移除，以免撤单异常
-			CompletableFuture.runAsync(() -> openReqSet.remove(req), CompletableFuture.delayedExecutor(10, TimeUnit.SECONDS));
+			CompletableFuture.runAsync(() -> openReqSet.remove(req), CompletableFuture.delayedExecutor(300, TimeUnit.MILLISECONDS));
 		}
 		savingCallback.run();
 	};
@@ -79,8 +78,7 @@ public class SimAccount {
 	Consumer<TradeRequest> closeCallback = req -> {
 		if(req.isDone()) {			
 			eventBus.unregister(req);
-			// 延迟十秒再移除，以免撤单异常
-			CompletableFuture.runAsync(() -> closeReqSet.remove(req), CompletableFuture.delayedExecutor(10, TimeUnit.SECONDS));
+			CompletableFuture.runAsync(() -> closeReqSet.remove(req), CompletableFuture.delayedExecutor(300, TimeUnit.MILLISECONDS));
 		}
 		savingCallback.run();
 	};
