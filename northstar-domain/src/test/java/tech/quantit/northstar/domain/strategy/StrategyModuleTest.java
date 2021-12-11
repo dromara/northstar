@@ -121,6 +121,7 @@ public class StrategyModuleTest {
 		SubmitOrderReqField req = factory.makeOrderReq("rb2210", DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open, 1, 2000, 0);
 		module.ti = mock(ModuleTradeIntent.class);
 		when(module.ti.getSubmitOrderReq()).thenReturn(req);
+		module.savingTradeCallback = mock(Consumer.class);
 		module.onEvent(new NorthstarEvent(NorthstarEventType.TRADE, 
 				TradeField.newBuilder().setOriginOrderId(req.getOriginOrderId()).setDirection(DirectionEnum.D_Sell).build()));
 		verify(module.meb).post(any());
@@ -136,6 +137,7 @@ public class StrategyModuleTest {
 		SubmitOrderReqField req = factory.makeOrderReq("rb2210", DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open, 1, 2000, 0);
 		module.ti = mock(ModuleTradeIntent.class);
 		when(module.ti.getSubmitOrderReq()).thenReturn(req);
+		module.savingTradeCallback = mock(Consumer.class);
 		module.onEvent(new NorthstarEvent(NorthstarEventType.TRADE, 
 				TradeField.newBuilder().setOriginOrderId(req.getOriginOrderId()).setDirection(DirectionEnum.D_Buy).build()));
 		verify(module.meb).post(any());

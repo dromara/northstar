@@ -19,7 +19,6 @@ import tech.quantit.northstar.strategy.api.constant.RiskAuditResult;
 import tech.quantit.northstar.strategy.api.event.ModuleEvent;
 import tech.quantit.northstar.strategy.api.event.ModuleEventBus;
 import tech.quantit.northstar.strategy.api.event.ModuleEventType;
-import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TickField;

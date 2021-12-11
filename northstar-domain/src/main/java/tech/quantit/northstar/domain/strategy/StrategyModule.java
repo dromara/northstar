@@ -55,9 +55,10 @@ public class StrategyModule implements EventDrivenComponent{
 	@Setter
 	protected Consumer<ModuleDealRecord> dealRecordGenHandler;
 	
-	protected ModuleTradeIntent ti;
+	@Setter
+	protected Consumer<TradeField> savingTradeCallback;
 	
-	protected Consumer<TradeField> openTradeIntentSuccessCallback = trade -> moduleStatus.updatePosition(trade);
+	protected ModuleTradeIntent ti;
 	
 	@Getter
 	private String bindedMktGatewayId;
@@ -125,6 +126,8 @@ public class StrategyModule implements EventDrivenComponent{
 		if(ti != null && event.getData() instanceof TradeField trade && trade.getOriginOrderId().equals(ti.getSubmitOrderReq().getOriginOrderId())) {			
 			log.debug("[{}] 收到成交回报，订单号:{}", moduleStatus.getModuleName(), trade.getOriginOrderId());
 			ti.onTrade(trade);
+			moduleStatus.updatePosition(trade);
+			savingTradeCallback.accept(trade);
 		} 
 		if(ti !=null && event.getData() instanceof OrderField order && order.getOriginOrderId().equals(ti.getSubmitOrderReq().getOriginOrderId())) {			
 			log.debug("[{}] 收到订单回报，订单号：{}，订单状态{}", moduleStatus.getModuleName(), order.getOriginOrderId(), order.getOrderStatus());
@@ -164,7 +167,7 @@ public class StrategyModule implements EventDrivenComponent{
 				orderReq = mti.getSubmitOrderReq();
 			} else {
 				orderReq = (SubmitOrderReqField) moduleEvent.getData();				
-				ti = new ModuleTradeIntent(getName(), orderReq, openTradeIntentSuccessCallback, dealRecordGenHandler, () -> ti = null);
+				ti = new ModuleTradeIntent(getName(), orderReq, dealRecordGenHandler, () -> ti = null);
 			}
 			log.info("[{}] 生成订单{}：{}，{}，{}，{}手，价格{}，止损{}", getName(), orderReq.getOriginOrderId(), orderReq.getContract().getSymbol(),
 					orderReq.getDirection(), orderReq.getOffsetFlag(), orderReq.getVolume(), orderReq.getPrice(), orderReq.getStopPrice());

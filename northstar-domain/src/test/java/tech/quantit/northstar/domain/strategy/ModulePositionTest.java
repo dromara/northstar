@@ -49,7 +49,6 @@ public class ModulePositionTest {
 		mp = ModulePosition.builder()
 				.moduleName(NAME)
 				.clearoutCallback(null)
-				.positionChangeCallback(null)
 				.build();
 	}
 	
@@ -60,21 +59,21 @@ public class ModulePositionTest {
 				.build();
 		p1.merge(buyTrade);
 		p1.onTick(tick);
-		assertThat(p1.getProfit()).isEqualTo(10000);
+		assertThat(p1.profit()).isEqualTo(10000);
 		
 		ModulePosition p2 = ModulePosition.builder()
 				.moduleName(NAME)
 				.build();
 		p2.merge(sellTrade);
 		p2.onTick(tick);
-		assertThat(p2.getProfit()).isEqualTo(-5000);
+		assertThat(p2.profit()).isEqualTo(-5000);
 	}
 	
 	@Test
 	public void shouldNotUpdateProfit() {
 		ModulePosition p1 = ModulePosition.builder().moduleName(NAME).build();
 		p1.onTick(tick2);
-		assertThat(p1.getProfit()).isZero();
+		assertThat(p1.profit()).isZero();
 	}
 
 	@SuppressWarnings("unchecked")

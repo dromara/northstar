@@ -1,7 +1,6 @@
 package tech.quantit.northstar.domain.strategy;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -55,7 +54,7 @@ class ModuleStatusTest {
 	void testHoldingProfit() {
 		ms = new ModuleStatus("name", mp);
 		ms.holdingProfit();
-		verify(mp).getProfit();
+		verify(mp).profit();
 	}
 
 }

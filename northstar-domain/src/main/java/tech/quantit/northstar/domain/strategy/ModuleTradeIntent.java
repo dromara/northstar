@@ -23,8 +23,6 @@ public class ModuleTradeIntent {
 	private SubmitOrderReqField submitOrderReq;
 	
 	private ModulePosition currentPosition;
-	// 持仓变动回调
-	private Consumer<TradeField> positionChangeCallback;
 	// 平仓回调
 	private Consumer<ModuleDealRecord> closeCallback; 
 	// 意图结束回调
@@ -32,21 +30,18 @@ public class ModuleTradeIntent {
 	
 	private String moduleName;
 	
-	public ModuleTradeIntent(String moduleName, SubmitOrderReqField submitOrderReq, Consumer<TradeField> positionChangeCallback,
-			Consumer<ModuleDealRecord> closeCallback, Runnable doneCallback) {
+	public ModuleTradeIntent(String moduleName, SubmitOrderReqField submitOrderReq, Consumer<ModuleDealRecord> closeCallback, Runnable doneCallback) {
 		this.submitOrderReq = submitOrderReq;
-		this.positionChangeCallback = positionChangeCallback;
 		this.closeCallback = closeCallback;
 		this.moduleName = moduleName;
 		this.doneCallback = doneCallback;
 	}
 	
 	public ModuleTradeIntent(String moduleName, ModulePosition position, SubmitOrderReqField submitOrderReq,
-			Consumer<TradeField> positionChangeCallback, Consumer<ModuleDealRecord> closeCallback, Runnable doneCallback) {
+			Consumer<ModuleDealRecord> closeCallback, Runnable doneCallback) {
 		this.submitOrderReq = submitOrderReq;
 		this.currentPosition = position;
 		this.moduleName = moduleName;
-		this.positionChangeCallback = positionChangeCallback;
 		this.closeCallback = closeCallback;
 		this.doneCallback = doneCallback;
 	}
@@ -79,13 +74,13 @@ public class ModuleTradeIntent {
 			return;
 		
 		// 处理情况一、二、四
-		positionChangeCallback.accept(trade);
 		if(FieldUtils.isClose(trade.getOffsetFlag())) {
 			closeCallback.accept(genDealRecord(trade));
 		}
 		if(trade.getVolume() == submitOrderReq.getVolume()) {
 			doneCallback.run();
 		}
+		
 	}
 	
 	public int volume() {

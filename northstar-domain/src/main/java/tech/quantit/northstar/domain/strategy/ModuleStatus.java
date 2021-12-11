@@ -33,7 +33,6 @@ public class ModuleStatus {
 	public ModuleStatus(String name, ModulePosition modulePosition) {
 		moduleName = name;
 		logicalPosition = modulePosition;
-		logicalPosition.setPositionChangeCallback(this::updatePosition);
 		stateMachine = new ModuleStateMachine(name, ModuleState.EMPTY);
 		stateMachine.setState(getMergedState());
 	}
@@ -68,7 +67,7 @@ public class ModuleStatus {
 	}
 	
 	public double holdingProfit() {
-		return logicalPosition.getProfit();
+		return logicalPosition.profit();
 	}
 	
 	private ModuleState getMergedState() {

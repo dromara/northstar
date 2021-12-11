@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import tech.quantit.northstar.common.model.ContractManager;
 import tech.quantit.northstar.domain.GatewayAndConnectionManager;
@@ -16,6 +17,7 @@ import tech.quantit.northstar.domain.strategy.StopLoss;
 import tech.quantit.northstar.domain.strategy.StrategyModule;
 import tech.quantit.northstar.gateway.api.TradeGateway;
 import tech.quantit.northstar.main.persistence.ModuleRepository;
+import tech.quantit.northstar.main.persistence.po.ModulePositionPO;
 import tech.quantit.northstar.strategy.api.DealerPolicy;
 import tech.quantit.northstar.strategy.api.DynamicParamsAware;
 import tech.quantit.northstar.strategy.api.EventDrivenComponent;
@@ -27,6 +29,7 @@ import tech.quantit.northstar.strategy.api.model.ComponentField;
 import tech.quantit.northstar.strategy.api.model.DynamicParams;
 import tech.quantit.northstar.strategy.api.model.ModuleInfo;
 import tech.quantit.northstar.strategy.api.model.ModulePositionInfo;
+import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
 
 /**
@@ -66,12 +69,22 @@ public class StrategyModuleFactory {
 		return module;
 	}
 	
+	private Consumer<ModulePositionInfo> positionSavingCallback = posInfo -> {
+		ModulePositionPO po = ModulePositionPO.builder()
+				.moduleName(posInfo.getModuleName())
+				.positions(List.of(posInfo))
+				.build();
+		moduleRepo.saveModulePosition(po);
+	};
+	
 	private ModuleStatus convertStatus(ModuleInfo moduleInfo, List<ModulePositionInfo> positionInfos, ModuleEventBus meb) {
 		if(positionInfos.isEmpty()) {
 			ModulePosition mp = ModulePosition.builder()
 					.moduleName(moduleInfo.getModuleName())
+					.direction(PositionDirectionEnum.PD_Unknown)
 					.meb(meb)
 					.clearoutCallback(dealRecord -> moduleRepo.saveDealRecord(dealRecord))
+					.positionSavingCallback(positionSavingCallback)
 					.build();
 			return new ModuleStatus(moduleInfo.getModuleName(), mp);
 		} else {
@@ -87,6 +100,7 @@ public class StrategyModuleFactory {
 					.volume(mpi.getVolume())
 					.contract(contract)
 					.clearoutCallback(dealRecord -> moduleRepo.saveDealRecord(dealRecord))
+					.positionSavingCallback(positionSavingCallback)
 					.direction(mpi.getPositionDir())
 					.build();
 			return new ModuleStatus(moduleInfo.getModuleName(), mp);

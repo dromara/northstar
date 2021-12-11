@@ -3,6 +3,7 @@ package tech.quantit.northstar.main.service;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -10,12 +11,14 @@ import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.math3.stat.StatUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.constant.DateTimeConstant;
 import tech.quantit.northstar.common.model.ContractManager;
+import tech.quantit.northstar.common.utils.FieldUtils;
 import tech.quantit.northstar.domain.GatewayAndConnectionManager;
 import tech.quantit.northstar.domain.GatewayConnection;
 import tech.quantit.northstar.domain.strategy.ModuleManager;
@@ -45,7 +48,6 @@ import tech.quantit.northstar.strategy.api.model.ModulePositionInfo;
 import tech.quantit.northstar.strategy.api.model.ModuleRealTimeInfo;
 import tech.quantit.northstar.strategy.api.model.ModuleTradeRecord;
 import tech.quantit.northstar.strategy.api.model.TimeSeriesData;
-import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.TickField;
 
@@ -175,6 +177,17 @@ public class ModuleService implements InitializingBean {
 			moduleInfo.setEnabled(isEnabled);
 			moduleRepo.saveModuleInfo(moduleInfo);
 		});
+		strategyModule.setSavingTradeCallback(trade -> {
+			moduleRepo.saveTradeRecord(ModuleTradeRecord.builder()
+				.contractName(trade.getContract().getFullName())
+				.actionTime(trade.getTradeTimestamp())
+				.moduleName(info.getModuleName())
+				.operation(FieldUtils.chn(trade.getDirection()) + FieldUtils.chn(trade.getOffsetFlag()))
+				.price(trade.getPrice())
+				.tradingDay(trade.getTradingDay())
+				.volume(trade.getVolume())
+				.build());
+		});
 
 		// 初始化策略数据
 		SignalPolicy signalPolicy = strategyModule.getSignalPolicy();
@@ -234,8 +247,31 @@ public class ModuleService implements InitializingBean {
 	 * @return
 	 */
 	public ModuleRealTimeInfo getModuleRealTimeInfo(String moduleName) {
-		// TODO
-		return null;
+		ModuleStatus moduleStatus = mdlMgr.getModule(moduleName).getModuleStatus();
+		List<ModulePositionInfo> list = moduleStatus.getLogicalPosition().getVolume() == 0 ? Collections.emptyList() : List.of(moduleStatus.getLogicalPosition().convertTo());
+		List<ModuleDealRecord> dealRecords = getDealRecords(moduleName);
+		List<ModuleDealRecord> subArrOfDealRecords = dealRecords.size() > 30 ? dealRecords.subList(dealRecords.size() - 30, dealRecords.size()) : dealRecords;
+		Map<String, ModulePositionInfo> longMap = new HashMap<>();
+		Map<String, ModulePositionInfo> shortMap = new HashMap<>();
+		list.stream().filter(info -> FieldUtils.isLong(info.getPositionDir())).forEach(info -> longMap.put(info.getUnifiedSymbol(), info));
+		list.stream().filter(info -> FieldUtils.isShort(info.getPositionDir())).forEach(info -> shortMap.put(info.getUnifiedSymbol(), info));
+		double winningRateOf5Trans = dealRecords.size() < 5 ? -1 : dealRecords.subList(dealRecords.size() - 5, dealRecords.size()).stream().filter(r -> r.getCloseProfit() > 0).count() / 5D;
+		double winningRateOf10Trans = dealRecords.size() < 10 ? -1 : dealRecords.subList(dealRecords.size() - 10, dealRecords.size()).stream().filter(r -> r.getCloseProfit() > 0).count() / 10D;
+		double meanProfitOf5Trans = dealRecords.size() < 5 ? 0 : dealRecords.subList(dealRecords.size() - 5, dealRecords.size()).stream().mapToDouble(ModuleDealRecord::getCloseProfit).sum() / 5D;
+		double meanProfitOf10Trans = dealRecords.size() < 10 ? 0 : dealRecords.subList(dealRecords.size() - 10, dealRecords.size()).stream().mapToDouble(ModuleDealRecord::getCloseProfit).sum() / 10D;
+		return ModuleRealTimeInfo.builder()
+				.moduleName(moduleName)
+				.accountId(mdlMgr.getModule(moduleName).getGateway().getGatewaySetting().getGatewayId())
+				.moduleState(moduleStatus.getStateMachine().getCurState())
+				.totalPositionProfit(moduleStatus.holdingProfit())
+				.avgOccupiedAmount(StatUtils.mean(subArrOfDealRecords.stream().mapToDouble(ModuleDealRecord::getEstimatedOccupiedMoney).toArray()))
+				.longPositions(longMap)
+				.shortPositions(shortMap)
+				.meanProfitOf5Transactions(meanProfitOf5Trans)
+				.meanProfitOf10Transactions(meanProfitOf10Trans)
+				.winningRateOf5Transactions(winningRateOf5Trans)
+				.winningRateOf10Transactions(winningRateOf10Trans)
+				.build();
 	}
 
 	/**
@@ -322,7 +358,6 @@ public class ModuleService implements InitializingBean {
 				.contract(contractMgr.getContract(position.getUnifiedSymbol()))
 				.clearoutCallback(dealRecord -> moduleRepo.saveDealRecord(dealRecord))
 				.direction(position.getPositionDir())
-				.positionChangeCallback(trade -> moduleStatus.updatePosition(trade))
 				.build();
 		moduleStatus.setLogicalPosition(mp);
 		List<ModulePositionInfo> posList = List.of(moduleStatus.getLogicalPosition().convertTo());

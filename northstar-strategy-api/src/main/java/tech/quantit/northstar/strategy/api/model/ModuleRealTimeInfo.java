@@ -20,9 +20,9 @@ public class ModuleRealTimeInfo {
 	private double totalPositionProfit;
 	
 	/**
-	 * 模组可用金额
+	 * 模组平均占用资金
 	 */
-	private int moduleAvailable;
+	private double avgOccupiedAmount;
 	
 	/**
 	 * 模组状态
@@ -48,4 +48,24 @@ public class ModuleRealTimeInfo {
 	 * 空头仓位
 	 */
 	private Map<String, ModulePositionInfo> shortPositions;
+	
+	/**
+	 * 最近五次交易的平均盈亏
+	 */
+	private double meanProfitOf5Transactions;
+	
+	/**
+	 * 最近十次交易的平均盈亏
+	 */
+	private double meanProfitOf10Transactions;
+	
+	/**
+	 * 最近五次交易的胜率 
+	 */
+	private double winningRateOf5Transactions;
+	
+	/**
+	 * 最近十次交易的胜率
+	 */
+	private double winningRateOf10Transactions;
 }

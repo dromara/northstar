@@ -25,20 +25,16 @@ public class ModuleTradeIntentTest {
 	String NAME = "testModule";
 	String SYMBOL = "rb2210";
 	
-	
-	@SuppressWarnings("unchecked")
-	Consumer<TradeField> openCallback = mock(Consumer.class);
-	
 	@SuppressWarnings("unchecked")
 	Consumer<ModuleDealRecord> closeCallback = mock(Consumer.class);
 
 	@SuppressWarnings("unchecked")
-	Runnable fallback = mock(Runnable.class);
+	Runnable doneCallback = mock(Runnable.class);
 	
 	@Test
 	public void testAllTradedForOpenOrder() {
 		SubmitOrderReqField orderReq = factory.makeOrderReq(SYMBOL, DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open, 4, 1000, 0);
-		ModuleTradeIntent mti = new ModuleTradeIntent(NAME, orderReq, openCallback, closeCallback, fallback);
+		ModuleTradeIntent mti = new ModuleTradeIntent(NAME, orderReq, closeCallback, doneCallback);
 		
 		mti.onOrder(OrderField.newBuilder()
 				.setOriginOrderId(orderReq.getOriginOrderId())
@@ -52,14 +48,21 @@ public class ModuleTradeIntentTest {
 				.setOffsetFlag(orderReq.getOffsetFlag())
 				.build());
 		
-		verify(openCallback).accept(any(TradeField.class));
+		verify(doneCallback).run();
 	}
 	
 	
 	@Test
 	public void testPartiallyTradedForOpenOrder() {
 		SubmitOrderReqField orderReq = factory.makeOrderReq(SYMBOL, DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open, 4, 1000, 0);
-		ModuleTradeIntent mti = new ModuleTradeIntent(NAME, orderReq, openCallback, closeCallback, fallback);
+		ModuleTradeIntent mti = new ModuleTradeIntent(NAME, orderReq, closeCallback, doneCallback);
+		
+		mti.onTrade(TradeField.newBuilder()
+				.setOriginOrderId(orderReq.getOriginOrderId())
+				.setVolume(orderReq.getVolume() - 1)
+				.setOffsetFlag(orderReq.getOffsetFlag())
+				.build());
+
 		
 		mti.onOrder(OrderField.newBuilder()
 				.setOriginOrderId(orderReq.getOriginOrderId())
@@ -68,20 +71,15 @@ public class ModuleTradeIntentTest {
 				.setOrderStatus(OrderStatusEnum.OS_Canceled)
 				.setOffsetFlag(orderReq.getOffsetFlag())
 				.build());
-		mti.onTrade(TradeField.newBuilder()
-				.setOriginOrderId(orderReq.getOriginOrderId())
-				.setVolume(orderReq.getVolume())
-				.setOffsetFlag(orderReq.getOffsetFlag())
-				.build());
 		
-		verify(openCallback).accept(any(TradeField.class));
+		verify(doneCallback).run();
 	}
 	
 	
 	@Test
 	public void testPartiallyTradedForOpenOrder2() {
 		SubmitOrderReqField orderReq = factory.makeOrderReq(SYMBOL, DirectionEnum.D_Sell, OffsetFlagEnum.OF_Open, 4, 1000, 0);
-		ModuleTradeIntent mti = new ModuleTradeIntent(NAME, orderReq, openCallback, closeCallback, fallback);
+		ModuleTradeIntent mti = new ModuleTradeIntent(NAME, orderReq, closeCallback, doneCallback);
 		
 		mti.onTrade(TradeField.newBuilder()
 				.setOriginOrderId(orderReq.getOriginOrderId())
@@ -96,14 +94,14 @@ public class ModuleTradeIntentTest {
 				.setOffsetFlag(orderReq.getOffsetFlag())
 				.build());
 		
-		verify(openCallback).accept(any(TradeField.class));
+		verify(doneCallback).run();
 	}
 	
 	
 	@Test
 	public void testNonTradedForOpenOrder() {
 		SubmitOrderReqField orderReq = factory.makeOrderReq(SYMBOL, DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open, 4, 1000, 0);
-		ModuleTradeIntent mti = new ModuleTradeIntent(NAME, orderReq, openCallback, closeCallback, fallback);
+		ModuleTradeIntent mti = new ModuleTradeIntent(NAME, orderReq, closeCallback, doneCallback);
 		
 		mti.onOrder(OrderField.newBuilder()
 				.setOriginOrderId(orderReq.getOriginOrderId())
@@ -113,7 +111,7 @@ public class ModuleTradeIntentTest {
 				.setOffsetFlag(orderReq.getOffsetFlag())
 				.build());
 		
-		verify(fallback).run();
+		verify(doneCallback).run();
 	}
 	
 	
@@ -123,7 +121,7 @@ public class ModuleTradeIntentTest {
 		ModulePosition mp = mock(ModulePosition.class);
 		when(mp.getOpenPrice()).thenReturn(1010D);
 		when(mp.getDirection()).thenReturn(PositionDirectionEnum.PD_Long);
-		ModuleTradeIntent mti = new ModuleTradeIntent(NAME, mp, orderReq, mock(Consumer.class), closeCallback, fallback);
+		ModuleTradeIntent mti = new ModuleTradeIntent(NAME, mp, orderReq, closeCallback, doneCallback);
 		
 		mti.onOrder(OrderField.newBuilder()
 				.setOriginOrderId(orderReq.getOriginOrderId())
@@ -146,7 +144,7 @@ public class ModuleTradeIntentTest {
 		ModulePosition mp = mock(ModulePosition.class);
 		when(mp.getOpenPrice()).thenReturn(1010D);
 		when(mp.getDirection()).thenReturn(PositionDirectionEnum.PD_Long);
-		ModuleTradeIntent mti = new ModuleTradeIntent(NAME, mp, orderReq, mock(Consumer.class), closeCallback, fallback);
+		ModuleTradeIntent mti = new ModuleTradeIntent(NAME, mp, orderReq, closeCallback, doneCallback);
 		
 		mti.onOrder(OrderField.newBuilder()
 				.setOriginOrderId(orderReq.getOriginOrderId())
@@ -177,7 +175,7 @@ public class ModuleTradeIntentTest {
 		ModulePosition mp = mock(ModulePosition.class);
 		when(mp.getOpenPrice()).thenReturn(1010D);
 		when(mp.getDirection()).thenReturn(PositionDirectionEnum.PD_Long);
-		ModuleTradeIntent mti = new ModuleTradeIntent(NAME, mp, orderReq, mock(Consumer.class), closeCallback, fallback);
+		ModuleTradeIntent mti = new ModuleTradeIntent(NAME, mp, orderReq, closeCallback, doneCallback);
 		
 		mti.onOrder(OrderField.newBuilder()
 				.setOriginOrderId(orderReq.getOriginOrderId())
@@ -187,7 +185,7 @@ public class ModuleTradeIntentTest {
 				.setOrderStatus(OrderStatusEnum.OS_Canceled)
 				.build());
 		
-		verify(fallback).run();
+		verify(doneCallback).run();
 	}
 	
 }

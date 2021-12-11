@@ -48,13 +48,10 @@ public class ModulePosition implements TickDataAware, EventDrivenComponent{
 	protected ModuleEventBus meb;
 	
 	@Getter
-	private double profit;
-	
-	@Getter
 	private int volume;
-	
+	@Builder.Default
 	@Getter
-	private PositionDirectionEnum direction;
+	private PositionDirectionEnum direction = PositionDirectionEnum.PD_Unknown;
 	
 	private String openTradingDay;
 	
@@ -64,17 +61,20 @@ public class ModulePosition implements TickDataAware, EventDrivenComponent{
 	@Getter
 	private ContractField contract;
 	
-	protected TickField lastTick;
+	private double multipler;
+	
+	private double currentPrice;
 	
 	private final String moduleName;
 	
 	private ModuleTradeIntent ti;
 	
+	protected TickField lastTick;
+	
 	// 清仓回调
 	private Consumer<ModuleDealRecord> clearoutCallback;
-	// 该回调属于外部调用，不能在ModulePosition内部调用，否则就是死循环
 	@Setter
-	private Consumer<TradeField> positionChangeCallback;
+	private Consumer<ModulePositionInfo> positionSavingCallback;
 	
 	public ModulePosition merge(TradeField trade){
 		if(volume > 0 && !StringUtils.equals(trade.getContract().getUnifiedSymbol(), contract.getUnifiedSymbol())) {
@@ -87,9 +87,11 @@ public class ModulePosition implements TickDataAware, EventDrivenComponent{
 			openTime = trade.getTradeTimestamp();
 			openPrice = trade.getPrice();
 			contract = trade.getContract();
+			multipler = contract.getMultiplier();
 			volume = trade.getVolume();
 			direction = convertDir(trade.getDirection());
-			log.debug("[{}] 持仓变化，当前方向{}，{}手", moduleName, direction, volume);
+			outputCurrentStatus();
+			applySaving();
 			return this;
 		}
 		
@@ -97,7 +99,8 @@ public class ModulePosition implements TickDataAware, EventDrivenComponent{
 		if(convertDir(trade.getDirection()) == direction && FieldUtils.isOpen(trade.getOffsetFlag())) {
 			openPrice = (volume * openPrice + trade.getVolume() * trade.getPrice()) / (volume + trade.getVolume()); 
 			volume += trade.getVolume();
-			log.debug("[{}] 持仓变化，当前方向{}，{}手", moduleName, direction, volume);
+			outputCurrentStatus();
+			applySaving();
 			return this;
 		}
 		
@@ -112,13 +115,23 @@ public class ModulePosition implements TickDataAware, EventDrivenComponent{
 				volume = 0;
 				direction = PositionDirectionEnum.PD_Unknown;
 			}
-			log.debug("[{}] 持仓变化，当前方向{}，{}手", moduleName, direction, volume);
+			outputCurrentStatus();
+			applySaving();
 			return this;
 		}
 		
 		String thisInfo = String.format("当时仓位成交信息：方向%s，手数%s ", direction, trade.getVolume());
 		String otherInfo = String.format("合并仓位成交信息：方向%s，开平%s，手数%s", trade.getDirection(), trade.getOffsetFlag(), trade.getVolume());
 		throw new IllegalStateException("未知异常情况：" + thisInfo + otherInfo);
+	}
+	
+	private void outputCurrentStatus() {
+		log.debug("[{}] 持仓变化，当前方向{}，{}手", moduleName, direction, volume);
+	}
+	
+	private void applySaving() {
+		if(positionSavingCallback != null)
+			positionSavingCallback.accept(convertTo());
 	}
 	
 	private PositionDirectionEnum convertDir(DirectionEnum dir) {
@@ -138,14 +151,17 @@ public class ModulePosition implements TickDataAware, EventDrivenComponent{
 		direction = PositionDirectionEnum.PD_Unknown;
 	}
 	
+	public double profit() {
+		return factor() * (currentPrice - openPrice) * volume * multipler;
+	}
+	
 	@Override
 	public void onTick(TickField tick) {
 		if(volume == 0 || !StringUtils.equals(tick.getUnifiedSymbol(), contract.getUnifiedSymbol())) {
 			return;
 		}
+		currentPrice = tick.getLastPrice();
 		lastTick = tick;
-		// 更新持仓盈亏
-		profit = factor() * (tick.getLastPrice() - openPrice) * volume * getContract().getMultiplier();
 		// 监听止损
 		if(available() > 0 && stopLoss != null && stopLoss.isTriggered(tick)) {
 			SubmitOrderReqField orderReq = SubmitOrderReqField.newBuilder()
@@ -162,7 +178,7 @@ public class ModulePosition implements TickDataAware, EventDrivenComponent{
 					.setHedgeFlag(HedgeFlagEnum.HF_Speculation)
 					.setForceCloseReason(ForceCloseReasonEnum.FCR_NotForceClose)
 					.build();
-			ti = new ModuleTradeIntent(moduleName, this, orderReq, positionChangeCallback, clearoutCallback, () -> ti = null);
+			ti = new ModuleTradeIntent(moduleName, this, orderReq, clearoutCallback, () -> ti = null);
 			meb.post(new ModuleEvent<>(ModuleEventType.STOP_LOSS, ti));
 		}
 	}
@@ -202,7 +218,7 @@ public class ModulePosition implements TickDataAware, EventDrivenComponent{
 							.setOffsetFlag(closeOffset())
 							.setDirection(closingDirection())
 							.build();
-					ti = new ModuleTradeIntent(moduleName, this, submitReq, positionChangeCallback, clearoutCallback, () -> ti = null );
+					ti = new ModuleTradeIntent(moduleName, this, submitReq, clearoutCallback, () -> ti = null );
 					meb.post(new ModuleEvent<>(ModuleEventType.ORDER_REQ_ACCEPTED, ti));
 				}
 			}
