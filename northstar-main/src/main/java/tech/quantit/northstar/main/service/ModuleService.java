@@ -48,8 +48,11 @@ import tech.quantit.northstar.strategy.api.model.ModulePositionInfo;
 import tech.quantit.northstar.strategy.api.model.ModuleRealTimeInfo;
 import tech.quantit.northstar.strategy.api.model.ModuleTradeRecord;
 import tech.quantit.northstar.strategy.api.model.TimeSeriesData;
+import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreField.BarField;
+import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.TickField;
+import xyz.redtorch.pb.CoreField.TradeField;
 
 @Slf4j
 public class ModuleService implements InitializingBean {
@@ -345,23 +348,33 @@ public class ModuleService implements InitializingBean {
 	 * @param position
 	 * @return
 	 */
-	public boolean updatePosition(String moduleName, ModulePositionInfo position) {
+	public boolean updatePosition(String moduleName, ModulePositionInfo posInfo) {
 		ModuleStatus moduleStatus = mdlMgr.getModule(moduleName).getModuleStatus();
-		ModulePosition mp = ModulePosition.builder()
-				.moduleName(moduleName)
-				.meb(moduleStatus.getModuleEventBus())
-				.openTime(position.getOpenTime())
-				.openPrice(position.getOpenPrice())
-				.stopLoss(new StopLoss(position.getPositionDir(), position.getStopLossPrice()))
-				.openTradingDay(position.getOpenTradingDay())
-				.volume(position.getVolume())
-				.contract(contractMgr.getContract(position.getUnifiedSymbol()))
-				.clearoutCallback(dealRecord -> moduleRepo.saveDealRecord(dealRecord))
-				.direction(position.getPositionDir())
+		ContractField contract = contractMgr.getContract(posInfo.getUnifiedSymbol());
+		TradeField simTrade = TradeField.newBuilder()
+				.setTradeTimestamp(posInfo.getOpenTime())
+				.setTradingDay(posInfo.getOpenTradingDay())
+				.setPrice(posInfo.getOpenPrice())
+				.setVolume(posInfo.getVolume())
+				.setContract(contract)
+				.setDirection(FieldUtils.isLong(posInfo.getPositionDir()) ? DirectionEnum.D_Buy : DirectionEnum.D_Sell)
 				.build();
-		moduleStatus.setLogicalPosition(mp);
+		moduleStatus.updatePosition(simTrade);
+		moduleStatus.getLogicalPosition().stopLoss(posInfo.getStopLossPrice());
 		List<ModulePositionInfo> posList = List.of(moduleStatus.getLogicalPosition().convertTo());
-		moduleRepo.saveModulePosition(ModulePositionPO.builder().moduleName(moduleName).positions(posList).build());
+		moduleRepo.saveTradeRecord(ModuleTradeRecord.builder()
+				.moduleName(moduleName)
+				.contractName(contract.getFullName())
+				.actionTime(posInfo.getOpenTime())
+				.price(posInfo.getOpenPrice())
+				.volume(posInfo.getVolume())
+				.tradingDay(posInfo.getOpenTradingDay())
+				.operation(FieldUtils.chn(simTrade.getDirection()) + FieldUtils.chn(simTrade.getOffsetFlag()))
+				.build());
+		moduleRepo.saveModulePosition(ModulePositionPO.builder()
+				.moduleName(moduleName)
+				.positions(posList)
+				.build());
 		return true;
 	}
 

@@ -86,8 +86,4 @@ public class ModuleStatus {
 		moduleEventBus.register(logicalPosition);
 	}
 
-	public void setLogicalPosition(ModulePosition position) {
-		logicalPosition = position;
-	}
-	
 }
