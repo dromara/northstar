@@ -1,8 +1,10 @@
 package tech.quantit.northstar.main.config;
 
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -19,11 +21,14 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.mongodb.client.MongoClient;
 
+import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.domain.GatewayAndConnectionManager;
 import tech.quantit.northstar.domain.account.TradeDayAccount;
 import tech.quantit.northstar.domain.gateway.ContractManager;
 import tech.quantit.northstar.gateway.api.AbstractGatewayFactory;
+import tech.quantit.northstar.gateway.api.MarketGlobalRegistry;
+import tech.quantit.northstar.gateway.api.SubscriptionManager;
 import tech.quantit.northstar.gateway.sim.persistence.SimAccountRepository;
 import tech.quantit.northstar.gateway.sim.trade.SimGatewayFactory;
 import tech.quantit.northstar.gateway.sim.trade.SimMarket;
@@ -31,6 +36,7 @@ import tech.quantit.northstar.main.interceptor.AuthorizationInterceptor;
 import tech.quantit.northstar.main.persistence.BarBufferManager;
 import tech.quantit.northstar.main.persistence.MarketDataRepository;
 import tech.quantit.northstar.main.persistence.MongoClientAdapter;
+import xyz.redtorch.gateway.ctp.common.CtpSubscriptionManager;
 import xyz.redtorch.gateway.ctp.x64v6v3v15v.CtpGatewayFactory;
 import xyz.redtorch.gateway.ctp.x64v6v5v1cpv.CtpSimGatewayFactory;
 
@@ -113,8 +119,15 @@ public class AppConfig implements WebMvcConfigurer {
 	}
 	
 	@Bean
-	public AbstractGatewayFactory ctpGatewayFactory(FastEventEngine fastEventEngine) {
-		return new CtpGatewayFactory(fastEventEngine);
+	public MarketGlobalRegistry marketGlobalRegistry(FastEventEngine fastEventEngine) {
+		Map<GatewayType, SubscriptionManager> csmMap = new EnumMap<>(GatewayType.class);
+		csmMap.put(GatewayType.CTP, new CtpSubscriptionManager());
+		return new MarketGlobalRegistry(fastEventEngine, csmMap);
+	}
+	
+	@Bean
+	public AbstractGatewayFactory ctpGatewayFactory(FastEventEngine fastEventEngine, MarketGlobalRegistry registry) {
+		return new CtpGatewayFactory(fastEventEngine, registry);
 	}
 	
 	@Bean

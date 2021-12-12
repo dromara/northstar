@@ -2,6 +2,7 @@ package tech.quantit.northstar.domain.gateway;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import tech.quantit.northstar.common.constant.GatewayType;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.OrderField;
@@ -20,9 +21,12 @@ public class Contract {
 
 	@Getter
 	protected ContractField field;
+	@Getter
+	protected GatewayType gatewayType;
 
-	public Contract(ContractField field) {
+	public Contract(ContractField field, GatewayType gatewayType) {
 		this.field = field;
+		this.gatewayType = gatewayType;
 	}
 	
 	public boolean hasTickOf(TickField tick) {
