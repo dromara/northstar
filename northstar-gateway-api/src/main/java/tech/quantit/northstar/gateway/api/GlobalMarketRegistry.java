@@ -12,13 +12,13 @@ import xyz.redtorch.pb.CoreField.TickField;
  * @author KevinHuangwl
  *
  */
-public class MarketGlobalRegistry {
+public class GlobalMarketRegistry {
 
 	private FastEventEngine feEngine;
 	
 	private Map<GatewayType, SubscriptionManager> csmMap;
 	
-	public MarketGlobalRegistry(FastEventEngine feEngine, Map<GatewayType, SubscriptionManager> csmMap) {
+	public GlobalMarketRegistry(FastEventEngine feEngine, Map<GatewayType, SubscriptionManager> csmMap) {
 		this.feEngine = feEngine;
 		this.csmMap = csmMap;
 	}

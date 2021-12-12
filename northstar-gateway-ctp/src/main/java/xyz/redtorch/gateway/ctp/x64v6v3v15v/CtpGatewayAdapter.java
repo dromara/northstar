@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.gateway.api.GatewayAbstract;
 import tech.quantit.northstar.gateway.api.MarketGateway;
-import tech.quantit.northstar.gateway.api.MarketGlobalRegistry;
+import tech.quantit.northstar.gateway.api.GlobalMarketRegistry;
 import tech.quantit.northstar.gateway.api.TradeGateway;
 import xyz.redtorch.pb.CoreEnum.GatewayTypeEnum;
 import xyz.redtorch.pb.CoreField.CancelOrderReqField;
@@ -72,9 +72,9 @@ public class CtpGatewayAdapter extends GatewayAbstract implements MarketGateway,
 	private MdSpi mdSpi = null;
 	private TdSpi tdSpi = null;
 	
-	private MarketGlobalRegistry registry;
+	private GlobalMarketRegistry registry;
 	
-	public CtpGatewayAdapter(FastEventEngine fastEventEngine, GatewaySettingField gatewaySetting, MarketGlobalRegistry registry) {
+	public CtpGatewayAdapter(FastEventEngine fastEventEngine, GatewaySettingField gatewaySetting, GlobalMarketRegistry registry) {
 		super(gatewaySetting);
 		
 		this.registry = registry;

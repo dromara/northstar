@@ -8,7 +8,7 @@ import tech.quantit.northstar.common.model.CtpSettings;
 import tech.quantit.northstar.common.model.GatewayDescription;
 import tech.quantit.northstar.gateway.api.AbstractGatewayFactory;
 import tech.quantit.northstar.gateway.api.Gateway;
-import tech.quantit.northstar.gateway.api.MarketGlobalRegistry;
+import tech.quantit.northstar.gateway.api.GlobalMarketRegistry;
 import xyz.redtorch.pb.CoreEnum.GatewayAdapterTypeEnum;
 import xyz.redtorch.pb.CoreEnum.GatewayTypeEnum;
 import xyz.redtorch.pb.CoreField.GatewaySettingField;
@@ -18,9 +18,9 @@ public class CtpGatewayFactory extends AbstractGatewayFactory{
 
 	private FastEventEngine fastEventEngine;
 	
-	private MarketGlobalRegistry registry;
+	private GlobalMarketRegistry registry;
 	
-	public CtpGatewayFactory(FastEventEngine fastEventEngine, MarketGlobalRegistry registry) {
+	public CtpGatewayFactory(FastEventEngine fastEventEngine, GlobalMarketRegistry registry) {
 		this.fastEventEngine = fastEventEngine;
 		this.registry = registry;
 	}
