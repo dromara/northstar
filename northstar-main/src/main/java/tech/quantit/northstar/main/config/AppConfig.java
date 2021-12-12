@@ -27,8 +27,8 @@ import tech.quantit.northstar.domain.GatewayAndConnectionManager;
 import tech.quantit.northstar.domain.account.TradeDayAccount;
 import tech.quantit.northstar.domain.gateway.ContractManager;
 import tech.quantit.northstar.gateway.api.AbstractGatewayFactory;
-import tech.quantit.northstar.gateway.api.GlobalMarketRegistry;
-import tech.quantit.northstar.gateway.api.SubscriptionManager;
+import tech.quantit.northstar.gateway.api.domain.GlobalMarketRegistry;
+import tech.quantit.northstar.gateway.api.domain.SubscriptionManager;
 import tech.quantit.northstar.gateway.sim.persistence.SimAccountRepository;
 import tech.quantit.northstar.gateway.sim.trade.SimGatewayFactory;
 import tech.quantit.northstar.gateway.sim.trade.SimMarket;
@@ -120,9 +120,9 @@ public class AppConfig implements WebMvcConfigurer {
 	
 	@Bean
 	public GlobalMarketRegistry marketGlobalRegistry(FastEventEngine fastEventEngine) {
-		Map<GatewayType, SubscriptionManager> csmMap = new EnumMap<>(GatewayType.class);
-		csmMap.put(GatewayType.CTP, new CtpSubscriptionManager());
-		return new GlobalMarketRegistry(fastEventEngine, csmMap);
+		GlobalMarketRegistry registry = new GlobalMarketRegistry(fastEventEngine);
+		registry.register(new CtpSubscriptionManager());
+		return registry;
 	}
 	
 	@Bean

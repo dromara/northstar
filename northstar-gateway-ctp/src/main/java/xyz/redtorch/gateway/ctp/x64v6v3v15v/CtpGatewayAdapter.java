@@ -8,11 +8,12 @@ import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.gateway.api.GatewayAbstract;
 import tech.quantit.northstar.gateway.api.MarketGateway;
-import tech.quantit.northstar.gateway.api.GlobalMarketRegistry;
 import tech.quantit.northstar.gateway.api.TradeGateway;
+import tech.quantit.northstar.gateway.api.domain.GlobalMarketRegistry;
 import xyz.redtorch.pb.CoreEnum.GatewayTypeEnum;
 import xyz.redtorch.pb.CoreField.CancelOrderReqField;
 import xyz.redtorch.pb.CoreField.ContractField;
@@ -263,6 +264,13 @@ public class CtpGatewayAdapter extends GatewayAbstract implements MarketGateway,
 		FileUtils.copyURLToFile(sourceURL, targetFile);
 
 		targetFile.deleteOnExit();
+	}
+
+
+
+	@Override
+	public GatewayType gatewayType() {
+		return GatewayType.CTP;
 	}
 
 }

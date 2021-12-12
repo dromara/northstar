@@ -1,19 +1,18 @@
 package tech.quantit.northstar.gateway.api;
 
+import tech.quantit.northstar.common.constant.GatewayType;
 import xyz.redtorch.pb.CoreField.ContractField;
 
 public interface MarketGateway extends Gateway {
 
 	/**
 	 * 订阅
-	 * 
 	 * @param subscribeReq
 	 */
 	boolean subscribe(ContractField contract);
 
 	/**
 	 * 退订
-	 * 
 	 * @param subscribeReq
 	 */
 	boolean unsubscribe(ContractField contract);
@@ -23,4 +22,10 @@ public interface MarketGateway extends Gateway {
 	 * @return
 	 */
 	boolean isActive();
+	
+	/**
+	 * 网关类型
+	 * @return
+	 */
+	GatewayType gatewayType();
 }

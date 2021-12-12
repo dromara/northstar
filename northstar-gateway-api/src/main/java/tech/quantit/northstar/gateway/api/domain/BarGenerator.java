@@ -1,9 +1,7 @@
-package tech.quantit.northstar.domain.gateway;
+package tech.quantit.northstar.gateway.api.domain;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoField;
-import java.util.Collection;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Consumer;
 
 import lombok.extern.slf4j.Slf4j;
@@ -24,25 +22,26 @@ public class BarGenerator {
 
 	private TickField preTick;
 
-	private boolean newFlag;
-
-	private Contract contract;
+	private NormalContract contract;
 	
 	private Consumer<BarField> barCallBack;
 
-	public BarGenerator(Contract contract, Consumer<BarField> barCallBack) {
+	public BarGenerator(NormalContract contract, Consumer<BarField> barCallBack) {
 		this.barCallBack = barCallBack;
 		this.contract = contract;
 	}
 	
-	private ConcurrentLinkedQueue<TickField> bufTickList = new ConcurrentLinkedQueue<>();
-
+	public BarGenerator(NormalContract contract) {
+		this(contract, null);
+	}
+	
 	/**
 	 * 更新Tick数据
 	 * 
 	 * @param tick
 	 */
 	public void update(TickField tick) {
+		boolean newFlag;
 		// 如果tick为空或者合约不匹配则返回
 		if (tick == null) {
 			log.warn("输入的Tick数据为空,当前Bar合约{}", contract.unifiedSymbol());
@@ -121,7 +120,6 @@ public class BarGenerator {
 		barBuilder.setOpenInterestDelta(tick.getOpenInterestDelta() + barBuilder.getOpenInterestDelta());
 
 		preTick = tick;
-		bufTickList.add(tick);
 	}
 
 	public void finish() {
@@ -133,11 +131,13 @@ public class BarGenerator {
 			barCallBack.accept(barBuilder.build());
 			
 		}
-		// 清空当前Tick缓存
-		bufTickList.clear();
 		
 		barLocalDateTime = null;
 		barBuilder = null;
+	}
+
+	public void setOnBarCallback(Consumer<BarField> callback) {
+		barCallBack = callback;
 	}
 
 }

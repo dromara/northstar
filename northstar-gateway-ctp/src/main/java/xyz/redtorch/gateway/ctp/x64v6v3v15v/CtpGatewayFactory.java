@@ -8,7 +8,7 @@ import tech.quantit.northstar.common.model.CtpSettings;
 import tech.quantit.northstar.common.model.GatewayDescription;
 import tech.quantit.northstar.gateway.api.AbstractGatewayFactory;
 import tech.quantit.northstar.gateway.api.Gateway;
-import tech.quantit.northstar.gateway.api.GlobalMarketRegistry;
+import tech.quantit.northstar.gateway.api.domain.GlobalMarketRegistry;
 import xyz.redtorch.pb.CoreEnum.GatewayAdapterTypeEnum;
 import xyz.redtorch.pb.CoreEnum.GatewayTypeEnum;
 import xyz.redtorch.pb.CoreField.GatewaySettingField;

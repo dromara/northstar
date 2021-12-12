@@ -12,7 +12,7 @@ import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.event.GenericEventHandler;
 import tech.quantit.northstar.common.event.NorthstarEvent;
 import tech.quantit.northstar.common.event.NorthstarEventType;
-import tech.quantit.northstar.domain.gateway.BarGenerator;
+import tech.quantit.northstar.gateway.api.domain.BarGenerator;
 import tech.quantit.northstar.main.persistence.BarBufferManager;
 import tech.quantit.northstar.main.persistence.po.MinBarDataPO;
 import tech.quantit.northstar.main.persistence.po.TickDataPO;
@@ -54,26 +54,26 @@ public class MarketBarDataHandler extends AbstractEventHandler implements Generi
 		String unifiedSymbol = tick.getUnifiedSymbol();
 		String gatewayId = tick.getGatewayId();
 		if (!generatorTbl.contains(gatewayId, unifiedSymbol)) {
-			generatorTbl.put(gatewayId, unifiedSymbol, new BarGenerator(unifiedSymbol, (bar, ticks) -> {
-				feEngine.emitEvent(NorthstarEventType.BAR, bar);
-				try {					
-					MinBarDataPO barPO = ProtoBeanUtils.toPojoBean(MinBarDataPO.class, bar);
-					List<TickDataPO> tickPOs = ticks.stream().map(TickDataPO::convertFrom).collect(Collectors.toList());
-					barPO.setNumOfTicks(ticks.size());
-					barPO.setTicksOfMin(tickPOs);
-					bbMgr.addBar(barPO);
-				}catch(Exception ex) {
-					log.warn("############ 详细Tick数据 ###########");
-					for(TickField t : ticks) {
-						log.info("[tick] - time:{}, vol:{}, volDelta:{}", t.getActionTime(), t.getVolume(), t.getVolumeDelta());
-					}
-					log.info("[bar] - vol:{}, volDelta:{}", bar.getVolume(), bar.getVolumeDelta());
-					log.warn("#######################");
-					throw new IllegalStateException(ex);
-				}
-			}));
+//			generatorTbl.put(gatewayId, unifiedSymbol, new BarGenerator(unifiedSymbol, (bar, ticks) -> {
+//				feEngine.emitEvent(NorthstarEventType.BAR, bar);
+//				try {					
+//					MinBarDataPO barPO = ProtoBeanUtils.toPojoBean(MinBarDataPO.class, bar);
+//					List<TickDataPO> tickPOs = ticks.stream().map(TickDataPO::convertFrom).collect(Collectors.toList());
+//					barPO.setNumOfTicks(ticks.size());
+//					barPO.setTicksOfMin(tickPOs);
+//					bbMgr.addBar(barPO);
+//				}catch(Exception ex) {
+//					log.warn("############ 详细Tick数据 ###########");
+//					for(TickField t : ticks) {
+//						log.info("[tick] - time:{}, vol:{}, volDelta:{}", t.getActionTime(), t.getVolume(), t.getVolumeDelta());
+//					}
+//					log.info("[bar] - vol:{}, volDelta:{}", bar.getVolume(), bar.getVolumeDelta());
+//					log.warn("#######################");
+//					throw new IllegalStateException(ex);
+//				}
+//			}));
 		}
 		
-		generatorTbl.get(gatewayId, unifiedSymbol).updateTick(tick);
+//		generatorTbl.get(gatewayId, unifiedSymbol).updateTick(tick);
 	}
 }

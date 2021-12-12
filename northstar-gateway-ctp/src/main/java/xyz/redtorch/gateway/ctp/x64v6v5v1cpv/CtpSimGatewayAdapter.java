@@ -8,6 +8,7 @@ import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.gateway.api.GatewayAbstract;
 import tech.quantit.northstar.gateway.api.MarketGateway;
@@ -256,6 +257,11 @@ public class CtpSimGatewayAdapter extends GatewayAbstract implements MarketGatew
 		FileUtils.copyURLToFile(sourceURL, targetFile);
 
 		targetFile.deleteOnExit();
+	}
+
+	@Override
+	public GatewayType gatewayType() {
+		return GatewayType.CTP_SIM;
 	}
 
 }

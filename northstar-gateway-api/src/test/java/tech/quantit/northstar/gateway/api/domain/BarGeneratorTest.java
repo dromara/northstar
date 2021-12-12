@@ -1,6 +1,7 @@
-package tech.quantit.northstar.domain.gateway;
+package tech.quantit.northstar.gateway.api.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -10,7 +11,6 @@ import java.time.ZoneOffset;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -19,14 +19,13 @@ import tech.quantit.northstar.common.constant.TickType;
 import tech.quantit.northstar.common.utils.MarketTimeUtil;
 import xyz.redtorch.pb.CoreField.TickField;
 
-
 class BarGeneratorTest {
 
 	private TickField.Builder proto;
 	
 	private MarketTimeUtil util = new CtpMarketTimeUtil();
 	
-	private Contract contract = mock(Contract.class);
+	private NormalContract contract = mock(NormalContract.class);
 	
 	@BeforeEach
 	public void prepare() {
@@ -234,5 +233,4 @@ class BarGeneratorTest {
 		}
 
 	}
-
 }

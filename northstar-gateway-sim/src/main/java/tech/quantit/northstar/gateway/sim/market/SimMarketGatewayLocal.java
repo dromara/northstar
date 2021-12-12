@@ -9,6 +9,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import lombok.extern.slf4j.Slf4j;
+import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.event.NorthstarEventType;
 import tech.quantit.northstar.gateway.api.MarketGateway;
@@ -101,6 +102,11 @@ public class SimMarketGatewayLocal implements MarketGateway{
 	@Override
 	public boolean getAuthErrorFlag() {
 		return false;
+	}
+
+	@Override
+	public GatewayType gatewayType() {
+		return GatewayType.SIM;
 	}
 
 }
