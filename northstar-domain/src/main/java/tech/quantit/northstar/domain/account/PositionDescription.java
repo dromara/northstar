@@ -10,9 +10,9 @@ import org.apache.commons.lang3.StringUtils;
 
 import tech.quantit.northstar.common.exception.InsufficientException;
 import tech.quantit.northstar.common.exception.NoSuchElementException;
-import tech.quantit.northstar.common.model.ContractManager;
 import tech.quantit.northstar.common.model.OrderRequest;
 import tech.quantit.northstar.common.utils.OrderUtils;
+import tech.quantit.northstar.domain.gateway.ContractManager;
 import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;

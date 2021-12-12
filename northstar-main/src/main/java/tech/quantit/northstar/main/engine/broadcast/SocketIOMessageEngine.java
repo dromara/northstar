@@ -31,7 +31,6 @@ public class SocketIOMessageEngine {
 
 		{
 			add(NorthstarEventType.TICK);
-			add(NorthstarEventType.IDX_TICK);
 			add(NorthstarEventType.BAR);
 			add(NorthstarEventType.HIS_BAR);
 		}
@@ -49,7 +48,7 @@ public class SocketIOMessageEngine {
 		NorthstarEventType type = event.getEvent();
 		// 为了避免接收端信息拥塞，把行情数据按合约分房间分发数据，可以提升客户端的接收效率
 		if(mdType.contains(type)) {
-			if(type == NorthstarEventType.TICK || type == NorthstarEventType.IDX_TICK) {
+			if(type == NorthstarEventType.TICK) {
 				emitTickData(event);
 			}else {
 				emitBarData(event);

@@ -22,7 +22,6 @@ public class BroadcastDispatcher implements NorthstarEventDispatcher {
 		private static final long serialVersionUID = 1L;
 		{
 			put(NorthstarEventType.TICK, TickField.class);
-			put(NorthstarEventType.IDX_TICK, TickField.class);
 			put(NorthstarEventType.BAR, BarField.class);
 			put(NorthstarEventType.ACCOUNT, AccountField.class);
 			put(NorthstarEventType.ORDER, OrderField.class);

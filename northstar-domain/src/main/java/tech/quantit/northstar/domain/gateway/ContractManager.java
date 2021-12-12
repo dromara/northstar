@@ -1,4 +1,4 @@
-package tech.quantit.northstar.common.model;
+package tech.quantit.northstar.domain.gateway;
 
 import java.lang.ref.WeakReference;
 import java.util.Collection;

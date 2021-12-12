@@ -9,7 +9,7 @@ import com.google.common.collect.Table.Cell;
 
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.event.NorthstarEventType;
-import tech.quantit.northstar.common.utils.ContractNameResolver;
+import xyz.redtorch.gateway.ctp.common.CtpContractNameResolver;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.TickField;
 
@@ -44,7 +44,7 @@ public class IndexEngine {
 		}
 		String gatewayId = tick.getGatewayId();
 		String unifiedSymbol = tick.getUnifiedSymbol();
-		String symbolGroup = ContractNameResolver.unifiedSymbolToSymbolGroup(unifiedSymbol);
+		String symbolGroup = CtpContractNameResolver.unifiedSymbolToSymbolGroup(unifiedSymbol);
 		if(idxContractTbl.contains(gatewayId, symbolGroup)) {
 			idxContractTbl.get(gatewayId, symbolGroup).updateByTick(tick);
 		}
@@ -52,7 +52,7 @@ public class IndexEngine {
 	
 	public void registerContract(ContractField contract) {
 		String gatewayId = contract.getGatewayId();
-		String symbolGroup = ContractNameResolver.unifiedSymbolToSymbolGroup(contract.getUnifiedSymbol());
+		String symbolGroup = CtpContractNameResolver.unifiedSymbolToSymbolGroup(contract.getUnifiedSymbol());
 		if(!contractGroupTbl.contains(gatewayId, symbolGroup)) {
 			contractGroupTbl.put(gatewayId, symbolGroup, new HashSet<>());
 		}
@@ -61,9 +61,9 @@ public class IndexEngine {
 	
 	public void start() {
 		for(Cell<String, String, Set<ContractField>> cell : contractGroupTbl.cellSet()) {
-			IndexContract idxContract = new IndexContract(cell.getValue(), (tick) -> feEngine.emitEvent(NorthstarEventType.IDX_TICK, tick));
-			idxContractTbl.put(cell.getRowKey(), cell.getColumnKey(), idxContract);
-			feEngine.emitEvent(NorthstarEventType.IDX_CONTRACT, idxContract.getContract());
+//			IndexContract idxContract = new IndexContract(cell.getValue(), (tick) -> feEngine.emitEvent(NorthstarEventType.IDX_TICK, tick));
+//			idxContractTbl.put(cell.getRowKey(), cell.getColumnKey(), idxContract);
+//			feEngine.emitEvent(NorthstarEventType.IDX_CONTRACT, idxContract.getContract());
 		}
 		isRunning = true;
 	}

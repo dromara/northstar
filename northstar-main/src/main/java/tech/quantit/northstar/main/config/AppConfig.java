@@ -20,9 +20,9 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import com.mongodb.client.MongoClient;
 
 import tech.quantit.northstar.common.event.FastEventEngine;
-import tech.quantit.northstar.common.model.ContractManager;
 import tech.quantit.northstar.domain.GatewayAndConnectionManager;
 import tech.quantit.northstar.domain.account.TradeDayAccount;
+import tech.quantit.northstar.domain.gateway.ContractManager;
 import tech.quantit.northstar.gateway.api.AbstractGatewayFactory;
 import tech.quantit.northstar.gateway.sim.persistence.SimAccountRepository;
 import tech.quantit.northstar.gateway.sim.trade.SimGatewayFactory;

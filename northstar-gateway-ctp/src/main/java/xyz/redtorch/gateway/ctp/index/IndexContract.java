@@ -8,7 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.ToDoubleFunction;
 
 import tech.quantit.northstar.common.constant.Constants;
-import tech.quantit.northstar.common.utils.ContractNameResolver;
+import xyz.redtorch.gateway.ctp.common.CtpContractNameResolver;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.TickField;
 
@@ -33,7 +33,7 @@ public class IndexContract {
 		ContractField proto = seriesContracts.iterator().next();
 		
 		String symbolName = proto.getSymbol().replaceAll("\\d+", "");
-		Optional<String> chnNameOpt = Optional.ofNullable(ContractNameResolver.getCNSymbolName(symbolName));
+		Optional<String> chnNameOpt = Optional.ofNullable(CtpContractNameResolver.getCNSymbolName(symbolName));
 		String symbol = symbolName + Constants.INDEX_SUFFIX; // 代码
 		String name = chnNameOpt.orElse(symbolName) + "指数"; // 简称
 		String fullName = name; // 全称

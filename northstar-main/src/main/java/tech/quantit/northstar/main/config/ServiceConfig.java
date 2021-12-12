@@ -9,9 +9,9 @@ import org.springframework.context.annotation.DependsOn;
 
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.event.InternalEventBus;
-import tech.quantit.northstar.common.model.ContractManager;
 import tech.quantit.northstar.domain.GatewayAndConnectionManager;
 import tech.quantit.northstar.domain.account.TradeDayAccount;
+import tech.quantit.northstar.domain.gateway.ContractManager;
 import tech.quantit.northstar.domain.strategy.ModuleManager;
 import tech.quantit.northstar.domain.strategy.SandboxModuleManager;
 import tech.quantit.northstar.gateway.sim.persistence.SimAccountRepository;

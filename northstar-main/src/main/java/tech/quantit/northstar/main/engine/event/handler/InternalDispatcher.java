@@ -29,7 +29,6 @@ public class InternalDispatcher implements NorthstarEventDispatcher {
 			add(NorthstarEventType.CONNECTED);
 			add(NorthstarEventType.DISCONNECTED);
 			add(NorthstarEventType.DISCONNECTING);
-			add(NorthstarEventType.IDX_CONTRACT);
 			add(NorthstarEventType.CONTRACT);
 			add(NorthstarEventType.CONTRACT_LOADED);
 			add(NorthstarEventType.PLACE_ORDER);

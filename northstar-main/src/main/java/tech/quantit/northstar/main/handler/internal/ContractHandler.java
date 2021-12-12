@@ -10,9 +10,9 @@ import tech.quantit.northstar.common.event.AbstractEventHandler;
 import tech.quantit.northstar.common.event.GenericEventHandler;
 import tech.quantit.northstar.common.event.NorthstarEvent;
 import tech.quantit.northstar.common.event.NorthstarEventType;
-import tech.quantit.northstar.common.model.ContractManager;
 import tech.quantit.northstar.domain.GatewayAndConnectionManager;
 import tech.quantit.northstar.domain.GatewayConnection;
+import tech.quantit.northstar.domain.gateway.ContractManager;
 import tech.quantit.northstar.gateway.api.MarketGateway;
 import tech.quantit.northstar.main.persistence.MarketDataRepository;
 import tech.quantit.northstar.main.persistence.po.ContractPO;
@@ -49,9 +49,9 @@ public class ContractHandler extends AbstractEventHandler implements GenericEven
 		case CONTRACT:
 			handleContractEvent((ContractField) e.getData());
 			break;
-		case IDX_CONTRACT:
-			handleIdxContractEvent((ContractField) e.getData());
-			break;
+//		case IDX_CONTRACT:
+//			handleIdxContractEvent((ContractField) e.getData());
+//			break;
 		case CONTRACT_LOADED:
 			handleContractLoadedEvent((String) e.getData());
 			break;
@@ -105,7 +105,6 @@ public class ContractHandler extends AbstractEventHandler implements GenericEven
 	@Override
 	public boolean canHandle(NorthstarEventType eventType) {
 		return NorthstarEventType.CONTRACT == eventType 
-				|| NorthstarEventType.IDX_CONTRACT == eventType
 				|| NorthstarEventType.CONTRACT_LOADED == eventType;
 	}
 

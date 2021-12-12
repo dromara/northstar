@@ -1,4 +1,4 @@
-package tech.quantit.northstar.common.utils;
+package xyz.redtorch.gateway.ctp.common;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -7,8 +7,10 @@ import java.util.regex.Pattern;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
-public abstract class ContractNameResolver {
+public class CtpContractNameResolver {
 
+	private CtpContractNameResolver() {}
+	
 	private static JSONObject contractNameDict;
 	
 	private static final Pattern futureNamePtn = Pattern.compile("([A-z]+)(\\d+)");
@@ -17,7 +19,7 @@ public abstract class ContractNameResolver {
 	
 	static {
 		//加载合约中文解释
-		InputStream is = ContractNameResolver.class.getClassLoader().getResourceAsStream("CTPSymbolNameMapping.json");
+		InputStream is = CtpContractNameResolver.class.getClassLoader().getResourceAsStream("CTPSymbolNameMapping.json");
 		try {
 			byte[] buf = new byte[1024*3];
 			StringBuilder sb = new StringBuilder();

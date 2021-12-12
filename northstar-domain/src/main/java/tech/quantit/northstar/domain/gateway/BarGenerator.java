@@ -1,4 +1,4 @@
-package xyz.redtorch.gateway.ctp;
+package tech.quantit.northstar.domain.gateway;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoField;

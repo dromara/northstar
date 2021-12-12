@@ -4,7 +4,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.event.AbstractEventHandler;
 import tech.quantit.northstar.common.event.NorthstarEvent;
 import tech.quantit.northstar.common.event.NorthstarEventType;
@@ -14,7 +13,6 @@ import tech.quantit.northstar.common.event.NorthstarEventType;
  * @author KevinHuangwl
  *
  */
-@Slf4j
 public class ModuleManager extends AbstractEventHandler{
 
 	/**
@@ -29,7 +27,6 @@ public class ModuleManager extends AbstractEventHandler{
 		eventSet.add(NorthstarEventType.TRADE);
 		eventSet.add(NorthstarEventType.ORDER);
 		eventSet.add(NorthstarEventType.TICK);
-		eventSet.add(NorthstarEventType.IDX_TICK);
 		eventSet.add(NorthstarEventType.BAR);
 		eventSet.add(NorthstarEventType.EXT_MSG);
 	}

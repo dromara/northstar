@@ -66,7 +66,6 @@ public class ModuleManagerTest {
 		assertThat(mdlMgr.canHandle(NorthstarEventType.BAR)).isTrue();
 		assertThat(mdlMgr.canHandle(NorthstarEventType.ORDER)).isTrue();
 		assertThat(mdlMgr.canHandle(NorthstarEventType.TRADE)).isTrue();
-		assertThat(mdlMgr.canHandle(NorthstarEventType.IDX_TICK)).isTrue();
 		assertThat(mdlMgr.canHandle(NorthstarEventType.EXT_MSG)).isTrue();
 		assertThat(mdlMgr.canHandle(NorthstarEventType.ACCOUNT)).isTrue();
 	}

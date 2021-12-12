@@ -23,8 +23,8 @@ import org.slf4j.LoggerFactory;
 
 import tech.quantit.northstar.common.constant.DateTimeConstant;
 import tech.quantit.northstar.common.event.NorthstarEventType;
-import tech.quantit.northstar.common.utils.ContractNameResolver;
 import tech.quantit.northstar.gateway.api.GatewayAbstract;
+import xyz.redtorch.gateway.ctp.common.CtpContractNameResolver;
 import xyz.redtorch.gateway.ctp.x64v6v3v15v.api.CThostFtdcAccountregisterField;
 import xyz.redtorch.gateway.ctp.x64v6v3v15v.api.CThostFtdcBatchOrderActionField;
 import xyz.redtorch.gateway.ctp.x64v6v3v15v.api.CThostFtdcBrokerTradingAlgosField;
@@ -1311,7 +1311,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 	public void OnRspQryInstrument(CThostFtdcInstrumentField pInstrument, CThostFtdcRspInfoField pRspInfo, int nRequestID, boolean bIsLast) {
 		try {
 			String symbol = pInstrument.getInstrumentID();
-			String name = ContractNameResolver.getCNSymbolName(symbol);
+			String name = CtpContractNameResolver.getCNSymbolName(symbol);
 			ContractField.Builder contractBuilder = ContractField.newBuilder();
 			contractBuilder.setGatewayId(gatewayId);
 			contractBuilder.setSymbol(symbol);

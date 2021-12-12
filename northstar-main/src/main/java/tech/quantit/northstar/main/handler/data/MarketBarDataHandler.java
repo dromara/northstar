@@ -12,11 +12,11 @@ import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.event.GenericEventHandler;
 import tech.quantit.northstar.common.event.NorthstarEvent;
 import tech.quantit.northstar.common.event.NorthstarEventType;
+import tech.quantit.northstar.domain.gateway.BarGenerator;
 import tech.quantit.northstar.main.persistence.BarBufferManager;
 import tech.quantit.northstar.main.persistence.po.MinBarDataPO;
 import tech.quantit.northstar.main.persistence.po.TickDataPO;
 import tech.quantit.northstar.main.utils.ProtoBeanUtils;
-import xyz.redtorch.gateway.ctp.BarGenerator;
 import xyz.redtorch.pb.CoreField.TickField;
 
 /**
@@ -45,7 +45,7 @@ public class MarketBarDataHandler extends AbstractEventHandler implements Generi
 	
 	@Override
 	public boolean canHandle(NorthstarEventType eventType) {
-		return NorthstarEventType.TICK == eventType || NorthstarEventType.IDX_TICK == eventType;
+		return NorthstarEventType.TICK == eventType;
 	}
 
 	@Override

@@ -24,7 +24,6 @@ import tech.quantit.northstar.strategy.api.model.ModulePositionInfo;
 import tech.quantit.northstar.strategy.api.model.ModuleRealTimeInfo;
 import tech.quantit.northstar.strategy.api.model.ModuleTradeRecord;
 import tech.quantit.northstar.strategy.api.model.TimeSeriesData;
-import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
 
 @RestController
 public class ModuleController {

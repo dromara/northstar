@@ -11,10 +11,6 @@ public enum NorthstarEventType {
 	 */
 	TICK,
 	/**
-	 * 指数TICK事件
-	 */
-	IDX_TICK,
-	/**
 	 * K线BAR事件
 	 */
 	BAR,
@@ -50,10 +46,6 @@ public enum NorthstarEventType {
 	 * 合约事件
 	 */
 	CONTRACT,
-	/**
-	 * 指数合约事件
-	 */
-	IDX_CONTRACT,
 	/**
 	 * 合约加载完成事件
 	 */

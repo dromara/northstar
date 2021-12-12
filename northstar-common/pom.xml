@@ -52,21 +52,21 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 			</plugin>
-			<plugin>
-				<groupId>org.jacoco</groupId>
-				<artifactId>jacoco-maven-plugin</artifactId>
-				<configuration>
-					<excludes>
-						<exclude>**/xyz/redtorch/pb/*</exclude>
-						<exclude>**/test/common/*</exclude>
-						<exclude>**/tech/quantit/northstar/common/constant/*</exclude>
-						<exclude>**/tech/quantit/northstar/common/event/*</exclude>
-						<exclude>**/tech/quantit/northstar/common/exception/*</exclude>
-						<exclude>**/tech/quantit/northstar/common/model/*</exclude>
-						<exclude>**/tech/quantit/northstar/common/*</exclude>
-					</excludes>
-				</configuration>
-			</plugin>
+<!-- 			<plugin> -->
+<!-- 				<groupId>org.jacoco</groupId> -->
+<!-- 				<artifactId>jacoco-maven-plugin</artifactId> -->
+<!-- 				<configuration> -->
+<!-- 					<excludes> -->
+<!-- 						<exclude>**/xyz/redtorch/pb/*</exclude> -->
+<!-- 						<exclude>**/test/common/*</exclude> -->
+<!-- 						<exclude>**/tech/quantit/northstar/common/constant/*</exclude> -->
+<!-- 						<exclude>**/tech/quantit/northstar/common/event/*</exclude> -->
+<!-- 						<exclude>**/tech/quantit/northstar/common/exception/*</exclude> -->
+<!-- 						<exclude>**/tech/quantit/northstar/common/model/*</exclude> -->
+<!-- 						<exclude>**/tech/quantit/northstar/common/*</exclude> -->
+<!-- 					</excludes> -->
+<!-- 				</configuration> -->
+<!-- 			</plugin> -->
 		</plugins>
 	</build>
 

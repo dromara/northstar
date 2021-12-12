@@ -11,9 +11,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import tech.quantit.northstar.common.exception.InsufficientException;
-import tech.quantit.northstar.common.model.ContractManager;
 import tech.quantit.northstar.common.model.OrderRequest;
 import tech.quantit.northstar.common.model.OrderRequest.TradeOperation;
+import tech.quantit.northstar.domain.gateway.ContractManager;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;

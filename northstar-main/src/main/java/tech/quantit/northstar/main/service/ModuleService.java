@@ -17,14 +17,12 @@ import org.springframework.context.ApplicationContext;
 
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.constant.DateTimeConstant;
-import tech.quantit.northstar.common.model.ContractManager;
 import tech.quantit.northstar.common.utils.FieldUtils;
 import tech.quantit.northstar.domain.GatewayAndConnectionManager;
 import tech.quantit.northstar.domain.GatewayConnection;
+import tech.quantit.northstar.domain.gateway.ContractManager;
 import tech.quantit.northstar.domain.strategy.ModuleManager;
-import tech.quantit.northstar.domain.strategy.ModulePosition;
 import tech.quantit.northstar.domain.strategy.ModuleStatus;
-import tech.quantit.northstar.domain.strategy.StopLoss;
 import tech.quantit.northstar.domain.strategy.StrategyModule;
 import tech.quantit.northstar.gateway.api.TradeGateway;
 import tech.quantit.northstar.main.factories.StrategyModuleFactory;
