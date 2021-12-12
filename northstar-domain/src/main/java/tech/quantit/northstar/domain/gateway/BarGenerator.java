@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoField;
 import java.util.Collection;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.function.Consumer;
 
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.constant.DateTimeConstant;
@@ -25,13 +26,13 @@ public class BarGenerator {
 
 	private boolean newFlag;
 
-	private String barUnifiedSymbol;
+	private Contract contract;
 	
-	CommonBarCallBack commonBarCallBack;
+	private Consumer<BarField> barCallBack;
 
-	public BarGenerator(String unifiedSymbol, CommonBarCallBack commonBarCallBack) {
-		this.commonBarCallBack = commonBarCallBack;
-		this.barUnifiedSymbol = unifiedSymbol;
+	public BarGenerator(Contract contract, Consumer<BarField> barCallBack) {
+		this.barCallBack = barCallBack;
+		this.contract = contract;
 	}
 	
 	private ConcurrentLinkedQueue<TickField> bufTickList = new ConcurrentLinkedQueue<>();
@@ -41,10 +42,10 @@ public class BarGenerator {
 	 * 
 	 * @param tick
 	 */
-	public void updateTick(TickField tick) {
+	public void update(TickField tick) {
 		// 如果tick为空或者合约不匹配则返回
 		if (tick == null) {
-			log.warn("输入的Tick数据为空,当前Bar合约{}",barUnifiedSymbol);
+			log.warn("输入的Tick数据为空,当前Bar合约{}", contract.unifiedSymbol());
 			return;
 		}
 		
@@ -52,10 +53,8 @@ public class BarGenerator {
 			return;
 		}
 
-		if (barUnifiedSymbol == null) {
-			barUnifiedSymbol = tick.getUnifiedSymbol();
-		} else if (!barUnifiedSymbol.equals(tick.getUnifiedSymbol())) {
-			log.warn("合约不匹配,当前Bar合约{}",barUnifiedSymbol);
+		if (!contract.unifiedSymbol().equals(tick.getUnifiedSymbol())) {
+			log.warn("合约不匹配,当前Bar合约{}", contract.unifiedSymbol());
 			return;
 		}
 
@@ -131,7 +130,7 @@ public class BarGenerator {
 			barBuilder.setActionTime(barLocalDateTime.format(DateTimeConstant.T_FORMAT_WITH_MS_INT_FORMATTER));
 			
 			// 回调OnBar方法
-			commonBarCallBack.call(barBuilder.build(), bufTickList);
+			barCallBack.accept(barBuilder.build());
 			
 		}
 		// 清空当前Tick缓存
@@ -141,7 +140,4 @@ public class BarGenerator {
 		barBuilder = null;
 	}
 
-	public interface CommonBarCallBack {
-		void call(BarField bar, Collection<TickField> minTicks);
-	}
 }
