@@ -13,6 +13,7 @@ import tech.quantit.northstar.common.constant.GatewayUsage;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.model.GatewayDescription;
 import tech.quantit.northstar.common.model.SimSettings;
+import tech.quantit.northstar.gateway.api.domain.GlobalMarketRegistry;
 import tech.quantit.northstar.gateway.sim.persistence.SimAccountRepository;
 
 class SimGatewayFactoryTest {
@@ -22,7 +23,7 @@ class SimGatewayFactoryTest {
 		SimAccountRepository accRepo = mock(SimAccountRepository.class);
 		SimMarket simMarket = mock(SimMarket.class);
 		when(simMarket.getMarketEventBus()).thenReturn(mock(EventBus.class));
-		SimGatewayFactory factory = new SimGatewayFactory(mock(FastEventEngine.class), simMarket, accRepo);
+		SimGatewayFactory factory = new SimGatewayFactory(mock(FastEventEngine.class), simMarket, accRepo, mock(GlobalMarketRegistry.class));
 		GatewayDescription gd = GatewayDescription.builder().gatewayId("gatewayid").gatewayType(GatewayType.SIM)
 				.gatewayUsage(GatewayUsage.TRADE).settings(new SimSettings()).build();
 		assertThat(factory.newInstance(gd)).isNotNull();

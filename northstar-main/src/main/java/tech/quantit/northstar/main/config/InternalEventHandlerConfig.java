@@ -18,7 +18,6 @@ import tech.quantit.northstar.main.handler.internal.ContractHandler;
 import tech.quantit.northstar.main.handler.internal.SimMarketHandler;
 import tech.quantit.northstar.main.handler.internal.TradeHandler;
 import tech.quantit.northstar.main.persistence.MarketDataRepository;
-import xyz.redtorch.gateway.ctp.index.IndexEngine;
 
 @Slf4j
 @Configuration
@@ -38,8 +37,8 @@ public class InternalEventHandlerConfig {
 	
 	@Bean
 	public ContractHandler contractEventHandler(InternalEventBus eventBus, GatewayAndConnectionManager gatewayConnMgr,
-			ContractManager contractMgr, IndexEngine idxEngine, MarketDataRepository mdRepo) {
-		ContractHandler handler = new ContractHandler(contractMgr, gatewayConnMgr, idxEngine, mdRepo);
+			ContractManager contractMgr, MarketDataRepository mdRepo) {
+		ContractHandler handler = new ContractHandler(contractMgr, gatewayConnMgr, mdRepo);
 		log.info("注册：ContractHandler");
 		eventBus.register(handler);
 		return handler;

@@ -25,7 +25,7 @@ import tech.quantit.northstar.domain.GatewayAndConnectionManager;
 import tech.quantit.northstar.domain.GatewayConnection;
 import tech.quantit.northstar.domain.MarketGatewayConnection;
 import tech.quantit.northstar.domain.TraderGatewayConnection;
-import tech.quantit.northstar.gateway.api.AbstractGatewayFactory;
+import tech.quantit.northstar.gateway.api.GatewayFactory;
 import tech.quantit.northstar.gateway.api.Gateway;
 import tech.quantit.northstar.gateway.api.MarketGateway;
 import tech.quantit.northstar.gateway.sim.trade.SimGatewayFactory;
@@ -100,7 +100,7 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 		GatewayConnection conn = gatewayDescription.getGatewayUsage() == GatewayUsage.MARKET_DATA
 				? new MarketGatewayConnection(gatewayDescription, eventBus)
 				: new TraderGatewayConnection(gatewayDescription, eventBus);
-		AbstractGatewayFactory factory = null;
+		GatewayFactory factory = null;
 		if(gatewayDescription.getGatewayType() == GatewayType.CTP) {
 			factory = ctx.getBean(CtpGatewayFactory.class);
 		} else if(gatewayDescription.getGatewayType() == GatewayType.SIM) {

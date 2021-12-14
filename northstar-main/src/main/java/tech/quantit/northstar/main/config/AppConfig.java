@@ -1,10 +1,8 @@
 package tech.quantit.northstar.main.config;
 
 import java.util.ArrayList;
-import java.util.EnumMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -21,14 +19,12 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.mongodb.client.MongoClient;
 
-import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.domain.GatewayAndConnectionManager;
 import tech.quantit.northstar.domain.account.TradeDayAccount;
 import tech.quantit.northstar.domain.gateway.ContractManager;
-import tech.quantit.northstar.gateway.api.AbstractGatewayFactory;
+import tech.quantit.northstar.gateway.api.GatewayFactory;
 import tech.quantit.northstar.gateway.api.domain.GlobalMarketRegistry;
-import tech.quantit.northstar.gateway.api.domain.SubscriptionManager;
 import tech.quantit.northstar.gateway.sim.persistence.SimAccountRepository;
 import tech.quantit.northstar.gateway.sim.trade.SimGatewayFactory;
 import tech.quantit.northstar.gateway.sim.trade.SimMarket;
@@ -126,18 +122,19 @@ public class AppConfig implements WebMvcConfigurer {
 	}
 	
 	@Bean
-	public AbstractGatewayFactory ctpGatewayFactory(FastEventEngine fastEventEngine, GlobalMarketRegistry registry) {
+	public GatewayFactory ctpGatewayFactory(FastEventEngine fastEventEngine, GlobalMarketRegistry registry) {
 		return new CtpGatewayFactory(fastEventEngine, registry);
 	}
 	
 	@Bean
-	public AbstractGatewayFactory ctpSimGatewayFactory(FastEventEngine fastEventEngine) {
-		return new CtpSimGatewayFactory(fastEventEngine);
+	public GatewayFactory ctpSimGatewayFactory(FastEventEngine fastEventEngine, GlobalMarketRegistry registry) {
+		return new CtpSimGatewayFactory(fastEventEngine, registry);
 	}
 	
 	@Bean
-	public AbstractGatewayFactory simGatewayFactory(FastEventEngine fastEventEngine, SimMarket simMarket, SimAccountRepository accRepo) {
-		return new SimGatewayFactory(fastEventEngine, simMarket, accRepo);
+	public GatewayFactory simGatewayFactory(FastEventEngine fastEventEngine, SimMarket simMarket, SimAccountRepository accRepo,
+			GlobalMarketRegistry registry) {
+		return new SimGatewayFactory(fastEventEngine, simMarket, accRepo, registry);
 	}
 	
 	@Bean 

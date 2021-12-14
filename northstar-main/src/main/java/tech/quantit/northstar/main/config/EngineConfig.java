@@ -14,7 +14,6 @@ import tech.quantit.northstar.common.event.StrategyEventBus;
 import tech.quantit.northstar.main.engine.broadcast.SocketIOMessageEngine;
 import tech.quantit.northstar.main.engine.event.DisruptorFastEventEngine;
 import tech.quantit.northstar.main.engine.event.DisruptorFastEventEngine.WaitStrategyEnum;
-import xyz.redtorch.gateway.ctp.index.IndexEngine;
 
 /**
  * 引擎配置
@@ -35,12 +34,6 @@ public class EngineConfig {
 	public FastEventEngine createEventEngine() {
 		log.info("创建EventEngine");
 		return new DisruptorFastEventEngine(WaitStrategyEnum.BlockingWaitStrategy);
-	}
-	
-	@Bean
-	public IndexEngine createIndexEngine(FastEventEngine feEngine) {
-		log.info("创建IndexEngine");
-		return new IndexEngine(feEngine);
 	}
 	
 	@Bean

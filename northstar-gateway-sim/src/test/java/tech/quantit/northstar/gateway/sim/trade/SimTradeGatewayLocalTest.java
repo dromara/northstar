@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.event.NorthstarEventType;
+import tech.quantit.northstar.gateway.api.domain.GlobalMarketRegistry;
 import test.common.TestFieldFactory;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
@@ -32,7 +33,7 @@ class SimTradeGatewayLocalTest {
 				.setGatewayId("gatewayId")
 				.build();
 		SimAccount simAccount = mock(SimAccount.class);
-		gateway = new SimTradeGatewayLocal(feEngine, settings, simAccount);
+		gateway = new SimTradeGatewayLocal(feEngine, settings, simAccount, mock(GlobalMarketRegistry.class));
 	}
 
 	@Test

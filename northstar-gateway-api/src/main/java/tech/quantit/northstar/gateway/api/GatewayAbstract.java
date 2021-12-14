@@ -5,6 +5,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.event.FastEventEngine;
+import tech.quantit.northstar.gateway.api.domain.GlobalMarketRegistry;
 import xyz.redtorch.pb.CoreEnum.GatewayTypeEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.GatewaySettingField;
@@ -24,9 +25,12 @@ public abstract class GatewayAbstract implements Gateway {
 	
 	protected FastEventEngine fastEventEngine;
 	
-	public Map<String, ContractField> contractMap = new ConcurrentHashMap<>();
+	public final Map<String, ContractField> contractMap = new ConcurrentHashMap<>();
+	
+	public final GlobalMarketRegistry registry;
 
-	public GatewayAbstract(GatewaySettingField gatewaySetting) {
+	protected GatewayAbstract(GatewaySettingField gatewaySetting, GlobalMarketRegistry registry) {
+		this.registry = registry;
 		this.gatewaySetting = gatewaySetting;
 		this.gatewayId = gatewaySetting.getGatewayId();
 		this.gatewayName = gatewaySetting.getGatewayName();

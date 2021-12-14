@@ -21,27 +21,27 @@ import xyz.redtorch.pb.CoreField.TickField;
 @Slf4j
 public class GlobalMarketRegistry {
 
-	private FastEventEngine feEngine;
+	protected FastEventEngine feEngine;
 	
-	private Map<GatewayType, SubscriptionManager> subMgrMap = new EnumMap<>(GatewayType.class);
+	protected Map<GatewayType, SubscriptionManager> subMgrMap = new EnumMap<>(GatewayType.class);
 	
-	private Map<GatewayType, MarketGateway> gatewayMap = new EnumMap<>(GatewayType.class);
+	protected Map<GatewayType, MarketGateway> gatewayMap = new EnumMap<>(GatewayType.class);
 	
 	/**
 	 * 合约表
 	 * unifiedSymbol --> contract
 	 */
-	private Map<String, NormalContract> contractMap = new HashMap<>(4096);
+	protected Map<String, NormalContract> contractMap = new HashMap<>(4096);
 	/**
 	 * 指数生成器表
 	 * unifiedSymbol --> ticker
 	 */
-	private Map<String, IndexTicker> idxTickerMap = new HashMap<>(1024);
+	protected Map<String, IndexTicker> idxTickerMap = new HashMap<>(1024);
 	/**
 	 * BAR生成器表
 	 * unifiedSymbol --> barGen
 	 */
-	private Map<String, BarGenerator> barGenMap = new HashMap<>(4096);
+	protected Map<String, BarGenerator> barGenMap = new HashMap<>(4096);
 	
 	
 	public GlobalMarketRegistry(FastEventEngine feEngine) {
@@ -92,7 +92,11 @@ public class GlobalMarketRegistry {
 	
 	public void dispatch(TickField tick) {
 		NormalContract contract = contractMap.get(tick.getUnifiedSymbol());
-		if(!(contract instanceof IndexContract)) {
+		if(contract == null) {
+			log.trace("没有登记合约 [{}]，忽略TICK分发", tick.getUnifiedSymbol());
+			return;
+		}
+		if(!(contract instanceof IndexContract) && idxTickerMap.containsKey(tick.getUnifiedSymbol())) {
 			idxTickerMap.get(tick.getUnifiedSymbol()).update(tick);
 		}
 		barGenMap.get(tick.getUnifiedSymbol()).update(tick);

@@ -6,19 +6,22 @@ import tech.quantit.northstar.common.constant.GatewayUsage;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.model.CtpSettings;
 import tech.quantit.northstar.common.model.GatewayDescription;
-import tech.quantit.northstar.gateway.api.AbstractGatewayFactory;
+import tech.quantit.northstar.gateway.api.GatewayFactory;
 import tech.quantit.northstar.gateway.api.Gateway;
+import tech.quantit.northstar.gateway.api.domain.GlobalMarketRegistry;
 import xyz.redtorch.pb.CoreEnum.GatewayAdapterTypeEnum;
 import xyz.redtorch.pb.CoreEnum.GatewayTypeEnum;
 import xyz.redtorch.pb.CoreField.GatewaySettingField;
 import xyz.redtorch.pb.CoreField.GatewaySettingField.CtpApiSettingField;
 
-public class CtpSimGatewayFactory extends AbstractGatewayFactory{
+public class CtpSimGatewayFactory implements GatewayFactory{
 
 	private FastEventEngine fastEventEngine;
+	private GlobalMarketRegistry registry;
 	
-	public CtpSimGatewayFactory(FastEventEngine fastEventEngine) {
+	public CtpSimGatewayFactory(FastEventEngine fastEventEngine, GlobalMarketRegistry registry) {
 		this.fastEventEngine = fastEventEngine;
+		this.registry = registry;
 	}
 	
 	@Override
@@ -45,7 +48,7 @@ public class CtpSimGatewayFactory extends AbstractGatewayFactory{
 				.setGatewayName(gatewayDescription.getGatewayId())
 				.setCtpApiSetting(ctpSetting)
 				.setGatewayType(gwType)
-				.build());
+				.build(), registry);
 	}
 
 }

@@ -12,16 +12,16 @@ import tech.quantit.northstar.common.utils.MarketTimeUtil;
  */
 public class CtpMarketTimeUtil implements MarketTimeUtil{
 	
-	LocalTime nightMarketStartTime = LocalTime.of(20, 58, 59, 999999999);
-	LocalTime nightMarketOpenTime = LocalTime.of(21, 0, 1);
-	LocalTime nightMarketEndTime = LocalTime.of(2, 30, 0, 999999);
-	LocalTime dayMarketStartTime = LocalTime.of(8, 58, 59, 999999999);
-	LocalTime dayMarketOpenTime = LocalTime.of(9, 0, 1);
-	LocalTime dayMarketClosingTime1 = LocalTime.of(15, 0, 0);
-	LocalTime dayMarketClosingTime2 = LocalTime.of(15, 15, 0);
-	LocalTime dayMarketEndTime = LocalTime.of(15, 15, 0, 999999);
+	final LocalTime nightMarketStartTime = LocalTime.of(20, 58, 59, 999999999);
+	final LocalTime nightMarketOpenTime = LocalTime.of(21, 0, 1);
+	final LocalTime nightMarketEndTime = LocalTime.of(2, 30, 0, 999999);
+	final LocalTime dayMarketStartTime = LocalTime.of(8, 58, 59, 999999999);
+	final LocalTime dayMarketOpenTime = LocalTime.of(9, 0, 1);
+	final LocalTime dayMarketClosingTime1 = LocalTime.of(15, 0, 0);
+	final LocalTime dayMarketClosingTime2 = LocalTime.of(15, 15, 0);
+	final LocalTime dayMarketEndTime = LocalTime.of(15, 15, 0, 999999);
 	
-	long LESS_THEN_HALF_SEC_IN_NANO = 400000000;
+	private static final long LESS_THEN_HALF_SEC_IN_NANO = 400000000;
 	/**
 	 * 根据时间判定Tick类型
 	 */

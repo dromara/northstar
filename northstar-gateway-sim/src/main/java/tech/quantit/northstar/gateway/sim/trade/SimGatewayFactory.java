@@ -8,14 +8,15 @@ import tech.quantit.northstar.common.constant.GatewayUsage;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.model.GatewayDescription;
 import tech.quantit.northstar.common.model.SimSettings;
-import tech.quantit.northstar.gateway.api.AbstractGatewayFactory;
+import tech.quantit.northstar.gateway.api.GatewayFactory;
 import tech.quantit.northstar.gateway.api.Gateway;
+import tech.quantit.northstar.gateway.api.domain.GlobalMarketRegistry;
 import tech.quantit.northstar.gateway.sim.market.SimMarketGatewayLocal;
 import tech.quantit.northstar.gateway.sim.persistence.SimAccountRepository;
 import xyz.redtorch.pb.CoreEnum.GatewayTypeEnum;
 import xyz.redtorch.pb.CoreField.GatewaySettingField;
 
-public class SimGatewayFactory extends AbstractGatewayFactory{
+public class SimGatewayFactory implements GatewayFactory{
 	
 	private SimMarket simMarket;
 	
@@ -23,10 +24,13 @@ public class SimGatewayFactory extends AbstractGatewayFactory{
 	
 	private SimAccountRepository simAccountRepo;
 	
-	public SimGatewayFactory(FastEventEngine fastEventEngine, SimMarket simMarket, SimAccountRepository repo) {
+	private GlobalMarketRegistry registry;
+	
+	public SimGatewayFactory(FastEventEngine fastEventEngine, SimMarket simMarket, SimAccountRepository repo, GlobalMarketRegistry registry) {
 		this.simMarket = simMarket;
 		this.fastEventEngine = fastEventEngine;
 		this.simAccountRepo = repo;
+		this.registry = registry;
 	}
 
 	@Override
@@ -60,7 +64,7 @@ public class SimGatewayFactory extends AbstractGatewayFactory{
 		account.setEventBus(simMarket.getMarketEventBus());
 		account.setFeEngine(fastEventEngine);
 		account.setSavingCallback(() -> simAccountRepo.save(account));
-		SimTradeGateway gateway = new SimTradeGatewayLocal(fastEventEngine, gwSettings, account);
+		SimTradeGateway gateway = new SimTradeGatewayLocal(fastEventEngine, gwSettings, account, registry);
 		simMarket.addGateway(mdGatewayId, gateway);
 		return gateway;
 	}

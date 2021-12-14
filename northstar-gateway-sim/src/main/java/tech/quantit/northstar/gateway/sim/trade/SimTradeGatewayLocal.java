@@ -8,11 +8,15 @@ import java.util.concurrent.TimeUnit;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.event.NorthstarEventType;
 import tech.quantit.northstar.common.exception.TradeException;
+import tech.quantit.northstar.gateway.api.domain.GlobalMarketRegistry;
+import tech.quantit.northstar.gateway.api.domain.NormalContract;
 import xyz.redtorch.pb.CoreField.AccountField;
 import xyz.redtorch.pb.CoreField.CancelOrderReqField;
+import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.GatewaySettingField;
 import xyz.redtorch.pb.CoreField.PositionField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
@@ -35,10 +39,13 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 	
 	private SimContractGenerator contractGen = new SimContractGenerator();
 	
-	public SimTradeGatewayLocal(FastEventEngine feEngine, GatewaySettingField gatewaySetting, SimAccount account) {
+	private GlobalMarketRegistry registry;
+	
+	public SimTradeGatewayLocal(FastEventEngine feEngine, GatewaySettingField gatewaySetting, SimAccount account, GlobalMarketRegistry registry) {
 		this.feEngine = feEngine;
 		this.gatewaySetting = gatewaySetting;
 		this.account = account;	
+		this.registry = registry;
 	}
 
 	@Override
@@ -74,7 +81,10 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 				log.error("", e);
 			}
 			
-			feEngine.emitEvent(NorthstarEventType.CONTRACT, contractGen.getContract(gatewaySetting.getGatewayId()));
+			ContractField simContract = contractGen.getContract(gatewaySetting.getGatewayId());
+			registry.register(new NormalContract(simContract, GatewayType.SIM));
+			
+			feEngine.emitEvent(NorthstarEventType.CONTRACT, simContract);
 			feEngine.emitEvent(NorthstarEventType.CONTRACT_LOADED, gatewaySetting.getGatewayId());
 		});
 	}

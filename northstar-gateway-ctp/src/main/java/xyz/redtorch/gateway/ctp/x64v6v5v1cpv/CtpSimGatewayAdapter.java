@@ -13,6 +13,7 @@ import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.gateway.api.GatewayAbstract;
 import tech.quantit.northstar.gateway.api.MarketGateway;
 import tech.quantit.northstar.gateway.api.TradeGateway;
+import tech.quantit.northstar.gateway.api.domain.GlobalMarketRegistry;
 import xyz.redtorch.pb.CoreEnum.GatewayTypeEnum;
 import xyz.redtorch.pb.CoreField.CancelOrderReqField;
 import xyz.redtorch.pb.CoreField.ContractField;
@@ -72,8 +73,8 @@ public class CtpSimGatewayAdapter extends GatewayAbstract implements MarketGatew
 	private MdSpi mdSpi = null;
 	private TdSpi tdSpi = null;
 	
-	public CtpSimGatewayAdapter(FastEventEngine fastEventEngine, GatewaySettingField gatewaySetting) {
-		super(gatewaySetting);
+	public CtpSimGatewayAdapter(FastEventEngine fastEventEngine, GatewaySettingField gatewaySetting, GlobalMarketRegistry registry) {
+		super(gatewaySetting, registry);
 
 		if (gatewaySetting.getGatewayType() == GatewayTypeEnum.GTE_Trade) {
 			tdSpi = new TdSpi(this);

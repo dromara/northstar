@@ -22,8 +22,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import tech.quantit.northstar.common.constant.DateTimeConstant;
+import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.common.event.NorthstarEventType;
 import tech.quantit.northstar.gateway.api.GatewayAbstract;
+import tech.quantit.northstar.gateway.api.domain.ContractFactory;
 import xyz.redtorch.gateway.ctp.common.CtpContractNameResolver;
 import xyz.redtorch.gateway.ctp.x64v6v5v1cpv.api.CThostFtdcAccountregisterField;
 import xyz.redtorch.gateway.ctp.x64v6v5v1cpv.api.CThostFtdcBatchOrderActionField;
@@ -1369,6 +1371,9 @@ public class TdSpi extends CThostFtdcTraderSpi {
 			if (bIsLast) {
 				
 				logger.warn("{}交易接口合约信息获取完成!共计{}条", logInfo, gatewayAdapter.contractMap.size());
+				// 仿真网关无须合成指数合约
+				ContractFactory contractFactory = new ContractFactory(GatewayType.CTP_SIM, gatewayAdapter.contractMap.values().stream().toList());
+				contractFactory.makeNormalContract().stream().forEach(gatewayAdapter.registry::register);
 				gatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.CONTRACT_LOADED, gatewayId);
 				
 				instrumentQueried = true;

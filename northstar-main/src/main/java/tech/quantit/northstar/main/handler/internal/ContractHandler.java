@@ -13,11 +13,9 @@ import tech.quantit.northstar.common.event.NorthstarEventType;
 import tech.quantit.northstar.domain.GatewayAndConnectionManager;
 import tech.quantit.northstar.domain.GatewayConnection;
 import tech.quantit.northstar.domain.gateway.ContractManager;
-import tech.quantit.northstar.gateway.api.MarketGateway;
 import tech.quantit.northstar.main.persistence.MarketDataRepository;
 import tech.quantit.northstar.main.persistence.po.ContractPO;
 import tech.quantit.northstar.main.utils.ProtoBeanUtils;
-import xyz.redtorch.gateway.ctp.index.IndexEngine;
 import xyz.redtorch.pb.CoreField.ContractField;
 
 /**
@@ -31,15 +29,11 @@ public class ContractHandler extends AbstractEventHandler implements GenericEven
 	
 	private GatewayAndConnectionManager gatewayConnMgr;
 	
-	private IndexEngine idxEngine;
-	
 	private MarketDataRepository mdRepo;
 	
-	public ContractHandler(ContractManager contractMgr, GatewayAndConnectionManager gatewayConnMgr,
-			IndexEngine idxEngine, MarketDataRepository mdRepo) {
+	public ContractHandler(ContractManager contractMgr, GatewayAndConnectionManager gatewayConnMgr, MarketDataRepository mdRepo) {
 		this.contractMgr = contractMgr;
 		this.gatewayConnMgr = gatewayConnMgr;
-		this.idxEngine = idxEngine;
 		this.mdRepo = mdRepo;
 	}
 	
@@ -49,9 +43,6 @@ public class ContractHandler extends AbstractEventHandler implements GenericEven
 		case CONTRACT:
 			handleContractEvent((ContractField) e.getData());
 			break;
-//		case IDX_CONTRACT:
-//			handleIdxContractEvent((ContractField) e.getData());
-//			break;
 		case CONTRACT_LOADED:
 			handleContractLoadedEvent((String) e.getData());
 			break;
@@ -69,25 +60,10 @@ public class ContractHandler extends AbstractEventHandler implements GenericEven
 		ContractField contractNew = contract.toBuilder()
 				.setGatewayId(relativeGatewayId)
 				.build();
-		if(contractMgr.addContract(contractNew)) {			
-			idxEngine.registerContract(contractNew);
-			MarketGateway gateway = (MarketGateway) gatewayConnMgr.getGatewayById(relativeGatewayId);
-			if(gateway.isConnected()) {				
-				gateway.subscribe(contractNew);
-			}
-		}
-	}
-	
-	private void handleIdxContractEvent(ContractField contract) {
-		long curTime = System.currentTimeMillis();
-		ContractPO c = ProtoBeanUtils.toPojoBean(ContractPO.class, contract);
-		c.setRecordTimestamp(curTime);
-		mdRepo.saveContract(c);
-		contractMgr.addContract(contract);
+		contractMgr.addContract(contractNew);
 	}
 	
 	private void handleContractLoadedEvent(String accountId) {
-		idxEngine.start();
 		long curTime = System.currentTimeMillis();
 		GatewayConnection conn = gatewayConnMgr.getGatewayConnectionById(accountId);
 		Map<String, ContractField> gatewayContractMap = contractMgr.getContractMapByGateway(conn.getGwDescription().getBindedMktGatewayId());

@@ -14,6 +14,7 @@ import tech.quantit.northstar.domain.account.TradeDayAccount;
 import tech.quantit.northstar.domain.gateway.ContractManager;
 import tech.quantit.northstar.domain.strategy.ModuleManager;
 import tech.quantit.northstar.domain.strategy.SandboxModuleManager;
+import tech.quantit.northstar.gateway.api.domain.GlobalMarketRegistry;
 import tech.quantit.northstar.gateway.sim.persistence.SimAccountRepository;
 import tech.quantit.northstar.gateway.sim.trade.SimMarket;
 import tech.quantit.northstar.main.engine.broadcast.SocketIOMessageEngine;
@@ -73,7 +74,8 @@ public class ServiceConfig {
 	
 	@Bean
 	public PlaybackService playbackService(FastEventEngine feEngine, SandboxModuleManager moduleMgr, GatewayAndConnectionManager gatewayConnMgr, 
-			ContractManager contractMgr, ModuleRepository moduleRepo, MarketDataRepository mdRepo, SimMarket simMarket, SimAccountRepository simAccRepo) {
-		return new PlaybackService(feEngine, moduleMgr, gatewayConnMgr, contractMgr, moduleRepo, mdRepo, simMarket, simAccRepo);
+			ContractManager contractMgr, ModuleRepository moduleRepo, MarketDataRepository mdRepo, SimMarket simMarket, SimAccountRepository simAccRepo,
+			GlobalMarketRegistry registry) {
+		return new PlaybackService(feEngine, moduleMgr, gatewayConnMgr, contractMgr, moduleRepo, mdRepo, simMarket, simAccRepo, registry);
 	}
 }

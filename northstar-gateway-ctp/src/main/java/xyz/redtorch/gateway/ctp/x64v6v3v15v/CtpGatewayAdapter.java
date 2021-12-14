@@ -73,13 +73,9 @@ public class CtpGatewayAdapter extends GatewayAbstract implements MarketGateway,
 	private MdSpi mdSpi = null;
 	private TdSpi tdSpi = null;
 	
-	private GlobalMarketRegistry registry;
-	
 	public CtpGatewayAdapter(FastEventEngine fastEventEngine, GatewaySettingField gatewaySetting, GlobalMarketRegistry registry) {
-		super(gatewaySetting);
+		super(gatewaySetting, registry);
 		
-		this.registry = registry;
-
 		if (gatewaySetting.getGatewayType() == GatewayTypeEnum.GTE_Trade) {
 			tdSpi = new TdSpi(this);
 		} else if (gatewaySetting.getGatewayType() == GatewayTypeEnum.GTE_MarketData) {
