@@ -1,39 +1,46 @@
 package tech.quantit.northstar.gateway.api.domain;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
 
-class NormalContractTest {
+import tech.quantit.northstar.common.constant.GatewayType;
+import test.common.TestFieldFactory;
+import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
+import xyz.redtorch.pb.CoreField.ContractField;
 
-	@Test
-	void testNormalContractContractFieldGatewayType() {
-		fail("Not yet implemented");
-	}
+class NormalContractTest {
+	
+	private TestFieldFactory factory = new TestFieldFactory("gateway");
+	
+	ContractField contractField = factory.makeContract("rb2210");
+	
+	NormalContract contract = new NormalContract(contractField, GatewayType.CTP); 
+
 
 	@Test
 	void testGatewayType() {
-		fail("Not yet implemented");
+		assertThat(contract.gatewayType()).isEqualTo(GatewayType.CTP);
 	}
 
 	@Test
 	void testUnifiedSymbol() {
-		fail("Not yet implemented");
+		assertThat(contract.unifiedSymbol()).isEqualTo("rb2210@SHFE@FUTURES");
 	}
 
 	@Test
 	void testContractField() {
-		fail("Not yet implemented");
+		assertThat(contract.contractField()).isEqualTo(contractField);
 	}
 
 	@Test
 	void testBarGenerator() {
-		fail("Not yet implemented");
+		assertThat(contract.barGenerator()).isNotNull();
 	}
 
 	@Test
-	void testNormalContract() {
-		fail("Not yet implemented");
+	void testProductClass() {
+		assertThat(contract.productClass()).isEqualTo(ProductClassEnum.FUTURES);
 	}
 
 }

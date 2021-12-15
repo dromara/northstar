@@ -1,24 +1,29 @@
 package tech.quantit.northstar.gateway.api.domain;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
+import test.common.TestFieldFactory;
+import xyz.redtorch.pb.CoreField.ContractField;
+
 class IndexContractTest {
 
-	@Test
-	void testIndexContract() {
-		fail("Not yet implemented");
-	}
+	private TestFieldFactory factory = new TestFieldFactory("gateway");
+	
+	Set<ContractField> contracts = Set.of(factory.makeContract("rb2201"), factory.makeContract("rb2205"), factory.makeContract("rb2210"));
+	IndexContract idxContract = new IndexContract("rb0000@SHFE@FUTURES", contracts);
 
 	@Test
 	void testIndexTicker() {
-		fail("Not yet implemented");
+		assertThat(idxContract.indexTicker()).isNotNull();
 	}
 
 	@Test
 	void testMonthlyContractSymbols() {
-		fail("Not yet implemented");
+		assertThat(idxContract.monthlyContractSymbols()).hasSize(3);
 	}
 
 }

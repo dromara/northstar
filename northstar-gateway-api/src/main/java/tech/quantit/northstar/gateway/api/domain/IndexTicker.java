@@ -1,12 +1,13 @@
 package tech.quantit.northstar.gateway.api.domain;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.ToDoubleFunction;
 
+import lombok.extern.slf4j.Slf4j;
 import xyz.redtorch.pb.CoreField.TickField;
 
 /**
@@ -14,6 +15,7 @@ import xyz.redtorch.pb.CoreField.TickField;
  * @author KevinHuangwl
  *
  */
+@Slf4j
 public class IndexTicker {
 
 	private IndexContract idxContract;
@@ -43,11 +45,15 @@ public class IndexTicker {
 		this.onTickCallback = onTickCallback;
 	}
 
-	public List<String> dependencySymbols() {
+	public Set<String> dependencySymbols() {
 		return idxContract.monthlyContractSymbols();
 	}
 
 	public void update(TickField tick) {
+		if(!dependencySymbols().contains(tick.getUnifiedSymbol())) {
+			log.warn("[{}]指数TICK生成器，无法处理 [{}] 的行情数据", idxContract.unifiedSymbol(), tick.getUnifiedSymbol());
+			return;
+		}
 		// 如果有过期的TICK数据(例如不活跃的合约),则并入下个K线
 		if (lastTickTimestamp < tick.getActionTimestamp()) {
 			if(lastTickTimestamp > 0) {
@@ -77,7 +83,7 @@ public class IndexTicker {
 	private void calculate() {
 		// 合计持仓量
 		final double totalOpenInterest = tickMap.reduceValuesToDouble(PARA_THRESHOLD, TickField::getOpenInterest, 0, (a, b) -> a + b);
-		final double totalOpenInterestDelta = tickMap.reduceValuesToDouble(PARA_THRESHOLD, TickField::getOpenInterest, 0, (a, b) -> a + b);
+		final double totalOpenInterestDelta = tickMap.reduceValuesToDouble(PARA_THRESHOLD, TickField::getOpenInterestDelta, 0, (a, b) -> a + b);
 		// 合约权值计算
 		tickMap.forEachEntry(PARA_THRESHOLD, e -> weightedMap.compute(e.getKey(), (k,v) -> e.getValue().getOpenInterest() * 1.0 / totalOpenInterest));
 		

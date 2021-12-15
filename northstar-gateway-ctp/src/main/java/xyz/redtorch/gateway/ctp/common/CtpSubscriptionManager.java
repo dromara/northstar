@@ -45,13 +45,11 @@ public class CtpSubscriptionManager implements SubscriptionManager {
 
 	@Override
 	public boolean subscribable(NormalContract contract) {
-		if(ptnClzBlk != null && ptnClzBlk.matcher(contract.productClass().toString()).find()
-				|| ptnSymBlk != null && ptnSymBlk.matcher(contract.unifiedSymbol()).find()) 
-			return false;
-		if(ptnSymWht != null && !ptnSymWht.matcher(contract.unifiedSymbol()).find()
-				|| ptnClzWht != null && !ptnClzWht.matcher(contract.productClass().toString()).find())
-			return false;
-		return true;
+		boolean inClzBlklist = ptnClzBlk != null && ptnClzBlk.matcher(contract.productClass().toString()).find();
+		boolean inSymBlklist = ptnSymBlk != null && ptnSymBlk.matcher(contract.unifiedSymbol()).find();
+		boolean notInSymWhtlist = ptnSymWht != null && !ptnSymWht.matcher(contract.unifiedSymbol()).find();
+		boolean notInClzWhtlist = ptnClzWht != null && !ptnClzWht.matcher(contract.productClass().toString()).find();
+		return  !inClzBlklist && !inSymBlklist && !notInSymWhtlist && !notInClzWhtlist;
 	}
 
 	@Override

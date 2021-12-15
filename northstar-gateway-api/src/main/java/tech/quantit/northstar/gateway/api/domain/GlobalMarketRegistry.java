@@ -93,7 +93,7 @@ public class GlobalMarketRegistry {
 	public void dispatch(TickField tick) {
 		NormalContract contract = contractMap.get(tick.getUnifiedSymbol());
 		if(contract == null) {
-			log.trace("没有登记合约 [{}]，忽略TICK分发", tick.getUnifiedSymbol());
+			log.warn("没有登记合约 [{}]，忽略TICK分发", tick.getUnifiedSymbol());
 			return;
 		}
 		if(!(contract instanceof IndexContract) && idxTickerMap.containsKey(tick.getUnifiedSymbol())) {

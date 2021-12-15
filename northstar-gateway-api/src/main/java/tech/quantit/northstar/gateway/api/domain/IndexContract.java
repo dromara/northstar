@@ -1,7 +1,7 @@
 package tech.quantit.northstar.gateway.api.domain;
 
-import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import xyz.redtorch.pb.CoreField.ContractField;
 
@@ -35,8 +35,8 @@ public class IndexContract extends NormalContract {
 		return ticker;
 	}
 	
-	public List<String> monthlyContractSymbols(){
-		return monthlyContracts.stream().map(ContractField::getUnifiedSymbol).toList();
+	public Set<String> monthlyContractSymbols(){
+		return monthlyContracts.stream().map(ContractField::getUnifiedSymbol).collect(Collectors.toSet());
 	}
 	
 }

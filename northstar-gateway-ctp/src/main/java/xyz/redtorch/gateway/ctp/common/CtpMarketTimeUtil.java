@@ -36,12 +36,12 @@ public class CtpMarketTimeUtil implements MarketTimeUtil{
 				|| time.isAfter(dayMarketStartTime) && time.isBefore(dayMarketOpenTime)) {
 			return TickType.PRE_OPENING_TICK;
 		}
+		if(Math.abs(dayMarketClosingTime1.toNanoOfDay() - time.toNanoOfDay()) <= LESS_THEN_HALF_SEC_IN_NANO
+				|| Math.abs(dayMarketClosingTime2.toNanoOfDay() - time.toNanoOfDay()) <= LESS_THEN_HALF_SEC_IN_NANO) {
+			return TickType.CLOSING_TICK;
+		}
 		if(time.getSecond() == 0 && time.getNano() == 0) {
 			return TickType.END_OF_MIN_TICK;
-		}
-		if(Math.abs(dayMarketClosingTime1.toNanoOfDay() - time.toNanoOfDay()) < LESS_THEN_HALF_SEC_IN_NANO
-				|| Math.abs(dayMarketClosingTime2.toNanoOfDay() - time.toNanoOfDay()) < LESS_THEN_HALF_SEC_IN_NANO) {
-			return TickType.CLOSING_TICK;
 		}
 		return TickType.NORMAL_TICK;
 	}

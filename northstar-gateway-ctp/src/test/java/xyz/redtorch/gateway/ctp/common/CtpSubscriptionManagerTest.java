@@ -9,7 +9,8 @@ import org.junit.jupiter.api.Test;
 import tech.quantit.northstar.gateway.api.domain.NormalContract;
 import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
 
-class CtpSubscriptionManagerTest {
+
+public class CtpSubscriptionManagerTest {
 	
 	static {
 		System.setProperty("subscription.ctp.classType.whitelist", "FUTURES");
@@ -19,7 +20,7 @@ class CtpSubscriptionManagerTest {
 	}
 
 	@Test
-	void testWhitelist() {
+	public void testWhitelist() {
 		CtpSubscriptionManager subMgr = new CtpSubscriptionManager();
 		NormalContract contract1 = mock(NormalContract.class);
 		NormalContract contract2 = mock(NormalContract.class);
