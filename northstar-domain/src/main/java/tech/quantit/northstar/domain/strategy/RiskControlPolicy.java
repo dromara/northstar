@@ -53,6 +53,7 @@ public class RiskControlPolicy implements TickDataAware, EventDrivenComponent, S
 			currentOrderReq = (SubmitOrderReqField) moduleEvent.getData();
 			if(FieldUtils.isOpen(currentOrderReq.getOffsetFlag())) {
 				log.debug("[{}] 收到新建开仓订单", moduleName);
+				riskCheckResults.add(RiskAuditResult.ACCEPTED);	//默认是通过的
 				if(lastTick == null) {
 					meb.post(new ModuleEvent<>(ModuleEventType.ORDER_REQ_RETAINED, currentOrderReq));
 					log.warn("[{}] 当前行情为空，无法计算风控", moduleName);
