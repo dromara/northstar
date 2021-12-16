@@ -4,12 +4,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
 
-import test.common.TestFieldFactory;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreEnum.OrderStatusEnum;
 import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
-import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 
 public class FieldUtilsTest {
 
@@ -76,10 +74,4 @@ public class FieldUtilsTest {
 		assertThat(FieldUtils.isSell(DirectionEnum.D_Unknown)).isFalse();
 	}
 
-	public static void main(String[] args) {
-		TestFieldFactory factory = new TestFieldFactory("testGateway");
-		SubmitOrderReqField orderReq = factory.makeOrderReq("rb2210", DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open, 10, 1000, 900);
-		System.out.println(orderReq);
-		System.out.println(orderReq.toBuilder().setPrice(2000).build());
-	}
 }

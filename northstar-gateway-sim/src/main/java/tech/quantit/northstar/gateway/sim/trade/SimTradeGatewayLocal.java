@@ -12,6 +12,7 @@ import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.event.NorthstarEventType;
 import tech.quantit.northstar.common.exception.TradeException;
+import tech.quantit.northstar.common.utils.MessagePrinter;
 import tech.quantit.northstar.gateway.api.domain.GlobalMarketRegistry;
 import tech.quantit.northstar.gateway.api.domain.NormalContract;
 import xyz.redtorch.pb.CoreField.AccountField;
@@ -58,11 +59,11 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 			log.trace("模拟账户定时回报");
 			AccountField af = account.accountField();
 			feEngine.emitEvent(NorthstarEventType.ACCOUNT, af);
-			log.trace("账户信息：{}", af);
+			log.trace("账户信息：{}", MessagePrinter.print(af));
 			boolean shouldClear = false;
 			for(PositionField pf : account.positionFields()) {
 				feEngine.emitEvent(NorthstarEventType.POSITION, pf);
-				log.trace("持仓信息：{}", pf);
+				log.trace("持仓信息：{}", MessagePrinter.print(pf));
 				if(pf.getPosition() == 0) {
 					shouldClear = true;
 				}

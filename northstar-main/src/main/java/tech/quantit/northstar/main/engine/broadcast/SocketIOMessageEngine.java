@@ -14,6 +14,7 @@ import com.google.protobuf.Message;
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.event.NorthstarEvent;
 import tech.quantit.northstar.common.event.NorthstarEventType;
+import tech.quantit.northstar.common.utils.MessagePrinter;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.TickField;
 
@@ -62,6 +63,7 @@ public class SocketIOMessageEngine {
 	
 	private void emitTickData(NorthstarEvent event) {
 		TickField tick = (TickField) event.getData();
+		log.trace("Tick: {}", MessagePrinter.print(tick));
 		server.getRoomOperations(tick.getUnifiedSymbol()).sendEvent(event.getEvent().toString(), tick.toByteArray());
 	}
 	

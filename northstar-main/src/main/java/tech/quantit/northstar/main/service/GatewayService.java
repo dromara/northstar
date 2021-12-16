@@ -28,6 +28,7 @@ import tech.quantit.northstar.domain.TraderGatewayConnection;
 import tech.quantit.northstar.gateway.api.GatewayFactory;
 import tech.quantit.northstar.gateway.api.Gateway;
 import tech.quantit.northstar.gateway.api.MarketGateway;
+import tech.quantit.northstar.gateway.api.domain.GlobalMarketRegistry;
 import tech.quantit.northstar.gateway.sim.trade.SimGatewayFactory;
 import tech.quantit.northstar.gateway.sim.trade.SimMarket;
 import tech.quantit.northstar.gateway.sim.trade.SimTradeGateway;
@@ -64,14 +65,17 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 	
 	private ModuleRepository moduleRepo;
 	
+	private GlobalMarketRegistry registry;
+	
 	public GatewayService(GatewayAndConnectionManager gatewayConnMgr, GatewayRepository gatewayRepo, MarketDataRepository mdRepo,
-			ModuleRepository moduleRepo, InternalEventBus eventBus, SimMarket simMarket) {
+			ModuleRepository moduleRepo, InternalEventBus eventBus, SimMarket simMarket, GlobalMarketRegistry registry) {
 		this.gatewayConnMgr = gatewayConnMgr;
 		this.gatewayRepo = gatewayRepo;
 		this.mdRepo = mdRepo;
 		this.moduleRepo = moduleRepo;
 		this.eventBus = eventBus;
 		this.simMarket = simMarket;
+		this.registry = registry;
 	}
 	
 	/**
@@ -116,6 +120,9 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 		gatewayConnMgr.createPair(conn, gateway);
 		if(gatewayDescription.isAutoConnect()) {
 			gateway.connect();
+		}
+		if(gateway instanceof MarketGateway mktGateway) {
+			registry.register(mktGateway);
 		}
 		
 		return true;
