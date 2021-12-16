@@ -29,10 +29,10 @@ public class CtpSubscriptionManager implements SubscriptionManager {
 	private Pattern ptnSymBlk;
 	
 	public CtpSubscriptionManager() {
-		String classTypeWhitelist = System.getProperty("subscription.ctp.classType.whitelist");
-		String classTypeBlacklist = System.getProperty("subscription.ctp.classType.blacklist");
-		String symbolWhitelist = System.getProperty("subscription.ctp.unifiedSymbol.whitelist");
-		String symbolBlacklist = System.getProperty("subscription.ctp.unifiedSymbol.blacklist");
+		String classTypeWhitelist = System.getProperty("northstar.subscription.ctp.classType.whitelist");
+		String classTypeBlacklist = System.getProperty("northstar.subscription.ctp.classType.blacklist");
+		String symbolWhitelist = System.getProperty("northstar.subscription.ctp.unifiedSymbol.whitelist");
+		String symbolBlacklist = System.getProperty("northstar.subscription.ctp.unifiedSymbol.blacklist");
 		if(StringUtils.isNotBlank(classTypeWhitelist))
 			ptnClzWht = Pattern.compile(classTypeWhitelist);
 		if(StringUtils.isNotBlank(classTypeBlacklist))

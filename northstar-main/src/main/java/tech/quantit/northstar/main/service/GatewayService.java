@@ -29,6 +29,7 @@ import tech.quantit.northstar.gateway.api.GatewayFactory;
 import tech.quantit.northstar.gateway.api.Gateway;
 import tech.quantit.northstar.gateway.api.MarketGateway;
 import tech.quantit.northstar.gateway.api.domain.GlobalMarketRegistry;
+import tech.quantit.northstar.gateway.api.domain.NormalContract;
 import tech.quantit.northstar.gateway.sim.trade.SimGatewayFactory;
 import tech.quantit.northstar.gateway.sim.trade.SimMarket;
 import tech.quantit.northstar.gateway.sim.trade.SimTradeGateway;
@@ -121,8 +122,8 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 		if(gatewayDescription.isAutoConnect()) {
 			gateway.connect();
 		}
-		if(gateway instanceof MarketGateway mktGateway) {
-			registry.register(mktGateway);
+		if(gatewayDescription.getGatewayUsage() == GatewayUsage.MARKET_DATA) {
+			registry.register((MarketGateway) gateway);
 		}
 		
 		return true;

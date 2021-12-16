@@ -13,10 +13,10 @@ import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
 public class CtpSubscriptionManagerTest {
 	
 	static {
-		System.setProperty("subscription.ctp.classType.whitelist", "FUTURES");
-		System.setProperty("subscription.ctp.classType.blacklist", "OPTION");
-		System.setProperty("subscription.ctp.unifiedSymbol.whitelist", "[A-z]+\\d+@[A-Z]+@FUTURES");
-		System.setProperty("subscription.ctp.unifiedSymbol.blacklist", "2210");
+		System.setProperty("northstar.subscription.ctp.classType.whitelist", "FUTURES");
+		System.setProperty("northstar.subscription.ctp.classType.blacklist", "OPTION");
+		System.setProperty("northstar.subscription.ctp.unifiedSymbol.whitelist", "[A-z]+\\d+@[A-Z]+@FUTURES");
+		System.setProperty("northstar.subscription.ctp.unifiedSymbol.blacklist", "2210");
 	}
 
 	@Test
