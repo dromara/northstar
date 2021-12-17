@@ -1,4 +1,4 @@
-package tech.quantit.northstar.main.engine.broadcast;
+package tech.quantit.northstar.main.handler.broadcast;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashSet;

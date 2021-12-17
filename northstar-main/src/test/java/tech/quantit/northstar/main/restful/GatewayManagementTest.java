@@ -31,7 +31,7 @@ import tech.quantit.northstar.common.model.GatewayDescription;
 import tech.quantit.northstar.common.model.NsUser;
 import tech.quantit.northstar.common.model.SimSettings;
 import tech.quantit.northstar.main.NorthstarApplication;
-import tech.quantit.northstar.main.engine.broadcast.SocketIOMessageEngine;
+import tech.quantit.northstar.main.handler.broadcast.SocketIOMessageEngine;
 
 /**
  * GatewayManagement接口黑盒测试类

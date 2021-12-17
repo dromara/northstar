@@ -36,7 +36,7 @@ import tech.quantit.northstar.common.model.PlaybackDescription;
 import tech.quantit.northstar.domain.gateway.ContractManager;
 import tech.quantit.northstar.gateway.sim.persistence.SimAccountRepository;
 import tech.quantit.northstar.main.NorthstarApplication;
-import tech.quantit.northstar.main.engine.broadcast.SocketIOMessageEngine;
+import tech.quantit.northstar.main.handler.broadcast.SocketIOMessageEngine;
 import tech.quantit.northstar.main.persistence.MarketDataRepository;
 import tech.quantit.northstar.main.persistence.ModuleRepository;
 import tech.quantit.northstar.strategy.api.model.ModuleInfo;

@@ -28,7 +28,7 @@ public class AccountHandler extends AbstractEventHandler implements GenericEvent
 	private Map<String, TradeDayAccount> accountMap;
 	private TradeDayAccountFactory factory;
 	
-	private final Set<NorthstarEventType> TARGET_TYPE = new HashSet<>() {
+	private static final Set<NorthstarEventType> TARGET_TYPE = new HashSet<>() {
 		private static final long serialVersionUID = 6418831877479036414L;
 		{
 			add(NorthstarEventType.LOGGED_IN);

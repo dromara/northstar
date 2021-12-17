@@ -17,7 +17,6 @@ import tech.quantit.northstar.common.constant.GatewayUsage;
 import tech.quantit.northstar.common.model.GatewayDescription;
 import tech.quantit.northstar.common.model.ResultBean;
 import tech.quantit.northstar.domain.gateway.ContractManager;
-import tech.quantit.northstar.main.engine.broadcast.SocketIOMessageEngine;
 import tech.quantit.northstar.main.service.GatewayService;
 
 @RequestMapping("/mgt")
@@ -30,9 +29,6 @@ public class GatewayManagementController {
 	@Autowired
 	protected ContractManager contractMgr;
 	
-	@Autowired
-	protected SocketIOMessageEngine msgEngine;
-
 	@PostMapping("/gateway")
 	public ResultBean<Boolean> create(@RequestBody GatewayDescription gd) throws Exception {
 		Assert.notNull(gd, "传入对象不能为空");

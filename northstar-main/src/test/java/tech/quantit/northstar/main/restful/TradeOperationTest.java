@@ -21,7 +21,7 @@ import tech.quantit.northstar.common.model.OrderRequest;
 import tech.quantit.northstar.common.model.OrderRequest.TradeOperation;
 import tech.quantit.northstar.domain.account.TradeDayAccount;
 import tech.quantit.northstar.main.NorthstarApplication;
-import tech.quantit.northstar.main.engine.broadcast.SocketIOMessageEngine;
+import tech.quantit.northstar.main.handler.broadcast.SocketIOMessageEngine;
 
 @SpringBootTest(classes = NorthstarApplication.class, value="spring.profiles.active=test")
 public class TradeOperationTest {
