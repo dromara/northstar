@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -96,12 +95,9 @@ public class AppConfig implements WebMvcConfigurer {
 		return new BarBufferManager(mdRepo);
 	}
 	
-	@Value("${northstar.contracts.canHandle}")
-	private String[] productClassTypes;
-	
 	@Bean
-	public ContractManager contractManager() {
-		return new ContractManager(productClassTypes);
+	public ContractManager contractManager(GlobalMarketRegistry registry) {
+		return new ContractManager(registry);
 	}
 	
 	@Bean

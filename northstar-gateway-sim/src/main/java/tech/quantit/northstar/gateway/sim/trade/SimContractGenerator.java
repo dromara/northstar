@@ -2,6 +2,7 @@ package tech.quantit.northstar.gateway.sim.trade;
 
 import java.time.LocalDate;
 
+import tech.quantit.northstar.common.constant.Constants;
 import xyz.redtorch.pb.CoreEnum.CurrencyEnum;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
@@ -16,7 +17,7 @@ public class SimContractGenerator {
 		String symbol = "sim" + year + month;
 		String name = "模拟品种" + year + month;
 		return ContractField.newBuilder()
-				.setGatewayId(gatewayId)
+				.setGatewayId(Constants.SIM_MKT_GATEWAY_ID)
 				.setContractId(symbol + "@SHFE@FUTURES@" + gatewayId)
 				.setCurrency(CurrencyEnum.CNY)
 				.setExchange(ExchangeEnum.SHFE)

@@ -14,10 +14,8 @@ import tech.quantit.northstar.gateway.sim.trade.SimMarket;
 import tech.quantit.northstar.main.factories.TradeDayAccountFactory;
 import tech.quantit.northstar.main.handler.internal.AccountHandler;
 import tech.quantit.northstar.main.handler.internal.ConnectionHandler;
-import tech.quantit.northstar.main.handler.internal.ContractHandler;
 import tech.quantit.northstar.main.handler.internal.SimMarketHandler;
 import tech.quantit.northstar.main.handler.internal.TradeHandler;
-import tech.quantit.northstar.main.persistence.MarketDataRepository;
 
 @Slf4j
 @Configuration
@@ -31,15 +29,6 @@ public class InternalEventHandlerConfig {
 			ConcurrentMap<String, TradeDayAccount> accountMap) {
 		AccountHandler handler = new AccountHandler(accountMap, new TradeDayAccountFactory(eventBus, contractMgr));
 		log.info("注册：AccountHandler");
-		eventBus.register(handler);
-		return handler;
-	}
-	
-	@Bean
-	public ContractHandler contractEventHandler(InternalEventBus eventBus, GatewayAndConnectionManager gatewayConnMgr,
-			ContractManager contractMgr, MarketDataRepository mdRepo) {
-		ContractHandler handler = new ContractHandler(contractMgr, gatewayConnMgr, mdRepo);
-		log.info("注册：ContractHandler");
 		eventBus.register(handler);
 		return handler;
 	}

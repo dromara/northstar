@@ -17,7 +17,6 @@ public class MarketDataDispatcher implements NorthstarEventDispatcher {
 
 		{
 			add(NorthstarEventType.TICK);
-			add(NorthstarEventType.CONTRACT_LOADED);
 		}
 	};
 	

@@ -11,8 +11,6 @@ northstar:
   auth:
     userId: ${nsuser:admin}
     password: ${nspwd:123456}
-  contracts:
-    canHandle: FUTURES
   holidays: 20210614,20210920,20210921,20211001,20211004,20211005,20211006,20211007
 
 logging:  level: 

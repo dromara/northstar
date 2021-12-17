@@ -30,7 +30,6 @@ public class InternalDispatcher implements NorthstarEventDispatcher {
 			add(NorthstarEventType.DISCONNECTED);
 			add(NorthstarEventType.DISCONNECTING);
 			add(NorthstarEventType.CONTRACT);
-			add(NorthstarEventType.CONTRACT_LOADED);
 			add(NorthstarEventType.PLACE_ORDER);
 			add(NorthstarEventType.WITHDRAW_ORDER);
 		}

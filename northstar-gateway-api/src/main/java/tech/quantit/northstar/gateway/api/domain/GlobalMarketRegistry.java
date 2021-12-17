@@ -3,12 +3,15 @@ package tech.quantit.northstar.gateway.api.domain;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.event.NorthstarEventType;
 import tech.quantit.northstar.gateway.api.MarketGateway;
+import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.TickField;
 
 /**
@@ -43,6 +46,9 @@ public class GlobalMarketRegistry {
 	 */
 	protected Map<String, BarGenerator> barGenMap = new HashMap<>(4096);
 	
+	@Setter
+	protected Consumer<ContractField> onContractSubsciptionCallback;
+	
 	
 	public GlobalMarketRegistry(FastEventEngine feEngine) {
 		this.feEngine = feEngine;
@@ -63,6 +69,7 @@ public class GlobalMarketRegistry {
 				dispatch(tick);
 			});
 			ticker.dependencySymbols().forEach(unifiedSymbol -> idxTickerMap.put(contract.unifiedSymbol(), ticker));
+			feEngine.emitEvent(NorthstarEventType.CONTRACT,  idxContract.contractField());
 			return;		// 指数合约不需要订阅，因此无需继续后面步骤
 		}
 		
@@ -73,7 +80,10 @@ public class GlobalMarketRegistry {
 				return;
 			}
 			MarketGateway gateway = gatewayMap.get(contract.gatewayType());
-			gateway.subscribe(contract.contractField());
+			ContractField contractField = contract.contractField();
+			gateway.subscribe(contractField);
+			onContractSubsciptionCallback.accept(contractField);
+			feEngine.emitEvent(NorthstarEventType.CONTRACT, contractField);
 		}
 	}
 	

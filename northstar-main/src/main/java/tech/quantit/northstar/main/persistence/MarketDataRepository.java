@@ -166,6 +166,7 @@ public class MarketDataRepository {
 	 * 查询有效合约列表
 	 * @return
 	 */
+	@Deprecated
 	public List<ContractPO> getAvailableContracts(){
 		log.info("查询十四天内登记过的有效合约");
 		long day14Ago = System.currentTimeMillis() - DAY14MILLISEC;

@@ -13,6 +13,9 @@ import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.gateway.api.MarketGateway;
 import test.common.TestFieldFactory;
+import java.util.function.Consumer;
+
+import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.TickField;
 
 class GlobalMarketRegistryTest {
@@ -29,9 +32,12 @@ class GlobalMarketRegistryTest {
 		when(contract.gatewayType()).thenReturn(GatewayType.CTP);
 		when(contract.barGenerator()).thenReturn(mock(BarGenerator.class));
 		registry.gatewayMap.put(GatewayType.CTP, gateway);
+		Consumer<ContractField> callback = mock(Consumer.class);
+		registry.setOnContractSubsciptionCallback(callback);
 		registry.register(contract);
 		
 		verify(gateway).subscribe(any());
+		verify(callback).accept(any());
 	}
 	
 	@Test

@@ -86,7 +86,6 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 			registry.register(new NormalContract(simContract, GatewayType.SIM));
 			
 			feEngine.emitEvent(NorthstarEventType.CONTRACT, simContract);
-			feEngine.emitEvent(NorthstarEventType.CONTRACT_LOADED, gatewaySetting.getGatewayId());
 		});
 	}
 

@@ -47,6 +47,6 @@ public class DataSyncController {
 	
 	@GetMapping("/contracts")
 	public ResultBean<List<SimpleContractInfo>> availableContracts(){
-		return new ResultBean<List<SimpleContractInfo>>(service.getAvailableContracts());
+		return new ResultBean<>(service.getAvailableContracts());
 	}
 }

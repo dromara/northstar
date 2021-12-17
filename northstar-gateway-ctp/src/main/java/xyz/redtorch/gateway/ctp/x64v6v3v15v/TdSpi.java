@@ -21,11 +21,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import tech.quantit.northstar.common.constant.Constants;
 import tech.quantit.northstar.common.constant.DateTimeConstant;
 import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.common.event.NorthstarEventType;
 import tech.quantit.northstar.gateway.api.GatewayAbstract;
 import tech.quantit.northstar.gateway.api.domain.ContractFactory;
+import tech.quantit.northstar.gateway.api.domain.NormalContract;
 import xyz.redtorch.gateway.ctp.common.CtpContractNameResolver;
 import xyz.redtorch.gateway.ctp.x64v6v3v15v.api.CThostFtdcAccountregisterField;
 import xyz.redtorch.gateway.ctp.x64v6v3v15v.api.CThostFtdcBatchOrderActionField;
@@ -686,7 +688,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 	// 前置机联机回报
 	public void OnFrontConnected() {
 		try {
-			logger.warn("{}交易接口前置机已连接", logInfo);
+			logger.info("{}交易接口前置机已连接", logInfo);
 			// 修改前置机连接状态
 			connectionStatus = CONNECTION_STATUS_CONNECTED;
 			
@@ -717,14 +719,14 @@ public class TdSpi extends CThostFtdcTraderSpi {
 	public void OnRspUserLogin(CThostFtdcRspUserLoginField pRspUserLogin, CThostFtdcRspInfoField pRspInfo, int nRequestID, boolean bIsLast) {
 		try {
 			if (pRspInfo.getErrorID() == 0) {
-				logger.warn("{}交易接口登录成功 TradingDay:{},SessionID:{},BrokerID:{},UserID:{}", logInfo, pRspUserLogin.getTradingDay(), pRspUserLogin.getSessionID(), pRspUserLogin.getBrokerID(),
+				logger.info("{}交易接口登录成功 TradingDay:{},SessionID:{},BrokerID:{},UserID:{}", logInfo, pRspUserLogin.getTradingDay(), pRspUserLogin.getSessionID(), pRspUserLogin.getBrokerID(),
 						pRspUserLogin.getUserID());
 				sessionId = pRspUserLogin.getSessionID();
 				frontId = pRspUserLogin.getFrontID();
 				// 修改登录状态为true
 				loginStatus = true;
 				tradingDay = pRspUserLogin.getTradingDay();
-				logger.warn("{}交易接口获取到的交易日为{}", logInfo, tradingDay);
+				logger.info("{}交易接口获取到的交易日为{}", logInfo, tradingDay);
 
 				// 确认结算单
 				CThostFtdcSettlementInfoConfirmField settlementInfoConfirmField = new CThostFtdcSettlementInfoConfirmField();
@@ -807,7 +809,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 		try {
 			if (pRspInfo != null) {
 				if (pRspInfo.getErrorID() == 0) {
-					logger.warn(logInfo + "交易接口客户端验证成功");
+					logger.info("{}{}", logInfo, "交易接口客户端验证成功");
 					CThostFtdcReqUserLoginField reqUserLoginField = new CThostFtdcReqUserLoginField();
 					reqUserLoginField.setBrokerID(this.brokerId);
 					reqUserLoginField.setUserID(this.userId);
@@ -984,7 +986,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 			if(pRspInfo == null) {
 				logger.warn("交易结算信息为空");
 			} else if (pRspInfo.getErrorID() == 0) {
-				logger.warn("{}交易接口结算信息确认完成", logInfo);
+				logger.info("{}交易接口结算信息确认完成", logInfo);
 			} else {
 				logger.error("{}交易接口结算信息确认出错 错误ID:{},错误信息:{}", logInfo, pRspInfo.getErrorID(), pRspInfo.getErrorMsg());
 				gatewayAdapter.disconnect();
@@ -994,7 +996,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 			// 防止被限流
 			Thread.sleep(1000);
 
-			logger.warn("{}交易接口开始查询投资者信息", logInfo);
+			logger.info("{}交易接口开始查询投资者信息", logInfo);
 			CThostFtdcQryInvestorField pQryInvestor = new CThostFtdcQryInvestorField();
 			pQryInvestor.setInvestorID(userId);
 			pQryInvestor.setBrokerID(brokerId);
@@ -1264,7 +1266,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 			} else {
 				if (pInvestor != null) {
 					investorName = pInvestor.getInvestorName();
-					logger.warn("{}交易接口获取到的投资者名为:{}", logInfo, investorName);
+					logger.info("{}交易接口获取到的投资者名为:{}", logInfo, investorName);
 				} else {
 					logger.error("{}交易接口未能获取到投资者名", logInfo);
 				}
@@ -1284,7 +1286,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 				// 防止被限流
 				Thread.sleep(1000);
 				// 查询所有合约
-				logger.warn("{}交易接口开始查询合约信息", logInfo);
+				logger.info("{}交易接口开始查询合约信息", logInfo);
 				CThostFtdcQryInstrumentField cThostFtdcQryInstrumentField = new CThostFtdcQryInstrumentField();
 				cThostFtdcTraderApi.ReqQryInstrument(cThostFtdcQryInstrumentField, reqId.incrementAndGet());
 			}
@@ -1315,7 +1317,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 			String symbol = pInstrument.getInstrumentID();
 			String name = CtpContractNameResolver.getCNSymbolName(symbol);
 			ContractField.Builder contractBuilder = ContractField.newBuilder();
-			contractBuilder.setGatewayId(gatewayId);
+			contractBuilder.setGatewayId(Constants.CTP_MKT_GATEWAY_ID);
 			contractBuilder.setSymbol(symbol);
 			contractBuilder.setExchange(CtpConstant.exchangeMapReverse.getOrDefault(pInstrument.getExchangeID(), ExchangeEnum.UnknownExchange));
 			contractBuilder.setProductClass(CtpConstant.productTypeMapReverse.getOrDefault(pInstrument.getProductClass(), ProductClassEnum.UnknownProductClass));
@@ -1352,22 +1354,18 @@ public class TdSpi extends CThostFtdcTraderSpi {
 
 			ContractField contract = contractBuilder.build();
 			gatewayAdapter.contractMap.put(contractBuilder.getSymbol(), contract);
-			gatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.CONTRACT, contract);
+			gatewayAdapter.registry.register(new NormalContract(contract, GatewayType.CTP));
 			if (bIsLast) {
 				
-				logger.warn("{}交易接口合约信息获取完成!共计{}条", logInfo, gatewayAdapter.contractMap.size());
+				logger.info("{}交易接口合约信息获取完成!共计{}条", logInfo, gatewayAdapter.contractMap.size());
 				ContractFactory contractFactory = new ContractFactory(GatewayType.CTP, gatewayAdapter.contractMap.values().stream().toList());
 				contractFactory.makeNormalContract().stream().forEach(gatewayAdapter.registry::register);
-				contractFactory.makeIndexContract().stream().forEach(idxContract -> {
-					gatewayAdapter.registry.register(idxContract);
-					gatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.CONTRACT, idxContract.contractField());
-				});
-				gatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.CONTRACT_LOADED, gatewayId);
+				contractFactory.makeIndexContract().stream().forEach(gatewayAdapter.registry::register);
 				
 				instrumentQueried = true;
 				this.startIntervalQuery();
 
-				logger.warn("{}交易接口开始推送缓存Order,共计{}条", logInfo, orderBuilderCacheList.size());
+				logger.info("{}交易接口开始推送缓存Order,共计{}条", logInfo, orderBuilderCacheList.size());
 				for (OrderField.Builder orderBuilder : orderBuilderCacheList) {
 					if (gatewayAdapter.contractMap.containsKey(orderBuilder.getContract().getSymbol())) {
 						orderBuilder.setContract(gatewayAdapter.contractMap.get(orderBuilder.getContract().getSymbol()));
@@ -1380,7 +1378,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 				}
 				orderBuilderCacheList.clear();
 
-				logger.warn("{}交易接口开始推送缓存Trade,共计{}条", logInfo, tradeBuilderCacheList.size());
+				logger.info("{}交易接口开始推送缓存Trade,共计{}条", logInfo, tradeBuilderCacheList.size());
 				for (TradeField.Builder tradeBuilder : tradeBuilderCacheList) {
 					if (gatewayAdapter.contractMap.containsKey(tradeBuilder.getContract().getSymbol())) {
 						tradeBuilder.setContract(gatewayAdapter.contractMap.get(tradeBuilder.getContract().getSymbol()));

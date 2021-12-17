@@ -1,10 +1,10 @@
 package tech.quantit.northstar.main.service;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentMap;
-import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.constant.DateTimeConstant;
@@ -15,7 +15,6 @@ import tech.quantit.northstar.domain.account.TradeDayAccount;
 import tech.quantit.northstar.domain.gateway.ContractManager;
 import tech.quantit.northstar.main.engine.broadcast.SocketIOMessageEngine;
 import tech.quantit.northstar.main.persistence.MarketDataRepository;
-import tech.quantit.northstar.main.persistence.po.ContractPO;
 import tech.quantit.northstar.main.persistence.po.MinBarDataPO;
 import tech.quantit.northstar.main.utils.ProtoBeanUtils;
 import xyz.redtorch.pb.CoreField.AccountField;
@@ -126,9 +125,9 @@ public class DataSyncService {
 	 * @return
 	 */
 	public List<SimpleContractInfo> getAvailableContracts(){
-		List<ContractPO> resultList = mdRepo.getAvailableContracts();
+		Collection<ContractField> resultList = contractMgr.getAllContracts();
 		return resultList.stream()
-				.map(po -> new SimpleContractInfo(po.getUnifiedSymbol(), po.getName(), po.getGatewayId()))
-				.collect(Collectors.toList());
+				.map(cf -> new SimpleContractInfo(cf.getUnifiedSymbol(), cf.getName(), cf.getGatewayId()))
+				.toList();
 	}
 }

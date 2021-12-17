@@ -33,7 +33,6 @@ import tech.quantit.northstar.main.service.SMSTradeService;
 	"broadcastEventDispatcher",
 	"strategyDispatcher",
 	"accountEventHandler",
-	"contractEventHandler",
 	"connectionEventHandler",
 	"tradeEventHandler",
 	"ctpGatewayFactory",
