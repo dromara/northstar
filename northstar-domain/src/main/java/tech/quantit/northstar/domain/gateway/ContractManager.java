@@ -1,12 +1,11 @@
 package tech.quantit.northstar.domain.gateway;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.Table;
+import java.util.concurrent.ConcurrentHashMap;
 
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.exception.NoSuchElementException;
@@ -19,58 +18,47 @@ public class ContractManager {
 	private static final int DEFAULT_SIZE = 4096;
 	
 	/**
-	 * gateway -> symbol -> contract
+	 * gateway -> unifiedSymbol -> contract
 	 */
-	private Table<String, String, ContractField> contractTbl = HashBasedTable.create();
-	/**
-	 * unifiedSymbol -> contract
-	 */
-	private Map<String, ContractField> contractMap = new HashMap<>(DEFAULT_SIZE);
-	
+	private Map<String, Map<String, ContractField>> contractTbl = new ConcurrentHashMap<>();
 	
 	public ContractManager(GlobalMarketRegistry registry) {
-		registry.setOnContractSubsciptionCallback(this::addContract);
+		registry.setOnContractSubsciption(this::addContract);
 	}
 	
-	public synchronized boolean addContract(ContractField contract) {
+	public boolean addContract(ContractField contract) {
 		String gatewayId = contract.getGatewayId();
 		String symbol = contract.getSymbol();
 		String unifiedSymbol = contract.getUnifiedSymbol();
-		contractMap.put(unifiedSymbol, contract);
-		contractTbl.put(gatewayId, symbol, contract);
-		log.info("加入合约：网关{}, 合约{}, 网关累计总合约数{}个", gatewayId, symbol, contractTbl.row(gatewayId).size());
+		contractTbl.putIfAbsent(gatewayId, new ConcurrentHashMap<>(DEFAULT_SIZE));
+		contractTbl.get(gatewayId).putIfAbsent(unifiedSymbol, contract);
+		log.trace("加入合约：网关{}, 合约{}, 网关累计总合约数{}个", gatewayId, symbol, contractTbl.get(gatewayId).size());
 		return true;
 	}
 	
-	public synchronized ContractField getContract(String gatewayId, String symbol) {
-		ContractField result = contractTbl.get(gatewayId, symbol);
-		if(result == null) {
-			throw new NoSuchElementException("找不到合约：" + gatewayId + "_" + symbol);
+	public ContractField getContract(String unifiedSymbol) {
+		for(Entry<String, Map<String, ContractField>> e : contractTbl.entrySet()) {
+			if(e.getValue().containsKey(unifiedSymbol)) {
+				return e.getValue().get(unifiedSymbol);
+			}
 		}
-		return result;
+		throw new NoSuchElementException("找不到合约：" + unifiedSymbol);
 	}
 	
-	public synchronized ContractField getContract(String unifiedSymbol) {
-		if(!contractMap.containsKey(unifiedSymbol)) {
-			throw new NoSuchElementException("找不到合约：" + unifiedSymbol);
+	public Collection<ContractField> getAllContracts(){
+		List<ContractField> results = new ArrayList<>();
+		for(Entry<String, Map<String, ContractField>> e : contractTbl.entrySet()) {
+			results.addAll(e.getValue().values());
 		}
-		return contractMap.get(unifiedSymbol);
+		return results;
 	}
 	
-	public synchronized Collection<ContractField> getAllContracts(){
-		return contractMap.values();
+	public Map<String, ContractField> getContractMapByGateway(String gatewayId){
+		return contractTbl.get(gatewayId);
 	}
 	
-	public synchronized Map<String, ContractField> getContractMapByGateway(String gatewayId){
-		return contractTbl.row(gatewayId);
-	}
-	
-	public synchronized void clear(String gatewayId) {
-		Map<String, ContractField> gatewayContractMap = getContractMapByGateway(gatewayId);
-		for(Entry<String, ContractField> e : gatewayContractMap.entrySet()) {
-			contractTbl.remove(gatewayId, e.getKey());
-			contractMap.remove(e.getValue().getUnifiedSymbol());
-		}
+	public void clear(String gatewayId) {
+		contractTbl.remove(gatewayId);
 	}
 	
 }

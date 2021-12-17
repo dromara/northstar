@@ -1,8 +1,9 @@
 package tech.quantit.northstar.main.persistence;
 
 import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import org.bson.Document;
 import org.bson.conversions.Bson;
@@ -83,8 +84,8 @@ public class MarketDataRepository {
 	public void insertMany(List<MinBarDataPO> barList) {
 		log.info("批量保存Bar数据：{}条", barList.size());
 		List<Document> data = barList.stream()
-				.map(bar -> MongoUtils.beanToDocument(bar))
-				.collect(Collectors.toList());
+				.map(MongoUtils::beanToDocument)
+				.toList();
 		client.insertMany(DB, COLLECTION_PREFIX + barList.get(0).getGatewayId(), data);
 	}
 	
@@ -100,7 +101,7 @@ public class MarketDataRepository {
 				.append("unifiedSymbol", unifiedSymbol)
 				.append("tradingDay", tradeDay));
 		log.info("[{}]-[{}]-[{}] 加载历史数据：{}条", gatewayId, unifiedSymbol, tradeDay, resultList.size());
-		return resultList.stream().map(doc -> MongoUtils.documentToBean(doc, MinBarDataPO.class)).collect(Collectors.toList());
+		return resultList.stream().map(doc -> MongoUtils.documentToBean(doc, MinBarDataPO.class)).toList();
 	}
 	
 	/**
@@ -114,7 +115,7 @@ public class MarketDataRepository {
 		Bson aggregator = new Document().append("$group", new Document().append("_id", "tradingDay"));
 		Bson sorter = new Document().append("$sort", new Document().append("_id", isAsc ? 1 : -1));
 		List<Document> resultList = client.aggregate(DB, COLLECTION_PREFIX + gatewayId, List.of(filter, aggregator, sorter));
-		return resultList.stream().map(doc -> doc.get("_id").toString()).collect(Collectors.toList());
+		return resultList.stream().map(doc -> doc.get("_id").toString()).toList();
 	}
 	
 	/**
@@ -125,32 +126,43 @@ public class MarketDataRepository {
 		if(contracts.isEmpty()) {
 			return;
 		}
-		log.info("网关-[{}] 保存合约：{}条", contracts.get(0).getGatewayId(), contracts.size());
+		log.info("保存合约：{}条", contracts.size());
 		long start = System.currentTimeMillis();
 		for(ContractPO po : contracts) {
 			mongo.save(po);
 		}
 		log.info("合约保存成功，耗时{}毫秒", System.currentTimeMillis() - start);
 	}
-
+	
+	private ArrayBlockingQueue<ContractPO> abq = new ArrayBlockingQueue<>(4096);
+	private CompletableFuture<Void> delayTask = null;
+	
 	/**
 	 * 保存合约信息
 	 * @param contract
 	 */
 	public void saveContract(ContractPO contract) {
-		log.info("保存合约：{}", contract.getFullName());
-		mongo.save(contract);
+		synchronized (abq) {			
+			if(!abq.offer(contract)) {
+				batchSaveContracts(abq.stream().toList());
+				abq.clear();
+				abq.add(contract);
+			}
+		}
+		
+		if(delayTask == null) {
+			delayTask = CompletableFuture.runAsync(() -> {
+				synchronized(abq) {					
+					if(abq.isEmpty()) {					
+						batchSaveContracts(abq.stream().toList());
+						abq.clear();
+					}
+				}
+				delayTask = null;
+			}, CompletableFuture.delayedExecutor(10, TimeUnit.SECONDS));
+		}
 	}
-	
-	/**
-	 * 清理网关合约
-	 * @param gatewayId
-	 */
-	public void clearGatewayContract(String gatewayId) {
-		log.info("清理网关[{}]的所有合约", gatewayId);
-		mongo.remove(Query.query(Criteria.where("gatewayId").is(gatewayId)), ContractPO.class);
-	}
-	
+
 	/**
 	 * 清理特定时间的行情
 	 * @param startTime
@@ -166,7 +178,6 @@ public class MarketDataRepository {
 	 * 查询有效合约列表
 	 * @return
 	 */
-	@Deprecated
 	public List<ContractPO> getAvailableContracts(){
 		log.info("查询十四天内登记过的有效合约");
 		long day14Ago = System.currentTimeMillis() - DAY14MILLISEC;

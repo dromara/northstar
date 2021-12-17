@@ -3,22 +3,23 @@ package tech.quantit.northstar.main.persistence.po;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import tech.quantit.northstar.common.constant.GatewayType;
 
 @Document
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class ContractPO {
 
 	@Id
-	private String contractId;
-
 	private String unifiedSymbol;
 	
-	private String name;
+	private byte[] data;
 	
-	private String fullName;
+	private GatewayType gatewayType;
 	
-	private String gatewayId;
-	
-	private long recordTimestamp;
+	private long updateTime;
 }

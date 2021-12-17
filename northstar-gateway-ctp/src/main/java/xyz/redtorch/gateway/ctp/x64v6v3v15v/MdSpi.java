@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import tech.quantit.northstar.common.constant.DateTimeConstant;
+import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.common.event.NorthstarEventType;
 import tech.quantit.northstar.common.utils.CommonUtils;
 import tech.quantit.northstar.common.utils.MarketTimeUtil;
@@ -273,7 +274,7 @@ public class MdSpi extends CThostFtdcMdSpi {
 	// 前置机联机回报
 	public void OnFrontConnected() {
 		try {
-			logger.warn(logInfo + "行情接口前置机已连接");
+			logger.info(logInfo + "行情接口前置机已连接");
 			// 修改前置机连接状态
 			connectionStatus = CONNECTION_STATUS_CONNECTED;
 			
@@ -306,12 +307,14 @@ public class MdSpi extends CThostFtdcMdSpi {
 				tradingDay = pRspUserLogin.getTradingDay();
 				// 修改登录状态为true
 				this.loginStatus = true;
-				logger.warn("{}行情接口获取到的交易日为{}", logInfo, tradingDay);
+				logger.info("{}行情接口获取到的交易日为{}", logInfo, tradingDay);
 
 				if (!subscribedSymbolSet.isEmpty()) {
 					String[] symbolArray = subscribedSymbolSet.toArray(new String[subscribedSymbolSet.size()]);
 					cThostFtdcMdApi.SubscribeMarketData(symbolArray, subscribedSymbolSet.size());
 				}
+				
+				gatewayAdapter.registry.autoSubscribeContracts(GatewayType.CTP);
 				
 				gatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.CONNECTED, gatewayId);
 				gatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.TRADE_DATE, tradingDay);
@@ -366,7 +369,7 @@ public class MdSpi extends CThostFtdcMdSpi {
 		if (pRspInfo != null) {
 			if (pRspInfo.getErrorID() == 0) {
 				if (pSpecificInstrument != null) {
-					logger.info("{}行情接口订阅合约成功:{}", logInfo, pSpecificInstrument.getInstrumentID());
+					logger.debug("{}行情接口订阅合约成功:{}", logInfo, pSpecificInstrument.getInstrumentID());
 				} else {
 					logger.error("{}行情接口订阅合约成功,不存在合约信息", logInfo);
 				}
@@ -383,7 +386,7 @@ public class MdSpi extends CThostFtdcMdSpi {
 		if (pRspInfo != null) {
 			if (pRspInfo.getErrorID() == 0) {
 				if (pSpecificInstrument != null) {
-					logger.info("{}行情接口退订合约成功:{}", logInfo, pSpecificInstrument.getInstrumentID());
+					logger.debug("{}行情接口退订合约成功:{}", logInfo, pSpecificInstrument.getInstrumentID());
 				} else {
 					logger.error("{}行情接口退订合约成功,不存在合约信息", logInfo);
 				}

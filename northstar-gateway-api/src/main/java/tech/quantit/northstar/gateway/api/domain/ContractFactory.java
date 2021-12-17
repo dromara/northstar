@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import tech.quantit.northstar.common.constant.Constants;
 import tech.quantit.northstar.common.constant.GatewayType;
 import xyz.redtorch.pb.CoreField.ContractField;
 
@@ -41,7 +42,7 @@ public class ContractFactory {
 			if(m.find()) {
 				String groundName = m.group(1);
 				String others = m.group(2);
-				String symbol = groundName + "0000" + others;
+				String symbol = groundName + Constants.INDEX_SUFFIX + others;
 				idxSrcMap.putIfAbsent(symbol, new HashSet<>());
 				idxSrcMap.get(symbol).add(cf);
 			}

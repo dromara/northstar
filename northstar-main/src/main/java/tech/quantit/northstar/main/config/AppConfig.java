@@ -1,11 +1,14 @@
 package tech.quantit.northstar.main.config;
 
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -16,14 +19,18 @@ import org.springframework.web.filter.CorsFilter;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import com.google.protobuf.InvalidProtocolBufferException;
 import com.mongodb.client.MongoClient;
 
+import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.domain.GatewayAndConnectionManager;
 import tech.quantit.northstar.domain.account.TradeDayAccount;
 import tech.quantit.northstar.domain.gateway.ContractManager;
 import tech.quantit.northstar.gateway.api.GatewayFactory;
 import tech.quantit.northstar.gateway.api.domain.GlobalMarketRegistry;
+import tech.quantit.northstar.gateway.api.domain.NormalContract;
+import tech.quantit.northstar.gateway.api.domain.SubscriptionManager;
 import tech.quantit.northstar.gateway.sim.persistence.SimAccountRepository;
 import tech.quantit.northstar.gateway.sim.trade.SimGatewayFactory;
 import tech.quantit.northstar.gateway.sim.trade.SimMarket;
@@ -31,9 +38,11 @@ import tech.quantit.northstar.main.interceptor.AuthorizationInterceptor;
 import tech.quantit.northstar.main.persistence.BarBufferManager;
 import tech.quantit.northstar.main.persistence.MarketDataRepository;
 import tech.quantit.northstar.main.persistence.MongoClientAdapter;
+import tech.quantit.northstar.main.persistence.po.ContractPO;
 import xyz.redtorch.gateway.ctp.common.CtpSubscriptionManager;
 import xyz.redtorch.gateway.ctp.x64v6v3v15v.CtpGatewayFactory;
 import xyz.redtorch.gateway.ctp.x64v6v5v1cpv.CtpSimGatewayFactory;
+import xyz.redtorch.pb.CoreField.ContractField;
 
 /**
  * 配置转换器
@@ -96,8 +105,22 @@ public class AppConfig implements WebMvcConfigurer {
 	}
 	
 	@Bean
-	public ContractManager contractManager(GlobalMarketRegistry registry) {
-		return new ContractManager(registry);
+	public ContractManager contractManager(GlobalMarketRegistry registry, List<SubscriptionManager> subMgrs, MarketDataRepository mdRepo)
+			throws InvalidProtocolBufferException {
+		ContractManager contractMgr = new ContractManager(registry);
+		List<ContractPO> poList = mdRepo.getAvailableContracts();
+		Map<GatewayType, SubscriptionManager> subMgrMap = new EnumMap<>(GatewayType.class);
+		for(SubscriptionManager subMgr : subMgrs) {
+			subMgrMap.put(subMgr.usedFor(), subMgr);
+		}
+		for(ContractPO po : poList) {
+			ContractField contract = ContractField.parseFrom(po.getData());
+			SubscriptionManager subMgr = subMgrMap.get(po.getGatewayType()); 
+			if(subMgr.subscribable(new NormalContract(contract, po.getGatewayType()))) {				
+				contractMgr.addContract(contract);
+			}
+		}
+		return contractMgr;
 	}
 	
 	@Bean
@@ -110,10 +133,33 @@ public class AppConfig implements WebMvcConfigurer {
 		return new SimMarket();
 	}
 	
+	@Value("${northstar.subscription.ctp.classType.whitelist:}")
+	private String clzTypeWhtlist;
+	@Value("${northstar.subscription.ctp.classType.blacklist:}")
+	private String clzTypeBlklist;
+	@Value("${northstar.subscription.ctp.unifiedSymbol.whitelist:}")
+	private String symbolWhtlist;
+	@Value("${northstar.subscription.ctp.unifiedSymbol.blacklist:}")
+	private String symbolBlklist;
+	
 	@Bean
-	public GlobalMarketRegistry marketGlobalRegistry(FastEventEngine fastEventEngine) {
-		GlobalMarketRegistry registry = new GlobalMarketRegistry(fastEventEngine);
-		registry.register(new CtpSubscriptionManager());
+	public SubscriptionManager ctpSubscriptionManager() {
+		return new CtpSubscriptionManager(clzTypeWhtlist, clzTypeBlklist, symbolWhtlist, symbolBlklist);
+	}
+	
+	@Bean
+	public GlobalMarketRegistry marketGlobalRegistry(FastEventEngine fastEventEngine, MarketDataRepository mdRepo, List<SubscriptionManager> subMgrs) {
+		GlobalMarketRegistry registry = new GlobalMarketRegistry(fastEventEngine,
+				contract -> mdRepo.saveContract(
+						new ContractPO(
+							contract.contractField().getUnifiedSymbol(),
+							contract.contractField().toByteArray(), 
+							contract.gatewayType(),
+							System.currentTimeMillis()
+							)));
+		for(SubscriptionManager subMgr : subMgrs) {			
+			registry.register(subMgr);
+		}
 		return registry;
 	}
 	

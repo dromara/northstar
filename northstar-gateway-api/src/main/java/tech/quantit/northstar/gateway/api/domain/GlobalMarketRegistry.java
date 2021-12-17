@@ -47,15 +47,18 @@ public class GlobalMarketRegistry {
 	protected Map<String, BarGenerator> barGenMap = new HashMap<>(4096);
 	
 	@Setter
-	protected Consumer<ContractField> onContractSubsciptionCallback;
+	protected Consumer<ContractField> onContractSubsciption;
+
+	protected Consumer<NormalContract> onContractSave; 
 	
-	
-	public GlobalMarketRegistry(FastEventEngine feEngine) {
+	public GlobalMarketRegistry(FastEventEngine feEngine, Consumer<NormalContract> onContractSave) {
 		this.feEngine = feEngine;
+		this.onContractSave = onContractSave;
 	}
 	
 	public synchronized void register(NormalContract contract) {
 		contractMap.put(contract.unifiedSymbol(), contract);
+		onContractSave.accept(contract);
 		// 设置BAR回调
 		BarGenerator barGen = contract.barGenerator();
 		barGen.setOnBarCallback(bar -> feEngine.emitEvent(NorthstarEventType.BAR, bar));
@@ -76,13 +79,13 @@ public class GlobalMarketRegistry {
 		// 合约订阅
 		if(gatewayMap.containsKey(contract.gatewayType())) {
 			if(subMgrMap.containsKey(contract.gatewayType()) && !subMgrMap.get(contract.gatewayType()).subscribable(contract)) {
-				log.debug("订阅管理器跳过订阅 [{} -> {}] 合约", contract.gatewayType(), contract.unifiedSymbol());
+				log.trace("订阅管理器跳过订阅 [{} -> {}] 合约", contract.gatewayType(), contract.unifiedSymbol());
 				return;
 			}
 			MarketGateway gateway = gatewayMap.get(contract.gatewayType());
 			ContractField contractField = contract.contractField();
 			gateway.subscribe(contractField);
-			onContractSubsciptionCallback.accept(contractField);
+			onContractSubsciption.accept(contractField);
 			feEngine.emitEvent(NorthstarEventType.CONTRACT, contractField);
 		}
 	}
@@ -93,10 +96,29 @@ public class GlobalMarketRegistry {
 	
 	public synchronized void register(MarketGateway mktGateway) {
 		gatewayMap.put(mktGateway.gatewayType(), mktGateway);
+		if(mktGateway.isConnected()) {
+			autoSubscribeContracts(mktGateway.gatewayType());
+		}
+	}
+	
+	public synchronized void unregister(MarketGateway mktGateway) {
+		gatewayMap.remove(mktGateway.gatewayType());
+	}
+	
+	public synchronized void autoSubscribeContracts(GatewayType gatewayType) {
+		if(!gatewayMap.containsKey(gatewayType)) {
+			throw new IllegalStateException("没有注册相应的行情网关：" + gatewayType);
+		}
+		MarketGateway mktGateway = gatewayMap.get(gatewayType);
 		if(contractMap.size() > 0) {
 			contractMap.values().stream()
 				.filter(c -> c.gatewayType() == mktGateway.gatewayType() && !(c instanceof IndexContract))
-				.forEach(c -> mktGateway.subscribe(c.contractField()));
+				.forEach(c -> {
+					ContractField contractField = c.contractField();
+					mktGateway.subscribe(contractField);
+					onContractSubsciption.accept(contractField);
+					feEngine.emitEvent(NorthstarEventType.CONTRACT, contractField);
+				});
 		}
 	}
 	
