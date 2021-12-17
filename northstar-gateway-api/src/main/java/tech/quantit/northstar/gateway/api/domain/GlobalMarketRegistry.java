@@ -78,15 +78,7 @@ public class GlobalMarketRegistry {
 		
 		// 合约订阅
 		if(gatewayMap.containsKey(contract.gatewayType())) {
-			if(subMgrMap.containsKey(contract.gatewayType()) && !subMgrMap.get(contract.gatewayType()).subscribable(contract)) {
-				log.trace("订阅管理器跳过订阅 [{} -> {}] 合约", contract.gatewayType(), contract.unifiedSymbol());
-				return;
-			}
-			MarketGateway gateway = gatewayMap.get(contract.gatewayType());
-			ContractField contractField = contract.contractField();
-			gateway.subscribe(contractField);
-			onContractSubsciption.accept(contractField);
-			feEngine.emitEvent(NorthstarEventType.CONTRACT, contractField);
+			doFilterAndSubscribe(contract);
 		}
 	}
 	
@@ -105,6 +97,18 @@ public class GlobalMarketRegistry {
 		gatewayMap.remove(mktGateway.gatewayType());
 	}
 	
+	private void doFilterAndSubscribe(NormalContract contract) {
+		if(subMgrMap.containsKey(contract.gatewayType()) && !subMgrMap.get(contract.gatewayType()).subscribable(contract)) {
+			log.trace("订阅管理器跳过订阅 [{} -> {}] 合约", contract.gatewayType(), contract.unifiedSymbol());
+			return;
+		}
+		MarketGateway gateway = gatewayMap.get(contract.gatewayType());
+		ContractField contractField = contract.contractField();
+		gateway.subscribe(contractField);
+		onContractSubsciption.accept(contractField);
+		feEngine.emitEvent(NorthstarEventType.CONTRACT, contractField);
+	}
+	
 	public synchronized void autoSubscribeContracts(GatewayType gatewayType) {
 		if(!gatewayMap.containsKey(gatewayType)) {
 			throw new IllegalStateException("没有注册相应的行情网关：" + gatewayType);
@@ -113,12 +117,7 @@ public class GlobalMarketRegistry {
 		if(contractMap.size() > 0) {
 			contractMap.values().stream()
 				.filter(c -> c.gatewayType() == mktGateway.gatewayType() && !(c instanceof IndexContract))
-				.forEach(c -> {
-					ContractField contractField = c.contractField();
-					mktGateway.subscribe(contractField);
-					onContractSubsciption.accept(contractField);
-					feEngine.emitEvent(NorthstarEventType.CONTRACT, contractField);
-				});
+				.forEach(this::doFilterAndSubscribe);
 		}
 	}
 	

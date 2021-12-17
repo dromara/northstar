@@ -2,7 +2,6 @@ package tech.quantit.northstar.main.service;
 
 import java.io.File;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -25,12 +24,10 @@ import tech.quantit.northstar.domain.GatewayAndConnectionManager;
 import tech.quantit.northstar.domain.GatewayConnection;
 import tech.quantit.northstar.domain.MarketGatewayConnection;
 import tech.quantit.northstar.domain.TraderGatewayConnection;
-import tech.quantit.northstar.domain.gateway.ContractManager;
-import tech.quantit.northstar.gateway.api.GatewayFactory;
 import tech.quantit.northstar.gateway.api.Gateway;
+import tech.quantit.northstar.gateway.api.GatewayFactory;
 import tech.quantit.northstar.gateway.api.MarketGateway;
 import tech.quantit.northstar.gateway.api.domain.GlobalMarketRegistry;
-import tech.quantit.northstar.gateway.api.domain.NormalContract;
 import tech.quantit.northstar.gateway.sim.trade.SimGatewayFactory;
 import tech.quantit.northstar.gateway.sim.trade.SimMarket;
 import tech.quantit.northstar.gateway.sim.trade.SimTradeGateway;
@@ -69,10 +66,8 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 	
 	private GlobalMarketRegistry registry;
 	
-	private ContractManager contractMgr;
-	
 	public GatewayService(GatewayAndConnectionManager gatewayConnMgr, GatewayRepository gatewayRepo, MarketDataRepository mdRepo,
-			ModuleRepository moduleRepo, InternalEventBus eventBus, SimMarket simMarket, GlobalMarketRegistry registry, ContractManager contractMgr) {
+			ModuleRepository moduleRepo, InternalEventBus eventBus, SimMarket simMarket, GlobalMarketRegistry registry) {
 		this.gatewayConnMgr = gatewayConnMgr;
 		this.gatewayRepo = gatewayRepo;
 		this.mdRepo = mdRepo;
@@ -80,7 +75,6 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 		this.eventBus = eventBus;
 		this.simMarket = simMarket;
 		this.registry = registry;
-		this.contractMgr = contractMgr;
 	}
 	
 	/**
@@ -183,7 +177,6 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 		boolean flag = doDeleteGateway(gatewayId);
 		gatewayRepo.deleteById(gatewayId);
 		mdRepo.dropGatewayData(gatewayId);
-		contractMgr.clear(gatewayId);
 		return flag;
 	}
 	
@@ -203,10 +196,10 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 	 * @return
 	 * @throws Exception 
 	 */
-	public List<GatewayDescription> findAllGateway() throws Exception{
+	public List<GatewayDescription> findAllGateway() {
 		return gatewayConnMgr.getAllConnections().stream()
-				.map(conn -> conn.getGwDescription())
-				.collect(Collectors.toList());
+				.map(GatewayConnection::getGwDescription)
+				.toList();
 	}
 	
 	/**
@@ -226,11 +219,11 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 	 * @return
 	 * @throws Exception 
 	 */
-	public List<GatewayDescription> findAllTraderGateway() throws Exception{
+	public List<GatewayDescription> findAllTraderGateway() {
 		return gatewayConnMgr.getAllConnections().stream()
-				.map(conn -> conn.getGwDescription())
+				.map(GatewayConnection::getGwDescription)
 				.filter(gwDescription -> gwDescription.getGatewayUsage() != GatewayUsage.MARKET_DATA)
-				.collect(Collectors.toList());
+				.toList();
 	}
 	
 	/**

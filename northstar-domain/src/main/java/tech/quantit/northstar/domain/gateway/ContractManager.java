@@ -12,6 +12,12 @@ import tech.quantit.northstar.common.exception.NoSuchElementException;
 import tech.quantit.northstar.gateway.api.domain.GlobalMarketRegistry;
 import xyz.redtorch.pb.CoreField.ContractField;
 
+/**
+ * 合约管理器
+ * 合约数据要么从账户网关加载，要么从本地数据库加载，加载后在程序运行时不会再改变
+ * @author KevinHuangwl
+ *
+ */
 @Slf4j
 public class ContractManager {
 	
@@ -55,10 +61,6 @@ public class ContractManager {
 	
 	public Map<String, ContractField> getContractMapByGateway(String gatewayId){
 		return contractTbl.get(gatewayId);
-	}
-	
-	public void clear(String gatewayId) {
-		contractTbl.remove(gatewayId);
 	}
 	
 }

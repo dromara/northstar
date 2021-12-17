@@ -1,8 +1,6 @@
 package tech.quantit.northstar.main.persistence;
 
 import java.util.List;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 import org.bson.Document;
@@ -134,33 +132,12 @@ public class MarketDataRepository {
 		log.info("合约保存成功，耗时{}毫秒", System.currentTimeMillis() - start);
 	}
 	
-	private ArrayBlockingQueue<ContractPO> abq = new ArrayBlockingQueue<>(4096);
-	private CompletableFuture<Void> delayTask = null;
-	
 	/**
 	 * 保存合约信息
 	 * @param contract
 	 */
 	public void saveContract(ContractPO contract) {
-		synchronized (abq) {			
-			if(!abq.offer(contract)) {
-				batchSaveContracts(abq.stream().toList());
-				abq.clear();
-				abq.add(contract);
-			}
-		}
-		
-		if(delayTask == null) {
-			delayTask = CompletableFuture.runAsync(() -> {
-				synchronized(abq) {					
-					if(abq.isEmpty()) {					
-						batchSaveContracts(abq.stream().toList());
-						abq.clear();
-					}
-				}
-				delayTask = null;
-			}, CompletableFuture.delayedExecutor(10, TimeUnit.SECONDS));
-		}
+		mongo.save(contract);
 	}
 
 	/**
@@ -181,6 +158,6 @@ public class MarketDataRepository {
 	public List<ContractPO> getAvailableContracts(){
 		log.info("查询十四天内登记过的有效合约");
 		long day14Ago = System.currentTimeMillis() - DAY14MILLISEC;
-		return mongo.find(Query.query(Criteria.where("recordTimestamp").gt(day14Ago)), ContractPO.class);
+		return mongo.find(Query.query(Criteria.where("updateTime").gt(day14Ago)), ContractPO.class);
 	}
 }

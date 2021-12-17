@@ -116,9 +116,11 @@ public class AppConfig implements WebMvcConfigurer {
 		for(ContractPO po : poList) {
 			ContractField contract = ContractField.parseFrom(po.getData());
 			SubscriptionManager subMgr = subMgrMap.get(po.getGatewayType()); 
-			if(subMgr.subscribable(new NormalContract(contract, po.getGatewayType()))) {				
-				contractMgr.addContract(contract);
+			if(subMgr!= null && !subMgr.subscribable(new NormalContract(contract, po.getGatewayType()))) {
+				//如果订阅管理器有定义且配置了不能订阅的情况，则跳过
+				continue;
 			}
+			contractMgr.addContract(contract);
 		}
 		return contractMgr;
 	}
