@@ -35,7 +35,6 @@ import tech.quantit.northstar.gateway.sim.persistence.SimAccountRepository;
 import tech.quantit.northstar.gateway.sim.trade.SimGatewayFactory;
 import tech.quantit.northstar.gateway.sim.trade.SimMarket;
 import tech.quantit.northstar.main.interceptor.AuthorizationInterceptor;
-import tech.quantit.northstar.main.persistence.BarBufferManager;
 import tech.quantit.northstar.main.persistence.MarketDataRepository;
 import tech.quantit.northstar.main.persistence.MongoClientAdapter;
 import tech.quantit.northstar.main.persistence.po.ContractPO;
@@ -97,11 +96,6 @@ public class AppConfig implements WebMvcConfigurer {
 	@Bean
 	public GatewayAndConnectionManager gatewayAndConnectionManager() {
 		return new GatewayAndConnectionManager();
-	}
-	
-	@Bean
-	public BarBufferManager barBufferManager(MarketDataRepository mdRepo) {
-		return new BarBufferManager(mdRepo);
 	}
 	
 	@Bean

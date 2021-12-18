@@ -14,87 +14,118 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
+import com.google.protobuf.InvalidProtocolBufferException;
+
 import tech.quantit.northstar.common.constant.PlaybackPrecision;
 import tech.quantit.northstar.common.model.PlaybackDescription;
 import tech.quantit.northstar.domain.strategy.StrategyModule;
 import tech.quantit.northstar.main.persistence.MarketDataRepository;
 import tech.quantit.northstar.main.persistence.po.MinBarDataPO;
-import tech.quantit.northstar.main.persistence.po.TickDataPO;
+import xyz.redtorch.pb.CoreField.BarField;
+import xyz.redtorch.pb.CoreField.TickField;
 
 public class PlaybackTaskTest {
 	
-	TickDataPO tck1 = TickDataPO.builder()
-			.actionTime("1")
-			.actionTimestamp(1634087280000L + 1000)
+	TickField tck1 = TickField.newBuilder()
+			.setActionTime("1")
+			.setActionTimestamp(1634087280000L + 1000)
 			.build();
 	
-	TickDataPO tck2 = TickDataPO.builder()
-			.actionTime("2")
-			.actionTimestamp(1634087280000L + 2000)
+	TickField tck2 = TickField.newBuilder()
+			.setActionTime("2")
+			.setActionTimestamp(1634087280000L + 2000)
 			.build();
 	
-	TickDataPO tck3 = TickDataPO.builder()
-			.actionTime("3")
-			.actionTimestamp(1634087280000L + 3000)
+	TickField tck3 = TickField.newBuilder()
+			.setActionTime("3")
+			.setActionTimestamp(1634087280000L + 3000)
 			.build();
 	
-	TickDataPO tck4 = TickDataPO.builder()
-			.actionTime("4")
-			.actionTimestamp(1634087340000L + 1000)
+	TickField tck4 = TickField.newBuilder()
+			.setActionTime("4")
+			.setActionTimestamp(1634087340000L + 1000)
 			.build();
 	
-	TickDataPO tck5 = TickDataPO.builder()
-			.actionTime("5")
-			.actionTimestamp(1634087340000L + 2000)
+	TickField tck5 = TickField.newBuilder()
+			.setActionTime("5")
+			.setActionTimestamp(1634087340000L + 2000)
 			.build();
 	
-	TickDataPO tck6 = TickDataPO.builder()
-			.actionTime("6")
-			.actionTimestamp(1634087340000L + 3000)
+	TickField tck6 = TickField.newBuilder()
+			.setActionTime("6")
+			.setActionTimestamp(1634087340000L + 3000)
+			.build();
+	
+	BarField bar1 = BarField.newBuilder()
+			.setUnifiedSymbol("rb2205@SHFE@FUTURES")
+			.setGatewayId("testGateway")
+			.setActionDay("20211111")
+			.setTradingDay("20211111")
+			.setActionTime("225500")
+			.setActionTimestamp(1634087280000L)
 			.build();
 	
 	MinBarDataPO po1 = MinBarDataPO.builder()
 			.unifiedSymbol("rb2205@SHFE@FUTURES")
 			.gatewayId("testGateway")
-			.actionDay("20211111")
-			.tradingDay("20211111")
-			.actionTime("225500")
-			.actionTimestamp(1634087280000L)
-			.ticksOfMin(List.of(tck1, tck2, tck3))
+			.barData(bar1.toByteArray())
+			.ticksData(List.of(tck1, tck2, tck3).stream().map(TickField::toByteArray).toList())
+			.updateTime(1634087280000L)
+			.build();
+	
+	BarField bar2 = BarField.newBuilder()
+			.setUnifiedSymbol("rb2205@SHFE@FUTURES")
+			.setGatewayId("testGateway")
+			.setActionDay("20211111")
+			.setTradingDay("20211111")
+			.setActionTime("225600")
+			.setActionTimestamp(1634087340000L)
 			.build();
 	
 	MinBarDataPO po2 = MinBarDataPO.builder()
 			.unifiedSymbol("rb2205@SHFE@FUTURES")
 			.gatewayId("testGateway")
-			.actionDay("20211111")
-			.tradingDay("20211111")
-			.actionTime("225600")
-			.actionTimestamp(1634087340000L)
-			.ticksOfMin(List.of(tck4, tck5, tck6))
+			.barData(bar2.toByteArray())
+			.ticksData(List.of(tck4, tck5, tck6).stream().map(TickField::toByteArray).toList())
+			.updateTime(1634087340000L)
+			.build();
+	
+	BarField bar3 = BarField.newBuilder()
+			.setUnifiedSymbol("rb2210@SHFE@FUTURES")
+			.setGatewayId("testGateway")
+			.setActionDay("20211111")
+			.setTradingDay("20211111")
+			.setActionTime("225500")
+			.setActionTimestamp(1634087280000L)
 			.build();
 	
 	MinBarDataPO po3 = MinBarDataPO.builder()
 			.unifiedSymbol("rb2210@SHFE@FUTURES")
 			.gatewayId("testGateway")
-			.actionDay("20211111")
-			.tradingDay("20211111")
-			.actionTime("225500")
-			.actionTimestamp(1634087280000L)
-			.ticksOfMin(List.of(tck1, tck2, tck3))
+			.barData(bar3.toByteArray())
+			.ticksData(List.of(tck1, tck2, tck3).stream().map(TickField::toByteArray).toList())
+			.updateTime(1634087280000L)
+			.build();
+	
+	BarField bar4 = BarField.newBuilder()
+			.setUnifiedSymbol("rb2210@SHFE@FUTURES")
+			.setGatewayId("testGateway")
+			.setActionDay("20211111")
+			.setTradingDay("20211111")
+			.setActionTime("225600")
+			.setActionTimestamp(1634087340000L)
 			.build();
 	
 	MinBarDataPO po4 = MinBarDataPO.builder()
 			.unifiedSymbol("rb2210@SHFE@FUTURES")
 			.gatewayId("testGateway")
-			.actionDay("20211111")
-			.tradingDay("20211111")
-			.actionTime("225600")
-			.actionTimestamp(1634087340000L)
-			.ticksOfMin(List.of(tck4, tck5, tck6))
+			.barData(bar4.toByteArray())
+			.ticksData(List.of(tck4, tck5, tck6).stream().map(TickField::toByteArray).toList())
+			.updateTime(1634087340000L)
 			.build();
 
 	@Test
-	public void test() {
+	public void test() throws InvalidProtocolBufferException {
 		StrategyModule module = mock(StrategyModule.class);
 		when(module.bindedContractUnifiedSymbols()).thenReturn(Set.of("rb2210@SHFE@FUTURES"));
 		when(module.getBindedMktGatewayId()).thenReturn("testGateway");

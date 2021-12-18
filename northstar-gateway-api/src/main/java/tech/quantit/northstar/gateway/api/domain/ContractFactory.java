@@ -43,7 +43,9 @@ public class ContractFactory {
 				String groundName = m.group(1);
 				String others = m.group(2);
 				String symbol = groundName + Constants.INDEX_SUFFIX + others;
-				idxSrcMap.putIfAbsent(symbol, new HashSet<>());
+				if(!idxSrcMap.containsKey(symbol)) {					
+					idxSrcMap.putIfAbsent(symbol, new HashSet<>());
+				}
 				idxSrcMap.get(symbol).add(cf);
 			}
 		}

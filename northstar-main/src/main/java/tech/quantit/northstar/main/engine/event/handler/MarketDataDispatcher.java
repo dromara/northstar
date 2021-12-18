@@ -1,33 +1,25 @@
 package tech.quantit.northstar.main.engine.event.handler;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import tech.quantit.northstar.common.event.MarketDataEventBus;
-import tech.quantit.northstar.common.event.NorthstarEvent;
-import tech.quantit.northstar.common.event.NorthstarEventType;
 import tech.quantit.northstar.common.event.FastEventEngine.NorthstarEventDispatcher;
+import tech.quantit.northstar.common.event.NorthstarEvent;
+import tech.quantit.northstar.main.handler.data.MarketBarDataPersistenceHandler;
+import xyz.redtorch.pb.CoreField.BarField;
+import xyz.redtorch.pb.CoreField.TickField;
 
 public class MarketDataDispatcher implements NorthstarEventDispatcher {
 	
-	private MarketDataEventBus mdeb;
+	private MarketBarDataPersistenceHandler persistenceHandler;
 	
-	private Set<NorthstarEventType> canHandleEvents = new HashSet<>() {
-		private static final long serialVersionUID = 1L;
-
-		{
-			add(NorthstarEventType.TICK);
-		}
-	};
-	
-	public MarketDataDispatcher(MarketDataEventBus mdeb) {
-		this.mdeb = mdeb;
+	public MarketDataDispatcher(MarketBarDataPersistenceHandler persistenceHandler) {
+		this.persistenceHandler = persistenceHandler;
 	}
-
+	
 	@Override
 	public void onEvent(NorthstarEvent event, long sequence, boolean endOfBatch) throws Exception {
-		if(canHandleEvents.contains(event.getEvent())) {
-			mdeb.post(event);
+		if(event.getData() instanceof TickField tick) {
+			persistenceHandler.onTick(tick);
+		} else if(event.getData() instanceof BarField bar) {
+			persistenceHandler.onBar(bar);
 		}
 	}
 

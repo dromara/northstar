@@ -36,7 +36,9 @@ public class ContractManager {
 		String gatewayId = contract.getGatewayId();
 		String symbol = contract.getSymbol();
 		String unifiedSymbol = contract.getUnifiedSymbol();
-		contractTbl.putIfAbsent(gatewayId, new ConcurrentHashMap<>(DEFAULT_SIZE));
+		if(!contractTbl.containsKey(gatewayId)) {			
+			contractTbl.putIfAbsent(gatewayId, new ConcurrentHashMap<>(DEFAULT_SIZE));
+		}
 		contractTbl.get(gatewayId).putIfAbsent(unifiedSymbol, contract);
 		log.trace("加入合约：网关{}, 合约{}, 网关累计总合约数{}个", gatewayId, symbol, contractTbl.get(gatewayId).size());
 		return true;

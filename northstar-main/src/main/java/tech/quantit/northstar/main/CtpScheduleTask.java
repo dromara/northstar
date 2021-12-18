@@ -2,7 +2,6 @@ package tech.quantit.northstar.main;
 
 import java.time.LocalDateTime;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -12,7 +11,6 @@ import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.domain.GatewayAndConnectionManager;
 import tech.quantit.northstar.domain.GatewayConnection;
 import tech.quantit.northstar.gateway.api.Gateway;
-import tech.quantit.northstar.main.persistence.BarBufferManager;
 import tech.quantit.northstar.main.utils.HolidayManager;
 
 @Slf4j
@@ -24,9 +22,6 @@ public class CtpScheduleTask {
 	
 	@Autowired
 	private HolidayManager holidayMgr;
-	
-	@Autowired
-	private BarBufferManager bbMgr;
 	
 	@Value("${spring.profiles.active}")
 	private String profile;
@@ -61,18 +56,6 @@ public class CtpScheduleTask {
 		}
 	}
 	
-	/**
-	 * 开盘时间定时持久化
-	 */
-	@Scheduled(cron="10 0/1 0-2,9-15,21-23 ? * 1-5")
-	public void timelySaveBar() {
-		if(holidayMgr.isHoliday(LocalDateTime.now())) {
-			return;
-		}
-		bbMgr.saveAndClear();
-		log.info("交易时间定时持久化Bar数据任务");
-	}
-	
 	@Scheduled(cron="0 1 15 ? * 1-5")
 	public void dailySettlement() {
 		if(holidayMgr.isHoliday(LocalDateTime.now())) {
@@ -82,11 +65,4 @@ public class CtpScheduleTask {
 		log.info("日结算定时任务");
 	}
 
-	@Scheduled(cron="10 0/1 * * * *")
-	public void timelySaveDevBar() {
-		if(StringUtils.equals(profile, "dev")) {
-			bbMgr.saveAndClear();
-			log.info("开发时间定时持久化Bar数据任务");
-		}
-	}
 }

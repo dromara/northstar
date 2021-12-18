@@ -3,6 +3,8 @@ package tech.quantit.northstar.main.playback;
 import java.util.Map;
 import java.util.PriorityQueue;
 
+import com.google.protobuf.InvalidProtocolBufferException;
+
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.event.NorthstarEvent;
 import tech.quantit.northstar.common.event.NorthstarEventType;
@@ -34,7 +36,12 @@ public class PlaybackEngine {
 		log.info("################# 开始回测 #################");
 		
 		while(!task.isDone()) {
-			Map<DataType, PriorityQueue<?>> batchDataMap = task.nextBatchData();
+			Map<DataType, PriorityQueue<?>> batchDataMap;
+			try {
+				batchDataMap = task.nextBatchData();
+			} catch (InvalidProtocolBufferException e) {
+				throw new IllegalStateException("历史行情数据加载异常", e);
+			}
 			PriorityQueue<TickField> tickQ = (PriorityQueue<TickField>) batchDataMap.get(DataType.TICK);
 			PriorityQueue<BarField> barQ = (PriorityQueue<BarField>) batchDataMap.get(DataType.BAR);
 			

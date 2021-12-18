@@ -8,7 +8,6 @@ import com.corundumstudio.socketio.SocketIOServer;
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.event.InternalEventBus;
-import tech.quantit.northstar.common.event.MarketDataEventBus;
 import tech.quantit.northstar.common.event.PluginEventBus;
 import tech.quantit.northstar.common.event.StrategyEventBus;
 import tech.quantit.northstar.main.engine.event.DisruptorFastEventEngine;
@@ -40,12 +39,6 @@ public class EngineConfig {
 	public InternalEventBus createInternalEventBus() {
 		log.info("创建InternalEventBus");
 		return new InternalEventBus();
-	}
-	
-	@Bean
-	public MarketDataEventBus createMarketDataEventBus() {
-		log.info("创建MarketDataEventBus");
-		return new MarketDataEventBus();
 	}
 	
 	@Bean

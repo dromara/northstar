@@ -1,10 +1,13 @@
 package tech.quantit.northstar.main.service;
 
+import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentMap;
+
+import com.google.protobuf.InvalidProtocolBufferException;
 
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.constant.DateTimeConstant;
@@ -16,7 +19,6 @@ import tech.quantit.northstar.domain.gateway.ContractManager;
 import tech.quantit.northstar.main.handler.broadcast.SocketIOMessageEngine;
 import tech.quantit.northstar.main.persistence.MarketDataRepository;
 import tech.quantit.northstar.main.persistence.po.MinBarDataPO;
-import tech.quantit.northstar.main.utils.ProtoBeanUtils;
 import xyz.redtorch.pb.CoreField.AccountField;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.ContractField;
@@ -84,9 +86,15 @@ public class DataSyncService {
 	
 	/**
 	 * 异步加载历史Bar数据
+	 * @throws InvalidProtocolBufferException 
+	 * @throws InvocationTargetException 
+	 * @throws IllegalArgumentException 
+	 * @throws IllegalAccessException 
+	 * @throws SecurityException 
+	 * @throws NoSuchMethodException 
 	 * @throws Exception 
 	 */
-	public void asyncLoadHistoryBarData(String gatewayId, String unifiedSymbol, LocalDate startDate, LocalDate endDate) throws Exception {
+	public void asyncLoadHistoryBarData(String gatewayId, String unifiedSymbol, LocalDate startDate, LocalDate endDate) throws InvalidProtocolBufferException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		// 自动处理起止日期反转的情况
 		if(startDate.isAfter(endDate)) {
 			LocalDate tmpDate = startDate;
@@ -99,12 +107,7 @@ public class DataSyncService {
 			String date = curDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER);
 			List<MinBarDataPO> dayBars = mdRepo.loadDataByDate(gatewayId, unifiedSymbol, date);
 			for(MinBarDataPO po : dayBars) {
-				// 清空冗余属性，避免转换异常
-				po.setTicksOfMin(null);
-				po.setNumOfTicks(null);
-				BarField.Builder bb = BarField.newBuilder();
-				ProtoBeanUtils.toProtoBean(bb, po);
-				ne.setData(bb.build());
+				ne.setData(BarField.parseFrom(po.getBarData()));
 				msgEngine.emitEvent(ne, BarField.class);
 			}
 			

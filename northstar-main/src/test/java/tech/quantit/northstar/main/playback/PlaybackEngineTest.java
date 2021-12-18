@@ -14,6 +14,8 @@ import java.util.PriorityQueue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import com.google.protobuf.InvalidProtocolBufferException;
+
 import tech.quantit.northstar.common.event.NorthstarEvent;
 import tech.quantit.northstar.domain.strategy.SandboxModuleManager;
 import tech.quantit.northstar.domain.strategy.StrategyModule;
@@ -99,7 +101,7 @@ public class PlaybackEngineTest {
 			.build();
 	
 	@BeforeEach
-	public void prepare() {
+	public void prepare() throws InvalidProtocolBufferException {
 		when(task.isDone()).thenReturn(false, true);
 		when(task.nextBatchData()).thenReturn(batchData);
 		

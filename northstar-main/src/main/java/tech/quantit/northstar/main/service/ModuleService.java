@@ -30,8 +30,6 @@ import tech.quantit.northstar.main.persistence.MarketDataRepository;
 import tech.quantit.northstar.main.persistence.ModuleRepository;
 import tech.quantit.northstar.main.persistence.po.MinBarDataPO;
 import tech.quantit.northstar.main.persistence.po.ModulePositionPO;
-import tech.quantit.northstar.main.persistence.po.TickDataPO;
-import tech.quantit.northstar.main.utils.ProtoBeanUtils;
 import tech.quantit.northstar.strategy.api.DealerPolicy;
 import tech.quantit.northstar.strategy.api.DynamicParamsAware;
 import tech.quantit.northstar.strategy.api.RiskControlRule;
@@ -204,32 +202,15 @@ public class ModuleService implements InitializingBean {
 				availableDates.size())) {
 			List<MinBarDataPO> dataBarPOList = mdRepo.loadDataByDate(mktGatewayId, unifiedSymbol, date);
 			for (MinBarDataPO po : dataBarPOList) {
-				BarField.Builder bb = BarField.newBuilder();
-				ProtoBeanUtils.toProtoBean(bb, po);
-				barList.add(bb.build());
-				for (TickDataPO tpo : po.getTicksOfMin()) {
-					tickList.add(restoreTick(po, tpo));
+				barList.add(BarField.parseFrom(po.getBarData()));
+				for(byte[] tickData : po.getTicksData()) {
+					tickList.add(TickField.parseFrom(tickData));
 				}
 			}
 		}
 		signalPolicy.initByTick(tickList);
 		signalPolicy.initByBar(barList);
 		mdlMgr.addModule(strategyModule);
-	}
-
-	private TickField restoreTick(MinBarDataPO barData, TickDataPO tickData) {
-		return TickField.newBuilder().setActionDay(barData.getActionDay()).setActionTime(tickData.getActionTime())
-				.setActionTimestamp(tickData.getActionTimestamp()).setTradingDay(barData.getTradingDay())
-				.addAskPrice(tickData.getAskPrice1()).addBidPrice(tickData.getBidPrice1())
-				.setGatewayId(barData.getGatewayId()).setLastPrice(tickData.getLastPrice())
-				.setAvgPrice(tickData.getAvgPrice()).setUnifiedSymbol(barData.getUnifiedSymbol())
-				.setTurnover(tickData.getTurnover()).setTurnoverDelta(tickData.getTurnoverDelta())
-				.addAskVolume(tickData.getAskVol1()).addBidVolume(tickData.getBidVol1()).setVolume(tickData.getVolume())
-				.setVolumeDelta(tickData.getVolumeDelta()).setNumTrades(tickData.getNumTrades())
-				.setNumTradesDelta(tickData.getNumTradesDelta()).setOpenInterest(tickData.getOpenInterest())
-				.setOpenInterestDelta(tickData.getOpenInterestDelta()).setPreClosePrice(barData.getPreClosePrice())
-				.setPreOpenInterest(barData.getPreOpenInterest()).setPreSettlePrice(barData.getPreSettlePrice())
-				.build();
 	}
 
 	/**

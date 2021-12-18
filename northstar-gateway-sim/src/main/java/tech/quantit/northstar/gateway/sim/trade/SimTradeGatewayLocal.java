@@ -77,7 +77,7 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 		// 模拟返回合约
 		CompletableFuture.runAsync(()->{
 			try {
-				Thread.sleep(3000);
+				Thread.sleep(2000);
 			} catch (InterruptedException e) {
 				log.error("", e);
 			}

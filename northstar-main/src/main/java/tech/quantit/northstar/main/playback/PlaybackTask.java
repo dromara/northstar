@@ -8,13 +8,14 @@ import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Set;
 
+import com.google.protobuf.InvalidProtocolBufferException;
+
 import tech.quantit.northstar.common.constant.DateTimeConstant;
 import tech.quantit.northstar.common.constant.PlaybackPrecision;
 import tech.quantit.northstar.common.model.PlaybackDescription;
 import tech.quantit.northstar.domain.strategy.StrategyModule;
 import tech.quantit.northstar.main.persistence.MarketDataRepository;
 import tech.quantit.northstar.main.persistence.po.MinBarDataPO;
-import tech.quantit.northstar.main.persistence.po.TickDataPO;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.TickField;
 
@@ -52,7 +53,7 @@ public class PlaybackTask {
 		this.totalNumOfDays = restOfDays();
 	}
 	
-	public Map<DataType, PriorityQueue<?>> nextBatchData(){
+	public Map<DataType, PriorityQueue<?>> nextBatchData() throws InvalidProtocolBufferException{
 		if(isDone()) {
 			throw new IllegalStateException("超出回测范围");
 		}
@@ -65,16 +66,19 @@ public class PlaybackTask {
 			for(String unifiedSymbol : interestContracts) {				
 				List<MinBarDataPO> data = mdRepo.loadDataByDate(module.getBindedMktGatewayId(), unifiedSymbol, curDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
 				for(MinBarDataPO po : data) {
+					BarField bar = BarField.parseFrom(po.getBarData());
+					barQ.offer(bar);
 					if(precision == PlaybackPrecision.TICK) {						
-						for(TickDataPO tickData : po.getTicksOfMin()) {
-							tickQ.offer(restorePlaybackTick(po, tickData));
+						for(byte[] tickData : po.getTicksData()) {
+							tickQ.offer(TickField.parseFrom(tickData));
 						}
 					} else if (precision == PlaybackPrecision.BAR) {
 						// 在回测模式为BAR模式时，TICK数据仅选取每分钟最后一个TICK，以免确保模拟计算时更准确
-						List<TickDataPO> list = po.getTicksOfMin();
-						tickQ.offer(restorePlaybackTick(po, list.get(list.size() - 1)));
+						TickField firstTick = TickField.parseFrom(po.getTicksData().get(0));
+						TickField lastTick = TickField.parseFrom(po.getTicksData().get(po.getTicksData().size() - 1));
+						tickQ.offer(firstTick);
+						tickQ.offer(lastTick);
 					}
-					barQ.offer(restorePlaybackBar(po));
 				}
 			}
 		}
@@ -104,59 +108,6 @@ public class PlaybackTask {
 		return 1.0 * (totalNumOfDays - restOfDays()) / totalNumOfDays + ratioOfDay() / totalNumOfDays;
 	}
 	
-	private BarField restorePlaybackBar(MinBarDataPO barData) {
-		return BarField.newBuilder()
-				.setActionDay(barData.getActionDay())
-				.setActionTime(barData.getActionTime())
-				.setActionTimestamp(barData.getActionTimestamp())
-				.setTradingDay(barData.getTradingDay())
-				.setGatewayId(barData.getGatewayId())
-				.setUnifiedSymbol(barData.getUnifiedSymbol())
-				.setHighPrice(barData.getHighPrice())
-				.setLowPrice(barData.getLowPrice())
-				.setOpenPrice(barData.getOpenPrice())
-				.setClosePrice(barData.getClosePrice())
-				.setPreClosePrice(barData.getPreClosePrice())
-				.setPreOpenInterest(barData.getPreOpenInterest())
-				.setPreSettlePrice(barData.getPreSettlePrice())
-				.setVolume(barData.getVolume())
-				.setVolumeDelta(barData.getVolumeDelta())
-				.setOpenInterest(barData.getOpenInterest())
-				.setOpenInterestDelta(barData.getOpenInterestDelta())
-				.setNumTrades(barData.getNumTrades())
-				.setNumTradesDelta(barData.getNumTradesDelta())
-				.setTurnover(barData.getTurnover())
-				.setTurnoverDelta(barData.getTurnoverDelta())
-				.build();
-	}
-	
-	private TickField restorePlaybackTick(MinBarDataPO barData, TickDataPO tickData) {
-		return TickField.newBuilder()
-				.setActionDay(barData.getActionDay())
-				.setActionTime(tickData.getActionTime())
-				.setActionTimestamp(tickData.getActionTimestamp())
-				.setTradingDay(barData.getTradingDay())
-				.addAskPrice(tickData.getAskPrice1())
-				.addBidPrice(tickData.getBidPrice1())
-				.setGatewayId(barData.getGatewayId())
-				.setLastPrice(tickData.getLastPrice())
-				.setAvgPrice(tickData.getAvgPrice())
-				.setUnifiedSymbol(barData.getUnifiedSymbol())
-				.setTurnover(tickData.getTurnover())
-				.setTurnoverDelta(tickData.getTurnoverDelta())
-				.addAskVolume(tickData.getAskVol1())
-				.addBidVolume(tickData.getBidVol1())
-				.setVolume(tickData.getVolume())
-				.setVolumeDelta(tickData.getVolumeDelta())
-				.setNumTrades(tickData.getNumTrades())
-				.setNumTradesDelta(tickData.getNumTradesDelta())
-				.setOpenInterest(tickData.getOpenInterest())
-				.setOpenInterestDelta(tickData.getOpenInterestDelta())
-				.setPreClosePrice(barData.getPreClosePrice())
-				.setPreOpenInterest(barData.getPreOpenInterest())
-				.setPreSettlePrice(barData.getPreSettlePrice())
-				.build();
-	}
 	
 	public enum DataType {
 		BAR,

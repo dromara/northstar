@@ -6,13 +6,14 @@ import org.springframework.context.annotation.Configuration;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.event.FastEventEngine.NorthstarEventDispatcher;
 import tech.quantit.northstar.common.event.InternalEventBus;
-import tech.quantit.northstar.common.event.MarketDataEventBus;
 import tech.quantit.northstar.common.event.StrategyEventBus;
 import tech.quantit.northstar.main.engine.event.handler.BroadcastDispatcher;
 import tech.quantit.northstar.main.engine.event.handler.InternalDispatcher;
 import tech.quantit.northstar.main.engine.event.handler.MarketDataDispatcher;
 import tech.quantit.northstar.main.engine.event.handler.StrategyDispatcher;
 import tech.quantit.northstar.main.handler.broadcast.SocketIOMessageEngine;
+import tech.quantit.northstar.main.handler.data.MarketBarDataPersistenceHandler;
+import tech.quantit.northstar.main.persistence.MarketDataRepository;
 
 /**
  * 事件处理器配置
@@ -30,8 +31,8 @@ public class FastEventDispatcherConfig {
 	}
 	
 	@Bean
-	public NorthstarEventDispatcher marketDataDispatcher(FastEventEngine ee, MarketDataEventBus mdeb) {
-		NorthstarEventDispatcher handler = new MarketDataDispatcher(mdeb);
+	public NorthstarEventDispatcher marketDataDispatcher(FastEventEngine ee, MarketDataRepository mdRepo) {
+		NorthstarEventDispatcher handler = new MarketDataDispatcher(new MarketBarDataPersistenceHandler(mdRepo));
 		ee.addHandler(handler);
 		return handler;
 	}
