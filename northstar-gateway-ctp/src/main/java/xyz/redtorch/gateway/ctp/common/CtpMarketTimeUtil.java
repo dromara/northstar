@@ -18,8 +18,8 @@ public class CtpMarketTimeUtil implements MarketTimeUtil{
 	final long dayMarketStartTime = LocalTime.of(8, 58, 59, 999999999).toNanoOfDay();
 	final long dayMarketOpenTime = LocalTime.of(8, 59, 59, 999999999).toNanoOfDay();
 	final long nightMarketClosingTime1 = LocalTime.of(23, 0, 0).toNanoOfDay();
-	final long nightMarketClosingTime2 = LocalTime.of(23, 30, 0).toNanoOfDay();
-	final long nightMarketClosingTime3 = LocalTime.of(1, 0, 0).toNanoOfDay();
+	final long nightMarketClosingTime2 = LocalTime.of(1, 0, 0).toNanoOfDay();
+	final long nightMarketClosingTime3 = LocalTime.of(2, 30, 0).toNanoOfDay();
 	final long dayMarketClosingTime1 = LocalTime.of(11, 30, 0).toNanoOfDay();
 	final long dayMarketClosingTime2 = LocalTime.of(15, 0, 0).toNanoOfDay();
 	final long dayMarketClosingTime3 = LocalTime.of(15, 15, 0).toNanoOfDay();
