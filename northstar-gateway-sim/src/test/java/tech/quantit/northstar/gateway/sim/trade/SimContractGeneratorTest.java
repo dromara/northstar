@@ -8,8 +8,9 @@ class SimContractGeneratorTest {
 
 	@Test
 	void test() {
-		SimContractGenerator gen = new SimContractGenerator();
-		assertThat(gen.getContract("test")).isNotNull();
+		SimContractGenerator gen = new SimContractGenerator("test");
+		assertThat(gen.getContract()).isNotNull();
+		assertThat(gen.getContract2()).isNotNull();
 	}
 
 }

@@ -67,7 +67,9 @@ class SimPosition implements TickDataAware{
 	
 	@Override
 	public void onTick(TickField tick) {
-		lastPrice = tick.getLastPrice();
+		if(tick.getUnifiedSymbol().equals(unifiedSymbol)) {			
+			lastPrice = tick.getLastPrice();
+		}
 	}
 
 	public int availableVol() {

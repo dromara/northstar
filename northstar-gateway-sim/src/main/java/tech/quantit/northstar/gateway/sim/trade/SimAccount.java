@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -21,6 +22,7 @@ import com.google.common.eventbus.EventBus;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import tech.quantit.northstar.common.TickDataAware;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.event.NorthstarEventType;
 import tech.quantit.northstar.common.utils.FieldUtils;
@@ -30,12 +32,13 @@ import xyz.redtorch.pb.CoreField.AccountField;
 import xyz.redtorch.pb.CoreField.CancelOrderReqField;
 import xyz.redtorch.pb.CoreField.PositionField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
+import xyz.redtorch.pb.CoreField.TickField;
 import xyz.redtorch.pb.CoreField.TradeField;
 
 @Data
 @Document
 @NoArgsConstructor
-public class SimAccount {
+public class SimAccount implements TickDataAware{
 	
 	@Id
 	private String gatewayId;
@@ -173,20 +176,6 @@ public class SimAccount {
 		}
 	}
 	
-	public void removeEmptyPosition() {
-		removeEmptyPosition(longMap);
-		removeEmptyPosition(shortMap);
-	}
-	
-	private void removeEmptyPosition(Map<String, SimPosition> positionMap) {
-		for(Entry<String, SimPosition> e : positionMap.entrySet()) {
-			if(e.getValue().getVolume() == 0) {
-				SimPosition position = positionMap.remove(e.getKey());
-				eventBus.unregister(position);
-			}
-		}
-	}
-	
 	public void onSubmitOrder(SubmitOrderReqField orderReq) {
 		if(FieldUtils.isOpen(orderReq.getOffsetFlag())) {
 			OpenTradeRequest tradeReq = new OpenTradeRequest(this, feEngine, orderReq, openCallback);
@@ -236,6 +225,7 @@ public class SimAccount {
 	
 	public void setEventBus(EventBus eventBus) {
 		this.eventBus = eventBus;
+		eventBus.register(this);
 		longMap.values().stream().forEach(eventBus::register);
 		shortMap.values().stream().forEach(eventBus::register);
 	}
@@ -246,5 +236,30 @@ public class SimAccount {
 
 	public void addCloseProfit(double profit) {
 		totalCloseProfit += profit;
+	}
+
+	private long lastTickTime;
+	@Override
+	public void onTick(TickField tick) {
+		if(lastTickTime == tick.getActionTimestamp()) {
+			return;
+		}
+		lastTickTime = tick.getActionTimestamp();
+		feEngine.emitEvent(NorthstarEventType.ACCOUNT, accountField());
+		
+		reportPosition(longMap);
+		reportPosition(shortMap);
+	}
+	
+	private void reportPosition(Map<String, SimPosition> posMap) {
+		Iterator<Entry<String, SimPosition>> itEntry = posMap.entrySet().iterator();
+		while(itEntry.hasNext()) {
+			Entry<String, SimPosition> e = itEntry.next();
+			PositionField pf = e.getValue().positionField();
+			feEngine.emitEvent(NorthstarEventType.POSITION, pf);
+			if(pf.getPosition() == 0) {
+				itEntry.remove();
+			}
+		}
 	}
 }

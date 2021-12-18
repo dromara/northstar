@@ -1,10 +1,6 @@
 package tech.quantit.northstar.gateway.sim.trade;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -12,7 +8,6 @@ import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.event.NorthstarEventType;
 import tech.quantit.northstar.common.exception.TradeException;
-import tech.quantit.northstar.common.utils.MessagePrinter;
 import tech.quantit.northstar.gateway.api.domain.GlobalMarketRegistry;
 import tech.quantit.northstar.gateway.api.domain.NormalContract;
 import xyz.redtorch.pb.CoreField.AccountField;
@@ -34,11 +29,7 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 	@Getter
 	protected SimAccount account;
 	
-	private ScheduledExecutorService execService = Executors.newScheduledThreadPool(1);
-	
-	private ScheduledFuture<?> job;
-	
-	private SimContractGenerator contractGen = new SimContractGenerator();
+	private SimContractGenerator contractGen;
 	
 	private GlobalMarketRegistry registry;
 	
@@ -47,6 +38,7 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 		this.gatewaySetting = gatewaySetting;
 		this.account = account;	
 		this.registry = registry;
+		this.contractGen = new SimContractGenerator(gatewaySetting.getGatewayId());
 	}
 
 	@Override
@@ -55,24 +47,12 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 		feEngine.emitEvent(NorthstarEventType.CONNECTED, gatewaySetting.getGatewayId());
 		feEngine.emitEvent(NorthstarEventType.LOGGED_IN, gatewaySetting.getGatewayId());
 		
-		job = execService.scheduleAtFixedRate(()->{
-			log.trace("模拟账户定时回报");
-			AccountField af = account.accountField();
-			feEngine.emitEvent(NorthstarEventType.ACCOUNT, af);
-			log.trace("账户信息：{}", MessagePrinter.print(af));
-			boolean shouldClear = false;
-			for(PositionField pf : account.positionFields()) {
-				feEngine.emitEvent(NorthstarEventType.POSITION, pf);
-				log.trace("持仓信息：{}", MessagePrinter.print(pf));
-				if(pf.getPosition() == 0) {
-					shouldClear = true;
-				}
-			}
-			if(shouldClear) {
-				account.removeEmptyPosition();
-			}
-			
-		}, 2, 2, TimeUnit.SECONDS);
+		AccountField af = account.accountField();
+		feEngine.emitEvent(NorthstarEventType.ACCOUNT, af);
+		
+		for(PositionField pf : account.positionFields()) {
+			feEngine.emitEvent(NorthstarEventType.POSITION, pf);
+		}
 		
 		// 模拟返回合约
 		CompletableFuture.runAsync(()->{
@@ -82,8 +62,10 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 				log.error("", e);
 			}
 			
-			ContractField simContract = contractGen.getContract(gatewaySetting.getGatewayId());
+			ContractField simContract = contractGen.getContract();
+			ContractField simContract2 = contractGen.getContract2();
 			registry.register(new NormalContract(simContract, GatewayType.SIM));
+			registry.register(new NormalContract(simContract2, GatewayType.SIM));
 			
 			feEngine.emitEvent(NorthstarEventType.CONTRACT, simContract);
 		});
@@ -94,12 +76,6 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 		connected = false;
 		feEngine.emitEvent(NorthstarEventType.DISCONNECTED, gatewaySetting.getGatewayId());
 		feEngine.emitEvent(NorthstarEventType.LOGGED_OUT, gatewaySetting.getGatewayId());
-		
-		if(job.cancel(true)) {
-			log.info("模拟账户定时回报任务结束");
-		} else {
-			log.info("模拟账户定时回报任务已经结束");
-		}
 	}
 
 	@Override
