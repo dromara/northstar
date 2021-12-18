@@ -8,7 +8,7 @@ cd ~
 echo "安装JDK17"
 wget --no-check-certificate https://download.oracle.com/java/17/latest/jdk-17_linux-x64_bin.tar.gz
 tar -xvf jdk-17_linux-x64_bin.tar.gz
-ln -s ~/jdk-17_linux-x64_bin/bin/* /usr/local/bin/
+ln -s ~/jdk-17.0.1/bin/* /usr/local/bin/
 echo "安装Maven"
 wget --no-check-certificate https://mirrors.bfsu.edu.cn/apache/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz
 tar -xvf apache-maven-3.6.3-bin.tar.gz
