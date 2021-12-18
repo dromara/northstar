@@ -59,7 +59,7 @@ public class SimTickGenerator {
 			.setVolumeDelta(deltaVol)
 			.setHighPrice(high)
 			.setLowPrice(low)
-			.setStatus(ldt.getSecond() == 59 && System.currentTimeMillis() % 1000 > 500 ? TickType.END_OF_MIN_TICK.getCode() : TickType.NORMAL_TICK.getCode())
+			.setStatus(TickType.NORMAL_TICK.getCode())
 			.setLastPrice(latestPrice);
 		ins.setLastTick(tb);
 		return tb.build();

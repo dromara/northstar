@@ -18,10 +18,6 @@ public enum TickType {
 	 */
 	NORMAL_TICK(3),
 	/**
-	 * 一分钟行情
-	 */
-	END_OF_MIN_TICK(4),
-	/**
 	 * 收市前最后一个TICK
 	 */
 	CLOSING_TICK(8);
