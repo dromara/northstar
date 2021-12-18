@@ -5,7 +5,7 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
 
-import tech.xuanwu.northstar.common.constant.DateTimeConstant;
+import tech.quantit.northstar.common.constant.DateTimeConstant;
 import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
 import xyz.redtorch.pb.CoreEnum.CurrencyEnum;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
@@ -104,6 +104,7 @@ public class TestFieldFactory {
 				.setVolume(vol)
 				.setDirection(dir)
 				.setOffsetFlag(offset)
+				.setTradingDay(LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
 				.build();
 	}
 

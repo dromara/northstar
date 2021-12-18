@@ -21,10 +21,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import tech.xuanwu.northstar.common.constant.DateTimeConstant;
-import tech.xuanwu.northstar.common.event.NorthstarEventType;
-import tech.xuanwu.northstar.common.utils.ContractNameResolver;
-import tech.xuanwu.northstar.gateway.api.GatewayAbstract;
+import tech.quantit.northstar.common.constant.Constants;
+import tech.quantit.northstar.common.constant.DateTimeConstant;
+import tech.quantit.northstar.common.constant.GatewayType;
+import tech.quantit.northstar.common.event.NorthstarEventType;
+import tech.quantit.northstar.gateway.api.GatewayAbstract;
+import tech.quantit.northstar.gateway.api.domain.ContractFactory;
+import tech.quantit.northstar.gateway.api.domain.NormalContract;
+import xyz.redtorch.gateway.ctp.common.CtpContractNameResolver;
 import xyz.redtorch.gateway.ctp.x64v6v5v1cpv.api.CThostFtdcAccountregisterField;
 import xyz.redtorch.gateway.ctp.x64v6v5v1cpv.api.CThostFtdcBatchOrderActionField;
 import xyz.redtorch.gateway.ctp.x64v6v5v1cpv.api.CThostFtdcBrokerTradingAlgosField;
@@ -1326,9 +1330,9 @@ public class TdSpi extends CThostFtdcTraderSpi {
 	public void OnRspQryInstrument(CThostFtdcInstrumentField pInstrument, CThostFtdcRspInfoField pRspInfo, int nRequestID, boolean bIsLast) {
 		try {
 			String symbol = pInstrument.getInstrumentID();
-			String name = ContractNameResolver.getCNSymbolName(symbol);
+			String name = CtpContractNameResolver.getCNSymbolName(symbol);
 			ContractField.Builder contractBuilder = ContractField.newBuilder();
-			contractBuilder.setGatewayId(gatewayId);
+			contractBuilder.setGatewayId(Constants.CTP_SIM_MKT_GATEWAY_ID);
 			contractBuilder.setSymbol(symbol);
 			contractBuilder.setExchange(CtpConstant.exchangeMapReverse.getOrDefault(pInstrument.getExchangeID(), ExchangeEnum.UnknownExchange));
 			contractBuilder.setProductClass(CtpConstant.productTypeMapReverse.getOrDefault(pInstrument.getProductClass(), ProductClassEnum.UnknownProductClass));
@@ -1365,11 +1369,13 @@ public class TdSpi extends CThostFtdcTraderSpi {
 
 			ContractField contract = contractBuilder.build();
 			gatewayAdapter.contractMap.put(contractBuilder.getSymbol(), contract);
-			gatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.CONTRACT, contract);
+			gatewayAdapter.registry.register(new NormalContract(contract, GatewayType.CTP_SIM));
 			if (bIsLast) {
 				
 				logger.warn("{}交易接口合约信息获取完成!共计{}条", logInfo, gatewayAdapter.contractMap.size());
-				gatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.CONTRACT_LOADED, gatewayId);
+				// 仿真网关无须合成指数合约
+				ContractFactory contractFactory = new ContractFactory(GatewayType.CTP_SIM, gatewayAdapter.contractMap.values().stream().toList());
+				contractFactory.makeNormalContract().stream().forEach(gatewayAdapter.registry::register);
 				
 				instrumentQueried = true;
 				this.startIntervalQuery();

@@ -11,14 +11,20 @@ northstar:
   auth:
     userId: ${nsuser:admin}
     password: ${nspwd:123456}
-  contracts:
-    canHandle: FUTURES
   holidays: 20210614,20210920,20210921,20211001,20211004,20211005,20211006,20211007
+  subscription:
+    ctp:
+      classType:
+        whitelist: FUTURES
+      
 
-logging:
-  level: 
+logging:  level: 
     root: info
-  path: logs/
+    '[tech.quantit.northstar.gateway]': debug
+    '[tech.quantit.northstar.domain]': debug
+    '[tech.quantit.northstar.strategy]': debug
+  file:    path: logs/
+
   
 spring:
   profiles:
@@ -44,21 +50,18 @@ spring:
             socketFactory.class: com.fintech.modules.base.util.mail.MailSSLSocketFactory
 ---
 spring:
-  profiles: prod
   data:
     mongodb:
-      uri: mongodb://127.0.0.1:27017/NS_DB
+      uri: mongodb://127.0.0.1:27017/NS_DB  config:    activate:      on-profile: prod
       
 ---
 spring:
-  profiles: dev
   data:
     mongodb:
-      uri: mongodb://127.0.0.1:27017/NS_DB
+      uri: mongodb://127.0.0.1:27017/NS_DB  config:    activate:      on-profile: dev
 
 ---
 spring:
-  profiles: test
   data:
     mongodb:
-      uri: mongodb://127.0.0.1:27017/TEST_NS_DB
+      uri: mongodb://127.0.0.1:27017/TEST_NS_DB  config:    activate:      on-profile: test

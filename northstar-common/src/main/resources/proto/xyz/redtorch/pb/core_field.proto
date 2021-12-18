@@ -264,6 +264,7 @@ message SubmitOrderReqField {
 	fixed32 autoSuspend = 19; // 自动挂起标志
 	fixed32 userForceClose = 20; // 用户强评标志
 	fixed32 swapOrder = 21; // 互换单标志
+	fixed64 actionTimestamp = 22;  // 时间戳
 }
 
 // 撤单请求

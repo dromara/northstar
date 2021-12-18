@@ -2,9 +2,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>tech.xuan-wu</groupId>
+		<groupId>tech.quantit</groupId>
 		<artifactId>northstar</artifactId>
-		<version>2.1.0</version>
+		<version>3.0.0</version>
 	</parent>
 	<artifactId>northstar-main</artifactId>
 	<name>northstar-main</name>
@@ -15,23 +15,19 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>tech.xuan-wu</groupId>
+			<groupId>tech.quantit</groupId>
 			<artifactId>northstar-common</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>tech.xuan-wu</groupId>
+			<groupId>tech.quantit</groupId>
 			<artifactId>northstar-domain</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>tech.xuan-wu</groupId>
-			<artifactId>northstar-plugin-notification</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>tech.xuan-wu</groupId>
+			<groupId>tech.quantit</groupId>
 			<artifactId>northstar-gateway-ctp</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>tech.xuan-wu</groupId>
+			<groupId>tech.quantit</groupId>
 			<artifactId>northstar-gateway-sim</artifactId>
 		</dependency>
 		<dependency>
@@ -39,12 +35,16 @@
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>tech.xuan-wu</groupId>
-			<artifactId>northstar-strategy-cta</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-mail</artifactId>
+		</dependency>
+		<dependency>
+		    <groupId>com.corundumstudio.socketio</groupId>
+		    <artifactId>netty-socketio</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
@@ -65,6 +65,10 @@
 		<dependency>
 			<groupId>cn.hutool</groupId>
 			<artifactId>hutool-crypto</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate.validator</groupId>
+			<artifactId>hibernate-validator</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.lucene</groupId>
@@ -97,13 +101,13 @@
 				<artifactId>jacoco-maven-plugin</artifactId>
 				<configuration>
 					<excludes>
-						<exclude>**/tech/xuanwu/northstar/main/*</exclude>
-						<exclude>**/tech/xuanwu/northstar/main/config/*</exclude>
-						<exclude>**/tech/xuanwu/northstar/main/factories/*</exclude>
-						<exclude>**/tech/xuanwu/northstar/main/interceptor/*</exclude>
-						<exclude>**/tech/xuanwu/northstar/main/handler/**/*</exclude>
-						<exclude>**/tech/xuanwu/northstar/main/persistence/**/*</exclude>
-						<exclude>**/tech/xuanwu/northstar/main/restful/common/*</exclude>
+						<exclude>**/tech/quantit/northstar/main/*</exclude>
+						<exclude>**/tech/quantit/northstar/main/config/*</exclude>
+						<exclude>**/tech/quantit/northstar/main/factories/*</exclude>
+						<exclude>**/tech/quantit/northstar/main/interceptor/*</exclude>
+						<exclude>**/tech/quantit/northstar/main/handler/**/*</exclude>
+						<exclude>**/tech/quantit/northstar/main/persistence/**/*</exclude>
+						<exclude>**/tech/quantit/northstar/main/restful/common/*</exclude>
 					</excludes>
 				</configuration>
 			</plugin>

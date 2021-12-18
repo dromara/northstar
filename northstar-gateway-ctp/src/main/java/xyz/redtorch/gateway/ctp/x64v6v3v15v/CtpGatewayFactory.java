@@ -2,23 +2,27 @@ package xyz.redtorch.gateway.ctp.x64v6v3v15v;
 
 import com.alibaba.fastjson.JSON;
 
-import tech.xuanwu.northstar.common.constant.GatewayUsage;
-import tech.xuanwu.northstar.common.model.CtpSettings;
-import tech.xuanwu.northstar.common.model.GatewayDescription;
-import tech.xuanwu.northstar.engine.event.FastEventEngine;
-import tech.xuanwu.northstar.gateway.api.AbstractGatewayFactory;
-import tech.xuanwu.northstar.gateway.api.Gateway;
+import tech.quantit.northstar.common.constant.GatewayUsage;
+import tech.quantit.northstar.common.event.FastEventEngine;
+import tech.quantit.northstar.common.model.CtpSettings;
+import tech.quantit.northstar.common.model.GatewayDescription;
+import tech.quantit.northstar.gateway.api.GatewayFactory;
+import tech.quantit.northstar.gateway.api.Gateway;
+import tech.quantit.northstar.gateway.api.domain.GlobalMarketRegistry;
 import xyz.redtorch.pb.CoreEnum.GatewayAdapterTypeEnum;
 import xyz.redtorch.pb.CoreEnum.GatewayTypeEnum;
 import xyz.redtorch.pb.CoreField.GatewaySettingField;
 import xyz.redtorch.pb.CoreField.GatewaySettingField.CtpApiSettingField;
 
-public class CtpGatewayFactory extends AbstractGatewayFactory{
+public class CtpGatewayFactory implements GatewayFactory{
 
 	private FastEventEngine fastEventEngine;
 	
-	public CtpGatewayFactory(FastEventEngine fastEventEngine) {
+	private GlobalMarketRegistry registry;
+	
+	public CtpGatewayFactory(FastEventEngine fastEventEngine, GlobalMarketRegistry registry) {
 		this.fastEventEngine = fastEventEngine;
+		this.registry = registry;
 	}
 	
 	@Override
@@ -45,7 +49,7 @@ public class CtpGatewayFactory extends AbstractGatewayFactory{
 				.setGatewayName(gatewayDescription.getGatewayId())
 				.setCtpApiSetting(ctpSetting)
 				.setGatewayType(gwType)
-				.build());
+				.build(), registry);
 	}
 
 }

@@ -8,10 +8,12 @@ import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import tech.xuanwu.northstar.engine.event.FastEventEngine;
-import tech.xuanwu.northstar.gateway.api.GatewayAbstract;
-import tech.xuanwu.northstar.gateway.api.MarketGateway;
-import tech.xuanwu.northstar.gateway.api.TradeGateway;
+import tech.quantit.northstar.common.constant.GatewayType;
+import tech.quantit.northstar.common.event.FastEventEngine;
+import tech.quantit.northstar.gateway.api.GatewayAbstract;
+import tech.quantit.northstar.gateway.api.MarketGateway;
+import tech.quantit.northstar.gateway.api.TradeGateway;
+import tech.quantit.northstar.gateway.api.domain.GlobalMarketRegistry;
 import xyz.redtorch.pb.CoreEnum.GatewayTypeEnum;
 import xyz.redtorch.pb.CoreField.CancelOrderReqField;
 import xyz.redtorch.pb.CoreField.ContractField;
@@ -71,9 +73,9 @@ public class CtpGatewayAdapter extends GatewayAbstract implements MarketGateway,
 	private MdSpi mdSpi = null;
 	private TdSpi tdSpi = null;
 	
-	public CtpGatewayAdapter(FastEventEngine fastEventEngine, GatewaySettingField gatewaySetting) {
-		super(gatewaySetting);
-
+	public CtpGatewayAdapter(FastEventEngine fastEventEngine, GatewaySettingField gatewaySetting, GlobalMarketRegistry registry) {
+		super(gatewaySetting, registry);
+		
 		if (gatewaySetting.getGatewayType() == GatewayTypeEnum.GTE_Trade) {
 			tdSpi = new TdSpi(this);
 		} else if (gatewaySetting.getGatewayType() == GatewayTypeEnum.GTE_MarketData) {
@@ -85,6 +87,8 @@ public class CtpGatewayAdapter extends GatewayAbstract implements MarketGateway,
 		
 		this.fastEventEngine = fastEventEngine;
 	}
+	
+	
 	
 	@Override
 	public boolean subscribe(ContractField contractField) {
@@ -256,6 +260,13 @@ public class CtpGatewayAdapter extends GatewayAbstract implements MarketGateway,
 		FileUtils.copyURLToFile(sourceURL, targetFile);
 
 		targetFile.deleteOnExit();
+	}
+
+
+
+	@Override
+	public GatewayType gatewayType() {
+		return GatewayType.CTP;
 	}
 
 }
