@@ -17,7 +17,7 @@
 
 
 项目架构采用事件驱动+插件式开发
-![Image](https://images.gitee.com/uploads/images/2021/0611/094207_e5a77d26_1676852.png)
+![Image](https://images.gitee.com/uploads/images/2021/1107/172130_9da2bdcd_1676852.png)
 
 
 开源不易，感谢点赞关注加收藏！  
@@ -122,6 +122,7 @@ source ~/.bashrc
 ```
 
 部署程序（每次代码更新后运行）
+注意：deploy.sh脚本中包括了JVM的启动参数，假定服务器配置是2核4G，如有不同应该按实际情况修改
 ```
 cd ~/northstar
 bash deploy.sh
