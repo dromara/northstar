@@ -28,7 +28,7 @@ public class InternalEventHandlerConfig {
 	public AccountHandler accountEventHandler(InternalEventBus eventBus, ContractManager contractMgr,
 			ConcurrentMap<String, TradeDayAccount> accountMap) {
 		AccountHandler handler = new AccountHandler(accountMap, new TradeDayAccountFactory(eventBus, contractMgr));
-		log.info("注册：AccountHandler");
+		log.debug("注册：AccountHandler");
 		eventBus.register(handler);
 		return handler;
 	}
@@ -37,7 +37,7 @@ public class InternalEventHandlerConfig {
 	public ConnectionHandler connectionEventHandler(InternalEventBus eventBus, GatewayAndConnectionManager gatewayConnMgr,
 			ContractManager contractMgr) {
 		ConnectionHandler handler = new ConnectionHandler(gatewayConnMgr, contractMgr);
-		log.info("注册：ConnectionHandler");
+		log.debug("注册：ConnectionHandler");
 		eventBus.register(handler);
 		return handler;
 	}
@@ -45,7 +45,7 @@ public class InternalEventHandlerConfig {
 	@Bean
 	public TradeHandler tradeEventHandler(InternalEventBus eventBus, GatewayAndConnectionManager gatewayConnMgr) {
 		TradeHandler handler = new TradeHandler(gatewayConnMgr);
-		log.info("注册：TradeHandler");
+		log.debug("注册：TradeHandler");
 		eventBus.register(handler);
 		return handler;
 	}
@@ -54,7 +54,7 @@ public class InternalEventHandlerConfig {
 	@Bean
 	public SimMarketHandler simMarketHandler(InternalEventBus eventBus, SimMarket market) {
 		SimMarketHandler handler = new SimMarketHandler(market);
-		log.info("注册：SimMarketHandler");
+		log.debug("注册：SimMarketHandler");
 		eventBus.register(handler);
 		return handler;
 	}

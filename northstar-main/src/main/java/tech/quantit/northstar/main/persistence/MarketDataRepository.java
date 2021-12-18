@@ -48,7 +48,7 @@ public class MarketDataRepository {
 		if(mongo.collectionExists(collectionName)) {
 			return;
 		}
-		log.info("初始化表：{}", collectionName);
+		log.debug("初始化表：{}", collectionName);
 		mongo.createCollection(collectionName);
 		IndexDefinition indexDefinition = new CompoundIndexDefinition(new Document().append("unifiedSymbol", 1).append("tradingDay", 1));
 		mongo.indexOps(collectionName).ensureIndex(indexDefinition);
@@ -71,7 +71,7 @@ public class MarketDataRepository {
 	 * @param bar
 	 */
 	public void insert(MinBarDataPO bar) {
-		log.info("保存Bar数据：{}", bar.getUnifiedSymbol());
+		log.debug("保存Bar数据：{}", bar.getUnifiedSymbol());
 		client.insert(DB, COLLECTION_PREFIX + bar.getGatewayId(), MongoUtils.beanToDocument(bar));
 	}
 	
@@ -80,7 +80,7 @@ public class MarketDataRepository {
 	 * @param barList
 	 */
 	public void insertMany(List<MinBarDataPO> barList) {
-		log.info("批量保存Bar数据：{}条", barList.size());
+		log.debug("批量保存Bar数据：{}条", barList.size());
 		List<Document> data = barList.stream()
 				.map(MongoUtils::beanToDocument)
 				.toList();
@@ -98,7 +98,7 @@ public class MarketDataRepository {
 		List<Document> resultList = client.find(DB, COLLECTION_PREFIX + gatewayId, new Document()
 				.append("unifiedSymbol", unifiedSymbol)
 				.append("tradingDay", tradeDay));
-		log.info("[{}]-[{}]-[{}] 加载历史数据：{}条", gatewayId, unifiedSymbol, tradeDay, resultList.size());
+		log.debug("[{}]-[{}]-[{}] 加载历史数据：{}条", gatewayId, unifiedSymbol, tradeDay, resultList.size());
 		return resultList.stream().map(doc -> MongoUtils.documentToBean(doc, MinBarDataPO.class)).toList();
 	}
 	
@@ -124,12 +124,12 @@ public class MarketDataRepository {
 		if(contracts.isEmpty()) {
 			return;
 		}
-		log.info("保存合约：{}条", contracts.size());
+		log.debug("保存合约：{}条", contracts.size());
 		long start = System.currentTimeMillis();
 		for(ContractPO po : contracts) {
 			mongo.save(po);
 		}
-		log.info("合约保存成功，耗时{}毫秒", System.currentTimeMillis() - start);
+		log.debug("合约保存成功，耗时{}毫秒", System.currentTimeMillis() - start);
 	}
 	
 	/**
@@ -156,7 +156,7 @@ public class MarketDataRepository {
 	 * @return
 	 */
 	public List<ContractPO> getAvailableContracts(){
-		log.info("查询十四天内登记过的有效合约");
+		log.debug("查询十四天内登记过的有效合约");
 		long day14Ago = System.currentTimeMillis() - DAY14MILLISEC;
 		return mongo.find(Query.query(Criteria.where("updateTime").gt(day14Ago)), ContractPO.class);
 	}

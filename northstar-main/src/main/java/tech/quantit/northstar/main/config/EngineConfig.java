@@ -25,31 +25,31 @@ public class EngineConfig {
 
 	@Bean
 	public SocketIOMessageEngine createMessageEngine(SocketIOServer server) {
-		log.info("创建SocketIOMessageEngine");
+		log.debug("创建SocketIOMessageEngine");
 		return new SocketIOMessageEngine(server);
 	}
 	
 	@Bean
 	public FastEventEngine createEventEngine() {
-		log.info("创建EventEngine");
+		log.debug("创建EventEngine");
 		return new DisruptorFastEventEngine(WaitStrategyEnum.BlockingWaitStrategy);
 	}
 	
 	@Bean
 	public InternalEventBus createInternalEventBus() {
-		log.info("创建InternalEventBus");
+		log.debug("创建InternalEventBus");
 		return new InternalEventBus();
 	}
 	
 	@Bean
 	public PluginEventBus createPluginEventBus() {
-		log.info("创建PluginEventBus");
+		log.debug("创建PluginEventBus");
 		return new PluginEventBus();
 	}
 	
 	@Bean
 	public StrategyEventBus createStrategyEventBus() {
-		log.info("创建StrategyEventBus");
+		log.debug("创建StrategyEventBus");
 		return new StrategyEventBus();
 	}
 

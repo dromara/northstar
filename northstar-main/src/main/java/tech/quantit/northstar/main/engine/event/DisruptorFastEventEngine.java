@@ -74,12 +74,12 @@ public class DisruptorFastEventEngine implements FastEventEngine, InitializingBe
 		disruptor = new Disruptor<>(new NorthstarEventFactory(), 65536, DaemonThreadFactory.INSTANCE,
 				ProducerType.MULTI, s);
 		ringBuffer = disruptor.start();
-		log.info("启动事件引擎");
+		log.debug("启动事件引擎");
 	}
 
 	@Override
 	public void addHandler(NorthstarEventDispatcher handler) {
-		log.info("加载：{}", handler);
+		log.debug("加载：{}", handler);
 		BatchEventProcessor<NorthstarEvent> processor = new BatchEventProcessor<>(ringBuffer, ringBuffer.newBarrier(), handler);
 		processor.setExceptionHandler(commonExceptionHandler);
 		ringBuffer.addGatingSequences(processor.getSequence());

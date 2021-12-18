@@ -376,8 +376,9 @@ public class ModuleService implements InitializingBean {
 	public void afterPropertiesSet() throws Exception {
 		CompletableFuture.runAsync(() -> {
 			try {
-				log.info("开始加载模组信息");
-				for (ModuleInfo m : getCurrentModuleInfos()) {
+				List<ModuleInfo> modules = getCurrentModuleInfos();
+				log.debug("开始加载模组信息: {}条", modules.size());
+				for (ModuleInfo m : modules) {
 					ModulePositionPO po = moduleRepo.loadModulePosition(m.getModuleName());
 					List<ModulePositionInfo> list = po == null ? Collections.emptyList() : po.getPositions();
 					loadModule(m, list);
