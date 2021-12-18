@@ -1,7 +1,6 @@
 package tech.quantit.northstar.gateway.api.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -17,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import tech.quantit.northstar.common.constant.DateTimeConstant;
 import tech.quantit.northstar.common.constant.TickType;
 import tech.quantit.northstar.common.utils.MarketTimeUtil;
+import test.common.TestFieldFactory;
 import xyz.redtorch.pb.CoreField.TickField;
 
 class BarGeneratorTest {
@@ -27,6 +27,8 @@ class BarGeneratorTest {
 	
 	private NormalContract contract = mock(NormalContract.class);
 	
+	private TestFieldFactory factory = new TestFieldFactory("testGateway");
+	
 	@BeforeEach
 	public void prepare() {
 		proto = TickField.newBuilder()
@@ -36,6 +38,7 @@ class BarGeneratorTest {
 				.setActionDay("20210618");
 		
 		when(contract.unifiedSymbol()).thenReturn("rb2101");
+		when(contract.contractField()).thenReturn(factory.makeContract("rb2101"));
 	}
 
 	/**
@@ -183,6 +186,7 @@ class BarGeneratorTest {
 		runner(bg, ldt, endTime);
 		assertThat(cnt.get()).isEqualTo(20);
 	}
+	
 
 	private void runner(BarGenerator bg, LocalDateTime startTime, LocalDateTime endTime) {
 		while(startTime.isBefore(endTime)) {
@@ -222,12 +226,12 @@ class BarGeneratorTest {
 					|| time.isAfter(dayMarketStartTime) && time.isBefore(dayMarketOpenTime)) {
 				return TickType.PRE_OPENING_TICK;
 			}
+			if(Math.abs(dayMarketClosingTime1.toNanoOfDay() - time.toNanoOfDay()) <= LESS_THEN_HALF_SEC_IN_NANO
+					|| Math.abs(dayMarketClosingTime2.toNanoOfDay() - time.toNanoOfDay()) <= LESS_THEN_HALF_SEC_IN_NANO) {
+				return TickType.CLOSING_TICK;
+			}
 			if(time.getSecond() == 0 && time.getNano() == 0) {
 				return TickType.END_OF_MIN_TICK;
-			}
-			if(Math.abs(dayMarketClosingTime1.toNanoOfDay() - time.toNanoOfDay()) < LESS_THEN_HALF_SEC_IN_NANO
-					|| Math.abs(dayMarketClosingTime2.toNanoOfDay() - time.toNanoOfDay()) < LESS_THEN_HALF_SEC_IN_NANO) {
-				return TickType.CLOSING_TICK;
 			}
 			return TickType.NORMAL_TICK;
 		}
