@@ -80,8 +80,7 @@ public class StrategyModule implements EventDrivenComponent{
 		this.gateway = gateway;
 		this.meb.register(status);
 		this.meb.register(this);
-		this.log = NorthstarLoggerFactory.getLogger(status.getModuleName(), this.getClass());
-		log.info("创建log");
+		this.log = NorthstarLoggerFactory.getLogger(status.getModuleName(), getClass());
 	}
 	
 	/**
