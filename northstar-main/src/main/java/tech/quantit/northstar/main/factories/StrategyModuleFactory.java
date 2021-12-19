@@ -24,6 +24,7 @@ import tech.quantit.northstar.strategy.api.EventDrivenComponent;
 import tech.quantit.northstar.strategy.api.RiskControlRule;
 import tech.quantit.northstar.strategy.api.SignalPolicy;
 import tech.quantit.northstar.strategy.api.event.ModuleEventBus;
+import tech.quantit.northstar.strategy.api.log.NorthstarLoggerFactory;
 import tech.quantit.northstar.strategy.api.model.ComponentAndParamsPair;
 import tech.quantit.northstar.strategy.api.model.ComponentField;
 import tech.quantit.northstar.strategy.api.model.DynamicParams;
@@ -85,6 +86,7 @@ public class StrategyModuleFactory {
 					.meb(meb)
 					.clearoutCallback(dealRecord -> moduleRepo.saveDealRecord(dealRecord))
 					.positionSavingCallback(positionSavingCallback)
+					.log(NorthstarLoggerFactory.getLogger(moduleInfo.getModuleName(), ModulePosition.class))
 					.build();
 			return new ModuleStatus(moduleInfo.getModuleName(), mp);
 		} else {
@@ -102,6 +104,7 @@ public class StrategyModuleFactory {
 					.clearoutCallback(dealRecord -> moduleRepo.saveDealRecord(dealRecord))
 					.positionSavingCallback(positionSavingCallback)
 					.direction(mpi.getPositionDir())
+					.log(NorthstarLoggerFactory.getLogger(moduleInfo.getModuleName(), ModulePosition.class))
 					.build();
 			return new ModuleStatus(moduleInfo.getModuleName(), mp);
 		}

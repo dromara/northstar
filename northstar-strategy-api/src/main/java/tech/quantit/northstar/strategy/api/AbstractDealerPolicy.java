@@ -2,13 +2,15 @@ package tech.quantit.northstar.strategy.api;
 
 import java.util.UUID;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+
 import tech.quantit.northstar.common.utils.FieldUtils;
 import tech.quantit.northstar.strategy.api.constant.ModuleState;
 import tech.quantit.northstar.strategy.api.constant.PriceType;
 import tech.quantit.northstar.strategy.api.event.ModuleEvent;
 import tech.quantit.northstar.strategy.api.event.ModuleEventBus;
 import tech.quantit.northstar.strategy.api.event.ModuleEventType;
+import tech.quantit.northstar.strategy.api.log.NorthstarLoggerFactory;
 import tech.quantit.northstar.strategy.api.model.Signal;
 import tech.quantit.northstar.strategy.api.utils.PriceResolver;
 import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
@@ -25,7 +27,6 @@ import xyz.redtorch.pb.CoreField.OrderField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TickField;
 
-@Slf4j
 public abstract class AbstractDealerPolicy implements DealerPolicy {
 
 	protected ModuleState currentState;
@@ -41,6 +42,8 @@ public abstract class AbstractDealerPolicy implements DealerPolicy {
 	protected ContractField bindedContract;
 
 	private String moduleName;
+	
+	protected Logger log;
 	
 	@Override
 	public void onChange(ModuleState state) {
@@ -124,6 +127,7 @@ public abstract class AbstractDealerPolicy implements DealerPolicy {
 	@Override
 	public void setModuleName(String name) {
 		this.moduleName = name;
+		log = NorthstarLoggerFactory.getLogger(name, getClass());
 	}
 
 	@Override

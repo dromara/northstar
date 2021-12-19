@@ -1,7 +1,6 @@
 package tech.quantit.northstar.strategy.api.policy.risk;
 
 
-import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.strategy.api.RiskControlRule;
 import tech.quantit.northstar.strategy.api.annotation.Setting;
 import tech.quantit.northstar.strategy.api.annotation.StrategicComponent;
@@ -17,7 +16,6 @@ import xyz.redtorch.pb.CoreField.TickField;
  * @author KevinHuangwl
  *
  */
-@Slf4j
 @StrategicComponent("委托超价限制")
 public class PriceExceededRule extends AbstractRule implements RiskControlRule {
 

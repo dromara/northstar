@@ -4,11 +4,11 @@ import java.util.UUID;
 import java.util.function.Consumer;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
 
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.TickDataAware;
 import tech.quantit.northstar.common.utils.FieldUtils;
 import tech.quantit.northstar.strategy.api.EventDrivenComponent;
@@ -39,7 +39,6 @@ import xyz.redtorch.pb.CoreField.TradeField;
  * @author KevinHuangwl
  *
  */
-@Slf4j
 @Builder
 public class ModulePosition implements TickDataAware, EventDrivenComponent{
 	
@@ -70,6 +69,8 @@ public class ModulePosition implements TickDataAware, EventDrivenComponent{
 	private ModuleTradeIntent ti;
 	
 	protected TickField lastTick;
+	
+	private Logger log;
 	
 	// 清仓回调
 	private Consumer<ModuleDealRecord> clearoutCallback;

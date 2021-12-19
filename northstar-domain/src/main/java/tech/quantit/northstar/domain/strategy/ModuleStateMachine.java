@@ -3,19 +3,20 @@ package tech.quantit.northstar.domain.strategy;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.strategy.api.StateChangeListener;
 import tech.quantit.northstar.strategy.api.constant.ModuleState;
 import tech.quantit.northstar.strategy.api.event.ModuleEventType;
+import tech.quantit.northstar.strategy.api.log.NorthstarLoggerFactory;
 
 /**
  * 模组状态机，管理状态转移
  * @author KevinHuangwl
  *
  */
-@Slf4j
 @Data
 @NoArgsConstructor
 public class ModuleStateMachine {
@@ -30,10 +31,13 @@ public class ModuleStateMachine {
 	
 	private static final String ERR_MSG = "当前状态异常：";
 	
+	private Logger log;
+	
 	public ModuleStateMachine(String moduleName, ModuleState state) {
 		this.moduleName = moduleName;
 		this.originState = state;
 		this.curState = state;
+		this.log = NorthstarLoggerFactory.getLogger(moduleName, getClass());
 	}
 	
 	public void addStateChangeListener(StateChangeListener listener) {

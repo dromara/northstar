@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
 
-import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.ContractBindedAware;
 import tech.quantit.northstar.common.Subscribable;
 import tech.quantit.northstar.common.TickDataAware;
@@ -19,11 +19,11 @@ import tech.quantit.northstar.strategy.api.constant.RiskAuditResult;
 import tech.quantit.northstar.strategy.api.event.ModuleEvent;
 import tech.quantit.northstar.strategy.api.event.ModuleEventBus;
 import tech.quantit.northstar.strategy.api.event.ModuleEventType;
+import tech.quantit.northstar.strategy.api.log.NorthstarLoggerFactory;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TickField;
 
-@Slf4j
 public class RiskControlPolicy implements TickDataAware, EventDrivenComponent, StateChangeListener, ContractBindedAware{
 	
 	private List<RiskControlRule> rules;
@@ -40,11 +40,14 @@ public class RiskControlPolicy implements TickDataAware, EventDrivenComponent, S
 	
 	private ContractField bindedContract;
 	
+	private Logger log;
+	
 	private Set<RiskAuditResult> riskCheckResults = new HashSet<>();
 	
 	public RiskControlPolicy(String moduleName, List<RiskControlRule> rules) {
 		this.rules = rules;
 		this.moduleName = moduleName;
+		this.log = NorthstarLoggerFactory.getLogger(moduleName, getClass());
 	}
 
 	@Override

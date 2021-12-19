@@ -24,7 +24,6 @@ logging:  level:
     '[tech.quantit.northstar.domain]': debug
     '[tech.quantit.northstar.strategy]': debug
   file:    path: logs/
-
   
 spring:
   profiles:

@@ -4,9 +4,10 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Consumer;
 
+import org.slf4j.Logger;
+
 import lombok.Getter;
 import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.ContractBindedAware;
 import tech.quantit.northstar.common.event.NorthstarEvent;
 import tech.quantit.northstar.gateway.api.TradeGateway;
@@ -16,6 +17,7 @@ import tech.quantit.northstar.strategy.api.StateChangeListener;
 import tech.quantit.northstar.strategy.api.event.ModuleEvent;
 import tech.quantit.northstar.strategy.api.event.ModuleEventBus;
 import tech.quantit.northstar.strategy.api.event.ModuleEventType;
+import tech.quantit.northstar.strategy.api.log.NorthstarLoggerFactory;
 import tech.quantit.northstar.strategy.api.model.ModuleDealRecord;
 import xyz.redtorch.pb.CoreEnum.OrderStatusEnum;
 import xyz.redtorch.pb.CoreField.CancelOrderReqField;
@@ -28,7 +30,6 @@ import xyz.redtorch.pb.CoreField.TradeField;
  * @author KevinHuangwl
  *
  */
-@Slf4j
 public class StrategyModule implements EventDrivenComponent{
 	
 	protected ModuleEventBus meb = new ModuleEventBus();
@@ -69,6 +70,8 @@ public class StrategyModule implements EventDrivenComponent{
 	
 	private Set<String> bindedSymbols = new HashSet<>();
 	
+	private Logger log;
+	
 	public StrategyModule(String bindedMktGatewayId, TradeGateway gateway, ModuleStatus status) {
 		this.moduleStatus = status;
 		this.moduleStatus.setModuleEventBus(meb);
@@ -77,6 +80,8 @@ public class StrategyModule implements EventDrivenComponent{
 		this.gateway = gateway;
 		this.meb.register(status);
 		this.meb.register(this);
+		this.log = NorthstarLoggerFactory.getLogger(status.getModuleName(), this.getClass());
+		log.info("创建log");
 	}
 	
 	/**

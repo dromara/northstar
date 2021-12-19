@@ -1,6 +1,5 @@
 package tech.quantit.northstar.strategy.api.policy.dealer;
 
-import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.utils.FieldUtils;
 import tech.quantit.northstar.strategy.api.AbstractDealerPolicy;
 import tech.quantit.northstar.strategy.api.DealerPolicy;
@@ -16,7 +15,6 @@ import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
  * @author KevinHuangwl
  *
  */
-@Slf4j
 @StrategicComponent("示例交易策略")
 public class SampleDealer extends AbstractDealerPolicy implements DealerPolicy {
 	
