@@ -14,6 +14,7 @@ import java.util.function.Consumer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatcher;
+import org.slf4j.Logger;
 
 import tech.quantit.northstar.strategy.api.event.ModuleEvent;
 import tech.quantit.northstar.strategy.api.event.ModuleEventBus;
@@ -43,12 +44,15 @@ public class ModulePositionTest {
 	TickField tick2 = factory.makeTickField("rb2110", 2100);
 	
 	ModulePosition mp;
+
+	Logger log = mock(Logger.class);
 	
 	@BeforeEach
 	public void setup() {
 		mp = ModulePosition.builder()
 				.moduleName(NAME)
 				.clearoutCallback(null)
+				.log(log)
 				.build();
 	}
 	
@@ -56,6 +60,7 @@ public class ModulePositionTest {
 	public void shouldUpdateProfit() {
 		ModulePosition p1 =ModulePosition.builder()
 				.moduleName(NAME)
+				.log(log)
 				.build();
 		p1.merge(buyTrade);
 		p1.onTick(tick);
@@ -63,6 +68,7 @@ public class ModulePositionTest {
 		
 		ModulePosition p2 = ModulePosition.builder()
 				.moduleName(NAME)
+				.log(log)
 				.build();
 		p2.merge(sellTrade);
 		p2.onTick(tick);
@@ -71,7 +77,7 @@ public class ModulePositionTest {
 	
 	@Test
 	public void shouldNotUpdateProfit() {
-		ModulePosition p1 = ModulePosition.builder().moduleName(NAME).build();
+		ModulePosition p1 = ModulePosition.builder().moduleName(NAME).log(log).build();
 		p1.onTick(tick2);
 		assertThat(p1.profit()).isZero();
 	}
@@ -80,7 +86,7 @@ public class ModulePositionTest {
 	@Test
 	public void shouldTriggerStopLoss() {
 		Consumer<ModuleDealRecord> callback = mock(Consumer.class);
-		ModulePosition p1 = ModulePosition.builder().moduleName(NAME).build();
+		ModulePosition p1 = ModulePosition.builder().moduleName(NAME).log(log).build();
 		p1.merge(sellTrade);
 		p1.stopLoss(2100);
 		p1.meb = mock(ModuleEventBus.class);
@@ -91,7 +97,7 @@ public class ModulePositionTest {
 	
 	@Test
 	public void shouldNotTriggerStopLoss() {
-		ModulePosition p1 = ModulePosition.builder().moduleName(NAME).build();
+		ModulePosition p1 = ModulePosition.builder().moduleName(NAME).log(log).build();
 		p1.merge(sellTrade);
 		p1.stopLoss(2101);
 		p1.meb = mock(ModuleEventBus.class);
@@ -101,14 +107,14 @@ public class ModulePositionTest {
 	
 	@Test
 	public void testOpenPrice() {
-		ModulePosition p1 = ModulePosition.builder().moduleName(NAME).build();
+		ModulePosition p1 = ModulePosition.builder().moduleName(NAME).log(log).build();
 		p1.merge(buyTrade);
 		assertThat(p1.getOpenPrice()).isEqualTo(2000);
 	}
 	
 	@Test
 	public void testSetEventBus() {
-		ModulePosition p1 = ModulePosition.builder().moduleName(NAME).build();
+		ModulePosition p1 = ModulePosition.builder().moduleName(NAME).log(log).build();
 		ModuleEventBus meb = mock(ModuleEventBus.class);
 		p1.setEventBus(meb);
 		assertThat(p1.meb).isEqualTo(meb);
@@ -116,7 +122,7 @@ public class ModulePositionTest {
 	
 	@Test
 	public void shouldSkipTheEvent() {
-		ModulePosition p1 = ModulePosition.builder().moduleName(NAME).build();
+		ModulePosition p1 = ModulePosition.builder().moduleName(NAME).log(log).build();
 		ModuleEventBus meb = mock(ModuleEventBus.class);
 		p1.setEventBus(meb);
 		
@@ -137,7 +143,7 @@ public class ModulePositionTest {
 	
 	@Test
 	public void shouldEmitOrderPassed() {
-		ModulePosition p1 = ModulePosition.builder().moduleName(NAME).build();
+		ModulePosition p1 = ModulePosition.builder().moduleName(NAME).log(log).build();
 		p1.merge(buyTrade);
 		p1.lastTick = TickField.newBuilder().setTradingDay(sellTrade.getTradingDay()).build();
 		ModuleEventBus meb = mock(ModuleEventBus.class);
@@ -182,7 +188,7 @@ public class ModulePositionTest {
 	
 	@Test
 	public void shouldEmitOrderRetained() {
-		ModulePosition p1 = ModulePosition.builder().moduleName(NAME).build();
+		ModulePosition p1 = ModulePosition.builder().moduleName(NAME).log(log).build();
 		p1.merge(buyTrade);
 		p1.lastTick = TickField.newBuilder().setTradingDay(sellTrade.getTradingDay()).build();
 		ModuleEventBus meb = mock(ModuleEventBus.class);
@@ -204,7 +210,7 @@ public class ModulePositionTest {
 	
 	@Test
 	public void shouldAddPosition() {
-		ModulePosition mp = ModulePosition.builder().moduleName(NAME).build();
+		ModulePosition mp = ModulePosition.builder().moduleName(NAME).log(log).build();
 		mp.merge(buyTrade);
 		mp.merge(buyTrade2);
 		assertThat(mp.getDirection()).isEqualTo(PositionDirectionEnum.PD_Long);
@@ -215,7 +221,7 @@ public class ModulePositionTest {
 	
 	@Test
 	public void shouldReducePosition() {
-		ModulePosition mp = ModulePosition.builder().moduleName(NAME).build();
+		ModulePosition mp = ModulePosition.builder().moduleName(NAME).log(log).build();
 		mp.merge(buyTrade);
 		mp.merge(sellTrade2);
 		assertThat(mp.getDirection()).isEqualTo(PositionDirectionEnum.PD_Long);
@@ -226,7 +232,7 @@ public class ModulePositionTest {
 	
 	@Test
 	public void shouldThrowIfNotMatchSymbol() {
-		ModulePosition mp = ModulePosition.builder().moduleName(NAME).build();
+		ModulePosition mp = ModulePosition.builder().moduleName(NAME).log(log).build();
 		mp.merge(buyTrade);
 		assertThrows(IllegalStateException.class, ()->{			
 			mp.merge(buyTrade3);
@@ -235,7 +241,7 @@ public class ModulePositionTest {
 	
 	@Test
 	public void shouldReverseDirection() {
-		ModulePosition mp = ModulePosition.builder().moduleName(NAME).build();
+		ModulePosition mp = ModulePosition.builder().moduleName(NAME).log(log).build();
 		mp.merge(buyTrade);
 		assertThat(mp.getDirection()).isEqualTo(PositionDirectionEnum.PD_Long);
 		assertThat(mp.getOpenPrice()).isCloseTo(2000, offset(1e-6));

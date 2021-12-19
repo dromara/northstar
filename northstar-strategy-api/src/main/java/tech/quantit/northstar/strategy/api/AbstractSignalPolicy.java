@@ -5,19 +5,20 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+
 import tech.quantit.northstar.strategy.api.constant.ModuleState;
 import tech.quantit.northstar.strategy.api.constant.SignalOperation;
 import tech.quantit.northstar.strategy.api.event.ModuleEvent;
 import tech.quantit.northstar.strategy.api.event.ModuleEventBus;
 import tech.quantit.northstar.strategy.api.event.ModuleEventType;
+import tech.quantit.northstar.strategy.api.log.NorthstarLoggerFactory;
 import tech.quantit.northstar.strategy.api.model.Signal;
 import tech.quantit.northstar.strategy.api.model.TimeSeriesData;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.TickField;
 
-@Slf4j
 public abstract class AbstractSignalPolicy implements SignalPolicy {
 
 	protected ModuleEventBus moduleEventBus;
@@ -33,6 +34,8 @@ public abstract class AbstractSignalPolicy implements SignalPolicy {
 	private String moduleName;
 	
 	private boolean moduleEnabled;
+	
+	protected Logger log;
 	
 	protected void emit(SignalOperation signalOperation) {
 		emit(signalOperation, 0, 0);
@@ -121,6 +124,7 @@ public abstract class AbstractSignalPolicy implements SignalPolicy {
 	@Override
 	public void setModuleName(String name) {
 		this.moduleName = name;
+		log = NorthstarLoggerFactory.getLogger(name, getClass()); 
 	}
 
 	@Override

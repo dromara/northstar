@@ -2,7 +2,6 @@ package tech.quantit.northstar.strategy.api.policy.signal;
 
 import java.util.concurrent.ThreadLocalRandom;
 
-import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.strategy.api.AbstractSignalPolicy;
 import tech.quantit.northstar.strategy.api.SignalPolicy;
 import tech.quantit.northstar.strategy.api.annotation.Setting;
@@ -21,7 +20,6 @@ import xyz.redtorch.pb.CoreField.TickField;
  * @author KevinHuangwl
  *
  */
-@Slf4j
 @StrategicComponent("示例信号策略")	// 该注解是用于给策略命名用的
 public class SampleSignalPolicy extends AbstractSignalPolicy
 	implements SignalPolicy //	所有的策略都应该是DynamicParamsAware的实现类

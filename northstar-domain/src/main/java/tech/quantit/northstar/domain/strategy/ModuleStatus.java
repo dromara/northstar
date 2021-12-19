@@ -1,10 +1,12 @@
 package tech.quantit.northstar.domain.strategy;
 
+import org.slf4j.Logger;
+
 import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.utils.FieldUtils;
 import tech.quantit.northstar.strategy.api.constant.ModuleState;
 import tech.quantit.northstar.strategy.api.event.ModuleEventBus;
+import tech.quantit.northstar.strategy.api.log.NorthstarLoggerFactory;
 import xyz.redtorch.pb.CoreField.TradeField;
 
 /**
@@ -13,7 +15,6 @@ import xyz.redtorch.pb.CoreField.TradeField;
  * @author KevinHuangwl
  *
  */
-@Slf4j
 public class ModuleStatus {
 
 	@Getter
@@ -29,9 +30,12 @@ public class ModuleStatus {
 	@Getter
 	private ModuleEventBus moduleEventBus;
 	
+	private Logger log;
+	
 	
 	public ModuleStatus(String name, ModulePosition modulePosition) {
 		moduleName = name;
+		log = NorthstarLoggerFactory.getLogger(name, getClass());
 		logicalPosition = modulePosition;
 		stateMachine = new ModuleStateMachine(name, ModuleState.EMPTY);
 		stateMachine.setState(getMergedState());

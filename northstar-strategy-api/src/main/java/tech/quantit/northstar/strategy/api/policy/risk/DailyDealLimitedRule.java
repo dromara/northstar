@@ -1,6 +1,5 @@
 package tech.quantit.northstar.strategy.api.policy.risk;
 
-import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.strategy.api.RiskControlRule;
 import tech.quantit.northstar.strategy.api.StateChangeListener;
 import tech.quantit.northstar.strategy.api.annotation.Setting;
@@ -16,7 +15,6 @@ import xyz.redtorch.pb.CoreField.TickField;
  * @author KevinHuangwl
  *
  */
-@Slf4j
 @StrategicComponent("日内开仓次数限制")
 public class DailyDealLimitedRule extends AbstractRule implements RiskControlRule, StateChangeListener{
 	
