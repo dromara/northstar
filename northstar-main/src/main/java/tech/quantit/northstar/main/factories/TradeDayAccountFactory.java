@@ -1,21 +1,22 @@
 package tech.quantit.northstar.main.factories;
 
-import tech.quantit.northstar.common.event.InternalEventBus;
 import tech.quantit.northstar.domain.account.TradeDayAccount;
 import tech.quantit.northstar.domain.gateway.ContractManager;
+import tech.quantit.northstar.domain.gateway.GatewayAndConnectionManager;
+import tech.quantit.northstar.gateway.api.TradeGateway;
 
 public class TradeDayAccountFactory {
 	
 	private ContractManager contractMgr;
-	private InternalEventBus eventBus;
+	private GatewayAndConnectionManager gatewayConnMgr;
 	
-	public TradeDayAccountFactory(InternalEventBus eventBus, ContractManager contractMgr) {
-		this.eventBus = eventBus;
+	public TradeDayAccountFactory(GatewayAndConnectionManager gatewayConnMgr, ContractManager contractMgr) {
+		this.gatewayConnMgr = gatewayConnMgr;
 		this.contractMgr = contractMgr;
 	}
 	
 	public TradeDayAccount newInstance(String gatewayId) {
-		return new TradeDayAccount(gatewayId, eventBus, contractMgr);
+		return new TradeDayAccount(gatewayId, (TradeGateway) gatewayConnMgr.getGatewayById(gatewayId), contractMgr);
 	}
 
 }

@@ -6,15 +6,13 @@ import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
 
-import tech.quantit.northstar.common.event.InternalEventBus;
-import tech.quantit.northstar.common.event.NorthstarEvent;
-import tech.quantit.northstar.common.event.NorthstarEventType;
 import tech.quantit.northstar.common.exception.InsufficientException;
 import tech.quantit.northstar.common.exception.TradeException;
 import tech.quantit.northstar.common.model.OrderRecall;
 import tech.quantit.northstar.common.model.OrderRequest;
 import tech.quantit.northstar.common.utils.OrderUtils;
 import tech.quantit.northstar.domain.gateway.ContractManager;
+import tech.quantit.northstar.gateway.api.TradeGateway;
 import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.ForceCloseReasonEnum;
@@ -47,12 +45,12 @@ public class TradeDayAccount {
 	
 	private String accountId;
 	
-	protected InternalEventBus eventBus;
+	protected TradeGateway gateway;
 	
-	public TradeDayAccount(String gatewayId, InternalEventBus eventBus, ContractManager contractMgr) {
+	public TradeDayAccount(String gatewayId, TradeGateway gateway, ContractManager contractMgr) {
 		this.accountId = gatewayId;
-		this.eventBus = eventBus;
 		this.contractMgr = contractMgr;
+		this.gateway = gateway;
 		this.posDescription = new PositionDescription(contractMgr);
 		this.accountInfo = AccountField.newBuilder()
 				.setAccountId(gatewayId)
@@ -104,13 +102,13 @@ public class TradeDayAccount {
 				.setMinVolume(1)
 				.setGatewayId(orderReq.getGatewayId())
 				.build();
-		eventBus.post(new NorthstarEvent(NorthstarEventType.PLACE_ORDER, req));
+		gateway.submitOrder(req);
 		return true;
 	}
 	
 	public boolean closePosition(OrderRequest orderReq) throws InsufficientException {
 		List<SubmitOrderReqField> orders = posDescription.generateCloseOrderReq(orderReq);
-		orders.forEach(order -> eventBus.post(new NorthstarEvent(NorthstarEventType.PLACE_ORDER, order)));
+		orders.forEach(gateway::submitOrder);
 		return true;
 	}
 	
@@ -122,7 +120,7 @@ public class TradeDayAccount {
 				.setOriginOrderId(orderRecall.getOriginOrderId())
 				.setGatewayId(orderRecall.getGatewayId())
 				.build();
-		eventBus.post(new NorthstarEvent(NorthstarEventType.WITHDRAW_ORDER, order));
+		gateway.cancelOrder(order);
 		return true;
 	}
 
