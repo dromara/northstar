@@ -9,8 +9,8 @@ import tech.quantit.northstar.common.event.GenericEventHandler;
 import tech.quantit.northstar.common.event.NorthstarEvent;
 import tech.quantit.northstar.common.event.NorthstarEventType;
 import tech.quantit.northstar.common.exception.NoSuchElementException;
-import tech.quantit.northstar.domain.GatewayAndConnectionManager;
-import tech.quantit.northstar.domain.GatewayConnection;
+import tech.quantit.northstar.domain.account.GatewayAndConnectionManager;
+import tech.quantit.northstar.domain.account.GatewayConnection;
 import tech.quantit.northstar.domain.gateway.ContractManager;
 
 /**

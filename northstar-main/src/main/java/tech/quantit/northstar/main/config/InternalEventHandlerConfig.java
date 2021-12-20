@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Configuration;
 
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.event.InternalEventBus;
-import tech.quantit.northstar.domain.GatewayAndConnectionManager;
+import tech.quantit.northstar.domain.account.GatewayAndConnectionManager;
 import tech.quantit.northstar.domain.account.TradeDayAccount;
 import tech.quantit.northstar.domain.gateway.ContractManager;
 import tech.quantit.northstar.gateway.sim.trade.SimMarket;

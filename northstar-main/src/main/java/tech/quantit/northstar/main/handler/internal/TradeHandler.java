@@ -5,7 +5,7 @@ import tech.quantit.northstar.common.event.GenericEventHandler;
 import tech.quantit.northstar.common.event.NorthstarEvent;
 import tech.quantit.northstar.common.event.NorthstarEventType;
 import tech.quantit.northstar.common.exception.NoSuchElementException;
-import tech.quantit.northstar.domain.GatewayAndConnectionManager;
+import tech.quantit.northstar.domain.account.GatewayAndConnectionManager;
 import tech.quantit.northstar.gateway.api.TradeGateway;
 import xyz.redtorch.pb.CoreField.CancelOrderReqField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;

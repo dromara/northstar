@@ -8,8 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 
 import tech.quantit.northstar.common.event.FastEventEngine;
-import tech.quantit.northstar.common.event.InternalEventBus;
-import tech.quantit.northstar.domain.GatewayAndConnectionManager;
+import tech.quantit.northstar.domain.account.GatewayAndConnectionManager;
 import tech.quantit.northstar.domain.account.TradeDayAccount;
 import tech.quantit.northstar.domain.gateway.ContractManager;
 import tech.quantit.northstar.domain.strategy.ModuleManager;
@@ -49,8 +48,8 @@ public class ServiceConfig {
 	
 	@Bean
 	public GatewayService gatewayService(GatewayAndConnectionManager gatewayConnMgr, GatewayRepository gatewayRepo,
-			MarketDataRepository mdRepo, ModuleRepository moduleRepo, InternalEventBus eventBus, SimMarket simMarket, GlobalMarketRegistry registry) {
-		return new GatewayService(gatewayConnMgr, gatewayRepo, mdRepo, moduleRepo, eventBus, simMarket, registry);
+			MarketDataRepository mdRepo, ModuleRepository moduleRepo, SimMarket simMarket, GlobalMarketRegistry registry) {
+		return new GatewayService(gatewayConnMgr, gatewayRepo, mdRepo, moduleRepo, simMarket, registry);
 	}
 	
 	@Bean

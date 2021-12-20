@@ -16,9 +16,8 @@ import tech.quantit.northstar.common.event.InternalEventBus;
 import tech.quantit.northstar.common.model.GatewayDescription;
 import tech.quantit.northstar.common.model.PlaybackDescription;
 import tech.quantit.northstar.common.model.SimSettings;
-import tech.quantit.northstar.domain.GatewayAndConnectionManager;
-import tech.quantit.northstar.domain.GatewayConnection;
-import tech.quantit.northstar.domain.TraderGatewayConnection;
+import tech.quantit.northstar.domain.account.GatewayAndConnectionManager;
+import tech.quantit.northstar.domain.account.GatewayConnection;
 import tech.quantit.northstar.domain.gateway.ContractManager;
 import tech.quantit.northstar.domain.strategy.ModuleManager;
 import tech.quantit.northstar.domain.strategy.SandboxModuleManager;
@@ -100,7 +99,7 @@ public class PlaybackService {
 					.settings(SimSettings.builder().fee(fee).build())
 					.build();
 			SimTradeGateway simTradeGateway = (SimTradeGateway) simGatewayFactory.newInstance(gwDescription);
-			GatewayConnection conn = new TraderGatewayConnection(gwDescription, eventBus);
+			GatewayConnection conn = new GatewayConnection(gwDescription);
 			gatewayConnMgr.createPair(conn, simTradeGateway);
 			
 			ModuleInfo moduleInfo = moduleRepo.findModuleInfo(name);

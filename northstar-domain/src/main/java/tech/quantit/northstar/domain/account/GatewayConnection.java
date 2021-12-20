@@ -1,7 +1,6 @@
-package tech.quantit.northstar.domain;
+package tech.quantit.northstar.domain.account;
 
 import tech.quantit.northstar.common.constant.ConnectionState;
-import tech.quantit.northstar.common.event.InternalEventBus;
 import tech.quantit.northstar.common.model.GatewayDescription;
 
 /**
@@ -9,13 +8,13 @@ import tech.quantit.northstar.common.model.GatewayDescription;
  * @author KevinHuangwl
  *
  */
-public abstract class GatewayConnection {
+public class GatewayConnection {
 	
 	protected GatewayDescription gwDescription;
 	
 	protected boolean errorFlag;
 	
-	public GatewayConnection(GatewayDescription gwDescription, InternalEventBus eventBus) {
+	public GatewayConnection(GatewayDescription gwDescription) {
 		this.gwDescription = gwDescription;
 	}
 	
