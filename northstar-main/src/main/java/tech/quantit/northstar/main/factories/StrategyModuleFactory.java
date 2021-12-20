@@ -7,9 +7,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
-import tech.quantit.northstar.domain.account.GatewayAndConnectionManager;
-import tech.quantit.northstar.domain.account.GatewayConnection;
 import tech.quantit.northstar.domain.gateway.ContractManager;
+import tech.quantit.northstar.domain.gateway.GatewayAndConnectionManager;
+import tech.quantit.northstar.domain.gateway.GatewayConnection;
 import tech.quantit.northstar.domain.strategy.ModulePosition;
 import tech.quantit.northstar.domain.strategy.ModuleStatus;
 import tech.quantit.northstar.domain.strategy.RiskControlPolicy;

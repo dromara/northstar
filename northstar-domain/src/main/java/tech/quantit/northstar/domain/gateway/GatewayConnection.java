@@ -1,4 +1,4 @@
-package tech.quantit.northstar.domain.account;
+package tech.quantit.northstar.domain.gateway;
 
 import tech.quantit.northstar.common.constant.ConnectionState;
 import tech.quantit.northstar.common.model.GatewayDescription;

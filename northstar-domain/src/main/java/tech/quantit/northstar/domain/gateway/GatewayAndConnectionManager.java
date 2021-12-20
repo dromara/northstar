@@ -1,4 +1,4 @@
-package tech.quantit.northstar.domain.account;
+package tech.quantit.northstar.domain.gateway;
 
 import java.util.Collections;
 import java.util.List;
