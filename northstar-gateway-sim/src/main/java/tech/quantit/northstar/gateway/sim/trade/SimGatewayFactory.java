@@ -46,7 +46,7 @@ public class SimGatewayFactory implements GatewayFactory{
 				.setGatewayId(gatewayDescription.getGatewayId())
 				.setGatewayType(GatewayTypeEnum.GTE_MarketData)
 				.build();
-		return new SimMarketGatewayLocal(gwSettings, fastEventEngine);
+		return new SimMarketGatewayLocal(gwSettings, fastEventEngine, registry);
 	}
 	
 	private Gateway getTradeGateway(GatewayDescription gatewayDescription) {
