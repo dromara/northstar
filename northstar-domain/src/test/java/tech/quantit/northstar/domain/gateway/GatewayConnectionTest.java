@@ -1,7 +1,6 @@
-package tech.quantit.northstar.domain;
+package tech.quantit.northstar.domain.gateway;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -9,9 +8,9 @@ import org.junit.jupiter.api.Test;
 import tech.quantit.northstar.common.constant.ConnectionState;
 import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.common.constant.GatewayUsage;
-import tech.quantit.northstar.common.event.InternalEventBus;
 import tech.quantit.northstar.common.model.CtpSettings;
 import tech.quantit.northstar.common.model.GatewayDescription;
+import tech.quantit.northstar.domain.gateway.GatewayConnection;
 
 public class GatewayConnectionTest {
 	
@@ -36,7 +35,7 @@ public class GatewayConnectionTest {
 				.gatewayUsage(GatewayUsage.TRADE)
 				.settings(settings)
 				.build();
-		conn = new TraderGatewayConnection(gd, mock(InternalEventBus.class));
+		conn = new GatewayConnection(gd);
 	}
 	
 

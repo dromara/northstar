@@ -27,7 +27,6 @@ public class NorthstarLoggerFactory {
 		encoder.setPattern("%d - %-5level --- [%10.10t] [%40.40logger{39}] : %m%n");
 	    encoder.setCharset(StandardCharsets.UTF_8);
 	    encoder.setContext(loggerContext);
-	    encoder.setOutputPatternAsHeader(true);
 	    encoder.start();
 	}
 	

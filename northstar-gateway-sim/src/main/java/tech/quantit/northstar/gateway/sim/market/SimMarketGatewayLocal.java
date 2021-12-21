@@ -13,8 +13,10 @@ import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.event.NorthstarEventType;
 import tech.quantit.northstar.gateway.api.MarketGateway;
+import tech.quantit.northstar.gateway.api.domain.GlobalMarketRegistry;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.GatewaySettingField;
+import xyz.redtorch.pb.CoreField.TickField;
 
 @Slf4j
 public class SimMarketGatewayLocal implements MarketGateway{
@@ -36,10 +38,12 @@ public class SimMarketGatewayLocal implements MarketGateway{
 	 */
 	private ConcurrentMap<String, InstrumentHolder> cache = new ConcurrentHashMap<>();
 	
-	public SimMarketGatewayLocal(GatewaySettingField settings, FastEventEngine feEngine) {
+	private GlobalMarketRegistry registry;
+	
+	public SimMarketGatewayLocal(GatewaySettingField settings, FastEventEngine feEngine, GlobalMarketRegistry registry) {
 		this.feEngine = feEngine;
 		this.settings = settings;
-		
+		this.registry = registry;
 	}
 
 	@Override
@@ -76,7 +80,9 @@ public class SimMarketGatewayLocal implements MarketGateway{
 			lastActiveTime = System.currentTimeMillis();
 			try {				
 				for(Entry<String, InstrumentHolder> e: cache.entrySet()) {
-					feEngine.emitEvent(NorthstarEventType.TICK, tickGen.generateNextTick(e.getValue()));
+					TickField tick = tickGen.generateNextTick(e.getValue());
+					feEngine.emitEvent(NorthstarEventType.TICK, tick);
+					registry.dispatch(tick);
 				}
 			} catch (Exception e) {
 				log.error("模拟行情TICK生成异常", e);

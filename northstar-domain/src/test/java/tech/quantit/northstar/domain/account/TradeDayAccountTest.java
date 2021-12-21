@@ -3,6 +3,7 @@ package tech.quantit.northstar.domain.account;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.offset;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -10,16 +11,14 @@ import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
 
-import tech.quantit.northstar.common.event.InternalEventBus;
-import tech.quantit.northstar.common.event.NorthstarEvent;
 import tech.quantit.northstar.common.exception.InsufficientException;
 import tech.quantit.northstar.common.exception.TradeException;
 import tech.quantit.northstar.common.model.OrderRecall;
 import tech.quantit.northstar.common.model.OrderRequest;
 import tech.quantit.northstar.common.model.OrderRequest.TradeOperation;
 import tech.quantit.northstar.domain.gateway.ContractManager;
+import tech.quantit.northstar.gateway.api.TradeGateway;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreEnum.OrderStatusEnum;
 import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
@@ -46,10 +45,10 @@ public class TradeDayAccountTest {
 	
 	@BeforeEach
 	public void prepare() {
-		InternalEventBus eventBus = mock(InternalEventBus.class);
+		TradeGateway gateway = mock(TradeGateway.class);
 		ContractManager contractMgr = mock(ContractManager.class);
 		when(contractMgr.getContract("rb2102@SHFE")).thenReturn(contract);
-		tda = new TradeDayAccount("testGateway", eventBus, contractMgr);
+		tda = new TradeDayAccount("testGateway", gateway, contractMgr);
 	}
 	
 
@@ -141,7 +140,7 @@ public class TradeDayAccountTest {
 				.gatewayId("testGateway")
 				.build();
 		tda.closePosition(orderReq);
-		verify(tda.eventBus, times(2)).post(ArgumentMatchers.any(NorthstarEvent.class));
+		verify(tda.gateway, times(2)).submitOrder(any());
 	}
 	
 	@Test
@@ -167,7 +166,7 @@ public class TradeDayAccountTest {
 				.originOrderId("adfskal")
 				.build();
 		tda.cancelOrder(recall);
-		verify(tda.eventBus).post(ArgumentMatchers.any(NorthstarEvent.class));
+		verify(tda.gateway).cancelOrder(any());
 	}
 	
 	@Test

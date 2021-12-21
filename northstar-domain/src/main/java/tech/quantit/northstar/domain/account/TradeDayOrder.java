@@ -55,8 +55,4 @@ public class TradeDayOrder {
 		return Collections.unmodifiableList(list);
 	}
 	
-	
-	public void dailySettlement() {
-		
-	}
 }

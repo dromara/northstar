@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -14,7 +13,6 @@ import tech.quantit.northstar.common.event.AbstractEventHandler;
 import tech.quantit.northstar.common.event.GenericEventHandler;
 import tech.quantit.northstar.common.event.NorthstarEvent;
 import tech.quantit.northstar.common.event.NorthstarEventType;
-import tech.quantit.northstar.common.event.PluginEventBus;
 import tech.quantit.northstar.common.utils.FieldUtils;
 import xyz.redtorch.pb.CoreEnum.OrderStatusEnum;
 import xyz.redtorch.pb.CoreField.NoticeField;
@@ -22,10 +20,8 @@ import xyz.redtorch.pb.CoreField.OrderField;
 import xyz.redtorch.pb.CoreField.TradeField;
 
 @Component
-public class NotificationDispatcher extends AbstractEventHandler implements InitializingBean, GenericEventHandler{
+public class NotificationDispatcher extends AbstractEventHandler implements GenericEventHandler{
 
-	@Autowired
-	private PluginEventBus peBus;
 	
 	@Autowired
 	private List<MessageSender> senderList;
@@ -54,12 +50,6 @@ public class NotificationDispatcher extends AbstractEventHandler implements Init
 		}
 	};
 	
-	@Override
-	public void afterPropertiesSet() throws Exception {
-		peBus.register(this);
-	}
-
-
 	@Override
 	public boolean canHandle(NorthstarEventType eventType) {
 		return  eventSet.contains(eventType);

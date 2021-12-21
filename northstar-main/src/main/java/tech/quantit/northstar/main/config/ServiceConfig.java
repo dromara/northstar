@@ -8,10 +8,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 
 import tech.quantit.northstar.common.event.FastEventEngine;
-import tech.quantit.northstar.common.event.InternalEventBus;
-import tech.quantit.northstar.domain.GatewayAndConnectionManager;
 import tech.quantit.northstar.domain.account.TradeDayAccount;
 import tech.quantit.northstar.domain.gateway.ContractManager;
+import tech.quantit.northstar.domain.gateway.GatewayAndConnectionManager;
 import tech.quantit.northstar.domain.strategy.ModuleManager;
 import tech.quantit.northstar.domain.strategy.SandboxModuleManager;
 import tech.quantit.northstar.gateway.api.domain.GlobalMarketRegistry;
@@ -34,7 +33,6 @@ import tech.quantit.northstar.main.service.SMSTradeService;
 	"strategyDispatcher",
 	"accountEventHandler",
 	"connectionEventHandler",
-	"tradeEventHandler",
 	"ctpGatewayFactory",
 	"simGatewayFactory",
 	"ctpSimGatewayFactory"
@@ -49,8 +47,8 @@ public class ServiceConfig {
 	
 	@Bean
 	public GatewayService gatewayService(GatewayAndConnectionManager gatewayConnMgr, GatewayRepository gatewayRepo,
-			MarketDataRepository mdRepo, ModuleRepository moduleRepo, InternalEventBus eventBus, SimMarket simMarket, GlobalMarketRegistry registry) {
-		return new GatewayService(gatewayConnMgr, gatewayRepo, mdRepo, moduleRepo, eventBus, simMarket, registry);
+			MarketDataRepository mdRepo, ModuleRepository moduleRepo, SimMarket simMarket, GlobalMarketRegistry registry) {
+		return new GatewayService(gatewayConnMgr, gatewayRepo, mdRepo, moduleRepo, simMarket, registry);
 	}
 	
 	@Bean

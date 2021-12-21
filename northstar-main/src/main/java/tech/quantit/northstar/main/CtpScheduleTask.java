@@ -8,8 +8,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import lombok.extern.slf4j.Slf4j;
-import tech.quantit.northstar.domain.GatewayAndConnectionManager;
-import tech.quantit.northstar.domain.GatewayConnection;
+import tech.quantit.northstar.domain.gateway.GatewayAndConnectionManager;
+import tech.quantit.northstar.domain.gateway.GatewayConnection;
 import tech.quantit.northstar.gateway.api.Gateway;
 import tech.quantit.northstar.main.utils.HolidayManager;
 

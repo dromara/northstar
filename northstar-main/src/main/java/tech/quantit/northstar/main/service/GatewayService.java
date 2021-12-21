@@ -15,15 +15,12 @@ import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.common.constant.GatewayUsage;
-import tech.quantit.northstar.common.event.InternalEventBus;
 import tech.quantit.northstar.common.exception.NoSuchElementException;
 import tech.quantit.northstar.common.model.CtpSettings;
 import tech.quantit.northstar.common.model.GatewayDescription;
 import tech.quantit.northstar.common.model.SimSettings;
-import tech.quantit.northstar.domain.GatewayAndConnectionManager;
-import tech.quantit.northstar.domain.GatewayConnection;
-import tech.quantit.northstar.domain.MarketGatewayConnection;
-import tech.quantit.northstar.domain.TraderGatewayConnection;
+import tech.quantit.northstar.domain.gateway.GatewayAndConnectionManager;
+import tech.quantit.northstar.domain.gateway.GatewayConnection;
 import tech.quantit.northstar.gateway.api.Gateway;
 import tech.quantit.northstar.gateway.api.GatewayFactory;
 import tech.quantit.northstar.gateway.api.MarketGateway;
@@ -56,8 +53,6 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 	
 	private MarketDataRepository mdRepo;
 	
-	private InternalEventBus eventBus;
-	
 	private SimMarket simMarket;
 	
 	private ApplicationContext ctx;
@@ -67,12 +62,11 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 	private GlobalMarketRegistry registry;
 	
 	public GatewayService(GatewayAndConnectionManager gatewayConnMgr, GatewayRepository gatewayRepo, MarketDataRepository mdRepo,
-			ModuleRepository moduleRepo, InternalEventBus eventBus, SimMarket simMarket, GlobalMarketRegistry registry) {
+			ModuleRepository moduleRepo, SimMarket simMarket, GlobalMarketRegistry registry) {
 		this.gatewayConnMgr = gatewayConnMgr;
 		this.gatewayRepo = gatewayRepo;
 		this.mdRepo = mdRepo;
 		this.moduleRepo = moduleRepo;
-		this.eventBus = eventBus;
 		this.simMarket = simMarket;
 		this.registry = registry;
 	}
@@ -100,9 +94,7 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 	
 	private boolean doCreateGateway(GatewayDescription gatewayDescription) {
 		Gateway gateway = null;
-		GatewayConnection conn = gatewayDescription.getGatewayUsage() == GatewayUsage.MARKET_DATA
-				? new MarketGatewayConnection(gatewayDescription, eventBus)
-				: new TraderGatewayConnection(gatewayDescription, eventBus);
+		GatewayConnection conn = new GatewayConnection(gatewayDescription);
 		GatewayFactory factory = null;
 		if(gatewayDescription.getGatewayType() == GatewayType.CTP) {
 			factory = ctx.getBean(CtpGatewayFactory.class);

@@ -7,15 +7,14 @@ import org.springframework.context.annotation.Configuration;
 
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.event.InternalEventBus;
-import tech.quantit.northstar.domain.GatewayAndConnectionManager;
 import tech.quantit.northstar.domain.account.TradeDayAccount;
 import tech.quantit.northstar.domain.gateway.ContractManager;
+import tech.quantit.northstar.domain.gateway.GatewayAndConnectionManager;
 import tech.quantit.northstar.gateway.sim.trade.SimMarket;
 import tech.quantit.northstar.main.factories.TradeDayAccountFactory;
 import tech.quantit.northstar.main.handler.internal.AccountHandler;
 import tech.quantit.northstar.main.handler.internal.ConnectionHandler;
 import tech.quantit.northstar.main.handler.internal.SimMarketHandler;
-import tech.quantit.northstar.main.handler.internal.TradeHandler;
 
 @Slf4j
 @Configuration
@@ -26,8 +25,8 @@ public class InternalEventHandlerConfig {
 	///////////////////
 	@Bean
 	public AccountHandler accountEventHandler(InternalEventBus eventBus, ContractManager contractMgr,
-			ConcurrentMap<String, TradeDayAccount> accountMap) {
-		AccountHandler handler = new AccountHandler(accountMap, new TradeDayAccountFactory(eventBus, contractMgr));
+			ConcurrentMap<String, TradeDayAccount> accountMap, GatewayAndConnectionManager gatewayConnMgr) {
+		AccountHandler handler = new AccountHandler(accountMap, new TradeDayAccountFactory(gatewayConnMgr, contractMgr));
 		log.debug("注册：AccountHandler");
 		eventBus.register(handler);
 		return handler;
@@ -41,15 +40,6 @@ public class InternalEventHandlerConfig {
 		eventBus.register(handler);
 		return handler;
 	}
-	
-	@Bean
-	public TradeHandler tradeEventHandler(InternalEventBus eventBus, GatewayAndConnectionManager gatewayConnMgr) {
-		TradeHandler handler = new TradeHandler(gatewayConnMgr);
-		log.debug("注册：TradeHandler");
-		eventBus.register(handler);
-		return handler;
-	}
-	
 	
 	@Bean
 	public SimMarketHandler simMarketHandler(InternalEventBus eventBus, SimMarket market) {

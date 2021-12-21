@@ -57,29 +57,42 @@ public class GlobalMarketRegistry {
 	}
 	
 	public synchronized void register(NormalContract contract) {
-		contractMap.put(contract.unifiedSymbol(), contract);
 		onContractSave.accept(contract);
-		// 设置BAR回调
-		BarGenerator barGen = contract.barGenerator();
-		barGen.setOnBarCallback(bar -> feEngine.emitEvent(NorthstarEventType.BAR, bar));
-		barGenMap.put(contract.unifiedSymbol(), barGen);
+		if(subMgrMap.containsKey(contract.gatewayType()) && !subMgrMap.get(contract.gatewayType()).subscribable(contract)) {
+			log.trace("订阅管理器跳过订阅 [{} -> {}] 合约", contract.gatewayType(), contract.unifiedSymbol());
+			return;
+		}
 		
+		contractMap.put(contract.unifiedSymbol(), contract);
+		makeBarGen(contract);
 		if(contract instanceof IndexContract idxContract) {
-			// 设置TICK回调
-			IndexTicker ticker = idxContract.indexTicker();
-			ticker.setOnTickCallback(tick -> {
-				feEngine.emitEvent(NorthstarEventType.TICK, tick);
-				dispatch(tick);
-			});
-			ticker.dependencySymbols().forEach(unifiedSymbol -> idxTickerMap.put(contract.unifiedSymbol(), ticker));
-			feEngine.emitEvent(NorthstarEventType.CONTRACT,  idxContract.contractField());
+			log.debug("注册指数合约：{}", contract.unifiedSymbol());
+			makeTicker(idxContract);
 			return;		// 指数合约不需要订阅，因此无需继续后面步骤
 		}
 		
 		// 合约订阅
 		if(gatewayMap.containsKey(contract.gatewayType())) {
-			doFilterAndSubscribe(contract);
+			log.debug("注册普通合约：{}", contract.unifiedSymbol());
+			doSubscribe(contract);
 		}
+	}
+	
+	// 设置BAR回调
+	private void makeBarGen(NormalContract contract) {
+		BarGenerator barGen = contract.barGenerator();
+		barGen.setOnBarCallback(bar -> feEngine.emitEvent(NorthstarEventType.BAR, bar));
+		barGenMap.put(contract.unifiedSymbol(), barGen);
+	}
+	
+	// 设置TICK回调
+	private void makeTicker(IndexContract idxContract) {
+		IndexTicker ticker = idxContract.indexTicker();
+		ticker.setOnTickCallback(tick -> {
+			feEngine.emitEvent(NorthstarEventType.TICK, tick);
+			dispatch(tick);
+		});
+		ticker.dependencySymbols().forEach(unifiedSymbol -> idxTickerMap.put(idxContract.unifiedSymbol(), ticker));
 	}
 	
 	public synchronized void register(SubscriptionManager subscriptionManager) {
@@ -97,16 +110,11 @@ public class GlobalMarketRegistry {
 		gatewayMap.remove(mktGateway.gatewayType());
 	}
 	
-	private void doFilterAndSubscribe(NormalContract contract) {
-		if(subMgrMap.containsKey(contract.gatewayType()) && !subMgrMap.get(contract.gatewayType()).subscribable(contract)) {
-			log.trace("订阅管理器跳过订阅 [{} -> {}] 合约", contract.gatewayType(), contract.unifiedSymbol());
-			return;
-		}
+	private void doSubscribe(NormalContract contract) {
 		MarketGateway gateway = gatewayMap.get(contract.gatewayType());
 		ContractField contractField = contract.contractField();
 		gateway.subscribe(contractField);
 		onContractSubsciption.accept(contractField);
-		feEngine.emitEvent(NorthstarEventType.CONTRACT, contractField);
 	}
 	
 	public synchronized void autoSubscribeContracts(GatewayType gatewayType) {
@@ -117,7 +125,7 @@ public class GlobalMarketRegistry {
 		if(contractMap.size() > 0) {
 			contractMap.values().stream()
 				.filter(c -> c.gatewayType() == mktGateway.gatewayType() && !(c instanceof IndexContract))
-				.forEach(this::doFilterAndSubscribe);
+				.forEach(this::doSubscribe);
 		}
 	}
 	
