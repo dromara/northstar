@@ -33,7 +33,6 @@ spring:
     username: ${email:somemail@126.com}
     password: UQNXPDZJIYQTRFRW
     default-encoding: UTF-8
-    subscribed: ${sub_email:somemail@126.com}
     port: 465
     protocol: smtp
     properties:
