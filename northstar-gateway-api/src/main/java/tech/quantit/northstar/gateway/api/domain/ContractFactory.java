@@ -10,6 +10,7 @@ import java.util.regex.Pattern;
 
 import tech.quantit.northstar.common.constant.Constants;
 import tech.quantit.northstar.common.constant.GatewayType;
+import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
 
 /**
@@ -23,7 +24,9 @@ public class ContractFactory {
 	
 	private GatewayType gatewayType;
 	
-	private final Pattern symbolPtn = Pattern.compile("([A-z]+)\\d{3,4}(@\\w+@\\w+)");
+	private static final Pattern symbolPtn = Pattern.compile("([A-z]+)\\d{3,4}(@\\w+@\\w+)");
+	
+	private static final ProductClassEnum indexProductClass = ProductClassEnum.FUTURES;
 	
 	public ContractFactory(GatewayType gatewayType, List<ContractField> contractList) {
 		this.contractList = contractList;
@@ -37,6 +40,10 @@ public class ContractFactory {
 	public List<IndexContract> makeIndexContract(){
 		Map<String, Set<ContractField>> idxSrcMap = new HashMap<>();
 		for(ContractField cf : contractList) {
+			// 暂时只对期货合约生成指数
+			if(cf.getProductClass() != indexProductClass) {
+				continue;
+			}
 			String unifiedSymbol = cf.getUnifiedSymbol();
 			Matcher m = symbolPtn.matcher(unifiedSymbol);
 			if(m.find()) {
