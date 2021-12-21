@@ -39,7 +39,7 @@ public class NorthstarLoggerFactory {
 			rollingFileAppender.setContext(loggerContext);
 			rollingFileAppender.setAppend(true);
 			rollingFileAppender.setName(moduleName);
-			rollingFileAppender.setFile(logPath + File.separator +  moduleName + File.separator + moduleName);
+			rollingFileAppender.setFile(logPath + File.separator +  moduleName + File.separator + moduleName + ".log");
 			
 			TimeBasedRollingPolicy<ILoggingEvent> rollingPolicy = new TimeBasedRollingPolicy<>();
 			rollingPolicy.setFileNamePattern(logPath + File.separator +  moduleName + File.separator + moduleName + "_%d{yyyy-MM-dd}.log");
