@@ -20,6 +20,7 @@ northstar:
 
 logging:  level: 
     root: info
+    '[tech.quantit.northstar]': debug
     '[tech.quantit.northstar.gateway]': debug
     '[tech.quantit.northstar.domain]': debug
     '[tech.quantit.northstar.strategy]': debug
@@ -33,7 +34,6 @@ spring:
     username: ${email:somemail@126.com}
     password: UQNXPDZJIYQTRFRW
     default-encoding: UTF-8
-    subscribed: ${sub_email:somemail@126.com}
     port: 465
     protocol: smtp
     properties:

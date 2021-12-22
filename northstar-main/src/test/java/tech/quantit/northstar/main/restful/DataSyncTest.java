@@ -20,6 +20,7 @@ import com.alibaba.fastjson.JSON;
 import com.corundumstudio.socketio.SocketIOServer;
 
 import common.TestMongoUtils;
+import tech.quantit.northstar.common.MessageHandler;
 import tech.quantit.northstar.common.constant.ReturnCode;
 import tech.quantit.northstar.common.model.NsUser;
 import tech.quantit.northstar.main.NorthstarApplication;
@@ -39,6 +40,9 @@ public class DataSyncTest {
 	
 	@MockBean
 	private SocketIOServer socketServer;
+	
+	@MockBean
+	private MessageHandler msgHandler;
 	
 	@BeforeEach
 	public void setUp() throws Exception {
