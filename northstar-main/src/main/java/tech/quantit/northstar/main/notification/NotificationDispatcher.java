@@ -12,7 +12,7 @@ import tech.quantit.northstar.common.event.NorthstarEventType;
 
 public class NotificationDispatcher extends AbstractEventHandler implements GenericEventHandler{
 
-	@Autowired
+	@Autowired(required = false)
 	private List<MessageHandler> handlerList;
 	
 	@Override
@@ -22,6 +22,8 @@ public class NotificationDispatcher extends AbstractEventHandler implements Gene
 	
 	@Override
 	protected void doHandle(NorthstarEvent e) {
+		if(handlerList == null) 
+			return;
 		handlerList.stream().forEach(sender -> sender.onEvent(e));
 	}
 	
