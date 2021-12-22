@@ -27,6 +27,8 @@ public class MinBarDataPO {
 	
 	private long updateTime;
 	
+	private String tradingDay;
+	
 	private byte[] barData;
 	
 	private List<byte[]> ticksData;

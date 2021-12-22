@@ -20,6 +20,7 @@ northstar:
 
 logging:  level: 
     root: info
+    '[tech.quantit.northstar]': debug
     '[tech.quantit.northstar.gateway]': debug
     '[tech.quantit.northstar.domain]': debug
     '[tech.quantit.northstar.strategy]': debug

@@ -62,6 +62,7 @@ public class MarketBarDataPersistenceHandler {
 					.barData(bar.toByteArray())
 					.ticksData(minTicks.stream().map(TickField::toByteArray).toList())
 					.updateTime(barTime + 60000)
+					.tradingDay(bar.getTradingDay())
 					.build()));
 	}
 	
