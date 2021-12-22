@@ -11,11 +11,12 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Component;
 
 import lombok.extern.slf4j.Slf4j;
+import tech.quantit.northstar.common.IMailSender;
 import tech.quantit.northstar.common.model.Message;
 
 @Slf4j
 @Component
-public class MailSender {
+public class NorthstarMailSender implements IMailSender{
 	
 	@Autowired
 	private JavaMailSender sender; 
@@ -23,6 +24,7 @@ public class MailSender {
 	@Value("${spring.mail.username}")
 	private String senderMail;
 	
+	@Override
 	public void send(Message message) {
 		if(StringUtils.isEmpty(senderMail)) {
 			throw new IllegalStateException("未设置发件人邮箱");

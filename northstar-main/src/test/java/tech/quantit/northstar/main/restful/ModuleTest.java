@@ -25,6 +25,7 @@ import com.corundumstudio.socketio.SocketIOServer;
 
 import common.TestGatewayFactory;
 import common.TestMongoUtils;
+import tech.quantit.northstar.common.MessageHandler;
 import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.common.constant.ReturnCode;
 import tech.quantit.northstar.common.model.CtpSettings;
@@ -52,6 +53,9 @@ public class ModuleTest {
 	
 	@MockBean
 	private SocketIOServer socketServer;
+	
+	@MockBean
+	private MessageHandler msgHandler;
 	
 	@BeforeEach
 	public void setUp() throws Exception {

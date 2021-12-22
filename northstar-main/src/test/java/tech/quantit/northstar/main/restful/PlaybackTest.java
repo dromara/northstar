@@ -27,6 +27,7 @@ import com.corundumstudio.socketio.SocketIOServer;
 
 import common.TestGatewayFactory;
 import common.TestMongoUtils;
+import tech.quantit.northstar.common.MessageHandler;
 import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.common.constant.PlaybackPrecision;
 import tech.quantit.northstar.common.constant.ReturnCode;
@@ -71,6 +72,9 @@ public class PlaybackTest {
 	
 	@MockBean
 	private ContractManager contractMgr;
+	
+	@MockBean
+	private MessageHandler msgHandler;
 	
 	TestFieldFactory factory = new TestFieldFactory("test");
 	
