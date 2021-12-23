@@ -80,11 +80,9 @@ Jun 27 17:30:14 ai-trader-hw mongod[5932]: child process started successfully, p
 Jun 27 17:30:14 ai-trader-hw systemd[1]: Started MongoDB Database Server.
 ```
 
-下载项目
-```
-cd ~
-git clone https://gitee.com/dromara/northstar.git
-```
+下载最新版项目，然后解压。**注意：把解压后的文件夹重命名为northstar**
+[https://gitee.com/dromara/northstar/releases](https://gitee.com/dromara/northstar/releases)
+
 
 修改northstar/northstar-main/src/main/resources/application.yml配置文件中的邮箱代理配置  
 (若不使用邮件通知功能，可以忽略此步)
