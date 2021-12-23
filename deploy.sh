@@ -6,4 +6,4 @@ cd ~/northstar
 \mv -f northstar-main/target/northstar-main*.jar ~/northstar.jar
 
 cd ~
-nohup java -Xlog:gc+heap=debug:gc.log -Xmn2g -Xmx2g  -jar northstar.jar >ns.log &
+nohup java -cp ./ -Xlog:gc+heap=debug:gc.log -Xmn1g -Xmx1g  -jar northstar.jar >ns.log &
