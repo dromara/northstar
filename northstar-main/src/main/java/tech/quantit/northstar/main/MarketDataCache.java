@@ -27,6 +27,8 @@ public class MarketDataCache {
 		while(!cacheQ.isEmpty()) {
 			list.add(cacheQ.poll());
 		}
-		mdRepo.insertMany(list);
+		if(!list.isEmpty()) {		
+			mdRepo.insertMany(list);
+		}
 	}
 }
