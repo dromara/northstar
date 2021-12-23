@@ -23,6 +23,9 @@ public class CtpScheduleTask {
 	@Autowired
 	private HolidayManager holidayMgr;
 	
+	@Autowired
+	private MarketDataCache mdCache;
+	
 	@Value("${spring.profiles.active}")
 	private String profile;
 
@@ -54,6 +57,19 @@ public class CtpScheduleTask {
 			gateway.connect();
 			log.info("网关[{}]，自动连线", conn.getGwDescription().getGatewayId());
 		}
+	}
+	
+	/**
+	 * 开盘时间定时持久化
+	 */
+	@Scheduled(cron="10 0/1 0-2,9-15,21-23 ? * 1-5")
+	public void timelySaveBar() {
+		if(holidayMgr.isHoliday(LocalDateTime.now())) {
+			return;
+		}
+		long startTime = System.currentTimeMillis();
+		mdCache.writeDisk();
+		log.info("交易时间定时持久化Bar数据任务，用时{}毫秒", System.currentTimeMillis() - startTime);
 	}
 	
 	@Scheduled(cron="0 1 15 ? * 1-5")
