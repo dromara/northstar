@@ -34,6 +34,7 @@ import tech.quantit.northstar.gateway.api.domain.SubscriptionManager;
 import tech.quantit.northstar.gateway.sim.persistence.SimAccountRepository;
 import tech.quantit.northstar.gateway.sim.trade.SimGatewayFactory;
 import tech.quantit.northstar.gateway.sim.trade.SimMarket;
+import tech.quantit.northstar.main.MarketDataCache;
 import tech.quantit.northstar.main.interceptor.AuthorizationInterceptor;
 import tech.quantit.northstar.main.persistence.MarketDataRepository;
 import tech.quantit.northstar.main.persistence.MongoClientAdapter;
@@ -144,7 +145,8 @@ public class AppConfig implements WebMvcConfigurer {
 	}
 	
 	@Bean
-	public GlobalMarketRegistry marketGlobalRegistry(FastEventEngine fastEventEngine, MarketDataRepository mdRepo, List<SubscriptionManager> subMgrs) {
+	public GlobalMarketRegistry marketGlobalRegistry(FastEventEngine fastEventEngine, MarketDataRepository mdRepo, List<SubscriptionManager> subMgrs,
+			MarketDataCache mdCache) {
 		GlobalMarketRegistry registry = new GlobalMarketRegistry(fastEventEngine,
 				contract -> mdRepo.saveContract(
 						new ContractPO(
@@ -152,7 +154,7 @@ public class AppConfig implements WebMvcConfigurer {
 							contract.contractField().toByteArray(), 
 							contract.gatewayType(),
 							System.currentTimeMillis()
-							)));
+							)), mdCache);
 		for(SubscriptionManager subMgr : subMgrs) {			
 			registry.register(subMgr);
 		}

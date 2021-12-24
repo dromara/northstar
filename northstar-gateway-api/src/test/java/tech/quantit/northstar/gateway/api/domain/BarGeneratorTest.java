@@ -48,7 +48,7 @@ class BarGeneratorTest {
 	public void testOpeningScene() {
 		AtomicInteger cnt = new AtomicInteger();
 		List<String> timeList = List.of("2100");
-		BarGenerator bg = new BarGenerator(contract, (bar) -> {
+		BarGenerator bg = new BarGenerator(contract, (bar, ticks) -> {
 			assertThat(bar.getActionTime().substring(0, 4)).isEqualTo(timeList.get(cnt.getAndIncrement()));
 		});
 		LocalDateTime ldt = LocalDateTime.of(2021, 6, 18, 20, 59, 0, 0);
@@ -64,7 +64,7 @@ class BarGeneratorTest {
 	public void testNormalScene() {
 		AtomicInteger cnt = new AtomicInteger();
 		List<String> timeList = List.of("2100", "2101", "2102");
-		BarGenerator bg = new BarGenerator(contract, (bar) -> {
+		BarGenerator bg = new BarGenerator(contract, (bar, ticks) -> {
 			assertThat(bar.getActionTime().substring(0, 4)).isEqualTo(timeList.get(cnt.getAndIncrement()));
 		});
 		LocalDateTime ldt = LocalDateTime.of(2021, 6, 18, 20, 59, 0, 0);
@@ -80,7 +80,7 @@ class BarGeneratorTest {
 	public void testCrossSectionScene0() {
 		AtomicInteger cnt = new AtomicInteger();
 		List<String> timeList = List.of("2255", "2256", "2257", "2258", "2259", "0900", "0901");
-		BarGenerator bg = new BarGenerator(contract, (bar) -> {
+		BarGenerator bg = new BarGenerator(contract, (bar, ticks) -> {
 			assertThat(bar.getActionTime().substring(0, 4)).isEqualTo(timeList.get(cnt.getAndIncrement()));
 		});
 		LocalDateTime ldt = LocalDateTime.of(2021, 6, 18, 22, 55, 0, 0);
@@ -100,7 +100,7 @@ class BarGeneratorTest {
 	public void testCrossSectionScene1() {
 		AtomicInteger cnt = new AtomicInteger();
 		List<String> timeList = List.of("2255", "2256", "2257", "2258", "2259", "0900", "0901");
-		BarGenerator bg = new BarGenerator(contract, (bar) -> {
+		BarGenerator bg = new BarGenerator(contract, (bar, ticks) -> {
 			assertThat(bar.getActionTime().substring(0, 4)).isEqualTo(timeList.get(cnt.getAndIncrement()));
 		});
 		LocalDateTime ldt = LocalDateTime.of(2021, 6, 18, 22, 55, 0, 0);
@@ -120,7 +120,7 @@ class BarGeneratorTest {
 	public void testCrossSectionScene2() {
 		AtomicInteger cnt = new AtomicInteger();
 		List<String> timeList = List.of("1128", "1129", "1330", "1331", "1332");
-		BarGenerator bg = new BarGenerator(contract, (bar) -> {
+		BarGenerator bg = new BarGenerator(contract, (bar, ticks) -> {
 			assertThat(bar.getActionTime().substring(0, 4)).isEqualTo(timeList.get(cnt.getAndIncrement()));
 		});
 		LocalDateTime ldt = LocalDateTime.of(2021, 6, 19, 11, 28, 0, 0);
@@ -140,7 +140,7 @@ class BarGeneratorTest {
 	public void testCrossSectionScene3() {
 		AtomicInteger cnt = new AtomicInteger();
 		List<String> timeList = List.of("1128", "1129", "1330", "1331", "1332");
-		BarGenerator bg = new BarGenerator(contract, (bar) -> {
+		BarGenerator bg = new BarGenerator(contract, (bar, ticks) -> {
 			assertThat(bar.getActionTime().substring(0, 4)).isEqualTo(timeList.get(cnt.getAndIncrement()));
 		});
 		LocalDateTime ldt = LocalDateTime.of(2021, 6, 19, 11, 28, 0, 0);
@@ -160,7 +160,7 @@ class BarGeneratorTest {
 	public void testClosingScene() {
 		AtomicInteger cnt = new AtomicInteger();
 		List<String> timeList = List.of("1455", "1456", "1457", "1458", "1459");
-		BarGenerator bg = new BarGenerator(contract, (bar) -> {
+		BarGenerator bg = new BarGenerator(contract, (bar, ticks) -> {
 			assertThat(bar.getActionTime().substring(0, 4)).isEqualTo(timeList.get(cnt.getAndIncrement()));
 		});
 		LocalDateTime ldt = LocalDateTime.of(2021, 6, 18, 14, 55, 0, 0);
@@ -178,7 +178,7 @@ class BarGeneratorTest {
 		List<String> timeList = List.of("1455", "1456", "1457", "1458", "1459", "1500",
 				"1501", "1502", "1503", "1504", "1505", "1506", "1507", "1508",
 				"1509", "1510", "1511", "1512", "1513", "1514");
-		BarGenerator bg = new BarGenerator(contract, (bar) -> {
+		BarGenerator bg = new BarGenerator(contract, (bar, ticks) -> {
 			assertThat(bar.getActionTime().substring(0, 4)).isEqualTo(timeList.get(cnt.getAndIncrement()));
 		});
 		LocalDateTime ldt = LocalDateTime.of(2021, 6, 18, 14, 55, 0, 0);

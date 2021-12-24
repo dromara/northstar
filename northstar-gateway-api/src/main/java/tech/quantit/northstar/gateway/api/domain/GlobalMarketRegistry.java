@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.event.NorthstarEventType;
+import tech.quantit.northstar.gateway.api.MarketDataBuffer;
 import tech.quantit.northstar.gateway.api.MarketGateway;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.TickField;
@@ -49,11 +50,14 @@ public class GlobalMarketRegistry {
 	@Setter
 	protected Consumer<ContractField> onContractSubsciption;
 
-	protected Consumer<NormalContract> onContractSave; 
+	protected Consumer<NormalContract> onContractSave;
 	
-	public GlobalMarketRegistry(FastEventEngine feEngine, Consumer<NormalContract> onContractSave) {
+	protected MarketDataBuffer buffer;
+	
+	public GlobalMarketRegistry(FastEventEngine feEngine, Consumer<NormalContract> onContractSave, MarketDataBuffer buffer) {
 		this.feEngine = feEngine;
 		this.onContractSave = onContractSave;
+		this.buffer = buffer;
 	}
 	
 	public synchronized void register(NormalContract contract) {
@@ -81,7 +85,10 @@ public class GlobalMarketRegistry {
 	// 设置BAR回调
 	private void makeBarGen(NormalContract contract) {
 		BarGenerator barGen = contract.barGenerator();
-		barGen.setOnBarCallback(bar -> feEngine.emitEvent(NorthstarEventType.BAR, bar));
+		barGen.setOnBarCallback((bar, ticks) -> {
+			feEngine.emitEvent(NorthstarEventType.BAR, bar);
+			buffer.save(bar, ticks);
+		});
 		barGenMap.put(contract.unifiedSymbol(), barGen);
 	}
 	
