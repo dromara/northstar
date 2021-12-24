@@ -3,7 +3,9 @@ package tech.quantit.northstar.gateway.api.domain;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.function.Consumer;
+import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.function.BiConsumer;
 
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.constant.DateTimeConstant;
@@ -27,11 +29,13 @@ public class BarGenerator {
 
 	private NormalContract contract;
 	
-	private Consumer<BarField> barCallBack;
+	private BiConsumer<BarField, List<TickField>> barCallBack;
 	
 	protected int tickCount;
+	
+	private ConcurrentLinkedQueue<TickField> barTicks = new ConcurrentLinkedQueue<>();
 
-	public BarGenerator(NormalContract contract, Consumer<BarField> barCallBack) {
+	public BarGenerator(NormalContract contract, BiConsumer<BarField, List<TickField>> barCallBack) {
 		this.barCallBack = barCallBack;
 		this.contract = contract;
 		this.barBuilder = BarField.newBuilder()
@@ -66,7 +70,9 @@ public class BarGenerator {
 				offset = 60000;	// 开盘前一分钟的TICK是盘前数据，要合并到第一个分钟K线
 			}
 			if(tickCount > 0) {
-				barCallBack.accept(barBuilder.build());
+				List<TickField> ticksList = barTicks.stream().toList();
+				barTicks.clear();
+				barCallBack.accept(barBuilder.build(), ticksList);
 				tickCount = 0;
 			}
 			long barActionTime = tick.getActionTimestamp() - tick.getActionTimestamp() % 60000L + offset;
@@ -89,6 +95,7 @@ public class BarGenerator {
 		}
 		
 		tickCount++;
+		barTicks.offer(tick);
 		barBuilder.setHighPrice(Math.max(tick.getLastPrice(), barBuilder.getHighPrice()));
 		barBuilder.setLowPrice(Math.min(tick.getLastPrice(), barBuilder.getLowPrice()));
 		barBuilder.setClosePrice(tick.getLastPrice());
@@ -102,12 +109,14 @@ public class BarGenerator {
 		barBuilder.setOpenInterestDelta(tick.getOpenInterestDelta() + barBuilder.getOpenInterestDelta());
 
 		if(tick.getStatus() == TickType.CLOSING_TICK.getCode()) {
-			barCallBack.accept(barBuilder.build());
+			List<TickField> ticksList = barTicks.stream().toList();
+			barTicks.clear();
+			barCallBack.accept(barBuilder.build(), ticksList);
 			tickCount = 0;
 		}
 	}
 	
-	public void setOnBarCallback(Consumer<BarField> callback) {
+	public void setOnBarCallback(BiConsumer<BarField, List<TickField>> callback) {
 		barCallBack = callback;
 	}
 
