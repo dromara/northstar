@@ -10,6 +10,8 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Component;
 
+import com.alibaba.fastjson.JSON;
+
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.IMailSender;
 import tech.quantit.northstar.common.model.Message;
@@ -41,7 +43,7 @@ public class NorthstarMailSender implements IMailSender{
 		try {			
 			sender.send(mail);
 		} catch(Exception e) {
-			log.warn("邮件发送异常：{} -> {}", message.getTitle(), message.getContent());
+			log.warn("邮件发送异常：{} -> {}: {}", JSON.toJSONString(message.getReceivers()), message.getTitle(), message.getContent());
 		}
 	}
 
