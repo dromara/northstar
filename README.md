@@ -120,12 +120,23 @@ source ~/.bashrc
 ```
 
 部署程序（每次代码更新后运行）
-注意：deploy.sh脚本中包括了JVM的启动参数，假定服务器配置是2核4G，如有不同应该按实际情况修改
 ```
 cd ~/northstar
 bash deploy.sh
 ```
 
+外部插件包部署(假设已经下载好)
+```
+cd ~/northstar-external
+bash deploy.sh
+```
+
+然后回到northstar目录启动程序
+```
+cd ~/northstar
+bash startup.sh
+```
+注意：startup.sh脚本中包括了JVM的启动参数，假定服务器配置是2核4G，如有不同应该按实际情况修改
 
 查询日志
 ```
