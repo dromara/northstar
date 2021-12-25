@@ -25,6 +25,7 @@ import com.mongodb.client.MongoClient;
 import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.domain.account.TradeDayAccount;
+import tech.quantit.northstar.domain.external.MessageHandlerManager;
 import tech.quantit.northstar.domain.gateway.ContractManager;
 import tech.quantit.northstar.domain.gateway.GatewayAndConnectionManager;
 import tech.quantit.northstar.gateway.api.GatewayFactory;
@@ -180,5 +181,10 @@ public class AppConfig implements WebMvcConfigurer {
 	@Bean 
 	public MongoClientAdapter mongoClientAdapter(MongoClient mongoClient) {
 		return new MongoClientAdapter(mongoClient);
+	}
+	
+	@Bean
+	public MessageHandlerManager messageHandlerManager() {
+		return new MessageHandlerManager();
 	}
 }

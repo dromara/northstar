@@ -1,10 +1,6 @@
 package tech.quantit.northstar.main.notification;
 
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-
-import tech.quantit.northstar.common.MessageHandler;
+import tech.quantit.northstar.common.IMessageHandlerManager;
 import tech.quantit.northstar.common.event.AbstractEventHandler;
 import tech.quantit.northstar.common.event.GenericEventHandler;
 import tech.quantit.northstar.common.event.NorthstarEvent;
@@ -12,8 +8,11 @@ import tech.quantit.northstar.common.event.NorthstarEventType;
 
 public class NotificationDispatcher extends AbstractEventHandler implements GenericEventHandler{
 
-	@Autowired(required = false)
-	private List<MessageHandler> handlerList;
+	private IMessageHandlerManager msgHandlerMgr;
+	
+	public NotificationDispatcher(IMessageHandlerManager messageHandlerManager) {
+		msgHandlerMgr = messageHandlerManager;
+	}
 	
 	@Override
 	public boolean canHandle(NorthstarEventType eventType) {
@@ -22,9 +21,7 @@ public class NotificationDispatcher extends AbstractEventHandler implements Gene
 	
 	@Override
 	protected void doHandle(NorthstarEvent e) {
-		if(handlerList == null) 
-			return;
-		handlerList.stream().forEach(sender -> sender.onEvent(e));
+		msgHandlerMgr.getHandlers().stream().forEach(sender -> sender.onEvent(e));
 	}
 	
 }

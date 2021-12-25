@@ -16,6 +16,7 @@ import tech.quantit.northstar.domain.strategy.SandboxModuleManager;
 import tech.quantit.northstar.gateway.api.domain.GlobalMarketRegistry;
 import tech.quantit.northstar.gateway.sim.persistence.SimAccountRepository;
 import tech.quantit.northstar.gateway.sim.trade.SimMarket;
+import tech.quantit.northstar.main.ExternalJarListener;
 import tech.quantit.northstar.main.handler.broadcast.SocketIOMessageEngine;
 import tech.quantit.northstar.main.persistence.GatewayRepository;
 import tech.quantit.northstar.main.persistence.MarketDataRepository;
@@ -58,9 +59,9 @@ public class ServiceConfig {
 	}
 	
 	@Bean
-	public ModuleService moduleService(ApplicationContext ctx, ModuleRepository moduleRepo, MarketDataRepository mdRepo,
+	public ModuleService moduleService(ApplicationContext ctx, ModuleRepository moduleRepo, MarketDataRepository mdRepo, ExternalJarListener extJarListener,
 			ModuleManager mdlMgr, GatewayAndConnectionManager gatewayConnMgr, ContractManager contractMgr) {
-		return new ModuleService(ctx, moduleRepo, mdRepo, mdlMgr, gatewayConnMgr, contractMgr);
+		return new ModuleService(ctx, moduleRepo, mdRepo, extJarListener, mdlMgr, gatewayConnMgr, contractMgr);
 	}
 	
 	@Bean

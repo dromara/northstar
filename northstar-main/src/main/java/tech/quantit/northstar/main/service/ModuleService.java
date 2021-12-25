@@ -25,6 +25,7 @@ import tech.quantit.northstar.domain.strategy.ModuleManager;
 import tech.quantit.northstar.domain.strategy.ModuleStatus;
 import tech.quantit.northstar.domain.strategy.StrategyModule;
 import tech.quantit.northstar.gateway.api.TradeGateway;
+import tech.quantit.northstar.main.ExternalJarListener;
 import tech.quantit.northstar.main.factories.StrategyModuleFactory;
 import tech.quantit.northstar.main.persistence.MarketDataRepository;
 import tech.quantit.northstar.main.persistence.ModuleRepository;
@@ -66,8 +67,10 @@ public class ModuleService implements InitializingBean {
 	private ContractManager contractMgr;
 
 	private StrategyModuleFactory moduleFactory;
+	
+	private ExternalJarListener extJarListener;
 
-	public ModuleService(ApplicationContext ctx, ModuleRepository moduleRepo, MarketDataRepository mdRepo,
+	public ModuleService(ApplicationContext ctx, ModuleRepository moduleRepo, MarketDataRepository mdRepo, ExternalJarListener extJarListener,
 			ModuleManager mdlMgr, GatewayAndConnectionManager gatewayConnMgr, ContractManager contractMgr) {
 		this.ctx = ctx;
 		this.moduleRepo = moduleRepo;
@@ -75,6 +78,7 @@ public class ModuleService implements InitializingBean {
 		this.mdlMgr = mdlMgr;
 		this.gatewayConnMgr = gatewayConnMgr;
 		this.contractMgr = contractMgr;
+		this.extJarListener = extJarListener;
 		this.moduleFactory = new StrategyModuleFactory(gatewayConnMgr, contractMgr, moduleRepo);
 	}
 
@@ -126,7 +130,14 @@ public class ModuleService implements InitializingBean {
 	 */
 	public Map<String, ComponentField> getComponentParams(ComponentMetaInfo info) throws ClassNotFoundException {
 		String className = info.getClassName();
-		Class<?> clz = Class.forName(className);
+		Class<?> clz = null;
+		ClassLoader cl = extJarListener.getExternalClassLoader();
+		if(cl != null) {
+			clz = cl.loadClass(className);
+		}
+		if(clz == null) {			
+			clz = Class.forName(className);
+		}
 		DynamicParamsAware aware = (DynamicParamsAware) ctx.getBean(clz);
 		DynamicParams params = aware.getDynamicParams();
 		return params.getMetaInfo();
