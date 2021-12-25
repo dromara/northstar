@@ -120,7 +120,9 @@ public class GlobalMarketRegistry {
 	private void doSubscribe(NormalContract contract) {
 		MarketGateway gateway = gatewayMap.get(contract.gatewayType());
 		ContractField contractField = contract.contractField();
-		gateway.subscribe(contractField);
+		if(gateway.isConnected()) {			
+			gateway.subscribe(contractField);
+		}
 		onContractSubsciption.accept(contractField);
 	}
 	
@@ -129,7 +131,7 @@ public class GlobalMarketRegistry {
 			throw new IllegalStateException("没有注册相应的行情网关：" + gatewayType);
 		}
 		MarketGateway mktGateway = gatewayMap.get(gatewayType);
-		if(contractMap.size() > 0) {
+		if(!contractMap.isEmpty()) {
 			contractMap.values().stream()
 				.filter(c -> c.gatewayType() == mktGateway.gatewayType() && !(c instanceof IndexContract))
 				.forEach(this::doSubscribe);
