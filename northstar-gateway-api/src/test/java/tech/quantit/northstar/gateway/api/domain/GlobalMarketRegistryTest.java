@@ -30,6 +30,7 @@ class GlobalMarketRegistryTest {
 		
 		NormalContract contract = mock(NormalContract.class);
 		MarketGateway gateway = mock(MarketGateway.class);
+		when(gateway.isConnected()).thenReturn(true);
 		when(contract.gatewayType()).thenReturn(GatewayType.CTP);
 		when(contract.barGenerator()).thenReturn(mock(BarGenerator.class));
 		registry.gatewayMap.put(GatewayType.CTP, gateway);

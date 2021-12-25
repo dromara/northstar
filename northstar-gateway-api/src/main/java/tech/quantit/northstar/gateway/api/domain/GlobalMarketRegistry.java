@@ -99,7 +99,7 @@ public class GlobalMarketRegistry {
 			feEngine.emitEvent(NorthstarEventType.TICK, tick);
 			dispatch(tick);
 		});
-		ticker.dependencySymbols().forEach(unifiedSymbol -> idxTickerMap.put(idxContract.unifiedSymbol(), ticker));
+		ticker.dependencySymbols().forEach(unifiedSymbol -> idxTickerMap.put(unifiedSymbol, ticker));
 	}
 	
 	public synchronized void register(SubscriptionManager subscriptionManager) {
