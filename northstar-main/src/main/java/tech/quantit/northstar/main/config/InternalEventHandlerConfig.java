@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.event.InternalEventBus;
 import tech.quantit.northstar.domain.account.TradeDayAccount;
+import tech.quantit.northstar.domain.external.MessageHandlerManager;
 import tech.quantit.northstar.domain.gateway.ContractManager;
 import tech.quantit.northstar.domain.gateway.GatewayAndConnectionManager;
 import tech.quantit.northstar.gateway.sim.trade.SimMarket;
@@ -51,8 +52,8 @@ public class InternalEventHandlerConfig {
 	}
 	
 	@Bean
-	public NotificationDispatcher notificationDispatcher(InternalEventBus eventBus) {
-		NotificationDispatcher dispatcher = new NotificationDispatcher();
+	public NotificationDispatcher notificationDispatcher(InternalEventBus eventBus, MessageHandlerManager msgHandlerMgr) {
+		NotificationDispatcher dispatcher = new NotificationDispatcher(msgHandlerMgr);
 		log.debug("注册：NotificationDispatcher");
 		eventBus.register(dispatcher);
 		return dispatcher;
