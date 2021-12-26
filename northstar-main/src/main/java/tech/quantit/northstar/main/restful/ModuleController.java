@@ -23,7 +23,7 @@ import tech.quantit.northstar.strategy.api.model.ModuleInfo;
 import tech.quantit.northstar.strategy.api.model.ModulePositionInfo;
 import tech.quantit.northstar.strategy.api.model.ModuleRealTimeInfo;
 import tech.quantit.northstar.strategy.api.model.ModuleTradeRecord;
-import tech.quantit.northstar.strategy.api.model.TimeSeriesData;
+import tech.quantit.northstar.strategy.api.model.TimeSeriesValue;
 
 @RestController
 public class ModuleController {
@@ -128,7 +128,7 @@ public class ModuleController {
 	 * @return
 	 */
 	@GetMapping("/module/refdata")
-	public ResultBean<List<TimeSeriesData>> inspectModuleDataRef(@NotNull String name){
+	public ResultBean<Map<String, TimeSeriesValue[]>> inspectModuleDataRef(@NotNull String name){
 		return new ResultBean<>(service.getModuleDataRef(name));
 	}
 	

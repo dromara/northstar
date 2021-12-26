@@ -44,7 +44,7 @@ import tech.quantit.northstar.strategy.api.model.ModuleInfo;
 import tech.quantit.northstar.strategy.api.model.ModulePositionInfo;
 import tech.quantit.northstar.strategy.api.model.ModuleRealTimeInfo;
 import tech.quantit.northstar.strategy.api.model.ModuleTradeRecord;
-import tech.quantit.northstar.strategy.api.model.TimeSeriesData;
+import tech.quantit.northstar.strategy.api.model.TimeSeriesValue;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.ContractField;
@@ -273,7 +273,7 @@ public class ModuleService implements InitializingBean {
 	 * @param moduleName
 	 * @return
 	 */
-	public List<TimeSeriesData> getModuleDataRef(String moduleName) {
+	public Map<String, TimeSeriesValue[]> getModuleDataRef(String moduleName) {
 		return mdlMgr.getModule(moduleName).getSignalPolicy().inspectRefData();
 	}
 
