@@ -20,8 +20,8 @@
 ![Image](https://images.gitee.com/uploads/images/2021/1107/172130_9da2bdcd_1676852.png)
 
 
-开源不易，感谢点赞关注加收藏！  
-详细文档请参考wiki： https://gitee.com/dromara/northstar/wikis/  
+**开源不易，感谢点赞关注加收藏！**  
+**详细文档请参考wiki： https://gitee.com/dromara/northstar/wikis/**
 
 ## 适用人群
 全栈技术爱好者、小型私募技术团队
