@@ -34,4 +34,14 @@ public interface SignalPolicy extends TickDataAware, BarDataAware, EventDrivenCo
 	 * @param bars
 	 */
 	void initByBar(Iterable<BarField> bars);
+	
+	/**
+	 * 策略周期（单位：分钟）
+	 */
+	int periodMins();
+	
+	/**
+	 * 回溯长度
+	 */
+	int numOfRefData();
 }

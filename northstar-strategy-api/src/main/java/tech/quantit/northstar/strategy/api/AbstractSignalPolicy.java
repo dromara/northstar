@@ -26,6 +26,10 @@ public abstract class AbstractSignalPolicy implements SignalPolicy {
 	
 	protected String bindedUnifiedSymbol;
 	
+	protected int periodMins;
+	
+	protected int numOfRefData;
+	
 	protected ContractField bindedContract;
 	
 	protected Map<String, Indicator> indicatorMap = new HashMap<>();
@@ -119,6 +123,16 @@ public abstract class AbstractSignalPolicy implements SignalPolicy {
 	@Override
 	public String getModuleName() {
 		return moduleName;
+	}
+	
+	@Override
+	public int periodMins() {
+		return periodMins;
+	}
+
+	@Override
+	public int numOfRefData() {
+		return numOfRefData;
 	}
 
 	/**

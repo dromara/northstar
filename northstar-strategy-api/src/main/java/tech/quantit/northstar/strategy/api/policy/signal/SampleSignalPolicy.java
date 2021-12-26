@@ -44,6 +44,8 @@ public class SampleSignalPolicy extends AbstractSignalPolicy
 		InitParams initParams = (InitParams) params;
 		this.bindedUnifiedSymbol = initParams.bindedUnifiedSymbol;
 		this.actionInterval = initParams.actionInterval;
+		this.numOfRefData = initParams.numOfRefData;
+		this.periodMins = initParams.periodMins;
 	}
 	
 	/**
@@ -54,6 +56,12 @@ public class SampleSignalPolicy extends AbstractSignalPolicy
 		
 		@Setting(value="绑定合约", order=10)	// Label注解用于定义属性的元信息
 		private String bindedUnifiedSymbol;		// 属性可以为任意多个，当元素为多个时order值用于控制前端的显示顺序
+		
+		@Setting(value="周期时长", order=11, unit="分钟")
+		private int periodMins;
+		
+		@Setting(value="回溯周期数", order=12)
+		private int numOfRefData;
 		
 		@Setting(value="操作间隔", order=20, unit="秒")	// 可以声明单位
 		private int actionInterval;

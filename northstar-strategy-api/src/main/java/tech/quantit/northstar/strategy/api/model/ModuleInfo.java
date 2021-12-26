@@ -46,8 +46,5 @@ public class ModuleInfo {
 	 * 策略类型
 	 */
 	private ModuleType type;
-	/**
-	 * 历史数据加载长度（单位：天）
-	 */
-	private int numOfDaysOfDataRef;
+	
 }
