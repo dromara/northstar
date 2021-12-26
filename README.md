@@ -112,7 +112,7 @@ vim ~/.bashrc
 export NSUSER=<登陆用户名>
 export NSPWD=<登陆密码>
 export EMAIL=<代理邮箱名> 
-export SUB_EMAIL=<订阅邮箱名>
+export EMAIL0=<订阅邮箱名>
 ```
 保存并退出，然后让配置生效
 ```
