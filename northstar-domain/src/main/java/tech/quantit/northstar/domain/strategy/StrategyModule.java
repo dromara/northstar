@@ -1,15 +1,19 @@
 package tech.quantit.northstar.domain.strategy;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
 import lombok.Getter;
 import lombok.Setter;
 import tech.quantit.northstar.common.ContractBindedAware;
 import tech.quantit.northstar.common.event.NorthstarEvent;
+import tech.quantit.northstar.common.utils.BarUtils;
 import tech.quantit.northstar.gateway.api.TradeGateway;
 import tech.quantit.northstar.strategy.api.EventDrivenComponent;
 import tech.quantit.northstar.strategy.api.SignalPolicy;
@@ -20,6 +24,7 @@ import tech.quantit.northstar.strategy.api.event.ModuleEventType;
 import tech.quantit.northstar.strategy.api.log.NorthstarLoggerFactory;
 import tech.quantit.northstar.strategy.api.model.ModuleDealRecord;
 import xyz.redtorch.pb.CoreEnum.OrderStatusEnum;
+import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.CancelOrderReqField;
 import xyz.redtorch.pb.CoreField.OrderField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
@@ -70,6 +75,8 @@ public class StrategyModule implements EventDrivenComponent{
 	
 	private Set<String> bindedSymbols = new HashSet<>();
 	
+	private List<BarField> periodBars;
+	
 	private Logger log;
 	
 	public StrategyModule(String bindedMktGatewayId, TradeGateway gateway, ModuleStatus status) {
@@ -96,6 +103,7 @@ public class StrategyModule implements EventDrivenComponent{
 		}
 		if(component instanceof SignalPolicy policy) {
 			signalPolicy = policy;
+			periodBars = new ArrayList<>(signalPolicy.periodMins());
 		}
 		if(component instanceof ContractBindedAware aware) {
 			bindedSymbols.add(aware.bindedContractSymbol());
@@ -126,7 +134,15 @@ public class StrategyModule implements EventDrivenComponent{
 	 * @param event
 	 */
 	public void onEvent(NorthstarEvent event) {
-		meb.post(event.getData());
+		if(event.getData() instanceof BarField bar && StringUtils.equals(bar.getUnifiedSymbol(), signalPolicy.bindedContractSymbol())) {
+			periodBars.add(bar);
+			if(periodBars.size() >= signalPolicy.periodMins()) {
+				meb.post(BarUtils.merge(periodBars));
+				periodBars.clear();
+			}
+		} else {			
+			meb.post(event.getData());
+		}
 		if(ti != null && event.getData() instanceof TradeField trade && trade.getOriginOrderId().equals(ti.getSubmitOrderReq().getOriginOrderId())) {			
 			log.debug("[{}] 收到成交回报，订单号:{}", moduleStatus.getModuleName(), trade.getOriginOrderId());
 			ti.onTrade(trade);
