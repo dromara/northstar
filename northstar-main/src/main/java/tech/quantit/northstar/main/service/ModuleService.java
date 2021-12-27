@@ -208,15 +208,20 @@ public class ModuleService implements InitializingBean {
 
 		LinkedList<BarField> barList = new LinkedList<>();
 		LinkedList<TickField> tickList = new LinkedList<>();
-		List<String> availableDates = mdRepo.findDataAvailableDates(mktGatewayId, unifiedSymbol, true);
-		for (String date : availableDates.subList(availableDates.size() - info.getNumOfDaysOfDataRef(),
-				availableDates.size())) {
+		List<String> availableDates = mdRepo.findDataAvailableDates(mktGatewayId, unifiedSymbol, false);
+		int expectedMinsOfPreparedData = signalPolicy.numOfRefData() * signalPolicy.periodMins();
+		for (String date : availableDates) {
 			List<MinBarDataPO> dataBarPOList = mdRepo.loadDataByDate(mktGatewayId, unifiedSymbol, date);
-			for (MinBarDataPO po : dataBarPOList) {
-				barList.add(BarField.parseFrom(po.getBarData()));
-				for(byte[] tickData : po.getTicksData()) {
-					tickList.add(TickField.parseFrom(tickData));
+			for(int i=dataBarPOList.size() - 1; i>=0; i--){
+				MinBarDataPO po = dataBarPOList.get(i);
+				barList.addFirst(BarField.parseFrom(po.getBarData()));
+				List<byte[]> tickBytes = po.getTicksData();
+				for(int j=tickBytes.size()-1; j>=0; j--) {
+					tickList.addFirst(TickField.parseFrom(tickBytes.get(j)));
 				}
+			}
+			if(barList.size() > expectedMinsOfPreparedData) {
+				break;
 			}
 		}
 		signalPolicy.initByTick(tickList);
