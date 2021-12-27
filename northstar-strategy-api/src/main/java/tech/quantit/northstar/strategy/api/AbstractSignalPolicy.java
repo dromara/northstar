@@ -13,7 +13,6 @@ import tech.quantit.northstar.strategy.api.event.ModuleEventType;
 import tech.quantit.northstar.strategy.api.indicator.Indicator;
 import tech.quantit.northstar.strategy.api.log.NorthstarLoggerFactory;
 import tech.quantit.northstar.strategy.api.model.Signal;
-import tech.quantit.northstar.strategy.api.model.TimeSeriesValue;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.TickField;
@@ -84,20 +83,6 @@ public abstract class AbstractSignalPolicy implements SignalPolicy {
 	@Override
 	public void setBindedContract(ContractField contract) {
 		bindedContract = contract;
-	}
-
-
-	@Override
-	public Map<String, TimeSeriesValue[]> inspectRefData() {
-		return null;
-	}
-	
-	@Override
-	public void initByTick(Iterable<TickField> ticks) {
-	}
-
-	@Override
-	public void initByBar(Iterable<BarField> bars) {
 	}
 
 	@Override
