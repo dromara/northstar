@@ -8,6 +8,7 @@ import tech.quantit.northstar.strategy.api.annotation.Setting;
 import tech.quantit.northstar.strategy.api.annotation.StrategicComponent;
 import tech.quantit.northstar.strategy.api.constant.ModuleState;
 import tech.quantit.northstar.strategy.api.constant.SignalOperation;
+import tech.quantit.northstar.strategy.api.event.ModuleEventBus;
 import tech.quantit.northstar.strategy.api.indicator.ExpMovingAverage;
 import tech.quantit.northstar.strategy.api.indicator.Indicator;
 import tech.quantit.northstar.strategy.api.indicator.Indicator.ValueType;
@@ -46,11 +47,16 @@ public class MovAvgSignalPolicy extends AbstractSignalPolicy
 		this.periodMins = initParams.periodMins;
 		maFast = new ExpMovingAverage(initParams.fastline, ValueType.CLOSE);
 		maSlow = new ExpMovingAverage(initParams.slowline, ValueType.CLOSE);
+	}
+	
+	@Override
+	public void setEventBus(ModuleEventBus moduleEventBus) {
+		super.setEventBus(moduleEventBus);
 		// 指标都要注册模组的事件总线，以便自动订阅行情更新
 		moduleEventBus.register(maFast);	
 		moduleEventBus.register(maSlow);
 	}
-	
+
 	public static class InitParams extends DynamicParams{
 		
 		@Setting(value="绑定合约", order=10)	// Label注解用于定义属性的元信息
@@ -88,14 +94,18 @@ public class MovAvgSignalPolicy extends AbstractSignalPolicy
 
 	@Override
 	protected void handleBar(BarField bar) {
+		log.debug("周期响应：{}", bar.getActionTime());
+		log.debug("当前指标：快线 [{}]，慢线 [{}]", maFast.value(0), maSlow.value(0));
 		// 快线上穿慢线，入场做多
-		if(maFast.value(1) < maSlow.value(1) && maFast.value(0) > maSlow.value(0)) {
+		if(currentState == ModuleState.EMPTY && maFast.value(1) < maSlow.value(1) && maFast.value(0) > maSlow.value(0)) {
+			log.debug("上一周期的指标：快线 [{}]，慢线 [{}]", maFast.value(1), maSlow.value(1));
 			entryPrice = bar.getClosePrice();
 			emit(SignalOperation.BUY_OPEN, entryPrice, 5);
 		}
 		
 		// 快线下穿慢线，入场做空
-		if(maFast.value(1) > maSlow.value(1) && maFast.value(0) < maSlow.value(0)) {
+		if(currentState == ModuleState.EMPTY && maFast.value(1) > maSlow.value(1) && maFast.value(0) < maSlow.value(0)) {
+			log.debug("上一周期的指标：快线 [{}]，慢线 [{}]", maFast.value(1), maSlow.value(1));
 			entryPrice = bar.getClosePrice();
 			emit(SignalOperation.SELL_OPEN, entryPrice, 5);
 		}

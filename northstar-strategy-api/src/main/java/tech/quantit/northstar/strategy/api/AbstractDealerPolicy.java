@@ -62,15 +62,21 @@ public abstract class AbstractDealerPolicy implements DealerPolicy {
 						.setActionTimestamp(lastTick.getActionTimestamp())
 						.build();
 				moduleEventBus.post(new ModuleEvent<>(ModuleEventType.ORDER_REQ_CREATED, currentOrderReq));
-				log.info("[{}->{}] 追单", getModuleName(), name());
+				if(log.isInfoEnabled()) {					
+					log.info("[{}->{}] 追单", getModuleName(), name());
+				}
 			}
 		}
 		if(moduleEvent.getEventType() == ModuleEventType.ORDER_CONFIRMED) {
-			log.info("[{}->{}] 订单确认", getModuleName(), name());
+			if(log.isInfoEnabled()) {				
+				log.info("[{}->{}] 订单确认", getModuleName(), name());
+			}
 		}
 		if(moduleEvent.getEventType() == ModuleEventType.RETRY_RISK_ALERTED || moduleEvent.getEventType() == ModuleEventType.REJECT_RISK_ALERTED) {
 			moduleEventBus.post(new ModuleEvent<>(ModuleEventType.ORDER_REQ_CANCELLED, genCancelReq()));
-			log.info("[{}->{}] 撤单", getModuleName(), name());
+			if(log.isInfoEnabled()) {				
+				log.info("[{}->{}] 撤单", getModuleName(), name());
+			}
 		}
 		if(moduleEvent.getEventType() == ModuleEventType.SIGNAL_CREATED) {
 			Signal signal = (Signal) moduleEvent.getData();
@@ -98,7 +104,9 @@ public abstract class AbstractDealerPolicy implements DealerPolicy {
 			}
 			currentOrderReq = genOrderReq(direction, offsetFlag, signal.getSignalPrice(), signal.getTicksToStop());
 			moduleEventBus.post(new ModuleEvent<>(ModuleEventType.ORDER_REQ_CREATED, currentOrderReq));
-			log.info("[{}->{}] 生成订单", getModuleName(), name());
+			if(log.isInfoEnabled()) {				
+				log.info("[{}->{}] 生成订单", getModuleName(), name());
+			}
 		}
 	}
 
@@ -146,7 +154,7 @@ public abstract class AbstractDealerPolicy implements DealerPolicy {
 		PriceType priceType = FieldUtils.isClose(offsetFlag) ? closePriceType() : openPriceType();
 		priceType = priceType == null ? PriceType.ANY_PRICE : priceType;	// 为防止子类没实现，默认使用市价，避免空指针异常
 		double price = PriceResolver.getPrice(priceType, signalPrice, lastTick, FieldUtils.isBuy(direction));
-		double customStopPrice = stopLossPrice(ticksToStop, direction);
+		double customStopPrice = stopLossPrice(price, ticksToStop, direction);
 		boolean validCustomStopPrice = FieldUtils.isBuy(direction) ? customStopPrice < price : customStopPrice > price;
 		double stopPrice = FieldUtils.isOpen(offsetFlag) && validCustomStopPrice ? customStopPrice : 0;
 		
@@ -184,5 +192,5 @@ public abstract class AbstractDealerPolicy implements DealerPolicy {
 	
 	protected abstract int tradeVolume();
 	
-	protected abstract double stopLossPrice(double orderPrice, DirectionEnum direction);
+	protected abstract double stopLossPrice(double orderPrice, int ticksToStop, DirectionEnum direction);
 }

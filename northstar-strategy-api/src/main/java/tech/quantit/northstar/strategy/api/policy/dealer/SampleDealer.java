@@ -54,8 +54,11 @@ public class SampleDealer extends AbstractDealerPolicy implements DealerPolicy {
 	 * 可以根据需要设置固定止损，甚至更复杂的止损逻辑
 	 */
 	@Override
-	protected double stopLossPrice(double orderPrice, DirectionEnum direction) {
+	protected double stopLossPrice(double orderPrice, int ticksToStop, DirectionEnum direction) {
 		int factor = FieldUtils.isBuy(direction) ? 1 : -1;
+		if(ticksToStop > 0) {
+			stopPriceTick = ticksToStop;
+		}
 		return orderPrice - factor * stopPriceTick * bindedContract.getPriceTick();
 	}
 	

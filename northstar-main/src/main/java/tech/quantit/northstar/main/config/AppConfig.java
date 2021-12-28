@@ -128,7 +128,7 @@ public class AppConfig implements WebMvcConfigurer {
 	
 	@Bean
 	public SimMarket simMarket(SimAccountRepository simAccRepo) {
-		return new SimMarket();
+		return new SimMarket(simAccRepo);
 	}
 	
 	@Value("${northstar.subscription.ctp.classType.whitelist:}")
