@@ -76,8 +76,8 @@ public class GlobalMarketRegistry {
 		}
 		
 		// 合约订阅
+		log.debug("注册普通合约：{}", contract.unifiedSymbol());
 		if(gatewayMap.containsKey(contract.gatewayType())) {
-			log.debug("注册普通合约：{}", contract.unifiedSymbol());
 			doSubscribe(contract);
 		}
 	}

@@ -1354,12 +1354,11 @@ public class TdSpi extends CThostFtdcTraderSpi {
 
 			ContractField contract = contractBuilder.build();
 			gatewayAdapter.contractMap.put(contractBuilder.getSymbol(), contract);
-			gatewayAdapter.registry.register(new NormalContract(contract, GatewayType.CTP));
+			gatewayAdapter.registry.register(new NormalContract(contract, GatewayType.CTP, System.currentTimeMillis()));
 			if (bIsLast) {
 				
 				logger.info("{}交易接口合约信息获取完成!共计{}条", logInfo, gatewayAdapter.contractMap.size());
 				ContractFactory contractFactory = new ContractFactory(GatewayType.CTP, gatewayAdapter.contractMap.values().stream().toList());
-				contractFactory.makeNormalContract().stream().forEach(gatewayAdapter.registry::register);
 				contractFactory.makeIndexContract().stream().forEach(gatewayAdapter.registry::register);
 				
 				instrumentQueried = true;

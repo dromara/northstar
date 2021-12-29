@@ -3,6 +3,7 @@ package tech.quantit.northstar.gateway.api.domain;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import tech.quantit.northstar.common.constant.GatewayType;
 import xyz.redtorch.pb.CoreField.ContractField;
 
 public class IndexContract extends NormalContract {
@@ -11,7 +12,7 @@ public class IndexContract extends NormalContract {
 	
 	private Set<ContractField> monthlyContracts;
 
-	public IndexContract(String idxSymbol, Set<ContractField> monthlyContracts) {
+	public IndexContract(String idxSymbol, GatewayType gatewayType, Set<ContractField> monthlyContracts) {
 		if(monthlyContracts.isEmpty()) {
 			throw new IllegalArgumentException("不能传入空集合");
 		}
@@ -25,6 +26,8 @@ public class IndexContract extends NormalContract {
 				.setFullName(fullName)
 				.setName(name)
 				.build();
+		super.gatewayType = gatewayType;
+		super.updateTime = System.currentTimeMillis();
 		this.monthlyContracts = monthlyContracts;
 	}
 

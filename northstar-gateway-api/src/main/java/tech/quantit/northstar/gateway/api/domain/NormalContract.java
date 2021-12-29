@@ -15,14 +15,20 @@ public class NormalContract {
 
 	protected ContractField field;
 	protected GatewayType gatewayType;
+	protected long updateTime;
 
-	public NormalContract(ContractField field, GatewayType gatewayType) {
+	public NormalContract(ContractField field, GatewayType gatewayType, long updateTime) {
 		this.field = field;
 		this.gatewayType = gatewayType;
+		this.updateTime = updateTime;
 	}
 	
 	public GatewayType gatewayType() {
 		return gatewayType;
+	}
+	
+	public long updateTime() {
+		return updateTime;
 	}
 
 	public String unifiedSymbol() {
