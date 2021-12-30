@@ -13,7 +13,7 @@ import tech.quantit.northstar.strategy.api.indicator.Indicator.ValueType;
 import xyz.redtorch.pb.CoreField.BarField;
 
 class MovingAverageTest {
-	
+	String symbol = "rb2210";
 	double[] sample = new double[20];
 	
 	@BeforeEach
@@ -25,7 +25,7 @@ class MovingAverageTest {
 
 	@Test
 	void test() {
-		Indicator ma10 = new MovingAverage(10, ValueType.HIGH);
+		Indicator ma10 = new MovingAverage(symbol, 10, ValueType.HIGH);
 		for(double val : sample) {
 			ma10.onBar(BarField.newBuilder().setHighPrice(val).build());
 		}

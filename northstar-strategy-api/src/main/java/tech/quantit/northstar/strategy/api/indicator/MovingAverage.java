@@ -15,8 +15,8 @@ public class MovingAverage extends Indicator{
 	
 	private int size;
 	
-	public MovingAverage(int size, ValueType valType) {
-		super(size, valType);
+	public MovingAverage(String unifiedSymbol, int size, ValueType valType) {
+		super(unifiedSymbol, size, valType);
 		this.values = new double[size];
 		this.size = size;
 	}

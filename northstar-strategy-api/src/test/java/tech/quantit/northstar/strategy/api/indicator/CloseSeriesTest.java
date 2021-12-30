@@ -8,16 +8,17 @@ import xyz.redtorch.pb.CoreField.BarField;
 
 class CloseSeriesTest {
 
+	String symbol = "rb2210";
 	
 	@Test
 	void test() {
-		BarField b1 = BarField.newBuilder().setClosePrice(1100).setActionTimestamp(1).build();
-		BarField b2 = BarField.newBuilder().setClosePrice(1105).setActionTimestamp(2).build();
-		BarField b3 = BarField.newBuilder().setClosePrice(1108).setActionTimestamp(3).build();
-		BarField b4 = BarField.newBuilder().setClosePrice(1109).setActionTimestamp(4).build();
-		BarField b5 = BarField.newBuilder().setClosePrice(1101).setActionTimestamp(5).build();
+		BarField b1 = BarField.newBuilder().setUnifiedSymbol(symbol).setClosePrice(1100).setActionTimestamp(1).build();
+		BarField b2 = BarField.newBuilder().setUnifiedSymbol(symbol).setClosePrice(1105).setActionTimestamp(2).build();
+		BarField b3 = BarField.newBuilder().setUnifiedSymbol(symbol).setClosePrice(1108).setActionTimestamp(3).build();
+		BarField b4 = BarField.newBuilder().setUnifiedSymbol(symbol).setClosePrice(1109).setActionTimestamp(4).build();
+		BarField b5 = BarField.newBuilder().setUnifiedSymbol(symbol).setClosePrice(1101).setActionTimestamp(5).build();
 		
-		Indicator close = new CloseSeries(4);
+		Indicator close = new CloseSeries(symbol, 4);
 		close.onBar(b1);
 		close.onBar(b2);
 		close.onBar(b3);

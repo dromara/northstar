@@ -6,6 +6,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.springframework.util.StringUtils;
+
+import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.strategy.api.BarDataAware;
 import tech.quantit.northstar.strategy.api.model.TimeSeriesValue;
 import xyz.redtorch.pb.CoreField.BarField;
@@ -15,6 +18,7 @@ import xyz.redtorch.pb.CoreField.BarField;
  * @author KevinHuangwl
  *
  */
+@Slf4j
 public abstract class Indicator implements BarDataAware {
 	
 	/**
@@ -31,11 +35,14 @@ public abstract class Indicator implements BarDataAware {
 	 */
 	private ValueType valType;
 	
-	protected Indicator(int size, ValueType valType) {
+	private String unifiedSymbol;
+	
+	protected Indicator(String unifiedSymbol, int size, ValueType valType) {
 		refVals = new TimeSeriesValue[size];
 		for(int i=0; i<refVals.length; i++) {
 			refVals[i] = new TimeSeriesValue(0, 0);
 		}
+		this.unifiedSymbol = unifiedSymbol;
 		this.valType = valType;
 	}
 	
@@ -76,6 +83,10 @@ public abstract class Indicator implements BarDataAware {
 	
 	@Override
 	public void onBar(BarField bar) {
+		if(!bar.getUnifiedSymbol().equals(unifiedSymbol)) {
+			return;
+		}
+		log.trace("{} -> {}", this, bar);
 		int index = nextCursor();
 		refVals[index].setTimestamp(bar.getActionTimestamp());
 		switch(valType) {

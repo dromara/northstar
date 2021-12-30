@@ -8,12 +8,12 @@ package tech.quantit.northstar.strategy.api.indicator;
  */
 public class CloseSeries extends Indicator{
 
-	protected CloseSeries(int size, ValueType valType) {
-		super(size, valType);
+	protected CloseSeries(String unifiedSymbol, int size, ValueType valType) {
+		super(unifiedSymbol, size, valType);
 	}
 
-	public CloseSeries(int size) {
-		this(size, ValueType.CLOSE);
+	public CloseSeries(String unifiedSymbol, int size) {
+		this(unifiedSymbol, size, ValueType.CLOSE);
 	}
 
 	@Override

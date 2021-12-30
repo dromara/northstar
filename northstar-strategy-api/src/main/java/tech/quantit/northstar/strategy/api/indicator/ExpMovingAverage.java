@@ -11,8 +11,8 @@ public class ExpMovingAverage extends Indicator{
 	
 	private double factor;
 	
-	public ExpMovingAverage(int size, ValueType valType) {
-		super(size, valType);
+	public ExpMovingAverage(String unifiedSymbol, int size, ValueType valType) {
+		super(unifiedSymbol, size, valType);
 		this.factor = 2D / (size + 1);
 	}
 

@@ -134,7 +134,10 @@ public class StrategyModule implements EventDrivenComponent{
 	 * @param event
 	 */
 	public void onEvent(NorthstarEvent event) {
-		if(event.getData() instanceof BarField bar && StringUtils.equals(bar.getUnifiedSymbol(), signalPolicy.bindedContractSymbol())) {
+		if(event.getData() instanceof BarField bar) {
+			if(!StringUtils.equals(bar.getUnifiedSymbol(), signalPolicy.bindedContractSymbol())) {
+				return;
+			}
 			periodBars.add(bar);
 			if(periodBars.size() >= signalPolicy.periodMins()) {
 				meb.post(BarUtils.merge(periodBars));

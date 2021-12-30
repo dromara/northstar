@@ -9,6 +9,7 @@ import tech.quantit.northstar.strategy.api.indicator.Indicator.ValueType;
 import xyz.redtorch.pb.CoreField.BarField;
 
 class ExpMovingAverageTest {
+	String symbol = "rb2210";
 	
 	double[] sample = new double[] {
 		5562,5421,5465,5515,5422,5546,5304,4976,4900,4825,
@@ -24,7 +25,7 @@ class ExpMovingAverageTest {
 	@Test
 	void test() {
 		int size = results.length;
-		Indicator ema5 = new ExpMovingAverage(5, ValueType.CLOSE);
+		Indicator ema5 = new ExpMovingAverage(symbol, 5, ValueType.CLOSE);
 		for(int i=0; i<size+4; i++) {
 			ema5.onBar(BarField.newBuilder().setClosePrice(sample[i]).build());
 		}

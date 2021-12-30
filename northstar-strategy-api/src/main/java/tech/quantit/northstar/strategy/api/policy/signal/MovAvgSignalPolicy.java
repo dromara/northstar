@@ -45,8 +45,8 @@ public class MovAvgSignalPolicy extends AbstractSignalPolicy
 		this.bindedUnifiedSymbol = initParams.bindedUnifiedSymbol;
 		this.numOfRefData = initParams.numOfRefData;
 		this.periodMins = initParams.periodMins;
-		maFast = new ExpMovingAverage(initParams.fastline, ValueType.CLOSE);
-		maSlow = new ExpMovingAverage(initParams.slowline, ValueType.CLOSE);
+		maFast = new ExpMovingAverage(bindedUnifiedSymbol, initParams.fastline, ValueType.CLOSE);
+		maSlow = new ExpMovingAverage(bindedUnifiedSymbol, initParams.slowline, ValueType.CLOSE);
 	}
 	
 	@Override
@@ -95,7 +95,8 @@ public class MovAvgSignalPolicy extends AbstractSignalPolicy
 	@Override
 	protected void handleBar(BarField bar) {
 		log.debug("周期响应：{}", bar.getActionTime());
-		log.debug("当前指标：快线 [{}]，慢线 [{}]", maFast.value(0), maSlow.value(0));
+		log.debug("当前Bar: {} {}", bar.getUnifiedSymbol(), bar.getClosePrice());
+		log.debug("当前指标：快线 [{} -> {}]，慢线 [{} -> {}]", maFast.value(1), maFast.value(0), maSlow.value(1), maSlow.value(0));
 		// 快线上穿慢线，入场做多
 		if(currentState == ModuleState.EMPTY && maFast.value(1) < maSlow.value(1) && maFast.value(0) > maSlow.value(0)) {
 			log.debug("上一周期的指标：快线 [{}]，慢线 [{}]", maFast.value(1), maSlow.value(1));
@@ -124,10 +125,10 @@ public class MovAvgSignalPolicy extends AbstractSignalPolicy
 
 	@Override
 	public void initByBar(Iterable<BarField> bars) {
-		for(BarField bar : bars) {
-			maFast.onBar(bar);
-			maSlow.onBar(bar);
-		}
+//		for(BarField bar : bars) {
+//			maFast.onBar(bar);
+//			maSlow.onBar(bar);
+//		}
 	}
 
 }

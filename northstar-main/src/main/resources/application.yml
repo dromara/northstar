@@ -21,7 +21,7 @@ northstar:
 logging:  level: 
     root: info
     '[tech.quantit.northstar]': debug
-    '[tech.quantit.northstar.main.handler.broadcast]': trace
+    #'[tech.quantit.northstar.main.handler.broadcast]': trace
     #'[tech.quantit.northstar.strategy]': debug
   file:    path: logs/
   
