@@ -156,14 +156,4 @@ class SimAccountTest {
 		verify(account.getEventBus()).post(any());
 	}
 	
-	@Test
-	void testSetEventBus() {
-		SimPosition pos = mock(SimPosition.class);
-		ConcurrentMap<String, SimPosition> longMap = new ConcurrentHashMap<>();
-		longMap.put("any", pos);
-		SimAccount account = new SimAccount("test", 3);
-		account.longMap = longMap;
-		account.setSavingCallback(mock(Runnable.class));
-		verify(pos).setSavingCallback(any(Runnable.class));
-	}
 }

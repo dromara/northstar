@@ -44,6 +44,7 @@ public class CloseTradeRequest extends TradeRequest {
 		account.addCloseProfit(factor * frozenVol() * (trade.getPrice() - position.getOpenPrice()) * position.getMultipler());
 		position.setCloseReq(null);
 		position.merge(trade);
+		account.reportAccountStatus();
 	}
 
 	@Override

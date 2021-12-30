@@ -1,8 +1,5 @@
 package tech.quantit.northstar.main.handler.broadcast;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.corundumstudio.socketio.SocketIOClient;
 import com.corundumstudio.socketio.SocketIOServer;
 import com.corundumstudio.socketio.annotation.OnConnect;
@@ -27,11 +24,6 @@ import xyz.redtorch.pb.CoreField.TickField;
 public class SocketIOMessageEngine {
 	SocketIOServer server;
 	
-	/**
-	 * 防止信道堵塞而增加的过滤机制
-	 */
-	private Map<String, Long> filterMap = new HashMap<>();
-	
 	public SocketIOMessageEngine(SocketIOServer server) {
 		this.server = server;
 	}
@@ -47,17 +39,9 @@ public class SocketIOMessageEngine {
 		} else if(event.getData() instanceof BarField bar) {
 			server.getRoomOperations(bar.getUnifiedSymbol()).sendEvent(event.getEvent().toString(), bar.toByteArray());
 		} else if(event.getData() instanceof AccountField account) {
-			if(filterMap.containsKey(account.getAccountId()) && System.currentTimeMillis() - filterMap.get(account.getAccountId()) < 1000) {
-				return;
-			}
 			log.trace("账户信息分发: [{}]", MessagePrinter.print(account));
-			filterMap.put(account.getAccountId(), System.currentTimeMillis());
 			server.getBroadcastOperations().sendEvent(event.getEvent().toString(), account.toByteArray());
 		} else if(event.getData() instanceof PositionField position) {
-			if(filterMap.containsKey(position.getPositionId()) && System.currentTimeMillis() - filterMap.get(position.getPositionId()) < 1000) {
-				return;
-			}
-			filterMap.put(position.getPositionId(), System.currentTimeMillis());
 			log.trace("持仓信息分发: [{}]", MessagePrinter.print(position));
 			server.getBroadcastOperations().sendEvent(event.getEvent().toString(), position.toByteArray());
 		} else if(event.getData() instanceof Message message) {			
