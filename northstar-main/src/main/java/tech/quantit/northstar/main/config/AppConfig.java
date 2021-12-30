@@ -1,12 +1,15 @@
 package tech.quantit.northstar.main.config;
 
 import java.util.ArrayList;
-import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.function.Consumer;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -22,7 +25,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.mongodb.client.MongoClient;
 
-import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.domain.account.TradeDayAccount;
 import tech.quantit.northstar.domain.external.MessageHandlerManager;
@@ -30,6 +32,7 @@ import tech.quantit.northstar.domain.gateway.ContractManager;
 import tech.quantit.northstar.domain.gateway.GatewayAndConnectionManager;
 import tech.quantit.northstar.gateway.api.GatewayFactory;
 import tech.quantit.northstar.gateway.api.domain.GlobalMarketRegistry;
+import tech.quantit.northstar.gateway.api.domain.IndexContract;
 import tech.quantit.northstar.gateway.api.domain.NormalContract;
 import tech.quantit.northstar.gateway.api.domain.SubscriptionManager;
 import tech.quantit.northstar.gateway.sim.persistence.SimAccountRepository;
@@ -101,24 +104,8 @@ public class AppConfig implements WebMvcConfigurer {
 	}
 	
 	@Bean
-	public ContractManager contractManager(GlobalMarketRegistry registry, List<SubscriptionManager> subMgrs, MarketDataRepository mdRepo)
-			throws InvalidProtocolBufferException {
-		ContractManager contractMgr = new ContractManager(registry);
-		List<ContractPO> poList = mdRepo.getAvailableContracts();
-		Map<GatewayType, SubscriptionManager> subMgrMap = new EnumMap<>(GatewayType.class);
-		for(SubscriptionManager subMgr : subMgrs) {
-			subMgrMap.put(subMgr.usedFor(), subMgr);
-		}
-		for(ContractPO po : poList) {
-			ContractField contract = ContractField.parseFrom(po.getData());
-			SubscriptionManager subMgr = subMgrMap.get(po.getGatewayType()); 
-			if(subMgr!= null && !subMgr.subscribable(new NormalContract(contract, po.getGatewayType()))) {
-				//如果订阅管理器有定义且配置了不能订阅的情况，则跳过
-				continue;
-			}
-			contractMgr.addContract(contract);
-		}
-		return contractMgr;
+	public ContractManager contractManager() {
+		return new ContractManager();
 	}
 	
 	@Bean
@@ -128,7 +115,7 @@ public class AppConfig implements WebMvcConfigurer {
 	
 	@Bean
 	public SimMarket simMarket(SimAccountRepository simAccRepo) {
-		return new SimMarket();
+		return new SimMarket(simAccRepo);
 	}
 	
 	@Value("${northstar.subscription.ctp.classType.whitelist:}")
@@ -147,17 +134,51 @@ public class AppConfig implements WebMvcConfigurer {
 	
 	@Bean
 	public GlobalMarketRegistry marketGlobalRegistry(FastEventEngine fastEventEngine, MarketDataRepository mdRepo, List<SubscriptionManager> subMgrs,
-			MarketDataCache mdCache) {
-		GlobalMarketRegistry registry = new GlobalMarketRegistry(fastEventEngine,
-				contract -> mdRepo.saveContract(
-						new ContractPO(
-							contract.contractField().getUnifiedSymbol(),
-							contract.contractField().toByteArray(), 
-							contract.gatewayType(),
-							System.currentTimeMillis()
-							)), mdCache);
+			MarketDataCache mdCache, ContractManager contractMgr) throws InvalidProtocolBufferException {
+		Consumer<NormalContract> handleContractSave = contract -> {
+			if(System.currentTimeMillis() - contract.updateTime() < 60000) {
+				// 更新时间少于一分钟的合约才是需要保存新增合约		
+				Set<String> monthlyContractSymbols = null;
+				boolean isIndexContract = false;
+				if(contract instanceof IndexContract idxContract) {
+					isIndexContract = true;
+					monthlyContractSymbols = idxContract.monthlyContractSymbols();
+				}
+				ContractPO po = ContractPO.builder()
+						.unifiedSymbol(contract.unifiedSymbol())
+						.data(contract.contractField().toByteArray())
+						.gatewayType(contract.gatewayType())
+						.updateTime(contract.updateTime())
+						.isIndexContract(isIndexContract)
+						.monthlyContractSymbols(monthlyContractSymbols)
+						.build();
+				mdRepo.saveContract(po);
+			}
+		};
+		
+		GlobalMarketRegistry registry = new GlobalMarketRegistry(fastEventEngine, handleContractSave, contractMgr::addContract, mdCache);
+		// 加载合约订阅管理器
 		for(SubscriptionManager subMgr : subMgrs) {			
 			registry.register(subMgr);
+		}
+		//　加载已有合约
+		List<ContractPO> contractList = mdRepo.getAvailableContracts();
+		Map<String, ContractField> contractMap = new HashMap<>();
+		for(ContractPO po : contractList) {
+			ContractField contract = ContractField.parseFrom(po.getData());
+			contractMap.put(contract.getUnifiedSymbol(), contract);
+		}
+		for(ContractPO po : contractList) {
+			ContractField contract = contractMap.get(po.getUnifiedSymbol());
+			if(po.isIndexContract()) {
+				Set<ContractField> monthlyContracts = new HashSet<>();
+				for(String monthlyContractSymbol : po.getMonthlyContractSymbols()) {
+					monthlyContracts.add(contractMap.get(monthlyContractSymbol));
+				}
+				registry.register(new IndexContract(contract.getUnifiedSymbol(), po.getGatewayType(), monthlyContracts));
+			} else {
+				registry.register(new NormalContract(contract, po.getGatewayType(), po.getUpdateTime()));
+			}
 		}
 		return registry;
 	}

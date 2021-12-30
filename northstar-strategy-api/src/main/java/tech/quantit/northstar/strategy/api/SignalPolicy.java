@@ -1,10 +1,10 @@
 package tech.quantit.northstar.strategy.api;
 
-import java.util.List;
+import java.util.Map;
 
 import tech.quantit.northstar.common.ContractBindedAware;
 import tech.quantit.northstar.common.TickDataAware;
-import tech.quantit.northstar.strategy.api.model.TimeSeriesData;
+import tech.quantit.northstar.strategy.api.model.TimeSeriesValue;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.TickField;
 
@@ -21,7 +21,7 @@ public interface SignalPolicy extends TickDataAware, BarDataAware, EventDrivenCo
 	 * 透视引用数据。
 	 * @return
 	 */
-	List<TimeSeriesData> inspectRefData();
+	Map<String, TimeSeriesValue[]> inspectRefData();
 	
 	/**
 	 * 使用TICK数据初始化
@@ -34,4 +34,14 @@ public interface SignalPolicy extends TickDataAware, BarDataAware, EventDrivenCo
 	 * @param bars
 	 */
 	void initByBar(Iterable<BarField> bars);
+	
+	/**
+	 * 策略周期（单位：分钟）
+	 */
+	int periodMins();
+	
+	/**
+	 * 回溯长度
+	 */
+	int numOfRefData();
 }

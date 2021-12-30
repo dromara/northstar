@@ -20,8 +20,6 @@ import xyz.redtorch.pb.CoreField.TradeField;
 class SimPosition implements TickDataAware{
 	
 	@Transient
-	private Runnable savingCallback;
-	@Transient
 	private CloseTradeRequest closeReq;
 	
 	private PositionDirectionEnum direction;

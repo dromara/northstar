@@ -225,8 +225,6 @@ public class CtpSimGatewayAdapter extends GatewayAbstract implements MarketGatew
 			return mdSpi.isConnected();
 		} else if (gatewaySetting.getGatewayType() == GatewayTypeEnum.GTE_TradeAndMarketData && tdSpi != null && mdSpi != null) {
 			return tdSpi.isConnected() && mdSpi.isConnected();
-		} else {
-			logger.error(getLogInfo() + "检测到SPI实例为空");
 		}
 		return false;
 	}

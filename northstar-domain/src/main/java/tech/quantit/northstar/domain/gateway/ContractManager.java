@@ -9,7 +9,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.exception.NoSuchElementException;
-import tech.quantit.northstar.gateway.api.domain.GlobalMarketRegistry;
 import xyz.redtorch.pb.CoreField.ContractField;
 
 /**
@@ -27,10 +26,6 @@ public class ContractManager {
 	 * gateway -> unifiedSymbol -> contract
 	 */
 	private Map<String, Map<String, ContractField>> contractTbl = new ConcurrentHashMap<>();
-	
-	public ContractManager(GlobalMarketRegistry registry) {
-		registry.setOnContractSubsciption(this::addContract);
-	}
 	
 	public boolean addContract(ContractField contract) {
 		String gatewayId = contract.getGatewayId();

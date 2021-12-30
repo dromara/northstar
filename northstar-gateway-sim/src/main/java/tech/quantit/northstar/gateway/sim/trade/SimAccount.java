@@ -63,6 +63,7 @@ public class SimAccount implements TickDataAware{
 	protected int transactionFee;
 	
 	@Transient
+	@Setter
 	protected Runnable savingCallback;
 	@Transient
 	private EventBus eventBus;
@@ -217,12 +218,6 @@ public class SimAccount implements TickDataAware{
 		eventBus.post(cancelReq);
 	}
 	
-	public void setSavingCallback(Runnable savingCallback) {
-		this.savingCallback = savingCallback;
-		longMap.values().stream().forEach(pos -> pos.setSavingCallback(savingCallback));
-		shortMap.values().stream().forEach(pos -> pos.setSavingCallback(savingCallback));
-	}
-	
 	public void setEventBus(EventBus eventBus) {
 		this.eventBus = eventBus;
 		eventBus.register(this);
@@ -238,15 +233,18 @@ public class SimAccount implements TickDataAware{
 		totalCloseProfit += profit;
 	}
 
-	private long lastTickTime;
+	private long lastReportTime;
 	@Override
 	public void onTick(TickField tick) {
-		if(lastTickTime == tick.getActionTimestamp()) {
+		if(System.currentTimeMillis() - lastReportTime < 1000) {
 			return;
 		}
-		lastTickTime = tick.getActionTimestamp();
+		lastReportTime = System.currentTimeMillis();
+		reportAccountStatus();
+	}
+	
+	protected void reportAccountStatus() {
 		feEngine.emitEvent(NorthstarEventType.ACCOUNT, accountField());
-		
 		reportPosition(longMap);
 		reportPosition(shortMap);
 	}

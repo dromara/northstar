@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.common.event.FastEventEngine;
@@ -47,16 +46,17 @@ public class GlobalMarketRegistry {
 	 */
 	protected Map<String, BarGenerator> barGenMap = new HashMap<>(4096);
 	
-	@Setter
 	protected Consumer<ContractField> onContractSubsciption;
 
 	protected Consumer<NormalContract> onContractSave;
 	
 	protected MarketDataBuffer buffer;
 	
-	public GlobalMarketRegistry(FastEventEngine feEngine, Consumer<NormalContract> onContractSave, MarketDataBuffer buffer) {
+	public GlobalMarketRegistry(FastEventEngine feEngine, Consumer<NormalContract> onContractSave, Consumer<ContractField> onContractSubsciption,
+			MarketDataBuffer buffer) {
 		this.feEngine = feEngine;
 		this.onContractSave = onContractSave;
+		this.onContractSubsciption = onContractSubsciption;
 		this.buffer = buffer;
 	}
 	
@@ -67,6 +67,7 @@ public class GlobalMarketRegistry {
 			return;
 		}
 		
+		onContractSubsciption.accept(contract.contractField());
 		contractMap.put(contract.unifiedSymbol(), contract);
 		makeBarGen(contract);
 		if(contract instanceof IndexContract idxContract) {
@@ -76,8 +77,8 @@ public class GlobalMarketRegistry {
 		}
 		
 		// 合约订阅
+		log.debug("注册普通合约：{}", contract.unifiedSymbol());
 		if(gatewayMap.containsKey(contract.gatewayType())) {
-			log.debug("注册普通合约：{}", contract.unifiedSymbol());
 			doSubscribe(contract);
 		}
 	}
@@ -123,7 +124,6 @@ public class GlobalMarketRegistry {
 		if(gateway.isConnected()) {			
 			gateway.subscribe(contractField);
 		}
-		onContractSubsciption.accept(contractField);
 	}
 	
 	public synchronized void autoSubscribeContracts(GatewayType gatewayType) {

@@ -39,6 +39,7 @@ public class OpenTradeRequest extends TradeRequest {
 	public void onTrade(TradeField trade) {
 		account.addPosition(new SimPosition(trade), trade);
 		account.addCommission(trade.getVolume());
+		account.reportAccountStatus();
 	}
 	
 }

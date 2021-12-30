@@ -44,7 +44,7 @@ import tech.quantit.northstar.strategy.api.model.ModuleInfo;
 import tech.quantit.northstar.strategy.api.model.ModulePositionInfo;
 import tech.quantit.northstar.strategy.api.model.ModuleRealTimeInfo;
 import tech.quantit.northstar.strategy.api.model.ModuleTradeRecord;
-import tech.quantit.northstar.strategy.api.model.TimeSeriesData;
+import tech.quantit.northstar.strategy.api.model.TimeSeriesValue;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.ContractField;
@@ -208,15 +208,20 @@ public class ModuleService implements InitializingBean {
 
 		LinkedList<BarField> barList = new LinkedList<>();
 		LinkedList<TickField> tickList = new LinkedList<>();
-		List<String> availableDates = mdRepo.findDataAvailableDates(mktGatewayId, unifiedSymbol, true);
-		for (String date : availableDates.subList(availableDates.size() - info.getNumOfDaysOfDataRef(),
-				availableDates.size())) {
+		List<String> availableDates = mdRepo.findDataAvailableDates(mktGatewayId, unifiedSymbol, false);
+		int expectedMinsOfPreparedData = signalPolicy.numOfRefData() * signalPolicy.periodMins();
+		for (String date : availableDates) {
 			List<MinBarDataPO> dataBarPOList = mdRepo.loadDataByDate(mktGatewayId, unifiedSymbol, date);
-			for (MinBarDataPO po : dataBarPOList) {
-				barList.add(BarField.parseFrom(po.getBarData()));
-				for(byte[] tickData : po.getTicksData()) {
-					tickList.add(TickField.parseFrom(tickData));
+			for(int i=dataBarPOList.size() - 1; i>=0; i--){
+				MinBarDataPO po = dataBarPOList.get(i);
+				barList.addFirst(BarField.parseFrom(po.getBarData()));
+				List<byte[]> tickBytes = po.getTicksData();
+				for(int j=tickBytes.size()-1; j>=0; j--) {
+					tickList.addFirst(TickField.parseFrom(tickBytes.get(j)));
 				}
+			}
+			if(barList.size() > expectedMinsOfPreparedData) {
+				break;
 			}
 		}
 		signalPolicy.initByTick(tickList);
@@ -273,7 +278,7 @@ public class ModuleService implements InitializingBean {
 	 * @param moduleName
 	 * @return
 	 */
-	public List<TimeSeriesData> getModuleDataRef(String moduleName) {
+	public Map<String, TimeSeriesValue[]> getModuleDataRef(String moduleName) {
 		return mdlMgr.getModule(moduleName).getSignalPolicy().inspectRefData();
 	}
 

@@ -33,10 +33,6 @@ public class ContractFactory {
 		this.gatewayType = gatewayType;
 	}
 	
-	public List<NormalContract> makeNormalContract(){
-		return contractList.stream().map(cf -> new NormalContract(cf, gatewayType)).toList();
-	}
-	
 	public List<IndexContract> makeIndexContract(){
 		Map<String, Set<ContractField>> idxSrcMap = new HashMap<>();
 		for(ContractField cf : contractList) {
@@ -56,6 +52,6 @@ public class ContractFactory {
 				idxSrcMap.get(symbol).add(cf);
 			}
 		}
-		return idxSrcMap.entrySet().stream().map(e -> new IndexContract(e.getKey(), e.getValue())).toList();
+		return idxSrcMap.entrySet().stream().map(e -> new IndexContract(e.getKey(), gatewayType, e.getValue())).toList();
 	}
 }

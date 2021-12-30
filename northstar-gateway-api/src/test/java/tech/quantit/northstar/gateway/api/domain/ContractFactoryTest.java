@@ -45,13 +45,6 @@ class ContractFactoryTest {
 	}
 
 	@Test
-	void testMakeNormalContract() {
-		ContractFactory contractFactory = new ContractFactory(GatewayType.CTP, list);
-		List<NormalContract> resultList = contractFactory.makeNormalContract();
-		assertThat(resultList).hasSize(6);
-	}
-
-	@Test
 	void testMakeIndexContract() {
 		ContractFactory contractFactory = new ContractFactory(GatewayType.CTP, list);
 		List<IndexContract> idxList = contractFactory.makeIndexContract();

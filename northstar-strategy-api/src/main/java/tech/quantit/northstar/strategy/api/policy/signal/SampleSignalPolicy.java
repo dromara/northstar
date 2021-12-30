@@ -1,5 +1,6 @@
 package tech.quantit.northstar.strategy.api.policy.signal;
 
+import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
 import tech.quantit.northstar.strategy.api.AbstractSignalPolicy;
@@ -9,12 +10,12 @@ import tech.quantit.northstar.strategy.api.annotation.StrategicComponent;
 import tech.quantit.northstar.strategy.api.constant.ModuleState;
 import tech.quantit.northstar.strategy.api.constant.SignalOperation;
 import tech.quantit.northstar.strategy.api.model.DynamicParams;
+import tech.quantit.northstar.strategy.api.model.TimeSeriesValue;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.TickField;
 
 /**
  * 本示例用于展示写一个策略的必要元素
- * 注意：定义完一个类后，需要注册成spring bean。因为项目依赖了spring bean机制来管理，而不是直接的类扫描
  * 
  * ## 风险提示：该策略仅作技术分享，据此交易，风险自担 ##
  * @author KevinHuangwl
@@ -44,6 +45,8 @@ public class SampleSignalPolicy extends AbstractSignalPolicy
 		InitParams initParams = (InitParams) params;
 		this.bindedUnifiedSymbol = initParams.bindedUnifiedSymbol;
 		this.actionInterval = initParams.actionInterval;
+		this.numOfRefData = initParams.numOfRefData;
+		this.periodMins = initParams.periodMins;
 	}
 	
 	/**
@@ -54,6 +57,12 @@ public class SampleSignalPolicy extends AbstractSignalPolicy
 		
 		@Setting(value="绑定合约", order=10)	// Label注解用于定义属性的元信息
 		private String bindedUnifiedSymbol;		// 属性可以为任意多个，当元素为多个时order值用于控制前端的显示顺序
+		
+		@Setting(value="周期时长", order=11, unit="分钟")
+		private int periodMins;
+		
+		@Setting(value="回溯周期数", order=12)
+		private int numOfRefData;
 		
 		@Setting(value="操作间隔", order=20, unit="秒")	// 可以声明单位
 		private int actionInterval;
@@ -117,6 +126,12 @@ public class SampleSignalPolicy extends AbstractSignalPolicy
 	@Override
 	protected void handleBar(BarField bar) {
 		log.debug("策略每分钟触发");
+	}
+
+	@Override
+	public Map<String, TimeSeriesValue[]> inspectRefData() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 }
