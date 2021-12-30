@@ -7,7 +7,6 @@ import tech.quantit.northstar.strategy.api.annotation.Setting;
 import tech.quantit.northstar.strategy.api.annotation.StrategicComponent;
 import tech.quantit.northstar.strategy.api.constant.PriceType;
 import tech.quantit.northstar.strategy.api.model.DynamicParams;
-import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 /**
  * 
@@ -26,8 +25,6 @@ public class SampleDealer extends AbstractDealerPolicy implements DealerPolicy {
 	
 	private int overprice;
 	
-	private int stopPriceTick;
-
 	@Override
 	public String name() {
 		return "示例交易策略";
@@ -50,18 +47,6 @@ public class SampleDealer extends AbstractDealerPolicy implements DealerPolicy {
 		return openVol;
 	}
 
-	/**
-	 * 可以根据需要设置固定止损，甚至更复杂的止损逻辑
-	 */
-	@Override
-	protected double stopLossPrice(double orderPrice, int ticksToStop, DirectionEnum direction) {
-		int factor = FieldUtils.isBuy(direction) ? 1 : -1;
-		if(ticksToStop > 0) {
-			stopPriceTick = ticksToStop;
-		}
-		return orderPrice - factor * stopPriceTick * bindedContract.getPriceTick();
-	}
-	
 	@Override
 	public DynamicParams getDynamicParams() {
 		return new InitParams();
@@ -89,7 +74,6 @@ public class SampleDealer extends AbstractDealerPolicy implements DealerPolicy {
 		this.openPriceTypeStr = initParams.openPriceTypeStr;
 		this.closePriceTypeStr = initParams.closePriceTypeStr;
 		this.overprice = initParams.overprice;
-		this.stopPriceTick = initParams.stopPriceTick;
 	}
 	
 	public static class InitParams extends DynamicParams{
@@ -109,8 +93,6 @@ public class SampleDealer extends AbstractDealerPolicy implements DealerPolicy {
 		@Setting(value="追单超价", order = 40, unit = "Tick")
 		private int overprice;
 		
-		@Setting(value="固定止损", order = 50, unit = "Tick")
-		private int stopPriceTick;
 	}
 
 }

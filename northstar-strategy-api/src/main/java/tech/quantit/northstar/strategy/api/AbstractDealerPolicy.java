@@ -154,9 +154,8 @@ public abstract class AbstractDealerPolicy implements DealerPolicy {
 		PriceType priceType = FieldUtils.isClose(offsetFlag) ? closePriceType() : openPriceType();
 		priceType = priceType == null ? PriceType.ANY_PRICE : priceType;	// 为防止子类没实现，默认使用市价，避免空指针异常
 		double price = PriceResolver.getPrice(priceType, signalPrice, lastTick, FieldUtils.isBuy(direction));
-		double customStopPrice = stopLossPrice(price, ticksToStop, direction);
-		boolean validCustomStopPrice = FieldUtils.isBuy(direction) ? customStopPrice < price : customStopPrice > price;
-		double stopPrice = FieldUtils.isOpen(offsetFlag) && validCustomStopPrice ? customStopPrice : 0;
+		int factor = FieldUtils.isBuy(direction) ? 1 : -1;
+		double stopPrice = ticksToStop > 0 ? lastTick.getLastPrice() - factor * ticksToStop * bindedContract.getPriceTick() : 0;
 		
 		return SubmitOrderReqField.newBuilder()
 				.setOriginOrderId(UUID.randomUUID().toString())
@@ -192,5 +191,4 @@ public abstract class AbstractDealerPolicy implements DealerPolicy {
 	
 	protected abstract int tradeVolume();
 	
-	protected abstract double stopLossPrice(double orderPrice, int ticksToStop, DirectionEnum direction);
 }
