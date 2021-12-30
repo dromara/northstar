@@ -19,7 +19,6 @@ import tech.quantit.northstar.domain.gateway.ContractManager;
 import tech.quantit.northstar.main.handler.broadcast.SocketIOMessageEngine;
 import tech.quantit.northstar.main.persistence.MarketDataRepository;
 import tech.quantit.northstar.main.persistence.po.MinBarDataPO;
-import xyz.redtorch.pb.CoreField.AccountField;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.OrderField;
@@ -55,7 +54,7 @@ public class DataSyncService {
 		for(ContractField c : contractMgr.getAllContracts()) {
 			event.setData(c);
 			event.setEvent(NorthstarEventType.CONTRACT);
-			msgEngine.emitEvent(event, ContractField.class);
+			msgEngine.emitEvent(event);
 		}
 	}
 	
@@ -68,18 +67,18 @@ public class DataSyncService {
 		log.info("异步更新账户信息");
 		for(Entry<String, TradeDayAccount> e : accountMap.entrySet()) {
 			TradeDayAccount account = e.getValue();
-			msgEngine.emitEvent(new NorthstarEvent(NorthstarEventType.ACCOUNT, account.getAccountInfo()), AccountField.class);
+			msgEngine.emitEvent(new NorthstarEvent(NorthstarEventType.ACCOUNT, account.getAccountInfo()));
 			
 			for(PositionField pf : account.getPositions()) {
-				msgEngine.emitEvent(new NorthstarEvent(NorthstarEventType.POSITION, pf), PositionField.class);
+				msgEngine.emitEvent(new NorthstarEvent(NorthstarEventType.POSITION, pf));
 			}
 			
 			for(OrderField of : account.getTradeDayOrders()) {
-				msgEngine.emitEvent(new NorthstarEvent(NorthstarEventType.ORDER, of), OrderField.class);
+				msgEngine.emitEvent(new NorthstarEvent(NorthstarEventType.ORDER, of));
 			}
 			
 			for(TradeField tf : account.getTradeDayTransactions()) {
-				msgEngine.emitEvent(new NorthstarEvent(NorthstarEventType.TRADE, tf), TradeField.class);
+				msgEngine.emitEvent(new NorthstarEvent(NorthstarEventType.TRADE, tf));
 			}
 		}
 	}
@@ -108,7 +107,7 @@ public class DataSyncService {
 			List<MinBarDataPO> dayBars = mdRepo.loadDataByDate(gatewayId, unifiedSymbol, date);
 			for(MinBarDataPO po : dayBars) {
 				ne.setData(BarField.parseFrom(po.getBarData()));
-				msgEngine.emitEvent(ne, BarField.class);
+				msgEngine.emitEvent(ne);
 			}
 			
 			curDate = curDate.plusDays(1);
@@ -120,7 +119,7 @@ public class DataSyncService {
 				.setUnifiedSymbol(unifiedSymbol)
 				.build();
 		ne.setData(bf);
-		msgEngine.emitEvent(ne, BarField.class);
+		msgEngine.emitEvent(ne);
 	}
 	
 	/**

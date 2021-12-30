@@ -1,8 +1,7 @@
 package tech.quantit.northstar.main.handler.broadcast;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.corundumstudio.socketio.SocketIOClient;
 import com.corundumstudio.socketio.SocketIOServer;
@@ -13,7 +12,6 @@ import com.google.protobuf.Message;
 
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.event.NorthstarEvent;
-import tech.quantit.northstar.common.event.NorthstarEventType;
 import tech.quantit.northstar.common.utils.MessagePrinter;
 import xyz.redtorch.pb.CoreField.AccountField;
 import xyz.redtorch.pb.CoreField.BarField;
@@ -29,15 +27,10 @@ import xyz.redtorch.pb.CoreField.TickField;
 public class SocketIOMessageEngine {
 	SocketIOServer server;
 	
-	private Set<NorthstarEventType> mdType = new HashSet<>() {
-		private static final long serialVersionUID = 1L;
-
-		{
-			add(NorthstarEventType.TICK);
-			add(NorthstarEventType.BAR);
-			add(NorthstarEventType.HIS_BAR);
-		}
-	};
+	/**
+	 * 防止信道堵塞而增加的过滤机制
+	 */
+	private Map<String, Long> filterMap = new HashMap<>();
 	
 	public SocketIOMessageEngine(SocketIOServer server) {
 		this.server = server;
@@ -47,36 +40,29 @@ public class SocketIOMessageEngine {
 	/*					消息发送端					  	*/
 	/****************************************************/
 	
-	public void emitEvent(NorthstarEvent event, Class<?> objClz) throws SecurityException, IllegalArgumentException {
-		NorthstarEventType type = event.getEvent();
+	public void emitEvent(NorthstarEvent event) throws SecurityException, IllegalArgumentException {
 		// 为了避免接收端信息拥塞，把行情数据按合约分房间分发数据，可以提升客户端的接收效率
-		if(mdType.contains(type)) {
-			if(type == NorthstarEventType.TICK) {
-				emitTickData(event);
-			}else {
-				emitBarData(event);
+		if(event.getData() instanceof TickField tick) {
+			server.getRoomOperations(tick.getUnifiedSymbol()).sendEvent(event.getEvent().toString(), tick.toByteArray());
+		} else if(event.getData() instanceof BarField bar) {
+			server.getRoomOperations(bar.getUnifiedSymbol()).sendEvent(event.getEvent().toString(), bar.toByteArray());
+		} else if(event.getData() instanceof AccountField account) {
+			if(filterMap.containsKey(account.getAccountId()) && System.currentTimeMillis() - filterMap.get(account.getAccountId()) < 1000) {
+				return;
 			}
-			return;
-		}
-		if(event.getData() instanceof AccountField account) {
 			log.trace("账户信息分发: [{}]", MessagePrinter.print(account));
-		}
-		if(event.getData() instanceof PositionField position) {
+			filterMap.put(account.getAccountId(), System.currentTimeMillis());
+			server.getBroadcastOperations().sendEvent(event.getEvent().toString(), account.toByteArray());
+		} else if(event.getData() instanceof PositionField position) {
+			if(filterMap.containsKey(position.getPositionId()) && System.currentTimeMillis() - filterMap.get(position.getPositionId()) < 1000) {
+				return;
+			}
+			filterMap.put(position.getPositionId(), System.currentTimeMillis());
 			log.trace("持仓信息分发: [{}]", MessagePrinter.print(position));
+			server.getBroadcastOperations().sendEvent(event.getEvent().toString(), position.toByteArray());
+		} else if(event.getData() instanceof Message message) {			
+			server.getBroadcastOperations().sendEvent(event.getEvent().toString(), message.toByteArray());
 		}
-		Message message = (Message) event.getData();
-		server.getBroadcastOperations().sendEvent(event.getEvent().toString(), message.toByteArray());
-	}
-	
-	private void emitTickData(NorthstarEvent event) {
-		TickField tick = (TickField) event.getData();
-		log.trace("Tick: {}", MessagePrinter.print(tick));
-		server.getRoomOperations(tick.getUnifiedSymbol()).sendEvent(event.getEvent().toString(), tick.toByteArray());
-	}
-	
-	private void emitBarData(NorthstarEvent event) {
-		BarField bar = (BarField) event.getData();
-		server.getRoomOperations(bar.getUnifiedSymbol()).sendEvent(event.getEvent().toString(), bar.toByteArray());
 	}
 	
 	/****************************************************/
