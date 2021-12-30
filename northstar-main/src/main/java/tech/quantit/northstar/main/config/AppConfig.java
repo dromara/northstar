@@ -156,7 +156,7 @@ public class AppConfig implements WebMvcConfigurer {
 			}
 		};
 		
-		GlobalMarketRegistry registry = new GlobalMarketRegistry(fastEventEngine, handleContractSave, mdCache);
+		GlobalMarketRegistry registry = new GlobalMarketRegistry(fastEventEngine, handleContractSave, contractMgr::addContract, mdCache);
 		// 加载合约订阅管理器
 		for(SubscriptionManager subMgr : subMgrs) {			
 			registry.register(subMgr);
@@ -180,7 +180,6 @@ public class AppConfig implements WebMvcConfigurer {
 				registry.register(new NormalContract(contract, po.getGatewayType(), po.getUpdateTime()));
 			}
 		}
-		registry.setOnContractSubsciption(contractMgr::addContract);
 		return registry;
 	}
 	
