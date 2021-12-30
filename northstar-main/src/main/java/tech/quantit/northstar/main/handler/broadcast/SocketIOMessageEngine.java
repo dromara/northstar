@@ -15,7 +15,9 @@ import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.event.NorthstarEvent;
 import tech.quantit.northstar.common.event.NorthstarEventType;
 import tech.quantit.northstar.common.utils.MessagePrinter;
+import xyz.redtorch.pb.CoreField.AccountField;
 import xyz.redtorch.pb.CoreField.BarField;
+import xyz.redtorch.pb.CoreField.PositionField;
 import xyz.redtorch.pb.CoreField.TickField;
 
 /**
@@ -45,7 +47,7 @@ public class SocketIOMessageEngine {
 	/*					消息发送端					  	*/
 	/****************************************************/
 	
-	public void emitEvent(NorthstarEvent event, Class<?> objClz) throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+	public void emitEvent(NorthstarEvent event, Class<?> objClz) throws SecurityException, IllegalArgumentException {
 		NorthstarEventType type = event.getEvent();
 		// 为了避免接收端信息拥塞，把行情数据按合约分房间分发数据，可以提升客户端的接收效率
 		if(mdType.contains(type)) {
@@ -54,8 +56,13 @@ public class SocketIOMessageEngine {
 			}else {
 				emitBarData(event);
 			}
-			
 			return;
+		}
+		if(event.getData() instanceof AccountField account) {
+			log.trace("账户信息分发: [{}]", MessagePrinter.print(account));
+		}
+		if(event.getData() instanceof PositionField position) {
+			log.trace("持仓信息分发: [{}]", MessagePrinter.print(position));
 		}
 		Message message = (Message) event.getData();
 		server.getBroadcastOperations().sendEvent(event.getEvent().toString(), message.toByteArray());
