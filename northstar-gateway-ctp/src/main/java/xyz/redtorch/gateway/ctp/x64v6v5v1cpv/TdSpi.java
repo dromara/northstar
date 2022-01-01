@@ -162,14 +162,8 @@ public class TdSpi extends CThostFtdcTraderSpi {
 	private static final Logger logger = LoggerFactory.getLogger(TdSpi.class);
 
 	private GatewayAbstract gatewayAdapter;
-	private String tdHost;
-	private String tdPort;
-	private String brokerId;
 	private String userId;
 	private String password;
-	private String authCode;
-	private String appId;
-	private String userProductInfo;
 	private String logInfo;
 	private String gatewayId;
 
@@ -193,14 +187,8 @@ public class TdSpi extends CThostFtdcTraderSpi {
 
 	TdSpi(GatewayAbstract gatewayAdapter) {
 		this.gatewayAdapter = gatewayAdapter;
-		this.tdHost = gatewayAdapter.getGatewaySetting().getCtpApiSetting().getTdHost();
-		this.tdPort = gatewayAdapter.getGatewaySetting().getCtpApiSetting().getTdPort();
-		this.brokerId = gatewayAdapter.getGatewaySetting().getCtpApiSetting().getBrokerId();
 		this.userId = gatewayAdapter.getGatewaySetting().getCtpApiSetting().getUserId();
 		this.password = gatewayAdapter.getGatewaySetting().getCtpApiSetting().getPassword();
-		this.appId = gatewayAdapter.getGatewaySetting().getCtpApiSetting().getAppId();
-		this.authCode = gatewayAdapter.getGatewaySetting().getCtpApiSetting().getAuthCode();
-		this.userProductInfo = gatewayAdapter.getGatewaySetting().getCtpApiSetting().getUserProductInfo();
 		this.gatewayId = gatewayAdapter.getGatewaySetting().getGatewayId();
 		this.logInfo = "交易网关ID-[" + this.gatewayId + "] [→] ";
 		logger.info("当前TdApi版本号：{}", CThostFtdcTraderApi.GetApiVersion());
@@ -337,6 +325,9 @@ public class TdSpi extends CThostFtdcTraderSpi {
 		logger.warn("{}交易接口使用临时文件夹{}", logInfo, tempFile.getParentFile().getAbsolutePath());
 
 		try {
+			String tdHost = GatewayConstants.SMART_CONNECTOR.bestEndpoint();
+			String tdPort = GatewayConstants.TRADER_PORT;
+			logger.info("使用IP [{}] 连接交易网关", tdPort);
 			cThostFtdcTraderApi = CThostFtdcTraderApi.CreateFtdcTraderApi(tempFile.getAbsolutePath());
 			cThostFtdcTraderApi.RegisterSpi(this);
 			cThostFtdcTraderApi.RegisterFront("tcp://" + tdHost + ":" + tdPort);
@@ -466,7 +457,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 
 		try {
 			CThostFtdcQryInvestorPositionField cThostFtdcQryInvestorPositionField = new CThostFtdcQryInvestorPositionField();
-			cThostFtdcQryInvestorPositionField.setBrokerID(brokerId);
+			cThostFtdcQryInvestorPositionField.setBrokerID(GatewayConstants.BROKER_ID);
 			cThostFtdcQryInvestorPositionField.setInvestorID(userId);
 			cThostFtdcTraderApi.ReqQryInvestorPosition(cThostFtdcQryInvestorPositionField, reqId.incrementAndGet());
 		} catch (Throwable t) {
@@ -495,7 +486,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 		cThostFtdcInputOrderField.setCombOffsetFlag(String.valueOf(CtpConstant.offsetFlagMap.getOrDefault(submitOrderReq.getOffsetFlag(), Character.valueOf('\0'))));
 		cThostFtdcInputOrderField.setInvestorID(userId);
 		cThostFtdcInputOrderField.setUserID(userId);
-		cThostFtdcInputOrderField.setBrokerID(brokerId);
+		cThostFtdcInputOrderField.setBrokerID(GatewayConstants.BROKER_ID);
 		cThostFtdcInputOrderField.setExchangeID(CtpConstant.exchangeMap.getOrDefault(submitOrderReq.getContract().getExchange(), ""));
 		cThostFtdcInputOrderField.setCombHedgeFlag(CtpConstant.hedgeFlagMap.get(submitOrderReq.getHedgeFlag()));
 		cThostFtdcInputOrderField.setContingentCondition(CtpConstant.contingentConditionMap.get(submitOrderReq.getContingentCondition()));
@@ -619,7 +610,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 				cThostFtdcInputOrderActionField.setSessionID(sessionId);
 
 				cThostFtdcInputOrderActionField.setActionFlag(jctpv6v5v1cpx64apiConstants.THOST_FTDC_AF_Delete);
-				cThostFtdcInputOrderActionField.setBrokerID(brokerId);
+				cThostFtdcInputOrderActionField.setBrokerID(GatewayConstants.BROKER_ID);
 				cThostFtdcInputOrderActionField.setInvestorID(userId);
 				cThostFtdcInputOrderActionField.setUserID(userId);
 				cThostFtdcInputOrderActionField.setExchangeID(CtpConstant.exchangeMap.getOrDefault(orderIdToSubmitOrderReqMap.get(orderId).getContract().getExchange(), ""));
@@ -634,7 +625,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 				cThostFtdcInputOrderActionField.setSessionID(orderIdToOrderMap.get(orderId).getSessionId());
 
 				cThostFtdcInputOrderActionField.setActionFlag(jctpv6v5v1cpx64apiConstants.THOST_FTDC_AF_Delete);
-				cThostFtdcInputOrderActionField.setBrokerID(brokerId);
+				cThostFtdcInputOrderActionField.setBrokerID(GatewayConstants.BROKER_ID);
 				cThostFtdcInputOrderActionField.setInvestorID(userId);
 				cThostFtdcInputOrderActionField.setUserID(userId);
 				cThostFtdcInputOrderActionField.setExchangeID(CtpConstant.exchangeMap.getOrDefault(orderIdToOrderMap.get(orderId).getContract().getExchange(), ""));
@@ -662,7 +653,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 			return;
 		}
 
-		if (StringUtils.isEmpty(brokerId)) {
+		if (StringUtils.isEmpty(GatewayConstants.BROKER_ID)) {
 			logger.error("{}BrokerID不允许为空", logInfo);
 			return;
 		}
@@ -677,11 +668,11 @@ public class TdSpi extends CThostFtdcTraderSpi {
 			return;
 		}
 
-		if (StringUtils.isEmpty(appId)) {
+		if (StringUtils.isEmpty(GatewayConstants.APP_ID)) {
 			logger.error("{}AppId不允许为空", logInfo);
 			return;
 		}
-		if (StringUtils.isEmpty(authCode)) {
+		if (StringUtils.isEmpty(GatewayConstants.AUTH_CODE)) {
 			logger.error("{}AuthCode不允许为空", logInfo);
 			return;
 		}
@@ -747,7 +738,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 
 				// 确认结算单
 				CThostFtdcSettlementInfoConfirmField settlementInfoConfirmField = new CThostFtdcSettlementInfoConfirmField();
-				settlementInfoConfirmField.setBrokerID(brokerId);
+				settlementInfoConfirmField.setBrokerID(GatewayConstants.BROKER_ID);
 				settlementInfoConfirmField.setInvestorID(userId);
 				cThostFtdcTraderApi.ReqSettlementInfoConfirm(settlementInfoConfirmField, reqId.incrementAndGet());
 
@@ -828,7 +819,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 				if (pRspInfo.getErrorID() == 0) {
 					logger.warn(logInfo + "交易接口客户端验证成功");
 					CThostFtdcReqUserLoginField reqUserLoginField = new CThostFtdcReqUserLoginField();
-					reqUserLoginField.setBrokerID(this.brokerId);
+					reqUserLoginField.setBrokerID(GatewayConstants.BROKER_ID);
 					reqUserLoginField.setUserID(this.userId);
 					reqUserLoginField.setPassword(this.password);
 					cThostFtdcTraderApi.ReqUserLogin(reqUserLoginField, reqId.incrementAndGet());
@@ -1014,7 +1005,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 			logger.warn("{}交易接口开始查询投资者信息", logInfo);
 			CThostFtdcQryInvestorField pQryInvestor = new CThostFtdcQryInvestorField();
 			pQryInvestor.setInvestorID(userId);
-			pQryInvestor.setBrokerID(brokerId);
+			pQryInvestor.setBrokerID(GatewayConstants.BROKER_ID);
 			cThostFtdcTraderApi.ReqQryInvestor(pQryInvestor, reqId.addAndGet(1));
 		} catch (Throwable t) {
 			logger.error("{}处理结算单确认回报错误", logInfo, t);

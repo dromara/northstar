@@ -25,6 +25,7 @@ import tech.quantit.northstar.common.utils.CommonUtils;
 import tech.quantit.northstar.common.utils.MarketTimeUtil;
 import tech.quantit.northstar.gateway.api.GatewayAbstract;
 import xyz.redtorch.gateway.ctp.common.CtpMarketTimeUtil;
+import xyz.redtorch.gateway.ctp.common.GatewayConstants;
 import xyz.redtorch.gateway.ctp.x64v6v3v15v.api.CThostFtdcDepthMarketDataField;
 import xyz.redtorch.gateway.ctp.x64v6v3v15v.api.CThostFtdcForQuoteRspField;
 import xyz.redtorch.gateway.ctp.x64v6v3v15v.api.CThostFtdcMdApi;
@@ -48,9 +49,6 @@ public class MdSpi extends CThostFtdcMdSpi {
 	private static final Logger logger = LoggerFactory.getLogger(MdSpi.class);
 
 	private GatewayAbstract gatewayAdapter;
-	private String mdHost;
-	private String mdPort;
-	private String brokerId;
 	private String userId;
 	private String password;
 	private String logInfo;
@@ -67,9 +65,6 @@ public class MdSpi extends CThostFtdcMdSpi {
 
 	MdSpi(GatewayAbstract gatewayAdapter) {
 		this.gatewayAdapter = gatewayAdapter;
-		this.mdHost = gatewayAdapter.getGatewaySetting().getCtpApiSetting().getMdHost();
-		this.mdPort = gatewayAdapter.getGatewaySetting().getCtpApiSetting().getMdPort();
-		this.brokerId = gatewayAdapter.getGatewaySetting().getCtpApiSetting().getBrokerId();
 		this.userId = gatewayAdapter.getGatewaySetting().getCtpApiSetting().getUserId();
 		this.password = gatewayAdapter.getGatewaySetting().getCtpApiSetting().getPassword();
 		this.gatewayId = gatewayAdapter.getGatewaySetting().getGatewayId();
@@ -140,6 +135,9 @@ public class MdSpi extends CThostFtdcMdSpi {
 		logger.warn("{}行情接口使用临时文件夹:{}", logInfo, tempFile.getParentFile().getAbsolutePath());
 
 		try {
+			String mdHost = GatewayConstants.SMART_CONNECTOR.bestEndpoint();
+			String mdPort = GatewayConstants.MARKET_PORT;
+			logger.info("使用IP [{}] 连接行情网关", mdHost);
 			cThostFtdcMdApi = CThostFtdcMdApi.CreateFtdcMdApi(tempFile.getAbsolutePath());
 			cThostFtdcMdApi.RegisterSpi(this);
 			cThostFtdcMdApi.RegisterFront("tcp://" + mdHost + ":" + mdPort);
@@ -254,14 +252,14 @@ public class MdSpi extends CThostFtdcMdSpi {
 	}
 
 	private void login() {
-		if (StringUtils.isEmpty(brokerId) || StringUtils.isEmpty(userId) || StringUtils.isEmpty(password)) {
+		if (StringUtils.isEmpty(GatewayConstants.BROKER_ID) || StringUtils.isEmpty(userId) || StringUtils.isEmpty(password)) {
 			logger.error("{}BrokerId UserID Password 不可为空", logInfo);
 			return;
 		}
 		try {
 			// 登录
 			CThostFtdcReqUserLoginField userLoginField = new CThostFtdcReqUserLoginField();
-			userLoginField.setBrokerID(brokerId);
+			userLoginField.setBrokerID(GatewayConstants.BROKER_ID);
 			userLoginField.setUserID(userId);
 			userLoginField.setPassword(password);
 			cThostFtdcMdApi.ReqUserLogin(userLoginField, 0);

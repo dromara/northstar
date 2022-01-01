@@ -7,4 +7,10 @@ public interface GatewayConstants {
 	String APP_ID = "client_northstar_2.0";
 	
 	String BROKER_ID = "1080";
+	
+	SmartGatewayConnector SMART_CONNECTOR = new SmartGatewayConnector();
+	
+	String TRADER_PORT = "42205";
+	
+	String MARKET_PORT = "42213";
 }
