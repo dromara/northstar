@@ -148,7 +148,7 @@ public class StrategyModuleTest {
 	@Test
 	public void testOnEventModuleEventOfStopLoss() {
 		ModuleStatus moduleStatus = new ModuleStatus("module", mock(ModulePosition.class));
-		moduleStatus.updatePosition(factory.makeTradeField("test", 1000, 1, DirectionEnum.D_Sell, OffsetFlagEnum.OF_Open));
+		moduleStatus.updatePosition(factory.makeTradeField("test", 1000, 1, DirectionEnum.D_Sell, OffsetFlagEnum.OF_Open), factory.makeOrderReq("test", DirectionEnum.D_Sell, OffsetFlagEnum.OF_Open, 1, 1000, 990));
 		module = new StrategyModule("mktGateway", tradeGateway, moduleStatus);
 		module.meb = mock(ModuleEventBus.class);
 		module.ti = mock(ModuleTradeIntent.class);
