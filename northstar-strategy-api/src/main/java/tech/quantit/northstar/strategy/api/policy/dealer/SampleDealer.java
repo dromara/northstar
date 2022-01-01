@@ -1,13 +1,11 @@
 package tech.quantit.northstar.strategy.api.policy.dealer;
 
-import tech.quantit.northstar.common.utils.FieldUtils;
 import tech.quantit.northstar.strategy.api.AbstractDealerPolicy;
 import tech.quantit.northstar.strategy.api.DealerPolicy;
 import tech.quantit.northstar.strategy.api.annotation.Setting;
 import tech.quantit.northstar.strategy.api.annotation.StrategicComponent;
 import tech.quantit.northstar.strategy.api.constant.PriceType;
 import tech.quantit.northstar.strategy.api.model.DynamicParams;
-import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 /**
  * 
  * ## 风险提示：该策略仅作技术分享，据此交易，风险自担 ##
@@ -22,8 +20,6 @@ public class SampleDealer extends AbstractDealerPolicy implements DealerPolicy {
 	private String openPriceTypeStr;
 	
 	private String closePriceTypeStr;
-	
-	private int overprice;
 	
 	@Override
 	public String name() {
@@ -52,20 +48,6 @@ public class SampleDealer extends AbstractDealerPolicy implements DealerPolicy {
 		return new InitParams();
 	}
 	
-	/**
-	 * 实现追价逻辑
-	 * 这个方法扩展有一定危机性，容易出错而不好排查
-	 */
-	@Override
-	protected SubmitOrderReqField genTracingOrderReq(SubmitOrderReqField originOrderReq) {
-		int factor = FieldUtils.isBuy(originOrderReq.getDirection()) ? 1 : -1;
-		double originPrice = originOrderReq.getPrice();
-		double tracingPrice = originPrice + factor * overprice * originOrderReq.getContract().getPriceTick();
-		return SubmitOrderReqField.newBuilder(originOrderReq)
-				.setPrice(tracingPrice)
-				.build();
-	}
-
 	@Override
 	public void initWithParams(DynamicParams params) {
 		InitParams initParams = (InitParams) params;
@@ -73,7 +55,6 @@ public class SampleDealer extends AbstractDealerPolicy implements DealerPolicy {
 		this.openVol = initParams.openVol;
 		this.openPriceTypeStr = initParams.openPriceTypeStr;
 		this.closePriceTypeStr = initParams.closePriceTypeStr;
-		this.overprice = initParams.overprice;
 	}
 	
 	public static class InitParams extends DynamicParams{
@@ -89,9 +70,6 @@ public class SampleDealer extends AbstractDealerPolicy implements DealerPolicy {
 		
 		@Setting(value="平仓价格类型", order = 31, options = {"市价","对手价","最新价","排队价","信号价"})
 		private String closePriceTypeStr;
-		
-		@Setting(value="追单超价", order = 40, unit = "Tick")
-		private int overprice;
 		
 	}
 

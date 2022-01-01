@@ -150,7 +150,7 @@ public abstract class AbstractDealerPolicy implements DealerPolicy {
 				.build();
 	}
 
-	protected SubmitOrderReqField genOrderReq(DirectionEnum direction, OffsetFlagEnum offsetFlag, double signalPrice, int ticksToStop) {
+	private SubmitOrderReqField genOrderReq(DirectionEnum direction, OffsetFlagEnum offsetFlag, double signalPrice, int ticksToStop) {
 		PriceType priceType = FieldUtils.isClose(offsetFlag) ? closePriceType() : openPriceType();
 		priceType = priceType == null ? PriceType.ANY_PRICE : priceType;	// 为防止子类没实现，默认使用市价，避免空指针异常
 		double price = PriceResolver.getPrice(priceType, signalPrice, lastTick, FieldUtils.isBuy(direction));
@@ -176,7 +176,8 @@ public abstract class AbstractDealerPolicy implements DealerPolicy {
 				.build();
 	}
 	
-	protected SubmitOrderReqField genTracingOrderReq(SubmitOrderReqField originOrderReq) {
+	// 按价格类型重新计算下单价格
+	private SubmitOrderReqField genTracingOrderReq(SubmitOrderReqField originOrderReq) {
 		PriceType priceType = FieldUtils.isClose(originOrderReq.getOffsetFlag()) ? closePriceType() : openPriceType();
 		double tracePrice = PriceResolver.getPrice(priceType, originOrderReq.getPrice(), lastTick, FieldUtils.isBuy(originOrderReq.getDirection()));
 		return originOrderReq.toBuilder()
