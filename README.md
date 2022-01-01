@@ -27,7 +27,7 @@
 全栈技术爱好者、小型私募技术团队
 
 ## 社群支持
-详情可私聊
+![Image](https://images.gitee.com/uploads/images/2022/0101/195241_2a9e70da_1676852.jpeg "微信图片_20220101195229.jpg")
 
 ## 运行环境
 建议使用Linux云服务器
