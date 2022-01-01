@@ -27,7 +27,7 @@ class MovingAverageTest {
 	void test() {
 		Indicator ma10 = new MovingAverage(symbol, 10, ValueType.HIGH);
 		for(double val : sample) {
-			ma10.onBar(BarField.newBuilder().setHighPrice(val).build());
+			ma10.onBar(BarField.newBuilder().setUnifiedSymbol(symbol).setHighPrice(val).build());
 		}
 		for(int i=0; i<10; i++) {
 			double[] values = new double[10];

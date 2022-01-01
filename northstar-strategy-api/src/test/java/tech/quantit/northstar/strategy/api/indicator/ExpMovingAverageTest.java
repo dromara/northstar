@@ -27,7 +27,7 @@ class ExpMovingAverageTest {
 		int size = results.length;
 		Indicator ema5 = new ExpMovingAverage(symbol, 5, ValueType.CLOSE);
 		for(int i=0; i<size+4; i++) {
-			ema5.onBar(BarField.newBuilder().setClosePrice(sample[i]).build());
+			ema5.onBar(BarField.newBuilder().setUnifiedSymbol(symbol).setClosePrice(sample[i]).build());
 		}
 		for(int i=0; i<5; i++) {
 			assertThat(ema5.value(i)).isCloseTo(results[results.length - 1 - i], offset(2D));

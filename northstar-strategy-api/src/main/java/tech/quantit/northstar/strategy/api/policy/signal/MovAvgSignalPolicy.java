@@ -125,10 +125,10 @@ public class MovAvgSignalPolicy extends AbstractSignalPolicy
 
 	@Override
 	public void initByBar(Iterable<BarField> bars) {
-//		for(BarField bar : bars) {
-//			maFast.onBar(bar);
-//			maSlow.onBar(bar);
-//		}
+		for(BarField bar : bars) {
+			maFast.onBar(bar);
+			maSlow.onBar(bar);
+		}
 	}
 
 }
