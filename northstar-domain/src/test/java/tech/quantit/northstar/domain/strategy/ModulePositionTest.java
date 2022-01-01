@@ -62,7 +62,7 @@ public class ModulePositionTest {
 				.moduleName(NAME)
 				.log(log)
 				.build();
-		p1.merge(buyTrade);
+		p1.merge(buyTrade, 0);
 		p1.onTick(tick);
 		assertThat(p1.profit()).isEqualTo(10000);
 		
@@ -70,7 +70,7 @@ public class ModulePositionTest {
 				.moduleName(NAME)
 				.log(log)
 				.build();
-		p2.merge(sellTrade);
+		p2.merge(sellTrade, 0);
 		p2.onTick(tick);
 		assertThat(p2.profit()).isEqualTo(-5000);
 	}
@@ -87,8 +87,7 @@ public class ModulePositionTest {
 	public void shouldTriggerStopLoss() {
 		Consumer<ModuleDealRecord> callback = mock(Consumer.class);
 		ModulePosition p1 = ModulePosition.builder().moduleName(NAME).log(log).build();
-		p1.merge(sellTrade);
-		p1.stopLoss(2100);
+		p1.merge(sellTrade, 2100);
 		p1.meb = mock(ModuleEventBus.class);
 		p1.onTick(tick);
 		verify(p1.meb).post(any(ModuleEvent.class));
@@ -98,8 +97,7 @@ public class ModulePositionTest {
 	@Test
 	public void shouldNotTriggerStopLoss() {
 		ModulePosition p1 = ModulePosition.builder().moduleName(NAME).log(log).build();
-		p1.merge(sellTrade);
-		p1.stopLoss(2101);
+		p1.merge(sellTrade, 2101);
 		p1.meb = mock(ModuleEventBus.class);
 		p1.onTick(tick);
 		verify(p1.meb, times(0)).post(any(ModuleEvent.class));
@@ -108,7 +106,7 @@ public class ModulePositionTest {
 	@Test
 	public void testOpenPrice() {
 		ModulePosition p1 = ModulePosition.builder().moduleName(NAME).log(log).build();
-		p1.merge(buyTrade);
+		p1.merge(buyTrade, 0);
 		assertThat(p1.getOpenPrice()).isEqualTo(2000);
 	}
 	
@@ -144,7 +142,7 @@ public class ModulePositionTest {
 	@Test
 	public void shouldEmitOrderPassed() {
 		ModulePosition p1 = ModulePosition.builder().moduleName(NAME).log(log).build();
-		p1.merge(buyTrade);
+		p1.merge(buyTrade, 0);
 		p1.lastTick = TickField.newBuilder().setTradingDay(sellTrade.getTradingDay()).build();
 		ModuleEventBus meb = mock(ModuleEventBus.class);
 		p1.setEventBus(meb);
@@ -189,7 +187,7 @@ public class ModulePositionTest {
 	@Test
 	public void shouldEmitOrderRetained() {
 		ModulePosition p1 = ModulePosition.builder().moduleName(NAME).log(log).build();
-		p1.merge(buyTrade);
+		p1.merge(buyTrade, 0);
 		p1.lastTick = TickField.newBuilder().setTradingDay(sellTrade.getTradingDay()).build();
 		ModuleEventBus meb = mock(ModuleEventBus.class);
 		p1.setEventBus(meb);
@@ -211,8 +209,8 @@ public class ModulePositionTest {
 	@Test
 	public void shouldAddPosition() {
 		ModulePosition mp = ModulePosition.builder().moduleName(NAME).log(log).build();
-		mp.merge(buyTrade);
-		mp.merge(buyTrade2);
+		mp.merge(buyTrade, 0);
+		mp.merge(buyTrade2, 0);
 		assertThat(mp.getDirection()).isEqualTo(PositionDirectionEnum.PD_Long);
 		assertThat(mp.getVolume()).isEqualTo(18);
 		assertThat(mp.getContract()).isEqualTo(buyTrade.getContract());
@@ -222,8 +220,8 @@ public class ModulePositionTest {
 	@Test
 	public void shouldReducePosition() {
 		ModulePosition mp = ModulePosition.builder().moduleName(NAME).log(log).build();
-		mp.merge(buyTrade);
-		mp.merge(sellTrade2);
+		mp.merge(buyTrade, 0);
+		mp.merge(sellTrade2, 0);
 		assertThat(mp.getDirection()).isEqualTo(PositionDirectionEnum.PD_Long);
 		assertThat(mp.getVolume()).isEqualTo(2);
 		assertThat(mp.getContract()).isEqualTo(buyTrade.getContract());
@@ -233,22 +231,22 @@ public class ModulePositionTest {
 	@Test
 	public void shouldThrowIfNotMatchSymbol() {
 		ModulePosition mp = ModulePosition.builder().moduleName(NAME).log(log).build();
-		mp.merge(buyTrade);
+		mp.merge(buyTrade, 0);
 		assertThrows(IllegalStateException.class, ()->{			
-			mp.merge(buyTrade3);
+			mp.merge(buyTrade3, 0);
 		});
 	}
 	
 	@Test
 	public void shouldReverseDirection() {
 		ModulePosition mp = ModulePosition.builder().moduleName(NAME).log(log).build();
-		mp.merge(buyTrade);
+		mp.merge(buyTrade, 0);
 		assertThat(mp.getDirection()).isEqualTo(PositionDirectionEnum.PD_Long);
 		assertThat(mp.getOpenPrice()).isCloseTo(2000, offset(1e-6));
-		mp.merge(sellTrade);
+		mp.merge(sellTrade, 0);
 		assertThat(mp.getVolume()).isZero();
 		assertThat(mp.getDirection()).isEqualTo(PositionDirectionEnum.PD_Unknown);
-		mp.merge(sellTrade);
+		mp.merge(sellTrade, 0);
 		assertThat(mp.getVolume()).isEqualTo(10);
 		assertThat(mp.getDirection()).isEqualTo(PositionDirectionEnum.PD_Short);
 		assertThat(mp.getContract()).isEqualTo(mp.getContract());

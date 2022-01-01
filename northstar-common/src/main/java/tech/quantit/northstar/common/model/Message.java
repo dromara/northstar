@@ -3,6 +3,7 @@ package tech.quantit.northstar.common.model;
 import java.time.LocalDateTime;
 
 import lombok.Data;
+import tech.quantit.northstar.common.utils.MessagePrinter;
 import xyz.redtorch.pb.CoreField.NoticeField;
 import xyz.redtorch.pb.CoreField.OrderField;
 import xyz.redtorch.pb.CoreField.TradeField;
@@ -30,10 +31,10 @@ public class Message {
 	}
 	
 	public Message(OrderField order, String[] receivers) {
-		this(String.format("Northstar下单通知 - [%s]", order.getGatewayId()), order.toString(), receivers);
+		this(String.format("Northstar下单通知 - [%s]", order.getGatewayId()), MessagePrinter.print(order), receivers);
 	}
 	
 	public Message(TradeField trade, String[] receivers) {
-		this(String.format("Northstar成交通知 - [%s]", trade.getGatewayId()), trade.toString(), receivers);
+		this(String.format("Northstar成交通知 - [%s]", trade.getGatewayId()), MessagePrinter.print(trade), receivers);
 	}
 }

@@ -147,9 +147,10 @@ public class StrategyModule implements EventDrivenComponent{
 			meb.post(event.getData());
 		}
 		if(ti != null && event.getData() instanceof TradeField trade && trade.getOriginOrderId().equals(ti.getSubmitOrderReq().getOriginOrderId())) {			
+			SubmitOrderReqField orderReq = ti.getSubmitOrderReq();
 			log.debug("[{}] 收到成交回报，订单号:{}", moduleStatus.getModuleName(), trade.getOriginOrderId());
 			ti.onTrade(trade);
-			moduleStatus.updatePosition(trade);
+			moduleStatus.updatePosition(trade, orderReq);
 			savingTradeCallback.accept(trade);
 		} 
 		if(ti !=null && event.getData() instanceof OrderField order && order.getOriginOrderId().equals(ti.getSubmitOrderReq().getOriginOrderId())) {			

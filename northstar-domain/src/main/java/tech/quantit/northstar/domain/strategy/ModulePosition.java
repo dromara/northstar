@@ -77,7 +77,7 @@ public class ModulePosition implements TickDataAware, EventDrivenComponent{
 	@Setter
 	private Consumer<ModulePositionInfo> positionSavingCallback;
 	
-	public ModulePosition merge(TradeField trade){
+	public ModulePosition merge(TradeField trade, double stopPrice){
 		if(volume > 0 && !StringUtils.equals(trade.getContract().getUnifiedSymbol(), contract.getUnifiedSymbol())) {
 			String errMsg = String.format("持仓不匹配，不能叠加: %s | %s", trade.getContract().getUnifiedSymbol(), contract.getUnifiedSymbol());
 			throw new IllegalStateException(errMsg);
@@ -91,6 +91,7 @@ public class ModulePosition implements TickDataAware, EventDrivenComponent{
 			multipler = contract.getMultiplier();
 			volume = trade.getVolume();
 			direction = convertDir(trade.getDirection());
+			stopLoss = new StopLoss(direction, stopPrice);
 			outputCurrentStatus();
 			applySaving();
 			return this;
@@ -114,6 +115,7 @@ public class ModulePosition implements TickDataAware, EventDrivenComponent{
 				volume = Math.abs(volume - trade.getVolume());
 			} else {
 				volume = 0;
+				stopLoss = null;
 				direction = PositionDirectionEnum.PD_Unknown;
 			}
 			outputCurrentStatus();

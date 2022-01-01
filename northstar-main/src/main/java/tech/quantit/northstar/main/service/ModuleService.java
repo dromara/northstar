@@ -48,6 +48,7 @@ import tech.quantit.northstar.strategy.api.model.TimeSeriesValue;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.ContractField;
+import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TickField;
 import xyz.redtorch.pb.CoreField.TradeField;
 
@@ -354,8 +355,14 @@ public class ModuleService implements InitializingBean {
 				.setContract(contract)
 				.setDirection(FieldUtils.isLong(posInfo.getPositionDir()) ? DirectionEnum.D_Buy : DirectionEnum.D_Sell)
 				.build();
-		moduleStatus.updatePosition(simTrade);
-		moduleStatus.getLogicalPosition().stopLoss(posInfo.getStopLossPrice());
+		SubmitOrderReqField simOrderReq = SubmitOrderReqField.newBuilder()
+				.setDirection(FieldUtils.isLong(posInfo.getPositionDir()) ? DirectionEnum.D_Buy : DirectionEnum.D_Sell)
+				.setVolume(posInfo.getVolume())
+				.setContract(contract)
+				.setPrice(posInfo.getOpenPrice())
+				.setStopPrice(posInfo.getStopLossPrice())
+				.build();
+		moduleStatus.updatePosition(simTrade, simOrderReq);
 		List<ModulePositionInfo> posList = List.of(moduleStatus.getLogicalPosition().convertTo());
 		moduleRepo.saveTradeRecord(ModuleTradeRecord.builder()
 				.moduleName(moduleName)

@@ -7,6 +7,7 @@ import tech.quantit.northstar.common.utils.FieldUtils;
 import tech.quantit.northstar.strategy.api.constant.ModuleState;
 import tech.quantit.northstar.strategy.api.event.ModuleEventBus;
 import tech.quantit.northstar.strategy.api.log.NorthstarLoggerFactory;
+import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TradeField;
 
 /**
@@ -45,8 +46,8 @@ public class ModuleStatus {
 	 * 更新持仓
 	 * @param position
 	 */
-	public void updatePosition(TradeField trade) {
-		logicalPosition.merge(trade);
+	public void updatePosition(TradeField trade, SubmitOrderReqField orderReq) {
+		logicalPosition.merge(trade, orderReq.getStopPrice());
 		ModuleState state = getMergedState();
 		stateMachine.setState(state);
 		

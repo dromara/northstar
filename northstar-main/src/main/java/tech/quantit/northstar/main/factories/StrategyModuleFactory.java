@@ -80,6 +80,7 @@ public class StrategyModuleFactory {
 	
 	private ModuleStatus convertStatus(ModuleInfo moduleInfo, List<ModulePositionInfo> positionInfos, ModuleEventBus meb) {
 		if(positionInfos.isEmpty()) {
+			// 初始化模组持仓
 			ModulePosition mp = ModulePosition.builder()
 					.moduleName(moduleInfo.getModuleName())
 					.direction(PositionDirectionEnum.PD_Unknown)
@@ -90,6 +91,8 @@ public class StrategyModuleFactory {
 					.build();
 			return new ModuleStatus(moduleInfo.getModuleName(), mp);
 		} else {
+			// 恢复模组持仓记录
+			// TODO 暂时只考虑了简单的持仓情况
 			ModulePositionInfo mpi = positionInfos.get(0);
 			ContractField contract = contractMgr.getContract(mpi.getUnifiedSymbol());
 			ModulePosition mp = ModulePosition.builder()

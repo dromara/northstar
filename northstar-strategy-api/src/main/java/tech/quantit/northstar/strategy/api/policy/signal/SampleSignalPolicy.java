@@ -108,7 +108,7 @@ public class SampleSignalPolicy extends AbstractSignalPolicy
 			log.info("开始交易");
 			if(currentState == ModuleState.EMPTY) {
 				SignalOperation op = (++seed & 1) > 0 ? SignalOperation.BUY_OPEN : SignalOperation.SELL_OPEN;
-				emit(op);
+				emit(op, 0, 5);	// 假设固定止损为5个价位
 			}
 			if(currentState == ModuleState.HOLDING_LONG) {	
 				emit(SignalOperation.SELL_CLOSE);
