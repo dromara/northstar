@@ -28,6 +28,7 @@ import tech.quantit.northstar.common.event.NorthstarEventType;
 import tech.quantit.northstar.gateway.api.GatewayAbstract;
 import tech.quantit.northstar.gateway.api.domain.NormalContract;
 import xyz.redtorch.gateway.ctp.common.CtpContractNameResolver;
+import xyz.redtorch.gateway.ctp.common.GatewayConstants;
 import xyz.redtorch.gateway.ctp.x64v6v5v1cpv.api.CThostFtdcAccountregisterField;
 import xyz.redtorch.gateway.ctp.x64v6v5v1cpv.api.CThostFtdcBatchOrderActionField;
 import xyz.redtorch.gateway.ctp.x64v6v5v1cpv.api.CThostFtdcBrokerTradingAlgosField;
@@ -688,10 +689,10 @@ public class TdSpi extends CThostFtdcTraderSpi {
 		try {
 			gatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.LOGGING_IN, gatewayId);
 			CThostFtdcReqAuthenticateField authenticateField = new CThostFtdcReqAuthenticateField();
-			authenticateField.setAppID(appId);
-			authenticateField.setAuthCode(authCode);
-			authenticateField.setBrokerID(brokerId);
-			authenticateField.setUserProductInfo(userProductInfo);
+			authenticateField.setAppID(GatewayConstants.APP_ID);
+			authenticateField.setAuthCode(GatewayConstants.AUTH_CODE);
+			authenticateField.setBrokerID(GatewayConstants.BROKER_ID);
+			authenticateField.setUserProductInfo(GatewayConstants.APP_ID);
 			authenticateField.setUserID(userId);
 			cThostFtdcTraderApi.ReqAuthenticate(authenticateField, reqId.incrementAndGet());
 		} catch (Throwable t) {
