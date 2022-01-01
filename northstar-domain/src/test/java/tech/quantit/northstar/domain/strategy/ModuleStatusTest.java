@@ -34,8 +34,9 @@ class ModuleStatusTest {
 	@Test
 	void testUpdatePosition() {
 		ms = new ModuleStatus("name", mp);
+		ms.logicalPosition = mock(ModulePosition.class);
 		ms.updatePosition(factory.makeTradeField("rb2210", 1000, 1, DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open), factory.makeOrderReq("rb2210", DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open, 1, 1000, 990));
-		verify(mp).merge(any(TradeField.class), eq(990));
+		verify(ms.logicalPosition).merge(any(TradeField.class), eq(990D));
 	}
 
 	@Test
