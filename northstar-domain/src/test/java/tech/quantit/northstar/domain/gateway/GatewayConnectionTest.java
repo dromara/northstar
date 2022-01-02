@@ -10,7 +10,6 @@ import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.common.constant.GatewayUsage;
 import tech.quantit.northstar.common.model.CtpSettings;
 import tech.quantit.northstar.common.model.GatewayDescription;
-import tech.quantit.northstar.domain.gateway.GatewayConnection;
 
 public class GatewayConnectionTest {
 	
@@ -19,16 +18,9 @@ public class GatewayConnectionTest {
 	@BeforeEach
 	public void prepare() {
 		CtpSettings settings = new CtpSettings();
-		settings.setAppId("app123456");
-		settings.setAuthCode("auth321564");
 		settings.setBrokerId("pingan");
-		settings.setMdHost("127.0.0.1");
-		settings.setMdPort("8080");
 		settings.setPassword("adslfkjals");
-		settings.setTdHost("127.0.0.1");
-		settings.setTdPort("8081");
 		settings.setUserId("kevin");
-		settings.setUserProductInfo("productioninfo");
 		GatewayDescription gd = GatewayDescription.builder()
 				.gatewayId("testGateway")
 				.gatewayType(GatewayType.CTP)
