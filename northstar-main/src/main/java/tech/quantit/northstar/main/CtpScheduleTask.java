@@ -12,6 +12,7 @@ import tech.quantit.northstar.domain.gateway.GatewayAndConnectionManager;
 import tech.quantit.northstar.domain.gateway.GatewayConnection;
 import tech.quantit.northstar.gateway.api.Gateway;
 import tech.quantit.northstar.main.utils.HolidayManager;
+import xyz.redtorch.gateway.ctp.common.GatewayConstants;
 
 @Slf4j
 @Component
@@ -34,16 +35,19 @@ public class CtpScheduleTask {
 		if(holidayMgr.isHoliday(LocalDateTime.now())) {
 			return;
 		}
+		GatewayConstants.SMART_CONNECTOR.update();
 		connectIfNotConnected();
 		log.debug("开盘时间连线巡检");
 	}
 	
 	@Scheduled(cron="0 55 8,20 ? * 1-5")
-	public void dailyCheckConnection() {
+	public void dailyCheckConnection() throws InterruptedException {
 		if(holidayMgr.isHoliday(LocalDateTime.now())) {
 			log.debug("当前为假期，不进行连线");
 			return;
 		}
+		GatewayConstants.SMART_CONNECTOR.update();
+		Thread.sleep(10000);
 		connectIfNotConnected();
 		log.info("日连线定时任务");
 	}

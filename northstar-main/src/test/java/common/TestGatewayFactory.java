@@ -14,16 +14,9 @@ public class TestGatewayFactory {
 	public static GatewaySettings makeGatewaySettings(Class<? extends GatewaySettings> type) {
 		if(type == CtpSettings.class) {
 			return CtpSettings.builder()
-					.appId("testAppId")
-					.authCode("testAuthCode")
 					.brokerId("9999")
-					.mdHost("127.0.0.1")
-					.mdPort("12345")
-					.tdHost("127.0.0.1")
-					.tdPort("65432")
 					.userId(RandomStringUtils.random(10))
 					.password(RandomStringUtils.random(10))
-					.userProductInfo(RandomStringUtils.random(10))
 					.build();
 		}
 		if(type == SimSettings.class) {

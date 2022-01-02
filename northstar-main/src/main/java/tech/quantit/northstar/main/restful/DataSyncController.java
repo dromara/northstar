@@ -30,7 +30,7 @@ public class DataSyncController {
 	}
 	
 	@GetMapping("/his/bar")
-	public ResultBean<Void> historyBars(String gatewayId, String unifiedSymbol, String startDate, String endDate) throws Exception {
+	public ResultBean<List<byte[]>> historyBars(String gatewayId, String unifiedSymbol, String startDate, String endDate) throws Exception {
 		Assert.notBlank(gatewayId);
 		Assert.notBlank(unifiedSymbol);
 		if(StringUtils.isEmpty(startDate)) {
@@ -41,8 +41,8 @@ public class DataSyncController {
 		}
 		LocalDate dateStart = LocalDate.parse(startDate, DateTimeConstant.D_FORMAT_INT_FORMATTER);
 		LocalDate dateEnd = LocalDate.parse(endDate, DateTimeConstant.D_FORMAT_INT_FORMATTER);
-		service.asyncLoadHistoryBarData(gatewayId, unifiedSymbol, dateStart, dateEnd);
-		return new ResultBean<>(null);
+		
+		return new ResultBean<>(service.loadHistoryBarData(gatewayId, unifiedSymbol, dateStart, dateEnd));
 	}
 	
 	@GetMapping("/contracts")
