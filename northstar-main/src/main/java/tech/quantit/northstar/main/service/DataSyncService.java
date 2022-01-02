@@ -3,6 +3,7 @@ package tech.quantit.northstar.main.service;
 import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentMap;
@@ -93,7 +94,7 @@ public class DataSyncService {
 	 * @throws NoSuchMethodException 
 	 * @throws Exception 
 	 */
-	public void asyncLoadHistoryBarData(String gatewayId, String unifiedSymbol, LocalDate startDate, LocalDate endDate) throws InvalidProtocolBufferException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+	public List<byte[]> loadHistoryBarData(String gatewayId, String unifiedSymbol, LocalDate startDate, LocalDate endDate) throws InvalidProtocolBufferException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		// 自动处理起止日期反转的情况
 		if(startDate.isAfter(endDate)) {
 			LocalDate tmpDate = startDate;
@@ -101,25 +102,18 @@ public class DataSyncService {
 			endDate = tmpDate;
 		}
 		LocalDate curDate = startDate;
-		NorthstarEvent ne = new NorthstarEvent(NorthstarEventType.HIS_BAR, null);
+		List<byte[]> results = new LinkedList<>();
 		while(!curDate.isAfter(endDate)) {
 			String date = curDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER);
 			List<MinBarDataPO> dayBars = mdRepo.loadDataByDate(gatewayId, unifiedSymbol, date);
 			for(MinBarDataPO po : dayBars) {
-				ne.setData(BarField.parseFrom(po.getBarData()));
-				msgEngine.emitEvent(ne);
+				results.add(po.getBarData());
 			}
 			
 			curDate = curDate.plusDays(1);
 		}
 		
-		// 历史行情结束信号
-		BarField bf = BarField.newBuilder()
-				.setGatewayId(gatewayId)
-				.setUnifiedSymbol(unifiedSymbol)
-				.build();
-		ne.setData(bf);
-		msgEngine.emitEvent(ne);
+		return results;
 	}
 	
 	/**
