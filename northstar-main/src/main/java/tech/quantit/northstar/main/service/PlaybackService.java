@@ -63,7 +63,7 @@ public class PlaybackService {
 	public PlaybackService(FastEventEngine feEngine, SandboxModuleManager sandboxMgr, GatewayAndConnectionManager gatewayConnMgr, ContractManager contractMgr,
 			ModuleRepository moduleRepo, MarketDataRepository mdRepo, SimMarket simMarket, SimAccountRepository simAccRepo, GlobalMarketRegistry registry) {
 		simGatewayFactory = new SimGatewayFactory(feEngine, simMarket, simAccRepo, registry);
-		moduleFactory = new StrategyModuleFactory(gatewayConnMgr, contractMgr, moduleRepo);
+		moduleFactory = new StrategyModuleFactory(gatewayConnMgr, contractMgr, moduleRepo, null);
 		pbEngine = new PlaybackEngine(simMarket, sandboxMgr);
 		this.sandboxMgr = sandboxMgr;
 		this.gatewayConnMgr = gatewayConnMgr;

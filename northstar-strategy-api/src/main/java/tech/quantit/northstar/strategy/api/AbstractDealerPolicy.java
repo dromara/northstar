@@ -4,6 +4,8 @@ import java.util.UUID;
 
 import org.slf4j.Logger;
 
+import tech.quantit.northstar.common.IMailSender;
+import tech.quantit.northstar.common.model.Message;
 import tech.quantit.northstar.common.utils.FieldUtils;
 import tech.quantit.northstar.strategy.api.constant.ModuleState;
 import tech.quantit.northstar.strategy.api.constant.PriceType;
@@ -45,6 +47,20 @@ public abstract class AbstractDealerPolicy implements DealerPolicy {
 	
 	protected Logger log;
 	
+	private IMailSender sender;
+	
+	@Override
+	public void setMailSender(IMailSender sender) {
+		this.sender = sender;
+	}
+	
+	@Override
+	public void sendMessage(Message msg) {
+		if(sender != null) {
+			sender.send(msg);
+		}
+	}
+
 	@Override
 	public void onChange(ModuleState state) {
 		currentState = state;
