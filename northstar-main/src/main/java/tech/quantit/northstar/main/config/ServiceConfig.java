@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 
+import tech.quantit.northstar.common.IMailSender;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.domain.account.TradeDayAccount;
 import tech.quantit.northstar.domain.gateway.ContractManager;
@@ -60,8 +61,8 @@ public class ServiceConfig {
 	
 	@Bean
 	public ModuleService moduleService(ApplicationContext ctx, ModuleRepository moduleRepo, MarketDataRepository mdRepo, ExternalJarListener extJarListener,
-			ModuleManager mdlMgr, GatewayAndConnectionManager gatewayConnMgr, ContractManager contractMgr) {
-		return new ModuleService(ctx, moduleRepo, mdRepo, extJarListener, mdlMgr, gatewayConnMgr, contractMgr);
+			ModuleManager mdlMgr, GatewayAndConnectionManager gatewayConnMgr, ContractManager contractMgr, IMailSender sender) {
+		return new ModuleService(ctx, moduleRepo, mdRepo, extJarListener, mdlMgr, gatewayConnMgr, contractMgr, sender);
 	}
 	
 	@Bean

@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
+import tech.quantit.northstar.common.IMailSender;
 import tech.quantit.northstar.domain.gateway.ContractManager;
 import tech.quantit.northstar.domain.gateway.GatewayAndConnectionManager;
 import tech.quantit.northstar.domain.gateway.GatewayConnection;
@@ -46,10 +47,13 @@ public class StrategyModuleFactory {
 	
 	private ModuleRepository moduleRepo;
 	
-	public StrategyModuleFactory(GatewayAndConnectionManager gatewayConnMgr, ContractManager contractMgr, ModuleRepository moduleRepo) {
+	private IMailSender sender;
+	
+	public StrategyModuleFactory(GatewayAndConnectionManager gatewayConnMgr, ContractManager contractMgr, ModuleRepository moduleRepo, IMailSender sender) {
 		this.gatewayConnMgr = gatewayConnMgr;
 		this.contractMgr = contractMgr;
 		this.moduleRepo = moduleRepo;
+		this.sender = sender;
 	}
 	
 	public StrategyModule makeModule(ModuleInfo moduleInfo) throws Exception {
@@ -118,6 +122,7 @@ public class StrategyModuleFactory {
 		for(ComponentAndParamsPair pair : moduleInfo.getRiskControlRules()) {
 			RiskControlRule rule = resolveComponent(pair);
 			rule.setModuleName(moduleInfo.getModuleName());
+			rule.setMailSender(sender);
 			riskRules.add(rule);
 		}
 		
@@ -126,7 +131,9 @@ public class StrategyModuleFactory {
 		DealerPolicy dealer = resolveComponent(moduleInfo.getDealer());
 		
 		signalPolicy.setModuleName(moduleInfo.getModuleName());
+		signalPolicy.setMailSender(sender);
 		dealer.setModuleName(moduleInfo.getModuleName());
+		dealer.setMailSender(sender);
 		
 		signalPolicy.setBindedContract(contractMgr.getContract(signalPolicy.bindedContractSymbol()));
 		dealer.setBindedContract(contractMgr.getContract(dealer.bindedContractSymbol()));

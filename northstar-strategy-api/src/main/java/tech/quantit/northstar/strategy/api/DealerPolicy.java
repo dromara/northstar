@@ -4,7 +4,7 @@ import tech.quantit.northstar.common.ContractBindedAware;
 import tech.quantit.northstar.common.TickDataAware;
 
 public interface DealerPolicy extends TickDataAware, EventDrivenComponent, StateChangeListener, DynamicParamsAware,
-	ContractBindedAware, ModuleNamingAware {
+	ContractBindedAware, ModuleNamingAware, MailSenderAware {
 
 	/**
 	 * 策略名称

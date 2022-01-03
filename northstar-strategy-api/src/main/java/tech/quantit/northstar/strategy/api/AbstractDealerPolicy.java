@@ -4,6 +4,8 @@ import java.util.UUID;
 
 import org.slf4j.Logger;
 
+import tech.quantit.northstar.common.IMailSender;
+import tech.quantit.northstar.common.model.Message;
 import tech.quantit.northstar.common.utils.FieldUtils;
 import tech.quantit.northstar.strategy.api.constant.ModuleState;
 import tech.quantit.northstar.strategy.api.constant.PriceType;
@@ -45,6 +47,20 @@ public abstract class AbstractDealerPolicy implements DealerPolicy {
 	
 	protected Logger log;
 	
+	private IMailSender sender;
+	
+	@Override
+	public void setMailSender(IMailSender sender) {
+		this.sender = sender;
+	}
+	
+	@Override
+	public void sendMessage(Message msg) {
+		if(sender != null) {
+			sender.send(msg);
+		}
+	}
+
 	@Override
 	public void onChange(ModuleState state) {
 		currentState = state;
@@ -102,7 +118,7 @@ public abstract class AbstractDealerPolicy implements DealerPolicy {
 			default: 
 				throw new IllegalStateException("未知信号：" + signal);
 			}
-			currentOrderReq = genOrderReq(direction, offsetFlag, signal.getSignalPrice(), signal.getTicksToStop());
+			currentOrderReq = genOrderReq(direction, offsetFlag, signal.getSignalPrice(), signal.getTicksToStop(), signal.getVolume());
 			moduleEventBus.post(new ModuleEvent<>(ModuleEventType.ORDER_REQ_CREATED, currentOrderReq));
 			if(log.isInfoEnabled()) {				
 				log.info("[{}->{}] 生成订单", getModuleName(), name());
@@ -150,10 +166,11 @@ public abstract class AbstractDealerPolicy implements DealerPolicy {
 				.build();
 	}
 
-	private SubmitOrderReqField genOrderReq(DirectionEnum direction, OffsetFlagEnum offsetFlag, double signalPrice, int ticksToStop) {
+	private SubmitOrderReqField genOrderReq(DirectionEnum direction, OffsetFlagEnum offsetFlag, double signalPrice, int ticksToStop, int volume) {
 		PriceType priceType = FieldUtils.isClose(offsetFlag) ? closePriceType() : openPriceType();
 		priceType = priceType == null ? PriceType.ANY_PRICE : priceType;	// 为防止子类没实现，默认使用市价，避免空指针异常
-		double price = PriceResolver.getPrice(priceType, signalPrice, lastTick, FieldUtils.isBuy(direction));
+		// 当信号价大于零时，优先使用信号价
+		double price = signalPrice > 0 ? signalPrice : PriceResolver.getPrice(priceType, signalPrice, lastTick, FieldUtils.isBuy(direction));
 		int factor = FieldUtils.isBuy(direction) ? 1 : -1;
 		double stopPrice = ticksToStop > 0 ? lastTick.getLastPrice() - factor * ticksToStop * bindedContract.getPriceTick() : 0;
 		
@@ -164,7 +181,7 @@ public abstract class AbstractDealerPolicy implements DealerPolicy {
 				.setOffsetFlag(offsetFlag)
 				.setStopPrice(stopPrice)
 				.setPrice(price)
-				.setVolume(tradeVolume())
+				.setVolume(volume > 0 ? volume : tradeVolume())		//	当信号交易量大于零时，优先使用信号交易量
 				.setHedgeFlag(HedgeFlagEnum.HF_Speculation)
 				.setTimeCondition(priceType == PriceType.ANY_PRICE ? TimeConditionEnum.TC_IOC : TimeConditionEnum.TC_GFD)
 				.setOrderPriceType(priceType == PriceType.ANY_PRICE ? OrderPriceTypeEnum.OPT_AnyPrice : OrderPriceTypeEnum.OPT_LimitPrice)

@@ -9,7 +9,7 @@ import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.TickField;
 
 public interface SignalPolicy extends TickDataAware, BarDataAware, EventDrivenComponent, StateChangeListener,
-	DynamicParamsAware, ContractBindedAware, ModuleNamingAware {
+	DynamicParamsAware, ContractBindedAware, ModuleNamingAware, MailSenderAware {
 
 	/**
 	 * 策略名称

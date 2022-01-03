@@ -16,6 +16,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 
 import lombok.extern.slf4j.Slf4j;
+import tech.quantit.northstar.common.IMailSender;
 import tech.quantit.northstar.common.constant.DateTimeConstant;
 import tech.quantit.northstar.common.utils.FieldUtils;
 import tech.quantit.northstar.domain.gateway.ContractManager;
@@ -72,7 +73,7 @@ public class ModuleService implements InitializingBean {
 	private ExternalJarListener extJarListener;
 
 	public ModuleService(ApplicationContext ctx, ModuleRepository moduleRepo, MarketDataRepository mdRepo, ExternalJarListener extJarListener,
-			ModuleManager mdlMgr, GatewayAndConnectionManager gatewayConnMgr, ContractManager contractMgr) {
+			ModuleManager mdlMgr, GatewayAndConnectionManager gatewayConnMgr, ContractManager contractMgr, IMailSender sender) {
 		this.ctx = ctx;
 		this.moduleRepo = moduleRepo;
 		this.mdRepo = mdRepo;
@@ -80,7 +81,7 @@ public class ModuleService implements InitializingBean {
 		this.gatewayConnMgr = gatewayConnMgr;
 		this.contractMgr = contractMgr;
 		this.extJarListener = extJarListener;
-		this.moduleFactory = new StrategyModuleFactory(gatewayConnMgr, contractMgr, moduleRepo);
+		this.moduleFactory = new StrategyModuleFactory(gatewayConnMgr, contractMgr, moduleRepo, sender);
 	}
 
 	/**

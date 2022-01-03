@@ -65,10 +65,10 @@ public class SampleDealer extends AbstractDealerPolicy implements DealerPolicy {
 		@Setting(value="开仓手数", order = 20)
 		private int openVol;
 		
-		@Setting(value="开仓价格类型", order = 30, options = {"市价","对手价","最新价","排队价","信号价"})
+		@Setting(value="开仓价格类型", order = 30, options = {"市价","对手价","最新价","排队价"})
 		private String openPriceTypeStr;
 		
-		@Setting(value="平仓价格类型", order = 31, options = {"市价","对手价","最新价","排队价","信号价"})
+		@Setting(value="平仓价格类型", order = 31, options = {"市价","对手价","最新价","排队价"})
 		private String closePriceTypeStr;
 		
 	}
