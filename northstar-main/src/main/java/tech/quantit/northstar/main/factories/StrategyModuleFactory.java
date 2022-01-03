@@ -17,6 +17,7 @@ import tech.quantit.northstar.domain.strategy.RiskControlPolicy;
 import tech.quantit.northstar.domain.strategy.StopLoss;
 import tech.quantit.northstar.domain.strategy.StrategyModule;
 import tech.quantit.northstar.gateway.api.TradeGateway;
+import tech.quantit.northstar.main.ExternalJarListener;
 import tech.quantit.northstar.main.persistence.ModuleRepository;
 import tech.quantit.northstar.main.persistence.po.ModulePositionPO;
 import tech.quantit.northstar.strategy.api.DealerPolicy;
@@ -49,11 +50,15 @@ public class StrategyModuleFactory {
 	
 	private IMailSender sender;
 	
-	public StrategyModuleFactory(GatewayAndConnectionManager gatewayConnMgr, ContractManager contractMgr, ModuleRepository moduleRepo, IMailSender sender) {
+	private ExternalJarListener extJarListener;
+	
+	public StrategyModuleFactory(GatewayAndConnectionManager gatewayConnMgr, ContractManager contractMgr, ModuleRepository moduleRepo,
+			IMailSender sender, ExternalJarListener extJarListener) {
 		this.gatewayConnMgr = gatewayConnMgr;
 		this.contractMgr = contractMgr;
 		this.moduleRepo = moduleRepo;
 		this.sender = sender;
+		this.extJarListener = extJarListener;
 	}
 	
 	public StrategyModule makeModule(ModuleInfo moduleInfo) throws Exception {
@@ -149,8 +154,18 @@ public class StrategyModuleFactory {
 		}
 		String clzName = metaInfo.getComponentMeta().getClassName();
 		String paramClzName = clzName + "$InitParams";
-		Class<?> type = Class.forName(clzName);
-		Class<?> paramType = Class.forName(paramClzName);
+		Class<?> type = null;
+		Class<?> paramType = null;
+		ClassLoader cl = extJarListener.getExternalClassLoader();
+		if(cl != null) {
+			type = cl.loadClass(clzName);
+			paramType = cl.loadClass(paramClzName);
+		}
+		if(type == null) {
+			type = Class.forName(clzName);
+			paramType = Class.forName(paramClzName);
+		}
+		
 		DynamicParamsAware obj = (DynamicParamsAware) type.getDeclaredConstructor().newInstance();
 		DynamicParams paramObj = (DynamicParams) paramType.getDeclaredConstructor().newInstance();
 		paramObj.resolveFromSource(fieldMap);

@@ -81,7 +81,7 @@ public class ModuleService implements InitializingBean {
 		this.gatewayConnMgr = gatewayConnMgr;
 		this.contractMgr = contractMgr;
 		this.extJarListener = extJarListener;
-		this.moduleFactory = new StrategyModuleFactory(gatewayConnMgr, contractMgr, moduleRepo, sender);
+		this.moduleFactory = new StrategyModuleFactory(gatewayConnMgr, contractMgr, moduleRepo, sender, extJarListener);
 	}
 
 	/**
