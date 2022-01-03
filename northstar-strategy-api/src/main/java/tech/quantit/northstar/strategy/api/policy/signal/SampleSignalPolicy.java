@@ -10,6 +10,7 @@ import tech.quantit.northstar.strategy.api.annotation.StrategicComponent;
 import tech.quantit.northstar.strategy.api.constant.ModuleState;
 import tech.quantit.northstar.strategy.api.constant.SignalOperation;
 import tech.quantit.northstar.strategy.api.model.DynamicParams;
+import tech.quantit.northstar.strategy.api.model.Signal;
 import tech.quantit.northstar.strategy.api.model.TimeSeriesValue;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.TickField;
@@ -108,13 +109,13 @@ public class SampleSignalPolicy extends AbstractSignalPolicy
 			log.info("开始交易");
 			if(currentState == ModuleState.EMPTY) {
 				SignalOperation op = (++seed & 1) > 0 ? SignalOperation.BUY_OPEN : SignalOperation.SELL_OPEN;
-				emit(op, 0, 5);	// 假设固定止损为5个价位
+				emit(Signal.builder().signalOperation(op).ticksToStop(5).build());	// 假设固定止损为5个价位
 			}
 			if(currentState == ModuleState.HOLDING_LONG) {	
-				emit(SignalOperation.SELL_CLOSE);
+				emit(Signal.builder().signalOperation(SignalOperation.SELL_CLOSE).build());
 			}
 			if(currentState == ModuleState.HOLDING_SHORT) {			
-				emit(SignalOperation.BUY_CLOSE);
+				emit(Signal.builder().signalOperation(SignalOperation.BUY_CLOSE).build());
 			}
 		}
 	}

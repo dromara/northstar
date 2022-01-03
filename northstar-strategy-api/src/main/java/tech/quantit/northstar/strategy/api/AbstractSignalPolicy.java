@@ -6,7 +6,6 @@ import java.util.Map;
 import org.slf4j.Logger;
 
 import tech.quantit.northstar.strategy.api.constant.ModuleState;
-import tech.quantit.northstar.strategy.api.constant.SignalOperation;
 import tech.quantit.northstar.strategy.api.event.ModuleEvent;
 import tech.quantit.northstar.strategy.api.event.ModuleEventBus;
 import tech.quantit.northstar.strategy.api.event.ModuleEventType;
@@ -39,17 +38,20 @@ public abstract class AbstractSignalPolicy implements SignalPolicy {
 	
 	protected Logger log;
 	
-	protected void emit(SignalOperation signalOperation) {
-		emit(signalOperation, 0, 0);
-	}
 	
-	protected void emit(SignalOperation signalOperation, double price, int ticksOfStopLoss) {
+	protected void emit(Signal signal) {
 		if(!isActive()) {
 			throw new IllegalStateException("当前状态下 [" + currentState + "] 不能发交易信号。");
 		}
-		moduleEventBus.post(new ModuleEvent<>(ModuleEventType.SIGNAL_CREATED, new Signal(signalOperation, price, ticksOfStopLoss)));
+		moduleEventBus.post(new ModuleEvent<>(ModuleEventType.SIGNAL_CREATED, signal));
 		if(log.isInfoEnabled()) {			
-			log.info("[{}->{}] 发出交易信号：{} {} 止损{}个TICK", getModuleName(), name(), signalOperation, price, ticksOfStopLoss);
+			log.info("[{}->{}] 发出交易信号：{}", getModuleName(), name(), signal.getSignalOperation());
+			if(signal.getSignalPrice() > 0) 				
+				log.info("[{}->{}] 信号价：{}", getModuleName(), name(), signal.getSignalPrice());
+			if(signal.getTicksToStop() > 0)
+				log.info("[{}->{}] 止损：{}个价位", getModuleName(), name(), signal.getTicksToStop());
+			if(signal.getVolume() > 0)
+				log.info("[{}->{}] 下单量：{}手", getModuleName(), name(), signal.getVolume());
 		}
 	}
 	

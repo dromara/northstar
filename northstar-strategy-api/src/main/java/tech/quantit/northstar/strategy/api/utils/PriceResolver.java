@@ -24,9 +24,6 @@ public class PriceResolver {
 		case WAITING_PRICE:
 			orderPrice = isBuy ? tick.getBidPrice(0) : tick.getAskPrice(0);
 			break;
-		case SIGNAL_PRICE:
-			orderPrice = signalPrice;
-			break;
 		default:
 			throw new IllegalStateException("未知下单价格类型：" + type);
 		}

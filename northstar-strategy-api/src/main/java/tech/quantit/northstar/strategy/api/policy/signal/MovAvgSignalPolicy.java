@@ -13,6 +13,7 @@ import tech.quantit.northstar.strategy.api.indicator.ExpMovingAverage;
 import tech.quantit.northstar.strategy.api.indicator.Indicator;
 import tech.quantit.northstar.strategy.api.indicator.Indicator.ValueType;
 import tech.quantit.northstar.strategy.api.model.DynamicParams;
+import tech.quantit.northstar.strategy.api.model.Signal;
 import tech.quantit.northstar.strategy.api.model.TimeSeriesValue;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.TickField;
@@ -84,11 +85,11 @@ public class MovAvgSignalPolicy extends AbstractSignalPolicy
 	protected void handleTick(TickField tick) {
 		// 挣20个TICK就离场
 		if(currentState == ModuleState.HOLDING_LONG && tick.getLastPrice() - entryPrice > 20 * bindedContract.getPriceTick()) {
-			emit(SignalOperation.SELL_CLOSE);
+			emit(Signal.builder().signalOperation(SignalOperation.SELL_CLOSE).build());
 		}
 		
 		if(currentState == ModuleState.HOLDING_SHORT && entryPrice - tick.getLastPrice() > 20 * bindedContract.getPriceTick()) {
-			emit(SignalOperation.BUY_CLOSE);
+			emit(Signal.builder().signalOperation(SignalOperation.BUY_CLOSE).build());
 		}
 	}
 
@@ -101,14 +102,14 @@ public class MovAvgSignalPolicy extends AbstractSignalPolicy
 		if(currentState == ModuleState.EMPTY && maFast.value(1) < maSlow.value(1) && maFast.value(0) > maSlow.value(0)) {
 			log.debug("上一周期的指标：快线 [{}]，慢线 [{}]", maFast.value(1), maSlow.value(1));
 			entryPrice = bar.getClosePrice();
-			emit(SignalOperation.BUY_OPEN, entryPrice, 5);
+			emit(Signal.builder().signalOperation(SignalOperation.BUY_OPEN).signalPrice(entryPrice).ticksToStop(5).build());
 		}
 		
 		// 快线下穿慢线，入场做空
 		if(currentState == ModuleState.EMPTY && maFast.value(1) > maSlow.value(1) && maFast.value(0) < maSlow.value(0)) {
 			log.debug("上一周期的指标：快线 [{}]，慢线 [{}]", maFast.value(1), maSlow.value(1));
 			entryPrice = bar.getClosePrice();
-			emit(SignalOperation.SELL_OPEN, entryPrice, 5);
+			emit(Signal.builder().signalOperation(SignalOperation.SELL_OPEN).signalPrice(entryPrice).ticksToStop(5).build());
 		}
 	}
 
