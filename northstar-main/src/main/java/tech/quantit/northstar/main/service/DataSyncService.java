@@ -1,7 +1,11 @@
 package tech.quantit.northstar.main.service;
 
 import java.lang.reflect.InvocationTargetException;
+import java.time.DayOfWeek;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -20,7 +24,6 @@ import tech.quantit.northstar.domain.gateway.ContractManager;
 import tech.quantit.northstar.main.handler.broadcast.SocketIOMessageEngine;
 import tech.quantit.northstar.main.persistence.MarketDataRepository;
 import tech.quantit.northstar.main.persistence.po.MinBarDataPO;
-import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.OrderField;
 import xyz.redtorch.pb.CoreField.PositionField;
@@ -49,7 +52,7 @@ public class DataSyncService {
 	 * 异步更新合约
 	 * @throws Exception 
 	 */
-	public void asyncUpdateContracts() throws Exception {
+	public void asyncUpdateContracts() {
 		log.info("异步更新合约");
 		NorthstarEvent event = new NorthstarEvent(null, null);
 		for(ContractField c : contractMgr.getAllContracts()) {
@@ -64,7 +67,7 @@ public class DataSyncService {
 	 * @throws Exception 
 	 * 
 	 */
-	public void asyncUpdateTradeAccount() throws Exception {
+	public void asyncUpdateTradeAccount() {
 		log.info("异步更新账户信息");
 		for(Entry<String, TradeDayAccount> e : accountMap.entrySet()) {
 			TradeDayAccount account = e.getValue();
@@ -94,26 +97,42 @@ public class DataSyncService {
 	 * @throws NoSuchMethodException 
 	 * @throws Exception 
 	 */
-	public List<byte[]> loadHistoryBarData(String gatewayId, String unifiedSymbol, LocalDate startDate, LocalDate endDate) throws InvalidProtocolBufferException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-		// 自动处理起止日期反转的情况
-		if(startDate.isAfter(endDate)) {
-			LocalDate tmpDate = startDate;
-			startDate = endDate;
-			endDate = tmpDate;
-		}
-		LocalDate curDate = startDate;
-		List<byte[]> results = new LinkedList<>();
-		while(!curDate.isAfter(endDate)) {
-			String date = curDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER);
-			List<MinBarDataPO> dayBars = mdRepo.loadDataByDate(gatewayId, unifiedSymbol, date);
-			for(MinBarDataPO po : dayBars) {
-				results.add(po.getBarData());
-			}
-			
-			curDate = curDate.plusDays(1);
+	public List<byte[]> loadHistoryBarData(String gatewayId, String unifiedSymbol, long startRefTime) throws SecurityException, IllegalArgumentException {
+		List<String> availableTradingDays = mdRepo.findDataAvailableDates(gatewayId, unifiedSymbol, false);
+		LocalDateTime startRefDateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(startRefTime), ZoneId.systemDefault());
+		LocalDate queryTradingDay = null;
+		if(startRefDateTime.getDayOfWeek() == DayOfWeek.FRIDAY && startRefDateTime.getHour() > 16) {
+			queryTradingDay = startRefDateTime.plusDays(3).toLocalDate();
+		} else if (startRefDateTime.getDayOfWeek() == DayOfWeek.SATURDAY) {
+			queryTradingDay = startRefDateTime.plusDays(2).toLocalDate();
+		} else {
+			queryTradingDay = startRefDateTime.plusDays(1).toLocalDate();
 		}
 		
-		return results;
+		List<byte[]> results = new LinkedList<>();
+		
+		for(String tradingDay : availableTradingDays) {
+			LocalDate curTradingDay = LocalDate.parse(tradingDay, DateTimeConstant.D_FORMAT_INT_FORMATTER);
+			if(queryTradingDay.isBefore(curTradingDay)) {
+				continue;
+			}
+			while(curTradingDay.isBefore(queryTradingDay)) {
+				queryTradingDay = queryTradingDay.minusDays(1);
+			}
+			
+			String date = queryTradingDay.format(DateTimeConstant.D_FORMAT_INT_FORMATTER);
+			List<MinBarDataPO> dayBars = mdRepo.loadDataByDate(gatewayId, unifiedSymbol, date);
+			for(MinBarDataPO po : dayBars) {
+				if(po.getUpdateTime() < startRefTime) {					
+					results.add(po.getBarData());
+				}
+			}
+			if(!results.isEmpty()) {
+				return results;
+			}
+		}
+		
+		throw new IllegalStateException("没有更多的数据了");
 	}
 	
 	/**
