@@ -58,7 +58,6 @@ public class ExternalJarClassLoader extends URLClassLoader {
 	@Override
 	public Class<?> loadClass(String name) throws ClassNotFoundException {
 		if (findLoadedClass(name) == null) {
-			log.debug("加载扩展包中的类：{}", name);
 			return super.loadClass(name);
 		} else {
 			return cacheClassMap.get(name);
@@ -81,6 +80,7 @@ public class ExternalJarClassLoader extends URLClassLoader {
 				String name = je.getName();
 				// 这里添加了路径扫描限制
 				if (name.endsWith(".class")) {
+					log.debug("加载扩展包中的类：{}", name);
 					String className = name.replace(".class", "").replaceAll("/", ".");
 					input = jarFile.getInputStream(je);
 					ByteArrayOutputStream baos = new ByteArrayOutputStream();
