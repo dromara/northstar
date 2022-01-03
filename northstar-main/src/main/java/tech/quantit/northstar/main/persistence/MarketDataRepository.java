@@ -46,6 +46,9 @@ public class MarketDataRepository {
 		dbName = mongo.getDb().getName();
 	}
 	
+	private static final String SYMBOL = "unifiedSymbol";
+	private static final String TRADING_DAY = "tradingDay";
+	
 	/**
 	 * 初始化表
 	 * @param gatewayId
@@ -57,9 +60,12 @@ public class MarketDataRepository {
 		}
 		log.debug("初始化表：{}", collectionName);
 		mongo.createCollection(collectionName);
-		IndexDefinition indexDefinition = new CompoundIndexDefinition(new Document().append("unifiedSymbol", 1).append("tradingDay", 1));
+		IndexDefinition indexDefinition = new CompoundIndexDefinition(new Document().append(SYMBOL, 1).append(TRADING_DAY, 1));
 		mongo.indexOps(collectionName).ensureIndex(indexDefinition);
-		
+		IndexDefinition indexDefinition2 = new CompoundIndexDefinition(new Document().append(SYMBOL, 1));
+		mongo.indexOps(collectionName).ensureIndex(indexDefinition2);
+		IndexDefinition indexDefinition3 = new CompoundIndexDefinition(new Document().append(TRADING_DAY, 1));
+		mongo.indexOps(collectionName).ensureIndex(indexDefinition3);
 	}
 
 	/**
@@ -103,8 +109,8 @@ public class MarketDataRepository {
 	 */
 	public List<MinBarDataPO> loadDataByDate(String gatewayId, String unifiedSymbol, String tradeDay) {
 		List<Document> resultList = client.find(dbName, COLLECTION_PREFIX + gatewayId, new Document()
-				.append("unifiedSymbol", unifiedSymbol)
-				.append("tradingDay", tradeDay));
+				.append(SYMBOL, unifiedSymbol)
+				.append(TRADING_DAY, tradeDay));
 		log.debug("[{}]-[{}]-[{}] 加载历史数据：{}条", gatewayId, unifiedSymbol, tradeDay, resultList.size());
 		return resultList.stream().map(doc -> MongoUtils.documentToBean(doc, MinBarDataPO.class)).toList();
 	}
@@ -116,7 +122,7 @@ public class MarketDataRepository {
 	 * @return
 	 */
 	public List<String> findDataAvailableDates(String gatewayId, String unifiedSymbol, boolean isAsc){
-		Bson filter = new Document().append("$match", new Document().append("unifiedSymbol", unifiedSymbol));
+		Bson filter = new Document().append("$match", new Document().append(SYMBOL, unifiedSymbol));
 		Bson aggregator = new Document().append("$group", new Document().append("_id", "$tradingDay"));
 		Bson sorter = new Document().append("$sort", new Document().append("_id", isAsc ? 1 : -1));
 		List<Document> resultList = client.aggregate(dbName, COLLECTION_PREFIX + gatewayId, List.of(filter, aggregator, sorter));
