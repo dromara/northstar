@@ -88,7 +88,7 @@ public class DataSyncService {
 	}
 	
 	/**
-	 * 异步加载历史Bar数据
+	 * 加载历史Bar数据
 	 * @throws InvalidProtocolBufferException 
 	 * @throws InvocationTargetException 
 	 * @throws IllegalArgumentException 
@@ -108,7 +108,7 @@ public class DataSyncService {
 		} else {
 			queryTradingDay = startRefDateTime.plusDays(1).toLocalDate();
 		}
-		
+		log.debug("加载 [{} -> {}] {}前的数据", gatewayId, unifiedSymbol, startRefDateTime);
 		List<byte[]> results = new LinkedList<>();
 		
 		for(String tradingDay : availableTradingDays) {

@@ -329,7 +329,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 		try {
 			String tdHost = GatewayConstants.SMART_CONNECTOR.bestEndpoint();
 			String tdPort = GatewayConstants.TRADER_PORT;
-			logger.info("使用IP [{}] 连接交易网关", tdPort);
+			logger.info("使用IP [{}] 连接交易网关", tdHost);
 			cThostFtdcTraderApi = CThostFtdcTraderApi.CreateFtdcTraderApi(tempFile.getAbsolutePath());
 			cThostFtdcTraderApi.RegisterSpi(this);
 			cThostFtdcTraderApi.RegisterFront("tcp://" + tdHost + ":" + tdPort);
