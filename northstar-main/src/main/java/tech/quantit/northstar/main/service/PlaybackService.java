@@ -28,6 +28,7 @@ import tech.quantit.northstar.gateway.sim.persistence.SimAccountRepository;
 import tech.quantit.northstar.gateway.sim.trade.SimGatewayFactory;
 import tech.quantit.northstar.gateway.sim.trade.SimMarket;
 import tech.quantit.northstar.gateway.sim.trade.SimTradeGateway;
+import tech.quantit.northstar.main.ExternalJarListener;
 import tech.quantit.northstar.main.factories.StrategyModuleFactory;
 import tech.quantit.northstar.main.persistence.MarketDataRepository;
 import tech.quantit.northstar.main.persistence.ModuleRepository;
@@ -61,9 +62,10 @@ public class PlaybackService {
 	private volatile boolean isRunning;
 	
 	public PlaybackService(FastEventEngine feEngine, SandboxModuleManager sandboxMgr, GatewayAndConnectionManager gatewayConnMgr, ContractManager contractMgr,
-			ModuleRepository moduleRepo, MarketDataRepository mdRepo, SimMarket simMarket, SimAccountRepository simAccRepo, GlobalMarketRegistry registry) {
+			ModuleRepository moduleRepo, MarketDataRepository mdRepo, SimMarket simMarket, SimAccountRepository simAccRepo, GlobalMarketRegistry registry,
+			ExternalJarListener extJarListener) {
 		simGatewayFactory = new SimGatewayFactory(feEngine, simMarket, simAccRepo, registry);
-		moduleFactory = new StrategyModuleFactory(gatewayConnMgr, contractMgr, moduleRepo, null);
+		moduleFactory = new StrategyModuleFactory(gatewayConnMgr, contractMgr, moduleRepo, null, extJarListener);
 		pbEngine = new PlaybackEngine(simMarket, sandboxMgr);
 		this.sandboxMgr = sandboxMgr;
 		this.gatewayConnMgr = gatewayConnMgr;

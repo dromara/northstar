@@ -73,7 +73,7 @@ public class ServiceConfig {
 	@Bean
 	public PlaybackService playbackService(FastEventEngine feEngine, SandboxModuleManager moduleMgr, GatewayAndConnectionManager gatewayConnMgr, 
 			ContractManager contractMgr, ModuleRepository moduleRepo, MarketDataRepository mdRepo, SimMarket simMarket, SimAccountRepository simAccRepo,
-			GlobalMarketRegistry registry) {
-		return new PlaybackService(feEngine, moduleMgr, gatewayConnMgr, contractMgr, moduleRepo, mdRepo, simMarket, simAccRepo, registry);
+			GlobalMarketRegistry registry, ExternalJarListener extJarListener) {
+		return new PlaybackService(feEngine, moduleMgr, gatewayConnMgr, contractMgr, moduleRepo, mdRepo, simMarket, simAccRepo, registry, extJarListener);
 	}
 }

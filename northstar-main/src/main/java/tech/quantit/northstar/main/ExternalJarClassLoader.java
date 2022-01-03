@@ -58,6 +58,7 @@ public class ExternalJarClassLoader extends URLClassLoader {
 	@Override
 	public Class<?> loadClass(String name) throws ClassNotFoundException {
 		if (findLoadedClass(name) == null) {
+			log.debug("加载扩展包中的类：{}", name);
 			return super.loadClass(name);
 		} else {
 			return cacheClassMap.get(name);
