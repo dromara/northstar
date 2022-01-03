@@ -7,7 +7,7 @@
 
 这是一个面向程序员的开源量化交易平台。用于期货、股票、外汇、炒币等多种投机场景，实现程序化投机。暂时只对接了国内期货交易所，理论上可以对接任意交易所。
 
-![输入图片说明](https://images.gitee.com/uploads/images/2021/0909/075051_336e5835_1676852.png "封面.png")
+![输入图片说明](https://images.gitee.com/uploads/images/2022/0103/205503_efb41f7c_1676852.png "login.PNG")
 ![Image text](https://images.gitee.com/uploads/images/2021/0609/223845_f3942e1e_1676852.png)
 
 通过JAVA后台来编写程序化的交易策略，并提供页面监控界面。详细请参考监控端项目https://gitee.com/dromara/northstar-monitor
