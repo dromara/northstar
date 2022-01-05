@@ -1,8 +1,19 @@
 package tech.quantit.northstar.strategy.api.event;
 
-import com.google.common.eventbus.EventBus;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
-public class ModuleEventBus extends EventBus{
+import com.google.common.eventbus.AsyncEventBus;
+
+public class ModuleEventBus extends AsyncEventBus{
+
+	public ModuleEventBus(Executor executor) {
+		super(executor);
+	}
+	
+	public ModuleEventBus() {
+		this(Executors.newSingleThreadExecutor());
+	}
 
 	@Override
 	public void post(Object event) {
