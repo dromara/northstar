@@ -115,6 +115,17 @@ public abstract class TradeRequest implements TickDataAware, Cancellable {
 					.build();
 			feEngine.emitEvent(NorthstarEventType.ORDER, order);
 			
+			double dealPrice = 0;
+			if(submitOrderReq.getOrderPriceType() == OrderPriceTypeEnum.OPT_AnyPrice) {
+				dealPrice = switch(order.getDirection()) {
+					case D_Buy -> tick.getAskPrice(0);
+					case D_Sell -> tick.getBidPrice(0);
+					default -> throw new IllegalArgumentException("Unexpected value: " + order.getDirection());
+				};
+			} else {
+				dealPrice = submitOrderReq.getPrice() > 0 ? submitOrderReq.getPrice() : tick.getLastPrice();
+			}
+			
 			TradeField trade = tradeBuilder
 					.setTradeId(System.currentTimeMillis()+"")
 					.setAccountId(submitOrderReq.getGatewayId())
@@ -127,7 +138,7 @@ public abstract class TradeRequest implements TickDataAware, Cancellable {
 					.setOffsetFlag(order.getOffsetFlag())
 					.setOrderId(order.getOrderId())
 					.setOriginOrderId(order.getOriginOrderId())
-					.setPrice(FieldUtils.isBuy(order.getDirection()) ? tick.getAskPrice(0) : tick.getBidPrice(0))
+					.setPrice(dealPrice)
 					.setPriceSource(PriceSourceEnum.PSRC_LastPrice)
 					.setTradeDate(tick.getActionDay())
 					.setTradingDay(tick.getTradingDay())
