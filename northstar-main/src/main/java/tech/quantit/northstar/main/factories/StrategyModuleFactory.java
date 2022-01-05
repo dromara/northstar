@@ -25,7 +25,6 @@ import tech.quantit.northstar.strategy.api.DynamicParamsAware;
 import tech.quantit.northstar.strategy.api.EventDrivenComponent;
 import tech.quantit.northstar.strategy.api.RiskControlRule;
 import tech.quantit.northstar.strategy.api.SignalPolicy;
-import tech.quantit.northstar.strategy.api.event.ModuleEventBus;
 import tech.quantit.northstar.strategy.api.log.NorthstarLoggerFactory;
 import tech.quantit.northstar.strategy.api.model.ComponentAndParamsPair;
 import tech.quantit.northstar.strategy.api.model.ComponentField;
@@ -69,8 +68,7 @@ public class StrategyModuleFactory {
 		TradeGateway tradeGateway = (TradeGateway) gatewayConnMgr.getGatewayById(moduleInfo.getAccountGatewayId());
 		GatewayConnection gatewayConn = gatewayConnMgr.getConnectionByGateway(tradeGateway);
 		String bindedMktGatewayId = gatewayConn.getGwDescription().getBindedMktGatewayId();
-		ModuleEventBus meb = new ModuleEventBus();
-		ModuleStatus moduleStatus = convertStatus(moduleInfo, positionInfos, meb);
+		ModuleStatus moduleStatus = convertStatus(moduleInfo, positionInfos);
 		StrategyModule module = new StrategyModule(bindedMktGatewayId, tradeGateway, moduleStatus);
 		for(EventDrivenComponent component : convertComponents(moduleInfo)) {
 			module.addComponent(component);
@@ -87,13 +85,12 @@ public class StrategyModuleFactory {
 		moduleRepo.saveModulePosition(po);
 	};
 	
-	private ModuleStatus convertStatus(ModuleInfo moduleInfo, List<ModulePositionInfo> positionInfos, ModuleEventBus meb) {
+	private ModuleStatus convertStatus(ModuleInfo moduleInfo, List<ModulePositionInfo> positionInfos) {
 		if(positionInfos.isEmpty()) {
 			// 初始化模组持仓
 			ModulePosition mp = ModulePosition.builder()
 					.moduleName(moduleInfo.getModuleName())
 					.direction(PositionDirectionEnum.PD_Unknown)
-					.meb(meb)
 					.clearoutCallback(dealRecord -> moduleRepo.saveDealRecord(dealRecord))
 					.positionSavingCallback(positionSavingCallback)
 					.log(NorthstarLoggerFactory.getLogger(moduleInfo.getModuleName(), ModulePosition.class))
@@ -106,7 +103,6 @@ public class StrategyModuleFactory {
 			ContractField contract = contractMgr.getContract(mpi.getUnifiedSymbol());
 			ModulePosition mp = ModulePosition.builder()
 					.moduleName(moduleInfo.getModuleName())
-					.meb(meb)
 					.openTime(mpi.getOpenTime())
 					.openPrice(mpi.getOpenPrice())
 					.stopLoss(new StopLoss(mpi.getPositionDir(), mpi.getStopLossPrice()))

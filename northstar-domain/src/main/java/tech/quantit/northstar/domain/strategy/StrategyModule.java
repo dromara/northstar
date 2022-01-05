@@ -37,7 +37,7 @@ import xyz.redtorch.pb.CoreField.TradeField;
  */
 public class StrategyModule implements EventDrivenComponent{
 	
-	protected ModuleEventBus meb = new ModuleEventBus();
+	protected ModuleEventBus meb;
 	
 	@Getter
 	protected ModuleStatus moduleStatus;
@@ -80,6 +80,7 @@ public class StrategyModule implements EventDrivenComponent{
 	private Logger log;
 	
 	public StrategyModule(String bindedMktGatewayId, TradeGateway gateway, ModuleStatus status) {
+		this.meb = new ModuleEventBus();
 		this.moduleStatus = status;
 		this.moduleStatus.setModuleEventBus(meb);
 		this.stateMachine = moduleStatus.getStateMachine();
