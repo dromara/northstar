@@ -32,13 +32,18 @@ public class SimMarket {
 		String simGatewayId = accountGateway.getGatewaySetting().getGatewayId();
 		simGatewayMap.put(mdGatewayId, simGatewayId, accountGateway);
 		SimTradeGatewayLocal gateway = (SimTradeGatewayLocal) accountGateway;
-		gateway.getAccount().setEventBus(marketEventBus);
+		SimAccount simAccount = gateway.getAccount();
+		simAccount.setEventBus(marketEventBus);
+		marketEventBus.register(simAccount);
 	}
 	
 	public synchronized void removeGateway(String mdGatewayId, SimTradeGateway accountGateway) {
 		String simGatewayId = accountGateway.getGatewaySetting().getGatewayId();
 		simGatewayMap.remove(mdGatewayId, simGatewayId);
+		SimTradeGatewayLocal simGateway = (SimTradeGatewayLocal) accountGateway;
+		SimAccount simAccount = simGateway.getAccount();
 		simAccRepo.deleteById(simGatewayId);
+		marketEventBus.unregister(simAccount);
 	}
 	
 	public void onTick(TickField tick) {

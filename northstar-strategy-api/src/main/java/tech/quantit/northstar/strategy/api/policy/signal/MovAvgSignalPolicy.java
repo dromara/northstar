@@ -2,13 +2,14 @@ package tech.quantit.northstar.strategy.api.policy.signal;
 
 import java.util.Map;
 
+import com.google.common.eventbus.EventBus;
+
 import tech.quantit.northstar.strategy.api.AbstractSignalPolicy;
 import tech.quantit.northstar.strategy.api.SignalPolicy;
 import tech.quantit.northstar.strategy.api.annotation.Setting;
 import tech.quantit.northstar.strategy.api.annotation.StrategicComponent;
 import tech.quantit.northstar.strategy.api.constant.ModuleState;
 import tech.quantit.northstar.strategy.api.constant.SignalOperation;
-import tech.quantit.northstar.strategy.api.event.ModuleEventBus;
 import tech.quantit.northstar.strategy.api.indicator.ExpMovingAverage;
 import tech.quantit.northstar.strategy.api.indicator.Indicator;
 import tech.quantit.northstar.strategy.api.indicator.Indicator.ValueType;
@@ -51,7 +52,7 @@ public class MovAvgSignalPolicy extends AbstractSignalPolicy
 	}
 	
 	@Override
-	public void setEventBus(ModuleEventBus moduleEventBus) {
+	public void setEventBus(EventBus moduleEventBus) {
 		super.setEventBus(moduleEventBus);
 		// 指标都要注册模组的事件总线，以便自动订阅行情更新
 		moduleEventBus.register(maFast);	

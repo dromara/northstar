@@ -4,13 +4,14 @@ import java.util.UUID;
 
 import org.slf4j.Logger;
 
+import com.google.common.eventbus.EventBus;
+
 import tech.quantit.northstar.common.IMailSender;
 import tech.quantit.northstar.common.model.Message;
 import tech.quantit.northstar.common.utils.FieldUtils;
 import tech.quantit.northstar.strategy.api.constant.ModuleState;
 import tech.quantit.northstar.strategy.api.constant.PriceType;
 import tech.quantit.northstar.strategy.api.event.ModuleEvent;
-import tech.quantit.northstar.strategy.api.event.ModuleEventBus;
 import tech.quantit.northstar.strategy.api.event.ModuleEventType;
 import tech.quantit.northstar.strategy.api.log.NorthstarLoggerFactory;
 import tech.quantit.northstar.strategy.api.model.Signal;
@@ -33,7 +34,7 @@ public abstract class AbstractDealerPolicy implements DealerPolicy {
 
 	protected ModuleState currentState;
 	
-	protected ModuleEventBus moduleEventBus;
+	protected EventBus moduleEventBus;
 	
 	protected SubmitOrderReqField currentOrderReq;
 	
@@ -127,7 +128,7 @@ public abstract class AbstractDealerPolicy implements DealerPolicy {
 	}
 
 	@Override
-	public void setEventBus(ModuleEventBus moduleEventBus) {
+	public void setEventBus(EventBus moduleEventBus) {
 		this.moduleEventBus = moduleEventBus;
 	}
 

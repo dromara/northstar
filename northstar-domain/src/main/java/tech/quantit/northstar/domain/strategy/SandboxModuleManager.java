@@ -6,14 +6,10 @@ public class SandboxModuleManager extends ModuleManager{
 
 	@Override
 	public boolean canHandle(NorthstarEventType eventType) {
-		switch(eventType) {
-		case ACCOUNT:
-		case TRADE:
-		case ORDER:
-			return true;
-		default:
-			return false;
-		}
+		return switch(eventType) {
+			case ACCOUNT, TRADE, ORDER, BAR, TICK -> true;
+			default -> false;
+		};
 	}
 
 	

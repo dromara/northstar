@@ -6,6 +6,8 @@ import java.util.function.Consumer;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
+import com.google.common.eventbus.EventBus;
+
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -13,7 +15,6 @@ import tech.quantit.northstar.common.TickDataAware;
 import tech.quantit.northstar.common.utils.FieldUtils;
 import tech.quantit.northstar.strategy.api.EventDrivenComponent;
 import tech.quantit.northstar.strategy.api.event.ModuleEvent;
-import tech.quantit.northstar.strategy.api.event.ModuleEventBus;
 import tech.quantit.northstar.strategy.api.event.ModuleEventType;
 import tech.quantit.northstar.strategy.api.model.ModuleDealRecord;
 import tech.quantit.northstar.strategy.api.model.ModulePositionInfo;
@@ -44,7 +45,7 @@ public class ModulePosition implements TickDataAware, EventDrivenComponent{
 	
 	private StopLoss stopLoss;
 	
-	protected ModuleEventBus meb;
+	protected EventBus meb;
 	
 	@Getter
 	private int volume;
@@ -238,7 +239,7 @@ public class ModulePosition implements TickDataAware, EventDrivenComponent{
 	}
 	
 	@Override
-	public void setEventBus(ModuleEventBus moduleEventBus) {
+	public void setEventBus(EventBus moduleEventBus) {
 		this.meb = moduleEventBus;
 		this.meb.register(this);
 	}
