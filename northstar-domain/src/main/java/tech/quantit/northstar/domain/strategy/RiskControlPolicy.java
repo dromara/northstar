@@ -7,6 +7,8 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
+import com.google.common.eventbus.EventBus;
+
 import tech.quantit.northstar.common.ContractBindedAware;
 import tech.quantit.northstar.common.Subscribable;
 import tech.quantit.northstar.common.TickDataAware;
@@ -17,7 +19,6 @@ import tech.quantit.northstar.strategy.api.StateChangeListener;
 import tech.quantit.northstar.strategy.api.constant.ModuleState;
 import tech.quantit.northstar.strategy.api.constant.RiskAuditResult;
 import tech.quantit.northstar.strategy.api.event.ModuleEvent;
-import tech.quantit.northstar.strategy.api.event.ModuleEventBus;
 import tech.quantit.northstar.strategy.api.event.ModuleEventType;
 import tech.quantit.northstar.strategy.api.log.NorthstarLoggerFactory;
 import xyz.redtorch.pb.CoreField.ContractField;
@@ -30,7 +31,7 @@ public class RiskControlPolicy implements TickDataAware, EventDrivenComponent, S
 	
 	protected TickField lastTick;
 	
-	private ModuleEventBus meb;
+	private EventBus meb;
 	
 	private ModuleState curState;
 	
@@ -102,7 +103,7 @@ public class RiskControlPolicy implements TickDataAware, EventDrivenComponent, S
 	}
 
 	@Override
-	public void setEventBus(ModuleEventBus moduleEventBus) {
+	public void setEventBus(EventBus moduleEventBus) {
 		meb = moduleEventBus;
 		for(RiskControlRule rule : rules) {
 			if(rule instanceof Subscribable sub) 				

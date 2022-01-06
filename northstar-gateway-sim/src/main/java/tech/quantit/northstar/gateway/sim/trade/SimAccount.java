@@ -220,7 +220,6 @@ public class SimAccount implements TickDataAware{
 	
 	public void setEventBus(EventBus eventBus) {
 		this.eventBus = eventBus;
-		eventBus.register(this);
 		longMap.values().stream().forEach(eventBus::register);
 		shortMap.values().stream().forEach(eventBus::register);
 	}

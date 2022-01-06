@@ -9,6 +9,8 @@ import java.util.function.Consumer;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
+import com.google.common.eventbus.EventBus;
+
 import lombok.Getter;
 import lombok.Setter;
 import tech.quantit.northstar.common.ContractBindedAware;
@@ -37,7 +39,7 @@ import xyz.redtorch.pb.CoreField.TradeField;
  */
 public class StrategyModule implements EventDrivenComponent{
 	
-	protected ModuleEventBus meb;
+	protected EventBus meb;
 	
 	@Getter
 	protected ModuleStatus moduleStatus;
@@ -79,8 +81,8 @@ public class StrategyModule implements EventDrivenComponent{
 	
 	private Logger log;
 	
-	public StrategyModule(String bindedMktGatewayId, TradeGateway gateway, ModuleStatus status) {
-		this.meb = new ModuleEventBus();
+	public StrategyModule(String bindedMktGatewayId, TradeGateway gateway, ModuleStatus status, boolean isSyncMode) {
+		this.meb = isSyncMode ? new EventBus() : new ModuleEventBus();
 		this.moduleStatus = status;
 		this.moduleStatus.setModuleEventBus(meb);
 		this.stateMachine = moduleStatus.getStateMachine();
@@ -205,7 +207,7 @@ public class StrategyModule implements EventDrivenComponent{
 	}
 	
 	@Override
-	public void setEventBus(ModuleEventBus moduleEventBus) {
+	public void setEventBus(EventBus moduleEventBus) {
 		throw new UnsupportedOperationException("该方法不支持");
 	}
 

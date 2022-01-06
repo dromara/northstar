@@ -16,6 +16,7 @@ import tech.quantit.northstar.common.event.InternalEventBus;
 import tech.quantit.northstar.common.model.GatewayDescription;
 import tech.quantit.northstar.common.model.PlaybackDescription;
 import tech.quantit.northstar.common.model.SimSettings;
+import tech.quantit.northstar.common.utils.FieldUtils;
 import tech.quantit.northstar.domain.gateway.ContractManager;
 import tech.quantit.northstar.domain.gateway.GatewayAndConnectionManager;
 import tech.quantit.northstar.domain.gateway.GatewayConnection;
@@ -59,6 +60,8 @@ public class PlaybackService {
 	
 	private GatewayAndConnectionManager gatewayConnMgr;
 	
+	private SimMarket simMarket;
+	
 	private volatile boolean isRunning;
 	
 	public PlaybackService(FastEventEngine feEngine, SandboxModuleManager sandboxMgr, GatewayAndConnectionManager gatewayConnMgr, ContractManager contractMgr,
@@ -71,6 +74,7 @@ public class PlaybackService {
 		this.gatewayConnMgr = gatewayConnMgr;
 		this.mdRepo = mdRepo;
 		this.moduleRepo = moduleRepo;
+		this.simMarket = simMarket;
 	}
 
 	/**
@@ -109,7 +113,22 @@ public class PlaybackService {
 			moduleInfo.setModuleName(moduleInfo.getModuleName() + Constants.PLAYBACK_MODULE_SUFFIX);
 			moduleInfo.setAccountGatewayId(gwDescription.getGatewayId());
 			
-			StrategyModule module = moduleFactory.makeModule(moduleInfo, Collections.emptyList());
+			StrategyModule module = moduleFactory.makeModule(moduleInfo, Collections.emptyList(), true);
+			module.setSubmitOrderHandler(simTradeGateway::submitOrder);
+			module.setCancelOrderHandler(simTradeGateway::cancelOrder);
+			module.setDealRecordGenHandler(moduleRepo::saveDealRecord);
+			module.setSavingTradeCallback(trade -> 
+				moduleRepo.saveTradeRecord(ModuleTradeRecord.builder()
+						.contractName(trade.getContract().getFullName())
+						.actionTime(trade.getTradeTimestamp())
+						.moduleName(name)
+						.operation(FieldUtils.chn(trade.getDirection()) + FieldUtils.chn(trade.getOffsetFlag()))
+						.price(trade.getPrice())
+						.tradingDay(trade.getTradingDay())
+						.volume(trade.getVolume())
+						.build())
+				);
+			module.setDealRecordGenHandler(dealRecord -> log.debug(""));
 			playbackModules.add(module);
 			sandboxMgr.addModule(module);
 			
@@ -129,6 +148,7 @@ public class PlaybackService {
 				if(module.isEnabled()) {					
 					module.toggleRunningState();
 				}
+				simMarket.removeGateway(module.getBindedMktGatewayId(), (SimTradeGateway) gateway);
 				CompletableFuture.delayedExecutor(10, TimeUnit.SECONDS).execute(() -> {					
 					sandboxMgr.removeModule(module.getName());
 					gatewayConnMgr.removePair(gateway);

@@ -2,10 +2,11 @@ package tech.quantit.northstar.domain.strategy;
 
 import org.slf4j.Logger;
 
+import com.google.common.eventbus.EventBus;
+
 import lombok.Getter;
 import tech.quantit.northstar.common.utils.FieldUtils;
 import tech.quantit.northstar.strategy.api.constant.ModuleState;
-import tech.quantit.northstar.strategy.api.event.ModuleEventBus;
 import tech.quantit.northstar.strategy.api.log.NorthstarLoggerFactory;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TradeField;
@@ -29,7 +30,7 @@ public class ModuleStatus {
 	protected ModulePosition logicalPosition;
 	
 	@Getter
-	private ModuleEventBus moduleEventBus;
+	private EventBus moduleEventBus;
 	
 	private Logger log;
 	
@@ -85,7 +86,7 @@ public class ModuleStatus {
 		throw new IllegalStateException("未知状态");
 	}
 
-	public void setModuleEventBus(ModuleEventBus moduleEventBus) {
+	public void setModuleEventBus(EventBus moduleEventBus) {
 		this.moduleEventBus = moduleEventBus;
 		logicalPosition.setEventBus(moduleEventBus);
 		moduleEventBus.register(logicalPosition);

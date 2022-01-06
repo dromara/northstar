@@ -1,7 +1,6 @@
 package tech.quantit.northstar.main.factories;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -60,16 +59,12 @@ public class StrategyModuleFactory {
 		this.extJarListener = extJarListener;
 	}
 	
-	public StrategyModule makeModule(ModuleInfo moduleInfo) throws Exception {
-		return makeModule(moduleInfo, Collections.emptyList());
-	}
-	
-	public StrategyModule makeModule(ModuleInfo moduleInfo, List<ModulePositionInfo> positionInfos) throws Exception {
+	public StrategyModule makeModule(ModuleInfo moduleInfo, List<ModulePositionInfo> positionInfos, boolean isForPlayback) throws Exception {
 		TradeGateway tradeGateway = (TradeGateway) gatewayConnMgr.getGatewayById(moduleInfo.getAccountGatewayId());
 		GatewayConnection gatewayConn = gatewayConnMgr.getConnectionByGateway(tradeGateway);
 		String bindedMktGatewayId = gatewayConn.getGwDescription().getBindedMktGatewayId();
 		ModuleStatus moduleStatus = convertStatus(moduleInfo, positionInfos);
-		StrategyModule module = new StrategyModule(bindedMktGatewayId, tradeGateway, moduleStatus);
+		StrategyModule module = new StrategyModule(bindedMktGatewayId, tradeGateway, moduleStatus, isForPlayback);
 		for(EventDrivenComponent component : convertComponents(moduleInfo)) {
 			module.addComponent(component);
 		}
