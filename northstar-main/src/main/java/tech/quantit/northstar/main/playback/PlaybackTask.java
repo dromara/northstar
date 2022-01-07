@@ -38,9 +38,9 @@ public class PlaybackTask {
 	
 	protected LocalDate endDate;
 	
-	protected PriorityQueue<TickField> tickQ;
+	protected PriorityQueue<TickField> tickQ = new PriorityQueue<>(100000, (t1, t2) -> t1.getActionTimestamp() < t2.getActionTimestamp() ? -1 : 1 );
 	
-	protected PriorityQueue<BarField> barQ;
+	protected PriorityQueue<BarField> barQ = new PriorityQueue<>(3000, (b1, b2) -> b1.getActionTimestamp() < b2.getActionTimestamp() ? -1 : 1 );
 	
 	private MarketDataRepository mdRepo;
 
@@ -53,13 +53,11 @@ public class PlaybackTask {
 		this.totalNumOfDays = restOfDays();
 	}
 	
-	public Map<DataType, PriorityQueue<?>> nextBatchData() throws InvalidProtocolBufferException{
-		if(isDone()) {
+	public Map<DataType, PriorityQueue<?>> nextBatchDataOfDay() throws InvalidProtocolBufferException{
+		if(!hasMoreDayToPlay()) {
 			throw new IllegalStateException("超出回测范围");
 		}
 		Map<DataType, PriorityQueue<?>> resultMap = new EnumMap<>(DataType.class);
-		tickQ = new PriorityQueue<>(100000, (t1, t2) -> t1.getActionTimestamp() < t2.getActionTimestamp() ? -1 : 1 );
-		barQ = new PriorityQueue<>(3000, (b1, b2) -> b1.getActionTimestamp() < b2.getActionTimestamp() ? -1 : 1 );
 		// 先把高维的TICK与BAR数据转成一维
 		for(StrategyModule module : playbackModules) {
 			Set<String> interestContracts = module.bindedContractUnifiedSymbols();
@@ -93,19 +91,19 @@ public class PlaybackTask {
 		return curDate.until(endDate.plusDays(1), ChronoUnit.DAYS);
 	}
 	
-	public boolean isDone() {
-		return curDate.isAfter(endDate);
+	public boolean hasMoreDayToPlay() {
+		return !curDate.isAfter(endDate);
 	}
 	
 	private double ratioOfDay() {
-		if(totalNumOfData == 0 || barQ == null || barQ.isEmpty()) {
-			return totalNumOfData;
+		if(totalNumOfData == 0) {
+			return 0;
 		}
 		return 1.0 * (totalNumOfData - barQ.size()) / totalNumOfData; 
 	}
 	
 	public double ratioOfProcess() {
-		return 1.0 * (totalNumOfDays - restOfDays()) / totalNumOfDays + ratioOfDay() / totalNumOfDays;
+		return Math.min((totalNumOfDays - restOfDays() + ratioOfDay()) / totalNumOfDays, 1) ;
 	}
 	
 	

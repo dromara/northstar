@@ -138,12 +138,18 @@ public class PlaybackTaskTest {
 		when(mdRepo.loadDataByDate(anyString(), anyString(), anyString())).thenReturn(List.of(po1,po2,po3,po4));
 		PlaybackTask task = new PlaybackTask(description, List.of(module), mdRepo);
 		
-		assertThat(task.isDone()).isFalse();
+		assertThat(task.hasMoreDayToPlay()).isTrue();
 		assertThat(task.ratioOfProcess()).isZero();
-		while(!task.isDone()) {
-			assertThat(task.nextBatchData().size() > 0).isTrue();
+		while(task.hasMoreDayToPlay()) {
+			assertThat(task.nextBatchDataOfDay().size() > 0).isTrue();
+			while(!task.barQ.isEmpty()) {
+				task.barQ.poll();
+			}
+			while(!task.tickQ.isEmpty()) {
+				task.tickQ.poll();
+			}
 		}
-		assertThat(task.isDone()).isTrue();
+		assertThat(task.hasMoreDayToPlay()).isFalse();
 		assertThat(task.ratioOfProcess()).isEqualTo(1);
 	}
 	
@@ -162,7 +168,7 @@ public class PlaybackTaskTest {
 		PlaybackTask task = new PlaybackTask(description, List.of(module), mdRepo);
 		
 		assertThrows(IllegalStateException.class, ()->{			
-			task.nextBatchData();
+			task.nextBatchDataOfDay();
 		});
 	}
 	

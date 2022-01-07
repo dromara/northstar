@@ -42,7 +42,7 @@ public class StrategyModuleTest {
 	
 	@BeforeEach
 	public void prepare() {
-		module = new StrategyModule("mktGateway", tradeGateway, new ModuleStatus("module", mock(ModulePosition.class)), true);
+		module = new StrategyModule("mktGateway", tradeGateway, new ModuleStatus("module", mock(ModulePosition.class)));
 	}
 
 	@Test
@@ -78,7 +78,7 @@ public class StrategyModuleTest {
 	public void testOnEventNorthstarEventOfOrderWhenCancelling() {
 		ModuleStatus moduleStatus = new ModuleStatus("module", mock(ModulePosition.class));
 		moduleStatus.stateMachine = new ModuleStateMachine("module", ModuleState.PENDING_ORDER);
-		module = new StrategyModule("mktGateway", tradeGateway, moduleStatus, true);
+		module = new StrategyModule("mktGateway", tradeGateway, moduleStatus);
 		module.meb = mock(ModuleEventBus.class);
 		SubmitOrderReqField req = factory.makeOrderReq("rb2210", DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open, 1, 2000, 0);
 		module.ti = mock(ModuleTradeIntent.class);
@@ -97,7 +97,7 @@ public class StrategyModuleTest {
 	public void testOnEventNorthstarEventOfOrderWhenOrdering() {
 		ModuleStatus moduleStatus = new ModuleStatus("module", mock(ModulePosition.class));
 		moduleStatus.stateMachine = new ModuleStateMachine("module", ModuleState.PLACING_ORDER);
-		module = new StrategyModule("mktGateway", tradeGateway, moduleStatus, true);
+		module = new StrategyModule("mktGateway", tradeGateway, moduleStatus);
 		module.meb = mock(ModuleEventBus.class);
 		SubmitOrderReqField req = factory.makeOrderReq("rb2210", DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open, 1, 2000, 0);
 		module.ti = mock(ModuleTradeIntent.class);
@@ -116,7 +116,7 @@ public class StrategyModuleTest {
 	public void testOnEventNorthstarEventOfBuyTrade() {
 		ModuleStatus moduleStatus = new ModuleStatus("module", mock(ModulePosition.class));
 		moduleStatus.stateMachine = new ModuleStateMachine("module", ModuleState.PENDING_ORDER);
-		module = new StrategyModule("mktGateway", tradeGateway, moduleStatus, true);
+		module = new StrategyModule("mktGateway", tradeGateway, moduleStatus);
 		module.meb = mock(ModuleEventBus.class);
 		SubmitOrderReqField req = factory.makeOrderReq("rb2210", DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open, 1, 2000, 0);
 		module.ti = mock(ModuleTradeIntent.class);
@@ -132,7 +132,7 @@ public class StrategyModuleTest {
 	public void testOnEventNorthstarEventOfSellTrade() {
 		ModuleStatus moduleStatus = new ModuleStatus("module", mock(ModulePosition.class));
 		moduleStatus.stateMachine = new ModuleStateMachine("module", ModuleState.PENDING_ORDER);
-		module = new StrategyModule("mktGateway", tradeGateway, moduleStatus, true);
+		module = new StrategyModule("mktGateway", tradeGateway, moduleStatus);
 		module.meb = mock(ModuleEventBus.class);
 		SubmitOrderReqField req = factory.makeOrderReq("rb2210", DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open, 1, 2000, 0);
 		module.ti = mock(ModuleTradeIntent.class);
@@ -149,7 +149,7 @@ public class StrategyModuleTest {
 	public void testOnEventModuleEventOfStopLoss() {
 		ModuleStatus moduleStatus = new ModuleStatus("module", mock(ModulePosition.class));
 		moduleStatus.updatePosition(factory.makeTradeField("test", 1000, 1, DirectionEnum.D_Sell, OffsetFlagEnum.OF_Open), factory.makeOrderReq("test", DirectionEnum.D_Sell, OffsetFlagEnum.OF_Open, 1, 1000, 990));
-		module = new StrategyModule("mktGateway", tradeGateway, moduleStatus, true);
+		module = new StrategyModule("mktGateway", tradeGateway, moduleStatus);
 		module.meb = mock(ModuleEventBus.class);
 		module.ti = mock(ModuleTradeIntent.class);
 		module.setSubmitOrderHandler(mock(Consumer.class));
@@ -164,7 +164,7 @@ public class StrategyModuleTest {
 	public void testOnEventModuleEventOfOrderConfirm() {
 		ModuleStatus moduleStatus = new ModuleStatus("module", mock(ModulePosition.class));
 		moduleStatus.stateMachine = new ModuleStateMachine("module", ModuleState.PENDING_ORDER);
-		module = new StrategyModule("mktGateway", tradeGateway, moduleStatus, true);
+		module = new StrategyModule("mktGateway", tradeGateway, moduleStatus);
 		module.meb = mock(ModuleEventBus.class);
 		module.ti = mock(ModuleTradeIntent.class);
 		module.setSubmitOrderHandler(mock(Consumer.class));
@@ -177,7 +177,7 @@ public class StrategyModuleTest {
 	public void testOnEventModuleEventOfOrderReqCancel() {
 		ModuleStatus moduleStatus = new ModuleStatus("module", mock(ModulePosition.class));
 		moduleStatus.stateMachine = new ModuleStateMachine("module", ModuleState.PENDING_ORDER);
-		module = new StrategyModule("mktGateway", tradeGateway, moduleStatus, true);
+		module = new StrategyModule("mktGateway", tradeGateway, moduleStatus);
 		module.meb = mock(ModuleEventBus.class);
 		module.ti = mock(ModuleTradeIntent.class);
 		module.setCancelOrderHandler(mock(Consumer.class));

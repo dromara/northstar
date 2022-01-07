@@ -102,8 +102,8 @@ public class PlaybackEngineTest {
 	
 	@BeforeEach
 	public void prepare() throws InvalidProtocolBufferException {
-		when(task.isDone()).thenReturn(false, true);
-		when(task.nextBatchData()).thenReturn(batchData);
+		when(task.hasMoreDayToPlay()).thenReturn(true, false);
+		when(task.nextBatchDataOfDay()).thenReturn(batchData);
 		
 		batchData.put(DataType.BAR, barQ);
 		batchData.put(DataType.TICK, tickQ);
@@ -117,7 +117,7 @@ public class PlaybackEngineTest {
 	}
 	
 	@Test
-	public void test() {
+	public void test() throws InterruptedException {
 		SimMarket market = mock(SimMarket.class);
 		SandboxModuleManager moduleMgr = mock(SandboxModuleManager.class);
 		engine = new PlaybackEngine(market, moduleMgr);
