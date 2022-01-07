@@ -32,13 +32,13 @@ public class PlaybackEngine {
 	}
 
 	@SuppressWarnings("unchecked")
-	public void play(PlaybackTask task) {
+	public void play(PlaybackTask task) throws InterruptedException {
 		log.info("################# 开始回测 #################");
 		
-		while(!task.isDone()) {
+		while(task.hasMoreDayToPlay()) {
 			Map<DataType, PriorityQueue<?>> batchDataMap;
 			try {
-				batchDataMap = task.nextBatchData();
+				batchDataMap = task.nextBatchDataOfDay();
 			} catch (InvalidProtocolBufferException e) {
 				throw new IllegalStateException("历史行情数据加载异常", e);
 			}
@@ -52,6 +52,7 @@ public class PlaybackEngine {
 					TickField tick = tickQ.poll();
 					simMarket.onTick(tick);
 					moduleMgr.onEvent(new NorthstarEvent(NorthstarEventType.TICK, tick));
+					Thread.sleep(3);
 				}
 				moduleMgr.onEvent(new NorthstarEvent(NorthstarEventType.BAR, bar));
 			}

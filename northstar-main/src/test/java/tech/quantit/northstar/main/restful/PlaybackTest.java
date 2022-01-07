@@ -163,7 +163,7 @@ public class PlaybackTest {
 
 	@Test
 	public void shouldGetReadyStateIfNotPlay() throws Exception {
-		Thread.sleep(500);
+		Thread.sleep(1000);
 		mockMvc.perform(get("/pb/readiness").session(session))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS))

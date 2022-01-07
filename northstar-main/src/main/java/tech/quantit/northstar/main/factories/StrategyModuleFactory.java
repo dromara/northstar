@@ -59,12 +59,12 @@ public class StrategyModuleFactory {
 		this.extJarListener = extJarListener;
 	}
 	
-	public StrategyModule makeModule(ModuleInfo moduleInfo, List<ModulePositionInfo> positionInfos, boolean isForPlayback) throws Exception {
+	public StrategyModule makeModule(ModuleInfo moduleInfo, List<ModulePositionInfo> positionInfos) throws Exception {
 		TradeGateway tradeGateway = (TradeGateway) gatewayConnMgr.getGatewayById(moduleInfo.getAccountGatewayId());
 		GatewayConnection gatewayConn = gatewayConnMgr.getConnectionByGateway(tradeGateway);
 		String bindedMktGatewayId = gatewayConn.getGwDescription().getBindedMktGatewayId();
 		ModuleStatus moduleStatus = convertStatus(moduleInfo, positionInfos);
-		StrategyModule module = new StrategyModule(bindedMktGatewayId, tradeGateway, moduleStatus, isForPlayback);
+		StrategyModule module = new StrategyModule(bindedMktGatewayId, tradeGateway, moduleStatus);
 		for(EventDrivenComponent component : convertComponents(moduleInfo)) {
 			module.addComponent(component);
 		}

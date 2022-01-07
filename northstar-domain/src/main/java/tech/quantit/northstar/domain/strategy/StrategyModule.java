@@ -81,8 +81,8 @@ public class StrategyModule implements EventDrivenComponent{
 	
 	private Logger log;
 	
-	public StrategyModule(String bindedMktGatewayId, TradeGateway gateway, ModuleStatus status, boolean isSyncMode) {
-		this.meb = isSyncMode ? new EventBus() : new ModuleEventBus();
+	public StrategyModule(String bindedMktGatewayId, TradeGateway gateway, ModuleStatus status) {
+		this.meb = new ModuleEventBus();
 		this.moduleStatus = status;
 		this.moduleStatus.setModuleEventBus(meb);
 		this.stateMachine = moduleStatus.getStateMachine();

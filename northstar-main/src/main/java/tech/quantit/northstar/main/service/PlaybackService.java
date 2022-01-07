@@ -113,7 +113,7 @@ public class PlaybackService {
 			moduleInfo.setModuleName(moduleInfo.getModuleName() + Constants.PLAYBACK_MODULE_SUFFIX);
 			moduleInfo.setAccountGatewayId(gwDescription.getGatewayId());
 			
-			StrategyModule module = moduleFactory.makeModule(moduleInfo, Collections.emptyList(), true);
+			StrategyModule module = moduleFactory.makeModule(moduleInfo, Collections.emptyList());
 			module.setSubmitOrderHandler(simTradeGateway::submitOrder);
 			module.setCancelOrderHandler(simTradeGateway::cancelOrder);
 			module.setDealRecordGenHandler(moduleRepo::saveDealRecord);
@@ -121,7 +121,7 @@ public class PlaybackService {
 				moduleRepo.saveTradeRecord(ModuleTradeRecord.builder()
 						.contractName(trade.getContract().getFullName())
 						.actionTime(trade.getTradeTimestamp())
-						.moduleName(name)
+						.moduleName(name + Constants.PLAYBACK_MODULE_SUFFIX)
 						.operation(FieldUtils.chn(trade.getDirection()) + FieldUtils.chn(trade.getOffsetFlag()))
 						.price(trade.getPrice())
 						.tradingDay(trade.getTradingDay())
@@ -140,16 +140,23 @@ public class PlaybackService {
 		task = new PlaybackTask(playbackDescription, playbackModules, mdRepo);
 		
 		new Thread(()->{			
-			pbEngine.play(task);
+			try {
+				Thread.sleep(500);
+				pbEngine.play(task);
+			} catch (InterruptedException e) {
+				log.error("", e);
+			}
 			// 清理回测网关与模组副本
 			for(StrategyModule module : playbackModules) {
-				Gateway gateway = module.getGateway();
-				gateway.disconnect();
-				if(module.isEnabled()) {					
-					module.toggleRunningState();
-				}
-				simMarket.removeGateway(module.getBindedMktGatewayId(), (SimTradeGateway) gateway);
-				CompletableFuture.delayedExecutor(10, TimeUnit.SECONDS).execute(() -> {					
+				CompletableFuture.delayedExecutor(10, TimeUnit.SECONDS).execute(() -> {	
+					Gateway gateway = module.getGateway();
+					try {
+						Thread.sleep(1000);
+					} catch (InterruptedException e) {
+						log.error("", e);
+					}
+					module.setEnabled(false);
+					simMarket.removeGateway(module.getBindedMktGatewayId(), (SimTradeGateway) gateway);
 					sandboxMgr.removeModule(module.getName());
 					gatewayConnMgr.removePair(gateway);
 					log.info("回测模组副本已清理");
