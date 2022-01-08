@@ -32,7 +32,6 @@ public class CtpGatewayFactory implements GatewayFactory{
 				: GatewayTypeEnum.GTE_Trade;
 		CtpSettings settings = JSON.toJavaObject((JSON)JSON.toJSON(gatewayDescription.getSettings()), CtpSettings.class);
 		CtpApiSettingField ctpSetting = CtpApiSettingField.newBuilder()
-				.setBrokerId(settings.getBrokerId())
 				.setPassword(settings.getPassword())
 				.setUserId(settings.getUserId())
 				.build();
