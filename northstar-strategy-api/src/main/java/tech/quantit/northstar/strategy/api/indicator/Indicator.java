@@ -11,6 +11,7 @@ import org.springframework.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.strategy.api.BarDataAware;
 import tech.quantit.northstar.strategy.api.model.TimeSeriesValue;
+import tech.quantit.northstar.strategy.api.utils.RingArray;
 import xyz.redtorch.pb.CoreField.BarField;
 
 /**
@@ -25,11 +26,7 @@ public abstract class Indicator implements BarDataAware {
 	 * 指标历史记录
 	 * 采用环型数组记录
 	 */
-	private TimeSeriesValue[] refVals;
-	/**
-	 * 数据当前指针位置
-	 */
-	private int cursor;
+	private RingArray<TimeSeriesValue> refVals;
 	/**
 	 * 指标取值类型
 	 */
@@ -37,13 +34,16 @@ public abstract class Indicator implements BarDataAware {
 	
 	private String unifiedSymbol;
 	
+	private int size;
+	
 	protected Indicator(String unifiedSymbol, int size, ValueType valType) {
-		refVals = new TimeSeriesValue[size];
-		for(int i=0; i<refVals.length; i++) {
-			refVals[i] = new TimeSeriesValue(0, 0);
+		refVals = new RingArray<>(size);
+		for(int i=0; i<size; i++) {
+			refVals.update(new TimeSeriesValue(0, 0));
 		}
 		this.unifiedSymbol = unifiedSymbol;
 		this.valType = valType;
+		this.size = size;
 	}
 	
 	/**
@@ -59,12 +59,10 @@ public abstract class Indicator implements BarDataAware {
 	 * @return
 	 */
 	public double value(int numOfStepBack) {
-		if(Math.abs(numOfStepBack) > refVals.length) {
+		if(Math.abs(numOfStepBack) > size) {
 			throw new IllegalArgumentException("回溯步长超过记录长度");
 		}
-		
-		int index = (cursor + refVals.length - numOfStepBack) % refVals.length;
-		return refVals[index].getValue();
+		return refVals.get(-numOfStepBack).getValue();
 	}
 	
 	/**
@@ -74,7 +72,8 @@ public abstract class Indicator implements BarDataAware {
 	 */
 	public Optional<Double> valueOn(long time){
 		Map<Long, Double> valMap = new HashMap<>();
-		for(TimeSeriesValue val : refVals) {
+		for(Object obj : refVals.toArray()) {
+			TimeSeriesValue val = (TimeSeriesValue) obj;
 			valMap.put(val.getTimestamp(), val.getValue());
 		}
 		return Optional.ofNullable(valMap.get(time)); 
@@ -87,30 +86,42 @@ public abstract class Indicator implements BarDataAware {
 			return;
 		}
 		log.trace("{} -> {}", this, bar);
-		int index = nextCursor();
-		refVals[index].setTimestamp(bar.getActionTimestamp());
+		TimeSeriesValue tsv = refVals.get(1);
+		tsv.setTimestamp(bar.getActionTimestamp());
 		switch(valType) {
-		case HIGH -> refVals[index].setValue(updateVal(bar.getHighPrice()));
-		case CLOSE -> refVals[index].setValue(updateVal(bar.getClosePrice()));
-		case LOW -> refVals[index].setValue(updateVal(bar.getLowPrice()));
-		case OPEN -> refVals[index].setValue(updateVal(bar.getOpenPrice()));
-		case OPEN_INTEREST -> refVals[index].setValue(updateVal(bar.getOpenInterestDelta()));
-		case VOL -> refVals[index].setValue(updateVal(bar.getVolumeDelta()));
+		case HIGH -> tsv.setValue(updateVal(bar.getHighPrice()));
+		case CLOSE -> tsv.setValue(updateVal(bar.getClosePrice()));
+		case LOW -> tsv.setValue(updateVal(bar.getLowPrice()));
+		case OPEN -> tsv.setValue(updateVal(bar.getOpenPrice()));
+		case OPEN_INTEREST -> tsv.setValue(updateVal(bar.getOpenInterestDelta()));
+		case VOL -> tsv.setValue(updateVal(bar.getVolumeDelta()));
 		default -> throw new IllegalArgumentException("Unexpected value: " + valType);
 		}
-		cursor = index;
-	}
-	
-	private int nextCursor() {
-		return ++cursor % refVals.length;
+		refVals.update(tsv);
 	}
 	
 	public TimeSeriesValue highestVal() {
-		return Collections.max(List.of(refVals));
+		TimeSeriesValue highest = null;
+		for(Object obj : refVals.toArray()) {
+			if(highest == null) {
+				highest = (TimeSeriesValue) obj;
+			} else {
+				highest = highest.compareTo((TimeSeriesValue) obj) > 0 ? highest : (TimeSeriesValue) obj;
+			}
+		}
+		return highest; 
 	}
 	
 	public TimeSeriesValue lowestVal() {
-		return Collections.min(List.of(refVals));
+		TimeSeriesValue lowest = null;
+		for(Object obj : refVals.toArray()) {
+			if(lowest == null) {
+				lowest = (TimeSeriesValue) obj;
+			} else {
+				lowest = lowest.compareTo((TimeSeriesValue) obj) < 0 ? lowest : (TimeSeriesValue) obj;
+			}
+		}
+		return lowest;
 	}
 
 	/**
