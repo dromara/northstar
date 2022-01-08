@@ -1,4 +1,4 @@
-package tech.quantit.northstar.strategy.api.utils;
+package tech.quantit.northstar.strategy.api.utils.collection;
 
 public class RingArray<T> {
 
@@ -22,9 +22,16 @@ public class RingArray<T> {
 		return (T) array[getIndex(index)];
 	}
 	
-	public void update(T obj) {
+	/**
+	 * 更新值
+	 * @param obj	返回旧值
+	 * @return
+	 */
+	public T update(T obj) {
 		cursor = getIndex(1);
+		T oldVal = (T) array[cursor]; 
 		array[cursor] = obj;
+		return oldVal;
 	}
 	
 	private int getIndex(int i) {

@@ -11,7 +11,7 @@ import org.springframework.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.strategy.api.BarDataAware;
 import tech.quantit.northstar.strategy.api.model.TimeSeriesValue;
-import tech.quantit.northstar.strategy.api.utils.RingArray;
+import tech.quantit.northstar.strategy.api.utils.collection.RingArray;
 import xyz.redtorch.pb.CoreField.BarField;
 
 /**
