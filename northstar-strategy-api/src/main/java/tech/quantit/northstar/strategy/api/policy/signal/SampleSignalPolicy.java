@@ -109,13 +109,13 @@ public class SampleSignalPolicy extends AbstractSignalPolicy
 			log.info("开始交易");
 			if(currentState == ModuleState.EMPTY) {
 				SignalOperation op = (++seed & 1) > 0 ? SignalOperation.BUY_OPEN : SignalOperation.SELL_OPEN;
-				emit(Signal.builder().signalOperation(op).ticksToStop(5).build());	// 假设固定止损为5个价位
+				emit(Signal.builder().signalOperation(op).ticksToStop(5).build(), tick.getActionTimestamp());	// 假设固定止损为5个价位
 			}
 			if(currentState == ModuleState.HOLDING_LONG) {	
-				emit(Signal.builder().signalOperation(SignalOperation.SELL_CLOSE).build());
+				emit(Signal.builder().signalOperation(SignalOperation.SELL_CLOSE).build(), tick.getActionTimestamp());
 			}
 			if(currentState == ModuleState.HOLDING_SHORT) {			
-				emit(Signal.builder().signalOperation(SignalOperation.BUY_CLOSE).build());
+				emit(Signal.builder().signalOperation(SignalOperation.BUY_CLOSE).build(), tick.getActionTimestamp());
 			}
 		}
 	}
