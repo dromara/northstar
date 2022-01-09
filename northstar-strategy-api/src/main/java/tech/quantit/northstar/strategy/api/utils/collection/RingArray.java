@@ -1,5 +1,7 @@
 package tech.quantit.northstar.strategy.api.utils.collection;
 
+import java.util.Optional;
+
 public class RingArray<T> {
 
 	private Object[] array;
@@ -27,11 +29,11 @@ public class RingArray<T> {
 	 * @param obj	返回旧值
 	 * @return
 	 */
-	public T update(T obj) {
+	public Optional<T> update(T obj) {
 		cursor = getIndex(1);
 		T oldVal = (T) array[cursor]; 
 		array[cursor] = obj;
-		return oldVal;
+		return Optional.ofNullable(oldVal);
 	}
 	
 	private int getIndex(int i) {
