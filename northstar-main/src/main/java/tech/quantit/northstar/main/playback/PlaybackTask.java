@@ -95,6 +95,10 @@ public class PlaybackTask {
 		return !curDate.isAfter(endDate);
 	}
 	
+	public static void main(String[] args) {
+		System.out.println(LocalDate.of(2022, 1, 3).until(LocalDate.of(2022, 1, 8), ChronoUnit.DAYS));
+	}
+	
 	private double ratioOfDay() {
 		if(totalNumOfData == 0) {
 			return 0;
@@ -103,7 +107,8 @@ public class PlaybackTask {
 	}
 	
 	public double ratioOfProcess() {
-		return Math.min((totalNumOfDays - restOfDays() + ratioOfDay()) / totalNumOfDays, 1) ;
+		double restPercentageOfWork = totalNumOfData == 0 ? 1D * restOfDays() / totalNumOfDays : (1D * restOfDays() + 1 - ratioOfDay()) / totalNumOfDays;
+		return 1 - restPercentageOfWork;
 	}
 	
 	

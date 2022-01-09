@@ -192,12 +192,12 @@ public class PlaybackTaskTest {
 		when(task.barQ.size()).thenReturn(400);
 		task.curDate = LocalDate.of(2021, 1, 2);
 		task.totalNumOfData = 500;
-		assertThat(task.ratioOfProcess()).isCloseTo(0.120, offset(1e-6));
+		assertThat(task.ratioOfProcess()).isCloseTo(0.020, offset(1e-6));
 		
 		when(task.barQ.size()).thenReturn(400);
 		task.curDate = LocalDate.of(2021, 1, 10);
 		task.totalNumOfData = 500;
-		assertThat(task.ratioOfProcess()).isCloseTo(0.920, offset(1e-6));
+		assertThat(task.ratioOfProcess()).isCloseTo(0.820, offset(1e-6));
 		
 		when(task.barQ.size()).thenReturn(0);
 		task.totalNumOfData = 0;
