@@ -112,7 +112,7 @@ public class PlaybackService {
 			moduleInfo.setModuleName(moduleInfo.getModuleName() + Constants.PLAYBACK_MODULE_SUFFIX);
 			moduleInfo.setAccountGatewayId(gwDescription.getGatewayId());
 			
-			StrategyModule module = moduleFactory.makeModule(moduleInfo, Collections.emptyList());
+			StrategyModule module = moduleFactory.makeModule(moduleInfo, Collections.emptyList(), true);
 			module.setSubmitOrderHandler(simTradeGateway::submitOrder);
 			module.setCancelOrderHandler(simTradeGateway::cancelOrder);
 			module.setDealRecordGenHandler(moduleRepo::saveDealRecord);

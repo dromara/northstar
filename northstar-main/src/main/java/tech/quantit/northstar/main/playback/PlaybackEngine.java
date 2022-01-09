@@ -53,7 +53,6 @@ public class PlaybackEngine {
 				while(!tickQ.isEmpty() && tickQ.peek().getActionTimestamp() < bar.getActionTimestamp() + 60000) {					
 					TickField tick = tickQ.poll();
 					moduleMgr.onEvent(new NorthstarEvent(NorthstarEventType.TICK, tick));
-					Thread.sleep(5);
 					simMarket.onTick(tick);
 				}
 				moduleMgr.onEvent(new NorthstarEvent(NorthstarEventType.BAR, bar));

@@ -179,7 +179,7 @@ public class ModuleService implements InitializingBean {
 	 * @param status
 	 */
 	private void loadModule(ModuleInfo info, List<ModulePositionInfo> positionInfos) throws Exception {
-		StrategyModule strategyModule = moduleFactory.makeModule(info, positionInfos);
+		StrategyModule strategyModule = moduleFactory.makeModule(info, positionInfos, false);
 		TradeGateway gateway = (TradeGateway) gatewayConnMgr.getGatewayById(info.getAccountGatewayId());
 		strategyModule.setCancelOrderHandler(gateway::cancelOrder);
 		strategyModule.setSubmitOrderHandler(gateway::submitOrder);
