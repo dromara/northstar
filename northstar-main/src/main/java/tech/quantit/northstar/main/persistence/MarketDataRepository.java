@@ -110,9 +110,12 @@ public class MarketDataRepository {
 	public List<MinBarDataPO> loadDataByDate(String gatewayId, String unifiedSymbol, String tradeDay) {
 		List<Document> resultList = client.find(dbName, COLLECTION_PREFIX + gatewayId, new Document()
 				.append(SYMBOL, unifiedSymbol)
-				.append(TRADING_DAY, tradeDay));
+				.append(TRADING_DAY, tradeDay));;
 		log.debug("[{}]-[{}]-[{}] 加载历史数据：{}条", gatewayId, unifiedSymbol, tradeDay, resultList.size());
-		return resultList.stream().map(doc -> MongoUtils.documentToBean(doc, MinBarDataPO.class)).toList();
+		return resultList.stream()
+				.map(doc -> MongoUtils.documentToBean(doc, MinBarDataPO.class))
+				.sorted((a, b) -> a.getUpdateTime() < b.getUpdateTime() ? -1 : 1)
+				.toList();
 	}
 	
 	/**
