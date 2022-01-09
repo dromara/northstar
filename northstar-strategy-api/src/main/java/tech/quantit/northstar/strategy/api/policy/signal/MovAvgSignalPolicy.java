@@ -86,11 +86,11 @@ public class MovAvgSignalPolicy extends AbstractSignalPolicy
 	protected void handleTick(TickField tick) {
 		// 挣20个TICK就离场
 		if(currentState == ModuleState.HOLDING_LONG && tick.getLastPrice() - entryPrice > 20 * bindedContract.getPriceTick()) {
-			emit(Signal.builder().signalOperation(SignalOperation.SELL_CLOSE).build());
+			emit(Signal.builder().signalOperation(SignalOperation.SELL_CLOSE).build(), tick.getActionTimestamp());
 		}
 		
 		if(currentState == ModuleState.HOLDING_SHORT && entryPrice - tick.getLastPrice() > 20 * bindedContract.getPriceTick()) {
-			emit(Signal.builder().signalOperation(SignalOperation.BUY_CLOSE).build());
+			emit(Signal.builder().signalOperation(SignalOperation.BUY_CLOSE).build(), tick.getActionTimestamp());
 		}
 	}
 
@@ -103,14 +103,14 @@ public class MovAvgSignalPolicy extends AbstractSignalPolicy
 		if(currentState == ModuleState.EMPTY && maFast.value(1) < maSlow.value(1) && maFast.value(0) > maSlow.value(0)) {
 			log.debug("上一周期的指标：快线 [{}]，慢线 [{}]", maFast.value(1), maSlow.value(1));
 			entryPrice = bar.getClosePrice();
-			emit(Signal.builder().signalOperation(SignalOperation.BUY_OPEN).signalPrice(entryPrice).ticksToStop(5).build());
+			emit(Signal.builder().signalOperation(SignalOperation.BUY_OPEN).signalPrice(entryPrice).ticksToStop(5).build(), bar.getActionTimestamp());
 		}
 		
 		// 快线下穿慢线，入场做空
 		if(currentState == ModuleState.EMPTY && maFast.value(1) > maSlow.value(1) && maFast.value(0) < maSlow.value(0)) {
 			log.debug("上一周期的指标：快线 [{}]，慢线 [{}]", maFast.value(1), maSlow.value(1));
 			entryPrice = bar.getClosePrice();
-			emit(Signal.builder().signalOperation(SignalOperation.SELL_OPEN).signalPrice(entryPrice).ticksToStop(5).build());
+			emit(Signal.builder().signalOperation(SignalOperation.SELL_OPEN).signalPrice(entryPrice).ticksToStop(5).build(), bar.getActionTimestamp());
 		}
 	}
 
@@ -121,16 +121,20 @@ public class MovAvgSignalPolicy extends AbstractSignalPolicy
 	}
 
 	@Override
-	public void initByTick(Iterable<TickField> ticks) {
+	public void initByTick(TickField tick) {
 		// 不用处理
 	}
 
 	@Override
-	public void initByBar(Iterable<BarField> bars) {
-		for(BarField bar : bars) {
-			maFast.onBar(bar);
-			maSlow.onBar(bar);
-		}
+	public void initByBar(BarField bar) {
+		maFast.onBar(bar);
+		maSlow.onBar(bar);
+	}
+
+	@Override
+	public boolean hasDoneInit() {
+		// 这里可以强制规定初始化的条件
+		return true;
 	}
 
 }

@@ -43,14 +43,17 @@ public abstract class AbstractSignalPolicy implements SignalPolicy {
 	
 	private IMailSender sender;
 	
+	protected long lastActionTime;
+	
 	/**
 	 * 发送信号
 	 * @param signal
 	 */
-	protected void emit(Signal signal) {
+	protected void emit(Signal signal, long actionTime) {
 		if(!isActive()) {
 			throw new IllegalStateException("当前状态下 [" + currentState + "] 不能发交易信号。");
 		}
+		lastActionTime = actionTime;
 		moduleEventBus.post(new ModuleEvent<>(ModuleEventType.SIGNAL_CREATED, signal));
 		if(log.isInfoEnabled()) {			
 			log.info("[{}->{}] 发出交易信号：{}", getModuleName(), name(), signal.getSignalOperation());

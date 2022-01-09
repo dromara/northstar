@@ -19,7 +19,7 @@ class RingArrayTest {
 		assertThat(ring.get(2)).isEqualTo(sample[3]);
 		assertThat(ring.get(-2)).isEqualTo(sample[3]);
 		assertThat(ring.get(-1)).isEqualTo(sample[4]);
-		assertThat(ring.update(sample[0])).isEqualTo(sample[2]);
+		assertThat(ring.update(sample[0])).contains(sample[2]);
 	}
 
 }

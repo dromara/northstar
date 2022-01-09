@@ -27,13 +27,19 @@ public interface SignalPolicy extends TickDataAware, BarDataAware, EventDrivenCo
 	 * 使用TICK数据初始化
 	 * @param ticks
 	 */
-	void initByTick(Iterable<TickField> ticks);
+	void initByTick(TickField tick);
 	
 	/**
 	 * 使用BAR数据初始化(1分钟K线数据)
 	 * @param bars
 	 */
-	void initByBar(Iterable<BarField> bars);
+	void initByBar(BarField bars);
+	
+	/**
+	 * 是否已经完成初始化
+	 * @return
+	 */
+	boolean hasDoneInit();
 	
 	/**
 	 * 策略周期（单位：分钟）

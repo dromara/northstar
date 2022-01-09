@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import tech.quantit.northstar.common.event.InternalEventBus;
 import tech.quantit.northstar.common.model.PlaybackDescription;
 import tech.quantit.northstar.common.model.ResultBean;
 import tech.quantit.northstar.domain.strategy.ModuleManager;
@@ -30,9 +29,6 @@ public class PlaybackController {
 	@Autowired 
 	private ModuleManager moduleMgr;
 	
-	@Autowired
-	private InternalEventBus eventBus;
-
 	/**
 	 * 开始回测
 	 * @param startDate
@@ -42,7 +38,7 @@ public class PlaybackController {
 	 */
 	@PostMapping("/play")
 	public ResultBean<Void> play(@RequestBody PlaybackDescription playbackDescription) throws Exception{
-		playbackService.play(playbackDescription, moduleMgr, eventBus);
+		playbackService.play(playbackDescription, moduleMgr);
 		return new ResultBean<>(null);
 	}
 	

@@ -12,7 +12,6 @@ import tech.quantit.northstar.common.constant.Constants;
 import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.common.constant.GatewayUsage;
 import tech.quantit.northstar.common.event.FastEventEngine;
-import tech.quantit.northstar.common.event.InternalEventBus;
 import tech.quantit.northstar.common.model.GatewayDescription;
 import tech.quantit.northstar.common.model.PlaybackDescription;
 import tech.quantit.northstar.common.model.SimSettings;
@@ -83,7 +82,7 @@ public class PlaybackService {
 	 * @param moduleMgr
 	 * @throws Exception
 	 */
-	public void play(PlaybackDescription playbackDescription, ModuleManager moduleMgr, InternalEventBus eventBus) throws Exception{
+	public void play(PlaybackDescription playbackDescription, ModuleManager moduleMgr) throws Exception{
 		isRunning = true;
 		List<String> moduleNames = playbackDescription.getModuleNames();
 		List<StrategyModule> playbackModules = new ArrayList<>();
@@ -113,7 +112,7 @@ public class PlaybackService {
 			moduleInfo.setModuleName(moduleInfo.getModuleName() + Constants.PLAYBACK_MODULE_SUFFIX);
 			moduleInfo.setAccountGatewayId(gwDescription.getGatewayId());
 			
-			StrategyModule module = moduleFactory.makeModule(moduleInfo, Collections.emptyList());
+			StrategyModule module = moduleFactory.makeModule(moduleInfo, Collections.emptyList(), true);
 			module.setSubmitOrderHandler(simTradeGateway::submitOrder);
 			module.setCancelOrderHandler(simTradeGateway::cancelOrder);
 			module.setDealRecordGenHandler(moduleRepo::saveDealRecord);

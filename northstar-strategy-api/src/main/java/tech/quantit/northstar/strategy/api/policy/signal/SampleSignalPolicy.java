@@ -79,7 +79,7 @@ public class SampleSignalPolicy extends AbstractSignalPolicy
 	 * 数据初始化入口
 	 */
 	@Override
-	public void initByTick(Iterable<TickField> ticks) {
+	public void initByTick(TickField ticks) {
 		// 示例代码不需要初始化数据
 	}
 
@@ -87,7 +87,7 @@ public class SampleSignalPolicy extends AbstractSignalPolicy
 	 * 数据初始化入口
 	 */
 	@Override
-	public void initByBar(Iterable<BarField> bars) {
+	public void initByBar(BarField bars) {
 		// 示例代码不需要初始化数据
 	}
 
@@ -109,13 +109,13 @@ public class SampleSignalPolicy extends AbstractSignalPolicy
 			log.info("开始交易");
 			if(currentState == ModuleState.EMPTY) {
 				SignalOperation op = (++seed & 1) > 0 ? SignalOperation.BUY_OPEN : SignalOperation.SELL_OPEN;
-				emit(Signal.builder().signalOperation(op).ticksToStop(5).build());	// 假设固定止损为5个价位
+				emit(Signal.builder().signalOperation(op).ticksToStop(5).build(), tick.getActionTimestamp());	// 假设固定止损为5个价位
 			}
 			if(currentState == ModuleState.HOLDING_LONG) {	
-				emit(Signal.builder().signalOperation(SignalOperation.SELL_CLOSE).build());
+				emit(Signal.builder().signalOperation(SignalOperation.SELL_CLOSE).build(), tick.getActionTimestamp());
 			}
 			if(currentState == ModuleState.HOLDING_SHORT) {			
-				emit(Signal.builder().signalOperation(SignalOperation.BUY_CLOSE).build());
+				emit(Signal.builder().signalOperation(SignalOperation.BUY_CLOSE).build(), tick.getActionTimestamp());
 			}
 		}
 	}
@@ -133,6 +133,12 @@ public class SampleSignalPolicy extends AbstractSignalPolicy
 	public Map<String, TimeSeriesValue[]> inspectRefData() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public boolean hasDoneInit() {
+		// 这里可以强制规定初始化的条件
+		return true;
 	}
 	
 }
