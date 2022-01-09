@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import tech.quantit.northstar.common.event.InternalEventBus;
 import tech.quantit.northstar.common.model.PlaybackDescription;
 import tech.quantit.northstar.common.model.ResultBean;
 import tech.quantit.northstar.domain.strategy.ModuleManager;

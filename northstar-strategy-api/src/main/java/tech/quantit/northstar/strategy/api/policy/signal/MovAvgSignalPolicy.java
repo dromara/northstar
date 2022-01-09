@@ -121,16 +121,20 @@ public class MovAvgSignalPolicy extends AbstractSignalPolicy
 	}
 
 	@Override
-	public void initByTick(Iterable<TickField> ticks) {
+	public void initByTick(TickField tick) {
 		// 不用处理
 	}
 
 	@Override
-	public void initByBar(Iterable<BarField> bars) {
-		for(BarField bar : bars) {
-			maFast.onBar(bar);
-			maSlow.onBar(bar);
-		}
+	public void initByBar(BarField bar) {
+		maFast.onBar(bar);
+		maSlow.onBar(bar);
+	}
+
+	@Override
+	public boolean hasDoneInit() {
+		// 这里可以强制规定初始化的条件
+		return true;
 	}
 
 }

@@ -79,7 +79,7 @@ public class SampleSignalPolicy extends AbstractSignalPolicy
 	 * 数据初始化入口
 	 */
 	@Override
-	public void initByTick(Iterable<TickField> ticks) {
+	public void initByTick(TickField ticks) {
 		// 示例代码不需要初始化数据
 	}
 
@@ -87,7 +87,7 @@ public class SampleSignalPolicy extends AbstractSignalPolicy
 	 * 数据初始化入口
 	 */
 	@Override
-	public void initByBar(Iterable<BarField> bars) {
+	public void initByBar(BarField bars) {
 		// 示例代码不需要初始化数据
 	}
 
@@ -133,6 +133,12 @@ public class SampleSignalPolicy extends AbstractSignalPolicy
 	public Map<String, TimeSeriesValue[]> inspectRefData() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public boolean hasDoneInit() {
+		// 这里可以强制规定初始化的条件
+		return true;
 	}
 	
 }

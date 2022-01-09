@@ -208,27 +208,30 @@ public class ModuleService implements InitializingBean {
 		GatewayConnection conn = gatewayConnMgr.getGatewayConnectionById(gatewayId);
 		String mktGatewayId = conn.getGwDescription().getBindedMktGatewayId();
 
-		LinkedList<BarField> barList = new LinkedList<>();
-		LinkedList<TickField> tickList = new LinkedList<>();
+		for(MinBarDataPO po : loadPrepareData(signalPolicy, mktGatewayId, unifiedSymbol)) {			
+			for(byte[] data : po.getTicksData()) {
+				signalPolicy.initByTick(TickField.parseFrom(data));
+			}
+			signalPolicy.initByBar(BarField.parseFrom(po.getBarData()));
+		}
+		
+		mdlMgr.addModule(strategyModule);
+	}
+	
+	private List<MinBarDataPO> loadPrepareData(SignalPolicy signalPolicy, String mktGatewayId, String unifiedSymbol){
 		List<String> availableDates = mdRepo.findDataAvailableDates(mktGatewayId, unifiedSymbol, false);
 		int expectedMinsOfPreparedData = signalPolicy.numOfRefData() * signalPolicy.periodMins();
+		LinkedList<MinBarDataPO> minBarList = new LinkedList<>();
 		for (String date : availableDates) {
 			List<MinBarDataPO> dataBarPOList = mdRepo.loadDataByDate(mktGatewayId, unifiedSymbol, date);
 			for(int i=dataBarPOList.size() - 1; i>=0; i--){
-				MinBarDataPO po = dataBarPOList.get(i);
-				barList.addFirst(BarField.parseFrom(po.getBarData()));
-				List<byte[]> tickBytes = po.getTicksData();
-				for(int j=tickBytes.size()-1; j>=0; j--) {
-					tickList.addFirst(TickField.parseFrom(tickBytes.get(j)));
-				}
+				minBarList.addFirst(dataBarPOList.get(i));
 			}
-			if(barList.size() > expectedMinsOfPreparedData) {
+			if(minBarList.size() >= expectedMinsOfPreparedData) {
 				break;
 			}
 		}
-		signalPolicy.initByTick(tickList);
-		signalPolicy.initByBar(barList);
-		mdlMgr.addModule(strategyModule);
+		return minBarList;
 	}
 
 	/**
