@@ -45,4 +45,8 @@ public class RingArray<T> {
 		}
 		return result;
 	}
+	
+	public int size() {
+		return size;
+	}
 }
