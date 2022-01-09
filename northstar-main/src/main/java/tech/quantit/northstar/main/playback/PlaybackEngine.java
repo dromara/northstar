@@ -1,5 +1,7 @@
 package tech.quantit.northstar.main.playback;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
 
@@ -50,11 +52,12 @@ public class PlaybackEngine {
 				log.info("开始回放数据：{} {} {}", bar.getUnifiedSymbol(), bar.getActionDay(), bar.getActionTime());
 				while(!tickQ.isEmpty() && tickQ.peek().getActionTimestamp() < bar.getActionTimestamp() + 60000) {					
 					TickField tick = tickQ.poll();
-					simMarket.onTick(tick);
 					moduleMgr.onEvent(new NorthstarEvent(NorthstarEventType.TICK, tick));
-					Thread.sleep(3);
+					Thread.sleep(5);
+					simMarket.onTick(tick);
 				}
 				moduleMgr.onEvent(new NorthstarEvent(NorthstarEventType.BAR, bar));
+				
 			}
 		}
 		log.info("################# 回测结束 #################");

@@ -1,10 +1,7 @@
 package tech.quantit.northstar.gateway.sim.trade;
 
-import java.util.concurrent.Executors;
-
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
-import com.google.common.eventbus.AsyncEventBus;
 import com.google.common.eventbus.EventBus;
 
 import lombok.Getter;
@@ -23,7 +20,7 @@ public class SimMarket {
 	private Table<String, String, SimTradeGateway> simGatewayMap = HashBasedTable.create();
 	
 	@Getter
-	private EventBus marketEventBus = new AsyncEventBus(Executors.newSingleThreadExecutor());
+	private EventBus marketEventBus = new EventBus();
 	
 	private SimAccountRepository simAccRepo;
 	
