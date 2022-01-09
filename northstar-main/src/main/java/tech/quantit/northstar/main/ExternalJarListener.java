@@ -7,6 +7,8 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.system.ApplicationHome;
 import org.springframework.stereotype.Component;
 
+import com.google.common.io.Files;
+
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -22,7 +24,7 @@ public class ExternalJarListener implements CommandLineRunner{
 		ApplicationHome appHome = new ApplicationHome(getClass());
 		File appPath = appHome.getDir();
 		for(File file : appPath.listFiles()) {
-			if(file.getName().contains("northstar-external")) {
+			if(file.getName().contains("northstar-external") && Files.getFileExtension(file.getName()).equalsIgnoreCase("jar") && !file.isDirectory()) {
 				log.info("加载northstar-external扩展包");
 				ExternalJarClassLoader clzLoader = new ExternalJarClassLoader(new URL[] {file.toURI().toURL()}, getClass().getClassLoader());
 				SpringContextUtil.getBeanFactory().setBeanClassLoader(clzLoader);
