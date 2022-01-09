@@ -30,9 +30,6 @@ public class PlaybackController {
 	@Autowired 
 	private ModuleManager moduleMgr;
 	
-	@Autowired
-	private InternalEventBus eventBus;
-
 	/**
 	 * 开始回测
 	 * @param startDate
@@ -42,7 +39,7 @@ public class PlaybackController {
 	 */
 	@PostMapping("/play")
 	public ResultBean<Void> play(@RequestBody PlaybackDescription playbackDescription) throws Exception{
-		playbackService.play(playbackDescription, moduleMgr, eventBus);
+		playbackService.play(playbackDescription, moduleMgr);
 		return new ResultBean<>(null);
 	}
 	
