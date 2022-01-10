@@ -48,6 +48,13 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 		feEngine.emitEvent(NorthstarEventType.CONNECTED, gatewaySetting.getGatewayId());
 		feEngine.emitEvent(NorthstarEventType.LOGGED_IN, gatewaySetting.getGatewayId());
 		
+		// 阻塞一下，防止账户回报比连线回报要快导致异常
+		try {
+			Thread.sleep(3000);
+		} catch (InterruptedException e) {
+			log.error("", e);
+		}
+		
 		AccountField af = account.accountField();
 		feEngine.emitEvent(NorthstarEventType.ACCOUNT, af);
 		
