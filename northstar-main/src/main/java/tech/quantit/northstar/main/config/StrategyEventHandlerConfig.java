@@ -4,6 +4,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
+import tech.quantit.northstar.common.event.PlaybackEventBus;
 import tech.quantit.northstar.common.event.StrategyEventBus;
 import tech.quantit.northstar.domain.strategy.ModuleManager;
 import tech.quantit.northstar.domain.strategy.SandboxModuleManager;
@@ -20,9 +21,9 @@ public class StrategyEventHandlerConfig {
 	}
 	
 	@Bean
-	public SandboxModuleManager sandboxModuleManager(StrategyEventBus seb) {
+	public SandboxModuleManager sandboxModuleManager(PlaybackEventBus peb) {
 		SandboxModuleManager smm = new SandboxModuleManager();
-		seb.register(smm);
+		peb.register(smm);
 		return smm;
 	}
 }

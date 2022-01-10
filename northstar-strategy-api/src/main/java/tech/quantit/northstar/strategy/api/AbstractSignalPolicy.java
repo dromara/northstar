@@ -45,6 +45,8 @@ public abstract class AbstractSignalPolicy implements SignalPolicy {
 	
 	protected long lastActionTime;
 	
+	protected TickField lastTick;
+	
 	/**
 	 * 发送信号
 	 * @param signal
@@ -112,6 +114,7 @@ public abstract class AbstractSignalPolicy implements SignalPolicy {
 	public void onTick(TickField tick) {
 		if(tick.getUnifiedSymbol().equals(bindedUnifiedSymbol) && moduleEnabled) {
 			handleTick(tick);
+			lastTick = tick;
 		}
 	}
 
