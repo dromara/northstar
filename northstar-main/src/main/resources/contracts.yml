@@ -1,0 +1,18 @@
+northstar:
+  # 合约订阅管理（采用正则表达式匹配）
+  subscription:
+    ctp:
+      classType:
+        whitelist: FUTURES
+        #blacklist: OPTIONS
+      #unifiedSymbol:
+        #whilelist: xxx
+        #blacklist: xxx
+  # 行情持久化管理（采用正则表达式匹配）
+  allow-persistence:
+    # 螺纹合约 
+    - rb[0-9]{4}
+    # 沪镍合约
+    - ni[0-9]{4}
+      
+          

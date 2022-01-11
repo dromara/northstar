@@ -11,17 +11,11 @@ northstar:
   auth:
     userId: ${nsuser:admin}
     password: ${nspwd:123456}
-  holidays: 20220103,20220131,20220201,20220202,20220203,20220204,20220405,20220502,20220503,20220504,20220603,20220912,20221003,20221004,20221005,20221006,20221007
-  subscription:
-    ctp:
-      classType:
-        whitelist: FUTURES
-      
 
 logging:  level: 
     root: info
     '[tech.quantit.northstar]': debug
-    #'[tech.quantit.northstar.main.handler.broadcast]': trace
+    '[tech.quantit.northstar.strategy.policy.signal]': trace
     #'[tech.quantit.northstar.strategy]': debug
   file:    path: logs/
   

@@ -13,7 +13,7 @@ public class HolidayManagerTest {
 	
 	@BeforeEach
 	public void prepare() throws Exception {
-		mgr.holidayStrs = new String[] {"20210614", "20210920", "20210921"};
+//		mgr.holidayStrs = new String[] {"20210614", "20210920", "20210921"};
 		mgr.afterPropertiesSet();
 	}
 

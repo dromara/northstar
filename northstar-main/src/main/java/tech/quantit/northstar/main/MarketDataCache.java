@@ -17,7 +17,10 @@ import xyz.redtorch.pb.CoreField.TickField;
 public class MarketDataCache implements MarketDataBuffer{
 	
 	@Autowired
-	MarketDataRepository mdRepo;
+	private MarketDataRepository mdRepo;
+	
+	@Autowired
+	private MarketDataPersistenceManager mdpMgr;
 	
 	private ConcurrentLinkedQueue<MinBarDataPO> cacheQ = new ConcurrentLinkedQueue<>();
 	
@@ -33,6 +36,9 @@ public class MarketDataCache implements MarketDataBuffer{
 
 	@Override
 	public void save(BarField bar, List<TickField> ticks) {
+		if(!mdpMgr.isAllowedPersistence(bar.getUnifiedSymbol())) {
+			return;
+		}
 		long barTime = bar.getActionTimestamp();
 		cacheQ.offer(MinBarDataPO.builder()
 				.gatewayId(bar.getGatewayId())
