@@ -22,7 +22,7 @@ import tech.quantit.northstar.main.config.HolidaySettings;
 public class HolidayManager implements InitializingBean{
 
 	@Autowired
-	HolidaySettings holidaySettings;
+	protected HolidaySettings holidaySettings;
 	
 	protected Set<LocalDate> holidaySet = new HashSet<>();
 
