@@ -3,7 +3,7 @@
 set -e
 
 echo "准备环境依赖..."
-yum install git nodejs wget python27 -y
+yum install git nodejs wget python27 gcc gcc-c++ -y
 cd ~
 echo "安装JDK17"
 wget --no-check-certificate https://download.oracle.com/java/17/latest/jdk-17_linux-x64_bin.tar.gz

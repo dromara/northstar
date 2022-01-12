@@ -118,18 +118,9 @@ public class AppConfig implements WebMvcConfigurer {
 		return new SimMarket(simAccRepo);
 	}
 	
-	@Value("${northstar.subscription.ctp.classType.whitelist:}")
-	private String clzTypeWhtlist;
-	@Value("${northstar.subscription.ctp.classType.blacklist:}")
-	private String clzTypeBlklist;
-	@Value("${northstar.subscription.ctp.unifiedSymbol.whitelist:}")
-	private String symbolWhtlist;
-	@Value("${northstar.subscription.ctp.unifiedSymbol.blacklist:}")
-	private String symbolBlklist;
-	
 	@Bean
-	public SubscriptionManager ctpSubscriptionManager() {
-		return new CtpSubscriptionManager(clzTypeWhtlist, clzTypeBlklist, symbolWhtlist, symbolBlklist);
+	public SubscriptionManager ctpSubscriptionManager(SubscriptionConfigurationProperties props) {
+		return new CtpSubscriptionManager(props.getClzTypeWhtlist(), props.getClzTypeBlklist(), props.getSymbolWhtlist(), props.getSymbolBlklist());
 	}
 	
 	@Bean

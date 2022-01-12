@@ -7,10 +7,11 @@ import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import tech.quantit.northstar.common.constant.DateTimeConstant;
+import tech.quantit.northstar.main.config.HolidaySettings;
 
 /**
  * 法定节假日管理器
@@ -20,14 +21,14 @@ import tech.quantit.northstar.common.constant.DateTimeConstant;
 @Component
 public class HolidayManager implements InitializingBean{
 
-	@Value("${northstar.holidays}")
-	protected String[] holidayStrs;
+	@Autowired
+	protected HolidaySettings holidaySettings;
 	
 	protected Set<LocalDate> holidaySet = new HashSet<>();
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		for(String date : holidayStrs) {
+		for(String date : holidaySettings.getHolidays()) {
 			if(StringUtils.isEmpty(date)) {
 				continue;
 			}
