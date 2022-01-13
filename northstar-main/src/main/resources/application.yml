@@ -23,9 +23,9 @@ spring:
   profiles:
     active: ${env:prod}
   mail:
-    host: smtp.126.com
-    username: ${email:somemail@126.com}
-    password: UQNXPDZJIYQTRFRW
+    host: ${smtpHost:smtp.126.com}
+    username: ${email:something@126.com}
+    password: ${secret:UQNXPDZJIYQTRFRW}
     default-encoding: UTF-8
     port: 465
     protocol: smtp

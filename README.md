@@ -1,4 +1,4 @@
-# Northstar高频量化交易平台（中文名：小牛）
+# Northstar高频量化交易平台
 
 **开源声明：**  
 **本项目归入dromara开源组织运营的初心，是希望可以有更多志同道合的朋友一起参与项目的开发，并且能借其在交易市场上有所收获！**  
@@ -86,25 +86,6 @@ Jun 27 17:30:14 ai-trader-hw systemd[1]: Started MongoDB Database Server.
 下载最新版项目，然后解压。**注意：把解压后的文件夹重命名为northstar**
 [https://gitee.com/dromara/northstar/releases](https://gitee.com/dromara/northstar/releases)
 
-
-修改northstar/northstar-main/src/main/resources/application.yml配置文件中的邮箱代理配置  
-(若不使用邮件通知功能，可以忽略此步)
-```
-spring:
-  ...
-
-  mail:
-    host: smtp.126.com              //不同的邮箱配置不同
-    username: ${email}              //为了不上传git，采用启动参数配置
-    password: UQNXPDZJIYQTRFRW      //在邮箱网站获取
-    default-encoding: UTF-8
-    subscribed: ${sub_email}        //为了不上传git，采用启动参数配置
-    port: 465
-    protocol: smtp
-    
-    ...
-```
-
 在.bashrc中加入以上启动参数（这样做能隐藏启动参数）  
 ```
 vim ~/.bashrc
@@ -114,6 +95,8 @@ vim ~/.bashrc
 ...
 export NSUSER=<登陆用户名>
 export NSPWD=<登陆密码>
+export SMTP_HOST=<邮箱SMTP，例如smtp.126.com>
+export SMTP_SECRET=<邮箱认证码，在邮箱设置中生成的认证码>
 export EMAIL=<代理邮箱名> 
 export EMAIL0=<订阅邮箱名>
 ```
