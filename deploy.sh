@@ -1,5 +1,15 @@
 #!/bin/bash
-kill `pgrep -a java | grep northstar.jar | awk '{print $1}'`
+
+if [[ `pgrep -a java | grep northstar.jar | wc -l` > 0 ]]; then
+	kill `pgrep -a java | grep northstar.jar | awk '{print $1}'`
+fi
+
+if [[ -z `ls ~ | grep northstar-monitor` ]]; then
+	wget https://gitee.com/dromara/northstar-monitor/attach_files/945147/download/dist.tar.gz
+	tar -xvf dist.tar.gz
+	mv dist northstar-monitor
+	cd northstar-monitor && node bundle.js
+fi
 
 cd ~/northstar
 ~/apache-maven-3.6.3/bin/mvn clean install -Dmaven.test.skip=true
