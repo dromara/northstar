@@ -1,4 +1,4 @@
-# Northstar高频量化交易平台
+# Northstar高频之星量化交易平台
 
 **开源声明：**  
 **本项目归入dromara开源组织运营的初心，是希望可以有更多志同道合的朋友一起参与项目的开发，并且能借其在交易市场上有所收获！**  
@@ -76,11 +76,6 @@ systemctl status mongod
    CGroup: /system.slice/mongod.service
            └─5934 /usr/bin/mongod -f /etc/mongod.conf
 
-Jun 27 17:30:13 ai-trader-hw systemd[1]: Starting MongoDB Database Server...
-Jun 27 17:30:13 ai-trader-hw mongod[5932]: about to fork child process, waiting until server is r>
-Jun 27 17:30:13 ai-trader-hw mongod[5932]: forked process: 5934
-Jun 27 17:30:14 ai-trader-hw mongod[5932]: child process started successfully, parent exiting
-Jun 27 17:30:14 ai-trader-hw systemd[1]: Started MongoDB Database Server.
 ```
 
 下载最新版项目，然后解压。**注意：把解压后的文件夹重命名为northstar**
