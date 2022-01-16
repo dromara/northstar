@@ -20,6 +20,8 @@ public class ModuleDealRecord {
 	
 	private String tradingDay;
 	
+	private long openTimestamp;
+	
 	private long dealTimestamp;
 	
 	private int volume;
