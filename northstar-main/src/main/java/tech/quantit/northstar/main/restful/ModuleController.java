@@ -1,5 +1,6 @@
 package tech.quantit.northstar.main.restful;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -15,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import tech.quantit.northstar.common.model.ResultBean;
+import tech.quantit.northstar.domain.strategy.ModuleManager;
+import tech.quantit.northstar.main.service.DataSyncService;
 import tech.quantit.northstar.main.service.ModuleService;
 import tech.quantit.northstar.strategy.api.model.ComponentField;
 import tech.quantit.northstar.strategy.api.model.ComponentMetaInfo;
@@ -23,13 +26,18 @@ import tech.quantit.northstar.strategy.api.model.ModuleInfo;
 import tech.quantit.northstar.strategy.api.model.ModulePositionInfo;
 import tech.quantit.northstar.strategy.api.model.ModuleRealTimeInfo;
 import tech.quantit.northstar.strategy.api.model.ModuleTradeRecord;
-import tech.quantit.northstar.strategy.api.model.TimeSeriesValue;
 
 @RestController
 public class ModuleController {
 	
 	@Autowired
 	private ModuleService service;
+	
+	@Autowired
+	private DataSyncService dataService;
+	
+	@Autowired
+	private ModuleManager mdlMgr;
 	
 	/**
 	 * 查询所有定义的信号策略
@@ -128,8 +136,12 @@ public class ModuleController {
 	 * @return
 	 */
 	@GetMapping("/module/refdata")
-	public ResultBean<Map<String, TimeSeriesValue[]>> inspectModuleDataRef(@NotNull String name){
-		return new ResultBean<>(service.getModuleDataRef(name));
+	public ResultBean<Map<String, List<byte[]>>> inspectModuleDataRef(@NotNull String name, long timestamp){
+		String gatewayId = mdlMgr.getModule(name).getBindedMktGatewayId();
+		String unifiedSymbol = mdlMgr.getModule(name).getSignalPolicy().bindedContractSymbol();
+		Map<String, List<byte[]>> resultMap = new HashMap<>();
+		resultMap.put(unifiedSymbol, dataService.loadHistoryBarData(gatewayId, unifiedSymbol, timestamp));
+		return new ResultBean<>(resultMap);
 	}
 	
 	/**

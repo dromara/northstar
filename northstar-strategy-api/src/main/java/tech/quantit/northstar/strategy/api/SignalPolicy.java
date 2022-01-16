@@ -1,10 +1,7 @@
 package tech.quantit.northstar.strategy.api;
 
-import java.util.Map;
-
 import tech.quantit.northstar.common.ContractBindedAware;
 import tech.quantit.northstar.common.TickDataAware;
-import tech.quantit.northstar.strategy.api.model.TimeSeriesValue;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.TickField;
 
@@ -16,12 +13,6 @@ public interface SignalPolicy extends TickDataAware, BarDataAware, EventDrivenCo
 	 * @return
 	 */
 	String name();
-	
-	/**
-	 * 透视引用数据。
-	 * @return
-	 */
-	Map<String, TimeSeriesValue[]> inspectRefData();
 	
 	/**
 	 * 使用TICK数据初始化

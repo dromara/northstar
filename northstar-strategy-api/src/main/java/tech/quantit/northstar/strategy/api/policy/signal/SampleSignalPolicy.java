@@ -1,6 +1,5 @@
 package tech.quantit.northstar.strategy.api.policy.signal;
 
-import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
 import tech.quantit.northstar.strategy.api.AbstractSignalPolicy;
@@ -11,7 +10,6 @@ import tech.quantit.northstar.strategy.api.constant.ModuleState;
 import tech.quantit.northstar.strategy.api.constant.SignalOperation;
 import tech.quantit.northstar.strategy.api.model.DynamicParams;
 import tech.quantit.northstar.strategy.api.model.Signal;
-import tech.quantit.northstar.strategy.api.model.TimeSeriesValue;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.TickField;
 
@@ -127,12 +125,6 @@ public class SampleSignalPolicy extends AbstractSignalPolicy
 	@Override
 	protected void handleBar(BarField bar) {
 		log.debug("策略每分钟触发");
-	}
-
-	@Override
-	public Map<String, TimeSeriesValue[]> inspectRefData() {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 	@Override
