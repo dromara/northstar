@@ -1,7 +1,5 @@
 package tech.quantit.northstar.strategy.api.policy.signal;
 
-import java.util.Map;
-
 import com.google.common.eventbus.EventBus;
 
 import tech.quantit.northstar.strategy.api.AbstractSignalPolicy;
@@ -15,7 +13,6 @@ import tech.quantit.northstar.strategy.api.indicator.Indicator;
 import tech.quantit.northstar.strategy.api.indicator.Indicator.ValueType;
 import tech.quantit.northstar.strategy.api.model.DynamicParams;
 import tech.quantit.northstar.strategy.api.model.Signal;
-import tech.quantit.northstar.strategy.api.model.TimeSeriesValue;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.TickField;
 
