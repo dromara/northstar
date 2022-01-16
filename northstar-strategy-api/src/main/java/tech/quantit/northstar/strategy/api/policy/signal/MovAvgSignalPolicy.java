@@ -115,12 +115,6 @@ public class MovAvgSignalPolicy extends AbstractSignalPolicy
 	}
 
 	@Override
-	public Map<String, TimeSeriesValue[]> inspectRefData() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public void initByTick(TickField tick) {
 		// 不用处理
 	}
