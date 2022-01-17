@@ -99,7 +99,7 @@ public class ModuleTradeIntent {
 				.contractName(latestTrade.getContract().getFullName())
 				.direction(currentPosition.getDirection())
 				.tradingDay(latestTrade.getTradingDay())
-				.dealTimestamp(latestTrade.getTradeTimestamp())
+				.closeTimestamp(latestTrade.getTradeTimestamp())
 				.openTimestamp(currentPosition.getOpenTime())
 				.volume(latestTrade.getVolume())
 				.openPrice(openPrice)

@@ -22,7 +22,7 @@ public class ModuleDealRecord {
 	
 	private long openTimestamp;
 	
-	private long dealTimestamp;
+	private long closeTimestamp;
 	
 	private int volume;
 	
