@@ -24,6 +24,12 @@ public class ModuleDealRecord {
 	
 	private long closeTimestamp;
 	
+	/**
+	 * @deprecated 该属性已经废弃，应该采用closeTimestamp属性代替 
+	 */
+	@Deprecated
+	private long dealTimestamp;
+	
 	private int volume;
 	
 	private double openPrice;
