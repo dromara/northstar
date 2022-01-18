@@ -54,7 +54,7 @@ public class ModulePosition implements TickDataAware, EventDrivenComponent{
 	private PositionDirectionEnum direction = PositionDirectionEnum.PD_Unknown;
 	
 	private String openTradingDay;
-	
+	@Getter
 	private long openTime;
 	@Getter
 	private double openPrice;
