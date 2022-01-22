@@ -42,7 +42,7 @@ import xyz.redtorch.pb.CoreField.TickField;
  *
  */
 @Slf4j
-@StrategicComponent("动量策略")
+@StrategicComponent("动量示例策略")
 public class MomentumSignalStrategy extends AbstractSignalPolicy implements SignalPolicy {
 	
 	private boolean isNightContract;			// 是否包含夜盘的合约
@@ -212,7 +212,7 @@ public class MomentumSignalStrategy extends AbstractSignalPolicy implements Sign
 
 	@Override
 	public String name() {
-		return "动量策略";
+		return "动量示例策略";
 	}
 	
 	@Override
