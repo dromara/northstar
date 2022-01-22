@@ -22,7 +22,7 @@ public class MovingAverage extends Indicator{
 	}
 
 	@Override
-	protected double updateVal(double newVal) {
+	protected double handleUpdate(double newVal) {
 		double oldVal = values[cursor];
 		values[cursor] = newVal;
 		cursor = nextIndex();
