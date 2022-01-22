@@ -10,7 +10,7 @@
 ![输入图片说明](https://images.gitee.com/uploads/images/2022/0103/205503_efb41f7c_1676852.png "login.PNG")
 ![Image text](https://images.gitee.com/uploads/images/2021/0609/223845_f3942e1e_1676852.png)
 
-通过JAVA后台来编写程序化的交易策略，并提供页面监控界面。详细请参考监控端项目https://gitee.com/dromara/northstar-monitor
+通过JAVA后台来编写程序化的交易策略，并提供页面监控界面。部署方法已集成在本项目的部署脚本中。
 
 ![Image](https://images.gitee.com/uploads/images/2021/0606/220710_eeab5dd9_1676852.png)
 ![Image](https://images.gitee.com/uploads/images/2021/0606/220728_32ef6b37_1676852.png)
@@ -100,7 +100,7 @@ export EMAIL0=<订阅邮箱名>
 source ~/.bashrc
 ```
 
-部署程序（每次代码更新后运行）
+部署程序（每次代码更新后运行），已包含northstar-monitor监控端的部署。
 ```
 cd ~/northstar
 bash deploy.sh
@@ -118,6 +118,10 @@ cd ~/northstar
 bash startup.sh
 ```
 注意：startup.sh脚本中包括了JVM的启动参数，假定服务器配置是2核4G，如有不同应该按实际情况修改
+
+**验证部署**  
+在浏览器直接访问部署服务的域名（端口使用了默认的80端口）， 应该可以看到以下界面，并可以登陆成功  
+![输入图片说明](https://images.gitee.com/uploads/images/2022/0103/205503_efb41f7c_1676852.png "login.PNG")
 
 查询日志
 ```
