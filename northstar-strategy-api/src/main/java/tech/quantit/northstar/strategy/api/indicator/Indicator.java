@@ -1,12 +1,8 @@
 package tech.quantit.northstar.strategy.api.indicator;
 
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
-import org.springframework.util.StringUtils;
 
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.strategy.api.BarDataAware;
@@ -79,24 +75,35 @@ public abstract class Indicator implements BarDataAware {
 		return Optional.ofNullable(valMap.get(time)); 
 	}
 	
-	
+	/**
+	 * 依赖BAR的值更新 
+	 */
 	@Override
 	public void onBar(BarField bar) {
 		if(!bar.getUnifiedSymbol().equals(unifiedSymbol)) {
 			return;
 		}
 		log.trace("{} -> {}", this, bar);
-		TimeSeriesValue tsv = refVals.get(1);
-		tsv.setTimestamp(bar.getActionTimestamp());
-		switch(valType) {
-		case HIGH -> tsv.setValue(updateVal(bar.getHighPrice()));
-		case CLOSE -> tsv.setValue(updateVal(bar.getClosePrice()));
-		case LOW -> tsv.setValue(updateVal(bar.getLowPrice()));
-		case OPEN -> tsv.setValue(updateVal(bar.getOpenPrice()));
-		case OPEN_INTEREST -> tsv.setValue(updateVal(bar.getOpenInterestDelta()));
-		case VOL -> tsv.setValue(updateVal(bar.getVolumeDelta()));
+		double barVal = switch(valType) {
+		case HIGH -> bar.getHighPrice();
+		case CLOSE -> bar.getClosePrice();
+		case LOW -> bar.getLowPrice();
+		case OPEN -> bar.getOpenPrice();
+		case OPEN_INTEREST -> bar.getOpenInterestDelta();
+		case VOL -> bar.getVolumeDelta();
 		default -> throw new IllegalArgumentException("Unexpected value: " + valType);
-		}
+		};
+		updateVal(barVal, bar.getActionTimestamp());
+	}
+	
+	/**
+	 * 值更新
+	 * @param newVal
+	 */
+	public void updateVal(double newVal, long timestamp) {
+		TimeSeriesValue tsv = refVals.get(1);
+		tsv.setTimestamp(timestamp);
+		tsv.setValue(handleUpdate(newVal));
 		refVals.update(tsv);
 	}
 	
@@ -125,11 +132,11 @@ public abstract class Indicator implements BarDataAware {
 	}
 
 	/**
-	 * 指标更新值
+	 * 更新算法实现
 	 * @param newVal
 	 * @return
 	 */
-	protected abstract double updateVal(double newVal);
+	protected abstract double handleUpdate(double newVal);
 	
 	/**
 	 * 指标取值类型
@@ -137,6 +144,10 @@ public abstract class Indicator implements BarDataAware {
 	 *
 	 */
 	public enum ValueType {
+		/**
+		 * 未设置
+		 */
+		NOT_SET,
 		/**
 		 * 最高价
 		 */

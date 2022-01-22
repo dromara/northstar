@@ -11,14 +11,21 @@ public class ExpMovingAverage extends Indicator{
 	
 	private double factor;
 	
+	private boolean hasInitVal;
+	
 	public ExpMovingAverage(String unifiedSymbol, int size, ValueType valType) {
 		super(unifiedSymbol, size, valType);
 		this.factor = 2D / (size + 1);
 	}
 
 	@Override
-	protected double updateVal(double newVal) {
-		ema = ema > 0 ? factor * newVal + (1 - factor) * ema : newVal;
+	protected double handleUpdate(double newVal) {
+		if(hasInitVal) {			
+			ema = factor * newVal + (1 - factor) * ema;
+		} else {
+			ema = newVal;
+			hasInitVal = true;
+		}
 		return ema;
 	}
 
