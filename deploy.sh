@@ -8,7 +8,7 @@ fi
 
 if [[ -z `ls ~ | grep northstar-monitor` ]]; then
 	# 不同的版本对应的前端部署包可能不同
-	cd ~ && wget https://gitee.com/dromara/northstar-monitor/attach_files/945147/download/dist.tar.gz
+	cd ~ && wget https://gitee.com/dromara/northstar-monitor/attach_files/952101/download/dist.tar.gz
 	tar -xvf dist.tar.gz
 	mkdir ~/northstar-monitor
 	mv dist ~/northstar-monitor/dist
