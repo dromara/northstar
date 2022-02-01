@@ -20,9 +20,10 @@ import xyz.redtorch.pb.CoreField.TickField;
  * @author KevinHuangwl
  *
  */
-@StrategicComponent("示例信号策略")	// 该注解是用于给策略命名用的
-public class SampleSignalPolicy extends AbstractSignalPolicy
-	implements SignalPolicy //	所有的策略都应该是DynamicParamsAware的实现类
+@StrategicComponent("示例信号策略")		// 该注解是用于给策略命名用的，所有的策略都要带上这个注解
+public class SampleSignalPolicy 
+	extends AbstractSignalPolicy	// 所有信号策略都要继承这个抽象类
+	implements SignalPolicy 		// 所有信号策略都要实现这个接口
 {
 	private int actionInterval;
 	
@@ -33,7 +34,7 @@ public class SampleSignalPolicy extends AbstractSignalPolicy
 	 */
 	@Override
 	public DynamicParams getDynamicParams() {
-		return new InitParams();
+		return new InitParams();	// 这个用于返回定义好的策略初始化参数
 	}
 
 	/**
@@ -52,9 +53,9 @@ public class SampleSignalPolicy extends AbstractSignalPolicy
 	 * 定义该策略的参数，类名必须为InitParams，必须继承DynamicParams，必须是个static类
 	 * @author KevinHuangwl
 	 */
-	public static class InitParams extends DynamicParams{
+	public static class InitParams extends DynamicParams {			// 每个策略都要有一个用于定义初始化参数的内部类，类名称不能改
 		
-		@Setting(value="绑定合约", order=10)	// Label注解用于定义属性的元信息
+		@Setting(value="绑定合约", order=10)		// Label注解用于定义属性的元信息
 		private String bindedUnifiedSymbol;		// 属性可以为任意多个，当元素为多个时order值用于控制前端的显示顺序
 		
 		@Setting(value="周期时长", order=11, unit="分钟")
@@ -63,7 +64,7 @@ public class SampleSignalPolicy extends AbstractSignalPolicy
 		@Setting(value="回溯周期数", order=12)
 		private int numOfRefData;
 		
-		@Setting(value="操作间隔", order=20, unit="秒")	// 可以声明单位
+		@Setting(value="操作间隔", order=20, unit="秒")		// 可以声明单位
 		private int actionInterval;
 		
 	}
