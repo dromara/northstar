@@ -7,7 +7,7 @@ package tech.quantit.northstar.strategy.api.indicator;
  */
 public class ValueSeries extends Indicator{
 
-	protected ValueSeries(String unifiedSymbol, int size, ValueType valType) {
+	public ValueSeries(String unifiedSymbol, int size, ValueType valType) {
 		super(unifiedSymbol, size, valType);
 	}
 
