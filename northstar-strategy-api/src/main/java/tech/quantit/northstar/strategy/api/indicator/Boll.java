@@ -10,15 +10,15 @@ import xyz.redtorch.pb.CoreField;
  */
 public class Boll extends MultiValueIndicator {
 
-    private static final String LOWER = "LOWER";
-    private static final String UPPER = "UPPER";
-    private static final String MID = "MID";
+    public static final String LOWER = "LOWER";
+    public static final String UPPER = "UPPER";
+    public static final String MID = "MID";
 
-    private Indicator lowerLine;
+    private final Indicator lowerLine;
 
-    private Indicator upperLine;
+    private final Indicator upperLine;
 
-    private Indicator midLine;
+    private final Indicator midLine;
 
     public Boll(String unifiedSymbol) {
         //默认参数是 (20, 2)
