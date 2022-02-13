@@ -24,9 +24,6 @@ class BollTest {
 	void test() {
 		MultiValueIndicator boll = new Boll(symbol,26,2);
 		for (int i = 0; i < sample.length; i++) {
-			if(i == sample.length - 10) {
-				System.out.println("d");
-			}
 			boll.onBar(BarField.newBuilder().setUnifiedSymbol(symbol).setClosePrice(sample[i]).build());
 		}
 		

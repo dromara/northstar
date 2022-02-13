@@ -22,7 +22,7 @@ public class MarketDataPersistenceManager {
 	@PostConstruct
 	private void init() {
 		for(String str : persistConfig.getAllowPersistence()) {
-			ptnSet.add(Pattern.compile(str));
+			ptnSet.add(Pattern.compile(str, Pattern.CASE_INSENSITIVE));
 		}
 	}
 	

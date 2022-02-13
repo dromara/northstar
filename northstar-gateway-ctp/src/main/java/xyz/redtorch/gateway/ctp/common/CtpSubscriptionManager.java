@@ -30,13 +30,13 @@ public class CtpSubscriptionManager implements SubscriptionManager {
 	
 	public CtpSubscriptionManager(String classTypeWhitelist, String classTypeBlacklist, String symbolWhitelist, String symbolBlacklist) {
 		if(StringUtils.isNotBlank(classTypeWhitelist))
-			ptnClzWht = Pattern.compile(classTypeWhitelist);
+			ptnClzWht = Pattern.compile(classTypeWhitelist, Pattern.CASE_INSENSITIVE);
 		if(StringUtils.isNotBlank(classTypeBlacklist))
-			ptnClzBlk = Pattern.compile(classTypeBlacklist);
+			ptnClzBlk = Pattern.compile(classTypeBlacklist, Pattern.CASE_INSENSITIVE);
 		if(StringUtils.isNotBlank(symbolWhitelist))
-			ptnSymWht = Pattern.compile(symbolWhitelist);
+			ptnSymWht = Pattern.compile(symbolWhitelist, Pattern.CASE_INSENSITIVE);
 		if(StringUtils.isNotBlank(symbolBlacklist))
-			ptnSymBlk = Pattern.compile(symbolBlacklist);
+			ptnSymBlk = Pattern.compile(symbolBlacklist, Pattern.CASE_INSENSITIVE);
 	}
 
 	@Override
