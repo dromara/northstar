@@ -24,7 +24,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.mongodb.client.MongoClient;
 
-import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.domain.account.TradeDayAccount;
 import tech.quantit.northstar.domain.external.MessageHandlerManager;
@@ -53,7 +52,6 @@ import xyz.redtorch.pb.CoreField.ContractField;
  * @author KevinHuangwl
  *
  */
-@Slf4j
 @Configuration
 public class AppConfig implements WebMvcConfigurer {
 
@@ -162,11 +160,12 @@ public class AppConfig implements WebMvcConfigurer {
 		}
 		for(ContractPO po : contractList) {
 			ContractField contract = contractMap.get(po.getUnifiedSymbol());
-			log.debug("读取合约：{}", po.getUnifiedSymbol());
 			if(po.isIndexContract()) {
 				Set<ContractField> monthlyContracts = new HashSet<>();
 				for(String monthlyContractSymbol : po.getMonthlyContractSymbols()) {
-					monthlyContracts.add(contractMap.get(monthlyContractSymbol));
+					if(contractMap.containsKey(monthlyContractSymbol)) {
+						monthlyContracts.add(contractMap.get(monthlyContractSymbol));
+					}
 				}
 				registry.register(new IndexContract(contract.getUnifiedSymbol(), po.getGatewayType(), monthlyContracts));
 			} else {
