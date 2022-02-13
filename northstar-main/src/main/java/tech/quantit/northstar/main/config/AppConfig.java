@@ -11,7 +11,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Consumer;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -25,6 +24,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.mongodb.client.MongoClient;
 
+import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.domain.account.TradeDayAccount;
 import tech.quantit.northstar.domain.external.MessageHandlerManager;
@@ -53,6 +53,7 @@ import xyz.redtorch.pb.CoreField.ContractField;
  * @author KevinHuangwl
  *
  */
+@Slf4j
 @Configuration
 public class AppConfig implements WebMvcConfigurer {
 
@@ -161,6 +162,7 @@ public class AppConfig implements WebMvcConfigurer {
 		}
 		for(ContractPO po : contractList) {
 			ContractField contract = contractMap.get(po.getUnifiedSymbol());
+			log.debug("读取合约：{}", po.getUnifiedSymbol());
 			if(po.isIndexContract()) {
 				Set<ContractField> monthlyContracts = new HashSet<>();
 				for(String monthlyContractSymbol : po.getMonthlyContractSymbols()) {
