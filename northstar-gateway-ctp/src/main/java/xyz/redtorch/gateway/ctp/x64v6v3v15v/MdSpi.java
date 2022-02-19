@@ -51,6 +51,7 @@ public class MdSpi extends CThostFtdcMdSpi {
 	private GatewayAbstract gatewayAdapter;
 	private String userId;
 	private String password;
+	private String brokerId;
 	private String logInfo;
 	private String gatewayId;
 	private String tradingDay;
@@ -67,6 +68,7 @@ public class MdSpi extends CThostFtdcMdSpi {
 		this.gatewayAdapter = gatewayAdapter;
 		this.userId = gatewayAdapter.getGatewaySetting().getCtpApiSetting().getUserId();
 		this.password = gatewayAdapter.getGatewaySetting().getCtpApiSetting().getPassword();
+		this.brokerId = gatewayAdapter.getGatewaySetting().getCtpApiSetting().getBrokerId();
 		this.gatewayId = gatewayAdapter.getGatewaySetting().getGatewayId();
 		this.logInfo = "行情网关ID-[" + this.gatewayId + "] [→] ";
 		logger.info("当前MdApi版本号：{}", CThostFtdcMdApi.GetApiVersion());
@@ -135,7 +137,7 @@ public class MdSpi extends CThostFtdcMdSpi {
 		logger.warn("{}行情接口使用临时文件夹:{}", logInfo, tempFile.getParentFile().getAbsolutePath());
 
 		try {
-			String mdHost = GatewayConstants.SMART_CONNECTOR.bestEndpoint();
+			String mdHost = GatewayConstants.SMART_CONNECTOR.bestEndpoint(brokerId);
 			String mdPort = GatewayConstants.MARKET_PORT;
 			logger.info("使用IP [{}] 连接行情网关", mdHost);
 			cThostFtdcMdApi = CThostFtdcMdApi.CreateFtdcMdApi(tempFile.getAbsolutePath());
@@ -252,14 +254,14 @@ public class MdSpi extends CThostFtdcMdSpi {
 	}
 
 	private void login() {
-		if (StringUtils.isEmpty(GatewayConstants.BROKER_ID) || StringUtils.isEmpty(userId) || StringUtils.isEmpty(password)) {
+		if (StringUtils.isEmpty(brokerId) || StringUtils.isEmpty(userId) || StringUtils.isEmpty(password)) {
 			logger.error("{}BrokerId UserID Password 不可为空", logInfo);
 			return;
 		}
 		try {
 			// 登录
 			CThostFtdcReqUserLoginField userLoginField = new CThostFtdcReqUserLoginField();
-			userLoginField.setBrokerID(GatewayConstants.BROKER_ID);
+			userLoginField.setBrokerID(brokerId);
 			userLoginField.setUserID(userId);
 			userLoginField.setPassword(password);
 			cThostFtdcMdApi.ReqUserLogin(userLoginField, 0);

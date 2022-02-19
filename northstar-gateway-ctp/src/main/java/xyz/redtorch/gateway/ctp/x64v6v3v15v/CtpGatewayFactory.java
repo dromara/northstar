@@ -34,6 +34,7 @@ public class CtpGatewayFactory implements GatewayFactory{
 		CtpApiSettingField ctpSetting = CtpApiSettingField.newBuilder()
 				.setPassword(settings.getPassword())
 				.setUserId(settings.getUserId())
+				.setBrokerId(settings.getBrokerId())
 				.build();
 		return new CtpGatewayAdapter(fastEventEngine, GatewaySettingField.newBuilder()
 				.setGatewayAdapterType(GatewayAdapterTypeEnum.GAT_CTP)
