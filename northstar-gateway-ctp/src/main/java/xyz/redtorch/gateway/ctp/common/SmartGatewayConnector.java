@@ -8,17 +8,22 @@ import java.util.LinkedList;
 import java.util.Set;
 import java.util.stream.IntStream;
 
+import org.apache.commons.lang3.StringUtils;
+
 import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class SmartGatewayConnector {
+	
+	private static final String PRIMARY = "1080";	//主席ID
+	private static final String SECONDARY = "2070";	//次席ID
 
 	private Set<Entry> gatewayIpOptions = new HashSet<>() {
 		private static final long serialVersionUID = 1L;
 
 		{
-			/* 宏源地址 */
+			/* 宏源地址 主席地址 */
 			add(new Entry("180.169.112.52"));
 			add(new Entry("180.169.112.53"));
 			add(new Entry("180.169.112.54"));
@@ -34,15 +39,35 @@ public class SmartGatewayConnector {
 		}
 	};
 	
-	protected LinkedList<Entry> endpointList = new LinkedList<>(gatewayIpOptions);
+	private Set<Entry> gatewayIpOptions2 = new HashSet<>() {
+		private static final long serialVersionUID = 1L;
+
+		{
+			/* 宏源地址 次席地址 */
+			add(new Entry("180.169.112.50"));
+			add(new Entry("180.169.112.51"));
+			add(new Entry("140.206.101.107"));
+			add(new Entry("140.206.101.108"));
+		}
+	};
 	
-	public String bestEndpoint() {
+	protected LinkedList<Entry> endpointList = new LinkedList<>(gatewayIpOptions);
+	protected LinkedList<Entry> endpointList2 = new LinkedList<>(gatewayIpOptions2);
+	
+	public String bestEndpoint(String brokerId) {
 		Collections.sort(endpointList);
-		return endpointList.peek().endpoint;
+		Collections.sort(endpointList2);
+		if(StringUtils.equals(brokerId, SECONDARY)) {			
+			return endpointList2.peek().endpoint;
+		} else if (StringUtils.equals(brokerId, PRIMARY)) {
+			return endpointList.peek().endpoint;
+		} 
+		throw new IllegalStateException("没有传入BrokerID");
 	}
 	
 	public void update() {
 		gatewayIpOptions.parallelStream().forEach(Entry::test);
+		gatewayIpOptions2.parallelStream().forEach(Entry::test);
 	}
 	
 	@EqualsAndHashCode

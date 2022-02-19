@@ -10,9 +10,12 @@ class SmartGatewayConnectorTest {
 	void test() {
 		SmartGatewayConnector sgc = new SmartGatewayConnector();
 		sgc.update();
-		String bestEndpoint = sgc.bestEndpoint();
+		String bestEndpoint = sgc.bestEndpoint("1080");
 		assertThat(bestEndpoint).isNotBlank();
 		System.out.println(bestEndpoint);
+		String bestEndpoint2 = sgc.bestEndpoint("2070");
+		assertThat(bestEndpoint2).isNotBlank();
+		System.out.println(bestEndpoint2);
 	}
 
 }
