@@ -14,7 +14,7 @@ import tech.quantit.northstar.common.constant.DateTimeConstant;
 import tech.quantit.northstar.common.constant.PlaybackPrecision;
 import tech.quantit.northstar.common.model.PlaybackDescription;
 import tech.quantit.northstar.domain.strategy.StrategyModule;
-import tech.quantit.northstar.main.persistence.MarketDataRepository;
+import tech.quantit.northstar.main.persistence.IMarketDataRepository;
 import tech.quantit.northstar.main.persistence.po.MinBarDataPO;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.TickField;
@@ -42,9 +42,9 @@ public class PlaybackTask {
 	
 	protected PriorityQueue<BarField> barQ = new PriorityQueue<>(3000, (b1, b2) -> b1.getActionTimestamp() < b2.getActionTimestamp() ? -1 : 1 );
 	
-	private MarketDataRepository mdRepo;
+	private IMarketDataRepository mdRepo;
 
-	public PlaybackTask(PlaybackDescription playbackDescription, List<StrategyModule> playbackModules, MarketDataRepository mdRepo) {
+	public PlaybackTask(PlaybackDescription playbackDescription, List<StrategyModule> playbackModules, IMarketDataRepository mdRepo) {
 		this.playbackModules = playbackModules;
 		this.precision = playbackDescription.getPrecision();
 		this.mdRepo = mdRepo;

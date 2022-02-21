@@ -22,7 +22,7 @@ import tech.quantit.northstar.common.model.SimpleContractInfo;
 import tech.quantit.northstar.domain.account.TradeDayAccount;
 import tech.quantit.northstar.domain.gateway.ContractManager;
 import tech.quantit.northstar.main.handler.broadcast.SocketIOMessageEngine;
-import tech.quantit.northstar.main.persistence.MarketDataRepository;
+import tech.quantit.northstar.main.persistence.IMarketDataRepository;
 import tech.quantit.northstar.main.persistence.po.MinBarDataPO;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.OrderField;
@@ -38,9 +38,9 @@ public class DataSyncService {
 	
 	private ConcurrentMap<String, TradeDayAccount> accountMap;
 	
-	private MarketDataRepository mdRepo;
+	private IMarketDataRepository mdRepo;
 	
-	public DataSyncService(ContractManager contractMgr, SocketIOMessageEngine msgEngine, MarketDataRepository mdRepo,
+	public DataSyncService(ContractManager contractMgr, SocketIOMessageEngine msgEngine, IMarketDataRepository mdRepo,
 			ConcurrentMap<String, TradeDayAccount> accountMap) {
 		this.contractMgr = contractMgr;
 		this.msgEngine = msgEngine;

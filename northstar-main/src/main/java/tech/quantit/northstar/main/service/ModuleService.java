@@ -28,7 +28,7 @@ import tech.quantit.northstar.domain.strategy.StrategyModule;
 import tech.quantit.northstar.gateway.api.TradeGateway;
 import tech.quantit.northstar.main.ExternalJarListener;
 import tech.quantit.northstar.main.factories.StrategyModuleFactory;
-import tech.quantit.northstar.main.persistence.MarketDataRepository;
+import tech.quantit.northstar.main.persistence.IMarketDataRepository;
 import tech.quantit.northstar.main.persistence.ModuleRepository;
 import tech.quantit.northstar.main.persistence.po.MinBarDataPO;
 import tech.quantit.northstar.main.persistence.po.ModulePositionPO;
@@ -59,7 +59,7 @@ public class ModuleService implements InitializingBean {
 
 	private ModuleRepository moduleRepo;
 
-	private MarketDataRepository mdRepo;
+	private IMarketDataRepository mdRepo;
 
 	private ModuleManager mdlMgr;
 
@@ -71,7 +71,7 @@ public class ModuleService implements InitializingBean {
 	
 	private ExternalJarListener extJarListener;
 
-	public ModuleService(ApplicationContext ctx, ModuleRepository moduleRepo, MarketDataRepository mdRepo, ExternalJarListener extJarListener,
+	public ModuleService(ApplicationContext ctx, ModuleRepository moduleRepo, IMarketDataRepository mdRepo, ExternalJarListener extJarListener,
 			ModuleManager mdlMgr, GatewayAndConnectionManager gatewayConnMgr, ContractManager contractMgr, IMailSender sender) {
 		this.ctx = ctx;
 		this.moduleRepo = moduleRepo;
