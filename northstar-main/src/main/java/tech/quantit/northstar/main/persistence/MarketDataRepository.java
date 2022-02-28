@@ -30,7 +30,7 @@ import tech.quantit.northstar.main.utils.MongoUtils;
  */
 @Slf4j
 @Repository
-public class MarketDataRepository {
+public class MarketDataRepository implements IMarketDataRepository {
 
 	@Autowired
 	private MongoClientAdapter client;
@@ -53,6 +53,7 @@ public class MarketDataRepository {
 	 * 初始化表
 	 * @param gatewayId
 	 */
+	@Override
 	public void init(String gatewayId) {
 		String collectionName = COLLECTION_PREFIX + gatewayId;
 		if(mongo.collectionExists(collectionName)) {
@@ -72,6 +73,7 @@ public class MarketDataRepository {
 	 * 移除行情表
 	 * @param gatewayId
 	 */
+	@Override
 	public void dropGatewayData(String gatewayId) {
 		String collectionName = COLLECTION_PREFIX + gatewayId;
 		if(mongo.collectionExists(collectionName)) {
@@ -83,6 +85,7 @@ public class MarketDataRepository {
 	 * 保存数据
 	 * @param bar
 	 */
+	@Override
 	public void insert(MinBarDataPO bar) {
 		log.debug("保存Bar数据：{}", bar.getUnifiedSymbol());
 		client.insert(dbName, COLLECTION_PREFIX + bar.getGatewayId(), MongoUtils.beanToDocument(bar));
@@ -92,6 +95,7 @@ public class MarketDataRepository {
 	 * 批量保存数据
 	 * @param barList
 	 */
+	@Override
 	public void insertMany(List<MinBarDataPO> barList) {
 		log.debug("批量保存Bar数据：{}条", barList.size());
 		List<Document> data = barList.stream()
@@ -107,6 +111,7 @@ public class MarketDataRepository {
 	 * @param tradeDay
 	 * @return
 	 */
+	@Override
 	public List<MinBarDataPO> loadDataByDate(String gatewayId, String unifiedSymbol, String tradeDay) {
 		List<Document> resultList = client.find(dbName, COLLECTION_PREFIX + gatewayId, new Document()
 				.append(SYMBOL, unifiedSymbol)
@@ -124,6 +129,7 @@ public class MarketDataRepository {
 	 * @param unifiedSymbol
 	 * @return
 	 */
+	@Override
 	public List<String> findDataAvailableDates(String gatewayId, String unifiedSymbol, boolean isAsc){
 		Bson filter = new Document().append("$match", new Document().append(SYMBOL, unifiedSymbol));
 		Bson aggregator = new Document().append("$group", new Document().append("_id", "$tradingDay"));
@@ -136,6 +142,7 @@ public class MarketDataRepository {
 	 * 批量保存合约信息
 	 * @param contracts
 	 */
+	@Override
 	public void batchSaveContracts(List<ContractPO> contracts) {
 		if(contracts.isEmpty()) {
 			return;
@@ -152,6 +159,7 @@ public class MarketDataRepository {
 	 * 保存合约信息
 	 * @param contract
 	 */
+	@Override
 	public void saveContract(ContractPO contract) {
 		mongo.save(contract);
 	}
@@ -161,6 +169,7 @@ public class MarketDataRepository {
 	 * @param startTime
 	 * @param endTime
 	 */
+	@Override
 	public void clearDataByTime(String gatewayId, long startTime, long endTime) {
 		mongo.remove(Query.query(Criteria.where("actionTimestamp").gte(startTime).lte(endTime)), COLLECTION_PREFIX + gatewayId);
 	}
@@ -171,6 +180,7 @@ public class MarketDataRepository {
 	 * 查询有效合约列表
 	 * @return
 	 */
+	@Override
 	public List<ContractPO> getAvailableContracts(){
 		log.debug("查询十四天内登记过的有效合约");
 		long day14Ago = System.currentTimeMillis() - DAY14MILLISEC;

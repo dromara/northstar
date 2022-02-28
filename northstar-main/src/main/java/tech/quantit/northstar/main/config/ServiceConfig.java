@@ -20,7 +20,7 @@ import tech.quantit.northstar.gateway.sim.trade.SimMarket;
 import tech.quantit.northstar.main.ExternalJarListener;
 import tech.quantit.northstar.main.handler.broadcast.SocketIOMessageEngine;
 import tech.quantit.northstar.main.persistence.GatewayRepository;
-import tech.quantit.northstar.main.persistence.MarketDataRepository;
+import tech.quantit.northstar.main.persistence.IMarketDataRepository;
 import tech.quantit.northstar.main.persistence.ModuleRepository;
 import tech.quantit.northstar.main.service.AccountService;
 import tech.quantit.northstar.main.service.DataSyncService;
@@ -49,18 +49,18 @@ public class ServiceConfig {
 	
 	@Bean
 	public GatewayService gatewayService(GatewayAndConnectionManager gatewayConnMgr, GatewayRepository gatewayRepo,
-			MarketDataRepository mdRepo, ModuleRepository moduleRepo, SimMarket simMarket, GlobalMarketRegistry registry) {
+			IMarketDataRepository mdRepo, ModuleRepository moduleRepo, SimMarket simMarket, GlobalMarketRegistry registry) {
 		return new GatewayService(gatewayConnMgr, gatewayRepo, mdRepo, moduleRepo, simMarket, registry);
 	}
 	
 	@Bean
-	public DataSyncService dataSyncService(ContractManager contractMgr, SocketIOMessageEngine msgEngine, MarketDataRepository mdRepo,
+	public DataSyncService dataSyncService(ContractManager contractMgr, SocketIOMessageEngine msgEngine, IMarketDataRepository mdRepo,
 			ConcurrentMap<String, TradeDayAccount> accountMap) {
 		return new DataSyncService(contractMgr, msgEngine, mdRepo, accountMap);
 	}
 	
 	@Bean
-	public ModuleService moduleService(ApplicationContext ctx, ModuleRepository moduleRepo, MarketDataRepository mdRepo, ExternalJarListener extJarListener,
+	public ModuleService moduleService(ApplicationContext ctx, ModuleRepository moduleRepo, IMarketDataRepository mdRepo, ExternalJarListener extJarListener,
 			ModuleManager mdlMgr, GatewayAndConnectionManager gatewayConnMgr, ContractManager contractMgr, IMailSender sender) {
 		return new ModuleService(ctx, moduleRepo, mdRepo, extJarListener, mdlMgr, gatewayConnMgr, contractMgr, sender);
 	}
@@ -72,7 +72,7 @@ public class ServiceConfig {
 	
 	@Bean
 	public PlaybackService playbackService(FastEventEngine feEngine, SandboxModuleManager moduleMgr, GatewayAndConnectionManager gatewayConnMgr, 
-			ContractManager contractMgr, ModuleRepository moduleRepo, MarketDataRepository mdRepo, SimMarket simMarket, SimAccountRepository simAccRepo,
+			ContractManager contractMgr, ModuleRepository moduleRepo, IMarketDataRepository mdRepo, SimMarket simMarket, SimAccountRepository simAccRepo,
 			GlobalMarketRegistry registry, ExternalJarListener extJarListener) {
 		return new PlaybackService(feEngine, moduleMgr, gatewayConnMgr, contractMgr, moduleRepo, mdRepo, simMarket, simAccRepo, registry, extJarListener);
 	}

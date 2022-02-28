@@ -39,7 +39,7 @@ import tech.quantit.northstar.gateway.sim.trade.SimGatewayFactory;
 import tech.quantit.northstar.gateway.sim.trade.SimMarket;
 import tech.quantit.northstar.main.MarketDataCache;
 import tech.quantit.northstar.main.interceptor.AuthorizationInterceptor;
-import tech.quantit.northstar.main.persistence.MarketDataRepository;
+import tech.quantit.northstar.main.persistence.IMarketDataRepository;
 import tech.quantit.northstar.main.persistence.MongoClientAdapter;
 import tech.quantit.northstar.main.persistence.po.ContractPO;
 import xyz.redtorch.gateway.ctp.common.CtpSubscriptionManager;
@@ -123,7 +123,7 @@ public class AppConfig implements WebMvcConfigurer {
 	}
 	
 	@Bean
-	public GlobalMarketRegistry marketGlobalRegistry(FastEventEngine fastEventEngine, MarketDataRepository mdRepo, List<SubscriptionManager> subMgrs,
+	public GlobalMarketRegistry marketGlobalRegistry(FastEventEngine fastEventEngine, IMarketDataRepository mdRepo, List<SubscriptionManager> subMgrs,
 			MarketDataCache mdCache, ContractManager contractMgr) throws InvalidProtocolBufferException {
 		Consumer<NormalContract> handleContractSave = contract -> {
 			if(System.currentTimeMillis() - contract.updateTime() < 60000) {

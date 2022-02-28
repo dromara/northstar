@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import tech.quantit.northstar.gateway.api.MarketDataBuffer;
-import tech.quantit.northstar.main.persistence.MarketDataRepository;
+import tech.quantit.northstar.main.persistence.IMarketDataRepository;
 import tech.quantit.northstar.main.persistence.po.MinBarDataPO;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.TickField;
@@ -17,7 +17,7 @@ import xyz.redtorch.pb.CoreField.TickField;
 public class MarketDataCache implements MarketDataBuffer{
 	
 	@Autowired
-	private MarketDataRepository mdRepo;
+	private IMarketDataRepository mdRepo;
 	
 	@Autowired
 	private MarketDataPersistenceManager mdpMgr;

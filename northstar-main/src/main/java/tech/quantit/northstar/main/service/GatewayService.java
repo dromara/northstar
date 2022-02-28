@@ -29,7 +29,7 @@ import tech.quantit.northstar.gateway.sim.trade.SimGatewayFactory;
 import tech.quantit.northstar.gateway.sim.trade.SimMarket;
 import tech.quantit.northstar.gateway.sim.trade.SimTradeGateway;
 import tech.quantit.northstar.main.persistence.GatewayRepository;
-import tech.quantit.northstar.main.persistence.MarketDataRepository;
+import tech.quantit.northstar.main.persistence.IMarketDataRepository;
 import tech.quantit.northstar.main.persistence.ModuleRepository;
 import tech.quantit.northstar.main.persistence.po.GatewayPO;
 import tech.quantit.northstar.main.utils.CodecUtils;
@@ -51,7 +51,7 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 	
 	private GatewayRepository gatewayRepo;
 	
-	private MarketDataRepository mdRepo;
+	private IMarketDataRepository mdRepo;
 	
 	private SimMarket simMarket;
 	
@@ -61,7 +61,7 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 	
 	private GlobalMarketRegistry registry;
 	
-	public GatewayService(GatewayAndConnectionManager gatewayConnMgr, GatewayRepository gatewayRepo, MarketDataRepository mdRepo,
+	public GatewayService(GatewayAndConnectionManager gatewayConnMgr, GatewayRepository gatewayRepo, IMarketDataRepository mdRepo,
 			ModuleRepository moduleRepo, SimMarket simMarket, GlobalMarketRegistry registry) {
 		this.gatewayConnMgr = gatewayConnMgr;
 		this.gatewayRepo = gatewayRepo;
