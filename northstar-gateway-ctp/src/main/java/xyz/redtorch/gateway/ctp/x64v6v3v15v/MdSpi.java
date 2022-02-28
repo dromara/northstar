@@ -8,6 +8,7 @@ import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -22,7 +23,9 @@ import tech.quantit.northstar.common.constant.DateTimeConstant;
 import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.common.event.NorthstarEventType;
 import tech.quantit.northstar.common.utils.CommonUtils;
+import tech.quantit.northstar.common.utils.FieldUtils;
 import tech.quantit.northstar.common.utils.MarketTimeUtil;
+import tech.quantit.northstar.common.utils.MessagePrinter;
 import tech.quantit.northstar.gateway.api.GatewayAbstract;
 import xyz.redtorch.gateway.ctp.common.CtpMarketTimeUtil;
 import xyz.redtorch.gateway.ctp.common.GatewayConstants;
@@ -397,6 +400,16 @@ public class MdSpi extends CThostFtdcMdSpi {
 			logger.info("{}行情接口退订回报，不存在回报信息", logInfo);
 		}
 	}
+	
+	
+	private Set<String> monitorSet = new HashSet<>() {
+		{
+			add("SA205");
+			add("FG205");
+			add("MA205");
+			add("rb2205");
+		}
+	};
 
 	// 合约行情推送
 	public void OnRtnDepthMarketData(CThostFtdcDepthMarketDataField pDepthMarketData) {
@@ -548,8 +561,18 @@ public class MdSpi extends CThostFtdcMdSpi {
 				if(volumeDelta > volume) {
 					logger.warn("数据有效性检测：{}", isReasonable(volume, 0, volumeDelta));
 					logger.warn("异常值：{}", volumeDelta);
-					logger.warn("异常Tick数据：{}", tick.toString());
+					logger.warn("异常Tick数据：{}", MessagePrinter.print(tick));
 				}
+				
+				/*************查错输出代码开始*************/
+				LocalTime now = LocalTime.now();
+				LocalTime startTime = LocalTime.of(14, 59);
+				LocalTime endTime = LocalTime.of(15, 1);
+				
+				if(monitorSet.contains(contract.getSymbol()) && now.isAfter(startTime) && now.isBefore(endTime)) {
+					logger.info("tick监控：{}", MessagePrinter.print(tick));
+				}
+				/*************查错输出代码结束*************/
 
 				preTickMap.put(contractId, tick);
 
