@@ -149,4 +149,8 @@ public class GlobalMarketRegistry {
 		}
 		barGenMap.get(tick.getUnifiedSymbol()).update(tick);
 	}
+	
+	public void finishUpBarGen() {
+		barGenMap.values().forEach(BarGenerator::finishOfBar);
+	}
 }

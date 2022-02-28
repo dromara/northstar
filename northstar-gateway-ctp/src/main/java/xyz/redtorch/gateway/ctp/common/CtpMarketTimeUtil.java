@@ -33,7 +33,7 @@ public class CtpMarketTimeUtil implements MarketTimeUtil{
 			dayMarketClosingTime2, 
 			dayMarketClosingTime3};
 	
-	private static final long LESS_THEN_HALF_SEC_IN_NANO = 400000000;
+	private static final long LESS_THEN_HALF_SEC_IN_NANO = 1000000000L;
 	/**
 	 * 根据时间判定Tick类型
 	 */
