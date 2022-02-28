@@ -23,7 +23,6 @@ import tech.quantit.northstar.common.constant.DateTimeConstant;
 import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.common.event.NorthstarEventType;
 import tech.quantit.northstar.common.utils.CommonUtils;
-import tech.quantit.northstar.common.utils.FieldUtils;
 import tech.quantit.northstar.common.utils.MarketTimeUtil;
 import tech.quantit.northstar.common.utils.MessagePrinter;
 import tech.quantit.northstar.gateway.api.GatewayAbstract;
@@ -566,10 +565,10 @@ public class MdSpi extends CThostFtdcMdSpi {
 				
 				/*************查错输出代码开始*************/
 				LocalTime now = LocalTime.now();
-				LocalTime startTime = LocalTime.of(14, 59);
-				LocalTime endTime = LocalTime.of(15, 1);
+				LocalTime startTime = LocalTime.of(9, 0, 1);
+				LocalTime endTime = LocalTime.of(22, 59, 58);
 				
-				if(monitorSet.contains(contract.getSymbol()) && now.isAfter(startTime) && now.isBefore(endTime)) {
+				if(monitorSet.contains(contract.getSymbol()) && now.isAfter(endTime) && now.isBefore(startTime)) {
 					logger.info("tick监控：{}", MessagePrinter.print(tick));
 				}
 				/*************查错输出代码结束*************/

@@ -31,10 +31,8 @@ public class BarGenerator {
 	
 	private BiConsumer<BarField, List<TickField>> barCallBack;
 	
-	protected int tickCount;
-	
 	private ConcurrentLinkedQueue<TickField> barTicks = new ConcurrentLinkedQueue<>();
-
+	
 	public BarGenerator(NormalContract contract, BiConsumer<BarField, List<TickField>> barCallBack) {
 		this.barCallBack = barCallBack;
 		this.contract = contract;
@@ -65,15 +63,12 @@ public class BarGenerator {
 		}
 		 
 		if(tick.getActionTimestamp() > cutoffTime) {
+			if(!barTicks.isEmpty()) {
+				finishOfBar();
+			}
 			long offset = 0;	// K线偏移量
 			if(tick.getStatus() == TickType.PRE_OPENING_TICK.getCode()) {
 				offset = 60000;	// 开盘前一分钟的TICK是盘前数据，要合并到第一个分钟K线
-			}
-			if(tickCount > 0) {
-				List<TickField> ticksList = barTicks.stream().toList();
-				barTicks.clear();
-				barCallBack.accept(barBuilder.build(), ticksList);
-				tickCount = 0;
 			}
 			long barActionTime = tick.getActionTimestamp() - tick.getActionTimestamp() % 60000L + offset;
 			cutoffTime = barActionTime + 60000;
@@ -94,7 +89,6 @@ public class BarGenerator {
 			barBuilder.setActionTime(LocalDateTime.ofInstant(Instant.ofEpochMilli(barActionTime), ZoneId.systemDefault()).format(DateTimeConstant.T_FORMAT_WITH_MS_INT_FORMATTER));
 		}
 		
-		tickCount++;
 		barTicks.offer(tick);
 		barBuilder.setHighPrice(Math.max(tick.getLastPrice(), barBuilder.getHighPrice()));
 		barBuilder.setLowPrice(Math.min(tick.getLastPrice(), barBuilder.getLowPrice()));
@@ -107,13 +101,12 @@ public class BarGenerator {
 		barBuilder.setVolumeDelta(Math.max(0, barBuilder.getVolumeDelta()));	// 防止volDelta为负数
 		barBuilder.setTurnoverDelta(tick.getTurnoverDelta() + barBuilder.getTurnoverDelta());
 		barBuilder.setOpenInterestDelta(tick.getOpenInterestDelta() + barBuilder.getOpenInterestDelta());
-
-		if(tick.getStatus() == TickType.CLOSING_TICK.getCode()) {
-			List<TickField> ticksList = barTicks.stream().toList();
-			barTicks.clear();
-			barCallBack.accept(barBuilder.build(), ticksList);
-			tickCount = 0;
-		}
+	}
+	
+	public void finishOfBar() {
+		List<TickField> ticksList = barTicks.stream().toList();
+		barTicks.clear();
+		barCallBack.accept(barBuilder.build(), ticksList);
 	}
 	
 	public void setOnBarCallback(BiConsumer<BarField, List<TickField>> callback) {
