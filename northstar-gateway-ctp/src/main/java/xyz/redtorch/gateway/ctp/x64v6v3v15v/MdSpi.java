@@ -565,10 +565,13 @@ public class MdSpi extends CThostFtdcMdSpi {
 				
 				/*************查错输出代码开始*************/
 				LocalTime now = LocalTime.now();
-				LocalTime startTime = LocalTime.of(9, 0, 1);
-				LocalTime endTime = LocalTime.of(22, 59, 58);
+				LocalTime nightStartTime = LocalTime.of(21, 0, 1);
+				LocalTime nightEndTime = LocalTime.of(22, 59, 58);
+				LocalTime dayStartTime = LocalTime.of(9, 0, 1);
+				LocalTime dayEndTime = LocalTime.of(14, 59, 59);
 				
-				if(monitorSet.contains(contract.getSymbol()) && now.isAfter(endTime) && now.isBefore(startTime)) {
+				if(monitorSet.contains(contract.getSymbol()) && (now.isBefore(nightStartTime) && now.isAfter(dayEndTime) 
+						|| now.isBefore(dayStartTime) && now.isAfter(nightEndTime))) {
 					logger.info("tick监控：{}", MessagePrinter.print(tick));
 				}
 				/*************查错输出代码结束*************/
