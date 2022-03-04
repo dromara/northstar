@@ -71,7 +71,7 @@ public class BarGenerator {
 				offset = 60000;	// 开盘前一分钟的TICK是盘前数据，要合并到第一个分钟K线
 			}
 			long barActionTime = tick.getActionTimestamp() - tick.getActionTimestamp() % 60000L + offset;
-			cutoffTime = barActionTime + 60000;
+			cutoffTime = barActionTime + 60100;
 			
 			barBuilder.setTradingDay(tick.getTradingDay());
 			barBuilder.setActionDay(tick.getActionDay());
