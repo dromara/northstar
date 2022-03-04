@@ -563,19 +563,6 @@ public class MdSpi extends CThostFtdcMdSpi {
 					logger.warn("异常Tick数据：{}", MessagePrinter.print(tick));
 				}
 				
-				/*************查错输出代码开始*************/
-				LocalTime now = LocalTime.now();
-				LocalTime nightStartTime = LocalTime.of(21, 0, 1);
-				LocalTime nightEndTime = LocalTime.of(22, 59, 58);
-				LocalTime dayStartTime = LocalTime.of(9, 0, 1);
-				LocalTime dayEndTime = LocalTime.of(14, 59, 59);
-				
-				if(monitorSet.contains(contract.getSymbol()) && (now.isBefore(nightStartTime) && now.isAfter(dayEndTime) 
-						|| now.isBefore(dayStartTime) && now.isAfter(nightEndTime))) {
-					logger.info("tick监控：{}", MessagePrinter.print(tick));
-				}
-				/*************查错输出代码结束*************/
-
 				preTickMap.put(contractId, tick);
 
 				gatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.TICK, tick);
