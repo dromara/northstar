@@ -2,18 +2,22 @@
 
 set -e
 
+# 停止旧进程
 if [[ `pgrep -a java | grep northstar.jar | wc -l` > 0 ]]; then
 	kill `pgrep -a java | grep northstar.jar | awk '{print $1}'`
 fi
 
-if [[ -z `ls ~ | grep northstar-monitor` ]]; then
-	# 不同的版本对应的前端部署包可能不同
-	cd ~ && wget https://gitee.com/dromara/northstar-monitor/attach_files/971552/download/dist.tar.gz
-	tar -xvf dist.tar.gz
-	mkdir ~/northstar-monitor
-	mv dist ~/northstar-monitor/dist
-	cd northstar-monitor/dist && nohup node bundle.js >ns-monitor.log &
+# 移除原有目录
+if [[ -n `ls ~ | grep northstar-monitor` ]]; then
+	kill `pgrep node`
+	rm -rf ~/northstar-monitor
 fi
+
+# 不同的版本对应的前端部署包可能不同
+cd ~ && wget https://gitee.com/dromara/northstar-monitor/attach_files/986590/download/dist.tar.gz
+tar -xvf dist.tar.gz && rm -f dist.tar.gz
+mkdir ~/northstar-monitor
+mv dist ~/northstar-monitor/dist
 
 cd ~/northstar
 ~/apache-maven-3.6.3/bin/mvn clean install -Dmaven.test.skip=true
