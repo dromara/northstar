@@ -7,10 +7,15 @@ if [[ `pgrep -a java | grep northstar.jar | wc -l` > 0 ]]; then
 	kill `pgrep -a java | grep northstar.jar | awk '{print $1}'`
 fi
 
+# 停止前端进程
+if [[ `pgrep node | wc -l` > 0 ]]; then
+	kill `pgrep node`
+fi
+
 # 移除原有目录
 if [[ -n `ls ~ | grep northstar-monitor` ]]; then
-	kill `pgrep node`
 	rm -rf ~/northstar-monitor
+	rm -f dist.tar.gz
 fi
 
 # 不同的版本对应的前端部署包可能不同
