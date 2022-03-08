@@ -539,7 +539,7 @@ public class MdSpi extends CThostFtdcMdSpi {
 				tickBuilder.setTurnoverDelta(turnoverDelta);
 				
 				LocalTime time = LocalTime.from(dateTime);
-				tickBuilder.setStatus(mktTimeUtil.resolveTickType(time).getCode());
+				tickBuilder.setStatus(mktTimeUtil.resolveTickType(symbol, time).getCode());
 
 				tickBuilder.setTradingDay(tradingDay);
 
