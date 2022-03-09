@@ -1,14 +1,10 @@
 package tech.quantit.northstar.gateway.sim.market;
 
 import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.event.NorthstarEventType;
@@ -20,26 +16,27 @@ import xyz.redtorch.pb.CoreField.TickField;
 
 @Slf4j
 public class SimMarketGatewayLocal implements MarketGateway{
-	
+
 	private FastEventEngine feEngine;
-	
-	private ScheduledExecutorService scheduleExec = Executors.newScheduledThreadPool(0);
-	
+
+	private ScheduledExecutorService scheduleExec = new ScheduledThreadPoolExecutor(0,
+			new BasicThreadFactory.Builder().namingPattern("sim-market-gateway-%d").daemon(false).build());
+
 	private long lastActiveTime;
-	
+
 	private GatewaySettingField settings;
-	
+
 	private ScheduledFuture<?> task;
-	
+
 	private SimTickGenerator tickGen = new SimTickGenerator();
-	
+
 	/**
 	 * unifiedSymbol --> InstrumentHolder
 	 */
 	private ConcurrentMap<String, InstrumentHolder> cache = new ConcurrentHashMap<>();
-	
+
 	private GlobalMarketRegistry registry;
-	
+
 	public SimMarketGatewayLocal(GatewaySettingField settings, FastEventEngine feEngine, GlobalMarketRegistry registry) {
 		this.feEngine = feEngine;
 		this.settings = settings;
@@ -78,7 +75,7 @@ public class SimMarketGatewayLocal implements MarketGateway{
 		log.info("模拟行情连线");
 		task = scheduleExec.scheduleAtFixedRate(()->{
 			lastActiveTime = System.currentTimeMillis();
-			try {				
+			try {
 				for(Entry<String, InstrumentHolder> e: cache.entrySet()) {
 					TickField tick = tickGen.generateNextTick(e.getValue());
 					feEngine.emitEvent(NorthstarEventType.TICK, tick);
@@ -93,7 +90,7 @@ public class SimMarketGatewayLocal implements MarketGateway{
 
 	@Override
 	public void disconnect() {
-		if(task != null) {			
+		if(task != null) {
 			task.cancel(false);
 		}
 		log.info("模拟行情断开");

@@ -1,10 +1,9 @@
 package tech.quantit.northstar.main.engine.event;
 
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 
+import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 
@@ -35,14 +34,15 @@ import tech.quantit.northstar.common.event.NorthstarEventType;
 @Slf4j
 public class DisruptorFastEventEngine implements FastEventEngine, InitializingBean, DisposableBean {
 
-	private static ExecutorService executor = Executors.newCachedThreadPool(DaemonThreadFactory.INSTANCE);
+	ScheduledExecutorService executorService = new ScheduledThreadPoolExecutor(500,
+			new BasicThreadFactory.Builder().namingPattern("disruptor-fast-event-%d").daemon(true).build());
 
 	private final Map<EventHandler<NorthstarEvent>, BatchEventProcessor<NorthstarEvent>> handlerProcessorMap = new ConcurrentHashMap<>();
 
 	private Disruptor<NorthstarEvent> disruptor;
 
 	private RingBuffer<NorthstarEvent> ringBuffer;
-	
+
 	private ExceptionHandler<NorthstarEvent> commonExceptionHandler = new ExceptionHandler<>() {
 
 		@Override
@@ -57,17 +57,17 @@ public class DisruptorFastEventEngine implements FastEventEngine, InitializingBe
 
 		@Override
 		public void handleOnShutdownException(Throwable ex) {
-			log.warn("事件中止异常", ex);			
+			log.warn("事件中止异常", ex);
 		}
-		
+
 	};
-	
+
 	private WaitStrategyEnum strategy;
-	
+
 	public DisruptorFastEventEngine(WaitStrategyEnum strategy) {
 		this.strategy = strategy;
 	}
-	
+
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		WaitStrategy s = (WaitStrategy) strategy.getStrategyClass().getDeclaredConstructor().newInstance();
@@ -83,7 +83,7 @@ public class DisruptorFastEventEngine implements FastEventEngine, InitializingBe
 		BatchEventProcessor<NorthstarEvent> processor = new BatchEventProcessor<>(ringBuffer, ringBuffer.newBarrier(), handler);
 		processor.setExceptionHandler(commonExceptionHandler);
 		ringBuffer.addGatingSequences(processor.getSequence());
-		executor.execute(processor);
+		executorService.execute(processor);
 		handlerProcessorMap.put(handler, processor);
 	}
 
@@ -113,7 +113,7 @@ public class DisruptorFastEventEngine implements FastEventEngine, InitializingBe
 	@Override
 	public void destroy() throws Exception {
 		disruptor.halt();
-		
+
 	}
 
 	@Override
@@ -128,19 +128,19 @@ public class DisruptorFastEventEngine implements FastEventEngine, InitializingBe
 			ringBuffer.publish(sequence);
 		}
 	}
-	
+
 	public static enum WaitStrategyEnum {
 		BlockingWaitStrategy(BlockingWaitStrategy.class),
 		BusySpinWaitStrategy(BusySpinWaitStrategy.class),
 		SleepingWaitStrategy(SleepingWaitStrategy.class),
 		TimeoutBlockingWaitStrategy(TimeoutBlockingWaitStrategy.class),
 		YieldingWaitStrategy(YieldingWaitStrategy.class);
-		
+
 		private Class<?> clz;
 		private WaitStrategyEnum(Class<?> clz){
 			this.clz = clz;
 		}
-		
+
 		public Class<?> getStrategyClass(){
 			return clz;
 		}
