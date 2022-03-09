@@ -42,7 +42,7 @@
 - 交互协议HTTP + websocket
 - 数据库为MongoDB
 - 前端采用nodejs + vue
-- 服务端采用java + springboot
+- 服务端采用java17（拥抱新技术） + springboot
 
 ## 启动步骤
 假设当前环境是全新的服务器  
@@ -81,7 +81,7 @@ systemctl status mongod
 下载最新版项目，然后解压。**注意：把解压后的文件夹重命名为northstar**
 [https://gitee.com/dromara/northstar/releases](https://gitee.com/dromara/northstar/releases)
 
-在.bashrc中加入以上启动参数（这样做能隐藏启动参数）  
+在.bashrc中加入启动参数（这样做能隐藏启动参数。若不用邮件通知与不修改默认的登陆账户密码可以不填）  
 ```
 vim ~/.bashrc
 ```
