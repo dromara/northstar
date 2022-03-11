@@ -18,12 +18,12 @@ public class CtpSimGatewayFactory implements GatewayFactory{
 
 	private FastEventEngine fastEventEngine;
 	private GlobalMarketRegistry registry;
-	
+
 	public CtpSimGatewayFactory(FastEventEngine fastEventEngine, GlobalMarketRegistry registry) {
 		this.fastEventEngine = fastEventEngine;
 		this.registry = registry;
 	}
-	
+
 	@Override
 	public Gateway newInstance(GatewayDescription gatewayDescription) {
 		GatewayTypeEnum gwType = gatewayDescription.getGatewayUsage() == GatewayUsage.MARKET_DATA
@@ -33,6 +33,7 @@ public class CtpSimGatewayFactory implements GatewayFactory{
 		CtpApiSettingField ctpSetting = CtpApiSettingField.newBuilder()
 				.setPassword(settings.getPassword())
 				.setUserId(settings.getUserId())
+				.setBrokerId(settings.getBrokerId())
 				.build();
 		return new CtpSimGatewayAdapter(fastEventEngine, GatewaySettingField.newBuilder()
 				.setGatewayAdapterType(GatewayAdapterTypeEnum.GAT_CTP)

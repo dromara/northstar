@@ -54,20 +54,20 @@ public class MdSpi extends CThostFtdcMdSpi {
 	private String logInfo;
 	private String gatewayId;
 	private String tradingDay;
-	
+
 	private volatile long lastUpdateTickTime = System.currentTimeMillis();
 
 	private Map<String, TickField> preTickMap = new HashMap<>();
 
 	private Set<String> subscribedSymbolSet = ConcurrentHashMap.newKeySet();
-	
+
 	private MarketTimeUtil mktTimeUtil = new CtpMarketTimeUtil();
 
 	MdSpi(GatewayAbstract gatewayAdapter) {
 		this.gatewayAdapter = gatewayAdapter;
 		this.userId = gatewayAdapter.getGatewaySetting().getCtpApiSetting().getUserId();
 		this.password = gatewayAdapter.getGatewaySetting().getCtpApiSetting().getPassword();
-		
+		this.brokerId = gatewayAdapter.getGatewaySetting().getCtpApiSetting().getBrokerId();
 		this.gatewayId = gatewayAdapter.getGatewaySetting().getGatewayId();
 		this.logInfo = "行情网关ID-[" + this.gatewayId + "] [→] ";
 		logger.info("当前MdApi版本号：{}", CThostFtdcMdApi.GetApiVersion());
@@ -276,9 +276,9 @@ public class MdSpi extends CThostFtdcMdSpi {
 			logger.warn(logInfo + "行情接口前置机已连接");
 			// 修改前置机连接状态
 			connectionStatus = CONNECTION_STATUS_CONNECTED;
-			
+
 			login();
-			
+
 		} catch (Throwable t) {
 			logger.error("{} OnFrontConnected Exception", logInfo, t);
 		}
@@ -289,9 +289,9 @@ public class MdSpi extends CThostFtdcMdSpi {
 		try {
 			logger.warn("{}行情接口前置机已断开, 原因:{}", logInfo, nReason);
 			gatewayAdapter.disconnect();
-			
+
 			gatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.DISCONNECTED, gatewayId);
-			
+
 		} catch (Throwable t) {
 			logger.error("{} OnFrontDisconnected Exception", logInfo, t);
 		}
@@ -312,7 +312,7 @@ public class MdSpi extends CThostFtdcMdSpi {
 					String[] symbolArray = subscribedSymbolSet.toArray(new String[subscribedSymbolSet.size()]);
 					cThostFtdcMdApi.SubscribeMarketData(symbolArray, subscribedSymbolSet.size());
 				}
-				
+
 				gatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.CONNECTED, gatewayId);
 				gatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.TRADE_DATE, tradingDay);
 			} else {
@@ -400,7 +400,7 @@ public class MdSpi extends CThostFtdcMdSpi {
 		if (pDepthMarketData != null) {
 			try {
 				String symbol = pDepthMarketData.getInstrumentID();
-				
+
 				if (!gatewayAdapter.contractMap.containsKey(symbol)) {
 					logger.warn("{}行情接口收到合约{}数据,但尚未获取到合约信息,丢弃", logInfo, symbol);
 					return;
@@ -416,7 +416,7 @@ public class MdSpi extends CThostFtdcMdSpi {
 				updateTimeStr = StringUtils.isEmpty(updateTimeStr) ? LocalTime.now().format(DateTimeConstant.T_FORMAT_INT_FORMATTER) : updateTimeStr;
 				Long updateTime = Long.valueOf(updateTimeStr);
 				Long updateMillisec = StringUtils.isEmpty(updateTimeStr) ? System.currentTimeMillis() % 1000 : (long) pDepthMarketData.getUpdateMillisec();
-				
+
 				/*
 				 * 大商所获取的ActionDay可能是不正确的,因此这里采用本地时间修正 1.请注意，本地时间应该准确 2.使用 SimNow 7x24
 				 * 服务器获取行情时,这个修正方式可能会导致问题
@@ -470,7 +470,7 @@ public class MdSpi extends CThostFtdcMdSpi {
 				Double lowerLimit = pDepthMarketData.getLowerLimitPrice();
 
 				List<Double> bidPriceList = new ArrayList<>();
-				
+
 				bidPriceList.add(!CommonUtils.isEquals(pDepthMarketData.getBidPrice1(), Double.MAX_VALUE) ? pDepthMarketData.getBidPrice1() : 0);
 				bidPriceList.add(!CommonUtils.isEquals(pDepthMarketData.getBidPrice2(), Double.MAX_VALUE) ? pDepthMarketData.getBidPrice2() : 0);
 				bidPriceList.add(!CommonUtils.isEquals(pDepthMarketData.getBidPrice3(), Double.MAX_VALUE) ? pDepthMarketData.getBidPrice3() : 0);
@@ -522,7 +522,7 @@ public class MdSpi extends CThostFtdcMdSpi {
 				tickBuilder.setVolumeDelta(isReasonable(volume, 0, volumeDelta) ? volumeDelta : 0);
 				tickBuilder.setTurnover(turnover);
 				tickBuilder.setTurnoverDelta(turnoverDelta);
-				
+
 				LocalTime time = LocalTime.from(dateTime);
 				tickBuilder.setStatus(mktTimeUtil.resolveTickType(symbol, time).getCode());
 
@@ -552,7 +552,7 @@ public class MdSpi extends CThostFtdcMdSpi {
 
 				gatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.TICK, tick);
 				lastUpdateTickTime = System.currentTimeMillis();
-				
+
 			} catch (Throwable t) {
 				logger.error("{} OnRtnDepthMarketData Exception", logInfo, t);
 			}
@@ -561,7 +561,7 @@ public class MdSpi extends CThostFtdcMdSpi {
 			logger.warn("{}行情接口收到行情数据为空", logInfo);
 		}
 	}
-	
+
 	private boolean isReasonable(double upperLimit, double lowerLimit, double actual) {
 		return upperLimit >= actual && actual >= lowerLimit;
 	}
@@ -580,7 +580,7 @@ public class MdSpi extends CThostFtdcMdSpi {
 	public void OnRtnForQuoteRsp(CThostFtdcForQuoteRspField pForQuoteRsp) {
 		logger.info("{}OnRspUnSubForQuoteRsp", logInfo);
 	}
-	
+
 	public boolean isActive() {
 		return System.currentTimeMillis() - lastUpdateTickTime < 1000;
 	}
