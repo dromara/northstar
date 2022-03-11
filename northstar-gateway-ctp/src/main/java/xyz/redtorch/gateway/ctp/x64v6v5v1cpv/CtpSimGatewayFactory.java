@@ -18,12 +18,12 @@ public class CtpSimGatewayFactory implements GatewayFactory{
 
 	private FastEventEngine fastEventEngine;
 	private GlobalMarketRegistry registry;
-	
+
 	public CtpSimGatewayFactory(FastEventEngine fastEventEngine, GlobalMarketRegistry registry) {
 		this.fastEventEngine = fastEventEngine;
 		this.registry = registry;
 	}
-	
+
 	@Override
 	public Gateway newInstance(GatewayDescription gatewayDescription) {
 		GatewayTypeEnum gwType = gatewayDescription.getGatewayUsage() == GatewayUsage.MARKET_DATA
