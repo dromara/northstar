@@ -62,7 +62,7 @@ public class SmartGatewayConnector {
 		} else if (StringUtils.equals(brokerId, PRIMARY)) {
 			return endpointList.peek().endpoint;
 		} 
-		throw new IllegalStateException("没有传入BrokerID");
+		throw new IllegalStateException("未知BrokerID：" + brokerId);
 	}
 	
 	public void update() {

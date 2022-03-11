@@ -33,6 +33,7 @@ public class CtpSimGatewayFactory implements GatewayFactory{
 		CtpApiSettingField ctpSetting = CtpApiSettingField.newBuilder()
 				.setPassword(settings.getPassword())
 				.setUserId(settings.getUserId())
+				.setBrokerId(settings.getBrokerId())
 				.build();
 		return new CtpSimGatewayAdapter(fastEventEngine, GatewaySettingField.newBuilder()
 				.setGatewayAdapterType(GatewayAdapterTypeEnum.GAT_CTP)
