@@ -1,0 +1,21 @@
+<svg width="400.00000000000006" height="400.00000000000006" xmlns="http://www.w3.org/2000/svg">
+ <!-- Created with Method Draw - http://github.com/duopixel/Method-Draw/ -->
+
+ <g>
+  <title>background</title>
+  <rect x="-1" y="-1" width="402" height="402" id="canvas_background" fill="#545c64"/>
+  <g id="canvasGrid" display="none">
+   <rect id="svg_1" width="100%" height="100%" x="0" y="0" stroke-width="0" fill="url(#gridpattern)"/>
+  </g>
+ </g>
+ <g>
+  <title>Layer 1</title>
+  <line stroke="#ffffff" fill="none" stroke-width="40" x1="18.213586" y1="408.9517" x2="119.82884" y2="151.556699" id="svg_12" stroke-linejoin="null" stroke-linecap="null"/>
+  <line stroke="#ffffff" fill="none" stroke-width="40" x1="217.773044" y1="308.460678" x2="327.935336" y2="48.310397" id="svg_14" stroke-linejoin="null" stroke-linecap="null"/>
+  <path stroke="#ffffff" fill="none" stroke-width="20" d="m322.161271,71.280025l-47.097987,-49.089516l84.68369,49.089516l-84.68369,49.089485l47.097987,-49.089485z" id="svg_16" transform="rotate(-66.57545471191406 317.40515136718756,71.28001403808595) "/>
+  <line stroke="#ffffff" fill="none" stroke-width="40" x1="121.749633" y1="171.27366" x2="216.420873" y2="288.494374" id="svg_17" stroke-linejoin="null" stroke-linecap="null"/>
+  <rect stroke="null" id="svg_8" height="30.817645" width="61.006354" y="128.635941" x="84.591092" stroke-width="40" fill="#545c64"/>
+  <rect stroke="null" id="svg_13" height="55.084506" width="121.185908" y="299.602314" x="173.305202" fill-opacity="null" stroke-opacity="null" stroke-width="40" fill="#545c64"/>
+  <text font-style="italic" font-weight="bold" stroke="#545c64" transform="matrix(3.23006534576416,0,0,3.5940492153167725,-259.8374575525522,-801.3585474379361) " xml:space="preserve" text-anchor="start" font-family="'Times New Roman', Times, serif" font-size="24" id="svg_20" y="333.589177" x="101.571025" stroke-width="0" fill="#ffffff">orthstar</text>
+ </g>
+</svg>
