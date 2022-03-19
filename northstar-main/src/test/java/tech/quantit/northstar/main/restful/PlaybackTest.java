@@ -88,15 +88,15 @@ public class PlaybackTest {
 		when(contractMgr.getContract(symbol + "@SHFE@FUTURES")).thenReturn(contract, contract, contract, contract, contract);
 		
 		session = new MockHttpSession();
-		mockMvc.perform(post("/auth/login").contentType(MediaType.APPLICATION_JSON_UTF8).content(JSON.toJSONString(new NsUser("admin","123456"))).session(session))
+		mockMvc.perform(post("/northstar/auth/login").contentType(MediaType.APPLICATION_JSON_UTF8).content(JSON.toJSONString(new NsUser("admin","123456"))).session(session))
 			.andExpect(status().isOk());
 		
 		String json = JSON.toJSONString(TestGatewayFactory.makeTrdGateway("TG1", "TG2",  GatewayType.CTP, TestGatewayFactory.makeGatewaySettings(CtpSettings.class),false));
-		mockMvc.perform(post("/mgt/gateway").contentType(MediaType.APPLICATION_JSON_UTF8).content(json).session(session))
+		mockMvc.perform(post("/northstar/mgt/gateway").contentType(MediaType.APPLICATION_JSON_UTF8).content(json).session(session))
 			.andExpect(status().isOk());
 		
 		String demoStr = "{\"moduleName\":\"TEST\",\"accountGatewayId\":\"TG1\",\"signalPolicy\":{\"componentMeta\":{\"name\":\"示例策略\",\"className\":\"tech.quantit.northstar.strategy.api.policy.signal.SampleSignalPolicy\"},\"initParams\":[{\"label\":\"绑定合约\",\"name\":\"bindedUnifiedSymbol\",\"order\":10,\"type\":\"String\",\"value\":\"" + symbol + "@SHFE@FUTURES\",\"unit\":\"\",\"options\":[]},{\"label\":\"长周期\",\"name\":\"actionInterval\",\"order\":30,\"type\":\"Number\",\"value\":\"3\",\"unit\":\"秒\",\"options\":[]}]},\"riskControlRules\":[{\"componentMeta\":{\"name\":\"委托超时限制\",\"className\":\"tech.quantit.northstar.strategy.api.policy.risk.TimeExceededRule\"},\"initParams\":[{\"label\":\"超时时间\",\"name\":\"timeoutSeconds\",\"order\":0,\"type\":\"Number\",\"value\":\"23\",\"unit\":\"秒\",\"options\":[]}]}],\"dealer\":{\"componentMeta\":{\"name\":\"示例交易策略\",\"className\":\"tech.quantit.northstar.strategy.api.policy.dealer.SampleDealer\"},\"initParams\":[{\"label\":\"绑定合约\",\"name\":\"bindedUnifiedSymbol\",\"order\":10,\"type\":\"String\",\"value\":\"" + symbol + "@SHFE@FUTURES\",\"unit\":\"\",\"options\":[]},{\"label\":\"开仓手数\",\"name\":\"openVol\",\"order\":20,\"type\":\"Number\",\"value\":\"2\",\"unit\":\"\",\"options\":[]},{\"label\":\"价格类型\",\"name\":\"openPriceTypeStr\",\"order\":30,\"type\":\"Options\",\"value\":\"市价\",\"unit\":\"\",\"options\":[\"对手价\",\"市价\",\"最新价\",\"排队价\",\"信号价\"]}]},\"enabled\":false,\"type\":\"CTA\"}";
-		mockMvc.perform(post("/module").contentType(MediaType.APPLICATION_JSON_UTF8).content(demoStr).session(session))
+		mockMvc.perform(post("/northstar/module").contentType(MediaType.APPLICATION_JSON_UTF8).content(demoStr).session(session))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
 		
@@ -123,7 +123,7 @@ public class PlaybackTest {
 				.precision(PlaybackPrecision.TICK)
 				.build();
 		
-		mockMvc.perform(post("/pb/play").contentType(MediaType.APPLICATION_JSON_UTF8).content(JSON.toJSONString(playbackDescription)).session(session))
+		mockMvc.perform(post("/northstar/pb/play").contentType(MediaType.APPLICATION_JSON_UTF8).content(JSON.toJSONString(playbackDescription)).session(session))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
 		
@@ -133,21 +133,21 @@ public class PlaybackTest {
 	public void shouldGetPlayProcess() throws Exception {
 		shouldSuccessfullyPlay();
 		
-		mockMvc.perform(get("/pb/play/process").session(session))
+		mockMvc.perform(get("/northstar/pb/play/process").session(session))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
 	}
 	
 	@Test
 	public void shouldThrowIfNotPlayAndGetTheProcess() throws Exception {
-		mockMvc.perform(get("/pb/play/process").session(session))
+		mockMvc.perform(get("/northstar/pb/play/process").session(session))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.status").value(ReturnCode.ERROR));
 	}
 
 	@Test
 	public void shouldThrowIfNotPlayAndGetTheBalance() throws Exception {
-		mockMvc.perform(get("/pb/balance?moduleName=TESTM").session(session))
+		mockMvc.perform(get("/northstar/pb/balance?moduleName=TESTM").session(session))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.status").value(ReturnCode.ERROR));
 	}
@@ -156,7 +156,7 @@ public class PlaybackTest {
 	public void shouldGetPlaybackBalance() throws Exception {
 		shouldSuccessfullyPlay();
 		
-		mockMvc.perform(get("/pb/balance?moduleName=TESTM").session(session))
+		mockMvc.perform(get("/northstar/pb/balance?moduleName=TESTM").session(session))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
 	}
@@ -164,7 +164,7 @@ public class PlaybackTest {
 	@Test
 	public void shouldGetReadyStateIfNotPlay() throws Exception {
 		Thread.sleep(1000);
-		mockMvc.perform(get("/pb/readiness").session(session))
+		mockMvc.perform(get("/northstar/pb/readiness").session(session))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS))
 			.andExpect(jsonPath("$.data").value(true));
