@@ -1,10 +1,17 @@
 package tech.quantit.northstar.main.config;
 
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.util.Enumeration;
+
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -28,30 +35,44 @@ public class SocketIOServerConfig implements DisposableBean, InitializingBean {
 	private SocketIOServer socketServer;
 	
 	@Bean
-	@ConditionalOnProperty(value = "spring.profiles.active", havingValue = "prod")
-    public SocketIOServer socketIOServer()  {
+	@ConditionalOnExpression("!'${spring.profiles.active}'.equals('test')")
+    public SocketIOServer socketIOServer() throws SocketException  {
 		return makeServer();
     }
 	
-	@Bean
-	@ConditionalOnProperty(value = "spring.profiles.active", havingValue = "dev")
-	public SocketIOServer socketIOServer2() {
-        return makeServer();
-    }
-	
-	private SocketIOServer makeServer() {
+	private SocketIOServer makeServer() throws SocketException {
+		String realHost = StringUtils.equals(host, "0.0.0.0") ? getInetAddress() : host;
 		com.corundumstudio.socketio.Configuration config = new com.corundumstudio.socketio.Configuration();
-        config.setHostname(host);
+        config.setHostname(realHost);
         config.setPort(port);
         config.setBossThreads(1);
         config.setWorkerThreads(100);
         SocketConfig socketConfig = new SocketConfig();
         socketConfig.setReuseAddress(true);
         config.setSocketConfig(socketConfig);
-        log.info("WebSocket服务地址：{}:{}", host, port);
-        SocketIOServer socketServer = new SocketIOServer(config);
-        socketServer.start();
-        return socketServer;
+        log.info("WebSocket服务地址：{}:{}", realHost, port);
+        SocketIOServer server = new SocketIOServer(config);
+        server.start();
+        return server;
+	}
+	
+	private String getInetAddress() throws SocketException {
+		log.info("正在自动获取IP");
+		Enumeration<NetworkInterface> allNetworkInterfaces = NetworkInterface.getNetworkInterfaces();
+		while(allNetworkInterfaces.hasMoreElements()) {
+			NetworkInterface netIntf = allNetworkInterfaces.nextElement();
+			if(netIntf.isLoopback()||netIntf.isVirtual()||!netIntf.isUp()||netIntf.getDisplayName().contains("VM")){
+                continue;
+            }
+			Enumeration<InetAddress> inetAddrs = netIntf.getInetAddresses();
+			while(inetAddrs.hasMoreElements()) {
+				InetAddress inetAddr = inetAddrs.nextElement();
+				if(inetAddr instanceof Inet4Address inet4) {
+					return inet4.getHostAddress();
+				}
+			}
+		}
+		throw new SocketException("没有找到网卡eth0的IP信息");
 	}
 	
 	@Bean
