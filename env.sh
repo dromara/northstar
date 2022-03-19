@@ -7,8 +7,8 @@ yum install git nodejs wget python27 gcc gcc-c++ -y
 cd ~
 echo "安装JDK17"
 wget --no-check-certificate https://download.oracle.com/java/17/latest/jdk-17_linux-x64_bin.tar.gz
-tar -xvf jdk-17_linux-x64_bin.tar.gz
-ln -s ~/jdk-17.0.1/bin/* /usr/local/bin/
+tar -xvf jdk-17_linux-x64_bin.tar.gz jdk17
+ln -s ~/$(find jdk* -maxdepth 0 -type d)/bin/* /usr/local/bin/
 echo "安装Maven"
 wget --no-check-certificate https://mirrors.bfsu.edu.cn/apache/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz
 tar -xvf apache-maven-3.6.3-bin.tar.gz
