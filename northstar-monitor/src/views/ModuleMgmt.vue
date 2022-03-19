@@ -99,13 +99,11 @@ export default {
       this.curModule = null
     },
     handlePerf(index, row) {
-      console.log(index, row)
       this.curTableIndex = index
       this.curModule = row
       this.modulePerfVisible = true
     },
     handleRow(index, row) {
-      console.log(index, row)
       this.curTableIndex = index
       this.curModule = row
       this.moduleFormVisible = true
@@ -115,7 +113,6 @@ export default {
       this.findAll()
     },
     async onSave(obj) {
-      console.log(obj)
       if (this.curTableIndex < 0) {
         await moduleApi.insertModule(obj)
       } else {

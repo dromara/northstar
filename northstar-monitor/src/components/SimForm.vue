@@ -58,7 +58,6 @@ export default {
   },
   watch: {
     settingsSrc: function (val) {
-      console.log(val)
       Object.assign(this.settings, val)
     }
   },

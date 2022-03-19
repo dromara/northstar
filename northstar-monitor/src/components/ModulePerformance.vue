@@ -326,7 +326,6 @@ export default {
       }
     },
     moduleTab: function (val) {
-      console.log(val)
       if (val === 'dealRecord') {
         setTimeout(() => {
           let table = this.$refs.dealTbl
@@ -423,7 +422,6 @@ export default {
       this.positionFormVisible = true
     },
     editPosition(position) {
-      console.log(position)
       this.curPosition = position
       this.positionFormVisible = true
     },

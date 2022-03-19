@@ -182,7 +182,6 @@ export default {
   async created() {
     this.linkedGatewayOptions = await gatewayMgmtApi.findAll('MARKET_DATA')
     this.form.gatewayUsage = this.gatewayUsage
-    console.log(this.form)
   },
   watch: {
     visible: function (val) {
@@ -205,7 +204,6 @@ export default {
       }
     },
     gatewaySettingConfig() {
-      console.log(this.form)
       if (this.form.gatewayType === 'CTP' || this.form.gatewayType === 'CTP_SIM') {
         this.ctpFormVisible = true
       }
@@ -214,7 +212,6 @@ export default {
       }
     },
     async saveGateway() {
-      console.log(this.form)
       if (this.gatewayUsage !== 'TRADE' && this.form.gatewayType === 'SIM') {
         this.form.settings = { nothing: 0 }
       }

@@ -76,7 +76,6 @@ export default {
     })
     this.socket.on('NOTICE', (data) => {
       let notice = NoticeField.deserializeBinary(data).toObject()
-      console.log(notice)
       this.$message[TYPE[notice.status]](notice.content)
     })
     this.socket.on('error', (e) => {

@@ -218,7 +218,6 @@ export default {
     handleContractChange() {
       this.dealPriceType = 'COUNTERPARTY_PRICE'
       this.$store.commit('updateFocusUnifiedSymbol', this.dealSymbol)
-      console.log(this.dealSymbol)
     },
     handleDealPriceTypeChange() {
       if (this.dealPriceType !== 'CUSTOM_PRICE') {
@@ -226,15 +225,12 @@ export default {
       }
     },
     onPositionChosen(pos) {
-      console.log(pos)
       this.dealVol = pos.position - pos.frozen
       this.dealSymbol = pos.contract.unifiedsymbol
       this.currentPosition = pos
       this.handleContractChange()
-      console.log(this.closePrice)
     },
     onCancelOrder(order) {
-      console.log(order)
       tradeOprApi.cancelOrder(this.currentAccountId, order.originorderid)
     },
     buyOpen() {

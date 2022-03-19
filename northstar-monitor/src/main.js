@@ -9,8 +9,6 @@ import NumberFilter from '@/filter/number-filter'
 import '@/assets/style/index.css'
 import './utils'
 
-console.log(NumberFilter)
-
 Vue.use(ELEMENT, { size: 'mini' })
 
 Vue.config.productionTip = false

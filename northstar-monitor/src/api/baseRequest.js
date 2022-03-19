@@ -35,7 +35,7 @@ service.interceptors.response.use(
     }
   },
   (error) => {
-    console.log('err' + error) // for debug
+    console.error('err' + error) // for debug
     return Promise.reject(new Error('网络出错'))
   }
 )

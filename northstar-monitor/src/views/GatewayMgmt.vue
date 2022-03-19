@@ -225,18 +225,15 @@ export default {
       this.curGatewayDescription = {}
     },
     handleEdit(index, row) {
-      console.log(index, row)
       this.curTableIndex = index
       this.curGatewayDescription = row
       this.dialogFormVisible = true
     },
     async handleDelete(index, row) {
-      console.log(index, row)
       await gatewayMgmtApi.remove(row.gatewayId)
       this.updateList()
     },
     async handleSave(obj) {
-      console.log(obj)
       if (this.curTableIndex > -1) {
         await gatewayMgmtApi.update(obj)
         this.updateList()
@@ -255,7 +252,6 @@ export default {
       this.updateList()
     },
     handleMoneyIO(row) {
-      console.log(row)
       this.curGatewayDescription = row
       this.simBalanceFormVisible = true
     }

@@ -233,7 +233,6 @@ export default {
       }
     },
     moduleTab: function (val) {
-      console.log(val)
       if (val === 'dealRecord') {
         setTimeout(() => {
           let table = this.$refs.dealTbl

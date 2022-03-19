@@ -362,7 +362,6 @@ export default {
       })
       const groupNames = ['信号策略', '风控策略', '交易策略']
       const unsetItemsTotal = [unsetItems1, unsetItems2, unsetItems3]
-      console.log(unsetItems1, unsetItems2, unsetItems3)
       // 二次校验
       for (let i = 0; i < 3; i++) {
         let unsetItems = unsetItemsTotal[i]
