@@ -37,7 +37,7 @@ export default {
     }
   },
   mounted() {
-    this.socket = SocketIO()
+    this.socket = SocketIO(`http://${location.hostname}:51888`)
     this.socket.on('TICK', (data) => {
       let tick = TickField.deserializeBinary(data).toObject()
       this.$store.commit('updateTick', tick)

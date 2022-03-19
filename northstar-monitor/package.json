@@ -1,14 +1,12 @@
 {
   "name": "northstar-monitor",
-  "version": "2.4.2",
+  "version": "3.4.0",
   "private": true,
   "scripts": {
-    "start": "cross-env PORT=3000 concurrently \"node ./server/bin/server.js\" \"npm run serve\" -k -n \"backend,frontend\" -c \"cyan.dim,yellow.dim\"",
+    "start": "npm run serve",
     "start-mock": "cross-env MOCK=true npm start",
     "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build && cd server && npm run build",
-    "build-patch": "npm version patch && vue-cli-service build && cd server && npm run build",
-    "build-minor": "npm version minor && vue-cli-service build && cd server && npm run build",
+    "build": "vue-cli-service build",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
