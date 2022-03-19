@@ -12,7 +12,7 @@ import tech.quantit.northstar.common.model.ResultBean;
 import tech.quantit.northstar.common.model.SimpleContractInfo;
 import tech.quantit.northstar.main.service.DataSyncService;
 
-@RequestMapping("/data")
+@RequestMapping("/northstar/data")
 @RestController
 public class DataSyncController {
 	

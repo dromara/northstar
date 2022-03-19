@@ -21,7 +21,7 @@ import tech.quantit.northstar.main.service.SMSTradeService;
  *
  */
 @RestController
-@RequestMapping("/trade")
+@RequestMapping("/northstar/trade")
 public class TradeOperationController {
 	
 	@Autowired
