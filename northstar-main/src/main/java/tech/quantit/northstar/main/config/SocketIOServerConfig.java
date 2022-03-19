@@ -72,7 +72,7 @@ public class SocketIOServerConfig implements DisposableBean, InitializingBean {
 				}
 			}
 		}
-		throw new SocketException("没有找到网卡eth0的IP信息");
+		throw new SocketException("没有找到IPv4的IP信息");
 	}
 	
 	@Bean
