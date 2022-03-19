@@ -37,8 +37,8 @@
 
 ## 程序架构
 - B/S架构
-- northstar项目为服务端
-- northstar-monitor项目为web网页监控端
+- northstar项目为服务端（包含了web网页监控端）
+- northstar-external为用户自行扩展的项目，可参考[此项目](https://gitee.com/NorthstarQuan/northstar-external)
 - 交互协议HTTP + websocket
 - 数据库为MongoDB
 - 前端采用nodejs + vue
