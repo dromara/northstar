@@ -53,7 +53,7 @@ public class DataSyncTest {
 	@BeforeEach
 	public void setUp() throws Exception {
 		session = new MockHttpSession();
-		mockMvc.perform(post("/auth/login").contentType(MediaType.APPLICATION_JSON_UTF8).content(JSON.toJSONString(new NsUser("admin","123456"))).session(session))
+		mockMvc.perform(post("/northstar/auth/login").contentType(MediaType.APPLICATION_JSON_UTF8).content(JSON.toJSONString(new NsUser("admin","123456"))).session(session))
 			.andExpect(status().isOk());
 		
 		LocalDateTime date = LocalDateTime.now().minusDays(2);
@@ -75,28 +75,28 @@ public class DataSyncTest {
 	
 	@Test
 	public void shouldSync() throws Exception {
-		mockMvc.perform(get("/data/sync").session(session))
+		mockMvc.perform(get("/northstar/data/sync").session(session))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
 	}
 
 	@Test
 	public void shouldGetHistoryBar() throws Exception {
-		mockMvc.perform(get("/data/his/bar?gatewayId=test&unifiedSymbol=rb2201@SHFE@FUTURES&startRefTime="+ System.currentTimeMillis()).session(session))
+		mockMvc.perform(get("/northstar/data/his/bar?gatewayId=test&unifiedSymbol=rb2201@SHFE@FUTURES&startRefTime="+ System.currentTimeMillis()).session(session))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
 	}
 	
 	@Test
 	public void shouldGetNoHistoryBar() throws Exception {
-		mockMvc.perform(get("/data/his/bar?gatewayId=test&unifiedSymbol=rb2201@SHFE@FUTURES&startRefTime="+ LocalDateTime.now().minusDays(3).toInstant(ZoneOffset.ofHours(8)).toEpochMilli()).session(session))
+		mockMvc.perform(get("/northstar/data/his/bar?gatewayId=test&unifiedSymbol=rb2201@SHFE@FUTURES&startRefTime="+ LocalDateTime.now().minusDays(3).toInstant(ZoneOffset.ofHours(8)).toEpochMilli()).session(session))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.status").value(ReturnCode.ERROR));
 	}
 	
 	@Test
 	public void shouldGetAvailableContract() throws Exception {
-		mockMvc.perform(get("/data/contracts").session(session))
+		mockMvc.perform(get("/northstar/data/contracts").session(session))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
 	}
