@@ -9,7 +9,7 @@ northstar:
   auth:
     userId: ${nsuser:admin}
     password: ${nspwd:123456}
-  # 历史数据服务
+  # 历史数据服务（需要购买用户授权）
   data-service:
     baseUrl: http://nsds.quantit.tech
     token: ${nsds_token:}
