@@ -1,0 +1,59 @@
+html,
+body {
+  margin: 0px;
+  padding: 0px;
+  height: 100%;
+  background-color: #545c64;
+  color: white;
+  font-size: 14px;
+  user-select: none;
+}
+
+.ns-page {
+  margin: 30px;
+  width: 100%;
+  display: flex;
+}
+
+.ns-block {
+  width: 100%;
+  height: 100%;
+}
+
+div::-webkit-scrollbar {
+  /*滚动条整体样式*/
+  width: 6px; /*高宽分别对应横竖滚动条的尺寸*/
+  height: 6px;
+  scrollbar-arrow-color: red;
+}
+div::-webkit-scrollbar-thumb {
+  /*滚动条里面小方块*/
+  border-radius: 5px;
+  -webkit-box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
+  background: rgba(0, 0, 0, 0.2);
+  scrollbar-arrow-color: red;
+}
+div::-webkit-scrollbar-track {
+  /*滚动条里面轨道*/
+  -webkit-box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
+  border-radius: 0;
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.color-red {
+  color: #ee9090;
+}
+
+.color-green {
+  color: #93c57a;
+}
+
+.el-dialog {
+  min-width: 370px;
+}
+.el-menu {
+  height: 100%;
+}
+.text-selectable {
+  user-select: all !important;
+}

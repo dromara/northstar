@@ -1,16 +1,18 @@
 server:
-  port: 8888
-  servlet:
-    context-path: /northstar
+  port: 80
 
 socketio:
-  host: 127.0.0.1
+  host: 0.0.0.0
   port: 51888
 
 northstar: 
   auth:
     userId: ${nsuser:admin}
     password: ${nspwd:123456}
+  # 历史数据服务
+  data-service:
+    baseUrl: http://nsds.quantit.tech
+    token: ${nsds_token:}
 
 logging:  level: 
     root: info

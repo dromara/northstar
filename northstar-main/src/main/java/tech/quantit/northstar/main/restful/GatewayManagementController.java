@@ -19,7 +19,7 @@ import tech.quantit.northstar.common.model.ResultBean;
 import tech.quantit.northstar.domain.gateway.ContractManager;
 import tech.quantit.northstar.main.service.GatewayService;
 
-@RequestMapping("/mgt")
+@RequestMapping("/northstar/mgt")
 @RestController
 public class GatewayManagementController {
 	

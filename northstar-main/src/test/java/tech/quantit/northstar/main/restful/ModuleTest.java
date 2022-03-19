@@ -65,11 +65,11 @@ public class ModuleTest {
 		symbol = "sim" + year + month;
 		
 		session = new MockHttpSession();
-		mockMvc.perform(post("/auth/login").contentType(MediaType.APPLICATION_JSON_UTF8).content(JSON.toJSONString(new NsUser("admin","123456"))).session(session))
+		mockMvc.perform(post("/northstar/auth/login").contentType(MediaType.APPLICATION_JSON_UTF8).content(JSON.toJSONString(new NsUser("admin","123456"))).session(session))
 			.andExpect(status().isOk());
 		
 		String json = JSON.toJSONString(TestGatewayFactory.makeTrdGateway("TG1", "TG2",  GatewayType.CTP, TestGatewayFactory.makeGatewaySettings(CtpSettings.class),false));
-		mockMvc.perform(post("/mgt/gateway").contentType(MediaType.APPLICATION_JSON_UTF8).content(json).session(session))
+		mockMvc.perform(post("/northstar/mgt/gateway").contentType(MediaType.APPLICATION_JSON_UTF8).content(json).session(session))
 			.andExpect(status().isOk());
 	}
 	
@@ -82,7 +82,7 @@ public class ModuleTest {
 	public void shouldSuccessfullyCreate() throws Exception {
 		String demoStr = "{\"moduleName\":\"TEST\",\"accountGatewayId\":\"TG1\",\"signalPolicy\":{\"componentMeta\":{\"name\":\"示例信号策略\",\"className\":\"tech.quantit.northstar.strategy.api.policy.signal.SampleSignalPolicy\"},\"initParams\":[{\"label\":\"绑定合约\",\"name\":\"bindedUnifiedSymbol\",\"order\":10,\"type\":\"String\",\"value\":\""+symbol+"@SHFE@FUTURES\",\"unit\":\"\",\"options\":[]},{\"label\":\"长周期\",\"name\":\"actionInterval\",\"order\":30,\"type\":\"Number\",\"value\":\"3\",\"unit\":\"秒\",\"options\":[]}]},\"riskControlRules\":[{\"componentMeta\":{\"name\":\"委托超时限制\",\"className\":\"tech.quantit.northstar.strategy.api.policy.risk.TimeExceededRule\"},\"initParams\":[{\"label\":\"超时时间\",\"name\":\"timeoutSeconds\",\"order\":0,\"type\":\"Number\",\"value\":\"23\",\"unit\":\"秒\",\"options\":[]}]}],\"dealer\":{\"componentMeta\":{\"name\":\"示例交易策略\",\"className\":\"tech.quantit.northstar.strategy.api.policy.dealer.SampleDealer\"},\"initParams\":[{\"label\":\"绑定合约\",\"name\":\"bindedUnifiedSymbol\",\"order\":10,\"type\":\"String\",\"value\":\""+symbol+"@SHFE@FUTURES\",\"unit\":\"\",\"options\":[]},{\"label\":\"开仓手数\",\"name\":\"openVol\",\"order\":20,\"type\":\"Number\",\"value\":\"2\",\"unit\":\"\",\"options\":[]},{\"label\":\"价格类型\",\"name\":\"openPriceTypeStr\",\"order\":30,\"type\":\"Options\",\"value\":\"市价\",\"unit\":\"\",\"options\":[\"对手价\",\"市价\",\"最新价\",\"排队价\",\"信号价\"]}]},\"enabled\":false,\"type\":\"CTA\"}";
 		
-		mockMvc.perform(post("/module").contentType(MediaType.APPLICATION_JSON_UTF8).content(demoStr).session(session))
+		mockMvc.perform(post("/northstar/module").contentType(MediaType.APPLICATION_JSON_UTF8).content(demoStr).session(session))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
 	}
@@ -92,14 +92,14 @@ public class ModuleTest {
 		shouldSuccessfullyCreate();
 		String demoStr = "{\"moduleName\":\"TEST\",\"accountGatewayId\":\"TG1\",\"signalPolicy\":{\"componentMeta\":{\"name\":\"示例信号策略\",\"className\":\"tech.quantit.northstar.strategy.api.policy.signal.SampleSignalPolicy\"},\"initParams\":[{\"label\":\"绑定合约\",\"name\":\"bindedUnifiedSymbol\",\"order\":10,\"type\":\"String\",\"value\":\""+symbol+"@SHFE@FUTURES\",\"unit\":\"\",\"options\":[]},{\"label\":\"长周期\",\"name\":\"actionInterval\",\"order\":30,\"type\":\"Number\",\"value\":\"3\",\"unit\":\"秒\",\"options\":[]}]},\"riskControlRules\":[{\"componentMeta\":{\"name\":\"委托超时限制\",\"className\":\"tech.quantit.northstar.strategy.api.policy.risk.TimeExceededRule\"},\"initParams\":[{\"label\":\"超时时间\",\"name\":\"timeoutSeconds\",\"order\":0,\"type\":\"Number\",\"value\":\"23\",\"unit\":\"秒\",\"options\":[]}]}],\"dealer\":{\"componentMeta\":{\"name\":\"示例交易策略\",\"className\":\"tech.quantit.northstar.strategy.api.policy.dealer.SampleDealer\"},\"initParams\":[{\"label\":\"绑定合约\",\"name\":\"bindedUnifiedSymbol\",\"order\":10,\"type\":\"String\",\"value\":\""+symbol+"@SHFE@FUTURES\",\"unit\":\"\",\"options\":[]},{\"label\":\"开仓手数\",\"name\":\"openVol\",\"order\":20,\"type\":\"Number\",\"value\":\"2\",\"unit\":\"\",\"options\":[]},{\"label\":\"价格类型\",\"name\":\"openPriceTypeStr\",\"order\":30,\"type\":\"Options\",\"value\":\"市价\",\"unit\":\"\",\"options\":[\"对手价\",\"市价\",\"最新价\",\"排队价\",\"信号价\"]}]},\"enabled\":true,\"type\":\"CTA\"}";
 		
-		mockMvc.perform(put("/module").contentType(MediaType.APPLICATION_JSON_UTF8).content(demoStr).session(session))
+		mockMvc.perform(put("/northstar/module").contentType(MediaType.APPLICATION_JSON_UTF8).content(demoStr).session(session))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
 	}
 	
 	@Test
 	public void shouldFindModules() throws Exception {
-		mockMvc.perform(get("/module").session(session))
+		mockMvc.perform(get("/northstar/module").session(session))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
 	}
@@ -108,7 +108,7 @@ public class ModuleTest {
 	public void shouldSuccessfullyRemove() throws Exception {
 		shouldSuccessfullyCreate();
 		
-		mockMvc.perform(delete("/module?name=TEST").session(session))
+		mockMvc.perform(delete("/northstar/module?name=TEST").session(session))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
 	}
@@ -128,7 +128,7 @@ public class ModuleTest {
 				.positionDir(PositionDirectionEnum.PD_Long)
 				.build();
 		
-		mockMvc.perform(post("/module/TEST/position").contentType(MediaType.APPLICATION_JSON_UTF8).content(JSON.toJSONString(position)).session(session))
+		mockMvc.perform(post("/northstar/module/TEST/position").contentType(MediaType.APPLICATION_JSON_UTF8).content(JSON.toJSONString(position)).session(session))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
 	}
@@ -146,7 +146,7 @@ public class ModuleTest {
 				.positionDir(PositionDirectionEnum.PD_Long)
 				.build();
 		
-		mockMvc.perform(put("/module/TEST/position").contentType(MediaType.APPLICATION_JSON_UTF8).content(JSON.toJSONString(position)).session(session))
+		mockMvc.perform(put("/northstar/module/TEST/position").contentType(MediaType.APPLICATION_JSON_UTF8).content(JSON.toJSONString(position)).session(session))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
 	}
@@ -155,19 +155,19 @@ public class ModuleTest {
 	public void shouldRemoveModulePosition() throws Exception {
 		shouldCreateModulePosition();
 		
-		mockMvc.perform(delete("/module/TEST/position?unifiedSymbol="+symbol+"@SHFE@FUTURES&dir=PD_Long").session(session))
+		mockMvc.perform(delete("/northstar/module/TEST/position?unifiedSymbol="+symbol+"@SHFE@FUTURES&dir=PD_Long").session(session))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
 	}
 	
 	private void prepareGateway() throws Exception {
 		GatewayDescription gateway = TestGatewayFactory.makeMktGateway("TG5", GatewayType.SIM, TestGatewayFactory.makeGatewaySettings(SimSettings.class),false);
-		mockMvc.perform(post("/mgt/gateway").contentType(MediaType.APPLICATION_JSON_UTF8).content(JSON.toJSONString(gateway)).session(session))
+		mockMvc.perform(post("/northstar/mgt/gateway").contentType(MediaType.APPLICATION_JSON_UTF8).content(JSON.toJSONString(gateway)).session(session))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
 		
 		GatewayDescription gateway2 = TestGatewayFactory.makeTrdGateway("TG5Account", "TG5", GatewayType.SIM, TestGatewayFactory.makeGatewaySettings(SimSettings.class),true);
-		mockMvc.perform(post("/mgt/gateway").contentType(MediaType.APPLICATION_JSON_UTF8).content(JSON.toJSONString(gateway2)).session(session))
+		mockMvc.perform(post("/northstar/mgt/gateway").contentType(MediaType.APPLICATION_JSON_UTF8).content(JSON.toJSONString(gateway2)).session(session))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
 		
@@ -177,7 +177,7 @@ public class ModuleTest {
 	@Test
 	public void shouldSuccessfullyGetModuleCurrentPerformance() throws Exception {
 		shouldCreateModulePosition();
-		mockMvc.perform(get("/module/info?name=TEST").session(session))
+		mockMvc.perform(get("/northstar/module/info?name=TEST").session(session))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
 	}
@@ -186,7 +186,7 @@ public class ModuleTest {
 	public void shouldSuccessfullyGetModuleDealRecords() throws Exception {
 		shouldCreateModulePosition();
 		
-		mockMvc.perform(get("/module/records?name=TEST").session(session))
+		mockMvc.perform(get("/northstar/module/records?name=TEST").session(session))
 		.andExpect(status().isOk())
 		.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
 	}
@@ -195,7 +195,7 @@ public class ModuleTest {
 	public void shouldSuccessfullyGetModuleTradeRecords() throws Exception {
 		shouldCreateModulePosition();
 		
-		mockMvc.perform(get("/module/records/trade?name=TEST").session(session))
+		mockMvc.perform(get("/northstar/module/records/trade?name=TEST").session(session))
 		.andExpect(status().isOk())
 		.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
 	}
@@ -204,7 +204,7 @@ public class ModuleTest {
 	public void shouldSuccessfullyToggleModuleState() throws Exception {
 		shouldCreateModulePosition();
 		
-		mockMvc.perform(get("/module/toggle?name=TEST").session(session))
+		mockMvc.perform(get("/northstar/module/toggle?name=TEST").session(session))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
 	}

@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>tech.quantit</groupId>
 		<artifactId>northstar</artifactId>
-		<version>3.3.0</version>
+		<version>3.4</version>
 	</parent>
 	<artifactId>northstar-domain</artifactId>
 	<name>northstar-domain</name>

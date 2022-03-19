@@ -20,7 +20,7 @@ import tech.quantit.northstar.strategy.api.model.ModuleDealRecord;
 import tech.quantit.northstar.strategy.api.model.ModuleTradeRecord;
 
 @RestController
-@RequestMapping("/pb")
+@RequestMapping("/northstar/pb")
 public class PlaybackController {
 	
 	@Autowired

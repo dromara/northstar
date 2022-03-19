@@ -95,10 +95,6 @@ public class PlaybackTask {
 		return !curDate.isAfter(endDate);
 	}
 	
-	public static void main(String[] args) {
-		System.out.println(LocalDate.of(2022, 1, 3).until(LocalDate.of(2022, 1, 8), ChronoUnit.DAYS));
-	}
-	
 	private double ratioOfDay() {
 		if(totalNumOfData == 0) {
 			return 0;

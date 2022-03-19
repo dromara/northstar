@@ -16,8 +16,8 @@ public class AuthorizationInterceptor implements HandlerInterceptor{
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
 			throws Exception {
 		HttpServletRequest req = (HttpServletRequest) request;
-		String path = req.getServletPath();
-		if(path.startsWith("/auth/login") || path.endsWith("/trade/sms")) {
+		String path = req.getRequestURI();
+		if(path.startsWith("/northstar/auth/login") || !path.startsWith("/northstar")) {
 			return true;
 		}
 		

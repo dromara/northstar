@@ -23,7 +23,7 @@ import tech.quantit.northstar.common.model.ResultBean;
  *
  */
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/northstar/auth")
 public class AuthenticationController {
 	
 	@Value("${northstar.auth.userId}")

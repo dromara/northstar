@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>tech.quantit</groupId>
 		<artifactId>northstar</artifactId>
-		<version>3.3.0</version>
+		<version>3.4</version>
 	</parent>
 	<artifactId>northstar-main</artifactId>
 	<name>northstar-main</name>
@@ -85,6 +85,28 @@
 
 	<build>
 		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+		        <artifactId>maven-resources-plugin</artifactId>
+		        <executions>
+		          <execution>
+		            <id>copy-resources</id>
+		            <!-- here the phase you need -->
+		            <phase>generate-resources</phase>
+		            <goals>
+		              <goal>copy-resources</goal>
+		            </goals>
+		            <configuration>
+		              <outputDirectory>${basedir}/src/main/resources/static</outputDirectory>
+		              <resources>          
+		                <resource>
+		                  <directory>${basedir}/../northstar-monitor/dist</directory>
+		                </resource>
+		              </resources>              
+		            </configuration>            
+		          </execution>
+		        </executions>
+		      </plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
