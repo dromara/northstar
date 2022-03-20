@@ -138,31 +138,7 @@ public class MarketDataRepository implements IMarketDataRepository {
 		return resultList.stream().map(doc -> doc.get("_id").toString()).toList();
 	}
 	
-	/**
-	 * 批量保存合约信息
-	 * @param contracts
-	 */
-	@Override
-	public void batchSaveContracts(List<ContractPO> contracts) {
-		if(contracts.isEmpty()) {
-			return;
-		}
-		log.debug("保存合约：{}条", contracts.size());
-		long start = System.currentTimeMillis();
-		for(ContractPO po : contracts) {
-			mongo.save(po);
-		}
-		log.debug("合约保存成功，耗时{}毫秒", System.currentTimeMillis() - start);
-	}
 	
-	/**
-	 * 保存合约信息
-	 * @param contract
-	 */
-	@Override
-	public void saveContract(ContractPO contract) {
-		mongo.save(contract);
-	}
 
 	/**
 	 * 清理特定时间的行情
@@ -174,16 +150,4 @@ public class MarketDataRepository implements IMarketDataRepository {
 		mongo.remove(Query.query(Criteria.where("actionTimestamp").gte(startTime).lte(endTime)), COLLECTION_PREFIX + gatewayId);
 	}
 
-	private static final long DAY14MILLISEC = TimeUnit.DAYS.toMillis(14);
-	
-	/**
-	 * 查询有效合约列表
-	 * @return
-	 */
-	@Override
-	public List<ContractPO> getAvailableContracts(){
-		log.debug("查询十四天内登记过的有效合约");
-		long day14Ago = System.currentTimeMillis() - DAY14MILLISEC;
-		return mongo.find(Query.query(Criteria.where("updateTime").gt(day14Ago)), ContractPO.class);
-	}
 }
