@@ -26,6 +26,7 @@ import org.springframework.web.client.RestTemplate;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import tech.quantit.northstar.common.IDataServiceManager;
 import tech.quantit.northstar.common.utils.MarketDateTimeUtil;
 import xyz.redtorch.gateway.ctp.common.CtpDateTimeUtil;
 import xyz.redtorch.pb.CoreField.BarField;
@@ -39,7 +40,7 @@ import xyz.redtorch.pb.CoreField.BarField;
 @Slf4j
 @Component
 @ConditionalOnExpression("#{!'${northstar.data-service.token}'.isBlank()}")
-public class DataServiceManager {
+public class DataServiceManager implements IDataServiceManager {
 	
 	@Value("${northstar.data-service.token}")
 	private String nsToken;
@@ -72,6 +73,7 @@ public class DataServiceManager {
 	 * @param endDate
 	 * @return
 	 */
+	@Override
 	public List<BarField> getMinutelyData(String unifiedSymbol, LocalDate startDate, LocalDate endDate) {
 		return commonGetData("min", unifiedSymbol, startDate, endDate);
 	}
@@ -83,6 +85,7 @@ public class DataServiceManager {
 	 * @param endDate
 	 * @return
 	 */
+	@Override
 	public List<BarField> getQuarterlyData(String unifiedSymbol, LocalDate startDate, LocalDate endDate) {
 		return commonGetData("quarter", unifiedSymbol, startDate, endDate);
 	}
@@ -94,6 +97,7 @@ public class DataServiceManager {
 	 * @param endDate
 	 * @return
 	 */
+	@Override
 	public List<BarField> getHourlyData(String unifiedSymbol, LocalDate startDate, LocalDate endDate) {
 		return commonGetData("hour", unifiedSymbol, startDate, endDate);
 	}
@@ -105,12 +109,37 @@ public class DataServiceManager {
 	 * @param endDate
 	 * @return
 	 */
+	@Override
 	public List<BarField> getDailyData(String unifiedSymbol, LocalDate startDate, LocalDate endDate) {
 		return commonGetData("day", unifiedSymbol, startDate, endDate);
 	}
 	
+	public List<String> getTradeDates(String exchange, LocalDate startDate, LocalDate endDate){
+		String start = "";
+		String end = "";
+		if(startDate != null) start = startDate.format(fmt);
+		if(endDate != null) end = endDate.format(fmt);
+		URI uri = URI.create(String.format("%s/calendar/?exchange=%s&startDate=%s&endDate=%s", baseUrl, exchange, start, end));
+		DataSet dataSet = execute(uri);
+		List<String> resultList = new LinkedList<>();
+		Map<String, Integer> keyIndexMap = new HashMap<>();
+		for(int i=0; i<dataSet.getFields().length; i++) {
+			keyIndexMap.put(dataSet.getFields()[i], i);
+		}
+		for(String[] item : dataSet.getItems()) {
+			if("1".equals(item[keyIndexMap.get("is_open")])) {
+				resultList.add(item[keyIndexMap.get("cal_date")]);
+			}
+		}
+		return resultList;
+	}
+	
 	private List<BarField> commonGetData(String type, String unifiedSymbol, LocalDate startDate, LocalDate endDate){
 		URI uri = URI.create(String.format("%s/data/%s?unifiedSymbol=%s&startDate=%s&endDate=%s", baseUrl, type, unifiedSymbol, startDate.format(fmt), endDate.format(fmt)));
+		return convertDataSet(execute(uri));
+	}
+	
+	private DataSet execute(URI uri) {
 		HttpHeaders headers = new HttpHeaders();
 		headers.add("token", nsToken);
 		HttpEntity<?> reqEntity = new HttpEntity<>(headers);
@@ -122,8 +151,7 @@ public class DataServiceManager {
 		if(respEntity.getStatusCode() != HttpStatus.OK) {
 			throw new IllegalStateException("历史数据服务返回异常：" + dataSet.getMessage());
 		}
-		
-		return convertDataSet(dataSet);
+		return dataSet;
 	}
 	
 	private List<BarField> convertDataSet(DataSet dataSet) {

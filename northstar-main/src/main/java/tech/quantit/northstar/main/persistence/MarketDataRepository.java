@@ -1,13 +1,13 @@
 package tech.quantit.northstar.main.persistence;
 
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.index.CompoundIndexDefinition;
 import org.springframework.data.mongodb.core.index.IndexDefinition;
@@ -16,7 +16,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Repository;
 
 import lombok.extern.slf4j.Slf4j;
-import tech.quantit.northstar.main.persistence.po.ContractPO;
+import tech.quantit.northstar.main.external.DataServiceManager;
 import tech.quantit.northstar.main.persistence.po.MinBarDataPO;
 import tech.quantit.northstar.main.utils.MongoUtils;
 
@@ -30,6 +30,7 @@ import tech.quantit.northstar.main.utils.MongoUtils;
  */
 @Slf4j
 @Repository
+@ConditionalOnMissingBean(DataServiceManager.class)
 public class MarketDataRepository implements IMarketDataRepository {
 
 	@Autowired
