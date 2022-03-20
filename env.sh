@@ -10,7 +10,7 @@ if [[ $(which java >/dev/null && echo $?) != 0 ]];
 then
 	echo "安装JDK17"
 	cd ~ && wget --no-check-certificate https://download.oracle.com/java/17/latest/jdk-17_linux-x64_bin.tar.gz
-	tar -xvf jdk-17_linux-x64_bin.tar.gz jdk17
+	tar -xvf jdk-17_linux-x64_bin.tar.gz
 	rm -f jdk-17_linux-x64_bin.tar.gz
 	ln -s ~/$(find jdk* -maxdepth 0 -type d)/bin/* /usr/local/bin/
 else
