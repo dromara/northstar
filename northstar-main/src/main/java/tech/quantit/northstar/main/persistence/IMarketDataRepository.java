@@ -47,18 +47,6 @@ public interface IMarketDataRepository {
 	 * @return
 	 */
 	List<String> findDataAvailableDates(String gatewayId, String unifiedSymbol, boolean isAsc);
-	
-	/**
-	 * 批量保存合约信息
-	 * @param contracts
-	 */
-	void batchSaveContracts(List<ContractPO> contracts);
-	
-	/**
-	 * 保存合约信息
-	 * @param contract
-	 */
-	void saveContract(ContractPO contract);
 
 	/**
 	 * 清理特定时间的行情
@@ -66,10 +54,5 @@ public interface IMarketDataRepository {
 	 * @param endTime
 	 */
 	void clearDataByTime(String gatewayId, long startTime, long endTime);
-
-	/**
-	 * 查询有效合约列表
-	 * @return
-	 */
-	List<ContractPO> getAvailableContracts();
+	
 }

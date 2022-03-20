@@ -11,6 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Consumer;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -39,7 +40,7 @@ import tech.quantit.northstar.gateway.sim.trade.SimGatewayFactory;
 import tech.quantit.northstar.gateway.sim.trade.SimMarket;
 import tech.quantit.northstar.main.MarketDataCache;
 import tech.quantit.northstar.main.interceptor.AuthorizationInterceptor;
-import tech.quantit.northstar.main.persistence.IMarketDataRepository;
+import tech.quantit.northstar.main.persistence.IContractRepository;
 import tech.quantit.northstar.main.persistence.MongoClientAdapter;
 import tech.quantit.northstar.main.persistence.po.ContractPO;
 import xyz.redtorch.gateway.ctp.common.CtpSubscriptionManager;
@@ -123,7 +124,7 @@ public class AppConfig implements WebMvcConfigurer {
 	}
 	
 	@Bean
-	public GlobalMarketRegistry marketGlobalRegistry(FastEventEngine fastEventEngine, IMarketDataRepository mdRepo, List<SubscriptionManager> subMgrs,
+	public GlobalMarketRegistry marketGlobalRegistry(FastEventEngine fastEventEngine, IContractRepository contractRepo, List<SubscriptionManager> subMgrs,
 			MarketDataCache mdCache, ContractManager contractMgr) throws InvalidProtocolBufferException {
 		Consumer<NormalContract> handleContractSave = contract -> {
 			if(System.currentTimeMillis() - contract.updateTime() < 60000) {
@@ -142,7 +143,7 @@ public class AppConfig implements WebMvcConfigurer {
 						.isIndexContract(isIndexContract)
 						.monthlyContractSymbols(monthlyContractSymbols)
 						.build();
-				mdRepo.saveContract(po);
+				contractRepo.saveContract(po);
 			}
 		};
 		
@@ -152,7 +153,7 @@ public class AppConfig implements WebMvcConfigurer {
 			registry.register(subMgr);
 		}
 		//　加载已有合约
-		List<ContractPO> contractList = mdRepo.getAvailableContracts();
+		List<ContractPO> contractList = contractRepo.getAvailableContracts();
 		Map<String, ContractField> contractMap = new HashMap<>();
 		for(ContractPO po : contractList) {
 			ContractField contract = ContractField.parseFrom(po.getData());
