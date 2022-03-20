@@ -33,7 +33,7 @@
 ![输入图片说明](https://images.gitee.com/uploads/images/2022/0107/210113_21d2977f_1676852.jpeg "微信图片_20220107210039.jpg")
 
 ## 运行环境
-建议使用Linux云服务器
+建议使用Linux云服务器，或者Windows系统（MAC系统没有试过，需自行摸索）
 
 ## 程序架构
 - B/S架构
@@ -44,43 +44,23 @@
 - 前端采用nodejs + vue
 - 服务端采用java17（拥抱新技术） + springboot
 
-## 启动步骤
+## 启动步骤（Linux环境）
 假设当前环境是全新的服务器  
 
+### 环境准备
 初始化系统环境（只需要运行一次）
 ```
 curl https://gitee.com/dromara/northstar/raw/master/env.sh | sh
 ```
 
-初始化数据库（如果使用外部数据库的可以忽略）
-```
-curl -o mongo.repo https://gitee.com/dromara/northstar/raw/master/mongo.repo
-curl https://gitee.com/dromara/northstar/raw/master/mongo.sh | sh
-```
-安装成功后验证mongoDB 是否安装成功（如果使用外部数据库的可以忽略）
-```
-systemctl status mongod
-```
-如果成功的话，屏幕输出如下，注意第三行Active的状态是active(running)：
-```
-● mongod.service - MongoDB Database Server
-   Loaded: loaded (/usr/lib/systemd/system/mongod.service; enabled; vendor preset: disabled)
-   Active: active (running) since Sun 2021-06-27 17:30:14 CST; 56s ago
-     Docs: https://docs.mongodb.org/manual
-  Process: 5932 ExecStart=/usr/bin/mongod $OPTIONS (code=exited, status=0/SUCCESS)
-  Process: 5929 ExecStartPre=/usr/bin/chmod 0755 /var/run/mongodb (code=exited, status=0/SUCCESS)
-  Process: 5926 ExecStartPre=/usr/bin/chown mongod:mongod /var/run/mongodb (code=exited, status=0>
-  Process: 5923 ExecStartPre=/usr/bin/mkdir -p /var/run/mongodb (code=exited, status=0/SUCCESS)
- Main PID: 5934 (mongod)
-   Memory: 53.2M
-   CGroup: /system.slice/mongod.service
-           └─5934 /usr/bin/mongod -f /etc/mongod.conf
-
-```
-
-下载最新版项目，然后解压。**注意：把解压后的文件夹重命名为northstar**
+### 程序包准备
+下载最新版项目
 [https://gitee.com/dromara/northstar/releases](https://gitee.com/dromara/northstar/releases)
+```
+cd ~ && wget https://gitee.com/dromara/northstar/attach_files/1001250/download/northstar-main-3.4.jar
+```
 
+### 启动参数准备
 在.bashrc中加入启动参数（这样做能隐藏启动参数。若不用邮件通知与不修改默认的登陆账户密码可以不填）  
 ```
 vim ~/.bashrc
@@ -100,35 +80,23 @@ export EMAIL0=<订阅邮箱名>
 source ~/.bashrc
 ```
 
+### 启动程序
 部署程序（每次代码更新后运行），已包含northstar-monitor监控端的部署。
 ```
-cd ~/northstar
-bash deploy.sh
-```
-
-外部插件包部署(假设已经下载好)
-```
-cd ~/northstar-external
-bash deploy.sh
-```
-
-然后回到northstar目录启动程序
-```
-cd ~/northstar
-bash startup.sh
+curl https://gitee.com/dromara/northstar/raw/master/startup.sh | sh
 ```
 注意：startup.sh脚本中包括了JVM的启动参数，假定服务器配置是2核4G，如有不同应该按实际情况修改
 
-**验证部署**  
+### 部署验证
 在浏览器直接访问部署服务的域名（端口使用了默认的80端口）， 应该可以看到以下界面，并可以登陆成功  
 ![输入图片说明](https://images.gitee.com/uploads/images/2022/0103/205503_efb41f7c_1676852.png "login.PNG")
 
-查询日志
+### 查询日志
 ```
 cd ~/logs/
 ```
 
-终止程序
+### 终止程序
 ```
 kill `pgrep java`
 ```
