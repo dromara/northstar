@@ -81,11 +81,10 @@ source ~/.bashrc
 ```
 
 ### 启动程序
-部署程序（每次代码更新后运行），已包含northstar-monitor监控端的部署。
 ```
 curl https://gitee.com/dromara/northstar/raw/master/startup.sh | sh
 ```
-注意：startup.sh脚本中包括了JVM的启动参数，假定服务器配置是2核4G，如有不同应该按实际情况修改
+注意：startup.sh脚本中包括了JVM的启动参数，假定服务器配置是2核4G，如有不同应该按实际情况自定义启动脚本
 
 ### 部署验证
 在浏览器直接访问部署服务的域名（端口使用了默认的80端口）， 应该可以看到以下界面，并可以登陆成功  
