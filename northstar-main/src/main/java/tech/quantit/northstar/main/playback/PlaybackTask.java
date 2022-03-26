@@ -66,11 +66,11 @@ public class PlaybackTask {
 				for(MinBarDataPO po : data) {
 					BarField bar = BarField.parseFrom(po.getBarData());
 					barQ.offer(bar);
-					if(precision == PlaybackPrecision.TICK) {						
+					if(precision == PlaybackPrecision.TICK && !po.getTicksData().isEmpty()) {						
 						for(byte[] tickData : po.getTicksData()) {
 							tickQ.offer(TickField.parseFrom(tickData));
 						}
-					} else if (precision == PlaybackPrecision.BAR) {
+					} else if (precision == PlaybackPrecision.BAR && !po.getTicksData().isEmpty()) {
 						// 在回测模式为BAR模式时，TICK数据仅选取每分钟最后一个TICK，以免确保模拟计算时更准确
 						TickField firstTick = TickField.parseFrom(po.getTicksData().get(0));
 						TickField lastTick = TickField.parseFrom(po.getTicksData().get(po.getTicksData().size() - 1));
