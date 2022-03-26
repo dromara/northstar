@@ -75,8 +75,18 @@ public class MarketDataServiceAdapter implements IMarketDataRepository{
 	public List<String> findDataAvailableDates(String gatewayId, String unifiedSymbol, boolean isAsc) {
 		// 返回最近一年的数据
 		LocalDate today = LocalDate.now();
+		LocalDate endDate = today;
+		if(today.getDayOfWeek() == DayOfWeek.FRIDAY) {
+			endDate = today.plusDays(3);
+		}
+		if(today.getDayOfWeek() == DayOfWeek.SATURDAY) {
+			endDate = today.plusDays(2);
+		}
+		if(today.getDayOfWeek() == DayOfWeek.SUNDAY) {
+			endDate = today.plusDays(1);
+		}
 		LocalDate oneYearAgo = today.minusDays(365);
-		List<String> resultList = dsMgr.getTradeDates("SHFE", oneYearAgo, today);
+		List<String> resultList = dsMgr.getTradeDates("SHFE", oneYearAgo, endDate);
 		return isAsc ? resultList : Lists.reverse(resultList);
 	}
 
