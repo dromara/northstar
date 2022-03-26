@@ -22,7 +22,10 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
+
+import com.alibaba.fastjson.JSON;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -143,15 +146,20 @@ public class DataServiceManager implements IDataServiceManager {
 		HttpHeaders headers = new HttpHeaders();
 		headers.add("token", nsToken);
 		HttpEntity<?> reqEntity = new HttpEntity<>(headers);
-		ResponseEntity<DataSet> respEntity = rest.exchange(uri, HttpMethod.GET, reqEntity, DataSet.class);
-		DataSet dataSet = respEntity.getBody();
-		if(dataSet == null) {
-			throw new IllegalStateException("历史数据服务返回为空");
+		try {			
+			ResponseEntity<DataSet> respEntity = rest.exchange(uri, HttpMethod.GET, reqEntity, DataSet.class);
+			DataSet dataSet = respEntity.getBody();
+			if(dataSet == null) {
+				throw new IllegalStateException("历史数据服务返回为空");
+			}
+			if(respEntity.getStatusCode() != HttpStatus.OK) {
+				throw new IllegalStateException("历史数据服务返回异常：" + dataSet.getMessage());
+			}
+			return dataSet;
+		} catch(HttpClientErrorException e) {
+			DataSet errorResult = JSON.parseObject(e.getResponseBodyAsByteArray(), DataSet.class);
+			throw new IllegalStateException(errorResult.getMessage());
 		}
-		if(respEntity.getStatusCode() != HttpStatus.OK) {
-			throw new IllegalStateException("历史数据服务返回异常：" + dataSet.getMessage());
-		}
-		return dataSet;
 	}
 	
 	private List<BarField> convertDataSet(DataSet dataSet) {
