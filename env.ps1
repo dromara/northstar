@@ -109,6 +109,8 @@ $MavenDownloadUrl = "https://mirrors.bfsu.edu.cn/apache/maven/maven-3/3.6.3/bina
 #MongoDB下载地址
 $MongoDownloadUrl = "https://download.oracle.com/java/17/latest/jdk-17_windows-x64_bin.exe"
 
+
+
 "Start download JDK17..."
 #下载的文件名
 $FileName = "jdk-17_windows-x64_bin.exe"
