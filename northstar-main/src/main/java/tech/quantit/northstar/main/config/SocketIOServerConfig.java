@@ -1,10 +1,6 @@
 package tech.quantit.northstar.main.config;
 
-import java.net.Inet4Address;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
 import java.net.SocketException;
-import java.util.Enumeration;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.DisposableBean;
@@ -20,6 +16,7 @@ import com.corundumstudio.socketio.SocketIOServer;
 import com.corundumstudio.socketio.annotation.SpringAnnotationScanner;
 
 import lombok.extern.slf4j.Slf4j;
+import tech.quantit.northstar.main.utils.InetAddressUtils;
 
 @Slf4j
 @Configuration
@@ -41,7 +38,7 @@ public class SocketIOServerConfig implements DisposableBean, InitializingBean {
     }
 	
 	private SocketIOServer makeServer() throws SocketException {
-		String realHost = StringUtils.equals(host, "0.0.0.0") ? getInetAddress() : host;
+		String realHost = StringUtils.equals(host, "0.0.0.0") ? InetAddressUtils.getInet4Address() : host;
 		com.corundumstudio.socketio.Configuration config = new com.corundumstudio.socketio.Configuration();
         config.setHostname(realHost);
         config.setPort(port);
@@ -54,25 +51,6 @@ public class SocketIOServerConfig implements DisposableBean, InitializingBean {
         SocketIOServer server = new SocketIOServer(config);
         server.start();
         return server;
-	}
-	
-	private String getInetAddress() throws SocketException {
-		log.info("正在自动获取IP");
-		Enumeration<NetworkInterface> allNetworkInterfaces = NetworkInterface.getNetworkInterfaces();
-		while(allNetworkInterfaces.hasMoreElements()) {
-			NetworkInterface netIntf = allNetworkInterfaces.nextElement();
-			if(netIntf.isLoopback()||netIntf.isVirtual()||!netIntf.isUp()||netIntf.getDisplayName().contains("VM")){
-                continue;
-            }
-			Enumeration<InetAddress> inetAddrs = netIntf.getInetAddresses();
-			while(inetAddrs.hasMoreElements()) {
-				InetAddress inetAddr = inetAddrs.nextElement();
-				if(inetAddr instanceof Inet4Address inet4) {
-					return inet4.getHostAddress();
-				}
-			}
-		}
-		throw new SocketException("没有找到IPv4的IP信息");
 	}
 	
 	@Bean
