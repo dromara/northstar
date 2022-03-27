@@ -122,10 +122,8 @@ export default {
     },
     async findAll() {
       this.list = await moduleApi.getAllModules()
-      console.log(this.list)
     },
     async toggle(index, row) {
-      console.log(index, row)
       this.$confirm(
         `是否确定切换模组启停状态？当前状态为［${row.enabled ? '启用' : '停用'}]`,
         '提示',
