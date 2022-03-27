@@ -50,9 +50,7 @@ public class LoginViewTest {
 	@Order(30)
 	@Test
 	void shouldLoginWithCorrectNameAndPassword() {
-		view.setUsername("admin");
-		view.setPassword("123456");
-		view.submit();
+		view.login("admin", "123456");
 		
 		verify(urlListener, times(1)).onChange(anyString());
 		verify(errListener, times(0)).onError(anyString());
@@ -63,19 +61,15 @@ public class LoginViewTest {
 	@Test
 	void getErrorPromptIfWrongAccountOrPassword() {
 		/* 情况1：什么都不输入 */
-		view.submit();
+		view.login("", "");
 		verify(errListener, times(1)).onError(anyString());
 		
 		/* 情况2：输入错误用户名 */
-		view.setUsername("admins");
-		view.setPassword("123456");
-		view.submit();
+		view.login("admins", "123456");
 		verify(errListener, times(2)).onError(anyString());
 		
 		/* 情况3：输入错误密码 */
-		view.setUsername("admin");
-		view.setPassword("987654");
-		view.submit();
+		view.login("admin", "987654");
 		verify(errListener, times(3)).onError(anyString());
 	}
 	

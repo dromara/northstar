@@ -39,20 +39,19 @@ public class LoginView {
 		this.btnSubmit = webDriver.findElement(By.tagName("button"));
 	}
 
-	
 	public String getTitle() {
 		return webDriver.getTitle();
 	}
 	
-	public void setUsername(String username) {
+	private void setUsername(String username) {
 		inputUsername.sendKeys(username);
 	}
 	
-	public void setPassword(String password) {
+	private void setPassword(String password) {
 		inputPassword.sendKeys(password);
 	}
 	
-	public void submit() {
+	private void submit() {
 		String urlBefore = webDriver.getCurrentUrl();
 		btnSubmit.click();
 		
@@ -67,6 +66,12 @@ public class LoginView {
 		if(!urlBefore.equals(urlAfter)) {
 			urlListener.onChange(urlAfter);
 		}
+	}
+	
+	public void login(String username, String password) {
+		setUsername(username);
+		setPassword(password);
+		submit();
 	}
 	
 }
