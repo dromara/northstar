@@ -9,6 +9,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.dao.DuplicateKeyException;
 
 import com.alibaba.fastjson.JSON;
 
@@ -84,7 +85,11 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 			throw new IllegalArgumentException("网关设置不能为空");
 		}
 		po.setSettings(CodecUtils.encrypt(JSON.toJSONString(gatewayDescription.getSettings())));
-		gatewayRepo.insert(po);
+		try {			
+			gatewayRepo.insert(po);
+		} catch(DuplicateKeyException e) {
+			throw new IllegalStateException("已存在同名网关，不能重复创建", e);
+		}
 		if(gatewayDescription.getGatewayUsage() == GatewayUsage.MARKET_DATA) {
 			mdRepo.init(gatewayDescription.getGatewayId());
 		}

@@ -239,7 +239,6 @@ export default {
         this.updateList()
         return
       }
-      this.tableData.push(obj)
       await gatewayMgmtApi.create(obj)
       this.updateList()
     },
