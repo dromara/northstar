@@ -1,5 +1,6 @@
 <template>
   <el-dialog
+    id="simForm"
     width="500px"
     title="SIM模拟网关配置"
     :visible="visible"
@@ -25,7 +26,7 @@
     </el-form>
     <div slot="footer" class="dialog-footer">
       <el-button @click="() => $emit('update:visible', false)">取 消</el-button>
-      <el-button type="primary" @click="saveSetting">保 存</el-button>
+      <el-button id="saveSimForm" type="primary" @click="saveSetting">保 存</el-button>
     </div>
   </el-dialog>
 </template>

@@ -59,3 +59,12 @@ spring:
   data:
     mongodb:
       uri: mongodb://127.0.0.1:27017/TEST_NS_DB  config:    activate:      on-profile: test
+      
+---
+spring:
+  data:
+    mongodb:
+      uri: mongodb://127.0.0.1:27017/TEST_NS_DB
+  config:
+    activate:
+      on-profile: e2e

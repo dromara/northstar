@@ -1,5 +1,6 @@
 <template>
   <el-dialog
+    id="ctpForm"
     width="700px"
     title="CTP网关配置"
     :visible.sync="dialogVisible"
@@ -33,7 +34,7 @@
         </el-col>
         <el-col :span="8">
           <el-form-item label="期货公司" prop="brokerId">
-            <el-select v-model="ctpSettings.brokerId" placeholder="请选择">
+            <el-select id="brokerOptions" v-model="ctpSettings.brokerId" placeholder="请选择">
               <el-option
                 v-for="item in brokerOptions"
                 :key="item.value"
@@ -48,7 +49,7 @@
     </el-form>
     <div slot="footer" class="dialog-footer">
       <el-button @click="close">取 消</el-button>
-      <el-button type="primary" @click="saveCtpSetting">保 存</el-button>
+      <el-button id="saveCtpForm" type="primary" @click="saveCtpSetting">保 存</el-button>
     </div>
   </el-dialog>
 </template>
