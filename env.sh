@@ -36,7 +36,7 @@ fi
 if [[ $(systemctl status mongod | grep active | wc -l) == 0 ]];
 then
 	echo "安装MongoDB"
-	curl mongo.repo https://gitee.com/dromara/northstar/raw/master/mongo.repo >/etc/yum.repos.d/mongodb-org-4.0.repo
+	curl https://gitee.com/dromara/northstar/raw/master/mongo.repo >/etc/yum.repos.d/mongodb-org-4.0.repo
 	yum install -y mongodb-org
 	systemctl start mongod
 else
