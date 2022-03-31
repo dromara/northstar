@@ -45,7 +45,7 @@
               :disabled="isUpdateMode"
             >
               <el-option label="CTP" value="CTP"></el-option>
-              <!-- <el-option label="CTP_SIM" value="CTP_SIM"></el-option> -->
+              <el-option v-if="$route.query.superuser" label="CTP_SIM" value="CTP_SIM"></el-option>
               <el-option label="SIM" value="SIM"></el-option>
               <!-- <el-option label="IB网关" value="beijing"></el-option> -->
             </el-select>
