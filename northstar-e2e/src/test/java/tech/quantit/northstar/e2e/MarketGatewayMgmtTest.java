@@ -124,6 +124,8 @@ public class MarketGatewayMgmtTest {
 		verify(errListener, times(0)).onError(anyString());
 	}
 	
-	/* 异常用例：仍有账户网关绑定时，删除行情网关失败 */
+	/* 正常用例：修改CTP账户网关成功（略） */
+	
+	/* 异常用例：仍有账户网关绑定时，删除行情网关失败（略） */
 	
 }
