@@ -14,8 +14,8 @@
         <el-menu-item index="2">账户管理</el-menu-item>
         <el-menu-item index="3">投机模组管理</el-menu-item>
         <el-menu-item index="4">套利模组管理</el-menu-item>
-        <el-menu-item index="5">手工期货交易</el-menu-item>
-        <el-menu-item index="6">历史行情</el-menu-item>
+        <el-menu-item index="5">历史行情</el-menu-item>
+        <el-menu-item index="6">手工期货交易</el-menu-item>
         <el-menu-item index="7">手工期权交易</el-menu-item>
       </el-menu>
     </div>
@@ -33,8 +33,8 @@ const pageOpts = {
         "2": 'tdgateway',
         "3": 'specmodule',
         "4": 'arbitmodule',
-        "5": 'manualfttd',
-        "6": 'mktdata',
+        "5": 'mktdata',
+        "6": 'manualfttd',
         "7": 'manualopttd'
       }
 
