@@ -18,23 +18,47 @@ const routes = [
   {
     path: '/workspace',
     name: 'workspace',
-    component: () => import('../views/Workspace.vue')
+    component: () => import('../views/Workspace.vue'),
+    children: [
+      {
+        path: '/mktgateway',
+        name: 'mktgateway',
+        props: { gatewayUsage: 'MARKET_DATA' },
+        component: () => import('../views/GatewayMgmt.vue')
+      },
+      {
+        path: '/tdgateway',
+        name: 'tdgateway',
+        props: { gatewayUsage: 'TRADE' },
+        component: () => import('../views/GatewayMgmt.vue')
+      },
+      {
+        path: '/specmodule',
+        name: 'specmodule',
+        component: () => import('../views/ModuleMgmt.vue')
+      },
+      {
+        path: '/arbitmodule',
+        name: 'arbitmodule',
+        component: () => import('../views/NotImplemented.vue')
+      },
+      {
+        path: '/manualfttd',
+        name: 'manualfttd',
+        component: () => import('../views/Trade.vue')
+      },
+      {
+        path: '/mktdata',
+        name: 'mktdata',
+        component: () => import('../views/MarketData.vue')
+      },
+      {
+        path: '/manualopttd',
+        name: 'manualopttd',
+        component: () => import('../views/NotImplemented.vue')
+      },
+    ]
   },
-  {
-    path: '/mktdata',
-    name: 'marketData',
-    component: () => import('../views/MarketData.vue')
-  },
-  {
-    path: '/trade',
-    name: 'trade',
-    component: () => import('../views/Trade.vue')
-  },
-  {
-    path: '/gateway',
-    name: 'gateway',
-    component: () => import('../views/GatewayMgmt.vue')
-  }
 ]
 
 const router = new VueRouter({
@@ -47,7 +71,6 @@ router.beforeEach(async (to, from, next) => {
     return
   }
   try {
-    console.log('test auth')
     await loginApi.test()
     next()
   } catch (e) {

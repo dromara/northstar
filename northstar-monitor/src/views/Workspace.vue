@@ -12,58 +12,52 @@
       >
         <el-menu-item index="1">网关管理</el-menu-item>
         <el-menu-item index="2">账户管理</el-menu-item>
-        <el-menu-item index="3">策略模组管理</el-menu-item>
-        <el-menu-item index="4">手工交易</el-menu-item>
+        <el-menu-item index="3">投机模组管理</el-menu-item>
+        <el-menu-item index="4">套利模组管理</el-menu-item>
+        <el-menu-item index="5">手工期货交易</el-menu-item>
+        <el-menu-item index="6">历史行情</el-menu-item>
+        <el-menu-item index="7">手工期权交易</el-menu-item>
       </el-menu>
     </div>
     <div class="ns-body">
-      <GatewayManagement
-        v-if="curPage === '1'"
-        :gatewayUsage="'MARKET_DATA'"
-        :key="1"
-      />
-      <GatewayManagement
-        v-if="curPage === '2'"
-        :gatewayUsage="'TRADE'"
-        :key="2"
-      />
-      <ModuleManagement v-if="curPage === '3'" :key="3" />
-      <div class="ns-trmkt-wrapper" v-if="curPage === '4'" :key="4">
-        <Trade />
-        <MarketData />
-      </div>
+      <router-view></router-view>
     </div>
     <socket-connection />
   </div>
 </template>
 
 <script>
-import GatewayManagement from './GatewayMgmt'
-import ModuleManagement from './ModuleMgmt'
-import SocketConnection from '../components/SocketConnection'
-import MarketData from './MarketData'
-import Trade from './Trade'
-import dataSyncApi from '../api/dataSyncApi'
+
+const pageOpts = {
+        "1": 'mktgateway',
+        "2": 'tdgateway',
+        "3": 'specmodule',
+        "4": 'arbitmodule',
+        "5": 'manualfttd',
+        "6": 'mktdata',
+        "7": 'manualopttd'
+      }
 
 export default {
-  components: {
-    GatewayManagement,
-    ModuleManagement,
-    SocketConnection,
-    MarketData,
-    Trade
-  },
-  data() {
+  data(){
     return {
-      curPage: '1'
+      curPage: "0"
     }
   },
-  created() {
-    dataSyncApi.dataSync()
+  mounted(){
+    if(this.$route.name === 'mktgateway'){
+      this.curPage = '1'
+      return 
+    }
+    this.handleSelect("1")
   },
   methods: {
     handleSelect(index) {
+      if(index === this.curPage){
+        return
+      }
       this.curPage = index
+      this.$router.push({name: pageOpts[index]})
     }
   }
 }

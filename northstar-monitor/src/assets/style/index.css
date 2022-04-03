@@ -25,3 +25,14 @@
 .pb-20{
   padding-bottom: 20px;
 }
+
+.flex{
+  display: flex;
+}
+
+.align-center{
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+}

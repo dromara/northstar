@@ -196,14 +196,20 @@ export default {
   mounted() {
     console.log('GatewayManagement created. Usage:' + this.gatewayUsage)
     const timelyUpdate = () => {
-      timer = setTimeout(timelyUpdate, 5000)
       this.updateList().catch(() => clearTimeout(timer))
+      timer = setTimeout(timelyUpdate, 5000)
     }
     timelyUpdate()
   },
   computed: {
     typeLabel() {
       return this.gatewayUsage === 'TRADE' ? '账户' : '网关'
+    }
+  },
+  watch:{
+    gatewayUsage: function(){
+      this.tableData = []
+      this.updateList()
     }
   },
   methods: {
