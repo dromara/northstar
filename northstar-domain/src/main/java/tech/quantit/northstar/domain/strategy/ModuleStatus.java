@@ -17,6 +17,7 @@ import xyz.redtorch.pb.CoreField.TradeField;
  * @author KevinHuangwl
  *
  */
+@Deprecated
 public class ModuleStatus {
 
 	@Getter

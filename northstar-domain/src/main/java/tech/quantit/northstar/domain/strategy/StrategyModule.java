@@ -37,6 +37,7 @@ import xyz.redtorch.pb.CoreField.TradeField;
  * @author KevinHuangwl
  *
  */
+@Deprecated
 public class StrategyModule implements EventDrivenComponent{
 	
 	protected EventBus meb;

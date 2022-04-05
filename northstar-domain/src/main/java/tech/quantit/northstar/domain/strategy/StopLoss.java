@@ -10,6 +10,7 @@ import xyz.redtorch.pb.CoreField.TickField;
  * @author KevinHuangwl
  *
  */
+@Deprecated
 @NoArgsConstructor
 @Data
 public class StopLoss {

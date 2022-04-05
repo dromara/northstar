@@ -40,6 +40,7 @@ import xyz.redtorch.pb.CoreField.TradeField;
  * @author KevinHuangwl
  *
  */
+@Deprecated
 @Builder
 public class ModulePosition implements TickDataAware, EventDrivenComponent{
 	
