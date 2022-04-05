@@ -7,9 +7,9 @@ import org.slf4j.Logger;
 import com.google.common.eventbus.EventBus;
 
 import tech.quantit.northstar.common.IMailSender;
+import tech.quantit.northstar.common.constant.ModuleState;
 import tech.quantit.northstar.common.model.Message;
 import tech.quantit.northstar.common.utils.FieldUtils;
-import tech.quantit.northstar.strategy.api.constant.ModuleState;
 import tech.quantit.northstar.strategy.api.constant.PriceType;
 import tech.quantit.northstar.strategy.api.event.ModuleEvent;
 import tech.quantit.northstar.strategy.api.event.ModuleEventType;

@@ -1,4 +1,4 @@
-package tech.quantit.northstar.strategy.api.constant;
+package tech.quantit.northstar.common.constant;
 
 /**
  * 策略模组状态

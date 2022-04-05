@@ -7,8 +7,8 @@ import org.slf4j.Logger;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import tech.quantit.northstar.common.constant.ModuleState;
 import tech.quantit.northstar.strategy.api.StateChangeListener;
-import tech.quantit.northstar.strategy.api.constant.ModuleState;
 import tech.quantit.northstar.strategy.api.event.ModuleEventType;
 import tech.quantit.northstar.strategy.api.log.NorthstarLoggerFactory;
 

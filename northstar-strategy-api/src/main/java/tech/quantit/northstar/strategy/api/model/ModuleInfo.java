@@ -9,7 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import tech.quantit.northstar.strategy.api.constant.ModuleType;
+import tech.quantit.northstar.common.constant.ModuleType;
 
 @Builder
 @NoArgsConstructor

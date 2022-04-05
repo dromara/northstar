@@ -5,8 +5,8 @@ import org.slf4j.Logger;
 import com.google.common.eventbus.EventBus;
 
 import lombok.Getter;
+import tech.quantit.northstar.common.constant.ModuleState;
 import tech.quantit.northstar.common.utils.FieldUtils;
-import tech.quantit.northstar.strategy.api.constant.ModuleState;
 import tech.quantit.northstar.strategy.api.log.NorthstarLoggerFactory;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TradeField;

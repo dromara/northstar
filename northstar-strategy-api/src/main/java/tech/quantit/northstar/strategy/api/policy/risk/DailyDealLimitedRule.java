@@ -1,10 +1,10 @@
 package tech.quantit.northstar.strategy.api.policy.risk;
 
+import tech.quantit.northstar.common.constant.ModuleState;
 import tech.quantit.northstar.strategy.api.RiskControlRule;
 import tech.quantit.northstar.strategy.api.StateChangeListener;
 import tech.quantit.northstar.strategy.api.annotation.Setting;
 import tech.quantit.northstar.strategy.api.annotation.StrategicComponent;
-import tech.quantit.northstar.strategy.api.constant.ModuleState;
 import tech.quantit.northstar.strategy.api.constant.RiskAuditResult;
 import tech.quantit.northstar.strategy.api.model.DynamicParams;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;

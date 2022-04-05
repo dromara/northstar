@@ -6,7 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import tech.quantit.northstar.strategy.api.constant.ModuleState;
+import tech.quantit.northstar.common.constant.ModuleState;
 
 @Builder
 @AllArgsConstructor

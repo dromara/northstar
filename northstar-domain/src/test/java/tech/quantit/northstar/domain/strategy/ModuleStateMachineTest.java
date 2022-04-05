@@ -6,8 +6,8 @@ import static org.mockito.Mockito.mock;
 
 import org.junit.jupiter.api.Test;
 
+import tech.quantit.northstar.common.constant.ModuleState;
 import tech.quantit.northstar.strategy.api.StateChangeListener;
-import tech.quantit.northstar.strategy.api.constant.ModuleState;
 import tech.quantit.northstar.strategy.api.event.ModuleEventType;
 
 public class ModuleStateMachineTest {
@@ -62,7 +62,7 @@ public class ModuleStateMachineTest {
 		state.transformForm(ModuleEventType.ORDER_CONFIRMED);
 		assertThat(state.getCurState()).isEqualTo(ModuleState.PENDING_ORDER);
 		state.transformForm(ModuleEventType.REJECT_RISK_ALERTED);
-		assertThat(state.getCurState()).isEqualTo(ModuleState.RETRIEVING_FOR_CANCAL);
+		assertThat(state.getCurState()).isEqualTo(ModuleState.RETRIEVING_FOR_CANCEL);
 		state.transformForm(ModuleEventType.ORDER_CANCELLED);
 		assertThat(state.getCurState()).isEqualTo(ModuleState.EMPTY);
 		
@@ -126,7 +126,7 @@ public class ModuleStateMachineTest {
 		state.transformForm(ModuleEventType.ORDER_CONFIRMED);
 		assertThat(state.getCurState()).isEqualTo(ModuleState.PENDING_ORDER);
 		state.transformForm(ModuleEventType.REJECT_RISK_ALERTED);
-		assertThat(state.getCurState()).isEqualTo(ModuleState.RETRIEVING_FOR_CANCAL);
+		assertThat(state.getCurState()).isEqualTo(ModuleState.RETRIEVING_FOR_CANCEL);
 		state.transformForm(ModuleEventType.ORDER_CANCELLED);
 		assertThat(state.getCurState()).isEqualTo(ModuleState.HOLDING_SHORT);
 		
@@ -155,7 +155,7 @@ public class ModuleStateMachineTest {
 		state.transformForm(ModuleEventType.ORDER_CONFIRMED);
 		assertThat(state.getCurState()).isEqualTo(ModuleState.PENDING_ORDER);
 		state.transformForm(ModuleEventType.REJECT_RISK_ALERTED);
-		assertThat(state.getCurState()).isEqualTo(ModuleState.RETRIEVING_FOR_CANCAL);
+		assertThat(state.getCurState()).isEqualTo(ModuleState.RETRIEVING_FOR_CANCEL);
 		state.transformForm(ModuleEventType.ORDER_CANCELLED);
 		assertThat(state.getCurState()).isEqualTo(ModuleState.HOLDING_LONG);
 		

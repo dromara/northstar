@@ -1,10 +1,10 @@
-package tech.quantit.northstar.strategy.api.constant;
+package tech.quantit.northstar.common.constant;
 
 public enum ModuleType {
 	/**
-	 * 趋势类
+	 * 投机
 	 */
-	CTA, 
+	SPECULATION, 
 	/**
 	 * 套利类
 	 */

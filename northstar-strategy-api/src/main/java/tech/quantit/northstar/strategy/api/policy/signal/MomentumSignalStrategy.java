@@ -4,11 +4,11 @@ import java.time.LocalTime;
 import java.util.stream.Stream;
 
 import lombok.extern.slf4j.Slf4j;
+import tech.quantit.northstar.common.constant.ModuleState;
 import tech.quantit.northstar.strategy.api.AbstractSignalPolicy;
 import tech.quantit.northstar.strategy.api.SignalPolicy;
 import tech.quantit.northstar.strategy.api.annotation.Setting;
 import tech.quantit.northstar.strategy.api.annotation.StrategicComponent;
-import tech.quantit.northstar.strategy.api.constant.ModuleState;
 import tech.quantit.northstar.strategy.api.constant.SignalOperation;
 import tech.quantit.northstar.strategy.api.model.DynamicParams;
 import tech.quantit.northstar.strategy.api.model.Signal;

@@ -13,13 +13,13 @@ import java.util.function.Consumer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import tech.quantit.northstar.common.constant.ModuleState;
 import tech.quantit.northstar.common.event.NorthstarEvent;
 import tech.quantit.northstar.common.event.NorthstarEventType;
 import tech.quantit.northstar.gateway.api.TradeGateway;
 import tech.quantit.northstar.strategy.api.DealerPolicy;
 import tech.quantit.northstar.strategy.api.EventDrivenComponent;
 import tech.quantit.northstar.strategy.api.SignalPolicy;
-import tech.quantit.northstar.strategy.api.constant.ModuleState;
 import tech.quantit.northstar.strategy.api.event.ModuleEvent;
 import tech.quantit.northstar.strategy.api.event.ModuleEventBus;
 import tech.quantit.northstar.strategy.api.event.ModuleEventType;
