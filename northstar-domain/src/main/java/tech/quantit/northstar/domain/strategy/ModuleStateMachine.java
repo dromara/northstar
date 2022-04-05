@@ -92,7 +92,6 @@ public class ModuleStateMachine {
 			if(curState != ModuleState.PENDING_ORDER) {
 				throw new IllegalStateException(ERR_MSG + curState);
 			}
-			setState(ModuleState.RETRIEVING_FOR_CANCAL);
 			break;
 		case ORDER_CANCELLED:
 			if(!curState.isOrdering()) {
