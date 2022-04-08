@@ -13,6 +13,7 @@ import tech.quantit.northstar.common.event.NorthstarEventType;
  * @author KevinHuangwl
  *
  */
+@Deprecated
 public class ModuleManager extends AbstractEventHandler{
 
 	/**
