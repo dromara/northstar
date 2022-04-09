@@ -99,7 +99,7 @@ public class TradeModule implements Module {
 		ModulePositionDescription posDescription = ModulePositionDescription.builder()
 				.logicalPosition(accStore.getLogicalPosition())
 				.logicalPositionProfit(accStore.getLogicalPositionProfit())
-				.uncloseTrade(accStore.getUncloseTrade().stream().map(TradeField::toByteArray).toList())
+				.uncloseTrades(accStore.getUncloseTrade().stream().map(TradeField::toByteArray).toList())
 				.build();
 		
 		return ModuleDescription.builder()

@@ -5,6 +5,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * 模组账户信息
+ * @author KevinHuangwl
+ *
+ */
 @Data
 @Builder
 @NoArgsConstructor

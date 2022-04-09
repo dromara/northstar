@@ -6,6 +6,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import tech.quantit.northstar.common.constant.ModuleState;
 
+/**
+ * 模组信息
+ * @author KevinHuangwl
+ *
+ */
 @Data
 @Builder
 @NoArgsConstructor
