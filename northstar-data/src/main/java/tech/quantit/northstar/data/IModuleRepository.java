@@ -55,7 +55,7 @@ public interface IModuleRepository {
 	 * 保存模组成交记录
 	 * @param record
 	 */
-	void saveTradeRecord(ModuleTradeRecord record);
+	void saveTradeRecord(ModuleTradeRecord tradeRecord);
 	/**
 	 * 查询模组全部成交记录
 	 * @param moduleName
@@ -71,7 +71,7 @@ public interface IModuleRepository {
 	 * 保存模组交易记录
 	 * @param record
 	 */
-	void saveDealRecord(ModuleDealRecord record);
+	void saveDealRecord(ModuleDealRecord dealRecord);
 	/**
 	 * 查询模组全部交易记录
 	 * @param moduleName
