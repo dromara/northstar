@@ -37,6 +37,7 @@ class ContractRepoRedisImplTest {
 	ContractField c1 = ContractField.newBuilder()
 			.setUnifiedSymbol("rb2205@SHFE@FUTURES")
 			.setSymbol("rb2205")
+			.setLastTradeDateOrContractMonth("20590101")
 			.setProductClass(ProductClassEnum.FUTURES)
 			.build();
 	
@@ -44,6 +45,13 @@ class ContractRepoRedisImplTest {
 			.setUnifiedSymbol("rb2205-C4000@SHFE@FUTURES")
 			.setSymbol("rb2205-C4000")
 			.setProductClass(ProductClassEnum.OPTION)
+			.build();
+	
+	ContractField c3 = ContractField.newBuilder()
+			.setUnifiedSymbol("rb2105@SHFE@FUTURES")
+			.setSymbol("rb2105")
+			.setProductClass(ProductClassEnum.FUTURES)
+			.setLastTradeDateOrContractMonth("20210515")
 			.build();
 	
 	@BeforeAll
@@ -81,14 +89,21 @@ class ContractRepoRedisImplTest {
 		repo.batchSave(List.of(c1,c2));
 		
 		List<ContractField> list = repo.findAllByType(ProductClassEnum.FUTURES);
-		assertThat(list).hasSize(1);
-		assertThat(list.get(0)).isEqualTo(c1);
+		assertThat(list).hasSize(1).contains(c1);
 	}
 	
 	@Test
 	void shouldOnlyCreateOnce() {
 		repo.save(c1);
 		repo.save(c1);
+		List<ContractField> list = repo.findAllByType(ProductClassEnum.FUTURES);
+		assertThat(list).hasSize(1).contains(c1);
+	}
+	
+	@Test
+	void shouldFilterExpiredContract() {
+		repo.save(c1);
+		repo.save(c3);
 		List<ContractField> list = repo.findAllByType(ProductClassEnum.FUTURES);
 		assertThat(list).hasSize(1);
 		assertThat(list.get(0)).isEqualTo(c1);

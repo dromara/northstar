@@ -1,17 +1,20 @@
 package tech.quantit.northstar.data.redis;
 
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.redis.core.BoundSetOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 
 import lombok.extern.slf4j.Slf4j;
+import tech.quantit.northstar.common.constant.DateTimeConstant;
 import tech.quantit.northstar.data.IContractRepository;
 import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
@@ -55,8 +58,12 @@ public class ContractRepoRedisImpl implements IContractRepository {
 				.orElse(EMPTY_SET)
 				.stream()
 				.map(this::convertObject)
-				.filter(Objects::nonNull)
+				.filter(item -> Objects.nonNull(item) && nonExpired(item.getLastTradeDateOrContractMonth()))
 				.toList();
+	}
+	
+	private boolean nonExpired(String expiredDate) {
+		return StringUtils.isNotBlank(expiredDate) && LocalDate.parse(expiredDate, DateTimeConstant.D_FORMAT_INT_FORMATTER).isAfter(LocalDate.now());
 	}
 	
 	private ContractField convertObject(byte[] data) {
