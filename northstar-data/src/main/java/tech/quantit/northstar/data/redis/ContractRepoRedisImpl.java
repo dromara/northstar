@@ -1,11 +1,12 @@
 package tech.quantit.northstar.data.redis;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
-import org.springframework.data.redis.core.BoundListOperations;
+import org.springframework.data.redis.core.BoundSetOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -27,7 +28,7 @@ public class ContractRepoRedisImpl implements IContractRepository {
 	
 	private static final String PREFIX = "contract:";
 	
-	private static final List<byte[]> EMPTY_LIST = new ArrayList<>(0);
+	private static final Set<byte[]> EMPTY_SET = new HashSet<>(0);
 	
 	public ContractRepoRedisImpl(RedisTemplate<String, byte[]> redisTemplate) {
 		this.redisTemplate = redisTemplate;
@@ -43,15 +44,15 @@ public class ContractRepoRedisImpl implements IContractRepository {
 	@Override
 	public void save(ContractField contract) {
 		String key = PREFIX + contract.getProductClass();
-		redisTemplate.boundListOps(key).rightPush(contract.toByteArray());
+		redisTemplate.boundSetOps(key).add(contract.toByteArray());
 	}
 
 	@Override
 	public List<ContractField> findAllByType(ProductClassEnum type) {
 		String key = PREFIX + type;
-		BoundListOperations<String, byte[]> opt = redisTemplate.boundListOps(key);
-		return Optional.ofNullable(opt.range(0, opt.size()))
-				.orElse(EMPTY_LIST)
+		BoundSetOperations<String, byte[]> opt = redisTemplate.boundSetOps(key);
+		return Optional.ofNullable(opt.members())
+				.orElse(EMPTY_SET)
 				.stream()
 				.map(this::convertObject)
 				.filter(Objects::nonNull)

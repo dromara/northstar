@@ -84,5 +84,14 @@ class ContractRepoRedisImplTest {
 		assertThat(list).hasSize(1);
 		assertThat(list.get(0)).isEqualTo(c1);
 	}
+	
+	@Test
+	void shouldOnlyCreateOnce() {
+		repo.save(c1);
+		repo.save(c1);
+		List<ContractField> list = repo.findAllByType(ProductClassEnum.FUTURES);
+		assertThat(list).hasSize(1);
+		assertThat(list.get(0)).isEqualTo(c1);
+	}
 
 }
