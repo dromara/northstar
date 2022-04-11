@@ -11,7 +11,6 @@
 	<artifactId>northstar-gateway-sim</artifactId>
 
 	<name>northstar-gateway-sim</name>
-	<description>北极星程序化交易平台模拟网关</description>
 
 	<properties>
 	</properties>

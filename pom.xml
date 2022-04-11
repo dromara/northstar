@@ -8,7 +8,7 @@
 	<version>3.5</version>
 	<name>northstar</name>
 	<packaging>pom</packaging>
-	<description>北极星程序化交易平台</description>
+	<description>智盈程序化交易平台</description>
 
 	<properties>
 		<java.version>17</java.version>
@@ -43,9 +43,11 @@
 	<modules>
 		<module>northstar-monitor</module>
 		<module>northstar-common</module>
+		<module>northstar-data</module>
 		<module>northstar-gateway-api</module>
 		<module>northstar-gateway-ctp</module>
 		<module>northstar-gateway-sim</module>
+		<module>northstar-gateway-playback</module>
 		<module>northstar-domain</module>
 		<module>northstar-strategy-api</module>
 		<module>northstar-main</module>
@@ -69,6 +71,11 @@
 			</dependency>
 			<dependency>
 				<groupId>tech.quantit</groupId>
+				<artifactId>northstar-data</artifactId>
+				<version>${northstar-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>tech.quantit</groupId>
 				<artifactId>northstar-strategy-api</artifactId>
 				<version>${northstar-version}</version>
 			</dependency>
@@ -85,6 +92,11 @@
 			<dependency>
 				<groupId>tech.quantit</groupId>
 				<artifactId>northstar-gateway-sim</artifactId>
+				<version>${northstar-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>tech.quantit</groupId>
+				<artifactId>northstar-gateway-playback</artifactId>
 				<version>${northstar-version}</version>
 			</dependency>
 			<dependency>
