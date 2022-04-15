@@ -20,7 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class SimAccountRepoMongoImplTest {
 
-	MongoTemplate mongoTemplate = new MongoTemplate(MongoClients.create("mongodb://10.11.216.32:27017"), "TEST_NS_DB");
+	MongoTemplate mongoTemplate = new MongoTemplate(MongoClients.create("mongodb://localhost:27017"), "TEST_NS_DB");
 
 	ISimAccountRepository repo = new SimAccountRepoMongoImpl(mongoTemplate);
 
