@@ -33,7 +33,7 @@ function downloadAndInstallMSI([string] $url, [string] $destPath, [string] $file
 	"Start download $fileName"
 	Invoke-WebRequest -Uri $url -OutFile "$destPath$fileName"
 	"Start install $fileName"
-	msiexec.exe /log "log_$fileName" /i "$destPath$fileName" /qr $args
+	msiexec.exe /log "$fileName.log" /i "$destPath$fileName" /qr $args
 	"$fileName installed"
 }
 
