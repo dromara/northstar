@@ -57,7 +57,7 @@ curl https://gitee.com/dromara/northstar/raw/master/env.sh | sh
 下载最新版项目
 [https://gitee.com/dromara/northstar/releases](https://gitee.com/dromara/northstar/releases)
 ```
-cd ~ && wget https://gitee.com/dromara/northstar/attach_files/1001250/download/northstar-main-3.4.jar
+cd ~ && wget https://gitee.com/dromara/northstar/attach_files/1008262/download/northstar-3.5.jar
 ```
 
 ### 启动参数准备
@@ -100,6 +100,17 @@ cd ~/logs/
 ```
 kill `pgrep java`
 ```
+
+## 开发环境配置（Windows环境）
+大多数用户开发时都是使用windows环境
+
+### 环境准备
+初始化系统环境（只需要运行一次），打开powershell命令行窗口
+```
+Invoke-WebRequest https://gitee.com/dromara/northstar/raw/master/env.ps1 -OutFile env.ps1; powershell -noexit "env.ps1"
+```
+
+### 
 
 ## 注意事项
 - 请勿直接使用master分支的最新代码，应该使用最新的tag来作为开发基线
