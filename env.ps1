@@ -5,6 +5,8 @@
 Add-Type -AssemblyName System.IO
 Add-Type -AssemblyName System.IO.Compression
 Add-Type -AssemblyName System.IO.Compression.FileSystem
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+
 #下载到northstar_env目录，如无该目录则创建
 $BasePath = "c:\\northstar_env\"
 If(!(test-path $BasePath))
@@ -49,11 +51,6 @@ function getInstallPath([string] $basePath, [string] $pattern){
 	return $path.fullName
 }
 
-#设置环境变量
-function setEnvPath([string] $key, [string] $val){
-	[Environment]::SetEnvironmentVariable($key, $val, 'User')
-}
-
 #JDK17环境安装
 If(checkExist java.exe 17*){
     "JDK17 installed"
@@ -61,8 +58,8 @@ If(checkExist java.exe 17*){
 	downloadAndInstallMSI $JDK17DownloadUrl $BasePath jdk-17_windows-x64_bin.msi
 	$programPath = "C:\Program Files\Java"
 	$jdkPath = getInstallPath $programPath jdk-17*
-	$path = "$jdkPath\bin;" + [Environment]::getEnvironmentVariable("Path")
-	setEnvPath Path $path
+	$path = "$jdkPath\bin;" + [Environment]::getEnvironmentVariable("Path", "User")
+	[Environment]::SetEnvironmentVariable("Path", $path, 'User')
 }
 
 #Node14环境安装
@@ -70,8 +67,8 @@ If(checkExist node.exe 14*){
 	"Node14 installed"
 } else {
 	downloadAndInstallMSI $Node14DownloadUrl $BasePath node-v14.19.0-x64.msi
-	$programPath = ""
-	
+	$path = "C:\Program Files\nodejs\;" + [Environment]::getEnvironmentVariable("Path", "User")
+	[Environment]::SetEnvironmentVariable("Path", $path, 'User')
 }
 
 #MongoDB环境安装
@@ -89,6 +86,6 @@ If(checkExist mvn.exe 3.6*){
 	downloadAndUnzip $MavenDownloadUrl apache-maven-3.6.3-bin.zip $BasePath
 	Remove-Item $BasePath\apache-maven-3.6.3-bin.zip
 	$mvnPath = getInstallPath $BasePath *maven*
-	$path = "$mvnPath\bin;" + [Environment]::getEnvironmentVariable("Path")
-	setEnvPath Path $path
+	$path = "$mvnPath\bin;" + [Environment]::getEnvironmentVariable("Path", "User")
+	[Environment]::SetEnvironmentVariable("Path", $path, 'User')
 }
