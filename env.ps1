@@ -73,7 +73,7 @@ If(checkExist node.exe 14*){
 If(checkExist mongo.exe 4*){
 	"MongoDB installed"
 } else {
-	downloadAndInstallMSI $MongoDownloadUrl $BasePath mongodb-win32-x86_64-2008plus-ssl-4.0.22-signed.msi SHOULD_INSTALL_COMPASS=0 MONGO_SERVICE_INSTALL=1
+	downloadAndInstallMSI $MongoDownloadUrl $BasePath mongodb-win32-x86_64-2008plus-ssl-4.0.22-signed.msi ADDLOCAL=ServerService,Server,ProductFeature,Client,MonitoringTools,ImportExportTools,Router,MiscellaneousTools
 }
 
 #Maven环境安装
