@@ -105,10 +105,11 @@ kill `pgrep java`
 大多数用户开发时都是使用windows环境
 
 ### 环境准备
-初始化系统环境（只需要运行一次），打开powershell命令行窗口
+初始化系统环境（只需要运行一次），打开powershell命令行窗口，输入以下命令
 ```
-Invoke-WebRequest https://gitee.com/dromara/northstar/raw/master/env.ps1 -OutFile env.ps1; powershell -noexit "env.ps1"
+Invoke-WebRequest https://gitee.com/dromara/northstar/raw/master/env.ps1 -OutFile env.ps1; powershell -noexit ".\env.ps1"
 ```
+
 
 ### 
 
