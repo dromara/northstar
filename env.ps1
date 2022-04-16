@@ -22,18 +22,18 @@ $MongoDownloadUrl = "http://downloads.mongodb.org/win32/mongodb-win32-x86_64-200
 #Maven下载地址
 $MavenDownloadUrl = "https://mirrors.bfsu.edu.cn/apache/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.zip"
 
-#检查环境
+# 检查环境  
 function checkCommand([string] $name, [string] $checkPattern){
 	$results = Get-Command $name -ErrorAction SilentlyContinue | Where-Object {$_.Version -like $checkPattern}
 	return $results.Count -gt 0
 }
-#检查服务
+# 检查服务   
 function checkService([string] $name){
 	$results = Get-Service $name -ErrorAction SilentlyContinue | Where-Object {$_.Version -like $checkPattern}
 	return $results.Count -gt 0
 }
 
-#下载安装 
+# 下载安装   
 function downloadAndInstallMSI([string] $url, [string] $destPath, [string] $fileName){
 	$error.Clear()
 	if(!(test-path $destPath$fileName)){
@@ -49,7 +49,7 @@ function downloadAndInstallMSI([string] $url, [string] $destPath, [string] $file
 	}
 }
 
-#下载解压
+# 下载解压  
 function downloadAndUnzip([string] $url, [string] $targetFile, [string] $destPath){
 	if(!(test-path "C:\northstar_env\apache-maven-3.6.3")){
 		"Start downloading $targetFile"
@@ -60,13 +60,13 @@ function downloadAndUnzip([string] $url, [string] $targetFile, [string] $destPat
 	}
 }
 
-#定位安装目录
+#定位安装目录  
 function getInstallPath([string] $basePath, [string] $pattern){
 	$path = Get-ChildItem $basePath | Where-Object {$_.Name -like $pattern}
 	return $path.fullName
 }
 
-#JDK17环境安装
+#JDK17环境安装  
 If(checkCommand java.exe 17*){
     "JDK17 installed"
 } else {
@@ -77,7 +77,7 @@ If(checkCommand java.exe 17*){
 	[Environment]::SetEnvironmentVariable("Path", $path, 'User')
 }
 
-#Node14环境安装
+#Node14环境安装  
 If(checkCommand node.exe 14*){
 	"Node14 installed"
 } else {
@@ -86,7 +86,7 @@ If(checkCommand node.exe 14*){
 	[Environment]::SetEnvironmentVariable("Path", $path, 'User')
 }
 
-#MongoDB环境安装
+#MongoDB环境安装  
 If(checkService *mongo*){
 	"MongoDB installed"
 } else {
@@ -94,7 +94,7 @@ If(checkService *mongo*){
 	downloadAndInstallMSI $MongoDownloadUrl $BasePath mongodb-win32-x86_64-2008plus-ssl-4.0.22-signed.msi $settings
 }
 
-#Maven环境安装
+#Maven环境安装  
 If(checkCommand mvn *){
 	"Maven installed"
 } else {
