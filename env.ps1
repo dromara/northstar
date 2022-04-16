@@ -23,26 +23,41 @@ $MongoDownloadUrl = "http://downloads.mongodb.org/win32/mongodb-win32-x86_64-200
 $MavenDownloadUrl = "https://mirrors.bfsu.edu.cn/apache/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.zip"
 
 #检查环境
-function checkExist([string] $name, [string] $checkPattern){
+function checkCommand([string] $name, [string] $checkPattern){
 	$results = Get-Command $name -ErrorAction SilentlyContinue | Where-Object {$_.Version -like $checkPattern}
+	return $results.Count -gt 0
+}
+#检查服务
+function checkService([string] $name){
+	$results = Get-Service $name -ErrorAction SilentlyContinue | Where-Object {$_.Version -like $checkPattern}
 	return $results.Count -gt 0
 }
 
 #下载安装 
 function downloadAndInstallMSI([string] $url, [string] $destPath, [string] $fileName){
-	"Start download $fileName"
-	Invoke-WebRequest -Uri $url -OutFile "$destPath$fileName"
-	"Start install $fileName"
-	msiexec.exe /log "$fileName.log" /i "$destPath$fileName" /qr $args
-	"$fileName installed"
+	$error.Clear()
+	if(!(test-path $destPath$fileName)){
+		"Start downloading $fileName"
+		Invoke-WebRequest -Uri $url -OutFile "$destPath$fileName"
+	}
+	if($error.Count -eq 0){	
+		"Start installing $fileName"
+		Start-Process msiexec.exe -ArgumentList "/log log_$fileName.txt /i $destPath$fileName /qr $args" -wait
+		"$fileName installed"
+	} else {
+		"Something wrong with $fileName installing. Retry later."
+	}
 }
 
 #下载解压
 function downloadAndUnzip([string] $url, [string] $targetFile, [string] $destPath){
-	"Start download $targetFile"
-	Invoke-WebRequest -Uri $url -OutFile "$destPath$targetFile"
-	Expand-Archive $destPath$targetFile -DestinationPath $destPath
-	"Unzipped $targetFile"
+	if(!(test-path "C:\northstar_env\apache-maven-3.6.3")){
+		"Start downloading $targetFile"
+		Invoke-WebRequest -Uri $url -OutFile "$destPath$targetFile"
+		Expand-Archive $destPath$targetFile -DestinationPath $destPath
+		"Unzipped $targetFile"
+		Remove-Item "$destPath$targetFile"
+	}
 }
 
 #定位安装目录
@@ -52,7 +67,7 @@ function getInstallPath([string] $basePath, [string] $pattern){
 }
 
 #JDK17环境安装
-If(checkExist java.exe 17*){
+If(checkCommand java.exe 17*){
     "JDK17 installed"
 } else {
 	downloadAndInstallMSI $JDK17DownloadUrl $BasePath jdk-17_windows-x64_bin.msi
@@ -63,16 +78,16 @@ If(checkExist java.exe 17*){
 }
 
 #Node14环境安装
-If(checkExist node.exe 14*){
+If(checkCommand node.exe 14*){
 	"Node14 installed"
 } else {
 	downloadAndInstallMSI $Node14DownloadUrl $BasePath node-v14.19.0-x64.msi
-	$path = "C:\Program Files\nodejs\;" + [Environment]::getEnvironmentVariable("Path", "User")
+	$path = "C:\Program Files\nodejs;" + [Environment]::getEnvironmentVariable("Path", "User")
 	[Environment]::SetEnvironmentVariable("Path", $path, 'User')
 }
 
 #MongoDB环境安装
-If(checkExist mongo.exe 4*){
+If(checkService *mongo*){
 	"MongoDB installed"
 } else {
 	$settings = "ADDLOCAL=ServerService,Server,ProductFeature,Client,MonitoringTools,ImportExportTools,Router,MiscellaneousTools"
@@ -80,11 +95,10 @@ If(checkExist mongo.exe 4*){
 }
 
 #Maven环境安装
-If(checkExist mvn.exe 3.6*){
+If(checkCommand mvn *){
 	"Maven installed"
 } else {
 	downloadAndUnzip $MavenDownloadUrl apache-maven-3.6.3-bin.zip $BasePath
-	Remove-Item $BasePath\apache-maven-3.6.3-bin.zip
 	$mvnPath = getInstallPath $BasePath *maven*
 	$path = "$mvnPath\bin;" + [Environment]::getEnvironmentVariable("Path", "User")
 	[Environment]::SetEnvironmentVariable("Path", $path, 'User')
