@@ -2,6 +2,8 @@
 # set-executionpolicy remotesigned
 # 选Y
 
+$OutputEncoding = New-Object -typename System.Text.UTF8Encoding
+
 Add-Type -AssemblyName System.IO
 Add-Type -AssemblyName System.IO.Compression
 Add-Type -AssemblyName System.IO.Compression.FileSystem
