@@ -40,8 +40,8 @@
 - northstar项目为服务端（包含了web网页监控端）
 - northstar-external为用户自行扩展的项目，可参考[此项目](https://gitee.com/NorthstarQuan/northstar-external)
 - 交互协议HTTP + websocket
-- 数据库为MongoDB
-- 前端采用nodejs + vue
+- 数据库为MongoDB 4.x
+- 前端采用node14 + vue2.x
 - 服务端采用java17（拥抱新技术） + springboot
 
 ## 启动步骤
