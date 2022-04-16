@@ -2,14 +2,12 @@
 # set-executionpolicy remotesigned
 # 选Y
 
-$OutputEncoding = New-Object -typename System.Text.UTF8Encoding
-
 Add-Type -AssemblyName System.IO
 Add-Type -AssemblyName System.IO.Compression
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
-#下载到northstar_env目录，如无该目录则创建
+#下载到northstar_env目录，如无该目录则创建;
 $BasePath = "c:\\northstar_env\"
 If(!(test-path $BasePath))
 {
