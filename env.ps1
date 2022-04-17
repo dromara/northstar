@@ -49,9 +49,14 @@ function downloadAndInstallMSI([string] $url, [string] $destPath, [string] $file
 	}
 }
 
-# 下载解压  
-function downloadAndUnzip([string] $url, [string] $targetFile, [string] $destPath){
-	
+# 设置环境变量  
+function setEnvironment([string] $name, [string] $path){
+	if([Environment]::getEnvironmentVariable("Path", "User") -like "*$path*"){	
+		"$Name environment is ready"
+	} else {
+		$fullPath = "$path;" + [Environment]::getEnvironmentVariable("Path", "User")
+		[Environment]::SetEnvironmentVariable("Path", $fullPath, 'User')
+	}
 }
 
 #定位安装目录  
@@ -67,8 +72,7 @@ If(checkCommand java.exe 17*){
 	downloadAndInstallMSI $JDK17DownloadUrl $BasePath jdk-17_windows-x64_bin.msi
 	$programPath = "C:\Program Files\Java"
 	$jdkPath = getInstallPath $programPath jdk-17*
-	$path = "$jdkPath\bin;" + [Environment]::getEnvironmentVariable("Path", "User")
-	[Environment]::SetEnvironmentVariable("Path", $path, 'User')
+	setEnvironment Java "$jdkPath\bin"
 }
 
 #Node14环境安装  
@@ -76,8 +80,8 @@ If(checkCommand node.exe 14*){
 	"Node14 installed"
 } else {
 	downloadAndInstallMSI $Node14DownloadUrl $BasePath node-v14.19.0-x64.msi
-	$path = "C:\Program Files\nodejs;" + [Environment]::getEnvironmentVariable("Path", "User")
-	[Environment]::SetEnvironmentVariable("Path", $path, 'User')
+	$nodePath = "C:\Program Files\nodejs"
+	setEnvironment Node $nodePath
 }
 
 #MongoDB环境安装  
@@ -101,10 +105,8 @@ If(checkCommand mvn *){
 		Remove-Item "$BasePath$targetFile"
 	}
 	$mvnPath = getInstallPath $BasePath *maven*
-	if([Environment]::getEnvironmentVariable("Path", "User") -like "*$mvnPath*"){	
-		"Maven environment is ready"
-	} else {
-		$path = "$mvnPath\bin;" + [Environment]::getEnvironmentVariable("Path", "User")
-		[Environment]::SetEnvironmentVariable("Path", $path, 'User')
-	}
+	setEnvironment Maven "$mvnPath\bin"
 }
+
+$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User") 
+
