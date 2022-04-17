@@ -109,3 +109,5 @@ If(checkCommand mvn *){
 	}
 }
 
+refreshenv
+

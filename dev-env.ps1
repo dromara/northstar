@@ -14,6 +14,18 @@ $EclipseDownloadUrl = "https://download.springsource.com/release/STS4/4.14.0.REL
 #northstar仓库地址  
 $NorthstarRepository = "https://gitee.com/dromara/northstar.git"
 
+If(checkCommand git.exe *){
+	"Git installed"
+} else {
+	$gitFile = "Git-2.35.1.2-64-bit.exe"
+	if(!(test-path $BasePath$gitFile)){
+		"Start downloading Git"
+		Invoke-WebRequest $GitDownloadUrl -OutFile $BasePath$gitFile
+	}
+	"Start installing Git"
+	Start-Process $BasePath$gitFile -ArgumentList "/S" -wait
+}
+
 cd $WorkspacePath
 "Cloning repository"
 git clone $NorthstarRepository
@@ -26,3 +38,6 @@ if(!(test-path $BasePath$stsJarName)){
 	Invoke-WebRequest $EclipseDownloadUrl -OutFile $BasePath$stsJarName
 	java -jar $BasePath$stsJarName
 }
+
+
+refreshenv
