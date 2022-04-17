@@ -26,4 +26,13 @@ public class ModuleAccountDescription {
 	 */
 	private double preBalance;
 	
+	/**
+	 * 累计平仓盈亏
+	 */
+	private double accCloseProfit;
+	
+	/**
+	 * 累计开平仓手数（开平仓一手算1）
+	 */
+	private int accDealVolume;
 }

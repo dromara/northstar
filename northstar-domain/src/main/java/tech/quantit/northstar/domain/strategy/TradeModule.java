@@ -6,7 +6,7 @@ import tech.quantit.northstar.common.event.NorthstarEvent;
 import tech.quantit.northstar.common.model.ModuleAccountDescription;
 import tech.quantit.northstar.common.model.ModuleDescription;
 import tech.quantit.northstar.common.model.ModulePositionDescription;
-import tech.quantit.northstar.strategy.api.ModuleContext;
+import tech.quantit.northstar.strategy.api.IModuleContext;
 import tech.quantit.northstar.strategy.api.TradeStrategy;
 import tech.quantit.northstar.strategy.api.event.ModuleEventBus;
 import xyz.redtorch.pb.CoreField.BarField;
@@ -30,19 +30,19 @@ import xyz.redtorch.pb.CoreField.TradeField;
  * @author KevinHuangwl
  *
  */
-public class TradeModule implements Module {
+public class TradeModule implements IModule {
 	
 	private String name;
 	
 	private boolean enabled;
 	
-	private MarketDataStore mktDataStore;
+	private IMarketDataStore mktDataStore;
 	
 	private ModuleAccountStore accStore;
 	
 	private ModuleOrderingStore orderStore;
 	
-	private ModuleContext ctx;
+	private IModuleContext ctx;
 	
 	private TradeStrategy strategy;
 	
@@ -64,7 +64,7 @@ public class TradeModule implements Module {
 
 	@Override
 	public void initModule() {
-		mktDataStore.addModuleEnableStateListener(flag -> this.enabled = flag);
+		mktDataStore.addModuleEnableStateCallback(flag -> this.enabled = flag);
 	}
 	
 	@Override

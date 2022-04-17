@@ -11,7 +11,7 @@ import xyz.redtorch.pb.CoreField.BarField;
  * @author KevinHuangwl
  *
  */
-public interface Module {
+public interface IModule {
 
 	/**
 	 * 模组名称
