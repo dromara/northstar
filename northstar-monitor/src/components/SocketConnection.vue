@@ -37,7 +37,9 @@ export default {
     }
   },
   mounted() {
-    this.socket = SocketIO(`http://${location.hostname}:51888`)
+    const wsHost = `http://${location.hostname}:51888`
+    console.log('准备连接websocket：' + wsHost)
+    this.socket = SocketIO(wsHost)
     this.socket.on('TICK', (data) => {
       let tick = TickField.deserializeBinary(data).toObject()
       this.$store.commit('updateTick', tick)
