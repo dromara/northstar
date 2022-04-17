@@ -1,7 +1,6 @@
 #检查env.ps1脚本是否已经运行过，没有的话就运行，确保环境准备好   
 Invoke-WebRequest https://gitee.com/dromara/northstar/raw/master/env.ps1 -OutFile env.ps1;
 powershell -noexit ".\env.ps1"
-. $profile
 $BasePath = "c:\northstar_env\"
 $WorkspacePath = "c:\northstar_workspace\"
 

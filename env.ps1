@@ -108,3 +108,5 @@ If(checkCommand mvn *){
 		[Environment]::SetEnvironmentVariable("Path", $path, 'User')
 	}
 }
+
+. $profile
