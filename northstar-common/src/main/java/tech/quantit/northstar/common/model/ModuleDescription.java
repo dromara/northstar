@@ -36,5 +36,12 @@ public class ModuleDescription {
 	 * 模组持仓描述
 	 */
 	private ModulePositionDescription positionDescription;
-	
+	/**
+	 * 模组账户描述2（套利套保场景可能需要多个账户）
+	 */
+	private ModuleAccountDescription extAccountDescription;
+	/**
+	 * 模组持仓描述2（套利套保场景可能需要多个账户）
+	 */
+	private ModulePositionDescription extPositionDescription;
 }
