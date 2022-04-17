@@ -124,13 +124,8 @@ kill `pgrep java`
 ```
 
 ## 开发环境配置（Windows环境）
-大多数用户开发时都是使用windows环境
+请参考[此文](https://gitee.com/dromara/northstar/wikis/%E5%A6%82%E4%BD%95%E6%90%AD%E5%BB%BA%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83?sort_id=5506194)
 
-### 环境准备
-
-
-
-### 
 
 ## 注意事项
 - 请勿直接使用master分支的最新代码，应该使用最新的tag来作为开发基线
