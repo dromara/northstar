@@ -8,7 +8,7 @@ If(!(test-path $WorkspacePath))
    New-Item -Path $WorkspacePath -ItemType Directory
 }
 #Git下载地址  
-$GitDownloadUrl = "https://github.com/git-for-windows/git/releases/download/v2.35.1.windows.2/Git-2.35.1.2-64-bit.exe"
+$GitDownloadUrl = "https://npm.taobao.org/mirrors/git-for-windows/v2.32.0.windows.1/Git-2.32.0-64-bit.exe"
 #Eclipse地址  
 $EclipseDownloadUrl = "https://download.springsource.com/release/STS4/4.14.0.RELEASE/dist/e4.23/spring-tool-suite-4-4.14.0.RELEASE-e4.23.0-win32.win32.x86_64.self-extracting.jar"
 #northstar仓库地址  
