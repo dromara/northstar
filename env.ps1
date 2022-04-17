@@ -51,13 +51,7 @@ function downloadAndInstallMSI([string] $url, [string] $destPath, [string] $file
 
 # 下载解压  
 function downloadAndUnzip([string] $url, [string] $targetFile, [string] $destPath){
-	if(!(test-path "C:\northstar_env\apache-maven-3.6.3")){
-		"Start downloading $targetFile"
-		Invoke-WebRequest -Uri $url -OutFile "$destPath$targetFile"
-		Expand-Archive $destPath$targetFile -DestinationPath $destPath
-		"Unzipped $targetFile"
-		Remove-Item "$destPath$targetFile"
-	}
+	
 }
 
 #定位安装目录  
@@ -98,8 +92,19 @@ If(checkService *mongo*){
 If(checkCommand mvn *){
 	"Maven installed"
 } else {
-	downloadAndUnzip $MavenDownloadUrl apache-maven-3.6.3-bin.zip $BasePath
+	$targetFile = "apache-maven-3.6.3-bin.zip"
+	if(!(test-path "C:\northstar_env\apache-maven-3.6.3")){
+		"Start downloading $targetFile"
+		Invoke-WebRequest -Uri $MavenDownloadUrl -OutFile "$BasePath$targetFile"
+		Expand-Archive $BasePath$targetFile -DestinationPath $BasePath
+		"Unzipped $targetFile"
+		Remove-Item "$BasePath$targetFile"
+	}
 	$mvnPath = getInstallPath $BasePath *maven*
-	$path = "$mvnPath\bin;" + [Environment]::getEnvironmentVariable("Path", "User")
-	[Environment]::SetEnvironmentVariable("Path", $path, 'User')
+	if([Environment]::getEnvironmentVariable("Path", "User") -like "*$mvnPath*"){	
+		"Maven environment is ready"
+	} else {
+		$path = "$mvnPath\bin;" + [Environment]::getEnvironmentVariable("Path", "User")
+		[Environment]::SetEnvironmentVariable("Path", $path, 'User')
+	}
 }
