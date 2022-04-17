@@ -108,5 +108,5 @@ If(checkCommand mvn *){
 	setEnvironment Maven "$mvnPath\bin"
 }
 
-refreshenv
+$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User") 
 

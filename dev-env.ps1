@@ -40,4 +40,3 @@ if(!(test-path $BasePath$stsJarName)){
 }
 
 
-refreshenv
