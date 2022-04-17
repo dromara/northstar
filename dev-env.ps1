@@ -23,19 +23,27 @@ If(checkCommand git.exe *){
 		Invoke-WebRequest $GitDownloadUrl -OutFile $BasePath$gitFile
 	}
 	"Start installing Git"
-	Start-Process $BasePath$gitFile -ArgumentList "/S" -wait
+	Start-Process $BasePath$gitFile -ArgumentList "/silent" -wait
+	$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User") 
 }
 
-cd $WorkspacePath
 "Cloning repository"
-git clone $NorthstarRepository
-cd northstar
+git clone $NorthstarRepository $WorkspacePath\northstar
+cd $WorkspacePath\northstar
 Start-Process mvn -ArgumentList "clean install -Dmaven.test.skip=true"
 
 $stsJarName = "spring-tool-suite-4-4.14.0.RELEASE-e4.23.0-win32.win32.x86_64.self-extracting.jar"
-if(!(test-path $BasePath$stsJarName)){
+if(test-path $BasePath$stsJarName){
+	"STS package is ready"
+} else {
 	"Start downloading STS"
 	Invoke-WebRequest $EclipseDownloadUrl -OutFile $BasePath$stsJarName
+}
+
+if(test-path "$BasePath\sts-4.14.0.RELEASE"){
+	"STS is installed"
+} else {
+	cd $BasePath
 	java -jar $BasePath$stsJarName
 }
 
