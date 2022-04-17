@@ -3,7 +3,10 @@ Invoke-WebRequest https://gitee.com/dromara/northstar/raw/master/env.ps1 -OutFil
 . .\env.ps1
 $BasePath = "c:\northstar_env\"
 $WorkspacePath = "c:\northstar_workspace\"
-
+If(!(test-path $WorkspacePath))
+{
+   New-Item -Path $WorkspacePath -ItemType Directory
+}
 #Git下载地址  
 $GitDownloadUrl = "https://github.com/git-for-windows/git/releases/download/v2.35.1.windows.2/Git-2.35.1.2-64-bit.exe"
 #Eclipse地址  
