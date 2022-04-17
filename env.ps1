@@ -109,4 +109,3 @@ If(checkCommand mvn *){
 	}
 }
 
-. $profile
