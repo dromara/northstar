@@ -45,7 +45,6 @@ if(test-path "$BasePath\sts-4.14.0.RELEASE"){
 } else {
 	cd $BasePath
 	java -jar $BasePath$stsJarName
-	"--add-opens=java.base/java.lang=ALL-UNNAMED" >>$BasePath\sts-4.14.0.RELEASE\SpringToolSuite4.ini
 }
 
 
