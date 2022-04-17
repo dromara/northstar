@@ -20,6 +20,10 @@ public enum ModuleState {
 	 */
 	HOLDING_SHORT,
 	/**
+	 * 持仓对冲 
+	 */
+	HOLDING_HEDGE,
+	/**
 	 * 下单中
 	 */
 	PLACING_ORDER,
