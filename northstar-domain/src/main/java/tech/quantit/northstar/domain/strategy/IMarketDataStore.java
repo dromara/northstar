@@ -38,7 +38,7 @@ public interface IMarketDataStore {
 	 * 添加启停状态切换回调
 	 * @param listener
 	 */
-	void addModuleEnableStateCallback(Consumer<Boolean> listener);
+	void addEnabledToggleCallback(Consumer<Boolean> listener);
 	/**
 	 * 获取数据状态
 	 * @return

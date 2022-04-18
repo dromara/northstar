@@ -64,7 +64,7 @@ public class TradeModule implements IModule {
 
 	@Override
 	public void initModule() {
-		mktDataStore.addModuleEnableStateCallback(flag -> this.enabled = flag);
+		mktDataStore.addEnabledToggleCallback(flag -> this.enabled = flag);
 	}
 	
 	@Override
