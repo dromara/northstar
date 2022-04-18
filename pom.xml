@@ -44,7 +44,6 @@
 		<module>northstar-monitor</module>
 		<module>northstar-common</module>
 		<module>northstar-data</module>
-		<module>northstar-e2e</module>
 		<module>northstar-gateway-api</module>
 		<module>northstar-gateway-ctp</module>
 		<module>northstar-gateway-sim</module>
