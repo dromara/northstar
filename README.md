@@ -40,27 +40,41 @@
 - northstar项目为服务端（包含了web网页监控端）
 - northstar-external为用户自行扩展的项目，可参考[此项目](https://gitee.com/NorthstarQuan/northstar-external)
 - 交互协议HTTP + websocket
-- 数据库为MongoDB
-- 前端采用nodejs + vue
+- 数据库为MongoDB 4.x
+- 前端采用node14 + vue2.x
 - 服务端采用java17（拥抱新技术） + springboot
 
-## 启动步骤（Linux环境）
+## 启动步骤
 假设当前环境是全新的服务器  
 
-### 环境准备
-初始化系统环境（只需要运行一次）
+### 环境准备（只需要运行一次）
+**Linux环境下**，初始化系统环境。
 ```
 curl https://gitee.com/dromara/northstar/raw/master/env.sh | sh
+```
+
+**Windows环境下**，初始化系统环境。打开powershell命令行窗口，输入以下命令
+```
+Invoke-WebRequest https://gitee.com/dromara/northstar/raw/master/env.ps1 -OutFile env.ps1; powershell -noexit ".\env.ps1"
 ```
 
 ### 程序包准备
 下载最新版项目
 [https://gitee.com/dromara/northstar/releases](https://gitee.com/dromara/northstar/releases)
+
+**Linux环境下**
 ```
-cd ~ && wget https://gitee.com/dromara/northstar/attach_files/1001250/download/northstar-main-3.4.jar
+cd ~ && wget https://gitee.com/dromara/northstar/attach_files/1008262/download/northstar-3.5.jar
+```
+
+**Windows环境下**
+```
+Invoke-WebRequest https://gitee.com/dromara/northstar/attach_files/1008262/download/northstar-3.5.jar -OutFile northstar.jar
 ```
 
 ### 启动参数准备
+
+**Linux环境下**
 在.bashrc中加入启动参数（这样做能隐藏启动参数。若不用邮件通知与不修改默认的登陆账户密码可以不填）  
 ```
 vim ~/.bashrc
@@ -80,11 +94,19 @@ export EMAIL0=<订阅邮箱名>
 source ~/.bashrc
 ```
 
+**Windows环境下**
+待补充
+
+
 ### 启动程序
+**Linux环境下**
 ```
 curl https://gitee.com/dromara/northstar/raw/master/startup.sh | sh
 ```
 注意：startup.sh脚本中包括了JVM的启动参数，假定服务器配置是2核4G，如有不同应该按实际情况自定义启动脚本
+
+**Windows环境下**
+待补充
 
 ### 部署验证
 在浏览器直接访问部署服务的域名（端口使用了默认的80端口）， 应该可以看到以下界面，并可以登陆成功  
@@ -100,6 +122,10 @@ cd ~/logs/
 ```
 kill `pgrep java`
 ```
+
+## 开发环境配置（Windows环境）
+请参考[此文](https://gitee.com/dromara/northstar/wikis/%E5%A6%82%E4%BD%95%E6%90%AD%E5%BB%BA%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83?sort_id=5506194)
+
 
 ## 注意事项
 - 请勿直接使用master分支的最新代码，应该使用最新的tag来作为开发基线

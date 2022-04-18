@@ -1,123 +1,112 @@
-# 检查JDK环境
-# Get-CimInstance -Class Win32_Product |
-#   Where-Object Name -eq "JDK17"
-#
-# Get-CimInstance -Class Win32_Product |
-#   Where-Object Name -eq "JDK17" |
-#     Format-List -Property *
-# invoke-command -computername machine1, machine2 -filepath c:\Script\script.ps1
+# 注意：防止文件访问权限问题,请先在Power shell 执行
+# set-executionpolicy remotesigned
+# 选Y
+
 Add-Type -AssemblyName System.IO
 Add-Type -AssemblyName System.IO.Compression
 Add-Type -AssemblyName System.IO.Compression.FileSystem
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
-#下载到Temp目录
-$TempPath = $env:TEMP
-#==============================全局变量区=========================#
-[bool]$isDownloaded=$False
-#==============================下载函数===========================#
-Function Download([String]$url, [String]$fullFileName)
+#下载到northstar_env目录，如无该目录则创建;   
+$BasePath = "c:\\northstar_env\"
+If(!(test-path $BasePath))
 {
-    #存储的完整文件路径
-    $FullPath = "$TempPath\$fullFileName"
-    if([String]::IsNullOrEmpty($url) -or [String]::IsNullOrEmpty($FullPath)){
-        return $false;
-    }
-
-    try {
-        $client = New-Object System.Net.WebClient
-        $client.UseDefaultCredentials = $True
-
-        #监视WebClient 的下载完成事件
-        Register-ObjectEvent -InputObject $client -EventName DownloadFileCompleted `
-        -SourceIdentifier Web.DownloadFileCompleted -Action {
-            #下载完成，结束下载
-            $Global:isDownloaded = $True
-        }
-        #监视WebClient 的进度事件
-        Register-ObjectEvent -InputObject $client -EventName DownloadProgressChanged `
-        -SourceIdentifier Web.DownloadProgressChanged -Action {
-            #将下载的进度信息记录到全局的Data对象中
-            $Global:Data = $event
-        }
-
-        $Global:isDownloaded =$False
-
-        #监视PowerShell退出事件
-        Register-EngineEvent -SourceIdentifier ([System.Management.Automation.PSEngineEvent]::Exiting) -Action {
-            #PowerShell 结束事件
-            Get-EventSubscriber | Unregister-Event
-            Get-Job | Remove-Job -Force
-        }
-
-         #启用定时器，设置1秒一次输出下载进度
-        $timer = New-Object timers.timer
-        # 1 second interval
-        $timer.Interval = 1000
-        #Create the event subscription
-        Register-ObjectEvent -InputObject $timer -EventName Elapsed -SourceIdentifier Timer.Output -Action {
-            $percent = $Global:Data.SourceArgs.ProgressPercentage
-            $totalBytes = $Global:Data.SourceArgs.TotalBytesToReceive
-            $receivedBytes = $Global:Data.SourceArgs.BytesReceived
-            If ($percent -ne $null) {
-                 #这里你可以选择将进度显示到命令行 也可以选择将进度写到文件，具体看自己需求
-                 #我这里选择将进度输出到命令行
-                    Write-Host "current download percent: $percent % downloaded : $receivedBytes totalBytes: $totalBytes"
-                    If ($percent -eq 100) {
-                        Write-Host "download complete!"
-                        $isDownloaded = $True
-
-                         Write-Host "Finish 1 "
-                         #清除监视
-#                          Get-EventSubscriber | Unregister-Event
-                         Write-Host "Finish 2 "
-                         Get-Job | Remove-Job -Force
-                         Write-Host "Finish 3"
-                         #关闭下载线程
-                         $client.Dispose()
-                         Write-Host "Finish 4"
-                         Remove-Variable client
-                         Write-Host "Finish "
-
-                        $timer.Enabled = $False
-
-                    }
-            }
-        }
-        If (-Not $isDownloaded) {
-            $timer.Enabled = $True
-        }
-
-        #使用异步方式下载文件
-        $client.DownloadFileAsync($url, $FullPath)
-        While (-Not $isDownloaded)
-        {
-            #等待下载线程结束
-            Start-Sleep -m 100
-        }
-    } catch {
-        return $false;
-    }
-    return $true;
+   New-Item -Path $BasePath -ItemType Directory
 }
-
 #JDK17下载地址
-$JDK17DownloadUrl = "https://download.oracle.com/java/17/latest/jdk-17_windows-x64_bin.exe"
+$JDK17DownloadUrl = "https://download.oracle.com/java/17/latest/jdk-17_windows-x64_bin.msi"
 #Node14下载地址
 $Node14DownloadUrl = "https://registry.npmmirror.com/-/binary/node/latest-v14.x/node-v14.19.0-x64.msi"
-#MavenDownloadUrl下载地址
-$MavenDownloadUrl = "https://mirrors.bfsu.edu.cn/apache/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz"
 #MongoDB下载地址
-$MongoDownloadUrl = "https://download.oracle.com/java/17/latest/jdk-17_windows-x64_bin.exe"
+$MongoDownloadUrl = "http://downloads.mongodb.org/win32/mongodb-win32-x86_64-2008plus-ssl-4.0.22-signed.msi"
+#Maven下载地址
+$MavenDownloadUrl = "https://mirrors.bfsu.edu.cn/apache/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.zip"
 
+# 检查环境  
+function checkCommand([string] $name, [string] $checkPattern){
+	$results = Get-Command $name -ErrorAction SilentlyContinue | Where-Object {$_.Version -like $checkPattern}
+	return $results.Count -gt 0
+}
+# 检查服务   
+function checkService([string] $name){
+	$results = Get-Service $name -ErrorAction SilentlyContinue | Where-Object {$_.Version -like $checkPattern}
+	return $results.Count -gt 0
+}
 
+# 下载安装   
+function downloadAndInstallMSI([string] $url, [string] $destPath, [string] $fileName){
+	$error.Clear()
+	if(!(test-path $destPath$fileName)){
+		"Start downloading $fileName"
+		Invoke-WebRequest -Uri $url -OutFile "$destPath$fileName"
+	}
+	if($error.Count -eq 0){	
+		"Start installing $fileName"
+		Start-Process msiexec.exe -ArgumentList "/log log_$fileName.txt /i $destPath$fileName /qr $args" -wait
+		"$fileName installed"
+	} else {
+		"Something wrong with $fileName installing. Retry later."
+	}
+}
 
-"Start download JDK17..."
-#下载的文件名
-$FileName = "jdk-17_windows-x64_bin.exe"
-Download $JDK17DownloadUrl $FileName
-"Download JDK17 finished..."
+# 设置环境变量  
+function setEnvironment([string] $name, [string] $path){
+	if([Environment]::getEnvironmentVariable("Path", "User") -like "*$path*"){	
+		"$Name environment is ready"
+	} else {
+		$fullPath = "$path;" + [Environment]::getEnvironmentVariable("Path", "User")
+		[Environment]::SetEnvironmentVariable("Path", $fullPath, 'User')
+	}
+}
 
-"Start install JDK17..."
-Invoke-CimMethod -ClassName Win32_Product -MethodName Install -Arguments @{PackageLocation=$FullPath}
-"Install JDK17 finished..."
+#定位安装目录  
+function getInstallPath([string] $basePath, [string] $pattern){
+	$path = Get-ChildItem $basePath | Where-Object {$_.Name -like $pattern}
+	return $path.fullName
+}
+
+#JDK17环境安装  
+If(checkCommand java.exe 17*){
+    "JDK17 installed"
+} else {
+	downloadAndInstallMSI $JDK17DownloadUrl $BasePath jdk-17_windows-x64_bin.msi
+	$programPath = "C:\Program Files\Java"
+	$jdkPath = getInstallPath $programPath jdk-17*
+	setEnvironment Java "$jdkPath\bin"
+}
+
+#Node14环境安装  
+If(checkCommand node.exe 14*){
+	"Node14 installed"
+} else {
+	downloadAndInstallMSI $Node14DownloadUrl $BasePath node-v14.19.0-x64.msi
+	$nodePath = "C:\Program Files\nodejs"
+	setEnvironment Node $nodePath
+}
+
+#MongoDB环境安装  
+If(checkService *mongo*){
+	"MongoDB installed"
+} else {
+	$settings = "ADDLOCAL=ServerService,Server,ProductFeature,Client,MonitoringTools,ImportExportTools,Router,MiscellaneousTools"
+	downloadAndInstallMSI $MongoDownloadUrl $BasePath mongodb-win32-x86_64-2008plus-ssl-4.0.22-signed.msi $settings
+}
+
+#Maven环境安装  
+If(checkCommand mvn *){
+	"Maven installed"
+} else {
+	$targetFile = "apache-maven-3.6.3-bin.zip"
+	if(!(test-path "C:\northstar_env\apache-maven-3.6.3")){
+		"Start downloading $targetFile"
+		Invoke-WebRequest -Uri $MavenDownloadUrl -OutFile "$BasePath$targetFile"
+		Expand-Archive $BasePath$targetFile -DestinationPath $BasePath
+		"Unzipped $targetFile"
+		Remove-Item "$BasePath$targetFile"
+	}
+	$mvnPath = getInstallPath $BasePath *maven*
+	setEnvironment Maven "$mvnPath\bin"
+}
+
+$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User") 
 
