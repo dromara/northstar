@@ -1,4 +1,4 @@
-package tech.quantit.northstar.domain.strategy;
+package tech.quantit.northstar.domain.module;
 
 import tech.quantit.northstar.common.constant.ModuleState;
 import tech.quantit.northstar.gateway.api.TradeGateway;

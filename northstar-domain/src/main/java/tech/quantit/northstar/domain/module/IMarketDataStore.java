@@ -1,4 +1,4 @@
-package tech.quantit.northstar.domain.strategy;
+package tech.quantit.northstar.domain.module;
 
 import java.util.List;
 import java.util.function.Consumer;
