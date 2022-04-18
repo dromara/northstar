@@ -4,5 +4,4 @@ public interface ContextAware {
 
 	void setContext(IModuleContext context);
 	
-	IModuleContext getContext();
 }

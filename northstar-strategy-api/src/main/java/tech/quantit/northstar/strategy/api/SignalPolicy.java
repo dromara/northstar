@@ -5,6 +5,7 @@ import tech.quantit.northstar.common.TickDataAware;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.TickField;
 
+@Deprecated
 public interface SignalPolicy extends TickDataAware, BarDataAware, EventDrivenComponent, StateChangeListener,
 	DynamicParamsAware, ContractBindedAware, ModuleNamingAware, MailSenderAware {
 

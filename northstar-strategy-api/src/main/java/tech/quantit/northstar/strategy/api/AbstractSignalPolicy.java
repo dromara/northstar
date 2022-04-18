@@ -19,6 +19,7 @@ import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.TickField;
 
+@Deprecated
 public abstract class AbstractSignalPolicy implements SignalPolicy {
 
 	protected EventBus moduleEventBus;

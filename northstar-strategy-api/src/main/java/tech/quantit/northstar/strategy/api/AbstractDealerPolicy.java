@@ -30,6 +30,7 @@ import xyz.redtorch.pb.CoreField.OrderField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TickField;
 
+@Deprecated
 public abstract class AbstractDealerPolicy implements DealerPolicy {
 
 	protected ModuleState currentState;

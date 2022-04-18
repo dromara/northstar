@@ -6,6 +6,7 @@ import com.google.common.eventbus.Subscribe;
 import tech.quantit.northstar.common.Subscribable;
 import tech.quantit.northstar.strategy.api.event.ModuleEvent;
 
+@Deprecated
 public interface EventDrivenComponent extends Subscribable {
 
 	@Subscribe
