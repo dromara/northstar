@@ -22,7 +22,7 @@ public class ModuleDescriptionPO {
 	
 	public static ModuleDescriptionPO convertFrom(ModuleDescription moduleDescription) {
 		ModuleDescriptionPO po = new ModuleDescriptionPO();
-		po.moduleName = moduleDescription.getModuleName();
+		po.moduleName = moduleDescription.moduleName();
 		po.moduleDescription = moduleDescription;
 		return po;
 	}
