@@ -265,7 +265,7 @@
 			    <version>${byte-buddy-version}</version>
 			    <scope>test</scope>
 			</dependency>
-						
+
 			<!-- https://mvnrepository.com/artifact/org.hibernate.validator/hibernate-validator -->
 			<dependency>
 				<groupId>org.hibernate.validator</groupId>
@@ -340,6 +340,12 @@
 					<artifactId>maven-compiler-plugin</artifactId>
 					<version>3.8.1</version>
 					<configuration>
+						<source>${java.version}</source>
+						<target>${java.version}</target>
+						<encoding>UTF-8</encoding>
+						<compilerArgs>
+							<arg>-parameters</arg>
+						</compilerArgs>
 						<parameters>true</parameters>
 					</configuration>
 				</plugin>

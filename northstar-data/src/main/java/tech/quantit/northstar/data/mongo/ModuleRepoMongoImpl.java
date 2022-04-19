@@ -1,91 +1,161 @@
 package tech.quantit.northstar.data.mongo;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import tech.quantit.northstar.common.model.ModuleDealRecord;
 import tech.quantit.northstar.common.model.ModuleDescription;
 import tech.quantit.northstar.common.model.ModuleSettingsDescription;
 import tech.quantit.northstar.common.model.ModuleTradeRecord;
 import tech.quantit.northstar.data.IModuleRepository;
+import tech.quantit.northstar.data.mongo.po.*;
 
+/**
+ * 模块服务
+ * @author : wpxs
+ */
 public class ModuleRepoMongoImpl implements IModuleRepository{
 
+	private final MongoTemplate mongoTemplate;
+
+	public ModuleRepoMongoImpl(MongoTemplate mongoTemplate) {
+		this.mongoTemplate = mongoTemplate;
+	}
+
+	/**
+	 * 保存模组配置信息
+	 * @param moduleSettingsDescription
+	 */
 	@Override
 	public void saveSettings(ModuleSettingsDescription moduleSettingsDescription) {
-		// TODO Auto-generated method stub
-		
+		mongoTemplate.save(ModuleSettingsDescriptionPO.convertFrom(moduleSettingsDescription));
 	}
 
+	/**
+	 * 查询模组配置信息
+	 * @param moduleName
+	 * @return
+	 */
 	@Override
 	public ModuleSettingsDescription findSettingsByName(String moduleName) {
-		// TODO Auto-generated method stub
-		return null;
+		ModuleSettingsDescriptionPO msd = mongoTemplate.findOne(Query.query(Criteria.where("moduleName").is(moduleName)), ModuleSettingsDescriptionPO.class);
+		if (msd == null) {
+			return null;
+		}
+		return msd.getModuleSettingsDescription();
 	}
 
+	/**
+	 * 查询所有模组配置信息
+	 * @return
+	 */
 	@Override
 	public List<ModuleSettingsDescription> findAll() {
-		// TODO Auto-generated method stub
-		return null;
+		return mongoTemplate.findAll(ModuleSettingsDescriptionPO.class).stream().map(ModuleSettingsDescriptionPO::getModuleSettingsDescription).collect(Collectors.toList());
 	}
 
+	/**
+	 * 移除模组配置信息
+	 * @param moduleName
+	 */
 	@Override
 	public void deleteSettingsByName(String moduleName) {
-		// TODO Auto-generated method stub
-		
+		Query query = Query.query(Criteria.where("moduleName").is(moduleName));
+		mongoTemplate.remove(query, ModuleSettingsDescriptionPO.class);
 	}
 
+	/**
+	 * 保存模组运行状态信息
+	 * @param moduleDescription
+	 */
 	@Override
 	public void save(ModuleDescription moduleDescription) {
-		// TODO Auto-generated method stub
-		
+		mongoTemplate.save(ModuleDescriptionPO.convertFrom(moduleDescription));
 	}
 
+	/**
+	 * 获取模组运行状态信息
+	 * @param moduleName
+	 * @return
+	 */
 	@Override
 	public ModuleDescription findByName(String moduleName) {
-		// TODO Auto-generated method stub
-		return null;
+		ModuleDescriptionPO md = mongoTemplate.findOne(Query.query(Criteria.where("moduleName").is(moduleName)), ModuleDescriptionPO.class);
+		if (md == null) {
+			return null;
+		}
+		return md.getModuleDescription();
 	}
 
+	/**
+	 * 移除模组运行状态信息
+	 * @param moduleName
+	 */
 	@Override
 	public void deleteByName(String moduleName) {
-		// TODO Auto-generated method stub
-		
+		Query query = Query.query(Criteria.where("moduleName").is(moduleName));
+		mongoTemplate.remove(query, ModuleDescriptionPO.class);
 	}
 
+	/**
+	 * 保存模组成交记录
+	 * @param tradeRecord
+	 */
 	@Override
 	public void saveTradeRecord(ModuleTradeRecord tradeRecord) {
-		// TODO Auto-generated method stub
-		
+		mongoTemplate.save(ModuleTradeRecordPO.convertFrom(tradeRecord));
 	}
 
+	/**
+	 * 查询模组全部成交记录
+	 * @param moduleName
+	 * @return
+	 */
 	@Override
 	public List<ModuleTradeRecord> findAllTradeRecords(String moduleName) {
-		// TODO Auto-generated method stub
-		return null;
+		return mongoTemplate.find(Query.query(Criteria.where("moduleName").is(moduleName)),ModuleTradeRecordPO.class).stream().map(ModuleTradeRecordPO::getModuleTradeRecord).collect(Collectors.toList());
 	}
 
+	/**
+	 * 删除模组全部成交记录
+	 * @param moduleName
+	 */
 	@Override
 	public void removeAllTradeRecords(String moduleName) {
-		// TODO Auto-generated method stub
-		
+		Query query = Query.query(Criteria.where("moduleName").is(moduleName));
+		mongoTemplate.remove(query,ModuleTradeRecordPO.class);
 	}
 
+	/**
+	 * 保存模组交易记录
+	 * @param dealRecord
+	 */
 	@Override
 	public void saveDealRecord(ModuleDealRecord dealRecord) {
-		// TODO Auto-generated method stub
-		
+		mongoTemplate.save(ModuleDealRecordPO.convertFrom(dealRecord));
 	}
 
+	/**
+	 * 查询模组全部交易记录
+	 * @param moduleName
+	 * @return
+	 */
 	@Override
 	public List<ModuleDealRecord> findAllDealRecords(String moduleName) {
-		// TODO Auto-generated method stub
-		return null;
+		return mongoTemplate.find(Query.query(Criteria.where("moduleName").is(moduleName)),ModuleDealRecordPO.class).stream().map(ModuleDealRecordPO::getModuleDealRecord).collect(Collectors.toList());
 	}
 
+	/**
+	 * 删除模组全部交易记录
+	 * @param moduleName
+	 */
 	@Override
 	public void removeAllDealRecords(String moduleName) {
-		// TODO Auto-generated method stub
-		
+		Query query = Query.query(Criteria.where("moduleName").is(moduleName));
+		mongoTemplate.remove(query,ModuleDealRecordPO.class);
 	}
 
 }
