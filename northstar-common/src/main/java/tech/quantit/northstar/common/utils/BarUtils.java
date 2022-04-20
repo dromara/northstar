@@ -4,9 +4,11 @@ import java.util.List;
 
 import xyz.redtorch.pb.CoreField.BarField;
 
-public interface BarUtils {
+public class BarUtils {
 
-	static BarField merge(List<BarField> bars) {
+	public BarUtils() {}
+	
+	public static BarField merge(List<BarField> bars) {
 		if(bars.isEmpty()) {
 			throw new IllegalArgumentException("空BAR集合无法合成新BAR");
 		}
