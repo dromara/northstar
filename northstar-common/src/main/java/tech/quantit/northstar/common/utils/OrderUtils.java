@@ -3,7 +3,9 @@ package tech.quantit.northstar.common.utils;
 import tech.quantit.northstar.common.constant.SignalOperation;
 import tech.quantit.northstar.common.model.OrderRequest.TradeOperation;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
+import xyz.redtorch.pb.CoreEnum.OrderStatusEnum;
 import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
+import xyz.redtorch.pb.CoreField.OrderField;
 
 public class OrderUtils {
 	
@@ -39,4 +41,7 @@ public class OrderUtils {
 		throw new IllegalArgumentException("无法确定[" + dir + "]的对应持仓方向");
 	}
 
+	public static boolean isValidOrder(OrderField order) {
+		return order.getOrderStatus() != OrderStatusEnum.OS_Rejected && order.getOrderStatus() != OrderStatusEnum.OS_Canceled;
+	}
 }
