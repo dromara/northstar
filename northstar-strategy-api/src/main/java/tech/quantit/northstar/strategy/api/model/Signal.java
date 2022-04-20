@@ -2,7 +2,7 @@ package tech.quantit.northstar.strategy.api.model;
 
 import lombok.Builder;
 import lombok.Getter;
-import tech.quantit.northstar.strategy.api.constant.SignalOperation;
+import tech.quantit.northstar.common.constant.SignalOperation;
 
 @Getter
 @Builder

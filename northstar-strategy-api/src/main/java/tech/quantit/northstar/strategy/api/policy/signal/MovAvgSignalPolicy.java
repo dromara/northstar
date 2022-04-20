@@ -3,11 +3,11 @@ package tech.quantit.northstar.strategy.api.policy.signal;
 import com.google.common.eventbus.EventBus;
 
 import tech.quantit.northstar.common.constant.ModuleState;
+import tech.quantit.northstar.common.constant.SignalOperation;
 import tech.quantit.northstar.strategy.api.AbstractSignalPolicy;
 import tech.quantit.northstar.strategy.api.SignalPolicy;
 import tech.quantit.northstar.strategy.api.annotation.Setting;
 import tech.quantit.northstar.strategy.api.annotation.StrategicComponent;
-import tech.quantit.northstar.strategy.api.constant.SignalOperation;
 import tech.quantit.northstar.strategy.api.indicator.ExpMovingAverage;
 import tech.quantit.northstar.strategy.api.indicator.Indicator;
 import tech.quantit.northstar.strategy.api.indicator.Indicator.ValueType;
