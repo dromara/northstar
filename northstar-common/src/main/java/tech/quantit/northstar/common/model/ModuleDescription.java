@@ -1,6 +1,9 @@
 package tech.quantit.northstar.common.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import tech.quantit.northstar.common.constant.ModuleState;
 
 /**
@@ -8,34 +11,37 @@ import tech.quantit.northstar.common.constant.ModuleState;
  * @author KevinHuangwl
  *
  */
+@Data
 @Builder
-public record ModuleDescription (
+@NoArgsConstructor
+@AllArgsConstructor
+public class ModuleDescription {
 		/**
 		 * 模组名称
 		 */
-		String moduleName,
+		private String moduleName;
 		/**
 		 * 模组启用状态
 		 */
-		boolean enabled,
+		private boolean enabled;
 		/***
 		 * 模组状态
 		 */
-		ModuleState moduleState,
+		private ModuleState moduleState;
 		/**
 		 * 模组账户描述
 		 */
-		ModuleAccountDescription accountDescription,
+		private ModuleAccountDescription accountDescription;
 		/**
 		 * 模组持仓描述
 		 */
-		ModulePositionDescription positionDescription,
+		private ModulePositionDescription positionDescription;
 		/**
 		 * 模组账户描述2（套利套保场景可能需要多个账户）
 		 */
-		ModuleAccountDescription extAccountDescription,
+		private ModuleAccountDescription extAccountDescription;
 		/**
 		 * 模组持仓描述2（套利套保场景可能需要多个账户）
 		 */
-		ModulePositionDescription extPositionDescription
-		){}
+		private ModulePositionDescription extPositionDescription;
+}
