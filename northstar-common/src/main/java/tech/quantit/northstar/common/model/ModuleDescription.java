@@ -2,6 +2,8 @@ package tech.quantit.northstar.common.model;
 
 import java.util.Map;
 
+import com.alibaba.fastjson.JSONObject;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -34,4 +36,8 @@ public class ModuleDescription {
 	 * 模组账户描述
 	 */
 	private Map<String, ModuleAccountDescription> accountDescriptions;
+	/**
+	 * 模组计算状态
+	 */
+	private JSONObject dataState;
 }

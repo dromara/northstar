@@ -1,6 +1,5 @@
 package tech.quantit.northstar.strategy.api;
 
-import tech.quantit.northstar.common.Subscribable;
 import tech.quantit.northstar.common.TickDataAware;
 import tech.quantit.northstar.common.TransactionAware;
 import tech.quantit.northstar.common.constant.SignalOperation;
@@ -52,5 +51,5 @@ public interface IModuleContext extends TickDataAware, BarDataAware, Transaction
 	 * 设置组件
 	 * @param component
 	 */
-	void setComponent(Subscribable component);
+	void setComponent(ContextAware component);
 }

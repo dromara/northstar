@@ -3,12 +3,9 @@ package tech.quantit.northstar.domain.module;
 import java.util.List;
 
 import tech.quantit.northstar.common.event.NorthstarEvent;
-import tech.quantit.northstar.common.model.ModuleAccountDescription;
 import tech.quantit.northstar.common.model.ModuleDescription;
-import tech.quantit.northstar.common.model.ModulePositionDescription;
 import tech.quantit.northstar.strategy.api.IModuleContext;
 import tech.quantit.northstar.strategy.api.TradeStrategy;
-import tech.quantit.northstar.strategy.api.event.ModuleEventBus;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.OrderField;
 import xyz.redtorch.pb.CoreField.TickField;
@@ -18,7 +15,7 @@ import xyz.redtorch.pb.CoreField.TradeField;
  * 难点：
  * 1. 模组启停状态，如何能既不影响行情数据更新，又能限制指令发送	DONE（通过MarketDataStore控制）
  * 2. 外部需要观察模组当前运行的各种状态，要如何封装描述 		DONE（通过ModuleDescription封装）
- * 3. 模组可能存在多个交易所，根据合约价差在多个交易所下单
+ * 3. 模组可能存在多个交易所，根据合约价差在多个交易所下单		DONE（多个交易所网关在context中保存，由于策略下单时指定）
  * 4. 策略、风控、下单模块怎么整合
  * 
  * */
@@ -38,13 +35,23 @@ public class TradeModule implements IModule {
 	
 	private IMarketDataStore mktDataStore;
 	
-	private ModuleAccountStore accStore;
+	private IModuleAccountStore accStore;
 	
-	private ModuleOrderingStore orderStore;
+	private IModuleOrderingStore orderStore;
 	
 	private IModuleContext ctx;
 	
 	private TradeStrategy strategy;
+	
+	public TradeModule(String name, IMarketDataStore marketDataStore, IModuleAccountStore accountStore, IModuleOrderingStore orderStore,
+			IModuleContext context, TradeStrategy strategy) {
+		this.name = name;
+		this.mktDataStore = marketDataStore;
+		this.accStore = accountStore;
+		this.orderStore = orderStore;
+		this.ctx = context;
+		this.strategy = strategy;
+	}
 	
 	@Override
 	public String getName() {
@@ -65,6 +72,10 @@ public class TradeModule implements IModule {
 	@Override
 	public void initModule() {
 		mktDataStore.addEnabledToggleCallback(flag -> this.enabled = flag);
+		ctx.setComponent(mktDataStore);
+		ctx.setComponent(accStore);
+		ctx.setComponent(orderStore);
+		ctx.setTradeStrategy(strategy);
 	}
 	
 	@Override
@@ -91,24 +102,11 @@ public class TradeModule implements IModule {
 
 	@Override
 	public ModuleDescription getModuleDescription() {
-		ModuleAccountDescription accDescription = ModuleAccountDescription.builder()
-				.initBalance(accStore.getInitBalance())
-				.preBalance(accStore.getPreBalance())
-				.build();
-		
-		ModulePositionDescription posDescription = ModulePositionDescription.builder()
-				.logicalPosition(accStore.getLogicalPosition())
-				.logicalPositionProfit(accStore.getLogicalPositionProfit())
-				.uncloseTrades(accStore.getUncloseTrade().stream().map(TradeField::toByteArray).toList())
-				.build();
-		
-		return ModuleDescription.builder()
-				.moduleName(name)
-				.enabled(enabled)
-				.moduleState(orderStore.getModuleState())
-				.accountDescription(accDescription)
-				.positionDescription(posDescription)
-				.build();
+		ModuleDescription md = ctx.getModuleDescription();
+		md.setEnabled(enabled);
+		md.setModuleName(name);
+		md.setDataState(strategy.getComputedState());
+		return md;
 	}
 
 }
