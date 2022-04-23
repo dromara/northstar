@@ -2,14 +2,12 @@ package tech.quantit.northstar.domain.module;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
 
 import tech.quantit.northstar.common.Subscribable;
 import tech.quantit.northstar.common.constant.SignalOperation;
-import tech.quantit.northstar.common.exception.NoSuchElementException;
 import tech.quantit.northstar.common.model.ModuleAccountDescription;
 import tech.quantit.northstar.common.model.ModuleDescription;
 import tech.quantit.northstar.common.model.ModulePositionDescription;
@@ -19,10 +17,8 @@ import tech.quantit.northstar.strategy.api.IModuleContext;
 import tech.quantit.northstar.strategy.api.TradeStrategy;
 import tech.quantit.northstar.strategy.api.constant.PriceType;
 import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
-import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.ForceCloseReasonEnum;
 import xyz.redtorch.pb.CoreEnum.HedgeFlagEnum;
-import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreEnum.OrderPriceTypeEnum;
 import xyz.redtorch.pb.CoreEnum.TimeConditionEnum;
 import xyz.redtorch.pb.CoreEnum.VolumeConditionEnum;
@@ -34,36 +30,49 @@ import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TickField;
 import xyz.redtorch.pb.CoreField.TradeField;
 
-public class ModuleContext implements IModuleContext{
+/**
+ * 投机模组上下文
+ * @author KevinHuangwl
+ *
+ */
+public class SpeculationModuleContext implements IModuleContext{
 	
-	private TradeStrategy bindedStrategy;
+	protected TradeStrategy tradeStrategy;
 	
-	private IModuleAccountStore accStore;
+	protected IModuleAccountStore accStore;
 	
-	private IModuleOrderingStore orderStore;
+	protected IModuleOrderingStore orderStore;
 	
-	private Map<String, TradeGateway> gatewayMap = new HashMap<>();
+	protected Map<String, Boolean> orderIdMap = new HashMap<>();
 	
-	private Map<String, Boolean> orderIdMap = new HashMap<>();
+	private TradeGateway gateway;
 	
-	private TickField lastTick;
+	private String tradingDay;
 	
-	@Override
-	public void setTradeStrategy(TradeStrategy strategy) {
-		bindedStrategy = strategy;
+	private ClosingStrategy closingStrategy;
+	
+	public SpeculationModuleContext(TradeGateway gateway, ClosingStrategy closingStrategy) {
+		this.gateway = gateway;
+		this.closingStrategy = closingStrategy;
+	}
+	
+	private String gatewayId() {
+		return gateway.getGatewaySetting().getGatewayId();
 	}
 
 	@Override
 	public ModuleDescription getModuleDescription() {
 		ModuleAccountDescription accDescription = ModuleAccountDescription.builder()
-				.initBalance(accStore.getInitBalance())
-				.preBalance(accStore.getPreBalance())
+				.initBalance(accStore.getInitBalance(gatewayId()))
+				.preBalance(accStore.getPreBalance(gatewayId()))
+				.accCloseProfit(accStore.getAccCloseProfit(gatewayId()))
+				.accDealVolume(accStore.getAccDealVolume(gatewayId()))
 				.build();
 		
 		ModulePositionDescription posDescription = ModulePositionDescription.builder()
-				.logicalPosition(accStore.getLogicalPosition())
-				.logicalPositionProfit(accStore.getLogicalPositionProfit())
-				.uncloseTrades(accStore.getUncloseTrade().stream().map(TradeField::toByteArray).toList())
+				.logicalPosition(accStore.getLogicalPosition(gatewayId()))
+				.logicalPositionProfit(accStore.getLogicalPositionProfit(gatewayId()))
+				.uncloseTrades(accStore.getUncloseTrade(gatewayId()).stream().map(TradeField::toByteArray).toList())
 				.build();
 		
 		return ModuleDescription.builder()
@@ -77,25 +86,12 @@ public class ModuleContext implements IModuleContext{
 	public String submitOrderReq(String gatewayId, ContractField contract, SignalOperation operation,
 			PriceType priceType, int volume, double price) {
 		String id = UUID.randomUUID().toString();
-		OffsetFlagEnum offsetFlag = OffsetFlagEnum.OF_Unknown;
-		if(operation.isClose()) {
-			DirectionEnum dir = operation.isBuy() ? DirectionEnum.D_Sell : DirectionEnum.D_Buy;
-			Optional<TradeField> opt = accStore.getUncloseTrade(contract.getUnifiedSymbol(), dir);
-			if(opt.isPresent()) {
-				offsetFlag = StringUtils.equals(opt.get().getTradingDay(), lastTick.getTradingDay()) 
-						? OffsetFlagEnum.OF_CloseToday 
-						: OffsetFlagEnum.OF_Close;
-			}
-		}
-		if(operation.isOpen()) {
-			offsetFlag = OffsetFlagEnum.OF_Open;
-		}
 		submitOrderReq(SubmitOrderReqField.newBuilder()
 				.setOriginOrderId(id)
 				.setContract(contract)
 				.setGatewayId(gatewayId)
 				.setDirection(OrderUtils.resolveDirection(operation))
-				.setOffsetFlag(offsetFlag)
+				.setOffsetFlag(closingStrategy.resolveOperation(operation, accStore))
 				.setPrice(price)
 				.setVolume(volume)		//	当信号交易量大于零时，优先使用信号交易量
 				.setHedgeFlag(HedgeFlagEnum.HF_Speculation)
@@ -111,41 +107,37 @@ public class ModuleContext implements IModuleContext{
 
 	@Override
 	public String submitOrderReq(SubmitOrderReqField orderReq) {
-		String gatewayId = orderReq.getGatewayId();
-		if(!gatewayMap.containsKey(gatewayId)) {
-			throw new NoSuchElementException("模组没有绑定此网关：" + gatewayId);
-		}
-		gatewayMap.get(gatewayId).submitOrder(orderReq);
+		gateway.submitOrder(orderReq);
 		orderIdMap.put(orderReq.getOriginOrderId(), Boolean.FALSE);
 		return orderReq.getOriginOrderId();
 	}
-
+	
 	@Override
 	public void cancelOrderReq(CancelOrderReqField cancelReq) {
-		String gatewayId = cancelReq.getGatewayId();
-		if(!gatewayMap.containsKey(gatewayId)) {
-			throw new NoSuchElementException("模组没有绑定此网关：" + gatewayId);
-		}
-		gatewayMap.get(gatewayId).cancelOrder(cancelReq);
+		gateway.cancelOrder(cancelReq);
 	}
 
 	@Override
 	public void onTick(TickField tick) {
-		lastTick = tick;
-		bindedStrategy.onTick(tick);
+		if(!StringUtils.equals(tradingDay, tick.getTradingDay())) {
+			tradingDay = tick.getTradingDay();
+		}
+		tradeStrategy.onTick(tick);
 	}
-
+	
 	@Override
 	public void onBar(BarField bar) {
-		bindedStrategy.onBar(bar);
+		tradeStrategy.onBar(bar);
 	}
-
+	
 	@Override
 	public void onOrder(OrderField order) {
 		if(OrderUtils.isValidOrder(order)) {
 			orderIdMap.put(order.getOriginOrderId(), Boolean.TRUE);
+		} else {
+			orderIdMap.remove(order.getOriginOrderId());
 		}
-		bindedStrategy.onOrder(order);
+		tradeStrategy.onOrder(order);
 	}
 
 	@Override
@@ -153,7 +145,7 @@ public class ModuleContext implements IModuleContext{
 		if(orderIdMap.containsKey(trade.getOriginOrderId())) {
 			orderIdMap.remove(trade.getOriginOrderId());
 		}
-		bindedStrategy.onTrade(trade);
+		tradeStrategy.onTrade(trade);
 	}
 
 	@Override
@@ -164,6 +156,16 @@ public class ModuleContext implements IModuleContext{
 		if (component instanceof IModuleOrderingStore store) {
 			this.orderStore = store;
 		}
+	}
+
+	@Override
+	public void setTradeStrategy(TradeStrategy strategy) {
+		tradeStrategy = strategy;
+	}
+
+	@Override
+	public TradeStrategy getTradeStrategy() {
+		return tradeStrategy;
 	}
 
 }
