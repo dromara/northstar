@@ -17,6 +17,11 @@ import lombok.NoArgsConstructor;
 public class ModuleAccountDescription {
 	
 	/**
+	 * 账户ID
+	 */
+	private String accountId;
+	
+	/**
 	 * 初始余额
 	 */
 	private double initBalance;
@@ -35,4 +40,9 @@ public class ModuleAccountDescription {
 	 * 累计开平仓手数（开平仓一手算1）
 	 */
 	private int accDealVolume;
+	
+	/**
+	 * 模组持仓描述
+	 */
+	private ModulePositionDescription positionDescription;
 }
