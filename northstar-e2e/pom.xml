@@ -8,7 +8,7 @@
   <artifactId>northstar-e2e</artifactId>
   <name>northstar-e2e</name>
   <description>End-to-end test of northstar</description>
-  
+
   <dependencies>
   	<dependency>
 		<groupId>tech.quantit</groupId>
@@ -20,4 +20,17 @@
 	    <version>3.141.59</version>
 	</dependency>
   </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
 </project>
