@@ -7,7 +7,7 @@
 		<version>3.5</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
-	
+
 	<artifactId>northstar-gateway-playback</artifactId>
 
 	<name>northstar-gateway-playback</name>
@@ -47,6 +47,16 @@
 	    <dependency>
 		    <groupId>org.slf4j</groupId>
 		    <artifactId>slf4j-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+		</dependency>
+			<!-- https://mvnrepository.com/artifact/cn.hutool/hutool-core -->
+		<dependency>
+			<groupId>cn.hutool</groupId>
+			<artifactId>hutool-core</artifactId>
+			<version>5.7.22</version>
 		</dependency>
 	</dependencies>
 
