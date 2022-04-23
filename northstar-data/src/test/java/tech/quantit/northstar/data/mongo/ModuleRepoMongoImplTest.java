@@ -14,7 +14,6 @@ import tech.quantit.northstar.common.model.ComponentAndParamsPair;
 import tech.quantit.northstar.common.model.ComponentMetaInfo;
 import tech.quantit.northstar.common.model.ModuleDealRecord;
 import tech.quantit.northstar.common.model.ModuleDescription;
-import tech.quantit.northstar.common.model.ModulePositionDescription;
 import tech.quantit.northstar.common.model.ModuleSettingsDescription;
 import tech.quantit.northstar.common.model.ModuleTradeRecord;
 import tech.quantit.northstar.data.IModuleRepository;
@@ -48,14 +47,12 @@ public class ModuleRepoMongoImplTest {
 			.moduleName("test1")
 			.moduleState(ModuleState.HOLDING_LONG)
 			.enabled(true)
-			.positionDescription(ModulePositionDescription.builder().logicalPosition(0).logicalPositionProfit(1.0).build())
 			.build();
 
 	ModuleDescription md2 = ModuleDescription.builder()
 			.moduleName("test2")
 			.moduleState(ModuleState.HOLDING_LONG)
 			.enabled(true)
-			.positionDescription(ModulePositionDescription.builder().logicalPosition(0).logicalPositionProfit(1.0).build())
 			.build();
 
 	ModuleTradeRecord mt1 = ModuleTradeRecord.builder()

@@ -6,13 +6,14 @@ import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
 
-import tech.quantit.northstar.common.Subscribable;
 import tech.quantit.northstar.common.constant.SignalOperation;
+import tech.quantit.northstar.common.exception.NoSuchElementException;
 import tech.quantit.northstar.common.model.ModuleAccountDescription;
 import tech.quantit.northstar.common.model.ModuleDescription;
 import tech.quantit.northstar.common.model.ModulePositionDescription;
 import tech.quantit.northstar.common.utils.OrderUtils;
 import tech.quantit.northstar.gateway.api.TradeGateway;
+import tech.quantit.northstar.strategy.api.ContextAware;
 import tech.quantit.northstar.strategy.api.IModuleContext;
 import tech.quantit.northstar.strategy.api.TradeStrategy;
 import tech.quantit.northstar.strategy.api.constant.PriceType;
@@ -31,11 +32,11 @@ import xyz.redtorch.pb.CoreField.TickField;
 import xyz.redtorch.pb.CoreField.TradeField;
 
 /**
- * 投机模组上下文
+ * 模组上下文
  * @author KevinHuangwl
  *
  */
-public class SpeculationModuleContext implements IModuleContext{
+public class ModuleContext implements IModuleContext{
 	
 	protected TradeStrategy tradeStrategy;
 	
@@ -45,40 +46,42 @@ public class SpeculationModuleContext implements IModuleContext{
 	
 	protected Map<String, Boolean> orderIdMap = new HashMap<>();
 	
-	private TradeGateway gateway;
+	private Map<String, TradeGateway> gatewayMap = new HashMap<>();
 	
 	private String tradingDay;
 	
 	private ClosingStrategy closingStrategy;
 	
-	public SpeculationModuleContext(TradeGateway gateway, ClosingStrategy closingStrategy) {
-		this.gateway = gateway;
+	public ModuleContext(ClosingStrategy closingStrategy, TradeGateway...gateways) {
 		this.closingStrategy = closingStrategy;
+		for(TradeGateway tradeGateway : gateways) {
+			gatewayMap.put(tradeGateway.getGatewaySetting().getGatewayId(), tradeGateway);
+		}
 	}
 	
-	private String gatewayId() {
-		return gateway.getGatewaySetting().getGatewayId();
-	}
 
 	@Override
 	public ModuleDescription getModuleDescription() {
-		ModuleAccountDescription accDescription = ModuleAccountDescription.builder()
-				.initBalance(accStore.getInitBalance(gatewayId()))
-				.preBalance(accStore.getPreBalance(gatewayId()))
-				.accCloseProfit(accStore.getAccCloseProfit(gatewayId()))
-				.accDealVolume(accStore.getAccDealVolume(gatewayId()))
-				.build();
-		
-		ModulePositionDescription posDescription = ModulePositionDescription.builder()
-				.logicalPosition(accStore.getLogicalPosition(gatewayId()))
-				.logicalPositionProfit(accStore.getLogicalPositionProfit(gatewayId()))
-				.uncloseTrades(accStore.getUncloseTrade(gatewayId()).stream().map(TradeField::toByteArray).toList())
-				.build();
-		
+		Map<String, ModuleAccountDescription> accMap = new HashMap<>();
+		for(String gatewayId : gatewayMap.keySet()) {
+			ModulePositionDescription posDescription = ModulePositionDescription.builder()
+					.logicalPosition(accStore.getLogicalPosition(gatewayId))
+					.logicalPositionProfit(accStore.getLogicalPositionProfit(gatewayId))
+					.uncloseTrades(accStore.getUncloseTrade(gatewayId).stream().map(TradeField::toByteArray).toList())
+					.build();
+			
+			ModuleAccountDescription accDescription = ModuleAccountDescription.builder()
+					.initBalance(accStore.getInitBalance(gatewayId))
+					.preBalance(accStore.getPreBalance(gatewayId))
+					.accCloseProfit(accStore.getAccCloseProfit(gatewayId))
+					.accDealVolume(accStore.getAccDealVolume(gatewayId))
+					.positionDescription(posDescription)
+					.build();
+			accMap.put(gatewayId, accDescription);
+		}
 		return ModuleDescription.builder()
 				.moduleState(orderStore.getModuleState())
-				.accountDescription(accDescription)
-				.positionDescription(posDescription)
+				.accountDescriptions(accMap)
 				.build();
 	}
 
@@ -107,14 +110,22 @@ public class SpeculationModuleContext implements IModuleContext{
 
 	@Override
 	public String submitOrderReq(SubmitOrderReqField orderReq) {
-		gateway.submitOrder(orderReq);
+		String gatewayId = orderReq.getGatewayId();
+		if(!gatewayMap.containsKey(gatewayId)) {
+			throw new NoSuchElementException("找不到网关：" + gatewayId);
+		}
+		gatewayMap.get(gatewayId).submitOrder(orderReq);
 		orderIdMap.put(orderReq.getOriginOrderId(), Boolean.FALSE);
 		return orderReq.getOriginOrderId();
 	}
 	
 	@Override
 	public void cancelOrderReq(CancelOrderReqField cancelReq) {
-		gateway.cancelOrder(cancelReq);
+		String gatewayId = cancelReq.getGatewayId();
+		if(!gatewayMap.containsKey(gatewayId)) {
+			throw new NoSuchElementException("找不到网关：" + gatewayId);
+		}
+		gatewayMap.get(gatewayId).cancelOrder(cancelReq);
 	}
 
 	@Override
@@ -149,7 +160,8 @@ public class SpeculationModuleContext implements IModuleContext{
 	}
 
 	@Override
-	public void setComponent(Subscribable component) {
+	public void setComponent(ContextAware component) {
+		component.setContext(this);
 		if(component instanceof IModuleAccountStore store) {
 			this.accStore = store;
 		}
