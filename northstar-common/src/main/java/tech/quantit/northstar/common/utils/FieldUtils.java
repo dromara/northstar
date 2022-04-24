@@ -75,6 +75,10 @@ public class FieldUtils {
 		return dir == DirectionEnum.D_Sell;
 	}
 	
+	public static boolean isOpposite(DirectionEnum dir1, DirectionEnum dir2) {
+		return dir1 != dir2 && dir1 != DirectionEnum.D_Unknown && dir2 != DirectionEnum.D_Unknown;
+	}
+	
 	public static boolean isOpen(OffsetFlagEnum offsetFlag) {
 		return offsetFlag == OffsetFlagEnum.OF_Open;
 	}

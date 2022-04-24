@@ -74,4 +74,12 @@ public class FieldUtilsTest {
 		assertThat(FieldUtils.isSell(DirectionEnum.D_Unknown)).isFalse();
 	}
 
+	
+	@Test
+	public void testIsOpposite() {
+		assertThat(FieldUtils.isOpposite(DirectionEnum.D_Buy, DirectionEnum.D_Sell)).isTrue();
+		assertThat(FieldUtils.isOpposite(DirectionEnum.D_Sell, DirectionEnum.D_Buy)).isTrue();
+		assertThat(FieldUtils.isOpposite(DirectionEnum.D_Unknown, DirectionEnum.D_Sell)).isFalse();
+		assertThat(FieldUtils.isOpposite(DirectionEnum.D_Buy, DirectionEnum.D_Unknown)).isFalse();
+	}
 }
