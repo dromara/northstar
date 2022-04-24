@@ -14,6 +14,7 @@ import tech.quantit.northstar.common.model.ModulePositionDescription;
 import tech.quantit.northstar.common.utils.OrderUtils;
 import tech.quantit.northstar.gateway.api.TradeGateway;
 import tech.quantit.northstar.strategy.api.ContextAware;
+import tech.quantit.northstar.strategy.api.IModule;
 import tech.quantit.northstar.strategy.api.IModuleContext;
 import tech.quantit.northstar.strategy.api.TradeStrategy;
 import tech.quantit.northstar.strategy.api.constant.PriceType;
@@ -40,9 +41,13 @@ public class ModuleContext implements IModuleContext{
 	
 	protected TradeStrategy tradeStrategy;
 	
+	protected IMarketDataStore mktStore;
+	
 	protected IModuleAccountStore accStore;
 	
 	protected IModuleOrderingStore orderStore;
+	
+	protected IModule module;
 	
 	protected Map<String, Boolean> orderIdMap = new HashMap<>();
 	
@@ -58,7 +63,6 @@ public class ModuleContext implements IModuleContext{
 			gatewayMap.put(tradeGateway.getGatewaySetting().getGatewayId(), tradeGateway);
 		}
 	}
-	
 
 	@Override
 	public ModuleDescription getModuleDescription() {
@@ -80,6 +84,8 @@ public class ModuleContext implements IModuleContext{
 			accMap.put(gatewayId, accDescription);
 		}
 		return ModuleDescription.builder()
+				.moduleName(module.getName())
+				.enabled(module.isEnabled())
 				.moduleState(orderStore.getModuleState())
 				.accountDescriptions(accMap)
 				.build();
@@ -168,6 +174,9 @@ public class ModuleContext implements IModuleContext{
 		if (component instanceof IModuleOrderingStore store) {
 			this.orderStore = store;
 		}
+		if (component instanceof IMarketDataStore store) {
+			this.mktStore = store;
+		}
 	}
 
 	@Override
@@ -178,6 +187,22 @@ public class ModuleContext implements IModuleContext{
 	@Override
 	public TradeStrategy getTradeStrategy() {
 		return tradeStrategy;
+	}
+
+
+	@Override
+	public void disabledModule() {
+		module.setEnabled(false);
+	}
+
+	@Override
+	public void setModule(IModule module) {
+		this.module = module;
+	}
+
+	@Override
+	public String getModuleName() {
+		return module.getName();
 	}
 
 }

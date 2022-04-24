@@ -1,4 +1,4 @@
-package tech.quantit.northstar.domain.module;
+package tech.quantit.northstar.strategy.api;
 
 import java.util.List;
 

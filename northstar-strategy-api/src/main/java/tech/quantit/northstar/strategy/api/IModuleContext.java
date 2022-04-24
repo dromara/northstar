@@ -52,4 +52,19 @@ public interface IModuleContext extends TickDataAware, BarDataAware, Transaction
 	 * @param component
 	 */
 	void setComponent(ContextAware component);
+	/**
+	 * 设置模组
+	 * @param module
+	 */
+	void setModule(IModule module);
+	/**
+	 * 停用模组策略
+	 * @param enabled
+	 */
+	void disabledModule();
+	/**
+	 * 获取模组名称
+	 * @return
+	 */
+	String getModuleName();
 }

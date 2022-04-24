@@ -25,6 +25,11 @@ public class ModuleAccountDescription {
 	 * 初始余额
 	 */
 	private double initBalance;
+	
+	/**
+	 * 交易手续费
+	 */
+	private double commissionPerDeal;
 
 	/**
 	 * 期初余额（开仓前计算）
