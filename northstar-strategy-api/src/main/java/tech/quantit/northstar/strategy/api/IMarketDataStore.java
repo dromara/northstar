@@ -1,10 +1,8 @@
-package tech.quantit.northstar.domain.module;
+package tech.quantit.northstar.strategy.api;
 
 import java.util.List;
 
 import tech.quantit.northstar.common.TickDataAware;
-import tech.quantit.northstar.strategy.api.BarDataAware;
-import tech.quantit.northstar.strategy.api.ContextAware;
 import xyz.redtorch.pb.CoreField.BarField;
 
 /**

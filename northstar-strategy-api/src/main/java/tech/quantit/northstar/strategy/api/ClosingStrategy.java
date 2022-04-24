@@ -1,5 +1,6 @@
-package tech.quantit.northstar.domain.module;
+package tech.quantit.northstar.strategy.api;
 
+import tech.quantit.northstar.common.constant.ClosingPolicy;
 import tech.quantit.northstar.common.constant.SignalOperation;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 
@@ -12,4 +13,10 @@ public interface ClosingStrategy {
 	 * @return
 	 */
 	OffsetFlagEnum resolveOperation(SignalOperation opr, IModuleAccountStore accStore);
+	
+	/**
+	 * 获取平仓策略
+	 * @return
+	 */
+	ClosingPolicy getClosingPolicy();
 }

@@ -21,6 +21,11 @@ public interface IModuleContext extends TickDataAware, BarDataAware, Transaction
 	 */
 	TradeStrategy getTradeStrategy();
 	/**
+	 * 获取平仓策略
+	 * @return
+	 */
+	ClosingStrategy getClosingStrategy();
+	/**
 	 * 获取模组状态
 	 * @return
 	 */
