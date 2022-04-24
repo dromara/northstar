@@ -2,6 +2,7 @@ package tech.quantit.northstar.strategy.api;
 
 import tech.quantit.northstar.common.TickDataAware;
 import tech.quantit.northstar.common.TransactionAware;
+import tech.quantit.northstar.common.constant.ClosingPolicy;
 import tech.quantit.northstar.common.constant.SignalOperation;
 import tech.quantit.northstar.common.model.ModuleDescription;
 import tech.quantit.northstar.strategy.api.constant.PriceType;
@@ -21,10 +22,10 @@ public interface IModuleContext extends TickDataAware, BarDataAware, Transaction
 	 */
 	TradeStrategy getTradeStrategy();
 	/**
-	 * 获取平仓策略
+	 * 获取平仓策略类型
 	 * @return
 	 */
-	ClosingStrategy getClosingStrategy();
+	ClosingPolicy getClosingPolicy();
 	/**
 	 * 获取模组状态
 	 * @return

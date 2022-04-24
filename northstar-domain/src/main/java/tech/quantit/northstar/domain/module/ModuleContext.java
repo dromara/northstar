@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
 
+import tech.quantit.northstar.common.constant.ClosingPolicy;
 import tech.quantit.northstar.common.constant.SignalOperation;
 import tech.quantit.northstar.common.exception.NoSuchElementException;
 import tech.quantit.northstar.common.model.ModuleAccountDescription;
@@ -13,9 +14,13 @@ import tech.quantit.northstar.common.model.ModuleDescription;
 import tech.quantit.northstar.common.model.ModulePositionDescription;
 import tech.quantit.northstar.common.utils.OrderUtils;
 import tech.quantit.northstar.gateway.api.TradeGateway;
+import tech.quantit.northstar.strategy.api.ClosingStrategy;
 import tech.quantit.northstar.strategy.api.ContextAware;
+import tech.quantit.northstar.strategy.api.IMarketDataStore;
 import tech.quantit.northstar.strategy.api.IModule;
+import tech.quantit.northstar.strategy.api.IModuleAccountStore;
 import tech.quantit.northstar.strategy.api.IModuleContext;
+import tech.quantit.northstar.strategy.api.IModuleOrderingStore;
 import tech.quantit.northstar.strategy.api.TradeStrategy;
 import tech.quantit.northstar.strategy.api.constant.PriceType;
 import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
@@ -203,6 +208,11 @@ public class ModuleContext implements IModuleContext{
 	@Override
 	public String getModuleName() {
 		return module.getName();
+	}
+
+	@Override
+	public ClosingPolicy getClosingPolicy() {
+		return closingStrategy.getClosingPolicy();
 	}
 
 }
