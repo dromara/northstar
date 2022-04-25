@@ -20,6 +20,7 @@ import xyz.redtorch.pb.CoreEnum.VolumeConditionEnum;
 import xyz.redtorch.pb.CoreField.CancelOrderReqField;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.GatewaySettingField;
+import xyz.redtorch.pb.CoreField.OrderField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TickField;
 import xyz.redtorch.pb.CoreField.TradeField;
@@ -96,6 +97,18 @@ public class TestFieldFactory {
 				.build();
 	}
 	
+	public OrderField makeOrderField(String symbol, double price, int vol, DirectionEnum dir, OffsetFlagEnum offset) {
+		return OrderField.newBuilder()
+				.setOriginOrderId(UUID.randomUUID().toString())
+				.setContract(makeContract(symbol))
+				.setPrice(price)
+				.setTotalVolume(vol)
+				.setDirection(dir)
+				.setOffsetFlag(offset)
+				.setTradingDay(LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
+				.build();
+	}
+	
 	public TradeField makeTradeField(String symbol, double price, int vol, DirectionEnum dir, OffsetFlagEnum offset) {
 		return TradeField.newBuilder()
 				.setOriginOrderId(UUID.randomUUID().toString())
@@ -108,4 +121,15 @@ public class TestFieldFactory {
 				.build();
 	}
 
+	public TradeField makeTradeField(String symbol, double price, int vol, DirectionEnum dir, OffsetFlagEnum offset, String tradingDay) {
+		return TradeField.newBuilder()
+				.setOriginOrderId(UUID.randomUUID().toString())
+				.setContract(makeContract(symbol))
+				.setPrice(price)
+				.setVolume(vol)
+				.setDirection(dir)
+				.setOffsetFlag(offset)
+				.setTradingDay(tradingDay)
+				.build();
+	}
 }

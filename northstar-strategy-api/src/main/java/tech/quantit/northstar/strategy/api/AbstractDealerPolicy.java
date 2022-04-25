@@ -173,7 +173,7 @@ public abstract class AbstractDealerPolicy implements DealerPolicy {
 		priceType = priceType == null ? PriceType.ANY_PRICE : priceType;	// 为防止子类没实现，默认使用市价，避免空指针异常
 		// 当信号价大于零时，优先使用信号价
 		double price = signalPrice > 0 ? signalPrice : PriceResolver.getPrice(priceType, signalPrice, lastTick, FieldUtils.isBuy(direction));
-		int factor = FieldUtils.isBuy(direction) ? 1 : -1;
+		int factor = FieldUtils.directionFactor(direction);
 		double stopPrice = ticksToStop > 0 ? lastTick.getLastPrice() - factor * ticksToStop * bindedContract.getPriceTick() : 0;
 		
 		return SubmitOrderReqField.newBuilder()

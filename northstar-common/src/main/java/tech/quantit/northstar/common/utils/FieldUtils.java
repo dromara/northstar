@@ -75,6 +75,14 @@ public class FieldUtils {
 		return dir == DirectionEnum.D_Sell;
 	}
 	
+	public static int directionFactor(DirectionEnum dir) {
+		return switch(dir) {
+		case D_Buy -> 1;
+		case D_Sell -> -1;
+		default -> 0;
+		};
+	}
+	
 	public static boolean isOpposite(DirectionEnum dir1, DirectionEnum dir2) {
 		return dir1 != dir2 && dir1 != DirectionEnum.D_Unknown && dir2 != DirectionEnum.D_Unknown;
 	}
