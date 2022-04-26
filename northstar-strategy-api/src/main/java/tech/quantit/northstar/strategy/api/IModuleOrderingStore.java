@@ -10,5 +10,8 @@ public interface IModuleOrderingStore extends TransactionAware, ContextAware{
 	ModuleState getModuleState();
 	
 	void registerGatewayBinding(ContractField contract, TradeGateway gateway);
-	
+	/**
+	 * 新交易日开盘前处理
+	 */
+	void tradeDayPreset();
 }

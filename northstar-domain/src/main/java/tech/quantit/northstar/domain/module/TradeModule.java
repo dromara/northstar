@@ -4,8 +4,11 @@ import java.util.List;
 
 import tech.quantit.northstar.common.event.NorthstarEvent;
 import tech.quantit.northstar.common.model.ModuleDescription;
+import tech.quantit.northstar.strategy.api.IMarketDataStore;
 import tech.quantit.northstar.strategy.api.IModule;
+import tech.quantit.northstar.strategy.api.IModuleAccountStore;
 import tech.quantit.northstar.strategy.api.IModuleContext;
+import tech.quantit.northstar.strategy.api.IModuleOrderingStore;
 import tech.quantit.northstar.strategy.api.TradeStrategy;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.OrderField;

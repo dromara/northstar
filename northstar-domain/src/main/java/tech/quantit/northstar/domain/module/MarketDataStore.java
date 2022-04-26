@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import tech.quantit.northstar.strategy.api.IMarketDataStore;
 import tech.quantit.northstar.strategy.api.IModuleContext;
 import tech.quantit.northstar.strategy.api.TradeStrategy;
 import xyz.redtorch.pb.CoreField.BarField;

@@ -1,7 +1,6 @@
 package tech.quantit.northstar.strategy.api;
 
 import java.util.List;
-import java.util.Optional;
 
 import tech.quantit.northstar.common.TickDataAware;
 import tech.quantit.northstar.common.TransactionAware;
@@ -41,7 +40,7 @@ public interface IModuleAccountStore extends TickDataAware, TransactionAware, Co
 	 * @param dir
 	 * @return
 	 */
-	Optional<TradeField> getUncloseTrade(String gatewayId, String unifiedSymbol, DirectionEnum dir);
+	List<TradeField> getUncloseTrade(String gatewayId, String unifiedSymbol, DirectionEnum dir);
 	/**
 	 * 获取逻辑持仓
 	 * @return
@@ -62,4 +61,8 @@ public interface IModuleAccountStore extends TickDataAware, TransactionAware, Co
 	 * @return
 	 */
 	double getAccCloseProfit(String gatewayId);
+	/**
+	 * 新交易日开盘前处理
+	 */
+	void tradeDayPreset();
 }
