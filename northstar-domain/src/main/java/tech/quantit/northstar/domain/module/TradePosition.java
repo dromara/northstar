@@ -248,7 +248,7 @@ public class TradePosition {
 	 * 场景：委托单跨交易日时，需要在开盘时处理
 	 */
 	public void releaseOrders() {
-		
+		pendingOrderMap.clear();
 	}
 
 }

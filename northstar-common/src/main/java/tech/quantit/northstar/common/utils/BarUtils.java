@@ -4,6 +4,7 @@ import java.util.List;
 
 import xyz.redtorch.pb.CoreField.BarField;
 
+@Deprecated
 public class BarUtils {
 
 	public BarUtils() {}

@@ -4,6 +4,7 @@ import java.util.List;
 
 import tech.quantit.northstar.common.TickDataAware;
 import tech.quantit.northstar.common.TransactionAware;
+import tech.quantit.northstar.common.constant.ModuleState;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreField.TradeField;
 
@@ -61,6 +62,11 @@ public interface IModuleAccountStore extends TickDataAware, TransactionAware, Co
 	 * @return
 	 */
 	double getAccCloseProfit(String gatewayId);
+	/**
+	 * 获取模组状态
+	 * @return
+	 */
+	ModuleState getModuleState();
 	/**
 	 * 新交易日开盘前处理
 	 */

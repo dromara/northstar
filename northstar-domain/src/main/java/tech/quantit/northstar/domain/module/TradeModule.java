@@ -8,7 +8,6 @@ import tech.quantit.northstar.strategy.api.IMarketDataStore;
 import tech.quantit.northstar.strategy.api.IModule;
 import tech.quantit.northstar.strategy.api.IModuleAccountStore;
 import tech.quantit.northstar.strategy.api.IModuleContext;
-import tech.quantit.northstar.strategy.api.IModuleOrderingStore;
 import tech.quantit.northstar.strategy.api.TradeStrategy;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.OrderField;
@@ -41,18 +40,15 @@ public class TradeModule implements IModule {
 	
 	private IModuleAccountStore accStore;
 	
-	private IModuleOrderingStore orderStore;
-	
 	private IModuleContext ctx;
 	
 	private TradeStrategy strategy;
 	
-	public TradeModule(String name, IMarketDataStore marketDataStore, IModuleAccountStore accountStore, IModuleOrderingStore orderStore,
+	public TradeModule(String name, IMarketDataStore marketDataStore, IModuleAccountStore accountStore,
 			IModuleContext context, TradeStrategy strategy) {
 		this.name = name;
 		this.mktDataStore = marketDataStore;
 		this.accStore = accountStore;
-		this.orderStore = orderStore;
 		this.ctx = context;
 		this.strategy = strategy;
 	}
@@ -77,7 +73,6 @@ public class TradeModule implements IModule {
 	public void initModule() {
 		ctx.setComponent(mktDataStore);
 		ctx.setComponent(accStore);
-		ctx.setComponent(orderStore);
 		ctx.setTradeStrategy(strategy);
 		ctx.setModule(this);
 	}
@@ -95,10 +90,8 @@ public class TradeModule implements IModule {
 		} else if (data instanceof BarField bar) {
 			mktDataStore.onBar(bar);
 		} else if (data instanceof OrderField order) {
-			orderStore.onOrder(order);
 			accStore.onOrder(order);
 		} else if (data instanceof TradeField trade) {
-			orderStore.onTrade(trade);
 			accStore.onTrade(trade);
 		}
 	}

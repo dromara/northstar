@@ -20,7 +20,6 @@ import tech.quantit.northstar.strategy.api.IMarketDataStore;
 import tech.quantit.northstar.strategy.api.IModule;
 import tech.quantit.northstar.strategy.api.IModuleAccountStore;
 import tech.quantit.northstar.strategy.api.IModuleContext;
-import tech.quantit.northstar.strategy.api.IModuleOrderingStore;
 import tech.quantit.northstar.strategy.api.TradeStrategy;
 import tech.quantit.northstar.strategy.api.constant.PriceType;
 import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
@@ -49,8 +48,6 @@ public class ModuleContext implements IModuleContext{
 	protected IMarketDataStore mktStore;
 	
 	protected IModuleAccountStore accStore;
-	
-	protected IModuleOrderingStore orderStore;
 	
 	protected IModule module;
 	
@@ -91,7 +88,7 @@ public class ModuleContext implements IModuleContext{
 		return ModuleDescription.builder()
 				.moduleName(module.getName())
 				.enabled(module.isEnabled())
-				.moduleState(orderStore.getModuleState())
+				.moduleState(accStore.getModuleState())
 				.accountDescriptions(accMap)
 				.build();
 	}
@@ -175,9 +172,6 @@ public class ModuleContext implements IModuleContext{
 		component.setContext(this);
 		if(component instanceof IModuleAccountStore store) {
 			this.accStore = store;
-		}
-		if (component instanceof IModuleOrderingStore store) {
-			this.orderStore = store;
 		}
 		if (component instanceof IMarketDataStore store) {
 			this.mktStore = store;
