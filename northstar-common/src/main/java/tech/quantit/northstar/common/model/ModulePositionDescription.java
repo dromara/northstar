@@ -19,15 +19,20 @@ import lombok.NoArgsConstructor;
 public class ModulePositionDescription {
 
 	/**
-	 * 逻辑持仓
+	 * 逻辑持仓净手数
 	 * 0代表无持仓，正数代表多头n手，负数代表空头n手
 	 */
-	private int logicalPosition;
+	private int netVolume;
 	
 	/**
-	 * 逻辑持仓盈亏
+	 * 逻辑持仓净盈亏
 	 */
-	private double logicalPositionProfit;
+	private double netProfit;
+	
+	/**
+	 * 逻辑持仓
+	 */
+	private List<byte[]> logicalPositions;
 	
 	/**
 	 * 未平仓成交（以TradeField的字节数组表示一个未平仓成交）

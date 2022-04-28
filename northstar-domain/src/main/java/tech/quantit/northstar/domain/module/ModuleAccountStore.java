@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 
 import org.springframework.util.Assert;
 
@@ -26,6 +25,7 @@ import tech.quantit.northstar.strategy.api.IModuleAccountStore;
 import tech.quantit.northstar.strategy.api.IModuleContext;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreField.OrderField;
+import xyz.redtorch.pb.CoreField.PositionField;
 import xyz.redtorch.pb.CoreField.TickField;
 import xyz.redtorch.pb.CoreField.TradeField;
 
@@ -134,7 +134,7 @@ public class ModuleAccountStore implements IModuleAccountStore {
 	}
 
 	@Override
-	public List<TradeField> getUncloseTrade(String gatewayId) {
+	public List<TradeField> getUncloseTrades(String gatewayId) {
 		Collection<TradePosition> buyOpenPositions = buyPositionTbl.row(gatewayId).values();
 		Collection<TradePosition> sellOpenPositions = sellPositionTbl.row(gatewayId).values();
 		List<TradeField> resultList = new ArrayList<>();
@@ -153,13 +153,13 @@ public class ModuleAccountStore implements IModuleAccountStore {
 	}
 
 	@Override
-	public int getLogicalPosition(String gatewayId) {
+	public int getNetVolume(String gatewayId) {
 		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
-	public double getLogicalPositionProfit(String gatewayId) {
+	public double getNetProfit(String gatewayId) {
 		// TODO Auto-generated method stub
 		return 0;
 	}
@@ -193,6 +193,12 @@ public class ModuleAccountStore implements IModuleAccountStore {
 
 	@Override
 	public ModuleState getModuleState() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<PositionField> getPositions(String gatewayId) {
 		// TODO Auto-generated method stub
 		return null;
 	}

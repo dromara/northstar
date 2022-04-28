@@ -6,6 +6,7 @@ import tech.quantit.northstar.common.TickDataAware;
 import tech.quantit.northstar.common.TransactionAware;
 import tech.quantit.northstar.common.constant.ModuleState;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
+import xyz.redtorch.pb.CoreField.PositionField;
 import xyz.redtorch.pb.CoreField.TradeField;
 
 /**
@@ -31,10 +32,16 @@ public interface IModuleAccountStore extends TickDataAware, TransactionAware, Co
 	 */
 	double getAvailable(String gatewayId);
 	/**
+	 * 获取持仓信息
+	 * @param gatewayId
+	 * @return
+	 */
+	List<PositionField> getPositions(String gatewayId);
+	/**
 	 * 获取全部未平仓成交
 	 * @return
 	 */
-	List<TradeField> getUncloseTrade(String gatewayId);
+	List<TradeField> getUncloseTrades(String gatewayId);
 	/**
 	 * 获取未平仓成交
 	 * @param unifiedSymbol
@@ -46,12 +53,12 @@ public interface IModuleAccountStore extends TickDataAware, TransactionAware, Co
 	 * 获取逻辑持仓
 	 * @return
 	 */
-	int getLogicalPosition(String gatewayId);
+	int getNetVolume(String gatewayId);
 	/**
 	 * 获取逻辑持仓盈亏
 	 * @return
 	 */
-	double getLogicalPositionProfit(String gatewayId);
+	double getNetProfit(String gatewayId);
 	/**
 	 * 获取累计开平仓手数
 	 * @return

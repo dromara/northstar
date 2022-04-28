@@ -32,6 +32,7 @@ import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.CancelOrderReqField;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.OrderField;
+import xyz.redtorch.pb.CoreField.PositionField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TickField;
 import xyz.redtorch.pb.CoreField.TradeField;
@@ -71,9 +72,10 @@ public class ModuleContext implements IModuleContext{
 		Map<String, ModuleAccountDescription> accMap = new HashMap<>();
 		for(String gatewayId : gatewayMap.keySet()) {
 			ModulePositionDescription posDescription = ModulePositionDescription.builder()
-					.logicalPosition(accStore.getLogicalPosition(gatewayId))
-					.logicalPositionProfit(accStore.getLogicalPositionProfit(gatewayId))
-					.uncloseTrades(accStore.getUncloseTrade(gatewayId).stream().map(TradeField::toByteArray).toList())
+					.netVolume(accStore.getNetVolume(gatewayId))
+					.netProfit(accStore.getNetProfit(gatewayId))
+					.logicalPositions(accStore.getPositions(gatewayId).stream().map(PositionField::toByteArray).toList())
+					.uncloseTrades(accStore.getUncloseTrades(gatewayId).stream().map(TradeField::toByteArray).toList())
 					.build();
 			
 			ModuleAccountDescription accDescription = ModuleAccountDescription.builder()
