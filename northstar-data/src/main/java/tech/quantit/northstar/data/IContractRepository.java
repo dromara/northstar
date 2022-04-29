@@ -17,17 +17,25 @@ public interface IContractRepository {
 	 * @param contracts
 	 */
 	void batchSave(List<ContractField> contracts);
-	
+
 	/**
 	 * 保存合约信息
 	 * @param contract
 	 */
 	void save(ContractField contract);
-	
+
 	/**
 	 * 按合约类型查询合约
 	 * @param type
 	 * @return
 	 */
 	List<ContractField> findAllByType(ProductClassEnum type);
+
+	/**
+	 * 根据gatewayId查询合约
+	 *
+	 * @param gatewayId
+	 * @return
+	 */
+	List<ContractField> getByGateWayId(String gatewayId);
 }

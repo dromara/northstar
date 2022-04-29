@@ -26,13 +26,13 @@ import xyz.redtorch.pb.CoreField.ContractField;
  */
 @Slf4j
 public class ContractRepoRedisImpl implements IContractRepository {
-	
+
 	private RedisTemplate<String, byte[]> redisTemplate;
-	
+
 	private static final String PREFIX = "contract:";
-	
+
 	private static final Set<byte[]> EMPTY_SET = new HashSet<>(0);
-	
+
 	public ContractRepoRedisImpl(RedisTemplate<String, byte[]> redisTemplate) {
 		this.redisTemplate = redisTemplate;
 	}
@@ -61,11 +61,32 @@ public class ContractRepoRedisImpl implements IContractRepository {
 				.filter(item -> Objects.nonNull(item) && nonExpired(item.getLastTradeDateOrContractMonth()))
 				.toList();
 	}
-	
+
+
+	/**
+	 * 根据gatewayId查询合约
+	 * TODO 待实现
+	 *
+	 * @param gatewayId
+	 * @return
+	 */
+	@Override
+	public List<ContractField> getByGateWayId(String gatewayId){
+		String type = "";
+		String key = PREFIX + type;
+		BoundSetOperations<String, byte[]> opt = redisTemplate.boundSetOps(key);
+		return Optional.ofNullable(opt.members())
+				.orElse(EMPTY_SET)
+				.stream()
+				.map(this::convertObject)
+				.filter(item -> Objects.nonNull(item) && nonExpired(item.getLastTradeDateOrContractMonth()))
+				.toList();
+	}
+
 	private boolean nonExpired(String expiredDate) {
 		return StringUtils.isNotBlank(expiredDate) && LocalDate.parse(expiredDate, DateTimeConstant.D_FORMAT_INT_FORMATTER).isAfter(LocalDate.now());
 	}
-	
+
 	private ContractField convertObject(byte[] data) {
 		try {
 			return ContractField.parseFrom(data);

@@ -16,16 +16,26 @@ public interface IGatewayRepository {
 	 * @param gatewayDescription
 	 */
 	void insert(GatewayDescription gatewayDescription);
+
 	/**
 	 * 更新网关
 	 * @param gatewayDescription
 	 */
 	void save(GatewayDescription gatewayDescription);
+
 	/**
 	 * 删除网关
 	 * @param gatewayId
 	 */
 	void deleteById(String gatewayId);
+
+	/**
+	 * 根据网关Id取得网关
+	 * @param gatewayId
+	 * @return
+	 */
+	GatewayDescription selectById(String gatewayId);
+
 	/**
 	 * 查询网关
 	 * @return

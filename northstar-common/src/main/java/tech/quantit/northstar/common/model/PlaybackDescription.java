@@ -44,4 +44,12 @@ public class PlaybackDescription {
 	 * 回测交易手续费（以元为单位）
 	 */
 	private int fee;
+	/**
+	 * 每秒钟回放的数据条数
+	 */
+	private int replayRate;
+	/**
+	 * 定多个读取数据的线程数可提升数据读取速度
+	 */
+	private int parallelLevel;
 }
