@@ -1,8 +1,6 @@
 package tech.quantit.northstar.gateway.playback;
 
 import org.springframework.scheduling.TaskScheduler;
-import tech.quantit.northstar.common.constant.DateTimeConstant;
-import tech.quantit.northstar.common.constant.PlaybackPrecision;
 import tech.quantit.northstar.common.model.GatewayDescription;
 import tech.quantit.northstar.common.model.PlaybackDescription;
 import tech.quantit.northstar.common.model.SimAccountDescription;
@@ -12,13 +10,11 @@ import tech.quantit.northstar.data.IMarketDataRepository;
 import tech.quantit.northstar.data.ISimAccountRepository;
 import xyz.redtorch.pb.CoreField;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
-import java.util.concurrent.TimeUnit;
 
 /**
  * 准备市场数据
@@ -28,8 +24,6 @@ import java.util.concurrent.TimeUnit;
 public class MarketDataSim {
 
     private Map<String, PriorityQueue<CoreField.TickField>> tickData = new HashMap<String, PriorityQueue<CoreField.TickField>>();
-
-    private final TaskScheduler taskScheduler;
 
     private final PlaybackDescription playbackDescription;
 
@@ -44,7 +38,6 @@ public class MarketDataSim {
     public MarketDataSim(TaskScheduler taskScheduler, PlaybackDescription playbackDescription,
                          IMarketDataRepository marketDataRepository, ISimAccountRepository simAccountRepository,
                          IGatewayRepository gatewayRepository, IContractRepository contractRepository) {
-        this.taskScheduler = taskScheduler;
         this.playbackDescription = playbackDescription;
         this.marketDataRepository = marketDataRepository;
         this.simAccountRepository = simAccountRepository;
@@ -80,24 +73,5 @@ public class MarketDataSim {
        });
     }
 
-
-    /**
-     * 回放数据
-     *
-     * @param inputTables
-     * @param outputTables
-     * @param replayRate 每秒钟回放的数据条数 正常、快速。正常速度为每秒 2 个TICK，快速则每秒 20 个TICK；
-     * @param parallelLevel 指定多个读取数据的线程数可提升数据读取速度。默认为 1
-     */
-    public void replay( PriorityQueue<CoreField.TickField> inputTables,  PriorityQueue<CoreField.TickField> outputTables,
-                        int replayRate, int parallelLevel) {
-        PlaybackDescription playbackDescription = new PlaybackDescription();
-
-
-        taskScheduler.scheduleAtFixedRate(()-> {
-            // 取得当前时间
-
-        }, replayRate, TimeUnit.MILLISECONDS);
-    }
 
 }
