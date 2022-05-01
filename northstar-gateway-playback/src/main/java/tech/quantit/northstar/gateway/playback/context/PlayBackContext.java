@@ -1,11 +1,15 @@
 package tech.quantit.northstar.gateway.playback.context;
 
 import tech.quantit.northstar.common.model.PlaybackDescription;
-import tech.quantit.northstar.common.model.SimAccountDescription;
 import xyz.redtorch.pb.CoreField;
 
 import java.util.List;
 
+/**
+ * 回放数据上下文
+ *
+ * @author changsong
+ */
 public class PlayBackContext {
 
     /**

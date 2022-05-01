@@ -1,6 +1,5 @@
 package tech.quantit.northstar.gateway.playback;
 
-import org.springframework.scheduling.TaskScheduler;
 import tech.quantit.northstar.common.model.GatewayDescription;
 import tech.quantit.northstar.common.model.PlaybackDescription;
 import tech.quantit.northstar.common.model.SimAccountDescription;
@@ -35,7 +34,7 @@ public class MarketDataSim {
 
     private final IContractRepository contractRepository;
 
-    public MarketDataSim(TaskScheduler taskScheduler, PlaybackDescription playbackDescription,
+    public MarketDataSim(PlaybackDescription playbackDescription,
                          IMarketDataRepository marketDataRepository, ISimAccountRepository simAccountRepository,
                          IGatewayRepository gatewayRepository, IContractRepository contractRepository) {
         this.playbackDescription = playbackDescription;
@@ -49,7 +48,7 @@ public class MarketDataSim {
      * 按照一定的周期，从数据库中读取数据，并将数据放入队列中
      *
      * @param accountId 账户ID
-     * @param curDate
+     * @param curDate 加载日期
      * @param parallelLevel 并行数据加载
      */
     public void loadData(String accountId, LocalDateTime curDate, int parallelLevel) {
@@ -73,5 +72,8 @@ public class MarketDataSim {
        });
     }
 
+    public Map<String, PriorityQueue<CoreField.TickField>> getTickData() {
+        return tickData;
+    }
 
 }
