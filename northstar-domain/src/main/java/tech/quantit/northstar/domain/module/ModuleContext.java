@@ -16,7 +16,6 @@ import tech.quantit.northstar.common.utils.OrderUtils;
 import tech.quantit.northstar.gateway.api.TradeGateway;
 import tech.quantit.northstar.strategy.api.ClosingStrategy;
 import tech.quantit.northstar.strategy.api.ContextAware;
-import tech.quantit.northstar.strategy.api.IMarketDataStore;
 import tech.quantit.northstar.strategy.api.IModule;
 import tech.quantit.northstar.strategy.api.IModuleAccountStore;
 import tech.quantit.northstar.strategy.api.IModuleContext;
@@ -46,15 +45,18 @@ public class ModuleContext implements IModuleContext{
 	
 	protected TradeStrategy tradeStrategy;
 	
-	protected IMarketDataStore mktStore;
-	
 	protected IModuleAccountStore accStore;
 	
 	protected IModule module;
 	
+	/* originOrderId -> boolean */
 	protected Map<String, Boolean> orderIdMap = new HashMap<>();
 	
+	/* gatewayId -> gateway */
 	private Map<String, TradeGateway> gatewayMap = new HashMap<>();
+	
+	/* unifiedSymbol -> barMerger */
+	private Map<String, BarMerger> contractBarMergerMap = new HashMap<>();
 	
 	private String tradingDay;
 	
@@ -72,8 +74,6 @@ public class ModuleContext implements IModuleContext{
 		Map<String, ModuleAccountDescription> accMap = new HashMap<>();
 		for(String gatewayId : gatewayMap.keySet()) {
 			ModulePositionDescription posDescription = ModulePositionDescription.builder()
-					.netVolume(accStore.getNetVolume(gatewayId))
-					.netProfit(accStore.getNetProfit(gatewayId))
 					.logicalPositions(accStore.getPositions(gatewayId).stream().map(PositionField::toByteArray).toList())
 					.uncloseTrades(accStore.getUncloseTrades(gatewayId).stream().map(TradeField::toByteArray).toList())
 					.build();
@@ -90,7 +90,7 @@ public class ModuleContext implements IModuleContext{
 		return ModuleDescription.builder()
 				.moduleName(module.getName())
 				.enabled(module.isEnabled())
-				.moduleState(accStore.getModuleState())
+				.moduleState(accStore.getModuleStateMachine().getState())
 				.accountDescriptions(accMap)
 				.build();
 	}
@@ -138,19 +138,28 @@ public class ModuleContext implements IModuleContext{
 		gatewayMap.get(gatewayId).cancelOrder(cancelReq);
 	}
 
+	/* 此处收到的TICK数据是所有订阅的数据，需要过滤 */
 	@Override
 	public void onTick(TickField tick) {
+		if(!contractBarMergerMap.containsKey(tick.getUnifiedSymbol())) {
+			return;
+		}
 		if(!StringUtils.equals(tradingDay, tick.getTradingDay())) {
 			tradingDay = tick.getTradingDay();
 		}
-		tradeStrategy.onTick(tick);
+		tradeStrategy.onTick(tick, module.isEnabled());
 	}
 	
+	/* 此处收到的BAR数据是所有订阅的数据，需要过滤 */
 	@Override
 	public void onBar(BarField bar) {
-		tradeStrategy.onBar(bar);
+		if(!contractBarMergerMap.containsKey(bar.getUnifiedSymbol())) {
+			return;
+		}
+		tradeStrategy.onBar(bar, module.isEnabled());
 	}
 	
+	/* 此处收到的ORDER数据是所有订单回报，需要过滤 */
 	@Override
 	public void onOrder(OrderField order) {
 		if(OrderUtils.isValidOrder(order)) {
@@ -158,26 +167,24 @@ public class ModuleContext implements IModuleContext{
 		} else {
 			orderIdMap.remove(order.getOriginOrderId());
 		}
+		accStore.onOrder(order);
 		tradeStrategy.onOrder(order);
 	}
 
+	/* 此处收到的TRADE数据是所有成交回报，需要过滤 */
 	@Override
 	public void onTrade(TradeField trade) {
 		if(orderIdMap.containsKey(trade.getOriginOrderId())) {
 			orderIdMap.remove(trade.getOriginOrderId());
 		}
+		accStore.onTrade(trade);
 		tradeStrategy.onTrade(trade);
 	}
 
 	@Override
-	public void setComponent(ContextAware component) {
-		component.setContext(this);
-		if(component instanceof IModuleAccountStore store) {
-			this.accStore = store;
-		}
-		if (component instanceof IMarketDataStore store) {
-			this.mktStore = store;
-		}
+	public void setAccountStore(IModuleAccountStore store) {
+		store.setContext(this);
+		this.accStore = store;
 	}
 
 	@Override

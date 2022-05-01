@@ -14,8 +14,10 @@ import tech.quantit.northstar.common.utils.FieldUtils;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreEnum.OrderStatusEnum;
+import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.OrderField;
+import xyz.redtorch.pb.CoreField.PositionField;
 import xyz.redtorch.pb.CoreField.TickField;
 import xyz.redtorch.pb.CoreField.TradeField;
 
@@ -241,6 +243,33 @@ public class TradePosition {
 	public double totalMargin() {
 		double ratio = FieldUtils.isBuy(dir) ? contract.getLongMarginRatio() : contract.getShortMarginRatio();
 		return totalVolume() * avgOpenPrice() * contract.getMultiplier() * ratio;
+	}
+	
+	/**
+	 * 持仓信息汇总
+	 * @return
+	 */
+	public PositionField convertToPositionField() {
+		int factor = FieldUtils.directionFactor(dir);
+		return PositionField.newBuilder()
+				.setContract(contract)
+				.setFrozen(totalVolume() - totalAvailable())
+				.setTdFrozen(tdVolume() - tdAvailable())
+				.setYdFrozen(ydVolume() - ydAvailable())
+				.setPosition(totalVolume())
+				.setTdPosition(tdVolume())
+				.setYdPosition(ydVolume())
+				.setExchangeMargin(totalMargin())
+				.setUseMargin(totalMargin())
+				.setLastPrice(lastTick.getLastPrice())
+				.setOpenPrice(avgOpenPrice())
+				.setOpenPriceDiff(factor * (lastTick.getLastPrice() - avgOpenPrice()))
+				.setPrice(avgOpenPrice())
+				.setPriceDiff(factor * (lastTick.getLastPrice() - avgOpenPrice()))
+				.setPositionProfit(profit())
+				.setOpenPositionProfit(profit())
+				.setPositionDirection(FieldUtils.isBuy(dir) ? PositionDirectionEnum.PD_Long : PositionDirectionEnum.PD_Short)
+				.build();
 	}
 	
 	/**

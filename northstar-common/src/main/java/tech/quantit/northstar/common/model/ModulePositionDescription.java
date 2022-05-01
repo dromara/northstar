@@ -19,17 +19,6 @@ import lombok.NoArgsConstructor;
 public class ModulePositionDescription {
 
 	/**
-	 * 逻辑持仓净手数
-	 * 0代表无持仓，正数代表多头n手，负数代表空头n手
-	 */
-	private int netVolume;
-	
-	/**
-	 * 逻辑持仓净盈亏
-	 */
-	private double netProfit;
-	
-	/**
 	 * 逻辑持仓
 	 */
 	private List<byte[]> logicalPositions;

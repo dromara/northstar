@@ -55,9 +55,9 @@ public interface IModuleContext extends TickDataAware, BarDataAware, Transaction
 	void cancelOrderReq(CancelOrderReqField cancelReq);
 	/**
 	 * 设置组件
-	 * @param component
+	 * @param store
 	 */
-	void setComponent(ContextAware component);
+	void setAccountStore(IModuleAccountStore store);
 	/**
 	 * 设置模组
 	 * @param module

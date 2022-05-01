@@ -16,13 +16,13 @@ import com.google.protobuf.InvalidProtocolBufferException;
 
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.constant.ClosingPolicy;
-import tech.quantit.northstar.common.constant.ModuleState;
 import tech.quantit.northstar.common.exception.NoSuchElementException;
 import tech.quantit.northstar.common.model.ModuleAccountDescription;
 import tech.quantit.northstar.common.model.ModuleDescription;
 import tech.quantit.northstar.common.utils.FieldUtils;
 import tech.quantit.northstar.strategy.api.IModuleAccountStore;
 import tech.quantit.northstar.strategy.api.IModuleContext;
+import tech.quantit.northstar.strategy.api.IModuleStateMachine;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreField.OrderField;
 import xyz.redtorch.pb.CoreField.PositionField;
@@ -51,6 +51,9 @@ public class ModuleAccountStore implements IModuleAccountStore {
 	/* gatewayId -> accCloseProfit */
 	private Map<String, Double> accCloseProfitMap = new HashMap<>();
 	
+	private ModuleStateMachine sm = new ModuleStateMachine();
+	
+	
 	public ModuleAccountStore(ModuleDescription moduleDescription) {
 		ClosingPolicy closingPolicy = ctx.getClosingPolicy();
 		for(ModuleAccountDescription mad : moduleDescription.getAccountDescriptions().values()) {
@@ -76,6 +79,8 @@ public class ModuleAccountStore implements IModuleAccountStore {
 				} else {
 					tbl.put(gatewayId, unifiedSymbol, new TradePosition(List.of(trade), closingPolicy));
 				}
+				sm.onTrade(trade);
+				
 			}
 		}
 	}
@@ -89,10 +94,16 @@ public class ModuleAccountStore implements IModuleAccountStore {
 		}
 	}
 	
+	@Override
+	public IModuleStateMachine getModuleStateMachine() {
+		return sm;
+	}
+	
 	/* 更新 */
 	@Override
 	public void onOrder(OrderField order) {
-		
+		buyPositionTbl.values().stream().forEach(tp -> tp.onOrder(order));
+		sellPositionTbl.values().stream().forEach(tp -> tp.onOrder(order));
 	}
 
 	@Override
@@ -104,8 +115,8 @@ public class ModuleAccountStore implements IModuleAccountStore {
 	/* 更新持仓盈亏 */
 	@Override
 	public void onTick(TickField tick) {
-		// TODO Auto-generated method stub
-		
+		buyPositionTbl.values().stream().forEach(tp -> tp.updateTick(tick));
+		sellPositionTbl.values().stream().forEach(tp -> tp.updateTick(tick));
 	}
 
 	@Override
@@ -142,7 +153,7 @@ public class ModuleAccountStore implements IModuleAccountStore {
 		sellOpenPositions.stream().forEach(tp -> resultList.addAll(tp.getUncloseTrades()));
 		return resultList;
 	}
-
+	
 	@Override
 	public List<TradeField> getUncloseTrade(String gatewayId, String unifiedSymbol, DirectionEnum dir) {
 		Table<String, String, TradePosition> tbl = FieldUtils.isBuy(dir) ? buyPositionTbl : sellPositionTbl;
@@ -150,18 +161,6 @@ public class ModuleAccountStore implements IModuleAccountStore {
 			return tbl.get(gatewayId, unifiedSymbol).getUncloseTrades();
 		}
 		return Collections.emptyList();
-	}
-
-	@Override
-	public int getNetVolume(String gatewayId) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public double getNetProfit(String gatewayId) {
-		// TODO Auto-generated method stub
-		return 0;
 	}
 
 	@Override
@@ -192,15 +191,11 @@ public class ModuleAccountStore implements IModuleAccountStore {
 	}
 
 	@Override
-	public ModuleState getModuleState() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public List<PositionField> getPositions(String gatewayId) {
-		// TODO Auto-generated method stub
-		return null;
+		List<PositionField> positionList = new ArrayList<>();
+		positionList.addAll(buyPositionTbl.values().stream().map(TradePosition::convertToPositionField).toList());
+		positionList.addAll(sellPositionTbl.values().stream().map(TradePosition::convertToPositionField).toList());
+		return positionList;
 	}
 
 }
