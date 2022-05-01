@@ -6,6 +6,8 @@ public interface Constants {
 
 	String GATEWAY_CONTRACT_MAP = "GatewayContractMap";
 	
+	String MOCK_ORDER_ID = "MockOrderId";
+	
 	String KEY_USER = "USER";
 	
 	String PLAYBACK_GATEWAY = "PlaybackGateway";

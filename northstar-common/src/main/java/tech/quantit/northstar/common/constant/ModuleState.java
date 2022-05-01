@@ -22,15 +22,11 @@ public enum ModuleState {
 	/**
 	 * 持仓对冲锁仓（合约相同，持仓数量相等，方向相反）
 	 */
-	HEDGE_EQUAL,
+	EMPTY_HEDGE,
 	/**
-	 * 套利持仓（多远月，空近月）
+	 * 套利持仓
 	 */
-	HEDGE_LONG,
-	/**
-	 * 套利持仓（空远月，多近月）
-	 */
-	HEDGE_SHORT,
+	HOLDING_HEDGE,
 	/**
 	 * 下单中
 	 */
@@ -50,7 +46,7 @@ public enum ModuleState {
 	
 	
 	public boolean isHolding() {
-		return this == HOLDING_LONG || this == HOLDING_SHORT || this == HEDGE_LONG || this == HEDGE_SHORT;
+		return this == HOLDING_LONG || this == HOLDING_SHORT || this == HOLDING_HEDGE;
 	}
 	
 	public boolean isWaiting() {
@@ -62,6 +58,6 @@ public enum ModuleState {
 	}
 	
 	public boolean isEmpty() {
-		return this ==  EMPTY || this == HEDGE_EQUAL;
+		return this ==  EMPTY || this == EMPTY_HEDGE;
 	}
 }
