@@ -1,5 +1,6 @@
 package tech.quantit.northstar.common.model;
 
+import java.util.Collections;
 import java.util.List;
 
 import lombok.AllArgsConstructor;
@@ -21,11 +22,13 @@ public class ModulePositionDescription {
 	/**
 	 * 逻辑持仓
 	 */
-	private List<byte[]> logicalPositions;
+	@Builder.Default
+	private List<byte[]> logicalPositions = Collections.emptyList();
 	
 	/**
 	 * 未平仓成交（以TradeField的字节数组表示一个未平仓成交）
 	 * 也可以理解为物理持仓
 	 */
-	private List<byte[]> uncloseTrades;
+	@Builder.Default
+	private List<byte[]> uncloseTrades = Collections.emptyList();
 }

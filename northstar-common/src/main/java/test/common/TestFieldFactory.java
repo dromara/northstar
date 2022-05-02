@@ -120,6 +120,7 @@ public class TestFieldFactory {
 				.setOffsetFlag(offset)
 				.setOrderStatus(status)
 				.setTradingDay(LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
+				.setGatewayId(gatewayId)
 				.build();
 	}
 	
@@ -132,6 +133,7 @@ public class TestFieldFactory {
 				.setDirection(dir)
 				.setOffsetFlag(offset)
 				.setTradingDay(LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
+				.setGatewayId(gatewayId)
 				.build();
 	}
 
@@ -144,6 +146,7 @@ public class TestFieldFactory {
 				.setDirection(dir)
 				.setOffsetFlag(offset)
 				.setTradingDay(tradingDay)
+				.setGatewayId(gatewayId)
 				.build();
 	}
 }

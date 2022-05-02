@@ -4,8 +4,10 @@ import java.util.List;
 
 import tech.quantit.northstar.common.TickDataAware;
 import tech.quantit.northstar.common.TransactionAware;
-import xyz.redtorch.pb.CoreEnum.DirectionEnum;
+import tech.quantit.northstar.common.constant.ModuleState;
+import xyz.redtorch.pb.CoreField.CancelOrderReqField;
 import xyz.redtorch.pb.CoreField.PositionField;
+import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TradeField;
 
 /**
@@ -13,7 +15,7 @@ import xyz.redtorch.pb.CoreField.TradeField;
  * @author KevinHuangwl
  *
  */
-public interface IModuleAccountStore extends TickDataAware, TransactionAware, ContextAware{
+public interface IModuleAccountStore extends TickDataAware, TransactionAware {
 	/**
 	 * 初始余额
 	 * @return
@@ -25,12 +27,6 @@ public interface IModuleAccountStore extends TickDataAware, TransactionAware, Co
 	 */
 	double getPreBalance(String gatewayId);
 	/**
-	 * 可用余额
-	 * @param gatewayId
-	 * @return
-	 */
-	double getAvailable(String gatewayId);
-	/**
 	 * 获取持仓信息
 	 * @param gatewayId
 	 * @return
@@ -41,13 +37,6 @@ public interface IModuleAccountStore extends TickDataAware, TransactionAware, Co
 	 * @return
 	 */
 	List<TradeField> getUncloseTrades(String gatewayId);
-	/**
-	 * 获取未平仓成交
-	 * @param unifiedSymbol
-	 * @param dir
-	 * @return
-	 */
-	List<TradeField> getUncloseTrade(String gatewayId, String unifiedSymbol, DirectionEnum dir);
 	/**
 	 * 获取累计开平仓手数
 	 * @return
@@ -63,8 +52,18 @@ public interface IModuleAccountStore extends TickDataAware, TransactionAware, Co
 	 */
 	void tradeDayPreset();
 	/**
-	 * 获取模组状态机
+	 * 获取模组状态
 	 * @return
 	 */
-	IModuleStateMachine getModuleStateMachine();
+	ModuleState getModuleState();
+	/**
+	 * 响应下单
+	 * @param submitOrder
+	 */
+	void onSubmitOrder(SubmitOrderReqField submitOrder);
+	/**
+	 * 响应撤单
+	 * @param cancelOrder
+	 */
+	void onCancelOrder(CancelOrderReqField cancelOrder);
 }

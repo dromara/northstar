@@ -7,6 +7,7 @@ import java.util.UUID;
 import org.apache.commons.lang3.StringUtils;
 
 import tech.quantit.northstar.common.constant.ClosingPolicy;
+import tech.quantit.northstar.common.constant.Constants;
 import tech.quantit.northstar.common.constant.SignalOperation;
 import tech.quantit.northstar.common.exception.NoSuchElementException;
 import tech.quantit.northstar.common.model.ModuleAccountDescription;
@@ -15,7 +16,6 @@ import tech.quantit.northstar.common.model.ModulePositionDescription;
 import tech.quantit.northstar.common.utils.OrderUtils;
 import tech.quantit.northstar.gateway.api.TradeGateway;
 import tech.quantit.northstar.strategy.api.ClosingStrategy;
-import tech.quantit.northstar.strategy.api.ContextAware;
 import tech.quantit.northstar.strategy.api.IModule;
 import tech.quantit.northstar.strategy.api.IModuleAccountStore;
 import tech.quantit.northstar.strategy.api.IModuleContext;
@@ -90,7 +90,7 @@ public class ModuleContext implements IModuleContext{
 		return ModuleDescription.builder()
 				.moduleName(module.getName())
 				.enabled(module.isEnabled())
-				.moduleState(accStore.getModuleStateMachine().getState())
+				.moduleState(accStore.getModuleState())
 				.accountDescriptions(accMap)
 				.build();
 	}
@@ -162,6 +162,9 @@ public class ModuleContext implements IModuleContext{
 	/* 此处收到的ORDER数据是所有订单回报，需要过滤 */
 	@Override
 	public void onOrder(OrderField order) {
+		if(!orderIdMap.containsKey(order.getOriginOrderId())) {
+			return;
+		}
 		if(OrderUtils.isValidOrder(order)) {
 			orderIdMap.put(order.getOriginOrderId(), Boolean.TRUE);
 		} else {
@@ -174,6 +177,9 @@ public class ModuleContext implements IModuleContext{
 	/* 此处收到的TRADE数据是所有成交回报，需要过滤 */
 	@Override
 	public void onTrade(TradeField trade) {
+		if(!orderIdMap.containsKey(trade.getOriginOrderId()) && !StringUtils.equals(trade.getOriginOrderId(), Constants.MOCK_ORDER_ID)) {
+			return;
+		}
 		if(orderIdMap.containsKey(trade.getOriginOrderId())) {
 			orderIdMap.remove(trade.getOriginOrderId());
 		}
@@ -183,7 +189,6 @@ public class ModuleContext implements IModuleContext{
 
 	@Override
 	public void setAccountStore(IModuleAccountStore store) {
-		store.setContext(this);
 		this.accStore = store;
 	}
 
@@ -196,7 +201,6 @@ public class ModuleContext implements IModuleContext{
 	public TradeStrategy getTradeStrategy() {
 		return tradeStrategy;
 	}
-
 
 	@Override
 	public void disabledModule() {
@@ -211,11 +215,6 @@ public class ModuleContext implements IModuleContext{
 	@Override
 	public String getModuleName() {
 		return module.getName();
-	}
-
-	@Override
-	public ClosingPolicy getClosingPolicy() {
-		return closingStrategy.getClosingPolicy();
 	}
 
 }
