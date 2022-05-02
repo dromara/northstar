@@ -3,6 +3,7 @@ package tech.quantit.northstar.domain.module;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.constant.ClosingPolicy;
@@ -77,8 +78,8 @@ public class ModuleStateMachine implements IModuleStateMachine {
 	}
 	
 	private void updateState() {
-		buyPosMap.keySet().stream().filter(c -> buyPosMap.get(c).totalVolume() == 0).forEach(c -> buyPosMap.remove(c));
-		sellPosMap.keySet().stream().filter(c -> sellPosMap.get(c).totalVolume() == 0).forEach(c -> sellPosMap.remove(c));
+		buyPosMap = buyPosMap.entrySet().stream().filter(e -> e.getValue().totalVolume() > 0).collect(Collectors.toMap(e->e.getKey(), e->e.getValue()));
+		sellPosMap = sellPosMap.entrySet().stream().filter(e -> e.getValue().totalVolume() > 0).collect(Collectors.toMap(e->e.getKey(), e->e.getValue()));
 		int buyVol = buyPosMap.values().stream().map(TradePosition::totalVolume).reduce(0, Integer::sum);
 		int sellVol = sellPosMap.values().stream().map(TradePosition::totalVolume).reduce(0, Integer::sum);
 		
