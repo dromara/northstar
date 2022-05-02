@@ -81,6 +81,16 @@ class TradePositionTest {
 		assertThat(tp.profit()).isCloseTo(330D, offset(1e-6));
 	}
 	
+	// 用例：平仓
+	@Test
+	void shouldClosePosition() {
+		TradePosition tp = new TradePosition(List.of(openTrade), ClosingPolicy.PRIOR_TODAY);
+		tp.onTrade(closeTrade);
+		assertThat(tp.tdAvailable()).isZero();
+		assertThat(tp.ydAvailable()).isZero();
+		assertThat(tp.totalVolume()).isZero();
+	}
+		
 	// 用例：减仓，平今优先
 	@Test
 	void shouldReduceTdPosition() {

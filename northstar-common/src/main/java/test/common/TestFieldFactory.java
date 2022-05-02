@@ -14,6 +14,7 @@ import xyz.redtorch.pb.CoreEnum.ForceCloseReasonEnum;
 import xyz.redtorch.pb.CoreEnum.HedgeFlagEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreEnum.OrderPriceTypeEnum;
+import xyz.redtorch.pb.CoreEnum.OrderStatusEnum;
 import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
 import xyz.redtorch.pb.CoreEnum.TimeConditionEnum;
 import xyz.redtorch.pb.CoreEnum.VolumeConditionEnum;
@@ -105,6 +106,19 @@ public class TestFieldFactory {
 				.setTotalVolume(vol)
 				.setDirection(dir)
 				.setOffsetFlag(offset)
+				.setTradingDay(LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
+				.build();
+	}
+	
+	public OrderField makeOrderField(String symbol, double price, int vol, DirectionEnum dir, OffsetFlagEnum offset, OrderStatusEnum status) {
+		return OrderField.newBuilder()
+				.setOriginOrderId(UUID.randomUUID().toString())
+				.setContract(makeContract(symbol))
+				.setPrice(price)
+				.setTotalVolume(vol)
+				.setDirection(dir)
+				.setOffsetFlag(offset)
+				.setOrderStatus(status)
 				.setTradingDay(LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
 				.build();
 	}
