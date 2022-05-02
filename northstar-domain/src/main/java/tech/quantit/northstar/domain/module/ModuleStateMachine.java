@@ -11,6 +11,7 @@ import tech.quantit.northstar.common.utils.FieldUtils;
 import tech.quantit.northstar.common.utils.OrderUtils;
 import tech.quantit.northstar.strategy.api.IModuleStateMachine;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
+import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreEnum.OrderStatusEnum;
 import xyz.redtorch.pb.CoreField.CancelOrderReqField;
 import xyz.redtorch.pb.CoreField.ContractField;
@@ -42,6 +43,9 @@ public class ModuleStateMachine implements IModuleStateMachine {
 
 	@Override
 	public void onOrder(OrderField order) {
+		if(!curState.isOrdering()) {
+			throw new IllegalStateException("当前状态异常：" + curState);
+		}
 		if(curState.isOrdering() && !OrderUtils.isValidOrder(order)) {
 			setState(prevState);
 		}
@@ -54,6 +58,9 @@ public class ModuleStateMachine implements IModuleStateMachine {
 	public void onTrade(TradeField trade) {
 		if(trade.getDirection() == DirectionEnum.D_Unknown) {
 			throw new IllegalArgumentException("成交方向不明确");
+		}
+		if(trade.getOffsetFlag() == OffsetFlagEnum.OF_Unknown) {
+			throw new IllegalArgumentException("操作意图不明确");
 		}
 		Map<ContractField, TradePosition> posMap = null;
 		if(FieldUtils.isOpen(trade.getOffsetFlag())) {
@@ -72,8 +79,8 @@ public class ModuleStateMachine implements IModuleStateMachine {
 	private void updateState() {
 		buyPosMap.keySet().stream().filter(c -> buyPosMap.get(c).totalVolume() == 0).forEach(c -> buyPosMap.remove(c));
 		sellPosMap.keySet().stream().filter(c -> sellPosMap.get(c).totalVolume() == 0).forEach(c -> sellPosMap.remove(c));
-		int buyVol = buyPosMap.values().stream().map(tp -> tp.totalVolume()).reduce(0, Integer::sum);
-		int sellVol = sellPosMap.values().stream().map(tp -> tp.totalVolume()).reduce(0, Integer::sum);
+		int buyVol = buyPosMap.values().stream().map(TradePosition::totalVolume).reduce(0, Integer::sum);
+		int sellVol = sellPosMap.values().stream().map(TradePosition::totalVolume).reduce(0, Integer::sum);
 		
 		if(buyPosMap.isEmpty() && sellPosMap.isEmpty()) {
 			setState(ModuleState.EMPTY);
@@ -100,17 +107,19 @@ public class ModuleStateMachine implements IModuleStateMachine {
 
 	@Override
 	public void onSubmitReq(SubmitOrderReqField orderReq) {
-		if(curState.isEmpty() || curState.isHolding()) {
-			prevState = curState;
-			setState(ModuleState.PLACING_ORDER);
+		if(curState.isOrdering()) {
+			throw new IllegalStateException("当前状态异常：" + curState);
 		}
+		prevState = curState;
+		setState(ModuleState.PLACING_ORDER);
 	}
 
 	@Override
 	public void onCancelReq(CancelOrderReqField cancelReq) {
-		if(curState.isOrdering()) {
-			setState(ModuleState.RETRIEVING_FOR_CANCEL);
+		if(!curState.isOrdering()) {
+			throw new IllegalStateException("当前状态异常：" + curState);
 		}
+		setState(ModuleState.RETRIEVING_FOR_CANCEL);
 	}
 
 }
