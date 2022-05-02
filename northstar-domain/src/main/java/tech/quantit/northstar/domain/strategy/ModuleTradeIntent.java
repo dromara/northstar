@@ -18,6 +18,7 @@ import xyz.redtorch.pb.CoreField.TradeField;
  * @author KevinHuangwl
  *
  */
+@Deprecated
 public class ModuleTradeIntent {
 	@Getter
 	private SubmitOrderReqField submitOrderReq;

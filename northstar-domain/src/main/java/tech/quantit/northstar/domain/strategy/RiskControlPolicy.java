@@ -24,7 +24,7 @@ import tech.quantit.northstar.strategy.api.log.NorthstarLoggerFactory;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TickField;
-
+@Deprecated
 public class RiskControlPolicy implements TickDataAware, EventDrivenComponent, StateChangeListener, ContractBindedAware{
 	
 	private List<RiskControlRule> rules;

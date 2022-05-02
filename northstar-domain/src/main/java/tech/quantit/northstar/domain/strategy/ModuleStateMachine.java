@@ -17,6 +17,7 @@ import tech.quantit.northstar.strategy.api.log.NorthstarLoggerFactory;
  * @author KevinHuangwl
  *
  */
+@Deprecated
 @Data
 @NoArgsConstructor
 public class ModuleStateMachine {
