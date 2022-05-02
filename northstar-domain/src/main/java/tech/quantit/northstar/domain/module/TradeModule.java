@@ -5,9 +5,7 @@ import java.util.List;
 import tech.quantit.northstar.common.event.NorthstarEvent;
 import tech.quantit.northstar.common.model.ModuleDescription;
 import tech.quantit.northstar.strategy.api.IModule;
-import tech.quantit.northstar.strategy.api.IModuleAccountStore;
 import tech.quantit.northstar.strategy.api.IModuleContext;
-import tech.quantit.northstar.strategy.api.TradeStrategy;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.OrderField;
 import xyz.redtorch.pb.CoreField.TickField;
@@ -35,17 +33,11 @@ public class TradeModule implements IModule {
 	
 	private boolean enabled;
 	
-	private IModuleAccountStore accStore;
-	
 	private IModuleContext ctx;
 	
-	private TradeStrategy strategy;
-	
-	public TradeModule(String name, IModuleAccountStore accountStore, IModuleContext context, TradeStrategy strategy) {
+	public TradeModule(String name, IModuleContext context) {
 		this.name = name;
-		this.accStore = accountStore;
 		this.ctx = context;
-		this.strategy = strategy;
 	}
 	
 	@Override
@@ -65,8 +57,6 @@ public class TradeModule implements IModule {
 
 	@Override
 	public void initModule() {
-		ctx.setAccountStore(accStore);
-		ctx.setTradeStrategy(strategy);
 		ctx.setModule(this);
 	}
 	
@@ -94,12 +84,9 @@ public class TradeModule implements IModule {
 		}
 	}
 
-
 	@Override
 	public ModuleDescription getModuleDescription() {
-		ModuleDescription md = ctx.getModuleDescription();
-		md.setDataState(strategy.getComputedState());
-		return md;
+		return ctx.getModuleDescription();
 	}
 
 }

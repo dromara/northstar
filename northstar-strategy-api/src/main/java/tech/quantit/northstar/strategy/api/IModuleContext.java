@@ -1,5 +1,7 @@
 package tech.quantit.northstar.strategy.api;
 
+import java.util.Set;
+
 import tech.quantit.northstar.common.TickDataAware;
 import tech.quantit.northstar.common.TransactionAware;
 import tech.quantit.northstar.common.constant.SignalOperation;
@@ -9,12 +11,17 @@ import xyz.redtorch.pb.CoreField.CancelOrderReqField;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 
-public interface IModuleContext extends TickDataAware, BarDataAware, TransactionAware{
+public interface IModuleContext extends TickDataAware, BarDataAware, TransactionAware {
 	/**
-	 * 设置交易策略
-	 * @param strategy
+	 * 获取模组名称
+	 * @return
 	 */
-	void setTradeStrategy(TradeStrategy strategy);
+	String getModuleName();
+	/**
+	 * 绑定的合约集
+	 * @return
+	 */
+	Set<ContractField> bindedContracts();
 	/**
 	 * 获取交易策略
 	 * @return
@@ -48,11 +55,6 @@ public interface IModuleContext extends TickDataAware, BarDataAware, Transaction
 	 */
 	void cancelOrderReq(CancelOrderReqField cancelReq);
 	/**
-	 * 设置组件
-	 * @param store
-	 */
-	void setAccountStore(IModuleAccountStore store);
-	/**
 	 * 设置模组
 	 * @param module
 	 */
@@ -62,9 +64,5 @@ public interface IModuleContext extends TickDataAware, BarDataAware, Transaction
 	 * @param enabled
 	 */
 	void disabledModule();
-	/**
-	 * 获取模组名称
-	 * @return
-	 */
-	String getModuleName();
+	
 }

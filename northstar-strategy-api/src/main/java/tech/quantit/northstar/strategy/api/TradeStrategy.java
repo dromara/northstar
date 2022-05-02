@@ -1,14 +1,12 @@
 package tech.quantit.northstar.strategy.api;
 
 import java.util.Map;
-import java.util.Set;
 
 import com.alibaba.fastjson.JSONObject;
 
 import tech.quantit.northstar.common.TransactionAware;
 import tech.quantit.northstar.strategy.api.indicator.Indicator;
 import xyz.redtorch.pb.CoreField.BarField;
-import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.TickField;
 
 public interface TradeStrategy extends TransactionAware, ContextAware{
@@ -20,11 +18,6 @@ public interface TradeStrategy extends TransactionAware, ContextAware{
 	 * @return
 	 */
 	Map<String, Indicator> bindedIndicatorMap();
-	/**
-	 * 绑定的合约集
-	 * @return
-	 */
-	Set<ContractField> bindedContracts();
 	/**
 	 * 获取计算状态
 	 * @return
