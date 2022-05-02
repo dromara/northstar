@@ -53,17 +53,14 @@ public class ModuleAccountStore implements IModuleAccountStore {
 	
 	private ModuleStateMachine sm;
 	
-	private double commissionPerDeal;
-	
 	private ClosingPolicy closingPolicy;
 	
-	public ModuleAccountStore(String moduleName, ClosingPolicy closingPolicy, double commissionPerDeal, ModuleDescription moduleDescription) {
+	public ModuleAccountStore(String moduleName, ClosingPolicy closingPolicy, ModuleDescription moduleDescription) {
 		this.sm = new ModuleStateMachine(moduleName);
 		this.closingPolicy = closingPolicy;
-		this.commissionPerDeal = commissionPerDeal;
 		for(ModuleAccountDescription mad : moduleDescription.getAccountDescriptions().values()) {
 			initBalanceMap.put(mad.getAccountId(), mad.getInitBalance());
-			commissionPerDealMap.put(mad.getAccountId(), new AtomicDouble(mad.getCommissionPerDeal() * mad.getAccDealVolume()));
+			commissionPerDealMap.put(mad.getAccountId(), new AtomicDouble(mad.getCommissionPerDeal()));
 			accDealVolMap.put(mad.getAccountId(), new AtomicInteger(mad.getAccDealVolume()));
 			accCloseProfitMap.put(mad.getAccountId(), new AtomicDouble(mad.getAccCloseProfit()));
 			
@@ -118,8 +115,6 @@ public class ModuleAccountStore implements IModuleAccountStore {
 			TradePosition tp = tbl.get(trade.getGatewayId(), trade.getContract().getUnifiedSymbol());
 			double profit = tp.onTrade(trade);
 			if(FieldUtils.isClose(trade.getOffsetFlag())) {
-				commissionPerDealMap.putIfAbsent(trade.getGatewayId(), new AtomicDouble());
-				commissionPerDealMap.get(trade.getGatewayId()).addAndGet(trade.getVolume() * commissionPerDeal);
 				accDealVolMap.putIfAbsent(trade.getGatewayId(), new AtomicInteger());
 				accDealVolMap.get(trade.getGatewayId()).addAndGet(trade.getVolume());
 				accCloseProfitMap.putIfAbsent(trade.getGatewayId(), new AtomicDouble());
@@ -155,7 +150,7 @@ public class ModuleAccountStore implements IModuleAccountStore {
 
 	@Override
 	public double getPreBalance(String gatewayId) {
-		return getInitBalance(gatewayId) + getAccCloseProfit(gatewayId) - getCommission(gatewayId);
+		return getInitBalance(gatewayId) + getAccCloseProfit(gatewayId) - getCommission(gatewayId) * getAccDealVolume(gatewayId);
 	}
 
 	@Override
