@@ -1,18 +1,21 @@
 package tech.quantit.northstar.domain.module;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 import org.apache.commons.lang3.StringUtils;
 
-import tech.quantit.northstar.common.constant.ClosingPolicy;
 import tech.quantit.northstar.common.constant.Constants;
 import tech.quantit.northstar.common.constant.SignalOperation;
 import tech.quantit.northstar.common.exception.NoSuchElementException;
+import tech.quantit.northstar.common.exception.TradeException;
 import tech.quantit.northstar.common.model.ModuleAccountDescription;
 import tech.quantit.northstar.common.model.ModuleDescription;
 import tech.quantit.northstar.common.model.ModulePositionDescription;
+import tech.quantit.northstar.common.utils.FieldUtils;
 import tech.quantit.northstar.common.utils.OrderUtils;
 import tech.quantit.northstar.gateway.api.TradeGateway;
 import tech.quantit.northstar.strategy.api.ClosingStrategy;
@@ -47,32 +50,47 @@ public class ModuleContext implements IModuleContext{
 	
 	protected IModuleAccountStore accStore;
 	
+	protected ClosingStrategy closingStrategy;
+	
 	protected IModule module;
 	
-	/* originOrderId -> boolean */
-	protected Map<String, Boolean> orderIdMap = new HashMap<>();
+	/* originOrderId -> order */
+	private Map<String, OrderField> orderMap = new HashMap<>();
 	
-	/* gatewayId -> gateway */
-	private Map<String, TradeGateway> gatewayMap = new HashMap<>();
+	/* contract -> gateway */
+	private Map<ContractField, TradeGateway> gatewayMap = new HashMap<>();
+	
+	/* unifiedSymbol -> contract */
+	private Map<String, ContractField> contractMap = new HashMap<>();
 	
 	/* unifiedSymbol -> barMerger */
 	private Map<String, BarMerger> contractBarMergerMap = new HashMap<>();
 	
-	private String tradingDay;
+	/* unifiedSymbol -> tick */
+	private Map<String, TickField> tickMap = new HashMap<>();
 	
-	private ClosingStrategy closingStrategy;
+	private String tradingDay = "";
 	
-	public ModuleContext(ClosingStrategy closingStrategy, TradeGateway...gateways) {
+	private Consumer<BarField> barMergingCallback;
+	
+	private int numOfMinsPerBar;
+	
+	public ModuleContext(TradeStrategy tradeStrategy, IModuleAccountStore accStore, ClosingStrategy closingStrategy, int numOfMinsPerBar) {
+		this.tradeStrategy = tradeStrategy;
+		this.accStore = accStore;
 		this.closingStrategy = closingStrategy;
-		for(TradeGateway tradeGateway : gateways) {
-			gatewayMap.put(tradeGateway.getGatewaySetting().getGatewayId(), tradeGateway);
-		}
+		this.numOfMinsPerBar = numOfMinsPerBar;
+		this.barMergingCallback = bar -> tradeStrategy.onBar(bar, module.isEnabled());
 	}
 
 	@Override
 	public ModuleDescription getModuleDescription() {
 		Map<String, ModuleAccountDescription> accMap = new HashMap<>();
-		for(String gatewayId : gatewayMap.keySet()) {
+		for(TradeGateway gateway : gatewayMap.values()) {
+			String gatewayId = gateway.getGatewaySetting().getGatewayId();
+			if(accMap.containsKey(gatewayId)) {
+				continue;
+			}
 			ModulePositionDescription posDescription = ModulePositionDescription.builder()
 					.logicalPositions(accStore.getPositions(gatewayId).stream().map(PositionField::toByteArray).toList())
 					.uncloseTrades(accStore.getUncloseTrades(gatewayId).stream().map(TradeField::toByteArray).toList())
@@ -91,18 +109,22 @@ public class ModuleContext implements IModuleContext{
 				.moduleName(module.getName())
 				.enabled(module.isEnabled())
 				.moduleState(accStore.getModuleState())
+				.dataState(tradeStrategy.getComputedState())
 				.accountDescriptions(accMap)
 				.build();
 	}
 
 	@Override
-	public String submitOrderReq(String gatewayId, ContractField contract, SignalOperation operation,
+	public String submitOrderReq(ContractField contract, SignalOperation operation,
 			PriceType priceType, int volume, double price) {
+		if(!gatewayMap.containsKey(contract)) {
+			throw new NoSuchElementException(String.format("找不到合约 [%s] 对应网关", contract.getUnifiedSymbol()));
+		}
 		String id = UUID.randomUUID().toString();
-		submitOrderReq(SubmitOrderReqField.newBuilder()
+		return submitOrderReq(SubmitOrderReqField.newBuilder()
 				.setOriginOrderId(id)
 				.setContract(contract)
-				.setGatewayId(gatewayId)
+				.setGatewayId(gatewayMap.get(contract).getGatewaySetting().getGatewayId())
 				.setDirection(OrderUtils.resolveDirection(operation))
 				.setOffsetFlag(closingStrategy.resolveOperation(operation, accStore))
 				.setPrice(price)
@@ -115,27 +137,44 @@ public class ModuleContext implements IModuleContext{
 				.setContingentCondition(ContingentConditionEnum.CC_Immediately)
 				.setMinVolume(1)
 				.build());
-		return id;
 	}
 
-	@Override
-	public String submitOrderReq(SubmitOrderReqField orderReq) {
-		String gatewayId = orderReq.getGatewayId();
-		if(!gatewayMap.containsKey(gatewayId)) {
-			throw new NoSuchElementException("找不到网关：" + gatewayId);
+	private String submitOrderReq(SubmitOrderReqField orderReq) {
+		if(FieldUtils.isOpen(orderReq.getOffsetFlag())) {
+			checkAmount(orderReq);
 		}
-		gatewayMap.get(gatewayId).submitOrder(orderReq);
-		orderIdMap.put(orderReq.getOriginOrderId(), Boolean.FALSE);
+		ContractField contract = orderReq.getContract();
+		TradeGateway gateway = gatewayMap.get(contract);
+		gateway.submitOrder(orderReq);
+		OrderField placeholder = OrderField.newBuilder()
+				.setGatewayId(gateway.getGatewaySetting().getGatewayId())
+				.setContract(contract)
+				.setOriginOrderId(orderReq.getOriginOrderId())
+				.build();
+		orderMap.put(orderReq.getOriginOrderId(), placeholder);
 		return orderReq.getOriginOrderId();
 	}
 	
-	@Override
-	public void cancelOrderReq(CancelOrderReqField cancelReq) {
-		String gatewayId = cancelReq.getGatewayId();
-		if(!gatewayMap.containsKey(gatewayId)) {
-			throw new NoSuchElementException("找不到网关：" + gatewayId);
+	private void checkAmount(SubmitOrderReqField orderReq) {
+		double orderPrice = orderReq.getOrderPriceType() == OrderPriceTypeEnum.OPT_AnyPrice ? tickMap.get(orderReq.getContract().getUnifiedSymbol()).getLastPrice() : orderReq.getPrice();
+		double extMargin = orderReq.getVolume() * orderPrice * orderReq.getContract().getMultiplier() * FieldUtils.marginRatio(orderReq.getContract(), orderReq.getDirection());
+		double preBalance = accStore.getPreBalance(orderReq.getGatewayId());
+		if(preBalance < extMargin) {
+			throw new TradeException(String.format("模组可用资金 [%s] 小于开仓保证金 [%s]", preBalance, extMargin));
 		}
-		gatewayMap.get(gatewayId).cancelOrder(cancelReq);
+	}
+
+	@Override
+	public void cancelOrder(String originOrderId) {
+		if(!orderMap.containsKey(originOrderId)) {
+			throw new NoSuchElementException("找不到订单：" + originOrderId);
+		}
+		ContractField contract = orderMap.get(originOrderId).getContract();
+		TradeGateway gateway = gatewayMap.get(contract);
+		gateway.cancelOrder(CancelOrderReqField.newBuilder()
+				.setGatewayId(gateway.getGatewaySetting().getGatewayId())
+				.setOriginOrderId(originOrderId)
+				.build());
 	}
 
 	/* 此处收到的TICK数据是所有订阅的数据，需要过滤 */
@@ -147,6 +186,7 @@ public class ModuleContext implements IModuleContext{
 		if(!StringUtils.equals(tradingDay, tick.getTradingDay())) {
 			tradingDay = tick.getTradingDay();
 		}
+		tickMap.put(tick.getUnifiedSymbol(), tick);
 		tradeStrategy.onTick(tick, module.isEnabled());
 	}
 	
@@ -156,19 +196,19 @@ public class ModuleContext implements IModuleContext{
 		if(!contractBarMergerMap.containsKey(bar.getUnifiedSymbol())) {
 			return;
 		}
-		tradeStrategy.onBar(bar, module.isEnabled());
+		contractBarMergerMap.get(bar.getUnifiedSymbol()).updateBar(bar);
 	}
 	
 	/* 此处收到的ORDER数据是所有订单回报，需要过滤 */
 	@Override
 	public void onOrder(OrderField order) {
-		if(!orderIdMap.containsKey(order.getOriginOrderId())) {
+		if(!orderMap.containsKey(order.getOriginOrderId())) {
 			return;
 		}
 		if(OrderUtils.isValidOrder(order)) {
-			orderIdMap.put(order.getOriginOrderId(), Boolean.TRUE);
+			orderMap.put(order.getOriginOrderId(), order);
 		} else {
-			orderIdMap.remove(order.getOriginOrderId());
+			orderMap.remove(order.getOriginOrderId());
 		}
 		accStore.onOrder(order);
 		tradeStrategy.onOrder(order);
@@ -177,24 +217,14 @@ public class ModuleContext implements IModuleContext{
 	/* 此处收到的TRADE数据是所有成交回报，需要过滤 */
 	@Override
 	public void onTrade(TradeField trade) {
-		if(!orderIdMap.containsKey(trade.getOriginOrderId()) && !StringUtils.equals(trade.getOriginOrderId(), Constants.MOCK_ORDER_ID)) {
+		if(!orderMap.containsKey(trade.getOriginOrderId()) && !StringUtils.equals(trade.getOriginOrderId(), Constants.MOCK_ORDER_ID)) {
 			return;
 		}
-		if(orderIdMap.containsKey(trade.getOriginOrderId())) {
-			orderIdMap.remove(trade.getOriginOrderId());
+		if(orderMap.containsKey(trade.getOriginOrderId())) {
+			orderMap.remove(trade.getOriginOrderId());
 		}
 		accStore.onTrade(trade);
 		tradeStrategy.onTrade(trade);
-	}
-
-	@Override
-	public void setAccountStore(IModuleAccountStore store) {
-		this.accStore = store;
-	}
-
-	@Override
-	public void setTradeStrategy(TradeStrategy strategy) {
-		tradeStrategy = strategy;
 	}
 
 	@Override
@@ -215,6 +245,23 @@ public class ModuleContext implements IModuleContext{
 	@Override
 	public String getModuleName() {
 		return module.getName();
+	}
+
+	@Override
+	public void bindGatewayContracts(TradeGateway gateway, List<ContractField> contracts) {
+		for(ContractField c : contracts) {			
+			gatewayMap.put(c, gateway);
+			contractMap.put(c.getUnifiedSymbol(), c);
+			contractBarMergerMap.put(c.getUnifiedSymbol(), new BarMerger(numOfMinsPerBar, c, barMergingCallback));
+		}
+	}
+
+	@Override
+	public ContractField getContract(String unifiedSymbol) {
+		if(!contractMap.containsKey(unifiedSymbol)) {
+			throw new NoSuchElementException("找不到合约：" + unifiedSymbol);
+		}
+		return contractMap.get(unifiedSymbol);
 	}
 
 }

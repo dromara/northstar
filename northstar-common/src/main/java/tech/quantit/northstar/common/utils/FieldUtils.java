@@ -4,6 +4,7 @@ import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreEnum.OrderStatusEnum;
 import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
+import xyz.redtorch.pb.CoreField.ContractField;
 
 public class FieldUtils {
 
@@ -79,6 +80,14 @@ public class FieldUtils {
 		return switch(dir) {
 		case D_Buy -> 1;
 		case D_Sell -> -1;
+		default -> 0;
+		};
+	}
+	
+	public static double marginRatio(ContractField contract, DirectionEnum dir) {
+		return switch(dir) {
+		case D_Buy -> contract.getLongMarginRatio();
+		case D_Sell -> contract.getShortMarginRatio();
 		default -> 0;
 		};
 	}
