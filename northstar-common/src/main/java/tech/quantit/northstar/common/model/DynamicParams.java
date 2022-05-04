@@ -1,4 +1,4 @@
-package tech.quantit.northstar.strategy.api.model;
+package tech.quantit.northstar.common.model;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;
@@ -7,7 +7,6 @@ import java.util.Map.Entry;
 
 import lombok.Getter;
 import lombok.Setter;
-import tech.quantit.northstar.strategy.api.annotation.Setting;
 
 @Getter
 @Setter

@@ -1,4 +1,4 @@
-package tech.quantit.northstar.strategy.api.annotation;
+package tech.quantit.northstar.common.model;
 
 import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;

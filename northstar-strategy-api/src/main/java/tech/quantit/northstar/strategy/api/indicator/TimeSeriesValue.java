@@ -1,4 +1,4 @@
-package tech.quantit.northstar.strategy.api.model;
+package tech.quantit.northstar.strategy.api.indicator;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
