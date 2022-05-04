@@ -6,12 +6,14 @@ import java.util.stream.Collectors;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+
 import tech.quantit.northstar.common.model.ModuleDealRecord;
 import tech.quantit.northstar.common.model.ModuleDescription;
 import tech.quantit.northstar.common.model.ModuleSettingsDescription;
-import tech.quantit.northstar.common.model.ModuleTradeRecord;
 import tech.quantit.northstar.data.IModuleRepository;
-import tech.quantit.northstar.data.mongo.po.*;
+import tech.quantit.northstar.data.mongo.po.ModuleDealRecordPO;
+import tech.quantit.northstar.data.mongo.po.ModuleDescriptionPO;
+import tech.quantit.northstar.data.mongo.po.ModuleSettingsDescriptionPO;
 
 /**
  * 模块服务
@@ -98,35 +100,6 @@ public class ModuleRepoMongoImpl implements IModuleRepository{
 	public void deleteByName(String moduleName) {
 		Query query = Query.query(Criteria.where("moduleName").is(moduleName));
 		mongoTemplate.remove(query, ModuleDescriptionPO.class);
-	}
-
-	/**
-	 * 保存模组成交记录
-	 * @param tradeRecord
-	 */
-	@Override
-	public void saveTradeRecord(ModuleTradeRecord tradeRecord) {
-		mongoTemplate.save(ModuleTradeRecordPO.convertFrom(tradeRecord));
-	}
-
-	/**
-	 * 查询模组全部成交记录
-	 * @param moduleName
-	 * @return
-	 */
-	@Override
-	public List<ModuleTradeRecord> findAllTradeRecords(String moduleName) {
-		return mongoTemplate.find(Query.query(Criteria.where("moduleName").is(moduleName)),ModuleTradeRecordPO.class).stream().map(ModuleTradeRecordPO::getModuleTradeRecord).collect(Collectors.toList());
-	}
-
-	/**
-	 * 删除模组全部成交记录
-	 * @param moduleName
-	 */
-	@Override
-	public void removeAllTradeRecords(String moduleName) {
-		Query query = Query.query(Criteria.where("moduleName").is(moduleName));
-		mongoTemplate.remove(query,ModuleTradeRecordPO.class);
 	}
 
 	/**

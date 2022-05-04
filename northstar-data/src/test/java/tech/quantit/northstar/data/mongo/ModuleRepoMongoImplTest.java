@@ -15,12 +15,10 @@ import tech.quantit.northstar.common.model.ComponentMetaInfo;
 import tech.quantit.northstar.common.model.ModuleDealRecord;
 import tech.quantit.northstar.common.model.ModuleDescription;
 import tech.quantit.northstar.common.model.ModuleSettingsDescription;
-import tech.quantit.northstar.common.model.ModuleTradeRecord;
 import tech.quantit.northstar.data.IModuleRepository;
 import tech.quantit.northstar.data.mongo.po.ModuleDealRecordPO;
 import tech.quantit.northstar.data.mongo.po.ModuleDescriptionPO;
 import tech.quantit.northstar.data.mongo.po.ModuleSettingsDescriptionPO;
-import tech.quantit.northstar.data.mongo.po.ModuleTradeRecordPO;
 
 /**
  * 模拟账户服务测试
@@ -55,35 +53,13 @@ public class ModuleRepoMongoImplTest {
 			.enabled(true)
 			.build();
 
-	ModuleTradeRecord mt1 = ModuleTradeRecord.builder()
-			.moduleName("test1")
-			.actionDay("20220415")
-			.contractName("A2205")
-			.operation("buy")
-			.price(100.0)
-			.build();
-
-	ModuleTradeRecord mt2 = ModuleTradeRecord.builder()
-			.moduleName("test1")
-			.actionDay("20220414")
-			.contractName("A2204")
-			.operation("buy")
-			.price(100.0)
-			.build();
-
 	ModuleDealRecord mdr1 = ModuleDealRecord.builder()
 			.moduleName("test1")
-			.closeDate("20220415")
-			.closePrice(10.0)
-			.closeProfit(11)
 			.contractName("A2205")
 			.build();
 
 	ModuleDealRecord mdr2 = ModuleDealRecord.builder()
 			.moduleName("test1")
-			.closeDate("20220413")
-			.closePrice(10.0)
-			.closeProfit(11)
 			.contractName("A2204")
 			.build();
 
@@ -91,7 +67,6 @@ public class ModuleRepoMongoImplTest {
 	void clear() {
 		mongoTemplate.dropCollection(ModuleSettingsDescriptionPO.class);
 		mongoTemplate.dropCollection(ModuleDescriptionPO.class);
-		mongoTemplate.dropCollection(ModuleTradeRecordPO.class);
 		mongoTemplate.dropCollection(ModuleDealRecordPO.class);
 	}
 
@@ -140,26 +115,6 @@ public class ModuleRepoMongoImplTest {
 		repo.save(md1);
 		repo.deleteByName(md1.getModuleName());
 		assertThat(mongoTemplate.findAll(ModuleDescriptionPO.class)).isEmpty();
-	}
-
-	@Test
-	void testSaveTradeRecord(){
-		repo.saveTradeRecord(mt1);
-		assertThat(mongoTemplate.findAll(ModuleTradeRecordPO.class)).hasSize(1);
-	}
-
-	@Test
-	void testFindAllTradeRecords(){
-		repo.saveTradeRecord(mt1);
-		repo.saveTradeRecord(mt2);
-		assertThat(repo.findAllTradeRecords(mt1.getModuleName())).hasSize(2);
-	}
-
-	@Test
-	void testRemoveAllTradeRecords(){
-		repo.saveTradeRecord(mt1);
-		repo.removeAllTradeRecords(mt1.getModuleName());
-		assertThat(mongoTemplate.findAll(ModuleTradeRecordPO.class)).isEmpty();
 	}
 
 	@Test

@@ -5,7 +5,6 @@ import java.util.List;
 import tech.quantit.northstar.common.model.ModuleDealRecord;
 import tech.quantit.northstar.common.model.ModuleDescription;
 import tech.quantit.northstar.common.model.ModuleSettingsDescription;
-import tech.quantit.northstar.common.model.ModuleTradeRecord;
 
 /**
  * 模组持久化
@@ -51,22 +50,6 @@ public interface IModuleRepository {
 	 * @param moduleName
 	 */
 	void deleteByName(String moduleName);
-	/**
-	 * 保存模组成交记录
-	 * @param record
-	 */
-	void saveTradeRecord(ModuleTradeRecord tradeRecord);
-	/**
-	 * 查询模组全部成交记录
-	 * @param moduleName
-	 * @return
-	 */
-	List<ModuleTradeRecord> findAllTradeRecords(String moduleName);
-	/**
-	 * 删除模组全部成交记录
-	 * @param moduleName
-	 */
-	void removeAllTradeRecords(String moduleName);
 	/**
 	 * 保存模组交易记录
 	 * @param record

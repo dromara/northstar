@@ -5,7 +5,6 @@ import java.util.List;
 import tech.quantit.northstar.common.model.ModuleDealRecord;
 import tech.quantit.northstar.common.model.ModuleDescription;
 import tech.quantit.northstar.common.model.ModuleSettingsDescription;
-import tech.quantit.northstar.common.model.ModuleTradeRecord;
 import tech.quantit.northstar.data.IModuleRepository;
 
 public class ModuleRepoRedisImpl implements IModuleRepository{
@@ -48,24 +47,6 @@ public class ModuleRepoRedisImpl implements IModuleRepository{
 
 	@Override
 	public void deleteByName(String moduleName) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void saveTradeRecord(ModuleTradeRecord tradeRecord) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public List<ModuleTradeRecord> findAllTradeRecords(String moduleName) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void removeAllTradeRecords(String moduleName) {
 		// TODO Auto-generated method stub
 		
 	}

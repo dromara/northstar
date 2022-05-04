@@ -13,9 +13,7 @@ import tech.quantit.northstar.domain.account.TradeDayAccount;
 import tech.quantit.northstar.domain.gateway.ContractManager;
 import tech.quantit.northstar.domain.gateway.GatewayAndConnectionManager;
 import tech.quantit.northstar.domain.strategy.ModuleManager;
-import tech.quantit.northstar.domain.strategy.SandboxModuleManager;
 import tech.quantit.northstar.gateway.api.domain.GlobalMarketRegistry;
-import tech.quantit.northstar.gateway.sim.persistence.SimAccountRepository;
 import tech.quantit.northstar.gateway.sim.trade.SimMarket;
 import tech.quantit.northstar.main.ExternalJarListener;
 import tech.quantit.northstar.main.handler.broadcast.SocketIOMessageEngine;
@@ -26,7 +24,6 @@ import tech.quantit.northstar.main.service.AccountService;
 import tech.quantit.northstar.main.service.DataSyncService;
 import tech.quantit.northstar.main.service.GatewayService;
 import tech.quantit.northstar.main.service.ModuleService;
-import tech.quantit.northstar.main.service.PlaybackService;
 import tech.quantit.northstar.main.service.SMSTradeService;
 
 @DependsOn({
@@ -70,10 +67,4 @@ public class ServiceConfig {
 		return new SMSTradeService(feEngine);
 	}
 	
-	@Bean
-	public PlaybackService playbackService(FastEventEngine feEngine, SandboxModuleManager moduleMgr, GatewayAndConnectionManager gatewayConnMgr, 
-			ContractManager contractMgr, ModuleRepository moduleRepo, IMarketDataRepository mdRepo, SimMarket simMarket, SimAccountRepository simAccRepo,
-			GlobalMarketRegistry registry, ExternalJarListener extJarListener) {
-		return new PlaybackService(feEngine, moduleMgr, gatewayConnMgr, contractMgr, moduleRepo, mdRepo, simMarket, simAccRepo, registry, extJarListener);
-	}
 }

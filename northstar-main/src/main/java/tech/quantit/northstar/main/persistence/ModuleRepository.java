@@ -10,7 +10,6 @@ import org.springframework.stereotype.Repository;
 
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.main.persistence.po.ModulePositionPO;
-import tech.quantit.northstar.main.playback.PlaybackStatRecord;
 import tech.quantit.northstar.strategy.api.model.ModuleDealRecord;
 import tech.quantit.northstar.strategy.api.model.ModuleInfo;
 import tech.quantit.northstar.strategy.api.model.ModuleTradeRecord;
@@ -111,20 +110,6 @@ public class ModuleRepository {
 			log.debug("[{}] 清除成交记录", moduleName);
 		}
 		mongo.remove(Query.query(Criteria.where(MODULE_NAME).is(moduleName)), ModuleTradeRecord.class);
-	}
-
-	/*************/
-	/** 模组回测 **/
-	/*************/
-	public void savePlaybackStatRecord(PlaybackStatRecord playbackRecord) {
-		if(log.isDebugEnabled()) {			
-			log.debug("[{}] 保存模组回测信息", playbackRecord.getModuleName());
-		}
-		mongo.save(playbackRecord);
-	}
-
-	public PlaybackStatRecord getPlaybackStatRecord(String moduleName) {
-		return mongo.findOne(Query.query(Criteria.where(MODULE_NAME).is(moduleName)), PlaybackStatRecord.class);
 	}
 
 }
