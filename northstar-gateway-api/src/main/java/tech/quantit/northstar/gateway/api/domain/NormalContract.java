@@ -17,9 +17,9 @@ public class NormalContract {
 	protected GatewayType gatewayType;
 	protected long updateTime;
 
-	public NormalContract(ContractField field, GatewayType gatewayType, long updateTime) {
+	public NormalContract(ContractField field, long updateTime) {
 		this.field = field;
-		this.gatewayType = gatewayType;
+		this.gatewayType = GatewayType.valueOf(field.getThirdPartyId().split("#")[1]);
 		this.updateTime = updateTime;
 	}
 	

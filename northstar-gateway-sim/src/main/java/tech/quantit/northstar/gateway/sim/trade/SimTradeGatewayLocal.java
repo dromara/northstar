@@ -4,7 +4,6 @@ import java.util.concurrent.CompletableFuture;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.event.NorthstarEventType;
 import tech.quantit.northstar.common.exception.TradeException;
@@ -72,8 +71,8 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 			
 			ContractField simContract = contractGen.getContract();
 			ContractField simContract2 = contractGen.getContract2();
-			registry.register(new NormalContract(simContract, GatewayType.SIM, System.currentTimeMillis()));
-			registry.register(new NormalContract(simContract2, GatewayType.SIM, System.currentTimeMillis()));
+			registry.register(new NormalContract(simContract, System.currentTimeMillis()));
+			registry.register(new NormalContract(simContract2, System.currentTimeMillis()));
 		});
 	}
 

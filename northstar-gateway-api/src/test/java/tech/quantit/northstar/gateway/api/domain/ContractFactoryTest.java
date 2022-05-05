@@ -9,7 +9,6 @@ import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import tech.quantit.northstar.common.constant.GatewayType;
 import test.common.TestFieldFactory;
 import xyz.redtorch.pb.CoreEnum.CurrencyEnum;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
@@ -46,7 +45,7 @@ class ContractFactoryTest {
 
 	@Test
 	void testMakeIndexContract() {
-		ContractFactory contractFactory = new ContractFactory(GatewayType.CTP, list);
+		ContractFactory contractFactory = new ContractFactory(list);
 		List<IndexContract> idxList = contractFactory.makeIndexContract();
 		String[] expectedName = {"rb0000@SHFE@FUTURES", "AP0000@CZE@FUTURES", "M0000@DZE@FUTURES"};
 		Set<String> nameSet = Set.of(expectedName);

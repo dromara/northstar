@@ -1319,7 +1319,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 			contractBuilder.setContractId(contractBuilder.getUnifiedSymbol() + "@" + gatewayId);
 			contractBuilder.setName(name != null ? name : pInstrument.getInstrumentName());
 			contractBuilder.setFullName(pInstrument.getInstrumentName());
-			contractBuilder.setThirdPartyId(contractBuilder.getSymbol());
+			contractBuilder.setThirdPartyId(contractBuilder.getSymbol() + "#" + GatewayType.CTP);
 
 			if (pInstrument.getVolumeMultiple() <= 0) {
 				contractBuilder.setMultiplier(1);
@@ -1348,11 +1348,11 @@ public class TdSpi extends CThostFtdcTraderSpi {
 
 			ContractField contract = contractBuilder.build();
 			gatewayAdapter.contractMap.put(contractBuilder.getSymbol(), contract);
-			gatewayAdapter.registry.register(new NormalContract(contract, GatewayType.CTP, System.currentTimeMillis()));
+			gatewayAdapter.registry.register(new NormalContract(contract, System.currentTimeMillis()));
 			if (bIsLast) {
 				
 				logger.info("{}交易接口合约信息获取完成!共计{}条", logInfo, gatewayAdapter.contractMap.size());
-				ContractFactory contractFactory = new ContractFactory(GatewayType.CTP, gatewayAdapter.contractMap.values().stream().toList());
+				ContractFactory contractFactory = new ContractFactory(gatewayAdapter.contractMap.values().stream().toList());
 				contractFactory.makeIndexContract().stream().forEach(gatewayAdapter.registry::register);
 				
 				instrumentQueried = true;

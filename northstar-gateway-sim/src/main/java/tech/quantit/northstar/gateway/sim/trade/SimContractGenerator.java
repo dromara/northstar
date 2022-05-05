@@ -3,6 +3,7 @@ package tech.quantit.northstar.gateway.sim.trade;
 import java.time.LocalDate;
 
 import tech.quantit.northstar.common.constant.Constants;
+import tech.quantit.northstar.common.constant.GatewayType;
 import xyz.redtorch.pb.CoreEnum.CurrencyEnum;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
@@ -32,7 +33,7 @@ public class SimContractGenerator {
 				.setUnifiedSymbol(symbol + "@SHFE@FUTURES")
 				.setSymbol(symbol)
 				.setProductClass(ProductClassEnum.FUTURES)
-				.setThirdPartyId(symbol)
+				.setThirdPartyId(symbol + "#" + GatewayType.SIM)
 				.setMultiplier(10)
 				.setPriceTick(1)
 				.setLongMarginRatio(0.08)
@@ -56,7 +57,7 @@ public class SimContractGenerator {
 				.setUnifiedSymbol(symbol + "@CZCE@FUTURES")
 				.setSymbol(symbol)
 				.setProductClass(ProductClassEnum.FUTURES)
-				.setThirdPartyId(symbol)
+				.setThirdPartyId(symbol + "#" + GatewayType.SIM)
 				.setMultiplier(10)
 				.setPriceTick(0.5)
 				.setLongMarginRatio(0.08)

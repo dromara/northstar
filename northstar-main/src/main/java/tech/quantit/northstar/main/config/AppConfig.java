@@ -1,10 +1,16 @@
 package tech.quantit.northstar.main.config;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
@@ -18,13 +24,21 @@ import org.springframework.web.filter.CorsFilter;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import com.google.protobuf.InvalidProtocolBufferException;
+import com.lmax.disruptor.dsl.ProducerType;
+
+import tech.quantit.northstar.common.constant.Constants;
 import tech.quantit.northstar.common.event.FastEventEngine;
+import tech.quantit.northstar.common.utils.ContractUtils;
+import tech.quantit.northstar.data.IContractRepository;
 import tech.quantit.northstar.domain.account.TradeDayAccount;
 import tech.quantit.northstar.domain.external.MessageHandlerManager;
 import tech.quantit.northstar.domain.gateway.ContractManager;
 import tech.quantit.northstar.domain.gateway.GatewayAndConnectionManager;
 import tech.quantit.northstar.gateway.api.GatewayFactory;
 import tech.quantit.northstar.gateway.api.domain.GlobalMarketRegistry;
+import tech.quantit.northstar.gateway.api.domain.IndexContract;
+import tech.quantit.northstar.gateway.api.domain.NormalContract;
 import tech.quantit.northstar.gateway.api.domain.SubscriptionManager;
 import tech.quantit.northstar.gateway.sim.persistence.SimAccountRepository;
 import tech.quantit.northstar.gateway.sim.trade.SimGatewayFactory;
@@ -33,6 +47,8 @@ import tech.quantit.northstar.main.interceptor.AuthorizationInterceptor;
 import xyz.redtorch.gateway.ctp.common.CtpSubscriptionManager;
 import xyz.redtorch.gateway.ctp.x64v6v3v15v.CtpGatewayFactory;
 import xyz.redtorch.gateway.ctp.x64v6v5v1cpv.CtpSimGatewayFactory;
+import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
+import xyz.redtorch.pb.CoreField.ContractField;
 
 /**
  * 配置转换器
@@ -109,58 +125,46 @@ public class AppConfig implements WebMvcConfigurer {
 		return new CtpSubscriptionManager(props.getClzTypeWhtlist(), props.getClzTypeBlklist(), props.getSymbolWhtlist(), props.getSymbolBlklist());
 	}
 	
-//	@Bean
-//	public GlobalMarketRegistry marketGlobalRegistry(FastEventEngine fastEventEngine, IContractRepository contractRepo, List<SubscriptionManager> subMgrs,
-//			MarketDataCache mdCache, ContractManager contractMgr) throws InvalidProtocolBufferException {
-//		Consumer<NormalContract> handleContractSave = contract -> {
-//			if(System.currentTimeMillis() - contract.updateTime() < 60000) {
-//				// 更新时间少于一分钟的合约才是需要保存新增合约		
-//				Set<String> monthlyContractSymbols = null;
-//				boolean isIndexContract = false;
-//				if(contract instanceof IndexContract idxContract) {
-//					isIndexContract = true;
-//					monthlyContractSymbols = idxContract.monthlyContractSymbols();
-//				}
-//				ContractPO po = ContractPO.builder()
-//						.unifiedSymbol(contract.unifiedSymbol())
-//						.data(contract.contractField().toByteArray())
-//						.gatewayType(contract.gatewayType())
-//						.updateTime(contract.updateTime())
-//						.isIndexContract(isIndexContract)
-//						.monthlyContractSymbols(monthlyContractSymbols)
-//						.build();
-//				contractRepo.saveContract(po);
-//			}
-//		};
-//		
-//		GlobalMarketRegistry registry = new GlobalMarketRegistry(fastEventEngine, handleContractSave, contractMgr::addContract, mdCache);
-//		// 加载合约订阅管理器
-//		for(SubscriptionManager subMgr : subMgrs) {			
-//			registry.register(subMgr);
-//		}
-//		//　加载已有合约
-//		List<ContractPO> contractList = contractRepo.getAvailableContracts();
-//		Map<String, ContractField> contractMap = new HashMap<>();
-//		for(ContractPO po : contractList) {
-//			ContractField contract = ContractField.parseFrom(po.getData());
-//			contractMap.put(contract.getUnifiedSymbol(), contract);
-//		}
-//		for(ContractPO po : contractList) {
-//			ContractField contract = contractMap.get(po.getUnifiedSymbol());
-//			if(po.isIndexContract()) {
-//				Set<ContractField> monthlyContracts = new HashSet<>();
-//				for(String monthlyContractSymbol : po.getMonthlyContractSymbols()) {
-//					if(contractMap.containsKey(monthlyContractSymbol)) {
-//						monthlyContracts.add(contractMap.get(monthlyContractSymbol));
-//					}
-//				}
-//				registry.register(new IndexContract(contract.getUnifiedSymbol(), po.getGatewayType(), monthlyContracts));
-//			} else {
-//				registry.register(new NormalContract(contract, po.getGatewayType(), po.getUpdateTime()));
-//			}
-//		}
-//		return registry;
-//	}
+	@Bean
+	public GlobalMarketRegistry marketGlobalRegistry(FastEventEngine fastEventEngine, IContractRepository contractRepo, List<SubscriptionManager> subMgrs,
+			ContractManager contractMgr) throws InvalidProtocolBufferException {
+		Consumer<NormalContract> handleContractSave = contract -> {
+			if(contract.updateTime() > 0) {
+				Set<String> monthlyContractSymbols = null;
+				boolean isIndexContract = false;
+				if(contract instanceof IndexContract idxContract) {
+					isIndexContract = true;
+					monthlyContractSymbols = idxContract.monthlyContractSymbols();
+				}
+				contractRepo.save(contract.contractField());
+			}
+		};
+		
+		GlobalMarketRegistry registry = new GlobalMarketRegistry(fastEventEngine, handleContractSave, contractMgr::addContract);
+		// 加载合约订阅管理器
+		for(SubscriptionManager subMgr : subMgrs) {			
+			registry.register(subMgr);
+		}
+		//　加载已有合约
+		List<ContractField> contractList = contractRepo.findAllByType(ProductClassEnum.FUTURES);
+		Map<String, ContractField> contractMap = contractList.stream()
+				.collect(Collectors.toMap(ContractField::getUnifiedSymbol, c -> c));
+		
+		for(ContractField contract : contractList) {
+			if(contract.getSymbol().endsWith(Constants.INDEX_SUFFIX)) {
+				Set<ContractField> monthlyContracts = new HashSet<>();
+				for(String monthlyContractSymbol : ContractUtils.getMonthlyUnifiedSymbolOfIndexContract(contract.getUnifiedSymbol(), contract.getExchange())) {
+					if(contractMap.containsKey(monthlyContractSymbol)) {
+						monthlyContracts.add(contractMap.get(monthlyContractSymbol));
+					}
+				}
+				registry.register(new IndexContract(contract.getUnifiedSymbol(), monthlyContracts));
+			} else {
+				registry.register(new NormalContract(contract, -1));
+			}
+		}
+		return registry;
+	}
 	
 	@Bean
 	public GatewayFactory ctpGatewayFactory(FastEventEngine fastEventEngine, GlobalMarketRegistry registry) {
