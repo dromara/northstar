@@ -24,8 +24,6 @@ public class MarketDataLocal {
 
     private Map<String, PriorityQueue<CoreField.TickField>> tickData = new HashMap<String, PriorityQueue<CoreField.TickField>>();
 
-    private final PlaybackDescription playbackDescription;
-
     private final IMarketDataRepository marketDataRepository;
 
     private final ISimAccountRepository simAccountRepository;
@@ -34,10 +32,8 @@ public class MarketDataLocal {
 
     private final IContractRepository contractRepository;
 
-    public MarketDataLocal(PlaybackDescription playbackDescription,
-                           IMarketDataRepository marketDataRepository, ISimAccountRepository simAccountRepository,
+    public MarketDataLocal(IMarketDataRepository marketDataRepository, ISimAccountRepository simAccountRepository,
                            IGatewayRepository gatewayRepository, IContractRepository contractRepository) {
-        this.playbackDescription = playbackDescription;
         this.marketDataRepository = marketDataRepository;
         this.simAccountRepository = simAccountRepository;
         this.gatewayRepository = gatewayRepository;
