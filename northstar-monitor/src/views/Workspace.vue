@@ -19,15 +19,15 @@
         <el-menu-item index="7">手工期权交易</el-menu-item>
       </el-menu>
     </div>
+    <socket-connection />
     <div class="ns-body">
       <router-view></router-view>
     </div>
-    <socket-connection />
   </div>
 </template>
 
 <script>
-
+import SocketConnection from '@/components/SocketConnection'
 const pageOpts = {
         "1": 'mktgateway',
         "2": 'tdgateway',
@@ -39,6 +39,9 @@ const pageOpts = {
       }
 
 export default {
+  components: {
+    SocketConnection
+  },
   data(){
     return {
       curPage: "0"

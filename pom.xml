@@ -31,7 +31,7 @@
 		<disruptor-version>3.4.2</disruptor-version>
 		<jwt-version>3.5.0</jwt-version>
 		<servlet-version>3.1.0</servlet-version>
-		<netty-socketio-version>1.7.8</netty-socketio-version>
+		<netty-socketio-version>1.7.19</netty-socketio-version>
 		<socketio-client-version>1.0.0</socketio-client-version>
 		<hessian-version>4.0.38</hessian-version>
 		<hutool-version>5.6.3</hutool-version>
