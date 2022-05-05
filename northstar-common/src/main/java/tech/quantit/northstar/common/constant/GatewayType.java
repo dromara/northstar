@@ -7,6 +7,10 @@ public enum GatewayType {
 	 */
 	SIM,
 	/**
+	 * 回放
+	 */
+	PLAYBACK,
+	/**
 	 * CTP生产
 	 */
 	CTP,
@@ -14,6 +18,6 @@ public enum GatewayType {
 	 * CTP仿真
 	 */
 	CTP_SIM,
-	
+
 	IB;
 }

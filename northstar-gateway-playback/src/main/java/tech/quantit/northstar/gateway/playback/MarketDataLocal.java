@@ -20,7 +20,7 @@ import java.util.PriorityQueue;
  *
  * @author changsong
  */
-public class MarketDataSim {
+public class MarketDataLocal {
 
     private Map<String, PriorityQueue<CoreField.TickField>> tickData = new HashMap<String, PriorityQueue<CoreField.TickField>>();
 
@@ -34,9 +34,9 @@ public class MarketDataSim {
 
     private final IContractRepository contractRepository;
 
-    public MarketDataSim(PlaybackDescription playbackDescription,
-                         IMarketDataRepository marketDataRepository, ISimAccountRepository simAccountRepository,
-                         IGatewayRepository gatewayRepository, IContractRepository contractRepository) {
+    public MarketDataLocal(PlaybackDescription playbackDescription,
+                           IMarketDataRepository marketDataRepository, ISimAccountRepository simAccountRepository,
+                           IGatewayRepository gatewayRepository, IContractRepository contractRepository) {
         this.playbackDescription = playbackDescription;
         this.marketDataRepository = marketDataRepository;
         this.simAccountRepository = simAccountRepository;
