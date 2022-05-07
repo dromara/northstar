@@ -48,11 +48,6 @@ const routes = [
         component: () => import('../views/Trade.vue')
       },
       {
-        path: '/mktdata',
-        name: 'mktdata',
-        component: () => import('../views/MarketData.vue')
-      },
-      {
         path: '/manualopttd',
         name: 'manualopttd',
         component: () => import('../views/NotImplemented.vue')

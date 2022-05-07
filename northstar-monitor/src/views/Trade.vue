@@ -1,131 +1,136 @@
 <template>
-  <div class="ns-trade">
-    <div class="ns-trade__account-profile">
-      <el-select
-        class="ns-trade__account"
-        v-model="currentAccountId"
-        placeholder="选择账户"
-        @change="handleAccountChange"
-      >
-        <el-option
-          v-for="(item, index) in accountOptions"
-          :key="index"
-          :label="item.gatewayId"
-          :value="item.gatewayId"
+  <div class="ns-page">
+    <div ref="tradeWrap" class="ns-trade">
+      <div class="ns-trade__account-profile">
+        <el-select
+          class="ns-trade__account"
+          v-model="currentAccountId"
+          placeholder="选择账户"
+          @change="handleAccountChange"
         >
-        </el-option>
-      </el-select>
-      <div class="ns-trade__account-description">
-        权益：{{ parseInt(accountBalance) | accountingFormatter }}
-      </div>
-      <div class="ns-trade__account-description">
-        可用：{{ parseInt(accountAvailable) | accountingFormatter }}
-      </div>
-      <div class="ns-trade__account-description">
-        使用率：{{
-          accountBalance
-            ? (((accountBalance - accountAvailable) * 100) / accountBalance).toFixed(1)
-            : 0
-        }}
-        %
-      </div>
-    </div>
-    <div class="ns-trade__trade-section">
-      <div class="ns-trade-action">
-        <div class="ns-trade-action__item">
-          <el-select
-            v-model="dealSymbol"
-            filterable
-            placeholder="请选择合约"
-            value-key="unifiedSymbol"
-            @change="handleContractChange"
+          <el-option
+            v-for="(item, index) in accountOptions"
+            :key="index"
+            :label="item.gatewayId"
+            :value="item.gatewayId"
           >
-            <el-option
-              v-for="(item, i) in symbolList"
-              :key="i"
-              :label="item.name"
-              :value="item.unifiedSymbol"
-            >
-            </el-option>
-          </el-select>
+          </el-option>
+        </el-select>
+        <div class="ns-trade__account-description">
+          权益：{{ parseInt(accountBalance) | accountingFormatter }}
         </div>
-        <div class="ns-trade-action__item">
-          <div class="ns-trade-action__complex-item">
-            <div class="ns-trade-action__complex-item-label">手数：</div>
-            <el-input-number
-              v-model="dealVol"
-              :min="1"
-              :max="10"
-              controls-position="right"
-            ></el-input-number>
+        <div class="ns-trade__account-description">
+          可用：{{ parseInt(accountAvailable) | accountingFormatter }}
+        </div>
+        <div class="ns-trade__account-description">
+          使用率：{{
+            accountBalance
+              ? (((accountBalance - accountAvailable) * 100) / accountBalance).toFixed(1)
+              : 0
+          }}
+          %
+        </div>
+      </div>
+      <div class="ns-trade__trade-section">
+        <div class="ns-trade-action">
+          <div class="ns-trade-action__item">
+            <el-select
+              v-model="dealSymbol"
+              filterable
+              placeholder="请选择合约"
+              value-key="unifiedSymbol"
+              @change="handleContractChange"
+            >
+              <el-option
+                v-for="(item, i) in symbolList"
+                :key="i"
+                :label="item.name"
+                :value="item.unifiedSymbol"
+              >
+              </el-option>
+            </el-select>
+          </div>
+          <div class="ns-trade-action__item">
+            <div class="ns-trade-action__complex-item">
+              <div class="ns-trade-action__complex-item-label">手数：</div>
+              <el-input-number
+                v-model="dealVol"
+                :min="1"
+                :max="10"
+                controls-position="right"
+              ></el-input-number>
+            </div>
+          </div>
+          <div class="ns-trade-action__item">
+            <el-select
+              v-model="dealPriceType"
+              filterable
+              placeholder="价格类型"
+              @change="handleDealPriceTypeChange"
+            >
+              <el-option
+                v-for="item in priceOptionList"
+                :key="item.type"
+                :label="item.label"
+                :value="item.type"
+              >
+              </el-option>
+            </el-select>
+          </div>
+          <div class="ns-trade-action__item">
+            <el-input
+              v-model="limitPrice"
+              placeholder="委托价"
+              :disabled="dealPriceType !== 'CUSTOM_PRICE'"
+              type="number"
+            ></el-input>
+          </div>
+          <div class="ns-trade-action__item">
+            <el-input v-model="stopPrice" placeholder="止损价" type="number"></el-input>
           </div>
         </div>
-        <div class="ns-trade-action__item">
-          <el-select
-            v-model="dealPriceType"
-            filterable
-            placeholder="价格类型"
-            @change="handleDealPriceTypeChange"
-          >
-            <el-option
-              v-for="item in priceOptionList"
-              :key="item.type"
-              :label="item.label"
-              :value="item.type"
-            >
-            </el-option>
-          </el-select>
-        </div>
-        <div class="ns-trade-action__item">
-          <el-input
-            v-model="limitPrice"
-            placeholder="委托价"
-            :disabled="dealPriceType !== 'CUSTOM_PRICE'"
-            type="number"
-          ></el-input>
-        </div>
-        <div class="ns-trade-action__item">
-          <el-input v-model="stopPrice" placeholder="止损价" type="number"></el-input>
+        <div class="ns-trade-info">
+          <NsPriceBoard :tick="$store.state.marketCurrentDataModule.curTick" />
         </div>
       </div>
-      <div class="ns-trade-info">
-        <NsPriceBoard :tick="$store.state.marketCurrentDataModule.curTick" />
+      <div class="ns-trade__trade-btn-wrap">
+        <div class="ns-trade-button">
+          <NsButton
+            :price="`${bkPrice || 0}`"
+            :color="'rgba(196, 68, 66, 1)'"
+            :label="'买开'"
+            @click.native="buyOpen"
+          />
+        </div>
+        <div class="ns-trade-button">
+          <NsButton
+            :price="`${skPrice || 0}`"
+            :color="'rgba(64, 158, 95, 1)'"
+            :label="'卖开'"
+            @click.native="sellOpen"
+          />
+        </div>
+        <div class="ns-trade-button">
+          <NsButton
+            :price="`${closePrice || '优先平今'}`"
+            :reverseColor="true"
+            :label="'平仓'"
+            @click.native="closePosition"
+          />
+        </div>
       </div>
+      <NsAccountDetail
+        :tableContentHeight="flexibleTblHeight"
+        :positionDescription="$store.state.accountModule.curInfo.positions"
+        :orderDescription="$store.state.accountModule.curInfo.orders"
+        :transactionDescription="$store.state.accountModule.curInfo.transactions"
+        @chosenPosition="onPositionChosen"
+        @cancelOrder="onCancelOrder"
+      />
     </div>
-    <div class="ns-trade__trade-btn-wrap">
-      <div class="ns-trade-button">
-        <NsButton
-          :price="`${bkPrice || 0}`"
-          :color="'rgba(196, 68, 66, 1)'"
-          :label="'买开'"
-          @click.native="buyOpen"
-        />
-      </div>
-      <div class="ns-trade-button">
-        <NsButton
-          :price="`${skPrice || 0}`"
-          :color="'rgba(64, 158, 95, 1)'"
-          :label="'卖开'"
-          @click.native="sellOpen"
-        />
-      </div>
-      <div class="ns-trade-button">
-        <NsButton
-          :price="`${closePrice || '优先平今'}`"
-          :reverseColor="true"
-          :label="'平仓'"
-          @click.native="closePosition"
-        />
-      </div>
+    <div class="ns-trade__md-wrapper">
+      <NsMarketData />
     </div>
-    <NsAccountDetail
-      :tableContentHeight="flexibleTblHeight"
-      :positionDescription="$store.state.accountModule.curInfo.positions"
-      :orderDescription="$store.state.accountModule.curInfo.orders"
-      :transactionDescription="$store.state.accountModule.curInfo.transactions"
-      @chosenPosition="onPositionChosen"
-      @cancelOrder="onCancelOrder"
-    />
   </div>
 </template>
 
@@ -133,6 +138,7 @@
 import NsButton from '@/components/TradeButton'
 import NsPriceBoard from '@/components/PriceBoard'
 import NsAccountDetail from '@/components/AccountDetail'
+import NsMarketData from '@/components/MarketData'
 import gatewayMgmtApi from '../api/gatewayMgmtApi'
 import tradeOprApi from '../api/tradeOprApi'
 import dataSyncApi from '../api/dataSyncApi'
@@ -144,7 +150,8 @@ export default {
   components: {
     NsButton,
     NsPriceBoard,
-    NsAccountDetail
+    NsAccountDetail,
+    NsMarketData
   },
   data() {
     return {
@@ -178,7 +185,8 @@ export default {
       curTab: 'position',
       symbolIndexMap: {},
       currentAccountId: '',
-      currentPosition: ''
+      currentPosition: '',
+      elementHeight: 0
     }
   },
   methods: {
@@ -288,10 +296,19 @@ export default {
       this.accountMap[i.gatewayId] = i
     })
     this.handleAccountChange()
+    const self = this
+    window.addEventListener('resize', ()=>{
+      if(self.$refs.tradeWrap){
+        self.elementHeight = self.$refs.tradeWrap.clientHeight
+      }
+    })
+  },
+  mounted(){
+    this.elementHeight = this.$refs.tradeWrap.clientHeight
   },
   computed: {
     flexibleTblHeight() {
-      return document.body.clientHeight - 460
+      return this.elementHeight - 420
     },
     currentAccount() {
       return this.accountMap[this.currentAccountId]
@@ -337,6 +354,9 @@ export default {
 </script>
 
 <style>
+.ns-trade-wrapper{
+  display: flex;
+}
 .ns-trade {
   width: 100%;
   max-width: 450px;
@@ -408,6 +428,10 @@ export default {
 }
 .el-input-number {
   width: 100%;
+}
+.ns-trade__md-wrapper{
+  width: 100%;
+  height: 100%;
 }
 .ns-trade-action__complex-item {
   display: flex;
