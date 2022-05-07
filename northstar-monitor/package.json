@@ -1,6 +1,6 @@
 {
   "name": "northstar-monitor",
-  "version": "3.5.0",
+  "version": "4.0.0",
   "private": true,
   "scripts": {
     "start": "npm run serve",
