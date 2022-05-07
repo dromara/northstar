@@ -1,5 +1,7 @@
 package tech.quantit.northstar.common.model;
 
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -32,6 +34,8 @@ public class GatewayDescription {
 	private boolean autoConnect;
 	
 	private Object settings;
+	
+	private List<String> subscribedContracts;
 
 	private String bindedMktGatewayId;
 	

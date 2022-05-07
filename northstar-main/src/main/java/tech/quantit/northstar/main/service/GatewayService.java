@@ -75,12 +75,14 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 		if(null == gatewayDescription.getSettings()) {
 			throw new IllegalArgumentException("网关设置不能为空");
 		}
-		gatewayDescription.setSettings(CodecUtils.encrypt(JSON.toJSONString(gatewayDescription.getSettings())));
+		String srcSettings = JSON.toJSONString(gatewayDescription.getSettings());
+		gatewayDescription.setSettings(CodecUtils.encrypt(srcSettings));
 		try {			
 			gatewayRepo.insert(gatewayDescription);
 		} catch(DuplicateKeyException e) {
 			throw new IllegalStateException("已存在同名网关，不能重复创建", e);
 		}
+		gatewayDescription.setSettings(srcSettings);
 		if(gatewayDescription.getGatewayUsage() == GatewayUsage.MARKET_DATA) {
 			mdRepo.init(gatewayDescription.getGatewayId());
 		}
@@ -123,6 +125,7 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 	public boolean updateGateway(GatewayDescription gatewayDescription) throws Exception {
 		log.info("更新网关[{}]", gatewayDescription.getGatewayId());
 		doDeleteGateway(gatewayDescription.getGatewayId());
+		gatewayDescription.setSettings(JSON.toJSONString(gatewayDescription.getSettings()));
 		// 先删除旧的，再重新创建新的
 		return doCreateGateway(gatewayDescription);
 	}
@@ -274,14 +277,7 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 				throw new IllegalStateException("解码字符串非法，很可能是临时文件夹" + System.getProperty("user.home") + File.separator
 						+ ".northstar-salt这个盐文件与加密时的不一致导致无法解码。解决办法：手动移除旧的Gateway数据，重新录入，并确保盐文件不会丢失。");
 			}
-			if(gd.getGatewayType() == GatewayType.CTP || gd.getGatewayType() == GatewayType.CTP_SIM) {
-				CtpSettings settings = JSON.parseObject(decodeStr, CtpSettings.class);
-				gd.setSettings(settings);
-			}
-			if(gd.getGatewayType() == GatewayType.SIM) {
-				SimSettings settings = JSON.parseObject(decodeStr, SimSettings.class);
-				gd.setSettings(settings);
-			}
+			gd.setSettings(decodeStr);
 			doCreateGateway(gd);
 		}
 	}

@@ -1,7 +1,5 @@
 package common;
 
-import org.apache.commons.lang3.RandomStringUtils;
-
 import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.common.constant.GatewayUsage;
 import tech.quantit.northstar.common.model.CtpSettings;
@@ -15,8 +13,8 @@ public class TestGatewayFactory {
 		if(type == CtpSettings.class) {
 			return CtpSettings.builder()
 					.brokerId("9999")
-					.userId(RandomStringUtils.random(10))
-					.password(RandomStringUtils.random(10))
+					.userId("kevin")
+					.password("123456")
 					.build();
 		}
 		if(type == SimSettings.class) {
@@ -32,7 +30,6 @@ public class TestGatewayFactory {
 				.gatewayId(id)
 				.autoConnect(autoConnect)
 				.gatewayType(type)
-				.gatewayAdapterType(RandomStringUtils.random(100))
 				.settings(settings)
 				.gatewayUsage(GatewayUsage.MARKET_DATA)
 				.build();
@@ -43,7 +40,6 @@ public class TestGatewayFactory {
 				.gatewayId(id)
 				.autoConnect(autoConnect)
 				.gatewayType(type)
-				.gatewayAdapterType(RandomStringUtils.random(100))
 				.settings(settings)
 				.gatewayUsage(GatewayUsage.TRADE)
 				.bindedMktGatewayId(bindGateway)

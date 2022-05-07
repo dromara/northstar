@@ -8,8 +8,8 @@ import tech.quantit.northstar.common.constant.GatewayUsage;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.model.GatewayDescription;
 import tech.quantit.northstar.common.model.SimSettings;
-import tech.quantit.northstar.gateway.api.GatewayFactory;
 import tech.quantit.northstar.gateway.api.Gateway;
+import tech.quantit.northstar.gateway.api.GatewayFactory;
 import tech.quantit.northstar.gateway.api.domain.GlobalMarketRegistry;
 import tech.quantit.northstar.gateway.sim.market.SimMarketGatewayLocal;
 import tech.quantit.northstar.gateway.sim.persistence.SimAccountRepository;
@@ -54,7 +54,7 @@ public class SimGatewayFactory implements GatewayFactory{
 		String accGatewayId = gatewayDescription.getGatewayId();
 		Optional<SimAccount> simAccountOp = simAccountRepo.findById(accGatewayId);
 
-		SimSettings settings = JSON.toJavaObject((JSON)JSON.toJSON(gatewayDescription.getSettings()), SimSettings.class);
+		SimSettings settings = JSON.parseObject((String)gatewayDescription.getSettings(), SimSettings.class);
 		GatewaySettingField gwSettings = GatewaySettingField.newBuilder()
 				.setGatewayId(gatewayDescription.getGatewayId())
 				.setGatewayType(GatewayTypeEnum.GTE_Trade)
