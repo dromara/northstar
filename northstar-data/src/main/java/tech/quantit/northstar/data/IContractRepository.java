@@ -2,7 +2,7 @@ package tech.quantit.northstar.data;
 
 import java.util.List;
 
-import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
+import tech.quantit.northstar.common.constant.GatewayType;
 import xyz.redtorch.pb.CoreField.ContractField;
 
 /**
@@ -13,21 +13,21 @@ import xyz.redtorch.pb.CoreField.ContractField;
 public interface IContractRepository {
 
 	/**
-	 * 批量保存合约信息
-	 * @param contracts
-	 */
-	void batchSave(List<ContractField> contracts);
-	
-	/**
 	 * 保存合约信息
 	 * @param contract
 	 */
-	void save(ContractField contract);
+	void save(ContractField contract, GatewayType gatewayType);
 	
 	/**
 	 * 按合约类型查询合约
 	 * @param type
 	 * @return
 	 */
-	List<ContractField> findAllByType(ProductClassEnum type);
+	List<ContractField> findAll(GatewayType gatewayType);
+	
+	/**
+	 * 查询全部合约
+	 * @return
+	 */
+	List<ContractField> findAll();
 }

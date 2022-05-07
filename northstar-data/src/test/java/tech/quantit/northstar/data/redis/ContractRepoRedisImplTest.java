@@ -12,6 +12,7 @@ import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactor
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
+import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.data.IContractRepository;
 /*
  * 单元测试主要验证这几个方面：
@@ -71,40 +72,33 @@ class ContractRepoRedisImplTest {
 	}
 
 	@Test
-	void testBatchSave() {
-		repo.batchSave(List.of(c1,c2));
-		assertThat(redisTemplate.hasKey("contract:FUTURES")).isTrue();
-		assertThat(redisTemplate.hasKey("contract:OPTION")).isTrue();
-	}
-
-	@Test
 	void testSave() {
-		repo.save(c2);
-		assertThat(redisTemplate.hasKey("contract:OPTION")).isTrue();
-		assertThat(redisTemplate.getExpire("contract:OPTION")).isNegative();
+		repo.save(c2, GatewayType.CTP);
+		assertThat(redisTemplate.hasKey("contracts:CTP")).isTrue();
+		assertThat(redisTemplate.getExpire("contracts:CTP")).isNegative();
 	}
 
 	@Test
-	void testFindAllByType() {
-		repo.batchSave(List.of(c1,c2));
+	void testFindAll() {
+		repo.save(c1, GatewayType.CTP);
 		
-		List<ContractField> list = repo.findAllByType(ProductClassEnum.FUTURES);
+		List<ContractField> list = repo.findAll(GatewayType.CTP);
 		assertThat(list).hasSize(1).contains(c1);
 	}
 	
 	@Test
 	void shouldOnlyCreateOnce() {
-		repo.save(c1);
-		repo.save(c1);
-		List<ContractField> list = repo.findAllByType(ProductClassEnum.FUTURES);
+		repo.save(c1, GatewayType.CTP);
+		repo.save(c1, GatewayType.CTP);
+		List<ContractField> list = repo.findAll(GatewayType.CTP);
 		assertThat(list).hasSize(1).contains(c1);
 	}
 	
 	@Test
 	void shouldFilterExpiredContract() {
-		repo.save(c1);
-		repo.save(c3);
-		List<ContractField> list = repo.findAllByType(ProductClassEnum.FUTURES);
+		repo.save(c1, GatewayType.CTP);
+		repo.save(c3, GatewayType.CTP);
+		List<ContractField> list = repo.findAll(GatewayType.CTP);
 		assertThat(list).hasSize(1).contains(c1);
 	}
 

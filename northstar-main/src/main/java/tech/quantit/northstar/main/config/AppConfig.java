@@ -1,7 +1,6 @@
 package tech.quantit.northstar.main.config;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -25,7 +24,6 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.google.protobuf.InvalidProtocolBufferException;
-import com.lmax.disruptor.dsl.ProducerType;
 
 import tech.quantit.northstar.common.constant.Constants;
 import tech.quantit.northstar.common.event.FastEventEngine;
@@ -47,7 +45,6 @@ import tech.quantit.northstar.main.interceptor.AuthorizationInterceptor;
 import xyz.redtorch.gateway.ctp.common.CtpSubscriptionManager;
 import xyz.redtorch.gateway.ctp.x64v6v3v15v.CtpGatewayFactory;
 import xyz.redtorch.gateway.ctp.x64v6v5v1cpv.CtpSimGatewayFactory;
-import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
 
 /**
@@ -127,16 +124,10 @@ public class AppConfig implements WebMvcConfigurer {
 	
 	@Bean
 	public GlobalMarketRegistry marketGlobalRegistry(FastEventEngine fastEventEngine, IContractRepository contractRepo, List<SubscriptionManager> subMgrs,
-			ContractManager contractMgr) throws InvalidProtocolBufferException {
+			ContractManager contractMgr) {
 		Consumer<NormalContract> handleContractSave = contract -> {
 			if(contract.updateTime() > 0) {
-				Set<String> monthlyContractSymbols = null;
-				boolean isIndexContract = false;
-				if(contract instanceof IndexContract idxContract) {
-					isIndexContract = true;
-					monthlyContractSymbols = idxContract.monthlyContractSymbols();
-				}
-				contractRepo.save(contract.contractField());
+				contractRepo.save(contract.contractField(), contract.gatewayType());
 			}
 		};
 		
@@ -146,7 +137,7 @@ public class AppConfig implements WebMvcConfigurer {
 			registry.register(subMgr);
 		}
 		//　加载已有合约
-		List<ContractField> contractList = contractRepo.findAllByType(ProductClassEnum.FUTURES);
+		List<ContractField> contractList = contractRepo.findAll();
 		Map<String, ContractField> contractMap = contractList.stream()
 				.collect(Collectors.toMap(ContractField::getUnifiedSymbol, c -> c));
 		

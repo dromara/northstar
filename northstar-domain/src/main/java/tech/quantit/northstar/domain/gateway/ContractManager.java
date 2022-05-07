@@ -5,10 +5,13 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 import lombok.extern.slf4j.Slf4j;
+import tech.quantit.northstar.common.constant.Constants;
 import tech.quantit.northstar.common.exception.NoSuchElementException;
+import tech.quantit.northstar.common.utils.ContractUtils;
 import xyz.redtorch.pb.CoreField.ContractField;
 
 /**
@@ -56,8 +59,19 @@ public class ContractManager {
 		return results;
 	}
 	
-	public Map<String, ContractField> getContractMapByGateway(String gatewayId){
-		return contractTbl.get(gatewayId);
+	public boolean isIndexContract(ContractField contract) {
+		return contract.getSymbol().contains(Constants.INDEX_SUFFIX);
+	}
+	
+	public List<ContractField> monthlyContractsOfIndex(ContractField contract){
+		if(!isIndexContract(contract)) {
+			throw new IllegalArgumentException("此合约非指数合约：" + contract.getUnifiedSymbol());
+		}
+		return ContractUtils.getMonthlyUnifiedSymbolOfIndexContract(contract.getUnifiedSymbol(), contract.getExchange())
+				.stream()
+				.map(this::getContract)
+				.filter(Objects::nonNull)
+				.toList();
 	}
 	
 }

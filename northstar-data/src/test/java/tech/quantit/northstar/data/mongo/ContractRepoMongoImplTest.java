@@ -10,6 +10,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 
 import com.mongodb.client.MongoClients;
 
+import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.data.IContractRepository;
 import tech.quantit.northstar.data.mongo.po.ContractPO;
 import test.common.TestFieldFactory;
@@ -50,38 +51,32 @@ class ContractRepoMongoImplTest {
 	}
 	
 	@Test
-	void testBatchSave() {
-		repo.batchSave(List.of(c1, c2, c3));
-		assertThat(mongoTemplate.findAll(ContractPO.class)).hasSize(3);
-	}
-
-	@Test
 	void testSave() {
-		repo.save(c3);
+		repo.save(c3, GatewayType.CTP);
 		assertThat(mongoTemplate.findAll(ContractPO.class)).hasSize(1);
 	}
 
 	@Test
-	void testFindAllByType() {
-		repo.batchSave(List.of(c1,c2));
+	void testFindAll() {
+		repo.save(c1, GatewayType.CTP);
 		
-		List<ContractField> list = repo.findAllByType(ProductClassEnum.FUTURES);
+		List<ContractField> list = repo.findAll(GatewayType.CTP);
 		assertThat(list).hasSize(1).contains(c1);
 	}
 	
 	@Test
 	void shouldOnlyCreateOnce() {
-		repo.save(c1);
-		repo.save(c1);
-		List<ContractField> list = repo.findAllByType(ProductClassEnum.FUTURES);
+		repo.save(c1, GatewayType.CTP);
+		repo.save(c1, GatewayType.CTP);
+		List<ContractField> list = repo.findAll(GatewayType.CTP);
 		assertThat(list).hasSize(1).contains(c1);
 	}
 	
 	@Test
 	void shouldFilterExpiredContract() {
-		repo.save(c1);
-		repo.save(c3);
-		List<ContractField> list = repo.findAllByType(ProductClassEnum.FUTURES);
+		repo.save(c1, GatewayType.CTP);
+		repo.save(c3, GatewayType.SIM);
+		List<ContractField> list = repo.findAll(GatewayType.CTP);
 		assertThat(list).hasSize(1).contains(c1);
 	}
 	
