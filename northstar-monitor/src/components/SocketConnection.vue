@@ -36,7 +36,15 @@ export default {
       }
     }
   },
-  mounted() {
+  async mounted() {
+    if(location.hostname === 'localhost' || location.hostname === '127.0.0.1'){
+      fetch('/redirect').then(res => res.json()).then(res => {
+        const redirectUrl = `http://${res}:${location.port}`
+        console.log(`redirecting to ` + redirectUrl)
+        location.href = redirectUrl
+      })
+      return
+    }
     const wsHost = `http://${location.hostname}:51888`
     console.log('准备连接websocket：' + wsHost)
     this.socket = SocketIO(wsHost)

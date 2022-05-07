@@ -43,6 +43,11 @@ const routes = [
         component: () => import('../views/NotImplemented.vue')
       },
       {
+        path: '/mktdata',
+        name: 'mktdata',
+        component: () => import('../views/NotImplemented.vue')
+      },
+      {
         path: '/manualfttd',
         name: 'manualfttd',
         component: () => import('../views/Trade.vue')
