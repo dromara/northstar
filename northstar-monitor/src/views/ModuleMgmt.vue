@@ -10,7 +10,6 @@
       :moduleName="curModule ? curModule.moduleName : ''"
       :visible.sync="modulePerfVisible"
     />
-    <ModulePlayback :visible.sync="modulePlaybackVisible" :data="playbackableList" />
     <el-table height="100%" :data="list">
       <el-table-column label="模组名称" prop="moduleName" align="center" width="100px" />
       <el-table-column label="策略模式" prop="type" align="center" width="90px" />
@@ -41,7 +40,6 @@
       <el-table-column align="center" width="240px">
         <template slot="header">
           <el-button size="mini" type="primary" @click="handleCreate">新建</el-button>
-          <el-button size="mini" @click="modulePlaybackVisible = true">回测</el-button>
         </template>
         <template slot-scope="scope">
           <el-button size="mini" @click="handlePerf(scope.$index, scope.row)">透视</el-button>
@@ -64,21 +62,18 @@
 <script>
 import ModuleForm from '@/components/ModuleForm'
 import ModulePerf from '@/components/ModulePerformance'
-import ModulePlayback from '@/components/ModulePlayback'
 
 import moduleApi from '@/api/moduleApi'
 
 export default {
   components: {
     ModuleForm,
-    ModulePerf,
-    ModulePlayback
+    ModulePerf
   },
   data() {
     return {
       moduleFormVisible: false,
       modulePerfVisible: false,
-      modulePlaybackVisible: false,
       curTableIndex: -1,
       curModule: null,
       list: []
