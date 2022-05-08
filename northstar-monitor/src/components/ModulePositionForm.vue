@@ -118,10 +118,6 @@ export default {
 </script>
 
 <style>
-.warning-text {
-  color: #f1f43c;
-  margin-bottom: 18px;
-}
 .form-wrapper {
   width: 250px;
   margin: auto;

@@ -17,6 +17,7 @@
       :settingsSrc="form.settings"
       @onSave="(settings) => (form.settings = settings)"
     />
+    <ContractSubscriptionForm :visible.sync="contractFormVisible" />
     <el-form ref="gatewayForm" :model="form" label-width="100px" width="200px" :rules="formRules">
       <el-row>
         <el-col :span="8">
@@ -102,6 +103,12 @@
     <div slot="footer" class="dialog-footer">
       <el-button @click="close">取 消</el-button>
       <el-button
+        type="primary"
+        v-if="gatewayUsage === 'MARKET_DATA'"
+        @click="contractFormVisible = true"
+        >合约订阅配置</el-button
+      >
+      <el-button
         id="gatewaySettings"
         type="primary"
         @click="gatewaySettingConfig"
@@ -116,6 +123,7 @@
 <script>
 import NsCtpForm from '@/components/CtpForm'
 import NsSimForm from '@/components/SimForm'
+import ContractSubscriptionForm from '@/components/ContractSubscriptionForm'
 import gatewayMgmtApi from '../api/gatewayMgmtApi'
 const GATEWAY_ADAPTER = {
   CTP: 'xyz.redtorch.gateway.ctp.x64v6v3v15v.CtpGatewayAdapter',
@@ -132,7 +140,8 @@ const CONNECTION_STATE = {
 export default {
   components: {
     NsCtpForm,
-    NsSimForm
+    NsSimForm,
+    ContractSubscriptionForm
   },
   props: {
     visible: {
@@ -164,6 +173,7 @@ export default {
       dialogVisible: false,
       ctpFormVisible: false,
       simFormVisible: false,
+      contractFormVisible: false,
       form: {
         gatewayId: '',
         description: '',
@@ -203,7 +213,7 @@ export default {
     onChooseGatewayType() {
       this.form.gatewayAdapterType = GATEWAY_ADAPTER[this.form.gatewayType]
       if (this.gatewayUsage === 'MARKET_DATA') {
-        this.form.gatewayId = `${this.form.gatewayType}行情`
+        this.form.gatewayId = `${this.form.gatewayType}`
       }
     },
     gatewaySettingConfig() {
