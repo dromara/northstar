@@ -88,7 +88,6 @@ curl https://gitee.com/dromara/northstar/raw/master/startup.sh | sh
 
 ### 部署验证
 在浏览器直接访问部署服务的域名（端口使用了默认的80端口）， 应该可以看到以下界面，并可以登陆成功  
-**注意：如果是本地的话，请用局域网IP。但不能用localhost与127.0.0.1。**
 ![输入图片说明](https://images.gitee.com/uploads/images/2022/0103/205503_efb41f7c_1676852.png "login.PNG")
 
 ### 查询日志

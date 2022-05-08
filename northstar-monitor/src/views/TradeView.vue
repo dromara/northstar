@@ -146,7 +146,6 @@ import dataSyncApi from '../api/dataSyncApi'
 let accountCheckTimer
 
 export default {
-  name: 'Trade',
   components: {
     NsButton,
     NsPriceBoard,
@@ -297,13 +296,13 @@ export default {
     })
     this.handleAccountChange()
     const self = this
-    window.addEventListener('resize', ()=>{
-      if(self.$refs.tradeWrap){
+    window.addEventListener('resize', () => {
+      if (self.$refs.tradeWrap) {
         self.elementHeight = self.$refs.tradeWrap.clientHeight
       }
     })
   },
-  mounted(){
+  mounted() {
     this.elementHeight = this.$refs.tradeWrap.clientHeight
   },
   computed: {
@@ -354,7 +353,7 @@ export default {
 </script>
 
 <style>
-.ns-trade-wrapper{
+.ns-trade-wrapper {
   display: flex;
 }
 .ns-trade {
@@ -429,7 +428,7 @@ export default {
 .el-input-number {
   width: 100%;
 }
-.ns-trade__md-wrapper{
+.ns-trade__md-wrapper {
   width: 100%;
   height: 100%;
 }

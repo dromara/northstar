@@ -23,7 +23,8 @@ const TYPE = {
 export default {
   data() {
     return {
-      socket: null
+      socket: null,
+      wsHost: location.hostname
     }
   },
   watch: {
@@ -37,27 +38,30 @@ export default {
     }
   },
   async mounted() {
-    if(location.hostname === 'localhost' || location.hostname === '127.0.0.1'){
-      fetch('/redirect').then(res => res.json()).then(res => {
-        const redirectUrl = `http://${res}:${location.port}`
-        console.log(`redirecting to ` + redirectUrl)
-        location.href = redirectUrl
-      }).catch(()=>{
-        this.$message({
-          type: 'error',
-          message: '服务端未启动',
-          duration: 0
+    if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+      fetch('/redirect')
+        .then((res) => res.json())
+        .then((res) => {
+          this.wsHost = res
+          this.initSocket()
         })
-      })
+        .catch(() => {
+          this.$message({
+            type: 'error',
+            message: '服务端未启动',
+            duration: 0
+          })
+        })
       return
+    } else {
+      setTimeout(this.initSocket, 500)
     }
-    setTimeout(this.initSocket, 500)
   },
-  methods:{
-    initSocket(){
-      const wsHost = `ws://${location.hostname}:51888`
-      console.log('准备连接websocket：' + wsHost)
-      this.socket = io(wsHost, { transports: [ 'websocket' ] })
+  methods: {
+    initSocket() {
+      const wsEndpoint = `ws://${this.wsHost}:51888`
+      console.log('准备连接websocket：' + wsEndpoint)
+      this.socket = io(wsEndpoint, { transports: ['websocket'] })
       this.socket.on('TICK', (data) => {
         let tick = TickField.deserializeBinary(data).toObject()
         this.$store.commit('updateTick', tick)
@@ -101,7 +105,7 @@ export default {
       this.socket.on('error', (e) => {
         console.log('SocketIO连接异常', e)
       })
-      this.socket.on('connect_error', e => {
+      this.socket.on('connect_error', (e) => {
         console.log('SocketIO连接失败', e)
       })
       this.socket.on('connect', () => {
