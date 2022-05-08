@@ -40,3 +40,7 @@
   align-items: center;
   justify-content: center;
 }
+
+.warning-text {
+  color: #f1f43c;
+}
