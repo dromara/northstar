@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.Test;
 
+import com.alibaba.fastjson.JSON;
 import com.google.common.eventbus.EventBus;
 
 import tech.quantit.northstar.common.constant.GatewayType;
@@ -25,7 +26,7 @@ class SimGatewayFactoryTest {
 		when(simMarket.getMarketEventBus()).thenReturn(mock(EventBus.class));
 		SimGatewayFactory factory = new SimGatewayFactory(mock(FastEventEngine.class), simMarket, accRepo, mock(GlobalMarketRegistry.class));
 		GatewayDescription gd = GatewayDescription.builder().gatewayId("gatewayid").gatewayType(GatewayType.SIM)
-				.gatewayUsage(GatewayUsage.TRADE).settings(new SimSettings()).build();
+				.gatewayUsage(GatewayUsage.TRADE).settings(JSON.toJSONString(new SimSettings())).build();
 		assertThat(factory.newInstance(gd)).isNotNull();
 		
 		GatewayDescription gd2 = GatewayDescription.builder().gatewayId("gatewayid").gatewayType(GatewayType.SIM)

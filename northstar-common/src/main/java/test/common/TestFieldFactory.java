@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.UUID;
 
 import tech.quantit.northstar.common.constant.DateTimeConstant;
+import tech.quantit.northstar.common.constant.GatewayType;
 import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
 import xyz.redtorch.pb.CoreEnum.CurrencyEnum;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
@@ -68,6 +69,7 @@ public class TestFieldFactory {
 				.setContractId(symbol + "@SHFE@FUTURES@" + gatewayId)
 				.setExchange(ExchangeEnum.SHFE)
 				.setFullName(symbol)
+				.setThirdPartyId(gatewayId + "#" + GatewayType.CTP)
 				.setLongMarginRatio(0.08)
 				.setShortMarginRatio(0.08)
 				.setMultiplier(10)
