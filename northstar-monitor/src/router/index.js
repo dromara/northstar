@@ -71,9 +71,7 @@ router.beforeEach(async (to, from, next) => {
     return
   }
   try {
-    if(process.env === 'production'){
-      await loginApi.test()
-    }
+    await loginApi.test()
     next()
   } catch (e) {
     console.log('test fail')

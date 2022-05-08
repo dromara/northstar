@@ -192,15 +192,14 @@ export default {
       return this.gatewayUsage === 'TRADE' ? '账户' : '网关'
     }
   },
-  async created() {
-    this.linkedGatewayOptions = await gatewayMgmtApi.findAll('MARKET_DATA')
-    this.form.gatewayUsage = this.gatewayUsage
-  },
   watch: {
-    visible: function (val) {
+    visible: async function (val) {
       if (val) {
         this.dialogVisible = val
         Object.assign(this.form, this.gatewayDescription)
+        this.form.gatewayUsage = this.gatewayUsage
+        this.linkedGatewayOptions = await gatewayMgmtApi.findAll('MARKET_DATA')
+        console.log('gd', this.gatewayDescription)
       }
     },
     dialogVisible: function (val) {
@@ -246,7 +245,6 @@ export default {
     close() {
       this.dialogVisible = false
       this.form = this.$options.data().form
-      this.form.gatewayUsage = this.gatewayUsage
     }
   }
 }

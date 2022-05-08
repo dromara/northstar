@@ -54,7 +54,7 @@ public class SimGatewayFactory implements GatewayFactory{
 		String accGatewayId = gatewayDescription.getGatewayId();
 		Optional<SimAccount> simAccountOp = simAccountRepo.findById(accGatewayId);
 
-		SimSettings settings = JSON.parseObject((String)gatewayDescription.getSettings(), SimSettings.class);
+		SimSettings settings = JSON.parseObject(JSON.toJSONString(gatewayDescription.getSettings()), SimSettings.class);
 		GatewaySettingField gwSettings = GatewaySettingField.newBuilder()
 				.setGatewayId(gatewayDescription.getGatewayId())
 				.setGatewayType(GatewayTypeEnum.GTE_Trade)

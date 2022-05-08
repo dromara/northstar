@@ -30,7 +30,7 @@ public class CtpGatewayFactory implements GatewayFactory{
 		GatewayTypeEnum gwType = gatewayDescription.getGatewayUsage() == GatewayUsage.MARKET_DATA
 				? GatewayTypeEnum.GTE_MarketData
 				: GatewayTypeEnum.GTE_Trade;
-		CtpSettings settings = JSON.parseObject((String)gatewayDescription.getSettings(), CtpSettings.class);
+		CtpSettings settings = JSON.parseObject(JSON.toJSONString(gatewayDescription.getSettings()), CtpSettings.class);
 		CtpApiSettingField ctpSetting = CtpApiSettingField.newBuilder()
 				.setPassword(settings.getPassword())
 				.setUserId(settings.getUserId())

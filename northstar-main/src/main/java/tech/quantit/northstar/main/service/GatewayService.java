@@ -75,14 +75,15 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 		if(null == gatewayDescription.getSettings()) {
 			throw new IllegalArgumentException("网关设置不能为空");
 		}
-		String srcSettings = JSON.toJSONString(gatewayDescription.getSettings());
+		Object settings = gatewayDescription.getSettings();
+		String srcSettings = JSON.toJSONString(settings);
 		gatewayDescription.setSettings(CodecUtils.encrypt(srcSettings));
 		try {			
 			gatewayRepo.insert(gatewayDescription);
 		} catch(DuplicateKeyException e) {
 			throw new IllegalStateException("已存在同名网关，不能重复创建", e);
 		}
-		gatewayDescription.setSettings(srcSettings);
+		gatewayDescription.setSettings(settings);
 		if(gatewayDescription.getGatewayUsage() == GatewayUsage.MARKET_DATA) {
 			mdRepo.init(gatewayDescription.getGatewayId());
 		}
@@ -125,7 +126,6 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 	public boolean updateGateway(GatewayDescription gatewayDescription) throws Exception {
 		log.info("更新网关[{}]", gatewayDescription.getGatewayId());
 		doDeleteGateway(gatewayDescription.getGatewayId());
-		gatewayDescription.setSettings(JSON.toJSONString(gatewayDescription.getSettings()));
 		// 先删除旧的，再重新创建新的
 		return doCreateGateway(gatewayDescription);
 	}
@@ -163,7 +163,6 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 //			}
 		}
 		boolean flag = doDeleteGateway(gatewayId);
-		gatewayRepo.deleteById(gatewayId);
 		mdRepo.dropGatewayData(gatewayId);
 		return flag;
 	}
@@ -172,6 +171,7 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 		GatewayConnection conn = gatewayConnMgr.getGatewayConnectionById(gatewayId);
 		Gateway gateway = gatewayConnMgr.getGatewayByConnection(conn);
 		gatewayConnMgr.removePair(conn);
+		gatewayRepo.deleteById(gatewayId);
 		// FIXME
 //		if(gateway instanceof SimTradeGateway simGateway) {
 //			String mdGatewayId = conn.getGwDescription().getBindedMktGatewayId();
@@ -277,7 +277,7 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 				throw new IllegalStateException("解码字符串非法，很可能是临时文件夹" + System.getProperty("user.home") + File.separator
 						+ ".northstar-salt这个盐文件与加密时的不一致导致无法解码。解决办法：手动移除旧的Gateway数据，重新录入，并确保盐文件不会丢失。");
 			}
-			gd.setSettings(decodeStr);
+			gd.setSettings(JSON.parseObject(decodeStr));
 			doCreateGateway(gd);
 		}
 	}
