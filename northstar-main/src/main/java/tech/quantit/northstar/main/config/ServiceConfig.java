@@ -6,7 +6,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 
-import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.data.IGatewayRepository;
 import tech.quantit.northstar.data.IMarketDataRepository;
 import tech.quantit.northstar.data.IModuleRepository;
@@ -15,7 +14,6 @@ import tech.quantit.northstar.domain.gateway.GatewayAndConnectionManager;
 import tech.quantit.northstar.gateway.api.domain.GlobalMarketRegistry;
 import tech.quantit.northstar.main.service.AccountService;
 import tech.quantit.northstar.main.service.GatewayService;
-import tech.quantit.northstar.main.service.SMSTradeService;
 
 @DependsOn({
 	"internalDispatcher",
@@ -33,11 +31,6 @@ public class ServiceConfig {
 	@Bean
 	public AccountService accountService(ConcurrentMap<String, TradeDayAccount> accountMap) {
 		return new AccountService(accountMap);
-	}
-	
-	@Bean
-	public SMSTradeService smsTradeService(FastEventEngine feEngine) {
-		return new SMSTradeService(feEngine);
 	}
 	
 	@Bean
