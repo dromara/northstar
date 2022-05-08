@@ -6,7 +6,6 @@ import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.Test;
 
-import com.alibaba.fastjson.JSON;
 import com.google.common.eventbus.EventBus;
 
 import tech.quantit.northstar.common.constant.GatewayType;

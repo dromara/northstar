@@ -45,6 +45,7 @@ import tech.quantit.northstar.main.interceptor.AuthorizationInterceptor;
 import xyz.redtorch.gateway.ctp.common.CtpSubscriptionManager;
 import xyz.redtorch.gateway.ctp.x64v6v3v15v.CtpGatewayFactory;
 import xyz.redtorch.gateway.ctp.x64v6v5v1cpv.CtpSimGatewayFactory;
+import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
 
 /**
@@ -142,7 +143,7 @@ public class AppConfig implements WebMvcConfigurer {
 				.collect(Collectors.toMap(ContractField::getUnifiedSymbol, c -> c));
 		
 		for(ContractField contract : contractList) {
-			if(contract.getSymbol().endsWith(Constants.INDEX_SUFFIX)) {
+			if(contract.getProductClass() == ProductClassEnum.FUTURES && contract.getSymbol().endsWith(Constants.INDEX_SUFFIX)) {
 				Set<ContractField> monthlyContracts = new HashSet<>();
 				for(String monthlyContractSymbol : ContractUtils.getMonthlyUnifiedSymbolOfIndexContract(contract.getUnifiedSymbol(), contract.getExchange())) {
 					if(contractMap.containsKey(monthlyContractSymbol)) {
