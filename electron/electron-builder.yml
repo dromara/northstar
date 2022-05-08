@@ -1,0 +1,16 @@
+directories:
+  output: ./out
+
+appId: com.northstar.assist
+
+linux:
+  executableName: northstar
+  target:
+    - target: tar.gz
+
+win:
+  executableName: northstar
+  target:
+    target: nsis
+    arch:
+    - ia32
