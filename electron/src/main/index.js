@@ -28,38 +28,10 @@ function createWindow () {
   global.mainWindow = mainWindow
 }
 
-// 注册协议
-// 在浏览器地址栏输入“videoPlug://”就可以打开插件
-if (!app.isDefaultProtocolClient('videoPlug')) {
-  app.setAsDefaultProtocolClient('videoPlug')
-}
-
-// 防止重复启动本程序
-// 可以在'second-instance'事件中获取到传递的参数。
-const gotTheLock = app.requestSingleInstanceLock()
- 
-if (!gotTheLock) {
-  app.quit()
-} else {
-  app.on('second-instance', async (event, argv) => {
-    console.log("window 准备执行网页端调起客户端逻辑");
-    // Windows 下通过协议URL启动时，URL会作为参数，所以需要在这个事件里处理
-    if (process.platform === 'win32') {
-      console.log("window 准备执行网页端调起客户端逻辑");
-      handleArgvFromWeb(argv);
-      _handleOpenWindowByWeb();
-    }
-  });
-}
-
 //应用启动执行
 app.whenReady().then(() => {
   // 创建窗口
   createWindow()
-  // 初始化服务
-  initServer()
-  // 初始化web页面事件
-  // initWebContentsEvent()
   // 初始化应用实践
   initAppEvent()
   // 快捷键支持
@@ -119,6 +91,7 @@ function initTray() {
 
 // 快捷键支持
 function bindShortCut() {
+  // 使用这个快捷键打开控制台
   globalShortcut.register('CommandOrControl+shift+D', () => {
     mainWindow.webContents.openDevTools()
   })

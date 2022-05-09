@@ -16,4 +16,4 @@ function getConfig(key) {
 
 module.exports = {
     getConfig
-  }
+}
