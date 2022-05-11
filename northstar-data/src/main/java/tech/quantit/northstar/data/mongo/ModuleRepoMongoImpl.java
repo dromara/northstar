@@ -8,7 +8,7 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 
 import tech.quantit.northstar.common.model.ModuleDealRecord;
-import tech.quantit.northstar.common.model.ModuleDescription;
+import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
 import tech.quantit.northstar.common.model.ModuleSettingsDescription;
 import tech.quantit.northstar.data.IModuleRepository;
 import tech.quantit.northstar.data.mongo.po.ModuleDealRecordPO;
@@ -74,7 +74,7 @@ public class ModuleRepoMongoImpl implements IModuleRepository{
 	 * @param moduleDescription
 	 */
 	@Override
-	public void save(ModuleDescription moduleDescription) {
+	public void save(ModuleRuntimeDescription moduleDescription) {
 		mongoTemplate.save(ModuleDescriptionPO.convertFrom(moduleDescription));
 	}
 
@@ -84,7 +84,7 @@ public class ModuleRepoMongoImpl implements IModuleRepository{
 	 * @return
 	 */
 	@Override
-	public ModuleDescription findByName(String moduleName) {
+	public ModuleRuntimeDescription findByName(String moduleName) {
 		ModuleDescriptionPO md = mongoTemplate.findOne(Query.query(Criteria.where("moduleName").is(moduleName)), ModuleDescriptionPO.class);
 		if (md == null) {
 			return null;

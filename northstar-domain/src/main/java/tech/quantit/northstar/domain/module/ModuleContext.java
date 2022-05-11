@@ -13,7 +13,7 @@ import tech.quantit.northstar.common.constant.SignalOperation;
 import tech.quantit.northstar.common.exception.NoSuchElementException;
 import tech.quantit.northstar.common.exception.TradeException;
 import tech.quantit.northstar.common.model.ModuleAccountDescription;
-import tech.quantit.northstar.common.model.ModuleDescription;
+import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
 import tech.quantit.northstar.common.model.ModulePositionDescription;
 import tech.quantit.northstar.common.utils.FieldUtils;
 import tech.quantit.northstar.common.utils.OrderUtils;
@@ -84,7 +84,7 @@ public class ModuleContext implements IModuleContext{
 	}
 
 	@Override
-	public ModuleDescription getModuleDescription() {
+	public ModuleRuntimeDescription getModuleDescription() {
 		Map<String, ModuleAccountDescription> accMap = new HashMap<>();
 		for(TradeGateway gateway : gatewayMap.values()) {
 			String gatewayId = gateway.getGatewaySetting().getGatewayId();
@@ -105,7 +105,7 @@ public class ModuleContext implements IModuleContext{
 					.build();
 			accMap.put(gatewayId, accDescription);
 		}
-		return ModuleDescription.builder()
+		return ModuleRuntimeDescription.builder()
 				.moduleName(module.getName())
 				.enabled(module.isEnabled())
 				.moduleState(accStore.getModuleState())

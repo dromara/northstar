@@ -20,7 +20,7 @@ import tech.quantit.northstar.common.constant.ClosingPolicy;
 import tech.quantit.northstar.common.constant.ModuleState;
 import tech.quantit.northstar.common.exception.NoSuchElementException;
 import tech.quantit.northstar.common.model.ModuleAccountDescription;
-import tech.quantit.northstar.common.model.ModuleDescription;
+import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
 import tech.quantit.northstar.common.utils.FieldUtils;
 import tech.quantit.northstar.strategy.api.IModuleAccountStore;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
@@ -55,7 +55,7 @@ public class ModuleAccountStore implements IModuleAccountStore {
 	
 	private ClosingPolicy closingPolicy;
 	
-	public ModuleAccountStore(String moduleName, ClosingPolicy closingPolicy, ModuleDescription moduleDescription) {
+	public ModuleAccountStore(String moduleName, ClosingPolicy closingPolicy, ModuleRuntimeDescription moduleDescription) {
 		this.sm = new ModuleStateMachine(moduleName);
 		this.closingPolicy = closingPolicy;
 		for(ModuleAccountDescription mad : moduleDescription.getAccountDescriptions().values()) {

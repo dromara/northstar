@@ -4,7 +4,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import lombok.Data;
-import tech.quantit.northstar.common.model.ModuleDescription;
+import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
 
 /**
  * 模组状态信息
@@ -18,9 +18,9 @@ public class ModuleDescriptionPO {
 	@Id
 	private String moduleName;
 	
-	private ModuleDescription moduleDescription;
+	private ModuleRuntimeDescription moduleDescription;
 	
-	public static ModuleDescriptionPO convertFrom(ModuleDescription moduleDescription) {
+	public static ModuleDescriptionPO convertFrom(ModuleRuntimeDescription moduleDescription) {
 		ModuleDescriptionPO po = new ModuleDescriptionPO();
 		po.moduleName = moduleDescription.getModuleName();
 		po.moduleDescription = moduleDescription;

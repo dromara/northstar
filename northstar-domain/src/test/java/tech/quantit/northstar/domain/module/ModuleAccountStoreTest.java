@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 import tech.quantit.northstar.common.constant.ClosingPolicy;
 import tech.quantit.northstar.common.constant.ModuleState;
 import tech.quantit.northstar.common.model.ModuleAccountDescription;
-import tech.quantit.northstar.common.model.ModuleDescription;
+import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
 import tech.quantit.northstar.common.model.ModulePositionDescription;
 import test.common.TestFieldFactory;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
@@ -48,7 +48,7 @@ class ModuleAccountStoreTest {
 				.build();
 		mamap.put(mad.getAccountId(), mad);
 		
-		ModuleDescription md = ModuleDescription.builder()
+		ModuleRuntimeDescription md = ModuleRuntimeDescription.builder()
 				.moduleName("testModule")
 				.enabled(true)
 				.moduleState(ModuleState.HOLDING_LONG)

@@ -3,7 +3,7 @@ package tech.quantit.northstar.strategy.api;
 import java.util.List;
 
 import tech.quantit.northstar.common.event.NorthstarEvent;
-import tech.quantit.northstar.common.model.ModuleDescription;
+import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
 import xyz.redtorch.pb.CoreField.BarField;
 
 /**
@@ -52,5 +52,5 @@ public interface IModule {
 	 * 获取模组状态描述
 	 * @return
 	 */
-	ModuleDescription getModuleDescription();
+	ModuleRuntimeDescription getModuleDescription();
 }

@@ -3,7 +3,7 @@ package tech.quantit.northstar.data;
 import java.util.List;
 
 import tech.quantit.northstar.common.model.ModuleDealRecord;
-import tech.quantit.northstar.common.model.ModuleDescription;
+import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
 import tech.quantit.northstar.common.model.ModuleSettingsDescription;
 
 /**
@@ -38,13 +38,13 @@ public interface IModuleRepository {
 	 * 保存模组运行状态信息
 	 * @param moduleDescription
 	 */
-	void save(ModuleDescription moduleDescription);
+	void save(ModuleRuntimeDescription moduleDescription);
 	/**
 	 * 获取模组运行状态信息
 	 * @param moduleName
 	 * @return
 	 */
-	ModuleDescription findByName(String moduleName);
+	ModuleRuntimeDescription findByName(String moduleName);
 	/**
 	 * 移除模组运行状态信息
 	 * @param moduleName

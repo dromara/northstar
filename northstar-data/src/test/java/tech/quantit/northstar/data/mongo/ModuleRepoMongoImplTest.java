@@ -13,7 +13,7 @@ import tech.quantit.northstar.common.constant.ModuleType;
 import tech.quantit.northstar.common.model.ComponentAndParamsPair;
 import tech.quantit.northstar.common.model.ComponentMetaInfo;
 import tech.quantit.northstar.common.model.ModuleDealRecord;
-import tech.quantit.northstar.common.model.ModuleDescription;
+import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
 import tech.quantit.northstar.common.model.ModuleSettingsDescription;
 import tech.quantit.northstar.data.IModuleRepository;
 import tech.quantit.northstar.data.mongo.po.ModuleDealRecordPO;
@@ -41,13 +41,13 @@ public class ModuleRepoMongoImplTest {
 			.type(ModuleType.ARBITRAGE)
 			.build();
 
-	ModuleDescription md1 = ModuleDescription.builder()
+	ModuleRuntimeDescription md1 = ModuleRuntimeDescription.builder()
 			.moduleName("test1")
 			.moduleState(ModuleState.HOLDING_LONG)
 			.enabled(true)
 			.build();
 
-	ModuleDescription md2 = ModuleDescription.builder()
+	ModuleRuntimeDescription md2 = ModuleRuntimeDescription.builder()
 			.moduleName("test2")
 			.moduleState(ModuleState.HOLDING_LONG)
 			.enabled(true)
@@ -106,7 +106,7 @@ public class ModuleRepoMongoImplTest {
 	@Test
 	void testFindByName(){
 		repo.save(md1);
-		ModuleDescription moduleDescription = repo.findByName(md1.getModuleName());
+		ModuleRuntimeDescription moduleDescription = repo.findByName(md1.getModuleName());
 		assertThat(moduleDescription).isNotNull();
 	}
 

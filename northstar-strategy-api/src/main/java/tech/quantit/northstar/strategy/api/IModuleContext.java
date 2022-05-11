@@ -5,7 +5,7 @@ import java.util.List;
 import tech.quantit.northstar.common.TickDataAware;
 import tech.quantit.northstar.common.TransactionAware;
 import tech.quantit.northstar.common.constant.SignalOperation;
-import tech.quantit.northstar.common.model.ModuleDescription;
+import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
 import tech.quantit.northstar.gateway.api.TradeGateway;
 import tech.quantit.northstar.strategy.api.constant.PriceType;
 import xyz.redtorch.pb.CoreField.ContractField;
@@ -25,7 +25,7 @@ public interface IModuleContext extends TickDataAware, BarDataAware, Transaction
 	 * 获取模组状态
 	 * @return
 	 */
-	ModuleDescription getModuleDescription();
+	ModuleRuntimeDescription getModuleDescription();
 	/**
 	 * 绑定网关与合约
 	 * @param gateway

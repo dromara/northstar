@@ -3,7 +3,7 @@ package tech.quantit.northstar.data.redis;
 import java.util.List;
 
 import tech.quantit.northstar.common.model.ModuleDealRecord;
-import tech.quantit.northstar.common.model.ModuleDescription;
+import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
 import tech.quantit.northstar.common.model.ModuleSettingsDescription;
 import tech.quantit.northstar.data.IModuleRepository;
 
@@ -34,13 +34,13 @@ public class ModuleRepoRedisImpl implements IModuleRepository{
 	}
 
 	@Override
-	public void save(ModuleDescription moduleDescription) {
+	public void save(ModuleRuntimeDescription moduleDescription) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public ModuleDescription findByName(String moduleName) {
+	public ModuleRuntimeDescription findByName(String moduleName) {
 		// TODO Auto-generated method stub
 		return null;
 	}

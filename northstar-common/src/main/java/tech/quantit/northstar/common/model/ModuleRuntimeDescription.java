@@ -19,7 +19,7 @@ import tech.quantit.northstar.common.constant.ModuleState;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ModuleDescription {
+public class ModuleRuntimeDescription {
 	/**
 	 * 模组名称
 	 */

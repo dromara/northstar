@@ -3,7 +3,7 @@ package tech.quantit.northstar.domain.module;
 import java.util.List;
 
 import tech.quantit.northstar.common.event.NorthstarEvent;
-import tech.quantit.northstar.common.model.ModuleDescription;
+import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
 import tech.quantit.northstar.strategy.api.IModule;
 import tech.quantit.northstar.strategy.api.IModuleContext;
 import xyz.redtorch.pb.CoreField.BarField;
@@ -85,7 +85,7 @@ public class TradeModule implements IModule {
 	}
 
 	@Override
-	public ModuleDescription getModuleDescription() {
+	public ModuleRuntimeDescription getModuleDescription() {
 		return ctx.getModuleDescription();
 	}
 
