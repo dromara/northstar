@@ -4,7 +4,7 @@ import java.util.List;
 
 import tech.quantit.northstar.common.model.ModuleDealRecord;
 import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
-import tech.quantit.northstar.common.model.ModuleSettingsDescription;
+import tech.quantit.northstar.common.model.ModuleDescription;
 
 /**
  * 模组持久化
@@ -17,18 +17,18 @@ public interface IModuleRepository {
 	 * 保存模组配置信息
 	 * @param moduleSettingsDescription
 	 */
-	void saveSettings(ModuleSettingsDescription moduleSettingsDescription);
+	void saveSettings(ModuleDescription moduleSettingsDescription);
 	/**
 	 * 查询模组配置信息
 	 * @param moduleName
 	 * @return
 	 */
-	ModuleSettingsDescription findSettingsByName(String moduleName);
+	ModuleDescription findSettingsByName(String moduleName);
 	/**
 	 * 查询所有模组配置信息
 	 * @return
 	 */
-	List<ModuleSettingsDescription> findAll();
+	List<ModuleDescription> findAll();
 	/**
 	 * 移除模组配置信息
 	 * @param moduleName

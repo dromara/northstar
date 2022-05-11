@@ -9,7 +9,7 @@ import org.springframework.data.mongodb.core.query.Query;
 
 import tech.quantit.northstar.common.model.ModuleDealRecord;
 import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
-import tech.quantit.northstar.common.model.ModuleSettingsDescription;
+import tech.quantit.northstar.common.model.ModuleDescription;
 import tech.quantit.northstar.data.IModuleRepository;
 import tech.quantit.northstar.data.mongo.po.ModuleDealRecordPO;
 import tech.quantit.northstar.data.mongo.po.ModuleDescriptionPO;
@@ -32,7 +32,7 @@ public class ModuleRepoMongoImpl implements IModuleRepository{
 	 * @param moduleSettingsDescription
 	 */
 	@Override
-	public void saveSettings(ModuleSettingsDescription moduleSettingsDescription) {
+	public void saveSettings(ModuleDescription moduleSettingsDescription) {
 		mongoTemplate.save(ModuleSettingsDescriptionPO.convertFrom(moduleSettingsDescription));
 	}
 
@@ -42,7 +42,7 @@ public class ModuleRepoMongoImpl implements IModuleRepository{
 	 * @return
 	 */
 	@Override
-	public ModuleSettingsDescription findSettingsByName(String moduleName) {
+	public ModuleDescription findSettingsByName(String moduleName) {
 		ModuleSettingsDescriptionPO msd = mongoTemplate.findOne(Query.query(Criteria.where("moduleName").is(moduleName)), ModuleSettingsDescriptionPO.class);
 		if (msd == null) {
 			return null;
@@ -55,7 +55,7 @@ public class ModuleRepoMongoImpl implements IModuleRepository{
 	 * @return
 	 */
 	@Override
-	public List<ModuleSettingsDescription> findAll() {
+	public List<ModuleDescription> findAll() {
 		return mongoTemplate.findAll(ModuleSettingsDescriptionPO.class).stream().map(ModuleSettingsDescriptionPO::getModuleSettingsDescription).collect(Collectors.toList());
 	}
 

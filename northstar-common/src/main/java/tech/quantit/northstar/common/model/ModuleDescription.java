@@ -17,14 +17,14 @@ import tech.quantit.northstar.common.constant.ModuleType;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ModuleSettingsDescription {
+public class ModuleDescription {
 
 	/**
 	 * 模组名称
 	 */
 	private String moduleName;
 	/**
-	 * 策略类型
+	 * 模组类型
 	 */
 	private ModuleType type;
 	/**

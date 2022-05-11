@@ -14,7 +14,7 @@ import tech.quantit.northstar.common.model.ComponentAndParamsPair;
 import tech.quantit.northstar.common.model.ComponentMetaInfo;
 import tech.quantit.northstar.common.model.ModuleDealRecord;
 import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
-import tech.quantit.northstar.common.model.ModuleSettingsDescription;
+import tech.quantit.northstar.common.model.ModuleDescription;
 import tech.quantit.northstar.data.IModuleRepository;
 import tech.quantit.northstar.data.mongo.po.ModuleDealRecordPO;
 import tech.quantit.northstar.data.mongo.po.ModuleDescriptionPO;
@@ -30,12 +30,12 @@ public class ModuleRepoMongoImplTest {
 
 	IModuleRepository repo = new ModuleRepoMongoImpl(mongoTemplate);
 
-	ModuleSettingsDescription msd1 = ModuleSettingsDescription.builder()
+	ModuleDescription msd1 = ModuleDescription.builder()
 			.moduleName("test1")
 			.strategySetting(ComponentAndParamsPair.builder().componentMeta(new ComponentMetaInfo("name1","className1")).build())
 			.type(ModuleType.SPECULATION)
 			.build();
-	ModuleSettingsDescription msd2 = ModuleSettingsDescription.builder()
+	ModuleDescription msd2 = ModuleDescription.builder()
 			.moduleName("test2")
 			.strategySetting(ComponentAndParamsPair.builder().componentMeta(new ComponentMetaInfo("name2","className2")).build())
 			.type(ModuleType.ARBITRAGE)
@@ -79,7 +79,7 @@ public class ModuleRepoMongoImplTest {
 	@Test
 	void testFindSettingsByName(){
 		repo.saveSettings(msd1);
-		ModuleSettingsDescription settingsByName = repo.findSettingsByName(msd1.getModuleName());
+		ModuleDescription settingsByName = repo.findSettingsByName(msd1.getModuleName());
 		assertThat(settingsByName).isNotNull();
 	}
 
