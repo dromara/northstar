@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ModuleAccountSettingsDescription {
+public class ModuleAccountDescription {
 
 	/**
 	 * 账户网关ID

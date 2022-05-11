@@ -30,7 +30,7 @@ public class ModuleDescription {
 	/**
 	 * 模组账户配置信息 
 	 */
-	private Set<ModuleAccountSettingsDescription> moduleAccountSettingsDescription;
+	private Set<ModuleAccountDescription> moduleAccountSettingsDescription;
 	/**
 	 * 策略配置信息
 	 */
