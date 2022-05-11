@@ -17,6 +17,12 @@
 .ml-30{
   margin-left: 30px;
 }
+.mr-10{
+  margin-right: 10px;
+}
+.mr-20{
+  margin-right: 20px;
+}
 
 .el-button.compact{
   padding: 4px;
@@ -28,6 +34,12 @@
 
 .pb-20{
   padding-bottom: 20px;
+}
+.mxw-340{
+  max-width: 340px;
+}
+.mxw-140{
+  max-width: 140px;
 }
 
 .flex{

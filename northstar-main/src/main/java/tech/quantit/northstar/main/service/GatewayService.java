@@ -72,18 +72,7 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 	 */
 	public boolean createGateway(GatewayDescription gatewayDescription) throws Exception {
 		log.info("创建网关[{}]", gatewayDescription.getGatewayId());
-		if(null == gatewayDescription.getSettings()) {
-			throw new IllegalArgumentException("网关设置不能为空");
-		}
-		Object settings = gatewayDescription.getSettings();
-		String srcSettings = JSON.toJSONString(settings);
-		gatewayDescription.setSettings(CodecUtils.encrypt(srcSettings));
-		try {			
-			gatewayRepo.insert(gatewayDescription);
-		} catch(DuplicateKeyException e) {
-			throw new IllegalStateException("已存在同名网关，不能重复创建", e);
-		}
-		gatewayDescription.setSettings(settings);
+		doSaveGatewayDescription(gatewayDescription);
 		if(gatewayDescription.getGatewayUsage() == GatewayUsage.MARKET_DATA) {
 			mdRepo.init(gatewayDescription.getGatewayId());
 		}
@@ -118,6 +107,21 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 		return true;
 	}
 	
+	private void doSaveGatewayDescription(GatewayDescription gatewayDescription) {
+		if(null == gatewayDescription.getSettings()) {
+			throw new IllegalArgumentException("网关设置不能为空");
+		}
+		Object settings = gatewayDescription.getSettings();
+		String srcSettings = JSON.toJSONString(settings);
+		gatewayDescription.setSettings(CodecUtils.encrypt(srcSettings));
+		try {			
+			gatewayRepo.insert(gatewayDescription);
+		} catch(DuplicateKeyException e) {
+			throw new IllegalStateException("已存在同名网关，不能重复创建", e);
+		}
+		gatewayDescription.setSettings(settings);
+	}
+	
 	/**
 	 * 更新网关
 	 * @return
@@ -126,6 +130,7 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 	public boolean updateGateway(GatewayDescription gatewayDescription) throws Exception {
 		log.info("更新网关[{}]", gatewayDescription.getGatewayId());
 		doDeleteGateway(gatewayDescription.getGatewayId());
+		doSaveGatewayDescription(gatewayDescription);
 		// 先删除旧的，再重新创建新的
 		return doCreateGateway(gatewayDescription);
 	}

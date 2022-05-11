@@ -20,8 +20,14 @@ public class IndexContract extends NormalContract {
 		String name = protoContract.getName().replaceAll("\\d+", "指数");
 		String fullName = protoContract.getFullName().replaceAll("\\d+", "指数");
 		String symbol = idxSymbol.replaceAll("([A-z]+\\d{3,4})@\\w+@\\w+", "$1");
+		String originSymbol = protoContract.getSymbol();
+		String contractId = protoContract.getContractId().replace(originSymbol, symbol);
+		String thirdPartyId = protoContract.getThirdPartyId().replace(originSymbol, symbol);
 		super.field = ContractField.newBuilder(protoContract)
 				.setSymbol(symbol)
+				.setThirdPartyId(thirdPartyId)
+				.setContractId(contractId)
+				.setLastTradeDateOrContractMonth("")
 				.setUnifiedSymbol(idxSymbol)
 				.setFullName(fullName)
 				.setName(name)
