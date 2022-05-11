@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 
 import tech.quantit.northstar.common.constant.ClosingPolicy;
 import tech.quantit.northstar.common.constant.ModuleState;
-import tech.quantit.northstar.common.model.ModuleAccountDescription;
+import tech.quantit.northstar.common.model.ModuleAccountRuntimeDescription;
 import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
 import tech.quantit.northstar.common.model.ModulePositionDescription;
 import test.common.TestFieldFactory;
@@ -34,8 +34,8 @@ class ModuleAccountStoreTest {
 	
 	@BeforeEach
 	void prepare() {
-		Map<String, ModuleAccountDescription> mamap = new HashMap<>();
-		ModuleAccountDescription mad = ModuleAccountDescription.builder()
+		Map<String, ModuleAccountRuntimeDescription> mamap = new HashMap<>();
+		ModuleAccountRuntimeDescription mad = ModuleAccountRuntimeDescription.builder()
 				.accountId("testAccount")
 				.initBalance(100000)
 				.preBalance(100000)

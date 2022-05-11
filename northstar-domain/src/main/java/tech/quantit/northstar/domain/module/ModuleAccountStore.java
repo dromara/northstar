@@ -19,7 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.constant.ClosingPolicy;
 import tech.quantit.northstar.common.constant.ModuleState;
 import tech.quantit.northstar.common.exception.NoSuchElementException;
-import tech.quantit.northstar.common.model.ModuleAccountDescription;
+import tech.quantit.northstar.common.model.ModuleAccountRuntimeDescription;
 import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
 import tech.quantit.northstar.common.utils.FieldUtils;
 import tech.quantit.northstar.strategy.api.IModuleAccountStore;
@@ -58,7 +58,7 @@ public class ModuleAccountStore implements IModuleAccountStore {
 	public ModuleAccountStore(String moduleName, ClosingPolicy closingPolicy, ModuleRuntimeDescription moduleDescription) {
 		this.sm = new ModuleStateMachine(moduleName);
 		this.closingPolicy = closingPolicy;
-		for(ModuleAccountDescription mad : moduleDescription.getAccountDescriptions().values()) {
+		for(ModuleAccountRuntimeDescription mad : moduleDescription.getAccountDescriptions().values()) {
 			initBalanceMap.put(mad.getAccountId(), mad.getInitBalance());
 			commissionPerDealMap.put(mad.getAccountId(), new AtomicDouble(mad.getCommissionPerDeal()));
 			accDealVolMap.put(mad.getAccountId(), new AtomicInteger(mad.getAccDealVolume()));

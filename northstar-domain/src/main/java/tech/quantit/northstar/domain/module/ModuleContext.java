@@ -12,7 +12,7 @@ import tech.quantit.northstar.common.constant.Constants;
 import tech.quantit.northstar.common.constant.SignalOperation;
 import tech.quantit.northstar.common.exception.NoSuchElementException;
 import tech.quantit.northstar.common.exception.TradeException;
-import tech.quantit.northstar.common.model.ModuleAccountDescription;
+import tech.quantit.northstar.common.model.ModuleAccountRuntimeDescription;
 import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
 import tech.quantit.northstar.common.model.ModulePositionDescription;
 import tech.quantit.northstar.common.utils.FieldUtils;
@@ -85,7 +85,7 @@ public class ModuleContext implements IModuleContext{
 
 	@Override
 	public ModuleRuntimeDescription getModuleDescription() {
-		Map<String, ModuleAccountDescription> accMap = new HashMap<>();
+		Map<String, ModuleAccountRuntimeDescription> accMap = new HashMap<>();
 		for(TradeGateway gateway : gatewayMap.values()) {
 			String gatewayId = gateway.getGatewaySetting().getGatewayId();
 			if(accMap.containsKey(gatewayId)) {
@@ -96,7 +96,7 @@ public class ModuleContext implements IModuleContext{
 					.uncloseTrades(accStore.getUncloseTrades(gatewayId).stream().map(TradeField::toByteArray).toList())
 					.build();
 			
-			ModuleAccountDescription accDescription = ModuleAccountDescription.builder()
+			ModuleAccountRuntimeDescription accDescription = ModuleAccountRuntimeDescription.builder()
 					.initBalance(accStore.getInitBalance(gatewayId))
 					.preBalance(accStore.getPreBalance(gatewayId))
 					.accCloseProfit(accStore.getAccCloseProfit(gatewayId))
