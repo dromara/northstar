@@ -28,7 +28,7 @@ public interface IModuleRepository {
 	 * 查询所有模组配置信息
 	 * @return
 	 */
-	List<ModuleDescription> findAll();
+	List<ModuleDescription> findAllSettings();
 	/**
 	 * 移除模组配置信息
 	 * @param moduleName
@@ -38,18 +38,18 @@ public interface IModuleRepository {
 	 * 保存模组运行状态信息
 	 * @param moduleDescription
 	 */
-	void save(ModuleRuntimeDescription moduleDescription);
+	void saveRuntime(ModuleRuntimeDescription moduleDescription);
 	/**
 	 * 获取模组运行状态信息
 	 * @param moduleName
 	 * @return
 	 */
-	ModuleRuntimeDescription findByName(String moduleName);
+	ModuleRuntimeDescription findRuntimeByName(String moduleName);
 	/**
 	 * 移除模组运行状态信息
 	 * @param moduleName
 	 */
-	void deleteByName(String moduleName);
+	void deleteRuntimeByName(String moduleName);
 	/**
 	 * 保存模组交易记录
 	 * @param record

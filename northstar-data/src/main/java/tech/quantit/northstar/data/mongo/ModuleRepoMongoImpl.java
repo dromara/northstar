@@ -12,8 +12,8 @@ import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
 import tech.quantit.northstar.common.model.ModuleDescription;
 import tech.quantit.northstar.data.IModuleRepository;
 import tech.quantit.northstar.data.mongo.po.ModuleDealRecordPO;
+import tech.quantit.northstar.data.mongo.po.ModuleRuntimeDescriptionPO;
 import tech.quantit.northstar.data.mongo.po.ModuleDescriptionPO;
-import tech.quantit.northstar.data.mongo.po.ModuleSettingsDescriptionPO;
 
 /**
  * 模块服务
@@ -33,7 +33,7 @@ public class ModuleRepoMongoImpl implements IModuleRepository{
 	 */
 	@Override
 	public void saveSettings(ModuleDescription moduleSettingsDescription) {
-		mongoTemplate.save(ModuleSettingsDescriptionPO.convertFrom(moduleSettingsDescription));
+		mongoTemplate.save(ModuleDescriptionPO.convertFrom(moduleSettingsDescription));
 	}
 
 	/**
@@ -43,7 +43,7 @@ public class ModuleRepoMongoImpl implements IModuleRepository{
 	 */
 	@Override
 	public ModuleDescription findSettingsByName(String moduleName) {
-		ModuleSettingsDescriptionPO msd = mongoTemplate.findOne(Query.query(Criteria.where("moduleName").is(moduleName)), ModuleSettingsDescriptionPO.class);
+		ModuleDescriptionPO msd = mongoTemplate.findOne(Query.query(Criteria.where("moduleName").is(moduleName)), ModuleDescriptionPO.class);
 		if (msd == null) {
 			return null;
 		}
@@ -55,8 +55,8 @@ public class ModuleRepoMongoImpl implements IModuleRepository{
 	 * @return
 	 */
 	@Override
-	public List<ModuleDescription> findAll() {
-		return mongoTemplate.findAll(ModuleSettingsDescriptionPO.class).stream().map(ModuleSettingsDescriptionPO::getModuleSettingsDescription).collect(Collectors.toList());
+	public List<ModuleDescription> findAllSettings() {
+		return mongoTemplate.findAll(ModuleDescriptionPO.class).stream().map(ModuleDescriptionPO::getModuleSettingsDescription).collect(Collectors.toList());
 	}
 
 	/**
@@ -66,7 +66,7 @@ public class ModuleRepoMongoImpl implements IModuleRepository{
 	@Override
 	public void deleteSettingsByName(String moduleName) {
 		Query query = Query.query(Criteria.where("moduleName").is(moduleName));
-		mongoTemplate.remove(query, ModuleSettingsDescriptionPO.class);
+		mongoTemplate.remove(query, ModuleDescriptionPO.class);
 	}
 
 	/**
@@ -74,8 +74,8 @@ public class ModuleRepoMongoImpl implements IModuleRepository{
 	 * @param moduleDescription
 	 */
 	@Override
-	public void save(ModuleRuntimeDescription moduleDescription) {
-		mongoTemplate.save(ModuleDescriptionPO.convertFrom(moduleDescription));
+	public void saveRuntime(ModuleRuntimeDescription moduleDescription) {
+		mongoTemplate.save(ModuleRuntimeDescriptionPO.convertFrom(moduleDescription));
 	}
 
 	/**
@@ -84,8 +84,8 @@ public class ModuleRepoMongoImpl implements IModuleRepository{
 	 * @return
 	 */
 	@Override
-	public ModuleRuntimeDescription findByName(String moduleName) {
-		ModuleDescriptionPO md = mongoTemplate.findOne(Query.query(Criteria.where("moduleName").is(moduleName)), ModuleDescriptionPO.class);
+	public ModuleRuntimeDescription findRuntimeByName(String moduleName) {
+		ModuleRuntimeDescriptionPO md = mongoTemplate.findOne(Query.query(Criteria.where("moduleName").is(moduleName)), ModuleRuntimeDescriptionPO.class);
 		if (md == null) {
 			return null;
 		}
@@ -97,9 +97,9 @@ public class ModuleRepoMongoImpl implements IModuleRepository{
 	 * @param moduleName
 	 */
 	@Override
-	public void deleteByName(String moduleName) {
+	public void deleteRuntimeByName(String moduleName) {
 		Query query = Query.query(Criteria.where("moduleName").is(moduleName));
-		mongoTemplate.remove(query, ModuleDescriptionPO.class);
+		mongoTemplate.remove(query, ModuleRuntimeDescriptionPO.class);
 	}
 
 	/**

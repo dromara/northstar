@@ -17,8 +17,8 @@ import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
 import tech.quantit.northstar.common.model.ModuleDescription;
 import tech.quantit.northstar.data.IModuleRepository;
 import tech.quantit.northstar.data.mongo.po.ModuleDealRecordPO;
+import tech.quantit.northstar.data.mongo.po.ModuleRuntimeDescriptionPO;
 import tech.quantit.northstar.data.mongo.po.ModuleDescriptionPO;
-import tech.quantit.northstar.data.mongo.po.ModuleSettingsDescriptionPO;
 
 /**
  * 模拟账户服务测试
@@ -65,15 +65,15 @@ public class ModuleRepoMongoImplTest {
 
 	@AfterEach
 	void clear() {
-		mongoTemplate.dropCollection(ModuleSettingsDescriptionPO.class);
 		mongoTemplate.dropCollection(ModuleDescriptionPO.class);
+		mongoTemplate.dropCollection(ModuleRuntimeDescriptionPO.class);
 		mongoTemplate.dropCollection(ModuleDealRecordPO.class);
 	}
 
 	@Test
 	void testSaveSettings(){
 		repo.saveSettings(msd1);
-		assertThat(mongoTemplate.findAll(ModuleSettingsDescriptionPO.class)).hasSize(1);
+		assertThat(mongoTemplate.findAll(ModuleDescriptionPO.class)).hasSize(1);
 	}
 
 	@Test
@@ -87,34 +87,34 @@ public class ModuleRepoMongoImplTest {
 	void testFindAll(){
 		repo.saveSettings(msd1);
 		repo.saveSettings(msd2);
-		assertThat(repo.findAll()).hasSize(2);
+		assertThat(repo.findAllSettings()).hasSize(2);
 	}
 
 	@Test
 	void testDeleteSettingsByName(){
 		repo.saveSettings(msd1);
 		repo.deleteSettingsByName(msd1.getModuleName());
-		assertThat(mongoTemplate.findAll(ModuleSettingsDescriptionPO.class)).isEmpty();
+		assertThat(mongoTemplate.findAll(ModuleDescriptionPO.class)).isEmpty();
 	}
 
 	@Test
 	void testSave(){
-		repo.save(md1);
-		assertThat(mongoTemplate.findAll(ModuleDescriptionPO.class)).hasSize(1);
+		repo.saveRuntime(md1);
+		assertThat(mongoTemplate.findAll(ModuleRuntimeDescriptionPO.class)).hasSize(1);
 	}
 
 	@Test
 	void testFindByName(){
-		repo.save(md1);
-		ModuleRuntimeDescription moduleDescription = repo.findByName(md1.getModuleName());
+		repo.saveRuntime(md1);
+		ModuleRuntimeDescription moduleDescription = repo.findRuntimeByName(md1.getModuleName());
 		assertThat(moduleDescription).isNotNull();
 	}
 
 	@Test
 	void testDeleteByName(){
-		repo.save(md1);
-		repo.deleteByName(md1.getModuleName());
-		assertThat(mongoTemplate.findAll(ModuleDescriptionPO.class)).isEmpty();
+		repo.saveRuntime(md1);
+		repo.deleteRuntimeByName(md1.getModuleName());
+		assertThat(mongoTemplate.findAll(ModuleRuntimeDescriptionPO.class)).isEmpty();
 	}
 
 	@Test

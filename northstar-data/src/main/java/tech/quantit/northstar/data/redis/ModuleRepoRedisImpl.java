@@ -22,7 +22,7 @@ public class ModuleRepoRedisImpl implements IModuleRepository{
 	}
 
 	@Override
-	public List<ModuleDescription> findAll() {
+	public List<ModuleDescription> findAllSettings() {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -34,19 +34,19 @@ public class ModuleRepoRedisImpl implements IModuleRepository{
 	}
 
 	@Override
-	public void save(ModuleRuntimeDescription moduleDescription) {
+	public void saveRuntime(ModuleRuntimeDescription moduleDescription) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public ModuleRuntimeDescription findByName(String moduleName) {
+	public ModuleRuntimeDescription findRuntimeByName(String moduleName) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public void deleteByName(String moduleName) {
+	public void deleteRuntimeByName(String moduleName) {
 		// TODO Auto-generated method stub
 		
 	}
