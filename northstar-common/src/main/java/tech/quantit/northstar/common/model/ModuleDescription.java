@@ -29,6 +29,14 @@ public class ModuleDescription {
 	 */
 	private ModuleType type;
 	/**
+	 * K线周期数
+	 */
+	private int numOfMinPerBar;
+	/**
+	 * 预热K线数
+	 */
+	private int numOfBarForPreparation;
+	/**
 	 * 平仓优化策略
 	 */
 	private ClosingPolicy closingPolicy;
