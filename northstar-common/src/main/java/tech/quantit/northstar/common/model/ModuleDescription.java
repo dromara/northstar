@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import tech.quantit.northstar.common.constant.ClosingPolicy;
 import tech.quantit.northstar.common.constant.ModuleType;
 
 /**
@@ -27,6 +28,10 @@ public class ModuleDescription {
 	 * 模组类型
 	 */
 	private ModuleType type;
+	/**
+	 * 平仓优化策略
+	 */
+	private ClosingPolicy closingPolicy;
 	/**
 	 * 模组账户配置信息 
 	 */

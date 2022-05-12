@@ -8,7 +8,7 @@ public enum ClosingPolicy {
 	
 	FIFO("先开先平"),
 	
-	PRIOR_BEFORE_LOCK_TODAY("平昨锁今");
+	PRIOR_BEFORE_HEGDE_TODAY("平昨锁今");
 
 	@Getter
 	private String name;
