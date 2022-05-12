@@ -3,6 +3,7 @@ package tech.quantit.northstar.strategy.api;
 import tech.quantit.northstar.common.constant.ClosingPolicy;
 import tech.quantit.northstar.common.constant.SignalOperation;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
+import xyz.redtorch.pb.CoreField.PositionField;
 
 public interface ClosingStrategy {
 
@@ -12,7 +13,7 @@ public interface ClosingStrategy {
 	 * @param accStore
 	 * @return
 	 */
-	OffsetFlagEnum resolveOperation(SignalOperation opr, IModuleAccountStore accStore);
+	OffsetFlagEnum resolveOperation(SignalOperation opr, PositionField position);
 	
 	/**
 	 * 获取平仓策略

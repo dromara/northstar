@@ -1,6 +1,7 @@
 package tech.quantit.northstar.domain.module;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -26,6 +27,7 @@ import test.common.TestFieldFactory;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.GatewaySettingField;
+import xyz.redtorch.pb.CoreField.PositionField;
 import xyz.redtorch.pb.CoreField.TickField;
 
 class ModuleContextTest {
@@ -50,7 +52,8 @@ class ModuleContextTest {
 		ClosingStrategy closingStrategy = mock(ClosingStrategy.class);
 		IModule module = mock(IModule.class);
 		when(module.isEnabled()).thenReturn(Boolean.TRUE);
-		when(closingStrategy.resolveOperation(any(SignalOperation.class), eq(accStore))).thenReturn(OffsetFlagEnum.OF_Open);
+		when(closingStrategy.resolveOperation(any(SignalOperation.class), any(PositionField.class))).thenReturn(OffsetFlagEnum.OF_Open);
+		when(closingStrategy.resolveOperation(any(SignalOperation.class), eq(null))).thenReturn(OffsetFlagEnum.OF_Open);
 		
 		ctx = new ModuleContext(strategy, accStore, closingStrategy, 3);
 		ctx.setModule(module);

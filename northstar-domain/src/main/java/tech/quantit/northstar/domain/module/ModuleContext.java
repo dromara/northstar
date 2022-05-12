@@ -121,12 +121,24 @@ public class ModuleContext implements IModuleContext{
 			throw new NoSuchElementException(String.format("找不到合约 [%s] 对应网关", contract.getUnifiedSymbol()));
 		}
 		String id = UUID.randomUUID().toString();
+		String gatewayId = gatewayMap.get(contract).getGatewaySetting().getGatewayId();
+		PositionField pf = null;
+		for(PositionField pos : accStore.getPositions(gatewayId)) {
+			boolean isOppositeDir = (operation.isBuy() && FieldUtils.isShort(pos.getPositionDirection()) 
+					|| operation.isSell() && FieldUtils.isLong(pos.getPositionDirection()));
+			if(operation.isClose() && pos.getContract().equals(contract) && isOppositeDir) {
+				pf = pos;
+			}
+		}
+		if(pf == null && operation.isClose()) {
+			throw new IllegalStateException("没有找到对应的持仓进行操作");
+		}
 		return submitOrderReq(SubmitOrderReqField.newBuilder()
 				.setOriginOrderId(id)
 				.setContract(contract)
-				.setGatewayId(gatewayMap.get(contract).getGatewaySetting().getGatewayId())
+				.setGatewayId(gatewayId)
 				.setDirection(OrderUtils.resolveDirection(operation))
-				.setOffsetFlag(closingStrategy.resolveOperation(operation, accStore))
+				.setOffsetFlag(closingStrategy.resolveOperation(operation, pf))
 				.setPrice(price)
 				.setVolume(volume)		//	当信号交易量大于零时，优先使用信号交易量
 				.setHedgeFlag(HedgeFlagEnum.HF_Speculation)
