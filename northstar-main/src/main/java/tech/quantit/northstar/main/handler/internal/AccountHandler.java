@@ -11,7 +11,7 @@ import tech.quantit.northstar.common.event.NorthstarEvent;
 import tech.quantit.northstar.common.event.NorthstarEventType;
 import tech.quantit.northstar.common.exception.NoSuchElementException;
 import tech.quantit.northstar.domain.account.TradeDayAccount;
-import tech.quantit.northstar.main.factories.TradeDayAccountFactory;
+import tech.quantit.northstar.domain.account.TradeDayAccountFactory;
 import xyz.redtorch.pb.CoreField.AccountField;
 import xyz.redtorch.pb.CoreField.OrderField;
 import xyz.redtorch.pb.CoreField.PositionField;

@@ -1,6 +1,5 @@
-package tech.quantit.northstar.main.factories;
+package tech.quantit.northstar.domain.account;
 
-import tech.quantit.northstar.domain.account.TradeDayAccount;
 import tech.quantit.northstar.domain.gateway.ContractManager;
 import tech.quantit.northstar.domain.gateway.GatewayAndConnectionManager;
 import tech.quantit.northstar.gateway.api.TradeGateway;
