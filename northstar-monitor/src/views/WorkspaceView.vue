@@ -12,8 +12,7 @@
       >
         <el-menu-item index="1">网关管理</el-menu-item>
         <el-menu-item index="2">账户管理</el-menu-item>
-        <el-menu-item index="3">投机模组管理</el-menu-item>
-        <el-menu-item index="4">套利模组管理</el-menu-item>
+        <el-menu-item index="3">模组管理</el-menu-item>
         <el-menu-item index="5">历史行情</el-menu-item>
         <el-menu-item index="6">手工期货交易</el-menu-item>
         <el-menu-item index="7">手工期权交易</el-menu-item>
@@ -27,35 +26,34 @@
 
 <script>
 const pageOpts = {
-        "1": 'mktgateway',
-        "2": 'tdgateway',
-        "3": 'specmodule',
-        "4": 'arbitmodule',
-        "5": 'mktdata',
-        "6": 'manualfttd',
-        "7": 'manualopttd'
-      }
+  1: 'mktgateway',
+  2: 'tdgateway',
+  3: 'specmodule',
+  5: 'mktdata',
+  6: 'manualfttd',
+  7: 'manualopttd'
+}
 
 export default {
-  data(){
+  data() {
     return {
-      curPage: "0"
+      curPage: '0'
     }
   },
-  mounted(){
-    if(this.$route.name === 'mktgateway'){
+  mounted() {
+    if (this.$route.name === 'mktgateway') {
       this.curPage = '1'
-      return 
+      return
     }
-    this.handleSelect("1")
+    this.handleSelect('1')
   },
   methods: {
     handleSelect(index) {
-      if(index === this.curPage){
+      if (index === this.curPage) {
         return
       }
       this.curPage = index
-      this.$router.push({name: pageOpts[index]})
+      this.$router.push({ name: pageOpts[index] })
     }
   }
 }

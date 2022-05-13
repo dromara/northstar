@@ -12,15 +12,11 @@
     />
     <el-table height="100%" :data="list">
       <el-table-column label="模组名称" prop="moduleName" align="center" width="100px" />
-      <el-table-column label="策略模式" prop="type" align="center" width="90px" />
+      <el-table-column label="模组类型" prop="type" align="center" width="90px" />
+      <el-table-column label="模组周期" prop="barInterval" align="center" width="90px" />
       <el-table-column label="绑定账户" prop="accountGatewayId" align="center" />
-      <el-table-column label="信号策略" prop="signalPolicy.componentMeta.name" align="center" />
-      <el-table-column label="风控策略" align="center">
-        <template slot-scope="scope">
-          {{ scope.row.riskControlRules.map((i) => i.componentMeta.name).join(', ') }}
-        </template>
-      </el-table-column>
-      <el-table-column label="交易策略" prop="dealer.componentMeta.name" align="center" />
+      <el-table-column label="绑定合约" align="center" />
+      <el-table-column label="交易策略" align="center" />
       <el-table-column label="启停切换" prop="enabled" align="center" width="100px">
         <template slot-scope="scope">
           <el-button

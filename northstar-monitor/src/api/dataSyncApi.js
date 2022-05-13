@@ -1,5 +1,7 @@
 import baseService from './baseRequest'
-
+/**
+ * @deprecated
+ */
 export default {
   dataSync() {
     return baseService.get('/data/sync')

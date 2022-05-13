@@ -11,7 +11,7 @@ export default {
         }
         const resultList = await baseService.get(`/data/contracts?type=${gatewayType}`)
         const contracts = resultList.map(data => ContractField.deserializeBinary(data).toObject())
-        contractsCache[gatewayType] = contracts
+        contractsCache[gatewayType] = contracts.sort((a, b) => a['unifiedsymbol'].localeCompare(b['unifiedsymbol']))
         return contracts
     }
 }
