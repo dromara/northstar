@@ -247,17 +247,14 @@ export default {
     },
     contractType: function (val) {
       this.contractOptions = this.cacheContracts[this.form.gatewayType] || []
-      this.contractOptions = this.contractOptions
-        .filter(filterMethods[val.value])
-        .map((item) => ({
-          unifiedSymbol: item.unifiedsymbol,
-          symbol: item.symbol,
-          name: item.name,
-          type: val.value,
-          gatewayId: item.gatewayid,
-          value: item.name
-        }))
-        .sort((a, b) => a['unifiedSymbol'].localeCompare(b['unifiedSymbol']))
+      this.contractOptions = this.contractOptions.filter(filterMethods[val.value]).map((item) => ({
+        unifiedSymbol: item.unifiedsymbol,
+        symbol: item.symbol,
+        name: item.name,
+        type: val.value,
+        gatewayId: item.gatewayid,
+        value: item.name
+      }))
     }
   },
   created() {

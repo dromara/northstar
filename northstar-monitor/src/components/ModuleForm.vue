@@ -36,9 +36,13 @@
       </el-aside>
       <el-main class="main-compact"
         ><el-form :model="form" label-width="100px" class="module-form" inline :rules="formRules">
-          <div v-if="activeIndex === '1'">
+          <div v-show="activeIndex === '1'">
             <el-form-item label="模组名称">
-              <el-input v-model="form.moduleName" :disabled="readOnly || this.module"></el-input>
+              <el-input
+                v-model="form.moduleName"
+                :maxlength="16"
+                :disabled="readOnly || this.module"
+              ></el-input>
             </el-form-item>
             <el-form-item value label="模组类型">
               <el-select v-model="form.type" :disabled="readOnly">
@@ -53,28 +57,32 @@
                 content="如有多个合约用 ; 分隔"
                 placement="bottom-end"
               >
-                <el-input v-model="form.moduleName" :disabled="readOnly || this.module"></el-input>
+                <el-input v-model="bindedContracts" :disabled="readOnly"></el-input>
               </el-tooltip>
             </el-form-item>
             <el-form-item label="平仓优化">
-              <el-select v-model="form.type" :disabled="readOnly">
+              <el-select v-model="form.closingPolicy" :disabled="readOnly">
                 <el-option label="先开先平" value="FIFO"></el-option>
                 <el-option label="平今优先" value="PRIOR_TODAY"></el-option>
                 <el-option label="平昨锁今" value="PRIOR_BEFORE_HEGDE_TODAY"></el-option>
               </el-select>
             </el-form-item>
             <el-form-item label="K线周期">
-              <el-input-number v-model="num" @change="handleChange" :min="1" />
+              <el-input-number v-model="form.numOfMinPerBar" @change="handleChange" :min="1" />
               <span class="ml-10">分钟</span>
             </el-form-item>
             <el-form-item label="预热数据量">
-              <el-input-number v-model="num" @change="handleChange" :min="1" />
+              <el-input-number
+                v-model="form.numOfBarForPreparation"
+                @change="handleChange"
+                :min="0"
+              />
               <span class="ml-10">根K线</span>
             </el-form-item>
           </div>
-          <div v-if="activeIndex === '2'">
-            <el-form-item v-if="activeIndex === '2'" label="信号策略">
-              <el-select placeholder="请选择" key="策略" :disabled="readOnly">
+          <div v-show="activeIndex === '2'">
+            <el-form-item label="交易策略">
+              <el-select v-model="chosenStrategy" placeholder="请选择" :disabled="readOnly">
                 <el-option
                   v-for="(p, i) in tradeStrategyOptions"
                   :label="p.componentMeta.name"
@@ -84,7 +92,7 @@
               </el-select>
             </el-form-item>
             <div v-for="(policy, i) in tradeStrategyOptions" :key="i">
-              <div v-if="chosenSignalPolicy === policy.componentMeta.name">
+              <div v-if="chosenStrategy === policy.componentMeta.name">
                 <el-form-item
                   v-for="(param, index) in policy.initParams"
                   :label="param.label"
@@ -107,20 +115,87 @@
                     :type="param.type.toLowerCase()"
                     :disabled="readOnly"
                   />
-                  <span v-if="param.unit" class="value-unit">{{ param.unit }}</span>
+                  <span v-if="param.unit" class="value-unit"> {{ param.unit }}</span>
                 </el-form-item>
               </div>
             </div>
           </div>
-          <div v-if="activeIndex === '3'"></div>
+          <div v-show="activeIndex === '3'">
+            <el-form-item label="绑定账号">
+              <el-select
+                v-model="choseAccounts"
+                placeholder="请选择账户"
+                multiple
+                :disabled="readOnly"
+                @change="accountSelected"
+              >
+                <el-option
+                  v-for="(acc, i) in accountOptions"
+                  :label="acc.gatewayId"
+                  :value="acc"
+                  :key="i"
+                ></el-option>
+              </el-select>
+            </el-form-item>
+            <div v-for="(acc, i) in form.moduleAccountSettingsDescription" :key="i">
+              <el-divider content-position="left"
+                >账户：{{ form.moduleAccountSettingsDescription[i].accountGatewayId }}</el-divider
+              >
+              <el-form-item label="模组分配金额">
+                <el-input
+                  v-model="form.moduleAccountSettingsDescription[i].moduleAccountInitBalance"
+                  type="number"
+                  :disabled="readOnly"
+                />
+              </el-form-item>
+              <el-form-item label="关联合约">
+                <el-select v-model="form.moduleAccountSettingsDescription[i].bindedUnifiedSymbols">
+                  <el-option
+                    v-for="(item, i) in bindedUnifiedSymbolsOptions"
+                    :value="item"
+                    :key="i"
+                  />
+                </el-select>
+              </el-form-item>
+              <el-tooltip class="item" effect="dark" content="只需要填其中一个" placement="top-end">
+                <el-form-item label="手续费估算">
+                  <el-input
+                    :class="'with-unit'"
+                    type="number"
+                    :disabled="readOnly"
+                    v-model="form.moduleAccountSettingsDescription[i].commissionFeePerDeal"
+                  />
+                  <span class="value-unit"> 元 / 每笔</span>
+                </el-form-item>
+              </el-tooltip>
+              <el-tooltip
+                class="item"
+                effect="dark"
+                content="只需要填其中一个"
+                placement="bottom-end"
+              >
+                <el-form-item label="手续费估算">
+                  <el-input
+                    :class="'with-unit'"
+                    type="number"
+                    :disabled="readOnly"
+                    v-model="
+                      form.moduleAccountSettingsDescription[i].commissionFeePerDealInPercentage
+                    "
+                  />
+                  <span class="value-unit"> ‰ / 每笔</span>
+                </el-form-item>
+              </el-tooltip>
+            </div>
+          </div>
         </el-form>
       </el-main>
     </el-container>
 
     <div slot="footer" class="dialog-footer">
-      <el-button v-if="!readOnly" type="primary" @click="contractFinderVisible = true"
-        >合约查询</el-button
-      >
+      <el-button v-if="!readOnly" type="primary" @click="contractFinderVisible = true">
+        合约查询
+      </el-button>
       <el-button @click="close">取 消</el-button>
       <el-button v-if="!readOnly" type="primary" @click="saveSetting">保 存</el-button>
     </div>
@@ -165,18 +240,25 @@ export default {
       tradeStrategyOptions: [],
       activeIndex: '1',
       chosenStrategy: '',
+      choseAccounts: [],
+      bindedContracts: '',
       form: {
         moduleName: '',
-        type: '',
-        numOfMinPerBar: '',
-        numOfBarForPreparation: '',
-        closingPolicy: '',
-        accountGatewayId: '',
+        type: 'SPECULATION',
+        numOfMinPerBar: '1',
+        numOfBarForPreparation: '0',
+        closingPolicy: 'FIFO',
+        moduleAccountSettingsDescription: [],
         strategySetting: {
           componentMeta: {},
           initParams: []
         }
       }
+    }
+  },
+  computed: {
+    bindedUnifiedSymbolsOptions() {
+      return this.bindedContracts.split(/;|；/).map((item) => item.trim())
     }
   },
   mounted() {
@@ -188,14 +270,14 @@ export default {
         if (!this.module) {
           return
         }
-        this.form = Object.assign({}, this.module)
+        // this.form = Object.assign({}, this.module)
 
-        this.chosenSignalPolicy = this.module.signalPolicy.componentMeta.name
-        this.tradeStrategyOptions.forEach((p) => {
-          if (p.componentMeta.name === this.chosenSignalPolicy) {
-            p.initParams = this.module.signalPolicy.initParams
-          }
-        })
+        // this.chosenSignalPolicy = this.module.signalPolicy.componentMeta.name
+        // this.tradeStrategyOptions.forEach((p) => {
+        //   if (p.componentMeta.name === this.chosenSignalPolicy) {
+        //     p.initParams = this.module.signalPolicy.initParams
+        //   }
+        // })
 
         // this.chosenDealer = this.module.dealer.componentMeta.name
         // this.dealerOptions.forEach((d) => {
@@ -208,9 +290,12 @@ export default {
   },
   methods: {
     initData() {
-      gatewayMgmtApi
-        .findAll('TRADE')
-        .then((result) => (this.accountOptions = result.map((i) => i.gatewayId)))
+      gatewayMgmtApi.findAll('TRADE').then((result) => {
+        this.accountOptions = result.map((item) => {
+          item.value = item.gatewayId
+          return item
+        })
+      })
       moduleApi.getStrategies().then((strategyMetas) => {
         strategyMetas.forEach(async (i) => initComponent(i, this.tradeStrategyOptions))
       })
@@ -218,13 +303,25 @@ export default {
     handleSelect(index) {
       this.activeIndex = index
     },
+    accountSelected(val) {
+      if (!val.length) return
+      this.form.moduleAccountSettingsDescription = val.map((item) => {
+        return {
+          accountGatewayId: item.gatewayId,
+          moduleAccountInitBalance: 0,
+          commissionFeePerDeal: 0,
+          commissionFeePerDealInPercentage: 0,
+          bindedUnifiedSymbols: []
+        }
+      })
+    },
     saveSetting() {
       let pass =
         this.assertTrue(this.form.moduleName, '未指定模组名称') &&
         this.assertTrue(this.form.type, '未指定模组类型') &&
-        this.assertTrue(this.form.accountGatewayId, '未指定绑定账户') &&
-        this.assertTrue(this.form.signalPolicy.componentMeta.name, '未指定信号策略') &&
-        this.assertTrue(this.form.dealer.componentMeta.name, '未指定交易策略')
+        this.assertTrue(this.form.numOfMinPerBar, '未指定K线周期') &&
+        this.assertTrue(this.form.strategySetting.componentMeta.name, '未指定交易策略') &&
+        this.assertTrue(this.form.moduleAccountSettingsDescription.length, '未指定交易账户')
 
       if (!pass) {
         return

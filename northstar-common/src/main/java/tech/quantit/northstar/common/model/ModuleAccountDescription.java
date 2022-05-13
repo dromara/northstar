@@ -27,7 +27,15 @@ public class ModuleAccountDescription {
 	 */
 	private int moduleAccountInitBalance;
 	/**
+	 * 每笔交易手续费
+	 */
+	private double commissionFeePerDeal;
+	/**
+	 * 每笔交易手续费（%）
+	 */
+	private double commissionFeePerDealInPercentage;
+	/**
 	 * 账户关联合约名称
 	 */
-	private Set<String> bindedUnifiedSymbol;
+	private Set<String> bindedUnifiedSymbols;
 }
