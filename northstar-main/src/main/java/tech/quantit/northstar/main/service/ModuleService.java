@@ -14,8 +14,8 @@ import tech.quantit.northstar.common.model.DynamicParams;
 import tech.quantit.northstar.common.model.ModuleDescription;
 import tech.quantit.northstar.data.IModuleRepository;
 import tech.quantit.northstar.domain.module.ModuleFactory;
-import tech.quantit.northstar.domain.module.ModuleManager;
 import tech.quantit.northstar.main.ExternalJarListener;
+import tech.quantit.northstar.main.handler.internal.ModuleManager;
 import tech.quantit.northstar.strategy.api.DynamicParamsAware;
 import tech.quantit.northstar.strategy.api.IModule;
 import tech.quantit.northstar.strategy.api.annotation.StrategicComponent;
@@ -32,8 +32,10 @@ public class ModuleService implements InitializingBean {
 	
 	private ClassLoader loader;
 	
-	public ModuleService(ApplicationContext ctx, ExternalJarListener extJarListener) {
+	public ModuleService(ApplicationContext ctx, ExternalJarListener extJarListener, IModuleRepository moduleRepo, ModuleManager moduleMgr) {
 		this.ctx = ctx;
+		this.moduleMgr = moduleMgr;
+		this.moduleRepo = moduleRepo;
 		this.loader = extJarListener.getExternalClassLoader();
 		this.moduleFactory = new ModuleFactory(this.loader);
 	}

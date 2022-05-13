@@ -9,7 +9,7 @@ import tech.quantit.northstar.strategy.api.indicator.Indicator;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.TickField;
 
-public interface TradeStrategy extends TransactionAware, ContextAware{
+public interface TradeStrategy extends TransactionAware, ContextAware, DynamicParamsAware{
 	
 	/* 状态与设置信息 */
 	

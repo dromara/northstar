@@ -1,4 +1,4 @@
-package tech.quantit.northstar.main.notification;
+package tech.quantit.northstar.main.handler.internal;
 
 import tech.quantit.northstar.common.IMessageHandlerManager;
 import tech.quantit.northstar.common.event.AbstractEventHandler;

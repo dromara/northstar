@@ -1,4 +1,4 @@
-package tech.quantit.northstar.domain.module;
+package tech.quantit.northstar.main.handler.internal;
 
 import java.util.HashSet;
 import java.util.Set;

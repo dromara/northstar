@@ -6,11 +6,9 @@ import org.springframework.context.annotation.Configuration;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.event.FastEventEngine.NorthstarEventDispatcher;
 import tech.quantit.northstar.common.event.InternalEventBus;
-import tech.quantit.northstar.common.event.PlaybackEventBus;
 import tech.quantit.northstar.common.event.StrategyEventBus;
 import tech.quantit.northstar.main.engine.event.handler.BroadcastDispatcher;
 import tech.quantit.northstar.main.engine.event.handler.InternalDispatcher;
-import tech.quantit.northstar.main.engine.event.handler.PlaybackDispatcher;
 import tech.quantit.northstar.main.engine.event.handler.StrategyDispatcher;
 import tech.quantit.northstar.main.handler.broadcast.SocketIOMessageEngine;
 
@@ -43,10 +41,4 @@ public class FastEventDispatcherConfig {
 		return handler;
 	}
 	
-	@Bean
-	public NorthstarEventDispatcher playbackDispatcher(FastEventEngine ee, PlaybackEventBus peb) {
-		NorthstarEventDispatcher handler = new PlaybackDispatcher(peb);
-		ee.addHandler(handler);
-		return handler;
-	}
 }

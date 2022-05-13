@@ -15,8 +15,9 @@ import tech.quantit.northstar.domain.gateway.GatewayAndConnectionManager;
 import tech.quantit.northstar.gateway.sim.trade.SimMarket;
 import tech.quantit.northstar.main.handler.internal.AccountHandler;
 import tech.quantit.northstar.main.handler.internal.ConnectionHandler;
+import tech.quantit.northstar.main.handler.internal.ModuleManager;
+import tech.quantit.northstar.main.handler.internal.NotificationDispatcher;
 import tech.quantit.northstar.main.handler.internal.SimMarketHandler;
-import tech.quantit.northstar.main.notification.NotificationDispatcher;
 
 @Slf4j
 @Configuration
@@ -57,6 +58,14 @@ public class InternalEventHandlerConfig {
 		log.debug("注册：NotificationDispatcher");
 		eventBus.register(dispatcher);
 		return dispatcher;
+	}
+	
+	@Bean
+	public ModuleManager moduleManager(InternalEventBus eventBus) {
+		ModuleManager moduleMgr = new ModuleManager();
+		log.debug("注册：ModuleManager");
+		eventBus.register(moduleMgr);
+		return moduleMgr;
 	}
 	//////////////////////
 	/* Internal类事件结束 */
