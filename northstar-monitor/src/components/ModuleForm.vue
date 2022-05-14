@@ -8,15 +8,6 @@
     width="540px"
   >
     <ContractFinder :visible.sync="contractFinderVisible" />
-    <el-alert
-      v-if="this.module && !this.readOnly"
-      class="mb-10"
-      title="修改模组会重置模组除持仓状态外的所有属性状态，请知悉"
-      type="warning"
-      show-icon
-      :closable="false"
-    >
-    </el-alert>
     <el-container>
       <el-aside width="150px" :style="{ overflow: 'hidden' }">
         <el-menu :default-active="activeIndex" @select="handleSelect">
@@ -82,43 +73,39 @@
           </div>
           <div v-show="activeIndex === '2'">
             <el-form-item label="交易策略">
-              <el-select v-model="chosenStrategy" placeholder="请选择" :disabled="readOnly">
+              <el-select v-model="form.strategySetting" placeholder="请选择" :disabled="readOnly">
                 <el-option
                   v-for="(p, i) in tradeStrategyOptions"
                   :label="p.componentMeta.name"
-                  :value="p.componentMeta.name"
+                  :value="p"
                   :key="i"
                 ></el-option>
               </el-select>
             </el-form-item>
-            <div v-for="(policy, i) in tradeStrategyOptions" :key="i">
-              <div v-if="chosenStrategy === policy.componentMeta.name">
-                <el-form-item
-                  v-for="(param, index) in policy.initParams"
-                  :label="param.label"
-                  :key="param.field"
-                >
-                  <el-select
-                    v-if="param.type === 'Options'"
-                    v-model="tradeStrategyOptions[i].initParams[index]['value']"
-                    :class="param.unit ? 'with-unit' : ''"
-                    :disabled="readOnly"
-                  >
-                    <el-option v-for="(item, i) in param.options" :value="item" :key="i">{{
-                      item
-                    }}</el-option>
-                  </el-select>
-                  <el-input
-                    v-else
-                    v-model="tradeStrategyOptions[i].initParams[index]['value']"
-                    :class="param.unit ? 'with-unit' : ''"
-                    :type="param.type.toLowerCase()"
-                    :disabled="readOnly"
-                  />
-                  <span v-if="param.unit" class="value-unit"> {{ param.unit }}</span>
-                </el-form-item>
-              </div>
-            </div>
+            <el-form-item
+              v-for="(param, index) in form.strategySetting.initParams"
+              :label="param.label"
+              :key="param.field"
+            >
+              <el-select
+                v-if="param.type === 'Options'"
+                v-model="form.strategySetting.initParams[index]['value']"
+                :class="param.unit ? 'with-unit' : ''"
+                :disabled="readOnly"
+              >
+                <el-option v-for="(item, i) in param.options" :value="item" :key="i">{{
+                  item
+                }}</el-option>
+              </el-select>
+              <el-input
+                v-else
+                v-model="form.strategySetting.initParams[index]['value']"
+                :class="param.unit ? 'with-unit' : ''"
+                :type="param.type.toLowerCase()"
+                :disabled="readOnly"
+              />
+              <span v-if="param.unit" class="value-unit"> {{ param.unit }}</span>
+            </el-form-item>
           </div>
           <div v-show="activeIndex === '3'">
             <el-form-item label="绑定账号">
@@ -149,7 +136,10 @@
                 />
               </el-form-item>
               <el-form-item label="关联合约">
-                <el-select v-model="form.moduleAccountSettingsDescription[i].bindedUnifiedSymbols">
+                <el-select
+                  v-model="form.moduleAccountSettingsDescription[i].bindedUnifiedSymbols"
+                  multiple
+                >
                   <el-option
                     v-for="(item, i) in bindedUnifiedSymbolsOptions"
                     :value="item"
@@ -239,7 +229,6 @@ export default {
       accountOptions: [],
       tradeStrategyOptions: [],
       activeIndex: '1',
-      chosenStrategy: '',
       choseAccounts: [],
       bindedContracts: '',
       form: {
@@ -270,21 +259,14 @@ export default {
         if (!this.module) {
           return
         }
-        // this.form = Object.assign({}, this.module)
-
-        // this.chosenSignalPolicy = this.module.signalPolicy.componentMeta.name
-        // this.tradeStrategyOptions.forEach((p) => {
-        //   if (p.componentMeta.name === this.chosenSignalPolicy) {
-        //     p.initParams = this.module.signalPolicy.initParams
-        //   }
-        // })
-
-        // this.chosenDealer = this.module.dealer.componentMeta.name
-        // this.dealerOptions.forEach((d) => {
-        //   if (d.componentMeta.name === this.chosenDealer) {
-        //     d.initParams = this.module.dealer.initParams
-        //   }
-        // })
+        this.form = this.module
+        this.bindedContracts = this.module.moduleAccountSettingsDescription
+          .map((item) => item.bindedUnifiedSymbols.join(';'))
+          .join(';')
+        this.choseAccounts = this.module.moduleAccountSettingsDescription.map((item) => {
+          item.value = item.accountGatewayId
+          return item
+        })
       }
     }
   },

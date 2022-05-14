@@ -22,8 +22,7 @@
           <el-option
             v-for="(c, i) in gwContractList"
             :label="c.name"
-            :value="c.unifiedSymbol"
-            :value-key="c.unifiedSymbol"
+            :value="c.unifiedsymbol"
             :key="i"
           ></el-option>
         </el-select>

@@ -34,6 +34,9 @@ const pageOpts = {
   7: 'manualopttd'
 }
 
+const pageOptsRevert = {}
+Object.keys(pageOpts).forEach((key) => (pageOptsRevert[pageOpts[key]] = key))
+
 export default {
   data() {
     return {
@@ -41,11 +44,7 @@ export default {
     }
   },
   mounted() {
-    if (this.$route.name === 'mktgateway') {
-      this.curPage = '1'
-      return
-    }
-    this.handleSelect('1')
+    this.curPage = pageOptsRevert[this.$route.name]
   },
   methods: {
     handleSelect(index) {

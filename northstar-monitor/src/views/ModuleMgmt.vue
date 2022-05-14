@@ -11,13 +11,55 @@
       :visible.sync="modulePerfVisible"
     />
     <el-table height="100%" :data="list">
-      <el-table-column label="模组名称" prop="moduleName" align="center" width="100px" />
-      <el-table-column label="模组类型" prop="type" align="center" width="90px" />
-      <el-table-column label="模组周期" prop="barInterval" align="center" width="90px" />
-      <el-table-column label="绑定账户" prop="accountGatewayId" align="center" />
-      <el-table-column label="绑定合约" align="center" />
-      <el-table-column label="交易策略" align="center" />
-      <el-table-column label="启停切换" prop="enabled" align="center" width="100px">
+      <el-table-column label="模组名称" prop="moduleName" align="center" width="200px" />
+      <el-table-column label="模组类型" prop="type" align="center" width="90px">
+        <template slot-scope="scope">
+          {{ { SPECULATION: '投机', ARBITRAGE: '套利' }[scope.row.type] }}
+        </template>
+      </el-table-column>
+      <el-table-column label="模组周期" prop="barInterval" align="center" width="90px">
+        <template slot-scope="scope">
+          {{ `${scope.row.numOfMinPerBar} 分钟` }}
+        </template>
+      </el-table-column>
+      <el-table-column label="交易策略" align="center" width="200px">
+        <template slot-scope="scope">
+          {{ scope.row.strategySetting.componentMeta.name }}
+        </template>
+      </el-table-column>
+      <el-table-column label="平仓优化" align="center" width="90px">
+        <template slot-scope="scope">
+          {{
+            { FIFO: '先开先平', PRIOR_TODAY: '平今优先', PRIOR_BEFORE_HEGDE_TODAY: '平昨锁今' }[
+              scope.row.closingPolicy
+            ]
+          }}
+        </template>
+      </el-table-column>
+      <el-table-column label="绑定账户" align="center" width="300px">
+        <template slot-scope="scope">
+          {{
+            (() => {
+              return scope.row.moduleAccountSettingsDescription
+                .map((item) => item.accountGatewayId)
+                .join('；')
+            })()
+          }}
+        </template>
+      </el-table-column>
+      <el-table-column label="绑定合约" align="center" min-width="200px">
+        <template slot-scope="scope">
+          {{
+            (() => {
+              return scope.row.moduleAccountSettingsDescription
+                .map((item) => item.bindedUnifiedSymbols.join('，'))
+                .join('；')
+            })()
+          }}
+        </template>
+      </el-table-column>
+
+      <el-table-column label="当前状态/切换" prop="enabled" align="center" width="100px">
         <template slot-scope="scope">
           <el-button
             v-if="scope.row.enabled"
