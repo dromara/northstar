@@ -14,9 +14,6 @@ export default {
     return baseService.get(
       `/data/his/bar?gatewayId=${gatewayId}&unifiedSymbol=${unifiedSymbol}&startRefTime=${startRefTime}`
     )
-  },
-
-  getAvailableContracts() {
-    return baseService.get('/data/contracts')
   }
+
 }

@@ -6,23 +6,23 @@
   >
     <div class="flex-row mt-10">
       <el-form label-width="100px" :inline="true">
-      <el-form-item label="网关列表">
-        <el-select v-model="gateway" filterable>
-          <el-option v-for="gw in gatewayList" :label="gw" :value="gw" :key="gw"></el-option>
-        </el-select>
-      </el-form-item>
-      <el-form-item label="合约列表">
-        <el-select v-model="unifiedSymbol" filterable>
-          <el-option
-            v-for="(c, i) in gwContractList"
-            :label="c.name"
-            :value="c.unifiedSymbol"
-            :value-key="c.unifiedSymbol"
-            :key="i"
-          ></el-option>
-        </el-select>
-      </el-form-item>
-    </el-form>
+        <el-form-item label="网关列表">
+          <el-select v-model="gateway" filterable :disabled="embededMode">
+            <el-option v-for="gw in gatewayList" :label="gw" :value="gw" :key="gw"></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="合约列表">
+          <el-select v-model="unifiedSymbol" filterable :disabled="embededMode">
+            <el-option
+              v-for="(c, i) in gwContractList"
+              :label="c.name"
+              :value="c.unifiedSymbol"
+              :value-key="c.unifiedSymbol"
+              :key="i"
+            ></el-option>
+          </el-select>
+        </el-form-item>
+      </el-form>
     </div>
     <div id="update-k-line" class="ns-mktdata__body">
       {{ !kLineChart ? '未有数据，请先选择合约' : '' }}
@@ -43,6 +43,20 @@ import { KLineUtils } from '@/utils.js'
 
 export default {
   name: 'UpdateKLineChart',
+  props: {
+    marketGatewayId: {
+      type: String,
+      default: ''
+    },
+    contractUnifiedSymbol: {
+      type: String,
+      default: ''
+    },
+    embededMode: {
+      type: Boolean,
+      default: false
+    }
+  },
   data() {
     return {
       kLineChart: null,
@@ -52,22 +66,11 @@ export default {
       unifiedSymbol: ''
     }
   },
-  created(){
+  created() {
     window.addEventListener('resize', () => {
-      if(this.kLineChart){
+      if (this.kLineChart) {
         this.kLineChart.resize()
       }
-    })
-  },
-  mounted: function () {
-    const sortFunc = (a, b) => {
-      return a['unifiedSymbol'].localeCompare(b['unifiedSymbol'])
-    }
-
-    dataSyncApi.getAvailableContracts().then((list) => {
-      console.log('合约总数', list.length)
-      this.contractList = list
-      this.contractList.sort(sortFunc)
     })
   },
   computed: {
@@ -82,10 +85,16 @@ export default {
     }
   },
   watch: {
-    gateway: function(gatewayId){
+    marketGatewayId: function (val) {
+      this.gateway = val
+    },
+    contractUnifiedSymbol: function (val) {
+      this.unifiedSymbol = val
+    },
+    gateway: function (gatewayId) {
       this.$store.commit('updateFocusMarketGatewayId', gatewayId)
     },
-    unifiedSymbol: function(symbol){
+    unifiedSymbol: function (symbol) {
       this.$store.commit('updateFocusUnifiedSymbol', symbol)
     },
     '$store.state.marketCurrentDataModule.curBar': function (bar) {

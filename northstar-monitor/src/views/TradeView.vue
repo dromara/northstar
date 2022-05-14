@@ -4,7 +4,7 @@
       <div class="ns-trade__account-profile">
         <el-select
           class="ns-trade__account"
-          v-model="currentAccountId"
+          v-model="chosenAccount"
           placeholder="选择账户"
           @change="handleAccountChange"
         >
@@ -12,7 +12,7 @@
             v-for="(item, index) in accountOptions"
             :key="index"
             :label="item.gatewayId"
-            :value="item.gatewayId"
+            :value="item"
           >
           </el-option>
         </el-select>
@@ -45,7 +45,7 @@
                 v-for="(item, i) in symbolList"
                 :key="i"
                 :label="item.name"
-                :value="item.unifiedSymbol"
+                :value="item.unifiedsymbol"
               >
               </el-option>
             </el-select>
@@ -129,7 +129,11 @@
       />
     </div>
     <div class="ns-trade__md-wrapper">
-      <NsMarketData />
+      <NsMarketData
+        :marketGatewayId="marketDataGatewayId"
+        :contractUnifiedSymbol="marketDataUnifiedSymbol"
+        embededMode
+      />
     </div>
   </div>
 </template>
@@ -139,9 +143,9 @@ import NsButton from '@/components/TradeButton'
 import NsPriceBoard from '@/components/PriceBoard'
 import NsAccountDetail from '@/components/AccountDetail'
 import NsMarketData from '@/components/MarketData'
-import gatewayMgmtApi from '../api/gatewayMgmtApi'
-import tradeOprApi from '../api/tradeOprApi'
-import dataSyncApi from '../api/dataSyncApi'
+import gatewayMgmtApi from '@/api/gatewayMgmtApi'
+import tradeOprApi from '@/api/tradeOprApi'
+import gatewayDataApi from '@/api/gatewayDataApi'
 
 let accountCheckTimer
 
@@ -155,7 +159,6 @@ export default {
   data() {
     return {
       accountOptions: [],
-      accountMap: {},
       symbolList: [],
       priceOptionList: [
         {
@@ -183,21 +186,22 @@ export default {
       dealPriceType: '',
       curTab: 'position',
       symbolIndexMap: {},
-      currentAccountId: '',
+      chosenAccount: '',
       currentPosition: '',
       elementHeight: 0
     }
   },
   methods: {
     handleAccountChange() {
-      if (!this.currentAccountId) {
+      this.dealSymbol = ''
+      if (!this.chosenAccount) {
         return
       }
       clearTimeout(accountCheckTimer)
       const timelyCheck = () => {
         accountCheckTimer = setTimeout(() => {
-          if (!this.$store.getters.isAccountConnected(this.currentAccountId)) {
-            this.$message.error(`账户${this.currentAccountId}没有连线`)
+          if (!this.$store.getters.isAccountConnected(this.chosenAccount.gatewayId)) {
+            this.$message.error(`账户${this.chosenAccount.gatewayId}没有连线`)
           }
           timelyCheck()
         }, 3000)
@@ -208,19 +212,13 @@ export default {
       //   this.currentAccount.bindedMktGatewayId,
       //   'FUTURES'
       // )
-      const sortFunc = (a, b) => {
-        return a['unifiedSymbol'].localeCompare(b['unifiedSymbol'])
-      }
 
-      dataSyncApi.getAvailableContracts().then((list) => {
-        console.log('合约总数', list.length)
-        this.symbolList = list
-          .filter((i) => i.gatewayId === this.currentAccount.bindedMktGatewayId)
-          .sort(sortFunc)
+      gatewayDataApi.getContracts(this.chosenAccount.gatewayType).then((list) => {
+        this.symbolList = list.filter((item) => item.unifiedsymbol.indexOf('FUTURES') > -1)
       })
 
-      this.$store.commit('updateFocusMarketGatewayId', this.currentAccount.bindedMktGatewayId)
-      this.$store.commit('updateCurAccountId', this.currentAccountId)
+      this.$store.commit('updateFocusMarketGatewayId', this.chosenAccount.bindedMktGatewayId)
+      this.$store.commit('updateCurAccountId', this.chosenAccount.gatewayId)
     },
     handleContractChange() {
       this.dealPriceType = 'COUNTERPARTY_PRICE'
@@ -238,14 +236,14 @@ export default {
       this.handleContractChange()
     },
     onCancelOrder(order) {
-      tradeOprApi.cancelOrder(this.currentAccountId, order.originorderid)
+      tradeOprApi.cancelOrder(this.chosenAccount.gatewayId, order.originorderid)
     },
     buyOpen() {
       if (this.stopPrice && this.stopPrice >= this.bkPrice) {
         throw new Error('多开止损价需要少于开仓价')
       }
       return tradeOprApi.buyOpen(
-        this.currentAccountId,
+        this.chosenAccount.gatewayId,
         this.dealSymbol,
         this.bkPrice,
         this.dealVol,
@@ -257,7 +255,7 @@ export default {
         throw new Error('空开止损价需要大于开仓价')
       }
       return tradeOprApi.sellOpen(
-        this.currentAccountId,
+        this.chosenAccount.gatewayId,
         this.dealSymbol,
         this.skPrice,
         this.dealVol,
@@ -267,7 +265,7 @@ export default {
     closePosition() {
       if (this.currentPosition.positiondirection === 2) {
         return tradeOprApi.closeLongPosition(
-          this.currentAccountId,
+          this.chosenAccount.gatewayId,
           this.dealSymbol,
           this.closePrice,
           this.dealVol
@@ -275,7 +273,7 @@ export default {
       }
       if (this.currentPosition.positiondirection === 3) {
         return tradeOprApi.closeShortPosition(
-          this.currentAccountId,
+          this.chosenAccount.gatewayId,
           this.dealSymbol,
           this.closePrice,
           this.dealVol
@@ -289,12 +287,11 @@ export default {
     this.$store.commit('resetMarketCurrentDataModule')
   },
   async created() {
-    this.currentAccountId = this.$store.state.accountModule.curAccountId
     this.accountOptions = await gatewayMgmtApi.findAll('TRADE')
-    this.accountOptions.forEach((i) => {
-      this.accountMap[i.gatewayId] = i
+    this.accountOptions = this.accountOptions.map((item) => {
+      item.value = item.gatewayId
+      return item
     })
-    this.handleAccountChange()
     const self = this
     window.addEventListener('resize', () => {
       if (self.$refs.tradeWrap) {
@@ -309,8 +306,11 @@ export default {
     flexibleTblHeight() {
       return this.elementHeight - 420
     },
-    currentAccount() {
-      return this.accountMap[this.currentAccountId]
+    marketDataGatewayId() {
+      return this.chosenAccount.bindedMktGatewayId
+    },
+    marketDataUnifiedSymbol() {
+      return this.dealSymbol
     },
     accountInfo() {
       return this.$store.state.accountModule.curInfo.account

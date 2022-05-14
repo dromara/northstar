@@ -44,6 +44,7 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 	public void connect() {
 		log.debug("[{}] 模拟网关连线", gatewaySetting.getGatewayId());
 		connected = true;
+		account.setConnected(connected);
 		feEngine.emitEvent(NorthstarEventType.CONNECTED, gatewaySetting.getGatewayId());
 		feEngine.emitEvent(NorthstarEventType.LOGGED_IN, gatewaySetting.getGatewayId());
 		
@@ -80,6 +81,7 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 	public void disconnect() {
 		log.debug("[{}] 模拟网关断开", gatewaySetting.getGatewayId());
 		connected = false;
+		account.setConnected(connected);
 		feEngine.emitEvent(NorthstarEventType.DISCONNECTED, gatewaySetting.getGatewayId());
 		feEngine.emitEvent(NorthstarEventType.LOGGED_OUT, gatewaySetting.getGatewayId());
 	}

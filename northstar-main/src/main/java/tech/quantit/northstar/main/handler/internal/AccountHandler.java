@@ -48,7 +48,7 @@ public class AccountHandler extends AbstractEventHandler implements GenericEvent
 	}
 	
 	@Override
-	public void doHandle(NorthstarEvent e) {
+	public synchronized void doHandle(NorthstarEvent e) {
 		if(e.getEvent() == NorthstarEventType.LOGGED_IN) {
 			String gatewayId = (String) e.getData();
 			accountMap.put(gatewayId, factory.newInstance(gatewayId));
@@ -59,30 +59,30 @@ public class AccountHandler extends AbstractEventHandler implements GenericEvent
 			log.info("账户登出：{}", gatewayId);
 		} else if (e.getEvent() == NorthstarEventType.ACCOUNT) {
 			AccountField af = (AccountField) e.getData();
-			checkAccount(af.getGatewayId());
+			checkAccount(af.getGatewayId(), e.getEvent());
 			TradeDayAccount account = accountMap.get(af.getGatewayId());
 			account.onAccountUpdate(af);
 		} else if (e.getEvent() == NorthstarEventType.POSITION) {
 			PositionField pf = (PositionField) e.getData();
-			checkAccount(pf.getGatewayId());
+			checkAccount(pf.getGatewayId(), e.getEvent());
 			TradeDayAccount account = accountMap.get(pf.getGatewayId());
 			account.onPositionUpdate(pf);
 		} else if (e.getEvent() == NorthstarEventType.TRADE) {
 			TradeField tf = (TradeField) e.getData();
-			checkAccount(tf.getGatewayId());
+			checkAccount(tf.getGatewayId(), e.getEvent());
 			TradeDayAccount account = accountMap.get(tf.getGatewayId());
 			account.onTradeUpdate(tf);
 		} else if (e.getEvent() == NorthstarEventType.ORDER) {
 			OrderField of = (OrderField) e.getData();
-			checkAccount(of.getGatewayId());
+			checkAccount(of.getGatewayId(), e.getEvent());
 			TradeDayAccount account = accountMap.get(of.getGatewayId());
 			account.onOrderUpdate(of);
 		}
 	}
 	
-	private void checkAccount(String gatewayId) {
+	private void checkAccount(String gatewayId, NorthstarEventType eventType) {
 		if(!accountMap.containsKey(gatewayId)) {
-			throw new NoSuchElementException("找不到网关：" + gatewayId);
+			throw new NoSuchElementException(String.format("[%s] 找不到网关：%s", eventType, gatewayId));
 		}
 	}
 
