@@ -11,4 +11,8 @@ public interface SimTradeGateway extends TradeGateway{
 	 */
 	int moneyIO(int money);
 	
+	/**
+	 * 销毁
+	 */
+	void destory();
 }

@@ -1,6 +1,6 @@
 package tech.quantit.northstar.common.model;
 
-import java.util.Set;
+import java.util.List;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -37,5 +37,5 @@ public class ModuleAccountDescription {
 	/**
 	 * 账户关联合约名称
 	 */
-	private Set<String> bindedUnifiedSymbols;
+	private List<String> bindedUnifiedSymbols;
 }

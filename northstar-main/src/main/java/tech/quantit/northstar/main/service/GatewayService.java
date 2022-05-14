@@ -16,9 +16,9 @@ import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.common.constant.GatewayUsage;
 import tech.quantit.northstar.common.exception.NoSuchElementException;
-import tech.quantit.northstar.common.model.CtpSettings;
 import tech.quantit.northstar.common.model.GatewayDescription;
-import tech.quantit.northstar.common.model.SimSettings;
+import tech.quantit.northstar.common.model.ModuleAccountDescription;
+import tech.quantit.northstar.common.model.ModuleDescription;
 import tech.quantit.northstar.data.IGatewayRepository;
 import tech.quantit.northstar.data.IMarketDataRepository;
 import tech.quantit.northstar.data.IModuleRepository;
@@ -160,12 +160,13 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 				}
 			}
 		} else {
-			// FIXME
-//			for(ModuleInfo info : moduleRepo.findAllModuleInfo()) {
-//				if(StringUtils.equals(info.getAccountGatewayId(), gatewayId)) {
-//					throw new IllegalStateException("仍有模组与本账户网关存在绑定关系，请先解除绑定！");
-//				}
-//			}
+			for(ModuleDescription md : moduleRepo.findAllSettings()) {
+				for(ModuleAccountDescription mad : md.getModuleAccountSettingsDescription()) {
+					if(StringUtils.equals(mad.getAccountGatewayId(), gatewayId)) {
+						throw new IllegalStateException("仍有模组与本账户网关存在绑定关系，请先解除绑定！");
+					}
+				}
+			}
 		}
 		boolean flag = doDeleteGateway(gatewayId);
 		mdRepo.dropGatewayData(gatewayId);
@@ -177,11 +178,9 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 		Gateway gateway = gatewayConnMgr.getGatewayByConnection(conn);
 		gatewayConnMgr.removePair(conn);
 		gatewayRepo.deleteById(gatewayId);
-		// FIXME
-//		if(gateway instanceof SimTradeGateway simGateway) {
-//			String mdGatewayId = conn.getGwDescription().getBindedMktGatewayId();
-//			simMarket.removeGateway(mdGatewayId, simGateway);
-//		}
+		if(gateway instanceof SimTradeGateway simGateway) {
+			simGateway.destory();
+		}
 		return true;
 	}
 	

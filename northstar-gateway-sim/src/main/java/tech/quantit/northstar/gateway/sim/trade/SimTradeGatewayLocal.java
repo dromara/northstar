@@ -32,10 +32,17 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 	
 	private GlobalMarketRegistry registry;
 	
-	public SimTradeGatewayLocal(FastEventEngine feEngine, GatewaySettingField gatewaySetting, SimAccount account, GlobalMarketRegistry registry) {
+	private SimMarket simMarket;
+	
+	private String bindedMarketGatewayId;
+	
+	public SimTradeGatewayLocal(FastEventEngine feEngine, SimMarket simMarket, GatewaySettingField gatewaySetting,
+			String bindedMarketGatewayId, SimAccount account, GlobalMarketRegistry registry) {
 		this.feEngine = feEngine;
 		this.gatewaySetting = gatewaySetting;
-		this.account = account;	
+		this.bindedMarketGatewayId = bindedMarketGatewayId;
+		this.account = account;
+		this.simMarket = simMarket;
 		this.registry = registry;
 		this.contractGen = new SimContractGenerator(gatewaySetting.getGatewayId());
 	}
@@ -114,6 +121,11 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 	@Override
 	public boolean getAuthErrorFlag() {
 		return false;
+	}
+
+	@Override
+	public void destory() {
+		simMarket.removeGateway(bindedMarketGatewayId, this);
 	}
 
 }

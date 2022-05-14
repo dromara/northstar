@@ -1,6 +1,6 @@
 package tech.quantit.northstar.common.model;
 
-import java.util.Set;
+import java.util.List;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -43,7 +43,7 @@ public class ModuleDescription {
 	/**
 	 * 模组账户配置信息 
 	 */
-	private Set<ModuleAccountDescription> moduleAccountSettingsDescription;
+	private List<ModuleAccountDescription> moduleAccountSettingsDescription;
 	/**
 	 * 策略配置信息
 	 */

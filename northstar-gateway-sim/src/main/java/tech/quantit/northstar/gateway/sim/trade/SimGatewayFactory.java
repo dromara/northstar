@@ -64,7 +64,7 @@ public class SimGatewayFactory implements GatewayFactory{
 		account.setEventBus(simMarket.getMarketEventBus());
 		account.setFeEngine(fastEventEngine);
 		account.setSavingCallback(() -> simAccountRepo.save(account));
-		SimTradeGateway gateway = new SimTradeGatewayLocal(fastEventEngine, gwSettings, account, registry);
+		SimTradeGateway gateway = new SimTradeGatewayLocal(fastEventEngine, simMarket, gwSettings, mdGatewayId, account, registry);
 		simMarket.addGateway(mdGatewayId, gateway);
 		return gateway;
 	}
