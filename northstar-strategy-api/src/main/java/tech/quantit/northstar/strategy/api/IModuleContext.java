@@ -25,7 +25,7 @@ public interface IModuleContext extends TickDataAware, BarDataAware, Transaction
 	 * 获取模组状态
 	 * @return
 	 */
-	ModuleRuntimeDescription getModuleDescription();
+	ModuleRuntimeDescription getRuntimeDescription();
 	/**
 	 * 绑定网关与合约
 	 * @param gateway

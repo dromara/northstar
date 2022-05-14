@@ -52,5 +52,5 @@ public interface IModule {
 	 * 获取模组状态描述
 	 * @return
 	 */
-	ModuleRuntimeDescription getModuleDescription();
+	ModuleRuntimeDescription getRuntimeDescription();
 }

@@ -6,9 +6,9 @@
       :module="curModule"
       @onSave="onSave"
     />
-    <ModulePerf
+    <ModuleRuntime
       :moduleName="curModule ? curModule.moduleName : ''"
-      :visible.sync="modulePerfVisible"
+      :visible.sync="ModuleRuntimeVisible"
     />
     <el-table height="100%" :data="list">
       <el-table-column label="模组名称" prop="moduleName" align="center" width="200px" />
@@ -61,16 +61,15 @@
 
       <el-table-column label="当前状态/切换" prop="enabled" align="center" width="100px">
         <template slot-scope="scope">
-          <el-button
-            v-if="scope.row.enabled"
-            type="success"
-            @click.native="toggle(scope.$index, scope.row)"
-            >启用</el-button
+          <el-popconfirm
+            v-if="scope.row.runtime.enabled"
+            class="ml-10"
+            title="确定停用吗？"
+            @confirm="toggle(scope.$index, scope.row)"
           >
-          <el-button
-            v-if="!scope.row.enabled"
-            type="danger"
-            @click.native="toggle(scope.$index, scope.row)"
+            <el-button type="success" slot="reference" size="mini">启用</el-button>
+          </el-popconfirm>
+          <el-button v-else type="danger" @click.native="toggle(scope.$index, scope.row)"
             >停用</el-button
           >
         </template>
@@ -80,7 +79,7 @@
           <el-button size="mini" type="primary" @click="handleCreate">新建</el-button>
         </template>
         <template slot-scope="scope">
-          <el-button size="mini" @click="handlePerf(scope.$index, scope.row)">透视</el-button>
+          <el-button size="mini" @click="handlePerf(scope.$index, scope.row)">运行状态</el-button>
           <el-button size="mini" @click="handleRow(scope.$index, scope.row)">{{
             scope.row.enabled ? '查看' : '修改'
           }}</el-button>
@@ -99,27 +98,22 @@
 
 <script>
 import ModuleForm from '@/components/ModuleForm'
-import ModulePerf from '@/components/ModulePerformance'
+import ModuleRuntime from '@/components/ModuleRuntime'
 
 import moduleApi from '@/api/moduleApi'
 
 export default {
   components: {
     ModuleForm,
-    ModulePerf
+    ModuleRuntime
   },
   data() {
     return {
       moduleFormVisible: false,
-      modulePerfVisible: false,
+      ModuleRuntimeVisible: false,
       curTableIndex: -1,
       curModule: null,
       list: []
-    }
-  },
-  computed: {
-    playbackableList() {
-      return this.list.filter((i) => !i.enabled)
     }
   },
   mounted() {
@@ -134,7 +128,7 @@ export default {
     handlePerf(index, row) {
       this.curTableIndex = index
       this.curModule = row
-      this.modulePerfVisible = true
+      this.ModuleRuntimeVisible = true
     },
     handleRow(index, row) {
       this.curTableIndex = index
@@ -154,21 +148,17 @@ export default {
       this.findAll()
     },
     async findAll() {
-      this.list = await moduleApi.getAllModules()
+      const results = await moduleApi.getAllModules()
+      const allReq = results.map(async (item) => {
+        item.runtime = await moduleApi.getModuleRuntime(item.moduleName)
+        return item
+      })
+      this.list = await Promise.all(allReq)
+      console.log(this.list)
     },
     async toggle(index, row) {
-      this.$confirm(
-        `是否确定切换模组启停状态？当前状态为［${row.enabled ? '启用' : '停用'}]`,
-        '提示',
-        {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }
-      ).then(async () => {
-        await moduleApi.toggleModuleState(row.moduleName)
-        await this.findAll()
-      })
+      await moduleApi.toggleModuleState(row.moduleName)
+      await this.findAll()
     }
   }
 }

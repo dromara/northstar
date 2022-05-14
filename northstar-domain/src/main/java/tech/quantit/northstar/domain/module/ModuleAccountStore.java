@@ -55,10 +55,10 @@ public class ModuleAccountStore implements IModuleAccountStore {
 	
 	private ClosingPolicy closingPolicy;
 	
-	public ModuleAccountStore(String moduleName, ClosingPolicy closingPolicy, ModuleRuntimeDescription moduleDescription) {
+	public ModuleAccountStore(String moduleName, ClosingPolicy closingPolicy, ModuleRuntimeDescription moduleRuntimeDescription) {
 		this.sm = new ModuleStateMachine(moduleName);
 		this.closingPolicy = closingPolicy;
-		for(ModuleAccountRuntimeDescription mad : moduleDescription.getAccountDescriptions().values()) {
+		for(ModuleAccountRuntimeDescription mad : moduleRuntimeDescription.getAccountDescriptions().values()) {
 			initBalanceMap.put(mad.getAccountId(), mad.getInitBalance());
 			commissionPerDealMap.put(mad.getAccountId(), new AtomicDouble(mad.getCommissionPerDeal()));
 			accDealVolMap.put(mad.getAccountId(), new AtomicInteger(mad.getAccDealVolume()));

@@ -17,7 +17,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import tech.quantit.northstar.common.model.ComponentField;
 import tech.quantit.northstar.common.model.ComponentMetaInfo;
+import tech.quantit.northstar.common.model.ModuleDealRecord;
 import tech.quantit.northstar.common.model.ModuleDescription;
+import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
 import tech.quantit.northstar.common.model.ResultBean;
 import tech.quantit.northstar.main.service.ModuleService;
 
@@ -101,4 +103,58 @@ public class ModuleController {
 	public ResultBean<Boolean> toggleModuleState(@NotNull String name){
 		return new ResultBean<>(service.toggleModule(name));
 	}
+	
+	/**
+	 * 获取模组状态信息
+	 * @param name
+	 * @return
+	 */
+	@GetMapping("/rt/info")
+	public ResultBean<ModuleRuntimeDescription> getModuleRealTimeInfo(@NotNull String name){
+		return new ResultBean<>(service.getModuleRealTimeInfo(name));
+	}
+	
+	/**
+	 * 获取模组交易记录
+	 * @param name
+	 * @return
+	 */
+	@GetMapping("/deal/records")
+	public ResultBean<List<ModuleDealRecord>> getDealRecords(@NotNull String name){
+		return new ResultBean<>(service.getDealRecords(name));
+	}
+	
+//	/**
+//	 * 增加模组持仓
+//	 * @param moduleName
+//	 * @param position
+//	 * @return
+//	 */
+//	@PostMapping("/{moduleName}/position")
+//	public ResultBean<Boolean> createPosition(@PathVariable String moduleName, @RequestBody Module position){
+//		return new ResultBean<>(service.createPosition(moduleName, position));
+//	}
+//	
+//	/**
+//	 * 修改模组持仓
+//	 * @param moduleName
+//	 * @param position
+//	 * @return
+//	 */
+//	@PutMapping("/{moduleName}/position")
+//	public ResultBean<Boolean> updatePosition(@PathVariable String moduleName, @RequestBody ModulePositionInfo position){
+//		return new ResultBean<>(service.updatePosition(moduleName, position));
+//	}
+//	
+//	/**
+//	 * 移除模组持仓
+//	 * @param moduleName
+//	 * @param unifiedSymbol
+//	 * @param dir
+//	 * @return
+//	 */
+//	@DeleteMapping("/{moduleName}/position")
+//	public ResultBean<Boolean> removePosition(@PathVariable String moduleName){
+//		return new ResultBean<>(service.removePosition(moduleName));
+//	}
 }

@@ -240,7 +240,8 @@ export default {
         moduleAccountSettingsDescription: [],
         strategySetting: {
           componentMeta: {},
-          initParams: []
+          initParams: [],
+          value: ''
         }
       }
     }

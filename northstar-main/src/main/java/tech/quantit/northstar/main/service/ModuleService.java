@@ -1,6 +1,7 @@
 package tech.quantit.northstar.main.service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -8,18 +9,28 @@ import java.util.Map.Entry;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 
+import com.alibaba.fastjson.JSONObject;
+
+import tech.quantit.northstar.common.constant.ModuleState;
 import tech.quantit.northstar.common.model.ComponentField;
 import tech.quantit.northstar.common.model.ComponentMetaInfo;
 import tech.quantit.northstar.common.model.DynamicParams;
+import tech.quantit.northstar.common.model.ModuleDealRecord;
 import tech.quantit.northstar.common.model.ModuleDescription;
+import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
 import tech.quantit.northstar.data.IModuleRepository;
-import tech.quantit.northstar.domain.module.ModuleFactory;
 import tech.quantit.northstar.main.ExternalJarListener;
 import tech.quantit.northstar.main.handler.internal.ModuleManager;
+import tech.quantit.northstar.main.utils.ModuleFactory;
 import tech.quantit.northstar.strategy.api.DynamicParamsAware;
 import tech.quantit.northstar.strategy.api.IModule;
 import tech.quantit.northstar.strategy.api.annotation.StrategicComponent;
 
+/**
+ * 
+ * @author KevinHuangwl
+ *
+ */
 public class ModuleService implements InitializingBean {
 	
 	private ApplicationContext ctx;
@@ -37,7 +48,7 @@ public class ModuleService implements InitializingBean {
 		this.moduleMgr = moduleMgr;
 		this.moduleRepo = moduleRepo;
 		this.loader = extJarListener.getExternalClassLoader();
-		this.moduleFactory = new ModuleFactory(this.loader);
+		this.moduleFactory = new ModuleFactory(this.loader, moduleRepo);
 	}
 
 	/**
@@ -86,8 +97,10 @@ public class ModuleService implements InitializingBean {
 	 * @throws Exception 
 	 */
 	public ModuleDescription createModule(ModuleDescription md) throws Exception {
-		loadModule(md);
+		ModuleRuntimeDescription mad = new ModuleRuntimeDescription(md.getModuleName(), false, ModuleState.EMPTY, Collections.emptyMap(), new JSONObject());
+		moduleRepo.saveRuntime(mad);
 		moduleRepo.saveSettings(md);
+		loadModule(md);
 		return md;
 	}
 	
@@ -125,6 +138,7 @@ public class ModuleService implements InitializingBean {
 	
 	private void loadModule(ModuleDescription md) throws Exception {
 		IModule module = moduleFactory.newInstance(md, moduleRepo.findRuntimeByName(md.getModuleName()));
+		module.initModule();
 		moduleMgr.addModule(module);
 	}
 	
@@ -143,6 +157,24 @@ public class ModuleService implements InitializingBean {
 		boolean flag = !module.isEnabled();
 		module.setEnabled(flag);
 		return flag;
+	}
+	
+	/**
+	 * 模组运行时状态
+	 * @param name
+	 * @return
+	 */
+	public ModuleRuntimeDescription getModuleRealTimeInfo(String name) {
+		return moduleRepo.findRuntimeByName(name);
+	}
+	
+	/**
+	 * 模组交易历史
+	 * @param name
+	 * @return
+	 */
+	public List<ModuleDealRecord> getDealRecords(String name){
+		return moduleRepo.findAllDealRecords(name);
 	}
 
 	@Override

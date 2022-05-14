@@ -84,7 +84,7 @@ public class ModuleContext implements IModuleContext{
 	}
 
 	@Override
-	public ModuleRuntimeDescription getModuleDescription() {
+	public ModuleRuntimeDescription getRuntimeDescription() {
 		Map<String, ModuleAccountRuntimeDescription> accMap = new HashMap<>();
 		for(TradeGateway gateway : gatewayMap.values()) {
 			String gatewayId = gateway.getGatewaySetting().getGatewayId();

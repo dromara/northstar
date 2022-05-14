@@ -48,4 +48,5 @@ public class ServiceConfig {
 			ModuleManager moduleMgr) {
 		return new ModuleService(ctx, extJarListener, moduleRepo, moduleMgr);
 	}
+	
 }

@@ -1,18 +1,23 @@
-package tech.quantit.northstar.domain.module;
+package tech.quantit.northstar.main.utils;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-
-import com.alibaba.fastjson.JSONObject;
+import java.util.function.Consumer;
 
 import tech.quantit.northstar.common.constant.ClosingPolicy;
-import tech.quantit.northstar.common.constant.ModuleState;
 import tech.quantit.northstar.common.model.ComponentAndParamsPair;
 import tech.quantit.northstar.common.model.ComponentField;
 import tech.quantit.northstar.common.model.DynamicParams;
+import tech.quantit.northstar.common.model.ModuleDealRecord;
 import tech.quantit.northstar.common.model.ModuleDescription;
 import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
+import tech.quantit.northstar.data.IModuleRepository;
+import tech.quantit.northstar.domain.module.FirstInFirstOutClosingStrategy;
+import tech.quantit.northstar.domain.module.ModuleAccountStore;
+import tech.quantit.northstar.domain.module.ModuleContext;
+import tech.quantit.northstar.domain.module.PriorBeforeAndHedgeTodayClosingStrategy;
+import tech.quantit.northstar.domain.module.PriorTodayClosingStrategy;
+import tech.quantit.northstar.domain.module.TradeModule;
 import tech.quantit.northstar.strategy.api.ClosingStrategy;
 import tech.quantit.northstar.strategy.api.DynamicParamsAware;
 import tech.quantit.northstar.strategy.api.IModule;
@@ -24,19 +29,25 @@ public class ModuleFactory {
 	
 	private ClassLoader loader;
 	
-	public ModuleFactory(ClassLoader loader) {
+	private IModuleRepository moduleRepo;
+	
+	public ModuleFactory(ClassLoader loader, IModuleRepository moduleRepo) {
 		this.loader = loader;
+		this.moduleRepo = moduleRepo;
 	}
  	
 	public IModule newInstance(ModuleDescription moduleDescription, ModuleRuntimeDescription moduleRuntimeDescription) throws Exception {
 		IModuleContext ctx = makeModuleContext(moduleDescription, moduleRuntimeDescription);
-		return new TradeModule(moduleDescription.getModuleName(), ctx);
+		Consumer<ModuleRuntimeDescription> onRuntimeChangeCallback = (rt) -> {
+			moduleRepo.saveRuntime(rt);
+		};
+		Consumer<ModuleDealRecord> onDealChangeCallback = (dealRecord) -> {
+			moduleRepo.saveDealRecord(dealRecord);
+		};
+		return new TradeModule(moduleDescription.getModuleName(), ctx, moduleDescription.getClosingPolicy(), onRuntimeChangeCallback, onDealChangeCallback);
 	}
 	
 	private IModuleAccountStore makeAccountStore(ModuleDescription moduleDescription, ModuleRuntimeDescription moduleRuntimeDescription) {
-		if(moduleRuntimeDescription == null) {
-			moduleRuntimeDescription = new ModuleRuntimeDescription(moduleDescription.getModuleName(), false, ModuleState.EMPTY, Collections.emptyMap(), new JSONObject());
-		}
 		return new ModuleAccountStore(moduleDescription.getModuleName(), moduleDescription.getClosingPolicy(), moduleRuntimeDescription);
 	}
 	

@@ -1,8 +1,11 @@
 package tech.quantit.northstar.domain.module;
 
 import java.util.List;
+import java.util.function.Consumer;
 
+import tech.quantit.northstar.common.constant.ClosingPolicy;
 import tech.quantit.northstar.common.event.NorthstarEvent;
+import tech.quantit.northstar.common.model.ModuleDealRecord;
 import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
 import tech.quantit.northstar.strategy.api.IModule;
 import tech.quantit.northstar.strategy.api.IModuleContext;
@@ -35,9 +38,19 @@ public class TradeModule implements IModule {
 	
 	private IModuleContext ctx;
 	
-	public TradeModule(String name, IModuleContext context) {
+	private Consumer<ModuleRuntimeDescription> onRuntimeChangeCallback;
+	
+	private Consumer<ModuleDealRecord> onDealCallback;
+	
+	private DealCollector dealCollector;
+	
+	public TradeModule(String name, IModuleContext context, ClosingPolicy closingPolicy,
+			Consumer<ModuleRuntimeDescription> onRuntimeChangeCallback, Consumer<ModuleDealRecord> onDealCallback) {
 		this.name = name;
+		this.dealCollector = new DealCollector(name, closingPolicy);
 		this.ctx = context;
+		this.onRuntimeChangeCallback = onRuntimeChangeCallback;
+		this.onDealCallback = onDealCallback;
 	}
 	
 	@Override
@@ -48,6 +61,7 @@ public class TradeModule implements IModule {
 	@Override
 	public void setEnabled(boolean enabled) {
 		this.enabled = enabled;
+		onRuntimeChangeCallback.accept(getRuntimeDescription());
 	}
 
 	@Override
@@ -81,12 +95,14 @@ public class TradeModule implements IModule {
 			ctx.onOrder(order);
 		} else if (data instanceof TradeField trade) {
 			ctx.onTrade(trade);
+			onRuntimeChangeCallback.accept(getRuntimeDescription());
+			dealCollector.onTrade(trade).ifPresent(list -> list.stream().forEach(this.onDealCallback::accept));
 		}
 	}
 
 	@Override
-	public ModuleRuntimeDescription getModuleDescription() {
-		return ctx.getModuleDescription();
+	public ModuleRuntimeDescription getRuntimeDescription() {
+		return ctx.getRuntimeDescription();
 	}
 
 }
