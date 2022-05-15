@@ -8,16 +8,21 @@ import tech.quantit.northstar.common.constant.ClosingPolicy;
 import tech.quantit.northstar.common.model.ComponentAndParamsPair;
 import tech.quantit.northstar.common.model.ComponentField;
 import tech.quantit.northstar.common.model.DynamicParams;
+import tech.quantit.northstar.common.model.ModuleAccountDescription;
 import tech.quantit.northstar.common.model.ModuleDealRecord;
 import tech.quantit.northstar.common.model.ModuleDescription;
 import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
 import tech.quantit.northstar.data.IModuleRepository;
+import tech.quantit.northstar.domain.gateway.ContractManager;
+import tech.quantit.northstar.domain.gateway.GatewayAndConnectionManager;
 import tech.quantit.northstar.domain.module.FirstInFirstOutClosingStrategy;
 import tech.quantit.northstar.domain.module.ModuleAccountStore;
 import tech.quantit.northstar.domain.module.ModuleContext;
 import tech.quantit.northstar.domain.module.PriorBeforeAndHedgeTodayClosingStrategy;
 import tech.quantit.northstar.domain.module.PriorTodayClosingStrategy;
 import tech.quantit.northstar.domain.module.TradeModule;
+import tech.quantit.northstar.gateway.api.TradeGateway;
+import tech.quantit.northstar.main.ExternalJarListener;
 import tech.quantit.northstar.strategy.api.ClosingStrategy;
 import tech.quantit.northstar.strategy.api.DynamicParamsAware;
 import tech.quantit.northstar.strategy.api.IModule;
@@ -31,13 +36,24 @@ public class ModuleFactory {
 	
 	private IModuleRepository moduleRepo;
 	
-	public ModuleFactory(ClassLoader loader, IModuleRepository moduleRepo) {
-		this.loader = loader;
+	private GatewayAndConnectionManager gatewayConnMgr;
+	
+	private ContractManager contractMgr;
+	
+	public ModuleFactory(ExternalJarListener extJarListener, IModuleRepository moduleRepo, GatewayAndConnectionManager gatewayConnMgr,
+			ContractManager contractMgr) {
+		this.loader = extJarListener.getExternalClassLoader();
 		this.moduleRepo = moduleRepo;
+		this.gatewayConnMgr = gatewayConnMgr;
+		this.contractMgr = contractMgr;
 	}
  	
 	public IModule newInstance(ModuleDescription moduleDescription, ModuleRuntimeDescription moduleRuntimeDescription) throws Exception {
 		IModuleContext ctx = makeModuleContext(moduleDescription, moduleRuntimeDescription);
+		for(ModuleAccountDescription mad : moduleDescription.getModuleAccountSettingsDescription()) {
+			TradeGateway tradeGateway = (TradeGateway) gatewayConnMgr.getGatewayById(mad.getAccountGatewayId());
+			ctx.bindGatewayContracts(tradeGateway, mad.getBindedUnifiedSymbols().stream().map(contractMgr::getContract).toList());
+		}
 		Consumer<ModuleRuntimeDescription> onRuntimeChangeCallback = (rt) -> {
 			moduleRepo.saveRuntime(rt);
 		};

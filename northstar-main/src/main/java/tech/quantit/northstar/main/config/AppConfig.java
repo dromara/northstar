@@ -27,6 +27,7 @@ import tech.quantit.northstar.common.constant.Constants;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.utils.ContractUtils;
 import tech.quantit.northstar.data.IContractRepository;
+import tech.quantit.northstar.data.IModuleRepository;
 import tech.quantit.northstar.domain.account.TradeDayAccount;
 import tech.quantit.northstar.domain.external.MessageHandlerManager;
 import tech.quantit.northstar.domain.gateway.ContractManager;
@@ -39,7 +40,9 @@ import tech.quantit.northstar.gateway.api.domain.SubscriptionManager;
 import tech.quantit.northstar.gateway.sim.persistence.SimAccountRepository;
 import tech.quantit.northstar.gateway.sim.trade.SimGatewayFactory;
 import tech.quantit.northstar.gateway.sim.trade.SimMarket;
+import tech.quantit.northstar.main.ExternalJarListener;
 import tech.quantit.northstar.main.interceptor.AuthorizationInterceptor;
+import tech.quantit.northstar.main.utils.ModuleFactory;
 import xyz.redtorch.gateway.ctp.common.CtpSubscriptionManager;
 import xyz.redtorch.gateway.ctp.x64v6v3v15v.CtpGatewayFactory;
 import xyz.redtorch.gateway.ctp.x64v6v5v1cpv.CtpSimGatewayFactory;
@@ -102,8 +105,8 @@ public class AppConfig implements WebMvcConfigurer {
 	}
 	
 	@Bean
-	public ContractManager contractManager() {
-		return new ContractManager();
+	public ContractManager contractManager(IContractRepository contractRepo) {
+		return new ContractManager(contractRepo.findAll());
 	}
 	
 	@Bean
@@ -122,7 +125,7 @@ public class AppConfig implements WebMvcConfigurer {
 	}
 	
 	@Bean
-	public GlobalMarketRegistry marketGlobalRegistry(FastEventEngine fastEventEngine, IContractRepository contractRepo, List<SubscriptionManager> subMgrs,
+	public GlobalMarketRegistry globalRegistry(FastEventEngine fastEventEngine, IContractRepository contractRepo, List<SubscriptionManager> subMgrs,
 			ContractManager contractMgr) {
 		Consumer<NormalContract> handleContractSave = contract -> {
 			if(contract.updateTime() > 0) {
@@ -170,6 +173,12 @@ public class AppConfig implements WebMvcConfigurer {
 	public GatewayFactory simGatewayFactory(FastEventEngine fastEventEngine, SimMarket simMarket, SimAccountRepository accRepo,
 			GlobalMarketRegistry registry) {
 		return new SimGatewayFactory(fastEventEngine, simMarket, accRepo, registry);
+	}
+	
+	@Bean
+	public ModuleFactory moduleFactory(ExternalJarListener extJarListener, IModuleRepository moduleRepo, GatewayAndConnectionManager gatewayConnMgr,
+			ContractManager contractMgr) {
+		return new ModuleFactory(extJarListener, moduleRepo, gatewayConnMgr, contractMgr);
 	}
 	
 	@Bean

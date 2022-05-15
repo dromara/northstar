@@ -18,12 +18,12 @@ public class ModuleRuntimeDescriptionPO {
 	@Id
 	private String moduleName;
 	
-	private ModuleRuntimeDescription moduleDescription;
+	private ModuleRuntimeDescription moduleRuntimeDescription;
 	
 	public static ModuleRuntimeDescriptionPO convertFrom(ModuleRuntimeDescription moduleDescription) {
 		ModuleRuntimeDescriptionPO po = new ModuleRuntimeDescriptionPO();
 		po.moduleName = moduleDescription.getModuleName();
-		po.moduleDescription = moduleDescription;
+		po.moduleRuntimeDescription = moduleDescription;
 		return po;
 	}
 }

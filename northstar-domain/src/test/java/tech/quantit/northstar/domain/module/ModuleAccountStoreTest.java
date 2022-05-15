@@ -52,7 +52,7 @@ class ModuleAccountStoreTest {
 				.moduleName("testModule")
 				.enabled(true)
 				.moduleState(ModuleState.HOLDING_LONG)
-				.accountDescriptions(mamap)
+				.accountRuntimeDescriptionMap(mamap)
 				.build();
 		mas = new ModuleAccountStore("testModule", ClosingPolicy.FIFO, md);
 	}

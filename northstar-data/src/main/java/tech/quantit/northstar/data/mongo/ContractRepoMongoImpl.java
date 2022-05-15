@@ -1,6 +1,7 @@
 package tech.quantit.northstar.data.mongo;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -53,7 +54,12 @@ public class ContractRepoMongoImpl implements IContractRepository {
 
 	@Override
 	public List<ContractField> findAll() {
-		return findAll(GatewayType.CTP);
+		GatewayType[] types = new GatewayType[] {GatewayType.CTP, GatewayType.SIM};
+		List<ContractField> resultList = new ArrayList<>();
+		for(GatewayType type : types) {
+			resultList.addAll(findAll(type));
+		}
+		return resultList;
 	}
 
 }

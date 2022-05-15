@@ -30,6 +30,12 @@ public class ContractManager {
 	 */
 	private Map<String, Map<String, ContractField>> contractTbl = new ConcurrentHashMap<>();
 	
+	public ContractManager(List<ContractField> contracts) {
+		for(ContractField c : contracts) {			
+			addContract(c);
+		}
+	}
+	
 	public boolean addContract(ContractField contract) {
 		String gatewayId = contract.getGatewayId();
 		String symbol = contract.getSymbol();

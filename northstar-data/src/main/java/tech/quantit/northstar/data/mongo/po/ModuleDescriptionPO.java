@@ -17,12 +17,12 @@ public class ModuleDescriptionPO {
 	@Id
 	private String moduleName;
 	
-	private ModuleDescription moduleSettingsDescription;
+	private ModuleDescription moduleDescription;
 	
 	public static ModuleDescriptionPO convertFrom(ModuleDescription moduleSettingsDescription) {
 		ModuleDescriptionPO po = new ModuleDescriptionPO();
 		po.moduleName = moduleSettingsDescription.getModuleName();
-		po.moduleSettingsDescription = moduleSettingsDescription;
+		po.moduleDescription = moduleSettingsDescription;
 		return po;
 	}
 }

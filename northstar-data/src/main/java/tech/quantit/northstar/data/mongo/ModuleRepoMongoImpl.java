@@ -47,7 +47,7 @@ public class ModuleRepoMongoImpl implements IModuleRepository{
 		if (msd == null) {
 			return null;
 		}
-		return msd.getModuleSettingsDescription();
+		return msd.getModuleDescription();
 	}
 
 	/**
@@ -56,7 +56,7 @@ public class ModuleRepoMongoImpl implements IModuleRepository{
 	 */
 	@Override
 	public List<ModuleDescription> findAllSettings() {
-		return mongoTemplate.findAll(ModuleDescriptionPO.class).stream().map(ModuleDescriptionPO::getModuleSettingsDescription).collect(Collectors.toList());
+		return mongoTemplate.findAll(ModuleDescriptionPO.class).stream().map(ModuleDescriptionPO::getModuleDescription).collect(Collectors.toList());
 	}
 
 	/**
@@ -89,7 +89,7 @@ public class ModuleRepoMongoImpl implements IModuleRepository{
 		if (md == null) {
 			return null;
 		}
-		return md.getModuleDescription();
+		return md.getModuleRuntimeDescription();
 	}
 
 	/**

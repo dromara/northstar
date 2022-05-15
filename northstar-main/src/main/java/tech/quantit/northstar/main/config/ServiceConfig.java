@@ -18,6 +18,7 @@ import tech.quantit.northstar.main.handler.internal.ModuleManager;
 import tech.quantit.northstar.main.service.AccountService;
 import tech.quantit.northstar.main.service.GatewayService;
 import tech.quantit.northstar.main.service.ModuleService;
+import tech.quantit.northstar.main.utils.ModuleFactory;
 
 @DependsOn({
 	"internalDispatcher",
@@ -27,7 +28,9 @@ import tech.quantit.northstar.main.service.ModuleService;
 	"connectionEventHandler",
 	"ctpGatewayFactory",
 	"simGatewayFactory",
-	"ctpSimGatewayFactory"
+	"ctpSimGatewayFactory",
+	"moduleFactory",
+	"globalRegistry"
 	})
 @Configuration
 public class ServiceConfig {
@@ -45,8 +48,8 @@ public class ServiceConfig {
 	
 	@Bean
 	public ModuleService moduleService(ApplicationContext ctx, ExternalJarListener extJarListener, IModuleRepository moduleRepo,
-			ModuleManager moduleMgr) {
-		return new ModuleService(ctx, extJarListener, moduleRepo, moduleMgr);
+			ModuleFactory moduleFactory, ModuleManager moduleMgr) {
+		return new ModuleService(ctx, extJarListener, moduleRepo, moduleFactory, moduleMgr);
 	}
 	
 }

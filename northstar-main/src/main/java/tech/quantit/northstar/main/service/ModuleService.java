@@ -1,10 +1,10 @@
 package tech.quantit.northstar.main.service;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
@@ -15,8 +15,10 @@ import tech.quantit.northstar.common.constant.ModuleState;
 import tech.quantit.northstar.common.model.ComponentField;
 import tech.quantit.northstar.common.model.ComponentMetaInfo;
 import tech.quantit.northstar.common.model.DynamicParams;
+import tech.quantit.northstar.common.model.ModuleAccountRuntimeDescription;
 import tech.quantit.northstar.common.model.ModuleDealRecord;
 import tech.quantit.northstar.common.model.ModuleDescription;
+import tech.quantit.northstar.common.model.ModulePositionDescription;
 import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
 import tech.quantit.northstar.data.IModuleRepository;
 import tech.quantit.northstar.main.ExternalJarListener;
@@ -43,12 +45,12 @@ public class ModuleService implements InitializingBean {
 	
 	private ClassLoader loader;
 	
-	public ModuleService(ApplicationContext ctx, ExternalJarListener extJarListener, IModuleRepository moduleRepo, ModuleManager moduleMgr) {
+	public ModuleService(ApplicationContext ctx, ExternalJarListener extJarListener, IModuleRepository moduleRepo, ModuleFactory moduleFactory, ModuleManager moduleMgr) {
 		this.ctx = ctx;
 		this.moduleMgr = moduleMgr;
 		this.moduleRepo = moduleRepo;
+		this.moduleFactory = moduleFactory;
 		this.loader = extJarListener.getExternalClassLoader();
-		this.moduleFactory = new ModuleFactory(this.loader, moduleRepo);
 	}
 
 	/**
@@ -97,7 +99,17 @@ public class ModuleService implements InitializingBean {
 	 * @throws Exception 
 	 */
 	public ModuleDescription createModule(ModuleDescription md) throws Exception {
-		ModuleRuntimeDescription mad = new ModuleRuntimeDescription(md.getModuleName(), false, ModuleState.EMPTY, Collections.emptyMap(), new JSONObject());
+		Map<String, ModuleAccountRuntimeDescription> accRtsMap = md.getModuleAccountSettingsDescription().stream()
+				.map(masd -> ModuleAccountRuntimeDescription.builder()
+						.accountId(masd.getAccountGatewayId())
+						.initBalance(masd.getModuleAccountInitBalance())
+						.preBalance(masd.getModuleAccountInitBalance())
+						.commissionPerDeal(masd.getCommissionFeePerDeal())
+						.commissionPerDealInPercentage(masd.getCommissionFeePerDealInPercentage())
+						.positionDescription(new ModulePositionDescription())
+						.build())
+				.collect(Collectors.toMap(ModuleAccountRuntimeDescription::getAccountId, mard -> mard));
+		ModuleRuntimeDescription mad = new ModuleRuntimeDescription(md.getModuleName(), false, ModuleState.EMPTY, accRtsMap, new JSONObject());
 		moduleRepo.saveRuntime(mad);
 		moduleRepo.saveSettings(md);
 		loadModule(md);

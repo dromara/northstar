@@ -81,6 +81,7 @@ public class ModuleContext implements IModuleContext{
 		this.closingStrategy = closingStrategy;
 		this.numOfMinsPerBar = numOfMinsPerBar;
 		this.barMergingCallback = bar -> tradeStrategy.onBar(bar, module.isEnabled());
+		tradeStrategy.setContext(this);
 	}
 
 	@Override
@@ -110,7 +111,7 @@ public class ModuleContext implements IModuleContext{
 				.enabled(module.isEnabled())
 				.moduleState(accStore.getModuleState())
 				.dataState(tradeStrategy.getComputedState())
-				.accountDescriptions(accMap)
+				.accountRuntimeDescriptionMap(accMap)
 				.build();
 	}
 
