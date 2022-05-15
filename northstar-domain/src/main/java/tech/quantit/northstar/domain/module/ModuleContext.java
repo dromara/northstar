@@ -167,6 +167,7 @@ public class ModuleContext implements IModuleContext{
 				.setOriginOrderId(orderReq.getOriginOrderId())
 				.build();
 		orderMap.put(orderReq.getOriginOrderId(), placeholder);
+		accStore.onSubmitOrder(orderReq);
 		return orderReq.getOriginOrderId();
 	}
 	
@@ -186,10 +187,12 @@ public class ModuleContext implements IModuleContext{
 		}
 		ContractField contract = orderMap.get(originOrderId).getContract();
 		TradeGateway gateway = gatewayMap.get(contract);
-		gateway.cancelOrder(CancelOrderReqField.newBuilder()
+		CancelOrderReqField cancelReq = CancelOrderReqField.newBuilder()
 				.setGatewayId(gateway.getGatewaySetting().getGatewayId())
 				.setOriginOrderId(originOrderId)
-				.build());
+				.build();
+		accStore.onCancelOrder(cancelReq);
+		gateway.cancelOrder(cancelReq);
 	}
 
 	/* 此处收到的TICK数据是所有订阅的数据，需要过滤 */
@@ -201,6 +204,7 @@ public class ModuleContext implements IModuleContext{
 		if(!StringUtils.equals(tradingDay, tick.getTradingDay())) {
 			tradingDay = tick.getTradingDay();
 		}
+		accStore.onTick(tick);
 		tickMap.put(tick.getUnifiedSymbol(), tick);
 		tradeStrategy.onTick(tick, module.isEnabled());
 	}

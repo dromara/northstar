@@ -251,6 +251,8 @@ public class TradePosition {
 	 */
 	public PositionField convertToPositionField() {
 		int factor = FieldUtils.directionFactor(dir);
+		double lastPrice = lastTick == null ? 0 : lastTick.getLastPrice();
+		double priceDiff = lastTick == null ? 0 : factor * (lastTick.getLastPrice() - avgOpenPrice());
 		return PositionField.newBuilder()
 				.setContract(contract)
 				.setFrozen(totalVolume() - totalAvailable())
@@ -261,11 +263,11 @@ public class TradePosition {
 				.setYdPosition(ydVolume())
 				.setExchangeMargin(totalMargin())
 				.setUseMargin(totalMargin())
-				.setLastPrice(lastTick.getLastPrice())
+				.setLastPrice(lastPrice)
 				.setOpenPrice(avgOpenPrice())
-				.setOpenPriceDiff(factor * (lastTick.getLastPrice() - avgOpenPrice()))
+				.setOpenPriceDiff(priceDiff)
 				.setPrice(avgOpenPrice())
-				.setPriceDiff(factor * (lastTick.getLastPrice() - avgOpenPrice()))
+				.setPriceDiff(priceDiff)
 				.setPositionProfit(profit())
 				.setOpenPositionProfit(profit())
 				.setPositionDirection(FieldUtils.isBuy(dir) ? PositionDirectionEnum.PD_Long : PositionDirectionEnum.PD_Short)

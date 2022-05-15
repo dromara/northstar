@@ -148,8 +148,10 @@ public class ModuleService implements InitializingBean {
 	}
 	
 	private void loadModule(ModuleDescription md) throws Exception {
-		IModule module = moduleFactory.newInstance(md, moduleRepo.findRuntimeByName(md.getModuleName()));
+		ModuleRuntimeDescription mrd = moduleRepo.findRuntimeByName(md.getModuleName());
+		IModule module = moduleFactory.newInstance(md, mrd);
 		module.initModule();
+		module.setEnabled(mrd.isEnabled());
 		moduleMgr.addModule(module);
 	}
 	
