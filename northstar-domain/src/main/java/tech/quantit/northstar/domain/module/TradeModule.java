@@ -3,7 +3,6 @@ package tech.quantit.northstar.domain.module;
 import java.util.List;
 import java.util.function.Consumer;
 
-import tech.quantit.northstar.common.constant.ClosingPolicy;
 import tech.quantit.northstar.common.event.NorthstarEvent;
 import tech.quantit.northstar.common.model.ModuleDealRecord;
 import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
@@ -44,10 +43,10 @@ public class TradeModule implements IModule {
 	
 	private DealCollector dealCollector;
 	
-	public TradeModule(String name, IModuleContext context, ClosingPolicy closingPolicy,
+	public TradeModule(String name, IModuleContext context, DealCollector dealCollector,
 			Consumer<ModuleRuntimeDescription> onRuntimeChangeCallback, Consumer<ModuleDealRecord> onDealCallback) {
 		this.name = name;
-		this.dealCollector = new DealCollector(name, closingPolicy);
+		this.dealCollector = dealCollector;
 		this.ctx = context;
 		this.onRuntimeChangeCallback = onRuntimeChangeCallback;
 		this.onDealCallback = onDealCallback;

@@ -9,12 +9,14 @@ import tech.quantit.northstar.common.model.ComponentAndParamsPair;
 import tech.quantit.northstar.common.model.ComponentField;
 import tech.quantit.northstar.common.model.DynamicParams;
 import tech.quantit.northstar.common.model.ModuleAccountDescription;
+import tech.quantit.northstar.common.model.ModuleAccountRuntimeDescription;
 import tech.quantit.northstar.common.model.ModuleDealRecord;
 import tech.quantit.northstar.common.model.ModuleDescription;
 import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
 import tech.quantit.northstar.data.IModuleRepository;
 import tech.quantit.northstar.domain.gateway.ContractManager;
 import tech.quantit.northstar.domain.gateway.GatewayAndConnectionManager;
+import tech.quantit.northstar.domain.module.DealCollector;
 import tech.quantit.northstar.domain.module.FirstInFirstOutClosingStrategy;
 import tech.quantit.northstar.domain.module.ModuleAccountStore;
 import tech.quantit.northstar.domain.module.ModuleContext;
@@ -29,6 +31,7 @@ import tech.quantit.northstar.strategy.api.IModule;
 import tech.quantit.northstar.strategy.api.IModuleAccountStore;
 import tech.quantit.northstar.strategy.api.IModuleContext;
 import tech.quantit.northstar.strategy.api.TradeStrategy;
+import xyz.redtorch.pb.CoreField.TradeField;
 
 public class ModuleFactory {
 	
@@ -50,6 +53,7 @@ public class ModuleFactory {
  	
 	public IModule newInstance(ModuleDescription moduleDescription, ModuleRuntimeDescription moduleRuntimeDescription) throws Exception {
 		IModuleContext ctx = makeModuleContext(moduleDescription, moduleRuntimeDescription);
+		
 		for(ModuleAccountDescription mad : moduleDescription.getModuleAccountSettingsDescription()) {
 			TradeGateway tradeGateway = (TradeGateway) gatewayConnMgr.getGatewayById(mad.getAccountGatewayId());
 			ctx.bindGatewayContracts(tradeGateway, mad.getBindedUnifiedSymbols().stream().map(contractMgr::getContract).toList());
@@ -60,7 +64,14 @@ public class ModuleFactory {
 		Consumer<ModuleDealRecord> onDealChangeCallback = (dealRecord) -> {
 			moduleRepo.saveDealRecord(dealRecord);
 		};
-		return new TradeModule(moduleDescription.getModuleName(), ctx, moduleDescription.getClosingPolicy(), onRuntimeChangeCallback, onDealChangeCallback);
+		DealCollector dc = new DealCollector(moduleDescription.getModuleName(), moduleDescription.getClosingPolicy());
+		for(ModuleAccountRuntimeDescription mard : moduleRuntimeDescription.getAccountRuntimeDescriptionMap().values()) {
+			for(byte[] uncloseTradeData : mard.getPositionDescription().getUncloseTrades()) {
+				dc.onTrade(TradeField.parseFrom(uncloseTradeData));
+			}
+		}
+		
+		return new TradeModule(moduleDescription.getModuleName(), ctx, dc, onRuntimeChangeCallback, onDealChangeCallback);
 	}
 	
 	private IModuleAccountStore makeAccountStore(ModuleDescription moduleDescription, ModuleRuntimeDescription moduleRuntimeDescription) {
