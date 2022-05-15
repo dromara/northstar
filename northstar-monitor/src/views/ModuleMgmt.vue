@@ -2,7 +2,7 @@
   <div class="ns-page">
     <ModuleForm
       :visible.sync="moduleFormVisible"
-      :readOnly="curTableIndex > -1 && curModule.enabled"
+      :readOnly="curTableIndex > -1 && curModule.runtime.enabled"
       :module="curModule"
       @onSave="onSave"
     />
@@ -69,9 +69,9 @@
           >
             <el-button type="success" slot="reference" size="mini">启用</el-button>
           </el-popconfirm>
-          <el-button v-else type="danger" @click.native="toggle(scope.$index, scope.row)"
-            >停用</el-button
-          >
+          <el-button v-else type="danger" @click.native="toggle(scope.$index, scope.row)">
+            停用
+          </el-button>
         </template>
       </el-table-column>
       <el-table-column align="center" width="240px">
@@ -81,7 +81,7 @@
         <template slot-scope="scope">
           <el-button size="mini" @click="handlePerf(scope.$index, scope.row)">运行状态</el-button>
           <el-button size="mini" @click="handleRow(scope.$index, scope.row)">{{
-            scope.row.enabled ? '查看' : '修改'
+            scope.row.runtime.enabled ? '查看' : '修改'
           }}</el-button>
           <el-popconfirm
             class="ml-10"
@@ -154,7 +154,6 @@ export default {
         return item
       })
       this.list = await Promise.all(allReq)
-      console.log(this.list)
     },
     async toggle(index, row) {
       await moduleApi.toggleModuleState(row.moduleName)

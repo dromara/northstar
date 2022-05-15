@@ -59,7 +59,12 @@
               </el-select>
             </el-form-item>
             <el-form-item label="K线周期">
-              <el-input-number v-model="form.numOfMinPerBar" @change="handleChange" :min="1" />
+              <el-input-number
+                :disabled="readOnly"
+                v-model="form.numOfMinPerBar"
+                @change="handleChange"
+                :min="1"
+              />
               <span class="ml-10">分钟</span>
             </el-form-item>
             <el-form-item label="预热数据量">
@@ -67,6 +72,7 @@
                 v-model="form.numOfBarForPreparation"
                 @change="handleChange"
                 :min="0"
+                :disabled="readOnly"
               />
               <span class="ml-10">根K线</span>
             </el-form-item>
