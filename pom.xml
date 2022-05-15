@@ -391,17 +391,6 @@
 					</configuration>
 				</plugin>
 				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-resources-plugin</artifactId>
-					<configuration>
-						<propertiesEncoding>${project.build.sourceEncoding}</propertiesEncoding>
-						<delimiters>
-							<delimiter>${resource.delimiter}</delimiter>
-						</delimiters>
-						<useDefaultDelimiters>false</useDefaultDelimiters>
-					</configuration>
-				</plugin>
-				<plugin>
 					<groupId>pl.project13.maven</groupId>
 					<artifactId>git-commit-id-plugin</artifactId>
 					<executions>
