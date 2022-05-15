@@ -87,6 +87,7 @@ public class ModuleFactory {
 		return new ModuleContext(strategy, accStore, closingStrategy, numOfMinPerBar);
 	}
 	
+	@SuppressWarnings("unchecked")
 	private <T extends DynamicParamsAware> T resolveComponent(ComponentAndParamsPair metaInfo) throws Exception {
 		Map<String, ComponentField> fieldMap = new HashMap<>();
 		for(ComponentField cf : metaInfo.getInitParams()) {

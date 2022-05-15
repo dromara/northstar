@@ -18,6 +18,7 @@ import test.common.TestFieldFactory;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.TickField;
 
+@SuppressWarnings("unchecked")
 class GlobalMarketRegistryTest {
 	
 	TestFieldFactory factory = new TestFieldFactory("gateway");

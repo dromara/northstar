@@ -45,10 +45,10 @@ public class SpringContextUtil implements ApplicationContextAware {
 	/**
 	 * 上下文对象实例
 	 */
-	private static ApplicationContext applicationContext;
+	private static ApplicationContext ctx;
 
 	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-		this.applicationContext = applicationContext;
+		ctx = applicationContext;
 	}
 
 	/**
@@ -57,7 +57,7 @@ public class SpringContextUtil implements ApplicationContextAware {
 	 * @return
 	 */
 	public static ApplicationContext getApplicationContext() {
-		return applicationContext;
+		return ctx;
 	}
 
 	public static Object getBean(String name) {
