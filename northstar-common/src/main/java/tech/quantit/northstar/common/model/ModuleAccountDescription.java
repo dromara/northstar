@@ -31,10 +31,6 @@ public class ModuleAccountDescription {
 	 */
 	private double commissionFeePerDeal;
 	/**
-	 * 每笔交易手续费（%）
-	 */
-	private double commissionFeePerDealInPercentage;
-	/**
 	 * 账户关联合约名称
 	 */
 	private List<String> bindedUnifiedSymbols;

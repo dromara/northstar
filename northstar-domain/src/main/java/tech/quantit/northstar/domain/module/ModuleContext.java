@@ -98,10 +98,12 @@ public class ModuleContext implements IModuleContext{
 					.build();
 			
 			ModuleAccountRuntimeDescription accDescription = ModuleAccountRuntimeDescription.builder()
+					.accountId(gatewayId)
 					.initBalance(accStore.getInitBalance(gatewayId))
 					.preBalance(accStore.getPreBalance(gatewayId))
 					.accCloseProfit(accStore.getAccCloseProfit(gatewayId))
 					.accDealVolume(accStore.getAccDealVolume(gatewayId))
+					.commissionPerDeal(accStore.getCommissionPerDeal(gatewayId))
 					.positionDescription(posDescription)
 					.build();
 			accMap.put(gatewayId, accDescription);

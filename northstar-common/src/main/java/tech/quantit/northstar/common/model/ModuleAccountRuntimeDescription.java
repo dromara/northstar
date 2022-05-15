@@ -30,11 +30,6 @@ public class ModuleAccountRuntimeDescription {
 	 * 交易手续费
 	 */
 	private double commissionPerDeal;
-	
-	/**
-	 * 交易手续费
-	 */
-	private double commissionPerDealInPercentage;
 
 	/**
 	 * 期初余额（开仓前计算）

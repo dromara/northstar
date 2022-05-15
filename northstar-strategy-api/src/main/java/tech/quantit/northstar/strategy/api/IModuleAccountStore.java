@@ -27,6 +27,12 @@ public interface IModuleAccountStore extends TickDataAware, TransactionAware {
 	 */
 	double getPreBalance(String gatewayId);
 	/**
+	 * 每手交易手续费
+	 * @param gatewayId
+	 * @return
+	 */
+	double getCommissionPerDeal(String gatewayId);
+	/**
 	 * 获取持仓信息
 	 * @param gatewayId
 	 * @return

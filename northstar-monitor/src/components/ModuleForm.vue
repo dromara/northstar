@@ -153,35 +153,15 @@
                   />
                 </el-select>
               </el-form-item>
-              <el-tooltip class="item" effect="dark" content="只需要填其中一个" placement="top-end">
-                <el-form-item label="手续费估算">
-                  <el-input
-                    :class="'with-unit'"
-                    type="number"
-                    :disabled="readOnly"
-                    v-model="form.moduleAccountSettingsDescription[i].commissionFeePerDeal"
-                  />
-                  <span class="value-unit"> 元 / 每笔</span>
-                </el-form-item>
-              </el-tooltip>
-              <el-tooltip
-                class="item"
-                effect="dark"
-                content="只需要填其中一个"
-                placement="bottom-end"
-              >
-                <el-form-item label="手续费估算">
-                  <el-input
-                    :class="'with-unit'"
-                    type="number"
-                    :disabled="readOnly"
-                    v-model="
-                      form.moduleAccountSettingsDescription[i].commissionFeePerDealInPercentage
-                    "
-                  />
-                  <span class="value-unit"> ‰ / 每笔</span>
-                </el-form-item>
-              </el-tooltip>
+              <el-form-item label="手续费估算">
+                <el-input
+                  :class="'with-unit'"
+                  type="number"
+                  :disabled="readOnly"
+                  v-model="form.moduleAccountSettingsDescription[i].commissionFeePerDeal"
+                />
+                <span class="value-unit"> 元 / 每笔</span>
+              </el-form-item>
             </div>
           </div>
         </el-form>
