@@ -1,122 +1,71 @@
 <template>
-  <el-dialog title="模组透视" :visible.sync="dialogVisible" fullscreen>
+  <el-dialog title="模组运行状态" :visible="visible" fullscreen @close="close">
     <ModulePositionForm :visible.sync="positionFormVisible" :data="curPosition" @save="onSave" />
-    <div class="module-perf-wrapper">
+    <div class="module-rt-wrapper">
       <div class="side-panel">
-        <div class="basic-info">
-          <el-form inline>
-            <el-row>
-              <el-col span="8">
-                <ReadonlyFieldValue label="模组名称" label-width="60px" :value="moduleName" />
-              </el-col>
-              <el-col span="8">
-                <ReadonlyFieldValue label="账户ID" label-width="60px" :value="accountId" />
-              </el-col>
-              <el-col span="8"
-                ><div class="cell-content">
-                  <el-button class="compact" icon="el-icon-refresh" @click="init"
-                    >刷新数据</el-button
-                  >
-                </div></el-col
+        <div class="description-wrapper">
+          <el-descriptions class="margin-top" title="模组信息" :column="3">
+            <template slot="extra">
+              <el-button class="compact mb-10" icon="el-icon-refresh" @click="init"
+                >刷新数据</el-button
               >
-            </el-row>
-            <el-row>
-              <el-col span="8">
-                <ReadonlyFieldValue
-                  label="账户总额"
-                  label-width="60px"
-                  :value="parseInt(accountBalance)"
-                />
-              </el-col>
-              <el-col span="8">
-                <ReadonlyFieldValue
-                  label="占用均额"
-                  label-width="60px"
-                  title="采用交易所保证金的1.5倍估算"
-                  :value="parseInt(avgOccupiedAmount)"
-                />
-              </el-col>
-              <el-col span="8">
-                <ReadonlyFieldValue label="模组状态" label-width="60px" :value="positionState" />
-              </el-col>
-            </el-row>
-            <el-row>
-              <el-col span="8">
-                <ReadonlyFieldValue
-                  label="平仓盈亏"
-                  label-width="60px"
-                  :value="parseInt(totalCloseProfit) || '0'"
-                />
-              </el-col>
-              <el-col span="8">
-                <ReadonlyFieldValue
-                  label="持仓盈亏"
-                  label-width="60px"
-                  :value="parseInt(totalPositionProfit) || '0'"
-                />
-              </el-col>
-              <el-col span="8">
-                <ReadonlyFieldValue
-                  label="总盈亏"
-                  label-width="50px"
-                  title="注意：手续费不算在总盈亏内"
-                  :value="parseInt(totalCloseProfit + totalPositionProfit) || '0'"
-                />
-              </el-col>
-            </el-row>
-            <el-row>
-              <el-col span="12">
-                <ReadonlyFieldValue
-                  label="近五次交易平均盈亏"
-                  label-width="140px"
-                  title="注意：手续费不算在盈亏内"
-                  :value="
-                    meanProfitOf5Transactions ? parseInt(meanProfitOf5Transactions) : '数据不足'
-                  "
-                />
-              </el-col>
-              <el-col span="12">
-                <ReadonlyFieldValue
-                  label="近五次交易胜率"
-                  label-width="120px"
-                  :value="
-                    winningRateOf5Transactions < 0
-                      ? '数据不足'
-                      : parseInt(winningRateOf5Transactions * 100) + ' %'
-                  "
-                />
-              </el-col>
-            </el-row>
-            <el-row>
-              <el-col span="12">
-                <ReadonlyFieldValue
-                  label="近十次交易平均盈亏"
-                  label-width="140px"
-                  title="注意：手续费不算在盈亏内"
-                  :value="
-                    meanProfitOf10Transactions ? parseInt(meanProfitOf10Transactions) : '数据不足'
-                  "
-                />
-              </el-col>
-              <el-col span="12">
-                <ReadonlyFieldValue
-                  label="近十次交易胜率"
-                  label-width="120px"
-                  :value="
-                    winningRateOf10Transactions < 0
-                      ? '数据不足'
-                      : parseInt(winningRateOf10Transactions * 100) + ' %'
-                  "
-                />
-              </el-col>
-            </el-row>
-          </el-form>
+            </template>
+            <el-descriptions-item label="名称">{{ moduleRuntime.moduleName }}</el-descriptions-item>
+            <el-descriptions-item label="启停状态"
+              ><el-tag size="small" :type="`${moduleRuntime.enabled ? 'success' : 'danger'}`">{{
+                moduleRuntime.enabled ? '启用' : '停用'
+              }}</el-tag></el-descriptions-item
+            >
+            <el-descriptions-item label="盘口状态">
+              <el-tag size="small">{{
+                {
+                  HOLDING_LONG: '持多单',
+                  HOLDING_SHORT: '持空单',
+                  EMPTY: '无持仓',
+                  EMPTY_HEDGE: '对冲锁仓',
+                  HOLDING_HEDGE: '对冲持仓',
+                  PENDING_ORDER: '等待成交'
+                }[moduleRuntime.moduleState]
+              }}</el-tag>
+            </el-descriptions-item>
+            <el-descriptions-item label="模组总盈亏"></el-descriptions-item>
+            <el-descriptions-item label="平均胜率"></el-descriptions-item>
+            <el-descriptions-item label="盈亏比"></el-descriptions-item>
+          </el-descriptions>
+          <el-tabs>
+            <el-tab-pane label="账户A"></el-tab-pane>
+            <el-tab-pane label="账户B"></el-tab-pane>
+          </el-tabs>
+          <div class="mt-10">
+            <el-descriptions class="margin-top" title="" :column="2">
+              <el-descriptions-item label="账户ID">
+                {{ moduleRuntime.moduleName }}
+              </el-descriptions-item>
+              <el-descriptions-item label="初始余额">
+                {{ moduleRuntime.moduleName }}
+              </el-descriptions-item>
+              <el-descriptions-item label="期初余额">
+                {{ moduleRuntime.moduleName }}
+              </el-descriptions-item>
+              <el-descriptions-item label="持仓盈亏">
+                {{ moduleRuntime.moduleName }}
+              </el-descriptions-item>
+              <el-descriptions-item label="平仓盈亏">
+                {{ moduleRuntime.moduleName }}
+              </el-descriptions-item>
+              <el-descriptions-item label="累计手续费">
+                {{ moduleRuntime.moduleName }}
+              </el-descriptions-item>
+              <el-descriptions-item label="模组账户盈亏">
+                {{ moduleRuntime.moduleName }}
+              </el-descriptions-item>
+            </el-descriptions>
+          </div>
         </div>
         <div>
           <el-tabs v-model="moduleTab" :stretch="true">
             <el-tab-pane name="holding" label="模组持仓"></el-tab-pane>
             <el-tab-pane name="dealRecord" label="交易历史"></el-tab-pane>
-            <el-tab-pane name="tradeRecord" label="原始成交"></el-tab-pane>
           </el-tabs>
         </div>
         <div class="table-wrapper">
@@ -238,7 +187,6 @@
 </template>
 <script>
 import ModulePositionForm from './ModulePositionForm.vue'
-import ReadonlyFieldValue from './ReadonlyFieldValue.vue'
 import { dispose, init } from 'klinecharts'
 import volumePure from '@/lib/indicator/volume-pure'
 import moduleApi from '@/api/moduleApi'
@@ -280,17 +228,16 @@ const makeShape = (deal) => {
 
 export default {
   components: {
-    ModulePositionForm,
-    ReadonlyFieldValue
+    ModulePositionForm
   },
   props: {
     visible: {
       type: Boolean,
       default: false
     },
-    moduleName: {
-      type: String,
-      default: ''
+    moduleRuntime: {
+      type: Object,
+      default: () => {}
     }
   },
   data() {
@@ -299,50 +246,29 @@ export default {
       curPosition: null,
       moduleTab: 'holding',
       activeTab: '',
-      dialogVisible: false,
       dealRecords: [],
-      tradeRecords: [],
       holdingPositions: [],
-      totalCloseProfit: 0,
-      totalPositionProfit: 0,
       moduleState: '',
       accountId: '',
       avgOccupiedAmount: 0,
-      meanProfitOf5Transactions: 0,
-      meanProfitOf10Transactions: 0,
-      winningRateOf5Transactions: 0,
-      winningRateOf10Transactions: 0,
       barDataMap: {},
       chart: null,
       loading: false
     }
   },
   watch: {
-    visible: function (val) {
-      if (val) {
-        this.dialogVisible = val
-        this.$nextTick(this.init)
-        this.$nextTick(this.loadRefData)
-      }
-    },
+    // visible: function (val) {
+    //   if (val) {
+    //     this.$nextTick(this.init)
+    //     this.$nextTick(this.loadRefData)
+    //   }
+    // },
     moduleTab: function (val) {
       if (val === 'dealRecord') {
         setTimeout(() => {
           let table = this.$refs.dealTbl
           table.bodyWrapper.scrollTop = table.bodyWrapper.scrollHeight
         }, 50)
-      }
-      if (val === 'tradeRecord') {
-        setTimeout(() => {
-          let table = this.$refs.tradeTbl
-          table.bodyWrapper.scrollTop = table.bodyWrapper.scrollHeight
-        }, 50)
-      }
-    },
-    dialogVisible: function (val) {
-      if (!val) {
-        this.$emit('update:visible', val)
-        this.$nextTick(this.close)
       }
     }
   },
@@ -366,24 +292,7 @@ export default {
   },
   methods: {
     async init() {
-      this.loadBasicInfo()
       this.loadDealRecord()
-      this.loadTradeRecord()
-    },
-    loadBasicInfo() {
-      moduleApi.getModuleInfo(this.moduleName).then((result) => {
-        this.totalPositionProfit = result.totalPositionProfit
-        this.moduleState = result.moduleState
-        this.accountId = result.accountId
-        this.avgOccupiedAmount = result.avgOccupiedAmount
-        let longPositions = Object.values(result.longPositions)
-        let shortPositions = Object.values(result.shortPositions)
-        this.holdingPositions = [...longPositions, ...shortPositions]
-        this.meanProfitOf5Transactions = result.meanProfitOf5Transactions
-        this.meanProfitOf10Transactions = result.meanProfitOf10Transactions
-        this.winningRateOf5Transactions = result.winningRateOf5Transactions
-        this.winningRateOf10Transactions = result.winningRateOf10Transactions
-      })
     },
     loadDealRecord() {
       moduleApi.getModuleDealRecords(this.moduleName).then((result) => {
@@ -394,15 +303,6 @@ export default {
 
         this.$nextTick(() => {
           let table = this.$refs.dealTbl
-          table.bodyWrapper.scrollTop = table.bodyWrapper.scrollHeight
-        })
-      })
-    },
-    loadTradeRecord() {
-      moduleApi.getModuleTradeRecords(this.moduleName).then((result) => {
-        this.tradeRecords = result
-        this.$nextTick(() => {
-          let table = this.$refs.tradeTbl
           table.bodyWrapper.scrollTop = table.bodyWrapper.scrollHeight
         })
       })
@@ -487,6 +387,7 @@ export default {
     close() {
       Object.assign(this.$data, this.$options.data())
       dispose('module-k-line')
+      this.$emit('update:visible', false)
     }
   }
 }
@@ -502,7 +403,7 @@ export default {
   border-top: 1px solid;
   border-left: 1px solid;
 }
-.module-perf-wrapper {
+.module-rt-wrapper {
   height: calc(100vh - 64px);
   display: flex;
 }
@@ -532,5 +433,9 @@ export default {
 }
 .el-dialog.is-fullscreen {
   overflow: hidden;
+}
+.description-wrapper {
+  padding: 10px;
+  padding-bottom: 0px;
 }
 </style>

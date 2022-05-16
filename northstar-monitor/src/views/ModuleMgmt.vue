@@ -7,8 +7,8 @@
       @onSave="onSave"
     />
     <ModuleRuntime
-      :moduleName="curModule ? curModule.moduleName : ''"
       :visible.sync="ModuleRuntimeVisible"
+      :moduleRuntime="curTableIndex > -1 && curModule.runtime"
     />
     <el-table height="100%" :data="list">
       <el-table-column label="模组名称" prop="moduleName" align="center" width="200px" />

@@ -57,3 +57,24 @@
 .warning-text {
   color: #f1f43c;
 }
+
+.el-descriptions__header {
+  display: flex;
+  justify-content: space-between;
+}
+.el-descriptions-item__label.has-colon:after {
+  content: ':';
+  position: relative;
+  top: -0.5px;
+}
+.el-descriptions-item__label:not(.is-bordered-label) {
+  margin-right: 10px;
+}
+.el-descriptions__body .el-descriptions__table {
+  border-collapse: collapse;
+  width: 100%;
+  table-layout: fixed;
+}
+.el-descriptions :not(.is-bordered) .el-descriptions-item__cell {
+  padding-bottom: 10px;
+}
