@@ -1,5 +1,5 @@
 <template>
-  <el-dialog title="模组运行状态" :visible="visible" fullscreen @close="close">
+  <el-dialog title="模组运行状态" :visible="visible" fullscreen class="flex-col" @close="close">
     <ModulePositionForm :visible.sync="positionFormVisible" :data="curPosition" @save="onSave" />
     <div class="module-rt-wrapper">
       <div class="side-panel">
@@ -28,7 +28,7 @@
                 }[moduleRuntime.moduleState]
               }}</el-tag>
             </el-descriptions-item>
-            <el-descriptions-item label="模组总盈亏"></el-descriptions-item>
+            <el-descriptions-item label="总盈亏"></el-descriptions-item>
             <el-descriptions-item label="平均胜率"></el-descriptions-item>
             <el-descriptions-item label="盈亏比"></el-descriptions-item>
           </el-descriptions>
@@ -36,7 +36,7 @@
             <el-tab-pane label="账户A"></el-tab-pane>
             <el-tab-pane label="账户B"></el-tab-pane>
           </el-tabs>
-          <div class="mt-10">
+          <div class="pt-10 pb-10">
             <el-descriptions class="margin-top" title="" :column="2">
               <el-descriptions-item label="账户ID">
                 {{ moduleRuntime.moduleName }}
@@ -60,112 +60,102 @@
                 {{ moduleRuntime.moduleName }}
               </el-descriptions-item>
             </el-descriptions>
+            <el-tabs v-model="moduleTab" :stretch="true">
+              <el-tab-pane name="holding" label="模组持仓"></el-tab-pane>
+              <el-tab-pane name="dealRecord" label="交易历史"></el-tab-pane>
+            </el-tabs>
+            <div class="table-wrapper">
+              <el-table v-show="moduleTab === 'holding'" :data="holdingPositions" height="100%">
+                <el-table-column prop="unifiedSymbol" label="合约" align="center" width="100px">
+                  <template slot-scope="scope">{{
+                    scope.row.unifiedSymbol.split('@')[0]
+                  }}</template>
+                </el-table-column>
+                <el-table-column prop="positionDir" label="方向" align="center" width="40px"
+                  ><template slot-scope="scope">{{
+                    { PD_Long: '多', PD_Short: '空' }[scope.row.positionDir] || '未知'
+                  }}</template></el-table-column
+                >
+                <el-table-column
+                  prop="volume"
+                  label="手数"
+                  align="center"
+                  width="40px"
+                ></el-table-column>
+                <el-table-column prop="openPrice" label="成本价" align="center"></el-table-column>
+                <el-table-column
+                  prop="stopLossPrice"
+                  label="止损价"
+                  align="center"
+                ></el-table-column>
+                <el-table-column label="操作" align="center">
+                  <template slot="header">
+                    <el-button
+                      class="compact"
+                      title="新建持仓"
+                      size="mini"
+                      icon="el-icon-plus"
+                      @click="createPosition"
+                    ></el-button>
+                  </template>
+                  <template slot-scope="scope">
+                    <el-button
+                      class="compact"
+                      title="修改持仓"
+                      size="mini"
+                      icon="el-icon-edit"
+                      @click="editPosition(scope.row)"
+                    ></el-button>
+                    <el-popconfirm
+                      class="ml-5"
+                      title="确定移除吗？"
+                      @confirm="delPosition(scope.row)"
+                    >
+                      <el-button
+                        class="compact"
+                        title="移除持仓"
+                        size="mini"
+                        slot="reference"
+                        icon="el-icon-delete"
+                      ></el-button>
+                    </el-popconfirm>
+                  </template>
+                </el-table-column>
+              </el-table>
+              <el-table
+                ref="dealTbl"
+                v-show="moduleTab === 'dealRecord'"
+                :data="dealRecords"
+                height="100%"
+              >
+                <el-table-column
+                  prop="contractName"
+                  label="合约"
+                  align="center"
+                  width="100px"
+                ></el-table-column>
+                <el-table-column prop="direction" label="方向" align="center" width="40px">
+                  <template slot-scope="scope">{{
+                    { PD_Long: '多', PD_Short: '空' }[scope.row.direction] || '未知'
+                  }}</template>
+                </el-table-column>
+                <el-table-column
+                  prop="volume"
+                  label="手数"
+                  align="center"
+                  width="30px"
+                ></el-table-column>
+                <el-table-column prop="openPrice" label="开仓价" align="center"></el-table-column>
+                <el-table-column prop="closePrice" label="平仓价" align="center"></el-table-column>
+                <el-table-column
+                  prop="closeProfit"
+                  label="平仓盈亏"
+                  align="center"
+                ></el-table-column>
+                <el-table-column prop="tradingDay" label="交易日" align="center"></el-table-column>
+              </el-table>
+            </div>
           </div>
-        </div>
-        <div>
-          <el-tabs v-model="moduleTab" :stretch="true">
-            <el-tab-pane name="holding" label="模组持仓"></el-tab-pane>
-            <el-tab-pane name="dealRecord" label="交易历史"></el-tab-pane>
-          </el-tabs>
-        </div>
-        <div class="table-wrapper">
-          <el-table v-show="moduleTab === 'holding'" :data="holdingPositions" height="100%">
-            <el-table-column prop="unifiedSymbol" label="合约" align="center" width="100px">
-              <template slot-scope="scope">{{ scope.row.unifiedSymbol.split('@')[0] }}</template>
-            </el-table-column>
-            <el-table-column prop="positionDir" label="方向" align="center" width="40px"
-              ><template slot-scope="scope">{{
-                { PD_Long: '多', PD_Short: '空' }[scope.row.positionDir] || '未知'
-              }}</template></el-table-column
-            >
-            <el-table-column
-              prop="volume"
-              label="手数"
-              align="center"
-              width="30px"
-            ></el-table-column>
-            <el-table-column prop="openPrice" label="成本价" align="center"></el-table-column>
-            <el-table-column prop="stopLossPrice" label="止损价" align="center"></el-table-column>
-            <el-table-column label="操作" align="center">
-              <template slot="header">
-                <el-button
-                  class="compact"
-                  title="新建持仓"
-                  size="mini"
-                  icon="el-icon-plus"
-                  @click="createPosition"
-                ></el-button>
-              </template>
-              <template slot-scope="scope">
-                <el-button
-                  class="compact"
-                  title="修改持仓"
-                  size="mini"
-                  icon="el-icon-edit"
-                  @click="editPosition(scope.row)"
-                ></el-button>
-                <el-popconfirm class="ml-5" title="确定移除吗？" @confirm="delPosition(scope.row)">
-                  <el-button
-                    class="compact"
-                    title="移除持仓"
-                    size="mini"
-                    slot="reference"
-                    icon="el-icon-delete"
-                  ></el-button>
-                </el-popconfirm>
-              </template>
-            </el-table-column>
-          </el-table>
-          <el-table
-            ref="dealTbl"
-            v-show="moduleTab === 'dealRecord'"
-            :data="dealRecords"
-            height="100%"
-          >
-            <el-table-column
-              prop="contractName"
-              label="合约"
-              align="center"
-              width="100px"
-            ></el-table-column>
-            <el-table-column prop="direction" label="方向" align="center" width="40px">
-              <template slot-scope="scope">{{
-                { PD_Long: '多', PD_Short: '空' }[scope.row.direction] || '未知'
-              }}</template>
-            </el-table-column>
-            <el-table-column
-              prop="volume"
-              label="手数"
-              align="center"
-              width="30px"
-            ></el-table-column>
-            <el-table-column prop="openPrice" label="开仓价" align="center"></el-table-column>
-            <el-table-column prop="closePrice" label="平仓价" align="center"></el-table-column>
-            <el-table-column prop="closeProfit" label="平仓盈亏" align="center"></el-table-column>
-            <el-table-column prop="tradingDay" label="交易日" align="center"></el-table-column>
-          </el-table>
-          <el-table
-            ref="tradeTbl"
-            v-show="moduleTab === 'tradeRecord'"
-            :data="tradeRecords"
-            height="100%"
-            max-height="100%"
-          >
-            <el-table-column
-              prop="contractName"
-              label="合约"
-              align="center"
-              width="100px"
-            ></el-table-column>
-            <el-table-column prop="operation" label="操作" align="center"> </el-table-column>
-            <el-table-column prop="volume" label="手数" align="center"></el-table-column>
-            <el-table-column prop="price" label="成交价" align="center"></el-table-column>
-            <el-table-column prop="tradingDay" label="成交时间" align="center" width="140px">
-              <template slot-scope="scope">
-                {{ new Date(scope.row.actionTime).toLocaleString('zh', { hour12: false }) }}
-              </template>
-            </el-table-column>
-          </el-table>
         </div>
       </div>
       <div class="kline-wrapper">
@@ -395,21 +385,21 @@ export default {
 
 <style scoped>
 .table-wrapper {
-  height: calc(100vh - 250px);
+  height: calc(100vh - 420px);
 }
 .kline-wrapper {
   height: 100%;
   width: 100%;
-  border-top: 1px solid;
   border-left: 1px solid;
 }
 .module-rt-wrapper {
-  height: calc(100vh - 64px);
   display: flex;
+  height: 100%;
+  border-top: 1px solid;
+  border-bottom: 1px solid;
 }
 .side-panel {
   min-width: 500px;
-  border-top: 1px solid;
   flex: 1;
 }
 .cell-content {
@@ -436,6 +426,6 @@ export default {
 }
 .description-wrapper {
   padding: 10px;
-  padding-bottom: 0px;
+  height: calc(100% - 20px);
 }
 </style>
