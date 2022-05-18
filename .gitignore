@@ -1,5 +1,6 @@
 HELP.md
 target/
+deploy/
 logs/
 **/.mvn/**
 !**/src/main/**

@@ -4,14 +4,13 @@
 	<parent>
 		<groupId>tech.quantit</groupId>
 		<artifactId>northstar</artifactId>
-		<version>3.5</version>
+		<version>4.0</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 	
 	<artifactId>northstar-gateway-ctp</artifactId>
 
 	<name>northstar-gateway-ctp</name>
-	<description>北极星程序化交易平台CTP网关</description>
 
 	<properties>
 	</properties>

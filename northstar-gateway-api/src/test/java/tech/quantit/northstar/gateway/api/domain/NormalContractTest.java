@@ -15,7 +15,7 @@ class NormalContractTest {
 	
 	ContractField contractField = factory.makeContract("rb2210");
 	
-	NormalContract contract = new NormalContract(contractField, GatewayType.CTP, 0); 
+	NormalContract contract = new NormalContract(contractField, 0); 
 
 
 	@Test

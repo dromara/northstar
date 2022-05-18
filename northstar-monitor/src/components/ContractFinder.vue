@@ -1,9 +1,20 @@
 <template>
-  <el-dialog width="300px" title="合约查询" :visible.sync="dialogVisible" append-to-body>
+  <el-dialog width="300px" title="合约查询" :visible="visible" append-to-body>
     <el-form label-width="100px">
       <el-form-item label="网关列表">
-        <el-select v-model="gateway" filterable>
+        <el-select v-model="gateway">
           <el-option v-for="gw in gatewayList" :label="gw" :value="gw" :key="gw"></el-option>
+        </el-select>
+      </el-form-item>
+      <el-form-item label="合约类型">
+        <el-select v-model="contractType">
+          <el-option
+            v-for="t in contractTypeOptions"
+            :label="t.label"
+            :value="t.value"
+            :key="t.value"
+            :disabled="t.disabled"
+          ></el-option>
         </el-select>
       </el-form-item>
       <el-form-item label="合约列表">
@@ -11,8 +22,7 @@
           <el-option
             v-for="(c, i) in gwContractList"
             :label="c.name"
-            :value="c.unifiedSymbol"
-            :value-key="c.unifiedSymbol"
+            :value="c.unifiedsymbol"
             :key="i"
           ></el-option>
         </el-select>
@@ -30,13 +40,19 @@
       </el-form-item>
     </el-form>
     <div slot="footer" class="dialog-footer">
-      <el-button @click="dialogVisible = false">返 回</el-button>
+      <el-button @click="$emit('update:visible', false)">返 回</el-button>
     </div>
   </el-dialog>
 </template>
 
 <script>
-import dataSyncApi from '@/api/dataSyncApi'
+import gatewayDataApi from '@/api/gatewayDataApi'
+
+const filterMethods = {
+  INDEX: (item) => item.unifiedsymbol.endsWith('FUTURES') && item.name.endsWith('指数'),
+  FUTURES: (item) => item.unifiedsymbol.endsWith('FUTURES') && !item.name.endsWith('指数')
+}
+
 export default {
   props: {
     visible: {
@@ -46,48 +62,33 @@ export default {
   },
   data() {
     return {
-      dialogVisible: false,
       gateway: '',
+      contractType: '',
       unifiedSymbol: '',
-      contractList: []
+      contractList: [],
+      contractTypeOptions: [
+        { value: 'INDEX', label: '指数合约' },
+        { value: 'FUTURES', label: '期货合约' },
+        { value: 'OPTION', label: '期权合约', disabled: true },
+        { value: 'OTHERS', label: '其他合约', disabled: true }
+      ]
     }
   },
   watch: {
-    gateway: function () {
+    gateway: async function () {
       this.unifiedSymbol = ''
-    },
-    visible: function (val) {
-      if (val) {
-        this.dialogVisible = val
-      }
-    },
-    dialogVisible: function (val) {
-      if (!val) {
-        this.$emit('update:visible', val)
-        this.unifiedSymbol = ''
-      }
+      this.contractList = await gatewayDataApi.getContracts(this.gateway)
+      console.log('gateway updated', this.contractList)
     }
   },
   computed: {
     gatewayList() {
-      const gatewayMap = {}
-      this.contractList.forEach((i) => (gatewayMap[i.gatewayId] = true))
-      return Object.keys(gatewayMap)
+      return ['CTP', 'SIM']
     },
     gwContractList() {
-      return this.contractList.filter((i) => i.gatewayId === this.gateway)
+      if (!filterMethods[this.contractType]) return []
+      return this.contractList.filter(filterMethods[this.contractType])
     }
-  },
-  created() {
-    const sortFunc = (a, b) => {
-      return a['unifiedSymbol'].localeCompare(b['unifiedSymbol'])
-    }
-
-    dataSyncApi.getAvailableContracts().then((list) => {
-      console.log('合约总数', list.length)
-      this.contractList = list
-      this.contractList.sort(sortFunc)
-    })
   },
   methods: {
     copy() {

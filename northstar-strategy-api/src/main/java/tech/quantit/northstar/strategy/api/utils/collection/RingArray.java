@@ -29,6 +29,7 @@ public class RingArray<T> {
 	 * @param obj	返回旧值
 	 * @return
 	 */
+	@SuppressWarnings("unchecked")
 	public Optional<T> update(T obj) {
 		cursor = getIndex(1);
 		T oldVal = (T) array[cursor]; 

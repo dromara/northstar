@@ -1,7 +1,7 @@
 <template>
   <el-dialog
     :title="`${isUpdateMode ? '修改' : '新增'}持仓`"
-    :visible.sync="dialogVisible"
+    :visible="visible"
     :close-on-click-modal="false"
     :show-close="false"
     width="200px"
@@ -61,7 +61,6 @@ export default {
   },
   data() {
     return {
-      dialogVisible: false,
       contractFinderVisible: false,
       form: {
         unifiedSymbol: '',
@@ -80,13 +79,7 @@ export default {
   watch: {
     visible: function (val) {
       if (val) {
-        this.dialogVisible = val
         Object.assign(this.form, this.data)
-      }
-    },
-    dialogVisible: function (val) {
-      if (!val) {
-        this.$emit('update:visible', val)
       }
     }
   },
@@ -100,11 +93,11 @@ export default {
       if (!flag) return
 
       this.$emit('save', this.form)
-      this.dialogVisible = false
+      this.close()
     },
     close() {
       this.$refs.positionInfo.resetFields()
-      this.dialogVisible = false
+      this.$emit('update:visible', false)
     },
     assertTrue(expression, errMsg) {
       if (!expression) {
@@ -118,10 +111,6 @@ export default {
 </script>
 
 <style>
-.warning-text {
-  color: #f1f43c;
-  margin-bottom: 18px;
-}
 .form-wrapper {
   width: 250px;
   margin: auto;

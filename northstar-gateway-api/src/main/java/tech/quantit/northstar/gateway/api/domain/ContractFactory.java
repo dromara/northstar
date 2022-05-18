@@ -9,7 +9,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import tech.quantit.northstar.common.constant.Constants;
-import tech.quantit.northstar.common.constant.GatewayType;
 import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
 
@@ -22,15 +21,12 @@ public class ContractFactory {
 
 	private List<ContractField> contractList;
 	
-	private GatewayType gatewayType;
-	
 	private static final Pattern symbolPtn = Pattern.compile("([A-z]+)\\d{3,4}(@\\w+@\\w+)");
 	
 	private static final ProductClassEnum indexProductClass = ProductClassEnum.FUTURES;
 	
-	public ContractFactory(GatewayType gatewayType, List<ContractField> contractList) {
+	public ContractFactory(List<ContractField> contractList) {
 		this.contractList = contractList;
-		this.gatewayType = gatewayType;
 	}
 	
 	public List<IndexContract> makeIndexContract(){
@@ -52,6 +48,6 @@ public class ContractFactory {
 				idxSrcMap.get(symbol).add(cf);
 			}
 		}
-		return idxSrcMap.entrySet().stream().map(e -> new IndexContract(e.getKey(), gatewayType, e.getValue())).toList();
+		return idxSrcMap.entrySet().stream().map(e -> new IndexContract(e.getKey(), e.getValue())).toList();
 	}
 }

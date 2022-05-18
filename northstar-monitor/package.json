@@ -1,6 +1,6 @@
 {
   "name": "northstar-monitor",
-  "version": "3.5.0",
+  "version": "4.0.0",
   "private": true,
   "scripts": {
     "start": "npm run serve",
@@ -12,31 +12,34 @@
   "dependencies": {
     "axios": "^0.21.1",
     "concurrently": "^6.2.0",
-    "core-js": "^3.6.5",
+    "core-js": "^3.8.3",
     "element-ui": "^2.15.6",
+    "eslint-plugin-vue": "^6.2.2",
     "google-protobuf": "^3.17.0-rc.1",
     "klinecharts": "^8.1.1",
     "moment": "^2.29.1",
-    "socket.io-client": "^2.3.0",
-    "vue": "^2.6.11",
+    "socket.io-client": "^2.3.1",
+    "vue": "^2.6.14",
     "vue-router": "^3.2.0",
     "vuex": "^3.4.0"
   },
   "devDependencies": {
-    "@vue/cli-plugin-babel": "~4.5.0",
-    "@vue/cli-plugin-eslint": "~4.5.0",
-    "@vue/cli-plugin-router": "~4.5.0",
-    "@vue/cli-plugin-vuex": "~4.5.0",
-    "@vue/cli-service": "~4.5.0",
+    "@babel/core": "^7.12.16",
+    "@babel/eslint-parser": "^7.12.16",
+    "@vue/cli-plugin-babel": "~5.0.0",
+    "@vue/cli-plugin-eslint": "~5.0.0",
+    "@vue/cli-plugin-router": "~5.0.0",
+    "@vue/cli-plugin-vuex": "~5.0.0",
+    "@vue/cli-service": "~5.0.0",
     "@vue/eslint-config-prettier": "^6.0.0",
     "babel-eslint": "^10.1.0",
     "cross-env": "^7.0.3",
-    "eslint": "^6.7.2",
+    "cypress": "^9.6.1",
+    "eslint": "^7.32.0",
     "eslint-plugin-prettier": "^3.3.1",
-    "eslint-plugin-vue": "^6.2.2",
     "node-sass": "^4.12.0",
     "prettier": "^2.2.1",
     "sass-loader": "^8.0.2",
-    "vue-template-compiler": "^2.6.11"
+    "vue-template-compiler": "^2.6.14"
   }
 }
