@@ -35,15 +35,14 @@ public class PlayBackGatewayLocal implements MarketGateway{
 
 	private ScheduledFuture<?> task;
 
-	private MarketDataLocal marketDataSim;
+	private MarketDataLocal marketDataLocal;
 
 	private PlaybackDescription playbackDescription;
 
 	/**
 	 * unifiedSymbol --> InstrumentHolder
 	 */
-	private ConcurrentMap<String, InstrumentHolder> cache = new ConcurrentHashMap<>();
-
+	// private ConcurrentMap<String, InstrumentHolder> cache = new ConcurrentHashMap<>();
 
 	@Getter
 	private boolean connected;
@@ -60,14 +59,14 @@ public class PlayBackGatewayLocal implements MarketGateway{
 
 	@Override
 	public boolean subscribe(ContractField contract) {
-		cache.putIfAbsent(contract.getUnifiedSymbol(), new InstrumentHolder(contract));
-		log.info("模拟订阅合约：{}", contract.getSymbol());
+		// cache.putIfAbsent(contract.getUnifiedSymbol(), new InstrumentHolder(contract));
+		// log.info("模拟订阅合约：{}", contract.getSymbol());
 		return true;
 	}
 
 	@Override
 	public boolean unsubscribe(ContractField contract) {
-		cache.remove(contract.getUnifiedSymbol());
+		// cache.remove(contract.getUnifiedSymbol());
 		log.info("模拟退订合约：{}", contract.getSymbol());
 		return true;
 	}
@@ -94,7 +93,7 @@ public class PlayBackGatewayLocal implements MarketGateway{
 
 		int replayRate = playbackDescription.getReplayRate();
 		// 取得回放数据
-		Map<String, PriorityQueue<TickField>> tickData = marketDataSim.getTickData();
+		Map<String, PriorityQueue<TickField>> tickData = marketDataLocal.getTickData();
 		tickData.keySet().forEach(unifiedSymbol -> {
 			PriorityQueue<CoreField.TickField> tickQ = (PriorityQueue<CoreField.TickField>) tickData.get(unifiedSymbol);
 			task = scheduleExec.scheduleAtFixedRate(()->{
@@ -119,7 +118,7 @@ public class PlayBackGatewayLocal implements MarketGateway{
 		if(task != null) {
 			task.cancel(false);
 		}
-		log.info("[{}] 模拟行情断开", settings.getGatewayId());
+		log.info("[{}] 回放行情断开", settings.getGatewayId());
 		connected = false;
 		feEngine.emitEvent(NorthstarEventType.DISCONNECTED, settings.getGatewayId());
 		feEngine.emitEvent(NorthstarEventType.LOGGED_OUT, settings.getGatewayId());
