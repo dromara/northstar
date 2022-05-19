@@ -177,7 +177,7 @@ public class ModuleService implements InitializingBean {
 	 * @return
 	 */
 	public ModuleRuntimeDescription getModuleRealTimeInfo(String name) {
-		return moduleRepo.findRuntimeByName(name);
+		return moduleMgr.getModule(name).getRuntimeDescription();
 	}
 	
 	/**

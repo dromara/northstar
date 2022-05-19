@@ -33,30 +33,35 @@
             <el-descriptions-item label="盈亏比"></el-descriptions-item>
           </el-descriptions>
           <el-tabs v-model="activeAccount">
-            <el-tab-pane v-for="item in accountOptions" :key="item" :label="item"></el-tab-pane>
+            <el-tab-pane
+              v-for="item in accountOptions"
+              :key="item"
+              :name="item"
+              :label="item"
+            ></el-tab-pane>
           </el-tabs>
-          <div class="pt-10 pb-10">
-            <el-descriptions class="margin-top" :column="2">
+          <div class="pt-10">
+            <el-descriptions class="margin-top" :column="3">
               <el-descriptions-item label="账户ID">
                 {{ accountInfo.accountId }}
               </el-descriptions-item>
               <el-descriptions-item label="初始余额">
                 {{ accountInfo.initBalance }}
               </el-descriptions-item>
-              <el-descriptions-item label="期初余额">
-                {{ accountInfo.preBalance }}
+              <el-descriptions-item label="当前余额">
+                {{ accountInfo.preBalance + holdingProfit }}
               </el-descriptions-item>
               <el-descriptions-item label="持仓盈亏">
-                {{ '未设置' }}
+                {{ holdingProfit }}
               </el-descriptions-item>
-              <el-descriptions-item label="平仓盈亏">
+              <el-descriptions-item label="累计平仓盈亏">
                 {{ accountInfo.accCloseProfit }}
               </el-descriptions-item>
               <el-descriptions-item label="累计手续费">
                 {{ accountInfo.accCommission }}
               </el-descriptions-item>
-              <el-descriptions-item label="模组账户盈亏">
-                {{ '未设置' }}
+              <el-descriptions-item label="合计盈亏">
+                {{ accountInfo.accCloseProfit - accountInfo.accCommission + holdingProfit }}
               </el-descriptions-item>
             </el-descriptions>
             <el-tabs v-model="moduleTab" :stretch="true">
@@ -66,25 +71,24 @@
             <div class="table-wrapper">
               <el-table v-show="moduleTab === 'holding'" :data="holdingPositions" height="100%">
                 <el-table-column prop="unifiedSymbol" label="合约" align="center" width="100px">
-                  <template slot-scope="scope">{{
-                    scope.row.unifiedSymbol.split('@')[0]
-                  }}</template>
+                  <template slot-scope="scope">{{ scope.row.contract.name }}</template>
                 </el-table-column>
                 <el-table-column prop="positionDir" label="方向" align="center" width="40px"
                   ><template slot-scope="scope">{{
-                    { PD_Long: '多', PD_Short: '空' }[scope.row.positionDir] || '未知'
+                    { 2: '多', 3: '空' }[scope.row.positiondirection] || '未知'
                   }}</template></el-table-column
                 >
                 <el-table-column
-                  prop="volume"
+                  prop="position"
                   label="手数"
                   align="center"
-                  width="40px"
+                  width="46px"
                 ></el-table-column>
-                <el-table-column prop="openPrice" label="成本价" align="center"></el-table-column>
+                <el-table-column prop="openprice" label="成本价" align="center"></el-table-column>
+                <el-table-column prop="lastprice" label="现价" align="center"></el-table-column>
                 <el-table-column
-                  prop="stopLossPrice"
-                  label="止损价"
+                  prop="positionprofit"
+                  label="持仓盈亏"
                   align="center"
                 ></el-table-column>
                 <el-table-column label="操作" align="center">
@@ -142,7 +146,7 @@
                   prop="volume"
                   label="手数"
                   align="center"
-                  width="40px"
+                  width="46px"
                 ></el-table-column>
                 <el-table-column prop="openPrice" label="开仓价" align="center"></el-table-column>
                 <el-table-column prop="closePrice" label="平仓价" align="center"></el-table-column>
@@ -181,7 +185,7 @@ import volumePure from '@/lib/indicator/volume-pure'
 import moduleApi from '@/api/moduleApi'
 import { KLineUtils } from '@/utils.js'
 
-import { BarField } from '@/lib/xyz/redtorch/pb/core_field_pb'
+import { BarField, PositionField } from '@/lib/xyz/redtorch/pb/core_field_pb'
 
 const convertDataRef = (dataRefSrcMap) => {
   const resultMap = {}
@@ -236,7 +240,6 @@ export default {
       activeTab: '',
       activeAccount: '',
       dealRecords: [],
-      holdingPositions: [],
       avgOccupiedAmount: 0,
       barDataMap: {},
       chart: null,
@@ -249,6 +252,7 @@ export default {
         // this.$nextTick(this.init)
         // this.$nextTick(this.loadRefData)
         this.activeAccount = this.accountOptions[0]
+        console.log(this.holdingPositions)
       }
     },
     moduleTab: function (val) {
@@ -271,6 +275,17 @@ export default {
     accountInfo() {
       if (!this.activeAccount) return {}
       return this.moduleRuntime.accountRuntimeDescriptionMap[this.activeAccount]
+    },
+    holdingProfit() {
+      if (!this.activeAccount) return 0
+      return this.holdingPositions.map((item) => item.positionprofit).reduce((a, b) => a + b)
+    },
+    holdingPositions() {
+      if (!this.activeAccount) return []
+      const positions = this.accountInfo.positionDescription.logicalPositions.map((data) =>
+        PositionField.deserializeBinary(data).toObject()
+      )
+      return positions.filter((item) => item.position > 0)
     }
   },
   methods: {
@@ -378,7 +393,7 @@ export default {
 
 <style scoped>
 .table-wrapper {
-  height: calc(100vh - 420px);
+  height: calc(100vh - 382px);
 }
 .kline-wrapper {
   height: 100%;
@@ -392,7 +407,7 @@ export default {
   border-bottom: 1px solid;
 }
 .side-panel {
-  min-width: 500px;
+  min-width: 520px;
   flex: 1;
 }
 .cell-content {
