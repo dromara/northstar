@@ -8,6 +8,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import lombok.Data;
 import tech.quantit.northstar.common.constant.DateTimeConstant;
+import tech.quantit.northstar.common.constant.GatewayType;
 import xyz.redtorch.pb.CoreField.ContractField;
 
 /**
@@ -22,20 +23,20 @@ public class ContractPO {
 	@Id
 	private String unifiedSymbol;
 	
-	private String type;
+	private GatewayType gatewayType;
 	
 	private int expiredDate;
 	
 	private byte[] data;
 
-	public static ContractPO convertFrom(ContractField contract) {
+	public static ContractPO convertFrom(ContractField contract, GatewayType gatewayType) {
 		ContractPO po = new ContractPO();
 		po.unifiedSymbol = contract.getUnifiedSymbol();
 		String dateStr = contract.getLastTradeDateOrContractMonth();
 		if(StringUtils.isEmpty(dateStr)) {
 			dateStr = LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER);
 		}
-		po.type = contract.getProductClass().toString();
+		po.gatewayType = gatewayType;
 		po.expiredDate = Integer.parseInt(dateStr);
 		po.data = contract.toByteArray();
 		return po;

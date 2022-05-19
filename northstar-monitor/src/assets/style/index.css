@@ -1,11 +1,15 @@
 .ml-5{
   margin-left: 5px;
 }
-
 .ml-10{
   margin-left: 10px;
 }
-
+.ml-20{
+  margin-left: 20px;
+}
+.ml-30{
+  margin-left: 30px;
+}
 .mb-10{
   margin-bottom: 10px;
 }
@@ -14,14 +18,19 @@
   margin-top: 10px;
 }
 
-.ml-30{
-  margin-left: 30px;
+.mr-10{
+  margin-right: 10px;
+}
+.mr-20{
+  margin-right: 20px;
 }
 
 .el-button.compact{
   padding: 4px;
 }
-
+.pt-10{
+  padding-top: 10px;
+}
 .pb-10{
   padding-bottom: 10px;
 }
@@ -29,9 +38,19 @@
 .pb-20{
   padding-bottom: 20px;
 }
+.mxw-340{
+  max-width: 340px;
+}
+.mxw-140{
+  max-width: 140px;
+}
 
 .flex{
+  flex: 1;
+}
+.flex-col{
   display: flex;
+  flex-direction: column;
 }
 
 .align-center{
@@ -39,4 +58,39 @@
   flex: 1;
   align-items: center;
   justify-content: center;
+}
+
+.warning-text {
+  color: #f1f43c;
+}
+
+.el-descriptions__header {
+  display: flex;
+  justify-content: space-between;
+}
+.el-descriptions-item__label.has-colon:after {
+  content: ':';
+  position: relative;
+  top: -0.5px;
+}
+.el-descriptions-item__label:not(.is-bordered-label) {
+  margin-right: 10px;
+}
+.el-descriptions__body .el-descriptions__table {
+  border-collapse: collapse;
+  width: 100%;
+  table-layout: fixed;
+}
+.el-descriptions :not(.is-bordered) .el-descriptions-item__cell {
+  padding-bottom: 10px;
+}
+
+.el-dialog.is-fullscreen {
+  display: flex;
+  flex-direction: column;
+}
+.is-fullscreen .el-dialog__body{
+  flex: 1;
+  padding: 20px;
+  padding-top: 10px;
 }

@@ -1,6 +1,7 @@
 package tech.quantit.northstar.data.mongo;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -14,9 +15,9 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.BoundSetOperations;
 import tech.quantit.northstar.common.constant.DateTimeConstant;
+import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.data.IContractRepository;
 import tech.quantit.northstar.data.mongo.po.ContractPO;
-import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
 
 @Slf4j
@@ -29,22 +30,15 @@ public class ContractRepoMongoImpl implements IContractRepository {
 	}
 
 	@Override
-	public void batchSave(List<ContractField> contracts) {
-		for(ContractField c : contracts) {
-			save(c);
-		}
+	public void save(ContractField contract, GatewayType gatewayType) {
+		mongoTemplate.save(ContractPO.convertFrom(contract, gatewayType));
 	}
 
 	@Override
-	public void save(ContractField contract) {
-		mongoTemplate.save(ContractPO.convertFrom(contract));
-	}
-
-	@Override
-	public List<ContractField> findAllByType(ProductClassEnum type) {
+	public List<ContractField> findAll(GatewayType type) {
 		int intDateToday = Integer.parseInt(LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
 		mongoTemplate.findAndRemove(Query.query(Criteria.where("expiredDate").lt(intDateToday)), ContractPO.class);
-		return mongoTemplate.find(Query.query(Criteria.where("type").is(type)), ContractPO.class)
+		return mongoTemplate.find(Query.query(Criteria.where("gatewayType").is(type.toString())), ContractPO.class)
 				.stream()
 				.map(this::convert)
 				.filter(Objects::nonNull)
@@ -77,6 +71,16 @@ public class ContractRepoMongoImpl implements IContractRepository {
 			log.warn("", e);
 			return null;
 		}
+	}
+
+	@Override
+	public List<ContractField> findAll() {
+		GatewayType[] types = new GatewayType[] {GatewayType.CTP, GatewayType.SIM};
+		List<ContractField> resultList = new ArrayList<>();
+		for(GatewayType type : types) {
+			resultList.addAll(findAll(type));
+		}
+		return resultList;
 	}
 
 }

@@ -19,7 +19,7 @@ import tech.quantit.northstar.common.model.ResultBean;
 import tech.quantit.northstar.domain.gateway.ContractManager;
 import tech.quantit.northstar.main.service.GatewayService;
 
-@RequestMapping("/northstar/mgt")
+@RequestMapping("/northstar/gateway")
 @RestController
 public class GatewayManagementController {
 	
@@ -29,25 +29,25 @@ public class GatewayManagementController {
 	@Autowired
 	protected ContractManager contractMgr;
 	
-	@PostMapping("/gateway")
+	@PostMapping
 	public ResultBean<Boolean> create(@RequestBody GatewayDescription gd) throws Exception {
 		Assert.notNull(gd, "传入对象不能为空");
 		return new ResultBean<>(gatewayService.createGateway(gd));
 	}
 	
-	@DeleteMapping("/gateway")
+	@DeleteMapping
 	public ResultBean<Boolean> remove(String gatewayId) {
 		Assert.notNull(gatewayId, "网关ID不能为空");
 		return new ResultBean<>(gatewayService.deleteGateway(gatewayId));
 	}
 	
-	@PutMapping("/gateway")
+	@PutMapping
 	public ResultBean<Boolean> modify(@RequestBody GatewayDescription gd) throws Exception {
 		Assert.notNull(gd, "传入对象不能为空");
 		return new ResultBean<>(gatewayService.updateGateway(gd));
 	}
 	
-	@GetMapping("/gateway")
+	@GetMapping
 	public ResultBean<List<GatewayDescription>> list(String usage) throws Exception { 
 		if(StringUtils.isBlank(usage)) {
 			return new ResultBean<>(gatewayService.findAllGateway());
@@ -58,7 +58,7 @@ public class GatewayManagementController {
 		return new ResultBean<>(gatewayService.findAllTraderGateway());
 	}
 	
-	@GetMapping("/gateway/active")
+	@GetMapping("/active")
 	public ResultBean<Boolean> getGatewayActive(String gatewayId){
 		Assert.notNull(gatewayId, "网关ID不能为空");
 		return new ResultBean<>(gatewayService.isActive(gatewayId));

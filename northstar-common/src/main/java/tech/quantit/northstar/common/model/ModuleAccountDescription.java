@@ -1,12 +1,14 @@
 package tech.quantit.northstar.common.model;
 
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * 模组账户信息
+ * 模组账户配置信息
  * @author KevinHuangwl
  *
  */
@@ -15,15 +17,21 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ModuleAccountDescription {
-	
-	/**
-	 * 初始余额
-	 */
-	private double initBalance;
 
 	/**
-	 * 期初余额（开仓前计算）
+	 * 账户网关ID
 	 */
-	private double preBalance;
-	
+	private String accountGatewayId;
+	/**
+	 * 模组账户初始金额
+	 */
+	private int moduleAccountInitBalance;
+	/**
+	 * 每笔交易手续费
+	 */
+	private double commissionFeePerDeal;
+	/**
+	 * 账户关联合约名称
+	 */
+	private List<String> bindedUnifiedSymbols;
 }

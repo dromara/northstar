@@ -23,6 +23,7 @@ import tech.quantit.northstar.common.utils.MarketDateTimeUtil;
 import tech.quantit.northstar.data.ds.DataServiceManager.DataSet;
 import xyz.redtorch.pb.CoreField.BarField;
 
+@SuppressWarnings("unchecked")
 class DataServiceManagerTest {
 	
 	DataServiceManager mgr;

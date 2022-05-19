@@ -13,12 +13,12 @@ const routes = [
   {
     path: '/login',
     name: 'login',
-    component: () => import('../views/Login.vue')
+    component: () => import('../views/LoginView.vue')
   },
   {
     path: '/workspace',
     name: 'workspace',
-    component: () => import('../views/Workspace.vue'),
+    component: () => import('../views/WorkspaceView.vue'),
     children: [
       {
         path: '/mktgateway',
@@ -43,14 +43,14 @@ const routes = [
         component: () => import('../views/NotImplemented.vue')
       },
       {
-        path: '/manualfttd',
-        name: 'manualfttd',
-        component: () => import('../views/Trade.vue')
-      },
-      {
         path: '/mktdata',
         name: 'mktdata',
-        component: () => import('../views/MarketData.vue')
+        component: () => import('../views/NotImplemented.vue')
+      },
+      {
+        path: '/manualfttd',
+        name: 'manualfttd',
+        component: () => import('../views/TradeView.vue')
       },
       {
         path: '/manualopttd',

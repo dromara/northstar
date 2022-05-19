@@ -62,6 +62,8 @@ public class SimAccount implements TickDataAware{
 	
 	protected int transactionFee;
 	
+	private volatile boolean connected;
+	
 	@Transient
 	@Setter
 	protected Runnable savingCallback;
@@ -235,7 +237,7 @@ public class SimAccount implements TickDataAware{
 	private long lastReportTime;
 	@Override
 	public void onTick(TickField tick) {
-		if(System.currentTimeMillis() - lastReportTime < 1000) {
+		if(!connected || System.currentTimeMillis() - lastReportTime < 1000) {
 			return;
 		}
 		lastReportTime = System.currentTimeMillis();
@@ -258,5 +260,9 @@ public class SimAccount implements TickDataAware{
 				itEntry.remove();
 			}
 		}
+	}
+	
+	public void setConnected(boolean connected) {
+		this.connected = connected;
 	}
 }

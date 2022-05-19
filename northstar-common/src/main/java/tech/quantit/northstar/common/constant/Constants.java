@@ -6,6 +6,8 @@ public interface Constants {
 
 	String GATEWAY_CONTRACT_MAP = "GatewayContractMap";
 	
+	String MOCK_ORDER_ID = "MockOrderId";
+	
 	String KEY_USER = "USER";
 	
 	String PLAYBACK_GATEWAY = "PlaybackGateway";
@@ -15,9 +17,4 @@ public interface Constants {
 	// 资金占用比例估算系数
 	double ESTIMATED_FROZEN_FACTOR = 1.5;
 	
-	String CTP_MKT_GATEWAY_ID = "CTP行情";
-	
-	String CTP_SIM_MKT_GATEWAY_ID = "CTP_SIM行情";
-	
-	String SIM_MKT_GATEWAY_ID = "SIM行情";
 }

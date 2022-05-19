@@ -7,7 +7,7 @@
     append-to-body
     :close-on-click-modal="false"
     :show-close="false"
-    @close="onClose"
+    @close="close"
   >
     <el-form
       ref="settingForm"
@@ -58,16 +58,20 @@ export default {
     }
   },
   watch: {
-    settingsSrc: function (val) {
-      Object.assign(this.settings, val)
+    visible: function (val) {
+      if (val) {
+        Object.assign(this.settings, this.settingsSrc)
+      }
     }
   },
   mounted() {
     this.settings = this.settingsSrc || {}
   },
   methods: {
-    onClose() {
+    close() {
       this.$emit('update:visible', false)
+      this.$refs.settingForm.resetFields()
+      console.log('settings', this.settings)
     },
     saveSetting() {
       this.$refs.settingForm.validate((valid) => {
@@ -75,8 +79,8 @@ export default {
           let obj = {}
           Object.assign(obj, this.settings)
           this.$emit('onSave', obj)
-          this.$emit('update:visible', false)
-          this.$refs.settingForm.resetFields()
+
+          this.close()
         }
       })
     }

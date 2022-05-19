@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.UUID;
 
 import tech.quantit.northstar.common.constant.DateTimeConstant;
+import tech.quantit.northstar.common.constant.GatewayType;
 import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
 import xyz.redtorch.pb.CoreEnum.CurrencyEnum;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
@@ -14,12 +15,14 @@ import xyz.redtorch.pb.CoreEnum.ForceCloseReasonEnum;
 import xyz.redtorch.pb.CoreEnum.HedgeFlagEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreEnum.OrderPriceTypeEnum;
+import xyz.redtorch.pb.CoreEnum.OrderStatusEnum;
 import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
 import xyz.redtorch.pb.CoreEnum.TimeConditionEnum;
 import xyz.redtorch.pb.CoreEnum.VolumeConditionEnum;
 import xyz.redtorch.pb.CoreField.CancelOrderReqField;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.GatewaySettingField;
+import xyz.redtorch.pb.CoreField.OrderField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TickField;
 import xyz.redtorch.pb.CoreField.TradeField;
@@ -66,6 +69,7 @@ public class TestFieldFactory {
 				.setContractId(symbol + "@SHFE@FUTURES@" + gatewayId)
 				.setExchange(ExchangeEnum.SHFE)
 				.setFullName(symbol)
+				.setThirdPartyId(gatewayId + "#" + GatewayType.CTP)
 				.setLongMarginRatio(0.08)
 				.setShortMarginRatio(0.08)
 				.setMultiplier(10)
@@ -96,6 +100,32 @@ public class TestFieldFactory {
 				.build();
 	}
 	
+	public OrderField makeOrderField(String symbol, double price, int vol, DirectionEnum dir, OffsetFlagEnum offset) {
+		return OrderField.newBuilder()
+				.setOriginOrderId(UUID.randomUUID().toString())
+				.setContract(makeContract(symbol))
+				.setPrice(price)
+				.setTotalVolume(vol)
+				.setDirection(dir)
+				.setOffsetFlag(offset)
+				.setTradingDay(LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
+				.build();
+	}
+	
+	public OrderField makeOrderField(String symbol, double price, int vol, DirectionEnum dir, OffsetFlagEnum offset, OrderStatusEnum status) {
+		return OrderField.newBuilder()
+				.setOriginOrderId(UUID.randomUUID().toString())
+				.setContract(makeContract(symbol))
+				.setPrice(price)
+				.setTotalVolume(vol)
+				.setDirection(dir)
+				.setOffsetFlag(offset)
+				.setOrderStatus(status)
+				.setTradingDay(LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
+				.setGatewayId(gatewayId)
+				.build();
+	}
+	
 	public TradeField makeTradeField(String symbol, double price, int vol, DirectionEnum dir, OffsetFlagEnum offset) {
 		return TradeField.newBuilder()
 				.setOriginOrderId(UUID.randomUUID().toString())
@@ -105,7 +135,20 @@ public class TestFieldFactory {
 				.setDirection(dir)
 				.setOffsetFlag(offset)
 				.setTradingDay(LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
+				.setGatewayId(gatewayId)
 				.build();
 	}
 
+	public TradeField makeTradeField(String symbol, double price, int vol, DirectionEnum dir, OffsetFlagEnum offset, String tradingDay) {
+		return TradeField.newBuilder()
+				.setOriginOrderId(UUID.randomUUID().toString())
+				.setContract(makeContract(symbol))
+				.setPrice(price)
+				.setVolume(vol)
+				.setDirection(dir)
+				.setOffsetFlag(offset)
+				.setTradingDay(tradingDay)
+				.setGatewayId(gatewayId)
+				.build();
+	}
 }

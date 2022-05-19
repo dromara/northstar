@@ -2,7 +2,6 @@ package tech.quantit.northstar.strategy.api;
 
 public interface ContextAware {
 
-	void setContext(ModuleContext context);
+	void setContext(IModuleContext context);
 	
-	ModuleContext getContext();
 }

@@ -70,7 +70,7 @@ public class BarGenerator {
 			if(tick.getStatus() == TickType.PRE_OPENING_TICK.getCode()) {
 				offset = 60000;	// 开盘前一分钟的TICK是盘前数据，要合并到第一个分钟K线
 			}
-			long barActionTime = tick.getActionTimestamp() - tick.getActionTimestamp() % 60000L + offset;
+			long barActionTime = tick.getActionTimestamp() - tick.getActionTimestamp() % 60000L + 60000 + offset; // 采用K线的收盘时间作为K线时间
 			cutoffTime = barActionTime + 60100;
 			
 			barBuilder.setTradingDay(tick.getTradingDay());

@@ -52,12 +52,11 @@ public class GlobalMarketRegistry {
 	
 	protected MarketDataBuffer buffer;
 	
-	public GlobalMarketRegistry(FastEventEngine feEngine, Consumer<NormalContract> onContractSave, Consumer<ContractField> onContractSubsciption,
-			MarketDataBuffer buffer) {
+	public GlobalMarketRegistry(FastEventEngine feEngine, Consumer<NormalContract> onContractSave, Consumer<ContractField> onContractSubsciption) {
 		this.feEngine = feEngine;
 		this.onContractSave = onContractSave;
 		this.onContractSubsciption = onContractSubsciption;
-		this.buffer = buffer;
+//		this.buffer = buffer;
 	}
 	
 	public synchronized void register(NormalContract contract) {
@@ -88,7 +87,7 @@ public class GlobalMarketRegistry {
 		BarGenerator barGen = contract.barGenerator();
 		barGen.setOnBarCallback((bar, ticks) -> {
 			feEngine.emitEvent(NorthstarEventType.BAR, bar);
-			buffer.save(bar, ticks);
+//			buffer.save(bar, ticks);
 		});
 		barGenMap.put(contract.unifiedSymbol(), barGen);
 	}

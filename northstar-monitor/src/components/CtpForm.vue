@@ -3,7 +3,7 @@
     id="ctpForm"
     width="700px"
     title="CTP网关配置"
-    :visible.sync="dialogVisible"
+    :visible="visible"
     append-to-body
     :close-on-click-modal="false"
     :show-close="false"
@@ -92,22 +92,16 @@ export default {
   watch: {
     visible: function (val) {
       if (val) {
-        this.dialogVisible = val
         if (!this.ctpSettingsSrc) {
           return
         }
         Object.assign(this.ctpSettings, this.ctpSettingsSrc)
       }
-    },
-    dialogVisible: function (val) {
-      if (!val) {
-        this.$emit('update:visible', val)
-      }
     }
   },
   methods: {
     close() {
-      this.dialogVisible = false
+      this.$emit('update:visible', false)
       this.ctpSettings = this.$options.data().ctpSettings
     },
     saveCtpSetting() {

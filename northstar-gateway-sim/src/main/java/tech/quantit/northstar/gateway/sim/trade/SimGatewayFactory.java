@@ -8,8 +8,8 @@ import tech.quantit.northstar.common.constant.GatewayUsage;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.model.GatewayDescription;
 import tech.quantit.northstar.common.model.SimSettings;
-import tech.quantit.northstar.gateway.api.GatewayFactory;
 import tech.quantit.northstar.gateway.api.Gateway;
+import tech.quantit.northstar.gateway.api.GatewayFactory;
 import tech.quantit.northstar.gateway.api.domain.GlobalMarketRegistry;
 import tech.quantit.northstar.gateway.sim.market.SimMarketGatewayLocal;
 import tech.quantit.northstar.gateway.sim.persistence.SimAccountRepository;
@@ -54,7 +54,7 @@ public class SimGatewayFactory implements GatewayFactory{
 		String accGatewayId = gatewayDescription.getGatewayId();
 		Optional<SimAccount> simAccountOp = simAccountRepo.findById(accGatewayId);
 
-		SimSettings settings = JSON.toJavaObject((JSON)JSON.toJSON(gatewayDescription.getSettings()), SimSettings.class);
+		SimSettings settings = JSON.parseObject(JSON.toJSONString(gatewayDescription.getSettings()), SimSettings.class);
 		GatewaySettingField gwSettings = GatewaySettingField.newBuilder()
 				.setGatewayId(gatewayDescription.getGatewayId())
 				.setGatewayType(GatewayTypeEnum.GTE_Trade)
@@ -64,7 +64,7 @@ public class SimGatewayFactory implements GatewayFactory{
 		account.setEventBus(simMarket.getMarketEventBus());
 		account.setFeEngine(fastEventEngine);
 		account.setSavingCallback(() -> simAccountRepo.save(account));
-		SimTradeGateway gateway = new SimTradeGatewayLocal(fastEventEngine, gwSettings, account, registry);
+		SimTradeGateway gateway = new SimTradeGatewayLocal(fastEventEngine, simMarket, gwSettings, mdGatewayId, account, registry);
 		simMarket.addGateway(mdGatewayId, gateway);
 		return gateway;
 	}
