@@ -153,15 +153,6 @@
                   />
                 </el-select>
               </el-form-item>
-              <el-form-item label="手续费估算">
-                <el-input
-                  :class="'with-unit'"
-                  type="number"
-                  :disabled="readOnly"
-                  v-model="form.moduleAccountSettingsDescription[i].commissionFeePerDeal"
-                />
-                <span class="value-unit"> 元 / 每笔</span>
-              </el-form-item>
             </div>
           </div>
         </el-form>
@@ -278,8 +269,6 @@ export default {
         return {
           accountGatewayId: item.gatewayId,
           moduleAccountInitBalance: 0,
-          commissionFeePerDeal: 0,
-          commissionFeePerDealInPercentage: 0,
           bindedUnifiedSymbols: []
         }
       })

@@ -32,32 +32,31 @@
             <el-descriptions-item label="平均胜率"></el-descriptions-item>
             <el-descriptions-item label="盈亏比"></el-descriptions-item>
           </el-descriptions>
-          <el-tabs>
-            <el-tab-pane label="账户A"></el-tab-pane>
-            <el-tab-pane label="账户B"></el-tab-pane>
+          <el-tabs v-model="activeAccount">
+            <el-tab-pane v-for="item in accountOptions" :key="item" :label="item"></el-tab-pane>
           </el-tabs>
           <div class="pt-10 pb-10">
-            <el-descriptions class="margin-top" title="" :column="2">
+            <el-descriptions class="margin-top" :column="2">
               <el-descriptions-item label="账户ID">
-                {{ moduleRuntime.moduleName }}
+                {{ accountInfo.accountId }}
               </el-descriptions-item>
               <el-descriptions-item label="初始余额">
-                {{ moduleRuntime.moduleName }}
+                {{ accountInfo.initBalance }}
               </el-descriptions-item>
               <el-descriptions-item label="期初余额">
-                {{ moduleRuntime.moduleName }}
+                {{ accountInfo.preBalance }}
               </el-descriptions-item>
               <el-descriptions-item label="持仓盈亏">
-                {{ moduleRuntime.moduleName }}
+                {{ '未设置' }}
               </el-descriptions-item>
               <el-descriptions-item label="平仓盈亏">
-                {{ moduleRuntime.moduleName }}
+                {{ accountInfo.accCloseProfit }}
               </el-descriptions-item>
               <el-descriptions-item label="累计手续费">
-                {{ moduleRuntime.moduleName }}
+                {{ accountInfo.accCommission }}
               </el-descriptions-item>
               <el-descriptions-item label="模组账户盈亏">
-                {{ moduleRuntime.moduleName }}
+                {{ '未设置' }}
               </el-descriptions-item>
             </el-descriptions>
             <el-tabs v-model="moduleTab" :stretch="true">
@@ -143,7 +142,7 @@
                   prop="volume"
                   label="手数"
                   align="center"
-                  width="30px"
+                  width="40px"
                 ></el-table-column>
                 <el-table-column prop="openPrice" label="开仓价" align="center"></el-table-column>
                 <el-table-column prop="closePrice" label="平仓价" align="center"></el-table-column>
@@ -180,7 +179,6 @@ import ModulePositionForm from './ModulePositionForm.vue'
 import { dispose, init } from 'klinecharts'
 import volumePure from '@/lib/indicator/volume-pure'
 import moduleApi from '@/api/moduleApi'
-import { mapGetters } from 'vuex'
 import { KLineUtils } from '@/utils.js'
 
 import { BarField } from '@/lib/xyz/redtorch/pb/core_field_pb'
@@ -236,10 +234,9 @@ export default {
       curPosition: null,
       moduleTab: 'holding',
       activeTab: '',
+      activeAccount: '',
       dealRecords: [],
       holdingPositions: [],
-      moduleState: '',
-      accountId: '',
       avgOccupiedAmount: 0,
       barDataMap: {},
       chart: null,
@@ -247,12 +244,13 @@ export default {
     }
   },
   watch: {
-    // visible: function (val) {
-    //   if (val) {
-    //     this.$nextTick(this.init)
-    //     this.$nextTick(this.loadRefData)
-    //   }
-    // },
+    visible: function (val) {
+      if (val) {
+        // this.$nextTick(this.init)
+        // this.$nextTick(this.loadRefData)
+        this.activeAccount = this.accountOptions[0]
+      }
+    },
     moduleTab: function (val) {
       if (val === 'dealRecord') {
         setTimeout(() => {
@@ -263,21 +261,16 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['getAccountById']),
     symbolOptions() {
       return Object.keys(this.barDataMap) || []
     },
-    positionState() {
-      return (
-        { HOLDING_LONG: '持多单', HOLDING_SHORT: '持空单', EMPTY: '无持仓' }[this.moduleState] ||
-        '等待成交'
-      )
+    accountOptions() {
+      if (!this.moduleRuntime) return []
+      return Object.keys(this.moduleRuntime.accountRuntimeDescriptionMap)
     },
-    accountBalance() {
-      if (!this.accountId || !this.getAccountById(this.accountId).account) {
-        return 0
-      }
-      return this.getAccountById(this.accountId).account.balance
+    accountInfo() {
+      if (!this.activeAccount) return {}
+      return this.moduleRuntime.accountRuntimeDescriptionMap[this.activeAccount]
     }
   },
   methods: {

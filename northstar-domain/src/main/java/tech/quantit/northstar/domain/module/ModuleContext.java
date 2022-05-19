@@ -103,7 +103,7 @@ public class ModuleContext implements IModuleContext{
 					.preBalance(accStore.getPreBalance(gatewayId))
 					.accCloseProfit(accStore.getAccCloseProfit(gatewayId))
 					.accDealVolume(accStore.getAccDealVolume(gatewayId))
-					.commissionPerDeal(accStore.getCommissionPerDeal(gatewayId))
+					.accCommission(accStore.getAccCommission(gatewayId))
 					.positionDescription(posDescription)
 					.build();
 			accMap.put(gatewayId, accDescription);

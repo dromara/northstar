@@ -40,7 +40,7 @@ class ModuleAccountStoreTest {
 				.initBalance(100000)
 				.preBalance(100000)
 				.accCloseProfit(200)
-				.commissionPerDeal(10)
+				.accCommission(10)
 				.accDealVolume(3)
 				.positionDescription(ModulePositionDescription.builder()
 						.uncloseTrades(List.of(trade.toByteArray(), trade2.toByteArray()))

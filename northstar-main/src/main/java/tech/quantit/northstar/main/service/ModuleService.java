@@ -104,7 +104,6 @@ public class ModuleService implements InitializingBean {
 						.accountId(masd.getAccountGatewayId())
 						.initBalance(masd.getModuleAccountInitBalance())
 						.preBalance(masd.getModuleAccountInitBalance())
-						.commissionPerDeal(masd.getCommissionFeePerDeal())
 						.positionDescription(new ModulePositionDescription())
 						.build())
 				.collect(Collectors.toMap(ModuleAccountRuntimeDescription::getAccountId, mard -> mard));
