@@ -1,5 +1,6 @@
 package tech.quantit.northstar.gateway.playback;
 
+import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.common.model.GatewayDescription;
 import tech.quantit.northstar.common.model.SimAccountDescription;
 import tech.quantit.northstar.data.IContractRepository;
@@ -55,7 +56,7 @@ public class MarketDataLocal {
         String bindedMktGateWayId = gatewayDescription.getBindedMktGatewayId();
 
         // 取得合约的日ticket数据
-        contractRepository.getByGateWayId(bindedMktGateWayId).forEach(contract -> {
+        contractRepository.findAll(GatewayType.PLAYBACK).forEach(contract -> {
             List<CoreField.TickField> data = marketDataRepository.loadTicksByDateTime(bindedMktGateWayId, contract.getUnifiedSymbol(),
                     curDate);
             PriorityQueue<CoreField.TickField> tickQ = new PriorityQueue<>(3000, (b1, b2) -> b1.getActionTimestamp() < b2.getActionTimestamp() ? -1 : 1 );

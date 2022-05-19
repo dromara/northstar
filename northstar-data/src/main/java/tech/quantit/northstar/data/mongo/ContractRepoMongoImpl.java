@@ -52,7 +52,6 @@ public class ContractRepoMongoImpl implements IContractRepository {
 	 * @param gatewayId
 	 * @return
 	 */
-	@Override
 	public List<ContractField> getByGateWayId(String gatewayId){
 		String type = "";
 		int intDateToday = Integer.parseInt(LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
