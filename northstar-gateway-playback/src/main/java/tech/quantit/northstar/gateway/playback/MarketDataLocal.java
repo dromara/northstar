@@ -1,7 +1,6 @@
 package tech.quantit.northstar.gateway.playback;
 
 import tech.quantit.northstar.common.model.GatewayDescription;
-import tech.quantit.northstar.common.model.PlaybackDescription;
 import tech.quantit.northstar.common.model.SimAccountDescription;
 import tech.quantit.northstar.data.IContractRepository;
 import tech.quantit.northstar.data.IGatewayRepository;
