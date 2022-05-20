@@ -9,11 +9,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.google.protobuf.InvalidProtocolBufferException;
 
 import tech.quantit.northstar.common.model.ComponentField;
 import tech.quantit.northstar.common.model.ComponentMetaInfo;
@@ -22,6 +25,7 @@ import tech.quantit.northstar.common.model.ModuleDescription;
 import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
 import tech.quantit.northstar.common.model.ResultBean;
 import tech.quantit.northstar.main.service.ModuleService;
+import xyz.redtorch.pb.CoreField.TradeField;
 
 @RequestMapping("/northstar/module")
 @RestController
@@ -124,37 +128,17 @@ public class ModuleController {
 		return new ResultBean<>(service.getDealRecords(name));
 	}
 	
-//	/**
-//	 * 增加模组持仓
-//	 * @param moduleName
-//	 * @param position
-//	 * @return
-//	 */
-//	@PostMapping("/{moduleName}/position")
-//	public ResultBean<Boolean> createPosition(@PathVariable String moduleName, @RequestBody Module position){
-//		return new ResultBean<>(service.createPosition(moduleName, position));
-//	}
-//	
-//	/**
-//	 * 修改模组持仓
-//	 * @param moduleName
-//	 * @param position
-//	 * @return
-//	 */
-//	@PutMapping("/{moduleName}/position")
-//	public ResultBean<Boolean> updatePosition(@PathVariable String moduleName, @RequestBody ModulePositionInfo position){
-//		return new ResultBean<>(service.updatePosition(moduleName, position));
-//	}
-//	
-//	/**
-//	 * 移除模组持仓
-//	 * @param moduleName
-//	 * @param unifiedSymbol
-//	 * @param dir
-//	 * @return
-//	 */
-//	@DeleteMapping("/{moduleName}/position")
-//	public ResultBean<Boolean> removePosition(@PathVariable String moduleName){
-//		return new ResultBean<>(service.removePosition(moduleName));
-//	}
+	/**
+	 * 手动调整模组持仓
+	 * @param moduleName
+	 * @param position
+	 * @return
+	 * @throws InvalidProtocolBufferException 
+	 */
+	@NotNull
+	@PostMapping("/{moduleName}/mockTrade")
+	public ResultBean<Boolean> mockTradeAdjustment(@PathVariable String moduleName, @RequestBody byte[] mockTrade) throws InvalidProtocolBufferException{
+		return new ResultBean<>(service.mockTradeAdjustment(moduleName, TradeField.parseFrom(mockTrade)));
+	}
+	
 }

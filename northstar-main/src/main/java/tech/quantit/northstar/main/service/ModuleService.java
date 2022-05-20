@@ -11,7 +11,10 @@ import org.springframework.context.ApplicationContext;
 
 import com.alibaba.fastjson.JSONObject;
 
+import tech.quantit.northstar.common.constant.Constants;
 import tech.quantit.northstar.common.constant.ModuleState;
+import tech.quantit.northstar.common.event.NorthstarEvent;
+import tech.quantit.northstar.common.event.NorthstarEventType;
 import tech.quantit.northstar.common.model.ComponentField;
 import tech.quantit.northstar.common.model.ComponentMetaInfo;
 import tech.quantit.northstar.common.model.DynamicParams;
@@ -27,6 +30,7 @@ import tech.quantit.northstar.main.utils.ModuleFactory;
 import tech.quantit.northstar.strategy.api.DynamicParamsAware;
 import tech.quantit.northstar.strategy.api.IModule;
 import tech.quantit.northstar.strategy.api.annotation.StrategicComponent;
+import xyz.redtorch.pb.CoreField.TradeField;
 
 /**
  * 
@@ -187,6 +191,16 @@ public class ModuleService implements InitializingBean {
 	 */
 	public List<ModuleDealRecord> getDealRecords(String name){
 		return moduleRepo.findAllDealRecords(name);
+	}
+	
+	/**
+	 * 持仓调整
+	 * @return
+	 */
+	public boolean mockTradeAdjustment(String moduleName, TradeField trade) {
+		trade = trade.toBuilder().setOriginOrderId(Constants.MOCK_ORDER_ID).build();
+		moduleMgr.getModule(moduleName).onEvent(new NorthstarEvent(NorthstarEventType.TRADE, trade));
+		return true;
 	}
 
 	@Override

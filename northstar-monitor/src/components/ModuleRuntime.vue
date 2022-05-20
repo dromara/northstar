@@ -278,7 +278,7 @@ export default {
     },
     holdingProfit() {
       if (!this.activeAccount) return 0
-      return this.holdingPositions.map((item) => item.positionprofit).reduce((a, b) => a + b)
+      return this.holdingPositions.map((item) => item.positionprofit).reduce((a, b) => a + b, 0)
     },
     holdingPositions() {
       if (!this.activeAccount) return []
