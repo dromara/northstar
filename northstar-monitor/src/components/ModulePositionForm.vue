@@ -1,33 +1,31 @@
 <template>
   <el-dialog
-    :title="`${isUpdateMode ? '修改' : '新增'}持仓`"
+    :title="`持仓调整`"
     :visible="visible"
     :close-on-click-modal="false"
     :show-close="false"
     width="200px"
     append-to-body
   >
-    <div class="warning-text">
+    <div class="warning-text pb-20">
       <i class="el-icon-warning" /> 该操作仅用于手工同步模组持仓状态，请谨慎使用<br />
-      <i class="el-icon-warning" /> 合约需要与交易策略设定一致，否则盈亏不会更新
+      <i class="el-icon-warning" /> 持仓调整实际上是生成一个手工的成交单
     </div>
-    <ContractFinder :visible.sync="contractFinderVisible" />
     <div class="form-wrapper">
-      <el-form ref="positionInfo" :model="form" label-width="70px" width="200px" :rules="formRules">
+      <el-form ref="positionInfo" :model="form" label-width="70px" width="200px" formRules>
         <el-form-item label="合约代码" prop="unifiedSymbol">
           <el-input v-model="form.unifiedSymbol" autocomplete="off"></el-input>
         </el-form-item>
-        <el-form-item label="持仓方向" prop="positionDir">
+        <el-form-item label="成交方向" prop="positionDir">
           <el-select v-model="form.positionDir">
-            <el-option value="PD_Long" label="多"></el-option>
-            <el-option value="PD_Short" label="空"></el-option>
+            <el-option :value="[1, 1]" label="多开"></el-option>
+            <el-option :value="[2, 1]" label="空开"></el-option>
+            <el-option :value="[1, 2]" label="多平"></el-option>
+            <el-option :value="[2, 2]" label="空平"></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="开仓价" prop="openPrice">
-          <el-input v-model="form.openPrice" type="number" autocomplete="off"></el-input>
-        </el-form-item>
-        <el-form-item label="止损价" prop="stopLossPrice">
-          <el-input v-model="form.stopLossPrice" type="number" autocomplete="off"></el-input>
+        <el-form-item label="成交价" prop="price">
+          <el-input v-model="form.price" type="number" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item label="手数" prop="volume">
           <el-input v-model="form.volume" type="number" autocomplete="off"></el-input>
@@ -36,7 +34,6 @@
     </div>
 
     <div slot="footer" class="dialog-footer">
-      <el-button type="primary" @click="contractFinderVisible = true">合约查询</el-button>
       <el-button @click="close">取 消</el-button>
       <el-button type="primary" @click="savePosition">保 存</el-button>
     </div>
@@ -44,15 +41,11 @@
 </template>
 
 <script>
-import ContractFinder from './ContractFinder.vue'
 export default {
-  components: {
-    ContractFinder
-  },
   props: {
-    data: {
-      type: Object,
-      default: () => {}
+    contractOptions: {
+      type: Array,
+      default: () => []
     },
     visible: {
       type: Boolean,
@@ -61,19 +54,12 @@ export default {
   },
   data() {
     return {
-      contractFinderVisible: false,
       form: {
         unifiedSymbol: '',
-        positionDir: '',
-        openPrice: '',
-        stopLossPrice: '',
+        direction: '',
+        price: '',
         volume: ''
       }
-    }
-  },
-  computed: {
-    isUpdateMode() {
-      return !!this.data
     }
   },
   watch: {

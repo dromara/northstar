@@ -26,7 +26,7 @@
         </el-menu>
       </el-aside>
       <el-main class="main-compact"
-        ><el-form :model="form" label-width="100px" class="module-form" inline :rules="formRules">
+        ><el-form :model="form" label-width="100px" class="module-form" inline>
           <div v-show="activeIndex === '1'">
             <el-form-item label="模组名称">
               <el-input
@@ -59,18 +59,12 @@
               </el-select>
             </el-form-item>
             <el-form-item label="K线周期">
-              <el-input-number
-                :disabled="readOnly"
-                v-model="form.numOfMinPerBar"
-                @change="handleChange"
-                :min="1"
-              />
+              <el-input-number :disabled="readOnly" v-model="form.numOfMinPerBar" :min="1" />
               <span class="ml-10">分钟</span>
             </el-form-item>
             <el-form-item label="预热数据量">
               <el-input-number
                 v-model="form.numOfBarForPreparation"
-                @change="handleChange"
                 :min="0"
                 :disabled="readOnly"
               />

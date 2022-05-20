@@ -91,37 +91,15 @@
                   label="持仓盈亏"
                   align="center"
                 ></el-table-column>
-                <el-table-column label="操作" align="center">
+                <el-table-column label="操作" align="center" width="50px">
                   <template slot="header">
                     <el-button
                       class="compact"
-                      title="新建持仓"
-                      size="mini"
-                      icon="el-icon-plus"
-                      @click="createPosition"
-                    ></el-button>
-                  </template>
-                  <template slot-scope="scope">
-                    <el-button
-                      class="compact"
-                      title="修改持仓"
+                      title="调整持仓"
                       size="mini"
                       icon="el-icon-edit"
-                      @click="editPosition(scope.row)"
+                      @click="createPosition"
                     ></el-button>
-                    <el-popconfirm
-                      class="ml-5"
-                      title="确定移除吗？"
-                      @confirm="delPosition(scope.row)"
-                    >
-                      <el-button
-                        class="compact"
-                        title="移除持仓"
-                        size="mini"
-                        slot="reference"
-                        icon="el-icon-delete"
-                      ></el-button>
-                    </el-popconfirm>
                   </template>
                 </el-table-column>
               </el-table>
