@@ -32,7 +32,7 @@ public class IndexContract extends NormalContract {
 				.setFullName(fullName)
 				.setName(name)
 				.build();
-		super.gatewayType = GatewayType.valueOf(protoContract.getThirdPartyId().split("#")[1]);
+		super.gatewayType = GatewayType.valueOf(protoContract.getThirdPartyId().split("@")[1]);
 		super.updateTime = System.currentTimeMillis();
 		this.monthlyContracts = monthlyContracts;
 	}

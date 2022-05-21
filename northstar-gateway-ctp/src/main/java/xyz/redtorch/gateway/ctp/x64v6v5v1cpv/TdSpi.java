@@ -1332,7 +1332,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 			contractBuilder.setContractId(contractBuilder.getUnifiedSymbol() + "@" + gatewayId);
 			contractBuilder.setName(name != null ? name : pInstrument.getInstrumentName());
 			contractBuilder.setFullName(pInstrument.getInstrumentName());
-			contractBuilder.setThirdPartyId(contractBuilder.getSymbol() + "#" + GatewayType.CTP_SIM);
+			contractBuilder.setThirdPartyId(contractBuilder.getSymbol() + "@" + GatewayType.CTP_SIM);
 
 			if (pInstrument.getVolumeMultiple() <= 0) {
 				contractBuilder.setMultiplier(1);
