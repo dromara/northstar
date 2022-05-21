@@ -33,7 +33,7 @@
                 }[moduleRuntime.moduleState]
               }}</el-tag>
             </el-descriptions-item>
-            <el-descriptions-item label="总盈亏"></el-descriptions-item>
+            <el-descriptions-item label="总盈亏">{{ totalProfit }}</el-descriptions-item>
             <el-descriptions-item label="平均胜率"></el-descriptions-item>
             <el-descriptions-item label="盈亏比"></el-descriptions-item>
           </el-descriptions>
@@ -81,21 +81,12 @@
                 <el-table-column prop="positionDir" label="方向" align="center" width="40px"
                   ><template slot-scope="scope">{{
                     { 2: '多', 3: '空' }[scope.row.positiondirection] || '未知'
-                  }}</template></el-table-column
-                >
-                <el-table-column
-                  prop="position"
-                  label="手数"
-                  align="center"
-                  width="46px"
-                ></el-table-column>
+                  }}</template>
+                </el-table-column>
+                <el-table-column prop="position" label="手数" align="center" width="46px" />
                 <el-table-column prop="openprice" label="成本价" align="center"></el-table-column>
                 <el-table-column prop="lastprice" label="现价" align="center"></el-table-column>
-                <el-table-column
-                  prop="positionprofit"
-                  label="持仓盈亏"
-                  align="center"
-                ></el-table-column>
+                <el-table-column prop="positionprofit" label="持仓盈亏" align="center" />
                 <el-table-column label="操作" align="center" width="50px">
                   <template slot="header">
                     <el-button
@@ -111,34 +102,16 @@
               <el-table
                 ref="dealTbl"
                 v-show="moduleTab === 'dealRecord'"
-                :data="dealRecords"
+                :data="accountDealRecords"
                 height="100%"
               >
-                <el-table-column
-                  prop="contractName"
-                  label="合约"
-                  align="center"
-                  width="100px"
-                ></el-table-column>
-                <el-table-column prop="direction" label="方向" align="center" width="40px">
-                  <template slot-scope="scope">{{
-                    { PD_Long: '多', PD_Short: '空' }[scope.row.direction] || '未知'
-                  }}</template>
-                </el-table-column>
-                <el-table-column
-                  prop="volume"
-                  label="手数"
-                  align="center"
-                  width="46px"
-                ></el-table-column>
-                <el-table-column prop="openPrice" label="开仓价" align="center"></el-table-column>
-                <el-table-column prop="closePrice" label="平仓价" align="center"></el-table-column>
-                <el-table-column
-                  prop="closeProfit"
-                  label="平仓盈亏"
-                  align="center"
-                ></el-table-column>
-                <el-table-column prop="tradingDay" label="交易日" align="center"></el-table-column>
+                <el-table-column prop="contractName" label="合约" align="center" width="100px" />
+                <el-table-column prop="direction" label="方向" align="center" width="40px" />
+                <el-table-column prop="volume" label="手数" align="center" width="46px" />
+                <el-table-column prop="openPrice" label="开仓价" align="center" />
+                <el-table-column prop="closePrice" label="平仓价" align="center" />
+                <el-table-column prop="dealProfit" label="平仓盈亏" align="center" width="70px" />
+                <el-table-column prop="tradingDay" label="交易日" align="center" width="100px" />
               </el-table>
             </div>
           </div>
@@ -168,7 +141,7 @@ import volumePure from '@/lib/indicator/volume-pure'
 import moduleApi from '@/api/moduleApi'
 import { KLineUtils } from '@/utils.js'
 
-import { BarField, PositionField } from '@/lib/xyz/redtorch/pb/core_field_pb'
+import { BarField, PositionField, TradeField } from '@/lib/xyz/redtorch/pb/core_field_pb'
 
 const convertDataRef = (dataRefSrcMap) => {
   const resultMap = {}
@@ -226,7 +199,6 @@ export default {
       activeTab: '',
       activeAccount: '',
       dealRecords: [],
-      avgOccupiedAmount: 0,
       barDataMap: {},
       chart: null,
       loading: false,
@@ -238,6 +210,7 @@ export default {
       if (val) {
         this.moduleRuntime = this.moduleRuntimeSrc
         this.activeAccount = this.accountOptions[0]
+        this.refresh()
         console.log(this.holdingPositions)
       }
     },
@@ -268,9 +241,26 @@ export default {
         (item) => item.accountGatewayId === this.activeAccount
       )
     },
+    accountDealRecords() {
+      if (!this.activeAccount) return []
+      return this.dealRecords.filter((item) => item.moduleAccountId === this.activeAccount)
+    },
     holdingProfit() {
       if (!this.activeAccount) return 0
       return this.holdingPositions.map((item) => item.positionprofit).reduce((a, b) => a + b, 0)
+    },
+    totalProfit() {
+      if (!this.moduleRuntime) return 0
+      return Object.values(this.moduleRuntime.accountRuntimeDescriptionMap)
+        .map((accountInfo) => {
+          const holdingProfit = accountInfo.positionDescription.logicalPositions
+            .map((data) => PositionField.deserializeBinary(data).toObject())
+            .filter((item) => item.position > 0)
+            .map((item) => item.positionprofit)
+            .reduce((a, b) => a + b, 0)
+          return accountInfo.accCloseProfit - accountInfo.accCommission + holdingProfit
+        })
+        .reduce((a, b) => a + b, 0)
     },
     holdingPositions() {
       if (!this.activeAccount) return []
@@ -291,11 +281,17 @@ export default {
       })
     },
     loadDealRecord() {
-      moduleApi.getModuleDealRecords(this.moduleName).then((result) => {
-        this.dealRecords = result
-        this.totalCloseProfit = result.length
-          ? result.map((i) => i.closeProfit).reduce((a, b) => a + b)
-          : 0
+      moduleApi.getModuleDealRecords(this.module.moduleName).then((result) => {
+        this.dealRecords = result.map((item) => {
+          item.openTrade = TradeField.deserializeBinary(item.openTrade).toObject()
+          item.closeTrade = TradeField.deserializeBinary(item.closeTrade).toObject()
+          item.volume = item.closeTrade.volume
+          item.direction = { 1: '多', 2: '空' }[item.openTrade.direction]
+          item.openPrice = item.openTrade.price
+          item.closePrice = item.closeTrade.price
+          item.tradingDay = item.closeTrade.tradingday
+          return item
+        })
 
         this.$nextTick(() => {
           let table = this.$refs.dealTbl

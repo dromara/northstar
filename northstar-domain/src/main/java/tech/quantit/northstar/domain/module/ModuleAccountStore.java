@@ -24,7 +24,6 @@ import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
 import tech.quantit.northstar.common.utils.FieldUtils;
 import tech.quantit.northstar.strategy.api.IModuleAccountStore;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
-import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreField.CancelOrderReqField;
 import xyz.redtorch.pb.CoreField.OrderField;
 import xyz.redtorch.pb.CoreField.PositionField;
@@ -181,8 +180,8 @@ public class ModuleAccountStore implements IModuleAccountStore {
 	@Override
 	public List<PositionField> getPositions(String gatewayId) {
 		List<PositionField> positionList = new ArrayList<>();
-		positionList.addAll(buyPositionTbl.values().stream().map(TradePosition::convertToPositionField).toList());
-		positionList.addAll(sellPositionTbl.values().stream().map(TradePosition::convertToPositionField).toList());
+		positionList.addAll(buyPositionTbl.row(gatewayId).values().stream().map(TradePosition::convertToPositionField).toList());
+		positionList.addAll(sellPositionTbl.row(gatewayId).values().stream().map(TradePosition::convertToPositionField).toList());
 		return positionList;
 	}
 

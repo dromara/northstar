@@ -1,5 +1,6 @@
 package tech.quantit.northstar.main.service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +13,7 @@ import org.springframework.context.ApplicationContext;
 import com.alibaba.fastjson.JSONObject;
 
 import tech.quantit.northstar.common.constant.Constants;
+import tech.quantit.northstar.common.constant.DateTimeConstant;
 import tech.quantit.northstar.common.constant.ModuleState;
 import tech.quantit.northstar.common.event.NorthstarEvent;
 import tech.quantit.northstar.common.event.NorthstarEventType;
@@ -146,6 +148,7 @@ public class ModuleService implements InitializingBean {
 	public boolean removeModule(String name) {
 		unloadModule(name);
 		moduleRepo.deleteRuntimeByName(name);
+		moduleRepo.removeAllDealRecords(name);
 		return true;
 	}
 	
@@ -210,6 +213,8 @@ public class ModuleService implements InitializingBean {
 		TradeField trade = TradeField.newBuilder()
 				.setOriginOrderId(Constants.MOCK_ORDER_ID)
 				.setContract(contract)
+				.setTradeDate(LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER) + "MT")
+				.setTradingDay(LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER) + "MT")
 				.setGatewayId(mockTrade.getGatewayId())
 				.setDirection(mockTrade.getDirection())
 				.setOffsetFlag(mockTrade.getOffsetFlag())

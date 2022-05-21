@@ -20,9 +20,17 @@ public class ModuleDealRecord {
 	 */
 	private String moduleName;
 	/**
+	 * 模组账户
+	 */
+	private String moduleAccountId;
+	/**
 	 * 合约中文名称
 	 */
 	private String contractName;
+	/**
+	 * 平仓盈亏
+	 */
+	private double dealProfit;
 	/**
 	 * 开仓成交
 	 */
