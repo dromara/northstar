@@ -1,12 +1,17 @@
 <template>
   <el-dialog title="模组运行状态" :visible="visible" fullscreen class="flex-col" @close="close">
-    <ModulePositionForm :visible.sync="positionFormVisible" :data="curPosition" @save="onSave" />
+    <ModulePositionForm
+      :visible.sync="positionFormVisible"
+      :moduleAccount="accountSettings"
+      :moduleName="module.moduleName"
+      @save="onSave"
+    />
     <div class="module-rt-wrapper">
       <div class="side-panel">
         <div class="description-wrapper">
           <el-descriptions class="margin-top" title="模组信息" :column="3">
             <template slot="extra">
-              <el-button class="compact mb-10" icon="el-icon-refresh" @click="init"
+              <el-button class="compact mb-10" icon="el-icon-refresh" @click="refresh"
                 >刷新数据</el-button
               >
             </template>
@@ -98,7 +103,7 @@
                       title="调整持仓"
                       size="mini"
                       icon="el-icon-edit"
-                      @click="createPosition"
+                      @click="positionFormVisible = true"
                     ></el-button>
                   </template>
                 </el-table-column>
@@ -205,7 +210,11 @@ export default {
       type: Boolean,
       default: false
     },
-    moduleRuntime: {
+    module: {
+      type: Object,
+      default: () => {}
+    },
+    moduleRuntimeSrc: {
       type: Object,
       default: () => {}
     }
@@ -213,7 +222,6 @@ export default {
   data() {
     return {
       positionFormVisible: false,
-      curPosition: null,
       moduleTab: 'holding',
       activeTab: '',
       activeAccount: '',
@@ -221,14 +229,14 @@ export default {
       avgOccupiedAmount: 0,
       barDataMap: {},
       chart: null,
-      loading: false
+      loading: false,
+      moduleRuntime: ''
     }
   },
   watch: {
     visible: function (val) {
       if (val) {
-        // this.$nextTick(this.init)
-        // this.$nextTick(this.loadRefData)
+        this.moduleRuntime = this.moduleRuntimeSrc
         this.activeAccount = this.accountOptions[0]
         console.log(this.holdingPositions)
       }
@@ -254,6 +262,12 @@ export default {
       if (!this.activeAccount) return {}
       return this.moduleRuntime.accountRuntimeDescriptionMap[this.activeAccount]
     },
+    accountSettings() {
+      if (!this.activeAccount) return {}
+      return this.module.moduleAccountSettingsDescription.find(
+        (item) => item.accountGatewayId === this.activeAccount
+      )
+    },
     holdingProfit() {
       if (!this.activeAccount) return 0
       return this.holdingPositions.map((item) => item.positionprofit).reduce((a, b) => a + b, 0)
@@ -267,8 +281,14 @@ export default {
     }
   },
   methods: {
-    async init() {
+    refresh() {
+      this.loadRuntime()
       this.loadDealRecord()
+    },
+    loadRuntime() {
+      moduleApi.getModuleRuntime(this.module.moduleName).then((result) => {
+        this.moduleRuntime = result
+      })
     },
     loadDealRecord() {
       moduleApi.getModuleDealRecords(this.moduleName).then((result) => {
@@ -293,25 +313,8 @@ export default {
       this.activeTab = this.symbolOptions.length ? this.symbolOptions[0] : ''
       this.updateChart()
     },
-    createPosition() {
-      this.curPosition = null
-      this.positionFormVisible = true
-    },
-    editPosition(position) {
-      this.curPosition = position
-      this.positionFormVisible = true
-    },
-    async delPosition(position) {
-      await moduleApi.removePosition(this.moduleName, position.unifiedSymbol, position.positionDir)
-      this.init()
-    },
-    async onSave(position) {
-      if (this.curPosition) {
-        await moduleApi.updatePosition(this.moduleName, position)
-      } else {
-        await moduleApi.createPosition(this.moduleName, position)
-      }
-      this.init()
+    async onSave() {
+      setTimeout(this.refresh, 500)
     },
     updateChart() {
       this.chart.clearData()

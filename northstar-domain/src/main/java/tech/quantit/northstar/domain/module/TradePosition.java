@@ -46,7 +46,7 @@ public class TradePosition {
 	public TradePosition(List<TradeField> trades, ClosingPolicy closingPolicy) {
 		Assert.notEmpty(trades, "不能传入空集合");
 		this.closingPolicy = closingPolicy;
-		this.trades.addAll(trades);
+		this.trades.addAll(trades.stream().filter(trade -> FieldUtils.isOpen(trade.getOffsetFlag())).toList());
 		this.trades.sort((a, b) -> a.getTradeTimestamp() < b.getTradeTimestamp() ? -1 : 1);
 		this.dir = trades.get(0).getDirection();
 		this.contract = trades.get(0).getContract();

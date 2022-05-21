@@ -18,18 +18,21 @@ import tech.quantit.northstar.common.event.NorthstarEventType;
 import tech.quantit.northstar.common.model.ComponentField;
 import tech.quantit.northstar.common.model.ComponentMetaInfo;
 import tech.quantit.northstar.common.model.DynamicParams;
+import tech.quantit.northstar.common.model.MockTradeDescription;
 import tech.quantit.northstar.common.model.ModuleAccountRuntimeDescription;
 import tech.quantit.northstar.common.model.ModuleDealRecord;
 import tech.quantit.northstar.common.model.ModuleDescription;
 import tech.quantit.northstar.common.model.ModulePositionDescription;
 import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
 import tech.quantit.northstar.data.IModuleRepository;
+import tech.quantit.northstar.domain.gateway.ContractManager;
 import tech.quantit.northstar.main.ExternalJarListener;
 import tech.quantit.northstar.main.handler.internal.ModuleManager;
 import tech.quantit.northstar.main.utils.ModuleFactory;
 import tech.quantit.northstar.strategy.api.DynamicParamsAware;
 import tech.quantit.northstar.strategy.api.IModule;
 import tech.quantit.northstar.strategy.api.annotation.StrategicComponent;
+import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.TradeField;
 
 /**
@@ -43,15 +46,19 @@ public class ModuleService implements InitializingBean {
 	
 	private ModuleManager moduleMgr;
 	
+	private ContractManager contractMgr;
+	
 	private IModuleRepository moduleRepo;
 	
 	private ModuleFactory moduleFactory;
 	
 	private ClassLoader loader;
 	
-	public ModuleService(ApplicationContext ctx, ExternalJarListener extJarListener, IModuleRepository moduleRepo, ModuleFactory moduleFactory, ModuleManager moduleMgr) {
+	public ModuleService(ApplicationContext ctx, ExternalJarListener extJarListener, IModuleRepository moduleRepo, ModuleFactory moduleFactory,
+			ModuleManager moduleMgr, ContractManager contractMgr) {
 		this.ctx = ctx;
 		this.moduleMgr = moduleMgr;
+		this.contractMgr = contractMgr;
 		this.moduleRepo = moduleRepo;
 		this.moduleFactory = moduleFactory;
 		this.loader = extJarListener.getExternalClassLoader();
@@ -197,9 +204,19 @@ public class ModuleService implements InitializingBean {
 	 * 持仓调整
 	 * @return
 	 */
-	public boolean mockTradeAdjustment(String moduleName, TradeField trade) {
-		trade = trade.toBuilder().setOriginOrderId(Constants.MOCK_ORDER_ID).build();
-		moduleMgr.getModule(moduleName).onEvent(new NorthstarEvent(NorthstarEventType.TRADE, trade));
+	public boolean mockTradeAdjustment(String moduleName, MockTradeDescription mockTrade) {
+		IModule module = moduleMgr.getModule(moduleName);
+		ContractField contract = contractMgr.getContract(mockTrade.getUnifiedSymbol());
+		TradeField trade = TradeField.newBuilder()
+				.setOriginOrderId(Constants.MOCK_ORDER_ID)
+				.setContract(contract)
+				.setGatewayId(mockTrade.getGatewayId())
+				.setDirection(mockTrade.getDirection())
+				.setOffsetFlag(mockTrade.getOffsetFlag())
+				.setPrice(mockTrade.getPrice())
+				.setVolume(mockTrade.getVolume())
+				.build();
+		module.onEvent(new NorthstarEvent(NorthstarEventType.TRADE, trade));
 		return true;
 	}
 

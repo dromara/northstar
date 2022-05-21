@@ -24,6 +24,7 @@ import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
 import tech.quantit.northstar.common.utils.FieldUtils;
 import tech.quantit.northstar.strategy.api.IModuleAccountStore;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
+import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreField.CancelOrderReqField;
 import xyz.redtorch.pb.CoreField.OrderField;
 import xyz.redtorch.pb.CoreField.PositionField;
@@ -119,7 +120,7 @@ public class ModuleAccountStore implements IModuleAccountStore {
 				accCloseProfitMap.putIfAbsent(trade.getGatewayId(), new AtomicDouble());
 				accCloseProfitMap.get(trade.getGatewayId()).addAndGet(profit);
 			}
-		} else {
+		} else if(FieldUtils.isOpen(trade.getOffsetFlag())) {
 			tbl.put(trade.getGatewayId(), trade.getContract().getUnifiedSymbol(), new TradePosition(List.of(trade), closingPolicy));
 		}
 		sm.onTrade(trade);

@@ -14,14 +14,20 @@
     <div class="form-wrapper">
       <el-form ref="positionInfo" :model="form" label-width="70px" width="200px" formRules>
         <el-form-item label="合约代码" prop="unifiedSymbol">
-          <el-input v-model="form.unifiedSymbol" autocomplete="off"></el-input>
+          <el-select v-model="form.unifiedSymbol">
+            <el-option
+              v-for="c in moduleAccount.bindedUnifiedSymbols"
+              :key="c"
+              :value="c"
+            ></el-option>
+          </el-select>
         </el-form-item>
         <el-form-item label="成交方向" prop="positionDir">
-          <el-select v-model="form.positionDir">
-            <el-option :value="[1, 1]" label="多开"></el-option>
-            <el-option :value="[2, 1]" label="空开"></el-option>
-            <el-option :value="[1, 2]" label="多平"></el-option>
-            <el-option :value="[2, 2]" label="空平"></el-option>
+          <el-select v-model="directionComb">
+            <el-option :value="['D_Buy', 'OF_Open']" label="多开"></el-option>
+            <el-option :value="['D_Sell', 'OF_Open']" label="空开"></el-option>
+            <el-option :value="['D_Buy', 'OF_Close']" label="多平"></el-option>
+            <el-option :value="['D_Sell', 'OF_Close']" label="空平"></el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="成交价" prop="price">
@@ -41,49 +47,63 @@
 </template>
 
 <script>
+import moduleApi from '@/api/moduleApi'
+
 export default {
   props: {
-    contractOptions: {
-      type: Array,
-      default: () => []
-    },
     visible: {
       type: Boolean,
       default: false
+    },
+    moduleAccount: {
+      type: Object,
+      default: () => {}
+    },
+    moduleName: {
+      type: String,
+      default: ''
     }
   },
   data() {
     return {
       form: {
+        gatewayId: '',
         unifiedSymbol: '',
         direction: '',
+        offsetFlag: '',
         price: '',
         volume: ''
-      }
+      },
+      directionComb: ''
     }
   },
   watch: {
     visible: function (val) {
       if (val) {
-        Object.assign(this.form, this.data)
+        this.form.gatewayId = this.moduleAccount.accountGatewayId
       }
+    },
+    directionComb: function (val) {
+      this.form.direction = val[0]
+      this.form.offsetFlag = val[1]
     }
   },
   methods: {
-    savePosition() {
+    async savePosition() {
       let flag =
         this.assertTrue(this.form.unifiedSymbol, '未指定合约代码') &&
-        this.assertTrue(this.form.positionDir, '未指定持仓方向') &&
-        this.assertTrue(this.form.openPrice, '未设置开仓价') &&
+        this.assertTrue(this.form.direction, '未指定成交方向') &&
+        this.assertTrue(this.form.price, '未设置成交价') &&
         this.assertTrue(this.form.volume, '未设置手数')
       if (!flag) return
 
-      this.$emit('save', this.form)
+      await moduleApi.mockTradeAdjustment(this.moduleName, this.form)
       this.close()
     },
     close() {
       this.$refs.positionInfo.resetFields()
       this.$emit('update:visible', false)
+      this.$emit('save')
     },
     assertTrue(expression, errMsg) {
       if (!expression) {

@@ -20,12 +20,12 @@ import com.google.protobuf.InvalidProtocolBufferException;
 
 import tech.quantit.northstar.common.model.ComponentField;
 import tech.quantit.northstar.common.model.ComponentMetaInfo;
+import tech.quantit.northstar.common.model.MockTradeDescription;
 import tech.quantit.northstar.common.model.ModuleDealRecord;
 import tech.quantit.northstar.common.model.ModuleDescription;
 import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
 import tech.quantit.northstar.common.model.ResultBean;
 import tech.quantit.northstar.main.service.ModuleService;
-import xyz.redtorch.pb.CoreField.TradeField;
 
 @RequestMapping("/northstar/module")
 @RestController
@@ -137,8 +137,8 @@ public class ModuleController {
 	 */
 	@NotNull
 	@PostMapping("/{moduleName}/mockTrade")
-	public ResultBean<Boolean> mockTradeAdjustment(@PathVariable String moduleName, @RequestBody byte[] mockTrade) throws InvalidProtocolBufferException{
-		return new ResultBean<>(service.mockTradeAdjustment(moduleName, TradeField.parseFrom(mockTrade)));
+	public ResultBean<Boolean> mockTradeAdjustment(@PathVariable String moduleName, @RequestBody MockTradeDescription mockTrade) {
+		return new ResultBean<>(service.mockTradeAdjustment(moduleName, mockTrade));
 	}
 	
 }

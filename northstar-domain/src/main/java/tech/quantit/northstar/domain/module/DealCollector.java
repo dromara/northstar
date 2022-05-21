@@ -7,13 +7,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.constant.ClosingPolicy;
 import tech.quantit.northstar.common.model.ModuleDealRecord;
 import tech.quantit.northstar.common.utils.FieldUtils;
+import tech.quantit.northstar.common.utils.MessagePrinter;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.TradeField;
 
+@Slf4j
 public class DealCollector {
 
 	private Map<ContractField, LinkedList<TradeField>> buyTradeMap = new HashMap<>();
@@ -58,7 +61,12 @@ public class DealCollector {
 			}
 		} else {
 			while(true) {
-				TradeField openTrade = getCloseMap(trade.getDirection()).get(trade.getContract()).pollFirst();
+				LinkedList<TradeField> openTradeList = getCloseMap(trade.getDirection()).get(trade.getContract());
+				if(openTradeList == null || openTradeList.isEmpty()) {
+					log.warn("异常平仓：{}", MessagePrinter.print(trade));
+					throw new IllegalStateException("不存在该成交对应的开仓记录");
+				}
+				TradeField openTrade = openTradeList.pollFirst(); 
 				if(openTrade.getVolume() < trade.getVolume()) {
 					TradeField matchTrade = trade.toBuilder().setVolume(openTrade.getVolume()).build();
 					trade = trade.toBuilder().setVolume(trade.getVolume() - openTrade.getVolume()).build();

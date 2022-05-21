@@ -235,9 +235,7 @@ public class ModuleContext implements IModuleContext{
 		if(!orderMap.containsKey(order.getOriginOrderId())) {
 			return;
 		}
-		if(OrderUtils.isValidOrder(order)) {
-			orderMap.put(order.getOriginOrderId(), order);
-		} else {
+		if(!OrderUtils.isValidOrder(order)) {
 			orderMap.remove(order.getOriginOrderId());
 		}
 		accStore.onOrder(order);

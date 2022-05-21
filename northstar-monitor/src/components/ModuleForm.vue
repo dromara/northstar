@@ -142,7 +142,8 @@
                 >
                   <el-option
                     v-for="(item, i) in bindedUnifiedSymbolsOptions"
-                    :value="item"
+                    :value="item.value"
+                    :label="item.label"
                     :key="i"
                   />
                 </el-select>
@@ -219,7 +220,8 @@ export default {
   },
   computed: {
     bindedUnifiedSymbolsOptions() {
-      return this.bindedContracts.split(/;|；/).map((item) => item.trim())
+      const unifiedSymbols = this.bindedContracts.split(/;|；/).map((item) => item.trim())
+      return unifiedSymbols.map((us) => ({ label: us.split('@')[0], value: us }))
     }
   },
   mounted() {
