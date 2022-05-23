@@ -30,4 +30,5 @@ public interface IContractRepository {
 	 * @return
 	 */
 	List<ContractField> findAll();
+	
 }

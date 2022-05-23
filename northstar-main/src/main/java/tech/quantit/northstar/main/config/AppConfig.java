@@ -134,10 +134,6 @@ public class AppConfig implements WebMvcConfigurer {
 		};
 		
 		GlobalMarketRegistry registry = new GlobalMarketRegistry(fastEventEngine, handleContractSave, contractMgr::addContract);
-		// 加载合约订阅管理器
-		for(SubscriptionManager subMgr : subMgrs) {			
-			registry.register(subMgr);
-		}
 		//　加载已有合约
 		List<ContractField> contractList = contractRepo.findAll();
 		Map<String, ContractField> contractMap = contractList.stream()

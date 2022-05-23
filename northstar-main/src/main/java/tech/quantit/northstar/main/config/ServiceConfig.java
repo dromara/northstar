@@ -13,7 +13,6 @@ import tech.quantit.northstar.data.IModuleRepository;
 import tech.quantit.northstar.domain.account.TradeDayAccount;
 import tech.quantit.northstar.domain.gateway.ContractManager;
 import tech.quantit.northstar.domain.gateway.GatewayAndConnectionManager;
-import tech.quantit.northstar.gateway.api.domain.GlobalMarketRegistry;
 import tech.quantit.northstar.main.ExternalJarListener;
 import tech.quantit.northstar.main.handler.internal.ModuleManager;
 import tech.quantit.northstar.main.service.AccountService;
@@ -43,8 +42,8 @@ public class ServiceConfig {
 	
 	@Bean
 	public GatewayService gatewayService(GatewayAndConnectionManager gatewayConnMgr, IGatewayRepository gatewayRepo, IMarketDataRepository mdRepo,
-			IModuleRepository moduleRepo, GlobalMarketRegistry registry) {
-		return new GatewayService(gatewayConnMgr, gatewayRepo, mdRepo, moduleRepo, registry);
+			IModuleRepository moduleRepo) {
+		return new GatewayService(gatewayConnMgr, gatewayRepo, mdRepo, moduleRepo);
 	}
 	
 	@Bean

@@ -1,6 +1,5 @@
 package tech.quantit.northstar.gateway.api.domain;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -34,7 +33,6 @@ class GlobalMarketRegistryTest {
 		when(gateway.isConnected()).thenReturn(true);
 		when(contract.gatewayType()).thenReturn(GatewayType.CTP);
 		when(contract.barGenerator()).thenReturn(mock(BarGenerator.class));
-		registry.gatewayMap.put(GatewayType.CTP, gateway);
 		
 		registry.register(contract);
 		
@@ -51,19 +49,9 @@ class GlobalMarketRegistryTest {
 		when(contract.indexTicker()).thenReturn(mock(IndexTicker.class));
 		when(contract.gatewayType()).thenReturn(GatewayType.CTP);
 		when(contract.barGenerator()).thenReturn(mock(BarGenerator.class));
-		registry.gatewayMap.put(GatewayType.CTP, gateway);
 		registry.register(contract);
 		
 		verify(gateway, times(0)).subscribe(any());
-	}
-
-	@Test
-	void testRegisterSubscriptionManager() {
-		registry = new GlobalMarketRegistry(mock(FastEventEngine.class), mock(Consumer.class), mock(Consumer.class));
-		SubscriptionManager subMgr = mock(SubscriptionManager.class);
-		when(subMgr.usedFor()).thenReturn(GatewayType.CTP);
-		registry.register(subMgr);
-		assertThat(registry.subMgrMap).hasSize(1);
 	}
 
 	@Test
@@ -76,7 +64,6 @@ class GlobalMarketRegistryTest {
 		when(contract.gatewayType()).thenReturn(GatewayType.CTP);
 		when(contract.barGenerator()).thenReturn(mock(BarGenerator.class));
 		registry.register(contract);
-		registry.register(gateway);
 		
 		verify(gateway).subscribe(any());
 	}
@@ -93,7 +80,6 @@ class GlobalMarketRegistryTest {
 		BarGenerator barGen = mock(BarGenerator.class);
 		when(contract.barGenerator()).thenReturn(barGen);
 		registry.register(contract);
-		registry.register(gateway);
 		registry.dispatch(tick);
 		
 		verify(barGen).update(any());
