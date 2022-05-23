@@ -36,14 +36,12 @@ import tech.quantit.northstar.gateway.api.GatewayFactory;
 import tech.quantit.northstar.gateway.api.domain.GlobalMarketRegistry;
 import tech.quantit.northstar.gateway.api.domain.IndexContract;
 import tech.quantit.northstar.gateway.api.domain.NormalContract;
-import tech.quantit.northstar.gateway.api.domain.SubscriptionManager;
 import tech.quantit.northstar.gateway.sim.persistence.SimAccountRepository;
 import tech.quantit.northstar.gateway.sim.trade.SimGatewayFactory;
 import tech.quantit.northstar.gateway.sim.trade.SimMarket;
 import tech.quantit.northstar.main.ExternalJarListener;
 import tech.quantit.northstar.main.interceptor.AuthorizationInterceptor;
 import tech.quantit.northstar.main.utils.ModuleFactory;
-import xyz.redtorch.gateway.ctp.common.CtpSubscriptionManager;
 import xyz.redtorch.gateway.ctp.x64v6v3v15v.CtpGatewayFactory;
 import xyz.redtorch.gateway.ctp.x64v6v5v1cpv.CtpSimGatewayFactory;
 import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
@@ -120,13 +118,7 @@ public class AppConfig implements WebMvcConfigurer {
 	}
 	
 	@Bean
-	public SubscriptionManager ctpSubscriptionManager(SubscriptionConfigurationProperties props) {
-		return new CtpSubscriptionManager(props.getClzTypeWhtlist(), props.getClzTypeBlklist(), props.getSymbolWhtlist(), props.getSymbolBlklist());
-	}
-	
-	@Bean
-	public GlobalMarketRegistry globalRegistry(FastEventEngine fastEventEngine, IContractRepository contractRepo, List<SubscriptionManager> subMgrs,
-			ContractManager contractMgr) {
+	public GlobalMarketRegistry globalRegistry(FastEventEngine fastEventEngine, IContractRepository contractRepo, ContractManager contractMgr) {
 		Consumer<NormalContract> handleContractSave = contract -> {
 			if(contract.updateTime() > 0) {
 				contractRepo.save(contract.contractField(), contract.gatewayType());
