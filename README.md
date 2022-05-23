@@ -127,7 +127,7 @@ Invoke-WebRequest https://gitee.com/dromara/northstar/raw/master/env.ps1 -OutFil
 - 尽量不要在开市期间重启程序
 - 编写策略逻辑时如需使用时间属性，务必使用TICK行情自带的时间戳，否则策略回测时会不准确
 - 本项目为量化爱好者及JAVA开发者搭建，对交易行为并不负责
-- 当前项目只包含一个示例策略，若要开发其他量化策略，需要自行开发并需要一定的JAVA基础
+- 使用者需要自行开发交易策略并需要一定的JAVA基础
 
 ## 特别鸣谢
 [redtorch项目](https://github.com/sun0x00/redtorch)作者。本项目演化自redtorch，并保留了小部分其源码，同时感谢redtorch作者的技术分享。
