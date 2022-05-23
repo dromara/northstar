@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import tech.quantit.northstar.common.constant.DateTimeConstant;
-import tech.quantit.northstar.main.config.HolidaySettings;
 
 /**
  * 法定节假日管理器
@@ -21,19 +20,11 @@ import tech.quantit.northstar.main.config.HolidaySettings;
 @Component
 public class HolidayManager implements InitializingBean{
 
-	@Autowired
-	protected HolidaySettings holidaySettings;
-	
 	protected Set<LocalDate> holidaySet = new HashSet<>();
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		for(String date : holidaySettings.getHolidays()) {
-			if(StringUtils.isEmpty(date)) {
-				continue;
-			}
-			addHoliday(date);
-		}
+		//FIXME 采用交易日查询服务
 	}
 	
 	public boolean isHoliday(LocalDateTime dateTime) {
