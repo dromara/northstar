@@ -422,12 +422,6 @@ export default {
 .el-table th > .cell {
   padding: 0;
 }
-.el-input-number--small {
-  width: 100%;
-}
-.el-input-number {
-  width: 100%;
-}
 .ns-trade__md-wrapper {
   width: 100%;
   height: 100%;

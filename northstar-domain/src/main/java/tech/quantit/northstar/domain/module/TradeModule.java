@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import tech.quantit.northstar.common.event.NorthstarEvent;
-import tech.quantit.northstar.common.model.ModuleDealRecord;
 import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
 import tech.quantit.northstar.strategy.api.IModule;
 import tech.quantit.northstar.strategy.api.IModuleContext;
@@ -39,17 +38,10 @@ public class TradeModule implements IModule {
 	
 	private Consumer<ModuleRuntimeDescription> onRuntimeChangeCallback;
 	
-	private Consumer<ModuleDealRecord> onDealCallback;
-	
-	private DealCollector dealCollector;
-	
-	public TradeModule(String name, IModuleContext context, DealCollector dealCollector,
-			Consumer<ModuleRuntimeDescription> onRuntimeChangeCallback, Consumer<ModuleDealRecord> onDealCallback) {
+	public TradeModule(String name, IModuleContext context, Consumer<ModuleRuntimeDescription> onRuntimeChangeCallback) {
 		this.name = name;
-		this.dealCollector = dealCollector;
 		this.ctx = context;
 		this.onRuntimeChangeCallback = onRuntimeChangeCallback;
-		this.onDealCallback = onDealCallback;
 	}
 	
 	@Override
@@ -94,8 +86,6 @@ public class TradeModule implements IModule {
 			ctx.onOrder(order);
 		} else if (data instanceof TradeField trade) {
 			ctx.onTrade(trade);
-			onRuntimeChangeCallback.accept(getRuntimeDescription());
-			dealCollector.onTrade(trade).ifPresent(list -> list.stream().forEach(this.onDealCallback::accept));
 		}
 	}
 

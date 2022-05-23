@@ -1,5 +1,6 @@
 package tech.quantit.northstar.main.service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -11,22 +12,30 @@ import org.springframework.context.ApplicationContext;
 
 import com.alibaba.fastjson.JSONObject;
 
+import tech.quantit.northstar.common.constant.Constants;
+import tech.quantit.northstar.common.constant.DateTimeConstant;
 import tech.quantit.northstar.common.constant.ModuleState;
+import tech.quantit.northstar.common.event.NorthstarEvent;
+import tech.quantit.northstar.common.event.NorthstarEventType;
 import tech.quantit.northstar.common.model.ComponentField;
 import tech.quantit.northstar.common.model.ComponentMetaInfo;
 import tech.quantit.northstar.common.model.DynamicParams;
+import tech.quantit.northstar.common.model.MockTradeDescription;
 import tech.quantit.northstar.common.model.ModuleAccountRuntimeDescription;
 import tech.quantit.northstar.common.model.ModuleDealRecord;
 import tech.quantit.northstar.common.model.ModuleDescription;
 import tech.quantit.northstar.common.model.ModulePositionDescription;
 import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
 import tech.quantit.northstar.data.IModuleRepository;
+import tech.quantit.northstar.domain.gateway.ContractManager;
 import tech.quantit.northstar.main.ExternalJarListener;
 import tech.quantit.northstar.main.handler.internal.ModuleManager;
 import tech.quantit.northstar.main.utils.ModuleFactory;
 import tech.quantit.northstar.strategy.api.DynamicParamsAware;
 import tech.quantit.northstar.strategy.api.IModule;
 import tech.quantit.northstar.strategy.api.annotation.StrategicComponent;
+import xyz.redtorch.pb.CoreField.ContractField;
+import xyz.redtorch.pb.CoreField.TradeField;
 
 /**
  * 
@@ -39,15 +48,19 @@ public class ModuleService implements InitializingBean {
 	
 	private ModuleManager moduleMgr;
 	
+	private ContractManager contractMgr;
+	
 	private IModuleRepository moduleRepo;
 	
 	private ModuleFactory moduleFactory;
 	
 	private ClassLoader loader;
 	
-	public ModuleService(ApplicationContext ctx, ExternalJarListener extJarListener, IModuleRepository moduleRepo, ModuleFactory moduleFactory, ModuleManager moduleMgr) {
+	public ModuleService(ApplicationContext ctx, ExternalJarListener extJarListener, IModuleRepository moduleRepo, ModuleFactory moduleFactory,
+			ModuleManager moduleMgr, ContractManager contractMgr) {
 		this.ctx = ctx;
 		this.moduleMgr = moduleMgr;
+		this.contractMgr = contractMgr;
 		this.moduleRepo = moduleRepo;
 		this.moduleFactory = moduleFactory;
 		this.loader = extJarListener.getExternalClassLoader();
@@ -104,7 +117,6 @@ public class ModuleService implements InitializingBean {
 						.accountId(masd.getAccountGatewayId())
 						.initBalance(masd.getModuleAccountInitBalance())
 						.preBalance(masd.getModuleAccountInitBalance())
-						.commissionPerDeal(masd.getCommissionFeePerDeal())
 						.positionDescription(new ModulePositionDescription())
 						.build())
 				.collect(Collectors.toMap(ModuleAccountRuntimeDescription::getAccountId, mard -> mard));
@@ -136,6 +148,7 @@ public class ModuleService implements InitializingBean {
 	public boolean removeModule(String name) {
 		unloadModule(name);
 		moduleRepo.deleteRuntimeByName(name);
+		moduleRepo.removeAllDealRecords(name);
 		return true;
 	}
 	
@@ -178,7 +191,7 @@ public class ModuleService implements InitializingBean {
 	 * @return
 	 */
 	public ModuleRuntimeDescription getModuleRealTimeInfo(String name) {
-		return moduleRepo.findRuntimeByName(name);
+		return moduleMgr.getModule(name).getRuntimeDescription();
 	}
 	
 	/**
@@ -188,6 +201,28 @@ public class ModuleService implements InitializingBean {
 	 */
 	public List<ModuleDealRecord> getDealRecords(String name){
 		return moduleRepo.findAllDealRecords(name);
+	}
+	
+	/**
+	 * 持仓调整
+	 * @return
+	 */
+	public boolean mockTradeAdjustment(String moduleName, MockTradeDescription mockTrade) {
+		IModule module = moduleMgr.getModule(moduleName);
+		ContractField contract = contractMgr.getContract(mockTrade.getUnifiedSymbol());
+		TradeField trade = TradeField.newBuilder()
+				.setOriginOrderId(Constants.MOCK_ORDER_ID)
+				.setContract(contract)
+				.setTradeDate(LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER) + "MT")
+				.setTradingDay(LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER) + "MT")
+				.setGatewayId(mockTrade.getGatewayId())
+				.setDirection(mockTrade.getDirection())
+				.setOffsetFlag(mockTrade.getOffsetFlag())
+				.setPrice(mockTrade.getPrice())
+				.setVolume(mockTrade.getVolume())
+				.build();
+		module.onEvent(new NorthstarEvent(NorthstarEventType.TRADE, trade));
+		return true;
 	}
 
 	@Override

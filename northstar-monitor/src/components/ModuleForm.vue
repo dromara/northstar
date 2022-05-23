@@ -26,7 +26,7 @@
         </el-menu>
       </el-aside>
       <el-main class="main-compact"
-        ><el-form :model="form" label-width="100px" class="module-form" inline :rules="formRules">
+        ><el-form :model="form" label-width="100px" class="module-form" inline>
           <div v-show="activeIndex === '1'">
             <el-form-item label="模组名称">
               <el-input
@@ -59,18 +59,12 @@
               </el-select>
             </el-form-item>
             <el-form-item label="K线周期">
-              <el-input-number
-                :disabled="readOnly"
-                v-model="form.numOfMinPerBar"
-                @change="handleChange"
-                :min="1"
-              />
+              <el-input-number :disabled="readOnly" v-model="form.numOfMinPerBar" :min="1" />
               <span class="ml-10">分钟</span>
             </el-form-item>
             <el-form-item label="预热数据量">
               <el-input-number
                 v-model="form.numOfBarForPreparation"
-                @change="handleChange"
                 :min="0"
                 :disabled="readOnly"
               />
@@ -148,19 +142,11 @@
                 >
                   <el-option
                     v-for="(item, i) in bindedUnifiedSymbolsOptions"
-                    :value="item"
+                    :value="item.value"
+                    :label="item.label"
                     :key="i"
                   />
                 </el-select>
-              </el-form-item>
-              <el-form-item label="手续费估算">
-                <el-input
-                  :class="'with-unit'"
-                  type="number"
-                  :disabled="readOnly"
-                  v-model="form.moduleAccountSettingsDescription[i].commissionFeePerDeal"
-                />
-                <span class="value-unit"> 元 / 每笔</span>
               </el-form-item>
             </div>
           </div>
@@ -234,7 +220,8 @@ export default {
   },
   computed: {
     bindedUnifiedSymbolsOptions() {
-      return this.bindedContracts.split(/;|；/).map((item) => item.trim())
+      const unifiedSymbols = this.bindedContracts.split(/;|；/).map((item) => item.trim())
+      return unifiedSymbols.map((us) => ({ label: us.split('@')[0], value: us }))
     }
   },
   mounted() {
@@ -278,8 +265,6 @@ export default {
         return {
           accountGatewayId: item.gatewayId,
           moduleAccountInitBalance: 0,
-          commissionFeePerDeal: 0,
-          commissionFeePerDealInPercentage: 0,
           bindedUnifiedSymbols: []
         }
       })

@@ -7,13 +7,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.constant.ClosingPolicy;
 import tech.quantit.northstar.common.model.ModuleDealRecord;
 import tech.quantit.northstar.common.utils.FieldUtils;
+import tech.quantit.northstar.common.utils.MessagePrinter;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.TradeField;
 
+@Slf4j
 public class DealCollector {
 
 	private Map<ContractField, LinkedList<TradeField>> buyTradeMap = new HashMap<>();
@@ -44,37 +47,56 @@ public class DealCollector {
 				if(openTrade.getVolume() < trade.getVolume()) {
 					TradeField matchTrade = trade.toBuilder().setVolume(openTrade.getVolume()).build();
 					trade = trade.toBuilder().setVolume(trade.getVolume() - openTrade.getVolume()).build();
-					resultList.add(new ModuleDealRecord(moduleName, trade.getContract().getFullName(), openTrade.toByteArray(), matchTrade.toByteArray()));
+					resultList.add(makeRecord(openTrade, matchTrade));
 				} else if (openTrade.getVolume() > trade.getVolume()) {
 					TradeField matchTrade = openTrade.toBuilder().setVolume(trade.getVolume()).build();
 					TradeField restTrade = openTrade.toBuilder().setVolume(openTrade.getVolume() - trade.getVolume()).build();
-					resultList.add(new ModuleDealRecord(moduleName, trade.getContract().getFullName(), matchTrade.toByteArray(), trade.toByteArray()));
+					resultList.add(makeRecord(matchTrade, trade));
 					getCloseMap(trade.getDirection()).get(trade.getContract()).offerLast(restTrade);
 					return Optional.of(resultList);
 				} else {
-					resultList.add(new ModuleDealRecord(moduleName, trade.getContract().getFullName(), openTrade.toByteArray(), trade.toByteArray()));
+					resultList.add(makeRecord(openTrade, trade));
 					return Optional.of(resultList);
 				}
 			}
 		} else {
 			while(true) {
-				TradeField openTrade = getCloseMap(trade.getDirection()).get(trade.getContract()).pollFirst();
+				LinkedList<TradeField> openTradeList = getCloseMap(trade.getDirection()).get(trade.getContract());
+				if(openTradeList == null || openTradeList.isEmpty()) {
+					log.warn("异常平仓：{}", MessagePrinter.print(trade));
+					throw new IllegalStateException("不存在该成交对应的开仓记录");
+				}
+				TradeField openTrade = openTradeList.pollFirst(); 
 				if(openTrade.getVolume() < trade.getVolume()) {
 					TradeField matchTrade = trade.toBuilder().setVolume(openTrade.getVolume()).build();
 					trade = trade.toBuilder().setVolume(trade.getVolume() - openTrade.getVolume()).build();
-					resultList.add(new ModuleDealRecord(moduleName, trade.getContract().getFullName(), openTrade.toByteArray(), matchTrade.toByteArray()));
+					resultList.add(makeRecord(openTrade, matchTrade));
 				} else if (openTrade.getVolume() > trade.getVolume()) {
 					TradeField matchTrade = openTrade.toBuilder().setVolume(trade.getVolume()).build();
 					TradeField restTrade = openTrade.toBuilder().setVolume(openTrade.getVolume() - trade.getVolume()).build();
-					resultList.add(new ModuleDealRecord(moduleName, trade.getContract().getFullName(), matchTrade.toByteArray(), trade.toByteArray()));
+					resultList.add(makeRecord(matchTrade, trade));
 					getCloseMap(trade.getDirection()).get(trade.getContract()).offerFirst(restTrade);
 					return Optional.of(resultList);
 				} else {
-					resultList.add(new ModuleDealRecord(moduleName, trade.getContract().getFullName(), openTrade.toByteArray(), trade.toByteArray()));
+					resultList.add(makeRecord(openTrade, trade));
 					return Optional.of(resultList);
 				}
 			}
 		}
+	}
+	
+	private ModuleDealRecord makeRecord(TradeField openTrade, TradeField closeTrade) {
+		ContractField contract = closeTrade.getContract();
+		int factor = FieldUtils.directionFactor(openTrade.getDirection());
+		double dealProfit = factor * (closeTrade.getPrice() - openTrade.getPrice()) * contract.getMultiplier() * closeTrade.getVolume();
+		return ModuleDealRecord.builder()
+				.moduleName(moduleName)
+				.moduleAccountId(closeTrade.getGatewayId())
+				.contractName(contract.getName())
+				.openTrade(openTrade.toByteArray())
+				.closeTrade(closeTrade.toByteArray())
+				.dealProfit(dealProfit)
+				.build();
 	}
 	
 	private Map<ContractField, LinkedList<TradeField>> getOpenMap(DirectionEnum dir){

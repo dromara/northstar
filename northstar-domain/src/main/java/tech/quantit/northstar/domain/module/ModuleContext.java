@@ -13,6 +13,7 @@ import tech.quantit.northstar.common.constant.SignalOperation;
 import tech.quantit.northstar.common.exception.NoSuchElementException;
 import tech.quantit.northstar.common.exception.TradeException;
 import tech.quantit.northstar.common.model.ModuleAccountRuntimeDescription;
+import tech.quantit.northstar.common.model.ModuleDealRecord;
 import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
 import tech.quantit.northstar.common.model.ModulePositionDescription;
 import tech.quantit.northstar.common.utils.FieldUtils;
@@ -75,11 +76,21 @@ public class ModuleContext implements IModuleContext{
 	
 	private int numOfMinsPerBar;
 	
-	public ModuleContext(TradeStrategy tradeStrategy, IModuleAccountStore accStore, ClosingStrategy closingStrategy, int numOfMinsPerBar) {
+	private DealCollector dealCollector;
+	
+	private Consumer<ModuleRuntimeDescription> onRuntimeChangeCallback;
+	
+	private Consumer<ModuleDealRecord> onDealCallback; 
+	
+	public ModuleContext(TradeStrategy tradeStrategy, IModuleAccountStore accStore, ClosingStrategy closingStrategy, int numOfMinsPerBar, 
+			DealCollector dealCollector, Consumer<ModuleRuntimeDescription> onRuntimeChangeCallback, Consumer<ModuleDealRecord> onDealCallback) {
 		this.tradeStrategy = tradeStrategy;
 		this.accStore = accStore;
 		this.closingStrategy = closingStrategy;
 		this.numOfMinsPerBar = numOfMinsPerBar;
+		this.dealCollector = dealCollector;
+		this.onRuntimeChangeCallback = onRuntimeChangeCallback;
+		this.onDealCallback = onDealCallback;
 		this.barMergingCallback = bar -> tradeStrategy.onBar(bar, module.isEnabled());
 		tradeStrategy.setContext(this);
 	}
@@ -103,7 +114,7 @@ public class ModuleContext implements IModuleContext{
 					.preBalance(accStore.getPreBalance(gatewayId))
 					.accCloseProfit(accStore.getAccCloseProfit(gatewayId))
 					.accDealVolume(accStore.getAccDealVolume(gatewayId))
-					.commissionPerDeal(accStore.getCommissionPerDeal(gatewayId))
+					.accCommission(accStore.getAccCommission(gatewayId))
 					.positionDescription(posDescription)
 					.build();
 			accMap.put(gatewayId, accDescription);
@@ -224,9 +235,7 @@ public class ModuleContext implements IModuleContext{
 		if(!orderMap.containsKey(order.getOriginOrderId())) {
 			return;
 		}
-		if(OrderUtils.isValidOrder(order)) {
-			orderMap.put(order.getOriginOrderId(), order);
-		} else {
+		if(!OrderUtils.isValidOrder(order)) {
 			orderMap.remove(order.getOriginOrderId());
 		}
 		accStore.onOrder(order);
@@ -244,6 +253,8 @@ public class ModuleContext implements IModuleContext{
 		}
 		accStore.onTrade(trade);
 		tradeStrategy.onTrade(trade);
+		onRuntimeChangeCallback.accept(getRuntimeDescription());
+		dealCollector.onTrade(trade).ifPresent(list -> list.stream().forEach(this.onDealCallback::accept));
 	}
 
 	@Override

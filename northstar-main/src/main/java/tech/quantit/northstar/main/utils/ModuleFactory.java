@@ -43,6 +43,13 @@ public class ModuleFactory {
 	
 	private ContractManager contractMgr;
 	
+	private Consumer<ModuleRuntimeDescription> onRuntimeChangeCallback = (rt) -> {
+		moduleRepo.saveRuntime(rt);
+	};
+	private Consumer<ModuleDealRecord> onDealChangeCallback = (dealRecord) -> {
+		moduleRepo.saveDealRecord(dealRecord);
+	};
+	
 	public ModuleFactory(ExternalJarListener extJarListener, IModuleRepository moduleRepo, GatewayAndConnectionManager gatewayConnMgr,
 			ContractManager contractMgr) {
 		this.loader = extJarListener.getExternalClassLoader();
@@ -58,20 +65,8 @@ public class ModuleFactory {
 			TradeGateway tradeGateway = (TradeGateway) gatewayConnMgr.getGatewayById(mad.getAccountGatewayId());
 			ctx.bindGatewayContracts(tradeGateway, mad.getBindedUnifiedSymbols().stream().map(contractMgr::getContract).toList());
 		}
-		Consumer<ModuleRuntimeDescription> onRuntimeChangeCallback = (rt) -> {
-			moduleRepo.saveRuntime(rt);
-		};
-		Consumer<ModuleDealRecord> onDealChangeCallback = (dealRecord) -> {
-			moduleRepo.saveDealRecord(dealRecord);
-		};
-		DealCollector dc = new DealCollector(moduleDescription.getModuleName(), moduleDescription.getClosingPolicy());
-		for(ModuleAccountRuntimeDescription mard : moduleRuntimeDescription.getAccountRuntimeDescriptionMap().values()) {
-			for(byte[] uncloseTradeData : mard.getPositionDescription().getUncloseTrades()) {
-				dc.onTrade(TradeField.parseFrom(uncloseTradeData));
-			}
-		}
 		
-		return new TradeModule(moduleDescription.getModuleName(), ctx, dc, onRuntimeChangeCallback, onDealChangeCallback);
+		return new TradeModule(moduleDescription.getModuleName(), ctx, onRuntimeChangeCallback);
 	}
 	
 	private IModuleAccountStore makeAccountStore(ModuleDescription moduleDescription, ModuleRuntimeDescription moduleRuntimeDescription) {
@@ -84,7 +79,15 @@ public class ModuleFactory {
 		IModuleAccountStore accStore = makeAccountStore(moduleDescription, moduleRuntimeDescription);
 		ClosingStrategy closingStrategy = getClosingStrategy(moduleDescription.getClosingPolicy());
 		int numOfMinPerBar = moduleDescription.getNumOfMinPerBar();
-		return new ModuleContext(strategy, accStore, closingStrategy, numOfMinPerBar);
+		
+		DealCollector dc = new DealCollector(moduleDescription.getModuleName(), moduleDescription.getClosingPolicy());
+		for(ModuleAccountRuntimeDescription mard : moduleRuntimeDescription.getAccountRuntimeDescriptionMap().values()) {
+			for(byte[] uncloseTradeData : mard.getPositionDescription().getUncloseTrades()) {
+				dc.onTrade(TradeField.parseFrom(uncloseTradeData));
+			}
+		}
+		
+		return new ModuleContext(strategy, accStore, closingStrategy, numOfMinPerBar, dc, onRuntimeChangeCallback, onDealChangeCallback);
 	}
 	
 	@SuppressWarnings("unchecked")

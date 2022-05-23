@@ -43,7 +43,7 @@ public class ModuleAccountStore implements IModuleAccountStore {
 	private Table<String, String, TradePosition> buyPositionTbl = HashBasedTable.create();
 	private Table<String, String, TradePosition> sellPositionTbl = HashBasedTable.create();
 	/* gatewayId -> commission */
-	private Map<String, Double> commissionPerDealMap = new HashMap<>();
+	private Map<String, Double> accCommissionMap = new HashMap<>();
 	/* gatewayId -> initBalance*/
 	private Map<String, Double> initBalanceMap = new HashMap<>();
 	/* gatewayId -> accDeal */
@@ -60,7 +60,6 @@ public class ModuleAccountStore implements IModuleAccountStore {
 		this.closingPolicy = closingPolicy;
 		for(ModuleAccountRuntimeDescription mad : moduleRuntimeDescription.getAccountRuntimeDescriptionMap().values()) {
 			initBalanceMap.put(mad.getAccountId(), mad.getInitBalance());
-			commissionPerDealMap.put(mad.getAccountId(), mad.getCommissionPerDeal());
 			accDealVolMap.put(mad.getAccountId(), new AtomicInteger(mad.getAccDealVolume()));
 			accCloseProfitMap.put(mad.getAccountId(), new AtomicDouble(mad.getAccCloseProfit()));
 			
@@ -120,7 +119,7 @@ public class ModuleAccountStore implements IModuleAccountStore {
 				accCloseProfitMap.putIfAbsent(trade.getGatewayId(), new AtomicDouble());
 				accCloseProfitMap.get(trade.getGatewayId()).addAndGet(profit);
 			}
-		} else {
+		} else if(FieldUtils.isOpen(trade.getOffsetFlag())) {
 			tbl.put(trade.getGatewayId(), trade.getContract().getUnifiedSymbol(), new TradePosition(List.of(trade), closingPolicy));
 		}
 		sm.onTrade(trade);
@@ -143,7 +142,7 @@ public class ModuleAccountStore implements IModuleAccountStore {
 	
 	@Override
 	public double getPreBalance(String gatewayId) {
-		return getInitBalance(gatewayId) + getAccCloseProfit(gatewayId) - getCommissionPerDeal(gatewayId) * getAccDealVolume(gatewayId);
+		return getInitBalance(gatewayId) + getAccCloseProfit(gatewayId) - getAccCommission(gatewayId);
 	}
 
 	@Override
@@ -181,8 +180,8 @@ public class ModuleAccountStore implements IModuleAccountStore {
 	@Override
 	public List<PositionField> getPositions(String gatewayId) {
 		List<PositionField> positionList = new ArrayList<>();
-		positionList.addAll(buyPositionTbl.values().stream().map(TradePosition::convertToPositionField).toList());
-		positionList.addAll(sellPositionTbl.values().stream().map(TradePosition::convertToPositionField).toList());
+		positionList.addAll(buyPositionTbl.row(gatewayId).values().stream().map(TradePosition::convertToPositionField).toList());
+		positionList.addAll(sellPositionTbl.row(gatewayId).values().stream().map(TradePosition::convertToPositionField).toList());
 		return positionList;
 	}
 
@@ -202,11 +201,9 @@ public class ModuleAccountStore implements IModuleAccountStore {
 	}
 
 	@Override
-	public double getCommissionPerDeal(String gatewayId) {
-		if(!commissionPerDealMap.containsKey(gatewayId)) {
-			throw new NoSuchElementException("找不到网关手续费：" + gatewayId);
-		}
-		return commissionPerDealMap.get(gatewayId);
+	public double getAccCommission(String gatewayId) {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 
 }

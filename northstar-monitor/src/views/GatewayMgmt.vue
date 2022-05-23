@@ -198,7 +198,7 @@ export default {
   },
   mounted() {
     console.log('GatewayManagement created. Usage:' + this.gatewayUsage)
-    this.updateList()
+    this.timelyUpdate()
   },
   computed: {
     typeLabel() {
@@ -207,16 +207,16 @@ export default {
   },
   watch: {
     gatewayUsage: function () {
-      clearTimeout(timer)
-      const timelyUpdate = () => {
-        this.updateList().catch(() => clearTimeout(timer))
-        timer = setTimeout(timelyUpdate, 5000)
-      }
       this.tableData = []
-      timelyUpdate()
+      clearTimeout(timer)
+      this.timelyUpdate()
     }
   },
   methods: {
+    timelyUpdate() {
+      this.updateList().catch(() => clearTimeout(timer))
+      timer = setTimeout(this.timelyUpdate, 5000)
+    },
     async updateList() {
       const data = await gatewayMgmtApi.findAll(this.gatewayUsage)
       if (this.gatewayUsage === 'MARKET_DATA') {

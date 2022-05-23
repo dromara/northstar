@@ -11,6 +11,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -45,6 +46,7 @@ class ModuleContextTest {
 	
 	private ModuleContext ctx;
 	
+	@SuppressWarnings("unchecked")
 	@BeforeEach
 	void prepare() {
 		TradeStrategy strategy = mock(TradeStrategy.class);
@@ -55,7 +57,7 @@ class ModuleContextTest {
 		when(closingStrategy.resolveOperation(any(SignalOperation.class), any(PositionField.class))).thenReturn(OffsetFlagEnum.OF_Open);
 		when(closingStrategy.resolveOperation(any(SignalOperation.class), eq(null))).thenReturn(OffsetFlagEnum.OF_Open);
 		
-		ctx = new ModuleContext(strategy, accStore, closingStrategy, 3);
+		ctx = new ModuleContext(strategy, accStore, closingStrategy, 3, mock(DealCollector.class), mock(Consumer.class), mock(Consumer.class));
 		ctx.setModule(module);
 	}
 

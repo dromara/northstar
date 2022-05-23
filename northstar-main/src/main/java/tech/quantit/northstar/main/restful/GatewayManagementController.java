@@ -48,7 +48,7 @@ public class GatewayManagementController {
 	}
 	
 	@GetMapping
-	public ResultBean<List<GatewayDescription>> list(String usage) throws Exception { 
+	public ResultBean<List<GatewayDescription>> list(String usage) { 
 		if(StringUtils.isBlank(usage)) {
 			return new ResultBean<>(gatewayService.findAllGateway());
 		}
