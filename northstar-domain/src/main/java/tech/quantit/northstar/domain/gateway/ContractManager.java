@@ -1,7 +1,5 @@
 package tech.quantit.northstar.domain.gateway;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -11,6 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.constant.Constants;
 import tech.quantit.northstar.common.exception.NoSuchElementException;
+import tech.quantit.northstar.common.model.ContractDefinition;
 import tech.quantit.northstar.common.utils.ContractUtils;
 import xyz.redtorch.pb.CoreField.ContractField;
 
@@ -30,10 +29,12 @@ public class ContractManager {
 	 */
 	private Map<String, Map<String, ContractField>> contractTbl = new ConcurrentHashMap<>();
 	
-	public ContractManager(List<ContractField> contracts) {
-		for(ContractField c : contracts) {			
-			addContract(c);
-		}
+	private Map<ContractField, ContractDefinition> contractDefMap = new ConcurrentHashMap<>();
+	
+	private List<ContractDefinition> contractDefinitions;
+	
+	public ContractManager(List<ContractDefinition> contractDefinitions) {
+		this.contractDefinitions = contractDefinitions;
 	}
 	
 	public boolean addContract(ContractField contract) {
@@ -44,8 +45,23 @@ public class ContractManager {
 			contractTbl.putIfAbsent(gatewayId, new ConcurrentHashMap<>(DEFAULT_SIZE));
 		}
 		contractTbl.get(gatewayId).putIfAbsent(unifiedSymbol, contract);
+		ContractDefinition def = findDefinition(contract);
+		if(def != null) {
+			contractDefMap.put(contract, def);
+		}
+		
 		log.trace("加入合约：网关{}, 合约{}, 网关累计总合约数{}个", gatewayId, symbol, contractTbl.get(gatewayId).size());
 		return true;
+	}
+	
+	private ContractDefinition findDefinition(ContractField contract) {
+		for(ContractDefinition contractDef : contractDefinitions) {
+			if(contractDef.getSymbolPattern().matcher(contract.getThirdPartyId()).matches()) {
+				return contractDef;
+			}
+		}
+		
+		return null;
 	}
 	
 	public ContractField getContract(String unifiedSymbol) {
@@ -57,12 +73,11 @@ public class ContractManager {
 		throw new NoSuchElementException("找不到合约：" + unifiedSymbol);
 	}
 	
-	public Collection<ContractField> getAllContracts(){
-		List<ContractField> results = new ArrayList<>();
-		for(Entry<String, Map<String, ContractField>> e : contractTbl.entrySet()) {
-			results.addAll(e.getValue().values());
+	public ContractDefinition getContractDefinition(String unifiedSymbol) {
+		if(!contractDefMap.containsKey(getContract(unifiedSymbol))) {
+			throw new NoSuchElementException("找不到合约定义：" + unifiedSymbol);
 		}
-		return results;
+		return contractDefMap.get(getContract(unifiedSymbol));
 	}
 	
 	public boolean isIndexContract(ContractField contract) {
@@ -80,4 +95,7 @@ public class ContractManager {
 				.toList();
 	}
 	
+	public List<ContractDefinition> getAllContractDefinitions(){
+		return contractDefinitions;
+	}
 }

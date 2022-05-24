@@ -1,5 +1,6 @@
 package tech.quantit.northstar.main.config;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -14,6 +15,8 @@ import java.util.stream.Collectors;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
@@ -25,6 +28,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import tech.quantit.northstar.common.constant.Constants;
 import tech.quantit.northstar.common.event.FastEventEngine;
+import tech.quantit.northstar.common.model.ContractDefinition;
+import tech.quantit.northstar.common.utils.ContractDefinitionReader;
 import tech.quantit.northstar.common.utils.ContractUtils;
 import tech.quantit.northstar.data.IContractRepository;
 import tech.quantit.northstar.data.IModuleRepository;
@@ -103,8 +108,15 @@ public class AppConfig implements WebMvcConfigurer {
 	}
 	
 	@Bean
-	public ContractManager contractManager(IContractRepository contractRepo) {
-		return new ContractManager(contractRepo.findAll());
+	public ContractManager contractManager(IContractRepository contractRepo) throws IOException {
+		Resource res = new ClassPathResource("ContractDefinition.csv");
+		ContractDefinitionReader reader = new ContractDefinitionReader();
+		List<ContractDefinition> contractDefs = reader.load(res.getFile());
+		ContractManager mgr = new ContractManager(contractDefs);
+		for(ContractField contract : contractRepo.findAll()) {
+			mgr.addContract(contract);
+		}
+		return mgr;
 	}
 	
 	@Bean
