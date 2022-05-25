@@ -42,8 +42,8 @@ public class ServiceConfig {
 	
 	@Bean
 	public GatewayService gatewayService(GatewayAndConnectionManager gatewayConnMgr, IGatewayRepository gatewayRepo, IMarketDataRepository mdRepo,
-			IModuleRepository moduleRepo) {
-		return new GatewayService(gatewayConnMgr, gatewayRepo, mdRepo, moduleRepo);
+			IModuleRepository moduleRepo, ContractManager contractMgr) {
+		return new GatewayService(gatewayConnMgr, gatewayRepo, mdRepo, moduleRepo, contractMgr);
 	}
 	
 	@Bean

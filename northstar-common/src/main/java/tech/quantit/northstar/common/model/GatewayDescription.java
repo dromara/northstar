@@ -35,7 +35,7 @@ public class GatewayDescription {
 	
 	private Object settings;
 	
-	private List<ContractDescription> subscribedContracts;
+	private List<ContractDefinition> subscribedContractGroups;
 
 	private String bindedMktGatewayId;
 	

@@ -16,12 +16,14 @@ import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.common.constant.GatewayUsage;
 import tech.quantit.northstar.common.exception.NoSuchElementException;
+import tech.quantit.northstar.common.model.ContractDefinition;
 import tech.quantit.northstar.common.model.GatewayDescription;
 import tech.quantit.northstar.common.model.ModuleAccountDescription;
 import tech.quantit.northstar.common.model.ModuleDescription;
 import tech.quantit.northstar.data.IGatewayRepository;
 import tech.quantit.northstar.data.IMarketDataRepository;
 import tech.quantit.northstar.data.IModuleRepository;
+import tech.quantit.northstar.domain.gateway.ContractManager;
 import tech.quantit.northstar.domain.gateway.GatewayAndConnectionManager;
 import tech.quantit.northstar.domain.gateway.GatewayConnection;
 import tech.quantit.northstar.gateway.api.Gateway;
@@ -54,11 +56,14 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 	
 	private IModuleRepository moduleRepo;
 	
+	private ContractManager contractMgr;
+	
 	public GatewayService(GatewayAndConnectionManager gatewayConnMgr, IGatewayRepository gatewayRepo, IMarketDataRepository mdRepo,
-			IModuleRepository moduleRepo) {
+			IModuleRepository moduleRepo, ContractManager contractMgr) {
 		this.gatewayConnMgr = gatewayConnMgr;
 		this.gatewayRepo = gatewayRepo;
 		this.mdRepo = mdRepo;
+		this.contractMgr = contractMgr;
 		this.moduleRepo = moduleRepo;
 	}
 	
@@ -254,6 +259,11 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 		return true;
 	}
 	
+	/**
+	 * 活跃检测
+	 * @param gatewayId
+	 * @return
+	 */
 	public boolean isActive(String gatewayId) {
 		try {
 			MarketGateway gateway = (MarketGateway) gatewayConnMgr.getGatewayById(gatewayId);
@@ -261,6 +271,17 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 		} catch (ClassCastException e) {
 			throw new IllegalStateException(gatewayId + "不是一个行情网关", e);
 		}
+	}
+	
+	/**
+	 * 获取合约定义
+	 * @param gatewayType
+	 * @return
+	 */
+	public List<ContractDefinition> contractDefinitions(GatewayType gatewayType){
+		return contractMgr.getAllContractDefinitions().stream()
+				.filter(def -> def.getGatewayType() == gatewayType)
+				.toList();
 	}
 	
 	@Override
