@@ -1,9 +1,12 @@
 package tech.quantit.northstar.domain.gateway;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import lombok.extern.slf4j.Slf4j;
@@ -27,9 +30,13 @@ public class ContractManager {
 	/**
 	 * gateway -> unifiedSymbol -> contract
 	 */
-	private Map<String, Map<String, ContractField>> contractTbl = new ConcurrentHashMap<>();
+	private Map<String, Map<String, ContractField>> contractTbl = new HashMap<>();
 	
-	private Map<ContractField, ContractDefinition> contractDefMap = new ConcurrentHashMap<>();
+	private Map<ContractField, ContractDefinition> contractDefMap = new HashMap<>();
+	/**
+	 * defId -> contractSet
+	 */
+	private Map<String, Set<ContractField>> defContractMap = new HashMap<>();
 	
 	private List<ContractDefinition> contractDefinitions;
 	
@@ -37,7 +44,7 @@ public class ContractManager {
 		this.contractDefinitions = contractDefinitions;
 	}
 	
-	public boolean addContract(ContractField contract) {
+	public synchronized boolean addContract(ContractField contract) {
 		String gatewayId = contract.getGatewayId();
 		String symbol = contract.getSymbol();
 		String unifiedSymbol = contract.getUnifiedSymbol();
@@ -48,6 +55,8 @@ public class ContractManager {
 		ContractDefinition def = findDefinition(contract);
 		if(def != null) {
 			contractDefMap.put(contract, def);
+			defContractMap.putIfAbsent(def.contractDefId(), new HashSet<>());
+			defContractMap.get(def.contractDefId()).add(contract);
 		}
 		
 		log.trace("加入合约：网关{}, 合约{}, 网关累计总合约数{}个", gatewayId, symbol, contractTbl.get(gatewayId).size());
@@ -93,6 +102,13 @@ public class ContractManager {
 				.map(this::getContract)
 				.filter(Objects::nonNull)
 				.toList();
+	}
+	
+	public Set<ContractField> relativeContracts(String contractDefId){
+		if(!defContractMap.containsKey(contractDefId)) {
+			throw new IllegalStateException("找不到关联合约集");
+		}
+		return defContractMap.get(contractDefId);
 	}
 	
 	public List<ContractDefinition> getAllContractDefinitions(){

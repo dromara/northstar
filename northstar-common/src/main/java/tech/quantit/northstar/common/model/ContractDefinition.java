@@ -43,4 +43,11 @@ public class ContractDefinition {
 	 * 手续费率（万分比）
 	 */
 	private double commissionInBasePoint;
+	/**
+	 * ID 
+	 * @return
+	 */
+	public String contractDefId() {
+		return name + "@" + productClass;
+	}
 }

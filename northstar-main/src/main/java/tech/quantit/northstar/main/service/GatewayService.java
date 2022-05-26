@@ -1,7 +1,10 @@
 package tech.quantit.northstar.main.service;
 
 import java.io.File;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeansException;
@@ -29,12 +32,12 @@ import tech.quantit.northstar.domain.gateway.GatewayConnection;
 import tech.quantit.northstar.gateway.api.Gateway;
 import tech.quantit.northstar.gateway.api.GatewayFactory;
 import tech.quantit.northstar.gateway.api.MarketGateway;
-import tech.quantit.northstar.gateway.api.domain.GlobalMarketRegistry;
 import tech.quantit.northstar.gateway.sim.trade.SimGatewayFactory;
 import tech.quantit.northstar.gateway.sim.trade.SimTradeGateway;
 import tech.quantit.northstar.main.utils.CodecUtils;
 import xyz.redtorch.gateway.ctp.x64v6v3v15v.CtpGatewayFactory;
 import xyz.redtorch.gateway.ctp.x64v6v5v1cpv.CtpSimGatewayFactory;
+import xyz.redtorch.pb.CoreField.ContractField;
 
 /**
  * 网关服务
@@ -282,6 +285,24 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 		return contractMgr.getAllContractDefinitions().stream()
 				.filter(def -> def.getGatewayType() == gatewayType)
 				.toList();
+	}
+	
+	/**
+	 * 获取已订阅合约
+	 * @param gatewayType
+	 * @return
+	 */
+	public List<byte[]> getSubscribedContracts(GatewayType gatewayType){
+		Map<String, GatewayDescription> resultMap = gatewayRepo.findAll().stream().collect(Collectors.toMap(GatewayDescription::getGatewayId, item -> item));
+		GatewayDescription gd = resultMap.get(gatewayType.toString());
+		if(gd == null) {
+			throw new NoSuchElementException("找不到网关信息：" + gatewayType);
+		}
+		List<ContractField> resultList = new LinkedList<>();
+		for(String contractDefId : gd.getSubscribedContractGroups()) {
+			resultList.addAll(contractMgr.relativeContracts(contractDefId));
+		}
+		return resultList.stream().map(ContractField::toByteArray).toList();
 	}
 	
 	@Override
