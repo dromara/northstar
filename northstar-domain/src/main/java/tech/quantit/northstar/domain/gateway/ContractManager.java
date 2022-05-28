@@ -1,14 +1,20 @@
 package tech.quantit.northstar.domain.gateway;
 
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import lombok.extern.slf4j.Slf4j;
+import tech.quantit.northstar.common.IContractManager;
+import tech.quantit.northstar.common.constant.Constants;
 import tech.quantit.northstar.common.exception.NoSuchElementException;
+import tech.quantit.northstar.common.model.ContractDefinition;
+import tech.quantit.northstar.common.utils.ContractUtils;
 import xyz.redtorch.pb.CoreField.ContractField;
 
 /**
@@ -18,16 +24,28 @@ import xyz.redtorch.pb.CoreField.ContractField;
  *
  */
 @Slf4j
-public class ContractManager {
+public class ContractManager implements IContractManager {
 	
 	private static final int DEFAULT_SIZE = 4096;
 	
 	/**
 	 * gateway -> unifiedSymbol -> contract
 	 */
-	private Map<String, Map<String, ContractField>> contractTbl = new ConcurrentHashMap<>();
+	private Map<String, Map<String, ContractField>> contractTbl = new HashMap<>();
 	
-	public boolean addContract(ContractField contract) {
+	private Map<ContractField, ContractDefinition> contractDefMap = new HashMap<>();
+	/**
+	 * defId -> contractSet
+	 */
+	private Map<String, Set<ContractField>> defContractMap = new HashMap<>();
+	
+	private List<ContractDefinition> contractDefinitions;
+	
+	public ContractManager(List<ContractDefinition> contractDefinitions) {
+		this.contractDefinitions = contractDefinitions;
+	}
+	
+	public synchronized boolean addContract(ContractField contract) {
 		String gatewayId = contract.getGatewayId();
 		String symbol = contract.getSymbol();
 		String unifiedSymbol = contract.getUnifiedSymbol();
@@ -35,8 +53,25 @@ public class ContractManager {
 			contractTbl.putIfAbsent(gatewayId, new ConcurrentHashMap<>(DEFAULT_SIZE));
 		}
 		contractTbl.get(gatewayId).putIfAbsent(unifiedSymbol, contract);
+		ContractDefinition def = findDefinition(contract);
+		if(def != null) {
+			contractDefMap.put(contract, def);
+			defContractMap.putIfAbsent(def.contractDefId(), new HashSet<>());
+			defContractMap.get(def.contractDefId()).add(contract);
+		}
+		
 		log.trace("加入合约：网关{}, 合约{}, 网关累计总合约数{}个", gatewayId, symbol, contractTbl.get(gatewayId).size());
 		return true;
+	}
+	
+	private ContractDefinition findDefinition(ContractField contract) {
+		for(ContractDefinition contractDef : contractDefinitions) {
+			if(contractDef.getSymbolPattern().matcher(contract.getThirdPartyId()).matches()) {
+				return contractDef;
+			}
+		}
+		
+		return null;
 	}
 	
 	public ContractField getContract(String unifiedSymbol) {
@@ -48,16 +83,36 @@ public class ContractManager {
 		throw new NoSuchElementException("找不到合约：" + unifiedSymbol);
 	}
 	
-	public Collection<ContractField> getAllContracts(){
-		List<ContractField> results = new ArrayList<>();
-		for(Entry<String, Map<String, ContractField>> e : contractTbl.entrySet()) {
-			results.addAll(e.getValue().values());
+	public ContractDefinition getContractDefinition(String unifiedSymbol) {
+		if(!contractDefMap.containsKey(getContract(unifiedSymbol))) {
+			throw new NoSuchElementException("找不到合约定义：" + unifiedSymbol);
 		}
-		return results;
+		return contractDefMap.get(getContract(unifiedSymbol));
 	}
 	
-	public Map<String, ContractField> getContractMapByGateway(String gatewayId){
-		return contractTbl.get(gatewayId);
+	public boolean isIndexContract(ContractField contract) {
+		return contract.getSymbol().contains(Constants.INDEX_SUFFIX);
 	}
 	
+	public List<ContractField> monthlyContractsOfIndex(ContractField contract){
+		if(!isIndexContract(contract)) {
+			throw new IllegalArgumentException("此合约非指数合约：" + contract.getUnifiedSymbol());
+		}
+		return ContractUtils.getMonthlyUnifiedSymbolOfIndexContract(contract.getUnifiedSymbol(), contract.getExchange())
+				.stream()
+				.map(this::getContract)
+				.filter(Objects::nonNull)
+				.toList();
+	}
+	
+	public Set<ContractField> relativeContracts(String contractDefId){
+		if(!defContractMap.containsKey(contractDefId)) {
+			throw new IllegalStateException("找不到关联合约集:" + contractDefId);
+		}
+		return defContractMap.get(contractDefId);
+	}
+	
+	public List<ContractDefinition> getAllContractDefinitions(){
+		return contractDefinitions;
+	}
 }

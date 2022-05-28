@@ -42,6 +42,7 @@ public class CloseTradeRequest extends TradeRequest {
 	public void onTrade(TradeField trade) {
 		int factor = FieldUtils.isLong(position.getDirection()) ? 1 : -1;
 		account.addCloseProfit(factor * frozenVol() * (trade.getPrice() - position.getOpenPrice()) * position.getMultipler());
+		account.updateCommission(trade);
 		position.setCloseReq(null);
 		position.merge(trade);
 		account.reportAccountStatus();

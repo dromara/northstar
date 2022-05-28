@@ -2,51 +2,87 @@
   <div class="ns-page">
     <ModuleForm
       :visible.sync="moduleFormVisible"
-      :readOnly="curTableIndex > -1 && curModule.enabled"
+      :readOnly="curTableIndex > -1 && curModule.runtime.enabled"
       :module="curModule"
       @onSave="onSave"
     />
-    <ModulePerf
-      :moduleName="curModule ? curModule.moduleName : ''"
-      :visible.sync="modulePerfVisible"
+    <ModuleRuntime
+      :visible.sync="ModuleRuntimeVisible"
+      :module="curTableIndex > -1 ? curModule : ''"
+      :moduleRuntimeSrc="curTableIndex > -1 ? curModule.runtime : ''"
     />
-    <ModulePlayback :visible.sync="modulePlaybackVisible" :data="playbackableList" />
     <el-table height="100%" :data="list">
-      <el-table-column label="模组名称" prop="moduleName" align="center" width="100px" />
-      <el-table-column label="策略模式" prop="type" align="center" width="90px" />
-      <el-table-column label="绑定账户" prop="accountGatewayId" align="center" />
-      <el-table-column label="信号策略" prop="signalPolicy.componentMeta.name" align="center" />
-      <el-table-column label="风控策略" align="center">
+      <el-table-column label="模组名称" prop="moduleName" align="center" width="200px" />
+      <el-table-column label="模组类型" prop="type" align="center" width="90px">
         <template slot-scope="scope">
-          {{ scope.row.riskControlRules.map((i) => i.componentMeta.name).join(', ') }}
+          {{ { SPECULATION: '投机', ARBITRAGE: '套利' }[scope.row.type] }}
         </template>
       </el-table-column>
-      <el-table-column label="交易策略" prop="dealer.componentMeta.name" align="center" />
-      <el-table-column label="启停切换" prop="enabled" align="center" width="100px">
+      <el-table-column label="模组周期" prop="barInterval" align="center" width="90px">
         <template slot-scope="scope">
-          <el-button
-            v-if="scope.row.enabled"
-            type="success"
-            @click.native="toggle(scope.$index, scope.row)"
-            >启用</el-button
+          {{ `${scope.row.numOfMinPerBar} 分钟` }}
+        </template>
+      </el-table-column>
+      <el-table-column label="交易策略" align="center" width="200px">
+        <template slot-scope="scope">
+          {{ scope.row.strategySetting.componentMeta.name }}
+        </template>
+      </el-table-column>
+      <el-table-column label="平仓优化" align="center" width="90px">
+        <template slot-scope="scope">
+          {{
+            { FIFO: '先开先平', PRIOR_TODAY: '平今优先', PRIOR_BEFORE_HEGDE_TODAY: '平昨锁今' }[
+              scope.row.closingPolicy
+            ]
+          }}
+        </template>
+      </el-table-column>
+      <el-table-column label="绑定账户" align="center" width="300px">
+        <template slot-scope="scope">
+          {{
+            (() => {
+              return scope.row.moduleAccountSettingsDescription
+                .map((item) => item.accountGatewayId)
+                .join('；')
+            })()
+          }}
+        </template>
+      </el-table-column>
+      <el-table-column label="绑定合约" align="center" min-width="200px">
+        <template slot-scope="scope">
+          {{
+            (() => {
+              return scope.row.moduleAccountSettingsDescription
+                .map((item) => item.bindedUnifiedSymbols.join('，'))
+                .join('；')
+            })()
+          }}
+        </template>
+      </el-table-column>
+
+      <el-table-column label="当前状态/切换" prop="enabled" align="center" width="100px">
+        <template slot-scope="scope">
+          <el-popconfirm
+            v-if="scope.row.runtime.enabled"
+            class="ml-10"
+            title="确定停用吗？"
+            @confirm="toggle(scope.$index, scope.row)"
           >
-          <el-button
-            v-if="!scope.row.enabled"
-            type="danger"
-            @click.native="toggle(scope.$index, scope.row)"
-            >停用</el-button
-          >
+            <el-button type="success" slot="reference" size="mini">启用</el-button>
+          </el-popconfirm>
+          <el-button v-else type="danger" @click.native="toggle(scope.$index, scope.row)">
+            停用
+          </el-button>
         </template>
       </el-table-column>
       <el-table-column align="center" width="240px">
         <template slot="header">
           <el-button size="mini" type="primary" @click="handleCreate">新建</el-button>
-          <el-button size="mini" @click="modulePlaybackVisible = true">回测</el-button>
         </template>
         <template slot-scope="scope">
-          <el-button size="mini" @click="handlePerf(scope.$index, scope.row)">透视</el-button>
+          <el-button size="mini" @click="handlePerf(scope.$index, scope.row)">运行状态</el-button>
           <el-button size="mini" @click="handleRow(scope.$index, scope.row)">{{
-            scope.row.enabled ? '查看' : '修改'
+            scope.row.runtime.enabled ? '查看' : '修改'
           }}</el-button>
           <el-popconfirm
             class="ml-10"
@@ -63,30 +99,22 @@
 
 <script>
 import ModuleForm from '@/components/ModuleForm'
-import ModulePerf from '@/components/ModulePerformance'
-import ModulePlayback from '@/components/ModulePlayback'
+import ModuleRuntime from '@/components/ModuleRuntime'
 
 import moduleApi from '@/api/moduleApi'
 
 export default {
   components: {
     ModuleForm,
-    ModulePerf,
-    ModulePlayback
+    ModuleRuntime
   },
   data() {
     return {
       moduleFormVisible: false,
-      modulePerfVisible: false,
-      modulePlaybackVisible: false,
+      ModuleRuntimeVisible: false,
       curTableIndex: -1,
       curModule: null,
       list: []
-    }
-  },
-  computed: {
-    playbackableList() {
-      return this.list.filter((i) => !i.enabled)
     }
   },
   mounted() {
@@ -101,7 +129,7 @@ export default {
     handlePerf(index, row) {
       this.curTableIndex = index
       this.curModule = row
-      this.modulePerfVisible = true
+      this.ModuleRuntimeVisible = true
     },
     handleRow(index, row) {
       this.curTableIndex = index
@@ -121,21 +149,16 @@ export default {
       this.findAll()
     },
     async findAll() {
-      this.list = await moduleApi.getAllModules()
+      const results = await moduleApi.getAllModules()
+      const allReq = results.map(async (item) => {
+        item.runtime = await moduleApi.getModuleRuntime(item.moduleName)
+        return item
+      })
+      this.list = await Promise.all(allReq)
     },
     async toggle(index, row) {
-      this.$confirm(
-        `是否确定切换模组启停状态？当前状态为［${row.enabled ? '启用' : '停用'}]`,
-        '提示',
-        {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }
-      ).then(async () => {
-        await moduleApi.toggleModuleState(row.moduleName)
-        await this.findAll()
-      })
+      await moduleApi.toggleModuleState(row.moduleName)
+      await this.findAll()
     }
   }
 }

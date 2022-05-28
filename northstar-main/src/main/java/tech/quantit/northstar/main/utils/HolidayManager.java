@@ -5,13 +5,12 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import tech.quantit.northstar.common.constant.DateTimeConstant;
-import tech.quantit.northstar.main.config.HolidaySettings;
+import tech.quantit.northstar.common.constant.GatewayType;
+import tech.quantit.northstar.data.IMarketDataRepository;
 
 /**
  * 法定节假日管理器
@@ -21,19 +20,16 @@ import tech.quantit.northstar.main.config.HolidaySettings;
 @Component
 public class HolidayManager implements InitializingBean{
 
-	@Autowired
-	protected HolidaySettings holidaySettings;
-	
 	protected Set<LocalDate> holidaySet = new HashSet<>();
 
+	@Autowired
+	private IMarketDataRepository repo;
+	
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		for(String date : holidaySettings.getHolidays()) {
-			if(StringUtils.isEmpty(date)) {
-				continue;
-			}
-			addHoliday(date);
-		}
+		LocalDate today = LocalDate.now();
+		holidaySet.addAll(repo.findHodidayInLaw(GatewayType.CTP, today.getYear()));
+		holidaySet.addAll(repo.findHodidayInLaw(GatewayType.CTP, today.getYear() + 1));
 	}
 	
 	public boolean isHoliday(LocalDateTime dateTime) {
@@ -54,7 +50,4 @@ public class HolidayManager implements InitializingBean{
 		return holidaySet.contains(date) || date.getDayOfWeek().getValue() > 5;
 	}
 	
-	public void addHoliday(String dateStr) {
-		holidaySet.add(LocalDate.parse(dateStr, DateTimeConstant.D_FORMAT_INT_FORMATTER));
-	}
 }

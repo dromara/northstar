@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>tech.quantit</groupId>
 		<artifactId>northstar</artifactId>
-		<version>3.5</version>
+		<version>4.0</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
@@ -39,6 +39,10 @@
 		<dependency>
 			<groupId>com.google.protobuf</groupId>
 			<artifactId>protobuf-java-util</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.googlecode.protobuf-java-format</groupId>

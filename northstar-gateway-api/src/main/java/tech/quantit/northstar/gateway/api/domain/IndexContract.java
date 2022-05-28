@@ -12,7 +12,7 @@ public class IndexContract extends NormalContract {
 	
 	private Set<ContractField> monthlyContracts;
 
-	public IndexContract(String idxSymbol, GatewayType gatewayType, Set<ContractField> monthlyContracts) {
+	public IndexContract(String idxSymbol, Set<ContractField> monthlyContracts) {
 		if(monthlyContracts.isEmpty()) {
 			throw new IllegalArgumentException("不能传入空集合");
 		}
@@ -20,13 +20,19 @@ public class IndexContract extends NormalContract {
 		String name = protoContract.getName().replaceAll("\\d+", "指数");
 		String fullName = protoContract.getFullName().replaceAll("\\d+", "指数");
 		String symbol = idxSymbol.replaceAll("([A-z]+\\d{3,4})@\\w+@\\w+", "$1");
+		String originSymbol = protoContract.getSymbol();
+		String contractId = protoContract.getContractId().replace(originSymbol, symbol);
+		String thirdPartyId = protoContract.getThirdPartyId().replace(originSymbol, symbol);
 		super.field = ContractField.newBuilder(protoContract)
 				.setSymbol(symbol)
+				.setThirdPartyId(thirdPartyId)
+				.setContractId(contractId)
+				.setLastTradeDateOrContractMonth("")
 				.setUnifiedSymbol(idxSymbol)
 				.setFullName(fullName)
 				.setName(name)
 				.build();
-		super.gatewayType = gatewayType;
+		super.gatewayType = GatewayType.valueOf(protoContract.getThirdPartyId().split("@")[1]);
 		super.updateTime = System.currentTimeMillis();
 		this.monthlyContracts = monthlyContracts;
 	}

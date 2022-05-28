@@ -41,7 +41,8 @@ then
 	cd redis-7.0.0
 	make
 	make install
-	redis-server
+	redis-server --daemonize yes
+	rm -f ~/redis-7.0.0.tar.gz
 else
 	echo "Redis已安装"
 fi

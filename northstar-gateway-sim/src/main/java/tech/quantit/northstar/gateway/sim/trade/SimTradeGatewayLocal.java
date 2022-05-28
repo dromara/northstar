@@ -4,7 +4,6 @@ import java.util.concurrent.CompletableFuture;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.event.NorthstarEventType;
 import tech.quantit.northstar.common.exception.TradeException;
@@ -33,10 +32,17 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 	
 	private GlobalMarketRegistry registry;
 	
-	public SimTradeGatewayLocal(FastEventEngine feEngine, GatewaySettingField gatewaySetting, SimAccount account, GlobalMarketRegistry registry) {
+	private SimMarket simMarket;
+	
+	private String bindedMarketGatewayId;
+	
+	public SimTradeGatewayLocal(FastEventEngine feEngine, SimMarket simMarket, GatewaySettingField gatewaySetting,
+			String bindedMarketGatewayId, SimAccount account, GlobalMarketRegistry registry) {
 		this.feEngine = feEngine;
 		this.gatewaySetting = gatewaySetting;
-		this.account = account;	
+		this.bindedMarketGatewayId = bindedMarketGatewayId;
+		this.account = account;
+		this.simMarket = simMarket;
 		this.registry = registry;
 		this.contractGen = new SimContractGenerator(gatewaySetting.getGatewayId());
 	}
@@ -45,6 +51,7 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 	public void connect() {
 		log.debug("[{}] 模拟网关连线", gatewaySetting.getGatewayId());
 		connected = true;
+		account.setConnected(connected);
 		feEngine.emitEvent(NorthstarEventType.CONNECTED, gatewaySetting.getGatewayId());
 		feEngine.emitEvent(NorthstarEventType.LOGGED_IN, gatewaySetting.getGatewayId());
 		
@@ -72,8 +79,8 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 			
 			ContractField simContract = contractGen.getContract();
 			ContractField simContract2 = contractGen.getContract2();
-			registry.register(new NormalContract(simContract, GatewayType.SIM, System.currentTimeMillis()));
-			registry.register(new NormalContract(simContract2, GatewayType.SIM, System.currentTimeMillis()));
+			registry.register(new NormalContract(simContract, System.currentTimeMillis()));
+			registry.register(new NormalContract(simContract2, System.currentTimeMillis()));
 		});
 	}
 
@@ -81,6 +88,7 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 	public void disconnect() {
 		log.debug("[{}] 模拟网关断开", gatewaySetting.getGatewayId());
 		connected = false;
+		account.setConnected(connected);
 		feEngine.emitEvent(NorthstarEventType.DISCONNECTED, gatewaySetting.getGatewayId());
 		feEngine.emitEvent(NorthstarEventType.LOGGED_OUT, gatewaySetting.getGatewayId());
 	}
@@ -113,6 +121,11 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 	@Override
 	public boolean getAuthErrorFlag() {
 		return false;
+	}
+
+	@Override
+	public void destory() {
+		simMarket.removeGateway(bindedMarketGatewayId, this);
 	}
 
 }

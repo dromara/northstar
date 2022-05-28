@@ -1,19 +1,23 @@
 package tech.quantit.northstar.main.config;
 
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
@@ -23,10 +27,14 @@ import org.springframework.web.filter.CorsFilter;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import com.google.protobuf.InvalidProtocolBufferException;
-import com.mongodb.client.MongoClient;
-
+import tech.quantit.northstar.common.constant.Constants;
+import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.common.event.FastEventEngine;
+import tech.quantit.northstar.common.model.ContractDefinition;
+import tech.quantit.northstar.common.utils.ContractDefinitionReader;
+import tech.quantit.northstar.common.utils.ContractUtils;
+import tech.quantit.northstar.data.IContractRepository;
+import tech.quantit.northstar.data.IModuleRepository;
 import tech.quantit.northstar.domain.account.TradeDayAccount;
 import tech.quantit.northstar.domain.external.MessageHandlerManager;
 import tech.quantit.northstar.domain.gateway.ContractManager;
@@ -35,18 +43,15 @@ import tech.quantit.northstar.gateway.api.GatewayFactory;
 import tech.quantit.northstar.gateway.api.domain.GlobalMarketRegistry;
 import tech.quantit.northstar.gateway.api.domain.IndexContract;
 import tech.quantit.northstar.gateway.api.domain.NormalContract;
-import tech.quantit.northstar.gateway.api.domain.SubscriptionManager;
 import tech.quantit.northstar.gateway.sim.persistence.SimAccountRepository;
 import tech.quantit.northstar.gateway.sim.trade.SimGatewayFactory;
 import tech.quantit.northstar.gateway.sim.trade.SimMarket;
-import tech.quantit.northstar.main.MarketDataCache;
+import tech.quantit.northstar.main.ExternalJarListener;
 import tech.quantit.northstar.main.interceptor.AuthorizationInterceptor;
-import tech.quantit.northstar.main.persistence.IContractRepository;
-import tech.quantit.northstar.main.persistence.MongoClientAdapter;
-import tech.quantit.northstar.main.persistence.po.ContractPO;
-import xyz.redtorch.gateway.ctp.common.CtpSubscriptionManager;
+import tech.quantit.northstar.main.utils.ModuleFactory;
 import xyz.redtorch.gateway.ctp.x64v6v3v15v.CtpGatewayFactory;
 import xyz.redtorch.gateway.ctp.x64v6v5v1cpv.CtpSimGatewayFactory;
+import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
 
 /**
@@ -105,8 +110,13 @@ public class AppConfig implements WebMvcConfigurer {
 	}
 	
 	@Bean
-	public ContractManager contractManager() {
-		return new ContractManager();
+	public ContractManager contractManager(IContractRepository contractRepo) throws IOException {
+		Resource res = new ClassPathResource("ContractDefinition.csv");
+		ContractDefinitionReader reader = new ContractDefinitionReader();
+		List<ContractDefinition> contractDefs = reader.load(res.getFile());
+		ContractManager mgr = new ContractManager(contractDefs);
+		findAllContract(contractRepo).forEach(mgr::addContract);
+		return mgr;
 	}
 	
 	@Bean
@@ -119,59 +129,38 @@ public class AppConfig implements WebMvcConfigurer {
 		return new SimMarket(simAccRepo);
 	}
 	
-	@Bean
-	public SubscriptionManager ctpSubscriptionManager(SubscriptionConfigurationProperties props) {
-		return new CtpSubscriptionManager(props.getClzTypeWhtlist(), props.getClzTypeBlklist(), props.getSymbolWhtlist(), props.getSymbolBlklist());
+	private List<ContractField> findAllContract(IContractRepository contractRepo){
+		List<ContractField> contractList = new LinkedList<>();
+		contractList.addAll(contractRepo.findAll(GatewayType.CTP));
+		contractList.addAll(contractRepo.findAll(GatewayType.SIM));
+		return contractList;
 	}
 	
 	@Bean
-	public GlobalMarketRegistry marketGlobalRegistry(FastEventEngine fastEventEngine, IContractRepository contractRepo, List<SubscriptionManager> subMgrs,
-			MarketDataCache mdCache, ContractManager contractMgr) throws InvalidProtocolBufferException {
+	public GlobalMarketRegistry globalRegistry(FastEventEngine fastEventEngine, IContractRepository contractRepo, ContractManager contractMgr) {
 		Consumer<NormalContract> handleContractSave = contract -> {
-			if(System.currentTimeMillis() - contract.updateTime() < 60000) {
-				// 更新时间少于一分钟的合约才是需要保存新增合约		
-				Set<String> monthlyContractSymbols = null;
-				boolean isIndexContract = false;
-				if(contract instanceof IndexContract idxContract) {
-					isIndexContract = true;
-					monthlyContractSymbols = idxContract.monthlyContractSymbols();
-				}
-				ContractPO po = ContractPO.builder()
-						.unifiedSymbol(contract.unifiedSymbol())
-						.data(contract.contractField().toByteArray())
-						.gatewayType(contract.gatewayType())
-						.updateTime(contract.updateTime())
-						.isIndexContract(isIndexContract)
-						.monthlyContractSymbols(monthlyContractSymbols)
-						.build();
-				contractRepo.saveContract(po);
+			if(contract.updateTime() > 0) {
+				contractRepo.save(contract.contractField(), contract.gatewayType());
 			}
 		};
 		
-		GlobalMarketRegistry registry = new GlobalMarketRegistry(fastEventEngine, handleContractSave, contractMgr::addContract, mdCache);
-		// 加载合约订阅管理器
-		for(SubscriptionManager subMgr : subMgrs) {			
-			registry.register(subMgr);
-		}
+		GlobalMarketRegistry registry = new GlobalMarketRegistry(fastEventEngine, handleContractSave, contractMgr::addContract);
 		//　加载已有合约
-		List<ContractPO> contractList = contractRepo.getAvailableContracts();
-		Map<String, ContractField> contractMap = new HashMap<>();
-		for(ContractPO po : contractList) {
-			ContractField contract = ContractField.parseFrom(po.getData());
-			contractMap.put(contract.getUnifiedSymbol(), contract);
-		}
-		for(ContractPO po : contractList) {
-			ContractField contract = contractMap.get(po.getUnifiedSymbol());
-			if(po.isIndexContract()) {
+		List<ContractField> contractList = findAllContract(contractRepo);
+		Map<String, ContractField> contractMap = contractList.stream()
+				.collect(Collectors.toMap(ContractField::getUnifiedSymbol, c -> c));
+		
+		for(ContractField contract : contractList) {
+			if(contract.getProductClass() == ProductClassEnum.FUTURES && contract.getSymbol().endsWith(Constants.INDEX_SUFFIX)) {
 				Set<ContractField> monthlyContracts = new HashSet<>();
-				for(String monthlyContractSymbol : po.getMonthlyContractSymbols()) {
+				for(String monthlyContractSymbol : ContractUtils.getMonthlyUnifiedSymbolOfIndexContract(contract.getUnifiedSymbol(), contract.getExchange())) {
 					if(contractMap.containsKey(monthlyContractSymbol)) {
 						monthlyContracts.add(contractMap.get(monthlyContractSymbol));
 					}
 				}
-				registry.register(new IndexContract(contract.getUnifiedSymbol(), po.getGatewayType(), monthlyContracts));
+				registry.register(new IndexContract(contract.getUnifiedSymbol(), monthlyContracts));
 			} else {
-				registry.register(new NormalContract(contract, po.getGatewayType(), po.getUpdateTime()));
+				registry.register(new NormalContract(contract, -1));
 			}
 		}
 		return registry;
@@ -189,13 +178,14 @@ public class AppConfig implements WebMvcConfigurer {
 	
 	@Bean
 	public GatewayFactory simGatewayFactory(FastEventEngine fastEventEngine, SimMarket simMarket, SimAccountRepository accRepo,
-			GlobalMarketRegistry registry) {
-		return new SimGatewayFactory(fastEventEngine, simMarket, accRepo, registry);
+			GlobalMarketRegistry registry, ContractManager contractMgr) {
+		return new SimGatewayFactory(fastEventEngine, simMarket, accRepo, registry, contractMgr);
 	}
 	
-	@Bean 
-	public MongoClientAdapter mongoClientAdapter(MongoClient mongoClient) {
-		return new MongoClientAdapter(mongoClient);
+	@Bean
+	public ModuleFactory moduleFactory(ExternalJarListener extJarListener, IModuleRepository moduleRepo, GatewayAndConnectionManager gatewayConnMgr,
+			ContractManager contractMgr) {
+		return new ModuleFactory(extJarListener, moduleRepo, gatewayConnMgr, contractMgr);
 	}
 	
 	@Bean

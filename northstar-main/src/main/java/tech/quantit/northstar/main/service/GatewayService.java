@@ -1,10 +1,12 @@
 package tech.quantit.northstar.main.service;
 
 import java.io.File;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
@@ -17,26 +19,26 @@ import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.common.constant.GatewayUsage;
 import tech.quantit.northstar.common.exception.NoSuchElementException;
-import tech.quantit.northstar.common.model.CtpSettings;
+import tech.quantit.northstar.common.model.ContractDefinition;
 import tech.quantit.northstar.common.model.GatewayDescription;
+import tech.quantit.northstar.common.model.ModuleAccountDescription;
+import tech.quantit.northstar.common.model.ModuleDescription;
 import tech.quantit.northstar.common.model.SimSettings;
+import tech.quantit.northstar.data.IGatewayRepository;
+import tech.quantit.northstar.data.IMarketDataRepository;
+import tech.quantit.northstar.data.IModuleRepository;
+import tech.quantit.northstar.domain.gateway.ContractManager;
 import tech.quantit.northstar.domain.gateway.GatewayAndConnectionManager;
 import tech.quantit.northstar.domain.gateway.GatewayConnection;
 import tech.quantit.northstar.gateway.api.Gateway;
 import tech.quantit.northstar.gateway.api.GatewayFactory;
 import tech.quantit.northstar.gateway.api.MarketGateway;
-import tech.quantit.northstar.gateway.api.domain.GlobalMarketRegistry;
 import tech.quantit.northstar.gateway.sim.trade.SimGatewayFactory;
-import tech.quantit.northstar.gateway.sim.trade.SimMarket;
 import tech.quantit.northstar.gateway.sim.trade.SimTradeGateway;
-import tech.quantit.northstar.main.persistence.GatewayRepository;
-import tech.quantit.northstar.main.persistence.IMarketDataRepository;
-import tech.quantit.northstar.main.persistence.ModuleRepository;
-import tech.quantit.northstar.main.persistence.po.GatewayPO;
 import tech.quantit.northstar.main.utils.CodecUtils;
-import tech.quantit.northstar.strategy.api.model.ModuleInfo;
 import xyz.redtorch.gateway.ctp.x64v6v3v15v.CtpGatewayFactory;
 import xyz.redtorch.gateway.ctp.x64v6v5v1cpv.CtpSimGatewayFactory;
+import xyz.redtorch.pb.CoreField.ContractField;
 
 /**
  * 网关服务
@@ -50,26 +52,23 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 	
 	private GatewayAndConnectionManager gatewayConnMgr;
 	
-	private GatewayRepository gatewayRepo;
+	private IGatewayRepository gatewayRepo;
 	
 	private IMarketDataRepository mdRepo;
 	
-	private SimMarket simMarket;
-	
 	private ApplicationContext ctx;
 	
-	private ModuleRepository moduleRepo;
+	private IModuleRepository moduleRepo;
 	
-	private GlobalMarketRegistry registry;
+	private ContractManager contractMgr;
 	
-	public GatewayService(GatewayAndConnectionManager gatewayConnMgr, GatewayRepository gatewayRepo, IMarketDataRepository mdRepo,
-			ModuleRepository moduleRepo, SimMarket simMarket, GlobalMarketRegistry registry) {
+	public GatewayService(GatewayAndConnectionManager gatewayConnMgr, IGatewayRepository gatewayRepo, IMarketDataRepository mdRepo,
+			IModuleRepository moduleRepo, ContractManager contractMgr) {
 		this.gatewayConnMgr = gatewayConnMgr;
 		this.gatewayRepo = gatewayRepo;
 		this.mdRepo = mdRepo;
+		this.contractMgr = contractMgr;
 		this.moduleRepo = moduleRepo;
-		this.simMarket = simMarket;
-		this.registry = registry;
 	}
 	
 	/**
@@ -79,20 +78,7 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 	 */
 	public boolean createGateway(GatewayDescription gatewayDescription) throws Exception {
 		log.info("创建网关[{}]", gatewayDescription.getGatewayId());
-		GatewayPO po = new GatewayPO();
-		BeanUtils.copyProperties(gatewayDescription, po);
-		if(null == gatewayDescription.getSettings()) {
-			throw new IllegalArgumentException("网关设置不能为空");
-		}
-		po.setSettings(CodecUtils.encrypt(JSON.toJSONString(gatewayDescription.getSettings())));
-		try {			
-			gatewayRepo.insert(po);
-		} catch(DuplicateKeyException e) {
-			throw new IllegalStateException("已存在同名网关，不能重复创建", e);
-		}
-		if(gatewayDescription.getGatewayUsage() == GatewayUsage.MARKET_DATA) {
-			mdRepo.init(gatewayDescription.getGatewayId());
-		}
+		doSaveGatewayDescription(gatewayDescription);
 		
 		return doCreateGateway(gatewayDescription);
 	}
@@ -114,14 +100,30 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 		}
 		gateway = factory.newInstance(gatewayDescription);
 		gatewayConnMgr.createPair(conn, gateway);
+		if(gateway instanceof SimTradeGateway simGateway) {
+			SimSettings simSettings = (SimSettings) gatewayDescription.getSettings();
+			simGateway.moneyIO(simSettings.getInitBalance());
+		}
 		if(gatewayDescription.isAutoConnect()) {
 			gateway.connect();
 		}
-		if(gatewayDescription.getGatewayUsage() == GatewayUsage.MARKET_DATA) {
-			registry.register((MarketGateway) gateway);
-		}
 		
 		return true;
+	}
+	
+	private void doSaveGatewayDescription(GatewayDescription gatewayDescription) {
+		if(null == gatewayDescription.getSettings()) {
+			throw new IllegalArgumentException("网关设置不能为空");
+		}
+		Object settings = gatewayDescription.getSettings();
+		String srcSettings = JSON.toJSONString(settings);
+		gatewayDescription.setSettings(CodecUtils.encrypt(srcSettings));
+		try {			
+			gatewayRepo.insert(gatewayDescription);
+		} catch(DuplicateKeyException e) {
+			throw new IllegalStateException("已存在同名网关，不能重复创建", e);
+		}
+		gatewayDescription.setSettings(settings);
 	}
 	
 	/**
@@ -131,13 +133,10 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 	 */
 	public boolean updateGateway(GatewayDescription gatewayDescription) throws Exception {
 		log.info("更新网关[{}]", gatewayDescription.getGatewayId());
-		GatewayPO po = new GatewayPO();
-		BeanUtils.copyProperties(gatewayDescription, po);
-		po.setSettings(CodecUtils.encrypt(JSON.toJSONString(gatewayDescription.getSettings())));
-		gatewayRepo.save(po);
-		
+		doDeleteGateway(gatewayDescription.getGatewayId());
+		doSaveGatewayDescription(gatewayDescription);
 		// 先删除旧的，再重新创建新的
-		return doDeleteGateway(gatewayDescription.getGatewayId()) && doCreateGateway(gatewayDescription);
+		return doCreateGateway(gatewayDescription);
 	}
 	
 	/**
@@ -147,10 +146,8 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 	public boolean deleteGateway(String gatewayId) {
 		log.info("移除网关[{}]", gatewayId);
 		GatewayConnection conn = null;
-		Gateway gateway = null;
 		if(gatewayConnMgr.exist(gatewayId)) {
 			conn = gatewayConnMgr.getGatewayConnectionById(gatewayId);
-			gateway = gatewayConnMgr.getGatewayByConnection(conn);
 		} else {
 			throw new NoSuchElementException("没有该网关记录：" +  gatewayId);
 		}
@@ -158,21 +155,21 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 			throw new IllegalStateException("非断开状态的网关不能删除");
 		}
 		if(conn.getGwDescription().getGatewayUsage() == GatewayUsage.MARKET_DATA) {			
-			registry.unregister((MarketGateway) gateway);
 			for(GatewayConnection gc : gatewayConnMgr.getAllConnections()) {
 				if(StringUtils.equals(gc.getGwDescription().getBindedMktGatewayId(), gatewayId)) {
 					throw new IllegalStateException("仍有账户网关与本行情网关存在绑定关系，请先解除绑定！");
 				}
 			}
 		} else {
-			for(ModuleInfo info : moduleRepo.findAllModuleInfo()) {
-				if(StringUtils.equals(info.getAccountGatewayId(), gatewayId)) {
-					throw new IllegalStateException("仍有模组与本账户网关存在绑定关系，请先解除绑定！");
+			for(ModuleDescription md : moduleRepo.findAllSettings()) {
+				for(ModuleAccountDescription mad : md.getModuleAccountSettingsDescription()) {
+					if(StringUtils.equals(mad.getAccountGatewayId(), gatewayId)) {
+						throw new IllegalStateException("仍有模组与本账户网关存在绑定关系，请先解除绑定！");
+					}
 				}
 			}
 		}
 		boolean flag = doDeleteGateway(gatewayId);
-		gatewayRepo.deleteById(gatewayId);
 		mdRepo.dropGatewayData(gatewayId);
 		return flag;
 	}
@@ -181,9 +178,9 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 		GatewayConnection conn = gatewayConnMgr.getGatewayConnectionById(gatewayId);
 		Gateway gateway = gatewayConnMgr.getGatewayByConnection(conn);
 		gatewayConnMgr.removePair(conn);
+		gatewayRepo.deleteById(gatewayId);
 		if(gateway instanceof SimTradeGateway simGateway) {
-			String mdGatewayId = conn.getGwDescription().getBindedMktGatewayId();
-			simMarket.removeGateway(mdGatewayId, simGateway);
+			simGateway.destory();
 		}
 		return true;
 	}
@@ -267,6 +264,11 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 		return true;
 	}
 	
+	/**
+	 * 活跃检测
+	 * @param gatewayId
+	 * @return
+	 */
 	public boolean isActive(String gatewayId) {
 		try {
 			MarketGateway gateway = (MarketGateway) gatewayConnMgr.getGatewayById(gatewayId);
@@ -276,25 +278,45 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 		}
 	}
 	
+	/**
+	 * 获取合约定义
+	 * @param gatewayType
+	 * @return
+	 */
+	public List<ContractDefinition> contractDefinitions(GatewayType gatewayType){
+		return contractMgr.getAllContractDefinitions().stream()
+				.filter(def -> def.getGatewayType() == gatewayType)
+				.toList();
+	}
+	
+	/**
+	 * 获取已订阅合约
+	 * @param gatewayType
+	 * @return
+	 */
+	public List<byte[]> getSubscribedContracts(GatewayType gatewayType){
+		Map<String, GatewayDescription> resultMap = gatewayRepo.findAll().stream().collect(Collectors.toMap(GatewayDescription::getGatewayId, item -> item));
+		GatewayDescription gd = resultMap.get(gatewayType.toString());
+		if(gd == null) {
+			throw new NoSuchElementException("找不到网关信息：" + gatewayType);
+		}
+		List<ContractField> resultList = new LinkedList<>();
+		for(String contractDefId : gd.getSubscribedContractGroups()) {
+			resultList.addAll(contractMgr.relativeContracts(contractDefId));
+		}
+		return resultList.stream().map(ContractField::toByteArray).toList();
+	}
+	
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		List<GatewayPO> result = gatewayRepo.findAll();
-		for(GatewayPO po : result) {
-			GatewayDescription gd = new GatewayDescription();
-			BeanUtils.copyProperties(po, gd);
-			String decodeStr = CodecUtils.decrypt((String) po.getSettings());
+		List<GatewayDescription> result = gatewayRepo.findAll();
+		for(GatewayDescription gd : result) {
+			String decodeStr = CodecUtils.decrypt((String) gd.getSettings());
 			if(!JSON.isValid(decodeStr)) {
 				throw new IllegalStateException("解码字符串非法，很可能是临时文件夹" + System.getProperty("user.home") + File.separator
 						+ ".northstar-salt这个盐文件与加密时的不一致导致无法解码。解决办法：手动移除旧的Gateway数据，重新录入，并确保盐文件不会丢失。");
 			}
-			if(gd.getGatewayType() == GatewayType.CTP || gd.getGatewayType() == GatewayType.CTP_SIM) {
-				CtpSettings settings = JSON.parseObject(decodeStr, CtpSettings.class);
-				gd.setSettings(settings);
-			}
-			if(gd.getGatewayType() == GatewayType.SIM) {
-				SimSettings settings = JSON.parseObject(decodeStr, SimSettings.class);
-				gd.setSettings(settings);
-			}
+			gd.setSettings(JSON.parseObject(decodeStr));
 			doCreateGateway(gd);
 		}
 	}

@@ -20,6 +20,7 @@ import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreField.OrderField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 
+@SuppressWarnings("unchecked")
 class TradeRequestTest {
 	
 	TestFieldFactory factory = new TestFieldFactory("gateway");

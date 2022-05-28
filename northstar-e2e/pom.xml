@@ -3,7 +3,7 @@
   <parent>
     <groupId>tech.quantit</groupId>
     <artifactId>northstar</artifactId>
-    <version>3.5</version>
+    <version>4.0</version>
   </parent>
   <artifactId>northstar-e2e</artifactId>
   <name>northstar-e2e</name>

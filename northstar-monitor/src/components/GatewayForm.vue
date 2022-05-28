@@ -2,7 +2,7 @@
   <el-dialog
     id="gatewayForm"
     :title="isUpdateMode ? '修改' : '新增'"
-    :visible.sync="dialogVisible"
+    :visible="visible"
     width="768px"
     :close-on-click-modal="false"
     :show-close="false"
@@ -30,7 +30,7 @@
         </el-col>
         <el-col :span="16">
           <el-form-item :label="`${typeLabel}描述`" prop="description">
-            <el-input v-model="form.description" autocomplete="off"></el-input>
+            <el-input v-model="form.description" autocomplete="off" class="mxw-340"></el-input>
           </el-form-item>
         </el-col>
       </el-row>
@@ -51,9 +51,9 @@
             </el-select>
           </el-form-item>
         </el-col>
-        <el-col :span="16">
-          <el-form-item label="适配器类型" prop="gatewayAdapterType">
-            <el-input v-model="form.gatewayAdapterType" autocomplete="off" disabled></el-input>
+        <el-col :span="5">
+          <el-form-item label="自动连接">
+            <el-switch v-model="form.autoConnect"></el-switch>
           </el-form-item>
         </el-col>
       </el-row>
@@ -92,11 +92,38 @@
             </el-select>
           </el-form-item>
         </el-col>
-        <el-col :span="5">
-          <el-form-item label="自动连接">
-            <el-switch v-model="form.autoConnect"></el-switch>
+        <el-col :span="16" v-if="gatewayUsage === 'MARKET_DATA'">
+          <el-form-item label="订阅合约">
+            <el-select
+              v-model="form.subscribedContractGroups"
+              multiple
+              filterable
+              collapse-tags
+              placeholder="请选择合约"
+            >
+              <el-option
+                v-for="item in contractDefOptions"
+                :key="item.name"
+                :label="item.label"
+                :value="item"
+              >
+              </el-option>
+            </el-select>
           </el-form-item>
         </el-col>
+      </el-row>
+      <el-row v-if="gatewayUsage === 'MARKET_DATA'">
+        <el-form-item label="已订阅合约">
+          <div
+            class="tag-wrapper"
+            v-if="form.subscribedContractGroups && form.subscribedContractGroups.length"
+          >
+            <el-tag v-for="(item, i) in form.subscribedContractGroups" :key="i">
+              {{ item.name + { FUTURES: '期货', OPTION: '期权' }[item.productClass] }}
+            </el-tag>
+          </div>
+          <el-tag type="info" v-else>没有订阅合约</el-tag>
+        </el-form-item>
       </el-row>
     </el-form>
     <div slot="footer" class="dialog-footer">
@@ -117,6 +144,7 @@
 import NsCtpForm from '@/components/CtpForm'
 import NsSimForm from '@/components/SimForm'
 import gatewayMgmtApi from '../api/gatewayMgmtApi'
+
 const GATEWAY_ADAPTER = {
   CTP: 'xyz.redtorch.gateway.ctp.x64v6v3v15v.CtpGatewayAdapter',
   CTP_SIM: 'xyz.redtorch.gateway.ctp.x64v6v5v1cpv.CtpSimGatewayAdapter',
@@ -161,9 +189,9 @@ export default {
         gatewayUsage: [{ required: true, message: '不能为空', trigger: 'blur' }],
         bindedMktGatewayId: [{ required: true, message: '不能为空', trigger: 'blur' }]
       },
-      dialogVisible: false,
       ctpFormVisible: false,
       simFormVisible: false,
+      contractFormVisible: false,
       form: {
         gatewayId: '',
         description: '',
@@ -173,37 +201,60 @@ export default {
         connectionState: CONNECTION_STATE.DISCONNECTED,
         autoConnect: true,
         bindedMktGatewayId: '',
+        subscribedContractGroups: [],
         settings: null
-      }
+      },
+      contractType: '',
+      cacheContracts: {}
     }
   },
   computed: {
     typeLabel() {
       return this.gatewayUsage === 'TRADE' ? '账户' : '网关'
+    },
+    contractDefOptions() {
+      if (!this.form.gatewayType) return []
+      const type = { FUTURES: '期货', OPTION: '期权' }
+      return this.cacheContracts[this.form.gatewayType].map((item) => {
+        item.value = item.name + '@' + item.productClass
+        item.label = item.name + type[item.productClass]
+        return item
+      })
     }
-  },
-  async created() {
-    this.linkedGatewayOptions = await gatewayMgmtApi.findAll('MARKET_DATA')
-    this.form.gatewayUsage = this.gatewayUsage
   },
   watch: {
-    visible: function (val) {
+    visible: async function (val) {
       if (val) {
-        this.dialogVisible = val
-        Object.assign(this.form, this.gatewayDescription)
+        this.form = Object.assign({}, this.gatewayDescription)
+        this.form.gatewayUsage = this.gatewayUsage
+        if (this.form.subscribedContractGroups) {
+          this.form.subscribedContractGroups = this.form.subscribedContractGroups.map((defId) =>
+            this.cacheContracts[this.form.gatewayType].find(
+              (item) => `${item.name}@${item.productClass}` === defId
+            )
+          )
+        }
+        this.linkedGatewayOptions = await gatewayMgmtApi.findAll('MARKET_DATA')
       }
     },
-    dialogVisible: function (val) {
-      if (!val) {
-        this.$emit('update:visible', val)
+    'form.gatewayType': function (val) {
+      if (val && this.gatewayUsage === 'MARKET_DATA' && !this.isUpdateMode) {
+        this.form.subscribedContractGroups.length = 0
       }
     }
+  },
+  created() {
+    ;['CTP', 'SIM'].forEach((item) => {
+      gatewayMgmtApi.getContractDef(item).then((results) => {
+        this.cacheContracts[item] = results
+      })
+    })
   },
   methods: {
     onChooseGatewayType() {
       this.form.gatewayAdapterType = GATEWAY_ADAPTER[this.form.gatewayType]
       if (this.gatewayUsage === 'MARKET_DATA') {
-        this.form.gatewayId = `${this.form.gatewayType}行情`
+        this.form.gatewayId = `${this.form.gatewayType}`
       }
     },
     gatewaySettingConfig() {
@@ -224,19 +275,22 @@ export default {
       this.$refs.gatewayForm
         .validate()
         .then(() => {
-          let obj = {}
-          Object.assign(obj, this.form)
-          this.$emit('onSave', obj)
+          if (this.gatewayUsage === 'MARKET_DATA') {
+            this.form.subscribedContractGroups = this.form.subscribedContractGroups.map(
+              (item) => item.value
+            )
+          }
+          this.$emit('onSave', this.form)
           this.close()
         })
         .catch((e) => {
           console.error(e)
+          this.$message.error(e.message)
         })
     },
     close() {
-      this.dialogVisible = false
+      this.$emit('update:visible', false)
       this.form = this.$options.data().form
-      this.form.gatewayUsage = this.gatewayUsage
     }
   }
 }
@@ -245,5 +299,12 @@ export default {
 <style>
 .el-dialog__body {
   padding: 10px 20px 0px;
+}
+.tag-wrapper {
+  overflow: auto;
+  max-height: 200px;
+}
+.tag-wrapper .el-tag {
+  margin-right: 10px;
 }
 </style>

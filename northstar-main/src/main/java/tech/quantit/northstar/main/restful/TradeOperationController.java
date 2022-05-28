@@ -13,7 +13,6 @@ import tech.quantit.northstar.common.model.OrderRecall;
 import tech.quantit.northstar.common.model.OrderRequest;
 import tech.quantit.northstar.common.model.ResultBean;
 import tech.quantit.northstar.main.service.AccountService;
-import tech.quantit.northstar.main.service.SMSTradeService;
 
 /**
  * 交易控制器
@@ -27,9 +26,6 @@ public class TradeOperationController {
 	@Autowired
 	protected AccountService accountService;
 	
-	@Autowired
-	protected SMSTradeService smsTradeService;
-
 	@PostMapping("/submit")
 	public ResultBean<Boolean> submitOrder(@RequestBody OrderRequest req) throws InsufficientException {
 		Assert.hasText(req.getGatewayId(), "账户网关ID不能为空");
@@ -45,9 +41,4 @@ public class TradeOperationController {
 		return new ResultBean<>(accountService.cancelOrder(recall));
 	}
 	
-	@PostMapping(value="/sms", consumes = {"text/plain"})
-	public ResultBean<Boolean> tradeBySMS(@RequestBody String text){
-		smsTradeService.dispatchMsg(text);
-		return new ResultBean<>(true);
-	}
 }

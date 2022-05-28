@@ -100,6 +100,9 @@
         header-align="center"
         align="center"
       >
+        <template slot-scope="scope">
+          {{ scope.row.bindedMktGatewayId }}
+        </template>
       </el-table-column>
       <el-table-column
         label="适配器类型"
@@ -195,27 +198,28 @@ export default {
   },
   mounted() {
     console.log('GatewayManagement created. Usage:' + this.gatewayUsage)
-    const timelyUpdate = () => {
-      this.updateList().catch(() => clearTimeout(timer))
-      timer = setTimeout(timelyUpdate, 5000)
-    }
-    timelyUpdate()
+    this.timelyUpdate()
   },
   computed: {
     typeLabel() {
       return this.gatewayUsage === 'TRADE' ? '账户' : '网关'
     }
   },
-  watch:{
-    gatewayUsage: function(){
+  watch: {
+    gatewayUsage: function () {
       this.tableData = []
-      this.updateList()
+      clearTimeout(timer)
+      this.timelyUpdate()
     }
   },
   methods: {
+    timelyUpdate() {
+      this.updateList().catch(() => clearTimeout(timer))
+      timer = setTimeout(this.timelyUpdate, 5000)
+    },
     async updateList() {
       const data = await gatewayMgmtApi.findAll(this.gatewayUsage)
-      if (this.gatewayUsage !== 'TRADE') {
+      if (this.gatewayUsage === 'MARKET_DATA') {
         const tableDataPromise = data.map(async (item) => {
           item.isActive = await gatewayMgmtApi.isActive(item.gatewayId)
           return item

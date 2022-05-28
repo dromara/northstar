@@ -31,6 +31,7 @@ class ContractFactoryTest {
 					.setCurrency(CurrencyEnum.CNY)
 					.setContractId(name + "@gateway")
 					.setExchange(ExchangeEnum.SHFE)
+					.setThirdPartyId("gateway@" + GatewayType.CTP)
 					.setFullName(name)
 					.setLongMarginRatio(0.08)
 					.setShortMarginRatio(0.08)
@@ -46,7 +47,7 @@ class ContractFactoryTest {
 
 	@Test
 	void testMakeIndexContract() {
-		ContractFactory contractFactory = new ContractFactory(GatewayType.CTP, list);
+		ContractFactory contractFactory = new ContractFactory(list);
 		List<IndexContract> idxList = contractFactory.makeIndexContract();
 		String[] expectedName = {"rb0000@SHFE@FUTURES", "AP0000@CZE@FUTURES", "M0000@DZE@FUTURES"};
 		Set<String> nameSet = Set.of(expectedName);

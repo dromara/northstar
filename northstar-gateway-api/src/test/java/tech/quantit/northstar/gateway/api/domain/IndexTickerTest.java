@@ -22,6 +22,7 @@ import tech.quantit.northstar.common.constant.DateTimeConstant;
 import test.common.TestFieldFactory;
 import xyz.redtorch.pb.CoreField.TickField;
 
+@SuppressWarnings("unchecked")
 class IndexTickerTest {
 
 	private TestFieldFactory factory = new TestFieldFactory("gateway");

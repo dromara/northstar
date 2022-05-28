@@ -20,11 +20,12 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import com.google.common.eventbus.EventBus;
 
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
+import tech.quantit.northstar.common.IContractManager;
 import tech.quantit.northstar.common.TickDataAware;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.event.NorthstarEventType;
+import tech.quantit.northstar.common.model.ContractDefinition;
 import tech.quantit.northstar.common.utils.FieldUtils;
 import xyz.redtorch.pb.CoreEnum.CurrencyEnum;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
@@ -37,7 +38,6 @@ import xyz.redtorch.pb.CoreField.TradeField;
 
 @Data
 @Document
-@NoArgsConstructor
 public class SimAccount implements TickDataAware{
 	
 	@Id
@@ -60,7 +60,9 @@ public class SimAccount implements TickDataAware{
 	
 	protected double totalWithdraw;
 	
-	protected int transactionFee;
+	private volatile boolean connected;
+	
+	private IContractManager contractMgr;
 	
 	@Transient
 	@Setter
@@ -87,9 +89,9 @@ public class SimAccount implements TickDataAware{
 		savingCallback.run();
 	};
 	
-	public SimAccount(String gatewayId,  int fee) {
+	public SimAccount(String gatewayId,  IContractManager contractMgr) {
 		this.gatewayId = gatewayId;
-		this.transactionFee = fee;
+		this.contractMgr = contractMgr;
 	}
 	
 	public double balance() {
@@ -224,8 +226,10 @@ public class SimAccount implements TickDataAware{
 		shortMap.values().stream().forEach(eventBus::register);
 	}
 
-	public void addCommission(int volume) {
-		totalCommission += volume * transactionFee;
+	public void updateCommission(TradeField trade) {
+		ContractDefinition contractDef = contractMgr.getContractDefinition(trade.getContract().getUnifiedSymbol());
+		double commission = contractDef.getCommissionInPrice() > 0 ? contractDef.getCommissionInPrice() : contractDef.commissionRate() * trade.getPrice() * trade.getContract().getMultiplier();
+		totalCommission += trade.getVolume() * commission;
 	}
 
 	public void addCloseProfit(double profit) {
@@ -235,7 +239,7 @@ public class SimAccount implements TickDataAware{
 	private long lastReportTime;
 	@Override
 	public void onTick(TickField tick) {
-		if(System.currentTimeMillis() - lastReportTime < 1000) {
+		if(!connected || System.currentTimeMillis() - lastReportTime < 1000) {
 			return;
 		}
 		lastReportTime = System.currentTimeMillis();
@@ -258,5 +262,9 @@ public class SimAccount implements TickDataAware{
 				itEntry.remove();
 			}
 		}
+	}
+	
+	public void setConnected(boolean connected) {
+		this.connected = connected;
 	}
 }

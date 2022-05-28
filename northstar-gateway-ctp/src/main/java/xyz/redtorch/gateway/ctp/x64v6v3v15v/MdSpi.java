@@ -8,7 +8,6 @@ import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -20,7 +19,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import tech.quantit.northstar.common.constant.DateTimeConstant;
-import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.common.event.NorthstarEventType;
 import tech.quantit.northstar.common.utils.CommonUtils;
 import tech.quantit.northstar.common.utils.MarketTimeUtil;
@@ -316,8 +314,6 @@ public class MdSpi extends CThostFtdcMdSpi {
 					cThostFtdcMdApi.SubscribeMarketData(symbolArray, subscribedSymbolSet.size());
 				}
 				
-				gatewayAdapter.registry.autoSubscribeContracts(GatewayType.CTP);
-				
 				gatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.CONNECTED, gatewayId);
 				gatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.TRADE_DATE, tradingDay);
 			} else {
@@ -400,16 +396,6 @@ public class MdSpi extends CThostFtdcMdSpi {
 		}
 	}
 	
-	
-	private Set<String> monitorSet = new HashSet<>() {
-		{
-			add("SA205");
-			add("FG205");
-			add("MA205");
-			add("rb2205");
-		}
-	};
-
 	// 合约行情推送
 	public void OnRtnDepthMarketData(CThostFtdcDepthMarketDataField pDepthMarketData) {
 		if (pDepthMarketData != null) {

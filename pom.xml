@@ -5,10 +5,10 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>tech.quantit</groupId>
 	<artifactId>northstar</artifactId>
-	<version>3.5</version>
+	<version>4.0</version>
 	<name>northstar</name>
 	<packaging>pom</packaging>
-	<description>北极星程序化交易平台</description>
+	<description>智盈程序化交易平台</description>
 
 	<properties>
 		<java.version>17</java.version>
@@ -24,14 +24,14 @@
 		<commons-lang3-version>3.7</commons-lang3-version>
 		<commons-codec-version>1.13</commons-codec-version>
 		<commons-io-version>2.6</commons-io-version>
-		<fastjson-version>1.2.62</fastjson-version>
+		<fastjson-version>2.0.4</fastjson-version>
 		<guava-version>30.1-jre</guava-version>
 		<protobuf-version>3.19.1</protobuf-version>
 		<protobuf-java-format-version>1.4</protobuf-java-format-version>
 		<disruptor-version>3.4.2</disruptor-version>
 		<jwt-version>3.5.0</jwt-version>
 		<servlet-version>3.1.0</servlet-version>
-		<netty-socketio-version>1.7.8</netty-socketio-version>
+		<netty-socketio-version>1.7.19</netty-socketio-version>
 		<socketio-client-version>1.0.0</socketio-client-version>
 		<hessian-version>4.0.38</hessian-version>
 		<hutool-version>5.6.3</hutool-version>
@@ -43,9 +43,11 @@
 	<modules>
 		<module>northstar-monitor</module>
 		<module>northstar-common</module>
+		<module>northstar-data</module>
 		<module>northstar-gateway-api</module>
 		<module>northstar-gateway-ctp</module>
 		<module>northstar-gateway-sim</module>
+		<module>northstar-gateway-playback</module>
 		<module>northstar-domain</module>
 		<module>northstar-strategy-api</module>
 		<module>northstar-main</module>
@@ -69,6 +71,11 @@
 			</dependency>
 			<dependency>
 				<groupId>tech.quantit</groupId>
+				<artifactId>northstar-data</artifactId>
+				<version>${northstar-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>tech.quantit</groupId>
 				<artifactId>northstar-strategy-api</artifactId>
 				<version>${northstar-version}</version>
 			</dependency>
@@ -85,6 +92,11 @@
 			<dependency>
 				<groupId>tech.quantit</groupId>
 				<artifactId>northstar-gateway-sim</artifactId>
+				<version>${northstar-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>tech.quantit</groupId>
+				<artifactId>northstar-gateway-playback</artifactId>
 				<version>${northstar-version}</version>
 			</dependency>
 			<dependency>
@@ -135,6 +147,11 @@
 				<version>${springboot-version}</version>
 			</dependency>
 			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-starter-data-redis</artifactId>
+				<version>${springboot-version}</version>
+			</dependency>
+			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-lang3</artifactId>
 				<version>${commons-lang3-version}</version>
@@ -163,6 +180,11 @@
 				<groupId>javax.validation</groupId>
 				<artifactId>validation-api</artifactId>
 				<version>2.0.1.Final</version>
+			</dependency>
+			<dependency>
+			    <groupId>com.squareup.okhttp3</groupId>
+			    <artifactId>okhttp</artifactId>
+			    <version>3.14.9</version>
 			</dependency>
 			<dependency>
 				<groupId>com.fasterxml.jackson.core</groupId>
@@ -243,7 +265,7 @@
 			    <version>${byte-buddy-version}</version>
 			    <scope>test</scope>
 			</dependency>
-						
+
 			<!-- https://mvnrepository.com/artifact/org.hibernate.validator/hibernate-validator -->
 			<dependency>
 				<groupId>org.hibernate.validator</groupId>
@@ -255,6 +277,11 @@
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-math3</artifactId>
 				<version>3.5</version>
+			</dependency>
+			<dependency>
+			    <groupId>org.springframework</groupId>
+			    <artifactId>spring-web</artifactId>
+			    <version>5.3.10</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.logging.log4j</groupId>
@@ -313,6 +340,12 @@
 					<artifactId>maven-compiler-plugin</artifactId>
 					<version>3.8.1</version>
 					<configuration>
+						<source>${java.version}</source>
+						<target>${java.version}</target>
+						<encoding>UTF-8</encoding>
+						<compilerArgs>
+							<arg>-parameters</arg>
+						</compilerArgs>
 						<parameters>true</parameters>
 					</configuration>
 				</plugin>
@@ -355,17 +388,6 @@
 								<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
 							</manifest>
 						</archive>
-					</configuration>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-resources-plugin</artifactId>
-					<configuration>
-						<propertiesEncoding>${project.build.sourceEncoding}</propertiesEncoding>
-						<delimiters>
-							<delimiter>${resource.delimiter}</delimiter>
-						</delimiters>
-						<useDefaultDelimiters>false</useDefaultDelimiters>
 					</configuration>
 				</plugin>
 				<plugin>
@@ -505,7 +527,7 @@
 											<limit>
 												<counter>LINE</counter>
 												<value>COVEREDRATIO</value>
-												<minimum>0.7</minimum>
+												<minimum>0.5</minimum>
 											</limit>
 										</limits>
 									</rule>

@@ -4,14 +4,13 @@
 	<parent>
 		<groupId>tech.quantit</groupId>
 		<artifactId>northstar</artifactId>
-		<version>3.5</version>
+		<version>4.0</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 	
 	<artifactId>northstar-gateway-api</artifactId>
 
 	<name>northstar-gateway-api</name>
-	<description>北极星程序化交易平台网关API</description>
 
 	<properties>
 	</properties>

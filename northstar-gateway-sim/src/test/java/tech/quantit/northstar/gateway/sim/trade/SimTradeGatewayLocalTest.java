@@ -33,7 +33,7 @@ class SimTradeGatewayLocalTest {
 				.setGatewayId("gatewayId")
 				.build();
 		SimAccount simAccount = mock(SimAccount.class);
-		gateway = new SimTradeGatewayLocal(feEngine, settings, simAccount, mock(GlobalMarketRegistry.class));
+		gateway = new SimTradeGatewayLocal(feEngine, mock(SimMarket.class), settings, "bindedGatewayId", simAccount, mock(GlobalMarketRegistry.class));
 	}
 
 	@Test

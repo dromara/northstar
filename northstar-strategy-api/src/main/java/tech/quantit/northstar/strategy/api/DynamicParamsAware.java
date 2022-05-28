@@ -1,6 +1,6 @@
 package tech.quantit.northstar.strategy.api;
 
-import tech.quantit.northstar.strategy.api.model.DynamicParams;
+import tech.quantit.northstar.common.model.DynamicParams;
 
 public interface DynamicParamsAware {
 

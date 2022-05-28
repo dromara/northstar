@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 public class SimSettings implements GatewaySettings{
 	
 	/**
-	 * 交易手续费
+	 * 初始账户资金
 	 */
-	private int fee;
+	private int initBalance;
 }

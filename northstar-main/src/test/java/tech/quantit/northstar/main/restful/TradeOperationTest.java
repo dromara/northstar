@@ -17,7 +17,6 @@ import com.corundumstudio.socketio.SocketIOServer;
 
 import tech.quantit.northstar.common.MessageHandler;
 import tech.quantit.northstar.common.event.FastEventEngine;
-import tech.quantit.northstar.common.event.NorthstarEventType;
 import tech.quantit.northstar.common.model.OrderRequest;
 import tech.quantit.northstar.common.model.OrderRequest.TradeOperation;
 import tech.quantit.northstar.domain.account.TradeDayAccount;
@@ -88,9 +87,4 @@ public class TradeOperationTest {
 		verify(account).closePosition(orderReq);
 	}
 	
-	@Test
-	public void shouldDispatchMessage() {
-		ctrlr.tradeBySMS("this is mock");
-		verify(feEngine).emitEvent(NorthstarEventType.EXT_MSG, "this is mock");
-	}
 }

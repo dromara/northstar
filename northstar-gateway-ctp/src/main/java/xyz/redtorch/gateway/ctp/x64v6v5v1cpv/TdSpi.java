@@ -21,7 +21,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import tech.quantit.northstar.common.constant.Constants;
 import tech.quantit.northstar.common.constant.DateTimeConstant;
 import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.common.event.NorthstarEventType;
@@ -1325,7 +1324,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 			String symbol = pInstrument.getInstrumentID();
 			String name = CtpContractNameResolver.getCNSymbolName(symbol);
 			ContractField.Builder contractBuilder = ContractField.newBuilder();
-			contractBuilder.setGatewayId(Constants.CTP_SIM_MKT_GATEWAY_ID);
+			contractBuilder.setGatewayId(GatewayType.CTP_SIM.toString());
 			contractBuilder.setSymbol(symbol);
 			contractBuilder.setExchange(CtpConstant.exchangeMapReverse.getOrDefault(pInstrument.getExchangeID(), ExchangeEnum.UnknownExchange));
 			contractBuilder.setProductClass(CtpConstant.productTypeMapReverse.getOrDefault(pInstrument.getProductClass(), ProductClassEnum.UnknownProductClass));
@@ -1333,7 +1332,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 			contractBuilder.setContractId(contractBuilder.getUnifiedSymbol() + "@" + gatewayId);
 			contractBuilder.setName(name != null ? name : pInstrument.getInstrumentName());
 			contractBuilder.setFullName(pInstrument.getInstrumentName());
-			contractBuilder.setThirdPartyId(contractBuilder.getSymbol());
+			contractBuilder.setThirdPartyId(contractBuilder.getSymbol() + "@" + GatewayType.CTP_SIM);
 
 			if (pInstrument.getVolumeMultiple() <= 0) {
 				contractBuilder.setMultiplier(1);
@@ -1362,7 +1361,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 
 			ContractField contract = contractBuilder.build();
 			gatewayAdapter.contractMap.put(contractBuilder.getSymbol(), contract);
-			gatewayAdapter.registry.register(new NormalContract(contract, GatewayType.CTP_SIM, System.currentTimeMillis()));
+			gatewayAdapter.registry.register(new NormalContract(contract, System.currentTimeMillis()));
 			if (bIsLast) {
 				
 				logger.warn("{}交易接口合约信息获取完成!共计{}条", logInfo, gatewayAdapter.contractMap.size());
