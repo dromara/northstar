@@ -27,12 +27,20 @@ public class ContractRepoRedisImpl implements IContractRepository {
 	
 	private RedisTemplate<String, byte[]> redisTemplate;
 	
-	private static final String PREFIX = "contracts:";
+	private static final String PREFIX = "Contracts:";
 	
 	public ContractRepoRedisImpl(RedisTemplate<String, byte[]> redisTemplate) {
 		this.redisTemplate = redisTemplate;
 	}
 
+	/**
+	 * redis的数据保存结构
+	 * key -> hash
+	 * key=Contract:GatewayType
+	 * value = {
+	 * 	unifiedSymbol: contractDataBytes
+	 * }
+	 */
 	@Override
 	public void save(ContractField contract, GatewayType gatewayType) {
 		String key = PREFIX + gatewayType;

@@ -1,5 +1,6 @@
 package tech.quantit.northstar.gateway.api.domain;
 
+import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -36,7 +37,6 @@ class GlobalMarketRegistryTest {
 		
 		registry.register(contract);
 		
-		verify(gateway).subscribe(any());
 		verify(callback).accept(any());
 	}
 	
@@ -63,9 +63,9 @@ class GlobalMarketRegistryTest {
 		when(gateway.isConnected()).thenReturn(true);
 		when(contract.gatewayType()).thenReturn(GatewayType.CTP);
 		when(contract.barGenerator()).thenReturn(mock(BarGenerator.class));
-		registry.register(contract);
 		
-		verify(gateway).subscribe(any());
+		registry.register(contract);
+		assertThatNoException();
 	}
 
 	@Test

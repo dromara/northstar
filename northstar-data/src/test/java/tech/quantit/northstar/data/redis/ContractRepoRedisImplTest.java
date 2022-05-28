@@ -74,8 +74,8 @@ class ContractRepoRedisImplTest {
 	@Test
 	void testSave() {
 		repo.save(c2, GatewayType.CTP);
-		assertThat(redisTemplate.hasKey("contracts:CTP")).isTrue();
-		assertThat(redisTemplate.getExpire("contracts:CTP")).isNegative();
+		assertThat(redisTemplate.hasKey("Contracts:CTP")).isTrue();
+		assertThat(redisTemplate.getExpire("Contracts:CTP")).isNegative();
 	}
 
 	@Test

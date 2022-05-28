@@ -31,7 +31,7 @@ class ContractFactoryTest {
 					.setCurrency(CurrencyEnum.CNY)
 					.setContractId(name + "@gateway")
 					.setExchange(ExchangeEnum.SHFE)
-					.setThirdPartyId("gateway#" + GatewayType.CTP)
+					.setThirdPartyId("gateway@" + GatewayType.CTP)
 					.setFullName(name)
 					.setLongMarginRatio(0.08)
 					.setShortMarginRatio(0.08)

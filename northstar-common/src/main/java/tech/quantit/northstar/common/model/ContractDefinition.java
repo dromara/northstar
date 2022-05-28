@@ -50,4 +50,11 @@ public class ContractDefinition {
 	public String contractDefId() {
 		return name + "@" + productClass;
 	}
+	/**
+	 * 手续费率
+	 * @return
+	 */
+	public double commissionRate() {
+		return commissionInBasePoint * 1e-4;
+	}
 }
