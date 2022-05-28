@@ -12,6 +12,7 @@ import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactor
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
+import tech.quantit.northstar.common.constant.Constants;
 import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.data.IContractRepository;
 /*
@@ -74,8 +75,8 @@ class ContractRepoRedisImplTest {
 	@Test
 	void testSave() {
 		repo.save(c2, GatewayType.CTP);
-		assertThat(redisTemplate.hasKey("Contracts:CTP")).isTrue();
-		assertThat(redisTemplate.getExpire("Contracts:CTP")).isNegative();
+		assertThat(redisTemplate.hasKey(Constants.APP_NAME + "Contracts:CTP")).isTrue();
+		assertThat(redisTemplate.getExpire(Constants.APP_NAME + "Contracts:CTP")).isNegative();
 	}
 
 	@Test

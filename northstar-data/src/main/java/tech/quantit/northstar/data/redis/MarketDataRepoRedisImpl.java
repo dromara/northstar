@@ -16,6 +16,7 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.constant.Constants;
 import tech.quantit.northstar.common.constant.DateTimeConstant;
+import tech.quantit.northstar.data.ds.DataServiceManager;
 import tech.quantit.northstar.data.ds.MarketDataRepoDataServiceImpl;
 import xyz.redtorch.pb.CoreField.BarField;
 
@@ -31,7 +32,8 @@ public class MarketDataRepoRedisImpl extends MarketDataRepoDataServiceImpl {
 	
 	private static final String KEY_PREFIX = Constants.APP_NAME + "BarData:";
 	
-	public MarketDataRepoRedisImpl(RedisTemplate<String, byte[]> redisTemplate) {
+	public MarketDataRepoRedisImpl(RedisTemplate<String, byte[]> redisTemplate, DataServiceManager dsMgr) {
+		super(dsMgr);
 		this.redisTemplate = redisTemplate;
 	}
 	
