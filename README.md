@@ -29,10 +29,6 @@
 ## 适用人群
 专业操作手、全栈技术爱好者、小型私募技术团队
 
-## 产品架构：  
-项目架构采用事件驱动+插件式开发
-![Image](https://images.gitee.com/uploads/images/2021/1107/172130_9da2bdcd_1676852.png)
-
 **开源不易，感谢点赞关注加收藏！**  
 **详细文档请参考wiki： https://gitee.com/dromara/northstar/wikis/**
 
@@ -53,6 +49,9 @@
 - 数据库为Redis
 - 前端采用node14 + vue2.x
 - 服务端采用java17（拥抱新技术） + springboot
+
+项目架构采用事件驱动+插件式开发
+![Image](https://images.gitee.com/uploads/images/2021/1107/172130_9da2bdcd_1676852.png)
 
 ## 启动步骤
 假设当前环境是全新的服务器  
