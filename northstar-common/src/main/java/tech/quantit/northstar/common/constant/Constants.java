@@ -10,9 +10,7 @@ public interface Constants {
 	
 	String KEY_USER = "USER";
 	
-	String PLAYBACK_GATEWAY = "PlaybackGateway";
-	
-	String PLAYBACK_MODULE_SUFFIX = "_Playback";
+	String APP_NAME ="NS:";
 	
 	// 资金占用比例估算系数
 	double ESTIMATED_FROZEN_FACTOR = 1.5;

@@ -12,13 +12,14 @@ import org.springframework.data.redis.core.RedisTemplate;
 import com.google.protobuf.InvalidProtocolBufferException;
 
 import lombok.extern.slf4j.Slf4j;
+import tech.quantit.northstar.common.constant.Constants;
 import tech.quantit.northstar.common.constant.DateTimeConstant;
 import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.data.IContractRepository;
 import xyz.redtorch.pb.CoreField.ContractField;
 
 /**
- * 合约信息以list结构保存，每种合约类型使用一个独立的key
+ * 
  * @author KevinHuangwl
  *
  */
@@ -27,7 +28,7 @@ public class ContractRepoRedisImpl implements IContractRepository {
 	
 	private RedisTemplate<String, byte[]> redisTemplate;
 	
-	private static final String PREFIX = "Contracts:";
+	private static final String KEY_PREFIX = Constants.APP_NAME + "Contracts:";
 	
 	public ContractRepoRedisImpl(RedisTemplate<String, byte[]> redisTemplate) {
 		this.redisTemplate = redisTemplate;
@@ -43,13 +44,13 @@ public class ContractRepoRedisImpl implements IContractRepository {
 	 */
 	@Override
 	public void save(ContractField contract, GatewayType gatewayType) {
-		String key = PREFIX + gatewayType;
+		String key = KEY_PREFIX + gatewayType;
 		redisTemplate.boundHashOps(key).put(contract.getUnifiedSymbol(), contract.toByteArray());
 	}
 
 	@Override
 	public List<ContractField> findAll(GatewayType type) {
-		String key = PREFIX + type;
+		String key = KEY_PREFIX + type;
 		BoundHashOperations<String, String, byte[]> opt = redisTemplate.boundHashOps(key);
 		List<byte[]> results = opt.values();
 		if(results == null)

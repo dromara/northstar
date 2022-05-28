@@ -5,12 +5,12 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import tech.quantit.northstar.common.constant.DateTimeConstant;
+import tech.quantit.northstar.common.constant.GatewayType;
+import tech.quantit.northstar.data.IMarketDataRepository;
 
 /**
  * 法定节假日管理器
@@ -22,9 +22,14 @@ public class HolidayManager implements InitializingBean{
 
 	protected Set<LocalDate> holidaySet = new HashSet<>();
 
+	@Autowired
+	private IMarketDataRepository repo;
+	
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		//FIXME 采用交易日查询服务
+		LocalDate today = LocalDate.now();
+		holidaySet.addAll(repo.findHodidayInLaw(GatewayType.CTP, today.getYear()));
+		holidaySet.addAll(repo.findHodidayInLaw(GatewayType.CTP, today.getYear() + 1));
 	}
 	
 	public boolean isHoliday(LocalDateTime dateTime) {
@@ -45,7 +50,4 @@ public class HolidayManager implements InitializingBean{
 		return holidaySet.contains(date) || date.getDayOfWeek().getValue() > 5;
 	}
 	
-	public void addHoliday(String dateStr) {
-		holidaySet.add(LocalDate.parse(dateStr, DateTimeConstant.D_FORMAT_INT_FORMATTER));
-	}
 }
