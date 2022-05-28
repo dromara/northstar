@@ -23,6 +23,7 @@ import tech.quantit.northstar.common.model.ContractDefinition;
 import tech.quantit.northstar.common.model.GatewayDescription;
 import tech.quantit.northstar.common.model.ModuleAccountDescription;
 import tech.quantit.northstar.common.model.ModuleDescription;
+import tech.quantit.northstar.common.model.SimSettings;
 import tech.quantit.northstar.data.IGatewayRepository;
 import tech.quantit.northstar.data.IMarketDataRepository;
 import tech.quantit.northstar.data.IModuleRepository;
@@ -99,6 +100,10 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 		}
 		gateway = factory.newInstance(gatewayDescription);
 		gatewayConnMgr.createPair(conn, gateway);
+		if(gateway instanceof SimTradeGateway simGateway) {
+			SimSettings simSettings = (SimSettings) gatewayDescription.getSettings();
+			simGateway.moneyIO(simSettings.getInitBalance());
+		}
 		if(gatewayDescription.isAutoConnect()) {
 			gateway.connect();
 		}

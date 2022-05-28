@@ -19,7 +19,7 @@ public class TestGatewayFactory {
 		}
 		if(type == SimSettings.class) {
 			return SimSettings.builder()
-					.fee(1)
+					.initBalance(100000)
 					.build();
 		}
 		return null;
