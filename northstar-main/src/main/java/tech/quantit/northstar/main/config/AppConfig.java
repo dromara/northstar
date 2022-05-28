@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -27,6 +28,7 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import tech.quantit.northstar.common.constant.Constants;
+import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.model.ContractDefinition;
 import tech.quantit.northstar.common.utils.ContractDefinitionReader;
@@ -113,9 +115,7 @@ public class AppConfig implements WebMvcConfigurer {
 		ContractDefinitionReader reader = new ContractDefinitionReader();
 		List<ContractDefinition> contractDefs = reader.load(res.getFile());
 		ContractManager mgr = new ContractManager(contractDefs);
-		for(ContractField contract : contractRepo.findAll()) {
-			mgr.addContract(contract);
-		}
+		findAllContract(contractRepo).forEach(mgr::addContract);
 		return mgr;
 	}
 	
@@ -129,6 +129,13 @@ public class AppConfig implements WebMvcConfigurer {
 		return new SimMarket(simAccRepo);
 	}
 	
+	private List<ContractField> findAllContract(IContractRepository contractRepo){
+		List<ContractField> contractList = new LinkedList<>();
+		contractList.addAll(contractRepo.findAll(GatewayType.CTP));
+		contractList.addAll(contractRepo.findAll(GatewayType.SIM));
+		return contractList;
+	}
+	
 	@Bean
 	public GlobalMarketRegistry globalRegistry(FastEventEngine fastEventEngine, IContractRepository contractRepo, ContractManager contractMgr) {
 		Consumer<NormalContract> handleContractSave = contract -> {
@@ -139,7 +146,7 @@ public class AppConfig implements WebMvcConfigurer {
 		
 		GlobalMarketRegistry registry = new GlobalMarketRegistry(fastEventEngine, handleContractSave, contractMgr::addContract);
 		//　加载已有合约
-		List<ContractField> contractList = contractRepo.findAll();
+		List<ContractField> contractList = findAllContract(contractRepo);
 		Map<String, ContractField> contractMap = contractList.stream()
 				.collect(Collectors.toMap(ContractField::getUnifiedSymbol, c -> c));
 		

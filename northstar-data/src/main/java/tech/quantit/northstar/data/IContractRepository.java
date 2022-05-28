@@ -25,10 +25,4 @@ public interface IContractRepository {
 	 */
 	List<ContractField> findAll(GatewayType gatewayType);
 	
-	/**
-	 * 查询全部合约
-	 * @return
-	 */
-	List<ContractField> findAll();
-	
 }

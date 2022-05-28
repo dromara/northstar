@@ -65,9 +65,4 @@ public class ContractRepoRedisImpl implements IContractRepository {
 		return null;
 	}
 
-	@Override
-	public List<ContractField> findAll() {
-		return findAll(GatewayType.CTP);
-	}
-
 }

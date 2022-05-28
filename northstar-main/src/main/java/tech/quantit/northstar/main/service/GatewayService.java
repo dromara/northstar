@@ -78,9 +78,6 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 	public boolean createGateway(GatewayDescription gatewayDescription) throws Exception {
 		log.info("创建网关[{}]", gatewayDescription.getGatewayId());
 		doSaveGatewayDescription(gatewayDescription);
-		if(gatewayDescription.getGatewayUsage() == GatewayUsage.MARKET_DATA) {
-			mdRepo.init(gatewayDescription.getGatewayId());
-		}
 		
 		return doCreateGateway(gatewayDescription);
 	}
