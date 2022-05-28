@@ -106,7 +106,7 @@ public class ContractManager {
 	
 	public Set<ContractField> relativeContracts(String contractDefId){
 		if(!defContractMap.containsKey(contractDefId)) {
-			throw new IllegalStateException("找不到关联合约集");
+			throw new IllegalStateException("找不到关联合约集:" + contractDefId);
 		}
 		return defContractMap.get(contractDefId);
 	}

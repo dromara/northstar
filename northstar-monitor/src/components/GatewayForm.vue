@@ -275,14 +275,17 @@ export default {
       this.$refs.gatewayForm
         .validate()
         .then(() => {
-          this.form.subscribedContractGroups = this.form.subscribedContractGroups.map(
-            (item) => item.value
-          )
+          if (this.gatewayUsage === 'MARKET_DATA') {
+            this.form.subscribedContractGroups = this.form.subscribedContractGroups.map(
+              (item) => item.value
+            )
+          }
           this.$emit('onSave', this.form)
           this.close()
         })
         .catch((e) => {
           console.error(e)
+          this.$message.error(e.message)
         })
     },
     close() {
