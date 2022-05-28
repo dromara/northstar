@@ -2,12 +2,10 @@ package tech.quantit.northstar.gateway.sim.trade;
 
 import java.util.Optional;
 
-import com.alibaba.fastjson.JSON;
-
+import tech.quantit.northstar.common.IContractManager;
 import tech.quantit.northstar.common.constant.GatewayUsage;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.model.GatewayDescription;
-import tech.quantit.northstar.common.model.SimSettings;
 import tech.quantit.northstar.gateway.api.Gateway;
 import tech.quantit.northstar.gateway.api.GatewayFactory;
 import tech.quantit.northstar.gateway.api.domain.GlobalMarketRegistry;
@@ -26,11 +24,15 @@ public class SimGatewayFactory implements GatewayFactory{
 	
 	private GlobalMarketRegistry registry;
 	
-	public SimGatewayFactory(FastEventEngine fastEventEngine, SimMarket simMarket, SimAccountRepository repo, GlobalMarketRegistry registry) {
+	private IContractManager contractMgr;
+	
+	public SimGatewayFactory(FastEventEngine fastEventEngine, SimMarket simMarket, SimAccountRepository repo, GlobalMarketRegistry registry,
+			IContractManager contractMgr) {
 		this.simMarket = simMarket;
 		this.fastEventEngine = fastEventEngine;
 		this.simAccountRepo = repo;
 		this.registry = registry;
+		this.contractMgr = contractMgr;
 	}
 
 	@Override
@@ -54,13 +56,12 @@ public class SimGatewayFactory implements GatewayFactory{
 		String accGatewayId = gatewayDescription.getGatewayId();
 		Optional<SimAccount> simAccountOp = simAccountRepo.findById(accGatewayId);
 
-		SimSettings settings = JSON.parseObject(JSON.toJSONString(gatewayDescription.getSettings()), SimSettings.class);
 		GatewaySettingField gwSettings = GatewaySettingField.newBuilder()
 				.setGatewayId(gatewayDescription.getGatewayId())
 				.setGatewayType(GatewayTypeEnum.GTE_Trade)
 				.build();
 		
-		SimAccount account = simAccountOp.orElse(new SimAccount(accGatewayId, settings.getFee()));
+		SimAccount account = simAccountOp.orElse(new SimAccount(accGatewayId, contractMgr));
 		account.setEventBus(simMarket.getMarketEventBus());
 		account.setFeEngine(fastEventEngine);
 		account.setSavingCallback(() -> simAccountRepo.save(account));

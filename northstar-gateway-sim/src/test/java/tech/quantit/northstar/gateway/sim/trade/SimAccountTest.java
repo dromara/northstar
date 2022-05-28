@@ -3,6 +3,7 @@ package tech.quantit.northstar.gateway.sim.trade;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -11,11 +12,14 @@ import static org.mockito.Mockito.when;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.google.common.eventbus.EventBus;
 
+import tech.quantit.northstar.common.IContractManager;
 import tech.quantit.northstar.common.event.FastEventEngine;
+import tech.quantit.northstar.common.model.ContractDefinition;
 import test.common.TestFieldFactory;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
@@ -24,10 +28,21 @@ import xyz.redtorch.pb.CoreField.AccountField;
 class SimAccountTest {
 	
 	TestFieldFactory factory = new TestFieldFactory("gateway");
+	
+	SimAccount account;
+	
+	@BeforeEach
+	void prepare() {
+		IContractManager contractMgr = mock(IContractManager.class);
+		when(contractMgr.getContractDefinition(anyString())).thenReturn(ContractDefinition.builder()
+				.commissionInPrice(1.5)
+				.build());
+		account = new SimAccount("testGateway", contractMgr);
+	}
 
 	@Test
 	void testAccountField() {
-		SimAccount account = new SimAccount("test", 3);
+		
 		account.totalCloseProfit = 1000;
 		account.totalDeposit = 200;
 		account.totalWithdraw = 300;
@@ -40,7 +55,7 @@ class SimAccountTest {
 	
 	@Test
 	void shouldMakeOpenOrder() {
-		SimAccount account = new SimAccount("test", 3);
+		
 		account.setFeEngine(mock(FastEventEngine.class));
 		account.totalDeposit = 1000000;
 		EventBus eventBus = mock(EventBus.class);
@@ -53,7 +68,7 @@ class SimAccountTest {
 	
 	@Test
 	void shouldMakeOpenOrderWithFailure() {
-		SimAccount account = new SimAccount("test", 3);
+		
 		account.setFeEngine(mock(FastEventEngine.class));
 		EventBus eventBus = mock(EventBus.class);
 		account.setEventBus(eventBus);
@@ -65,7 +80,7 @@ class SimAccountTest {
 	
 	@Test
 	void shouldMakeCloseOrder() {
-		SimAccount account = new SimAccount("test", 3);
+		
 		account.setFeEngine(mock(FastEventEngine.class));
 		EventBus eventBus = mock(EventBus.class);
 		account.setEventBus(eventBus);
@@ -83,7 +98,7 @@ class SimAccountTest {
 	
 	@Test
 	void shouldMakeCloseOrderWithFailure() {
-		SimAccount account = new SimAccount("test", 3);
+		
 		account.setFeEngine(mock(FastEventEngine.class));
 		EventBus eventBus = mock(EventBus.class);
 		account.setEventBus(eventBus);
@@ -103,7 +118,7 @@ class SimAccountTest {
 	
 	@Test
 	void testDeposit() {
-		SimAccount account = new SimAccount("test", 3);
+		
 		Runnable savingCallback = mock(Runnable.class);
 		account.setSavingCallback(savingCallback);
 		account.setFeEngine(mock(FastEventEngine.class));
@@ -115,7 +130,7 @@ class SimAccountTest {
 	
 	@Test
 	void testDepositFailure() {
-		SimAccount account = new SimAccount("test", 3);
+		
 		assertThrows(IllegalArgumentException.class, ()->{			
 			account.depositMoney(-1);
 		});
@@ -124,7 +139,7 @@ class SimAccountTest {
 	
 	@Test
 	void testWithdraw() {
-		SimAccount account = new SimAccount("test", 3);
+		
 		Runnable savingCallback = mock(Runnable.class);
 		account.setEventBus(mock(EventBus.class));
 		account.setFeEngine(mock(FastEventEngine.class));
@@ -139,7 +154,7 @@ class SimAccountTest {
 	
 	@Test
 	void testWithdrawFailure() {
-		SimAccount account = new SimAccount("test", 3);
+		
 		assertThrows(IllegalArgumentException.class, ()->{			
 			account.withdrawMoney(-1);
 		});
@@ -150,7 +165,7 @@ class SimAccountTest {
 	
 	@Test
 	void testOnCancel() {
-		SimAccount account = new SimAccount("test", 3);
+		
 		account.setEventBus(mock(EventBus.class));
 		account.onCancelOrder(factory.makeCancelReq(factory.makeOrderReq("rb2201", DirectionEnum.D_Buy, OffsetFlagEnum.OF_Close, 0, 0, 0)));
 		verify(account.getEventBus()).post(any());

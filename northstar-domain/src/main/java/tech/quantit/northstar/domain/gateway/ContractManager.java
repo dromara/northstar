@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import lombok.extern.slf4j.Slf4j;
+import tech.quantit.northstar.common.IContractManager;
 import tech.quantit.northstar.common.constant.Constants;
 import tech.quantit.northstar.common.exception.NoSuchElementException;
 import tech.quantit.northstar.common.model.ContractDefinition;
@@ -23,7 +24,7 @@ import xyz.redtorch.pb.CoreField.ContractField;
  *
  */
 @Slf4j
-public class ContractManager {
+public class ContractManager implements IContractManager {
 	
 	private static final int DEFAULT_SIZE = 4096;
 	

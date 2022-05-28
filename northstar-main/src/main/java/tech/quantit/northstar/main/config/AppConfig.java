@@ -178,8 +178,8 @@ public class AppConfig implements WebMvcConfigurer {
 	
 	@Bean
 	public GatewayFactory simGatewayFactory(FastEventEngine fastEventEngine, SimMarket simMarket, SimAccountRepository accRepo,
-			GlobalMarketRegistry registry) {
-		return new SimGatewayFactory(fastEventEngine, simMarket, accRepo, registry);
+			GlobalMarketRegistry registry, ContractManager contractMgr) {
+		return new SimGatewayFactory(fastEventEngine, simMarket, accRepo, registry, contractMgr);
 	}
 	
 	@Bean

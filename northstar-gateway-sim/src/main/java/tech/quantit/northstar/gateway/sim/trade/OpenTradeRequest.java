@@ -38,7 +38,7 @@ public class OpenTradeRequest extends TradeRequest {
 	@Override
 	public void onTrade(TradeField trade) {
 		account.addPosition(new SimPosition(trade), trade);
-		account.addCommission(trade.getVolume());
+		account.updateCommission(trade);
 		account.reportAccountStatus();
 	}
 	
