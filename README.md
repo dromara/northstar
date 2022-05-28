@@ -13,7 +13,7 @@
 ![Image](https://images.gitee.com/uploads/images/2021/0606/220710_eeab5dd9_1676852.png)
 ![Image](https://images.gitee.com/uploads/images/2021/0606/220728_32ef6b37_1676852.png)
 
-## 产品特性
+## 产品简介
 这是一个面向程序员的开源高频量化交易平台，用于期货、股票、外汇、炒币等多种交易场景，实现自动交易。暂时只对接了国内期货交易所，理论上可以对接任意交易所。
 
 **功能特性：**
@@ -46,9 +46,9 @@
 - northstar项目为服务端（包含了web网页监控端）
 - northstar-external为用户自行扩展的项目，可参考[此项目](https://gitee.com/NorthstarQuan/northstar-external)
 - 交互协议HTTP + websocket
-- 数据库为Redis
+- 数据库为Redis7
 - 前端采用node14 + vue2.x
-- 服务端采用java17（拥抱新技术） + springboot
+- 服务端采用java17（拥抱新技术） + springboot3
 
 项目架构采用事件驱动+插件式开发
 ![Image](https://images.gitee.com/uploads/images/2021/1107/172130_9da2bdcd_1676852.png)
