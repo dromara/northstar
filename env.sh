@@ -22,7 +22,7 @@ fi
 if [[ $(which mvn >/dev/null && echo $?) != 0 ]]; 
 then
 	echo "安装Maven"
-	wget --no-check-certificate https://mirrors.bfsu.edu.cn/apache/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz
+	cd ~ && wget --no-check-certificate https://mirrors.bfsu.edu.cn/apache/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz
 	tar -xvf apache-maven-3.6.3-bin.tar.gz
 	rm -f apache-maven-3.6.3-bin.tar.gz
 	ln -s ~/apache-maven-3.6.3/bin/mvn /usr/local/bin/
@@ -32,15 +32,18 @@ else
 	mvn -v
 fi
 
-# 检查MongoDB环境
-if [[ $(systemctl status mongod | grep active | wc -l) == 0 ]];
+# 安装Redis
+if [[ $(which redis-server >/dev/null && echo $?) != 0 ]];
 then
-	echo "安装MongoDB"
-	curl https://gitee.com/dromara/northstar/raw/master/mongo.repo >/etc/yum.repos.d/mongodb-org-4.0.repo
-	yum install -y mongodb-org
-	systemctl start mongod
+	echo "安装Redis"
+	cd ~ && wget --no-check-certificate http://download.redis.io/releases/redis-7.0.0.tar.gz
+	tar -xzf redis-7.0.0.tar.gz
+	cd redis-7.0.0
+	make
+	make install
+	redis-server
 else
-	echo "MongoDB已安装"
+	echo "Redis已安装"
 fi
 
 echo "环境安装完成"
