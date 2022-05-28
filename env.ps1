@@ -17,8 +17,8 @@ If(!(test-path $BasePath))
 $JDK17DownloadUrl = "https://download.oracle.com/java/17/latest/jdk-17_windows-x64_bin.msi"
 #Node14下载地址
 $Node14DownloadUrl = "https://registry.npmmirror.com/-/binary/node/latest-v14.x/node-v14.19.0-x64.msi"
-#MongoDB下载地址
-$MongoDownloadUrl = "http://downloads.mongodb.org/win32/mongodb-win32-x86_64-2008plus-ssl-4.0.22-signed.msi"
+#Redis下载地址
+$RedisDownloadUrl = "https://gitee.com/dromara/northstar/attach_files/1077290/download"
 #Maven下载地址
 $MavenDownloadUrl = "https://mirrors.bfsu.edu.cn/apache/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.zip"
 
@@ -29,7 +29,7 @@ function checkCommand([string] $name, [string] $checkPattern){
 }
 # 检查服务   
 function checkService([string] $name){
-	$results = Get-Service $name -ErrorAction SilentlyContinue | Where-Object {$_.Version -like $checkPattern}
+	$results = Get-Service $name -ErrorAction SilentlyContinue 
 	return $results.Count -gt 0
 }
 
@@ -84,12 +84,11 @@ If(checkCommand node.exe 14*){
 	setEnvironment Node $nodePath
 }
 
-#MongoDB环境安装  
-If(checkService *mongo*){
-	"MongoDB installed"
+#Redis环境安装
+If(checkService redis){
+	"Redis installed"
 } else {
-	$settings = "ADDLOCAL=ServerService,Server,ProductFeature,Client,MonitoringTools,ImportExportTools,Router,MiscellaneousTools"
-	downloadAndInstallMSI $MongoDownloadUrl $BasePath mongodb-win32-x86_64-2008plus-ssl-4.0.22-signed.msi $settings
+	downloadAndInstallMSI $RedisDownloadUrl $BasePath Redis-x64-3.0.504.msi
 }
 
 #Maven环境安装  
