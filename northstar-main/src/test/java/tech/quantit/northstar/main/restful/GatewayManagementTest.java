@@ -30,7 +30,6 @@ import tech.quantit.northstar.common.constant.ReturnCode;
 import tech.quantit.northstar.common.model.CtpSettings;
 import tech.quantit.northstar.common.model.GatewayDescription;
 import tech.quantit.northstar.common.model.NsUser;
-import tech.quantit.northstar.common.model.SimSettings;
 import tech.quantit.northstar.main.NorthstarApplication;
 import tech.quantit.northstar.main.handler.broadcast.SocketIOMessageEngine;
 
@@ -165,7 +164,7 @@ public class GatewayManagementTest {
 	public void shouldIncreaseBalance() throws Exception {
 		shouldCreateGateway();
 		
-		GatewayDescription gwDes = TestGatewayFactory.makeTrdGateway("TG2", "", GatewayType.SIM, TestGatewayFactory.makeGatewaySettings(SimSettings.class), false);
+		GatewayDescription gwDes = TestGatewayFactory.makeTrdGateway("TG2", "", GatewayType.SIM, new Object(), false);
 		
 		mockMvc.perform(post("/northstar/gateway").contentType(MediaType.APPLICATION_JSON).content(JSON.toJSONString(gwDes)).session(session))
 			.andExpect(status().isOk())

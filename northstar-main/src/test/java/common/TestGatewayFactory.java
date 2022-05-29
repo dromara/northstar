@@ -5,7 +5,6 @@ import tech.quantit.northstar.common.constant.GatewayUsage;
 import tech.quantit.northstar.common.model.CtpSettings;
 import tech.quantit.northstar.common.model.GatewayDescription;
 import tech.quantit.northstar.common.model.GatewaySettings;
-import tech.quantit.northstar.common.model.SimSettings;
 
 public class TestGatewayFactory {
 
@@ -15,11 +14,6 @@ public class TestGatewayFactory {
 					.brokerId("9999")
 					.userId("kevin")
 					.password("123456")
-					.build();
-		}
-		if(type == SimSettings.class) {
-			return SimSettings.builder()
-					.initBalance(100000)
 					.build();
 		}
 		return null;

@@ -23,7 +23,6 @@ import tech.quantit.northstar.common.model.ContractDefinition;
 import tech.quantit.northstar.common.model.GatewayDescription;
 import tech.quantit.northstar.common.model.ModuleAccountDescription;
 import tech.quantit.northstar.common.model.ModuleDescription;
-import tech.quantit.northstar.common.model.SimSettings;
 import tech.quantit.northstar.data.IGatewayRepository;
 import tech.quantit.northstar.data.IMarketDataRepository;
 import tech.quantit.northstar.data.IModuleRepository;
@@ -102,13 +101,6 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 		gatewayConnMgr.createPair(conn, gateway);
 		if(gatewayDescription.isAutoConnect()) {
 			connect(gatewayDescription.getGatewayId());
-		}
-		if(gateway instanceof SimTradeGateway simGateway) {
-			SimSettings simSettings = JSON.parseObject(JSON.toJSONString(gatewayDescription.getSettings()), SimSettings.class);
-			boolean flag = gateway.isConnected();
-			if(!flag)	gateway.connect();
-			simGateway.moneyIO(simSettings.getInitBalance());
-			if(!flag)	gateway.disconnect();
 		}
 		
 		return true;
@@ -234,11 +226,13 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 			gateway.connect();
 			if(gateway instanceof MarketGateway mktGateway) {
 				GatewayDescription gd = gatewayRepo.findById(gatewayId);
-				for(String contractDefId : gd.getSubscribedContractGroups()) {
-					for(ContractField contract : contractMgr.relativeContracts(contractDefId)) {
-						mktGateway.subscribe(contract);
+				if(gd.getSubscribedContractGroups() != null) {					
+					for(String contractDefId : gd.getSubscribedContractGroups()) {
+						for(ContractField contract : contractMgr.relativeContracts(contractDefId)) {
+							mktGateway.subscribe(contract);
+						}
 					}
-				}
+				} 
 			}
 		} else {
 			throw new NoSuchElementException("没有该网关记录：" +  gatewayId);

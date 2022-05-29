@@ -261,6 +261,8 @@ public class SimAccount implements TickDataAware{
 	private long lastReportTime;
 	@Override
 	public void onTick(TickField tick) {
+		longMap.values().stream().forEach(tp -> tp.updateTick(tick));
+		shortMap.values().stream().forEach(tp -> tp.updateTick(tick));
 		if(!connected || System.currentTimeMillis() - lastReportTime < 1000) {
 			return;
 		}

@@ -256,8 +256,10 @@ public class TradePosition {
 		int factor = FieldUtils.directionFactor(dir);
 		double lastPrice = lastTick == null ? 0 : lastTick.getLastPrice();
 		double priceDiff = lastTick == null ? 0 : factor * (lastTick.getLastPrice() - avgOpenPrice());
+		PositionDirectionEnum posDir = FieldUtils.isBuy(dir) ? PositionDirectionEnum.PD_Long : PositionDirectionEnum.PD_Short;
 		return PositionField.newBuilder()
 				.setGatewayId(simAccount.getGatewayId())
+				.setPositionId(contract.getUnifiedSymbol() + "@" + posDir)
 				.setContract(contract)
 				.setFrozen(totalVolume() - totalAvailable())
 				.setTdFrozen(tdVolume() - tdAvailable())
@@ -274,7 +276,7 @@ public class TradePosition {
 				.setPriceDiff(priceDiff)
 				.setPositionProfit(profit())
 				.setOpenPositionProfit(profit())
-				.setPositionDirection(FieldUtils.isBuy(dir) ? PositionDirectionEnum.PD_Long : PositionDirectionEnum.PD_Short)
+				.setPositionDirection(posDir)
 				.build();
 	}
 	

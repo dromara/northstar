@@ -12,11 +12,6 @@
       :ctpSettingsSrc="form.settings"
       @onSave="(settings) => (form.settings = settings)"
     />
-    <NsSimForm
-      :visible.sync="simFormVisible"
-      :settingsSrc="form.settings"
-      @onSave="(settings) => (form.settings = settings)"
-    />
     <el-form ref="gatewayForm" :model="form" label-width="100px" width="200px" :rules="formRules">
       <el-row>
         <el-col :span="8">
@@ -132,7 +127,9 @@
         id="gatewaySettings"
         type="primary"
         @click="gatewaySettingConfig"
-        :disabled="!form.gatewayType || (gatewayUsage !== 'TRADE' && form.gatewayType === 'SIM')"
+        :disabled="
+          form.gatewayType !== 'CTP' || (gatewayUsage !== 'TRADE' && form.gatewayType === 'SIM')
+        "
         >{{ typeLabel }}配置</el-button
       >
       <el-button id="saveGatewaySettings" type="primary" @click="saveGateway">保 存</el-button>
@@ -142,7 +139,6 @@
 
 <script>
 import NsCtpForm from '@/components/CtpForm'
-import NsSimForm from '@/components/SimForm'
 import gatewayMgmtApi from '../api/gatewayMgmtApi'
 
 const GATEWAY_ADAPTER = {
@@ -159,8 +155,7 @@ const CONNECTION_STATE = {
 }
 export default {
   components: {
-    NsCtpForm,
-    NsSimForm
+    NsCtpForm
   },
   props: {
     visible: {
@@ -266,7 +261,7 @@ export default {
       }
     },
     async saveGateway() {
-      if (this.gatewayUsage !== 'TRADE' && this.form.gatewayType === 'SIM') {
+      if (this.form.gatewayType === 'SIM') {
         this.form.settings = { nothing: 0 }
       }
       if (!this.form.settings || !Object.keys(this.form.settings).length) {
