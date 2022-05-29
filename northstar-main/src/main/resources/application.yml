@@ -16,12 +16,15 @@ northstar:
 
 logging:  level: 
     root: info
-    '[tech.quantit.northstar]': info
+    '[tech.quantit.northstar]': debug
     #'[tech.quantit.northstar.strategy.policy.signal]': trace
     #'[tech.quantit.northstar.strategy]': debug
   file:    path: logs/
   
 spring:
+  redis:
+    host: 127.0.0.1
+    port: 6379
   profiles:
     active: ${env:prod}
   mail:
@@ -44,32 +47,22 @@ spring:
             socketFactory.class: com.fintech.modules.base.util.mail.MailSSLSocketFactory
 ---
 spring:
-  redis:
-    database: 0
-    host: 127.0.0.1
-    port: 6379
+  redis.database: 0
   config:    activate:      on-profile: prod
       
 ---
 spring:
-  redis:
-    database: 0
-    host: 127.0.0.1
-    port: 6379  config:    activate:      on-profile: dev
+  redis.database: 0
+  config:    activate:      on-profile: dev
 
 ---
 spring:
-  redis:
-    database: 1
-    host: 127.0.0.1
-    port: 6379  config:    activate:      on-profile: test
+  redis.database: 1
+  config:    activate:      on-profile: test
       
 ---
 spring:
-  redis:
-    database: 1
-    host: 127.0.0.1
-    port: 6379
+  redis.database: 1
   config:
     activate:
       on-profile: e2e

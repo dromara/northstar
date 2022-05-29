@@ -1,5 +1,7 @@
 package tech.quantit.northstar.gateway.sim.trade;
 
+import com.google.protobuf.InvalidProtocolBufferException;
+
 import tech.quantit.northstar.common.IContractManager;
 import tech.quantit.northstar.common.ISimAccountRepository;
 import tech.quantit.northstar.common.constant.GatewayUsage;
@@ -64,7 +66,11 @@ public class SimGatewayFactory implements GatewayFactory{
 		if(simAccountDescription == null) {
 			account = new SimAccount(accGatewayId, contractMgr);
 		} else {
-			account = new SimAccount(simAccountDescription, contractMgr);
+			try {
+				account = new SimAccount(simAccountDescription, contractMgr);
+			} catch (InvalidProtocolBufferException e) {
+				throw new IllegalStateException("无法创建模拟账户", e);
+			}
 		}
 		account.setEventBus(simMarket.getMarketEventBus());
 		account.setFeEngine(fastEventEngine);

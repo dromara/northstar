@@ -32,6 +32,7 @@ public class SimContractGenerator {
 				.setPriceTick(1)
 				.setLongMarginRatio(0.08)
 				.setShortMarginRatio(0.08)
+				.setLastTradeDateOrContractMonth(name)
 				.build();
 	}
 	

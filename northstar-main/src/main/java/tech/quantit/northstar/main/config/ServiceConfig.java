@@ -30,7 +30,8 @@ import tech.quantit.northstar.main.utils.ModuleFactory;
 	"simGatewayFactory",
 	"ctpSimGatewayFactory",
 	"moduleFactory",
-	"globalRegistry"
+	"globalRegistry",
+	"contractManager"
 	})
 @Configuration
 public class ServiceConfig {

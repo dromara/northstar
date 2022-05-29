@@ -3,12 +3,9 @@ package tech.quantit.northstar.main.config;
 import java.nio.charset.StandardCharsets;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.redis.connection.RedisConfiguration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
-import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.web.client.RestTemplate;
@@ -17,11 +14,13 @@ import tech.quantit.northstar.data.IContractRepository;
 import tech.quantit.northstar.data.IGatewayRepository;
 import tech.quantit.northstar.data.IMarketDataRepository;
 import tech.quantit.northstar.data.IModuleRepository;
+import tech.quantit.northstar.data.ISimAccountRepository;
 import tech.quantit.northstar.data.ds.DataServiceManager;
 import tech.quantit.northstar.data.redis.ContractRepoRedisImpl;
 import tech.quantit.northstar.data.redis.GatewayRepoRedisImpl;
 import tech.quantit.northstar.data.redis.MarketDataRepoRedisImpl;
 import tech.quantit.northstar.data.redis.ModuleRepoRedisImpl;
+import tech.quantit.northstar.data.redis.SimAccountRepoRedisImpl;
 import xyz.redtorch.gateway.ctp.common.CtpDateTimeUtil;
 
 @Configuration
@@ -62,4 +61,8 @@ public class RepositoryConfig {
 		return new MarketDataRepoRedisImpl(redisTemplate, dsMgr);
 	}
 	
+	@Bean
+	public ISimAccountRepository simAccountRepository(RedisTemplate<String, byte[]> redisTemplate) {
+		return new SimAccountRepoRedisImpl(redisTemplate);
+	}
 }

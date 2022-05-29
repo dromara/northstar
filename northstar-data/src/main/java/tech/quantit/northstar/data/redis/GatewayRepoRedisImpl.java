@@ -60,4 +60,11 @@ public class GatewayRepoRedisImpl implements IGatewayRepository{
 				.toList();
 	}
 
+	@Override
+	public GatewayDescription findById(String gatewayId) {
+		byte[] data = redisTemplate.boundValueOps(KEY_PREFIX + gatewayId).get();
+		if(data == null)	return null;
+		return JSON.parseObject(data, GatewayDescription.class);
+	}
+
 }

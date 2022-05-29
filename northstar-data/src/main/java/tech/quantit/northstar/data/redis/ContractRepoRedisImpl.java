@@ -57,13 +57,14 @@ public class ContractRepoRedisImpl implements IContractRepository {
 			return Collections.emptyList();
 		return results.stream()
 				.map(this::convertObject)
-				.filter(item -> Objects.nonNull(item) && nonExpired(item.getLastTradeDateOrContractMonth()))
+//				.filter(item -> Objects.nonNull(item) && nonExpired(item))
 				.toList();
 	}
 	
-	private boolean nonExpired(String expiredDate) {
-		return StringUtils.isNotBlank(expiredDate) && LocalDate.parse(expiredDate, DateTimeConstant.D_FORMAT_INT_FORMATTER).isAfter(LocalDate.now());
-	}
+//	private boolean nonExpired(ContractField contract) {
+//		if(contract.getSymbol().contains(Constants.INDEX_SUFFIX)) return false;
+//		return StringUtils.isNotBlank(expiredDate) && LocalDate.parse(expiredDate, DateTimeConstant.D_FORMAT_INT_FORMATTER).isAfter(LocalDate.now());
+//	}
 	
 	private ContractField convertObject(byte[] data) {
 		try {

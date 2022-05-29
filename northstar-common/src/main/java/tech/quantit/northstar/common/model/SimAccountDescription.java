@@ -6,7 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import xyz.redtorch.pb.CoreField.TradeField;
 
 /**
  * 模拟账户信息描述
@@ -41,5 +40,5 @@ public class SimAccountDescription {
 	/**
 	 * 未平仓（开仓）成交
 	 */
-	private List<TradeField> openTrades;
+	private List<byte[]> openTrades;
 }

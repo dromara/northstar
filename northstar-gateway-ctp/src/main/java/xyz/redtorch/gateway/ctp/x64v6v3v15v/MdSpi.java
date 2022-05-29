@@ -216,6 +216,7 @@ public class MdSpi extends CThostFtdcMdSpi {
 
 	// 订阅行情
 	public boolean subscribe(String symbol) {
+		logger.debug("订阅合约：{}", symbol);
 		subscribedSymbolSet.add(symbol);
 		if (isConnected()) {
 			String[] symbolArray = new String[1];

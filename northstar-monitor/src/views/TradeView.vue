@@ -201,7 +201,7 @@ export default {
       const timelyCheck = () => {
         accountCheckTimer = setTimeout(() => {
           if (!this.$store.getters.isAccountConnected(this.chosenAccount.gatewayId)) {
-            this.$message.error(`账户${this.chosenAccount.gatewayId}没有连线`)
+            this.$message.error(`账户【${this.chosenAccount.gatewayId}】没有连线`)
           }
           timelyCheck()
         }, 3000)

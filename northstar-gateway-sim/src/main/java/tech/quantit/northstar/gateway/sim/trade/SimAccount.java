@@ -10,6 +10,7 @@ import java.util.Map.Entry;
 import java.util.function.Consumer;
 
 import com.google.common.eventbus.EventBus;
+import com.google.protobuf.InvalidProtocolBufferException;
 
 import lombok.Data;
 import lombok.Setter;
@@ -79,14 +80,15 @@ public class SimAccount implements TickDataAware{
 		this.contractMgr = contractMgr;
 	}
 	
-	public SimAccount(SimAccountDescription simAccDescription, IContractManager contractMgr) {
+	public SimAccount(SimAccountDescription simAccDescription, IContractManager contractMgr) throws InvalidProtocolBufferException {
 		this.gatewayId = simAccDescription.getGatewayId();
 		this.contractMgr = contractMgr;
 		this.totalCloseProfit = simAccDescription.getTotalCloseProfit();
 		this.totalCommission = simAccDescription.getTotalCommission();
 		this.totalDeposit = simAccDescription.getTotalDeposit();
 		this.totalWithdraw = simAccDescription.getTotalWithdraw();
-		for(TradeField uncloseTrade : simAccDescription.getOpenTrades()) {
+		for(byte[] uncloseTradeData : simAccDescription.getOpenTrades()) {
+			TradeField uncloseTrade = TradeField.parseFrom(uncloseTradeData);
 			Map<ContractField, TradePosition> tMap = getOpeningMap(uncloseTrade.getDirection());
 			if(tMap.containsKey(uncloseTrade.getContract())) {
 				tMap.get(uncloseTrade.getContract()).onTrade(uncloseTrade);
@@ -165,8 +167,8 @@ public class SimAccount implements TickDataAware{
 		if(size == 0)
 			return Collections.emptyList();
 		List<PositionField> list = new ArrayList<>(size);
-		list.addAll(longMap.values().stream().map(TradePosition::convertToPositionField).toList());
-		list.addAll(shortMap.values().stream().map(TradePosition::convertToPositionField).toList());
+		list.addAll(longMap.values().stream().map(tp -> tp.convertToPositionField(this)).toList());
+		list.addAll(shortMap.values().stream().map(tp -> tp.convertToPositionField(this)).toList());
 		return list;
 	}
 	
@@ -276,7 +278,7 @@ public class SimAccount implements TickDataAware{
 		Iterator<Entry<ContractField, TradePosition>> itEntry = posMap.entrySet().iterator();
 		while(itEntry.hasNext()) {
 			Entry<ContractField, TradePosition> e = itEntry.next();
-			PositionField pf = e.getValue().convertToPositionField();
+			PositionField pf = e.getValue().convertToPositionField(this);
 			feEngine.emitEvent(NorthstarEventType.POSITION, pf);
 			if(pf.getPosition() == 0) {
 				itEntry.remove();
@@ -293,11 +295,12 @@ public class SimAccount implements TickDataAware{
 		longMap.values().stream().forEach(tp -> uncloseTrades.addAll(tp.getUncloseTrades()));
 		shortMap.values().stream().forEach(tp -> uncloseTrades.addAll(tp.getUncloseTrades()));
 		return SimAccountDescription.builder()
+				.gatewayId(gatewayId)
 				.totalCloseProfit(totalCloseProfit)
 				.totalCloseProfit(totalCloseProfit)
 				.totalDeposit(totalDeposit)
 				.totalWithdraw(totalWithdraw)
-				.openTrades(uncloseTrades)
+				.openTrades(uncloseTrades.stream().map(TradeField::toByteArray).toList())
 				.build();
 	}
 }

@@ -1,7 +1,7 @@
 <template>
   <el-dialog
     id="simForm"
-    width="500px"
+    width="400px"
     title="SIM模拟网关配置"
     :visible="visible"
     append-to-body
@@ -9,13 +9,7 @@
     :show-close="false"
     @close="close"
   >
-    <el-form
-      ref="settingForm"
-      :model="settings"
-      label-width="330px"
-      width="200px"
-      :rules="formRules"
-    >
+    <el-form ref="settingForm" :model="settings" label-width="140px" :rules="formRules">
       <el-row>
         <el-col :span="24">
           <el-form-item label="初始账户余额：" :required="true" prop="initBalance">

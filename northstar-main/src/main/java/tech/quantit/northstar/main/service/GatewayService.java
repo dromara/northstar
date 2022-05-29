@@ -100,12 +100,15 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 		}
 		gateway = factory.newInstance(gatewayDescription);
 		gatewayConnMgr.createPair(conn, gateway);
+		if(gatewayDescription.isAutoConnect()) {
+			connect(gatewayDescription.getGatewayId());
+		}
 		if(gateway instanceof SimTradeGateway simGateway) {
 			SimSettings simSettings = JSON.parseObject(JSON.toJSONString(gatewayDescription.getSettings()), SimSettings.class);
+			boolean flag = gateway.isConnected();
+			if(!flag)	gateway.connect();
 			simGateway.moneyIO(simSettings.getInitBalance());
-		}
-		if(gatewayDescription.isAutoConnect()) {
-			gateway.connect();
+			if(!flag)	gateway.disconnect();
 		}
 		
 		return true;
@@ -227,7 +230,16 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 	public boolean connect(String gatewayId) {
 		log.info("连接网关[{}]", gatewayId);
 		if(gatewayConnMgr.exist(gatewayId)) {
-			gatewayConnMgr.getGatewayById(gatewayId).connect();
+			Gateway gateway = gatewayConnMgr.getGatewayById(gatewayId);
+			gateway.connect();
+			if(gateway instanceof MarketGateway mktGateway) {
+				GatewayDescription gd = gatewayRepo.findById(gatewayId);
+				for(String contractDefId : gd.getSubscribedContractGroups()) {
+					for(ContractField contract : contractMgr.relativeContracts(contractDefId)) {
+						mktGateway.subscribe(contract);
+					}
+				}
+			}
 		} else {
 			throw new NoSuchElementException("没有该网关记录：" +  gatewayId);
 		}

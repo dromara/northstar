@@ -52,7 +52,7 @@ public class TradePosition {
 		this.dir = trades.get(0).getDirection();
 		this.contract = trades.get(0).getContract();
 		for(TradeField trade : trades) {			
-			if(dir != trade.getDirection() || contract.equals(trade.getContract())) {
+			if(dir != trade.getDirection() || !contract.equals(trade.getContract())) {
 				throw new IllegalArgumentException("传入的数据不一致");
 			}
 		}
@@ -252,11 +252,12 @@ public class TradePosition {
 	 * 持仓信息汇总
 	 * @return
 	 */
-	public PositionField convertToPositionField() {
+	public PositionField convertToPositionField(SimAccount simAccount) {
 		int factor = FieldUtils.directionFactor(dir);
 		double lastPrice = lastTick == null ? 0 : lastTick.getLastPrice();
 		double priceDiff = lastTick == null ? 0 : factor * (lastTick.getLastPrice() - avgOpenPrice());
 		return PositionField.newBuilder()
+				.setGatewayId(simAccount.getGatewayId())
 				.setContract(contract)
 				.setFrozen(totalVolume() - totalAvailable())
 				.setTdFrozen(tdVolume() - tdAvailable())

@@ -285,7 +285,6 @@ export default {
         })
         .catch((e) => {
           console.error(e)
-          this.$message.error(e.message)
         })
     },
     close() {
