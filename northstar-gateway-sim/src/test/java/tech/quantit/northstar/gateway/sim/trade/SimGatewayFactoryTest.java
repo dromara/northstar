@@ -9,19 +9,19 @@ import org.junit.jupiter.api.Test;
 import com.google.common.eventbus.EventBus;
 
 import tech.quantit.northstar.common.IContractManager;
+import tech.quantit.northstar.common.ISimAccountRepository;
 import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.common.constant.GatewayUsage;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.model.GatewayDescription;
 import tech.quantit.northstar.common.model.SimSettings;
 import tech.quantit.northstar.gateway.api.domain.GlobalMarketRegistry;
-import tech.quantit.northstar.gateway.sim.persistence.SimAccountRepository;
 
 class SimGatewayFactoryTest {
 
 	@Test
 	void test() {
-		SimAccountRepository accRepo = mock(SimAccountRepository.class);
+		ISimAccountRepository accRepo = mock(ISimAccountRepository.class);
 		SimMarket simMarket = mock(SimMarket.class);
 		when(simMarket.getMarketEventBus()).thenReturn(mock(EventBus.class));
 		SimGatewayFactory factory = new SimGatewayFactory(mock(FastEventEngine.class), simMarket, accRepo, mock(GlobalMarketRegistry.class), mock(IContractManager.class));

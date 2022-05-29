@@ -1,11 +1,12 @@
 package tech.quantit.northstar.gateway.sim.trade;
 
+import java.util.function.Consumer;
+
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import com.google.common.eventbus.EventBus;
 
 import lombok.Getter;
-import tech.quantit.northstar.gateway.sim.persistence.SimAccountRepository;
 import xyz.redtorch.pb.CoreField.TickField;
 /**
  * 用于管理Gateway实例及模拟账户持久化操作
@@ -22,10 +23,10 @@ public class SimMarket {
 	@Getter
 	private EventBus marketEventBus = new EventBus();
 	
-	private SimAccountRepository simAccRepo;
+	private Consumer<SimTradeGateway> removeCallback;
 	
-	public SimMarket(SimAccountRepository simAccRepo) {
-		this.simAccRepo = simAccRepo;
+	public SimMarket(Consumer<SimTradeGateway> removeCallback) {
+		this.removeCallback = removeCallback;
 	}
 	
 	public synchronized void addGateway(String mdGatewayId, SimTradeGateway accountGateway) {
@@ -42,7 +43,7 @@ public class SimMarket {
 		simGatewayMap.remove(mdGatewayId, simGatewayId);
 		SimTradeGatewayLocal simGateway = (SimTradeGatewayLocal) accountGateway;
 		SimAccount simAccount = simGateway.getAccount();
-		simAccRepo.deleteById(simGatewayId);
+		removeCallback.accept(accountGateway);
 		marketEventBus.unregister(simAccount);
 	}
 	

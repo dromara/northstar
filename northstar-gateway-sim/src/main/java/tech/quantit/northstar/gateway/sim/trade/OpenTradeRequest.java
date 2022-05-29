@@ -5,6 +5,7 @@ import java.util.function.Consumer;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.utils.FieldUtils;
 import xyz.redtorch.pb.CoreField.ContractField;
+import xyz.redtorch.pb.CoreField.OrderField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TradeField;
 
@@ -12,15 +13,19 @@ public class OpenTradeRequest extends TradeRequest {
 	
 	private SimAccount account;
 	
-	public OpenTradeRequest(SimAccount account, FastEventEngine feEngine, SubmitOrderReqField submitOrderReq, Consumer<TradeRequest> doneCallback) {
-		super(feEngine, submitOrderReq, doneCallback);
-		if(!FieldUtils.isOpen(submitOrderReq.getOffsetFlag())) {
-			throw new IllegalArgumentException("传入非开仓请求");
-		}
+	public OpenTradeRequest(SimAccount account, FastEventEngine feEngine, Consumer<TradeRequest> doneCallback) {
+		super(feEngine, doneCallback);
 		this.account = account;
-		this.initOrder(submitOrderReq);
 	}
 	
+	@Override
+	protected OrderField initOrder(SubmitOrderReqField orderReq) {
+		if(!FieldUtils.isOpen(orderReq.getOffsetFlag())) {
+			throw new IllegalArgumentException("传入非开仓请求");
+		}
+		return super.initOrder(orderReq);
+	}
+
 	public double frozenAmount() {
 		ContractField contract = submitOrderReq.getContract();
 		int vol = submitOrderReq.getVolume();
@@ -37,8 +42,7 @@ public class OpenTradeRequest extends TradeRequest {
 
 	@Override
 	public void onTrade(TradeField trade) {
-		account.addPosition(new SimPosition(trade), trade);
-		account.updateCommission(trade);
+		account.onOpenTrade(trade);
 		account.reportAccountStatus();
 	}
 	

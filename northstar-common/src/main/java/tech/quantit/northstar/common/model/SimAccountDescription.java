@@ -39,10 +39,6 @@ public class SimAccountDescription {
 	 */
 	private double totalWithdraw;
 	/**
-	 * 账户手续费
-	 */
-	private int transactionFee;
-	/**
 	 * 未平仓（开仓）成交
 	 */
 	private List<TradeField> openTrades;

@@ -101,7 +101,7 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 		gateway = factory.newInstance(gatewayDescription);
 		gatewayConnMgr.createPair(conn, gateway);
 		if(gateway instanceof SimTradeGateway simGateway) {
-			SimSettings simSettings = (SimSettings) gatewayDescription.getSettings();
+			SimSettings simSettings = JSON.parseObject(JSON.toJSONString(gatewayDescription.getSettings()), SimSettings.class);
 			simGateway.moneyIO(simSettings.getInitBalance());
 		}
 		if(gatewayDescription.isAutoConnect()) {

@@ -1,8 +1,8 @@
-package tech.quantit.northstar.data;
+package tech.quantit.northstar.common;
 
 import tech.quantit.northstar.common.model.SimAccountDescription;
 
-public interface ISimAccountRepository extends tech.quantit.northstar.common.ISimAccountRepository {
+public interface ISimAccountRepository {
 
 	/**
 	 * 保存账户信息

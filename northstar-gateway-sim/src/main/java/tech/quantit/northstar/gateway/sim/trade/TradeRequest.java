@@ -7,7 +7,6 @@ import java.util.function.Consumer;
 
 import org.apache.commons.lang3.StringUtils;
 
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.TickDataAware;
 import tech.quantit.northstar.common.constant.DateTimeConstant;
@@ -33,25 +32,23 @@ import xyz.redtorch.pb.CoreField.TradeField;
 public abstract class TradeRequest implements TickDataAware, Cancellable {
 
 	protected FastEventEngine feEngine;
-	@Getter
 	protected SubmitOrderReqField submitOrderReq;
 	protected Consumer<TradeRequest> doneCallback;
 	
 	protected OrderField.Builder orderBuilder = OrderField.newBuilder();
 	protected TradeField.Builder tradeBuilder = TradeField.newBuilder();
 	
-	@Getter
-	protected boolean isDone;
-	@Getter
-	protected boolean isValid = true;
-	
-	protected TradeRequest(FastEventEngine feEngine, SubmitOrderReqField submitOrderReq, Consumer<TradeRequest> doneCallback) {
+	protected TradeRequest(FastEventEngine feEngine, Consumer<TradeRequest> doneCallback) {
 		this.feEngine = feEngine;
-		this.submitOrderReq = submitOrderReq;
 		this.doneCallback = doneCallback;
 	}
 	
-	protected void initOrder(SubmitOrderReqField orderReq) {
+	public String originOrderId() {
+		return submitOrderReq.getOriginOrderId();
+	}
+	
+	protected OrderField initOrder(SubmitOrderReqField orderReq) {
+		this.submitOrderReq = orderReq;
 		orderBuilder.setActiveTime(String.valueOf(System.currentTimeMillis()))
 		.setOrderId(orderReq.getGatewayId() + "_" + UUID.randomUUID().toString())
 		.setContract(orderReq.getContract())
@@ -76,32 +73,28 @@ public abstract class TradeRequest implements TickDataAware, Cancellable {
 					submitOrderReq.getOffsetFlag(), submitOrderReq.getVolume(), submitOrderReq.getPrice(), submitOrderReq.getStopPrice());
 			order = orderBuilder.setStatusMsg("已报单").setOrderStatus(OrderStatusEnum.OS_Unknown).build();
 		} else {
-			isValid = false;
 			order = orderBuilder.setStatusMsg("废单").setOrderStatus(OrderStatusEnum.OS_Rejected).build();
 		}
 		feEngine.emitEvent(NorthstarEventType.ORDER, order);
+		return order;
 	}
 	
 	protected abstract boolean canMakeOrder();
 	
 	@Override
-	public void onCancal(CancelOrderReqField cancelReq) {
+	public OrderField onCancal(CancelOrderReqField cancelReq) {
 		if(!StringUtils.equals(submitOrderReq.getOriginOrderId(), cancelReq.getOriginOrderId())) {
-			return;
+			throw new IllegalArgumentException("");
 		}
-		if(isDone) {
-			feEngine.emitEvent(NorthstarEventType.ORDER, orderBuilder.build());
-			return;
-		}
-		isDone = true;
 		OrderField order = orderBuilder.setStatusMsg("已撤单").setOrderStatus(OrderStatusEnum.OS_Canceled).build();
 		feEngine.emitEvent(NorthstarEventType.ORDER, order);
 		doneCallback.accept(this);
+		return order;
 	}
 
 	@Override
 	public void onTick(TickField tick) {
-		if(!StringUtils.equals(submitOrderReq.getContract().getUnifiedSymbol(), tick.getUnifiedSymbol()) || isDone) {
+		if(!StringUtils.equals(submitOrderReq.getContract().getUnifiedSymbol(), tick.getUnifiedSymbol())) {
 			return;
 		}
 		if(submitOrderReq.getOrderPriceType() == OrderPriceTypeEnum.OPT_AnyPrice
@@ -149,7 +142,6 @@ public abstract class TradeRequest implements TickDataAware, Cancellable {
 					trade.getDirection(), trade.getOffsetFlag(), trade.getVolume(), trade.getPrice(), trade.getTradingDay());
 			feEngine.emitEvent(NorthstarEventType.TRADE, trade);
 			onTrade(trade);
-			isDone = true;
 			doneCallback.accept(this);
 		}
 	}

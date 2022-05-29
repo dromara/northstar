@@ -1,7 +1,7 @@
 package tech.quantit.northstar.gateway.sim.trade;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -9,8 +9,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,6 +24,7 @@ import test.common.TestFieldFactory;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreField.AccountField;
+import xyz.redtorch.pb.CoreField.ContractField;
 
 class SimAccountTest {
 	
@@ -63,7 +64,7 @@ class SimAccountTest {
 		account.onSubmitOrder(factory.makeOrderReq("rb2210", DirectionEnum.D_Sell, OffsetFlagEnum.OF_Open, 1, 1000, 0));
 		
 		verify(eventBus).register(any(OpenTradeRequest.class));
-		assertThat(account.openReqSet).hasSize(1);
+		assertThat(account.openReqMap).hasSize(1);
 	}
 	
 	@Test
@@ -75,7 +76,7 @@ class SimAccountTest {
 		account.onSubmitOrder(factory.makeOrderReq("rb2210", DirectionEnum.D_Sell, OffsetFlagEnum.OF_Open, 1, 1000, 0));
 		
 		verify(eventBus, times(0)).register(any(OpenTradeRequest.class));
-		assertThat(account.openReqSet).isEmpty();
+		assertThat(account.openReqMap).isEmpty();
 	}
 	
 	@Test
@@ -85,15 +86,15 @@ class SimAccountTest {
 		EventBus eventBus = mock(EventBus.class);
 		account.setEventBus(eventBus);
 		
-		SimPosition pos = mock(SimPosition.class);
-		when(pos.availableVol()).thenReturn(1);
-		ConcurrentMap<String, SimPosition> longMap = new ConcurrentHashMap<>();
-		longMap.put("rb2210@SHFE@FUTURES", pos);
+		TradePosition pos = mock(TradePosition.class);
+		when(pos.totalAvailable()).thenReturn(1);
+		Map<ContractField, TradePosition> longMap = new HashMap<>();
+		longMap.put(factory.makeContract("rb2210"), pos);
 		account.longMap = longMap;
 		account.onSubmitOrder(factory.makeOrderReq("rb2210", DirectionEnum.D_Sell, OffsetFlagEnum.OF_Close, 1, 1000, 0));
 		
 		verify(eventBus).register(any(CloseTradeRequest.class));
-		assertThat(account.closeReqSet).hasSize(1);
+		assertThat(account.closeReqMap).hasSize(1);
 	}
 	
 	@Test
@@ -106,14 +107,14 @@ class SimAccountTest {
 			account.onSubmitOrder(factory.makeOrderReq("rb2210", DirectionEnum.D_Sell, OffsetFlagEnum.OF_Close, 1, 1000, 0));
 		});
 		
-		SimPosition pos = mock(SimPosition.class);
-		ConcurrentMap<String, SimPosition> longMap = new ConcurrentHashMap<>();
-		longMap.put("rb2210@SHFE@FUTURES", pos);
+		TradePosition pos = mock(TradePosition.class);
+		Map<ContractField, TradePosition> longMap = new HashMap<>();
+		longMap.put(factory.makeContract("rb2210"), pos);
 		account.longMap = longMap;
 		account.onSubmitOrder(factory.makeOrderReq("rb2210", DirectionEnum.D_Sell, OffsetFlagEnum.OF_Close, 1, 1000, 0));
 		
 		verify(eventBus, times(0)).register(any(OpenTradeRequest.class));
-		assertThat(account.openReqSet).isEmpty();
+		assertThat(account.openReqMap).isEmpty();
 	}
 	
 	@Test

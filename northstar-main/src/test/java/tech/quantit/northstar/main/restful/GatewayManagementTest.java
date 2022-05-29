@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.web.servlet.MockMvc;
@@ -22,7 +23,6 @@ import com.alibaba.fastjson.JSON;
 import com.corundumstudio.socketio.SocketIOServer;
 
 import common.TestGatewayFactory;
-import common.TestMongoUtils;
 import tech.quantit.northstar.common.MessageHandler;
 import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.common.constant.GatewayUsage;
@@ -57,6 +57,9 @@ public class GatewayManagementTest {
 	@MockBean
 	private MessageHandler msgHandler;
 	
+	@Autowired
+	private RedisTemplate<String, byte[]> redisTemplate;
+	
 	@BeforeEach
 	public void setUp() throws Exception {
 		session = new MockHttpSession();
@@ -66,7 +69,7 @@ public class GatewayManagementTest {
 	
 	@AfterEach
 	public void tearDown() {
-		TestMongoUtils.clearDB();
+		redisTemplate.delete(redisTemplate.keys("*"));
 	}
 	
 	@Test

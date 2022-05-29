@@ -27,6 +27,7 @@ import org.springframework.web.filter.CorsFilter;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import tech.quantit.northstar.common.ISimAccountRepository;
 import tech.quantit.northstar.common.constant.Constants;
 import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.common.event.FastEventEngine;
@@ -43,7 +44,6 @@ import tech.quantit.northstar.gateway.api.GatewayFactory;
 import tech.quantit.northstar.gateway.api.domain.GlobalMarketRegistry;
 import tech.quantit.northstar.gateway.api.domain.IndexContract;
 import tech.quantit.northstar.gateway.api.domain.NormalContract;
-import tech.quantit.northstar.gateway.sim.persistence.SimAccountRepository;
 import tech.quantit.northstar.gateway.sim.trade.SimGatewayFactory;
 import tech.quantit.northstar.gateway.sim.trade.SimMarket;
 import tech.quantit.northstar.main.ExternalJarListener;
@@ -125,8 +125,8 @@ public class AppConfig implements WebMvcConfigurer {
 	}
 	
 	@Bean
-	public SimMarket simMarket(SimAccountRepository simAccRepo) {
-		return new SimMarket(simAccRepo);
+	public SimMarket simMarket(ISimAccountRepository simAccRepo) {
+		return new SimMarket(simTradeGateway -> simAccRepo.deleteById(simTradeGateway.getGatewaySetting().getGatewayId()));
 	}
 	
 	private List<ContractField> findAllContract(IContractRepository contractRepo){
@@ -177,7 +177,7 @@ public class AppConfig implements WebMvcConfigurer {
 	}
 	
 	@Bean
-	public GatewayFactory simGatewayFactory(FastEventEngine fastEventEngine, SimMarket simMarket, SimAccountRepository accRepo,
+	public GatewayFactory simGatewayFactory(FastEventEngine fastEventEngine, SimMarket simMarket, ISimAccountRepository accRepo,
 			GlobalMarketRegistry registry, ContractManager contractMgr) {
 		return new SimGatewayFactory(fastEventEngine, simMarket, accRepo, registry, contractMgr);
 	}
