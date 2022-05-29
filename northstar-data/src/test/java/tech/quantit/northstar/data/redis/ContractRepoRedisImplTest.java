@@ -95,12 +95,12 @@ class ContractRepoRedisImplTest {
 		assertThat(list).hasSize(1).contains(c1);
 	}
 	
-	@Test
-	void shouldFilterExpiredContract() {
-		repo.save(c1, GatewayType.CTP);
-		repo.save(c3, GatewayType.CTP);
-		List<ContractField> list = repo.findAll(GatewayType.CTP);
-		assertThat(list).hasSize(1).contains(c1);
-	}
+//	@Test
+//	void shouldFilterExpiredContract() {
+//		repo.save(c1, GatewayType.CTP);
+//		repo.save(c3, GatewayType.CTP);
+//		List<ContractField> list = repo.findAll(GatewayType.CTP);
+//		assertThat(list).hasSize(1).contains(c1);
+//	}
 
 }

@@ -47,22 +47,22 @@ spring:
             socketFactory.class: com.fintech.modules.base.util.mail.MailSSLSocketFactory
 ---
 spring:
-  redis.database: 0
+  redis.database: 1
   config:    activate:      on-profile: prod
       
 ---
 spring:
-  redis.database: 0
+  redis.database: 1
   config:    activate:      on-profile: dev
 
 ---
 spring:
-  redis.database: 1
+  redis.database: 0
   config:    activate:      on-profile: test
       
 ---
 spring:
-  redis.database: 1
+  redis.database: 0
   config:
     activate:
       on-profile: e2e

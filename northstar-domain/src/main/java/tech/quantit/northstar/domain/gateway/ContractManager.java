@@ -1,5 +1,6 @@
 package tech.quantit.northstar.domain.gateway;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -107,7 +108,8 @@ public class ContractManager implements IContractManager {
 	
 	public Set<ContractField> relativeContracts(String contractDefId){
 		if(!defContractMap.containsKey(contractDefId)) {
-			throw new IllegalStateException("找不到关联合约集:" + contractDefId);
+			log.debug("找不到关联合约集:" + contractDefId);
+			return Collections.emptySet();
 		}
 		return defContractMap.get(contractDefId);
 	}

@@ -141,9 +141,13 @@ public abstract class TradeRequest implements TickDataAware, Cancellable {
 			log.info("模拟成交：{}，{}，{}，{}，{}手，{}，{}", trade.getOriginOrderId(), trade.getContract().getName(), 
 					trade.getDirection(), trade.getOffsetFlag(), trade.getVolume(), trade.getPrice(), trade.getTradingDay());
 			feEngine.emitEvent(NorthstarEventType.TRADE, trade);
-			onTrade(trade);
 			doneCallback.accept(this);
+			onTrade(trade);
 		}
+	}
+	
+	public OrderField getOrder() {
+		return orderBuilder.build();
 	}
 	
 	public abstract void onTrade(TradeField trade);

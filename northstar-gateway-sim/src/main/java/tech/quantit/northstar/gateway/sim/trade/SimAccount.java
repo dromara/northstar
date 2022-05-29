@@ -73,6 +73,8 @@ public class SimAccount implements TickDataAware{
 		eventBus.unregister(req);
 		savingCallback.run();
 		closeReqMap.remove(req.originOrderId());
+		OrderField order = req.getOrder();
+		getClosingMap(order.getDirection()).values().stream().forEach(tp -> tp.onOrder(order));;
 	};
 	
 	public SimAccount(String gatewayId,  IContractManager contractMgr) {
@@ -113,9 +115,9 @@ public class SimAccount implements TickDataAware{
 	}
 	
 	public double totalMargin() {
-		double longPositionFrozen = longMap.values().stream().mapToDouble(tp -> tp.totalVolume() - tp.totalAvailable()).reduce((a, b) -> a + b).orElse(0);
-		double shortPositionFrozen = shortMap.values().stream().mapToDouble(tp -> tp.totalVolume() - tp.totalAvailable()).reduce((a, b) -> a + b).orElse(0);
-		return longPositionFrozen + shortPositionFrozen;
+		double longPositionMargin = longMap.values().stream().mapToDouble(TradePosition::totalMargin).reduce((a, b) -> a + b).orElse(0);
+		double shortPositionMargin = shortMap.values().stream().mapToDouble(TradePosition::totalMargin).reduce((a, b) -> a + b).orElse(0);
+		return longPositionMargin + shortPositionMargin;
 	}
 	
 	public double positionProfit() {
