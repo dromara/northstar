@@ -9,6 +9,7 @@ release.properties
 **/*.releaseBackup
 *.versionsBackup
 **/*.versionsBackup
+.lh
 
 ### STS ###
 .apt_generated

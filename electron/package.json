@@ -10,22 +10,11 @@
     "electron:generate-icons": "electron-icon-builder --input=./public/logo.ico --output=dist --flatten"
   },
   "build": {
-    "extraResources": ["config.json"],
+    "extraResources": [
+      "config.json"
+    ],
     "win": {
       "icon": "./src/main/logo.ico"
-    },
-    "nsis": {
-      "oneClick": false,
-      "guid": "idea",
-      "perMachine": true,
-      "allowElevation": true,
-      "allowToChangeInstallationDirectory": true,
-      "installerIcon": "./src/main/logo.ico",
-      "uninstallerIcon": "./src/main/logo.ico",
-      "installerHeaderIcon": "./src/main/logo.ico",
-      "createDesktopShortcut": true,
-      "createStartMenuShortcut": true,
-      "shortcutName": "idea"
     }
   },
   "dependencies": {
