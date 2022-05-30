@@ -13,7 +13,14 @@ yarn dist
 ```
 
 ## 使用
-### 配置网页
+#### 安装包路径
+electron/installation-package
 
+#### 1.解压目标文件，window版：
+northstar-electron-window.zip
+
+#### 2.运行文件
+northstar.exe
+
+#### 3.配置默认打开地址
 resources下的config.json
-可以配置目标网页地址
