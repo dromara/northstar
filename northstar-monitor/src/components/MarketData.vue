@@ -34,8 +34,8 @@
 import { dispose, init } from 'klinecharts'
 import volumePure from '@/lib/indicator/volume-pure'
 import openInterestDelta from '@/lib/indicator/open-interest'
+import gatewayDataApi from '@/api/gatewayDataApi'
 
-import dataSyncApi from '@/api/dataSyncApi'
 import { mapGetters } from 'vuex'
 
 import { BarField } from '@/lib/xyz/redtorch/pb/core_field_pb'
@@ -133,12 +133,11 @@ export default {
     async loadBars(timestamp) {
       this.fullscreenLoading = true
       try {
-        const barDataList = await dataSyncApi.loadHistoryBars(
+        const barDataList = await gatewayDataApi.loadWeeklyBarData(
           this.curMarketGatewayId,
           this.curUnifiedSymbol,
           timestamp
         )
-
         return barDataList
           .map((data) => BarField.deserializeBinary(data).toObject())
           .map((bar) => KLineUtils.createFromBar(bar))

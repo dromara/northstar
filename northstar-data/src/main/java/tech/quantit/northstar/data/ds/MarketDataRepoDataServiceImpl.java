@@ -33,6 +33,7 @@ public class MarketDataRepoDataServiceImpl implements IMarketDataRepository{
 
 	@Override
 	public List<BarField> loadBars(String gatewayId, String unifiedSymbol, LocalDate startDate, LocalDate endDate) {
+		log.debug("从数据服务加载历史行情数据：{}，{} -> {}", unifiedSymbol, startDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), endDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
 		try {			
 			return dsMgr.getMinutelyData(unifiedSymbol, startDate, endDate);
 		} catch (Exception e) {

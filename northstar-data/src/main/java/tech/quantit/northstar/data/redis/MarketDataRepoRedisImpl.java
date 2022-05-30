@@ -63,6 +63,7 @@ public class MarketDataRepoRedisImpl extends MarketDataRepoDataServiceImpl {
 	 */
 	@Override
 	public List<BarField> loadBars(String gatewayId, String unifiedSymbol, LocalDate startDate, LocalDate endDate) {
+		log.debug("加载 [{}] 历史行情数据：{}，{} -> {}", gatewayId, unifiedSymbol, startDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), endDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
 		LocalDate today = LocalDate.now();
 		if(today.isAfter(endDate) || today.isEqual(endDate) && LocalTime.now().isAfter(LocalTime.of(20, 0))) {			
 			return super.loadBars(gatewayId, unifiedSymbol, startDate, endDate)
