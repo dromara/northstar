@@ -28,7 +28,6 @@ public class SimAccountRepoMongoImplTest {
 			.totalCloseProfit(1.0)
 			.totalDeposit(1.0)
 			.totalWithdraw(1.0)
-			.transactionFee(1)
 			.build();
 
 	@AfterEach

@@ -1,18 +1,17 @@
 package tech.quantit.northstar.gateway.sim.trade;
 
-import java.util.Optional;
+import com.google.protobuf.InvalidProtocolBufferException;
 
-import com.alibaba.fastjson.JSON;
-
+import tech.quantit.northstar.common.IContractManager;
+import tech.quantit.northstar.common.ISimAccountRepository;
 import tech.quantit.northstar.common.constant.GatewayUsage;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.model.GatewayDescription;
-import tech.quantit.northstar.common.model.SimSettings;
+import tech.quantit.northstar.common.model.SimAccountDescription;
 import tech.quantit.northstar.gateway.api.Gateway;
 import tech.quantit.northstar.gateway.api.GatewayFactory;
 import tech.quantit.northstar.gateway.api.domain.GlobalMarketRegistry;
 import tech.quantit.northstar.gateway.sim.market.SimMarketGatewayLocal;
-import tech.quantit.northstar.gateway.sim.persistence.SimAccountRepository;
 import xyz.redtorch.pb.CoreEnum.GatewayTypeEnum;
 import xyz.redtorch.pb.CoreField.GatewaySettingField;
 
@@ -22,15 +21,19 @@ public class SimGatewayFactory implements GatewayFactory{
 	
 	private FastEventEngine fastEventEngine;
 	
-	private SimAccountRepository simAccountRepo;
+	private ISimAccountRepository simAccountRepo;
 	
 	private GlobalMarketRegistry registry;
 	
-	public SimGatewayFactory(FastEventEngine fastEventEngine, SimMarket simMarket, SimAccountRepository repo, GlobalMarketRegistry registry) {
+	private IContractManager contractMgr;
+	
+	public SimGatewayFactory(FastEventEngine fastEventEngine, SimMarket simMarket, ISimAccountRepository repo, GlobalMarketRegistry registry,
+			IContractManager contractMgr) {
 		this.simMarket = simMarket;
 		this.fastEventEngine = fastEventEngine;
 		this.simAccountRepo = repo;
 		this.registry = registry;
+		this.contractMgr = contractMgr;
 	}
 
 	@Override
@@ -52,18 +55,26 @@ public class SimGatewayFactory implements GatewayFactory{
 	private Gateway getTradeGateway(GatewayDescription gatewayDescription) {
 		String mdGatewayId = gatewayDescription.getBindedMktGatewayId();
 		String accGatewayId = gatewayDescription.getGatewayId();
-		Optional<SimAccount> simAccountOp = simAccountRepo.findById(accGatewayId);
+		SimAccountDescription simAccountDescription = simAccountRepo.findById(accGatewayId);
 
-		SimSettings settings = JSON.parseObject(JSON.toJSONString(gatewayDescription.getSettings()), SimSettings.class);
 		GatewaySettingField gwSettings = GatewaySettingField.newBuilder()
 				.setGatewayId(gatewayDescription.getGatewayId())
 				.setGatewayType(GatewayTypeEnum.GTE_Trade)
 				.build();
 		
-		SimAccount account = simAccountOp.orElse(new SimAccount(accGatewayId, settings.getFee()));
+		final SimAccount account;
+		if(simAccountDescription == null) {
+			account = new SimAccount(accGatewayId, contractMgr);
+		} else {
+			try {
+				account = new SimAccount(simAccountDescription, contractMgr);
+			} catch (InvalidProtocolBufferException e) {
+				throw new IllegalStateException("无法创建模拟账户", e);
+			}
+		}
 		account.setEventBus(simMarket.getMarketEventBus());
 		account.setFeEngine(fastEventEngine);
-		account.setSavingCallback(() -> simAccountRepo.save(account));
+		account.setSavingCallback(() -> simAccountRepo.save(account.getDescription()));
 		SimTradeGateway gateway = new SimTradeGatewayLocal(fastEventEngine, simMarket, gwSettings, mdGatewayId, account, registry);
 		simMarket.addGateway(mdGatewayId, gateway);
 		return gateway;

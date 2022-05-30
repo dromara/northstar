@@ -41,4 +41,10 @@ public interface IGatewayRepository {
 	 * @return
 	 */
 	List<GatewayDescription> findAll();
+	/**
+	 * 查询网关
+	 * @param gatewayId
+	 * @return
+	 */
+	GatewayDescription findById(String gatewayId);
 }

@@ -19,9 +19,11 @@ import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.constant.ClosingPolicy;
 import tech.quantit.northstar.common.constant.ModuleState;
 import tech.quantit.northstar.common.exception.NoSuchElementException;
+import tech.quantit.northstar.common.model.ContractDefinition;
 import tech.quantit.northstar.common.model.ModuleAccountRuntimeDescription;
 import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
 import tech.quantit.northstar.common.utils.FieldUtils;
+import tech.quantit.northstar.domain.gateway.ContractManager;
 import tech.quantit.northstar.strategy.api.IModuleAccountStore;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreField.CancelOrderReqField;
@@ -42,8 +44,8 @@ public class ModuleAccountStore implements IModuleAccountStore {
 	/* gatewayId -> unifiedSymbol -> position */
 	private Table<String, String, TradePosition> buyPositionTbl = HashBasedTable.create();
 	private Table<String, String, TradePosition> sellPositionTbl = HashBasedTable.create();
-	/* gatewayId -> commission */
-	private Map<String, Double> accCommissionMap = new HashMap<>();
+	/* gatewayId -> accCommission */
+	private Map<String, AtomicDouble> accCommissionMap = new HashMap<>();
 	/* gatewayId -> initBalance*/
 	private Map<String, Double> initBalanceMap = new HashMap<>();
 	/* gatewayId -> accDeal */
@@ -55,13 +57,18 @@ public class ModuleAccountStore implements IModuleAccountStore {
 	
 	private ClosingPolicy closingPolicy;
 	
-	public ModuleAccountStore(String moduleName, ClosingPolicy closingPolicy, ModuleRuntimeDescription moduleRuntimeDescription) {
+	private ContractManager contractMgr;
+	
+	public ModuleAccountStore(String moduleName, ClosingPolicy closingPolicy, ModuleRuntimeDescription moduleRuntimeDescription,
+			ContractManager contractMgr) {
 		this.sm = new ModuleStateMachine(moduleName);
 		this.closingPolicy = closingPolicy;
+		this.contractMgr = contractMgr;
 		for(ModuleAccountRuntimeDescription mad : moduleRuntimeDescription.getAccountRuntimeDescriptionMap().values()) {
 			initBalanceMap.put(mad.getAccountId(), mad.getInitBalance());
 			accDealVolMap.put(mad.getAccountId(), new AtomicInteger(mad.getAccDealVolume()));
 			accCloseProfitMap.put(mad.getAccountId(), new AtomicDouble(mad.getAccCloseProfit()));
+			accCommissionMap.put(mad.getAccountId(), new AtomicDouble(mad.getAccCommission()));
 			
 			List<TradeField> allTrades = mad.getPositionDescription()
 					.getUncloseTrades()
@@ -118,6 +125,11 @@ public class ModuleAccountStore implements IModuleAccountStore {
 				accDealVolMap.get(trade.getGatewayId()).addAndGet(trade.getVolume());
 				accCloseProfitMap.putIfAbsent(trade.getGatewayId(), new AtomicDouble());
 				accCloseProfitMap.get(trade.getGatewayId()).addAndGet(profit);
+				accCommissionMap.putIfAbsent(trade.getGatewayId(), new AtomicDouble());
+				ContractDefinition contractDef = contractMgr.getContractDefinition(trade.getContract().getUnifiedSymbol());
+				
+				double commission = contractDef.getCommissionInPrice() > 0 ? contractDef.getCommissionInPrice() : contractDef.commissionRate() * trade.getPrice() * trade.getContract().getMultiplier();
+				accCommissionMap.get(trade.getGatewayId()).addAndGet(commission * 2 * trade.getVolume()); // 乘2代表手续费双向计算
 			}
 		} else if(FieldUtils.isOpen(trade.getOffsetFlag())) {
 			tbl.put(trade.getGatewayId(), trade.getContract().getUnifiedSymbol(), new TradePosition(List.of(trade), closingPolicy));
@@ -202,8 +214,7 @@ public class ModuleAccountStore implements IModuleAccountStore {
 
 	@Override
 	public double getAccCommission(String gatewayId) {
-		// TODO Auto-generated method stub
-		return 0;
+		return accCommissionMap.get(gatewayId).get();
 	}
 
 }

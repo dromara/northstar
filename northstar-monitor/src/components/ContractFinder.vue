@@ -46,12 +46,8 @@
 </template>
 
 <script>
-import gatewayDataApi from '@/api/gatewayDataApi'
-
-const filterMethods = {
-  INDEX: (item) => item.unifiedsymbol.endsWith('FUTURES') && item.name.endsWith('指数'),
-  FUTURES: (item) => item.unifiedsymbol.endsWith('FUTURES') && !item.name.endsWith('指数')
-}
+import gatewayMgmtApi from '@/api/gatewayMgmtApi'
+import { ContractField } from '@/lib/xyz/redtorch/pb/core_field_pb'
 
 export default {
   props: {
@@ -67,18 +63,19 @@ export default {
       unifiedSymbol: '',
       contractList: [],
       contractTypeOptions: [
-        { value: 'INDEX', label: '指数合约' },
-        { value: 'FUTURES', label: '期货合约' },
-        { value: 'OPTION', label: '期权合约', disabled: true },
-        { value: 'OTHERS', label: '其他合约', disabled: true }
+        { value: 2, label: '期货合约' },
+        { value: 3, label: '期权合约' }
       ]
     }
   },
   watch: {
     gateway: async function () {
       this.unifiedSymbol = ''
-      this.contractList = await gatewayDataApi.getContracts(this.gateway)
-      console.log('gateway updated', this.contractList)
+      try {
+        await this.updateContractList()
+      } catch (e) {
+        this.$message.error(e.message)
+      }
     }
   },
   computed: {
@@ -86,8 +83,7 @@ export default {
       return ['CTP', 'SIM']
     },
     gwContractList() {
-      if (!filterMethods[this.contractType]) return []
-      return this.contractList.filter(filterMethods[this.contractType])
+      return this.contractList.filter((item) => item.productclass === this.contractType)
     }
   },
   methods: {
@@ -99,6 +95,12 @@ export default {
       selection.removeAllRanges()
       selection.addRange(range)
       document.execCommand('Copy')
+    },
+    async updateContractList() {
+      this.contractList = await gatewayMgmtApi.getSubscribedContracts(this.gateway)
+      this.contractList = this.contractList
+        .map((item) => ContractField.deserializeBinary(item).toObject())
+        .sort((a, b) => a['unifiedsymbol'].localeCompare(b['unifiedsymbol']))
     }
   }
 }

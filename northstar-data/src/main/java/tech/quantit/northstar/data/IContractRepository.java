@@ -17,17 +17,12 @@ public interface IContractRepository {
 	 * @param contract
 	 */
 	void save(ContractField contract, GatewayType gatewayType);
-
+	
 	/**
 	 * 按合约类型查询合约
 	 * @param type
 	 * @return
 	 */
 	List<ContractField> findAll(GatewayType gatewayType);
-
-	/**
-	 * 查询全部合约
-	 * @return
-	 */
-	List<ContractField> findAll();
+	
 }

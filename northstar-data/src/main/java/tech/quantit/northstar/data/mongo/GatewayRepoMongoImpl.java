@@ -58,4 +58,10 @@ public class GatewayRepoMongoImpl implements IGatewayRepository{
 		return mongoTemplate.findAll(GatewayDescriptionPO.class).stream().map(GatewayDescriptionPO::getGatewayDescription).collect(Collectors.toList());
 	}
 
+	@Override
+	public GatewayDescription findById(String gatewayId) {
+		GatewayDescriptionPO po = mongoTemplate.findById(gatewayId, GatewayDescriptionPO.class);
+		return po.getGatewayDescription();
+	}
+
 }

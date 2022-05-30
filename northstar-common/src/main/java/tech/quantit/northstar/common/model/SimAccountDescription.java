@@ -6,7 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import xyz.redtorch.pb.CoreField.TradeField;
 
 /**
  * 模拟账户信息描述
@@ -39,11 +38,7 @@ public class SimAccountDescription {
 	 */
 	private double totalWithdraw;
 	/**
-	 * 账户手续费
-	 */
-	private int transactionFee;
-	/**
 	 * 未平仓（开仓）成交
 	 */
-	private List<TradeField> openTrades;
+	private List<byte[]> openTrades;
 }

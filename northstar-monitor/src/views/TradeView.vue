@@ -145,7 +145,7 @@ import NsAccountDetail from '@/components/AccountDetail'
 import NsMarketData from '@/components/MarketData'
 import gatewayMgmtApi from '@/api/gatewayMgmtApi'
 import tradeOprApi from '@/api/tradeOprApi'
-import gatewayDataApi from '@/api/gatewayDataApi'
+import { ContractField } from '@/lib/xyz/redtorch/pb/core_field_pb'
 
 let accountCheckTimer
 
@@ -201,21 +201,24 @@ export default {
       const timelyCheck = () => {
         accountCheckTimer = setTimeout(() => {
           if (!this.$store.getters.isAccountConnected(this.chosenAccount.gatewayId)) {
-            this.$message.error(`账户${this.chosenAccount.gatewayId}没有连线`)
+            this.$message.error(`账户【${this.chosenAccount.gatewayId}】没有连线`)
           }
           timelyCheck()
         }, 3000)
       }
       timelyCheck()
 
-      // this.symbolList = this.$store.getters.findContractsByType(
-      //   this.currentAccount.bindedMktGatewayId,
-      //   'FUTURES'
-      // )
-
-      gatewayDataApi.getContracts(this.chosenAccount.gatewayType).then((list) => {
-        this.symbolList = list.filter((item) => item.unifiedsymbol.indexOf('FUTURES') > -1)
-      })
+      gatewayMgmtApi
+        .getSubscribedContracts(this.chosenAccount.bindedMktGatewayId)
+        .then((list) => {
+          this.symbolList = list
+            .map((item) => ContractField.deserializeBinary(item).toObject())
+            .filter((item) => item.productclass === 2)
+            .sort((a, b) => a['unifiedsymbol'].localeCompare(b['unifiedsymbol']))
+        })
+        .catch((e) => {
+          this.$message.error(e.message)
+        })
 
       this.$store.commit('updateFocusMarketGatewayId', this.chosenAccount.bindedMktGatewayId)
       this.$store.commit('updateCurAccountId', this.chosenAccount.gatewayId)

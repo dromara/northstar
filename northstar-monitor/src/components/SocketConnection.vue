@@ -104,9 +104,11 @@ export default {
       })
       this.socket.on('error', (e) => {
         console.log('SocketIO连接异常', e)
+        this.$message.error('服务端连接异常')
       })
       this.socket.on('connect_error', (e) => {
         console.log('SocketIO连接失败', e)
+        this.$message.error('服务端连接失败')
       })
       this.socket.on('connect', () => {
         console.log('SocketIO连接成功')

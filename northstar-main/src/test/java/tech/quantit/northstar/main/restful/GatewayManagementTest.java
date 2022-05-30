@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.web.servlet.MockMvc;
@@ -22,7 +23,6 @@ import com.alibaba.fastjson.JSON;
 import com.corundumstudio.socketio.SocketIOServer;
 
 import common.TestGatewayFactory;
-import common.TestMongoUtils;
 import tech.quantit.northstar.common.MessageHandler;
 import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.common.constant.GatewayUsage;
@@ -30,7 +30,6 @@ import tech.quantit.northstar.common.constant.ReturnCode;
 import tech.quantit.northstar.common.model.CtpSettings;
 import tech.quantit.northstar.common.model.GatewayDescription;
 import tech.quantit.northstar.common.model.NsUser;
-import tech.quantit.northstar.common.model.SimSettings;
 import tech.quantit.northstar.main.NorthstarApplication;
 import tech.quantit.northstar.main.handler.broadcast.SocketIOMessageEngine;
 
@@ -57,6 +56,9 @@ public class GatewayManagementTest {
 	@MockBean
 	private MessageHandler msgHandler;
 	
+	@Autowired
+	private RedisTemplate<String, byte[]> redisTemplate;
+	
 	@BeforeEach
 	public void setUp() throws Exception {
 		session = new MockHttpSession();
@@ -66,7 +68,7 @@ public class GatewayManagementTest {
 	
 	@AfterEach
 	public void tearDown() {
-		TestMongoUtils.clearDB();
+		redisTemplate.delete(redisTemplate.keys("*"));
 	}
 	
 	@Test
@@ -162,7 +164,7 @@ public class GatewayManagementTest {
 	public void shouldIncreaseBalance() throws Exception {
 		shouldCreateGateway();
 		
-		GatewayDescription gwDes = TestGatewayFactory.makeTrdGateway("TG2", "", GatewayType.SIM, TestGatewayFactory.makeGatewaySettings(SimSettings.class), false);
+		GatewayDescription gwDes = TestGatewayFactory.makeTrdGateway("TG2", "", GatewayType.SIM, new Object(), false);
 		
 		mockMvc.perform(post("/northstar/gateway").contentType(MediaType.APPLICATION_JSON).content(JSON.toJSONString(gwDes)).session(session))
 			.andExpect(status().isOk())

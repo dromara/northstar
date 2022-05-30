@@ -16,6 +16,7 @@
     "element-ui": "^2.15.6",
     "eslint-plugin-vue": "^6.2.2",
     "google-protobuf": "^3.17.0-rc.1",
+    "jstat": "^1.9.5",
     "klinecharts": "^8.1.1",
     "moment": "^2.29.1",
     "socket.io-client": "^2.3.1",

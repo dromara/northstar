@@ -3,54 +3,49 @@ package tech.quantit.northstar.gateway.sim.trade;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.annotation.Transient;
-import org.springframework.data.mongodb.core.mapping.Document;
-
 import com.google.common.eventbus.EventBus;
+import com.google.protobuf.InvalidProtocolBufferException;
 
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
+import tech.quantit.northstar.common.IContractManager;
 import tech.quantit.northstar.common.TickDataAware;
+import tech.quantit.northstar.common.constant.ClosingPolicy;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.event.NorthstarEventType;
+import tech.quantit.northstar.common.model.ContractDefinition;
+import tech.quantit.northstar.common.model.SimAccountDescription;
 import tech.quantit.northstar.common.utils.FieldUtils;
+import tech.quantit.northstar.common.utils.MessagePrinter;
 import xyz.redtorch.pb.CoreEnum.CurrencyEnum;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
+import xyz.redtorch.pb.CoreEnum.OrderStatusEnum;
 import xyz.redtorch.pb.CoreField.AccountField;
 import xyz.redtorch.pb.CoreField.CancelOrderReqField;
+import xyz.redtorch.pb.CoreField.ContractField;
+import xyz.redtorch.pb.CoreField.OrderField;
 import xyz.redtorch.pb.CoreField.PositionField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TickField;
 import xyz.redtorch.pb.CoreField.TradeField;
 
 @Data
-@Document
-@NoArgsConstructor
 public class SimAccount implements TickDataAware{
 	
-	@Id
 	private String gatewayId;
 
-	// 委托请求不需要持久化
-	@Transient
-	protected Set<OpenTradeRequest> openReqSet = new HashSet<>();
-	@Transient
-	protected Set<CloseTradeRequest> closeReqSet = new HashSet<>();
+	// originOrderId -> tradeRequest
+	protected Map<String, OpenTradeRequest> openReqMap = new HashMap<>();
+	protected Map<String, CloseTradeRequest> closeReqMap = new HashMap<>();
 
-	protected Map<String, SimPosition> longMap = new HashMap<>();
-	protected Map<String, SimPosition> shortMap = new HashMap<>();
+	protected Map<ContractField, TradePosition> longMap = new HashMap<>();
+	protected Map<ContractField, TradePosition> shortMap = new HashMap<>();
 	
 	protected double totalCloseProfit;
 	
@@ -60,38 +55,49 @@ public class SimAccount implements TickDataAware{
 	
 	protected double totalWithdraw;
 	
-	protected int transactionFee;
-	
 	private volatile boolean connected;
 	
-	@Transient
+	private IContractManager contractMgr;
+	
 	@Setter
 	protected Runnable savingCallback;
-	@Transient
 	private EventBus eventBus;
-	@Transient
 	@Setter
 	private FastEventEngine feEngine;
-	@Transient
 	protected Consumer<TradeRequest> openCallback = req -> {
-		if(req.isDone()) {			
-			eventBus.unregister(req);
-			CompletableFuture.runAsync(() -> openReqSet.remove(req), CompletableFuture.delayedExecutor(300, TimeUnit.MILLISECONDS));
-		}
+		eventBus.unregister(req);
 		savingCallback.run();
+		openReqMap.remove(req.originOrderId());
 	};
-	@Transient
 	Consumer<TradeRequest> closeCallback = req -> {
-		if(req.isDone()) {			
-			eventBus.unregister(req);
-			CompletableFuture.runAsync(() -> closeReqSet.remove(req), CompletableFuture.delayedExecutor(300, TimeUnit.MILLISECONDS));
-		}
+		eventBus.unregister(req);
 		savingCallback.run();
+		closeReqMap.remove(req.originOrderId());
+		OrderField order = req.getOrder();
+		getClosingMap(order.getDirection()).values().stream().forEach(tp -> tp.onOrder(order));;
 	};
 	
-	public SimAccount(String gatewayId,  int fee) {
+	public SimAccount(String gatewayId,  IContractManager contractMgr) {
 		this.gatewayId = gatewayId;
-		this.transactionFee = fee;
+		this.contractMgr = contractMgr;
+	}
+	
+	public SimAccount(SimAccountDescription simAccDescription, IContractManager contractMgr) throws InvalidProtocolBufferException {
+		this.gatewayId = simAccDescription.getGatewayId();
+		this.contractMgr = contractMgr;
+		this.totalCloseProfit = simAccDescription.getTotalCloseProfit();
+		this.totalCommission = simAccDescription.getTotalCommission();
+		this.totalDeposit = simAccDescription.getTotalDeposit();
+		this.totalWithdraw = simAccDescription.getTotalWithdraw();
+		for(byte[] uncloseTradeData : simAccDescription.getOpenTrades()) {
+			TradeField uncloseTrade = TradeField.parseFrom(uncloseTradeData);
+			Map<ContractField, TradePosition> tMap = getOpeningMap(uncloseTrade.getDirection());
+			if(tMap.containsKey(uncloseTrade.getContract())) {
+				tMap.get(uncloseTrade.getContract()).onTrade(uncloseTrade);
+			}else {
+				tMap.put(uncloseTrade.getContract(), new TradePosition(List.of(uncloseTrade), ClosingPolicy.FIFO));
+			}
+		}
 	}
 	
 	public double balance() {
@@ -105,18 +111,18 @@ public class SimAccount implements TickDataAware{
 	}
 	
 	public double totalFrozen() {
-		return openReqSet.stream().mapToDouble(OpenTradeRequest::frozenAmount).reduce((a, b) -> a + b).orElse(0);
+		return openReqMap.values().stream().mapToDouble(OpenTradeRequest::frozenAmount).reduce((a, b) -> a + b).orElse(0);
 	}
 	
 	public double totalMargin() {
-		double longPositionFrozen = longMap.values().stream().mapToDouble(SimPosition::frozenMargin).reduce((a, b) -> a + b).orElse(0);
-		double shortPositionFrozen = shortMap.values().stream().mapToDouble(SimPosition::frozenMargin).reduce((a, b) -> a + b).orElse(0);
-		return longPositionFrozen + shortPositionFrozen;
+		double longPositionMargin = longMap.values().stream().mapToDouble(TradePosition::totalMargin).reduce((a, b) -> a + b).orElse(0);
+		double shortPositionMargin = shortMap.values().stream().mapToDouble(TradePosition::totalMargin).reduce((a, b) -> a + b).orElse(0);
+		return longPositionMargin + shortPositionMargin;
 	}
 	
 	public double positionProfit() {
-		double longPositionProfit = longMap.values().stream().mapToDouble(SimPosition::profit).reduce((a, b) -> a + b).orElse(0);
-		double shortPositionProfit = shortMap.values().stream().mapToDouble(SimPosition::profit).reduce((a, b) -> a + b).orElse(0);
+		double longPositionProfit = longMap.values().stream().mapToDouble(TradePosition::profit).reduce((a, b) -> a + b).orElse(0);
+		double shortPositionProfit = shortMap.values().stream().mapToDouble(TradePosition::profit).reduce((a, b) -> a + b).orElse(0);
 		return longPositionProfit + shortPositionProfit;
 	}
 	
@@ -163,54 +169,53 @@ public class SimAccount implements TickDataAware{
 		if(size == 0)
 			return Collections.emptyList();
 		List<PositionField> list = new ArrayList<>(size);
-		list.addAll(longMap.values().stream().map(SimPosition::positionField).toList());
-		list.addAll(shortMap.values().stream().map(SimPosition::positionField).toList());
+		list.addAll(longMap.values().stream().map(tp -> tp.convertToPositionField(this)).toList());
+		list.addAll(shortMap.values().stream().map(tp -> tp.convertToPositionField(this)).toList());
 		return list;
-	}
-	
-	public void addPosition(SimPosition position, TradeField trade) {
-		Map<String, SimPosition> posMap = FieldUtils.isLong(position.getDirection()) ? longMap : shortMap;
-		if(posMap.containsKey(position.getUnifiedSymbol())) {
-			SimPosition originPosition = posMap.get(position.getUnifiedSymbol());
-			originPosition.merge(trade);
-		} else {			
-			posMap.put(position.getUnifiedSymbol(), position);
-			eventBus.register(position);
-		}
 	}
 	
 	public void onSubmitOrder(SubmitOrderReqField orderReq) {
 		if(FieldUtils.isOpen(orderReq.getOffsetFlag())) {
-			OpenTradeRequest tradeReq = new OpenTradeRequest(this, feEngine, orderReq, openCallback);
-			if(!tradeReq.isValid()) {
+			OpenTradeRequest tradeReq = new OpenTradeRequest(this, feEngine, openCallback);
+			OrderField order = tradeReq.initOrder(orderReq);
+			if(order.getOrderStatus() == OrderStatusEnum.OS_Rejected) {
 				return;
 			}
 			eventBus.register(tradeReq);
-			openReqSet.add(tradeReq);
+			openReqMap.put(tradeReq.originOrderId(), tradeReq);
 		}
 		
 		if(FieldUtils.isClose(orderReq.getOffsetFlag())) {
-			SimPosition position = getClosingPositionByReq(orderReq);
-			CloseTradeRequest tradeReq = new CloseTradeRequest(this, position, feEngine, orderReq, closeCallback);
-			if(!tradeReq.isValid()) {
+			TradePosition position = getClosingPositionByReq(orderReq);
+			CloseTradeRequest tradeReq = new CloseTradeRequest(this, position, feEngine, closeCallback);
+			OrderField order = tradeReq.initOrder(orderReq);
+			if(order.getOrderStatus() == OrderStatusEnum.OS_Rejected) {
 				return;
 			}
-			position.setCloseReq(tradeReq);
+			position.onOrder(order);
 			eventBus.register(tradeReq);
-			closeReqSet.add(tradeReq);
+			closeReqMap.put(tradeReq.originOrderId(), tradeReq);
 		}
 	}
 	
-	private Map<String, SimPosition> getClosingMap(DirectionEnum direction){
-		if(FieldUtils.isBuy(direction)) 
-			return shortMap;
-		if(FieldUtils.isSell(direction))
-			return longMap;
-		throw new IllegalStateException("平仓方向不明确");
+	private Map<ContractField, TradePosition> getOpeningMap(DirectionEnum direction){
+		return switch(direction) {
+		case D_Buy -> longMap;
+		case D_Sell -> shortMap;
+		default -> throw new IllegalStateException("开仓方向不明确");
+		};
 	}
 	
-	private SimPosition getClosingPositionByReq(SubmitOrderReqField orderReq) {
-		SimPosition pos = getClosingMap(orderReq.getDirection()).get(orderReq.getContract().getUnifiedSymbol());
+	private Map<ContractField, TradePosition> getClosingMap(DirectionEnum direction){
+		return switch(direction) {
+		case D_Buy -> shortMap;
+		case D_Sell -> longMap;
+		default -> throw new IllegalStateException("平仓方向不明确");
+		};
+	}
+	
+	private TradePosition getClosingPositionByReq(SubmitOrderReqField orderReq) {
+		TradePosition pos = getClosingMap(orderReq.getDirection()).get(orderReq.getContract());
 		if(pos == null)
 			throw new IllegalStateException("没有找到可以平仓的合约");
 		return pos;
@@ -225,9 +230,30 @@ public class SimAccount implements TickDataAware{
 		longMap.values().stream().forEach(eventBus::register);
 		shortMap.values().stream().forEach(eventBus::register);
 	}
+	
+	public void onOpenTrade(TradeField trade) {
+		Map<ContractField, TradePosition> tMap = getOpeningMap(trade.getDirection());
+		if(tMap.containsKey(trade.getContract())) {
+			tMap.get(trade.getContract()).onTrade(trade);
+		} else {
+			tMap.put(trade.getContract(), new TradePosition(List.of(trade), ClosingPolicy.FIFO));
+		}
+		onTrade(trade);
+	}
+	
+	public void onCloseTrade(TradeField trade) {
+		Map<ContractField, TradePosition> tMap = getClosingMap(trade.getDirection());
+		if(!tMap.containsKey(trade.getContract())) {
+			throw new IllegalStateException("没有对应持仓可以对冲当前成交：" + MessagePrinter.print(trade));
+		}
+		tMap.get(trade.getContract()).onTrade(trade);
+		onTrade(trade);
+	}
 
-	public void addCommission(int volume) {
-		totalCommission += volume * transactionFee;
+	private void onTrade(TradeField trade) {
+		ContractDefinition contractDef = contractMgr.getContractDefinition(trade.getContract().getUnifiedSymbol());
+		double commission = contractDef.getCommissionInPrice() > 0 ? contractDef.getCommissionInPrice() : contractDef.commissionRate() * trade.getPrice() * trade.getContract().getMultiplier();
+		totalCommission += trade.getVolume() * commission;
 	}
 
 	public void addCloseProfit(double profit) {
@@ -237,6 +263,8 @@ public class SimAccount implements TickDataAware{
 	private long lastReportTime;
 	@Override
 	public void onTick(TickField tick) {
+		longMap.values().stream().forEach(tp -> tp.updateTick(tick));
+		shortMap.values().stream().forEach(tp -> tp.updateTick(tick));
 		if(!connected || System.currentTimeMillis() - lastReportTime < 1000) {
 			return;
 		}
@@ -250,11 +278,11 @@ public class SimAccount implements TickDataAware{
 		reportPosition(shortMap);
 	}
 	
-	private void reportPosition(Map<String, SimPosition> posMap) {
-		Iterator<Entry<String, SimPosition>> itEntry = posMap.entrySet().iterator();
+	private void reportPosition(Map<ContractField, TradePosition> posMap) {
+		Iterator<Entry<ContractField, TradePosition>> itEntry = posMap.entrySet().iterator();
 		while(itEntry.hasNext()) {
-			Entry<String, SimPosition> e = itEntry.next();
-			PositionField pf = e.getValue().positionField();
+			Entry<ContractField, TradePosition> e = itEntry.next();
+			PositionField pf = e.getValue().convertToPositionField(this);
 			feEngine.emitEvent(NorthstarEventType.POSITION, pf);
 			if(pf.getPosition() == 0) {
 				itEntry.remove();
@@ -264,5 +292,19 @@ public class SimAccount implements TickDataAware{
 	
 	public void setConnected(boolean connected) {
 		this.connected = connected;
+	}
+
+	public SimAccountDescription getDescription() {
+		List<TradeField> uncloseTrades = new ArrayList<>();
+		longMap.values().stream().forEach(tp -> uncloseTrades.addAll(tp.getUncloseTrades()));
+		shortMap.values().stream().forEach(tp -> uncloseTrades.addAll(tp.getUncloseTrades()));
+		return SimAccountDescription.builder()
+				.gatewayId(gatewayId)
+				.totalCloseProfit(totalCloseProfit)
+				.totalCloseProfit(totalCloseProfit)
+				.totalDeposit(totalDeposit)
+				.totalWithdraw(totalWithdraw)
+				.openTrades(uncloseTrades.stream().map(TradeField::toByteArray).toList())
+				.build();
 	}
 }

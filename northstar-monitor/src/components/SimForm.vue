@@ -1,7 +1,7 @@
 <template>
   <el-dialog
     id="simForm"
-    width="500px"
+    width="400px"
     title="SIM模拟网关配置"
     :visible="visible"
     append-to-body
@@ -9,17 +9,11 @@
     :show-close="false"
     @close="close"
   >
-    <el-form
-      ref="settingForm"
-      :model="settings"
-      label-width="330px"
-      width="200px"
-      :rules="formRules"
-    >
+    <el-form ref="settingForm" :model="settings" label-width="140px" :rules="formRules">
       <el-row>
         <el-col :span="24">
-          <el-form-item label="模拟交易每笔手续费（单位：元）：" :required="true" prop="fee">
-            <el-input v-model="settings.fee" type="number" autocomplete="off"></el-input>
+          <el-form-item label="初始账户余额：" :required="true" prop="initBalance">
+            <el-input v-model="settings.initBalance" type="number" autocomplete="off"></el-input>
           </el-form-item>
         </el-col>
       </el-row>
@@ -50,10 +44,10 @@ export default {
   data() {
     return {
       formRules: {
-        fee: [{ required: true, message: '不能为空', trigger: 'blur' }]
+        initBalance: [{ required: true, message: '不能为空', trigger: 'blur' }]
       },
       settings: {
-        fee: ''
+        initBalance: ''
       }
     }
   },

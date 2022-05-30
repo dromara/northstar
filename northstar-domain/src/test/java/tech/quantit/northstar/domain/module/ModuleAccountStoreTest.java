@@ -1,6 +1,10 @@
 package tech.quantit.northstar.domain.module;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.offset;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.List;
@@ -11,8 +15,10 @@ import org.junit.jupiter.api.Test;
 
 import tech.quantit.northstar.common.constant.ClosingPolicy;
 import tech.quantit.northstar.common.constant.ModuleState;
+import tech.quantit.northstar.common.model.ContractDefinition;
 import tech.quantit.northstar.common.model.ModuleAccountRuntimeDescription;
 import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
+import tech.quantit.northstar.domain.gateway.ContractManager;
 import tech.quantit.northstar.common.model.ModulePositionDescription;
 import test.common.TestFieldFactory;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
@@ -54,7 +60,11 @@ class ModuleAccountStoreTest {
 				.moduleState(ModuleState.HOLDING_LONG)
 				.accountRuntimeDescriptionMap(mamap)
 				.build();
-		mas = new ModuleAccountStore("testModule", ClosingPolicy.FIFO, md);
+		ContractManager contractMgr = mock(ContractManager.class);
+		when(contractMgr.getContractDefinition(anyString())).thenReturn(ContractDefinition.builder()
+				.commissionInBasePoint(1)
+				.build());
+		mas = new ModuleAccountStore("testModule", ClosingPolicy.FIFO, md, contractMgr);
 	}
 
 	@Test
@@ -70,7 +80,7 @@ class ModuleAccountStoreTest {
 		assertThat(mas.getAccCloseProfit("testAccount")).isEqualTo(4200);
 		assertThat(mas.getAccDealVolume("testAccount")).isEqualTo(5);
 		assertThat(mas.getUncloseTrades("testAccount")).hasSize(1);
-		assertThat(mas.getPreBalance("testAccount")).isEqualTo(104150);
+		assertThat(mas.getPreBalance("testAccount")).isCloseTo(104185.2, offset(1e-4));
 	}
 
 	@Test
@@ -80,7 +90,7 @@ class ModuleAccountStoreTest {
 
 	@Test
 	void testGetPreBalance() {
-		assertThat(mas.getPreBalance("testAccount")).isEqualTo(100170);
+		assertThat(mas.getPreBalance("testAccount")).isEqualTo(100190);
 	}
 
 	@Test

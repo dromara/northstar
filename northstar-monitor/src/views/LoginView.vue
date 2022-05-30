@@ -19,7 +19,7 @@
 
 <script>
 import loginApi from '@/api/loginApi'
-import { version } from '@/../package.json'
+import packageJson from '@/../package.json'
 export default {
   data() {
     return {
@@ -28,7 +28,7 @@ export default {
         pass: ''
       },
       hostUrl: '',
-      version: version
+      version: packageJson.version
     }
   },
   methods: {

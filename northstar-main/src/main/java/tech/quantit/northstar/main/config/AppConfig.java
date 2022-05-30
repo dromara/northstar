@@ -1,8 +1,10 @@
 package tech.quantit.northstar.main.config;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -14,6 +16,8 @@ import java.util.stream.Collectors;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
@@ -23,8 +27,12 @@ import org.springframework.web.filter.CorsFilter;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import tech.quantit.northstar.common.ISimAccountRepository;
 import tech.quantit.northstar.common.constant.Constants;
+import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.common.event.FastEventEngine;
+import tech.quantit.northstar.common.model.ContractDefinition;
+import tech.quantit.northstar.common.utils.ContractDefinitionReader;
 import tech.quantit.northstar.common.utils.ContractUtils;
 import tech.quantit.northstar.data.IContractRepository;
 import tech.quantit.northstar.data.IModuleRepository;
@@ -36,14 +44,11 @@ import tech.quantit.northstar.gateway.api.GatewayFactory;
 import tech.quantit.northstar.gateway.api.domain.GlobalMarketRegistry;
 import tech.quantit.northstar.gateway.api.domain.IndexContract;
 import tech.quantit.northstar.gateway.api.domain.NormalContract;
-import tech.quantit.northstar.gateway.api.domain.SubscriptionManager;
-import tech.quantit.northstar.gateway.sim.persistence.SimAccountRepository;
 import tech.quantit.northstar.gateway.sim.trade.SimGatewayFactory;
 import tech.quantit.northstar.gateway.sim.trade.SimMarket;
 import tech.quantit.northstar.main.ExternalJarListener;
 import tech.quantit.northstar.main.interceptor.AuthorizationInterceptor;
 import tech.quantit.northstar.main.utils.ModuleFactory;
-import xyz.redtorch.gateway.ctp.common.CtpSubscriptionManager;
 import xyz.redtorch.gateway.ctp.x64v6v3v15v.CtpGatewayFactory;
 import xyz.redtorch.gateway.ctp.x64v6v5v1cpv.CtpSimGatewayFactory;
 import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
@@ -105,8 +110,13 @@ public class AppConfig implements WebMvcConfigurer {
 	}
 	
 	@Bean
-	public ContractManager contractManager(IContractRepository contractRepo) {
-		return new ContractManager(contractRepo.findAll());
+	public ContractManager contractManager(IContractRepository contractRepo) throws IOException {
+		Resource res = new ClassPathResource("ContractDefinition.csv");
+		ContractDefinitionReader reader = new ContractDefinitionReader();
+		List<ContractDefinition> contractDefs = reader.load(res.getFile());
+		ContractManager mgr = new ContractManager(contractDefs);
+		findAllContract(contractRepo).forEach(mgr::addContract);
+		return mgr;
 	}
 	
 	@Bean
@@ -115,18 +125,19 @@ public class AppConfig implements WebMvcConfigurer {
 	}
 	
 	@Bean
-	public SimMarket simMarket(SimAccountRepository simAccRepo) {
-		return new SimMarket(simAccRepo);
+	public SimMarket simMarket(ISimAccountRepository simAccRepo) {
+		return new SimMarket(simTradeGateway -> simAccRepo.deleteById(simTradeGateway.getGatewaySetting().getGatewayId()));
+	}
+	
+	private List<ContractField> findAllContract(IContractRepository contractRepo){
+		List<ContractField> contractList = new LinkedList<>();
+		contractList.addAll(contractRepo.findAll(GatewayType.CTP));
+		contractList.addAll(contractRepo.findAll(GatewayType.SIM));
+		return contractList;
 	}
 	
 	@Bean
-	public SubscriptionManager ctpSubscriptionManager(SubscriptionConfigurationProperties props) {
-		return new CtpSubscriptionManager(props.getClzTypeWhtlist(), props.getClzTypeBlklist(), props.getSymbolWhtlist(), props.getSymbolBlklist());
-	}
-	
-	@Bean
-	public GlobalMarketRegistry globalRegistry(FastEventEngine fastEventEngine, IContractRepository contractRepo, List<SubscriptionManager> subMgrs,
-			ContractManager contractMgr) {
+	public GlobalMarketRegistry globalRegistry(FastEventEngine fastEventEngine, IContractRepository contractRepo, ContractManager contractMgr) {
 		Consumer<NormalContract> handleContractSave = contract -> {
 			if(contract.updateTime() > 0) {
 				contractRepo.save(contract.contractField(), contract.gatewayType());
@@ -134,12 +145,8 @@ public class AppConfig implements WebMvcConfigurer {
 		};
 		
 		GlobalMarketRegistry registry = new GlobalMarketRegistry(fastEventEngine, handleContractSave, contractMgr::addContract);
-		// 加载合约订阅管理器
-		for(SubscriptionManager subMgr : subMgrs) {			
-			registry.register(subMgr);
-		}
 		//　加载已有合约
-		List<ContractField> contractList = contractRepo.findAll();
+		List<ContractField> contractList = findAllContract(contractRepo);
 		Map<String, ContractField> contractMap = contractList.stream()
 				.collect(Collectors.toMap(ContractField::getUnifiedSymbol, c -> c));
 		
@@ -170,9 +177,9 @@ public class AppConfig implements WebMvcConfigurer {
 	}
 	
 	@Bean
-	public GatewayFactory simGatewayFactory(FastEventEngine fastEventEngine, SimMarket simMarket, SimAccountRepository accRepo,
-			GlobalMarketRegistry registry) {
-		return new SimGatewayFactory(fastEventEngine, simMarket, accRepo, registry);
+	public GatewayFactory simGatewayFactory(FastEventEngine fastEventEngine, SimMarket simMarket, ISimAccountRepository accRepo,
+			GlobalMarketRegistry registry, ContractManager contractMgr) {
+		return new SimGatewayFactory(fastEventEngine, simMarket, accRepo, registry, contractMgr);
 	}
 	
 	@Bean

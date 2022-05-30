@@ -14,6 +14,9 @@
               <el-button class="compact mb-10" icon="el-icon-refresh" @click="refresh"
                 >刷新数据</el-button
               >
+              <!-- <el-button class="compact mb-10" icon="el-icon-info" @click="refresh"
+                >更多统计</el-button
+              > -->
             </template>
             <el-descriptions-item label="名称">{{ moduleRuntime.moduleName }}</el-descriptions-item>
             <el-descriptions-item label="启停状态"
@@ -34,8 +37,10 @@
               }}</el-tag>
             </el-descriptions-item>
             <el-descriptions-item label="总盈亏">{{ totalProfit }}</el-descriptions-item>
-            <el-descriptions-item label="平均胜率"></el-descriptions-item>
-            <el-descriptions-item label="盈亏比"></el-descriptions-item>
+            <el-descriptions-item label="胜率">
+              {{ `${(winningRatio * 100).toFixed(1)} %` }}
+            </el-descriptions-item>
+            <el-descriptions-item label="盈亏比">{{ earningPerLoss }}</el-descriptions-item>
           </el-descriptions>
           <el-tabs v-model="activeAccount">
             <el-tab-pane
@@ -140,6 +145,7 @@ import { dispose, init } from 'klinecharts'
 import volumePure from '@/lib/indicator/volume-pure'
 import moduleApi from '@/api/moduleApi'
 import { KLineUtils } from '@/utils.js'
+import { jStat } from 'jstat'
 
 import { BarField, PositionField, TradeField } from '@/lib/xyz/redtorch/pb/core_field_pb'
 
@@ -261,6 +267,19 @@ export default {
           return accountInfo.accCloseProfit - accountInfo.accCommission + holdingProfit
         })
         .reduce((a, b) => a + b, 0)
+    },
+    winningRatio() {
+      if (!this.dealRecords.length) return 0
+      const numberOfWinning = this.dealRecords.filter((item) => item.dealProfit > 0).length || 0
+      return (numberOfWinning / this.dealRecords.length).toFixed(3)
+    },
+    earningPerLoss() {
+      if (!this.dealRecords.length) return 'N/A'
+      const winningDeals = this.dealRecords.filter((item) => item.dealProfit > 0)
+      const lossDeals = this.dealRecords.filter((item) => item.dealProfit <= 0)
+      const avgProfit = jStat.sum(winningDeals.map((item) => item.dealProfit))
+      const avgLoss = jStat.sum(lossDeals.map((item) => item.dealProfit))
+      return `${avgProfit.toFixed(1)} : ${Math.abs(avgLoss).toFixed(1)}`
     },
     holdingPositions() {
       if (!this.activeAccount) return []

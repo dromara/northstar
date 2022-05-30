@@ -41,6 +41,10 @@
 			<artifactId>protobuf-java-util</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>com.googlecode.protobuf-java-format</groupId>
 			<artifactId>protobuf-java-format</artifactId>
 		</dependency>
