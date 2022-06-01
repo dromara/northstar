@@ -62,18 +62,19 @@ public class MarketDataRepoRedisImpl extends MarketDataRepoDataServiceImpl {
 	 * 当天的数据查询redis，非当天数据查询数据服务
 	 */
 	@Override
-	public List<BarField> loadBars(String gatewayId, String unifiedSymbol, LocalDate startDate, LocalDate endDate) {
-		log.debug("加载 [{}] 历史行情数据：{}，{} -> {}", gatewayId, unifiedSymbol, startDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), endDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
+	public List<BarField> loadBars(String gatewayId, String unifiedSymbol, LocalDate startDate, LocalDate endDate0) {
+		log.debug("加载 [{}] 历史行情数据：{}，{} -> {}", gatewayId, unifiedSymbol, startDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), endDate0.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
 		LocalDate today = LocalDate.now();
-		if(today.isAfter(endDate) || today.isEqual(endDate) && LocalTime.now().isAfter(LocalTime.of(20, 0))) {			
-			return super.loadBars(gatewayId, unifiedSymbol, startDate, endDate)
-					.stream()
-					.sorted((a, b) -> a.getActionTimestamp() < b.getActionTimestamp() ? -1 : 1)
-					.toList();
-		}
+		LocalDate endDate = today.isAfter(endDate0) ? endDate0 : today; 
 		List<BarField> resultList = new LinkedList<>();
-		LocalDate date = today;
-		while(!date.isAfter(endDate)) {
+		List<BarField> list = super.loadBars(gatewayId, unifiedSymbol, startDate, endDate)
+				.stream()
+				.sorted((a, b) -> a.getActionTimestamp() < b.getActionTimestamp() ? -1 : 1)
+				.toList();
+		resultList.addAll(list);
+		
+		LocalDate date = LocalTime.now().isAfter(LocalTime.of(20, 0)) ? today.plusDays(1) : today;
+		while(!date.isAfter(endDate0)) {
 			resultList.addAll(findBarData(date, gatewayId, unifiedSymbol));
 			date = date.plusDays(1);
 		}
@@ -84,6 +85,7 @@ public class MarketDataRepoRedisImpl extends MarketDataRepoDataServiceImpl {
 	}
 	
 	private List<BarField> findBarData(LocalDate date, String gatewayId, String unifiedSymbol){
+		log.debug("加载 [{}] 本地行情数据：{}，{}", gatewayId, unifiedSymbol, date.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
 		String key = String.format("%s%s:%s:%s", KEY_PREFIX, gatewayId, date.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), unifiedSymbol);
 		BoundListOperations<String, byte[]> list = redisTemplate.boundListOps(key);
 		return Optional

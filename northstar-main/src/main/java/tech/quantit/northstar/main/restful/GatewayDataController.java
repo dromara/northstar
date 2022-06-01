@@ -26,9 +26,9 @@ public class GatewayDataController {
 	
 	@GetMapping("/bar/min")
 	@NotNull
-	public ResultBean<List<byte[]>> loadWeeklyBarData(String gatewayId, String unifiedSymbol, long refStartTimestamp){
+	public ResultBean<List<byte[]>> loadWeeklyBarData(String gatewayId, String unifiedSymbol, long refStartTimestamp, boolean firstLoad){
 		LocalDate start = utils.getLastDayOfLastWeek(refStartTimestamp);
-		LocalDate end = utils.getCurrentTradeDay(refStartTimestamp);
+		LocalDate end = utils.getCurrentTradeDay(refStartTimestamp, firstLoad);
 		return new ResultBean<>(
 				mdRepo
 				.loadBars(gatewayId, unifiedSymbol, start, end)
@@ -36,6 +36,5 @@ public class GatewayDataController {
 				.map(BarField::toByteArray)
 				.toList());
 	}
-	
 	
 }
