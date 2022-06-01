@@ -127,6 +127,7 @@ export var KLineUtils = (()=>{
       close: bar.closeprice,
       volume: bar.volumedelta,
       openInterestDelta: bar.openinterestdelta,
+      openInterest: bar.openinterest,
       timestamp: bar.actiontimestamp
     }
   }

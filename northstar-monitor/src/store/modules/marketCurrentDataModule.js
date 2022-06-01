@@ -68,6 +68,7 @@ const marketCurrentDataModule = {
         return
       }
       state.lastBar = bar
+      state.curBar = null
     }
   },
   actions: {},
