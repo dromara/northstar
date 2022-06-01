@@ -11,7 +11,7 @@ northstar:
     password: ${nspwd:123456}
   # 历史数据服务（需要购买用户授权）
   data-service:
-    baseUrl: http://nsds.quantit.tech:41888
+    baseUrl: http://124.221.172.207:41888
     token: ${nsds_token:}
 
 logging:  level: 

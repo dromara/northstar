@@ -9,6 +9,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.data.IMarketDataRepository;
 
@@ -17,6 +18,7 @@ import tech.quantit.northstar.data.IMarketDataRepository;
  * @author KevinHuangwl
  *
  */
+@Slf4j
 @Component
 public class HolidayManager implements InitializingBean{
 
@@ -30,6 +32,9 @@ public class HolidayManager implements InitializingBean{
 		LocalDate today = LocalDate.now();
 		holidaySet.addAll(repo.findHodidayInLaw(GatewayType.CTP, today.getYear()));
 		holidaySet.addAll(repo.findHodidayInLaw(GatewayType.CTP, today.getYear() + 1));
+		for(LocalDate date : holidaySet) {
+			log.debug("假期日：{}", date);
+		}
 	}
 	
 	public boolean isHoliday(LocalDateTime dateTime) {
