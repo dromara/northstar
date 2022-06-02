@@ -10,6 +10,7 @@ import java.util.function.BiConsumer;
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.constant.DateTimeConstant;
 import tech.quantit.northstar.common.constant.TickType;
+import tech.quantit.northstar.common.utils.MessagePrinter;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.TickField;
 
@@ -106,7 +107,9 @@ public class BarGenerator {
 	public void finishOfBar() {
 		List<TickField> ticksList = barTicks.stream().toList();
 		barTicks.clear();
-		barCallBack.accept(barBuilder.build(), ticksList);
+		BarField bar = barBuilder.build();
+		barCallBack.accept(bar, ticksList);
+		log.trace("生成bar: {}", MessagePrinter.print(bar));
 	}
 	
 	public void setOnBarCallback(BiConsumer<BarField, List<TickField>> callback) {

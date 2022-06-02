@@ -4,6 +4,8 @@ import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -224,16 +226,19 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 		if(gatewayConnMgr.exist(gatewayId)) {
 			Gateway gateway = gatewayConnMgr.getGatewayById(gatewayId);
 			gateway.connect();
-			if(gateway instanceof MarketGateway mktGateway) {
-				GatewayDescription gd = gatewayRepo.findById(gatewayId);
-				if(gd.getSubscribedContractGroups() != null) {					
-					for(String contractDefId : gd.getSubscribedContractGroups()) {
-						for(ContractField contract : contractMgr.relativeContracts(contractDefId)) {
-							mktGateway.subscribe(contract);
+			// 订阅操作需要网关连接后才进行
+			CompletableFuture.runAsync(() -> {				
+				if(gateway instanceof MarketGateway mktGateway) {
+					GatewayDescription gd = gatewayRepo.findById(gatewayId);
+					if(gd.getSubscribedContractGroups() != null) {					
+						for(String contractDefId : gd.getSubscribedContractGroups()) {
+							for(ContractField contract : contractMgr.relativeContracts(contractDefId)) {
+								mktGateway.subscribe(contract);
+							}
 						}
-					}
-				} 
-			}
+					} 
+				}
+			}, CompletableFuture.delayedExecutor(3, TimeUnit.SECONDS));
 		} else {
 			throw new NoSuchElementException("没有该网关记录：" +  gatewayId);
 		}
