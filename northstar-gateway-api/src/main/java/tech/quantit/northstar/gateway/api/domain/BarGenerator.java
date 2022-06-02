@@ -3,11 +3,14 @@ package tech.quantit.northstar.gateway.api.domain;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.BiConsumer;
 
 import lombok.extern.slf4j.Slf4j;
+import tech.quantit.northstar.common.constant.Constants;
 import tech.quantit.northstar.common.constant.DateTimeConstant;
 import tech.quantit.northstar.common.constant.TickType;
 import tech.quantit.northstar.common.utils.MessagePrinter;
@@ -27,6 +30,8 @@ public class BarGenerator {
 	private BarField.Builder barBuilder;
 	
 	private long cutoffTime;
+	
+	private static final GlobalCutOffTimeHelper helper = new GlobalCutOffTimeHelper();
 
 	private NormalContract contract;
 	
@@ -40,6 +45,7 @@ public class BarGenerator {
 		this.barBuilder = BarField.newBuilder()
 				.setGatewayId(contract.contractField().getGatewayId())
 				.setUnifiedSymbol(contract.unifiedSymbol());
+		helper.register(this);
 	}
 	
 	public BarGenerator(NormalContract contract) {
@@ -63,25 +69,26 @@ public class BarGenerator {
 			return;
 		}
 		 
-		if(tick.getActionTimestamp() > cutoffTime) {
-			if(!barTicks.isEmpty()) {
-				finishOfBar();
-			}
+		if(tick.getActionTimestamp() >= cutoffTime) {
 			long offset = 0;	// K线偏移量
 			if(tick.getStatus() == TickType.PRE_OPENING_TICK.getCode()) {
 				offset = 60000;	// 开盘前一分钟的TICK是盘前数据，要合并到第一个分钟K线
 			}
 			long barActionTime = tick.getActionTimestamp() - tick.getActionTimestamp() % 60000L + 60000 + offset; // 采用K线的收盘时间作为K线时间
-			cutoffTime = barActionTime + 60100;
+			long newCutoffTime = barActionTime;
 			
-			barBuilder.setTradingDay(tick.getTradingDay());
-			barBuilder.setActionDay(tick.getActionDay());
+			if(newCutoffTime != helper.cutoffTime) {
+				if(tick.getUnifiedSymbol().contains(Constants.INDEX_SUFFIX)) {
+					log.info("new cutoff: {}, helper cutoff: {}", newCutoffTime, helper.cutoffTime);
+					log.info("{}", MessagePrinter.print(tick));
+				}
+				helper.updateCutoffTime(newCutoffTime);
+			}
+			
 			barBuilder.setOpenPrice(tick.getLastPrice());
 			barBuilder.setHighPrice(tick.getLastPrice());
 			barBuilder.setLowPrice(tick.getLastPrice());
-			barBuilder.setPreClosePrice(tick.getPreClosePrice());
-			barBuilder.setPreOpenInterest(tick.getPreOpenInterest());
-			barBuilder.setPreSettlePrice(tick.getPreSettlePrice());
+			
 			barBuilder.setNumTradesDelta(0);
 			barBuilder.setOpenInterestDelta(0);
 			barBuilder.setTurnoverDelta(0);
@@ -91,6 +98,11 @@ public class BarGenerator {
 		}
 		
 		barTicks.offer(tick);
+		barBuilder.setPreClosePrice(tick.getPreClosePrice());
+		barBuilder.setPreOpenInterest(tick.getPreOpenInterest());
+		barBuilder.setPreSettlePrice(tick.getPreSettlePrice());
+		barBuilder.setTradingDay(tick.getTradingDay());
+		barBuilder.setActionDay(tick.getActionDay());
 		barBuilder.setHighPrice(Math.max(tick.getLastPrice(), barBuilder.getHighPrice()));
 		barBuilder.setLowPrice(Math.min(tick.getLastPrice(), barBuilder.getLowPrice()));
 		barBuilder.setClosePrice(tick.getLastPrice());
@@ -104,16 +116,39 @@ public class BarGenerator {
 		barBuilder.setOpenInterestDelta(tick.getOpenInterestDelta() + barBuilder.getOpenInterestDelta());
 	}
 	
-	public void finishOfBar() {
+	public BarField finishOfBar() {
+		if(barTicks.size() < 3) {
+			// 若TICK数据少于三个TICK，则不触发回调，因为这不是一个正常的数据集
+			return barBuilder.build();
+		}
 		List<TickField> ticksList = barTicks.stream().toList();
 		barTicks.clear();
 		BarField bar = barBuilder.build();
 		barCallBack.accept(bar, ticksList);
-		log.trace("生成bar: {}", MessagePrinter.print(bar));
+		return bar;
 	}
 	
 	public void setOnBarCallback(BiConsumer<BarField, List<TickField>> callback) {
 		barCallBack = callback;
 	}
 
+	private static class GlobalCutOffTimeHelper{
+		
+		private volatile long cutoffTime;
+		
+		private Set<BarGenerator> registeredSet = new HashSet<>();
+		
+		synchronized void register(BarGenerator barGen) {
+			registeredSet.add(barGen);
+		}
+		
+		synchronized void updateCutoffTime(long newCutoffTime) {
+			if(newCutoffTime > cutoffTime) {
+				registeredSet.stream().forEach(BarGenerator::finishOfBar);
+				LocalDateTime ldt = LocalDateTime.ofInstant(Instant.ofEpochMilli(newCutoffTime), ZoneId.systemDefault());
+				log.trace("下次K线生成时间：{}", ldt.toLocalTime());
+			}
+			cutoffTime = newCutoffTime;
+		}
+	}
 }
