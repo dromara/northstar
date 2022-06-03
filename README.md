@@ -62,7 +62,7 @@
 curl https://gitee.com/dromara/northstar/raw/master/env.sh | sh
 ```
 
-**Windows环境下**，初始化系统环境。打开powershell命令行窗口，输入以下命令
+**Windows环境下**，初始化系统环境。打开powershell命令行窗口，输入以下命令（部分系统可能报错，需要把脚本下载到本地后右键选择powershell执行）
 ```
 Invoke-WebRequest https://gitee.com/dromara/northstar/raw/master/env.ps1 -OutFile env.ps1; powershell -noexit ".\env.ps1"
 ```
@@ -135,7 +135,7 @@ kill `pgrep java`
 大多数用户开发时都是使用windows环境
 
 ### 环境准备
-初始化系统环境（只需要运行一次），打开powershell命令行窗口，输入以下命令
+初始化系统环境（只需要运行一次），打开powershell命令行窗口，输入以下命令（部分系统可能报错，需要把脚本下载到本地后右键选择powershell执行）
 ```
 Invoke-WebRequest https://gitee.com/dromara/northstar/raw/master/dev-env.ps1 -OutFile dev-env.ps1; powershell -noexit ".\dev-env.ps1"
 ```
