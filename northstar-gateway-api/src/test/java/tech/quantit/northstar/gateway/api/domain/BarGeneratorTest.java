@@ -20,6 +20,7 @@ class BarGeneratorTest {
 
 	TestFieldFactory factory = new TestFieldFactory("testGateway");
 	
+	@SuppressWarnings("unchecked")
 	@Test
 	void test() {
 		ContractField contract = factory.makeContract("rb2210");
