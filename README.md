@@ -46,7 +46,7 @@
 - northstar项目为服务端（包含了web网页监控端）
 - northstar-external为用户自行扩展的项目，可参考[此项目](https://gitee.com/NorthstarQuan/northstar-external)
 - 交互协议HTTP + websocket
-- 数据库为Redis7
+- 数据库、缓存为Redis7（历史行情数据主要依赖数据服务，本地仅保存少量账户配置信息）
 - 前端采用node14 + vue2.x
 - 服务端采用java17（拥抱新技术） + springboot3
 
