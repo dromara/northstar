@@ -24,6 +24,7 @@ import com.alibaba.fastjson.JSON;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.IDataServiceManager;
+import tech.quantit.northstar.common.utils.LocalEnvUtils;
 import tech.quantit.northstar.common.utils.MarketDateTimeUtil;
 import xyz.redtorch.pb.CoreField.BarField;
 
@@ -155,6 +156,7 @@ public class DataServiceManager implements IDataServiceManager {
 	private DataSet execute(URI uri) {
 		HttpHeaders headers = new HttpHeaders();
 		headers.add("token", nsToken);
+		headers.add("machine", LocalEnvUtils.getMACAddress());
 		HttpEntity<?> reqEntity = new HttpEntity<>(headers);
 		try {			
 			ResponseEntity<DataSet> respEntity = restTemplate.exchange(uri, HttpMethod.GET, reqEntity, DataSet.class);
