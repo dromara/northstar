@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
+import javax.validation.constraints.NotNull;
+
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 
@@ -22,6 +24,7 @@ import tech.quantit.northstar.common.model.ComponentMetaInfo;
 import tech.quantit.northstar.common.model.DynamicParams;
 import tech.quantit.northstar.common.model.MockTradeDescription;
 import tech.quantit.northstar.common.model.ModuleAccountRuntimeDescription;
+import tech.quantit.northstar.common.model.ModuleCalculatedDataFrame;
 import tech.quantit.northstar.common.model.ModuleDealRecord;
 import tech.quantit.northstar.common.model.ModuleDescription;
 import tech.quantit.northstar.common.model.ModulePositionDescription;
@@ -195,6 +198,16 @@ public class ModuleService implements InitializingBean {
 	}
 	
 	/**
+	 * 获取模组计算值
+	 * @param name
+	 * @param startRefTimestamp
+	 * @return
+	 */
+	public List<ModuleCalculatedDataFrame> getModuleData(String name) {
+		return moduleMgr.getModule(name).getCalculatedData();
+	}
+	
+	/**
 	 * 模组交易历史
 	 * @param name
 	 * @return
@@ -224,11 +237,13 @@ public class ModuleService implements InitializingBean {
 		module.onEvent(new NorthstarEvent(NorthstarEventType.TRADE, trade));
 		return true;
 	}
-
+	
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		for(ModuleDescription md : findAllModules()) {
 			loadModule(md);
 		}
 	}
+
+	
 }

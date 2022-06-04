@@ -26,6 +26,10 @@ public abstract class Indicator implements BarDataAware {
 	 * 指标取值类型
 	 */
 	private ValueType valType;
+	/**
+	 * 指标类别
+	 */
+	private Category category = Category.UNKNOWN;
 	
 	private String unifiedSymbol;
 	
@@ -39,6 +43,12 @@ public abstract class Indicator implements BarDataAware {
 		this.unifiedSymbol = unifiedSymbol;
 		this.valType = valType;
 		this.size = size;
+		this.category = switch(valType) {
+		case VOL -> Category.VOLUME_BASE;
+		case OPEN_INTEREST -> Category.INTEREST_BASE;
+		case NOT_SET -> Category.UNKNOWN;
+		default -> Category.PRICE_BASE;
+		};
 	}
 	
 	/**
@@ -54,10 +64,19 @@ public abstract class Indicator implements BarDataAware {
 	 * @return
 	 */
 	public double value(int numOfStepBack) {
+		return valueWithTime(numOfStepBack).getValue();
+	}
+	
+	/**
+	 * 获取指标回溯值
+	 * @param numOfStepBack
+	 * @return
+	 */
+	public TimeSeriesValue valueWithTime(int numOfStepBack) {
 		if(Math.abs(numOfStepBack) > size) {
 			throw new IllegalArgumentException("回溯步长超过记录长度");
 		}
-		return refVals.get(-numOfStepBack).getValue();
+		return refVals.get(-numOfStepBack);
 	}
 	
 	/**
@@ -129,6 +148,14 @@ public abstract class Indicator implements BarDataAware {
 		}
 		return lowest;
 	}
+	
+	public int length() {
+		return size;
+	}
+	
+	public Category getCategory() {
+		return category;
+	}
 
 	/**
 	 * 更新算法实现
@@ -171,5 +198,29 @@ public abstract class Indicator implements BarDataAware {
 		 * 持仓量
 		 */
 		OPEN_INTEREST;
+	}
+	
+	/**
+	 * 指标类型
+	 * @author Administrator
+	 *
+	 */
+	public enum Category {
+		/**
+		 * 基于价格
+		 */
+		PRICE_BASE,
+		/**
+		 * 基于成交量
+		 */
+		VOLUME_BASE,
+		/**
+		 * 基于持仓量
+		 */
+		INTEREST_BASE,
+		/**
+		 * 未知
+		 */
+		UNKNOWN;
 	}
 }

@@ -1,8 +1,10 @@
 package tech.quantit.northstar.domain.module;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.function.Consumer;
 
@@ -13,9 +15,10 @@ import tech.quantit.northstar.common.constant.SignalOperation;
 import tech.quantit.northstar.common.exception.NoSuchElementException;
 import tech.quantit.northstar.common.exception.TradeException;
 import tech.quantit.northstar.common.model.ModuleAccountRuntimeDescription;
+import tech.quantit.northstar.common.model.ModuleCalculatedDataFrame;
 import tech.quantit.northstar.common.model.ModuleDealRecord;
-import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
 import tech.quantit.northstar.common.model.ModulePositionDescription;
+import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
 import tech.quantit.northstar.common.utils.FieldUtils;
 import tech.quantit.northstar.common.utils.OrderUtils;
 import tech.quantit.northstar.gateway.api.TradeGateway;
@@ -25,6 +28,8 @@ import tech.quantit.northstar.strategy.api.IModuleAccountStore;
 import tech.quantit.northstar.strategy.api.IModuleContext;
 import tech.quantit.northstar.strategy.api.TradeStrategy;
 import tech.quantit.northstar.strategy.api.constant.PriceType;
+import tech.quantit.northstar.strategy.api.indicator.Indicator;
+import tech.quantit.northstar.strategy.api.indicator.TimeSeriesValue;
 import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
 import xyz.redtorch.pb.CoreEnum.ForceCloseReasonEnum;
 import xyz.redtorch.pb.CoreEnum.HedgeFlagEnum;
@@ -91,7 +96,10 @@ public class ModuleContext implements IModuleContext{
 		this.dealCollector = dealCollector;
 		this.onRuntimeChangeCallback = onRuntimeChangeCallback;
 		this.onDealCallback = onDealCallback;
-		this.barMergingCallback = bar -> tradeStrategy.onBar(bar, module.isEnabled());
+		this.barMergingCallback = bar -> {
+			tradeStrategy.bindedIndicatorMap().values().forEach(indicator -> indicator.onBar(bar));
+			tradeStrategy.onBar(bar, module.isEnabled());
+		};
 		tradeStrategy.setContext(this);
 	}
 
@@ -292,6 +300,29 @@ public class ModuleContext implements IModuleContext{
 			throw new NoSuchElementException("找不到合约：" + unifiedSymbol);
 		}
 		return contractMap.get(unifiedSymbol);
+	}
+
+	@Override
+	public List<ModuleCalculatedDataFrame> getModuleData() {
+		Map<String, Indicator> indicatorMap = tradeStrategy.bindedIndicatorMap();
+		int length = indicatorMap.values().stream().min((i1, i2) -> i1.length() < i2.length() ? -1 : 1).get().length();
+		List<ModuleCalculatedDataFrame> resultList = new ArrayList<>(length);
+		for(int i=0; i<length; i++) {
+			ModuleCalculatedDataFrame frame = new ModuleCalculatedDataFrame();
+			for(Entry<String, Indicator> entry : indicatorMap.entrySet()) {
+				Indicator indicator = entry.getValue();
+				TimeSeriesValue tsv = indicator.valueWithTime(i);
+				frame.setTimestamp(tsv.getTimestamp());
+				switch(indicator.getCategory()) {
+				case PRICE_BASE -> frame.getPriceBaseValues().put(entry.getKey(), tsv.getValue());
+				case INTEREST_BASE -> frame.getOpenInterestBaseValues().put(entry.getKey(), tsv.getValue());
+				case VOLUME_BASE -> frame.getVolBaseValues().put(entry.getKey(), tsv.getValue());
+				default -> throw new IllegalStateException();
+				}
+			}
+			resultList.add(frame);
+		}
+		return resultList;
 	}
 
 }

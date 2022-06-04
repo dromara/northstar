@@ -13,9 +13,9 @@
         <el-menu-item index="1">网关管理</el-menu-item>
         <el-menu-item index="2">账户管理</el-menu-item>
         <el-menu-item index="3">模组管理</el-menu-item>
-        <el-menu-item index="5">历史行情</el-menu-item>
+        <!-- <el-menu-item index="5">历史行情</el-menu-item> -->
         <el-menu-item index="6">手工期货交易</el-menu-item>
-        <el-menu-item index="7">手工期权交易</el-menu-item>
+        <!-- <el-menu-item index="7">手工期权交易</el-menu-item> -->
       </el-menu>
     </div>
     <div class="ns-body">

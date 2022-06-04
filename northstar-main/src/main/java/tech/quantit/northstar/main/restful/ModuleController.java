@@ -21,6 +21,7 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import tech.quantit.northstar.common.model.ComponentField;
 import tech.quantit.northstar.common.model.ComponentMetaInfo;
 import tech.quantit.northstar.common.model.MockTradeDescription;
+import tech.quantit.northstar.common.model.ModuleCalculatedDataFrame;
 import tech.quantit.northstar.common.model.ModuleDealRecord;
 import tech.quantit.northstar.common.model.ModuleDescription;
 import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
@@ -116,6 +117,17 @@ public class ModuleController {
 	@GetMapping("/rt/info")
 	public ResultBean<ModuleRuntimeDescription> getModuleRealTimeInfo(@NotNull String name){
 		return new ResultBean<>(service.getModuleRealTimeInfo(name));
+	}
+	
+	/**
+	 * 获取模组计算值
+	 * @param name
+	 * @param startRefTimestamp
+	 * @return
+	 */
+	@GetMapping("/data")
+	public ResultBean<List<ModuleCalculatedDataFrame>> getModuleData(@NotNull String name){
+		return new ResultBean<>(service.getModuleData(name));
 	}
 	
 	/**
