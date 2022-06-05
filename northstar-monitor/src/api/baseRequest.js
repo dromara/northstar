@@ -34,8 +34,8 @@ service.interceptors.response.use(
     }
   },
   (error) => {
-    console.error('err' + error) // for debug
-    return Promise.reject(new Error('网络出错'))
+    const errMsg = error.response && error.response.data ? error.response.data.message : '网络出错'
+    return Promise.reject(new Error(errMsg))
   }
 )
 
