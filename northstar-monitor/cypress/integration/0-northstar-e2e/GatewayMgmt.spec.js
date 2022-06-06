@@ -12,12 +12,14 @@ describe('网关管理-测试', () => {
         cy.contains('用户名').parent().find('input').type('admin')
         cy.contains('密码').parent().find('input').type('123456')
         cy.contains('登陆').click()
+        cy.wait(500)
     })
 
     describe('行情网关管理-基础测试', () => {
         beforeEach(() => {
             cy.Cookies.preserveOnce('JSESSIONID')
             cy.visit('http://localhost:8090/#/mktgateway')
+            cy.wait(300)
         })
     
         it('应该可以新增SIM行情网关', () => {
@@ -68,6 +70,7 @@ describe('网关管理-测试', () => {
             cy.get('.el-select-dropdown').contains('模拟合约').click()
             cy.get('.el-dialog').filter(':visible').find('button').last().click()
             cy.visit('http://localhost:8090/#/tdgateway')
+            cy.wait(300)
         })
         beforeEach(() => {
             cy.Cookies.preserveOnce('JSESSIONID')
@@ -115,8 +118,6 @@ describe('网关管理-测试', () => {
     describe('网关管理-级联测试', () => {
         beforeEach(() => {
             cy.Cookies.preserveOnce('JSESSIONID')
-        })
-        it('当行情网关被账户网关绑定时，行情网关不能被删除', () => {
             cy.visit('http://localhost:8090/#/mktgateway')
             cy.contains('新建').click()
             cy.get('.el-dialog').contains('网关类型').parent().find('.el-select').click()
@@ -135,6 +136,8 @@ describe('网关管理-测试', () => {
             cy.get('.el-dialog').filter(':visible').find('button').last().click()
             cy.visit('http://localhost:8090/#/mktgateway')
             cy.wait(300)
+        })
+        it('当行情网关被账户网关绑定时，行情网关不能被删除', () => {
             cy.get('.el-table__row').first().contains('删除').click()
             cy.get('.el-popconfirm').find('button').contains('确定').click()
 
