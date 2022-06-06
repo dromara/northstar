@@ -36,7 +36,7 @@ public class GatewayRepoRedisImpl implements IGatewayRepository{
 	public void insert(GatewayDescription gatewayDescription) {
 		Set<String> gatewayKeys = redisTemplate.keys(KEY_PREFIX + gatewayDescription.getGatewayId());
 		if(!gatewayKeys.isEmpty()) {
-			throw new IllegalStateException();
+			throw new IllegalStateException("已存在同名网关，不能重复创建");
 		}
 		save(gatewayDescription);
 	}

@@ -65,4 +65,5 @@ public class RepositoryConfig {
 	public ISimAccountRepository simAccountRepository(RedisTemplate<String, byte[]> redisTemplate) {
 		return new SimAccountRepoRedisImpl(redisTemplate);
 	}
+
 }
