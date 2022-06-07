@@ -1,6 +1,7 @@
 package tech.quantit.northstar.gateway.playback;
 
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.date.LocalDateTimeUtil;
 import org.apache.commons.lang3.time.DateUtils;
 import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.common.model.GatewayDescription;
@@ -11,6 +12,7 @@ import tech.quantit.northstar.data.IMarketDataRepository;
 import tech.quantit.northstar.data.ISimAccountRepository;
 import xyz.redtorch.pb.CoreField;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -43,10 +45,11 @@ public class MarketDataLocal {
      * 按照一定的周期，从数据库中读取数据，并将数据放入队列中
      *
      * @param accountId 账户ID
-     * @param curDate 加载日期
+     * @param startDate 加载开始日期
+     * @param endDate 加载结束日期
      * @param parallelLevel 并行数据加载
      */
-    public void loadData(String accountId, LocalDateTime curDate, int parallelLevel) {
+    public void loadData(String accountId, LocalDate startDate, LocalDate endDate,  int parallelLevel) {
         // 从模拟账号取得网关Id
         SimAccountDescription simAccountDescription = simAccountRepository.findById(accountId);
         String gateWayId = simAccountDescription.getGatewayId();
@@ -54,15 +57,14 @@ public class MarketDataLocal {
         GatewayDescription gatewayDescription = gatewayRepository.selectById(gateWayId);
         String bindedMktGateWayId = gatewayDescription.getBindedMktGatewayId();
 
-        Date endDate = DateUtil.offsetDay(new Date(curDate.toLocalTime().toNanoOfDay()), 1);
         // 取得合约的日ticket数据
         contractRepository.findAll(GatewayType.PLAYBACK).forEach(contract -> {
-            List<CoreField.BarField> data = marketDataRepository.loadBars(bindedMktGateWayId, contract.getUnifiedSymbol(),curDate,
+            List<CoreField.BarField> data = marketDataRepository.loadBars(bindedMktGateWayId, contract.getUnifiedSymbol(),startDate,
                     endDate);
             PriorityQueue<CoreField.TickField> tickQ = new PriorityQueue<>(3000, (b1, b2) -> b1.getActionTimestamp() < b2.getActionTimestamp() ? -1 : 1 );
-            for(CoreField.TickField tickData : data) {
-                tickQ.offer(tickData);
-            }
+            // for(CoreField.BarField tickData : data) {
+            //     tickQ.offer(tickData);
+            // }
 
             tickData.put(contract.getUnifiedSymbol(), tickQ);
        });
