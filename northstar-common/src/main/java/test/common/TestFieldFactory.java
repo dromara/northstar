@@ -7,6 +7,7 @@ import java.util.UUID;
 
 import tech.quantit.northstar.common.constant.DateTimeConstant;
 import tech.quantit.northstar.common.constant.GatewayType;
+import tech.quantit.northstar.common.constant.TickType;
 import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
 import xyz.redtorch.pb.CoreEnum.CurrencyEnum;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
@@ -90,6 +91,7 @@ public class TestFieldFactory {
 				.addAllAskPrice(List.of(price + 1D, 0D, 0D, 0D, 0D))
 				.addAllBidPrice(List.of(price - 1D, 0D, 0D, 0D, 0D))
 				.setLastPrice(price)
+				.setStatus(TickType.NORMAL_TICK.getCode())
 				.setTradingDay(LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
 				.build();
 	}

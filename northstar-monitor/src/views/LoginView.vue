@@ -10,7 +10,7 @@
           <el-input type="password" v-model="userForm.pass" autocomplete="off" clearable></el-input>
         </el-form-item>
         <el-form-item>
-          <el-button @click="login">提交</el-button>
+          <el-button @click="login">登陆</el-button>
         </el-form-item>
       </el-form>
     </div>

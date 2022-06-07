@@ -57,7 +57,7 @@ public class ModuleRepoRedisImpl implements IModuleRepository{
 
 	@Override
 	public List<ModuleDescription> findAllSettings() {
-		Set<String> keys = redisTemplate.keys(KEY_PREFIX + KEY_SETTING);
+		Set<String> keys = redisTemplate.keys(KEY_PREFIX + KEY_SETTING + "*");
 		return keys.stream()
 				.map(key -> redisTemplate.boundValueOps(key).get())
 				.map(data -> JSON.parseObject(data, ModuleDescription.class))

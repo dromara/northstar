@@ -233,7 +233,12 @@ export default {
       }
     },
     'form.gatewayType': function (val) {
-      if (val && this.gatewayUsage === 'MARKET_DATA' && !this.isUpdateMode) {
+      if (
+        val &&
+        this.gatewayUsage === 'MARKET_DATA' &&
+        !this.isUpdateMode &&
+        this.form.subscribedContractGroups
+      ) {
         this.form.subscribedContractGroups.length = 0
       }
     }

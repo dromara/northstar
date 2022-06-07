@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import tech.quantit.northstar.common.event.NorthstarEvent;
+import tech.quantit.northstar.common.model.ModuleCalculatedDataFrame;
 import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
 import tech.quantit.northstar.strategy.api.IModule;
 import tech.quantit.northstar.strategy.api.IModuleContext;
@@ -92,6 +93,11 @@ public class TradeModule implements IModule {
 	@Override
 	public ModuleRuntimeDescription getRuntimeDescription() {
 		return ctx.getRuntimeDescription();
+	}
+
+	@Override
+	public List<ModuleCalculatedDataFrame> getCalculatedData() {
+		return ctx.getModuleData();
 	}
 
 }

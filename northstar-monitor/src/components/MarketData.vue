@@ -33,7 +33,6 @@
 <script>
 import { dispose, init } from 'klinecharts'
 import volumePure from '@/lib/indicator/volume-pure'
-import openInterestDelta from '@/lib/indicator/open-interest'
 import gatewayDataApi from '@/api/gatewayDataApi'
 
 import { mapGetters } from 'vuex'
@@ -106,9 +105,7 @@ export default {
       if (!this.kLineChart) {
         const kLineChart = init('update-k-line')
         kLineChart.addTechnicalIndicatorTemplate(volumePure)
-        kLineChart.addTechnicalIndicatorTemplate(openInterestDelta)
         kLineChart.createTechnicalIndicator('CJL', false)
-        kLineChart.createTechnicalIndicator('OpDif', false)
         this.kLineChart = kLineChart
         kLineChart.setStyleOptions(KLineUtils.getThemeOptions('dark'))
 
@@ -119,7 +116,7 @@ export default {
             return
           }
           await new Promise((r) => setTimeout(r, 1000))
-          const data = await this.loadBars(timestamp)
+          const data = await this.loadBars(timestamp, true)
           kLineChart.applyMoreData(data || [], !!data)
         })
       }
@@ -130,13 +127,14 @@ export default {
     }
   },
   methods: {
-    async loadBars(timestamp) {
+    async loadBars(timestamp, loadMore) {
       this.fullscreenLoading = true
       try {
         const barDataList = await gatewayDataApi.loadWeeklyBarData(
           this.curMarketGatewayId,
           this.curUnifiedSymbol,
-          timestamp
+          timestamp,
+          !loadMore
         )
         return barDataList
           .map((data) => BarField.deserializeBinary(data).toObject())

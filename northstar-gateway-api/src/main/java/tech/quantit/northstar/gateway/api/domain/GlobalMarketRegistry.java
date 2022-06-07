@@ -7,7 +7,9 @@ import java.util.function.Consumer;
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.event.NorthstarEventType;
+import tech.quantit.northstar.common.utils.MessagePrinter;
 import tech.quantit.northstar.gateway.api.MarketDataBuffer;
+import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.TickField;
 
@@ -52,6 +54,9 @@ public class GlobalMarketRegistry {
 	}
 	
 	public synchronized void register(NormalContract contract) {
+		if(contractMap.containsKey(contract.unifiedSymbol())) {
+			return;
+		}
 		onContractSave.accept(contract);
 		onContractSubsciption.accept(contract.contractField());
 		contractMap.put(contract.unifiedSymbol(), contract);
@@ -64,12 +69,21 @@ public class GlobalMarketRegistry {
 	
 	// 设置BAR回调
 	private void makeBarGen(NormalContract contract) {
+		if(checkBarGeneralable(contract)) {
+			return;
+		}
 		BarGenerator barGen = contract.barGenerator();
 		barGen.setOnBarCallback((bar, ticks) -> {
+			log.trace("生成bar: {}", MessagePrinter.print(bar));
 			feEngine.emitEvent(NorthstarEventType.BAR, bar);
 //			buffer.save(bar, ticks);
 		});
 		barGenMap.put(contract.unifiedSymbol(), barGen);
+	}
+	
+	private boolean checkBarGeneralable(NormalContract contract) {
+		//目前只有期货合约会生成BAR
+		return contract.contractField().getProductClass() != ProductClassEnum.FUTURES;
 	}
 	
 	// 设置TICK回调
@@ -86,6 +100,9 @@ public class GlobalMarketRegistry {
 		NormalContract contract = contractMap.get(tick.getUnifiedSymbol());
 		if(contract == null) {
 			log.warn("没有登记合约 [{}]，忽略TICK分发", tick.getUnifiedSymbol());
+			return;
+		}
+		if(checkBarGeneralable(contract)) {
 			return;
 		}
 		if(!(contract instanceof IndexContract) && idxTickerMap.containsKey(tick.getUnifiedSymbol())) {

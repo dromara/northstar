@@ -30,6 +30,7 @@ class GlobalMarketRegistryTest {
 		registry = new GlobalMarketRegistry(mock(FastEventEngine.class), mock(Consumer.class), callback);
 		
 		NormalContract contract = mock(NormalContract.class);
+		when(contract.contractField()).thenReturn(factory.makeContract("rb2210"));
 		MarketGateway gateway = mock(MarketGateway.class);
 		when(gateway.isConnected()).thenReturn(true);
 		when(contract.gatewayType()).thenReturn(GatewayType.CTP);
@@ -45,6 +46,7 @@ class GlobalMarketRegistryTest {
 		registry = new GlobalMarketRegistry(mock(FastEventEngine.class), mock(Consumer.class), mock(Consumer.class));
 		
 		IndexContract contract = mock(IndexContract.class);
+		when(contract.contractField()).thenReturn(factory.makeContract("rb2210"));
 		MarketGateway gateway = mock(MarketGateway.class);
 		when(contract.indexTicker()).thenReturn(mock(IndexTicker.class));
 		when(contract.gatewayType()).thenReturn(GatewayType.CTP);
@@ -59,6 +61,7 @@ class GlobalMarketRegistryTest {
 		registry = new GlobalMarketRegistry(mock(FastEventEngine.class), mock(Consumer.class), mock(Consumer.class));
 		NormalContract contract = mock(NormalContract.class);
 		MarketGateway gateway = mock(MarketGateway.class);
+		when(contract.contractField()).thenReturn(factory.makeContract("rb2210"));
 		when(gateway.gatewayType()).thenReturn(GatewayType.CTP);
 		when(gateway.isConnected()).thenReturn(true);
 		when(contract.gatewayType()).thenReturn(GatewayType.CTP);
@@ -73,6 +76,7 @@ class GlobalMarketRegistryTest {
 		registry = new GlobalMarketRegistry(mock(FastEventEngine.class), mock(Consumer.class), mock(Consumer.class));
 		TickField tick = factory.makeTickField("rb2210", 2000);
 		NormalContract contract = mock(NormalContract.class);
+		when(contract.contractField()).thenReturn(factory.makeContract("rb2210"));
 		MarketGateway gateway = mock(MarketGateway.class);
 		when(gateway.gatewayType()).thenReturn(GatewayType.CTP);
 		when(contract.gatewayType()).thenReturn(GatewayType.CTP);

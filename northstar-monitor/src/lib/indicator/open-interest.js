@@ -6,14 +6,14 @@ Object.defineProperty(exports, '__esModule', {
 exports.default = void 0
 
 var _default = {
-  name: 'OpDif',
+  name: 'OPI',
   series: 'volume',
   shouldCheckParamCount: false,
   shouldFormatBigNumber: false,
   plots: [
     {
-      key: 'openInterestDelta',
-      title: 'OpDif: ',
+      key: 'openInterest',
+      title: '持仓量：',
       type: 'bar',
       baseValue: 0,
       color: function color(data, options) {
@@ -31,9 +31,9 @@ var _default = {
 
   calcTechnicalIndicator: (dataList) => {
     return dataList.map((kLineData) => {
-      const openInterestDelta = kLineData.openInterestDelta || 0
+      const openInterest = kLineData.openInterest || 0
       return {
-        openInterestDelta
+        openInterest
       }
     })
   }

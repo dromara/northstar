@@ -143,11 +143,6 @@
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-starter-data-mongodb</artifactId>
-				<version>${springboot-version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-starter-data-redis</artifactId>
 				<version>${springboot-version}</version>
 			</dependency>
@@ -527,7 +522,7 @@
 											<limit>
 												<counter>LINE</counter>
 												<value>COVEREDRATIO</value>
-												<minimum>0.5</minimum>
+												<minimum>0.6</minimum>
 											</limit>
 										</limits>
 									</rule>

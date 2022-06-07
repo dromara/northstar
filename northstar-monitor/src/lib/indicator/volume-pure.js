@@ -13,7 +13,7 @@ var _default = {
   plots: [
     {
       key: 'volume',
-      title: 'VOLUME: ',
+      title: '成交量：',
       type: 'bar',
       baseValue: 0,
       minValue: 0,

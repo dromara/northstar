@@ -11,13 +11,13 @@ northstar:
     password: ${nspwd:123456}
   # 历史数据服务（需要购买用户授权）
   data-service:
-    baseUrl: http://nsds.quantit.tech:41888
+    baseUrl: http://124.221.172.207:41888
     token: ${nsds_token:}
 
 logging:  level: 
     root: info
     '[tech.quantit.northstar]': debug
-    #'[tech.quantit.northstar.strategy.policy.signal]': trace
+    '[tech.quantit.northstar.gateway.api.domain]': trace
     #'[tech.quantit.northstar.strategy]': debug
   file:    path: logs/
   

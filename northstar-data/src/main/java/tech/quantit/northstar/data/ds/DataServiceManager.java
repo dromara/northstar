@@ -24,6 +24,7 @@ import com.alibaba.fastjson.JSON;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.IDataServiceManager;
+import tech.quantit.northstar.common.utils.LocalEnvUtils;
 import tech.quantit.northstar.common.utils.MarketDateTimeUtil;
 import xyz.redtorch.pb.CoreField.BarField;
 
@@ -109,12 +110,7 @@ public class DataServiceManager implements IDataServiceManager {
 	}
 	
 	public List<String> getTradeDates(String exchange, LocalDate startDate, LocalDate endDate){
-		String start = "";
-		String end = "";
-		if(startDate != null) start = startDate.format(fmt);
-		if(endDate != null) end = endDate.format(fmt);
-		URI uri = URI.create(String.format("%s/calendar/?exchange=%s&startDate=%s&endDate=%s", baseUrl, exchange, start, end));
-		DataSet dataSet = execute(uri);
+		DataSet dataSet = getTradeCalendar(exchange, startDate, endDate);
 		List<String> resultList = new LinkedList<>();
 		Map<String, Integer> keyIndexMap = new HashMap<>();
 		for(int i=0; i<dataSet.getFields().length; i++) {
@@ -128,6 +124,30 @@ public class DataServiceManager implements IDataServiceManager {
 		return resultList;
 	}
 	
+	public List<String> getHolidays(String exchange, LocalDate startDate, LocalDate endDate) {
+		DataSet dataSet = getTradeCalendar(exchange, startDate, endDate);
+		List<String> resultList = new LinkedList<>();
+		Map<String, Integer> keyIndexMap = new HashMap<>();
+		for(int i=0; i<dataSet.getFields().length; i++) {
+			keyIndexMap.put(dataSet.getFields()[i], i);
+		}
+		for(String[] item : dataSet.getItems()) {
+			if("0".equals(item[keyIndexMap.get("is_open")])) {
+				resultList.add(item[keyIndexMap.get("cal_date")]);
+			}
+		}
+		return resultList;
+	}
+	
+	private DataSet getTradeCalendar(String exchange, LocalDate startDate, LocalDate endDate){
+		String start = "";
+		String end = "";
+		if(startDate != null) start = startDate.format(fmt);
+		if(endDate != null) end = endDate.format(fmt);
+		URI uri = URI.create(String.format("%s/calendar/?exchange=%s&startDate=%s&endDate=%s", baseUrl, exchange, start, end));
+		return execute(uri);
+	}
+	
 	private List<BarField> commonGetData(String type, String unifiedSymbol, LocalDate startDate, LocalDate endDate){
 		URI uri = URI.create(String.format("%s/data/%s?unifiedSymbol=%s&startDate=%s&endDate=%s", baseUrl, type, unifiedSymbol, startDate.format(fmt), endDate.format(fmt)));
 		return convertDataSet(execute(uri));
@@ -136,15 +156,18 @@ public class DataServiceManager implements IDataServiceManager {
 	private DataSet execute(URI uri) {
 		HttpHeaders headers = new HttpHeaders();
 		headers.add("token", nsToken);
+		headers.add("machine", LocalEnvUtils.getMACAddress());
 		HttpEntity<?> reqEntity = new HttpEntity<>(headers);
 		try {			
 			ResponseEntity<DataSet> respEntity = restTemplate.exchange(uri, HttpMethod.GET, reqEntity, DataSet.class);
 			DataSet dataSet = respEntity.getBody();
+			if(respEntity.getStatusCode() != HttpStatus.OK) {
+				String errMsg = dataSet != null ? dataSet.getMessage() : "";
+				log.warn("{}", respEntity.toString());
+				throw new IllegalStateException("历史数据服务返回异常：" + errMsg);
+			}
 			if(dataSet == null) {
 				throw new IllegalStateException("历史数据服务返回为空");
-			}
-			if(respEntity.getStatusCode() != HttpStatus.OK) {
-				throw new IllegalStateException("历史数据服务返回异常：" + dataSet.getMessage());
 			}
 			return dataSet;
 		} catch(HttpClientErrorException e) {

@@ -46,7 +46,7 @@
 - northstar项目为服务端（包含了web网页监控端）
 - northstar-external为用户自行扩展的项目，可参考[此项目](https://gitee.com/NorthstarQuan/northstar-external)
 - 交互协议HTTP + websocket
-- 数据库为Redis7
+- 数据库、缓存为Redis7（历史行情数据主要依赖数据服务，本地仅保存少量账户配置信息）
 - 前端采用node14 + vue2.x
 - 服务端采用java17（拥抱新技术） + springboot3
 
@@ -62,7 +62,7 @@
 curl https://gitee.com/dromara/northstar/raw/master/env.sh | sh
 ```
 
-**Windows环境下**，初始化系统环境。打开powershell命令行窗口，输入以下命令
+**Windows环境下**，初始化系统环境。打开powershell命令行窗口，输入以下命令（部分系统可能报错，需要把脚本下载到本地后右键选择powershell执行）
 ```
 Invoke-WebRequest https://gitee.com/dromara/northstar/raw/master/env.ps1 -OutFile env.ps1; powershell -noexit ".\env.ps1"
 ```
@@ -135,9 +135,9 @@ kill `pgrep java`
 大多数用户开发时都是使用windows环境
 
 ### 环境准备
-初始化系统环境（只需要运行一次），打开powershell命令行窗口，输入以下命令
+初始化系统环境（只需要运行一次），打开powershell命令行窗口，输入以下命令（部分系统可能报错，需要把脚本下载到本地后右键选择powershell执行）
 ```
-Invoke-WebRequest https://gitee.com/dromara/northstar/raw/master/env.ps1 -OutFile env.ps1; powershell -noexit ".\env.ps1"
+Invoke-WebRequest https://gitee.com/dromara/northstar/raw/master/dev-env.ps1 -OutFile dev-env.ps1; powershell -noexit ".\dev-env.ps1"
 ```
 
 ## 注意事项

@@ -37,7 +37,7 @@ public class MarketDataRepoDataServiceImpl implements IMarketDataRepository{
 		try {			
 			return dsMgr.getMinutelyData(unifiedSymbol, startDate, endDate);
 		} catch (Exception e) {
-			log.warn("第三方数据服务暂时不可用：{}", e.getMessage());
+			log.warn("第三方数据服务暂时不可用：{}", e.getMessage(), e);
 			return Collections.emptyList();
 		}
 	}
@@ -46,9 +46,9 @@ public class MarketDataRepoDataServiceImpl implements IMarketDataRepository{
 	public List<LocalDate> findHodidayInLaw(GatewayType gatewayType, int year) {
 		List<String> resultList;
 		try {
-			resultList = dsMgr.getTradeDates("SHFE", LocalDate.of(year, 1, 1), LocalDate.of(year, 12, 31));
+			resultList = dsMgr.getHolidays("SHFE", LocalDate.of(year, 1, 1), LocalDate.of(year, 12, 31));
 		} catch (Exception e) {
-			log.warn("第三方数据服务暂时不可用：{}", e.getMessage());
+			log.warn("第三方数据服务暂时不可用：{}", e.getMessage(), e);
 			return Collections.emptyList();
 		}
 		return resultList.stream()
