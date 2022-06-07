@@ -12,16 +12,16 @@ import tech.quantit.northstar.common.model.GatewayDescription;
 import tech.quantit.northstar.data.IGatewayRepository;
 
 /**
- * 
+ *
  * @author KevinHuangwl
  *
  */
 public class GatewayRepoRedisImpl implements IGatewayRepository{
-	
+
 	private RedisTemplate<String, byte[]> redisTemplate;
-	
+
 	private static final String KEY_PREFIX = Constants.APP_NAME + "Gateway:";
-	
+
 	public GatewayRepoRedisImpl(RedisTemplate<String, byte[]> redisTemplate) {
 		this.redisTemplate = redisTemplate;
 	}
@@ -49,6 +49,11 @@ public class GatewayRepoRedisImpl implements IGatewayRepository{
 	@Override
 	public void deleteById(String gatewayId) {
 		redisTemplate.delete(KEY_PREFIX + gatewayId);
+	}
+
+	@Override
+	public GatewayDescription selectById(String gatewayId) {
+		return null;
 	}
 
 	@Override

@@ -1,5 +1,7 @@
 package tech.quantit.northstar.gateway.playback;
 
+import cn.hutool.core.date.DateUtil;
+import org.apache.commons.lang3.time.DateUtils;
 import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.common.model.GatewayDescription;
 import tech.quantit.northstar.common.model.SimAccountDescription;
@@ -10,10 +12,7 @@ import tech.quantit.northstar.data.ISimAccountRepository;
 import xyz.redtorch.pb.CoreField;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.PriorityQueue;
+import java.util.*;
 
 /**
  * 准备市场数据
@@ -55,10 +54,11 @@ public class MarketDataLocal {
         GatewayDescription gatewayDescription = gatewayRepository.selectById(gateWayId);
         String bindedMktGateWayId = gatewayDescription.getBindedMktGatewayId();
 
+        Date endDate = DateUtil.offsetDay(new Date(curDate.toLocalTime().toNanoOfDay()), 1);
         // 取得合约的日ticket数据
         contractRepository.findAll(GatewayType.PLAYBACK).forEach(contract -> {
-            List<CoreField.TickField> data = marketDataRepository.loadTicksByDateTime(bindedMktGateWayId, contract.getUnifiedSymbol(),
-                    curDate);
+            List<CoreField.BarField> data = marketDataRepository.loadBars(bindedMktGateWayId, contract.getUnifiedSymbol(),curDate,
+                    endDate);
             PriorityQueue<CoreField.TickField> tickQ = new PriorityQueue<>(3000, (b1, b2) -> b1.getActionTimestamp() < b2.getActionTimestamp() ? -1 : 1 );
             for(CoreField.TickField tickData : data) {
                 tickQ.offer(tickData);
