@@ -1,4 +1,4 @@
-package tech.quantit.northstar.gateway.playback.constant;
+package tech.quantit.northstar.common.constant;
 
 /**
  * 回测精度
