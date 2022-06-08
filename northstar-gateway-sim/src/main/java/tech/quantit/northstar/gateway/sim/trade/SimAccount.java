@@ -126,7 +126,7 @@ public class SimAccount implements TickDataAware{
 		return longPositionProfit + shortPositionProfit;
 	}
 	
-	public void depositMoney(int money) {
+	public synchronized void depositMoney(int money) {
 		if(money < 0) {
 			throw new IllegalArgumentException("金额不少于0");
 		}
@@ -135,7 +135,7 @@ public class SimAccount implements TickDataAware{
 		feEngine.emitEvent(NorthstarEventType.ACCOUNT, accountField());
 	}
 	
-	public void withdrawMoney(int money) {
+	public synchronized void withdrawMoney(int money) {
 		if(money < 0) {
 			throw new IllegalArgumentException("金额不少于0");
 		}
@@ -174,7 +174,7 @@ public class SimAccount implements TickDataAware{
 		return list;
 	}
 	
-	public void onSubmitOrder(SubmitOrderReqField orderReq) {
+	public synchronized void onSubmitOrder(SubmitOrderReqField orderReq) {
 		if(FieldUtils.isOpen(orderReq.getOffsetFlag())) {
 			OpenTradeRequest tradeReq = new OpenTradeRequest(this, feEngine, openCallback);
 			OrderField order = tradeReq.initOrder(orderReq);
@@ -221,7 +221,7 @@ public class SimAccount implements TickDataAware{
 		return pos;
 	}
 	
-	public void onCancelOrder(CancelOrderReqField cancelReq) {
+	public synchronized void onCancelOrder(CancelOrderReqField cancelReq) {
 		eventBus.post(cancelReq);
 	}
 	
@@ -231,7 +231,7 @@ public class SimAccount implements TickDataAware{
 		shortMap.values().stream().forEach(eventBus::register);
 	}
 	
-	public void onOpenTrade(TradeField trade) {
+	public synchronized void onOpenTrade(TradeField trade) {
 		Map<ContractField, TradePosition> tMap = getOpeningMap(trade.getDirection());
 		if(tMap.containsKey(trade.getContract())) {
 			tMap.get(trade.getContract()).onTrade(trade);
@@ -241,7 +241,7 @@ public class SimAccount implements TickDataAware{
 		onTrade(trade);
 	}
 	
-	public void onCloseTrade(TradeField trade) {
+	public synchronized void onCloseTrade(TradeField trade) {
 		Map<ContractField, TradePosition> tMap = getClosingMap(trade.getDirection());
 		if(!tMap.containsKey(trade.getContract())) {
 			throw new IllegalStateException("没有对应持仓可以对冲当前成交：" + MessagePrinter.print(trade));

@@ -94,12 +94,13 @@ public class PositionDescription {
 		}
 		DirectionEnum orderDir = OrderUtils.resolveDirection(orderReq.getTradeOpr());
 		List<SubmitOrderReqField> result = new ArrayList<>();
+		double price = Double.parseDouble(orderReq.getPrice());
 		SubmitOrderReqField.Builder sb = SubmitOrderReqField.newBuilder();
 		sb.setContract(contract)
 		.setOriginOrderId(UUID.randomUUID().toString())
-		.setPrice(Double.parseDouble(orderReq.getPrice()))
+		.setPrice(price)
 		.setStopPrice(StringUtils.isNotBlank(orderReq.getStopPrice()) ? Double.parseDouble(orderReq.getStopPrice()) : 0D)
-		.setOrderPriceType(OrderPriceTypeEnum.OPT_LimitPrice)
+		.setOrderPriceType(price <= 0 ? OrderPriceTypeEnum.OPT_AnyPrice : OrderPriceTypeEnum.OPT_LimitPrice)
 		.setDirection(orderDir)
 		.setHedgeFlag(HedgeFlagEnum.HF_Speculation)
 		.setTimeCondition(TimeConditionEnum.TC_GFD)

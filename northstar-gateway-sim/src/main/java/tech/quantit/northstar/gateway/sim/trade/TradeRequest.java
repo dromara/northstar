@@ -47,7 +47,7 @@ public abstract class TradeRequest implements TickDataAware, Cancellable {
 		return submitOrderReq.getOriginOrderId();
 	}
 	
-	protected OrderField initOrder(SubmitOrderReqField orderReq) {
+	protected synchronized OrderField initOrder(SubmitOrderReqField orderReq) {
 		this.submitOrderReq = orderReq;
 		orderBuilder.setActiveTime(String.valueOf(System.currentTimeMillis()))
 		.setOrderId(orderReq.getGatewayId() + "_" + UUID.randomUUID().toString())
@@ -82,9 +82,9 @@ public abstract class TradeRequest implements TickDataAware, Cancellable {
 	protected abstract boolean canMakeOrder();
 	
 	@Override
-	public OrderField onCancal(CancelOrderReqField cancelReq) {
+	public synchronized OrderField onCancal(CancelOrderReqField cancelReq) {
 		if(!StringUtils.equals(submitOrderReq.getOriginOrderId(), cancelReq.getOriginOrderId())) {
-			throw new IllegalArgumentException("");
+			throw new IllegalArgumentException("撤单ID与委托单ID不一致：" + String.format("[%s] [%s]", submitOrderReq.getOriginOrderId(), cancelReq.getOriginOrderId()));
 		}
 		OrderField order = orderBuilder.setStatusMsg("已撤单").setOrderStatus(OrderStatusEnum.OS_Canceled).build();
 		feEngine.emitEvent(NorthstarEventType.ORDER, order);
@@ -93,7 +93,7 @@ public abstract class TradeRequest implements TickDataAware, Cancellable {
 	}
 
 	@Override
-	public void onTick(TickField tick) {
+	public synchronized void onTick(TickField tick) {
 		if(!StringUtils.equals(submitOrderReq.getContract().getUnifiedSymbol(), tick.getUnifiedSymbol())) {
 			return;
 		}

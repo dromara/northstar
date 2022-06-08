@@ -19,7 +19,7 @@ public class OpenTradeRequest extends TradeRequest {
 	}
 	
 	@Override
-	protected OrderField initOrder(SubmitOrderReqField orderReq) {
+	protected synchronized OrderField initOrder(SubmitOrderReqField orderReq) {
 		if(!FieldUtils.isOpen(orderReq.getOffsetFlag())) {
 			throw new IllegalArgumentException("传入非开仓请求");
 		}
@@ -41,7 +41,7 @@ public class OpenTradeRequest extends TradeRequest {
 	}
 
 	@Override
-	public void onTrade(TradeField trade) {
+	public synchronized void onTrade(TradeField trade) {
 		account.onOpenTrade(trade);
 		account.reportAccountStatus();
 	}

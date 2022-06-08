@@ -85,12 +85,13 @@ public class TradeDayAccount {
 			throw new InsufficientException("可用资金不足，无法开仓");
 		}
 		DirectionEnum orderDir = OrderUtils.resolveDirection(orderReq.getTradeOpr());
+		double price = Double.parseDouble(orderReq.getPrice());
 		SubmitOrderReqField req = SubmitOrderReqField.newBuilder()
 				.setOriginOrderId(UUID.randomUUID().toString())
 				.setContract(contract)
-				.setPrice(Double.parseDouble(orderReq.getPrice()))
+				.setPrice(price)
 				.setStopPrice(StringUtils.isNotBlank(orderReq.getStopPrice()) ? Double.parseDouble(orderReq.getStopPrice()) : 0D)
-				.setOrderPriceType(OrderPriceTypeEnum.OPT_LimitPrice)
+				.setOrderPriceType(price <= 0 ? OrderPriceTypeEnum.OPT_AnyPrice : OrderPriceTypeEnum.OPT_LimitPrice)
 				.setDirection(orderDir)
 				.setVolume(orderReq.getVolume())
 				.setOffsetFlag(OffsetFlagEnum.OF_Open)
