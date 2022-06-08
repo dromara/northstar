@@ -5,10 +5,9 @@
 **借用组织的口号：一个人或许能走的更快，但一群人会走的更远。**  
 **本项目仅属于技术分享，不构成任何交易建议。使用者自身在交易前，需要清楚其可能面对的交易风险与相关法律规定，并为自身行为负责！**
 
+用户监控台效果：
 ![输入图片说明](https://images.gitee.com/uploads/images/2022/0103/205503_efb41f7c_1676852.png "login.PNG")
 ![Image text](https://images.gitee.com/uploads/images/2021/0609/223845_f3942e1e_1676852.png)
-
-通过JAVA后台来编写程序化的交易策略，并提供页面监控界面。部署方法已集成在本项目的部署脚本中。
 
 ![Image](https://images.gitee.com/uploads/images/2021/0606/220710_eeab5dd9_1676852.png)
 ![Image](https://images.gitee.com/uploads/images/2021/0606/220728_32ef6b37_1676852.png)
