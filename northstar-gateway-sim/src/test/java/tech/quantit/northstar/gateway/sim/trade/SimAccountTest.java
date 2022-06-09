@@ -60,7 +60,6 @@ class SimAccountTest {
 		account.setFeEngine(mock(FastEventEngine.class));
 		account.totalDeposit = 1000000;
 		EventBus eventBus = mock(EventBus.class);
-		account.setEventBus(eventBus);
 		account.onSubmitOrder(factory.makeOrderReq("rb2210", DirectionEnum.D_Sell, OffsetFlagEnum.OF_Open, 1, 1000, 0));
 		
 		verify(eventBus).register(any(OpenTradeRequest.class));
@@ -72,7 +71,6 @@ class SimAccountTest {
 		
 		account.setFeEngine(mock(FastEventEngine.class));
 		EventBus eventBus = mock(EventBus.class);
-		account.setEventBus(eventBus);
 		account.onSubmitOrder(factory.makeOrderReq("rb2210", DirectionEnum.D_Sell, OffsetFlagEnum.OF_Open, 1, 1000, 0));
 		
 		verify(eventBus, times(0)).register(any(OpenTradeRequest.class));
@@ -84,7 +82,6 @@ class SimAccountTest {
 		
 		account.setFeEngine(mock(FastEventEngine.class));
 		EventBus eventBus = mock(EventBus.class);
-		account.setEventBus(eventBus);
 		
 		TradePosition pos = mock(TradePosition.class);
 		when(pos.totalAvailable()).thenReturn(1);
@@ -102,7 +99,6 @@ class SimAccountTest {
 		
 		account.setFeEngine(mock(FastEventEngine.class));
 		EventBus eventBus = mock(EventBus.class);
-		account.setEventBus(eventBus);
 		assertThrows(IllegalStateException.class, ()->{			
 			account.onSubmitOrder(factory.makeOrderReq("rb2210", DirectionEnum.D_Sell, OffsetFlagEnum.OF_Close, 1, 1000, 0));
 		});
@@ -123,7 +119,6 @@ class SimAccountTest {
 		Runnable savingCallback = mock(Runnable.class);
 		account.setSavingCallback(savingCallback);
 		account.setFeEngine(mock(FastEventEngine.class));
-		account.setEventBus(mock(EventBus.class));
 		account.depositMoney(666);
 		assertThat(account.totalDeposit).isEqualTo(666);
 		verify(savingCallback).run();
@@ -142,7 +137,6 @@ class SimAccountTest {
 	void testWithdraw() {
 		
 		Runnable savingCallback = mock(Runnable.class);
-		account.setEventBus(mock(EventBus.class));
 		account.setFeEngine(mock(FastEventEngine.class));
 		account.setSavingCallback(savingCallback);
 		account.depositMoney(666);
@@ -166,10 +160,7 @@ class SimAccountTest {
 	
 	@Test
 	void testOnCancel() {
-		
-		account.setEventBus(mock(EventBus.class));
 		account.onCancelOrder(factory.makeCancelReq(factory.makeOrderReq("rb2201", DirectionEnum.D_Buy, OffsetFlagEnum.OF_Close, 0, 0, 0)));
-		verify(account.getEventBus()).post(any());
 	}
 	
 }
