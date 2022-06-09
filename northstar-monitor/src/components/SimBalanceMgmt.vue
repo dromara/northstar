@@ -76,7 +76,7 @@ export default {
       this.money = ''
       setTimeout(() => {
         this.updateAmount()
-      }, 300)
+      }, 600)
     },
     updateAmount() {
       this.accountBalance = this.$store.getters.getAccountById(this.simGatewayId).account?.balance

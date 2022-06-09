@@ -2,11 +2,12 @@ package tech.quantit.northstar.gateway.sim.trade;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.function.Consumer;
 
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -40,19 +41,19 @@ public class SimAccount implements TickDataAware{
 	private String gatewayId;
 
 	// originOrderId -> tradeRequest
-	protected Map<String, OpenTradeRequest> openReqMap = new HashMap<>();
-	protected Map<String, CloseTradeRequest> closeReqMap = new HashMap<>();
+	protected ConcurrentMap<String, OpenTradeRequest> openReqMap = new ConcurrentHashMap<>();
+	protected ConcurrentMap<String, CloseTradeRequest> closeReqMap = new ConcurrentHashMap<>();
 
-	protected Map<ContractField, TradePosition> longMap = new HashMap<>();
-	protected Map<ContractField, TradePosition> shortMap = new HashMap<>();
+	protected ConcurrentMap<ContractField, TradePosition> longMap = new ConcurrentHashMap<>();
+	protected ConcurrentMap<ContractField, TradePosition> shortMap = new ConcurrentHashMap<>();
 	
-	protected double totalCloseProfit;
+	protected volatile double totalCloseProfit;
 	
-	protected double totalCommission;
+	protected volatile double totalCommission;
 	
-	protected double totalDeposit;
+	protected volatile double totalDeposit;
 	
-	protected double totalWithdraw;
+	protected volatile double totalWithdraw;
 	
 	private volatile boolean connected;
 	
@@ -122,7 +123,7 @@ public class SimAccount implements TickDataAware{
 		return longPositionProfit + shortPositionProfit;
 	}
 	
-	public synchronized void depositMoney(int money) {
+	public void depositMoney(int money) {
 		if(money < 0) {
 			throw new IllegalArgumentException("金额不少于0");
 		}
@@ -131,7 +132,7 @@ public class SimAccount implements TickDataAware{
 		feEngine.emitEvent(NorthstarEventType.ACCOUNT, accountField());
 	}
 	
-	public synchronized void withdrawMoney(int money) {
+	public void withdrawMoney(int money) {
 		if(money < 0) {
 			throw new IllegalArgumentException("金额不少于0");
 		}
@@ -170,7 +171,7 @@ public class SimAccount implements TickDataAware{
 		return list;
 	}
 	
-	public synchronized void onSubmitOrder(SubmitOrderReqField orderReq) {
+	public void onSubmitOrder(SubmitOrderReqField orderReq) {
 		if(FieldUtils.isOpen(orderReq.getOffsetFlag())) {
 			OpenTradeRequest tradeReq = new OpenTradeRequest(this, feEngine, openCallback);
 			OrderField order = tradeReq.initOrder(orderReq);
@@ -215,7 +216,7 @@ public class SimAccount implements TickDataAware{
 		return pos;
 	}
 	
-	public synchronized void onCancelOrder(CancelOrderReqField cancelReq) {
+	public void onCancelOrder(CancelOrderReqField cancelReq) {
 		if(closeReqMap.containsKey(cancelReq.getOriginOrderId())) {
 			closeReqMap.get(cancelReq.getOriginOrderId()).onCancal(cancelReq);
 		} else if (openReqMap.containsKey(cancelReq.getOriginOrderId())) {
@@ -223,7 +224,7 @@ public class SimAccount implements TickDataAware{
 		}
 	}
 	
-	public synchronized void onOpenTrade(TradeField trade) {
+	public void onOpenTrade(TradeField trade) {
 		Map<ContractField, TradePosition> tMap = getOpeningMap(trade.getDirection());
 		if(tMap.containsKey(trade.getContract())) {
 			tMap.get(trade.getContract()).onTrade(trade);
@@ -233,7 +234,7 @@ public class SimAccount implements TickDataAware{
 		onTrade(trade);
 	}
 	
-	public synchronized void onCloseTrade(TradeField trade) {
+	public void onCloseTrade(TradeField trade) {
 		Map<ContractField, TradePosition> tMap = getClosingMap(trade.getDirection());
 		if(!tMap.containsKey(trade.getContract())) {
 			throw new IllegalStateException("没有对应持仓可以对冲当前成交：" + MessagePrinter.print(trade));

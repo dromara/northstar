@@ -9,8 +9,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -85,7 +85,7 @@ class SimAccountTest {
 		
 		TradePosition pos = mock(TradePosition.class);
 		when(pos.totalAvailable()).thenReturn(1);
-		Map<ContractField, TradePosition> longMap = new HashMap<>();
+		ConcurrentMap<ContractField, TradePosition> longMap = new ConcurrentHashMap<>();
 		longMap.put(factory.makeContract("rb2210"), pos);
 		account.longMap = longMap;
 		account.onSubmitOrder(factory.makeOrderReq("rb2210", DirectionEnum.D_Sell, OffsetFlagEnum.OF_Close, 1, 1000, 0));
@@ -104,7 +104,7 @@ class SimAccountTest {
 		});
 		
 		TradePosition pos = mock(TradePosition.class);
-		Map<ContractField, TradePosition> longMap = new HashMap<>();
+		ConcurrentMap<ContractField, TradePosition> longMap = new ConcurrentHashMap<>();
 		longMap.put(factory.makeContract("rb2210"), pos);
 		account.longMap = longMap;
 		account.onSubmitOrder(factory.makeOrderReq("rb2210", DirectionEnum.D_Sell, OffsetFlagEnum.OF_Close, 1, 1000, 0));
