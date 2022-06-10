@@ -33,14 +33,9 @@ const routes = [
         component: () => import('../views/GatewayMgmt.vue')
       },
       {
-        path: '/specmodule',
-        name: 'specmodule',
+        path: '/module',
+        name: 'module',
         component: () => import('../views/ModuleMgmt.vue')
-      },
-      {
-        path: '/arbitmodule',
-        name: 'arbitmodule',
-        component: () => import('../views/NotImplemented.vue')
       },
       {
         path: '/mktdata',

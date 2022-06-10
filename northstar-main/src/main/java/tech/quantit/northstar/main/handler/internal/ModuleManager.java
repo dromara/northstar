@@ -4,11 +4,13 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.event.AbstractEventHandler;
 import tech.quantit.northstar.common.event.NorthstarEvent;
 import tech.quantit.northstar.common.event.NorthstarEventType;
 import tech.quantit.northstar.strategy.api.IModule;
 
+@Slf4j
 public class ModuleManager extends AbstractEventHandler{
 	/**
 	 * moduleName --> module
@@ -30,12 +32,16 @@ public class ModuleManager extends AbstractEventHandler{
 		moduleMap.put(module.getName(), module);
 	}
 	
-	public IModule removeModule(String name) {
+	public void removeModule(String name) {
 		IModule module = moduleMap.get(name);
+		if(module == null) {
+			log.debug("[{}] 已删除", name);
+			return;
+		} 	
 		if(module.isEnabled()) {
 			throw new IllegalStateException("模组处于启用状态，不允许移除");
 		}
-		return moduleMap.remove(name);
+		moduleMap.remove(name);
 	}
 	
 	public IModule getModule(String name) {
