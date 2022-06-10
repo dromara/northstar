@@ -31,6 +31,7 @@ describe('模组管理-测试', () => {
         cy.get('.el-table__row').first().contains('连线').click()
         cy.wait(1000)
         cy.get('.el-table__row').first().contains('出入金').click()
+        cy.wait(500)
         cy.get('.el-dialog').filter(':visible').find('input').type(50000)
         cy.get('.el-dialog').filter(':visible').find('button').contains('出入金').click()
         cy.wait(1000)
@@ -107,21 +108,95 @@ describe('模组管理-测试', () => {
     })
 
     describe('模组状态管理-测试', () => {
+        before(()=>{
+            cy.visit('http://localhost:8090/#/module')
+            cy.contains('新建').click()
+            cy.get('.el-dialog').contains('模组名称').parent().find('input').type('TESTM')
+            cy.get('.el-dialog').contains('绑定合约').parent().find('input').type('sim999@CZCE@FUTURES')
+            cy.get('.el-dialog').contains('预热数据量').parent().find('input').clear().type('100')
+            cy.get('.el-dialog').contains('交易策略').click()
+            cy.get('.el-dialog').contains('绑定策略').parent().find('input').click()
+            cy.get('.el-select-dropdown').contains('示例信号策略').click()
+            cy.get('.el-dialog').contains('操作间隔').parent().find('input').type(60)
+            cy.get('.el-dialog').contains('账户绑定').click()
+            cy.get('.el-dialog').contains('绑定账号').parent().find('input').click()
+            cy.get('.el-select-dropdown').contains('testAccount').click()
+            cy.get('.el-dialog').contains('模组分配金额').parent().find('input').clear().type('20000')
+            cy.get('.el-dialog').contains('关联合约').parent().find('input').click()
+            cy.get('.el-select-dropdown').contains('sim999').click()
+            cy.get('.el-dialog').filter(':visible').find('button').last().click()
+        })
+
         beforeEach(() => {
             cy.Cookies.preserveOnce('JSESSIONID')
         })
 
-        it('模组运行状态能正常查询，没有报错', () => {})
+        it('模组运行状态能正常查询，没有报错', () => {
+            cy.intercept('/northstar/module/rt/info*').as('getRtInfo')
+            cy.intercept('/northstar/module/deal/record*').as('getRecord')
+            cy.get('.el-table__row').contains('运行状态').click()
+            cy.wait('@getRtInfo').should('have.nested.property', 'response.statusCode', 200)
+            cy.wait('@getRecord').should('have.nested.property', 'response.statusCode', 200)
+        })
 
-        it('可以手工增加模组持仓', () => {})
+        it('可以手工增加模组持仓', () => {
+            cy.get('#editPosition').click()
+            cy.get('.el-dialog').contains('合约代码').parent().click()
+            cy.get('.el-select-dropdown').filter(':visible').contains('sim999@CZCE@FUTURES').click()
+            cy.get('.el-dialog').contains('成交方向').parent().click()
+            cy.get('.el-select-dropdown').filter(':visible').contains('多开').click()
+            cy.get('.el-dialog').contains('成交价').parent().find('input').type(3000)
+            cy.get('#editPositionVol').find('input').type(1)
+            cy.get('#savePosition').click()
 
-        it('可以手工减少模组持仓', () => {})
+            cy.get('.el-dialog').find('.el-table__row').filter(':visible').should('have.length', 1)
+            cy.get('.el-dialog').find('.el-table__row').filter(':visible').find('.cell').eq(2).should('have.text', '1')
 
-        it('模组的持仓状态与持仓方向一致', () => {})
+            cy.get('#editPosition').click()
+            cy.get('.el-dialog').contains('合约代码').parent().click()
+            cy.get('.el-select-dropdown').filter(':visible').contains('sim999@CZCE@FUTURES').click()
+            cy.get('.el-dialog').contains('成交方向').parent().click()
+            cy.get('.el-select-dropdown').filter(':visible').contains('多开').click()
+            cy.get('.el-dialog').contains('成交价').parent().find('input').type(3000)
+            cy.get('#editPositionVol').find('input').type(1)
+            cy.get('#savePosition').click()
+
+            cy.get('.el-dialog').find('.el-table__row').should('have.length', 1)
+            cy.get('.el-dialog').find('.el-table__row').filter(':visible').find('.cell').eq(2).should('have.text', '2')
+        })
+
+        it('可以手工减少模组持仓', () => {
+            cy.get('#editPosition').click()
+            cy.get('.el-dialog').contains('合约代码').parent().click()
+            cy.get('.el-select-dropdown').filter(':visible').contains('sim999@CZCE@FUTURES').click()
+            cy.get('.el-dialog').contains('成交方向').parent().click()
+            cy.get('.el-select-dropdown').contains('空平').click()
+            cy.get('.el-dialog').contains('成交价').parent().find('input').type(3000)
+            cy.get('#editPositionVol').find('input').type(1)
+            cy.get('#savePosition').click()
+
+            cy.get('.el-dialog').find('.el-table__row').filter(':visible').should('have.length', 1)
+            cy.get('.el-dialog').find('.el-table__row').filter(':visible').find('.cell').eq(2).should('have.text', '1')
+
+            cy.get('#editPosition').click()
+            cy.get('.el-dialog').contains('合约代码').parent().click()
+            cy.get('.el-select-dropdown').filter(':visible').contains('sim999@CZCE@FUTURES').click()
+            cy.get('.el-dialog').contains('成交方向').parent().click()
+            cy.get('.el-select-dropdown').contains('空平').click()
+            cy.get('.el-dialog').contains('成交价').parent().find('input').type(3000)
+            cy.get('#editPositionVol').find('input').type(1)
+            cy.get('#savePosition').click()
+            cy.wait(500)
+
+            cy.get('.el-dialog').filter(':visible').find('.el-table__row').filter(':visible').should('have.length', 0)
+        })
+
+        after(() => {
+            cy.request('DELETE', 'http://localhost/northstar/module?name=TESTM')
+        })
     })
 
     after(() => {
-        cy.request('DELETE', 'http://localhost/northstar/module?name=TESTM')
         cy.request('DELETE', 'http://localhost/northstar/gateway/connection?gatewayId=testAccount')
         cy.request('DELETE', 'http://localhost/northstar/gateway/connection?gatewayId=SIM')
         cy.request('DELETE', 'http://localhost/northstar/gateway?gatewayId=testAccount')

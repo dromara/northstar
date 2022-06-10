@@ -118,19 +118,20 @@ public class BeginnerSampleStrategy implements TradeStrategy{
 	
 	private long nextActionTime;
 	private String originOrderId;
-
+	
 	@Override
 	public void onTick(TickField tick, boolean isModuleEnabled) {
 		timer.onTick(tick);
 		
 		if(!isModuleEnabled)	{
+			nextActionTime = 0;
 			return;	// 若模组停用，则不执行后面逻辑		
 		}
 		
 		log.debug("策略每个TICK触发: {} {} {}", tick.getUnifiedSymbol(), tick.getActionTime(), tick.getLastPrice());
 		long now = tick.getActionTimestamp();
-		//初始状态下，等待10秒才开始交易
-		if(nextActionTime < 0) {
+		// 启用后，等待10秒才开始交易
+		if(nextActionTime == 0) {
 			nextActionTime = now + 10000;
 		}
 		int seed = ThreadLocalRandom.current().nextInt();
@@ -148,7 +149,6 @@ public class BeginnerSampleStrategy implements TradeStrategy{
 				originOrderId = ctx.submitOrderReq(ctx.getContract(tick.getUnifiedSymbol()), SignalOperation.BUY_CLOSE, PriceType.ANY_PRICE, 1, 0);
 			}
 		}
-		
 	}
 
 	@Override

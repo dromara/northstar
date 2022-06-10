@@ -33,7 +33,7 @@
         <el-form-item label="成交价" prop="price">
           <el-input v-model="form.price" type="number" autocomplete="off"></el-input>
         </el-form-item>
-        <el-form-item label="手数" prop="volume">
+        <el-form-item id="editPositionVol" label="手数" prop="volume">
           <el-input v-model="form.volume" type="number" autocomplete="off"></el-input>
         </el-form-item>
       </el-form>
@@ -41,7 +41,7 @@
 
     <div slot="footer" class="dialog-footer">
       <el-button @click="close">取 消</el-button>
-      <el-button type="primary" @click="savePosition">保 存</el-button>
+      <el-button id="savePosition" type="primary" @click="savePosition">保 存</el-button>
     </div>
   </el-dialog>
 </template>
