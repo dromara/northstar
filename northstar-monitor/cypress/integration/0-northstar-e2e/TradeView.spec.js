@@ -102,7 +102,7 @@ describe('手工期货交易-测试', () => {
         cy.get('.el-table__row').filter(':visible').click()
         cy.get('#priceType').click()
         cy.get('.el-select-dropdown').contains('限价').parent().click()
-        cy.get('#limitPrice').type(10000)
+        cy.get('#limitPrice').find('input').type(10000)
         cy.get('.ns-trade-button').last().click()
         cy.wait(100)
         cy.contains('持仓').click()
