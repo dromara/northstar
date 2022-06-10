@@ -7,6 +7,7 @@ import com.corundumstudio.socketio.annotation.OnDisconnect;
 import com.corundumstudio.socketio.annotation.OnEvent;
 import com.google.protobuf.Message;
 
+import cn.hutool.core.codec.Base64;
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.event.NorthstarEvent;
 import tech.quantit.northstar.common.utils.MessagePrinter;
@@ -35,17 +36,17 @@ public class SocketIOMessageEngine {
 	public void emitEvent(NorthstarEvent event) throws SecurityException, IllegalArgumentException {
 		// 为了避免接收端信息拥塞，把行情数据按合约分房间分发数据，可以提升客户端的接收效率
 		if(event.getData() instanceof TickField tick) {
-			server.getRoomOperations(tick.getUnifiedSymbol()).sendEvent(event.getEvent().toString(), tick.toByteArray());
+			server.getRoomOperations(tick.getUnifiedSymbol()).sendEvent(event.getEvent().toString(), Base64.encode(tick.toByteArray()));
 		} else if(event.getData() instanceof BarField bar) {
-			server.getRoomOperations(bar.getUnifiedSymbol()).sendEvent(event.getEvent().toString(), bar.toByteArray());
+			server.getRoomOperations(bar.getUnifiedSymbol()).sendEvent(event.getEvent().toString(), Base64.encode(bar.toByteArray()));
 		} else if(event.getData() instanceof AccountField account) {
 			log.trace("账户信息分发: [{}]", MessagePrinter.print(account));
-			server.getBroadcastOperations().sendEvent(event.getEvent().toString(), account.toByteArray());
+			server.getBroadcastOperations().sendEvent(event.getEvent().toString(), Base64.encode(account.toByteArray()));
 		} else if(event.getData() instanceof PositionField position) {
 			log.trace("持仓信息分发: [{}]", MessagePrinter.print(position));
-			server.getBroadcastOperations().sendEvent(event.getEvent().toString(), position.toByteArray());
+			server.getBroadcastOperations().sendEvent(event.getEvent().toString(), Base64.encode(position.toByteArray()));
 		} else if(event.getData() instanceof Message message) {			
-			server.getBroadcastOperations().sendEvent(event.getEvent().toString(), message.toByteArray());
+			server.getBroadcastOperations().sendEvent(event.getEvent().toString(), Base64.encode(message.toByteArray()));
 		}
 	}
 	

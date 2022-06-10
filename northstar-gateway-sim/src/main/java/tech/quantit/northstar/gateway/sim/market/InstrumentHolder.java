@@ -2,6 +2,7 @@ package tech.quantit.northstar.gateway.sim.market;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.List;
 
 import tech.quantit.northstar.common.constant.DateTimeConstant;
 import xyz.redtorch.pb.CoreField.ContractField;
@@ -23,10 +24,10 @@ public class InstrumentHolder {
 		.setSettlePrice(InstrumentBasePrice.getBasePrice(contract))
 		.setPreSettlePrice(InstrumentBasePrice.getBasePrice(contract))
 		.setGatewayId(contract.getGatewayId())
-		.addAskPrice(0)
-		.addBidPrice(0)
-		.addAskVolume(0)
-		.addBidVolume(0)
+		.addAllAskPrice(List.of(0D, 0D, 0D, 0D, 0D))
+		.addAllBidPrice(List.of(0D, 0D, 0D, 0D, 0D))
+		.addAllAskVolume(List.of(0, 0, 0, 0, 0))
+		.addAllBidVolume(List.of(0, 0, 0, 0, 0))
 		.setUnifiedSymbol(contract.getUnifiedSymbol())
 		.setActionDay(ldt.format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
 		.setActionTime(ldt.format(DateTimeConstant.T_FORMAT_WITH_MS_INT_FORMATTER))
