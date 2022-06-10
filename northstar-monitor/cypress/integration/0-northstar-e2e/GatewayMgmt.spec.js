@@ -13,13 +13,13 @@ describe('网关管理-测试', () => {
         cy.contains('密码').parent().find('input').type('123456')
         cy.contains('登陆').click()
         cy.wait(500)
+        cy.visit('http://localhost:8090/#/mktgateway')
+        cy.wait(300)
     })
 
     describe('行情网关管理-基础测试', () => {
         beforeEach(() => {
             cy.Cookies.preserveOnce('JSESSIONID')
-            cy.visit('http://localhost:8090/#/mktgateway')
-            cy.wait(300)
         })
     
         it('应该可以新增SIM行情网关', () => {
@@ -62,7 +62,6 @@ describe('网关管理-测试', () => {
     
     describe('账户网关管理-基础测试', () => {
         before(() => {
-            cy.visit('http://localhost:8090/#/mktgateway')
             cy.contains('新建').click()
             cy.get('.el-dialog').contains('网关类型').parent().find('.el-select').click()
             cy.get('.el-select-dropdown').contains('SIM').click()

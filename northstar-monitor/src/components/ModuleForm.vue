@@ -72,7 +72,7 @@
             </el-form-item>
           </div>
           <div v-show="activeIndex === '2'">
-            <el-form-item label="交易策略">
+            <el-form-item label="绑定策略">
               <el-select v-model="form.strategySetting" placeholder="请选择" :disabled="readOnly">
                 <el-option
                   v-for="(p, i) in tradeStrategyOptions"

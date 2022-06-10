@@ -89,7 +89,13 @@
             title="确定移除吗？"
             @confirm="handleDelete(scope.$index, scope.row)"
           >
-            <el-button slot="reference" size="mini" type="danger">删除</el-button>
+            <el-button
+              :disabled="scope.row.runtime.enabled"
+              slot="reference"
+              size="mini"
+              type="danger"
+              >删除</el-button
+            >
           </el-popconfirm>
         </template>
       </el-table-column>
