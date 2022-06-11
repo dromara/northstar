@@ -17,7 +17,6 @@ northstar:
 logging:  level: 
     root: info
     '[tech.quantit.northstar]': debug
-    '[tech.quantit.northstar.main.handler.broadcast]': trace
   file:    path: logs/
   
 spring:
