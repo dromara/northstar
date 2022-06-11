@@ -2,10 +2,10 @@ import baseService from './baseRequest'
 
 export default {
   getStrategies() {
-    return baseService.get('/module/components')
+    return baseService.get('/module/strategies')
   },
   componentParams(metaInfo) {
-    return baseService.post(`/module/component/params`, metaInfo)
+    return baseService.post(`/module/strategy/params`, metaInfo)
   },
   insertModule(module) {
     return baseService.post('/module', module)

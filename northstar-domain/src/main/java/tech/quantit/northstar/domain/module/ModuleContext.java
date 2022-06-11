@@ -1,6 +1,7 @@
 package tech.quantit.northstar.domain.module;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -305,6 +306,9 @@ public class ModuleContext implements IModuleContext{
 	@Override
 	public List<ModuleCalculatedDataFrame> getModuleData() {
 		Map<String, Indicator> indicatorMap = tradeStrategy.bindedIndicatorMap();
+		if(indicatorMap.isEmpty()) {
+			return Collections.emptyList();
+		}
 		int length = indicatorMap.values().stream().min((i1, i2) -> i1.length() < i2.length() ? -1 : 1).get().length();
 		List<ModuleCalculatedDataFrame> resultList = new ArrayList<>(length);
 		for(int i=0; i<length; i++) {

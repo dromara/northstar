@@ -39,7 +39,7 @@ public class ModuleController {
 	 * 查询所有定义的信号策略
 	 * @return
 	 */
-	@GetMapping("/components")
+	@GetMapping("/strategies")
 	public ResultBean<List<ComponentMetaInfo>> getRegisteredTradeStrategies(){
 		return new ResultBean<>(service.getRegisteredTradeStrategies());
 	}
@@ -50,7 +50,7 @@ public class ModuleController {
 	 * @return
 	 * @throws ClassNotFoundException
 	 */
-	@PostMapping("/component/params")
+	@PostMapping("/strategy/params")
 	public ResultBean<Map<String, ComponentField>> getComponentParams(@RequestBody ComponentMetaInfo info) throws ClassNotFoundException{
 		Assert.notNull(info, "组件不能为空");
 		return new ResultBean<>(service.getComponentParams(info));
