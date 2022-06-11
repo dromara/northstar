@@ -1,6 +1,7 @@
 package tech.quantit.northstar.main.config;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -10,6 +11,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.web.client.RestTemplate;
 
+import tech.quantit.northstar.common.constant.Constants;
 import tech.quantit.northstar.data.IContractRepository;
 import tech.quantit.northstar.data.IGatewayRepository;
 import tech.quantit.northstar.data.IMarketDataRepository;
@@ -52,12 +54,10 @@ public class RepositoryConfig {
 	@Value("${northstar.data-service.baseUrl}")
 	private String baseUrl;
 	
-	@Value("${northstar.data-service.token}")
-	private String token;
-	
 	@Bean
 	public IMarketDataRepository marketDataRepository(RedisTemplate<String, byte[]> redisTemplate, RestTemplate restTemplate) {
-		DataServiceManager dsMgr = new DataServiceManager(baseUrl, token, restTemplate, new CtpDateTimeUtil());
+		String nsdsSecret = Optional.ofNullable(System.getenv(Constants.NS_DS_SECRET)).orElse("");
+		DataServiceManager dsMgr = new DataServiceManager(baseUrl, nsdsSecret, restTemplate, new CtpDateTimeUtil());
 		return new MarketDataRepoRedisImpl(redisTemplate, dsMgr);
 	}
 	

@@ -19,7 +19,7 @@
 **功能特性：**
 - 一站式平台，可适配对接不同的交易所；
 - 允许多账户交易，能实现跨市套利等复杂逻辑；
-- 灵活多变的自动化策略框架，能实现复杂的个性化交易逻辑，如多合约价差交易，高频交易，CTA交易，期权期货混合交易等等；
+- 灵活多变的自动化策略框架，能实现复杂的个性化交易逻辑，如多合约价差交易，算法高频交易，CTA交易，期权期货混合交易等等；
 - 自然易操作的自动化模组管理，轻松掌握与管理自动化策略的运行状态；
 - 直观易理解的API编程接口，并且提供了多种策略的编写范例，只需要掌握最基本的JAVA编程知识便可以上手编写自己的交易策略；
 - 可实现完全自主的风控手段；
@@ -80,32 +80,6 @@ cd ~ && wget https://gitee.com/dromara/northstar/attach_files/1008262/download/n
 ```
 Invoke-WebRequest https://gitee.com/dromara/northstar/attach_files/1008262/download/northstar-3.5.jar -OutFile northstar.jar
 ```
-
-### 启动参数准备
-
-**Linux环境下**
-在.bashrc中加入启动参数（这样做能隐藏启动参数。若不用邮件通知与不修改默认的登陆账户密码可以不填）  
-```
-vim ~/.bashrc
-```
-在文末加入以下设置
-```
-...
-export NSUSER=<登陆用户名>
-export NSPWD=<登陆密码>
-export SMTP_HOST=<邮箱SMTP，例如smtp.126.com>
-export SMTP_SECRET=<邮箱认证码，在邮箱设置中生成的认证码>
-export EMAIL=<代理邮箱名> 
-export EMAIL0=<订阅邮箱名>
-```
-保存并退出，然后让配置生效
-```
-source ~/.bashrc
-```
-
-**Windows环境下**
-待补充
-
 
 ### 启动程序
 **Linux环境下**

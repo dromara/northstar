@@ -1,5 +1,7 @@
 package tech.quantit.northstar.common.model;
 
+import java.io.Serializable;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,7 +14,12 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class NsUser {
+public class NsUser implements Serializable{
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 8553220725430453845L;
 
 	private String userName;
 	

@@ -1,10 +1,12 @@
 package tech.quantit.northstar.main.restful;
 
+import java.util.Optional;
+
 import javax.servlet.http.HttpSession;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,11 +26,9 @@ import tech.quantit.northstar.common.model.ResultBean;
  */
 @RestController
 @RequestMapping("/northstar/auth")
-public class AuthenticationController {
+public class AuthenticationController implements InitializingBean{
 	
-	@Value("${northstar.auth.userId}")
 	protected String userId;
-	@Value("${northstar.auth.password}")
 	protected String password;
 	
 	@Autowired
@@ -48,5 +48,13 @@ public class AuthenticationController {
 	@GetMapping("/test")
 	public ResultBean<Boolean> testAuth() {
 		return new ResultBean<>(Boolean.TRUE);
+	}
+
+	@Override
+	public void afterPropertiesSet() throws Exception {
+		String user = System.getenv(Constants.NS_USER);
+		String pwd = System.getenv(Constants.NS_PWD);
+		userId = Optional.ofNullable(user).orElse(Constants.DEFAULT_USERID);
+		password = Optional.ofNullable(pwd).orElse(Constants.DEFAULT_PASSWORD);
 	}
 }

@@ -37,9 +37,11 @@ import xyz.redtorch.pb.CoreField.BarField;
 @Slf4j
 public class DataServiceManager implements IDataServiceManager {
 	
-	private String nsToken;
+	private String nsSecret;
 
 	private String baseUrl;
+	
+	private volatile String userToken;
 	
 	private DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyyMMdd");
 	
@@ -53,9 +55,9 @@ public class DataServiceManager implements IDataServiceManager {
 	
 	private RestTemplate restTemplate;
 	
-	public DataServiceManager(String baseUrl, String token, RestTemplate restTemplate, MarketDateTimeUtil dtUtil) {
+	public DataServiceManager(String baseUrl, String secret, RestTemplate restTemplate, MarketDateTimeUtil dtUtil) {
 		this.baseUrl =  baseUrl;
-		this.nsToken = token;
+		this.nsSecret = secret;
 		this.dtUtil = dtUtil;
 		this.restTemplate = restTemplate;
 		log.info("采用外部数据源加载历史数据");
@@ -155,8 +157,9 @@ public class DataServiceManager implements IDataServiceManager {
 	
 	private DataSet execute(URI uri) {
 		HttpHeaders headers = new HttpHeaders();
-		headers.add("token", nsToken);
-		headers.add("machine", LocalEnvUtils.getMACAddress());
+		headers.add("X-SECRET", nsSecret);
+		headers.add("X-TOKEN", userToken);
+		headers.add("X-MACHINE", LocalEnvUtils.getMACAddress());
 		HttpEntity<?> reqEntity = new HttpEntity<>(headers);
 		try {			
 			ResponseEntity<DataSet> respEntity = restTemplate.exchange(uri, HttpMethod.GET, reqEntity, DataSet.class);
