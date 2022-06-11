@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.constant.Constants;
 import tech.quantit.northstar.common.exception.AuthenticationException;
 import tech.quantit.northstar.common.model.NsUser;
@@ -24,6 +25,7 @@ import tech.quantit.northstar.common.model.ResultBean;
  * @author KevinHuangwl
  *
  */
+@Slf4j
 @RestController
 @RequestMapping("/northstar/auth")
 public class AuthenticationController implements InitializingBean{
@@ -56,5 +58,6 @@ public class AuthenticationController implements InitializingBean{
 		String pwd = System.getenv(Constants.NS_PWD);
 		userId = Optional.ofNullable(user).orElse(Constants.DEFAULT_USERID);
 		password = Optional.ofNullable(pwd).orElse(Constants.DEFAULT_PASSWORD);
+		log.info("监控台登陆信息：{} / {}", userId, password);
 	}
 }
