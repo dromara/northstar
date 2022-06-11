@@ -5,6 +5,7 @@
 		<groupId>tech.quantit</groupId>
 		<artifactId>northstar</artifactId>
 		<version>4.0</version>
+		<relativePath>../pom.xml</relativePath>
 	</parent>
 	<artifactId>northstar-main</artifactId>
 	<name>northstar-main</name>
