@@ -53,7 +53,7 @@ public class BeginnerSampleStrategy implements TradeStrategy{
 		
 	}
 	
-	/***************** 以下如果看不懂，基本上可以照搬 *************************/
+	/***************** 以下如果看不懂，基本可以照搬 *************************/
 	@Override
 	public DynamicParams getDynamicParams() {
 		return new InitParams();
@@ -78,7 +78,7 @@ public class BeginnerSampleStrategy implements TradeStrategy{
 	public void setComputedState(JSONObject stateObj) {
 		this.inspectableState = stateObj;
 	}
-	/***************** 以上如果看不懂，基本上可以照搬 *************************/
+	/***************** 以上如果看不懂，基本可以照搬 *************************/
 	
 	/**
 	 * 定义一个本策略用到的一些指标

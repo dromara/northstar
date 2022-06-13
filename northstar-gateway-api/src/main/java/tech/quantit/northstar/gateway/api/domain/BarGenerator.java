@@ -10,10 +10,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.BiConsumer;
 
 import lombok.extern.slf4j.Slf4j;
-import tech.quantit.northstar.common.constant.Constants;
 import tech.quantit.northstar.common.constant.DateTimeConstant;
 import tech.quantit.northstar.common.constant.TickType;
-import tech.quantit.northstar.common.utils.MessagePrinter;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.TickField;
 
@@ -78,10 +76,6 @@ public class BarGenerator {
 			long newCutoffTime = barActionTime;
 			
 			if(newCutoffTime != helper.cutoffTime) {
-				if(tick.getUnifiedSymbol().contains(Constants.INDEX_SUFFIX)) {
-					log.info("new cutoff: {}, helper cutoff: {}", newCutoffTime, helper.cutoffTime);
-					log.info("{}", MessagePrinter.print(tick));
-				}
 				helper.updateCutoffTime(newCutoffTime);
 			}
 			
