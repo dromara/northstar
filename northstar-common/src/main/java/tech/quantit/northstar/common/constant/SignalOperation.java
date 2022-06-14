@@ -30,7 +30,13 @@ public enum SignalOperation {
 	 */
 	SELL_CLOSE("空平");
 	
+	private String text;
 	private SignalOperation(String text) {
+		this.text = text;
+	}
+	
+	public String text() {
+		return text;
 	}
 	
 	public boolean isOpen() {
