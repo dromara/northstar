@@ -2,9 +2,11 @@ package tech.quantit.northstar.main.service;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.InitializingBean;
@@ -14,6 +16,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import tech.quantit.northstar.common.constant.Constants;
 import tech.quantit.northstar.common.constant.DateTimeConstant;
+import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.common.constant.ModuleState;
 import tech.quantit.northstar.common.event.NorthstarEvent;
 import tech.quantit.northstar.common.event.NorthstarEventType;
@@ -173,7 +176,21 @@ public class ModuleService implements InitializingBean {
 	
 	private void loadModule(ModuleDescription md) throws Exception {
 		ModuleRuntimeDescription mrd = moduleRepo.findRuntimeByName(md.getModuleName());
-		LocalDate date = LocalDate.parse(md.getStartDateOfDataPreparation(), DateTimeConstant.D_FORMAT_INT_FORMATTER); 
+		int daysOfDataForPreparation = md.getDaysOfDataForPreparation();
+		int year = LocalDate.now().getYear();
+		List<LocalDate> datesLastYear = mdRepo.findHodidayInLaw(GatewayType.CTP, year - 1);
+		List<LocalDate> datesThisYear = mdRepo.findHodidayInLaw(GatewayType.CTP, year);
+		Set<LocalDate> holidays = new HashSet<>();
+		holidays.addAll(datesLastYear);
+		holidays.addAll(datesThisYear);
+		LocalDate date = LocalDate.now();
+		while(daysOfDataForPreparation > 0) {
+			if(!holidays.contains(date)) {
+				daysOfDataForPreparation--;
+			}
+			date.minusDays(1);
+		}
+		
 		IModule module = moduleFactory.newInstance(md, mrd);
 		module.initModule();
 		// 模组数据初始化

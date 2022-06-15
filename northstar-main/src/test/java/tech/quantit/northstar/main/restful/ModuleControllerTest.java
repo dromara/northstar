@@ -8,7 +8,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.io.UnsupportedEncodingException;
-import java.time.LocalDate;
 import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
@@ -28,7 +27,6 @@ import com.corundumstudio.socketio.SocketIOServer;
 
 import common.TestGatewayFactory;
 import tech.quantit.northstar.common.constant.ClosingPolicy;
-import tech.quantit.northstar.common.constant.DateTimeConstant;
 import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.common.constant.ModuleType;
 import tech.quantit.northstar.common.constant.ReturnCode;
@@ -110,7 +108,7 @@ class ModuleControllerTest {
 						.bindedUnifiedSymbols(List.of("rb2210@SHFE@FUTURES"))
 						.build()))
 				.numOfMinPerBar(1)
-				.startDateOfDataPreparation(LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
+				.daysOfDataForPreparation(1)
 				.build();
 		
 		md2 = ModuleDescription.builder()
@@ -124,7 +122,7 @@ class ModuleControllerTest {
 						.bindedUnifiedSymbols(List.of("rb2210@SHFE@FUTURES"))
 						.build()))
 				.numOfMinPerBar(10)
-				.startDateOfDataPreparation(LocalDate.now().minusWeeks(1).format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
+				.daysOfDataForPreparation(1)
 				.build();
 	}
 	

@@ -33,9 +33,9 @@ public class ModuleDescription {
 	 */
 	private int numOfMinPerBar;
 	/**
-	 * 数据加载起始日
+	 * 数据预热天数
 	 */
-	private String startDateOfDataPreparation;
+	private int daysOfDataForPreparation;
 	/**
 	 * 平仓优化策略
 	 */
