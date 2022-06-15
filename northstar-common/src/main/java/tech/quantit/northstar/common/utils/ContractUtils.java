@@ -6,6 +6,7 @@ import java.util.List;
 
 import tech.quantit.northstar.common.constant.Constants;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
+import xyz.redtorch.pb.CoreField.ContractField;
 
 public class ContractUtils {
 
@@ -30,5 +31,9 @@ public class ContractUtils {
 			resultList.add(symbol);
 		}
 		return resultList;
+	}
+	
+	public static String getMarketGatewayId(ContractField contract) {
+		return contract.getThirdPartyId().split("@")[1];
 	}
 }

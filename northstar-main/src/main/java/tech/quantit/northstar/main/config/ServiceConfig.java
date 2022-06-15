@@ -48,9 +48,9 @@ public class ServiceConfig {
 	}
 	
 	@Bean
-	public ModuleService moduleService(ApplicationContext ctx, ExternalJarListener extJarListener, IModuleRepository moduleRepo,
+	public ModuleService moduleService(ApplicationContext ctx, ExternalJarListener extJarListener, IModuleRepository moduleRepo, IMarketDataRepository mdRepo,
 			ModuleFactory moduleFactory, ModuleManager moduleMgr, ContractManager contractMgr) {
-		return new ModuleService(ctx, extJarListener, moduleRepo, moduleFactory, moduleMgr, contractMgr);
+		return new ModuleService(ctx, extJarListener, moduleRepo, mdRepo, moduleFactory, moduleMgr, contractMgr);
 	}
 	
 }

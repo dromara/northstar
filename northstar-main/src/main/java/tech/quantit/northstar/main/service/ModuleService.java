@@ -21,20 +21,25 @@ import tech.quantit.northstar.common.model.ComponentField;
 import tech.quantit.northstar.common.model.ComponentMetaInfo;
 import tech.quantit.northstar.common.model.DynamicParams;
 import tech.quantit.northstar.common.model.MockTradeDescription;
+import tech.quantit.northstar.common.model.ModuleAccountDescription;
 import tech.quantit.northstar.common.model.ModuleAccountRuntimeDescription;
 import tech.quantit.northstar.common.model.ModuleCalculatedDataFrame;
 import tech.quantit.northstar.common.model.ModuleDealRecord;
 import tech.quantit.northstar.common.model.ModuleDescription;
 import tech.quantit.northstar.common.model.ModulePositionDescription;
 import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
+import tech.quantit.northstar.common.utils.ContractUtils;
+import tech.quantit.northstar.data.IMarketDataRepository;
 import tech.quantit.northstar.data.IModuleRepository;
 import tech.quantit.northstar.domain.gateway.ContractManager;
 import tech.quantit.northstar.main.ExternalJarListener;
 import tech.quantit.northstar.main.handler.internal.ModuleManager;
+import tech.quantit.northstar.main.utils.MarketDataLoadingUtils;
 import tech.quantit.northstar.main.utils.ModuleFactory;
 import tech.quantit.northstar.strategy.api.DynamicParamsAware;
 import tech.quantit.northstar.strategy.api.IModule;
 import tech.quantit.northstar.strategy.api.annotation.StrategicComponent;
+import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.TradeField;
 
@@ -53,16 +58,21 @@ public class ModuleService implements InitializingBean {
 	
 	private IModuleRepository moduleRepo;
 	
+	private IMarketDataRepository mdRepo;
+	
+	private MarketDataLoadingUtils utils = new MarketDataLoadingUtils();
+	
 	private ModuleFactory moduleFactory;
 	
 	private ClassLoader loader;
 	
-	public ModuleService(ApplicationContext ctx, ExternalJarListener extJarListener, IModuleRepository moduleRepo, ModuleFactory moduleFactory,
-			ModuleManager moduleMgr, ContractManager contractMgr) {
+	public ModuleService(ApplicationContext ctx, ExternalJarListener extJarListener, IModuleRepository moduleRepo, IMarketDataRepository mdRepo,
+			ModuleFactory moduleFactory, ModuleManager moduleMgr, ContractManager contractMgr) {
 		this.ctx = ctx;
 		this.moduleMgr = moduleMgr;
 		this.contractMgr = contractMgr;
 		this.moduleRepo = moduleRepo;
+		this.mdRepo = mdRepo;
 		this.moduleFactory = moduleFactory;
 		this.loader = extJarListener.getExternalClassLoader();
 	}
@@ -163,8 +173,23 @@ public class ModuleService implements InitializingBean {
 	
 	private void loadModule(ModuleDescription md) throws Exception {
 		ModuleRuntimeDescription mrd = moduleRepo.findRuntimeByName(md.getModuleName());
+		LocalDate date = LocalDate.parse(md.getStartDateOfDataPreparation(), DateTimeConstant.D_FORMAT_INT_FORMATTER); 
 		IModule module = moduleFactory.newInstance(md, mrd);
 		module.initModule();
+		// 模组数据初始化
+		while(LocalDate.now().isAfter(date)) {
+			LocalDate start = utils.getFridayOfThisWeek(date.minusWeeks(1));
+			LocalDate end = utils.getFridayOfThisWeek(date);
+			for(ModuleAccountDescription mad : md.getModuleAccountSettingsDescription()) {
+				for(String unifiedSymbol : mad.getBindedUnifiedSymbols()) {
+					ContractField contract = contractMgr.getContract(unifiedSymbol);
+					List<BarField> bars = mdRepo.loadBars(ContractUtils.getMarketGatewayId(contract), unifiedSymbol, start, end);
+					module.initData(bars);
+				}
+			}
+			date = date.plusWeeks(1);
+		}
+		;
 		module.setEnabled(mrd.isEnabled());
 		moduleMgr.addModule(module);
 	}
