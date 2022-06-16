@@ -68,7 +68,7 @@
                 :min="0"
                 :disabled="readOnly"
               />
-              <span class="ml-10">根K线</span>
+              <span class="ml-10">天</span>
             </el-form-item>
           </div>
           <div v-show="activeIndex === '2'">
