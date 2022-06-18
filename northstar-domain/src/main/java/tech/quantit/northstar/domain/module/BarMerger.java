@@ -33,6 +33,8 @@ public class BarMerger {
 		if(numOfMinPerBar == 1) {
 			callback.accept(bar);
 			return;
+		} else if(Objects.nonNull(barBuilder) && !StringUtils.equals(barBuilder.getTradingDay(), bar.getTradingDay())) {
+			doGenerate();
 		}
 		countBars++;
 		if(countBars == 1 || Objects.isNull(barBuilder)) {
@@ -64,9 +66,13 @@ public class BarMerger {
 			.setTurnoverDelta(turnoverDelta + bar.getTurnoverDelta());
 		
 		if(countBars == numOfMinPerBar) {
-			callback.accept(barBuilder.build());
-			countBars = 0;
+			doGenerate();
 		}
+	}
+	
+	private void doGenerate() {
+		callback.accept(barBuilder.build());
+		countBars = 0;
 	}
 
 }
