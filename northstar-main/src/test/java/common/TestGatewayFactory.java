@@ -1,5 +1,7 @@
 package common;
 
+import java.util.List;
+
 import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.common.constant.GatewayUsage;
 import tech.quantit.northstar.common.model.CtpSettings;
@@ -26,6 +28,7 @@ public class TestGatewayFactory {
 				.gatewayType(type)
 				.settings(settings)
 				.gatewayUsage(GatewayUsage.MARKET_DATA)
+				.subscribedContractGroups(List.of("CONTRACT_GROUP1", "CONTRACT_GROUP2"))
 				.build();
 	}
 	

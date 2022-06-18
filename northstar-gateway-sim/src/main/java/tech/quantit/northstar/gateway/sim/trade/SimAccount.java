@@ -2,14 +2,14 @@ package tech.quantit.northstar.gateway.sim.trade;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.function.Consumer;
 
-import com.google.common.eventbus.EventBus;
 import com.google.protobuf.InvalidProtocolBufferException;
 
 import lombok.Data;
@@ -41,19 +41,19 @@ public class SimAccount implements TickDataAware{
 	private String gatewayId;
 
 	// originOrderId -> tradeRequest
-	protected Map<String, OpenTradeRequest> openReqMap = new HashMap<>();
-	protected Map<String, CloseTradeRequest> closeReqMap = new HashMap<>();
+	protected ConcurrentMap<String, OpenTradeRequest> openReqMap = new ConcurrentHashMap<>();
+	protected ConcurrentMap<String, CloseTradeRequest> closeReqMap = new ConcurrentHashMap<>();
 
-	protected Map<ContractField, TradePosition> longMap = new HashMap<>();
-	protected Map<ContractField, TradePosition> shortMap = new HashMap<>();
+	protected ConcurrentMap<ContractField, TradePosition> longMap = new ConcurrentHashMap<>();
+	protected ConcurrentMap<ContractField, TradePosition> shortMap = new ConcurrentHashMap<>();
 	
-	protected double totalCloseProfit;
+	protected volatile double totalCloseProfit;
 	
-	protected double totalCommission;
+	protected volatile double totalCommission;
 	
-	protected double totalDeposit;
+	protected volatile double totalDeposit;
 	
-	protected double totalWithdraw;
+	protected volatile double totalWithdraw;
 	
 	private volatile boolean connected;
 	
@@ -61,16 +61,13 @@ public class SimAccount implements TickDataAware{
 	
 	@Setter
 	protected Runnable savingCallback;
-	private EventBus eventBus;
 	@Setter
 	private FastEventEngine feEngine;
 	protected Consumer<TradeRequest> openCallback = req -> {
-		eventBus.unregister(req);
 		savingCallback.run();
 		openReqMap.remove(req.originOrderId());
 	};
 	Consumer<TradeRequest> closeCallback = req -> {
-		eventBus.unregister(req);
 		savingCallback.run();
 		closeReqMap.remove(req.originOrderId());
 		OrderField order = req.getOrder();
@@ -181,7 +178,6 @@ public class SimAccount implements TickDataAware{
 			if(order.getOrderStatus() == OrderStatusEnum.OS_Rejected) {
 				return;
 			}
-			eventBus.register(tradeReq);
 			openReqMap.put(tradeReq.originOrderId(), tradeReq);
 		}
 		
@@ -193,7 +189,6 @@ public class SimAccount implements TickDataAware{
 				return;
 			}
 			position.onOrder(order);
-			eventBus.register(tradeReq);
 			closeReqMap.put(tradeReq.originOrderId(), tradeReq);
 		}
 	}
@@ -222,13 +217,11 @@ public class SimAccount implements TickDataAware{
 	}
 	
 	public void onCancelOrder(CancelOrderReqField cancelReq) {
-		eventBus.post(cancelReq);
-	}
-	
-	public void setEventBus(EventBus eventBus) {
-		this.eventBus = eventBus;
-		longMap.values().stream().forEach(eventBus::register);
-		shortMap.values().stream().forEach(eventBus::register);
+		if(closeReqMap.containsKey(cancelReq.getOriginOrderId())) {
+			closeReqMap.get(cancelReq.getOriginOrderId()).onCancal(cancelReq);
+		} else if (openReqMap.containsKey(cancelReq.getOriginOrderId())) {
+			openReqMap.get(cancelReq.getOriginOrderId()).onCancal(cancelReq);
+		}
 	}
 	
 	public void onOpenTrade(TradeField trade) {
@@ -263,6 +256,8 @@ public class SimAccount implements TickDataAware{
 	private long lastReportTime;
 	@Override
 	public void onTick(TickField tick) {
+		openReqMap.values().stream().forEach(req -> req.onTick(tick));
+		closeReqMap.values().stream().forEach(req -> req.onTick(tick));
 		longMap.values().stream().forEach(tp -> tp.updateTick(tick));
 		shortMap.values().stream().forEach(tp -> tp.updateTick(tick));
 		if(!connected || System.currentTimeMillis() - lastReportTime < 1000) {

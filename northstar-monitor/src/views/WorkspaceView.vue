@@ -28,7 +28,7 @@
 const pageOpts = {
   1: 'mktgateway',
   2: 'tdgateway',
-  3: 'specmodule',
+  3: 'module',
   5: 'mktdata',
   6: 'manualfttd',
   7: 'manualopttd'

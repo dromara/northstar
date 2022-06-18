@@ -4,6 +4,7 @@ import java.util.List;
 
 import tech.quantit.northstar.common.TickDataAware;
 import tech.quantit.northstar.common.TransactionAware;
+import tech.quantit.northstar.common.constant.ModuleState;
 import tech.quantit.northstar.common.constant.SignalOperation;
 import tech.quantit.northstar.common.model.ModuleCalculatedDataFrame;
 import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
@@ -70,5 +71,10 @@ public interface IModuleContext extends TickDataAware, BarDataAware, Transaction
 	 * @return
 	 */
 	List<ModuleCalculatedDataFrame> getModuleData();
+	/**
+	 * 获取模组状态
+	 * @return
+	 */
+	ModuleState getState();
 	
 }

@@ -72,7 +72,6 @@ public class SimGatewayFactory implements GatewayFactory{
 				throw new IllegalStateException("无法创建模拟账户", e);
 			}
 		}
-		account.setEventBus(simMarket.getMarketEventBus());
 		account.setFeEngine(fastEventEngine);
 		account.setSavingCallback(() -> simAccountRepo.save(account.getDescription()));
 		SimTradeGateway gateway = new SimTradeGatewayLocal(fastEventEngine, simMarket, gwSettings, mdGatewayId, account, registry);

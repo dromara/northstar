@@ -95,6 +95,7 @@
                 <el-table-column label="操作" align="center" width="50px">
                   <template slot="header">
                     <el-button
+                      id="editPosition"
                       class="compact"
                       title="调整持仓"
                       size="mini"

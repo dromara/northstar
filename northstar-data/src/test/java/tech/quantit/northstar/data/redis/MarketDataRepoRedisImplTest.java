@@ -5,6 +5,7 @@ import static org.mockito.Mockito.mock;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
@@ -33,7 +34,9 @@ class MarketDataRepoRedisImplTest {
 	
 	TestFieldFactory fieldFactory = new TestFieldFactory("test");
 	
-	String date = LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER);
+	String date = LocalTime.now().isAfter(LocalTime.of(20, 0)) 
+			? LocalDate.now().plusDays(1).format(DateTimeConstant.D_FORMAT_INT_FORMATTER)
+			: LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER);
 	
 	BarField bar1 = BarField.newBuilder()
 			.setGatewayId("testGateway")
@@ -87,7 +90,9 @@ class MarketDataRepoRedisImplTest {
 	@Test
 	void testLoadBars() {
 		testInsert();
-		List<BarField> result = repo.loadBars("testGateway", "rb2210@SHFE@FUTURES", LocalDate.now().minusDays(1), LocalDate.now());
+		LocalDate start = LocalTime.now().isAfter(LocalTime.of(20, 0)) ? LocalDate.now() : LocalDate.now().minusDays(1);
+		LocalDate end = LocalDate.now().plusWeeks(1);
+		List<BarField> result = repo.loadBars("testGateway", "rb2210@SHFE@FUTURES", start, end);
 		assertThat(result).hasSize(3);
 	}
 

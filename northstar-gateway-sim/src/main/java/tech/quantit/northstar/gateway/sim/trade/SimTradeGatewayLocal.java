@@ -57,7 +57,7 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 		
 		// 阻塞一下，防止账户回报比连线回报要快导致异常
 		try {
-			Thread.sleep(3000);
+			Thread.sleep(1000);
 		} catch (InterruptedException e) {
 			log.error("", e);
 		}
@@ -71,12 +71,6 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 		
 		// 模拟返回合约
 		CompletableFuture.runAsync(()->{
-			try {
-				Thread.sleep(2000);
-			} catch (InterruptedException e) {
-				log.error("", e);
-			}
-			
 			ContractField simContract = contractGen.getContract();
 			ContractField simContract2 = contractGen.getContract2();
 			registry.register(new NormalContract(simContract, System.currentTimeMillis()));

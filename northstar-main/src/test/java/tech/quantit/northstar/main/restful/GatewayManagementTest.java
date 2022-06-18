@@ -62,7 +62,7 @@ public class GatewayManagementTest {
 	@BeforeEach
 	public void setUp() throws Exception {
 		session = new MockHttpSession();
-		mockMvc.perform(post("/northstar/auth/login").contentType(MediaType.APPLICATION_JSON_UTF8).content(JSON.toJSONString(new NsUser("admin","123456"))).session(session))
+		mockMvc.perform(post("/northstar/auth/login").contentType(MediaType.APPLICATION_JSON).content(JSON.toJSONString(new NsUser("admin","123456"))).session(session))
 			.andExpect(status().isOk());
 	}
 	
@@ -74,14 +74,14 @@ public class GatewayManagementTest {
 	@Test
 	public void shouldFailWithoutAuth() throws Exception {
 		GatewayDescription gatewayDes = TestGatewayFactory.makeMktGateway("testGateway", GatewayType.CTP, TestGatewayFactory.makeGatewaySettings(CtpSettings.class), false);
-		mockMvc.perform(post("/northstar/gateway").contentType(MediaType.APPLICATION_JSON_UTF8).content(JSON.toJSONString(gatewayDes)))
+		mockMvc.perform(post("/northstar/gateway").contentType(MediaType.APPLICATION_JSON).content(JSON.toJSONString(gatewayDes)))
 			.andExpect(status().is(401));
 	}
 
 	@Test
 	public void shouldCreateGateway() throws Exception {
-		GatewayDescription gatewayDes = TestGatewayFactory.makeMktGateway("TG1", GatewayType.CTP, TestGatewayFactory.makeGatewaySettings(CtpSettings.class),false);
-		mockMvc.perform(post("/northstar/gateway").contentType(MediaType.APPLICATION_JSON_UTF8).content(JSON.toJSONString(gatewayDes)).session(session))
+		GatewayDescription gatewayDes = TestGatewayFactory.makeMktGateway("CTP", GatewayType.CTP, TestGatewayFactory.makeGatewaySettings(CtpSettings.class),false);
+		mockMvc.perform(post("/northstar/gateway").contentType(MediaType.APPLICATION_JSON).content(JSON.toJSONString(gatewayDes)).session(session))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
 	}
@@ -99,8 +99,8 @@ public class GatewayManagementTest {
 	public void shouldUpdateGateway() throws Exception {
 		shouldCreateGateway();
 		
-		GatewayDescription gatewayDes = TestGatewayFactory.makeMktGateway("TG1", GatewayType.CTP, TestGatewayFactory.makeGatewaySettings(CtpSettings.class), true);
-		mockMvc.perform(put("/northstar/gateway").contentType(MediaType.APPLICATION_JSON_UTF8).content(JSON.toJSONString(gatewayDes)).session(session))
+		GatewayDescription gatewayDes = TestGatewayFactory.makeMktGateway("CTP", GatewayType.CTP, TestGatewayFactory.makeGatewaySettings(CtpSettings.class), true);
+		mockMvc.perform(put("/northstar/gateway").contentType(MediaType.APPLICATION_JSON).content(JSON.toJSONString(gatewayDes)).session(session))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
 	}
@@ -109,16 +109,16 @@ public class GatewayManagementTest {
 	public void shouldRemoveGateway() throws Exception {
 		shouldCreateGateway();
 		
-		mockMvc.perform(delete("/northstar/gateway?gatewayId=TG1").session(session))
+		mockMvc.perform(delete("/northstar/gateway?gatewayId=CTP").session(session))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
 	}
 	
 	@Test
 	public void shouldFailIfNotProvidingSetting() throws Exception {
-		GatewayDescription gwDes = TestGatewayFactory.makeMktGateway("TG1", GatewayType.CTP, null,false);
+		GatewayDescription gwDes = TestGatewayFactory.makeMktGateway("CTP", GatewayType.CTP, null,false);
 		mockMvc.perform(post("/northstar/gateway").contentType(MediaType.APPLICATION_JSON).content(JSON.toJSONString(gwDes)).session(session))
-			.andExpect(status().isOk())
+			.andExpect(status().is5xxServerError())
 			.andExpect(jsonPath("$.status").value(ReturnCode.ERROR));
 	}
 	
@@ -126,7 +126,7 @@ public class GatewayManagementTest {
 	public void shouldSuccessWhenGettingActiveState() throws Exception {
 		shouldCreateGateway();
 		
-		mockMvc.perform(get("/northstar/gateway/active?gatewayId=TG1").session(session))
+		mockMvc.perform(get("/northstar/gateway/active?gatewayId=CTP").session(session))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
 	}
@@ -135,7 +135,7 @@ public class GatewayManagementTest {
 	public void shouldSuccessWhenConnecting() throws Exception {
 		shouldCreateGateway();
 		
-		mockMvc.perform(get("/northstar/gateway/connection?gatewayId=TG1").session(session))
+		mockMvc.perform(get("/northstar/gateway/connection?gatewayId=CTP").session(session))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
 	}
@@ -144,7 +144,7 @@ public class GatewayManagementTest {
 	public void shouldSuccessWhenDisconnecting() throws Exception {
 		shouldCreateGateway();
 		
-		mockMvc.perform(delete("/northstar/gateway/connection?gatewayId=TG1").session(session))
+		mockMvc.perform(delete("/northstar/gateway/connection?gatewayId=CTP").session(session))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
 	}
@@ -152,11 +152,11 @@ public class GatewayManagementTest {
 	@Test
 	public void shouldFailIfGatewayNotFound() throws Exception {
 		mockMvc.perform(get("/northstar/gateway/connection?gatewayId=ANY").session(session))
-			.andExpect(status().isOk())
+			.andExpect(status().is5xxServerError())
 			.andExpect(jsonPath("$.status").value(ReturnCode.NO_SUCH_ELEMENT_EXCEPTION));
 		
 		mockMvc.perform(delete("/northstar/gateway/connection?gatewayId=ANY").session(session))
-			.andExpect(status().isOk())
+			.andExpect(status().is5xxServerError())
 			.andExpect(jsonPath("$.status").value(ReturnCode.NO_SUCH_ELEMENT_EXCEPTION));
 	}
 	
@@ -188,8 +188,26 @@ public class GatewayManagementTest {
 	public void shouldFailIfNotSimGateway() throws Exception {
 		shouldCreateGateway();
 		
-		mockMvc.perform(post("/northstar/gateway/moneyio?gatewayId=TG1&money=10000").session(session))
-			.andExpect(status().isOk())
+		mockMvc.perform(post("/northstar/gateway/moneyio?gatewayId=CTP&money=10000").session(session))
+			.andExpect(status().is5xxServerError())
 			.andExpect(jsonPath("$.status").value(ReturnCode.ERROR));
+	}
+	
+	@Test
+	public void shouldGetContractDef() throws Exception {
+		shouldCreateGateway();
+		
+		mockMvc.perform(get("/northstar/gateway/contractDefs").session(session))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.data").isArray());
+	}
+	
+	@Test
+	public void shouldGetSubscribableContracts() throws Exception {
+		shouldCreateGateway();
+		
+		mockMvc.perform(get("/northstar/gateway/subContracts?gatewayType=CTP").session(session))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.data").isArray());
 	}
 }

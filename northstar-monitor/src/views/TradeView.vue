@@ -63,6 +63,7 @@
           </div>
           <div class="ns-trade-action__item">
             <el-select
+              id="priceType"
               v-model="dealPriceType"
               filterable
               placeholder="价格类型"
@@ -79,6 +80,7 @@
           </div>
           <div class="ns-trade-action__item">
             <el-input
+              id="limitPrice"
               v-model="limitPrice"
               placeholder="委托价"
               :disabled="dealPriceType !== 'CUSTOM_PRICE'"

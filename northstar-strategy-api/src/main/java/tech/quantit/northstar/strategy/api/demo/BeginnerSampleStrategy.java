@@ -53,7 +53,7 @@ public class BeginnerSampleStrategy implements TradeStrategy{
 		
 	}
 	
-	/***************** 以下如果看不懂，基本上可以照搬 *************************/
+	/***************** 以下如果看不懂，基本可以照搬 *************************/
 	@Override
 	public DynamicParams getDynamicParams() {
 		return new InitParams();
@@ -78,7 +78,7 @@ public class BeginnerSampleStrategy implements TradeStrategy{
 	public void setComputedState(JSONObject stateObj) {
 		this.inspectableState = stateObj;
 	}
-	/***************** 以上如果看不懂，基本上可以照搬 *************************/
+	/***************** 以上如果看不懂，基本可以照搬 *************************/
 	
 	/**
 	 * 定义一个本策略用到的一些指标
@@ -102,7 +102,7 @@ public class BeginnerSampleStrategy implements TradeStrategy{
 	
 	@Override
 	public void onOrder(OrderField order) {
-		if(runningTask == null && ctx.getRuntimeDescription().getModuleState().isWaiting()) {
+		if(runningTask == null && ctx.getState().isWaiting()) {
 			runningTask = withdrawOrderIfTimeout;
 			timer.schedule(runningTask, 5000);		// 5秒超时撤单
 		}
@@ -118,37 +118,37 @@ public class BeginnerSampleStrategy implements TradeStrategy{
 	
 	private long nextActionTime;
 	private String originOrderId;
-
+	
 	@Override
 	public void onTick(TickField tick, boolean isModuleEnabled) {
 		timer.onTick(tick);
 		
 		if(!isModuleEnabled)	{
+			nextActionTime = 0;
 			return;	// 若模组停用，则不执行后面逻辑		
 		}
 		
 		log.debug("策略每个TICK触发: {} {} {}", tick.getUnifiedSymbol(), tick.getActionTime(), tick.getLastPrice());
 		long now = tick.getActionTimestamp();
-		//初始状态下，等待10秒才开始交易
-		if(nextActionTime < 0) {
+		// 启用后，等待10秒才开始交易
+		if(nextActionTime == 0) {
 			nextActionTime = now + 10000;
 		}
 		int seed = ThreadLocalRandom.current().nextInt();
 		if(now > nextActionTime) {
 			nextActionTime = now + params.actionInterval * 1000;
 			log.info("开始交易");
-			if(ctx.getRuntimeDescription().getModuleState() == ModuleState.EMPTY) {
+			if(ctx.getState() == ModuleState.EMPTY) {
 				SignalOperation op = (++seed & 1) > 0 ? SignalOperation.BUY_OPEN : SignalOperation.SELL_OPEN;
 				originOrderId = ctx.submitOrderReq(ctx.getContract(tick.getUnifiedSymbol()), op, PriceType.WAITING_PRICE, 1, tick.getLastPrice());
 			}
-			if(ctx.getRuntimeDescription().getModuleState() == ModuleState.HOLDING_LONG) {	
+			if(ctx.getState() == ModuleState.HOLDING_LONG) {	
 				originOrderId = ctx.submitOrderReq(ctx.getContract(tick.getUnifiedSymbol()), SignalOperation.SELL_CLOSE, PriceType.ANY_PRICE, 1, 0);
 			}
-			if(ctx.getRuntimeDescription().getModuleState() == ModuleState.HOLDING_SHORT) {			
+			if(ctx.getState() == ModuleState.HOLDING_SHORT) {			
 				originOrderId = ctx.submitOrderReq(ctx.getContract(tick.getUnifiedSymbol()), SignalOperation.BUY_CLOSE, PriceType.ANY_PRICE, 1, 0);
 			}
 		}
-		
 	}
 
 	@Override

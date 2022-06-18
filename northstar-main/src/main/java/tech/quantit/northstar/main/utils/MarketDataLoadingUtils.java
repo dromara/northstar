@@ -28,4 +28,12 @@ public class MarketDataLoadingUtils {
 		LocalDate nowDate = ldt.toLocalDate();
 		return nowDate.minusDays(nowDate.getDayOfWeek().getValue() + 2L);
 	}
+	
+	public LocalDate getFridayOfThisWeek(LocalDate date) {
+		return switch(date.getDayOfWeek()) {
+		case FRIDAY -> date;
+		case SATURDAY, SUNDAY -> date.minusDays(date.getDayOfWeek().getValue() - 5L);
+		default -> date.plusDays(5L - date.getDayOfWeek().getValue());
+		};
+	}
 }

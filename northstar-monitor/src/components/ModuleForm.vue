@@ -62,17 +62,17 @@
               <el-input-number :disabled="readOnly" v-model="form.numOfMinPerBar" :min="1" />
               <span class="ml-10">分钟</span>
             </el-form-item>
-            <el-form-item label="预热数据量">
+            <el-form-item label="数据预热天数">
               <el-input-number
-                v-model="form.numOfBarForPreparation"
+                v-model="form.daysOfDataForPreparation"
                 :min="0"
                 :disabled="readOnly"
               />
-              <span class="ml-10">根K线</span>
+              <span class="ml-10">天</span>
             </el-form-item>
           </div>
           <div v-show="activeIndex === '2'">
-            <el-form-item label="交易策略">
+            <el-form-item label="绑定策略">
               <el-select v-model="form.strategySetting" placeholder="请选择" :disabled="readOnly">
                 <el-option
                   v-for="(p, i) in tradeStrategyOptions"
@@ -207,7 +207,7 @@ export default {
         moduleName: '',
         type: 'SPECULATION',
         numOfMinPerBar: '1',
-        numOfBarForPreparation: '0',
+        daysOfDataForPreparation: '0',
         closingPolicy: 'FIFO',
         moduleAccountSettingsDescription: [],
         strategySetting: {

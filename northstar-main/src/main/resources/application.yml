@@ -6,19 +6,13 @@ socketio:
   port: 51888
 
 northstar: 
-  auth:
-    userId: ${nsuser:admin}
-    password: ${nspwd:123456}
   # 历史数据服务（需要购买用户授权）
   data-service:
     baseUrl: http://124.221.172.207:41888
-    token: ${nsds_token:}
 
 logging:  level: 
     root: info
     '[tech.quantit.northstar]': debug
-    '[tech.quantit.northstar.gateway.api.domain]': trace
-    #'[tech.quantit.northstar.strategy]': debug
   file:    path: logs/
   
 spring:
@@ -27,24 +21,7 @@ spring:
     port: 6379
   profiles:
     active: ${env:prod}
-  mail:
-    host: ${smtpHost:smtp.126.com}
-    username: ${email:something@126.com}
-    password: ${secret:UQNXPDZJIYQTRFRW}
-    default-encoding: UTF-8
-    port: 465
-    protocol: smtp
-    properties:
-      mail:
-        imap.ssl.socketFactory.fallback: false
-        smtp:
-          auth: true
-          starttls:
-            enable: true
-            required: true
-          ssl:
-            enable: true
-            socketFactory.class: com.fintech.modules.base.util.mail.MailSSLSocketFactory
+
 ---
 spring:
   redis.database: 1

@@ -1,6 +1,7 @@
 package tech.quantit.northstar.domain.module;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,6 +12,7 @@ import java.util.function.Consumer;
 import org.apache.commons.lang3.StringUtils;
 
 import tech.quantit.northstar.common.constant.Constants;
+import tech.quantit.northstar.common.constant.ModuleState;
 import tech.quantit.northstar.common.constant.SignalOperation;
 import tech.quantit.northstar.common.exception.NoSuchElementException;
 import tech.quantit.northstar.common.exception.TradeException;
@@ -305,7 +307,11 @@ public class ModuleContext implements IModuleContext{
 	@Override
 	public List<ModuleCalculatedDataFrame> getModuleData() {
 		Map<String, Indicator> indicatorMap = tradeStrategy.bindedIndicatorMap();
-		int length = indicatorMap.values().stream().min((i1, i2) -> i1.length() < i2.length() ? -1 : 1).get().length();
+		if(indicatorMap.isEmpty()) {
+			return Collections.emptyList();
+		}
+		int length = indicatorMap.values().stream()
+				.mapToInt(Indicator::length).min().getAsInt();
 		List<ModuleCalculatedDataFrame> resultList = new ArrayList<>(length);
 		for(int i=0; i<length; i++) {
 			ModuleCalculatedDataFrame frame = new ModuleCalculatedDataFrame();
@@ -323,6 +329,11 @@ public class ModuleContext implements IModuleContext{
 			resultList.add(frame);
 		}
 		return resultList;
+	}
+
+	@Override
+	public ModuleState getState() {
+		return accStore.getModuleState();
 	}
 
 }

@@ -22,7 +22,7 @@ public class CloseTradeRequest extends TradeRequest {
 	}
 	
 	@Override
-	protected OrderField initOrder(SubmitOrderReqField orderReq) {
+	protected synchronized OrderField initOrder(SubmitOrderReqField orderReq) {
 		if(!FieldUtils.isClose(orderReq.getOffsetFlag())) {
 			throw new IllegalArgumentException("传入非平仓请求");
 		}
@@ -43,7 +43,7 @@ public class CloseTradeRequest extends TradeRequest {
 	}
 
 	@Override
-	public void onTrade(TradeField trade) {
+	public synchronized void onTrade(TradeField trade) {
 		account.onCloseTrade(trade);
 		account.reportAccountStatus();
 	}

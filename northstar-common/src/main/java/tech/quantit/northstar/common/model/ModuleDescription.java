@@ -33,9 +33,9 @@ public class ModuleDescription {
 	 */
 	private int numOfMinPerBar;
 	/**
-	 * 预热K线数
+	 * 数据预热天数
 	 */
-	private int numOfBarForPreparation;
+	private int daysOfDataForPreparation;
 	/**
 	 * 平仓优化策略
 	 */

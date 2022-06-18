@@ -14,12 +14,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
-import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -37,9 +37,11 @@ import xyz.redtorch.pb.CoreField.BarField;
 @Slf4j
 public class DataServiceManager implements IDataServiceManager {
 	
-	private String nsToken;
+	private String nsSecret;
 
 	private String baseUrl;
+	
+	private volatile String userToken;
 	
 	private DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyyMMdd");
 	
@@ -53,12 +55,22 @@ public class DataServiceManager implements IDataServiceManager {
 	
 	private RestTemplate restTemplate;
 	
-	public DataServiceManager(String baseUrl, String token, RestTemplate restTemplate, MarketDateTimeUtil dtUtil) {
+	public DataServiceManager(String baseUrl, String secret, RestTemplate restTemplate, MarketDateTimeUtil dtUtil) {
 		this.baseUrl =  baseUrl;
-		this.nsToken = token;
+		this.nsSecret = secret;
 		this.dtUtil = dtUtil;
 		this.restTemplate = restTemplate;
 		log.info("采用外部数据源加载历史数据");
+		register();
+	}
+	
+	private void register() {
+		HttpHeaders headers = new HttpHeaders();
+		headers.add("X-SECRET", nsSecret);
+		headers.add("X-MACHINE", LocalEnvUtils.getMACAddress());
+		HttpEntity<?> reqEntity = new HttpEntity<>(headers);
+		ResponseEntity<String> respEntity = restTemplate.exchange(URI.create(baseUrl + "/reg"), HttpMethod.GET, reqEntity, String.class);
+		userToken = respEntity.getBody();
 	}
 	
 	/**
@@ -155,24 +167,18 @@ public class DataServiceManager implements IDataServiceManager {
 	
 	private DataSet execute(URI uri) {
 		HttpHeaders headers = new HttpHeaders();
-		headers.add("token", nsToken);
-		headers.add("machine", LocalEnvUtils.getMACAddress());
+		headers.add("X-SECRET", nsSecret);
+		headers.add("X-TOKEN", userToken);
+		headers.add("X-MACHINE", LocalEnvUtils.getMACAddress());
 		HttpEntity<?> reqEntity = new HttpEntity<>(headers);
 		try {			
 			ResponseEntity<DataSet> respEntity = restTemplate.exchange(uri, HttpMethod.GET, reqEntity, DataSet.class);
-			DataSet dataSet = respEntity.getBody();
-			if(respEntity.getStatusCode() != HttpStatus.OK) {
-				String errMsg = dataSet != null ? dataSet.getMessage() : "";
-				log.warn("{}", respEntity.toString());
-				throw new IllegalStateException("历史数据服务返回异常：" + errMsg);
-			}
-			if(dataSet == null) {
-				throw new IllegalStateException("历史数据服务返回为空");
-			}
-			return dataSet;
-		} catch(HttpClientErrorException e) {
-			DataSet errorResult = JSON.parseObject(e.getResponseBodyAsByteArray(), DataSet.class);
-			throw new IllegalStateException(errorResult.getMessage());
+			return respEntity.getBody();
+		} catch(HttpServerErrorException e) {
+			JSONObject entity = JSON.parseObject(e.getResponseBodyAsString());
+			throw new IllegalStateException(entity.getString("message"));
+		} catch (Exception e) {
+			throw new IllegalStateException("数据服务连接异常", e);
 		}
 	}
 	
