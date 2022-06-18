@@ -1,12 +1,11 @@
 package tech.quantit.northstar.domain.module;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
+import java.util.Queue;
 import java.util.UUID;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.function.Consumer;
 
 import org.apache.commons.lang3.StringUtils;
@@ -17,7 +16,6 @@ import tech.quantit.northstar.common.constant.SignalOperation;
 import tech.quantit.northstar.common.exception.NoSuchElementException;
 import tech.quantit.northstar.common.exception.TradeException;
 import tech.quantit.northstar.common.model.ModuleAccountRuntimeDescription;
-import tech.quantit.northstar.common.model.ModuleCalculatedDataFrame;
 import tech.quantit.northstar.common.model.ModuleDealRecord;
 import tech.quantit.northstar.common.model.ModulePositionDescription;
 import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
@@ -30,8 +28,6 @@ import tech.quantit.northstar.strategy.api.IModuleAccountStore;
 import tech.quantit.northstar.strategy.api.IModuleContext;
 import tech.quantit.northstar.strategy.api.TradeStrategy;
 import tech.quantit.northstar.strategy.api.constant.PriceType;
-import tech.quantit.northstar.strategy.api.indicator.Indicator;
-import tech.quantit.northstar.strategy.api.indicator.TimeSeriesValue;
 import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
 import xyz.redtorch.pb.CoreEnum.ForceCloseReasonEnum;
 import xyz.redtorch.pb.CoreEnum.HedgeFlagEnum;
@@ -77,6 +73,9 @@ public class ModuleContext implements IModuleContext{
 	/* unifiedSymbol -> tick */
 	private Map<String, TickField> tickMap = new HashMap<>();
 	
+	/* unifiedSymbol -> barQ */
+	private Map<String, Queue<BarField>> barBufQMap = new HashMap<>();
+	
 	private String tradingDay = "";
 	
 	private Consumer<BarField> barMergingCallback;
@@ -101,12 +100,13 @@ public class ModuleContext implements IModuleContext{
 		this.barMergingCallback = bar -> {
 			tradeStrategy.bindedIndicatorMap().values().forEach(indicator -> indicator.onBar(bar));
 			tradeStrategy.onBar(bar, module.isEnabled());
+			barBufQMap.get(bar.getUnifiedSymbol()).offer(bar);
 		};
 		tradeStrategy.setContext(this);
 	}
 
 	@Override
-	public ModuleRuntimeDescription getRuntimeDescription() {
+	public ModuleRuntimeDescription getRuntimeDescription(boolean fullDescription) {
 		Map<String, ModuleAccountRuntimeDescription> accMap = new HashMap<>();
 		for(TradeGateway gateway : gatewayMap.values()) {
 			String gatewayId = gateway.getGatewaySetting().getGatewayId();
@@ -129,13 +129,19 @@ public class ModuleContext implements IModuleContext{
 					.build();
 			accMap.put(gatewayId, accDescription);
 		}
-		return ModuleRuntimeDescription.builder()
+		
+		ModuleRuntimeDescription mad = ModuleRuntimeDescription.builder()
 				.moduleName(module.getName())
 				.enabled(module.isEnabled())
 				.moduleState(accStore.getModuleState())
 				.dataState(tradeStrategy.getComputedState())
 				.accountRuntimeDescriptionMap(accMap)
 				.build();
+		if(fullDescription) {
+			mad.setBarDataMap(null);
+			mad.setIndicatorMap(null);
+		}
+		return mad;
 	}
 
 	@Override
@@ -263,7 +269,7 @@ public class ModuleContext implements IModuleContext{
 		}
 		accStore.onTrade(trade);
 		tradeStrategy.onTrade(trade);
-		onRuntimeChangeCallback.accept(getRuntimeDescription());
+		onRuntimeChangeCallback.accept(getRuntimeDescription(false));
 		dealCollector.onTrade(trade).ifPresent(list -> list.stream().forEach(this.onDealCallback::accept));
 	}
 
@@ -292,6 +298,7 @@ public class ModuleContext implements IModuleContext{
 		for(ContractField c : contracts) {			
 			gatewayMap.put(c, gateway);
 			contractMap.put(c.getUnifiedSymbol(), c);
+			barBufQMap.put(c.getUnifiedSymbol(), new LinkedBlockingQueue<>(500));
 			contractBarMergerMap.put(c.getUnifiedSymbol(), new BarMerger(numOfMinsPerBar, c, barMergingCallback));
 		}
 	}
@@ -305,35 +312,13 @@ public class ModuleContext implements IModuleContext{
 	}
 
 	@Override
-	public List<ModuleCalculatedDataFrame> getModuleData() {
-		Map<String, Indicator> indicatorMap = tradeStrategy.bindedIndicatorMap();
-		if(indicatorMap.isEmpty()) {
-			return Collections.emptyList();
-		}
-		int length = indicatorMap.values().stream()
-				.mapToInt(Indicator::length).min().getAsInt();
-		List<ModuleCalculatedDataFrame> resultList = new ArrayList<>(length);
-		for(int i=0; i<length; i++) {
-			ModuleCalculatedDataFrame frame = new ModuleCalculatedDataFrame();
-			for(Entry<String, Indicator> entry : indicatorMap.entrySet()) {
-				Indicator indicator = entry.getValue();
-				TimeSeriesValue tsv = indicator.valueWithTime(i);
-				frame.setTimestamp(tsv.getTimestamp());
-				switch(indicator.getCategory()) {
-				case PRICE_BASE -> frame.getPriceBaseValues().put(entry.getKey(), tsv.getValue());
-				case INTEREST_BASE -> frame.getOpenInterestBaseValues().put(entry.getKey(), tsv.getValue());
-				case VOLUME_BASE -> frame.getVolBaseValues().put(entry.getKey(), tsv.getValue());
-				default -> throw new IllegalStateException();
-				}
-			}
-			resultList.add(frame);
-		}
-		return resultList;
+	public ModuleState getState() {
+		return accStore.getModuleState();
 	}
 
 	@Override
-	public ModuleState getState() {
-		return accStore.getModuleState();
+	public List<BarField> getModuleBufBars(String unifiedSymbol) {
+		return barBufQMap.get(unifiedSymbol).stream().toList();
 	}
 
 }

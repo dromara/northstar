@@ -15,7 +15,7 @@ import xyz.redtorch.pb.CoreField.TradeField;
 public abstract class AbstractStrategy implements TradeStrategy{
 	
 	// 模组上下文
-	protected IModuleContext ctx;
+	protected IModuleStrategyContext ctx;
 	// 模组计算状态
 	protected JSONObject inspectableState;
 	// 指标集，name -> indicator

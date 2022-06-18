@@ -1,5 +1,6 @@
 package tech.quantit.northstar.common.model;
 
+import java.util.List;
 import java.util.Map;
 
 import com.alibaba.fastjson.JSONObject;
@@ -36,6 +37,14 @@ public class ModuleRuntimeDescription {
 	 * 模组账户描述
 	 */
 	private Map<String, ModuleAccountRuntimeDescription> accountRuntimeDescriptionMap;
+	/**
+	 * 指标数据
+	 */
+	private Map<String, IndicatorData> indicatorMap;
+	/**
+	 * 行情数据
+	 */
+	private Map<String, List<byte[]>> barDataMap;
 	/**
 	 * 模组计算状态
 	 */

@@ -1,8 +1,10 @@
 package tech.quantit.northstar.strategy.api.indicator;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.strategy.api.BarDataAware;
@@ -26,10 +28,6 @@ public abstract class Indicator implements BarDataAware {
 	 * 指标取值类型
 	 */
 	private ValueType valType;
-	/**
-	 * 指标类别
-	 */
-	private Category category = Category.UNKNOWN;
 	
 	private String unifiedSymbol;
 	
@@ -43,12 +41,6 @@ public abstract class Indicator implements BarDataAware {
 		this.unifiedSymbol = unifiedSymbol;
 		this.valType = valType;
 		this.size = size;
-		this.category = switch(valType) {
-		case VOL -> Category.VOLUME_BASE;
-		case OPEN_INTEREST -> Category.INTEREST_BASE;
-		case NOT_SET -> Category.UNKNOWN;
-		default -> Category.PRICE_BASE;
-		};
 	}
 	
 	/**
@@ -153,10 +145,16 @@ public abstract class Indicator implements BarDataAware {
 		return size;
 	}
 	
-	public Category getCategory() {
-		return category;
+	public ValueType getValueType() {
+		return valType;
 	}
-
+	
+	public List<TimeSeriesValue> getData(){
+		return Stream.of(refVals.toArray())
+				.map(TimeSeriesValue.class::cast)
+				.toList();
+	}
+	
 	/**
 	 * 更新算法实现
 	 * @param newVal
@@ -200,27 +198,4 @@ public abstract class Indicator implements BarDataAware {
 		OPEN_INTEREST;
 	}
 	
-	/**
-	 * 指标类型
-	 * @author Administrator
-	 *
-	 */
-	public enum Category {
-		/**
-		 * 基于价格
-		 */
-		PRICE_BASE,
-		/**
-		 * 基于成交量
-		 */
-		VOLUME_BASE,
-		/**
-		 * 基于持仓量
-		 */
-		INTEREST_BASE,
-		/**
-		 * 未知
-		 */
-		UNKNOWN;
-	}
 }
