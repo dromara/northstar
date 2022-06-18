@@ -1,11 +1,8 @@
 package tech.quantit.northstar.strategy.api;
 
-import java.util.List;
-
 import tech.quantit.northstar.common.constant.ModuleState;
 import tech.quantit.northstar.common.constant.SignalOperation;
 import tech.quantit.northstar.strategy.api.constant.PriceType;
-import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.ContractField;
 
 public interface IModuleStrategyContext {
@@ -14,11 +11,6 @@ public interface IModuleStrategyContext {
 	 * @return
 	 */
 	String getModuleName();
-	/**
-	 * 获取模组缓存数据
-	 * @return
-	 */
-	List<BarField> getModuleBufBars(String unifiedSymbol);
 	/**
 	 * 获取合约
 	 * @param unifiedSymbol
@@ -46,4 +38,9 @@ public interface IModuleStrategyContext {
 	 * @return
 	 */
 	ModuleState getState();
+	/**
+	 * 停用模组策略
+	 * @param enabled
+	 */
+	void disabledModule();
 }

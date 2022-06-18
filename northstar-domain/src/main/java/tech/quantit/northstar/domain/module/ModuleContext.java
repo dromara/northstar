@@ -7,14 +7,17 @@ import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
 import tech.quantit.northstar.common.constant.Constants;
+import tech.quantit.northstar.common.constant.IndicatorType;
 import tech.quantit.northstar.common.constant.ModuleState;
 import tech.quantit.northstar.common.constant.SignalOperation;
 import tech.quantit.northstar.common.exception.NoSuchElementException;
 import tech.quantit.northstar.common.exception.TradeException;
+import tech.quantit.northstar.common.model.IndicatorData;
 import tech.quantit.northstar.common.model.ModuleAccountRuntimeDescription;
 import tech.quantit.northstar.common.model.ModuleDealRecord;
 import tech.quantit.northstar.common.model.ModulePositionDescription;
@@ -138,8 +141,17 @@ public class ModuleContext implements IModuleContext{
 				.accountRuntimeDescriptionMap(accMap)
 				.build();
 		if(fullDescription) {
-			mad.setBarDataMap(null);
-			mad.setIndicatorMap(null);
+			mad.setBarDataMap(barBufQMap.entrySet().stream()
+					.collect(Collectors.toMap(Map.Entry::getKey, 
+							e -> e.getValue().stream().map(BarField::toByteArray).toList())));
+			mad.setIndicatorMap(tradeStrategy.bindedIndicatorMap().entrySet().stream()
+					.filter(e -> e.getValue().getType() != IndicatorType.UNKNOWN)
+					.collect(Collectors.toMap(Map.Entry::getKey,
+							e -> IndicatorData.builder()
+								.unifiedSymbol(e.getValue().bindedUnifiedSymbol())
+								.type(e.getValue().getType())
+								.values(e.getValue().getData())
+								.build())));
 		}
 		return mad;
 	}
@@ -314,11 +326,6 @@ public class ModuleContext implements IModuleContext{
 	@Override
 	public ModuleState getState() {
 		return accStore.getModuleState();
-	}
-
-	@Override
-	public List<BarField> getModuleBufBars(String unifiedSymbol) {
-		return barBufQMap.get(unifiedSymbol).stream().toList();
 	}
 
 }

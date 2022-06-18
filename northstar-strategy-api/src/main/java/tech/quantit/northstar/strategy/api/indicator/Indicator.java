@@ -7,6 +7,8 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import lombok.extern.slf4j.Slf4j;
+import tech.quantit.northstar.common.constant.IndicatorType;
+import tech.quantit.northstar.common.model.TimeSeriesValue;
 import tech.quantit.northstar.strategy.api.BarDataAware;
 import tech.quantit.northstar.strategy.api.utils.collection.RingArray;
 import xyz.redtorch.pb.CoreField.BarField;
@@ -145,8 +147,17 @@ public abstract class Indicator implements BarDataAware {
 		return size;
 	}
 	
-	public ValueType getValueType() {
-		return valType;
+	public String bindedUnifiedSymbol() {
+		return unifiedSymbol;
+	}
+	
+	public IndicatorType getType() {
+		return switch(valType) {
+		case OPEN,CLOSE,HIGH,LOW -> IndicatorType.PRICE_BASE;
+		case VOL -> IndicatorType.VOLUME_BASE;
+		case OPEN_INTEREST -> IndicatorType.OPEN_INTEREST_BASE;
+		default -> IndicatorType.UNKNOWN;
+		};
 	}
 	
 	public List<TimeSeriesValue> getData(){

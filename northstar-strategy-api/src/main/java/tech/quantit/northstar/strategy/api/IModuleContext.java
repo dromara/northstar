@@ -30,10 +30,5 @@ public interface IModuleContext extends IModuleStrategyContext, TickDataAware, B
 	 * @param module
 	 */
 	void setModule(IModule module);
-	/**
-	 * 停用模组策略
-	 * @param enabled
-	 */
-	void disabledModule();
 	
 }
