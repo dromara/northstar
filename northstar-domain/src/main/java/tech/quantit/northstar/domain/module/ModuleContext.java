@@ -1,11 +1,11 @@
 package tech.quantit.northstar.domain.module;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.UUID;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -103,6 +103,9 @@ public class ModuleContext implements IModuleContext{
 		this.barMergingCallback = bar -> {
 			tradeStrategy.bindedIndicatorMap().values().forEach(indicator -> indicator.onBar(bar));
 			tradeStrategy.onBar(bar, module.isEnabled());
+			if(barBufQMap.get(bar.getUnifiedSymbol()).size() > 499) {
+				barBufQMap.get(bar.getUnifiedSymbol()).poll();
+			}
 			barBufQMap.get(bar.getUnifiedSymbol()).offer(bar);
 		};
 		tradeStrategy.setContext(this);
@@ -310,7 +313,7 @@ public class ModuleContext implements IModuleContext{
 		for(ContractField c : contracts) {			
 			gatewayMap.put(c, gateway);
 			contractMap.put(c.getUnifiedSymbol(), c);
-			barBufQMap.put(c.getUnifiedSymbol(), new LinkedBlockingQueue<>(500));
+			barBufQMap.put(c.getUnifiedSymbol(), new LinkedList<>());
 			contractBarMergerMap.put(c.getUnifiedSymbol(), new BarMerger(numOfMinsPerBar, c, barMergingCallback));
 		}
 	}

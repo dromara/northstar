@@ -18,8 +18,6 @@ public class BarMerger {
 	
 	private int countBars;
 	
-	private String tradingDay;
-	
 	private BarField.Builder barBuilder;
 	
 	public BarMerger(int numOfMinPerBar, ContractField bindedContract, Consumer<BarField> callback) {
@@ -32,13 +30,13 @@ public class BarMerger {
 		if(!StringUtils.equals(bar.getUnifiedSymbol(), bindedContract.getUnifiedSymbol())) {
 			return;
 		}
-		if(!StringUtils.equals(tradingDay, bar.getTradingDay()) && Objects.nonNull(barBuilder)) {
-			callback.accept(barBuilder.build());
+		if(numOfMinPerBar == 1) {
+			callback.accept(bar);
+			return;
 		}
-		if(countBars == 0 || Objects.isNull(barBuilder)) {
-			tradingDay = bar.getTradingDay();
+		countBars++;
+		if(countBars == 1 || Objects.isNull(barBuilder)) {
 			barBuilder = bar.toBuilder();
-			countBars++;
 			return;
 		}
 		
@@ -65,7 +63,7 @@ public class BarMerger {
 			.setTurnover(bar.getTurnover())
 			.setTurnoverDelta(turnoverDelta + bar.getTurnoverDelta());
 		
-		if(++countBars == numOfMinPerBar) {
+		if(countBars == numOfMinPerBar) {
 			callback.accept(barBuilder.build());
 			countBars = 0;
 		}
