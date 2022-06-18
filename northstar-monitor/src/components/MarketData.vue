@@ -38,7 +38,7 @@ import gatewayDataApi from '@/api/gatewayDataApi'
 import { mapGetters } from 'vuex'
 
 import { BarField } from '@/lib/xyz/redtorch/pb/core_field_pb'
-import { KLineUtils } from '@/utils.js'
+import KLineUtils from '@/utils/kline-utils.js'
 
 export default {
   name: 'UpdateKLineChart',

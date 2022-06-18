@@ -125,11 +125,24 @@
       </div>
       <div class="kline-wrapper">
         <div class="kline-header">模组当前引用的K线数据</div>
-
-        <el-tabs v-model="activeTab" stretch @tab-click="updateChart">
-          <el-tab-pane :label="symbol" :name="symbol" v-for="(symbol, i) in symbolOptions" :key="i">
-          </el-tab-pane>
-        </el-tabs>
+        <div>
+          <el-select class="ml-10" v-model="unifiedSymbolOfChart" placeholder="请选择合约">
+            <el-option
+              v-for="(item, i) in contractOptions"
+              :key="i"
+              :label="item"
+              :value="item"
+            ></el-option>
+          </el-select>
+          <el-select class="ml-10" v-model="unifiedSymbolOfChart" placeholder="请选择合约">
+            <el-option
+              v-for="(item, i) in contractOptions"
+              :key="i"
+              :label="item.unifiedSymbol"
+              :value="item.unifiedSymbol"
+            ></el-option>
+          </el-select>
+        </div>
         <div
           id="module-k-line"
           class="kline-body"
@@ -145,23 +158,10 @@ import ModulePositionForm from './ModulePositionForm.vue'
 import { dispose, init } from 'klinecharts'
 import volumePure from '@/lib/indicator/volume-pure'
 import moduleApi from '@/api/moduleApi'
-import { KLineUtils } from '@/utils.js'
+import KLineUtils from '@/utils/kline-utils.js'
 import { jStat } from 'jstat'
 
 import { BarField, PositionField, TradeField } from '@/lib/xyz/redtorch/pb/core_field_pb'
-
-const convertDataRef = (dataRefSrcMap) => {
-  const resultMap = {}
-  Object.keys(dataRefSrcMap).forEach((k) => {
-    if (!(dataRefSrcMap[k] instanceof Array)) {
-      return
-    }
-    resultMap[k] = dataRefSrcMap[k]
-      .map((byteData) => BarField.deserializeBinary(byteData).toObject())
-      .map(KLineUtils.createFromBar)
-  })
-  return resultMap
-}
 
 const makeShape = (deal) => {
   return {
@@ -209,7 +209,8 @@ export default {
       barDataMap: {},
       chart: null,
       loading: false,
-      moduleRuntime: ''
+      moduleRuntime: '',
+      unifiedSymbolOfChart: ''
     }
   },
   watch: {
@@ -217,8 +218,9 @@ export default {
       if (val) {
         this.moduleRuntime = this.moduleRuntimeSrc
         this.activeAccount = this.accountOptions[0]
-        this.refresh()
-        console.log(this.holdingPositions)
+        setTimeout(() => {
+          this.refresh()
+        }, 100)
       }
     },
     moduleTab: function (val) {
@@ -227,6 +229,11 @@ export default {
           let table = this.$refs.dealTbl
           table.bodyWrapper.scrollTop = table.bodyWrapper.scrollHeight
         }, 50)
+      }
+    },
+    unifiedSymbolOfChart: function (val) {
+      if (val) {
+        this.updateChart()
       }
     }
   },
@@ -288,16 +295,26 @@ export default {
         PositionField.deserializeBinary(data).toObject()
       )
       return positions.filter((item) => item.position > 0)
+    },
+    contractOptions() {
+      return Object.keys(this.barDataMap)
     }
   },
   methods: {
     refresh() {
+      this.initChart()
       this.loadRuntime()
       this.loadDealRecord()
     },
     loadRuntime() {
       moduleApi.getModuleRuntime(this.module.moduleName).then((result) => {
         this.moduleRuntime = result
+        this.barDataMap = {}
+        Object.keys(result.barDataMap).forEach((key) => {
+          this.barDataMap[key] = result.barDataMap[key]
+            .map((data) => BarField.deserializeBinary(data).toObject())
+            .map(KLineUtils.createFromBar)
+        })
       })
     },
     loadDealRecord() {
@@ -319,59 +336,20 @@ export default {
         })
       })
     },
-    async loadRefData() {
+    initChart() {
       const kLineChart = init(`module-k-line`)
       kLineChart.addTechnicalIndicatorTemplate(volumePure)
       kLineChart.createTechnicalIndicator('CJL', false)
       kLineChart.setStyleOptions(KLineUtils.getThemeOptions('dark'))
       this.chart = kLineChart
-      this.barDataMap = await this.loadData(this.moduleName, new Date().getTime())
-      this.activeTab = this.symbolOptions.length ? this.symbolOptions[0] : ''
-      this.updateChart()
     },
     async onSave() {
       setTimeout(this.refresh, 500)
     },
     updateChart() {
       this.chart.clearData()
-      if (!this.barDataMap[this.activeTab] || !this.barDataMap[this.activeTab].length) {
-        this.$message.warning('数据为空')
-        return
-      }
-
-      this.chart.applyNewData(this.barDataMap[this.activeTab])
-      this.chart.loadMore(async (timestamp) => {
-        console.log('加载更多数据')
-        if (typeof timestamp !== 'number') {
-          console.warn('忽略一个不是数值的时间戳: ' + timestamp)
-          return
-        }
-        await new Promise((r) => setTimeout(r, 1000))
-        const dataSet = await this.loadData(this.moduleName, timestamp)
-        const deltaData = dataSet[this.activeTab]
-        if (this.chart) {
-          this.chart.applyMoreData(deltaData || [], !!deltaData)
-          Object.keys(dataSet)
-            .filter((i) => !!deltaData[i])
-            .forEach((i) => {
-              this.barDataMap[i] = deltaData[i].concat(this.barDataMap[i] || [])
-            })
-          this.tradeVisualize()
-        }
-      })
-      this.tradeVisualize()
-    },
-    async loadData(moduleName, timestamp) {
-      this.loading = true
-      try {
-        const result = await moduleApi.getModuleDataRef(moduleName, timestamp)
-        return convertDataRef(result)
-      } catch (e) {
-        this.$message.error(e.message)
-        throw new Error(e)
-      } finally {
-        this.loading = false
-      }
+      console.log(this.barDataMap[this.unifiedSymbolOfChart])
+      this.chart.applyNewData(this.barDataMap[this.unifiedSymbolOfChart])
     },
     tradeVisualize() {
       this.chart.removeShape()
