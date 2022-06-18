@@ -69,18 +69,7 @@ Invoke-WebRequest https://gitee.com/dromara/northstar/raw/master/env.ps1 -OutFil
 ```
 
 ### 程序包准备
-下载最新版项目
-[https://gitee.com/dromara/northstar/releases](https://gitee.com/dromara/northstar/releases)
-
-**Linux环境下**
-```
-cd ~ && wget https://gitee.com/dromara/northstar/attach_files/1008262/download/northstar-3.5.jar
-```
-
-**Windows环境下**
-```
-Invoke-WebRequest https://gitee.com/dromara/northstar/attach_files/1008262/download/northstar-3.5.jar -OutFile northstar.jar
-```
+本说明仅适用于4.0版本以上，暂没有发布版。
 
 ### 启动程序
 **Linux环境下**
