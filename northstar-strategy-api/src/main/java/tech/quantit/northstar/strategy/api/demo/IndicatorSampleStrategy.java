@@ -34,7 +34,13 @@ public class IndicatorSampleStrategy extends AbstractStrategy	// 为了简化代
 	
 	@Override
 	protected void onBar(BarField bar) {
-		log.debug("{} K线数据： 开 [{}], 高 [{}], 低 [{}], 收 [{}]", bar.getUnifiedSymbol(), bar.getOpenPrice(), bar.getHighPrice(), bar.getLowPrice(), bar.getClosePrice());
+		log.debug("{} K线数据： 开 [{}], 高 [{}], 低 [{}], 收 [{}]", 
+				bar.getUnifiedSymbol(), bar.getOpenPrice(), bar.getHighPrice(), bar.getLowPrice(), bar.getClosePrice());
+		// 确保指标已经准备好再开始交易
+		if(fastLine.isReady() && slowLine.isReady()) {
+			log.debug("指标未准备就绪");
+			return;
+		}
 		switch (ctx.getState()) {
 			case EMPTY -> {
 				// 快线在慢线之上开多，快线在慢线之下开空

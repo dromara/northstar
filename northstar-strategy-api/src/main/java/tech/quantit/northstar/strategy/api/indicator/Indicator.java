@@ -35,6 +35,8 @@ public abstract class Indicator implements BarDataAware {
 	
 	private int size;
 	
+	private int actualUpdate;
+	
 	protected Indicator(String unifiedSymbol, int size, ValueType valType) {
 		refVals = new RingArray<>(size);
 		for(int i=0; i<size; i++) {
@@ -114,6 +116,15 @@ public abstract class Indicator implements BarDataAware {
 	 */
 	public void updateVal(double newVal, long timestamp) {
 		refVals.update(new TimeSeriesValue(handleUpdate(newVal), timestamp));
+		actualUpdate++;
+	}
+	
+	/**
+	 * 指标是否已完成初始化
+	 * @return
+	 */
+	public boolean isReady() {
+		return actualUpdate >= size;
 	}
 	
 	public TimeSeriesValue highestVal() {

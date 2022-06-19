@@ -116,7 +116,9 @@ public class ModuleContext implements IModuleContext{
 				if(indicatorValBufQMap.get(e.getKey()).size() >= BUF_SIZE) {
 					indicatorValBufQMap.get(e.getKey()).poll();
 				}
-				indicatorValBufQMap.get(e.getKey()).offer(indicator.valueWithTime(0));
+				if(indicator.isReady()) {					
+					indicatorValBufQMap.get(e.getKey()).offer(indicator.valueWithTime(0));
+				}
 			});
 			tradeStrategy.onBar(bar, module.isEnabled());
 			if(barBufQMap.get(bar.getUnifiedSymbol()).size() >= BUF_SIZE) {
