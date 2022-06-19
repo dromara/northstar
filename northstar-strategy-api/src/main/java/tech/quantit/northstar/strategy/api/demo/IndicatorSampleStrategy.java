@@ -34,6 +34,7 @@ public class IndicatorSampleStrategy extends AbstractStrategy	// 为了简化代
 	
 	@Override
 	protected void onBar(BarField bar) {
+		log.debug("{} K线数据： 开 [{}], 高 [{}], 低 [{}], 收 [{}]", bar.getUnifiedSymbol(), bar.getOpenPrice(), bar.getHighPrice(), bar.getLowPrice(), bar.getClosePrice());
 		switch (ctx.getState()) {
 			case EMPTY -> {
 				// 快线在慢线之上开多，快线在慢线之下开空
