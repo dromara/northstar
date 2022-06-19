@@ -258,7 +258,7 @@ public class TradePosition {
 		double priceDiff = lastTick == null ? 0 : factor * (lastTick.getLastPrice() - avgOpenPrice());
 		PositionDirectionEnum posDir = FieldUtils.isBuy(dir) ? PositionDirectionEnum.PD_Long : PositionDirectionEnum.PD_Short;
 		return PositionField.newBuilder()
-				.setGatewayId(simAccount.getGatewayId())
+				.setGatewayId(simAccount.gatewayId())
 				.setPositionId(contract.getUnifiedSymbol() + "@" + posDir)
 				.setContract(contract)
 				.setFrozen(totalVolume() - totalAvailable())

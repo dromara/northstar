@@ -64,16 +64,14 @@ public class SimGatewayFactory implements GatewayFactory{
 		
 		final SimAccount account;
 		if(simAccountDescription == null) {
-			account = new SimAccount(accGatewayId, contractMgr);
+			account = new SimAccount(accGatewayId, contractMgr, fastEventEngine, simAccDescription -> simAccountRepo.save(simAccDescription));
 		} else {
 			try {
-				account = new SimAccount(simAccountDescription, contractMgr);
+				account = new SimAccount(simAccountDescription, contractMgr, fastEventEngine, simAccDescription -> simAccountRepo.save(simAccDescription));
 			} catch (InvalidProtocolBufferException e) {
 				throw new IllegalStateException("无法创建模拟账户", e);
 			}
 		}
-		account.setFeEngine(fastEventEngine);
-		account.setSavingCallback(() -> simAccountRepo.save(account.getDescription()));
 		SimTradeGateway gateway = new SimTradeGatewayLocal(fastEventEngine, simMarket, gwSettings, mdGatewayId, account, registry);
 		simMarket.addGateway(mdGatewayId, gateway);
 		return gateway;

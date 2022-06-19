@@ -4,12 +4,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.function.Consumer;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,13 +28,14 @@ class SimAccountTest {
 	
 	SimAccount account;
 	
+	@SuppressWarnings("unchecked")
 	@BeforeEach
 	void prepare() {
 		IContractManager contractMgr = mock(IContractManager.class);
 		when(contractMgr.getContractDefinition(anyString())).thenReturn(ContractDefinition.builder()
 				.commissionInPrice(1.5)
 				.build());
-		account = new SimAccount("testGateway", contractMgr);
+		account = new SimAccount("testGateway", contractMgr, mock(FastEventEngine.class), mock(Consumer.class));
 	}
 
 	@Test
@@ -53,8 +53,6 @@ class SimAccountTest {
 	
 	@Test
 	void shouldMakeOpenOrder() {
-		
-		account.setFeEngine(mock(FastEventEngine.class));
 		account.totalDeposit = 1000000;
 		account.onSubmitOrder(factory.makeOrderReq("rb2210", DirectionEnum.D_Sell, OffsetFlagEnum.OF_Open, 1, 1000, 0));
 		
@@ -63,8 +61,6 @@ class SimAccountTest {
 	
 	@Test
 	void shouldMakeOpenOrderWithFailure() {
-		
-		account.setFeEngine(mock(FastEventEngine.class));
 		account.onSubmitOrder(factory.makeOrderReq("rb2210", DirectionEnum.D_Sell, OffsetFlagEnum.OF_Open, 1, 1000, 0));
 		
 		assertThat(account.openReqMap).isEmpty();
@@ -72,9 +68,6 @@ class SimAccountTest {
 	
 	@Test
 	void shouldMakeCloseOrder() {
-		
-		account.setFeEngine(mock(FastEventEngine.class));
-		
 		TradePosition pos = mock(TradePosition.class);
 		when(pos.totalAvailable()).thenReturn(1);
 		ConcurrentMap<ContractField, TradePosition> longMap = new ConcurrentHashMap<>();
@@ -87,8 +80,6 @@ class SimAccountTest {
 	
 	@Test
 	void shouldMakeCloseOrderWithFailure() {
-		
-		account.setFeEngine(mock(FastEventEngine.class));
 		assertThrows(IllegalStateException.class, ()->{			
 			account.onSubmitOrder(factory.makeOrderReq("rb2210", DirectionEnum.D_Sell, OffsetFlagEnum.OF_Close, 1, 1000, 0));
 		});
@@ -104,18 +95,12 @@ class SimAccountTest {
 	
 	@Test
 	void testDeposit() {
-		
-		Runnable savingCallback = mock(Runnable.class);
-		account.setSavingCallback(savingCallback);
-		account.setFeEngine(mock(FastEventEngine.class));
 		account.depositMoney(666);
 		assertThat(account.totalDeposit).isEqualTo(666);
-		verify(savingCallback).run();
 	}
 	
 	@Test
 	void testDepositFailure() {
-		
 		assertThrows(IllegalArgumentException.class, ()->{			
 			account.depositMoney(-1);
 		});
@@ -124,21 +109,15 @@ class SimAccountTest {
 	
 	@Test
 	void testWithdraw() {
-		
-		Runnable savingCallback = mock(Runnable.class);
-		account.setFeEngine(mock(FastEventEngine.class));
-		account.setSavingCallback(savingCallback);
 		account.depositMoney(666);
 		account.withdrawMoney(333);
 		assertThat(account.balance()).isEqualTo(333);
 		assertThat(account.totalDeposit).isEqualTo(666);
 		assertThat(account.totalWithdraw).isEqualTo(333);
-		verify(savingCallback, times(2)).run();
 	}
 	
 	@Test
 	void testWithdrawFailure() {
-		
 		assertThrows(IllegalArgumentException.class, ()->{			
 			account.withdrawMoney(-1);
 		});
