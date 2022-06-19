@@ -126,7 +126,7 @@
       <div class="kline-wrapper">
         <div class="kline-header">模组当前引用的K线数据</div>
         <div>
-          <el-select class="ml-10" v-model="unifiedSymbolOfChart" placeholder="请选择合约">
+          <el-select class="ml-10 mt-5" v-model="unifiedSymbolOfChart" placeholder="请选择合约">
             <el-option
               v-for="(item, i) in contractOptions"
               :key="i"
@@ -134,12 +134,12 @@
               :value="item"
             ></el-option>
           </el-select>
-          <el-select class="ml-10" v-model="unifiedSymbolOfChart" placeholder="请选择合约">
+          <el-select class="ml-10 mt-5" v-model="indicator" placeholder="请选择指标">
             <el-option
-              v-for="(item, i) in contractOptions"
+              v-for="(item, i) in indicatorOptions"
               :key="i"
-              :label="item.unifiedSymbol"
-              :value="item.unifiedSymbol"
+              :label="item"
+              :value="item"
             ></el-option>
           </el-select>
         </div>
@@ -157,13 +157,14 @@
 import ModulePositionForm from './ModulePositionForm.vue'
 import { dispose, init } from 'klinecharts'
 import volumePure from '@/lib/indicator/volume-pure'
+import simpleVal from '@/lib/indicator/simple-value'
 import moduleApi from '@/api/moduleApi'
 import KLineUtils from '@/utils/kline-utils.js'
 import { jStat } from 'jstat'
 
 import { BarField, PositionField, TradeField } from '@/lib/xyz/redtorch/pb/core_field_pb'
 
-const makeShape = (deal) => {
+const makeHoldingSegment = (deal) => {
   return {
     name: 'segment',
     points: [
@@ -210,7 +211,12 @@ export default {
       chart: null,
       loading: false,
       moduleRuntime: '',
-      unifiedSymbolOfChart: ''
+      unifiedSymbolOfChart: '',
+      indicator: '',
+      indicator2: '',
+      indicator3: '',
+      indicator4: '',
+      indicator5: ''
     }
   },
   watch: {
@@ -219,6 +225,7 @@ export default {
         this.moduleRuntime = this.moduleRuntimeSrc
         this.activeAccount = this.accountOptions[0]
         setTimeout(() => {
+          this.initChart()
           this.refresh()
         }, 100)
       }
@@ -235,6 +242,9 @@ export default {
       if (val) {
         this.updateChart()
       }
+    },
+    indicator: function (val) {
+      this.addIndicator(val)
     }
   },
   computed: {
@@ -298,11 +308,23 @@ export default {
     },
     contractOptions() {
       return Object.keys(this.barDataMap)
+    },
+    indicatorOptions() {
+      if (!this.moduleRuntime.indicatorMap) return []
+      return Object.keys(this.moduleRuntime.indicatorMap).filter(
+        (key) => this.moduleRuntime.indicatorMap[key].unifiedSymbol === this.unifiedSymbolOfChart
+      )
     }
+  },
+  created() {
+    window.addEventListener('resize', () => {
+      if (this.chart) {
+        this.chart.resize()
+      }
+    })
   },
   methods: {
     refresh() {
-      this.initChart()
       this.loadRuntime()
       this.loadDealRecord()
     },
@@ -347,14 +369,19 @@ export default {
       setTimeout(this.refresh, 500)
     },
     updateChart() {
-      this.chart.clearData()
-      console.log(this.barDataMap[this.unifiedSymbolOfChart])
       this.chart.applyNewData(this.barDataMap[this.unifiedSymbolOfChart])
     },
-    tradeVisualize() {
+    addIndicator(name) {
+      const indicatorData = this.moduleRuntime.indicatorMap[name]
+      this.chart.addTechnicalIndicatorTemplate(simpleVal(name, indicatorData))
+      this.chart.createTechnicalIndicator('VAL_' + name, true, {
+        id: 'candle_pane'
+      })
+    },
+    visualizeTradeRecords() {
       this.chart.removeShape()
       this.dealRecords.forEach((i, idx) => {
-        this.chart.createShape(makeShape(i), 'panel' + idx)
+        this.chart.createShape(makeHoldingSegment(i), 'panel' + idx)
       })
     },
     close() {
@@ -371,13 +398,16 @@ export default {
   height: calc(100vh - 382px);
 }
 .kline-wrapper {
-  height: 100%;
   width: 100%;
   border-left: 1px solid;
+  display: flex;
+  flex-direction: column;
+}
+#module-k-line {
+  flex: 1;
 }
 .module-rt-wrapper {
   display: flex;
-  height: 100%;
   border-top: 1px solid;
   border-bottom: 1px solid;
 }
@@ -388,9 +418,6 @@ export default {
 .cell-content {
   position: absolute;
   bottom: 0;
-}
-.kline-body {
-  height: calc(100% - 56px);
 }
 .kline-header {
   margin-left: 8px;

@@ -22,6 +22,7 @@ import tech.quantit.northstar.common.model.ModuleAccountRuntimeDescription;
 import tech.quantit.northstar.common.model.ModuleDealRecord;
 import tech.quantit.northstar.common.model.ModulePositionDescription;
 import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
+import tech.quantit.northstar.common.model.TimeSeriesValue;
 import tech.quantit.northstar.common.utils.FieldUtils;
 import tech.quantit.northstar.common.utils.OrderUtils;
 import tech.quantit.northstar.gateway.api.TradeGateway;
@@ -31,6 +32,7 @@ import tech.quantit.northstar.strategy.api.IModuleAccountStore;
 import tech.quantit.northstar.strategy.api.IModuleContext;
 import tech.quantit.northstar.strategy.api.TradeStrategy;
 import tech.quantit.northstar.strategy.api.constant.PriceType;
+import tech.quantit.northstar.strategy.api.indicator.Indicator;
 import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
 import xyz.redtorch.pb.CoreEnum.ForceCloseReasonEnum;
 import xyz.redtorch.pb.CoreEnum.HedgeFlagEnum;
@@ -79,6 +81,9 @@ public class ModuleContext implements IModuleContext{
 	/* unifiedSymbol -> barQ */
 	private Map<String, Queue<BarField>> barBufQMap = new HashMap<>();
 	
+	/* indicatorName -> values */
+	private Map<String, Queue<TimeSeriesValue>> indicatorValBufQMap = new HashMap<>(); 
+	
 	private String tradingDay = "";
 	
 	private Consumer<BarField> barMergingCallback;
@@ -89,7 +94,9 @@ public class ModuleContext implements IModuleContext{
 	
 	private Consumer<ModuleRuntimeDescription> onRuntimeChangeCallback;
 	
-	private Consumer<ModuleDealRecord> onDealCallback; 
+	private Consumer<ModuleDealRecord> onDealCallback;
+	
+	private static final int BUF_SIZE = 500;
 	
 	public ModuleContext(TradeStrategy tradeStrategy, IModuleAccountStore accStore, ClosingStrategy closingStrategy, int numOfMinsPerBar, 
 			DealCollector dealCollector, Consumer<ModuleRuntimeDescription> onRuntimeChangeCallback, Consumer<ModuleDealRecord> onDealCallback) {
@@ -100,10 +107,19 @@ public class ModuleContext implements IModuleContext{
 		this.dealCollector = dealCollector;
 		this.onRuntimeChangeCallback = onRuntimeChangeCallback;
 		this.onDealCallback = onDealCallback;
+		this.tradeStrategy.bindedIndicatorMap().entrySet().stream()
+			.forEach(e -> indicatorValBufQMap.put(e.getKey(), new LinkedList<>()));
 		this.barMergingCallback = bar -> {
-			tradeStrategy.bindedIndicatorMap().values().forEach(indicator -> indicator.onBar(bar));
+			tradeStrategy.bindedIndicatorMap().entrySet().stream().forEach(e -> {
+				Indicator indicator = e.getValue();
+				indicator.onBar(bar);
+				if(indicatorValBufQMap.get(e.getKey()).size() >= BUF_SIZE) {
+					indicatorValBufQMap.get(e.getKey()).poll();
+				}
+				indicatorValBufQMap.get(e.getKey()).offer(indicator.valueWithTime(0));
+			});
 			tradeStrategy.onBar(bar, module.isEnabled());
-			if(barBufQMap.get(bar.getUnifiedSymbol()).size() > 499) {
+			if(barBufQMap.get(bar.getUnifiedSymbol()).size() >= BUF_SIZE) {
 				barBufQMap.get(bar.getUnifiedSymbol()).poll();
 			}
 			barBufQMap.get(bar.getUnifiedSymbol()).offer(bar);
@@ -153,7 +169,7 @@ public class ModuleContext implements IModuleContext{
 							e -> IndicatorData.builder()
 								.unifiedSymbol(e.getValue().bindedUnifiedSymbol())
 								.type(e.getValue().getType())
-								.values(e.getValue().getData())
+								.values(indicatorValBufQMap.get(e.getKey()).stream().toList())
 								.build())));
 		}
 		return mad;

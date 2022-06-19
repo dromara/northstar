@@ -113,10 +113,7 @@ public abstract class Indicator implements BarDataAware {
 	 * @param newVal
 	 */
 	public void updateVal(double newVal, long timestamp) {
-		TimeSeriesValue tsv = refVals.get(1);
-		tsv.setTimestamp(timestamp);
-		tsv.setValue(handleUpdate(newVal));
-		refVals.update(tsv);
+		refVals.update(new TimeSeriesValue(handleUpdate(newVal), timestamp));
 	}
 	
 	public TimeSeriesValue highestVal() {
