@@ -173,7 +173,8 @@ const initComponent = async (component, arr) => {
   const paramsMap = await moduleApi.componentParams(component)
   arr.push({
     componentMeta: component,
-    initParams: Object.values(paramsMap).sort((a, b) => a.order - b.order)
+    initParams: Object.values(paramsMap).sort((a, b) => a.order - b.order),
+    value: component.name
   })
 }
 
