@@ -127,6 +127,10 @@ public abstract class Indicator implements BarDataAware {
 		return actualUpdate >= size;
 	}
 	
+	/**
+	 * 指标最大值
+	 * @return
+	 */
 	public TimeSeriesValue highestVal() {
 		TimeSeriesValue highest = null;
 		for(Object obj : refVals.toArray()) {
@@ -139,6 +143,10 @@ public abstract class Indicator implements BarDataAware {
 		return highest; 
 	}
 	
+	/**
+	 * 指标最小值
+	 * @return
+	 */
 	public TimeSeriesValue lowestVal() {
 		TimeSeriesValue lowest = null;
 		for(Object obj : refVals.toArray()) {
@@ -151,10 +159,10 @@ public abstract class Indicator implements BarDataAware {
 		return lowest;
 	}
 	
-	public int length() {
-		return size;
-	}
-	
+	/**
+	 * 指标绑定合约
+	 * @return
+	 */
 	public String bindedUnifiedSymbol() {
 		return unifiedSymbol;
 	}
