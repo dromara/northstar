@@ -15,13 +15,12 @@ const colorOptions = [
   "#AAC370",  //墨绿
   "#C5E6FB"   //天蓝
 ]
-let colorIndex = 0
-exports.default = (name, indicatorData) => {
+exports.default = (name, indicatorData, colorIndex) => {
   return {
     name: 'VAL_' + name,
     shortName: '模组计算值',
     plots: [
-      { key: 'value', title: `${name}: `, type: 'line', color: colorOptions[colorIndex++ % colorOptions.length] }
+      { key: 'value', title: `${name}: `, type: 'line', color: colorOptions[colorIndex % colorOptions.length] }
     ],
     calcTechnicalIndicator: (kLineDataList) => {
       const timeValueMap = indicatorData.values.reduce((obj, val) => {

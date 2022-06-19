@@ -213,10 +213,7 @@ export default {
       moduleRuntime: '',
       unifiedSymbolOfChart: '',
       indicator: '',
-      indicator2: '',
-      indicator3: '',
-      indicator4: '',
-      indicator5: ''
+      indicatorSet: new Set()
     }
   },
   watch: {
@@ -244,7 +241,10 @@ export default {
       }
     },
     indicator: function (val) {
-      this.addIndicator(val)
+      if (val) {
+        this.addIndicator(val)
+        this.indicatorSet.add(val)
+      }
     }
   },
   computed: {
@@ -337,6 +337,8 @@ export default {
             .map((data) => BarField.deserializeBinary(data).toObject())
             .map(KLineUtils.createFromBar)
         })
+        this.updateChart()
+        this.indicatorSet.forEach(this.addIndicator)
       })
     },
     loadDealRecord() {
@@ -369,11 +371,15 @@ export default {
       setTimeout(this.refresh, 500)
     },
     updateChart() {
-      this.chart.applyNewData(this.barDataMap[this.unifiedSymbolOfChart])
+      if (this.unifiedSymbolOfChart) {
+        this.chart.removeTechnicalIndicator('candle_pane')
+        this.chart.applyNewData(this.barDataMap[this.unifiedSymbolOfChart])
+      }
     },
     addIndicator(name) {
       const indicatorData = this.moduleRuntime.indicatorMap[name]
-      this.chart.addTechnicalIndicatorTemplate(simpleVal(name, indicatorData))
+      const colorIndex = Object.keys(this.moduleRuntime.indicatorMap).indexOf(name)
+      this.chart.addTechnicalIndicatorTemplate(simpleVal(name, indicatorData, colorIndex))
       this.chart.createTechnicalIndicator('VAL_' + name, true, {
         id: 'candle_pane'
       })

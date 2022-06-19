@@ -37,7 +37,7 @@ public class IndicatorSampleStrategy extends AbstractStrategy	// 为了简化代
 		log.debug("{} K线数据： 开 [{}], 高 [{}], 低 [{}], 收 [{}]", 
 				bar.getUnifiedSymbol(), bar.getOpenPrice(), bar.getHighPrice(), bar.getLowPrice(), bar.getClosePrice());
 		// 确保指标已经准备好再开始交易
-		if(fastLine.isReady() && slowLine.isReady()) {
+		if(!fastLine.isReady() || !slowLine.isReady()) {
 			log.debug("指标未准备就绪");
 			return;
 		}
