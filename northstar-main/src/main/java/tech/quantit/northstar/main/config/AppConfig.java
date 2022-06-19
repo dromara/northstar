@@ -125,8 +125,8 @@ public class AppConfig implements WebMvcConfigurer {
 	}
 	
 	@Bean
-	public SimMarket simMarket(ISimAccountRepository simAccRepo) {
-		return new SimMarket(simTradeGateway -> simAccRepo.deleteById(simTradeGateway.getGatewaySetting().getGatewayId()));
+	public SimMarket simMarket() {
+		return new SimMarket();
 	}
 	
 	private List<ContractField> findAllContract(IContractRepository contractRepo){
