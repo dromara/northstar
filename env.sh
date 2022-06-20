@@ -13,7 +13,7 @@ then
 	cd ~/northstar-env && wget --no-check-certificate https://nodejs.org/dist/v16.15.1/node-v16.15.1-linux-x64.tar.xz
 	tar -xvf node-v16.15.1-linux-x64.tar.xz
 	rm -f node-v16.15.1-linux-x64.tar.xz
-	ln -s ~/northstar-env/node-v16.15.1-linux-x64/bin/* /usr/local/bin/
+	ln -sf ~/northstar-env/node-v16.15.1-linux-x64/bin/* /usr/local/bin/
 else
 	echo "Node16已安装"
 	node -v
@@ -26,7 +26,7 @@ then
 	cd ~/northstar-env && wget --no-check-certificate https://download.oracle.com/java/17/latest/jdk-17_linux-x64_bin.tar.gz
 	tar -xvf jdk-17_linux-x64_bin.tar.gz
 	rm -f jdk-17_linux-x64_bin.tar.gz
-	ln -s ~/northstar-env/$(find jdk* -maxdepth 0 -type d)/bin/* /usr/local/bin/
+	ln -sf ~/northstar-env/$(find jdk* -maxdepth 0 -type d)/bin/* /usr/local/bin/
 else
 	echo "JDK17已安装"
 	java -version
@@ -39,7 +39,7 @@ then
 	cd ~/northstar-env && wget --no-check-certificate https://mirrors.bfsu.edu.cn/apache/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz
 	tar -xvf apache-maven-3.6.3-bin.tar.gz
 	rm -f apache-maven-3.6.3-bin.tar.gz
-	ln -s ~/northstar-env/apache-maven-3.6.3/bin/mvn /usr/local/bin/
+	ln -sf ~/northstar-env/apache-maven-3.6.3/bin/mvn /usr/local/bin/
 	curl https://gitee.com/dromara/northstar/raw/master/settings.xml >~/northstar-env/apache-maven-3.6.3/conf/settings.xml
 else
 	echo "Maven已安装"
