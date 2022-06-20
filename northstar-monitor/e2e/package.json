@@ -1,0 +1,15 @@
+{
+  "name": "northstar-e2e",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "e2e": "./node_modules/.bin/cypress open",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "KevinHuangwl",
+  "license": "ISC",
+  "devDependencies": {
+    "cypress": "^10.1.0"
+  }
+}
