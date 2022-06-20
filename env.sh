@@ -10,10 +10,10 @@ mkdir -p ~/northstar-env
 if [[ $(which node >/dev/null && echo $?) != 0 ]];
 then 
 	echo "安装Node16"
-	cd ~/northstar-env && wget --no-check-certificate https://nodejs.org/dist/v16.15.1/node-v16.15.1-linux-x64.tar.xz
-	tar -xvf node-v16.15.1-linux-x64.tar.xz
-	rm -f node-v16.15.1-linux-x64.tar.xz
-	ln -sf ~/northstar-env/node-v16.15.1-linux-x64/bin/* /usr/local/bin/
+	cd ~/northstar-env && wget --no-check-certificate https://nodejs.org/download/release/v14.19.1/node-v14.19.1-linux-x64.tar.xz
+	tar -xvf node-v14.19.1-linux-x64.tar.xz 
+	rm -f node-v14.19.1-linux-x64.tar.xz 
+	ln -sf ~/northstar-env/node-v14.19.1-linux-x64/bin/* /usr/local/bin/
 else
 	echo "Node16已安装"
 	node -v
