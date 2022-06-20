@@ -36,7 +36,6 @@
     "@vue/eslint-config-prettier": "^6.0.0",
     "babel-eslint": "^10.1.0",
     "cross-env": "^7.0.3",
-    "cypress": "^9.6.1",
     "eslint": "^7.32.0",
     "eslint-plugin-prettier": "^3.3.1",
     "node-sass": "^4.12.0",
