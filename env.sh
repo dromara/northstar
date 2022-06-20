@@ -3,7 +3,7 @@
 set -e
 
 echo "准备环境依赖..."
-yum install git wget python36 gcc gcc-c++ -y
+yum install git wget python27 gcc gcc-c++ -y
 
 mkdir -p /home/quantit/northstar-env
 echo alias northstar="'cd /home/quantit'" >> ~/.bashrc
