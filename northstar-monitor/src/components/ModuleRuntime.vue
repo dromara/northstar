@@ -142,6 +142,18 @@
               :value="item"
             ></el-option>
           </el-select>
+          <el-select class="ml-10 mt-5 mr-10" v-model="paneId" placeholder="请选择绘图位置">
+            <el-option :key="1" label="主图" value="candle_pane" />
+            <el-option :key="2" label="副图1" value="pane1" />
+            <el-option :key="3" label="副图2" value="pane2" />
+            <el-option :key="4" label="副图3" value="pane3" />
+          </el-select>
+          <el-button icon="el-icon-plus" title="绘制指标" @click.native="addIndicator"></el-button>
+          <el-button
+            icon="el-icon-minus"
+            title="移除指标"
+            @click.native="removeIndicator"
+          ></el-button>
         </div>
         <div
           id="module-k-line"
@@ -204,7 +216,6 @@ export default {
     return {
       positionFormVisible: false,
       moduleTab: 'holding',
-      activeTab: '',
       activeAccount: '',
       dealRecords: [],
       barDataMap: {},
@@ -212,8 +223,9 @@ export default {
       loading: false,
       moduleRuntime: '',
       unifiedSymbolOfChart: '',
+      paneId: '',
       indicator: '',
-      indicatorSet: new Set()
+      indicatorMap: {}
     }
   },
   watch: {
@@ -238,12 +250,6 @@ export default {
     unifiedSymbolOfChart: function (val) {
       if (val) {
         this.updateChart()
-      }
-    },
-    indicator: function (val) {
-      if (val) {
-        this.addIndicator(val)
-        this.indicatorSet.add(val)
       }
     }
   },
@@ -338,7 +344,7 @@ export default {
             .map(KLineUtils.createFromBar)
         })
         this.updateChart()
-        this.indicatorSet.forEach(this.addIndicator)
+        this.updateIndicator()
       })
     },
     loadDealRecord() {
@@ -363,7 +369,7 @@ export default {
     initChart() {
       const kLineChart = init(`module-k-line`)
       kLineChart.addTechnicalIndicatorTemplate(volumePure)
-      kLineChart.createTechnicalIndicator('CJL', false)
+      kLineChart.createTechnicalIndicator('CJL', false, { id: 'pane1' })
       kLineChart.setStyleOptions(KLineUtils.getThemeOptions('dark'))
       this.chart = kLineChart
     },
@@ -376,12 +382,41 @@ export default {
         this.chart.applyNewData(this.barDataMap[this.unifiedSymbolOfChart])
       }
     },
-    addIndicator(name) {
-      const indicatorData = this.moduleRuntime.indicatorMap[name]
-      const colorIndex = Object.keys(this.moduleRuntime.indicatorMap).indexOf(name)
+    addIndicator() {
+      if (!this.indicator) return
+      if (!this.paneId) return
+      const indicatorData = this.moduleRuntime.indicatorMap[this.indicator]
+      const colorIndex = Object.keys(this.moduleRuntime.indicatorMap).indexOf(this.indicator)
+      this.indicatorMap[this.indicator] = this.paneId
+      this.renderIndicator(this.indicator, this.paneId, indicatorData, colorIndex)
+    },
+    removeIndicator() {
+      if (!this.indicator) return
+      if (!this.paneId) return
+      this.chart.removeTechnicalIndicator(
+        this.indicatorMap[this.indicator],
+        'VAL_' + this.indicator
+      )
+      delete this.indicatorMap[this.indicator]
+      console.log('移除指标', this.indicator)
+    },
+    updateIndicator() {
+      Object.values(this.indicatorMap).forEach((pane) => this.chart.removeTechnicalIndicator(pane))
+      Object.keys(this.indicatorMap).forEach((indicatorName) => {
+        const indicatorData = this.moduleRuntime.indicatorMap[indicatorName]
+        const colorIndex = Object.keys(this.moduleRuntime.indicatorMap).indexOf(indicatorName)
+        this.renderIndicator(
+          indicatorName,
+          this.indicatorMap[indicatorName],
+          indicatorData,
+          colorIndex
+        )
+      })
+    },
+    renderIndicator(name, paneId, indicatorData, colorIndex) {
       this.chart.addTechnicalIndicatorTemplate(simpleVal(name, indicatorData, colorIndex))
       this.chart.createTechnicalIndicator('VAL_' + name, true, {
-        id: 'candle_pane'
+        id: paneId
       })
     },
     visualizeTradeRecords() {

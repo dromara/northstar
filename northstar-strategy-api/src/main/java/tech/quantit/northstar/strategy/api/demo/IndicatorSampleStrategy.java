@@ -82,13 +82,15 @@ public class IndicatorSampleStrategy extends AbstractStrategy	// 为了简化代
 
 	public static class InitParams extends DynamicParams {			
 		
+		@Setting(value="指标合约", order=0)
+		private String indicatorSymbol;
+		
 		@Setting(value="快线周期", order=1)		
 		private int fast;						
 		
 		@Setting(value="慢线周期", order=2)		
 		private int slow;
 		
-		@Setting(value="指标合约", order=3)
-		private String indicatorSymbol;
+		
 	}
 }
