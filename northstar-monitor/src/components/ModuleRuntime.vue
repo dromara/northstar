@@ -154,6 +154,11 @@
             title="移除指标"
             @click.native="removeIndicator"
           ></el-button>
+          <el-button
+            :icon="`${holdingVisibleOnChart ? 'el-icon-data-board' : 'el-icon-data-line'}`"
+            :title="`${holdingVisibleOnChart ? '隐藏持仓线' : '显示持仓线'}`"
+            @click.native="holdingVisibleOnChart = !holdingVisibleOnChart"
+          ></el-button>
         </div>
         <div
           id="module-k-line"
@@ -180,14 +185,14 @@ const makeHoldingSegment = (deal) => {
   return {
     name: 'segment',
     points: [
-      { timestamp: deal.openTimestamp, value: deal.openPrice },
-      { timestamp: deal.closeTimestamp, value: deal.closePrice }
+      { timestamp: deal.openTrade.tradetimestamp, value: deal.openPrice },
+      { timestamp: deal.closeTrade.tradetimestamp, value: deal.closePrice }
     ],
     lock: true,
     styles: {
       line: {
         color:
-          deal.direction === 'PD_Long' ? '#f00' : deal.direction === 'PD_Short' ? '#0f0' : '#00f',
+          deal.direction === '多' ? '#ff0000' : deal.direction === '空' ? '#00ff00' : '#0000ff',
         size: 2
       }
     }
@@ -215,6 +220,7 @@ export default {
   data() {
     return {
       positionFormVisible: false,
+      holdingVisibleOnChart: false,
       moduleTab: 'holding',
       activeAccount: '',
       dealRecords: [],
@@ -250,6 +256,13 @@ export default {
     unifiedSymbolOfChart: function (val) {
       if (val) {
         this.updateChart()
+      }
+    },
+    holdingVisibleOnChart: function (val) {
+      if (val) {
+        this.visualizeTradeRecords()
+      } else {
+        this.chart.removeShape()
       }
     }
   },
@@ -301,8 +314,12 @@ export default {
       if (!this.dealRecords.length) return 'N/A'
       const winningDeals = this.dealRecords.filter((item) => item.dealProfit > 0)
       const lossDeals = this.dealRecords.filter((item) => item.dealProfit <= 0)
-      const avgProfit = jStat.sum(winningDeals.map((item) => item.dealProfit))
-      const avgLoss = jStat.sum(lossDeals.map((item) => item.dealProfit))
+      const avgProfit = winningDeals.length
+        ? jStat.sum(winningDeals.map((item) => item.dealProfit)) / winningDeals.length
+        : '0'
+      const avgLoss = lossDeals.length
+        ? jStat.sum(lossDeals.map((item) => item.dealProfit)) / lossDeals.length
+        : '0'
       return `${avgProfit.toFixed(1)} : ${Math.abs(avgLoss).toFixed(1)}`
     },
     holdingPositions() {
@@ -421,9 +438,11 @@ export default {
     },
     visualizeTradeRecords() {
       this.chart.removeShape()
-      this.dealRecords.forEach((i, idx) => {
-        this.chart.createShape(makeHoldingSegment(i), 'panel' + idx)
-      })
+      this.dealRecords
+        .filter((deal) => deal.closeTrade.contract.unifiedsymbol === this.unifiedSymbolOfChart)
+        .forEach((i) => {
+          this.chart.createShape(makeHoldingSegment(i), 'candle_pane')
+        })
     },
     close() {
       Object.assign(this.$data, this.$options.data())
