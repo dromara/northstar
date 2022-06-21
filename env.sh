@@ -16,6 +16,7 @@ then
 	tar -xvf node-v14.19.1-linux-x64.tar.xz 
 	rm -f node-v14.19.1-linux-x64.tar.xz 
 	ln -sf /home/quantit/northstar-env/node-v14.19.1-linux-x64/bin/* /usr/local/bin/
+	npm config set registry https://registry.npm.taobao.org
 else
 	echo "Node16已安装"
 	node -v
