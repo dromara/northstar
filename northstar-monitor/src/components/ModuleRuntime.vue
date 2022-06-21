@@ -315,12 +315,14 @@ export default {
       const winningDeals = this.dealRecords.filter((item) => item.dealProfit > 0)
       const lossDeals = this.dealRecords.filter((item) => item.dealProfit <= 0)
       const avgProfit = winningDeals.length
-        ? jStat.sum(winningDeals.map((item) => item.dealProfit)) / winningDeals.length
+        ? (jStat.sum(winningDeals.map((item) => item.dealProfit)) / winningDeals.length).toFixed(0)
         : '0'
       const avgLoss = lossDeals.length
-        ? jStat.sum(lossDeals.map((item) => item.dealProfit)) / lossDeals.length
+        ? Math.abs(jStat.sum(lossDeals.map((item) => item.dealProfit)) / lossDeals.length).toFixed(
+            0
+          )
         : '0'
-      return `${avgProfit.toFixed(1)} : ${Math.abs(avgLoss).toFixed(1)}`
+      return `${avgProfit} : ${avgLoss}`
     },
     holdingPositions() {
       if (!this.activeAccount) return []

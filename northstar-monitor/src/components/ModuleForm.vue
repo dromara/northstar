@@ -62,7 +62,7 @@
               <el-input-number :disabled="readOnly" v-model="form.numOfMinPerBar" :min="1" />
               <span class="ml-10">分钟</span>
             </el-form-item>
-            <el-form-item label="数据预热天数">
+            <el-form-item label="预热数据量">
               <el-input-number
                 v-model="form.daysOfDataForPreparation"
                 :min="0"
