@@ -63,6 +63,7 @@
 ```
 curl https://gitee.com/dromara/northstar/raw/master/env.sh | sh
 ```
+**注意：所有northstar相关的包统一放在 /home/quantit 目录下**
 
 **Windows环境下**，初始化系统环境。打开powershell命令行窗口，输入以下命令（部分系统可能报错，需要把脚本下载到本地后右键选择powershell执行）
 ```
