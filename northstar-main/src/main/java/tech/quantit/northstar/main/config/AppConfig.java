@@ -1,5 +1,7 @@
 package tech.quantit.northstar.main.config;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -13,10 +15,12 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -111,9 +115,18 @@ public class AppConfig implements WebMvcConfigurer {
 	
 	@Bean
 	public ContractManager contractManager(IContractRepository contractRepo) throws IOException {
-		Resource res = new ClassPathResource("ContractDefinition.csv");
+		String fileName = "ContractDefinition.csv";
+		String tempPath = System.getProperty("java.io.tmpdir") + "Northstar_" + System.currentTimeMillis();
+		String tempFilePath = tempPath + File.separator + fileName;
+		Resource resource = new DefaultResourceLoader().getResource("classpath:" + fileName);
+		File tempFile = new File(tempFilePath);
+		FileUtils.forceMkdirParent(tempFile);
+		try(FileOutputStream fos = new FileOutputStream(tempFile)){
+			IOUtils.copy(resource.getInputStream(), fos);
+		}
+
 		ContractDefinitionReader reader = new ContractDefinitionReader();
-		List<ContractDefinition> contractDefs = reader.load(res.getFile());
+		List<ContractDefinition> contractDefs = reader.load(tempFile);
 		ContractManager mgr = new ContractManager(contractDefs);
 		findAllContract(contractRepo).forEach(mgr::addContract);
 		return mgr;
