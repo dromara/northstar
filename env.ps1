@@ -82,6 +82,8 @@ If(checkCommand node.exe 14*){
 	downloadAndInstallMSI $Node14DownloadUrl $BasePath node-v14.19.0-x64.msi
 	$nodePath = "C:\Program Files\nodejs"
 	setEnvironment Node $nodePath
+	npm config set registry https://registry.npm.taobao.org
+	npm config set unsafe-perm=true
 }
 
 #Redis环境安装
