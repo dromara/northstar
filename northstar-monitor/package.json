@@ -8,8 +8,7 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
-    "e2e": "npx cypress open",
-    "postinstall": "echo doing postinstall"
+    "e2e": "npx cypress open"
   },
   "dependencies": {
     "axios": "^0.21.1",
