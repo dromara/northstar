@@ -17,7 +17,9 @@ public class PlayBackContext {
      */
     private PlaybackDescription playbackDescription;
 
-    // TICK
+    /**
+     * 生产tick
+     */
     private List<CoreField.TickField> tickList;
 
     public List<CoreField.TickField> getTickList() {
