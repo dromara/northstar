@@ -17,6 +17,8 @@ public abstract class MultiValueIndicator implements BarDataAware {
 
 	private Map<String, Indicator> indicatorMap = new HashMap<>();
 	
+	private String unifiedSymbol;
+	
 	/**
 	 * 获取指标回溯值
 	 * @param name				指标值名称
@@ -55,7 +57,27 @@ public abstract class MultiValueIndicator implements BarDataAware {
 		}
 	}
 	
+	/**
+	 * 指标绑定合约
+	 * @return
+	 */
+	public String bindedUnifiedSymbol() {
+		return unifiedSymbol;
+	}
+	
+	/**
+	 * 指标是否已完成初始化
+	 * @return
+	 */
+	public boolean isReady() {
+		return indicatorMap.entrySet().stream()
+				.filter(e -> !e.getValue().isReady())
+				.toList()
+				.isEmpty();
+	}
+	
 	protected void setIndicator(String name, Indicator indicator) {
+		unifiedSymbol = indicator.bindedUnifiedSymbol();
 		indicatorMap.put(name, indicator);
 	}
 	

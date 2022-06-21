@@ -1,10 +1,14 @@
 package tech.quantit.northstar.strategy.api.indicator;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import lombok.extern.slf4j.Slf4j;
+import tech.quantit.northstar.common.constant.IndicatorType;
+import tech.quantit.northstar.common.model.TimeSeriesValue;
 import tech.quantit.northstar.strategy.api.BarDataAware;
 import tech.quantit.northstar.strategy.api.utils.collection.RingArray;
 import xyz.redtorch.pb.CoreField.BarField;
@@ -26,14 +30,12 @@ public abstract class Indicator implements BarDataAware {
 	 * 指标取值类型
 	 */
 	private ValueType valType;
-	/**
-	 * 指标类别
-	 */
-	private Category category = Category.UNKNOWN;
 	
 	private String unifiedSymbol;
 	
 	private int size;
+	
+	private int actualUpdate;
 	
 	protected Indicator(String unifiedSymbol, int size, ValueType valType) {
 		refVals = new RingArray<>(size);
@@ -43,12 +45,6 @@ public abstract class Indicator implements BarDataAware {
 		this.unifiedSymbol = unifiedSymbol;
 		this.valType = valType;
 		this.size = size;
-		this.category = switch(valType) {
-		case VOL -> Category.VOLUME_BASE;
-		case OPEN_INTEREST -> Category.INTEREST_BASE;
-		case NOT_SET -> Category.UNKNOWN;
-		default -> Category.PRICE_BASE;
-		};
 	}
 	
 	/**
@@ -119,12 +115,22 @@ public abstract class Indicator implements BarDataAware {
 	 * @param newVal
 	 */
 	public void updateVal(double newVal, long timestamp) {
-		TimeSeriesValue tsv = refVals.get(1);
-		tsv.setTimestamp(timestamp);
-		tsv.setValue(handleUpdate(newVal));
-		refVals.update(tsv);
+		refVals.update(new TimeSeriesValue(handleUpdate(newVal), timestamp));
+		actualUpdate++;
 	}
 	
+	/**
+	 * 指标是否已完成初始化
+	 * @return
+	 */
+	public boolean isReady() {
+		return actualUpdate >= size;
+	}
+	
+	/**
+	 * 指标最大值
+	 * @return
+	 */
 	public TimeSeriesValue highestVal() {
 		TimeSeriesValue highest = null;
 		for(Object obj : refVals.toArray()) {
@@ -137,6 +143,10 @@ public abstract class Indicator implements BarDataAware {
 		return highest; 
 	}
 	
+	/**
+	 * 指标最小值
+	 * @return
+	 */
 	public TimeSeriesValue lowestVal() {
 		TimeSeriesValue lowest = null;
 		for(Object obj : refVals.toArray()) {
@@ -149,14 +159,29 @@ public abstract class Indicator implements BarDataAware {
 		return lowest;
 	}
 	
-	public int length() {
-		return size;
+	/**
+	 * 指标绑定合约
+	 * @return
+	 */
+	public String bindedUnifiedSymbol() {
+		return unifiedSymbol;
 	}
 	
-	public Category getCategory() {
-		return category;
+	public IndicatorType getType() {
+		return switch(valType) {
+		case OPEN,CLOSE,HIGH,LOW -> IndicatorType.PRICE_BASE;
+		case VOL -> IndicatorType.VOLUME_BASE;
+		case OPEN_INTEREST -> IndicatorType.OPEN_INTEREST_BASE;
+		default -> IndicatorType.UNKNOWN;
+		};
 	}
-
+	
+	public List<TimeSeriesValue> getData(){
+		return Stream.of(refVals.toArray())
+				.map(TimeSeriesValue.class::cast)
+				.toList();
+	}
+	
 	/**
 	 * 更新算法实现
 	 * @param newVal
@@ -200,27 +225,4 @@ public abstract class Indicator implements BarDataAware {
 		OPEN_INTEREST;
 	}
 	
-	/**
-	 * 指标类型
-	 * @author Administrator
-	 *
-	 */
-	public enum Category {
-		/**
-		 * 基于价格
-		 */
-		PRICE_BASE,
-		/**
-		 * 基于成交量
-		 */
-		VOLUME_BASE,
-		/**
-		 * 基于持仓量
-		 */
-		INTEREST_BASE,
-		/**
-		 * 未知
-		 */
-		UNKNOWN;
-	}
 }

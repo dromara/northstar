@@ -15,7 +15,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
@@ -47,7 +46,7 @@ class DataServiceManagerTest {
 		when(rest.exchange(any(URI.class), any(HttpMethod.class), any(HttpEntity.class), any(Class.class)))
 			.thenReturn(mockResp2);
 		
-		List<BarField> result = mgr.getMinutelyData("test", LocalDate.now(), LocalDate.now());
+		List<BarField> result = mgr.getDailyData("test", LocalDate.now(), LocalDate.now());
 		assertThat(result).hasSize(2);
 		assertThat(result.get(0).getActionDay()).isEqualTo("20220214");
 		assertThat(result.get(0).getActionTime()).isEqualTo("09:00:00");
@@ -57,7 +56,7 @@ class DataServiceManagerTest {
 	}
 	
 	@Test
-	void testMinData() {
+	void testHourlyData() {
 		RestTemplate rest = mock(RestTemplate.class);
 		ResponseEntity<String> mockResp = mock(ResponseEntity.class);
 		when(mockResp.getBody()).thenReturn("");
@@ -73,10 +72,10 @@ class DataServiceManagerTest {
 		when(rest.exchange(any(URI.class), any(HttpMethod.class), any(HttpEntity.class), any(Class.class)))
 			.thenReturn(mockResp2);
 		
-		List<BarField> result = mgr.getMinutelyData("test", LocalDate.now(), LocalDate.now());
-		assertThat(result).hasSize(7);
+		List<BarField> result = mgr.getHourlyData("test", LocalDate.now(), LocalDate.now());
+		assertThat(result).hasSize(6);
 		assertThat(result.get(0).getActionDay()).isEqualTo("20220214");
-		assertThat(result.get(0).getActionTime()).isEqualTo("21:00:00");
+		assertThat(result.get(0).getActionTime()).isEqualTo("22:00:00");
 		assertThat(result.get(0).getTradingDay()).isEqualTo("20220215");
 		assertThat(result.get(0).getActionTimestamp() > 0).isTrue();
 		assertThat(result.get(0).getUnifiedSymbol()).isEqualTo("rb2205@SHFE");

@@ -12,8 +12,6 @@ import java.util.function.Consumer;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 
-import lombok.Data;
-import lombok.Setter;
 import tech.quantit.northstar.common.IContractManager;
 import tech.quantit.northstar.common.TickDataAware;
 import tech.quantit.northstar.common.constant.ClosingPolicy;
@@ -35,7 +33,6 @@ import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TickField;
 import xyz.redtorch.pb.CoreField.TradeField;
 
-@Data
 public class SimAccount implements TickDataAware{
 	
 	private String gatewayId;
@@ -59,29 +56,28 @@ public class SimAccount implements TickDataAware{
 	
 	private IContractManager contractMgr;
 	
-	@Setter
-	protected Runnable savingCallback;
-	@Setter
+	private Consumer<SimAccountDescription> savingCallback;
+	
 	private FastEventEngine feEngine;
+	
 	protected Consumer<TradeRequest> openCallback = req -> {
-		savingCallback.run();
 		openReqMap.remove(req.originOrderId());
 	};
 	Consumer<TradeRequest> closeCallback = req -> {
-		savingCallback.run();
 		closeReqMap.remove(req.originOrderId());
 		OrderField order = req.getOrder();
 		getClosingMap(order.getDirection()).values().stream().forEach(tp -> tp.onOrder(order));;
 	};
 	
-	public SimAccount(String gatewayId,  IContractManager contractMgr) {
+	public SimAccount(String gatewayId,  IContractManager contractMgr, FastEventEngine feEngine, Consumer<SimAccountDescription> savingCallback) {
 		this.gatewayId = gatewayId;
 		this.contractMgr = contractMgr;
+		this.savingCallback = savingCallback;
+		this.feEngine = feEngine;
 	}
 	
-	public SimAccount(SimAccountDescription simAccDescription, IContractManager contractMgr) throws InvalidProtocolBufferException {
-		this.gatewayId = simAccDescription.getGatewayId();
-		this.contractMgr = contractMgr;
+	public SimAccount(SimAccountDescription simAccDescription, IContractManager contractMgr, FastEventEngine feEngine, Consumer<SimAccountDescription> savingCallback) throws InvalidProtocolBufferException {
+		this(simAccDescription.getGatewayId(), contractMgr, feEngine, savingCallback);
 		this.totalCloseProfit = simAccDescription.getTotalCloseProfit();
 		this.totalCommission = simAccDescription.getTotalCommission();
 		this.totalDeposit = simAccDescription.getTotalDeposit();
@@ -123,12 +119,16 @@ public class SimAccount implements TickDataAware{
 		return longPositionProfit + shortPositionProfit;
 	}
 	
+	public String gatewayId() {
+		return gatewayId;
+	}
+	
 	public void depositMoney(int money) {
 		if(money < 0) {
 			throw new IllegalArgumentException("金额不少于0");
 		}
 		totalDeposit += money;
-		savingCallback.run();
+		savingCallback.accept(getDescription());
 		feEngine.emitEvent(NorthstarEventType.ACCOUNT, accountField());
 	}
 	
@@ -140,18 +140,18 @@ public class SimAccount implements TickDataAware{
 			throw new IllegalStateException("余额不足");
 		}
 		totalWithdraw += money;
-		savingCallback.run();
+		savingCallback.accept(getDescription());
 		feEngine.emitEvent(NorthstarEventType.ACCOUNT, accountField());
 	}
 
 	public AccountField accountField() {
 		return AccountField.newBuilder()
-				.setAccountId(getGatewayId())
+				.setAccountId(gatewayId)
 				.setAvailable(available())
 				.setBalance(balance())
 				.setCloseProfit(totalCloseProfit)
 				.setCommission(totalCommission)
-				.setGatewayId(getGatewayId())
+				.setGatewayId(gatewayId)
 				.setCurrency(CurrencyEnum.CNY)
 				.setName("模拟账户")
 				.setDeposit(totalDeposit)
@@ -232,6 +232,7 @@ public class SimAccount implements TickDataAware{
 			tMap.put(trade.getContract(), new TradePosition(List.of(trade), ClosingPolicy.FIFO));
 		}
 		onTrade(trade);
+		savingCallback.accept(getDescription());
 	}
 	
 	public void onCloseTrade(TradeField trade) {
@@ -241,6 +242,7 @@ public class SimAccount implements TickDataAware{
 		}
 		tMap.get(trade.getContract()).onTrade(trade);
 		onTrade(trade);
+		savingCallback.accept(getDescription());
 	}
 
 	private void onTrade(TradeField trade) {

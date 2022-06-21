@@ -202,14 +202,6 @@ class ModuleControllerTest {
 	}
 
 	@Test
-	void testGetModuleData() throws UnsupportedEncodingException, Exception {
-		testCreateModule();
-		mockMvc.perform(get("/northstar/module/data?name=testModule").session(session))
-			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
-	}
-
-	@Test
 	void testGetDealRecords() throws UnsupportedEncodingException, Exception {
 		testCreateModule();
 		mockMvc.perform(get("/northstar/module/deal/records?name=testModule").session(session))

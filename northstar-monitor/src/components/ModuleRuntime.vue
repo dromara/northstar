@@ -125,11 +125,41 @@
       </div>
       <div class="kline-wrapper">
         <div class="kline-header">模组当前引用的K线数据</div>
-
-        <el-tabs v-model="activeTab" stretch @tab-click="updateChart">
-          <el-tab-pane :label="symbol" :name="symbol" v-for="(symbol, i) in symbolOptions" :key="i">
-          </el-tab-pane>
-        </el-tabs>
+        <div>
+          <el-select class="ml-10 mt-5" v-model="unifiedSymbolOfChart" placeholder="请选择合约">
+            <el-option
+              v-for="(item, i) in contractOptions"
+              :key="i"
+              :label="item"
+              :value="item"
+            ></el-option>
+          </el-select>
+          <el-select class="ml-10 mt-5" v-model="indicator" placeholder="请选择指标">
+            <el-option
+              v-for="(item, i) in indicatorOptions"
+              :key="i"
+              :label="item"
+              :value="item"
+            ></el-option>
+          </el-select>
+          <el-select class="ml-10 mt-5 mr-10" v-model="paneId" placeholder="请选择绘图位置">
+            <el-option :key="1" label="主图" value="candle_pane" />
+            <el-option :key="2" label="副图1" value="pane1" />
+            <el-option :key="3" label="副图2" value="pane2" />
+            <el-option :key="4" label="副图3" value="pane3" />
+          </el-select>
+          <el-button icon="el-icon-plus" title="绘制指标" @click.native="addIndicator"></el-button>
+          <el-button
+            icon="el-icon-minus"
+            title="移除指标"
+            @click.native="removeIndicator"
+          ></el-button>
+          <el-button
+            :icon="`${holdingVisibleOnChart ? 'el-icon-data-board' : 'el-icon-data-line'}`"
+            :title="`${holdingVisibleOnChart ? '隐藏持仓线' : '显示持仓线'}`"
+            @click.native="holdingVisibleOnChart = !holdingVisibleOnChart"
+          ></el-button>
+        </div>
         <div
           id="module-k-line"
           class="kline-body"
@@ -144,37 +174,25 @@
 import ModulePositionForm from './ModulePositionForm.vue'
 import { dispose, init } from 'klinecharts'
 import volumePure from '@/lib/indicator/volume-pure'
+import simpleVal from '@/lib/indicator/simple-value'
 import moduleApi from '@/api/moduleApi'
-import { KLineUtils } from '@/utils.js'
+import KLineUtils from '@/utils/kline-utils.js'
 import { jStat } from 'jstat'
 
 import { BarField, PositionField, TradeField } from '@/lib/xyz/redtorch/pb/core_field_pb'
 
-const convertDataRef = (dataRefSrcMap) => {
-  const resultMap = {}
-  Object.keys(dataRefSrcMap).forEach((k) => {
-    if (!(dataRefSrcMap[k] instanceof Array)) {
-      return
-    }
-    resultMap[k] = dataRefSrcMap[k]
-      .map((byteData) => BarField.deserializeBinary(byteData).toObject())
-      .map(KLineUtils.createFromBar)
-  })
-  return resultMap
-}
-
-const makeShape = (deal) => {
+const makeHoldingSegment = (deal) => {
   return {
     name: 'segment',
     points: [
-      { timestamp: deal.openTimestamp, value: deal.openPrice },
-      { timestamp: deal.closeTimestamp, value: deal.closePrice }
+      { timestamp: deal.openTrade.tradetimestamp, value: deal.openPrice },
+      { timestamp: deal.closeTrade.tradetimestamp, value: deal.closePrice }
     ],
     lock: true,
     styles: {
       line: {
         color:
-          deal.direction === 'PD_Long' ? '#f00' : deal.direction === 'PD_Short' ? '#0f0' : '#00f',
+          deal.direction === '多' ? '#ff0000' : deal.direction === '空' ? '#00ff00' : '#0000ff',
         size: 2
       }
     }
@@ -202,14 +220,18 @@ export default {
   data() {
     return {
       positionFormVisible: false,
+      holdingVisibleOnChart: false,
       moduleTab: 'holding',
-      activeTab: '',
       activeAccount: '',
       dealRecords: [],
       barDataMap: {},
       chart: null,
       loading: false,
-      moduleRuntime: ''
+      moduleRuntime: '',
+      unifiedSymbolOfChart: '',
+      paneId: '',
+      indicator: '',
+      indicatorMap: {}
     }
   },
   watch: {
@@ -217,8 +239,10 @@ export default {
       if (val) {
         this.moduleRuntime = this.moduleRuntimeSrc
         this.activeAccount = this.accountOptions[0]
-        this.refresh()
-        console.log(this.holdingPositions)
+        setTimeout(() => {
+          this.initChart()
+          this.refresh()
+        }, 100)
       }
     },
     moduleTab: function (val) {
@@ -227,6 +251,18 @@ export default {
           let table = this.$refs.dealTbl
           table.bodyWrapper.scrollTop = table.bodyWrapper.scrollHeight
         }, 50)
+      }
+    },
+    unifiedSymbolOfChart: function (val) {
+      if (val) {
+        this.updateChart()
+      }
+    },
+    holdingVisibleOnChart: function (val) {
+      if (val) {
+        this.visualizeTradeRecords()
+      } else {
+        this.chart.removeShape()
       }
     }
   },
@@ -278,9 +314,15 @@ export default {
       if (!this.dealRecords.length) return 'N/A'
       const winningDeals = this.dealRecords.filter((item) => item.dealProfit > 0)
       const lossDeals = this.dealRecords.filter((item) => item.dealProfit <= 0)
-      const avgProfit = jStat.sum(winningDeals.map((item) => item.dealProfit))
-      const avgLoss = jStat.sum(lossDeals.map((item) => item.dealProfit))
-      return `${avgProfit.toFixed(1)} : ${Math.abs(avgLoss).toFixed(1)}`
+      const avgProfit = winningDeals.length
+        ? (jStat.sum(winningDeals.map((item) => item.dealProfit)) / winningDeals.length).toFixed(0)
+        : '0'
+      const avgLoss = lossDeals.length
+        ? Math.abs(jStat.sum(lossDeals.map((item) => item.dealProfit)) / lossDeals.length).toFixed(
+            0
+          )
+        : '0'
+      return `${avgProfit} : ${avgLoss}`
     },
     holdingPositions() {
       if (!this.activeAccount) return []
@@ -288,7 +330,23 @@ export default {
         PositionField.deserializeBinary(data).toObject()
       )
       return positions.filter((item) => item.position > 0)
+    },
+    contractOptions() {
+      return Object.keys(this.barDataMap)
+    },
+    indicatorOptions() {
+      if (!this.moduleRuntime.indicatorMap) return []
+      return Object.keys(this.moduleRuntime.indicatorMap).filter(
+        (key) => this.moduleRuntime.indicatorMap[key].unifiedSymbol === this.unifiedSymbolOfChart
+      )
     }
+  },
+  created() {
+    window.addEventListener('resize', () => {
+      if (this.chart) {
+        this.chart.resize()
+      }
+    })
   },
   methods: {
     refresh() {
@@ -298,6 +356,14 @@ export default {
     loadRuntime() {
       moduleApi.getModuleRuntime(this.module.moduleName).then((result) => {
         this.moduleRuntime = result
+        this.barDataMap = {}
+        Object.keys(result.barDataMap).forEach((key) => {
+          this.barDataMap[key] = result.barDataMap[key]
+            .map((data) => BarField.deserializeBinary(data).toObject())
+            .map(KLineUtils.createFromBar)
+        })
+        this.updateChart()
+        this.updateIndicator()
       })
     },
     loadDealRecord() {
@@ -319,65 +385,66 @@ export default {
         })
       })
     },
-    async loadRefData() {
+    initChart() {
       const kLineChart = init(`module-k-line`)
       kLineChart.addTechnicalIndicatorTemplate(volumePure)
-      kLineChart.createTechnicalIndicator('CJL', false)
+      kLineChart.createTechnicalIndicator('CJL', false, { id: 'pane1' })
       kLineChart.setStyleOptions(KLineUtils.getThemeOptions('dark'))
       this.chart = kLineChart
-      this.barDataMap = await this.loadData(this.moduleName, new Date().getTime())
-      this.activeTab = this.symbolOptions.length ? this.symbolOptions[0] : ''
-      this.updateChart()
     },
     async onSave() {
       setTimeout(this.refresh, 500)
     },
     updateChart() {
-      this.chart.clearData()
-      if (!this.barDataMap[this.activeTab] || !this.barDataMap[this.activeTab].length) {
-        this.$message.warning('数据为空')
-        return
+      if (this.unifiedSymbolOfChart) {
+        this.chart.removeTechnicalIndicator('candle_pane')
+        this.chart.applyNewData(this.barDataMap[this.unifiedSymbolOfChart])
       }
-
-      this.chart.applyNewData(this.barDataMap[this.activeTab])
-      this.chart.loadMore(async (timestamp) => {
-        console.log('加载更多数据')
-        if (typeof timestamp !== 'number') {
-          console.warn('忽略一个不是数值的时间戳: ' + timestamp)
-          return
-        }
-        await new Promise((r) => setTimeout(r, 1000))
-        const dataSet = await this.loadData(this.moduleName, timestamp)
-        const deltaData = dataSet[this.activeTab]
-        if (this.chart) {
-          this.chart.applyMoreData(deltaData || [], !!deltaData)
-          Object.keys(dataSet)
-            .filter((i) => !!deltaData[i])
-            .forEach((i) => {
-              this.barDataMap[i] = deltaData[i].concat(this.barDataMap[i] || [])
-            })
-          this.tradeVisualize()
-        }
+    },
+    addIndicator() {
+      if (!this.indicator) return
+      if (!this.paneId) return
+      const indicatorData = this.moduleRuntime.indicatorMap[this.indicator]
+      const colorIndex = Object.keys(this.moduleRuntime.indicatorMap).indexOf(this.indicator)
+      this.indicatorMap[this.indicator] = this.paneId
+      this.renderIndicator(this.indicator, this.paneId, indicatorData, colorIndex)
+    },
+    removeIndicator() {
+      if (!this.indicator) return
+      if (!this.paneId) return
+      this.chart.removeTechnicalIndicator(
+        this.indicatorMap[this.indicator],
+        'VAL_' + this.indicator
+      )
+      delete this.indicatorMap[this.indicator]
+      console.log('移除指标', this.indicator)
+    },
+    updateIndicator() {
+      Object.values(this.indicatorMap).forEach((pane) => this.chart.removeTechnicalIndicator(pane))
+      Object.keys(this.indicatorMap).forEach((indicatorName) => {
+        const indicatorData = this.moduleRuntime.indicatorMap[indicatorName]
+        const colorIndex = Object.keys(this.moduleRuntime.indicatorMap).indexOf(indicatorName)
+        this.renderIndicator(
+          indicatorName,
+          this.indicatorMap[indicatorName],
+          indicatorData,
+          colorIndex
+        )
       })
-      this.tradeVisualize()
     },
-    async loadData(moduleName, timestamp) {
-      this.loading = true
-      try {
-        const result = await moduleApi.getModuleDataRef(moduleName, timestamp)
-        return convertDataRef(result)
-      } catch (e) {
-        this.$message.error(e.message)
-        throw new Error(e)
-      } finally {
-        this.loading = false
-      }
+    renderIndicator(name, paneId, indicatorData, colorIndex) {
+      this.chart.addTechnicalIndicatorTemplate(simpleVal(name, indicatorData, colorIndex))
+      this.chart.createTechnicalIndicator('VAL_' + name, true, {
+        id: paneId
+      })
     },
-    tradeVisualize() {
+    visualizeTradeRecords() {
       this.chart.removeShape()
-      this.dealRecords.forEach((i, idx) => {
-        this.chart.createShape(makeShape(i), 'panel' + idx)
-      })
+      this.dealRecords
+        .filter((deal) => deal.closeTrade.contract.unifiedsymbol === this.unifiedSymbolOfChart)
+        .forEach((i) => {
+          this.chart.createShape(makeHoldingSegment(i), 'candle_pane')
+        })
     },
     close() {
       Object.assign(this.$data, this.$options.data())
@@ -393,13 +460,16 @@ export default {
   height: calc(100vh - 382px);
 }
 .kline-wrapper {
-  height: 100%;
   width: 100%;
   border-left: 1px solid;
+  display: flex;
+  flex-direction: column;
+}
+#module-k-line {
+  flex: 1;
 }
 .module-rt-wrapper {
   display: flex;
-  height: 100%;
   border-top: 1px solid;
   border-bottom: 1px solid;
 }
@@ -410,9 +480,6 @@ export default {
 .cell-content {
   position: absolute;
   bottom: 0;
-}
-.kline-body {
-  height: calc(100% - 56px);
 }
 .kline-header {
   margin-left: 8px;

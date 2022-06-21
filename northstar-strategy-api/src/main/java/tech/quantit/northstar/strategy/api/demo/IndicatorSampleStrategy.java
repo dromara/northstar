@@ -34,6 +34,13 @@ public class IndicatorSampleStrategy extends AbstractStrategy	// 为了简化代
 	
 	@Override
 	protected void onBar(BarField bar) {
+		log.debug("{} K线数据： 开 [{}], 高 [{}], 低 [{}], 收 [{}]", 
+				bar.getUnifiedSymbol(), bar.getOpenPrice(), bar.getHighPrice(), bar.getLowPrice(), bar.getClosePrice());
+		// 确保指标已经准备好再开始交易
+		if(!fastLine.isReady() || !slowLine.isReady()) {
+			log.debug("指标未准备就绪");
+			return;
+		}
 		switch (ctx.getState()) {
 			case EMPTY -> {
 				// 快线在慢线之上开多，快线在慢线之下开空
@@ -75,13 +82,15 @@ public class IndicatorSampleStrategy extends AbstractStrategy	// 为了简化代
 
 	public static class InitParams extends DynamicParams {			
 		
+		@Setting(value="指标合约", order=0)
+		private String indicatorSymbol;
+		
 		@Setting(value="快线周期", order=1)		
 		private int fast;						
 		
 		@Setting(value="慢线周期", order=2)		
 		private int slow;
 		
-		@Setting(value="指标合约", order=3)
-		private String indicatorSymbol;
+		
 	}
 }

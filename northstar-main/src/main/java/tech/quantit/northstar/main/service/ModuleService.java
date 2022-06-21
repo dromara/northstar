@@ -14,6 +14,7 @@ import org.springframework.context.ApplicationContext;
 
 import com.alibaba.fastjson.JSONObject;
 
+import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.constant.Constants;
 import tech.quantit.northstar.common.constant.DateTimeConstant;
 import tech.quantit.northstar.common.constant.GatewayType;
@@ -26,7 +27,6 @@ import tech.quantit.northstar.common.model.DynamicParams;
 import tech.quantit.northstar.common.model.MockTradeDescription;
 import tech.quantit.northstar.common.model.ModuleAccountDescription;
 import tech.quantit.northstar.common.model.ModuleAccountRuntimeDescription;
-import tech.quantit.northstar.common.model.ModuleCalculatedDataFrame;
 import tech.quantit.northstar.common.model.ModuleDealRecord;
 import tech.quantit.northstar.common.model.ModuleDescription;
 import tech.quantit.northstar.common.model.ModulePositionDescription;
@@ -51,6 +51,7 @@ import xyz.redtorch.pb.CoreField.TradeField;
  * @author KevinHuangwl
  *
  */
+@Slf4j
 public class ModuleService implements InitializingBean {
 	
 	private ApplicationContext ctx;
@@ -134,7 +135,13 @@ public class ModuleService implements InitializingBean {
 						.positionDescription(new ModulePositionDescription())
 						.build())
 				.collect(Collectors.toMap(ModuleAccountRuntimeDescription::getAccountId, mard -> mard));
-		ModuleRuntimeDescription mad = new ModuleRuntimeDescription(md.getModuleName(), false, ModuleState.EMPTY, accRtsMap, new JSONObject());
+		ModuleRuntimeDescription mad = ModuleRuntimeDescription.builder()
+				.moduleName(md.getModuleName())
+				.enabled(false)
+				.moduleState(ModuleState.EMPTY)
+				.accountRuntimeDescriptionMap(accRtsMap)
+				.dataState(new JSONObject())
+				.build();
 		moduleRepo.saveRuntime(mad);
 		moduleRepo.saveSettings(md);
 		loadModule(md);
@@ -188,11 +195,12 @@ public class ModuleService implements InitializingBean {
 			if(!holidays.contains(date)) {
 				daysOfDataForPreparation--;
 			}
-			date.minusDays(1);
+			date = date.minusDays(1);
 		}
 		
 		IModule module = moduleFactory.newInstance(md, mrd);
 		module.initModule();
+		log.info("模组[{}] 初始化数据起始计算日为：{}", md.getModuleName(), date);
 		// 模组数据初始化
 		while(LocalDate.now().isAfter(date)) {
 			LocalDate start = utils.getFridayOfThisWeek(date.minusWeeks(1));
@@ -206,7 +214,6 @@ public class ModuleService implements InitializingBean {
 			}
 			date = date.plusWeeks(1);
 		}
-		;
 		module.setEnabled(mrd.isEnabled());
 		moduleMgr.addModule(module);
 	}
@@ -235,16 +242,6 @@ public class ModuleService implements InitializingBean {
 	 */
 	public ModuleRuntimeDescription getModuleRealTimeInfo(String name) {
 		return moduleMgr.getModule(name).getRuntimeDescription();
-	}
-	
-	/**
-	 * 获取模组计算值
-	 * @param name
-	 * @param startRefTimestamp
-	 * @return
-	 */
-	public List<ModuleCalculatedDataFrame> getModuleData(String name) {
-		return moduleMgr.getModule(name).getCalculatedData();
 	}
 	
 	/**
@@ -284,6 +281,5 @@ public class ModuleService implements InitializingBean {
 			loadModule(md);
 		}
 	}
-
 	
 }

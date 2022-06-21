@@ -8,7 +8,7 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
-    "e2e": "./node_modules/.bin/cypress open"
+    "e2e": "npx cypress open"
   },
   "dependencies": {
     "axios": "^0.21.1",
@@ -18,7 +18,7 @@
     "eslint-plugin-vue": "^6.2.2",
     "google-protobuf": "^3.17.0-rc.1",
     "jstat": "^1.9.5",
-    "klinecharts": "^8.1.1",
+    "klinecharts": "^8.3.6",
     "moment": "^2.29.1",
     "socket.io-client": "^2.3.1",
     "vue": "^2.6.14",
@@ -36,7 +36,6 @@
     "@vue/eslint-config-prettier": "^6.0.0",
     "babel-eslint": "^10.1.0",
     "cross-env": "^7.0.3",
-    "cypress": "^9.6.1",
     "eslint": "^7.32.0",
     "eslint-plugin-prettier": "^3.3.1",
     "node-sass": "^4.12.0",

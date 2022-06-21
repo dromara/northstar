@@ -3,8 +3,8 @@ package tech.quantit.northstar.domain.module;
 import java.util.List;
 import java.util.function.Consumer;
 
+import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.event.NorthstarEvent;
-import tech.quantit.northstar.common.model.ModuleCalculatedDataFrame;
 import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
 import tech.quantit.northstar.strategy.api.IModule;
 import tech.quantit.northstar.strategy.api.IModuleContext;
@@ -29,6 +29,7 @@ import xyz.redtorch.pb.CoreField.TradeField;
  * @author KevinHuangwl
  *
  */
+@Slf4j
 public class TradeModule implements IModule {
 	
 	private String name;
@@ -53,7 +54,7 @@ public class TradeModule implements IModule {
 	@Override
 	public void setEnabled(boolean enabled) {
 		this.enabled = enabled;
-		onRuntimeChangeCallback.accept(getRuntimeDescription());
+		onRuntimeChangeCallback.accept(ctx.getRuntimeDescription(false));
 	}
 
 	@Override
@@ -68,6 +69,14 @@ public class TradeModule implements IModule {
 	
 	@Override
 	public void initData(List<BarField> historyBars) {
+		if(historyBars.isEmpty()) {
+			log.debug("[{}] 初始化数据为空", name);
+			return;
+		}
+		
+		log.debug("[{}] 合约{} 初始化数据 {} {} -> {} {}", name, historyBars.get(0).getUnifiedSymbol(),
+				historyBars.get(0).getActionDay(), historyBars.get(0).getActionTime(), 
+				historyBars.get(historyBars.size() - 1).getActionDay(), historyBars.get(historyBars.size() - 1).getActionTime());
 		boolean flag = enabled;
 		enabled = false;
 		for(BarField bar : historyBars) {
@@ -92,12 +101,7 @@ public class TradeModule implements IModule {
 
 	@Override
 	public ModuleRuntimeDescription getRuntimeDescription() {
-		return ctx.getRuntimeDescription();
-	}
-
-	@Override
-	public List<ModuleCalculatedDataFrame> getCalculatedData() {
-		return ctx.getModuleData();
+		return ctx.getRuntimeDescription(true);
 	}
 
 }

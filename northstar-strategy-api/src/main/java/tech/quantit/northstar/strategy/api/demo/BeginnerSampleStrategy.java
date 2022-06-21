@@ -13,6 +13,7 @@ import tech.quantit.northstar.common.constant.SignalOperation;
 import tech.quantit.northstar.common.model.DynamicParams;
 import tech.quantit.northstar.common.model.Setting;
 import tech.quantit.northstar.strategy.api.IModuleContext;
+import tech.quantit.northstar.strategy.api.IModuleStrategyContext;
 import tech.quantit.northstar.strategy.api.TradeStrategy;
 import tech.quantit.northstar.strategy.api.annotation.StrategicComponent;
 import tech.quantit.northstar.strategy.api.constant.PriceType;
@@ -38,7 +39,7 @@ public class BeginnerSampleStrategy implements TradeStrategy{
 	
 	private InitParams params;	// 策略的参数配置信息
 	
-	private IModuleContext ctx;		// 模组的操作上下文
+	private IModuleStrategyContext ctx;		// 模组的操作上下文
 	
 	private JSONObject inspectableState; 	// 可透视状态计算信息
 	

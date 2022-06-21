@@ -62,7 +62,7 @@
               <el-input-number :disabled="readOnly" v-model="form.numOfMinPerBar" :min="1" />
               <span class="ml-10">分钟</span>
             </el-form-item>
-            <el-form-item label="数据预热天数">
+            <el-form-item label="预热数据量">
               <el-input-number
                 v-model="form.daysOfDataForPreparation"
                 :min="0"
@@ -173,7 +173,8 @@ const initComponent = async (component, arr) => {
   const paramsMap = await moduleApi.componentParams(component)
   arr.push({
     componentMeta: component,
-    initParams: Object.values(paramsMap).sort((a, b) => a.order - b.order)
+    initParams: Object.values(paramsMap).sort((a, b) => a.order - b.order),
+    value: component.name
   })
 }
 

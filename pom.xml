@@ -8,7 +8,7 @@
 	<version>4.0</version>
 	<name>northstar</name>
 	<packaging>pom</packaging>
-	<description>智盈程序化交易平台</description>
+	<description>盈富量化交易平台</description>
 
 	<properties>
 		<java.version>17</java.version>

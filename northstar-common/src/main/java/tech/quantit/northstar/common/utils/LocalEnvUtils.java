@@ -2,6 +2,9 @@ package tech.quantit.northstar.common.utils;
 
 import java.net.InetAddress;
 import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.net.UnknownHostException;
+import java.util.Enumeration;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -13,25 +16,33 @@ public class LocalEnvUtils {
 	
 	public static String getMACAddress() {
 		try {
-			InetAddress inet = InetAddress.getLocalHost();
-			return getMACAddress(inet);
+			byte[] hardwareAddress = getMACAddressBytes();
+			String[] hexadecimalFormat = new String[hardwareAddress.length];
+	        for (int i = 0; i < hardwareAddress.length; i++) {
+	            hexadecimalFormat[i] = String.format("%02X", hardwareAddress[i]);
+	        }
+	        return String.join("-", hexadecimalFormat);
 		} catch (Exception e) {
 			log.warn("无法获取MAC地址", e);
 			return "";
 		}
 	}
 
-	private static String getMACAddress(InetAddress ia) throws Exception {
-		byte[] mac = NetworkInterface.getByInetAddress(ia).getHardwareAddress();
-		StringBuffer sb = new StringBuffer();
-		for (int i = 0; i < mac.length; i++) {
-			if (i != 0) {
-				sb.append("-");
-			}
-			String s = Integer.toHexString(mac[i] & 0xFF);
-			sb.append(s.length() == 1 ? 0 + s : s);
+	private static byte[] getMACAddressBytes() throws SocketException, UnknownHostException {
+		byte[] hardwareAddress = NetworkInterface.getByInetAddress(InetAddress.getLocalHost()).getHardwareAddress();
+		if(hardwareAddress != null) {
+			return hardwareAddress; 
 		}
-		return sb.toString().toUpperCase();
+		
+		Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
+		while (networkInterfaces.hasMoreElements()) {
+		    NetworkInterface ni = networkInterfaces.nextElement();
+		    hardwareAddress = ni.getHardwareAddress();
+		    if (hardwareAddress != null) {
+		        return hardwareAddress;
+		    }
+		}
+		throw new IllegalStateException("没有查到MAC信息");
 	}
 	
 }

@@ -18,6 +18,7 @@ import org.springframework.dao.DuplicateKeyException;
 import com.alibaba.fastjson.JSON;
 
 import lombok.extern.slf4j.Slf4j;
+import tech.quantit.northstar.common.ISimAccountRepository;
 import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.common.constant.GatewayUsage;
 import tech.quantit.northstar.common.exception.NoSuchElementException;
@@ -57,6 +58,8 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 	
 	private IMarketDataRepository mdRepo;
 	
+	private ISimAccountRepository simAccRepo;
+	
 	private ApplicationContext ctx;
 	
 	private IModuleRepository moduleRepo;
@@ -64,12 +67,13 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 	private ContractManager contractMgr;
 	
 	public GatewayService(GatewayAndConnectionManager gatewayConnMgr, IGatewayRepository gatewayRepo, IMarketDataRepository mdRepo,
-			IModuleRepository moduleRepo, ContractManager contractMgr) {
+			IModuleRepository moduleRepo, ISimAccountRepository simAccRepo, ContractManager contractMgr) {
 		this.gatewayConnMgr = gatewayConnMgr;
 		this.gatewayRepo = gatewayRepo;
 		this.mdRepo = mdRepo;
 		this.contractMgr = contractMgr;
 		this.moduleRepo = moduleRepo;
+		this.simAccRepo = simAccRepo;
 	}
 	
 	/**
@@ -168,6 +172,7 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 		}
 		boolean flag = doDeleteGateway(gatewayId);
 		mdRepo.dropGatewayData(gatewayId);
+		simAccRepo.deleteById(gatewayId);
 		return flag;
 	}
 	

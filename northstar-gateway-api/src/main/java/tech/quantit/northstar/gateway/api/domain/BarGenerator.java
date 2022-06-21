@@ -78,6 +78,7 @@ public class BarGenerator {
 			if(newCutoffTime != helper.cutoffTime) {
 				helper.updateCutoffTime(newCutoffTime);
 			}
+			cutoffTime = newCutoffTime;
 			
 			barBuilder.setOpenPrice(tick.getLastPrice());
 			barBuilder.setHighPrice(tick.getLastPrice());

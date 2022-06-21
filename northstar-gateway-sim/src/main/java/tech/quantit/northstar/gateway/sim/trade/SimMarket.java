@@ -1,7 +1,5 @@
 package tech.quantit.northstar.gateway.sim.trade;
 
-import java.util.function.Consumer;
-
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 
@@ -18,12 +16,6 @@ public class SimMarket {
 	 */
 	private Table<String, String, SimTradeGateway> simGatewayMap = HashBasedTable.create();
 	
-	private Consumer<SimTradeGateway> removeCallback;
-	
-	public SimMarket(Consumer<SimTradeGateway> removeCallback) {
-		this.removeCallback = removeCallback;
-	}
-	
 	public synchronized void addGateway(String mdGatewayId, SimTradeGateway accountGateway) {
 		String simGatewayId = accountGateway.getGatewaySetting().getGatewayId();
 		simGatewayMap.put(mdGatewayId, simGatewayId, accountGateway);
@@ -32,7 +24,6 @@ public class SimMarket {
 	public synchronized void removeGateway(String mdGatewayId, SimTradeGateway accountGateway) {
 		String simGatewayId = accountGateway.getGatewaySetting().getGatewayId();
 		simGatewayMap.remove(mdGatewayId, simGatewayId);
-		removeCallback.accept(accountGateway);
 	}
 	
 	public void onTick(TickField tick) {

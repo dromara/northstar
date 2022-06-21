@@ -7,9 +7,10 @@
 
 这是一个用户可以自行编写交易策略程序的量化交易平台。
 用户监控台效果（监控台仅用于给用户提供一个可视化窗口，以方便进行程序的监控与管理）：
-![输入图片说明](https://images.gitee.com/uploads/images/2022/0103/205503_efb41f7c_1676852.png "login.PNG")
-![Image text](https://images.gitee.com/uploads/images/2021/0609/223845_f3942e1e_1676852.png)
-
+![输入图片说明](https://images.gitee.com/uploads/images/2022/0619/230500_fe02aedd_1676852.png "屏幕截图.png")
+![输入图片说明](https://images.gitee.com/uploads/images/2022/0619/230527_2e868183_1676852.png "屏幕截图.png")
+![输入图片说明](https://images.gitee.com/uploads/images/2022/0619/230813_a3991d60_1676852.png "屏幕截图.png")
+![输入图片说明](https://images.gitee.com/uploads/images/2022/0620/105911_4e5622ee_1676852.png "屏幕截图.png")
 ![Image](https://images.gitee.com/uploads/images/2021/0606/220710_eeab5dd9_1676852.png)
 ![Image](https://images.gitee.com/uploads/images/2021/0606/220728_32ef6b37_1676852.png)
 
@@ -62,6 +63,7 @@
 ```
 curl https://gitee.com/dromara/northstar/raw/master/env.sh | sh
 ```
+**注意：所有northstar相关的包统一放在 /home/quantit 目录下**
 
 **Windows环境下**，初始化系统环境。打开powershell命令行窗口，输入以下命令（部分系统可能报错，需要把脚本下载到本地后右键选择powershell执行）
 ```
