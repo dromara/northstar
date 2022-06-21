@@ -13,7 +13,7 @@ import java.util.List;
 /**
  * 生成Ticker 数据
  * 参考: https://www.fmz.com/bbs-topic/662
- * 
+ *
  * v1.0版
  * @author changsong
  */
@@ -23,19 +23,16 @@ public class TickerGnerator {
      * 根据BarField生成TickField
      *
      * @param period
-     * @param num_digits
      * @param records
      * @return
      */
-    public List<CoreField.TickField> recordsToTicks(int period, int num_digits, List<CoreField.BarField> records) {
+    public static List<CoreField.TickField> recordsToTicks(int period,  List<CoreField.BarField> records) {
         // http://www.metatrader5.com/en/terminal/help/tick_generation
         if (records.size() == 0) {
             return Lists.newArrayList();
         }
         List<CoreField.TickField> ticks = new ArrayList<CoreField.TickField>();
         int[] steps = {0, 2, 4, 6, 10, 12, 16, 18, 23, 25, 27, 29};
-        double pown = Math.pow(10, num_digits);
-
 
         for (var i = 0; i < records.size(); i++) {
 
@@ -108,7 +105,11 @@ public class TickerGnerator {
      *
      * // ticks.push([Math.floor(t), Math.floor(price * pown) / pown, vol])
      */
-    private void pushTick(CoreField.BarField barField, long time, double price, double vol, List<CoreField.TickField> tickFieldList) {
+    private static void pushTick(CoreField.BarField barField, long time, double price, double vol, List<CoreField.TickField> tickFieldList) {
+        // 金额转换
+        double pown = Math.pow(10, 2);
+        price = Math.floor(price * pown) / pown;
+
         CoreField.TickField tickField = CoreField.TickField.newBuilder()
                     .setGatewayId(barField.getGatewayId())
                     .setUnifiedSymbol(barField.getUnifiedSymbol())

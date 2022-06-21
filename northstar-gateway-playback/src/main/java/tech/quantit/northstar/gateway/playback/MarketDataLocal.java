@@ -7,6 +7,7 @@ import tech.quantit.northstar.data.IContractRepository;
 import tech.quantit.northstar.data.IGatewayRepository;
 import tech.quantit.northstar.data.IMarketDataRepository;
 import tech.quantit.northstar.data.ISimAccountRepository;
+import tech.quantit.northstar.gateway.playback.ticker.TickerGnerator;
 import xyz.redtorch.pb.CoreField;
 
 import java.time.LocalDate;
@@ -61,9 +62,7 @@ public class MarketDataLocal {
             List<CoreField.BarField> data = marketDataRepository.loadBars(bindedMktGateWayId, contract.getUnifiedSymbol(),startDate,
                     endDate);
             PriorityQueue<CoreField.TickField> tickQ = new PriorityQueue<>(3000, (b1, b2) -> b1.getActionTimestamp() < b2.getActionTimestamp() ? -1 : 1 );
-            // for(CoreField.BarField tickData : data) {
-            //     tickQ.offer(tickData);
-            // }
+            TickerGnerator.recordsToTicks(1000, data);
 
             tickData.put(contract.getUnifiedSymbol(), tickQ);
        });
