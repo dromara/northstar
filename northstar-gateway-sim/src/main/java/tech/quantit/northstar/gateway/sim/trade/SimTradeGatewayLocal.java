@@ -1,6 +1,7 @@
 package tech.quantit.northstar.gateway.sim.trade;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -54,7 +55,9 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 		account.setConnected(connected);
 		feEngine.emitEvent(NorthstarEventType.CONNECTED, gatewaySetting.getGatewayId());
 		feEngine.emitEvent(NorthstarEventType.LOGGED_IN, gatewaySetting.getGatewayId());
-		
+		CompletableFuture.runAsync(() -> {
+			feEngine.emitEvent(NorthstarEventType.GATEWAY_READY, gatewaySetting.getGatewayId());
+		}, CompletableFuture.delayedExecutor(2, TimeUnit.SECONDS));
 		// 阻塞一下，防止账户回报比连线回报要快导致异常
 		try {
 			Thread.sleep(1000);
@@ -84,7 +87,6 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 		connected = false;
 		account.setConnected(connected);
 		feEngine.emitEvent(NorthstarEventType.DISCONNECTED, gatewaySetting.getGatewayId());
-		feEngine.emitEvent(NorthstarEventType.LOGGED_OUT, gatewaySetting.getGatewayId());
 	}
 
 	@Override

@@ -1,6 +1,7 @@
 package tech.quantit.northstar.gateway.sim.market;
 
 import java.util.Map.Entry;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executors;
@@ -89,6 +90,9 @@ public class SimMarketGatewayLocal implements MarketGateway{
 			}
 		}, 500, 500, TimeUnit.MILLISECONDS);
 		feEngine.emitEvent(NorthstarEventType.CONNECTED, settings.getGatewayId());
+		CompletableFuture.runAsync(() -> {
+			feEngine.emitEvent(NorthstarEventType.GATEWAY_READY, settings.getGatewayId());
+		}, CompletableFuture.delayedExecutor(2, TimeUnit.SECONDS));
 	}
 
 	@Override

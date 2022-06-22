@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Configuration;
 
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.event.InternalEventBus;
+import tech.quantit.northstar.data.IGatewayRepository;
 import tech.quantit.northstar.domain.account.TradeDayAccount;
 import tech.quantit.northstar.domain.account.TradeDayAccountFactory;
 import tech.quantit.northstar.domain.external.MessageHandlerManager;
@@ -37,8 +38,8 @@ public class InternalEventHandlerConfig {
 	
 	@Bean
 	public ConnectionHandler connectionEventHandler(InternalEventBus eventBus, GatewayAndConnectionManager gatewayConnMgr,
-			ContractManager contractMgr) {
-		ConnectionHandler handler = new ConnectionHandler(gatewayConnMgr, contractMgr);
+			ContractManager contractMgr, IGatewayRepository gatewayRepo) {
+		ConnectionHandler handler = new ConnectionHandler(gatewayConnMgr, contractMgr, gatewayRepo);
 		log.debug("注册：ConnectionHandler");
 		eventBus.register(handler);
 		return handler;
