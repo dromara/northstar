@@ -41,6 +41,7 @@
 	</properties>
 
 	<modules>
+		<module>northstar-external-archetype</module>
 		<module>northstar-monitor</module>
 		<module>northstar-common</module>
 		<module>northstar-data</module>
