@@ -5,7 +5,7 @@
   <artifactId>northstar-external-archetype</artifactId>
   <version>1.0</version>
   <packaging>maven-archetype</packaging>
-  <name>Northstar外部策略模板项目</name>
+  <name>northstar-external-archetype</name>
     
   <url>http://maven.apache.org</url>
   
