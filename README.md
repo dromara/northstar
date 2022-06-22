@@ -1,5 +1,9 @@
 # Northstar盈富量化交易平台
-
+<p align="center">
+    <img src ="https://img.shields.io/badge/version-4.0.0-yellow.svg"/>
+    <img src ="https://img.shields.io/badge/platform-windows|linux-green.svg"/>
+    <img src ="https://img.shields.io/badge/licence-Apache2.0-blue.svg"/>
+</p>
 **开源声明：**  
 **本项目归入dromara开源组织运营的初心，是希望可以有更多志同道合的朋友一起参与项目的开发，并且能借其在交易市场上有所收获！**  
 **借用组织的口号：一个人或许能走的更快，但一群人会走的更远。**  
@@ -63,7 +67,12 @@
 ```
 curl https://gitee.com/dromara/northstar/raw/master/env.sh | sh
 ```
-**注意：所有northstar相关的包统一放在 /home/quantit 目录下**
+
+目录结构如下：  
+~/  
+|--northstar-dist/ 	程序包目录  
+|--northstar-env/	环境依赖包目录  
+
 
 **Windows环境下**，初始化系统环境。打开powershell命令行窗口，输入以下命令（部分系统可能报错，需要把脚本下载到本地后右键选择powershell执行）
 ```
