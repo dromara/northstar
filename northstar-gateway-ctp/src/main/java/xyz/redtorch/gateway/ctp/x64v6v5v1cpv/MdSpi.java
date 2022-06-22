@@ -314,7 +314,6 @@ public class MdSpi extends CThostFtdcMdSpi {
 				}
 
 				gatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.CONNECTED, gatewayId);
-				gatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.TRADE_DATE, tradingDay);
 			} else {
 				logger.warn("{}行情接口登录回报错误 错误ID:{},错误信息:{}", logInfo, pRspInfo.getErrorID(), pRspInfo.getErrorMsg());
 				// 不合法的登录

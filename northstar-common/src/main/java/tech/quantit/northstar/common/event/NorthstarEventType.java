@@ -15,10 +15,6 @@ public enum NorthstarEventType {
 	 */
 	BAR,
 	/**
-	 * 历史K线事件
-	 */
-	HIS_BAR,
-	/**
 	 * 账户回报事件
 	 */
 	ACCOUNT,
@@ -86,10 +82,6 @@ public enum NorthstarEventType {
 	 * 断开成功
 	 */
 	DISCONNECTED,
-	/**
-	 * 交易日更新事件
-	 */
-	TRADE_DATE,
 	/**
 	 * 下单事件
 	 */
