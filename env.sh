@@ -9,7 +9,7 @@ mkdir -p ~/northstar-env ~/northstar-dist
 
 if [[ $(which node >/dev/null && echo $?) != 0 ]];
 then 
-	echo "安装Node16"
+	echo "安装Node14"
 	cd ~/northstar-env && wget --no-check-certificate https://nodejs.org/download/release/v14.19.1/node-v14.19.1-linux-x64.tar.xz
 	tar -xvf node-v14.19.1-linux-x64.tar.xz 
 	rm -f node-v14.19.1-linux-x64.tar.xz 
@@ -17,7 +17,7 @@ then
 	npm config set registry https://registry.npm.taobao.org
 	npm config set unsafe-perm=true
 else
-	echo "Node16已安装"
+	echo "Node14已安装"
 	node -v
 fi
 
