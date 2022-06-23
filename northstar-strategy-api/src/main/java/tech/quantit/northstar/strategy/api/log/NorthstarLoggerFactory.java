@@ -5,6 +5,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.slf4j.ILoggerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,9 +16,8 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.rolling.RollingFileAppender;
 import ch.qos.logback.core.rolling.TimeBasedRollingPolicy;
 
-public class NorthstarLoggerFactory {
+public class NorthstarLoggerFactory implements ILoggerFactory{
 	
-	private NorthstarLoggerFactory() {}
 	private static Map<String, Logger> loggerMap = new HashMap<>();
 	private static Map<String, RollingFileAppender<ILoggingEvent>> appenderMap = new HashMap<>();
 	private static LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
@@ -30,19 +30,23 @@ public class NorthstarLoggerFactory {
 	    encoder.start();
 	}
 	
-	public static synchronized Logger getLogger(String moduleName, Class<?> clz) {
-		String loggerName = String.format("%s.%s", moduleName, clz.getName());
+	@Override
+	public synchronized Logger getLogger(String name) {
 		String logPath = System.getProperty("LOG_PATH");
-
-		RollingFileAppender<ILoggingEvent> rollingFileAppender = appenderMap.computeIfAbsent(moduleName, k -> new RollingFileAppender<>());
+		String logLevel = System.getProperty("LOG_LEVEL");
+		if(loggerMap.containsKey(name)) {
+			return loggerMap.get(name);
+		}
+		
+		RollingFileAppender<ILoggingEvent> rollingFileAppender = appenderMap.computeIfAbsent(name, k -> new RollingFileAppender<>());
 		if(!rollingFileAppender.isStarted()) {
 			rollingFileAppender.setContext(loggerContext);
 			rollingFileAppender.setAppend(true);
-			rollingFileAppender.setName(moduleName);
-			rollingFileAppender.setFile(logPath + File.separator +  moduleName + File.separator + moduleName + ".log");
+			rollingFileAppender.setName(name);
+			rollingFileAppender.setFile(logPath + File.separator +  name + File.separator + name + ".log");
 			
 			TimeBasedRollingPolicy<ILoggingEvent> rollingPolicy = new TimeBasedRollingPolicy<>();
-			rollingPolicy.setFileNamePattern(logPath + File.separator +  moduleName + File.separator + moduleName + "_%d{yyyy-MM-dd}.log");
+			rollingPolicy.setFileNamePattern(logPath + File.separator +  name + File.separator + name + "_%d{yyyy-MM-dd}.log");
 			rollingPolicy.setMaxHistory(10);
 			rollingPolicy.setContext(loggerContext);
 			rollingPolicy.setParent(rollingFileAppender);
@@ -53,14 +57,11 @@ public class NorthstarLoggerFactory {
 			rollingFileAppender.start();
 		}
 	    
-        ch.qos.logback.classic.Logger rootLogger = loggerContext.getLogger(loggerName);
-        rootLogger.setLevel(Level.DEBUG);
+        ch.qos.logback.classic.Logger rootLogger = loggerContext.getLogger(name);
+        rootLogger.setLevel(Level.toLevel(logLevel));
         rootLogger.addAppender(rollingFileAppender);
-		
-        if(loggerMap.containsKey(loggerName)) {
-			return loggerMap.get(loggerName);
-		}
-		loggerMap.put(loggerName, rootLogger);
+        
+		loggerMap.put(name, rootLogger);
 		return rootLogger;
 	}
 

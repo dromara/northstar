@@ -3,6 +3,8 @@ package tech.quantit.northstar.strategy.api;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.slf4j.Logger;
+
 import com.alibaba.fastjson.JSONObject;
 
 import tech.quantit.northstar.common.TickDataAware;
@@ -24,6 +26,8 @@ public abstract class AbstractStrategy implements TradeStrategy{
 	protected Map<String, TickHandler> tickHandlerMap = new HashMap<>();
 	// 处理器，unifiedSymbol -> handler
 	protected Map<String, BarHandler> barHandlerMap = new HashMap<>();
+	// 日志对象
+	protected Logger log;
 	
 	@Override
 	public void onOrder(OrderField order) {
@@ -37,7 +41,8 @@ public abstract class AbstractStrategy implements TradeStrategy{
 
 	@Override
 	public void setContext(IModuleContext context) {
-		this.ctx = context;
+		ctx = context;
+		log = ctx.getLogger();
 	}
 
 	@Override

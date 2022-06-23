@@ -1,6 +1,5 @@
 package tech.quantit.northstar.strategy.api.demo;
 
-import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.constant.SignalOperation;
 import tech.quantit.northstar.common.model.DynamicParams;
 import tech.quantit.northstar.common.model.Setting;
@@ -21,7 +20,6 @@ import xyz.redtorch.pb.CoreField.BarField;
  * @author KevinHuangwl
  *
  */
-@Slf4j
 @StrategicComponent(IndicatorSampleStrategy.NAME)
 public class IndicatorSampleStrategy extends AbstractStrategy	// 为了简化代码，引入一个通用的基础抽象类
 	implements TradeStrategy{

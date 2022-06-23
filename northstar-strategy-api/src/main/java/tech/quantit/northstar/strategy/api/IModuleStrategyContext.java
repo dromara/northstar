@@ -1,5 +1,7 @@
 package tech.quantit.northstar.strategy.api;
 
+import org.slf4j.Logger;
+
 import tech.quantit.northstar.common.constant.ModuleState;
 import tech.quantit.northstar.common.constant.SignalOperation;
 import tech.quantit.northstar.strategy.api.constant.PriceType;
@@ -43,4 +45,9 @@ public interface IModuleStrategyContext {
 	 * @param enabled
 	 */
 	void disabledModule();
+	/**
+	 * 获取日志对象
+	 * @return
+	 */
+	Logger getLogger();
 }

@@ -43,12 +43,9 @@ public class ModuleFactory {
 	
 	private ContractManager contractMgr;
 	
-	private Consumer<ModuleRuntimeDescription> onRuntimeChangeCallback = (rt) -> {
-		moduleRepo.saveRuntime(rt);
-	};
-	private Consumer<ModuleDealRecord> onDealChangeCallback = (dealRecord) -> {
-		moduleRepo.saveDealRecord(dealRecord);
-	};
+	private Consumer<ModuleRuntimeDescription> onRuntimeChangeCallback = rt -> moduleRepo.saveRuntime(rt);
+	
+	private Consumer<ModuleDealRecord> onDealChangeCallback = dealRecord -> moduleRepo.saveDealRecord(dealRecord);
 	
 	public ModuleFactory(ExternalJarListener extJarListener, IModuleRepository moduleRepo, GatewayAndConnectionManager gatewayConnMgr,
 			ContractManager contractMgr) {
@@ -87,7 +84,7 @@ public class ModuleFactory {
 			}
 		}
 		
-		return new ModuleContext(strategy, accStore, closingStrategy, numOfMinPerBar, dc, onRuntimeChangeCallback, onDealChangeCallback);
+		return new ModuleContext(moduleDescription.getModuleName(), strategy, accStore, closingStrategy, numOfMinPerBar, dc, onRuntimeChangeCallback, onDealChangeCallback);
 	}
 	
 	@SuppressWarnings("unchecked")

@@ -57,7 +57,7 @@ class ModuleContextTest {
 		when(closingStrategy.resolveOperation(any(SignalOperation.class), any(PositionField.class))).thenReturn(OffsetFlagEnum.OF_Open);
 		when(closingStrategy.resolveOperation(any(SignalOperation.class), eq(null))).thenReturn(OffsetFlagEnum.OF_Open);
 		
-		ctx = new ModuleContext(strategy, accStore, closingStrategy, 3, mock(DealCollector.class), mock(Consumer.class), mock(Consumer.class));
+		ctx = new ModuleContext("testModule", strategy, accStore, closingStrategy, 3, mock(DealCollector.class), mock(Consumer.class), mock(Consumer.class));
 		ctx.setModule(module);
 	}
 
