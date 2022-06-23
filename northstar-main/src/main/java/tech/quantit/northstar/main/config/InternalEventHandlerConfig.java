@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.event.InternalEventBus;
 import tech.quantit.northstar.data.IGatewayRepository;
+import tech.quantit.northstar.data.IMarketDataRepository;
 import tech.quantit.northstar.domain.account.TradeDayAccount;
 import tech.quantit.northstar.domain.account.TradeDayAccountFactory;
 import tech.quantit.northstar.domain.external.MessageHandlerManager;
@@ -16,6 +17,7 @@ import tech.quantit.northstar.domain.gateway.GatewayAndConnectionManager;
 import tech.quantit.northstar.gateway.sim.trade.SimMarket;
 import tech.quantit.northstar.main.handler.internal.AccountHandler;
 import tech.quantit.northstar.main.handler.internal.ConnectionHandler;
+import tech.quantit.northstar.main.handler.internal.MarketDataHandler;
 import tech.quantit.northstar.main.handler.internal.ModuleManager;
 import tech.quantit.northstar.main.handler.internal.NotificationDispatcher;
 import tech.quantit.northstar.main.handler.internal.SimMarketHandler;
@@ -67,6 +69,14 @@ public class InternalEventHandlerConfig {
 		log.debug("注册：ModuleManager");
 		eventBus.register(moduleMgr);
 		return moduleMgr;
+	}
+	
+	@Bean 
+	public MarketDataHandler marketDataHandler(IMarketDataRepository mdRepo, InternalEventBus eventBus) {
+		MarketDataHandler mdHandler = new MarketDataHandler(mdRepo);
+		log.debug("注册：MarketDataHandler");
+		eventBus.register(mdHandler);
+		return mdHandler;
 	}
 	//////////////////////
 	/* Internal类事件结束 */

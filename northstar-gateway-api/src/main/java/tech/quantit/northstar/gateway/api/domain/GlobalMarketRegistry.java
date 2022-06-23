@@ -8,7 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.event.NorthstarEventType;
 import tech.quantit.northstar.common.utils.MessagePrinter;
-import tech.quantit.northstar.gateway.api.MarketDataBuffer;
 import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.TickField;
@@ -44,13 +43,10 @@ public class GlobalMarketRegistry {
 
 	protected Consumer<NormalContract> onContractSave;
 	
-	protected MarketDataBuffer buffer;
-	
 	public GlobalMarketRegistry(FastEventEngine feEngine, Consumer<NormalContract> onContractSave, Consumer<ContractField> onContractSubsciption) {
 		this.feEngine = feEngine;
 		this.onContractSave = onContractSave;
 		this.onContractSubsciption = onContractSubsciption;
-//		this.buffer = buffer;
 	}
 	
 	public synchronized void register(NormalContract contract) {
@@ -76,7 +72,6 @@ public class GlobalMarketRegistry {
 		barGen.setOnBarCallback((bar, ticks) -> {
 			log.trace("生成bar: {}", MessagePrinter.print(bar));
 			feEngine.emitEvent(NorthstarEventType.BAR, bar);
-//			buffer.save(bar, ticks);
 		});
 		barGenMap.put(contract.unifiedSymbol(), barGen);
 	}
