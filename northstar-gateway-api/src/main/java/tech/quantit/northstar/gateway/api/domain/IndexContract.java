@@ -23,14 +23,6 @@ public class IndexContract extends NormalContract {
 		String originSymbol = protoContract.getSymbol();
 		String contractId = protoContract.getContractId().replace(originSymbol, symbol);
 		String thirdPartyId = protoContract.getThirdPartyId().replace(originSymbol, symbol);
-		double longMarginRatio = monthlyContracts.stream()
-				.mapToDouble(ContractField::getLongMarginRatio)
-				.min()
-				.getAsDouble();
-		double shortMarginRatio = monthlyContracts.stream()
-				.mapToDouble(ContractField::getShortMarginRatio)
-				.min()
-				.getAsDouble();
 		super.field = ContractField.newBuilder(protoContract)
 				.setSymbol(symbol)
 				.setThirdPartyId(thirdPartyId)
@@ -38,8 +30,8 @@ public class IndexContract extends NormalContract {
 				.setLastTradeDateOrContractMonth("")
 				.setUnifiedSymbol(idxSymbol)
 				.setFullName(fullName)
-				.setLongMarginRatio(longMarginRatio)
-				.setShortMarginRatio(shortMarginRatio)
+				.setLongMarginRatio(0.1)
+				.setShortMarginRatio(0.1)
 				.setName(name)
 				.build();
 		super.gatewayType = GatewayType.valueOf(protoContract.getThirdPartyId().split("@")[1]);
