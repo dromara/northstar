@@ -21,10 +21,10 @@ import org.slf4j.LoggerFactory;
 import tech.quantit.northstar.common.constant.DateTimeConstant;
 import tech.quantit.northstar.common.event.NorthstarEventType;
 import tech.quantit.northstar.common.utils.CommonUtils;
-import tech.quantit.northstar.common.utils.MarketTimeUtil;
+import tech.quantit.northstar.common.utils.MarketDateTimeUtil;
 import tech.quantit.northstar.common.utils.MessagePrinter;
 import tech.quantit.northstar.gateway.api.GatewayAbstract;
-import xyz.redtorch.gateway.ctp.common.CtpMarketTimeUtil;
+import xyz.redtorch.gateway.ctp.common.CtpDateTimeUtil;
 import xyz.redtorch.gateway.ctp.common.GatewayConstants;
 import xyz.redtorch.gateway.ctp.x64v6v3v15v.api.CThostFtdcDepthMarketDataField;
 import xyz.redtorch.gateway.ctp.x64v6v3v15v.api.CThostFtdcForQuoteRspField;
@@ -62,7 +62,7 @@ public class MdSpi extends CThostFtdcMdSpi {
 
 	private Set<String> subscribedSymbolSet = ConcurrentHashMap.newKeySet();
 	
-	private MarketTimeUtil mktTimeUtil = new CtpMarketTimeUtil();
+	private MarketDateTimeUtil mktTimeUtil = new CtpDateTimeUtil();
 
 	MdSpi(GatewayAbstract gatewayAdapter) {
 		this.gatewayAdapter = gatewayAdapter;

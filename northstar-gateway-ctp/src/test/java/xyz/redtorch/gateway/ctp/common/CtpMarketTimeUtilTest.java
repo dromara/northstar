@@ -7,10 +7,11 @@ import java.time.LocalTime;
 import org.junit.jupiter.api.Test;
 
 import tech.quantit.northstar.common.constant.TickType;
+import tech.quantit.northstar.common.utils.MarketDateTimeUtil;
 
 class CtpMarketTimeUtilTest {
 	
-	CtpMarketTimeUtil util = new CtpMarketTimeUtil();
+	private MarketDateTimeUtil util = new CtpDateTimeUtil();
 
 	@Test
 	public void test() {
