@@ -73,7 +73,7 @@ public class MarketDataRepoRedisImpl extends MarketDataRepoDataServiceImpl {
 				.toList();
 		resultList.addAll(list);
 		
-		LocalDate date = LocalTime.now().isAfter(LocalTime.of(20, 0)) ? today.plusDays(1) : today;
+		LocalDate date = LocalTime.now().isAfter(LocalTime.of(19, 0)) ? today.plusDays(1) : today;
 		while(!date.isAfter(endDate0)) {
 			resultList.addAll(findBarData(date, gatewayId, unifiedSymbol));
 			date = date.plusDays(1);
