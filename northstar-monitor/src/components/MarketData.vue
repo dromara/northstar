@@ -23,11 +23,7 @@
           </el-select>
         </el-form-item>
         <el-form-item label="行情延时">
-          <span>
-            {{
-              getCurTick.actiontimestamp ? new Date().getTime() - getCurTick.actiontimestamp : 0
-            }}</span
-          >
+          <span>{{ latency }}</span>
           <span> 毫秒</span></el-form-item
         >
       </el-form>
@@ -70,7 +66,8 @@ export default {
       fullscreenLoading: false,
       contractList: [],
       gateway: '',
-      unifiedSymbol: ''
+      unifiedSymbol: '',
+      latency: 0
     }
   },
   created() {
@@ -103,6 +100,10 @@ export default {
     },
     unifiedSymbol: function (symbol) {
       this.$store.commit('updateFocusUnifiedSymbol', symbol)
+    },
+    '$store.state.marketCurrentDataModule.curTick': function (tick) {
+      this.latency = new Date().getTime() - tick.actiontimestamp
+      console.log(new Date().getTime(), tick.actiontimestamp, tick.actiontime)
     },
     '$store.state.marketCurrentDataModule.curBar': function (bar) {
       if (this.kLineChart && !!bar) {

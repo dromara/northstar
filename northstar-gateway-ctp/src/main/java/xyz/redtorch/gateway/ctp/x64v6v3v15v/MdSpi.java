@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -415,9 +416,8 @@ public class MdSpi extends CThostFtdcMdSpi {
 
 				// 接口返回的updateTime数据格式为 HH:mm:ss
 				String updateTimeStr = pDepthMarketData.getUpdateTime().replaceAll(":", "");
-				updateTimeStr = StringUtils.isEmpty(updateTimeStr) ? LocalTime.now().format(DateTimeConstant.T_FORMAT_INT_FORMATTER) : updateTimeStr;
 				Long updateTime = Long.valueOf(updateTimeStr);
-				Long updateMillisec = StringUtils.isEmpty(updateTimeStr) ? System.currentTimeMillis() % 1000 : (long) pDepthMarketData.getUpdateMillisec();
+				Long updateMillisec = (long) pDepthMarketData.getUpdateMillisec();
 				
 				/*
 				 * 大商所获取的ActionDay可能是不正确的,因此这里采用本地时间修正 1.请注意，本地时间应该准确 2.使用 SimNow 7x24
@@ -507,7 +507,7 @@ public class MdSpi extends CThostFtdcMdSpi {
 				tickBuilder.setUnifiedSymbol(contract.getUnifiedSymbol());
 				tickBuilder.setActionDay(actionDay);
 				tickBuilder.setActionTime(actionTime);
-				long localDateTimeMillisec = dateTime.toInstant(OffsetDateTime.now().getOffset()).toEpochMilli();
+				long localDateTimeMillisec = dateTime.toInstant(ZoneOffset.ofHours(8)).toEpochMilli();
 				tickBuilder.setActionTimestamp(localDateTimeMillisec);
 				tickBuilder.setAvgPrice(isReasonable(upperLimit, lowerLimit, averagePrice) ? averagePrice : preClosePrice);
 
