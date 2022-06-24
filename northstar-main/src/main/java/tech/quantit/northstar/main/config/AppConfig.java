@@ -17,6 +17,9 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,6 +34,7 @@ import org.springframework.web.filter.CorsFilter;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.ISimAccountRepository;
 import tech.quantit.northstar.common.constant.Constants;
 import tech.quantit.northstar.common.constant.GatewayType;
@@ -47,6 +51,7 @@ import tech.quantit.northstar.domain.gateway.GatewayAndConnectionManager;
 import tech.quantit.northstar.gateway.api.GatewayFactory;
 import tech.quantit.northstar.gateway.api.domain.GlobalMarketRegistry;
 import tech.quantit.northstar.gateway.api.domain.IndexContract;
+import tech.quantit.northstar.gateway.api.domain.LatencyDetector;
 import tech.quantit.northstar.gateway.api.domain.NormalContract;
 import tech.quantit.northstar.gateway.sim.trade.SimGatewayFactory;
 import tech.quantit.northstar.gateway.sim.trade.SimMarket;
@@ -63,6 +68,7 @@ import xyz.redtorch.pb.CoreField.ContractField;
  * @author KevinHuangwl
  *
  */
+@Slf4j
 @Configuration
 public class AppConfig implements WebMvcConfigurer {
 
@@ -149,15 +155,24 @@ public class AppConfig implements WebMvcConfigurer {
 		return contractList;
 	}
 	
+	
+	@ConditionalOnProperty(prefix = "northstar.latency-detection", name = "enabled", havingValue = "true")
 	@Bean
-	public GlobalMarketRegistry globalRegistry(FastEventEngine fastEventEngine, IContractRepository contractRepo, ContractManager contractMgr) {
+	public LatencyDetector latencyDetector(@Value("${northstar.latency-detection.sampling-interval}") int samplingInterval) {
+		log.info("启用延时探测器");
+		return new LatencyDetector(samplingInterval, 3);
+	}
+	
+	@Bean
+	public GlobalMarketRegistry globalRegistry(FastEventEngine fastEventEngine, IContractRepository contractRepo, ContractManager contractMgr,
+			@Autowired(required = false) LatencyDetector latencyDetector) {
 		Consumer<NormalContract> handleContractSave = contract -> {
 			if(contract.updateTime() > 0) {
 				contractRepo.save(contract.contractField(), contract.gatewayType());
 			}
 		};
 		
-		GlobalMarketRegistry registry = new GlobalMarketRegistry(fastEventEngine, handleContractSave, contractMgr::addContract);
+		GlobalMarketRegistry registry = new GlobalMarketRegistry(fastEventEngine, handleContractSave, contractMgr::addContract, latencyDetector);
 		//　加载已有合约
 		List<ContractField> contractList = findAllContract(contractRepo);
 		Map<String, ContractField> contractMap = contractList.stream()

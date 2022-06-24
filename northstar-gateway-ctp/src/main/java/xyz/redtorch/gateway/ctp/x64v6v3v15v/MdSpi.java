@@ -555,6 +555,8 @@ public class MdSpi extends CThostFtdcMdSpi {
 				gatewayAdapter.registry.dispatch(tick);
 				lastUpdateTickTime = System.currentTimeMillis();
 				
+				gatewayAdapter.registry.getLatencyDetector().ifPresent(detector -> detector.getCheckpoint(0).sampling(tick));
+				
 			} catch (Throwable t) {
 				logger.error("{} OnRtnDepthMarketData Exception", logInfo, t);
 			}

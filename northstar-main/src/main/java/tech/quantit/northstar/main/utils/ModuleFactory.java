@@ -63,7 +63,7 @@ public class ModuleFactory {
 			ctx.bindGatewayContracts(tradeGateway, mad.getBindedUnifiedSymbols().stream().map(contractMgr::getContract).toList());
 		}
 		
-		return new TradeModule(moduleDescription.getModuleName(), ctx, onRuntimeChangeCallback);
+		return new TradeModule(ctx, onRuntimeChangeCallback);
 	}
 	
 	private IModuleAccountStore makeAccountStore(ModuleDescription moduleDescription, ModuleRuntimeDescription moduleRuntimeDescription) {

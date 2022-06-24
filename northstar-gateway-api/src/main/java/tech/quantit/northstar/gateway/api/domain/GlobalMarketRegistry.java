@@ -2,6 +2,7 @@ package tech.quantit.northstar.gateway.api.domain;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 import lombok.extern.slf4j.Slf4j;
@@ -43,10 +44,14 @@ public class GlobalMarketRegistry {
 
 	protected Consumer<NormalContract> onContractSave;
 	
-	public GlobalMarketRegistry(FastEventEngine feEngine, Consumer<NormalContract> onContractSave, Consumer<ContractField> onContractSubsciption) {
+	private LatencyDetector latencyDetector;
+	
+	public GlobalMarketRegistry(FastEventEngine feEngine, Consumer<NormalContract> onContractSave, Consumer<ContractField> onContractSubsciption,
+			LatencyDetector latencyDetector) {
 		this.feEngine = feEngine;
 		this.onContractSave = onContractSave;
 		this.onContractSubsciption = onContractSubsciption;
+		this.latencyDetector = latencyDetector;
 	}
 	
 	public synchronized void register(NormalContract contract) {
@@ -108,5 +113,9 @@ public class GlobalMarketRegistry {
 	
 	public void finishUpBarGen() {
 		barGenMap.values().forEach(BarGenerator::finishOfBar);
+	}
+	
+	public Optional<LatencyDetector> getLatencyDetector(){
+		return Optional.ofNullable(latencyDetector);
 	}
 }

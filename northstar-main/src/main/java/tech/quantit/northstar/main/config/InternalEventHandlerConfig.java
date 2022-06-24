@@ -2,6 +2,7 @@ package tech.quantit.northstar.main.config;
 
 import java.util.concurrent.ConcurrentMap;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -14,6 +15,7 @@ import tech.quantit.northstar.domain.account.TradeDayAccountFactory;
 import tech.quantit.northstar.domain.external.MessageHandlerManager;
 import tech.quantit.northstar.domain.gateway.ContractManager;
 import tech.quantit.northstar.domain.gateway.GatewayAndConnectionManager;
+import tech.quantit.northstar.gateway.api.domain.LatencyDetector;
 import tech.quantit.northstar.gateway.sim.trade.SimMarket;
 import tech.quantit.northstar.main.handler.internal.AccountHandler;
 import tech.quantit.northstar.main.handler.internal.ConnectionHandler;
@@ -64,8 +66,8 @@ public class InternalEventHandlerConfig {
 	}
 	
 	@Bean
-	public ModuleManager moduleManager(InternalEventBus eventBus) {
-		ModuleManager moduleMgr = new ModuleManager();
+	public ModuleManager moduleManager(InternalEventBus eventBus, @Autowired(required = false) LatencyDetector latencyDetector) {
+		ModuleManager moduleMgr = new ModuleManager(latencyDetector);
 		log.debug("注册：ModuleManager");
 		eventBus.register(moduleMgr);
 		return moduleMgr;
