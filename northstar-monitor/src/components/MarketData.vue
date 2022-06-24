@@ -103,7 +103,6 @@ export default {
     },
     '$store.state.marketCurrentDataModule.curTick': function (tick) {
       this.latency = new Date().getTime() - tick.actiontimestamp
-      console.log(new Date().getTime(), tick.actiontimestamp, tick.actiontime)
     },
     '$store.state.marketCurrentDataModule.curBar': function (bar) {
       if (this.kLineChart && !!bar) {
