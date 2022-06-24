@@ -88,6 +88,9 @@ const marketCurrentDataModule = {
     },
     curUnifiedSymbol: (state) => {
       return state.curUnifiedSymbol
+    },
+    getCurTick: (state) => {
+      return state.curTick
     }
   }
 }

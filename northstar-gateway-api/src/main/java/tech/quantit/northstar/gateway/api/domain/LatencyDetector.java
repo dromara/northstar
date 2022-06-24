@@ -78,7 +78,7 @@ public class LatencyDetector {
 				log.debug("行情延时探测器，检查点[{}] 统计汇总：统计合约数 [{}]个，统计间隔 [{}]秒，平均延时 [{}]毫秒",
 						indexOfCheckpoint, sumOfTickCountMap.size(), samplingInterval, sumLatency / count);
 				log.debug("行情延时探测器，检查点[{}] 统计明细：最大延时合约 [{}]，平均延时 [{}]毫秒",
-						indexOfCheckpoint, maxLatencyEntry.getKey(), maxLatencyEntry.getValue() / count);
+						indexOfCheckpoint, maxLatencyEntry.getKey(), maxLatencyEntry.getValue() / sumOfTickCountMap.get(maxLatencyEntry.getKey()));
 				
 				lastStatTimestamp = System.currentTimeMillis();
 				sumOfTickCountMap.clear();

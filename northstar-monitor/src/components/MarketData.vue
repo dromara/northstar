@@ -22,6 +22,14 @@
             ></el-option>
           </el-select>
         </el-form-item>
+        <el-form-item label="行情延时">
+          <span>
+            {{
+              getCurTick.actiontimestamp ? new Date().getTime() - getCurTick.actiontimestamp : 0
+            }}</span
+          >
+          <span> 毫秒</span></el-form-item
+        >
       </el-form>
     </div>
     <div id="update-k-line" class="ns-mktdata__body">
@@ -73,7 +81,7 @@ export default {
     })
   },
   computed: {
-    ...mapGetters(['curMarketGatewayId', 'curUnifiedSymbol']),
+    ...mapGetters(['curMarketGatewayId', 'curUnifiedSymbol', 'getCurTick']),
     gatewayList() {
       const gatewayMap = {}
       this.contractList.forEach((i) => (gatewayMap[i.gatewayId] = true))
