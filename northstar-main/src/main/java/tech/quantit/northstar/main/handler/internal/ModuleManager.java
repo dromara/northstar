@@ -8,7 +8,9 @@ import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.event.AbstractEventHandler;
 import tech.quantit.northstar.common.event.NorthstarEvent;
 import tech.quantit.northstar.common.event.NorthstarEventType;
+import tech.quantit.northstar.gateway.api.domain.LatencyDetector;
 import tech.quantit.northstar.strategy.api.IModule;
+import xyz.redtorch.pb.CoreField.TickField;
 
 @Slf4j
 public class ModuleManager extends AbstractEventHandler{
@@ -19,7 +21,10 @@ public class ModuleManager extends AbstractEventHandler{
 	
 	private Set<NorthstarEventType> eventSet = new HashSet<>();
 	
-	public ModuleManager() {
+	private LatencyDetector latencyDetector;
+	
+	public ModuleManager(LatencyDetector latencyDetector) {
+		this.latencyDetector = latencyDetector;
 		eventSet.add(NorthstarEventType.ACCOUNT);
 		eventSet.add(NorthstarEventType.TRADE);
 		eventSet.add(NorthstarEventType.ORDER);
@@ -59,7 +64,16 @@ public class ModuleManager extends AbstractEventHandler{
 
 	@Override
 	protected void doHandle(NorthstarEvent e) {
-		moduleMap.values().parallelStream().forEach(sm -> sm.onEvent(e));
+		if(latencyDetector != null && e.getData() instanceof TickField tick) {
+			// 分发到模组前的检测点
+			latencyDetector.getCheckpoint(1).sampling(tick);
+		}
+		moduleMap.values().parallelStream().forEach(sm -> {
+			sm.onEvent(e);
+			if(latencyDetector != null && e.getData() instanceof TickField tick) {
+				// 模组运行后的检测点
+				latencyDetector.getCheckpoint(2).sampling(tick);
+			}
+		});
 	}
-
 }

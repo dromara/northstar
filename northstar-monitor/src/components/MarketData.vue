@@ -22,6 +22,10 @@
             ></el-option>
           </el-select>
         </el-form-item>
+        <el-form-item label="行情延时">
+          <span>{{ latency }}</span>
+          <span> 毫秒</span></el-form-item
+        >
       </el-form>
     </div>
     <div id="update-k-line" class="ns-mktdata__body">
@@ -62,7 +66,8 @@ export default {
       fullscreenLoading: false,
       contractList: [],
       gateway: '',
-      unifiedSymbol: ''
+      unifiedSymbol: '',
+      latency: 0
     }
   },
   created() {
@@ -73,7 +78,7 @@ export default {
     })
   },
   computed: {
-    ...mapGetters(['curMarketGatewayId', 'curUnifiedSymbol']),
+    ...mapGetters(['curMarketGatewayId', 'curUnifiedSymbol', 'getCurTick']),
     gatewayList() {
       const gatewayMap = {}
       this.contractList.forEach((i) => (gatewayMap[i.gatewayId] = true))
@@ -95,6 +100,9 @@ export default {
     },
     unifiedSymbol: function (symbol) {
       this.$store.commit('updateFocusUnifiedSymbol', symbol)
+    },
+    '$store.state.marketCurrentDataModule.curTick': function (tick) {
+      this.latency = new Date().getTime() - tick.actiontimestamp
     },
     '$store.state.marketCurrentDataModule.curBar': function (bar) {
       if (this.kLineChart && !!bar) {

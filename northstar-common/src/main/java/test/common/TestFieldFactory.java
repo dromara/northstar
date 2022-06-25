@@ -1,9 +1,12 @@
 package test.common;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 
 import tech.quantit.northstar.common.constant.DateTimeConstant;
 import tech.quantit.northstar.common.constant.GatewayType;
@@ -20,6 +23,7 @@ import xyz.redtorch.pb.CoreEnum.OrderStatusEnum;
 import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
 import xyz.redtorch.pb.CoreEnum.TimeConditionEnum;
 import xyz.redtorch.pb.CoreEnum.VolumeConditionEnum;
+import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.CancelOrderReqField;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.GatewaySettingField;
@@ -93,6 +97,24 @@ public class TestFieldFactory {
 				.setLastPrice(price)
 				.setStatus(TickType.NORMAL_TICK.getCode())
 				.setTradingDay(LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
+				.build();
+	}
+	
+	public BarField makeBarField(String symbol, double price, double deltaRange, LocalDateTime ldt) {
+		double dif1 = ThreadLocalRandom.current().nextDouble(deltaRange);
+		double dif2 = ThreadLocalRandom.current().nextDouble(deltaRange);
+		double dif3 = ThreadLocalRandom.current().nextDouble(deltaRange);
+		return BarField.newBuilder()
+				.setGatewayId(gatewayId)
+				.setUnifiedSymbol(symbol)
+				.setUnifiedSymbol(symbol + "@SHFE@FUTURES")
+				.setActionDay(LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
+				.setActionTime(LocalTime.now().format(DateTimeConstant.T_FORMAT_FORMATTER))
+				.setActionTimestamp(ldt.toInstant(ZoneOffset.ofHours(8)).toEpochMilli())
+				.setOpenPrice(price + dif1)
+				.setHighPrice(price + Math.max(dif3, Math.max(dif1, dif2)))
+				.setLowPrice(price + Math.min(dif3, Math.min(dif1, dif2)))
+				.setClosePrice(price)
 				.build();
 	}
 	

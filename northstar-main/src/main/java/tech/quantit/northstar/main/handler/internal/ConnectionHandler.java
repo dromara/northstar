@@ -9,9 +9,15 @@ import tech.quantit.northstar.common.event.GenericEventHandler;
 import tech.quantit.northstar.common.event.NorthstarEvent;
 import tech.quantit.northstar.common.event.NorthstarEventType;
 import tech.quantit.northstar.common.exception.NoSuchElementException;
+import tech.quantit.northstar.common.model.GatewayDescription;
+import tech.quantit.northstar.data.IGatewayRepository;
 import tech.quantit.northstar.domain.gateway.ContractManager;
 import tech.quantit.northstar.domain.gateway.GatewayAndConnectionManager;
 import tech.quantit.northstar.domain.gateway.GatewayConnection;
+import tech.quantit.northstar.gateway.api.Gateway;
+import tech.quantit.northstar.gateway.api.MarketGateway;
+import xyz.redtorch.pb.CoreEnum.GatewayTypeEnum;
+import xyz.redtorch.pb.CoreField.ContractField;
 
 /**
  * 处理连接相关操作
@@ -23,6 +29,7 @@ public class ConnectionHandler extends AbstractEventHandler implements GenericEv
 	
 	protected GatewayAndConnectionManager gatewayConnMgr;
 	protected ContractManager contractMgr;
+	protected IGatewayRepository gatewayRepo;
 	
 	private static final Set<NorthstarEventType> TARGET_TYPE = new HashSet<>() {
 		private static final long serialVersionUID = 6418831877479036414L;
@@ -31,12 +38,14 @@ public class ConnectionHandler extends AbstractEventHandler implements GenericEv
 			add(NorthstarEventType.CONNECTED);
 			add(NorthstarEventType.DISCONNECTED);
 			add(NorthstarEventType.DISCONNECTING);
+			add(NorthstarEventType.GATEWAY_READY);
 		}
 	};
 	
-	public ConnectionHandler(GatewayAndConnectionManager gatewayConnMgr, ContractManager contractMgr) {
+	public ConnectionHandler(GatewayAndConnectionManager gatewayConnMgr, ContractManager contractMgr, IGatewayRepository gatewayRepo) {
 		this.gatewayConnMgr = gatewayConnMgr;
 		this.contractMgr = contractMgr;
+		this.gatewayRepo = gatewayRepo;
 	}
 
 	@Override
@@ -58,8 +67,31 @@ public class ConnectionHandler extends AbstractEventHandler implements GenericEv
 		} else if(e.getEvent() == NorthstarEventType.DISCONNECTED) {
 			log.info("[{}]-已断开", gatewayId);
 			conn.onDisconnected();
+		} else if(e.getEvent() == NorthstarEventType.GATEWAY_READY) {
+			log.info("[{}]-已可用", gatewayId);
+			Gateway gateway = gatewayConnMgr.getGatewayById(gatewayId);
+			if(gateway instanceof MarketGateway mktGateway && gateway.getGatewaySetting().getGatewayType() == GatewayTypeEnum.GTE_MarketData) {
+				doSubscribe(mktGateway);
+			} else {
+				GatewayConnection gatewayConn = gatewayConnMgr.getConnectionByGateway(gateway);
+				String mktGatewayId = gatewayConn.getGwDescription().getBindedMktGatewayId();
+				MarketGateway mktGateway = (MarketGateway) gatewayConnMgr.getGatewayById(mktGatewayId);
+				if(mktGateway.isConnected()) {					
+					doSubscribe(mktGateway);
+				}
+			}
 		}
-		
+	}
+	
+	private void doSubscribe(MarketGateway mktGateway) {
+		GatewayDescription gd = gatewayRepo.findById(mktGateway.getGatewaySetting().getGatewayId());
+		if(gd.getSubscribedContractGroups() != null) {					
+			for(String contractDefId : gd.getSubscribedContractGroups()) {
+				for(ContractField contract : contractMgr.relativeContracts(contractDefId)) {
+					mktGateway.subscribe(contract);
+				}
+			}
+		} 
 	}
 
 	@Override

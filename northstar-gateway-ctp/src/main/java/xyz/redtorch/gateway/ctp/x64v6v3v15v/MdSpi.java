@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -21,10 +22,10 @@ import org.slf4j.LoggerFactory;
 import tech.quantit.northstar.common.constant.DateTimeConstant;
 import tech.quantit.northstar.common.event.NorthstarEventType;
 import tech.quantit.northstar.common.utils.CommonUtils;
-import tech.quantit.northstar.common.utils.MarketTimeUtil;
+import tech.quantit.northstar.common.utils.MarketDateTimeUtil;
 import tech.quantit.northstar.common.utils.MessagePrinter;
 import tech.quantit.northstar.gateway.api.GatewayAbstract;
-import xyz.redtorch.gateway.ctp.common.CtpMarketTimeUtil;
+import xyz.redtorch.gateway.ctp.common.CtpDateTimeUtil;
 import xyz.redtorch.gateway.ctp.common.GatewayConstants;
 import xyz.redtorch.gateway.ctp.x64v6v3v15v.api.CThostFtdcDepthMarketDataField;
 import xyz.redtorch.gateway.ctp.x64v6v3v15v.api.CThostFtdcForQuoteRspField;
@@ -62,7 +63,7 @@ public class MdSpi extends CThostFtdcMdSpi {
 
 	private Set<String> subscribedSymbolSet = ConcurrentHashMap.newKeySet();
 	
-	private MarketTimeUtil mktTimeUtil = new CtpMarketTimeUtil();
+	private MarketDateTimeUtil mktTimeUtil = new CtpDateTimeUtil();
 
 	MdSpi(GatewayAbstract gatewayAdapter) {
 		this.gatewayAdapter = gatewayAdapter;
@@ -316,7 +317,7 @@ public class MdSpi extends CThostFtdcMdSpi {
 				}
 				
 				gatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.CONNECTED, gatewayId);
-				gatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.TRADE_DATE, tradingDay);
+				gatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.GATEWAY_READY, gatewayId);
 			} else {
 				logger.warn("{}行情接口登录回报错误 错误ID:{},错误信息:{}", logInfo, pRspInfo.getErrorID(), pRspInfo.getErrorMsg());
 				// 不合法的登录
@@ -415,9 +416,8 @@ public class MdSpi extends CThostFtdcMdSpi {
 
 				// 接口返回的updateTime数据格式为 HH:mm:ss
 				String updateTimeStr = pDepthMarketData.getUpdateTime().replaceAll(":", "");
-				updateTimeStr = StringUtils.isEmpty(updateTimeStr) ? LocalTime.now().format(DateTimeConstant.T_FORMAT_INT_FORMATTER) : updateTimeStr;
 				Long updateTime = Long.valueOf(updateTimeStr);
-				Long updateMillisec = StringUtils.isEmpty(updateTimeStr) ? System.currentTimeMillis() % 1000 : (long) pDepthMarketData.getUpdateMillisec();
+				Long updateMillisec = (long) pDepthMarketData.getUpdateMillisec();
 				
 				/*
 				 * 大商所获取的ActionDay可能是不正确的,因此这里采用本地时间修正 1.请注意，本地时间应该准确 2.使用 SimNow 7x24
@@ -507,7 +507,7 @@ public class MdSpi extends CThostFtdcMdSpi {
 				tickBuilder.setUnifiedSymbol(contract.getUnifiedSymbol());
 				tickBuilder.setActionDay(actionDay);
 				tickBuilder.setActionTime(actionTime);
-				long localDateTimeMillisec = dateTime.toInstant(OffsetDateTime.now().getOffset()).toEpochMilli();
+				long localDateTimeMillisec = dateTime.toInstant(ZoneOffset.ofHours(8)).toEpochMilli();
 				tickBuilder.setActionTimestamp(localDateTimeMillisec);
 				tickBuilder.setAvgPrice(isReasonable(upperLimit, lowerLimit, averagePrice) ? averagePrice : preClosePrice);
 
@@ -555,6 +555,8 @@ public class MdSpi extends CThostFtdcMdSpi {
 				gatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.TICK, tick);
 				gatewayAdapter.registry.dispatch(tick);
 				lastUpdateTickTime = System.currentTimeMillis();
+				
+				gatewayAdapter.registry.getLatencyDetector().ifPresent(detector -> detector.getCheckpoint(0).sampling(tick));
 				
 			} catch (Throwable t) {
 				logger.error("{} OnRtnDepthMarketData Exception", logInfo, t);

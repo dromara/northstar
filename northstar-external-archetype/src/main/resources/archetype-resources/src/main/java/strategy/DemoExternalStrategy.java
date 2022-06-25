@@ -1,40 +1,38 @@
-package tech.quantit.northstar.strategy.api.demo;
+#set( $symbol_pound = '#' )
+#set( $symbol_dollar = '$' )
+#set( $symbol_escape = '\' )
+package ${package}.strategy;
 
-import tech.quantit.northstar.common.constant.SignalOperation;
-import tech.quantit.northstar.common.model.DynamicParams;
-import tech.quantit.northstar.common.model.Setting;
-import tech.quantit.northstar.strategy.api.AbstractStrategy;
-import tech.quantit.northstar.strategy.api.TradeStrategy;
-import tech.quantit.northstar.strategy.api.annotation.StrategicComponent;
-import tech.quantit.northstar.strategy.api.constant.PriceType;
-import tech.quantit.northstar.strategy.api.indicator.Indicator;
-import tech.quantit.northstar.strategy.api.indicator.Indicator.ValueType;
-import tech.quantit.northstar.strategy.api.indicator.function.MovingAverage;
+import lombok.extern.slf4j.Slf4j;
+import ${groupId}.northstar.common.constant.SignalOperation;
+import ${groupId}.northstar.common.model.DynamicParams;
+import ${groupId}.northstar.common.model.Setting;
+import ${groupId}.northstar.strategy.api.AbstractStrategy;
+import ${groupId}.northstar.strategy.api.TradeStrategy;
+import ${groupId}.northstar.strategy.api.annotation.StrategicComponent;
+import ${groupId}.northstar.strategy.api.constant.PriceType;
+import ${groupId}.northstar.strategy.api.indicator.Indicator;
+import ${groupId}.northstar.strategy.api.indicator.Indicator.ValueType;
+import ${groupId}.northstar.strategy.api.indicator.MovingAverage;
 import xyz.redtorch.pb.CoreField.BarField;
 
 /**
- * 本示例用于展示一个带指标的策略
+ * 本示例源自于示例指标策略，用于展示自定义项目生成的情况下，如何使用自定义项目。
  * 采用的是简单的均线策略：快线在慢线之上做多，快线在慢线之下做空
  * 
- * ## 风险提示：该策略仅作技术分享，据此交易，风险自担 ##
- * @author KevinHuangwl
+ *  * @author KevinHuangwl
  *
  */
-@StrategicComponent(IndicatorSampleStrategy.NAME)
-public class IndicatorSampleStrategy extends AbstractStrategy	// 为了简化代码，引入一个通用的基础抽象类
+@Slf4j
+@StrategicComponent(DemoExternalStrategy.NAME)
+public class DemoExternalStrategy extends AbstractStrategy	// 为了简化代码，引入一个通用的基础抽象类
 	implements TradeStrategy{
 
-	protected static final String NAME = "示例指标策略";
-	
-	private InitParams params;	// 策略的参数配置信息
+	protected static final String NAME = "示例外部策略";
 	
 	private Indicator fastLine;
 	
 	private Indicator slowLine;
-	
-	private Indicator macdDiff;
-	
-	private Indicator macdDea;
 	
 	@Override
 	protected void onBar(BarField bar) {
@@ -75,14 +73,13 @@ public class IndicatorSampleStrategy extends AbstractStrategy	// 为了简化代
 
 	@Override
 	public void initWithParams(DynamicParams params) {
-		this.params = (InitParams) params;
-	}
-	
-	@Override
-	protected void initIndicators() {
+		InitParams settings = (InitParams) params;
 		// 指标的创建 
-		this.fastLine = ctx.newIndicator("快线", params.indicatorSymbol, params.fast, ValueType.CLOSE, new MovingAverage(params.fast));
-		this.slowLine = ctx.newIndicator("慢线", params.indicatorSymbol, params.slow, ValueType.CLOSE, new MovingAverage(params.slow));
+		this.fastLine = new MovingAverage(settings.indicatorSymbol, settings.fast, ValueType.CLOSE);
+		this.slowLine = new MovingAverage(settings.indicatorSymbol, settings.slow, ValueType.CLOSE);
+		// 指标创建后，必须加入指标集才能自动更新
+		indicatorMap.put("快线", fastLine);
+		indicatorMap.put("慢线", slowLine);
 	}
 
 	public static class InitParams extends DynamicParams {			
@@ -95,6 +92,7 @@ public class IndicatorSampleStrategy extends AbstractStrategy	// 为了简化代
 		
 		@Setting(value="慢线周期", order=2)		
 		private int slow;
+		
 		
 	}
 }

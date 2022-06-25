@@ -2,19 +2,24 @@ package tech.quantit.northstar.main.config;
 
 import java.util.concurrent.ConcurrentMap;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.event.InternalEventBus;
+import tech.quantit.northstar.data.IGatewayRepository;
+import tech.quantit.northstar.data.IMarketDataRepository;
 import tech.quantit.northstar.domain.account.TradeDayAccount;
 import tech.quantit.northstar.domain.account.TradeDayAccountFactory;
 import tech.quantit.northstar.domain.external.MessageHandlerManager;
 import tech.quantit.northstar.domain.gateway.ContractManager;
 import tech.quantit.northstar.domain.gateway.GatewayAndConnectionManager;
+import tech.quantit.northstar.gateway.api.domain.LatencyDetector;
 import tech.quantit.northstar.gateway.sim.trade.SimMarket;
 import tech.quantit.northstar.main.handler.internal.AccountHandler;
 import tech.quantit.northstar.main.handler.internal.ConnectionHandler;
+import tech.quantit.northstar.main.handler.internal.MarketDataHandler;
 import tech.quantit.northstar.main.handler.internal.ModuleManager;
 import tech.quantit.northstar.main.handler.internal.NotificationDispatcher;
 import tech.quantit.northstar.main.handler.internal.SimMarketHandler;
@@ -37,8 +42,8 @@ public class InternalEventHandlerConfig {
 	
 	@Bean
 	public ConnectionHandler connectionEventHandler(InternalEventBus eventBus, GatewayAndConnectionManager gatewayConnMgr,
-			ContractManager contractMgr) {
-		ConnectionHandler handler = new ConnectionHandler(gatewayConnMgr, contractMgr);
+			ContractManager contractMgr, IGatewayRepository gatewayRepo) {
+		ConnectionHandler handler = new ConnectionHandler(gatewayConnMgr, contractMgr, gatewayRepo);
 		log.debug("注册：ConnectionHandler");
 		eventBus.register(handler);
 		return handler;
@@ -61,11 +66,19 @@ public class InternalEventHandlerConfig {
 	}
 	
 	@Bean
-	public ModuleManager moduleManager(InternalEventBus eventBus) {
-		ModuleManager moduleMgr = new ModuleManager();
+	public ModuleManager moduleManager(InternalEventBus eventBus, @Autowired(required = false) LatencyDetector latencyDetector) {
+		ModuleManager moduleMgr = new ModuleManager(latencyDetector);
 		log.debug("注册：ModuleManager");
 		eventBus.register(moduleMgr);
 		return moduleMgr;
+	}
+	
+	@Bean 
+	public MarketDataHandler marketDataHandler(IMarketDataRepository mdRepo, InternalEventBus eventBus) {
+		MarketDataHandler mdHandler = new MarketDataHandler(mdRepo);
+		log.debug("注册：MarketDataHandler");
+		eventBus.register(mdHandler);
+		return mdHandler;
 	}
 	//////////////////////
 	/* Internal类事件结束 */

@@ -1,8 +1,14 @@
 package tech.quantit.northstar.strategy.api;
 
+import java.util.function.DoubleUnaryOperator;
+
+import org.slf4j.Logger;
+
 import tech.quantit.northstar.common.constant.ModuleState;
 import tech.quantit.northstar.common.constant.SignalOperation;
 import tech.quantit.northstar.strategy.api.constant.PriceType;
+import tech.quantit.northstar.strategy.api.indicator.Indicator;
+import tech.quantit.northstar.strategy.api.indicator.Indicator.ValueType;
 import xyz.redtorch.pb.CoreField.ContractField;
 
 public interface IModuleStrategyContext {
@@ -43,4 +49,20 @@ public interface IModuleStrategyContext {
 	 * @param enabled
 	 */
 	void disabledModule();
+	/**
+	 * 获取日志对象
+	 * @return
+	 */
+	Logger getLogger();
+	/**
+	 * 创建指标
+	 * @param indicatorName
+	 * @param bindedUnifiedSymbol
+	 * @param indicatorLength
+	 * @param valTypeOfBar
+	 * @param valueUpdateHandler
+	 * @return
+	 */
+	Indicator newIndicator(String indicatorName, String bindedUnifiedSymbol, int indicatorLength, ValueType valTypeOfBar,
+			DoubleUnaryOperator valueUpdateHandler);
 }

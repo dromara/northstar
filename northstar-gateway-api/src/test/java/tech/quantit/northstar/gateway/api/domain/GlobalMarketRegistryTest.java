@@ -27,7 +27,7 @@ class GlobalMarketRegistryTest {
 	@Test
 	void shouldSubscribeContract() {
 		Consumer<ContractField> callback = mock(Consumer.class);
-		registry = new GlobalMarketRegistry(mock(FastEventEngine.class), mock(Consumer.class), callback);
+		registry = new GlobalMarketRegistry(mock(FastEventEngine.class), mock(Consumer.class), callback, mock(LatencyDetector.class));
 		
 		NormalContract contract = mock(NormalContract.class);
 		when(contract.contractField()).thenReturn(factory.makeContract("rb2210"));
@@ -43,7 +43,7 @@ class GlobalMarketRegistryTest {
 	
 	@Test
 	void shouldNotSubscribeContract() {
-		registry = new GlobalMarketRegistry(mock(FastEventEngine.class), mock(Consumer.class), mock(Consumer.class));
+		registry = new GlobalMarketRegistry(mock(FastEventEngine.class), mock(Consumer.class), mock(Consumer.class), mock(LatencyDetector.class));
 		
 		IndexContract contract = mock(IndexContract.class);
 		when(contract.contractField()).thenReturn(factory.makeContract("rb2210"));
@@ -58,7 +58,7 @@ class GlobalMarketRegistryTest {
 
 	@Test
 	void testRegisterMarketGateway() {
-		registry = new GlobalMarketRegistry(mock(FastEventEngine.class), mock(Consumer.class), mock(Consumer.class));
+		registry = new GlobalMarketRegistry(mock(FastEventEngine.class), mock(Consumer.class), mock(Consumer.class), mock(LatencyDetector.class));
 		NormalContract contract = mock(NormalContract.class);
 		MarketGateway gateway = mock(MarketGateway.class);
 		when(contract.contractField()).thenReturn(factory.makeContract("rb2210"));
@@ -73,7 +73,7 @@ class GlobalMarketRegistryTest {
 
 	@Test
 	void testDispatch() {
-		registry = new GlobalMarketRegistry(mock(FastEventEngine.class), mock(Consumer.class), mock(Consumer.class));
+		registry = new GlobalMarketRegistry(mock(FastEventEngine.class), mock(Consumer.class), mock(Consumer.class), mock(LatencyDetector.class));
 		TickField tick = factory.makeTickField("rb2210", 2000);
 		NormalContract contract = mock(NormalContract.class);
 		when(contract.contractField()).thenReturn(factory.makeContract("rb2210"));

@@ -1,13 +1,12 @@
 package tech.quantit.northstar.strategy.api.demo;
 
-import java.util.Collections;
-import java.util.Map;
 import java.util.TimerTask;
 import java.util.concurrent.ThreadLocalRandom;
 
+import org.slf4j.Logger;
+
 import com.alibaba.fastjson.JSONObject;
 
-import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.constant.ModuleState;
 import tech.quantit.northstar.common.constant.SignalOperation;
 import tech.quantit.northstar.common.model.DynamicParams;
@@ -17,7 +16,6 @@ import tech.quantit.northstar.strategy.api.IModuleStrategyContext;
 import tech.quantit.northstar.strategy.api.TradeStrategy;
 import tech.quantit.northstar.strategy.api.annotation.StrategicComponent;
 import tech.quantit.northstar.strategy.api.constant.PriceType;
-import tech.quantit.northstar.strategy.api.indicator.Indicator;
 import tech.quantit.northstar.strategy.api.utils.time.TickBasedTimer;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.OrderField;
@@ -31,7 +29,6 @@ import xyz.redtorch.pb.CoreField.TradeField;
  * @author KevinHuangwl
  *
  */
-@Slf4j
 @StrategicComponent(BeginnerSampleStrategy.NAME)		// 该注解是用于给策略命名用的，所有的策略都要带上这个注解
 public class BeginnerSampleStrategy implements TradeStrategy{
 	
@@ -42,6 +39,8 @@ public class BeginnerSampleStrategy implements TradeStrategy{
 	private IModuleStrategyContext ctx;		// 模组的操作上下文
 	
 	private JSONObject inspectableState; 	// 可透视状态计算信息
+	
+	private Logger log;
 	
 	/**
 	 * 定义该策略的参数。该类每个策略必须自己重写一个，类名必须为InitParams，必须继承DynamicParams，必须是个static类。
@@ -68,6 +67,7 @@ public class BeginnerSampleStrategy implements TradeStrategy{
 	@Override
 	public void setContext(IModuleContext context) {
 		ctx = context;
+		log = ctx.getLogger();
 	}
 	
 	@Override
@@ -81,15 +81,6 @@ public class BeginnerSampleStrategy implements TradeStrategy{
 	}
 	/***************** 以上如果看不懂，基本可以照搬 *************************/
 	
-	/**
-	 * 定义一个本策略用到的一些指标
-	 * 该示例没有使用到指标，则返回一个空集合
-	 */
-	@Override
-	public Map<String, Indicator> bindedIndicatorMap() {
-		return Collections.emptyMap();
-	}
-
 	private TickBasedTimer timer = new TickBasedTimer();
 	private TimerTask runningTask = null;
 	private TimerTask withdrawOrderIfTimeout = new TimerTask() {

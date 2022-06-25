@@ -1,4 +1,10 @@
 # Northstar盈富量化交易平台
+<p align="center">
+    <img src ="https://img.shields.io/badge/version-4.0.0-yellow.svg"/>
+    <img src ="https://img.shields.io/badge/platform-windows|linux-green.svg"/>
+    <img src ="https://img.shields.io/badge/licence-Apache2.0-blue.svg"/>
+    <img src ="https://img.shields.io/badge/lang-JAVA|JS-orange.svg"/>
+</p>
 
 **开源声明：**  
 **本项目归入dromara开源组织运营的初心，是希望可以有更多志同道合的朋友一起参与项目的开发，并且能借其在交易市场上有所收获！**  
@@ -37,7 +43,7 @@
 为了更好地了解实盘用户的使用情况，程序对期货公司做了一定的管理，如需要进行实盘交易，请联系作者咨询。
 
 ## 社群支持
-**为防止滥发广告的微信号加群，加群需收取100元红包（可抵用数据服务费用）**
+**为防止滥发广告的微信号加群，加群需收取100元红包（可抵扣数据服务费用）**
 ![输入图片说明](https://images.gitee.com/uploads/images/2022/0107/210113_21d2977f_1676852.jpeg "微信图片_20220107210039.jpg")
 
 ## 运行环境
@@ -46,7 +52,6 @@
 ## 程序架构
 - B/S架构
 - northstar项目为服务端（包含了web网页监控端）
-- northstar-external为用户自行扩展的项目，可参考[此项目](https://gitee.com/NorthstarQuan/northstar-external)
 - 交互协议HTTP + websocket
 - 数据库、缓存为Redis7（历史行情数据主要依赖数据服务，本地仅保存少量账户配置信息）
 - 前端采用node14 + vue2.x
@@ -63,7 +68,12 @@
 ```
 curl https://gitee.com/dromara/northstar/raw/master/env.sh | sh
 ```
-**注意：所有northstar相关的包统一放在 /home/quantit 目录下**
+
+目录结构如下：  
+~/  
+|--northstar-dist/ 	程序包目录  
+|--northstar-env/	环境依赖包目录  
+
 
 **Windows环境下**，初始化系统环境。打开powershell命令行窗口，输入以下命令（部分系统可能报错，需要把脚本下载到本地后右键选择powershell执行）
 ```

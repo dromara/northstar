@@ -8,4 +8,6 @@ if [[ `pgrep -a java | grep northstar.jar | wc -l` > 0 ]]; then
 fi
 
 mvn clean install -Dmaven.test.skip=true
-\mv -f northstar-main/target/northstar-*.jar northstar-main/target/northstar.jar
+cp startup.sh ~/northstar-dist/
+\mv -f northstar-main/target/northstar-*.jar ~/northstar-dist/northstar.jar
+

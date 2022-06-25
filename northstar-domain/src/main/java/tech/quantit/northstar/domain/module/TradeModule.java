@@ -32,23 +32,20 @@ import xyz.redtorch.pb.CoreField.TradeField;
 @Slf4j
 public class TradeModule implements IModule {
 	
-	private String name;
-	
 	private boolean enabled;
 	
 	private IModuleContext ctx;
 	
 	private Consumer<ModuleRuntimeDescription> onRuntimeChangeCallback;
 	
-	public TradeModule(String name, IModuleContext context, Consumer<ModuleRuntimeDescription> onRuntimeChangeCallback) {
-		this.name = name;
+	public TradeModule(IModuleContext context, Consumer<ModuleRuntimeDescription> onRuntimeChangeCallback) {
 		this.ctx = context;
 		this.onRuntimeChangeCallback = onRuntimeChangeCallback;
 	}
 	
 	@Override
 	public String getName() {
-		return name;
+		return ctx.getModuleName();
 	}
 
 	@Override
@@ -70,11 +67,11 @@ public class TradeModule implements IModule {
 	@Override
 	public void initData(List<BarField> historyBars) {
 		if(historyBars.isEmpty()) {
-			log.debug("[{}] 初始化数据为空", name);
+			log.debug("[{}] 初始化数据为空", ctx.getModuleName());
 			return;
 		}
 		
-		log.debug("[{}] 合约{} 初始化数据 {} {} -> {} {}", name, historyBars.get(0).getUnifiedSymbol(),
+		log.debug("[{}] 合约{} 初始化数据 {} {} -> {} {}", ctx.getModuleName(), historyBars.get(0).getUnifiedSymbol(),
 				historyBars.get(0).getActionDay(), historyBars.get(0).getActionTime(), 
 				historyBars.get(historyBars.size() - 1).getActionDay(), historyBars.get(historyBars.size() - 1).getActionTime());
 		boolean flag = enabled;

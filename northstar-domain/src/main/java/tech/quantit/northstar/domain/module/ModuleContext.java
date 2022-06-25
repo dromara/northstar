@@ -7,9 +7,12 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.UUID;
 import java.util.function.Consumer;
+import java.util.function.DoubleUnaryOperator;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.ILoggerFactory;
+import org.slf4j.Logger;
 
 import tech.quantit.northstar.common.constant.Constants;
 import tech.quantit.northstar.common.constant.IndicatorType;
@@ -30,9 +33,12 @@ import tech.quantit.northstar.strategy.api.ClosingStrategy;
 import tech.quantit.northstar.strategy.api.IModule;
 import tech.quantit.northstar.strategy.api.IModuleAccountStore;
 import tech.quantit.northstar.strategy.api.IModuleContext;
+import tech.quantit.northstar.strategy.api.IndicatorFactory;
 import tech.quantit.northstar.strategy.api.TradeStrategy;
 import tech.quantit.northstar.strategy.api.constant.PriceType;
 import tech.quantit.northstar.strategy.api.indicator.Indicator;
+import tech.quantit.northstar.strategy.api.indicator.Indicator.ValueType;
+import tech.quantit.northstar.strategy.api.log.NorthstarLoggerFactory;
 import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
 import xyz.redtorch.pb.CoreEnum.ForceCloseReasonEnum;
 import xyz.redtorch.pb.CoreEnum.HedgeFlagEnum;
@@ -96,10 +102,17 @@ public class ModuleContext implements IModuleContext{
 	
 	private Consumer<ModuleDealRecord> onDealCallback;
 	
+	private ILoggerFactory logFactory = new NorthstarLoggerFactory();
+	
+	private IndicatorFactory indicatorFactory = new IndicatorFactory();
+	
 	private static final int BUF_SIZE = 500;
 	
-	public ModuleContext(TradeStrategy tradeStrategy, IModuleAccountStore accStore, ClosingStrategy closingStrategy, int numOfMinsPerBar, 
+	private final String moduleName;
+	
+	public ModuleContext(String name, TradeStrategy tradeStrategy, IModuleAccountStore accStore, ClosingStrategy closingStrategy, int numOfMinsPerBar, 
 			DealCollector dealCollector, Consumer<ModuleRuntimeDescription> onRuntimeChangeCallback, Consumer<ModuleDealRecord> onDealCallback) {
+		this.moduleName = name;
 		this.tradeStrategy = tradeStrategy;
 		this.accStore = accStore;
 		this.closingStrategy = closingStrategy;
@@ -107,12 +120,13 @@ public class ModuleContext implements IModuleContext{
 		this.dealCollector = dealCollector;
 		this.onRuntimeChangeCallback = onRuntimeChangeCallback;
 		this.onDealCallback = onDealCallback;
-		this.tradeStrategy.bindedIndicatorMap().entrySet().stream()
-			.forEach(e -> indicatorValBufQMap.put(e.getKey(), new LinkedList<>()));
 		this.barMergingCallback = bar -> {
-			tradeStrategy.bindedIndicatorMap().entrySet().stream().forEach(e -> {
+			indicatorFactory.getIndicatorMap().entrySet().stream().forEach(e -> {
 				Indicator indicator = e.getValue();
 				indicator.onBar(bar);
+				if(!indicatorValBufQMap.containsKey(e.getKey())) {
+					indicatorValBufQMap.put(e.getKey(), new LinkedList<>());
+				}
 				if(indicatorValBufQMap.get(e.getKey()).size() >= BUF_SIZE) {
 					indicatorValBufQMap.get(e.getKey()).poll();
 				}
@@ -165,7 +179,7 @@ public class ModuleContext implements IModuleContext{
 			mad.setBarDataMap(barBufQMap.entrySet().stream()
 					.collect(Collectors.toMap(Map.Entry::getKey, 
 							e -> e.getValue().stream().map(BarField::toByteArray).toList())));
-			mad.setIndicatorMap(tradeStrategy.bindedIndicatorMap().entrySet().stream()
+			mad.setIndicatorMap(indicatorFactory.getIndicatorMap().entrySet().stream()
 					.filter(e -> e.getValue().getType() != IndicatorType.UNKNOWN)
 					.collect(Collectors.toMap(Map.Entry::getKey,
 							e -> IndicatorData.builder()
@@ -323,7 +337,7 @@ public class ModuleContext implements IModuleContext{
 
 	@Override
 	public String getModuleName() {
-		return module.getName();
+		return moduleName;
 	}
 
 	@Override
@@ -347,6 +361,17 @@ public class ModuleContext implements IModuleContext{
 	@Override
 	public ModuleState getState() {
 		return accStore.getModuleState();
+	}
+
+	@Override
+	public Logger getLogger() {
+		return logFactory.getLogger(getModuleName());
+	}
+
+	@Override
+	public Indicator newIndicator(String indicatorName, String bindedUnifiedSymbol, int indicatorLength,
+			ValueType valTypeOfBar, DoubleUnaryOperator valueUpdateHandler) {
+		return indicatorFactory.newIndicator(indicatorName, bindedUnifiedSymbol, indicatorLength, valTypeOfBar, valueUpdateHandler);
 	}
 
 }

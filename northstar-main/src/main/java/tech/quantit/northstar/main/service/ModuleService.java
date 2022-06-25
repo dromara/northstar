@@ -68,7 +68,7 @@ public class ModuleService implements InitializingBean {
 	
 	private ModuleFactory moduleFactory;
 	
-	private ClassLoader loader;
+	private ExternalJarListener extJarListener;
 	
 	public ModuleService(ApplicationContext ctx, ExternalJarListener extJarListener, IModuleRepository moduleRepo, IMarketDataRepository mdRepo,
 			ModuleFactory moduleFactory, ModuleManager moduleMgr, ContractManager contractMgr) {
@@ -78,7 +78,7 @@ public class ModuleService implements InitializingBean {
 		this.moduleRepo = moduleRepo;
 		this.mdRepo = mdRepo;
 		this.moduleFactory = moduleFactory;
-		this.loader = extJarListener.getExternalClassLoader();
+		this.extJarListener = extJarListener;
 	}
 
 	/**
@@ -108,7 +108,7 @@ public class ModuleService implements InitializingBean {
 	public Map<String, ComponentField> getComponentParams(ComponentMetaInfo metaInfo) throws ClassNotFoundException {
 		String className = metaInfo.getClassName();
 		Class<?> clz = null;
-		ClassLoader cl = loader;
+		ClassLoader cl = extJarListener.getExternalClassLoader();
 		if(cl != null) {
 			clz = cl.loadClass(className);
 		}
