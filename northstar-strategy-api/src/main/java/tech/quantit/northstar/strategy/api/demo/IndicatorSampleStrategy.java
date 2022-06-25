@@ -9,7 +9,7 @@ import tech.quantit.northstar.strategy.api.annotation.StrategicComponent;
 import tech.quantit.northstar.strategy.api.constant.PriceType;
 import tech.quantit.northstar.strategy.api.indicator.Indicator;
 import tech.quantit.northstar.strategy.api.indicator.Indicator.ValueType;
-import tech.quantit.northstar.strategy.api.indicator.MovingAverage;
+import tech.quantit.northstar.strategy.api.indicator.function.MovingAverage;
 import xyz.redtorch.pb.CoreField.BarField;
 
 /**
@@ -26,9 +26,15 @@ public class IndicatorSampleStrategy extends AbstractStrategy	// 为了简化代
 
 	protected static final String NAME = "示例指标策略";
 	
+	private InitParams params;	// 策略的参数配置信息
+	
 	private Indicator fastLine;
 	
 	private Indicator slowLine;
+	
+	private Indicator macdDiff;
+	
+	private Indicator macdDea;
 	
 	@Override
 	protected void onBar(BarField bar) {
@@ -69,13 +75,14 @@ public class IndicatorSampleStrategy extends AbstractStrategy	// 为了简化代
 
 	@Override
 	public void initWithParams(DynamicParams params) {
-		InitParams settings = (InitParams) params;
+		this.params = (InitParams) params;
+	}
+	
+	@Override
+	protected void initIndicators() {
 		// 指标的创建 
-		this.fastLine = new MovingAverage(settings.indicatorSymbol, settings.fast, ValueType.CLOSE);
-		this.slowLine = new MovingAverage(settings.indicatorSymbol, settings.slow, ValueType.CLOSE);
-		// 指标创建后，必须加入指标集才能自动更新
-		indicatorMap.put("快线", fastLine);
-		indicatorMap.put("慢线", slowLine);
+		this.fastLine = ctx.newIndicator("快线", params.indicatorSymbol, params.fast, ValueType.CLOSE, new MovingAverage(params.fast));
+		this.slowLine = ctx.newIndicator("慢线", params.indicatorSymbol, params.slow, ValueType.CLOSE, new MovingAverage(params.slow));
 	}
 
 	public static class InitParams extends DynamicParams {			
@@ -88,7 +95,6 @@ public class IndicatorSampleStrategy extends AbstractStrategy	// 为了简化代
 		
 		@Setting(value="慢线周期", order=2)		
 		private int slow;
-		
 		
 	}
 }

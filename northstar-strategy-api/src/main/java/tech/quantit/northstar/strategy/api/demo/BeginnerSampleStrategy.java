@@ -1,7 +1,5 @@
 package tech.quantit.northstar.strategy.api.demo;
 
-import java.util.Collections;
-import java.util.Map;
 import java.util.TimerTask;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -18,7 +16,6 @@ import tech.quantit.northstar.strategy.api.IModuleStrategyContext;
 import tech.quantit.northstar.strategy.api.TradeStrategy;
 import tech.quantit.northstar.strategy.api.annotation.StrategicComponent;
 import tech.quantit.northstar.strategy.api.constant.PriceType;
-import tech.quantit.northstar.strategy.api.indicator.Indicator;
 import tech.quantit.northstar.strategy.api.utils.time.TickBasedTimer;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.OrderField;
@@ -84,15 +81,6 @@ public class BeginnerSampleStrategy implements TradeStrategy{
 	}
 	/***************** 以上如果看不懂，基本可以照搬 *************************/
 	
-	/**
-	 * 定义一个本策略用到的一些指标
-	 * 该示例没有使用到指标，则返回一个空集合
-	 */
-	@Override
-	public Map<String, Indicator> bindedIndicatorMap() {
-		return Collections.emptyMap();
-	}
-
 	private TickBasedTimer timer = new TickBasedTimer();
 	private TimerTask runningTask = null;
 	private TimerTask withdrawOrderIfTimeout = new TimerTask() {

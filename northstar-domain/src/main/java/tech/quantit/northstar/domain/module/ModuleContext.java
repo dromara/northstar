@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.UUID;
 import java.util.function.Consumer;
+import java.util.function.DoubleUnaryOperator;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -32,9 +33,11 @@ import tech.quantit.northstar.strategy.api.ClosingStrategy;
 import tech.quantit.northstar.strategy.api.IModule;
 import tech.quantit.northstar.strategy.api.IModuleAccountStore;
 import tech.quantit.northstar.strategy.api.IModuleContext;
+import tech.quantit.northstar.strategy.api.IndicatorFactory;
 import tech.quantit.northstar.strategy.api.TradeStrategy;
 import tech.quantit.northstar.strategy.api.constant.PriceType;
 import tech.quantit.northstar.strategy.api.indicator.Indicator;
+import tech.quantit.northstar.strategy.api.indicator.Indicator.ValueType;
 import tech.quantit.northstar.strategy.api.log.NorthstarLoggerFactory;
 import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
 import xyz.redtorch.pb.CoreEnum.ForceCloseReasonEnum;
@@ -101,6 +104,8 @@ public class ModuleContext implements IModuleContext{
 	
 	private ILoggerFactory logFactory = new NorthstarLoggerFactory();
 	
+	private IndicatorFactory indicatorFactory = new IndicatorFactory();
+	
 	private static final int BUF_SIZE = 500;
 	
 	private final String moduleName;
@@ -115,12 +120,13 @@ public class ModuleContext implements IModuleContext{
 		this.dealCollector = dealCollector;
 		this.onRuntimeChangeCallback = onRuntimeChangeCallback;
 		this.onDealCallback = onDealCallback;
-		this.tradeStrategy.bindedIndicatorMap().entrySet().stream()
-			.forEach(e -> indicatorValBufQMap.put(e.getKey(), new LinkedList<>()));
 		this.barMergingCallback = bar -> {
-			tradeStrategy.bindedIndicatorMap().entrySet().stream().forEach(e -> {
+			indicatorFactory.getIndicatorMap().entrySet().stream().forEach(e -> {
 				Indicator indicator = e.getValue();
 				indicator.onBar(bar);
+				if(!indicatorValBufQMap.containsKey(e.getKey())) {
+					indicatorValBufQMap.put(e.getKey(), new LinkedList<>());
+				}
 				if(indicatorValBufQMap.get(e.getKey()).size() >= BUF_SIZE) {
 					indicatorValBufQMap.get(e.getKey()).poll();
 				}
@@ -173,7 +179,7 @@ public class ModuleContext implements IModuleContext{
 			mad.setBarDataMap(barBufQMap.entrySet().stream()
 					.collect(Collectors.toMap(Map.Entry::getKey, 
 							e -> e.getValue().stream().map(BarField::toByteArray).toList())));
-			mad.setIndicatorMap(tradeStrategy.bindedIndicatorMap().entrySet().stream()
+			mad.setIndicatorMap(indicatorFactory.getIndicatorMap().entrySet().stream()
 					.filter(e -> e.getValue().getType() != IndicatorType.UNKNOWN)
 					.collect(Collectors.toMap(Map.Entry::getKey,
 							e -> IndicatorData.builder()
@@ -360,6 +366,12 @@ public class ModuleContext implements IModuleContext{
 	@Override
 	public Logger getLogger() {
 		return logFactory.getLogger(getModuleName());
+	}
+
+	@Override
+	public Indicator newIndicator(String indicatorName, String bindedUnifiedSymbol, int indicatorLength,
+			ValueType valTypeOfBar, DoubleUnaryOperator valueUpdateHandler) {
+		return indicatorFactory.newIndicator(indicatorName, bindedUnifiedSymbol, indicatorLength, valTypeOfBar, valueUpdateHandler);
 	}
 
 }

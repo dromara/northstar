@@ -8,7 +8,6 @@ import org.slf4j.Logger;
 import com.alibaba.fastjson.JSONObject;
 
 import tech.quantit.northstar.common.TickDataAware;
-import tech.quantit.northstar.strategy.api.indicator.Indicator;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.OrderField;
 import xyz.redtorch.pb.CoreField.TickField;
@@ -20,8 +19,6 @@ public abstract class AbstractStrategy implements TradeStrategy{
 	protected IModuleStrategyContext ctx;
 	// 模组计算状态
 	protected JSONObject inspectableState;
-	// 指标集，name -> indicator
-	protected Map<String, Indicator> indicatorMap = new HashMap<>();
 	// 处理器，unifiedSymbol -> handler
 	protected Map<String, TickHandler> tickHandlerMap = new HashMap<>();
 	// 处理器，unifiedSymbol -> handler
@@ -43,11 +40,7 @@ public abstract class AbstractStrategy implements TradeStrategy{
 	public void setContext(IModuleContext context) {
 		ctx = context;
 		log = ctx.getLogger();
-	}
-
-	@Override
-	public Map<String, Indicator> bindedIndicatorMap() {
-		return indicatorMap;
+		initIndicators();
 	}
 
 	@Override
@@ -59,6 +52,11 @@ public abstract class AbstractStrategy implements TradeStrategy{
 	public void setComputedState(JSONObject stateObj) {
 		this.inspectableState = stateObj;
 	}
+	
+	/**
+	 * 指标初始化
+	 */
+	protected void initIndicators() {}
 
 	/**
 	 * 该方法不管模组是否启用都会被调用
@@ -107,7 +105,7 @@ public abstract class AbstractStrategy implements TradeStrategy{
 	 * @param bar
 	 */
 	protected void onBar(BarField bar) {}
-
+	
 	/**
 	 * 订阅多个合约时，可以加上各自的处理器来减少if...else代码
 	 * @param unifiedSymbol

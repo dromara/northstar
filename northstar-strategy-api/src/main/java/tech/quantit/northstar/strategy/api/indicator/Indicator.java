@@ -4,22 +4,23 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.DoubleUnaryOperator;
 import java.util.stream.Stream;
 
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.constant.IndicatorType;
 import tech.quantit.northstar.common.model.TimeSeriesValue;
-import tech.quantit.northstar.strategy.api.BarDataAware;
 import tech.quantit.northstar.strategy.api.utils.collection.RingArray;
 import xyz.redtorch.pb.CoreField.BarField;
 
 /**
- * 行情指标抽象类
+ * 行情指标
+ * 主要关注指标与合约的绑定关系、指标长度、指标更新处理
  * @author KevinHuangwl
  *
  */
 @Slf4j
-public abstract class Indicator implements BarDataAware {
+public class Indicator {
 	
 	/**
 	 * 指标历史记录
@@ -37,7 +38,9 @@ public abstract class Indicator implements BarDataAware {
 	
 	private int actualUpdate;
 	
-	protected Indicator(String unifiedSymbol, int size, ValueType valType) {
+	private DoubleUnaryOperator valueUpdateHandler;
+	
+	public Indicator(String unifiedSymbol, int size, ValueType valType, DoubleUnaryOperator valueUpdateHandler) {
 		refVals = new RingArray<>(size);
 		for(int i=0; i<size; i++) {
 			refVals.update(new TimeSeriesValue(0, 0));
@@ -45,6 +48,11 @@ public abstract class Indicator implements BarDataAware {
 		this.unifiedSymbol = unifiedSymbol;
 		this.valType = valType;
 		this.size = size;
+		this.valueUpdateHandler = valueUpdateHandler;
+	}
+	
+	public Indicator(String unifiedSymbol, int size, ValueType valType) {
+		this(unifiedSymbol, size, valType, val -> val);
 	}
 	
 	/**
@@ -92,7 +100,6 @@ public abstract class Indicator implements BarDataAware {
 	/**
 	 * 依赖BAR的值更新 
 	 */
-	@Override
 	public void onBar(BarField bar) {
 		if(!bar.getUnifiedSymbol().equals(unifiedSymbol)) {
 			return;
@@ -115,7 +122,7 @@ public abstract class Indicator implements BarDataAware {
 	 * @param newVal
 	 */
 	public void updateVal(double newVal, long timestamp) {
-		refVals.update(new TimeSeriesValue(handleUpdate(newVal), timestamp));
+		refVals.update(new TimeSeriesValue(valueUpdateHandler.applyAsDouble(newVal), timestamp));
 		actualUpdate++;
 	}
 	
@@ -128,38 +135,6 @@ public abstract class Indicator implements BarDataAware {
 	}
 	
 	/**
-	 * 指标最大值
-	 * @return
-	 */
-	public TimeSeriesValue highestVal() {
-		TimeSeriesValue highest = null;
-		for(Object obj : refVals.toArray()) {
-			if(highest == null) {
-				highest = (TimeSeriesValue) obj;
-			} else {
-				highest = highest.compareTo((TimeSeriesValue) obj) > 0 ? highest : (TimeSeriesValue) obj;
-			}
-		}
-		return highest; 
-	}
-	
-	/**
-	 * 指标最小值
-	 * @return
-	 */
-	public TimeSeriesValue lowestVal() {
-		TimeSeriesValue lowest = null;
-		for(Object obj : refVals.toArray()) {
-			if(lowest == null) {
-				lowest = (TimeSeriesValue) obj;
-			} else {
-				lowest = lowest.compareTo((TimeSeriesValue) obj) < 0 ? lowest : (TimeSeriesValue) obj;
-			}
-		}
-		return lowest;
-	}
-	
-	/**
 	 * 指标绑定合约
 	 * @return
 	 */
@@ -167,6 +142,10 @@ public abstract class Indicator implements BarDataAware {
 		return unifiedSymbol;
 	}
 	
+	/**
+	 * 指标类型
+	 * @return
+	 */
 	public IndicatorType getType() {
 		return switch(valType) {
 		case OPEN,CLOSE,HIGH,LOW -> IndicatorType.PRICE_BASE;
@@ -176,18 +155,15 @@ public abstract class Indicator implements BarDataAware {
 		};
 	}
 	
+	/**
+	 * 获取系列值
+	 * @return
+	 */
 	public List<TimeSeriesValue> getData(){
 		return Stream.of(refVals.toArray())
 				.map(TimeSeriesValue.class::cast)
 				.toList();
 	}
-	
-	/**
-	 * 更新算法实现
-	 * @param newVal
-	 * @return
-	 */
-	protected abstract double handleUpdate(double newVal);
 	
 	/**
 	 * 指标取值类型
