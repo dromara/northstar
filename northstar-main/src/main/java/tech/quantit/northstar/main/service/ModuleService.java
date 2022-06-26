@@ -35,7 +35,7 @@ import tech.quantit.northstar.common.utils.ContractUtils;
 import tech.quantit.northstar.data.IMarketDataRepository;
 import tech.quantit.northstar.data.IModuleRepository;
 import tech.quantit.northstar.domain.gateway.ContractManager;
-import tech.quantit.northstar.main.ExternalJarListener;
+import tech.quantit.northstar.main.ExternalJarClassLoader;
 import tech.quantit.northstar.main.handler.internal.ModuleManager;
 import tech.quantit.northstar.main.utils.MarketDataLoadingUtils;
 import tech.quantit.northstar.main.utils.ModuleFactory;
@@ -68,9 +68,9 @@ public class ModuleService implements InitializingBean {
 	
 	private ModuleFactory moduleFactory;
 	
-	private ExternalJarListener extJarListener;
+	private ExternalJarClassLoader extJarLoader;
 	
-	public ModuleService(ApplicationContext ctx, ExternalJarListener extJarListener, IModuleRepository moduleRepo, IMarketDataRepository mdRepo,
+	public ModuleService(ApplicationContext ctx, ExternalJarClassLoader extJarLoader, IModuleRepository moduleRepo, IMarketDataRepository mdRepo,
 			ModuleFactory moduleFactory, ModuleManager moduleMgr, ContractManager contractMgr) {
 		this.ctx = ctx;
 		this.moduleMgr = moduleMgr;
@@ -78,7 +78,7 @@ public class ModuleService implements InitializingBean {
 		this.moduleRepo = moduleRepo;
 		this.mdRepo = mdRepo;
 		this.moduleFactory = moduleFactory;
-		this.extJarListener = extJarListener;
+		this.extJarLoader = extJarLoader;
 	}
 
 	/**
@@ -108,9 +108,8 @@ public class ModuleService implements InitializingBean {
 	public Map<String, ComponentField> getComponentParams(ComponentMetaInfo metaInfo) throws ClassNotFoundException {
 		String className = metaInfo.getClassName();
 		Class<?> clz = null;
-		ClassLoader cl = extJarListener.getExternalClassLoader();
-		if(cl != null) {
-			clz = cl.loadClass(className);
+		if(extJarLoader != null) {
+			clz = extJarLoader.loadClass(className);
 		}
 		if(clz == null) {			
 			clz = Class.forName(className);
