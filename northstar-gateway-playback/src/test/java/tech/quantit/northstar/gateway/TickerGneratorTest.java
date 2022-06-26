@@ -1,8 +1,10 @@
 
 package tech.quantit.northstar.gateway;
 
+import com.alibaba.fastjson.JSON;
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.json.JsonbTester;
 import tech.quantit.northstar.common.constant.DateTimeConstant;
 import tech.quantit.northstar.gateway.api.domain.BarGenerator;
 import tech.quantit.northstar.gateway.api.domain.NormalContract;
@@ -30,29 +32,337 @@ public class TickerGneratorTest {
 
     TestFieldFactory factory = new TestFieldFactory("testGateway");
 
+    /**
+     * open=close=low，high>open
+     *
+     * 预期 3个ticket
+     */
     @SuppressWarnings("unchecked")
     @Test
-    void testRecordsToTicks() {
-        CoreField.ContractField contract = factory.makeContract("rb2210");
-        BarGenerator gen = new BarGenerator(new NormalContract(contract, 0), mock(BiConsumer.class));
+    void testRecordsToTicksCase1() {
+        CoreField.BarField.Builder barBuilder = CoreField.BarField.newBuilder()
+                .setGatewayId("testGateway")
+                .setUnifiedSymbol("rb2210");
+
         long now = System.currentTimeMillis();
         long expectedTime = now - now % 60000 + 60000;
-        LocalDateTime ldt = LocalDateTime.ofInstant(Instant.ofEpochMilli(expectedTime), ZoneId.systemDefault());
-        System.out.println(ldt.toLocalTime().format(DateTimeConstant.T_FORMAT_FORMATTER));
-        CoreField.TickField tick1 = factory.makeTickField("rb2210", 1000);
+        barBuilder.setActionTimestamp(expectedTime);
 
-        gen.update(tick1);
+        barBuilder.setOpenPrice(1000);
+        barBuilder.setHighPrice(1020);
+        barBuilder.setClosePrice(1000);
+        barBuilder.setLowPrice(1000);
+        barBuilder.setVolume(20);
 
-        CoreField.BarField bar = gen.finishOfBar();
-        assertThat(bar.getActionTimestamp()).isEqualTo(expectedTime);
-        assertThat(bar.getActionTime()).isEqualTo(ldt.toLocalTime().format(DateTimeConstant.T_FORMAT_WITH_MS_INT_FORMATTER));
-
+        CoreField.BarField barField = barBuilder.build();
         List<CoreField.BarField> records = Lists.newArrayList();
-        records.add(bar);
+        records.add(barField);
         List<CoreField.TickField> tickFieldList = TickerGnerator.recordsToTicks(1000, records);
 
         assertThat(tickFieldList.size()).isEqualTo(3);
+        for(CoreField.TickField tickField:tickFieldList){
+            System.out.println( tickField.toString());
+        }
     }
 
 
+    /**
+     * open=close=high，low<open
+     *
+     * 预期 3个ticket
+     */
+    @SuppressWarnings("unchecked")
+    @Test
+    void testRecordsToTicksCase2() {
+        CoreField.BarField.Builder barBuilder = CoreField.BarField.newBuilder()
+                .setGatewayId("testGateway")
+                .setUnifiedSymbol("rb2210");
+
+        long now = System.currentTimeMillis();
+        long expectedTime = now - now % 60000 + 60000;
+        barBuilder.setActionTimestamp(expectedTime);
+
+        barBuilder.setOpenPrice(1000);
+        barBuilder.setHighPrice(1000);
+        barBuilder.setClosePrice(1000);
+        barBuilder.setLowPrice(900);
+        barBuilder.setVolume(20);
+
+        CoreField.BarField barField = barBuilder.build();
+        List<CoreField.BarField> records = Lists.newArrayList();
+        records.add(barField);
+        List<CoreField.TickField> tickFieldList = TickerGnerator.recordsToTicks(1000, records);
+
+        assertThat(tickFieldList.size()).isEqualTo(3);
+        for(CoreField.TickField tickField:tickFieldList){
+            System.out.println( tickField.toString());
+        }
+    }
+
+    /**
+     * close>open >low , high=close
+     *
+     * 预期 3个ticket
+     */
+    @SuppressWarnings("unchecked")
+    @Test
+    void testRecordsToTicksCase3() {
+        CoreField.BarField.Builder barBuilder = CoreField.BarField.newBuilder()
+                .setGatewayId("testGateway")
+                .setUnifiedSymbol("rb2210");
+
+        long now = System.currentTimeMillis();
+        long expectedTime = now - now % 60000 + 60000;
+        barBuilder.setActionTimestamp(expectedTime);
+
+        barBuilder.setOpenPrice(1000);
+        barBuilder.setLowPrice(800);
+        barBuilder.setHighPrice(1020);
+        barBuilder.setClosePrice(1020);
+        barBuilder.setVolume(20);
+
+        CoreField.BarField barField = barBuilder.build();
+        List<CoreField.BarField> records = Lists.newArrayList();
+        records.add(barField);
+        List<CoreField.TickField> tickFieldList = TickerGnerator.recordsToTicks(1000, records);
+
+        assertThat(tickFieldList.size()).isEqualTo(3);
+        for(CoreField.TickField tickField:tickFieldList){
+            System.out.println( tickField.toString());
+        }
+    }
+
+    /**
+     * high >open >close , low=close
+     *
+     * 预期 3个ticket
+     */
+    @SuppressWarnings("unchecked")
+    @Test
+    void testRecordsToTicksCase4() {
+        CoreField.BarField.Builder barBuilder = CoreField.BarField.newBuilder()
+                .setGatewayId("testGateway")
+                .setUnifiedSymbol("rb2210");
+
+        long now = System.currentTimeMillis();
+        long expectedTime = now - now % 60000 + 60000;
+        barBuilder.setActionTimestamp(expectedTime);
+
+        barBuilder.setOpenPrice(1000);
+        barBuilder.setLowPrice(800);
+        barBuilder.setHighPrice(1020);
+        barBuilder.setClosePrice(800);
+        barBuilder.setVolume(20);
+
+        CoreField.BarField barField = barBuilder.build();
+        List<CoreField.BarField> records = Lists.newArrayList();
+        records.add(barField);
+        List<CoreField.TickField> tickFieldList = TickerGnerator.recordsToTicks(1000, records);
+
+        assertThat(tickFieldList.size()).isEqualTo(3);
+        for(CoreField.TickField tickField:tickFieldList){
+            System.out.println( tickField.toString());
+        }
+    }
+
+    /**
+     * high >close >open , low=open
+     *
+     * 预期 3个ticket
+     */
+    @SuppressWarnings("unchecked")
+    @Test
+    void testRecordsToTicksCase5() {
+        CoreField.BarField.Builder barBuilder = CoreField.BarField.newBuilder()
+                .setGatewayId("testGateway")
+                .setUnifiedSymbol("rb2210");
+
+        long now = System.currentTimeMillis();
+        long expectedTime = now - now % 60000 + 60000;
+        barBuilder.setActionTimestamp(expectedTime);
+
+        barBuilder.setOpenPrice(800);
+        barBuilder.setLowPrice(800);
+        barBuilder.setHighPrice(1020);
+        barBuilder.setClosePrice(1000);
+        barBuilder.setVolume(20);
+
+        CoreField.BarField barField = barBuilder.build();
+        List<CoreField.BarField> records = Lists.newArrayList();
+        records.add(barField);
+        List<CoreField.TickField> tickFieldList = TickerGnerator.recordsToTicks(1000, records);
+
+        assertThat(tickFieldList.size()).isEqualTo(3);
+        for(CoreField.TickField tickField:tickFieldList){
+            System.out.println( tickField.toString());
+        }
+    }
+
+    /**
+     * open >close >low , high=open
+     *
+     * 预期 3个ticket
+     */
+    @SuppressWarnings("unchecked")
+    @Test
+    void testRecordsToTicksCase6() {
+        CoreField.BarField.Builder barBuilder = CoreField.BarField.newBuilder()
+                .setGatewayId("testGateway")
+                .setUnifiedSymbol("rb2210");
+
+        long now = System.currentTimeMillis();
+        long expectedTime = now - now % 60000 + 60000;
+        barBuilder.setActionTimestamp(expectedTime);
+
+        barBuilder.setOpenPrice(1020);
+        barBuilder.setLowPrice(800);
+        barBuilder.setHighPrice(1020);
+        barBuilder.setClosePrice(1000);
+        barBuilder.setVolume(20);
+
+        CoreField.BarField barField = barBuilder.build();
+        List<CoreField.BarField> records = Lists.newArrayList();
+        records.add(barField);
+        List<CoreField.TickField> tickFieldList = TickerGnerator.recordsToTicks(1000, records);
+
+        assertThat(tickFieldList.size()).isEqualTo(3);
+        for(CoreField.TickField tickField:tickFieldList){
+            System.out.println( tickField.toString());
+        }
+    }
+
+
+    /**
+     * close > open, low = open, close = high
+     *
+     * 预期 2 个ticket
+     */
+    @SuppressWarnings("unchecked")
+    @Test
+    void testRecordsToTicksCase7() {
+        CoreField.BarField.Builder barBuilder = CoreField.BarField.newBuilder()
+                .setGatewayId("testGateway")
+                .setUnifiedSymbol("rb2210");
+
+        long now = System.currentTimeMillis();
+        long expectedTime = now - now % 60000 + 60000;
+        barBuilder.setActionTimestamp(expectedTime);
+
+        barBuilder.setOpenPrice(800);
+        barBuilder.setLowPrice(800);
+        barBuilder.setHighPrice(1020);
+        barBuilder.setClosePrice(1020);
+        barBuilder.setVolume(20);
+
+        CoreField.BarField barField = barBuilder.build();
+        List<CoreField.BarField> records = Lists.newArrayList();
+        records.add(barField);
+        List<CoreField.TickField> tickFieldList = TickerGnerator.recordsToTicks(1000, records);
+        for(CoreField.TickField tickField:tickFieldList){
+            System.out.println( tickField.toString());
+        }
+        assertThat(tickFieldList.size()).isEqualTo(2);
+
+    }
+
+
+    /**
+     * open >close >low , high=open
+     *
+     * 预期 3个ticket
+     */
+    @SuppressWarnings("unchecked")
+    @Test
+    void testRecordsToTicksCase8() {
+        CoreField.BarField.Builder barBuilder = CoreField.BarField.newBuilder()
+                .setGatewayId("testGateway")
+                .setUnifiedSymbol("rb2210");
+
+        long now = System.currentTimeMillis();
+        long expectedTime = now - now % 60000 + 60000;
+        barBuilder.setActionTimestamp(expectedTime);
+
+        barBuilder.setOpenPrice(1020);
+        barBuilder.setLowPrice(800);
+        barBuilder.setHighPrice(1020);
+        barBuilder.setClosePrice(800);
+        barBuilder.setVolume(20);
+
+        CoreField.BarField barField = barBuilder.build();
+        List<CoreField.BarField> records = Lists.newArrayList();
+        records.add(barField);
+        List<CoreField.TickField> tickFieldList = TickerGnerator.recordsToTicks(1000, records);
+
+        assertThat(tickFieldList.size()).isEqualTo(2);
+        for(CoreField.TickField tickField:tickFieldList){
+            System.out.println( tickField.toString());
+        }
+    }
+
+    /**
+     * high > close > open > low, 12个ticket
+     *
+     * 预期 12 个ticket
+     */
+    @SuppressWarnings("unchecked")
+    @Test
+    void testRecordsToTicksCase9() {
+        CoreField.BarField.Builder barBuilder = CoreField.BarField.newBuilder()
+                .setGatewayId("testGateway")
+                .setUnifiedSymbol("rb2210");
+
+        long now = System.currentTimeMillis();
+        long expectedTime = now - now % 60000 + 60000;
+        barBuilder.setActionTimestamp(expectedTime);
+
+        barBuilder.setOpenPrice(900);
+        barBuilder.setLowPrice(800);
+        barBuilder.setHighPrice(1020);
+        barBuilder.setClosePrice(1000);
+        barBuilder.setVolume(24);
+
+        CoreField.BarField barField = barBuilder.build();
+        List<CoreField.BarField> records = Lists.newArrayList();
+        records.add(barField);
+        List<CoreField.TickField> tickFieldList = TickerGnerator.recordsToTicks(1000, records);
+
+        assertThat(tickFieldList.size()).isEqualTo(12);
+        for(CoreField.TickField tickField:tickFieldList){
+            System.out.println( tickField.toString());
+        }
+    }
+
+
+    /**
+     * close = open, Doji Canlesticks
+     *
+     * 预期 12 个ticket
+     */
+    @SuppressWarnings("unchecked")
+    @Test
+    void testRecordsToTicksCase10() {
+        CoreField.BarField.Builder barBuilder = CoreField.BarField.newBuilder()
+                .setGatewayId("testGateway")
+                .setUnifiedSymbol("rb2210");
+
+        long now = System.currentTimeMillis();
+        long expectedTime = now - now % 60000 + 60000;
+        barBuilder.setActionTimestamp(expectedTime);
+
+        barBuilder.setOpenPrice(1020);
+//        barBuilder.setLowPrice(800);
+//        barBuilder.setHighPrice(1020);
+        barBuilder.setClosePrice(1020);
+        barBuilder.setVolume(20);
+
+        CoreField.BarField barField = barBuilder.build();
+        List<CoreField.BarField> records = Lists.newArrayList();
+        records.add(barField);
+        List<CoreField.TickField> tickFieldList = TickerGnerator.recordsToTicks(1000, records);
+
+        assertThat(tickFieldList.size()).isEqualTo(12);
+        for(CoreField.TickField tickField:tickFieldList){
+            System.out.println( tickField.toString());
+        }
+    }
 }

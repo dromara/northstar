@@ -5,8 +5,10 @@ import tech.quantit.northstar.common.constant.DateTimeConstant;
 import tech.quantit.northstar.common.constant.TickType;
 import xyz.redtorch.pb.CoreField;
 
+import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalTime;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -110,11 +112,14 @@ public class TickerGnerator {
         double pown = Math.pow(10, 2);
         price = Math.floor(price * pown) / pown;
 
+        LocalDateTime ldt = LocalDateTime.ofInstant(Instant.ofEpochMilli(time), ZoneId.systemDefault());
+
         CoreField.TickField tickField = CoreField.TickField.newBuilder()
                     .setGatewayId(barField.getGatewayId())
                     .setUnifiedSymbol(barField.getUnifiedSymbol())
-                    .setActionDay(LocalTime.ofNanoOfDay(time).format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
-                    .setActionTime(LocalTime.ofNanoOfDay(time).format(DateTimeConstant.T_FORMAT_FORMATTER))
+                    .setActionDay(ldt.format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
+                    .setActionTime(ldt.format(DateTimeConstant.T_FORMAT_FORMATTER))
+
                     .setActionTimestamp(time)
 
                     .addAskPrice(price)
