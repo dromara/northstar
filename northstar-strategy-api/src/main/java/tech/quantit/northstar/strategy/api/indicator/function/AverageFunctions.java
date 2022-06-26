@@ -2,10 +2,15 @@ package tech.quantit.northstar.strategy.api.indicator.function;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Function;
+
+import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.util.concurrent.AtomicDouble;
 
 import tech.quantit.northstar.common.model.TimeSeriesValue;
+import xyz.redtorch.pb.CoreField.BarField;
 
 /**
  * 均线函数
@@ -13,6 +18,35 @@ import tech.quantit.northstar.common.model.TimeSeriesValue;
  *
  */
 public interface AverageFunctions {
+	
+	/**
+	 * 当日成交量加权均价（当日结算价）
+	 * 注意：该算法与交易所的结算价存在一定误差，主要因为该算法是按K线计算，K线周期越小，误差越小
+	 * @param resetPerDay
+	 * @param length
+	 * @return
+	 */
+	static Function<BarField, TimeSeriesValue> SETTLE(){
+		final AtomicDouble weightPrice = new AtomicDouble();
+		final AtomicInteger countOfBarsToday = new AtomicInteger();
+		final AtomicLong sumVol = new AtomicLong();
+		final String[] tradeDay = {""};
+		return bar -> {
+			if(!StringUtils.equals(tradeDay[0], bar.getTradingDay())) {
+				tradeDay[0] = bar.getTradingDay();
+				sumVol.set(0);
+				weightPrice.set(0);
+				countOfBarsToday.set(0);
+			}
+			countOfBarsToday.incrementAndGet();
+			sumVol.addAndGet(bar.getVolumeDelta());
+			double wp = (bar.getHighPrice() + bar.getLowPrice() + bar.getClosePrice() * 2) / 4;
+			double factor = bar.getVolumeDelta() / sumVol.get();
+			double value = factor * wp + (1 - factor) * weightPrice.get();
+			weightPrice.set(value);
+			return new TimeSeriesValue(value, bar.getActionTimestamp());
+		};
+	}
 
 	/**
 	 * 指数加权平均EMA

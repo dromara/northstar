@@ -14,7 +14,7 @@ import tech.quantit.northstar.data.IModuleRepository;
 import tech.quantit.northstar.domain.account.TradeDayAccount;
 import tech.quantit.northstar.domain.gateway.ContractManager;
 import tech.quantit.northstar.domain.gateway.GatewayAndConnectionManager;
-import tech.quantit.northstar.main.ExternalJarListener;
+import tech.quantit.northstar.main.ExternalJarClassLoader;
 import tech.quantit.northstar.main.handler.internal.ModuleManager;
 import tech.quantit.northstar.main.service.AccountService;
 import tech.quantit.northstar.main.service.GatewayService;
@@ -49,9 +49,9 @@ public class ServiceConfig {
 	}
 	
 	@Bean
-	public ModuleService moduleService(ApplicationContext ctx, ExternalJarListener extJarListener, IModuleRepository moduleRepo, IMarketDataRepository mdRepo,
+	public ModuleService moduleService(ApplicationContext ctx, ExternalJarClassLoader extJarLoader, IModuleRepository moduleRepo, IMarketDataRepository mdRepo,
 			ModuleFactory moduleFactory, ModuleManager moduleMgr, ContractManager contractMgr) {
-		return new ModuleService(ctx, extJarListener, moduleRepo, mdRepo, moduleFactory, moduleMgr, contractMgr);
+		return new ModuleService(ctx, extJarLoader, moduleRepo, mdRepo, moduleFactory, moduleMgr, contractMgr);
 	}
 	
 }

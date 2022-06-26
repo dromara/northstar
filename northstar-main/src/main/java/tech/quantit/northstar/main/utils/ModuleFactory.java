@@ -24,7 +24,7 @@ import tech.quantit.northstar.domain.module.PriorBeforeAndHedgeTodayClosingStrat
 import tech.quantit.northstar.domain.module.PriorTodayClosingStrategy;
 import tech.quantit.northstar.domain.module.TradeModule;
 import tech.quantit.northstar.gateway.api.TradeGateway;
-import tech.quantit.northstar.main.ExternalJarListener;
+import tech.quantit.northstar.main.ExternalJarClassLoader;
 import tech.quantit.northstar.strategy.api.ClosingStrategy;
 import tech.quantit.northstar.strategy.api.DynamicParamsAware;
 import tech.quantit.northstar.strategy.api.IModule;
@@ -35,7 +35,7 @@ import xyz.redtorch.pb.CoreField.TradeField;
 
 public class ModuleFactory {
 	
-	private ClassLoader loader;
+	private ExternalJarClassLoader extJarLoader;
 	
 	private IModuleRepository moduleRepo;
 	
@@ -47,9 +47,9 @@ public class ModuleFactory {
 	
 	private Consumer<ModuleDealRecord> onDealChangeCallback = dealRecord -> moduleRepo.saveDealRecord(dealRecord);
 	
-	public ModuleFactory(ExternalJarListener extJarListener, IModuleRepository moduleRepo, GatewayAndConnectionManager gatewayConnMgr,
+	public ModuleFactory(ExternalJarClassLoader extJarLoader, IModuleRepository moduleRepo, GatewayAndConnectionManager gatewayConnMgr,
 			ContractManager contractMgr) {
-		this.loader = extJarListener.getExternalClassLoader();
+		this.extJarLoader = extJarLoader;
 		this.moduleRepo = moduleRepo;
 		this.gatewayConnMgr = gatewayConnMgr;
 		this.contractMgr = contractMgr;
@@ -97,10 +97,9 @@ public class ModuleFactory {
 		String paramClzName = clzName + "$InitParams";
 		Class<?> type = null;
 		Class<?> paramType = null;
-		ClassLoader cl = loader;
-		if(cl != null) {
-			type = cl.loadClass(clzName);
-			paramType = cl.loadClass(paramClzName);
+		if(extJarLoader != null) {
+			type = extJarLoader.loadClass(clzName);
+			paramType = extJarLoader.loadClass(paramClzName);
 		}
 		if(type == null) {
 			type = Class.forName(clzName);

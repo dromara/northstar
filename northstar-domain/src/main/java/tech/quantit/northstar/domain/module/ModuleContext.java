@@ -15,7 +15,6 @@ import org.slf4j.ILoggerFactory;
 import org.slf4j.Logger;
 
 import tech.quantit.northstar.common.constant.Constants;
-import tech.quantit.northstar.common.constant.IndicatorType;
 import tech.quantit.northstar.common.constant.ModuleState;
 import tech.quantit.northstar.common.constant.SignalOperation;
 import tech.quantit.northstar.common.exception.NoSuchElementException;
@@ -181,7 +180,6 @@ public class ModuleContext implements IModuleContext{
 					.collect(Collectors.toMap(Map.Entry::getKey, 
 							e -> e.getValue().stream().map(BarField::toByteArray).toList())));
 			mad.setIndicatorMap(indicatorFactory.getIndicatorMap().entrySet().stream()
-					.filter(e -> e.getValue().getType() != IndicatorType.UNKNOWN)
 					.collect(Collectors.toMap(Map.Entry::getKey,
 							e -> IndicatorData.builder()
 								.unifiedSymbol(e.getValue().bindedUnifiedSymbol())
@@ -378,7 +376,7 @@ public class ModuleContext implements IModuleContext{
 	@Override
 	public Indicator newIndicator(String indicatorName, String bindedUnifiedSymbol,
 			TimeSeriesUnaryOperator valueUpdateHandler) {
-		return newIndicator(indicatorName, bindedUnifiedSymbol, 10, ValueType.CLOSE, valueUpdateHandler);
+		return newIndicator(indicatorName, bindedUnifiedSymbol, 16, ValueType.CLOSE, valueUpdateHandler);
 	}
 
 	@Override
@@ -390,7 +388,7 @@ public class ModuleContext implements IModuleContext{
 	@Override
 	public Indicator newIndicator(String indicatorName, String bindedUnifiedSymbol,
 			Function<BarField, TimeSeriesValue> valueUpdateHandler) {
-		return newIndicator(indicatorName, bindedUnifiedSymbol, 10, valueUpdateHandler);
+		return newIndicator(indicatorName, bindedUnifiedSymbol, 16, valueUpdateHandler);
 	}
 
 }
