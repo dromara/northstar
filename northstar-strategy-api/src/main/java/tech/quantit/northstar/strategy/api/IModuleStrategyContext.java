@@ -1,14 +1,17 @@
 package tech.quantit.northstar.strategy.api;
 
-import java.util.function.DoubleUnaryOperator;
+import java.util.function.Function;
 
 import org.slf4j.Logger;
 
 import tech.quantit.northstar.common.constant.ModuleState;
 import tech.quantit.northstar.common.constant.SignalOperation;
+import tech.quantit.northstar.common.model.TimeSeriesValue;
 import tech.quantit.northstar.strategy.api.constant.PriceType;
 import tech.quantit.northstar.strategy.api.indicator.Indicator;
 import tech.quantit.northstar.strategy.api.indicator.Indicator.ValueType;
+import tech.quantit.northstar.strategy.api.indicator.function.TimeSeriesUnaryOperator;
+import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.ContractField;
 
 public interface IModuleStrategyContext {
@@ -60,9 +63,40 @@ public interface IModuleStrategyContext {
 	 * @param bindedUnifiedSymbol
 	 * @param indicatorLength
 	 * @param valTypeOfBar
-	 * @param valueUpdateHandler
+	 * @param updateValPublisher
+	 * @return
+	 */
+	Indicator newIndicator(String indicatorName, String bindedUnifiedSymbol, int indicatorLength,
+			Function<BarField, TimeSeriesValue> indicatorFunction);
+	/**
+	 * 创建指标（采用默认长度与收盘价取值）
+	 * @param indicatorName
+	 * @param bindedUnifiedSymbol
+	 * @param indicatorLength
+	 * @param valTypeOfBar
+	 * @param updateValPublisher
+	 * @return
+	 */
+	Indicator newIndicator(String indicatorName, String bindedUnifiedSymbol, Function<BarField, TimeSeriesValue> indicatorFunction);
+	/**
+	 * 创建指标
+	 * @param indicatorName
+	 * @param bindedUnifiedSymbol
+	 * @param indicatorLength
+	 * @param valTypeOfBar
+	 * @param updateValPublisher
 	 * @return
 	 */
 	Indicator newIndicator(String indicatorName, String bindedUnifiedSymbol, int indicatorLength, ValueType valTypeOfBar,
-			DoubleUnaryOperator valueUpdateHandler);
+			TimeSeriesUnaryOperator indicatorFunction);
+	/**
+	 * 创建指标（采用默认长度与收盘价取值）
+	 * @param indicatorName
+	 * @param bindedUnifiedSymbol
+	 * @param indicatorLength
+	 * @param valTypeOfBar
+	 * @param updateValPublisher
+	 * @return
+	 */
+	Indicator newIndicator(String indicatorName, String bindedUnifiedSymbol, TimeSeriesUnaryOperator indicatorFunction);
 }
