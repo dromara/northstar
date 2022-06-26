@@ -8,8 +8,8 @@ import tech.quantit.northstar.strategy.api.TradeStrategy;
 import tech.quantit.northstar.strategy.api.annotation.StrategicComponent;
 import tech.quantit.northstar.strategy.api.constant.PriceType;
 import tech.quantit.northstar.strategy.api.indicator.Indicator;
-import tech.quantit.northstar.strategy.api.indicator.Indicator.ValueType;
-import tech.quantit.northstar.strategy.api.indicator.function.MovingAverage;
+import tech.quantit.northstar.strategy.api.indicator.function.AverageFunctions;
+import tech.quantit.northstar.strategy.api.indicator.function.FunctionCompute;
 import xyz.redtorch.pb.CoreField.BarField;
 
 /**
@@ -48,9 +48,15 @@ public class IndicatorSampleStrategy extends AbstractStrategy	// 为了简化代
 		switch (ctx.getState()) {
 			case EMPTY -> {
 				// 快线在慢线之上开多，快线在慢线之下开空
-				SignalOperation opr = fastLine.value(0) > slowLine.value(0) ? SignalOperation.BUY_OPEN : SignalOperation.SELL_OPEN;
-				ctx.submitOrderReq(ctx.getContract(bar.getUnifiedSymbol()), opr, PriceType.ANY_PRICE, 1, 0);
-				log.info("[{} {}] {}", ctx.getModuleName(), NAME, opr.text());
+				if(shouldBuy()) {					
+					ctx.submitOrderReq(ctx.getContract(bar.getUnifiedSymbol()), SignalOperation.BUY_OPEN, PriceType.ANY_PRICE, 1, 0);
+					log.info("[{} {}] {}", ctx.getModuleName(), NAME, SignalOperation.BUY_OPEN.text());
+				}
+				if(shouldSell()) {
+					ctx.submitOrderReq(ctx.getContract(bar.getUnifiedSymbol()), SignalOperation.SELL_OPEN, PriceType.ANY_PRICE, 1, 0);
+					log.info("[{} {}] {}", ctx.getModuleName(), NAME, SignalOperation.BUY_OPEN.text());
+				}
+					
 			}
 			case HOLDING_LONG -> {
 				if(fastLine.value(0) < slowLine.value(0)) {
@@ -67,6 +73,14 @@ public class IndicatorSampleStrategy extends AbstractStrategy	// 为了简化代
 			default -> { /* 其他情况不处理 */}
 		}
 	}
+	
+	private boolean shouldBuy() {
+		return fastLine.value(0) > slowLine.value(0) && this.macdDiff.value(0) > this.macdDea.value(0);
+	}
+	
+	private boolean shouldSell() {
+		return fastLine.value(0) < slowLine.value(0) && this.macdDiff.value(0) < this.macdDea.value(0);
+	}
 
 	@Override
 	public DynamicParams getDynamicParams() {
@@ -80,9 +94,16 @@ public class IndicatorSampleStrategy extends AbstractStrategy	// 为了简化代
 	
 	@Override
 	protected void initIndicators() {
-		// 指标的创建 
-		this.fastLine = ctx.newIndicator("快线", params.indicatorSymbol, params.fast, ValueType.CLOSE, new MovingAverage(params.fast));
-		this.slowLine = ctx.newIndicator("慢线", params.indicatorSymbol, params.slow, ValueType.CLOSE, new MovingAverage(params.slow));
+		// 简单指标的创建 
+		this.fastLine = ctx.newIndicator("快线", params.indicatorSymbol, AverageFunctions.MA(params.fast));
+		this.slowLine = ctx.newIndicator("慢线", params.indicatorSymbol, AverageFunctions.MA(params.slow));
+		
+		// 复杂指标的创建
+		var fnMacdDiff = FunctionCompute.minus(AverageFunctions.EMA(12), AverageFunctions.EMA(26));
+		this.macdDiff = ctx.newIndicator("MACD_DIFF", params.indicatorSymbol, fnMacdDiff);
+		var fnMacdDea = FunctionCompute.minus(AverageFunctions.EMA(12), AverageFunctions.EMA(26))
+				.andThen(AverageFunctions.EMA(9));
+		this.macdDea = ctx.newIndicator("MACD_DEA", params.indicatorSymbol, fnMacdDea);
 	}
 
 	public static class InitParams extends DynamicParams {			
@@ -97,4 +118,5 @@ public class IndicatorSampleStrategy extends AbstractStrategy	// 为了简化代
 		private int slow;
 		
 	}
+	
 }

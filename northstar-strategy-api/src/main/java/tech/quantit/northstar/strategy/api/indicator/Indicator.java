@@ -4,12 +4,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.DoubleUnaryOperator;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import lombok.extern.slf4j.Slf4j;
+import reactor.core.publisher.Flux;
 import tech.quantit.northstar.common.constant.IndicatorType;
 import tech.quantit.northstar.common.model.TimeSeriesValue;
+import tech.quantit.northstar.strategy.api.indicator.function.AverageFunctions;
 import tech.quantit.northstar.strategy.api.utils.collection.RingArray;
 import xyz.redtorch.pb.CoreField.BarField;
 
@@ -38,9 +40,9 @@ public class Indicator {
 	
 	private int actualUpdate;
 	
-	private DoubleUnaryOperator valueUpdateHandler;
+	private BarListener barListener;
 	
-	public Indicator(String unifiedSymbol, int size, ValueType valType, DoubleUnaryOperator valueUpdateHandler) {
+	public Indicator(String unifiedSymbol, int size, ValueType valType, Function<TimeSeriesValue, TimeSeriesValue> valueUpdateHandler) {
 		refVals = new RingArray<>(size);
 		for(int i=0; i<size; i++) {
 			refVals.update(new TimeSeriesValue(0, 0));
@@ -48,11 +50,13 @@ public class Indicator {
 		this.unifiedSymbol = unifiedSymbol;
 		this.valType = valType;
 		this.size = size;
-		this.valueUpdateHandler = valueUpdateHandler;
-	}
-	
-	public Indicator(String unifiedSymbol, int size, ValueType valType) {
-		this(unifiedSymbol, size, valType, val -> val);
+		
+		Flux.push(sink -> 
+			barListener = sink::next
+		)
+		.map(TimeSeriesValue.class::cast)
+		.map(valueUpdateHandler)
+		.subscribe(this::updateVal);
 	}
 	
 	/**
@@ -114,15 +118,15 @@ public class Indicator {
 		case VOL -> bar.getVolumeDelta();
 		default -> throw new IllegalArgumentException("Unexpected value: " + valType);
 		};
-		updateVal(barVal, bar.getActionTimestamp());
+		barListener.onBar(new TimeSeriesValue(barVal, bar.getActionTimestamp()));
 	}
 	
 	/**
 	 * 值更新
 	 * @param newVal
 	 */
-	public void updateVal(double newVal, long timestamp) {
-		refVals.update(new TimeSeriesValue(valueUpdateHandler.applyAsDouble(newVal), timestamp));
+	public void updateVal(TimeSeriesValue tv) {
+		refVals.update(tv);
 		actualUpdate++;
 	}
 	
@@ -201,4 +205,26 @@ public class Indicator {
 		OPEN_INTEREST;
 	}
 	
+	interface BarListener {
+	
+		void onBar(TimeSeriesValue tv);
+	}
+	
+	static BarListener listener;
+	public static void main(String[] args) throws InterruptedException {
+		Flux.create(sink -> {
+			listener = sink::next;
+		})
+		.map(TimeSeriesValue.class::cast)
+		.map(AverageFunctions.MA(10))
+		.subscribe(System.out::println);
+		
+		Thread t = new Thread(() -> {
+			for(int i=0; i<40; i++) {
+				listener.onBar(new TimeSeriesValue(i, i));
+			}
+		});
+		t.start();
+		t.join();
+	}
 }

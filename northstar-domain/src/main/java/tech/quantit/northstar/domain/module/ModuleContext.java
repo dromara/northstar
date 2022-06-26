@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.UUID;
 import java.util.function.Consumer;
-import java.util.function.DoubleUnaryOperator;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -370,8 +370,14 @@ public class ModuleContext implements IModuleContext{
 
 	@Override
 	public Indicator newIndicator(String indicatorName, String bindedUnifiedSymbol, int indicatorLength,
-			ValueType valTypeOfBar, DoubleUnaryOperator valueUpdateHandler) {
+			ValueType valTypeOfBar, Function<TimeSeriesValue, TimeSeriesValue> valueUpdateHandler) {
 		return indicatorFactory.newIndicator(indicatorName, bindedUnifiedSymbol, indicatorLength, valTypeOfBar, valueUpdateHandler);
+	}
+
+	@Override
+	public Indicator newIndicator(String indicatorName, String bindedUnifiedSymbol,
+			Function<TimeSeriesValue, TimeSeriesValue> indicatorFunction) {
+		return newIndicator(indicatorName, bindedUnifiedSymbol, 10, ValueType.CLOSE, indicatorFunction);
 	}
 
 }

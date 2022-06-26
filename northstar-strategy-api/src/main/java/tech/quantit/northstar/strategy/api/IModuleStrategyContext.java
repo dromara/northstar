@@ -1,11 +1,12 @@
 package tech.quantit.northstar.strategy.api;
 
-import java.util.function.DoubleUnaryOperator;
+import java.util.function.Function;
 
 import org.slf4j.Logger;
 
 import tech.quantit.northstar.common.constant.ModuleState;
 import tech.quantit.northstar.common.constant.SignalOperation;
+import tech.quantit.northstar.common.model.TimeSeriesValue;
 import tech.quantit.northstar.strategy.api.constant.PriceType;
 import tech.quantit.northstar.strategy.api.indicator.Indicator;
 import tech.quantit.northstar.strategy.api.indicator.Indicator.ValueType;
@@ -60,9 +61,19 @@ public interface IModuleStrategyContext {
 	 * @param bindedUnifiedSymbol
 	 * @param indicatorLength
 	 * @param valTypeOfBar
-	 * @param valueUpdateHandler
+	 * @param updateValPublisher
 	 * @return
 	 */
 	Indicator newIndicator(String indicatorName, String bindedUnifiedSymbol, int indicatorLength, ValueType valTypeOfBar,
-			DoubleUnaryOperator valueUpdateHandler);
+			Function<TimeSeriesValue, TimeSeriesValue> indicatorFunction);
+	/**
+	 * 创建指标（采用默认长度与收盘价取值）
+	 * @param indicatorName
+	 * @param bindedUnifiedSymbol
+	 * @param indicatorLength
+	 * @param valTypeOfBar
+	 * @param updateValPublisher
+	 * @return
+	 */
+	Indicator newIndicator(String indicatorName, String bindedUnifiedSymbol, Function<TimeSeriesValue, TimeSeriesValue> indicatorFunction);
 }
