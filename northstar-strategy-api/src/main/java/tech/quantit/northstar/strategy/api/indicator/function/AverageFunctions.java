@@ -41,7 +41,7 @@ public interface AverageFunctions {
 			countOfBarsToday.incrementAndGet();
 			sumVol.addAndGet(bar.getVolumeDelta());
 			double wp = (bar.getHighPrice() + bar.getLowPrice() + bar.getClosePrice() * 2) / 4;
-			double factor = bar.getVolumeDelta() / sumVol.get();
+			double factor = 1.0 * bar.getVolumeDelta() / sumVol.get();
 			double value = factor * wp + (1 - factor) * weightPrice.get();
 			weightPrice.set(value);
 			return new TimeSeriesValue(value, bar.getActionTimestamp());
