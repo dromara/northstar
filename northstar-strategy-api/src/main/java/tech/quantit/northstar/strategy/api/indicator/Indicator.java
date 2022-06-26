@@ -5,13 +5,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import tech.quantit.northstar.common.constant.IndicatorType;
 import tech.quantit.northstar.common.model.TimeSeriesValue;
-import tech.quantit.northstar.strategy.api.indicator.function.AverageFunctions;
 import tech.quantit.northstar.strategy.api.utils.collection.RingArray;
 import xyz.redtorch.pb.CoreField.BarField;
 
@@ -42,7 +42,7 @@ public class Indicator {
 	
 	private BarListener barListener;
 	
-	public Indicator(String unifiedSymbol, int size, ValueType valType, Function<TimeSeriesValue, TimeSeriesValue> valueUpdateHandler) {
+	public Indicator(String unifiedSymbol, int size, ValueType valType, UnaryOperator<TimeSeriesValue> valueUpdateHandler) {
 		refVals = new RingArray<>(size);
 		for(int i=0; i<size; i++) {
 			refVals.update(new TimeSeriesValue(0, 0));
@@ -55,6 +55,23 @@ public class Indicator {
 			barListener = sink::next
 		)
 		.map(TimeSeriesValue.class::cast)
+		.map(valueUpdateHandler)
+		.subscribe(this::updateVal);
+	}
+	
+	public Indicator(String unifiedSymbol, int size, Function<BarField, TimeSeriesValue> valueUpdateHandler) {
+		refVals = new RingArray<>(size);
+		for(int i=0; i<size; i++) {
+			refVals.update(new TimeSeriesValue(0, 0));
+		}
+		this.unifiedSymbol = unifiedSymbol;
+		this.valType = ValueType.NOT_SET;
+		this.size = size;
+		
+		Flux.push(sink -> 
+			barListener = sink::next
+		)
+		.map(BarField.class::cast)
 		.map(valueUpdateHandler)
 		.subscribe(this::updateVal);
 	}
@@ -109,6 +126,11 @@ public class Indicator {
 			return;
 		}
 		log.trace("{} -> {}", this, bar);
+		if(valType == ValueType.NOT_SET) {
+			barListener.onBar(bar);
+			return;
+		}
+		
 		double barVal = switch(valType) {
 		case HIGH -> bar.getHighPrice();
 		case CLOSE -> bar.getClosePrice();
@@ -207,24 +229,7 @@ public class Indicator {
 	
 	interface BarListener {
 	
-		void onBar(TimeSeriesValue tv);
+		void onBar(Object obj);
 	}
 	
-	static BarListener listener;
-	public static void main(String[] args) throws InterruptedException {
-		Flux.create(sink -> {
-			listener = sink::next;
-		})
-		.map(TimeSeriesValue.class::cast)
-		.map(AverageFunctions.MA(10))
-		.subscribe(System.out::println);
-		
-		Thread t = new Thread(() -> {
-			for(int i=0; i<40; i++) {
-				listener.onBar(new TimeSeriesValue(i, i));
-			}
-		});
-		t.start();
-		t.join();
-	}
 }

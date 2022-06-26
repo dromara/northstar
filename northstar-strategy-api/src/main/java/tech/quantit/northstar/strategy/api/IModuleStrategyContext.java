@@ -10,6 +10,8 @@ import tech.quantit.northstar.common.model.TimeSeriesValue;
 import tech.quantit.northstar.strategy.api.constant.PriceType;
 import tech.quantit.northstar.strategy.api.indicator.Indicator;
 import tech.quantit.northstar.strategy.api.indicator.Indicator.ValueType;
+import tech.quantit.northstar.strategy.api.indicator.function.TimeSeriesUnaryOperator;
+import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.ContractField;
 
 public interface IModuleStrategyContext {
@@ -64,8 +66,8 @@ public interface IModuleStrategyContext {
 	 * @param updateValPublisher
 	 * @return
 	 */
-	Indicator newIndicator(String indicatorName, String bindedUnifiedSymbol, int indicatorLength, ValueType valTypeOfBar,
-			Function<TimeSeriesValue, TimeSeriesValue> indicatorFunction);
+	Indicator newIndicator(String indicatorName, String bindedUnifiedSymbol, int indicatorLength,
+			Function<BarField, TimeSeriesValue> indicatorFunction);
 	/**
 	 * 创建指标（采用默认长度与收盘价取值）
 	 * @param indicatorName
@@ -75,5 +77,26 @@ public interface IModuleStrategyContext {
 	 * @param updateValPublisher
 	 * @return
 	 */
-	Indicator newIndicator(String indicatorName, String bindedUnifiedSymbol, Function<TimeSeriesValue, TimeSeriesValue> indicatorFunction);
+	Indicator newIndicator(String indicatorName, String bindedUnifiedSymbol, Function<BarField, TimeSeriesValue> indicatorFunction);
+	/**
+	 * 创建指标
+	 * @param indicatorName
+	 * @param bindedUnifiedSymbol
+	 * @param indicatorLength
+	 * @param valTypeOfBar
+	 * @param updateValPublisher
+	 * @return
+	 */
+	Indicator newIndicator(String indicatorName, String bindedUnifiedSymbol, int indicatorLength, ValueType valTypeOfBar,
+			TimeSeriesUnaryOperator indicatorFunction);
+	/**
+	 * 创建指标（采用默认长度与收盘价取值）
+	 * @param indicatorName
+	 * @param bindedUnifiedSymbol
+	 * @param indicatorLength
+	 * @param valTypeOfBar
+	 * @param updateValPublisher
+	 * @return
+	 */
+	Indicator newIndicator(String indicatorName, String bindedUnifiedSymbol, TimeSeriesUnaryOperator indicatorFunction);
 }

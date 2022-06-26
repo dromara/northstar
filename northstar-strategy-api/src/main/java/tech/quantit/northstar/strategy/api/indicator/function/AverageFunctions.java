@@ -2,7 +2,6 @@ package tech.quantit.northstar.strategy.api.indicator.function;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.UnaryOperator;
 
 import com.google.common.util.concurrent.AtomicDouble;
 
@@ -20,7 +19,7 @@ public interface AverageFunctions {
 	 * @param size
 	 * @return
 	 */
-	static UnaryOperator<TimeSeriesValue> EMA(int size) {
+	static TimeSeriesUnaryOperator EMA(int size) {
 		final AtomicDouble ema = new AtomicDouble();
 		final AtomicBoolean hasInitVal = new AtomicBoolean();
 		final double factor = 2D / (size + 1);
@@ -42,7 +41,7 @@ public interface AverageFunctions {
 	 * @param size
 	 * @return
 	 */
-	static UnaryOperator<TimeSeriesValue> MA(int size) {
+	static TimeSeriesUnaryOperator MA(int size) {
 		final double[] values = new double[size];
 		final AtomicInteger cursor = new AtomicInteger();
 		final AtomicDouble sumOfValues = new AtomicDouble();

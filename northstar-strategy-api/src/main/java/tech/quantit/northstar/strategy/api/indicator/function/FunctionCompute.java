@@ -1,12 +1,14 @@
 package tech.quantit.northstar.strategy.api.indicator.function;
 
-import java.util.function.UnaryOperator;
+import java.util.Objects;
 
 import tech.quantit.northstar.common.model.TimeSeriesValue;
 
 public interface FunctionCompute {
 
-	static UnaryOperator<TimeSeriesValue> add(UnaryOperator<TimeSeriesValue> fn1, UnaryOperator<TimeSeriesValue> fn2){
+	static TimeSeriesUnaryOperator add(TimeSeriesUnaryOperator fn1, TimeSeriesUnaryOperator fn2){
+		Objects.requireNonNull(fn1);
+		Objects.requireNonNull(fn2);
 		return tv -> {
 			TimeSeriesValue v = fn1.apply(tv);
 			TimeSeriesValue v0 = fn2.apply(tv);
@@ -15,7 +17,9 @@ public interface FunctionCompute {
 		};
 	}
 	
-	static UnaryOperator<TimeSeriesValue> minus(UnaryOperator<TimeSeriesValue> fn1, UnaryOperator<TimeSeriesValue> fn2){
+	static TimeSeriesUnaryOperator minus(TimeSeriesUnaryOperator fn1, TimeSeriesUnaryOperator fn2){
+		Objects.requireNonNull(fn1);
+		Objects.requireNonNull(fn2);
 		return tv -> {
 			TimeSeriesValue v = fn1.apply(tv);
 			TimeSeriesValue v0 = fn2.apply(tv);
@@ -23,4 +27,5 @@ public interface FunctionCompute {
 			return v;
 		};
 	} 
+	
 }

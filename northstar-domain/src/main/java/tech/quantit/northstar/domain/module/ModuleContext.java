@@ -38,6 +38,7 @@ import tech.quantit.northstar.strategy.api.TradeStrategy;
 import tech.quantit.northstar.strategy.api.constant.PriceType;
 import tech.quantit.northstar.strategy.api.indicator.Indicator;
 import tech.quantit.northstar.strategy.api.indicator.Indicator.ValueType;
+import tech.quantit.northstar.strategy.api.indicator.function.TimeSeriesUnaryOperator;
 import tech.quantit.northstar.strategy.api.log.NorthstarLoggerFactory;
 import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
 import xyz.redtorch.pb.CoreEnum.ForceCloseReasonEnum;
@@ -370,14 +371,26 @@ public class ModuleContext implements IModuleContext{
 
 	@Override
 	public Indicator newIndicator(String indicatorName, String bindedUnifiedSymbol, int indicatorLength,
-			ValueType valTypeOfBar, Function<TimeSeriesValue, TimeSeriesValue> valueUpdateHandler) {
+			ValueType valTypeOfBar, TimeSeriesUnaryOperator valueUpdateHandler) {
 		return indicatorFactory.newIndicator(indicatorName, bindedUnifiedSymbol, indicatorLength, valTypeOfBar, valueUpdateHandler);
 	}
 
 	@Override
 	public Indicator newIndicator(String indicatorName, String bindedUnifiedSymbol,
-			Function<TimeSeriesValue, TimeSeriesValue> indicatorFunction) {
-		return newIndicator(indicatorName, bindedUnifiedSymbol, 10, ValueType.CLOSE, indicatorFunction);
+			TimeSeriesUnaryOperator valueUpdateHandler) {
+		return newIndicator(indicatorName, bindedUnifiedSymbol, 10, ValueType.CLOSE, valueUpdateHandler);
+	}
+
+	@Override
+	public Indicator newIndicator(String indicatorName, String bindedUnifiedSymbol, int indicatorLength,
+			Function<BarField, TimeSeriesValue> valueUpdateHandler) {
+		return indicatorFactory.newIndicator(indicatorName, bindedUnifiedSymbol, indicatorLength, valueUpdateHandler);
+	}
+
+	@Override
+	public Indicator newIndicator(String indicatorName, String bindedUnifiedSymbol,
+			Function<BarField, TimeSeriesValue> valueUpdateHandler) {
+		return newIndicator(indicatorName, bindedUnifiedSymbol, 10, valueUpdateHandler);
 	}
 
 }
