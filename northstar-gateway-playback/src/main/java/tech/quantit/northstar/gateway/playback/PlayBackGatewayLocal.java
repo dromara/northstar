@@ -15,7 +15,10 @@ import xyz.redtorch.pb.CoreField.TickField;
 
 import java.util.Map;
 import java.util.PriorityQueue;
-import java.util.concurrent.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 回放GateWay
@@ -39,34 +42,30 @@ public class PlayBackGatewayLocal implements MarketGateway{
 
 	private PlaybackDescription playbackDescription;
 
-	/**
-	 * unifiedSymbol --> InstrumentHolder
-	 */
-	// private ConcurrentMap<String, InstrumentHolder> cache = new ConcurrentHashMap<>();
-
 	@Getter
 	private boolean connected;
 
 	private GlobalMarketRegistry registry;
 
 	public PlayBackGatewayLocal(GatewaySettingField settings, FastEventEngine feEngine, GlobalMarketRegistry registry,
-								PlaybackDescription playbackDescription) {
+								PlaybackDescription playbackDescription, MarketDataLocal marketDataLocal) {
 		this.feEngine = feEngine;
 		this.settings = settings;
 		this.registry = registry;
 		this.playbackDescription = playbackDescription;
+		this.marketDataLocal = marketDataLocal;
 	}
 
 	@Override
 	public boolean subscribe(ContractField contract) {
-		// cache.putIfAbsent(contract.getUnifiedSymbol(), new InstrumentHolder(contract));
-		// log.info("模拟订阅合约：{}", contract.getSymbol());
+		marketDataLocal.put(contract.getUnifiedSymbol());
+		log.info("模拟订阅合约：{}", contract.getSymbol());
 		return true;
 	}
 
 	@Override
 	public boolean unsubscribe(ContractField contract) {
-		// cache.remove(contract.getUnifiedSymbol());
+		marketDataLocal.remove(contract.getUnifiedSymbol());
 		log.info("模拟退订合约：{}", contract.getSymbol());
 		return true;
 	}
@@ -99,11 +98,11 @@ public class PlayBackGatewayLocal implements MarketGateway{
 			task = scheduleExec.scheduleAtFixedRate(()->{
 				lastActiveTime = System.currentTimeMillis();
 				try {
-					CoreField.TickField bar = tickQ.poll();
-					log.info("开始回放数据：{} {} {}", bar.getUnifiedSymbol(), bar.getActionDay(), bar.getActionTime());
+					CoreField.TickField tickField = tickQ.poll();
+					log.info("开始回放数据：{} {} {}", tickField.getUnifiedSymbol(), tickField.getActionDay(), tickField.getActionTime());
 
-					feEngine.emitEvent(NorthstarEventType.TICK, bar);
-					registry.dispatch(bar);
+					feEngine.emitEvent(NorthstarEventType.TICK, tickField);
+					registry.dispatch(tickField);
 				} catch (Exception e) {
 					log.error("回放行情TICK生成异常", e);
 				}

@@ -1,20 +1,12 @@
 package tech.quantit.northstar.gateway.playback;
 
-import tech.quantit.northstar.common.constant.GatewayType;
-import tech.quantit.northstar.common.model.GatewayDescription;
-import tech.quantit.northstar.common.model.SimAccountDescription;
 import tech.quantit.northstar.data.IContractRepository;
-import tech.quantit.northstar.data.IGatewayRepository;
 import tech.quantit.northstar.data.IMarketDataRepository;
-import tech.quantit.northstar.data.ISimAccountRepository;
 import tech.quantit.northstar.gateway.playback.ticker.TickerGnerator;
 import xyz.redtorch.pb.CoreField;
 
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.PriorityQueue;
+import java.util.*;
 
 /**
  * 准备市场数据
@@ -27,45 +19,55 @@ public class MarketDataLocal {
 
     private final IMarketDataRepository marketDataRepository;
 
-    private final ISimAccountRepository simAccountRepository;
-
-    private final IGatewayRepository gatewayRepository;
-
-    private final IContractRepository contractRepository;
-
-    public MarketDataLocal(IMarketDataRepository marketDataRepository, ISimAccountRepository simAccountRepository,
-                           IGatewayRepository gatewayRepository, IContractRepository contractRepository) {
+    public MarketDataLocal(IMarketDataRepository marketDataRepository, IContractRepository contractRepository) {
         this.marketDataRepository = marketDataRepository;
-        this.simAccountRepository = simAccountRepository;
-        this.gatewayRepository = gatewayRepository;
-        this.contractRepository = contractRepository;
     }
+
+    /**
+     * 放入处理表弟
+     *
+     * @param unifiedSymbol 账户ID
+     */
+    public void put(String unifiedSymbol) {
+        PriorityQueue<CoreField.TickField> tickQ = new PriorityQueue<>(3000, (b1, b2) -> b1.getActionTimestamp() < b2.getActionTimestamp() ? -1 : 1 );
+        tickData.put(unifiedSymbol, tickQ);
+    }
+
+    /**
+     * 去除处理
+     *
+     * @param unifiedSymbol 标的
+     */
+    public void remove(String unifiedSymbol) {
+        tickData.remove(unifiedSymbol);
+    }
+
 
     /**
      * 按照一定的周期，从数据库中读取数据，并将数据放入队列中
      *
-     * @param accountId 账户ID
+     * @param gateWayId 网关ID
      * @param startDate 加载开始日期
      * @param endDate 加载结束日期
      * @param parallelLevel 并行数据加载
      */
-    public void loadData(String accountId, LocalDate startDate, LocalDate endDate,  int parallelLevel) {
-        // 从模拟账号取得网关Id
-        SimAccountDescription simAccountDescription = simAccountRepository.findById(accountId);
-        String gateWayId = simAccountDescription.getGatewayId();
+    public void loadData(String gateWayId, LocalDate startDate, LocalDate endDate,  int parallelLevel) {
+        Set<String> symbols = tickData.keySet();
+        for(String symbol : symbols){
+            PriorityQueue<CoreField.TickField> tickQ = tickData.get(symbol);
+            if(null == tickQ){
+                tickQ= new PriorityQueue<>(3000, (b1, b2) -> b1.getActionTimestamp() < b2.getActionTimestamp() ? -1 : 1 );
+            }
 
-        GatewayDescription gatewayDescription = gatewayRepository.selectById(gateWayId);
-        String bindedMktGateWayId = gatewayDescription.getBindedMktGatewayId();
-
-        // 取得合约的日ticket数据
-        contractRepository.findAll(GatewayType.PLAYBACK).forEach(contract -> {
-            List<CoreField.BarField> data = marketDataRepository.loadBars(bindedMktGateWayId, contract.getUnifiedSymbol(),startDate,
+            // 取得合约的日ticket数据
+            List<CoreField.BarField> data = marketDataRepository.loadBars(gateWayId, symbol, startDate,
                     endDate);
-            PriorityQueue<CoreField.TickField> tickQ = new PriorityQueue<>(3000, (b1, b2) -> b1.getActionTimestamp() < b2.getActionTimestamp() ? -1 : 1 );
-            TickerGnerator.recordsToTicks(1000, data);
-
-            tickData.put(contract.getUnifiedSymbol(), tickQ);
-       });
+            List<CoreField.TickField> tickFieldList = TickerGnerator.recordsToTicks(1000, data);
+            for(CoreField.TickField field: tickFieldList){
+                tickQ.offer(field);
+            }
+            tickData.put(symbol, tickQ);
+        }
     }
 
     public Map<String, PriorityQueue<CoreField.TickField>> getTickData() {
