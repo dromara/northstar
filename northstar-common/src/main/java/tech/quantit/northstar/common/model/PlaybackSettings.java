@@ -1,7 +1,5 @@
 package tech.quantit.northstar.common.model;
 
-import java.util.List;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,7 +16,7 @@ import tech.quantit.northstar.common.constant.PlaybackSpeed;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PlaybackDescription {
+public class PlaybackSettings implements GatewaySettings{
 	/**
 	 * 开始时间
 	 * 格式：YYYYMMDD
@@ -37,8 +35,5 @@ public class PlaybackDescription {
 	 * 回放速度
 	 */
 	private PlaybackSpeed speed;
-	/**
-	 * 回放的合约组
-	 */
-	private List<String> subscribedContractGroups;
+
 }
