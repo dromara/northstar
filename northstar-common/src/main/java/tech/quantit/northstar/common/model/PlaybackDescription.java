@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import tech.quantit.northstar.common.constant.PlaybackPrecision;
+import tech.quantit.northstar.common.constant.PlaybackSpeed;
 
 /**
  * 回测请求描述
@@ -29,27 +30,15 @@ public class PlaybackDescription {
 	 */
 	private String endDate;
 	/**
-	 * 回测精度
+	 * 回放精度
 	 */
 	private PlaybackPrecision precision;
 	/**
-	 * 回测模组列表
+	 * 回放速度
 	 */
-	private List<String> moduleNames;
+	private PlaybackSpeed speed;
 	/**
-	 * 回测账户初始金额
+	 * 回放的合约组
 	 */
-	private int playbackAccountInitialBalance;
-	/**
-	 * 回测交易手续费（以元为单位）
-	 */
-	private int fee;
-	/**
-	 * 每秒钟回放的数据条数
-	 */
-	private int replayRate;
-	/**
-	 * 定多个读取数据的线程数可提升数据读取速度
-	 */
-	private int parallelLevel;
+	private List<String> subscribedContractGroups;
 }
