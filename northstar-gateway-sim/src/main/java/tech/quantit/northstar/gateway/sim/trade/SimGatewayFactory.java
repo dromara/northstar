@@ -3,11 +3,11 @@ package tech.quantit.northstar.gateway.sim.trade;
 import com.google.protobuf.InvalidProtocolBufferException;
 
 import tech.quantit.northstar.common.IContractManager;
-import tech.quantit.northstar.common.ISimAccountRepository;
 import tech.quantit.northstar.common.constant.GatewayUsage;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.model.GatewayDescription;
 import tech.quantit.northstar.common.model.SimAccountDescription;
+import tech.quantit.northstar.data.ISimAccountRepository;
 import tech.quantit.northstar.gateway.api.Gateway;
 import tech.quantit.northstar.gateway.api.GatewayFactory;
 import tech.quantit.northstar.gateway.api.domain.GlobalMarketRegistry;

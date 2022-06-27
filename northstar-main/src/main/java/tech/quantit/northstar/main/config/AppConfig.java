@@ -40,7 +40,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import com.google.common.io.Files;
 
 import lombok.extern.slf4j.Slf4j;
-import tech.quantit.northstar.common.ISimAccountRepository;
 import tech.quantit.northstar.common.constant.Constants;
 import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.common.event.FastEventEngine;
@@ -49,6 +48,7 @@ import tech.quantit.northstar.common.utils.ContractDefinitionReader;
 import tech.quantit.northstar.common.utils.ContractUtils;
 import tech.quantit.northstar.data.IContractRepository;
 import tech.quantit.northstar.data.IModuleRepository;
+import tech.quantit.northstar.data.ISimAccountRepository;
 import tech.quantit.northstar.domain.account.TradeDayAccount;
 import tech.quantit.northstar.domain.external.MessageHandlerManager;
 import tech.quantit.northstar.domain.gateway.ContractManager;

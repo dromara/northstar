@@ -6,11 +6,11 @@ import static org.mockito.Mockito.mock;
 import org.junit.jupiter.api.Test;
 
 import tech.quantit.northstar.common.IContractManager;
-import tech.quantit.northstar.common.ISimAccountRepository;
 import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.common.constant.GatewayUsage;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.model.GatewayDescription;
+import tech.quantit.northstar.data.ISimAccountRepository;
 import tech.quantit.northstar.gateway.api.domain.GlobalMarketRegistry;
 
 class SimGatewayFactoryTest {
