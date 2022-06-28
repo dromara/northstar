@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import lombok.extern.slf4j.Slf4j;
+import tech.quantit.northstar.common.IHolidayManager;
 import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.data.IMarketDataRepository;
 
@@ -20,7 +21,7 @@ import tech.quantit.northstar.data.IMarketDataRepository;
  */
 @Slf4j
 @Component
-public class HolidayManager implements InitializingBean{
+public class CtpHolidayManager implements IHolidayManager, InitializingBean{
 
 	protected Set<LocalDate> holidaySet = new HashSet<>();
 
@@ -37,6 +38,7 @@ public class HolidayManager implements InitializingBean{
 		}
 	}
 	
+	@Override
 	public boolean isHoliday(LocalDateTime dateTime) {
 		LocalDate date = LocalDate.from(dateTime);
 		boolean isWeekend = dateTime.getDayOfWeek().getValue() > 5;

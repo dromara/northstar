@@ -12,7 +12,7 @@ import tech.quantit.northstar.domain.gateway.GatewayAndConnectionManager;
 import tech.quantit.northstar.domain.gateway.GatewayConnection;
 import tech.quantit.northstar.gateway.api.Gateway;
 import tech.quantit.northstar.gateway.api.domain.GlobalMarketRegistry;
-import tech.quantit.northstar.main.utils.HolidayManager;
+import tech.quantit.northstar.main.utils.CtpHolidayManager;
 import xyz.redtorch.gateway.ctp.common.GatewayConstants;
 
 @Slf4j
@@ -23,7 +23,7 @@ public class CtpScheduleTask {
 	private GatewayAndConnectionManager gatewayConnMgr;
 	
 	@Autowired
-	private HolidayManager holidayMgr;
+	private CtpHolidayManager holidayMgr;
 	
 	@Autowired
 	private GlobalMarketRegistry mktRegistry;

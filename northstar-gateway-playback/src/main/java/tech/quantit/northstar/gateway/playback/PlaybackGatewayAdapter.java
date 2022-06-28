@@ -5,60 +5,62 @@ import tech.quantit.northstar.gateway.api.MarketGateway;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.GatewaySettingField;
 
-public class PlaybackGatewayAdapter implements MarketGateway{
+public class PlaybackGatewayAdapter implements MarketGateway {
+	
+	private PlaybackContext ctx;
+	
+	private GatewaySettingField settings;
+	
+	public PlaybackGatewayAdapter(PlaybackContext ctx, GatewaySettingField settings) {
+		this.ctx = ctx;
+		this.settings = settings;
+	}
 
 	@Override
 	public GatewaySettingField getGatewaySetting() {
-		// TODO Auto-generated method stub
-		return null;
+		return settings;
 	}
 
 	@Override
 	public void connect() {
-		// TODO Auto-generated method stub
-		
+		ctx.start();
 	}
 
 	@Override
 	public void disconnect() {
-		// TODO Auto-generated method stub
-		
+		ctx.stop();
 	}
 
 	@Override
 	public boolean isConnected() {
-		// TODO Auto-generated method stub
-		return false;
+		return ctx.isRunning();
 	}
 
 	@Override
 	public boolean getAuthErrorFlag() {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
 	public boolean subscribe(ContractField contract) {
-		// TODO Auto-generated method stub
-		return false;
+		// 动态订阅不需要实现
+		return true;
 	}
 
 	@Override
 	public boolean unsubscribe(ContractField contract) {
-		// TODO Auto-generated method stub
-		return false;
+		// 动态取消订阅不需要实现
+		return true;
 	}
 
 	@Override
 	public boolean isActive() {
-		// TODO Auto-generated method stub
-		return false;
+		return ctx.isRunning();
 	}
 
 	@Override
 	public GatewayType gatewayType() {
-		// TODO Auto-generated method stub
-		return null;
+		return GatewayType.PLAYBACK;
 	}
 
 }
