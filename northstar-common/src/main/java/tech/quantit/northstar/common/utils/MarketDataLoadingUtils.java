@@ -1,4 +1,4 @@
-package tech.quantit.northstar.main.utils;
+package tech.quantit.northstar.common.utils;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -23,7 +23,7 @@ public class MarketDataLoadingUtils {
 		return nowDate.plusDays(incrDay);
 	}
 	
-	public LocalDate getLastDayOfLastWeek(long curTimestamp) {
+	public LocalDate getFridayOfLastWeek(long curTimestamp) {
 		LocalDateTime ldt = LocalDateTime.ofInstant(Instant.ofEpochMilli(curTimestamp), ZoneId.systemDefault());
 		LocalDate nowDate = ldt.toLocalDate();
 		return nowDate.minusDays(nowDate.getDayOfWeek().getValue() + 2L);

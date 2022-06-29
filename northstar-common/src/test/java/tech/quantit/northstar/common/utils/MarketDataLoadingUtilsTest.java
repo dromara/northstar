@@ -1,4 +1,4 @@
-package tech.quantit.northstar.main.utils;
+package tech.quantit.northstar.common.utils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -47,11 +47,11 @@ class MarketDataLoadingUtilsTest {
 	void testGetLastDayOfLastWeek() {
 		// 周一日盘情况
 		LocalDateTime sometime = LocalDateTime.of(LocalDate.of(2022, 5, 30), LocalTime.of(9, 0));
-		assertThat(utils.getLastDayOfLastWeek(sometime.toInstant(ZoneOffset.ofHours(8)).toEpochMilli())).isEqualTo(LocalDate.of(2022, 5, 27));
+		assertThat(utils.getFridayOfLastWeek(sometime.toInstant(ZoneOffset.ofHours(8)).toEpochMilli())).isEqualTo(LocalDate.of(2022, 5, 27));
 				
 		// 周五晚夜盘情况
 		LocalDateTime sometime2 = LocalDateTime.of(LocalDate.of(2022, 5, 27), LocalTime.of(22, 0));
-		assertThat(utils.getLastDayOfLastWeek(sometime2.toInstant(ZoneOffset.ofHours(8)).toEpochMilli())).isEqualTo(LocalDate.of(2022, 5, 20));
+		assertThat(utils.getFridayOfLastWeek(sometime2.toInstant(ZoneOffset.ofHours(8)).toEpochMilli())).isEqualTo(LocalDate.of(2022, 5, 20));
 	}
 
 }

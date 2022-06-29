@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import tech.quantit.northstar.common.model.ResultBean;
+import tech.quantit.northstar.common.utils.MarketDataLoadingUtils;
 import tech.quantit.northstar.data.IMarketDataRepository;
-import tech.quantit.northstar.main.utils.MarketDataLoadingUtils;
 import xyz.redtorch.pb.CoreField.BarField;
 
 @RequestMapping("/northstar/data")
@@ -27,7 +27,7 @@ public class GatewayDataController {
 	@GetMapping("/bar/min")
 	@NotNull
 	public ResultBean<List<byte[]>> loadWeeklyBarData(String gatewayId, String unifiedSymbol, long refStartTimestamp, boolean firstLoad){
-		LocalDate start = utils.getLastDayOfLastWeek(refStartTimestamp);
+		LocalDate start = utils.getFridayOfLastWeek(refStartTimestamp);
 		LocalDate end = utils.getCurrentTradeDay(refStartTimestamp, firstLoad);
 		return new ResultBean<>(
 				mdRepo
