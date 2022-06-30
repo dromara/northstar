@@ -104,11 +104,13 @@ public class BarGenerator {
 		barBuilder.setOpenInterest(tick.getOpenInterest());
 		barBuilder.setVolume(tick.getVolume());
 		barBuilder.setTurnover(tick.getTurnover());
+		barBuilder.setNumTrades(tick.getNumTrades());
 
 		barBuilder.setVolumeDelta(tick.getVolumeDelta() + barBuilder.getVolumeDelta());
 		barBuilder.setVolumeDelta(Math.max(0, barBuilder.getVolumeDelta()));	// 防止volDelta为负数
 		barBuilder.setTurnoverDelta(tick.getTurnoverDelta() + barBuilder.getTurnoverDelta());
 		barBuilder.setOpenInterestDelta(tick.getOpenInterestDelta() + barBuilder.getOpenInterestDelta());
+		barBuilder.setNumTradesDelta(tick.getNumTradesDelta() + barBuilder.getNumTradesDelta());
 	}
 	
 	public BarField finishOfBar() {
