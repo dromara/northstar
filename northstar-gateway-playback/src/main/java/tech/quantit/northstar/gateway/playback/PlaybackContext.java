@@ -8,13 +8,14 @@ import java.time.ZoneOffset;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.stream.Collectors;
 
+import tech.quantit.northstar.common.IContractManager;
 import tech.quantit.northstar.common.constant.DateTimeConstant;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.event.NorthstarEventType;
@@ -54,6 +55,8 @@ public class PlaybackContext {
 	
 	private final LocalDate endDate;
 	
+	private final IContractManager contractMgr;
+	
 	// 回放时间戳状态
 	private long playbackTimeState;
 	
@@ -61,7 +64,7 @@ public class PlaybackContext {
 	private Timer timer;
 	
 	public PlaybackContext(PlaybackSettings settings, LocalDateTime currentTimeState, PlaybackClock clock, TickSimulationAlgorithm tickerAlgo,
-			PlaybackDataLoader loader, FastEventEngine feEngine, IPlaybackRuntimeRepository rtRepo) {
+			PlaybackDataLoader loader, FastEventEngine feEngine, IPlaybackRuntimeRepository rtRepo, IContractManager contractMgr) {
 		this.settings = settings;
 		this.playbackTimeState = currentTimeState.toInstant(ZoneOffset.ofHours(8)).toEpochMilli();
 		this.clock = clock;
@@ -69,6 +72,7 @@ public class PlaybackContext {
 		this.loader = loader;
 		this.feEngine = feEngine;
 		this.rtRepo = rtRepo;
+		this.contractMgr = contractMgr;
 		this.endDate = LocalDate.parse(settings.getEndDate(), DateTimeConstant.D_FORMAT_INT_FORMATTER);
 		
 	}
@@ -149,14 +153,12 @@ public class PlaybackContext {
 	}
 	
 	private void loadBars() {
-		settings.getContractGroups()
+		contractBarMap = settings.getUnifiedSymbols()
 			.stream()
-			.map(contractGroup -> loader.loadData(playbackTimeState, contractGroup))
-			.forEach(sourceMap -> {
-				for(Entry<ContractField, List<BarField>> e : sourceMap.entrySet()) {
-					contractBarMap.put(e.getKey(), new LinkedList<>(e.getValue()));
-				}
-			});
+			.map(contractMgr::getContract)
+			.collect(Collectors.toMap(
+					contract -> contract, 
+					contract -> new LinkedList<>(loader.loadData(playbackTimeState, contract))));
 	}
 	
 	private void loadTicks() {

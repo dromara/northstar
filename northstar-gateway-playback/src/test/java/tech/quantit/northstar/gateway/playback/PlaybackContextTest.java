@@ -11,13 +11,12 @@ import static org.mockito.Mockito.when;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import tech.quantit.northstar.common.IContractManager;
 import tech.quantit.northstar.common.constant.PlaybackPrecision;
 import tech.quantit.northstar.common.constant.PlaybackSpeed;
 import tech.quantit.northstar.common.event.FastEventEngine;
@@ -42,15 +41,19 @@ class PlaybackContextTest {
 	PlaybackClock clock = mock(PlaybackClock.class);
 	
 	LocalDateTime ldt = LocalDateTime.of(2022, 6, 29, 9, 0);
+	TestFieldFactory factory = new TestFieldFactory("testGateway");
+	IContractManager contractMgr = mock(IContractManager.class);
+	
+	ContractField contract = factory.makeContract("rb2210");
 	PlaybackSettings settings = PlaybackSettings.builder()
 			.startDate("20220629")
 			.endDate("20220629")
 			.precision(PlaybackPrecision.LOW)
 			.speed(PlaybackSpeed.SPRINT)
-			.contractGroups(List.of("someContractGroup"))
+			.unifiedSymbols(List.of(contract.getUnifiedSymbol()))
 			.build();
 	
-	TestFieldFactory factory = new TestFieldFactory("testGateway");
+	
 	
 	TickField t1 = factory.makeTickField("rb2210", 5000);
 	TickField t2 = factory.makeTickField("rb2210", 5001);
@@ -61,17 +64,15 @@ class PlaybackContextTest {
 	
 	@BeforeEach
 	void prepare() {
-		Map<ContractField, List<BarField>> map = new HashMap<>();
-		map.put(factory.makeContract("rb2210"), List.of(bar));
 		when(clock.nextMarketMinute()).thenReturn(ldt.plusMinutes(1).toInstant(ZoneOffset.ofHours(8)).toEpochMilli());
-		when(loader.loadData(eq(ldt.toInstant(ZoneOffset.ofHours(8)).toEpochMilli()), anyString())).thenReturn(map);
+		when(loader.loadData(eq(ldt.toInstant(ZoneOffset.ofHours(8)).toEpochMilli()), eq(contract))).thenReturn(List.of(bar));
 		when(algo.generateFrom(any(BarField.class))).thenReturn(List.of(t1, t2, t3, t4));
-		
+		when(contractMgr.getContract(anyString())).thenReturn(contract);
 	}
 	
 	@Test
 	void testRunning() throws InterruptedException {
-		PlaybackContext ctx = new PlaybackContext(settings, ldt, clock, algo, loader, feEngine, rtRepo);
+		PlaybackContext ctx = new PlaybackContext(settings, ldt, clock, algo, loader, feEngine, rtRepo, contractMgr);
 		ctx.setGatewaySettings(GatewaySettingField.newBuilder().setGatewayId("testGateway").build());
 		
 		ctx.start();
