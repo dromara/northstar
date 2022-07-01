@@ -40,6 +40,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import com.google.common.io.Files;
 
 import lombok.extern.slf4j.Slf4j;
+import tech.quantit.northstar.common.IContractManager;
+import tech.quantit.northstar.common.IHolidayManager;
 import tech.quantit.northstar.common.constant.Constants;
 import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.common.event.FastEventEngine;
@@ -47,7 +49,9 @@ import tech.quantit.northstar.common.model.ContractDefinition;
 import tech.quantit.northstar.common.utils.ContractDefinitionReader;
 import tech.quantit.northstar.common.utils.ContractUtils;
 import tech.quantit.northstar.data.IContractRepository;
+import tech.quantit.northstar.data.IMarketDataRepository;
 import tech.quantit.northstar.data.IModuleRepository;
+import tech.quantit.northstar.data.IPlaybackRuntimeRepository;
 import tech.quantit.northstar.data.ISimAccountRepository;
 import tech.quantit.northstar.domain.account.TradeDayAccount;
 import tech.quantit.northstar.domain.external.MessageHandlerManager;
@@ -58,6 +62,7 @@ import tech.quantit.northstar.gateway.api.domain.GlobalMarketRegistry;
 import tech.quantit.northstar.gateway.api.domain.IndexContract;
 import tech.quantit.northstar.gateway.api.domain.LatencyDetector;
 import tech.quantit.northstar.gateway.api.domain.NormalContract;
+import tech.quantit.northstar.gateway.playback.PlaybackGatewayFactory;
 import tech.quantit.northstar.gateway.sim.trade.SimGatewayFactory;
 import tech.quantit.northstar.gateway.sim.trade.SimMarket;
 import tech.quantit.northstar.main.ExternalJarClassLoader;
@@ -207,6 +212,12 @@ public class AppConfig implements WebMvcConfigurer {
 	@Bean
 	public GatewayFactory ctpSimGatewayFactory(FastEventEngine fastEventEngine, GlobalMarketRegistry registry) {
 		return new CtpSimGatewayFactory(fastEventEngine, registry);
+	}
+	
+	@Bean
+	public GatewayFactory playbackGatewayFactory(FastEventEngine fastEventEngine, IContractManager contractMgr,
+			IHolidayManager holidayMgr, IMarketDataRepository mdRepo, IPlaybackRuntimeRepository rtRepo) {
+		return new PlaybackGatewayFactory(fastEventEngine, contractMgr, holidayMgr, rtRepo, mdRepo);
 	}
 	
 	@Bean

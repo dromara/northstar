@@ -13,6 +13,7 @@ public class PlaybackGatewayAdapter implements MarketGateway {
 	
 	public PlaybackGatewayAdapter(PlaybackContext ctx, GatewaySettingField settings) {
 		this.ctx = ctx;
+		this.ctx.setGatewaySettings(settings);
 		this.settings = settings;
 	}
 
