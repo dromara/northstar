@@ -62,7 +62,6 @@ public class TrigonometricTickSimulation implements TickSimulationAlgorithm {
 		List<Double> ohlc = insertVals(List.of(openArcSinVal, closeArcSinVal, highArcSinVal, lowArcSinVal), sectionLens) ;
 		List<Double> prices = ohlc.stream()
 				.mapToDouble(Double::doubleValue)
-				.sorted()
 				.map(Math::sin)
 				.map(val -> Math.round((val + 1) / valuePerPriceTick) * priceTick + bar.getLowPrice())
 				.mapToObj(Double::valueOf)
@@ -138,7 +137,7 @@ public class TrigonometricTickSimulation implements TickSimulationAlgorithm {
 		for(int i=0; i<numOfValToInsert; i++) {
 			sectionValues.add(rand.nextDouble(rangeLow, rangeHigh));
 		}
-		return sectionValues;
+		return sectionValues.stream().sorted().toList();
 	}
 	
 }

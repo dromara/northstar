@@ -1,5 +1,7 @@
 package tech.quantit.northstar.common.model;
 
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -35,5 +37,8 @@ public class PlaybackSettings implements GatewaySettings{
 	 * 回放速度
 	 */
 	private PlaybackSpeed speed;
-
+	/**
+	 * 回放的合约清单
+	 */
+	List<String> unifiedSymbols;
 }

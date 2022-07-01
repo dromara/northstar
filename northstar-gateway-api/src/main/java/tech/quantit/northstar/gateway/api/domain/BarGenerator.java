@@ -67,7 +67,7 @@ public class BarGenerator {
 			return;
 		}
 		 
-		if(tick.getActionTimestamp() >= cutoffTime) {
+		if(tick.getActionTimestamp() > cutoffTime) {
 			long offset = 0;	// K线偏移量
 			if(tick.getStatus() == TickType.PRE_OPENING_TICK.getCode()) {
 				offset = 60000;	// 开盘前一分钟的TICK是盘前数据，要合并到第一个分钟K线

@@ -9,13 +9,10 @@ import static org.mockito.Mockito.when;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import tech.quantit.northstar.common.IContractManager;
 import tech.quantit.northstar.data.IMarketDataRepository;
 import test.common.TestFieldFactory;
 import xyz.redtorch.pb.CoreField.BarField;
@@ -37,24 +34,18 @@ class PlaybackDataLoaderTest {
 	BarField b3 = factory.makeBarField("rb2210", 5000, 20, LocalDateTime.now().plusSeconds(1));
 	
 	ContractField c1 = factory.makeContract("rb2210");
-	ContractField c2 = factory.makeContract("rb2301");
 	
 	@BeforeEach
 	void prepare() {
 		IMarketDataRepository mdRepo = mock(IMarketDataRepository.class);
-		IContractManager contractMgr = mock(IContractManager.class);
-		
 		when(mdRepo.loadBars(anyString(), anyString(), any(LocalDate.class), any(LocalDate.class))).thenReturn(List.of(b1,b2,b3));
-		when(contractMgr.relativeContracts(anyString())).thenReturn(Set.of(c1,c2));
-		
-		loader = new PlaybackDataLoader(contractMgr, mdRepo);
+		loader = new PlaybackDataLoader(mdRepo);
 	}
 
 	@Test
 	void test() {
-		Map<ContractField, List<BarField>> resultMap = loader.loadData(System.currentTimeMillis(), "someGroup");
-		assertThat(resultMap).hasSize(2);
-		assertThat(resultMap.get(c1)).hasSize(1);
+		List<BarField> resultList = loader.loadData(System.currentTimeMillis(), c1);
+		assertThat(resultList).hasSize(1);
 	}
 
 }
