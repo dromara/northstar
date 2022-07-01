@@ -242,7 +242,7 @@ public class AppConfig implements WebMvcConfigurer {
 	}
 	
 	@Bean
-	public ModuleFactory moduleFactory(ExternalJarClassLoader extJarLoader, IModuleRepository moduleRepo, GatewayAndConnectionManager gatewayConnMgr,
+	public ModuleFactory moduleFactory(@Autowired(required = false) ExternalJarClassLoader extJarLoader, IModuleRepository moduleRepo, GatewayAndConnectionManager gatewayConnMgr,
 			ContractManager contractMgr) {
 		return new ModuleFactory(extJarLoader, moduleRepo, gatewayConnMgr, contractMgr);
 	}

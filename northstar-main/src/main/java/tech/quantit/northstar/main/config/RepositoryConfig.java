@@ -16,12 +16,14 @@ import tech.quantit.northstar.data.IContractRepository;
 import tech.quantit.northstar.data.IGatewayRepository;
 import tech.quantit.northstar.data.IMarketDataRepository;
 import tech.quantit.northstar.data.IModuleRepository;
+import tech.quantit.northstar.data.IPlaybackRuntimeRepository;
 import tech.quantit.northstar.data.ISimAccountRepository;
 import tech.quantit.northstar.data.ds.DataServiceManager;
 import tech.quantit.northstar.data.redis.ContractRepoRedisImpl;
 import tech.quantit.northstar.data.redis.GatewayRepoRedisImpl;
 import tech.quantit.northstar.data.redis.MarketDataRepoRedisImpl;
 import tech.quantit.northstar.data.redis.ModuleRepoRedisImpl;
+import tech.quantit.northstar.data.redis.PlaybackRuntimeRepoRedisImpl;
 import tech.quantit.northstar.data.redis.SimAccountRepoRedisImpl;
 import xyz.redtorch.gateway.ctp.common.CtpDateTimeUtil;
 
@@ -64,6 +66,11 @@ public class RepositoryConfig {
 	@Bean
 	public ISimAccountRepository simAccountRepository(RedisTemplate<String, byte[]> redisTemplate) {
 		return new SimAccountRepoRedisImpl(redisTemplate);
+	}
+	
+	@Bean 
+	public IPlaybackRuntimeRepository playbackRuntimeRepository(RedisTemplate<String, byte[]> redisTemplate) {
+		return new PlaybackRuntimeRepoRedisImpl(redisTemplate);
 	}
 
 }

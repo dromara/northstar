@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class PlaybackRuntimeDescription {
 
-	private String playbackGatewayId;
+	private String gatewayId;
 	
 	private LocalDateTime playbackTimeState;
 }

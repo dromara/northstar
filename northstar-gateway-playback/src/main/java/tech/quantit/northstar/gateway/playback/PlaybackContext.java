@@ -133,7 +133,7 @@ public class PlaybackContext {
 					playbackTimeState = clock.nextMarketMinute();
 					LocalDateTime newDT = LocalDateTime.ofInstant(Instant.ofEpochMilli(playbackTimeState), ZoneId.systemDefault());
 					rtRepo.save(PlaybackRuntimeDescription.builder()
-							.playbackGatewayId(gatewaySettings.getGatewayId())
+							.gatewayId(gatewaySettings.getGatewayId())
 							.playbackTimeState(newDT)
 							.build());
 					// 回放结束后，自动停机

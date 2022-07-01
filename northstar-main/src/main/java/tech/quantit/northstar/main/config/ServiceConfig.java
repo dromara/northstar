@@ -30,6 +30,7 @@ import tech.quantit.northstar.main.utils.ModuleFactory;
 	"ctpGatewayFactory",
 	"simGatewayFactory",
 	"ctpSimGatewayFactory",
+	"playbackGatewayFactory",
 	"moduleFactory",
 	"globalRegistry",
 	"contractManager"

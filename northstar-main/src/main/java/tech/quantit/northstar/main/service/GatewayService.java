@@ -33,6 +33,7 @@ import tech.quantit.northstar.domain.gateway.GatewayConnection;
 import tech.quantit.northstar.gateway.api.Gateway;
 import tech.quantit.northstar.gateway.api.GatewayFactory;
 import tech.quantit.northstar.gateway.api.MarketGateway;
+import tech.quantit.northstar.gateway.playback.PlaybackGatewayFactory;
 import tech.quantit.northstar.gateway.sim.trade.SimGatewayFactory;
 import tech.quantit.northstar.gateway.sim.trade.SimTradeGateway;
 import tech.quantit.northstar.main.utils.CodecUtils;
@@ -96,8 +97,8 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 			factory = ctx.getBean(SimGatewayFactory.class);
 		} else if(gatewayDescription.getGatewayType() == GatewayType.CTP_SIM) {
 			factory = ctx.getBean(CtpSimGatewayFactory.class);
-		} else if(gatewayDescription.getGatewayType() == GatewayType.IB) {
-			// TODO IB网关
+		} else if(gatewayDescription.getGatewayType() == GatewayType.PLAYBACK) {
+			factory = ctx.getBean(PlaybackGatewayFactory.class);
 		} else {
 			throw new NoSuchElementException("没有这种网关类型：" + gatewayDescription.getGatewayType());
 		}
