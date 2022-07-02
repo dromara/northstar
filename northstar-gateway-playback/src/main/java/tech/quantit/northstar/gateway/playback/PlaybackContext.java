@@ -140,7 +140,7 @@ public class PlaybackContext {
 					if(newDT.toLocalDate().isAfter(endDate)) {
 						feEngine.emitEvent(NorthstarEventType.NOTICE, NoticeField.newBuilder()
 								.setContent(String.format("[%s] 回放已经结束", gatewaySettings.getGatewayId()))
-								.setStatus(CommonStatusEnum.COMS_INFO)
+								.setStatus(CommonStatusEnum.COMS_WARN)
 								.setTimestamp(playbackTimeState)
 								.build());
 						stop();

@@ -99,3 +99,7 @@
 .el-table thead{
   color: #BABABA;
 }
+
+.el-message--info .el-message__content{
+  color: darkcyan;
+}

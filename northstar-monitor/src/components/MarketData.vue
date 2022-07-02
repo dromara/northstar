@@ -24,8 +24,9 @@
         </el-form-item>
         <el-form-item label="行情延时">
           <span>{{ latency }}</span>
-          <span> 毫秒</span></el-form-item
-        >
+          <span> 毫秒</span>
+          <span v-if="latency > 60000">（非实时行情）</span>
+        </el-form-item>
       </el-form>
     </div>
     <div id="update-k-line" class="ns-mktdata__body">

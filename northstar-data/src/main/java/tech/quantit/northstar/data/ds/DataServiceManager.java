@@ -5,10 +5,12 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpEntity;
@@ -252,6 +254,10 @@ public class DataServiceManager implements IDataServiceManager {
 	}
 	
 	private List<BarField> convertDataSet(DataSet dataSet) {
+		if(Objects.isNull(dataSet.getFields())) {
+			log.warn("数据服务查询不到相关数据");
+			return Collections.emptyList();
+		}
 		LinkedList<BarField> resultList = new LinkedList<>();
 		Map<String, Integer> fieldIndexMap = new HashMap<>();
 		for(int i=0; i<dataSet.getFields().length; i++) {

@@ -38,7 +38,7 @@
       <el-table-column
         :label="`${typeLabel}类型`"
         prop="gatewayType"
-        width="80px"
+        width="90px"
         header-align="center"
         align="center"
       >
