@@ -10,7 +10,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -64,8 +63,8 @@ class PlaybackContextTest {
 	
 	@BeforeEach
 	void prepare() {
-		when(clock.nextMarketMinute()).thenReturn(ldt.plusMinutes(1).toInstant(ZoneOffset.ofHours(8)).toEpochMilli());
-		when(loader.loadData(eq(ldt.toInstant(ZoneOffset.ofHours(8)).toEpochMilli()), eq(contract))).thenReturn(List.of(bar));
+		when(clock.nextMarketMinute()).thenReturn(ldt.plusMinutes(1));
+		when(loader.loadData(eq(ldt), eq(contract))).thenReturn(List.of(bar));
 		when(algo.generateFrom(any(BarField.class))).thenReturn(List.of(t1, t2, t3, t4));
 		when(contractMgr.getContract(anyString())).thenReturn(contract);
 	}

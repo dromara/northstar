@@ -3,7 +3,6 @@ package tech.quantit.northstar.gateway.playback;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.ZoneOffset;
 import java.util.Objects;
 
 import com.alibaba.fastjson.JSON;
@@ -62,7 +61,7 @@ public class PlaybackGatewayFactory implements GatewayFactory{
 		LocalDateTime ldt = Objects.nonNull(playbackRt) 
 				? playbackRt.getPlaybackTimeState() 
 				: LocalDateTime.of(LocalDate.parse(settings.getStartDate(), DateTimeConstant.D_FORMAT_INT_FORMATTER), LocalTime.of(9, 0));
-		PlaybackClock clock = new CtpPlaybackClock(holidayMgr, ldt.toInstant(ZoneOffset.ofHours(8)).toEpochMilli());
+		PlaybackClock clock = new CtpPlaybackClock(holidayMgr, ldt);
 		PlaybackDataLoader loader = new PlaybackDataLoader(mdRepo);
 		TickSimulationAlgorithm ticker = new TrigonometricTickSimulation(gatewayId, settings.getPrecision(), contractMgr);
 		return new PlaybackContext(settings, ldt, clock, ticker, loader, feEngine, rtRepo, contractMgr);

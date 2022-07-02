@@ -44,7 +44,7 @@ class PlaybackDataLoaderTest {
 
 	@Test
 	void test() {
-		List<BarField> resultList = loader.loadData(System.currentTimeMillis(), c1);
+		List<BarField> resultList = loader.loadData(LocalDateTime.now(), c1);
 		assertThat(resultList).hasSize(1);
 	}
 

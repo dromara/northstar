@@ -1,10 +1,7 @@
 package tech.quantit.northstar.gateway.playback.utils;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
 
 import tech.quantit.northstar.common.IHolidayManager;
 
@@ -28,18 +25,18 @@ public class CtpPlaybackClock implements PlaybackClock {
 	private int t4Start = LocalTime.of(21, 0).toSecondOfDay();
 	private int t4End = LocalTime.of(23, 59, 59).toSecondOfDay();
 	
-	public CtpPlaybackClock(IHolidayManager holidayMgr, long initTimestamp) {
+	public CtpPlaybackClock(IHolidayManager holidayMgr, LocalDateTime ldt) {
 		this.holidayMgr = holidayMgr;
-		this.ldt = LocalDateTime.ofInstant(Instant.ofEpochMilli(initTimestamp), ZoneId.systemDefault());
+		this.ldt = ldt;
 	}
 
 	@Override
-	public long nextMarketMinute() {
+	public LocalDateTime nextMarketMinute() {
 		ldt = ldt.plusMinutes(1);
 		while(!withinSection(ldt)) {
 			ldt = ldt.plusMinutes(15);
 		}
-		return ldt.toInstant(ZoneOffset.ofHours(8)).toEpochMilli();
+		return ldt;
 	}
 
 	private boolean withinSection(LocalDateTime ldt) {
