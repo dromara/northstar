@@ -127,7 +127,7 @@ public class PlaybackContext {
 				if(contractTickMap.isEmpty()) {
 					Iterator<Entry<ContractField, BarField>> itCacheBars = cacheBarMap.entrySet().iterator();
 					while(itCacheBars.hasNext()) {
-						feEngine.emitEvent(NorthstarEventType.BAR, itCacheBars.next().getValue());
+						feEngine.emitEvent(NorthstarEventType.BAR, BarField.newBuilder(itCacheBars.next().getValue()).setGatewayId(gatewaySettings.getGatewayId()).build());
 						itCacheBars.remove();
 					}
 					playbackTimeState = clock.nextMarketMinute();

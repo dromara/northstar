@@ -69,6 +69,7 @@ const marketCurrentDataModule = {
       ) {
         return
       }
+      
       state.lastBar = bar
       state.curBar = {
         openprice: bar.closeprice,

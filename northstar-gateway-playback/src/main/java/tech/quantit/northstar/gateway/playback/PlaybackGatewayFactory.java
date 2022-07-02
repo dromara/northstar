@@ -53,18 +53,18 @@ public class PlaybackGatewayFactory implements GatewayFactory{
 		PlaybackRuntimeDescription playbackRt = rtRepo.findById(gatewayDescription.getGatewayId());
 		PlaybackSettings settings = JSON.parseObject(JSON.toJSONString(gatewayDescription.getSettings()), PlaybackSettings.class);
 		
-		PlaybackContext context = createPlaybackContext(settings, playbackRt);
+		PlaybackContext context = createPlaybackContext(gatewayDescription.getGatewayId(), settings, playbackRt);
 		GatewaySettingField settingField = createGatewaySettings(gatewayDescription);
 		return new PlaybackGatewayAdapter(context, settingField);
 	}
 	
-	private PlaybackContext createPlaybackContext(PlaybackSettings settings, PlaybackRuntimeDescription playbackRt) {
+	private PlaybackContext createPlaybackContext(String gatewayId, PlaybackSettings settings, PlaybackRuntimeDescription playbackRt) {
 		LocalDateTime ldt = Objects.nonNull(playbackRt) 
 				? playbackRt.getPlaybackTimeState() 
 				: LocalDateTime.of(LocalDate.parse(settings.getStartDate(), DateTimeConstant.D_FORMAT_INT_FORMATTER), LocalTime.of(9, 0));
 		PlaybackClock clock = new CtpPlaybackClock(holidayMgr, ldt.toInstant(ZoneOffset.ofHours(8)).toEpochMilli());
 		PlaybackDataLoader loader = new PlaybackDataLoader(mdRepo);
-		TickSimulationAlgorithm ticker = new TrigonometricTickSimulation(settings.getPrecision(), contractMgr);
+		TickSimulationAlgorithm ticker = new TrigonometricTickSimulation(gatewayId, settings.getPrecision(), contractMgr);
 		return new PlaybackContext(settings, ldt, clock, ticker, loader, feEngine, rtRepo, contractMgr);
 	}
 	

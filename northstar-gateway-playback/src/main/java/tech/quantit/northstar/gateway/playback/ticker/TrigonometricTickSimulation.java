@@ -27,7 +27,10 @@ public class TrigonometricTickSimulation implements TickSimulationAlgorithm {
 	
 	private int totalSize;
 	
-	public TrigonometricTickSimulation(PlaybackPrecision precision, IContractManager contractMgr) {
+	private String gatewayId;
+	
+	public TrigonometricTickSimulation(String gatewayId, PlaybackPrecision precision, IContractManager contractMgr) {
+		this.gatewayId = gatewayId;
 		this.precision = precision;
 		this.contractMgr = contractMgr;
 		this.totalSize = switch (precision) {
@@ -87,7 +90,7 @@ public class TrigonometricTickSimulation implements TickSimulationAlgorithm {
 						.setActionTimestamp(bar.getActionTimestamp() - (totalSize - i) * timeFrame)
 						.addAllAskPrice(List.of(prices.get(i) + priceTick, 0D, 0D, 0D, 0D)) // 仅模拟卖一价
 						.addAllBidPrice(List.of(prices.get(i) - priceTick, 0D, 0D, 0D, 0D)) // 仅模拟买一价
-						.setGatewayId(bar.getGatewayId())
+						.setGatewayId(gatewayId)
 						.setHighPrice(bar.getHighPrice())	
 						.setLowPrice(bar.getLowPrice())		
 						.setLowerLimit(0)

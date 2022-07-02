@@ -101,7 +101,7 @@ public class GatewayManagementController {
 	
 	@GetMapping("/subContracts")
 	@NotNull(message="网关类型不能为空")
-	public ResultBean<List<byte[]>> getSubscribedContracts(GatewayType gatewayType){
-		return new ResultBean<>(gatewayService.getSubscribedContracts(gatewayType));
+	public ResultBean<List<byte[]>> getSubscribedContracts(String gatewayId){
+		return new ResultBean<>(gatewayService.getSubscribedContracts(gatewayId));
 	}
 }

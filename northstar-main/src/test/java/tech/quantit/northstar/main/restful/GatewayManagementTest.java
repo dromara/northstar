@@ -206,7 +206,7 @@ public class GatewayManagementTest {
 	public void shouldGetSubscribableContracts() throws Exception {
 		shouldCreateGateway();
 		
-		mockMvc.perform(get("/northstar/gateway/subContracts?gatewayType=CTP").session(session))
+		mockMvc.perform(get("/northstar/gateway/subContracts?gatewayId=CTP").session(session))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.data").isArray());
 	}

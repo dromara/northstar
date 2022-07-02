@@ -57,7 +57,7 @@ class TrigonometricTickSimulationTest {
 				.setHighPrice(5100)
 				.setLowPrice(4950)
 				.build();
-		TrigonometricTickSimulation ticker = new TrigonometricTickSimulation(PlaybackPrecision.LOW, contractMgr);
+		TrigonometricTickSimulation ticker = new TrigonometricTickSimulation(contract.getGatewayId(), PlaybackPrecision.LOW, contractMgr);
 		List<TickField> ticks = ticker.generateFrom(bar);
 		assertThat(ticks).hasSize(4);
 		assertThat(ticks.get(0).getLastPrice()).isEqualTo(5000);
@@ -76,7 +76,7 @@ class TrigonometricTickSimulationTest {
 				.setHighPrice(5100)
 				.setLowPrice(4950)
 				.build();
-		TrigonometricTickSimulation ticker = new TrigonometricTickSimulation(PlaybackPrecision.LOW, contractMgr);
+		TrigonometricTickSimulation ticker = new TrigonometricTickSimulation(contract.getGatewayId(), PlaybackPrecision.LOW, contractMgr);
 		List<TickField> ticks = ticker.generateFrom(bar);
 		assertThat(ticks).hasSize(4);
 		assertThat(ticks.get(0).getLastPrice()).isEqualTo(5050);
@@ -99,7 +99,7 @@ class TrigonometricTickSimulationTest {
 				.setHighPrice(5100)
 				.setLowPrice(4950)
 				.build();
-		TrigonometricTickSimulation ticker = new TrigonometricTickSimulation(PlaybackPrecision.MEDIUM, contractMgr);
+		TrigonometricTickSimulation ticker = new TrigonometricTickSimulation(contract.getGatewayId(), PlaybackPrecision.MEDIUM, contractMgr);
 		List<TickField> ticks = ticker.generateFrom(bar);
 		assertThat(ticks).hasSize(30);
 		assertThat(ticks.get(0).getLastPrice()).isEqualTo(5000);
@@ -124,7 +124,7 @@ class TrigonometricTickSimulationTest {
 				.setHighPrice(5100)
 				.setLowPrice(4950)
 				.build();
-		TrigonometricTickSimulation ticker = new TrigonometricTickSimulation(PlaybackPrecision.MEDIUM, contractMgr);
+		TrigonometricTickSimulation ticker = new TrigonometricTickSimulation(contract.getGatewayId(), PlaybackPrecision.MEDIUM, contractMgr);
 		List<TickField> ticks = ticker.generateFrom(bar);
 		assertThat(ticks).hasSize(30);
 		assertThat(ticks.get(0).getLastPrice()).isEqualTo(5050);
@@ -149,7 +149,7 @@ class TrigonometricTickSimulationTest {
 				.setHighPrice(5100)
 				.setLowPrice(4950)
 				.build();
-		TrigonometricTickSimulation ticker = new TrigonometricTickSimulation(PlaybackPrecision.HIGH, contractMgr);
+		TrigonometricTickSimulation ticker = new TrigonometricTickSimulation(contract.getGatewayId(), PlaybackPrecision.HIGH, contractMgr);
 		List<TickField> ticks = ticker.generateFrom(bar);
 		assertThat(ticks).hasSize(120);
 		assertThat(ticks.get(0).getLastPrice()).isEqualTo(5000);
@@ -174,7 +174,7 @@ class TrigonometricTickSimulationTest {
 				.setHighPrice(5100)
 				.setLowPrice(4950)
 				.build();
-		TrigonometricTickSimulation ticker = new TrigonometricTickSimulation(PlaybackPrecision.HIGH, contractMgr);
+		TrigonometricTickSimulation ticker = new TrigonometricTickSimulation(contract.getGatewayId(), PlaybackPrecision.HIGH, contractMgr);
 		List<TickField> ticks = ticker.generateFrom(bar);
 		assertThat(ticks).hasSize(120);
 		assertThat(ticks.get(0).getLastPrice()).isEqualTo(5050);
@@ -210,7 +210,7 @@ class TrigonometricTickSimulationTest {
 				.setTurnover(360000000)
 				.setTurnoverDelta(540000)
 				.build();
-		TrigonometricTickSimulation ticker = new TrigonometricTickSimulation(PlaybackPrecision.HIGH, contractMgr);
+		TrigonometricTickSimulation ticker = new TrigonometricTickSimulation(contract.getGatewayId(), PlaybackPrecision.HIGH, contractMgr);
 		List<TickField> ticks = ticker.generateFrom(bar);
 		assertThat(ticks).hasSize(120);
 		assertThat(ticks.get(0).getLastPrice()).isEqualTo(5050);

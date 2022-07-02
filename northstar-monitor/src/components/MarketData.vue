@@ -94,6 +94,10 @@ export default {
     },
     contractUnifiedSymbol: function (val) {
       this.unifiedSymbol = val
+      if (this.kLineChart) {
+        this.kLineChart.clearData()
+        this.kLineChart.resize()
+      }
     },
     gateway: function (gatewayId) {
       this.$store.commit('updateFocusMarketGatewayId', gatewayId)

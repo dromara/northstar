@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.constant.DateTimeConstant;
 import tech.quantit.northstar.common.constant.GatewayType;
@@ -33,6 +35,10 @@ public class MarketDataRepoDataServiceImpl implements IMarketDataRepository{
 
 	@Override
 	public List<BarField> loadBars(String gatewayId, String unifiedSymbol, LocalDate startDate, LocalDate endDate) {
+		if(!StringUtils.equals(gatewayId, "CTP")) {
+			log.debug("无法查询CTP网关以外的历史行情数据");
+			return Collections.emptyList();
+		}
 		log.debug("从数据服务加载历史行情数据：{}，{} -> {}", unifiedSymbol, startDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), endDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
 		try {			
 			return dsMgr.getMinutelyData(unifiedSymbol, startDate, endDate);
