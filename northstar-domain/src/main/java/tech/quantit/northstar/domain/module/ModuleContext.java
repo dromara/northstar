@@ -180,6 +180,7 @@ public class ModuleContext implements IModuleContext{
 					.collect(Collectors.toMap(Map.Entry::getKey, 
 							e -> e.getValue().stream().map(BarField::toByteArray).toList())));
 			mad.setIndicatorMap(indicatorFactory.getIndicatorMap().entrySet().stream()
+					.filter(e -> indicatorValBufQMap.containsKey(e.getKey()))
 					.collect(Collectors.toMap(Map.Entry::getKey,
 							e -> IndicatorData.builder()
 								.unifiedSymbol(e.getValue().bindedUnifiedSymbol())

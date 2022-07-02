@@ -1,4 +1,4 @@
-package tech.quantit.northstar.external.indicator;
+package tech.quantit.northstar.external.strategy;
 
 import tech.quantit.northstar.common.constant.SignalOperation;
 import tech.quantit.northstar.common.model.DynamicParams;

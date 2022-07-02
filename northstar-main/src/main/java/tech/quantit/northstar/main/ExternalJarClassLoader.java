@@ -126,6 +126,7 @@ public class ExternalJarClassLoader extends URLClassLoader {
 	 * @method initBean
 	 */
 	public void initBean() {
+		SpringContextUtil.getBeanFactory().setBeanClassLoader(this);
 		for (Map.Entry<String, Class<?>> entry : cacheClassMap.entrySet()) {
 			String className = entry.getKey();
 			Class<?> cla = entry.getValue();
@@ -136,10 +137,8 @@ public class ExternalJarClassLoader extends URLClassLoader {
 				
 				// 将变量首字母置小写
 				String beanName = StringUtils.uncapitalize(className);
-
 				beanName = beanName.substring(beanName.lastIndexOf(".") + 1);
 				beanName = StringUtils.uncapitalize(beanName);
-				
 				SpringContextUtil.getBeanFactory().registerBeanDefinition(beanName, beanDefinitionBuilder.getBeanDefinition());
 				registeredBean.add(beanName);
 				SpringContextUtil.getBeanFactory().getBean(beanName);

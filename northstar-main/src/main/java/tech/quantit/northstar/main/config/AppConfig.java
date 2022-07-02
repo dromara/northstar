@@ -235,6 +235,7 @@ public class AppConfig implements WebMvcConfigurer {
 			if(file.getName().contains("northstar-external") && Files.getFileExtension(file.getName()).equalsIgnoreCase("jar") && !file.isDirectory()) {
 				log.info("加载northstar-external扩展包");
 				clzLoader = new ExternalJarClassLoader(new URL[] {file.toURI().toURL()}, getClass().getClassLoader());
+				clzLoader.initBean();
 				break;
 			}
 		}
