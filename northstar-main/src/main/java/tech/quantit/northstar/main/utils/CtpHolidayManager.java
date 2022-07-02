@@ -3,6 +3,7 @@ package tech.quantit.northstar.main.utils;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.springframework.beans.factory.InitializingBean;
@@ -31,11 +32,17 @@ public class CtpHolidayManager implements IHolidayManager, InitializingBean{
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		LocalDate today = LocalDate.now();
-		holidaySet.addAll(repo.findHodidayInLaw(GatewayType.CTP, today.getYear()));
-		holidaySet.addAll(repo.findHodidayInLaw(GatewayType.CTP, today.getYear() + 1));
-		for(LocalDate date : holidaySet) {
-			log.debug("假期日：{}", date);
-		}
+		// 加载前后一年的假期数据
+		addHoliday(repo.findHodidayInLaw(GatewayType.CTP, today.getYear() - 1));
+		addHoliday(repo.findHodidayInLaw(GatewayType.CTP, today.getYear()));
+		addHoliday(repo.findHodidayInLaw(GatewayType.CTP, today.getYear() + 1));
+	}
+	
+	private void addHoliday(List<LocalDate> holidays) {
+		holidays.stream().forEach(date -> {
+				log.debug("假期日：{}", date);
+				holidaySet.add(date);
+			});
 	}
 	
 	@Override

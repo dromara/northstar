@@ -72,8 +72,8 @@ public class TrigonometricTickSimulation implements TickSimulationAlgorithm {
 		List<TickField> ticks = new ArrayList<>(totalSize);
 		int timeFrame = 60000 / totalSize;
 		long tickVolDelta = bar.getVolumeDelta() / totalSize;
-		long tickOpenInterestDelta = (long) (bar.getOpenInterestDelta() / totalSize);
-		long tickTurnoverDelta = (long) (bar.getTurnoverDelta() / totalSize);
+		double tickOpenInterestDelta = bar.getOpenInterestDelta() / totalSize;
+		double tickTurnoverDelta = bar.getTurnoverDelta() / totalSize;
 		long tickNumTradesDelta = bar.getNumTradesDelta() / totalSize;
 		
 		for(int i=0; i<totalSize; i++) {
@@ -96,13 +96,13 @@ public class TrigonometricTickSimulation implements TickSimulationAlgorithm {
 						.setLowerLimit(0)
 						.setUpperLimit(Integer.MAX_VALUE)
 						.setVolumeDelta(tickVolDelta)
-						.setVolume(bar.getVolume() - (totalSize - 1 - i) * tickVolDelta)
+						.setVolume(bar.getVolume())
 						.setOpenInterestDelta(tickOpenInterestDelta)
-						.setOpenInterest(bar.getOpenInterest() - (totalSize - 1 - i) * tickOpenInterestDelta)
+						.setOpenInterest(bar.getOpenInterest())
 						.setTurnoverDelta(tickTurnoverDelta)
-						.setTurnover(bar.getTurnover() - (totalSize - 1 - i) * tickTurnoverDelta)
+						.setTurnover(bar.getTurnover())
 						.setNumTradesDelta(tickNumTradesDelta)
-						.setNumTrades(bar.getNumTrades() - (totalSize - 1 - i) * tickNumTradesDelta)
+						.setNumTrades(bar.getNumTrades())
 						.build());
 		}
 		return ticks;

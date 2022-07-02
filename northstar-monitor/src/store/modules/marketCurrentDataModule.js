@@ -50,14 +50,24 @@ const marketCurrentDataModule = {
           volume: tick.volume
         }
       }
-      if(!state.curBar || tick.actiontimestamp - tick.actiontimestamp % 60000 + 60000 === state.curBar.actiontimestamp){
+      if(state.curBar){
         state.curBar = {
           openprice: state.lastBar.closeprice,
           closeprice: tick.lastprice,
-          highprice: state.curBar ? Math.max(tick.lastprice, state.curBar.highprice) : tick.lastprice,
-          lowprice: state.curBar ? Math.min(tick.lastprice, state.curBar.lowprice) : tick.lastprice,
-          volumedelta: tick.volume - state.lastBar.volume,
-          openinterestdelta: tick.openinterest - state.lastBar.openinterest,
+          highprice: Math.max(tick.lastprice, state.curBar.highprice),
+          lowprice: Math.min(tick.lastprice, state.curBar.lowprice),
+          volumedelta: tick.volumedelta + state.curBar.volumedelta,
+          openinterestdelta: tick.openinterestdelta + state.curBar.openinterestdelta,
+          actiontimestamp: tick.actiontimestamp - tick.actiontimestamp % 60000 + 60000
+        }
+      } else {
+        state.curBar = {
+          openprice: state.lastBar.closeprice,
+          closeprice: tick.lastprice,
+          highprice: tick.lastprice,
+          lowprice: tick.lastprice,
+          volumedelta: tick.volumedelta,
+          openinterestdelta: tick.openinterestdelta,
           actiontimestamp: tick.actiontimestamp - tick.actiontimestamp % 60000 + 60000
         }
       }
@@ -69,17 +79,8 @@ const marketCurrentDataModule = {
       ) {
         return
       }
-      console.log(bar)
       state.lastBar = bar
-      state.curBar = {
-        openprice: bar.closeprice,
-        closeprice: bar.closeprice,
-        highprice: bar.closeprice,
-        lowprice: bar.closeprice,
-        volumedelta: 0,
-        openinterestdelta: 0,
-        actiontimestamp: bar.actiontimestamp + 60000
-      }
+      state.curBar = null
     }
   },
   actions: {},

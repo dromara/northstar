@@ -2,7 +2,6 @@ package tech.quantit.northstar.gateway.playback;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.ZoneOffset;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -93,20 +92,21 @@ public class PlaybackContext {
 		timer = new Timer();
 		timer.scheduleAtFixedRate(new TimerTask() {
 			
-			private final LocalTime loadTime1 = LocalTime.of(9, 0);
-			private final LocalTime loadTime2 = LocalTime.of(21, 0);
+			private LocalDate lastLoadDate;
 			
-			private boolean isLoadTime(LocalTime time) {
-				return time.equals(loadTime1) || time.equals(loadTime2);
+			private boolean hasLoaded(LocalDate date) {
+				return date.equals(lastLoadDate);
 			}
 			
 			@Override
 			public void run() {
-				if(contractBarMap.isEmpty() && isLoadTime(playbackTimeState.toLocalTime())) {
+				LocalDate loadDate = playbackTimeState.toLocalDate();
+				if(contractBarMap.isEmpty() && !hasLoaded(loadDate)) {
 					loadBars();
+					lastLoadDate = loadDate;
 				}
 				
-				if(contractTickMap.isEmpty() && isLoadTime(playbackTimeState.toLocalTime())) {
+				if(contractTickMap.isEmpty()) {
 					loadTicks();
 				}
 				
@@ -171,7 +171,7 @@ public class PlaybackContext {
 		contractBarMap.entrySet()
 			.stream()
 			.filter(entry -> !entry.getValue().isEmpty())
-			.filter(entry -> entry.getValue().peek().getActionTimestamp() <= currentTime)
+			.filter(entry -> entry.getValue().peek().getActionTimestamp() < currentTime)
 			.forEach(entry -> {
 				BarField bar = entry.getValue().poll();
 				cacheBarMap.put(entry.getKey(), bar);

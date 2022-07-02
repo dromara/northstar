@@ -114,6 +114,11 @@ export default {
         this.kLineChart.updateData(KLineUtils.createFromBar(bar))
       }
     },
+    '$store.state.marketCurrentDataModule.lastBar': function (bar) {
+      if (this.kLineChart && !!bar) {
+        this.kLineChart.updateData(KLineUtils.createFromBar(bar))
+      }
+    },
     '$store.state.marketCurrentDataModule.curUnifiedSymbol': async function (val) {
       if (!this.kLineChart) {
         const kLineChart = init('update-k-line')
