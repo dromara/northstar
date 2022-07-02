@@ -64,10 +64,6 @@ export default {
     ctpSettingsSrc: {
       type: Object,
       default: () => {}
-    },
-    gatewayUsage: {
-      type: String,
-      default: 'TRADE'
     }
   },
   data() {
@@ -77,7 +73,6 @@ export default {
         password: [{ required: true, message: '不能为空', trigger: 'blur' }],
         brokerId: [{ required: true, message: '不能为空', trigger: 'blur' }]
       },
-      dialogVisible: false,
       ctpSettings: {
         userId: '',
         password: '',

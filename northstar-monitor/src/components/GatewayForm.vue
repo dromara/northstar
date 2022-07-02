@@ -12,6 +12,11 @@
       :ctpSettingsSrc="form.settings"
       @onSave="(settings) => (form.settings = settings)"
     />
+    <NsPlaybackForm
+      :visible.sync="playbackFormVisible"
+      :playbackSettingsSrc="form.settings"
+      @onSave="(settings) => (form.settings = settings)"
+    />
     <el-form ref="gatewayForm" :model="form" label-width="100px" width="200px" :rules="formRules">
       <el-row>
         <el-col :span="8">
@@ -19,7 +24,9 @@
             <el-input
               v-model="form.gatewayId"
               autocomplete="off"
-              :disabled="isUpdateMode || gatewayUsage === 'MARKET_DATA'"
+              :disabled="
+                isUpdateMode || (gatewayUsage === 'MARKET_DATA' && form.gatewayType !== 'PLAYBACK')
+              "
             ></el-input>
           </el-form-item>
         </el-col>
@@ -40,8 +47,13 @@
               :disabled="isUpdateMode"
             >
               <el-option label="CTP" value="CTP"></el-option>
-              <el-option v-if="$route.query.superuser" label="CTP_SIM" value="CTP_SIM"></el-option>
               <el-option label="SIM" value="SIM"></el-option>
+              <el-option
+                v-if="gatewayUsage === 'MARKET_DATA'"
+                label="PLAYBACK"
+                value="PLAYBACK"
+              ></el-option>
+              <el-option v-if="$route.query.superuser" label="CTP_SIM" value="CTP_SIM"></el-option>
               <!-- <el-option label="IB网关" value="beijing"></el-option> -->
             </el-select>
           </el-form-item>
@@ -95,6 +107,7 @@
               filterable
               collapse-tags
               placeholder="请选择合约"
+              :disabled="form.gatewayType === 'PLAYBACK'"
             >
               <el-option
                 v-for="item in contractDefOptions"
@@ -127,9 +140,7 @@
         id="gatewaySettings"
         type="primary"
         @click="gatewaySettingConfig"
-        :disabled="
-          form.gatewayType !== 'CTP' || (gatewayUsage !== 'TRADE' && form.gatewayType === 'SIM')
-        "
+        :disabled="!form.gatewayType || form.gatewayType === 'SIM'"
         >{{ typeLabel }}配置</el-button
       >
       <el-button id="saveGatewaySettings" type="primary" @click="saveGateway">保 存</el-button>
@@ -139,13 +150,14 @@
 
 <script>
 import NsCtpForm from '@/components/CtpForm'
+import NsPlaybackForm from '@/components/PlaybackForm'
 import gatewayMgmtApi from '../api/gatewayMgmtApi'
 
 const GATEWAY_ADAPTER = {
   CTP: 'xyz.redtorch.gateway.ctp.x64v6v3v15v.CtpGatewayAdapter',
   CTP_SIM: 'xyz.redtorch.gateway.ctp.x64v6v5v1cpv.CtpSimGatewayAdapter',
   SIM: 'tech.xuanwu.northstar.gateway.sim.SimGatewayLocalImpl',
-  IB: ''
+  PLAYBACK: 'tech.quantit.northstar.gateway.playback.PlaybackGatewayAdapter'
 }
 const CONNECTION_STATE = {
   CONNECTING: 'CONNECTING',
@@ -155,7 +167,8 @@ const CONNECTION_STATE = {
 }
 export default {
   components: {
-    NsCtpForm
+    NsCtpForm,
+    NsPlaybackForm
   },
   props: {
     visible: {
@@ -185,7 +198,7 @@ export default {
         bindedMktGatewayId: [{ required: true, message: '不能为空', trigger: 'blur' }]
       },
       ctpFormVisible: false,
-      simFormVisible: false,
+      playbackFormVisible: false,
       contractFormVisible: false,
       form: {
         gatewayId: '',
@@ -209,12 +222,7 @@ export default {
     },
     contractDefOptions() {
       if (!this.form.gatewayType) return []
-      const type = { FUTURES: '期货', OPTION: '期权' }
-      return this.cacheContracts[this.form.gatewayType].map((item) => {
-        item.value = item.name + '@' + item.productClass
-        item.label = item.name + type[item.productClass]
-        return item
-      })
+      return this.cacheContracts[this.form.gatewayType]
     }
   },
   watch: {
@@ -241,19 +249,34 @@ export default {
       ) {
         this.form.subscribedContractGroups.length = 0
       }
+      if (val === 'PLAYBACK') {
+        gatewayMgmtApi.find('CTP').then((result) => {
+          this.form.subscribedContractGroups = result.subscribedContractGroups.map(
+            (contractGroup) =>
+              this.cacheContracts['CTP'].find(
+                (item) => contractGroup === `${item.name}@${item.productClass}`
+              )
+          )
+        })
+      }
     }
   },
   created() {
-    ;['CTP', 'SIM'].forEach((item) => {
+    ;['CTP', 'SIM', 'PLAYBACK'].forEach((item) => {
+      const type = { FUTURES: '期货', OPTION: '期权' }
       gatewayMgmtApi.getContractDef(item).then((results) => {
-        this.cacheContracts[item] = results
+        this.cacheContracts[item] = results.map((result) => {
+          result.value = result.name + '@' + result.productClass
+          result.label = result.name + type[result.productClass]
+          return result
+        })
       })
     })
   },
   methods: {
     onChooseGatewayType() {
       this.form.gatewayAdapterType = GATEWAY_ADAPTER[this.form.gatewayType]
-      if (this.gatewayUsage === 'MARKET_DATA') {
+      if (this.gatewayUsage === 'MARKET_DATA' && this.form.gatewayType !== 'PLAYBACK') {
         this.form.gatewayId = `${this.form.gatewayType}`
       }
     },
@@ -261,8 +284,8 @@ export default {
       if (this.form.gatewayType === 'CTP' || this.form.gatewayType === 'CTP_SIM') {
         this.ctpFormVisible = true
       }
-      if (this.form.gatewayType === 'SIM') {
-        this.simFormVisible = true
+      if (this.form.gatewayType === 'PLAYBACK') {
+        this.playbackFormVisible = true
       }
     },
     async saveGateway() {

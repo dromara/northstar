@@ -13,6 +13,9 @@ export default {
   findAll(gatewayUsage) {
     return baseService.get('/gateway?usage=' + gatewayUsage)
   },
+  find(gatewayId){
+    return baseService.get('/gateway/specific?gatewayId=' + gatewayId)
+  },
   connect(gatewayId) {
     return baseService.get('/gateway/connection?gatewayId=' + gatewayId)
   },

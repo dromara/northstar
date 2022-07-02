@@ -187,14 +187,23 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 	}
 	
 	/**
-	 * 查询所有网关
+	 * 查询所有网关配置
 	 * @return
 	 * @throws Exception 
 	 */
-	public List<GatewayDescription> findAllGateway() {
+	public List<GatewayDescription> findAllGatewayDescription() {
 		return gatewayConnMgr.getAllConnections().stream()
 				.map(GatewayConnection::getGwDescription)
 				.toList();
+	}
+	
+	/**
+	 * 查询网关配置
+	 * @param gatewayId
+	 * @return
+	 */
+	public GatewayDescription findGatewayDescription(String gatewayId) {
+		return gatewayConnMgr.getGatewayConnectionById(gatewayId).getGwDescription();
 	}
 	
 	/**
@@ -202,7 +211,7 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 	 * @return
 	 * @throws Exception 
 	 */
-	public List<GatewayDescription> findAllMarketGateway() {
+	public List<GatewayDescription> findAllMarketGatewayDescription() {
 		return gatewayConnMgr.getAllConnections().stream()
 				.map(GatewayConnection::getGwDescription)
 				.filter(gwDescription -> gwDescription.getGatewayUsage() == GatewayUsage.MARKET_DATA)
@@ -214,7 +223,7 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 	 * @return
 	 * @throws Exception 
 	 */
-	public List<GatewayDescription> findAllTraderGateway() {
+	public List<GatewayDescription> findAllTraderGatewayDescription() {
 		return gatewayConnMgr.getAllConnections().stream()
 				.map(GatewayConnection::getGwDescription)
 				.filter(gwDescription -> gwDescription.getGatewayUsage() != GatewayUsage.MARKET_DATA)

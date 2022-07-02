@@ -40,8 +40,8 @@ public class GatewayManagementController {
 	}
 	
 	@DeleteMapping
+	@NotNull(message="网关ID不能为空")
 	public ResultBean<Boolean> remove(String gatewayId) {
-		Assert.notNull(gatewayId, "网关ID不能为空");
 		return new ResultBean<>(gatewayService.deleteGateway(gatewayId));
 	}
 	
@@ -52,14 +52,21 @@ public class GatewayManagementController {
 	}
 	
 	@GetMapping
+	@NotNull(message="网关用途不能为空")
 	public ResultBean<List<GatewayDescription>> list(String usage) { 
 		if(StringUtils.isBlank(usage)) {
-			return new ResultBean<>(gatewayService.findAllGateway());
+			return new ResultBean<>(gatewayService.findAllGatewayDescription());
 		}
 		if(GatewayUsage.valueOf(usage) == GatewayUsage.MARKET_DATA) {
-			return new ResultBean<>(gatewayService.findAllMarketGateway());
+			return new ResultBean<>(gatewayService.findAllMarketGatewayDescription());
 		}
-		return new ResultBean<>(gatewayService.findAllTraderGateway());
+		return new ResultBean<>(gatewayService.findAllTraderGatewayDescription());
+	}
+	
+	@GetMapping("/specific")
+	@NotNull(message="网关ID不能为空")
+	public ResultBean<GatewayDescription> findGatewayDescription(String gatewayId){
+		return new ResultBean<>(gatewayService.findGatewayDescription(gatewayId));
 	}
 	
 	@GetMapping("/active")
