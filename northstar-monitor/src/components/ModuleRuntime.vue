@@ -6,6 +6,11 @@
       :moduleName="module.moduleName"
       @save="onSave"
     />
+    <ModulePerformanceForm
+      :visible.sync="performanceVisible"
+      :moduleInitBalance="accountInfo.initBalance"
+      :moduleDealRecords="dealRecords"
+    />
     <div class="module-rt-wrapper">
       <div class="side-panel">
         <div class="description-wrapper">
@@ -14,9 +19,12 @@
               <el-button class="compact mb-10" icon="el-icon-refresh" @click="refresh"
                 >刷新数据</el-button
               >
-              <!-- <el-button class="compact mb-10" icon="el-icon-info" @click="refresh"
-                >更多统计</el-button
-              > -->
+              <el-button
+                class="compact mb-10"
+                icon="el-icon-info"
+                @click="performanceVisible = true"
+                >模组绩效</el-button
+              >
             </template>
             <el-descriptions-item label="名称">{{ moduleRuntime.moduleName }}</el-descriptions-item>
             <el-descriptions-item label="启停状态"
@@ -172,6 +180,7 @@
 </template>
 <script>
 import ModulePositionForm from './ModulePositionForm.vue'
+import ModulePerformanceForm from './ModulePerformance.vue'
 import { dispose, init } from 'klinecharts'
 import volumePure from '@/lib/indicator/volume-pure'
 import simpleVal from '@/lib/indicator/simple-value'
@@ -201,7 +210,8 @@ const makeHoldingSegment = (deal) => {
 
 export default {
   components: {
-    ModulePositionForm
+    ModulePositionForm,
+    ModulePerformanceForm
   },
   props: {
     visible: {
@@ -220,6 +230,7 @@ export default {
   data() {
     return {
       positionFormVisible: false,
+      performanceVisible: false,
       holdingVisibleOnChart: false,
       moduleTab: 'holding',
       activeAccount: '',

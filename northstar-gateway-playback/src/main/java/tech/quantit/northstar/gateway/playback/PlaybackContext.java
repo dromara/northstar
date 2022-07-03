@@ -13,6 +13,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.stream.Collectors;
 
+import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.IContractManager;
 import tech.quantit.northstar.common.constant.DateTimeConstant;
 import tech.quantit.northstar.common.event.FastEventEngine;
@@ -35,6 +36,7 @@ import xyz.redtorch.pb.CoreField.TickField;
  * @author KevinHuangwl
  *
  */
+@Slf4j
 public class PlaybackContext {
 	
 	private IPlaybackRuntimeRepository rtRepo;
@@ -89,6 +91,8 @@ public class PlaybackContext {
 		case SPRINT -> 50;
 		default -> throw new IllegalArgumentException("Unexpected value: " + settings.getSpeed());
 		};
+		
+		log.debug("回放网关 [{}] 开始回放。当前时间：{}", gatewaySettings.getGatewayId(), playbackTimeState);
 		timer = new Timer();
 		timer.scheduleAtFixedRate(new TimerTask() {
 			
@@ -186,6 +190,7 @@ public class PlaybackContext {
 		isRunning = false;
 		timer.cancel();
 		feEngine.emitEvent(NorthstarEventType.DISCONNECTED, gatewaySettings.getGatewayId());
+		log.debug("回放网关 [{}] 结束回放。当前时间：{}", gatewaySettings.getGatewayId(), playbackTimeState);
 	}
 	
 	/**

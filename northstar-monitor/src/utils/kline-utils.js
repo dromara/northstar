@@ -93,6 +93,22 @@ export default (()=>{
       }
     }
   
+
+    const getPerformanceChartOptions = () => {
+
+      return {
+        candle: {
+          type: 'area',
+          tooltip: {
+            showRule: 'none'
+          }
+        },
+        yAxis: {
+          position: 'left'
+        }
+      }
+    }
+
     const createFromBar = (bar) => {
       return {
         open: bar.openprice,
@@ -108,6 +124,7 @@ export default (()=>{
   
     return {
       getThemeOptions,
+      getPerformanceChartOptions,
       createFromBar
     }
   })()

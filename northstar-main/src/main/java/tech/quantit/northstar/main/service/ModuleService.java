@@ -280,7 +280,7 @@ public class ModuleService implements InitializingBean {
 			try {				
 				loadModule(md);
 			} catch (ClassNotFoundException e) {
-				log.warn("模组 [{}] 加载失败，找不到相应的类", md.getModuleName());
+				log.warn("模组 [{}] 加载失败，找不到相应的类", md.getModuleName(), e);
 			}
 		}
 	}
