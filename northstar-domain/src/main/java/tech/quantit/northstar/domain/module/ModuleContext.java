@@ -1,5 +1,9 @@
 package tech.quantit.northstar.domain.module;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneOffset;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -15,6 +19,7 @@ import org.slf4j.ILoggerFactory;
 import org.slf4j.Logger;
 
 import tech.quantit.northstar.common.constant.Constants;
+import tech.quantit.northstar.common.constant.DateTimeConstant;
 import tech.quantit.northstar.common.constant.ModuleState;
 import tech.quantit.northstar.common.constant.SignalOperation;
 import tech.quantit.northstar.common.exception.NoSuchElementException;
@@ -82,7 +87,7 @@ public class ModuleContext implements IModuleContext{
 	private Map<String, BarMerger> contractBarMergerMap = new HashMap<>();
 	
 	/* unifiedSymbol -> tick */
-	private Map<String, TickField> tickMap = new HashMap<>();
+	private Map<String, TickField> latestTickMap = new HashMap<>();
 	
 	/* unifiedSymbol -> barQ */
 	private Map<String, Queue<BarField>> barBufQMap = new HashMap<>();
@@ -246,7 +251,7 @@ public class ModuleContext implements IModuleContext{
 	}
 	
 	private void checkAmount(SubmitOrderReqField orderReq) {
-		double orderPrice = orderReq.getOrderPriceType() == OrderPriceTypeEnum.OPT_AnyPrice ? tickMap.get(orderReq.getContract().getUnifiedSymbol()).getLastPrice() : orderReq.getPrice();
+		double orderPrice = orderReq.getOrderPriceType() == OrderPriceTypeEnum.OPT_AnyPrice ? latestTickMap.get(orderReq.getContract().getUnifiedSymbol()).getLastPrice() : orderReq.getPrice();
 		double extMargin = orderReq.getVolume() * orderPrice * orderReq.getContract().getMultiplier() * FieldUtils.marginRatio(orderReq.getContract(), orderReq.getDirection());
 		double preBalance = accStore.getPreBalance(orderReq.getGatewayId());
 		if(preBalance < extMargin) {
@@ -279,7 +284,7 @@ public class ModuleContext implements IModuleContext{
 			tradingDay = tick.getTradingDay();
 		}
 		accStore.onTick(tick);
-		tickMap.put(tick.getUnifiedSymbol(), tick);
+		latestTickMap.put(tick.getUnifiedSymbol(), tick);
 		tradeStrategy.onTick(tick, module.isEnabled());
 	}
 	
@@ -390,6 +395,18 @@ public class ModuleContext implements IModuleContext{
 	public Indicator newIndicator(String indicatorName, String bindedUnifiedSymbol,
 			Function<BarField, TimeSeriesValue> valueUpdateHandler) {
 		return newIndicator(indicatorName, bindedUnifiedSymbol, 16, valueUpdateHandler);
+	}
+
+	@Override
+	public boolean isOrderWaitTimeout(String originOrderId, long timeout) {
+		if(!latestTickMap.containsKey(originOrderId) || !orderMap.containsKey(originOrderId)) {
+			return false;
+		}
+		
+		TickField lastTick = latestTickMap.get(originOrderId);
+		OrderField order = orderMap.get(originOrderId);
+		LocalDateTime ldt = LocalDateTime.of(LocalDate.parse(order.getOrderDate(), DateTimeConstant.D_FORMAT_INT_FORMATTER), LocalTime.parse(order.getOrderTime(), DateTimeConstant.T_FORMAT_FORMATTER));
+		return lastTick.getActionTimestamp() - ldt.toInstant(ZoneOffset.ofHours(8)).toEpochMilli() > timeout;
 	}
 
 }

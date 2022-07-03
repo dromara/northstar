@@ -11,6 +11,7 @@ import tech.quantit.northstar.strategy.api.indicator.Indicator;
 import tech.quantit.northstar.strategy.api.indicator.function.AverageFunctions;
 import tech.quantit.northstar.strategy.api.indicator.function.FunctionCompute;
 import xyz.redtorch.pb.CoreField.BarField;
+import xyz.redtorch.pb.CoreField.TickField;
 
 /**
  * 本示例用于展示一个带指标的策略
@@ -36,6 +37,8 @@ public class IndicatorSampleStrategy extends AbstractStrategy	// 为了简化代
 	
 	private Indicator macdDea;
 	
+	private String originOrderId;
+	
 	@Override
 	protected void onBar(BarField bar) {
 		log.debug("{} K线数据： 开 [{}], 高 [{}], 低 [{}], 收 [{}]", 
@@ -49,28 +52,38 @@ public class IndicatorSampleStrategy extends AbstractStrategy	// 为了简化代
 			case EMPTY -> {
 				// 快线在慢线之上开多，快线在慢线之下开空
 				if(shouldBuy()) {					
-					ctx.submitOrderReq(ctx.getContract(bar.getUnifiedSymbol()), SignalOperation.BUY_OPEN, PriceType.ANY_PRICE, 1, 0);
+					originOrderId = ctx.submitOrderReq(ctx.getContract(bar.getUnifiedSymbol()), SignalOperation.BUY_OPEN, PriceType.ANY_PRICE, 1, 0);
 					log.info("[{} {}] {}", ctx.getModuleName(), NAME, SignalOperation.BUY_OPEN.text());
 				}
 				if(shouldSell()) {
-					ctx.submitOrderReq(ctx.getContract(bar.getUnifiedSymbol()), SignalOperation.SELL_OPEN, PriceType.ANY_PRICE, 1, 0);
+					originOrderId = ctx.submitOrderReq(ctx.getContract(bar.getUnifiedSymbol()), SignalOperation.SELL_OPEN, PriceType.ANY_PRICE, 1, 0);
 					log.info("[{} {}] {}", ctx.getModuleName(), NAME, SignalOperation.BUY_OPEN.text());
 				}
 					
 			}
 			case HOLDING_LONG -> {
 				if(fastLine.value(0) < slowLine.value(0)) {
-					ctx.submitOrderReq(ctx.getContract(bar.getUnifiedSymbol()), SignalOperation.SELL_CLOSE, PriceType.ANY_PRICE, 1, 0);
+					originOrderId = ctx.submitOrderReq(ctx.getContract(bar.getUnifiedSymbol()), SignalOperation.SELL_CLOSE, PriceType.ANY_PRICE, 1, 0);
 					log.info("[{} {}] 平多", ctx.getModuleName(), NAME);
 				}
 			}
 			case HOLDING_SHORT -> {
 				if(fastLine.value(0) > slowLine.value(0)) {
-					ctx.submitOrderReq(ctx.getContract(bar.getUnifiedSymbol()), SignalOperation.BUY_CLOSE, PriceType.ANY_PRICE, 1, 0);
+					originOrderId = ctx.submitOrderReq(ctx.getContract(bar.getUnifiedSymbol()), SignalOperation.BUY_CLOSE, PriceType.ANY_PRICE, 1, 0);
 					log.info("[{} {}] 平空", ctx.getModuleName(), NAME);
 				}
 			}
 			default -> { /* 其他情况不处理 */}
+		}
+	}
+	
+	private int orderWaitTimeout = 60000 * 3;
+	@Override
+	protected void onTick(TickField tick) {
+		// 超时撤单
+		if(ctx.getState().isWaiting() && ctx.isOrderWaitTimeout(originOrderId, orderWaitTimeout)) {
+			ctx.cancelOrder(originOrderId);
+			originOrderId = null;
 		}
 	}
 	

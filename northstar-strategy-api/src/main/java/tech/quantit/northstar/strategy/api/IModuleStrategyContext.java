@@ -34,12 +34,20 @@ public interface IModuleStrategyContext {
 	 * @param priceType
 	 * @param volume
 	 * @param price
-	 * @return
+	 * @return	originOrderId	订单凭据
 	 */
 	String submitOrderReq(ContractField contract, SignalOperation operation, PriceType priceType, int volume, double price);
 	/**
+	 * 判断订单是否已经超时
+	 * 该方法用于撤单场景
+	 * @param originOrderId
+	 * @param timeout
+	 * @return
+	 */
+	boolean isOrderWaitTimeout(String originOrderId, long timeout);
+	/**
 	 * 撤单
-	 * @param cancelReq
+	 * @param originOrderId
 	 */
 	void cancelOrder(String originOrderId);
 	/**

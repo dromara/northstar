@@ -8,7 +8,7 @@ socketio:
 northstar: 
   # 行情延时探测（由于有多余的性能损耗，生产环境建议禁用）
   latency-detection:
-    enabled: true
+    enabled: false
     # 采样时间间隔（单位：秒）
     sampling-interval: 60 
   # 历史数据服务（需要购买用户授权）

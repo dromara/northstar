@@ -30,7 +30,7 @@ public class SimMarket {
 		simGatewayMap.values().stream()
 			.map(SimTradeGatewayLocal.class::cast)
 			.map(SimTradeGatewayLocal::getAccount)
-			.forEach(simAccount -> simAccount.onTick(tick));;
+			.forEach(simAccount -> simAccount.onTick(tick));
 	}
 	
 }
