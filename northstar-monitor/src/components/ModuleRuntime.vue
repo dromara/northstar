@@ -44,7 +44,9 @@
                 }[moduleRuntime.moduleState]
               }}</el-tag>
             </el-descriptions-item>
-            <el-descriptions-item label="总盈亏">{{ totalProfit }}</el-descriptions-item>
+            <el-descriptions-item label="总盈亏">{{
+              totalProfit | formatter
+            }}</el-descriptions-item>
             <el-descriptions-item label="胜率">
               {{ `${(winningRatio * 100).toFixed(1)} %` }}
             </el-descriptions-item>
@@ -64,22 +66,25 @@
                 {{ accountInfo.accountId }}
               </el-descriptions-item>
               <el-descriptions-item label="初始余额">
-                {{ accountInfo.initBalance }}
+                {{ accountInfo.initBalance | formatter }}
               </el-descriptions-item>
               <el-descriptions-item label="当前余额">
-                {{ accountInfo.preBalance + holdingProfit }}
+                {{ (accountInfo.preBalance + holdingProfit) | formatter }}
               </el-descriptions-item>
               <el-descriptions-item label="持仓盈亏">
-                {{ holdingProfit }}
+                {{ holdingProfit | formatter }}
               </el-descriptions-item>
               <el-descriptions-item label="累计平仓盈亏">
-                {{ accountInfo.accCloseProfit }}
+                {{ accountInfo.accCloseProfit | formatter }}
               </el-descriptions-item>
               <el-descriptions-item label="累计手续费">
-                {{ accountInfo.accCommission }}
+                {{ accountInfo.accCommission | formatter }}
               </el-descriptions-item>
               <el-descriptions-item label="合计盈亏">
-                {{ accountInfo.accCloseProfit - accountInfo.accCommission + holdingProfit }}
+                {{
+                  (accountInfo.accCloseProfit - accountInfo.accCommission + holdingProfit)
+                    | formatter
+                }}
               </el-descriptions-item>
             </el-descriptions>
             <el-tabs v-model="moduleTab" :stretch="true">
@@ -243,6 +248,11 @@ export default {
       paneId: '',
       indicator: '',
       indicatorMap: {}
+    }
+  },
+  filters: {
+    formatter: function (val) {
+      return typeof val === 'number' ? val.toFixed(0) : val
     }
   },
   watch: {

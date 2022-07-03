@@ -66,6 +66,8 @@ import xyz.redtorch.pb.CoreField.TradeField;
  */
 public class ModuleContext implements IModuleContext{
 	
+	private static final ILoggerFactory logFactory = new NorthstarLoggerFactory();
+	
 	protected TradeStrategy tradeStrategy;
 	
 	protected IModuleAccountStore accStore;
@@ -107,17 +109,18 @@ public class ModuleContext implements IModuleContext{
 	
 	private Consumer<ModuleDealRecord> onDealCallback;
 	
-	private ILoggerFactory logFactory = new NorthstarLoggerFactory();
-	
 	private IndicatorFactory indicatorFactory = new IndicatorFactory();
 	
 	private static final int BUF_SIZE = 500;
 	
 	private final String moduleName;
 	
+	private Logger log;
+	
 	public ModuleContext(String name, TradeStrategy tradeStrategy, IModuleAccountStore accStore, ClosingStrategy closingStrategy, int numOfMinsPerBar, 
 			DealCollector dealCollector, Consumer<ModuleRuntimeDescription> onRuntimeChangeCallback, Consumer<ModuleDealRecord> onDealCallback) {
 		this.moduleName = name;
+		this.log = logFactory.getLogger(name);
 		this.tradeStrategy = tradeStrategy;
 		this.accStore = accStore;
 		this.closingStrategy = closingStrategy;
@@ -234,6 +237,7 @@ public class ModuleContext implements IModuleContext{
 	}
 
 	private String submitOrderReq(SubmitOrderReqField orderReq) {
+		log.debug("模组 [{}] 发单：{}", moduleName, orderReq.getOriginOrderId());
 		if(FieldUtils.isOpen(orderReq.getOffsetFlag())) {
 			checkAmount(orderReq);
 		}
@@ -261,6 +265,7 @@ public class ModuleContext implements IModuleContext{
 
 	@Override
 	public void cancelOrder(String originOrderId) {
+		log.debug("模组 [{}] 撤单：{}", moduleName, originOrderId);
 		if(!orderMap.containsKey(originOrderId)) {
 			throw new NoSuchElementException("找不到订单：" + originOrderId);
 		}
@@ -370,7 +375,7 @@ public class ModuleContext implements IModuleContext{
 
 	@Override
 	public Logger getLogger() {
-		return logFactory.getLogger(getModuleName());
+		return log;
 	}
 
 	@Override

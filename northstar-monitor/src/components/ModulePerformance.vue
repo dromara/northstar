@@ -78,6 +78,9 @@ export default {
   methods: {
     updateChart() {
       this.kLineChart.applyNewData(this.performanceData)
+      setTimeout(() => {
+        this.kLineChart.resize() // 防止偶尔渲染不成功
+      }, 2000)
     },
     close() {
       this.$emit('update:visible', false)

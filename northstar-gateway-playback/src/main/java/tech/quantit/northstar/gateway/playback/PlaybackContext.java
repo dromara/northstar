@@ -88,7 +88,7 @@ public class PlaybackContext {
 		isRunning = true;
 		long rate = switch (settings.getSpeed()) {
 		case NORMAL -> 500;
-		case SPRINT -> 50;
+		case SPRINT -> 10;
 		default -> throw new IllegalArgumentException("Unexpected value: " + settings.getSpeed());
 		};
 		
