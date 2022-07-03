@@ -80,6 +80,11 @@ curl https://gitee.com/dromara/northstar/raw/master/env.sh | sh
 Invoke-WebRequest https://gitee.com/dromara/northstar/raw/master/env.ps1 -OutFile env.ps1; powershell -noexit ".\env.ps1"
 ```
 
+目录结构如下：  
+C:\  
+|--northstar-dist\ 	程序包目录  
+|--northstar-env\	环境依赖包目录  
+
 ### 程序包准备
 直接放到上述提及的 northstar-dist 目录
 ```
@@ -89,15 +94,17 @@ https://gitee.com/dromara/northstar/attach_files/1114803/download/northstar-4.0.
 ### 启动程序
 **Linux环境下**
 ```
-curl https://gitee.com/dromara/northstar/raw/master/startup.sh | sh
+nohup java -Xmn1g -Xmx1g -jar ~/northstar-dist/northstar.jar >ns.log &
 ```
-注意：startup.sh脚本中包括了JVM的启动参数，假定服务器配置是2核4G，如有不同应该按实际情况自定义启动脚本
+注意：启动命令包括了JVM的启动参数，假定服务器配置是2核4G，如有不同应该按实际情况修改
 
 **Windows环境下**
-待补充
+```
+s
+```
 
 ### 部署验证
-在浏览器直接访问部署服务的域名（端口使用了默认的80端口）， 应该可以看到以下界面，并可以登陆成功  
+在浏览器直接访问部署服务的域名（端口使用了默认的80端口），应该可以看到以下界面，并可以登陆成功  
 ![输入图片说明](https://images.gitee.com/uploads/images/2022/0103/205503_efb41f7c_1676852.png "login.PNG")
 
 ### 查询日志

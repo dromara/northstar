@@ -18,7 +18,7 @@
     "eslint-plugin-vue": "^6.2.2",
     "google-protobuf": "^3.17.0-rc.1",
     "jstat": "^1.9.5",
-    "klinecharts": "^8.3.6",
+    "klinecharts": "^8.5.0",
     "moment": "^2.29.1",
     "socket.io-client": "^2.3.1",
     "vue": "^2.6.14",

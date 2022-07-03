@@ -7,11 +7,15 @@ Add-Type -AssemblyName System.IO.Compression
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
-#下载到northstar_env目录，如无该目录则创建;   
+# 程序包目录
+$DistPath = "c:\\northstar_dist\" 
+# 下载到northstar_env目录，如无该目录则创建;  
 $BasePath = "c:\\northstar_env\"
-If(!(test-path $BasePath))
-{
+If(!(test-path $BasePath)){
    New-Item -Path $BasePath -ItemType Directory
+}
+If(!(test-path $DistPath)){
+	New-Item -Path $DistPath -ItemType Directory
 }
 #JDK17下载地址
 $JDK17DownloadUrl = "https://download.oracle.com/java/17/latest/jdk-17_windows-x64_bin.msi"
@@ -59,13 +63,13 @@ function setEnvironment([string] $name, [string] $path){
 	}
 }
 
-#定位安装目录  
+# 定位安装目录  
 function getInstallPath([string] $basePath, [string] $pattern){
 	$path = Get-ChildItem $basePath | Where-Object {$_.Name -like $pattern}
 	return $path.fullName
 }
 
-#JDK17环境安装  
+# JDK17环境安装  
 If(checkCommand java.exe 17*){
     "JDK17 installed"
 } else {
@@ -75,7 +79,7 @@ If(checkCommand java.exe 17*){
 	setEnvironment Java "$jdkPath\bin"
 }
 
-#Node14环境安装  
+# Node14环境安装  
 If(checkCommand node.exe 14*){
 	"Node14 installed"
 } else {
@@ -86,14 +90,14 @@ If(checkCommand node.exe 14*){
 	npm config set unsafe-perm=true
 }
 
-#Redis环境安装
+# Redis环境安装
 If(checkService redis){
 	"Redis installed"
 } else {
 	downloadAndInstallMSI $RedisDownloadUrl $BasePath Redis-x64-3.0.504.msi
 }
 
-#Maven环境安装  
+# Maven环境安装  
 If(checkCommand mvn *){
 	"Maven installed"
 } else {

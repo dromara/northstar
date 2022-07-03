@@ -277,7 +277,11 @@ public class ModuleService implements InitializingBean {
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		for(ModuleDescription md : findAllModules()) {
-			loadModule(md);
+			try {				
+				loadModule(md);
+			} catch (ClassNotFoundException e) {
+				log.warn("模组 [{}] 加载失败，找不到相应的类", md.getModuleName());
+			}
 		}
 	}
 	
