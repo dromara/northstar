@@ -26,6 +26,7 @@ import tech.quantit.northstar.common.model.ModuleDescription;
 import tech.quantit.northstar.data.IGatewayRepository;
 import tech.quantit.northstar.data.IMarketDataRepository;
 import tech.quantit.northstar.data.IModuleRepository;
+import tech.quantit.northstar.data.IPlaybackRuntimeRepository;
 import tech.quantit.northstar.data.ISimAccountRepository;
 import tech.quantit.northstar.domain.gateway.ContractManager;
 import tech.quantit.northstar.domain.gateway.GatewayAndConnectionManager;
@@ -59,6 +60,8 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 	
 	private ISimAccountRepository simAccRepo;
 	
+	private IPlaybackRuntimeRepository playbackRtRepo;
+	
 	private ApplicationContext ctx;
 	
 	private IModuleRepository moduleRepo;
@@ -66,13 +69,14 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 	private ContractManager contractMgr;
 	
 	public GatewayService(GatewayAndConnectionManager gatewayConnMgr, IGatewayRepository gatewayRepo, IMarketDataRepository mdRepo,
-			IModuleRepository moduleRepo, ISimAccountRepository simAccRepo, ContractManager contractMgr) {
+			IPlaybackRuntimeRepository playbackRtRepo, IModuleRepository moduleRepo, ISimAccountRepository simAccRepo, ContractManager contractMgr) {
 		this.gatewayConnMgr = gatewayConnMgr;
 		this.gatewayRepo = gatewayRepo;
 		this.mdRepo = mdRepo;
 		this.contractMgr = contractMgr;
 		this.moduleRepo = moduleRepo;
 		this.simAccRepo = simAccRepo;
+		this.playbackRtRepo = playbackRtRepo;
 	}
 	
 	/**
@@ -154,7 +158,8 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 		if(conn.isConnected()) {
 			throw new IllegalStateException("非断开状态的网关不能删除");
 		}
-		if(conn.getGwDescription().getGatewayUsage() == GatewayUsage.MARKET_DATA) {			
+		GatewayDescription gd = conn.getGwDescription();
+		if(gd.getGatewayUsage() == GatewayUsage.MARKET_DATA) {			
 			for(GatewayConnection gc : gatewayConnMgr.getAllConnections()) {
 				if(StringUtils.equals(gc.getGwDescription().getBindedMktGatewayId(), gatewayId)) {
 					throw new IllegalStateException("仍有账户网关与本行情网关存在绑定关系，请先解除绑定！");
@@ -171,7 +176,10 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 		}
 		boolean flag = doDeleteGateway(gatewayId);
 		mdRepo.dropGatewayData(gatewayId);
-		simAccRepo.deleteById(gatewayId);
+		if(gd.getGatewayType() == GatewayType.SIM)
+			simAccRepo.deleteById(gatewayId);
+		if(gd.getGatewayType() == GatewayType.PLAYBACK) 
+			playbackRtRepo.deleteById(gatewayId);
 		return flag;
 	}
 	

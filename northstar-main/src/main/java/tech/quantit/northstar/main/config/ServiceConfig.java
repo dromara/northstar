@@ -10,6 +10,7 @@ import org.springframework.context.annotation.DependsOn;
 import tech.quantit.northstar.data.IGatewayRepository;
 import tech.quantit.northstar.data.IMarketDataRepository;
 import tech.quantit.northstar.data.IModuleRepository;
+import tech.quantit.northstar.data.IPlaybackRuntimeRepository;
 import tech.quantit.northstar.data.ISimAccountRepository;
 import tech.quantit.northstar.domain.account.TradeDayAccount;
 import tech.quantit.northstar.domain.gateway.ContractManager;
@@ -45,8 +46,8 @@ public class ServiceConfig {
 	
 	@Bean
 	public GatewayService gatewayService(GatewayAndConnectionManager gatewayConnMgr, IGatewayRepository gatewayRepo, IMarketDataRepository mdRepo,
-			IModuleRepository moduleRepo, ISimAccountRepository simAccRepo, ContractManager contractMgr) {
-		return new GatewayService(gatewayConnMgr, gatewayRepo, mdRepo, moduleRepo, simAccRepo, contractMgr);
+			IPlaybackRuntimeRepository playbackRtRepo, IModuleRepository moduleRepo, ISimAccountRepository simAccRepo, ContractManager contractMgr) {
+		return new GatewayService(gatewayConnMgr, gatewayRepo, mdRepo, playbackRtRepo, moduleRepo, simAccRepo, contractMgr);
 	}
 	
 	@Bean

@@ -240,7 +240,7 @@ public class SimAccount implements TickDataAware{
 		if(!tMap.containsKey(trade.getContract())) {
 			throw new IllegalStateException("没有对应持仓可以对冲当前成交：" + MessagePrinter.print(trade));
 		}
-		tMap.get(trade.getContract()).onTrade(trade);
+		addCloseProfit(tMap.get(trade.getContract()).onTrade(trade));
 		onTrade(trade);
 		savingCallback.accept(getDescription());
 	}
@@ -251,7 +251,7 @@ public class SimAccount implements TickDataAware{
 		totalCommission += trade.getVolume() * commission;
 	}
 
-	public void addCloseProfit(double profit) {
+	private void addCloseProfit(double profit) {
 		totalCloseProfit += profit;
 	}
 
@@ -298,7 +298,7 @@ public class SimAccount implements TickDataAware{
 		return SimAccountDescription.builder()
 				.gatewayId(gatewayId)
 				.totalCloseProfit(totalCloseProfit)
-				.totalCloseProfit(totalCloseProfit)
+				.totalCommission(totalCommission)
 				.totalDeposit(totalDeposit)
 				.totalWithdraw(totalWithdraw)
 				.openTrades(uncloseTrades.stream().map(TradeField::toByteArray).toList())
