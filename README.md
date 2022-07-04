@@ -1,7 +1,6 @@
 # Northstar盈富量化交易平台
 <p align="center">
     <img src ="https://img.shields.io/badge/version-4.0.0-yellow.svg"/>
-    <img src ="https://img.shields.io/badge/platform-windows|linux-green.svg"/>
     <img src ="https://img.shields.io/badge/licence-Apache2.0-blue.svg"/>
     <img src ="https://img.shields.io/badge/lang-JAVA|JS-orange.svg"/>
 </p>
