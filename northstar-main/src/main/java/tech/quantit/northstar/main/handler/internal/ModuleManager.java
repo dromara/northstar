@@ -66,14 +66,10 @@ public class ModuleManager extends AbstractEventHandler{
 	protected void doHandle(NorthstarEvent e) {
 		if(latencyDetector != null && e.getData() instanceof TickField tick) {
 			// 分发到模组前的检测点
-			latencyDetector.getCheckpoint(1).sampling(tick);
+			latencyDetector.getCheckpoint(0).sampling(tick);
 		}
 		moduleMap.values().parallelStream().forEach(sm -> {
 			sm.onEvent(e);
-			if(latencyDetector != null && e.getData() instanceof TickField tick) {
-				// 模组运行后的检测点
-				latencyDetector.getCheckpoint(2).sampling(tick);
-			}
 		});
 	}
 }

@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -555,8 +554,6 @@ public class MdSpi extends CThostFtdcMdSpi {
 				gatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.TICK, tick);
 				gatewayAdapter.registry.dispatch(tick);
 				lastUpdateTickTime = System.currentTimeMillis();
-				
-				gatewayAdapter.registry.getLatencyDetector().ifPresent(detector -> detector.getCheckpoint(0).sampling(tick));
 				
 			} catch (Throwable t) {
 				logger.error("{} OnRtnDepthMarketData Exception", logInfo, t);
