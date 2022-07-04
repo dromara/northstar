@@ -57,9 +57,13 @@ public class RepositoryConfig {
 	private String baseUrl;
 	
 	@Bean
-	public IMarketDataRepository marketDataRepository(RedisTemplate<String, byte[]> redisTemplate, RestTemplate restTemplate) {
+	public DataServiceManager dataServiceManager(RedisTemplate<String, byte[]> redisTemplate, RestTemplate restTemplate) {
 		String nsdsSecret = Optional.ofNullable(System.getenv(Constants.NS_DS_SECRET)).orElse("");
-		DataServiceManager dsMgr = new DataServiceManager(baseUrl, nsdsSecret, restTemplate, new CtpDateTimeUtil());
+		return new DataServiceManager(baseUrl, nsdsSecret, restTemplate, new CtpDateTimeUtil());
+	}
+	
+	@Bean
+	public IMarketDataRepository marketDataRepository(RedisTemplate<String, byte[]> redisTemplate, DataServiceManager dsMgr) {
 		return new MarketDataRepoRedisImpl(redisTemplate, dsMgr);
 	}
 	

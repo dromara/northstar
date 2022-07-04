@@ -26,9 +26,14 @@ import com.alibaba.fastjson2.JSONObject;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.IDataServiceManager;
+import tech.quantit.northstar.common.constant.DateTimeConstant;
 import tech.quantit.northstar.common.utils.LocalEnvUtils;
 import tech.quantit.northstar.common.utils.MarketDateTimeUtil;
+import xyz.redtorch.pb.CoreEnum.CurrencyEnum;
+import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
+import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
 import xyz.redtorch.pb.CoreField.BarField;
+import xyz.redtorch.pb.CoreField.ContractField;
 
 /**
  * 历史数据服务接口管理器
@@ -192,23 +197,12 @@ public class DataServiceManager implements IDataServiceManager {
 		return commonGetData("day", unifiedSymbol, startDate, endDate);
 	}
 	
-	public List<String> getTradeDates(String exchange, LocalDate startDate, LocalDate endDate){
-		DataSet dataSet = getTradeCalendar(exchange, startDate, endDate);
-		List<String> resultList = new LinkedList<>();
-		Map<String, Integer> keyIndexMap = new HashMap<>();
-		for(int i=0; i<dataSet.getFields().length; i++) {
-			keyIndexMap.put(dataSet.getFields()[i], i);
+	@Override
+	public List<LocalDate> getHolidays(ExchangeEnum exchange, LocalDate startDate, LocalDate endDate) {
+		DataSet dataSet = getTradeCalendar(exchange.toString(), startDate, endDate);
+		if(Objects.isNull(dataSet.getFields())) {
+			return Collections.emptyList();
 		}
-		for(String[] item : dataSet.getItems()) {
-			if("1".equals(item[keyIndexMap.get("is_open")])) {
-				resultList.add(item[keyIndexMap.get("cal_date")]);
-			}
-		}
-		return resultList;
-	}
-	
-	public List<String> getHolidays(String exchange, LocalDate startDate, LocalDate endDate) {
-		DataSet dataSet = getTradeCalendar(exchange, startDate, endDate);
 		List<String> resultList = new LinkedList<>();
 		Map<String, Integer> keyIndexMap = new HashMap<>();
 		for(int i=0; i<dataSet.getFields().length; i++) {
@@ -218,6 +212,46 @@ public class DataServiceManager implements IDataServiceManager {
 			if("0".equals(item[keyIndexMap.get("is_open")])) {
 				resultList.add(item[keyIndexMap.get("cal_date")]);
 			}
+		}
+		return resultList.stream()
+				.map(dateStr -> LocalDate.parse(dateStr, DateTimeConstant.D_FORMAT_INT_FORMATTER))
+				.toList();
+	}
+
+	@Override
+	public List<ContractField> getAllContracts(ExchangeEnum exchange) {
+		DataSet dataSet = execute(URI.create(String.format("%s/contracts/?exchange=%s", baseUrl, exchange)));
+		if(Objects.isNull(dataSet.getFields())) {
+			return Collections.emptyList();
+		}
+		LinkedList<ContractField> resultList = new LinkedList<>();
+		Map<String, Integer> fieldIndexMap = new HashMap<>();
+		for(int i=0; i<dataSet.getFields().length; i++) {
+			fieldIndexMap.put(dataSet.getFields()[i], i);
+		}
+		for(String[] item : dataSet.getItems()) {
+			String unifiedSymbol = getValue("ns_code", fieldIndexMap, item, "");
+			String symbol = unifiedSymbol.split("@")[0];
+			String name = getValue("name", fieldIndexMap, item, "");
+			String unitDesc = getValue("quote_unit_desc", fieldIndexMap, item, "");
+			ContractField contract = ContractField.newBuilder()
+					.setUnifiedSymbol(unifiedSymbol)
+					.setSymbol(symbol)
+					.setExchange(exchange)
+					.setCurrency(CurrencyEnum.CNY)
+					.setContractId(unifiedSymbol + "@CTP")
+					.setFullName(name)
+					.setName(name)
+					.setGatewayId("CTP")
+					.setThirdPartyId(symbol + "@CTP")
+					.setLastTradeDateOrContractMonth(getValue("delist_date", fieldIndexMap, item, ""))
+					.setLongMarginRatio(0.1)
+					.setShortMarginRatio(0.1)
+					.setProductClass(ProductClassEnum.FUTURES)
+					.setMultiplier(Double.parseDouble(getValue("per_unit", fieldIndexMap, item, "0")))
+					.setPriceTick(Double.parseDouble(unitDesc.replaceAll("(\\d+\\.?[\\d+]?)[^\\d]+", "$1")))
+					.build();
+			resultList.add(contract);
 		}
 		return resultList;
 	}
@@ -328,4 +362,5 @@ public class DataServiceManager implements IDataServiceManager {
 		
 		private String message;
 	}
+
 }
