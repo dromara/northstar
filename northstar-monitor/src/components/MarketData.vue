@@ -133,9 +133,13 @@ export default {
             console.warn('忽略一个不是数值的时间戳: ' + timestamp)
             return
           }
+          if (new Date().getTime() - timestamp < 86400000) {
+            console.warn('查询时间间隔少于一天，忽略该查询')
+            return
+          }
           await new Promise((r) => setTimeout(r, 1000))
           const data = await this.loadBars(timestamp, true)
-          kLineChart.applyMoreData(data || [], !!data)
+          kLineChart.applyMoreData(data || [], data.length)
         })
       }
       if (val) {
