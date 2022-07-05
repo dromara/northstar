@@ -3,9 +3,21 @@ package tech.quantit.northstar.strategy.api.indicator.function;
 import java.util.Objects;
 
 import tech.quantit.northstar.common.model.TimeSeriesValue;
+import tech.quantit.northstar.strategy.api.indicator.TimeSeriesUnaryOperator;
 
+/**
+ * 多函数计算
+ * @author KevinHuangwl
+ *
+ */
 public interface FunctionCompute {
-
+	
+	/**
+	 * 函数相加
+	 * @param fn1
+	 * @param fn2
+	 * @return
+	 */
 	static TimeSeriesUnaryOperator add(TimeSeriesUnaryOperator fn1, TimeSeriesUnaryOperator fn2){
 		Objects.requireNonNull(fn1);
 		Objects.requireNonNull(fn2);
@@ -17,6 +29,12 @@ public interface FunctionCompute {
 		};
 	}
 	
+	/**
+	 * 函数相减
+	 * @param fn1
+	 * @param fn2
+	 * @return
+	 */
 	static TimeSeriesUnaryOperator minus(TimeSeriesUnaryOperator fn1, TimeSeriesUnaryOperator fn2){
 		Objects.requireNonNull(fn1);
 		Objects.requireNonNull(fn2);

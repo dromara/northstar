@@ -10,6 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.google.common.util.concurrent.AtomicDouble;
 
 import tech.quantit.northstar.common.model.TimeSeriesValue;
+import tech.quantit.northstar.strategy.api.indicator.TimeSeriesUnaryOperator;
 import xyz.redtorch.pb.CoreField.BarField;
 
 /**

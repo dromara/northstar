@@ -1,10 +1,15 @@
-package tech.quantit.northstar.strategy.api.indicator.function;
+package tech.quantit.northstar.strategy.api.indicator;
 
 import java.util.Objects;
 import java.util.function.UnaryOperator;
 
 import tech.quantit.northstar.common.model.TimeSeriesValue;
 
+/**
+ * 
+ * @author KevinHuangwl
+ *
+ */
 @FunctionalInterface
 public interface TimeSeriesUnaryOperator extends UnaryOperator<TimeSeriesValue> {
 
