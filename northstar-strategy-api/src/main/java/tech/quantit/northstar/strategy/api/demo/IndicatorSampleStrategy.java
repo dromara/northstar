@@ -8,8 +8,8 @@ import tech.quantit.northstar.strategy.api.TradeStrategy;
 import tech.quantit.northstar.strategy.api.annotation.StrategicComponent;
 import tech.quantit.northstar.strategy.api.constant.PriceType;
 import tech.quantit.northstar.strategy.api.indicator.Indicator;
-import tech.quantit.northstar.strategy.api.indicator.function.AverageFunctions;
-import tech.quantit.northstar.strategy.api.indicator.function.FunctionCompute;
+import static tech.quantit.northstar.strategy.api.indicator.function.AverageFunctions.*;
+import static tech.quantit.northstar.strategy.api.indicator.function.FunctionCompute.*;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.TickField;
 
@@ -108,15 +108,12 @@ public class IndicatorSampleStrategy extends AbstractStrategy	// 为了简化代
 	@Override
 	protected void initIndicators() {
 		// 简单指标的创建 
-		this.fastLine = ctx.newIndicator("快线", params.indicatorSymbol, AverageFunctions.MA(params.fast));
-		this.slowLine = ctx.newIndicator("慢线", params.indicatorSymbol, AverageFunctions.MA(params.slow));
+		this.fastLine = ctx.newIndicator("快线", params.indicatorSymbol, MA(params.fast));
+		this.slowLine = ctx.newIndicator("慢线", params.indicatorSymbol, MA(params.slow));
 		
 		// 复杂指标的创建
-		var fnMacdDiff = FunctionCompute.minus(AverageFunctions.EMA(12), AverageFunctions.EMA(26));
-		this.macdDiff = ctx.newIndicator("MACD_DIFF", params.indicatorSymbol, fnMacdDiff);
-		var fnMacdDea = FunctionCompute.minus(AverageFunctions.EMA(12), AverageFunctions.EMA(26))
-				.andThen(AverageFunctions.EMA(9));
-		this.macdDea = ctx.newIndicator("MACD_DEA", params.indicatorSymbol, fnMacdDea);
+		this.macdDiff = ctx.newIndicator("MACD_DIFF", params.indicatorSymbol, minus(EMA(12), EMA(26)));
+		this.macdDea = ctx.newIndicator("MACD_DEA", params.indicatorSymbol, minus(EMA(12), EMA(26)).andThen(EMA(9)));
 	}
 
 	public static class InitParams extends DynamicParams {			

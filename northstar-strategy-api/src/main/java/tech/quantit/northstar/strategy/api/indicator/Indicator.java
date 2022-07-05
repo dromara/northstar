@@ -227,7 +227,7 @@ public class Indicator {
 		OPEN_INTEREST;
 	}
 	
-	interface BarListener {
+	private interface BarListener {
 	
 		void onBar(Object obj);
 	}
