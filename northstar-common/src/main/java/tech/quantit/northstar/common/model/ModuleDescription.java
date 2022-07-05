@@ -37,6 +37,10 @@ public class ModuleDescription {
 	 */
 	private int daysOfDataForPreparation;
 	/**
+	 * 模组缓存的数据量（模组运行状态可观察的数据量）
+	 */
+	private int moduleCacheDataSize;
+	/**
 	 * 平仓优化策略
 	 */
 	private ClosingPolicy closingPolicy;

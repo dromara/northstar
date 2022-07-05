@@ -83,8 +83,9 @@ public class ModuleFactory {
 				dc.onTrade(TradeField.parseFrom(uncloseTradeData));
 			}
 		}
-		
-		return new ModuleContext(moduleDescription.getModuleName(), strategy, accStore, closingStrategy, numOfMinPerBar, dc, onRuntimeChangeCallback, onDealChangeCallback);
+		int moduleBufDataSize = Math.max(100, moduleDescription.getModuleCacheDataSize());	// 至少缓存100个数据 
+		return new ModuleContext(moduleDescription.getModuleName(), strategy, accStore, closingStrategy, numOfMinPerBar,
+				moduleBufDataSize, dc, onRuntimeChangeCallback, onDealChangeCallback);
 	}
 	
 	@SuppressWarnings("unchecked")

@@ -70,6 +70,10 @@
               />
               <span class="ml-10">天</span>
             </el-form-item>
+            <el-form-item label="缓存数据量">
+              <el-input-number v-model="form.moduleCacheDataSize" :min="100" :disabled="readOnly">
+              </el-input-number>
+            </el-form-item>
           </div>
           <div v-show="activeIndex === '2'">
             <el-form-item label="绑定策略">
@@ -209,6 +213,7 @@ export default {
         type: 'SPECULATION',
         numOfMinPerBar: '1',
         daysOfDataForPreparation: '0',
+        moduleCacheDataSize: 500,
         closingPolicy: 'FIFO',
         moduleAccountSettingsDescription: [],
         strategySetting: {

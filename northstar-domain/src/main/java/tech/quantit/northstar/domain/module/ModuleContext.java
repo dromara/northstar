@@ -111,14 +111,12 @@ public class ModuleContext implements IModuleContext{
 	
 	private IndicatorFactory indicatorFactory = new IndicatorFactory();
 	
-	private static final int BUF_SIZE = 500;
-	
 	private final String moduleName;
 	
 	private Logger log;
 	
 	public ModuleContext(String name, TradeStrategy tradeStrategy, IModuleAccountStore accStore, ClosingStrategy closingStrategy, int numOfMinsPerBar, 
-			DealCollector dealCollector, Consumer<ModuleRuntimeDescription> onRuntimeChangeCallback, Consumer<ModuleDealRecord> onDealCallback) {
+			int bufSize, DealCollector dealCollector, Consumer<ModuleRuntimeDescription> onRuntimeChangeCallback, Consumer<ModuleDealRecord> onDealCallback) {
 		this.moduleName = name;
 		this.log = logFactory.getLogger(name);
 		this.tradeStrategy = tradeStrategy;
@@ -135,7 +133,7 @@ public class ModuleContext implements IModuleContext{
 				if(!indicatorValBufQMap.containsKey(e.getKey())) {
 					indicatorValBufQMap.put(e.getKey(), new LinkedList<>());
 				}
-				if(indicatorValBufQMap.get(e.getKey()).size() >= BUF_SIZE) {
+				if(indicatorValBufQMap.get(e.getKey()).size() >= bufSize) {
 					indicatorValBufQMap.get(e.getKey()).poll();
 				}
 				if(indicator.isReady()) {					
@@ -143,7 +141,7 @@ public class ModuleContext implements IModuleContext{
 				}
 			});
 			tradeStrategy.onBar(bar, module.isEnabled());
-			if(barBufQMap.get(bar.getUnifiedSymbol()).size() >= BUF_SIZE) {
+			if(barBufQMap.get(bar.getUnifiedSymbol()).size() >= bufSize) {
 				barBufQMap.get(bar.getUnifiedSymbol()).poll();
 			}
 			barBufQMap.get(bar.getUnifiedSymbol()).offer(bar);
