@@ -102,7 +102,7 @@
         <el-col :span="16" v-if="gatewayUsage === 'MARKET_DATA'">
           <el-form-item label="订阅合约">
             <el-select
-              v-model="form.subscribedContractGroups"
+              v-model="subscribedContractGroups"
               multiple
               filterable
               collapse-tags
@@ -124,9 +124,9 @@
         <el-form-item label="已订阅合约">
           <div
             class="tag-wrapper"
-            v-if="form.subscribedContractGroups && form.subscribedContractGroups.length"
+            v-if="subscribedContractGroups && subscribedContractGroups.length"
           >
-            <el-tag v-for="(item, i) in form.subscribedContractGroups" :key="i">
+            <el-tag v-for="(item, i) in subscribedContractGroups" :key="i">
               {{ item.name + { FUTURES: '期货', OPTION: '期权' }[item.productClass] }}
             </el-tag>
           </div>
@@ -212,6 +212,7 @@ export default {
         subscribedContractGroups: [],
         settings: null
       },
+      subscribedContractGroups: [],
       contractType: '',
       cacheContracts: {}
     }
@@ -231,7 +232,7 @@ export default {
         this.form = Object.assign({}, this.gatewayDescription)
         this.form.gatewayUsage = this.gatewayUsage
         if (this.form.subscribedContractGroups) {
-          this.form.subscribedContractGroups = this.form.subscribedContractGroups.map((defId) =>
+          this.subscribedContractGroups = this.form.subscribedContractGroups.map((defId) =>
             this.cacheContracts[this.form.gatewayType].find(
               (item) => `${item.name}@${item.productClass}` === defId
             )
@@ -245,17 +246,16 @@ export default {
         val &&
         this.gatewayUsage === 'MARKET_DATA' &&
         !this.isUpdateMode &&
-        this.form.subscribedContractGroups
+        this.subscribedContractGroups
       ) {
-        this.form.subscribedContractGroups.length = 0
+        this.subscribedContractGroups = []
       }
       if (val === 'PLAYBACK') {
         gatewayMgmtApi.find('CTP').then((result) => {
-          this.form.subscribedContractGroups = result.subscribedContractGroups.map(
-            (contractGroup) =>
-              this.cacheContracts['CTP'].find(
-                (item) => contractGroup === `${item.name}@${item.productClass}`
-              )
+          this.subscribedContractGroups = result.subscribedContractGroups.map((contractGroup) =>
+            this.cacheContracts['CTP'].find(
+              (item) => contractGroup === `${item.name}@${item.productClass}`
+            )
           )
         })
       }
@@ -299,7 +299,7 @@ export default {
         .validate()
         .then(() => {
           if (this.gatewayUsage === 'MARKET_DATA') {
-            this.form.subscribedContractGroups = this.form.subscribedContractGroups.map(
+            this.form.subscribedContractGroups = this.subscribedContractGroups.map(
               (item) => item.value
             )
           }
@@ -312,7 +312,7 @@ export default {
     },
     close() {
       this.$emit('update:visible', false)
-      this.form = this.$options.data().form
+      this.subscribedContractGroups = []
     }
   }
 }
