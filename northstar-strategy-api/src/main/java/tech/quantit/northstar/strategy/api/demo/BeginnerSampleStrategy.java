@@ -32,7 +32,7 @@ import xyz.redtorch.pb.CoreField.TradeField;
 @StrategicComponent(BeginnerSampleStrategy.NAME)		// 该注解是用于给策略命名用的，所有的策略都要带上这个注解
 public class BeginnerSampleStrategy implements TradeStrategy{
 	
-	protected static final String NAME = "示例信号策略";	// 之所以要这样定义一个常量，是为了方便日志输出时可以带上策略
+	protected static final String NAME = "简单示例策略";	// 之所以要这样定义一个常量，是为了方便日志输出时可以带上策略
 	
 	private InitParams params;	// 策略的参数配置信息
 	

@@ -57,7 +57,7 @@ export default {
         return
       }
       this.curPage = index
-      this.$router.push({ name: pageOpts[index] })
+      this.$router.push({ name: pageOpts[index], query: { auth: this.$route.query.auth } })
     }
   }
 }
