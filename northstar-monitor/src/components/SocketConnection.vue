@@ -21,6 +21,16 @@ const TYPE = {
   3: 'error'
 }
 export default {
+  props: {
+    username: {
+      type: String,
+      default: ''
+    },
+    password: {
+      type: String,
+      default: ''
+    }
+  },
   data() {
     return {
       socket: null,
@@ -60,8 +70,12 @@ export default {
   methods: {
     initSocket() {
       const wsEndpoint = `ws://${this.wsHost}:51888`
-      console.log('准备连接websocket：' + wsEndpoint)
-      this.socket = io(wsEndpoint, { transports: ['websocket'] })
+      const token = this.$route.query.auth
+      console.log('准备连接websocket：' + wsEndpoint, ' token:' + token)
+      this.socket = io(wsEndpoint, {
+        transports: ['websocket'],
+        query: { auth: token }
+      })
       this.socket.on('TICK', (data) => {
         let tick = TickField.deserializeBinary(data).toObject()
         this.$store.commit('updateTick', tick)

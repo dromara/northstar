@@ -21,10 +21,12 @@
     <div class="ns-body">
       <router-view></router-view>
     </div>
+    <socket-connection />
   </div>
 </template>
 
 <script>
+import SocketConnection from '@/components/SocketConnection'
 const pageOpts = {
   1: 'mktgateway',
   2: 'tdgateway',
@@ -38,6 +40,9 @@ const pageOptsRevert = {}
 Object.keys(pageOpts).forEach((key) => (pageOptsRevert[pageOpts[key]] = key))
 
 export default {
+  components: {
+    SocketConnection
+  },
   data() {
     return {
       curPage: '0'

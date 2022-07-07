@@ -1,6 +1,7 @@
 package tech.quantit.northstar.main.config;
 
 import java.net.SocketException;
+import java.util.Base64;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.DisposableBean;
@@ -31,17 +32,26 @@ public class SocketIOServerConfig implements DisposableBean, InitializingBean {
 	@Autowired
 	private SocketIOServer socketServer;
 	
+	private UserInfo userInfo = new UserInfo();
+	
 	@Bean
 	@ConditionalOnExpression("!'${spring.profiles.active}'.equals('test')")
     public SocketIOServer socketIOServer() throws SocketException  {
 		return makeServer();
     }
 	
+	@Bean
+	public UserInfo userInfo() {
+		return userInfo;
+	}
+	
 	private SocketIOServer makeServer() throws SocketException {
+		String token = Base64.getEncoder().encodeToString(String.format("%s:%s", userInfo.getUserId(), userInfo.getPassword()).getBytes());
 		String realHost = StringUtils.equals(host, "0.0.0.0") ? InetAddressUtils.getInet4Address() : host;
 		com.corundumstudio.socketio.Configuration config = new com.corundumstudio.socketio.Configuration();
         config.setHostname(realHost);
         config.setPort(port);
+        config.setAuthorizationListener(data -> data.getUrlParams().get("auth").get(0).equals(token));
         config.setBossThreads(1);
         config.setWorkerThreads(100);
         SocketConfig socketConfig = new SocketConfig();

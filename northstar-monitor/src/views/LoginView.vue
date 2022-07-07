@@ -35,7 +35,10 @@ export default {
     async login() {
       await loginApi.login(this.userForm.name, this.userForm.pass)
       console.log('登陆成功')
-      this.$router.push({ name: 'mktgateway' })
+      this.$router.push({
+        name: 'mktgateway',
+        query: { auth: window.btoa(`${this.userForm.name}:${this.userForm.pass}`) }
+      })
     },
     resetForm() {}
   }

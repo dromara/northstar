@@ -1,7 +1,5 @@
 package tech.quantit.northstar.main.restful;
 
-import java.util.Optional;
-
 import javax.servlet.http.HttpSession;
 
 import org.apache.commons.lang3.StringUtils;
@@ -19,6 +17,7 @@ import tech.quantit.northstar.common.constant.Constants;
 import tech.quantit.northstar.common.exception.AuthenticationException;
 import tech.quantit.northstar.common.model.NsUser;
 import tech.quantit.northstar.common.model.ResultBean;
+import tech.quantit.northstar.main.config.UserInfo;
 
 /**
  * 身份认证
@@ -30,8 +29,8 @@ import tech.quantit.northstar.common.model.ResultBean;
 @RequestMapping("/northstar/auth")
 public class AuthenticationController implements InitializingBean{
 	
-	protected String userId;
-	protected String password;
+	@Autowired
+	protected UserInfo userInfo;
 	
 	@Autowired
 	protected HttpSession session;
@@ -40,7 +39,7 @@ public class AuthenticationController implements InitializingBean{
 	public ResultBean<String> doAuth(@RequestBody NsUser user) {
 		Assert.hasText(user.getUserName(), "账户不能为空");
 		Assert.hasText(user.getPassword(), "密码不能为空");
-		if(StringUtils.equals(user.getUserName(), userId) && StringUtils.equals(user.getPassword(), password)) {
+		if(StringUtils.equals(user.getUserName(), userInfo.getUserId()) && StringUtils.equals(user.getPassword(), userInfo.getPassword())) {
 			session.setAttribute(Constants.KEY_USER, user);
 			return new ResultBean<>("OK");
 		}
@@ -54,10 +53,6 @@ public class AuthenticationController implements InitializingBean{
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		String user = System.getenv(Constants.NS_USER);
-		String pwd = System.getenv(Constants.NS_PWD);
-		userId = Optional.ofNullable(user).orElse(Constants.DEFAULT_USERID);
-		password = Optional.ofNullable(pwd).orElse(Constants.DEFAULT_PASSWORD);
-		log.info("监控台登陆信息：{} / {}", userId, password);
+		log.info("监控台登陆信息：{} / {}", userInfo.getUserId(), userInfo.getPassword());
 	}
 }
