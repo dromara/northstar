@@ -9,8 +9,8 @@ import tech.quantit.northstar.common.constant.SignalOperation;
 import tech.quantit.northstar.common.model.TimeSeriesValue;
 import tech.quantit.northstar.strategy.api.constant.PriceType;
 import tech.quantit.northstar.strategy.api.indicator.Indicator;
-import tech.quantit.northstar.strategy.api.indicator.TimeSeriesUnaryOperator;
 import tech.quantit.northstar.strategy.api.indicator.Indicator.ValueType;
+import tech.quantit.northstar.strategy.api.indicator.TimeSeriesUnaryOperator;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.ContractField;
 
@@ -66,45 +66,83 @@ public interface IModuleStrategyContext {
 	 */
 	Logger getLogger();
 	/**
-	 * 创建指标
-	 * @param indicatorName
-	 * @param bindedUnifiedSymbol
-	 * @param indicatorLength
-	 * @param valTypeOfBar
-	 * @param updateValPublisher
+	 * 创建指标	
+	 * @param indicatorName			指标名称
+	 * @param bindedUnifiedSymbol	绑定合约
+	 * @param indicatorLength		指标缓存长度
+	 * @param indicatorFunction		计算函数 
 	 * @return
 	 */
 	Indicator newIndicator(String indicatorName, String bindedUnifiedSymbol, int indicatorLength,
 			Function<BarField, TimeSeriesValue> indicatorFunction);
 	/**
-	 * 创建指标（采用默认长度与收盘价取值）
-	 * @param indicatorName
-	 * @param bindedUnifiedSymbol
-	 * @param indicatorLength
-	 * @param valTypeOfBar
-	 * @param updateValPublisher
+	 * 创建指标（采用默认长度16与收盘价取值）
+	 * @param indicatorName			指标名称
+	 * @param bindedUnifiedSymbol	绑定合约
+	 * @param indicatorFunction		计算函数 
 	 * @return
 	 */
 	Indicator newIndicator(String indicatorName, String bindedUnifiedSymbol, Function<BarField, TimeSeriesValue> indicatorFunction);
 	/**
 	 * 创建指标
-	 * @param indicatorName
-	 * @param bindedUnifiedSymbol
-	 * @param indicatorLength
-	 * @param valTypeOfBar
-	 * @param updateValPublisher
+	 * @param indicatorName			指标名称
+	 * @param bindedUnifiedSymbol	绑定合约
+	 * @param indicatorLength		指标缓存长度
+	 * @param valTypeOfBar			取值类型
+	 * @param indicatorFunction		计算函数
 	 * @return
 	 */
 	Indicator newIndicator(String indicatorName, String bindedUnifiedSymbol, int indicatorLength, ValueType valTypeOfBar,
 			TimeSeriesUnaryOperator indicatorFunction);
 	/**
-	 * 创建指标（采用默认长度与收盘价取值）
-	 * @param indicatorName
-	 * @param bindedUnifiedSymbol
-	 * @param indicatorLength
-	 * @param valTypeOfBar
-	 * @param updateValPublisher
+	 * 创建指标（采用默认长度16与收盘价取值）
+	 * @param indicatorName			指标名称
+	 * @param bindedUnifiedSymbol	绑定合约
+	 * @param indicatorFunction		计算函数
 	 * @return
 	 */
 	Indicator newIndicator(String indicatorName, String bindedUnifiedSymbol, TimeSeriesUnaryOperator indicatorFunction);
+	/**
+	 *  创建不同周期的指标
+	 * @param numOfMinPerPeriod		周期分钟数
+	 * @param indicatorName			指标名称
+	 * @param bindedUnifiedSymbol	绑定合约
+	 * @param indicatorLength		指标缓存长度
+	 * @param indicatorFunction		计算函数
+	 * @return
+	 */
+	Indicator newIndicatorAtPeriod(int numOfMinPerPeriod, String indicatorName, String bindedUnifiedSymbol, int indicatorLength, 
+			Function<BarField, TimeSeriesValue> indicatorFunction);
+	/**
+	 * 创建不同周期的指标（采用默认长度16与收盘价取值）
+	 * @param numOfMinPerPeriod		周期分钟数
+	 * @param indicatorName			指标名称
+	 * @param bindedUnifiedSymbol	绑定合约
+	 * @param indicatorFunction		计算函数
+	 * @return
+	 */
+	Indicator newIndicatorAtPeriod(int numOfMinPerPeriod, String indicatorName, String bindedUnifiedSymbol, 
+			Function<BarField, TimeSeriesValue> indicatorFunction);
+	/**
+	 *  创建不同周期的指标
+	 * @param numOfMinPerPeriod		周期分钟数
+	 * @param indicatorName			指标名称
+	 * @param bindedUnifiedSymbol	绑定合约
+	 * @param indicatorLength		指标缓存长度
+	 * @param valTypeOfBar			取值类型
+	 * @param indicatorFunction		计算函数
+	 * @return
+	 */
+	Indicator newIndicatorAtPeriod(int numOfMinPerPeriod, String indicatorName, String bindedUnifiedSymbol, int indicatorLength, 
+			ValueType valTypeOfBar, TimeSeriesUnaryOperator indicatorFunction);
+	/**
+	 * 创建不同周期的指标（采用默认长度16与收盘价取值）
+	 * @param numOfMinPerPeriod		周期分钟数
+	 * @param indicatorName			指标名称
+	 * @param bindedUnifiedSymbol	绑定合约
+	 * @param indicatorFunction		计算函数
+	 * @return
+	 */
+	Indicator newIndicatorAtPeriod(int numOfMinPerPeriod, String indicatorName, String bindedUnifiedSymbol, 
+			TimeSeriesUnaryOperator indicatorFunction);
 }

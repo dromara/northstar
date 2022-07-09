@@ -1,5 +1,6 @@
 package tech.quantit.northstar.domain.module;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -12,20 +13,25 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import tech.quantit.northstar.common.constant.SignalOperation;
 import tech.quantit.northstar.common.exception.TradeException;
+import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
+import tech.quantit.northstar.common.model.TimeSeriesValue;
 import tech.quantit.northstar.gateway.api.TradeGateway;
 import tech.quantit.northstar.strategy.api.ClosingStrategy;
 import tech.quantit.northstar.strategy.api.IModule;
 import tech.quantit.northstar.strategy.api.IModuleAccountStore;
 import tech.quantit.northstar.strategy.api.TradeStrategy;
 import tech.quantit.northstar.strategy.api.constant.PriceType;
+import tech.quantit.northstar.strategy.api.indicator.TimeSeriesUnaryOperator;
 import test.common.TestFieldFactory;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
+import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.GatewaySettingField;
 import xyz.redtorch.pb.CoreField.PositionField;
@@ -90,5 +96,43 @@ class ModuleContextTest {
 		verify(gateway, times(1)).submitOrder(any());
 	}
 
-
+	@Test
+	void testNewIndicator() {
+		ctx.newIndicator("testIndicator", contract.getUnifiedSymbol(), new TimeSeriesUnaryOperator() {
+			@Override
+			public TimeSeriesValue apply(TimeSeriesValue t) {
+				return t;
+			}
+		});
+		
+		ctx.newIndicatorAtPeriod(5, "testIndicator", contract.getUnifiedSymbol(), new TimeSeriesUnaryOperator() {
+			@Override
+			public TimeSeriesValue apply(TimeSeriesValue t) {
+				return t;
+			}
+		});
+		
+		ctx.newIndicator("testIndicator2", contract.getUnifiedSymbol(), new Function<>() {
+			
+			@Override
+			public TimeSeriesValue apply(BarField bar) {
+				return new TimeSeriesValue(bar.getClosePrice(), bar.getActionTimestamp());
+			}
+		});
+		
+		ctx.newIndicatorAtPeriod(5, "testIndicator2", contract.getUnifiedSymbol(), new Function<>() {
+			
+			@Override
+			public TimeSeriesValue apply(BarField bar) {
+				return new TimeSeriesValue(bar.getClosePrice(), bar.getActionTimestamp());
+			}
+		});
+		
+		ModuleRuntimeDescription mrd = ctx.getRuntimeDescription(true);
+		assertThat(mrd.getIndicatorMap()).containsKey("testIndicator");
+		assertThat(mrd.getIndicatorMap()).containsKey("testIndicator2");
+		assertThat(mrd.getIndicatorMap()).containsKey("testIndicator_5M");
+		assertThat(mrd.getIndicatorMap()).containsKey("testIndicator2_5M");
+	}
+	
 }

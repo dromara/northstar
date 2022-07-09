@@ -4,29 +4,25 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * 使用四位二进制数表达六个状态
- * 
- * 反手本质上是两组运作的叠加，例如反手多=多平+多开
- * 因此由该二进制编码可得规律，并总结成枚举方法如下
- * 
+ *  
  * @author KevinHuangwl
  *
  */
 public enum SignalOperation {
 	/**
-	 * 多开
+	 * 多开，发出多单委托，结果为多头持仓+1；
 	 */
 	BUY_OPEN("多开"),
 	/**
-	 * 空开
+	 * 空开，发出空单委托，结果为空头持仓+1；
 	 */
 	SELL_OPEN("空开"),
 	/**
-	 * 多平
+	 * 多平，发出多单委托，结果为空头持仓-1；
 	 */
 	BUY_CLOSE("多平"),
 	/**
-	 * 空平
+	 * 空平，发出空单委托，结果为多头持仓-1；
 	 */
 	SELL_CLOSE("空平");
 	

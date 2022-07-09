@@ -25,7 +25,7 @@ import xyz.redtorch.pb.CoreField.TickField;
 public class IndicatorSampleStrategy extends AbstractStrategy	// 为了简化代码，引入一个通用的基础抽象类
 	implements TradeStrategy{
 
-	protected static final String NAME = "示例指标策略";
+	protected static final String NAME = "指标示例策略";
 	
 	private InitParams params;	// 策略的参数配置信息
 	

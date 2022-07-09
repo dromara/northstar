@@ -5,11 +5,14 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneOffset;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -85,8 +88,8 @@ public class ModuleContext implements IModuleContext{
 	/* unifiedSymbol -> contract */
 	private Map<String, ContractField> contractMap = new HashMap<>();
 	
-	/* unifiedSymbol -> barMerger */
-	private Map<String, BarMerger> contractBarMergerMap = new HashMap<>();
+	private Set<String> bindedSymbolSet = new HashSet<>();
+	private Set<BarMerger> contractBarMergerSet = new HashSet<>();
 	
 	/* unifiedSymbol -> tick */
 	private Map<String, TickField> latestTickMap = new HashMap<>();
@@ -99,8 +102,6 @@ public class ModuleContext implements IModuleContext{
 	
 	private String tradingDay = "";
 	
-	private Consumer<BarField> barMergingCallback;
-	
 	private int numOfMinsPerBar;
 	
 	private DealCollector dealCollector;
@@ -109,7 +110,29 @@ public class ModuleContext implements IModuleContext{
 	
 	private Consumer<ModuleDealRecord> onDealCallback;
 	
-	private IndicatorFactory indicatorFactory = new IndicatorFactory();
+	private final IndicatorFactory indicatorFactory = new IndicatorFactory();	// 基础周期指标工厂
+	
+	private final IndicatorFactory periodicIndicatorFactory = new IndicatorFactory();	// 额外周期指标工厂
+	
+	private final AtomicInteger bufSize = new AtomicInteger(0);
+	
+	private Consumer<BarField> barMergingCallback = bar -> {
+		indicatorFactory.getIndicatorMap().entrySet().stream().forEach(e -> {
+			Indicator indicator = e.getValue();
+			indicator.onBar(bar);
+			if(indicatorValBufQMap.get(e.getKey()).size() >= bufSize.intValue()) {
+				indicatorValBufQMap.get(e.getKey()).poll();
+			}
+			if(indicator.isReady()) {					
+				indicatorValBufQMap.get(e.getKey()).offer(indicator.valueWithTime(0));
+			}
+		});
+		tradeStrategy.onBar(bar, module.isEnabled());
+		if(barBufQMap.get(bar.getUnifiedSymbol()).size() >= bufSize.intValue()) {
+			barBufQMap.get(bar.getUnifiedSymbol()).poll();
+		}
+		barBufQMap.get(bar.getUnifiedSymbol()).offer(bar);
+	};
 	
 	private final String moduleName;
 	
@@ -126,27 +149,7 @@ public class ModuleContext implements IModuleContext{
 		this.dealCollector = dealCollector;
 		this.onRuntimeChangeCallback = onRuntimeChangeCallback;
 		this.onDealCallback = onDealCallback;
-		this.barMergingCallback = bar -> {
-			indicatorFactory.getIndicatorMap().entrySet().stream().forEach(e -> {
-				Indicator indicator = e.getValue();
-				indicator.onBar(bar);
-				if(!indicatorValBufQMap.containsKey(e.getKey())) {
-					indicatorValBufQMap.put(e.getKey(), new LinkedList<>());
-				}
-				if(indicatorValBufQMap.get(e.getKey()).size() >= bufSize) {
-					indicatorValBufQMap.get(e.getKey()).poll();
-				}
-				if(indicator.isReady()) {					
-					indicatorValBufQMap.get(e.getKey()).offer(indicator.valueWithTime(0));
-				}
-			});
-			tradeStrategy.onBar(bar, module.isEnabled());
-			if(barBufQMap.get(bar.getUnifiedSymbol()).size() >= bufSize) {
-				barBufQMap.get(bar.getUnifiedSymbol()).poll();
-			}
-			barBufQMap.get(bar.getUnifiedSymbol()).offer(bar);
-		};
-		tradeStrategy.setContext(this);
+		this.bufSize.set(bufSize);
 	}
 
 	@Override
@@ -185,14 +188,26 @@ public class ModuleContext implements IModuleContext{
 			mad.setBarDataMap(barBufQMap.entrySet().stream()
 					.collect(Collectors.toMap(Map.Entry::getKey, 
 							e -> e.getValue().stream().map(BarField::toByteArray).toList())));
-			mad.setIndicatorMap(indicatorFactory.getIndicatorMap().entrySet().stream()
+			Map<String, IndicatorData> indicatorMap = new HashMap<>();
+			indicatorFactory.getIndicatorMap().entrySet().stream()
 					.filter(e -> indicatorValBufQMap.containsKey(e.getKey()))
-					.collect(Collectors.toMap(Map.Entry::getKey,
-							e -> IndicatorData.builder()
+					.forEach(e -> 
+						indicatorMap.put(e.getKey(), IndicatorData.builder()
 								.unifiedSymbol(e.getValue().bindedUnifiedSymbol())
 								.type(e.getValue().getType())
 								.values(indicatorValBufQMap.get(e.getKey()).stream().toList())
-								.build())));
+								.build())
+					);
+			periodicIndicatorFactory.getIndicatorMap().entrySet().stream()
+				.filter(e -> indicatorValBufQMap.containsKey(e.getKey()))
+				.forEach(e -> 
+					indicatorMap.put(e.getKey(), IndicatorData.builder()
+							.unifiedSymbol(e.getValue().bindedUnifiedSymbol())
+							.type(e.getValue().getType())
+							.values(indicatorValBufQMap.get(e.getKey()).stream().toList())
+							.build())
+				);
+			mad.setIndicatorMap(indicatorMap);
 		}
 		return mad;
 	}
@@ -280,7 +295,7 @@ public class ModuleContext implements IModuleContext{
 	/* 此处收到的TICK数据是所有订阅的数据，需要过滤 */
 	@Override
 	public void onTick(TickField tick) {
-		if(!contractBarMergerMap.containsKey(tick.getUnifiedSymbol())) {
+		if(!bindedSymbolSet.contains(tick.getUnifiedSymbol())) {
 			return;
 		}
 		if(!StringUtils.equals(tradingDay, tick.getTradingDay())) {
@@ -294,10 +309,10 @@ public class ModuleContext implements IModuleContext{
 	/* 此处收到的BAR数据是所有订阅的数据，需要过滤 */
 	@Override
 	public void onBar(BarField bar) {
-		if(!contractBarMergerMap.containsKey(bar.getUnifiedSymbol())) {
+		if(!bindedSymbolSet.contains(bar.getUnifiedSymbol())) {
 			return;
 		}
-		contractBarMergerMap.get(bar.getUnifiedSymbol()).updateBar(bar);
+		contractBarMergerSet.forEach(barMerger -> barMerger.updateBar(bar));
 	}
 	
 	/* 此处收到的ORDER数据是所有订单回报，需要过滤 */
@@ -341,6 +356,7 @@ public class ModuleContext implements IModuleContext{
 	@Override
 	public void setModule(IModule module) {
 		this.module = module;
+		tradeStrategy.setContext(this);
 	}
 
 	@Override
@@ -354,7 +370,8 @@ public class ModuleContext implements IModuleContext{
 			gatewayMap.put(c, gateway);
 			contractMap.put(c.getUnifiedSymbol(), c);
 			barBufQMap.put(c.getUnifiedSymbol(), new LinkedList<>());
-			contractBarMergerMap.put(c.getUnifiedSymbol(), new BarMerger(numOfMinsPerBar, c, barMergingCallback));
+			contractBarMergerSet.add(new BarMerger(numOfMinsPerBar, c, barMergingCallback));
+			bindedSymbolSet.add(c.getUnifiedSymbol());
 		}
 	}
 
@@ -370,6 +387,18 @@ public class ModuleContext implements IModuleContext{
 	public ModuleState getState() {
 		return accStore.getModuleState();
 	}
+	
+	@Override
+	public boolean isOrderWaitTimeout(String originOrderId, long timeout) {
+		if(!latestTickMap.containsKey(originOrderId) || !orderMap.containsKey(originOrderId)) {
+			return false;
+		}
+		
+		TickField lastTick = latestTickMap.get(originOrderId);
+		OrderField order = orderMap.get(originOrderId);
+		LocalDateTime ldt = LocalDateTime.of(LocalDate.parse(order.getOrderDate(), DateTimeConstant.D_FORMAT_INT_FORMATTER), LocalTime.parse(order.getOrderTime(), DateTimeConstant.T_FORMAT_FORMATTER));
+		return lastTick.getActionTimestamp() - ldt.toInstant(ZoneOffset.ofHours(8)).toEpochMilli() > timeout;
+	}
 
 	@Override
 	public Logger getLogger() {
@@ -379,6 +408,7 @@ public class ModuleContext implements IModuleContext{
 	@Override
 	public Indicator newIndicator(String indicatorName, String bindedUnifiedSymbol, int indicatorLength,
 			ValueType valTypeOfBar, TimeSeriesUnaryOperator valueUpdateHandler) {
+		indicatorValBufQMap.put(indicatorName, new LinkedList<>());
 		return indicatorFactory.newIndicator(indicatorName, bindedUnifiedSymbol, indicatorLength, valTypeOfBar, valueUpdateHandler);
 	}
 
@@ -391,6 +421,7 @@ public class ModuleContext implements IModuleContext{
 	@Override
 	public Indicator newIndicator(String indicatorName, String bindedUnifiedSymbol, int indicatorLength,
 			Function<BarField, TimeSeriesValue> valueUpdateHandler) {
+		indicatorValBufQMap.put(indicatorName, new LinkedList<>());
 		return indicatorFactory.newIndicator(indicatorName, bindedUnifiedSymbol, indicatorLength, valueUpdateHandler);
 	}
 
@@ -399,17 +430,59 @@ public class ModuleContext implements IModuleContext{
 			Function<BarField, TimeSeriesValue> valueUpdateHandler) {
 		return newIndicator(indicatorName, bindedUnifiedSymbol, 16, valueUpdateHandler);
 	}
+	
+	@Override
+	public Indicator newIndicatorAtPeriod(int numOfMinPerPeriod, String indicatorName, String bindedUnifiedSymbol,
+			int indicatorLength, Function<BarField, TimeSeriesValue> indicatorFunction) {
+		if(numOfMinPerPeriod < 2) {
+			throw new IllegalStateException("非法指标周期，期望周期数大于1。实际: " + numOfMinPerPeriod);
+		}
+		final String indicatorNameWithPeriod = String.format("%s_%dM", indicatorName, numOfMinPerPeriod);
+		indicatorValBufQMap.put(indicatorNameWithPeriod, new LinkedList<>());
+		contractBarMergerSet.add(new BarMerger(numOfMinPerPeriod, contractMap.get(bindedUnifiedSymbol), bar -> {
+			Indicator indicator = periodicIndicatorFactory.getIndicatorMap().get(indicatorNameWithPeriod);
+			indicator.onBar(bar);
+			if(indicatorValBufQMap.get(indicatorNameWithPeriod).size() >= bufSize.intValue()) {
+				indicatorValBufQMap.get(indicatorNameWithPeriod).poll();
+			}
+			if(indicator.isReady()) {					
+				indicatorValBufQMap.get(indicatorNameWithPeriod).offer(indicator.valueWithTime(0));
+			}
+		}));
+		return periodicIndicatorFactory.newIndicator(indicatorNameWithPeriod, bindedUnifiedSymbol, indicatorLength, indicatorFunction);
+	}
 
 	@Override
-	public boolean isOrderWaitTimeout(String originOrderId, long timeout) {
-		if(!latestTickMap.containsKey(originOrderId) || !orderMap.containsKey(originOrderId)) {
-			return false;
+	public Indicator newIndicatorAtPeriod(int numOfMinPerPeriod, String indicatorName, String bindedUnifiedSymbol,
+			Function<BarField, TimeSeriesValue> indicatorFunction) {
+		return newIndicatorAtPeriod(numOfMinPerPeriod, indicatorName, bindedUnifiedSymbol, 16, indicatorFunction);
+	}
+
+	@Override
+	public Indicator newIndicatorAtPeriod(int numOfMinPerPeriod, String indicatorName, String bindedUnifiedSymbol,
+			int indicatorLength, ValueType valueTypeOfBar, TimeSeriesUnaryOperator indicatorFunction) {
+		if(numOfMinPerPeriod < 2) {
+			throw new IllegalStateException("非法指标周期，期望周期数大于1。实际: " + numOfMinPerPeriod);
 		}
-		
-		TickField lastTick = latestTickMap.get(originOrderId);
-		OrderField order = orderMap.get(originOrderId);
-		LocalDateTime ldt = LocalDateTime.of(LocalDate.parse(order.getOrderDate(), DateTimeConstant.D_FORMAT_INT_FORMATTER), LocalTime.parse(order.getOrderTime(), DateTimeConstant.T_FORMAT_FORMATTER));
-		return lastTick.getActionTimestamp() - ldt.toInstant(ZoneOffset.ofHours(8)).toEpochMilli() > timeout;
+		final String indicatorNameWithPeriod = String.format("%s_%dM", indicatorName, numOfMinPerPeriod);
+		indicatorValBufQMap.put(indicatorNameWithPeriod, new LinkedList<>());
+		contractBarMergerSet.add(new BarMerger(numOfMinPerPeriod, contractMap.get(bindedUnifiedSymbol), bar -> {
+			Indicator indicator = periodicIndicatorFactory.getIndicatorMap().get(indicatorNameWithPeriod);
+			indicator.onBar(bar);
+			if(indicatorValBufQMap.get(indicatorNameWithPeriod).size() >= bufSize.intValue()) {
+				indicatorValBufQMap.get(indicatorNameWithPeriod).poll();
+			}
+			if(indicator.isReady()) {					
+				indicatorValBufQMap.get(indicatorNameWithPeriod).offer(indicator.valueWithTime(0));
+			}
+		}));
+		return periodicIndicatorFactory.newIndicator(indicatorNameWithPeriod, bindedUnifiedSymbol, indicatorLength, valueTypeOfBar, indicatorFunction);
+	}
+
+	@Override
+	public Indicator newIndicatorAtPeriod(int numOfBarPerPeriod, String indicatorName, String bindedUnifiedSymbol,
+			TimeSeriesUnaryOperator indicatorFunction) {
+		return newIndicatorAtPeriod(numOfBarPerPeriod, indicatorName, bindedUnifiedSymbol, 16, ValueType.CLOSE, indicatorFunction);
 	}
 
 }
