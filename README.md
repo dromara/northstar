@@ -87,7 +87,7 @@ C:\
 ### 程序包准备
 直接放到上述提及的 northstar-dist 目录
 ```
-https://gitee.com/dromara/northstar/attach_files/1115939/download/northstar-4.0.jar
+https://gitee.com/dromara/northstar/attach_files/1122241/download/northstar-4.0.jar
 ```
 
 ### 启动程序
