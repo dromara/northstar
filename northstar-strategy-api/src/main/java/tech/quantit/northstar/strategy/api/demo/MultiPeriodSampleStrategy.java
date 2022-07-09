@@ -29,17 +29,17 @@ public class MultiPeriodSampleStrategy extends AbstractStrategy	// 为了简化�
 	
 	private InitParams params;	// 策略的参数配置信息
 	
-	private Indicator fastLine1;	// 1分钟快线
-	private Indicator slowLine1;	// 1分钟慢线
-	private Indicator fastLine15;	// 15分钟快线
-	private Indicator slowLine15;	// 15分钟慢线 
+	private Indicator fastLine1;	// 主周期快线
+	private Indicator slowLine1;	// 主周期慢线
+	private Indicator fastLine2;	// 参考周期快线
+	private Indicator slowLine2;	// 参考周期慢线 
 	
 	@Override
 	protected void onBar(BarField bar) {
 		log.debug("{} K线数据： 开 [{}], 高 [{}], 低 [{}], 收 [{}]", 
 				bar.getUnifiedSymbol(), bar.getOpenPrice(), bar.getHighPrice(), bar.getLowPrice(), bar.getClosePrice());
 		// 确保指标已经准备好再开始交易
-		boolean allLineReady = fastLine1.isReady() && slowLine1.isReady() && fastLine15.isReady() && slowLine15.isReady();
+		boolean allLineReady = fastLine1.isReady() && slowLine1.isReady() && fastLine2.isReady() && slowLine2.isReady();
 		if(!allLineReady) {
 			log.debug("指标未准备就绪");
 			return;
@@ -74,22 +74,22 @@ public class MultiPeriodSampleStrategy extends AbstractStrategy	// 为了简化�
 	}
 
 	private boolean shouldBuy() {
-		return fastLine1.value(0) > slowLine1.value(0) && this.fastLine15.value(0) > this.slowLine15.value(0);
+		return fastLine1.value(0) > slowLine1.value(0) && this.fastLine2.value(0) > this.slowLine2.value(0);
 	}
 	
 	private boolean shouldSell() {
-		return fastLine1.value(0) < slowLine1.value(0) && this.fastLine15.value(0) < this.slowLine15.value(0);
+		return fastLine1.value(0) < slowLine1.value(0) && this.fastLine2.value(0) < this.slowLine2.value(0);
 	}
 	
 	@Override
 	protected void initIndicators() {
-		// 1分钟周期线
+		// 主周期线
 		this.fastLine1 = ctx.newIndicator("快线", params.indicatorSymbol, MA(params.fast));
 		this.slowLine1 = ctx.newIndicator("慢线", params.indicatorSymbol, MA(params.slow));
 		
-		// 15分钟周期线
-		this.fastLine15 = ctx.newIndicatorAtPeriod(15, "快线", params.indicatorSymbol, MA(params.fast));
-		this.slowLine15 = ctx.newIndicatorAtPeriod(15, "慢线", params.indicatorSymbol, MA(params.slow));
+		// 参考周期线
+		this.fastLine2 = ctx.newIndicatorAtPeriod(params.refPeriod, "快线", params.indicatorSymbol, MA(params.fast));
+		this.slowLine2 = ctx.newIndicatorAtPeriod(params.refPeriod, "慢线", params.indicatorSymbol, MA(params.slow));
 	}
 	
 	@Override
@@ -113,6 +113,8 @@ public class MultiPeriodSampleStrategy extends AbstractStrategy	// 为了简化�
 		@Setting(value="慢线周期", order=2)		
 		private int slow;
 		
+		@Setting(value="参考周期", order=10)
+		private int refPeriod;
 	}
 
 }

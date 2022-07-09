@@ -434,8 +434,8 @@ public class ModuleContext implements IModuleContext{
 	@Override
 	public Indicator newIndicatorAtPeriod(int numOfMinPerPeriod, String indicatorName, String bindedUnifiedSymbol,
 			int indicatorLength, Function<BarField, TimeSeriesValue> indicatorFunction) {
-		if(numOfMinPerPeriod < 2) {
-			throw new IllegalStateException("非法指标周期，期望周期数大于1。实际: " + numOfMinPerPeriod);
+		if(numOfMinPerPeriod < 1) {
+			throw new IllegalStateException("非法指标周期，期望周期数大于0。实际: " + numOfMinPerPeriod);
 		}
 		final String indicatorNameWithPeriod = String.format("%s_%dM", indicatorName, numOfMinPerPeriod);
 		indicatorValBufQMap.put(indicatorNameWithPeriod, new LinkedList<>());
@@ -461,8 +461,8 @@ public class ModuleContext implements IModuleContext{
 	@Override
 	public Indicator newIndicatorAtPeriod(int numOfMinPerPeriod, String indicatorName, String bindedUnifiedSymbol,
 			int indicatorLength, ValueType valueTypeOfBar, TimeSeriesUnaryOperator indicatorFunction) {
-		if(numOfMinPerPeriod < 2) {
-			throw new IllegalStateException("非法指标周期，期望周期数大于1。实际: " + numOfMinPerPeriod);
+		if(numOfMinPerPeriod < 1) {
+			throw new IllegalStateException("非法指标周期，期望周期数大于0。实际: " + numOfMinPerPeriod);
 		}
 		final String indicatorNameWithPeriod = String.format("%s_%dM", indicatorName, numOfMinPerPeriod);
 		indicatorValBufQMap.put(indicatorNameWithPeriod, new LinkedList<>());
