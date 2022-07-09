@@ -153,7 +153,7 @@ public class ModuleContext implements IModuleContext{
 	}
 
 	@Override
-	public ModuleRuntimeDescription getRuntimeDescription(boolean fullDescription) {
+	public synchronized ModuleRuntimeDescription getRuntimeDescription(boolean fullDescription) {
 		Map<String, ModuleAccountRuntimeDescription> accMap = new HashMap<>();
 		for(TradeGateway gateway : gatewayMap.values()) {
 			String gatewayId = gateway.getGatewaySetting().getGatewayId();
@@ -213,7 +213,7 @@ public class ModuleContext implements IModuleContext{
 	}
 
 	@Override
-	public String submitOrderReq(ContractField contract, SignalOperation operation,
+	public synchronized String submitOrderReq(ContractField contract, SignalOperation operation,
 			PriceType priceType, int volume, double price) {
 		if(!gatewayMap.containsKey(contract)) {
 			throw new NoSuchElementException(String.format("找不到合约 [%s] 对应网关", contract.getUnifiedSymbol()));
@@ -277,7 +277,7 @@ public class ModuleContext implements IModuleContext{
 	}
 
 	@Override
-	public void cancelOrder(String originOrderId) {
+	public synchronized void cancelOrder(String originOrderId) {
 		log.debug("模组 [{}] 撤单：{}", moduleName, originOrderId);
 		if(!orderMap.containsKey(originOrderId)) {
 			throw new NoSuchElementException("找不到订单：" + originOrderId);
@@ -294,7 +294,7 @@ public class ModuleContext implements IModuleContext{
 
 	/* 此处收到的TICK数据是所有订阅的数据，需要过滤 */
 	@Override
-	public void onTick(TickField tick) {
+	public synchronized void onTick(TickField tick) {
 		if(!bindedSymbolSet.contains(tick.getUnifiedSymbol())) {
 			return;
 		}
@@ -308,7 +308,7 @@ public class ModuleContext implements IModuleContext{
 	
 	/* 此处收到的BAR数据是所有订阅的数据，需要过滤 */
 	@Override
-	public void onBar(BarField bar) {
+	public synchronized void onBar(BarField bar) {
 		if(!bindedSymbolSet.contains(bar.getUnifiedSymbol())) {
 			return;
 		}
@@ -317,7 +317,7 @@ public class ModuleContext implements IModuleContext{
 	
 	/* 此处收到的ORDER数据是所有订单回报，需要过滤 */
 	@Override
-	public void onOrder(OrderField order) {
+	public synchronized void onOrder(OrderField order) {
 		if(!orderMap.containsKey(order.getOriginOrderId())) {
 			return;
 		}
@@ -330,7 +330,7 @@ public class ModuleContext implements IModuleContext{
 
 	/* 此处收到的TRADE数据是所有成交回报，需要过滤 */
 	@Override
-	public void onTrade(TradeField trade) {
+	public synchronized void onTrade(TradeField trade) {
 		if(!orderMap.containsKey(trade.getOriginOrderId()) && !StringUtils.equals(trade.getOriginOrderId(), Constants.MOCK_ORDER_ID)) {
 			return;
 		}
@@ -365,7 +365,7 @@ public class ModuleContext implements IModuleContext{
 	}
 
 	@Override
-	public void bindGatewayContracts(TradeGateway gateway, List<ContractField> contracts) {
+	public synchronized void bindGatewayContracts(TradeGateway gateway, List<ContractField> contracts) {
 		for(ContractField c : contracts) {			
 			gatewayMap.put(c, gateway);
 			contractMap.put(c.getUnifiedSymbol(), c);
@@ -389,7 +389,7 @@ public class ModuleContext implements IModuleContext{
 	}
 	
 	@Override
-	public boolean isOrderWaitTimeout(String originOrderId, long timeout) {
+	public synchronized boolean isOrderWaitTimeout(String originOrderId, long timeout) {
 		if(!latestTickMap.containsKey(originOrderId) || !orderMap.containsKey(originOrderId)) {
 			return false;
 		}
