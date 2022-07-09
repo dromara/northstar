@@ -60,26 +60,34 @@
         </template>
       </el-table-column>
 
-      <el-table-column label="当前状态/切换" prop="enabled" align="center" width="100px">
+      <el-table-column label="当前状态" prop="enabled" align="center" width="90px">
         <template slot-scope="scope">
-          <el-popconfirm
-            v-if="scope.row.runtime.enabled"
-            class="ml-10"
-            title="确定停用吗？"
-            @confirm="toggle(scope.$index, scope.row)"
-          >
-            <el-button type="success" slot="reference" size="mini">启用</el-button>
-          </el-popconfirm>
-          <el-button v-else type="danger" @click.native="toggle(scope.$index, scope.row)">
-            停用
-          </el-button>
+          <span :class="scope.row.runtime.enabled ? 'color-green' : 'color-red'">
+            {{ scope.row.runtime.enabled ? '运行中' : '已停用' }}
+          </span>
         </template>
       </el-table-column>
-      <el-table-column align="center" width="240px">
+      <el-table-column align="center" width="320px">
         <template slot="header">
           <el-button size="mini" type="primary" @click="handleCreate">新建</el-button>
         </template>
         <template slot-scope="scope">
+          <el-popconfirm
+            v-if="scope.row.runtime.enabled"
+            class="mr-10"
+            title="确定停用吗？"
+            @confirm="toggle(scope.$index, scope.row)"
+          >
+            <el-button type="danger" slot="reference"> 停用 </el-button>
+          </el-popconfirm>
+          <el-button
+            v-if="!scope.row.runtime.enabled"
+            type="success"
+            size="mini"
+            @click.native="toggle(scope.$index, scope.row)"
+          >
+            启用
+          </el-button>
           <el-button size="mini" @click="handlePerf(scope.$index, scope.row)">运行状态</el-button>
           <el-button size="mini" @click="handleRow(scope.$index, scope.row)">{{
             scope.row.runtime.enabled ? '查看' : '修改'
@@ -89,13 +97,9 @@
             title="确定移除吗？"
             @confirm="handleDelete(scope.$index, scope.row)"
           >
-            <el-button
-              :disabled="scope.row.runtime.enabled"
-              slot="reference"
-              size="mini"
-              type="danger"
-              >删除</el-button
-            >
+            <el-button v-if="!scope.row.runtime.enabled" slot="reference" size="mini" type="danger">
+              删除
+            </el-button>
           </el-popconfirm>
         </template>
       </el-table-column>

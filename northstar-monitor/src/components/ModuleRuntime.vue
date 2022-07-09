@@ -16,7 +16,14 @@
         <div class="description-wrapper">
           <el-descriptions class="margin-top" title="模组信息" :column="3">
             <template slot="extra">
-              <el-button class="compact mb-10" icon="el-icon-refresh" @click="refresh"
+              <el-switch
+                v-model="isManualUpdate"
+                inactive-text="自动刷新"
+                active-color="#D8DBE1"
+                inactive-color="#f7c139"
+              >
+              </el-switch>
+              <el-button class="compact mb-10 ml-10" icon="el-icon-refresh" @click="refresh"
                 >刷新数据</el-button
               >
               <el-button
@@ -247,7 +254,9 @@ export default {
       unifiedSymbolOfChart: '',
       paneId: '',
       indicator: '',
-      indicatorMap: {}
+      indicatorMap: {},
+      timer: '',
+      isManualUpdate: true
     }
   },
   filters: {
@@ -264,6 +273,17 @@ export default {
           this.initChart()
           this.refresh()
         }, 100)
+      }
+    },
+    isManualUpdate(val) {
+      if (val) {
+        clearTimeout(this.timer)
+      } else {
+        const autoUpdate = () => {
+          this.refresh()
+          this.timer = setTimeout(autoUpdate, 5000)
+        }
+        this.timer = setTimeout(autoUpdate, 5000)
       }
     },
     moduleTab: function (val) {
@@ -283,7 +303,9 @@ export default {
       if (val) {
         this.visualizeTradeRecords()
       } else {
-        this.chart.removeShape()
+        if (this.chart) {
+          this.chart.removeShape()
+        }
       }
     }
   },
@@ -468,6 +490,7 @@ export default {
         })
     },
     close() {
+      clearTimeout(this.timer)
       Object.assign(this.$data, this.$options.data())
       dispose('module-k-line')
       this.$emit('update:visible', false)

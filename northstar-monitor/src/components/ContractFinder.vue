@@ -1,5 +1,5 @@
 <template>
-  <el-dialog width="300px" title="合约查询" :visible="visible" append-to-body>
+  <el-dialog width="300px" title="合约查询" :visible="visible" append-to-body :before-close="close">
     <el-form label-width="100px">
       <el-form-item label="网关列表">
         <el-select v-model="gateway">
@@ -40,7 +40,7 @@
       </el-form-item>
     </el-form>
     <div slot="footer" class="dialog-footer">
-      <el-button @click="$emit('update:visible', false)">返 回</el-button>
+      <el-button @click="close">返 回</el-button>
     </div>
   </el-dialog>
 </template>
@@ -101,6 +101,9 @@ export default {
       this.contractList = this.contractList
         .map((item) => ContractField.deserializeBinary(item).toObject())
         .sort((a, b) => a['unifiedsymbol'].localeCompare(b['unifiedsymbol']))
+    },
+    close() {
+      this.$emit('update:visible', false)
     }
   }
 }
