@@ -10,7 +10,7 @@
         active-text-color="#ffd04b"
         :default-active="curPage"
       >
-        <el-menu-item index="1">网关管理</el-menu-item>
+        <el-menu-item index="1">行情管理</el-menu-item>
         <el-menu-item index="2">账户管理</el-menu-item>
         <el-menu-item index="3">模组管理</el-menu-item>
         <!-- <el-menu-item index="5">历史行情</el-menu-item> -->

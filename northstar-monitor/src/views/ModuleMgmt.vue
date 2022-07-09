@@ -78,7 +78,7 @@
             title="确定停用吗？"
             @confirm="toggle(scope.$index, scope.row)"
           >
-            <el-button type="danger" slot="reference"> 停用 </el-button>
+            <el-button type="danger" slot="reference">停用</el-button>
           </el-popconfirm>
           <el-button
             v-if="!scope.row.runtime.enabled"
