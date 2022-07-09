@@ -24,7 +24,7 @@ public enum ModuleState {
 	 */
 	EMPTY_HEDGE,
 	/**
-	 * 套利持仓
+	 * 套利持仓（合约不同，持仓数量相等，方向相反）
 	 */
 	HOLDING_HEDGE,
 	/**

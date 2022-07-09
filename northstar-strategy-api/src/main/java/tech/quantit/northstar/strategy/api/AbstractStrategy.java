@@ -41,6 +41,7 @@ public abstract class AbstractStrategy implements TradeStrategy{
 		ctx = context;
 		log = ctx.getLogger();
 		initIndicators();
+		initMultiContractHandler();
 	}
 
 	@Override
@@ -57,6 +58,11 @@ public abstract class AbstractStrategy implements TradeStrategy{
 	 * 指标初始化
 	 */
 	protected void initIndicators() {}
+	
+	/**
+	 * 多合约处理器初始化
+	 */
+	protected void initMultiContractHandler() {}
 
 	/**
 	 * 该方法不管模组是否启用都会被调用
@@ -115,7 +121,7 @@ public abstract class AbstractStrategy implements TradeStrategy{
 		barHandlerMap.put(unifiedSymbol, handler);
 	}
 	
-	static interface TickHandler extends TickDataAware {}
+	protected static interface TickHandler extends TickDataAware {}
 	
-	static interface BarHandler extends BarDataAware {}
+	protected static interface BarHandler extends BarDataAware {}
 }
