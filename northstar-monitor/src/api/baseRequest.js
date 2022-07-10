@@ -1,3 +1,4 @@
+import router from '@/router'
 /* eslint-disable */
 // import axios from 'axios'
 
@@ -34,7 +35,12 @@ service.interceptors.response.use(
     }
   },
   (error) => {
-    const errMsg = error.response && error.response.data ? error.response.data.message : '网络出错'
+    console.log('error', error.response.status)
+    let errMsg = error.response && error.response.data ? error.response.data.message : '网络出错'
+    if(error.response.status === 401){
+      router.push({name: 'login'})
+      errMsg = '会话过期，请重新登陆'
+    }
     return Promise.reject(new Error(errMsg))
   }
 )
