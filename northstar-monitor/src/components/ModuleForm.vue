@@ -286,6 +286,12 @@ export default {
       if (!pass) {
         return
       }
+      this.form.moduleAccountSettingsDescription.forEach((desc) => {
+        if (!desc.bindedUnifiedSymbols.length) {
+          const errMsg = `账户【${desc.accountGatewayId}】未关联合约`
+          throw new Error(errMsg)
+        }
+      })
 
       const obj = Object.assign({}, this.form)
       this.$emit('onSave', obj)
