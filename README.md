@@ -54,7 +54,7 @@
 - 交互协议HTTP + websocket
 - 数据库、缓存为Redis7（历史行情数据主要依赖数据服务，本地仅保存少量账户配置信息）
 - 前端采用node14 + vue2.x
-- 服务端采用java17（拥抱新技术） + springboot3
+- 服务端采用java17（拥抱新技术） + springboot2.7
 
 项目架构采用事件驱动+插件式开发
 ![Image](https://images.gitee.com/uploads/images/2021/1107/172130_9da2bdcd_1676852.png)
@@ -85,10 +85,8 @@ C:\
 |--northstar-env\	环境依赖包目录  
 
 ### 程序包准备
-直接放到上述提及的 northstar-dist 目录
-```
-https://gitee.com/dromara/northstar/attach_files/1122312/download/northstar-4.0.jar
-```
+请下载【[最新发布包](https://gitee.com/dromara/northstar/releases)】，并放置到上述提及的 northstar-dist 目录
+
 
 ### 启动程序
 **Linux环境下**
@@ -99,7 +97,7 @@ nohup java -Xmn1g -Xmx1g -jar ~/northstar-dist/northstar.jar >ns.log &
 
 **Windows环境下**
 ```
-s
+ Start-Process java "-Xmn1g -Xmx1g -jar c:\northstar-dist\northstar.jar"
 ```
 
 ### 部署验证
