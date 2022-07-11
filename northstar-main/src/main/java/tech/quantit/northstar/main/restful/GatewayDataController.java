@@ -28,6 +28,9 @@ public class GatewayDataController {
 	@NotNull
 	public ResultBean<List<byte[]>> loadWeeklyBarData(String gatewayId, String unifiedSymbol, long refStartTimestamp, boolean firstLoad){
 		LocalDate start = utils.getFridayOfLastWeek(refStartTimestamp);
+		if(firstLoad) {
+			start = start.minusWeeks(1);
+		}
 		LocalDate end = utils.getCurrentTradeDay(refStartTimestamp, firstLoad);
 		return new ResultBean<>(
 				mdRepo
