@@ -54,7 +54,7 @@
 - 交互协议HTTP + websocket
 - 数据库、缓存为Redis7（历史行情数据主要依赖数据服务，本地仅保存少量账户配置信息）
 - 前端采用node14 + vue2.x
-- 服务端采用java17（拥抱新技术） + springboot2.7
+- 服务端采用java17（拥抱新技术） + springboot2
 
 项目架构采用事件驱动+插件式开发
 ![Image](https://images.gitee.com/uploads/images/2021/1107/172130_9da2bdcd_1676852.png)
