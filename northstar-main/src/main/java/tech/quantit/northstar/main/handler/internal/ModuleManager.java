@@ -30,7 +30,6 @@ public class ModuleManager extends AbstractEventHandler{
 		eventSet.add(NorthstarEventType.ORDER);
 		eventSet.add(NorthstarEventType.TICK);
 		eventSet.add(NorthstarEventType.BAR);
-		eventSet.add(NorthstarEventType.EXT_MSG);
 	}
 	
 	public void addModule(IModule module) {

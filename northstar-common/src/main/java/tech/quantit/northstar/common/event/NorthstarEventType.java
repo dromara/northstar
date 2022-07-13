@@ -35,10 +35,6 @@ public enum NorthstarEventType {
 	 */
 	NOTICE,
 	/**
-	 * 外部消息事件
-	 */
-	EXT_MSG,
-	/**
 	 * 合约事件
 	 */
 	CONTRACT,
@@ -82,13 +78,5 @@ public enum NorthstarEventType {
 	 * 断开成功
 	 */
 	DISCONNECTED,
-	/**
-	 * 下单事件
-	 */
-	PLACE_ORDER,
-	/**
-	 * 撤单事件
-	 */
-	WITHDRAW_ORDER
 	
 }
