@@ -45,6 +45,11 @@ public class AuthenticationController implements InitializingBean{
 		}
 		throw new AuthenticationException("账户或密码不正确");
 	}
+
+	@GetMapping("/logout")
+	public void logout() {
+		session.invalidate();
+	}
 	
 	@GetMapping("/test")
 	public ResultBean<Boolean> testAuth() {

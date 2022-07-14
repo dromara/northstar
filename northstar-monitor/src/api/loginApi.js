@@ -8,6 +8,10 @@ export default {
     })
   },
 
+  logout(){
+    return baseService.get('/auth/logout')
+  },
+
   test() {
     return baseService.get('/auth/test')
   }

@@ -12,7 +12,7 @@
       <i class="el-icon-warning" /> 持仓调整实际上是生成一个手工的成交单
     </div>
     <div class="form-wrapper">
-      <el-form ref="positionInfo" :model="form" label-width="70px" width="200px" formRules>
+      <el-form ref="positionInfo" :model="form" label-width="70px" width="200px">
         <el-form-item label="合约代码" prop="unifiedSymbol">
           <el-select v-model="form.unifiedSymbol">
             <el-option
