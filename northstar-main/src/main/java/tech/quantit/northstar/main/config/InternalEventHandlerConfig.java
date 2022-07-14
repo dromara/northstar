@@ -12,7 +12,6 @@ import tech.quantit.northstar.data.IGatewayRepository;
 import tech.quantit.northstar.data.IMarketDataRepository;
 import tech.quantit.northstar.domain.account.TradeDayAccount;
 import tech.quantit.northstar.domain.account.TradeDayAccountFactory;
-import tech.quantit.northstar.domain.external.MessageHandlerManager;
 import tech.quantit.northstar.domain.gateway.ContractManager;
 import tech.quantit.northstar.domain.gateway.GatewayAndConnectionManager;
 import tech.quantit.northstar.gateway.api.domain.LatencyDetector;
@@ -21,7 +20,6 @@ import tech.quantit.northstar.main.handler.internal.AccountHandler;
 import tech.quantit.northstar.main.handler.internal.ConnectionHandler;
 import tech.quantit.northstar.main.handler.internal.MarketDataHandler;
 import tech.quantit.northstar.main.handler.internal.ModuleManager;
-import tech.quantit.northstar.main.handler.internal.NotificationDispatcher;
 import tech.quantit.northstar.main.handler.internal.SimMarketHandler;
 
 @Slf4j
@@ -55,14 +53,6 @@ public class InternalEventHandlerConfig {
 		log.debug("注册：SimMarketHandler");
 		eventBus.register(handler);
 		return handler;
-	}
-	
-	@Bean
-	public NotificationDispatcher notificationDispatcher(InternalEventBus eventBus, MessageHandlerManager msgHandlerMgr) {
-		NotificationDispatcher dispatcher = new NotificationDispatcher(msgHandlerMgr);
-		log.debug("注册：NotificationDispatcher");
-		eventBus.register(dispatcher);
-		return dispatcher;
 	}
 	
 	@Bean

@@ -23,7 +23,6 @@ import com.alibaba.fastjson.JSON;
 import com.corundumstudio.socketio.SocketIOServer;
 
 import common.TestGatewayFactory;
-import tech.quantit.northstar.common.MessageHandler;
 import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.common.constant.GatewayUsage;
 import tech.quantit.northstar.common.constant.ReturnCode;
@@ -52,9 +51,6 @@ public class GatewayManagementTest {
 	
 	@MockBean
 	private SocketIOServer socketServer;
-	
-	@MockBean
-	private MessageHandler msgHandler;
 	
 	@Autowired
 	private RedisTemplate<String, byte[]> redisTemplate;

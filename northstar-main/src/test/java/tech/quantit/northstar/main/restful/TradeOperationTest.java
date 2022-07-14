@@ -15,7 +15,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 
 import com.corundumstudio.socketio.SocketIOServer;
 
-import tech.quantit.northstar.common.MessageHandler;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.model.OrderRequest;
 import tech.quantit.northstar.common.model.OrderRequest.TradeOperation;
@@ -47,9 +46,6 @@ public class TradeOperationTest {
 	@MockBean
 	private SocketIOServer socketServer;
 	
-	@MockBean
-	private MessageHandler msgHandler;
-
 	@BeforeEach
 	public void setUp() throws Exception {
 		account = mock(TradeDayAccount.class);

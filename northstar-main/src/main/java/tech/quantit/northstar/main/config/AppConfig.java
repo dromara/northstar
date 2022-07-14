@@ -54,7 +54,6 @@ import tech.quantit.northstar.data.IModuleRepository;
 import tech.quantit.northstar.data.IPlaybackRuntimeRepository;
 import tech.quantit.northstar.data.ISimAccountRepository;
 import tech.quantit.northstar.domain.account.TradeDayAccount;
-import tech.quantit.northstar.domain.external.MessageHandlerManager;
 import tech.quantit.northstar.domain.gateway.ContractManager;
 import tech.quantit.northstar.domain.gateway.GatewayAndConnectionManager;
 import tech.quantit.northstar.gateway.api.GatewayFactory;
@@ -246,11 +245,6 @@ public class AppConfig implements WebMvcConfigurer {
 	public ModuleFactory moduleFactory(@Autowired(required = false) ExternalJarClassLoader extJarLoader, IModuleRepository moduleRepo, GatewayAndConnectionManager gatewayConnMgr,
 			ContractManager contractMgr) {
 		return new ModuleFactory(extJarLoader, moduleRepo, gatewayConnMgr, contractMgr);
-	}
-	
-	@Bean
-	public MessageHandlerManager messageHandlerManager() {
-		return new MessageHandlerManager();
 	}
 	
 	@Bean
