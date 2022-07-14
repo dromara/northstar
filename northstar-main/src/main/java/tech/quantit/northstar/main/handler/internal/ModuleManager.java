@@ -1,6 +1,6 @@
 package tech.quantit.northstar.main.handler.internal;
 
-import java.util.HashSet;
+import java.util.EnumSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -19,17 +19,18 @@ public class ModuleManager extends AbstractEventHandler{
 	 */
 	protected ConcurrentHashMap<String, IModule> moduleMap = new ConcurrentHashMap<>(50);
 	
-	private Set<NorthstarEventType> eventSet = new HashSet<>();
+	private static final Set<NorthstarEventType> TARGET_TYPE = EnumSet.of(
+			NorthstarEventType.ACCOUNT,
+			NorthstarEventType.TRADE,
+			NorthstarEventType.ORDER,
+			NorthstarEventType.TICK,
+			NorthstarEventType.BAR
+	);
 	
 	private LatencyDetector latencyDetector;
 	
 	public ModuleManager(LatencyDetector latencyDetector) {
 		this.latencyDetector = latencyDetector;
-		eventSet.add(NorthstarEventType.ACCOUNT);
-		eventSet.add(NorthstarEventType.TRADE);
-		eventSet.add(NorthstarEventType.ORDER);
-		eventSet.add(NorthstarEventType.TICK);
-		eventSet.add(NorthstarEventType.BAR);
 	}
 	
 	public void addModule(IModule module) {
@@ -58,7 +59,7 @@ public class ModuleManager extends AbstractEventHandler{
 
 	@Override
 	public boolean canHandle(NorthstarEventType eventType) {
-		return eventSet.contains(eventType);
+		return TARGET_TYPE.contains(eventType);
 	}
 
 	@Override

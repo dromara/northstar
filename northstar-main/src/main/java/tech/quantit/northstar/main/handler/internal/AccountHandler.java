@@ -1,6 +1,6 @@
 package tech.quantit.northstar.main.handler.internal;
 
-import java.util.HashSet;
+import java.util.EnumSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -28,20 +28,17 @@ public class AccountHandler extends AbstractEventHandler implements GenericEvent
 	private Map<String, TradeDayAccount> accountMap;
 	private TradeDayAccountFactory factory;
 	
-	private static final Set<NorthstarEventType> TARGET_TYPE = new HashSet<>() {
-		private static final long serialVersionUID = 6418831877479036414L;
-		{
-			add(NorthstarEventType.LOGGED_IN);
-			add(NorthstarEventType.LOGGING_IN);
-			add(NorthstarEventType.LOGGED_OUT);
-			add(NorthstarEventType.LOGGING_OUT);
-			add(NorthstarEventType.ACCOUNT);
-			add(NorthstarEventType.POSITION);
-			add(NorthstarEventType.TRADE);
-			add(NorthstarEventType.ORDER);
-		}
-	};
-	
+	private static final Set<NorthstarEventType> TARGET_TYPE = EnumSet.of(
+			NorthstarEventType.LOGGED_IN, 
+			NorthstarEventType.LOGGING_IN,
+			NorthstarEventType.LOGGED_OUT,
+			NorthstarEventType.LOGGING_OUT,
+			NorthstarEventType.ACCOUNT,
+			NorthstarEventType.POSITION,
+			NorthstarEventType.TRADE,
+			NorthstarEventType.ORDER
+	); 
+			
 	public AccountHandler(Map<String, TradeDayAccount> accountMap, TradeDayAccountFactory factory) {
 		this.accountMap = accountMap;
 		this.factory = factory;

@@ -1,6 +1,6 @@
 package tech.quantit.northstar.main.handler.internal;
 
-import java.util.HashSet;
+import java.util.EnumSet;
 import java.util.Set;
 
 import lombok.extern.slf4j.Slf4j;
@@ -31,16 +31,14 @@ public class ConnectionHandler extends AbstractEventHandler implements GenericEv
 	protected ContractManager contractMgr;
 	protected IGatewayRepository gatewayRepo;
 	
-	private static final Set<NorthstarEventType> TARGET_TYPE = new HashSet<>() {
-		private static final long serialVersionUID = 6418831877479036414L;
-		{
-			add(NorthstarEventType.CONNECTING);
-			add(NorthstarEventType.CONNECTED);
-			add(NorthstarEventType.DISCONNECTED);
-			add(NorthstarEventType.DISCONNECTING);
-			add(NorthstarEventType.GATEWAY_READY);
-		}
-	};
+	private static final Set<NorthstarEventType> TARGET_TYPE = EnumSet.of(
+			NorthstarEventType.CONNECTING,
+			NorthstarEventType.CONNECTED,
+			NorthstarEventType.DISCONNECTED,
+			NorthstarEventType.DISCONNECTING,
+			NorthstarEventType.GATEWAY_READY
+	); 
+			
 	
 	public ConnectionHandler(GatewayAndConnectionManager gatewayConnMgr, ContractManager contractMgr, IGatewayRepository gatewayRepo) {
 		this.gatewayConnMgr = gatewayConnMgr;

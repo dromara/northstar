@@ -14,8 +14,9 @@
         <el-menu-item index="1">行情管理</el-menu-item>
         <el-menu-item index="2">账户管理</el-menu-item>
         <el-menu-item index="3">模组管理</el-menu-item>
-        <!-- <el-menu-item index="5">历史行情</el-menu-item> -->
+        <!-- <el-menu-item index="5">手工期权交易</el-menu-item> -->
         <el-menu-item index="6">手工期货交易</el-menu-item>
+        <el-menu-item index="9">日志跟踪</el-menu-item>
       </el-menu>
       <div class="ns-tools">
         <el-button
@@ -52,9 +53,9 @@ const pageOpts = {
   1: 'mktgateway',
   2: 'tdgateway',
   3: 'module',
-  5: 'mktdata',
+  5: 'manualopttd',
   6: 'manualfttd',
-  7: 'manualopttd'
+  9: 'logTailer'
 }
 
 const pageOptsRevert = {}
