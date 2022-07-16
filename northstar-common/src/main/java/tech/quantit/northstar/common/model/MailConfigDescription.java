@@ -4,6 +4,7 @@ import java.util.List;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Builder.Default;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import tech.quantit.northstar.common.event.NorthstarEventType;
@@ -21,7 +22,8 @@ public class MailConfigDescription {
 	/**
 	 * 禁用邮件通知
 	 */
-	private boolean disabled;
+	@Default
+	private boolean disabled = true;
 	/**
 	 * SMTP服务器地址
 	 */

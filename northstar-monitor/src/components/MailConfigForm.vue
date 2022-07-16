@@ -19,33 +19,40 @@
       label-width="120px"
     >
       <el-form-item label="SMTP地址" prop="emailSMTPHost">
-        <el-input v-model="form.emailSMTPHost" placeholder="例如smtp.163.com" />
+        <el-input
+          v-model="form.emailSMTPHost"
+          :placeholder="form.disabled ? '' : '例如smtp.163.com'"
+        />
       </el-form-item>
       <el-form-item label="Email邮箱地址" prop="emailUsername">
         <el-input
           v-model="form.emailUsername"
           autocomplete="off"
-          placeholder="发送人的邮箱"
+          :placeholder="form.disabled ? '' : '发送人的邮箱'"
         ></el-input>
       </el-form-item>
       <el-form-item label="邮箱授权码" prop="emailPassword">
         <el-input
           v-model="form.emailPassword"
           autocomplete="off"
-          placeholder="可在邮箱设置中找到"
+          :placeholder="form.disabled ? '' : '可在邮箱设置中找到'"
         ></el-input>
       </el-form-item>
       <el-form-item label="订阅邮箱列表" prop="subscriberList">
         <el-input
           type="textarea"
           :rows="3"
-          placeholder="接收人的邮箱，如有多个用分号隔开"
+          :placeholder="form.disabled ? '' : '接收人的邮箱，如有多个用分号隔开'"
           v-model="subscriberListSrc"
         >
         </el-input>
       </el-form-item>
       <el-form-item label="订阅事件列表" prop="interestTopicList">
-        <el-select v-model="form.interestTopicList" multiple>
+        <el-select
+          v-model="form.interestTopicList"
+          multiple
+          :placeholder="form.disabled ? '' : '可多选'"
+        >
           <el-option value="TRADE" key="1">成交事件</el-option>
           <el-option value="ORDER" key="2">订单事件</el-option>
           <el-option value="NOTICE" key="3">消息事件</el-option>
@@ -75,7 +82,7 @@ export default {
     return {
       subscriberListSrc: '',
       form: {
-        disabled: false,
+        disabled: true,
         emailSMTPHost: '',
         emailUsername: '',
         emailPassword: '',
@@ -101,7 +108,9 @@ export default {
   created() {
     mailConfigApi.getConfig().then((result) => {
       this.form = result
-      this.subscriberListSrc = result.subscriberList.join(';\n')
+      if (result.subscriberList) {
+        this.subscriberListSrc = result.subscriberList.join(';\n')
+      }
     })
   },
   methods: {
