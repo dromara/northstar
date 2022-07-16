@@ -1,5 +1,7 @@
 package tech.quantit.northstar.data.redis;
 
+import java.util.Optional;
+
 import org.springframework.data.redis.core.RedisTemplate;
 
 import com.alibaba.fastjson2.JSON;
@@ -25,7 +27,8 @@ public class MailConfigRepoRedisImpl implements IMailConfigRepository{
 
 	@Override
 	public MailConfigDescription get() {
-		return JSON.parseObject(redisTemplate.boundValueOps(KEY).get(), MailConfigDescription.class) ;
+		byte[] data = redisTemplate.boundValueOps(KEY).get();
+		return JSON.parseObject(Optional.ofNullable(data).orElse("{}".getBytes()), MailConfigDescription.class) ;
 	}
 
 }

@@ -25,8 +25,8 @@ public class EmailConfigController {
 	private EmailConfigService service;
 
 	@PostMapping
-	public ResultBean<Boolean> save(@NotNull @RequestBody MailConfigDescription configDescription, boolean enabled){
-		service.saveConfig(configDescription, enabled);
+	public ResultBean<Boolean> save(@NotNull @RequestBody MailConfigDescription configDescription){
+		service.saveConfig(configDescription);
 		return new ResultBean<>(Boolean.TRUE);
 	}
 	

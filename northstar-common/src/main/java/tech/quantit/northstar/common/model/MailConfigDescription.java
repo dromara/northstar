@@ -19,6 +19,10 @@ import tech.quantit.northstar.common.event.NorthstarEventType;
 @Data
 public class MailConfigDescription {
 	/**
+	 * 禁用邮件通知
+	 */
+	private boolean disabled;
+	/**
 	 * SMTP服务器地址
 	 */
 	private String emailSMTPHost;

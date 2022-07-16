@@ -6,7 +6,18 @@
     :show-close="false"
     width="200px"
   >
-    <el-form ref="mailSettings" :model="form" :rules="rules" label-width="120px">
+    <el-form label-width="120px">
+      <el-form-item label="禁用邮件通知">
+        <el-checkbox v-model="form.disabled"></el-checkbox>
+      </el-form-item>
+    </el-form>
+    <el-form
+      ref="mailSettings"
+      :model="form"
+      :disabled="form.disabled"
+      :rules="rules"
+      label-width="120px"
+    >
       <el-form-item label="SMTP地址" prop="emailSMTPHost">
         <el-input v-model="form.emailSMTPHost" placeholder="例如smtp.163.com" />
       </el-form-item>
@@ -29,7 +40,7 @@
           type="textarea"
           :rows="3"
           placeholder="接收人的邮箱，如有多个用分号隔开"
-          v-model="form.subscriberList"
+          v-model="subscriberListSrc"
         >
         </el-input>
       </el-form-item>
@@ -51,6 +62,8 @@
 </template>
 
 <script>
+import mailConfigApi from '@/api/mailConfigApi'
+
 export default {
   props: {
     visible: {
@@ -60,11 +73,13 @@ export default {
   },
   data() {
     return {
+      subscriberListSrc: '',
       form: {
+        disabled: false,
         emailSMTPHost: '',
         emailUsername: '',
         emailPassword: '',
-        subscriberList: '',
+        subscriberList: [],
         interestTopicList: []
       },
       rules: {
@@ -76,17 +91,30 @@ export default {
       }
     }
   },
+  watch: {
+    subscriberListSrc: function (val) {
+      if (val) {
+        this.form.subscriberList = val.split(/;|；/).map((mail) => mail.trim())
+      }
+    }
+  },
+  created() {
+    mailConfigApi.getConfig().then((result) => {
+      this.form = result
+      this.subscriberListSrc = result.subscriberList.join(';\n')
+    })
+  },
   methods: {
     saveMailConfig() {
       this.$refs.mailSettings.validate((valid) => {
         if (valid) {
           console.log(this.form)
+          mailConfigApi.saveConfig(this.form)
           this.close()
         }
       })
     },
     close() {
-      this.$refs.mailSettings.resetFields()
       this.$emit('update:visible', false)
     }
   }

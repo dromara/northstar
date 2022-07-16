@@ -15,9 +15,8 @@ public class EmailConfigService {
 		this.repo = repo;
 	}
 	
-	public void saveConfig(MailConfigDescription emailConfig, boolean enabled) {
+	public void saveConfig(MailConfigDescription emailConfig) {
 		repo.save(emailConfig);
-		mailMgr.setEnabled(enabled);
 		mailMgr.setEmailConfig(emailConfig);
 	}
 	

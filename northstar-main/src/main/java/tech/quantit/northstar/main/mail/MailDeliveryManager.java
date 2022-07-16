@@ -51,12 +51,9 @@ public class MailDeliveryManager {
 	
 	public void setEmailConfig(MailConfigDescription emailConfig) {
 		this.emailConfig = emailConfig;
+		this.enabled = !emailConfig.isDisabled();
 		this.sender = factory.newInstance(emailConfig);
 		emailConfig.getInterestTopicList().stream().forEach(interestedEvents::add);
-	}
-	
-	public void setEnabled(boolean enabled) {
-		this.enabled = enabled;
 	}
 	
 	public void onEvent(NorthstarEvent event) {
