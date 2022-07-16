@@ -30,9 +30,7 @@ public class AccountHandler extends AbstractEventHandler implements GenericEvent
 	
 	private static final Set<NorthstarEventType> TARGET_TYPE = EnumSet.of(
 			NorthstarEventType.LOGGED_IN, 
-			NorthstarEventType.LOGGING_IN,
 			NorthstarEventType.LOGGED_OUT,
-			NorthstarEventType.LOGGING_OUT,
 			NorthstarEventType.ACCOUNT,
 			NorthstarEventType.POSITION,
 			NorthstarEventType.TRADE,
@@ -46,34 +44,42 @@ public class AccountHandler extends AbstractEventHandler implements GenericEvent
 	
 	@Override
 	public synchronized void doHandle(NorthstarEvent e) {
-		if(e.getEvent() == NorthstarEventType.LOGGED_IN) {
+		switch(e.getEvent()) {
+		case LOGGED_IN -> {
 			String gatewayId = (String) e.getData();
 			accountMap.put(gatewayId, factory.newInstance(gatewayId));
 			log.info("账户登陆：{}", gatewayId);
-		} else if (e.getEvent() == NorthstarEventType.LOGGED_OUT) {
+		}
+		case LOGGED_OUT -> {
 			String gatewayId = (String) e.getData();
 			accountMap.remove(gatewayId);
 			log.info("账户登出：{}", gatewayId);
-		} else if (e.getEvent() == NorthstarEventType.ACCOUNT) {
+		}
+		case ACCOUNT -> {
 			AccountField af = (AccountField) e.getData();
 			checkAccount(af.getGatewayId(), e.getEvent());
 			TradeDayAccount account = accountMap.get(af.getGatewayId());
 			account.onAccountUpdate(af);
-		} else if (e.getEvent() == NorthstarEventType.POSITION) {
+		}
+		case POSITION -> {
 			PositionField pf = (PositionField) e.getData();
 			checkAccount(pf.getGatewayId(), e.getEvent());
 			TradeDayAccount account = accountMap.get(pf.getGatewayId());
 			account.onPositionUpdate(pf);
-		} else if (e.getEvent() == NorthstarEventType.TRADE) {
+		}
+		case TRADE -> {
 			TradeField tf = (TradeField) e.getData();
 			checkAccount(tf.getGatewayId(), e.getEvent());
 			TradeDayAccount account = accountMap.get(tf.getGatewayId());
 			account.onTradeUpdate(tf);
-		} else if (e.getEvent() == NorthstarEventType.ORDER) {
+		}
+		case ORDER -> {
 			OrderField of = (OrderField) e.getData();
 			checkAccount(of.getGatewayId(), e.getEvent());
 			TradeDayAccount account = accountMap.get(of.getGatewayId());
 			account.onOrderUpdate(of);
+		}
+		default -> throw new IllegalArgumentException("Unexpected value: " + e.getEvent());
 		}
 	}
 	

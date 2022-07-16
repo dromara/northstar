@@ -14,6 +14,7 @@ import org.springframework.web.client.RestTemplate;
 import tech.quantit.northstar.common.constant.Constants;
 import tech.quantit.northstar.data.IContractRepository;
 import tech.quantit.northstar.data.IGatewayRepository;
+import tech.quantit.northstar.data.IMailConfigRepository;
 import tech.quantit.northstar.data.IMarketDataRepository;
 import tech.quantit.northstar.data.IModuleRepository;
 import tech.quantit.northstar.data.IPlaybackRuntimeRepository;
@@ -21,6 +22,7 @@ import tech.quantit.northstar.data.ISimAccountRepository;
 import tech.quantit.northstar.data.ds.DataServiceManager;
 import tech.quantit.northstar.data.redis.ContractRepoRedisImpl;
 import tech.quantit.northstar.data.redis.GatewayRepoRedisImpl;
+import tech.quantit.northstar.data.redis.MailConfigRepoRedisImpl;
 import tech.quantit.northstar.data.redis.MarketDataRepoRedisImpl;
 import tech.quantit.northstar.data.redis.ModuleRepoRedisImpl;
 import tech.quantit.northstar.data.redis.PlaybackRuntimeRepoRedisImpl;
@@ -77,4 +79,8 @@ public class RepositoryConfig {
 		return new PlaybackRuntimeRepoRedisImpl(redisTemplate);
 	}
 
+	@Bean
+	public IMailConfigRepository mailConfigRepository(RedisTemplate<String, byte[]> redisTemplate) {
+		return new MailConfigRepoRedisImpl(redisTemplate);
+	}
 }

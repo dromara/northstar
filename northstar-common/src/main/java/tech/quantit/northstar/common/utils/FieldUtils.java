@@ -13,9 +13,9 @@ public class FieldUtils {
 	public static String chn(DirectionEnum dir) {
 		switch(dir) {
 		case D_Buy:
-			return "买";
+			return "多";
 		case D_Sell:
-			return "卖";
+			return "空";
 		default:
 			return "未知";
 		}

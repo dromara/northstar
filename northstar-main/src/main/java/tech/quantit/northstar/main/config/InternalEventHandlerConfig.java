@@ -18,9 +18,11 @@ import tech.quantit.northstar.gateway.api.domain.LatencyDetector;
 import tech.quantit.northstar.gateway.sim.trade.SimMarket;
 import tech.quantit.northstar.main.handler.internal.AccountHandler;
 import tech.quantit.northstar.main.handler.internal.ConnectionHandler;
+import tech.quantit.northstar.main.handler.internal.MailBindedEventHandler;
 import tech.quantit.northstar.main.handler.internal.MarketDataHandler;
 import tech.quantit.northstar.main.handler.internal.ModuleManager;
 import tech.quantit.northstar.main.handler.internal.SimMarketHandler;
+import tech.quantit.northstar.main.mail.MailDeliveryManager;
 
 @Slf4j
 @Configuration
@@ -69,6 +71,14 @@ public class InternalEventHandlerConfig {
 		log.debug("注册：MarketDataHandler");
 		eventBus.register(mdHandler);
 		return mdHandler;
+	}
+	
+	@Bean
+	public MailBindedEventHandler mailBindedEventHandler(MailDeliveryManager mailMgr, InternalEventBus eventBus) {
+		MailBindedEventHandler handler = new MailBindedEventHandler(mailMgr);
+		log.debug("注册：MailBindedEventHandler");
+		eventBus.register(handler);
+		return handler;
 	}
 	//////////////////////
 	/* Internal类事件结束 */

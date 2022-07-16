@@ -21,6 +21,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.system.ApplicationHome;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -42,6 +43,7 @@ import com.google.common.io.Files;
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.IContractManager;
 import tech.quantit.northstar.common.IHolidayManager;
+import tech.quantit.northstar.common.IMailMessageContentHandler;
 import tech.quantit.northstar.common.constant.Constants;
 import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.common.event.FastEventEngine;
@@ -66,6 +68,8 @@ import tech.quantit.northstar.gateway.sim.trade.SimGatewayFactory;
 import tech.quantit.northstar.gateway.sim.trade.SimMarket;
 import tech.quantit.northstar.main.ExternalJarClassLoader;
 import tech.quantit.northstar.main.interceptor.AuthorizationInterceptor;
+import tech.quantit.northstar.main.mail.MailDeliveryManager;
+import tech.quantit.northstar.main.mail.MailSenderFactory;
 import tech.quantit.northstar.main.utils.ModuleFactory;
 import xyz.redtorch.gateway.ctp.x64v6v3v15v.CtpGatewayFactory;
 import xyz.redtorch.gateway.ctp.x64v6v5v1cpv.CtpSimGatewayFactory;
@@ -250,5 +254,16 @@ public class AppConfig implements WebMvcConfigurer {
 	@Bean
 	public RestTemplate restTemplate(RestTemplateBuilder builder) {
 		return builder.build();
+	}
+	
+	@ConditionalOnMissingBean(IMailMessageContentHandler.class)
+	@Bean
+	public IMailMessageContentHandler messageDeliveryHandler() {
+		return new IMailMessageContentHandler() {};
+	}
+	
+	@Bean
+	public MailDeliveryManager mailDeliveryManager(IMailMessageContentHandler handler) {
+		return new MailDeliveryManager(new MailSenderFactory(), handler);
 	}
 }
