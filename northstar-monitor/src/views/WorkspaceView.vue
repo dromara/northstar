@@ -55,7 +55,7 @@ const pageOpts = {
   3: 'module',
   5: 'manualopttd',
   6: 'manualfttd',
-  9: 'logTailer'
+  9: 'logger'
 }
 
 const pageOptsRevert = {}
@@ -77,12 +77,13 @@ export default {
     this.curPage = pageOptsRevert[this.$route.name]
   },
   methods: {
-    handleSelect(index) {
+    handleSelect(index, queryParams) {
       if (index === this.curPage) {
         return
       }
       this.curPage = index
-      this.$router.push({ name: pageOpts[index], query: { auth: this.$route.query.auth } })
+      const query = Object.assign({ auth: this.$route.query.auth }, queryParams)
+      this.$router.push({ name: pageOpts[index], query: query })
     },
     logout() {
       loginApi.logout()

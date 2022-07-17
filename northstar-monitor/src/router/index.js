@@ -52,6 +52,11 @@ const routes = [
         name: 'manualopttd',
         component: () => import('../views/NotImplemented.vue')
       },
+      {
+        path: '/logger',
+        name: 'logger',
+        component: () => import('../views/LogTailingView.vue')
+      }
     ]
   },
 ]

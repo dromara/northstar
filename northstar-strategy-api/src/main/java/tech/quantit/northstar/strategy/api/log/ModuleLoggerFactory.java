@@ -7,7 +7,6 @@ import java.util.Map;
 
 import org.slf4j.ILoggerFactory;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
@@ -20,7 +19,7 @@ public class ModuleLoggerFactory implements ILoggerFactory{
 	
 	private static Map<String, Logger> loggerMap = new HashMap<>();
 	private static Map<String, RollingFileAppender<ILoggingEvent>> appenderMap = new HashMap<>();
-	private static LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+	private static LoggerContext loggerContext = new LoggerContext();
 	private static PatternLayoutEncoder encoder = new PatternLayoutEncoder();
 	
 	static {

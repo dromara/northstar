@@ -52,7 +52,7 @@
   flex: 1;
 }
 .flex-col{
-  display: flex;
+  display: flex block;
   flex-direction: column;
 }
 

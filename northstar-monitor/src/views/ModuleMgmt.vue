@@ -67,7 +67,7 @@
           </span>
         </template>
       </el-table-column>
-      <el-table-column align="center" width="320px">
+      <el-table-column align="center" width="360px">
         <template slot="header">
           <el-button size="mini" type="primary" @click="handleCreate">新建</el-button>
         </template>
@@ -89,6 +89,7 @@
             启用
           </el-button>
           <el-button size="mini" @click="handlePerf(scope.$index, scope.row)">运行状态</el-button>
+          <el-button size="mini" @click="tailModuleLog(scope.row)">日志跟踪</el-button>
           <el-button size="mini" @click="handleRow(scope.$index, scope.row)">{{
             scope.row.runtime.enabled ? '查看' : '修改'
           }}</el-button>
@@ -169,6 +170,9 @@ export default {
     async toggle(index, row) {
       await moduleApi.toggleModuleState(row.moduleName)
       await this.findAll()
+    },
+    tailModuleLog(row) {
+      this.$parent.handleSelect('9', { module: row.moduleName })
     }
   }
 }

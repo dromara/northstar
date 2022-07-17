@@ -31,6 +31,21 @@ export default {
       version: packageJson.version
     }
   },
+  mounted() {
+    const tryService = () => {
+      fetch('/redirect')
+        .then((res) => res.json())
+        .catch(() => {
+          setTimeout(tryService, 5000)
+          this.$message({
+            type: 'error',
+            message: '服务端未启动',
+            duration: 5000
+          })
+        })
+    }
+    tryService()
+  },
   methods: {
     async login() {
       await loginApi.login(this.userForm.name, this.userForm.pass)
@@ -39,8 +54,7 @@ export default {
         name: 'mktgateway',
         query: { auth: window.btoa(`${this.userForm.name}:${this.userForm.pass}`) }
       })
-    },
-    resetForm() {}
+    }
   }
 }
 </script>
@@ -51,8 +65,6 @@ export default {
   width: 300px;
   min-width: 300px;
   margin: auto;
-}
-.logo {
 }
 .wrapper {
   display: flex;

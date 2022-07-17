@@ -2,6 +2,7 @@ package tech.quantit.northstar.main.config;
 
 import java.util.concurrent.ConcurrentMap;
 
+import org.springframework.boot.logging.LoggingSystem;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,6 +23,7 @@ import tech.quantit.northstar.main.mail.MailDeliveryManager;
 import tech.quantit.northstar.main.service.AccountService;
 import tech.quantit.northstar.main.service.EmailConfigService;
 import tech.quantit.northstar.main.service.GatewayService;
+import tech.quantit.northstar.main.service.LogService;
 import tech.quantit.northstar.main.service.ModuleService;
 import tech.quantit.northstar.main.utils.ModuleFactory;
 
@@ -62,5 +64,10 @@ public class ServiceConfig {
 	@Bean
 	public EmailConfigService emailConfigService(MailDeliveryManager mailMgr, IMailConfigRepository repo) {
 		return new EmailConfigService(mailMgr, repo);
+	}
+	
+	@Bean
+	public LogService logService(LoggingSystem loggingSystem) {
+		return new LogService(loggingSystem);
 	}
 }
