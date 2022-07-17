@@ -240,6 +240,7 @@ export default {
           return
         }
         this.form = this.module
+        this.form.strategySetting.value = this.form.strategySetting.componentMeta.name
         this.bindedContracts = this.module.moduleAccountSettingsDescription
           .map((item) => item.bindedUnifiedSymbols.join(';'))
           .join(';')
