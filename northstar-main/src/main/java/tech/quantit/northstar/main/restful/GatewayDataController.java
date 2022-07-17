@@ -1,6 +1,7 @@
 package tech.quantit.northstar.main.restful;
 
 import java.time.LocalDate;
+import java.time.Period;
 import java.util.List;
 
 import javax.validation.constraints.NotNull;
@@ -28,7 +29,7 @@ public class GatewayDataController {
 	@NotNull
 	public ResultBean<List<byte[]>> loadWeeklyBarData(String gatewayId, String unifiedSymbol, long refStartTimestamp, boolean firstLoad){
 		LocalDate start = utils.getFridayOfLastWeek(refStartTimestamp);
-		if(firstLoad) {
+		if(firstLoad && Period.between(start, LocalDate.now()).getDays() < 7) {
 			start = start.minusWeeks(1);
 		}
 		LocalDate end = utils.getCurrentTradeDay(refStartTimestamp, firstLoad);
