@@ -13,8 +13,8 @@ public class FieldUtilsTest {
 
 	@Test
 	public void testChnDirectionEnum() {
-		assertThat(FieldUtils.chn(DirectionEnum.D_Buy)).isEqualTo("买");
-		assertThat(FieldUtils.chn(DirectionEnum.D_Sell)).isEqualTo("卖");
+		assertThat(FieldUtils.chn(DirectionEnum.D_Buy)).isEqualTo("多");
+		assertThat(FieldUtils.chn(DirectionEnum.D_Sell)).isEqualTo("空");
 		assertThat(FieldUtils.chn(DirectionEnum.D_Unknown)).isEqualTo("未知");
 	}
 

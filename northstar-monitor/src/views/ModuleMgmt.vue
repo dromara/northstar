@@ -37,7 +37,7 @@
           }}
         </template>
       </el-table-column>
-      <el-table-column label="绑定账户" align="center" width="300px">
+      <el-table-column label="绑定账户" align="center" width="minmax(120px,300px)">
         <template slot-scope="scope">
           {{
             (() => {
@@ -48,7 +48,7 @@
           }}
         </template>
       </el-table-column>
-      <el-table-column label="绑定合约" align="center" min-width="200px">
+      <el-table-column label="绑定合约" align="center" width="minmax(120px, 400px)">
         <template slot-scope="scope">
           {{
             (() => {
@@ -67,7 +67,7 @@
           </span>
         </template>
       </el-table-column>
-      <el-table-column align="center" width="360px">
+      <el-table-column align="center" width="420px">
         <template slot="header">
           <el-button size="mini" type="primary" @click="handleCreate">新建</el-button>
         </template>

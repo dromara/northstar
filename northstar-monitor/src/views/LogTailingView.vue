@@ -74,10 +74,12 @@
     </div>
     <div
       v-else
-      class="ns-page-body-placeholder"
+      class="ns-page-body-placeholder flex align-center"
       v-loading="loading"
       element-loading-background="rgba(0, 0, 0, 0.3)"
-    ></div>
+    >
+      没有日志数据
+    </div>
   </div>
 </template>
 
@@ -166,9 +168,12 @@ export default {
           (item, i) => i >= this.logContent.length - this.numOfLinesInView
         )
       }
+      this.loading = false
       if (this.autoScroll) {
         this.$nextTick(() => {
-          this.$refs.logView.scrollTop = this.$refs.logView.scrollHeight
+          if (this.$refs.logView) {
+            this.$refs.logView.scrollTop = this.$refs.logView.scrollHeight
+          }
         })
       }
     }
