@@ -46,7 +46,7 @@ import tech.quantit.northstar.strategy.api.constant.PriceType;
 import tech.quantit.northstar.strategy.api.indicator.Indicator;
 import tech.quantit.northstar.strategy.api.indicator.TimeSeriesUnaryOperator;
 import tech.quantit.northstar.strategy.api.indicator.Indicator.ValueType;
-import tech.quantit.northstar.strategy.api.log.NorthstarLoggerFactory;
+import tech.quantit.northstar.strategy.api.log.ModuleLoggerFactory;
 import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
 import xyz.redtorch.pb.CoreEnum.ForceCloseReasonEnum;
 import xyz.redtorch.pb.CoreEnum.HedgeFlagEnum;
@@ -69,7 +69,7 @@ import xyz.redtorch.pb.CoreField.TradeField;
  */
 public class ModuleContext implements IModuleContext{
 	
-	private static final ILoggerFactory logFactory = new NorthstarLoggerFactory();
+	private static final ILoggerFactory logFactory = new ModuleLoggerFactory();
 	
 	protected TradeStrategy tradeStrategy;
 	

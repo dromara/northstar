@@ -58,6 +58,6 @@ public class AuthenticationController implements InitializingBean{
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		log.info("监控台登陆信息：{} / {}", userInfo.getUserId(), userInfo.getPassword());
+		log.debug("监控台登陆信息：{} / {}", userInfo.getUserId(), userInfo.getPassword());
 	}
 }

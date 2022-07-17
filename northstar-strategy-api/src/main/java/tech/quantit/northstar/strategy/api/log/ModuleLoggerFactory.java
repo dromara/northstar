@@ -16,7 +16,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.rolling.RollingFileAppender;
 import ch.qos.logback.core.rolling.TimeBasedRollingPolicy;
 
-public class NorthstarLoggerFactory implements ILoggerFactory{
+public class ModuleLoggerFactory implements ILoggerFactory{
 	
 	private static Map<String, Logger> loggerMap = new HashMap<>();
 	private static Map<String, RollingFileAppender<ILoggingEvent>> appenderMap = new HashMap<>();
