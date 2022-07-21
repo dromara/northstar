@@ -77,7 +77,12 @@
           </div>
           <div v-show="activeIndex === '2'">
             <el-form-item label="绑定策略">
-              <el-select v-model="form.strategySetting" placeholder="请选择" :disabled="readOnly">
+              <el-select
+                v-model="form.strategySetting"
+                placeholder="请选择"
+                :disabled="readOnly"
+                filterable
+              >
                 <el-option
                   v-for="(p, i) in tradeStrategyOptions"
                   :label="p.componentMeta.name"
@@ -261,6 +266,7 @@ export default {
       })
       moduleApi.getStrategies().then((strategyMetas) => {
         strategyMetas.forEach(async (i) => initComponent(i, this.tradeStrategyOptions))
+        this.tradeStrategyOptions.sort((a, b) => a.value.localeCompare(b.value))
       })
     },
     handleSelect(index) {

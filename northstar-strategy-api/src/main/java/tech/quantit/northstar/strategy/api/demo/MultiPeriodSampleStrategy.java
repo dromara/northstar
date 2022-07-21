@@ -25,7 +25,7 @@ import xyz.redtorch.pb.CoreField.BarField;
 public class MultiPeriodSampleStrategy extends AbstractStrategy	// 为了简化代码，引入一个通用的基础抽象类
 	implements TradeStrategy{
 
-	protected static final String NAME = "多周期示例策略";	// 之所以要这样定义一个常量，是为了方便日志输出时可以带上策略
+	protected static final String NAME = "示例-多周期策略";	// 之所以要这样定义一个常量，是为了方便日志输出时可以带上策略
 	
 	private InitParams params;	// 策略的参数配置信息
 	
