@@ -57,7 +57,7 @@
 - 服务端采用java17（拥抱新技术） + springboot2
 
 项目架构采用事件驱动+插件式开发
-![Image](https://images.gitee.com/uploads/images/2021/1107/172130_9da2bdcd_1676852.png)
+![输入图片说明](https://images.gitee.com/uploads/images/2022/0721/205844_7985317e_1676852.png "总体架构图.png")
 
 ## 启动步骤
 假设当前环境是全新的服务器  
