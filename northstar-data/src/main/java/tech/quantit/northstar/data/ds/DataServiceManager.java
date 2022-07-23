@@ -44,11 +44,11 @@ import xyz.redtorch.pb.CoreField.ContractField;
 @Slf4j
 public class DataServiceManager implements IDataServiceManager {
 	
-	private String nsSecret;
+	private String userToken;
+	
+	private String dummyToken;
 
 	private String baseUrl;
-	
-	private volatile String userToken;
 	
 	private DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyyMMdd");
 	
@@ -64,7 +64,7 @@ public class DataServiceManager implements IDataServiceManager {
 	
 	public DataServiceManager(String baseUrl, String secret, RestTemplate restTemplate, MarketDateTimeUtil dtUtil) {
 		this.baseUrl =  baseUrl;
-		this.nsSecret = secret;
+		this.userToken = secret;
 		this.dtUtil = dtUtil;
 		this.restTemplate = restTemplate;
 		log.info("采用外部数据源加载历史数据");
@@ -73,11 +73,15 @@ public class DataServiceManager implements IDataServiceManager {
 	
 	private void register() {
 		HttpHeaders headers = new HttpHeaders();
-		headers.add("X-SECRET", nsSecret);
+		headers.add("X-PCNAME", LocalEnvUtils.getPCName());
 		headers.add("X-MACHINE", LocalEnvUtils.getMACAddress());
 		HttpEntity<?> reqEntity = new HttpEntity<>(headers);
-		ResponseEntity<String> respEntity = restTemplate.exchange(URI.create(baseUrl + "/reg"), HttpMethod.GET, reqEntity, String.class);
-		userToken = respEntity.getBody();
+		try {			
+			ResponseEntity<String> respEntity = restTemplate.exchange(URI.create(baseUrl + "/reg"), HttpMethod.GET, reqEntity, String.class);
+			dummyToken = respEntity.getBody();
+		} catch (HttpServerErrorException e) {
+			throw new IllegalStateException("无法注册数据服务", e);
+		}
 	}
 	
 	/**
@@ -272,14 +276,19 @@ public class DataServiceManager implements IDataServiceManager {
 	
 	private DataSet execute(URI uri) {
 		HttpHeaders headers = new HttpHeaders();
-		headers.add("X-SECRET", nsSecret);
-		headers.add("X-TOKEN", userToken);
-		headers.add("X-MACHINE", LocalEnvUtils.getMACAddress());
+		String token;
+		if(StringUtils.isNotBlank(userToken)) {
+			token = userToken;
+		} else {
+			token = dummyToken;
+			log.warn("【注意】 当前数据服务调用受限，仅能查询 [合约信息] 与 [交易日历]。如需要查询历史行情数据，请向社群咨询。");
+		}
+		headers.add("Authorization", String.format("Bearer %s", token));
 		HttpEntity<?> reqEntity = new HttpEntity<>(headers);
 		try {			
 			ResponseEntity<DataSet> respEntity = restTemplate.exchange(uri, HttpMethod.GET, reqEntity, DataSet.class);
 			return respEntity.getBody();
-		} catch(HttpServerErrorException e) {
+		} catch (HttpServerErrorException e) {
 			JSONObject entity = JSON.parseObject(e.getResponseBodyAsString());
 			throw new IllegalStateException(entity.getString("message"));
 		} catch (Exception e) {

@@ -13,6 +13,14 @@ public class LocalEnvUtils {
 
 	private LocalEnvUtils() {
 	}
+
+	public static String getPCName() {
+		try {
+			return InetAddress.getLocalHost().getHostName();
+		} catch (UnknownHostException e) {
+			return "unknowHost";
+		}
+	}
 	
 	public static String getMACAddress() {
 		try {
@@ -27,7 +35,7 @@ public class LocalEnvUtils {
 			return "";
 		}
 	}
-
+	
 	private static byte[] getMACAddressBytes() throws SocketException, UnknownHostException {
 		byte[] hardwareAddress = NetworkInterface.getByInetAddress(InetAddress.getLocalHost()).getHardwareAddress();
 		if(hardwareAddress != null) {
