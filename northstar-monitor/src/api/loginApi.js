@@ -1,10 +1,12 @@
 import baseService from './baseRequest'
+import md5 from 'js-md5'
 
 export default {
   login(username, password) {
-    return baseService.post('/auth/login', {
+    const salt = new Date().getTime()
+    return baseService.post(`/auth/login?timestamp=${salt}`, {
       userName: username,
-      password: password
+      password: md5(password + salt)
     })
   },
 

@@ -1,5 +1,8 @@
 package tech.quantit.northstar.main.restful;
 
+import java.time.LocalDate;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import javax.servlet.http.HttpSession;
 
 import org.apache.commons.lang3.StringUtils;
@@ -12,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import cn.hutool.crypto.digest.MD5;
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.constant.Constants;
 import tech.quantit.northstar.common.exception.AuthenticationException;
@@ -35,14 +39,29 @@ public class AuthenticationController implements InitializingBean{
 	@Autowired
 	protected HttpSession session;
 	
+	private LocalDate errDate = LocalDate.now();
+	private AtomicInteger errCnt = new AtomicInteger();
+	private static final int MAX_ATTEMPT = 5;
+	
 	@PostMapping(value="/login", produces = "application/json")
-	public ResultBean<String> doAuth(@RequestBody NsUser user) {
+	public ResultBean<String> doAuth(long timestamp, @RequestBody NsUser user) {
+		if(errCnt.get() >= MAX_ATTEMPT) {
+			throw new AuthenticationException("超过重试限制，登陆受限");
+		}
 		Assert.hasText(user.getUserName(), "账户不能为空");
 		Assert.hasText(user.getPassword(), "密码不能为空");
-		if(StringUtils.equals(user.getUserName(), userInfo.getUserId()) && StringUtils.equals(user.getPassword(), userInfo.getPassword())) {
+		Assert.isTrue(Math.abs(timestamp - System.currentTimeMillis()) < 30000, "使用了非法登陆时间戳，请同步校准电脑时间");
+		String encodedPassword = MD5.create().digestHex((userInfo.getPassword() + timestamp));
+		if(StringUtils.equals(user.getUserName(), userInfo.getUserId()) && StringUtils.equals(user.getPassword(), encodedPassword)) {
 			session.setAttribute(Constants.KEY_USER, user);
 			return new ResultBean<>("OK");
 		}
+		LocalDate curDate = LocalDate.now();
+		if(!errDate.equals(curDate)) {
+			errDate = curDate;
+			errCnt.set(0);
+		}
+		errCnt.incrementAndGet();
 		throw new AuthenticationException("账户或密码不正确");
 	}
 
