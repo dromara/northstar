@@ -22,6 +22,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import com.alibaba.fastjson.JSON;
 import com.corundumstudio.socketio.SocketIOServer;
 
+import cn.hutool.crypto.digest.MD5;
 import common.TestGatewayFactory;
 import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.common.constant.GatewayUsage;
@@ -58,7 +59,9 @@ public class GatewayManagementTest {
 	@BeforeEach
 	public void setUp() throws Exception {
 		session = new MockHttpSession();
-		mockMvc.perform(post("/northstar/auth/login").contentType(MediaType.APPLICATION_JSON).content(JSON.toJSONString(new NsUser("admin","123456"))).session(session))
+		long time = System.currentTimeMillis();
+		String token = MD5.create().digestHex("123456" + time);
+		mockMvc.perform(post("/northstar/auth/login?timestamp="+time).contentType(MediaType.APPLICATION_JSON).content(JSON.toJSONString(new NsUser("admin",token))).session(session))
 			.andExpect(status().isOk());
 	}
 	

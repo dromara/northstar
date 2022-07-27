@@ -11,15 +11,15 @@ describe('登陆页-测试', () => {
     })
 
     it('用户名为空时，显示错误提示', () => {
-        cy.contains('用户名').parent().find('input').type('admin')
-        cy.contains('登陆').click()
-        cy.get('.el-message--error').contains('不能为空')
-    })
-
-    it('密码为空时，显示错误提示', () => {
         cy.contains('密码').parent().find('input').type('123456')
         cy.contains('登陆').click()
         cy.get('.el-message--error').contains('不能为空')
+    })
+    
+    it('密码为空时，显示错误提示', () => {
+        cy.contains('用户名').parent().find('input').type('admin')
+        cy.contains('登陆').click()
+        cy.get('.el-message--error').contains('不正确')
     })
 
     it('用户名不正确时，显示错误提示', () => {

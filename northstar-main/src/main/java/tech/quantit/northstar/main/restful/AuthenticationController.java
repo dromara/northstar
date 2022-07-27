@@ -54,6 +54,7 @@ public class AuthenticationController implements InitializingBean{
 		String encodedPassword = MD5.create().digestHex((userInfo.getPassword() + timestamp));
 		if(StringUtils.equals(user.getUserName(), userInfo.getUserId()) && StringUtils.equals(user.getPassword(), encodedPassword)) {
 			session.setAttribute(Constants.KEY_USER, user);
+			errCnt.set(0);
 			return new ResultBean<>("OK");
 		}
 		LocalDate curDate = LocalDate.now();
