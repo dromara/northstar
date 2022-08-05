@@ -107,6 +107,8 @@ public class DataServiceManager implements IDataServiceManager {
 						if(lastBar != null) {							
 							return BarField.newBuilder(bar)
 									.setOpenPrice(lastBar.getOpenPrice())
+									.setHighPrice(Math.max(lastBar.getOpenPrice(), bar.getHighPrice()))
+									.setLowPrice(Math.min(lastBar.getOpenPrice(), bar.getLowPrice()))
 									.setOpenInterestDelta(bar.getOpenInterestDelta() + lastBar.getOpenInterestDelta())
 									.setVolumeDelta(bar.getVolumeDelta() + lastBar.getVolumeDelta())
 									.setTurnoverDelta(bar.getTurnoverDelta() + lastBar.getTurnoverDelta())

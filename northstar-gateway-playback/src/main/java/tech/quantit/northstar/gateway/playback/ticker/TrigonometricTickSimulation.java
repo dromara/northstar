@@ -49,7 +49,7 @@ public class TrigonometricTickSimulation implements TickSimulationAlgorithm {
 		int numOfPriceTickFromHighToLow = (int) Math.round((bar.getHighPrice() - bar.getLowPrice()) / priceTick);	// 最高最低价之间一共有多少个最小变动价位
 		int numOfPriceTickFromOpenToLow = (int) Math.round((bar.getOpenPrice() - bar.getLowPrice()) / priceTick);
 		int numOfPriceTickFromCloseToLow = (int) Math.round((bar.getClosePrice() - bar.getLowPrice()) / priceTick);
-		double valuePerPriceTick = 2.0 / numOfPriceTickFromHighToLow;
+		double valuePerPriceTick = 2.0 / numOfPriceTickFromHighToLow;	// 每个价位在三角函数y坐标轴 [-1,1] 占据的比例 
 		double offset = isUp ? 0 : Math.PI * 2;
 		double highArcSinVal = Math.PI / 2;
 		double lowArcSinVal = - (Math.PI / 2) + offset; 
@@ -62,6 +62,7 @@ public class TrigonometricTickSimulation implements TickSimulationAlgorithm {
 		sectionLens[0] = isUp ? numOfPriceTickFromOpenToLow : numOfPriceTickFromHighToLow - numOfPriceTickFromOpenToLow;
 		sectionLens[1] = numOfPriceTickFromHighToLow;
 		sectionLens[2] = isUp ? numOfPriceTickFromHighToLow - numOfPriceTickFromCloseToLow : numOfPriceTickFromCloseToLow;
+		List<TickField> ticks = new ArrayList<>(totalSize);
 		List<Double> ohlc = insertVals(List.of(openArcSinVal, closeArcSinVal, highArcSinVal, lowArcSinVal), sectionLens) ;
 		List<Double> prices = ohlc.stream()
 				.mapToDouble(Double::doubleValue)
@@ -69,7 +70,6 @@ public class TrigonometricTickSimulation implements TickSimulationAlgorithm {
 				.map(val -> Math.round((val + 1) / valuePerPriceTick) * priceTick + bar.getLowPrice())
 				.mapToObj(Double::valueOf)
 				.toList();
-		List<TickField> ticks = new ArrayList<>(totalSize);
 		int timeFrame = 60000 / totalSize;
 		long tickVolDelta = bar.getVolumeDelta() / totalSize;
 		double tickOpenInterestDelta = bar.getOpenInterestDelta() / totalSize;
@@ -78,32 +78,32 @@ public class TrigonometricTickSimulation implements TickSimulationAlgorithm {
 		
 		for(int i=0; i<totalSize; i++) {
 			ticks.add(TickField.newBuilder()
-						.setUnifiedSymbol(bar.getUnifiedSymbol())
-						.setPreClosePrice(bar.getPreClosePrice())
-						.setPreOpenInterest(bar.getPreOpenInterest())
-						.setPreSettlePrice(bar.getPreSettlePrice())
-						.setTradingDay(bar.getTradingDay())
-						.setLastPrice(prices.get(i))
-						.setStatus(TickType.NORMAL_TICK.getCode())
-						.setActionDay(bar.getActionDay())
-						.setActionTime(bar.getActionTime())
-						.setActionTimestamp(bar.getActionTimestamp() - (totalSize - i) * timeFrame)
-						.addAllAskPrice(List.of(prices.get(i) + priceTick, 0D, 0D, 0D, 0D)) // 仅模拟卖一价
-						.addAllBidPrice(List.of(prices.get(i) - priceTick, 0D, 0D, 0D, 0D)) // 仅模拟买一价
-						.setGatewayId(gatewayId)
-						.setHighPrice(bar.getHighPrice())	
-						.setLowPrice(bar.getLowPrice())		
-						.setLowerLimit(0)
-						.setUpperLimit(Integer.MAX_VALUE)
-						.setVolumeDelta(tickVolDelta)
-						.setVolume(bar.getVolume())
-						.setOpenInterestDelta(tickOpenInterestDelta)
-						.setOpenInterest(bar.getOpenInterest())
-						.setTurnoverDelta(tickTurnoverDelta)
-						.setTurnover(bar.getTurnover())
-						.setNumTradesDelta(tickNumTradesDelta)
-						.setNumTrades(bar.getNumTrades())
-						.build());
+					.setUnifiedSymbol(bar.getUnifiedSymbol())
+					.setPreClosePrice(bar.getPreClosePrice())
+					.setPreOpenInterest(bar.getPreOpenInterest())
+					.setPreSettlePrice(bar.getPreSettlePrice())
+					.setTradingDay(bar.getTradingDay())
+					.setLastPrice(prices.get(i))
+					.setStatus(TickType.NORMAL_TICK.getCode())
+					.setActionDay(bar.getActionDay())
+					.setActionTime(bar.getActionTime())
+					.setActionTimestamp(bar.getActionTimestamp() - (totalSize - i) * timeFrame)
+					.addAllAskPrice(List.of(prices.get(i) + priceTick, 0D, 0D, 0D, 0D)) // 仅模拟卖一价
+					.addAllBidPrice(List.of(prices.get(i) - priceTick, 0D, 0D, 0D, 0D)) // 仅模拟买一价
+					.setGatewayId(gatewayId)
+					.setHighPrice(bar.getHighPrice())	
+					.setLowPrice(bar.getLowPrice())		
+					.setLowerLimit(0)
+					.setUpperLimit(Integer.MAX_VALUE)
+					.setVolumeDelta(tickVolDelta)
+					.setVolume(bar.getVolume())
+					.setOpenInterestDelta(tickOpenInterestDelta)
+					.setOpenInterest(bar.getOpenInterest())
+					.setTurnoverDelta(tickTurnoverDelta)
+					.setTurnover(bar.getTurnover())
+					.setNumTradesDelta(tickNumTradesDelta)
+					.setNumTrades(bar.getNumTrades())
+					.build());
 		}
 		return ticks;
 	}
@@ -128,7 +128,9 @@ public class TrigonometricTickSimulation implements TickSimulationAlgorithm {
 		List<Double> resultList = new ArrayList<>(totalSize);
 		for(int i=0; i<3; i++) {
 			resultList.add(sourceArr[i]);
-			resultList.addAll(makeSectionValues(sourceArr[i], sourceArr[i+1], sectionLen[i]));
+			double rangeLow = Math.min(sourceArr[i], sourceArr[i+1]);
+			double rangeHigh = Math.max(sourceArr[i], sourceArr[i+1]);
+			resultList.addAll(makeSectionValues(rangeLow, rangeHigh, sectionLen[i]));
 		}
 		resultList.add(sourceArr[3]);
 		return resultList;
@@ -138,7 +140,7 @@ public class TrigonometricTickSimulation implements TickSimulationAlgorithm {
 	private List<Double> makeSectionValues(double rangeLow, double rangeHigh, int numOfValToInsert){
 		List<Double> sectionValues = new ArrayList<>();
 		for(int i=0; i<numOfValToInsert; i++) {
-			sectionValues.add(rand.nextDouble(rangeLow, rangeHigh));
+			sectionValues.add(rangeLow == rangeHigh ? rangeHigh : rand.nextDouble(rangeLow, rangeHigh));
 		}
 		return sectionValues.stream().sorted().toList();
 	}
