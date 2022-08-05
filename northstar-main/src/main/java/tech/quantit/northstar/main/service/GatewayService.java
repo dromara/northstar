@@ -1,25 +1,21 @@
 package tech.quantit.northstar.main.service;
 
 import java.io.File;
-import java.util.LinkedList;
+import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.dao.DuplicateKeyException;
 
 import com.alibaba.fastjson.JSON;
 
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import tech.quantit.northstar.common.constant.GatewayType;
+import tech.quantit.northstar.common.IContractManager;
 import tech.quantit.northstar.common.constant.GatewayUsage;
 import tech.quantit.northstar.common.exception.NoSuchElementException;
-import tech.quantit.northstar.common.model.ContractDefinition;
+import tech.quantit.northstar.common.model.ComponentField;
 import tech.quantit.northstar.common.model.GatewayDescription;
 import tech.quantit.northstar.common.model.ModuleAccountDescription;
 import tech.quantit.northstar.common.model.ModuleDescription;
@@ -28,18 +24,15 @@ import tech.quantit.northstar.data.IMarketDataRepository;
 import tech.quantit.northstar.data.IModuleRepository;
 import tech.quantit.northstar.data.IPlaybackRuntimeRepository;
 import tech.quantit.northstar.data.ISimAccountRepository;
-import tech.quantit.northstar.domain.gateway.ContractManager;
 import tech.quantit.northstar.domain.gateway.GatewayAndConnectionManager;
 import tech.quantit.northstar.domain.gateway.GatewayConnection;
 import tech.quantit.northstar.gateway.api.Gateway;
 import tech.quantit.northstar.gateway.api.GatewayFactory;
+import tech.quantit.northstar.gateway.api.GatewaySettingsMetaInfoProvider;
+import tech.quantit.northstar.gateway.api.GatewayTypeProvider;
 import tech.quantit.northstar.gateway.api.MarketGateway;
-import tech.quantit.northstar.gateway.playback.PlaybackGatewayFactory;
-import tech.quantit.northstar.gateway.sim.trade.SimGatewayFactory;
 import tech.quantit.northstar.gateway.sim.trade.SimTradeGateway;
 import tech.quantit.northstar.main.utils.CodecUtils;
-import xyz.redtorch.gateway.ctp.x64v6v3v15v.CtpGatewayFactory;
-import xyz.redtorch.gateway.ctp.x64v6v5v1cpv.CtpSimGatewayFactory;
 import xyz.redtorch.pb.CoreField.ContractField;
 
 /**
@@ -50,9 +43,16 @@ import xyz.redtorch.pb.CoreField.ContractField;
  *
  */
 @Slf4j
-public class GatewayService implements InitializingBean, ApplicationContextAware{
+@AllArgsConstructor
+public class GatewayService implements InitializingBean {
 	
 	private GatewayAndConnectionManager gatewayConnMgr;
+	
+	private GatewayTypeProvider gatewayTypeProvider;
+	
+	private GatewaySettingsMetaInfoProvider gatewaySettingsProvider;
+	
+	private IContractManager contractMgr;
 	
 	private IGatewayRepository gatewayRepo;
 	
@@ -62,22 +62,7 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 	
 	private IPlaybackRuntimeRepository playbackRtRepo;
 	
-	private ApplicationContext ctx;
-	
 	private IModuleRepository moduleRepo;
-	
-	private ContractManager contractMgr;
-	
-	public GatewayService(GatewayAndConnectionManager gatewayConnMgr, IGatewayRepository gatewayRepo, IMarketDataRepository mdRepo,
-			IPlaybackRuntimeRepository playbackRtRepo, IModuleRepository moduleRepo, ISimAccountRepository simAccRepo, ContractManager contractMgr) {
-		this.gatewayConnMgr = gatewayConnMgr;
-		this.gatewayRepo = gatewayRepo;
-		this.mdRepo = mdRepo;
-		this.contractMgr = contractMgr;
-		this.moduleRepo = moduleRepo;
-		this.simAccRepo = simAccRepo;
-		this.playbackRtRepo = playbackRtRepo;
-	}
 	
 	/**
 	 * 创建网关
@@ -94,18 +79,7 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 	private boolean doCreateGateway(GatewayDescription gatewayDescription) {
 		Gateway gateway = null;
 		GatewayConnection conn = new GatewayConnection(gatewayDescription);
-		GatewayFactory factory = null;
-		if(gatewayDescription.getGatewayType() == GatewayType.CTP) {
-			factory = ctx.getBean(CtpGatewayFactory.class);
-		} else if(gatewayDescription.getGatewayType() == GatewayType.SIM) {
-			factory = ctx.getBean(SimGatewayFactory.class);
-		} else if(gatewayDescription.getGatewayType() == GatewayType.CTP_SIM) {
-			factory = ctx.getBean(CtpSimGatewayFactory.class);
-		} else if(gatewayDescription.getGatewayType() == GatewayType.PLAYBACK) {
-			factory = ctx.getBean(PlaybackGatewayFactory.class);
-		} else {
-			throw new NoSuchElementException("没有这种网关类型：" + gatewayDescription.getGatewayType());
-		}
+		GatewayFactory factory = gatewayTypeProvider.getFactory(gatewayDescription.getGatewayType());
 		gateway = factory.newInstance(gatewayDescription);
 		gatewayConnMgr.createPair(conn, gateway);
 		if(gatewayDescription.isAutoConnect()) {
@@ -176,9 +150,9 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 		}
 		boolean flag = doDeleteGateway(gatewayId);
 		mdRepo.dropGatewayData(gatewayId);
-		if(gd.getGatewayType() == GatewayType.SIM)
+		if(gd.getGatewayType().equals("SIM"))
 			simAccRepo.deleteById(gatewayId);
-		if(gd.getGatewayType() == GatewayType.PLAYBACK) 
+		if(gd.getGatewayType().equals("PLAYBACK")) 
 			playbackRtRepo.deleteById(gatewayId);
 		return flag;
 	}
@@ -298,32 +272,29 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 	}
 	
 	/**
-	 * 获取合约定义
+	 * 网关配置元信息
 	 * @param gatewayType
 	 * @return
 	 */
-	public List<ContractDefinition> contractDefinitions(GatewayType gatewayType){
-		return contractMgr.getAllContractDefinitions().stream()
-				.filter(def -> def.getGatewayType() == gatewayType)
-				.toList();
+	public Collection<ComponentField> getGatewaySettingsMetaInfo(String gatewayType) {
+		return gatewaySettingsProvider.getSettings(gatewayType);
 	}
 	
 	/**
-	 * 获取已订阅合约
-	 * @param gatewayType
+	 * 网关已订阅合约
+	 * @param gatewayId
 	 * @return
 	 */
-	public List<byte[]> getSubscribedContracts(String gatewayId){
-		Map<String, GatewayDescription> resultMap = gatewayRepo.findAll().stream().collect(Collectors.toMap(GatewayDescription::getGatewayId, item -> item));
-		GatewayDescription gd = resultMap.get(gatewayId);
+	public List<ContractField> getSubscribedContractList(String gatewayId){
+		GatewayDescription gd = gatewayRepo.findById(gatewayId);
 		if(gd == null) {
-			throw new NoSuchElementException("找不到网关信息：" + gatewayId);
+			throw new NoSuchElementException("没有找到网关：" + gatewayId);
 		}
-		List<ContractField> resultList = new LinkedList<>();
-		for(String contractDefId : gd.getSubscribedContractGroups()) {
-			resultList.addAll(contractMgr.relativeContracts(contractDefId));
-		}
-		return resultList.stream().map(ContractField::toByteArray).toList();
+		List<String> subContractDefIds = gd.getSubscribedContractGroups();
+		return subContractDefIds.stream()
+				.map(defId -> contractMgr.relativeContracts(defId))
+				.flatMap(Collection::stream)
+				.toList();
 	}
 	
 	@Override
@@ -340,8 +311,5 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 		}
 	}
 
-	@Override
-	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-		this.ctx = applicationContext;
-	}
+	
 }

@@ -9,7 +9,6 @@ import org.apache.commons.lang3.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.IDataServiceManager;
 import tech.quantit.northstar.common.constant.DateTimeConstant;
-import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.data.IMarketDataRepository;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreField.BarField;
@@ -51,7 +50,7 @@ public class MarketDataRepoDataServiceImpl implements IMarketDataRepository{
 	}
 
 	@Override
-	public List<LocalDate> findHodidayInLaw(GatewayType gatewayType, int year) {
+	public List<LocalDate> findHodidayInLaw(String gatewayType, int year) {
 		List<LocalDate> resultList;
 		try {
 			resultList = dsMgr.getHolidays(ExchangeEnum.SHFE, LocalDate.of(year, 1, 1), LocalDate.of(year, 12, 31));

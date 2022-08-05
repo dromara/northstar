@@ -1,6 +1,5 @@
 package tech.quantit.northstar.gateway.sim.trade;
 
-import tech.quantit.northstar.common.constant.GatewayType;
 import xyz.redtorch.pb.CoreEnum.CurrencyEnum;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
@@ -18,7 +17,7 @@ public class SimContractGenerator {
 		String symbol = "sim9999";
 		String name = "模拟品种9999";
 		return ContractField.newBuilder()
-				.setGatewayId(GatewayType.SIM.toString())
+				.setGatewayId("SIM")
 				.setContractId(symbol + "@SHFE@FUTURES@" + gatewayId)
 				.setCurrency(CurrencyEnum.CNY)
 				.setExchange(ExchangeEnum.SHFE)
@@ -27,7 +26,7 @@ public class SimContractGenerator {
 				.setUnifiedSymbol(symbol + "@SHFE@FUTURES")
 				.setSymbol(symbol)
 				.setProductClass(ProductClassEnum.FUTURES)
-				.setThirdPartyId(symbol + "@" + GatewayType.SIM)
+				.setThirdPartyId(symbol + "@SIM")
 				.setMultiplier(10)
 				.setPriceTick(1)
 				.setLongMarginRatio(0.08)
@@ -40,7 +39,7 @@ public class SimContractGenerator {
 		String symbol = "sim999";
 		String name = "模拟品种999";
 		return ContractField.newBuilder()
-				.setGatewayId(GatewayType.SIM.toString())
+				.setGatewayId("SIM")
 				.setContractId(symbol + "@CZCE@FUTURES@" + gatewayId)
 				.setCurrency(CurrencyEnum.CNY)
 				.setExchange(ExchangeEnum.CZCE)
@@ -49,7 +48,7 @@ public class SimContractGenerator {
 				.setUnifiedSymbol(symbol + "@CZCE@FUTURES")
 				.setSymbol(symbol)
 				.setProductClass(ProductClassEnum.FUTURES)
-				.setThirdPartyId(symbol + "@" + GatewayType.SIM)
+				.setThirdPartyId(symbol + "@SIM")
 				.setMultiplier(10)
 				.setPriceTick(0.5)
 				.setLongMarginRatio(0.08)

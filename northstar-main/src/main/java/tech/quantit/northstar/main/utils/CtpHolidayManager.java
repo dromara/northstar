@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.IHolidayManager;
-import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.data.IMarketDataRepository;
 
 /**
@@ -33,9 +32,9 @@ public class CtpHolidayManager implements IHolidayManager, InitializingBean{
 	public void afterPropertiesSet() throws Exception {
 		LocalDate today = LocalDate.now();
 		// 加载前后一年的假期数据
-		addHoliday(repo.findHodidayInLaw(GatewayType.CTP, today.getYear() - 1));
-		addHoliday(repo.findHodidayInLaw(GatewayType.CTP, today.getYear()));
-		addHoliday(repo.findHodidayInLaw(GatewayType.CTP, today.getYear() + 1));
+		addHoliday(repo.findHodidayInLaw("CTP", today.getYear() - 1));
+		addHoliday(repo.findHodidayInLaw("CTP", today.getYear()));
+		addHoliday(repo.findHodidayInLaw("CTP", today.getYear() + 1));
 	}
 	
 	private void addHoliday(List<LocalDate> holidays) {

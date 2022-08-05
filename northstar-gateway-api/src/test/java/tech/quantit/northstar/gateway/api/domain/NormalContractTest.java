@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
 
-import tech.quantit.northstar.common.constant.GatewayType;
 import test.common.TestFieldFactory;
 import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
@@ -20,7 +19,7 @@ class NormalContractTest {
 
 	@Test
 	void testGatewayType() {
-		assertThat(contract.gatewayType()).isEqualTo(GatewayType.CTP);
+		assertThat(contract.gatewayType()).isEqualTo("CTP");
 	}
 
 	@Test

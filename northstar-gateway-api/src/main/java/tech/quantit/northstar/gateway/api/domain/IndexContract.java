@@ -3,7 +3,6 @@ package tech.quantit.northstar.gateway.api.domain;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import tech.quantit.northstar.common.constant.GatewayType;
 import xyz.redtorch.pb.CoreField.ContractField;
 
 public class IndexContract extends NormalContract {
@@ -34,7 +33,7 @@ public class IndexContract extends NormalContract {
 				.setShortMarginRatio(0.1)
 				.setName(name)
 				.build();
-		super.gatewayType = GatewayType.valueOf(protoContract.getThirdPartyId().split("@")[1]);
+		super.gatewayType = protoContract.getThirdPartyId().split("@")[1];
 		super.updateTime = System.currentTimeMillis();
 		this.monthlyContracts = monthlyContracts;
 	}

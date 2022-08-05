@@ -1,26 +1,20 @@
 <template>
   <el-dialog width="300px" title="合约查询" :visible="visible" append-to-body :before-close="close">
     <el-form label-width="100px">
-      <el-form-item label="网关列表">
-        <el-select v-model="gateway">
-          <el-option v-for="gw in gatewayList" :label="gw" :value="gw" :key="gw"></el-option>
+      <el-form-item label="网关类别">
+        <el-select v-model="gatewayType">
+          <el-option v-for="gw in gatewayTypes" :label="gw" :value="gw" :key="gw"></el-option>
         </el-select>
       </el-form-item>
       <el-form-item label="合约类型">
         <el-select v-model="contractType">
-          <el-option
-            v-for="t in contractTypeOptions"
-            :label="t.label"
-            :value="t.value"
-            :key="t.value"
-            :disabled="t.disabled"
-          ></el-option>
+          <el-option v-for="t in contractTypeOptions" :label="t" :value="t" :key="t"></el-option>
         </el-select>
       </el-form-item>
       <el-form-item label="合约列表">
         <el-select v-model="unifiedSymbol" filterable>
           <el-option
-            v-for="(c, i) in gwContractList"
+            v-for="(c, i) in contractList"
             :label="c.name"
             :value="c.unifiedsymbol"
             :key="i"
@@ -47,6 +41,7 @@
 
 <script>
 import gatewayMgmtApi from '@/api/gatewayMgmtApi'
+import contractApi from '@/api/contractApi'
 import { ContractField } from '@/lib/xyz/redtorch/pb/core_field_pb'
 
 export default {
@@ -58,33 +53,36 @@ export default {
   },
   data() {
     return {
-      gateway: '',
+      gatewayType: '',
       contractType: '',
       unifiedSymbol: '',
+      gatewayTypes: [],
       contractList: [],
-      contractTypeOptions: [
-        { value: 2, label: '期货合约' },
-        { value: 3, label: '期权合约' }
-      ]
+      contractTypeOptions: []
     }
   },
   watch: {
-    gateway: async function () {
+    gatewayType: function (val) {
+      this.contractType = ''
       this.unifiedSymbol = ''
-      try {
-        await this.updateContractList()
-      } catch (e) {
-        this.$message.error(e.message)
+      contractApi.getContractProviders(val).then((result) => {
+        this.contractTypeOptions = result
+      })
+    },
+    contractType: function (val) {
+      if (val) {
+        contractApi.getContractList(val).then((result) => {
+          this.contractList = result
+            .map((item) => ContractField.deserializeBinary(item).toObject())
+            .sort((a, b) => a['unifiedsymbol'].localeCompare(b['unifiedsymbol']))
+        })
       }
     }
   },
-  computed: {
-    gatewayList() {
-      return ['CTP', 'SIM']
-    },
-    gwContractList() {
-      return this.contractList.filter((item) => item.productclass === this.contractType)
-    }
+  mounted() {
+    gatewayMgmtApi.getGatewayTypeDescriptions().then((result) => {
+      this.gatewayTypes = result.filter((item) => !item.adminOnly).map((item) => item.name)
+    })
   },
   methods: {
     copy() {
@@ -95,12 +93,6 @@ export default {
       selection.removeAllRanges()
       selection.addRange(range)
       document.execCommand('Copy')
-    },
-    async updateContractList() {
-      this.contractList = await gatewayMgmtApi.getSubscribedContracts(this.gateway)
-      this.contractList = this.contractList
-        .map((item) => ContractField.deserializeBinary(item).toObject())
-        .sort((a, b) => a['unifiedsymbol'].localeCompare(b['unifiedsymbol']))
     },
     close() {
       this.$emit('update:visible', false)

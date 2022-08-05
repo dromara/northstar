@@ -13,7 +13,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 import tech.quantit.northstar.common.constant.Constants;
-import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.data.IContractRepository;
 /*
  * 单元测试主要验证这几个方面：
@@ -74,32 +73,32 @@ class ContractRepoRedisImplTest {
 
 	@Test
 	void testSave() {
-		repo.save(c2, GatewayType.CTP);
+		repo.save(c2, "CTP");
 		assertThat(redisTemplate.hasKey(Constants.APP_NAME + "Contracts:CTP")).isTrue();
 		assertThat(redisTemplate.getExpire(Constants.APP_NAME + "Contracts:CTP")).isNegative();
 	}
 
 	@Test
 	void testFindAll() {
-		repo.save(c1, GatewayType.CTP);
+		repo.save(c1, "CTP");
 		
-		List<ContractField> list = repo.findAll(GatewayType.CTP);
+		List<ContractField> list = repo.findAll("CTP");
 		assertThat(list).hasSize(1).contains(c1);
 	}
 	
 	@Test
 	void shouldOnlyCreateOnce() {
-		repo.save(c1, GatewayType.CTP);
-		repo.save(c1, GatewayType.CTP);
-		List<ContractField> list = repo.findAll(GatewayType.CTP);
+		repo.save(c1, "CTP");
+		repo.save(c1, "CTP");
+		List<ContractField> list = repo.findAll("CTP");
 		assertThat(list).hasSize(1).contains(c1);
 	}
 	
 //	@Test
 //	void shouldFilterExpiredContract() {
-//		repo.save(c1, GatewayType.CTP);
-//		repo.save(c3, GatewayType.CTP);
-//		List<ContractField> list = repo.findAll(GatewayType.CTP);
+//		repo.save(c1, "CTP");
+//		repo.save(c3, "CTP");
+//		List<ContractField> list = repo.findAll("CTP");
 //		assertThat(list).hasSize(1).contains(c1);
 //	}
 

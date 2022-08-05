@@ -13,7 +13,6 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 
-import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.common.model.ContractDefinition;
 import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
 
@@ -31,7 +30,7 @@ public class ContractDefinitionReader {
 				Double commissionInBP = StringUtils.isEmpty(tokens[headerMap.get("commissionInBP")]) ? 0D : Double.parseDouble(tokens[headerMap.get("commissionInBP")]); 
 				String ptnStr = tokens[headerMap.get("symbolPattern")].replaceAll("^\"(.+)\"$", "$1");
 				resultList.add(ContractDefinition.builder()
-						.gatewayType(GatewayType.valueOf(tokens[headerMap.get("gatewayType")]))
+						.gatewayType(tokens[headerMap.get("gatewayType")])
 						.name(tokens[headerMap.get("name")])
 						.productClass(ProductClassEnum.valueOf(tokens[headerMap.get("class")]))
 						.symbolPattern(Pattern.compile(ptnStr))

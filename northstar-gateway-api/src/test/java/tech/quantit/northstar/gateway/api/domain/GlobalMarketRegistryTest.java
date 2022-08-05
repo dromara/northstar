@@ -11,7 +11,7 @@ import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Test;
 
-import tech.quantit.northstar.common.constant.GatewayType;
+import tech.quantit.northstar.common.GatewayType;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.gateway.api.MarketGateway;
 import test.common.TestFieldFactory;
@@ -33,7 +33,7 @@ class GlobalMarketRegistryTest {
 		when(contract.contractField()).thenReturn(factory.makeContract("rb2210"));
 		MarketGateway gateway = mock(MarketGateway.class);
 		when(gateway.isConnected()).thenReturn(true);
-		when(contract.gatewayType()).thenReturn(GatewayType.CTP);
+		when(contract.gatewayType()).thenReturn("CTP");
 		when(contract.barGenerator()).thenReturn(mock(BarGenerator.class));
 		
 		registry.register(contract);
@@ -49,7 +49,7 @@ class GlobalMarketRegistryTest {
 		when(contract.contractField()).thenReturn(factory.makeContract("rb2210"));
 		MarketGateway gateway = mock(MarketGateway.class);
 		when(contract.indexTicker()).thenReturn(mock(IndexTicker.class));
-		when(contract.gatewayType()).thenReturn(GatewayType.CTP);
+		when(contract.gatewayType()).thenReturn("CTP");
 		when(contract.barGenerator()).thenReturn(mock(BarGenerator.class));
 		registry.register(contract);
 		
@@ -62,9 +62,9 @@ class GlobalMarketRegistryTest {
 		NormalContract contract = mock(NormalContract.class);
 		MarketGateway gateway = mock(MarketGateway.class);
 		when(contract.contractField()).thenReturn(factory.makeContract("rb2210"));
-		when(gateway.gatewayType()).thenReturn(GatewayType.CTP);
+		when(gateway.gatewayType()).thenReturn("CTP");
 		when(gateway.isConnected()).thenReturn(true);
-		when(contract.gatewayType()).thenReturn(GatewayType.CTP);
+		when(contract.gatewayType()).thenReturn("CTP");
 		when(contract.barGenerator()).thenReturn(mock(BarGenerator.class));
 		
 		registry.register(contract);
@@ -78,8 +78,8 @@ class GlobalMarketRegistryTest {
 		NormalContract contract = mock(NormalContract.class);
 		when(contract.contractField()).thenReturn(factory.makeContract("rb2210"));
 		MarketGateway gateway = mock(MarketGateway.class);
-		when(gateway.gatewayType()).thenReturn(GatewayType.CTP);
-		when(contract.gatewayType()).thenReturn(GatewayType.CTP);
+		when(gateway.gatewayType()).thenReturn("CTP");
+		when(contract.gatewayType()).thenReturn("CTP");
 		when(contract.unifiedSymbol()).thenReturn(tick.getUnifiedSymbol());
 		BarGenerator barGen = mock(BarGenerator.class);
 		when(contract.barGenerator()).thenReturn(barGen);

@@ -17,7 +17,6 @@ import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.constant.Constants;
 import tech.quantit.northstar.common.constant.DateTimeConstant;
-import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.common.constant.ModuleState;
 import tech.quantit.northstar.common.event.NorthstarEvent;
 import tech.quantit.northstar.common.event.NorthstarEventType;
@@ -184,8 +183,8 @@ public class ModuleService implements InitializingBean {
 		ModuleRuntimeDescription mrd = moduleRepo.findRuntimeByName(md.getModuleName());
 		int daysOfDataForPreparation = md.getDaysOfDataForPreparation();
 		int year = LocalDate.now().getYear();
-		List<LocalDate> datesLastYear = mdRepo.findHodidayInLaw(GatewayType.CTP, year - 1);
-		List<LocalDate> datesThisYear = mdRepo.findHodidayInLaw(GatewayType.CTP, year);
+		List<LocalDate> datesLastYear = mdRepo.findHodidayInLaw("CTP", year - 1);
+		List<LocalDate> datesThisYear = mdRepo.findHodidayInLaw("CTP", year);
 		Set<LocalDate> holidays = new HashSet<>();
 		holidays.addAll(datesLastYear);
 		holidays.addAll(datesThisYear);

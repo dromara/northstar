@@ -213,7 +213,7 @@ export default {
       timelyCheck()
 
       gatewayMgmtApi
-        .getSubscribedContracts(this.chosenAccount.bindedMktGatewayId)
+        .getSubscribedContractList(this.chosenAccount.bindedMktGatewayId)
         .then((list) => {
           this.symbolList = list
             .map((item) => ContractField.deserializeBinary(item).toObject())

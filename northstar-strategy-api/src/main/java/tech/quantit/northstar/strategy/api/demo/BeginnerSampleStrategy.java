@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 
 import com.alibaba.fastjson.JSONObject;
 
+import tech.quantit.northstar.common.constant.FieldType;
 import tech.quantit.northstar.common.constant.ModuleState;
 import tech.quantit.northstar.common.constant.SignalOperation;
 import tech.quantit.northstar.common.model.DynamicParams;
@@ -48,7 +49,7 @@ public class BeginnerSampleStrategy implements TradeStrategy{
 	 */
 	public static class InitParams extends DynamicParams {			// 每个策略都要有一个用于定义初始化参数的内部类，类名称不能改
 		
-		@Setting(value="操作间隔", order=10, unit="秒")		// Label注解用于定义属性的元信息。可以声明单位
+		@Setting(label="操作间隔", type = FieldType.NUMBER, order=10, unit="秒")		// Label注解用于定义属性的元信息。可以声明单位
 		private int actionInterval;						// 属性可以为任意多个，当元素为多个时order值用于控制前端的显示顺序
 		
 	}

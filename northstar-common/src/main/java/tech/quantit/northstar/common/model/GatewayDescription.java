@@ -7,7 +7,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import tech.quantit.northstar.common.constant.ConnectionState;
-import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.common.constant.GatewayUsage;
 
 /**
@@ -25,7 +24,7 @@ public class GatewayDescription {
 	
 	private String description;
 	
-	private GatewayType gatewayType;
+	private String gatewayType;
 	
 	private GatewayUsage gatewayUsage;
 	

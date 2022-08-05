@@ -6,7 +6,6 @@ import static org.mockito.Mockito.mock;
 import org.junit.jupiter.api.Test;
 
 import tech.quantit.northstar.common.IContractManager;
-import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.common.constant.GatewayUsage;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.model.GatewayDescription;
@@ -20,11 +19,11 @@ class SimGatewayFactoryTest {
 		ISimAccountRepository accRepo = mock(ISimAccountRepository.class);
 		SimMarket simMarket = mock(SimMarket.class);
 		SimGatewayFactory factory = new SimGatewayFactory(mock(FastEventEngine.class), simMarket, accRepo, mock(GlobalMarketRegistry.class), mock(IContractManager.class));
-		GatewayDescription gd = GatewayDescription.builder().gatewayId("gatewayid").gatewayType(GatewayType.SIM)
+		GatewayDescription gd = GatewayDescription.builder().gatewayId("gatewayid").gatewayType("SIM")
 				.gatewayUsage(GatewayUsage.TRADE).build();
 		assertThat(factory.newInstance(gd)).isNotNull();
 		
-		GatewayDescription gd2 = GatewayDescription.builder().gatewayId("gatewayid").gatewayType(GatewayType.SIM)
+		GatewayDescription gd2 = GatewayDescription.builder().gatewayId("gatewayid").gatewayType("SIM")
 				.gatewayUsage(GatewayUsage.MARKET_DATA).build();
 		assertThat(factory.newInstance(gd2)).isNotNull();
 	}

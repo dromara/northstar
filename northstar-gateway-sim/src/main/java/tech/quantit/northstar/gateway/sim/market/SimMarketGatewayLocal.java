@@ -10,11 +10,11 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import lombok.extern.slf4j.Slf4j;
-import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.event.NorthstarEventType;
 import tech.quantit.northstar.gateway.api.MarketGateway;
 import tech.quantit.northstar.gateway.api.domain.GlobalMarketRegistry;
+import tech.quantit.northstar.gateway.sim.SIM;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.GatewaySettingField;
 import xyz.redtorch.pb.CoreField.TickField;
@@ -115,8 +115,8 @@ public class SimMarketGatewayLocal implements MarketGateway{
 	}
 
 	@Override
-	public GatewayType gatewayType() {
-		return GatewayType.SIM;
+	public String gatewayType() {
+		return SIM.class.getName();
 	}
 
 }

@@ -22,7 +22,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import tech.quantit.northstar.common.constant.DateTimeConstant;
-import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.common.event.NorthstarEventType;
 import tech.quantit.northstar.gateway.api.GatewayAbstract;
 import tech.quantit.northstar.gateway.api.domain.ContractFactory;
@@ -1309,7 +1308,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 			String symbol = pInstrument.getInstrumentID();
 			String name = CtpContractNameResolver.getCNSymbolName(symbol);
 			ContractField.Builder contractBuilder = ContractField.newBuilder();
-			contractBuilder.setGatewayId(GatewayType.CTP.toString());
+			contractBuilder.setGatewayId("CTP");
 			contractBuilder.setSymbol(symbol);
 			contractBuilder.setExchange(CtpConstant.exchangeMapReverse.getOrDefault(pInstrument.getExchangeID(), ExchangeEnum.UnknownExchange));
 			contractBuilder.setProductClass(CtpConstant.productTypeMapReverse.getOrDefault(pInstrument.getProductClass(), ProductClassEnum.UnknownProductClass));
@@ -1317,7 +1316,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 			contractBuilder.setContractId(contractBuilder.getUnifiedSymbol() + "@" + gatewayId);
 			contractBuilder.setName(name != null ? name : pInstrument.getInstrumentName());
 			contractBuilder.setFullName(pInstrument.getInstrumentName());
-			contractBuilder.setThirdPartyId(contractBuilder.getSymbol() + "@" + GatewayType.CTP);
+			contractBuilder.setThirdPartyId(contractBuilder.getSymbol() + "@CTP");
 
 			if (pInstrument.getVolumeMultiple() <= 0) {
 				contractBuilder.setMultiplier(1);

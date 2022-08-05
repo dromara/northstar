@@ -20,7 +20,6 @@ import tech.quantit.northstar.common.constant.PlaybackPrecision;
 import tech.quantit.northstar.common.constant.PlaybackSpeed;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.event.NorthstarEventType;
-import tech.quantit.northstar.common.model.PlaybackSettings;
 import tech.quantit.northstar.data.IPlaybackRuntimeRepository;
 import tech.quantit.northstar.gateway.playback.ticker.TickSimulationAlgorithm;
 import tech.quantit.northstar.gateway.playback.utils.PlaybackClock;
@@ -44,13 +43,7 @@ class PlaybackContextTest {
 	IContractManager contractMgr = mock(IContractManager.class);
 	
 	ContractField contract = factory.makeContract("rb2210");
-	PlaybackSettings settings = PlaybackSettings.builder()
-			.startDate("20220629")
-			.endDate("20220629")
-			.precision(PlaybackPrecision.LOW)
-			.speed(PlaybackSpeed.SPRINT)
-			.unifiedSymbols(List.of(contract.getUnifiedSymbol()))
-			.build();
+	PlaybackGatewaySettings settings = new PlaybackGatewaySettings();
 	
 	
 	
@@ -67,6 +60,12 @@ class PlaybackContextTest {
 		when(loader.loadData(eq(ldt), eq(contract))).thenReturn(List.of(bar));
 		when(algo.generateFrom(any(BarField.class))).thenReturn(List.of(t1, t2, t3, t4));
 		when(contractMgr.getContract(anyString())).thenReturn(contract);
+		
+		settings.setStartDate("20220629");
+		settings.setEndDate("20220629");
+		settings.setPrecision(PlaybackPrecision.LOW);
+		settings.setSpeed(PlaybackSpeed.SPRINT);
+		settings.setUnifiedSymbols(List.of(contract.getUnifiedSymbol()));
 	}
 	
 	@Test

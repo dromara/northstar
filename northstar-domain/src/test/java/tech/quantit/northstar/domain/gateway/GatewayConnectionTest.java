@@ -5,10 +5,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import com.alibaba.fastjson.JSONObject;
+
 import tech.quantit.northstar.common.constant.ConnectionState;
-import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.common.constant.GatewayUsage;
-import tech.quantit.northstar.common.model.CtpSettings;
 import tech.quantit.northstar.common.model.GatewayDescription;
 
 public class GatewayConnectionTest {
@@ -17,15 +17,11 @@ public class GatewayConnectionTest {
 	
 	@BeforeEach
 	public void prepare() {
-		CtpSettings settings = new CtpSettings();
-		settings.setBrokerId("pingan");
-		settings.setPassword("adslfkjals");
-		settings.setUserId("kevin");
 		GatewayDescription gd = GatewayDescription.builder()
 				.gatewayId("testGateway")
-				.gatewayType(GatewayType.CTP)
+				.gatewayType("CTP")
 				.gatewayUsage(GatewayUsage.TRADE)
-				.settings(settings)
+				.settings(new JSONObject())
 				.build();
 		conn = new GatewayConnection(gd);
 	}

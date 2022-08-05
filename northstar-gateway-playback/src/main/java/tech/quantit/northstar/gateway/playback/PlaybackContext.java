@@ -19,7 +19,6 @@ import tech.quantit.northstar.common.constant.DateTimeConstant;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.event.NorthstarEventType;
 import tech.quantit.northstar.common.model.PlaybackRuntimeDescription;
-import tech.quantit.northstar.common.model.PlaybackSettings;
 import tech.quantit.northstar.data.IPlaybackRuntimeRepository;
 import tech.quantit.northstar.gateway.playback.ticker.TickSimulationAlgorithm;
 import tech.quantit.northstar.gateway.playback.utils.PlaybackClock;
@@ -49,7 +48,7 @@ public class PlaybackContext {
 	
 	private PlaybackClock clock;
 	
-	private PlaybackSettings settings;
+	private PlaybackGatewaySettings settings;
 	
 	private GatewaySettingField gatewaySettings;
 	
@@ -63,7 +62,7 @@ public class PlaybackContext {
 	private boolean isRunning;
 	private Timer timer;
 	
-	public PlaybackContext(PlaybackSettings settings, LocalDateTime currentTimeState, PlaybackClock clock, TickSimulationAlgorithm tickerAlgo,
+	public PlaybackContext(PlaybackGatewaySettings settings, LocalDateTime currentTimeState, PlaybackClock clock, TickSimulationAlgorithm tickerAlgo,
 			PlaybackDataLoader loader, FastEventEngine feEngine, IPlaybackRuntimeRepository rtRepo, IContractManager contractMgr) {
 		this.settings = settings;
 		this.playbackTimeState = currentTimeState;

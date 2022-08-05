@@ -2,6 +2,7 @@ package tech.quantit.northstar.strategy.api.demo;
 
 import static tech.quantit.northstar.strategy.api.indicator.function.AverageFunctions.MA;
 
+import tech.quantit.northstar.common.constant.FieldType;
 import tech.quantit.northstar.common.constant.SignalOperation;
 import tech.quantit.northstar.common.model.DynamicParams;
 import tech.quantit.northstar.common.model.Setting;
@@ -104,16 +105,16 @@ public class MultiPeriodSampleStrategy extends AbstractStrategy	// 为了简化�
 	
 	public static class InitParams extends DynamicParams {			
 		
-		@Setting(value="指标合约", order=0)
+		@Setting(label="指标合约", order=0)
 		private String indicatorSymbol;
 		
-		@Setting(value="快线周期", order=1)		
+		@Setting(label="快线周期", type = FieldType.NUMBER, order=1)		
 		private int fast;						
 		
-		@Setting(value="慢线周期", order=2)		
+		@Setting(label="慢线周期", type = FieldType.NUMBER, order=2)		
 		private int slow;
 		
-		@Setting(value="参考周期", order=10)
+		@Setting(label="参考周期", type = FieldType.NUMBER, order=10)
 		private int refPeriod;
 	}
 

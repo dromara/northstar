@@ -10,7 +10,6 @@ import com.google.protobuf.InvalidProtocolBufferException;
 
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.constant.Constants;
-import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.data.IContractRepository;
 import xyz.redtorch.pb.CoreField.ContractField;
 
@@ -39,13 +38,13 @@ public class ContractRepoRedisImpl implements IContractRepository {
 	 * }
 	 */
 	@Override
-	public void save(ContractField contract, GatewayType gatewayType) {
+	public void save(ContractField contract, String gatewayType) {
 		String key = KEY_PREFIX + gatewayType;
 		redisTemplate.boundHashOps(key).put(contract.getUnifiedSymbol(), contract.toByteArray());
 	}
 
 	@Override
-	public List<ContractField> findAll(GatewayType type) {
+	public List<ContractField> findAll(String type) {
 		String key = KEY_PREFIX + type;
 		BoundHashOperations<String, String, byte[]> opt = redisTemplate.boundHashOps(key);
 		List<byte[]> results = opt.values();
@@ -63,6 +62,18 @@ public class ContractRepoRedisImpl implements IContractRepository {
 			log.warn("", e);
 		}
 		return null;
+	}
+
+	@Override
+	public List<ContractField> findAll() {
+		String key = KEY_PREFIX + "*";
+		BoundHashOperations<String, String, byte[]> opt = redisTemplate.boundHashOps(key);
+		List<byte[]> results = opt.values();
+		if(results == null)
+			return Collections.emptyList();
+		return results.stream()
+				.map(this::convertObject)
+				.toList();
 	}
 
 }

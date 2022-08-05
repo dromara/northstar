@@ -2,12 +2,12 @@ package xyz.redtorch.gateway.ctp.x64v6v3v15v;
 
 import com.alibaba.fastjson.JSON;
 
+import tech.quantit.northstar.CtpGatewaySettings;
 import tech.quantit.northstar.common.constant.GatewayUsage;
 import tech.quantit.northstar.common.event.FastEventEngine;
-import tech.quantit.northstar.common.model.CtpSettings;
 import tech.quantit.northstar.common.model.GatewayDescription;
-import tech.quantit.northstar.gateway.api.GatewayFactory;
 import tech.quantit.northstar.gateway.api.Gateway;
+import tech.quantit.northstar.gateway.api.GatewayFactory;
 import tech.quantit.northstar.gateway.api.domain.GlobalMarketRegistry;
 import xyz.redtorch.pb.CoreEnum.GatewayAdapterTypeEnum;
 import xyz.redtorch.pb.CoreEnum.GatewayTypeEnum;
@@ -30,7 +30,7 @@ public class CtpGatewayFactory implements GatewayFactory{
 		GatewayTypeEnum gwType = gatewayDescription.getGatewayUsage() == GatewayUsage.MARKET_DATA
 				? GatewayTypeEnum.GTE_MarketData
 				: GatewayTypeEnum.GTE_Trade;
-		CtpSettings settings = JSON.parseObject(JSON.toJSONString(gatewayDescription.getSettings()), CtpSettings.class);
+		CtpGatewaySettings settings = JSON.parseObject(JSON.toJSONString(gatewayDescription.getSettings()), CtpGatewaySettings.class);
 		CtpApiSettingField ctpSetting = CtpApiSettingField.newBuilder()
 				.setPassword(settings.getPassword())
 				.setUserId(settings.getUserId())

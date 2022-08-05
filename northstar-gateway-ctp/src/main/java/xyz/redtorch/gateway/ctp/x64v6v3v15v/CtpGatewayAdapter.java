@@ -8,7 +8,7 @@ import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import tech.quantit.northstar.common.constant.GatewayType;
+import tech.quantit.northstar.CTP;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.gateway.api.GatewayAbstract;
 import tech.quantit.northstar.gateway.api.MarketGateway;
@@ -263,8 +263,8 @@ public class CtpGatewayAdapter extends GatewayAbstract implements MarketGateway,
 
 
 	@Override
-	public GatewayType gatewayType() {
-		return GatewayType.CTP;
+	public String gatewayType() {
+		return CTP.class.getName();
 	}
 
 }

@@ -2,7 +2,6 @@ package tech.quantit.northstar.data;
 
 import java.util.List;
 
-import tech.quantit.northstar.common.constant.GatewayType;
 import xyz.redtorch.pb.CoreField.ContractField;
 
 /**
@@ -16,13 +15,20 @@ public interface IContractRepository {
 	 * 保存合约信息
 	 * @param contract
 	 */
-	void save(ContractField contract, GatewayType gatewayType);
+	void save(ContractField contract, String gatewayType);
 	
 	/**
 	 * 按合约类型查询合约
 	 * @param type
 	 * @return
 	 */
-	List<ContractField> findAll(GatewayType gatewayType);
+	List<ContractField> findAll(String gatewayType);
 	
+	
+	/**
+	 * 查询所有合约
+	 * @param type
+	 * @return
+	 */
+	List<ContractField> findAll();
 }

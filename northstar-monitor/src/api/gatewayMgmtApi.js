@@ -28,10 +28,16 @@ export default {
   isActive(gatewayId) {
     return baseService.get('/gateway/active?gatewayId=' + gatewayId)
   },
-  getContractDef(gatewayType){
-    return baseService.get('/gateway/contractDefs?gatewayType=' + gatewayType)
-  },
   getSubscribedContracts(gatewayId){
     return baseService.get('/gateway/subContracts?gatewayId=' + gatewayId)
-  }
+  },
+  getGatewayTypeDescriptions(){
+    return baseService.get('/gateway/types')
+  },
+  getGatewaySettingsMetaInfo(gatewayType){
+    return baseService.get('/gateway/settings?gatewayType=' + gatewayType)
+  },
+  getSubscribedContractList(gatewayId){
+    return baseService.get(`/gateway/sub?gatewayId=${gatewayId}`)
+  },
 }

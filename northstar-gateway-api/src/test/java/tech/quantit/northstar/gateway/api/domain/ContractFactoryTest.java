@@ -9,7 +9,6 @@ import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import tech.quantit.northstar.common.constant.GatewayType;
 import test.common.TestFieldFactory;
 import xyz.redtorch.pb.CoreEnum.CurrencyEnum;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
@@ -31,7 +30,7 @@ class ContractFactoryTest {
 					.setCurrency(CurrencyEnum.CNY)
 					.setContractId(name + "@gateway")
 					.setExchange(ExchangeEnum.SHFE)
-					.setThirdPartyId("gateway@" + GatewayType.CTP)
+					.setThirdPartyId("gateway@CTP")
 					.setFullName(name)
 					.setLongMarginRatio(0.08)
 					.setShortMarginRatio(0.08)

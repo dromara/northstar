@@ -52,11 +52,6 @@ public class GatewayRepoRedisImpl implements IGatewayRepository{
 	}
 
 	@Override
-	public GatewayDescription selectById(String gatewayId) {
-		return null;
-	}
-
-	@Override
 	public List<GatewayDescription> findAll() {
 		Set<String> gatewayKeys = redisTemplate.keys(KEY_PREFIX+"*");
 		return gatewayKeys.stream()

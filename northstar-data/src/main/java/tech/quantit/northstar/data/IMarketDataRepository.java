@@ -3,7 +3,6 @@ package tech.quantit.northstar.data;
 import java.time.LocalDate;
 import java.util.List;
 
-import tech.quantit.northstar.common.constant.GatewayType;
 import xyz.redtorch.pb.CoreField.BarField;
 
 /**
@@ -41,5 +40,5 @@ public interface IMarketDataRepository {
 	 * @param year
 	 * @return
 	 */
-	List<LocalDate> findHodidayInLaw(GatewayType gatewayType, int year);
+	List<LocalDate> findHodidayInLaw(String gatewayType, int year);
 }

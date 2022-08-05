@@ -13,5 +13,6 @@ import org.springframework.stereotype.Component;
 @Component
 public @interface StrategicComponent {
 
-	String value() default "";
+	//策略名称
+	String value();
 }

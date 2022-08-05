@@ -1,6 +1,5 @@
 package tech.quantit.northstar.gateway.api;
 
-import tech.quantit.northstar.common.constant.GatewayType;
 import xyz.redtorch.pb.CoreField.ContractField;
 
 public interface MarketGateway extends Gateway {
@@ -27,5 +26,5 @@ public interface MarketGateway extends Gateway {
 	 * 网关类型
 	 * @return
 	 */
-	GatewayType gatewayType();
+	String gatewayType();
 }

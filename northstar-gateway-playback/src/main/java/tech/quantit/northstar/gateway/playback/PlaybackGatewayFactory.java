@@ -13,7 +13,6 @@ import tech.quantit.northstar.common.constant.DateTimeConstant;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.model.GatewayDescription;
 import tech.quantit.northstar.common.model.PlaybackRuntimeDescription;
-import tech.quantit.northstar.common.model.PlaybackSettings;
 import tech.quantit.northstar.data.IMarketDataRepository;
 import tech.quantit.northstar.data.IPlaybackRuntimeRepository;
 import tech.quantit.northstar.gateway.api.Gateway;
@@ -50,14 +49,14 @@ public class PlaybackGatewayFactory implements GatewayFactory{
 	@Override
 	public Gateway newInstance(GatewayDescription gatewayDescription) {
 		PlaybackRuntimeDescription playbackRt = rtRepo.findById(gatewayDescription.getGatewayId());
-		PlaybackSettings settings = JSON.parseObject(JSON.toJSONString(gatewayDescription.getSettings()), PlaybackSettings.class);
+		PlaybackGatewaySettings settings = JSON.parseObject(JSON.toJSONString(gatewayDescription.getSettings()), PlaybackGatewaySettings.class);
 		
 		PlaybackContext context = createPlaybackContext(gatewayDescription.getGatewayId(), settings, playbackRt);
 		GatewaySettingField settingField = createGatewaySettings(gatewayDescription);
 		return new PlaybackGatewayAdapter(context, settingField);
 	}
 	
-	private PlaybackContext createPlaybackContext(String gatewayId, PlaybackSettings settings, PlaybackRuntimeDescription playbackRt) {
+	private PlaybackContext createPlaybackContext(String gatewayId, PlaybackGatewaySettings settings, PlaybackRuntimeDescription playbackRt) {
 		LocalDateTime ldt = Objects.nonNull(playbackRt) 
 				? playbackRt.getPlaybackTimeState() 
 				: LocalDateTime.of(LocalDate.parse(settings.getStartDate(), DateTimeConstant.D_FORMAT_INT_FORMATTER), LocalTime.of(9, 0));

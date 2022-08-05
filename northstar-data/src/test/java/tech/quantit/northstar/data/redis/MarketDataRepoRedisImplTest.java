@@ -87,6 +87,7 @@ class MarketDataRepoRedisImplTest {
 		assertThat(redisTemplate.hasKey(KEY_PREFIX + "testGateway:" + date + ":rb2210@SHFE@FUTURES")).isTrue();
 	}
 
+	// 20:00点整时，跑该测试可能会报错
 	@Test
 	void testLoadBars() {
 		testInsert();

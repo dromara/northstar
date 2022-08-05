@@ -6,7 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import tech.quantit.northstar.common.constant.GatewayType;
 import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
 
 /**
@@ -22,7 +21,7 @@ public class ContractDefinition {
 	/**
 	 * 网关类别 
 	 */
-	private GatewayType gatewayType;
+	private String gatewayType;
 	/**
 	 * 品种类别
 	 */
