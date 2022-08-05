@@ -5,7 +5,7 @@ import tech.quantit.northstar.strategy.api.indicator.TimeSeriesUnaryOperator;
 
 import static tech.quantit.northstar.strategy.api.indicator.function.AverageFunctions.*;
 
-public final class Boll {
+public final class BOLL {
 
     private int x;
     private int n;
@@ -15,7 +15,7 @@ public final class Boll {
      * @param n		代表均线周期
      * @param x		代表标准差倍数
      */
-    public Boll(int n, int x) {
+    public BOLL(int n, int x) {
         this.x = x;
         this.n = n;
     }
@@ -26,8 +26,8 @@ public final class Boll {
      * @param x		代表标准差倍数
      * @return
      */
-    public static Boll of(int n, int x){
-        return new Boll(n, x);
+    public static BOLL of(int n, int x){
+        return new BOLL(n, x);
     }
 
     /**

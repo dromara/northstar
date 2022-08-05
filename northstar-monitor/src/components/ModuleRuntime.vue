@@ -379,9 +379,11 @@ export default {
     },
     indicatorOptions() {
       if (!this.moduleRuntime.indicatorMap) return []
-      return Object.keys(this.moduleRuntime.indicatorMap).filter(
-        (key) => this.moduleRuntime.indicatorMap[key].unifiedSymbol === this.unifiedSymbolOfChart
-      )
+      return Object.keys(this.moduleRuntime.indicatorMap)
+        .filter(
+          (key) => this.moduleRuntime.indicatorMap[key].unifiedSymbol === this.unifiedSymbolOfChart
+        )
+        .sort((a, b) => a.localeCompare(b))
     }
   },
   created() {

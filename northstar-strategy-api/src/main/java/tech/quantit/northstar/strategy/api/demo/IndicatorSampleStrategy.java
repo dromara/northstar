@@ -1,5 +1,9 @@
 package tech.quantit.northstar.strategy.api.demo;
 
+import static tech.quantit.northstar.strategy.api.indicator.function.AverageFunctions.EMA;
+import static tech.quantit.northstar.strategy.api.indicator.function.AverageFunctions.MA;
+import static tech.quantit.northstar.strategy.api.indicator.function.FunctionCompute.minus;
+
 import tech.quantit.northstar.common.constant.FieldType;
 import tech.quantit.northstar.common.constant.SignalOperation;
 import tech.quantit.northstar.common.model.DynamicParams;
@@ -9,12 +13,8 @@ import tech.quantit.northstar.strategy.api.TradeStrategy;
 import tech.quantit.northstar.strategy.api.annotation.StrategicComponent;
 import tech.quantit.northstar.strategy.api.constant.PriceType;
 import tech.quantit.northstar.strategy.api.indicator.Indicator;
-import tech.quantit.northstar.strategy.api.indicator.complex.Boll;
-
-import static tech.quantit.northstar.strategy.api.indicator.function.AverageFunctions.*;
-import static tech.quantit.northstar.strategy.api.indicator.function.AverageFunctions.STD;
-import static tech.quantit.northstar.strategy.api.indicator.function.FunctionCompute.*;
-
+import tech.quantit.northstar.strategy.api.indicator.complex.BOLL;
+import tech.quantit.northstar.strategy.api.indicator.complex.MACD;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.TickField;
 
@@ -41,12 +41,6 @@ public class IndicatorSampleStrategy extends AbstractStrategy	// 为了简化代
 	private Indicator macdDiff;
 
 	private Indicator macdDea;
-
-	private Indicator bollUpper;
-
-	private Indicator bollLower;
-
-	private Indicator bollMid;
 
 	private String originOrderId;
 
@@ -122,16 +116,23 @@ public class IndicatorSampleStrategy extends AbstractStrategy	// 为了简化代
 		this.fastLine = ctx.newIndicator("快线", params.indicatorSymbol, MA(params.fast));
 		this.slowLine = ctx.newIndicator("慢线", params.indicatorSymbol, MA(params.slow));
 
-		// 复杂指标的创建
+		// 复杂指标的创建；MACD的原始写法
 		this.macdDiff = ctx.newIndicator("MACD_DIFF", params.indicatorSymbol, minus(EMA(12), EMA(26)));
 		this.macdDea = ctx.newIndicator("MACD_DEA", params.indicatorSymbol, minus(EMA(12), EMA(26)).andThen(EMA(9)));
 
-		// Boll 上轨
-		this.bollUpper = ctx.newIndicator("BOLL_UPPER",params.indicatorSymbol,params.n, Indicator.ValueType.CLOSE, Boll.of(params.n, params.x).upper());
-		// Boll 下轨
-		this.bollLower = ctx.newIndicator("BOLL_LOWER",params.indicatorSymbol,params.n, Indicator.ValueType.CLOSE,Boll.of(params.n, params.x).lower());
-		// Boll 中轨
-		this.bollMid = ctx.newIndicator("BOLL_MID",params.indicatorSymbol,params.n, Indicator.ValueType.CLOSE,Boll.of(params.n, params.x).mid());
+		
+		//######## 以下写法仅用于监控台演示，因此没有赋值给类属性，同时为了简化参数也直接写死 ########//
+		
+		// MACD的另一种写法，对MACD的计算函数做进一步封装
+		MACD macd = MACD.of(12, 26, 9);
+		ctx.newIndicator("MACD_DIFF2", params.indicatorSymbol, macd.diff());
+		ctx.newIndicator("MACD_DEA2", params.indicatorSymbol, macd.dea());
+		
+		// BOLL指标
+		BOLL boll = BOLL.of(20, 2);
+		ctx.newIndicator("BOLL_UPPER",params.indicatorSymbol, boll.upper());
+		ctx.newIndicator("BOLL_LOWER",params.indicatorSymbol, boll.lower());
+		ctx.newIndicator("BOLL_MID",params.indicatorSymbol, boll.mid());
 	}
 
 	public static class InitParams extends DynamicParams {			
@@ -145,11 +146,6 @@ public class IndicatorSampleStrategy extends AbstractStrategy	// 为了简化代
 		@Setting(label="慢线周期", type = FieldType.NUMBER, order=2)		
 		private int slow;
 
-		@Setting(value="Boll统计天数", order=3)
-		private int n;
-
-		@Setting(value="Boll宽度", order=4)
-		private int x;
 	}
 
 }
