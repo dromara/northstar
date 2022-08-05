@@ -9,6 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.util.concurrent.AtomicDouble;
 
+import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 import tech.quantit.northstar.common.model.TimeSeriesValue;
 import tech.quantit.northstar.strategy.api.indicator.TimeSeriesUnaryOperator;
 import xyz.redtorch.pb.CoreField.BarField;
@@ -19,12 +20,12 @@ import xyz.redtorch.pb.CoreField.BarField;
  *
  */
 public interface AverageFunctions {
-	
+
 	/**
 	 * 当日成交量加权均价（当日结算价）
 	 * 注意：该算法与交易所的结算价存在一定误差，主要因为该算法是按K线计算，K线周期越小，误差越小
-	 * @param resetPerDay
-	 * @param length
+	 * @param
+	 * @param
 	 * @return
 	 */
 	static Function<BarField, TimeSeriesValue> SETTLE(){
@@ -61,7 +62,7 @@ public interface AverageFunctions {
 		return tv -> {
 			double val = tv.getValue();
 			long timestamp = tv.getTimestamp();
-			if(hasInitVal.get()) {			
+			if(hasInitVal.get()) {
 				ema.set(factor * val + (1 - factor) * ema.get());
 			} else {
 				ema.set(val);
@@ -70,7 +71,7 @@ public interface AverageFunctions {
 			return new TimeSeriesValue(ema.get(), timestamp);
 		};
 	}
-	
+
 	/**
 	 * 简单移动平均MA
 	 * @param size
@@ -89,6 +90,25 @@ public interface AverageFunctions {
 			sumOfValues.addAndGet(val - oldVal);
 			val = sumOfValues.get() / size;
 			return new TimeSeriesValue(val, timestamp);
+		};
+	}
+
+	/**
+	 * 函数：STD
+	 * 说明:估算标准差
+	 * 用法:STD(size)为收盘价的size日估算标准差
+	 * @param size
+	 * @return
+	 */
+	static TimeSeriesUnaryOperator STD(int size){
+		final double[] values = new double[size];
+		final AtomicInteger cursor = new AtomicInteger();
+		return tv ->{
+			long timestamp = tv.getTimestamp();
+			values[cursor.get()] = tv.getValue();
+			cursor.set(cursor.incrementAndGet() % size);
+			double variance = new StandardDeviation().evaluate(values);
+			return new TimeSeriesValue(variance, timestamp);
 		};
 	}
 }
