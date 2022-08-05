@@ -44,8 +44,8 @@ public class MACD {
 		return tv -> {
 			TimeSeriesValue v = fastLine.apply(tv);
 			TimeSeriesValue v0 = slowLine.apply(tv);
-			v.setValue(v.getValue() - v0.getValue());
-			return v;
+			double val = v.getValue() - v0.getValue();
+			return new TimeSeriesValue(val, tv.getTimestamp());
 		};
 	}
 	

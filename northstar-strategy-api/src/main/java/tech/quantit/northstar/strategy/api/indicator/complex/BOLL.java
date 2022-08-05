@@ -40,8 +40,8 @@ public final class BOLL {
         return tv -> {
             TimeSeriesValue v = ma.apply(tv);
             TimeSeriesValue v0 = std.apply(tv);
-            v.setValue(v.getValue() + x * v0.getValue());
-            return v;
+            double val = v.getValue() + x * v0.getValue();
+            return new TimeSeriesValue(val, tv.getTimestamp());
         };
     }
 
@@ -55,8 +55,8 @@ public final class BOLL {
         return tv -> {
             TimeSeriesValue v = ma.apply(tv);
             TimeSeriesValue v0 = std.apply(tv);
-            v.setValue(v.getValue() - x * v0.getValue());
-            return v;
+            double val = v.getValue() - x * v0.getValue();
+            return new TimeSeriesValue(val, tv.getTimestamp());
         };
     }
 
