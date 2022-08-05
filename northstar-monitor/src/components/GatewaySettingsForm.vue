@@ -85,6 +85,7 @@ export default {
   methods: {
     close() {
       this.$emit('update:visible', false)
+      this.gatewaySettings = {}
     },
     saveSettings() {
       this.gatewaySettingsMetaInfo.forEach((item) => {
