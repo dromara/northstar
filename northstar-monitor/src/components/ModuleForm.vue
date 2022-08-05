@@ -1,6 +1,6 @@
 <template>
   <el-dialog
-    :title="readOnly ? '查看' : this.module ? '修改' : '新增'"
+    :title="readOnly ? '查看' : isUpdateMode ? '修改' : '新增'"
     :visible="visible"
     :close-on-click-modal="false"
     :show-close="false"
@@ -32,11 +32,11 @@
               <el-input
                 v-model="form.moduleName"
                 :maxlength="16"
-                :disabled="readOnly || this.module"
+                :disabled="readOnly || isUpdateMode"
               ></el-input>
             </el-form-item>
             <el-form-item value label="模组类型">
-              <el-select v-model="form.type" :disabled="readOnly">
+              <el-select v-model="form.type" :disabled="readOnly || isUpdateMode">
                 <el-option label="投机" value="SPECULATION"></el-option>
                 <el-option label="套利" value="ARBITRAGE"></el-option>
               </el-select>
@@ -59,19 +59,27 @@
               </el-select>
             </el-form-item>
             <el-form-item label="K线周期">
-              <el-input-number :disabled="readOnly" v-model="form.numOfMinPerBar" :min="1" />
+              <el-input-number
+                :disabled="readOnly || isUpdateMode"
+                v-model="form.numOfMinPerBar"
+                :min="1"
+              />
               <span class="ml-10">分钟</span>
             </el-form-item>
             <el-form-item label="预热数据量">
               <el-input-number
                 v-model="form.daysOfDataForPreparation"
                 :min="0"
-                :disabled="readOnly"
+                :disabled="readOnly || isUpdateMode"
               />
               <span class="ml-10">天</span>
             </el-form-item>
             <el-form-item label="缓存数据量">
-              <el-input-number v-model="form.moduleCacheDataSize" :min="100" :disabled="readOnly">
+              <el-input-number
+                :disabled="readOnly || isUpdateMode"
+                v-model="form.moduleCacheDataSize"
+                :min="100"
+              >
               </el-input-number>
             </el-form-item>
           </div>
@@ -80,7 +88,7 @@
               <el-select
                 v-model="form.strategySetting"
                 placeholder="请选择"
-                :disabled="readOnly"
+                :disabled="readOnly || isUpdateMode"
                 filterable
               >
                 <el-option
@@ -122,7 +130,7 @@
                 v-model="choseAccounts"
                 placeholder="请选择账户"
                 multiple
-                :disabled="readOnly"
+                :disabled="readOnly || isUpdateMode"
                 @change="accountSelected"
               >
                 <el-option
@@ -141,7 +149,7 @@
                 <el-input
                   v-model="form.moduleAccountSettingsDescription[i].moduleAccountInitBalance"
                   type="number"
-                  :disabled="readOnly"
+                  :disabled="readOnly || isUpdateMode"
                 />
               </el-form-item>
               <el-form-item label="关联合约">
@@ -233,6 +241,9 @@ export default {
     bindedUnifiedSymbolsOptions() {
       const unifiedSymbols = this.bindedContracts.split(/;|；/).map((item) => item.trim())
       return unifiedSymbols.map((us) => ({ label: us.split('@')[0], value: us }))
+    },
+    isUpdateMode() {
+      return !!this.module
     }
   },
   mounted() {
@@ -273,6 +284,7 @@ export default {
       this.activeIndex = index
     },
     accountSelected(val) {
+      this.form.moduleAccountSettingsDescription = []
       if (!val.length) return
       this.form.moduleAccountSettingsDescription = val.map((item) => {
         return {
