@@ -14,9 +14,19 @@
     <div class="module-rt-wrapper">
       <div class="side-panel">
         <div class="description-wrapper">
-          <el-descriptions class="margin-top" title="模组信息" :column="3">
+          <el-descriptions class="margin-top" :column="3">
+            <template slot="title">
+              模组信息
+              <el-tag
+                class="ml-10"
+                :type="{ PLAYBACK: 'info', UAT: 'warning', PROD: '' }[module.usage]"
+                effect="dark"
+                >{{ { PLAYBACK: '回测', UAT: '模拟盘', PROD: '实盘' }[module.usage] }}</el-tag
+              >
+            </template>
             <template slot="extra">
               <el-switch
+                class="ml-10"
                 v-model="isManualUpdate"
                 inactive-text="自动刷新"
                 active-color="#D8DBE1"
