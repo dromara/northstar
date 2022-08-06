@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>tech.quantit</groupId>
   <artifactId>northstar-external-archetype</artifactId>
-  <version>1.0</version>
+  <version>4.0</version>
   <packaging>maven-archetype</packaging>
   <name>northstar-external-archetype</name>
     
