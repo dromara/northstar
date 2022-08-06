@@ -155,6 +155,7 @@ public class ModuleService implements InitializingBean {
 			// 校验模组用途与配置吻合
 			if(md.getUsage() == ModuleUsage.PLAYBACK) {
 				Assert.isTrue(marketGatewayDescription.getGatewayType().equals("PLAYBACK"), "回测模组应该采用【PLAYBACK】行情网关");
+				Assert.isTrue(accountGatewayDescription.getGatewayType().equals("SIM"), "回测模组应该采用【SIM】账户网关");
 			}
 			if(md.getUsage() == ModuleUsage.UAT) {
 				Assert.isTrue(accountGatewayDescription.getGatewayType().equals("SIM"), "模拟盘模组应该采用【SIM】账户网关");

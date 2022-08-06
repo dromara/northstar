@@ -103,6 +103,15 @@ public interface IModuleStrategyContext {
 	 */
 	Indicator newIndicator(String indicatorName, String bindedUnifiedSymbol, TimeSeriesUnaryOperator indicatorFunction);
 	/**
+	 * 创建指标（采用默认收盘价取值）
+	 * @param indicatorName			指标名称
+	 * @param bindedUnifiedSymbol	绑定合约
+	 * @param indicatorLength		指标缓存长度
+	 * @param indicatorFunction		计算函数
+	 * @return
+	 */
+	Indicator newIndicator(String indicatorName, String bindedUnifiedSymbol, int indicatorLength, TimeSeriesUnaryOperator indicatorFunction);
+	/**
 	 *  创建不同周期的指标
 	 * @param numOfMinPerPeriod		周期分钟数
 	 * @param indicatorName			指标名称
@@ -144,5 +153,16 @@ public interface IModuleStrategyContext {
 	 * @return
 	 */
 	Indicator newIndicatorAtPeriod(int numOfMinPerPeriod, String indicatorName, String bindedUnifiedSymbol, 
+			TimeSeriesUnaryOperator indicatorFunction);
+	/**
+	 * 创建不同周期的指标（采用默认长度16与收盘价取值）
+	 * @param numOfMinPerPeriod		周期分钟数
+	 * @param indicatorName			指标名称
+	 * @param bindedUnifiedSymbol	绑定合约
+	 * @param indicatorLength		指标缓存长度
+	 * @param indicatorFunction		计算函数
+	 * @return
+	 */
+	Indicator newIndicatorAtPeriod(int numOfMinPerPeriod, String indicatorName, String bindedUnifiedSymbol, int indicatorLength,
 			TimeSeriesUnaryOperator indicatorFunction);
 }

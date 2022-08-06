@@ -417,6 +417,12 @@ public class ModuleContext implements IModuleContext{
 			TimeSeriesUnaryOperator valueUpdateHandler) {
 		return newIndicator(indicatorName, bindedUnifiedSymbol, 16, ValueType.CLOSE, valueUpdateHandler);
 	}
+	
+	@Override
+	public Indicator newIndicator(String indicatorName, String bindedUnifiedSymbol, int indicatorLength,
+			TimeSeriesUnaryOperator valueUpdateHandler) {
+		return newIndicator(indicatorName, bindedUnifiedSymbol, indicatorLength, ValueType.CLOSE, valueUpdateHandler);
+	}
 
 	@Override
 	public Indicator newIndicator(String indicatorName, String bindedUnifiedSymbol, int indicatorLength,
@@ -483,6 +489,12 @@ public class ModuleContext implements IModuleContext{
 	public Indicator newIndicatorAtPeriod(int numOfBarPerPeriod, String indicatorName, String bindedUnifiedSymbol,
 			TimeSeriesUnaryOperator indicatorFunction) {
 		return newIndicatorAtPeriod(numOfBarPerPeriod, indicatorName, bindedUnifiedSymbol, 16, ValueType.CLOSE, indicatorFunction);
+	}
+
+	@Override
+	public Indicator newIndicatorAtPeriod(int numOfMinPerPeriod, String indicatorName, String bindedUnifiedSymbol,
+			int indicatorLength, TimeSeriesUnaryOperator indicatorFunction) {
+		return newIndicatorAtPeriod(numOfMinPerPeriod, indicatorName, bindedUnifiedSymbol, indicatorLength, ValueType.CLOSE, indicatorFunction);
 	}
 
 }
