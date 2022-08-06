@@ -1,7 +1,7 @@
 package tech.quantit.northstar.strategy.api.demo;
 
 import static tech.quantit.northstar.strategy.api.indicator.function.AverageFunctions.*;
-import static tech.quantit.northstar.strategy.api.indicator.function.ComputeFunction.minus;
+import static tech.quantit.northstar.strategy.api.indicator.function.ComputeFunctions.minus;
 
 import tech.quantit.northstar.common.constant.FieldType;
 import tech.quantit.northstar.common.constant.SignalOperation;
