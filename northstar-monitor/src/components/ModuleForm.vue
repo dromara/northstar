@@ -35,10 +35,17 @@
                 :disabled="readOnly || isUpdateMode"
               ></el-input>
             </el-form-item>
-            <el-form-item value label="模组类型">
+            <el-form-item label="模组类型">
               <el-select v-model="form.type" :disabled="readOnly || isUpdateMode">
                 <el-option label="投机" value="SPECULATION"></el-option>
                 <el-option label="套利" value="ARBITRAGE"></el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="模组用途">
+              <el-select v-model="form.usage">
+                <el-option label="回测" value="PLAYBACK"></el-option>
+                <el-option label="模拟盘" value="UAT"></el-option>
+                <el-option label="实盘" value="PROD"></el-option>
               </el-select>
             </el-form-item>
             <el-form-item label="绑定合约">
@@ -70,7 +77,7 @@
               <el-input-number
                 v-model="form.daysOfDataForPreparation"
                 :min="0"
-                :disabled="readOnly || isUpdateMode"
+                :disabled="readOnly || isUpdateMode || form.usage === 'PLAYBACK'"
               />
               <span class="ml-10">天</span>
             </el-form-item>
@@ -224,8 +231,9 @@ export default {
       form: {
         moduleName: '',
         type: 'SPECULATION',
-        numOfMinPerBar: '1',
-        daysOfDataForPreparation: '0',
+        usage: 'UAT',
+        numOfMinPerBar: 1,
+        daysOfDataForPreparation: 0,
         moduleCacheDataSize: 500,
         closingPolicy: 'FIFO',
         moduleAccountSettingsDescription: [],
@@ -246,12 +254,10 @@ export default {
       return !!this.module
     }
   },
-  mounted() {
-    this.initData()
-  },
   watch: {
     visible: function (val) {
       if (val) {
+        this.initData()
         if (!this.module) {
           return
         }
@@ -265,6 +271,11 @@ export default {
           return item
         })
       }
+    },
+    'form.usage': function (val) {
+      if (val === 'PLAYBACK') {
+        this.form.daysOfDataForPreparation = 0
+      }
     }
   },
   methods: {
@@ -274,6 +285,7 @@ export default {
           item.value = item.gatewayId
           return item
         })
+        console.log(this.accountOptions)
       })
       moduleApi.getStrategies().then((strategyMetas) => {
         strategyMetas.forEach(async (i) => initComponent(i, this.tradeStrategyOptions))
@@ -294,7 +306,7 @@ export default {
         }
       })
     },
-    saveSetting() {
+    async saveSetting() {
       let pass =
         this.assertTrue(this.form.moduleName, '未指定模组名称') &&
         this.assertTrue(this.form.type, '未指定模组类型') &&
@@ -312,6 +324,8 @@ export default {
         }
       })
 
+      await moduleApi.validateModule(this.form)
+
       const obj = Object.assign({}, this.form)
       this.$emit('onSave', obj)
       this.close()
@@ -319,7 +333,6 @@ export default {
     close() {
       this.activeIndex = '1'
       Object.assign(this.$data, this.$options.data())
-      this.$nextTick(this.initData)
       this.$emit('update:visible', false)
     },
     assertTrue(expression, errMsg) {

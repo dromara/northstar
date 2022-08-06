@@ -63,9 +63,10 @@ public class ServiceConfig {
 	}
 	
 	@Bean
-	public ModuleService moduleService(ApplicationContext ctx, ExternalJarClassLoader extJarLoader, IModuleRepository moduleRepo, IMarketDataRepository mdRepo,
-			ModuleFactory moduleFactory, ModuleManager moduleMgr, ContractManager contractMgr) {
-		return new ModuleService(ctx, extJarLoader, moduleRepo, mdRepo, moduleFactory, moduleMgr, contractMgr);
+	public ModuleService moduleService(ApplicationContext ctx, ExternalJarClassLoader extJarLoader, IModuleRepository moduleRepo, 
+			IMarketDataRepository mdRepo,IGatewayRepository gatewayRepo, ModuleFactory moduleFactory, ModuleManager moduleMgr, 
+			ContractManager contractMgr) {
+		return new ModuleService(ctx, extJarLoader, gatewayRepo, moduleRepo, mdRepo, moduleFactory, moduleMgr, contractMgr);
 	}
 	
 	@Bean

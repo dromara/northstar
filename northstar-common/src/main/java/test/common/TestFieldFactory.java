@@ -73,7 +73,7 @@ public class TestFieldFactory {
 				.setContractId(symbol + "@SHFE@FUTURES@" + gatewayId)
 				.setExchange(ExchangeEnum.SHFE)
 				.setFullName(symbol)
-				.setThirdPartyId(gatewayId + "@CTP")
+				.setThirdPartyId(symbol + "@CTP")
 				.setLongMarginRatio(0.08)
 				.setShortMarginRatio(0.08)
 				.setMultiplier(10)

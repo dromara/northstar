@@ -12,23 +12,28 @@
       :moduleRuntimeSrc="curTableIndex > -1 ? curModule.runtime : ''"
     />
     <el-table height="100%" :data="list">
-      <el-table-column label="模组名称" prop="moduleName" align="center" width="200px" />
-      <el-table-column label="模组类型" prop="type" align="center" width="90px">
+      <el-table-column label="模组名称" prop="moduleName" sortable align="center" width="180px" />
+      <el-table-column label="模组类型" prop="type" sortable align="center" width="100px">
         <template slot-scope="scope">
           {{ { SPECULATION: '投机', ARBITRAGE: '套利' }[scope.row.type] }}
         </template>
       </el-table-column>
-      <el-table-column label="模组周期" prop="barInterval" align="center" width="90px">
+      <el-table-column label="模组用途" prop="usage" sortable align="center" width="100px">
+        <template slot-scope="scope">
+          {{ { PLAYBACK: '回测', UAT: '模拟盘', PROD: '实盘' }[scope.row.usage] }}
+        </template>
+      </el-table-column>
+      <el-table-column label="模组周期" prop="barInterval" sortable align="center" width="100px">
         <template slot-scope="scope">
           {{ `${scope.row.numOfMinPerBar} 分钟` }}
         </template>
       </el-table-column>
-      <el-table-column label="交易策略" align="center" width="200px">
+      <el-table-column label="交易策略" align="center" sortable width="200px">
         <template slot-scope="scope">
           {{ scope.row.strategySetting.componentMeta.name }}
         </template>
       </el-table-column>
-      <el-table-column label="平仓优化" align="center" width="90px">
+      <el-table-column label="平仓优化" align="center" sortable width="100px">
         <template slot-scope="scope">
           {{
             { FIFO: '先开先平', PRIOR_TODAY: '平今优先', PRIOR_BEFORE_HEGDE_TODAY: '平昨锁今' }[
@@ -37,7 +42,7 @@
           }}
         </template>
       </el-table-column>
-      <el-table-column label="绑定账户" align="center" width="minmax(120px,300px)">
+      <el-table-column label="绑定账户" align="center" sortable width="minmax(120px,300px)">
         <template slot-scope="scope">
           {{
             (() => {
@@ -60,7 +65,7 @@
         </template>
       </el-table-column>
 
-      <el-table-column label="当前状态" prop="enabled" align="center" width="90px">
+      <el-table-column label="当前状态" prop="enabled" sortable align="center" width="100px">
         <template slot-scope="scope">
           <span :class="scope.row.runtime.enabled ? 'color-green' : 'color-red'">
             {{ scope.row.runtime.enabled ? '运行中' : '已停用' }}

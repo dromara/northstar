@@ -1,9 +1,9 @@
 package tech.quantit.northstar.main;
 
 import java.time.LocalDate;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -33,11 +33,10 @@ public class ContractsDefaultLoader implements CommandLineRunner{
 	@Override
 	public void run(String... args) throws Exception {
 		final LocalDate today = LocalDate.now();
-		Map<String, ContractField> contractMap = new HashMap<>();
+		Map<String, ContractField> contractMap = new ConcurrentHashMap<>();
 		List.of(ExchangeEnum.CFFEX, ExchangeEnum.SHFE, ExchangeEnum.DCE, ExchangeEnum.CZCE, ExchangeEnum.INE)
-			.stream()
+			.parallelStream()
 			.forEach(exchange -> {
-				log.info("预加载 [{}] 交易所合约信息", exchange);
 				dsMgr.getAllContracts(exchange).stream()
 					//过滤掉过期合约
 					.filter(contract -> LocalDate.parse(contract.getLastTradeDateOrContractMonth(), DateTimeConstant.D_FORMAT_INT_FORMATTER).isAfter(today))
@@ -45,6 +44,7 @@ public class ContractsDefaultLoader implements CommandLineRunner{
 						registry.register(new NormalContract(contract, 1));
 						contractMap.put(contract.getUnifiedSymbol(), contract);
 					});
+				log.info("预加载 [{}] 交易所合约信息", exchange);
 			});
 		// 构建指数合约
 		ContractFactory contractFactory = new ContractFactory(contractMap.values().stream().toList());

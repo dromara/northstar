@@ -56,14 +56,25 @@ public class ModuleController {
 	}
 	
 	/**
+	 * 校验模组配置
+	 * @param module
+	 * @return
+	 */
+	@PostMapping("/validate")
+	@NotNull(message = "模组不能为空")
+	public ResultBean<Boolean> validateModuleSettings(@RequestBody ModuleDescription module){
+		return new ResultBean<>(service.validateModule(module));
+	}
+	
+	/**
 	 * 创建模组
 	 * @param module
 	 * @return		返回更新后实体
 	 * @throws Exception
 	 */
 	@PostMapping
-	public ResultBean<ModuleDescription> createModule(@NotNull @RequestBody ModuleDescription module) throws Exception{
-		Assert.notNull(module, "模组不能为空");
+	@NotNull(message = "模组不能为空")
+	public ResultBean<ModuleDescription> createModule(@RequestBody ModuleDescription module) throws Exception{
 		return new ResultBean<>(service.createModule(module));
 	}
 	
@@ -74,8 +85,8 @@ public class ModuleController {
 	 * @throws Exception
 	 */
 	@PutMapping
-	public ResultBean<ModuleDescription> updateModule(@NotNull @RequestBody ModuleDescription module) throws Exception{
-		Assert.notNull(module, "模组不能为空");
+	@NotNull(message = "模组不能为空")
+	public ResultBean<ModuleDescription> updateModule(@RequestBody ModuleDescription module) throws Exception{
 		return new ResultBean<>(service.modifyModule(module));
 	}
 	

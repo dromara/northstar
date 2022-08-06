@@ -30,6 +30,7 @@ import common.TestGatewayFactory;
 import tech.quantit.northstar.CtpGatewaySettings;
 import tech.quantit.northstar.common.constant.ClosingPolicy;
 import tech.quantit.northstar.common.constant.ModuleType;
+import tech.quantit.northstar.common.constant.ModuleUsage;
 import tech.quantit.northstar.common.constant.ReturnCode;
 import tech.quantit.northstar.common.model.ComponentAndParamsPair;
 import tech.quantit.northstar.common.model.ComponentField;
@@ -101,6 +102,7 @@ class ModuleControllerTest {
 		md1 = ModuleDescription.builder()
 				.moduleName("testModule")
 				.type(ModuleType.SPECULATION)
+				.usage(ModuleUsage.PROD)
 				.strategySetting(cpp)
 				.closingPolicy(ClosingPolicy.FIFO)
 				.moduleAccountSettingsDescription(List.of(ModuleAccountDescription.builder()
@@ -115,6 +117,7 @@ class ModuleControllerTest {
 		md2 = ModuleDescription.builder()
 				.moduleName("testModule")
 				.type(ModuleType.SPECULATION)
+				.usage(ModuleUsage.UAT)
 				.strategySetting(cpp)
 				.closingPolicy(ClosingPolicy.FIFO)
 				.moduleAccountSettingsDescription(List.of(ModuleAccountDescription.builder()
@@ -144,6 +147,20 @@ class ModuleControllerTest {
 		mockMvc.perform(post("/northstar/module/strategy/params").contentType(MediaType.APPLICATION_JSON).characterEncoding("UTF-8").content(strategy).session(session))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
+	}
+	
+	@Test
+	void testValidateModuleSuccessfully() throws Exception {
+		mockMvc.perform(post("/northstar/module/validate").contentType(MediaType.APPLICATION_JSON).content(JSON.toJSONString(md1)).session(session))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
+	}
+	
+	@Test
+	void testValidateModuleWithFailure() throws Exception {
+		mockMvc.perform(post("/northstar/module/validate").contentType(MediaType.APPLICATION_JSON).content(JSON.toJSONString(md2)).session(session))
+			.andExpect(status().is5xxServerError())
+			.andExpect(jsonPath("$.message").value("模拟盘模组应该采用【SIM】账户网关"));
 	}
 
 	@Test

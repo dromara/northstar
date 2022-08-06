@@ -27,7 +27,7 @@ public class TestGatewayFactory {
 				.gatewayType(type)
 				.settings(settings)
 				.gatewayUsage(GatewayUsage.MARKET_DATA)
-				.subscribedContractGroups(List.of("CONTRACT_GROUP1", "CONTRACT_GROUP2"))
+				.subscribedContractGroups(List.of("螺纹钢@FUTURES", "CONTRACT_GROUP2"))
 				.build();
 	}
 	

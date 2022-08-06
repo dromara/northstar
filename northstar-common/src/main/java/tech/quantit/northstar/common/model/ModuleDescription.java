@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import tech.quantit.northstar.common.constant.ClosingPolicy;
 import tech.quantit.northstar.common.constant.ModuleType;
+import tech.quantit.northstar.common.constant.ModuleUsage;
 
 /**
  * 模组配置信息
@@ -28,6 +29,10 @@ public class ModuleDescription {
 	 * 模组类型
 	 */
 	private ModuleType type;
+	/**
+	 * 模组用途
+	 */
+	private ModuleUsage usage;
 	/**
 	 * K线周期数
 	 */
