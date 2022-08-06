@@ -4,29 +4,28 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
+import java.util.stream.LongStream;
 
 import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.util.concurrent.AtomicDouble;
 
-import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 import tech.quantit.northstar.common.model.TimeSeriesValue;
 import tech.quantit.northstar.strategy.api.indicator.TimeSeriesUnaryOperator;
 import xyz.redtorch.pb.CoreField.BarField;
 
 /**
  * 均线函数
+ * 函数名称为了与业界实践保持一致，并没有僵硬地采用驼峰命名规范，而是遵循业界常用命名
  * @author KevinHuangwl
  *
  */
 public interface AverageFunctions {
 
 	/**
-	 * 当日成交量加权均价（当日结算价）
+	 * 当日成交量加权均价（当日结算价）函数
 	 * 注意：该算法与交易所的结算价存在一定误差，主要因为该算法是按K线计算，K线周期越小，误差越小
-	 * @param
-	 * @param
-	 * @return
+	 * @return		返回更新函数
 	 */
 	static Function<BarField, TimeSeriesValue> SETTLE(){
 		final AtomicDouble weightPrice = new AtomicDouble();
@@ -49,7 +48,34 @@ public interface AverageFunctions {
 			return new TimeSeriesValue(value, bar.getActionTimestamp());
 		};
 	}
-
+	
+	/**
+	 * N周期内的成交量加权均价函数
+	 * @param size	统计范围
+	 * @return		返回更新函数
+	 */
+	static Function<BarField, TimeSeriesValue> SETTLE(int size){
+		final int n = size;
+		final long[] volArr = new long[size];
+		final double[] priceArr = new double[size];
+		final AtomicInteger index = new AtomicInteger(0);
+		return bar -> {
+			int i = index.get();
+			volArr[i] = bar.getVolumeDelta();
+			priceArr[i] = (bar.getClosePrice() * 2 + bar.getHighPrice() + bar.getLowPrice()) / 4;	// 利用K线重心为计算依据
+			index.set(++i % n);
+			long total = LongStream.of(volArr).sum();
+			if(total == 0) {
+				return new TimeSeriesValue(0, bar.getActionTimestamp());
+			}
+			double weightedSum = 0;
+			for(int j=0; j<n; j++) {
+				weightedSum += priceArr[j] * volArr[j] / total;
+			}
+			return new TimeSeriesValue(weightedSum, bar.getActionTimestamp());
+		};
+	}
+	
 	/**
 	 * 指数加权平均EMA
 	 * @param size
@@ -93,22 +119,4 @@ public interface AverageFunctions {
 		};
 	}
 
-	/**
-	 * 函数：STD
-	 * 说明:估算标准差
-	 * 用法:STD(size)为收盘价的size日估算标准差
-	 * @param size
-	 * @return
-	 */
-	static TimeSeriesUnaryOperator STD(int size){
-		final double[] values = new double[size];
-		final AtomicInteger cursor = new AtomicInteger();
-		return tv ->{
-			long timestamp = tv.getTimestamp();
-			values[cursor.get()] = tv.getValue();
-			cursor.set(cursor.incrementAndGet() % size);
-			double variance = new StandardDeviation().evaluate(values);
-			return new TimeSeriesValue(variance, timestamp);
-		};
-	}
 }

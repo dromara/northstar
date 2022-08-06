@@ -4,6 +4,7 @@ import tech.quantit.northstar.common.model.TimeSeriesValue;
 import tech.quantit.northstar.strategy.api.indicator.TimeSeriesUnaryOperator;
 
 import static tech.quantit.northstar.strategy.api.indicator.function.AverageFunctions.*;
+import static tech.quantit.northstar.strategy.api.indicator.function.StatsFunctions.*;
 
 public final class BOLL {
 

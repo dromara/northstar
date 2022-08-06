@@ -10,7 +10,7 @@ import tech.quantit.northstar.strategy.api.indicator.TimeSeriesUnaryOperator;
  * @author KevinHuangwl
  *
  */
-public interface FunctionCompute {
+public interface ComputeFunction {
 
 	/**
 	 * 函数相加

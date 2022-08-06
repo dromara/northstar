@@ -1,8 +1,7 @@
 package tech.quantit.northstar.strategy.api.demo;
 
-import static tech.quantit.northstar.strategy.api.indicator.function.AverageFunctions.EMA;
-import static tech.quantit.northstar.strategy.api.indicator.function.AverageFunctions.MA;
-import static tech.quantit.northstar.strategy.api.indicator.function.FunctionCompute.minus;
+import static tech.quantit.northstar.strategy.api.indicator.function.AverageFunctions.*;
+import static tech.quantit.northstar.strategy.api.indicator.function.ComputeFunction.minus;
 
 import tech.quantit.northstar.common.constant.FieldType;
 import tech.quantit.northstar.common.constant.SignalOperation;
@@ -133,6 +132,9 @@ public class IndicatorSampleStrategy extends AbstractStrategy	// 为了简化代
 		ctx.newIndicator("BOLL_UPPER",params.indicatorSymbol, boll.upper());
 		ctx.newIndicator("BOLL_LOWER",params.indicatorSymbol, boll.lower());
 		ctx.newIndicator("BOLL_MID",params.indicatorSymbol, boll.mid());
+		
+		// 加权均价
+		ctx.newIndicator("WP", params.indicatorSymbol, SETTLE(72));
 	}
 
 	public static class InitParams extends DynamicParams {			
