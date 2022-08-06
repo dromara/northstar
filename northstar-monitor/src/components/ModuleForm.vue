@@ -66,27 +66,19 @@
               </el-select>
             </el-form-item>
             <el-form-item label="K线周期">
-              <el-input-number
-                :disabled="readOnly || isUpdateMode"
-                v-model="form.numOfMinPerBar"
-                :min="1"
-              />
+              <el-input-number :disabled="readOnly" v-model="form.numOfMinPerBar" :min="1" />
               <span class="ml-10">分钟</span>
             </el-form-item>
             <el-form-item label="预热数据量">
               <el-input-number
                 v-model="form.daysOfDataForPreparation"
                 :min="0"
-                :disabled="readOnly || isUpdateMode || form.usage === 'PLAYBACK'"
+                :disabled="readOnly || form.usage === 'PLAYBACK'"
               />
               <span class="ml-10">天</span>
             </el-form-item>
             <el-form-item label="缓存数据量">
-              <el-input-number
-                :disabled="readOnly || isUpdateMode"
-                v-model="form.moduleCacheDataSize"
-                :min="100"
-              >
+              <el-input-number :disabled="readOnly" v-model="form.moduleCacheDataSize" :min="100">
               </el-input-number>
             </el-form-item>
           </div>
