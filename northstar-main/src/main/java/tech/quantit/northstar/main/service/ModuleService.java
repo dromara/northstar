@@ -205,7 +205,11 @@ public class ModuleService implements InitializingBean {
 	 * @return
 	 * @throws Exception 
 	 */
-	public ModuleDescription modifyModule(ModuleDescription md) throws Exception {
+	public ModuleDescription modifyModule(ModuleDescription md, boolean reset) throws Exception {
+		if(reset) {
+			removeModule(md.getModuleName());
+			return createModule(md);
+		}
 		unloadModule(md.getModuleName());
 		loadModule(md);
 		moduleRepo.saveSettings(md);
@@ -340,5 +344,5 @@ public class ModuleService implements InitializingBean {
 		}, CompletableFuture.delayedExecutor(10, TimeUnit.SECONDS));
 		
 	}
-	
+
 }

@@ -40,4 +40,7 @@ export default {
   getSubscribedContractList(gatewayId){
     return baseService.get(`/gateway/sub?gatewayId=${gatewayId}`)
   },
+  resetPlayback(gatewayId){
+    return baseService.get(`/gateway/reset?gatewayId=${gatewayId}`)
+  }
 }

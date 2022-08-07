@@ -13,8 +13,8 @@ export default {
   insertModule(module) {
     return baseService.post('/module', module)
   },
-  updateModule(module) {
-    return baseService.put('/module', module)
+  updateModule(module, reset) {
+    return baseService.put(`/module?reset=${!!reset}`, module)
   },
   getAllModules() {
     return baseService.get('/module')

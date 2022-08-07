@@ -121,4 +121,10 @@ public class GatewayManagementController {
 				.map(ContractField::toByteArray)
 				.toList());
 	}
+	
+	@GetMapping("/reset")
+	@NotNull(message="网关ID不能为空")
+	public ResultBean<Boolean> resetPlayback(String gatewayId) throws Exception{
+		return new ResultBean<>(gatewayService.resetPlayback(gatewayId));
+	}
 }

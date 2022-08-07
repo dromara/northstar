@@ -146,8 +146,10 @@ public class PlaybackContext {
 							.build());
 					// 回放结束后，自动停机
 					if(playbackTimeState.toLocalDate().isAfter(endDate)) {
+						String infoMsg = String.format("[%s]-历史行情回放已经结束，可通过【复位】重置", gatewaySettings.getGatewayId());
+						log.info(infoMsg);
 						feEngine.emitEvent(NorthstarEventType.NOTICE, NoticeField.newBuilder()
-								.setContent(String.format("[%s] 回放已经结束", gatewaySettings.getGatewayId()))
+								.setContent(infoMsg)
 								.setStatus(CommonStatusEnum.COMS_WARN)
 								.setTimestamp(System.currentTimeMillis())
 								.build());

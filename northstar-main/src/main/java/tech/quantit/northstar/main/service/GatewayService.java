@@ -69,7 +69,7 @@ public class GatewayService implements InitializingBean {
 	 * @return
 	 * @throws Exception 
 	 */
-	public boolean createGateway(GatewayDescription gatewayDescription) throws Exception {
+	public boolean createGateway(GatewayDescription gatewayDescription) {
 		log.info("创建网关[{}]", gatewayDescription.getGatewayId());
 		doSaveGatewayDescription(gatewayDescription);
 		
@@ -109,7 +109,7 @@ public class GatewayService implements InitializingBean {
 	 * @return
 	 * @throws Exception 
 	 */
-	public boolean updateGateway(GatewayDescription gatewayDescription) throws Exception {
+	public boolean updateGateway(GatewayDescription gatewayDescription) {
 		log.info("更新网关[{}]", gatewayDescription.getGatewayId());
 		doDeleteGateway(gatewayDescription.getGatewayId());
 		doSaveGatewayDescription(gatewayDescription);
@@ -297,19 +297,37 @@ public class GatewayService implements InitializingBean {
 				.toList();
 	}
 	
+	/**
+	 * 复位重置回放网关
+	 * @param gatewayId
+	 * @return
+	 * @throws Exception 
+	 */
+	public boolean resetPlayback(String gatewayId) {
+		log.info("复位 [{}] 行情回放网关", gatewayId);
+		GatewayDescription gd = gatewayRepo.findById(gatewayId);
+		playbackRtRepo.deleteById(gatewayId);
+		decodeSettings(gd);
+		doCreateGateway(gd);
+		return true;
+	}
+	
+	private void decodeSettings(GatewayDescription gd) {
+		String decodeStr = CodecUtils.decrypt((String) gd.getSettings());
+		if(!JSON.isValid(decodeStr)) {
+			throw new IllegalStateException("解码字符串非法，很可能是临时文件夹" + System.getProperty("user.home") + File.separator
+					+ ".northstar-salt这个盐文件与加密时的不一致导致无法解码。解决办法：手动移除旧的Gateway数据，重新录入，并确保盐文件不会丢失。");
+		}
+		gd.setSettings(JSON.parseObject(decodeStr));
+	}
+	
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		List<GatewayDescription> result = gatewayRepo.findAll();
 		for(GatewayDescription gd : result) {
-			String decodeStr = CodecUtils.decrypt((String) gd.getSettings());
-			if(!JSON.isValid(decodeStr)) {
-				throw new IllegalStateException("解码字符串非法，很可能是临时文件夹" + System.getProperty("user.home") + File.separator
-						+ ".northstar-salt这个盐文件与加密时的不一致导致无法解码。解决办法：手动移除旧的Gateway数据，重新录入，并确保盐文件不会丢失。");
-			}
-			gd.setSettings(JSON.parseObject(decodeStr));
+			decodeSettings(gd);
 			doCreateGateway(gd);
 		}
 	}
 
-	
 }

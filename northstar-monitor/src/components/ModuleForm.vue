@@ -42,7 +42,7 @@
               </el-select>
             </el-form-item>
             <el-form-item label="模组用途">
-              <el-select v-model="form.usage">
+              <el-select v-model="form.usage" :disabled="readOnly || isUpdateMode">
                 <el-option label="回测" value="PLAYBACK"></el-option>
                 <el-option label="模拟盘" value="UAT"></el-option>
                 <el-option label="实盘" value="PROD"></el-option>
@@ -171,11 +171,21 @@
     </el-container>
 
     <div slot="footer" class="dialog-footer">
+      <el-popconfirm
+        v-if="!readOnly && isUpdateMode && form.usage !== 'PROD'"
+        class="mr-10"
+        title="确定重置吗？"
+        @confirm="saveSetting(true)"
+      >
+        <el-button slot="reference" size="mini" type="warning" title="模组状态将重置为初始状态">
+          重置模组
+        </el-button>
+      </el-popconfirm>
       <el-button v-if="!readOnly" type="primary" @click="contractFinderVisible = true">
         合约查询
       </el-button>
       <el-button @click="close">取 消</el-button>
-      <el-button v-if="!readOnly" type="primary" @click="saveSetting">保 存</el-button>
+      <el-button v-if="!readOnly" type="primary" @click="saveSetting(false)">保 存</el-button>
     </div>
   </el-dialog>
 </template>
@@ -298,7 +308,7 @@ export default {
         }
       })
     },
-    async saveSetting() {
+    async saveSetting(reset) {
       let pass =
         this.assertTrue(this.form.moduleName, '未指定模组名称') &&
         this.assertTrue(this.form.type, '未指定模组类型') &&
@@ -319,7 +329,7 @@ export default {
       await moduleApi.validateModule(this.form)
 
       const obj = Object.assign({}, this.form)
-      this.$emit('onSave', obj)
+      this.$emit(reset ? 'onReset' : 'onSave', obj)
       this.close()
     },
     close() {

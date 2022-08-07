@@ -140,6 +140,18 @@
             @click="handleMoneyIO(scope.row)"
             >出入金</el-button
           >
+          <el-popconfirm
+            v-if="
+              gatewayUsage === 'MARKET_DATA' &&
+              scope.row.connectionState === 'DISCONNECTED' &&
+              scope.row.gatewayType === 'PLAYBACK'
+            "
+            class="ml-10 mr-10"
+            title="确定要重新回放历史行情吗？"
+            @confirm="handleReset(scope.row)"
+          >
+            <el-button size="mini" slot="reference" type="warning"> 复位 </el-button>
+          </el-popconfirm>
           <el-button
             size="mini"
             @click="handleEdit(scope.$index, scope.row)"
@@ -259,6 +271,9 @@ export default {
     async disconnect(row) {
       await gatewayMgmtApi.disconnect(row.gatewayId)
       this.updateList()
+    },
+    handleReset(row) {
+      gatewayMgmtApi.resetPlayback(row.gatewayId)
     },
     handleMoneyIO(row) {
       this.curGatewayDescription = row

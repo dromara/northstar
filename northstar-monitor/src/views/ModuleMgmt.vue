@@ -4,7 +4,8 @@
       :visible.sync="moduleFormVisible"
       :readOnly="curTableIndex > -1 && curModule.runtime.enabled"
       :module="curModule"
-      @onSave="onSave"
+      @onSave="(obj) => onSave(obj, false)"
+      @onReset="(obj) => onSave(obj, true)"
     />
     <ModuleRuntime
       :visible.sync="ModuleRuntimeVisible"
@@ -155,11 +156,12 @@ export default {
       await moduleApi.removeModule(row.moduleName)
       this.findAll()
     },
-    async onSave(obj) {
+    async onSave(obj, reset) {
+      console.log('reset,', reset)
       if (this.curTableIndex < 0) {
         await moduleApi.insertModule(obj)
       } else {
-        await moduleApi.updateModule(obj)
+        await moduleApi.updateModule(obj, reset)
       }
       this.findAll()
     },

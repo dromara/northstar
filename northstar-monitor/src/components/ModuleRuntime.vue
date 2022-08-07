@@ -146,7 +146,11 @@
                 <el-table-column prop="volume" label="手数" align="center" width="46px" />
                 <el-table-column prop="openPrice" label="开仓价" align="center" />
                 <el-table-column prop="closePrice" label="平仓价" align="center" />
-                <el-table-column prop="dealProfit" label="平仓盈亏" align="center" width="70px" />
+                <el-table-column prop="dealProfit" label="平仓盈亏" align="center" width="70px">
+                  <template slot-scope="scope">
+                    {{ scope.row.dealProfit | formatter }}
+                  </template>
+                </el-table-column>
                 <el-table-column prop="tradingDay" label="交易日" align="center" width="100px" />
               </el-table>
             </div>
