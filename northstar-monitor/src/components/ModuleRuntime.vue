@@ -158,7 +158,9 @@
         </div>
       </div>
       <div class="kline-wrapper">
-        <div class="kline-header">模组当前引用的K线数据（模组仅缓存最近的500根K线数据）</div>
+        <div class="kline-header">
+          模组当前引用的K线数据（模组仅缓存最近的{{ module.moduleCacheDataSize }}根K线数据）
+        </div>
         <div>
           <el-select class="ml-10 mt-5" v-model="unifiedSymbolOfChart" placeholder="请选择合约">
             <el-option

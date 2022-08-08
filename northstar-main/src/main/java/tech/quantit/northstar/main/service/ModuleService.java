@@ -18,6 +18,7 @@ import org.springframework.util.Assert;
 
 import com.alibaba.fastjson.JSONObject;
 
+import cn.hutool.core.date.LocalDateTimeUtil;
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.constant.Constants;
 import tech.quantit.northstar.common.constant.DateTimeConstant;
@@ -256,8 +257,9 @@ public class ModuleService implements InitializingBean {
 		IModule module = moduleFactory.newInstance(md, mrd);
 		module.initModule();
 		log.info("模组[{}] 初始化数据起始计算日为：{}", md.getModuleName(), date);
+		LocalDate now = LocalDate.now();
 		// 模组数据初始化
-		while(LocalDate.now().isAfter(date)) {
+		while(LocalDateTimeUtil.weekOfYear(now) >= LocalDateTimeUtil.weekOfYear(date)) {
 			LocalDate start = utils.getFridayOfThisWeek(date.minusWeeks(1));
 			LocalDate end = utils.getFridayOfThisWeek(date);
 			for(ModuleAccountDescription mad : md.getModuleAccountSettingsDescription()) {
