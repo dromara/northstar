@@ -72,6 +72,7 @@ public class BarMerger {
 	
 	private void doGenerate() {
 		callback.accept(barBuilder.build());
+		barBuilder = null;
 		countBars = 0;
 	}
 
