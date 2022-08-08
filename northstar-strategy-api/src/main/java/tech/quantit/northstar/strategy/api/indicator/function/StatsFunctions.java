@@ -2,7 +2,7 @@ package tech.quantit.northstar.strategy.api.indicator.function;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
+import org.apache.commons.math3.stat.StatUtils;
 
 import tech.quantit.northstar.common.model.TimeSeriesValue;
 import tech.quantit.northstar.strategy.api.indicator.TimeSeriesUnaryOperator;
@@ -29,8 +29,9 @@ public interface StatsFunctions {
 			long timestamp = tv.getTimestamp();
 			values[cursor.get()] = tv.getValue();
 			cursor.set(cursor.incrementAndGet() % size);
-			double variance = new StandardDeviation().evaluate(values);
+			double variance = StatUtils.variance(values);
 			return new TimeSeriesValue(variance, timestamp);
 		};
 	}
+	
 }

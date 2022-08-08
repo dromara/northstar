@@ -312,22 +312,22 @@ public class GatewayService implements InitializingBean {
 		return true;
 	}
 	
-	private void decodeSettings(GatewayDescription gd) {
+	private GatewayDescription decodeSettings(GatewayDescription gd) {
 		String decodeStr = CodecUtils.decrypt((String) gd.getSettings());
 		if(!JSON.isValid(decodeStr)) {
 			throw new IllegalStateException("解码字符串非法，很可能是临时文件夹" + System.getProperty("user.home") + File.separator
 					+ ".northstar-salt这个盐文件与加密时的不一致导致无法解码。解决办法：手动移除旧的Gateway数据，重新录入，并确保盐文件不会丢失。");
 		}
 		gd.setSettings(JSON.parseObject(decodeStr));
+		return gd;
 	}
 	
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		List<GatewayDescription> result = gatewayRepo.findAll();
-		for(GatewayDescription gd : result) {
-			decodeSettings(gd);
-			doCreateGateway(gd);
-		}
+		// 因为依赖关系，加载要有先后顺序
+		result.stream().filter(gd -> gd.getGatewayUsage() == GatewayUsage.MARKET_DATA).map(this::decodeSettings).forEach(this::doCreateGateway);
+		result.stream().filter(gd -> gd.getGatewayUsage() == GatewayUsage.TRADE).map(this::decodeSettings).forEach(this::doCreateGateway);
 	}
 
 }
