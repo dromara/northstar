@@ -1,6 +1,7 @@
 package tech.quantit.northstar.strategy.api.demo;
 
-import static tech.quantit.northstar.strategy.api.indicator.function.AverageFunctions.*;
+import static tech.quantit.northstar.strategy.api.indicator.function.AverageFunctions.EMA;
+import static tech.quantit.northstar.strategy.api.indicator.function.AverageFunctions.MA;
 import static tech.quantit.northstar.strategy.api.indicator.function.ComputeFunctions.minus;
 
 import tech.quantit.northstar.common.constant.FieldType;
@@ -12,7 +13,6 @@ import tech.quantit.northstar.strategy.api.TradeStrategy;
 import tech.quantit.northstar.strategy.api.annotation.StrategicComponent;
 import tech.quantit.northstar.strategy.api.constant.PriceType;
 import tech.quantit.northstar.strategy.api.indicator.Indicator;
-import tech.quantit.northstar.strategy.api.indicator.complex.BOLL;
 import tech.quantit.northstar.strategy.api.indicator.complex.MACD;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.TickField;
@@ -127,14 +127,6 @@ public class IndicatorSampleStrategy extends AbstractStrategy	// 为了简化代
 		ctx.newIndicator("MACD_DIFF2", params.indicatorSymbol, macd.diff());
 		ctx.newIndicator("MACD_DEA2", params.indicatorSymbol, macd.dea());
 		
-		// BOLL指标
-		BOLL boll = BOLL.of(20, 2);
-		ctx.newIndicator("BOLL_UPPER",params.indicatorSymbol, boll.upper());
-		ctx.newIndicator("BOLL_LOWER",params.indicatorSymbol, boll.lower());
-		ctx.newIndicator("BOLL_MID",params.indicatorSymbol, boll.mid());
-		
-		// 加权均价
-		ctx.newIndicator("WP", params.indicatorSymbol, SETTLE(72));
 	}
 
 	public static class InitParams extends DynamicParams {			

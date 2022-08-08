@@ -41,7 +41,12 @@ public interface StatsFunctions {
 	 */
 	static TimeSeriesUnaryOperator LLV(int n) {
 		final double[] values = new double[n];
-		return tv -> new TimeSeriesValue(StatUtils.min(values), tv.getTimestamp());
+		final AtomicInteger cursor = new AtomicInteger();
+		return tv -> {
+			values[cursor.get()] = tv.getValue();
+			cursor.set(cursor.incrementAndGet() % n);
+			return new TimeSeriesValue(StatUtils.min(values), tv.getTimestamp());
+		};
 	}
 	
 	/**
@@ -51,6 +56,11 @@ public interface StatsFunctions {
 	 */
 	static TimeSeriesUnaryOperator HHV(int n) {
 		final double[] values = new double[n];
-		return tv -> new TimeSeriesValue(StatUtils.max(values), tv.getTimestamp());
+		final AtomicInteger cursor = new AtomicInteger();
+		return tv -> {
+			values[cursor.get()] = tv.getValue();
+			cursor.set(cursor.incrementAndGet() % n);
+			return new TimeSeriesValue(StatUtils.max(values), tv.getTimestamp());
+		};
 	}
 }

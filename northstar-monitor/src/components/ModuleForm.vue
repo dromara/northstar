@@ -287,11 +287,14 @@ export default {
           item.value = item.gatewayId
           return item
         })
-        console.log(this.accountOptions)
       })
       moduleApi.getStrategies().then((strategyMetas) => {
         strategyMetas.forEach(async (i) => initComponent(i, this.tradeStrategyOptions))
-        this.tradeStrategyOptions.sort((a, b) => a.value.localeCompare(b.value))
+        setTimeout(() => {
+          this.tradeStrategyOptions = this.tradeStrategyOptions.sort((a, b) =>
+            a.value.localeCompare(b.value)
+          )
+        }, 500)
       })
     },
     handleSelect(index) {
