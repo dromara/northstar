@@ -25,7 +25,7 @@ public interface AverageFunctions {
 	/**
 	 * 当日成交量加权均价（当日结算价）函数
 	 * 注意：该算法与交易所的结算价存在一定误差，主要因为该算法是按K线计算，K线周期越小，误差越小
-	 * @return		返回更新函数
+	 * @return		返回计算函数
 	 */
 	static Function<BarField, TimeSeriesValue> SETTLE(){
 		final AtomicDouble weightPrice = new AtomicDouble();
@@ -51,13 +51,12 @@ public interface AverageFunctions {
 	
 	/**
 	 * N周期内的成交量加权均价函数
-	 * @param size	统计范围
-	 * @return		返回更新函数
+	 * @param n		统计范围
+	 * @return		返回计算函数
 	 */
-	static Function<BarField, TimeSeriesValue> SETTLE(int size){
-		final int n = size;
-		final long[] volArr = new long[size];
-		final double[] priceArr = new double[size];
+	static Function<BarField, TimeSeriesValue> SETTLE(int n){
+		final long[] volArr = new long[n];
+		final double[] priceArr = new double[n];
 		final AtomicInteger index = new AtomicInteger(0);
 		return bar -> {
 			int i = index.get();
@@ -77,14 +76,14 @@ public interface AverageFunctions {
 	}
 	
 	/**
-	 * 指数加权平均EMA
-	 * @param size
-	 * @return
+	 * 指数加权平均EMA函数
+	 * @param n		统计范围
+	 * @return		返回计算函数
 	 */
-	static TimeSeriesUnaryOperator EMA(int size) {
+	static TimeSeriesUnaryOperator EMA(int n) {
 		final AtomicDouble ema = new AtomicDouble();
 		final AtomicBoolean hasInitVal = new AtomicBoolean();
-		final double factor = 2D / (size + 1);
+		final double factor = 2D / (n + 1);
 		return tv -> {
 			double val = tv.getValue();
 			long timestamp = tv.getTimestamp();
@@ -99,12 +98,12 @@ public interface AverageFunctions {
 	}
 
 	/**
-	 * 简单移动平均MA
-	 * @param size
-	 * @return
+	 * 简单移动平均MA函数
+	 * @param n		统计范围
+	 * @return		返回计算函数
 	 */
-	static TimeSeriesUnaryOperator MA(int size) {
-		final double[] values = new double[size];
+	static TimeSeriesUnaryOperator MA(int n) {
+		final double[] values = new double[n];
 		final AtomicInteger cursor = new AtomicInteger();
 		final AtomicDouble sumOfValues = new AtomicDouble();
 		return tv -> {
@@ -112,9 +111,9 @@ public interface AverageFunctions {
 			double val = tv.getValue();
 			double oldVal = values[cursor.get()];
 			values[cursor.get()] = val;
-			cursor.set(cursor.incrementAndGet() % size);
+			cursor.set(cursor.incrementAndGet() % n);
 			sumOfValues.addAndGet(val - oldVal);
-			val = sumOfValues.get() / size;
+			val = sumOfValues.get() / n;
 			return new TimeSeriesValue(val, timestamp);
 		};
 	}

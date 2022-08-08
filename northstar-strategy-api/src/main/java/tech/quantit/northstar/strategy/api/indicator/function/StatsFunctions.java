@@ -3,6 +3,7 @@ package tech.quantit.northstar.strategy.api.indicator.function;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.math3.stat.StatUtils;
+import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 
 import tech.quantit.northstar.common.model.TimeSeriesValue;
 import tech.quantit.northstar.strategy.api.indicator.TimeSeriesUnaryOperator;
@@ -16,22 +17,40 @@ import tech.quantit.northstar.strategy.api.indicator.TimeSeriesUnaryOperator;
 public interface StatsFunctions {
 	
 	/**
-	 * 函数：STD
-	 * 说明:估算标准差
-	 * 用法:STD(size)为收盘价的size日估算标准差
-	 * @param size
-	 * @return
+	 * N个周期内的标准差函数
+	 * @param n		统计范围
+	 * @return		返回计算函数
 	 */
-	static TimeSeriesUnaryOperator STD(int size){
-		final double[] values = new double[size];
+	static TimeSeriesUnaryOperator STD(int n){
+		final double[] values = new double[n];
 		final AtomicInteger cursor = new AtomicInteger();
+		final StandardDeviation std = new StandardDeviation();
 		return tv ->{
 			long timestamp = tv.getTimestamp();
 			values[cursor.get()] = tv.getValue();
-			cursor.set(cursor.incrementAndGet() % size);
-			double variance = StatUtils.variance(values);
-			return new TimeSeriesValue(variance, timestamp);
+			cursor.set(cursor.incrementAndGet() % n);
+			double stdVal = std.evaluate(values);
+			return new TimeSeriesValue(stdVal, timestamp);
 		};
 	}
 	
+	/**
+	 * N个周期内的最低价计算函数
+	 * @param n		统计范围
+	 * @return		返回计算函数
+	 */
+	static TimeSeriesUnaryOperator LLV(int n) {
+		final double[] values = new double[n];
+		return tv -> new TimeSeriesValue(StatUtils.min(values), tv.getTimestamp());
+	}
+	
+	/**
+	 * N个周期内的最高价计算函数
+	 * @param n		统计范围
+	 * @return		返回计算函数
+	 */
+	static TimeSeriesUnaryOperator HHV(int n) {
+		final double[] values = new double[n];
+		return tv -> new TimeSeriesValue(StatUtils.max(values), tv.getTimestamp());
+	}
 }
