@@ -59,7 +59,7 @@
               </el-tooltip>
             </el-form-item>
             <el-form-item label="平仓优化">
-              <el-select v-model="form.closingPolicy" :disabled="readOnly">
+              <el-select v-model="form.closingPolicy" :disabled="readOnly || form.usage !== 'PROD'">
                 <el-option label="先开先平" value="FIFO"></el-option>
                 <el-option label="平今优先" value="PRIOR_TODAY"></el-option>
                 <el-option label="平昨锁今" value="PRIOR_BEFORE_HEGDE_TODAY"></el-option>
@@ -278,6 +278,7 @@ export default {
       if (val === 'PLAYBACK') {
         this.form.daysOfDataForPreparation = 0
       }
+      this.form.closingPolicy = 'FIFO'
     }
   },
   methods: {
