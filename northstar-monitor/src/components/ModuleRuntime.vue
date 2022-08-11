@@ -103,6 +103,9 @@
                     | formatter
                 }}
               </el-descriptions-item>
+              <el-descriptions-item label="交易笔数">
+                {{ accountDealRecords.length || 0 }}
+              </el-descriptions-item>
             </el-descriptions>
             <el-tabs v-model="moduleTab" :stretch="true">
               <el-tab-pane name="holding" label="模组持仓"></el-tab-pane>
