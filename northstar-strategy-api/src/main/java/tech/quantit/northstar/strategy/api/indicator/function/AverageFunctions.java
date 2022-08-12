@@ -96,8 +96,9 @@ public interface AverageFunctions {
 	}
 
 	/**
-	 * 简单移动平均SMA函数
+	 * 扩展指数加权移动平均SMA函数
 	 * @param n		统计范围
+	 * @param m		权重
 	 * @return		返回计算函数
 	 */
 	static TimeSeriesUnaryOperator SMA(int n, int m) {
