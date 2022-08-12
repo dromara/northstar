@@ -1,18 +1,16 @@
 package tech.quantit.northstar.strategy.api.indicator.function;
 
+import com.google.common.util.concurrent.AtomicDouble;
+import org.apache.commons.lang3.StringUtils;
+import tech.quantit.northstar.common.model.TimeSeriesValue;
+import tech.quantit.northstar.strategy.api.indicator.TimeSeriesUnaryOperator;
+import xyz.redtorch.pb.CoreField.BarField;
+
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 import java.util.stream.LongStream;
-
-import org.apache.commons.lang3.StringUtils;
-
-import com.google.common.util.concurrent.AtomicDouble;
-
-import tech.quantit.northstar.common.model.TimeSeriesValue;
-import tech.quantit.northstar.strategy.api.indicator.TimeSeriesUnaryOperator;
-import xyz.redtorch.pb.CoreField.BarField;
 
 /**
  * 均线函数
@@ -74,7 +72,7 @@ public interface AverageFunctions {
 			return new TimeSeriesValue(weightedSum, bar.getActionTimestamp());
 		};
 	}
-	
+
 	/**
 	 * 指数加权平均EMA函数
 	 * @param n		统计范围
@@ -94,6 +92,28 @@ public interface AverageFunctions {
 				hasInitVal.set(true);
 			}
 			return new TimeSeriesValue(ema.get(), timestamp);
+		};
+	}
+
+	/**
+	 * 简单移动平均SMA函数
+	 * @param n		统计范围
+	 * @return		返回计算函数
+	 */
+	static TimeSeriesUnaryOperator SMA(int n, int m) {
+		final AtomicDouble sma = new AtomicDouble();
+		final AtomicBoolean hasInitVal = new AtomicBoolean();
+		final double factor = (double) m / n;
+		return tv -> {
+			double val = tv.getValue();
+			long timestamp = tv.getTimestamp();
+			if(hasInitVal.get()) {
+				sma.set(factor * val + (1 - factor) * sma.get());
+			} else {
+				sma.set(val);
+				hasInitVal.set(true);
+			}
+			return new TimeSeriesValue(sma.get(), timestamp);
 		};
 	}
 
