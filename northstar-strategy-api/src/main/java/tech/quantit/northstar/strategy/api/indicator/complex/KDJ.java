@@ -56,7 +56,7 @@ public class KDJ {
 	public Function<BarField, TimeSeriesValue> k() {
 		final TimeSeriesUnaryOperator llv = LLV(this.n);
 		final TimeSeriesUnaryOperator hhv = HHV(this.n);
-		final TimeSeriesUnaryOperator sma = SMA(this.n, this.m1);
+		final TimeSeriesUnaryOperator sma = SMA(this.m1, 1);
 		return bar -> {
 			TimeSeriesValue lowV = llv.apply(new TimeSeriesValue(bar.getLowPrice(), bar.getActionTimestamp()));
 			TimeSeriesValue highV = hhv.apply(new TimeSeriesValue(bar.getHighPrice(), bar.getActionTimestamp()));
@@ -72,7 +72,7 @@ public class KDJ {
 	 */
 	public Function<BarField, TimeSeriesValue> d() {
 		final Function<BarField, TimeSeriesValue> k = k();
-		final TimeSeriesUnaryOperator sma = SMA(this.n, this.m1);
+		final TimeSeriesUnaryOperator sma = SMA(this.m2, 1);
 		return bar -> sma.apply(k.apply(bar));
 	}
 
