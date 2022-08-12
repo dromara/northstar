@@ -21,6 +21,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.ILoggerFactory;
 import org.slf4j.Logger;
 
+import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.constant.Constants;
 import tech.quantit.northstar.common.constant.DateTimeConstant;
 import tech.quantit.northstar.common.constant.ModuleState;
@@ -37,6 +38,7 @@ import tech.quantit.northstar.common.utils.FieldUtils;
 import tech.quantit.northstar.common.utils.OrderUtils;
 import tech.quantit.northstar.gateway.api.TradeGateway;
 import tech.quantit.northstar.strategy.api.ClosingStrategy;
+import tech.quantit.northstar.strategy.api.IDisposablePriceListener;
 import tech.quantit.northstar.strategy.api.IModule;
 import tech.quantit.northstar.strategy.api.IModuleAccountStore;
 import tech.quantit.northstar.strategy.api.IModuleContext;
@@ -47,7 +49,9 @@ import tech.quantit.northstar.strategy.api.indicator.Indicator;
 import tech.quantit.northstar.strategy.api.indicator.TimeSeriesUnaryOperator;
 import tech.quantit.northstar.strategy.api.indicator.Indicator.ValueType;
 import tech.quantit.northstar.strategy.api.log.ModuleLoggerFactory;
+import tech.quantit.northstar.strategy.api.utils.trade.DisposablePriceListener;
 import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
+import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.ForceCloseReasonEnum;
 import xyz.redtorch.pb.CoreEnum.HedgeFlagEnum;
 import xyz.redtorch.pb.CoreEnum.OrderPriceTypeEnum;
@@ -67,6 +71,7 @@ import xyz.redtorch.pb.CoreField.TradeField;
  * @author KevinHuangwl
  *
  */
+@Slf4j
 public class ModuleContext implements IModuleContext{
 	
 	private static final ILoggerFactory logFactory = new ModuleLoggerFactory();
@@ -99,6 +104,8 @@ public class ModuleContext implements IModuleContext{
 	
 	/* indicatorName -> values */
 	private Map<String, Queue<TimeSeriesValue>> indicatorValBufQMap = new HashMap<>(); 
+	
+	private Set<DisposablePriceListener> listenerSet = new HashSet<>();
 	
 	private String tradingDay = "";
 	
@@ -136,12 +143,12 @@ public class ModuleContext implements IModuleContext{
 	
 	private final String moduleName;
 	
-	private Logger log;
+	private Logger mlog;
 	
 	public ModuleContext(String name, TradeStrategy tradeStrategy, IModuleAccountStore accStore, ClosingStrategy closingStrategy, int numOfMinsPerBar, 
 			int bufSize, DealCollector dealCollector, Consumer<ModuleRuntimeDescription> onRuntimeChangeCallback, Consumer<ModuleDealRecord> onDealCallback) {
 		this.moduleName = name;
-		this.log = logFactory.getLogger(name);
+		this.mlog = logFactory.getLogger(name);
 		this.tradeStrategy = tradeStrategy;
 		this.accStore = accStore;
 		this.closingStrategy = closingStrategy;
@@ -250,7 +257,7 @@ public class ModuleContext implements IModuleContext{
 	}
 
 	private String submitOrderReq(SubmitOrderReqField orderReq) {
-		log.debug("模组 [{}] 发单：{}", moduleName, orderReq.getOriginOrderId());
+		mlog.debug("发单：{}", orderReq.getOriginOrderId());
 		if(FieldUtils.isOpen(orderReq.getOffsetFlag())) {
 			checkAmount(orderReq);
 		}
@@ -275,10 +282,24 @@ public class ModuleContext implements IModuleContext{
 			throw new TradeException(String.format("模组可用资金 [%s] 小于开仓保证金 [%s]", preBalance, extMargin));
 		}
 	}
+	
+	@Override
+	public IDisposablePriceListener priceTriggerOut(String unifiedSymbol, DirectionEnum openDir, double basePrice, int numOfPriceTickToTrigger, int volume) {
+		return priceTriggerOut(getContract(unifiedSymbol), openDir, basePrice, numOfPriceTickToTrigger, volume);
+	}
+	
+	@Override
+	public IDisposablePriceListener priceTriggerOut(ContractField contract, DirectionEnum openDir, double basePrice, int numOfPriceTickToTrigger, int volume) {
+		DisposablePriceListener listener = DisposablePriceListener.create(this, contract, openDir, basePrice, numOfPriceTickToTrigger, volume);
+		if(mlog.isInfoEnabled())
+			mlog.info("增加【{}】", listener.description());
+		listenerSet.add(listener);
+		return listener;
+	}
 
 	@Override
 	public synchronized void cancelOrder(String originOrderId) {
-		log.debug("模组 [{}] 撤单：{}", moduleName, originOrderId);
+		mlog.debug("撤单：{}", originOrderId);
 		if(!orderMap.containsKey(originOrderId)) {
 			throw new NoSuchElementException("找不到订单：" + originOrderId);
 		}
@@ -303,7 +324,15 @@ public class ModuleContext implements IModuleContext{
 		}
 		accStore.onTick(tick);
 		latestTickMap.put(tick.getUnifiedSymbol(), tick);
+		listenerSet.stream()
+			.filter(listener -> listener.shouldBeTriggered(tick))
+			.forEach(listener -> {
+				listener.execute();
+				mlog.info("触发【{}】", listener.description());
+				log.info("模组[{}] 触发【{}】", moduleName, listener.description());
+			});
 		tradeStrategy.onTick(tick, module.isEnabled());
+		listenerSet = listenerSet.stream().filter(DisposablePriceListener::isValid).collect(Collectors.toSet());
 	}
 	
 	/* 此处收到的BAR数据是所有订阅的数据，需要过滤 */
@@ -341,6 +370,11 @@ public class ModuleContext implements IModuleContext{
 		tradeStrategy.onTrade(trade);
 		onRuntimeChangeCallback.accept(getRuntimeDescription(false));
 		dealCollector.onTrade(trade).ifPresent(list -> list.stream().forEach(this.onDealCallback::accept));
+		
+		if(getState().isEmpty()) {
+			mlog.info("净持仓为零，止盈止损监听器被清除");
+			listenerSet.clear();
+		}
 	}
 
 	@Override
@@ -354,7 +388,7 @@ public class ModuleContext implements IModuleContext{
 	}
 
 	@Override
-	public void setModule(IModule module) {
+	public synchronized void setModule(IModule module) {
 		this.module = module;
 		tradeStrategy.setContext(this);
 	}
@@ -402,7 +436,7 @@ public class ModuleContext implements IModuleContext{
 
 	@Override
 	public Logger getLogger() {
-		return log;
+		return mlog;
 	}
 
 	@Override
