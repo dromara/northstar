@@ -6,6 +6,14 @@ import tech.quantit.northstar.strategy.api.indicator.TimeSeriesUnaryOperator;
 import static tech.quantit.northstar.strategy.api.indicator.function.AverageFunctions.*;
 import static tech.quantit.northstar.strategy.api.indicator.function.StatsFunctions.*;
 
+/**
+ * MID:MA(CLOSE,N);//求N个周期的收盘价均线，称为布林通道中轨
+ * TMP2:=STD(CLOSE,M);//求M个周期内的收盘价的标准差
+ * TOP:MID+P*TMP2;//布林通道上轨
+ * BOTTOM:MID-P*TMP2;//布林通道下轨
+ * @author KevinHuangwl
+ *
+ */
 public final class BOLL {
 
     private int x;
@@ -32,7 +40,10 @@ public final class BOLL {
     }
 
     /**
-     * 获取上轨线生成函数
+     * 获取上轨线计算函数
+     * MID:MA(CLOSE,N);//求N个周期的收盘价均线，称为布林通道中轨
+	 * TMP2:=STD(CLOSE,M);//求M个周期内的收盘价的标准差
+	 * TOP:MID+P*TMP2;//布林通道上轨
      * @return
      */
     public TimeSeriesUnaryOperator upper(){
@@ -47,7 +58,10 @@ public final class BOLL {
     }
 
     /**
-     * 获取下轨线生成函数
+     * 获取下轨线计算函数
+     * MID:MA(CLOSE,N);//求N个周期的收盘价均线，称为布林通道中轨
+	 * TMP2:=STD(CLOSE,M);//求M个周期内的收盘价的标准差
+	 * BOTTOM:MID-P*TMP2;//布林通道下轨
      * @return
      */
     public TimeSeriesUnaryOperator lower(){
@@ -62,7 +76,8 @@ public final class BOLL {
     }
 
     /**
-     * 获取中轨线生成函数
+     * 获取中轨线计算函数
+     * MID:MA(CLOSE,N);//求N个周期的收盘价均线，称为布林通道中轨
      * @return
      */
     public TimeSeriesUnaryOperator mid(){

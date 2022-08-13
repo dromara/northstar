@@ -63,4 +63,5 @@ public interface StatsFunctions {
 			return new TimeSeriesValue(StatUtils.max(values), tv.getTimestamp());
 		};
 	}
+
 }

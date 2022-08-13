@@ -10,6 +10,7 @@ import tech.quantit.northstar.strategy.api.TradeStrategy;
 import tech.quantit.northstar.strategy.api.annotation.StrategicComponent;
 import tech.quantit.northstar.strategy.api.indicator.complex.BOLL;
 import tech.quantit.northstar.strategy.api.indicator.complex.KDJ;
+import tech.quantit.northstar.strategy.api.indicator.complex.LWR;
 
 /**
  * 本策略没有交易逻辑，仅用于做指标演示
@@ -37,6 +38,10 @@ public class IndicatorDemoStrategy extends AbstractStrategy	// 为了简化代�
 		ctx.newIndicator("K", params.indicatorSymbol, kdj.k());
 		ctx.newIndicator("D", params.indicatorSymbol, kdj.d());
 		ctx.newIndicator("J", params.indicatorSymbol, kdj.j());
+		
+		LWR lwr = LWR.of(9, 3, 3);
+		ctx.newIndicator("LWR1", params.indicatorSymbol, lwr.fast());
+		ctx.newIndicator("LWR2", params.indicatorSymbol, lwr.slow());
 		
 		ctx.newIndicator("SMA", params.indicatorSymbol, SMA(10, 2));
 		ctx.newIndicator("WP", params.indicatorSymbol, SETTLE(72));	// 加权均价

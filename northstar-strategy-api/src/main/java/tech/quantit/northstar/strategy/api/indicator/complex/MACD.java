@@ -5,6 +5,12 @@ import static tech.quantit.northstar.strategy.api.indicator.function.AverageFunc
 import tech.quantit.northstar.common.model.TimeSeriesValue;
 import tech.quantit.northstar.strategy.api.indicator.TimeSeriesUnaryOperator;
 
+/**
+ * DIFF : EMA(CLOSE,SHORT) - EMA(CLOSE,LONG);//短周期与长周期的收盘价的指数平滑移动平均值做差。
+ * DEA  : EMA(DIFF,M);//DIFF的M个周期指数平滑移动平均
+ * @author KevinHuangwl
+ *
+ */
 public class MACD {
 
 	private int fast;
@@ -36,6 +42,7 @@ public class MACD {
 	
 	/**
 	 * 获取DIFF线计算函数
+	 * DIFF : EMA(CLOSE,SHORT) - EMA(CLOSE,LONG);//短周期与长周期的收盘价的指数平滑移动平均值做差。
 	 * @return
 	 */
 	public TimeSeriesUnaryOperator diff() {
@@ -51,6 +58,7 @@ public class MACD {
 	
 	/**
 	 * 获取DEA线计算函数
+	 * DEA  : EMA(DIFF,M);//DIFF的M个周期指数平滑移动平均
 	 * @return
 	 */
 	public TimeSeriesUnaryOperator dea() {
