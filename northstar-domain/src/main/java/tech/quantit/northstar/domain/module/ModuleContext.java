@@ -130,8 +130,8 @@ public class ModuleContext implements IModuleContext{
 			if(indicatorValBufQMap.get(e.getKey()).size() >= bufSize.intValue()) {
 				indicatorValBufQMap.get(e.getKey()).poll();
 			}
-			if(indicator.isReady()) {					
-				indicatorValBufQMap.get(e.getKey()).offer(indicator.valueWithTime(0));
+			if(indicator.isReady() && indicator.valueWithTime(0).getTimestamp() == bar.getActionTimestamp()) {		// 只有时间戳一致才会被记录			
+				indicatorValBufQMap.get(e.getKey()).offer(indicator.valueWithTime(0));	
 			}
 		});
 		tradeStrategy.onBar(bar, module.isEnabled());

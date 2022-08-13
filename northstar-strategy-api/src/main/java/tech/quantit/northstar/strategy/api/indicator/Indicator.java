@@ -148,6 +148,7 @@ public class Indicator {
 	 * @param newVal
 	 */
 	public void updateVal(TimeSeriesValue tv) {
+		if(tv.getTimestamp() == 0) 	return;	// 时间戳为零会视为无效记录 
 		refVals.update(tv);
 		actualUpdate++;
 	}
