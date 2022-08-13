@@ -8,8 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.InitializingBean;
@@ -335,16 +333,14 @@ public class ModuleService implements InitializingBean {
 	
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		CompletableFuture.runAsync(() -> {
-			log.info("正在加载模组");
-			for(ModuleDescription md : findAllModules()) {
-				try {				
-					loadModule(md);
-				} catch (Exception e) {
-					log.warn("模组 [{}] 加载失败", md.getModuleName(), e);
-				}
+		log.info("正在加载模组");
+		for(ModuleDescription md : findAllModules()) {
+			try {				
+				loadModule(md);
+			} catch (Exception e) {
+				log.warn("模组 [{}] 加载失败", md.getModuleName(), e);
 			}
-		}, CompletableFuture.delayedExecutor(10, TimeUnit.SECONDS));
+		}
 		
 	}
 

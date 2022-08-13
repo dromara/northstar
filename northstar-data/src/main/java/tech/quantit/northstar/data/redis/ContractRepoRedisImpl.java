@@ -66,14 +66,12 @@ public class ContractRepoRedisImpl implements IContractRepository {
 
 	@Override
 	public List<ContractField> findAll() {
-		String key = KEY_PREFIX + "*";
-		BoundHashOperations<String, String, byte[]> opt = redisTemplate.boundHashOps(key);
-		List<byte[]> results = opt.values();
-		if(results == null)
-			return Collections.emptyList();
-		return results.stream()
-				.map(this::convertObject)
-				.toList();
+		String keys = KEY_PREFIX + "*";
+		return redisTemplate.keys(keys).stream()
+			.map(redisTemplate::boundHashOps)
+			.flatMap(opt -> opt.values().stream())
+			.map(bytes -> convertObject((byte[])bytes))
+			.toList();
 	}
 
 }
