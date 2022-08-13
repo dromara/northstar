@@ -11,6 +11,7 @@ import tech.quantit.northstar.strategy.api.annotation.StrategicComponent;
 import tech.quantit.northstar.strategy.api.indicator.complex.BOLL;
 import tech.quantit.northstar.strategy.api.indicator.complex.KDJ;
 import tech.quantit.northstar.strategy.api.indicator.complex.LWR;
+import tech.quantit.northstar.strategy.api.indicator.complex.WaveShape;
 
 /**
  * 本策略没有交易逻辑，仅用于做指标演示
@@ -42,6 +43,9 @@ public class IndicatorDemoStrategy extends AbstractStrategy	// 为了简化代�
 		LWR lwr = LWR.of(9, 3, 3);
 		ctx.newIndicator("LWR1", params.indicatorSymbol, lwr.fast());
 		ctx.newIndicator("LWR2", params.indicatorSymbol, lwr.slow());
+		
+		WaveShape waveShape = WaveShape.of(20, 3);
+		ctx.newIndicator("WAVE", params.indicatorSymbol, waveShape.wave());
 		
 		ctx.newIndicator("SMA", params.indicatorSymbol, SMA(10, 2));
 		ctx.newIndicator("WP", params.indicatorSymbol, SETTLE(72));	// 加权均价
