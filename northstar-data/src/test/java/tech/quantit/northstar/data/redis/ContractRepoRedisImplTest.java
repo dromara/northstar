@@ -84,6 +84,9 @@ class ContractRepoRedisImplTest {
 		
 		List<ContractField> list = repo.findAll("CTP");
 		assertThat(list).hasSize(1).contains(c1);
+		
+		List<ContractField> list2 = repo.findAll();
+		assertThat(list2).hasSize(1).contains(c1);
 	}
 	
 	@Test
@@ -94,12 +97,4 @@ class ContractRepoRedisImplTest {
 		assertThat(list).hasSize(1).contains(c1);
 	}
 	
-//	@Test
-//	void shouldFilterExpiredContract() {
-//		repo.save(c1, "CTP");
-//		repo.save(c3, "CTP");
-//		List<ContractField> list = repo.findAll("CTP");
-//		assertThat(list).hasSize(1).contains(c1);
-//	}
-
 }
