@@ -12,11 +12,11 @@ import tech.quantit.northstar.strategy.api.indicator.TimeSeriesUnaryOperator;
 import xyz.redtorch.pb.CoreField.BarField;
 
 /**
- * 波浪形态
+ * 波浪指标
  * @author KevinHuangwl
  *
  */
-public class WaveShape {
+public class WAVE {
 
 	private LWR lwr;
 	
@@ -24,13 +24,13 @@ public class WaveShape {
 	
 	private static final TimeSeriesValue TV_PLACEHOLDER = new TimeSeriesValue(0, 0);
 	
-	public WaveShape(int n, int m) {
+	public WAVE(int n, int m) {
 		this.m = m;
 		lwr = LWR.of(n, m, m);
 	}
 	
-	public static WaveShape of(int n, int m) {
-		return new WaveShape(n, m); 
+	public static WAVE of(int n, int m) {
+		return new WAVE(n, m); 
 	}
 	
 	public Function<BarField, TimeSeriesValue> wave(){
@@ -66,4 +66,5 @@ public class WaveShape {
 			return result;
 		};
 	}
+	
 }
