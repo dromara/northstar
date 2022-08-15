@@ -8,6 +8,8 @@ export default (()=>{
     const gridColorLight = '#ededed'
     const axisLineColorLight = '#DDDDDD'
     const crossTextBackgroundColorLight = '#686d76'
+    const upColor = '#EF5350'
+    const downColor = '#26A69A'
   
     const getThemeOptions = (theme) => {
       const textColor = theme === 'dark' ? textColorDark : textColorLight
@@ -26,12 +28,20 @@ export default (()=>{
           }
         },
         candle: {
+          bar: {
+            upColor: upColor,
+            downColor: downColor,
+          },
           priceMark: {
             high: {
               color: textColor
             },
             low: {
               color: textColor
+            },
+            last: {
+              upColor: upColor,
+              downColor: downColor,
             }
           },
           tooltip: {
@@ -41,6 +51,14 @@ export default (()=>{
           }
         },
         technicalIndicator: {
+          bar: {
+            upColor: upColor,
+            downColor: downColor,
+          },
+          circle: {
+            upColor: upColor,
+            downColor: downColor,
+          },
           tooltip: {
             text: {
               color: textColor
