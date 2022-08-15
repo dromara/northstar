@@ -21,7 +21,7 @@ import java.util.stream.LongStream;
 public interface AverageFunctions {
 
 	/**
-	 * 当日成交量加权均价（当日结算价）函数
+	 * 当日成交量加权均价（当日结算价）计算函数
 	 * 注意：该算法与交易所的结算价存在一定误差，主要因为该算法是按K线计算，K线周期越小，误差越小
 	 * @return		返回计算函数
 	 */
@@ -46,13 +46,13 @@ public interface AverageFunctions {
 			return new TimeSeriesValue(value, bar.getActionTimestamp());
 		};
 	}
-	
+
 	/**
-	 * N周期内的成交量加权均价函数
+	 * N周期内的成交量加权均价计算函数
 	 * @param n		统计范围
 	 * @return		返回计算函数
 	 */
-	static Function<BarField, TimeSeriesValue> SETTLE(int n){
+	static Function<BarField, TimeSeriesValue> WMA(int n){
 		final long[] volArr = new long[n];
 		final double[] priceArr = new double[n];
 		final AtomicInteger index = new AtomicInteger(0);
@@ -63,7 +63,7 @@ public interface AverageFunctions {
 			index.set(++i % n);
 			long total = LongStream.of(volArr).sum();
 			if(total == 0) {
-				return new TimeSeriesValue(0, bar.getActionTimestamp());
+				return new TimeSeriesValue(0, 0);
 			}
 			double weightedSum = 0;
 			for(int j=0; j<n; j++) {
@@ -74,7 +74,7 @@ public interface AverageFunctions {
 	}
 
 	/**
-	 * 指数加权平均EMA函数
+	 * 指数加权平均EMA计算函数
 	 * @param n		统计范围
 	 * @return		返回计算函数
 	 */
@@ -96,7 +96,7 @@ public interface AverageFunctions {
 	}
 
 	/**
-	 * 扩展指数加权移动平均SMA函数
+	 * 扩展指数加权移动平均SMA计算函数
 	 * @param n		统计范围
 	 * @param m		权重
 	 * @return		返回计算函数
@@ -119,7 +119,7 @@ public interface AverageFunctions {
 	}
 
 	/**
-	 * 简单移动平均MA函数
+	 * 简单移动平均MA计算函数
 	 * @param n		统计范围
 	 * @return		返回计算函数
 	 */

@@ -48,13 +48,14 @@ public class IndicatorDemoStrategy extends AbstractStrategy	// 为了简化代�
 		ctx.newIndicator("WAVE", params.indicatorSymbol, waveShape.wave());
 		
 		ctx.newIndicator("SMA", params.indicatorSymbol, SMA(20, 2));
-		ctx.newIndicator("WP", params.indicatorSymbol, SETTLE(72));	// 加权均价
+		ctx.newIndicator("SETTLE", params.indicatorSymbol, SETTLE());
+		ctx.newIndicator("WMA", params.indicatorSymbol, WMA(72));	// 加权均价
 		ctx.newIndicator("HHV", params.indicatorSymbol, HHV(72));	// 最高价
 		ctx.newIndicator("LLV", params.indicatorSymbol, LLV(72)); 	// 最低价
 
 		// 复合指标
-		ctx.newIndicator("SETTLE_HHV", params.indicatorSymbol, SETTLE(72).andThen(HHV(72))); 	// 加权均价的最高价
-		ctx.newIndicator("SETTLE_LLV", params.indicatorSymbol, SETTLE(72).andThen(LLV(72))); 	// 加权均价的最高价
+		ctx.newIndicator("WMA_HHV", params.indicatorSymbol, WMA(72).andThen(HHV(72))); 	// 加权均价的最高价
+		ctx.newIndicator("WMA_LLV", params.indicatorSymbol, WMA(72).andThen(LLV(72))); 	// 加权均价的最高价
 	}
 	
 	@Override
