@@ -183,6 +183,38 @@ public class Indicator {
 	}
 	
 	/**
+	 * 获取最高值的回溯步长
+	 * @return		
+	 */
+	public int highestPosition() {
+		int stepback = 0;
+		double highestVal = Double.MIN_VALUE;
+		for(int i=0; i<size; i++) {
+			if(value(i) > highestVal) {
+				highestVal = value(i);
+				stepback = i;
+			}
+		}
+		return stepback;
+	}
+	
+	/**
+	 * 获取最低值的回溯步长
+	 * @return		
+	 */
+	public int lowestPosition() {
+		int stepback = 0;
+		double lowestVal = Double.MAX_VALUE;
+		for(int i=0; i<size; i++) {
+			if(value(i) < lowestVal) {
+				lowestVal = value(i);
+				stepback = i;
+			}
+		}
+		return stepback;
+	}
+	
+	/**
 	 * 获取系列值
 	 * @return
 	 */
