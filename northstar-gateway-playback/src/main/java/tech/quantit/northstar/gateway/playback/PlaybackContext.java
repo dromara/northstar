@@ -6,6 +6,7 @@ import java.time.ZoneOffset;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Queue;
@@ -62,6 +63,8 @@ public class PlaybackContext {
 	private boolean isRunning;
 	private Timer timer;
 	
+	private int numOfTickDataLoaded;
+	
 	public PlaybackContext(PlaybackGatewaySettings settings, LocalDateTime currentTimeState, PlaybackClock clock, TickSimulationAlgorithm tickerAlgo,
 			PlaybackDataLoader loader, FastEventEngine feEngine, IPlaybackRuntimeRepository rtRepo, IContractManager contractMgr) {
 		this.settings = settings;
@@ -103,14 +106,20 @@ public class PlaybackContext {
 			
 			@Override
 			public void run() {
-				LocalDate loadDate = playbackTimeState.toLocalDate();
-				if(contractBarMap.isEmpty() && !hasLoaded(loadDate)) {
-					loadBars();
-					lastLoadDate = loadDate;
-				}
-				
-				if(contractTickMap.isEmpty()) {
-					loadTicks();
+				while(numOfTickDataLoaded == 0) {					
+					LocalDate loadDate = playbackTimeState.toLocalDate();
+					if(contractBarMap.isEmpty() && !hasLoaded(loadDate)) {
+						loadBars();
+						lastLoadDate = loadDate;
+					}
+					
+					if(contractTickMap.isEmpty()) {
+						loadTicks();
+					}
+					
+					if(numOfTickDataLoaded == 0) {
+						playbackTimeState = clock.nextMarketMinute();
+					}
 				}
 				
 				// 每次分发TICK
@@ -134,6 +143,7 @@ public class PlaybackContext {
 				
 				// 每分钟分发BAR
 				if(contractTickMap.isEmpty()) {
+					numOfTickDataLoaded = 0;
 					Iterator<Entry<ContractField, BarField>> itCacheBars = cacheBarMap.entrySet().iterator();
 					while(itCacheBars.hasNext()) {
 						feEngine.emitEvent(NorthstarEventType.BAR, BarField.newBuilder(itCacheBars.next().getValue()).setGatewayId(gatewaySettings.getGatewayId()).build());
@@ -162,6 +172,7 @@ public class PlaybackContext {
 		feEngine.emitEvent(NorthstarEventType.CONNECTED, gatewaySettings.getGatewayId());
 	}
 	
+	// 按天加载BAR数据
 	private void loadBars() {
 		contractBarMap = settings.getUnifiedSymbols()
 			.stream()
@@ -171,16 +182,19 @@ public class PlaybackContext {
 					contract -> new LinkedList<>(loader.loadData(playbackTimeState, contract))));
 	}
 	
+	// 按分钟加载TICK数据 
 	private void loadTicks() {
 		long currentTime = playbackTimeState.toInstant(ZoneOffset.ofHours(8)).toEpochMilli(); 
 		contractBarMap.entrySet()
 			.stream()
 			.filter(entry -> !entry.getValue().isEmpty())
-			.filter(entry -> entry.getValue().peek().getActionTimestamp() < currentTime)
+			.filter(entry -> entry.getValue().peek().getActionTimestamp() <= currentTime)
 			.forEach(entry -> {
 				BarField bar = entry.getValue().poll();
+				List<TickField> ticksOfBar = tickerAlgo.generateFrom(bar);
 				cacheBarMap.put(entry.getKey(), bar);
-				contractTickMap.put(entry.getKey(), new LinkedList<>(tickerAlgo.generateFrom(bar)));
+				contractTickMap.put(entry.getKey(), new LinkedList<>(ticksOfBar));
+				numOfTickDataLoaded += ticksOfBar.size();
 			});
 	}
 	
