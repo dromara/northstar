@@ -278,7 +278,9 @@ export default {
       if (val === 'PLAYBACK') {
         this.form.daysOfDataForPreparation = 0
       }
-      this.form.closingPolicy = 'FIFO'
+      if (val === 'PLAYBACK' || val === 'UAT') {
+        this.form.closingPolicy = 'FIFO'
+      }
     }
   },
   methods: {
