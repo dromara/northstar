@@ -10,6 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.Assert;
 
 import tech.quantit.northstar.common.constant.ClosingPolicy;
+import tech.quantit.northstar.common.utils.ContractUtils;
 import tech.quantit.northstar.common.utils.FieldUtils;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
@@ -51,7 +52,7 @@ public class TradePosition {
 		this.dir = trades.get(0).getDirection();
 		this.contract = trades.get(0).getContract();
 		for(TradeField trade : trades) {			
-			Assert.isTrue(dir == trade.getDirection() && contract.equals(trade.getContract()), "传入的数据不一致");
+			Assert.isTrue(dir == trade.getDirection() && ContractUtils.isSame(contract, trade.getContract()), "传入的数据不一致");
 		}
 	}
 	
@@ -70,7 +71,7 @@ public class TradePosition {
 	 * @param order
 	 */
 	public void onOrder(OrderField order) {
-		if(!contract.equals(order.getContract())	//合约不一致 
+		if(!ContractUtils.isSame(contract, order.getContract())				//合约不一致 
 				|| !FieldUtils.isClose(order.getOffsetFlag())				//不是平仓订单 
 				|| !FieldUtils.isOpposite(dir, order.getDirection())		//不是反向订单
 				|| order.getOrderStatus() == OrderStatusEnum.OS_Rejected	//废单
@@ -90,7 +91,7 @@ public class TradePosition {
 	 * @return			返回平仓盈亏
 	 */
 	public double onTrade(TradeField trade) {
-		if(!contract.equals(trade.getContract())) {
+		if(!ContractUtils.isSame(contract, trade.getContract())) {
 			return 0D;
 		}
 		if(FieldUtils.isClose(trade.getOffsetFlag()) && FieldUtils.isOpposite(dir, trade.getDirection()))	//平仓时，方向要反向

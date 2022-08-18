@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+
 import tech.quantit.northstar.common.constant.Constants;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
@@ -35,5 +37,9 @@ public class ContractUtils {
 	
 	public static String getMarketGatewayId(ContractField contract) {
 		return contract.getThirdPartyId().split("@")[1];
+	}
+	
+	public static boolean isSame(ContractField c1, ContractField c2) {
+		return StringUtils.equals(c1.getUnifiedSymbol(), c2.getUnifiedSymbol());
 	}
 }

@@ -34,6 +34,7 @@ import tech.quantit.northstar.common.model.ModuleDealRecord;
 import tech.quantit.northstar.common.model.ModulePositionDescription;
 import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
 import tech.quantit.northstar.common.model.TimeSeriesValue;
+import tech.quantit.northstar.common.utils.ContractUtils;
 import tech.quantit.northstar.common.utils.FieldUtils;
 import tech.quantit.northstar.common.utils.OrderUtils;
 import tech.quantit.northstar.gateway.api.TradeGateway;
@@ -231,7 +232,7 @@ public class ModuleContext implements IModuleContext{
 		for(PositionField pos : accStore.getPositions(gatewayId)) {
 			boolean isOppositeDir = (operation.isBuy() && FieldUtils.isShort(pos.getPositionDirection()) 
 					|| operation.isSell() && FieldUtils.isLong(pos.getPositionDirection()));
-			if(operation.isClose() && pos.getContract().equals(contract) && isOppositeDir) {
+			if(operation.isClose() && ContractUtils.isSame(pos.getContract(), contract) && isOppositeDir) {
 				pf = pos;
 			}
 		}

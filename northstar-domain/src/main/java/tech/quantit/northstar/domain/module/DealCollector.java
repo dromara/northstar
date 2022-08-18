@@ -19,8 +19,9 @@ import xyz.redtorch.pb.CoreField.TradeField;
 @Slf4j
 public class DealCollector {
 
-	private Map<ContractField, LinkedList<TradeField>> buyTradeMap = new HashMap<>();
-	private Map<ContractField, LinkedList<TradeField>> sellTradeMap = new HashMap<>();
+	/* unifiedSymbol -> tradeList */
+	private Map<String, LinkedList<TradeField>> buyTradeMap = new HashMap<>();
+	private Map<String, LinkedList<TradeField>> sellTradeMap = new HashMap<>();
 	
 	private ClosingPolicy closingPolicy;
 	
@@ -34,8 +35,8 @@ public class DealCollector {
 	public Optional<List<ModuleDealRecord>> onTrade(TradeField trade) {
 		// 开仓处理
 		if(FieldUtils.isOpen(trade.getOffsetFlag())) {
-			getOpenMap(trade.getDirection()).putIfAbsent(trade.getContract(), new LinkedList<>());
-			getOpenMap(trade.getDirection()).get(trade.getContract()).offer(trade);
+			getOpenMap(trade.getDirection()).putIfAbsent(trade.getContract().getUnifiedSymbol(), new LinkedList<>());
+			getOpenMap(trade.getDirection()).get(trade.getContract().getUnifiedSymbol()).offer(trade);
 			return Optional.empty();
 		}
 
@@ -43,7 +44,7 @@ public class DealCollector {
 		List<ModuleDealRecord> resultList = new ArrayList<>();
 		if(closingPolicy == ClosingPolicy.PRIOR_TODAY) {
 			while(true) {
-				TradeField openTrade = getCloseMap(trade.getDirection()).get(trade.getContract()).pollLast();
+				TradeField openTrade = getCloseMap(trade.getDirection()).get(trade.getContract().getUnifiedSymbol()).pollLast();
 				if(openTrade.getVolume() < trade.getVolume()) {
 					TradeField matchTrade = trade.toBuilder().setVolume(openTrade.getVolume()).build();
 					trade = trade.toBuilder().setVolume(trade.getVolume() - openTrade.getVolume()).build();
@@ -52,7 +53,7 @@ public class DealCollector {
 					TradeField matchTrade = openTrade.toBuilder().setVolume(trade.getVolume()).build();
 					TradeField restTrade = openTrade.toBuilder().setVolume(openTrade.getVolume() - trade.getVolume()).build();
 					resultList.add(makeRecord(matchTrade, trade));
-					getCloseMap(trade.getDirection()).get(trade.getContract()).offerLast(restTrade);
+					getCloseMap(trade.getDirection()).get(trade.getContract().getUnifiedSymbol()).offerLast(restTrade);
 					return Optional.of(resultList);
 				} else {
 					resultList.add(makeRecord(openTrade, trade));
@@ -61,7 +62,7 @@ public class DealCollector {
 			}
 		} else {
 			while(true) {
-				LinkedList<TradeField> openTradeList = getCloseMap(trade.getDirection()).get(trade.getContract());
+				LinkedList<TradeField> openTradeList = getCloseMap(trade.getDirection()).get(trade.getContract().getUnifiedSymbol());
 				if(openTradeList == null || openTradeList.isEmpty()) {
 					log.warn("异常平仓：{}", MessagePrinter.print(trade));
 					throw new IllegalStateException("不存在该成交对应的开仓记录");
@@ -75,7 +76,7 @@ public class DealCollector {
 					TradeField matchTrade = openTrade.toBuilder().setVolume(trade.getVolume()).build();
 					TradeField restTrade = openTrade.toBuilder().setVolume(openTrade.getVolume() - trade.getVolume()).build();
 					resultList.add(makeRecord(matchTrade, trade));
-					getCloseMap(trade.getDirection()).get(trade.getContract()).offerFirst(restTrade);
+					getCloseMap(trade.getDirection()).get(trade.getContract().getUnifiedSymbol()).offerFirst(restTrade);
 					return Optional.of(resultList);
 				} else {
 					resultList.add(makeRecord(openTrade, trade));
@@ -99,7 +100,7 @@ public class DealCollector {
 				.build();
 	}
 	
-	private Map<ContractField, LinkedList<TradeField>> getOpenMap(DirectionEnum dir){
+	private Map<String, LinkedList<TradeField>> getOpenMap(DirectionEnum dir){
 		return switch(dir) {
 		case D_Buy -> buyTradeMap;
 		case D_Sell -> sellTradeMap;
@@ -107,7 +108,7 @@ public class DealCollector {
 		};
 	}
 	
-	private Map<ContractField, LinkedList<TradeField>> getCloseMap(DirectionEnum dir){
+	private Map<String, LinkedList<TradeField>> getCloseMap(DirectionEnum dir){
 		return switch(dir) {
 		case D_Buy -> sellTradeMap;
 		case D_Sell -> buyTradeMap;
