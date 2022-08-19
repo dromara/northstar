@@ -98,27 +98,31 @@ public class PlaybackContext {
 		timer = new Timer();
 		timer.scheduleAtFixedRate(new TimerTask() {
 			
-			private LocalDate lastLoadDate;
+			private boolean isBarDataEmpty() {
+				int dataQty = contractBarMap.values()
+						.stream()
+						.mapToInt(Queue::size)
+						.reduce(0, (a,b) -> a + b);
+				return contractBarMap.isEmpty() || dataQty == 0;
+			}
 			
-			private boolean hasLoaded(LocalDate date) {
-				return date.equals(lastLoadDate);
+			private boolean isTickDataEmpty() {
+				return numOfTickDataLoaded == 0;
 			}
 			
 			@Override
 			public void run() {
-				while(numOfTickDataLoaded == 0) {					
-					LocalDate loadDate = playbackTimeState.toLocalDate();
-					if(contractBarMap.isEmpty() && !hasLoaded(loadDate)) {
+				while(isTickDataEmpty()) {					
+					if(isBarDataEmpty()) {		// 每周加载一次
 						loadBars();
-						lastLoadDate = loadDate;
 					}
 					
-					if(contractTickMap.isEmpty()) {
-						loadTicks();
+					if(isTickDataEmpty()) {		// 当Tick数据为空时
+						loadTicks();			// 加载Tick数据
 					}
 					
-					if(numOfTickDataLoaded == 0) {
-						playbackTimeState = clock.nextMarketMinute();
+					if(isTickDataEmpty()) {		// 当加载完仍为空，证明这分钟没有数据 
+						playbackTimeState = clock.nextMarketMinute();	// 跳到下一分钟
 					}
 				}
 				
