@@ -3,7 +3,7 @@
     <div class="ns-price-board__row" role="ask5">
       <div class="ns-price-board__cell ns-price-board__cell--left"></div>
       <div class="ns-price-board__cell ns-price-board__cell--mid">
-        {{ askPrice[4] }}
+        {{ askPrice[4] | smartFormatter }}
       </div>
       <div class="ns-price-board__cell ns-price-board__cell--right">
         {{ askVol[4] }}
@@ -12,7 +12,7 @@
     <div class="ns-price-board__row" role="ask4">
       <div class="ns-price-board__cell ns-price-board__cell--left"></div>
       <div class="ns-price-board__cell ns-price-board__cell--mid">
-        {{ askPrice[3] }}
+        {{ askPrice[3] | smartFormatter }}
       </div>
       <div class="ns-price-board__cell ns-price-board__cell--right">
         {{ askVol[3] }}
@@ -21,7 +21,7 @@
     <div class="ns-price-board__row" role="ask3">
       <div class="ns-price-board__cell ns-price-board__cell--left"></div>
       <div class="ns-price-board__cell ns-price-board__cell--mid">
-        {{ askPrice[2] }}
+        {{ askPrice[2] | smartFormatter }}
       </div>
       <div class="ns-price-board__cell ns-price-board__cell--right">
         {{ askVol[2] }}
@@ -30,7 +30,7 @@
     <div class="ns-price-board__row" role="ask2">
       <div class="ns-price-board__cell ns-price-board__cell--left"></div>
       <div class="ns-price-board__cell ns-price-board__cell--mid">
-        {{ askPrice[1] }}
+        {{ askPrice[1] | smartFormatter }}
       </div>
       <div class="ns-price-board__cell ns-price-board__cell--right">
         {{ askVol[1] }}
@@ -39,21 +39,18 @@
     <div class="ns-price-board__row" role="ask1">
       <div class="ns-price-board__cell ns-price-board__cell--left"></div>
       <div class="ns-price-board__cell ns-price-board__cell--mid">
-        {{ askPrice[0] }}
+        {{ askPrice[0] | smartFormatter }}
       </div>
       <div class="ns-price-board__cell ns-price-board__cell--right">
         {{ askVol[0] }}
       </div>
     </div>
-    <div
-      class="ns-price-board__row ns-price-board__row--highlight"
-      role="latest"
-    >
+    <div class="ns-price-board__row ns-price-board__row--highlight" role="latest">
       <div class="ns-price-board__cell ns-price-board__cell--left">
         {{ volume }}
       </div>
       <div class="ns-price-board__cell ns-price-board__cell--mid">
-        {{ lastPrice }}
+        {{ lastPrice | smartFormatter }}
       </div>
       <div class="ns-price-board__cell ns-price-board__cell--right">
         {{ volume }}
@@ -64,7 +61,7 @@
         {{ bidVol[0] }}
       </div>
       <div class="ns-price-board__cell ns-price-board__cell--mid">
-        {{ bidPrice[0] }}
+        {{ bidPrice[0] | smartFormatter }}
       </div>
       <div class="ns-price-board__cell ns-price-board__cell--right"></div>
     </div>
@@ -73,7 +70,7 @@
         {{ bidVol[1] }}
       </div>
       <div class="ns-price-board__cell ns-price-board__cell--mid">
-        {{ bidPrice[1] }}
+        {{ bidPrice[1] | smartFormatter }}
       </div>
       <div class="ns-price-board__cell ns-price-board__cell--right"></div>
     </div>
@@ -82,7 +79,7 @@
         {{ bidVol[2] }}
       </div>
       <div class="ns-price-board__cell ns-price-board__cell--mid">
-        {{ bidPrice[2] }}
+        {{ bidPrice[2] | smartFormatter }}
       </div>
       <div class="ns-price-board__cell ns-price-board__cell--right"></div>
     </div>
@@ -91,7 +88,7 @@
         {{ bidVol[3] }}
       </div>
       <div class="ns-price-board__cell ns-price-board__cell--mid">
-        {{ bidPrice[3] }}
+        {{ bidPrice[3] | smartFormatter }}
       </div>
       <div class="ns-price-board__cell ns-price-board__cell--right"></div>
     </div>
@@ -100,7 +97,7 @@
         {{ bidVol[4] }}
       </div>
       <div class="ns-price-board__cell ns-price-board__cell--mid">
-        {{ bidPrice[4] }}
+        {{ bidPrice[4] | smartFormatter }}
       </div>
       <div class="ns-price-board__cell ns-price-board__cell--right"></div>
     </div>

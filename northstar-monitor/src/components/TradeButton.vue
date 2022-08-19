@@ -6,7 +6,7 @@
   >
     <div class="ns-button__wrapper">
       <div class="ns-button__label ns-button--text-mid">
-        <span>{{ price }}</span>
+        <span>{{ price | smartFormatter }}</span>
       </div>
       <div class="ns-button__divider"></div>
       <div class="ns-button__label ns-button--text-mid">
@@ -20,8 +20,8 @@
 export default {
   props: {
     price: {
-      type: String,
-      default: '0'
+      type: Number,
+      default: 0
     },
     label: {
       type: String,

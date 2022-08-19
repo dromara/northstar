@@ -14,6 +14,7 @@ Vue.use(ELEMENT, { size: 'mini' })
 Vue.config.productionTip = false
 
 Vue.filter('accountingFormatter', NumberFilter.accountingFormatter)
+Vue.filter('smartFormatter', NumberFilter.smartFormatter)
 
 // 统一异常处理
 Vue.config.errorHandler = function (e, v) {
