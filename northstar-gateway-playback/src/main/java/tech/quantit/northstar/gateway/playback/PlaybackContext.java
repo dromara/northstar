@@ -63,8 +63,6 @@ public class PlaybackContext {
 	private boolean isRunning;
 	private Timer timer;
 	
-	private int numOfTickDataLoaded;
-	
 	public PlaybackContext(PlaybackGatewaySettings settings, LocalDateTime currentTimeState, PlaybackClock clock, TickSimulationAlgorithm tickerAlgo,
 			PlaybackDataLoader loader, FastEventEngine feEngine, IPlaybackRuntimeRepository rtRepo, IContractManager contractMgr) {
 		this.settings = settings;
@@ -107,14 +105,37 @@ public class PlaybackContext {
 			}
 			
 			private boolean isTickDataEmpty() {
-				return numOfTickDataLoaded == 0;
+				int dataQty = contractTickMap.values()
+						.stream()
+						.mapToInt(Queue::size)
+						.reduce(0, (a,b) -> a + b);
+				return contractTickMap.isEmpty() || dataQty == 0;
 			}
+			
+			private boolean checkDone() {
+				if(playbackTimeState.toLocalDate().isAfter(endDate)) {
+					String infoMsg = String.format("[%s]-历史行情回放已经结束，可通过【复位】重置", gatewaySettings.getGatewayId());
+					log.info(infoMsg);
+					feEngine.emitEvent(NorthstarEventType.NOTICE, NoticeField.newBuilder()
+							.setContent(infoMsg)
+							.setStatus(CommonStatusEnum.COMS_WARN)
+							.setTimestamp(System.currentTimeMillis())
+							.build());
+					stop();
+					return true;
+				}
+				return false;
+			}
+			
+			private LocalDate lastLoadDate;
 			
 			@Override
 			public void run() {
-				while(isTickDataEmpty()) {					
-					if(isBarDataEmpty()) {		// 每周加载一次
+				while(isTickDataEmpty()) {	
+					LocalDate date = playbackTimeState.toLocalDate();
+					if(isBarDataEmpty() && !date.equals(lastLoadDate)) {		// 每周加载一次
 						loadBars();
+						lastLoadDate = date;
 					}
 					
 					if(isTickDataEmpty()) {		// 当Tick数据为空时
@@ -123,6 +144,10 @@ public class PlaybackContext {
 					
 					if(isTickDataEmpty()) {		// 当加载完仍为空，证明这分钟没有数据 
 						playbackTimeState = clock.nextMarketMinute();	// 跳到下一分钟
+					}
+					
+					if(checkDone()) {
+						return;
 					}
 				}
 				
@@ -146,8 +171,7 @@ public class PlaybackContext {
 				}
 				
 				// 每分钟分发BAR
-				if(contractTickMap.isEmpty()) {
-					numOfTickDataLoaded = 0;
+				if(isTickDataEmpty()) {
 					Iterator<Entry<ContractField, BarField>> itCacheBars = cacheBarMap.entrySet().iterator();
 					while(itCacheBars.hasNext()) {
 						feEngine.emitEvent(NorthstarEventType.BAR, BarField.newBuilder(itCacheBars.next().getValue()).setGatewayId(gatewaySettings.getGatewayId()).build());
@@ -159,16 +183,7 @@ public class PlaybackContext {
 							.playbackTimeState(playbackTimeState)
 							.build());
 					// 回放结束后，自动停机
-					if(playbackTimeState.toLocalDate().isAfter(endDate)) {
-						String infoMsg = String.format("[%s]-历史行情回放已经结束，可通过【复位】重置", gatewaySettings.getGatewayId());
-						log.info(infoMsg);
-						feEngine.emitEvent(NorthstarEventType.NOTICE, NoticeField.newBuilder()
-								.setContent(infoMsg)
-								.setStatus(CommonStatusEnum.COMS_WARN)
-								.setTimestamp(System.currentTimeMillis())
-								.build());
-						stop();
-					}
+					checkDone();
 				}
 			}
 			
@@ -198,7 +213,6 @@ public class PlaybackContext {
 				List<TickField> ticksOfBar = tickerAlgo.generateFrom(bar);
 				cacheBarMap.put(entry.getKey(), bar);
 				contractTickMap.put(entry.getKey(), new LinkedList<>(ticksOfBar));
-				numOfTickDataLoaded += ticksOfBar.size();
 			});
 	}
 	
