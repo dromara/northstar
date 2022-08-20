@@ -49,6 +49,4 @@ public class CtpFutureContractProvider implements ICategorizedContractProvider {
 				.toList();
 	}
 
-	
-
 }
