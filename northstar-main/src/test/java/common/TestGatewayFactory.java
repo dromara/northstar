@@ -12,7 +12,7 @@ public class TestGatewayFactory {
 	public static GatewaySettings makeGatewaySettings(Class<? extends GatewaySettings> type) {
 		if(type == CtpGatewaySettings.class) {
 			CtpGatewaySettings settings = new CtpGatewaySettings();
-			settings.setBrokerId("9999");
+			settings.setBrokerId("1080");
 			settings.setUserId("kevin");
 			settings.setPassword("123456");
 			return settings;
