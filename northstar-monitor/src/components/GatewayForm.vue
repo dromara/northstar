@@ -270,7 +270,7 @@ export default {
 
         // 获取合约品种列表
         const type = { FUTURES: '期货', OPTION: '期权' }
-        contractApi.getContractProviders(val).then((result) => {
+        contractApi.getContractProviders(val.replace('_SIM', '')).then((result) => {
           const promiseList = result.map((pvd) => contractApi.getContractDefs(pvd))
           Promise.all(promiseList).then((results) => {
             results.forEach((res) => {
