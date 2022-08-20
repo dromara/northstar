@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.math3.stat.StatUtils;
 
 import com.google.common.util.concurrent.AtomicDouble;
 
@@ -68,7 +69,7 @@ public class ATR {
 			highest.set(Math.max(highest.get(), bar.getHighPrice()));
 			lowest.set(Math.min(lowest.get(), bar.getLowPrice()));
 			lastClose.set(bar.getClosePrice());
-			return new TimeSeriesValue(ranges[cursor.get()], bar.getActionTimestamp());
+			return new TimeSeriesValue(StatUtils.mean(ranges), bar.getActionTimestamp());
 		};
 	}
 }

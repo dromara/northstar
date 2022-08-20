@@ -26,12 +26,10 @@ public class RSI {
 		final TimeSeriesUnaryOperator sma2 = SMA(n, 1);
 		final AtomicDouble lastVal = new AtomicDouble();
 		return tv -> {
-			double val = tv.getValue() - lastVal.get();
+			double val = lastVal.get() == 0 ? 0 : tv.getValue() - lastVal.get();
 			lastVal.set(tv.getValue());
-			tv.setValue(Math.max(val, n));
-			TimeSeriesValue v1 = sma1.apply(tv);
-			tv.setValue(Math.abs(val));
-			TimeSeriesValue v2 = sma2.apply(tv);
+			TimeSeriesValue v1 = sma1.apply(new TimeSeriesValue(Math.max(val, 0), tv.getTimestamp()));
+			TimeSeriesValue v2 = sma2.apply(new TimeSeriesValue(Math.abs(val), tv.getTimestamp()));
 			return new TimeSeriesValue(v1.getValue() / v2.getValue() * 100, tv.getTimestamp());
 		};
 	}
