@@ -71,6 +71,11 @@ public class SmartGatewayConnector {
 	
 	ExecutorService exec = Executors.newCachedThreadPool();
 	
+	
+	public SmartGatewayConnector(){
+		update();
+	}
+	
 	public String bestEndpoint(String brokerId) {
 		LinkedList<Entry> endpoints = switch(brokerId) {
 		case HY_PRI -> endpointHYPRI;
