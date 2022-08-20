@@ -226,7 +226,8 @@ public class DataServiceManager implements IDataServiceManager {
 
 	@Override
 	public List<ContractField> getAllContracts(ExchangeEnum exchange) {
-		DataSet dataSet = execute(URI.create(String.format("%s/contracts/?exchange=%s", baseUrl, exchange)));
+		ResponseEntity<DataSet> result = execute(URI.create(String.format("%s/contracts/?exchange=%s", baseUrl, exchange)), DataSet.class);
+		DataSet dataSet = result.getBody();
 		if(Objects.isNull(dataSet.getFields())) {
 			return Collections.emptyList();
 		}
@@ -262,34 +263,42 @@ public class DataServiceManager implements IDataServiceManager {
 		return resultList;
 	}
 	
+	/**
+	 * 获取CTP信息
+	 */
+	@Override
+	public JSONObject getCtpMetaSettings(String brokerId) {
+		URI uri = URI.create(String.format("%s/ctp/settings?brokerId=%s", baseUrl, brokerId));
+		return execute(uri, JSONObject.class).getBody();
+	}
+	
 	private DataSet getTradeCalendar(String exchange, LocalDate startDate, LocalDate endDate){
 		String start = "";
 		String end = "";
 		if(startDate != null) start = startDate.format(fmt);
 		if(endDate != null) end = endDate.format(fmt);
 		URI uri = URI.create(String.format("%s/calendar/?exchange=%s&startDate=%s&endDate=%s", baseUrl, exchange, start, end));
-		return execute(uri);
+		return execute(uri, DataSet.class).getBody();
 	}
 	
 	private List<BarField> commonGetData(String type, String unifiedSymbol, LocalDate startDate, LocalDate endDate){
 		URI uri = URI.create(String.format("%s/data/%s?unifiedSymbol=%s&startDate=%s&endDate=%s", baseUrl, type, unifiedSymbol, startDate.format(fmt), endDate.format(fmt)));
-		return convertDataSet(execute(uri));
+		return convertDataSet(execute(uri, DataSet.class).getBody());
 	}
 	
-	private DataSet execute(URI uri) {
+	private <T> ResponseEntity<T> execute(URI uri, Class<T> clz) {
 		HttpHeaders headers = new HttpHeaders();
 		String token;
 		if(StringUtils.isNotBlank(userToken)) {
 			token = userToken;
 		} else {
 			token = dummyToken;
-			log.warn("【注意】 当前数据服务调用受限，仅能查询 [合约信息] 与 [交易日历]。如需要查询历史行情数据，请向社群咨询。");
+			log.warn("【注意】 当前数据服务调用受限，仅能查询部分基础信息。如需要查询历史行情数据，请向社群咨询。");
 		}
 		headers.add("Authorization", String.format("Bearer %s", token));
 		HttpEntity<?> reqEntity = new HttpEntity<>(headers);
 		try {			
-			ResponseEntity<DataSet> respEntity = restTemplate.exchange(uri, HttpMethod.GET, reqEntity, DataSet.class);
-			return respEntity.getBody();
+			return restTemplate.exchange(uri, HttpMethod.GET, reqEntity, clz);
 		} catch (HttpServerErrorException e) {
 			JSONObject entity = JSON.parseObject(e.getResponseBodyAsString());
 			throw new IllegalStateException(entity.getString("message"));

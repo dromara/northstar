@@ -326,7 +326,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 
 		try {
 			String tdHost = GatewayConstants.SMART_CONNECTOR.bestEndpoint(brokerId);
-			String tdPort = GatewayConstants.TRADER_PORT;
+			String tdPort = gatewayAdapter.getGatewaySetting().getCtpApiSetting().getTdPort();
 			logger.info("使用IP [{}] 连接交易网关", tdHost);
 			cThostFtdcTraderApi = CThostFtdcTraderApi.CreateFtdcTraderApi(tempFile.getAbsolutePath());
 			cThostFtdcTraderApi.RegisterSpi(this);
@@ -668,11 +668,11 @@ public class TdSpi extends CThostFtdcTraderSpi {
 			return;
 		}
 
-		if (StringUtils.isEmpty(GatewayConstants.APP_ID)) {
+		if (StringUtils.isEmpty(gatewayAdapter.getGatewaySetting().getCtpApiSetting().getAppId())) {
 			logger.error("{}AppId不允许为空", logInfo);
 			return;
 		}
-		if (StringUtils.isEmpty(GatewayConstants.AUTH_CODE)) {
+		if (StringUtils.isEmpty(gatewayAdapter.getGatewaySetting().getCtpApiSetting().getAuthCode())) {
 			logger.error("{}AuthCode不允许为空", logInfo);
 			return;
 		}
@@ -680,10 +680,10 @@ public class TdSpi extends CThostFtdcTraderSpi {
 		try {
 			gatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.LOGGING_IN, gatewayId);
 			CThostFtdcReqAuthenticateField authenticateField = new CThostFtdcReqAuthenticateField();
-			authenticateField.setAppID(GatewayConstants.APP_ID);
-			authenticateField.setAuthCode(GatewayConstants.AUTH_CODE);
+			authenticateField.setAppID(gatewayAdapter.getGatewaySetting().getCtpApiSetting().getAppId());
+			authenticateField.setAuthCode(gatewayAdapter.getGatewaySetting().getCtpApiSetting().getAuthCode());
 			authenticateField.setBrokerID(brokerId);
-			authenticateField.setUserProductInfo(GatewayConstants.APP_ID);
+			authenticateField.setUserProductInfo(gatewayAdapter.getGatewaySetting().getCtpApiSetting().getAppId());
 			authenticateField.setUserID(userId);
 			cThostFtdcTraderApi.ReqAuthenticate(authenticateField, reqId.incrementAndGet());
 		} catch (Throwable t) {

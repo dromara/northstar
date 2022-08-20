@@ -3,6 +3,8 @@ package tech.quantit.northstar.common;
 import java.time.LocalDate;
 import java.util.List;
 
+import com.alibaba.fastjson2.JSONObject;
+
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.ContractField;
@@ -60,4 +62,11 @@ public interface IDataServiceManager {
 	 * @return
 	 */
 	List<ContractField> getAllContracts(ExchangeEnum exchange);
+	
+	/**
+	 * 获取CTP信息
+	 * @param brokerId
+	 * @return
+	 */
+	JSONObject getCtpMetaSettings(String brokerId);
 }

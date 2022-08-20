@@ -41,6 +41,7 @@ import com.google.common.io.Files;
 
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.IContractManager;
+import tech.quantit.northstar.common.IDataServiceManager;
 import tech.quantit.northstar.common.IHolidayManager;
 import tech.quantit.northstar.common.IMailMessageContentHandler;
 import tech.quantit.northstar.common.constant.Constants;
@@ -198,13 +199,13 @@ public class AppConfig implements WebMvcConfigurer {
 	}
 	
 	@Bean
-	public GatewayFactory ctpGatewayFactory(FastEventEngine fastEventEngine, GlobalMarketRegistry registry) {
-		return new CtpGatewayFactory(fastEventEngine, registry);
+	public GatewayFactory ctpGatewayFactory(FastEventEngine fastEventEngine, GlobalMarketRegistry registry, IDataServiceManager dataMgr) {
+		return new CtpGatewayFactory(fastEventEngine, registry, dataMgr);
 	}
 	
 	@Bean
-	public GatewayFactory ctpSimGatewayFactory(FastEventEngine fastEventEngine, GlobalMarketRegistry registry) {
-		return new CtpSimGatewayFactory(fastEventEngine, registry);
+	public GatewayFactory ctpSimGatewayFactory(FastEventEngine fastEventEngine, GlobalMarketRegistry registry, IDataServiceManager dataMgr) {
+		return new CtpSimGatewayFactory(fastEventEngine, registry, dataMgr);
 	}
 	
 	@Bean
