@@ -1,10 +1,5 @@
 server:
   port: 80
-  ssl:    enabled: false
-    key-store: classpath:keystore/northstarkey.p12
-    key-store-type: PKCS12
-    key-store-password: northstar
-    key-alias: northstarkey
 
 northstar: 
   # 行情延时探测（由于有多余的性能损耗，生产环境建议禁用）
@@ -14,7 +9,7 @@ northstar:
     sampling-interval: 60 
   # 历史数据服务（需要购买用户授权）
   data-service:
-    baseUrl: http://124.221.172.207:41888
+    baseUrl: https://124.221.172.207:44388
 
 logging:  level: 
     root: info
