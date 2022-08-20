@@ -8,9 +8,11 @@ import tech.quantit.northstar.common.model.Setting;
 import tech.quantit.northstar.strategy.api.AbstractStrategy;
 import tech.quantit.northstar.strategy.api.TradeStrategy;
 import tech.quantit.northstar.strategy.api.annotation.StrategicComponent;
+import tech.quantit.northstar.strategy.api.indicator.complex.ATR;
 import tech.quantit.northstar.strategy.api.indicator.complex.BOLL;
 import tech.quantit.northstar.strategy.api.indicator.complex.KDJ;
 import tech.quantit.northstar.strategy.api.indicator.complex.LWR;
+import tech.quantit.northstar.strategy.api.indicator.complex.RSI;
 import tech.quantit.northstar.strategy.api.indicator.complex.WAVE;
 
 /**
@@ -46,6 +48,12 @@ public class IndicatorDemoStrategy extends AbstractStrategy	// 为了简化代�
 		
 		WAVE waveShape = WAVE.of(20, 3);
 		ctx.newIndicator("WAVE", params.indicatorSymbol, waveShape.wave());
+		
+		ctx.newIndicator("RSI1", params.indicatorSymbol, RSI.line(7));
+		ctx.newIndicator("RSI2", params.indicatorSymbol, RSI.line(14));
+		
+		ctx.newIndicator("ATR1", params.indicatorSymbol, ATR.ofBar(20));
+		ctx.newIndicator("ATR2", params.indicatorSymbol, ATR.ofDay(3));
 		
 		ctx.newIndicator("SMA", params.indicatorSymbol, SMA(20, 2));
 		ctx.newIndicator("SETTLE", params.indicatorSymbol, SETTLE());
