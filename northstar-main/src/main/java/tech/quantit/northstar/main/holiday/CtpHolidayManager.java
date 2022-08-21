@@ -1,4 +1,4 @@
-package tech.quantit.northstar.main.utils;
+package tech.quantit.northstar.main.holiday;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import lombok.extern.slf4j.Slf4j;
+import tech.quantit.northstar.CTP;
 import tech.quantit.northstar.common.IHolidayManager;
 import tech.quantit.northstar.data.IMarketDataRepository;
 
@@ -61,6 +62,11 @@ public class CtpHolidayManager implements IHolidayManager, InitializingBean{
 			date = LocalDate.from(dateTime.minusHours(4));
 		}
 		return holidaySet.contains(date) || date.getDayOfWeek().getValue() > 5;
+	}
+
+	@Override
+	public String gatewayType() {
+		return CTP.class.getSimpleName();
 	}
 	
 }

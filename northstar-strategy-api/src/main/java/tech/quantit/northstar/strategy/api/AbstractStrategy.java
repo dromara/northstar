@@ -77,6 +77,9 @@ public abstract class AbstractStrategy implements TradeStrategy{
 	 */
 	@Override
 	public void onTick(TickField tick, boolean isModuleEnabled) {
+		if(!canProceed()) {
+			return;
+		}
 		if(tickHandlerMap.containsKey(tick.getUnifiedSymbol()) && isModuleEnabled) {
 			tickHandlerMap.get(tick.getUnifiedSymbol()).onTick(tick);
 		} else if(isModuleEnabled) {
@@ -115,6 +118,10 @@ public abstract class AbstractStrategy implements TradeStrategy{
 		}
 	}
 	
+	protected boolean canProceed() {
+		return barCache.isEmpty() && numOfBarsToPrepare == 0;
+	}
+	
 	protected boolean canProceed(BarField bar) {
 		if(barCache.size() < numOfBarsToPrepare) {
 			if(barCache.isEmpty() || barCache.peek().getUnifiedSymbol().equals(bar.getUnifiedSymbol())) {
@@ -122,6 +129,7 @@ public abstract class AbstractStrategy implements TradeStrategy{
 			}
 			return false;
 		}
+		
 		numOfBarsToPrepare = 0;
 		barCache.clear();
 		return true;

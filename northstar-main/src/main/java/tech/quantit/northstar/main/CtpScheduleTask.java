@@ -12,7 +12,7 @@ import tech.quantit.northstar.domain.gateway.GatewayAndConnectionManager;
 import tech.quantit.northstar.domain.gateway.GatewayConnection;
 import tech.quantit.northstar.gateway.api.Gateway;
 import tech.quantit.northstar.gateway.api.domain.GlobalMarketRegistry;
-import tech.quantit.northstar.main.utils.CtpHolidayManager;
+import tech.quantit.northstar.main.holiday.CtpHolidayManager;
 import xyz.redtorch.gateway.ctp.common.GatewayConstants;
 
 @Slf4j

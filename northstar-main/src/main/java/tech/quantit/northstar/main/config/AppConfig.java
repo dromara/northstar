@@ -286,6 +286,7 @@ public class AppConfig implements WebMvcConfigurer {
 			return new OkHttpClient.Builder()
 					.sslSocketFactory(sslSocketFactory, (X509TrustManager) trustAllCerts[0])
 					.hostnameVerifier((host, session) -> true)
+					.retryOnConnectionFailure(true)
 					.build();
 		} catch (Exception e) {
 			throw new RuntimeException(e);
@@ -296,8 +297,8 @@ public class AppConfig implements WebMvcConfigurer {
 	public RestTemplate restTemplate() {
 		return new RestTemplateBuilder()
 				.requestFactory(() -> new OkHttp3ClientHttpRequestFactory(getUnsafeOkHttpClient()))
-				.setReadTimeout(Duration.ofSeconds(10))
-				.setConnectTimeout(Duration.ofSeconds(10))
+				.setReadTimeout(Duration.ofSeconds(30))
+				.setConnectTimeout(Duration.ofSeconds(5))
 				.build();
 	}
 

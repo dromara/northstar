@@ -1,9 +1,10 @@
 package tech.quantit.northstar.main.service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -43,6 +44,7 @@ import tech.quantit.northstar.data.IModuleRepository;
 import tech.quantit.northstar.domain.gateway.ContractManager;
 import tech.quantit.northstar.main.ExternalJarClassLoader;
 import tech.quantit.northstar.main.handler.internal.ModuleManager;
+import tech.quantit.northstar.main.holiday.GlobalHolidayManager;
 import tech.quantit.northstar.main.utils.ModuleFactory;
 import tech.quantit.northstar.strategy.api.DynamicParamsAware;
 import tech.quantit.northstar.strategy.api.IModule;
@@ -77,8 +79,10 @@ public class ModuleService implements InitializingBean {
 	
 	private ExternalJarClassLoader extJarLoader;
 	
+	private GlobalHolidayManager globalHolidayMgr;
+	
 	public ModuleService(ApplicationContext ctx, ExternalJarClassLoader extJarLoader, IGatewayRepository gatewayRepo, IModuleRepository moduleRepo,
-			IMarketDataRepository mdRepo, ModuleFactory moduleFactory, ModuleManager moduleMgr, ContractManager contractMgr) {
+			IMarketDataRepository mdRepo, ModuleFactory moduleFactory, ModuleManager moduleMgr, ContractManager contractMgr, GlobalHolidayManager globalHolidayMgr) {
 		this.ctx = ctx;
 		this.moduleMgr = moduleMgr;
 		this.contractMgr = contractMgr;
@@ -87,6 +91,7 @@ public class ModuleService implements InitializingBean {
 		this.mdRepo = mdRepo;
 		this.moduleFactory = moduleFactory;
 		this.extJarLoader = extJarLoader;
+		this.globalHolidayMgr = globalHolidayMgr;
 	}
 
 	/**
@@ -238,15 +243,17 @@ public class ModuleService implements InitializingBean {
 	private void loadModule(ModuleDescription md) throws Exception {
 		ModuleRuntimeDescription mrd = moduleRepo.findRuntimeByName(md.getModuleName());
 		int daysOfDataForPreparation = md.getDaysOfDataForPreparation();
-		int year = LocalDate.now().getYear();
-		List<LocalDate> datesLastYear = mdRepo.findHodidayInLaw("CTP", year - 1);
-		List<LocalDate> datesThisYear = mdRepo.findHodidayInLaw("CTP", year);
-		Set<LocalDate> holidays = new HashSet<>();
-		holidays.addAll(datesLastYear);
-		holidays.addAll(datesThisYear);
 		LocalDate date = LocalDate.now();
 		while(daysOfDataForPreparation > 0) {
-			if(!holidays.contains(date)) {
+			final LocalDateTime dt = LocalDateTime.of(date, LocalTime.of(9, 0));
+			long notHoliday = md.getModuleAccountSettingsDescription().stream()
+				.map(ModuleAccountDescription::getAccountGatewayId)
+				.map(gatewayId -> gatewayRepo.findById(gatewayId))
+				.map(gd -> gatewayRepo.findById(gd.getBindedMktGatewayId()))
+				.map(gd -> globalHolidayMgr.isHoliday(gd.getGatewayType(), dt))
+				.filter(flag -> !flag)
+				.count();
+			if(notHoliday > 0) {
 				daysOfDataForPreparation--;
 			}
 			date = date.minusDays(1);
