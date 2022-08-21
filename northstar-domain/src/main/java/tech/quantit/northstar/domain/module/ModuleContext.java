@@ -1,6 +1,9 @@
 package tech.quantit.northstar.domain.module;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -254,8 +257,11 @@ public class ModuleContext implements IModuleContext{
 				.build());
 	}
 
+	DateFormat fmt = new SimpleDateFormat();
 	private String submitOrderReq(SubmitOrderReqField orderReq) {
-		mlog.debug("发单：{}", orderReq.getOriginOrderId());
+		if(mlog.isDebugEnabled()) {			
+			mlog.debug("发单：{}，{}", orderReq.getOriginOrderId(), fmt.format(new Date(orderReq.getActionTimestamp())));
+		}
 		if(FieldUtils.isOpen(orderReq.getOffsetFlag())) {
 			checkAmount(orderReq);
 		}
@@ -368,6 +374,8 @@ public class ModuleContext implements IModuleContext{
 			return;
 		}
 		if(orderReqMap.containsKey(trade.getOriginOrderId())) {
+			mlog.info("成交：{}， 操作：{}{}， 价格：{}， 手数：{}", trade.getOriginOrderId(), FieldUtils.chn(trade.getDirection()), 
+					FieldUtils.chn(trade.getOffsetFlag()), trade.getPrice(), trade.getVolume());
 			orderReqMap.remove(trade.getOriginOrderId());
 		}
 		accStore.onTrade(trade);
@@ -375,7 +383,7 @@ public class ModuleContext implements IModuleContext{
 		onRuntimeChangeCallback.accept(getRuntimeDescription(false));
 		dealCollector.onTrade(trade).ifPresent(list -> list.stream().forEach(this.onDealCallback::accept));
 		
-		if(getState().isEmpty()) {
+		if(getState().isEmpty() && !listenerSet.isEmpty()) {
 			mlog.info("净持仓为零，止盈止损监听器被清除");
 			listenerSet.clear();
 		}
@@ -532,6 +540,14 @@ public class ModuleContext implements IModuleContext{
 	public Indicator newIndicatorAtPeriod(int numOfMinPerPeriod, String indicatorName, String bindedUnifiedSymbol,
 			int indicatorLength, TimeSeriesUnaryOperator indicatorFunction) {
 		return newIndicatorAtPeriod(numOfMinPerPeriod, indicatorName, bindedUnifiedSymbol, indicatorLength, ValueType.CLOSE, indicatorFunction);
+	}
+
+	@Override
+	public boolean explain(boolean expression, String infoMessage, Object... args) {
+		if(expression) {
+			mlog.info(infoMessage, args);
+		}
+		return expression;
 	}
 
 }

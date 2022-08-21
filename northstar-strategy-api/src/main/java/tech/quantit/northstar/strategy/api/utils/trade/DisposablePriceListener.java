@@ -36,7 +36,7 @@ public final class DisposablePriceListener implements IDisposablePriceListener {
 		int factor = FieldUtils.directionFactor(openDir);
 		double actionPrice = basePrice + factor * numOfPriceTickToTrigger * contract.getPriceTick();
 		SignalOperation closeOpr = factor > 0 ? SignalOperation.SELL_CLOSE : SignalOperation.BUY_CLOSE;
-		String desc = String.format("%s-%s", numOfPriceTickToTrigger < 0 ? "止损" : "止盈", actionPrice);
+		String desc = String.format("%s，%s", numOfPriceTickToTrigger < 0 ? "止损" : "止盈", actionPrice);
 		Predicate<TickField> testFunc;
 		if(numOfPriceTickToTrigger > 0) {
 			testFunc = t -> (int)(factor * (t.getLastPrice() - basePrice) / contract.getPriceTick()) >= numOfPriceTickToTrigger;

@@ -22,6 +22,14 @@ public interface IModuleStrategyContext {
 	 */
 	String getModuleName();
 	/**
+	 * 为条件添加日志解释
+	 * @param expression		判断条件
+	 * @param infoMessage		条件成立时的日志输出
+	 * @param args				条件成立时的日志参数
+	 * @return					条件真假
+	 */
+	boolean explain(boolean expression, String infoMessage, Object... args);
+	/**
 	 * 获取合约
 	 * @param unifiedSymbol		合约编码
 	 * @return					返回合约信息

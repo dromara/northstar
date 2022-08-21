@@ -1,7 +1,9 @@
 package tech.quantit.northstar.strategy.api;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
+import java.util.Queue;
 
 import org.slf4j.Logger;
 
@@ -25,6 +27,10 @@ public abstract class AbstractStrategy implements TradeStrategy{
 	protected Map<String, BarHandler> barHandlerMap = new HashMap<>();
 	// 日志对象
 	protected Logger log;
+	// 预热K线数据量（该预热数据量与模组的设置并不相等，该属性用于策略内部判断接收了多少数据，而模组的预热设置用于外部投喂了多少数据）
+	protected int numOfBarsToPrepare;
+	
+	private Queue<BarField> barCache = new LinkedList<>();
 	
 	@Override
 	public void onOrder(OrderField order) {
@@ -99,11 +105,26 @@ public abstract class AbstractStrategy implements TradeStrategy{
 	 */
 	@Override
 	public void onBar(BarField bar, boolean isModuleEnabled) {
+		if(!canProceed(bar)) {
+			return;
+		}
 		if(barHandlerMap.containsKey(bar.getUnifiedSymbol()) && isModuleEnabled) {
 			barHandlerMap.get(bar.getUnifiedSymbol()).onBar(bar);
 		} else if(isModuleEnabled) {
 			onBar(bar);
 		}
+	}
+	
+	protected boolean canProceed(BarField bar) {
+		if(barCache.size() < numOfBarsToPrepare) {
+			if(barCache.isEmpty() || barCache.peek().getUnifiedSymbol().equals(bar.getUnifiedSymbol())) {
+				barCache.offer(bar);
+			}
+			return false;
+		}
+		numOfBarsToPrepare = 0;
+		barCache.clear();
+		return true;
 	}
 	
 	/**
