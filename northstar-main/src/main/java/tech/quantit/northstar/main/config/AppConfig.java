@@ -18,9 +18,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
@@ -285,18 +283,10 @@ public class AppConfig implements WebMvcConfigurer {
 			sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
 			// Create an ssl socket factory with our all-trusting manager
 			final SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
-
-			OkHttpClient.Builder builder = new OkHttpClient.Builder();
-			builder.sslSocketFactory(sslSocketFactory, (X509TrustManager) trustAllCerts[0]);
-			builder.hostnameVerifier(new HostnameVerifier() {
-				@Override
-				public boolean verify(String hostname, SSLSession session) {
-					return true;
-				}
-			});
-
-			OkHttpClient okHttpClient = builder.build();
-			return okHttpClient;
+			return new OkHttpClient.Builder()
+					.sslSocketFactory(sslSocketFactory, (X509TrustManager) trustAllCerts[0])
+					.hostnameVerifier((host, session) -> true)
+					.build();
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
