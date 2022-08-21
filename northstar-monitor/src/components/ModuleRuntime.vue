@@ -122,9 +122,21 @@
                   }}</template>
                 </el-table-column>
                 <el-table-column prop="position" label="手数" align="center" width="46px" />
-                <el-table-column prop="openprice" label="成本价" align="center"></el-table-column>
-                <el-table-column prop="lastprice" label="现价" align="center"></el-table-column>
-                <el-table-column prop="positionprofit" label="持仓盈亏" align="center" />
+                <el-table-column prop="openprice" label="成本价" align="center">
+                  <template slot-scope="scope">
+                    {{ scope.row.openprice | smartFormatter }}
+                  </template>
+                </el-table-column>
+                <el-table-column prop="lastprice" label="现价" align="center">
+                  <template slot-scope="scope">
+                    {{ scope.row.lastprice | smartFormatter }}
+                  </template>
+                </el-table-column>
+                <el-table-column prop="positionprofit" label="持仓盈亏" align="center">
+                  <template slot-scope="scope">
+                    {{ scope.row.positionprofit | formatter }}
+                  </template>
+                </el-table-column>
                 <el-table-column label="操作" align="center" width="50px">
                   <template slot="header">
                     <el-button
