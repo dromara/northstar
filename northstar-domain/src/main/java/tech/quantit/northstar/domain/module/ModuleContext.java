@@ -1,9 +1,6 @@
 package tech.quantit.northstar.domain.module;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZoneOffset;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -23,7 +20,6 @@ import org.slf4j.Logger;
 
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.constant.Constants;
-import tech.quantit.northstar.common.constant.DateTimeConstant;
 import tech.quantit.northstar.common.constant.ModuleState;
 import tech.quantit.northstar.common.constant.SignalOperation;
 import tech.quantit.northstar.common.exception.NoSuchElementException;
@@ -47,8 +43,8 @@ import tech.quantit.northstar.strategy.api.IndicatorFactory;
 import tech.quantit.northstar.strategy.api.TradeStrategy;
 import tech.quantit.northstar.strategy.api.constant.PriceType;
 import tech.quantit.northstar.strategy.api.indicator.Indicator;
-import tech.quantit.northstar.strategy.api.indicator.TimeSeriesUnaryOperator;
 import tech.quantit.northstar.strategy.api.indicator.Indicator.ValueType;
+import tech.quantit.northstar.strategy.api.indicator.TimeSeriesUnaryOperator;
 import tech.quantit.northstar.strategy.api.log.ModuleLoggerFactory;
 import tech.quantit.northstar.strategy.api.utils.trade.DisposablePriceListener;
 import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
@@ -85,8 +81,8 @@ public class ModuleContext implements IModuleContext{
 	
 	protected IModule module;
 	
-	/* originOrderId -> order */
-	private Map<String, OrderField> orderMap = new HashMap<>();
+	/* originOrderId -> orderReq */
+	private Map<String, SubmitOrderReqField> orderReqMap = new HashMap<>();
 	
 	/* contract -> gateway */
 	private Map<ContractField, TradeGateway> gatewayMap = new HashMap<>();
@@ -253,6 +249,7 @@ public class ModuleContext implements IModuleContext{
 				.setVolumeCondition(VolumeConditionEnum.VC_AV)
 				.setForceCloseReason(ForceCloseReasonEnum.FCR_NotForceClose)
 				.setContingentCondition(ContingentConditionEnum.CC_Immediately)
+				.setActionTimestamp(latestTickMap.get(contract.getUnifiedSymbol()).getActionTimestamp())
 				.setMinVolume(1)
 				.build());
 	}
@@ -265,12 +262,7 @@ public class ModuleContext implements IModuleContext{
 		ContractField contract = orderReq.getContract();
 		TradeGateway gateway = gatewayMap.get(contract);
 		gateway.submitOrder(orderReq);
-		OrderField placeholder = OrderField.newBuilder()
-				.setGatewayId(gateway.getGatewaySetting().getGatewayId())
-				.setContract(contract)
-				.setOriginOrderId(orderReq.getOriginOrderId())
-				.build();
-		orderMap.put(orderReq.getOriginOrderId(), placeholder);
+		orderReqMap.put(orderReq.getOriginOrderId(), orderReq);
 		accStore.onSubmitOrder(orderReq);
 		return orderReq.getOriginOrderId();
 	}
@@ -300,11 +292,12 @@ public class ModuleContext implements IModuleContext{
 
 	@Override
 	public synchronized void cancelOrder(String originOrderId) {
-		mlog.debug("撤单：{}", originOrderId);
-		if(!orderMap.containsKey(originOrderId)) {
-			throw new NoSuchElementException("找不到订单：" + originOrderId);
+		if(!orderReqMap.containsKey(originOrderId)) {
+			mlog.debug("找不到订单：{}", originOrderId);
+			return;
 		}
-		ContractField contract = orderMap.get(originOrderId).getContract();
+		mlog.debug("撤单：{}", originOrderId);
+		ContractField contract = orderReqMap.get(originOrderId).getContract();
 		TradeGateway gateway = gatewayMap.get(contract);
 		CancelOrderReqField cancelReq = CancelOrderReqField.newBuilder()
 				.setGatewayId(gateway.getGatewaySetting().getGatewayId())
@@ -312,6 +305,16 @@ public class ModuleContext implements IModuleContext{
 				.build();
 		accStore.onCancelOrder(cancelReq);
 		gateway.cancelOrder(cancelReq);
+	}
+	
+	@Override
+	public int holdingNetProfit() {
+		return gatewayMap.values().stream()
+				.map(gw -> gw.getGatewaySetting().getGatewayId())
+				.map(gatewayId -> accStore.getPositions(gatewayId))
+				.flatMap(Collection::stream)
+				.mapToInt(pf -> (int)pf.getPositionProfit())
+				.sum();
 	}
 
 	/* 此处收到的TICK数据是所有订阅的数据，需要过滤 */
@@ -348,11 +351,11 @@ public class ModuleContext implements IModuleContext{
 	/* 此处收到的ORDER数据是所有订单回报，需要过滤 */
 	@Override
 	public synchronized void onOrder(OrderField order) {
-		if(!orderMap.containsKey(order.getOriginOrderId())) {
+		if(!orderReqMap.containsKey(order.getOriginOrderId())) {
 			return;
 		}
 		if(!OrderUtils.isValidOrder(order)) {
-			orderMap.remove(order.getOriginOrderId());
+			orderReqMap.remove(order.getOriginOrderId());
 		}
 		accStore.onOrder(order);
 		tradeStrategy.onOrder(order);
@@ -361,11 +364,11 @@ public class ModuleContext implements IModuleContext{
 	/* 此处收到的TRADE数据是所有成交回报，需要过滤 */
 	@Override
 	public synchronized void onTrade(TradeField trade) {
-		if(!orderMap.containsKey(trade.getOriginOrderId()) && !StringUtils.equals(trade.getOriginOrderId(), Constants.MOCK_ORDER_ID)) {
+		if(!orderReqMap.containsKey(trade.getOriginOrderId()) && !StringUtils.equals(trade.getOriginOrderId(), Constants.MOCK_ORDER_ID)) {
 			return;
 		}
-		if(orderMap.containsKey(trade.getOriginOrderId())) {
-			orderMap.remove(trade.getOriginOrderId());
+		if(orderReqMap.containsKey(trade.getOriginOrderId())) {
+			orderReqMap.remove(trade.getOriginOrderId());
 		}
 		accStore.onTrade(trade);
 		tradeStrategy.onTrade(trade);
@@ -425,14 +428,13 @@ public class ModuleContext implements IModuleContext{
 	
 	@Override
 	public synchronized boolean isOrderWaitTimeout(String originOrderId, long timeout) {
-		if(!latestTickMap.containsKey(originOrderId) || !orderMap.containsKey(originOrderId)) {
+		if(!orderReqMap.containsKey(originOrderId)) {
 			return false;
 		}
 		
-		TickField lastTick = latestTickMap.get(originOrderId);
-		OrderField order = orderMap.get(originOrderId);
-		LocalDateTime ldt = LocalDateTime.of(LocalDate.parse(order.getOrderDate(), DateTimeConstant.D_FORMAT_INT_FORMATTER), LocalTime.parse(order.getOrderTime(), DateTimeConstant.T_FORMAT_FORMATTER));
-		return lastTick.getActionTimestamp() - ldt.toInstant(ZoneOffset.ofHours(8)).toEpochMilli() > timeout;
+		SubmitOrderReqField orderReq = orderReqMap.get(originOrderId);
+		TickField lastTick = latestTickMap.get(orderReq.getContract().getUnifiedSymbol());
+		return lastTick.getActionTimestamp() - orderReq.getActionTimestamp() > timeout;
 	}
 
 	@Override

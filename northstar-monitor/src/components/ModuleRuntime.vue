@@ -321,7 +321,9 @@ export default {
       if (val === 'dealRecord') {
         setTimeout(() => {
           let table = this.$refs.dealTbl
-          table.bodyWrapper.scrollTop = table.bodyWrapper.scrollHeight
+          if (table) {
+            table.bodyWrapper.scrollTop = table.bodyWrapper.scrollHeight
+          }
         }, 50)
       }
     },
@@ -457,7 +459,9 @@ export default {
 
         this.$nextTick(() => {
           let table = this.$refs.dealTbl
-          table.bodyWrapper.scrollTop = table.bodyWrapper.scrollHeight
+          if (table) {
+            table.bodyWrapper.scrollTop = table.bodyWrapper.scrollHeight
+          }
         })
       })
     },

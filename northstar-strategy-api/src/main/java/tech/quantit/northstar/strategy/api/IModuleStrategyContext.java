@@ -80,6 +80,11 @@ public interface IModuleStrategyContext {
 	 */
 	void cancelOrder(String originOrderId);
 	/**
+	 * 模组持仓净盈亏
+	 * @return
+	 */
+	int holdingNetProfit();
+	/**
 	 * 获取模组状态
 	 * @return
 	 */

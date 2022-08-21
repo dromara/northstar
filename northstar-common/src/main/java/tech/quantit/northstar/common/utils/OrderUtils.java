@@ -44,4 +44,8 @@ public class OrderUtils {
 	public static boolean isValidOrder(OrderField order) {
 		return order.getOrderStatus() != OrderStatusEnum.OS_Rejected && order.getOrderStatus() != OrderStatusEnum.OS_Canceled;
 	}
+	
+	public static boolean isDoneOrder(OrderField order) {
+		return order.getOrderStatus() == OrderStatusEnum.OS_Canceled || order.getOrderStatus() == OrderStatusEnum.OS_AllTraded;
+	}
 }
