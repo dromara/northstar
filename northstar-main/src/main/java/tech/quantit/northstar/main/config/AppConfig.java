@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.cert.CertificateException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -31,6 +32,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.system.ApplicationHome;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.DefaultResourceLoader;
@@ -302,7 +304,11 @@ public class AppConfig implements WebMvcConfigurer {
 
 	@Bean
 	public RestTemplate restTemplate() {
-		return new RestTemplate(new OkHttp3ClientHttpRequestFactory(getUnsafeOkHttpClient()));
+		return new RestTemplateBuilder()
+				.requestFactory(() -> new OkHttp3ClientHttpRequestFactory(getUnsafeOkHttpClient()))
+				.setReadTimeout(Duration.ofSeconds(10))
+				.setConnectTimeout(Duration.ofSeconds(10))
+				.build();
 	}
 
 	@ConditionalOnMissingBean(IMailMessageContentHandler.class)
