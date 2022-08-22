@@ -47,7 +47,11 @@ public final class DisposablePriceListener implements IDisposablePriceListener {
 		return DisposablePriceListener.builder()
 				.desc(desc)
 				.testFunc(testFunc) 	
-				.action(() -> ctx.submitOrderReq(contract, closeOpr, PriceType.ANY_PRICE, volume, 0))
+				.action(() -> {
+					if(ctx.availablePosition(openDir, contract.getUnifiedSymbol()) > 0) {
+						ctx.submitOrderReq(contract, closeOpr, PriceType.ANY_PRICE, volume, 0);
+					}
+				})
 				.build();
 	}
 	

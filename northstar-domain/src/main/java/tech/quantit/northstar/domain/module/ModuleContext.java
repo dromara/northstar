@@ -322,6 +322,17 @@ public class ModuleContext implements IModuleContext{
 				.mapToInt(pf -> (int)pf.getPositionProfit())
 				.sum();
 	}
+	
+	@Override
+	public int availablePosition(DirectionEnum direction, String unifiedSymbol) {
+		return gatewayMap.values().stream()
+				.map(gw -> gw.getGatewaySetting().getGatewayId())
+				.map(gatewayId -> accStore.getPositions(gatewayId))
+				.flatMap(Collection::stream)
+				.filter(pf -> StringUtils.equals(pf.getContract().getUnifiedSymbol(), unifiedSymbol))
+				.mapToInt(pf -> pf.getPosition() - pf.getFrozen())
+				.sum();
+	}
 
 	/* 此处收到的TICK数据是所有订阅的数据，需要过滤 */
 	@Override
@@ -337,9 +348,9 @@ public class ModuleContext implements IModuleContext{
 		listenerSet.stream()
 			.filter(listener -> listener.shouldBeTriggered(tick))
 			.forEach(listener -> {
-				listener.execute();
 				mlog.info("触发【{}】", listener.description());
 				log.info("模组[{}] 触发【{}】", moduleName, listener.description());
+				listener.execute();
 			});
 		tradeStrategy.onTick(tick, module.isEnabled());
 		listenerSet = listenerSet.stream().filter(DisposablePriceListener::isValid).collect(Collectors.toSet());
