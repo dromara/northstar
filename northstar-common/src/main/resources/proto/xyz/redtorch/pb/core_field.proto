@@ -280,6 +280,13 @@ message GatewaySettingField {
 		string userId = 1;
 		string password = 2;
 		string brokerId = 3;
+		string tdHost = 4;
+		string tdPort = 5;
+		string mdHost = 6;
+		string mdPort = 7;
+		string authCode = 8;
+		string userProductInfo = 9; 
+		string appId = 10;
 	}
 
 	message IbApiSettingField {
