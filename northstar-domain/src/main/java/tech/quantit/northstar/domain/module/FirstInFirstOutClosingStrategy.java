@@ -23,7 +23,7 @@ public class FirstInFirstOutClosingStrategy implements ClosingStrategy{
 		}
 		ContractField contract = position.getContract();
 		if(contract.getExchange() == ExchangeEnum.SHFE) {			
-			if(position.getYdPosition() - position.getYdFrozen() > 0)	return OffsetFlagEnum.OF_CloseYesterday;
+			if(position.getYdPosition() - position.getYdFrozen() > 0)	return OffsetFlagEnum.OF_Close;
 			if(position.getTdPosition() - position.getTdFrozen() > 0)	return OffsetFlagEnum.OF_CloseToday;
 		}
 		return OffsetFlagEnum.OF_Close;

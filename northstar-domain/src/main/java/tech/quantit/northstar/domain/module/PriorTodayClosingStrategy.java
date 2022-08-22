@@ -19,7 +19,6 @@ public class PriorTodayClosingStrategy  implements ClosingStrategy{
 		ContractField contract = position.getContract();
 		if(contract.getExchange() == ExchangeEnum.SHFE) {			
 			if(position.getTdPosition() - position.getTdFrozen() > 0)	return OffsetFlagEnum.OF_CloseToday;
-			if(position.getYdPosition() - position.getYdFrozen() > 0)	return OffsetFlagEnum.OF_CloseYesterday;
 		}
 		return OffsetFlagEnum.OF_Close;
 	}
