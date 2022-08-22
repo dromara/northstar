@@ -259,6 +259,7 @@ export default {
   watch: {
     visible: function (val) {
       if (val) {
+        Object.assign(this.$data, this.$options.data())
         this.initData()
         if (!this.module) {
           return
@@ -339,9 +340,8 @@ export default {
       this.close()
     },
     close() {
-      this.activeIndex = '1'
-      Object.assign(this.$data, this.$options.data())
       this.$emit('update:visible', false)
+      this.activeIndex = '1'
     },
     assertTrue(expression, errMsg) {
       if (!expression) {
