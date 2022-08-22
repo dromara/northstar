@@ -2,26 +2,41 @@ package tech.quantit.northstar.domain.module;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import tech.quantit.northstar.common.constant.ClosingPolicy;
 import tech.quantit.northstar.common.constant.SignalOperation;
 import tech.quantit.northstar.strategy.api.ClosingStrategy;
+import test.common.TestFieldFactory;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
+import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.PositionField;
 
 class PriorBeforeAndHedgeTodayClosingStrategyTest {
 	
 	ClosingStrategy cs = new PriorBeforeAndHedgeTodayClosingStrategy();
 	
-	PositionField pf1 = PositionField.newBuilder()
-			.setTdPosition(2)
-			.setYdPosition(2)
-			.build();
+	TestFieldFactory factory = new TestFieldFactory("testGateway");
+	PositionField pf1, pf2;
 	
-	PositionField pf2 = PositionField.newBuilder()
-			.setTdPosition(2)
-			.build();
+	@BeforeEach
+	void prepare() {
+		ContractField contract = factory.makeContract("rb2210"); 
+		
+		pf1 = PositionField.newBuilder()
+				.setContract(contract)
+				.setPosition(4)
+				.setTdPosition(2)
+				.setYdPosition(2)
+				.build();
+		
+		pf2 = PositionField.newBuilder()
+				.setContract(contract)
+				.setPosition(2)
+				.setTdPosition(2)
+				.build();
+	}
 
 	@Test
 	void testResolveOperation() {
