@@ -3,6 +3,8 @@ package tech.quantit.northstar.main.service;
 import java.io.File;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.InitializingBean;
@@ -324,10 +326,12 @@ public class GatewayService implements InitializingBean {
 	
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		List<GatewayDescription> result = gatewayRepo.findAll();
-		// 因为依赖关系，加载要有先后顺序
-		result.stream().filter(gd -> gd.getGatewayUsage() == GatewayUsage.MARKET_DATA).map(this::decodeSettings).forEach(this::doCreateGateway);
-		result.stream().filter(gd -> gd.getGatewayUsage() == GatewayUsage.TRADE).map(this::decodeSettings).forEach(this::doCreateGateway);
+		CompletableFuture.runAsync(() -> {
+			List<GatewayDescription> result = gatewayRepo.findAll();
+			// 因为依赖关系，加载要有先后顺序
+			result.stream().filter(gd -> gd.getGatewayUsage() == GatewayUsage.MARKET_DATA).map(this::decodeSettings).forEach(this::doCreateGateway);
+			result.stream().filter(gd -> gd.getGatewayUsage() == GatewayUsage.TRADE).map(this::decodeSettings).forEach(this::doCreateGateway);
+		}, CompletableFuture.delayedExecutor(2, TimeUnit.SECONDS));
 	}
 
 }
