@@ -131,7 +131,7 @@ public class BeginnerSampleStrategy implements TradeStrategy{
 		if(now > nextActionTime) {
 			nextActionTime = now + params.actionInterval * 1000;
 			log.info("开始交易");
-			if(ctx.getState() == ModuleState.EMPTY) {
+			if(ctx.getState().isEmpty()) {
 				SignalOperation op = flag ? SignalOperation.BUY_OPEN : SignalOperation.SELL_OPEN;	// 随机开多或者开空
 				originOrderId = ctx.submitOrderReq(ctx.getContract(tick.getUnifiedSymbol()), op, PriceType.WAITING_PRICE, 1, tick.getLastPrice());
 			}

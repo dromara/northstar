@@ -93,12 +93,20 @@ public interface IModuleStrategyContext {
 	 */
 	int holdingNetProfit();
 	/**
-	 * 模组可用持仓
+	 * 模组可用持仓（全部）
 	 * @param direction			持仓方向
 	 * @param unifiedSymbol 	合约编码
 	 * @return
 	 */
 	int availablePosition(DirectionEnum direction, String unifiedSymbol);
+	/**
+	 * 模组可用持仓（明细）
+	 * @param direction			持仓方向
+	 * @param unifiedSymbol		合约编码
+	 * @param isToday			是否为当天持仓
+	 * @return
+	 */
+	int availablePosition(DirectionEnum direction, String unifiedSymbol, boolean isToday);
 	/**
 	 * 获取模组状态
 	 * @return

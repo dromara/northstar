@@ -3,6 +3,7 @@ package tech.quantit.northstar.domain.module;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
@@ -78,22 +79,27 @@ public class ModuleStateMachine implements IModuleStateMachine {
 	}
 	
 	private void updateState() {
-		buyPosMap = buyPosMap.entrySet().stream().filter(e -> e.getValue().totalVolume() > 0).collect(Collectors.toMap(e->e.getKey(), e->e.getValue()));
-		sellPosMap = sellPosMap.entrySet().stream().filter(e -> e.getValue().totalVolume() > 0).collect(Collectors.toMap(e->e.getKey(), e->e.getValue()));
+		buyPosMap = buyPosMap.entrySet().stream().filter(e -> e.getValue().totalVolume() > 0).collect(Collectors.toMap(Entry::getKey, Entry::getValue));
+		sellPosMap = sellPosMap.entrySet().stream().filter(e -> e.getValue().totalVolume() > 0).collect(Collectors.toMap(Entry::getKey, Entry::getValue));
 		int buyVol = buyPosMap.values().stream().map(TradePosition::totalVolume).reduce(0, Integer::sum);
 		int sellVol = sellPosMap.values().stream().map(TradePosition::totalVolume).reduce(0, Integer::sum);
 		
-		if(buyPosMap.isEmpty() && sellPosMap.isEmpty()) {
+		if(isEmpty(buyPosMap) && isEmpty(sellPosMap)) {
 			setState(ModuleState.EMPTY);
-		} else if(buyPosMap.isEmpty()) {
+		} else if(isEmpty(buyPosMap)) {
 			setState(ModuleState.HOLDING_SHORT);
-		} else if(sellPosMap.isEmpty()) {
+		} else if(isEmpty(sellPosMap)) {
 			setState(ModuleState.HOLDING_LONG);
 		} else if(buyPosMap.size() == sellPosMap.size() && buyPosMap.keySet().equals(sellPosMap.keySet()) && buyVol == sellVol) {
 			setState(ModuleState.EMPTY_HEDGE);
 		} else {
 			setState(ModuleState.HOLDING_HEDGE);
 		}
+	}
+	
+	private boolean isEmpty(Map<ContractField, TradePosition> posMap) {
+		int pos = posMap.values().stream().mapToInt(TradePosition::totalVolume).sum();
+		return posMap.isEmpty() || pos == 0;
 	}
 
 	@Override

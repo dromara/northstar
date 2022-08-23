@@ -40,9 +40,10 @@ class PriorBeforeAndHedgeTodayClosingStrategyTest {
 
 	@Test
 	void testResolveOperation() {
+		assertThat(cs.resolveOperation(SignalOperation.BUY_OPEN, null)).isEqualTo(OffsetFlagEnum.OF_Open);
+		assertThat(cs.resolveOperation(SignalOperation.BUY_OPEN, pf1)).isEqualTo(OffsetFlagEnum.OF_Close);
 		assertThat(cs.resolveOperation(SignalOperation.BUY_CLOSE, pf1)).isEqualTo(OffsetFlagEnum.OF_Close);
 		assertThat(cs.resolveOperation(SignalOperation.BUY_CLOSE, pf2)).isEqualTo(OffsetFlagEnum.OF_Open);
-		assertThat(cs.resolveOperation(SignalOperation.BUY_OPEN, null)).isEqualTo(OffsetFlagEnum.OF_Open);
 	}
 
 	@Test

@@ -1,5 +1,7 @@
 package tech.quantit.northstar.domain.module;
 
+import java.util.Objects;
+
 import tech.quantit.northstar.common.constant.ClosingPolicy;
 import tech.quantit.northstar.common.constant.SignalOperation;
 import tech.quantit.northstar.strategy.api.ClosingStrategy;
@@ -10,11 +12,7 @@ public class PriorBeforeAndHedgeTodayClosingStrategy  implements ClosingStrategy
 
 	@Override
 	public OffsetFlagEnum resolveOperation(SignalOperation opr, PositionField position) {
-		if(opr.isOpen())	return OffsetFlagEnum.OF_Open;
-		if(position.getPosition() - position.getFrozen() < 1) {
-			throw new IllegalStateException("没有足够持仓可对冲");
-		}
-		if(position.getYdPosition() - position.getYdFrozen() > 0) {			
+		if(Objects.nonNull(position) && position.getYdPosition() - position.getYdFrozen() > 0) {
 			return OffsetFlagEnum.OF_Close;
 		}
 		return OffsetFlagEnum.OF_Open;

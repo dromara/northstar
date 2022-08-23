@@ -16,6 +16,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.ILoggerFactory;
@@ -332,6 +333,18 @@ public class ModuleContext implements IModuleContext{
 				.filter(pf -> StringUtils.equals(pf.getContract().getUnifiedSymbol(), unifiedSymbol))
 				.mapToInt(pf -> pf.getPosition() - pf.getFrozen())
 				.sum();
+	}
+	
+	@Override
+	public int availablePosition(DirectionEnum direction, String unifiedSymbol, boolean isToday) {
+		Stream<PositionField> posStream = gatewayMap.values().stream()
+				.map(gw -> gw.getGatewaySetting().getGatewayId())
+				.map(gatewayId -> accStore.getPositions(gatewayId))
+				.flatMap(Collection::stream)
+				.filter(pf -> StringUtils.equals(pf.getContract().getUnifiedSymbol(), unifiedSymbol));
+		
+		if(isToday)	return posStream.mapToInt(pf -> pf.getTdPosition() - pf.getTdFrozen()).sum();
+		return posStream.mapToInt(pf -> pf.getYdPosition() - pf.getYdFrozen()).sum(); 
 	}
 
 	/* 此处收到的TICK数据是所有订阅的数据，需要过滤 */

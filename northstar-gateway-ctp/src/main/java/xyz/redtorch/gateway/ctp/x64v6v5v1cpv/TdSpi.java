@@ -1061,7 +1061,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 			String symbol = pInvestorPosition.getInstrumentID();
 
 			if (!(instrumentQueried && gatewayAdapter.contractMap.containsKey(symbol))) {
-				logger.warn("{}尚未获取到合约信息,暂时不处理持仓数据,代码{}", logInfo, symbol);
+				logger.debug("{}尚未获取到合约信息,暂时不处理持仓数据,代码{}", logInfo, symbol);
 				return;
 			}
 
