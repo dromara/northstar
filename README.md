@@ -54,7 +54,7 @@
 [https://northstar-doc-1gwbhfxd522a1168-1310148562.ap-shanghai.app.tcloudbase.com/guide/chat-group.html](https://northstar-doc-1gwbhfxd522a1168-1310148562.ap-shanghai.app.tcloudbase.com/guide/chat-group.html)
 
 ## 注意事项
-- 请使用前先通读一遍 [【官网文档】](https://northstar-doc-1gwbhfxd522a1168-1310148562.ap-shanghai.app.tcloudbase.com/)**
+- 请使用前先通读一遍 [【官网文档】](https://northstar-doc-1gwbhfxd522a1168-1310148562.ap-shanghai.app.tcloudbase.com/)  
 - 请勿直接使用master分支的最新代码，应该使用最新的tag来作为开发基线
 - 服务器时间校正为北京时间
 - 尽量不要在开市期间重启程序
