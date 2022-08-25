@@ -223,6 +223,9 @@ public class ModuleContext implements IModuleContext{
 	@Override
 	public synchronized String submitOrderReq(ContractField contract, SignalOperation operation,
 			PriceType priceType, int volume, double price) {
+		if(mlog.isInfoEnabled()) {			
+			mlog.info("策略信号：合约【{}】，操作【{}】，价格【{}】，手数【{}】，类型【{}】", contract.getUnifiedSymbol(), operation.text(), price, volume, priceType);
+		}
 		if(!gatewayMap.containsKey(contract)) {
 			throw new NoSuchElementException(String.format("找不到合约 [%s] 对应网关", contract.getUnifiedSymbol()));
 		}
@@ -232,7 +235,7 @@ public class ModuleContext implements IModuleContext{
 		for(PositionField pos : accStore.getPositions(gatewayId)) {
 			boolean isOppositeDir = (operation.isBuy() && FieldUtils.isShort(pos.getPositionDirection()) 
 					|| operation.isSell() && FieldUtils.isLong(pos.getPositionDirection()));
-			if(operation.isClose() && ContractUtils.isSame(pos.getContract(), contract) && isOppositeDir) {
+			if(ContractUtils.isSame(pos.getContract(), contract) && isOppositeDir) {
 				pf = pos;
 			}
 		}
@@ -260,8 +263,8 @@ public class ModuleContext implements IModuleContext{
 
 	DateFormat fmt = new SimpleDateFormat();
 	private String submitOrderReq(SubmitOrderReqField orderReq) {
-		if(mlog.isDebugEnabled()) {			
-			mlog.debug("发单：{}，{}", orderReq.getOriginOrderId(), fmt.format(new Date(orderReq.getActionTimestamp())));
+		if(mlog.isInfoEnabled()) {			
+			mlog.info("发单：{}，{}", orderReq.getOriginOrderId(), fmt.format(new Date(orderReq.getActionTimestamp())));
 		}
 		if(FieldUtils.isOpen(orderReq.getOffsetFlag())) {
 			checkAmount(orderReq);
@@ -303,7 +306,7 @@ public class ModuleContext implements IModuleContext{
 			mlog.debug("找不到订单：{}", originOrderId);
 			return;
 		}
-		mlog.debug("撤单：{}", originOrderId);
+		mlog.info("撤单：{}", originOrderId);
 		ContractField contract = orderReqMap.get(originOrderId).getContract();
 		TradeGateway gateway = gatewayMap.get(contract);
 		CancelOrderReqField cancelReq = CancelOrderReqField.newBuilder()

@@ -2,7 +2,9 @@ package tech.quantit.northstar.main.utils;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import tech.quantit.northstar.common.constant.ClosingPolicy;
 import tech.quantit.northstar.common.model.ComponentAndParamsPair;
@@ -13,6 +15,7 @@ import tech.quantit.northstar.common.model.ModuleAccountRuntimeDescription;
 import tech.quantit.northstar.common.model.ModuleDealRecord;
 import tech.quantit.northstar.common.model.ModuleDescription;
 import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
+import tech.quantit.northstar.data.IGatewayRepository;
 import tech.quantit.northstar.data.IModuleRepository;
 import tech.quantit.northstar.domain.gateway.ContractManager;
 import tech.quantit.northstar.domain.gateway.GatewayAndConnectionManager;
@@ -23,6 +26,7 @@ import tech.quantit.northstar.domain.module.ModuleContext;
 import tech.quantit.northstar.domain.module.PriorBeforeAndHedgeTodayClosingStrategy;
 import tech.quantit.northstar.domain.module.PriorTodayClosingStrategy;
 import tech.quantit.northstar.domain.module.TradeModule;
+import tech.quantit.northstar.gateway.api.MarketGateway;
 import tech.quantit.northstar.gateway.api.TradeGateway;
 import tech.quantit.northstar.main.ExternalJarClassLoader;
 import tech.quantit.northstar.strategy.api.ClosingStrategy;
@@ -39,6 +43,8 @@ public class ModuleFactory {
 	
 	private IModuleRepository moduleRepo;
 	
+	private IGatewayRepository gatewayRepo;
+	
 	private GatewayAndConnectionManager gatewayConnMgr;
 	
 	private ContractManager contractMgr;
@@ -47,10 +53,11 @@ public class ModuleFactory {
 	
 	private Consumer<ModuleDealRecord> onDealChangeCallback = dealRecord -> moduleRepo.saveDealRecord(dealRecord);
 	
-	public ModuleFactory(ExternalJarClassLoader extJarLoader, IModuleRepository moduleRepo, GatewayAndConnectionManager gatewayConnMgr,
-			ContractManager contractMgr) {
+	public ModuleFactory(ExternalJarClassLoader extJarLoader, IModuleRepository moduleRepo, IGatewayRepository gatewayRepo,
+			GatewayAndConnectionManager gatewayConnMgr, ContractManager contractMgr) {
 		this.extJarLoader = extJarLoader;
 		this.moduleRepo = moduleRepo;
+		this.gatewayRepo = gatewayRepo;
 		this.gatewayConnMgr = gatewayConnMgr;
 		this.contractMgr = contractMgr;
 	}
@@ -63,7 +70,15 @@ public class ModuleFactory {
 			ctx.bindGatewayContracts(tradeGateway, mad.getBindedUnifiedSymbols().stream().map(contractMgr::getContract).toList());
 		}
 		
-		return new TradeModule(ctx, onRuntimeChangeCallback);
+		Set<MarketGateway> mktGatewaySet = moduleDescription.getModuleAccountSettingsDescription().stream()
+				.map(ModuleAccountDescription::getAccountGatewayId)
+				.map(accGatewayId -> gatewayRepo.findById(accGatewayId))
+				.map(gd -> gatewayRepo.findById(gd.getBindedMktGatewayId()))
+				.map(gd -> gatewayConnMgr.getGatewayById(gd.getGatewayId()))
+				.map(MarketGateway.class::cast)
+				.collect(Collectors.toSet());
+		
+		return new TradeModule(ctx, mktGatewaySet, onRuntimeChangeCallback);
 	}
 	
 	private IModuleAccountStore makeAccountStore(ModuleDescription moduleDescription, ModuleRuntimeDescription moduleRuntimeDescription) {

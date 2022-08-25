@@ -198,7 +198,11 @@ public class PlaybackContext {
 			.map(contractMgr::getContract)
 			.collect(Collectors.toMap(
 					contract -> contract, 
-					contract -> new LinkedList<>(loader.loadData(playbackTimeState, contract))));
+					contract -> new LinkedList<>(loader.loadData(playbackTimeState, contract)
+									.stream()
+									.map(bar -> bar.toBuilder().setGatewayId(gatewaySettings.getGatewayId()).build())
+									.toList()
+							)));
 	}
 	
 	// 按分钟加载TICK数据 

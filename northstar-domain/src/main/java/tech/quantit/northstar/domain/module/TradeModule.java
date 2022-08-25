@@ -1,11 +1,14 @@
 package tech.quantit.northstar.domain.module;
 
 import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.event.NorthstarEvent;
 import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
+import tech.quantit.northstar.gateway.api.MarketGateway;
 import tech.quantit.northstar.strategy.api.IModule;
 import tech.quantit.northstar.strategy.api.IModuleContext;
 import xyz.redtorch.pb.CoreField.BarField;
@@ -36,10 +39,13 @@ public class TradeModule implements IModule {
 	
 	private IModuleContext ctx;
 	
+	private Set<String> mktGatewayIdSet;
+	
 	private Consumer<ModuleRuntimeDescription> onRuntimeChangeCallback;
 	
-	public TradeModule(IModuleContext context, Consumer<ModuleRuntimeDescription> onRuntimeChangeCallback) {
+	public TradeModule(IModuleContext context, Set<MarketGateway> mktGatewaySet, Consumer<ModuleRuntimeDescription> onRuntimeChangeCallback) {
 		this.ctx = context;
+		this.mktGatewayIdSet = mktGatewaySet.stream().map(mktGateway -> mktGateway.getGatewaySetting().getGatewayId()).collect(Collectors.toSet());
 		this.onRuntimeChangeCallback = onRuntimeChangeCallback;
 	}
 	
@@ -85,9 +91,9 @@ public class TradeModule implements IModule {
 	@Override
 	public void onEvent(NorthstarEvent event) {
 		Object data = event.getData();
-		if(data instanceof TickField tick) {
+		if(data instanceof TickField tick && mktGatewayIdSet.contains(tick.getGatewayId())) {
 			ctx.onTick(tick);
-		} else if (data instanceof BarField bar) {
+		} else if (data instanceof BarField bar && mktGatewayIdSet.contains(bar.getGatewayId())) {
 			ctx.onBar(bar);
 		} else if (data instanceof OrderField order) {
 			ctx.onOrder(order);

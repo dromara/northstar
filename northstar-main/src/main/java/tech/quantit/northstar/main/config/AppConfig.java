@@ -59,6 +59,7 @@ import tech.quantit.northstar.common.model.ContractDefinition;
 import tech.quantit.northstar.common.utils.ContractDefinitionReader;
 import tech.quantit.northstar.common.utils.ContractUtils;
 import tech.quantit.northstar.data.IContractRepository;
+import tech.quantit.northstar.data.IGatewayRepository;
 import tech.quantit.northstar.data.IMarketDataRepository;
 import tech.quantit.northstar.data.IModuleRepository;
 import tech.quantit.northstar.data.IPlaybackRuntimeRepository;
@@ -253,9 +254,9 @@ public class AppConfig implements WebMvcConfigurer {
 	}
 
 	@Bean
-	public ModuleFactory moduleFactory(@Autowired(required = false) ExternalJarClassLoader extJarLoader,
+	public ModuleFactory moduleFactory(@Autowired(required = false) ExternalJarClassLoader extJarLoader, IGatewayRepository gatewayRepo,
 			IModuleRepository moduleRepo, GatewayAndConnectionManager gatewayConnMgr, ContractManager contractMgr) {
-		return new ModuleFactory(extJarLoader, moduleRepo, gatewayConnMgr, contractMgr);
+		return new ModuleFactory(extJarLoader, moduleRepo, gatewayRepo, gatewayConnMgr, contractMgr);
 	}
 
 	private static OkHttpClient getUnsafeOkHttpClient() {
