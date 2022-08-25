@@ -21,7 +21,7 @@
 		</dependency>
 		<dependency>
 			<groupId>tech.quantit</groupId>
-			<artifactId>northstar-domain</artifactId>
+			<artifactId>northstar-strategy-api</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>tech.quantit</groupId>

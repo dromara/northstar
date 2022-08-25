@@ -49,7 +49,6 @@
 		<module>northstar-gateway-ctp</module>
 		<module>northstar-gateway-sim</module>
 		<module>northstar-gateway-playback</module>
-		<module>northstar-domain</module>
 		<module>northstar-strategy-api</module>
 		<module>northstar-main</module>
 	</modules>
@@ -93,11 +92,6 @@
 			<dependency>
 				<groupId>tech.quantit</groupId>
 				<artifactId>northstar-gateway-playback</artifactId>
-				<version>${northstar-version}</version>
-			</dependency>
-			<dependency>
-				<groupId>tech.quantit</groupId>
-				<artifactId>northstar-domain</artifactId>
 				<version>${northstar-version}</version>
 			</dependency>
 			<dependency>
