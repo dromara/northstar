@@ -18,10 +18,6 @@
 	<dependencies>
 		<dependency>
 			<groupId>tech.quantit</groupId>
-			<artifactId>northstar-data</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>tech.quantit</groupId>
 			<artifactId>northstar-gateway-api</artifactId>
 		</dependency>
 		<dependency>

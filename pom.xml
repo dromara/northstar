@@ -45,7 +45,6 @@
 		<module>northstar-external-archetype</module>
 		<module>northstar-monitor</module>
 		<module>northstar-common</module>
-		<module>northstar-data</module>
 		<module>northstar-gateway-api</module>
 		<module>northstar-gateway-ctp</module>
 		<module>northstar-gateway-sim</module>
@@ -69,11 +68,6 @@
 			<dependency>
 				<groupId>tech.quantit</groupId>
 				<artifactId>northstar-common</artifactId>
-				<version>${northstar-version}</version>
-			</dependency>
-			<dependency>
-				<groupId>tech.quantit</groupId>
-				<artifactId>northstar-data</artifactId>
 				<version>${northstar-version}</version>
 			</dependency>
 			<dependency>
