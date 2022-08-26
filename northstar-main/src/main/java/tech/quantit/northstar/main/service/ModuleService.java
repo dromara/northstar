@@ -264,7 +264,10 @@ public class ModuleService implements InitializingBean {
 		IModule module = moduleFactory.newInstance(md, mrd);
 		module.initModule();
 		log.info("模组[{}] 初始化数据起始计算日为：{}", md.getModuleName(), date);
-		LocalDate now = LocalDate.now();
+		LocalDateTime nowDateTime = LocalDateTime.now();
+		LocalDate now = nowDateTime.getDayOfWeek().getValue() > 5 || nowDateTime.getDayOfWeek().getValue() == 5 && nowDateTime.toLocalTime().isAfter(LocalTime.of(20, 30))
+				? LocalDate.now().plusWeeks(1)
+				: LocalDate.now();
 		// 模组数据初始化
 		while(md.getDaysOfDataForPreparation() > 0
 				&& LocalDateTimeUtil.weekOfYear(now) >= LocalDateTimeUtil.weekOfYear(date)) {
