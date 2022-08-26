@@ -20,6 +20,7 @@ import tech.quantit.northstar.common.event.NorthstarEvent;
 import tech.quantit.northstar.common.event.NorthstarEventType;
 import tech.quantit.northstar.common.model.MailConfigDescription;
 import xyz.redtorch.pb.CoreEnum.OrderStatusEnum;
+import xyz.redtorch.pb.CoreField.NoticeField;
 import xyz.redtorch.pb.CoreField.OrderField;
 import xyz.redtorch.pb.CoreField.TradeField;
 
@@ -69,7 +70,7 @@ public class MailDeliveryManager {
 		case DISCONNECTED -> contentHandler.onDisconnected((String) event.getData());
 		case TRADE -> contentHandler.onEvent((TradeField) event.getData());
 		case ORDER -> contentHandler.onEvent((OrderField) event.getData());
-		case NOTICE -> contentHandler.onEvent((TradeField) event.getData());
+		case NOTICE -> contentHandler.onEvent((NoticeField) event.getData());
 		default -> throw new IllegalArgumentException("Unexpected value: " + event.getEvent());
 		};
 		exec.execute(() -> {

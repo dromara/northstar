@@ -26,6 +26,8 @@ import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.event.NorthstarEvent;
 import tech.quantit.northstar.common.event.NorthstarEventType;
+import xyz.redtorch.pb.CoreEnum.CommonStatusEnum;
+import xyz.redtorch.pb.CoreField.NoticeField;
 
 /**
  * 核心事件引擎
@@ -48,6 +50,11 @@ public class DisruptorFastEventEngine implements FastEventEngine, InitializingBe
 		@Override
 		public void handleEventException(Throwable ex, long sequence, NorthstarEvent event) {
 			log.warn("事件异常：事件类型【"+event+"】", ex);
+			emitEvent(NorthstarEventType.NOTICE, NoticeField.newBuilder()
+					.setContent(ex.toString())
+					.setStatus(CommonStatusEnum.COMS_ERROR)
+					.setTimestamp(System.currentTimeMillis())
+					.build());
 		}
 
 		@Override
