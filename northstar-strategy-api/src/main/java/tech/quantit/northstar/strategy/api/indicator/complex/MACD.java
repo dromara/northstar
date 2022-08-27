@@ -2,8 +2,11 @@ package tech.quantit.northstar.strategy.api.indicator.complex;
 
 import static tech.quantit.northstar.strategy.api.indicator.function.AverageFunctions.EMA;
 
+import java.util.function.Function;
+
 import tech.quantit.northstar.common.model.TimeSeriesValue;
 import tech.quantit.northstar.strategy.api.indicator.TimeSeriesUnaryOperator;
+import xyz.redtorch.pb.CoreField.BarField;
 
 /**
  * DIFF : EMA(CLOSE,SHORT) - EMA(CLOSE,LONG);//短周期与长周期的收盘价的指数平滑移动平均值做差。
@@ -68,6 +71,68 @@ public class MACD {
 		return tv -> {
 			TimeSeriesValue v = fastLine.apply(tv);
 			TimeSeriesValue v0 = slowLine.apply(tv);
+			v.setValue(v.getValue() - v0.getValue());
+			return ema.apply(v);
+		};
+	}
+	
+	/**
+	 * 获取DIFF线计算函数
+	 * @param fastLine		快线计算函数 
+	 * @param slowLine		慢线计算函数
+	 * @return
+	 */
+	public static TimeSeriesUnaryOperator diff(TimeSeriesUnaryOperator fastLine, TimeSeriesUnaryOperator slowLine) {
+		return tv -> {
+			TimeSeriesValue v = fastLine.apply(tv);
+			TimeSeriesValue v0 = slowLine.apply(tv);
+			double val = v.getValue() - v0.getValue();
+			return new TimeSeriesValue(val, tv.getTimestamp());
+		};
+	}
+	
+	/**
+	 * 获取DEA线计算函数
+	 * @param fastLine		快线计算函数 
+	 * @param slowLine		慢线计算函数
+	 * @return
+	 */
+	public static TimeSeriesUnaryOperator dea(TimeSeriesUnaryOperator fastLine, TimeSeriesUnaryOperator slowLine, int m) {
+		final TimeSeriesUnaryOperator ema = EMA(m);
+		return tv -> {
+			TimeSeriesValue v = fastLine.apply(tv);
+			TimeSeriesValue v0 = slowLine.apply(tv);
+			v.setValue(v.getValue() - v0.getValue());
+			return ema.apply(v);
+		};
+	}
+	
+	/**
+	 * 获取DIFF线计算函数
+	 * @param fastLine		快线计算函数 
+	 * @param slowLine		慢线计算函数
+	 * @return
+	 */
+	public static Function<BarField, TimeSeriesValue> diff(Function<BarField, TimeSeriesValue> fastLine, Function<BarField, TimeSeriesValue> slowLine) {
+		return bar -> {
+			TimeSeriesValue v = fastLine.apply(bar);
+			TimeSeriesValue v0 = slowLine.apply(bar);
+			double val = v.getValue() - v0.getValue();
+			return new TimeSeriesValue(val, bar.getActionTimestamp());
+		};
+	}
+	
+	/**
+	 * 获取DEA线计算函数
+	 * @param fastLine		快线计算函数 
+	 * @param slowLine		慢线计算函数
+	 * @return
+	 */
+	public static Function<BarField, TimeSeriesValue> dea(Function<BarField, TimeSeriesValue> fastLine, Function<BarField, TimeSeriesValue> slowLine, int m) {
+		final TimeSeriesUnaryOperator ema = EMA(m);
+		return bar -> {
+			TimeSeriesValue v = fastLine.apply(bar);
+			TimeSeriesValue v0 = slowLine.apply(bar);
 			v.setValue(v.getValue() - v0.getValue());
 			return ema.apply(v);
 		};
