@@ -147,18 +147,20 @@ export default {
       }
     },
     tailPlatformLog() {
-      logApi.tailPlatformLog(this.positionOffset).then((result) => {
+      logApi.tailPlatformLog(this.positionOffset, this.numOfLinesInView).then((result) => {
         this.tailingLog(result)
         this.timer = setTimeout(this.tailPlatformLog, this.updateInterval)
       })
     },
     tailModuleLog(moduleName) {
-      logApi.tailModuleLog(moduleName, this.positionOffset).then((result) => {
-        this.tailingLog(result)
-        this.timer = setTimeout(() => {
-          this.tailModuleLog(moduleName)
-        }, this.updateInterval)
-      })
+      logApi
+        .tailModuleLog(moduleName, this.positionOffset, this.numOfLinesInView)
+        .then((result) => {
+          this.tailingLog(result)
+          this.timer = setTimeout(() => {
+            this.tailModuleLog(moduleName)
+          }, this.updateInterval)
+        })
     },
     tailingLog(logDescription) {
       this.positionOffset = logDescription.endPosition

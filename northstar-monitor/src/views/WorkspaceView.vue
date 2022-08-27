@@ -77,13 +77,12 @@ export default {
     this.curPage = pageOptsRevert[this.$route.name]
   },
   methods: {
-    handleSelect(index, queryParams) {
+    handleSelect(index) {
       if (index === this.curPage) {
         return
       }
       this.curPage = index
-      const query = Object.assign({ auth: this.$route.query.auth }, queryParams)
-      this.$router.push({ name: pageOpts[index], query: query })
+      this.$router.push({ name: pageOpts[index], query: { auth: this.$route.query.auth } })
     },
     logout() {
       loginApi.logout()

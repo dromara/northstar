@@ -25,18 +25,18 @@ public class LogController {
 	private LogService service;
 	
 	@GetMapping
-	public ResultBean<LogDescription> tailNorthstarLog(long positionOffset) throws IOException{
+	public ResultBean<LogDescription> tailNorthstarLog(long positionOffset, int tailNumOfLines) throws IOException{
 		LocalDate today = LocalDate.now();
 		File logPath = new File(System.getProperty("LOG_PATH"));
 		File logFile = new File(logPath, "Northstar_" + today.format(DateTimeConstant.D_FORMAT_FORMATTER) + ".log");
-		return new ResultBean<>(service.tailLogFile(logFile, positionOffset));
+		return new ResultBean<>(service.tailLogFile(logFile, positionOffset, tailNumOfLines));
 	}
 	
 	@GetMapping("/module")
-	public ResultBean<LogDescription> tailModuleLog(String name, long positionOffset) throws IOException{
+	public ResultBean<LogDescription> tailModuleLog(String name, long positionOffset, int tailNumOfLines) throws IOException{
 		File moduleLogPath = new File(System.getProperty("LOG_PATH"), name);
 		File moduleLogFile = new File(moduleLogPath, name + ".log");
-		return new ResultBean<>(service.tailLogFile(moduleLogFile, positionOffset));
+		return new ResultBean<>(service.tailLogFile(moduleLogFile, positionOffset, tailNumOfLines));
 	}
 	
 	@PutMapping("/level")

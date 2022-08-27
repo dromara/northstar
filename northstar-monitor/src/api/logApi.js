@@ -1,11 +1,11 @@
 import baseService from './baseRequest'
 
 export default {
-    tailPlatformLog(positionOffset){
-        return baseService.get('/log?positionOffset=' + positionOffset)
+    tailPlatformLog(positionOffset, maxLinesToLoad){
+        return baseService.get(`/log?positionOffset=${positionOffset}&tailNumOfLines=${maxLinesToLoad}`)
     },
-    tailModuleLog(moduleName, positionOffset){
-        return baseService.get(`/log/module?name=${moduleName}&positionOffset=${positionOffset}`)
+    tailModuleLog(moduleName, positionOffset, maxLinesToLoad){
+        return baseService.get(`/log/module?name=${moduleName}&positionOffset=${positionOffset}&tailNumOfLines=${maxLinesToLoad}`)
     },
     getPlatformLogLevel(){
         return baseService.get('/log/level')

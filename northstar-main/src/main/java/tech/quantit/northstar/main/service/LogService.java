@@ -28,14 +28,15 @@ public class LogService {
 		this.loggingSystem = logginSystem;
 	}
 	
-	public LogDescription tailLogFile(File logFile, long positionOffset) throws IOException {
+	public LogDescription tailLogFile(File logFile, long positionOffset, int tailNumOfLines) throws IOException {
 		LinkedList<String> list = new LinkedList<>();
 		LogDescription result = new LogDescription();
-		result.setStartPosition(positionOffset);
 		try(RandomAccessFile raf = new RandomAccessFile(logFile, "r")){
 			long lenOfFile = raf.length();
+			long realOffset = Math.max(positionOffset, lenOfFile - 1000000);	//最多加载1MB的日志数据
+			result.setStartPosition(realOffset); 	
 			result.setEndPosition(lenOfFile);
-			raf.seek(positionOffset);
+			raf.seek(realOffset);
 			while(raf.getFilePointer() < lenOfFile) {
 				String line = FileUtil.readLine(raf, StandardCharsets.UTF_8);
 				if(StringUtils.isNotEmpty(line)) {					
@@ -43,7 +44,7 @@ public class LogService {
 				}
 			}
 			
-			result.setLinesOfLog(list);
+			result.setLinesOfLog(list.subList(Math.max(0, list.size() - tailNumOfLines), list.size()));
 			return result;
 		}
 	}
