@@ -49,6 +49,35 @@ public class TrigonometricTickSimulation implements TickSimulationAlgorithm {
 		int numOfPriceTickFromHighToLow = (int) Math.round((bar.getHighPrice() - bar.getLowPrice()) / priceTick);	// 最高最低价之间一共有多少个最小变动价位
 		int numOfPriceTickFromOpenToLow = (int) Math.round((bar.getOpenPrice() - bar.getLowPrice()) / priceTick);
 		int numOfPriceTickFromCloseToLow = (int) Math.round((bar.getClosePrice() - bar.getLowPrice()) / priceTick);
+		if(numOfPriceTickFromHighToLow == 0) {
+			return List.of(TickField.newBuilder()
+					.setUnifiedSymbol(bar.getUnifiedSymbol())
+					.setPreClosePrice(bar.getPreClosePrice())
+					.setPreOpenInterest(bar.getPreOpenInterest())
+					.setPreSettlePrice(bar.getPreSettlePrice())
+					.setTradingDay(bar.getTradingDay())
+					.setLastPrice(bar.getClosePrice())
+					.setStatus(TickType.NORMAL_TICK.getCode())
+					.setActionDay(bar.getActionDay())
+					.setActionTime(bar.getActionTime())
+					.setActionTimestamp(bar.getActionTimestamp())
+					.addAllAskPrice(List.of(bar.getClosePrice() + priceTick, 0D, 0D, 0D, 0D)) // 仅模拟卖一价
+					.addAllBidPrice(List.of(bar.getClosePrice() - priceTick, 0D, 0D, 0D, 0D)) // 仅模拟买一价
+					.setGatewayId(gatewayId)
+					.setHighPrice(bar.getHighPrice())	
+					.setLowPrice(bar.getLowPrice())		
+					.setLowerLimit(0)
+					.setUpperLimit(Integer.MAX_VALUE)
+					.setVolumeDelta(bar.getVolumeDelta())
+					.setVolume(bar.getVolume())
+					.setOpenInterestDelta(bar.getOpenInterestDelta())
+					.setOpenInterest(bar.getOpenInterest())
+					.setTurnoverDelta(bar.getTurnoverDelta())
+					.setTurnover(bar.getTurnover())
+					.setNumTradesDelta(bar.getNumTradesDelta())
+					.setNumTrades(bar.getNumTrades())
+					.build());
+		}
 		double valuePerPriceTick = 2.0 / numOfPriceTickFromHighToLow;	// 每个价位在三角函数y坐标轴 [-1,1] 占据的比例 
 		double offset = isUp ? 0 : Math.PI * 2;
 		double highArcSinVal = Math.PI / 2;
