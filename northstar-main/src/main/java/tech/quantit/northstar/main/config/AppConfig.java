@@ -76,6 +76,7 @@ import tech.quantit.northstar.gateway.playback.PlaybackGatewayFactory;
 import tech.quantit.northstar.gateway.sim.trade.SimGatewayFactory;
 import tech.quantit.northstar.gateway.sim.trade.SimMarket;
 import tech.quantit.northstar.main.ExternalJarClassLoader;
+import tech.quantit.northstar.main.SpringContextUtil;
 import tech.quantit.northstar.main.interceptor.AuthorizationInterceptor;
 import tech.quantit.northstar.main.mail.MailDeliveryManager;
 import tech.quantit.northstar.main.mail.MailSenderFactory;
@@ -237,7 +238,7 @@ public class AppConfig implements WebMvcConfigurer {
 	}
 
 	@Bean
-	public ExternalJarClassLoader extJarListener() throws MalformedURLException {
+	public ExternalJarClassLoader extJarListener(SpringContextUtil springContextUtil) throws MalformedURLException {
 		ApplicationHome appHome = new ApplicationHome(getClass());
 		File appPath = appHome.getDir();
 		ExternalJarClassLoader clzLoader = null;

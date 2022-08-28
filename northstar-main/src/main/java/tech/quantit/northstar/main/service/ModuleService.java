@@ -343,7 +343,7 @@ public class ModuleService implements InitializingBean {
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		CompletableFuture.runAsync(() -> {
-			log.info("正在加载模组");
+			log.info("开始加载模组");
 			for(ModuleDescription md : findAllModules()) {
 				try {				
 					loadModule(md);
@@ -351,6 +351,7 @@ public class ModuleService implements InitializingBean {
 					log.warn("模组 [{}] 加载失败", md.getModuleName(), e);
 				}
 			}
+			log.info("模组加载完毕");
 		}, CompletableFuture.delayedExecutor(5, TimeUnit.SECONDS));
 		
 	}
