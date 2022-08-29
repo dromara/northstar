@@ -14,8 +14,6 @@ import java.util.Set;
 import org.springframework.data.redis.core.BoundListOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 
-import com.google.protobuf.InvalidProtocolBufferException;
-
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.constant.Constants;
 import tech.quantit.northstar.common.constant.DateTimeConstant;
@@ -70,17 +68,21 @@ public class MarketDataRepoRedisImpl extends MarketDataRepoDataServiceImpl {
 		log.debug("加载 [{}] 历史行情数据：{}，{} -> {}", gatewayId, unifiedSymbol, startDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), endDate0.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
 		LocalDate today = LocalDate.now();
 		LocalDate endDate = today.isAfter(endDate0) ? endDate0 : today; 
-		List<BarField> resultList = new LinkedList<>();
+		LinkedList<BarField> resultList = new LinkedList<>();
 		List<BarField> list = super.loadBars(gatewayId, unifiedSymbol, startDate, endDate)
 				.stream()
 				.sorted((a, b) -> a.getActionTimestamp() < b.getActionTimestamp() ? -1 : 1)
 				.toList();
 		resultList.addAll(list);
 		
-		LocalDate date = LocalTime.now().isAfter(LocalTime.of(21, 0)) ? today.plusDays(1) : today;
-		while(!date.isAfter(endDate0)) {
-			resultList.addAll(findBarData(date, gatewayId, unifiedSymbol));
-			date = date.plusDays(1);
+		if(!resultList.isEmpty()) {
+			LocalDate localQueryDate = today;
+			if(resultList.peekLast().getTradingDay().equals(today.format(DateTimeConstant.D_FORMAT_INT_FORMATTER))) {
+				do {					
+					localQueryDate = localQueryDate.plusDays(1);
+				} while(localQueryDate.getDayOfWeek().getValue() > 5);
+			}
+			resultList.addAll(findBarData(localQueryDate, gatewayId, unifiedSymbol));
 		}
 		return resultList
 				.stream()
