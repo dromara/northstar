@@ -7,6 +7,7 @@ import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -96,13 +97,14 @@ public class MarketDataRepoRedisImpl extends MarketDataRepoDataServiceImpl {
 				.orElse(Collections.emptyList())
 				.stream()
 				.map(this::convert)
+				.filter(Objects::nonNull)
 				.toList();
 	}
 	
 	private BarField convert(byte[] data) {
 		try {
 			return BarField.parseFrom(data);
-		} catch (InvalidProtocolBufferException e) {
+		} catch (Exception e) {
 			log.warn("", e);
 			return null;
 		}
