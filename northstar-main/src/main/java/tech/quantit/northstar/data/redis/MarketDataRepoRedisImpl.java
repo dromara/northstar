@@ -75,19 +75,27 @@ public class MarketDataRepoRedisImpl extends MarketDataRepoDataServiceImpl {
 				.toList();
 		resultList.addAll(list);
 		
-		if(!resultList.isEmpty()) {
-			LocalDate localQueryDate = today;
-			if(resultList.peekLast().getTradingDay().equals(today.format(DateTimeConstant.D_FORMAT_INT_FORMATTER))) {
+		if(today.isAfter(endDate0))	return resultList; 
+		
+		LocalDate localQueryDate = today;
+		if(resultList.isEmpty()) {
+			while(resultList.isEmpty() && endDate0.isAfter(localQueryDate)) {
+				resultList.addAll(findBarData(localQueryDate, gatewayId, unifiedSymbol));
+				localQueryDate = localQueryDate.plusDays(1);
+			}
+		} else {			
+			if(resultList.peekLast().getTradingDay().equals(today.format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
+					|| today.getDayOfWeek().getValue() > 5) {
 				do {					
 					localQueryDate = localQueryDate.plusDays(1);
 				} while(localQueryDate.getDayOfWeek().getValue() > 5);
+				resultList.addAll(findBarData(localQueryDate, gatewayId, unifiedSymbol));
+			} else {
+				resultList.addAll(findBarData(localQueryDate, gatewayId, unifiedSymbol));
 			}
-			resultList.addAll(findBarData(localQueryDate, gatewayId, unifiedSymbol));
 		}
-		return resultList
-				.stream()
-				.sorted((a,b) -> a.getActionTimestamp() < b.getActionTimestamp() ? -1 : 1)
-				.toList();
+		
+		return resultList;
 	}
 	
 	private List<BarField> findBarData(LocalDate date, String gatewayId, String unifiedSymbol){
