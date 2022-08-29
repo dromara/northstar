@@ -6,6 +6,7 @@ import java.util.function.Function;
 
 import tech.quantit.northstar.common.model.TimeSeriesValue;
 import tech.quantit.northstar.strategy.api.indicator.TimeSeriesUnaryOperator;
+import tech.quantit.northstar.strategy.api.indicator.function.ComputeFunctions;
 import xyz.redtorch.pb.CoreField.BarField;
 
 /**
@@ -49,14 +50,7 @@ public class MACD {
 	 * @return
 	 */
 	public TimeSeriesUnaryOperator diff() {
-		final TimeSeriesUnaryOperator fastLine = EMA(this.fast);
-		final TimeSeriesUnaryOperator slowLine = EMA(this.slow);
-		return tv -> {
-			TimeSeriesValue v = fastLine.apply(tv);
-			TimeSeriesValue v0 = slowLine.apply(tv);
-			double val = v.getValue() - v0.getValue();
-			return new TimeSeriesValue(val, tv.getTimestamp());
-		};
+		return diff(EMA(this.fast), EMA(this.slow));
 	}
 	
 	/**
@@ -65,15 +59,7 @@ public class MACD {
 	 * @return
 	 */
 	public TimeSeriesUnaryOperator dea() {
-		final TimeSeriesUnaryOperator fastLine = EMA(this.fast);
-		final TimeSeriesUnaryOperator slowLine = EMA(this.slow);
-		final TimeSeriesUnaryOperator ema = EMA(this.m);
-		return tv -> {
-			TimeSeriesValue v = fastLine.apply(tv);
-			TimeSeriesValue v0 = slowLine.apply(tv);
-			v.setValue(v.getValue() - v0.getValue());
-			return ema.apply(v);
-		};
+		return dea(EMA(this.fast), EMA(this.slow), this.m);
 	}
 	
 	/**
@@ -83,12 +69,7 @@ public class MACD {
 	 * @return
 	 */
 	public static TimeSeriesUnaryOperator diff(TimeSeriesUnaryOperator fastLine, TimeSeriesUnaryOperator slowLine) {
-		return tv -> {
-			TimeSeriesValue v = fastLine.apply(tv);
-			TimeSeriesValue v0 = slowLine.apply(tv);
-			double val = v.getValue() - v0.getValue();
-			return new TimeSeriesValue(val, tv.getTimestamp());
-		};
+		return ComputeFunctions.minus(fastLine, slowLine);
 	}
 	
 	/**
@@ -98,13 +79,7 @@ public class MACD {
 	 * @return
 	 */
 	public static TimeSeriesUnaryOperator dea(TimeSeriesUnaryOperator fastLine, TimeSeriesUnaryOperator slowLine, int m) {
-		final TimeSeriesUnaryOperator ema = EMA(m);
-		return tv -> {
-			TimeSeriesValue v = fastLine.apply(tv);
-			TimeSeriesValue v0 = slowLine.apply(tv);
-			v.setValue(v.getValue() - v0.getValue());
-			return ema.apply(v);
-		};
+		return diff(fastLine, slowLine).andThen(EMA(m));
 	}
 	
 	/**
@@ -114,12 +89,7 @@ public class MACD {
 	 * @return
 	 */
 	public static Function<BarField, TimeSeriesValue> diff(Function<BarField, TimeSeriesValue> fastLine, Function<BarField, TimeSeriesValue> slowLine) {
-		return bar -> {
-			TimeSeriesValue v = fastLine.apply(bar);
-			TimeSeriesValue v0 = slowLine.apply(bar);
-			double val = v.getValue() - v0.getValue();
-			return new TimeSeriesValue(val, bar.getActionTimestamp());
-		};
+		return ComputeFunctions.diff(fastLine, slowLine);
 	}
 	
 	/**
@@ -129,12 +99,6 @@ public class MACD {
 	 * @return
 	 */
 	public static Function<BarField, TimeSeriesValue> dea(Function<BarField, TimeSeriesValue> fastLine, Function<BarField, TimeSeriesValue> slowLine, int m) {
-		final TimeSeriesUnaryOperator ema = EMA(m);
-		return bar -> {
-			TimeSeriesValue v = fastLine.apply(bar);
-			TimeSeriesValue v0 = slowLine.apply(bar);
-			v.setValue(v.getValue() - v0.getValue());
-			return ema.apply(v);
-		};
+		return diff(fastLine, slowLine).andThen(EMA(m));
 	}
 }

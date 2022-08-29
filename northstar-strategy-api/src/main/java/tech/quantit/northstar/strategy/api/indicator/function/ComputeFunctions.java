@@ -1,9 +1,11 @@
 package tech.quantit.northstar.strategy.api.indicator.function;
 
 import java.util.Objects;
+import java.util.function.Function;
 
 import tech.quantit.northstar.common.model.TimeSeriesValue;
 import tech.quantit.northstar.strategy.api.indicator.TimeSeriesUnaryOperator;
+import xyz.redtorch.pb.CoreField.BarField;
 
 /**
  * 多函数计算
@@ -46,4 +48,18 @@ public interface ComputeFunctions {
 		};
 	}
 
+	/**
+	 * 两线距离
+	 * @param line1
+	 * @param line2
+	 * @return
+	 */
+	static Function<BarField, TimeSeriesValue> diff(Function<BarField, TimeSeriesValue> line1Fn, Function<BarField, TimeSeriesValue> line2Fn) {
+		return bar -> {
+			TimeSeriesValue v = line1Fn.apply(bar);
+			TimeSeriesValue v0 = line2Fn.apply(bar);
+			double val = v.getValue() - v0.getValue();
+			return new TimeSeriesValue(val, bar.getActionTimestamp());
+		};
+	}
 }
