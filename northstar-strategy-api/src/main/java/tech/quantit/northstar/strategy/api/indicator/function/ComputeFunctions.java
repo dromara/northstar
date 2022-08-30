@@ -1,7 +1,6 @@
 package tech.quantit.northstar.strategy.api.indicator.function;
 
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
 import com.google.common.util.concurrent.AtomicDouble;
@@ -72,8 +71,6 @@ public interface ComputeFunctions {
 	 * @return
 	 */
 	static TimeSeriesUnaryOperator display(AtomicDouble valueHolder) {
-		return tv -> {
-			return new TimeSeriesValue(valueHolder.get(), tv.getTimestamp());
-		};
+		return tv -> new TimeSeriesValue(valueHolder.get(), tv.getTimestamp());
 	}
 }

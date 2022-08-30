@@ -3,6 +3,8 @@ package tech.quantit.northstar.strategy.api.demo;
 import static tech.quantit.northstar.strategy.api.indicator.function.AverageFunctions.*;
 import static tech.quantit.northstar.strategy.api.indicator.function.StatsFunctions.*;
 
+import com.google.common.util.concurrent.AtomicDouble;
+
 import tech.quantit.northstar.common.model.DynamicParams;
 import tech.quantit.northstar.common.model.Setting;
 import tech.quantit.northstar.strategy.api.AbstractStrategy;
@@ -14,6 +16,8 @@ import tech.quantit.northstar.strategy.api.indicator.complex.KDJ;
 import tech.quantit.northstar.strategy.api.indicator.complex.LWR;
 import tech.quantit.northstar.strategy.api.indicator.complex.RSI;
 import tech.quantit.northstar.strategy.api.indicator.complex.WAVE;
+import tech.quantit.northstar.strategy.api.indicator.function.ComputeFunctions;
+import xyz.redtorch.pb.CoreField.BarField;
 
 /**
  * 本策略没有交易逻辑，仅用于做指标演示
@@ -28,6 +32,16 @@ public class IndicatorDemoStrategy extends AbstractStrategy	// 为了简化代�
 	
 	private InitParams params;	// 策略的参数配置信息
 	
+	private final AtomicDouble valueHolder = new AtomicDouble();
+	
+	@Override
+	public void onBar(BarField bar, boolean isModuleEnabled) {
+		super.onBar(bar, isModuleEnabled);
+	
+		// 当夜盘时值为0，日盘时值为1
+		valueHolder.set(bar.getActionDay().equals(bar.getTradingDay()) ? 1 : 0);
+	}
+
 	@Override
 	protected void initIndicators() {
 		//######## 以下写法仅用于监控台演示，因此没有赋值给类属性，同时为了简化参数也直接写死 ########//
@@ -64,6 +78,8 @@ public class IndicatorDemoStrategy extends AbstractStrategy	// 为了简化代�
 		// 复合指标
 		ctx.newIndicator("WMA_HHV", params.indicatorSymbol, WMA(72).andThen(HHV(72))); 	// 加权均价的最高价
 		ctx.newIndicator("WMA_LLV", params.indicatorSymbol, WMA(72).andThen(LLV(72))); 	// 加权均价的最高价
+		
+		ctx.newIndicator("VAL", params.indicatorSymbol, ComputeFunctions.display(valueHolder));
 	}
 	
 	@Override
