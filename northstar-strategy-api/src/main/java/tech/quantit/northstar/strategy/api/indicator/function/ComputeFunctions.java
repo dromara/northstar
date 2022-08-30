@@ -1,7 +1,10 @@
 package tech.quantit.northstar.strategy.api.indicator.function;
 
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
+
+import com.google.common.util.concurrent.AtomicDouble;
 
 import tech.quantit.northstar.common.model.TimeSeriesValue;
 import tech.quantit.northstar.strategy.api.indicator.TimeSeriesUnaryOperator;
@@ -60,6 +63,17 @@ public interface ComputeFunctions {
 			TimeSeriesValue v0 = line2Fn.apply(bar);
 			double val = v.getValue() - v0.getValue();
 			return new TimeSeriesValue(val, bar.getActionTimestamp());
+		};
+	}
+	
+	/**
+	 * 数值透视
+	 * @param valueHolder	
+	 * @return
+	 */
+	static TimeSeriesUnaryOperator display(AtomicDouble valueHolder) {
+		return tv -> {
+			return new TimeSeriesValue(valueHolder.get(), tv.getTimestamp());
 		};
 	}
 }
