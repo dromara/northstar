@@ -440,8 +440,8 @@ export default {
             .map((data) => BarField.deserializeBinary(data).toObject())
             .map(KLineUtils.createFromBar)
         })
-        this.updateChart()
         this.updateIndicator()
+        this.updateChart()
       })
     },
     loadDealRecord() {
