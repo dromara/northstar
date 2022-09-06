@@ -9,40 +9,27 @@ import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.ContractField;
 
 /**
- * 分钟K线合成器
+ * 日线合成器
  * @author KevinHuangwl
  *
  */
-public class BarMerger {
+public class DailyBarMerger extends BarMerger{
 	
-	private final int numOfMinPerBar;
-	
-	private int countBars;
-	
-	protected ContractField bindedContract;
-	
-	protected Consumer<BarField> callback;
-	
-	protected BarField.Builder barBuilder;
-	
-	public BarMerger(int numOfMinPerBar, ContractField bindedContract, Consumer<BarField> callback) {
-		this.numOfMinPerBar = numOfMinPerBar;
-		this.callback = callback;
-		this.bindedContract = bindedContract;
+	public DailyBarMerger(ContractField bindedContract, Consumer<BarField> callback) {
+		super(0, bindedContract, callback);
 	}
-	
+
+	@Override
 	public void updateBar(BarField bar) {
 		if(!StringUtils.equals(bar.getUnifiedSymbol(), bindedContract.getUnifiedSymbol())) {
 			return;
 		}
-		if(numOfMinPerBar == 1) {
-			callback.accept(bar);
-			return;
-		} else if(Objects.nonNull(barBuilder) && !StringUtils.equals(barBuilder.getTradingDay(), bar.getTradingDay())) {
+		
+		if(Objects.nonNull(barBuilder) && !StringUtils.equals(barBuilder.getTradingDay(), bar.getTradingDay())) {
 			doGenerate();
 		}
-		countBars++;
-		if(countBars == 1 || Objects.isNull(barBuilder)) {
+		
+		if(Objects.isNull(barBuilder)) {
 			barBuilder = bar.toBuilder();
 			return;
 		}
@@ -69,16 +56,6 @@ public class BarMerger {
 			.setNumTradesDelta(numOfTradeDelta + bar.getNumTradesDelta())
 			.setTurnover(bar.getTurnover())
 			.setTurnoverDelta(turnoverDelta + bar.getTurnoverDelta());
-		
-		if(countBars == numOfMinPerBar) {
-			doGenerate();
-		}
 	}
 	
-	protected void doGenerate() {
-		callback.accept(barBuilder.build());
-		barBuilder = null;
-		countBars = 0;
-	}
-
 }
