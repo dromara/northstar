@@ -110,7 +110,6 @@ public class TestFieldFactory {
 				.setActionDay(ldt.toLocalDate().format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
 				.setActionTime(ldt.toLocalTime().format(DateTimeConstant.T_FORMAT_FORMATTER))
 				.setActionTimestamp(ldt.toInstant(ZoneOffset.ofHours(8)).toEpochMilli())
-				.setTradingDay(ldt.toLocalDate().format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
 				.setOpenPrice(price + dif1)
 				.setHighPrice(price + Math.max(dif3, Math.max(dif1, dif2)))
 				.setLowPrice(price + Math.min(dif3, Math.min(dif1, dif2)))

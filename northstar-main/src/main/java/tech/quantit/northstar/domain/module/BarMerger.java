@@ -8,22 +8,17 @@ import org.apache.commons.lang3.StringUtils;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.ContractField;
 
-/**
- * 分钟K线合成器
- * @author KevinHuangwl
- *
- */
 public class BarMerger {
 	
 	private final int numOfMinPerBar;
 	
+	private Consumer<BarField> callback;
+	
+	private ContractField bindedContract;
+	
 	private int countBars;
 	
-	protected ContractField bindedContract;
-	
-	protected Consumer<BarField> callback;
-	
-	protected BarField.Builder barBuilder;
+	private BarField.Builder barBuilder;
 	
 	public BarMerger(int numOfMinPerBar, ContractField bindedContract, Consumer<BarField> callback) {
 		this.numOfMinPerBar = numOfMinPerBar;
@@ -75,7 +70,7 @@ public class BarMerger {
 		}
 	}
 	
-	protected void doGenerate() {
+	private void doGenerate() {
 		callback.accept(barBuilder.build());
 		barBuilder = null;
 		countBars = 0;
