@@ -25,7 +25,7 @@ public interface IMarketDataRepository {
 	void insert(BarField bar);
 	
 	/**
-	 * 加载历史行情K线数据
+	 * 加载历史行情分钟K线数据
 	 * @param gatewayId
 	 * @param unifiedSymbol
 	 * @param startDate
@@ -33,6 +33,17 @@ public interface IMarketDataRepository {
 	 * @return
 	 */
 	List<BarField> loadBars(String gatewayId, String unifiedSymbol, LocalDate startDate, LocalDate endDate);
+	
+	
+	/**
+	 * 加载历史行情日K线数据
+	 * @param gatewayId
+	 * @param unifiedSymbol
+	 * @param startDate
+	 * @param endDate
+	 * @return
+	 */
+	List<BarField> loadDailyBars(String gatewayId, String unifiedSymbol, LocalDate startDate, LocalDate endDate);
 	
 	/**
 	 * 查询某年的法定节假日（即不包含周末的非交易日）

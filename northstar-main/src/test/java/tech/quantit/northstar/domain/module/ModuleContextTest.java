@@ -22,6 +22,7 @@ import tech.quantit.northstar.common.constant.SignalOperation;
 import tech.quantit.northstar.common.exception.TradeException;
 import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
 import tech.quantit.northstar.common.model.TimeSeriesValue;
+import tech.quantit.northstar.data.IMarketDataRepository;
 import tech.quantit.northstar.gateway.api.TradeGateway;
 import tech.quantit.northstar.strategy.api.ClosingStrategy;
 import tech.quantit.northstar.strategy.api.IModule;
@@ -63,7 +64,7 @@ class ModuleContextTest {
 		when(closingStrategy.resolveOperation(any(SignalOperation.class), any(PositionField.class))).thenReturn(OffsetFlagEnum.OF_Open);
 		when(closingStrategy.resolveOperation(any(SignalOperation.class), eq(null))).thenReturn(OffsetFlagEnum.OF_Open);
 		
-		ctx = new ModuleContext("testModule", strategy, accStore, closingStrategy, 3, 100, mock(DealCollector.class), mock(Consumer.class), mock(Consumer.class));
+		ctx = new ModuleContext("testModule", strategy, accStore, closingStrategy, 3, 100, mock(DealCollector.class), mock(Consumer.class), mock(Consumer.class), mock(IMarketDataRepository.class));
 		ctx.setModule(module);
 	}
 

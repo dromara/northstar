@@ -2,6 +2,7 @@ package tech.quantit.northstar.domain.module;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -37,6 +38,7 @@ import tech.quantit.northstar.common.model.TimeSeriesValue;
 import tech.quantit.northstar.common.utils.ContractUtils;
 import tech.quantit.northstar.common.utils.FieldUtils;
 import tech.quantit.northstar.common.utils.OrderUtils;
+import tech.quantit.northstar.data.IMarketDataRepository;
 import tech.quantit.northstar.gateway.api.TradeGateway;
 import tech.quantit.northstar.strategy.api.ClosingStrategy;
 import tech.quantit.northstar.strategy.api.IDisposablePriceListener;
@@ -118,6 +120,8 @@ public class ModuleContext implements IModuleContext{
 	
 	private Consumer<ModuleDealRecord> onDealCallback;
 	
+	private IMarketDataRepository mdRepo;
+	
 	private final IndicatorFactory indicatorFactory = new IndicatorFactory();	// 基础周期指标工厂
 	
 	private final IndicatorFactory periodicIndicatorFactory = new IndicatorFactory();	// 额外周期指标工厂
@@ -147,11 +151,13 @@ public class ModuleContext implements IModuleContext{
 	private Logger mlog;
 	
 	public ModuleContext(String name, TradeStrategy tradeStrategy, IModuleAccountStore accStore, ClosingStrategy closingStrategy, int numOfMinsPerBar, 
-			int bufSize, DealCollector dealCollector, Consumer<ModuleRuntimeDescription> onRuntimeChangeCallback, Consumer<ModuleDealRecord> onDealCallback) {
+			int bufSize, DealCollector dealCollector, Consumer<ModuleRuntimeDescription> onRuntimeChangeCallback, Consumer<ModuleDealRecord> onDealCallback,
+			IMarketDataRepository mdRepo) {
 		this.moduleName = name;
 		this.mlog = logFactory.getLogger(name);
 		this.tradeStrategy = tradeStrategy;
 		this.accStore = accStore;
+		this.mdRepo = mdRepo;
 		this.closingStrategy = closingStrategy;
 		this.numOfMinsPerBar = numOfMinsPerBar;
 		this.dealCollector = dealCollector;
@@ -575,6 +581,11 @@ public class ModuleContext implements IModuleContext{
 			mlog.info(infoMessage, args);
 		}
 		return expression;
+	}
+
+	@Override
+	public List<BarField> dailyBars(ContractField contract, LocalDate startDate, LocalDate endDate) {
+		return mdRepo.loadDailyBars(contract.getGatewayId(), contract.getUnifiedSymbol(), startDate, endDate);
 	}
 
 }

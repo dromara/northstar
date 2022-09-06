@@ -16,6 +16,7 @@ import tech.quantit.northstar.common.model.ModuleDealRecord;
 import tech.quantit.northstar.common.model.ModuleDescription;
 import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
 import tech.quantit.northstar.data.IGatewayRepository;
+import tech.quantit.northstar.data.IMarketDataRepository;
 import tech.quantit.northstar.data.IModuleRepository;
 import tech.quantit.northstar.domain.gateway.ContractManager;
 import tech.quantit.northstar.domain.gateway.GatewayAndConnectionManager;
@@ -43,6 +44,8 @@ public class ModuleFactory {
 	
 	private IModuleRepository moduleRepo;
 	
+	private IMarketDataRepository mdRepo;
+	
 	private IGatewayRepository gatewayRepo;
 	
 	private GatewayAndConnectionManager gatewayConnMgr;
@@ -53,10 +56,11 @@ public class ModuleFactory {
 	
 	private Consumer<ModuleDealRecord> onDealChangeCallback = dealRecord -> moduleRepo.saveDealRecord(dealRecord);
 	
-	public ModuleFactory(ExternalJarClassLoader extJarLoader, IModuleRepository moduleRepo, IGatewayRepository gatewayRepo,
+	public ModuleFactory(ExternalJarClassLoader extJarLoader, IModuleRepository moduleRepo, IGatewayRepository gatewayRepo, IMarketDataRepository mdRepo,
 			GatewayAndConnectionManager gatewayConnMgr, ContractManager contractMgr) {
 		this.extJarLoader = extJarLoader;
 		this.moduleRepo = moduleRepo;
+		this.mdRepo = mdRepo;
 		this.gatewayRepo = gatewayRepo;
 		this.gatewayConnMgr = gatewayConnMgr;
 		this.contractMgr = contractMgr;
@@ -100,7 +104,7 @@ public class ModuleFactory {
 		}
 		int moduleBufDataSize = Math.max(100, moduleDescription.getModuleCacheDataSize());	// 至少缓存100个数据 
 		return new ModuleContext(moduleDescription.getModuleName(), strategy, accStore, closingStrategy, numOfMinPerBar,
-				moduleBufDataSize, dc, onRuntimeChangeCallback, onDealChangeCallback);
+				moduleBufDataSize, dc, onRuntimeChangeCallback, onDealChangeCallback, mdRepo);
 	}
 	
 	@SuppressWarnings("unchecked")

@@ -1,5 +1,7 @@
 package tech.quantit.northstar.strategy.api;
 
+import java.time.LocalDate;
+import java.util.List;
 import java.util.function.Function;
 
 import org.slf4j.Logger;
@@ -222,4 +224,13 @@ public interface IModuleStrategyContext {
 	 */
 	Indicator newIndicatorAtPeriod(int numOfMinPerPeriod, String indicatorName, String bindedUnifiedSymbol, int indicatorLength,
 			TimeSeriesUnaryOperator indicatorFunction);
+	
+	/**
+	 * 获取日线数据
+	 * @param contract
+	 * @param startDate
+	 * @param endDate
+	 * @return
+	 */
+	List<BarField> dailyBars(ContractField contract, LocalDate startDate, LocalDate endDate);
 }
