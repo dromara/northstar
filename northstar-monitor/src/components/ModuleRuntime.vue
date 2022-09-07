@@ -303,6 +303,7 @@ export default {
         setTimeout(() => {
           this.initChart()
           this.refresh()
+          this.loadIndicators()
         }, 100)
       }
     },
@@ -531,7 +532,19 @@ export default {
           this.chart.createShape(makeHoldingSegment(i), 'candle_pane')
         })
     },
+    loadIndicators() {
+      this.indicatorMap = JSON.parse(localStorage.getItem(`module_${this.module.moduleName}`)) || {}
+      Object.keys(this.indicatorMap).forEach((indicatorName) => {
+        this.indicator = indicatorName
+        this.paneId = this.indicatorMap[indicatorName]
+        this.addIndicator()
+      })
+    },
+    saveIndicators() {
+      localStorage.setItem(`module_${this.module.moduleName}`, JSON.stringify(this.indicatorMap))
+    },
     close() {
+      this.saveIndicators()
       clearTimeout(this.timer)
       Object.assign(this.$data, this.$options.data())
       dispose('module-k-line')
