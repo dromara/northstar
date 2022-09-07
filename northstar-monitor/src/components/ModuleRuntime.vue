@@ -477,7 +477,7 @@ export default {
     },
     updateChart() {
       if (this.unifiedSymbolOfChart) {
-        this.chart.removeTechnicalIndicator('candle_pane')
+        this.chart.clearData()
         this.chart.applyNewData(this.barDataMap[this.unifiedSymbolOfChart])
       }
     },
@@ -499,7 +499,7 @@ export default {
       delete this.indicatorMap[this.indicator]
       console.log('移除指标', this.indicator)
     },
-    updateIndicator() {
+    async updateIndicator() {
       Object.values(this.indicatorMap).forEach((pane) => this.chart.removeTechnicalIndicator(pane))
       Object.keys(this.indicatorMap).forEach((indicatorName) => {
         const indicatorData = this.moduleRuntime.indicatorMap[indicatorName]
