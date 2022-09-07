@@ -26,7 +26,7 @@ const colorOptions = [
   "#C5E6FB"   //天蓝
 
 ]
-exports.default = (name, indicatorData, colorIndex) => {
+exports.default = (name, colorIndex) => {
   return {
     name: 'VAL_' + name,
     shortName: '模组计算值',
@@ -34,13 +34,9 @@ exports.default = (name, indicatorData, colorIndex) => {
       { key: 'value', title: `${name}: `, type: 'line', color: colorOptions[colorIndex % colorOptions.length] }
     ],
     calcTechnicalIndicator: (kLineDataList) => {
-      const timeValueMap = indicatorData.values.reduce((obj, val) => {
-        obj[val.timestamp] = val.value
-        return obj
-      }, {})
       return kLineDataList.map((data) => {
         return {
-          value: timeValueMap[data.timestamp] 
+          value: data[name] 
         }
       })
     }

@@ -434,13 +434,31 @@ export default {
     loadRuntime() {
       moduleApi.getModuleRuntime(this.module.moduleName).then((result) => {
         this.moduleRuntime = result
+        const symbolIndicatorMap = {}
+        Object.keys(result.indicatorMap).forEach((indicatorName) => {
+          const timeValMap = {} // key=timestamp, value=indicatorVal
+          result.indicatorMap[indicatorName].values.forEach((obj) => {
+            timeValMap[obj.timestamp] = obj.value
+          })
+          if (!symbolIndicatorMap[result.indicatorMap[indicatorName].unifiedSymbol]) {
+            symbolIndicatorMap[result.indicatorMap[indicatorName].unifiedSymbol] = {}
+          }
+          symbolIndicatorMap[result.indicatorMap[indicatorName].unifiedSymbol][
+            indicatorName
+          ] = timeValMap
+        })
         this.barDataMap = {}
         Object.keys(result.barDataMap).forEach((key) => {
           this.barDataMap[key] = result.barDataMap[key]
             .map((data) => BarField.deserializeBinary(data).toObject())
             .map(KLineUtils.createFromBar)
+            .map((bar) => {
+              Object.keys(symbolIndicatorMap[key]).forEach((indicatorName) => {
+                bar[indicatorName] = symbolIndicatorMap[key][indicatorName][bar.timestamp]
+              })
+              return bar
+            })
         })
-        this.updateIndicator()
         this.updateChart()
       })
     },
@@ -499,21 +517,8 @@ export default {
       delete this.indicatorMap[this.indicator]
       console.log('移除指标', this.indicator)
     },
-    async updateIndicator() {
-      Object.values(this.indicatorMap).forEach((pane) => this.chart.removeTechnicalIndicator(pane))
-      Object.keys(this.indicatorMap).forEach((indicatorName) => {
-        const indicatorData = this.moduleRuntime.indicatorMap[indicatorName]
-        const colorIndex = Object.keys(this.moduleRuntime.indicatorMap).indexOf(indicatorName)
-        this.renderIndicator(
-          indicatorName,
-          this.indicatorMap[indicatorName],
-          indicatorData,
-          colorIndex
-        )
-      })
-    },
     renderIndicator(name, paneId, indicatorData, colorIndex) {
-      this.chart.addTechnicalIndicatorTemplate(simpleVal(name, indicatorData, colorIndex))
+      this.chart.addTechnicalIndicatorTemplate(simpleVal(name, colorIndex))
       this.chart.createTechnicalIndicator('VAL_' + name, true, {
         id: paneId
       })
