@@ -168,10 +168,15 @@ export default {
     async findAll() {
       const results = await moduleApi.getAllModules()
       const allReq = results.map(async (item) => {
-        item.runtime = await moduleApi.getModuleRuntime(item.moduleName)
-        return item
+        try {
+          item.runtime = await moduleApi.getModuleRuntime(item.moduleName)
+          return item
+        } catch (e) {
+          this.$message.error(`加载模组【${item.moduleName}】失败。原因：${e.message || '未知'}`)
+        }
       })
-      this.list = await Promise.all(allReq)
+      const moduleList = await Promise.all(allReq)
+      this.list = moduleList.filter((item) => !!item)
     },
     async toggle(index, row) {
       await moduleApi.toggleModuleState(row.moduleName)
