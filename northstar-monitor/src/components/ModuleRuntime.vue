@@ -507,6 +507,7 @@ export default {
       const colorIndex = Object.keys(this.moduleRuntime.indicatorMap).indexOf(this.indicator)
       this.indicatorMap[this.indicator] = this.paneId
       this.renderIndicator(this.indicator, this.paneId, indicatorData, colorIndex)
+      this.saveIndicators()
     },
     removeIndicator() {
       if (!this.indicator) return
@@ -516,6 +517,7 @@ export default {
         'VAL_' + this.indicator
       )
       delete this.indicatorMap[this.indicator]
+      this.saveIndicators()
       console.log('移除指标', this.indicator)
     },
     renderIndicator(name, paneId, indicatorData, colorIndex) {
