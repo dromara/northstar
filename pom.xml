@@ -34,7 +34,7 @@
 		<netty-socketio-version>1.7.19</netty-socketio-version>
 		<socketio-client-version>1.0.0</socketio-client-version>
 		<hessian-version>4.0.38</hessian-version>
-		<hutool-version>5.6.3</hutool-version>
+		<hutool-version>5.7.22</hutool-version>
 		<jackson-version>2.12.5</jackson-version>
 		<log4j-version>2.16.0</log4j-version>
 		<byte-buddy-version>1.10.20</byte-buddy-version>
@@ -230,6 +230,11 @@
 			<dependency>
 				<groupId>cn.hutool</groupId>
 				<artifactId>hutool-crypto</artifactId>
+				<version>${hutool-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>cn.hutool</groupId>
+				<artifactId>hutool-core</artifactId>
 				<version>${hutool-version}</version>
 			</dependency>
 			<!-- https://mvnrepository.com/artifact/net.bytebuddy/byte-buddy -->

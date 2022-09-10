@@ -45,7 +45,6 @@
 		    <artifactId>reactor-core</artifactId>
 		    <version>3.4.19</version>
 		</dependency>
-		
 	</dependencies>
 
 	<build>
