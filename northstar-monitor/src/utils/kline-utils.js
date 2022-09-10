@@ -133,7 +133,7 @@ export default (()=>{
         low: bar.lowprice,
         high: bar.highprice,
         close: bar.closeprice,
-        volume: bar.volumedelta,
+        volume: bar.volume,
         openInterestDelta: bar.openinterestdelta,
         openInterest: bar.openinterest,
         timestamp: bar.actiontimestamp
