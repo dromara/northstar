@@ -12,8 +12,12 @@ import tech.quantit.northstar.common.model.TimeSeriesValue;
  */
 @FunctionalInterface
 public interface TimeSeriesUnaryOperator extends UnaryOperator<TimeSeriesValue> {
-
+	
 	TimeSeriesValue apply(TimeSeriesValue t); 
+	
+	static TimeSeriesUnaryOperator identity() {
+		return tv -> tv;
+	};
 
 	default TimeSeriesUnaryOperator compose(TimeSeriesUnaryOperator before) {
 		Objects.requireNonNull(before);
