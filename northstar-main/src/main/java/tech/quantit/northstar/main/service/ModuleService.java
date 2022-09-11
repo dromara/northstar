@@ -270,7 +270,7 @@ public class ModuleService implements InitializingBean {
 				: LocalDate.now();
 		// 模组数据初始化
 		while(md.getDaysOfDataForPreparation() > 0
-				&& LocalDateTimeUtil.weekOfYear(now) >= LocalDateTimeUtil.weekOfYear(date)) {
+				&& toYearWeekVal(now) >= toYearWeekVal(date)) {
 			LocalDate start = utils.getFridayOfThisWeek(date.minusWeeks(1));
 			LocalDate end = utils.getFridayOfThisWeek(date);
 			for(ModuleAccountDescription mad : md.getModuleAccountSettingsDescription()) {
@@ -284,6 +284,11 @@ public class ModuleService implements InitializingBean {
 		}
 		module.setEnabled(mrd.isEnabled());
 		moduleMgr.addModule(module);
+	}
+	
+	// 把日期转换成年周，例如2022年第二周为202202
+	private int toYearWeekVal(LocalDate date) {
+		return Integer.valueOf(String.format("%d%d", date.getYear(), LocalDateTimeUtil.weekOfYear(date)));
 	}
 	
 	private void unloadModule(String moduleName) {
