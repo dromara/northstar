@@ -83,6 +83,20 @@ public class MACD {
 	}
 	
 	/**
+	 * 获取MACD红绿柱计算函数
+	 * @param diff
+	 * @param dea
+	 * @return
+	 */
+	public static TimeSeriesUnaryOperator post(TimeSeriesUnaryOperator diff, TimeSeriesUnaryOperator dea) {
+		return tv -> {
+			TimeSeriesValue difVal = diff.apply(tv);
+			TimeSeriesValue deaVal = dea.apply(tv);
+			return new TimeSeriesValue(2 * (difVal.getValue() - deaVal.getValue()), tv.getTimestamp());
+		};
+	}
+	
+	/**
 	 * 获取DIFF线计算函数
 	 * @param fastLine		快线计算函数 
 	 * @param slowLine		慢线计算函数
@@ -100,5 +114,19 @@ public class MACD {
 	 */
 	public static Function<BarField, TimeSeriesValue> dea(Function<BarField, TimeSeriesValue> fastLine, Function<BarField, TimeSeriesValue> slowLine, int m) {
 		return diff(fastLine, slowLine).andThen(EMA(m));
+	}
+	
+	/**
+	 * 获取MACD红绿柱计算函数
+	 * @param diff
+	 * @param dea
+	 * @return
+	 */
+	public static Function<BarField, TimeSeriesValue> post(Function<BarField, TimeSeriesValue> diff, Function<BarField, TimeSeriesValue> dea){
+		return bar -> {
+			TimeSeriesValue difVal = diff.apply(bar);
+			TimeSeriesValue deaVal = dea.apply(bar);
+			return new TimeSeriesValue(2 * (difVal.getValue() - deaVal.getValue()), bar.getActionTimestamp());
+		};
 	}
 }
