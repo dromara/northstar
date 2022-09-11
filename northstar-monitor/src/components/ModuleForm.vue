@@ -5,6 +5,8 @@
     :close-on-click-modal="false"
     :show-close="false"
     class="module-dialog"
+    v-loading="loading"
+    element-loading-background="rgba(0, 0, 0, 0.3)"
     width="540px"
   >
     <ContractFinder :visible.sync="contractFinderVisible" />
@@ -229,6 +231,7 @@ export default {
   data() {
     return {
       contractFinderVisible: false,
+      loading: false,
       accountOptions: [],
       tradeStrategyOptions: [],
       activeIndex: '1',
@@ -340,7 +343,19 @@ export default {
       await moduleApi.validateModule(this.form)
 
       const obj = Object.assign({}, this.form)
-      this.$emit(reset ? 'onReset' : 'onSave', obj)
+      this.loading = true
+      try{
+        if(this.isUpdateMode){
+          await moduleApi.updateModule(obj, reset)
+        } else {
+          await moduleApi.insertModule(obj)
+        }
+      } catch(e){
+        this.$message.error(e.message)
+      } finally {
+        this.loading = false
+      }
+      this.$emit('onSave')
       this.close()
     },
     close() {
