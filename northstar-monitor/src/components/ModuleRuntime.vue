@@ -537,6 +537,9 @@ export default {
     loadIndicators() {
       this.indicatorMap = JSON.parse(localStorage.getItem(`module_${this.module.moduleName}`)) || {}
       Object.keys(this.indicatorMap).forEach((indicatorName) => {
+        if(!this.moduleRuntime.indicatorMap[indicatorName]){
+          return
+        }
         this.indicator = indicatorName
         this.paneId = this.indicatorMap[indicatorName]
         this.addIndicator()
