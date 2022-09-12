@@ -99,7 +99,7 @@ public class Indicator {
 	 */
 	public TimeSeriesValue valueWithTime(int numOfStepBack) {
 		if(Math.abs(numOfStepBack) > size) {
-			throw new IllegalArgumentException("回溯步长超过记录长度");
+			throw new IllegalArgumentException("回溯步长[" + numOfStepBack + "]超过记录长度");
 		}
 		return refVals.get(-numOfStepBack);
 	}
