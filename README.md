@@ -51,7 +51,7 @@
 ![输入图片说明](https://images.gitee.com/uploads/images/2022/0721/205844_7985317e_1676852.png "总体架构图.png")
 
 ## 技术支持
-[https://northstar-doc-1gwbhfxd522a1168-1310148562.ap-shanghai.app.tcloudbase.com/guide/chat-group.html](https://northstar-doc-1gwbhfxd522a1168-1310148562.ap-shanghai.app.tcloudbase.com/guide/chat-group.html)
+[https://northstar-doc-1gwbhfxd522a1168-1310148562.ap-shanghai.app.tcloudbase.com/chat-group.html](https://northstar-doc-1gwbhfxd522a1168-1310148562.ap-shanghai.app.tcloudbase.com/chat-group.html)
 
 ## 注意事项
 - 请使用前先通读一遍 [【官网文档】](https://northstar-doc-1gwbhfxd522a1168-1310148562.ap-shanghai.app.tcloudbase.com/)  
