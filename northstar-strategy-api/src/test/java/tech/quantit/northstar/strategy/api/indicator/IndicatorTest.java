@@ -6,11 +6,19 @@ import org.junit.jupiter.api.Test;
 
 import tech.quantit.northstar.common.constant.IndicatorType;
 import tech.quantit.northstar.common.model.TimeSeriesValue;
+import tech.quantit.northstar.strategy.api.indicator.Indicator.Configuration;
 import tech.quantit.northstar.strategy.api.indicator.Indicator.ValueType;
+import test.common.TestFieldFactory;
 
 class IndicatorTest {
 	
-	Indicator indicator = new Indicator("rb2210", 5, ValueType.CLOSE, tv -> tv);
+	TestFieldFactory factory = new TestFieldFactory("testGateway");
+	
+	Indicator indicator = new Indicator(Configuration.builder()
+			.indicatorName("test")
+			.bindedContract(factory.makeContract("rb2210"))
+			.indicatorRefLength(5)
+			.build(), ValueType.CLOSE, tv -> tv);
 
 	@Test
 	void testValue() {
@@ -44,7 +52,7 @@ class IndicatorTest {
 
 	@Test
 	void testBindedUnifiedSymbol() {
-		assertThat(indicator.bindedUnifiedSymbol()).isEqualTo("rb2210");
+		assertThat(indicator.bindedUnifiedSymbol()).isEqualTo("rb2210@SHFE@FUTURES");
 	}
 
 	@Test

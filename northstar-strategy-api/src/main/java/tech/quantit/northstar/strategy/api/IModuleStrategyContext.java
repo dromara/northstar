@@ -1,7 +1,5 @@
 package tech.quantit.northstar.strategy.api;
 
-import java.time.LocalDate;
-import java.util.List;
 import java.util.function.Function;
 
 import org.slf4j.Logger;
@@ -125,112 +123,25 @@ public interface IModuleStrategyContext {
 	 */
 	Logger getLogger();
 	/**
-	 * 创建指标	
-	 * @param indicatorName			指标名称
-	 * @param bindedUnifiedSymbol	绑定合约
-	 * @param indicatorLength		指标缓存长度
-	 * @param indicatorFunction		计算函数 
+	 * 创建指标
+	 * @param configuration
+	 * @param valueType
+	 * @param indicatorFunction
 	 * @return
 	 */
-	Indicator newIndicator(String indicatorName, String bindedUnifiedSymbol, int indicatorLength,
-			Function<BarField, TimeSeriesValue> indicatorFunction);
-	/**
-	 * 创建指标（采用默认长度16与收盘价取值）
-	 * @param indicatorName			指标名称
-	 * @param bindedUnifiedSymbol	绑定合约
-	 * @param indicatorFunction		计算函数 
-	 * @return
-	 */
-	Indicator newIndicator(String indicatorName, String bindedUnifiedSymbol, Function<BarField, TimeSeriesValue> indicatorFunction);
+	Indicator newIndicator(Indicator.Configuration configuration, ValueType valueType, TimeSeriesUnaryOperator indicatorFunction);
 	/**
 	 * 创建指标
-	 * @param indicatorName			指标名称
-	 * @param bindedUnifiedSymbol	绑定合约
-	 * @param indicatorLength		指标缓存长度
-	 * @param valTypeOfBar			取值类型
-	 * @param indicatorFunction		计算函数
+	 * @param configuration
+	 * @param indicatorFunction
 	 * @return
 	 */
-	Indicator newIndicator(String indicatorName, String bindedUnifiedSymbol, int indicatorLength, ValueType valTypeOfBar,
-			TimeSeriesUnaryOperator indicatorFunction);
+	Indicator newIndicator(Indicator.Configuration configuration, TimeSeriesUnaryOperator indicatorFunction);
 	/**
-	 * 创建指标（采用默认长度16与收盘价取值）
-	 * @param indicatorName			指标名称
-	 * @param bindedUnifiedSymbol	绑定合约
-	 * @param indicatorFunction		计算函数
+	 * 创建指标
+	 * @param configuration
+	 * @param indicatorFunction
 	 * @return
 	 */
-	Indicator newIndicator(String indicatorName, String bindedUnifiedSymbol, TimeSeriesUnaryOperator indicatorFunction);
-	/**
-	 * 创建指标（采用默认收盘价取值）
-	 * @param indicatorName			指标名称
-	 * @param bindedUnifiedSymbol	绑定合约
-	 * @param indicatorLength		指标缓存长度
-	 * @param indicatorFunction		计算函数
-	 * @return
-	 */
-	Indicator newIndicator(String indicatorName, String bindedUnifiedSymbol, int indicatorLength, TimeSeriesUnaryOperator indicatorFunction);
-	/**
-	 *  创建不同周期的指标
-	 * @param numOfMinPerPeriod		周期分钟数
-	 * @param indicatorName			指标名称
-	 * @param bindedUnifiedSymbol	绑定合约
-	 * @param indicatorLength		指标缓存长度
-	 * @param indicatorFunction		计算函数
-	 * @return
-	 */
-	Indicator newIndicatorAtPeriod(int numOfMinPerPeriod, String indicatorName, String bindedUnifiedSymbol, int indicatorLength, 
-			Function<BarField, TimeSeriesValue> indicatorFunction);
-	/**
-	 * 创建不同周期的指标（采用默认长度16与收盘价取值）
-	 * @param numOfMinPerPeriod		周期分钟数
-	 * @param indicatorName			指标名称
-	 * @param bindedUnifiedSymbol	绑定合约
-	 * @param indicatorFunction		计算函数
-	 * @return
-	 */
-	Indicator newIndicatorAtPeriod(int numOfMinPerPeriod, String indicatorName, String bindedUnifiedSymbol, 
-			Function<BarField, TimeSeriesValue> indicatorFunction);
-	/**
-	 *  创建不同周期的指标
-	 * @param numOfMinPerPeriod		周期分钟数
-	 * @param indicatorName			指标名称
-	 * @param bindedUnifiedSymbol	绑定合约
-	 * @param indicatorLength		指标缓存长度
-	 * @param valTypeOfBar			取值类型
-	 * @param indicatorFunction		计算函数
-	 * @return
-	 */
-	Indicator newIndicatorAtPeriod(int numOfMinPerPeriod, String indicatorName, String bindedUnifiedSymbol, int indicatorLength, 
-			ValueType valTypeOfBar, TimeSeriesUnaryOperator indicatorFunction);
-	/**
-	 * 创建不同周期的指标（采用默认长度16与收盘价取值）
-	 * @param numOfMinPerPeriod		周期分钟数
-	 * @param indicatorName			指标名称
-	 * @param bindedUnifiedSymbol	绑定合约
-	 * @param indicatorFunction		计算函数
-	 * @return
-	 */
-	Indicator newIndicatorAtPeriod(int numOfMinPerPeriod, String indicatorName, String bindedUnifiedSymbol, 
-			TimeSeriesUnaryOperator indicatorFunction);
-	/**
-	 * 创建不同周期的指标（采用默认长度16与收盘价取值）
-	 * @param numOfMinPerPeriod		周期分钟数
-	 * @param indicatorName			指标名称
-	 * @param bindedUnifiedSymbol	绑定合约
-	 * @param indicatorLength		指标缓存长度
-	 * @param indicatorFunction		计算函数
-	 * @return
-	 */
-	Indicator newIndicatorAtPeriod(int numOfMinPerPeriod, String indicatorName, String bindedUnifiedSymbol, int indicatorLength,
-			TimeSeriesUnaryOperator indicatorFunction);
-	
-	/**
-	 * 获取日线数据
-	 * @param contract
-	 * @param startDate
-	 * @param endDate
-	 * @return
-	 */
-	List<BarField> dailyBars(ContractField contract, LocalDate startDate, LocalDate endDate);
+	Indicator newIndicator(Indicator.Configuration configuration, Function<BarField, TimeSeriesValue> indicatorFunction);
 }

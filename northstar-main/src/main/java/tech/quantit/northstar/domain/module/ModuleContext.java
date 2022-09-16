@@ -2,7 +2,6 @@ package tech.quantit.northstar.domain.module;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -23,6 +22,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.ILoggerFactory;
 import org.slf4j.Logger;
 
+import cn.hutool.core.lang.Assert;
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.constant.Constants;
 import tech.quantit.northstar.common.constant.ModuleState;
@@ -38,7 +38,6 @@ import tech.quantit.northstar.common.model.TimeSeriesValue;
 import tech.quantit.northstar.common.utils.ContractUtils;
 import tech.quantit.northstar.common.utils.FieldUtils;
 import tech.quantit.northstar.common.utils.OrderUtils;
-import tech.quantit.northstar.data.IMarketDataRepository;
 import tech.quantit.northstar.gateway.api.TradeGateway;
 import tech.quantit.northstar.strategy.api.ClosingStrategy;
 import tech.quantit.northstar.strategy.api.IDisposablePriceListener;
@@ -49,6 +48,7 @@ import tech.quantit.northstar.strategy.api.IndicatorFactory;
 import tech.quantit.northstar.strategy.api.TradeStrategy;
 import tech.quantit.northstar.strategy.api.constant.PriceType;
 import tech.quantit.northstar.strategy.api.indicator.Indicator;
+import tech.quantit.northstar.strategy.api.indicator.Indicator.Configuration;
 import tech.quantit.northstar.strategy.api.indicator.Indicator.ValueType;
 import tech.quantit.northstar.strategy.api.indicator.TimeSeriesUnaryOperator;
 import tech.quantit.northstar.strategy.api.log.ModuleLoggerFactory;
@@ -120,11 +120,7 @@ public class ModuleContext implements IModuleContext{
 	
 	private Consumer<ModuleDealRecord> onDealCallback;
 	
-	private IMarketDataRepository mdRepo;
-	
-	private final IndicatorFactory indicatorFactory = new IndicatorFactory();	// 基础周期指标工厂
-	
-	private final IndicatorFactory periodicIndicatorFactory = new IndicatorFactory();	// 额外周期指标工厂
+	private final IndicatorFactory indicatorFactory = new IndicatorFactory();
 	
 	private final AtomicInteger bufSize = new AtomicInteger(0);
 	
@@ -151,13 +147,11 @@ public class ModuleContext implements IModuleContext{
 	private Logger mlog;
 	
 	public ModuleContext(String name, TradeStrategy tradeStrategy, IModuleAccountStore accStore, ClosingStrategy closingStrategy, int numOfMinsPerBar, 
-			int bufSize, DealCollector dealCollector, Consumer<ModuleRuntimeDescription> onRuntimeChangeCallback, Consumer<ModuleDealRecord> onDealCallback,
-			IMarketDataRepository mdRepo) {
+			int bufSize, DealCollector dealCollector, Consumer<ModuleRuntimeDescription> onRuntimeChangeCallback, Consumer<ModuleDealRecord> onDealCallback) {
 		this.moduleName = name;
 		this.mlog = logFactory.getLogger(name);
 		this.tradeStrategy = tradeStrategy;
 		this.accStore = accStore;
-		this.mdRepo = mdRepo;
 		this.closingStrategy = closingStrategy;
 		this.numOfMinsPerBar = numOfMinsPerBar;
 		this.dealCollector = dealCollector;
@@ -212,15 +206,6 @@ public class ModuleContext implements IModuleContext{
 								.values(indicatorValBufQMap.get(e.getKey()).stream().toList())
 								.build())
 					);
-			periodicIndicatorFactory.getIndicatorMap().entrySet().stream()
-				.filter(e -> indicatorValBufQMap.containsKey(e.getKey()))
-				.forEach(e -> 
-					indicatorMap.put(e.getKey(), IndicatorData.builder()
-							.unifiedSymbol(e.getValue().bindedUnifiedSymbol())
-							.type(e.getValue().getType())
-							.values(indicatorValBufQMap.get(e.getKey()).stream().toList())
-							.build())
-				);
 			mad.setIndicatorMap(indicatorMap);
 		}
 		return mad;
@@ -407,8 +392,10 @@ public class ModuleContext implements IModuleContext{
 			return;
 		}
 		if(orderReqMap.containsKey(trade.getOriginOrderId())) {
-			mlog.info("成交：{}， 操作：{}{}， 价格：{}， 手数：{}", trade.getOriginOrderId(), FieldUtils.chn(trade.getDirection()), 
-					FieldUtils.chn(trade.getOffsetFlag()), trade.getPrice(), trade.getVolume());
+			if(mlog.isInfoEnabled()) {				
+				mlog.info("成交：{}， 操作：{}{}， 价格：{}， 手数：{}", trade.getOriginOrderId(), FieldUtils.chn(trade.getDirection()), 
+						FieldUtils.chn(trade.getOffsetFlag()), trade.getPrice(), trade.getVolume());
+			}
 			orderReqMap.remove(trade.getOriginOrderId());
 		}
 		accStore.onTrade(trade);
@@ -484,98 +471,6 @@ public class ModuleContext implements IModuleContext{
 	}
 
 	@Override
-	public Indicator newIndicator(String indicatorName, String bindedUnifiedSymbol, int indicatorLength,
-			ValueType valTypeOfBar, TimeSeriesUnaryOperator valueUpdateHandler) {
-		indicatorValBufQMap.put(indicatorName, new LinkedList<>());
-		return indicatorFactory.newIndicator(indicatorName, bindedUnifiedSymbol, indicatorLength, valTypeOfBar, valueUpdateHandler);
-	}
-
-	@Override
-	public Indicator newIndicator(String indicatorName, String bindedUnifiedSymbol,
-			TimeSeriesUnaryOperator valueUpdateHandler) {
-		return newIndicator(indicatorName, bindedUnifiedSymbol, 16, ValueType.CLOSE, valueUpdateHandler);
-	}
-	
-	@Override
-	public Indicator newIndicator(String indicatorName, String bindedUnifiedSymbol, int indicatorLength,
-			TimeSeriesUnaryOperator valueUpdateHandler) {
-		return newIndicator(indicatorName, bindedUnifiedSymbol, indicatorLength, ValueType.CLOSE, valueUpdateHandler);
-	}
-
-	@Override
-	public Indicator newIndicator(String indicatorName, String bindedUnifiedSymbol, int indicatorLength,
-			Function<BarField, TimeSeriesValue> valueUpdateHandler) {
-		indicatorValBufQMap.put(indicatorName, new LinkedList<>());
-		return indicatorFactory.newIndicator(indicatorName, bindedUnifiedSymbol, indicatorLength, valueUpdateHandler);
-	}
-
-	@Override
-	public Indicator newIndicator(String indicatorName, String bindedUnifiedSymbol,
-			Function<BarField, TimeSeriesValue> valueUpdateHandler) {
-		return newIndicator(indicatorName, bindedUnifiedSymbol, 16, valueUpdateHandler);
-	}
-	
-	@Override
-	public Indicator newIndicatorAtPeriod(int numOfMinPerPeriod, String indicatorName, String bindedUnifiedSymbol,
-			int indicatorLength, Function<BarField, TimeSeriesValue> indicatorFunction) {
-		if(numOfMinPerPeriod < 1) {
-			throw new IllegalStateException("非法指标周期，期望周期数大于0。实际: " + numOfMinPerPeriod);
-		}
-		final String indicatorNameWithPeriod = String.format("%s_%dM", indicatorName, numOfMinPerPeriod);
-		indicatorValBufQMap.put(indicatorNameWithPeriod, new LinkedList<>());
-		contractBarMergerSet.add(new BarMerger(numOfMinPerPeriod, contractMap.get(bindedUnifiedSymbol), bar -> {
-			Indicator indicator = periodicIndicatorFactory.getIndicatorMap().get(indicatorNameWithPeriod);
-			indicator.onBar(bar);
-			if(indicatorValBufQMap.get(indicatorNameWithPeriod).size() >= bufSize.intValue()) {
-				indicatorValBufQMap.get(indicatorNameWithPeriod).poll();
-			}
-			if(indicator.isReady()) {					
-				indicatorValBufQMap.get(indicatorNameWithPeriod).offer(indicator.valueWithTime(0));
-			}
-		}));
-		return periodicIndicatorFactory.newIndicator(indicatorNameWithPeriod, bindedUnifiedSymbol, indicatorLength, indicatorFunction);
-	}
-
-	@Override
-	public Indicator newIndicatorAtPeriod(int numOfMinPerPeriod, String indicatorName, String bindedUnifiedSymbol,
-			Function<BarField, TimeSeriesValue> indicatorFunction) {
-		return newIndicatorAtPeriod(numOfMinPerPeriod, indicatorName, bindedUnifiedSymbol, 16, indicatorFunction);
-	}
-
-	@Override
-	public Indicator newIndicatorAtPeriod(int numOfMinPerPeriod, String indicatorName, String bindedUnifiedSymbol,
-			int indicatorLength, ValueType valueTypeOfBar, TimeSeriesUnaryOperator indicatorFunction) {
-		if(numOfMinPerPeriod < 1) {
-			throw new IllegalStateException("非法指标周期，期望周期数大于0。实际: " + numOfMinPerPeriod);
-		}
-		final String indicatorNameWithPeriod = String.format("%s_%dM", indicatorName, numOfMinPerPeriod);
-		indicatorValBufQMap.put(indicatorNameWithPeriod, new LinkedList<>());
-		contractBarMergerSet.add(new BarMerger(numOfMinPerPeriod, contractMap.get(bindedUnifiedSymbol), bar -> {
-			Indicator indicator = periodicIndicatorFactory.getIndicatorMap().get(indicatorNameWithPeriod);
-			indicator.onBar(bar);
-			if(indicatorValBufQMap.get(indicatorNameWithPeriod).size() >= bufSize.intValue()) {
-				indicatorValBufQMap.get(indicatorNameWithPeriod).poll();
-			}
-			if(indicator.isReady()) {					
-				indicatorValBufQMap.get(indicatorNameWithPeriod).offer(indicator.valueWithTime(0));
-			}
-		}));
-		return periodicIndicatorFactory.newIndicator(indicatorNameWithPeriod, bindedUnifiedSymbol, indicatorLength, valueTypeOfBar, indicatorFunction);
-	}
-
-	@Override
-	public Indicator newIndicatorAtPeriod(int numOfBarPerPeriod, String indicatorName, String bindedUnifiedSymbol,
-			TimeSeriesUnaryOperator indicatorFunction) {
-		return newIndicatorAtPeriod(numOfBarPerPeriod, indicatorName, bindedUnifiedSymbol, 16, ValueType.CLOSE, indicatorFunction);
-	}
-
-	@Override
-	public Indicator newIndicatorAtPeriod(int numOfMinPerPeriod, String indicatorName, String bindedUnifiedSymbol,
-			int indicatorLength, TimeSeriesUnaryOperator indicatorFunction) {
-		return newIndicatorAtPeriod(numOfMinPerPeriod, indicatorName, bindedUnifiedSymbol, indicatorLength, ValueType.CLOSE, indicatorFunction);
-	}
-
-	@Override
 	public boolean explain(boolean expression, String infoMessage, Object... args) {
 		if(expression) {
 			mlog.info(infoMessage, args);
@@ -584,8 +479,24 @@ public class ModuleContext implements IModuleContext{
 	}
 
 	@Override
-	public List<BarField> dailyBars(ContractField contract, LocalDate startDate, LocalDate endDate) {
-		return mdRepo.loadDailyBars(contract.getGatewayId(), contract.getUnifiedSymbol(), startDate, endDate);
+	public Indicator newIndicator(Configuration configuration, ValueType valueType, TimeSeriesUnaryOperator indicatorFunction) {
+		Assert.isTrue(configuration.getNumOfUnits() > 0, "周期数必须大于0，当前为：" + configuration.getNumOfUnits());
+		Assert.isTrue(configuration.getIndicatorRefLength() > 0, "指标回溯长度必须大于0，当前为：" + configuration.getIndicatorRefLength());
+		indicatorValBufQMap.put(configuration.getIndicatorName(), new LinkedList<>());
+		return indicatorFactory.newIndicator(configuration, valueType, indicatorFunction);
+	}
+
+	@Override
+	public Indicator newIndicator(Configuration configuration, TimeSeriesUnaryOperator indicatorFunction) {
+		return newIndicator(configuration, ValueType.CLOSE, indicatorFunction);
+	}
+
+	@Override
+	public Indicator newIndicator(Configuration configuration, Function<BarField, TimeSeriesValue> indicatorFunction) {
+		Assert.isTrue(configuration.getNumOfUnits() > 0, "周期数必须大于0，当前为：" + configuration.getNumOfUnits());
+		Assert.isTrue(configuration.getIndicatorRefLength() > 0, "指标回溯长度必须大于0，当前为：" + configuration.getIndicatorRefLength());
+		indicatorValBufQMap.put(configuration.getIndicatorName(), new LinkedList<>());
+		return indicatorFactory.newIndicator(configuration, indicatorFunction);
 	}
 
 }

@@ -8,12 +8,16 @@ import java.util.function.Function;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import tech.quantit.northstar.common.constant.IndicatorType;
 import tech.quantit.northstar.common.model.TimeSeriesValue;
 import tech.quantit.northstar.strategy.api.utils.collection.RingArray;
 import xyz.redtorch.pb.CoreField.BarField;
+import xyz.redtorch.pb.CoreField.ContractField;
 
 /**
  * 行情指标
@@ -42,14 +46,14 @@ public class Indicator {
 	
 	private BarListener barListener;
 	
-	public Indicator(String unifiedSymbol, int size, ValueType valType, UnaryOperator<TimeSeriesValue> valueUpdateHandler) {
+	public Indicator(Indicator.Configuration config, ValueType valType, UnaryOperator<TimeSeriesValue> valueUpdateHandler) {
+		this.size = config.indicatorRefLength;
+		this.unifiedSymbol = config.bindedContract.getUnifiedSymbol();
+		this.valType = valType;
 		refVals = new RingArray<>(size);
 		for(int i=0; i<size; i++) {
-			refVals.update(new TimeSeriesValue(0, 0));
+			refVals.update(new TimeSeriesValue(0, 0, true));
 		}
-		this.unifiedSymbol = unifiedSymbol;
-		this.valType = valType;
-		this.size = size;
 		
 		Flux.push(sink -> 
 			barListener = sink::next
@@ -59,14 +63,14 @@ public class Indicator {
 		.subscribe(this::updateVal);
 	}
 	
-	public Indicator(String unifiedSymbol, int size, Function<BarField, TimeSeriesValue> valueUpdateHandler) {
+	public Indicator(Indicator.Configuration config, Function<BarField, TimeSeriesValue> valueUpdateHandler) {
+		this.size = config.indicatorRefLength;
+		this.unifiedSymbol = config.bindedContract.getUnifiedSymbol();
+		this.valType = ValueType.NOT_SET;
 		refVals = new RingArray<>(size);
 		for(int i=0; i<size; i++) {
-			refVals.update(new TimeSeriesValue(0, 0));
+			refVals.update(new TimeSeriesValue(0, 0, true));
 		}
-		this.unifiedSymbol = unifiedSymbol;
-		this.valType = ValueType.NOT_SET;
-		this.size = size;
 		
 		Flux.push(sink -> 
 			barListener = sink::next
@@ -260,9 +264,82 @@ public class Indicator {
 		OPEN_INTEREST;
 	}
 	
+	/**
+	 * 周期单位
+	 * @author KevinHuangwl
+	 *
+	 */
+	public enum PeriodUnit{
+		/**
+		 * 分钟
+		 */
+		MINUTE("m"),
+		/**
+		 * 小时
+		 */
+		HOUR("hr"),
+		/**
+		 * 天
+		 */
+		DAY("d"),
+		/**
+		 * 周
+		 */
+		WEEK("wk"),
+		/**
+		 * 月
+		 */
+		MONTH("M");
+		
+		String symbol;
+		private PeriodUnit(String unitSymbol) {
+			symbol = unitSymbol;
+		}
+		
+	}
+	
 	private interface BarListener {
 	
 		void onBar(Object obj);
 	}
 	
+	/**
+	 * 指标配置
+	 * @author KevinHuangwl
+	 *
+	 */
+	@Builder
+	@Getter
+	public static class Configuration {
+		/**
+		 * 显示名称
+		 */
+		@NonNull
+		private String indicatorName;
+		/**
+		 * 绑定合约
+		 */
+		@NonNull
+		private ContractField bindedContract;
+		/**
+		 * N个周期
+		 */
+		@Builder.Default
+		private int numOfUnits = 1;
+		/**
+		 * 周期单位
+		 */
+		@Builder.Default
+		private PeriodUnit period = PeriodUnit.MINUTE;
+		/**
+		 * 可回溯长度
+		 */
+		@Builder.Default
+		private int indicatorRefLength = 16;
+		
+		
+		public String getIndicatorName() {
+			return String.format("%s_%d%s", indicatorName, numOfUnits, period.symbol);
+		}
+	}
 }

@@ -112,20 +112,38 @@ public class IndicatorSampleStrategy extends AbstractStrategy	// 为了简化代
 	@Override
 	protected void initIndicators() {
 		// 简单指标的创建
-		this.fastLine = ctx.newIndicator("快线", params.indicatorSymbol, MA(params.fast));
-		this.slowLine = ctx.newIndicator("慢线", params.indicatorSymbol, MA(params.slow));
+		this.fastLine = ctx.newIndicator(Indicator.Configuration.builder()
+				.indicatorName("快线")
+				.bindedContract(ctx.getContract(params.indicatorSymbol))
+				.build(), MA(params.fast));
+		this.slowLine = ctx.newIndicator(Indicator.Configuration.builder()
+				.indicatorName("慢线")
+				.bindedContract(ctx.getContract(params.indicatorSymbol))
+				.build(), MA(params.slow));
 
 		// 复杂指标的创建；MACD的原始写法
-		this.macdDiff = ctx.newIndicator("MACD_DIFF", params.indicatorSymbol, minus(EMA(12), EMA(26)));
-		this.macdDea = ctx.newIndicator("MACD_DEA", params.indicatorSymbol, minus(EMA(12), EMA(26)).andThen(EMA(9)));
+		this.macdDiff = ctx.newIndicator(Indicator.Configuration.builder()
+				.indicatorName("MACD_DIF")
+				.bindedContract(ctx.getContract(params.indicatorSymbol))
+				.build(), minus(EMA(12), EMA(26)));
+		this.macdDea = ctx.newIndicator(Indicator.Configuration.builder()
+				.indicatorName("MACD_DEA")
+				.bindedContract(ctx.getContract(params.indicatorSymbol))
+				.build(), minus(EMA(12), EMA(26)).andThen(EMA(9)));
 
 		
 		//######## 以下写法仅用于监控台演示，因此没有赋值给类属性，同时为了简化参数也直接写死 ########//
 		
 		// MACD的另一种写法，对MACD的计算函数做进一步封装
 		MACD macd = MACD.of(12, 26, 9);
-		ctx.newIndicator("MACD_DIFF2", params.indicatorSymbol, macd.diff());
-		ctx.newIndicator("MACD_DEA2", params.indicatorSymbol, macd.dea());
+		ctx.newIndicator(Indicator.Configuration.builder()
+				.indicatorName("MACD_DIF2")
+				.bindedContract(ctx.getContract(params.indicatorSymbol))
+				.build(), macd.diff());
+		ctx.newIndicator(Indicator.Configuration.builder()
+				.indicatorName("MACD_DEA2")
+				.bindedContract(ctx.getContract(params.indicatorSymbol))
+				.build(), macd.dea());
 		
 	}
 

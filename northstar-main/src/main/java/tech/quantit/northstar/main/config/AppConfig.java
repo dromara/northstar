@@ -257,7 +257,7 @@ public class AppConfig implements WebMvcConfigurer {
 	@Bean
 	public ModuleFactory moduleFactory(@Autowired(required = false) ExternalJarClassLoader extJarLoader, IGatewayRepository gatewayRepo,
 			IModuleRepository moduleRepo, IMarketDataRepository mdRepo, GatewayAndConnectionManager gatewayConnMgr, ContractManager contractMgr) {
-		return new ModuleFactory(extJarLoader, moduleRepo, gatewayRepo, mdRepo, gatewayConnMgr, contractMgr);
+		return new ModuleFactory(extJarLoader, moduleRepo, gatewayRepo, gatewayConnMgr, contractMgr);
 	}
 
 	private static OkHttpClient getUnsafeOkHttpClient() {

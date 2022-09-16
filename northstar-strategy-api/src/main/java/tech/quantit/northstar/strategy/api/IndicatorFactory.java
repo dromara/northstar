@@ -19,23 +19,21 @@ public class IndicatorFactory {
 
 	private Map<String, Indicator> indicatorMap = new LinkedHashMap<>();
 	
-	public Indicator newIndicator(String indicatorName, String bindedUnifiedSymbol, int indicatorLength, ValueType valTypeOfBar,
-			TimeSeriesUnaryOperator valueUpdateHandler) {
-		if(indicatorMap.containsKey(indicatorName)) {
-			throw new IllegalArgumentException(String.format("[%s] 指标已存在，不能重名", indicatorName));
+	public Indicator newIndicator(Indicator.Configuration config, ValueType valTypeOfBar, TimeSeriesUnaryOperator valueUpdateHandler) {
+		if(indicatorMap.containsKey(config.getIndicatorName())) {
+			throw new IllegalArgumentException(String.format("[%s] 指标已存在，不能重名", config.getIndicatorName()));
 		}
-		Indicator indicator = new Indicator(bindedUnifiedSymbol, indicatorLength, valTypeOfBar, valueUpdateHandler);
-		indicatorMap.put(indicatorName, indicator);
+		Indicator indicator = new Indicator(config, valTypeOfBar, valueUpdateHandler);
+		indicatorMap.put(config.getIndicatorName(), indicator);
 		return indicator;
 	}
 	
-	public Indicator newIndicator(String indicatorName, String bindedUnifiedSymbol, int indicatorLength, 
-			Function<BarField, TimeSeriesValue> valueUpdateHandler) {
-		if(indicatorMap.containsKey(indicatorName)) {
-			throw new IllegalArgumentException(String.format("[%s] 指标已存在，不能重名", indicatorName));
+	public Indicator newIndicator(Indicator.Configuration config, Function<BarField, TimeSeriesValue> valueUpdateHandler) {
+		if(indicatorMap.containsKey(config.getIndicatorName())) {
+			throw new IllegalArgumentException(String.format("[%s] 指标已存在，不能重名", config.getIndicatorName()));
 		}
-		Indicator indicator = new Indicator(bindedUnifiedSymbol, indicatorLength, valueUpdateHandler);
-		indicatorMap.put(indicatorName, indicator);
+		Indicator indicator = new Indicator(config, valueUpdateHandler);
+		indicatorMap.put(config.getIndicatorName(), indicator);
 		return indicator;
 	}
 	

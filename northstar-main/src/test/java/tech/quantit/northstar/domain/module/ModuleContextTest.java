@@ -22,13 +22,14 @@ import tech.quantit.northstar.common.constant.SignalOperation;
 import tech.quantit.northstar.common.exception.TradeException;
 import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
 import tech.quantit.northstar.common.model.TimeSeriesValue;
-import tech.quantit.northstar.data.IMarketDataRepository;
 import tech.quantit.northstar.gateway.api.TradeGateway;
 import tech.quantit.northstar.strategy.api.ClosingStrategy;
 import tech.quantit.northstar.strategy.api.IModule;
 import tech.quantit.northstar.strategy.api.IModuleAccountStore;
 import tech.quantit.northstar.strategy.api.TradeStrategy;
 import tech.quantit.northstar.strategy.api.constant.PriceType;
+import tech.quantit.northstar.strategy.api.indicator.Indicator.Configuration;
+import tech.quantit.northstar.strategy.api.indicator.Indicator.PeriodUnit;
 import tech.quantit.northstar.strategy.api.indicator.TimeSeriesUnaryOperator;
 import test.common.TestFieldFactory;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
@@ -64,7 +65,7 @@ class ModuleContextTest {
 		when(closingStrategy.resolveOperation(any(SignalOperation.class), any(PositionField.class))).thenReturn(OffsetFlagEnum.OF_Open);
 		when(closingStrategy.resolveOperation(any(SignalOperation.class), eq(null))).thenReturn(OffsetFlagEnum.OF_Open);
 		
-		ctx = new ModuleContext("testModule", strategy, accStore, closingStrategy, 3, 100, mock(DealCollector.class), mock(Consumer.class), mock(Consumer.class), mock(IMarketDataRepository.class));
+		ctx = new ModuleContext("testModule", strategy, accStore, closingStrategy, 3, 100, mock(DealCollector.class), mock(Consumer.class), mock(Consumer.class));
 		ctx.setModule(module);
 	}
 
@@ -99,21 +100,17 @@ class ModuleContextTest {
 
 	@Test
 	void testNewIndicator() {
-		ctx.newIndicator("testIndicator", contract.getUnifiedSymbol(), new TimeSeriesUnaryOperator() {
-			@Override
-			public TimeSeriesValue apply(TimeSeriesValue t) {
-				return t;
-			}
-		});
+		ctx.newIndicator(Configuration.builder()
+				.indicatorName("testIndicator")
+				.bindedContract(contract)
+				.build(), TimeSeriesUnaryOperator.identity());
 		
-		ctx.newIndicatorAtPeriod(5, "testIndicator", contract.getUnifiedSymbol(), new TimeSeriesUnaryOperator() {
-			@Override
-			public TimeSeriesValue apply(TimeSeriesValue t) {
-				return t;
-			}
-		});
-		
-		ctx.newIndicator("testIndicator2", contract.getUnifiedSymbol(), new Function<>() {
+		ctx.newIndicator(Configuration.builder()
+				.indicatorName("testIndicator2")
+				.numOfUnits(10)
+				.period(PeriodUnit.DAY)
+				.bindedContract(contract)
+				.build(), new Function<>() {
 			
 			@Override
 			public TimeSeriesValue apply(BarField bar) {
@@ -121,19 +118,10 @@ class ModuleContextTest {
 			}
 		});
 		
-		ctx.newIndicatorAtPeriod(5, "testIndicator2", contract.getUnifiedSymbol(), new Function<>() {
-			
-			@Override
-			public TimeSeriesValue apply(BarField bar) {
-				return new TimeSeriesValue(bar.getClosePrice(), bar.getActionTimestamp());
-			}
-		});
 		
 		ModuleRuntimeDescription mrd = ctx.getRuntimeDescription(true);
-		assertThat(mrd.getIndicatorMap()).containsKey("testIndicator");
-		assertThat(mrd.getIndicatorMap()).containsKey("testIndicator2");
-		assertThat(mrd.getIndicatorMap()).containsKey("testIndicator_5M");
-		assertThat(mrd.getIndicatorMap()).containsKey("testIndicator2_5M");
+		assertThat(mrd.getIndicatorMap()).containsKey("testIndicator_1m");
+		assertThat(mrd.getIndicatorMap()).containsKey("testIndicator2_10d");
 	}
 	
 }
