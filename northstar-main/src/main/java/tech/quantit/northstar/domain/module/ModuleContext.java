@@ -53,6 +53,7 @@ import tech.quantit.northstar.strategy.api.indicator.Indicator.Configuration;
 import tech.quantit.northstar.strategy.api.indicator.Indicator.ValueType;
 import tech.quantit.northstar.strategy.api.indicator.TimeSeriesUnaryOperator;
 import tech.quantit.northstar.strategy.api.log.ModuleLoggerFactory;
+import tech.quantit.northstar.strategy.api.utils.bar.BarMerger;
 import tech.quantit.northstar.strategy.api.utils.trade.DisposablePriceListener;
 import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;

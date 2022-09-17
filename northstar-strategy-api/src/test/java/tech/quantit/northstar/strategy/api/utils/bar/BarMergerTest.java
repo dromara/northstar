@@ -1,4 +1,4 @@
-package tech.quantit.northstar.domain.module;
+package tech.quantit.northstar.strategy.api.utils.bar;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.offset;
@@ -57,10 +57,10 @@ class BarMergerTest {
 		assertThat(results.get(9).getClosePrice()).isCloseTo(samples.get(19).getClosePrice(), offset(1e-6));
 		assertThat(results.get(9).getHighPrice()).isCloseTo(Math.max(samples.get(18).getHighPrice(), samples.get(19).getHighPrice()) , offset(1e-6));
 		assertThat(results.get(9).getLowPrice()).isCloseTo(Math.min(samples.get(18).getLowPrice(), samples.get(19).getLowPrice()), offset(1e-6));
-		assertThat(results.get(9).getVolume()).isEqualTo(samples.get(19).getVolume());
-		assertThat(results.get(9).getNumTrades()).isEqualTo(samples.get(19).getNumTrades());
+		assertThat(results.get(9).getVolume()).isEqualTo(samples.get(18).getVolume() + samples.get(19).getVolume());
+		assertThat(results.get(9).getNumTrades()).isEqualTo(samples.get(18).getNumTrades() + samples.get(19).getNumTrades());
 		assertThat(results.get(9).getOpenInterest()).isCloseTo(samples.get(19).getOpenInterest(), offset(1e-6));
-		assertThat(results.get(9).getTurnover()).isCloseTo(samples.get(19).getTurnover(), offset(1e-6));
+		assertThat(results.get(9).getTurnover()).isCloseTo(samples.get(18).getTurnover() + samples.get(19).getTurnover(), offset(1e-6));
 		assertThat(results.get(9).getVolumeDelta()).isEqualTo(samples.get(18).getVolumeDelta() + samples.get(19).getVolumeDelta());
 		assertThat(results.get(9).getNumTradesDelta()).isEqualTo(samples.get(18).getNumTradesDelta() + samples.get(19).getNumTradesDelta());
 		assertThat(results.get(9).getOpenInterestDelta()).isCloseTo(samples.get(18).getOpenInterestDelta() + samples.get(19).getOpenInterestDelta(), offset(1e-6));
