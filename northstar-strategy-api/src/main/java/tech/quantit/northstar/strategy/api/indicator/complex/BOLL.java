@@ -53,7 +53,7 @@ public final class BOLL {
             TimeSeriesValue v = ma.apply(tv);
             TimeSeriesValue v0 = std.apply(tv);
             double val = v.getValue() + x * v0.getValue();
-            return new TimeSeriesValue(val, tv.getTimestamp());
+            return new TimeSeriesValue(val, tv.getTimestamp(), tv.isUnsettled());
         };
     }
 
@@ -71,7 +71,7 @@ public final class BOLL {
             TimeSeriesValue v = ma.apply(tv);
             TimeSeriesValue v0 = std.apply(tv);
             double val = v.getValue() - x * v0.getValue();
-            return new TimeSeriesValue(val, tv.getTimestamp());
+            return new TimeSeriesValue(val, tv.getTimestamp(), tv.isUnsettled());
         };
     }
 

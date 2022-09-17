@@ -27,10 +27,12 @@ public class RSI {
 		final AtomicDouble lastVal = new AtomicDouble();
 		return tv -> {
 			double val = lastVal.get() == 0 ? 0 : tv.getValue() - lastVal.get();
-			lastVal.set(tv.getValue());
-			TimeSeriesValue v1 = sma1.apply(new TimeSeriesValue(Math.max(val, 0), tv.getTimestamp()));
-			TimeSeriesValue v2 = sma2.apply(new TimeSeriesValue(Math.abs(val), tv.getTimestamp()));
-			return new TimeSeriesValue(v1.getValue() / v2.getValue() * 100, tv.getTimestamp());
+			if(!tv.isUnsettled()) {				
+				lastVal.set(tv.getValue());
+			}
+			TimeSeriesValue v1 = sma1.apply(new TimeSeriesValue(Math.max(val, 0), tv.getTimestamp(), tv.isUnsettled()));
+			TimeSeriesValue v2 = sma2.apply(new TimeSeriesValue(Math.abs(val), tv.getTimestamp(), tv.isUnsettled()));
+			return new TimeSeriesValue(v1.getValue() / v2.getValue() * 100, tv.getTimestamp(), tv.isUnsettled());
 		};
 	}
 	

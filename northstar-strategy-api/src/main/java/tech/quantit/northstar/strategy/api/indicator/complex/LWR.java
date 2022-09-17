@@ -57,10 +57,10 @@ public class LWR {
 		final TimeSeriesUnaryOperator hhv = HHV(this.n);
 		final TimeSeriesUnaryOperator sma = SMA(this.m1, 1);
 		return bar -> {
-			TimeSeriesValue lowV = llv.apply(new TimeSeriesValue(bar.getBar().getLowPrice(), bar.getBar().getActionTimestamp()));
-			TimeSeriesValue highV = hhv.apply(new TimeSeriesValue(bar.getBar().getHighPrice(), bar.getBar().getActionTimestamp()));
+			TimeSeriesValue lowV = llv.apply(new TimeSeriesValue(bar.getBar().getLowPrice(), bar.getBar().getActionTimestamp(), bar.isUnsettled()));
+			TimeSeriesValue highV = hhv.apply(new TimeSeriesValue(bar.getBar().getHighPrice(), bar.getBar().getActionTimestamp(), bar.isUnsettled()));
 			double rsv = (bar.getBar().getClosePrice() - highV.getValue()) / (highV.getValue() - lowV.getValue()) * 100;
-			return sma.apply(new TimeSeriesValue(rsv, bar.getBar().getActionTimestamp()));
+			return sma.apply(new TimeSeriesValue(rsv, bar.getBar().getActionTimestamp(), bar.isUnsettled()));
 		};
 	}
 	

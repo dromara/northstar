@@ -69,8 +69,7 @@ public class IndicatorDemoStrategy extends AbstractStrategy	// 为了简化代�
 		ctx.newIndicator(Configuration.builder().indicatorName("RSI1").bindedContract(c).build(), RSI.line(7));
 		ctx.newIndicator(Configuration.builder().indicatorName("RSI2").bindedContract(c).build(), RSI.line(14));
 		
-		ctx.newIndicator(Configuration.builder().indicatorName("ATR1").bindedContract(c).build(), ATR.ofBar(20));
-		ctx.newIndicator(Configuration.builder().indicatorName("ATR2").bindedContract(c).build(), ATR.ofDay(3));
+		ctx.newIndicator(Configuration.builder().indicatorName("ATR").bindedContract(c).build(), ATR.of(20));
 		
 		ctx.newIndicator(Configuration.builder().indicatorName("SMA").bindedContract(c).build(), SMA(20, 2));
 		ctx.newIndicator(Configuration.builder().indicatorName("SETTLE").bindedContract(c).build(), SETTLE());

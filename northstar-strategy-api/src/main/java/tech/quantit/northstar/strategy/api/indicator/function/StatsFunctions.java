@@ -26,11 +26,18 @@ public interface StatsFunctions {
 		final AtomicInteger cursor = new AtomicInteger();
 		final StandardDeviation std = new StandardDeviation();
 		return tv ->{
-			long timestamp = tv.getTimestamp();
+			if(tv.isUnsettled()) {
+				double[] valuesCopy = new double[n];
+				System.arraycopy(values, 0, valuesCopy, 0, n);
+				valuesCopy[cursor.get()] = tv.getValue();
+				double stdVal = std.evaluate(values);
+				return new TimeSeriesValue(stdVal, tv.getTimestamp(), tv.isUnsettled());
+			}
+			
 			values[cursor.get()] = tv.getValue();
 			cursor.set(cursor.incrementAndGet() % n);
 			double stdVal = std.evaluate(values);
-			return new TimeSeriesValue(stdVal, timestamp);
+			return new TimeSeriesValue(stdVal, tv.getTimestamp());
 		};
 	}
 	
@@ -43,6 +50,13 @@ public interface StatsFunctions {
 		final double[] values = new double[n];
 		final AtomicInteger cursor = new AtomicInteger();
 		return tv -> {
+			if(tv.isUnsettled()) {
+				double[] valuesCopy = new double[n];
+				System.arraycopy(values, 0, valuesCopy, 0, n);
+				valuesCopy[cursor.get()] = tv.getValue();
+				return new TimeSeriesValue(StatUtils.min(valuesCopy), tv.getTimestamp(), tv.isUnsettled());
+			}
+			
 			values[cursor.get()] = tv.getValue();
 			cursor.set(cursor.incrementAndGet() % n);
 			return new TimeSeriesValue(StatUtils.min(values), tv.getTimestamp());
@@ -58,6 +72,13 @@ public interface StatsFunctions {
 		final double[] values = new double[n];
 		final AtomicInteger cursor = new AtomicInteger();
 		return tv -> {
+			if(tv.isUnsettled()) {
+				double[] valuesCopy = new double[n];
+				System.arraycopy(values, 0, valuesCopy, 0, n);
+				valuesCopy[cursor.get()] = tv.getValue();
+				return new TimeSeriesValue(StatUtils.max(valuesCopy), tv.getTimestamp(), tv.isUnsettled());
+			}
+			
 			values[cursor.get()] = tv.getValue();
 			cursor.set(cursor.incrementAndGet() % n);
 			return new TimeSeriesValue(StatUtils.max(values), tv.getTimestamp());

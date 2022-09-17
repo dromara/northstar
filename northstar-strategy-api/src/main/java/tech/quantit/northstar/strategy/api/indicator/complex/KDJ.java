@@ -61,7 +61,7 @@ public class KDJ {
 			TimeSeriesValue lowV = llv.apply(new TimeSeriesValue(bar.getBar().getLowPrice(), bar.getBar().getActionTimestamp()));
 			TimeSeriesValue highV = hhv.apply(new TimeSeriesValue(bar.getBar().getHighPrice(), bar.getBar().getActionTimestamp()));
 			double rsv = (bar.getBar().getClosePrice() - lowV.getValue()) / (highV.getValue() - lowV.getValue()) * 100;
-			return sma.apply(new TimeSeriesValue(rsv, bar.getBar().getActionTimestamp()));
+			return sma.apply(new TimeSeriesValue(rsv, bar.getBar().getActionTimestamp(), bar.isUnsettled()));
 		};
 	}
 
@@ -72,7 +72,7 @@ public class KDJ {
 	 */
 	public Function<BarWrapper, TimeSeriesValue> d() {
 		final Function<BarWrapper, TimeSeriesValue> k = k();
-		final TimeSeriesUnaryOperator sma = SMA(this.m2, 1);
+		final TimeSeriesUnaryOperator sma = SMA(m2, 1);
 		return bar -> sma.apply(k.apply(bar));
 	}
 
@@ -88,7 +88,7 @@ public class KDJ {
 			TimeSeriesValue v = k.apply(bar);
 			TimeSeriesValue v0 = d.apply(bar);
 			double j = 3 * v.getValue() - 2 * v0.getValue();
-			return new TimeSeriesValue(j, v.getTimestamp());
+			return new TimeSeriesValue(j, v.getTimestamp(), bar.isUnsettled());
 		};
 	}
 }

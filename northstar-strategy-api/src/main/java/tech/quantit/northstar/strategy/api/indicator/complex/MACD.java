@@ -92,7 +92,7 @@ public class MACD {
 		return tv -> {
 			TimeSeriesValue difVal = diff.apply(tv);
 			TimeSeriesValue deaVal = dea.apply(tv);
-			return new TimeSeriesValue(2 * (difVal.getValue() - deaVal.getValue()), tv.getTimestamp());
+			return new TimeSeriesValue(2 * (difVal.getValue() - deaVal.getValue()), tv.getTimestamp(), tv.isUnsettled());
 		};
 	}
 	
@@ -126,7 +126,7 @@ public class MACD {
 		return bar -> {
 			TimeSeriesValue difVal = diff.apply(bar);
 			TimeSeriesValue deaVal = dea.apply(bar);
-			return new TimeSeriesValue(2 * (difVal.getValue() - deaVal.getValue()), bar.getBar().getActionTimestamp());
+			return new TimeSeriesValue(2 * (difVal.getValue() - deaVal.getValue()), bar.getBar().getActionTimestamp(), bar.isUnsettled());
 		};
 	}
 }

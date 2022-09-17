@@ -52,21 +52,25 @@ public class SETTLE {
 							.flatMap(Collection::stream)
 							.count();
 					double std = Math.sqrt(sumSquare / (numOfItem - 1));
-					result = new TimeSeriesValue(std, bar.getBar().getActionTimestamp());
+					result = new TimeSeriesValue(std, bar.getBar().getActionTimestamp(), bar.isUnsettled());
 				}
-				// 当统计天数已满，需要移除旧数据
-				if(tradeDateQ.size() == n) {					
-					String date = tradeDateQ.pollFirst();
-					dateValueMap.remove(date);
+				if(!bar.isUnsettled()) {					
+					// 当统计天数已满，需要移除旧数据
+					if(tradeDateQ.size() == n) {					
+						String date = tradeDateQ.pollFirst();
+						dateValueMap.remove(date);
+					}
+					tradeDateQ.offerLast(bar.getBar().getTradingDay());
+					dateValueMap.put(bar.getBar().getTradingDay(), new LinkedList<>());
 				}
-				tradeDateQ.offerLast(bar.getBar().getTradingDay());
-				dateValueMap.put(bar.getBar().getTradingDay(), new LinkedList<>());
 			}
 			
 			TimeSeriesValue settleVal = settleLine.apply(bar);
 			double weightedClose = (bar.getBar().getClosePrice() * 2 + bar.getBar().getHighPrice() + bar.getBar().getClosePrice()) / 4; 	// 加权重心价
 			double variance = Math.pow(weightedClose - settleVal.getValue(), 2);
-			dateValueMap.get(bar.getBar().getTradingDay()).add(variance);
+			if(!bar.isUnsettled()) {				
+				dateValueMap.get(bar.getBar().getTradingDay()).add(variance);
+			}
 			return result;
 		};
 	}
