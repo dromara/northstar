@@ -29,17 +29,29 @@ public interface AverageFunctions {
 	 */
 	static Function<BarWrapper, TimeSeriesValue> SETTLE(){
 		final AtomicDouble weightPrice = new AtomicDouble();
-		final AtomicInteger countOfBarsToday = new AtomicInteger();
 		final AtomicLong sumVol = new AtomicLong();
 		final String[] tradeDay = {""};
 		return bar -> {
+			if(bar.isUnsettled()) {
+				long sumVolTmp = 0;
+				double wPrice = 0;
+				if(StringUtils.equals(tradeDay[0], bar.getBar().getTradingDay())) {
+					sumVolTmp = sumVol.get();
+					wPrice = weightPrice.get();
+				}
+				
+				long sumVolTemp = sumVolTmp + bar.getBar().getVolume(); 
+				double wp = (bar.getBar().getHighPrice() + bar.getBar().getLowPrice() + bar.getBar().getClosePrice() * 2) / 4;
+				double factor = 1.0 * bar.getBar().getVolume() / sumVolTemp;
+				double value = factor * wp + (1 - factor) * wPrice;
+				return new TimeSeriesValue(value, bar.getBar().getActionTimestamp(), bar.isUnsettled());
+			}
+			
 			if(!StringUtils.equals(tradeDay[0], bar.getBar().getTradingDay())) {
 				tradeDay[0] = bar.getBar().getTradingDay();
 				sumVol.set(0);
 				weightPrice.set(0);
-				countOfBarsToday.set(0);
 			}
-			countOfBarsToday.incrementAndGet();
 			sumVol.addAndGet(bar.getBar().getVolume());
 			double wp = (bar.getBar().getHighPrice() + bar.getBar().getLowPrice() + bar.getBar().getClosePrice() * 2) / 4;
 			double factor = 1.0 * bar.getBar().getVolume() / sumVol.get();
@@ -60,6 +72,23 @@ public interface AverageFunctions {
 		final AtomicInteger index = new AtomicInteger(0);
 		return bar -> {
 			int i = index.get();
+			if(bar.isUnsettled()) {
+				long total = LongStream.of(volArr).sum() - volArr[i] + bar.getBar().getVolume();
+				double wPrice = (bar.getBar().getClosePrice() * 2 + bar.getBar().getHighPrice() + bar.getBar().getLowPrice()) / 4;
+				if(total == 0) {
+					return new TimeSeriesValue(0, 0);
+				}
+				double weightedSum = 0;
+				for(int j=0; j<n; j++) {
+					if(j == i) {
+						weightedSum += wPrice * bar.getBar().getVolume() / total;
+					} else {						
+						weightedSum += priceArr[j] * volArr[j] / total;
+					}
+				}
+				return new TimeSeriesValue(weightedSum, bar.getBar().getActionTimestamp(), bar.isUnsettled());
+			}
+			
 			volArr[i] = bar.getBar().getVolume();
 			priceArr[i] = (bar.getBar().getClosePrice() * 2 + bar.getBar().getHighPrice() + bar.getBar().getLowPrice()) / 4;	// 利用K线重心为计算依据
 			index.set(++i % n);
@@ -85,15 +114,19 @@ public interface AverageFunctions {
 		final AtomicBoolean hasInitVal = new AtomicBoolean();
 		final double factor = 2D / (n + 1);
 		return tv -> {
+			if(tv.isUnsettled()) {
+				double val = hasInitVal.get() ? factor * tv.getValue() + (1 - factor) * ema.get() : tv.getValue();
+				return new TimeSeriesValue(val, tv.getTimestamp(), tv.isUnsettled());
+			}
+			
 			double val = tv.getValue();
-			long timestamp = tv.getTimestamp();
 			if(hasInitVal.get()) {
 				ema.set(factor * val + (1 - factor) * ema.get());
 			} else {
 				ema.set(val);
 				hasInitVal.set(true);
 			}
-			return new TimeSeriesValue(ema.get(), timestamp);
+			return new TimeSeriesValue(ema.get(), tv.getTimestamp());
 		};
 	}
 
@@ -108,15 +141,19 @@ public interface AverageFunctions {
 		final AtomicBoolean hasInitVal = new AtomicBoolean();
 		final double factor = (double) m / n;
 		return tv -> {
+			if(tv.isUnsettled()) {
+				double val = hasInitVal.get() ? factor * tv.getValue() + (1 - factor) * sma.get() : tv.getValue();
+				return new TimeSeriesValue(val, tv.getTimestamp(), tv.isUnsettled());
+			}
+			
 			double val = tv.getValue();
-			long timestamp = tv.getTimestamp();
 			if(hasInitVal.get()) {
 				sma.set(factor * val + (1 - factor) * sma.get());
 			} else {
 				sma.set(val);
 				hasInitVal.set(true);
 			}
-			return new TimeSeriesValue(sma.get(), timestamp);
+			return new TimeSeriesValue(sma.get(), tv.getTimestamp());
 		};
 	}
 
@@ -130,14 +167,19 @@ public interface AverageFunctions {
 		final AtomicInteger cursor = new AtomicInteger();
 		final AtomicDouble sumOfValues = new AtomicDouble();
 		return tv -> {
-			long timestamp = tv.getTimestamp();
+			int i = cursor.get();
+			if(tv.isUnsettled()) {
+				double sumVal = sumOfValues.get() - values[i] + tv.getValue();
+				return new TimeSeriesValue(sumVal/n, tv.getTimestamp(), tv.isUnsettled());
+			}
+			
 			double val = tv.getValue();
-			double oldVal = values[cursor.get()];
-			values[cursor.get()] = val;
+			double oldVal = values[i];
+			values[i] = val;
 			cursor.set(cursor.incrementAndGet() % n);
 			sumOfValues.addAndGet(val - oldVal);
 			val = sumOfValues.get() / n;
-			return new TimeSeriesValue(val, timestamp);
+			return new TimeSeriesValue(val, tv.getTimestamp());
 		};
 	}
 

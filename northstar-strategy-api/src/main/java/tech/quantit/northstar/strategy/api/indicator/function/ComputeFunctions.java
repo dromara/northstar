@@ -28,7 +28,7 @@ public interface ComputeFunctions {
 		return tv -> {
 			TimeSeriesValue v = fn1.apply(tv);
 			TimeSeriesValue v0 = fn2.apply(tv);
-			return new TimeSeriesValue(v.getValue() + v0.getValue(), tv.getTimestamp(), tv.isSettled());
+			return new TimeSeriesValue(v.getValue() + v0.getValue(), tv.getTimestamp(), tv.isUnsettled());
 		};
 	}
 
@@ -44,7 +44,7 @@ public interface ComputeFunctions {
 		return tv -> {
 			TimeSeriesValue v = fn1.apply(tv);
 			TimeSeriesValue v0 = fn2.apply(tv);
-			return new TimeSeriesValue(v.getValue() - v0.getValue(), tv.getTimestamp(), tv.isSettled());
+			return new TimeSeriesValue(v.getValue() - v0.getValue(), tv.getTimestamp(), tv.isUnsettled());
 		};
 	}
 
@@ -58,8 +58,7 @@ public interface ComputeFunctions {
 		return bar -> {
 			TimeSeriesValue v = line1Fn.apply(bar);
 			TimeSeriesValue v0 = line2Fn.apply(bar);
-			double val = v.getValue() - v0.getValue();
-			return new TimeSeriesValue(val, bar.getBar().getActionTimestamp());
+			return new TimeSeriesValue(v.getValue() - v0.getValue(), bar.getBar().getActionTimestamp(), bar.isUnsettled());
 		};
 	}
 	
@@ -69,6 +68,6 @@ public interface ComputeFunctions {
 	 * @return
 	 */
 	static TimeSeriesUnaryOperator display(AtomicDouble valueHolder) {
-		return tv -> new TimeSeriesValue(valueHolder.get(), tv.getTimestamp());
+		return tv -> new TimeSeriesValue(valueHolder.get(), tv.getTimestamp(), tv.isUnsettled());
 	}
 }

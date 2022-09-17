@@ -11,7 +11,7 @@ public class TimeSeriesValue implements Comparable<TimeSeriesValue> {
 	
 	private long timestamp;
 	
-	private boolean isSettled = true;
+	private boolean unsettled;
 	
 	/**
 	 * @param value			时序值
@@ -25,12 +25,12 @@ public class TimeSeriesValue implements Comparable<TimeSeriesValue> {
 	/**
 	 * @param value			时序值
 	 * @param timestamp		值对应的时间
-	 * @param isSettled		是否为确定值（不会再发生变化）
+	 * @param unsettled		是否为未确定值（会发生变化）
 	 */
-	public TimeSeriesValue(double value, long timestamp, boolean isSettled) {
+	public TimeSeriesValue(double value, long timestamp, boolean unsettled) {
 		this.value = value;
 		this.timestamp = timestamp;
-		this.isSettled = isSettled;
+		this.unsettled = unsettled;
 	}
 	
 	@Override

@@ -9,7 +9,7 @@ import xyz.redtorch.pb.CoreField.BarField;
 public class BarWrapper implements Comparable<BarWrapper>{
 
 	private BarField bar;
-	private boolean isSettled = true;
+	private boolean unsettled;
 	
 	public BarWrapper(BarField bar) {
 		this.bar = bar;
@@ -17,11 +17,11 @@ public class BarWrapper implements Comparable<BarWrapper>{
 	
 	/**
 	 * @param bar			K线数据
-	 * @param isSettled		是否为确定值（不会再发生变化）
+	 * @param unsettled		是否为未确定值（会发生变化）
 	 */
-	public BarWrapper(BarField bar, boolean isSettled) {
+	public BarWrapper(BarField bar, boolean unsettled) {
 		this.bar = bar;
-		this.isSettled = isSettled;
+		this.unsettled = unsettled;
 	}
 
 	@Override
