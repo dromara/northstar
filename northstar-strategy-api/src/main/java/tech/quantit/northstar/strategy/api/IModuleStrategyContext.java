@@ -6,13 +6,13 @@ import org.slf4j.Logger;
 
 import tech.quantit.northstar.common.constant.ModuleState;
 import tech.quantit.northstar.common.constant.SignalOperation;
+import tech.quantit.northstar.common.model.BarWrapper;
 import tech.quantit.northstar.common.model.TimeSeriesValue;
 import tech.quantit.northstar.strategy.api.constant.PriceType;
 import tech.quantit.northstar.strategy.api.indicator.Indicator;
 import tech.quantit.northstar.strategy.api.indicator.Indicator.ValueType;
 import tech.quantit.northstar.strategy.api.indicator.TimeSeriesUnaryOperator;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
-import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.ContractField;
 
 public interface IModuleStrategyContext {
@@ -143,5 +143,5 @@ public interface IModuleStrategyContext {
 	 * @param indicatorFunction
 	 * @return
 	 */
-	Indicator newIndicator(Indicator.Configuration configuration, Function<BarField, TimeSeriesValue> indicatorFunction);
+	Indicator newIndicator(Indicator.Configuration configuration, Function<BarWrapper, TimeSeriesValue> indicatorFunction);
 }

@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Test;
 
 import tech.quantit.northstar.common.constant.SignalOperation;
 import tech.quantit.northstar.common.exception.TradeException;
+import tech.quantit.northstar.common.model.BarWrapper;
 import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
 import tech.quantit.northstar.common.model.TimeSeriesValue;
 import tech.quantit.northstar.gateway.api.TradeGateway;
@@ -33,7 +34,6 @@ import tech.quantit.northstar.strategy.api.indicator.Indicator.PeriodUnit;
 import tech.quantit.northstar.strategy.api.indicator.TimeSeriesUnaryOperator;
 import test.common.TestFieldFactory;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
-import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.GatewaySettingField;
 import xyz.redtorch.pb.CoreField.PositionField;
@@ -113,8 +113,8 @@ class ModuleContextTest {
 				.build(), new Function<>() {
 			
 			@Override
-			public TimeSeriesValue apply(BarField bar) {
-				return new TimeSeriesValue(bar.getClosePrice(), bar.getActionTimestamp());
+			public TimeSeriesValue apply(BarWrapper bar) {
+				return new TimeSeriesValue(bar.getBar().getClosePrice(), bar.getBar().getActionTimestamp());
 			}
 		});
 		

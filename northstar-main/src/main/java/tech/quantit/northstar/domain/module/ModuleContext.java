@@ -29,6 +29,7 @@ import tech.quantit.northstar.common.constant.ModuleState;
 import tech.quantit.northstar.common.constant.SignalOperation;
 import tech.quantit.northstar.common.exception.NoSuchElementException;
 import tech.quantit.northstar.common.exception.TradeException;
+import tech.quantit.northstar.common.model.BarWrapper;
 import tech.quantit.northstar.common.model.IndicatorData;
 import tech.quantit.northstar.common.model.ModuleAccountRuntimeDescription;
 import tech.quantit.northstar.common.model.ModuleDealRecord;
@@ -492,7 +493,7 @@ public class ModuleContext implements IModuleContext{
 	}
 
 	@Override
-	public Indicator newIndicator(Configuration configuration, Function<BarField, TimeSeriesValue> indicatorFunction) {
+	public Indicator newIndicator(Configuration configuration, Function<BarWrapper, TimeSeriesValue> indicatorFunction) {
 		Assert.isTrue(configuration.getNumOfUnits() > 0, "周期数必须大于0，当前为：" + configuration.getNumOfUnits());
 		Assert.isTrue(configuration.getIndicatorRefLength() > 0, "指标回溯长度必须大于0，当前为：" + configuration.getIndicatorRefLength());
 		indicatorValBufQMap.put(configuration.getIndicatorName(), new LinkedList<>());

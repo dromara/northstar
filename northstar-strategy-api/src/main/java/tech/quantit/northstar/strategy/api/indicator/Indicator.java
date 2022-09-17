@@ -14,6 +14,7 @@ import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import tech.quantit.northstar.common.constant.IndicatorType;
+import tech.quantit.northstar.common.model.BarWrapper;
 import tech.quantit.northstar.common.model.TimeSeriesValue;
 import tech.quantit.northstar.strategy.api.utils.collection.RingArray;
 import xyz.redtorch.pb.CoreField.BarField;
@@ -63,7 +64,7 @@ public class Indicator {
 		.subscribe(this::updateVal);
 	}
 	
-	public Indicator(Indicator.Configuration config, Function<BarField, TimeSeriesValue> valueUpdateHandler) {
+	public Indicator(Indicator.Configuration config, Function<BarWrapper, TimeSeriesValue> valueUpdateHandler) {
 		this.size = config.indicatorRefLength;
 		this.unifiedSymbol = config.bindedContract.getUnifiedSymbol();
 		this.valType = ValueType.NOT_SET;
@@ -75,7 +76,7 @@ public class Indicator {
 		Flux.push(sink -> 
 			barListener = sink::next
 		)
-		.map(BarField.class::cast)
+		.map(BarWrapper.class::cast)
 		.map(valueUpdateHandler)
 		.subscribe(this::updateVal);
 	}

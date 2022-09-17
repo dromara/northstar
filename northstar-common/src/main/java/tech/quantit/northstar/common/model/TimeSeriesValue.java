@@ -1,8 +1,10 @@
 package tech.quantit.northstar.common.model;
 
-import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 
-@Data
+@EqualsAndHashCode
+@Getter
 public class TimeSeriesValue implements Comparable<TimeSeriesValue> {
 	
 	private double value;
@@ -33,6 +35,7 @@ public class TimeSeriesValue implements Comparable<TimeSeriesValue> {
 	
 	@Override
 	public int compareTo(TimeSeriesValue o) {
-		return value < o.value ? -1 : 1;
+		return timestamp < o.timestamp ? -1 : 1;
 	}
+	
 }

@@ -28,8 +28,7 @@ public interface ComputeFunctions {
 		return tv -> {
 			TimeSeriesValue v = fn1.apply(tv);
 			TimeSeriesValue v0 = fn2.apply(tv);
-			v.setValue(v.getValue() + v0.getValue());
-			return v;
+			return new TimeSeriesValue(v.getValue() + v0.getValue(), tv.getTimestamp(), tv.isSettled());
 		};
 	}
 
@@ -45,8 +44,7 @@ public interface ComputeFunctions {
 		return tv -> {
 			TimeSeriesValue v = fn1.apply(tv);
 			TimeSeriesValue v0 = fn2.apply(tv);
-			v.setValue(v.getValue() - v0.getValue());
-			return v;
+			return new TimeSeriesValue(v.getValue() - v0.getValue(), tv.getTimestamp(), tv.isSettled());
 		};
 	}
 

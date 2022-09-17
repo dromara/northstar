@@ -4,11 +4,11 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+import tech.quantit.northstar.common.model.BarWrapper;
 import tech.quantit.northstar.common.model.TimeSeriesValue;
 import tech.quantit.northstar.strategy.api.indicator.Indicator;
-import tech.quantit.northstar.strategy.api.indicator.TimeSeriesUnaryOperator;
 import tech.quantit.northstar.strategy.api.indicator.Indicator.ValueType;
-import xyz.redtorch.pb.CoreField.BarField;
+import tech.quantit.northstar.strategy.api.indicator.TimeSeriesUnaryOperator;
 
 /**
  * 指标工厂
@@ -28,7 +28,7 @@ public class IndicatorFactory {
 		return indicator;
 	}
 	
-	public Indicator newIndicator(Indicator.Configuration config, Function<BarField, TimeSeriesValue> valueUpdateHandler) {
+	public Indicator newIndicator(Indicator.Configuration config, Function<BarWrapper, TimeSeriesValue> valueUpdateHandler) {
 		if(indicatorMap.containsKey(config.getIndicatorName())) {
 			throw new IllegalArgumentException(String.format("[%s] 指标已存在，不能重名", config.getIndicatorName()));
 		}
