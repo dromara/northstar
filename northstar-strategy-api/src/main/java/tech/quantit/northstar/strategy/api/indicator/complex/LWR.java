@@ -1,14 +1,14 @@
 package tech.quantit.northstar.strategy.api.indicator.complex;
 
+import static tech.quantit.northstar.strategy.api.indicator.function.AverageFunctions.SMA;
 import static tech.quantit.northstar.strategy.api.indicator.function.StatsFunctions.HHV;
 import static tech.quantit.northstar.strategy.api.indicator.function.StatsFunctions.LLV;
-import static tech.quantit.northstar.strategy.api.indicator.function.AverageFunctions.SMA;
 
 import java.util.function.Function;
 
+import tech.quantit.northstar.common.model.BarWrapper;
 import tech.quantit.northstar.common.model.TimeSeriesValue;
 import tech.quantit.northstar.strategy.api.indicator.TimeSeriesUnaryOperator;
-import xyz.redtorch.pb.CoreField.BarField;
 
 /**
  * 威廉指标
@@ -52,15 +52,15 @@ public class LWR {
 	 * FAST:SMA(RSV,M1,1);//RSV的移动平均
 	 * @return
 	 */
-	public Function<BarField, TimeSeriesValue> fast() {
+	public Function<BarWrapper, TimeSeriesValue> fast() {
 		final TimeSeriesUnaryOperator llv = LLV(this.n);
 		final TimeSeriesUnaryOperator hhv = HHV(this.n);
 		final TimeSeriesUnaryOperator sma = SMA(this.m1, 1);
 		return bar -> {
-			TimeSeriesValue lowV = llv.apply(new TimeSeriesValue(bar.getLowPrice(), bar.getActionTimestamp()));
-			TimeSeriesValue highV = hhv.apply(new TimeSeriesValue(bar.getHighPrice(), bar.getActionTimestamp()));
-			double rsv = (bar.getClosePrice() - highV.getValue()) / (highV.getValue() - lowV.getValue()) * 100;
-			return sma.apply(new TimeSeriesValue(rsv, bar.getActionTimestamp()));
+			TimeSeriesValue lowV = llv.apply(new TimeSeriesValue(bar.getBar().getLowPrice(), bar.getBar().getActionTimestamp()));
+			TimeSeriesValue highV = hhv.apply(new TimeSeriesValue(bar.getBar().getHighPrice(), bar.getBar().getActionTimestamp()));
+			double rsv = (bar.getBar().getClosePrice() - highV.getValue()) / (highV.getValue() - lowV.getValue()) * 100;
+			return sma.apply(new TimeSeriesValue(rsv, bar.getBar().getActionTimestamp()));
 		};
 	}
 	
@@ -71,8 +71,8 @@ public class LWR {
 	 * SLOW:SMA(FAST,M2,1);//LWR1的移动平均
 	 * @return
 	 */
-	public Function<BarField, TimeSeriesValue> slow() {
-		final Function<BarField, TimeSeriesValue> fast = fast();
+	public Function<BarWrapper, TimeSeriesValue> slow() {
+		final Function<BarWrapper, TimeSeriesValue> fast = fast();
 		final TimeSeriesUnaryOperator sma = SMA(this.m2, 1);
 		return bar -> {
 			TimeSeriesValue fastV = fast.apply(bar);

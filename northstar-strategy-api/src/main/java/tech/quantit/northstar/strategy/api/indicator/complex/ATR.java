@@ -10,9 +10,9 @@ import org.apache.commons.math3.stat.StatUtils;
 
 import com.google.common.util.concurrent.AtomicDouble;
 
+import tech.quantit.northstar.common.model.BarWrapper;
 import tech.quantit.northstar.common.model.TimeSeriesValue;
 import tech.quantit.northstar.strategy.api.indicator.TimeSeriesUnaryOperator;
-import xyz.redtorch.pb.CoreField.BarField;
 
 /**
  * TR : MAX(MAX((HIGH-LOW),ABS(REF(CLOSE,1)-HIGH)),ABS(REF(CLOSE,1)-LOW));//求最高价减去最低价，一个周期前的收盘价减去最高价的绝对值，一个周期前的收盘价减去最低价的绝对值，这三个值中的最大值
@@ -28,16 +28,16 @@ public class ATR {
 	 * @param n		统计N个K线周期
 	 * @return
 	 */
-	public static Function<BarField, TimeSeriesValue> ofBar(int n){
+	public static Function<BarWrapper, TimeSeriesValue> ofBar(int n){
 		final AtomicDouble lastClose = new AtomicDouble();
 		final TimeSeriesUnaryOperator ma = MA(n);
 		return bar -> {
-			double range = bar.getHighPrice() - bar.getLowPrice();
+			double range = bar.getBar().getHighPrice() - bar.getBar().getLowPrice();
 			double maxVal = lastClose.get() == 0 
 					? range
-					: Math.max(range, Math.max(Math.abs(lastClose.get() - bar.getHighPrice()), Math.abs(lastClose.get() - bar.getLowPrice())));
-			lastClose.set(bar.getClosePrice());
-			return ma.apply(new TimeSeriesValue(maxVal, bar.getActionTimestamp()));
+					: Math.max(range, Math.max(Math.abs(lastClose.get() - bar.getBar().getHighPrice()), Math.abs(lastClose.get() - bar.getBar().getLowPrice())));
+			lastClose.set(bar.getBar().getClosePrice());
+			return ma.apply(new TimeSeriesValue(maxVal, bar.getBar().getActionTimestamp()));
 		};
 	}
 	
@@ -47,7 +47,7 @@ public class ATR {
 	 * @param n		统计N天的K线周期
 	 * @return
 	 */
-	public static Function<BarField, TimeSeriesValue> ofDay(int n){
+	public static Function<BarWrapper, TimeSeriesValue> ofDay(int n){
 		final double[] ranges = new double[n];
 		final AtomicInteger cursor = new AtomicInteger();
 		final AtomicDouble highest = new AtomicDouble(Double.MIN_VALUE);
@@ -56,20 +56,20 @@ public class ATR {
 		final AtomicDouble lastClose = new AtomicDouble();
 		final String[] date = {""};
 		return bar -> {
-			if(!StringUtils.equals(bar.getTradingDay(), date[0])) {
+			if(!StringUtils.equals(bar.getBar().getTradingDay(), date[0])) {
 				double preClose = closeYd.get();
 				double trueRange = Math.max(highest.get() - lowest.get(), Math.max(Math.abs(preClose - highest.get()), Math.abs(preClose - lowest.get())));
-				date[0] = bar.getTradingDay();
+				date[0] = bar.getBar().getTradingDay();
 				cursor.set(cursor.incrementAndGet() % n);
 				ranges[cursor.get()] = trueRange;
 				closeYd.set(lastClose.get());
-				highest.set(bar.getOpenPrice());
-				lowest.set(bar.getOpenPrice());
+				highest.set(bar.getBar().getOpenPrice());
+				lowest.set(bar.getBar().getOpenPrice());
 			}
-			highest.set(Math.max(highest.get(), bar.getHighPrice()));
-			lowest.set(Math.min(lowest.get(), bar.getLowPrice()));
-			lastClose.set(bar.getClosePrice());
-			return new TimeSeriesValue(StatUtils.mean(ranges), bar.getActionTimestamp());
+			highest.set(Math.max(highest.get(), bar.getBar().getHighPrice()));
+			lowest.set(Math.min(lowest.get(), bar.getBar().getLowPrice()));
+			lastClose.set(bar.getBar().getClosePrice());
+			return new TimeSeriesValue(StatUtils.mean(ranges), bar.getBar().getActionTimestamp());
 		};
 	}
 }

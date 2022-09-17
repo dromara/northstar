@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
@@ -16,6 +17,10 @@ import reactor.core.publisher.Flux;
 import tech.quantit.northstar.common.constant.IndicatorType;
 import tech.quantit.northstar.common.model.BarWrapper;
 import tech.quantit.northstar.common.model.TimeSeriesValue;
+import tech.quantit.northstar.strategy.api.utils.bar.BarMerger;
+import tech.quantit.northstar.strategy.api.utils.bar.DailyBarMerger;
+import tech.quantit.northstar.strategy.api.utils.bar.MonthlyBarMerger;
+import tech.quantit.northstar.strategy.api.utils.bar.WeeklyBarMerger;
 import tech.quantit.northstar.strategy.api.utils.collection.RingArray;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.ContractField;
@@ -47,10 +52,24 @@ public class Indicator {
 	
 	private BarListener barListener;
 	
+	private BarMerger barMerger;
+	
 	public Indicator(Indicator.Configuration config, ValueType valType, UnaryOperator<TimeSeriesValue> valueUpdateHandler) {
 		this.size = config.indicatorRefLength;
 		this.unifiedSymbol = config.bindedContract.getUnifiedSymbol();
 		this.valType = valType;
+		this.barMerger = config.createBarMerger(bar -> {
+			double barVal = switch(valType) {
+			case HIGH -> bar.getHighPrice();
+			case CLOSE -> bar.getClosePrice();
+			case LOW -> bar.getLowPrice();
+			case OPEN -> bar.getOpenPrice();
+			case OPEN_INTEREST -> bar.getOpenInterestDelta();
+			case VOL -> bar.getVolumeDelta();
+			default -> throw new IllegalArgumentException("Unexpected value: " + valType);
+			};
+			barListener.onBar(new TimeSeriesValue(barVal, bar.getActionTimestamp()));
+		});
 		refVals = new RingArray<>(size);
 		for(int i=0; i<size; i++) {
 			refVals.update(new TimeSeriesValue(0, 0, true));
@@ -68,6 +87,7 @@ public class Indicator {
 		this.size = config.indicatorRefLength;
 		this.unifiedSymbol = config.bindedContract.getUnifiedSymbol();
 		this.valType = ValueType.NOT_SET;
+		this.barMerger = config.createBarMerger(bar -> barListener.onBar(new BarWrapper(bar)));
 		refVals = new RingArray<>(size);
 		for(int i=0; i<size; i++) {
 			refVals.update(new TimeSeriesValue(0, 0, true));
@@ -132,7 +152,7 @@ public class Indicator {
 		}
 		log.trace("{} -> {}", this, bar);
 		if(valType == ValueType.NOT_SET) {
-			barListener.onBar(bar);
+			barListener.onBar(new BarWrapper(bar, false));
 			return;
 		}
 		
@@ -145,7 +165,8 @@ public class Indicator {
 		case VOL -> bar.getVolumeDelta();
 		default -> throw new IllegalArgumentException("Unexpected value: " + valType);
 		};
-		barListener.onBar(new TimeSeriesValue(barVal, bar.getActionTimestamp()));
+		barListener.onBar(new TimeSeriesValue(barVal, bar.getActionTimestamp(), false));
+		barMerger.updateBar(bar);
 	}
 	
 	/**
@@ -341,6 +362,17 @@ public class Indicator {
 		
 		public String getIndicatorName() {
 			return String.format("%s_%d%s", indicatorName, numOfUnits, period.symbol);
+		}
+		
+		public BarMerger createBarMerger(Consumer<BarField> callback) {
+			return switch(period) {
+			case MINUTE -> new BarMerger(numOfUnits, bindedContract, callback);
+			case HOUR -> new BarMerger(numOfUnits * 60, bindedContract, callback);
+			case DAY -> new DailyBarMerger(numOfUnits, bindedContract, callback);
+			case WEEK -> new WeeklyBarMerger(numOfUnits, bindedContract, callback);
+			case MONTH -> new MonthlyBarMerger(numOfUnits, bindedContract, callback);
+			default -> throw new IllegalArgumentException("Unexpected value: " + period);
+			};
 		}
 	}
 }

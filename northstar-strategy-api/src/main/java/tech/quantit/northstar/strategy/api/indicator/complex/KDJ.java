@@ -1,14 +1,14 @@
 package tech.quantit.northstar.strategy.api.indicator.complex;
 
-import tech.quantit.northstar.common.model.TimeSeriesValue;
-import tech.quantit.northstar.strategy.api.indicator.TimeSeriesUnaryOperator;
-import xyz.redtorch.pb.CoreField.BarField;
-
-import java.util.function.Function;
-
 import static tech.quantit.northstar.strategy.api.indicator.function.AverageFunctions.SMA;
 import static tech.quantit.northstar.strategy.api.indicator.function.StatsFunctions.HHV;
 import static tech.quantit.northstar.strategy.api.indicator.function.StatsFunctions.LLV;
+
+import java.util.function.Function;
+
+import tech.quantit.northstar.common.model.BarWrapper;
+import tech.quantit.northstar.common.model.TimeSeriesValue;
+import tech.quantit.northstar.strategy.api.indicator.TimeSeriesUnaryOperator;
 
 /**
  * N,M1,M2为KDJ指标参数
@@ -53,15 +53,15 @@ public class KDJ {
 	 * K=SMA(RSV,M1,1);//RSV的M1日移动平均值，1为权重
 	 * @return
 	 */
-	public Function<BarField, TimeSeriesValue> k() {
+	public Function<BarWrapper, TimeSeriesValue> k() {
 		final TimeSeriesUnaryOperator llv = LLV(this.n);
 		final TimeSeriesUnaryOperator hhv = HHV(this.n);
 		final TimeSeriesUnaryOperator sma = SMA(this.m1, 1);
 		return bar -> {
-			TimeSeriesValue lowV = llv.apply(new TimeSeriesValue(bar.getLowPrice(), bar.getActionTimestamp()));
-			TimeSeriesValue highV = hhv.apply(new TimeSeriesValue(bar.getHighPrice(), bar.getActionTimestamp()));
-			double rsv = (bar.getClosePrice() - lowV.getValue()) / (highV.getValue() - lowV.getValue()) * 100;
-			return sma.apply(new TimeSeriesValue(rsv, bar.getActionTimestamp()));
+			TimeSeriesValue lowV = llv.apply(new TimeSeriesValue(bar.getBar().getLowPrice(), bar.getBar().getActionTimestamp()));
+			TimeSeriesValue highV = hhv.apply(new TimeSeriesValue(bar.getBar().getHighPrice(), bar.getBar().getActionTimestamp()));
+			double rsv = (bar.getBar().getClosePrice() - lowV.getValue()) / (highV.getValue() - lowV.getValue()) * 100;
+			return sma.apply(new TimeSeriesValue(rsv, bar.getBar().getActionTimestamp()));
 		};
 	}
 
@@ -70,8 +70,8 @@ public class KDJ {
 	 * D=SMA(K,M2,1);//K的M1日移动平均值，1为权重
 	 * @return
 	 */
-	public Function<BarField, TimeSeriesValue> d() {
-		final Function<BarField, TimeSeriesValue> k = k();
+	public Function<BarWrapper, TimeSeriesValue> d() {
+		final Function<BarWrapper, TimeSeriesValue> k = k();
 		final TimeSeriesUnaryOperator sma = SMA(this.m2, 1);
 		return bar -> sma.apply(k.apply(bar));
 	}
@@ -81,9 +81,9 @@ public class KDJ {
 	 * J=3*K-2*D;
 	 * @return
 	 */
-	public Function<BarField, TimeSeriesValue> j() {
-		final Function<BarField, TimeSeriesValue> k = k();
-		final Function<BarField, TimeSeriesValue> d = d();
+	public Function<BarWrapper, TimeSeriesValue> j() {
+		final Function<BarWrapper, TimeSeriesValue> k = k();
+		final Function<BarWrapper, TimeSeriesValue> d = d();
 		return bar -> {
 			TimeSeriesValue v = k.apply(bar);
 			TimeSeriesValue v0 = d.apply(bar);

@@ -1,16 +1,18 @@
 package tech.quantit.northstar.strategy.api.indicator.function;
 
-import com.google.common.util.concurrent.AtomicDouble;
-import org.apache.commons.lang3.StringUtils;
-import tech.quantit.northstar.common.model.TimeSeriesValue;
-import tech.quantit.northstar.strategy.api.indicator.TimeSeriesUnaryOperator;
-import xyz.redtorch.pb.CoreField.BarField;
-
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 import java.util.stream.LongStream;
+
+import org.apache.commons.lang3.StringUtils;
+
+import com.google.common.util.concurrent.AtomicDouble;
+
+import tech.quantit.northstar.common.model.BarWrapper;
+import tech.quantit.northstar.common.model.TimeSeriesValue;
+import tech.quantit.northstar.strategy.api.indicator.TimeSeriesUnaryOperator;
 
 /**
  * 均线函数
@@ -25,25 +27,25 @@ public interface AverageFunctions {
 	 * 注意：该算法与交易所的结算价存在一定误差，主要因为该算法是按K线计算，K线周期越小，误差越小
 	 * @return		返回计算函数
 	 */
-	static Function<BarField, TimeSeriesValue> SETTLE(){
+	static Function<BarWrapper, TimeSeriesValue> SETTLE(){
 		final AtomicDouble weightPrice = new AtomicDouble();
 		final AtomicInteger countOfBarsToday = new AtomicInteger();
 		final AtomicLong sumVol = new AtomicLong();
 		final String[] tradeDay = {""};
 		return bar -> {
-			if(!StringUtils.equals(tradeDay[0], bar.getTradingDay())) {
-				tradeDay[0] = bar.getTradingDay();
+			if(!StringUtils.equals(tradeDay[0], bar.getBar().getTradingDay())) {
+				tradeDay[0] = bar.getBar().getTradingDay();
 				sumVol.set(0);
 				weightPrice.set(0);
 				countOfBarsToday.set(0);
 			}
 			countOfBarsToday.incrementAndGet();
-			sumVol.addAndGet(bar.getVolumeDelta());
-			double wp = (bar.getHighPrice() + bar.getLowPrice() + bar.getClosePrice() * 2) / 4;
-			double factor = 1.0 * bar.getVolumeDelta() / sumVol.get();
+			sumVol.addAndGet(bar.getBar().getVolume());
+			double wp = (bar.getBar().getHighPrice() + bar.getBar().getLowPrice() + bar.getBar().getClosePrice() * 2) / 4;
+			double factor = 1.0 * bar.getBar().getVolume() / sumVol.get();
 			double value = factor * wp + (1 - factor) * weightPrice.get();
 			weightPrice.set(value);
-			return new TimeSeriesValue(value, bar.getActionTimestamp());
+			return new TimeSeriesValue(value, bar.getBar().getActionTimestamp());
 		};
 	}
 
@@ -52,14 +54,14 @@ public interface AverageFunctions {
 	 * @param n		统计范围
 	 * @return		返回计算函数
 	 */
-	static Function<BarField, TimeSeriesValue> WMA(int n){
+	static Function<BarWrapper, TimeSeriesValue> WMA(int n){
 		final long[] volArr = new long[n];
 		final double[] priceArr = new double[n];
 		final AtomicInteger index = new AtomicInteger(0);
 		return bar -> {
 			int i = index.get();
-			volArr[i] = bar.getVolumeDelta();
-			priceArr[i] = (bar.getClosePrice() * 2 + bar.getHighPrice() + bar.getLowPrice()) / 4;	// 利用K线重心为计算依据
+			volArr[i] = bar.getBar().getVolume();
+			priceArr[i] = (bar.getBar().getClosePrice() * 2 + bar.getBar().getHighPrice() + bar.getBar().getLowPrice()) / 4;	// 利用K线重心为计算依据
 			index.set(++i % n);
 			long total = LongStream.of(volArr).sum();
 			if(total == 0) {
@@ -69,7 +71,7 @@ public interface AverageFunctions {
 			for(int j=0; j<n; j++) {
 				weightedSum += priceArr[j] * volArr[j] / total;
 			}
-			return new TimeSeriesValue(weightedSum, bar.getActionTimestamp());
+			return new TimeSeriesValue(weightedSum, bar.getBar().getActionTimestamp());
 		};
 	}
 

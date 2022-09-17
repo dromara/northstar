@@ -4,10 +4,10 @@ import static tech.quantit.northstar.strategy.api.indicator.function.AverageFunc
 
 import java.util.function.Function;
 
+import tech.quantit.northstar.common.model.BarWrapper;
 import tech.quantit.northstar.common.model.TimeSeriesValue;
 import tech.quantit.northstar.strategy.api.indicator.TimeSeriesUnaryOperator;
 import tech.quantit.northstar.strategy.api.indicator.function.ComputeFunctions;
-import xyz.redtorch.pb.CoreField.BarField;
 
 /**
  * DIFF : EMA(CLOSE,SHORT) - EMA(CLOSE,LONG);//短周期与长周期的收盘价的指数平滑移动平均值做差。
@@ -102,7 +102,7 @@ public class MACD {
 	 * @param slowLine		慢线计算函数
 	 * @return
 	 */
-	public static Function<BarField, TimeSeriesValue> diff(Function<BarField, TimeSeriesValue> fastLine, Function<BarField, TimeSeriesValue> slowLine) {
+	public static Function<BarWrapper, TimeSeriesValue> diff(Function<BarWrapper, TimeSeriesValue> fastLine, Function<BarWrapper, TimeSeriesValue> slowLine) {
 		return ComputeFunctions.diff(fastLine, slowLine);
 	}
 	
@@ -112,7 +112,7 @@ public class MACD {
 	 * @param slowLine		慢线计算函数
 	 * @return
 	 */
-	public static Function<BarField, TimeSeriesValue> dea(Function<BarField, TimeSeriesValue> fastLine, Function<BarField, TimeSeriesValue> slowLine, int m) {
+	public static Function<BarWrapper, TimeSeriesValue> dea(Function<BarWrapper, TimeSeriesValue> fastLine, Function<BarWrapper, TimeSeriesValue> slowLine, int m) {
 		return diff(fastLine, slowLine).andThen(EMA(m));
 	}
 	
@@ -122,11 +122,11 @@ public class MACD {
 	 * @param dea
 	 * @return
 	 */
-	public static Function<BarField, TimeSeriesValue> post(Function<BarField, TimeSeriesValue> diff, Function<BarField, TimeSeriesValue> dea){
+	public static Function<BarWrapper, TimeSeriesValue> post(Function<BarWrapper, TimeSeriesValue> diff, Function<BarWrapper, TimeSeriesValue> dea){
 		return bar -> {
 			TimeSeriesValue difVal = diff.apply(bar);
 			TimeSeriesValue deaVal = dea.apply(bar);
-			return new TimeSeriesValue(2 * (difVal.getValue() - deaVal.getValue()), bar.getActionTimestamp());
+			return new TimeSeriesValue(2 * (difVal.getValue() - deaVal.getValue()), bar.getBar().getActionTimestamp());
 		};
 	}
 }

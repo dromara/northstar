@@ -5,9 +5,9 @@ import java.util.function.Function;
 
 import com.google.common.util.concurrent.AtomicDouble;
 
+import tech.quantit.northstar.common.model.BarWrapper;
 import tech.quantit.northstar.common.model.TimeSeriesValue;
 import tech.quantit.northstar.strategy.api.indicator.TimeSeriesUnaryOperator;
-import xyz.redtorch.pb.CoreField.BarField;
 
 /**
  * 多函数计算
@@ -54,12 +54,12 @@ public interface ComputeFunctions {
 	 * @param line2
 	 * @return
 	 */
-	static Function<BarField, TimeSeriesValue> diff(Function<BarField, TimeSeriesValue> line1Fn, Function<BarField, TimeSeriesValue> line2Fn) {
+	static Function<BarWrapper, TimeSeriesValue> diff(Function<BarWrapper, TimeSeriesValue> line1Fn, Function<BarWrapper, TimeSeriesValue> line2Fn) {
 		return bar -> {
 			TimeSeriesValue v = line1Fn.apply(bar);
 			TimeSeriesValue v0 = line2Fn.apply(bar);
 			double val = v.getValue() - v0.getValue();
-			return new TimeSeriesValue(val, bar.getActionTimestamp());
+			return new TimeSeriesValue(val, bar.getBar().getActionTimestamp());
 		};
 	}
 	

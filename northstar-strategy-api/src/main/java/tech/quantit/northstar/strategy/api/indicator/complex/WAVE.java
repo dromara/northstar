@@ -13,9 +13,9 @@ import org.apache.commons.math3.stat.StatUtils;
 
 import com.google.common.util.concurrent.AtomicDouble;
 
+import tech.quantit.northstar.common.model.BarWrapper;
 import tech.quantit.northstar.common.model.TimeSeriesValue;
 import tech.quantit.northstar.strategy.api.indicator.TimeSeriesUnaryOperator;
-import xyz.redtorch.pb.CoreField.BarField;
 
 /**
  * 波浪指标
@@ -45,9 +45,9 @@ public class WAVE {
 	/**
 	 * @return	波浪计算函数
 	 */
-	public Function<BarField, TimeSeriesValue> wave(){
-		final Function<BarField, TimeSeriesValue> fast = lwr.fast();
-		final Function<BarField, TimeSeriesValue> slow = lwr.slow();
+	public Function<BarWrapper, TimeSeriesValue> wave(){
+		final Function<BarWrapper, TimeSeriesValue> fast = lwr.fast();
+		final Function<BarWrapper, TimeSeriesValue> slow = lwr.slow();
 		int ref = this.m * 2;
 		final TimeSeriesUnaryOperator barllv = LLV(ref);
 		final TimeSeriesUnaryOperator barhhv = HHV(ref);
@@ -56,12 +56,12 @@ public class WAVE {
 		final AtomicDouble lastFast = new AtomicDouble();
 		final AtomicDouble lastSlow = new AtomicDouble();
 		return bar -> {
-			TimeSeriesValue barllvV = barllv.apply(new TimeSeriesValue(bar.getLowPrice(), bar.getActionTimestamp()));
-			TimeSeriesValue barhhvV = barhhv.apply(new TimeSeriesValue(bar.getHighPrice(), bar.getActionTimestamp()));
+			TimeSeriesValue barllvV = barllv.apply(new TimeSeriesValue(bar.getBar().getLowPrice(), bar.getBar().getActionTimestamp()));
+			TimeSeriesValue barhhvV = barhhv.apply(new TimeSeriesValue(bar.getBar().getHighPrice(), bar.getBar().getActionTimestamp()));
 			TimeSeriesValue fastV = fast.apply(bar);
 			TimeSeriesValue slowV = slow.apply(bar);
-			TimeSeriesValue fastllvV = fastllv.apply(new TimeSeriesValue(fastV.getValue(), bar.getActionTimestamp()));
-			TimeSeriesValue fasthhvV = fasthhv.apply(new TimeSeriesValue(fastV.getValue(), bar.getActionTimestamp()));
+			TimeSeriesValue fastllvV = fastllv.apply(new TimeSeriesValue(fastV.getValue(), bar.getBar().getActionTimestamp()));
+			TimeSeriesValue fasthhvV = fasthhv.apply(new TimeSeriesValue(fastV.getValue(), bar.getBar().getActionTimestamp()));
 			TimeSeriesValue result = TV_PLACEHOLDER; // 空值
 			if(lastFast.get() == 0) 
 				lastFast.set(fastV.getValue());
@@ -84,9 +84,9 @@ public class WAVE {
 	 * @param num	统计数量
 	 * @return		浪顶均值		
 	 */
-	public Function<BarField, TimeSeriesValue> peak(int num){
-		final Function<BarField, TimeSeriesValue> wma = WMA(n);
-		final Function<BarField, TimeSeriesValue> wave = wave();
+	public Function<BarWrapper, TimeSeriesValue> peak(int num){
+		final Function<BarWrapper, TimeSeriesValue> wma = WMA(n);
+		final Function<BarWrapper, TimeSeriesValue> wave = wave();
 		final double[] valArr = new double[num];
 		final AtomicInteger cursor = new AtomicInteger();
 		final AtomicBoolean flag = new AtomicBoolean();
@@ -94,7 +94,7 @@ public class WAVE {
 			TimeSeriesValue wmaVal = wma.apply(bar);
 			TimeSeriesValue waveVal = wave.apply(bar);
 			if(StatUtils.mean(valArr) == 0) {	// 初始化数组
-				Arrays.fill(valArr, bar.getHighPrice());
+				Arrays.fill(valArr, bar.getBar().getHighPrice());
 			}
 			if(waveVal != TV_PLACEHOLDER) {
 				boolean oldFlag = flag.get();
@@ -109,7 +109,7 @@ public class WAVE {
 					}
 				}
 			}
-			return new TimeSeriesValue(StatUtils.max(valArr), bar.getActionTimestamp());
+			return new TimeSeriesValue(StatUtils.max(valArr), bar.getBar().getActionTimestamp());
 		};
 	}
 	
@@ -118,9 +118,9 @@ public class WAVE {
 	 * @param num	统计数量
 	 * @return		浪底均值		
 	 */
-	public Function<BarField, TimeSeriesValue> trough(int num){
-		final Function<BarField, TimeSeriesValue> wma = WMA(n);
-		final Function<BarField, TimeSeriesValue> wave = wave();
+	public Function<BarWrapper, TimeSeriesValue> trough(int num){
+		final Function<BarWrapper, TimeSeriesValue> wma = WMA(n);
+		final Function<BarWrapper, TimeSeriesValue> wave = wave();
 		final double[] valArr = new double[num];
 		final AtomicInteger cursor = new AtomicInteger();
 		final AtomicBoolean flag = new AtomicBoolean();
@@ -128,7 +128,7 @@ public class WAVE {
 			TimeSeriesValue wmaVal = wma.apply(bar);
 			TimeSeriesValue waveVal = wave.apply(bar);
 			if(StatUtils.mean(valArr) == 0) {	// 初始化数组
-				Arrays.fill(valArr, bar.getLowPrice());
+				Arrays.fill(valArr, bar.getBar().getLowPrice());
 			}
 			if(waveVal != TV_PLACEHOLDER) {
 				boolean oldFlag = flag.get();
@@ -143,7 +143,7 @@ public class WAVE {
 					}
 				}
 			}
-			return new TimeSeriesValue(StatUtils.min(valArr), bar.getActionTimestamp());
+			return new TimeSeriesValue(StatUtils.min(valArr), bar.getBar().getActionTimestamp());
 		};
 	}
 	
