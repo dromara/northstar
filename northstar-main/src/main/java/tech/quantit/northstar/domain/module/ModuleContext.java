@@ -99,8 +99,8 @@ public class ModuleContext implements IModuleContext{
 	private Map<String, ContractField> contractMap = new HashMap<>();
 	
 	private Set<String> bindedSymbolSet = new HashSet<>();
-	private Set<BarMerger> contractBarMergerSet = new HashSet<>();
-	
+	/* unifiedSymbol -> barMerger */
+	private Map<String, BarMerger> contractBarMergerMap = new HashMap<>();
 	/* unifiedSymbol -> tick */
 	private Map<String, TickField> latestTickMap = new HashMap<>();
 	
@@ -352,6 +352,7 @@ public class ModuleContext implements IModuleContext{
 		if(!StringUtils.equals(tradingDay, tick.getTradingDay())) {
 			tradingDay = tick.getTradingDay();
 		}
+		indicatorFactory.getIndicatorMap().values().parallelStream().forEach(indicator -> indicator.onTick(tick));
 		accStore.onTick(tick);
 		latestTickMap.put(tick.getUnifiedSymbol(), tick);
 		listenerSet.stream()
@@ -363,6 +364,7 @@ public class ModuleContext implements IModuleContext{
 			});
 		tradeStrategy.onTick(tick, module.isEnabled());
 		listenerSet = listenerSet.stream().filter(DisposablePriceListener::isValid).collect(Collectors.toSet());
+		
 	}
 	
 	/* 此处收到的BAR数据是所有订阅的数据，需要过滤 */
@@ -371,7 +373,7 @@ public class ModuleContext implements IModuleContext{
 		if(!bindedSymbolSet.contains(bar.getUnifiedSymbol())) {
 			return;
 		}
-		contractBarMergerSet.forEach(barMerger -> barMerger.updateBar(bar));
+		contractBarMergerMap.get(bar.getUnifiedSymbol()).updateBar(bar);
 	}
 	
 	/* 此处收到的ORDER数据是所有订单回报，需要过滤 */
@@ -438,8 +440,8 @@ public class ModuleContext implements IModuleContext{
 			gatewayMap.put(c, gateway);
 			contractMap.put(c.getUnifiedSymbol(), c);
 			barBufQMap.put(c.getUnifiedSymbol(), new LinkedList<>());
-			contractBarMergerSet.add(new BarMerger(numOfMinsPerBar, c, barMergingCallback));
 			bindedSymbolSet.add(c.getUnifiedSymbol());
+			contractBarMergerMap.put(c.getUnifiedSymbol(), new BarMerger(numOfMinsPerBar, c, barMergingCallback));
 		}
 	}
 

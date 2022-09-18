@@ -30,7 +30,11 @@ public class RingArray<T> {
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	public Optional<T> update(T obj) {
+	public Optional<T> update(T obj, boolean unsettled) {
+		if(unsettled) {
+			array[cursor] = obj;
+			return Optional.ofNullable(obj);
+		}
 		cursor = getIndex(1);
 		T oldVal = (T) array[cursor]; 
 		array[cursor] = obj;

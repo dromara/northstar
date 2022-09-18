@@ -11,7 +11,7 @@ class RingArrayTest {
 		Object[] sample = new Object[] {new Object(), new Object(), new Object(), new Object(), new Object(), new Object()};
 		RingArray<Object> ring = new RingArray<>(4);
 		for(Object obj : sample) {
-			ring.update(obj);
+			ring.update(obj, false);
 		}
 		
 		assertThat(ring.get()).isEqualTo(sample[5]);
@@ -19,7 +19,7 @@ class RingArrayTest {
 		assertThat(ring.get(2)).isEqualTo(sample[3]);
 		assertThat(ring.get(-2)).isEqualTo(sample[3]);
 		assertThat(ring.get(-1)).isEqualTo(sample[4]);
-		assertThat(ring.update(sample[0])).contains(sample[2]);
+		assertThat(ring.update(sample[0], false)).contains(sample[2]);
 	}
 
 }

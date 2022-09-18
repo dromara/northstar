@@ -19,11 +19,13 @@ import tech.quantit.northstar.common.model.BarWrapper;
 import tech.quantit.northstar.common.model.TimeSeriesValue;
 import tech.quantit.northstar.strategy.api.utils.bar.BarMerger;
 import tech.quantit.northstar.strategy.api.utils.bar.DailyBarMerger;
+import tech.quantit.northstar.strategy.api.utils.bar.InstantBarGenerator;
 import tech.quantit.northstar.strategy.api.utils.bar.MonthlyBarMerger;
 import tech.quantit.northstar.strategy.api.utils.bar.WeeklyBarMerger;
 import tech.quantit.northstar.strategy.api.utils.collection.RingArray;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.ContractField;
+import xyz.redtorch.pb.CoreField.TickField;
 
 /**
  * 行情指标
@@ -54,25 +56,17 @@ public class Indicator {
 	
 	private BarMerger barMerger;
 	
+	private InstantBarGenerator ibg;
+	
 	public Indicator(Indicator.Configuration config, ValueType valType, UnaryOperator<TimeSeriesValue> valueUpdateHandler) {
 		this.size = config.indicatorRefLength;
 		this.unifiedSymbol = config.bindedContract.getUnifiedSymbol();
+		this.ibg = new InstantBarGenerator(config.bindedContract);
 		this.valType = valType;
-		this.barMerger = config.createBarMerger(bar -> {
-			double barVal = switch(valType) {
-			case HIGH -> bar.getHighPrice();
-			case CLOSE -> bar.getClosePrice();
-			case LOW -> bar.getLowPrice();
-			case OPEN -> bar.getOpenPrice();
-			case OPEN_INTEREST -> bar.getOpenInterestDelta();
-			case VOL -> bar.getVolumeDelta();
-			default -> throw new IllegalArgumentException("Unexpected value: " + valType);
-			};
-			barListener.onBar(new TimeSeriesValue(barVal, bar.getActionTimestamp()));
-		});
+		this.barMerger = config.createBarMerger(bar -> onBar(bar, false));
 		refVals = new RingArray<>(size);
 		for(int i=0; i<size; i++) {
-			refVals.update(new TimeSeriesValue(0, 0, true));
+			refVals.update(new TimeSeriesValue(0, 0, false), false);
 		}
 		
 		Flux.push(sink -> 
@@ -86,11 +80,12 @@ public class Indicator {
 	public Indicator(Indicator.Configuration config, Function<BarWrapper, TimeSeriesValue> valueUpdateHandler) {
 		this.size = config.indicatorRefLength;
 		this.unifiedSymbol = config.bindedContract.getUnifiedSymbol();
+		this.ibg = new InstantBarGenerator(config.bindedContract);
 		this.valType = ValueType.NOT_SET;
-		this.barMerger = config.createBarMerger(bar -> barListener.onBar(new BarWrapper(bar)));
+		this.barMerger = config.createBarMerger(bar -> onBar(bar, false));
 		refVals = new RingArray<>(size);
 		for(int i=0; i<size; i++) {
-			refVals.update(new TimeSeriesValue(0, 0, true));
+			refVals.update(new TimeSeriesValue(0, 0, false), false);
 		}
 		
 		Flux.push(sink -> 
@@ -147,12 +142,17 @@ public class Indicator {
 	 * 依赖BAR的值更新 
 	 */
 	public void onBar(BarField bar) {
+		onBar(bar, true);
+		barMerger.updateBar(bar);
+	}
+	
+	private void onBar(BarField bar, boolean isUnsettled) {
 		if(!bar.getUnifiedSymbol().equals(unifiedSymbol)) {
 			return;
 		}
 		log.trace("{} -> {}", this, bar);
 		if(valType == ValueType.NOT_SET) {
-			barListener.onBar(new BarWrapper(bar, false));
+			barListener.onBar(new BarWrapper(bar, isUnsettled));
 			return;
 		}
 		
@@ -165,8 +165,15 @@ public class Indicator {
 		case VOL -> bar.getVolumeDelta();
 		default -> throw new IllegalArgumentException("Unexpected value: " + valType);
 		};
-		barListener.onBar(new TimeSeriesValue(barVal, bar.getActionTimestamp(), false));
-		barMerger.updateBar(bar);
+		barListener.onBar(new TimeSeriesValue(barVal, bar.getActionTimestamp(), isUnsettled));
+	}
+	
+	/**
+	 * 依赖TICK的临时值更新
+	 * @param tick
+	 */
+	public void onTick(TickField tick) {
+		ibg.update(tick).ifPresent(bar -> onBar(bar, true));
 	}
 	
 	/**
@@ -175,8 +182,10 @@ public class Indicator {
 	 */
 	public void updateVal(TimeSeriesValue tv) {
 		if(tv.getTimestamp() == 0) 	return;	// 时间戳为零会视为无效记录 
-		refVals.update(tv);
-		actualUpdate++;
+		refVals.update(tv, tv.isUnsettled());
+		if(!tv.isUnsettled()) {			
+			actualUpdate++;
+		}
 	}
 	
 	/**

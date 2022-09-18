@@ -21,7 +21,7 @@ import tech.quantit.northstar.strategy.api.indicator.TimeSeriesUnaryOperator;
  *
  */
 public interface AverageFunctions {
-
+	
 	/**
 	 * 当日成交量加权均价（当日结算价）计算函数
 	 * 注意：该算法与交易所的结算价存在一定误差，主要因为该算法是按K线计算，K线周期越小，误差越小
@@ -169,8 +169,8 @@ public interface AverageFunctions {
 		return tv -> {
 			int i = cursor.get();
 			if(tv.isUnsettled()) {
-				double sumVal = sumOfValues.get() - values[i] + tv.getValue();
-				return new TimeSeriesValue(sumVal/n, tv.getTimestamp(), tv.isUnsettled());
+				double val = (sumOfValues.get() - values[i] + tv.getValue()) / n ;
+				return new TimeSeriesValue(val, tv.getTimestamp(), tv.isUnsettled());
 			}
 			
 			double val = tv.getValue();

@@ -89,6 +89,8 @@ public class IndicatorSampleStrategy extends AbstractStrategy	// 为了简化代
 			ctx.cancelOrder(originOrderId);
 			originOrderId = null;
 		}
+		
+		log.info("时间：{} {} 价格：{} 指标值：{}", tick.getActionDay(), tick.getActionTime(), tick.getLastPrice(), fastLine.value(0));
 	}
 
 	private boolean shouldBuy() {
