@@ -173,7 +173,10 @@ export default {
       await this.findAll()
     },
     tailModuleLog(row) {
-      this.$parent.handleSelect('9', { module: row.moduleName })
+      this.$router.push({
+        name: 'logger',
+        query: { auth: this.$route.query.auth, module: row.moduleName }
+      })
     }
   }
 }
