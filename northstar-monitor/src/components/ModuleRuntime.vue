@@ -185,7 +185,7 @@
               :value="item"
             ></el-option>
           </el-select>
-          <el-select class="ml-10 mt-5" v-model="indicator" placeholder="请选择指标">
+          <el-select class="ml-10 mt-5" v-model="indicator.name" placeholder="请选择指标">
             <el-option
               v-for="(item, i) in indicatorOptions"
               :key="i"
@@ -193,7 +193,11 @@
               :value="item"
             ></el-option>
           </el-select>
-          <el-select class="ml-10 mt-5 mr-10" v-model="paneId" placeholder="请选择绘图位置">
+          <el-select
+            class="ml-10 mt-5 mr-10"
+            v-model="indicator.paneId"
+            placeholder="请选择绘图位置"
+          >
             <el-option :key="1" label="主图" value="candle_pane" />
             <el-option :key="2" label="副图1" value="pane1" />
             <el-option :key="3" label="副图2" value="pane2" />
@@ -205,6 +209,31 @@
             title="移除指标"
             @click.native="removeIndicator"
           ></el-button>
+          <el-popover>
+            <el-form>
+              <el-form-item label="线粗" size="mini">
+                <el-input-number
+                  style="width: 100px"
+                  v-model="indicator.lineWidth"
+                  :min="1"
+                  :max="4"
+                  @change="updateIndicator"
+                />
+              </el-form-item>
+              <el-form-item style="margin-bottom: 0" label="线形" size="mini">
+                <el-select style="width: 100px" v-model="indicator.lineStyle">
+                  <el-option value="line" label="折线" key="1">折线</el-option>
+                  <el-option value="bar" label="柱形" key="2">柱形</el-option>
+                </el-select>
+              </el-form-item>
+            </el-form>
+            <el-button
+              class="ml-10 mr-10"
+              slot="reference"
+              icon="el-icon-setting"
+              title="指标样式设置"
+            ></el-button>
+          </el-popover>
           <el-button
             :icon="`${holdingVisibleOnChart ? 'el-icon-data-board' : 'el-icon-data-line'}`"
             :title="`${holdingVisibleOnChart ? '隐藏持仓线' : '显示持仓线'}`"
@@ -283,8 +312,12 @@ export default {
       loading: false,
       moduleRuntime: '',
       unifiedSymbolOfChart: '',
-      paneId: '',
-      indicator: '',
+      indicator: {
+        name: '',
+        paneId: '',
+        lineWidth: 1,
+        lineStyle: 'line'
+      },
       indicatorMap: {},
       timer: '',
       isManualUpdate: true
@@ -306,6 +339,9 @@ export default {
           this.loadIndicators()
         }, 100)
       }
+    },
+    'indicator.name': function () {
+      this.indicator.lineStyle = 'line'
     },
     isManualUpdate(val) {
       if (val) {
@@ -501,30 +537,41 @@ export default {
       }
     },
     addIndicator() {
-      if (!this.indicator) return
-      if (!this.paneId) return
-      const indicatorData = this.moduleRuntime.indicatorMap[this.indicator]
-      const colorIndex = Object.keys(this.moduleRuntime.indicatorMap).indexOf(this.indicator)
-      this.indicatorMap[this.indicator] = this.paneId
-      this.renderIndicator(this.indicator, this.paneId, indicatorData, colorIndex)
+      if (!this.indicator.name) return
+      this.indicatorMap[this.indicator.name] = Object.assign({}, this.indicator)
+      this.renderIndicator(this.indicator)
       this.saveIndicators()
     },
     removeIndicator() {
-      if (!this.indicator) return
-      if (!this.paneId) return
-      this.chart.removeTechnicalIndicator(
-        this.indicatorMap[this.indicator],
-        'VAL_' + this.indicator
-      )
-      delete this.indicatorMap[this.indicator]
+      if (!this.indicator.name) return
+      this.chart.removeTechnicalIndicator(this.indicator.paneId, 'VAL_' + this.indicator.name)
+      delete this.indicatorMap[this.indicator.name]
       this.saveIndicators()
       console.log('移除指标', this.indicator)
     },
-    renderIndicator(name, paneId, indicatorData, colorIndex) {
-      this.chart.addTechnicalIndicatorTemplate(simpleVal(name, colorIndex))
-      this.chart.createTechnicalIndicator('VAL_' + name, true, {
-        id: paneId
+    renderIndicator(indicator) {
+      const colorIndex = Object.keys(this.indicatorMap).indexOf(indicator.name)
+      this.chart.addTechnicalIndicatorTemplate(simpleVal(indicator, colorIndex))
+      this.chart.createTechnicalIndicator('VAL_' + indicator.name, true, {
+        id: indicator.paneId
       })
+    },
+    updateIndicator() {
+      this.indicatorMap[this.indicator.name] = this.indicator
+      const override = {
+        name: 'VAL_' + this.indicator.name,
+        styles: {
+          margin: {
+            top: 0.2,
+            bottom: 0.1
+          },
+          line: {
+            size: this.indicator.lineWidth
+          }
+        }
+      }
+      this.chart.overrideTechnicalIndicator(override, this.indicator.paneId)
+      this.saveIndicators()
     },
     visualizeTradeRecords() {
       this.chart.removeShape()
@@ -537,12 +584,11 @@ export default {
     loadIndicators() {
       this.indicatorMap = JSON.parse(localStorage.getItem(`module_${this.module.moduleName}`)) || {}
       Object.keys(this.indicatorMap).forEach((indicatorName) => {
-        if(!this.moduleRuntime.indicatorMap[indicatorName]){
+        if (!this.moduleRuntime.indicatorMap[indicatorName]) {
           return
         }
-        this.indicator = indicatorName
-        this.paneId = this.indicatorMap[indicatorName]
-        this.addIndicator()
+        this.indicator = Object.assign({}, this.indicatorMap[indicatorName])
+        this.renderIndicator(this.indicator)
       })
     },
     saveIndicators() {

@@ -26,13 +26,59 @@ const colorOptions = [
   "#C5E6FB"   //天蓝
 
 ]
-exports.default = (name, colorIndex) => {
+
+const createStyle = (indicator, colorIndex) => {
+  const styleMap = {
+    'line': { key: 'value', title: `${indicator.name}: `, type: 'line', color: colorOptions[colorIndex % colorOptions.length] },
+    'bar': { 
+      key: 'value',
+      title: `${indicator.name}: `, 
+      type: 'bar', 
+      baseValue: 0,
+      color: function color(data, options) {
+        var current = data.current;
+        var value = current.technicalIndicatorData.value
+        if (value > 0) {
+          return options.bar.upColor;
+        } else if (value < 0) {
+          return options.bar.downColor;
+        } else {
+          return options.bar.noChangeColor;
+        }
+      },
+      isStroke: function isStroke(data) {
+        var prev = data.prev,
+            current = data.current;
+        var value = (current.technicalIndicatorData || {}).value;
+        var preVal = (prev.technicalIndicatorData || {}).value;
+        return preVal > value;
+      }
+    }
+  }
+  return styleMap[indicator.lineStyle]
+}
+
+exports.default = (indicator, colorIndex) => {
+  const name = indicator.name
+  const plot = createStyle(indicator, colorIndex)
   return {
     name: 'VAL_' + name,
     shortName: '模组计算值',
-    plots: [
-      { key: 'value', title: `${name}: `, type: 'line', color: colorOptions[colorIndex % colorOptions.length] }
-    ],
+    plots: [plot],
+    styles: {
+      margin: {
+        top: 0.2,
+        bottom: 0.1
+      },
+      line: {
+        size: indicator.lineWidth
+      },
+      bar: {
+        upColor: '#EF5350',
+        downColor: '#26A69A',
+        noChangeColor: '#888888'
+      },
+    },
     calcTechnicalIndicator: (kLineDataList) => {
       return kLineDataList.map((data) => {
         return {
