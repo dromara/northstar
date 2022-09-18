@@ -129,12 +129,12 @@ public class ModuleContext implements IModuleContext{
 	private Consumer<BarField> barMergingCallback = bar -> {
 		indicatorFactory.getIndicatorMap().entrySet().stream().forEach(e -> {
 			Indicator indicator = e.getValue();
-			indicator.onBar(bar);
 			if(indicatorValBufQMap.get(e.getKey()).size() >= bufSize.intValue()) {
 				indicatorValBufQMap.get(e.getKey()).poll();
 			}
-			if(indicator.isReady() && indicator.valueWithTime(0).getTimestamp() == bar.getActionTimestamp()) {		// 只有时间戳一致才会被记录			
-				indicatorValBufQMap.get(e.getKey()).offer(indicator.valueWithTime(0));	
+			if(indicator.isReady() && indicator.timeSeriesValue(0).getTimestamp() == bar.getActionTimestamp()
+					&& (indicator.ifPlotPerBar() || !indicator.timeSeriesValue(0).isUnsettled())) {		// 只有时间戳一致才会被记录
+				indicatorValBufQMap.get(e.getKey()).offer(indicator.timeSeriesValue(0));	
 			}
 		});
 		tradeStrategy.onBar(bar, module.isEnabled());
@@ -373,6 +373,7 @@ public class ModuleContext implements IModuleContext{
 		if(!bindedSymbolSet.contains(bar.getUnifiedSymbol())) {
 			return;
 		}
+		indicatorFactory.getIndicatorMap().entrySet().parallelStream().forEach(e -> e.getValue().onBar(bar));
 		contractBarMergerMap.get(bar.getUnifiedSymbol()).updateBar(bar);
 	}
 	

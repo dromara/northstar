@@ -29,13 +29,13 @@ class IndicatorTest {
 	@Test
 	void testValueWithTime() {
 		indicator.updateVal(new TimeSeriesValue(5000, 123456789));
-		assertThat(indicator.valueWithTime(0).getValue()).isEqualTo(5000);
+		assertThat(indicator.timeSeriesValue(0).getValue()).isEqualTo(5000);
 	}
 
 	@Test
 	void testValueOn() {
 		indicator.updateVal(new TimeSeriesValue(5000, 123456789));
-		assertThat(indicator.valueOn(indicator.valueWithTime(0).getTimestamp())).hasValue(5000D);
+		assertThat(indicator.valueOn(indicator.timeSeriesValue(0).getTimestamp())).hasValue(5000D);
 	}
 	
 	@Test

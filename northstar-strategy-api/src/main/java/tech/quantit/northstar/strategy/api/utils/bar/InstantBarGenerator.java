@@ -23,7 +23,7 @@ public class InstantBarGenerator {
 		this.contract = contract;
 	}
 
-	public Optional<BarField> update(TickField tick) {
+	public synchronized Optional<BarField> update(TickField tick) {
 		if (!contract.getUnifiedSymbol().equals(tick.getUnifiedSymbol())) {
 			throw new IllegalArgumentException("合约不匹配，期望合约：" + contract.getUnifiedSymbol() + "，实际合约：" + tick.getUnifiedSymbol());
 		}

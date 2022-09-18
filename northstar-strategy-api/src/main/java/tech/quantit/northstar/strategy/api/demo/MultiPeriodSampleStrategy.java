@@ -103,6 +103,7 @@ public class MultiPeriodSampleStrategy extends AbstractStrategy	// 为了简化�
 		this.slowLine2 = ctx.newIndicator(Indicator.Configuration.builder()
 				.indicatorName("慢线")
 				.numOfUnits(params.refPeriod)
+				.plotPerBar(true)
 				.bindedContract(ctx.getContract(params.indicatorSymbol))
 				.build(), MA(params.slow));
 	}

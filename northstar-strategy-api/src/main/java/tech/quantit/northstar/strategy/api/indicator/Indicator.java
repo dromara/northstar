@@ -58,9 +58,12 @@ public class Indicator {
 	
 	private InstantBarGenerator ibg;
 	
+	private boolean plotPerBar;
+	
 	public Indicator(Indicator.Configuration config, ValueType valType, UnaryOperator<TimeSeriesValue> valueUpdateHandler) {
 		this.size = config.indicatorRefLength;
 		this.unifiedSymbol = config.bindedContract.getUnifiedSymbol();
+		this.plotPerBar = config.plotPerBar;
 		this.ibg = new InstantBarGenerator(config.bindedContract);
 		this.valType = valType;
 		this.barMerger = config.createBarMerger(bar -> onBar(bar, false));
@@ -109,7 +112,7 @@ public class Indicator {
 	 * @return
 	 */
 	public double value(int numOfStepBack) {
-		return valueWithTime(numOfStepBack).getValue();
+		return timeSeriesValue(numOfStepBack).getValue();
 	}
 	
 	/**
@@ -117,7 +120,7 @@ public class Indicator {
 	 * @param numOfStepBack
 	 * @return
 	 */
-	public TimeSeriesValue valueWithTime(int numOfStepBack) {
+	public TimeSeriesValue timeSeriesValue(int numOfStepBack) {
 		if(Math.abs(numOfStepBack) > size) {
 			throw new IllegalArgumentException("回溯步长[" + numOfStepBack + "]超过记录长度");
 		}
@@ -130,18 +133,27 @@ public class Indicator {
 	 * @return
 	 */
 	public Optional<Double> valueOn(long time){
-		Map<Long, Double> valMap = new HashMap<>();
+		return timeSeriesValueOn(time).map(TimeSeriesValue::getValue); 
+	}
+	
+	/**
+	 * 获取指标回溯值
+	 * @param time		指标值对应的时间戳
+	 * @return
+	 */
+	public Optional<TimeSeriesValue> timeSeriesValueOn(long time){
+		Map<Long, TimeSeriesValue> valMap = new HashMap<>();
 		for(Object obj : refVals.toArray()) {
 			TimeSeriesValue val = (TimeSeriesValue) obj;
-			valMap.put(val.getTimestamp(), val.getValue());
+			valMap.put(val.getTimestamp(), val);
 		}
-		return Optional.ofNullable(valMap.get(time)); 
+		return Optional.ofNullable(valMap.get(time));
 	}
 	
 	/**
 	 * 依赖BAR的值更新 
 	 */
-	public void onBar(BarField bar) {
+	public synchronized void onBar(BarField bar) {
 		onBar(bar, true);
 		barMerger.updateBar(bar);
 	}
@@ -172,7 +184,7 @@ public class Indicator {
 	 * 依赖TICK的临时值更新
 	 * @param tick
 	 */
-	public void onTick(TickField tick) {
+	public synchronized void onTick(TickField tick) {
 		ibg.update(tick).ifPresent(bar -> onBar(bar, true));
 	}
 	
@@ -180,7 +192,7 @@ public class Indicator {
 	 * 值更新
 	 * @param newVal
 	 */
-	public void updateVal(TimeSeriesValue tv) {
+	public synchronized void updateVal(TimeSeriesValue tv) {
 		if(tv.getTimestamp() == 0) 	return;	// 时间戳为零会视为无效记录 
 		refVals.update(tv, tv.isUnsettled());
 		if(!tv.isUnsettled()) {			
@@ -257,6 +269,14 @@ public class Indicator {
 		return Stream.of(refVals.toArray())
 				.map(TimeSeriesValue.class::cast)
 				.toList();
+	}
+	
+	/**
+	 * 跨周期
+	 * @return
+	 */
+	public boolean ifPlotPerBar() {
+		return plotPerBar;
 	}
 	
 	/**
@@ -367,6 +387,11 @@ public class Indicator {
 		 */
 		@Builder.Default
 		private int indicatorRefLength = 16;
+		/**
+		 * 跨周期指标映射到每根K线
+		 */
+		@Builder.Default
+		private boolean plotPerBar = false;
 		
 		
 		public String getIndicatorName() {
