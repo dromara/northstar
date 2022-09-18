@@ -34,6 +34,7 @@
       </el-form-item>
       <el-form-item label="回放精度">
         <el-select v-model="playbackSettings.precision">
+          <el-option label="极低（每分钟1个TICK）" value="EXTREME" key="0"></el-option>
           <el-option label="低（每分钟4个TICK）" value="LOW" key="1"></el-option>
           <el-option label="中（每分钟30个TICK）" value="MEDIUM" key="2"></el-option>
           <el-option label="高（每分钟120个TICK）" value="HIGH" key="3"></el-option>
@@ -43,6 +44,7 @@
         <el-select v-model="playbackSettings.speed">
           <el-option label="正常" value="NORMAL" key="1"></el-option>
           <el-option label="极速" value="SPRINT" key="2"></el-option>
+          <el-option label="超速" value="RUSH" key="3"></el-option>
         </el-select>
       </el-form-item>
       <el-form-item label="回放合约">

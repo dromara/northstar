@@ -6,6 +6,7 @@ package tech.quantit.northstar.common.constant;
  *
  */
 public enum PlaybackPrecision {
+	EXTREME,
 	LOW,
 	MEDIUM,
 	HIGH;

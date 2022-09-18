@@ -13,5 +13,9 @@ public enum PlaybackSpeed {
 	/**
 	 * 超快速度
 	 */
-	SPRINT;
+	SPRINT,
+	/**
+	 * 超速度
+	 */
+	RUSH;
 }

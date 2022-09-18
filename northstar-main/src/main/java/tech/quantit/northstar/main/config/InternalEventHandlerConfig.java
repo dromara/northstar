@@ -21,7 +21,6 @@ import tech.quantit.northstar.main.handler.internal.ConnectionHandler;
 import tech.quantit.northstar.main.handler.internal.MailBindedEventHandler;
 import tech.quantit.northstar.main.handler.internal.MarketDataHandler;
 import tech.quantit.northstar.main.handler.internal.ModuleManager;
-import tech.quantit.northstar.main.handler.internal.SimMarketHandler;
 import tech.quantit.northstar.main.mail.MailDeliveryManager;
 
 @Slf4j
@@ -49,17 +48,17 @@ public class InternalEventHandlerConfig {
 		return handler;
 	}
 	
-	@Bean
-	public SimMarketHandler simMarketHandler(InternalEventBus eventBus, SimMarket market) {
-		SimMarketHandler handler = new SimMarketHandler(market);
-		log.debug("注册：SimMarketHandler");
-		eventBus.register(handler);
-		return handler;
-	}
+//	@Bean
+//	public SimMarketHandler simMarketHandler(InternalEventBus eventBus, SimMarket market) {
+//		SimMarketHandler handler = new SimMarketHandler(market);
+//		log.debug("注册：SimMarketHandler");
+//		eventBus.register(handler);
+//		return handler;
+//	}
 	
 	@Bean
-	public ModuleManager moduleManager(InternalEventBus eventBus, @Autowired(required = false) LatencyDetector latencyDetector) {
-		ModuleManager moduleMgr = new ModuleManager(latencyDetector);
+	public ModuleManager moduleManager(InternalEventBus eventBus, SimMarket market, @Autowired(required = false) LatencyDetector latencyDetector) {
+		ModuleManager moduleMgr = new ModuleManager(market, latencyDetector);
 		log.debug("注册：ModuleManager");
 		eventBus.register(moduleMgr);
 		return moduleMgr;

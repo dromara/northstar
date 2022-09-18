@@ -49,7 +49,7 @@ public class TrigonometricTickSimulation implements TickSimulationAlgorithm {
 		int numOfPriceTickFromHighToLow = (int) Math.round((bar.getHighPrice() - bar.getLowPrice()) / priceTick);	// 最高最低价之间一共有多少个最小变动价位
 		int numOfPriceTickFromOpenToLow = (int) Math.round((bar.getOpenPrice() - bar.getLowPrice()) / priceTick);
 		int numOfPriceTickFromCloseToLow = (int) Math.round((bar.getClosePrice() - bar.getLowPrice()) / priceTick);
-		if(numOfPriceTickFromHighToLow == 0) {
+		if(numOfPriceTickFromHighToLow == 0 || precision == PlaybackPrecision.EXTREME) {
 			return List.of(TickField.newBuilder()
 					.setUnifiedSymbol(bar.getUnifiedSymbol())
 					.setPreClosePrice(bar.getPreClosePrice())

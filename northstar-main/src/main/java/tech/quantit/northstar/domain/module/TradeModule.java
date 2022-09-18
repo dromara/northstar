@@ -89,7 +89,7 @@ public class TradeModule implements IModule {
 	}
 
 	@Override
-	public void onEvent(NorthstarEvent event) {
+	public synchronized void onEvent(NorthstarEvent event) {
 		Object data = event.getData();
 		if(data instanceof TickField tick && mktGatewayIdSet.contains(tick.getGatewayId())) {
 			ctx.onTick(tick);

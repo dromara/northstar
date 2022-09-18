@@ -9,6 +9,7 @@ import tech.quantit.northstar.common.event.AbstractEventHandler;
 import tech.quantit.northstar.common.event.NorthstarEvent;
 import tech.quantit.northstar.common.event.NorthstarEventType;
 import tech.quantit.northstar.gateway.api.domain.LatencyDetector;
+import tech.quantit.northstar.gateway.sim.trade.SimMarket;
 import tech.quantit.northstar.strategy.api.IModule;
 import xyz.redtorch.pb.CoreField.TickField;
 
@@ -18,6 +19,8 @@ public class ModuleManager extends AbstractEventHandler{
 	 * moduleName --> module
 	 */
 	protected ConcurrentHashMap<String, IModule> moduleMap = new ConcurrentHashMap<>(50);
+	
+	private SimMarket simMarket;
 	
 	private static final Set<NorthstarEventType> TARGET_TYPE = EnumSet.of(
 			NorthstarEventType.ACCOUNT,
@@ -29,8 +32,9 @@ public class ModuleManager extends AbstractEventHandler{
 	
 	private LatencyDetector latencyDetector;
 	
-	public ModuleManager(LatencyDetector latencyDetector) {
+	public ModuleManager(SimMarket simMarket, LatencyDetector latencyDetector) {
 		this.latencyDetector = latencyDetector;
+		this.simMarket = simMarket;
 	}
 	
 	public void addModule(IModule module) {
@@ -71,5 +75,9 @@ public class ModuleManager extends AbstractEventHandler{
 		moduleMap.values().parallelStream().forEach(sm -> {
 			sm.onEvent(e);
 		});
+		
+		if(e.getData() instanceof TickField tick) {
+			simMarket.onTick(tick);
+		}
 	}
 }
