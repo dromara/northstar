@@ -38,9 +38,9 @@ public class ModuleDescription {
 	 */
 	private int numOfMinPerBar;
 	/**
-	 * 数据预热天数
+	 * 预热数据量（单位：周）
 	 */
-	private int daysOfDataForPreparation;
+	private int weeksOfDataForPreparation;
 	/**
 	 * 模组缓存的数据量（模组运行状态可观察的数据量）
 	 */

@@ -46,7 +46,6 @@ import tech.quantit.northstar.data.IModuleRepository;
 import tech.quantit.northstar.domain.gateway.ContractManager;
 import tech.quantit.northstar.main.ExternalJarClassLoader;
 import tech.quantit.northstar.main.handler.internal.ModuleManager;
-import tech.quantit.northstar.main.holiday.GlobalHolidayManager;
 import tech.quantit.northstar.main.utils.ModuleFactory;
 import tech.quantit.northstar.strategy.api.DynamicParamsAware;
 import tech.quantit.northstar.strategy.api.IModule;
@@ -81,10 +80,8 @@ public class ModuleService implements InitializingBean {
 	
 	private ExternalJarClassLoader extJarLoader;
 	
-	private GlobalHolidayManager globalHolidayMgr;
-	
 	public ModuleService(ApplicationContext ctx, ExternalJarClassLoader extJarLoader, IGatewayRepository gatewayRepo, IModuleRepository moduleRepo,
-			IMarketDataRepository mdRepo, ModuleFactory moduleFactory, ModuleManager moduleMgr, ContractManager contractMgr, GlobalHolidayManager globalHolidayMgr) {
+			IMarketDataRepository mdRepo, ModuleFactory moduleFactory, ModuleManager moduleMgr, ContractManager contractMgr) {
 		this.ctx = ctx;
 		this.moduleMgr = moduleMgr;
 		this.contractMgr = contractMgr;
@@ -93,7 +90,6 @@ public class ModuleService implements InitializingBean {
 		this.mdRepo = mdRepo;
 		this.moduleFactory = moduleFactory;
 		this.extJarLoader = extJarLoader;
-		this.globalHolidayMgr = globalHolidayMgr;
 	}
 
 	/**
@@ -244,22 +240,8 @@ public class ModuleService implements InitializingBean {
 	
 	private void loadModule(ModuleDescription md) throws Exception {
 		ModuleRuntimeDescription mrd = moduleRepo.findRuntimeByName(md.getModuleName());
-		int daysOfDataForPreparation = md.getDaysOfDataForPreparation();
-		LocalDate date = LocalDate.now();
-		while(daysOfDataForPreparation > 0) {
-			final LocalDateTime dt = LocalDateTime.of(date, LocalTime.of(9, 0));
-			long notHoliday = md.getModuleAccountSettingsDescription().stream()
-				.map(ModuleAccountDescription::getAccountGatewayId)
-				.map(gatewayId -> gatewayRepo.findById(gatewayId))
-				.map(gd -> gatewayRepo.findById(gd.getBindedMktGatewayId()))
-				.map(gd -> globalHolidayMgr.isHoliday(gd.getGatewayType(), dt))
-				.filter(flag -> !flag)
-				.count();
-			if(notHoliday > 0) {
-				daysOfDataForPreparation--;
-			}
-			date = date.minusDays(1);
-		}
+		int weeksOfDataForPreparation = md.getWeeksOfDataForPreparation();
+		LocalDate date = LocalDate.now().minusWeeks(weeksOfDataForPreparation);
 		
 		IModule module = moduleFactory.newInstance(md, mrd);
 		module.initModule();
@@ -269,7 +251,7 @@ public class ModuleService implements InitializingBean {
 				? LocalDate.now().plusWeeks(1)
 				: LocalDate.now();
 		// 模组数据初始化
-		while(md.getDaysOfDataForPreparation() > 0
+		while(weeksOfDataForPreparation > 0
 				&& toYearWeekVal(now) >= toYearWeekVal(date)) {
 			LocalDate start = utils.getFridayOfThisWeek(date.minusWeeks(1));
 			LocalDate end = utils.getFridayOfThisWeek(date);

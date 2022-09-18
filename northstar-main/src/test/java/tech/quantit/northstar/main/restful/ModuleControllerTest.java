@@ -111,7 +111,7 @@ class ModuleControllerTest {
 						.bindedUnifiedSymbols(List.of("rb2210@SHFE@FUTURES"))
 						.build()))
 				.numOfMinPerBar(1)
-				.daysOfDataForPreparation(1)
+				.weeksOfDataForPreparation(1)
 				.build();
 		
 		md2 = ModuleDescription.builder()
@@ -126,7 +126,7 @@ class ModuleControllerTest {
 						.bindedUnifiedSymbols(List.of("rb2210@SHFE@FUTURES"))
 						.build()))
 				.numOfMinPerBar(10)
-				.daysOfDataForPreparation(1)
+				.weeksOfDataForPreparation(1)
 				.build();
 	}
 	

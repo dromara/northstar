@@ -77,11 +77,11 @@
             </el-form-item>
             <el-form-item label="预热数据量">
               <el-input-number
-                v-model="form.daysOfDataForPreparation"
+                v-model="form.weeksOfDataForPreparation"
                 :min="0"
                 :disabled="readOnly || form.usage === 'PLAYBACK'"
               />
-              <span class="ml-10">天</span>
+              <span class="ml-10">周</span>
             </el-form-item>
             <el-form-item label="缓存数据量">
               <el-input-number :disabled="readOnly" v-model="form.moduleCacheDataSize" :min="100">
@@ -242,7 +242,7 @@ export default {
         type: 'SPECULATION',
         usage: 'UAT',
         numOfMinPerBar: 1,
-        daysOfDataForPreparation: 0,
+        weeksOfDataForPreparation: 0,
         moduleCacheDataSize: 500,
         closingPolicy: 'FIFO',
         moduleAccountSettingsDescription: [],
@@ -284,7 +284,7 @@ export default {
     },
     'form.usage': function (val) {
       if (val === 'PLAYBACK') {
-        this.form.daysOfDataForPreparation = 0
+        this.form.weeksOfDataForPreparation = 0
       }
       if (val === 'PLAYBACK' || val === 'UAT') {
         this.form.closingPolicy = 'FIFO'
@@ -344,13 +344,13 @@ export default {
 
       const obj = Object.assign({}, this.form)
       this.loading = true
-      try{
-        if(this.isUpdateMode){
+      try {
+        if (this.isUpdateMode) {
           await moduleApi.updateModule(obj, reset)
         } else {
           await moduleApi.insertModule(obj)
         }
-      } catch(e){
+      } catch (e) {
         this.$message.error(e.message)
       } finally {
         this.loading = false

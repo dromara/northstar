@@ -24,7 +24,6 @@ import tech.quantit.northstar.gateway.api.GatewayTypeProvider;
 import tech.quantit.northstar.gateway.api.ICategorizedContractProvider;
 import tech.quantit.northstar.main.ExternalJarClassLoader;
 import tech.quantit.northstar.main.handler.internal.ModuleManager;
-import tech.quantit.northstar.main.holiday.GlobalHolidayManager;
 import tech.quantit.northstar.main.mail.MailDeliveryManager;
 import tech.quantit.northstar.main.service.AccountService;
 import tech.quantit.northstar.main.service.ContractService;
@@ -66,8 +65,8 @@ public class ServiceConfig {
 	@Bean
 	public ModuleService moduleService(ApplicationContext ctx, ExternalJarClassLoader extJarLoader, IModuleRepository moduleRepo, 
 			IMarketDataRepository mdRepo,IGatewayRepository gatewayRepo, ModuleFactory moduleFactory, ModuleManager moduleMgr, 
-			ContractManager contractMgr, GlobalHolidayManager globalHolidayMgr) {
-		return new ModuleService(ctx, extJarLoader, gatewayRepo, moduleRepo, mdRepo, moduleFactory, moduleMgr, contractMgr, globalHolidayMgr);
+			ContractManager contractMgr) {
+		return new ModuleService(ctx, extJarLoader, gatewayRepo, moduleRepo, mdRepo, moduleFactory, moduleMgr, contractMgr);
 	}
 	
 	@Bean
