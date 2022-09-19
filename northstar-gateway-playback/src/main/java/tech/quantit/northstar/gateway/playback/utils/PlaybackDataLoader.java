@@ -21,10 +21,17 @@ public class PlaybackDataLoader {
 	}
 	
 	public List<BarField> loadData(LocalDateTime fromStartDateTime, ContractField contract){
+		LocalDate queryStart;
+		LocalDate queryEnd;
 		long fromStartTimestamp = fromStartDateTime.toInstant(ZoneOffset.ofHours(8)).toEpochMilli();
-		LocalDate endOfLastWeek = utils.getFridayOfLastWeek(fromStartTimestamp);
-		LocalDate endOfThisWeek = utils.getFridayOfThisWeek(fromStartDateTime.toLocalDate());
-		return mdRepo.loadBars("CTP", contract.getUnifiedSymbol(), endOfLastWeek, endOfThisWeek)
+		if(fromStartDateTime.toLocalDate().getDayOfWeek().getValue() >= 5) {
+			queryStart = utils.getFridayOfThisWeek(fromStartDateTime.toLocalDate());
+			queryEnd = queryStart.plusWeeks(1);
+		} else {
+			queryEnd = utils.getFridayOfThisWeek(fromStartDateTime.toLocalDate());
+			queryStart = queryEnd.minusWeeks(1);
+		}
+		return mdRepo.loadBars("CTP", contract.getUnifiedSymbol(), queryStart, queryEnd)
 				.stream()
 				.filter(bar -> bar.getActionTimestamp() >= fromStartTimestamp)
 				.toList();
