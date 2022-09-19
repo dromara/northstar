@@ -101,7 +101,7 @@ public class PlaybackContext {
 		default -> throw new IllegalArgumentException("Unexpected value: " + settings.getSpeed());
 		};
 		
-		log.debug("回放网关 [{}] 开始回放。当前时间：{}", gatewaySettings.getGatewayId(), playbackTimeState);
+		log.info("回放网关 [{}] 开始回放。当前时间：{}", gatewaySettings.getGatewayId(), playbackTimeState);
 		timer = new Timer();
 		timer.scheduleAtFixedRate(new TimerTask() {
 			
@@ -248,7 +248,7 @@ public class PlaybackContext {
 	
 	// 按天加载BAR数据
 	private void loadBars() {
-		log.debug("回放网关 [{}] 运行至 {}", gatewaySettings.getGatewayId(), playbackTimeState);
+		log.info("回放网关 [{}] 运行至 {}", gatewaySettings.getGatewayId(), playbackTimeState);
 		contractBarMap = settings.getUnifiedSymbols()
 			.stream()
 			.map(contractMgr::getContract)
@@ -283,7 +283,7 @@ public class PlaybackContext {
 		isRunning = false;
 		timer.cancel();
 		feEngine.emitEvent(NorthstarEventType.DISCONNECTED, gatewaySettings.getGatewayId());
-		log.debug("回放网关 [{}] 结束回放。当前时间：{}", gatewaySettings.getGatewayId(), playbackTimeState);
+		log.info("回放网关 [{}] 结束回放。当前时间：{}", gatewaySettings.getGatewayId(), playbackTimeState);
 	}
 	
 	/**
