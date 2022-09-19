@@ -59,7 +59,7 @@ public class PlaybackGatewayFactory implements GatewayFactory{
 	private PlaybackContext createPlaybackContext(String gatewayId, PlaybackGatewaySettings settings, PlaybackRuntimeDescription playbackRt) {
 		LocalDateTime ldt = Objects.nonNull(playbackRt) 
 				? playbackRt.getPlaybackTimeState() 
-				: LocalDateTime.of(LocalDate.parse(settings.getStartDate(), DateTimeConstant.D_FORMAT_INT_FORMATTER), LocalTime.of(9, 0));
+				: LocalDateTime.of(LocalDate.parse(settings.getStartDate(), DateTimeConstant.D_FORMAT_INT_FORMATTER), LocalTime.of(20, 0));
 		PlaybackClock clock = new CtpPlaybackClock(holidayMgr, ldt);
 		PlaybackDataLoader loader = new PlaybackDataLoader(mdRepo);
 		TickSimulationAlgorithm ticker = new TrigonometricTickSimulation(gatewayId, settings.getPrecision(), contractMgr);

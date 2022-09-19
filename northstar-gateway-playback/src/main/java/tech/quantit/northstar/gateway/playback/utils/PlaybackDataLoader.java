@@ -29,4 +29,8 @@ public class PlaybackDataLoader {
 				.filter(bar -> bar.getActionTimestamp() >= fromStartTimestamp)
 				.toList();
 	}
+	
+	public List<BarField> loadDataRaw(LocalDate startDate, LocalDate endDate, ContractField contract){
+		return mdRepo.loadBars("CTP", contract.getUnifiedSymbol(), startDate, endDate);
+	}
 }

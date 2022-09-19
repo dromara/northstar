@@ -19,6 +19,15 @@
       :rules="formRules"
       :disabled="isUpdateMode"
     >
+      <el-form-item label="预热起始日">
+        <el-date-picker
+          style="width: 193px"
+          v-model="preStartDate"
+          type="date"
+          placeholder="请选择"
+        >
+        </el-date-picker>
+      </el-form-item>
       <el-form-item label="回放日期">
         <el-date-picker
           v-model="dateRange"
@@ -133,8 +142,10 @@ export default {
         ]
       },
       dateRange: '',
+      preStartDate: '',
       contractOptions: [],
       playbackSettings: {
+        preStartDate: '',
         startDate: '',
         endDate: '',
         precision: '',
@@ -167,6 +178,7 @@ export default {
           moment(this.playbackSettingsSrc.startDate, 'YYYYMMDD').toDate(),
           moment(this.playbackSettingsSrc.endDate, 'YYYYMMDD').toDate()
         ]
+        this.preStartDate = moment(this.playbackSettingsSrc.preStartDate, 'YYYYMMDD').toDate()
       }
     },
     'playbackSettings.unifiedSymbols': function (val) {
@@ -185,6 +197,7 @@ export default {
         if (valid) {
           this.playbackSettings.startDate = moment(this.dateRange[0]).format('yyyyMMDD')
           this.playbackSettings.endDate = moment(this.dateRange[1]).format('yyyyMMDD')
+          this.playbackSettings.preStartDate = moment(this.preStartDate).format('yyyyMMDD')
           let obj = {}
           Object.assign(obj, this.playbackSettings)
           this.$emit('onSave', obj)

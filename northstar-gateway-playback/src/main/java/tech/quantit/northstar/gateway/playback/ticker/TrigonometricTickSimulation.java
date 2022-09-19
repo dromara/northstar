@@ -34,6 +34,7 @@ public class TrigonometricTickSimulation implements TickSimulationAlgorithm {
 		this.precision = precision;
 		this.contractMgr = contractMgr;
 		this.totalSize = switch (precision) {
+		case EXTREME -> 1;
 		case LOW -> 4;
 		case MEDIUM -> 30;	// 中精度一共30个TICK
 		case HIGH -> 120;	// 高精度一共120个TICK

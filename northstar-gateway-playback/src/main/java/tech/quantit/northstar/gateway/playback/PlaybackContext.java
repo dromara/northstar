@@ -2,6 +2,7 @@ package tech.quantit.northstar.gateway.playback;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneOffset;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -9,10 +10,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.CountDownLatch;
 import java.util.Queue;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.StringUtils;
 
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.IContractManager;
@@ -20,6 +24,7 @@ import tech.quantit.northstar.common.constant.DateTimeConstant;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.event.NorthstarEventType;
 import tech.quantit.northstar.common.model.PlaybackRuntimeDescription;
+import tech.quantit.northstar.common.utils.MarketDataLoadingUtils;
 import tech.quantit.northstar.data.IPlaybackRuntimeRepository;
 import tech.quantit.northstar.gateway.playback.ticker.TickSimulationAlgorithm;
 import tech.quantit.northstar.gateway.playback.utils.PlaybackClock;
@@ -57,6 +62,8 @@ public class PlaybackContext {
 	
 	private final IContractManager contractMgr;
 	
+	private boolean hasPreLoaded;	// 预加载是否被执行过
+	
 	// 回放时间戳状态
 	private LocalDateTime playbackTimeState;
 	
@@ -83,8 +90,10 @@ public class PlaybackContext {
 	
 	/**
 	 * 开始回放
+	 * @throws InterruptedException 
 	 */
 	public void start() {
+		feEngine.emitEvent(NorthstarEventType.CONNECTED, gatewaySettings.getGatewayId());
 		isRunning = true;
 		long rate = switch (settings.getSpeed()) {
 		case NORMAL -> 500;
@@ -132,6 +141,50 @@ public class PlaybackContext {
 			
 			@Override
 			public void run() {
+				// 预加载数据
+				if(!hasPreLoaded && StringUtils.isNotBlank(settings.getPreStartDate())) {			
+					LocalDate preloadStartDate = LocalDate.parse(settings.getPreStartDate(), DateTimeConstant.D_FORMAT_INT_FORMATTER);
+					LocalDate preloadEndDate = playbackTimeState.toLocalDate();
+					log.debug("回放网关 [{}] 正在加载预热数据，预热时间段：{} -> {}", gatewaySettings.getGatewayId(), preloadStartDate, preloadEndDate);
+					playbackTimeState = LocalDateTime.of(preloadEndDate, LocalTime.of(21, 0));
+					
+					CountDownLatch cdl = new CountDownLatch(settings.getUnifiedSymbols().size());
+					settings.getUnifiedSymbols()
+						.parallelStream()
+						.map(contractMgr::getContract)
+						.forEach(contract -> 
+							new Thread(() -> {
+								LocalDate queryStart = preloadStartDate;
+								LocalDate queryEnd = queryStart.plusWeeks(2); 
+								while(queryStart.isBefore(preloadEndDate)) {
+									if(queryEnd.isAfter(preloadEndDate)) {
+										queryEnd = preloadEndDate;
+									}
+									
+									List<BarField> data = loader.loadDataRaw(queryStart, queryEnd, contract);
+									for(BarField bar : data) {
+										log.debug("Bar信息： {} {}，价格：{}", bar.getActionDay(), bar.getActionTime(), bar.getClosePrice());
+										feEngine.emitEvent(NorthstarEventType.BAR, bar);
+									}
+									
+									queryStart = queryEnd;
+									queryEnd = queryEnd.plusWeeks(2);
+								}
+								
+								log.debug("回放网关 [{}] 合约 {} 数据预热完毕", gatewaySettings.getGatewayId(), contract.getUnifiedSymbol());
+								cdl.countDown();
+							}).start()
+						);
+					
+					try {
+						cdl.await();
+						hasPreLoaded = true;
+					} catch (InterruptedException e) {
+						log.warn("预热加载等待被中断", e);
+						stop();
+					}
+				}
+				
 				while(isTickDataEmpty()) {	
 					LocalDate date = playbackTimeState.toLocalDate();
 					if(isBarDataEmpty() && !date.equals(lastLoadDate)) {		// 每周加载一次
@@ -175,7 +228,9 @@ public class PlaybackContext {
 				if(isTickDataEmpty()) {
 					Iterator<Entry<ContractField, BarField>> itCacheBars = cacheBarMap.entrySet().iterator();
 					while(itCacheBars.hasNext()) {
-						feEngine.emitEvent(NorthstarEventType.BAR, BarField.newBuilder(itCacheBars.next().getValue()).setGatewayId(gatewaySettings.getGatewayId()).build());
+						BarField bar = BarField.newBuilder(itCacheBars.next().getValue()).setGatewayId(gatewaySettings.getGatewayId()).build();
+						log.debug("Bar信息： {} {}，价格：{}", bar.getActionDay(), bar.getActionTime(), bar.getClosePrice());
+						feEngine.emitEvent(NorthstarEventType.BAR, bar);
 						itCacheBars.remove();
 					}
 					playbackTimeState = clock.nextMarketMinute();
@@ -189,11 +244,12 @@ public class PlaybackContext {
 			}
 			
 		}, 0, rate);
-		feEngine.emitEvent(NorthstarEventType.CONNECTED, gatewaySettings.getGatewayId());
+		
 	}
 	
 	// 按天加载BAR数据
 	private void loadBars() {
+		log.debug("回放网关 [{}] 运行至 {}", gatewaySettings.getGatewayId(), playbackTimeState);
 		contractBarMap = settings.getUnifiedSymbols()
 			.stream()
 			.map(contractMgr::getContract)

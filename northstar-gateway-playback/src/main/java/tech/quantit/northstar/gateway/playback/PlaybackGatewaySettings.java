@@ -28,6 +28,12 @@ public class PlaybackGatewaySettings extends DynamicParams implements GatewaySet
 	private PLAYBACK playback;
 	
 	/**
+	 * 预热起始时间
+	 * 格式：YYYYMMDD
+	 */
+	@Setting(label="预热起始日", order=0, type=FieldType.DATE)
+	private String preStartDate;
+	/**
 	 * 开始时间
 	 * 格式：YYYYMMDD
 	 */
