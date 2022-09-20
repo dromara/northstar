@@ -36,6 +36,7 @@ import tech.quantit.northstar.common.model.ModuleDealRecord;
 import tech.quantit.northstar.common.model.ModulePositionDescription;
 import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
 import tech.quantit.northstar.common.model.TimeSeriesValue;
+import tech.quantit.northstar.common.utils.BarUtils;
 import tech.quantit.northstar.common.utils.ContractUtils;
 import tech.quantit.northstar.common.utils.FieldUtils;
 import tech.quantit.northstar.common.utils.OrderUtils;
@@ -132,8 +133,8 @@ public class ModuleContext implements IModuleContext{
 			if(indicatorValBufQMap.get(e.getKey()).size() >= bufSize.intValue()) {
 				indicatorValBufQMap.get(e.getKey()).poll();
 			}
-			if(indicator.isReady() && indicator.timeSeriesValue(0).getTimestamp() == bar.getActionTimestamp()
-					&& (indicator.ifPlotPerBar() || !indicator.timeSeriesValue(0).isUnsettled())) {		// 只有时间戳一致才会被记录
+			if(indicator.isReady() && indicator.timeSeriesValue(0).getTimestamp() == bar.getActionTimestamp()	// 只有时间戳一致才会被记录
+					&& (BarUtils.isEndOfTheTradingDay(bar) || indicator.ifPlotPerBar() || !indicator.timeSeriesValue(0).isUnsettled())) {		
 				indicatorValBufQMap.get(e.getKey()).offer(indicator.timeSeriesValue(0));	
 			}
 		});

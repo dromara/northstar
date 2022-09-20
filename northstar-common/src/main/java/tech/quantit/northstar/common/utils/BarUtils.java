@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import cn.hutool.core.date.LocalDateTimeUtil;
 import tech.quantit.northstar.common.constant.DateTimeConstant;
+import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreField.BarField;
 
 /**
@@ -62,5 +63,14 @@ public class BarUtils {
 			bb0.setNumTradesDelta(bb0.getNumTrades() - bb1.getNumTrades());
 			bb0.setTurnoverDelta(bb0.getTurnover() - bb1.getTurnover());
 		}
+	}
+	
+	public static boolean isEndOfTheTradingDay(BarField bar) {
+		if(bar.getGatewayId().startsWith("CTP")) {
+			boolean absEndTime = bar.getActionTime().startsWith("15:15");
+			boolean mostEndTime = bar.getActionTime().startsWith("15:00") && !(bar.getUnifiedSymbol().startsWith("T") && bar.getUnifiedSymbol().contains(ExchangeEnum.CFFEX.toString()));
+			return mostEndTime || absEndTime;
+		}
+		return false;
 	}
 }

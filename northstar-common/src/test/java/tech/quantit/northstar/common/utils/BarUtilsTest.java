@@ -33,4 +33,23 @@ class BarUtilsTest {
 		assertThat(BarUtils.mergeWeeklyBar(samples)).hasSize(10);
 	}
 
+	@Test
+	void testEndTime() {
+		BarField.Builder bb = BarField.newBuilder().setActionTime("15:00").setGatewayId("CTP");
+		
+		assertThat(BarUtils.isEndOfTheTradingDay(bb.setUnifiedSymbol("TA2210@SHFE@FUTURES").build())).isTrue();
+		assertThat(BarUtils.isEndOfTheTradingDay(bb.setUnifiedSymbol("TS@CFFEX@FUTURES").build())).isFalse();
+		assertThat(BarUtils.isEndOfTheTradingDay(bb.setUnifiedSymbol("T@CFFEX@FUTURES").build())).isFalse();
+		assertThat(BarUtils.isEndOfTheTradingDay(bb.setUnifiedSymbol("TF@CFFEX@FUTURES").build())).isFalse();
+	}
+	
+	@Test
+	void testEndTime2() {
+		BarField.Builder bb = BarField.newBuilder().setActionTime("15:15").setGatewayId("CTP");
+		
+		assertThat(BarUtils.isEndOfTheTradingDay(bb.setUnifiedSymbol("TA2210@SHFE@FUTURES").build())).isTrue();
+		assertThat(BarUtils.isEndOfTheTradingDay(bb.setUnifiedSymbol("TS@CFFEX@FUTURES").build())).isTrue();
+		assertThat(BarUtils.isEndOfTheTradingDay(bb.setUnifiedSymbol("T@CFFEX@FUTURES").build())).isTrue();
+		assertThat(BarUtils.isEndOfTheTradingDay(bb.setUnifiedSymbol("TF@CFFEX@FUTURES").build())).isTrue();
+	}
 }
