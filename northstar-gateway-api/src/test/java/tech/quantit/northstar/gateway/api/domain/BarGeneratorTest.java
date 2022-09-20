@@ -6,7 +6,7 @@ import static org.mockito.Mockito.mock;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Test;
 
@@ -24,7 +24,7 @@ class BarGeneratorTest {
 	@Test
 	void test() {
 		ContractField contract = factory.makeContract("rb2210");
-		BarGenerator gen = new BarGenerator(new NormalContract(contract, 0), mock(BiConsumer.class));
+		BarGenerator gen = new BarGenerator(new NormalContract(contract, 0), mock(Consumer.class));
 		long now = System.currentTimeMillis();
 		long expectedTime = now - now % 60000 + 60000;
 		LocalDateTime ldt = LocalDateTime.ofInstant(Instant.ofEpochMilli(expectedTime), ZoneId.systemDefault());

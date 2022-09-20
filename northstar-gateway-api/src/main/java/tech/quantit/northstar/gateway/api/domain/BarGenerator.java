@@ -4,10 +4,9 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.constant.DateTimeConstant;
@@ -33,11 +32,11 @@ public class BarGenerator {
 
 	private NormalContract contract;
 	
-	private BiConsumer<BarField, List<TickField>> barCallBack;
+	private Consumer<BarField> barCallBack;
 	
 	private ConcurrentLinkedQueue<TickField> barTicks = new ConcurrentLinkedQueue<>();
 	
-	public BarGenerator(NormalContract contract, BiConsumer<BarField, List<TickField>> barCallBack) {
+	public BarGenerator(NormalContract contract, Consumer<BarField> barCallBack) {
 		this.barCallBack = barCallBack;
 		this.contract = contract;
 		this.barBuilder = BarField.newBuilder()
@@ -84,10 +83,11 @@ public class BarGenerator {
 			barBuilder.setHighPrice(tick.getLastPrice());
 			barBuilder.setLowPrice(tick.getLastPrice());
 			
-			barBuilder.setNumTradesDelta(0);
+			barBuilder.setVolume(0);				
+			barBuilder.setTurnover(0);
+			barBuilder.setNumTrades(0);
 			barBuilder.setOpenInterestDelta(0);
-			barBuilder.setTurnoverDelta(0);
-			barBuilder.setVolumeDelta(0);
+			
 			barBuilder.setActionTimestamp(barActionTime);
 			barBuilder.setActionTime(LocalDateTime.ofInstant(Instant.ofEpochMilli(barActionTime), ZoneId.systemDefault()).format(DateTimeConstant.T_FORMAT_WITH_MS_INT_FORMATTER));
 		}
@@ -102,15 +102,10 @@ public class BarGenerator {
 		barBuilder.setLowPrice(Math.min(tick.getLastPrice(), barBuilder.getLowPrice()));
 		barBuilder.setClosePrice(tick.getLastPrice());
 		barBuilder.setOpenInterest(tick.getOpenInterest());
-		barBuilder.setVolume(tick.getVolume());
-		barBuilder.setTurnover(tick.getTurnover());
-		barBuilder.setNumTrades(tick.getNumTrades());
-
-		barBuilder.setVolumeDelta(tick.getVolumeDelta() + barBuilder.getVolumeDelta());
-		barBuilder.setVolumeDelta(Math.max(0, barBuilder.getVolumeDelta()));	// 防止volDelta为负数
-		barBuilder.setTurnoverDelta(tick.getTurnoverDelta() + barBuilder.getTurnoverDelta());
 		barBuilder.setOpenInterestDelta(tick.getOpenInterestDelta() + barBuilder.getOpenInterestDelta());
-		barBuilder.setNumTradesDelta(tick.getNumTradesDelta() + barBuilder.getNumTradesDelta());
+		barBuilder.setVolume(tick.getVolumeDelta() + barBuilder.getVolume());
+		barBuilder.setTurnover(tick.getTurnoverDelta() + barBuilder.getTurnover());
+		barBuilder.setNumTrades(tick.getNumTradesDelta() + barBuilder.getNumTrades());
 	}
 	
 	public BarField finishOfBar() {
@@ -118,14 +113,16 @@ public class BarGenerator {
 			// 若TICK数据少于三个TICK，则不触发回调，因为这不是一个正常的数据集
 			return barBuilder.build();
 		}
-		List<TickField> ticksList = barTicks.stream().toList();
 		barTicks.clear();
-		BarField bar = barBuilder.build();
-		barCallBack.accept(bar, ticksList);
-		return bar;
+		
+		barBuilder.setVolume(Math.max(0, barBuilder.getVolume()));				// 防止vol为负数
+		
+		BarField lastBar = barBuilder.build();
+		barCallBack.accept(lastBar);
+		return lastBar;
 	}
 	
-	public void setOnBarCallback(BiConsumer<BarField, List<TickField>> callback) {
+	public void setOnBarCallback(Consumer<BarField> callback) {
 		barCallBack = callback;
 	}
 

@@ -74,7 +74,7 @@ public class GlobalMarketRegistry {
 			return;
 		}
 		BarGenerator barGen = contract.barGenerator();
-		barGen.setOnBarCallback((bar, ticks) -> {
+		barGen.setOnBarCallback((bar) -> {
 			log.trace("生成bar: {}", MessagePrinter.print(bar));
 			feEngine.emitEvent(NorthstarEventType.BAR, bar);
 		});

@@ -437,14 +437,14 @@ public class MdSpi extends CThostFtdcMdSpi {
 				String contractId = contract.getContractId();
 				String actionTime = dateTime.format(DateTimeConstant.T_FORMAT_WITH_MS_INT_FORMATTER);
 				double lastPrice = pDepthMarketData.getLastPrice();
-				long volume = pDepthMarketData.getVolume();
+				long volume = pDepthMarketData.getVolume();	//该成交量为当日累计值
 				long volumeDelta = 0;
 				if (preTickMap.containsKey(contractId)) {
 					volumeDelta = volume - preTickMap.get(contractId).getVolume();
 					volumeDelta = Math.max(0, volumeDelta);	//防止数据异常时为负数
 				}
 
-				Double turnover = pDepthMarketData.getTurnover();
+				Double turnover = pDepthMarketData.getTurnover();	//该金额为当日累计值
 				double turnoverDelta = 0;
 				if (preTickMap.containsKey(contractId)) {
 					turnoverDelta = turnover - preTickMap.get(contractId).getTurnover();
@@ -539,7 +539,11 @@ public class MdSpi extends CThostFtdcMdSpi {
 				tickBuilder.setGatewayId(gatewayId);
 
 				TickField tick = tickBuilder.build();
-				if(volumeDelta > volume) {
+				
+				if(logger.isTraceEnabled()) {					
+					logger.trace("{}", MessagePrinter.print(tick));
+				}
+				if(volumeDelta > volume && logger.isWarnEnabled()) {
 					logger.warn("数据有效性检测：{}", isReasonable(volume, 0, volumeDelta));
 					logger.warn("异常值：{}", volumeDelta);
 					logger.warn("异常Tick数据：{}", MessagePrinter.print(tick));
