@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneOffset;
 import java.util.List;
-import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -40,7 +40,7 @@ class TrigonometricTickSimulationTest {
 	IContractManager contractMgr = mock(IContractManager.class);
 	
 	@SuppressWarnings("unchecked")
-	BarGenerator barGen = new BarGenerator(new NormalContract(contract, System.currentTimeMillis()), mock(BiConsumer.class));
+	BarGenerator barGen = new BarGenerator(new NormalContract(contract, System.currentTimeMillis()), (Consumer<BarField>) mock(Consumer.class));
 	
 	@BeforeEach
 	void prepare() {
@@ -202,13 +202,13 @@ class TrigonometricTickSimulationTest {
 				.setPreOpenInterest(230000)
 				.setPreSettlePrice(5001)
 				.setVolume(1800000)
-				.setVolumeDelta(3600)
+				.setVolumeDelta(0)
 				.setOpenInterest(1800000)
 				.setOpenInterestDelta(7200)
 				.setNumTrades(2400000)
-				.setNumTradesDelta(960)
+				.setNumTradesDelta(0)
 				.setTurnover(360000000)
-				.setTurnoverDelta(540000)
+				.setTurnoverDelta(0)
 				.build();
 		TrigonometricTickSimulation ticker = new TrigonometricTickSimulation(contract.getGatewayId(), PlaybackPrecision.HIGH, contractMgr);
 		List<TickField> ticks = ticker.generateFrom(bar);

@@ -101,10 +101,10 @@ public class TrigonometricTickSimulation implements TickSimulationAlgorithm {
 				.mapToObj(Double::valueOf)
 				.toList();
 		int timeFrame = 60000 / totalSize;
-		long tickVolDelta = bar.getVolumeDelta() / totalSize;
+		long tickVolDelta = bar.getVolume() / totalSize;
 		double tickOpenInterestDelta = bar.getOpenInterestDelta() / totalSize;
-		double tickTurnoverDelta = bar.getTurnoverDelta() / totalSize;
-		long tickNumTradesDelta = bar.getNumTradesDelta() / totalSize;
+		double tickTurnoverDelta = bar.getTurnover() / totalSize;
+		long tickNumTradesDelta = bar.getNumTrades() / totalSize;
 		
 		for(int i=0; i<totalSize; i++) {
 			ticks.add(TickField.newBuilder()
