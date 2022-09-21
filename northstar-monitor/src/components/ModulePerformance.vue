@@ -1,7 +1,5 @@
 <template>
-  <el-dialog title="盈亏曲线" :visible="visible" width="80%" append-to-body :before-close="close">
-    <div id="performance-chart" class="chart-wrapper"></div>
-  </el-dialog>
+  <div :id="chartId" class="chart-wrapper"></div>
 </template>
 
 <script>
@@ -11,10 +9,6 @@ import KLineUtils from '@/utils/kline-utils.js'
 const fields = ['open', 'high', 'close', 'low', 'volume']
 export default {
   props: {
-    visible: {
-      type: Boolean,
-      default: false
-    },
     moduleInitBalance: {
       type: Number,
       default: 0
@@ -26,8 +20,16 @@ export default {
   },
   data() {
     return {
+      chartId: 'perf-chart_' + Math.random(),
       kLineChart: null
     }
+  },
+  mounted() {
+    const kLineChart = init(this.chartId)
+    this.kLineChart = kLineChart
+    this.kLineChart.setStyleOptions(KLineUtils.getThemeOptions('dark'))
+    this.kLineChart.setStyleOptions(KLineUtils.getPerformanceChartOptions())
+    this.updateChart()
   },
   computed: {
     performanceData() {
@@ -51,17 +53,6 @@ export default {
     }
   },
   watch: {
-    visible: function () {
-      this.$nextTick(() => {
-        if (!this.kLineChart) {
-          const kLineChart = init('performance-chart')
-          this.kLineChart = kLineChart
-          this.kLineChart.setStyleOptions(KLineUtils.getThemeOptions('dark'))
-          this.kLineChart.setStyleOptions(KLineUtils.getPerformanceChartOptions())
-        }
-        this.updateChart()
-      })
-    },
     moduleDealRecords: function () {
       if (this.kLineChart) {
         this.updateChart()
@@ -80,11 +71,8 @@ export default {
       this.kLineChart.applyNewData(this.performanceData)
       this.kLineChart.resize() // 防止偶尔渲染不成功
     },
-    close() {
-      this.$emit('update:visible', false)
-    },
     destroyed: function () {
-      dispose('performance-chart')
+      dispose(this.chartId)
     }
   }
 }
@@ -92,6 +80,6 @@ export default {
 
 <style>
 .chart-wrapper {
-  height: 600px;
+  height: 100%;
 }
 </style>

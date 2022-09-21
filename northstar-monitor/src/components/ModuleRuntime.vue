@@ -6,7 +6,7 @@
       :moduleName="module.moduleName"
       @save="onSave"
     />
-    <ModulePerformanceForm
+    <ModulePerformancePopup
       :visible.sync="performanceVisible"
       :moduleInitBalance="accountInfo.initBalance"
       :moduleDealRecords="dealRecords"
@@ -169,6 +169,13 @@
                 <el-table-column prop="tradingDay" label="交易日" align="center" width="100px" />
               </el-table>
             </div>
+            <div class="performance-min">
+              <ModulePerformance
+                :visible.sync="performanceVisible"
+                :moduleInitBalance="accountInfo.initBalance"
+                :moduleDealRecords="dealRecords"
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -252,7 +259,8 @@
 </template>
 <script>
 import ModulePositionForm from './ModulePositionForm.vue'
-import ModulePerformanceForm from './ModulePerformance.vue'
+import ModulePerformance from './ModulePerformance.vue'
+import ModulePerformancePopup from './ModulePerformancePopup.vue'
 import { dispose, init } from 'klinecharts'
 import volumePure from '@/lib/indicator/volume-pure'
 import simpleVal from '@/lib/indicator/simple-value'
@@ -283,7 +291,8 @@ const makeHoldingSegment = (deal) => {
 export default {
   components: {
     ModulePositionForm,
-    ModulePerformanceForm
+    ModulePerformance,
+    ModulePerformancePopup
   },
   props: {
     visible: {
@@ -607,7 +616,10 @@ export default {
 
 <style scoped>
 .table-wrapper {
-  height: calc(100vh - 382px);
+  height: calc(100vh - 682px);
+}
+.performance-min {
+  height: 300px;
 }
 .kline-wrapper {
   width: 100%;
