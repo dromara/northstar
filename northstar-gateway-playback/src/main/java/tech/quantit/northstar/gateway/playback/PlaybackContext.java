@@ -163,7 +163,7 @@ public class PlaybackContext {
 									List<BarField> data = loader.loadDataRaw(queryStart, queryEnd, contract);
 									for(BarField bar : data) {
 										log.debug("Bar信息： {} {}，价格：{}", bar.getActionDay(), bar.getActionTime(), bar.getClosePrice());
-										feEngine.emitEvent(NorthstarEventType.BAR, bar);
+										feEngine.emitEvent(NorthstarEventType.BAR, bar.toBuilder().setGatewayId(gatewaySettings.getGatewayId()).build());
 									}
 									
 									queryStart = queryEnd;
