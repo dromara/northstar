@@ -141,10 +141,16 @@ public class PlaybackContext {
 			@Override
 			public void run() {
 				// 预加载数据
-				if(!hasPreLoaded && StringUtils.isNotBlank(settings.getPreStartDate())) {			
+				if(!hasPreLoaded && StringUtils.isNotBlank(settings.getPreStartDate())) {		
+					feEngine.emitEvent(NorthstarEventType.NOTICE, NoticeField.newBuilder()
+							.setContent(String.format("[%s]-当前处于预热阶段，请稍等……", gatewaySettings.getGatewayId()))
+							.setStatus(CommonStatusEnum.COMS_WARN)
+							.setTimestamp(System.currentTimeMillis())
+							.build());
 					LocalDate preloadStartDate = LocalDate.parse(settings.getPreStartDate(), DateTimeConstant.D_FORMAT_INT_FORMATTER);
 					LocalDate preloadEndDate = playbackTimeState.toLocalDate();
 					log.debug("回放网关 [{}] 正在加载预热数据，预热时间段：{} -> {}", gatewaySettings.getGatewayId(), preloadStartDate, preloadEndDate);
+					
 					playbackTimeState = LocalDateTime.of(preloadEndDate, LocalTime.of(21, 0));
 					
 					CountDownLatch cdl = new CountDownLatch(settings.getUnifiedSymbols().size());
@@ -161,10 +167,12 @@ public class PlaybackContext {
 									}
 									
 									List<BarField> data = loader.loadDataRaw(queryStart, queryEnd, contract);
-									for(BarField bar : data) {
-										log.debug("Bar信息： {} {}，价格：{}", bar.getActionDay(), bar.getActionTime(), bar.getClosePrice());
-										feEngine.emitEvent(NorthstarEventType.BAR, bar.toBuilder().setGatewayId(gatewaySettings.getGatewayId()).build());
-									}
+									data.parallelStream()
+										.map(bar -> bar.toBuilder().setGatewayId(gatewaySettings.getGatewayId()).build())
+										.forEachOrdered(bar -> {
+											log.debug("Bar信息： {} {}，价格：{}", bar.getActionDay(), bar.getActionTime(), bar.getClosePrice());
+											feEngine.emitEvent(NorthstarEventType.BAR, bar);
+										});
 									
 									queryStart = queryEnd;
 									queryEnd = queryEnd.plusWeeks(2);
@@ -180,8 +188,15 @@ public class PlaybackContext {
 						hasPreLoaded = true;
 					} catch (InterruptedException e) {
 						log.warn("预热加载等待被中断", e);
+					} finally {
+						feEngine.emitEvent(NorthstarEventType.NOTICE, NoticeField.newBuilder()
+								.setContent(String.format("[%s]-预热阶段结束，请重新连线，正式开始回放。", gatewaySettings.getGatewayId()))
+								.setStatus(CommonStatusEnum.COMS_WARN)
+								.setTimestamp(System.currentTimeMillis())
+								.build());
 						stop();
 					}
+					return;
 				}
 				
 				while(isTickDataEmpty()) {	
