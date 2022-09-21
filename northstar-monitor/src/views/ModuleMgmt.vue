@@ -67,8 +67,12 @@
 
       <el-table-column label="当前状态" prop="enabled" sortable align="center" width="100px">
         <template slot-scope="scope">
-          <span :class="scope.row.runtime.enabled ? 'color-green' : 'color-red'">
-            {{ scope.row.runtime.enabled ? '运行中' : '已停用' }}
+          <span
+            :class="
+              !scope.row.runtime ? '' : scope.row.runtime.enabled ? 'color-green' : 'color-red'
+            "
+          >
+            {{ !scope.row.runtime ? '加载中' : scope.row.runtime.enabled ? '运行中' : '已停用' }}
           </span>
         </template>
       </el-table-column>
@@ -78,7 +82,7 @@
         </template>
         <template slot-scope="scope">
           <el-popconfirm
-            v-if="scope.row.runtime.enabled"
+            v-if="scope.row.runtime && scope.row.runtime.enabled"
             class="mr-10"
             title="确定停用吗？"
             @confirm="toggle(scope.$index, scope.row)"
@@ -86,20 +90,25 @@
             <el-button type="danger" slot="reference">停用</el-button>
           </el-popconfirm>
           <el-button
-            v-if="!scope.row.runtime.enabled"
+            v-if="scope.row.runtime && !scope.row.runtime.enabled"
             type="success"
             size="mini"
             @click.native="toggle(scope.$index, scope.row)"
           >
             启用
           </el-button>
-          <el-button size="mini" @click="handlePerf(scope.$index, scope.row)">运行状态</el-button>
+          <el-button
+            v-if="scope.row.runtime"
+            size="mini"
+            @click="handlePerf(scope.$index, scope.row)"
+            >运行状态</el-button
+          >
           <el-button size="mini" @click="tailModuleLog(scope.row)">日志跟踪</el-button>
           <el-button size="mini" @click="handleRow(scope.$index, scope.row)">{{
-            scope.row.runtime.enabled ? '查看' : '修改'
+            scope.row.runtime && scope.row.runtime.enabled ? '查看' : '修改'
           }}</el-button>
           <el-popconfirm
-            v-if="!scope.row.runtime.enabled"
+            v-if="scope.row.runtime && !scope.row.runtime.enabled"
             class="ml-10"
             title="确定移除吗？"
             @confirm="handleDelete(scope.$index, scope.row)"
@@ -155,18 +164,21 @@ export default {
       await moduleApi.removeModule(row.moduleName)
       this.findAll()
     },
-    async findAll() {
-      const results = await moduleApi.getAllModules()
-      const allReq = results.map(async (item) => {
-        try {
-          item.runtime = await moduleApi.getModuleRuntime(item.moduleName)
+    findAll() {
+      moduleApi.getAllModules().then((results) => {
+        this.list = results
+        this.list.map((item) => {
+          moduleApi.getModuleRuntime(item.moduleName).then((rt) => {
+            this.list.find((item, index, array) => {
+              if (item.moduleName === rt.moduleName) {
+                array[index] = Object.assign({ runtime: rt }, item)
+                this.list = [...array]
+              }
+            })
+          })
           return item
-        } catch (e) {
-          this.$message.error(`加载模组【${item.moduleName}】失败。原因：${e.message || '未知'}`)
-        }
+        })
       })
-      const moduleList = await Promise.all(allReq)
-      this.list = moduleList.filter((item) => !!item)
     },
     async toggle(index, row) {
       await moduleApi.toggleModuleState(row.moduleName)
