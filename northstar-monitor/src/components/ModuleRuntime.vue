@@ -352,6 +352,11 @@ export default {
     'indicator.name': function () {
       this.indicator.lineStyle = 'line'
     },
+    'dealRecords.length': function () {
+      if (this.holdingVisibleOnChart) {
+        this.visualizeTradeRecords()
+      }
+    },
     isManualUpdate(val) {
       if (val) {
         clearTimeout(this.timer)
