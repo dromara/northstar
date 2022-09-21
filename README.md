@@ -31,7 +31,7 @@
 专业量化操盘手、全栈技术爱好者、小型私募技术团队
 
 **开源不易，感谢点赞关注加收藏！**  
-**详细文档请参考 [【官网文档】](http://www.quantit.tech/)**
+**详细文档请参考 [【官网文档】](https://www.quantit.tech/)**
 
 ## 实盘注意事项
 为了更好地了解实盘用户的使用情况，程序对期货公司做了一定的管理，如需要进行实盘交易，请联系作者咨询。
@@ -51,10 +51,10 @@
 ![输入图片说明](https://images.gitee.com/uploads/images/2022/0721/205844_7985317e_1676852.png "总体架构图.png")
 
 ## 技术支持
-[http://www.quantit.tech/chat-group.html](http://www.quantit.tech/chat-group.html)
+[https://www.quantit.tech/chat-group.html](https://www.quantit.tech/chat-group.html)
 
 ## 注意事项
-- 请使用前先通读一遍 [【官网文档】](http://www.quantit.tech/)  
+- 请使用前先通读一遍 [【官网文档】](https://www.quantit.tech/)  
 - 请勿直接使用master分支的最新代码，应该使用最新的tag来作为开发基线
 - 服务器时间校正为北京时间
 - 尽量不要在开市期间重启程序
