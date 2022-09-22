@@ -101,7 +101,7 @@ public class PlaybackContext {
 		default -> throw new IllegalArgumentException("Unexpected value: " + settings.getSpeed());
 		};
 		
-		log.info("回放网关 [{}] 开始回放。当前时间：{}", gatewaySettings.getGatewayId(), playbackTimeState);
+		log.info("回放网关 [{}] 连线。当前回放时间状态：{}", gatewaySettings.getGatewayId(), playbackTimeState);
 		timer = new Timer();
 		timer.scheduleAtFixedRate(new TimerTask() {
 			
@@ -298,7 +298,7 @@ public class PlaybackContext {
 		isRunning = false;
 		timer.cancel();
 		feEngine.emitEvent(NorthstarEventType.DISCONNECTED, gatewaySettings.getGatewayId());
-		log.info("回放网关 [{}] 结束回放。当前时间：{}", gatewaySettings.getGatewayId(), playbackTimeState);
+		log.info("回放网关 [{}] 断开。当前回放时间状态：{}", gatewaySettings.getGatewayId(), playbackTimeState);
 	}
 	
 	/**
