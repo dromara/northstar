@@ -1,6 +1,6 @@
 {
   "name": "northstar-monitor",
-  "version": "4.2.0-Beta.1",
+  "version": "4.2.0-RC1",
   "private": true,
   "main": "electron/main.js",
   "scripts": {
@@ -19,6 +19,7 @@
     "eslint-plugin-vue": "^6.2.2",
     "google-protobuf": "^3.17.0-rc.1",
     "js-md5": "^0.7.3",
+    "json2csv": "^5.0.7",
     "jstat": "^1.9.5",
     "klinecharts": "^8.5.0",
     "moment": "^2.29.1",

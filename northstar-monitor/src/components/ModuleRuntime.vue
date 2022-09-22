@@ -37,6 +37,12 @@
                 >刷新数据</el-button
               >
               <el-button
+                class="compact mb-10 ml-10"
+                icon="el-icon-download"
+                @click="exportDealRecord"
+                >导出交易</el-button
+              >
+              <el-button
                 class="compact mb-10"
                 icon="el-icon-info"
                 @click="performanceVisible = true"
@@ -266,7 +272,9 @@ import volumePure from '@/lib/indicator/volume-pure'
 import simpleVal from '@/lib/indicator/simple-value'
 import moduleApi from '@/api/moduleApi'
 import KLineUtils from '@/utils/kline-utils.js'
+import { downloadData } from '@/utils/file-utils.js'
 import { jStat } from 'jstat'
+import { parse } from 'json2csv'
 
 import { BarField, PositionField, TradeField } from '@/lib/xyz/redtorch/pb/core_field_pb'
 
@@ -533,6 +541,32 @@ export default {
           }
         })
       })
+    },
+    exportDealRecord() {
+      const fields = [
+        '合约名称',
+        '持仓方向',
+        '开仓价',
+        '开仓时间',
+        '平仓价',
+        '平仓时间',
+        '手数',
+        '交易盈亏'
+      ]
+      const data = this.dealRecords.map((item) => {
+        return {
+          合约名称: item.contractName,
+          持仓方向: item.direction,
+          开仓价: item.openPrice,
+          开仓时间: `${item.openTrade.tradedate} ${item.openTrade.tradetime}`,
+          平仓价: item.closePrice,
+          平仓时间: `${item.closeTrade.tradedate} ${item.closeTrade.tradetime}`,
+          手数: item.volume,
+          交易盈亏: item.dealProfit
+        }
+      })
+      const csvData = parse(data, { fields })
+      downloadData(csvData, `${this.module.moduleName}_交易历史.csv`, 'text/csv,charset=UTF-8')
     },
     initChart() {
       const kLineChart = init(`module-k-line`)
