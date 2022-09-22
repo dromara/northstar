@@ -622,9 +622,15 @@ export default {
 <style scoped>
 .table-wrapper {
   height: calc(100vh - 682px);
+  min-height: 150px;
 }
 .performance-min {
   height: 300px;
+}
+@media screen and (max-height: 600px) {
+  .performance-min {
+    height: 0px;
+  }
 }
 .kline-wrapper {
   width: 100%;

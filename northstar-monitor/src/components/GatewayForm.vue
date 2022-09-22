@@ -92,6 +92,7 @@
               @change="onChooseGatewayType"
             >
               <el-option
+                :id="`bindedGatewayOption_${item.gatewayId}`"
                 :label="item.gatewayId"
                 :value="item.gatewayId"
                 v-for="(item, i) in linkedGatewayOptions"

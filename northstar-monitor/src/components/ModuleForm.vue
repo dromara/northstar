@@ -191,7 +191,9 @@
         合约查询
       </el-button>
       <el-button @click="close">取 消</el-button>
-      <el-button v-if="!readOnly" type="primary" @click="saveSetting(false)">保 存</el-button>
+      <el-button id="saveModuleSettings" v-if="!readOnly" type="primary" @click="saveSetting(false)"
+        >保 存</el-button
+      >
     </div>
   </el-dialog>
 </template>
