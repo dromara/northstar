@@ -655,11 +655,11 @@ export default {
 
 <style scoped>
 .table-wrapper {
-  height: calc(100vh - 682px);
+  height: calc((100vh - 382px) * 0.5);
   min-height: 150px;
 }
 .performance-min {
-  height: 300px;
+  height: calc((100vh - 382px) * 0.5);
 }
 @media screen and (max-height: 600px) {
   .performance-min {
@@ -676,6 +676,7 @@ export default {
   flex: 1;
 }
 .module-rt-wrapper {
+  height: calc(100vh - 80px);
   display: flex;
   border-top: 1px solid;
   border-bottom: 1px solid;
