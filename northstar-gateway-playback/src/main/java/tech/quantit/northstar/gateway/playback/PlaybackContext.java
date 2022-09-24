@@ -67,6 +67,7 @@ public class PlaybackContext {
 	private LocalDateTime playbackTimeState;
 	
 	private boolean isRunning;
+	private boolean isLoading;
 	private Timer timer;
 	
 	public PlaybackContext(PlaybackGatewaySettings settings, LocalDateTime currentTimeState, PlaybackClock clock, TickSimulationAlgorithm tickerAlgo,
@@ -91,9 +92,17 @@ public class PlaybackContext {
 	 * 开始回放
 	 * @throws InterruptedException 
 	 */
-	public void start() {
+	public synchronized void start() {
 		feEngine.emitEvent(NorthstarEventType.CONNECTED, gatewaySettings.getGatewayId());
 		isRunning = true;
+		if(isLoading) {
+			feEngine.emitEvent(NorthstarEventType.NOTICE, NoticeField.newBuilder()
+					.setContent(String.format("[%s]-当前处于预热阶段，请稍等……", gatewaySettings.getGatewayId()))
+					.setStatus(CommonStatusEnum.COMS_WARN)
+					.setTimestamp(System.currentTimeMillis())
+					.build());
+			return;
+		}
 		long rate = switch (settings.getSpeed()) {
 		case NORMAL -> 500;
 		case SPRINT -> 10;
@@ -141,7 +150,8 @@ public class PlaybackContext {
 			@Override
 			public void run() {
 				// 预加载数据
-				if(!hasPreLoaded && StringUtils.isNotBlank(settings.getPreStartDate())) {		
+				if(!hasPreLoaded && StringUtils.isNotBlank(settings.getPreStartDate())) {	
+					isLoading = true;
 					feEngine.emitEvent(NorthstarEventType.NOTICE, NoticeField.newBuilder()
 							.setContent(String.format("[%s]-当前处于预热阶段，请稍等……", gatewaySettings.getGatewayId()))
 							.setStatus(CommonStatusEnum.COMS_WARN)
@@ -180,6 +190,7 @@ public class PlaybackContext {
 								
 								log.debug("回放网关 [{}] 合约 {} 数据预热完毕", gatewaySettings.getGatewayId(), contract.getUnifiedSymbol());
 								cdl.countDown();
+								isLoading = false;
 							}).start()
 						);
 					
@@ -294,7 +305,7 @@ public class PlaybackContext {
 	/**
 	 * 暂停回放
 	 */
-	public void stop() {
+	public synchronized void stop() {
 		isRunning = false;
 		timer.cancel();
 		feEngine.emitEvent(NorthstarEventType.DISCONNECTED, gatewaySettings.getGatewayId());

@@ -8,16 +8,12 @@
     :show-close="false"
     destroy-on-close
   >
-    <div v-if="isUpdateMode" class="warning-text pb-20">
-      <i class="el-icon-warning" /> 回放网关不支持修改操作
-    </div>
     <el-form
       ref="playbackSettings"
       :model="playbackSettings"
       label-width="100px"
       width="200px"
       :rules="formRules"
-      :disabled="isUpdateMode"
     >
       <el-form-item label="预热起始日">
         <el-date-picker
@@ -76,7 +72,7 @@
     </el-form>
     <div slot="footer" class="dialog-footer">
       <el-button @click="close">取 消</el-button>
-      <el-button v-if="!isUpdateMode" type="primary" @click="savePlaybackSetting">保 存</el-button>
+      <el-button type="primary" @click="savePlaybackSetting">保 存</el-button>
     </div>
   </el-dialog>
 </template>
