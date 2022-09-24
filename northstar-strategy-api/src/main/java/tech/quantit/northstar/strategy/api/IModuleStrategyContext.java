@@ -8,12 +8,14 @@ import tech.quantit.northstar.common.constant.ModuleState;
 import tech.quantit.northstar.common.constant.SignalOperation;
 import tech.quantit.northstar.common.model.BarWrapper;
 import tech.quantit.northstar.common.model.TimeSeriesValue;
+import tech.quantit.northstar.strategy.api.constant.DisposablePriceListenerType;
 import tech.quantit.northstar.strategy.api.constant.PriceType;
 import tech.quantit.northstar.strategy.api.indicator.Indicator;
 import tech.quantit.northstar.strategy.api.indicator.Indicator.ValueType;
 import tech.quantit.northstar.strategy.api.indicator.TimeSeriesUnaryOperator;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
+import xyz.redtorch.pb.CoreField.TradeField;
 
 public interface IModuleStrategyContext {
 	/**
@@ -54,11 +56,12 @@ public interface IModuleStrategyContext {
 	 * 【注意】：止盈止损单没有实现状态持仓化，程序重启会导致其丢失，注意处理
 	 * @param unifiedSymbol				合约编码
 	 * @param openDir					开仓方向
+	 * @param listenerType				监听类型
 	 * @param basePrice					基准价格
-	 * @param numOfPriceTickToTrigger	触发价差（正数代表止盈，负数代表止损）
+	 * @param numOfPriceTickToTrigger	触发价差
 	 * return 							监听对象
 	 */
-	IDisposablePriceListener priceTriggerOut(String unifiedSymbol, DirectionEnum openDir, double basePrice, int numOfPriceTickToTrigger, int volume);
+	IDisposablePriceListener priceTriggerOut(String unifiedSymbol, DirectionEnum openDir, DisposablePriceListenerType listenerType, double basePrice, int numOfPriceTickToTrigger, int volume);
 	/**
 	 * 止损止盈操作，达到价位会自动触发平仓逻辑
 	 * 自动失效条件：
@@ -66,14 +69,12 @@ public interface IModuleStrategyContext {
 	 * 2. 模组净持仓为零时
 	 * 可通过 DisposablePriceListener.invalidate 方法主动失效
 	 * 【注意】：止盈止损单没有实现状态持仓化，程序重启会导致其丢失，注意处理
-	 * @param contract					交易合约
-	 * @param openDir					开仓方向
-	 * @param basePrice					基准价格
-	 * @param numOfPriceTickToTrigger	触发价差（正数代表止盈，负数代表止损）
-	 * @param volume					手数
+	 * @param trade						成交对象
+	 * @param listenerType				监听类型
+	 * @param numOfPriceTickToTrigger	触发价差
 	 * return 							监听对象
 	 */
-	IDisposablePriceListener priceTriggerOut(ContractField contract, DirectionEnum openDir, double basePrice, int numOfPriceTickToTrigger, int volume);
+	IDisposablePriceListener priceTriggerOut(TradeField trade, DisposablePriceListenerType listenerType, int numOfTickToTrigger);
 	/**
 	 * 判断订单是否已经超时
 	 * 该方法用于撤单场景

@@ -1,5 +1,6 @@
 package tech.quantit.northstar.strategy.api.utils.trade;
 
+import java.util.Objects;
 import java.util.function.Predicate;
 
 import lombok.Builder;
@@ -28,6 +29,8 @@ public final class DisposablePriceListener implements IDisposablePriceListener {
 	protected String desc;
 	
 	private Predicate<TickField> testFunc;
+	
+	private Runnable callback;
 	
 	public static DisposablePriceListener create(IModuleStrategyContext ctx, ContractField contract, DirectionEnum openDir, double basePrice, int numOfPriceTickToTrigger, int volume) {
 		if(numOfPriceTickToTrigger == 0) {
@@ -93,6 +96,17 @@ public final class DisposablePriceListener implements IDisposablePriceListener {
 	public void execute() {
 		action.run();
 		valid = false;
+		if(Objects.nonNull(callback)) {
+			callback.run();
+		}
+	}
+
+	/**
+	 * 设置监听器触发后回调
+	 */
+	@Override
+	public void setCallback(Runnable callback) {
+		this.callback = callback;
 	}
 	
 }

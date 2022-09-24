@@ -48,6 +48,7 @@ import tech.quantit.northstar.strategy.api.IModuleAccountStore;
 import tech.quantit.northstar.strategy.api.IModuleContext;
 import tech.quantit.northstar.strategy.api.IndicatorFactory;
 import tech.quantit.northstar.strategy.api.TradeStrategy;
+import tech.quantit.northstar.strategy.api.constant.DisposablePriceListenerType;
 import tech.quantit.northstar.strategy.api.constant.PriceType;
 import tech.quantit.northstar.strategy.api.indicator.Indicator;
 import tech.quantit.northstar.strategy.api.indicator.Indicator.Configuration;
@@ -281,17 +282,22 @@ public class ModuleContext implements IModuleContext{
 	}
 	
 	@Override
-	public IDisposablePriceListener priceTriggerOut(String unifiedSymbol, DirectionEnum openDir, double basePrice, int numOfPriceTickToTrigger, int volume) {
-		return priceTriggerOut(getContract(unifiedSymbol), openDir, basePrice, numOfPriceTickToTrigger, volume);
-	}
-	
-	@Override
-	public IDisposablePriceListener priceTriggerOut(ContractField contract, DirectionEnum openDir, double basePrice, int numOfPriceTickToTrigger, int volume) {
-		DisposablePriceListener listener = DisposablePriceListener.create(this, contract, openDir, basePrice, numOfPriceTickToTrigger, volume);
+	public IDisposablePriceListener priceTriggerOut(String unifiedSymbol, DirectionEnum openDir, DisposablePriceListenerType listenerType, double basePrice, int numOfPriceTickToTrigger, int volume) {
+		int factor = switch(listenerType) {
+		case TAKE_PROFIT -> 1;
+		case STOP_LOSS -> -1;
+		default -> throw new IllegalArgumentException("Unexpected value: " + listenerType);
+		};
+		DisposablePriceListener listener = DisposablePriceListener.create(this, getContract(unifiedSymbol), openDir, basePrice, factor * Math.abs(numOfPriceTickToTrigger), volume);
 		if(mlog.isInfoEnabled())
 			mlog.info("增加【{}】", listener.description());
 		listenerSet.add(listener);
 		return listener;
+	}
+	
+	@Override
+	public IDisposablePriceListener priceTriggerOut(TradeField trade, DisposablePriceListenerType listenerType, int numOfPriceTickToTrigger) {
+		return priceTriggerOut(trade.getContract().getUnifiedSymbol(), trade.getDirection(), listenerType, trade.getPrice(), numOfPriceTickToTrigger, trade.getVolume());
 	}
 
 	@Override

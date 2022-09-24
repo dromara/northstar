@@ -13,6 +13,7 @@ import tech.quantit.northstar.strategy.api.AbstractStrategy;
 import tech.quantit.northstar.strategy.api.IModuleContext;
 import tech.quantit.northstar.strategy.api.TradeStrategy;
 import tech.quantit.northstar.strategy.api.annotation.StrategicComponent;
+import tech.quantit.northstar.strategy.api.constant.DisposablePriceListenerType;
 import tech.quantit.northstar.strategy.api.constant.PriceType;
 import tech.quantit.northstar.strategy.api.utils.time.TickBasedTimer;
 import xyz.redtorch.pb.CoreField.ContractField;
@@ -94,8 +95,8 @@ public class ListenerSampleStrategy extends AbstractStrategy implements TradeStr
 			runningTask = null;
 		}
 		if(FieldUtils.isOpen(trade.getOffsetFlag())) {
-			ctx.priceTriggerOut(trade.getContract(), trade.getDirection(), trade.getPrice(), TICK_EARN, 1);		// 设置止盈 	
-			ctx.priceTriggerOut(trade.getContract(), trade.getDirection(), trade.getPrice(), TICK_STOP, 1);		// 设置止损
+			ctx.priceTriggerOut(trade, DisposablePriceListenerType.TAKE_PROFIT, TICK_EARN);		// 设置止盈 	
+			ctx.priceTriggerOut(trade, DisposablePriceListenerType.STOP_LOSS, TICK_STOP);		// 设置止损
 		}
 	}
 	
