@@ -146,7 +146,14 @@ public class IndicatorSampleStrategy extends AbstractStrategy	// 为了简化代
 				.indicatorName("MACD_DEA2")
 				.bindedContract(ctx.getContract(params.indicatorSymbol))
 				.build(), macd.dea());
-		
+		ctx.newIndicator(Indicator.Configuration.builder()
+				.indicatorName("MACD_POST")
+				.bindedContract(ctx.getContract(params.indicatorSymbol))
+				.build(), macd.post());
+		ctx.newIndicator(Indicator.Configuration.builder()
+				.indicatorName("MACD_DIV")
+				.bindedContract(ctx.getContract(params.indicatorSymbol))
+				.build(), macd.divergence());
 	}
 
 	public static class InitParams extends DynamicParams {			
