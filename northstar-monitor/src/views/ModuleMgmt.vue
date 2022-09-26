@@ -104,9 +104,12 @@
             >运行状态</el-button
           >
           <el-button size="mini" @click="tailModuleLog(scope.row)">日志跟踪</el-button>
-          <el-button size="mini" @click="handleRow(scope.$index, scope.row)">{{
-            scope.row.runtime && scope.row.runtime.enabled ? '查看' : '修改'
-          }}</el-button>
+          <el-button
+            v-if="scope.row.runtime"
+            size="mini"
+            @click="handleRow(scope.$index, scope.row)"
+            >{{ scope.row.runtime.enabled ? '查看' : '修改' }}</el-button
+          >
           <el-popconfirm
             v-if="scope.row.runtime && !scope.row.runtime.enabled"
             class="ml-10"
@@ -168,14 +171,21 @@ export default {
       moduleApi.getAllModules().then((results) => {
         this.list = results
         this.list.map((item) => {
-          moduleApi.getModuleRuntime(item.moduleName).then((rt) => {
-            this.list.find((item, index, array) => {
-              if (item.moduleName === rt.moduleName) {
-                array[index] = Object.assign({ runtime: rt }, item)
-                this.list = [...array]
-              }
-            })
-          })
+          moduleApi.getModuleRuntime(item.moduleName).then(
+            (rt) => {
+              this.list.find((item, index, array) => {
+                if (item.moduleName === rt.moduleName) {
+                  array[index] = Object.assign({ runtime: rt }, item)
+                  this.list = [...array]
+                }
+              })
+            },
+            (e) => {
+              console.warn('请求异常：' + e.message)
+              console.log('稍后自动重试')
+              setTimeout(this.findAll, 10000)
+            }
+          )
           return item
         })
       })
