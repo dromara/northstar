@@ -241,24 +241,29 @@ public class DataServiceManager implements IDataServiceManager {
 			String symbol = unifiedSymbol.split("@")[0];
 			String name = getValue("name", fieldIndexMap, item, "");
 			String unitDesc = getValue("quote_unit_desc", fieldIndexMap, item, "");
-			ContractField contract = ContractField.newBuilder()
-					.setUnifiedSymbol(unifiedSymbol)
-					.setSymbol(symbol)
-					.setExchange(exchange)
-					.setCurrency(CurrencyEnum.CNY)
-					.setContractId(unifiedSymbol + "@CTP")
-					.setFullName(name)
-					.setName(name)
-					.setGatewayId("CTP")
-					.setThirdPartyId(symbol + "@CTP")
-					.setLastTradeDateOrContractMonth(getValue("delist_date", fieldIndexMap, item, ""))
-					.setLongMarginRatio(0.1)
-					.setShortMarginRatio(0.1)
-					.setProductClass(ProductClassEnum.FUTURES)
-					.setMultiplier(Double.parseDouble(getValue("per_unit", fieldIndexMap, item, "0")))
-					.setPriceTick(Double.parseDouble(unitDesc.replaceAll("(\\d+\\.?[\\d+]?)[^\\d]+", "$1")))
-					.build();
-			resultList.add(contract);
+			
+			try {				
+				ContractField contract = ContractField.newBuilder()
+						.setUnifiedSymbol(unifiedSymbol)
+						.setSymbol(symbol)
+						.setExchange(exchange)
+						.setCurrency(CurrencyEnum.CNY)
+						.setContractId(unifiedSymbol + "@CTP")
+						.setFullName(name)
+						.setName(name)
+						.setGatewayId("CTP")
+						.setThirdPartyId(symbol + "@CTP")
+						.setLastTradeDateOrContractMonth(getValue("delist_date", fieldIndexMap, item, ""))
+						.setLongMarginRatio(0.1)
+						.setShortMarginRatio(0.1)
+						.setProductClass(ProductClassEnum.FUTURES)
+						.setMultiplier(Double.parseDouble(getValue("per_unit", fieldIndexMap, item, "0")))
+						.setPriceTick(Double.parseDouble(unitDesc.replaceAll("(\\d+\\.?[\\d+]?)[^\\d]+", "$1")))
+						.build();
+				resultList.add(contract);
+			} catch(Exception e) {
+				log.warn("无效合约数据：{}", JSON.toJSONString(item));
+			}
 		}
 		return resultList;
 	}
@@ -341,25 +346,29 @@ public class DataServiceManager implements IDataServiceManager {
 				timestamp = dateTime.toInstant(ZoneOffset.ofHours(8)).toEpochMilli();
 			}
 			
-			resultList.addFirst(BarField.newBuilder()
-					.setUnifiedSymbol(getValue("ns_code", fieldIndexMap, item, ""))
-					.setTradingDay(tradingDay)
-					.setActionDay(actionDay)
-					.setActionTime(actionTime)
-					.setActionTimestamp(timestamp)
-					.setHighPrice(Double.parseDouble(getValue("high", fieldIndexMap, item, "0")))
-					.setClosePrice(Double.parseDouble(getValue("close", fieldIndexMap, item, "0")))
-					.setLowPrice(Double.parseDouble(getValue("low", fieldIndexMap, item, "0")))
-					.setOpenPrice(Double.parseDouble(getValue("open", fieldIndexMap, item, "0")))
-					.setGatewayId("CTP行情")
-					.setOpenInterestDelta(Double.parseDouble(getValue("oi_chg", fieldIndexMap, item, "0")))
-					.setOpenInterest(Double.parseDouble(getValue("oi", fieldIndexMap, item, "0")))
-					.setVolume((long) Double.parseDouble(getValue("vol", fieldIndexMap, item, "0")))
-					.setTurnover(Double.parseDouble(getValue("amount", fieldIndexMap, item, "0")))
-					.setPreClosePrice(Double.parseDouble(getValue("pre_close", fieldIndexMap, item, "0")))
-					.setPreSettlePrice(Double.parseDouble(getValue("pre_settle", fieldIndexMap, item, "0")))
-					.setPreOpenInterest(Double.parseDouble(getValue("oi", fieldIndexMap, item, "0")) - Double.parseDouble(getValue("oi_chg", fieldIndexMap, item, "0")))
-					.build());
+			try {				
+				resultList.addFirst(BarField.newBuilder()
+						.setUnifiedSymbol(getValue("ns_code", fieldIndexMap, item, ""))
+						.setTradingDay(tradingDay)
+						.setActionDay(actionDay)
+						.setActionTime(actionTime)
+						.setActionTimestamp(timestamp)
+						.setHighPrice(Double.parseDouble(getValue("high", fieldIndexMap, item, "0")))
+						.setClosePrice(Double.parseDouble(getValue("close", fieldIndexMap, item, "0")))
+						.setLowPrice(Double.parseDouble(getValue("low", fieldIndexMap, item, "0")))
+						.setOpenPrice(Double.parseDouble(getValue("open", fieldIndexMap, item, "0")))
+						.setGatewayId("CTP行情")
+						.setOpenInterestDelta(Double.parseDouble(getValue("oi_chg", fieldIndexMap, item, "0")))
+						.setOpenInterest(Double.parseDouble(getValue("oi", fieldIndexMap, item, "0")))
+						.setVolume((long) Double.parseDouble(getValue("vol", fieldIndexMap, item, "0")))
+						.setTurnover(Double.parseDouble(getValue("amount", fieldIndexMap, item, "0")))
+						.setPreClosePrice(Double.parseDouble(getValue("pre_close", fieldIndexMap, item, "0")))
+						.setPreSettlePrice(Double.parseDouble(getValue("pre_settle", fieldIndexMap, item, "0")))
+						.setPreOpenInterest(Double.parseDouble(getValue("oi", fieldIndexMap, item, "0")) - Double.parseDouble(getValue("oi_chg", fieldIndexMap, item, "0")))
+						.build());
+			} catch(Exception e) {
+				log.warn("无效合约数据：{}", JSON.toJSONString(item));
+			}
 		}
 		
 		return resultList;
