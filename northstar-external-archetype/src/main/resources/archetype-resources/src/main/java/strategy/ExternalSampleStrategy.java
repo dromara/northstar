@@ -12,8 +12,10 @@ import tech.quantit.northstar.strategy.api.TradeStrategy;
 import tech.quantit.northstar.strategy.api.annotation.StrategicComponent;
 import tech.quantit.northstar.strategy.api.constant.PriceType;
 import tech.quantit.northstar.strategy.api.indicator.Indicator;
+import tech.quantit.northstar.strategy.api.indicator.Indicator.Configuration;
 import tech.quantit.northstar.strategy.api.indicator.function.AverageFunctions;
 import xyz.redtorch.pb.CoreField.BarField;
+import xyz.redtorch.pb.CoreField.ContractField;
 
 /**
  * 本示例用于展示外置策略
@@ -95,10 +97,9 @@ public class ExternalSampleStrategy extends AbstractStrategy	// 为了简化代�
 	@Override
 	protected void initIndicators() {
 		// 简单指标的创建 
-		this.fastLine = ctx.newIndicator("快线", params.indicatorSymbol, AverageFunctions.MA(params.fast));
-		this.slowLine = ctx.newIndicator("慢线", params.indicatorSymbol, AverageFunctions.MA(params.slow));
-		// 成交量加权均价线
-		this.settleLine = ctx.newIndicator("加权线", params.indicatorSymbol, AverageFunctions.SETTLE());
+		ContractField contract = ctx.getContract(params.indicatorSymbol);
+		this.fastLine = ctx.newIndicator(Configuration.builder().indicatorName("快线").bindedContract(contract).build(), AverageFunctions.MA(params.fast));
+		this.slowLine = ctx.newIndicator(Configuration.builder().indicatorName("慢线").bindedContract(contract).build(), AverageFunctions.MA(params.slow));
 	}
 
 	public static class InitParams extends DynamicParams {			
