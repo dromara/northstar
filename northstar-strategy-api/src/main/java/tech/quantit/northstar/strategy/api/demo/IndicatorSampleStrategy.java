@@ -13,6 +13,7 @@ import tech.quantit.northstar.strategy.api.TradeStrategy;
 import tech.quantit.northstar.strategy.api.annotation.StrategicComponent;
 import tech.quantit.northstar.strategy.api.constant.PriceType;
 import tech.quantit.northstar.strategy.api.indicator.Indicator;
+import tech.quantit.northstar.strategy.api.indicator.Indicator.PeriodUnit;
 import tech.quantit.northstar.strategy.api.indicator.complex.MACD;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.TickField;
@@ -117,20 +118,28 @@ public class IndicatorSampleStrategy extends AbstractStrategy	// 为了简化代
 		this.fastLine = ctx.newIndicator(Indicator.Configuration.builder()
 				.indicatorName("快线")
 				.bindedContract(ctx.getContract(params.indicatorSymbol))
+				.numOfUnits(ctx.numOfMinPerModuleBar())
+				.period(PeriodUnit.MINUTE)
 				.build(), MA(params.fast));
 		this.slowLine = ctx.newIndicator(Indicator.Configuration.builder()
 				.indicatorName("慢线")
 				.bindedContract(ctx.getContract(params.indicatorSymbol))
+				.numOfUnits(ctx.numOfMinPerModuleBar())
+				.period(PeriodUnit.MINUTE)
 				.build(), MA(params.slow));
 
 		// 复杂指标的创建；MACD的原始写法
 		this.macdDiff = ctx.newIndicator(Indicator.Configuration.builder()
 				.indicatorName("MACD_DIF")
 				.bindedContract(ctx.getContract(params.indicatorSymbol))
+				.numOfUnits(ctx.numOfMinPerModuleBar())
+				.period(PeriodUnit.MINUTE)
 				.build(), minus(EMA(12), EMA(26)));
 		this.macdDea = ctx.newIndicator(Indicator.Configuration.builder()
 				.indicatorName("MACD_DEA")
 				.bindedContract(ctx.getContract(params.indicatorSymbol))
+				.numOfUnits(ctx.numOfMinPerModuleBar())
+				.period(PeriodUnit.MINUTE)
 				.build(), minus(EMA(12), EMA(26)).andThen(EMA(9)));
 
 		
@@ -141,18 +150,26 @@ public class IndicatorSampleStrategy extends AbstractStrategy	// 为了简化代
 		ctx.newIndicator(Indicator.Configuration.builder()
 				.indicatorName("MACD_DIF2")
 				.bindedContract(ctx.getContract(params.indicatorSymbol))
+				.numOfUnits(ctx.numOfMinPerModuleBar())
+				.period(PeriodUnit.MINUTE)
 				.build(), macd.diff());
 		ctx.newIndicator(Indicator.Configuration.builder()
 				.indicatorName("MACD_DEA2")
 				.bindedContract(ctx.getContract(params.indicatorSymbol))
+				.numOfUnits(ctx.numOfMinPerModuleBar())
+				.period(PeriodUnit.MINUTE)
 				.build(), macd.dea());
 		ctx.newIndicator(Indicator.Configuration.builder()
 				.indicatorName("MACD_POST")
 				.bindedContract(ctx.getContract(params.indicatorSymbol))
+				.numOfUnits(ctx.numOfMinPerModuleBar())
+				.period(PeriodUnit.MINUTE)
 				.build(), macd.post());
 		ctx.newIndicator(Indicator.Configuration.builder()
 				.indicatorName("MACD_DIV")
 				.bindedContract(ctx.getContract(params.indicatorSymbol))
+				.numOfUnits(ctx.numOfMinPerModuleBar())
+				.period(PeriodUnit.MINUTE)
 				.build(), macd.divergence());
 	}
 

@@ -89,6 +89,11 @@ public interface IModuleStrategyContext {
 	 */
 	void cancelOrder(String originOrderId);
 	/**
+	 * 获取模组周期设置
+	 * @return
+	 */
+	int numOfMinPerModuleBar();
+	/**
 	 * 模组持仓净盈亏
 	 * @return
 	 */

@@ -171,11 +171,11 @@ public class MACD {
 				if(last3Posts.get(0).getValue() > last3Posts.get(1).getValue() && last3Posts.get(1).getValue() < last3Posts.get(2).getValue()) {
 					double area = - last3Posts.stream().mapToDouble(TimeSeriesValue::getValue).sum();
 					
-					if(area < lastSectionGreenArea.get() && sectionGreenArea.get() == 0 && last3Bars.get(1) < sectionLowestClose.get()) {
+					if(area < lastSectionGreenArea.get() && sectionGreenArea.get() == 0 && last3Bars.get(1) < lastSectionLowestClose.get()) {
 						divergenceCount.getAndAdd(-SECTION_OFFSET);
 					}
 					
-					if(area < sectionGreenArea.get() && last3Bars.get(1) < lastSectionLowestClose.get()) {
+					if(area < sectionGreenArea.get() && last3Bars.get(1) < sectionLowestClose.get()) {
 						divergenceCount.getAndAdd(-OFFSET);
 					}
 					sectionGreenArea.set(area);

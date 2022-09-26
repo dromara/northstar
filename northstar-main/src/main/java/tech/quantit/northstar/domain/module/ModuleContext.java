@@ -318,6 +318,11 @@ public class ModuleContext implements IModuleContext{
 	}
 	
 	@Override
+	public int numOfMinPerModuleBar() {
+		return numOfMinsPerBar;
+	}
+	
+	@Override
 	public int holdingNetProfit() {
 		return gatewayMap.values().stream()
 				.map(gw -> gw.getGatewaySetting().getGatewayId())
