@@ -35,9 +35,9 @@ public class RingArray<T> {
 			array[cursor] = obj;
 			return Optional.ofNullable(obj);
 		}
-		cursor = getIndex(1);
 		T oldVal = (T) array[cursor]; 
 		array[cursor] = obj;
+		cursor = getIndex(1);
 		return Optional.ofNullable(oldVal);
 	}
 	
