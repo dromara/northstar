@@ -165,12 +165,6 @@ public class IndicatorSampleStrategy extends AbstractStrategy	// 为了简化代
 				.numOfUnits(ctx.numOfMinPerModuleBar())
 				.period(PeriodUnit.MINUTE)
 				.build(), macd.post());
-		ctx.newIndicator(Indicator.Configuration.builder()
-				.indicatorName("MACD_DIV")
-				.bindedContract(ctx.getContract(params.indicatorSymbol))
-				.numOfUnits(ctx.numOfMinPerModuleBar())
-				.period(PeriodUnit.MINUTE)
-				.build(), macd.divergence());
 	}
 
 	public static class InitParams extends DynamicParams {			
