@@ -1,7 +1,5 @@
 package tech.quantit.northstar.strategy.api.utils.collection;
 
-import java.util.Optional;
-
 public class RingArray<T> {
 
 	private Object[] array;
@@ -29,16 +27,13 @@ public class RingArray<T> {
 	 * @param obj	返回旧值
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
-	public Optional<T> update(T obj, boolean unsettled) {
+	public void update(T obj, boolean unsettled) {
 		if(unsettled) {
 			array[cursor] = obj;
-			return Optional.ofNullable(obj);
 		}
-		T oldVal = (T) array[cursor]; 
-		array[cursor] = obj;
+		array[cursor] = obj;	// 最终回溯步长为1的值
 		cursor = getIndex(1);
-		return Optional.ofNullable(oldVal);
+		array[cursor] = obj;	// 最终回溯步长为0的值
 	}
 	
 	private int getIndex(int i) {
