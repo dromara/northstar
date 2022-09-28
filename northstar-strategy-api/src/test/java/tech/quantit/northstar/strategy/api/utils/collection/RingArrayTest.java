@@ -8,17 +8,19 @@ class RingArrayTest {
 
 	@Test
 	void test() {
-		Object[] sample = new Object[] {new Object(), new Object(), new Object(), new Object(), new Object(), new Object()};
+		int[] sample = new int[] {10, 11, 12, 13, 14, 15};
 		RingArray<Object> ring = new RingArray<>(4);
-		for(Object obj : sample) {
-			ring.update(obj, false);
+		for(int i=0; i<sample.length - 1; i++) {
+			ring.update(sample[i], false);
 		}
+		ring.update(sample[sample.length - 1], true);
 		
-		assertThat(ring.get()).isEqualTo(sample[5]);
-		assertThat(ring.get(1)).isEqualTo(sample[2]);
-		assertThat(ring.get(2)).isEqualTo(sample[3]);
-		assertThat(ring.get(-2)).isEqualTo(sample[3]);
-		assertThat(ring.get(-1)).isEqualTo(sample[4]);
+		assertThat(ring.get()).isEqualTo(15);
+		assertThat(ring.get(0)).isEqualTo(15);
+		assertThat(ring.get(1)).isEqualTo(12);
+		assertThat(ring.get(2)).isEqualTo(13);
+		assertThat(ring.get(-2)).isEqualTo(13);
+		assertThat(ring.get(-1)).isEqualTo(14);
 	}
 
 }

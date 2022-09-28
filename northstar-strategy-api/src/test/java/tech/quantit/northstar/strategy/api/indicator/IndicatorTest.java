@@ -64,7 +64,7 @@ class IndicatorTest {
 	void testHighestPosition() {
 		double[] data = new double[] {5000D, 5001D, 4988D, 5050D, 5022D};
 		for(int i=0; i<5; i++) {
-			indicator.updateVal(new TimeSeriesValue(data[i], 123456789 + i * 100));
+			indicator.updateVal(new TimeSeriesValue(data[i], 123456789 + i * 100, i==4));
 		}
 		assertThat(indicator.highestPosition()).isEqualTo(1);
 	}
@@ -73,7 +73,7 @@ class IndicatorTest {
 	void testLowestPosition() {
 		double[] data = new double[] {5000D, 5001D, 4988D, 5050D, 5022D};
 		for(int i=0; i<5; i++) {
-			indicator.updateVal(new TimeSeriesValue(data[i], 123456789 + i * 100));
+			indicator.updateVal(new TimeSeriesValue(data[i], 123456789 + i * 100, i==4));
 		}
 		assertThat(indicator.lowestPosition()).isEqualTo(2);
 	}
@@ -82,7 +82,7 @@ class IndicatorTest {
 	void testGetData() {
 		double[] data = new double[] {5000D, 5001D, 4988D, 5050D, 5022D};
 		for(int i=0; i<5; i++) {
-			indicator.updateVal(new TimeSeriesValue(data[i], 123456789 + i * 100));
+			indicator.updateVal(new TimeSeriesValue(data[i], 123456789 + i * 100, i==4));
 		}
 		assertThat(indicator.getData()).hasSize(5);
 	}
