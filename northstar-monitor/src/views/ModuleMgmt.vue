@@ -141,7 +141,8 @@ export default {
       ModuleRuntimeVisible: false,
       curTableIndex: -1,
       curModule: null,
-      list: []
+      list: [],
+      timer: -1
     }
   },
   mounted() {
@@ -183,7 +184,8 @@ export default {
             (e) => {
               console.warn('请求异常：' + e.message)
               console.log('稍后自动重试')
-              setTimeout(this.findAll, 10000)
+              clearTimeout(this.timer)
+              this.timer = setTimeout(this.findAll, 10000)
             }
           )
           return item
