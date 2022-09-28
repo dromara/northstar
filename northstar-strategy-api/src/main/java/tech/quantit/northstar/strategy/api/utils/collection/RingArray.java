@@ -30,6 +30,7 @@ public class RingArray<T> {
 	public void update(T obj, boolean unsettled) {
 		if(unsettled) {
 			array[cursor] = obj;
+			return;
 		}
 		array[cursor] = obj;	// 最终回溯步长为1的值
 		cursor = getIndex(1);

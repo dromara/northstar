@@ -36,8 +36,6 @@ public class ExternalSampleStrategy extends AbstractStrategy	// 为了简化代�
 	
 	private Indicator slowLine;
 	
-	private Indicator settleLine;
-	
 	@Override
 	protected void onBar(BarField bar) {
 		log.debug("{} K线数据： 开 [{}], 高 [{}], 低 [{}], 收 [{}]", 
@@ -77,11 +75,11 @@ public class ExternalSampleStrategy extends AbstractStrategy	// 为了简化代�
 	}
 	
 	private boolean shouldBuy() {
-		return fastLine.value(0) > slowLine.value(0) && fastLine.value(0) > settleLine.value(0);
+		return fastLine.value(0) > slowLine.value(0);
 	}
 	
 	private boolean shouldSell() {
-		return fastLine.value(0) < slowLine.value(0) && fastLine.value(0) < settleLine.value(0);
+		return fastLine.value(0) < slowLine.value(0);
 	}
 
 	@Override
