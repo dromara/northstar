@@ -9,7 +9,7 @@ northstar:
     sampling-interval: 60 
   # 历史数据服务（需要购买用户授权）
   data-service:
-    baseUrl: https://dataservice.盈富量化.中国:44388
+    baseUrl: https://service.quantit.tech:44388
 
 logging:  level: 
     root: info
