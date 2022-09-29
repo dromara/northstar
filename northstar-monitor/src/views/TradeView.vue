@@ -201,14 +201,12 @@ export default {
       }
       clearTimeout(accountCheckTimer)
       const timelyCheck = () => {
-        accountCheckTimer = setTimeout(() => {
-          if (!this.$store.getters.isAccountConnected(this.chosenAccount.gatewayId)) {
-            this.$message.warning(
-              `账户【${this.chosenAccount.gatewayId}】超时没有反馈，可能账户未连线或者处于停盘时间`
-            )
-          }
-          timelyCheck()
-        }, 3000)
+        if (!this.$store.getters.isAccountConnected(this.chosenAccount.gatewayId)) {
+          this.$message.warning(
+            `账户【${this.chosenAccount.gatewayId}】超时没有反馈，可能账户未连线或者处于停盘时间`
+          )
+        }
+        accountCheckTimer = setTimeout(timelyCheck, 6000)
       }
       timelyCheck()
 
