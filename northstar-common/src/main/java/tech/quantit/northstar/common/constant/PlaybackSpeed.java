@@ -11,7 +11,7 @@ public enum PlaybackSpeed {
 	 */
 	NORMAL,
 	/**
-	 * 超快速度
+	 * 快速度
 	 */
 	SPRINT,
 	/**

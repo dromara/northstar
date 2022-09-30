@@ -48,7 +48,7 @@
       <el-form-item label="回放速度">
         <el-select v-model="playbackSettings.speed">
           <el-option label="正常" value="NORMAL" key="1"></el-option>
-          <el-option label="极速" value="SPRINT" key="2"></el-option>
+          <el-option label="快速" value="SPRINT" key="2"></el-option>
           <el-option label="超速" value="RUSH" key="3"></el-option>
         </el-select>
       </el-form-item>
