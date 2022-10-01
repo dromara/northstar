@@ -23,4 +23,20 @@ class RingArrayTest {
 		assertThat(ring.get(-1)).isEqualTo(14);
 	}
 
+	
+	@Test
+	void test1() {
+		int[] sample = new int[] {10, 11, 12, 13, 14, 15};
+		RingArray<Object> ring = new RingArray<>(4);
+		for(int i=0; i<sample.length; i++) {
+			ring.update(sample[i], false);
+		}
+		
+		assertThat(ring.get()).isEqualTo(15);
+		assertThat(ring.get(0)).isEqualTo(15);
+		assertThat(ring.get(1)).isEqualTo(12);
+		assertThat(ring.get(2)).isEqualTo(13);
+		assertThat(ring.get(-2)).isEqualTo(13);
+		assertThat(ring.get(-1)).isEqualTo(14);
+	}
 }

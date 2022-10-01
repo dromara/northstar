@@ -8,6 +8,8 @@ public class RingArray<T> {
 	
 	private int cursor;
 	
+	private boolean lastFlag = true;
+	
 	public RingArray(int size) {
 		this.array = new Object[size];
 		this.size = size;
@@ -29,16 +31,21 @@ public class RingArray<T> {
 	 */
 	public void update(T obj, boolean unsettled) {
 		if(unsettled) {
+			if(lastFlag != unsettled) {
+				cursor = getIndex(1);
+			}
 			array[cursor] = obj;
+			lastFlag = unsettled;
 			return;
 		}
-		array[cursor] = obj;	// 最终回溯步长为1的值
-		cursor = getIndex(1);
-		array[cursor] = obj;	// 最终回溯步长为0的值
+		int incr = lastFlag == unsettled ? 1 : 0;
+		cursor = getIndex(incr);
+		array[cursor] = obj;	
+		lastFlag = unsettled;
 	}
 	
-	private int getIndex(int i) {
-		return (cursor + size + i) % size;
+	private int getIndex(int incr) {
+		return (cursor + size + incr) % size;
 	}
 	
 	public Object[] toArray() {
