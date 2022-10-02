@@ -2,6 +2,8 @@ package tech.quantit.northstar.strategy.api.utils.collection;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.concurrent.ThreadLocalRandom;
+
 import org.junit.jupiter.api.Test;
 
 class RingArrayTest {
@@ -10,10 +12,12 @@ class RingArrayTest {
 	void test() {
 		int[] sample = new int[] {10, 11, 12, 13, 14, 15};
 		RingArray<Object> ring = new RingArray<>(4);
-		for(int i=0; i<sample.length - 1; i++) {
+		for(int i=0; i<sample.length; i++) {
+			for(int j=0; j<3; j++) {
+				ring.update(sample[i] + (ThreadLocalRandom.current().nextBoolean() ? 1 : -1) * ThreadLocalRandom.current().nextInt(3), true);
+			}
 			ring.update(sample[i], false);
 		}
-		ring.update(sample[sample.length - 1], true);
 		
 		assertThat(ring.get()).isEqualTo(15);
 		assertThat(ring.get(0)).isEqualTo(15);
