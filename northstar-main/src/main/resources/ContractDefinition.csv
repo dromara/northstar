@@ -84,7 +84,7 @@ CTP,OPTION,CZCE,"CF[0-9]{3,4}[^@].+",棉花,1.5,
 CTP,OPTION,DCE,"c[0-9]{3,4}[^@].+",玉米,0.6,
 CTP,OPTION,DCE,"i[0-9]{3,4}[^@].+",铁矿石,2,
 CTP,OPTION,DCE,"l[0-9]{3,4}[^@].+",聚乙烯,0.5,
-CTP,OPTION,CZCE,"TA[0-9]{3,4}[^@].+",化纤,0.5,
+CTP,OPTION,CZCE,"TA[0-9]{3,4}[^@].+",PTA,0.5,
 CTP,OPTION,DCE,"m[0-9]{3,4}[^@].+",豆粕,1,
 CTP,OPTION,DCE,"p[0-9]{3,4}[^@].+",棕榈油,0.5,
 CTP,OPTION,SHFE,"cu[0-9]{3,4}[^@].+",沪铜,5,
@@ -98,7 +98,7 @@ PLAYBACK,FUTURES,CFFEX,"IC[0-9]{3,4}@.+",IC股指,,0.23
 PLAYBACK,FUTURES,CZCE,"UR[0-9]{3,4}@.+",尿素,5,
 PLAYBACK,FUTURES,CFFEX,"IF[0-9]{3,4}@.+",IF股指,,0.23
 PLAYBACK,FUTURES,CFFEX,"IH[0-9]{3,4}@.+",IH股指,,0.23
-PLAYBACK,FUTURES,DCE,"eg[0-9]{3,4}@.+",乙醇,3,
+PLAYBACK,FUTURES,DCE,"eg[0-9]{3,4}@.+",乙二醇,3,
 PLAYBACK,FUTURES,SHFE,"ag[0-9]{3,4}@.+",白银,,0.1
 PLAYBACK,FUTURES,CZCE,"ZC[0-9]{3,4}@.+",动力煤,30,
 PLAYBACK,FUTURES,SHFE,"al[0-9]{3,4}@.+",沪铝,3,
@@ -136,7 +136,7 @@ PLAYBACK,FUTURES,DCE,"c[0-9]{3,4}@.+",玉米,1.2,
 PLAYBACK,FUTURES,DCE,"i[0-9]{3,4}@.+",铁矿石,,1
 PLAYBACK,FUTURES,DCE,"j[0-9]{3,4}@.+",焦炭,,1
 PLAYBACK,FUTURES,DCE,"l[0-9]{3,4}@.+",聚乙烯,1,
-PLAYBACK,FUTURES,CZCE,"TA[0-9]{3,4}@.+",化纤,3,
+PLAYBACK,FUTURES,CZCE,"TA[0-9]{3,4}@.+",PTA,3,
 PLAYBACK,FUTURES,DCE,"m[0-9]{3,4}@.+",豆粕,1.5,
 PLAYBACK,FUTURES,DCE,"cs[0-9]{3,4}@.+",淀粉,1.5,
 PLAYBACK,FUTURES,DCE,"p[0-9]{3,4}@.+",棕榈油,2.5,
