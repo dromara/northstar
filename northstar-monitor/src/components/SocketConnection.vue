@@ -77,28 +77,28 @@ export default {
         query: { auth: token }
       })
       this.socket.on('TICK', (data) => {
-        let tick = TickField.deserializeBinary(data).toObject()
-        this.$store.commit('updateTick', tick)
-      })
-      this.socket.on('IDX_TICK', (data) => {
-        let tick = TickField.deserializeBinary(data).toObject()
-        this.$store.commit('updateTick', tick)
+        this.$nextTick(() => {
+          let tick = TickField.deserializeBinary(data).toObject()
+          this.$store.commit('updateTick', tick)
+        })
       })
       this.socket.on('BAR', (data) => {
-        let bar = BarField.deserializeBinary(data).toObject()
-        this.$store.commit('updateBar', bar)
-      })
-      this.socket.on('HIS_BAR', (data) => {
-        let bar = BarField.deserializeBinary(data).toObject()
-        this.$store.commit('updateHisBar', bar)
+        this.$nextTick(() => {
+          let bar = BarField.deserializeBinary(data).toObject()
+          this.$store.commit('updateBar', bar)
+        })
       })
       this.socket.on('ACCOUNT', (data) => {
-        let account = AccountField.deserializeBinary(data).toObject()
-        this.$store.commit('updateAccount', account)
+        this.$nextTick(() => {
+          let account = AccountField.deserializeBinary(data).toObject()
+          this.$store.commit('updateAccount', account)
+        })
       })
       this.socket.on('POSITION', (data) => {
-        let position = PositionField.deserializeBinary(data).toObject()
-        this.$store.commit('updatePosition', position)
+        this.$nextTick(() => {
+          let position = PositionField.deserializeBinary(data).toObject()
+          this.$store.commit('updatePosition', position)
+        })
       })
       this.socket.on('TRADE', (data) => {
         let trade = TradeField.deserializeBinary(data).toObject()
