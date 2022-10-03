@@ -32,7 +32,6 @@ public class ModuleLoggerFactory implements ILoggerFactory{
 	@Override
 	public synchronized Logger getLogger(String name) {
 		String logPath = System.getProperty("LOG_PATH");
-		String logLevel = System.getProperty("LOG_LEVEL");
 		if(loggerMap.containsKey(name)) {
 			return loggerMap.get(name);
 		}
@@ -57,7 +56,7 @@ public class ModuleLoggerFactory implements ILoggerFactory{
 		}
 	    
         ch.qos.logback.classic.Logger rootLogger = loggerContext.getLogger(name);
-        rootLogger.setLevel(Level.toLevel(logLevel));
+        rootLogger.setLevel(Level.INFO);
         rootLogger.addAppender(rollingFileAppender);
         
 		loggerMap.put(name, rootLogger);
