@@ -150,4 +150,9 @@ public interface IModuleStrategyContext {
 	 * @return
 	 */
 	Indicator newIndicator(Indicator.Configuration configuration, Function<BarWrapper, TimeSeriesValue> indicatorFunction);
+	/**
+	 * 绑定组合指标
+	 * @param comboIndicator
+	 */
+	void addComboIndicator(IComboIndicator comboIndicator);
 }

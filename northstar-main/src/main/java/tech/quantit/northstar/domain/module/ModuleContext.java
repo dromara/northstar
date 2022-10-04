@@ -42,6 +42,7 @@ import tech.quantit.northstar.common.utils.FieldUtils;
 import tech.quantit.northstar.common.utils.OrderUtils;
 import tech.quantit.northstar.gateway.api.TradeGateway;
 import tech.quantit.northstar.strategy.api.ClosingStrategy;
+import tech.quantit.northstar.strategy.api.IComboIndicator;
 import tech.quantit.northstar.strategy.api.IDisposablePriceListener;
 import tech.quantit.northstar.strategy.api.IModule;
 import tech.quantit.northstar.strategy.api.IModuleAccountStore;
@@ -125,6 +126,8 @@ public class ModuleContext implements IModuleContext{
 	private Consumer<ModuleDealRecord> onDealCallback;
 	
 	private final IndicatorFactory indicatorFactory = new IndicatorFactory();
+	
+	private final HashSet<IComboIndicator> comboIndicators = new HashSet<>();
 	
 	private final AtomicInteger bufSize = new AtomicInteger(0);
 	
@@ -365,6 +368,7 @@ public class ModuleContext implements IModuleContext{
 			tradingDay = tick.getTradingDay();
 		}
 		indicatorFactory.getIndicatorMap().values().parallelStream().forEach(indicator -> indicator.onTick(tick));
+		comboIndicators.parallelStream().forEach(combo -> combo.onTick(tick));
 		accStore.onTick(tick);
 		latestTickMap.put(tick.getUnifiedSymbol(), tick);
 		listenerSet.stream()
@@ -386,6 +390,7 @@ public class ModuleContext implements IModuleContext{
 			return;
 		}
 		indicatorFactory.getIndicatorMap().entrySet().parallelStream().forEach(e -> e.getValue().onBar(bar));
+		comboIndicators.parallelStream().forEach(combo -> combo.onBar(bar));
 		contractBarMergerMap.get(bar.getUnifiedSymbol()).updateBar(bar);
 	}
 	
@@ -514,6 +519,11 @@ public class ModuleContext implements IModuleContext{
 		Assert.isTrue(configuration.getIndicatorRefLength() > 0, "指标回溯长度必须大于0，当前为：" + configuration.getIndicatorRefLength());
 		indicatorValBufQMap.put(configuration.getIndicatorName(), new LinkedList<>());
 		return indicatorFactory.newIndicator(configuration, indicatorFunction);
+	}
+
+	@Override
+	public void addComboIndicator(IComboIndicator comboIndicator) {
+		comboIndicators.add(comboIndicator);
 	}
 
 }
