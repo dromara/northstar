@@ -197,10 +197,7 @@ export default {
       await this.findAll()
     },
     tailModuleLog(row) {
-      this.$router.push({
-        name: 'logger',
-        query: { auth: this.$route.query.auth, module: row.moduleName }
-      })
+      this.$parent.handleSelect('9', { module: row.moduleName })
     }
   }
 }

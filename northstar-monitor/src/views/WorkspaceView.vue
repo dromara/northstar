@@ -16,7 +16,7 @@
         <el-menu-item index="3">模组管理</el-menu-item>
         <!-- <el-menu-item index="5">手工期权交易</el-menu-item> -->
         <el-menu-item index="6">手工期货交易</el-menu-item>
-        <el-menu-item index="9">日志跟踪</el-menu-item>
+        <el-menu-item index="9" @click="systemLogger">日志跟踪</el-menu-item>
       </el-menu>
       <div class="ns-tools">
         <el-button
@@ -77,12 +77,15 @@ export default {
     this.curPage = pageOptsRevert[this.$route.name]
   },
   methods: {
-    handleSelect(index) {
+    handleSelect(index, params) {
       if (index === this.curPage) {
         return
       }
       this.curPage = index
-      this.$router.push({ name: pageOpts[index], query: { auth: this.$route.query.auth } })
+      this.$router.push({
+        name: pageOpts[index],
+        query: Object.assign({ auth: this.$route.query.auth }, params)
+      })
     },
     logout() {
       loginApi.logout()
