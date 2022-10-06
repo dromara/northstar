@@ -63,8 +63,7 @@ public class IndicatorDemoStrategy extends AbstractStrategy	// 为了简化代�
 		ctx.newIndicator(Configuration.builder().indicatorName("LWR1").bindedContract(c).build(), lwr.fast());
 		ctx.newIndicator(Configuration.builder().indicatorName("LWR2").bindedContract(c).build(), lwr.slow());
 		
-		WAVE waveShape = WAVE.of(20, 3);
-		ctx.newIndicator(Configuration.builder().indicatorName("WAVE").bindedContract(c).build(), waveShape.wave());
+		ctx.newIndicator(Configuration.builder().indicatorName("WAVE").bindedContract(c).build(), WAVE.wr(20, 3));
 		
 		ctx.newIndicator(Configuration.builder().indicatorName("RSI1").bindedContract(c).build(), RSI.line(7));
 		ctx.newIndicator(Configuration.builder().indicatorName("RSI2").bindedContract(c).build(), RSI.line(14));

@@ -18,28 +18,19 @@ import tech.quantit.northstar.strategy.api.indicator.TimeSeriesUnaryOperator;
  */
 public class WAVE {
 
-	private LWR lwr;
-	
-	private int m;
-	
 	private static final TimeSeriesValue TV_PLACEHOLDER = new TimeSeriesValue(0, 0);
 	
-	public WAVE(int n, int m) {
-		this.m = m;
-		lwr = LWR.of(n, m, m);
-	}
-	
-	public static WAVE of(int n, int m) {
-		return new WAVE(n, m); 
-	}
-	
 	/**
-	 * @return	波浪计算函数
+	 * 威廉波浪计算函数
+	 * @param n
+	 * @param m
+	 * @return	
 	 */
-	public Function<BarWrapper, TimeSeriesValue> wave(){
+	public static Function<BarWrapper, TimeSeriesValue> wr(int n, int m){
+		final LWR lwr = LWR.of(n, m, m);
 		final Function<BarWrapper, TimeSeriesValue> fast = lwr.fast();
 		final Function<BarWrapper, TimeSeriesValue> slow = lwr.slow();
-		int ref = this.m * 2;
+		int ref = m * 2;
 		final TimeSeriesUnaryOperator barllv = LLV(ref);
 		final TimeSeriesUnaryOperator barhhv = HHV(ref);
 		final TimeSeriesUnaryOperator fastllv = LLV(ref);
@@ -51,8 +42,9 @@ public class WAVE {
 			TimeSeriesValue barhhvV = barhhv.apply(new TimeSeriesValue(bar.getBar().getHighPrice(), bar.getBar().getActionTimestamp(), bar.isUnsettled()));
 			TimeSeriesValue fastV = fast.apply(bar);
 			TimeSeriesValue slowV = slow.apply(bar);
-			TimeSeriesValue fastllvV = fastllv.apply(new TimeSeriesValue(fastV.getValue(), bar.getBar().getActionTimestamp(), bar.isUnsettled()));
-			TimeSeriesValue fasthhvV = fasthhv.apply(new TimeSeriesValue(fastV.getValue(), bar.getBar().getActionTimestamp(), bar.isUnsettled()));
+			TimeSeriesValue fastTV = new TimeSeriesValue(fastV.getValue(), bar.getBar().getActionTimestamp(), bar.isUnsettled());
+			TimeSeriesValue fastllvV = fastllv.apply(fastTV);
+			TimeSeriesValue fasthhvV = fasthhv.apply(fastTV);
 			TimeSeriesValue result = TV_PLACEHOLDER; // 空值
 			if(lastFast.get() == 0) 
 				lastFast.set(fastV.getValue());
@@ -72,4 +64,23 @@ public class WAVE {
 		};
 	}
 	
+	/**
+	 * MACD波浪计算函数
+	 * @param n1
+	 * @param n2
+	 * @param m
+	 * @return
+	 */
+	public static Function<BarWrapper, TimeSeriesValue> macd(int n1, int n2, int m){
+		final MACD macd = MACD.of(n1, n2, m);
+		final TimeSeriesUnaryOperator diff = macd.diff();
+		final TimeSeriesUnaryOperator dea = macd.dea();
+		final TimeSeriesUnaryOperator macdPost = macd.post();
+		return bar -> {
+			TimeSeriesValue result = TV_PLACEHOLDER;
+			TimeSeriesValue difVal = diff.apply(result);
+			
+			return result;
+		};
+	}
 }
