@@ -15,6 +15,7 @@ import tech.quantit.northstar.strategy.api.indicator.complex.ATR;
 import tech.quantit.northstar.strategy.api.indicator.complex.BOLL;
 import tech.quantit.northstar.strategy.api.indicator.complex.KDJ;
 import tech.quantit.northstar.strategy.api.indicator.complex.LWR;
+import tech.quantit.northstar.strategy.api.indicator.complex.MACD;
 import tech.quantit.northstar.strategy.api.indicator.complex.RSI;
 import tech.quantit.northstar.strategy.api.indicator.complex.WAVE;
 import tech.quantit.northstar.strategy.api.indicator.function.ComputeFunctions;
@@ -50,37 +51,42 @@ public class IndicatorDemoStrategy extends AbstractStrategy	// 为了简化代�
 		// BOLL指标
 		BOLL boll = BOLL.of(20, 2);
 		ContractField c = ctx.getContract(params.indicatorSymbol);
-		ctx.newIndicator(Configuration.builder().indicatorName("BOLL_UPPER").bindedContract(c).build(), boll.upper());
-		ctx.newIndicator(Configuration.builder().indicatorName("BOLL_LOWER").bindedContract(c).build(), boll.lower());
-		ctx.newIndicator(Configuration.builder().indicatorName("BOLL_MID").bindedContract(c).build(), boll.mid());
+		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("BOLL_UPPER").bindedContract(c).build(), boll.upper());
+		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("BOLL_LOWER").bindedContract(c).build(), boll.lower());
+		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("BOLL_MID").bindedContract(c).build(), boll.mid());
 		
 		KDJ kdj = KDJ.of(9, 3, 3);
-		ctx.newIndicator(Configuration.builder().indicatorName("K").bindedContract(c).build(), kdj.k());
-		ctx.newIndicator(Configuration.builder().indicatorName("D").bindedContract(c).build(), kdj.d());
-		ctx.newIndicator(Configuration.builder().indicatorName("J").bindedContract(c).build(), kdj.j());
+		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("K").bindedContract(c).build(), kdj.k());
+		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("D").bindedContract(c).build(), kdj.d());
+		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("J").bindedContract(c).build(), kdj.j());
 		
 		LWR lwr = LWR.of(9, 3, 3);
-		ctx.newIndicator(Configuration.builder().indicatorName("LWR1").bindedContract(c).build(), lwr.fast());
-		ctx.newIndicator(Configuration.builder().indicatorName("LWR2").bindedContract(c).build(), lwr.slow());
+		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("LWR1").bindedContract(c).build(), lwr.fast());
+		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("LWR2").bindedContract(c).build(), lwr.slow());
 		
-		ctx.newIndicator(Configuration.builder().indicatorName("WAVE").bindedContract(c).build(), WAVE.wr(20, 3));
+		MACD macd = MACD.of(12, 26, 9);
+		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("MACD_DIF").bindedContract(c).build(), macd.diff());
+		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("MACD_DEA").bindedContract(c).build(), macd.dea());
+		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("MACD").bindedContract(c).build(), macd.post());
+		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("WAVE1").bindedContract(c).build(), WAVE.wr(20, 3));
+		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("WAVE2").bindedContract(c).build(), WAVE.macd(10, 20, 3));
 		
-		ctx.newIndicator(Configuration.builder().indicatorName("RSI1").bindedContract(c).build(), RSI.line(7));
-		ctx.newIndicator(Configuration.builder().indicatorName("RSI2").bindedContract(c).build(), RSI.line(14));
+		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("RSI1").bindedContract(c).build(), RSI.line(7));
+		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("RSI2").bindedContract(c).build(), RSI.line(14));
 		
-		ctx.newIndicator(Configuration.builder().indicatorName("ATR").bindedContract(c).build(), ATR.of(20));
+		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("ATR").bindedContract(c).build(), ATR.of(20));
 		
-		ctx.newIndicator(Configuration.builder().indicatorName("SMA").bindedContract(c).build(), SMA(20, 2));
-		ctx.newIndicator(Configuration.builder().indicatorName("SETTLE").bindedContract(c).build(), SETTLE());
-		ctx.newIndicator(Configuration.builder().indicatorName("WMA").bindedContract(c).build(), WMA(72));
-		ctx.newIndicator(Configuration.builder().indicatorName("HHV").bindedContract(c).build(), HHV(72));
-		ctx.newIndicator(Configuration.builder().indicatorName("LLV").bindedContract(c).build(), LLV(72));
+		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("SMA").bindedContract(c).build(), SMA(20, 2));
+		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("SETTLE").bindedContract(c).build(), SETTLE());
+		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("WMA").bindedContract(c).build(), WMA(72));
+		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("HHV").bindedContract(c).build(), HHV(72));
+		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("LLV").bindedContract(c).build(), LLV(72));
 
 		// 复合指标
-		ctx.newIndicator(Configuration.builder().indicatorName("WMA_HHV").bindedContract(c).build(), WMA(72).andThen(HHV(72)));
-		ctx.newIndicator(Configuration.builder().indicatorName("WMA_LLV").bindedContract(c).build(), WMA(72).andThen(LLV(72)));
+		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("WMA_HHV").bindedContract(c).build(), WMA(72).andThen(HHV(72)));
+		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("WMA_LLV").bindedContract(c).build(), WMA(72).andThen(LLV(72)));
 		
-		ctx.newIndicator(Configuration.builder().indicatorName("VAL").bindedContract(c).build(), ComputeFunctions.display(valueHolder));
+		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("VAL").bindedContract(c).build(), ComputeFunctions.display(valueHolder));
 	}
 	
 	@Override

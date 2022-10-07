@@ -50,12 +50,10 @@ public class WAVE {
 				lastFast.set(fastV.getValue());
 			if(lastSlow.get() == 0) 
 				lastSlow.set(slowV.getValue());
-			if(lastFast.get() < lastSlow.get() && fastV.getValue() > slowV.getValue() && fastllvV.getValue() < -60) {
+			if(lastFast.get() < lastSlow.get() && fastV.getValue() > slowV.getValue() && fastllvV.getValue() < -60) 
 				result = barllvV;
-			}
-			if(lastFast.get() > lastSlow.get() && fastV.getValue() < slowV.getValue() && fasthhvV.getValue() > -40) {
+			if(lastFast.get() > lastSlow.get() && fastV.getValue() < slowV.getValue() && fasthhvV.getValue() > -40) 
 				result = barhhvV;
-			}
 			if(!bar.isUnsettled()) {				
 				lastFast.set(fastV.getValue());
 				lastSlow.set(slowV.getValue());
@@ -75,11 +73,26 @@ public class WAVE {
 		final MACD macd = MACD.of(n1, n2, m);
 		final TimeSeriesUnaryOperator diff = macd.diff();
 		final TimeSeriesUnaryOperator dea = macd.dea();
-		final TimeSeriesUnaryOperator macdPost = macd.post();
+		int ref = m * 2;
+		final TimeSeriesUnaryOperator barllv = LLV(ref);
+		final TimeSeriesUnaryOperator barhhv = HHV(ref);
+		final AtomicDouble lastDif = new AtomicDouble();
+		final AtomicDouble lastDea = new AtomicDouble();
 		return bar -> {
 			TimeSeriesValue result = TV_PLACEHOLDER;
-			TimeSeriesValue difVal = diff.apply(result);
-			
+			TimeSeriesValue tv = new TimeSeriesValue(bar.getBar().getClosePrice(), bar.getBar().getActionTimestamp(), bar.isUnsettled());
+			TimeSeriesValue difVal = diff.apply(tv);
+			TimeSeriesValue deaVal = dea.apply(tv);
+			TimeSeriesValue llv = barllv.apply(new TimeSeriesValue(bar.getBar().getLowPrice(), bar.getBar().getActionTimestamp(), bar.isUnsettled()));
+			TimeSeriesValue hhv = barhhv.apply(new TimeSeriesValue(bar.getBar().getHighPrice(), bar.getBar().getActionTimestamp(), bar.isUnsettled()));
+			if(difVal.getValue() < deaVal.getValue() && lastDif.get() > lastDea.get() && lastDea.get() > 0) 
+				result = hhv;
+			if(difVal.getValue() > deaVal.getValue() && lastDif.get() < lastDea.get() && lastDea.get() < 0) 
+				result = llv;
+			if(!bar.isUnsettled()) {
+				lastDif.set(difVal.getValue());
+				lastDea.set(deaVal.getValue());
+			}
 			return result;
 		};
 	}
