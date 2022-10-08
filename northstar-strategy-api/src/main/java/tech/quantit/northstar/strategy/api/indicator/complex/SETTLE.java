@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
+import com.google.common.util.concurrent.AtomicDouble;
+
 import tech.quantit.northstar.common.model.BarWrapper;
 import tech.quantit.northstar.common.model.TimeSeriesValue;
 import tech.quantit.northstar.strategy.api.indicator.function.AverageFunctions;
@@ -38,8 +40,11 @@ public class SETTLE {
 		final LinkedList<String> tradeDateQ = new LinkedList<>();
 		final Map<String, List<Double>> dateValueMap = new HashMap<>();
 		final Function<BarWrapper, TimeSeriesValue> settleLine = baseLine();
+		final AtomicDouble currentSTD = new AtomicDouble();
 		return bar -> {
-			TimeSeriesValue result = TV_PLACEHOLDER;
+			if(bar.isUnsettled()) {
+				return TV_PLACEHOLDER;
+			}
 			// 新交易日的值更新
 			if(tradeDateQ.isEmpty() || !tradeDateQ.peekLast().equals(bar.getBar().getTradingDay())) {
 				// 计算标准差
@@ -51,27 +56,22 @@ public class SETTLE {
 					long numOfItem = dateValueMap.values().stream()
 							.flatMap(Collection::stream)
 							.count();
-					double std = Math.sqrt(sumSquare / (numOfItem - 1));
-					result = new TimeSeriesValue(std, bar.getBar().getActionTimestamp(), bar.isUnsettled());
+					currentSTD.set(Math.sqrt(sumSquare / (numOfItem - 1)));
 				}
-				if(!bar.isUnsettled()) {					
-					// 当统计天数已满，需要移除旧数据
-					if(tradeDateQ.size() == n) {					
-						String date = tradeDateQ.pollFirst();
-						dateValueMap.remove(date);
-					}
-					tradeDateQ.offerLast(bar.getBar().getTradingDay());
-					dateValueMap.put(bar.getBar().getTradingDay(), new LinkedList<>());
+				// 当统计天数已满，需要移除旧数据
+				if(tradeDateQ.size() == n) {					
+					String date = tradeDateQ.pollFirst();
+					dateValueMap.remove(date);
 				}
+				tradeDateQ.offerLast(bar.getBar().getTradingDay());
+				dateValueMap.put(bar.getBar().getTradingDay(), new LinkedList<>());
 			}
 			
 			TimeSeriesValue settleVal = settleLine.apply(bar);
 			double weightedClose = (bar.getBar().getClosePrice() * 2 + bar.getBar().getHighPrice() + bar.getBar().getClosePrice()) / 4; 	// 加权重心价
 			double variance = Math.pow(weightedClose - settleVal.getValue(), 2);
-			if(!bar.isUnsettled()) {				
-				dateValueMap.get(bar.getBar().getTradingDay()).add(variance);
-			}
-			return result;
+			dateValueMap.get(bar.getBar().getTradingDay()).add(variance);
+			return new TimeSeriesValue(currentSTD.get(), bar.getBar().getActionTimestamp());
 		};
 	}
 }
