@@ -166,7 +166,7 @@ export default {
     },
     async handleDelete(index, row) {
       await moduleApi.removeModule(row.moduleName)
-      this.findAll()
+      this.list = this.list.filter((item, i) => i !== index)
     },
     findAll() {
       moduleApi.getAllModules().then((results) => {
@@ -194,7 +194,10 @@ export default {
     },
     async toggle(index, row) {
       await moduleApi.toggleModuleState(row.moduleName)
-      await this.findAll()
+      row.runtime = null
+      moduleApi.getModuleRuntime(row.moduleName).then(rt => {
+        row.runtime = rt
+      })
     },
     tailModuleLog(row) {
       this.$parent.handleSelect('9', { module: row.moduleName })
