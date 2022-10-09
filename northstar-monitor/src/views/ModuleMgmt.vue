@@ -2,7 +2,7 @@
   <div class="ns-page">
     <ModuleForm
       :visible.sync="moduleFormVisible"
-      :readOnly="curTableIndex > -1 && curModule.runtime.enabled"
+      :readOnly="curTableIndex > -1 && curModule.runtime && curModule.runtime.enabled"
       :module="curModule"
       @onSave="findAll"
     />
