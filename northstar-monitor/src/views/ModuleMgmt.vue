@@ -65,7 +65,7 @@
         </template>
       </el-table-column>
 
-      <el-table-column label="当前状态" prop="enabled" sortable align="center" width="100px">
+      <el-table-column label="当前状态" sortable align="center" width="100px">
         <template slot-scope="scope">
           <span
             :class="
