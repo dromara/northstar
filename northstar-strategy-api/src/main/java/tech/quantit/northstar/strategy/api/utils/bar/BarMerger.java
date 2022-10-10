@@ -25,16 +25,22 @@ public class BarMerger {
 	
 	protected BarField.Builder barBuilder;
 	
+	protected long curBarTimestamp;
+	
 	public BarMerger(int numOfMinPerBar, ContractField bindedContract, Consumer<BarField> callback) {
 		this.numOfMinPerBar = numOfMinPerBar;
 		this.callback = callback;
 		this.bindedContract = bindedContract;
 	}
 	
-	public void updateBar(BarField bar) {
+	public synchronized void updateBar(BarField bar) {
 		if(!StringUtils.equals(bar.getUnifiedSymbol(), bindedContract.getUnifiedSymbol())) {
 			return;
 		}
+		if(bar.getActionTimestamp() <= curBarTimestamp) {
+			return;
+		}
+		curBarTimestamp = bar.getActionTimestamp();
 		if(numOfMinPerBar == 1) {
 			callback.accept(bar);
 			return;
