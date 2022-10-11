@@ -25,7 +25,7 @@ class BarMergerTest {
 		List<BarField> results = new ArrayList<>();
 		BarMerger bm = new BarMerger(2, contract, bar -> results.add(bar));
 		Random rand = new Random();
-		for(int i=0; i<20; i++) {
+		for(int i=1; i<21; i++) {
 			BarField bar = BarField.newBuilder()
 					.setUnifiedSymbol("rb2205@SHFE@FUTURES")
 					.setActionDay(String.valueOf(i))
