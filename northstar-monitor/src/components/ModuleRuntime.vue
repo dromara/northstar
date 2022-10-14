@@ -331,7 +331,7 @@ export default {
       unifiedSymbolOfChart: '',
       indicator: {
         name: '',
-        paneId: '',
+        paneId: 'candle_pane',
         lineWidth: 1,
         lineStyle: 'line'
       },
