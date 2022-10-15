@@ -238,6 +238,15 @@ export default {
               .filter((item) => !item.adminOnly || this.$route.query.superuser)
               .map((item) => item.name)
           })
+
+          if (
+            this.contractDefOptions.length &&
+            this.form.subscribedContractGroups instanceof Array
+          ) {
+            this.subscribedContractGroups = this.form.subscribedContractGroups.map((defId) =>
+              this.contractDefOptions.find((item) => `${item.name}@${item.productClass}` === defId)
+            )
+          }
         })
       }
     },
