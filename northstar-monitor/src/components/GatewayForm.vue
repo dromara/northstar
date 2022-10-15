@@ -239,14 +239,6 @@ export default {
               .map((item) => item.name)
           })
         })
-
-        setTimeout(() => {
-          if (this.form.subscribedContractGroups) {
-            this.subscribedContractGroups = this.form.subscribedContractGroups.map((defId) =>
-              this.contractDefOptions.find((item) => `${item.name}@${item.productClass}` === defId)
-            )
-          }
-        }, 300)
       }
     },
     'form.gatewayType': function (val) {
@@ -281,6 +273,13 @@ export default {
                 item.label = item.name + type[item.productClass]
                 return item
               })
+              if (this.form.subscribedContractGroups instanceof Array) {
+                this.subscribedContractGroups = this.form.subscribedContractGroups.map((defId) =>
+                  this.contractDefOptions.find(
+                    (item) => `${item.name}@${item.productClass}` === defId
+                  )
+                )
+              }
             })
           })
         })
