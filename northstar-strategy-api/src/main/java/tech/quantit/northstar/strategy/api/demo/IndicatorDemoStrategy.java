@@ -16,6 +16,7 @@ import tech.quantit.northstar.strategy.api.indicator.complex.BOLL;
 import tech.quantit.northstar.strategy.api.indicator.complex.KDJ;
 import tech.quantit.northstar.strategy.api.indicator.complex.LWR;
 import tech.quantit.northstar.strategy.api.indicator.complex.MACD;
+import tech.quantit.northstar.strategy.api.indicator.complex.PBX;
 import tech.quantit.northstar.strategy.api.indicator.complex.RSI;
 import tech.quantit.northstar.strategy.api.indicator.complex.WAVE;
 import tech.quantit.northstar.strategy.api.indicator.function.ComputeFunctions;
@@ -81,6 +82,20 @@ public class IndicatorDemoStrategy extends AbstractStrategy	// 为了简化代�
 		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("WMA").bindedContract(c).build(), WMA(72));
 		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("HHV").bindedContract(c).build(), HHV(72));
 		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("LLV").bindedContract(c).build(), LLV(72));
+		
+		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("PB1").bindedContract(c).build(), PBX.line(4));
+		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("PB2").bindedContract(c).build(), PBX.line(6));
+		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("PB3").bindedContract(c).build(), PBX.line(9));
+		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("PB4").bindedContract(c).build(), PBX.line(13));
+		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("PB5").bindedContract(c).build(), PBX.line(18));
+		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("PB6").bindedContract(c).build(), PBX.line(24));
+		
+		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("PBW1").bindedContract(c).build(), PBX.wline(4));
+		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("PBW2").bindedContract(c).build(), PBX.wline(6));
+		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("PBW3").bindedContract(c).build(), PBX.wline(9));
+		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("PBW4").bindedContract(c).build(), PBX.wline(13));
+		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("PBW5").bindedContract(c).build(), PBX.wline(18));
+		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("PBW6").bindedContract(c).build(), PBX.wline(24));
 
 		// 复合指标
 		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("WMA_HHV").bindedContract(c).build(), WMA(72).andThen(HHV(72)));
