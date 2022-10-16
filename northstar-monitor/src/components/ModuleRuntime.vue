@@ -512,9 +512,11 @@ export default {
             .map((data) => BarField.deserializeBinary(data).toObject())
             .map(KLineUtils.createFromBar)
             .map((bar) => {
-              Object.keys(symbolIndicatorMap[key]).forEach((indicatorName) => {
-                bar[indicatorName] = symbolIndicatorMap[key][indicatorName][bar.timestamp]
-              })
+              if (typeof symbolIndicatorMap[key] === 'object') {
+                Object.keys(symbolIndicatorMap[key]).forEach((indicatorName) => {
+                  bar[indicatorName] = symbolIndicatorMap[key][indicatorName][bar.timestamp]
+                })
+              }
               return bar
             })
         })
