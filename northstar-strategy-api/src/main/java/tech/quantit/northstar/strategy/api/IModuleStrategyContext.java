@@ -4,6 +4,8 @@ import java.util.function.Function;
 
 import org.slf4j.Logger;
 
+import com.google.common.util.concurrent.AtomicDouble;
+
 import tech.quantit.northstar.common.constant.ModuleState;
 import tech.quantit.northstar.common.constant.SignalOperation;
 import tech.quantit.northstar.common.model.BarWrapper;
@@ -150,6 +152,12 @@ public interface IModuleStrategyContext {
 	 * @return
 	 */
 	Indicator newIndicator(Indicator.Configuration configuration, Function<BarWrapper, TimeSeriesValue> indicatorFunction);
+	/**
+	 * 用指标方式透视值
+	 * @param configuration
+	 * @param value
+	 */
+	void viewValueAsIndicator(Indicator.Configuration configuration, AtomicDouble value);
 	/**
 	 * 绑定组合指标
 	 * @param comboIndicator

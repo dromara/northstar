@@ -3,8 +3,6 @@ package tech.quantit.northstar.strategy.api.indicator.function;
 import java.util.Objects;
 import java.util.function.Function;
 
-import com.google.common.util.concurrent.AtomicDouble;
-
 import tech.quantit.northstar.common.model.BarWrapper;
 import tech.quantit.northstar.common.model.TimeSeriesValue;
 import tech.quantit.northstar.strategy.api.indicator.TimeSeriesUnaryOperator;
@@ -60,14 +58,5 @@ public interface ComputeFunctions {
 			TimeSeriesValue v0 = line2Fn.apply(bar);
 			return new TimeSeriesValue(v.getValue() - v0.getValue(), bar.getBar().getActionTimestamp(), bar.isUnsettled());
 		};
-	}
-	
-	/**
-	 * 数值透视
-	 * @param valueHolder	
-	 * @return
-	 */
-	static TimeSeriesUnaryOperator display(AtomicDouble valueHolder) {
-		return tv -> new TimeSeriesValue(valueHolder.get(), tv.getTimestamp(), tv.isUnsettled());
 	}
 }

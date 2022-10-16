@@ -1,7 +1,10 @@
 package tech.quantit.northstar.strategy.api.demo;
 
-import static tech.quantit.northstar.strategy.api.indicator.function.AverageFunctions.*;
-import static tech.quantit.northstar.strategy.api.indicator.function.StatsFunctions.*;
+import static tech.quantit.northstar.strategy.api.indicator.function.AverageFunctions.SETTLE;
+import static tech.quantit.northstar.strategy.api.indicator.function.AverageFunctions.SMA;
+import static tech.quantit.northstar.strategy.api.indicator.function.AverageFunctions.WMA;
+import static tech.quantit.northstar.strategy.api.indicator.function.StatsFunctions.HHV;
+import static tech.quantit.northstar.strategy.api.indicator.function.StatsFunctions.LLV;
 
 import com.google.common.util.concurrent.AtomicDouble;
 
@@ -19,7 +22,6 @@ import tech.quantit.northstar.strategy.api.indicator.complex.MACD;
 import tech.quantit.northstar.strategy.api.indicator.complex.PBX;
 import tech.quantit.northstar.strategy.api.indicator.complex.RSI;
 import tech.quantit.northstar.strategy.api.indicator.complex.WAVE;
-import tech.quantit.northstar.strategy.api.indicator.function.ComputeFunctions;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.ContractField;
 
@@ -101,7 +103,7 @@ public class IndicatorDemoStrategy extends AbstractStrategy	// 为了简化代�
 		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("WMA_HHV").bindedContract(c).build(), WMA(72).andThen(HHV(72)));
 		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("WMA_LLV").bindedContract(c).build(), WMA(72).andThen(LLV(72)));
 		
-		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("VAL").bindedContract(c).build(), ComputeFunctions.display(valueHolder));
+		ctx.viewValueAsIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("VAL").bindedContract(c).build(), valueHolder);
 	}
 	
 	@Override

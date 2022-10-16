@@ -174,7 +174,7 @@ public class Indicator {
 		case LOW -> bar.getLowPrice();
 		case OPEN -> bar.getOpenPrice();
 		case OPEN_INTEREST -> bar.getOpenInterestDelta();
-		case VOL -> bar.getVolumeDelta();
+		case VOL -> bar.getVolume();
 		default -> throw new IllegalArgumentException("Unexpected value: " + valType);
 		};
 		barListener.onBar(new TimeSeriesValue(barVal, bar.getActionTimestamp(), isUnsettled));

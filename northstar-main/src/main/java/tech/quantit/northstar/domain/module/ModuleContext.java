@@ -22,6 +22,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.ILoggerFactory;
 import org.slf4j.Logger;
 
+import com.google.common.util.concurrent.AtomicDouble;
+
 import cn.hutool.core.lang.Assert;
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.constant.Constants;
@@ -127,12 +129,14 @@ public class ModuleContext implements IModuleContext{
 	
 	private final IndicatorFactory indicatorFactory = new IndicatorFactory();
 	
+	private final IndicatorFactory inspectedValIndicatorFactory = new IndicatorFactory();
+	
 	private final HashSet<IComboIndicator> comboIndicators = new HashSet<>();
 	
 	private final AtomicInteger bufSize = new AtomicInteger(0);
 	
 	private Consumer<BarField> barMergingCallback = bar -> {
-		indicatorFactory.getIndicatorMap().entrySet().stream().forEach(e -> {
+		Consumer<Map.Entry<String,Indicator>> action = e -> {
 			Indicator indicator = e.getValue();
 			if(indicatorValBufQMap.get(e.getKey()).size() >= bufSize.intValue()) {
 				indicatorValBufQMap.get(e.getKey()).poll();
@@ -141,7 +145,9 @@ public class ModuleContext implements IModuleContext{
 					&& (BarUtils.isEndOfTheTradingDay(bar) || indicator.ifPlotPerBar() || !indicator.timeSeriesValue(0).isUnsettled())) {		
 				indicatorValBufQMap.get(e.getKey()).offer(indicator.timeSeriesValue(0));	
 			}
-		});
+		};
+		indicatorFactory.getIndicatorMap().entrySet().stream().forEach(action);
+		inspectedValIndicatorFactory.getIndicatorMap().entrySet().stream().forEach(action);
 		tradeStrategy.onBar(bar, module.isEnabled());
 		if(barBufQMap.get(bar.getUnifiedSymbol()).size() >= bufSize.intValue()) {
 			barBufQMap.get(bar.getUnifiedSymbol()).poll();
@@ -204,18 +210,23 @@ public class ModuleContext implements IModuleContext{
 					.collect(Collectors.toMap(Map.Entry::getKey, 
 							e -> e.getValue().stream().map(BarField::toByteArray).toList())));
 			Map<String, IndicatorData> indicatorMap = new HashMap<>();
-			indicatorFactory.getIndicatorMap().entrySet().stream()
-					.filter(e -> indicatorValBufQMap.containsKey(e.getKey()))
-					.forEach(e -> 
-						indicatorMap.put(e.getKey(), IndicatorData.builder()
-								.unifiedSymbol(e.getValue().bindedUnifiedSymbol())
-								.type(e.getValue().getType())
-								.values(indicatorValBufQMap.get(e.getKey()).stream().toList())
-								.build())
-					);
+			indicatorFactorys().stream()
+				.flatMap(factory -> factory.getIndicatorMap().entrySet().stream())
+				.filter(e -> indicatorValBufQMap.containsKey(e.getKey()))
+				.forEach(e -> 
+					indicatorMap.put(e.getKey(), IndicatorData.builder()
+							.unifiedSymbol(e.getValue().bindedUnifiedSymbol())
+							.type(e.getValue().getType())
+							.values(indicatorValBufQMap.get(e.getKey()).stream().toList())
+							.build())
+				);
 			mad.setIndicatorMap(indicatorMap);
 		}
 		return mad;
+	}
+	
+	private List<IndicatorFactory> indicatorFactorys(){
+		return List.of(indicatorFactory, inspectedValIndicatorFactory);
 	}
 
 	@Override
@@ -389,8 +400,9 @@ public class ModuleContext implements IModuleContext{
 		if(!bindedSymbolSet.contains(bar.getUnifiedSymbol())) {
 			return;
 		}
-		indicatorFactory.getIndicatorMap().entrySet().parallelStream().forEach(e -> e.getValue().onBar(bar));
+		indicatorFactory.getIndicatorMap().entrySet().parallelStream().forEach(e -> e.getValue().onBar(bar));	// 普通指标的更新
 		comboIndicators.parallelStream().forEach(combo -> combo.onBar(bar));
+		inspectedValIndicatorFactory.getIndicatorMap().entrySet().parallelStream().forEach(e -> e.getValue().onBar(bar));	// 值透视指标的更新
 		contractBarMergerMap.get(bar.getUnifiedSymbol()).updateBar(bar);
 	}
 	
@@ -519,6 +531,12 @@ public class ModuleContext implements IModuleContext{
 		Assert.isTrue(configuration.getIndicatorRefLength() > 0, "指标回溯长度必须大于0，当前为：" + configuration.getIndicatorRefLength());
 		indicatorValBufQMap.put(configuration.getIndicatorName(), new LinkedList<>());
 		return indicatorFactory.newIndicator(configuration, indicatorFunction);
+	}
+	
+	@Override
+	public void viewValueAsIndicator(Configuration configuration, AtomicDouble value) {
+		indicatorValBufQMap.put(configuration.getIndicatorName(), new LinkedList<>());
+		inspectedValIndicatorFactory.newIndicator(configuration, bar -> new TimeSeriesValue(value.get(), bar.getBar().getActionTimestamp(), bar.isUnsettled()));
 	}
 
 	@Override
