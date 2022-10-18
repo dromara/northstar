@@ -72,9 +72,7 @@ public class ModuleManager extends AbstractEventHandler{
 			// 分发到模组前的检测点
 			latencyDetector.getCheckpoint(0).sampling(tick);
 		}
-		moduleMap.values().parallelStream().forEach(sm -> {
-			sm.onEvent(e);
-		});
+		moduleMap.values().parallelStream().forEach(sm -> sm.onEvent(e));
 		
 		if(e.getData() instanceof TickField tick) {
 			simMarket.onTick(tick);
