@@ -135,7 +135,7 @@ public abstract class TradeRequest implements TickDataAware, Cancellable {
 					.setPriceSource(PriceSourceEnum.PSRC_LastPrice)
 					.setTradeDate(tick.getActionDay())
 					.setTradingDay(tick.getTradingDay())
-					.setTradeTime(tick.getActionTime())
+					.setTradeTime(LocalTime.parse(tick.getActionTime(), DateTimeConstant.T_FORMAT_WITH_MS_INT_FORMATTER).format(DateTimeConstant.T_FORMAT_FORMATTER))
 					.setVolume(order.getTotalVolume())
 					.build();
 			log.info("模拟成交：{}，{}，{}，{}，{}手，{}，{}", trade.getOriginOrderId(), trade.getContract().getName(), 
