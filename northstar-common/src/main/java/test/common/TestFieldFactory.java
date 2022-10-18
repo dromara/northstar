@@ -89,7 +89,7 @@ public class TestFieldFactory {
 				.setGatewayId(gatewayId)
 				.setUnifiedSymbol(symbol + "@SHFE@FUTURES")
 				.setActionDay(LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
-				.setActionTime(LocalTime.now().format(DateTimeConstant.T_FORMAT_FORMATTER))
+				.setActionTime(LocalTime.now().format(DateTimeConstant.T_FORMAT_WITH_MS_INT_FORMATTER))
 				.setActionTimestamp(System.currentTimeMillis())
 				.addAllAskPrice(List.of(price + 1D, 0D, 0D, 0D, 0D))
 				.addAllBidPrice(List.of(price - 1D, 0D, 0D, 0D, 0D))
