@@ -26,7 +26,7 @@ public class AuthorizationInterceptor implements HandlerInterceptor{
 			return true;
 		}
 		
-		String msg = "token校验失败";
+		String msg = "token校验失败，IP：" + request.getRemoteAddr();
 		response.sendError(HttpStatus.UNAUTHORIZED.value(), msg);
 		log.warn(msg);
 		return false;
