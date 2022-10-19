@@ -111,8 +111,8 @@ public abstract class TradeRequest implements TickDataAware, Cancellable {
 			double dealPrice = 0;
 			if(submitOrderReq.getOrderPriceType() == OrderPriceTypeEnum.OPT_AnyPrice) {
 				dealPrice = switch(order.getDirection()) {
-					case D_Buy -> tick.getAskPrice(0);
-					case D_Sell -> tick.getBidPrice(0);
+					case D_Buy -> tick.getAskPrice(0) > 0 ? tick.getAskPrice(0) : tick.getLastPrice();
+					case D_Sell -> tick.getBidPrice(0) > 0 ? tick.getBidPrice(0) : tick.getLastPrice();
 					default -> throw new IllegalArgumentException("Unexpected value: " + order.getDirection());
 				};
 			} else {
