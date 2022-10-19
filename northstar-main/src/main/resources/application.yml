@@ -13,6 +13,8 @@ northstar:
 
 logging:  level: 
     root: info
+    '[tech.quantit.northstar]': debug
+    '[xyz.redtorch.gateway.ctp]': debug
   file:    path: logs/
   
 spring:
