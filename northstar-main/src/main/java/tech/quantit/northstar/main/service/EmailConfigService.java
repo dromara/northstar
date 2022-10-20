@@ -13,6 +13,7 @@ public class EmailConfigService {
 	public EmailConfigService(MailDeliveryManager mailMgr, IMailConfigRepository repo) {
 		this.mailMgr = mailMgr;
 		this.repo = repo;
+		mailMgr.setEmailConfig(getConfig());
 	}
 	
 	public void saveConfig(MailConfigDescription emailConfig) {

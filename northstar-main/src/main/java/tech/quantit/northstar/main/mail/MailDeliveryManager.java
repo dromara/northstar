@@ -47,6 +47,7 @@ public class MailDeliveryManager {
 		this.emailConfig = emailConfig;
 		this.enabled = !emailConfig.isDisabled();
 		this.sender = factory.newInstance(emailConfig);
+		interestedEvents.clear();
 		emailConfig.getInterestTopicList().stream().forEach(interestedEvents::add);
 	}
 	

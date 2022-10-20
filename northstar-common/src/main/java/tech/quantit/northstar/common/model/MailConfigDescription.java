@@ -1,5 +1,6 @@
 package tech.quantit.northstar.common.model;
 
+import java.util.Collections;
 import java.util.List;
 
 import lombok.AllArgsConstructor;
@@ -39,9 +40,11 @@ public class MailConfigDescription {
 	/**
 	 * 订阅人邮箱列表
 	 */
-	private List<String> subscriberList;
+	@Default
+	private List<String> subscriberList = Collections.emptyList();
 	/**
 	 * 订阅事件列表
 	 */
-	private List<NorthstarEventType> interestTopicList;
+	@Default
+	private List<NorthstarEventType> interestTopicList = Collections.emptyList();
 }
