@@ -122,7 +122,7 @@ public class SmartGatewayConnector {
 						}
 					}
 					delay = IntStream.of(testResults).sum() / 10;
-					log.debug("[{}] 连线用时：{}毫秒", endpoint, delay);
+					log.trace("[{}] 连线用时：{}毫秒", endpoint, delay);
 				} catch (IOException e) {
 					log.error("无法测试IP：" + endpoint, e);
 				}
