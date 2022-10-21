@@ -180,7 +180,7 @@ public class PlaybackContext {
 									data.parallelStream()
 										.map(bar -> bar.toBuilder().setGatewayId(gatewaySettings.getGatewayId()).build())
 										.forEachOrdered(bar -> {
-											log.debug("Bar信息： {} {}，价格：{}", bar.getActionDay(), bar.getActionTime(), bar.getClosePrice());
+											log.trace("Bar信息： {} {}，价格：{}", bar.getActionDay(), bar.getActionTime(), bar.getClosePrice());
 											feEngine.emitEvent(NorthstarEventType.BAR, bar);
 										});
 									
@@ -254,7 +254,7 @@ public class PlaybackContext {
 					Iterator<Entry<ContractField, BarField>> itCacheBars = cacheBarMap.entrySet().iterator();
 					while(itCacheBars.hasNext()) {
 						BarField bar = BarField.newBuilder(itCacheBars.next().getValue()).setGatewayId(gatewaySettings.getGatewayId()).build();
-						log.debug("Bar信息： {} {}，价格：{}", bar.getActionDay(), bar.getActionTime(), bar.getClosePrice());
+						log.trace("Bar信息： {} {}，价格：{}", bar.getActionDay(), bar.getActionTime(), bar.getClosePrice());
 						feEngine.emitEvent(NorthstarEventType.BAR, bar);
 						itCacheBars.remove();
 					}
