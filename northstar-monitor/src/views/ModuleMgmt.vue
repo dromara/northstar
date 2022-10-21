@@ -148,6 +148,9 @@ export default {
   mounted() {
     this.findAll()
   },
+  beforeDestroy() {
+    clearTimeout(this.timer)
+  },
   methods: {
     handleCreate() {
       this.moduleFormVisible = true
@@ -195,7 +198,7 @@ export default {
     async toggle(index, row) {
       await moduleApi.toggleModuleState(row.moduleName)
       row.runtime = null
-      moduleApi.getModuleRuntime(row.moduleName).then(rt => {
+      moduleApi.getModuleRuntime(row.moduleName).then((rt) => {
         row.runtime = rt
       })
     },

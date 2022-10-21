@@ -485,6 +485,9 @@ export default {
       }
     })
   },
+  beforeDestroy() {
+    clearTimeout(this.timer)
+  },
   methods: {
     refresh() {
       this.loadRuntime()
