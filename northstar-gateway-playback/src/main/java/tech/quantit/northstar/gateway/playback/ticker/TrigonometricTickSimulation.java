@@ -1,5 +1,6 @@
 package tech.quantit.northstar.gateway.playback.ticker;
 
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -7,6 +8,7 @@ import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 
 import tech.quantit.northstar.common.IContractManager;
+import tech.quantit.northstar.common.constant.DateTimeConstant;
 import tech.quantit.northstar.common.constant.PlaybackPrecision;
 import tech.quantit.northstar.common.constant.TickType;
 import xyz.redtorch.pb.CoreField.BarField;
@@ -60,7 +62,7 @@ public class TrigonometricTickSimulation implements TickSimulationAlgorithm {
 					.setLastPrice(bar.getClosePrice())
 					.setStatus(TickType.NORMAL_TICK.getCode())
 					.setActionDay(bar.getActionDay())
-					.setActionTime(bar.getActionTime())
+					.setActionTime(LocalTime.parse(bar.getActionTime(), DateTimeConstant.T_FORMAT_FORMATTER).format(DateTimeConstant.T_FORMAT_WITH_MS_INT_FORMATTER))
 					.setActionTimestamp(bar.getActionTimestamp())
 					.addAllAskPrice(List.of(bar.getClosePrice() + priceTick, 0D, 0D, 0D, 0D)) // 仅模拟卖一价
 					.addAllBidPrice(List.of(bar.getClosePrice() - priceTick, 0D, 0D, 0D, 0D)) // 仅模拟买一价
