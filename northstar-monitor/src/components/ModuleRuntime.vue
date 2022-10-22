@@ -1,6 +1,7 @@
 <template>
   <el-dialog title="模组运行状态" :visible="visible" fullscreen class="flex-col" @close="close">
     <ModulePositionForm
+      v-if="module.usage !== 'PLAYBACK'"
       :visible.sync="positionFormVisible"
       :moduleAccount="accountSettings"
       :moduleName="module.moduleName"
@@ -143,7 +144,12 @@
                     {{ scope.row.positionprofit | formatter }}
                   </template>
                 </el-table-column>
-                <el-table-column label="操作" align="center" width="50px">
+                <el-table-column
+                  v-if="module.usage !== 'PLAYBACK'"
+                  label="操作"
+                  align="center"
+                  width="50px"
+                >
                   <template slot="header">
                     <el-button
                       id="editPosition"
