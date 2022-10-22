@@ -25,7 +25,6 @@ import org.slf4j.Logger;
 import com.google.common.util.concurrent.AtomicDouble;
 
 import cn.hutool.core.lang.Assert;
-import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.constant.Constants;
 import tech.quantit.northstar.common.constant.ModuleState;
 import tech.quantit.northstar.common.constant.SignalOperation;
@@ -41,7 +40,6 @@ import tech.quantit.northstar.common.model.TimeSeriesValue;
 import tech.quantit.northstar.common.utils.BarUtils;
 import tech.quantit.northstar.common.utils.ContractUtils;
 import tech.quantit.northstar.common.utils.FieldUtils;
-import tech.quantit.northstar.common.utils.MessagePrinter;
 import tech.quantit.northstar.common.utils.OrderUtils;
 import tech.quantit.northstar.gateway.api.TradeGateway;
 import tech.quantit.northstar.strategy.api.ClosingStrategy;
@@ -82,7 +80,6 @@ import xyz.redtorch.pb.CoreField.TradeField;
  * @author KevinHuangwl
  *
  */
-@Slf4j
 public class ModuleContext implements IModuleContext{
 	
 	private static final ILoggerFactory logFactory = new ModuleLoggerFactory();
@@ -376,7 +373,7 @@ public class ModuleContext implements IModuleContext{
 		if(!bindedSymbolSet.contains(tick.getUnifiedSymbol())) {
 			return;
 		}
-		log.trace("模组 [{}], TICK信息: {}", getModuleName(), MessagePrinter.print(tick));
+		mlog.trace("TICK信息: {} {} {}，最新价: {}", tick.getUnifiedSymbol(), tick.getActionDay(), tick.getActionTime(), tick.getLastPrice());
 		if(!StringUtils.equals(tradingDay, tick.getTradingDay())) {
 			tradingDay = tick.getTradingDay();
 		}
@@ -388,7 +385,6 @@ public class ModuleContext implements IModuleContext{
 			.filter(listener -> listener.shouldBeTriggered(tick))
 			.forEach(listener -> {
 				mlog.info("触发【{}】", listener.description());
-				log.info("模组[{}] 触发【{}】", moduleName, listener.description());
 				listener.execute();
 			});
 		tradeStrategy.onTick(tick, module.isEnabled());
@@ -402,7 +398,7 @@ public class ModuleContext implements IModuleContext{
 		if(!bindedSymbolSet.contains(bar.getUnifiedSymbol())) {
 			return;
 		}
-		log.trace("模组 [{}], Bar信息: {}", getModuleName(), MessagePrinter.print(bar));
+		mlog.trace("Bar信息: {} {} {}，最新价: {}", bar.getUnifiedSymbol(), bar.getActionDay(), bar.getActionTime(), bar.getClosePrice());
 		indicatorFactory.getIndicatorMap().entrySet().parallelStream().forEach(e -> e.getValue().onBar(bar));	// 普通指标的更新
 		comboIndicators.parallelStream().forEach(combo -> combo.onBar(bar));
 		inspectedValIndicatorFactory.getIndicatorMap().entrySet().parallelStream().forEach(e -> e.getValue().onBar(bar));	// 值透视指标的更新

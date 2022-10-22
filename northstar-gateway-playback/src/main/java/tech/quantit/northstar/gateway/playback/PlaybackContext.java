@@ -231,7 +231,7 @@ public class PlaybackContext {
 				}
 				
 				// 每次分发TICK
-				contractTickMap.values().parallelStream()
+				contractTickMap.values().stream()
 					.filter(tickQ -> !tickQ.isEmpty())
 					.forEach(tickQ -> feEngine.emitEvent(NorthstarEventType.TICK, tickQ.poll()));
 				
@@ -267,7 +267,6 @@ public class PlaybackContext {
 					checkDone();
 				}
 			}
-			
 		}, 0, rate);
 		
 	}
