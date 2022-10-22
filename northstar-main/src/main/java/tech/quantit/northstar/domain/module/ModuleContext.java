@@ -351,6 +351,7 @@ public class ModuleContext implements IModuleContext{
 				.map(gatewayId -> accStore.getPositions(gatewayId))
 				.flatMap(Collection::stream)
 				.filter(pf -> StringUtils.equals(pf.getContract().getUnifiedSymbol(), unifiedSymbol))
+				.filter(pf -> FieldUtils.isLong(pf.getPositionDirection()) && FieldUtils.isBuy(direction) || FieldUtils.isShort(pf.getPositionDirection()) && FieldUtils.isSell(direction))
 				.mapToInt(pf -> pf.getPosition() - pf.getFrozen())
 				.sum();
 	}
@@ -361,7 +362,8 @@ public class ModuleContext implements IModuleContext{
 				.map(gw -> gw.getGatewaySetting().getGatewayId())
 				.map(gatewayId -> accStore.getPositions(gatewayId))
 				.flatMap(Collection::stream)
-				.filter(pf -> StringUtils.equals(pf.getContract().getUnifiedSymbol(), unifiedSymbol));
+				.filter(pf -> StringUtils.equals(pf.getContract().getUnifiedSymbol(), unifiedSymbol))
+				.filter(pf -> FieldUtils.isLong(pf.getPositionDirection()) && FieldUtils.isBuy(direction) || FieldUtils.isShort(pf.getPositionDirection()) && FieldUtils.isSell(direction));
 		
 		if(isToday)	return posStream.mapToInt(pf -> pf.getTdPosition() - pf.getTdFrozen()).sum();
 		return posStream.mapToInt(pf -> pf.getYdPosition() - pf.getYdFrozen()).sum(); 
