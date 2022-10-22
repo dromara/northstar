@@ -76,7 +76,7 @@ public interface IModuleStrategyContext {
 	 * @param numOfPriceTickToTrigger	触发价差
 	 * return 							监听对象
 	 */
-	IDisposablePriceListener priceTriggerOut(TradeField trade, DisposablePriceListenerType listenerType, int numOfTickToTrigger);
+	IDisposablePriceListener priceTriggerOut(TradeField trade, DisposablePriceListenerType listenerType, int numOfPriceTickToTrigger);
 	/**
 	 * 判断订单是否已经超时
 	 * 该方法用于撤单场景

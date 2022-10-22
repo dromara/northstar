@@ -7,6 +7,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import tech.quantit.northstar.common.constant.ClosingPolicy;
+import tech.quantit.northstar.common.constant.ModuleUsage;
 import tech.quantit.northstar.common.model.ComponentAndParamsPair;
 import tech.quantit.northstar.common.model.ComponentField;
 import tech.quantit.northstar.common.model.DynamicParams;
@@ -23,6 +24,7 @@ import tech.quantit.northstar.domain.module.DealCollector;
 import tech.quantit.northstar.domain.module.FirstInFirstOutClosingStrategy;
 import tech.quantit.northstar.domain.module.ModuleAccountStore;
 import tech.quantit.northstar.domain.module.ModuleContext;
+import tech.quantit.northstar.domain.module.ModulePlaybackContext;
 import tech.quantit.northstar.domain.module.PriorBeforeAndHedgeTodayClosingStrategy;
 import tech.quantit.northstar.domain.module.PriorTodayClosingStrategy;
 import tech.quantit.northstar.domain.module.TradeModule;
@@ -98,7 +100,10 @@ public class ModuleFactory {
 				dc.onTrade(TradeField.parseFrom(uncloseTradeData));
 			}
 		}
-		int moduleBufDataSize = Math.max(100, moduleDescription.getModuleCacheDataSize());	// 至少缓存100个数据 
+		int moduleBufDataSize = Math.max(100, moduleDescription.getModuleCacheDataSize());	// 至少缓存100个数据
+		if(moduleDescription.getUsage() == ModuleUsage.PLAYBACK) {
+			return new ModulePlaybackContext(moduleDescription.getModuleName(), strategy, accStore, numOfMinPerBar, moduleBufDataSize, dc);
+		}
 		return new ModuleContext(moduleDescription.getModuleName(), strategy, accStore, closingStrategy, numOfMinPerBar,
 				moduleBufDataSize, dc, onRuntimeChangeCallback, onDealChangeCallback);
 	}

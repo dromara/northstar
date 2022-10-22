@@ -8,7 +8,7 @@ import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.PositionField;
 
-public class PriorTodayClosingStrategy  implements ClosingStrategy{
+public class PriorTodayClosingStrategy implements ClosingStrategy{
 
 	@Override
 	public OffsetFlagEnum resolveOperation(SignalOperation opr, PositionField position) {
