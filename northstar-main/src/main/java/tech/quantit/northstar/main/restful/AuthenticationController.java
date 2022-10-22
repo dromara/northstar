@@ -48,7 +48,7 @@ public class AuthenticationController implements InitializingBean{
 		if(errCnt.get() >= MAX_ATTEMPT) {
 			throw new AuthenticationException("超过重试限制，登陆受限");
 		}
-		Assert.hasText(user.getUserName(), "账户不能为空");
+		Assert.hasText(user.getUserName(), "用户名不能为空");
 		Assert.hasText(user.getPassword(), "密码不能为空");
 		Assert.isTrue(Math.abs(timestamp - System.currentTimeMillis()) < 30000, "使用了非法登陆时间戳，请同步校准电脑时间");
 		String encodedPassword = MD5.create().digestHex((userInfo.getPassword() + timestamp));
@@ -63,7 +63,7 @@ public class AuthenticationController implements InitializingBean{
 			errCnt.set(0);
 		}
 		errCnt.incrementAndGet();
-		throw new AuthenticationException("账户或密码不正确");
+		throw new AuthenticationException("用户名或密码不正确");
 	}
 
 	@GetMapping("/logout")
