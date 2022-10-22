@@ -102,7 +102,9 @@ public class ModuleFactory {
 		}
 		int moduleBufDataSize = Math.max(100, moduleDescription.getModuleCacheDataSize());	// 至少缓存100个数据
 		if(moduleDescription.getUsage() == ModuleUsage.PLAYBACK) {
-			return new ModulePlaybackContext(moduleDescription.getModuleName(), strategy, accStore, numOfMinPerBar, moduleBufDataSize, dc);
+			IModuleAccountStore pbAccStore = new ModuleAccountStore(moduleDescription.getModuleName(), moduleDescription.getClosingPolicy(), moduleRuntimeDescription, contractMgr);
+			return new ModulePlaybackContext(moduleDescription.getModuleName(), strategy, pbAccStore, numOfMinPerBar, moduleBufDataSize, dc,
+					onRuntimeChangeCallback, onDealChangeCallback);
 		}
 		return new ModuleContext(moduleDescription.getModuleName(), strategy, accStore, closingStrategy, numOfMinPerBar,
 				moduleBufDataSize, dc, onRuntimeChangeCallback, onDealChangeCallback);

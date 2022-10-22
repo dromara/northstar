@@ -28,8 +28,12 @@ public class SocketIOServerConfig implements DisposableBean, InitializingBean {
 	
 	@Bean
 	@ConditionalOnExpression("!'${spring.profiles.active}'.equals('test')")
-    public SocketIOServer socketIOServer() throws SocketException  {
-		return makeServer();
+    public SocketIOServer socketIOServer() {
+		try {
+			return makeServer();
+		} catch (SocketException e) {
+			throw new Error("请检查本机网络环境是否正常", e);
+		}
     }
 	
 	@Bean

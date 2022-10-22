@@ -76,7 +76,7 @@ public class ModulePlaybackContext implements IModuleContext {
 	
 	private static final ILoggerFactory logFactory = new ModuleLoggerFactory();
 
-	private static final String PLAYBACK_GATEWAY = "回放账户";
+	public static final String PLAYBACK_GATEWAY = "回测账户";
 	
 	private String moduleName;
 	
@@ -91,8 +91,6 @@ public class ModulePlaybackContext implements IModuleContext {
 	private int numOfMinsPerBar;
 	
 	private DealCollector dealCollector;
-	
-	private List<ModuleDealRecord> dealRecords = new LinkedList<>();
 	
 	private Set<String> bindedSymbolSet = new HashSet<>();
 	/* originOrderId -> orderReq */
@@ -123,6 +121,10 @@ public class ModulePlaybackContext implements IModuleContext {
 	
 	private final HashSet<IComboIndicator> comboIndicators = new HashSet<>();
 	
+	private Consumer<ModuleRuntimeDescription> onRuntimeChangeCallback;
+	
+	private Consumer<ModuleDealRecord> onDealCallback;
+	
 	private Consumer<BarField> barMergingCallback = bar -> {
 		Consumer<Map.Entry<String,Indicator>> action = e -> {
 			Indicator indicator = e.getValue();
@@ -144,7 +146,7 @@ public class ModulePlaybackContext implements IModuleContext {
 	};
 	
 	public ModulePlaybackContext(String name, TradeStrategy tradeStrategy, IModuleAccountStore accStore, int numOfMinsPerBar, 
-			int bufSize, DealCollector dealCollector) {
+			int bufSize, DealCollector dealCollector, Consumer<ModuleRuntimeDescription> onRuntimeChangeCallback, Consumer<ModuleDealRecord> onDealCallback) {
 		this.moduleName = name;
 		this.mlog = logFactory.getLogger(name);
 		this.tradeStrategy = tradeStrategy;
@@ -152,6 +154,8 @@ public class ModulePlaybackContext implements IModuleContext {
 		this.bufSize.set(bufSize);
 		this.numOfMinsPerBar = numOfMinsPerBar;
 		this.closingStrategy = new PriorTodayClosingStrategy();
+		this.onRuntimeChangeCallback = onRuntimeChangeCallback;
+		this.onDealCallback = onDealCallback;
 		this.dealCollector = dealCollector;
 	}
 	
@@ -214,7 +218,8 @@ public class ModulePlaybackContext implements IModuleContext {
 				.setTradeTime(LocalTime.parse(lastTick.getActionTime(), DateTimeConstant.T_FORMAT_WITH_MS_INT_FORMATTER).format(DateTimeConstant.T_FORMAT_FORMATTER))
 				.build();
 		accStore.onTrade(trade);
-		dealCollector.onTrade(trade).ifPresent(records -> dealRecords.addAll(records));
+		onRuntimeChangeCallback.accept(getRuntimeDescription(false));
+		dealCollector.onTrade(trade).ifPresent(list -> list.stream().forEach(this.onDealCallback::accept));
 		return id;
 	}
 	

@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -44,6 +45,7 @@ import tech.quantit.northstar.data.IGatewayRepository;
 import tech.quantit.northstar.data.IMarketDataRepository;
 import tech.quantit.northstar.data.IModuleRepository;
 import tech.quantit.northstar.domain.gateway.ContractManager;
+import tech.quantit.northstar.domain.module.ModulePlaybackContext;
 import tech.quantit.northstar.main.ExternalJarClassLoader;
 import tech.quantit.northstar.main.handler.internal.ModuleManager;
 import tech.quantit.northstar.main.utils.ModuleFactory;
@@ -180,14 +182,24 @@ public class ModuleService implements InitializingBean {
 	 * @throws Exception 
 	 */
 	public ModuleDescription createModule(ModuleDescription md) throws Exception {
-		Map<String, ModuleAccountRuntimeDescription> accRtsMap = md.getModuleAccountSettingsDescription().stream()
-				.map(masd -> ModuleAccountRuntimeDescription.builder()
-						.accountId(masd.getAccountGatewayId())
-						.initBalance(masd.getModuleAccountInitBalance())
-						.preBalance(masd.getModuleAccountInitBalance())
-						.positionDescription(new ModulePositionDescription())
-						.build())
-				.collect(Collectors.toMap(ModuleAccountRuntimeDescription::getAccountId, mard -> mard));
+		Map<String, ModuleAccountRuntimeDescription> accRtsMap = new HashMap<>();
+		if(md.getUsage() == ModuleUsage.PLAYBACK) {
+			accRtsMap.put(ModulePlaybackContext.PLAYBACK_GATEWAY, ModuleAccountRuntimeDescription.builder()
+					.accountId(ModulePlaybackContext.PLAYBACK_GATEWAY)
+					.initBalance(md.getModuleAccountSettingsDescription().get(0).getModuleAccountInitBalance())
+					.preBalance(md.getModuleAccountSettingsDescription().get(0).getModuleAccountInitBalance())
+					.positionDescription(new ModulePositionDescription())
+					.build());
+		} else {
+			accRtsMap = md.getModuleAccountSettingsDescription().stream()
+					.map(masd -> ModuleAccountRuntimeDescription.builder()
+							.accountId(masd.getAccountGatewayId())
+							.initBalance(masd.getModuleAccountInitBalance())
+							.preBalance(masd.getModuleAccountInitBalance())
+							.positionDescription(new ModulePositionDescription())
+							.build())
+					.collect(Collectors.toMap(ModuleAccountRuntimeDescription::getAccountId, mard -> mard));
+		}
 		ModuleRuntimeDescription mad = ModuleRuntimeDescription.builder()
 				.moduleName(md.getModuleName())
 				.enabled(false)
