@@ -41,6 +41,7 @@ import tech.quantit.northstar.common.model.TimeSeriesValue;
 import tech.quantit.northstar.common.utils.BarUtils;
 import tech.quantit.northstar.common.utils.ContractUtils;
 import tech.quantit.northstar.common.utils.FieldUtils;
+import tech.quantit.northstar.common.utils.MessagePrinter;
 import tech.quantit.northstar.common.utils.OrderUtils;
 import tech.quantit.northstar.gateway.api.TradeGateway;
 import tech.quantit.northstar.strategy.api.ClosingStrategy;
@@ -375,6 +376,7 @@ public class ModuleContext implements IModuleContext{
 		if(!bindedSymbolSet.contains(tick.getUnifiedSymbol())) {
 			return;
 		}
+		log.trace("模组 [{}], TICK信息: {}", getModuleName(), MessagePrinter.print(tick));
 		if(!StringUtils.equals(tradingDay, tick.getTradingDay())) {
 			tradingDay = tick.getTradingDay();
 		}
@@ -400,6 +402,7 @@ public class ModuleContext implements IModuleContext{
 		if(!bindedSymbolSet.contains(bar.getUnifiedSymbol())) {
 			return;
 		}
+		log.trace("模组 [{}], Bar信息: {}", getModuleName(), MessagePrinter.print(bar));
 		indicatorFactory.getIndicatorMap().entrySet().parallelStream().forEach(e -> e.getValue().onBar(bar));	// 普通指标的更新
 		comboIndicators.parallelStream().forEach(combo -> combo.onBar(bar));
 		inspectedValIndicatorFactory.getIndicatorMap().entrySet().parallelStream().forEach(e -> e.getValue().onBar(bar));	// 值透视指标的更新

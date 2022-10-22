@@ -12,7 +12,6 @@ import java.util.stream.Stream;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
-import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import tech.quantit.northstar.common.constant.IndicatorType;
 import tech.quantit.northstar.common.model.BarWrapper;
@@ -33,7 +32,6 @@ import xyz.redtorch.pb.CoreField.TickField;
  * @author KevinHuangwl
  *
  */
-@Slf4j
 public class Indicator {
 	
 	/**
@@ -162,7 +160,6 @@ public class Indicator {
 		if(!bar.getUnifiedSymbol().equals(unifiedSymbol)) {
 			return;
 		}
-		log.trace("{} -> {}", this, bar);
 		if(valType == ValueType.NOT_SET) {
 			barListener.onBar(new BarWrapper(bar, isUnsettled));
 			return;
