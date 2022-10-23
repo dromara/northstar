@@ -1,6 +1,7 @@
 package tech.quantit.northstar.main.handler.internal;
 
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.Set;
 
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +31,7 @@ public class ConnectionHandler extends AbstractEventHandler implements GenericEv
 	protected GatewayAndConnectionManager gatewayConnMgr;
 	protected ContractManager contractMgr;
 	protected IGatewayRepository gatewayRepo;
+	protected Set<String> subscribedSet = new HashSet<>();
 	
 	private static final Set<NorthstarEventType> TARGET_TYPE = EnumSet.of(
 			NorthstarEventType.CONNECTING,
@@ -38,7 +40,6 @@ public class ConnectionHandler extends AbstractEventHandler implements GenericEv
 			NorthstarEventType.DISCONNECTING,
 			NorthstarEventType.GATEWAY_READY
 	); 
-			
 	
 	public ConnectionHandler(GatewayAndConnectionManager gatewayConnMgr, ContractManager contractMgr, IGatewayRepository gatewayRepo) {
 		this.gatewayConnMgr = gatewayConnMgr;
@@ -58,6 +59,7 @@ public class ConnectionHandler extends AbstractEventHandler implements GenericEv
 			conn.onConnecting();
 		} else if(e.getEvent() == NorthstarEventType.DISCONNECTING) {
 			log.info("[{}]-断开中", gatewayId);
+			subscribedSet.remove(gatewayId);
 			conn.onDisconnecting();
 		} else if(e.getEvent() == NorthstarEventType.CONNECTED) {
 			log.info("[{}]-已连接", gatewayId);
@@ -82,7 +84,11 @@ public class ConnectionHandler extends AbstractEventHandler implements GenericEv
 	}
 	
 	private void doSubscribe(MarketGateway mktGateway) {
-		GatewayDescription gd = gatewayRepo.findById(mktGateway.getGatewaySetting().getGatewayId());
+		String gatewayId = mktGateway.getGatewaySetting().getGatewayId();
+		if(subscribedSet.contains(gatewayId)) {
+			return;
+		}
+		GatewayDescription gd = gatewayRepo.findById(gatewayId);
 		if(gd.getSubscribedContractGroups() != null) {					
 			for(String contractDefId : gd.getSubscribedContractGroups()) {
 				for(ContractField contract : contractMgr.relativeContracts(contractDefId)) {
@@ -90,6 +96,7 @@ public class ConnectionHandler extends AbstractEventHandler implements GenericEv
 				}
 			}
 		} 
+		subscribedSet.add(gatewayId);
 	}
 
 	@Override
