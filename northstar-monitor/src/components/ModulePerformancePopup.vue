@@ -2,6 +2,7 @@
   <el-dialog title="盈亏曲线" :visible="visible" width="80%" append-to-body :before-close="close">
     <div class="perf-chart-wrapper">
       <module-performance
+        ref="chartContainer"
         :moduleInitBalance="moduleInitBalance"
         :moduleDealRecords="moduleDealRecords"
       />
@@ -28,6 +29,15 @@ export default {
     moduleDealRecords: {
       type: Array,
       default: () => []
+    }
+  },
+  watch: {
+    visible: function (val) {
+      if (val) {
+        this.$nextTick(() => {
+          this.$refs.chartContainer.refresh()
+        })
+      }
     }
   },
   methods: {

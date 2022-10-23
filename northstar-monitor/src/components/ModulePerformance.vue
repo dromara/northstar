@@ -61,15 +61,19 @@ export default {
   },
   created() {
     window.addEventListener('resize', () => {
-      if (this.kLineChart) {
-        this.kLineChart.resize()
-      }
+      this.refresh()
     })
   },
   methods: {
     updateChart() {
       this.kLineChart.applyNewData(this.performanceData)
-      this.kLineChart.resize() // 防止偶尔渲染不成功
+      this.refresh() // 防止偶尔渲染不成功
+    },
+    refresh() {
+      console.log('Refreshing chart')
+      if (this.kLineChart) {
+        this.kLineChart.resize()
+      }
     },
     destroyed: function () {
       dispose(this.chartId)
