@@ -83,14 +83,13 @@
           <el-button size="mini" type="primary" @click="handleCreate">新建</el-button>
         </template>
         <template slot-scope="scope">
-          <el-popconfirm
+          <el-button
             v-if="scope.row.runtime && scope.row.runtime.enabled"
-            class="mr-10"
-            title="确定停用吗？"
-            @confirm="toggle(scope.$index, scope.row)"
+            type="danger"
+            size="mini"
+            @click.native="toggle(scope.$index, scope.row)"
+            >停用</el-button
           >
-            <el-button type="danger" slot="reference">停用</el-button>
-          </el-popconfirm>
           <el-button
             v-if="scope.row.runtime && !scope.row.runtime.enabled"
             type="success"

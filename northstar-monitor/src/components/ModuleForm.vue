@@ -181,7 +181,7 @@
         v-if="!readOnly && isUpdateMode && form.usage !== 'PROD'"
         class="mr-10"
         title="确定重置吗？"
-        @confirm="saveSetting(true)"
+        @confirm="saveSettingAndClose(true)"
       >
         <el-button slot="reference" size="mini" type="warning" title="模组状态将重置为初始状态">
           重置模组
@@ -196,9 +196,11 @@
         v-if="!readOnly"
         type="primary"
         @click="saveSettingAndClose(false)"
-        >保存 | 关闭</el-button
+        >保存{{ isUpdateMode ? '' : ` | 关闭` }}</el-button
       >
-      <el-button v-if="!readOnly" type="primary" @click="saveSettingAndMore">保存 | 继续</el-button>
+      <el-button v-if="!readOnly && !isUpdateMode" type="primary" @click="saveSettingAndMore"
+        >保存 | 继续</el-button
+      >
     </div>
   </el-dialog>
 </template>
