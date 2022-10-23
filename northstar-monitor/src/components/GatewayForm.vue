@@ -243,9 +243,13 @@ export default {
             this.contractDefOptions.length &&
             this.form.subscribedContractGroups instanceof Array
           ) {
-            this.subscribedContractGroups = this.form.subscribedContractGroups.map((defId) =>
-              this.contractDefOptions.find((item) => `${item.name}@${item.productClass}` === defId)
-            )
+            this.subscribedContractGroups = this.form.subscribedContractGroups
+              .map((defId) =>
+                this.contractDefOptions.find(
+                  (item) => `${item.name}@${item.productClass}` === defId
+                )
+              )
+              .filter((item) => !!item)
           }
         })
       }
@@ -283,11 +287,13 @@ export default {
                 return item
               })
               if (this.form.subscribedContractGroups instanceof Array) {
-                this.subscribedContractGroups = this.form.subscribedContractGroups.map((defId) =>
-                  this.contractDefOptions.find(
-                    (item) => `${item.name}@${item.productClass}` === defId
+                this.subscribedContractGroups = this.form.subscribedContractGroups
+                  .map((defId) =>
+                    this.contractDefOptions.find(
+                      (item) => `${item.name}@${item.productClass}` === defId
+                    )
                   )
-                )
+                  .filter((item) => !!item)
               }
             })
           })
