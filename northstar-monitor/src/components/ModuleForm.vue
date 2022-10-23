@@ -191,9 +191,14 @@
         合约查询
       </el-button>
       <el-button @click="close">取 消</el-button>
-      <el-button id="saveModuleSettings" v-if="!readOnly" type="primary" @click="saveSetting(false)"
-        >保 存</el-button
+      <el-button
+        id="saveModuleSettings"
+        v-if="!readOnly"
+        type="primary"
+        @click="saveSettingAndClose(false)"
+        >保存 | 关闭</el-button
       >
+      <el-button v-if="!readOnly" type="primary" @click="saveSettingAndMore">保存 | 继续</el-button>
     </div>
   </el-dialog>
 </template>
@@ -333,7 +338,7 @@ export default {
         this.assertTrue(this.form.moduleAccountSettingsDescription.length, '未指定交易账户')
 
       if (!pass) {
-        return
+        throw new Error('校验不通过')
       }
       this.form.moduleAccountSettingsDescription.forEach((desc) => {
         if (!desc.bindedUnifiedSymbols.length) {
@@ -358,7 +363,12 @@ export default {
         this.loading = false
       }
       this.$emit('onSave')
-      this.close()
+    },
+    async saveSettingAndClose(reset) {
+      this.saveSetting(reset).then(this.close)
+    },
+    saveSettingAndMore() {
+      this.saveSetting(false)
     },
     close() {
       this.$emit('update:visible', false)
