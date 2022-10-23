@@ -55,13 +55,15 @@
       </el-table-column>
       <el-table-column label="绑定合约" align="center" width="minmax(120px, 400px)">
         <template slot-scope="scope">
-          {{
-            (() => {
-              return scope.row.moduleAccountSettingsDescription
-                .map((item) => item.bindedUnifiedSymbols.join('，'))
-                .join('；')
-            })()
-          }}
+          <span class="text-selectable">
+            {{
+              (() => {
+                return scope.row.moduleAccountSettingsDescription
+                  .map((item) => item.bindedUnifiedSymbols.join('，'))
+                  .join('；')
+              })()
+            }}
+          </span>
         </template>
       </el-table-column>
 
