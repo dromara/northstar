@@ -36,8 +36,10 @@ public class SocketIOMessageEngine {
 	public void emitEvent(NorthstarEvent event) throws SecurityException, IllegalArgumentException {
 		// 为了避免接收端信息拥塞，把行情数据按合约分房间分发数据，可以提升客户端的接收效率
 		if(event.getData() instanceof TickField tick) {
+			log.trace("TICK数据分发：[{} {} {} 价格：{}]", tick.getUnifiedSymbol(), tick.getActionDay(), tick.getActionTime(), tick.getLastPrice());
 			server.getRoomOperations(tick.getUnifiedSymbol()).sendEvent(event.getEvent().toString(), Base64.encode(tick.toByteArray()));
 		} else if(event.getData() instanceof BarField bar) {
+			log.trace("BAR数据分发：[{} {} {} 价格：{}]", bar.getUnifiedSymbol(), bar.getActionDay(), bar.getActionTime(), bar.getClosePrice());
 			server.getRoomOperations(bar.getUnifiedSymbol()).sendEvent(event.getEvent().toString(), Base64.encode(bar.toByteArray()));
 		} else if(event.getData() instanceof AccountField account) {
 			log.trace("账户信息分发: [{}]", MessagePrinter.print(account));

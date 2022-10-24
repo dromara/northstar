@@ -13,7 +13,10 @@ northstar:
 
 logging:  level: 
     root: info
-    '[xyz.redtorch]': debug
+    # 行情数据入口
+    '[xyz.redtorch.gateway.ctp.x64v6v3v15v]': info
+    # 行情数据出口
+    '[tech.quantit.northstar.main.handler.broadcast]': info
   file:    path: logs/
   
 spring:
