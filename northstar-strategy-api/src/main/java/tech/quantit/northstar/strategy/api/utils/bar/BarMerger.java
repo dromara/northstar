@@ -37,7 +37,7 @@ public class BarMerger {
 		if(!StringUtils.equals(bar.getUnifiedSymbol(), bindedContract.getUnifiedSymbol())) {
 			return;
 		}
-		if(bar.getActionTimestamp() <= curBarTimestamp) {
+		if(bar.getActionTimestamp() < curBarTimestamp) {
 			return;
 		}
 		curBarTimestamp = bar.getActionTimestamp();
