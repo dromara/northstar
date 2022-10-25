@@ -78,26 +78,22 @@ public class BarGenerator {
 				helper.updateCutoffTime(newCutoffTime);
 			}
 			cutoffTime = newCutoffTime;
-			
-			barBuilder.setOpenPrice(tick.getLastPrice());
-			barBuilder.setHighPrice(tick.getLastPrice());
-			barBuilder.setLowPrice(tick.getLastPrice());
-			
-			barBuilder.setVolume(0);				
-			barBuilder.setTurnover(0);
-			barBuilder.setNumTrades(0);
-			barBuilder.setOpenInterestDelta(0);
-			
-			barBuilder.setActionTimestamp(barActionTime);
-			barBuilder.setActionTime(LocalDateTime.ofInstant(Instant.ofEpochMilli(barActionTime), ZoneId.systemDefault()).format(DateTimeConstant.T_FORMAT_WITH_MS_INT_FORMATTER));
+			barBuilder = BarField.newBuilder()
+					.setGatewayId(contract.contractField().getGatewayId())
+					.setUnifiedSymbol(contract.unifiedSymbol())
+					.setTradingDay(tick.getTradingDay())
+					.setOpenPrice(tick.getLastPrice())
+					.setHighPrice(tick.getLastPrice())
+					.setLowPrice(tick.getLastPrice())
+					.setPreClosePrice(tick.getPreClosePrice())
+					.setPreOpenInterest(tick.getPreOpenInterest())
+					.setPreSettlePrice(tick.getPreSettlePrice())
+					.setActionTimestamp(barActionTime)
+					.setActionDay(tick.getActionDay())
+					.setActionTime(LocalDateTime.ofInstant(Instant.ofEpochMilli(barActionTime), ZoneId.systemDefault()).format(DateTimeConstant.T_FORMAT_WITH_MS_INT_FORMATTER));
 		}
 		
 		barTicks.offer(tick);
-		barBuilder.setPreClosePrice(tick.getPreClosePrice());
-		barBuilder.setPreOpenInterest(tick.getPreOpenInterest());
-		barBuilder.setPreSettlePrice(tick.getPreSettlePrice());
-		barBuilder.setTradingDay(tick.getTradingDay());
-		barBuilder.setActionDay(tick.getActionDay());
 		barBuilder.setHighPrice(Math.max(tick.getLastPrice(), barBuilder.getHighPrice()));
 		barBuilder.setLowPrice(Math.min(tick.getLastPrice(), barBuilder.getLowPrice()));
 		barBuilder.setClosePrice(tick.getLastPrice());
