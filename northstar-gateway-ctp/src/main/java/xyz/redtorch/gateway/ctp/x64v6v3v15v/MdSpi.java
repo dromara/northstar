@@ -213,10 +213,8 @@ public class MdSpi extends CThostFtdcMdSpi {
 		logger.debug("订阅合约：{}", symbol);
 		subscribedSymbolSet.add(symbol);
 		if (isConnected()) {
-			String[] symbolArray = new String[1];
-			symbolArray[0] = symbol;
 			try {
-				cThostFtdcMdApi.SubscribeMarketData(symbolArray, 1);
+				cThostFtdcMdApi.SubscribeMarketData(new String[]{symbol}, 1);
 			} catch (Throwable t) {
 				logger.error("{}订阅行情异常,合约代码{}", logInfo, symbol, t);
 				return false;
@@ -232,11 +230,8 @@ public class MdSpi extends CThostFtdcMdSpi {
 	public boolean unsubscribe(String symbol) {
 		subscribedSymbolSet.remove(symbol);
 		if (isConnected()) {
-			String[] symbolArray = new String[1];
-			symbolArray[0] = symbol;
-			symbolArray[0] = symbol;
 			try {
-				cThostFtdcMdApi.UnSubscribeMarketData(symbolArray, 1);
+				cThostFtdcMdApi.UnSubscribeMarketData(new String[]{symbol}, 1);
 			} catch (Throwable t) {
 				logger.error("{}行情退订异常,合约代码{}", logInfo, symbol, t);
 				return false;
