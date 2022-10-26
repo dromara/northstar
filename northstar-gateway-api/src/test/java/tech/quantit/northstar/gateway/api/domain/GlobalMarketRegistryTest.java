@@ -11,7 +11,6 @@ import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Test;
 
-import tech.quantit.northstar.common.GatewayType;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.gateway.api.MarketGateway;
 import test.common.TestFieldFactory;
