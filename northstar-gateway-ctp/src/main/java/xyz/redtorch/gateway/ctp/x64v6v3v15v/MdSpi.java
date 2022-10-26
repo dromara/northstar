@@ -398,6 +398,11 @@ public class MdSpi extends CThostFtdcMdSpi {
 					logger.warn("{}行情接口收到合约{}数据,但尚未获取到合约信息,丢弃", logInfo, symbol);
 					return;
 				}
+				
+				if(!mktTimeUtil.isOpeningTime(symbol, LocalTime.now())) {
+					logger.trace("[{}] 收到非开市时间数据", symbol);
+					return;
+				}
 
 				ContractField contract = gatewayAdapter.contractMap.get(symbol);
 
@@ -428,7 +433,7 @@ public class MdSpi extends CThostFtdcMdSpi {
 					logger.error("{}解析日期发生异常", logInfo, e);
 					return;
 				}
-
+				
 				String contractId = contract.getContractId();
 				String actionTime = dateTime.format(DateTimeConstant.T_FORMAT_WITH_MS_INT_FORMATTER);
 				double lastPrice = pDepthMarketData.getLastPrice();

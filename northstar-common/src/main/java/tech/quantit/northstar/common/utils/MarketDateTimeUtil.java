@@ -22,4 +22,12 @@ public interface MarketDateTimeUtil {
 	 * @return
 	 */
 	TickType resolveTickType(String symbol, LocalTime time);
+	
+	/**
+	 * 判断为开市时间
+	 * @param symbol
+	 * @param time
+	 * @return
+	 */
+	boolean isOpeningTime(String symbol, LocalTime time);
 }
