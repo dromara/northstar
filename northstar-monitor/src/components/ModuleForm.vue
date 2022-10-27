@@ -359,18 +359,18 @@ export default {
         } else {
           await moduleApi.insertModule(obj)
         }
-      } catch (e) {
-        this.$message.error(e.message)
       } finally {
         this.loading = false
       }
       this.$emit('onSave')
     },
     async saveSettingAndClose(reset) {
-      this.saveSetting(reset).then(this.close)
+      this.saveSetting(reset)
+        .then(this.close)
+        .catch((e) => this.$message.error(e.message))
     },
     saveSettingAndMore() {
-      this.saveSetting(false)
+      this.saveSetting(false).catch((e) => this.$message.error(e.message))
     },
     close() {
       this.$emit('update:visible', false)
