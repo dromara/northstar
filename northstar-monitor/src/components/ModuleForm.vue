@@ -362,7 +362,7 @@ export default {
       } finally {
         this.loading = false
       }
-      this.$emit('onSave')
+      this.$emit('onSave', obj)
     },
     async saveSettingAndClose(reset) {
       this.saveSetting(reset)

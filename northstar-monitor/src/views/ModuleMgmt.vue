@@ -4,14 +4,14 @@
       :visible.sync="moduleFormVisible"
       :readOnly="curTableIndex > -1 && curModule.runtime && curModule.runtime.enabled"
       :module="curModule"
-      @onSave="findAll"
+      @onSave="saveModule"
     />
     <ModuleRuntime
       :visible.sync="ModuleRuntimeVisible"
       :module="curTableIndex > -1 ? curModule : ''"
       :moduleRuntimeSrc="curTableIndex > -1 ? curModule.runtime : ''"
     />
-    <el-table height="100%" :data="list">
+    <el-table height="100%" :data="moduleList">
       <el-table-column label="模组名称" prop="moduleName" sortable align="center" width="180px" />
       <el-table-column label="模组类型" prop="type" sortable align="center" width="100px">
         <template slot-scope="scope">
@@ -128,7 +128,7 @@
 <script>
 import ModuleForm from '@/components/ModuleForm'
 import ModuleRuntime from '@/components/ModuleRuntime'
-
+import { mapGetters } from 'vuex'
 import moduleApi from '@/api/moduleApi'
 
 export default {
@@ -142,12 +142,16 @@ export default {
       ModuleRuntimeVisible: false,
       curTableIndex: -1,
       curModule: null,
-      list: [],
       timer: -1
     }
   },
+  computed: {
+    ...mapGetters(['moduleList'])
+  },
   mounted() {
-    this.findAll()
+    if (!this.moduleList.length) {
+      this.findAll()
+    }
   },
   beforeDestroy() {
     clearTimeout(this.timer)
@@ -170,18 +174,21 @@ export default {
     },
     async handleDelete(index, row) {
       await moduleApi.removeModule(row.moduleName)
-      this.list = this.list.filter((item, i) => i !== index)
+      this.$store.commit(
+        'updateList',
+        this.moduleList.filter((item, i) => i !== index)
+      )
     },
     findAll() {
       moduleApi.getAllModules().then((results) => {
-        this.list = results
-        this.list.map((item) => {
+        this.$store.commit('updateList', results)
+        this.moduleList.map((item) => {
           moduleApi.getModuleRuntime(item.moduleName).then(
             (rt) => {
-              this.list.find((item, index, array) => {
+              this.moduleList.find((item, index, array) => {
                 if (item.moduleName === rt.moduleName) {
                   array[index] = Object.assign({ runtime: rt }, item)
-                  this.list = [...array]
+                  this.$store.commit('updateList', [...array])
                 }
               })
             },
@@ -195,6 +202,21 @@ export default {
           return item
         })
       })
+    },
+    async saveModule(module) {
+      console.log(module)
+      const rt = await moduleApi.getModuleRuntime(module.moduleName)
+      module.runtime = rt
+      let isFresh = true
+      this.moduleList.find((item, index, array) => {
+        if (item.moduleName === module.moduleName) {
+          isFresh = false
+          array[index] = module
+        }
+      })
+      if (isFresh) {
+        this.moduleList.push(module)
+      }
     },
     async toggle(index, row) {
       await moduleApi.toggleModuleState(row.moduleName)
