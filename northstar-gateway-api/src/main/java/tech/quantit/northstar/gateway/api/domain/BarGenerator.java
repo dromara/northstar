@@ -5,10 +5,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 import lombok.extern.slf4j.Slf4j;
@@ -32,20 +29,12 @@ public class BarGenerator {
 	private long cutoffTime;
 	
 	private static final GlobalCutOffTimeHelper helper = new GlobalCutOffTimeHelper();
-	
-	private static final AtomicInteger cnt = new AtomicInteger();
 
 	private NormalContract contract;
 	
 	private Consumer<BarField> barCallBack;
 	
 	private ConcurrentLinkedQueue<TickField> barTicks = new ConcurrentLinkedQueue<>();
-	
-	private boolean marketStopped;	// 停盘标识
-	
-	private Timer timer = new Timer("BarTimer-" + cnt.incrementAndGet(), true);
-	
-	private TimerTask autoFinishingTask; 
 	
 	public BarGenerator(NormalContract contract, Consumer<BarField> barCallBack) {
 		this.barCallBack = barCallBack;
@@ -54,19 +43,6 @@ public class BarGenerator {
 				.setGatewayId(contract.contractField().getGatewayId())
 				.setUnifiedSymbol(contract.unifiedSymbol());
 		helper.register(this);
-		autoFinishingTask = new TimerTask() {
-
-			@Override
-			public void run() {
-				if(!marketStopped && System.currentTimeMillis() > cutoffTime) {					
-					BarGenerator.this.finishOfBar();
-					marketStopped = true;
-				}
-			}
-			
-		};
-		long secondsToNextWholeMinute = System.currentTimeMillis() % 60000;
-		timer.schedule(autoFinishingTask, secondsToNextWholeMinute + 5000, 60000);
 	}
 	
 	public BarGenerator(NormalContract contract) {
@@ -89,8 +65,6 @@ public class BarGenerator {
 		if(tick.getStatus() < 1) {
 			return;
 		}
-		
-		marketStopped = false;
 		 
 		if(tick.getActionTimestamp() > cutoffTime) {
 			long offset = 0;	// K线偏移量
