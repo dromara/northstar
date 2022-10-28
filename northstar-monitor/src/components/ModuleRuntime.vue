@@ -43,12 +43,12 @@
                 @click="exportDealRecord"
                 >导出交易</el-button
               >
-              <el-button
+              <!-- <el-button
                 class="compact mb-10"
                 icon="el-icon-info"
                 @click="performanceVisible = true"
                 >模组绩效</el-button
-              >
+              > -->
             </template>
             <el-descriptions-item label="名称">{{ moduleRuntime.moduleName }}</el-descriptions-item>
             <el-descriptions-item label="启停状态"
@@ -182,6 +182,13 @@
               </el-table>
             </div>
             <div class="performance-min">
+              <el-button
+                class="compact btn-enlarge"
+                title="放大盈亏曲线"
+                size="mini"
+                icon="el-icon-zoom-in"
+                @click="performanceVisible = true"
+              ></el-button>
               <ModulePerformance
                 :visible.sync="performanceVisible"
                 :moduleInitBalance="accountInfo.initBalance"
@@ -670,6 +677,7 @@ export default {
   min-height: 150px;
 }
 .performance-min {
+  position: relative;
   height: calc((100vh - 382px) * 0.5);
 }
 @media screen and (max-height: 600px) {
@@ -706,6 +714,12 @@ export default {
 .text-wrapper {
   box-sizing: content-box;
   width: 100%;
+}
+.btn-enlarge {
+  position: absolute;
+  right: 0;
+  margin: 10px 0;
+  z-index: 999;
 }
 </style>
 <style>
