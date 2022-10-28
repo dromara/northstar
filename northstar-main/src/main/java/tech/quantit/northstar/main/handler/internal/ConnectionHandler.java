@@ -66,6 +66,7 @@ public class ConnectionHandler extends AbstractEventHandler implements GenericEv
 			conn.onConnected();
 		} else if(e.getEvent() == NorthstarEventType.DISCONNECTED) {
 			log.info("[{}]-已断开", gatewayId);
+			subscribedSet.remove(gatewayId);
 			conn.onDisconnected();
 		} else if(e.getEvent() == NorthstarEventType.GATEWAY_READY) {
 			log.info("[{}]-已可用", gatewayId);
