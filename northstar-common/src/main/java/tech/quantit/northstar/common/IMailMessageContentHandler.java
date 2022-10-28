@@ -15,8 +15,9 @@ public interface IMailMessageContentHandler {
 
 	default String onEvent(TradeField trade) {
 		StringBuilder sb = new StringBuilder();
-		sb.append("收到【成交】事件:\n");
+		sb.append("收到【账户成交】事件:\n");
 		sb.append(String.format("账户：%s%n", trade.getGatewayId()));
+		sb.append(String.format("委托ID：%s%n", trade.getOriginOrderId()));
 		sb.append(String.format("交易品种：%s%n", trade.getContract().getFullName()));
 		sb.append(String.format("成交时间：%s%n", trade.getTradeTime()));
 		sb.append(String.format("操作：%s%n", FieldUtils.chn(trade.getDirection()) + FieldUtils.chn(trade.getOffsetFlag())));
@@ -27,8 +28,9 @@ public interface IMailMessageContentHandler {
 	
 	default String onEvent(OrderField order) {
 		StringBuilder sb = new StringBuilder();
-		sb.append("收到【订单】事件:\n");
+		sb.append("收到【账户订单】事件:\n");
 		sb.append(String.format("账户：%s%n", order.getGatewayId()));
+		sb.append(String.format("委托ID：%s%n", order.getOriginOrderId()));
 		sb.append(String.format("交易品种：%s%n", order.getContract().getFullName()));
 		sb.append(String.format("订单状态：%s%n", FieldUtils.chn(order.getOrderStatus())));
 		sb.append(String.format("操作：%s%n", FieldUtils.chn(order.getDirection()) + FieldUtils.chn(order.getOffsetFlag())));
@@ -40,7 +42,7 @@ public interface IMailMessageContentHandler {
 	
 	default String onEvent(NoticeField notice) {
 		StringBuilder sb = new StringBuilder();
-		sb.append("收到【消息】事件:\n");
+		sb.append("收到【系统消息】事件:\n");
 		sb.append(String.format("消息级别：%s%n", notice.getStatus()));
 		sb.append(notice.getContent());
 		return sb.toString();
@@ -48,14 +50,14 @@ public interface IMailMessageContentHandler {
 	
 	default String onConnected(String gatewayId) {
 		StringBuilder sb = new StringBuilder();
-		sb.append("收到【连线】事件:\n");
+		sb.append("收到【网关连线】事件:\n");
 		sb.append(String.format("【%s】 已连线", gatewayId));
 		return sb.toString();
 	}
 	
 	default String onDisconnected(String gatewayId) {
 		StringBuilder sb = new StringBuilder();
-		sb.append("收到【离线】事件:\n");
+		sb.append("收到【网关离线】事件:\n");
 		sb.append(String.format("【%s】 已离线", gatewayId));
 		return sb.toString();
 	}

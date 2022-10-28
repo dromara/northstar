@@ -12,6 +12,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -65,7 +66,8 @@ class ModuleContextTest {
 		when(closingStrategy.resolveOperation(any(SignalOperation.class), any(PositionField.class))).thenReturn(OffsetFlagEnum.OF_Open);
 		when(closingStrategy.resolveOperation(any(SignalOperation.class), eq(null))).thenReturn(OffsetFlagEnum.OF_Open);
 		
-		ctx = new ModuleContext("testModule", strategy, accStore, closingStrategy, 3, 100, mock(DealCollector.class), mock(Consumer.class), mock(Consumer.class));
+		ctx = new ModuleContext("testModule", strategy, accStore, closingStrategy, 3, 100, mock(DealCollector.class), 
+				mock(Consumer.class), mock(Consumer.class), mock(BiConsumer.class));
 		ctx.setModule(module);
 	}
 

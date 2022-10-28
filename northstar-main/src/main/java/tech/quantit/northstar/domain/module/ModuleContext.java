@@ -13,6 +13,7 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -125,6 +126,8 @@ public class ModuleContext implements IModuleContext{
 	
 	private Consumer<ModuleDealRecord> onDealCallback;
 	
+	private BiConsumer<ModuleContext, TradeField> onModuleTradeCallback;
+	
 	private final IndicatorFactory indicatorFactory = new IndicatorFactory();
 	
 	private final IndicatorFactory inspectedValIndicatorFactory = new IndicatorFactory();
@@ -158,7 +161,8 @@ public class ModuleContext implements IModuleContext{
 	private Logger mlog;
 	
 	public ModuleContext(String name, TradeStrategy tradeStrategy, IModuleAccountStore accStore, ClosingStrategy closingStrategy, int numOfMinsPerBar, 
-			int bufSize, DealCollector dealCollector, Consumer<ModuleRuntimeDescription> onRuntimeChangeCallback, Consumer<ModuleDealRecord> onDealCallback) {
+			int bufSize, DealCollector dealCollector, Consumer<ModuleRuntimeDescription> onRuntimeChangeCallback, Consumer<ModuleDealRecord> onDealCallback,
+			BiConsumer<ModuleContext, TradeField> onModuleTradeCallback) {
 		this.moduleName = name;
 		this.mlog = logFactory.getLogger(name);
 		this.tradeStrategy = tradeStrategy;
@@ -168,6 +172,7 @@ public class ModuleContext implements IModuleContext{
 		this.dealCollector = dealCollector;
 		this.onRuntimeChangeCallback = onRuntimeChangeCallback;
 		this.onDealCallback = onDealCallback;
+		this.onModuleTradeCallback = onModuleTradeCallback;
 		this.bufSize.set(bufSize);
 	}
 
@@ -435,6 +440,7 @@ public class ModuleContext implements IModuleContext{
 		}
 		accStore.onTrade(trade);
 		tradeStrategy.onTrade(trade);
+		onModuleTradeCallback.accept(this, trade);
 		onRuntimeChangeCallback.accept(getRuntimeDescription(false));
 		dealCollector.onTrade(trade).ifPresent(list -> list.stream().forEach(this.onDealCallback::accept));
 		

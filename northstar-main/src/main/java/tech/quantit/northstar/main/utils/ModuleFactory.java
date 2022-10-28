@@ -3,11 +3,14 @@ package tech.quantit.northstar.main.utils;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import tech.quantit.northstar.common.constant.ClosingPolicy;
 import tech.quantit.northstar.common.constant.ModuleUsage;
+import tech.quantit.northstar.common.event.NorthstarEvent;
+import tech.quantit.northstar.common.event.NorthstarEventType;
 import tech.quantit.northstar.common.model.ComponentAndParamsPair;
 import tech.quantit.northstar.common.model.ComponentField;
 import tech.quantit.northstar.common.model.DynamicParams;
@@ -16,6 +19,7 @@ import tech.quantit.northstar.common.model.ModuleAccountRuntimeDescription;
 import tech.quantit.northstar.common.model.ModuleDealRecord;
 import tech.quantit.northstar.common.model.ModuleDescription;
 import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
+import tech.quantit.northstar.common.utils.FieldUtils;
 import tech.quantit.northstar.data.IGatewayRepository;
 import tech.quantit.northstar.data.IModuleRepository;
 import tech.quantit.northstar.domain.gateway.ContractManager;
@@ -31,12 +35,14 @@ import tech.quantit.northstar.domain.module.TradeModule;
 import tech.quantit.northstar.gateway.api.MarketGateway;
 import tech.quantit.northstar.gateway.api.TradeGateway;
 import tech.quantit.northstar.main.ExternalJarClassLoader;
+import tech.quantit.northstar.main.mail.MailDeliveryManager;
 import tech.quantit.northstar.strategy.api.ClosingStrategy;
 import tech.quantit.northstar.strategy.api.DynamicParamsAware;
 import tech.quantit.northstar.strategy.api.IModule;
 import tech.quantit.northstar.strategy.api.IModuleAccountStore;
 import tech.quantit.northstar.strategy.api.IModuleContext;
 import tech.quantit.northstar.strategy.api.TradeStrategy;
+import xyz.redtorch.pb.CoreField.NoticeField;
 import xyz.redtorch.pb.CoreField.TradeField;
 
 public class ModuleFactory {
@@ -51,17 +57,37 @@ public class ModuleFactory {
 	
 	private ContractManager contractMgr;
 	
+	private MailDeliveryManager mailMgr;
+	
 	private Consumer<ModuleRuntimeDescription> onRuntimeChangeCallback = rt -> moduleRepo.saveRuntime(rt);
 	
 	private Consumer<ModuleDealRecord> onDealChangeCallback = dealRecord -> moduleRepo.saveDealRecord(dealRecord);
 	
+	private BiConsumer<ModuleContext, TradeField> onModuleTradeCallback = (ctx, trade) -> {
+		StringBuilder sb = new StringBuilder();
+		sb.append("收到【模组成交】事件:\n");
+		sb.append(String.format("模组：%s%n", ctx.getModuleName()));
+		sb.append(String.format("委托ID：%s%n", trade.getOriginOrderId()));
+		sb.append(String.format("委托ID：%s%n", trade.getOriginOrderId()));
+		sb.append(String.format("交易品种：%s%n", trade.getContract().getFullName()));
+		sb.append(String.format("成交时间：%s%n", trade.getTradeTime()));
+		sb.append(String.format("操作：%s%n", FieldUtils.chn(trade.getDirection()) + FieldUtils.chn(trade.getOffsetFlag())));
+		sb.append(String.format("成交价：%s%n", trade.getPrice()));
+		sb.append(String.format("手数：%s%n", trade.getVolume()));
+		mailMgr.onEvent(new NorthstarEvent(NorthstarEventType.NOTICE, NoticeField.newBuilder()
+				.setTimestamp(System.currentTimeMillis())
+				.setContent(sb.toString())
+				.build()));
+	};
+	
 	public ModuleFactory(ExternalJarClassLoader extJarLoader, IModuleRepository moduleRepo, IGatewayRepository gatewayRepo, 
-			GatewayAndConnectionManager gatewayConnMgr, ContractManager contractMgr) {
+			GatewayAndConnectionManager gatewayConnMgr, ContractManager contractMgr, MailDeliveryManager mailMgr) {
 		this.extJarLoader = extJarLoader;
 		this.moduleRepo = moduleRepo;
 		this.gatewayRepo = gatewayRepo;
 		this.gatewayConnMgr = gatewayConnMgr;
 		this.contractMgr = contractMgr;
+		this.mailMgr = mailMgr;
 	}
  	
 	public IModule newInstance(ModuleDescription moduleDescription, ModuleRuntimeDescription moduleRuntimeDescription) throws Exception {
@@ -107,7 +133,7 @@ public class ModuleFactory {
 					onRuntimeChangeCallback, onDealChangeCallback);
 		}
 		return new ModuleContext(moduleDescription.getModuleName(), strategy, accStore, closingStrategy, numOfMinPerBar,
-				moduleBufDataSize, dc, onRuntimeChangeCallback, onDealChangeCallback);
+				moduleBufDataSize, dc, onRuntimeChangeCallback, onDealChangeCallback, onModuleTradeCallback);
 	}
 	
 	@SuppressWarnings("unchecked")
