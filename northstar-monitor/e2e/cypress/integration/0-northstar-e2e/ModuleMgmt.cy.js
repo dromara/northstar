@@ -77,8 +77,7 @@ describe('模组管理-测试', () => {
             cy.get('.el-table__row').contains('删除').should('be.enabled')
             cy.get('.el-table__row').contains('启用').click()
             cy.get('.el-table__row').contains('运行中')
-            cy.get('.el-table__row').find('button').contains('停用').parent().click()
-            cy.get('.el-popconfirm').filter(':visible').find('button').contains('确定').click()
+            cy.get('.el-table__row').contains('停用').click()
             cy.get('.el-table__row').contains('删除').should('be.enabled')
         })
 
@@ -124,7 +123,8 @@ describe('模组管理-测试', () => {
             cy.get('.el-dialog').contains('模组分配金额').parent().find('input').clear().type('20000')
             cy.get('.el-dialog').contains('关联合约').parent().find('input').click()
             cy.get('.el-select-dropdown').contains('sim999').click()
-            cy.get('.el-dialog').filter(':visible').find('button').last().click()
+            cy.get('.el-dialog').contains('模组分配金额').parent().find('input').click()
+            cy.get('#saveModuleSettings').click()
         })
 
         beforeEach(() => {
