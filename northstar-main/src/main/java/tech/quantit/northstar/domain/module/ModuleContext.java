@@ -2,6 +2,7 @@ package tech.quantit.northstar.domain.module;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalTime;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -28,6 +29,7 @@ import com.google.common.util.concurrent.AtomicDouble;
 
 import cn.hutool.core.lang.Assert;
 import tech.quantit.northstar.common.constant.Constants;
+import tech.quantit.northstar.common.constant.DateTimeConstant;
 import tech.quantit.northstar.common.constant.ModuleState;
 import tech.quantit.northstar.common.constant.SignalOperation;
 import tech.quantit.northstar.common.exception.NoSuchElementException;
@@ -236,10 +238,14 @@ public class ModuleContext implements IModuleContext{
 	@Override
 	public synchronized Optional<String> submitOrderReq(ContractField contract, SignalOperation operation,
 			PriceType priceType, int volume, double price) {
+		if(!module.isEnabled()) {
+			mlog.info("策略处于停用状态，忽略委托单");
+			return Optional.empty();
+		}
 		if(mlog.isInfoEnabled()) {
 			TickField tick = latestTickMap.get(contract.getUnifiedSymbol());
 			mlog.info("[{} {}] 策略信号：合约【{}】，操作【{}】，价格【{}】，手数【{}】，类型【{}】", 
-					tick.getActionDay(), tick.getActionTime(),
+					tick.getActionDay(), LocalTime.parse(tick.getActionTime(), DateTimeConstant.T_FORMAT_WITH_MS_INT_FORMATTER),
 					contract.getUnifiedSymbol(), operation.text(), price, volume, priceType);
 		}
 		if(!gatewayMap.containsKey(contract)) {

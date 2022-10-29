@@ -185,8 +185,15 @@ public class ModulePlaybackContext implements IModuleContext {
 	@Override
 	public Optional<String> submitOrderReq(ContractField contract, SignalOperation operation, PriceType priceType, int volume,
 			double price) {
+		if(!module.isEnabled()) {
+			mlog.info("策略处于停用状态，忽略委托单");
+			return Optional.empty();
+		}
 		if(mlog.isInfoEnabled()) {			
-			mlog.info("策略信号：合约【{}】，操作【{}】，价格【{}】，手数【{}】，类型【{}】", contract.getUnifiedSymbol(), operation.text(), price, volume, priceType);
+			TickField tick = latestTickMap.get(contract.getUnifiedSymbol());
+			mlog.info("[{} {}] 策略信号：合约【{}】，操作【{}】，价格【{}】，手数【{}】，类型【{}】", 
+					tick.getActionDay(), LocalTime.parse(tick.getActionTime(), DateTimeConstant.T_FORMAT_WITH_MS_INT_FORMATTER),
+					contract.getUnifiedSymbol(), operation.text(), price, volume, priceType);
 		}
 		String id = UUID.randomUUID().toString();
 		String gatewayId = PLAYBACK_GATEWAY;
