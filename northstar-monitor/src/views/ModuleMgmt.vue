@@ -207,23 +207,16 @@ export default {
       console.log(module)
       const rt = await moduleApi.getModuleRuntime(module.moduleName)
       module.runtime = rt
-      let isFresh = true
-      this.moduleList.find((item, index, array) => {
-        if (item.moduleName === module.moduleName) {
-          isFresh = false
-          array[index] = module
-        }
-      })
-      if (isFresh) {
+      if (this.curTableIndex < 0) {
         this.moduleList.push(module)
+      } else {
+        this.moduleList[this.curTableIndex] = module
+        this.$store.commit('updateList', [...this.moduleList])
       }
     },
     async toggle(index, row) {
       await moduleApi.toggleModuleState(row.moduleName)
-      row.runtime = null
-      moduleApi.getModuleRuntime(row.moduleName).then((rt) => {
-        row.runtime = rt
-      })
+      row.runtime.enabled = !row.runtime.enabled
     },
     tailModuleLog(row) {
       this.$parent.handleSelect('9', { module: row.moduleName })
