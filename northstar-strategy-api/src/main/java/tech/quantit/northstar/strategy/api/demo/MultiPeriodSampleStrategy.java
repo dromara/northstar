@@ -36,7 +36,7 @@ public class MultiPeriodSampleStrategy extends AbstractStrategy	// 为了简化�
 	private Indicator slowLine2;	// 参考周期慢线 
 	
 	@Override
-	protected void onBar(BarField bar) {
+	public void onBar(BarField bar) {
 		log.debug("{} K线数据： 开 [{}], 高 [{}], 低 [{}], 收 [{}]", 
 				bar.getUnifiedSymbol(), bar.getOpenPrice(), bar.getHighPrice(), bar.getLowPrice(), bar.getClosePrice());
 		// 确保指标已经准备好再开始交易

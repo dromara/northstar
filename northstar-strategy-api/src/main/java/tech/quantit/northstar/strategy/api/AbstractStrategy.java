@@ -76,21 +76,14 @@ public abstract class AbstractStrategy implements TradeStrategy{
 	 * 如果订阅了多个合约，则会有多个TICK，因此每个TICK时刻会触发多次
 	 */
 	@Override
-	public void onTick(TickField tick, boolean isModuleEnabled) {
+	public void onTick(TickField tick) {
 		if(!canProceed()) {
 			return;
 		}
-		if(tickHandlerMap.containsKey(tick.getUnifiedSymbol()) && isModuleEnabled) {
+		if(tickHandlerMap.containsKey(tick.getUnifiedSymbol())) {
 			tickHandlerMap.get(tick.getUnifiedSymbol()).onTick(tick);
-		} else if(isModuleEnabled) {
-			onTick(tick);
 		}
 	}
-	
-	/**
-	 * 该方法旨在简化代码，与以上的onTick方法二选一，进行重写 
-	 */
-	protected void onTick(TickField tick) {}
 	
 	/**
 	 * 订阅多个合约时，可以加上各自的处理器来减少if...else代码
@@ -107,14 +100,12 @@ public abstract class AbstractStrategy implements TradeStrategy{
 	 * 如果订阅了多个合约，则会有多个K线，因此每个K线时刻会触发多次
 	 */
 	@Override
-	public void onBar(BarField bar, boolean isModuleEnabled) {
+	public void onBar(BarField bar) {
 		if(!canProceed(bar)) {
 			return;
 		}
-		if(barHandlerMap.containsKey(bar.getUnifiedSymbol()) && isModuleEnabled) {
+		if(barHandlerMap.containsKey(bar.getUnifiedSymbol())) {
 			barHandlerMap.get(bar.getUnifiedSymbol()).onBar(bar);
-		} else if(isModuleEnabled) {
-			onBar(bar);
 		}
 	}
 	
@@ -134,12 +125,6 @@ public abstract class AbstractStrategy implements TradeStrategy{
 		barCache.clear();
 		return true;
 	}
-	
-	/**
-	 * 该方法旨在简化代码，与以上的onTick方法二选一，进行重写 
-	 * @param bar
-	 */
-	protected void onBar(BarField bar) {}
 	
 	/**
 	 * 订阅多个合约时，可以加上各自的处理器来减少if...else代码

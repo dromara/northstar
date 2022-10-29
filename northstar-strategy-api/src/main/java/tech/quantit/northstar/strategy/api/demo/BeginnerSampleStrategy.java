@@ -113,13 +113,8 @@ public class BeginnerSampleStrategy implements TradeStrategy{
 	private Optional<String> originOrderId;
 	
 	@Override
-	public void onTick(TickField tick, boolean isModuleEnabled) {
+	public void onTick(TickField tick) {
 		timer.onTick(tick);
-		
-		if(!isModuleEnabled)	{
-			nextActionTime = 0;
-			return;	// 若模组停用，则不执行后面逻辑		
-		}
 		
 		log.debug("策略每个TICK触发: {} {} {}", tick.getUnifiedSymbol(), tick.getActionTime(), tick.getLastPrice());
 		long now = tick.getActionTimestamp();
@@ -145,7 +140,7 @@ public class BeginnerSampleStrategy implements TradeStrategy{
 	}
 
 	@Override
-	public void onBar(BarField bar, boolean isModuleEnabled) {
+	public void onBar(BarField bar) {
 		log.debug("策略每分钟触发");
 	}
 

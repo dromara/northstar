@@ -41,9 +41,7 @@ public class IndicatorDemoStrategy extends AbstractStrategy	// 为了简化代�
 	private final AtomicDouble valueHolder = new AtomicDouble();
 	
 	@Override
-	public void onBar(BarField bar, boolean isModuleEnabled) {
-		super.onBar(bar, isModuleEnabled);
-	
+	public void onBar(BarField bar) {
 		// 当夜盘时值为0，日盘时值为1
 		valueHolder.set(bar.getActionDay().equals(bar.getTradingDay()) ? 1 : 0);
 	}

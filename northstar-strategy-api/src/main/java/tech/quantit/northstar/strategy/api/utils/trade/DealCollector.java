@@ -1,4 +1,4 @@
-package tech.quantit.northstar.domain.module;
+package tech.quantit.northstar.strategy.api.utils.trade;
 
 import java.util.ArrayList;
 import java.util.HashMap;

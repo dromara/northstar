@@ -62,6 +62,7 @@ import tech.quantit.northstar.strategy.api.indicator.Indicator.ValueType;
 import tech.quantit.northstar.strategy.api.indicator.TimeSeriesUnaryOperator;
 import tech.quantit.northstar.strategy.api.log.ModuleLoggerFactory;
 import tech.quantit.northstar.strategy.api.utils.bar.BarMerger;
+import tech.quantit.northstar.strategy.api.utils.trade.DealCollector;
 import tech.quantit.northstar.strategy.api.utils.trade.DisposablePriceListener;
 import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
@@ -151,7 +152,7 @@ public class ModuleContext implements IModuleContext{
 			}
 		};
 		indicatorFactory.getIndicatorMap().entrySet().stream().forEach(action);	// 记录常规指标更新值 
-		tradeStrategy.onBar(bar, module.isEnabled());
+		tradeStrategy.onBar(bar);
 		inspectedValIndicatorFactory.getIndicatorMap().entrySet().stream().forEach(action);	// 记录透视值更新
 		if(barBufQMap.get(bar.getUnifiedSymbol()).size() >= bufSize.intValue()) {
 			barBufQMap.get(bar.getUnifiedSymbol()).poll();
@@ -404,7 +405,7 @@ public class ModuleContext implements IModuleContext{
 				mlog.info("触发【{}】", listener.description());
 				listener.execute();
 			});
-		tradeStrategy.onTick(tick, module.isEnabled());
+		tradeStrategy.onTick(tick);
 		listenerSet = listenerSet.stream().filter(DisposablePriceListener::isValid).collect(Collectors.toSet());
 		
 	}

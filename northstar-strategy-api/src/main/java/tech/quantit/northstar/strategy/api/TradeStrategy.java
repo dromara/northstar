@@ -26,14 +26,12 @@ public interface TradeStrategy extends TransactionAware, ContextAware, DynamicPa
 	 * TICK事件
 	 * 当模组状态为停用时，也不排除策略会有相应的数据更新逻辑，所以即使模组状态为停用，该方法仍会被调用
 	 * @param tick
-	 * @param isModuleEnabled	当前模组启停状态
 	 */
-	void onTick(TickField tick, boolean isModuleEnabled);
+	void onTick(TickField tick);
 	/**
 	 * BAR事件
 	 * 当模组状态为停用时，也不排除策略会有相应的数据更新逻辑，所以即使模组状态为停用，该方法仍会被调用
 	 * @param bar
-	 * @param isModuleEnabled	当前模组启停状态
 	 */
-	void onBar(BarField bar, boolean isModuleEnabled);
+	void onBar(BarField bar);
 }

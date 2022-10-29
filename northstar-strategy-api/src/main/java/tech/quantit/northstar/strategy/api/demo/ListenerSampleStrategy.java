@@ -105,7 +105,7 @@ public class ListenerSampleStrategy extends AbstractStrategy implements TradeStr
 	private static final int TICK_EARN = 10;	// 十个价位止盈
 
 	@Override
-	protected void onTick(TickField tick) {
+	public void onTick(TickField tick) {
 		timer.onTick(tick);
 		
 		long now = tick.getActionTimestamp();

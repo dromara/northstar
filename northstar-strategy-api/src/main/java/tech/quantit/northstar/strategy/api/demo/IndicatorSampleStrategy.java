@@ -47,7 +47,7 @@ public class IndicatorSampleStrategy extends AbstractStrategy	// 为了简化代
 	private Optional<String> originOrderId;
 
 	@Override
-	protected void onBar(BarField bar) {
+	public void onBar(BarField bar) {
 		log.debug("{} K线数据： 开 [{}], 高 [{}], 低 [{}], 收 [{}]",
 				bar.getUnifiedSymbol(), bar.getOpenPrice(), bar.getHighPrice(), bar.getLowPrice(), bar.getClosePrice());
 		// 确保指标已经准备好再开始交易
@@ -86,7 +86,7 @@ public class IndicatorSampleStrategy extends AbstractStrategy	// 为了简化代
 
 	private int orderWaitTimeout = 60000 * 3;
 	@Override
-	protected void onTick(TickField tick) {
+	public void onTick(TickField tick) {
 		// 超时撤单
 		if(ctx.getState().isWaiting() && ctx.isOrderWaitTimeout(originOrderId.get(), orderWaitTimeout)) {
 			ctx.cancelOrder(originOrderId.get());
