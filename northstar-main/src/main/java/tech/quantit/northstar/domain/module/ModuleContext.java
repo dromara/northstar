@@ -236,8 +236,11 @@ public class ModuleContext implements IModuleContext{
 	@Override
 	public synchronized Optional<String> submitOrderReq(ContractField contract, SignalOperation operation,
 			PriceType priceType, int volume, double price) {
-		if(mlog.isInfoEnabled()) {			
-			mlog.info("策略信号：合约【{}】，操作【{}】，价格【{}】，手数【{}】，类型【{}】", contract.getUnifiedSymbol(), operation.text(), price, volume, priceType);
+		if(mlog.isInfoEnabled()) {
+			TickField tick = latestTickMap.get(contract.getUnifiedSymbol());
+			mlog.info("[{} {}] 策略信号：合约【{}】，操作【{}】，价格【{}】，手数【{}】，类型【{}】", 
+					tick.getActionDay(), tick.getActionTime(),
+					contract.getUnifiedSymbol(), operation.text(), price, volume, priceType);
 		}
 		if(!gatewayMap.containsKey(contract)) {
 			throw new NoSuchElementException(String.format("找不到合约 [%s] 对应网关", contract.getUnifiedSymbol()));
