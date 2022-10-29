@@ -24,12 +24,4 @@ public interface IEmbededRule extends BarDataAware, TickDataAware {
 	@Override
 	default void onBar(BarField bar) {}
 
-	/**
-	 * 策略当前的持仓
-	 * 0为无持仓
-	 * 1为多头仓
-	 * -1为空头仓
-	 * @return
-	 */
-	int holdingStatus();
 }

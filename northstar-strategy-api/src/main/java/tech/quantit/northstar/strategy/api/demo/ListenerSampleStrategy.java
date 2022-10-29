@@ -1,5 +1,6 @@
 package tech.quantit.northstar.strategy.api.demo;
 
+import java.util.Optional;
 import java.util.TimerTask;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -74,9 +75,7 @@ public class ListenerSampleStrategy extends AbstractStrategy implements TradeStr
 	private TimerTask withdrawOrderIfTimeout = new TimerTask() {
 		@Override
 		public void run() {
-			if(originOrderId != null) {
-				ctx.cancelOrder(originOrderId);
-			}
+			originOrderId.ifPresent(ctx::cancelOrder);
 		}
 	};
 	
@@ -90,8 +89,7 @@ public class ListenerSampleStrategy extends AbstractStrategy implements TradeStr
 
 	@Override
 	public void onTrade(TradeField trade) {
-		if(trade.getOriginOrderId().equals(originOrderId)) {
-			originOrderId = null;
+		if(trade.getOriginOrderId().equals(originOrderId.get())) {
 			runningTask = null;
 		}
 		if(FieldUtils.isOpen(trade.getOffsetFlag())) {
@@ -101,7 +99,7 @@ public class ListenerSampleStrategy extends AbstractStrategy implements TradeStr
 	}
 	
 	private long nextActionTime;
-	private String originOrderId;
+	private Optional<String> originOrderId;
 	
 	private static final int TICK_STOP = -5;		// 五个价位止损
 	private static final int TICK_EARN = 10;	// 十个价位止盈

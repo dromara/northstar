@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
 import java.util.UUID;
@@ -182,7 +183,7 @@ public class ModulePlaybackContext implements IModuleContext {
 
 	// 所有的委托都会立马转为成交单
 	@Override
-	public String submitOrderReq(ContractField contract, SignalOperation operation, PriceType priceType, int volume,
+	public Optional<String> submitOrderReq(ContractField contract, SignalOperation operation, PriceType priceType, int volume,
 			double price) {
 		if(mlog.isInfoEnabled()) {			
 			mlog.info("策略信号：合约【{}】，操作【{}】，价格【{}】，手数【{}】，类型【{}】", contract.getUnifiedSymbol(), operation.text(), price, volume, priceType);
@@ -220,7 +221,7 @@ public class ModulePlaybackContext implements IModuleContext {
 		accStore.onTrade(trade);
 		onRuntimeChangeCallback.accept(getRuntimeDescription(false));
 		dealCollector.onTrade(trade).ifPresent(list -> list.stream().forEach(this.onDealCallback::accept));
-		return id;
+		return Optional.of(id);
 	}
 	
 	

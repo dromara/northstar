@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
 import java.util.UUID;
@@ -233,7 +234,7 @@ public class ModuleContext implements IModuleContext{
 	}
 
 	@Override
-	public synchronized String submitOrderReq(ContractField contract, SignalOperation operation,
+	public synchronized Optional<String> submitOrderReq(ContractField contract, SignalOperation operation,
 			PriceType priceType, int volume, double price) {
 		if(mlog.isInfoEnabled()) {			
 			mlog.info("策略信号：合约【{}】，操作【{}】，价格【{}】，手数【{}】，类型【{}】", contract.getUnifiedSymbol(), operation.text(), price, volume, priceType);
@@ -254,7 +255,7 @@ public class ModuleContext implements IModuleContext{
 		if(pf == null && operation.isClose()) {
 			throw new IllegalStateException("没有找到对应的持仓进行操作");
 		}
-		return submitOrderReq(SubmitOrderReqField.newBuilder()
+		return Optional.of(submitOrderReq(SubmitOrderReqField.newBuilder()
 				.setOriginOrderId(id)
 				.setContract(contract)
 				.setGatewayId(gatewayId)
@@ -270,7 +271,7 @@ public class ModuleContext implements IModuleContext{
 				.setContingentCondition(ContingentConditionEnum.CC_Immediately)
 				.setActionTimestamp(latestTickMap.get(contract.getUnifiedSymbol()).getActionTimestamp())
 				.setMinVolume(1)
-				.build());
+				.build()));
 	}
 
 	DateFormat fmt = new SimpleDateFormat();

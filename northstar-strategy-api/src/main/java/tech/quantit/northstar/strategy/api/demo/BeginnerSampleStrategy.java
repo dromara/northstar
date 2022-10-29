@@ -1,5 +1,6 @@
 package tech.quantit.northstar.strategy.api.demo;
 
+import java.util.Optional;
 import java.util.TimerTask;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -87,9 +88,7 @@ public class BeginnerSampleStrategy implements TradeStrategy{
 	private TimerTask withdrawOrderIfTimeout = new TimerTask() {
 		@Override
 		public void run() {
-			if(originOrderId != null) {
-				ctx.cancelOrder(originOrderId);
-			}
+			originOrderId.ifPresent(ctx::cancelOrder);
 		}
 	};
 	
@@ -103,14 +102,15 @@ public class BeginnerSampleStrategy implements TradeStrategy{
 
 	@Override
 	public void onTrade(TradeField trade) {
-		if(trade.getOriginOrderId().equals(originOrderId)) {
-			originOrderId = null;
-			runningTask = null;
-		}
+		originOrderId.ifPresent(id -> {			
+			if(trade.getOriginOrderId().equals(id)) {
+				runningTask = null;
+			}
+		});
 	}
 	
 	private long nextActionTime;
-	private String originOrderId;
+	private Optional<String> originOrderId;
 	
 	@Override
 	public void onTick(TickField tick, boolean isModuleEnabled) {

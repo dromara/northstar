@@ -1,5 +1,6 @@
 package tech.quantit.northstar.strategy.api;
 
+import java.util.Optional;
 import java.util.function.Function;
 
 import org.slf4j.Logger;
@@ -48,7 +49,7 @@ public interface IModuleStrategyContext {
 	 * @param price				委托价（市价为0）
 	 * @return	originOrderId	订单ID
 	 */
-	String submitOrderReq(ContractField contract, SignalOperation operation, PriceType priceType, int volume, double price);
+	Optional<String> submitOrderReq(ContractField contract, SignalOperation operation, PriceType priceType, int volume, double price);
 	/**
 	 * 止损止盈操作，达到价位会自动触发平仓逻辑
 	 * 自动失效条件：

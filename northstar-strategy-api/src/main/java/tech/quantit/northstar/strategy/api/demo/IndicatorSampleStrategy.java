@@ -4,6 +4,8 @@ import static tech.quantit.northstar.strategy.api.indicator.function.AverageFunc
 import static tech.quantit.northstar.strategy.api.indicator.function.AverageFunctions.MA;
 import static tech.quantit.northstar.strategy.api.indicator.function.ComputeFunctions.minus;
 
+import java.util.Optional;
+
 import tech.quantit.northstar.common.constant.FieldType;
 import tech.quantit.northstar.common.constant.SignalOperation;
 import tech.quantit.northstar.common.model.DynamicParams;
@@ -42,7 +44,7 @@ public class IndicatorSampleStrategy extends AbstractStrategy	// 为了简化代
 
 	private Indicator macdDea;
 
-	private String originOrderId;
+	private Optional<String> originOrderId;
 
 	@Override
 	protected void onBar(BarField bar) {
@@ -86,9 +88,8 @@ public class IndicatorSampleStrategy extends AbstractStrategy	// 为了简化代
 	@Override
 	protected void onTick(TickField tick) {
 		// 超时撤单
-		if(ctx.getState().isWaiting() && ctx.isOrderWaitTimeout(originOrderId, orderWaitTimeout)) {
-			ctx.cancelOrder(originOrderId);
-			originOrderId = null;
+		if(ctx.getState().isWaiting() && ctx.isOrderWaitTimeout(originOrderId.get(), orderWaitTimeout)) {
+			ctx.cancelOrder(originOrderId.get());
 		}
 		
 		log.info("时间：{} {} 价格：{} 指标值：{}", tick.getActionDay(), tick.getActionTime(), tick.getLastPrice(), fastLine.value(0));
