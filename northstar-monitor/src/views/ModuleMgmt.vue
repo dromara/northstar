@@ -213,12 +213,11 @@ export default {
           this.moduleList.push(module)
         } else {
           this.moduleList[index] = module
-          this.$store.commit('updateList', [...this.moduleList])
         }
       } else {
         this.moduleList[this.curTableIndex] = module
-        this.$store.commit('updateList', [...this.moduleList])
       }
+      this.$store.commit('updateList', [...this.moduleList])
     },
     async toggle(index, row) {
       await moduleApi.toggleModuleState(row.moduleName)
