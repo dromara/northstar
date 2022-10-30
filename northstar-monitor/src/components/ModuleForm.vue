@@ -351,7 +351,7 @@ export default {
 
       await moduleApi.validateModule(this.form)
 
-      const obj = Object.assign({}, this.form)
+      const obj = JSON.parse(JSON.stringify(this.form))
       this.loading = true
       try {
         if (this.isUpdateMode) {
