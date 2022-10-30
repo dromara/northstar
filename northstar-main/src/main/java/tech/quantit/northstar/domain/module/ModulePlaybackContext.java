@@ -277,8 +277,8 @@ public class ModulePlaybackContext implements IModuleContext {
 			return;
 		}
 		mlog.trace("TICK信息: {} {} {}，最新价: {}", tick.getUnifiedSymbol(), tick.getActionDay(), tick.getActionTime(), tick.getLastPrice());
-		indicatorFactory.getIndicatorMap().values().parallelStream().forEach(indicator -> indicator.onTick(tick));
-		comboIndicators.parallelStream().forEach(combo -> combo.onTick(tick));
+		indicatorFactory.getIndicatorMap().values().stream().forEach(indicator -> indicator.onTick(tick));
+		comboIndicators.stream().forEach(combo -> combo.onTick(tick));
 		accStore.onTick(tick);
 		latestTickMap.put(tick.getUnifiedSymbol(), tick);
 		listenerSet.stream()
@@ -297,9 +297,9 @@ public class ModulePlaybackContext implements IModuleContext {
 			return;
 		}
 		mlog.trace("Bar信息: {} {} {}，最新价: {}", bar.getUnifiedSymbol(), bar.getActionDay(), bar.getActionTime(), bar.getClosePrice());
-		indicatorFactory.getIndicatorMap().entrySet().parallelStream().forEach(e -> e.getValue().onBar(bar));	// 普通指标的更新
-		comboIndicators.parallelStream().forEach(combo -> combo.onBar(bar));
-		inspectedValIndicatorFactory.getIndicatorMap().entrySet().parallelStream().forEach(e -> e.getValue().onBar(bar));	// 值透视指标的更新
+		indicatorFactory.getIndicatorMap().entrySet().stream().forEach(e -> e.getValue().onBar(bar));	// 普通指标的更新
+		comboIndicators.stream().forEach(combo -> combo.onBar(bar));
+		inspectedValIndicatorFactory.getIndicatorMap().entrySet().stream().forEach(e -> e.getValue().onBar(bar));	// 值透视指标的更新
 		contractBarMergerMap.get(bar.getUnifiedSymbol()).updateBar(bar);
 	}
 
