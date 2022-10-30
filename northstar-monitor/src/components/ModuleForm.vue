@@ -2,12 +2,11 @@
   <el-dialog
     :title="readOnly ? '查看' : isUpdateMode ? '修改' : '新增'"
     :visible="visible"
-    :close-on-click-modal="false"
-    :show-close="false"
     class="module-dialog"
     v-loading="loading"
     element-loading-background="rgba(0, 0, 0, 0.3)"
     width="540px"
+    @close="close"
   >
     <ContractFinder :visible.sync="contractFinderVisible" />
     <el-container>
