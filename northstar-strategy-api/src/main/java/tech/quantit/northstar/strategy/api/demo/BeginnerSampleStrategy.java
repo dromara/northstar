@@ -110,7 +110,7 @@ public class BeginnerSampleStrategy implements TradeStrategy{
 	}
 	
 	private long nextActionTime;
-	private Optional<String> originOrderId;
+	private Optional<String> originOrderId = Optional.empty();
 	
 	@Override
 	public void onTick(TickField tick) {
