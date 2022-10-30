@@ -208,7 +208,13 @@ export default {
       const rt = await moduleApi.getModuleRuntime(module.moduleName)
       module.runtime = rt
       if (this.curTableIndex < 0) {
-        this.moduleList.push(module)
+        const index = this.moduleList.findIndex((obj) => obj.moduleName === module.moduleName)
+        if (index < 0) {
+          this.moduleList.push(module)
+        } else {
+          this.moduleList[index] = module
+          this.$store.commit('updateList', [...this.moduleList])
+        }
       } else {
         this.moduleList[this.curTableIndex] = module
         this.$store.commit('updateList', [...this.moduleList])
