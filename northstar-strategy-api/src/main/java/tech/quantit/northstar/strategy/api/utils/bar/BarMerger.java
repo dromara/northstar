@@ -1,10 +1,12 @@
 package tech.quantit.northstar.strategy.api.utils.bar;
 
+import java.util.EnumSet;
 import java.util.Objects;
 import java.util.function.Consumer;
 
 import org.apache.commons.lang3.StringUtils;
 
+import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.ContractField;
 
@@ -27,10 +29,18 @@ public class BarMerger {
 	
 	protected long curBarTimestamp;
 	
+	private BarField lastBar;
+	
+	private boolean segregateTheFirstBarOfDay;	// 是否区别对待每天开盘第一个K线
+	
+	private EnumSet<ExchangeEnum> chnExchanges = EnumSet.of(ExchangeEnum.SHFE, ExchangeEnum.CFFEX, ExchangeEnum.DCE,
+			ExchangeEnum.CZCE, ExchangeEnum.SSE, ExchangeEnum.SZSE);
+	
 	public BarMerger(int numOfMinPerBar, ContractField bindedContract, Consumer<BarField> callback) {
 		this.numOfMinPerBar = numOfMinPerBar;
 		this.callback = callback;
 		this.bindedContract = bindedContract;
+		this.segregateTheFirstBarOfDay = chnExchanges.contains(bindedContract.getExchange());
 	}
 	
 	public synchronized void updateBar(BarField bar) {
@@ -41,12 +51,17 @@ public class BarMerger {
 			return;
 		}
 		curBarTimestamp = bar.getActionTimestamp();
-		if(numOfMinPerBar == 1) {
+		
+		boolean isFirstBarOfDay = Objects.isNull(lastBar) || !StringUtils.equals(lastBar.getTradingDay(), bar.getTradingDay());
+		lastBar = bar;
+		
+		if(numOfMinPerBar == 1 || isFirstBarOfDay && segregateTheFirstBarOfDay) {
 			callback.accept(bar);
 			return;
 		} else if(Objects.nonNull(barBuilder) && !StringUtils.equals(barBuilder.getTradingDay(), bar.getTradingDay())) {
 			doGenerate();
 		}
+		
 		countBars++;
 		if(countBars == 1 || Objects.isNull(barBuilder)) {
 			barBuilder = bar.toBuilder();

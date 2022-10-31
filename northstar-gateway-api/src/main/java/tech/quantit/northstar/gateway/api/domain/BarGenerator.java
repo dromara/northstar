@@ -4,13 +4,12 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Consumer;
 
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.constant.DateTimeConstant;
-import tech.quantit.northstar.common.constant.TickType;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.TickField;
 
@@ -34,14 +33,9 @@ public class BarGenerator {
 	
 	private Consumer<BarField> barCallBack;
 	
-	private ConcurrentLinkedQueue<TickField> barTicks = new ConcurrentLinkedQueue<>();
-	
 	public BarGenerator(NormalContract contract, Consumer<BarField> barCallBack) {
 		this.barCallBack = barCallBack;
 		this.contract = contract;
-		this.barBuilder = BarField.newBuilder()
-				.setGatewayId(contract.contractField().getGatewayId())
-				.setUnifiedSymbol(contract.unifiedSymbol());
 		helper.register(this);
 	}
 	
@@ -67,11 +61,7 @@ public class BarGenerator {
 		}
 		 
 		if(tick.getActionTimestamp() > cutoffTime) {
-			long offset = 0;	// K线偏移量
-			if(tick.getStatus() == TickType.PRE_OPENING_TICK.getCode()) {
-				offset = 60000;	// 开盘前一分钟的TICK是盘前数据，要合并到第一个分钟K线
-			}
-			long barActionTime = tick.getActionTimestamp() - tick.getActionTimestamp() % 60000L + 60000 + offset; // 采用K线的收盘时间作为K线时间
+			long barActionTime = tick.getActionTimestamp() - tick.getActionTimestamp() % 60000L + 60000; // 采用K线的收盘时间作为K线时间
 			long newCutoffTime = barActionTime;
 			
 			if(newCutoffTime != helper.cutoffTime) {
@@ -93,7 +83,6 @@ public class BarGenerator {
 					.setActionTime(LocalDateTime.ofInstant(Instant.ofEpochMilli(barActionTime), ZoneId.systemDefault()).format(DateTimeConstant.T_FORMAT_WITH_MS_INT_FORMATTER));
 		}
 		
-		barTicks.offer(tick);
 		barBuilder.setHighPrice(Math.max(tick.getLastPrice(), barBuilder.getHighPrice()));
 		barBuilder.setLowPrice(Math.min(tick.getLastPrice(), barBuilder.getLowPrice()));
 		barBuilder.setClosePrice(tick.getLastPrice());
@@ -105,16 +94,14 @@ public class BarGenerator {
 	}
 	
 	public BarField finishOfBar() {
-		if(barTicks.size() < 3) {
-			// 若TICK数据少于三个TICK，则不触发回调，因为这不是一个正常的数据集
-			return barBuilder.build();
+		if(Objects.isNull(barBuilder)) {
+			return null;
 		}
-		barTicks.clear();
-		
 		barBuilder.setVolume(Math.max(0, barBuilder.getVolume()));				// 防止vol为负数
 		
 		BarField lastBar = barBuilder.build();
 		barCallBack.accept(lastBar);
+		barBuilder = null;
 		return lastBar;
 	}
 	
