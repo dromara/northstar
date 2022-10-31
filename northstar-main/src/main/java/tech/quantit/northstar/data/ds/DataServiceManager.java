@@ -93,32 +93,7 @@ public class DataServiceManager implements IDataServiceManager {
 	 */
 	@Override
 	public List<BarField> getMinutelyData(String unifiedSymbol, LocalDate startDate, LocalDate endDate) {
-		Map<Long, BarField> barMap = new HashMap<>();
-		return commonGetData("min", unifiedSymbol, startDate, endDate)
-				.stream()
-				.map(bar -> {
-					barMap.put(bar.getActionTimestamp(), bar);
-					return bar;
-				})
-				.filter(bar -> !bar.getActionTime().equals("21:00:00") && !bar.getActionTime().equals("09:00:00"))
-				.map(bar -> {
-					if(bar.getActionTime().equals("21:01:00") || bar.getActionTime().equals("09:01:00")) {
-						BarField lastBar = barMap.get(bar.getActionTimestamp() - 60000);
-						if(lastBar != null) {							
-							return BarField.newBuilder(bar)
-									.setOpenPrice(lastBar.getOpenPrice())
-									.setHighPrice(Math.max(lastBar.getOpenPrice(), bar.getHighPrice()))
-									.setLowPrice(Math.min(lastBar.getOpenPrice(), bar.getLowPrice()))
-									.setOpenInterestDelta(bar.getOpenInterestDelta() + lastBar.getOpenInterestDelta())
-									.setVolumeDelta(bar.getVolumeDelta() + lastBar.getVolumeDelta())
-									.setTurnoverDelta(bar.getTurnoverDelta() + lastBar.getTurnoverDelta())
-									.setNumTradesDelta(bar.getNumTradesDelta() + lastBar.getNumTradesDelta())
-									.build();
-						}
-					}
-					return bar;
-				})
-				.toList();
+		return commonGetData("min", unifiedSymbol, startDate, endDate);
 	}
 	
 	/**
@@ -130,30 +105,7 @@ public class DataServiceManager implements IDataServiceManager {
 	 */
 	@Override
 	public List<BarField> getQuarterlyData(String unifiedSymbol, LocalDate startDate, LocalDate endDate) {
-		Map<Long, BarField> barMap = new HashMap<>();
-		return commonGetData("quarter", unifiedSymbol, startDate, endDate)
-				.stream()
-				.map(bar -> {
-					barMap.put(bar.getActionTimestamp(), bar);
-					return bar;
-				})
-				.filter(bar -> !bar.getActionTime().equals("21:00:00") && !bar.getActionTime().equals("09:00:00"))
-				.map(bar -> {
-					if(bar.getActionTime().equals("21:15:00") || bar.getActionTime().equals("09:15:00")) {
-						BarField lastBar = barMap.get(bar.getActionTimestamp() - 60000 * 15);
-						if(lastBar != null) {							
-							return BarField.newBuilder(bar)
-									.setOpenPrice(lastBar.getOpenPrice())
-									.setOpenInterestDelta(bar.getOpenInterestDelta() + lastBar.getOpenInterestDelta())
-									.setVolumeDelta(bar.getVolumeDelta() + lastBar.getVolumeDelta())
-									.setTurnoverDelta(bar.getTurnoverDelta() + lastBar.getTurnoverDelta())
-									.setNumTradesDelta(bar.getNumTradesDelta() + lastBar.getNumTradesDelta())
-									.build();
-						}
-					}
-					return bar;
-				})
-				.toList();
+		return commonGetData("quarter", unifiedSymbol, startDate, endDate);
 	}
 	
 	/**
@@ -165,30 +117,7 @@ public class DataServiceManager implements IDataServiceManager {
 	 */
 	@Override
 	public List<BarField> getHourlyData(String unifiedSymbol, LocalDate startDate, LocalDate endDate) {
-		Map<Long, BarField> barMap = new HashMap<>();
-		return commonGetData("hour", unifiedSymbol, startDate, endDate)
-				.stream()
-				.map(bar -> {
-					barMap.put(bar.getActionTimestamp(), bar);
-					return bar;
-				})
-				.filter(bar -> !bar.getActionTime().equals("21:00:00") && !bar.getActionTime().equals("09:00:00"))
-				.map(bar -> {
-					if(bar.getActionTime().equals("22:00:00") || bar.getActionTime().equals("10:00:00")) {
-						BarField lastBar = barMap.get(bar.getActionTimestamp() - 60000 * 60);
-						if(lastBar != null) {							
-							return BarField.newBuilder(bar)
-									.setOpenPrice(lastBar.getOpenPrice())
-									.setOpenInterestDelta(bar.getOpenInterestDelta() + lastBar.getOpenInterestDelta())
-									.setVolumeDelta(bar.getVolumeDelta() + lastBar.getVolumeDelta())
-									.setTurnoverDelta(bar.getTurnoverDelta() + lastBar.getTurnoverDelta())
-									.setNumTradesDelta(bar.getNumTradesDelta() + lastBar.getNumTradesDelta())
-									.build();
-						}
-					}
-					return bar;
-				})
-				.toList();
+		return commonGetData("hour", unifiedSymbol, startDate, endDate);
 	}
 	
 	/**
