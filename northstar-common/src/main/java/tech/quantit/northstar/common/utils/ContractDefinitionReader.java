@@ -36,6 +36,7 @@ public class ContractDefinitionReader {
 						.symbolPattern(Pattern.compile(ptnStr))
 						.commissionInPrice(commission)
 						.commissionInBasePoint(commissionInBP)
+						.tradeTimeType(tokens[headerMap.get("tradeTimeType")])
 						.build());
 			}
 		}

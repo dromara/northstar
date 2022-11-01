@@ -43,6 +43,10 @@ public class ContractDefinition {
 	 */
 	private double commissionInBasePoint;
 	/**
+	 * 交易时间类别
+	 */
+	private String tradeTimeType;
+	/**
 	 * ID 
 	 * @return
 	 */
