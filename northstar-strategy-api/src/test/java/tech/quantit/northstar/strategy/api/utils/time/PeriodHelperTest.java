@@ -3,6 +3,7 @@ package tech.quantit.northstar.strategy.api.utils.time;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalTime;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
@@ -22,4 +23,12 @@ class PeriodHelperTest {
 		assertThat(h1.withinTheSamePeriod(LocalTime.of(2, 1), LocalTime.of(9, 1))).isTrue();
 	}
 
+	@Test
+	void testTimeFrame() {
+		List<LocalTime> timeFrame1 = h1.getRunningBaseTimeFrame();
+		List<LocalTime> timeFrame2 = h2.getRunningBaseTimeFrame();
+		
+		assertThat(timeFrame1).hasSize(556);
+		assertThat(timeFrame2).hasSize(555);
+	}
 }

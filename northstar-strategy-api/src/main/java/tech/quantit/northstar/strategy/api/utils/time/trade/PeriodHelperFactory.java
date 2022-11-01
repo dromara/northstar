@@ -1,4 +1,4 @@
-package tech.quantit.northstar.strategy.api.utils.time;
+package tech.quantit.northstar.strategy.api.utils.time.trade;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -9,16 +9,14 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
+import org.springframework.util.Assert;
+
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.Table;
 
 import tech.quantit.northstar.common.model.ContractDefinition;
 import tech.quantit.northstar.common.utils.ContractDefinitionReader;
-import tech.quantit.northstar.strategy.api.utils.time.trade.CnFtBondTradeTime;
-import tech.quantit.northstar.strategy.api.utils.time.trade.CnFtComTradeTime1;
-import tech.quantit.northstar.strategy.api.utils.time.trade.CnFtComTradeTime2;
-import tech.quantit.northstar.strategy.api.utils.time.trade.CnFtComTradeTime3;
-import tech.quantit.northstar.strategy.api.utils.time.trade.CnFtComTradeTime4;
-import tech.quantit.northstar.strategy.api.utils.time.trade.CnFtIndexTradeTime;
-import tech.quantit.northstar.strategy.api.utils.time.trade.TradeTimeConstant;
+import tech.quantit.northstar.strategy.api.utils.time.PeriodHelper;
 import xyz.redtorch.pb.CoreField.ContractField;
 
 public class PeriodHelperFactory {
@@ -43,13 +41,22 @@ public class PeriodHelperFactory {
 	}
 	
 	private PeriodHelperFactory() {}
+	
+	private static Table<String, Integer, PeriodHelper> helperCache = HashBasedTable.create();
+	private static Table<String, Integer, PeriodHelper> helperCache2 = HashBasedTable.create();
 
 	public static PeriodHelper newInstance(int numbersOfMinPerPeriod, boolean segregateOpenning, ContractField contract) {
+		Assert.isTrue(numbersOfMinPerPeriod > 0, "分钟周期数应该大于0");
 		ContractDefinition cd = findDefinition(contract);
 		if(Objects.isNull(cd)) {
 			return null;
 		}
-		return switch(cd.getTradeTimeType()) {
+		
+		if(getHelperCache(segregateOpenning).contains(cd.getTradeTimeType(), numbersOfMinPerPeriod)) {
+			return getHelperCache(segregateOpenning).get(cd.getTradeTimeType(), numbersOfMinPerPeriod);
+		}
+		
+		PeriodHelper helper = switch(cd.getTradeTimeType()) {
 		case "CN_FT_TT1" -> segregateOpenning ? new PeriodHelper(numbersOfMinPerPeriod, new CnFtComTradeTime1()) : new PeriodHelper(numbersOfMinPerPeriod, new CnFtComTradeTime1(), TradeTimeConstant.CN_FT_NIGHT_OPENNING);
 		case "CN_FT_TT2" -> segregateOpenning ? new PeriodHelper(numbersOfMinPerPeriod, new CnFtComTradeTime2()) : new PeriodHelper(numbersOfMinPerPeriod, new CnFtComTradeTime2(), TradeTimeConstant.CN_FT_NIGHT_OPENNING);
 		case "CN_FT_TT3" -> segregateOpenning ? new PeriodHelper(numbersOfMinPerPeriod, new CnFtComTradeTime3()) : new PeriodHelper(numbersOfMinPerPeriod, new CnFtComTradeTime3(), TradeTimeConstant.CN_FT_NIGHT_OPENNING);
@@ -58,6 +65,15 @@ public class PeriodHelperFactory {
 		case "CN_FT_TT6" -> segregateOpenning ? new PeriodHelper(numbersOfMinPerPeriod, new CnFtBondTradeTime()) : new PeriodHelper(numbersOfMinPerPeriod, new CnFtBondTradeTime(), TradeTimeConstant.CN_FT_DAY_OPENNING2);
 		default -> null;
 		};
+		
+		if(Objects.nonNull(helper)) {
+			getHelperCache(segregateOpenning).put(cd.getTradeTimeType(), numbersOfMinPerPeriod, helper);
+		}
+		return helper;
+	}
+	
+	private static Table<String, Integer, PeriodHelper> getHelperCache(boolean segregateOpenning) {
+		return segregateOpenning ? helperCache : helperCache2;
 	}
 	
 	private static ContractDefinition findDefinition(ContractField contract) {

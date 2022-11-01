@@ -4,6 +4,7 @@ import java.time.LocalTime;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -20,8 +21,16 @@ public class PeriodHelper {
 	
 	private LinkedList<Set<LocalTime>> segmentQ = new LinkedList<>();
 	private LinkedHashMap<LocalTime, Set<LocalTime>> periodSegmentsMap = new LinkedHashMap<>();
+	private List<LocalTime> baseTimeFrame;
 	
 	public PeriodHelper(int numbersOfMinPerPeriod, TradeTimeDefinition tradeTimeDefinition) {
+		this(numbersOfMinPerPeriod, tradeTimeDefinition, null);
+	}
+	
+	public PeriodHelper(int numbersOfMinPerPeriod, TradeTimeDefinition tradeTimeDefinition, LocalTime inclusiveOpenningTime) {
+		if(Objects.nonNull(inclusiveOpenningTime)) {
+			periodSegmentsMap.put(inclusiveOpenningTime, new HashSet<>());
+		}
 		LocalTime t = START_TIME.plusMinutes(1);
 		while(t != START_TIME) {
 			boolean isTradeTime = false;
@@ -40,14 +49,11 @@ public class PeriodHelper {
 			}
 			t = t.plusMinutes(1);
 		}
-	}
-	
-	public PeriodHelper(int numbersOfMinPerPeriod, TradeTimeDefinition tradeTimeDefinition, LocalTime inclusiveOpenningTime) {
-		this(numbersOfMinPerPeriod, tradeTimeDefinition);
 		if(Objects.nonNull(inclusiveOpenningTime)) {
 			segmentQ.get(0).add(inclusiveOpenningTime);
-			periodSegmentsMap.put(inclusiveOpenningTime, segmentQ.get(0));
+			periodSegmentsMap.get(inclusiveOpenningTime).addAll(segmentQ.get(0));
 		}
+		baseTimeFrame = periodSegmentsMap.keySet().stream().toList();
 	}
 
 	/**
@@ -61,5 +67,13 @@ public class PeriodHelper {
 			return false;
 		}
 		return periodSegmentsMap.get(t1).contains(t2);
+	}
+	
+	/**
+	 * 获取K线时间基线
+	 * @return
+	 */
+	public List<LocalTime> getRunningBaseTimeFrame(){
+		return baseTimeFrame;
 	}
 }
