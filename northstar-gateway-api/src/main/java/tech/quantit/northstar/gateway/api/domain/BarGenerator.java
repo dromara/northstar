@@ -10,6 +10,7 @@ import java.util.function.Consumer;
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.constant.DateTimeConstant;
 import tech.quantit.northstar.gateway.api.domain.time.OpenningMinuteClock;
+import tech.quantit.northstar.gateway.api.domain.time.PeriodHelperFactory;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.TickField;
 
@@ -37,14 +38,10 @@ private BarField.Builder barBuilder;
 	
 	private TickField lastTick;
 	
-	public BarGenerator(NormalContract contract, Consumer<BarField> barCallBack) {
+	public BarGenerator(NormalContract contract, Consumer<BarField> barCallBack, PeriodHelperFactory phFactory) {
 		this.barCallBack = barCallBack;
 		this.contract = contract;
-		this.clock = new OpenningMinuteClock(contract.contractField());
-	}
-	
-	public BarGenerator(NormalContract contract) {
-		this(contract, null);
+		this.clock = new OpenningMinuteClock(contract.contractField(), phFactory);
 	}
 	
 	/**
@@ -135,8 +132,4 @@ private BarField.Builder barBuilder;
 		finishOfBar();
 	}
 	
-	public synchronized void setOnBarCallback(Consumer<BarField> callback) {
-		barCallBack = callback;
-	}
-
 }

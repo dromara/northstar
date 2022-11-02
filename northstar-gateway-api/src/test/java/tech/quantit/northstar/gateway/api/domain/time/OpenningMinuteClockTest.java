@@ -1,35 +1,35 @@
-package tech.quantit.northstar.main.utils;
+package tech.quantit.northstar.gateway.api.domain.time;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-
-import com.corundumstudio.socketio.SocketIOServer;
 
 import tech.quantit.northstar.common.constant.DateTimeConstant;
-import tech.quantit.northstar.gateway.api.domain.time.OpenningMinuteClock;
-import tech.quantit.northstar.main.NorthstarApplication;
-import tech.quantit.northstar.main.handler.broadcast.SocketIOMessageEngine;
 import test.common.TestFieldFactory;
+import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.TickField;
 
-@SpringBootTest(classes = NorthstarApplication.class, value="spring.profiles.active=test")
 class OpenningMinuteClockTest {
 
-	@MockBean
-	private SocketIOMessageEngine msgEngine;
-	
-	@MockBean
-	private SocketIOServer socketServer;
-	
 	TestFieldFactory factory = new TestFieldFactory("testGateway");
 	
-	OpenningMinuteClock clock = new OpenningMinuteClock(factory.makeContract("rb2210"));
+	OpenningMinuteClock clock;
+	
+	@BeforeEach
+	void prepare() {
+		PeriodHelperFactory phFactory = mock(PeriodHelperFactory.class);
+		when(phFactory.newInstance(anyInt(), anyBoolean(), any(ContractField.class))).thenReturn(new PeriodHelper(60, new CnFtComTradeTime1(), LocalTime.of(21, 0)));
+		clock = new OpenningMinuteClock(factory.makeContract("rb2210"), phFactory);
+	}
 
 	@Test
 	void testBarMin() {

@@ -26,8 +26,8 @@ public class OpenningMinuteClock {
 	
 	private boolean endByWholeMin;
 	
-	public OpenningMinuteClock(ContractField contract) {
-		timeFrame = PeriodHelperFactory.newInstance(1, true, contract).getRunningBaseTimeFrame();
+	public OpenningMinuteClock(ContractField contract, PeriodHelperFactory phFactory) {
+		timeFrame = phFactory.newInstance(1, true, contract).getRunningBaseTimeFrame();
 		endByWholeMin = exchangesOfEndByWholeMin.contains(contract.getExchange());
 	}
 	
