@@ -1,51 +1,29 @@
 package tech.quantit.northstar.gateway.api.domain.time;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.util.List;
 import java.util.Objects;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import org.springframework.core.io.DefaultResourceLoader;
-import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 
 import tech.quantit.northstar.common.model.ContractDefinition;
-import tech.quantit.northstar.common.utils.ContractDefinitionReader;
 import xyz.redtorch.pb.CoreField.ContractField;
 
 public class PeriodHelperFactory {
-	private static List<ContractDefinition> contractDefs;
-	static {
-		try {
-			String fileName = "ContractDefinition.csv";
-			String tempPath = System.getProperty("java.io.tmpdir") + "Northstar_" + System.currentTimeMillis();
-			String tempFilePath = tempPath + File.separator + fileName;
-			Resource resource = new DefaultResourceLoader().getResource("classpath:" + fileName);
-			File tempFile = new File(tempFilePath);
-			FileUtils.forceMkdirParent(tempFile);
-			try (FileOutputStream fos = new FileOutputStream(tempFile)) {
-				IOUtils.copy(resource.getInputStream(), fos);
-			}
-			
-			ContractDefinitionReader reader = new ContractDefinitionReader();
-			contractDefs = reader.load(tempFile);
-		} catch(Exception e) {
-			throw new Error(e);
-		}
-	}
 	
-	private PeriodHelperFactory() {}
-	
-	private static Table<String, Integer, PeriodHelper> helperCache = HashBasedTable.create();
-	private static Table<String, Integer, PeriodHelper> helperCache2 = HashBasedTable.create();
 	private static final PeriodHelper GENERIC_HELPER = new PeriodHelper(1, new GenericTradeTime());
+	private List<ContractDefinition> contractDefs;
+	
+	private Table<String, Integer, PeriodHelper> helperCache = HashBasedTable.create();
+	private Table<String, Integer, PeriodHelper> helperCache2 = HashBasedTable.create();
+	
+	public PeriodHelperFactory(List<ContractDefinition> contractDefs) {
+		this.contractDefs = contractDefs;
+	}
 
-	public static PeriodHelper newInstance(int numbersOfMinPerPeriod, boolean segregateOpenning, ContractField contract) {
+	public PeriodHelper newInstance(int numbersOfMinPerPeriod, boolean segregateOpenning, ContractField contract) {
 		Assert.isTrue(numbersOfMinPerPeriod > 0, "分钟周期数应该大于0");
 		ContractDefinition cd = findDefinition(contract);
 		if(Objects.isNull(cd)) {
@@ -69,11 +47,11 @@ public class PeriodHelperFactory {
 		return helper;
 	}
 	
-	private static Table<String, Integer, PeriodHelper> getHelperCache(boolean segregateOpenning) {
+	private Table<String, Integer, PeriodHelper> getHelperCache(boolean segregateOpenning) {
 		return segregateOpenning ? helperCache : helperCache2;
 	}
 	
-	private static ContractDefinition findDefinition(ContractField contract) {
+	private ContractDefinition findDefinition(ContractField contract) {
 		for(ContractDefinition contractDef : contractDefs) {
 			if(contractDef.getSymbolPattern().matcher(contract.getThirdPartyId()).matches()) {
 				return contractDef;
