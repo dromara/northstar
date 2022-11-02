@@ -1,4 +1,4 @@
-package tech.quantit.northstar.strategy.api.utils.time;
+package tech.quantit.northstar.gateway.api.domain.time;
 
 import java.time.LocalTime;
 

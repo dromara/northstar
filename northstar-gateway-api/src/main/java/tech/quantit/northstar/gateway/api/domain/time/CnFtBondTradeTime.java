@@ -1,9 +1,7 @@
-package tech.quantit.northstar.strategy.api.utils.time.trade;
+package tech.quantit.northstar.gateway.api.domain.time;
 
 import java.time.LocalTime;
 import java.util.List;
-
-import tech.quantit.northstar.strategy.api.utils.time.PeriodSegment;
 
 /**
  * 国内金融期货一类品种交易时间（国债）

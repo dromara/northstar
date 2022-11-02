@@ -1,4 +1,4 @@
-package tech.quantit.northstar.strategy.api.utils.time;
+package tech.quantit.northstar.gateway.api.domain.time;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -7,7 +7,8 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-import tech.quantit.northstar.strategy.api.utils.time.trade.CnFtComTradeTime3;
+import tech.quantit.northstar.gateway.api.domain.time.CnFtComTradeTime3;
+import tech.quantit.northstar.gateway.api.domain.time.PeriodHelper;
 
 class PeriodHelperTest {
 

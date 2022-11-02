@@ -1,4 +1,4 @@
-package tech.quantit.northstar.strategy.api.utils.time;
+package tech.quantit.northstar.gateway.api.domain.time;
 
 import java.time.LocalTime;
 import java.util.HashSet;
@@ -7,8 +7,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-
-import tech.quantit.northstar.strategy.api.utils.time.trade.TradeTimeDefinition;
 
 /**
  * K线周期分割器

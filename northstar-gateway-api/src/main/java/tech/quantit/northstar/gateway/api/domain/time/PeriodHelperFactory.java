@@ -1,4 +1,4 @@
-package tech.quantit.northstar.strategy.api.utils.time.trade;
+package tech.quantit.northstar.gateway.api.domain.time;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -16,7 +16,6 @@ import com.google.common.collect.Table;
 
 import tech.quantit.northstar.common.model.ContractDefinition;
 import tech.quantit.northstar.common.utils.ContractDefinitionReader;
-import tech.quantit.northstar.strategy.api.utils.time.PeriodHelper;
 import xyz.redtorch.pb.CoreField.ContractField;
 
 public class PeriodHelperFactory {

@@ -8,10 +8,10 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 
 import com.corundumstudio.socketio.SocketIOServer;
 
+import tech.quantit.northstar.gateway.api.domain.time.PeriodHelper;
+import tech.quantit.northstar.gateway.api.domain.time.PeriodHelperFactory;
 import tech.quantit.northstar.main.NorthstarApplication;
 import tech.quantit.northstar.main.handler.broadcast.SocketIOMessageEngine;
-import tech.quantit.northstar.strategy.api.utils.time.PeriodHelper;
-import tech.quantit.northstar.strategy.api.utils.time.trade.PeriodHelperFactory;
 import test.common.TestFieldFactory;
 
 @SpringBootTest(classes = NorthstarApplication.class, value="spring.profiles.active=test")

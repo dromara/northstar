@@ -1,10 +1,12 @@
-package tech.quantit.northstar.strategy.api.utils.time;
+package tech.quantit.northstar.gateway.api.domain.time;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalTime;
 
 import org.junit.jupiter.api.Test;
+
+import tech.quantit.northstar.gateway.api.domain.time.PeriodSegment;
 
 class PeriodSegmentTest {
 
