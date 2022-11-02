@@ -6,8 +6,6 @@ import java.time.LocalTime;
 
 import org.junit.jupiter.api.Test;
 
-import tech.quantit.northstar.gateway.api.domain.time.PeriodSegment;
-
 class PeriodSegmentTest {
 
 	@Test

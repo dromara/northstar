@@ -43,12 +43,13 @@ public class PeriodHelperFactory {
 	
 	private static Table<String, Integer, PeriodHelper> helperCache = HashBasedTable.create();
 	private static Table<String, Integer, PeriodHelper> helperCache2 = HashBasedTable.create();
+	private static final PeriodHelper GENERIC_HELPER = new PeriodHelper(1, new GenericTradeTime());
 
 	public static PeriodHelper newInstance(int numbersOfMinPerPeriod, boolean segregateOpenning, ContractField contract) {
 		Assert.isTrue(numbersOfMinPerPeriod > 0, "分钟周期数应该大于0");
 		ContractDefinition cd = findDefinition(contract);
 		if(Objects.isNull(cd)) {
-			return null;
+			return GENERIC_HELPER;
 		}
 		
 		if(getHelperCache(segregateOpenning).contains(cd.getTradeTimeType(), numbersOfMinPerPeriod)) {
@@ -62,12 +63,9 @@ public class PeriodHelperFactory {
 		case "CN_FT_TT4" -> segregateOpenning ? new PeriodHelper(numbersOfMinPerPeriod, new CnFtComTradeTime4()) : new PeriodHelper(numbersOfMinPerPeriod, new CnFtComTradeTime4(), TradeTimeConstant.CN_FT_DAY_OPENNING1);
 		case "CN_FT_TT5" -> segregateOpenning ? new PeriodHelper(numbersOfMinPerPeriod, new CnFtIndexTradeTime()) : new PeriodHelper(numbersOfMinPerPeriod, new CnFtIndexTradeTime(), TradeTimeConstant.CN_FT_DAY_OPENNING2);
 		case "CN_FT_TT6" -> segregateOpenning ? new PeriodHelper(numbersOfMinPerPeriod, new CnFtBondTradeTime()) : new PeriodHelper(numbersOfMinPerPeriod, new CnFtBondTradeTime(), TradeTimeConstant.CN_FT_DAY_OPENNING2);
-		default -> null;
+		default -> GENERIC_HELPER;
 		};
-		
-		if(Objects.nonNull(helper)) {
-			getHelperCache(segregateOpenning).put(cd.getTradeTimeType(), numbersOfMinPerPeriod, helper);
-		}
+		getHelperCache(segregateOpenning).put(cd.getTradeTimeType(), numbersOfMinPerPeriod, helper);
 		return helper;
 	}
 	

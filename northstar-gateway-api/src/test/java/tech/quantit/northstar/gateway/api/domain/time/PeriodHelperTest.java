@@ -7,9 +7,6 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-import tech.quantit.northstar.gateway.api.domain.time.CnFtComTradeTime3;
-import tech.quantit.northstar.gateway.api.domain.time.PeriodHelper;
-
 class PeriodHelperTest {
 
 	PeriodHelper h1 = new PeriodHelper(60, new CnFtComTradeTime3(), LocalTime.of(21, 0));
