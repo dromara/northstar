@@ -18,7 +18,7 @@ logging:  level:
     # 行情数据出口
     '[tech.quantit.northstar.main.handler.broadcast]': info
     # K线数据验证
-    '[tech.quantit.northstar.domain.module]': info
+    '[tech.quantit.northstar.gateway.api.domain]': info
   file:    path: logs/
   
 spring:

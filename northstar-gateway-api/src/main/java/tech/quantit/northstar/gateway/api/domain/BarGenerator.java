@@ -24,7 +24,9 @@ import xyz.redtorch.pb.CoreField.TickField;
 public class BarGenerator {
 	
 private BarField.Builder barBuilder;
-	
+
+	private static final long MAX_TIME_GAP = 90000; //90秒TICK过期判定
+
 	private LocalTime cutoffTime;
 	
 	private NormalContract contract;
@@ -32,6 +34,8 @@ private BarField.Builder barBuilder;
 	private Consumer<BarField> barCallBack;
 	
 	private OpenningMinuteClock clock;
+	
+	private TickField lastTick;
 	
 	public BarGenerator(NormalContract contract, Consumer<BarField> barCallBack) {
 		this.barCallBack = barCallBack;
@@ -54,11 +58,17 @@ private BarField.Builder barBuilder;
 			log.warn("合约不匹配,当前Bar合约{}", contract.unifiedSymbol());
 			return;
 		}
+		if (System.currentTimeMillis() - tick.getActionTimestamp() > MAX_TIME_GAP) {
+			log.debug("忽略过期数据: {} {} {}", tick.getUnifiedSymbol(), tick.getActionDay(), tick.getActionTime());
+			return;
+		}
 		
 		// 忽略非行情数据
 		if(tick.getStatus() < 1) {
 			return;
 		}
+		
+		lastTick = tick;
 		
 		if(Objects.isNull(cutoffTime)) {
 			cutoffTime = clock.barMinute(tick);
@@ -68,7 +78,6 @@ private BarField.Builder barBuilder;
 			finishOfBar();
 			cutoffTime = clock.nextBarMinute();
 		}
-		
 		if(Objects.isNull(barBuilder)) {
 			LocalDateTime barTime = LocalDateTime.of(LocalDate.parse(tick.getActionDay(), DateTimeConstant.D_FORMAT_INT_FORMATTER), cutoffTime);
 			barBuilder = BarField.newBuilder()
@@ -100,8 +109,12 @@ private BarField.Builder barBuilder;
 		return LocalTime.parse(tick.getActionTime(), DateTimeConstant.T_FORMAT_WITH_MS_INT_FORMATTER);
 	}
 	
+	/**
+	 * 分钟收盘生成
+	 * @return
+	 */
 	public synchronized BarField finishOfBar() {
-		if(Objects.isNull(barBuilder) || LocalTime.now().isBefore(cutoffTime)) {
+		if(Objects.isNull(barBuilder)) {
 			return null;
 		}
 		barBuilder.setVolume(Math.max(0, barBuilder.getVolume()));				// 防止vol为负数
@@ -110,6 +123,16 @@ private BarField.Builder barBuilder;
 		barCallBack.accept(lastBar);
 		barBuilder = null;
 		return lastBar;
+	}
+	
+	/**
+	 * 小节收盘检查
+	 */
+	public synchronized void endOfBar() {
+		if(Objects.isNull(lastTick) || System.currentTimeMillis() - lastTick.getActionTimestamp() < MAX_TIME_GAP) {
+			return;
+		}
+		finishOfBar();
 	}
 	
 	public synchronized void setOnBarCallback(Consumer<BarField> callback) {

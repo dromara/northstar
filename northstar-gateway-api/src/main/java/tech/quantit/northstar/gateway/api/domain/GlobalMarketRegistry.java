@@ -112,7 +112,7 @@ public class GlobalMarketRegistry {
 	}
 	
 	public void finishUpBarGen() {
-		barGenMap.values().forEach(BarGenerator::finishOfBar);
+		barGenMap.values().forEach(BarGenerator::endOfBar);
 	}
 	
 	public Optional<LatencyDetector> getLatencyDetector(){
