@@ -1,6 +1,9 @@
 package tech.quantit.northstar.gateway.playback.ticker;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -20,6 +23,9 @@ import tech.quantit.northstar.common.constant.DateTimeConstant;
 import tech.quantit.northstar.common.constant.PlaybackPrecision;
 import tech.quantit.northstar.gateway.api.domain.BarGenerator;
 import tech.quantit.northstar.gateway.api.domain.NormalContract;
+import tech.quantit.northstar.gateway.api.domain.time.CnFtComTradeTime1;
+import tech.quantit.northstar.gateway.api.domain.time.PeriodHelper;
+import tech.quantit.northstar.gateway.api.domain.time.PeriodHelperFactory;
 import test.common.TestFieldFactory;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.ContractField;
@@ -39,11 +45,14 @@ class TrigonometricTickSimulationTest {
 	
 	IContractManager contractMgr = mock(IContractManager.class);
 	
-	@SuppressWarnings("unchecked")
-	BarGenerator barGen = new BarGenerator(new NormalContract(contract, System.currentTimeMillis()), (Consumer<BarField>) mock(Consumer.class));
+	BarGenerator barGen;
 	
+	@SuppressWarnings("unchecked")
 	@BeforeEach
 	void prepare() {
+		PeriodHelperFactory phFactory = mock(PeriodHelperFactory.class);
+		when(phFactory.newInstance(anyInt(), anyBoolean(), any(ContractField.class))).thenReturn(new PeriodHelper(60, new CnFtComTradeTime1(), LocalTime.of(21, 0)));
+		barGen = new BarGenerator(new NormalContract(contract, System.currentTimeMillis()), (Consumer<BarField>) mock(Consumer.class), phFactory);
 		when(contractMgr.getContract(anyString())).thenReturn(contract);
 	}
 	
@@ -52,6 +61,8 @@ class TrigonometricTickSimulationTest {
 		// 阳线场景
 		BarField bar = BarField.newBuilder()
 				.setUnifiedSymbol(contract.getUnifiedSymbol())
+				.setActionDay(LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
+				.setActionTime(LocalTime.now().format(DateTimeConstant.T_FORMAT_FORMATTER))
 				.setOpenPrice(5000)
 				.setClosePrice(5050)
 				.setHighPrice(5100)
@@ -71,6 +82,8 @@ class TrigonometricTickSimulationTest {
 		// 阴线场景
 		BarField bar = BarField.newBuilder()
 				.setUnifiedSymbol(contract.getUnifiedSymbol())
+				.setActionDay(LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
+				.setActionTime(LocalTime.now().format(DateTimeConstant.T_FORMAT_FORMATTER))
 				.setOpenPrice(5050)
 				.setClosePrice(5000)
 				.setHighPrice(5100)
@@ -92,7 +105,7 @@ class TrigonometricTickSimulationTest {
 				.setGatewayId("testGateway")
 				.setUnifiedSymbol(contract.getUnifiedSymbol())
 				.setActionDay(LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
-				.setActionTime(LocalTime.of(21, 15).format(DateTimeConstant.T_FORMAT_WITH_MS_INT_FORMATTER))
+				.setActionTime(LocalTime.of(21, 15).format(DateTimeConstant.T_FORMAT_FORMATTER))
 				.setActionTimestamp(LocalDateTime.of(LocalDate.now(), LocalTime.of(21, 15)).toInstant(ZoneOffset.ofHours(8)).toEpochMilli())
 				.setOpenPrice(5000)
 				.setClosePrice(5050)
@@ -105,7 +118,7 @@ class TrigonometricTickSimulationTest {
 		assertThat(ticks.get(0).getLastPrice()).isEqualTo(5000);
 		assertThat(ticks.get(29).getLastPrice()).isEqualTo(5050);
 		ticks.forEach(tick -> {
-			barGen.update(tick);
+			barGen.update(mapToNow(tick));
 		});
 		assertThat(barGen.finishOfBar()).isEqualTo(bar);
 	}
@@ -117,7 +130,7 @@ class TrigonometricTickSimulationTest {
 				.setGatewayId("testGateway")
 				.setUnifiedSymbol(contract.getUnifiedSymbol())
 				.setActionDay(LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
-				.setActionTime(LocalTime.of(21, 15).format(DateTimeConstant.T_FORMAT_WITH_MS_INT_FORMATTER))
+				.setActionTime(LocalTime.of(21, 15).format(DateTimeConstant.T_FORMAT_FORMATTER))
 				.setActionTimestamp(LocalDateTime.of(LocalDate.now(), LocalTime.of(21, 15)).toInstant(ZoneOffset.ofHours(8)).toEpochMilli())
 				.setOpenPrice(5050)
 				.setClosePrice(5000)
@@ -130,7 +143,7 @@ class TrigonometricTickSimulationTest {
 		assertThat(ticks.get(0).getLastPrice()).isEqualTo(5050);
 		assertThat(ticks.get(29).getLastPrice()).isEqualTo(5000);
 		ticks.forEach(tick -> {
-			barGen.update(tick);
+			barGen.update(mapToNow(tick));
 		});
 		assertThat(barGen.finishOfBar()).isEqualTo(bar);
 	}
@@ -142,7 +155,7 @@ class TrigonometricTickSimulationTest {
 				.setGatewayId("testGateway")
 				.setUnifiedSymbol(contract.getUnifiedSymbol())
 				.setActionDay(LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
-				.setActionTime(LocalTime.of(21, 15).format(DateTimeConstant.T_FORMAT_WITH_MS_INT_FORMATTER))
+				.setActionTime(LocalTime.of(21, 15).format(DateTimeConstant.T_FORMAT_FORMATTER))
 				.setActionTimestamp(LocalDateTime.of(LocalDate.now(), LocalTime.of(21, 15)).toInstant(ZoneOffset.ofHours(8)).toEpochMilli())
 				.setOpenPrice(5000)
 				.setClosePrice(5050)
@@ -155,7 +168,7 @@ class TrigonometricTickSimulationTest {
 		assertThat(ticks.get(0).getLastPrice()).isEqualTo(5000);
 		assertThat(ticks.get(119).getLastPrice()).isEqualTo(5050);
 		ticks.forEach(tick -> {
-			barGen.update(tick);
+			barGen.update(mapToNow(tick));
 		});
 		assertThat(barGen.finishOfBar()).isEqualTo(bar);
 	}
@@ -167,7 +180,7 @@ class TrigonometricTickSimulationTest {
 				.setGatewayId("testGateway")
 				.setUnifiedSymbol(contract.getUnifiedSymbol())
 				.setActionDay(LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
-				.setActionTime(LocalTime.of(21, 15).format(DateTimeConstant.T_FORMAT_WITH_MS_INT_FORMATTER))
+				.setActionTime(LocalTime.of(21, 15).format(DateTimeConstant.T_FORMAT_FORMATTER))
 				.setActionTimestamp(LocalDateTime.of(LocalDate.now(), LocalTime.of(21, 15)).toInstant(ZoneOffset.ofHours(8)).toEpochMilli())
 				.setOpenPrice(5050)
 				.setClosePrice(5000)
@@ -180,7 +193,7 @@ class TrigonometricTickSimulationTest {
 		assertThat(ticks.get(0).getLastPrice()).isEqualTo(5050);
 		assertThat(ticks.get(119).getLastPrice()).isEqualTo(5000);
 		ticks.forEach(tick -> {
-			barGen.update(tick);
+			barGen.update(mapToNow(tick));
 		});
 		assertThat(barGen.finishOfBar()).isEqualTo(bar);
 	}
@@ -192,7 +205,7 @@ class TrigonometricTickSimulationTest {
 				.setGatewayId("testGateway")
 				.setUnifiedSymbol(contract.getUnifiedSymbol())
 				.setActionDay(LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
-				.setActionTime(LocalTime.of(21, 15).format(DateTimeConstant.T_FORMAT_WITH_MS_INT_FORMATTER))
+				.setActionTime(LocalTime.of(21, 15).format(DateTimeConstant.T_FORMAT_FORMATTER))
 				.setActionTimestamp(LocalDateTime.of(LocalDate.now(), LocalTime.of(21, 15)).toInstant(ZoneOffset.ofHours(8)).toEpochMilli())
 				.setOpenPrice(5050)
 				.setClosePrice(5000)
@@ -216,8 +229,14 @@ class TrigonometricTickSimulationTest {
 		assertThat(ticks.get(0).getLastPrice()).isEqualTo(5050);
 		assertThat(ticks.get(119).getLastPrice()).isEqualTo(5000);
 		ticks.forEach(tick -> {
-			barGen.update(tick);
+			barGen.update(mapToNow(tick));
 		});
 		assertThat(barGen.finishOfBar()).isEqualTo(bar);
+	}
+	
+	private TickField mapToNow(TickField t) {
+		return t.toBuilder()
+				.setActionTimestamp(System.currentTimeMillis())
+				.build();
 	}
 }

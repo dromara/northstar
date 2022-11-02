@@ -24,7 +24,7 @@ import xyz.redtorch.pb.CoreField.TickField;
 @Slf4j
 public class BarGenerator {
 	
-private BarField.Builder barBuilder;
+	private BarField.Builder barBuilder;
 
 	private static final long MAX_TIME_GAP = 90000; //90秒TICK过期判定
 
