@@ -33,11 +33,6 @@ class NormalContractTest {
 	}
 
 	@Test
-	void testBarGenerator() {
-		assertThat(contract.barGenerator()).isNotNull();
-	}
-
-	@Test
 	void testProductClass() {
 		assertThat(contract.productClass()).isEqualTo(ProductClassEnum.FUTURES);
 	}
