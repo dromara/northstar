@@ -65,15 +65,15 @@ public class CtpScheduleTask {
 	}
 	
 	/**
-	 * 日夜盘收盘数据整理
+	 * K线数据合成检查
 	 */
-	@Scheduled(cron="10 30 2,15 ? * 1-6")
+	@Scheduled(cron="10 0/1 * ? * 1-6")
 	public void sectionFinishUp() {
 		if(holidayMgr.isHoliday(LocalDateTime.now())) {
 			return;
 		}
 		mktRegistry.finishUpBarGen();
-		log.info("收盘数据整理");
+		log.debug("K线数据合成检查");
 	}
 	
 	@Scheduled(cron="0 1 15 ? * 1-5")

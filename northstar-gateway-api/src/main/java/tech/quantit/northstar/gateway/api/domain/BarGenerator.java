@@ -1,17 +1,15 @@
 package tech.quantit.northstar.gateway.api.domain;
 
-import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.HashSet;
+import java.time.LocalTime;
+import java.time.ZoneOffset;
 import java.util.Objects;
-import java.util.Set;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.constant.DateTimeConstant;
+import tech.quantit.northstar.gateway.api.domain.time.OpenningMinuteClock;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.TickField;
 
@@ -27,20 +25,18 @@ public class BarGenerator {
 	
 private BarField.Builder barBuilder;
 	
-	private long cutoffTime;
+	private LocalTime cutoffTime;
 	
-	private static final GlobalCutOffTimeHelper helper = new GlobalCutOffTimeHelper();
-	
-	private Lock lock = new ReentrantLock();
-
 	private NormalContract contract;
 	
 	private Consumer<BarField> barCallBack;
 	
+	private OpenningMinuteClock clock;
+	
 	public BarGenerator(NormalContract contract, Consumer<BarField> barCallBack) {
 		this.barCallBack = barCallBack;
 		this.contract = contract;
-		helper.register(this);
+		this.clock = new OpenningMinuteClock(contract.contractField());
 	}
 	
 	public BarGenerator(NormalContract contract) {
@@ -52,64 +48,60 @@ private BarField.Builder barBuilder;
 	 * 
 	 * @param tick
 	 */
-	public void update(TickField tick) {
-		lock.lock();
-		try {
-			// 如果tick为空或者合约不匹配则返回
-			if (tick == null || !contract.unifiedSymbol().equals(tick.getUnifiedSymbol())) {
-				log.warn("合约不匹配,当前Bar合约{}", contract.unifiedSymbol());
-				return;
-			}
-			
-			// 忽略非行情数据
-			if(tick.getStatus() < 1) {
-				return;
-			}
-			
-			if(tick.getActionTimestamp() > cutoffTime) {
-				long newCutoffTime = barActionTime(tick);
-				
-				if(newCutoffTime != helper.cutoffTime) {
-					helper.updateCutoffTime(newCutoffTime);
-				}
-				cutoffTime = newCutoffTime;
-			}
-			if(Objects.isNull(barBuilder)) {
-				long barActionTime = barActionTime(tick);
-				barBuilder = BarField.newBuilder()
-						.setGatewayId(contract.contractField().getGatewayId())
-						.setUnifiedSymbol(contract.unifiedSymbol())
-						.setTradingDay(tick.getTradingDay())
-						.setOpenPrice(tick.getLastPrice())
-						.setHighPrice(tick.getLastPrice())
-						.setLowPrice(tick.getLastPrice())
-						.setPreClosePrice(tick.getPreClosePrice())
-						.setPreOpenInterest(tick.getPreOpenInterest())
-						.setPreSettlePrice(tick.getPreSettlePrice())
-						.setActionTimestamp(barActionTime)
-						.setActionDay(tick.getActionDay())
-						.setActionTime(LocalDateTime.ofInstant(Instant.ofEpochMilli(barActionTime), ZoneId.systemDefault()).format(DateTimeConstant.T_FORMAT_WITH_MS_INT_FORMATTER));
-			}
-			
-			barBuilder.setHighPrice(Math.max(tick.getLastPrice(), barBuilder.getHighPrice()));
-			barBuilder.setLowPrice(Math.min(tick.getLastPrice(), barBuilder.getLowPrice()));
-			barBuilder.setClosePrice(tick.getLastPrice());
-			barBuilder.setOpenInterest(tick.getOpenInterest());
-			barBuilder.setOpenInterestDelta(tick.getOpenInterestDelta() + barBuilder.getOpenInterestDelta());
-			barBuilder.setVolume(tick.getVolumeDelta() + barBuilder.getVolume());
-			barBuilder.setTurnover(tick.getTurnoverDelta() + barBuilder.getTurnover());
-			barBuilder.setNumTrades(tick.getNumTradesDelta() + barBuilder.getNumTrades());
-		} finally {
-			lock.unlock();
+	public synchronized void update(TickField tick) {
+		// 如果tick为空或者合约不匹配则返回
+		if (tick == null || !contract.unifiedSymbol().equals(tick.getUnifiedSymbol())) {
+			log.warn("合约不匹配,当前Bar合约{}", contract.unifiedSymbol());
+			return;
 		}
-	}
-	
-	private long barActionTime(TickField tick) {
-		return tick.getActionTimestamp() - tick.getActionTimestamp() % 60000L + 60000; // 采用K线的收盘时间作为K线时间
-	}
-	
-	public BarField finishOfBar() {
+		
+		// 忽略非行情数据
+		if(tick.getStatus() < 1) {
+			return;
+		}
+		
+		if(Objects.isNull(cutoffTime)) {
+			cutoffTime = clock.barMinute(tick);
+		}
+		
+		if(tickTime(tick).isAfter(cutoffTime)) {
+			finishOfBar();
+			cutoffTime = clock.nextBarMinute();
+		}
+		
 		if(Objects.isNull(barBuilder)) {
+			LocalDateTime barTime = LocalDateTime.of(LocalDate.parse(tick.getActionDay(), DateTimeConstant.D_FORMAT_INT_FORMATTER), cutoffTime);
+			barBuilder = BarField.newBuilder()
+					.setGatewayId(contract.contractField().getGatewayId())
+					.setUnifiedSymbol(contract.unifiedSymbol())
+					.setTradingDay(tick.getTradingDay())
+					.setOpenPrice(tick.getLastPrice())
+					.setHighPrice(tick.getLastPrice())
+					.setLowPrice(tick.getLastPrice())
+					.setPreClosePrice(tick.getPreClosePrice())
+					.setPreOpenInterest(tick.getPreOpenInterest())
+					.setPreSettlePrice(tick.getPreSettlePrice())
+					.setActionTimestamp(barTime.toInstant(ZoneOffset.ofHours(8)).toEpochMilli())
+					.setActionDay(tick.getActionDay())
+					.setActionTime(cutoffTime.format(DateTimeConstant.T_FORMAT_FORMATTER));
+		}
+		
+		barBuilder.setHighPrice(Math.max(tick.getLastPrice(), barBuilder.getHighPrice()));
+		barBuilder.setLowPrice(Math.min(tick.getLastPrice(), barBuilder.getLowPrice()));
+		barBuilder.setClosePrice(tick.getLastPrice());
+		barBuilder.setOpenInterest(tick.getOpenInterest());
+		barBuilder.setOpenInterestDelta(tick.getOpenInterestDelta() + barBuilder.getOpenInterestDelta());
+		barBuilder.setVolume(tick.getVolumeDelta() + barBuilder.getVolume());
+		barBuilder.setTurnover(tick.getTurnoverDelta() + barBuilder.getTurnover());
+		barBuilder.setNumTrades(tick.getNumTradesDelta() + barBuilder.getNumTrades());
+	}
+	
+	private LocalTime tickTime(TickField tick) {
+		return LocalTime.parse(tick.getActionTime(), DateTimeConstant.T_FORMAT_WITH_MS_INT_FORMATTER);
+	}
+	
+	public synchronized BarField finishOfBar() {
+		if(Objects.isNull(barBuilder) || LocalTime.now().isBefore(cutoffTime)) {
 			return null;
 		}
 		barBuilder.setVolume(Math.max(0, barBuilder.getVolume()));				// 防止vol为负数
@@ -120,35 +112,8 @@ private BarField.Builder barBuilder;
 		return lastBar;
 	}
 	
-	public void setOnBarCallback(Consumer<BarField> callback) {
+	public synchronized void setOnBarCallback(Consumer<BarField> callback) {
 		barCallBack = callback;
-	}
-
-	private static class GlobalCutOffTimeHelper{
-		
-		private volatile long cutoffTime;
-		
-		private Lock lock = new ReentrantLock();
-		
-		private Set<BarGenerator> registeredSet = new HashSet<>();
-		
-		void register(BarGenerator barGen) {
-			registeredSet.add(barGen);
-		}
-		
-		void updateCutoffTime(long newCutoffTime) {
-			lock.lock();
-			try {				
-				if(newCutoffTime > cutoffTime) {
-					registeredSet.stream().forEach(BarGenerator::finishOfBar);
-					LocalDateTime ldt = LocalDateTime.ofInstant(Instant.ofEpochMilli(newCutoffTime), ZoneId.systemDefault());
-					log.trace("下次K线生成时间：{}", ldt.toLocalTime());
-				}
-				cutoffTime = newCutoffTime;
-			} finally {
-				lock.unlock();
-			}
-		}
 	}
 
 }
