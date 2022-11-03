@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.gateway.api.MarketGateway;
 import tech.quantit.northstar.gateway.api.domain.time.CnFtComTradeTime1;
+import tech.quantit.northstar.gateway.api.domain.time.GenericTradeTime;
 import tech.quantit.northstar.gateway.api.domain.time.PeriodHelper;
 import tech.quantit.northstar.gateway.api.domain.time.PeriodHelperFactory;
 import test.common.TestFieldFactory;
@@ -82,7 +83,7 @@ class GlobalMarketRegistryTest {
 	@Test
 	void testDispatch() {
 		PeriodHelperFactory phFactory = mock(PeriodHelperFactory.class);
-		when(phFactory.newInstance(anyInt(), anyBoolean(), any(ContractField.class))).thenReturn(new PeriodHelper(60, new CnFtComTradeTime1(), LocalTime.of(21, 0)));
+		when(phFactory.newInstance(anyInt(), anyBoolean(), any(ContractField.class))).thenReturn(new PeriodHelper(60, new GenericTradeTime(), LocalTime.of(21, 0)));
 		registry = new GlobalMarketRegistry(mock(FastEventEngine.class), mock(Consumer.class), mock(Consumer.class), mock(LatencyDetector.class), phFactory);
 		TickField tick = factory.makeTickField("rb2210", 2000);
 		NormalContract contract = mock(NormalContract.class);
