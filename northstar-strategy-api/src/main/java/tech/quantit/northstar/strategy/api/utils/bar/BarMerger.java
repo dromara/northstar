@@ -1,5 +1,7 @@
 package tech.quantit.northstar.strategy.api.utils.bar;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 
@@ -17,8 +19,6 @@ public class BarMerger {
 	
 	private final int numOfMinPerBar;
 	
-	private int countBars;
-	
 	protected Consumer<BarField> callback;
 	
 	protected ContractField bindedContract;
@@ -27,10 +27,15 @@ public class BarMerger {
 	
 	protected long curBarTimestamp;
 	
+	private List<BarField> barCache;
+	
+	private BarField lastBar;
+	
 	public BarMerger(int numOfMinPerBar, ContractField bindedContract, Consumer<BarField> callback) {
 		this.numOfMinPerBar = numOfMinPerBar;
 		this.callback = callback;
 		this.bindedContract = bindedContract;
+		this.barCache = new ArrayList<>(numOfMinPerBar);
 	}
 	
 	public synchronized void updateBar(BarField bar) {
@@ -41,21 +46,32 @@ public class BarMerger {
 			return;
 		}
 		curBarTimestamp = bar.getActionTimestamp();
+		
+		boolean firstBarOfDay = Objects.isNull(lastBar) || !StringUtils.equals(lastBar.getTradingDay(), bar.getTradingDay());
+		lastBar = bar;
+		
 		if(numOfMinPerBar == 1) {
 			callback.accept(bar);
 			return;
-		} else if(Objects.nonNull(barBuilder) && !StringUtils.equals(barBuilder.getTradingDay(), bar.getTradingDay())) {
+		}
+		
+		if(Objects.nonNull(barBuilder) && !StringUtils.equals(barBuilder.getTradingDay(), bar.getTradingDay())) {
 			doGenerate();
 		}
-		countBars++;
-		if(countBars == 1 || Objects.isNull(barBuilder)) {
+		
+		// 忽略每天开盘首个K线的计数，使得合并数量对齐
+		if(!firstBarOfDay) {	
+			barCache.add(bar);
+		}
+				
+		if(Objects.isNull(barBuilder)) {
 			barBuilder = bar.toBuilder();
 			return;
 		}
 		
 		doMerger(bar);
 		
-		if(countBars == numOfMinPerBar) {
+		if(barCache.size() == numOfMinPerBar) {
 			doGenerate();
 		}
 	}
@@ -63,7 +79,7 @@ public class BarMerger {
 	protected void doGenerate() {
 		callback.accept(barBuilder.build());
 		barBuilder = null;
-		countBars = 0;
+		barCache.clear();
 	}
 	
 	protected void doMerger(BarField bar) {

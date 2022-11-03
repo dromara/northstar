@@ -50,13 +50,9 @@ public class DataServiceManager implements IDataServiceManager {
 
 	private String baseUrl;
 	
-	private DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyyMMdd");
-	
 	private DateTimeFormatter dtfmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 	
 	private DateTimeFormatter dtfmt2 = DateTimeFormatter.ofPattern("yyyyMMdd HH:mm:ss");
-	
-	private DateTimeFormatter tfmt = DateTimeFormatter.ofPattern("HH:mm:ss");
 	
 	private MarketDateTimeUtil dtUtil;
 	
@@ -93,32 +89,7 @@ public class DataServiceManager implements IDataServiceManager {
 	 */
 	@Override
 	public List<BarField> getMinutelyData(String unifiedSymbol, LocalDate startDate, LocalDate endDate) {
-		Map<Long, BarField> barMap = new HashMap<>();
-		return commonGetData("min", unifiedSymbol, startDate, endDate)
-				.stream()
-				.map(bar -> {
-					barMap.put(bar.getActionTimestamp(), bar);
-					return bar;
-				})
-				.filter(bar -> !bar.getActionTime().equals("21:00:00") && !bar.getActionTime().equals("09:00:00"))
-				.map(bar -> {
-					if(bar.getActionTime().equals("21:01:00") || bar.getActionTime().equals("09:01:00")) {
-						BarField lastBar = barMap.get(bar.getActionTimestamp() - 60000);
-						if(lastBar != null) {							
-							return BarField.newBuilder(bar)
-									.setOpenPrice(lastBar.getOpenPrice())
-									.setHighPrice(Math.max(lastBar.getOpenPrice(), bar.getHighPrice()))
-									.setLowPrice(Math.min(lastBar.getOpenPrice(), bar.getLowPrice()))
-									.setOpenInterestDelta(bar.getOpenInterestDelta() + lastBar.getOpenInterestDelta())
-									.setVolumeDelta(bar.getVolumeDelta() + lastBar.getVolumeDelta())
-									.setTurnoverDelta(bar.getTurnoverDelta() + lastBar.getTurnoverDelta())
-									.setNumTradesDelta(bar.getNumTradesDelta() + lastBar.getNumTradesDelta())
-									.build();
-						}
-					}
-					return bar;
-				})
-				.toList();
+		return commonGetData("min", unifiedSymbol, startDate, endDate);
 	}
 	
 	/**
@@ -130,30 +101,7 @@ public class DataServiceManager implements IDataServiceManager {
 	 */
 	@Override
 	public List<BarField> getQuarterlyData(String unifiedSymbol, LocalDate startDate, LocalDate endDate) {
-		Map<Long, BarField> barMap = new HashMap<>();
-		return commonGetData("quarter", unifiedSymbol, startDate, endDate)
-				.stream()
-				.map(bar -> {
-					barMap.put(bar.getActionTimestamp(), bar);
-					return bar;
-				})
-				.filter(bar -> !bar.getActionTime().equals("21:00:00") && !bar.getActionTime().equals("09:00:00"))
-				.map(bar -> {
-					if(bar.getActionTime().equals("21:15:00") || bar.getActionTime().equals("09:15:00")) {
-						BarField lastBar = barMap.get(bar.getActionTimestamp() - 60000 * 15);
-						if(lastBar != null) {							
-							return BarField.newBuilder(bar)
-									.setOpenPrice(lastBar.getOpenPrice())
-									.setOpenInterestDelta(bar.getOpenInterestDelta() + lastBar.getOpenInterestDelta())
-									.setVolumeDelta(bar.getVolumeDelta() + lastBar.getVolumeDelta())
-									.setTurnoverDelta(bar.getTurnoverDelta() + lastBar.getTurnoverDelta())
-									.setNumTradesDelta(bar.getNumTradesDelta() + lastBar.getNumTradesDelta())
-									.build();
-						}
-					}
-					return bar;
-				})
-				.toList();
+		return commonGetData("quarter", unifiedSymbol, startDate, endDate);
 	}
 	
 	/**
@@ -165,30 +113,7 @@ public class DataServiceManager implements IDataServiceManager {
 	 */
 	@Override
 	public List<BarField> getHourlyData(String unifiedSymbol, LocalDate startDate, LocalDate endDate) {
-		Map<Long, BarField> barMap = new HashMap<>();
-		return commonGetData("hour", unifiedSymbol, startDate, endDate)
-				.stream()
-				.map(bar -> {
-					barMap.put(bar.getActionTimestamp(), bar);
-					return bar;
-				})
-				.filter(bar -> !bar.getActionTime().equals("21:00:00") && !bar.getActionTime().equals("09:00:00"))
-				.map(bar -> {
-					if(bar.getActionTime().equals("22:00:00") || bar.getActionTime().equals("10:00:00")) {
-						BarField lastBar = barMap.get(bar.getActionTimestamp() - 60000 * 60);
-						if(lastBar != null) {							
-							return BarField.newBuilder(bar)
-									.setOpenPrice(lastBar.getOpenPrice())
-									.setOpenInterestDelta(bar.getOpenInterestDelta() + lastBar.getOpenInterestDelta())
-									.setVolumeDelta(bar.getVolumeDelta() + lastBar.getVolumeDelta())
-									.setTurnoverDelta(bar.getTurnoverDelta() + lastBar.getTurnoverDelta())
-									.setNumTradesDelta(bar.getNumTradesDelta() + lastBar.getNumTradesDelta())
-									.build();
-						}
-					}
-					return bar;
-				})
-				.toList();
+		return commonGetData("hour", unifiedSymbol, startDate, endDate);
 	}
 	
 	/**
@@ -280,14 +205,15 @@ public class DataServiceManager implements IDataServiceManager {
 	private DataSet getTradeCalendar(String exchange, LocalDate startDate, LocalDate endDate){
 		String start = "";
 		String end = "";
-		if(startDate != null) start = startDate.format(fmt);
-		if(endDate != null) end = endDate.format(fmt);
+		if(startDate != null) start = startDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER);
+		if(endDate != null) end = endDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER);
 		URI uri = URI.create(String.format("%s/calendar/?exchange=%s&startDate=%s&endDate=%s", baseUrl, exchange, start, end));
 		return execute(uri, DataSet.class).getBody();
 	}
 	
 	private List<BarField> commonGetData(String type, String unifiedSymbol, LocalDate startDate, LocalDate endDate){
-		URI uri = URI.create(String.format("%s/data/%s?unifiedSymbol=%s&startDate=%s&endDate=%s", baseUrl, type, unifiedSymbol, startDate.format(fmt), endDate.format(fmt)));
+		URI uri = URI.create(String.format("%s/data/%s?unifiedSymbol=%s&startDate=%s&endDate=%s", baseUrl, type, unifiedSymbol, 
+				startDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), endDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER)));
 		return convertDataSet(execute(uri, DataSet.class).getBody());
 	}
 	
@@ -332,17 +258,17 @@ public class DataServiceManager implements IDataServiceManager {
 			
 			if(StringUtils.isNotBlank(tradeDateTime)) {
 				dateTime = LocalDateTime.parse(tradeDateTime, dtfmt);
-				actionDay = dateTime.format(fmt);
-				actionTime = dateTime.format(tfmt);
-				tradingDay = dtUtil.getTradingDay(dateTime).format(fmt);
+				actionDay = dateTime.format(DateTimeConstant.D_FORMAT_INT_FORMATTER);
+				actionTime = dateTime.format(DateTimeConstant.T_FORMAT_FORMATTER);
+				tradingDay = dtUtil.getTradingDay(dateTime).format(DateTimeConstant.D_FORMAT_INT_FORMATTER);
 				timestamp = dateTime.toInstant(ZoneOffset.ofHours(8)).toEpochMilli();
 			}
 			
 			if(StringUtils.isNotBlank(getValue("trade_date", fieldIndexMap, item, ""))) {
 				tradingDay = getValue("trade_date", fieldIndexMap, item, "");
 				dateTime = LocalDateTime.parse(tradingDay + " 09:00:00", dtfmt2);
-				actionDay = dateTime.format(fmt);
-				actionTime = dateTime.format(tfmt);
+				actionDay = dateTime.format(DateTimeConstant.D_FORMAT_INT_FORMATTER);
+				actionTime = dateTime.format(DateTimeConstant.T_FORMAT_FORMATTER);
 				timestamp = dateTime.toInstant(ZoneOffset.ofHours(8)).toEpochMilli();
 			}
 			

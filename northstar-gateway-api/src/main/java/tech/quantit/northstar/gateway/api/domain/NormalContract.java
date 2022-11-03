@@ -42,8 +42,4 @@ public class NormalContract {
 		return field;
 	}
 
-	public BarGenerator barGenerator() {
-		return new BarGenerator(this);
-	}
-
 }

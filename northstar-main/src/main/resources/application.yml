@@ -17,6 +17,8 @@ logging:  level:
     '[xyz.redtorch.gateway.ctp.x64v6v3v15v]': info
     # 行情数据出口
     '[tech.quantit.northstar.main.handler.broadcast]': info
+    # K线数据验证
+    '[tech.quantit.northstar.gateway.api.domain]': info
   file:    path: logs/
   
 spring:

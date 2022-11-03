@@ -72,6 +72,7 @@ import tech.quantit.northstar.gateway.api.domain.GlobalMarketRegistry;
 import tech.quantit.northstar.gateway.api.domain.IndexContract;
 import tech.quantit.northstar.gateway.api.domain.LatencyDetector;
 import tech.quantit.northstar.gateway.api.domain.NormalContract;
+import tech.quantit.northstar.gateway.api.domain.time.PeriodHelperFactory;
 import tech.quantit.northstar.gateway.playback.PlaybackGatewayFactory;
 import tech.quantit.northstar.gateway.sim.trade.SimGatewayFactory;
 import tech.quantit.northstar.gateway.sim.trade.SimMarket;
@@ -145,7 +146,19 @@ public class AppConfig implements WebMvcConfigurer {
 	}
 
 	@Bean
-	public ContractManager contractManager(IContractRepository contractRepo) throws IOException {
+	public ContractManager contractManager(IContractRepository contractRepo, List<ContractDefinition> contractDefs) throws IOException {
+		ContractManager mgr = new ContractManager(contractDefs);
+		contractRepo.findAll().forEach(mgr::addContract);
+		return mgr;
+	}
+	
+	@Bean
+	public PeriodHelperFactory periodHelperFactory(List<ContractDefinition> contractDefs) {
+		return new PeriodHelperFactory(contractDefs);
+	}
+	
+	@Bean
+	public List<ContractDefinition> contractDefinitions() throws IOException {
 		String fileName = "ContractDefinition.csv";
 		String tempPath = System.getProperty("java.io.tmpdir") + "Northstar_" + System.currentTimeMillis();
 		String tempFilePath = tempPath + File.separator + fileName;
@@ -157,10 +170,7 @@ public class AppConfig implements WebMvcConfigurer {
 		}
 
 		ContractDefinitionReader reader = new ContractDefinitionReader();
-		List<ContractDefinition> contractDefs = reader.load(tempFile);
-		ContractManager mgr = new ContractManager(contractDefs);
-		contractRepo.findAll().forEach(mgr::addContract);
-		return mgr;
+		return reader.load(tempFile);
 	}
 
 	@Bean
@@ -183,7 +193,7 @@ public class AppConfig implements WebMvcConfigurer {
 
 	@Bean
 	public GlobalMarketRegistry globalRegistry(FastEventEngine fastEventEngine, IContractRepository contractRepo,
-			ContractManager contractMgr, @Autowired(required = false) LatencyDetector latencyDetector) {
+			ContractManager contractMgr, @Autowired(required = false) LatencyDetector latencyDetector, PeriodHelperFactory phFactory) {
 		Consumer<NormalContract> handleContractSave = contract -> {
 			if (contract.updateTime() > 0) {
 				contractRepo.save(contract.contractField(), contract.gatewayType());
@@ -191,7 +201,7 @@ public class AppConfig implements WebMvcConfigurer {
 		};
 
 		GlobalMarketRegistry registry = new GlobalMarketRegistry(fastEventEngine, handleContractSave,
-				contractMgr::addContract, latencyDetector);
+				contractMgr::addContract, latencyDetector, phFactory);
 		// 加载已有合约
 		List<ContractField> contractList = contractRepo.findAll();
 		Map<String, ContractField> contractMap = contractList.stream()

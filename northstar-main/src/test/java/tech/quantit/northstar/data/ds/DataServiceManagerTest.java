@@ -73,12 +73,12 @@ class DataServiceManagerTest {
 			.thenReturn(mockResp2);
 		
 		List<BarField> result = mgr.getHourlyData("test", LocalDate.now(), LocalDate.now());
-		assertThat(result).hasSize(6);
-		assertThat(result.get(0).getActionDay()).isEqualTo("20220214");
-		assertThat(result.get(0).getActionTime()).isEqualTo("22:00:00");
-		assertThat(result.get(0).getTradingDay()).isEqualTo("20220215");
-		assertThat(result.get(0).getActionTimestamp() > 0).isTrue();
-		assertThat(result.get(0).getUnifiedSymbol()).isEqualTo("rb2205@SHFE");
+		assertThat(result).hasSize(7);
+		assertThat(result.get(1).getActionDay()).isEqualTo("20220214");
+		assertThat(result.get(1).getActionTime()).isEqualTo("22:00:00");
+		assertThat(result.get(1).getTradingDay()).isEqualTo("20220215");
+		assertThat(result.get(1).getActionTimestamp() > 0).isTrue();
+		assertThat(result.get(1).getUnifiedSymbol()).isEqualTo("rb2205@SHFE");
 	}
 
 }

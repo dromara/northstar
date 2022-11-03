@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.event.NorthstarEventType;
 import tech.quantit.northstar.common.utils.MessagePrinter;
+import tech.quantit.northstar.gateway.api.domain.time.PeriodHelperFactory;
 import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.TickField;
@@ -46,12 +47,15 @@ public class GlobalMarketRegistry {
 	
 	private LatencyDetector latencyDetector;
 	
+	private PeriodHelperFactory phFactory;
+	
 	public GlobalMarketRegistry(FastEventEngine feEngine, Consumer<NormalContract> onContractSave, Consumer<ContractField> onContractSubsciption,
-			LatencyDetector latencyDetector) {
+			LatencyDetector latencyDetector, PeriodHelperFactory phFactory) {
 		this.feEngine = feEngine;
 		this.onContractSave = onContractSave;
 		this.onContractSubsciption = onContractSubsciption;
 		this.latencyDetector = latencyDetector;
+		this.phFactory = phFactory;
 	}
 	
 	public synchronized void register(NormalContract contract) {
@@ -73,11 +77,10 @@ public class GlobalMarketRegistry {
 		if(checkBarGeneralable(contract)) {
 			return;
 		}
-		BarGenerator barGen = contract.barGenerator();
-		barGen.setOnBarCallback((bar) -> {
+		BarGenerator barGen = new BarGenerator(contract, bar -> {
 			log.trace("生成bar: {}", MessagePrinter.print(bar));
 			feEngine.emitEvent(NorthstarEventType.BAR, bar);
-		});
+		}, phFactory);
 		barGenMap.put(contract.unifiedSymbol(), barGen);
 	}
 	
@@ -112,7 +115,7 @@ public class GlobalMarketRegistry {
 	}
 	
 	public void finishUpBarGen() {
-		barGenMap.values().forEach(BarGenerator::finishOfBar);
+		barGenMap.values().forEach(BarGenerator::endOfBar);
 	}
 	
 	public Optional<LatencyDetector> getLatencyDetector(){

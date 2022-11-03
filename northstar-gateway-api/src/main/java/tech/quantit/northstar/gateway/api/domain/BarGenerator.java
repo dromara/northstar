@@ -1,16 +1,16 @@
 package tech.quantit.northstar.gateway.api.domain;
 
-import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.time.LocalTime;
+import java.time.ZoneOffset;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.constant.DateTimeConstant;
-import tech.quantit.northstar.common.constant.TickType;
+import tech.quantit.northstar.gateway.api.domain.time.OpenningMinuteClock;
+import tech.quantit.northstar.gateway.api.domain.time.PeriodHelperFactory;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.TickField;
 
@@ -25,28 +25,23 @@ import xyz.redtorch.pb.CoreField.TickField;
 public class BarGenerator {
 	
 	private BarField.Builder barBuilder;
-	
-	private long cutoffTime;
-	
-	private static final GlobalCutOffTimeHelper helper = new GlobalCutOffTimeHelper();
 
+	private static final long MAX_TIME_GAP = 90000; //90秒TICK过期判定
+
+	private LocalTime cutoffTime;
+	
 	private NormalContract contract;
 	
 	private Consumer<BarField> barCallBack;
 	
-	private ConcurrentLinkedQueue<TickField> barTicks = new ConcurrentLinkedQueue<>();
+	private OpenningMinuteClock clock;
 	
-	public BarGenerator(NormalContract contract, Consumer<BarField> barCallBack) {
+	private TickField lastTick;
+	
+	public BarGenerator(NormalContract contract, Consumer<BarField> barCallBack, PeriodHelperFactory phFactory) {
 		this.barCallBack = barCallBack;
 		this.contract = contract;
-		this.barBuilder = BarField.newBuilder()
-				.setGatewayId(contract.contractField().getGatewayId())
-				.setUnifiedSymbol(contract.unifiedSymbol());
-		helper.register(this);
-	}
-	
-	public BarGenerator(NormalContract contract) {
-		this(contract, null);
+		this.clock = new OpenningMinuteClock(contract.contractField(), phFactory);
 	}
 	
 	/**
@@ -60,24 +55,28 @@ public class BarGenerator {
 			log.warn("合约不匹配,当前Bar合约{}", contract.unifiedSymbol());
 			return;
 		}
+		if (System.currentTimeMillis() - tick.getActionTimestamp() > MAX_TIME_GAP) {
+			log.debug("忽略过期数据: {} {} {}", tick.getUnifiedSymbol(), tick.getActionDay(), tick.getActionTime());
+			return;
+		}
 		
 		// 忽略非行情数据
 		if(tick.getStatus() < 1) {
 			return;
 		}
-		 
-		if(tick.getActionTimestamp() > cutoffTime) {
-			long offset = 0;	// K线偏移量
-			if(tick.getStatus() == TickType.PRE_OPENING_TICK.getCode()) {
-				offset = 60000;	// 开盘前一分钟的TICK是盘前数据，要合并到第一个分钟K线
-			}
-			long barActionTime = tick.getActionTimestamp() - tick.getActionTimestamp() % 60000L + 60000 + offset; // 采用K线的收盘时间作为K线时间
-			long newCutoffTime = barActionTime;
-			
-			if(newCutoffTime != helper.cutoffTime) {
-				helper.updateCutoffTime(newCutoffTime);
-			}
-			cutoffTime = newCutoffTime;
+		
+		lastTick = tick;
+		
+		if(Objects.isNull(cutoffTime)) {
+			cutoffTime = clock.barMinute(tick);
+		}
+		
+		if(tickTime(tick).isAfter(cutoffTime)) {
+			finishOfBar();
+			cutoffTime = clock.nextBarMinute();
+		}
+		if(Objects.isNull(barBuilder)) {
+			LocalDateTime barTime = LocalDateTime.of(LocalDate.parse(tick.getActionDay(), DateTimeConstant.D_FORMAT_INT_FORMATTER), cutoffTime);
 			barBuilder = BarField.newBuilder()
 					.setGatewayId(contract.contractField().getGatewayId())
 					.setUnifiedSymbol(contract.unifiedSymbol())
@@ -88,12 +87,11 @@ public class BarGenerator {
 					.setPreClosePrice(tick.getPreClosePrice())
 					.setPreOpenInterest(tick.getPreOpenInterest())
 					.setPreSettlePrice(tick.getPreSettlePrice())
-					.setActionTimestamp(barActionTime)
+					.setActionTimestamp(barTime.toInstant(ZoneOffset.ofHours(8)).toEpochMilli())
 					.setActionDay(tick.getActionDay())
-					.setActionTime(LocalDateTime.ofInstant(Instant.ofEpochMilli(barActionTime), ZoneId.systemDefault()).format(DateTimeConstant.T_FORMAT_WITH_MS_INT_FORMATTER));
+					.setActionTime(cutoffTime.format(DateTimeConstant.T_FORMAT_FORMATTER));
 		}
 		
-		barTicks.offer(tick);
 		barBuilder.setHighPrice(Math.max(tick.getLastPrice(), barBuilder.getHighPrice()));
 		barBuilder.setLowPrice(Math.min(tick.getLastPrice(), barBuilder.getLowPrice()));
 		barBuilder.setClosePrice(tick.getLastPrice());
@@ -104,41 +102,34 @@ public class BarGenerator {
 		barBuilder.setNumTrades(tick.getNumTradesDelta() + barBuilder.getNumTrades());
 	}
 	
-	public BarField finishOfBar() {
-		if(barTicks.size() < 3) {
-			// 若TICK数据少于三个TICK，则不触发回调，因为这不是一个正常的数据集
-			return barBuilder.build();
+	private LocalTime tickTime(TickField tick) {
+		return LocalTime.parse(tick.getActionTime(), DateTimeConstant.T_FORMAT_WITH_MS_INT_FORMATTER);
+	}
+	
+	/**
+	 * 分钟收盘生成
+	 * @return
+	 */
+	public synchronized BarField finishOfBar() {
+		if(Objects.isNull(barBuilder)) {
+			return null;
 		}
-		barTicks.clear();
-		
 		barBuilder.setVolume(Math.max(0, barBuilder.getVolume()));				// 防止vol为负数
 		
 		BarField lastBar = barBuilder.build();
 		barCallBack.accept(lastBar);
+		barBuilder = null;
 		return lastBar;
 	}
 	
-	public void setOnBarCallback(Consumer<BarField> callback) {
-		barCallBack = callback;
-	}
-
-	private static class GlobalCutOffTimeHelper{
-		
-		private volatile long cutoffTime;
-		
-		private Set<BarGenerator> registeredSet = new HashSet<>();
-		
-		synchronized void register(BarGenerator barGen) {
-			registeredSet.add(barGen);
+	/**
+	 * 小节收盘检查
+	 */
+	public synchronized void endOfBar() {
+		if(Objects.isNull(lastTick) || System.currentTimeMillis() - lastTick.getActionTimestamp() < MAX_TIME_GAP) {
+			return;
 		}
-		
-		synchronized void updateCutoffTime(long newCutoffTime) {
-			if(newCutoffTime > cutoffTime) {
-				registeredSet.stream().forEach(BarGenerator::finishOfBar);
-				LocalDateTime ldt = LocalDateTime.ofInstant(Instant.ofEpochMilli(newCutoffTime), ZoneId.systemDefault());
-				log.trace("下次K线生成时间：{}", ldt.toLocalTime());
-			}
-			cutoffTime = newCutoffTime;
-		}
+		finishOfBar();
 	}
+	
 }

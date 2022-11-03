@@ -65,14 +65,14 @@ public class ModuleFactory {
 	
 	private BiConsumer<ModuleContext, TradeField> onModuleTradeCallback = (ctx, trade) -> {
 		StringBuilder sb = new StringBuilder();
-		sb.append("[模组成交]:\n");
+		sb.append("模组成交:\n");
 		sb.append(String.format(" 模组：%s%n", ctx.getModuleName()));
-		sb.append(String.format(" 委托ID：%s%n", trade.getOriginOrderId()));
-		sb.append(String.format(" 交易品种：%s%n", trade.getContract().getFullName()));
-		sb.append(String.format(" 成交时间：%s%n", trade.getTradeTime()));
+		sb.append(String.format(" 合约：%s%n", trade.getContract().getFullName()));
 		sb.append(String.format(" 操作：%s%n", FieldUtils.chn(trade.getDirection()) + FieldUtils.chn(trade.getOffsetFlag())));
 		sb.append(String.format(" 成交价：%s%n", trade.getPrice()));
 		sb.append(String.format(" 手数：%s%n", trade.getVolume()));
+		sb.append(String.format(" 成交时间：%s%n", trade.getTradeTime()));
+		sb.append(String.format(" 委托ID：%s%n", trade.getOriginOrderId()));
 		mailMgr.onEvent(new NorthstarEvent(NorthstarEventType.NOTICE, NoticeField.newBuilder()
 				.setTimestamp(System.currentTimeMillis())
 				.setContent(sb.toString())
