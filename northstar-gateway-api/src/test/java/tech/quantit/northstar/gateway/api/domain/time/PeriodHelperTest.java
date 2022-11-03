@@ -29,4 +29,15 @@ class PeriodHelperTest {
 		assertThat(timeFrame1).hasSize(556);
 		assertThat(timeFrame2).hasSize(555);
 	}
+	
+	@Test
+	void testEndOfSection() {
+		assertThat(h1.isEndOfSection(LocalTime.of(2, 30))).isTrue();
+		assertThat(h1.isEndOfSection(LocalTime.of(10, 15))).isTrue();
+		assertThat(h1.isEndOfSection(LocalTime.of(11, 30))).isTrue();
+		assertThat(h1.isEndOfSection(LocalTime.of(15, 0))).isTrue();
+		
+		assertThat(h1.isEndOfSection(LocalTime.of(23, 0))).isFalse();
+		assertThat(h1.isEndOfSection(LocalTime.of(14, 59))).isFalse();
+	}
 }

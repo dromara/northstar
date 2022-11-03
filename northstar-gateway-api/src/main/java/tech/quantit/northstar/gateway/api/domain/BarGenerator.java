@@ -71,7 +71,7 @@ public class BarGenerator {
 			cutoffTime = clock.barMinute(tick);
 		}
 		
-		if(tickTime(tick).isAfter(cutoffTime)) {
+		if(!clock.isEndOfSection(cutoffTime) && tickTime(tick).isAfter(cutoffTime)) {
 			finishOfBar();
 			cutoffTime = clock.nextBarMinute();
 		}
@@ -119,6 +119,7 @@ public class BarGenerator {
 		BarField lastBar = barBuilder.build();
 		barCallBack.accept(lastBar);
 		barBuilder = null;
+		cutoffTime = null;
 		return lastBar;
 	}
 	

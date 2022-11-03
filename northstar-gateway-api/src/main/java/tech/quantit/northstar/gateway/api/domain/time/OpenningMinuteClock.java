@@ -26,8 +26,11 @@ public class OpenningMinuteClock {
 	
 	private boolean endByWholeMin;
 	
+	private PeriodHelper helper;
+	
 	public OpenningMinuteClock(ContractField contract, PeriodHelperFactory phFactory) {
-		timeFrame = phFactory.newInstance(1, true, contract).getRunningBaseTimeFrame();
+		helper = phFactory.newInstance(1, true, contract);
+		timeFrame = helper.getRunningBaseTimeFrame();
 		endByWholeMin = exchangesOfEndByWholeMin.contains(contract.getExchange());
 	}
 	
@@ -68,6 +71,15 @@ public class OpenningMinuteClock {
 	
 	private int nextCursor() {
 		return cursor.incrementAndGet() % timeFrame.size();
+	}
+	
+	/**
+	 * 是否为小节末时间
+	 * @param t
+	 * @return
+	 */
+	public boolean isEndOfSection(LocalTime t) {
+		return helper.isEndOfSection(t);
 	}
 	
 }

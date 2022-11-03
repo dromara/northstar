@@ -20,6 +20,7 @@ public class PeriodHelper {
 	private LinkedList<Set<LocalTime>> segmentQ = new LinkedList<>();
 	private LinkedHashMap<LocalTime, Set<LocalTime>> periodSegmentsMap = new LinkedHashMap<>();
 	private List<LocalTime> baseTimeFrame;
+	private Set<LocalTime> endOfSections = new HashSet<>();
 	
 	public PeriodHelper(int numbersOfMinPerPeriod, TradeTimeDefinition tradeTimeDefinition) {
 		this(numbersOfMinPerPeriod, tradeTimeDefinition, null);
@@ -33,6 +34,7 @@ public class PeriodHelper {
 		while(t != START_TIME) {
 			boolean isTradeTime = false;
 			for(PeriodSegment ps : tradeTimeDefinition.getPeriodSegments()) {
+				endOfSections.add(ps.endOfSegment());
 				if(ps.withinPeriod(t)) {
 					isTradeTime = true;
 					break;
@@ -73,5 +75,14 @@ public class PeriodHelper {
 	 */
 	public List<LocalTime> getRunningBaseTimeFrame(){
 		return baseTimeFrame;
+	}
+	
+	/**
+	 * 当前时间是否要小节收盘
+	 * @param t
+	 * @return
+	 */
+	public boolean isEndOfSection(LocalTime t) {
+		return endOfSections.contains(t);
 	}
 }
