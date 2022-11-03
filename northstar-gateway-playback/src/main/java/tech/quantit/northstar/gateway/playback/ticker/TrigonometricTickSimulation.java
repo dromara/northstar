@@ -62,8 +62,8 @@ public class TrigonometricTickSimulation implements TickSimulationAlgorithm {
 					.setLastPrice(bar.getClosePrice())
 					.setStatus(TickType.NORMAL_TICK.getCode())
 					.setActionDay(bar.getActionDay())
-					.setActionTime(LocalTime.parse(bar.getActionTime(), DateTimeConstant.T_FORMAT_FORMATTER).format(DateTimeConstant.T_FORMAT_WITH_MS_INT_FORMATTER))
-					.setActionTimestamp(bar.getActionTimestamp())
+					.setActionTime(LocalTime.parse(bar.getActionTime(), DateTimeConstant.T_FORMAT_FORMATTER).minusMinutes(1).format(DateTimeConstant.T_FORMAT_WITH_MS_INT_FORMATTER))
+					.setActionTimestamp(bar.getActionTimestamp() - 60000)
 					.addAllAskPrice(List.of(bar.getClosePrice() + priceTick, 0D, 0D, 0D, 0D)) // 仅模拟卖一价
 					.addAllBidPrice(List.of(bar.getClosePrice() - priceTick, 0D, 0D, 0D, 0D)) // 仅模拟买一价
 					.setGatewayId(gatewayId)
@@ -118,7 +118,7 @@ public class TrigonometricTickSimulation implements TickSimulationAlgorithm {
 					.setLastPrice(prices.get(i))
 					.setStatus(TickType.NORMAL_TICK.getCode())
 					.setActionDay(bar.getActionDay())
-					.setActionTime(LocalTime.parse(bar.getActionTime(), DateTimeConstant.T_FORMAT_FORMATTER).format(DateTimeConstant.T_FORMAT_WITH_MS_INT_FORMATTER))
+					.setActionTime(LocalTime.parse(bar.getActionTime(), DateTimeConstant.T_FORMAT_FORMATTER).minusSeconds(60 - i/2).format(DateTimeConstant.T_FORMAT_WITH_MS_INT_FORMATTER))
 					.setActionTimestamp(bar.getActionTimestamp() - (totalSize - i) * timeFrame)
 					.addAllAskPrice(List.of(prices.get(i) + priceTick, 0D, 0D, 0D, 0D)) // 仅模拟卖一价
 					.addAllBidPrice(List.of(prices.get(i) - priceTick, 0D, 0D, 0D, 0D)) // 仅模拟买一价
