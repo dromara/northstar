@@ -380,7 +380,7 @@ public class ModuleContext implements IModuleContext{
 		if(!bindedSymbolSet.contains(tick.getUnifiedSymbol())) {
 			return;
 		}
-		mlog.trace("TICK信息: {} {} {}，最新价: {}", tick.getUnifiedSymbol(), tick.getActionDay(), tick.getActionTime(), tick.getLastPrice());
+		mlog.trace("TICK信息: {} {} {} {}，最新价: {}", tick.getUnifiedSymbol(), tick.getActionDay(), tick.getActionTime(), tick.getActionTimestamp(), tick.getLastPrice());
 		if(!StringUtils.equals(tradingDay, tick.getTradingDay())) {
 			tradingDay = tick.getTradingDay();
 		}
@@ -405,7 +405,7 @@ public class ModuleContext implements IModuleContext{
 		if(!bindedSymbolSet.contains(bar.getUnifiedSymbol())) {
 			return;
 		}
-		mlog.trace("Bar信息: {} {} {}，最新价: {}", bar.getUnifiedSymbol(), bar.getActionDay(), bar.getActionTime(), bar.getClosePrice());
+		mlog.trace("Bar信息: {} {} {} {}，最新价: {}", bar.getUnifiedSymbol(), bar.getActionDay(), bar.getActionTime(), bar.getActionTimestamp(), bar.getClosePrice());
 		indicatorFactory.getIndicatorMap().entrySet().stream().forEach(e -> e.getValue().onBar(bar));	// 普通指标的更新
 		comboIndicators.stream().forEach(combo -> combo.onBar(bar));
 		inspectedValIndicatorFactory.getIndicatorMap().entrySet().stream().forEach(e -> e.getValue().onBar(bar));	// 值透视指标的更新

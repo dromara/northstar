@@ -1,5 +1,8 @@
 package tech.quantit.northstar.strategy.api.utils.bar;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -7,6 +10,7 @@ import java.util.function.Consumer;
 
 import org.apache.commons.lang3.StringUtils;
 
+import lombok.extern.slf4j.Slf4j;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.ContractField;
 
@@ -15,6 +19,7 @@ import xyz.redtorch.pb.CoreField.ContractField;
  * @author KevinHuangwl
  *
  */
+@Slf4j
 public class BarMerger {
 	
 	private final int numOfMinPerBar;
@@ -43,6 +48,10 @@ public class BarMerger {
 			return;
 		}
 		if(bar.getActionTimestamp() < curBarTimestamp) {
+			if(log.isTraceEnabled()) {				
+				log.trace("当前计算时间：{}", LocalDateTime.ofInstant(Instant.ofEpochMilli(curBarTimestamp), ZoneId.systemDefault()));
+				log.trace("忽略过时数据：{} {} {} {}", bar.getUnifiedSymbol(), bar.getActionDay(), bar.getActionTime(), bar.getActionTimestamp());
+			}
 			return;
 		}
 		curBarTimestamp = bar.getActionTimestamp();
