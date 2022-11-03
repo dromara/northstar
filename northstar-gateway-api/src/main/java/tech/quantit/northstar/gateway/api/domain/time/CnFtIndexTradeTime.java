@@ -13,7 +13,7 @@ public final class CnFtIndexTradeTime implements TradeTimeDefinition {
 	@Override
 	public List<PeriodSegment> getPeriodSegments() {
 		return List.of(
-				new PeriodSegment(LocalTime.of(9, 31), LocalTime.of(11, 30)),
+				new PeriodSegment(LocalTime.of(9, 30), LocalTime.of(11, 30)),
 				new PeriodSegment(LocalTime.of(13, 1), LocalTime.of(15, 00))
 			);
 	}
