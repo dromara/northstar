@@ -27,7 +27,7 @@ class OpenningMinuteClockTest {
 	@BeforeEach
 	void prepare() {
 		PeriodHelperFactory phFactory = mock(PeriodHelperFactory.class);
-		when(phFactory.newInstance(anyInt(), anyBoolean(), any(ContractField.class))).thenReturn(new PeriodHelper(60, new CnFtComTradeTime1(), LocalTime.of(21, 0)));
+		when(phFactory.newInstance(anyInt(), anyBoolean(), any(ContractField.class))).thenReturn(new PeriodHelper(60, new CnFtComTradeTime1()));
 		clock = new OpenningMinuteClock(factory.makeContract("rb2210"), phFactory);
 	}
 
@@ -61,8 +61,13 @@ class OpenningMinuteClockTest {
 				.setActionDay(LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
 				.setActionTime("225958000")
 				.build();
-		
+		TickField t2 = TickField.newBuilder()
+				.setLastPrice(1000)
+				.setActionDay(LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
+				.setActionTime("205900500")
+				.build();
 		assertThat(clock.barMinute(t1)).isEqualTo(LocalTime.of(23, 0));
 		assertThat(clock.nextBarMinute()).isEqualTo(LocalTime.of(9, 1));
+		assertThat(clock.barMinute(t2)).isEqualTo(LocalTime.of(21, 0));
 	}
 }

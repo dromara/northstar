@@ -22,4 +22,8 @@ public class PeriodSegment {
 	public LocalTime endOfSegment() {
 		return end;
 	}
+	
+	public LocalTime startOfSegment() {
+		return start;
+	}
 }

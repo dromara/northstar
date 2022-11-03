@@ -9,17 +9,10 @@ import org.junit.jupiter.api.Test;
 
 class PeriodHelperTest {
 
-	PeriodHelper h1 = new PeriodHelper(60, new CnFtComTradeTime3(), LocalTime.of(21, 0));
-	PeriodHelper h2 = new PeriodHelper(60, new CnFtComTradeTime3());
+	PeriodHelper h1 = new PeriodHelper(60, new CnFtComTradeTime3());
+	PeriodHelper h2 = new PeriodHelper(60, new CnFtComTradeTime3(), true);
 	
 	
-	@Test
-	void test() {
-		assertThat(h1.withinTheSamePeriod(LocalTime.of(21, 0), LocalTime.of(22, 0))).isTrue();
-		assertThat(h2.withinTheSamePeriod(LocalTime.of(21, 0), LocalTime.of(22, 0))).isFalse();
-		
-		assertThat(h1.withinTheSamePeriod(LocalTime.of(2, 1), LocalTime.of(9, 1))).isTrue();
-	}
 
 	@Test
 	void testTimeFrame() {

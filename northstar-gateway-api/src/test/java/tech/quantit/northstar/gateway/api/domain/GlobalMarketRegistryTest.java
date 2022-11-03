@@ -9,7 +9,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.time.LocalTime;
 import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Test;
@@ -34,7 +33,7 @@ class GlobalMarketRegistryTest {
 	void shouldSubscribeContract() {
 		Consumer<ContractField> callback = mock(Consumer.class);
 		PeriodHelperFactory phFactory = mock(PeriodHelperFactory.class);
-		when(phFactory.newInstance(anyInt(), anyBoolean(), any(ContractField.class))).thenReturn(new PeriodHelper(60, new CnFtComTradeTime1(), LocalTime.of(21, 0)));
+		when(phFactory.newInstance(anyInt(), anyBoolean(), any(ContractField.class))).thenReturn(new PeriodHelper(60, new CnFtComTradeTime1()));
 		registry = new GlobalMarketRegistry(mock(FastEventEngine.class), mock(Consumer.class), callback, mock(LatencyDetector.class), phFactory);
 		
 		NormalContract contract = mock(NormalContract.class);
@@ -51,7 +50,7 @@ class GlobalMarketRegistryTest {
 	@Test
 	void shouldNotSubscribeContract() {
 		PeriodHelperFactory phFactory = mock(PeriodHelperFactory.class);
-		when(phFactory.newInstance(anyInt(), anyBoolean(), any(ContractField.class))).thenReturn(new PeriodHelper(60, new CnFtComTradeTime1(), LocalTime.of(21, 0)));
+		when(phFactory.newInstance(anyInt(), anyBoolean(), any(ContractField.class))).thenReturn(new PeriodHelper(60, new CnFtComTradeTime1()));
 		registry = new GlobalMarketRegistry(mock(FastEventEngine.class), mock(Consumer.class), mock(Consumer.class), mock(LatencyDetector.class), phFactory);
 		
 		IndexContract contract = mock(IndexContract.class);
@@ -67,7 +66,7 @@ class GlobalMarketRegistryTest {
 	@Test
 	void testRegisterMarketGateway() {
 		PeriodHelperFactory phFactory = mock(PeriodHelperFactory.class);
-		when(phFactory.newInstance(anyInt(), anyBoolean(), any(ContractField.class))).thenReturn(new PeriodHelper(60, new CnFtComTradeTime1(), LocalTime.of(21, 0)));
+		when(phFactory.newInstance(anyInt(), anyBoolean(), any(ContractField.class))).thenReturn(new PeriodHelper(60, new CnFtComTradeTime1()));
 		registry = new GlobalMarketRegistry(mock(FastEventEngine.class), mock(Consumer.class), mock(Consumer.class), mock(LatencyDetector.class), phFactory);
 		NormalContract contract = mock(NormalContract.class);
 		MarketGateway gateway = mock(MarketGateway.class);
@@ -83,7 +82,7 @@ class GlobalMarketRegistryTest {
 	@Test
 	void testDispatch() {
 		PeriodHelperFactory phFactory = mock(PeriodHelperFactory.class);
-		when(phFactory.newInstance(anyInt(), anyBoolean(), any(ContractField.class))).thenReturn(new PeriodHelper(60, new GenericTradeTime(), LocalTime.of(21, 0)));
+		when(phFactory.newInstance(anyInt(), anyBoolean(), any(ContractField.class))).thenReturn(new PeriodHelper(60, new GenericTradeTime()));
 		registry = new GlobalMarketRegistry(mock(FastEventEngine.class), mock(Consumer.class), mock(Consumer.class), mock(LatencyDetector.class), phFactory);
 		TickField tick = factory.makeTickField("rb2210", 2000);
 		NormalContract contract = mock(NormalContract.class);
