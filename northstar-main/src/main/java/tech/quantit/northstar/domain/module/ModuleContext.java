@@ -147,9 +147,13 @@ public class ModuleContext implements IModuleContext{
 				indicatorValBufQMap.get(e.getKey()).offer(indicator.timeSeriesValue(0));	
 			}
 		};
-		indicatorFactory.getIndicatorMap().entrySet().stream().forEach(action);	// 记录常规指标更新值 
-		tradeStrategy.onBar(bar, module.isEnabled());
-		inspectedValIndicatorFactory.getIndicatorMap().entrySet().stream().forEach(action);	// 记录透视值更新
+		try {			
+			indicatorFactory.getIndicatorMap().entrySet().stream().forEach(action);	// 记录常规指标更新值 
+			tradeStrategy.onBar(bar, module.isEnabled());
+			inspectedValIndicatorFactory.getIndicatorMap().entrySet().stream().forEach(action);	// 记录透视值更新
+		} catch(Exception e) {
+			getLogger().error("", e);
+		}
 		if(barBufQMap.get(bar.getUnifiedSymbol()).size() >= bufSize.intValue()) {
 			barBufQMap.get(bar.getUnifiedSymbol()).poll();
 		}
