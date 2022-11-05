@@ -70,6 +70,9 @@ public class GlobalMarketRegistry {
 			log.debug("注册指数合约：{}", contract.unifiedSymbol());
 			makeTicker(idxContract);
 		}
+		if(contract instanceof PrimaryContract pContract) {
+			log.debug("注册主力合约：{}", contract.unifiedSymbol());
+		}
 	}
 	
 	// 设置BAR回调

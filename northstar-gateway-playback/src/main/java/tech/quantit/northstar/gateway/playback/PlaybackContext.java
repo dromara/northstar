@@ -173,6 +173,7 @@ public class PlaybackContext {
 						.map(contractMgr::getContract)
 						.forEach(contract -> 
 							new Thread(() -> {
+								log.info("正在加载 [{}] 合约数据", contract.getUnifiedSymbol());
 								LocalDate queryStart = preloadStartDate;
 								LocalDate queryEnd = queryStart.plusWeeks(WEEK_DELTA); 
 								while(queryStart.isBefore(preloadEndDate)) {

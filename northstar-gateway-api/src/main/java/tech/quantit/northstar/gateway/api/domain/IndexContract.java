@@ -5,6 +5,11 @@ import java.util.stream.Collectors;
 
 import xyz.redtorch.pb.CoreField.ContractField;
 
+/**
+ * 指数合约
+ * @author KevinHuangwl
+ *
+ */
 public class IndexContract extends NormalContract {
 	
 	private IndexTicker ticker;

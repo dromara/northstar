@@ -16,6 +16,7 @@ import tech.quantit.northstar.data.ds.DataServiceManager;
 import tech.quantit.northstar.gateway.api.domain.ContractFactory;
 import tech.quantit.northstar.gateway.api.domain.GlobalMarketRegistry;
 import tech.quantit.northstar.gateway.api.domain.NormalContract;
+import tech.quantit.northstar.gateway.api.domain.PrimaryContract;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
 
@@ -48,7 +49,10 @@ public class ContractsDefaultLoader implements CommandLineRunner{
 			});
 		// 构建指数合约
 		ContractFactory contractFactory = new ContractFactory(contractMap.values().stream().toList());
-		contractFactory.makeIndexContract().stream().forEach(registry::register);
+		contractFactory.makeIndexContract().stream().forEach(contract -> {
+			registry.register(contract);
+			registry.register(new PrimaryContract(contract.contractField()));
+		});
 	}
 
 }

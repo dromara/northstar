@@ -5,7 +5,7 @@ import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
 
 /**
- * 
+ * 普通合约
  * @author KevinHuangwl
  *
  */
