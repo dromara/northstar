@@ -1,10 +1,11 @@
 package tech.quantit.northstar.strategy.api.utils.collection;
 
+import java.util.Objects;
+import java.util.stream.Stream;
+
 public class RingArray<T> {
 
 	private Object[] array;
-	
-	private int size;
 	
 	private int cursor;
 	
@@ -12,7 +13,6 @@ public class RingArray<T> {
 	
 	public RingArray(int size) {
 		this.array = new Object[size];
-		this.size = size;
 	}
 	
 	public T get() {
@@ -45,18 +45,18 @@ public class RingArray<T> {
 	}
 	
 	private int getIndex(int incr) {
-		return (cursor + size + incr) % size;
+		return (cursor + array.length + incr) % array.length;
 	}
 	
 	public Object[] toArray() {
-		Object[] result = new Object[size];
-		for(int i=0; i<size; i++) {
+		Object[] result = new Object[array.length];
+		for(int i=0; i<array.length; i++) {
 			result[i] = get(-(i+1));
 		}
 		return result;
 	}
 	
 	public int size() {
-		return size;
+		return (int) Stream.of(array).filter(Objects::nonNull).count();
 	}
 }
