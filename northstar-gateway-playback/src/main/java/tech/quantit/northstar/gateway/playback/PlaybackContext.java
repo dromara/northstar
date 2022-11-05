@@ -24,6 +24,7 @@ import tech.quantit.northstar.common.constant.DateTimeConstant;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.event.NorthstarEventType;
 import tech.quantit.northstar.common.model.PlaybackRuntimeDescription;
+import tech.quantit.northstar.common.utils.MarketDataLoadingUtils;
 import tech.quantit.northstar.data.IPlaybackRuntimeRepository;
 import tech.quantit.northstar.gateway.playback.ticker.TickSimulationAlgorithm;
 import tech.quantit.northstar.gateway.playback.utils.PlaybackClock;
@@ -48,6 +49,8 @@ public class PlaybackContext {
 	private FastEventEngine feEngine;
 	
 	private PlaybackDataLoader loader;
+	
+	private MarketDataLoadingUtils utils = new MarketDataLoadingUtils();
 	
 	private TickSimulationAlgorithm tickerAlgo;
 	
@@ -146,6 +149,7 @@ public class PlaybackContext {
 			}
 			
 			private LocalDate lastLoadDate;
+			private static final int WEEK_DELTA = 20; // 预热时每次加载20周数据
 			
 			@Override
 			public void run() {
@@ -157,7 +161,7 @@ public class PlaybackContext {
 							.setStatus(CommonStatusEnum.COMS_WARN)
 							.setTimestamp(System.currentTimeMillis())
 							.build());
-					LocalDate preloadStartDate = LocalDate.parse(settings.getPreStartDate(), DateTimeConstant.D_FORMAT_INT_FORMATTER);
+					LocalDate preloadStartDate = utils.getFridayOfThisWeek(LocalDate.parse(settings.getPreStartDate(), DateTimeConstant.D_FORMAT_INT_FORMATTER).minusWeeks(1));
 					LocalDate preloadEndDate = playbackTimeState.toLocalDate();
 					log.debug("回放网关 [{}] 正在加载预热数据，预热时间段：{} -> {}", gatewaySettings.getGatewayId(), preloadStartDate, preloadEndDate);
 					
@@ -170,7 +174,7 @@ public class PlaybackContext {
 						.forEach(contract -> 
 							new Thread(() -> {
 								LocalDate queryStart = preloadStartDate;
-								LocalDate queryEnd = queryStart.plusWeeks(2); 
+								LocalDate queryEnd = queryStart.plusWeeks(WEEK_DELTA); 
 								while(queryStart.isBefore(preloadEndDate)) {
 									if(queryEnd.isAfter(preloadEndDate)) {
 										queryEnd = preloadEndDate;
@@ -185,7 +189,7 @@ public class PlaybackContext {
 										});
 									
 									queryStart = queryEnd;
-									queryEnd = queryEnd.plusWeeks(2);
+									queryEnd = queryEnd.plusWeeks(WEEK_DELTA);
 								}
 								
 								log.debug("回放网关 [{}] 合约 {} 数据预热完毕", gatewaySettings.getGatewayId(), contract.getUnifiedSymbol());
