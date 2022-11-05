@@ -165,7 +165,7 @@ public class PlaybackContext {
 					
 					CountDownLatch cdl = new CountDownLatch(settings.getUnifiedSymbols().size());
 					settings.getUnifiedSymbols()
-						.parallelStream()
+						.stream()
 						.map(contractMgr::getContract)
 						.forEach(contract -> 
 							new Thread(() -> {
