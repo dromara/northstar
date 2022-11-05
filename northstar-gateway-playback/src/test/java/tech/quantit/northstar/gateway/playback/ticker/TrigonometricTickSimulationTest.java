@@ -51,7 +51,7 @@ class TrigonometricTickSimulationTest {
 	@BeforeEach
 	void prepare() {
 		PeriodHelperFactory phFactory = mock(PeriodHelperFactory.class);
-		when(phFactory.newInstance(anyInt(), anyBoolean(), any(ContractField.class))).thenReturn(new PeriodHelper(60, new CnFtComTradeTime1(), LocalTime.of(21, 0)));
+		when(phFactory.newInstance(anyInt(), anyBoolean(), any(ContractField.class))).thenReturn(new PeriodHelper(60, new CnFtComTradeTime1()));
 		barGen = new BarGenerator(new NormalContract(contract, System.currentTimeMillis()), (Consumer<BarField>) mock(Consumer.class), phFactory);
 		when(contractMgr.getContract(anyString())).thenReturn(contract);
 	}

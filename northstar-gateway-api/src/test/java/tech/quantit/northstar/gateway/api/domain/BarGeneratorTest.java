@@ -9,14 +9,12 @@ import static org.mockito.Mockito.when;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Test;
 
 import tech.quantit.northstar.common.constant.DateTimeConstant;
-import tech.quantit.northstar.gateway.api.domain.time.CnFtComTradeTime1;
 import tech.quantit.northstar.gateway.api.domain.time.GenericTradeTime;
 import tech.quantit.northstar.gateway.api.domain.time.PeriodHelper;
 import tech.quantit.northstar.gateway.api.domain.time.PeriodHelperFactory;
@@ -34,7 +32,7 @@ class BarGeneratorTest {
 	void test() {
 		ContractField contract = factory.makeContract("rb2210");
 		PeriodHelperFactory phFactory = mock(PeriodHelperFactory.class);
-		when(phFactory.newInstance(anyInt(), anyBoolean(), any(ContractField.class))).thenReturn(new PeriodHelper(60, new GenericTradeTime(), LocalTime.of(21, 0)));
+		when(phFactory.newInstance(anyInt(), anyBoolean(), any(ContractField.class))).thenReturn(new PeriodHelper(60, new GenericTradeTime()));
 		BarGenerator gen = new BarGenerator(new NormalContract(contract, 0), mock(Consumer.class), phFactory);
 		long now = System.currentTimeMillis();
 		long expectedTime = now - now % 60000 + 60000;
