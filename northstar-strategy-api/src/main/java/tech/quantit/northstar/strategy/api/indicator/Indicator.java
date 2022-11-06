@@ -182,6 +182,9 @@ public class Indicator {
 	 * @param tick
 	 */
 	public synchronized void onTick(TickField tick) {
+		if(!tick.getUnifiedSymbol().equals(unifiedSymbol)) {
+			return;
+		}
 		ibg.update(tick).ifPresent(bar -> onBar(bar, true));
 	}
 	
