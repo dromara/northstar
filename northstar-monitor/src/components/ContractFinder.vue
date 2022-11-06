@@ -74,7 +74,7 @@ export default {
         contractApi.getContractList(val).then((result) => {
           this.contractList = result
             .map((item) => ContractField.deserializeBinary(item).toObject())
-            .sort((a, b) => a['unifiedsymbol'].localeCompare(b['unifiedsymbol']))
+            .sort((a, b) => a['name'].localeCompare(b['name']))
         })
       }
     }
