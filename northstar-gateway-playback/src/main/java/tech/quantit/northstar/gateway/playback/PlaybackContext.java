@@ -16,8 +16,6 @@ import java.util.TimerTask;
 import java.util.concurrent.CountDownLatch;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.StringUtils;
-
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.IContractManager;
 import tech.quantit.northstar.common.constant.DateTimeConstant;
@@ -154,7 +152,7 @@ public class PlaybackContext {
 			@Override
 			public void run() {
 				// 预加载数据
-				if(!hasPreLoaded && StringUtils.isNotBlank(settings.getPreStartDate())) {	
+				if(!hasPreLoaded) {	
 					isLoading = true;
 					feEngine.emitEvent(NorthstarEventType.NOTICE, NoticeField.newBuilder()
 							.setContent(String.format("[%s]-当前处于预热阶段，请稍等……", gatewaySettings.getGatewayId()))

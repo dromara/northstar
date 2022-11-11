@@ -24,9 +24,9 @@
         >
         </el-date-picker>
       </el-form-item>
-      <el-form-item label="回放日期">
+      <el-form-item label="回放日期" prop="dateRange">
         <el-date-picker
-          v-model="dateRange"
+          v-model="playbackSettings.dateRange"
           type="daterange"
           align="left"
           unlink-panels
@@ -37,7 +37,7 @@
         >
         </el-date-picker>
       </el-form-item>
-      <el-form-item label="回放精度">
+      <el-form-item label="回放精度" prop="precision">
         <el-select v-model="playbackSettings.precision">
           <el-option label="极低（每分钟1个TICK）" value="EXTREME" key="0"></el-option>
           <el-option label="低（每分钟4个TICK）" value="LOW" key="1"></el-option>
@@ -45,14 +45,14 @@
           <el-option label="高（每分钟120个TICK）" value="HIGH" key="3"></el-option>
         </el-select>
       </el-form-item>
-      <el-form-item label="回放速度">
+      <el-form-item label="回放速度" prop="speed">
         <el-select v-model="playbackSettings.speed">
           <el-option label="正常" value="NORMAL" key="1"></el-option>
           <el-option label="快速" value="SPRINT" key="2"></el-option>
           <el-option label="超速" value="RUSH" key="3"></el-option>
         </el-select>
       </el-form-item>
-      <el-form-item label="回放合约">
+      <el-form-item label="回放合约" prop="unifiedSymbols">
         <el-select
           v-model="playbackSettings.unifiedSymbols"
           multiple
@@ -137,11 +137,11 @@ export default {
           }
         ]
       },
-      dateRange: '',
       preStartDate: '',
       contractOptions: [],
       playbackSettings: {
         preStartDate: '',
+        dateRange: '',
         startDate: '',
         endDate: '',
         precision: '',
@@ -170,7 +170,7 @@ export default {
           return
         }
         Object.assign(this.playbackSettings, this.playbackSettingsSrc)
-        this.dateRange = [
+        this.playbackSettings.dateRange = [
           moment(this.playbackSettingsSrc.startDate, 'YYYYMMDD').toDate(),
           moment(this.playbackSettingsSrc.endDate, 'YYYYMMDD').toDate()
         ]
@@ -191,9 +191,10 @@ export default {
     savePlaybackSetting() {
       this.$refs.playbackSettings.validate((valid) => {
         if (valid) {
-          this.playbackSettings.startDate = moment(this.dateRange[0]).format('yyyyMMDD')
-          this.playbackSettings.endDate = moment(this.dateRange[1]).format('yyyyMMDD')
-          this.playbackSettings.preStartDate = moment(this.preStartDate).format('yyyyMMDD')
+          const [start, end] = this.playbackSettings.dateRange
+          this.playbackSettings.startDate = moment(start).format('yyyyMMDD')
+          this.playbackSettings.endDate = moment(end).format('yyyyMMDD')
+          this.playbackSettings.preStartDate = moment(this.preStartDate || start).format('yyyyMMDD')
           let obj = {}
           Object.assign(obj, this.playbackSettings)
           this.$emit('onSave', obj)
