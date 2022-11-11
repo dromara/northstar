@@ -162,7 +162,7 @@ export default {
           contractApi.getSubscribableContractList(item.value).then((result) => {
             const contracts = result
               .map((item) => ContractField.deserializeBinary(item).toObject())
-              .sort((a, b) => a['unifiedsymbol'].localeCompare(b['unifiedsymbol']))
+              .sort((a, b) => a['name'].localeCompare(b['name']))
             this.contractOptions = this.contractOptions.concat(contracts)
           })
         })
