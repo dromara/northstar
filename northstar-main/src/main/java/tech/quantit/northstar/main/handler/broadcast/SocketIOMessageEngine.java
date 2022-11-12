@@ -10,6 +10,7 @@ import com.google.protobuf.Message;
 import cn.hutool.core.codec.Base64;
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.event.NorthstarEvent;
+import tech.quantit.northstar.common.event.NorthstarEventType;
 import tech.quantit.northstar.common.utils.MessagePrinter;
 import xyz.redtorch.pb.CoreField.AccountField;
 import xyz.redtorch.pb.CoreField.BarField;
@@ -23,24 +24,29 @@ import xyz.redtorch.pb.CoreField.TickField;
  */
 @Slf4j
 public class SocketIOMessageEngine {
-	SocketIOServer server;
+	
+	private static final int LATENCY_TOLERANCE = 60000;
+	
+	private SocketIOServer server;
 	
 	public SocketIOMessageEngine(SocketIOServer server) {
 		this.server = server;
 	}
 	
-	/****************************************************/
-	/*					消息发送端					  	*/
-	/****************************************************/
-	
-	public void emitEvent(NorthstarEvent event) throws SecurityException, IllegalArgumentException {
+	/*****************************************************/
+	/**					消息发送端					  		**/
+	/*****************************************************/
+	public void emitEvent(NorthstarEvent event) throws SecurityException, IllegalArgumentException, InterruptedException {
 		// 为了避免接收端信息拥塞，把行情数据按合约分房间分发数据，可以提升客户端的接收效率
 		if(event.getData() instanceof TickField tick) {
+			// 非实时TICK数据不会分发
+			if(!isRealTimeTick(tick))	
+				return; 
 			log.trace("TICK数据分发：[{} {} {} 价格：{}]", tick.getUnifiedSymbol(), tick.getActionDay(), tick.getActionTime(), tick.getLastPrice());
-			server.getRoomOperations(tick.getUnifiedSymbol()).sendEvent(event.getEvent().toString(), Base64.encode(tick.toByteArray()));
+			server.getRoomOperations(tick.getUnifiedSymbol()).sendEvent(NorthstarEventType.TICK.toString(), Base64.encode(tick.toByteArray()));
 		} else if(event.getData() instanceof BarField bar) {
 			log.trace("BAR数据分发：[{} {} {} 价格：{}]", bar.getUnifiedSymbol(), bar.getActionDay(), bar.getActionTime(), bar.getClosePrice());
-			server.getRoomOperations(bar.getUnifiedSymbol()).sendEvent(event.getEvent().toString(), Base64.encode(bar.toByteArray()));
+			server.getRoomOperations(bar.getUnifiedSymbol()).sendEvent(NorthstarEventType.BAR.toString(), Base64.encode(bar.toByteArray()));
 		} else if(event.getData() instanceof AccountField account) {
 			log.trace("账户信息分发: [{}]", MessagePrinter.print(account));
 			server.getBroadcastOperations().sendEvent(event.getEvent().toString(), Base64.encode(account.toByteArray()));
@@ -52,9 +58,13 @@ public class SocketIOMessageEngine {
 		}
 	}
 	
-	/****************************************************/
-	/*					消息接收端						*/
-	/****************************************************/
+	private boolean isRealTimeTick(TickField tick) {
+		return System.currentTimeMillis() - tick.getActionTimestamp() < LATENCY_TOLERANCE;
+	}
+	
+	/*************************************************/
+	/**					消息接收端						**/
+	/*************************************************/
 	@OnConnect  
     private void onConnect(final SocketIOClient client) {
     	log.info("【客户端连接】-[{}],建立连接", client.getSessionId());
