@@ -193,7 +193,7 @@ public class ModulePlaybackContext implements IModuleContext {
 
 	// 所有的委托都会立马转为成交单
 	@Override
-	public Optional<String> submitOrderReq(ContractField contract, SignalOperation operation, PriceType priceType, int volume,
+	public synchronized Optional<String> submitOrderReq(ContractField contract, SignalOperation operation, PriceType priceType, int volume,
 			double price) {
 		if(!module.isEnabled()) {
 			mlog.info("策略处于停用状态，忽略委托单");
@@ -244,7 +244,7 @@ public class ModulePlaybackContext implements IModuleContext {
 	
 
 	@Override
-	public IDisposablePriceListener priceTriggerOut(String unifiedSymbol, DirectionEnum openDir,
+	public synchronized IDisposablePriceListener priceTriggerOut(String unifiedSymbol, DirectionEnum openDir,
 			DisposablePriceListenerType listenerType, double basePrice, int numOfPriceTickToTrigger, int volume) {
 		int factor = switch(listenerType) {
 		case TAKE_PROFIT -> 1;
@@ -259,13 +259,13 @@ public class ModulePlaybackContext implements IModuleContext {
 	}
 
 	@Override
-	public IDisposablePriceListener priceTriggerOut(TradeField trade, DisposablePriceListenerType listenerType,
+	public synchronized IDisposablePriceListener priceTriggerOut(TradeField trade, DisposablePriceListenerType listenerType,
 			int numOfPriceTickToTrigger) {
 		return priceTriggerOut(trade.getContract().getUnifiedSymbol(), trade.getDirection(), listenerType, trade.getPrice(), numOfPriceTickToTrigger, trade.getVolume());
 	}
 
 	@Override
-	public boolean isOrderWaitTimeout(String originOrderId, long timeout) {
+	public synchronized boolean isOrderWaitTimeout(String originOrderId, long timeout) {
 		if(!orderReqMap.containsKey(originOrderId)) {
 			return false;
 		}
@@ -281,7 +281,7 @@ public class ModulePlaybackContext implements IModuleContext {
 	}
 	
 	@Override
-	public void onTick(TickField tick) {
+	public synchronized void onTick(TickField tick) {
 		if(!bindedSymbolSet.contains(tick.getUnifiedSymbol())) {
 			return;
 		}
@@ -301,7 +301,7 @@ public class ModulePlaybackContext implements IModuleContext {
 	}
 
 	@Override
-	public void onBar(BarField bar) {
+	public synchronized void onBar(BarField bar) {
 		if(!bindedSymbolSet.contains(bar.getUnifiedSymbol())) {
 			return;
 		}
@@ -313,12 +313,12 @@ public class ModulePlaybackContext implements IModuleContext {
 	}
 
 	@Override
-	public void onOrder(OrderField order) {
+	public synchronized void onOrder(OrderField order) {
 		// 回测上下文不接收外部的订单数据
 	}
 
 	@Override
-	public void onTrade(TradeField trade) {
+	public synchronized void onTrade(TradeField trade) {
 		// 回测上下文不接收外部的成交数据
 	}
 
@@ -328,7 +328,7 @@ public class ModulePlaybackContext implements IModuleContext {
 	}
 
 	@Override
-	public int holdingNetProfit() {
+	public synchronized int holdingNetProfit() {
 		return accStore.getPositions(PLAYBACK_GATEWAY)
 				.stream()
 				.mapToInt(pf -> (int)pf.getPositionProfit())
@@ -336,7 +336,7 @@ public class ModulePlaybackContext implements IModuleContext {
 	}
 
 	@Override
-	public int availablePosition(DirectionEnum direction, String unifiedSymbol) {
+	public synchronized int availablePosition(DirectionEnum direction, String unifiedSymbol) {
 		return accStore.getPositions(PLAYBACK_GATEWAY)
 				.stream()
 				.filter(pf -> StringUtils.equals(pf.getContract().getUnifiedSymbol(), unifiedSymbol))
@@ -346,7 +346,7 @@ public class ModulePlaybackContext implements IModuleContext {
 	}
 
 	@Override
-	public int availablePosition(DirectionEnum direction, String unifiedSymbol, boolean isToday) {
+	public synchronized int availablePosition(DirectionEnum direction, String unifiedSymbol, boolean isToday) {
 		Stream<PositionField> posStream = accStore.getPositions(PLAYBACK_GATEWAY).stream()
 				.filter(pf -> StringUtils.equals(pf.getContract().getUnifiedSymbol(), unifiedSymbol))
 				.filter(pf -> FieldUtils.isLong(pf.getPositionDirection()) && FieldUtils.isBuy(direction) || FieldUtils.isShort(pf.getPositionDirection()) && FieldUtils.isSell(direction));
@@ -361,7 +361,7 @@ public class ModulePlaybackContext implements IModuleContext {
 	}
 
 	@Override
-	public void disabledModule() {
+	public synchronized void disabledModule() {
 		module.setEnabled(false);
 	}
 
@@ -371,7 +371,7 @@ public class ModulePlaybackContext implements IModuleContext {
 	}
 
 	@Override
-	public Indicator newIndicator(Configuration configuration, ValueType valueType, TimeSeriesUnaryOperator indicatorFunction) {
+	public synchronized Indicator newIndicator(Configuration configuration, ValueType valueType, TimeSeriesUnaryOperator indicatorFunction) {
 		Assert.isTrue(configuration.getNumOfUnits() > 0, "周期数必须大于0，当前为：" + configuration.getNumOfUnits());
 		Assert.isTrue(configuration.getIndicatorRefLength() > 0, "指标回溯长度必须大于0，当前为：" + configuration.getIndicatorRefLength());
 		Indicator in = indicatorFactory.newIndicator(configuration, valueType, indicatorFunction);
@@ -380,12 +380,12 @@ public class ModulePlaybackContext implements IModuleContext {
 	}
 
 	@Override
-	public Indicator newIndicator(Configuration configuration, TimeSeriesUnaryOperator indicatorFunction) {
+	public synchronized Indicator newIndicator(Configuration configuration, TimeSeriesUnaryOperator indicatorFunction) {
 		return newIndicator(configuration, ValueType.CLOSE, indicatorFunction);
 	}
 
 	@Override
-	public Indicator newIndicator(Configuration configuration, Function<BarWrapper, TimeSeriesValue> indicatorFunction) {
+	public synchronized Indicator newIndicator(Configuration configuration, Function<BarWrapper, TimeSeriesValue> indicatorFunction) {
 		Assert.isTrue(configuration.getNumOfUnits() > 0, "周期数必须大于0，当前为：" + configuration.getNumOfUnits());
 		Assert.isTrue(configuration.getIndicatorRefLength() > 0, "指标回溯长度必须大于0，当前为：" + configuration.getIndicatorRefLength());
 		Indicator in = indicatorFactory.newIndicator(configuration, indicatorFunction);
@@ -394,13 +394,13 @@ public class ModulePlaybackContext implements IModuleContext {
 	}
 	
 	@Override
-	public void viewValueAsIndicator(Configuration configuration, AtomicDouble value) {
+	public synchronized void viewValueAsIndicator(Configuration configuration, AtomicDouble value) {
 		Indicator in = inspectedValIndicatorFactory.newIndicator(configuration, bar -> new TimeSeriesValue(value.get(), bar.getBar().getActionTimestamp(), bar.isUnsettled()));
 		indicatorValBufQMap.put(in, new LinkedList<>());
 	}
 
 	@Override
-	public void addComboIndicator(IComboIndicator comboIndicator) {
+	public synchronized void addComboIndicator(IComboIndicator comboIndicator) {
 		comboIndicators.add(comboIndicator);
 	}
 	
@@ -410,7 +410,7 @@ public class ModulePlaybackContext implements IModuleContext {
 	}
 
 	@Override
-	public ModuleRuntimeDescription getRuntimeDescription(boolean fullDescription) {
+	public synchronized ModuleRuntimeDescription getRuntimeDescription(boolean fullDescription) {
 		Map<String, ModuleAccountRuntimeDescription> accMap = new HashMap<>();
 		String gatewayId = PLAYBACK_GATEWAY;
 		ModulePositionDescription posDescription = ModulePositionDescription.builder()
@@ -493,7 +493,7 @@ public class ModulePlaybackContext implements IModuleContext {
 	}
 
 	@Override
-	public void bindGatewayContracts(TradeGateway gateway, List<ContractField> contracts) {
+	public synchronized void bindGatewayContracts(TradeGateway gateway, List<ContractField> contracts) {
 		for(ContractField c : contracts) {			
 			contractMap.put(c.getUnifiedSymbol(), c);
 			barBufQMap.put(c.getUnifiedSymbol(), new LinkedList<>());
@@ -503,7 +503,7 @@ public class ModulePlaybackContext implements IModuleContext {
 	}
 
 	@Override
-	public void setModule(IModule module) {
+	public synchronized void setModule(IModule module) {
 		this.module = module;
 		tradeStrategy.setContext(this);
 	}

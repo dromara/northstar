@@ -351,7 +351,7 @@ public class ModuleContext implements IModuleContext{
 	}
 	
 	@Override
-	public IDisposablePriceListener priceTriggerOut(String unifiedSymbol, DirectionEnum openDir, DisposablePriceListenerType listenerType, double basePrice, int numOfPriceTickToTrigger, int volume) {
+	public synchronized IDisposablePriceListener priceTriggerOut(String unifiedSymbol, DirectionEnum openDir, DisposablePriceListenerType listenerType, double basePrice, int numOfPriceTickToTrigger, int volume) {
 		int factor = switch(listenerType) {
 		case TAKE_PROFIT -> 1;
 		case STOP_LOSS -> -1;
@@ -365,7 +365,7 @@ public class ModuleContext implements IModuleContext{
 	}
 	
 	@Override
-	public IDisposablePriceListener priceTriggerOut(TradeField trade, DisposablePriceListenerType listenerType, int numOfPriceTickToTrigger) {
+	public synchronized IDisposablePriceListener priceTriggerOut(TradeField trade, DisposablePriceListenerType listenerType, int numOfPriceTickToTrigger) {
 		return priceTriggerOut(trade.getContract().getUnifiedSymbol(), trade.getDirection(), listenerType, trade.getPrice(), numOfPriceTickToTrigger, trade.getVolume());
 	}
 
@@ -392,7 +392,7 @@ public class ModuleContext implements IModuleContext{
 	}
 	
 	@Override
-	public int holdingNetProfit() {
+	public synchronized int holdingNetProfit() {
 		return gatewayMap.values().stream()
 				.map(gw -> gw.getGatewaySetting().getGatewayId())
 				.map(gatewayId -> accStore.getPositions(gatewayId))
@@ -402,7 +402,7 @@ public class ModuleContext implements IModuleContext{
 	}
 	
 	@Override
-	public int availablePosition(DirectionEnum direction, String unifiedSymbol) {
+	public synchronized int availablePosition(DirectionEnum direction, String unifiedSymbol) {
 		return gatewayMap.values().stream()
 				.map(gw -> gw.getGatewaySetting().getGatewayId())
 				.map(gatewayId -> accStore.getPositions(gatewayId))
@@ -414,7 +414,7 @@ public class ModuleContext implements IModuleContext{
 	}
 	
 	@Override
-	public int availablePosition(DirectionEnum direction, String unifiedSymbol, boolean isToday) {
+	public synchronized int availablePosition(DirectionEnum direction, String unifiedSymbol, boolean isToday) {
 		Stream<PositionField> posStream = gatewayMap.values().stream()
 				.map(gw -> gw.getGatewaySetting().getGatewayId())
 				.map(gatewayId -> accStore.getPositions(gatewayId))
@@ -508,7 +508,7 @@ public class ModuleContext implements IModuleContext{
 	}
 
 	@Override
-	public void disabledModule() {
+	public synchronized void disabledModule() {
 		module.setEnabled(false);
 	}
 
@@ -572,7 +572,7 @@ public class ModuleContext implements IModuleContext{
 	}
 
 	@Override
-	public Indicator newIndicator(Configuration configuration, ValueType valueType, TimeSeriesUnaryOperator indicatorFunction) {
+	public synchronized Indicator newIndicator(Configuration configuration, ValueType valueType, TimeSeriesUnaryOperator indicatorFunction) {
 		Assert.isTrue(configuration.getNumOfUnits() > 0, "周期数必须大于0，当前为：" + configuration.getNumOfUnits());
 		Assert.isTrue(configuration.getIndicatorRefLength() > 0, "指标回溯长度必须大于0，当前为：" + configuration.getIndicatorRefLength());
 		Indicator in = indicatorFactory.newIndicator(configuration, valueType, indicatorFunction);
@@ -581,12 +581,12 @@ public class ModuleContext implements IModuleContext{
 	}
 
 	@Override
-	public Indicator newIndicator(Configuration configuration, TimeSeriesUnaryOperator indicatorFunction) {
+	public synchronized Indicator newIndicator(Configuration configuration, TimeSeriesUnaryOperator indicatorFunction) {
 		return newIndicator(configuration, ValueType.CLOSE, indicatorFunction);
 	}
 
 	@Override
-	public Indicator newIndicator(Configuration configuration, Function<BarWrapper, TimeSeriesValue> indicatorFunction) {
+	public synchronized Indicator newIndicator(Configuration configuration, Function<BarWrapper, TimeSeriesValue> indicatorFunction) {
 		Assert.isTrue(configuration.getNumOfUnits() > 0, "周期数必须大于0，当前为：" + configuration.getNumOfUnits());
 		Assert.isTrue(configuration.getIndicatorRefLength() > 0, "指标回溯长度必须大于0，当前为：" + configuration.getIndicatorRefLength());
 		Indicator in = indicatorFactory.newIndicator(configuration, indicatorFunction);
@@ -595,13 +595,13 @@ public class ModuleContext implements IModuleContext{
 	}
 	
 	@Override
-	public void viewValueAsIndicator(Configuration configuration, AtomicDouble value) {
+	public synchronized void viewValueAsIndicator(Configuration configuration, AtomicDouble value) {
 		Indicator in = inspectedValIndicatorFactory.newIndicator(configuration, bar -> new TimeSeriesValue(value.get(), bar.getBar().getActionTimestamp(), bar.isUnsettled()));
 		indicatorValBufQMap.put(in, new LinkedList<>());
 	}
 
 	@Override
-	public void addComboIndicator(IComboIndicator comboIndicator) {
+	public synchronized void addComboIndicator(IComboIndicator comboIndicator) {
 		comboIndicators.add(comboIndicator);
 	}
 
