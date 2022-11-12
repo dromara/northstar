@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSONArray;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -38,15 +39,15 @@ public class ModuleRuntimeDescription {
 	 */
 	private Map<String, ModuleAccountRuntimeDescription> accountRuntimeDescriptionMap;
 	/**
-	 * 指标数据
+	 * 合约指标集
 	 */
-	private Map<String, IndicatorData> indicatorMap;
+	private Map<String, List<String>> indicatorMap;
 	/**
-	 * 行情数据
+	 * 行情与指标数据
 	 */
-	private Map<String, List<byte[]>> barDataMap;
+	private Map<String, JSONArray> dataMap;
 	/**
-	 * 模组计算状态
+	 * 模组计算状态（非指标化数据）
 	 */
 	private JSONObject dataState;
 }

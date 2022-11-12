@@ -1,6 +1,5 @@
 package tech.quantit.northstar.domain.module;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -14,26 +13,19 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import tech.quantit.northstar.common.constant.SignalOperation;
 import tech.quantit.northstar.common.exception.TradeException;
-import tech.quantit.northstar.common.model.BarWrapper;
-import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
-import tech.quantit.northstar.common.model.TimeSeriesValue;
 import tech.quantit.northstar.gateway.api.TradeGateway;
 import tech.quantit.northstar.strategy.api.ClosingStrategy;
 import tech.quantit.northstar.strategy.api.IModule;
 import tech.quantit.northstar.strategy.api.IModuleAccountStore;
 import tech.quantit.northstar.strategy.api.TradeStrategy;
 import tech.quantit.northstar.strategy.api.constant.PriceType;
-import tech.quantit.northstar.strategy.api.indicator.Indicator.Configuration;
-import tech.quantit.northstar.strategy.api.indicator.Indicator.PeriodUnit;
 import tech.quantit.northstar.strategy.api.utils.trade.DealCollector;
-import tech.quantit.northstar.strategy.api.indicator.TimeSeriesUnaryOperator;
 import test.common.TestFieldFactory;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
@@ -101,30 +93,4 @@ class ModuleContextTest {
 		verify(gateway, times(1)).submitOrder(any());
 	}
 
-	@Test
-	void testNewIndicator() {
-		ctx.newIndicator(Configuration.builder()
-				.indicatorName("testIndicator")
-				.bindedContract(contract)
-				.build(), TimeSeriesUnaryOperator.identity());
-		
-		ctx.newIndicator(Configuration.builder()
-				.indicatorName("testIndicator2")
-				.numOfUnits(10)
-				.period(PeriodUnit.DAY)
-				.bindedContract(contract)
-				.build(), new Function<>() {
-			
-			@Override
-			public TimeSeriesValue apply(BarWrapper bar) {
-				return new TimeSeriesValue(bar.getBar().getClosePrice(), bar.getBar().getActionTimestamp());
-			}
-		});
-		
-		
-		ModuleRuntimeDescription mrd = ctx.getRuntimeDescription(true);
-		assertThat(mrd.getIndicatorMap()).containsKey("testIndicator_1m");
-		assertThat(mrd.getIndicatorMap()).containsKey("testIndicator2_10d");
-	}
-	
 }

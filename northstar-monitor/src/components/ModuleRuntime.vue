@@ -289,7 +289,7 @@ import { downloadData } from '@/utils/file-utils.js'
 import { jStat } from 'jstat'
 import { parse } from 'json2csv'
 
-import { BarField, PositionField, TradeField } from '@/lib/xyz/redtorch/pb/core_field_pb'
+import { PositionField, TradeField } from '@/lib/xyz/redtorch/pb/core_field_pb'
 
 const makeHoldingSegment = (deal) => {
   return {
@@ -484,11 +484,7 @@ export default {
     },
     indicatorOptions() {
       if (!this.moduleRuntime.indicatorMap) return []
-      return Object.keys(this.moduleRuntime.indicatorMap)
-        .filter(
-          (key) => this.moduleRuntime.indicatorMap[key].unifiedSymbol === this.unifiedSymbolOfChart
-        )
-        .sort((a, b) => a.localeCompare(b))
+      return this.moduleRuntime.indicatorMap[this.unifiedSymbolOfChart]
     }
   },
   created() {
@@ -509,33 +505,7 @@ export default {
     loadRuntime() {
       moduleApi.getModuleRuntime(this.module.moduleName).then((result) => {
         this.moduleRuntime = result
-        const symbolIndicatorMap = {}
-        Object.keys(result.indicatorMap).forEach((indicatorName) => {
-          const timeValMap = {} // key=timestamp, value=indicatorVal
-          result.indicatorMap[indicatorName].values.forEach((obj) => {
-            timeValMap[obj.timestamp] = obj.value
-          })
-          if (!symbolIndicatorMap[result.indicatorMap[indicatorName].unifiedSymbol]) {
-            symbolIndicatorMap[result.indicatorMap[indicatorName].unifiedSymbol] = {}
-          }
-          symbolIndicatorMap[result.indicatorMap[indicatorName].unifiedSymbol][
-            indicatorName
-          ] = timeValMap
-        })
-        this.barDataMap = {}
-        Object.keys(result.barDataMap).forEach((key) => {
-          this.barDataMap[key] = result.barDataMap[key]
-            .map((data) => BarField.deserializeBinary(data).toObject())
-            .map(KLineUtils.createFromBar)
-            .map((bar) => {
-              if (typeof symbolIndicatorMap[key] === 'object') {
-                Object.keys(symbolIndicatorMap[key]).forEach((indicatorName) => {
-                  bar[indicatorName] = symbolIndicatorMap[key][indicatorName][bar.timestamp]
-                })
-              }
-              return bar
-            })
-        })
+        this.barDataMap = result.dataMap
         this.updateChart()
       })
     },

@@ -58,8 +58,11 @@ public class Indicator {
 	
 	private boolean plotPerBar;
 	
+	private Indicator.Configuration config;
+	
 	public Indicator(Indicator.Configuration config, ValueType valType, UnaryOperator<TimeSeriesValue> valueUpdateHandler) {
 		this.size = config.indicatorRefLength;
+		this.config = config;
 		this.unifiedSymbol = config.bindedContract.getUnifiedSymbol();
 		this.plotPerBar = config.plotPerBar;
 		this.ibg = new InstantBarGenerator(config.bindedContract);
@@ -80,6 +83,7 @@ public class Indicator {
 	
 	public Indicator(Indicator.Configuration config, Function<BarWrapper, TimeSeriesValue> valueUpdateHandler) {
 		this.size = config.indicatorRefLength;
+		this.config = config;
 		this.unifiedSymbol = config.bindedContract.getUnifiedSymbol();
 		this.ibg = new InstantBarGenerator(config.bindedContract);
 		this.valType = ValueType.NOT_SET;
@@ -269,6 +273,14 @@ public class Indicator {
 		return Stream.of(refVals.toArray())
 				.map(TimeSeriesValue.class::cast)
 				.toList();
+	}
+	
+	/**
+	 * 指标名称
+	 * @return
+	 */
+	public String name() {
+		return config.getIndicatorName();
 	}
 	
 	/**

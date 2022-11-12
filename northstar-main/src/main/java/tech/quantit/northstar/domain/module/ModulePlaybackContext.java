@@ -1,8 +1,11 @@
 package tech.quantit.northstar.domain.module;
 
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -10,6 +13,7 @@ import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
 import java.util.UUID;
+import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -20,6 +24,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.ILoggerFactory;
 import org.slf4j.Logger;
 
+import com.alibaba.fastjson2.JSONArray;
+import com.alibaba.fastjson2.JSONObject;
 import com.google.common.util.concurrent.AtomicDouble;
 
 import cn.hutool.core.lang.Assert;
@@ -28,7 +34,6 @@ import tech.quantit.northstar.common.constant.ModuleState;
 import tech.quantit.northstar.common.constant.SignalOperation;
 import tech.quantit.northstar.common.exception.NoSuchElementException;
 import tech.quantit.northstar.common.model.BarWrapper;
-import tech.quantit.northstar.common.model.IndicatorData;
 import tech.quantit.northstar.common.model.ModuleAccountRuntimeDescription;
 import tech.quantit.northstar.common.model.ModuleDealRecord;
 import tech.quantit.northstar.common.model.ModulePositionDescription;
@@ -105,8 +110,8 @@ public class ModulePlaybackContext implements IModuleContext {
 	/* unifiedSymbol -> barQ */
 	private Map<String, Queue<BarField>> barBufQMap = new HashMap<>();
 	
-	/* indicatorName -> values */
-	private Map<String, Queue<TimeSeriesValue>> indicatorValBufQMap = new HashMap<>(); 
+	/* indicator -> values */
+	private Map<Indicator, Queue<TimeSeriesValue>> indicatorValBufQMap = new HashMap<>(); 
 	
 	private final AtomicInteger bufSize = new AtomicInteger(0);
 	
@@ -130,12 +135,12 @@ public class ModulePlaybackContext implements IModuleContext {
 	private Consumer<BarField> barMergingCallback = bar -> {
 		Consumer<Map.Entry<String,Indicator>> action = e -> {
 			Indicator indicator = e.getValue();
-			if(indicatorValBufQMap.get(e.getKey()).size() >= bufSize.intValue()) {
-				indicatorValBufQMap.get(e.getKey()).poll();
+			if(indicatorValBufQMap.get(indicator).size() >= bufSize.intValue()) {
+				indicatorValBufQMap.get(indicator).poll();
 			}
 			if(indicator.isReady() && indicator.timeSeriesValue(0).getTimestamp() == bar.getActionTimestamp()	// 只有时间戳一致才会被记录
 					&& (BarUtils.isEndOfTheTradingDay(bar) || indicator.ifPlotPerBar() || !indicator.timeSeriesValue(0).isUnsettled())) {		
-				indicatorValBufQMap.get(e.getKey()).offer(indicator.timeSeriesValue(0));	
+				indicatorValBufQMap.get(indicator).offer(indicator.timeSeriesValue(0));	
 			}
 		};
 		try {			
@@ -369,8 +374,9 @@ public class ModulePlaybackContext implements IModuleContext {
 	public Indicator newIndicator(Configuration configuration, ValueType valueType, TimeSeriesUnaryOperator indicatorFunction) {
 		Assert.isTrue(configuration.getNumOfUnits() > 0, "周期数必须大于0，当前为：" + configuration.getNumOfUnits());
 		Assert.isTrue(configuration.getIndicatorRefLength() > 0, "指标回溯长度必须大于0，当前为：" + configuration.getIndicatorRefLength());
-		indicatorValBufQMap.put(configuration.getIndicatorName(), new LinkedList<>());
-		return indicatorFactory.newIndicator(configuration, valueType, indicatorFunction);
+		Indicator in = indicatorFactory.newIndicator(configuration, valueType, indicatorFunction);
+		indicatorValBufQMap.put(in, new LinkedList<>());
+		return in;
 	}
 
 	@Override
@@ -382,14 +388,15 @@ public class ModulePlaybackContext implements IModuleContext {
 	public Indicator newIndicator(Configuration configuration, Function<BarWrapper, TimeSeriesValue> indicatorFunction) {
 		Assert.isTrue(configuration.getNumOfUnits() > 0, "周期数必须大于0，当前为：" + configuration.getNumOfUnits());
 		Assert.isTrue(configuration.getIndicatorRefLength() > 0, "指标回溯长度必须大于0，当前为：" + configuration.getIndicatorRefLength());
-		indicatorValBufQMap.put(configuration.getIndicatorName(), new LinkedList<>());
-		return indicatorFactory.newIndicator(configuration, indicatorFunction);
+		Indicator in = indicatorFactory.newIndicator(configuration, indicatorFunction);
+		indicatorValBufQMap.put(in, new LinkedList<>());
+		return in;
 	}
 	
 	@Override
 	public void viewValueAsIndicator(Configuration configuration, AtomicDouble value) {
-		indicatorValBufQMap.put(configuration.getIndicatorName(), new LinkedList<>());
-		inspectedValIndicatorFactory.newIndicator(configuration, bar -> new TimeSeriesValue(value.get(), bar.getBar().getActionTimestamp(), bar.isUnsettled()));
+		Indicator in = inspectedValIndicatorFactory.newIndicator(configuration, bar -> new TimeSeriesValue(value.get(), bar.getBar().getActionTimestamp(), bar.isUnsettled()));
+		indicatorValBufQMap.put(in, new LinkedList<>());
 	}
 
 	@Override
@@ -430,27 +437,59 @@ public class ModulePlaybackContext implements IModuleContext {
 				.accountRuntimeDescriptionMap(accMap)
 				.build();
 		if(fullDescription) {
-			mad.setBarDataMap(barBufQMap.entrySet().stream()
-					.collect(Collectors.toMap(Map.Entry::getKey, 
-							e -> e.getValue().stream().map(BarField::toByteArray).toList())));
-			Map<String, IndicatorData> indicatorMap = new HashMap<>();
-			indicatorFactorys().stream()
-				.flatMap(factory -> factory.getIndicatorMap().entrySet().stream())
-				.filter(e -> indicatorValBufQMap.containsKey(e.getKey()))
-				.forEach(e -> 
-					indicatorMap.put(e.getKey(), IndicatorData.builder()
-							.unifiedSymbol(e.getValue().bindedUnifiedSymbol())
-							.type(e.getValue().getType())
-							.values(indicatorValBufQMap.get(e.getKey()).stream().toList())
-							.build())
-				);
+			Map<String, List<String>> indicatorMap = new HashMap<>();
+			Map<String, LinkedHashMap<Long, JSONObject>> symbolTimeObject = new HashMap<>();
+			barBufQMap.entrySet().forEach(e -> 
+				e.getValue().forEach(bar -> {
+					if(!symbolTimeObject.containsKey(bar.getUnifiedSymbol())) {
+						symbolTimeObject.put(bar.getUnifiedSymbol(), new LinkedHashMap<>());
+					}
+					symbolTimeObject.get(bar.getUnifiedSymbol()).put(bar.getActionTimestamp(), assignBar(bar));
+				})
+			);
+			
+			indicatorValBufQMap.entrySet().forEach(e -> {
+				Indicator in = e.getKey();
+				if(!indicatorMap.containsKey(in.bindedUnifiedSymbol())) {
+					indicatorMap.put(in.bindedUnifiedSymbol(), new ArrayList<>());
+				}
+				indicatorMap.get(in.bindedUnifiedSymbol()).add(in.name());
+				Collections.sort(indicatorMap.get(in.bindedUnifiedSymbol()));
+				
+				e.getValue().stream().forEach(tv -> {
+					if(!symbolTimeObject.containsKey(in.bindedUnifiedSymbol())
+							|| !symbolTimeObject.get(in.bindedUnifiedSymbol()).containsKey(tv.getTimestamp())) {
+						return;
+					}
+					symbolTimeObject.get(in.bindedUnifiedSymbol()).get(tv.getTimestamp()).put(in.name(), tv.getValue());
+				});
+			});
+			Map<String, JSONArray> dataMap = barBufQMap.entrySet().stream().collect(Collectors.toMap(
+					Entry::getKey, 
+					e -> {
+						if(!symbolTimeObject.containsKey(e.getKey())) 							
+							return new JSONArray();
+						return new JSONArray(symbolTimeObject.get(e.getKey()).values().stream().toList());
+					})
+			);
+			
 			mad.setIndicatorMap(indicatorMap);
+			mad.setDataMap(dataMap);
 		}
 		return mad;
 	}
 	
-	private List<IndicatorFactory> indicatorFactorys(){
-		return List.of(indicatorFactory, inspectedValIndicatorFactory);
+	private JSONObject assignBar(BarField bar) {
+		JSONObject json = new JSONObject();
+		json.put("open", bar.getOpenPrice());
+		json.put("low", bar.getLowPrice());
+		json.put("high", bar.getHighPrice());
+		json.put("close", bar.getClosePrice());
+		json.put("volume", bar.getVolume());
+		json.put("openInterestDelta", bar.getOpenInterestDelta());
+		json.put("openInterest", bar.getOpenInterest());
+		json.put("timestamp", bar.getActionTimestamp());
+		return json;
 	}
 
 	@Override
