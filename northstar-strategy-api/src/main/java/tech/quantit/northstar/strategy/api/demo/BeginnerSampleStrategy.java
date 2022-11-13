@@ -116,7 +116,9 @@ public class BeginnerSampleStrategy implements TradeStrategy{
 	public void onTick(TickField tick) {
 		timer.onTick(tick);
 		
-		log.debug("策略每个TICK触发: {} {} {}", tick.getUnifiedSymbol(), tick.getActionTime(), tick.getLastPrice());
+		log.debug("TICK触发: C:{} D:{} T:{} P:{} V:{} OI:{} OID:{}", 
+				tick.getUnifiedSymbol(), tick.getActionDay(), tick.getActionTime(), 
+				tick.getLastPrice(), tick.getVolume(), tick.getOpenInterest(), tick.getOpenInterestDelta());
 		long now = tick.getActionTimestamp();
 		// 启用后，等待10秒才开始交易
 		if(nextActionTime == 0) {

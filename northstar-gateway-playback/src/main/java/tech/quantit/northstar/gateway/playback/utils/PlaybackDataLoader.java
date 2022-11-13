@@ -61,6 +61,6 @@ public class PlaybackDataLoader {
 					.setOpenInterestDelta(openInterestDelta)
 					.build());
 		}
-		return list;
+		return results;
 	}
 }

@@ -37,14 +37,12 @@ class PlaybackContextTest {
 	PlaybackDataLoader loader = mock(PlaybackDataLoader.class);
 	PlaybackClock clock = mock(PlaybackClock.class);
 	
-	LocalDateTime ldt = LocalDateTime.of(2022, 6, 29, 9, 0);
+	LocalDateTime ldt = LocalDateTime.of(2022, 6, 29, 21, 0);
 	TestFieldFactory factory = new TestFieldFactory("testGateway");
 	IContractManager contractMgr = mock(IContractManager.class);
 	
 	ContractField contract = factory.makeContract("rb2210");
 	PlaybackGatewaySettings settings = new PlaybackGatewaySettings();
-	
-	
 	
 	TickField t1 = factory.makeTickField("rb2210", 5000);
 	TickField t2 = factory.makeTickField("rb2210", 5001);
@@ -79,7 +77,7 @@ class PlaybackContextTest {
 		assertThat(ctx.isRunning()).isFalse();
 		Thread.sleep(500);
 		ctx.start();
-		Thread.sleep(500);
+		Thread.sleep(1000);
 		ctx.stop();
 		
 		verify(feEngine, times(4)).emitEvent(eq(NorthstarEventType.TICK), any(TickField.class));

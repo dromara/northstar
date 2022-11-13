@@ -189,17 +189,25 @@ public class PlaybackContext {
 					playbackTimeState = LocalDateTime.of(preloadEndDate, LocalTime.of(21, 0));
 					
 					CountDownLatch cdl = new CountDownLatch(settings.getUnifiedSymbols().size());
+					LocalDate startDate = LocalDate.parse(settings.getStartDate(), DateTimeConstant.D_FORMAT_INT_FORMATTER);
+					LocalDate endDate = LocalDate.parse(settings.getEndDate(), DateTimeConstant.D_FORMAT_INT_FORMATTER);
 					settings.getUnifiedSymbols()
 						.stream()
 						.map(contractMgr::getContract)
 						.forEach(contract -> {
-							loader.loadTradeDayDataRaw(
-									LocalDate.parse(settings.getPreStartDate(), DateTimeConstant.D_FORMAT_INT_FORMATTER),
-									LocalDate.parse(settings.getEndDate(), DateTimeConstant.D_FORMAT_INT_FORMATTER),
-									contract)
+							LocalDate queryStart0 = startDate;
+							LocalDate queryEnd0 = startDate.plusMonths(6);
+							while(!queryEnd0.isAfter(endDate)) {								
+								loader.loadTradeDayDataRaw(
+										queryStart0,
+										queryEnd0,
+										contract)
 								.forEach(bar -> {
 									tradeDayBarMap.put(contract, LocalDate.parse(bar.getTradingDay(), DateTimeConstant.D_FORMAT_INT_FORMATTER), bar);
 								});
+								queryStart0 = queryEnd0;
+								queryEnd0 = queryEnd0.plusMonths(6);
+							}
 						
 							new Thread(() -> {
 								log.info("正在加载 [{}] 合约数据", contract.getUnifiedSymbol());
@@ -213,7 +221,7 @@ public class PlaybackContext {
 									loader.loadMinuteDataRaw(queryStart, queryEnd, contract)
 										.stream()
 										.forEachOrdered(bar -> {
-											log.trace("Bar信息： {} {}， {} 价格：{}", bar.getActionDay(), bar.getActionTime(), bar.getUnifiedSymbol(), bar.getClosePrice());
+											log.trace("Bar信息： {} {}， {} 价格：{}，网关:{}", bar.getActionDay(), bar.getActionTime(), bar.getUnifiedSymbol(), bar.getClosePrice(), bar.getGatewayId());
 											feEngine.emitEvent(NorthstarEventType.BAR, bar);
 										});
 									
