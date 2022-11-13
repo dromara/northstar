@@ -17,8 +17,6 @@ import tech.quantit.northstar.data.IMarketDataRepository;
 import tech.quantit.northstar.data.IPlaybackRuntimeRepository;
 import tech.quantit.northstar.gateway.api.Gateway;
 import tech.quantit.northstar.gateway.api.GatewayFactory;
-import tech.quantit.northstar.gateway.playback.ticker.TickSimulationAlgorithm;
-import tech.quantit.northstar.gateway.playback.ticker.TrigonometricTickSimulation;
 import tech.quantit.northstar.gateway.playback.utils.CtpPlaybackClock;
 import tech.quantit.northstar.gateway.playback.utils.PlaybackClock;
 import tech.quantit.northstar.gateway.playback.utils.PlaybackDataLoader;
@@ -62,8 +60,7 @@ public class PlaybackGatewayFactory implements GatewayFactory{
 				: LocalDateTime.of(LocalDate.parse(settings.getStartDate(), DateTimeConstant.D_FORMAT_INT_FORMATTER), LocalTime.of(20, 0));
 		PlaybackClock clock = new CtpPlaybackClock(holidayMgr, ldt);
 		PlaybackDataLoader loader = new PlaybackDataLoader(mdRepo);
-		TickSimulationAlgorithm ticker = new TrigonometricTickSimulation(gatewayId, settings.getPrecision(), contractMgr);
-		return new PlaybackContext(settings, ldt, clock, ticker, loader, feEngine, rtRepo, contractMgr);
+		return new PlaybackContext(settings, ldt, clock, loader, feEngine, rtRepo, contractMgr);
 	}
 	
 	private GatewaySettingField createGatewaySettings(GatewayDescription gatewayDescription) {

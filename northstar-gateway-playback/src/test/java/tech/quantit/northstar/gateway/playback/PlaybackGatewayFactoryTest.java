@@ -1,7 +1,6 @@
 package tech.quantit.northstar.gateway.playback;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -21,7 +20,6 @@ import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.model.GatewayDescription;
 import tech.quantit.northstar.data.IMarketDataRepository;
 import tech.quantit.northstar.data.IPlaybackRuntimeRepository;
-import tech.quantit.northstar.gateway.playback.ticker.TickSimulationAlgorithm;
 import tech.quantit.northstar.gateway.playback.utils.PlaybackClock;
 import tech.quantit.northstar.gateway.playback.utils.PlaybackDataLoader;
 import test.common.TestFieldFactory;
@@ -31,7 +29,6 @@ import xyz.redtorch.pb.CoreField.TickField;
 
 class PlaybackGatewayFactoryTest {
 	
-	TickSimulationAlgorithm algo = mock(TickSimulationAlgorithm.class);
 	IPlaybackRuntimeRepository rtRepo = mock(IPlaybackRuntimeRepository.class);
 	FastEventEngine feEngine = mock(FastEventEngine.class);
 	PlaybackDataLoader loader = mock(PlaybackDataLoader.class);
@@ -60,7 +57,6 @@ class PlaybackGatewayFactoryTest {
 	void prepare() {
 		when(clock.nextMarketMinute()).thenReturn(ldt.plusMinutes(1));
 		when(loader.loadData(eq(ldt), eq(contract))).thenReturn(List.of(bar));
-		when(algo.generateFrom(any(BarField.class))).thenReturn(List.of(t1, t2, t3, t4));
 		when(contractMgr.getContract(anyString())).thenReturn(contract);
 		
 		settings.setStartDate("20220629");
