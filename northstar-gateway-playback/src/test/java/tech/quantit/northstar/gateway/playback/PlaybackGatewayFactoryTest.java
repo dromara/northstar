@@ -56,7 +56,7 @@ class PlaybackGatewayFactoryTest {
 	@BeforeEach
 	void prepare() {
 		when(clock.nextMarketMinute()).thenReturn(ldt.plusMinutes(1));
-		when(loader.loadData(eq(ldt), eq(contract))).thenReturn(List.of(bar));
+		when(loader.loadMinuteData(eq(ldt), eq(contract))).thenReturn(List.of(bar));
 		when(contractMgr.getContract(anyString())).thenReturn(contract);
 		
 		settings.setStartDate("20220629");

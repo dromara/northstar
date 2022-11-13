@@ -161,13 +161,13 @@ class VolumeRandomWalk {
 		List<Long> results = new ArrayList<>(numOfTickPerBar);
 		for(int i=0; i<numOfTickPerBar; i++) {
 			if(numOfTickPerBar - i == 1) {
-				results.add(volume - sumVol);
+				results.add(Math.max(volume - sumVol, 0));
 				break;
 			}
 			double restAvgVol = (double) (volume - sumVol) / (numOfTickPerBar - i);
 			long vol = (long) ThreadLocalRandom.current().nextGaussian(restAvgVol, restAvgVol / 2);
 			if(vol < 1) {
-				vol = (long) restAvgVol;
+				vol = i + 2 < numOfTickPerBar ? (long) restAvgVol : 1;
 			}
 			results.add(vol);
 			sumVol += vol;

@@ -9,6 +9,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -21,7 +22,6 @@ import tech.quantit.northstar.common.constant.PlaybackSpeed;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.event.NorthstarEventType;
 import tech.quantit.northstar.data.IPlaybackRuntimeRepository;
-import tech.quantit.northstar.gateway.playback.ticker.TickSimulationAlgorithm;
 import tech.quantit.northstar.gateway.playback.utils.PlaybackClock;
 import tech.quantit.northstar.gateway.playback.utils.PlaybackDataLoader;
 import test.common.TestFieldFactory;
@@ -32,7 +32,6 @@ import xyz.redtorch.pb.CoreField.TickField;
 
 class PlaybackContextTest {
 	
-	TickSimulationAlgorithm algo = mock(TickSimulationAlgorithm.class);
 	IPlaybackRuntimeRepository rtRepo = mock(IPlaybackRuntimeRepository.class);
 	FastEventEngine feEngine = mock(FastEventEngine.class);
 	PlaybackDataLoader loader = mock(PlaybackDataLoader.class);
@@ -57,10 +56,11 @@ class PlaybackContextTest {
 	@BeforeEach
 	void prepare() {
 		when(clock.nextMarketMinute()).thenReturn(ldt.plusMinutes(1));
-		when(loader.loadData(eq(ldt), eq(contract))).thenReturn(List.of(bar));
-		when(algo.generateFrom(any(BarField.class))).thenReturn(List.of(t1, t2, t3, t4));
+		when(loader.loadMinuteData(eq(ldt), eq(contract))).thenReturn(List.of(bar));
+		when(loader.loadTradeDayDataRaw(any(LocalDate.class), any(LocalDate.class), eq(contract))).thenReturn(List.of(bar));
 		when(contractMgr.getContract(anyString())).thenReturn(contract);
 		
+		settings.setPreStartDate("20220629");
 		settings.setStartDate("20220629");
 		settings.setEndDate("20220629");
 		settings.setPrecision(PlaybackPrecision.LOW);
@@ -70,11 +70,10 @@ class PlaybackContextTest {
 	
 	@Test
 	void testRunning() throws InterruptedException {
-		PlaybackContext ctx = new PlaybackContext(settings, ldt, clock, algo, loader, feEngine, rtRepo, contractMgr);
+		PlaybackContext ctx = new PlaybackContext(settings, ldt, clock, loader, feEngine, rtRepo, contractMgr);
 		ctx.setGatewaySettings(GatewaySettingField.newBuilder().setGatewayId("testGateway").build());
 		
 		ctx.start();
-		Thread.sleep(100);
 		assertThat(ctx.isRunning()).isTrue();
 		ctx.stop();
 		assertThat(ctx.isRunning()).isFalse();

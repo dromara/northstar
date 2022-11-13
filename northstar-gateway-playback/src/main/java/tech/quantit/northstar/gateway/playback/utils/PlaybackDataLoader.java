@@ -3,6 +3,7 @@ package tech.quantit.northstar.gateway.playback.utils;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.List;
 
 import tech.quantit.northstar.common.utils.MarketDataLoadingUtils;
@@ -14,13 +15,16 @@ public class PlaybackDataLoader {
 
 	private IMarketDataRepository mdRepo;
 	
+	private String gatewayId;
+	
 	private MarketDataLoadingUtils utils = new MarketDataLoadingUtils();
 	
-	public PlaybackDataLoader(IMarketDataRepository mdRepo) {
+	public PlaybackDataLoader(String playbackGatewayId, IMarketDataRepository mdRepo) {
 		this.mdRepo = mdRepo;
+		this.gatewayId = playbackGatewayId;
 	}
 	
-	public List<BarField> loadData(LocalDateTime fromStartDateTime, ContractField contract){
+	public List<BarField> loadMinuteData(LocalDateTime fromStartDateTime, ContractField contract){
 		LocalDate queryStart;
 		LocalDate queryEnd;
 		long fromStartTimestamp = fromStartDateTime.toInstant(ZoneOffset.ofHours(8)).toEpochMilli();
@@ -31,13 +35,32 @@ public class PlaybackDataLoader {
 			queryEnd = utils.getFridayOfThisWeek(fromStartDateTime.toLocalDate());
 			queryStart = queryEnd.minusWeeks(1);
 		}
-		return mdRepo.loadBars("CTP", contract.getUnifiedSymbol(), queryStart, queryEnd)
+		return enhanceData(mdRepo.loadBars("CTP", contract.getUnifiedSymbol(), queryStart, queryEnd)
 				.stream()
 				.filter(bar -> bar.getActionTimestamp() >= fromStartTimestamp)
-				.toList();
+				.toList());
 	}
 	
-	public List<BarField> loadDataRaw(LocalDate startDate, LocalDate endDate, ContractField contract){
-		return mdRepo.loadBars("CTP", contract.getUnifiedSymbol(), startDate, endDate);
+	public List<BarField> loadMinuteDataRaw(LocalDate startDate, LocalDate endDate, ContractField contract){
+		return enhanceData(mdRepo.loadBars("CTP", contract.getUnifiedSymbol(), startDate, endDate));
+	}
+	
+	public List<BarField> loadTradeDayDataRaw(LocalDate startDate, LocalDate endDate, ContractField contract){
+		return enhanceData(mdRepo.loadDailyBars("CTP", contract.getUnifiedSymbol(), startDate, endDate));
+	}
+	
+	private List<BarField> enhanceData(List<BarField> list) {
+		List<BarField> results = new ArrayList<>(list.size());
+		for(int i=0; i<list.size(); i++) {
+			double openInterestDelta = 0;
+			if(i > 0) {
+				openInterestDelta = list.get(i).getOpenInterest() - list.get(i - 1).getOpenInterest();
+			}
+			results.add(list.get(i).toBuilder()
+					.setGatewayId(gatewayId)
+					.setOpenInterestDelta(openInterestDelta)
+					.build());
+		}
+		return list;
 	}
 }

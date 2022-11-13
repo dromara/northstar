@@ -1,8 +1,10 @@
 package tech.quantit.northstar.gateway.playback;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -16,14 +18,22 @@ import java.util.TimerTask;
 import java.util.concurrent.CountDownLatch;
 import java.util.stream.Collectors;
 
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.Table;
+
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.IContractManager;
 import tech.quantit.northstar.common.constant.DateTimeConstant;
+import tech.quantit.northstar.common.constant.TickType;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.event.NorthstarEventType;
 import tech.quantit.northstar.common.model.PlaybackRuntimeDescription;
 import tech.quantit.northstar.common.utils.MarketDataLoadingUtils;
 import tech.quantit.northstar.data.IPlaybackRuntimeRepository;
+import tech.quantit.northstar.gateway.playback.ticker.RandomWalkTickSimulation;
+import tech.quantit.northstar.gateway.playback.ticker.SimpleCloseSimulation;
+import tech.quantit.northstar.gateway.playback.ticker.SimplePriceSimulation;
+import tech.quantit.northstar.gateway.playback.ticker.TickEntry;
 import tech.quantit.northstar.gateway.playback.ticker.TickSimulationAlgorithm;
 import tech.quantit.northstar.gateway.playback.utils.PlaybackClock;
 import tech.quantit.northstar.gateway.playback.utils.PlaybackDataLoader;
@@ -50,8 +60,6 @@ public class PlaybackContext {
 	
 	private MarketDataLoadingUtils utils = new MarketDataLoadingUtils();
 	
-	private TickSimulationAlgorithm tickerAlgo;
-	
 	private PlaybackClock clock;
 	
 	private PlaybackGatewaySettings settings;
@@ -64,6 +72,10 @@ public class PlaybackContext {
 	
 	private boolean hasPreLoaded;	// 预加载是否被执行过
 	
+	private Table<ContractField, LocalDate, BarField> tradeDayBarMap = HashBasedTable.create();
+	
+	private Map<ContractField, TickSimulationAlgorithm> algoMap = new HashMap<>();
+	
 	// 回放时间戳状态
 	private LocalDateTime playbackTimeState;
 	
@@ -71,18 +83,29 @@ public class PlaybackContext {
 	private boolean isLoading;
 	private Timer timer;
 	
-	public PlaybackContext(PlaybackGatewaySettings settings, LocalDateTime currentTimeState, PlaybackClock clock, TickSimulationAlgorithm tickerAlgo,
+	public PlaybackContext(PlaybackGatewaySettings settings, LocalDateTime currentTimeState, PlaybackClock clock, 
 			PlaybackDataLoader loader, FastEventEngine feEngine, IPlaybackRuntimeRepository rtRepo, IContractManager contractMgr) {
 		this.settings = settings;
 		this.playbackTimeState = currentTimeState;
 		this.clock = clock;
-		this.tickerAlgo = tickerAlgo;
 		this.loader = loader;
 		this.feEngine = feEngine;
 		this.rtRepo = rtRepo;
 		this.contractMgr = contractMgr;
 		this.endDate = LocalDate.parse(settings.getEndDate(), DateTimeConstant.D_FORMAT_INT_FORMATTER);
 		
+		settings.getUnifiedSymbols()
+			.stream()
+			.map(contractMgr::getContract)
+			.forEach(contract -> 
+				algoMap.put(contract, switch(settings.getPrecision()) {
+					case EXTREME -> new SimpleCloseSimulation();
+					case LOW -> new SimplePriceSimulation();
+					case MEDIUM -> new RandomWalkTickSimulation(30, contract.getPriceTick());
+					case HIGH -> new RandomWalkTickSimulation(120, contract.getPriceTick());
+					default -> throw new IllegalArgumentException("Unexpected value: " + settings.getPrecision());
+				})
+			);
 	}
 	
 	Map<ContractField, Queue<BarField>> contractBarMap = new HashMap<>();
@@ -169,7 +192,15 @@ public class PlaybackContext {
 					settings.getUnifiedSymbols()
 						.stream()
 						.map(contractMgr::getContract)
-						.forEach(contract -> 
+						.forEach(contract -> {
+							loader.loadTradeDayDataRaw(
+									LocalDate.parse(settings.getPreStartDate(), DateTimeConstant.D_FORMAT_INT_FORMATTER),
+									LocalDate.parse(settings.getEndDate(), DateTimeConstant.D_FORMAT_INT_FORMATTER),
+									contract)
+								.forEach(bar -> {
+									tradeDayBarMap.put(contract, LocalDate.parse(bar.getTradingDay(), DateTimeConstant.D_FORMAT_INT_FORMATTER), bar);
+								});
+						
 							new Thread(() -> {
 								log.info("正在加载 [{}] 合约数据", contract.getUnifiedSymbol());
 								LocalDate queryStart = preloadStartDate;
@@ -179,9 +210,8 @@ public class PlaybackContext {
 										queryEnd = preloadEndDate;
 									}
 									
-									List<BarField> data = loader.loadDataRaw(queryStart, queryEnd, contract);
-									data.stream()
-										.map(bar -> bar.toBuilder().setGatewayId(gatewaySettings.getGatewayId()).build())
+									loader.loadMinuteDataRaw(queryStart, queryEnd, contract)
+										.stream()
 										.forEachOrdered(bar -> {
 											log.trace("Bar信息： {} {}， {} 价格：{}", bar.getActionDay(), bar.getActionTime(), bar.getUnifiedSymbol(), bar.getClosePrice());
 											feEngine.emitEvent(NorthstarEventType.BAR, bar);
@@ -194,8 +224,8 @@ public class PlaybackContext {
 								log.debug("回放网关 [{}] 合约 {} 数据预热完毕", gatewaySettings.getGatewayId(), contract.getUnifiedSymbol());
 								cdl.countDown();
 								isLoading = false;
-							}).start()
-						);
+							}).start();
+						});
 					
 					try {
 						cdl.await();
@@ -282,11 +312,7 @@ public class PlaybackContext {
 			.map(contractMgr::getContract)
 			.collect(Collectors.toMap(
 					contract -> contract, 
-					contract -> new LinkedList<>(loader.loadData(playbackTimeState, contract)
-									.stream()
-									.map(bar -> bar.toBuilder().setGatewayId(gatewaySettings.getGatewayId()).build())
-									.toList()
-							)));
+					contract -> new LinkedList<>(loader.loadMinuteData(playbackTimeState, contract))));
 	}
 	
 	// 按分钟加载TICK数据 
@@ -298,10 +324,43 @@ public class PlaybackContext {
 			.filter(entry -> entry.getValue().peek().getActionTimestamp() <= currentTime)
 			.forEach(entry -> {
 				BarField bar = entry.getValue().poll();
-				List<TickField> ticksOfBar = tickerAlgo.generateFrom(bar);
+				TickSimulationAlgorithm algo = algoMap.get(contractMgr.getContract(bar.getUnifiedSymbol()));
+				List<TickEntry> ticksOfBar = algo.generateFrom(bar);
 				cacheBarMap.put(entry.getKey(), bar);
-				contractTickMap.put(entry.getKey(), new LinkedList<>(ticksOfBar));
+				contractTickMap.put(entry.getKey(), new LinkedList<>(convertTicks(ticksOfBar, bar)));
 			});
+	}
+	
+	private List<TickField> convertTicks(List<TickEntry> ticks, BarField srcBar) {
+		ContractField contract = contractMgr.getContract(srcBar.getUnifiedSymbol());
+		BarField tradeDayBar = tradeDayBarMap.get(contract, LocalDate.parse(srcBar.getTradingDay(), DateTimeConstant.D_FORMAT_INT_FORMATTER));
+		double priceTick = contract.getPriceTick();
+		return ticks.stream()
+				.map(e -> TickField.newBuilder()
+						.setPreClosePrice(tradeDayBar.getPreClosePrice())
+						.setPreOpenInterest(tradeDayBar.getPreOpenInterest())
+						.setPreSettlePrice(tradeDayBar.getPreSettlePrice())
+						.setLowerLimit(tradeDayBar.getPreSettlePrice() * (1 - 0.07))	// 采用7%跌停幅度
+						.setUpperLimit(tradeDayBar.getPreSettlePrice() * (1 + 0.07))	// 采用7%涨停幅度
+						.setHighPrice(tradeDayBar.getHighPrice())			// 采用K线未来值
+						.setLowPrice(tradeDayBar.getLowPrice())				// 采用K线未来值
+						.setUnifiedSymbol(srcBar.getUnifiedSymbol())
+						.setTradingDay(srcBar.getTradingDay())
+						.setStatus(TickType.NORMAL_TICK.getCode())
+						.setActionDay(srcBar.getActionDay())
+						.setActionTime(LocalDateTime.ofInstant(Instant.ofEpochMilli(e.timestamp()), ZoneId.systemDefault()).format(DateTimeConstant.T_FORMAT_FORMATTER))
+						.setActionTimestamp(e.timestamp())
+						.setLastPrice(e.price())
+						.addAllAskPrice(List.of(e.price() + priceTick, 0D, 0D, 0D, 0D)) // 仅模拟卖一价
+						.addAllBidPrice(List.of(e.price() - priceTick, 0D, 0D, 0D, 0D)) // 仅模拟买一价
+						.setGatewayId(gatewaySettings.getGatewayId())
+						.setVolume(e.volume())								// 采用模拟随机值
+						.setOpenInterest(srcBar.getOpenInterest())			// 采用分钟K线的模糊值
+						.setOpenInterestDelta(e.openInterestDelta())		// 采用模拟随机值
+						.setTurnoverDelta(srcBar.getTurnoverDelta())		// 采用分钟K线的模糊值
+						.setTurnover(srcBar.getTurnover())					// 采用分钟K线的模糊值
+						.build())
+				.toList();
 	}
 	
 	/**

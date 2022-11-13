@@ -39,12 +39,12 @@ class PlaybackDataLoaderTest {
 	void prepare() {
 		IMarketDataRepository mdRepo = mock(IMarketDataRepository.class);
 		when(mdRepo.loadBars(anyString(), anyString(), any(LocalDate.class), any(LocalDate.class))).thenReturn(List.of(b1,b2,b3));
-		loader = new PlaybackDataLoader(mdRepo);
+		loader = new PlaybackDataLoader("testGateway", mdRepo);
 	}
 
 	@Test
 	void test() {
-		List<BarField> resultList = loader.loadData(LocalDateTime.now(), c1);
+		List<BarField> resultList = loader.loadMinuteData(LocalDateTime.now(), c1);
 		assertThat(resultList).hasSize(1);
 	}
 

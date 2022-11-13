@@ -59,7 +59,7 @@ public class PlaybackGatewayFactory implements GatewayFactory{
 				? playbackRt.getPlaybackTimeState() 
 				: LocalDateTime.of(LocalDate.parse(settings.getStartDate(), DateTimeConstant.D_FORMAT_INT_FORMATTER), LocalTime.of(20, 0));
 		PlaybackClock clock = new CtpPlaybackClock(holidayMgr, ldt);
-		PlaybackDataLoader loader = new PlaybackDataLoader(mdRepo);
+		PlaybackDataLoader loader = new PlaybackDataLoader(gatewayId, mdRepo);
 		return new PlaybackContext(settings, ldt, clock, loader, feEngine, rtRepo, contractMgr);
 	}
 	
