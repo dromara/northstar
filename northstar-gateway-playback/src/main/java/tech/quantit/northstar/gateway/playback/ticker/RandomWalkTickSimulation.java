@@ -33,9 +33,11 @@ public class RandomWalkTickSimulation implements TickSimulationAlgorithm {
 				up ? bar.getHighPrice() : bar.getLowPrice(),
 				bar.getClosePrice()
 				);
+		double rangeFactor = (bar.getHighPrice() - bar.getLowPrice()) / bar.getClosePrice();
+		double actualDiffRatio = Math.abs(bar.getClosePrice() - bar.getOpenPrice()) / (bar.getHighPrice() - bar.getLowPrice());
 		PriceRandomWalk pricer = new PriceRandomWalk(numOfTickPerBar, milestonePrices, priceTick);
-		VolumeRandomWalk voler = new VolumeRandomWalk(numOfTickPerBar, 0);
-		OpenInterestRandomWalk oier = new OpenInterestRandomWalk(numOfTickPerBar);
+		VolumeRandomWalk voler = new VolumeRandomWalk(numOfTickPerBar, bar.getVolume());
+		OpenInterestRandomWalk oier = new OpenInterestRandomWalk(numOfTickPerBar, bar.getOpenInterestDelta(), rangeFactor, actualDiffRatio);
 		List<Double> prices = pricer.generate();
 		List<Long> volumes = voler.generate();
 		List<Double> openInterests = oier.generate();
@@ -51,10 +53,9 @@ public class RandomWalkTickSimulation implements TickSimulationAlgorithm {
  * 价格算法：
  * 初始价取K线开盘价，然后随机分配接下来的目标价，可能是[high, low, close]，也可能是[low, high, close];
  * 确定了价格运行路径后，就可以确定总步长（以最小变动价位为一个基础步长，例如最小变动价位为2，从开盘价5000至最高价5020，所需步长为10）；
- * 每个K线包含的TICK数视为总步数，可以得到平均步长（假设一分钟内总步长为20个价位变动，该分钟生成30个数据点，则平均步长为0.67）；
- * 把平均步长视为概率（即朝目标前进的概率，剩余的概率就是反向运动与原地停留的概率和），这样可以保留一定的随机运动；
- * 随着可用的数据点变小，往前运动的概率会自然增加；
- * 当概率大于1时，例如达到1.4，则代表步长变化至少为1个价位，在一个价位的基础上，40%的概率再加1，60%的概率为加0或-1；
+ * 每个K线包含的TICK数视为总步数，可以得到平均步长（假设一分钟内总步长为20个价位变动，该分钟生成30个数据点，则平均步长为0.67）；同理可以得到剩余平均步长；
+ * 把剩余平均步长视为高斯均值，然后求高斯随机值，这样可以保留一定的随机运动；
+ * 随着可用的数据点变小，剩余平均步长会自然提高，往前运动的概率会自然增加；
  * @author KevinHuangwl
  *
  */
@@ -90,8 +91,8 @@ class PriceRandomWalk {
 			} while(!appxEquals(milestonePrice, curStep));
 		}
 		double stepSize = (double) pathway.size() / numOfTickPerBar;
-		double std = stepSize * 2;
-		int times = (int) Math.ceil(2 * std);	// 正负两倍标准差
+		double std = stepSize;
+		int times = (int) (4 * std);	// 正负两倍标准差
 		// 增加最高价的权重
 		double highest = pathway.stream().mapToDouble(Double::doubleValue).max().getAsDouble();
 		int indexOfHigh = pathway.indexOf(highest);
@@ -113,7 +114,6 @@ class PriceRandomWalk {
 	
 	List<Double> generate(){
 		List<Double> results = new ArrayList<>(numOfTickPerBar);
-		double stepSize = (double) walkingPath.size() / numOfTickPerBar;
 		for(int i=0; i<numOfTickPerBar; i++) {
 			int restStep = numOfTickPerBar - i;
 			if(i == 0) {
@@ -124,8 +124,8 @@ class PriceRandomWalk {
 				results.add(walkingPath.get(walkingPath.size() - 1)); 	// 最后一步确保是收盘价
 				break;
 			}
-			double avgStep = (double) (walkingPath.size() - cursor) / restStep;
-			int randStep = (int) (ThreadLocalRandom.current().nextGaussian(avgStep, Math.max(1, stepSize)));
+			double avgStep = (double) (walkingPath.size() - cursor) / restStep; // 剩余平均步长
+			int randStep = (int) (ThreadLocalRandom.current().nextGaussian(avgStep, Math.E)); // 使用高斯随机数保证波动的随机性
 			cursor = safeAdd(cursor, randStep);
 			results.add(walkingPath.get(cursor));
 		}
@@ -135,10 +135,13 @@ class PriceRandomWalk {
 	private int safeAdd(int cursor, int delta) {
 		return Math.min(Math.max(0, cursor + delta), walkingPath.size() - 1);
 	}
+	
 }
 
 /**
  * 成交量算法：
+ * 成交量的变化并不像价格变化那样有规律，只能随便模拟。
+ * 
  * @author KevinHuangwl
  *
  */
@@ -146,17 +149,28 @@ class VolumeRandomWalk {
 	
 	int numOfTickPerBar;
 	
-	long volumeDelta;
+	long volume;
 	
-	VolumeRandomWalk(int numOfTickPerBar, long volumeDelta){
+	VolumeRandomWalk(int numOfTickPerBar, long volume){
 		this.numOfTickPerBar = numOfTickPerBar;
-		this.volumeDelta = volumeDelta;
+		this.volume = volume;
 	}
 	
 	List<Long> generate(){
+		long sumVol = 0;
 		List<Long> results = new ArrayList<>(numOfTickPerBar);
 		for(int i=0; i<numOfTickPerBar; i++) {
-			results.add(0L);
+			if(numOfTickPerBar - i == 1) {
+				results.add(volume - sumVol);
+				break;
+			}
+			double restAvgVol = (double) (volume - sumVol) / (numOfTickPerBar - i);
+			long vol = (long) ThreadLocalRandom.current().nextGaussian(restAvgVol, restAvgVol / 2);
+			if(vol < 1) {
+				vol = (long) restAvgVol;
+			}
+			results.add(vol);
+			sumVol += vol;
 		}
 		return results;
 	}
@@ -164,6 +178,12 @@ class VolumeRandomWalk {
 
 /**
  * 持仓量算法：
+ * 持仓量的变化并不像价格变化那样有规律，只能随便模拟。
+ * 有几种情况：
+ * K线震幅与实际波幅比较大，即大阴大阳线，持仓量会倾向于朝一个方向变化，这时标准差会相对小；
+ * K线震幅远大于实际波幅，例如十字星，持仓量变化也会反复不定，这时标准差会大；
+ * K线震幅比较小，标准差会相对小。
+ * 定义两个系数来描述以上情况：震幅系数与实际波幅比例系数
  * @author KevinHuangwl
  *
  */
@@ -171,14 +191,34 @@ class OpenInterestRandomWalk {
 	
 	int numOfTickPerBar;
 	
-	OpenInterestRandomWalk(int numOfTickPerBar){
+	double openInterestDelta;
+	
+	double stdRef;
+	
+	OpenInterestRandomWalk(int numOfTickPerBar, double openInterestDelta, double rangeFactor, double actualDiffRatio){
 		this.numOfTickPerBar = numOfTickPerBar;
+		this.openInterestDelta = openInterestDelta;
+		if(rangeFactor < 0.003) {	// 价格震幅小于千分之3时，属于震幅较小
+			stdRef = 50;
+		} else if (actualDiffRatio < 0.2) { // 震幅较大，且实际波幅小于震幅的20%时，属于十字星 
+			stdRef = 100;
+		} else {
+			stdRef = Math.log(Math.abs(openInterestDelta));
+		}
 	}
 	
 	List<Double> generate(){
+		double avgDelta = openInterestDelta / numOfTickPerBar;
 		List<Double> results = new ArrayList<>(numOfTickPerBar);
+		double sumDelta = 0;
 		for(int i=0; i<numOfTickPerBar; i++) {
-			results.add(0D);
+			if(numOfTickPerBar - i == 1) {
+				results.add(openInterestDelta - sumDelta);
+				break;
+			}
+			int delta = (int) ThreadLocalRandom.current().nextGaussian(avgDelta, stdRef);
+			results.add((double) delta);
+			sumDelta += delta;
 		}
 		return results;
 	}

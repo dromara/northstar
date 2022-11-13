@@ -27,6 +27,8 @@ class RandomWalkTickSimulationTest {
 				.setHighPrice(5005)
 				.setLowPrice(4998)
 				.setClosePrice(5000)
+				.setOpenInterestDelta(31)
+				.setVolume(2000)
 				.build();
 		
 		List<TickEntry> results = rws.generateFrom(bar);
@@ -37,6 +39,9 @@ class RandomWalkTickSimulationTest {
 		assertThat(results.stream().mapToDouble(TickEntry::price).max().getAsDouble()).isCloseTo(5005D, offset(1.0));
 		assertThat(results.stream().mapToDouble(TickEntry::price).min().getAsDouble()).isCloseTo(4998D, offset(1.0));
 		assertThat(results.get(29).price()).isCloseTo(5000D, offset(0.5));
+		assertThat(results.stream().mapToDouble(TickEntry::openInterestDelta).sum()).isCloseTo(31, offset(1.0));
+		assertThat(results.stream().mapToLong(TickEntry::volume).sum()).isEqualTo(2000);
+		assertThat(results.get(29).volume()).isPositive();
 	}
 	
 	@Test
@@ -46,6 +51,8 @@ class RandomWalkTickSimulationTest {
 				.setHighPrice(5055)
 				.setLowPrice(4998)
 				.setClosePrice(5000)
+				.setOpenInterestDelta(500)
+				.setVolume(50000)
 				.build();
 		
 		List<TickEntry> results = rws.generateFrom(bar);
@@ -56,6 +63,9 @@ class RandomWalkTickSimulationTest {
 		assertThat(results.stream().mapToDouble(TickEntry::price).max().getAsDouble()).isCloseTo(5055D, offset(1.0));
 		assertThat(results.stream().mapToDouble(TickEntry::price).min().getAsDouble()).isCloseTo(4998D, offset(1.0));
 		assertThat(results.get(29).price()).isCloseTo(5000D, offset(0.5));
+		assertThat(results.stream().mapToDouble(TickEntry::openInterestDelta).sum()).isCloseTo(500, offset(1.0));
+		assertThat(results.stream().mapToLong(TickEntry::volume).sum()).isEqualTo(50000);
+		assertThat(results.get(29).volume()).isPositive();
 	}
 	
 	@Test
@@ -65,6 +75,8 @@ class RandomWalkTickSimulationTest {
 				.setHighPrice(5005)
 				.setLowPrice(4998)
 				.setClosePrice(5000)
+				.setOpenInterestDelta(-50)
+				.setVolume(10000)
 				.build();
 		
 		List<TickEntry> results = rws2.generateFrom(bar);
@@ -75,5 +87,8 @@ class RandomWalkTickSimulationTest {
 		assertThat(results.stream().mapToDouble(TickEntry::price).max().getAsDouble()).isCloseTo(5005D, offset(0.2));
 		assertThat(results.stream().mapToDouble(TickEntry::price).min().getAsDouble()).isCloseTo(4998D, offset(0.2));
 		assertThat(results.get(119).price()).isCloseTo(5000D, offset(0.2));
+		assertThat(results.stream().mapToDouble(TickEntry::openInterestDelta).sum()).isCloseTo(-50, offset(1.0));
+		assertThat(results.stream().mapToLong(TickEntry::volume).sum()).isEqualTo(10000);
+		assertThat(results.get(119).volume()).isPositive();
 	}
 }

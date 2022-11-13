@@ -5,9 +5,9 @@ package tech.quantit.northstar.gateway.playback.ticker;
  * @author KevinHuangwl
  *
  */
-public record TickEntry(double price, long volumeDelta, double openInterest, long timestamp) {
+public record TickEntry(double price, long volume, double openInterestDelta, long timestamp) {
 
-	public static TickEntry of(double price, long volumeDelta, double openInterest, long timestamp) {
-		return new TickEntry(price, volumeDelta, openInterest, timestamp);
+	public static TickEntry of(double price, long volume, double openInterestDelta, long timestamp) {
+		return new TickEntry(price, volume, openInterestDelta, timestamp);
 	}
 }

@@ -15,5 +15,5 @@ public class SimpleCloseSimulation implements TickSimulationAlgorithm {
 	public List<TickEntry> generateFrom(BarField bar) {
 		return List.of(TickEntry.of(bar.getClosePrice(), bar.getVolume(), bar.getOpenInterest(), bar.getActionTimestamp() - 30000));
 	}
-
+	
 }
