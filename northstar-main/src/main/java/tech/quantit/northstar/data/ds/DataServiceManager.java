@@ -188,6 +188,7 @@ public class DataServiceManager implements IDataServiceManager {
 				resultList.add(contract);
 			} catch(Exception e) {
 				log.warn("无效合约数据：{}", JSON.toJSONString(item));
+				log.error("", e);
 			}
 		}
 		return resultList;
@@ -293,7 +294,8 @@ public class DataServiceManager implements IDataServiceManager {
 						.setPreOpenInterest(Double.parseDouble(getValue("oi", fieldIndexMap, item, "0")) - Double.parseDouble(getValue("oi_chg", fieldIndexMap, item, "0")))
 						.build());
 			} catch(Exception e) {
-				log.warn("无效合约数据：{}", JSON.toJSONString(item));
+				log.warn("无效合约行情数据：{}", JSON.toJSONString(item));
+				log.error("", e);
 			}
 		}
 		

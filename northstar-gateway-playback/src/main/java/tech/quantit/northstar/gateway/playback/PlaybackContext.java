@@ -66,7 +66,7 @@ public class PlaybackContext {
 	
 	private GatewaySettingField gatewaySettings;
 	
-	private final LocalDate endDate;
+	private final LocalDate playbackEndDate;
 	
 	private final IContractManager contractMgr;
 	
@@ -92,7 +92,7 @@ public class PlaybackContext {
 		this.feEngine = feEngine;
 		this.rtRepo = rtRepo;
 		this.contractMgr = contractMgr;
-		this.endDate = LocalDate.parse(settings.getEndDate(), DateTimeConstant.D_FORMAT_INT_FORMATTER);
+		this.playbackEndDate = LocalDate.parse(settings.getEndDate(), DateTimeConstant.D_FORMAT_INT_FORMATTER);
 		
 		settings.getUnifiedSymbols()
 			.stream()
@@ -155,7 +155,7 @@ public class PlaybackContext {
 			}
 			
 			private boolean checkDone() {
-				if(playbackTimeState.toLocalDate().isAfter(endDate)) {
+				if(playbackTimeState.toLocalDate().isAfter(playbackEndDate)) {
 					String infoMsg = String.format("[%s]-历史行情回放已经结束，可通过【复位】重置", gatewaySettings.getGatewayId());
 					log.info(infoMsg);
 					feEngine.emitEvent(NorthstarEventType.NOTICE, NoticeField.newBuilder()
@@ -195,19 +195,13 @@ public class PlaybackContext {
 						.stream()
 						.map(contractMgr::getContract)
 						.forEach(contract -> {
-							LocalDate queryStart0 = startDate;
-							LocalDate queryEnd0 = startDate.plusMonths(6);
-							while(!queryEnd0.isAfter(endDate)) {								
-								loader.loadTradeDayDataRaw(
-										queryStart0,
-										queryEnd0,
-										contract)
-								.forEach(bar -> {
-									tradeDayBarMap.put(contract, LocalDate.parse(bar.getTradingDay(), DateTimeConstant.D_FORMAT_INT_FORMATTER), bar);
-								});
-								queryStart0 = queryEnd0;
-								queryEnd0 = queryEnd0.plusMonths(6);
-							}
+							loader.loadTradeDayDataRaw(
+									startDate,
+									endDate,
+									contract)
+							.forEach(bar -> 
+								tradeDayBarMap.put(contract, LocalDate.parse(bar.getTradingDay(), DateTimeConstant.D_FORMAT_INT_FORMATTER), bar)
+							);
 						
 							new Thread(() -> {
 								log.info("正在加载 [{}] 合约数据", contract.getUnifiedSymbol());
