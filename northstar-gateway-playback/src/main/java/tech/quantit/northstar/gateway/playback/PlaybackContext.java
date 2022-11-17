@@ -99,8 +99,8 @@ public class PlaybackContext {
 			.map(contractMgr::getContract)
 			.forEach(contract -> 
 				algoMap.put(contract, switch(settings.getPrecision()) {
-					case EXTREME -> new SimpleCloseSimulation();
-					case LOW -> new SimplePriceSimulation();
+					case EXTREME -> new SimpleCloseSimulation(contract.getPriceTick());
+					case LOW -> new SimplePriceSimulation(contract.getPriceTick());
 					case MEDIUM -> new RandomWalkTickSimulation(30, contract.getPriceTick());
 					case HIGH -> new RandomWalkTickSimulation(120, contract.getPriceTick());
 					default -> throw new IllegalArgumentException("Unexpected value: " + settings.getPrecision());
@@ -339,7 +339,6 @@ public class PlaybackContext {
 	private List<TickField> convertTicks(List<TickEntry> ticks, BarField srcBar) {
 		ContractField contract = contractMgr.getContract(srcBar.getUnifiedSymbol());
 		BarField tradeDayBar = tradeDayBarMap.get(contract, LocalDate.parse(srcBar.getTradingDay(), DateTimeConstant.D_FORMAT_INT_FORMATTER));
-		double priceTick = contract.getPriceTick();
 		return ticks.stream()
 				.map(e -> TickField.newBuilder()
 						.setPreClosePrice(tradeDayBar.getPreClosePrice())
@@ -356,8 +355,8 @@ public class PlaybackContext {
 						.setActionTime(LocalDateTime.ofInstant(Instant.ofEpochMilli(e.timestamp()), ZoneId.systemDefault()).format(DateTimeConstant.T_FORMAT_FORMATTER))
 						.setActionTimestamp(e.timestamp())
 						.setLastPrice(e.price())
-						.addAllAskPrice(List.of(e.price() + priceTick, 0D, 0D, 0D, 0D)) // 仅模拟卖一价
-						.addAllBidPrice(List.of(e.price() - priceTick, 0D, 0D, 0D, 0D)) // 仅模拟买一价
+						.addAllAskPrice(List.of(e.askPrice0(), 0D, 0D, 0D, 0D)) // 仅模拟卖一价
+						.addAllBidPrice(List.of(e.bidPrice0(), 0D, 0D, 0D, 0D)) // 仅模拟买一价
 						.setGatewayId(gatewaySettings.getGatewayId())
 						.setVolumeDelta(e.volume())							// 采用模拟随机值
 						.setOpenInterest(srcBar.getOpenInterest())			// 采用分钟K线的模糊值

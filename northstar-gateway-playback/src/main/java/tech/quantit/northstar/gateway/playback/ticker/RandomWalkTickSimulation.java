@@ -43,9 +43,15 @@ public class RandomWalkTickSimulation implements TickSimulationAlgorithm {
 		List<Double> openInterests = oier.generate();
 		List<TickEntry> ticks = new ArrayList<>(numOfTickPerBar);
 		for(int i=0; i<numOfTickPerBar; i++) {
-			ticks.add(TickEntry.of(prices.get(i), volumes.get(i), openInterests.get(i), bar.getActionTimestamp() - 60000 + i * 59990 / numOfTickPerBar));
+			ticks.add(randomAskBid(prices.get(i), volumes.get(i), openInterests.get(i), bar.getActionTimestamp() - 60000 + i * 59990 / numOfTickPerBar));
 		}
 		return ticks;
+	}
+	
+	private TickEntry randomAskBid(double price, long volume, double openInterestDelta, long tickTime) {
+		double askPrice = price + ThreadLocalRandom.current().nextInt(2) * priceTick;
+		double bidPrice = askPrice - priceTick;
+		return TickEntry.of(price, askPrice, bidPrice, volume, openInterestDelta, tickTime);
 	}
 }
 
