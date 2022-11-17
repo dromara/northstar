@@ -43,15 +43,19 @@ public class RandomWalkTickSimulation implements TickSimulationAlgorithm {
 		List<Double> openInterests = oier.generate();
 		List<TickEntry> ticks = new ArrayList<>(numOfTickPerBar);
 		for(int i=0; i<numOfTickPerBar; i++) {
-			ticks.add(randomAskBid(prices.get(i), volumes.get(i), openInterests.get(i), bar.getActionTimestamp() - 60000 + i * 59990 / numOfTickPerBar));
+			double askPrice = prices.get(i);
+			double bidPrice = prices.get(i);
+			if(i == 0) {
+				askPrice = prices.get(i) + ThreadLocalRandom.current().nextInt(2) * priceTick;
+				bidPrice = askPrice - priceTick;
+			} else if(prices.get(i) > ticks.get(i - 1).price()) {
+				bidPrice = prices.get(i) - priceTick;	// 当价位上升时，代表最新价=卖一价，即买一价要小于最新价 
+			} else {
+				askPrice = prices.get(i) + priceTick;	// 当价位下跌时，代表最新价=买一价，即卖一价要大于最新价
+			}
+			ticks.add(TickEntry.of(prices.get(i), askPrice, bidPrice, volumes.get(i), openInterests.get(i), bar.getActionTimestamp() - 60000 + i * 59990 / numOfTickPerBar));
 		}
 		return ticks;
-	}
-	
-	private TickEntry randomAskBid(double price, long volume, double openInterestDelta, long tickTime) {
-		double askPrice = price + ThreadLocalRandom.current().nextInt(2) * priceTick;
-		double bidPrice = askPrice - priceTick;
-		return TickEntry.of(price, askPrice, bidPrice, volume, openInterestDelta, tickTime);
 	}
 }
 
