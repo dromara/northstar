@@ -174,6 +174,9 @@ public class PlaybackContext {
 			
 			@Override
 			public void run() {
+				if(!isRunning()) {
+					return;
+				}
 				// 预加载数据
 				if(!hasPreLoaded) {	
 					isLoading = true;
