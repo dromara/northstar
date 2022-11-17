@@ -352,7 +352,7 @@ public class PlaybackContext {
 						.setTradingDay(srcBar.getTradingDay())
 						.setStatus(TickType.NORMAL_TICK.getCode())
 						.setActionDay(srcBar.getActionDay())
-						.setActionTime(LocalDateTime.ofInstant(Instant.ofEpochMilli(e.timestamp()), ZoneId.systemDefault()).format(DateTimeConstant.T_FORMAT_FORMATTER))
+						.setActionTime(LocalDateTime.ofInstant(Instant.ofEpochMilli(e.timestamp()), ZoneId.systemDefault()).format(DateTimeConstant.T_FORMAT_WITH_MS_INT_FORMATTER))
 						.setActionTimestamp(e.timestamp())
 						.setLastPrice(e.price())
 						.addAllAskPrice(List.of(e.askPrice0(), 0D, 0D, 0D, 0D)) // 仅模拟卖一价
