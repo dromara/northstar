@@ -359,7 +359,7 @@ public class PlaybackContext {
 						.addAllAskPrice(List.of(e.price() + priceTick, 0D, 0D, 0D, 0D)) // 仅模拟卖一价
 						.addAllBidPrice(List.of(e.price() - priceTick, 0D, 0D, 0D, 0D)) // 仅模拟买一价
 						.setGatewayId(gatewaySettings.getGatewayId())
-						.setVolume(e.volume())								// 采用模拟随机值
+						.setVolumeDelta(e.volume())							// 采用模拟随机值
 						.setOpenInterest(srcBar.getOpenInterest())			// 采用分钟K线的模糊值
 						.setOpenInterestDelta(e.openInterestDelta())		// 采用模拟随机值
 						.setTurnoverDelta(srcBar.getTurnoverDelta())		// 采用分钟K线的模糊值
