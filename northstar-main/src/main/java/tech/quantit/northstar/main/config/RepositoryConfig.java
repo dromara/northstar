@@ -27,6 +27,7 @@ import tech.quantit.northstar.data.redis.MarketDataRepoRedisImpl;
 import tech.quantit.northstar.data.redis.ModuleRepoRedisImpl;
 import tech.quantit.northstar.data.redis.PlaybackRuntimeRepoRedisImpl;
 import tech.quantit.northstar.data.redis.SimAccountRepoRedisImpl;
+import tech.quantit.northstar.domain.gateway.ContractManager;
 import xyz.redtorch.gateway.ctp.common.CtpDateTimeUtil;
 
 @Configuration
@@ -59,9 +60,9 @@ public class RepositoryConfig {
 	private String baseUrl;
 	
 	@Bean
-	public DataServiceManager dataServiceManager(RedisTemplate<String, byte[]> redisTemplate, RestTemplate restTemplate) {
+	public DataServiceManager dataServiceManager(RedisTemplate<String, byte[]> redisTemplate, RestTemplate restTemplate, ContractManager contractMgr) {
 		String nsdsSecret = Optional.ofNullable(System.getenv(Constants.NS_DS_SECRET)).orElse("");
-		return new DataServiceManager(baseUrl, nsdsSecret, restTemplate, new CtpDateTimeUtil());
+		return new DataServiceManager(baseUrl, nsdsSecret, restTemplate, new CtpDateTimeUtil(), contractMgr);
 	}
 	
 	@Bean

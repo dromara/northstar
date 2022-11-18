@@ -29,6 +29,7 @@ import tech.quantit.northstar.common.IDataServiceManager;
 import tech.quantit.northstar.common.constant.DateTimeConstant;
 import tech.quantit.northstar.common.utils.LocalEnvUtils;
 import tech.quantit.northstar.common.utils.MarketDateTimeUtil;
+import tech.quantit.northstar.domain.gateway.ContractManager;
 import xyz.redtorch.pb.CoreEnum.CurrencyEnum;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
@@ -58,11 +59,14 @@ public class DataServiceManager implements IDataServiceManager {
 	
 	private RestTemplate restTemplate;
 	
-	public DataServiceManager(String baseUrl, String secret, RestTemplate restTemplate, MarketDateTimeUtil dtUtil) {
+	private ContractManager contractMgr;
+	
+	public DataServiceManager(String baseUrl, String secret, RestTemplate restTemplate, MarketDateTimeUtil dtUtil, ContractManager contractMgr) {
 		this.baseUrl =  baseUrl;
 		this.userToken = secret;
 		this.dtUtil = dtUtil;
 		this.restTemplate = restTemplate;
+		this.contractMgr = contractMgr;
 		log.info("采用外部数据源加载历史数据");
 		register();
 	}
@@ -274,16 +278,18 @@ public class DataServiceManager implements IDataServiceManager {
 			}
 			
 			try {				
+				String unifiedSymbol = getValue("ns_code", fieldIndexMap, item, "");
+				ContractField contract = contractMgr.getContract(unifiedSymbol);
 				resultList.addFirst(BarField.newBuilder()
-						.setUnifiedSymbol(getValue("ns_code", fieldIndexMap, item, ""))
+						.setUnifiedSymbol(unifiedSymbol)
 						.setTradingDay(tradingDay)
 						.setActionDay(actionDay)
 						.setActionTime(actionTime)
 						.setActionTimestamp(timestamp)
-						.setHighPrice(Double.parseDouble(getValue("high", fieldIndexMap, item, "0")))
-						.setClosePrice(Double.parseDouble(getValue("close", fieldIndexMap, item, "0")))
-						.setLowPrice(Double.parseDouble(getValue("low", fieldIndexMap, item, "0")))
-						.setOpenPrice(Double.parseDouble(getValue("open", fieldIndexMap, item, "0")))
+						.setHighPrice(normalizeValue(Double.parseDouble(getValue("high", fieldIndexMap, item, "0")), contract.getPriceTick()))
+						.setClosePrice(normalizeValue(Double.parseDouble(getValue("close", fieldIndexMap, item, "0")), contract.getPriceTick()))
+						.setLowPrice(normalizeValue(Double.parseDouble(getValue("low", fieldIndexMap, item, "0")), contract.getPriceTick()))
+						.setOpenPrice(normalizeValue(Double.parseDouble(getValue("open", fieldIndexMap, item, "0")), contract.getPriceTick()))
 						.setGatewayId("CTP行情")
 						.setOpenInterestDelta(Double.parseDouble(getValue("oi_chg", fieldIndexMap, item, "0")))
 						.setOpenInterest(Double.parseDouble(getValue("oi", fieldIndexMap, item, "0")))
@@ -300,6 +306,10 @@ public class DataServiceManager implements IDataServiceManager {
 		}
 		
 		return resultList;
+	}
+	
+	private double normalizeValue(double val, double priceTick) {
+		return (int)(val / priceTick) * priceTick;
 	}
 	
 	private String getValue(String key, Map<String, Integer> fieldIndexMap, String[] item, String defaultVal) {
