@@ -23,17 +23,23 @@
           {{ { PLAYBACK: '回测', UAT: '模拟盘', PROD: '实盘' }[scope.row.usage] }}
         </template>
       </el-table-column>
-      <el-table-column label="模组周期" prop="barInterval" sortable align="center" width="100px">
+      <el-table-column label="模组周期" prop="numOfMinPerBar" sortable align="center" width="100px">
         <template slot-scope="scope">
           {{ `${scope.row.numOfMinPerBar} 分钟` }}
         </template>
       </el-table-column>
-      <el-table-column label="交易策略" align="center" sortable width="200px">
+      <el-table-column
+        label="交易策略"
+        align="center"
+        prop="strategySetting.componentMeta.name"
+        sortable
+        width="200px"
+      >
         <template slot-scope="scope">
           {{ scope.row.strategySetting.componentMeta.name }}
         </template>
       </el-table-column>
-      <el-table-column label="平仓优化" align="center" sortable width="100px">
+      <el-table-column label="平仓优化" prop="closingPolicy" align="center" sortable width="100px">
         <template slot-scope="scope">
           {{
             { FIFO: '先开先平', PRIOR_TODAY: '平今优先', PRIOR_BEFORE_HEGDE_TODAY: '平昨锁今' }[
@@ -42,7 +48,7 @@
           }}
         </template>
       </el-table-column>
-      <el-table-column label="绑定账户" align="center" sortable width="minmax(120px,300px)">
+      <el-table-column label="绑定账户" align="center" width="minmax(120px,300px)">
         <template slot-scope="scope">
           {{
             (() => {
@@ -67,7 +73,13 @@
         </template>
       </el-table-column>
 
-      <el-table-column label="当前状态" sortable align="center" width="100px">
+      <el-table-column
+        label="当前状态"
+        prop="runtime.enabled"
+        sortable
+        align="center"
+        width="100px"
+      >
         <template slot-scope="scope">
           <span
             :class="
