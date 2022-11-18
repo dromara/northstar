@@ -6,11 +6,13 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.Timer;
@@ -339,6 +341,9 @@ public class PlaybackContext {
 	private List<TickField> convertTicks(List<TickEntry> ticks, BarField srcBar) {
 		ContractField contract = contractMgr.getContract(srcBar.getUnifiedSymbol());
 		BarField tradeDayBar = tradeDayBarMap.get(contract, LocalDate.parse(srcBar.getTradingDay(), DateTimeConstant.D_FORMAT_INT_FORMATTER));
+		if(Objects.isNull(tradeDayBar)) {
+			return Collections.emptyList();
+		}
 		return ticks.stream()
 				.map(e -> TickField.newBuilder()
 						.setPreClosePrice(tradeDayBar.getPreClosePrice())
