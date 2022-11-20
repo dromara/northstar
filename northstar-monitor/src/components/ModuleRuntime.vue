@@ -211,7 +211,12 @@
               :value="item"
             ></el-option>
           </el-select>
-          <el-select class="ml-10 mt-5" v-model="indicator.name" placeholder="请选择指标">
+          <el-select
+            class="ml-10 mt-5"
+            v-model="indicator.name"
+            filterable
+            placeholder="请选择指标"
+          >
             <el-option
               v-for="(item, i) in indicatorOptions"
               :key="i"
