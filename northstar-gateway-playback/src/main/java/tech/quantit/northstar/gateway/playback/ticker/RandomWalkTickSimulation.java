@@ -175,7 +175,7 @@ class VolumeRandomWalk {
 				break;
 			}
 			double restAvgVol = (double) (volume - sumVol) / (numOfTickPerBar - i);
-			long vol = (long) ThreadLocalRandom.current().nextGaussian(restAvgVol, restAvgVol / 2);
+			long vol = (long) ThreadLocalRandom.current().nextGaussian(restAvgVol, Math.max(10, restAvgVol / 2));
 			if(vol < 1) {
 				vol = i + 2 < numOfTickPerBar ? (long) restAvgVol : 1;
 			}
@@ -226,7 +226,7 @@ class OpenInterestRandomWalk {
 				results.add(openInterestDelta - sumDelta);
 				break;
 			}
-			int delta = (int) ThreadLocalRandom.current().nextGaussian(avgDelta, stdRef);
+			int delta = (int) ThreadLocalRandom.current().nextGaussian(avgDelta, Math.max(stdRef, 1));
 			results.add((double) delta);
 			sumDelta += delta;
 		}
