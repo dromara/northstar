@@ -359,6 +359,9 @@ public class Indicator {
 			symbol = unitSymbol;
 		}
 		
+		public String symbol() {
+			return symbol;
+		}
 	}
 	
 	private interface BarListener {
