@@ -85,6 +85,7 @@ public class Indicator {
 		this.size = config.indicatorRefLength;
 		this.config = config;
 		this.unifiedSymbol = config.bindedContract.getUnifiedSymbol();
+		this.plotPerBar = config.plotPerBar;
 		this.ibg = new InstantBarGenerator(config.bindedContract);
 		this.valType = ValueType.NOT_SET;
 		this.barMerger = config.createBarMerger(bar -> onBar(bar, false));
