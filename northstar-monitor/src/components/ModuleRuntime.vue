@@ -618,6 +618,13 @@ export default {
       this.chart.removeShape()
       this.dealRecords
         .filter((deal) => deal.closeTrade.contract.unifiedsymbol === this.unifiedSymbolOfChart)
+        .filter((deal) => {
+          const dealTime = deal.closeTrade.tradetimestamp
+          const dataHeadTime = this.barDataMap[this.unifiedSymbolOfChart].length
+            ? this.barDataMap[this.unifiedSymbolOfChart][0]['timestamp']
+            : dealTime
+          return dealTime > dataHeadTime
+        })
         .forEach((i) => {
           this.chart.createShape(makeHoldingSegment(i), 'candle_pane')
         })
