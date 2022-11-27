@@ -371,7 +371,6 @@ export default {
         setTimeout(() => {
           this.initChart()
           this.refresh()
-          this.loadIndicators()
         }, 100)
       }
     },
@@ -407,6 +406,7 @@ export default {
     unifiedSymbolOfChart: function (val) {
       if (val) {
         this.updateChart()
+        this.loadIndicators()
       }
     },
     holdingVisibleOnChart: function (val) {
@@ -630,9 +630,12 @@ export default {
         })
     },
     loadIndicators() {
-      this.indicatorMap = JSON.parse(localStorage.getItem(`module_${this.module.moduleName}`)) || {}
+      const dataStr =
+        localStorage.getItem(`module_${this.module.moduleName}_${this.unifiedSymbolOfChart}`) ||
+        '{}'
+      this.indicatorMap = JSON.parse(dataStr)
       Object.keys(this.indicatorMap).forEach((indicatorName) => {
-        if (!this.moduleRuntime.indicatorMap[indicatorName]) {
+        if (this.moduleRuntime.indicatorMap[this.unifiedSymbolOfChart].indexOf(indicatorName) < 0) {
           return
         }
         this.indicator = Object.assign({}, this.indicatorMap[indicatorName])
@@ -640,7 +643,10 @@ export default {
       })
     },
     saveIndicators() {
-      localStorage.setItem(`module_${this.module.moduleName}`, JSON.stringify(this.indicatorMap))
+      localStorage.setItem(
+        `module_${this.module.moduleName}_${this.unifiedSymbolOfChart}`,
+        JSON.stringify(this.indicatorMap)
+      )
     },
     close() {
       this.saveIndicators()
