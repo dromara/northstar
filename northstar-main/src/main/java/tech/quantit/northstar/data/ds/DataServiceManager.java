@@ -313,7 +313,7 @@ public class DataServiceManager implements IDataServiceManager {
 	}
 	
 	private String getValue(String key, Map<String, Integer> fieldIndexMap, String[] item, String defaultVal) {
-		return fieldIndexMap.containsKey(key) ? item[fieldIndexMap.get(key)] : defaultVal;
+		return fieldIndexMap.containsKey(key) && Objects.nonNull(item[fieldIndexMap.get(key)]) ? item[fieldIndexMap.get(key)] : defaultVal;
 	}
 	
 	@Data
