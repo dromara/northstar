@@ -242,6 +242,7 @@ public class ModulePlaybackContext implements IModuleContext {
 		accStore.onTrade(trade);
 		onRuntimeChangeCallback.accept(getRuntimeDescription(false));
 		dealCollector.onTrade(trade).ifPresent(list -> list.stream().forEach(this.onDealCallback::accept));
+		tradeStrategy.onTrade(trade);
 		return Optional.of(id);
 	}
 	
