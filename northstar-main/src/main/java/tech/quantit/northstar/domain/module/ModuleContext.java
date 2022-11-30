@@ -13,6 +13,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Queue;
@@ -280,12 +281,15 @@ public class ModuleContext implements IModuleContext{
 	@Override
 	public synchronized Optional<String> submitOrderReq(ContractField contract, SignalOperation operation,
 			PriceType priceType, int volume, double price) {
+		TickField tick = latestTickMap.get(contract.getUnifiedSymbol());
+		if(Objects.isNull(tick)) {
+			throw new IllegalStateException("没有行情时不应该发送订单");
+		}
 		if(!module.isEnabled()) {
 			mlog.info("策略处于停用状态，忽略委托单");
 			return Optional.empty();
 		}
 		if(mlog.isInfoEnabled()) {
-			TickField tick = latestTickMap.get(contract.getUnifiedSymbol());
 			mlog.info("[{} {}] 策略信号：合约【{}】，操作【{}】，价格【{}】，手数【{}】，类型【{}】", 
 					tick.getActionDay(), LocalTime.parse(tick.getActionTime(), DateTimeConstant.T_FORMAT_WITH_MS_INT_FORMATTER),
 					contract.getUnifiedSymbol(), operation.text(), price, volume, priceType);
