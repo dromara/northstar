@@ -37,7 +37,7 @@ const createStyle = (indicator, colorIndex) => {
       baseValue: 0,
       color: function color(data, options) {
         var current = data.current;
-        var value = current.technicalIndicatorData.value
+        var value = current.technicalIndicatorData ? current.technicalIndicatorData.value : 0
         if (value > 0) {
           return options.bar.upColor;
         } else if (value < 0) {

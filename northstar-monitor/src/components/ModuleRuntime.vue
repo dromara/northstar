@@ -596,6 +596,7 @@ export default {
       this.chart.createTechnicalIndicator('VAL_' + indicator.name, true, {
         id: indicator.paneId
       })
+      this.chart.resize()
     },
     updateIndicator() {
       this.indicatorMap[this.indicator.name] = this.indicator
