@@ -88,6 +88,9 @@
             </el-form-item>
           </div>
           <div v-show="activeIndex === '2'">
+            <el-form-item>
+              <el-checkbox v-model="showDemoStrategy">显示示例策略</el-checkbox>
+            </el-form-item>
             <el-form-item label="绑定策略">
               <el-select
                 v-model="form.strategySetting"
@@ -240,8 +243,9 @@ export default {
     return {
       contractFinderVisible: false,
       loading: false,
+      showDemoStrategy: false,
       accountOptions: [],
-      tradeStrategyOptions: [],
+      tradeStrategyOptionsSource: [],
       activeIndex: '1',
       choseAccounts: [],
       bindedContracts: '',
@@ -269,6 +273,12 @@ export default {
     },
     isUpdateMode() {
       return !!this.module
+    },
+    tradeStrategyOptions() {
+      if (this.showDemoStrategy) {
+        return this.tradeStrategyOptionsSource
+      }
+      return this.tradeStrategyOptionsSource.filter((item) => !/示例/.test(item.componentMeta.name))
     }
   },
   watch: {
@@ -308,9 +318,9 @@ export default {
         })
       })
       moduleApi.getStrategies().then((strategyMetas) => {
-        strategyMetas.forEach(async (i) => initComponent(i, this.tradeStrategyOptions))
+        strategyMetas.forEach(async (i) => initComponent(i, this.tradeStrategyOptionsSource))
         setTimeout(() => {
-          this.tradeStrategyOptions = this.tradeStrategyOptions.sort((a, b) =>
+          this.tradeStrategyOptionsSource = this.tradeStrategyOptionsSource.sort((a, b) =>
             a.value.localeCompare(b.value)
           )
         }, 500)
