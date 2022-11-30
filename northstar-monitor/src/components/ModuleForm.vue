@@ -89,7 +89,9 @@
           </div>
           <div v-show="activeIndex === '2'">
             <el-form-item>
-              <el-checkbox v-model="showDemoStrategy">显示示例策略</el-checkbox>
+              <el-checkbox id="showDemoStrategy" v-model="showDemoStrategy"
+                >显示示例策略</el-checkbox
+              >
             </el-form-item>
             <el-form-item label="绑定策略">
               <el-select
