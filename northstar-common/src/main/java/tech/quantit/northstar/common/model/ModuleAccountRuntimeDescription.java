@@ -40,9 +40,16 @@ public class ModuleAccountRuntimeDescription {
 	 * 累计手续费
 	 */
 	private double accCommission;
-	
 	/**
 	 * 模组持仓描述
 	 */
 	private ModulePositionDescription positionDescription;
+	/**
+	 * 最大盈利
+	 */
+	private double maxProfit;
+	/**
+	 * 最大回撤
+	 */
+	private double maxDrawBack;
 }

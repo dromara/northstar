@@ -18,41 +18,58 @@ import xyz.redtorch.pb.CoreField.TradeField;
 public interface IModuleAccountStore extends TickDataAware, TransactionAware {
 	/**
 	 * 初始余额
+	 * @param gatewayId		账户ID
 	 * @return
 	 */
 	double getInitBalance(String gatewayId);
 	/**
 	 * 期初余额
+	 * @param gatewayId		账户ID
 	 * @return
 	 */
 	double getPreBalance(String gatewayId);
 	/**
 	 * 累计交易手续费
-	 * @param gatewayId
+	 * @param gatewayId		账户ID
 	 * @return
 	 */
 	double getAccCommission(String gatewayId);
 	/**
 	 * 获取持仓信息
-	 * @param gatewayId
+	 * @param gatewayId		账户ID
 	 * @return
 	 */
 	List<PositionField> getPositions(String gatewayId);
 	/**
 	 * 获取全部未平仓成交
+	 * @param gatewayId		账户ID
 	 * @return
 	 */
 	List<TradeField> getUncloseTrades(String gatewayId);
 	/**
 	 * 获取累计开平仓手数
+	 * @param gatewayId		账户ID
 	 * @return
 	 */
 	int getAccDealVolume(String gatewayId);
 	/**
 	 * 获取累计平仓盈亏
+	 * @param gatewayId		账户ID
 	 * @return
 	 */
 	double getAccCloseProfit(String gatewayId);
+	/**
+	 * 获取最大回撤
+	 * @param gatewayId		账户ID
+	 * @return
+	 */
+	double getMaxDrawBack(String gatewayId);
+	/**
+	 * 获取最大利润
+	 * @param gatewayId
+	 * @return
+	 */
+	double getMaxProfit(String gatewayId);
 	/**
 	 * 新交易日开盘前处理
 	 */

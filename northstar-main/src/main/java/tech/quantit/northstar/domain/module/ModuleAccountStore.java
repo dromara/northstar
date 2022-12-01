@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.springframework.util.Assert;
@@ -45,13 +46,17 @@ public class ModuleAccountStore implements IModuleAccountStore {
 	private Table<String, String, TradePosition> buyPositionTbl = HashBasedTable.create();
 	private Table<String, String, TradePosition> sellPositionTbl = HashBasedTable.create();
 	/* gatewayId -> accCommission */
-	private Map<String, AtomicDouble> accCommissionMap = new HashMap<>();
+	private Map<String, AtomicDouble> accCommissionMap = new HashMap<>();	// 使用Atomic是方便累加操作
 	/* gatewayId -> initBalance*/
 	private Map<String, Double> initBalanceMap = new HashMap<>();
 	/* gatewayId -> accDeal */
-	private Map<String, AtomicInteger> accDealVolMap = new HashMap<>();
+	private Map<String, AtomicInteger> accDealVolMap = new HashMap<>();		// 使用Atomic是方便累加操作
 	/* gatewayId -> accCloseProfit */
-	private Map<String, AtomicDouble> accCloseProfitMap = new HashMap<>();
+	private Map<String, AtomicDouble> accCloseProfitMap = new HashMap<>();	// 使用Atomic是方便累加操作
+	/* gatewayId -> maxProfit */
+	private Map<String, Double> maxProfitMap = new HashMap<>();
+	/* gatewayId -> maxDrawBack */
+	private Map<String, Double> maxDrawBackMap = new HashMap<>();
 	
 	private ModuleStateMachine sm;
 	
@@ -121,15 +126,23 @@ public class ModuleAccountStore implements IModuleAccountStore {
 			TradePosition tp = tbl.get(trade.getGatewayId(), trade.getContract().getUnifiedSymbol());
 			double profit = tp.onTrade(trade);
 			if(FieldUtils.isClose(trade.getOffsetFlag())) {
-				accDealVolMap.putIfAbsent(trade.getGatewayId(), new AtomicInteger());
-				accDealVolMap.get(trade.getGatewayId()).addAndGet(trade.getVolume());
-				accCloseProfitMap.putIfAbsent(trade.getGatewayId(), new AtomicDouble());
-				accCloseProfitMap.get(trade.getGatewayId()).addAndGet(profit);
-				accCommissionMap.putIfAbsent(trade.getGatewayId(), new AtomicDouble());
+				String gatewayId = trade.getGatewayId();
+				accDealVolMap.putIfAbsent(gatewayId, new AtomicInteger());
+				accCloseProfitMap.putIfAbsent(gatewayId, new AtomicDouble());
+				accCommissionMap.putIfAbsent(gatewayId, new AtomicDouble());
+				maxProfitMap.putIfAbsent(gatewayId, 0D);
+				maxDrawBackMap.putIfAbsent(gatewayId, 0D);
+				
+				accDealVolMap.get(gatewayId).addAndGet(trade.getVolume());
+				accCloseProfitMap.get(gatewayId).addAndGet(profit);
 				ContractDefinition contractDef = contractMgr.getContractDefinition(trade.getContract().getUnifiedSymbol());
 				
 				double commission = contractDef.getCommissionInPrice() > 0 ? contractDef.getCommissionInPrice() : contractDef.commissionRate() * trade.getPrice() * trade.getContract().getMultiplier();
-				accCommissionMap.get(trade.getGatewayId()).addAndGet(commission * 2 * trade.getVolume()); // 乘2代表手续费双向计算
+				accCommissionMap.get(gatewayId).addAndGet(commission * 2 * trade.getVolume()); // 乘2代表手续费双向计算
+				double maxProfit = Math.max(getMaxProfit(gatewayId), getAccCloseProfit(gatewayId) - getAccCommission(gatewayId));
+				maxProfitMap.put(gatewayId, maxProfit);
+				double maxDrawBack = Math.min(getMaxDrawBack(gatewayId), getAccCloseProfit(gatewayId) - getAccCommission(gatewayId) - maxProfit);
+				maxDrawBackMap.put(gatewayId, maxDrawBack);
 			}
 		} else if(FieldUtils.isOpen(trade.getOffsetFlag())) {
 			tbl.put(trade.getGatewayId(), trade.getContract().getUnifiedSymbol(), new TradePosition(List.of(trade), closingPolicy));
@@ -196,7 +209,7 @@ public class ModuleAccountStore implements IModuleAccountStore {
 		positionList.addAll(sellPositionTbl.row(gatewayId).values().stream().map(TradePosition::convertToPositionField).toList());
 		return positionList;
 	}
-
+	
 	@Override
 	public ModuleState getModuleState() {
 		return sm.getState();
@@ -215,6 +228,16 @@ public class ModuleAccountStore implements IModuleAccountStore {
 	@Override
 	public double getAccCommission(String gatewayId) {
 		return accCommissionMap.get(gatewayId).get();
+	}
+
+	@Override
+	public double getMaxDrawBack(String gatewayId) {
+		return Optional.ofNullable(maxDrawBackMap.get(gatewayId)).orElse(0D);
+	}
+
+	@Override
+	public double getMaxProfit(String gatewayId) {
+		return Optional.ofNullable(maxProfitMap.get(gatewayId)).orElse(0D);
 	}
 
 }

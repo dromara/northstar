@@ -430,6 +430,8 @@ public class ModulePlaybackContext implements IModuleContext {
 				.accCloseProfit(accStore.getAccCloseProfit(gatewayId))
 				.accDealVolume(accStore.getAccDealVolume(gatewayId))
 				.accCommission(accStore.getAccCommission(gatewayId))
+				.maxDrawBack(accStore.getMaxDrawBack(gatewayId))
+				.maxProfit(accStore.getMaxProfit(gatewayId))
 				.positionDescription(posDescription)
 				.build();
 		accMap.put(gatewayId, accDescription);
