@@ -196,13 +196,13 @@ public class ModulePlaybackContext implements IModuleContext {
 	@Override
 	public synchronized Optional<String> submitOrderReq(ContractField contract, SignalOperation operation, PriceType priceType, int volume,
 			double price) {
-		TickField tick = latestTickMap.get(contract.getUnifiedSymbol());
-		if(Objects.isNull(tick)) {
-			throw new IllegalStateException("没有行情时不应该发送订单。请确保行情预热时，模组应处于【停用】状态");
-		}
 		if(!module.isEnabled()) {
 			mlog.info("策略处于停用状态，忽略委托单");
 			return Optional.empty();
+		}
+		TickField tick = latestTickMap.get(contract.getUnifiedSymbol());
+		if(Objects.isNull(tick)) {
+			throw new IllegalStateException("没有行情时不应该发送订单。请确保行情预热时，模组应处于【停用】状态");
 		}
 		if(mlog.isInfoEnabled()) {			
 			mlog.info("[{} {}] 策略信号：合约【{}】，操作【{}】，价格【{}】，手数【{}】，类型【{}】", 
