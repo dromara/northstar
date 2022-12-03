@@ -56,6 +56,7 @@
         <el-select
           v-model="playbackSettings.unifiedSymbols"
           multiple
+          filterable
           :disabled="playbackSettings.unifiedSymbols.length >= 10"
         >
           <el-option
