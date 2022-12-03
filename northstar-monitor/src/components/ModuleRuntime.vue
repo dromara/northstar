@@ -303,8 +303,8 @@ const makeHoldingSegment = (deal) => {
   return {
     name: 'segment',
     points: [
-      { timestamp: deal.openTrade.tradetimestamp, value: deal.openPrice },
-      { timestamp: deal.closeTrade.tradetimestamp, value: deal.closePrice }
+      { timestamp: deal.openTrade.tradetimestamp + 60000, value: deal.openPrice },
+      { timestamp: deal.closeTrade.tradetimestamp + 60000, value: deal.closePrice }
     ],
     lock: true,
     styles: {
