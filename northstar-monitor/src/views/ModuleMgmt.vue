@@ -188,7 +188,7 @@ export default {
       await moduleApi.removeModule(row.moduleName)
       this.$store.commit(
         'updateList',
-        this.moduleList.filter((item, i) => i !== index)
+        this.moduleList.filter((item) => item.moduleName !== row.moduleName)
       )
     },
     findAll() {
