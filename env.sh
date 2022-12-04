@@ -58,7 +58,7 @@ then
 	cd redis-7.0.0
 	make
 	make install
-	redis-server --daemonize yes --maxmemory 2g
+	redis-server --daemonize yes --maxmemory 2g --maxmemory-policy allkeys-lfu
 else
 	echo "Redis已安装"
 fi
