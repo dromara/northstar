@@ -25,9 +25,9 @@ fi
 if [[ $(which java >/dev/null && echo $?) != 0 ]]; 
 then
 	echo "安装JDK17"
-	cd ~/northstar-env && wget --no-check-certificate https://d6.injdk.cn/openjdk/openjdk/17/openjdk-17.0.1_linux-x64_bin.tar.gz
-	tar -xvf openjdk-17.0.1_linux-x64_bin.tar.gz
-	rm -f openjdk-17.0.1_linux-x64_bin.tar.gz
+	cd ~/northstar-env && wget --no-check-certificate https://download.oracle.com/java/17/archive/jdk-17.0.5_linux-x64_bin.tar.gz
+	tar -xvf jdk-17.0.5_linux-x64_bin.tar.gz
+	rm -f jdk-17.0.5_linux-x64_bin.tar.gz
 	ln -sf ~/northstar-env/$(find jdk* -maxdepth 0 -type d)/bin/* /usr/local/bin/
 else
 	echo "JDK17已安装"
