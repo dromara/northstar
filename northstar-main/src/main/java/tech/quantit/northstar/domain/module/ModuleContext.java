@@ -291,10 +291,18 @@ public class ModuleContext implements IModuleContext{
 		if(Objects.isNull(tick)) {
 			throw new IllegalStateException("没有行情时不应该发送订单");
 		}
+		double orderPrice = switch(priceType) {
+		case ANY_PRICE -> 0;
+		case LAST_PRICE -> tick.getLastPrice();
+		case LIMIT_PRICE -> price;
+		case OPP_PRICE -> operation.isBuy() ? tick.getAskPrice(0) : tick.getBidPrice(0);
+		case WAITING_PRICE -> operation.isBuy() ? tick.getBidPrice(0) : tick.getAskPrice(0);
+		default -> throw new IllegalArgumentException("Unexpected value: " + priceType);
+		};
 		if(mlog.isInfoEnabled()) {
 			mlog.info("[{} {}] 策略信号：合约【{}】，操作【{}】，价格【{}】，手数【{}】，类型【{}】", 
 					tick.getActionDay(), LocalTime.parse(tick.getActionTime(), DateTimeConstant.T_FORMAT_WITH_MS_INT_FORMATTER),
-					contract.getUnifiedSymbol(), operation.text(), price, volume, priceType);
+					contract.getUnifiedSymbol(), operation.text(), orderPrice, volume, priceType);
 		}
 		if(!gatewayMap.containsKey(contract)) {
 			throw new NoSuchElementException(String.format("找不到合约 [%s] 对应网关", contract.getUnifiedSymbol()));
@@ -318,7 +326,7 @@ public class ModuleContext implements IModuleContext{
 				.setGatewayId(gatewayId)
 				.setDirection(OrderUtils.resolveDirection(operation))
 				.setOffsetFlag(closingStrategy.resolveOperation(operation, pf))
-				.setPrice(price)
+				.setPrice(orderPrice)
 				.setVolume(volume)		//	当信号交易量大于零时，优先使用信号交易量
 				.setHedgeFlag(HedgeFlagEnum.HF_Speculation)
 				.setTimeCondition(priceType == PriceType.ANY_PRICE ? TimeConditionEnum.TC_IOC : TimeConditionEnum.TC_GFD)

@@ -13,7 +13,9 @@ public enum PriceType {
 	
 	LAST_PRICE("最新价"),
 	
-	WAITING_PRICE("排队价");
+	WAITING_PRICE("排队价"),
+	
+	LIMIT_PRICE("限价");
 	
 	@Getter
 	private String name;
@@ -29,6 +31,7 @@ public enum PriceType {
 			put("对手价", OPP_PRICE);
 			put("最新价", LAST_PRICE);
 			put("排队价", WAITING_PRICE);
+			put("限价", LIMIT_PRICE);
 		}
 	};
 	public static PriceType parse(String name) {
