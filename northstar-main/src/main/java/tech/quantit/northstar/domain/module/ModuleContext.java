@@ -70,6 +70,7 @@ import tech.quantit.northstar.strategy.api.log.ModuleLoggerFactory;
 import tech.quantit.northstar.strategy.api.utils.bar.BarMerger;
 import tech.quantit.northstar.strategy.api.utils.trade.DealCollector;
 import tech.quantit.northstar.strategy.api.utils.trade.DisposablePriceListener;
+import tech.quantit.northstar.strategy.api.utils.trade.TradeIntent;
 import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.ForceCloseReasonEnum;
@@ -129,6 +130,8 @@ public class ModuleContext implements IModuleContext{
 	private String tradingDay = "";
 	
 	private int numOfMinsPerBar;
+	
+	private TradeIntent tradeIntent;	// 交易意图
 	
 	private DealCollector dealCollector;
 	
@@ -338,6 +341,11 @@ public class ModuleContext implements IModuleContext{
 				.setMinVolume(1)
 				.build()));
 	}
+	
+	@Override
+	public void submitOrderReq(TradeIntent tradeIntent) {
+		this.tradeIntent = tradeIntent;
+	}
 
 	DateFormat fmt = new SimpleDateFormat();
 	private String submitOrderReq(SubmitOrderReqField orderReq) {
@@ -446,7 +454,11 @@ public class ModuleContext implements IModuleContext{
 		if(!bindedSymbolSet.contains(tick.getUnifiedSymbol())) {
 			return;
 		}
-		mlog.trace("TICK信息: {} {} {} {}，最新价: {}", tick.getUnifiedSymbol(), tick.getActionDay(), tick.getActionTime(), tick.getActionTimestamp(), tick.getLastPrice());
+		mlog.trace("TICK信息: {} {} {} {}，最新价: {}", 
+				tick.getUnifiedSymbol(), tick.getActionDay(), tick.getActionTime(), tick.getActionTimestamp(), tick.getLastPrice());
+		if(Objects.nonNull(tradeIntent) && !tradeIntent.hasTerminated()) {
+			tradeIntent.onTick(tick);
+		}
 		if(!StringUtils.equals(tradingDay, tick.getTradingDay())) {
 			tradingDay = tick.getTradingDay();
 		}
@@ -489,6 +501,9 @@ public class ModuleContext implements IModuleContext{
 		}
 		accStore.onOrder(order);
 		tradeStrategy.onOrder(order);
+		if(Objects.nonNull(tradeIntent)) {
+			tradeIntent.onOrder(order);
+		}
 	}
 
 	/* 此处收到的TRADE数据是所有成交回报，需要过滤 */
@@ -513,6 +528,12 @@ public class ModuleContext implements IModuleContext{
 		if(getState().isEmpty() && !listenerSet.isEmpty()) {
 			mlog.info("净持仓为零，止盈止损监听器被清除");
 			listenerSet.clear();
+		}
+		if(Objects.nonNull(tradeIntent)) {
+			tradeIntent.onTrade(trade);
+			if(tradeIntent.hasTerminated()) {
+				tradeIntent = null;
+			}
 		}
 	}
 

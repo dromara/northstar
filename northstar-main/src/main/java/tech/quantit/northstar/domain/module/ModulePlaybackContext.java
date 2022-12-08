@@ -63,6 +63,7 @@ import tech.quantit.northstar.strategy.api.log.ModuleLoggerFactory;
 import tech.quantit.northstar.strategy.api.utils.bar.BarMerger;
 import tech.quantit.northstar.strategy.api.utils.trade.DealCollector;
 import tech.quantit.northstar.strategy.api.utils.trade.DisposablePriceListener;
+import tech.quantit.northstar.strategy.api.utils.trade.TradeIntent;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.HedgeFlagEnum;
 import xyz.redtorch.pb.CoreEnum.PriceSourceEnum;
@@ -246,7 +247,11 @@ public class ModulePlaybackContext implements IModuleContext {
 		return Optional.of(id);
 	}
 	
-	
+	@Override
+	public void submitOrderReq(TradeIntent tradeIntent) {
+		// 回测时直接成交，没有撤单追单逻辑
+		submitOrderReq(tradeIntent.getContract(), tradeIntent.getOperation(), tradeIntent.getPriceType(), tradeIntent.getVolume(), 0);
+	}
 
 	@Override
 	public synchronized IDisposablePriceListener priceTriggerOut(String unifiedSymbol, DirectionEnum openDir,
@@ -514,5 +519,5 @@ public class ModulePlaybackContext implements IModuleContext {
 		this.module = module;
 		tradeStrategy.setContext(this);
 	}
-	
+
 }

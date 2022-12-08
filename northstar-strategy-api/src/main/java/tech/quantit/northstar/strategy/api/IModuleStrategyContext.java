@@ -16,6 +16,7 @@ import tech.quantit.northstar.strategy.api.constant.PriceType;
 import tech.quantit.northstar.strategy.api.indicator.Indicator;
 import tech.quantit.northstar.strategy.api.indicator.Indicator.ValueType;
 import tech.quantit.northstar.strategy.api.indicator.TimeSeriesUnaryOperator;
+import tech.quantit.northstar.strategy.api.utils.trade.TradeIntent;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.TradeField;
@@ -50,6 +51,11 @@ public interface IModuleStrategyContext {
 	 * @return	originOrderId	订单ID
 	 */
 	Optional<String> submitOrderReq(ContractField contract, SignalOperation operation, PriceType priceType, int volume, double price);
+	/**
+	 * 委托下单（根据配置自动处理撤单追单）
+	 * @param tradeIntent		交易意图
+	 */
+	void submitOrderReq(TradeIntent tradeIntent);
 	/**
 	 * 止损止盈操作，达到价位会自动触发平仓逻辑
 	 * 自动失效条件：

@@ -19,6 +19,7 @@ import tech.quantit.northstar.strategy.api.TradeStrategy;
 import tech.quantit.northstar.strategy.api.annotation.StrategicComponent;
 import tech.quantit.northstar.strategy.api.constant.PriceType;
 import tech.quantit.northstar.strategy.api.utils.time.TickBasedTimer;
+import tech.quantit.northstar.strategy.api.utils.trade.TradeIntent;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.OrderField;
 import xyz.redtorch.pb.CoreField.TickField;
@@ -83,6 +84,7 @@ public class BeginnerSampleStrategy implements TradeStrategy{
 	}
 	/***************** 以上如果看不懂，基本可以照搬 *************************/
 	
+	// 从88行至112行 这是自行管理撤单的逻辑。还可以通过下单时使用TradeIntent，直接定义下单意图，让框架来处理撤单追单逻辑，例如138行与148行示例。
 	private TickBasedTimer timer = new TickBasedTimer();
 	private TimerTask runningTask = null;
 	private TimerTask withdrawOrderIfTimeout = new TimerTask() {
@@ -133,10 +135,24 @@ public class BeginnerSampleStrategy implements TradeStrategy{
 				originOrderId = ctx.submitOrderReq(ctx.getContract(tick.getUnifiedSymbol()), op, PriceType.WAITING_PRICE, 1, tick.getLastPrice());
 			}
 			if(ctx.getState() == ModuleState.HOLDING_LONG) {	
-				originOrderId = ctx.submitOrderReq(ctx.getContract(tick.getUnifiedSymbol()), SignalOperation.SELL_CLOSE, PriceType.ANY_PRICE, 1, 0);
+				ctx.submitOrderReq(TradeIntent.builder()
+						.context(ctx)
+						.contract(ctx.getContract(tick.getUnifiedSymbol()))
+						.operation(SignalOperation.SELL_CLOSE)
+						.priceType(PriceType.WAITING_PRICE)
+						.volume(1)
+						.timeout(3000)
+						.build());
 			}
 			if(ctx.getState() == ModuleState.HOLDING_SHORT) {			
-				originOrderId = ctx.submitOrderReq(ctx.getContract(tick.getUnifiedSymbol()), SignalOperation.BUY_CLOSE, PriceType.ANY_PRICE, 1, 0);
+				ctx.submitOrderReq(TradeIntent.builder()
+						.context(ctx)
+						.contract(ctx.getContract(tick.getUnifiedSymbol()))
+						.operation(SignalOperation.BUY_CLOSE)
+						.priceType(PriceType.WAITING_PRICE)
+						.volume(1)
+						.timeout(3000)
+						.build());
 			}
 		}
 	}
