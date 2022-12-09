@@ -156,6 +156,7 @@ public class ModuleContext implements IModuleContext{
 				indicatorValBufQMap.get(indicator).poll();
 			}
 			if(indicator.isReady() && indicator.timeSeriesValue(0).getTimestamp() == bar.getActionTimestamp()	// 只有时间戳一致才会被记录
+					&& (indicator.value(0) != Double.MIN_VALUE && indicator.value(0) != Double.MAX_VALUE)		// 忽略潜在的初始值
 					&& (BarUtils.isEndOfTheTradingDay(bar) || indicator.ifPlotPerBar() || !indicator.timeSeriesValue(0).isUnsettled())) {		
 				indicatorValBufQMap.get(indicator).offer(indicator.timeSeriesValue(0));	
 			}
