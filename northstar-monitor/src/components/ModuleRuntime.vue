@@ -254,11 +254,14 @@
                   @change="updateIndicator"
                 />
               </el-form-item>
-              <el-form-item style="margin-bottom: 0" label="线形" size="mini">
+              <el-form-item label="线形" size="mini">
                 <el-select style="width: 100px" v-model="indicator.lineStyle">
                   <el-option value="line" label="折线" key="1">折线</el-option>
                   <el-option value="bar" label="柱形" key="2">柱形</el-option>
                 </el-select>
+              </el-form-item>
+              <el-form-item style="margin-bottom: 0">
+                  <el-button style="float:right" type="warning" @click.native="clearIndicators">清空指标</el-button>
               </el-form-item>
             </el-form>
             <el-button
@@ -632,6 +635,12 @@ export default {
         .forEach((i) => {
           this.chart.createShape(makeHoldingSegment(i), 'candle_pane')
         })
+    },
+    clearIndicators(){
+      Object.keys(this.indicatorMap).forEach(indicatorName => {
+        this.indicator = this.indicatorMap[indicatorName]
+        this.removeIndicator()
+      })
     },
     loadIndicators() {
       const dataStr =
