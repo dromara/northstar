@@ -195,22 +195,24 @@ export default {
       moduleApi.getAllModules().then((results) => {
         this.$store.commit('updateList', results)
         this.moduleList.map((item) => {
-          moduleApi.getModuleRuntime(item.moduleName).then(
-            (rt) => {
-              this.moduleList.find((item, index, array) => {
-                if (item.moduleName === rt.moduleName) {
-                  array[index] = Object.assign({ runtime: rt }, item)
-                  this.$store.commit('updateList', [...array])
-                }
-              })
-            },
-            (e) => {
-              console.warn('请求异常：' + e.message)
-              console.log('稍后自动重试')
-              clearTimeout(this.timer)
-              this.timer = setTimeout(this.findAll, 10000)
-            }
-          )
+          const retriableRequest = () => {
+            moduleApi.getModuleRuntime(item.moduleName).then(
+              (rt) => {
+                this.moduleList.find((item, index, array) => {
+                  if (item.moduleName === rt.moduleName) {
+                    array[index] = Object.assign({ runtime: rt }, item)
+                    this.$store.commit('updateList', [...array])
+                  }
+                })
+              },
+              (e) => {
+                console.warn('请求异常：' + e.message)
+                console.log('10秒稍后自动重试')
+                setTimeout(retriableRequest, 10000)
+              }
+            )
+          }
+          retriableRequest()
           return item
         })
       })

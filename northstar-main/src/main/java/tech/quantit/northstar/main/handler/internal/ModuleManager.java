@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.event.AbstractEventHandler;
 import tech.quantit.northstar.common.event.NorthstarEvent;
 import tech.quantit.northstar.common.event.NorthstarEventType;
+import tech.quantit.northstar.common.exception.NoSuchElementException;
 import tech.quantit.northstar.gateway.api.domain.LatencyDetector;
 import tech.quantit.northstar.gateway.sim.trade.SimMarket;
 import tech.quantit.northstar.strategy.api.IModule;
@@ -55,7 +56,7 @@ public class ModuleManager extends AbstractEventHandler{
 	
 	public IModule getModule(String name) {
 		if(!moduleMap.containsKey(name)) {
-			throw new IllegalStateException("没有找到模组：" + name);
+			throw new NoSuchElementException("没有找到模组：" + name);
 		}
 		return moduleMap.get(name);
 	}

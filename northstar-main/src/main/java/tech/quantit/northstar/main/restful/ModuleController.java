@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 
+import tech.quantit.northstar.common.constant.ReturnCode;
+import tech.quantit.northstar.common.exception.NoSuchElementException;
 import tech.quantit.northstar.common.model.ComponentField;
 import tech.quantit.northstar.common.model.ComponentMetaInfo;
 import tech.quantit.northstar.common.model.MockTradeDescription;
@@ -129,7 +131,11 @@ public class ModuleController {
 	@GetMapping("/rt/info")
 	@NotNull(message = "模组名称不能为空")
 	public ResultBean<ModuleRuntimeDescription> getModuleRealTimeInfo(String name){
-		return new ResultBean<>(service.getModuleRealTimeInfo(name));
+		try {			
+			return new ResultBean<>(service.getModuleRealTimeInfo(name));
+		} catch(NoSuchElementException e) {
+			return new ResultBean<>(ReturnCode.NO_SUCH_ELEMENT_EXCEPTION, "模组加载中");
+		}
 	}
 	
 	/**
