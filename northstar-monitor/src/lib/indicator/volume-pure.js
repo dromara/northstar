@@ -8,6 +8,7 @@ exports.default = void 0
 var _default = {
   name: 'CJL',
   series: 'volume',
+  precision: 0,
   shouldCheckParamCount: false,
   shouldFormatBigNumber: false,
   plots: [

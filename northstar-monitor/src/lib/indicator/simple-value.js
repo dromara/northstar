@@ -65,6 +65,7 @@ exports.default = (indicator, colorIndex) => {
     name: 'VAL_' + name,
     shortName: '模组计算值',
     plots: [plot],
+    precision: 2,
     styles: {
       margin: {
         top: 0.2,
