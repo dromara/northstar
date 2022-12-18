@@ -68,7 +68,7 @@ public class ModuleManager extends AbstractEventHandler{
 	}
 
 	@Override
-	protected synchronized void doHandle(NorthstarEvent e) {
+	protected void doHandle(NorthstarEvent e) {
 		if(latencyDetector != null && e.getData() instanceof TickField tick) {
 			// 分发到模组前的检测点
 			latencyDetector.getCheckpoint(0).sampling(tick);
