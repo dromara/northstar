@@ -7,7 +7,6 @@ import tech.quantit.northstar.common.event.NorthstarEventType;
 import tech.quantit.northstar.gateway.sim.trade.SimMarket;
 import xyz.redtorch.pb.CoreField.TickField;
 
-@Deprecated
 public class SimMarketHandler extends AbstractEventHandler implements GenericEventHandler{
 
 	private SimMarket market;

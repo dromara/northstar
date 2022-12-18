@@ -1,5 +1,8 @@
 package tech.quantit.northstar.gateway.sim.trade;
 
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 
@@ -16,6 +19,8 @@ public class SimMarket {
 	 */
 	private Table<String, String, SimTradeGateway> simGatewayMap = HashBasedTable.create();
 	
+	private Executor exec = Executors.newSingleThreadExecutor();	// 增加一个工作线程解耦TICK事件可能导致的死锁问题
+	
 	public synchronized void addGateway(String mdGatewayId, SimTradeGateway accountGateway) {
 		String simGatewayId = accountGateway.getGatewaySetting().getGatewayId();
 		simGatewayMap.put(mdGatewayId, simGatewayId, accountGateway);
@@ -27,10 +32,12 @@ public class SimMarket {
 	}
 	
 	public void onTick(TickField tick) {
-		simGatewayMap.values().stream()
-			.map(SimTradeGatewayLocal.class::cast)
-			.map(SimTradeGatewayLocal::getAccount)
-			.forEach(simAccount -> simAccount.onTick(tick));
+		exec.execute(() ->
+			simGatewayMap.values().stream()
+				.map(SimTradeGatewayLocal.class::cast)
+				.map(SimTradeGatewayLocal::getAccount)
+				.forEach(simAccount -> simAccount.onTick(tick))
+		);
 	}
 	
 }
