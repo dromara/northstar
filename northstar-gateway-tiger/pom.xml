@@ -5,7 +5,50 @@
     <artifactId>northstar</artifactId>
     <version>4.3</version>
   </parent>
-  <groupId>tech.quantit</groupId>
   <artifactId>northstar-gateway-tiger</artifactId>
-  <version>4.3</version>
+  
+  <dependencies>
+  	<dependency>
+			<groupId>tech.quantit</groupId>
+			<artifactId>northstar-gateway-api</artifactId>
+		</dependency>
+		<dependency>
+		    <groupId>com.alibaba</groupId>
+		    <artifactId>fastjson</artifactId>
+		</dependency>
+		<dependency>
+		    <groupId>commons-io</groupId>
+		    <artifactId>commons-io</artifactId>
+		</dependency>
+		<dependency>
+		    <groupId>org.apache.commons</groupId>
+		    <artifactId>commons-lang3</artifactId>
+		</dependency>
+		<dependency>
+	        <groupId>org.projectlombok</groupId>
+	        <artifactId>lombok</artifactId>
+	    </dependency>
+	    <dependency>
+		    <groupId>org.slf4j</groupId>
+		    <artifactId>slf4j-api</artifactId>
+		</dependency>
+		<dependency>
+		  <groupId>io.github.tigerbrokers</groupId>
+		  <artifactId>openapi-java-sdk</artifactId>
+		  <version>1.4.9</version>
+		</dependency>
+  </dependencies>
+  
+  <build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
 </project>

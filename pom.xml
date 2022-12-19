@@ -96,6 +96,11 @@
 			</dependency>
 			<dependency>
 				<groupId>tech.quantit</groupId>
+				<artifactId>northstar-gateway-tiger</artifactId>
+				<version>${northstar-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>tech.quantit</groupId>
 				<artifactId>northstar-main</artifactId>
 				<version>${northstar-version}</version>
 			</dependency>

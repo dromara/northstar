@@ -2,20 +2,22 @@ package tech.quantit.northstar.gateway.playback;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
 
 import tech.quantit.northstar.common.GatewayType;
 import tech.quantit.northstar.common.constant.GatewayUsage;
 import tech.quantit.northstar.gateway.api.GatewayTypeProvider;
 
+@DependsOn({"playbackGatewayFactory"})
 @Component
 public class PLAYBACK implements GatewayType, InitializingBean{
 
 	@Autowired
-	GatewayTypeProvider gtp;
+	private GatewayTypeProvider gtp;
 	
 	@Autowired
-	PlaybackGatewayFactory factory;
+	private PlaybackGatewayFactory factory;
 	
 	@Override
 	public GatewayUsage[] usage() {
