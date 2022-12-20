@@ -11,9 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import lombok.extern.slf4j.Slf4j;
-import tech.quantit.northstar.CTP;
 import tech.quantit.northstar.common.IHolidayManager;
 import tech.quantit.northstar.data.IMarketDataRepository;
+import tech.quantit.northstar.gateway.ctp.CTP;
 
 /**
  * 法定节假日管理器

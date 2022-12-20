@@ -27,7 +27,6 @@ import com.corundumstudio.socketio.SocketIOServer;
 
 import cn.hutool.crypto.digest.MD5;
 import common.TestGatewayFactory;
-import tech.quantit.northstar.CtpGatewaySettings;
 import tech.quantit.northstar.common.constant.ClosingPolicy;
 import tech.quantit.northstar.common.constant.ModuleType;
 import tech.quantit.northstar.common.constant.ModuleUsage;
@@ -41,6 +40,7 @@ import tech.quantit.northstar.common.model.ModuleAccountDescription;
 import tech.quantit.northstar.common.model.ModuleDescription;
 import tech.quantit.northstar.common.model.NsUser;
 import tech.quantit.northstar.domain.gateway.ContractManager;
+import tech.quantit.northstar.gateway.ctp.CtpGatewaySettings;
 import tech.quantit.northstar.main.NorthstarApplication;
 import test.common.TestFieldFactory;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;

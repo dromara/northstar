@@ -24,11 +24,11 @@ import com.corundumstudio.socketio.SocketIOServer;
 
 import cn.hutool.crypto.digest.MD5;
 import common.TestGatewayFactory;
-import tech.quantit.northstar.CtpGatewaySettings;
 import tech.quantit.northstar.common.constant.GatewayUsage;
 import tech.quantit.northstar.common.constant.ReturnCode;
 import tech.quantit.northstar.common.model.GatewayDescription;
 import tech.quantit.northstar.common.model.NsUser;
+import tech.quantit.northstar.gateway.ctp.CtpGatewaySettings;
 import tech.quantit.northstar.main.NorthstarApplication;
 import tech.quantit.northstar.main.handler.broadcast.SocketIOMessageEngine;
 

@@ -2,10 +2,10 @@ package common;
 
 import java.util.List;
 
-import tech.quantit.northstar.CtpGatewaySettings;
 import tech.quantit.northstar.common.constant.GatewayUsage;
 import tech.quantit.northstar.common.model.GatewayDescription;
 import tech.quantit.northstar.common.model.GatewaySettings;
+import tech.quantit.northstar.gateway.ctp.CtpGatewaySettings;
 
 public class TestGatewayFactory {
 
