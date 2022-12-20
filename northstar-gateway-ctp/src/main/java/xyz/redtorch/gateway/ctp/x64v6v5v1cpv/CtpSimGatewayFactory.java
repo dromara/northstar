@@ -3,7 +3,6 @@ package xyz.redtorch.gateway.ctp.x64v6v5v1cpv;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson2.JSONObject;
 
-import tech.quantit.northstar.CtpGatewaySettings;
 import tech.quantit.northstar.common.IDataServiceManager;
 import tech.quantit.northstar.common.constant.GatewayUsage;
 import tech.quantit.northstar.common.event.FastEventEngine;
@@ -11,6 +10,7 @@ import tech.quantit.northstar.common.model.GatewayDescription;
 import tech.quantit.northstar.gateway.api.Gateway;
 import tech.quantit.northstar.gateway.api.GatewayFactory;
 import tech.quantit.northstar.gateway.api.domain.GlobalMarketRegistry;
+import tech.quantit.northstar.gateway.ctp.CtpGatewaySettings;
 import xyz.redtorch.pb.CoreEnum.GatewayAdapterTypeEnum;
 import xyz.redtorch.pb.CoreEnum.GatewayTypeEnum;
 import xyz.redtorch.pb.CoreField.GatewaySettingField;

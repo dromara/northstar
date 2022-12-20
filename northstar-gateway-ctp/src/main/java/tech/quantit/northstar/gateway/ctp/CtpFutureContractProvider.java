@@ -1,4 +1,4 @@
-package tech.quantit.northstar;
+package tech.quantit.northstar.gateway.ctp;
 
 import java.util.Collection;
 import java.util.List;
@@ -14,8 +14,8 @@ import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
 
 @Component
-public class CtpOptionContractProvider implements ICategorizedContractProvider {
-	
+public class CtpFutureContractProvider implements ICategorizedContractProvider {
+
 	@Autowired
 	IContractManager contractMgr;
 	
@@ -29,14 +29,14 @@ public class CtpOptionContractProvider implements ICategorizedContractProvider {
 	
 	@Override
 	public String nameOfCategory() {
-		return "CTP期权";
+		return "CTP期货";
 	}
 
 	@Override
 	public List<ContractDefinition> loadContractDefinitions() {
 		return contractMgr.getAllContractDefinitions()
 				.stream()
-				.filter(item -> item.getGatewayType().equals(ctp.name()) && item.getProductClass() == ProductClassEnum.OPTION)
+				.filter(item -> item.getGatewayType().equals(ctp.name()) && item.getProductClass() == ProductClassEnum.FUTURES)
 				.toList();
 	}
 
@@ -48,7 +48,5 @@ public class CtpOptionContractProvider implements ICategorizedContractProvider {
 				.flatMap(Collection::stream)
 				.toList();
 	}
-
-	
 
 }

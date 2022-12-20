@@ -1,4 +1,4 @@
-package tech.quantit.northstar;
+package tech.quantit.northstar.gateway.ctp;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;

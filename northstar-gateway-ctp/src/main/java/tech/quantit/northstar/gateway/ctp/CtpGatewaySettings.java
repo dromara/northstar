@@ -1,4 +1,4 @@
-package tech.quantit.northstar;
+package tech.quantit.northstar.gateway.ctp;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,13 +15,13 @@ import tech.quantit.northstar.gateway.api.GatewaySettingsMetaInfoProvider;
 @Getter
 @Setter
 @Component
-public class CtpSimGatewaySettings extends DynamicParams implements GatewaySettings, InitializingBean {
-
+public class CtpGatewaySettings extends DynamicParams implements GatewaySettings, InitializingBean{
+	
 	@Autowired
 	private GatewaySettingsMetaInfoProvider pvd;
 	
 	@Autowired
-	private CTP_SIM ctpSim;
+	private CTP ctp;
 
 	@Setting(label = "网关账户", order = 10)
 	private String userId;
@@ -29,12 +29,11 @@ public class CtpSimGatewaySettings extends DynamicParams implements GatewaySetti
 	@Setting(label = "网关密码", type = FieldType.PASSWORD, order = 20)
 	private String password;
 	
-	@Setting(label = "期货公司", type = FieldType.SELECT, options = {"宏源仿真"}, optionsVal = {"3070"}, placeholder = "请选择", order = 30)
+	@Setting(label = "期货公司", type = FieldType.SELECT, options = {"平安主席", "宏源主席", "宏源次席"}, optionsVal = {"5200", "1080", "2070"}, placeholder = "请选择", order = 30)
 	private String brokerId;
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		pvd.addSettings(ctpSim.name(), this);
+		pvd.addSettings(ctp.name(), this);
 	}
-
 }
