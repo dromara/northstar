@@ -76,6 +76,7 @@ import tech.quantit.northstar.gateway.api.domain.time.PeriodHelperFactory;
 import tech.quantit.northstar.gateway.playback.PlaybackGatewayFactory;
 import tech.quantit.northstar.gateway.sim.trade.SimGatewayFactory;
 import tech.quantit.northstar.gateway.sim.trade.SimMarket;
+import tech.quantit.northstar.gateway.tiger.TigerGatewayFactory;
 import tech.quantit.northstar.main.ExternalJarClassLoader;
 import tech.quantit.northstar.main.SpringContextUtil;
 import tech.quantit.northstar.main.interceptor.AuthorizationInterceptor;
@@ -245,6 +246,11 @@ public class AppConfig implements WebMvcConfigurer {
 	public GatewayFactory simGatewayFactory(FastEventEngine fastEventEngine, SimMarket simMarket,
 			ISimAccountRepository accRepo, GlobalMarketRegistry registry, ContractManager contractMgr) {
 		return new SimGatewayFactory(fastEventEngine, simMarket, accRepo, registry, contractMgr);
+	}
+	
+	@Bean
+	public GatewayFactory tigerGatewayFactory(FastEventEngine fastEventEngine, IContractManager contractMgr) {
+		return new TigerGatewayFactory();
 	}
 
 	@Bean
