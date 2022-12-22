@@ -3,9 +3,7 @@ package tech.quantit.northstar.main.config;
 import java.net.SocketException;
 import java.util.Base64;
 
-import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,11 +17,8 @@ import tech.quantit.northstar.main.utils.InetAddressUtils;
 
 @Slf4j
 @Configuration
-public class SocketIOServerConfig implements DisposableBean, InitializingBean {
+public class SocketIOServerConfig implements InitializingBean {
 
-	@Autowired
-	private SocketIOServer socketServer;
-	
 	private UserInfo userInfo = new UserInfo();
 	
 	@Bean
@@ -62,11 +57,6 @@ public class SocketIOServerConfig implements DisposableBean, InitializingBean {
 	@Bean
 	public SpringAnnotationScanner springAnnotationScanner(SocketIOServer socketServer) {
 		return new SpringAnnotationScanner(socketServer);
-	}
-
-	@Override
-	public void destroy() throws Exception {
-		socketServer.stop();
 	}
 
 	@Override
