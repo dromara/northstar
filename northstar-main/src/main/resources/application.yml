@@ -1,5 +1,7 @@
 server:
   port: 80
+  servlet:    session:      cookie:        same-site: none
+        secure: true
 
 northstar: 
   # 行情延时探测（由于有多余的性能损耗，生产环境建议禁用）
