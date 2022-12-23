@@ -38,3 +38,4 @@ build/
 ### VS Code ###
 .vscode/
 /pom.xml.versionsBackup
+/northstar-dist/

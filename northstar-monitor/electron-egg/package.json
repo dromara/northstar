@@ -1,6 +1,6 @@
 {
-  "name": "ee",
-  "version": "2.4.0",
+  "name": "northstar-desktop",
+  "version": "4.4.0",
   "description": "A fast, desktop software development framework",
   "main": "main.js",
   "scripts": {
@@ -28,11 +28,10 @@
     "re-sqlite": "electron-rebuild -f -w better-sqlite3"
   },
   "build": {
-    "productName": "Northstar",
-    "appId": "northstar",
-    "copyright": "quantit.tech",
+    "productName": "northstar-monitor",
+    "appId": "northstar-monitor",
     "directories": {
-      "output": "out"
+      "output": "../../northstar-dist"
     },
     "asar": true,
     "files": [
@@ -58,7 +57,7 @@
       "installerHeaderIcon": "./build/icons/icon.ico",
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "EE框架"
+      "shortcutName": "Northstar"
     },
     "publish": [
       {

@@ -11,7 +11,7 @@
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
     "install-all": "npm i && cd electron-egg && npm i",
-    "build-all": "npm run build && cd electron-egg && npm run build-w"
+    "build-all": "npm run build && cd electron-egg && npm run rd && npm run build-wz-64"
   },
   "dependencies": {
     "axios": "^0.21.1",

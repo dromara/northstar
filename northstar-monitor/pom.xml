@@ -4,13 +4,26 @@
 	<parent>
 		<groupId>tech.quantit</groupId>
 		<artifactId>northstar</artifactId>
-		<version>4.3</version>
+		<version>4.4</version>
 	</parent>
 	<artifactId>northstar-monitor</artifactId>
 	<name>northstar-monitor</name>
 
 	<build>
 		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-clean-plugin</artifactId>
+			    <configuration>
+			    	<followSymLinks>false</followSymLinks>
+			        <filesets>
+			            <fileset>
+			            	<directory>${basedir}/../northstar-main/src/main/resources/static</directory>
+			            	<directory>${basedir}/../northstar-dist</directory>
+			            </fileset>
+			        </filesets>
+			    </configuration>
+			</plugin>
 			<plugin>
 			    <groupId>org.codehaus.mojo</groupId>
 			    <artifactId>exec-maven-plugin</artifactId>
@@ -24,7 +37,8 @@
 			        <configuration>
 			          <executable>npm</executable>
 			          <arguments>
-			            <argument>install</argument>
+			          	<argument>run</argument>
+			            <argument>install-all</argument>
 			          </arguments>
 			        </configuration>
 			      </execution>
@@ -39,24 +53,12 @@
 			          <executable>npm</executable>
 			          <arguments>
 			            <argument>run</argument>
-			            <argument>build</argument>
+			            <argument>build-all</argument>
 			          </arguments>
 			        </configuration>
 			      </execution>
 			    </executions>
 			  </plugin>
-			  <plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-clean-plugin</artifactId>
-			    <configuration>
-			    	<followSymLinks>false</followSymLinks>
-			        <filesets>
-			            <fileset>
-			            	<directory>${basedir}/../northstar-main/src/main/resources/static</directory>
-			            </fileset>
-			        </filesets>
-			    </configuration>
-			</plugin>
 		</plugins>
 	</build>
 

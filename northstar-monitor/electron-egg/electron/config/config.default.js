@@ -146,7 +146,7 @@ module.exports = (appInfo) => {
     },
     tray: {
       enable: true,
-      title: 'EE程序',
+      title: 'Northstar盈富量化交易平台',
       icon: '/public/images/tray_logo.png'
     },
     security: {
