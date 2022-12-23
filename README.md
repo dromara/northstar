@@ -64,3 +64,5 @@
 
 ## 特别鸣谢
 [redtorch项目](https://github.com/sun0x00/redtorch)作者。本项目演化自redtorch，并保留了小部分其源码，同时感谢redtorch作者的技术分享。
+[klinechart项目](https://klinecharts.com/zh-CN)作者，提供了优秀的K线前端库，并提供了相关的技术支持。
+[electron-egg项目](https://www.yuque.com/u34495/mivcfg)作者，提供了简便易于上手的桌面化生成方案，并提供了相关的技术支持。
