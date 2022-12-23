@@ -34,7 +34,7 @@ export default {
   data() {
     return {
       socket: null,
-      wsHost: location.hostname
+      wsHost: ''
     }
   },
   watch: {
@@ -48,8 +48,9 @@ export default {
     }
   },
   async mounted() {
-    if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
-      fetch('/redirect')
+    this.wsHost = window.remoteHost || location.hostname
+    if (this.wsHost === 'localhost' || this.wsHost === '127.0.0.1') {
+      fetch(`https://${this.wsHost}/redirect`)
         .then((res) => res.json())
         .then((res) => {
           this.wsHost = res
@@ -69,12 +70,13 @@ export default {
   },
   methods: {
     initSocket() {
-      const wsEndpoint = `ws://${this.wsHost}:51888`
+      const wsEndpoint = `wss://${this.wsHost}:51888`
       const token = this.$route.query.auth
       console.log('准备连接websocket：' + wsEndpoint, ' token:' + token)
       this.socket = io(wsEndpoint, {
         transports: ['websocket'],
-        query: { auth: token }
+        query: { auth: token },
+        rejectUnauthorized : false 
       })
       this.socket.on('TICK', (data) => {
         this.$nextTick(() => {
