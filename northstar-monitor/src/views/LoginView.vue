@@ -50,7 +50,7 @@ export default {
     }
   },
   mounted() {
-    this.showHost = !!(window.require && window.require('electron'))
+    this.showHost = !!(window.require && window.require('electron')) || this.$route.query.desktop
     if(!this.showHost){
       tryService()
     }
