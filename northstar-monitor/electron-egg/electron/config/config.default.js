@@ -45,11 +45,11 @@ module.exports = (appInfo) => {
    * 主窗口
    */
   config.windowsOption = {
-    title: 'EE框架',
-    width: 980,
-    height: 650,
-    minWidth: 800,
-    minHeight: 650,
+    title: 'Northstar盈富量化交易平台',
+    width: 1920,
+    height: 1080,
+    minWidth: 1024,
+    minHeight: 768,
     webPreferences: {
       //webSecurity: false, // 跨域问题 -> 打开注释
       contextIsolation: false, // false -> 可在渲染进程中使用electron的api，true->需要bridge.js(contextBridge)
@@ -100,7 +100,7 @@ module.exports = (appInfo) => {
   config.httpServer = {
     enable: false,
     https: {
-      enable: false, 
+      enable: true, 
       key: '/public/ssl/localhost+1.key',
       cert: '/public/ssl/localhost+1.pem'
     },

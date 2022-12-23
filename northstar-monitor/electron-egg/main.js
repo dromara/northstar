@@ -1,5 +1,6 @@
 const Appliaction = require('ee-core').Appliaction;
-
+const { app } = require('electron')
+app.commandLine.appendSwitch('ignore-certificate-errors')    //忽略证书的检测
 class Main extends Appliaction {
 
   constructor() {

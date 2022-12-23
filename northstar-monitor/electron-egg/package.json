@@ -22,15 +22,15 @@
     "build-l-armv7l": "electron-builder -l=deb --armv7l",
     "build-lr-64": "electron-builder -l=rpm --x64",
     "build-lp-64": "electron-builder -l=pacman --x64",
-    "rd": "ee-core rd --dist_dir=./frontend/dist",
+    "rd": "ee-core rd --dist_dir=../dist",
     "encrypt": "ee-core encrypt",
     "rebuild": "electron-rebuild",
     "re-sqlite": "electron-rebuild -f -w better-sqlite3"
   },
   "build": {
-    "productName": "ee",
-    "appId": "com.electron.ee",
-    "copyright": "wallace5303",
+    "productName": "Northstar",
+    "appId": "northstar",
+    "copyright": "quantit.tech",
     "directories": {
       "output": "out"
     },
@@ -40,8 +40,7 @@
       "!frontend/",
       "!run/",
       "!logs/",
-      "!data/",
-      "!electron/"
+      "!data/"
     ],
     "extraResources": {
       "from": "./build/extraResources/",

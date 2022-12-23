@@ -1,6 +1,6 @@
 {
   "name": "northstar-monitor",
-  "version": "4.3.10",
+  "version": "4.4.0",
   "private": true,
   "main": "electron/main.js",
   "scripts": {
@@ -9,7 +9,9 @@
     "start-mock": "cross-env MOCK=true npm start",
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "install-all": "npm i && cd electron-egg && npm i",
+    "build-all": "npm run build && cd electron-egg && npm run build-w"
   },
   "dependencies": {
     "axios": "^0.21.1",

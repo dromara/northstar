@@ -3,9 +3,7 @@
 /*
  * test
  */
-module.exports = (appInfo) => {
+module.exports = () => {
   return {
-    openDevTools: true,
-    openAppMenu: 'dev-show'
   }
 }
