@@ -8,12 +8,12 @@
 
 describe('网关管理-测试', () => {
     before(() => {
-        cy.visit('http://localhost:8090')
+        cy.visit('https://localhost:8090')
         cy.contains('用户名').parent().find('input').type('admin')
         cy.contains('密码').parent().find('input').type('123456')
         cy.contains('登陆').click()
         cy.wait(500)
-        cy.visit('http://localhost:8090/#/mktgateway')
+        cy.visit('https://localhost:8090/#/mktgateway')
         cy.wait(300)
     })
 
@@ -56,7 +56,7 @@ describe('网关管理-测试', () => {
         })
 
         after(() => {
-            cy.request('http://localhost/resetDB')
+            cy.request('https://localhost/resetDB')
         })
     })
     
@@ -68,7 +68,7 @@ describe('网关管理-测试', () => {
             cy.get('.el-dialog').contains('订阅合约').parent().find('.el-select').click()
             cy.get('.el-select-dropdown').contains('模拟合约').click()
             cy.get('.el-dialog').filter(':visible').find('button').last().click()
-            cy.visit('http://localhost:8090/#/tdgateway')
+            cy.visit('https://localhost:8090/#/tdgateway')
             cy.wait(300)
         })
         beforeEach(() => {
@@ -110,21 +110,21 @@ describe('网关管理-测试', () => {
         })
 
         after(() => {
-            cy.request('http://localhost/resetDB')
+            cy.request('https://localhost/resetDB')
         })
     })
 
     describe('网关管理-级联测试', () => {
         beforeEach(() => {
             cy.Cookies.preserveOnce('JSESSIONID')
-            cy.visit('http://localhost:8090/#/mktgateway')
+            cy.visit('https://localhost:8090/#/mktgateway')
             cy.contains('新建').click()
             cy.get('.el-dialog').contains('网关类型').parent().find('.el-select').click()
             cy.get('.el-select-dropdown').contains('SIM').click()
             cy.get('.el-dialog').contains('订阅合约').parent().find('.el-select').click()
             cy.get('.el-select-dropdown').contains('模拟合约').click()
             cy.get('.el-dialog').filter(':visible').find('button').last().click()
-            cy.visit('http://localhost:8090/#/tdgateway')
+            cy.visit('https://localhost:8090/#/tdgateway')
             cy.wait(300)
             cy.get('button').contains('新建').click()
             cy.get('.el-dialog').contains('账户ID').parent().find('input').type('testAccount')
@@ -133,7 +133,7 @@ describe('网关管理-测试', () => {
             cy.get('.el-dialog').contains('行情网关').parent().find('.el-select').click()
             cy.get('.el-select-dropdown').filter(':visible').last().contains('SIM').click()
             cy.get('.el-dialog').filter(':visible').find('button').last().click()
-            cy.visit('http://localhost:8090/#/mktgateway')
+            cy.visit('https://localhost:8090/#/mktgateway')
             cy.wait(300)
         })
         it('当行情网关被账户网关绑定时，行情网关不能被删除', () => {
@@ -143,8 +143,8 @@ describe('网关管理-测试', () => {
             cy.get('.el-message--error').contains('请先解除绑定')
         })
         after(() => {
-            cy.request('DELETE', 'http://localhost/northstar/gateway?gatewayId=testAccount')
-            cy.request('http://localhost/resetDB')
+            cy.request('DELETE', 'https://localhost/northstar/gateway?gatewayId=testAccount')
+            cy.request('https://localhost/resetDB')
         })
     })
 })
