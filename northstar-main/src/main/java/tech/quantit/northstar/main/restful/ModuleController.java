@@ -3,8 +3,6 @@ package tech.quantit.northstar.main.restful;
 import java.util.List;
 import java.util.Map;
 
-import javax.validation.constraints.NotNull;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -63,8 +61,8 @@ public class ModuleController {
 	 * @return
 	 */
 	@PostMapping("/validate")
-	@NotNull(message = "模组不能为空")
 	public ResultBean<Boolean> validateModuleSettings(@RequestBody ModuleDescription module){
+		Assert.notNull(module, "模组对象不能为空");
 		return new ResultBean<>(service.validateModule(module));
 	}
 	
@@ -75,8 +73,8 @@ public class ModuleController {
 	 * @throws Exception
 	 */
 	@PostMapping
-	@NotNull(message = "模组不能为空")
 	public ResultBean<ModuleDescription> createModule(@RequestBody ModuleDescription module) throws Exception{
+		Assert.notNull(module, "模组对象不能为空");
 		return new ResultBean<>(service.createModule(module));
 	}
 	
@@ -87,8 +85,8 @@ public class ModuleController {
 	 * @throws Exception
 	 */
 	@PutMapping
-	@NotNull(message = "模组不能为空")
 	public ResultBean<ModuleDescription> updateModule(@RequestBody ModuleDescription module, boolean reset) throws Exception{
+		Assert.notNull(module, "模组对象不能为空");
 		return new ResultBean<>(service.modifyModule(module, reset));
 	}
 	
@@ -107,8 +105,8 @@ public class ModuleController {
 	 * @return		返回删除结果提示
 	 */
 	@DeleteMapping
-	@NotNull(message = "模组名称不能为空")
 	public ResultBean<Boolean> removeModule(String name){
+		Assert.notNull(name, "模组名称不能为空");
 		return new ResultBean<>(service.removeModule(name));
 	}
 	
@@ -118,8 +116,8 @@ public class ModuleController {
 	 * @return	返回更新后状态
 	 */
 	@GetMapping("/toggle")
-	@NotNull(message = "模组名称不能为空")
 	public ResultBean<Boolean> toggleModuleState(String name){
+		Assert.notNull(name, "模组名称不能为空");
 		return new ResultBean<>(service.toggleModule(name));
 	}
 	
@@ -129,8 +127,8 @@ public class ModuleController {
 	 * @return
 	 */
 	@GetMapping("/rt/info")
-	@NotNull(message = "模组名称不能为空")
 	public ResultBean<ModuleRuntimeDescription> getModuleRealTimeInfo(String name){
+		Assert.notNull(name, "模组名称不能为空");
 		try {			
 			return new ResultBean<>(service.getModuleRealTimeInfo(name));
 		} catch(NoSuchElementException e) {
@@ -144,8 +142,8 @@ public class ModuleController {
 	 * @return
 	 */
 	@GetMapping("/deal/records")
-	@NotNull(message = "模组名称不能为空")
 	public ResultBean<List<ModuleDealRecord>> getDealRecords(String name){
+		Assert.notNull(name, "模组名称不能为空");
 		return new ResultBean<>(service.getDealRecords(name));
 	}
 	
@@ -156,9 +154,9 @@ public class ModuleController {
 	 * @return
 	 * @throws InvalidProtocolBufferException 
 	 */
-	@NotNull
 	@PostMapping("/{moduleName}/mockTrade")
 	public ResultBean<Boolean> mockTradeAdjustment(@PathVariable String moduleName, @RequestBody MockTradeDescription mockTrade) {
+		Assert.notNull(moduleName, "模组名称不能为空");
 		return new ResultBean<>(service.mockTradeAdjustment(moduleName, mockTrade));
 	}
 	

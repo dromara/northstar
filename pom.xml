@@ -24,6 +24,7 @@
 		<commons-lang3-version>3.7</commons-lang3-version>
 		<commons-codec-version>1.13</commons-codec-version>
 		<commons-io-version>2.6</commons-io-version>
+		<commons-math-version>3.6.1</commons-math-version>
 		<fastjson-version>2.0.4</fastjson-version>
 		<guava-version>30.1-jre</guava-version>
 		<protobuf-version>3.19.1</protobuf-version>
@@ -163,11 +164,6 @@
 				<version>${guava-version}</version>
 			</dependency>
 			<dependency>
-				<groupId>javax.validation</groupId>
-				<artifactId>validation-api</artifactId>
-				<version>2.0.1.Final</version>
-			</dependency>
-			<dependency>
 			    <groupId>com.squareup.okhttp3</groupId>
 			    <artifactId>okhttp</artifactId>
 			    <version>3.14.9</version>
@@ -256,23 +252,11 @@
 			    <version>${byte-buddy-version}</version>
 			    <scope>test</scope>
 			</dependency>
-
-			<!-- https://mvnrepository.com/artifact/org.hibernate.validator/hibernate-validator -->
-			<dependency>
-				<groupId>org.hibernate.validator</groupId>
-				<artifactId>hibernate-validator</artifactId>
-				<version>6.2.0.Final</version>
-			</dependency>
 			<!--用于数据计算的数学工具包 拟合函数，聚类函数，矩阵，积分等 -->
 			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-math3</artifactId>
-				<version>3.5</version>
-			</dependency>
-			<dependency>
-			    <groupId>org.springframework</groupId>
-			    <artifactId>spring-web</artifactId>
-			    <version>5.3.10</version>
+				<version>${commons-math-version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.logging.log4j</groupId>

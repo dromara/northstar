@@ -1,8 +1,7 @@
 package tech.quantit.northstar.main.restful;
 
-import javax.validation.constraints.NotNull;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -32,7 +31,8 @@ public class EmailConfigController {
 	private FastEventEngine feEngine;
 	
 	@PostMapping
-	public ResultBean<Boolean> save(@NotNull @RequestBody MailConfigDescription configDescription){
+	public ResultBean<Boolean> save(@RequestBody MailConfigDescription configDescription){
+		Assert.notNull(configDescription, "邮件配置信息不能为空");
 		service.saveConfig(configDescription);
 		return new ResultBean<>(Boolean.TRUE);
 	}

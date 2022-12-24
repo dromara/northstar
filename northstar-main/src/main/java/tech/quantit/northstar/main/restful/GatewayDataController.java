@@ -4,9 +4,8 @@ import java.time.LocalDate;
 import java.time.Period;
 import java.util.List;
 
-import javax.validation.constraints.NotNull;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -26,8 +25,9 @@ public class GatewayDataController {
 	private MarketDataLoadingUtils utils = new MarketDataLoadingUtils();
 	
 	@GetMapping("/bar/min")
-	@NotNull
 	public ResultBean<List<byte[]>> loadWeeklyBarData(String gatewayId, String unifiedSymbol, long refStartTimestamp, boolean firstLoad){
+		Assert.notNull(gatewayId, "网关ID不能为空");
+		Assert.notNull(unifiedSymbol, "合约代码不能为空");
 		LocalDate start = utils.getFridayOfLastWeek(refStartTimestamp);
 		if(firstLoad && Period.between(start, LocalDate.now()).getDays() < 7) {
 			start = start.minusWeeks(1);
