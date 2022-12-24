@@ -49,6 +49,7 @@
 		<module>northstar-gateway-ctp</module>
 		<module>northstar-gateway-sim</module>
 		<module>northstar-gateway-playback</module>
+		<module>northstar-gateway-tiger</module>
 		<module>northstar-strategy-api</module>
 		<module>northstar-main</module>
 	</modules>
