@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>tech.quantit</groupId>
 		<artifactId>northstar</artifactId>
-		<version>4.3</version>
+		<version>4.4</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 

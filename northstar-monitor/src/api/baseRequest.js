@@ -11,7 +11,6 @@ const service = axios.create({
 service.interceptors.request.use(
   (config) => {
     //根据vuex store内容动态设置baseurl
-    config.baseURL = '/northstar'
     return config
   },
   (error) => {
@@ -45,4 +44,21 @@ service.interceptors.response.use(
   }
 )
 
-export default service
+const mergeConfig = (config) => {
+  return Object.assign({baseURL: `${window.baseURL || ''}/northstar`, withCredentials: true}, config)
+}
+
+export default {
+  get(url, config){
+    return service.get(url, mergeConfig(config))
+  },
+  post(url, data, config){
+    return service.post(url, data, mergeConfig(config))
+  },
+  put(url, data, config){
+    return service.put(url, data, mergeConfig(config))
+  },
+  delete(url, config){
+    return service.delete(url, mergeConfig(config))
+  }
+}

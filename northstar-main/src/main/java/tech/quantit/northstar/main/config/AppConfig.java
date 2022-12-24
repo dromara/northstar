@@ -25,6 +25,7 @@ import javax.net.ssl.X509TrustManager;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -45,6 +46,7 @@ import org.springframework.web.filter.CorsFilter;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import com.corundumstudio.socketio.SocketIOServer;
 import com.google.common.io.Files;
 
 import lombok.extern.slf4j.Slf4j;
@@ -96,8 +98,11 @@ import xyz.redtorch.pb.CoreField.ContractField;
  */
 @Slf4j
 @Configuration
-public class AppConfig implements WebMvcConfigurer {
+public class AppConfig implements WebMvcConfigurer, DisposableBean {
 
+	@Autowired
+	private SocketIOServer socketServer;
+	
 	@Override
 	public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
 		/**
@@ -331,6 +336,11 @@ public class AppConfig implements WebMvcConfigurer {
 	@Bean
 	public MailDeliveryManager mailDeliveryManager(IMailMessageContentHandler handler) {
 		return new MailDeliveryManager(new MailSenderFactory(), handler);
+	}
+
+	@Override
+	public void destroy() throws Exception {
+		socketServer.stop();		
 	}
 
 }

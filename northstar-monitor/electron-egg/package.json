@@ -1,0 +1,117 @@
+{
+  "name": "northstar-desktop",
+  "version": "4.4.0",
+  "description": "A fast, desktop software development framework",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron . ",
+    "dev": "electron . --env=local",
+    "reload": "nodemon --config ./electron/config/nodemon.json",
+    "test": "set DEBUG=* && electron . --env=local",
+    "build-w": "electron-builder -w=nsis --ia32",
+    "build-w-64": "electron-builder -w=nsis --x64",
+    "build-w-arm64": "electron-builder -w=nsis --arm64",
+    "build-wz": "electron-builder -w=7z --ia32",
+    "build-wz-64": "electron-builder -w=7z --x64",
+    "build-wz-arm64": "electron-builder -w=7z --arm64",
+    "build-m": "electron-builder -m",
+    "build-m-arm64": "electron-builder -m --arm64",
+    "build-l": "electron-builder -l=deb --ia32",
+    "build-l-64": "electron-builder -l=deb --x64",
+    "build-l-arm64": "electron-builder -l=deb --arm64",
+    "build-l-armv7l": "electron-builder -l=deb --armv7l",
+    "build-lr-64": "electron-builder -l=rpm --x64",
+    "build-lp-64": "electron-builder -l=pacman --x64",
+    "rd": "ee-core rd --dist_dir=../dist",
+    "encrypt": "ee-core encrypt",
+    "rebuild": "electron-rebuild",
+    "re-sqlite": "electron-rebuild -f -w better-sqlite3"
+  },
+  "build": {
+    "productName": "northstar-monitor",
+    "appId": "northstar-monitor",
+    "directories": {
+      "output": "../../northstar-dist"
+    },
+    "asar": true,
+    "files": [
+      "**/*",
+      "!frontend/",
+      "!run/",
+      "!logs/",
+      "!data/"
+    ],
+    "extraResources": {
+      "from": "./build/extraResources/",
+      "to": "extraResources"
+    },
+    "electronDownload": {
+      "mirror": "https://npmmirror.com/mirrors/electron/"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowElevation": true,
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "./build/icons/icon.ico",
+      "uninstallerIcon": "./build/icons/icon.ico",
+      "installerHeaderIcon": "./build/icons/icon.ico",
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Northstar"
+    },
+    "publish": [
+      {
+        "provider": "generic",
+        "url": "https://github.com/wallace5303/electron-egg"
+      }
+    ],
+    "mac": {
+      "icon": "./build/icons/icon.icns",
+      "artifactName": "${productName}-${os}-${version}-${arch}.${ext}",
+      "target": [
+        "dmg",
+        "zip"
+      ]
+    },
+    "win": {
+      "icon": "./build/icons/icon.ico",
+      "artifactName": "${productName}-${os}-${version}-${arch}.${ext}",
+      "target": [
+        {
+          "target": "nsis"
+        }
+      ]
+    },
+    "linux": {
+      "icon": "./build/icons/icon.icns",
+      "artifactName": "${productName}-${os}-${version}-${arch}.${ext}",
+      "target": [
+        "deb"
+      ],
+      "category": "Utility"
+    }
+  },
+  "repository": "https://github.com/wallace5303/ee.git",
+  "keywords": [
+    "Electron"
+  ],
+  "author": "wallace5303, Inc <530353222@qq.com>",
+  "license": "Apache",
+  "devDependencies": {
+    "debug": "^4.3.3",
+    "electron": "^13.6.9",
+    "electron-builder": "^23.1.0",
+    "electron-rebuild": "^3.2.8",
+    "eslint": "^5.13.0",
+    "eslint-config-egg": "^7.1.0",
+    "eslint-plugin-prettier": "^3.0.1",
+    "nodemon": "^2.0.16"
+  },
+  "dependencies": {
+    "dayjs": "^1.10.7",
+    "ee-core": "^1.4.1",
+    "electron-is": "^3.0.0",
+    "electron-updater": "^5.3.0",
+    "lodash": "^4.17.21"
+  }
+}

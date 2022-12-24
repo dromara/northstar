@@ -51,11 +51,10 @@ public class InstantBarGenerator {
 		bb.setLowPrice(Math.min(bb.getLowPrice(), tick.getLastPrice()));
 		bb.setClosePrice(tick.getLastPrice());
 		bb.setOpenInterest(tick.getOpenInterest());
-		bb.setVolume(tick.getVolume());
+		bb.setVolume(bb.getVolume() + tick.getVolumeDelta());
 		bb.setTurnover(tick.getTurnover());
 		bb.setNumTrades(tick.getNumTrades());
 		bb.setOpenInterestDelta(bb.getOpenInterestDelta() + tick.getOpenInterestDelta());
-		bb.setVolumeDelta(bb.getVolumeDelta() + tick.getVolumeDelta());
 		bb.setTurnoverDelta(bb.getTurnoverDelta() + tick.getTurnoverDelta());
 		bb.setNumTradesDelta(bb.getNumTradesDelta() + tick.getNumTradesDelta());
 		return Optional.of(bb.build());

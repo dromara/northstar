@@ -1531,7 +1531,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 			String orderDate = pOrder.getInsertDate();
 			String orderTime = pOrder.getInsertTime();
 			LocalDateTime tradeDatetime = LocalDateTime.of(LocalDate.from(DateTimeConstant.D_FORMAT_INT_FORMATTER.parse(orderDate)), LocalTime.from(DateTimeConstant.T_FORMAT_FORMATTER.parse(orderTime)));
-			long tradeTimestamp = tradeDatetime.atZone(ZoneId.systemDefault()).toInstant().getEpochSecond();
+			long tradeTimestamp = tradeDatetime.atZone(ZoneId.systemDefault()).toInstant().getEpochSecond() * 1000;
 			String activeTime = String.valueOf(tradeTimestamp);
 			String cancelTime = pOrder.getCancelTime();
 			String updateTime = pOrder.getUpdateTime();
@@ -1638,7 +1638,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 			String tradeDate = pTrade.getTradeDate();
 			String tradeTime = pTrade.getTradeTime();
 			LocalDateTime tradeDatetime = LocalDateTime.of(LocalDate.from(DateTimeConstant.D_FORMAT_INT_FORMATTER.parse(tradeDate)), LocalTime.from(DateTimeConstant.T_FORMAT_FORMATTER.parse(tradeTime)));
-			long tradeTimestamp = tradeDatetime.atZone(ZoneId.systemDefault()).toInstant().getEpochSecond();
+			long tradeTimestamp = tradeDatetime.atZone(ZoneId.systemDefault()).toInstant().getEpochSecond() * 1000;
 
 			HedgeFlagEnum hedgeFlag = CtpConstant.hedgeFlagMapReverse.getOrDefault(String.valueOf(pTrade.getHedgeFlag()), HedgeFlagEnum.HF_Unknown);
 			TradeTypeEnum tradeType = CtpConstant.tradeTypeMapReverse.getOrDefault(pTrade.getTradeType(), TradeTypeEnum.TT_Unknown);

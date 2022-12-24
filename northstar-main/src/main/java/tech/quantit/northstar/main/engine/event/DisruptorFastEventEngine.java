@@ -37,8 +37,9 @@ import xyz.redtorch.pb.CoreField.NoticeField;
 @Slf4j
 public class DisruptorFastEventEngine implements FastEventEngine, InitializingBean, DisposableBean {
 
-	private static ExecutorService executor = Executors.newCachedThreadPool(DaemonThreadFactory.INSTANCE);
-
+	private static final ExecutorService executor = Executors.newCachedThreadPool(DaemonThreadFactory.INSTANCE);
+	private static final int BUF_SIZE = 65536;
+	
 	private final Map<EventHandler<NorthstarEvent>, BatchEventProcessor<NorthstarEvent>> handlerProcessorMap = new ConcurrentHashMap<>();
 
 	private Disruptor<NorthstarEvent> disruptor;
@@ -78,7 +79,7 @@ public class DisruptorFastEventEngine implements FastEventEngine, InitializingBe
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		WaitStrategy s = (WaitStrategy) strategy.getStrategyClass().getDeclaredConstructor().newInstance();
-		disruptor = new Disruptor<>(new NorthstarEventFactory(), 65536, DaemonThreadFactory.INSTANCE,
+		disruptor = new Disruptor<>(new NorthstarEventFactory(), BUF_SIZE, DaemonThreadFactory.INSTANCE,
 				ProducerType.MULTI, s);
 		ringBuffer = disruptor.start();
 		log.debug("启动事件引擎");
@@ -136,7 +137,7 @@ public class DisruptorFastEventEngine implements FastEventEngine, InitializingBe
 		}
 	}
 	
-	public static enum WaitStrategyEnum {
+	public enum WaitStrategyEnum {
 		BlockingWaitStrategy(BlockingWaitStrategy.class),
 		BusySpinWaitStrategy(BusySpinWaitStrategy.class),
 		SleepingWaitStrategy(SleepingWaitStrategy.class),
