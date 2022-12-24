@@ -14,15 +14,32 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-clean-plugin</artifactId>
-			    <configuration>
-			    	<followSymLinks>false</followSymLinks>
-			        <filesets>
-			            <fileset>
-			            	<directory>${basedir}/../northstar-main/src/main/resources/static</directory>
-			            	<directory>${basedir}/../northstar-dist</directory>
-			            </fileset>
-			        </filesets>
-			    </configuration>
+				<executions>
+					<execution>
+						<id>pre-cleaner</id>
+						<phase>clean</phase>
+						<goals>
+							<goal>clean</goal>
+						</goals>
+						<configuration>
+					    	<followSymLinks>false</followSymLinks>
+					        <filesets>
+					            <fileset>
+					            	<directory>${basedir}/../northstar-dist</directory>
+					            	<includes>
+					            		<include>**/*</include>
+					            	</includes>
+					            </fileset>
+					            <fileset>
+					            	<directory>${basedir}/../northstar-main/src/main/resources/static</directory>
+					            	<includes>
+					            		<include>**/*</include>
+					            	</includes>
+					            </fileset>
+					        </filesets>
+				    	</configuration>
+					</execution>
+				</executions>
 			</plugin>
 			<plugin>
 			    <groupId>org.codehaus.mojo</groupId>
