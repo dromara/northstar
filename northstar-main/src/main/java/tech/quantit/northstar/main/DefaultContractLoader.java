@@ -23,7 +23,7 @@ import xyz.redtorch.pb.CoreField.ContractField;
 @Slf4j
 @Component
 @ConditionalOnExpression("!'${spring.profiles.active}'.equals('test')")
-public class ContractsDefaultLoader implements CommandLineRunner{
+public class DefaultContractLoader implements CommandLineRunner{
 
 	@Autowired
 	private GlobalMarketRegistry registry;
