@@ -2,7 +2,6 @@ package tech.quantit.northstar.strategy.api;
 
 import com.google.common.eventbus.Subscribe;
 
-import tech.quantit.northstar.common.Subscribable;
 import xyz.redtorch.pb.CoreField.BarField;
 
 /**
@@ -10,7 +9,7 @@ import xyz.redtorch.pb.CoreField.BarField;
  * @author KevinHuangwl
  *
  */
-public interface BarDataAware extends Subscribable {
+public interface BarDataAware {
 	
 	@Subscribe
 	void onBar(BarField bar);
