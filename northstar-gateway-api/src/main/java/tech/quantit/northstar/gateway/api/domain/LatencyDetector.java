@@ -15,6 +15,7 @@ import xyz.redtorch.pb.CoreField.TickField;
  * @author KevinHuangwl
  *
  */
+@Deprecated
 @Slf4j
 public class LatencyDetector {
 

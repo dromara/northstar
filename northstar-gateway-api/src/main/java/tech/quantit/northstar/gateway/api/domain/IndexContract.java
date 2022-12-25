@@ -10,6 +10,7 @@ import xyz.redtorch.pb.CoreField.ContractField;
  * @author KevinHuangwl
  *
  */
+@Deprecated
 public class IndexContract extends NormalContract {
 	
 	private IndexTicker ticker;

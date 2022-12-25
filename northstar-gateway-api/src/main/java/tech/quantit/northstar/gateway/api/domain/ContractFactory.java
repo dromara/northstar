@@ -17,6 +17,7 @@ import xyz.redtorch.pb.CoreField.ContractField;
  * @author KevinHuangwl
  *
  */
+@Deprecated
 public class ContractFactory {
 
 	private List<ContractField> contractList;

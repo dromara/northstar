@@ -9,6 +9,7 @@ import xyz.redtorch.pb.CoreField.ContractField;
  * @author KevinHuangwl
  *
  */
+@Deprecated
 @NoArgsConstructor
 public class NormalContract {
 

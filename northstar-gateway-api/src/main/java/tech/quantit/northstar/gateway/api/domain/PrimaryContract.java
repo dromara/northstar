@@ -8,6 +8,7 @@ import xyz.redtorch.pb.CoreField.ContractField;
  * @author KevinHuangwl
  *
  */
+@Deprecated
 public class PrimaryContract extends NormalContract {
 
 	public PrimaryContract(ContractField indexContract) {

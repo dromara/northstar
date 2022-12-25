@@ -21,6 +21,7 @@ import xyz.redtorch.pb.CoreField.TickField;
  * 情况二：假如行情运行期间断线重连，离线间隔超过原有K线，那么应该先结束原有K线，然后重新生成新K线
  * 情况三：在非行情运行时间，也有可能收到无效的TICK数据，需要做忽略处理
  */
+@Deprecated
 @Slf4j
 public class BarGenerator {
 	
