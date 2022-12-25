@@ -18,6 +18,7 @@ import xyz.redtorch.pb.CoreField.ContractField;
  * @author KevinHuangwl
  *
  */
+@Deprecated
 @Slf4j
 public class ContractRepoRedisImpl implements IContractRepository {
 	
