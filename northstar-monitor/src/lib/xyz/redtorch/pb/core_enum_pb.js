@@ -11,6 +11,16 @@
 /* eslint-disable */
 // @ts-nocheck
 
+var jspb = require('google-protobuf');
+var goog = jspb;
+var global = (function() {
+  if (this) { return this; }
+  if (typeof window !== 'undefined') { return window; }
+  if (typeof global !== 'undefined') { return global; }
+  if (typeof self !== 'undefined') { return self; }
+  return Function('return this')();
+}.call(null));
+
 goog.exportSymbol('proto.xyz.redtorch.pb.ActionFlagEnum', null, global);
 goog.exportSymbol('proto.xyz.redtorch.pb.BarCycleEnum', null, global);
 goog.exportSymbol('proto.xyz.redtorch.pb.CombinationTypeEnum', null, global);
@@ -492,3 +502,4 @@ proto.xyz.redtorch.pb.CombinationTypeEnum = {
   COMBT_CLD: 7
 };
 
+goog.object.extend(exports, proto.xyz.redtorch.pb);

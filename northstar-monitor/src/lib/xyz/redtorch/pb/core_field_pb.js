@@ -11,6 +11,18 @@
 /* eslint-disable */
 // @ts-nocheck
 
+var jspb = require('google-protobuf');
+var goog = jspb;
+var global = (function() {
+  if (this) { return this; }
+  if (typeof window !== 'undefined') { return window; }
+  if (typeof global !== 'undefined') { return global; }
+  if (typeof self !== 'undefined') { return self; }
+  return Function('return this')();
+}.call(null));
+
+var xyz_redtorch_pb_core_enum_pb = require('../../../xyz/redtorch/pb/core_enum_pb.js');
+goog.object.extend(proto, xyz_redtorch_pb_core_enum_pb);
 goog.exportSymbol('proto.xyz.redtorch.pb.AccountField', null, global);
 goog.exportSymbol('proto.xyz.redtorch.pb.BarField', null, global);
 goog.exportSymbol('proto.xyz.redtorch.pb.CancelOrderReqField', null, global);
@@ -9922,3 +9934,4 @@ proto.xyz.redtorch.pb.NoticeField.prototype.setContent = function(value) {
 };
 
 
+goog.object.extend(exports, proto.xyz.redtorch.pb);
