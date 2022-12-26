@@ -764,8 +764,8 @@ proto.xyz.redtorch.pb.ContractField.toObject = function(includeInstance, msg) {
     minlimitordervolume: jspb.Message.getFieldWithDefault(msg, 25, 0),
     combinationtype: jspb.Message.getFieldWithDefault(msg, 26, 0),
     gatewayid: jspb.Message.getFieldWithDefault(msg, 27, ""),
-    comssionfee: jspb.Message.getFloatingPointFieldWithDefault(msg, 28, 0.0),
-    comssionrate: jspb.Message.getFloatingPointFieldWithDefault(msg, 29, 0.0)
+    commissionfee: jspb.Message.getFloatingPointFieldWithDefault(msg, 28, 0.0),
+    commissionrate: jspb.Message.getFloatingPointFieldWithDefault(msg, 29, 0.0)
   };
 
   if (includeInstance) {
@@ -904,11 +904,11 @@ proto.xyz.redtorch.pb.ContractField.deserializeBinaryFromReader = function(msg, 
       break;
     case 28:
       var value = /** @type {number} */ (reader.readDouble());
-      msg.setComssionfee(value);
+      msg.setCommissionfee(value);
       break;
     case 29:
       var value = /** @type {number} */ (reader.readDouble());
-      msg.setComssionrate(value);
+      msg.setCommissionrate(value);
       break;
     default:
       reader.skipField();
@@ -1114,14 +1114,14 @@ proto.xyz.redtorch.pb.ContractField.serializeBinaryToWriter = function(message, 
       f
     );
   }
-  f = message.getComssionfee();
+  f = message.getCommissionfee();
   if (f !== 0.0) {
     writer.writeDouble(
       28,
       f
     );
   }
-  f = message.getComssionrate();
+  f = message.getCommissionrate();
   if (f !== 0.0) {
     writer.writeDouble(
       29,
@@ -1582,10 +1582,10 @@ proto.xyz.redtorch.pb.ContractField.prototype.setGatewayid = function(value) {
 
 
 /**
- * optional double comssionFee = 28;
+ * optional double commissionFee = 28;
  * @return {number}
  */
-proto.xyz.redtorch.pb.ContractField.prototype.getComssionfee = function() {
+proto.xyz.redtorch.pb.ContractField.prototype.getCommissionfee = function() {
   return /** @type {number} */ (jspb.Message.getFloatingPointFieldWithDefault(this, 28, 0.0));
 };
 
@@ -1594,16 +1594,16 @@ proto.xyz.redtorch.pb.ContractField.prototype.getComssionfee = function() {
  * @param {number} value
  * @return {!proto.xyz.redtorch.pb.ContractField} returns this
  */
-proto.xyz.redtorch.pb.ContractField.prototype.setComssionfee = function(value) {
+proto.xyz.redtorch.pb.ContractField.prototype.setCommissionfee = function(value) {
   return jspb.Message.setProto3FloatField(this, 28, value);
 };
 
 
 /**
- * optional double comssionRate = 29;
+ * optional double commissionRate = 29;
  * @return {number}
  */
-proto.xyz.redtorch.pb.ContractField.prototype.getComssionrate = function() {
+proto.xyz.redtorch.pb.ContractField.prototype.getCommissionrate = function() {
   return /** @type {number} */ (jspb.Message.getFloatingPointFieldWithDefault(this, 29, 0.0));
 };
 
@@ -1612,7 +1612,7 @@ proto.xyz.redtorch.pb.ContractField.prototype.getComssionrate = function() {
  * @param {number} value
  * @return {!proto.xyz.redtorch.pb.ContractField} returns this
  */
-proto.xyz.redtorch.pb.ContractField.prototype.setComssionrate = function(value) {
+proto.xyz.redtorch.pb.ContractField.prototype.setCommissionrate = function(value) {
   return jspb.Message.setProto3FloatField(this, 29, value);
 };
 

@@ -42,8 +42,8 @@ message ContractField {
 	fixed32 minLimitOrderVolume = 25;  // 限价单最小下单量
 	CombinationTypeEnum combinationType = 26; // 组合类型
 	string gatewayId = 27;  // 网关
-	double comssionFee = 28;  // 手续费
-	double comssionRate = 29; // 手续费率
+	double commissionFee = 28;  // 手续费
+	double commissionRate = 29; // 手续费率
 }
 
 // 账户
