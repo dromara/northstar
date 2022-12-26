@@ -74,7 +74,7 @@ import tech.quantit.northstar.gateway.api.domain.GlobalMarketRegistry;
 import tech.quantit.northstar.gateway.api.domain.IndexContract;
 import tech.quantit.northstar.gateway.api.domain.LatencyDetector;
 import tech.quantit.northstar.gateway.api.domain.NormalContract;
-import tech.quantit.northstar.gateway.ctp.time.PeriodHelperFactory;
+import tech.quantit.northstar.gateway.ctp.time.CnFtPeriodHelperFactory;
 import tech.quantit.northstar.gateway.playback.PlaybackGatewayFactory;
 import tech.quantit.northstar.gateway.sim.trade.SimGatewayFactory;
 import tech.quantit.northstar.gateway.sim.trade.SimMarket;
@@ -159,8 +159,8 @@ public class AppConfig implements WebMvcConfigurer, DisposableBean {
 	}
 	
 	@Bean
-	public PeriodHelperFactory periodHelperFactory(List<ContractDefinition> contractDefs) {
-		return new PeriodHelperFactory(contractDefs);
+	public CnFtPeriodHelperFactory periodHelperFactory(List<ContractDefinition> contractDefs) {
+		return new CnFtPeriodHelperFactory(contractDefs);
 	}
 	
 	@Bean
@@ -199,7 +199,7 @@ public class AppConfig implements WebMvcConfigurer, DisposableBean {
 
 	@Bean
 	public GlobalMarketRegistry globalRegistry(FastEventEngine fastEventEngine, IContractRepository contractRepo,
-			ContractManager contractMgr, @Autowired(required = false) LatencyDetector latencyDetector, PeriodHelperFactory phFactory) {
+			ContractManager contractMgr, @Autowired(required = false) LatencyDetector latencyDetector, CnFtPeriodHelperFactory phFactory) {
 		Consumer<NormalContract> handleContractSave = contract -> {
 			if (contract.updateTime() > 0) {
 				contractRepo.save(contract.contractField(), contract.gatewayType());

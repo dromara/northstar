@@ -14,7 +14,7 @@ import tech.quantit.northstar.gateway.api.domain.time.IPeriodHelperFactory;
 import tech.quantit.northstar.gateway.api.domain.time.PeriodHelper;
 import xyz.redtorch.pb.CoreField.ContractField;
 
-public class PeriodHelperFactory implements IPeriodHelperFactory{
+public class CnFtPeriodHelperFactory implements IPeriodHelperFactory{
 	
 	private static final PeriodHelper GENERIC_HELPER = new PeriodHelper(1, new GenericTradeTime());
 	private List<ContractDefinition> contractDefs;
@@ -22,7 +22,7 @@ public class PeriodHelperFactory implements IPeriodHelperFactory{
 	private Table<String, Integer, PeriodHelper> helperCache = HashBasedTable.create();
 	private Table<String, Integer, PeriodHelper> helperCache2 = HashBasedTable.create();
 	
-	public PeriodHelperFactory(List<ContractDefinition> contractDefs) {
+	public CnFtPeriodHelperFactory(List<ContractDefinition> contractDefs) {
 		this.contractDefs = contractDefs;
 	}
 

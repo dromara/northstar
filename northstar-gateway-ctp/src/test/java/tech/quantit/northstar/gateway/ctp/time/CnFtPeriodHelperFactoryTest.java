@@ -12,11 +12,11 @@ import tech.quantit.northstar.common.model.ContractDefinition;
 import tech.quantit.northstar.gateway.api.domain.time.PeriodHelper;
 import test.common.TestFieldFactory;
 
-class PeriodHelperFactoryTest {
+class CnFtPeriodHelperFactoryTest {
 	
 	TestFieldFactory factory = new TestFieldFactory("testGateway");
 	
-	PeriodHelperFactory phFactory;
+	CnFtPeriodHelperFactory phFactory;
 	
 	
 	@BeforeEach
@@ -26,7 +26,7 @@ class PeriodHelperFactoryTest {
 				.symbolPattern(Pattern.compile("rb[0-9]{3,4}@.+"))
 				.tradeTimeType("CN_FT_TT1")
 				.build();
-		phFactory = new PeriodHelperFactory(List.of(cd));
+		phFactory = new CnFtPeriodHelperFactory(List.of(cd));
 	}
 	
 	@Test
