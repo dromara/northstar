@@ -1,57 +1,56 @@
-/* eslint-disable */
+// source: xyz/redtorch/pb/core_enum.proto
 /**
  * @fileoverview
  * @enhanceable
+ * @suppress {missingRequire} reports error on implicit type usages.
  * @suppress {messageConventions} JS Compiler reports an error if a variable or
  *     field starts with 'MSG_' and isn't a translatable message.
  * @public
  */
 // GENERATED CODE -- DO NOT EDIT!
+/* eslint-disable */
+// @ts-nocheck
 
-var jspb = require('google-protobuf')
-var goog = jspb
-var global = Function('return this')()
-
-goog.exportSymbol('proto.xyz.redtorch.pb.ActionFlagEnum', null, global)
-goog.exportSymbol('proto.xyz.redtorch.pb.BarCycleEnum', null, global)
-goog.exportSymbol('proto.xyz.redtorch.pb.CombinationTypeEnum', null, global)
-goog.exportSymbol('proto.xyz.redtorch.pb.CommonStatusEnum', null, global)
-goog.exportSymbol('proto.xyz.redtorch.pb.ConnectStatusEnum', null, global)
-goog.exportSymbol('proto.xyz.redtorch.pb.ContingentConditionEnum', null, global)
-goog.exportSymbol('proto.xyz.redtorch.pb.CurrencyEnum', null, global)
-goog.exportSymbol('proto.xyz.redtorch.pb.DirectionEnum', null, global)
-goog.exportSymbol('proto.xyz.redtorch.pb.ExchangeEnum', null, global)
-goog.exportSymbol('proto.xyz.redtorch.pb.ForceCloseReasonEnum', null, global)
-goog.exportSymbol('proto.xyz.redtorch.pb.GatewayAdapterTypeEnum', null, global)
-goog.exportSymbol('proto.xyz.redtorch.pb.GatewayTypeEnum', null, global)
-goog.exportSymbol('proto.xyz.redtorch.pb.HedgeFlagEnum', null, global)
-goog.exportSymbol('proto.xyz.redtorch.pb.LogLevelEnum', null, global)
-goog.exportSymbol('proto.xyz.redtorch.pb.MarketDataDBTypeEnum', null, global)
-goog.exportSymbol('proto.xyz.redtorch.pb.OffsetFlagEnum', null, global)
-goog.exportSymbol('proto.xyz.redtorch.pb.OptionsTypeEnum', null, global)
-goog.exportSymbol('proto.xyz.redtorch.pb.OrderActionStatusTyp', null, global)
-goog.exportSymbol('proto.xyz.redtorch.pb.OrderPriceTypeEnum', null, global)
-goog.exportSymbol('proto.xyz.redtorch.pb.OrderSourceEnum', null, global)
-goog.exportSymbol('proto.xyz.redtorch.pb.OrderStatusEnum', null, global)
-goog.exportSymbol('proto.xyz.redtorch.pb.OrderSubmitStatusEnum', null, global)
-goog.exportSymbol('proto.xyz.redtorch.pb.OrderTypeEnum', null, global)
-goog.exportSymbol('proto.xyz.redtorch.pb.PositionDirectionEnum', null, global)
-goog.exportSymbol('proto.xyz.redtorch.pb.PositionTypeEnum', null, global)
-goog.exportSymbol('proto.xyz.redtorch.pb.PriceSourceEnum', null, global)
-goog.exportSymbol('proto.xyz.redtorch.pb.ProductClassEnum', null, global)
-goog.exportSymbol('proto.xyz.redtorch.pb.StrategyEngineTypeEnum', null, global)
-goog.exportSymbol('proto.xyz.redtorch.pb.StrikeModeEnum', null, global)
-goog.exportSymbol('proto.xyz.redtorch.pb.TimeConditionEnum', null, global)
-goog.exportSymbol('proto.xyz.redtorch.pb.TradeTypeEnum', null, global)
-goog.exportSymbol('proto.xyz.redtorch.pb.TradingRightEnum', null, global)
-goog.exportSymbol('proto.xyz.redtorch.pb.VolumeConditionEnum', null, global)
+goog.exportSymbol('proto.xyz.redtorch.pb.ActionFlagEnum', null, global);
+goog.exportSymbol('proto.xyz.redtorch.pb.BarCycleEnum', null, global);
+goog.exportSymbol('proto.xyz.redtorch.pb.CombinationTypeEnum', null, global);
+goog.exportSymbol('proto.xyz.redtorch.pb.CommonStatusEnum', null, global);
+goog.exportSymbol('proto.xyz.redtorch.pb.ConnectStatusEnum', null, global);
+goog.exportSymbol('proto.xyz.redtorch.pb.ContingentConditionEnum', null, global);
+goog.exportSymbol('proto.xyz.redtorch.pb.CurrencyEnum', null, global);
+goog.exportSymbol('proto.xyz.redtorch.pb.DirectionEnum', null, global);
+goog.exportSymbol('proto.xyz.redtorch.pb.ExchangeEnum', null, global);
+goog.exportSymbol('proto.xyz.redtorch.pb.ForceCloseReasonEnum', null, global);
+goog.exportSymbol('proto.xyz.redtorch.pb.GatewayAdapterTypeEnum', null, global);
+goog.exportSymbol('proto.xyz.redtorch.pb.GatewayTypeEnum', null, global);
+goog.exportSymbol('proto.xyz.redtorch.pb.HedgeFlagEnum', null, global);
+goog.exportSymbol('proto.xyz.redtorch.pb.LogLevelEnum', null, global);
+goog.exportSymbol('proto.xyz.redtorch.pb.MarketDataDBTypeEnum', null, global);
+goog.exportSymbol('proto.xyz.redtorch.pb.OffsetFlagEnum', null, global);
+goog.exportSymbol('proto.xyz.redtorch.pb.OptionsTypeEnum', null, global);
+goog.exportSymbol('proto.xyz.redtorch.pb.OrderActionStatusTyp', null, global);
+goog.exportSymbol('proto.xyz.redtorch.pb.OrderPriceTypeEnum', null, global);
+goog.exportSymbol('proto.xyz.redtorch.pb.OrderSourceEnum', null, global);
+goog.exportSymbol('proto.xyz.redtorch.pb.OrderStatusEnum', null, global);
+goog.exportSymbol('proto.xyz.redtorch.pb.OrderSubmitStatusEnum', null, global);
+goog.exportSymbol('proto.xyz.redtorch.pb.OrderTypeEnum', null, global);
+goog.exportSymbol('proto.xyz.redtorch.pb.PositionDirectionEnum', null, global);
+goog.exportSymbol('proto.xyz.redtorch.pb.PositionTypeEnum', null, global);
+goog.exportSymbol('proto.xyz.redtorch.pb.PriceSourceEnum', null, global);
+goog.exportSymbol('proto.xyz.redtorch.pb.ProductClassEnum', null, global);
+goog.exportSymbol('proto.xyz.redtorch.pb.StrategyEngineTypeEnum', null, global);
+goog.exportSymbol('proto.xyz.redtorch.pb.StrikeModeEnum', null, global);
+goog.exportSymbol('proto.xyz.redtorch.pb.TimeConditionEnum', null, global);
+goog.exportSymbol('proto.xyz.redtorch.pb.TradeTypeEnum', null, global);
+goog.exportSymbol('proto.xyz.redtorch.pb.TradingRightEnum', null, global);
+goog.exportSymbol('proto.xyz.redtorch.pb.VolumeConditionEnum', null, global);
 /**
  * @enum {number}
  */
 proto.xyz.redtorch.pb.StrategyEngineTypeEnum = {
   SET_TREADING: 0,
   SET_BACKTESTING: 1
-}
+};
 
 /**
  * @enum {number}
@@ -60,7 +59,7 @@ proto.xyz.redtorch.pb.GatewayTypeEnum = {
   GTE_TRADEANDMARKETDATA: 0,
   GTE_MARKETDATA: 1,
   GTE_TRADE: 2
-}
+};
 
 /**
  * @enum {number}
@@ -68,7 +67,7 @@ proto.xyz.redtorch.pb.GatewayTypeEnum = {
 proto.xyz.redtorch.pb.GatewayAdapterTypeEnum = {
   GAT_CTP: 0,
   GAT_IB: 1
-}
+};
 
 /**
  * @enum {number}
@@ -78,7 +77,7 @@ proto.xyz.redtorch.pb.CommonStatusEnum = {
   COMS_INFO: 1,
   COMS_WARN: 2,
   COMS_ERROR: 3
-}
+};
 
 /**
  * @enum {number}
@@ -90,7 +89,7 @@ proto.xyz.redtorch.pb.LogLevelEnum = {
   LL_INFO: 20000,
   LL_DEBUG: 10000,
   LL_TRACE: 5000
-}
+};
 
 /**
  * @enum {number}
@@ -99,7 +98,7 @@ proto.xyz.redtorch.pb.MarketDataDBTypeEnum = {
   MDDT_MIX: 0,
   MDDT_TD: 1,
   MDDT_HIST: 2
-}
+};
 
 /**
  * @enum {number}
@@ -111,28 +110,28 @@ proto.xyz.redtorch.pb.BarCycleEnum = {
   B_5MIN: 3,
   B_15MIN: 4,
   B_1DAY: 5
-}
+};
 
 /**
  * @enum {number}
  */
 proto.xyz.redtorch.pb.ConnectStatusEnum = {
-  CS_UNKONWN: 0,
+  CS_UNKNOWN: 0,
   CS_DISCONNECTED: 1,
   CS_CONNECTED: 2,
   CS_DISCONNECTING: 3,
   CS_CONNECTING: 4
-}
+};
 
 /**
  * @enum {number}
  */
 proto.xyz.redtorch.pb.OrderActionStatusTyp = {
-  OAS_UNKONWN: 0,
+  OAS_UNKNOWN: 0,
   OAS_SUBMITTED: 1,
   OAS_ACCEPTED: 2,
   OAS_REJECTED: 3
-}
+};
 
 /**
  * @enum {number}
@@ -148,7 +147,7 @@ proto.xyz.redtorch.pb.OrderStatusEnum = {
   OS_NOTTOUCHED: 7,
   OS_TOUCHED: 8,
   OS_REJECTED: 9
-}
+};
 
 /**
  * @enum {number}
@@ -162,7 +161,7 @@ proto.xyz.redtorch.pb.OrderSubmitStatusEnum = {
   OSS_INSERTREJECTED: 5,
   OSS_CANCELREJECTED: 6,
   OSS_MODIFYREJECTED: 7
-}
+};
 
 /**
  * @enum {number}
@@ -184,7 +183,7 @@ proto.xyz.redtorch.pb.ProductClassEnum = {
   FUND: 13,
   EFP: 14,
   SPOTOPTION: 15
-}
+};
 
 /**
  * @enum {number}
@@ -193,7 +192,7 @@ proto.xyz.redtorch.pb.DirectionEnum = {
   D_UNKNOWN: 0,
   D_BUY: 1,
   D_SELL: 2
-}
+};
 
 /**
  * @enum {number}
@@ -202,7 +201,7 @@ proto.xyz.redtorch.pb.PositionTypeEnum = {
   PT_UNKNOWN: 0,
   PT_NET: 1,
   PT_GROSS: 2
-}
+};
 
 /**
  * @enum {number}
@@ -212,7 +211,7 @@ proto.xyz.redtorch.pb.PositionDirectionEnum = {
   PD_NET: 1,
   PD_LONG: 2,
   PD_SHORT: 3
-}
+};
 
 /**
  * @enum {number}
@@ -225,7 +224,7 @@ proto.xyz.redtorch.pb.HedgeFlagEnum = {
   HF_MARKETMAKER: 4,
   HF_SPECHEDGE: 5,
   HF_HEDGESPEC: 6
-}
+};
 
 /**
  * @enum {number}
@@ -248,13 +247,13 @@ proto.xyz.redtorch.pb.OrderPriceTypeEnum = {
   OPT_BIDPRICE1PLUSTWOTICKS: 14,
   OPT_BIDPRICE1PLUSTHREETICKS: 15,
   OPT_FIVELEVELPRICE: 16
-}
+};
 
 /**
  * @enum {number}
  */
 proto.xyz.redtorch.pb.OffsetFlagEnum = {
-  OF_UNKONWN: 0,
+  OF_UNKNOWN: 0,
   OF_OPEN: 1,
   OF_CLOSE: 2,
   OF_FORCECLOSE: 3,
@@ -262,13 +261,13 @@ proto.xyz.redtorch.pb.OffsetFlagEnum = {
   OF_CLOSEYESTERDAY: 5,
   OF_FORCEOFF: 6,
   OF_LOCALFORCECLOSE: 7
-}
+};
 
 /**
  * @enum {number}
  */
 proto.xyz.redtorch.pb.ForceCloseReasonEnum = {
-  FCR_UNKONWN: 0,
+  FCR_UNKNOWN: 0,
   FCR_NOTFORCECLOSE: 1,
   FCR_LACKDEPOSIT: 2,
   FCR_CLIENTOVERPOSITIONLIMIT: 3,
@@ -277,49 +276,49 @@ proto.xyz.redtorch.pb.ForceCloseReasonEnum = {
   FCR_VIOLATION: 6,
   FCR_OTHER: 7,
   FCR_PERSONDELIVER: 8
-}
+};
 
 /**
  * @enum {number}
  */
 proto.xyz.redtorch.pb.OrderTypeEnum = {
-  OT_UNKONWN: 0,
+  OT_UNKNOWN: 0,
   OT_NORMAL: 1,
   OT_DERIVEFROMQUOTE: 2,
   OT_DERIVEFROMCOMBINATION: 3,
   OT_COMBINATION: 4,
   OT_CONDITIONALORDER: 5,
   OT_SWAP: 6
-}
+};
 
 /**
  * @enum {number}
  */
 proto.xyz.redtorch.pb.TimeConditionEnum = {
-  TC_UNKONWN: 0,
+  TC_UNKNOWN: 0,
   TC_IOC: 1,
   TC_GFS: 2,
   TC_GFD: 3,
   TC_GTD: 4,
   TC_GTC: 5,
   TC_GFA: 6
-}
+};
 
 /**
  * @enum {number}
  */
 proto.xyz.redtorch.pb.VolumeConditionEnum = {
-  VC_UNKONWN: 0,
+  VC_UNKNOWN: 0,
   VC_AV: 1,
   VC_MV: 2,
   VC_CV: 3
-}
+};
 
 /**
  * @enum {number}
  */
 proto.xyz.redtorch.pb.ContingentConditionEnum = {
-  CC_UNKONWN: 0,
+  CC_UNKNOWN: 0,
   CC_IMMEDIATELY: 1,
   CC_TOUCH: 2,
   CC_TOUCHPROFIT: 3,
@@ -338,41 +337,41 @@ proto.xyz.redtorch.pb.ContingentConditionEnum = {
   CC_BIDPRICELESSEREQUALSTOPPRICE: 16,
   CC_LOCALLASTPRICELESSEREQUALSTOPPRICE: 17,
   CC_LOCALLASTPRICEGREATEREQUALSTOPPRICE: 18
-}
+};
 
 /**
  * @enum {number}
  */
 proto.xyz.redtorch.pb.ActionFlagEnum = {
-  AF_UNKONWN: 0,
+  AF_UNKNOWN: 0,
   AF_DELETE: 1,
   AF_MODIFY: 2
-}
+};
 
 /**
  * @enum {number}
  */
 proto.xyz.redtorch.pb.TradingRightEnum = {
-  TR_UNKONWN: 0,
+  TR_UNKNOWN: 0,
   TR_ALLOW: 1,
   TR_CLOSEONLY: 2,
   TR_FORBIDDEN: 3
-}
+};
 
 /**
  * @enum {number}
  */
 proto.xyz.redtorch.pb.OrderSourceEnum = {
-  ODS_UNKONWN: 0,
+  ODS_UNKNOWN: 0,
   ODS_PARTICIPANT: 1,
   ODS_ADMINISTRATOR: 2
-}
+};
 
 /**
  * @enum {number}
  */
 proto.xyz.redtorch.pb.TradeTypeEnum = {
-  TT_UNKONWN: 0,
+  TT_UNKNOWN: 0,
   TT_SPLITCOMBINATION: 1,
   TT_COMMON: 2,
   TT_OPTIONSEXECUTION: 3,
@@ -380,18 +379,18 @@ proto.xyz.redtorch.pb.TradeTypeEnum = {
   TT_EFPDERIVED: 5,
   TT_COMBINATIONDERIVED: 6,
   TT_BLOCKTRADE: 7
-}
+};
 
 /**
  * @enum {number}
  */
 proto.xyz.redtorch.pb.PriceSourceEnum = {
-  PSRC_UNKONWN: 0,
+  PSRC_UNKNOWN: 0,
   PSRC_LASTPRICE: 1,
   PSRC_BUY: 2,
   PSRC_SELL: 3,
   PSRC_OTC: 4
-}
+};
 
 /**
  * @enum {number}
@@ -427,7 +426,7 @@ proto.xyz.redtorch.pb.CurrencyEnum = {
   SUR: 27,
   SGD: 28,
   KRW: 29
-}
+};
 
 /**
  * @enum {number}
@@ -458,7 +457,7 @@ proto.xyz.redtorch.pb.ExchangeEnum = {
   OANDA: 22,
   FXCM: 23,
   SMART: 24
-}
+};
 
 /**
  * @enum {number}
@@ -467,7 +466,7 @@ proto.xyz.redtorch.pb.OptionsTypeEnum = {
   O_UNKNOWN: 0,
   O_CALLOPTIONS: 1,
   O_PUTOPTIONS: 2
-}
+};
 
 /**
  * @enum {number}
@@ -477,7 +476,7 @@ proto.xyz.redtorch.pb.StrikeModeEnum = {
   STM_CONTINENTAL: 1,
   STM_AMERICAN: 2,
   STM_BERMUDA: 3
-}
+};
 
 /**
  * @enum {number}
@@ -491,6 +490,5 @@ proto.xyz.redtorch.pb.CombinationTypeEnum = {
   COMBT_STG: 5,
   COMBT_PRT: 6,
   COMBT_CLD: 7
-}
+};
 
-goog.object.extend(exports, proto.xyz.redtorch.pb)

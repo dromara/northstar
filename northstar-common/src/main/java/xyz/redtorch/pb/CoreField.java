@@ -1906,6 +1906,26 @@ public final class CoreField {
      */
     com.google.protobuf.ByteString
         getGatewayIdBytes();
+
+    /**
+     * <pre>
+     * 手续费
+     * </pre>
+     *
+     * <code>double comssionFee = 28;</code>
+     * @return The comssionFee.
+     */
+    double getComssionFee();
+
+    /**
+     * <pre>
+     * 手续费率
+     * </pre>
+     *
+     * <code>double comssionRate = 29;</code>
+     * @return The comssionRate.
+     */
+    double getComssionRate();
   }
   /**
    * <pre>
@@ -2107,6 +2127,16 @@ public final class CoreField {
               java.lang.String s = input.readStringRequireUtf8();
 
               gatewayId_ = s;
+              break;
+            }
+            case 225: {
+
+              comssionFee_ = input.readDouble();
+              break;
+            }
+            case 233: {
+
+              comssionRate_ = input.readDouble();
               break;
             }
             default: {
@@ -2855,6 +2885,36 @@ public final class CoreField {
       }
     }
 
+    public static final int COMSSIONFEE_FIELD_NUMBER = 28;
+    private double comssionFee_;
+    /**
+     * <pre>
+     * 手续费
+     * </pre>
+     *
+     * <code>double comssionFee = 28;</code>
+     * @return The comssionFee.
+     */
+    @java.lang.Override
+    public double getComssionFee() {
+      return comssionFee_;
+    }
+
+    public static final int COMSSIONRATE_FIELD_NUMBER = 29;
+    private double comssionRate_;
+    /**
+     * <pre>
+     * 手续费率
+     * </pre>
+     *
+     * <code>double comssionRate = 29;</code>
+     * @return The comssionRate.
+     */
+    @java.lang.Override
+    public double getComssionRate() {
+      return comssionRate_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -2943,6 +3003,12 @@ public final class CoreField {
       }
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(gatewayId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 27, gatewayId_);
+      }
+      if (java.lang.Double.doubleToRawLongBits(comssionFee_) != 0) {
+        output.writeDouble(28, comssionFee_);
+      }
+      if (java.lang.Double.doubleToRawLongBits(comssionRate_) != 0) {
+        output.writeDouble(29, comssionRate_);
       }
       unknownFields.writeTo(output);
     }
@@ -3044,6 +3110,14 @@ public final class CoreField {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(gatewayId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(27, gatewayId_);
       }
+      if (java.lang.Double.doubleToRawLongBits(comssionFee_) != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(28, comssionFee_);
+      }
+      if (java.lang.Double.doubleToRawLongBits(comssionRate_) != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(29, comssionRate_);
+      }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
       return size;
@@ -3110,6 +3184,12 @@ public final class CoreField {
       if (combinationType_ != other.combinationType_) return false;
       if (!getGatewayId()
           .equals(other.getGatewayId())) return false;
+      if (java.lang.Double.doubleToLongBits(getComssionFee())
+          != java.lang.Double.doubleToLongBits(
+              other.getComssionFee())) return false;
+      if (java.lang.Double.doubleToLongBits(getComssionRate())
+          != java.lang.Double.doubleToLongBits(
+              other.getComssionRate())) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -3178,6 +3258,12 @@ public final class CoreField {
       hash = (53 * hash) + combinationType_;
       hash = (37 * hash) + GATEWAYID_FIELD_NUMBER;
       hash = (53 * hash) + getGatewayId().hashCode();
+      hash = (37 * hash) + COMSSIONFEE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getComssionFee()));
+      hash = (37 * hash) + COMSSIONRATE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getComssionRate()));
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -3365,6 +3451,10 @@ public final class CoreField {
 
         gatewayId_ = "";
 
+        comssionFee_ = 0D;
+
+        comssionRate_ = 0D;
+
         return this;
       }
 
@@ -3416,6 +3506,8 @@ public final class CoreField {
         result.minLimitOrderVolume_ = minLimitOrderVolume_;
         result.combinationType_ = combinationType_;
         result.gatewayId_ = gatewayId_;
+        result.comssionFee_ = comssionFee_;
+        result.comssionRate_ = comssionRate_;
         onBuilt();
         return result;
       }
@@ -3547,6 +3639,12 @@ public final class CoreField {
         if (!other.getGatewayId().isEmpty()) {
           gatewayId_ = other.gatewayId_;
           onChanged();
+        }
+        if (other.getComssionFee() != 0D) {
+          setComssionFee(other.getComssionFee());
+        }
+        if (other.getComssionRate() != 0D) {
+          setComssionRate(other.getComssionRate());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -5280,6 +5378,92 @@ public final class CoreField {
   checkByteStringIsUtf8(value);
         
         gatewayId_ = value;
+        onChanged();
+        return this;
+      }
+
+      private double comssionFee_ ;
+      /**
+       * <pre>
+       * 手续费
+       * </pre>
+       *
+       * <code>double comssionFee = 28;</code>
+       * @return The comssionFee.
+       */
+      @java.lang.Override
+      public double getComssionFee() {
+        return comssionFee_;
+      }
+      /**
+       * <pre>
+       * 手续费
+       * </pre>
+       *
+       * <code>double comssionFee = 28;</code>
+       * @param value The comssionFee to set.
+       * @return This builder for chaining.
+       */
+      public Builder setComssionFee(double value) {
+        
+        comssionFee_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * 手续费
+       * </pre>
+       *
+       * <code>double comssionFee = 28;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearComssionFee() {
+        
+        comssionFee_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private double comssionRate_ ;
+      /**
+       * <pre>
+       * 手续费率
+       * </pre>
+       *
+       * <code>double comssionRate = 29;</code>
+       * @return The comssionRate.
+       */
+      @java.lang.Override
+      public double getComssionRate() {
+        return comssionRate_;
+      }
+      /**
+       * <pre>
+       * 手续费率
+       * </pre>
+       *
+       * <code>double comssionRate = 29;</code>
+       * @param value The comssionRate to set.
+       * @return This builder for chaining.
+       */
+      public Builder setComssionRate(double value) {
+        
+        comssionRate_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * 手续费率
+       * </pre>
+       *
+       * <code>double comssionRate = 29;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearComssionRate() {
+        
+        comssionRate_ = 0D;
         onChanged();
         return this;
       }
@@ -41866,7 +42050,7 @@ public final class CoreField {
       "ayTypeEnum\022C\n\022gatewayAdapterType\030\005 \001(\0162\'" +
       ".xyz.redtorch.pb.GatewayAdapterTypeEnum\022" +
       "2\n\006status\030\006 \001(\0162\".xyz.redtorch.pb.Connec" +
-      "tStatusEnum\022\025\n\rauthErrorFlag\030\007 \001(\010\"\207\006\n\rC" +
+      "tStatusEnum\022\025\n\rauthErrorFlag\030\007 \001(\010\"\262\006\n\rC" +
       "ontractField\022\022\n\ncontractId\030\001 \001(\t\022\014\n\004name" +
       "\030\002 \001(\t\022\020\n\010fullName\030\003 \001(\t\022\024\n\014thirdPartyId" +
       "\030\004 \001(\t\022\025\n\runifiedSymbol\030\007 \001(\t\022\016\n\006symbol\030" +
@@ -41886,159 +42070,160 @@ public final class CoreField {
       "imitOrderVolume\030\030 \001(\007\022\033\n\023minLimitOrderVo" +
       "lume\030\031 \001(\007\022=\n\017combinationType\030\032 \001(\0162$.xy" +
       "z.redtorch.pb.CombinationTypeEnum\022\021\n\tgat" +
-      "ewayId\030\033 \001(\t\"\275\002\n\014AccountField\022\021\n\taccount" +
-      "Id\030\001 \001(\t\022\014\n\004code\030\002 \001(\t\022\014\n\004name\030\003 \001(\t\022\016\n\006" +
-      "holder\030\004 \001(\t\022/\n\010currency\030\005 \001(\0162\035.xyz.red" +
-      "torch.pb.CurrencyEnum\022\022\n\npreBalance\030\006 \001(" +
-      "\001\022\017\n\007balance\030\007 \001(\001\022\021\n\tavailable\030\010 \001(\001\022\022\n" +
-      "\ncommission\030\t \001(\001\022\016\n\006margin\030\n \001(\001\022\023\n\013clo" +
-      "seProfit\030\013 \001(\001\022\026\n\016positionProfit\030\014 \001(\001\022\017" +
-      "\n\007deposit\030\r \001(\001\022\020\n\010withdraw\030\016 \001(\001\022\021\n\tgat" +
-      "ewayId\030\017 \001(\t\"\376\010\n\nOrderField\022\025\n\roriginOrd" +
-      "erId\030\001 \001(\t\022\017\n\007orderId\030\002 \001(\t\022\026\n\016adapterOr" +
-      "derId\030\003 \001(\t\022\021\n\taccountId\030\004 \001(\t\022\024\n\014orderL" +
-      "ocalId\030\005 \001(\t\022\026\n\016brokerOrderSeq\030\006 \001(\t\022\022\n\n" +
-      "orderSysId\030\007 \001(\t\022\022\n\nsequenceNo\030\010 \001(\t\0221\n\t" +
-      "direction\030\t \001(\0162\036.xyz.redtorch.pb.Direct" +
-      "ionEnum\0223\n\noffsetFlag\030\n \001(\0162\037.xyz.redtor" +
-      "ch.pb.OffsetFlagEnum\0221\n\thedgeFlag\030\013 \001(\0162" +
-      "\036.xyz.redtorch.pb.HedgeFlagEnum\022;\n\016order" +
-      "PriceType\030\014 \001(\0162#.xyz.redtorch.pb.OrderP" +
-      "riceTypeEnum\0225\n\013orderStatus\030\r \001(\0162 .xyz." +
-      "redtorch.pb.OrderStatusEnum\022\r\n\005price\030\016 \001" +
-      "(\001\022\023\n\013totalVolume\030\017 \001(\007\022\024\n\014tradedVolume\030" +
-      "\020 \001(\007\0229\n\rtimeCondition\030\021 \001(\0162\".xyz.redto" +
-      "rch.pb.TimeConditionEnum\022\017\n\007gtdDate\030\022 \001(" +
-      "\t\022=\n\017volumeCondition\030\023 \001(\0162$.xyz.redtorc" +
-      "h.pb.VolumeConditionEnum\022\021\n\tminVolume\030\024 " +
-      "\001(\007\022E\n\023contingentCondition\030\025 \001(\0162(.xyz.r" +
-      "edtorch.pb.ContingentConditionEnum\022\021\n\tst" +
-      "opPrice\030\026 \001(\001\022?\n\020forceCloseReason\030\027 \001(\0162" +
-      "%.xyz.redtorch.pb.ForceCloseReasonEnum\022\023" +
-      "\n\013autoSuspend\030\030 \001(\007\022\026\n\016userForceClose\030\031 " +
-      "\001(\007\022\021\n\tswapOrder\030\032 \001(\007\022\022\n\ntradingDay\030\033 \001" +
-      "(\t\022\021\n\torderDate\030\034 \001(\t\022\021\n\torderTime\030\035 \001(\t" +
-      "\022\022\n\nactiveTime\030\036 \001(\t\022\023\n\013suspendTime\030\037 \001(" +
-      "\t\022\022\n\ncancelTime\030  \001(\t\022\022\n\nupdateTime\030! \001(" +
-      "\t\022\021\n\tstatusMsg\030\" \001(\t\022\017\n\007frontId\030# \001(\007\022\021\n" +
-      "\tsessionId\030$ \001(\007\0220\n\010contract\030% \001(\0132\036.xyz" +
-      ".redtorch.pb.ContractField\022\021\n\tgatewayId\030" +
-      "& \001(\t\"\257\005\n\nTradeField\022\017\n\007tradeId\030\001 \001(\t\022\026\n" +
-      "\016adapterTradeId\030\002 \001(\t\022\025\n\roriginOrderId\030\003" +
-      " \001(\t\022\017\n\007orderId\030\004 \001(\t\022\026\n\016adapterOrderId\030" +
-      "\005 \001(\t\022\024\n\014orderLocalId\030\006 \001(\t\022\026\n\016brokerOrd" +
-      "erSeq\030\007 \001(\t\022\022\n\norderSysId\030\010 \001(\t\022\024\n\014settl" +
-      "ementId\030\t \001(\t\022\022\n\nsequenceNo\030\n \001(\t\022\021\n\tacc" +
-      "ountId\030\013 \001(\t\0221\n\tdirection\030\014 \001(\0162\036.xyz.re" +
-      "dtorch.pb.DirectionEnum\0223\n\noffsetFlag\030\r " +
-      "\001(\0162\037.xyz.redtorch.pb.OffsetFlagEnum\0221\n\t" +
-      "hedgeFlag\030\016 \001(\0162\036.xyz.redtorch.pb.HedgeF" +
-      "lagEnum\022\r\n\005price\030\017 \001(\001\022\016\n\006volume\030\020 \001(\007\0221" +
-      "\n\ttradeType\030\021 \001(\0162\036.xyz.redtorch.pb.Trad" +
-      "eTypeEnum\0225\n\013priceSource\030\022 \001(\0162 .xyz.red" +
-      "torch.pb.PriceSourceEnum\022\022\n\ntradingDay\030\023" +
-      " \001(\t\022\021\n\ttradeDate\030\024 \001(\t\022\021\n\ttradeTime\030\025 \001" +
-      "(\t\022\026\n\016tradeTimestamp\030\026 \001(\006\0220\n\010contract\030\027" +
-      " \001(\0132\036.xyz.redtorch.pb.ContractField\022\021\n\t" +
-      "gatewayId\030\030 \001(\t\"\362\004\n\rPositionField\022\022\n\npos" +
-      "itionId\030\001 \001(\t\022\021\n\taccountId\030\002 \001(\t\022A\n\021posi" +
-      "tionDirection\030\003 \001(\0162&.xyz.redtorch.pb.Po" +
-      "sitionDirectionEnum\022\020\n\010position\030\004 \001(\007\022\016\n" +
-      "\006frozen\030\005 \001(\007\022\022\n\nydPosition\030\006 \001(\007\022\020\n\010ydF" +
-      "rozen\030\007 \001(\007\022\022\n\ntdPosition\030\010 \001(\007\022\020\n\010tdFro" +
-      "zen\030\t \001(\007\022\021\n\tlastPrice\030\n \001(\001\022\r\n\005price\030\013 " +
-      "\001(\001\022\021\n\tpriceDiff\030\014 \001(\001\022\021\n\topenPrice\030\r \001(" +
-      "\001\022\025\n\ropenPriceDiff\030\016 \001(\001\022\026\n\016positionProf" +
-      "it\030\017 \001(\001\022\033\n\023positionProfitRatio\030\020 \001(\001\022\032\n" +
-      "\022openPositionProfit\030\021 \001(\001\022\037\n\027openPositio" +
-      "nProfitRatio\030\022 \001(\001\022\021\n\tuseMargin\030\023 \001(\001\022\026\n" +
-      "\016exchangeMargin\030\024 \001(\001\022\025\n\rcontractValue\030\025" +
-      " \001(\001\0221\n\thedgeFlag\030\026 \001(\0162\036.xyz.redtorch.p" +
-      "b.HedgeFlagEnum\0220\n\010contract\030\027 \001(\0132\036.xyz." +
-      "redtorch.pb.ContractField\022\021\n\tgatewayId\030\030" +
-      " \001(\t\"\372\005\n\tTickField\022\025\n\runifiedSymbol\030\001 \001(" +
-      "\t\022\021\n\tgatewayId\030\002 \001(\t\022\022\n\ntradingDay\030\003 \001(\t" +
-      "\022\021\n\tactionDay\030\004 \001(\t\022\022\n\nactionTime\030\005 \001(\t\022" +
-      "\027\n\017actionTimestamp\030\006 \001(\006\022\016\n\006status\030\007 \001(\007" +
-      "\022\021\n\tlastPrice\030\010 \001(\001\022\020\n\010avgPrice\030\t \001(\001\022\023\n" +
-      "\013totalBidVol\030\n \001(\006\022\023\n\013totalAskVol\030\013 \001(\006\022" +
-      "\033\n\023weightedAvgBidPrice\030\014 \001(\001\022\033\n\023weighted" +
-      "AvgAskPrice\030\r \001(\001\022\014\n\004iopv\030\016 \001(\001\022\027\n\017yield" +
-      "ToMaturity\030\017 \001(\001\022\023\n\013volumeDelta\030\020 \001(\006\022\016\n" +
-      "\006volume\030\021 \001(\006\022\020\n\010turnover\030\022 \001(\001\022\025\n\rturno" +
-      "verDelta\030\023 \001(\001\022\021\n\tnumTrades\030\024 \001(\006\022\026\n\016num" +
-      "TradesDelta\030\025 \001(\006\022\024\n\014openInterest\030\026 \001(\001\022" +
-      "\031\n\021openInterestDelta\030\027 \001(\001\022\027\n\017preOpenInt" +
-      "erest\030\030 \001(\001\022\025\n\rpreClosePrice\030\031 \001(\001\022\023\n\013se" +
-      "ttlePrice\030\032 \001(\001\022\026\n\016preSettlePrice\030\033 \001(\001\022" +
-      "\021\n\topenPrice\030\034 \001(\001\022\021\n\thighPrice\030\035 \001(\001\022\020\n" +
-      "\010lowPrice\030\036 \001(\001\022\022\n\nupperLimit\030\037 \001(\001\022\022\n\nl" +
-      "owerLimit\030  \001(\001\022\020\n\010bidPrice\030! \003(\001\022\020\n\010ask" +
-      "Price\030\" \003(\001\022\021\n\tbidVolume\030# \003(\007\022\021\n\taskVol" +
-      "ume\030$ \003(\007\"\306\003\n\010BarField\022\025\n\runifiedSymbol\030" +
-      "\001 \001(\t\022\021\n\tgatewayId\030\002 \001(\t\022\022\n\ntradingDay\030\003" +
-      " \001(\t\022\021\n\tactionDay\030\004 \001(\t\022\022\n\nactionTime\030\005 " +
-      "\001(\t\022\027\n\017actionTimestamp\030\006 \001(\006\022\021\n\topenPric" +
-      "e\030\007 \001(\001\022\021\n\thighPrice\030\010 \001(\001\022\020\n\010lowPrice\030\t" +
-      " \001(\001\022\022\n\nclosePrice\030\n \001(\001\022\024\n\014openInterest" +
-      "\030\013 \001(\001\022\031\n\021openInterestDelta\030\014 \001(\001\022\016\n\006vol" +
-      "ume\030\r \001(\006\022\023\n\013volumeDelta\030\016 \001(\006\022\020\n\010turnov" +
-      "er\030\017 \001(\001\022\025\n\rturnoverDelta\030\020 \001(\001\022\021\n\tnumTr" +
-      "ades\030\021 \001(\006\022\026\n\016numTradesDelta\030\022 \001(\006\022\027\n\017pr" +
-      "eOpenInterest\030\023 \001(\001\022\025\n\rpreClosePrice\030\024 \001" +
-      "(\001\022\026\n\016preSettlePrice\030\025 \001(\001\"_\n\016CommonReqF" +
-      "ield\022\r\n\005reqId\030\001 \001(\t\022\022\n\noperatorId\030\002 \001(\t\022" +
-      "\024\n\014targetNodeId\030\003 \001(\007\022\024\n\014sourceNodeId\030\004 " +
-      "\001(\007\"B\n\016CommonRspField\022\r\n\005reqId\030\001 \001(\t\022\017\n\007" +
-      "errorId\030\002 \001(\007\022\020\n\010errorMsg\030\003 \001(\t\"\300\006\n\023Subm" +
-      "itOrderReqField\022\025\n\roriginOrderId\030\001 \001(\t\022\023" +
-      "\n\013accountCode\030\002 \001(\t\022/\n\010currency\030\003 \001(\0162\035." +
-      "xyz.redtorch.pb.CurrencyEnum\0220\n\010contract" +
-      "\030\004 \001(\0132\036.xyz.redtorch.pb.ContractField\022\021" +
-      "\n\tgatewayId\030\005 \001(\t\022\016\n\006volume\030\006 \001(\007\022\r\n\005pri" +
-      "ce\030\007 \001(\001\022;\n\016orderPriceType\030\010 \001(\0162#.xyz.r" +
-      "edtorch.pb.OrderPriceTypeEnum\0221\n\tdirecti" +
-      "on\030\t \001(\0162\036.xyz.redtorch.pb.DirectionEnum" +
-      "\0223\n\noffsetFlag\030\n \001(\0162\037.xyz.redtorch.pb.O" +
-      "ffsetFlagEnum\0221\n\thedgeFlag\030\013 \001(\0162\036.xyz.r" +
-      "edtorch.pb.HedgeFlagEnum\0229\n\rtimeConditio" +
-      "n\030\014 \001(\0162\".xyz.redtorch.pb.TimeConditionE" +
-      "num\022\017\n\007gtdDate\030\r \001(\t\022=\n\017volumeCondition\030" +
-      "\016 \001(\0162$.xyz.redtorch.pb.VolumeConditionE" +
-      "num\022\021\n\tminVolume\030\017 \001(\007\022E\n\023contingentCond" +
-      "ition\030\020 \001(\0162(.xyz.redtorch.pb.Contingent" +
-      "ConditionEnum\022\021\n\tstopPrice\030\021 \001(\001\022?\n\020forc" +
-      "eCloseReason\030\022 \001(\0162%.xyz.redtorch.pb.For" +
-      "ceCloseReasonEnum\022\023\n\013autoSuspend\030\023 \001(\007\022\026" +
-      "\n\016userForceClose\030\024 \001(\007\022\021\n\tswapOrder\030\025 \001(" +
-      "\007\022\027\n\017actionTimestamp\030\026 \001(\006\"P\n\023CancelOrde" +
-      "rReqField\022\021\n\tgatewayId\030\001 \001(\t\022\017\n\007orderId\030" +
-      "\002 \001(\t\022\025\n\roriginOrderId\030\003 \001(\t\"\373\005\n\023Gateway" +
-      "SettingField\022\021\n\tgatewayId\030\001 \001(\t\022\023\n\013gatew" +
-      "ayName\030\002 \001(\t\022\032\n\022gatewayDescription\030\004 \001(\t" +
-      "\022\032\n\022implementClassName\030\005 \001(\t\0225\n\013gatewayT" +
-      "ype\030\006 \001(\0162 .xyz.redtorch.pb.GatewayTypeE" +
-      "num\022C\n\022gatewayAdapterType\030\007 \001(\0162\'.xyz.re" +
-      "dtorch.pb.GatewayAdapterTypeEnum\022N\n\rctpA" +
-      "piSetting\030\010 \001(\01327.xyz.redtorch.pb.Gatewa" +
-      "ySettingField.CtpApiSettingField\022L\n\014ibAp" +
-      "iSetting\030\t \001(\01326.xyz.redtorch.pb.Gateway" +
-      "SettingField.IbApiSettingField\0222\n\006status" +
-      "\030\n \001(\0162\".xyz.redtorch.pb.ConnectStatusEn" +
-      "um\022\017\n\007version\030\013 \001(\006\022\035\n\025autoConnectTimeRa" +
-      "nges\030\014 \001(\t\032\302\001\n\022CtpApiSettingField\022\016\n\006use" +
-      "rId\030\001 \001(\t\022\020\n\010password\030\002 \001(\t\022\020\n\010brokerId\030" +
-      "\003 \001(\t\022\016\n\006tdHost\030\004 \001(\t\022\016\n\006tdPort\030\005 \001(\t\022\016\n" +
-      "\006mdHost\030\006 \001(\t\022\016\n\006mdPort\030\007 \001(\t\022\020\n\010authCod" +
-      "e\030\010 \001(\t\022\027\n\017userProductInfo\030\t \001(\t\022\r\n\005appI" +
-      "d\030\n \001(\t\032A\n\021IbApiSettingField\022\014\n\004host\030\001 \001" +
-      "(\t\022\014\n\004port\030\002 \001(\007\022\020\n\010clientId\030\003 \001(\007\"_\n\010Lo" +
-      "gField\022/\n\010logLevel\030\001 \001(\0162\035.xyz.redtorch." +
-      "pb.LogLevelEnum\022\021\n\ttimestamp\030\002 \001(\006\022\017\n\007co" +
-      "ntent\030\003 \001(\t\"d\n\013NoticeField\0221\n\006status\030\001 \001" +
-      "(\0162!.xyz.redtorch.pb.CommonStatusEnum\022\021\n" +
-      "\ttimestamp\030\002 \001(\006\022\017\n\007content\030\003 \001(\tb\006proto" +
-      "3"
+      "ewayId\030\033 \001(\t\022\023\n\013comssionFee\030\034 \001(\001\022\024\n\014com" +
+      "ssionRate\030\035 \001(\001\"\275\002\n\014AccountField\022\021\n\tacco" +
+      "untId\030\001 \001(\t\022\014\n\004code\030\002 \001(\t\022\014\n\004name\030\003 \001(\t\022" +
+      "\016\n\006holder\030\004 \001(\t\022/\n\010currency\030\005 \001(\0162\035.xyz." +
+      "redtorch.pb.CurrencyEnum\022\022\n\npreBalance\030\006" +
+      " \001(\001\022\017\n\007balance\030\007 \001(\001\022\021\n\tavailable\030\010 \001(\001" +
+      "\022\022\n\ncommission\030\t \001(\001\022\016\n\006margin\030\n \001(\001\022\023\n\013" +
+      "closeProfit\030\013 \001(\001\022\026\n\016positionProfit\030\014 \001(" +
+      "\001\022\017\n\007deposit\030\r \001(\001\022\020\n\010withdraw\030\016 \001(\001\022\021\n\t" +
+      "gatewayId\030\017 \001(\t\"\376\010\n\nOrderField\022\025\n\rorigin" +
+      "OrderId\030\001 \001(\t\022\017\n\007orderId\030\002 \001(\t\022\026\n\016adapte" +
+      "rOrderId\030\003 \001(\t\022\021\n\taccountId\030\004 \001(\t\022\024\n\014ord" +
+      "erLocalId\030\005 \001(\t\022\026\n\016brokerOrderSeq\030\006 \001(\t\022" +
+      "\022\n\norderSysId\030\007 \001(\t\022\022\n\nsequenceNo\030\010 \001(\t\022" +
+      "1\n\tdirection\030\t \001(\0162\036.xyz.redtorch.pb.Dir" +
+      "ectionEnum\0223\n\noffsetFlag\030\n \001(\0162\037.xyz.red" +
+      "torch.pb.OffsetFlagEnum\0221\n\thedgeFlag\030\013 \001" +
+      "(\0162\036.xyz.redtorch.pb.HedgeFlagEnum\022;\n\016or" +
+      "derPriceType\030\014 \001(\0162#.xyz.redtorch.pb.Ord" +
+      "erPriceTypeEnum\0225\n\013orderStatus\030\r \001(\0162 .x" +
+      "yz.redtorch.pb.OrderStatusEnum\022\r\n\005price\030" +
+      "\016 \001(\001\022\023\n\013totalVolume\030\017 \001(\007\022\024\n\014tradedVolu" +
+      "me\030\020 \001(\007\0229\n\rtimeCondition\030\021 \001(\0162\".xyz.re" +
+      "dtorch.pb.TimeConditionEnum\022\017\n\007gtdDate\030\022" +
+      " \001(\t\022=\n\017volumeCondition\030\023 \001(\0162$.xyz.redt" +
+      "orch.pb.VolumeConditionEnum\022\021\n\tminVolume" +
+      "\030\024 \001(\007\022E\n\023contingentCondition\030\025 \001(\0162(.xy" +
+      "z.redtorch.pb.ContingentConditionEnum\022\021\n" +
+      "\tstopPrice\030\026 \001(\001\022?\n\020forceCloseReason\030\027 \001" +
+      "(\0162%.xyz.redtorch.pb.ForceCloseReasonEnu" +
+      "m\022\023\n\013autoSuspend\030\030 \001(\007\022\026\n\016userForceClose" +
+      "\030\031 \001(\007\022\021\n\tswapOrder\030\032 \001(\007\022\022\n\ntradingDay\030" +
+      "\033 \001(\t\022\021\n\torderDate\030\034 \001(\t\022\021\n\torderTime\030\035 " +
+      "\001(\t\022\022\n\nactiveTime\030\036 \001(\t\022\023\n\013suspendTime\030\037" +
+      " \001(\t\022\022\n\ncancelTime\030  \001(\t\022\022\n\nupdateTime\030!" +
+      " \001(\t\022\021\n\tstatusMsg\030\" \001(\t\022\017\n\007frontId\030# \001(\007" +
+      "\022\021\n\tsessionId\030$ \001(\007\0220\n\010contract\030% \001(\0132\036." +
+      "xyz.redtorch.pb.ContractField\022\021\n\tgateway" +
+      "Id\030& \001(\t\"\257\005\n\nTradeField\022\017\n\007tradeId\030\001 \001(\t" +
+      "\022\026\n\016adapterTradeId\030\002 \001(\t\022\025\n\roriginOrderI" +
+      "d\030\003 \001(\t\022\017\n\007orderId\030\004 \001(\t\022\026\n\016adapterOrder" +
+      "Id\030\005 \001(\t\022\024\n\014orderLocalId\030\006 \001(\t\022\026\n\016broker" +
+      "OrderSeq\030\007 \001(\t\022\022\n\norderSysId\030\010 \001(\t\022\024\n\014se" +
+      "ttlementId\030\t \001(\t\022\022\n\nsequenceNo\030\n \001(\t\022\021\n\t" +
+      "accountId\030\013 \001(\t\0221\n\tdirection\030\014 \001(\0162\036.xyz" +
+      ".redtorch.pb.DirectionEnum\0223\n\noffsetFlag" +
+      "\030\r \001(\0162\037.xyz.redtorch.pb.OffsetFlagEnum\022" +
+      "1\n\thedgeFlag\030\016 \001(\0162\036.xyz.redtorch.pb.Hed" +
+      "geFlagEnum\022\r\n\005price\030\017 \001(\001\022\016\n\006volume\030\020 \001(" +
+      "\007\0221\n\ttradeType\030\021 \001(\0162\036.xyz.redtorch.pb.T" +
+      "radeTypeEnum\0225\n\013priceSource\030\022 \001(\0162 .xyz." +
+      "redtorch.pb.PriceSourceEnum\022\022\n\ntradingDa" +
+      "y\030\023 \001(\t\022\021\n\ttradeDate\030\024 \001(\t\022\021\n\ttradeTime\030" +
+      "\025 \001(\t\022\026\n\016tradeTimestamp\030\026 \001(\006\0220\n\010contrac" +
+      "t\030\027 \001(\0132\036.xyz.redtorch.pb.ContractField\022" +
+      "\021\n\tgatewayId\030\030 \001(\t\"\362\004\n\rPositionField\022\022\n\n" +
+      "positionId\030\001 \001(\t\022\021\n\taccountId\030\002 \001(\t\022A\n\021p" +
+      "ositionDirection\030\003 \001(\0162&.xyz.redtorch.pb" +
+      ".PositionDirectionEnum\022\020\n\010position\030\004 \001(\007" +
+      "\022\016\n\006frozen\030\005 \001(\007\022\022\n\nydPosition\030\006 \001(\007\022\020\n\010" +
+      "ydFrozen\030\007 \001(\007\022\022\n\ntdPosition\030\010 \001(\007\022\020\n\010td" +
+      "Frozen\030\t \001(\007\022\021\n\tlastPrice\030\n \001(\001\022\r\n\005price" +
+      "\030\013 \001(\001\022\021\n\tpriceDiff\030\014 \001(\001\022\021\n\topenPrice\030\r" +
+      " \001(\001\022\025\n\ropenPriceDiff\030\016 \001(\001\022\026\n\016positionP" +
+      "rofit\030\017 \001(\001\022\033\n\023positionProfitRatio\030\020 \001(\001" +
+      "\022\032\n\022openPositionProfit\030\021 \001(\001\022\037\n\027openPosi" +
+      "tionProfitRatio\030\022 \001(\001\022\021\n\tuseMargin\030\023 \001(\001" +
+      "\022\026\n\016exchangeMargin\030\024 \001(\001\022\025\n\rcontractValu" +
+      "e\030\025 \001(\001\0221\n\thedgeFlag\030\026 \001(\0162\036.xyz.redtorc" +
+      "h.pb.HedgeFlagEnum\0220\n\010contract\030\027 \001(\0132\036.x" +
+      "yz.redtorch.pb.ContractField\022\021\n\tgatewayI" +
+      "d\030\030 \001(\t\"\372\005\n\tTickField\022\025\n\runifiedSymbol\030\001" +
+      " \001(\t\022\021\n\tgatewayId\030\002 \001(\t\022\022\n\ntradingDay\030\003 " +
+      "\001(\t\022\021\n\tactionDay\030\004 \001(\t\022\022\n\nactionTime\030\005 \001" +
+      "(\t\022\027\n\017actionTimestamp\030\006 \001(\006\022\016\n\006status\030\007 " +
+      "\001(\007\022\021\n\tlastPrice\030\010 \001(\001\022\020\n\010avgPrice\030\t \001(\001" +
+      "\022\023\n\013totalBidVol\030\n \001(\006\022\023\n\013totalAskVol\030\013 \001" +
+      "(\006\022\033\n\023weightedAvgBidPrice\030\014 \001(\001\022\033\n\023weigh" +
+      "tedAvgAskPrice\030\r \001(\001\022\014\n\004iopv\030\016 \001(\001\022\027\n\017yi" +
+      "eldToMaturity\030\017 \001(\001\022\023\n\013volumeDelta\030\020 \001(\006" +
+      "\022\016\n\006volume\030\021 \001(\006\022\020\n\010turnover\030\022 \001(\001\022\025\n\rtu" +
+      "rnoverDelta\030\023 \001(\001\022\021\n\tnumTrades\030\024 \001(\006\022\026\n\016" +
+      "numTradesDelta\030\025 \001(\006\022\024\n\014openInterest\030\026 \001" +
+      "(\001\022\031\n\021openInterestDelta\030\027 \001(\001\022\027\n\017preOpen" +
+      "Interest\030\030 \001(\001\022\025\n\rpreClosePrice\030\031 \001(\001\022\023\n" +
+      "\013settlePrice\030\032 \001(\001\022\026\n\016preSettlePrice\030\033 \001" +
+      "(\001\022\021\n\topenPrice\030\034 \001(\001\022\021\n\thighPrice\030\035 \001(\001" +
+      "\022\020\n\010lowPrice\030\036 \001(\001\022\022\n\nupperLimit\030\037 \001(\001\022\022" +
+      "\n\nlowerLimit\030  \001(\001\022\020\n\010bidPrice\030! \003(\001\022\020\n\010" +
+      "askPrice\030\" \003(\001\022\021\n\tbidVolume\030# \003(\007\022\021\n\task" +
+      "Volume\030$ \003(\007\"\306\003\n\010BarField\022\025\n\runifiedSymb" +
+      "ol\030\001 \001(\t\022\021\n\tgatewayId\030\002 \001(\t\022\022\n\ntradingDa" +
+      "y\030\003 \001(\t\022\021\n\tactionDay\030\004 \001(\t\022\022\n\nactionTime" +
+      "\030\005 \001(\t\022\027\n\017actionTimestamp\030\006 \001(\006\022\021\n\topenP" +
+      "rice\030\007 \001(\001\022\021\n\thighPrice\030\010 \001(\001\022\020\n\010lowPric" +
+      "e\030\t \001(\001\022\022\n\nclosePrice\030\n \001(\001\022\024\n\014openInter" +
+      "est\030\013 \001(\001\022\031\n\021openInterestDelta\030\014 \001(\001\022\016\n\006" +
+      "volume\030\r \001(\006\022\023\n\013volumeDelta\030\016 \001(\006\022\020\n\010tur" +
+      "nover\030\017 \001(\001\022\025\n\rturnoverDelta\030\020 \001(\001\022\021\n\tnu" +
+      "mTrades\030\021 \001(\006\022\026\n\016numTradesDelta\030\022 \001(\006\022\027\n" +
+      "\017preOpenInterest\030\023 \001(\001\022\025\n\rpreClosePrice\030" +
+      "\024 \001(\001\022\026\n\016preSettlePrice\030\025 \001(\001\"_\n\016CommonR" +
+      "eqField\022\r\n\005reqId\030\001 \001(\t\022\022\n\noperatorId\030\002 \001" +
+      "(\t\022\024\n\014targetNodeId\030\003 \001(\007\022\024\n\014sourceNodeId" +
+      "\030\004 \001(\007\"B\n\016CommonRspField\022\r\n\005reqId\030\001 \001(\t\022" +
+      "\017\n\007errorId\030\002 \001(\007\022\020\n\010errorMsg\030\003 \001(\t\"\300\006\n\023S" +
+      "ubmitOrderReqField\022\025\n\roriginOrderId\030\001 \001(" +
+      "\t\022\023\n\013accountCode\030\002 \001(\t\022/\n\010currency\030\003 \001(\016" +
+      "2\035.xyz.redtorch.pb.CurrencyEnum\0220\n\010contr" +
+      "act\030\004 \001(\0132\036.xyz.redtorch.pb.ContractFiel" +
+      "d\022\021\n\tgatewayId\030\005 \001(\t\022\016\n\006volume\030\006 \001(\007\022\r\n\005" +
+      "price\030\007 \001(\001\022;\n\016orderPriceType\030\010 \001(\0162#.xy" +
+      "z.redtorch.pb.OrderPriceTypeEnum\0221\n\tdire" +
+      "ction\030\t \001(\0162\036.xyz.redtorch.pb.DirectionE" +
+      "num\0223\n\noffsetFlag\030\n \001(\0162\037.xyz.redtorch.p" +
+      "b.OffsetFlagEnum\0221\n\thedgeFlag\030\013 \001(\0162\036.xy" +
+      "z.redtorch.pb.HedgeFlagEnum\0229\n\rtimeCondi" +
+      "tion\030\014 \001(\0162\".xyz.redtorch.pb.TimeConditi" +
+      "onEnum\022\017\n\007gtdDate\030\r \001(\t\022=\n\017volumeConditi" +
+      "on\030\016 \001(\0162$.xyz.redtorch.pb.VolumeConditi" +
+      "onEnum\022\021\n\tminVolume\030\017 \001(\007\022E\n\023contingentC" +
+      "ondition\030\020 \001(\0162(.xyz.redtorch.pb.Conting" +
+      "entConditionEnum\022\021\n\tstopPrice\030\021 \001(\001\022?\n\020f" +
+      "orceCloseReason\030\022 \001(\0162%.xyz.redtorch.pb." +
+      "ForceCloseReasonEnum\022\023\n\013autoSuspend\030\023 \001(" +
+      "\007\022\026\n\016userForceClose\030\024 \001(\007\022\021\n\tswapOrder\030\025" +
+      " \001(\007\022\027\n\017actionTimestamp\030\026 \001(\006\"P\n\023CancelO" +
+      "rderReqField\022\021\n\tgatewayId\030\001 \001(\t\022\017\n\007order" +
+      "Id\030\002 \001(\t\022\025\n\roriginOrderId\030\003 \001(\t\"\373\005\n\023Gate" +
+      "waySettingField\022\021\n\tgatewayId\030\001 \001(\t\022\023\n\013ga" +
+      "tewayName\030\002 \001(\t\022\032\n\022gatewayDescription\030\004 " +
+      "\001(\t\022\032\n\022implementClassName\030\005 \001(\t\0225\n\013gatew" +
+      "ayType\030\006 \001(\0162 .xyz.redtorch.pb.GatewayTy" +
+      "peEnum\022C\n\022gatewayAdapterType\030\007 \001(\0162\'.xyz" +
+      ".redtorch.pb.GatewayAdapterTypeEnum\022N\n\rc" +
+      "tpApiSetting\030\010 \001(\01327.xyz.redtorch.pb.Gat" +
+      "ewaySettingField.CtpApiSettingField\022L\n\014i" +
+      "bApiSetting\030\t \001(\01326.xyz.redtorch.pb.Gate" +
+      "waySettingField.IbApiSettingField\0222\n\006sta" +
+      "tus\030\n \001(\0162\".xyz.redtorch.pb.ConnectStatu" +
+      "sEnum\022\017\n\007version\030\013 \001(\006\022\035\n\025autoConnectTim" +
+      "eRanges\030\014 \001(\t\032\302\001\n\022CtpApiSettingField\022\016\n\006" +
+      "userId\030\001 \001(\t\022\020\n\010password\030\002 \001(\t\022\020\n\010broker" +
+      "Id\030\003 \001(\t\022\016\n\006tdHost\030\004 \001(\t\022\016\n\006tdPort\030\005 \001(\t" +
+      "\022\016\n\006mdHost\030\006 \001(\t\022\016\n\006mdPort\030\007 \001(\t\022\020\n\010auth" +
+      "Code\030\010 \001(\t\022\027\n\017userProductInfo\030\t \001(\t\022\r\n\005a" +
+      "ppId\030\n \001(\t\032A\n\021IbApiSettingField\022\014\n\004host\030" +
+      "\001 \001(\t\022\014\n\004port\030\002 \001(\007\022\020\n\010clientId\030\003 \001(\007\"_\n" +
+      "\010LogField\022/\n\010logLevel\030\001 \001(\0162\035.xyz.redtor" +
+      "ch.pb.LogLevelEnum\022\021\n\ttimestamp\030\002 \001(\006\022\017\n" +
+      "\007content\030\003 \001(\t\"d\n\013NoticeField\0221\n\006status\030" +
+      "\001 \001(\0162!.xyz.redtorch.pb.CommonStatusEnum" +
+      "\022\021\n\ttimestamp\030\002 \001(\006\022\017\n\007content\030\003 \001(\tb\006pr" +
+      "oto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -42056,7 +42241,7 @@ public final class CoreField {
     internal_static_xyz_redtorch_pb_ContractField_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_xyz_redtorch_pb_ContractField_descriptor,
-        new java.lang.String[] { "ContractId", "Name", "FullName", "ThirdPartyId", "UnifiedSymbol", "Symbol", "Exchange", "ProductClass", "Currency", "Multiplier", "PriceTick", "LongMarginRatio", "ShortMarginRatio", "MaxMarginSideAlgorithm", "UnderlyingSymbol", "StrikePrice", "OptionsType", "UnderlyingMultiplier", "LastTradeDateOrContractMonth", "MaxMarketOrderVolume", "MinMarketOrderVolume", "MaxLimitOrderVolume", "MinLimitOrderVolume", "CombinationType", "GatewayId", });
+        new java.lang.String[] { "ContractId", "Name", "FullName", "ThirdPartyId", "UnifiedSymbol", "Symbol", "Exchange", "ProductClass", "Currency", "Multiplier", "PriceTick", "LongMarginRatio", "ShortMarginRatio", "MaxMarginSideAlgorithm", "UnderlyingSymbol", "StrikePrice", "OptionsType", "UnderlyingMultiplier", "LastTradeDateOrContractMonth", "MaxMarketOrderVolume", "MinMarketOrderVolume", "MaxLimitOrderVolume", "MinLimitOrderVolume", "CombinationType", "GatewayId", "ComssionFee", "ComssionRate", });
     internal_static_xyz_redtorch_pb_AccountField_descriptor =
       getDescriptor().getMessageTypes().get(2);
     internal_static_xyz_redtorch_pb_AccountField_fieldAccessorTable = new
