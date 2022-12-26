@@ -1,4 +1,4 @@
-package tech.quantit.northstar.gateway.api.domain.time;
+package tech.quantit.northstar.gateway.ctp.time;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -9,10 +9,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import tech.quantit.northstar.common.model.ContractDefinition;
+import tech.quantit.northstar.gateway.api.domain.time.PeriodHelper;
 import test.common.TestFieldFactory;
 
 class PeriodHelperFactoryTest {
-
+	
 	TestFieldFactory factory = new TestFieldFactory("testGateway");
 	
 	PeriodHelperFactory phFactory;

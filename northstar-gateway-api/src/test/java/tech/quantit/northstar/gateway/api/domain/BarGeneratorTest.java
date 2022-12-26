@@ -16,8 +16,8 @@ import org.junit.jupiter.api.Test;
 
 import tech.quantit.northstar.common.constant.DateTimeConstant;
 import tech.quantit.northstar.gateway.api.domain.time.GenericTradeTime;
+import tech.quantit.northstar.gateway.api.domain.time.IPeriodHelperFactory;
 import tech.quantit.northstar.gateway.api.domain.time.PeriodHelper;
-import tech.quantit.northstar.gateway.api.domain.time.PeriodHelperFactory;
 import test.common.TestFieldFactory;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.ContractField;
@@ -31,7 +31,7 @@ class BarGeneratorTest {
 	@Test
 	void test() {
 		ContractField contract = factory.makeContract("rb2210");
-		PeriodHelperFactory phFactory = mock(PeriodHelperFactory.class);
+		IPeriodHelperFactory phFactory = mock(IPeriodHelperFactory.class);
 		when(phFactory.newInstance(anyInt(), anyBoolean(), any(ContractField.class))).thenReturn(new PeriodHelper(60, new GenericTradeTime()));
 		BarGenerator gen = new BarGenerator(new NormalContract(contract, 0), mock(Consumer.class), phFactory);
 		long now = System.currentTimeMillis();

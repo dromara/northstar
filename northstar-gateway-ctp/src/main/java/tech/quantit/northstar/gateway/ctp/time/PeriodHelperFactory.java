@@ -1,4 +1,4 @@
-package tech.quantit.northstar.gateway.api.domain.time;
+package tech.quantit.northstar.gateway.ctp.time;
 
 import java.util.List;
 import java.util.Objects;
@@ -9,9 +9,12 @@ import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 
 import tech.quantit.northstar.common.model.ContractDefinition;
+import tech.quantit.northstar.gateway.api.domain.time.GenericTradeTime;
+import tech.quantit.northstar.gateway.api.domain.time.IPeriodHelperFactory;
+import tech.quantit.northstar.gateway.api.domain.time.PeriodHelper;
 import xyz.redtorch.pb.CoreField.ContractField;
 
-public class PeriodHelperFactory {
+public class PeriodHelperFactory implements IPeriodHelperFactory{
 	
 	private static final PeriodHelper GENERIC_HELPER = new PeriodHelper(1, new GenericTradeTime());
 	private List<ContractDefinition> contractDefs;

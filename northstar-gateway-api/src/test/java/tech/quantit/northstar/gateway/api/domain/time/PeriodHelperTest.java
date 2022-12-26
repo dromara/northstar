@@ -8,11 +8,21 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 class PeriodHelperTest {
+	
+	TradeTimeDefinition demo = new TradeTimeDefinition() {
+		@Override
+		public List<PeriodSegment> getPeriodSegments() {
+			return List.of(
+					new PeriodSegment(LocalTime.of(21, 0), LocalTime.of(2, 30)),
+					new PeriodSegment(LocalTime.of(9, 1), LocalTime.of(10, 15)),
+					new PeriodSegment(LocalTime.of(10, 31), LocalTime.of(11, 30)),
+					new PeriodSegment(LocalTime.of(13, 31), LocalTime.of(15, 00))
+				);
+		}
+	};
 
-	PeriodHelper h1 = new PeriodHelper(60, new CnFtComTradeTime3());
-	PeriodHelper h2 = new PeriodHelper(60, new CnFtComTradeTime3(), true);
-	
-	
+	PeriodHelper h1 = new PeriodHelper(60, demo);
+	PeriodHelper h2 = new PeriodHelper(60, demo, true);
 
 	@Test
 	void testTimeFrame() {

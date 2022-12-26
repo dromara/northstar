@@ -26,8 +26,8 @@ class OpenningMinuteClockTest {
 	
 	@BeforeEach
 	void prepare() {
-		PeriodHelperFactory phFactory = mock(PeriodHelperFactory.class);
-		when(phFactory.newInstance(anyInt(), anyBoolean(), any(ContractField.class))).thenReturn(new PeriodHelper(60, new CnFtComTradeTime1()));
+		IPeriodHelperFactory phFactory = mock(IPeriodHelperFactory.class);
+		when(phFactory.newInstance(anyInt(), anyBoolean(), any(ContractField.class))).thenReturn(new PeriodHelper(60, mock(TradeTimeDefinition.class)));
 		clock = new OpenningMinuteClock(factory.makeContract("rb2210"), phFactory);
 	}
 

@@ -74,7 +74,7 @@ import tech.quantit.northstar.gateway.api.domain.GlobalMarketRegistry;
 import tech.quantit.northstar.gateway.api.domain.IndexContract;
 import tech.quantit.northstar.gateway.api.domain.LatencyDetector;
 import tech.quantit.northstar.gateway.api.domain.NormalContract;
-import tech.quantit.northstar.gateway.api.domain.time.PeriodHelperFactory;
+import tech.quantit.northstar.gateway.ctp.time.PeriodHelperFactory;
 import tech.quantit.northstar.gateway.playback.PlaybackGatewayFactory;
 import tech.quantit.northstar.gateway.sim.trade.SimGatewayFactory;
 import tech.quantit.northstar.gateway.sim.trade.SimMarket;

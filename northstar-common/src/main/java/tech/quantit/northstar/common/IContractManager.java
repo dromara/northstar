@@ -6,6 +6,7 @@ import java.util.Set;
 import tech.quantit.northstar.common.model.ContractDefinition;
 import xyz.redtorch.pb.CoreField.ContractField;
 
+@Deprecated
 public interface IContractManager {
 
 	public boolean addContract(ContractField contract);
