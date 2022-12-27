@@ -7,6 +7,8 @@ import tech.quantit.northstar.common.model.Identifier;
 import tech.quantit.northstar.gateway.api.MarketGateway;
 import tech.quantit.northstar.gateway.api.domain.mktdata.MinuteBarGenerator;
 import tech.quantit.northstar.gateway.api.domain.time.IPeriodHelperFactory;
+import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
+import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.TickField;
 
@@ -23,9 +25,12 @@ public class GatewayContract implements Contract, TickDataAware{
 	
 	private MarketGateway gateway;
 	
-	protected GatewayContract(MarketGateway gateway, FastEventEngine feEngine, ContractField contract, IPeriodHelperFactory phFactory) {
+	private Identifier identifier;
+	
+	public GatewayContract(MarketGateway gateway, FastEventEngine feEngine, ContractField contract, IPeriodHelperFactory phFactory) {
 		this.contract = contract;
 		this.gateway = gateway;
+		this.identifier = new Identifier(contract.getUnifiedSymbol());
 		this.barGen = new MinuteBarGenerator(contract, phFactory, bar -> feEngine.emitEvent(NorthstarEventType.BAR, bar));
 	}
 
@@ -60,8 +65,23 @@ public class GatewayContract implements Contract, TickDataAware{
 	}
 
 	@Override
-	public Identifier indentifier() {
-		return new Identifier(contract.getUnifiedSymbol());
+	public Identifier identifier() {
+		return identifier;
+	}
+
+	@Override
+	public ProductClassEnum productClass() {
+		return contract.getProductClass();
+	}
+
+	@Override
+	public ExchangeEnum exchange() {
+		return contract.getExchange();
+	}
+
+	@Override
+	public String gatewayId() {
+		return contract.getGatewayId();
 	}
 
 }

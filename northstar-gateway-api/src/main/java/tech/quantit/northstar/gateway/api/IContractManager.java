@@ -15,9 +15,9 @@ public interface IContractManager {
 	Contract getContract(Identifier identifier);
 	
 	/**
-	 * 获取网关已订阅合约
+	 * 获取网关全部合约
 	 * @param gatewayId
 	 * @return
 	 */
-	List<Contract> getSubscribedContracts(String gatewayId);
+	List<Contract> getContracts(String gatewayId);
 }

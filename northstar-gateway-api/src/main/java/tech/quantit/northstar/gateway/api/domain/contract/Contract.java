@@ -11,7 +11,13 @@ import xyz.redtorch.pb.CoreField.ContractField;
  *
  */
 public interface Contract extends Subscribable, Instrument {
-
+	
+	/**
+	 * 网关ID
+	 * @return
+	 */
+	String gatewayId();
+	
 	/**
 	 * 获取成份合约
 	 * @return

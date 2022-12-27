@@ -10,6 +10,8 @@ import tech.quantit.northstar.common.model.Identifier;
 import tech.quantit.northstar.gateway.api.domain.mktdata.IndexTicker;
 import tech.quantit.northstar.gateway.api.domain.mktdata.MinuteBarGenerator;
 import tech.quantit.northstar.gateway.api.domain.time.IPeriodHelperFactory;
+import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
+import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.TickField;
 
@@ -21,19 +23,22 @@ import xyz.redtorch.pb.CoreField.TickField;
 @Slf4j
 public class IndexContract implements Contract, TickDataAware{
 
-	private List<Contract> monthContracts;
+	private final List<Contract> monthContracts;
 	
-	private MinuteBarGenerator barGen;
+	private final MinuteBarGenerator barGen;
 	
-	private IndexTicker ticker;
+	private final IndexTicker ticker;
 	
-	private ContractField contract;
+	private final ContractField contract;
 	
-	protected IndexContract(FastEventEngine feEngine, ContractField contract, List<Contract> monthContracts, IPeriodHelperFactory phFactory) {
+	private final Identifier identifier;
+	
+	public IndexContract(FastEventEngine feEngine, ContractField contract, List<Contract> monthContracts, IPeriodHelperFactory phFactory) {
 		this.contract = contract;
+		this.identifier = new Identifier(contract.getUnifiedSymbol());
 		this.monthContracts = monthContracts;
 		this.barGen = new MinuteBarGenerator(contract, phFactory, bar -> feEngine.emitEvent(NorthstarEventType.BAR, bar));
-		this.ticker = new IndexTicker(this, t -> barGen.update(t));
+		this.ticker = new IndexTicker(this, barGen::update);
 	}
 
 	@Override
@@ -77,8 +82,23 @@ public class IndexContract implements Contract, TickDataAware{
 	}
 
 	@Override
-	public Identifier indentifier() {
-		return new Identifier(contract.getUnifiedSymbol());
+	public Identifier identifier() {
+		return identifier;
+	}
+
+	@Override
+	public ProductClassEnum productClass() {
+		return contract.getProductClass();
+	}
+
+	@Override
+	public ExchangeEnum exchange() {
+		return contract.getExchange();
+	}
+
+	@Override
+	public String gatewayId() {
+		return contract.getGatewayId();
 	}
 
 }

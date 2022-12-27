@@ -1,5 +1,7 @@
 package tech.quantit.northstar.gateway.ctp;
 
+import java.util.Objects;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -49,14 +51,19 @@ public class CtpContract implements Instrument{
 	private CombinationTypeEnum combinationType; 	// 组合类型
 	private String gatewayId;  						// 网关
 	
+	private Identifier identifier;
+	
 	@Override
 	public String name() {
 		return name;
 	}
 
 	@Override
-	public Identifier indentifier() {
-		return new Identifier(unifiedSymbol);
+	public Identifier identifier() {
+		if(Objects.isNull(identifier)) {
+			identifier = new Identifier(unifiedSymbol);
+		}
+		return identifier;
 	}
 
 	@Override
@@ -90,6 +97,16 @@ public class CtpContract implements Instrument{
 				.setCommissionFee(contractDef.getCommissionFee())
 				.setCommissionRate(contractDef.getCommissionRate())
 				.build();
+	}
+
+	@Override
+	public ProductClassEnum productClass() {
+		return productClass;
+	}
+
+	@Override
+	public ExchangeEnum exchange() {
+		return exchange;
 	}
 
 }

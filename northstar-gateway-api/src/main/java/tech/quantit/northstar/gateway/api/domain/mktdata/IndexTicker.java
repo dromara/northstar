@@ -26,7 +26,7 @@ public class IndexTicker {
 	private ConcurrentHashMap<String, TickField> tickMap = new ConcurrentHashMap<>(20);
 	private ConcurrentHashMap<String, Double> weightedMap = new ConcurrentHashMap<>(20);
 	
-	private volatile long lastTickTimestamp = -1;
+	private long lastTickTimestamp = -1;
 	
 	protected final TickField.Builder tickBuilder = TickField.newBuilder();
 	
@@ -46,7 +46,7 @@ public class IndexTicker {
 		return memberContracts;
 	}
 
-	public void update(TickField tick) {
+	public synchronized void update(TickField tick) {
 		if(!dependencySymbols().contains(tick.getUnifiedSymbol())) {
 			log.warn("[{}]指数TICK生成器，无法处理 [{}] 的行情数据", idxContract.contractField().getUnifiedSymbol(), tick.getUnifiedSymbol());
 			return;

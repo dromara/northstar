@@ -1,6 +1,8 @@
 package tech.quantit.northstar.gateway.api.domain.contract;
 
 import tech.quantit.northstar.common.model.Identifier;
+import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
+import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
 
 /**
@@ -20,7 +22,19 @@ public interface Instrument {
 	 * 唯一标识
 	 * @return
 	 */
-	Identifier indentifier();
+	Identifier identifier();
+	
+	/**
+	 * 种类
+	 * @return
+	 */
+	ProductClassEnum productClass();
+	
+	/**
+	 * 交易所
+	 * @return
+	 */
+	ExchangeEnum exchange();
 	
 	/**
 	 * 转换为合约信息

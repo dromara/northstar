@@ -2,8 +2,12 @@ package tech.quantit.northstar.gateway.api.domain.contract;
 
 import java.util.List;
 
+import org.springframework.util.Assert;
+
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.model.Identifier;
+import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
+import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
 
 /**
  * 组合合约
@@ -13,12 +17,17 @@ import tech.quantit.northstar.common.model.Identifier;
 @Slf4j
 public class GroupedContract implements Contract {
 
-	private String name;
+	private final String name;
 	
-	private List<Contract> memberContracts;
+	private final List<Contract> memberContracts;
 	
-	protected GroupedContract(String name, List<Contract> memberContracts) {
+	private final Identifier identifier;
+	
+	public GroupedContract(String name, List<Contract> memberContracts) {
+		Assert.notEmpty(memberContracts, "集合不能为空");
 		this.memberContracts = memberContracts;
+		this.identifier = new Identifier(name);
+		this.name = name;
 	}
 
 	@Override
@@ -47,8 +56,22 @@ public class GroupedContract implements Contract {
 	}
 
 	@Override
-	public Identifier indentifier() {
-		return new Identifier(name);
+	public Identifier identifier() {
+		return identifier;
 	}
 
+	@Override
+	public ProductClassEnum productClass() {
+		return memberContracts.get(0).productClass();
+	}
+
+	@Override
+	public ExchangeEnum exchange() {
+		return memberContracts.get(0).exchange();
+	}
+
+	@Override
+	public String gatewayId() {
+		return memberContracts.get(0).gatewayId();
+	}
 }

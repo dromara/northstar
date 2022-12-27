@@ -5,24 +5,22 @@ import java.util.regex.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
 
 @AllArgsConstructor
 @Builder
 @Data
 public class ContractDefinition {
-	/**
-	 * 网关类别 
-	 */
-	private String gatewayType;
+
 	/**
 	 * 品种类别
 	 */
 	private ProductClassEnum productClass;
 	/**
-	 * 合约名称
+	 * 交易所
 	 */
-	private String name;
+	private ExchangeEnum exchange;
 	/**
 	 * 合约代码特征
 	 */
@@ -39,4 +37,24 @@ public class ContractDefinition {
 	 * 交易时间类别
 	 */
 	private String tradeTimeType;
+	/**
+	 * 名称
+	 */
+	private String name;
+	/**
+	 * 合约定义类别
+	 */
+	private Type type;
+	
+	
+	public enum Type {
+		/**
+		 * 指数
+		 */
+		INDEX,
+		/**
+		 * 其他
+		 */
+		OTHERS
+	}
 }
