@@ -14,7 +14,7 @@ public interface Instrument {
 	 * 名称
 	 * @return
 	 */
-	String symbol();
+	String name();
 	
 	/**
 	 * 唯一标识
@@ -26,5 +26,7 @@ public interface Instrument {
 	 * 转换为合约信息
 	 * @return
 	 */
-	ContractField mergeToContractField(ContractDefinition contractDef);
+	default ContractField mergeToContractField(ContractDefinition contractDef) {
+		throw new UnsupportedOperationException();
+	}
 }

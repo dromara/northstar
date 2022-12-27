@@ -3,6 +3,7 @@ package tech.quantit.northstar.gateway.api.domain.contract;
 import java.util.List;
 
 import lombok.extern.slf4j.Slf4j;
+import tech.quantit.northstar.common.model.Identifier;
 
 /**
  * 组合合约
@@ -12,9 +13,11 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class GroupedContract implements Contract {
 
+	private String name;
+	
 	private List<Contract> memberContracts;
 	
-	protected GroupedContract(List<Contract> memberContracts) {
+	protected GroupedContract(String name, List<Contract> memberContracts) {
 		this.memberContracts = memberContracts;
 	}
 
@@ -36,6 +39,16 @@ public class GroupedContract implements Contract {
 			}
 		}
 		return true;
+	}
+
+	@Override
+	public String name() {
+		return name;
+	}
+
+	@Override
+	public Identifier indentifier() {
+		return new Identifier(name);
 	}
 
 }

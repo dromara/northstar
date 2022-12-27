@@ -50,7 +50,7 @@ public class CtpContract implements Instrument{
 	private String gatewayId;  						// 网关
 	
 	@Override
-	public String symbol() {
+	public String name() {
 		return name;
 	}
 

@@ -10,7 +10,7 @@ import xyz.redtorch.pb.CoreField.ContractField;
  * @author KevinHuangwl
  *
  */
-public interface Contract extends Subscribable {
+public interface Contract extends Subscribable, Instrument {
 
 	/**
 	 * 获取成份合约

@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.TickDataAware;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.event.NorthstarEventType;
+import tech.quantit.northstar.common.model.Identifier;
 import tech.quantit.northstar.gateway.api.domain.mktdata.IndexTicker;
 import tech.quantit.northstar.gateway.api.domain.mktdata.MinuteBarGenerator;
 import tech.quantit.northstar.gateway.api.domain.time.IPeriodHelperFactory;
@@ -68,6 +69,16 @@ public class IndexContract implements Contract, TickDataAware{
 	@Override
 	public ContractField contractField() {
 		return contract;
+	}
+
+	@Override
+	public String name() {
+		return contract.getName();
+	}
+
+	@Override
+	public Identifier indentifier() {
+		return new Identifier(contract.getUnifiedSymbol());
 	}
 
 }

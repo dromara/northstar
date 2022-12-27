@@ -3,6 +3,7 @@ package tech.quantit.northstar.gateway.api.domain.contract;
 import tech.quantit.northstar.common.TickDataAware;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.event.NorthstarEventType;
+import tech.quantit.northstar.common.model.Identifier;
 import tech.quantit.northstar.gateway.api.MarketGateway;
 import tech.quantit.northstar.gateway.api.domain.mktdata.MinuteBarGenerator;
 import tech.quantit.northstar.gateway.api.domain.time.IPeriodHelperFactory;
@@ -51,6 +52,16 @@ public class GatewayContract implements Contract, TickDataAware{
 	@Override
 	public boolean tradable() {
 		return true;
+	}
+
+	@Override
+	public String name() {
+		return contract.getName();
+	}
+
+	@Override
+	public Identifier indentifier() {
+		return new Identifier(contract.getUnifiedSymbol());
 	}
 
 }
