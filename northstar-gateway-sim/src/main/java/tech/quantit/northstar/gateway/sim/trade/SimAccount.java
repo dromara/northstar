@@ -12,15 +12,16 @@ import java.util.function.Consumer;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 
-import tech.quantit.northstar.common.IContractManager;
 import tech.quantit.northstar.common.TickDataAware;
 import tech.quantit.northstar.common.constant.ClosingPolicy;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.event.NorthstarEventType;
-import tech.quantit.northstar.common.model.ContractDefinition;
+import tech.quantit.northstar.common.model.Identifier;
 import tech.quantit.northstar.common.model.SimAccountDescription;
 import tech.quantit.northstar.common.utils.FieldUtils;
 import tech.quantit.northstar.common.utils.MessagePrinter;
+import tech.quantit.northstar.gateway.api.IContractManager;
+import tech.quantit.northstar.gateway.api.domain.contract.Contract;
 import xyz.redtorch.pb.CoreEnum.CurrencyEnum;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OrderStatusEnum;
@@ -246,8 +247,9 @@ public class SimAccount implements TickDataAware{
 	}
 
 	private void onTrade(TradeField trade) {
-		ContractDefinition contractDef = contractMgr.getContractDefinition(trade.getContract().getUnifiedSymbol());
-		double commission = contractDef.getCommissionInPrice() > 0 ? contractDef.getCommissionInPrice() : contractDef.commissionRate() * trade.getPrice() * trade.getContract().getMultiplier();
+		Contract contract = contractMgr.getContract(Identifier.of(trade.getContract().getUnifiedSymbol()));
+		ContractField contractField = contract.contractField();
+		double commission = contractField.getCommissionFee() > 0 ? contractField.getCommissionFee() : contractField.getCommissionRate() * trade.getPrice() * trade.getContract().getMultiplier();
 		totalCommission += trade.getVolume() * commission;
 	}
 

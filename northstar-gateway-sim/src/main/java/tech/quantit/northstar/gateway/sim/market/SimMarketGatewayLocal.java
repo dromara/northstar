@@ -12,9 +12,13 @@ import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.event.NorthstarEventType;
+import tech.quantit.northstar.common.model.Identifier;
+import tech.quantit.northstar.gateway.api.IMarketCenter;
 import tech.quantit.northstar.gateway.api.MarketGateway;
-import tech.quantit.northstar.gateway.api.domain.GlobalMarketRegistry;
+import tech.quantit.northstar.gateway.api.domain.contract.GatewayContract;
+import tech.quantit.northstar.gateway.api.domain.contract.Instrument;
 import tech.quantit.northstar.gateway.sim.SIM;
+import tech.quantit.northstar.gateway.sim.trade.SimContractGenerator;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.GatewaySettingField;
 import xyz.redtorch.pb.CoreField.TickField;
@@ -39,12 +43,12 @@ public class SimMarketGatewayLocal implements MarketGateway{
 	 */
 	private ConcurrentMap<String, InstrumentHolder> cache = new ConcurrentHashMap<>();
 	
-	private GlobalMarketRegistry registry;
+	private IMarketCenter mktCenter;
 	
-	public SimMarketGatewayLocal(GatewaySettingField settings, FastEventEngine feEngine, GlobalMarketRegistry registry) {
+	public SimMarketGatewayLocal(GatewaySettingField settings, FastEventEngine feEngine, IMarketCenter mktCenter) {
 		this.feEngine = feEngine;
 		this.settings = settings;
-		this.registry = registry;
+		this.mktCenter = mktCenter;
 	}
 
 	@Override
@@ -83,12 +87,23 @@ public class SimMarketGatewayLocal implements MarketGateway{
 				for(Entry<String, InstrumentHolder> e: cache.entrySet()) {
 					TickField tick = tickGen.generateNextTick(e.getValue());
 					feEngine.emitEvent(NorthstarEventType.TICK, tick);
-					registry.dispatch(tick);
+					GatewayContract contract = (GatewayContract) mktCenter.getContract(Identifier.of(tick.getUnifiedSymbol()));
+					contract.onTick(tick);
 				}
 			} catch (Exception e) {
 				log.error("模拟行情TICK生成异常", e);
 			}
 		}, 500, 500, TimeUnit.MILLISECONDS);
+		
+		// 模拟返回合约
+		CompletableFuture.runAsync(()->{
+			SimContractGenerator contractGen = new SimContractGenerator("SIM");
+			Instrument simContract = contractGen.getContract();
+			Instrument simContract2 = contractGen.getContract2();
+			mktCenter.addInstrument(simContract, this, null);
+			mktCenter.addInstrument(simContract2, this, null);
+		});
+		
 		feEngine.emitEvent(NorthstarEventType.CONNECTED, settings.getGatewayId());
 		CompletableFuture.runAsync(() -> {
 			feEngine.emitEvent(NorthstarEventType.GATEWAY_READY, settings.getGatewayId());

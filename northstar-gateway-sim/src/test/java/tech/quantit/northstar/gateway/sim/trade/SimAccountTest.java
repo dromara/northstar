@@ -2,7 +2,7 @@ package tech.quantit.northstar.gateway.sim.trade;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -13,9 +13,10 @@ import java.util.function.Consumer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import tech.quantit.northstar.common.IContractManager;
 import tech.quantit.northstar.common.event.FastEventEngine;
-import tech.quantit.northstar.common.model.ContractDefinition;
+import tech.quantit.northstar.common.model.Identifier;
+import tech.quantit.northstar.gateway.api.IContractManager;
+import tech.quantit.northstar.gateway.api.domain.contract.Contract;
 import test.common.TestFieldFactory;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
@@ -31,9 +32,11 @@ class SimAccountTest {
 	@SuppressWarnings("unchecked")
 	@BeforeEach
 	void prepare() {
+		Contract contract = mock(Contract.class);
 		IContractManager contractMgr = mock(IContractManager.class);
-		when(contractMgr.getContractDefinition(anyString())).thenReturn(ContractDefinition.builder()
-				.commissionInPrice(1.5)
+		when(contractMgr.getContract(any(Identifier.class))).thenReturn(contract);
+		when(contract.contractField()).thenReturn(ContractField.newBuilder()
+				.setCommissionFee(1.5)
 				.build());
 		account = new SimAccount("testGateway", contractMgr, mock(FastEventEngine.class), mock(Consumer.class));
 	}

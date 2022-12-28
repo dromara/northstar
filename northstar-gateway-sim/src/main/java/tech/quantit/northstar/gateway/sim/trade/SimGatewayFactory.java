@@ -2,7 +2,6 @@ package tech.quantit.northstar.gateway.sim.trade;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 
-import tech.quantit.northstar.common.IContractManager;
 import tech.quantit.northstar.common.constant.GatewayUsage;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.model.GatewayDescription;
@@ -10,7 +9,7 @@ import tech.quantit.northstar.common.model.SimAccountDescription;
 import tech.quantit.northstar.data.ISimAccountRepository;
 import tech.quantit.northstar.gateway.api.Gateway;
 import tech.quantit.northstar.gateway.api.GatewayFactory;
-import tech.quantit.northstar.gateway.api.domain.GlobalMarketRegistry;
+import tech.quantit.northstar.gateway.api.IMarketCenter;
 import tech.quantit.northstar.gateway.sim.market.SimMarketGatewayLocal;
 import xyz.redtorch.pb.CoreEnum.GatewayTypeEnum;
 import xyz.redtorch.pb.CoreField.GatewaySettingField;
@@ -23,17 +22,13 @@ public class SimGatewayFactory implements GatewayFactory{
 	
 	private ISimAccountRepository simAccountRepo;
 	
-	private GlobalMarketRegistry registry;
+	private IMarketCenter mktCenter;
 	
-	private IContractManager contractMgr;
-	
-	public SimGatewayFactory(FastEventEngine fastEventEngine, SimMarket simMarket, ISimAccountRepository repo, GlobalMarketRegistry registry,
-			IContractManager contractMgr) {
+	public SimGatewayFactory(FastEventEngine fastEventEngine, SimMarket simMarket, ISimAccountRepository repo, IMarketCenter mktCenter) {
 		this.simMarket = simMarket;
 		this.fastEventEngine = fastEventEngine;
 		this.simAccountRepo = repo;
-		this.registry = registry;
-		this.contractMgr = contractMgr;
+		this.mktCenter = mktCenter;
 	}
 
 	@Override
@@ -49,7 +44,7 @@ public class SimGatewayFactory implements GatewayFactory{
 				.setGatewayId(gatewayDescription.getGatewayId())
 				.setGatewayType(GatewayTypeEnum.GTE_MarketData)
 				.build();
-		return new SimMarketGatewayLocal(gwSettings, fastEventEngine, registry);
+		return new SimMarketGatewayLocal(gwSettings, fastEventEngine, mktCenter);
 	}
 	
 	private Gateway getTradeGateway(GatewayDescription gatewayDescription) {
@@ -64,15 +59,15 @@ public class SimGatewayFactory implements GatewayFactory{
 		
 		final SimAccount account;
 		if(simAccountDescription == null) {
-			account = new SimAccount(accGatewayId, contractMgr, fastEventEngine, simAccDescription -> simAccountRepo.save(simAccDescription));
+			account = new SimAccount(accGatewayId, mktCenter, fastEventEngine, simAccDescription -> simAccountRepo.save(simAccDescription));
 		} else {
 			try {
-				account = new SimAccount(simAccountDescription, contractMgr, fastEventEngine, simAccDescription -> simAccountRepo.save(simAccDescription));
+				account = new SimAccount(simAccountDescription, mktCenter, fastEventEngine, simAccDescription -> simAccountRepo.save(simAccDescription));
 			} catch (InvalidProtocolBufferException e) {
 				throw new IllegalStateException("无法创建模拟账户", e);
 			}
 		}
-		SimTradeGateway gateway = new SimTradeGatewayLocal(fastEventEngine, simMarket, gwSettings, mdGatewayId, account, registry);
+		SimTradeGateway gateway = new SimTradeGatewayLocal(fastEventEngine, simMarket, gwSettings, mdGatewayId, account);
 		simMarket.addGateway(mdGatewayId, gateway);
 		return gateway;
 	}
