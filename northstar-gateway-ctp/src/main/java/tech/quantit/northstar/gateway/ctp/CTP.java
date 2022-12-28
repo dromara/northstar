@@ -24,11 +24,6 @@ public class CTP implements GatewayType, InitializingBean{
 	}
 
 	@Override
-	public boolean adminOnly() {
-		return false;
-	}
-
-	@Override
 	public String name() {
 		return getClass().getSimpleName();
 	}

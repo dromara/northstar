@@ -25,8 +25,8 @@ public class PLAYBACK implements GatewayType, InitializingBean{
 	}
 
 	@Override
-	public boolean adminOnly() {
-		return false;
+	public boolean allowDuplication() {
+		return true;
 	}
 
 	@Override

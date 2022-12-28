@@ -26,4 +26,8 @@ public class GatewayTypeDescription {
 	public boolean isAdminOnly() {
 		return type.adminOnly();
 	}
+	
+	public boolean isAllowDuplication() {
+		return type.allowDuplication();
+	}
 }
