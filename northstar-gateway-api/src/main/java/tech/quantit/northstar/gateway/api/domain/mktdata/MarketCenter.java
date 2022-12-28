@@ -82,7 +82,7 @@ public class MarketCenter implements IMarketCenter, TickDataAware{
 		List<ContractDefinition> defList = contractDefTbl.get(ins.exchange(), ins.productClass());
 		for(ContractDefinition def : defList) {
 			if(def.getSymbolPattern().matcher(ins.identifier().value()).matches()) {
-				Contract contract = new GatewayContract(gateway, feEngine, ins.mergeToContractField(def), phFactory);
+				Contract contract = new GatewayContract(gateway, feEngine, ins.mergeToContractField(def), phFactory.newInstance(1, false, def));
 				contractMap.put(ins.identifier(), contract);
 				
 				if(!gatewayDefContractGroups.contains(gatewayId, def)) {					
@@ -132,8 +132,9 @@ public class MarketCenter implements IMarketCenter, TickDataAware{
 			if(e.getKey().getType() != Type.INDEX) {
 				continue;
 			}
+			ContractDefinition def = e.getKey();
 			ContractField idxContractField = makeIndexContractField(e.getValue().get(0).contractField());
-			IndexContract c = new IndexContract(feEngine, idxContractField, e.getValue(), factory);
+			IndexContract c = new IndexContract(feEngine, idxContractField, e.getValue(), factory.newInstance(1, false, def));
 			contractMap.put(c.identifier(), c);
 		}
 	}

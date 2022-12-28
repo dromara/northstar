@@ -1,8 +1,8 @@
 package tech.quantit.northstar.gateway.api.domain.time;
 
-import xyz.redtorch.pb.CoreField.ContractField;
+import tech.quantit.northstar.gateway.api.domain.contract.ContractDefinition;
 
 public interface IPeriodHelperFactory {
 
-	PeriodHelper newInstance(int numbersOfMinPerPeriod, boolean exclusiveOpenning, ContractField contract);
+	PeriodHelper newInstance(int numbersOfMinPerPeriod, boolean exclusiveOpenning, ContractDefinition contractDef);
 }

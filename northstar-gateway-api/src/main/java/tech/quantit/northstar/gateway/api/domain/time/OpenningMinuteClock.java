@@ -28,8 +28,8 @@ public class OpenningMinuteClock {
 	
 	private PeriodHelper helper;
 	
-	public OpenningMinuteClock(ContractField contract, IPeriodHelperFactory phFactory) {
-		helper = phFactory.newInstance(1, false, contract);
+	public OpenningMinuteClock(ContractField contract, PeriodHelper phHelper) {
+		helper = phHelper;
 		timeFrame = helper.getRunningBaseTimeFrame();
 		endByWholeMin = exchangesOfEndByWholeMin.contains(contract.getExchange());
 	}

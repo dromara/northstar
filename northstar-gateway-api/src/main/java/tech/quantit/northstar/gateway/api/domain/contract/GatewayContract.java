@@ -6,7 +6,7 @@ import tech.quantit.northstar.common.event.NorthstarEventType;
 import tech.quantit.northstar.common.model.Identifier;
 import tech.quantit.northstar.gateway.api.MarketGateway;
 import tech.quantit.northstar.gateway.api.domain.mktdata.MinuteBarGenerator;
-import tech.quantit.northstar.gateway.api.domain.time.IPeriodHelperFactory;
+import tech.quantit.northstar.gateway.api.domain.time.PeriodHelper;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
@@ -27,11 +27,11 @@ public class GatewayContract implements Contract, TickDataAware{
 	
 	private Identifier identifier;
 	
-	public GatewayContract(MarketGateway gateway, FastEventEngine feEngine, ContractField contract, IPeriodHelperFactory phFactory) {
+	public GatewayContract(MarketGateway gateway, FastEventEngine feEngine, ContractField contract, PeriodHelper phHelper) {
 		this.contract = contract;
 		this.gateway = gateway;
 		this.identifier = new Identifier(contract.getUnifiedSymbol());
-		this.barGen = new MinuteBarGenerator(contract, phFactory, bar -> feEngine.emitEvent(NorthstarEventType.BAR, bar));
+		this.barGen = new MinuteBarGenerator(contract, phHelper, bar -> feEngine.emitEvent(NorthstarEventType.BAR, bar));
 	}
 
 	@Override

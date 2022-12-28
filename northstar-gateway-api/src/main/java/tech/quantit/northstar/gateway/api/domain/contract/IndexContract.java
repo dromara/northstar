@@ -9,7 +9,7 @@ import tech.quantit.northstar.common.event.NorthstarEventType;
 import tech.quantit.northstar.common.model.Identifier;
 import tech.quantit.northstar.gateway.api.domain.mktdata.IndexTicker;
 import tech.quantit.northstar.gateway.api.domain.mktdata.MinuteBarGenerator;
-import tech.quantit.northstar.gateway.api.domain.time.IPeriodHelperFactory;
+import tech.quantit.northstar.gateway.api.domain.time.PeriodHelper;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
@@ -33,11 +33,11 @@ public class IndexContract implements Contract, TickDataAware{
 	
 	private final Identifier identifier;
 	
-	public IndexContract(FastEventEngine feEngine, ContractField contract, List<Contract> monthContracts, IPeriodHelperFactory phFactory) {
+	public IndexContract(FastEventEngine feEngine, ContractField contract, List<Contract> monthContracts, PeriodHelper phHelper) {
 		this.contract = contract;
 		this.identifier = new Identifier(contract.getUnifiedSymbol());
 		this.monthContracts = monthContracts;
-		this.barGen = new MinuteBarGenerator(contract, phFactory, bar -> feEngine.emitEvent(NorthstarEventType.BAR, bar));
+		this.barGen = new MinuteBarGenerator(contract, phHelper, bar -> feEngine.emitEvent(NorthstarEventType.BAR, bar));
 		this.ticker = new IndexTicker(this, barGen::update);
 	}
 
