@@ -25,13 +25,20 @@ public class PeriodHelper {
 	public PeriodHelper(int numbersOfMinPerPeriod, TradeTimeDefinition tradeTimeDefinition, boolean exclusiveOpening) {
 		List<PeriodSegment> tradeTimeSegments = tradeTimeDefinition.getPeriodSegments();
 		LocalTime opening = tradeTimeSegments.get(0).startOfSegment();
+		LocalTime ending = tradeTimeSegments.get(tradeTimeSegments.size() - 1).endOfSegment();
 		LocalTime t = START_TIME.plusMinutes(1);
+		int minCount = 0;
 		while(t != START_TIME) {
 			for(PeriodSegment ps : tradeTimeSegments) {
 				endOfSections.add(ps.endOfSegment());
-				if(ps.withinPeriod(t) && !(exclusiveOpening && t == opening)) {
-					baseTimeFrame.add(t);
-					break;
+				while(ps.withinPeriod(t)) {
+					if(t != opening && minCount == numbersOfMinPerPeriod || t == ending || t == opening && !exclusiveOpening) {
+						baseTimeFrame.add(t);
+						minCount = 1;
+					} else {
+						minCount++;
+					}
+					t = t.plusMinutes(1);
 				}
 			}
 			t = t.plusMinutes(1);

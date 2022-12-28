@@ -20,17 +20,19 @@ class PeriodHelperTest {
 				);
 		}
 	};
-
-	PeriodHelper h1 = new PeriodHelper(60, demo);
-	PeriodHelper h2 = new PeriodHelper(60, demo, true);
+	PeriodHelper h1 = new PeriodHelper(1, demo);
+	PeriodHelper h2 = new PeriodHelper(1, demo, true);
+	PeriodHelper h3 = new PeriodHelper(60, demo, true);
 
 	@Test
 	void testTimeFrame() {
 		List<LocalTime> timeFrame1 = h1.getRunningBaseTimeFrame();
 		List<LocalTime> timeFrame2 = h2.getRunningBaseTimeFrame();
+		List<LocalTime> timeFrame3 = h3.getRunningBaseTimeFrame();
 		
 		assertThat(timeFrame1).hasSize(556);
 		assertThat(timeFrame2).hasSize(555);
+		assertThat(timeFrame3).hasSize(10);
 	}
 	
 	@Test

@@ -173,7 +173,7 @@ class MarketCenterTest {
 				.build();
 		center = new MarketCenter(List.of(def1, def2, def3), mock(FastEventEngine.class));
 		
-		when(phFactory.newInstance(anyInt(), anyBoolean(), any(ContractField.class))).thenReturn(pHelper);
+		when(phFactory.newInstance(anyInt(), anyBoolean(), any(ContractDefinition.class))).thenReturn(pHelper);
 		when(pHelper.getRunningBaseTimeFrame()).thenReturn(List.of(LocalTime.now().plusMinutes(1).withSecond(0).withNano(0)));
 	}
 	

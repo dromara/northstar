@@ -14,8 +14,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import tech.quantit.northstar.common.constant.DateTimeConstant;
+import tech.quantit.northstar.gateway.api.domain.contract.ContractDefinition;
 import test.common.TestFieldFactory;
-import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.TickField;
 
 class OpenningMinuteClockTest {
@@ -27,8 +27,8 @@ class OpenningMinuteClockTest {
 	@BeforeEach
 	void prepare() {
 		IPeriodHelperFactory phFactory = mock(IPeriodHelperFactory.class);
-		when(phFactory.newInstance(anyInt(), anyBoolean(), any(ContractField.class))).thenReturn(new PeriodHelper(60, mock(TradeTimeDefinition.class)));
-		clock = new OpenningMinuteClock(factory.makeContract("rb2210"), phFactory);
+		when(phFactory.newInstance(anyInt(), anyBoolean(), any(ContractDefinition.class))).thenReturn(new PeriodHelper(60, mock(TradeTimeDefinition.class)));
+		clock = new OpenningMinuteClock(factory.makeContract("rb2210"), new PeriodHelper(60, mock(TradeTimeDefinition.class)));
 	}
 
 	@Test

@@ -15,6 +15,7 @@ import java.util.function.Consumer;
 import org.junit.jupiter.api.Test;
 
 import tech.quantit.northstar.common.constant.DateTimeConstant;
+import tech.quantit.northstar.gateway.api.domain.contract.ContractDefinition;
 import tech.quantit.northstar.gateway.api.domain.time.GenericTradeTime;
 import tech.quantit.northstar.gateway.api.domain.time.IPeriodHelperFactory;
 import tech.quantit.northstar.gateway.api.domain.time.PeriodHelper;
@@ -32,8 +33,9 @@ TestFieldFactory factory = new TestFieldFactory("testGateway");
 	void test() {
 		ContractField contract = factory.makeContract("rb2210");
 		IPeriodHelperFactory phFactory = mock(IPeriodHelperFactory.class);
-		when(phFactory.newInstance(anyInt(), anyBoolean(), any(ContractField.class))).thenReturn(new PeriodHelper(60, new GenericTradeTime()));
-		MinuteBarGenerator gen = new MinuteBarGenerator(contract, phFactory, mock(Consumer.class));
+		PeriodHelper helper = new PeriodHelper(60, new GenericTradeTime());
+		when(phFactory.newInstance(anyInt(), anyBoolean(), any(ContractDefinition.class))).thenReturn(helper);
+		MinuteBarGenerator gen = new MinuteBarGenerator(contract, helper, mock(Consumer.class));
 		long now = System.currentTimeMillis();
 		long expectedTime = now - now % 60000 + 60000;
 		LocalDateTime ldt = LocalDateTime.ofInstant(Instant.ofEpochMilli(expectedTime), ZoneId.systemDefault());
