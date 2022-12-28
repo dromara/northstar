@@ -12,8 +12,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Queue;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -24,14 +24,16 @@ import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 
 import lombok.extern.slf4j.Slf4j;
-import tech.quantit.northstar.common.IContractManager;
 import tech.quantit.northstar.common.constant.DateTimeConstant;
 import tech.quantit.northstar.common.constant.TickType;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.event.NorthstarEventType;
+import tech.quantit.northstar.common.model.Identifier;
 import tech.quantit.northstar.common.model.PlaybackRuntimeDescription;
 import tech.quantit.northstar.common.utils.MarketDataLoadingUtils;
 import tech.quantit.northstar.data.IPlaybackRuntimeRepository;
+import tech.quantit.northstar.gateway.api.IContractManager;
+import tech.quantit.northstar.gateway.api.domain.contract.Contract;
 import tech.quantit.northstar.gateway.playback.ticker.RandomWalkTickSimulation;
 import tech.quantit.northstar.gateway.playback.ticker.SimpleCloseSimulation;
 import tech.quantit.northstar.gateway.playback.ticker.SimplePriceSimulation;
@@ -98,8 +100,9 @@ public class PlaybackContext {
 		
 		settings.getUnifiedSymbols()
 			.stream()
-			.map(contractMgr::getContract)
-			.forEach(contract -> 
+			.map(unifiedSymbol -> contractMgr.getContract(Identifier.of(unifiedSymbol)))
+			.map(Contract::contractField)
+			.forEach(contract ->  
 				algoMap.put(contract, switch(settings.getPrecision()) {
 					case EXTREME -> new SimpleCloseSimulation(contract.getPriceTick());
 					case LOW -> new SimplePriceSimulation(contract.getPriceTick());
@@ -198,7 +201,8 @@ public class PlaybackContext {
 					LocalDate endDate = LocalDate.parse(settings.getEndDate(), DateTimeConstant.D_FORMAT_INT_FORMATTER);
 					settings.getUnifiedSymbols()
 						.stream()
-						.map(contractMgr::getContract)
+						.map(unifiedSymbol -> contractMgr.getContract(Identifier.of(unifiedSymbol)))
+						.map(Contract::contractField)
 						.forEach(contract -> {
 							loader.loadTradeDayDataRaw(
 									startDate,
@@ -316,7 +320,8 @@ public class PlaybackContext {
 		log.info("回放网关 [{}] 运行至 {}", gatewaySettings.getGatewayId(), playbackTimeState);
 		contractBarMap = settings.getUnifiedSymbols()
 			.stream()
-			.map(contractMgr::getContract)
+			.map(unifiedSymbol -> contractMgr.getContract(Identifier.of(unifiedSymbol)))
+			.map(Contract::contractField)
 			.collect(Collectors.toMap(
 					contract -> contract, 
 					contract -> new LinkedList<>(loader.loadMinuteData(playbackTimeState, contract))));
@@ -331,7 +336,7 @@ public class PlaybackContext {
 			.filter(entry -> entry.getValue().peek().getActionTimestamp() <= currentTime)
 			.forEach(entry -> {
 				BarField bar = entry.getValue().poll();
-				TickSimulationAlgorithm algo = algoMap.get(contractMgr.getContract(bar.getUnifiedSymbol()));
+				TickSimulationAlgorithm algo = algoMap.get(contractMgr.getContract(Identifier.of(bar.getUnifiedSymbol())).contractField());
 				List<TickEntry> ticksOfBar = algo.generateFrom(bar);
 				cacheBarMap.put(entry.getKey(), bar);
 				contractTickMap.put(entry.getKey(), new LinkedList<>(convertTicks(ticksOfBar, bar)));
@@ -339,7 +344,7 @@ public class PlaybackContext {
 	}
 	
 	private List<TickField> convertTicks(List<TickEntry> ticks, BarField srcBar) {
-		ContractField contract = contractMgr.getContract(srcBar.getUnifiedSymbol());
+		ContractField contract = contractMgr.getContract(Identifier.of(srcBar.getUnifiedSymbol())).contractField();
 		BarField tradeDayBar = tradeDayBarMap.get(contract, LocalDate.parse(srcBar.getTradingDay(), DateTimeConstant.D_FORMAT_INT_FORMATTER));
 		if(Objects.isNull(tradeDayBar)) {
 			return Collections.emptyList();

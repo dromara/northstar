@@ -1,43 +1,30 @@
 package tech.quantit.northstar.gateway.ctp.time;
 
-import java.util.List;
-import java.util.Objects;
-
 import org.springframework.util.Assert;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 
-import tech.quantit.northstar.common.model.ContractDefinition;
+import tech.quantit.northstar.gateway.api.domain.contract.ContractDefinition;
 import tech.quantit.northstar.gateway.api.domain.time.GenericTradeTime;
 import tech.quantit.northstar.gateway.api.domain.time.IPeriodHelperFactory;
 import tech.quantit.northstar.gateway.api.domain.time.PeriodHelper;
-import xyz.redtorch.pb.CoreField.ContractField;
 
 public class CnFtPeriodHelperFactory implements IPeriodHelperFactory{
 	
 	private static final PeriodHelper GENERIC_HELPER = new PeriodHelper(1, new GenericTradeTime());
-	private List<ContractDefinition> contractDefs;
 	
 	private Table<String, Integer, PeriodHelper> helperCache = HashBasedTable.create();
 	private Table<String, Integer, PeriodHelper> helperCache2 = HashBasedTable.create();
-	
-	public CnFtPeriodHelperFactory(List<ContractDefinition> contractDefs) {
-		this.contractDefs = contractDefs;
-	}
 
-	public PeriodHelper newInstance(int numbersOfMinPerPeriod, boolean exclusiveOpenning, ContractField contract) {
+	public PeriodHelper newInstance(int numbersOfMinPerPeriod, boolean exclusiveOpenning, ContractDefinition contractDef) {
 		Assert.isTrue(numbersOfMinPerPeriod > 0, "分钟周期数应该大于0");
-		ContractDefinition cd = findDefinition(contract);
-		if(Objects.isNull(cd)) {
-			return GENERIC_HELPER;
+		
+		if(getHelperCache(exclusiveOpenning).contains(contractDef.getTradeTimeType(), numbersOfMinPerPeriod)) {
+			return getHelperCache(exclusiveOpenning).get(contractDef.getTradeTimeType(), numbersOfMinPerPeriod);
 		}
 		
-		if(getHelperCache(exclusiveOpenning).contains(cd.getTradeTimeType(), numbersOfMinPerPeriod)) {
-			return getHelperCache(exclusiveOpenning).get(cd.getTradeTimeType(), numbersOfMinPerPeriod);
-		}
-		
-		PeriodHelper helper = switch(cd.getTradeTimeType()) {
+		PeriodHelper helper = switch(contractDef.getTradeTimeType()) {
 		case "CN_FT_TT1" -> new PeriodHelper(numbersOfMinPerPeriod, new CnFtComTradeTime1(), exclusiveOpenning);
 		case "CN_FT_TT2" -> new PeriodHelper(numbersOfMinPerPeriod, new CnFtComTradeTime2(), exclusiveOpenning);
 		case "CN_FT_TT3" -> new PeriodHelper(numbersOfMinPerPeriod, new CnFtComTradeTime3(), exclusiveOpenning);
@@ -46,7 +33,7 @@ public class CnFtPeriodHelperFactory implements IPeriodHelperFactory{
 		case "CN_FT_TT6" -> new PeriodHelper(numbersOfMinPerPeriod, new CnFtBondTradeTime(), exclusiveOpenning);
 		default -> GENERIC_HELPER;
 		};
-		getHelperCache(exclusiveOpenning).put(cd.getTradeTimeType(), numbersOfMinPerPeriod, helper);
+		getHelperCache(exclusiveOpenning).put(contractDef.getTradeTimeType(), numbersOfMinPerPeriod, helper);
 		return helper;
 	}
 	
@@ -54,13 +41,4 @@ public class CnFtPeriodHelperFactory implements IPeriodHelperFactory{
 		return exclusiveOpenning ? helperCache : helperCache2;
 	}
 	
-	private ContractDefinition findDefinition(ContractField contract) {
-		for(ContractDefinition contractDef : contractDefs) {
-			if(contractDef.getSymbolPattern().matcher(contract.getThirdPartyId()).matches()) {
-				return contractDef;
-			}
-		}
-		
-		return null;
-	}
 }
