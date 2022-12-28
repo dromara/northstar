@@ -20,9 +20,14 @@ class PeriodHelperTest {
 				);
 		}
 	};
+	
+	TradeTimeDefinition general = new GenericTradeTime();
+	
 	PeriodHelper h1 = new PeriodHelper(1, demo);
 	PeriodHelper h2 = new PeriodHelper(1, demo, true);
 	PeriodHelper h3 = new PeriodHelper(60, demo, true);
+	
+	PeriodHelper h4 = new PeriodHelper(1, general);
 
 	@Test
 	void testTimeFrame() {
@@ -36,6 +41,12 @@ class PeriodHelperTest {
 	}
 	
 	@Test
+	void testTimeFrame2() {
+		List<LocalTime> timeFrame4 = h4.getRunningBaseTimeFrame();
+		assertThat(timeFrame4).hasSize(1440);
+	}
+	
+	@Test
 	void testEndOfSection() {
 		assertThat(h1.isEndOfSection(LocalTime.of(2, 30))).isTrue();
 		assertThat(h1.isEndOfSection(LocalTime.of(10, 15))).isTrue();
@@ -45,4 +56,5 @@ class PeriodHelperTest {
 		assertThat(h1.isEndOfSection(LocalTime.of(23, 0))).isFalse();
 		assertThat(h1.isEndOfSection(LocalTime.of(14, 59))).isFalse();
 	}
+	
 }

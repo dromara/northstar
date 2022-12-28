@@ -13,8 +13,6 @@ import java.util.Set;
  */
 public class PeriodHelper {
 	
-	private static final LocalTime START_TIME = LocalTime.of(17, 0);
-	
 	private List<LocalTime> baseTimeFrame = new ArrayList<>(256); // 基准时间线
 	private Set<LocalTime> endOfSections = new HashSet<>();
 	
@@ -26,15 +24,21 @@ public class PeriodHelper {
 		List<PeriodSegment> tradeTimeSegments = tradeTimeDefinition.getPeriodSegments();
 		LocalTime opening = tradeTimeSegments.get(0).startOfSegment();
 		LocalTime ending = tradeTimeSegments.get(tradeTimeSegments.size() - 1).endOfSegment();
-		LocalTime t = START_TIME.plusMinutes(1);
-		int minCount = 0;
-		while(t != START_TIME) {
+		LocalTime t = opening.plusMinutes(1);
+		if(!exclusiveOpening) {
+			baseTimeFrame.add(opening);
+		}
+		int minCount = 1;
+		while(!t.equals(opening)) {
 			for(PeriodSegment ps : tradeTimeSegments) {
 				endOfSections.add(ps.endOfSegment());
 				while(ps.withinPeriod(t)) {
-					if(t != opening && minCount == numbersOfMinPerPeriod || t == ending || t == opening && !exclusiveOpening) {
+					if(!t.equals(opening) && minCount == numbersOfMinPerPeriod && !t.equals(ending)) {
 						baseTimeFrame.add(t);
 						minCount = 1;
+					} else if (t.equals(ending)) {
+						baseTimeFrame.add(t);
+						return;
 					} else {
 						minCount++;
 					}
