@@ -64,7 +64,7 @@ class MarketCenterTest {
 		@Override
 		public ContractField mergeToContractField(ContractDefinition contractDef) {
 			return ContractField.newBuilder()
-					.setSymbol(identifier().value().replaceAll("(.+)@.+", "$1"))
+					.setSymbol("rb2305")
 					.setUnifiedSymbol(identifier().value())
 					.setExchange(ExchangeEnum.SHFE)
 					.setProductClass(ProductClassEnum.FUTURES)
@@ -100,7 +100,7 @@ class MarketCenterTest {
 		@Override
 		public ContractField mergeToContractField(ContractDefinition contractDef) {
 			return ContractField.newBuilder()
-					.setSymbol(identifier().value().replaceAll("(.+)@.+", "$1"))
+					.setSymbol("rb2310")
 					.setUnifiedSymbol(identifier().value())
 					.setExchange(ExchangeEnum.SHFE)
 					.setProductClass(ProductClassEnum.FUTURES)
@@ -136,7 +136,7 @@ class MarketCenterTest {
 		@Override
 		public ContractField mergeToContractField(ContractDefinition contractDef) {
 			return ContractField.newBuilder()
-					.setSymbol(identifier().value().replaceAll("(.+)@.+", "$1"))
+					.setSymbol(name())
 					.setUnifiedSymbol(identifier().value())
 					.setExchange(ExchangeEnum.SHFE)
 					.setProductClass(ProductClassEnum.OPTION)
@@ -187,6 +187,18 @@ class MarketCenterTest {
 		
 		assertThat(center.getContracts(GATEWAY_ID)).hasSize(3);
 		assertThat(center.getContracts("")).hasSize(3);
+	}
+	
+	@Test
+	void testFindContract() {
+		MarketGateway gateway = mock(MarketGateway.class);
+		when(gateway.getGatewaySetting()).thenReturn(GatewaySettingField.newBuilder().setGatewayId(GATEWAY_ID).build());
+		center.addInstrument(ins1, gateway, phFactory);
+		center.addInstrument(ins2, gateway, phFactory);
+		center.addInstrument(ins3, gateway, phFactory);
+		
+		assertThat(center.getContract(GATEWAY_ID, "rb2305").identifier()).isEqualTo(new Identifier("rb2305@SHFE@FUTURES"));
+		assertThat(center.getContract(new Identifier("rb2305@SHFE@FUTURES"))).isEqualTo(center.getContract(GATEWAY_ID, "rb2305"));
 	}
 
 	@Test

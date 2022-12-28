@@ -15,6 +15,14 @@ public interface IContractManager {
 	Contract getContract(Identifier identifier);
 	
 	/**
+	 * 根据网关与编码获取合约
+	 * @param gatewayId
+	 * @param symbol
+	 * @return
+	 */
+	Contract getContract(String gatewayId, String symbol);
+	
+	/**
 	 * 获取网关全部合约
 	 * @param gatewayId
 	 * @return

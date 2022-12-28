@@ -47,10 +47,12 @@ public class MarketCenter implements IMarketCenter, TickDataAware{
 	private final ConcurrentMap<Identifier, Contract> contractMap = new ConcurrentHashMap<>(INIT_SIZE);
 	/* 成份合约 -> 指数合约 */
 	private final ConcurrentMap<Contract, IndexContract> idxContractMap = new ConcurrentHashMap<>(INIT_SIZE);
-	
+
 	private final Table<ExchangeEnum, ProductClassEnum, List<ContractDefinition>> contractDefTbl = HashBasedTable.create();
 	
 	private final Table<String, ContractDefinition, List<Contract>> gatewayDefContractGroups = HashBasedTable.create();
+	
+	private final Table<String, String, Contract> gatewaySymbolContractTbl = HashBasedTable.create(); 
 	
 	private final FastEventEngine feEngine;
 	
@@ -87,6 +89,7 @@ public class MarketCenter implements IMarketCenter, TickDataAware{
 					gatewayDefContractGroups.put(gatewayId, def, new ArrayList<>());
 				}
 				gatewayDefContractGroups.get(gatewayId, def).add(contract);
+				gatewaySymbolContractTbl.put(gatewayId, contract.contractField().getSymbol(), contract);
 			}
 		}
 	}
@@ -177,6 +180,17 @@ public class MarketCenter implements IMarketCenter, TickDataAware{
 		return contractMap.get(identifier);
 	}
 
+	/**
+	 * 查询合约
+	 */
+	@Override
+	public Contract getContract(String gatewayId, String symbol) {
+		if(!gatewaySymbolContractTbl.contains(gatewayId, symbol)) {
+			throw new NoSuchElementException(String.format("找不到合约：%s -> %s", gatewayId, symbol));
+		}
+		return gatewaySymbolContractTbl.get(gatewayId, symbol);
+	}
+	
 	/**
 	 * 获取网关合约
 	 */
