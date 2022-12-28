@@ -905,8 +905,9 @@ public class TdSpi extends CThostFtdcTraderSpi {
 
 				if (instrumentQueried && gatewayAdapter.contractMap.containsKey(symbol)) {
 					ContractField contract = gatewayAdapter.contractMap.get(symbol);
+					price = (int)(price / contract.getPriceTick()) * contract.getPriceTick();
 					orderBuilder.setContract(contract);
-					orderBuilder.setPrice((int)(price / contract.getPriceTick()) * contract.getPriceTick());	// 优化价格精度
+					orderBuilder.setPrice(price);	// 优化价格精度
 					OrderField order = orderBuilder.build();
 					orderIdToOrderMap.put(order.getOrderId(), order);
 					gatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.ORDER, order);
@@ -1672,8 +1673,9 @@ public class TdSpi extends CThostFtdcTraderSpi {
 
 			if (instrumentQueried && gatewayAdapter.contractMap.containsKey(symbol)) {
 				ContractField contract = gatewayAdapter.contractMap.get(symbol);
+				price = (int)(price / contract.getPriceTick()) * contract.getPriceTick();
 				tradeBuilder.setContract(contract);
-				tradeBuilder.setPrice((int)(price / contract.getPriceTick()) * contract.getPriceTick());	// 优化价格精度
+				tradeBuilder.setPrice(price);	// 优化价格精度
 				gatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.TRADE, tradeBuilder.build());
 			} else {
 				ContractField.Builder contractBuilder = ContractField.newBuilder();
