@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -23,9 +24,13 @@ import org.slf4j.LoggerFactory;
 
 import tech.quantit.northstar.common.constant.DateTimeConstant;
 import tech.quantit.northstar.common.event.NorthstarEventType;
+import tech.quantit.northstar.common.exception.NoSuchElementException;
 import tech.quantit.northstar.gateway.api.GatewayAbstract;
-import tech.quantit.northstar.gateway.api.domain.ContractFactory;
-import tech.quantit.northstar.gateway.api.domain.NormalContract;
+import tech.quantit.northstar.gateway.api.MarketGateway;
+import tech.quantit.northstar.gateway.api.domain.contract.Contract;
+import tech.quantit.northstar.gateway.api.domain.time.IPeriodHelperFactory;
+import tech.quantit.northstar.gateway.ctp.CtpContract;
+import tech.quantit.northstar.gateway.ctp.time.CnFtPeriodHelperFactory;
 import xyz.redtorch.gateway.ctp.common.CtpContractNameResolver;
 import xyz.redtorch.gateway.ctp.common.GatewayConstants;
 import xyz.redtorch.gateway.ctp.x64v6v3v15v.api.CThostFtdcAccountregisterField;
@@ -154,14 +159,19 @@ import xyz.redtorch.pb.CoreField.TradeField;
 
 public class TdSpi extends CThostFtdcTraderSpi {
 
-	private static int CONNECTION_STATUS_DISCONNECTED = 0;
-	private static int CONNECTION_STATUS_CONNECTED = 1;
-	private static int CONNECTION_STATUS_CONNECTING = 2;
-	private static int CONNECTION_STATUS_DISCONNECTING = 3;
+	private static final int CONNECTION_STATUS_DISCONNECTED = 0;
+	private static final int CONNECTION_STATUS_CONNECTED = 1;
+	private static final int CONNECTION_STATUS_CONNECTING = 2;
+	private static final int CONNECTION_STATUS_DISCONNECTING = 3;
+	private static final String MKT_GATEWAY_ID = "CTP";
+	private static final IPeriodHelperFactory PHFACTORY = new CnFtPeriodHelperFactory();
 
 	private static final Logger logger = LoggerFactory.getLogger(TdSpi.class);
 
 	private GatewayAbstract gatewayAdapter;
+	private String userId;
+	private String password;
+	private String brokerId;
 	private String logInfo;
 	private String gatewayId;
 
@@ -185,6 +195,9 @@ public class TdSpi extends CThostFtdcTraderSpi {
 
 	TdSpi(GatewayAbstract gatewayAdapter) {
 		this.gatewayAdapter = gatewayAdapter;
+		this.userId = gatewayAdapter.getGatewaySetting().getCtpApiSetting().getUserId();
+		this.password = gatewayAdapter.getGatewaySetting().getCtpApiSetting().getPassword();
+		this.brokerId = gatewayAdapter.getGatewaySetting().getCtpApiSetting().getBrokerId();
 		this.gatewayId = gatewayAdapter.getGatewaySetting().getGatewayId();
 		this.logInfo = "交易网关ID-[" + this.gatewayId + "] [→] ";
 		logger.info("当前TdApi版本号：{}", CThostFtdcTraderApi.GetApiVersion());
@@ -321,7 +334,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 		logger.warn("{}交易接口使用临时文件夹{}", logInfo, tempFile.getParentFile().getAbsolutePath());
 
 		try {
-			String tdHost = GatewayConstants.SMART_CONNECTOR.bestEndpoint(gatewayAdapter.getGatewaySetting().getCtpApiSetting().getBrokerId());
+			String tdHost = GatewayConstants.SMART_CONNECTOR.bestEndpoint(brokerId);
 			String tdPort = gatewayAdapter.getGatewaySetting().getCtpApiSetting().getTdPort();
 			logger.info("{}使用IP [{}] 连接交易网关", logInfo, tdHost);
 			cThostFtdcTraderApi = CThostFtdcTraderApi.CreateFtdcTraderApi(tempFile.getAbsolutePath());
@@ -453,8 +466,8 @@ public class TdSpi extends CThostFtdcTraderSpi {
 
 		try {
 			CThostFtdcQryInvestorPositionField cThostFtdcQryInvestorPositionField = new CThostFtdcQryInvestorPositionField();
-			cThostFtdcQryInvestorPositionField.setBrokerID(gatewayAdapter.getGatewaySetting().getCtpApiSetting().getBrokerId());
-			cThostFtdcQryInvestorPositionField.setInvestorID(gatewayAdapter.getGatewaySetting().getCtpApiSetting().getUserId());
+			cThostFtdcQryInvestorPositionField.setBrokerID(brokerId);
+			cThostFtdcQryInvestorPositionField.setInvestorID(userId);
 			cThostFtdcTraderApi.ReqQryInvestorPosition(cThostFtdcQryInvestorPositionField, reqId.incrementAndGet());
 		} catch (Throwable t) {
 			logger.error("{}交易接口查询持仓异常", logInfo, t);
@@ -480,9 +493,9 @@ public class TdSpi extends CThostFtdcTraderSpi {
 		cThostFtdcInputOrderField.setOrderPriceType(CtpConstant.orderPriceTypeMap.getOrDefault(submitOrderReq.getOrderPriceType(), Character.valueOf('\0')));
 		cThostFtdcInputOrderField.setDirection(CtpConstant.directionMap.getOrDefault(submitOrderReq.getDirection(), Character.valueOf('\0')));
 		cThostFtdcInputOrderField.setCombOffsetFlag(String.valueOf(CtpConstant.offsetFlagMap.getOrDefault(submitOrderReq.getOffsetFlag(), Character.valueOf('\0'))));
-		cThostFtdcInputOrderField.setInvestorID(gatewayAdapter.getGatewaySetting().getCtpApiSetting().getUserId());
-		cThostFtdcInputOrderField.setUserID(gatewayAdapter.getGatewaySetting().getCtpApiSetting().getUserId());
-		cThostFtdcInputOrderField.setBrokerID(gatewayAdapter.getGatewaySetting().getCtpApiSetting().getBrokerId());
+		cThostFtdcInputOrderField.setInvestorID(userId);
+		cThostFtdcInputOrderField.setUserID(userId);
+		cThostFtdcInputOrderField.setBrokerID(brokerId);
 		cThostFtdcInputOrderField.setExchangeID(CtpConstant.exchangeMap.getOrDefault(submitOrderReq.getContract().getExchange(), ""));
 		cThostFtdcInputOrderField.setCombHedgeFlag(CtpConstant.hedgeFlagMap.get(submitOrderReq.getHedgeFlag()));
 		cThostFtdcInputOrderField.setContingentCondition(CtpConstant.contingentConditionMap.get(submitOrderReq.getContingentCondition()));
@@ -588,9 +601,9 @@ public class TdSpi extends CThostFtdcTraderSpi {
 				cThostFtdcInputOrderActionField.setSessionID(sessionId);
 
 				cThostFtdcInputOrderActionField.setActionFlag(jctpv6v3v15x64apiConstants.THOST_FTDC_AF_Delete);
-				cThostFtdcInputOrderActionField.setBrokerID(gatewayAdapter.getGatewaySetting().getCtpApiSetting().getBrokerId());
-				cThostFtdcInputOrderActionField.setInvestorID(gatewayAdapter.getGatewaySetting().getCtpApiSetting().getUserId());
-				cThostFtdcInputOrderActionField.setUserID(gatewayAdapter.getGatewaySetting().getCtpApiSetting().getUserId());
+				cThostFtdcInputOrderActionField.setBrokerID(brokerId);
+				cThostFtdcInputOrderActionField.setInvestorID(userId);
+				cThostFtdcInputOrderActionField.setUserID(userId);
 				cThostFtdcInputOrderActionField.setExchangeID(CtpConstant.exchangeMap.getOrDefault(orderIdToSubmitOrderReqMap.get(orderId).getContract().getExchange(), ""));
 				cThostFtdcTraderApi.ReqOrderAction(cThostFtdcInputOrderActionField, reqId.incrementAndGet());
 				return true;
@@ -603,9 +616,9 @@ public class TdSpi extends CThostFtdcTraderSpi {
 				cThostFtdcInputOrderActionField.setSessionID(orderIdToOrderMap.get(orderId).getSessionId());
 
 				cThostFtdcInputOrderActionField.setActionFlag(jctpv6v3v15x64apiConstants.THOST_FTDC_AF_Delete);
-				cThostFtdcInputOrderActionField.setBrokerID(gatewayAdapter.getGatewaySetting().getCtpApiSetting().getBrokerId());
-				cThostFtdcInputOrderActionField.setInvestorID(gatewayAdapter.getGatewaySetting().getCtpApiSetting().getUserId());
-				cThostFtdcInputOrderActionField.setUserID(gatewayAdapter.getGatewaySetting().getCtpApiSetting().getUserId());
+				cThostFtdcInputOrderActionField.setBrokerID(brokerId);
+				cThostFtdcInputOrderActionField.setInvestorID(userId);
+				cThostFtdcInputOrderActionField.setUserID(userId);
 				cThostFtdcInputOrderActionField.setExchangeID(CtpConstant.exchangeMap.getOrDefault(orderIdToOrderMap.get(orderId).getContract().getExchange(), ""));
 				cThostFtdcTraderApi.ReqOrderAction(cThostFtdcInputOrderActionField, reqId.incrementAndGet());
 				return true;
@@ -631,17 +644,17 @@ public class TdSpi extends CThostFtdcTraderSpi {
 			return;
 		}
 
-		if (StringUtils.isEmpty(gatewayAdapter.getGatewaySetting().getCtpApiSetting().getBrokerId())) {
+		if (StringUtils.isEmpty(brokerId)) {
 			logger.error("{}BrokerID不允许为空", logInfo);
 			return;
 		}
 
-		if (StringUtils.isEmpty(gatewayAdapter.getGatewaySetting().getCtpApiSetting().getUserId())) {
+		if (StringUtils.isEmpty(userId)) {
 			logger.error("{}UserId不允许为空", logInfo);
 			return;
 		}
 
-		if (StringUtils.isEmpty(gatewayAdapter.getGatewaySetting().getCtpApiSetting().getPassword())) {
+		if (StringUtils.isEmpty(password)) {
 			logger.error("{}Password不允许为空", logInfo);
 			return;
 		}
@@ -660,9 +673,9 @@ public class TdSpi extends CThostFtdcTraderSpi {
 			CThostFtdcReqAuthenticateField authenticateField = new CThostFtdcReqAuthenticateField();
 			authenticateField.setAppID(gatewayAdapter.getGatewaySetting().getCtpApiSetting().getAppId());
 			authenticateField.setAuthCode(gatewayAdapter.getGatewaySetting().getCtpApiSetting().getAuthCode());
-			authenticateField.setBrokerID(gatewayAdapter.getGatewaySetting().getCtpApiSetting().getBrokerId());
-			authenticateField.setUserProductInfo(gatewayAdapter.getGatewaySetting().getCtpApiSetting().getUserProductInfo());
-			authenticateField.setUserID(gatewayAdapter.getGatewaySetting().getCtpApiSetting().getUserId());
+			authenticateField.setBrokerID(brokerId);
+			authenticateField.setUserProductInfo(gatewayAdapter.getGatewaySetting().getCtpApiSetting().getAppId());
+			authenticateField.setUserID(userId);
 			cThostFtdcTraderApi.ReqAuthenticate(authenticateField, reqId.incrementAndGet());
 		} catch (Throwable t) {
 			logger.error("{}发起客户端验证异常", logInfo, t);
@@ -716,8 +729,8 @@ public class TdSpi extends CThostFtdcTraderSpi {
 
 				// 确认结算单
 				CThostFtdcSettlementInfoConfirmField settlementInfoConfirmField = new CThostFtdcSettlementInfoConfirmField();
-				settlementInfoConfirmField.setBrokerID(gatewayAdapter.getGatewaySetting().getCtpApiSetting().getBrokerId());
-				settlementInfoConfirmField.setInvestorID(gatewayAdapter.getGatewaySetting().getCtpApiSetting().getUserId());
+				settlementInfoConfirmField.setBrokerID(brokerId);
+				settlementInfoConfirmField.setInvestorID(userId);
 				cThostFtdcTraderApi.ReqSettlementInfoConfirm(settlementInfoConfirmField, reqId.incrementAndGet());
 
 				// 不合法的登录
@@ -796,9 +809,9 @@ public class TdSpi extends CThostFtdcTraderSpi {
 				if (pRspInfo.getErrorID() == 0) {
 					logger.info("{}{}", logInfo, "交易接口客户端验证成功");
 					CThostFtdcReqUserLoginField reqUserLoginField = new CThostFtdcReqUserLoginField();
-					reqUserLoginField.setBrokerID(gatewayAdapter.getGatewaySetting().getCtpApiSetting().getBrokerId());
-					reqUserLoginField.setUserID(gatewayAdapter.getGatewaySetting().getCtpApiSetting().getUserId());
-					reqUserLoginField.setPassword(gatewayAdapter.getGatewaySetting().getCtpApiSetting().getPassword());
+					reqUserLoginField.setBrokerID(brokerId);
+					reqUserLoginField.setUserID(userId);
+					reqUserLoginField.setPassword(password);
 					cThostFtdcTraderApi.ReqUserLogin(reqUserLoginField, reqId.incrementAndGet());
 					
 				} else {
@@ -835,7 +848,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 				String symbol = pInputOrder.getInstrumentID();
 
 				// 无法获取账户信息,使用userId作为账户ID
-				String accountCode = gatewayAdapter.getGatewaySetting().getCtpApiSetting().getUserId();
+				String accountCode = userId;
 				// 无法获取币种信息使用特定值CNY
 				String accountId = accountCode + "@" + gatewayId;
 
@@ -903,8 +916,8 @@ public class TdSpi extends CThostFtdcTraderSpi {
 					orderBuilder.setStatusMsg(pRspInfo.getErrorMsg());
 				}
 
-				if (instrumentQueried && gatewayAdapter.contractMap.containsKey(symbol)) {
-					ContractField contract = gatewayAdapter.contractMap.get(symbol);
+				if (instrumentQueried) {
+					ContractField contract = gatewayAdapter.mktCenter.getContract(MKT_GATEWAY_ID, symbol).contractField();
 					price = (int)(price / contract.getPriceTick()) * contract.getPriceTick();
 					orderBuilder.setContract(contract);
 					orderBuilder.setPrice(price);	// 优化价格精度
@@ -914,7 +927,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 				} else {
 					ContractField.Builder contractBuilder = ContractField.newBuilder();
 					contractBuilder.setSymbol(symbol);
-					orderBuilder.setContract(gatewayAdapter.contractMap.get(symbol));
+					orderBuilder.setContract(contractBuilder.build());
 
 					orderBuilderCacheList.add(orderBuilder);
 				}
@@ -986,8 +999,8 @@ public class TdSpi extends CThostFtdcTraderSpi {
 
 			logger.info("{}交易接口开始查询投资者信息", logInfo);
 			CThostFtdcQryInvestorField pQryInvestor = new CThostFtdcQryInvestorField();
-			pQryInvestor.setInvestorID(gatewayAdapter.getGatewaySetting().getCtpApiSetting().getUserId());
-			pQryInvestor.setBrokerID(gatewayAdapter.getGatewaySetting().getCtpApiSetting().getBrokerId());
+			pQryInvestor.setInvestorID(userId);
+			pQryInvestor.setBrokerID(brokerId);
 			cThostFtdcTraderApi.ReqQryInvestor(pQryInvestor, reqId.addAndGet(1));
 		} catch (Throwable t) {
 			logger.error("{}处理结算单确认回报错误", logInfo, t);
@@ -1043,17 +1056,17 @@ public class TdSpi extends CThostFtdcTraderSpi {
 			}
 			String symbol = pInvestorPosition.getInstrumentID();
 
-			if (!(instrumentQueried && gatewayAdapter.contractMap.containsKey(symbol))) {
+			if (!instrumentQueried) {
 				logger.debug("{}尚未获取到合约信息,暂时不处理持仓数据,代码{}", logInfo, symbol);
 				return;
 			}
 
-			ContractField contract = gatewayAdapter.contractMap.get(symbol);
+			Contract contract = gatewayAdapter.mktCenter.getContract(MKT_GATEWAY_ID, symbol);
 
-			String uniqueSymbol = symbol + "@" + contract.getExchange().getValueDescriptor().getName() + "@" + contract.getProductClass().getValueDescriptor().getName();
+			String uniqueSymbol = symbol + "@" + contract.exchange().getValueDescriptor().getName() + "@" + contract.productClass().getValueDescriptor().getName();
 
 			// 无法获取账户信息,使用userId作为账户ID
-			String accountCode = gatewayAdapter.getGatewaySetting().getCtpApiSetting().getUserId();
+			String accountCode = userId;
 			// 无法获取币种信息使用特定值
 			String accountId = accountCode + "@" + gatewayId;
 
@@ -1068,7 +1081,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 			} else {
 				positionBuilder = PositionField.newBuilder();
 				positionBuilderMap.put(positionId, positionBuilder);
-				positionBuilder.setContract(gatewayAdapter.contractMap.get(symbol));
+				positionBuilder.setContract(contract.contractField());
 				positionBuilder.setPositionDirection(CtpConstant.posiDirectionMapReverse.getOrDefault(pInvestorPosition.getPosiDirection(), PositionDirectionEnum.PD_Unknown));
 				positionBuilder.setPositionId(positionId);
 
@@ -1303,63 +1316,55 @@ public class TdSpi extends CThostFtdcTraderSpi {
 	public void OnRspQryInstrument(CThostFtdcInstrumentField pInstrument, CThostFtdcRspInfoField pRspInfo, int nRequestID, boolean bIsLast) {
 		try {
 			String symbol = pInstrument.getInstrumentID();
-			String name = CtpContractNameResolver.getCNSymbolName(symbol);
-			ContractField.Builder contractBuilder = ContractField.newBuilder();
-			contractBuilder.setGatewayId("CTP");
-			contractBuilder.setSymbol(symbol);
-			contractBuilder.setExchange(CtpConstant.exchangeMapReverse.getOrDefault(pInstrument.getExchangeID(), ExchangeEnum.UnknownExchange));
-			contractBuilder.setProductClass(CtpConstant.productTypeMapReverse.getOrDefault(pInstrument.getProductClass(), ProductClassEnum.UnknownProductClass));
-			contractBuilder.setUnifiedSymbol(contractBuilder.getSymbol() + "@" + contractBuilder.getExchange() + "@" + contractBuilder.getProductClass());
-			contractBuilder.setContractId(contractBuilder.getUnifiedSymbol() + "@" + gatewayId);
-			contractBuilder.setName(name != null ? name : pInstrument.getInstrumentName());
-			contractBuilder.setFullName(pInstrument.getInstrumentName());
-			contractBuilder.setThirdPartyId(contractBuilder.getSymbol() + "@CTP");
-
-			if (pInstrument.getVolumeMultiple() <= 0) {
-				contractBuilder.setMultiplier(1);
-			} else {
-				contractBuilder.setMultiplier(pInstrument.getVolumeMultiple());
-			}
-
-			contractBuilder.setPriceTick(pInstrument.getPriceTick());
-			contractBuilder.setCurrency(CurrencyEnum.CNY); // 默认人民币
-			contractBuilder.setLastTradeDateOrContractMonth(pInstrument.getExpireDate());
-			contractBuilder.setStrikePrice(pInstrument.getStrikePrice());
-			contractBuilder.setOptionsType(CtpConstant.optionTypeMapReverse.getOrDefault(pInstrument.getOptionsType(), OptionsTypeEnum.O_Unknown));
-
-			if (pInstrument.getUnderlyingInstrID() != null) {
-				contractBuilder.setUnderlyingSymbol(pInstrument.getUnderlyingInstrID());
-			}
-
-			contractBuilder.setUnderlyingMultiplier(pInstrument.getUnderlyingMultiple());
-			contractBuilder.setMaxLimitOrderVolume(pInstrument.getMaxLimitOrderVolume());
-			contractBuilder.setMaxMarketOrderVolume(pInstrument.getMaxMarketOrderVolume());
-			contractBuilder.setMinLimitOrderVolume(pInstrument.getMinLimitOrderVolume());
-			contractBuilder.setMinMarketOrderVolume(pInstrument.getMinMarketOrderVolume());
-			contractBuilder.setMaxMarginSideAlgorithm(pInstrument.getMaxMarginSideAlgorithm() == '1');
-			contractBuilder.setLongMarginRatio(pInstrument.getLongMarginRatio());
-			contractBuilder.setShortMarginRatio(pInstrument.getShortMarginRatio());
-
-			ContractField contract = contractBuilder.build();
-			gatewayAdapter.contractMap.put(contractBuilder.getSymbol(), contract);
-			gatewayAdapter.registry.register(new NormalContract(contract, System.currentTimeMillis()));
+			String name = Optional.ofNullable(CtpContractNameResolver.getCNSymbolName(symbol)).orElse(pInstrument.getInstrumentName());
+			ExchangeEnum exchange = CtpConstant.exchangeMapReverse.getOrDefault(pInstrument.getExchangeID(), ExchangeEnum.UnknownExchange);
+			ProductClassEnum productClass = CtpConstant.productTypeMapReverse.getOrDefault(pInstrument.getProductClass(), ProductClassEnum.UnknownProductClass);
+			String unifiedSymbol = String.format("%s@%s@%s", symbol, exchange, productClass);
+			String contractId = String.format("%s@%s", unifiedSymbol, gatewayId);
+			
+			CtpContract contract = CtpContract.builder()
+					.gatewayId(MKT_GATEWAY_ID)
+					.symbol(symbol)
+					.name(name)
+					.fullName(pInstrument.getInstrumentName())
+					.thirdPartyId(symbol + "@CTP")
+					.exchange(exchange)
+					.productClass(productClass)
+					.unifiedSymbol(unifiedSymbol)
+					.contractId(contractId)
+					.multiplier(Math.max(1, pInstrument.getVolumeMultiple()))
+					.priceTick(pInstrument.getPriceTick())
+					.currency(CurrencyEnum.CNY)
+					.lastTradeDateOrContractMonth(pInstrument.getExpireDate())
+					.strikePrice(pInstrument.getStrikePrice())
+					.optionsType(CtpConstant.optionTypeMapReverse.getOrDefault(pInstrument.getOptionsType(), OptionsTypeEnum.O_Unknown))
+					.underlyingSymbol(Optional.ofNullable(pInstrument.getUnderlyingInstrID()).orElse(""))
+					.underlyingMultiplier(pInstrument.getUnderlyingMultiple())
+					.maxLimitOrderVolume(pInstrument.getMaxLimitOrderVolume())
+					.minLimitOrderVolume(pInstrument.getMinLimitOrderVolume())
+					.maxMarketOrderVolume(pInstrument.getMaxMarketOrderVolume())
+					.minMarketOrderVolume(pInstrument.getMinMarketOrderVolume())
+					.maxMarginSideAlgorithm(pInstrument.getMaxMarginSideAlgorithm() == '1')
+					.longMarginRatio(pInstrument.getLongMarginRatio())
+					.shortMarginRatio(pInstrument.getShortMarginRatio())
+					.build();
+			
+			gatewayAdapter.mktCenter.addInstrument(contract, (MarketGateway) gatewayAdapter, PHFACTORY);
+			
 			if (bIsLast) {
-				
-				logger.info("{}交易接口合约信息获取完成!共计{}条", logInfo, gatewayAdapter.contractMap.size());
-				ContractFactory contractFactory = new ContractFactory(gatewayAdapter.contractMap.values().stream().toList());
-				contractFactory.makeIndexContract().stream().forEach(gatewayAdapter.registry::register);
+				logger.info("{}交易接口合约信息获取完成!共计{}条", logInfo, gatewayAdapter.mktCenter.getContracts(MKT_GATEWAY_ID).size());
 				
 				instrumentQueried = true;
 				this.startIntervalQuery();
 
 				logger.info("{}交易接口开始推送缓存Order,共计{}条", logInfo, orderBuilderCacheList.size());
 				for (OrderField.Builder orderBuilder : orderBuilderCacheList) {
-					if (gatewayAdapter.contractMap.containsKey(orderBuilder.getContract().getSymbol())) {
-						orderBuilder.setContract(gatewayAdapter.contractMap.get(orderBuilder.getContract().getSymbol()));
+					try {
+						orderBuilder.setContract(gatewayAdapter.mktCenter.getContract(MKT_GATEWAY_ID, symbol).contractField());
 						OrderField order = orderBuilder.build();
 						orderIdToOrderMap.put(order.getOrderId(), order);
 						gatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.ORDER, order);
-					} else {
+					} catch(NoSuchElementException e) {
 						logger.error("{}未能正确获取到合约信息，代码{}", logInfo, orderBuilder.getContract().getSymbol());
 					}
 				}
@@ -1367,15 +1372,15 @@ public class TdSpi extends CThostFtdcTraderSpi {
 
 				logger.info("{}交易接口开始推送缓存Trade,共计{}条", logInfo, tradeBuilderCacheList.size());
 				for (TradeField.Builder tradeBuilder : tradeBuilderCacheList) {
-					if (gatewayAdapter.contractMap.containsKey(tradeBuilder.getContract().getSymbol())) {
-						tradeBuilder.setContract(gatewayAdapter.contractMap.get(tradeBuilder.getContract().getSymbol()));
+					try {
+						tradeBuilder.setContract(gatewayAdapter.mktCenter.getContract(MKT_GATEWAY_ID, symbol).contractField());
 						gatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.TRADE, tradeBuilder.build());
-					} else {
+					} catch(NoSuchElementException e) {
 						logger.error("{}未能正确获取到合约信息，代码{}", logInfo, tradeBuilder.getContract().getSymbol());
 					}
 				}
 				tradeBuilderCacheList.clear();
-				
+				gatewayAdapter.mktCenter.loadContractGroup(gatewayId);
 				gatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.GATEWAY_READY, gatewayId);
 			}
 		} catch (Throwable t) {
@@ -1486,7 +1491,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 			String symbol = pOrder.getInstrumentID();
 
 			// 无法获取账户信息,使用userId作为账户ID
-			String accountCode = gatewayAdapter.getGatewaySetting().getCtpApiSetting().getUserId();
+			String accountCode = userId;
 			// 无法获取币种信息使用特定值CNY
 			String accountId = accountCode + "@" + gatewayId;
 
@@ -1586,14 +1591,10 @@ public class TdSpi extends CThostFtdcTraderSpi {
 			orderBuilder.setOrderPriceType(orderPriceType);
 
 			if (instrumentQueried) {
-				if (gatewayAdapter.contractMap.containsKey(symbol)) {
-					orderBuilder.setContract(gatewayAdapter.contractMap.get(symbol));
-					OrderField order = orderBuilder.build();
-					orderIdToOrderMap.put(order.getOrderId(), order);
-					gatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.ORDER, order);
-				} else {
-					logger.error("{}交易接口定单回报处理错误,未找到合约:{}", logInfo, symbol);
-				}
+				orderBuilder.setContract(gatewayAdapter.mktCenter.getContract(MKT_GATEWAY_ID, symbol).contractField());
+				OrderField order = orderBuilder.build();
+				orderIdToOrderMap.put(order.getOrderId(), order);
+				gatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.ORDER, order);
 			} else {
 				ContractField.Builder contractBuilder = ContractField.newBuilder();
 				contractBuilder.setSymbol(symbol);
@@ -1641,7 +1642,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 			String originalOrderId = orderIdToOriginalOrderIdMap.getOrDefault(orderId, "");
 
 			// 无法获取账户信息,使用userId作为账户ID
-			String accountCode = gatewayAdapter.getGatewaySetting().getCtpApiSetting().getUserId();
+			String accountCode = userId;
 			// 无法获取币种信息使用特定值CNY
 			String accountId = accountCode + "@" + gatewayId;
 
@@ -1671,8 +1672,8 @@ public class TdSpi extends CThostFtdcTraderSpi {
 			tradeBuilder.setTradeType(tradeType);
 			tradeBuilder.setPriceSource(priceSource);
 
-			if (instrumentQueried && gatewayAdapter.contractMap.containsKey(symbol)) {
-				ContractField contract = gatewayAdapter.contractMap.get(symbol);
+			if (instrumentQueried) {
+				ContractField contract = gatewayAdapter.mktCenter.getContract(MKT_GATEWAY_ID, symbol).contractField();
 				price = (int)(price / contract.getPriceTick()) * contract.getPriceTick();
 				tradeBuilder.setContract(contract);
 				tradeBuilder.setPrice(price);	// 优化价格精度

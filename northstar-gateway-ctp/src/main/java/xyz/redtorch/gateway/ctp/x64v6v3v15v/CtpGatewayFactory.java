@@ -9,7 +9,7 @@ import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.model.GatewayDescription;
 import tech.quantit.northstar.gateway.api.Gateway;
 import tech.quantit.northstar.gateway.api.GatewayFactory;
-import tech.quantit.northstar.gateway.api.domain.GlobalMarketRegistry;
+import tech.quantit.northstar.gateway.api.IMarketCenter;
 import tech.quantit.northstar.gateway.ctp.CtpGatewaySettings;
 import xyz.redtorch.pb.CoreEnum.GatewayAdapterTypeEnum;
 import xyz.redtorch.pb.CoreEnum.GatewayTypeEnum;
@@ -20,13 +20,13 @@ public class CtpGatewayFactory implements GatewayFactory{
 
 	private FastEventEngine fastEventEngine;
 	
-	private GlobalMarketRegistry registry;
+	private IMarketCenter mktCenter;
 	
 	private IDataServiceManager dataMgr;
 	
-	public CtpGatewayFactory(FastEventEngine fastEventEngine, GlobalMarketRegistry registry, IDataServiceManager dataMgr) {
+	public CtpGatewayFactory(FastEventEngine fastEventEngine, IMarketCenter mktCenter, IDataServiceManager dataMgr) {
 		this.fastEventEngine = fastEventEngine;
-		this.registry = registry;
+		this.mktCenter = mktCenter;
 		this.dataMgr = dataMgr;
 	}
 	
@@ -53,7 +53,7 @@ public class CtpGatewayFactory implements GatewayFactory{
 				.setGatewayName(gatewayDescription.getGatewayId())
 				.setCtpApiSetting(ctpSetting)
 				.setGatewayType(gwType)
-				.build(), registry);
+				.build(), mktCenter);
 	}
 
 }

@@ -10,9 +10,9 @@ import org.slf4j.LoggerFactory;
 
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.gateway.api.GatewayAbstract;
+import tech.quantit.northstar.gateway.api.IMarketCenter;
 import tech.quantit.northstar.gateway.api.MarketGateway;
 import tech.quantit.northstar.gateway.api.TradeGateway;
-import tech.quantit.northstar.gateway.api.domain.GlobalMarketRegistry;
 import tech.quantit.northstar.gateway.ctp.CTP;
 import xyz.redtorch.pb.CoreEnum.GatewayTypeEnum;
 import xyz.redtorch.pb.CoreField.CancelOrderReqField;
@@ -73,8 +73,8 @@ public class CtpGatewayAdapter extends GatewayAbstract implements MarketGateway,
 	private MdSpi mdSpi = null;
 	private TdSpi tdSpi = null;
 	
-	public CtpGatewayAdapter(FastEventEngine fastEventEngine, GatewaySettingField gatewaySetting, GlobalMarketRegistry registry) {
-		super(gatewaySetting, registry);
+	public CtpGatewayAdapter(FastEventEngine fastEventEngine, GatewaySettingField gatewaySetting, IMarketCenter mktCenter) {
+		super(gatewaySetting, mktCenter);
 		
 		if (gatewaySetting.getGatewayType() == GatewayTypeEnum.GTE_Trade) {
 			tdSpi = new TdSpi(this);
@@ -96,18 +96,11 @@ public class CtpGatewayAdapter extends GatewayAbstract implements MarketGateway,
 			if (mdSpi == null) {
 				logger.error(getLogInfo() + "行情接口尚未初始化或已断开");
 				return false;
-			} else {
-				// 如果网关类型仅为行情,那就无法通过交易接口拿到合约信息，以订阅时的合约信息为准
-				if (gatewaySetting.getGatewayType() == GatewayTypeEnum.GTE_MarketData) {
-					contractMap.put(contractField.getSymbol(), contractField);
-				}
-
-				return mdSpi.subscribe(contractField.getSymbol());
 			}
-		} else {
-			logger.warn(getLogInfo() + "不包含订阅功能");
-			return false;
+			return mdSpi.subscribe(contractField.getSymbol());
 		}
+		logger.warn(getLogInfo() + "不包含订阅功能");
+		return false;
 	}
 
 	@Override
@@ -116,13 +109,11 @@ public class CtpGatewayAdapter extends GatewayAbstract implements MarketGateway,
 			if (mdSpi == null) {
 				logger.error(getLogInfo() + "行情接口尚未初始化或已断开");
 				return false;
-			} else {
-				return mdSpi.unsubscribe(contractField.getSymbol());
 			}
-		} else {
-			logger.warn(getLogInfo() + "不包含取消订阅功能");
-			return false;
+			return mdSpi.unsubscribe(contractField.getSymbol());
 		}
+		logger.warn(getLogInfo() + "不包含取消订阅功能");
+		return false;
 	}
 
 	@Override
@@ -131,13 +122,11 @@ public class CtpGatewayAdapter extends GatewayAbstract implements MarketGateway,
 			if (tdSpi == null || !tdSpi.isConnected()) {
 				logger.error(getLogInfo() + "交易接口尚未初始化或已断开");
 				return "";
-			} else {
-				return tdSpi.submitOrder(submitOrderReq);
 			}
-		} else {
-			logger.warn(getLogInfo() + "不包含提交定单功能");
-			return "";
+			return tdSpi.submitOrder(submitOrderReq);
 		}
+		logger.warn(getLogInfo() + "不包含提交定单功能");
+		return "";
 	}
 
 	@Override
@@ -146,13 +135,11 @@ public class CtpGatewayAdapter extends GatewayAbstract implements MarketGateway,
 			if (tdSpi == null || !tdSpi.isConnected()) {
 				logger.error(getLogInfo() + "交易接口尚未初始化或已断开");
 				return false;
-			} else {
-				return tdSpi.cancelOrder(cancelOrderReq);
 			}
-		} else {
-			logger.warn(getLogInfo() + "不包含撤销定单功能");
-			return false;
+			return tdSpi.cancelOrder(cancelOrderReq);
 		}
+		logger.warn(getLogInfo() + "不包含撤销定单功能");
+		return false;
 	}
 
 	@Override
