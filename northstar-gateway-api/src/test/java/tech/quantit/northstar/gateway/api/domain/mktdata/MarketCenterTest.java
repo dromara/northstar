@@ -53,7 +53,7 @@ class MarketCenterTest {
 		
 		@Override
 		public Identifier identifier() {
-			return new Identifier("rb2305@SHFE@FUTURES");
+			return Identifier.of("rb2305@SHFE@FUTURES");
 		}
 		
 		@Override
@@ -89,7 +89,7 @@ class MarketCenterTest {
 		
 		@Override
 		public Identifier identifier() {
-			return new Identifier("rb2310@SHFE@FUTURES");
+			return Identifier.of("rb2310@SHFE@FUTURES");
 		}
 		
 		@Override
@@ -125,7 +125,7 @@ class MarketCenterTest {
 		
 		@Override
 		public Identifier identifier() {
-			return new Identifier("rb2305C5000@SHFE@OPTIONS");
+			return Identifier.of("rb2305C5000@SHFE@OPTIONS");
 		}
 		
 		@Override
@@ -197,8 +197,8 @@ class MarketCenterTest {
 		center.addInstrument(ins2, gateway, phFactory);
 		center.addInstrument(ins3, gateway, phFactory);
 		
-		assertThat(center.getContract(GATEWAY_ID, "rb2305").identifier()).isEqualTo(new Identifier("rb2305@SHFE@FUTURES"));
-		assertThat(center.getContract(new Identifier("rb2305@SHFE@FUTURES"))).isEqualTo(center.getContract(GATEWAY_ID, "rb2305"));
+		assertThat(center.getContract(GATEWAY_ID, "rb2305").identifier()).isEqualTo(Identifier.of("rb2305@SHFE@FUTURES"));
+		assertThat(center.getContract(Identifier.of("rb2305@SHFE@FUTURES"))).isEqualTo(center.getContract(GATEWAY_ID, "rb2305"));
 	}
 
 	@Test

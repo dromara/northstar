@@ -35,7 +35,7 @@ public class IndexContract implements Contract, TickDataAware{
 	
 	public IndexContract(FastEventEngine feEngine, ContractField contract, List<Contract> monthContracts, PeriodHelper phHelper) {
 		this.contract = contract;
-		this.identifier = new Identifier(contract.getUnifiedSymbol());
+		this.identifier = Identifier.of(contract.getUnifiedSymbol());
 		this.monthContracts = monthContracts;
 		this.barGen = new MinuteBarGenerator(contract, phHelper, bar -> feEngine.emitEvent(NorthstarEventType.BAR, bar));
 		this.ticker = new IndexTicker(this, barGen::update);

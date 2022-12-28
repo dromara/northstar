@@ -208,7 +208,7 @@ public class MarketCenter implements IMarketCenter, TickDataAware{
 	 */
 	@Override
 	public void onTick(TickField tick) {
-		Identifier id = new Identifier(tick.getUnifiedSymbol()); 
+		Identifier id = Identifier.of(tick.getUnifiedSymbol()); 
 		// 更新普通合约
 		Contract contract = getContract(id);
 		if(contract instanceof TickDataAware tdAware) {

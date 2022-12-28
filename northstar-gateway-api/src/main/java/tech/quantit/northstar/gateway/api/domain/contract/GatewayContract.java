@@ -30,7 +30,7 @@ public class GatewayContract implements Contract, TickDataAware{
 	public GatewayContract(MarketGateway gateway, FastEventEngine feEngine, ContractField contract, PeriodHelper phHelper) {
 		this.contract = contract;
 		this.gateway = gateway;
-		this.identifier = new Identifier(contract.getUnifiedSymbol());
+		this.identifier = Identifier.of(contract.getUnifiedSymbol());
 		this.barGen = new MinuteBarGenerator(contract, phHelper, bar -> feEngine.emitEvent(NorthstarEventType.BAR, bar));
 	}
 

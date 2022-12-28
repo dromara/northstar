@@ -26,7 +26,7 @@ public class GroupedContract implements Contract {
 	public GroupedContract(String name, List<Contract> memberContracts) {
 		Assert.notEmpty(memberContracts, "集合不能为空");
 		this.memberContracts = memberContracts;
-		this.identifier = new Identifier(name);
+		this.identifier = Identifier.of(name);
 		this.name = name;
 	}
 

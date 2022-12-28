@@ -61,7 +61,7 @@ public class SimContract implements Instrument{
 	@Override
 	public Identifier identifier() {
 		if(Objects.isNull(identifier)) {
-			identifier = new Identifier(unifiedSymbol);
+			identifier = Identifier.of(unifiedSymbol);
 		}
 		return identifier;
 	}
