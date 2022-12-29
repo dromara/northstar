@@ -50,7 +50,7 @@ export default {
   async mounted() {
     this.wsHost = window.remoteHost || location.hostname
     if (this.wsHost === 'localhost' || this.wsHost === '127.0.0.1') {
-      fetch(`https://${this.wsHost}/redirect`)
+      fetch(`${location.protocol}//${this.wsHost}/redirect`)
         .then((res) => res.json())
         .then((res) => {
           this.wsHost = res
@@ -70,7 +70,8 @@ export default {
   },
   methods: {
     initSocket() {
-      const wsEndpoint = `wss://${this.wsHost}:51888`
+      const wsProtocal = process.env.NODE_ENV === 'development' ? 'ws' : 'wss'
+      const wsEndpoint = `${wsProtocal}://${this.wsHost}:51888`
       const token = this.$route.query.auth
       console.log('准备连接websocket：' + wsEndpoint, ' token:' + token)
       this.socket = io(wsEndpoint, {

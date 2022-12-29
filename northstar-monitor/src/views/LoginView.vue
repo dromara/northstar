@@ -58,7 +58,7 @@ export default {
   methods: {
     async login() {
       if(this.domain){
-        window.baseURL = 'https://' + this.domain
+        window.baseURL = location.protocol + '//' + this.domain
         window.remoteHost = this.domain
       }
       // await tryService()
