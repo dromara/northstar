@@ -8,7 +8,7 @@
 
 describe('手工期货交易-测试', () => {
     before(() => {
-        cy.visit('https://localhost:8090')
+        cy.visit('https://localhost')
         cy.contains('用户名').parent().find('input').type('admin')
         cy.contains('密码').parent().find('input').type('123456')
         cy.contains('登陆').click()
@@ -19,7 +19,7 @@ describe('手工期货交易-测试', () => {
         cy.get('.el-dialog').contains('订阅合约').parent().find('.el-select').click()
         cy.get('.el-select-dropdown').contains('模拟合约').click()
         cy.get('.el-dialog').filter(':visible').find('button').last().click()
-        cy.visit('https://localhost:8090/#/tdgateway')
+        cy.visit('https://localhost/#/tdgateway')
         cy.wait(300)
         cy.get('button').contains('新建').click()
         cy.get('.el-dialog').contains('账户ID').parent().find('input').type('testAccount')
@@ -35,11 +35,11 @@ describe('手工期货交易-测试', () => {
         cy.get('.el-dialog').filter(':visible').find('button').contains('出入金').click()
         cy.wait(1000)
         cy.get('.el-dialog').filter(':visible').find('button').first().click()
-        cy.visit('https://localhost:8090/#/mktgateway')
+        cy.visit('https://localhost/#/mktgateway')
         cy.wait(500)
         cy.get('.el-table__row').first().contains('连线').click()
         cy.wait(1000)
-        cy.visit('https://localhost:8090/#/manualfttd')
+        cy.visit('https://localhost/#/manualfttd')
         cy.wait(300)
         cy.get('.ns-trade__account').find('input').click()
         cy.get('.el-select-dropdown').filter(':visible').contains('testAccount').click()

@@ -51,9 +51,6 @@ export default {
   },
   mounted() {
     this.showHost = !!(window.require && window.require('electron')) || this.$route.query.desktop
-    if(!this.showHost){
-      tryService()
-    }
   },
   methods: {
     async login() {
@@ -61,7 +58,7 @@ export default {
         window.baseURL = location.protocol + '//' + this.domain
         window.remoteHost = this.domain
       }
-      // await tryService()
+      await tryService()
       await loginApi.login(this.userForm.name, this.userForm.pass)
       console.log('登陆成功')
       this.$router.push({
