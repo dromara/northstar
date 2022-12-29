@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 import tech.quantit.northstar.common.exception.InsufficientException;
 import tech.quantit.northstar.common.model.OrderRequest;
 import tech.quantit.northstar.common.model.OrderRequest.TradeOperation;
-import tech.quantit.northstar.domain.gateway.ContractManager;
+import tech.quantit.northstar.gateway.api.IContractManager;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
@@ -23,7 +23,7 @@ import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 
 public class PositionDescriptionTest {
 	
-	private PositionDescription pd = new PositionDescription(mock(ContractManager.class));;
+	private PositionDescription pd = new PositionDescription(mock(IContractManager.class));;
 	ContractField contract = ContractField.newBuilder()
 			.setContractId("rb2102@SHFE")
 			.setExchange(ExchangeEnum.SHFE)
@@ -47,8 +47,8 @@ public class PositionDescriptionTest {
 	
 	@BeforeEach
 	public void setup() {
-		when(pd.contractMgr.getContract("AP2102@CZCE")).thenReturn(contract2);
-		when(pd.contractMgr.getContract("rb2102@SHFE")).thenReturn(contract);
+//		when(pd.contractMgr.getContract("AP2102@CZCE")).thenReturn(contract2);
+//		when(pd.contractMgr.getContract("rb2102@SHFE")).thenReturn(contract);
 	}
 
 	@Test

@@ -27,9 +27,10 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.IDataServiceManager;
 import tech.quantit.northstar.common.constant.DateTimeConstant;
+import tech.quantit.northstar.common.model.Identifier;
 import tech.quantit.northstar.common.utils.LocalEnvUtils;
 import tech.quantit.northstar.common.utils.MarketDateTimeUtil;
-import tech.quantit.northstar.domain.gateway.ContractManager;
+import tech.quantit.northstar.gateway.api.IContractManager;
 import xyz.redtorch.pb.CoreEnum.CurrencyEnum;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
@@ -59,9 +60,9 @@ public class DataServiceManager implements IDataServiceManager {
 	
 	private RestTemplate restTemplate;
 	
-	private ContractManager contractMgr;
+	private IContractManager contractMgr;
 	
-	public DataServiceManager(String baseUrl, String secret, RestTemplate restTemplate, MarketDateTimeUtil dtUtil, ContractManager contractMgr) {
+	public DataServiceManager(String baseUrl, String secret, RestTemplate restTemplate, MarketDateTimeUtil dtUtil, IContractManager contractMgr) {
 		this.baseUrl =  baseUrl;
 		this.userToken = secret;
 		this.dtUtil = dtUtil;
@@ -279,7 +280,7 @@ public class DataServiceManager implements IDataServiceManager {
 			
 			try {				
 				String unifiedSymbol = getValue("ns_code", fieldIndexMap, item, "");
-				ContractField contract = contractMgr.getContract(unifiedSymbol);
+				ContractField contract = contractMgr.getContract(Identifier.of(unifiedSymbol)).contractField();
 				resultList.addFirst(BarField.newBuilder()
 						.setUnifiedSymbol(unifiedSymbol)
 						.setTradingDay(tradingDay)

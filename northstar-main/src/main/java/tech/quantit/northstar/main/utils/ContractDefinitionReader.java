@@ -1,4 +1,4 @@
-package tech.quantit.northstar.common.utils;
+package tech.quantit.northstar.main.utils;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -13,7 +13,8 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 
-import tech.quantit.northstar.common.model.ContractDefinition;
+import tech.quantit.northstar.gateway.api.domain.contract.ContractDefinition;
+import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
 
 public class ContractDefinitionReader {
@@ -30,12 +31,12 @@ public class ContractDefinitionReader {
 				Double commissionInBP = StringUtils.isEmpty(tokens[headerMap.get("commissionInBP")]) ? 0D : Double.parseDouble(tokens[headerMap.get("commissionInBP")]); 
 				String ptnStr = tokens[headerMap.get("symbolPattern")].replaceAll("^\"(.+)\"$", "$1");
 				resultList.add(ContractDefinition.builder()
-						.gatewayType(tokens[headerMap.get("gatewayType")])
 						.name(tokens[headerMap.get("name")])
 						.productClass(ProductClassEnum.valueOf(tokens[headerMap.get("class")]))
+						.exchange(ExchangeEnum.valueOf(tokens[headerMap.get("exchange")]))
 						.symbolPattern(Pattern.compile(ptnStr))
-						.commissionInPrice(commission)
-						.commissionInBasePoint(commissionInBP)
+						.commissionFee(commission)
+						.commissionRate(commissionInBP)
 						.tradeTimeType(tokens[headerMap.get("tradeTimeType")])
 						.build());
 			}

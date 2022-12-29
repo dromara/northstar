@@ -1,5 +1,6 @@
 package tech.quantit.northstar.common.model;
 
+import java.util.Collections;
 import java.util.List;
 
 import lombok.AllArgsConstructor;
@@ -34,7 +35,8 @@ public class GatewayDescription {
 	
 	private Object settings;
 	
-	private List<String> subscribedContractGroups;
+	@Builder.Default
+	private List<ContractSimpleInfo> subscribedContracts = Collections.emptyList();
 
 	private String bindedMktGatewayId;
 	

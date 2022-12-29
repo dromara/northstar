@@ -60,11 +60,11 @@ public class ModuleController {
 	 * @param module
 	 * @return
 	 */
-	@PostMapping("/validate")
-	public ResultBean<Boolean> validateModuleSettings(@RequestBody ModuleDescription module){
-		Assert.notNull(module, "模组对象不能为空");
-		return new ResultBean<>(service.validateModule(module));
-	}
+//	@PostMapping("/validate")
+//	public ResultBean<Boolean> validateModuleSettings(@RequestBody ModuleDescription module){
+//		Assert.notNull(module, "模组对象不能为空");
+//		return new ResultBean<>(service.validateModule(module));
+//	}
 	
 	/**
 	 * 创建模组

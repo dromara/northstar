@@ -1,6 +1,7 @@
 package tech.quantit.northstar.gateway.ctp;
 
 import java.util.Objects;
+import java.util.Optional;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -53,6 +54,36 @@ public class CtpContract implements Instrument{
 	
 	private Identifier identifier;
 	
+	public CtpContract(ContractField c) {
+		contractId = c.getContractId();
+		name = c.getName();
+		fullName = c.getFullName();
+		thirdPartyId = c.getThirdPartyId();
+		unifiedSymbol = c.getUnderlyingSymbol();
+		symbol = c.getSymbol();
+		exchange = c.getExchange();
+		productClass = c.getProductClass();
+		currency = c.getCurrency();
+		multiplier = c.getMultiplier();
+		priceTick = c.getPriceTick();
+		longMarginRatio = c.getLongMarginRatio();
+		shortMarginRatio = c.getShortMarginRatio();
+		maxMarginSideAlgorithm = c.getMaxMarginSideAlgorithm();
+		underlyingSymbol = c.getUnifiedSymbol();
+		strikePrice = c.getStrikePrice();
+		optionsType = c.getOptionsType();
+		underlyingMultiplier = c.getUnderlyingMultiplier();
+		lastTradeDateOrContractMonth = c.getLastTradeDateOrContractMonth();
+		maxMarketOrderVolume = c.getMaxMarketOrderVolume();
+		minMarketOrderVolume = c.getMinMarketOrderVolume();
+		maxLimitOrderVolume = c.getMaxLimitOrderVolume();
+		minLimitOrderVolume = c.getMinLimitOrderVolume();
+		combinationType = c.getCombinationType();
+		gatewayId = c.getGatewayId();
+				
+		identifier = Identifier.of(unifiedSymbol);
+	}
+	
 	@Override
 	public String name() {
 		return name;
@@ -69,31 +100,31 @@ public class CtpContract implements Instrument{
 	@Override
 	public ContractField mergeToContractField(ContractDefinition contractDef) {
 		return ContractField.newBuilder()
-				.setContractId(contractId)
-				.setName(name)
-				.setFullName(fullName)
-				.setThirdPartyId(thirdPartyId)
-				.setUnifiedSymbol(unifiedSymbol)
-				.setSymbol(symbol)
-				.setExchange(exchange)
-				.setProductClass(productClass)
-				.setCurrency(currency)
+				.setContractId(Optional.ofNullable(contractId).orElse(""))
+				.setName(Optional.ofNullable(name).orElse(""))
+				.setFullName(Optional.ofNullable(fullName).orElse(""))
+				.setThirdPartyId(Optional.ofNullable(thirdPartyId).orElse(""))
+				.setUnifiedSymbol(Optional.ofNullable(unifiedSymbol).orElse(""))
+				.setSymbol(Optional.ofNullable(symbol).orElse(""))
+				.setExchange(Optional.ofNullable(exchange).orElse(ExchangeEnum.UNRECOGNIZED))
+				.setProductClass(Optional.ofNullable(productClass).orElse(ProductClassEnum.UNRECOGNIZED))
+				.setCurrency(Optional.ofNullable(currency).orElse(CurrencyEnum.CNY))
 				.setMultiplier(multiplier)
 				.setPriceTick(priceTick)
 				.setLongMarginRatio(longMarginRatio)
 				.setShortMarginRatio(shortMarginRatio)
 				.setMaxMarginSideAlgorithm(maxMarginSideAlgorithm)
-				.setUnderlyingSymbol(underlyingSymbol)
+				.setUnderlyingSymbol(Optional.ofNullable(underlyingSymbol).orElse(""))
 				.setStrikePrice(strikePrice)
-				.setOptionsType(optionsType)
+				.setOptionsType(Optional.ofNullable(optionsType).orElse(OptionsTypeEnum.UNRECOGNIZED))
 				.setUnderlyingMultiplier(underlyingMultiplier)
-				.setLastTradeDateOrContractMonth(lastTradeDateOrContractMonth)
+				.setLastTradeDateOrContractMonth(Optional.ofNullable(lastTradeDateOrContractMonth).orElse(""))
 				.setMaxMarketOrderVolume(maxMarketOrderVolume)
 				.setMinMarketOrderVolume(minMarketOrderVolume)
 				.setMaxLimitOrderVolume(maxLimitOrderVolume)
 				.setMinLimitOrderVolume(minLimitOrderVolume)
 				.setCombinationType(combinationType)
-				.setGatewayId(gatewayId)
+				.setGatewayId(Optional.ofNullable(gatewayId).orElse(""))
 				.setCommissionFee(contractDef.getCommissionFee())
 				.setCommissionRate(contractDef.getCommissionRate())
 				.build();

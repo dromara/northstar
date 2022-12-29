@@ -14,10 +14,10 @@ import com.alibaba.fastjson.JSON;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import tech.quantit.northstar.common.IContractManager;
 import tech.quantit.northstar.common.constant.GatewayUsage;
 import tech.quantit.northstar.common.exception.NoSuchElementException;
 import tech.quantit.northstar.common.model.ComponentField;
+import tech.quantit.northstar.common.model.ContractSimpleInfo;
 import tech.quantit.northstar.common.model.GatewayDescription;
 import tech.quantit.northstar.common.model.ModuleAccountDescription;
 import tech.quantit.northstar.common.model.ModuleDescription;
@@ -32,10 +32,10 @@ import tech.quantit.northstar.gateway.api.Gateway;
 import tech.quantit.northstar.gateway.api.GatewayFactory;
 import tech.quantit.northstar.gateway.api.GatewaySettingsMetaInfoProvider;
 import tech.quantit.northstar.gateway.api.GatewayTypeProvider;
+import tech.quantit.northstar.gateway.api.IContractManager;
 import tech.quantit.northstar.gateway.api.MarketGateway;
 import tech.quantit.northstar.gateway.sim.trade.SimTradeGateway;
 import tech.quantit.northstar.main.utils.CodecUtils;
-import xyz.redtorch.pb.CoreField.ContractField;
 
 /**
  * 网关服务
@@ -287,16 +287,12 @@ public class GatewayService implements InitializingBean {
 	 * @param gatewayId
 	 * @return
 	 */
-	public List<ContractField> getSubscribedContractList(String gatewayId){
+	public List<ContractSimpleInfo> getSubscribedContractList(String gatewayId){
 		GatewayDescription gd = gatewayRepo.findById(gatewayId);
 		if(gd == null) {
 			throw new NoSuchElementException("没有找到网关：" + gatewayId);
 		}
-		List<String> subContractDefIds = gd.getSubscribedContractGroups();
-		return subContractDefIds.stream()
-				.map(defId -> contractMgr.relativeContracts(defId))
-				.flatMap(Collection::stream)
-				.toList();
+		return gd.getSubscribedContracts();
 	}
 	
 	/**

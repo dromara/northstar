@@ -9,9 +9,7 @@ import tech.quantit.northstar.common.event.AbstractEventHandler;
 import tech.quantit.northstar.common.event.NorthstarEvent;
 import tech.quantit.northstar.common.event.NorthstarEventType;
 import tech.quantit.northstar.common.exception.NoSuchElementException;
-import tech.quantit.northstar.gateway.api.domain.LatencyDetector;
 import tech.quantit.northstar.strategy.api.IModule;
-import xyz.redtorch.pb.CoreField.TickField;
 
 @Slf4j
 public class ModuleManager extends AbstractEventHandler{
@@ -27,12 +25,6 @@ public class ModuleManager extends AbstractEventHandler{
 			NorthstarEventType.TICK,
 			NorthstarEventType.BAR
 	);
-	
-	private LatencyDetector latencyDetector;
-	
-	public ModuleManager(LatencyDetector latencyDetector) {
-		this.latencyDetector = latencyDetector;
-	}
 	
 	public void addModule(IModule module) {
 		moduleMap.put(module.getName(), module);
@@ -65,10 +57,6 @@ public class ModuleManager extends AbstractEventHandler{
 
 	@Override
 	protected void doHandle(NorthstarEvent e) {
-		if(latencyDetector != null && e.getData() instanceof TickField tick) {
-			// 分发到模组前的检测点
-			latencyDetector.getCheckpoint(0).sampling(tick);
-		}
 		moduleMap.values().parallelStream().forEach(sm -> sm.onEvent(e));
 	}
 }

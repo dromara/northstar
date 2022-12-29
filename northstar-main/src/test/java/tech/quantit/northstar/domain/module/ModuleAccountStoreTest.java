@@ -2,9 +2,6 @@ package tech.quantit.northstar.domain.module;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.offset;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.List;
@@ -13,13 +10,10 @@ import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import tech.quantit.northstar.common.constant.ClosingPolicy;
 import tech.quantit.northstar.common.constant.ModuleState;
-import tech.quantit.northstar.common.model.ContractDefinition;
 import tech.quantit.northstar.common.model.ModuleAccountRuntimeDescription;
-import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
-import tech.quantit.northstar.domain.gateway.ContractManager;
 import tech.quantit.northstar.common.model.ModulePositionDescription;
+import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
 import test.common.TestFieldFactory;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
@@ -60,11 +54,11 @@ class ModuleAccountStoreTest {
 				.moduleState(ModuleState.HOLDING_LONG)
 				.accountRuntimeDescriptionMap(mamap)
 				.build();
-		ContractManager contractMgr = mock(ContractManager.class);
-		when(contractMgr.getContractDefinition(anyString())).thenReturn(ContractDefinition.builder()
-				.commissionInBasePoint(1)
-				.build());
-		mas = new ModuleAccountStore("testModule", ClosingPolicy.FIFO, md, contractMgr);
+//		IContractManager contractMgr = mock(ContractManager.class);
+//		when(contractMgr.getContractDefinition(anyString())).thenReturn(ContractDefinition.builder()
+//				.commissionInBasePoint(1)
+//				.build());
+//		mas = new ModuleAccountStore("testModule", ClosingPolicy.FIFO, md, contractMgr);
 	}
 
 	@Test

@@ -1,6 +1,7 @@
 package tech.quantit.northstar.main.utils;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
@@ -14,6 +15,7 @@ import tech.quantit.northstar.common.event.NorthstarEventType;
 import tech.quantit.northstar.common.model.ComponentAndParamsPair;
 import tech.quantit.northstar.common.model.ComponentField;
 import tech.quantit.northstar.common.model.DynamicParams;
+import tech.quantit.northstar.common.model.Identifier;
 import tech.quantit.northstar.common.model.ModuleAccountDescription;
 import tech.quantit.northstar.common.model.ModuleAccountRuntimeDescription;
 import tech.quantit.northstar.common.model.ModuleDealRecord;
@@ -22,7 +24,7 @@ import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
 import tech.quantit.northstar.common.utils.FieldUtils;
 import tech.quantit.northstar.data.IGatewayRepository;
 import tech.quantit.northstar.data.IModuleRepository;
-import tech.quantit.northstar.domain.gateway.ContractManager;
+import tech.quantit.northstar.gateway.api.IContractManager;
 import tech.quantit.northstar.domain.gateway.GatewayAndConnectionManager;
 import tech.quantit.northstar.domain.module.FirstInFirstOutClosingStrategy;
 import tech.quantit.northstar.domain.module.ModuleAccountStore;
@@ -33,6 +35,7 @@ import tech.quantit.northstar.domain.module.PriorTodayClosingStrategy;
 import tech.quantit.northstar.domain.module.TradeModule;
 import tech.quantit.northstar.gateway.api.MarketGateway;
 import tech.quantit.northstar.gateway.api.TradeGateway;
+import tech.quantit.northstar.gateway.api.domain.contract.Contract;
 import tech.quantit.northstar.main.ExternalJarClassLoader;
 import tech.quantit.northstar.main.mail.MailDeliveryManager;
 import tech.quantit.northstar.strategy.api.ClosingStrategy;
@@ -42,6 +45,7 @@ import tech.quantit.northstar.strategy.api.IModuleAccountStore;
 import tech.quantit.northstar.strategy.api.IModuleContext;
 import tech.quantit.northstar.strategy.api.TradeStrategy;
 import tech.quantit.northstar.strategy.api.utils.trade.DealCollector;
+import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.NoticeField;
 import xyz.redtorch.pb.CoreField.TradeField;
 
@@ -55,7 +59,7 @@ public class ModuleFactory {
 	
 	private GatewayAndConnectionManager gatewayConnMgr;
 	
-	private ContractManager contractMgr;
+	private IContractManager contractMgr;
 	
 	private MailDeliveryManager mailMgr;
 	
@@ -80,7 +84,7 @@ public class ModuleFactory {
 	};
 	
 	public ModuleFactory(ExternalJarClassLoader extJarLoader, IModuleRepository moduleRepo, IGatewayRepository gatewayRepo, 
-			GatewayAndConnectionManager gatewayConnMgr, ContractManager contractMgr, MailDeliveryManager mailMgr) {
+			GatewayAndConnectionManager gatewayConnMgr, IContractManager contractMgr, MailDeliveryManager mailMgr) {
 		this.extJarLoader = extJarLoader;
 		this.moduleRepo = moduleRepo;
 		this.gatewayRepo = gatewayRepo;
@@ -94,7 +98,12 @@ public class ModuleFactory {
 		
 		for(ModuleAccountDescription mad : moduleDescription.getModuleAccountSettingsDescription()) {
 			TradeGateway tradeGateway = (TradeGateway) gatewayConnMgr.getGatewayById(mad.getAccountGatewayId());
-			ctx.bindGatewayContracts(tradeGateway, mad.getBindedUnifiedSymbols().stream().map(contractMgr::getContract).toList());
+			List<ContractField> contracts = mad.getBindedUnifiedSymbols()
+					.stream()
+					.map(unifiedSymbol -> contractMgr.getContract(Identifier.of(unifiedSymbol)))
+					.map(Contract::contractField)
+					.toList();
+			ctx.bindGatewayContracts(tradeGateway, contracts);
 		}
 		
 		Set<MarketGateway> mktGatewaySet = moduleDescription.getModuleAccountSettingsDescription().stream()

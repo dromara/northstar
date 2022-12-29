@@ -4,19 +4,16 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
-import org.springframework.util.Assert;
 
 import com.alibaba.fastjson.JSONObject;
 
@@ -31,7 +28,7 @@ import tech.quantit.northstar.common.event.NorthstarEventType;
 import tech.quantit.northstar.common.model.ComponentField;
 import tech.quantit.northstar.common.model.ComponentMetaInfo;
 import tech.quantit.northstar.common.model.DynamicParams;
-import tech.quantit.northstar.common.model.GatewayDescription;
+import tech.quantit.northstar.common.model.Identifier;
 import tech.quantit.northstar.common.model.MockTradeDescription;
 import tech.quantit.northstar.common.model.ModuleAccountDescription;
 import tech.quantit.northstar.common.model.ModuleAccountRuntimeDescription;
@@ -44,8 +41,8 @@ import tech.quantit.northstar.common.utils.MarketDataLoadingUtils;
 import tech.quantit.northstar.data.IGatewayRepository;
 import tech.quantit.northstar.data.IMarketDataRepository;
 import tech.quantit.northstar.data.IModuleRepository;
-import tech.quantit.northstar.domain.gateway.ContractManager;
 import tech.quantit.northstar.domain.module.ModulePlaybackContext;
+import tech.quantit.northstar.gateway.api.IContractManager;
 import tech.quantit.northstar.main.ExternalJarClassLoader;
 import tech.quantit.northstar.main.handler.internal.ModuleManager;
 import tech.quantit.northstar.main.utils.ModuleFactory;
@@ -68,7 +65,7 @@ public class ModuleService implements InitializingBean {
 	
 	private ModuleManager moduleMgr;
 	
-	private ContractManager contractMgr;
+	private IContractManager contractMgr;
 	
 	private IGatewayRepository gatewayRepo;
 	
@@ -83,7 +80,7 @@ public class ModuleService implements InitializingBean {
 	private ExternalJarClassLoader extJarLoader;
 	
 	public ModuleService(ApplicationContext ctx, ExternalJarClassLoader extJarLoader, IGatewayRepository gatewayRepo, IModuleRepository moduleRepo,
-			IMarketDataRepository mdRepo, ModuleFactory moduleFactory, ModuleManager moduleMgr, ContractManager contractMgr) {
+			IMarketDataRepository mdRepo, ModuleFactory moduleFactory, ModuleManager moduleMgr, IContractManager contractMgr) {
 		this.ctx = ctx;
 		this.moduleMgr = moduleMgr;
 		this.contractMgr = contractMgr;
@@ -137,43 +134,43 @@ public class ModuleService implements InitializingBean {
 	 * @param md
 	 * @return
 	 */
-	public boolean validateModule(ModuleDescription md) {
-		for(ModuleAccountDescription mad : md.getModuleAccountSettingsDescription()) {
-			// 校验模组绑定合约是已订阅合约
-			GatewayDescription accountGatewayDescription = gatewayRepo.findById(mad.getAccountGatewayId());
-			GatewayDescription marketGatewayDescription = gatewayRepo.findById(accountGatewayDescription.getBindedMktGatewayId());
-			Set<String> subscribedUnifiedSymbols = marketGatewayDescription
-					.getSubscribedContractGroups()
-					.stream()
-					.map(contractMgr::relativeContracts)
-					.flatMap(Collection::stream)
-					.map(ContractField::getUnifiedSymbol)
-					.collect(Collectors.toSet());
-			for(String unifiedSymbol : mad.getBindedUnifiedSymbols()) {
-				if(!subscribedUnifiedSymbols.contains(unifiedSymbol)) {
-					throw new IllegalStateException(String.format("网关【%s】没有订阅合约【%s】", 
-							accountGatewayDescription.getBindedMktGatewayId(), unifiedSymbol));
-				}
-			}
-			
-			// 校验模组用途与配置吻合
-			if(md.getUsage() == ModuleUsage.PLAYBACK) {
-				Assert.isTrue(marketGatewayDescription.getGatewayType().equals("PLAYBACK"), "回测模组应该采用【PLAYBACK】行情网关");
-				Assert.isTrue(accountGatewayDescription.getGatewayType().equals("SIM"), "回测模组应该采用【SIM】账户网关");
-			}
-			if(md.getUsage() == ModuleUsage.UAT) {
-				Assert.isTrue(accountGatewayDescription.getGatewayType().equals("SIM"), "模拟盘模组应该采用【SIM】账户网关");
-			}
-			if(md.getUsage() == ModuleUsage.PROD) {
-				Assert.isTrue(!marketGatewayDescription.getGatewayType().equals("PLAYBACK"), "实盘模组不应该采用【PLAYBACK】行情网关");
-				Assert.isTrue(!marketGatewayDescription.getGatewayType().equals("SIM"), "实盘模组不应该采用【SIM】行情网关");
-				Assert.isTrue(!accountGatewayDescription.getGatewayType().equals("SIM"), "实盘模组不应该采用【SIM】账户网关");
-			}
-			
-		}
-		
-		return true;
-	}
+//	public boolean validateModule(ModuleDescription md) {
+//		for(ModuleAccountDescription mad : md.getModuleAccountSettingsDescription()) {
+//			// 校验模组绑定合约是已订阅合约
+//			GatewayDescription accountGatewayDescription = gatewayRepo.findById(mad.getAccountGatewayId());
+//			GatewayDescription marketGatewayDescription = gatewayRepo.findById(accountGatewayDescription.getBindedMktGatewayId());
+//			Set<String> subscribedUnifiedSymbols = marketGatewayDescription
+//					.getSubscribedContractGroups()
+//					.stream()
+//					.map(contractMgr::relativeContracts)
+//					.flatMap(Collection::stream)
+//					.map(ContractField::getUnifiedSymbol)
+//					.collect(Collectors.toSet());
+//			for(String unifiedSymbol : mad.getBindedUnifiedSymbols()) {
+//				if(!subscribedUnifiedSymbols.contains(unifiedSymbol)) {
+//					throw new IllegalStateException(String.format("网关【%s】没有订阅合约【%s】", 
+//							accountGatewayDescription.getBindedMktGatewayId(), unifiedSymbol));
+//				}
+//			}
+//			
+//			// 校验模组用途与配置吻合
+//			if(md.getUsage() == ModuleUsage.PLAYBACK) {
+//				Assert.isTrue(marketGatewayDescription.getGatewayType().equals("PLAYBACK"), "回测模组应该采用【PLAYBACK】行情网关");
+//				Assert.isTrue(accountGatewayDescription.getGatewayType().equals("SIM"), "回测模组应该采用【SIM】账户网关");
+//			}
+//			if(md.getUsage() == ModuleUsage.UAT) {
+//				Assert.isTrue(accountGatewayDescription.getGatewayType().equals("SIM"), "模拟盘模组应该采用【SIM】账户网关");
+//			}
+//			if(md.getUsage() == ModuleUsage.PROD) {
+//				Assert.isTrue(!marketGatewayDescription.getGatewayType().equals("PLAYBACK"), "实盘模组不应该采用【PLAYBACK】行情网关");
+//				Assert.isTrue(!marketGatewayDescription.getGatewayType().equals("SIM"), "实盘模组不应该采用【SIM】行情网关");
+//				Assert.isTrue(!accountGatewayDescription.getGatewayType().equals("SIM"), "实盘模组不应该采用【SIM】账户网关");
+//			}
+//			
+//		}
+//		
+//		return true;
+//	}
 	
 	/**
 	 * 增加模组
@@ -269,7 +266,7 @@ public class ModuleService implements InitializingBean {
 			LocalDate end = utils.getFridayOfThisWeek(date);
 			for(ModuleAccountDescription mad : md.getModuleAccountSettingsDescription()) {
 				for(String unifiedSymbol : mad.getBindedUnifiedSymbols()) {
-					ContractField contract = contractMgr.getContract(unifiedSymbol);
+					ContractField contract = contractMgr.getContract(Identifier.of(unifiedSymbol)).contractField();
 					List<BarField> bars = mdRepo.loadBars(ContractUtils.getMarketGatewayId(contract), unifiedSymbol, start, end);
 					module.initData(bars);
 				}
@@ -326,7 +323,7 @@ public class ModuleService implements InitializingBean {
 	 */
 	public boolean mockTradeAdjustment(String moduleName, MockTradeDescription mockTrade) {
 		IModule module = moduleMgr.getModule(moduleName);
-		ContractField contract = contractMgr.getContract(mockTrade.getUnifiedSymbol());
+		ContractField contract = contractMgr.getContract(Identifier.of(mockTrade.getUnifiedSymbol())).contractField();
 		TradeField trade = TradeField.newBuilder()
 				.setOriginOrderId(Constants.MOCK_ORDER_ID)
 				.setContract(contract)

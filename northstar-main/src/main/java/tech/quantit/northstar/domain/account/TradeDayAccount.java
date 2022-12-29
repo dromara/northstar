@@ -8,10 +8,11 @@ import org.apache.commons.lang3.StringUtils;
 
 import tech.quantit.northstar.common.exception.InsufficientException;
 import tech.quantit.northstar.common.exception.TradeException;
+import tech.quantit.northstar.common.model.Identifier;
 import tech.quantit.northstar.common.model.OrderRecall;
 import tech.quantit.northstar.common.model.OrderRequest;
 import tech.quantit.northstar.common.utils.OrderUtils;
-import tech.quantit.northstar.domain.gateway.ContractManager;
+import tech.quantit.northstar.gateway.api.IContractManager;
 import tech.quantit.northstar.gateway.api.TradeGateway;
 import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
@@ -41,13 +42,13 @@ public class TradeDayAccount {
 	protected PositionDescription posDescription;
 	
 	private volatile AccountField accountInfo;
-	private ContractManager contractMgr;
+	private IContractManager contractMgr;
 	
 	private String accountId;
 	
 	protected TradeGateway gateway;
 	
-	public TradeDayAccount(String gatewayId, TradeGateway gateway, ContractManager contractMgr) {
+	public TradeDayAccount(String gatewayId, TradeGateway gateway, IContractManager contractMgr) {
 		this.accountId = gatewayId;
 		this.contractMgr = contractMgr;
 		this.gateway = gateway;
@@ -74,7 +75,7 @@ public class TradeDayAccount {
 	}
 	
 	public boolean openPosition(OrderRequest orderReq) throws InsufficientException {
-		ContractField contract = contractMgr.getContract(orderReq.getContractUnifiedSymbol());
+		ContractField contract = contractMgr.getContract(Identifier.of(orderReq.getContractUnifiedSymbol())).contractField();
 		if(contract == null) {
 			throw new NoSuchElementException("不存在此合约：" + orderReq.getContractUnifiedSymbol());
 		}

@@ -14,10 +14,11 @@ import org.junit.jupiter.api.Test;
 
 import tech.quantit.northstar.common.exception.InsufficientException;
 import tech.quantit.northstar.common.exception.TradeException;
+import tech.quantit.northstar.common.model.Identifier;
 import tech.quantit.northstar.common.model.OrderRecall;
 import tech.quantit.northstar.common.model.OrderRequest;
 import tech.quantit.northstar.common.model.OrderRequest.TradeOperation;
-import tech.quantit.northstar.domain.gateway.ContractManager;
+import tech.quantit.northstar.gateway.api.IContractManager;
 import tech.quantit.northstar.gateway.api.TradeGateway;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreEnum.OrderStatusEnum;
@@ -46,9 +47,9 @@ public class TradeDayAccountTest {
 	@BeforeEach
 	public void prepare() {
 		TradeGateway gateway = mock(TradeGateway.class);
-		ContractManager contractMgr = mock(ContractManager.class);
-		when(contractMgr.getContract("rb2102@SHFE")).thenReturn(contract);
-		tda = new TradeDayAccount("testGateway", gateway, contractMgr);
+		IContractManager contractMgr = mock(IContractManager.class);
+//		when(contractMgr.getContract(Identifier.of("rb2102@SHFE"))).thenReturn(contract);
+//		tda = new TradeDayAccount("testGateway", gateway, contractMgr);
 	}
 	
 

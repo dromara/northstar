@@ -30,7 +30,7 @@
               v-model="form.gatewayId"
               autocomplete="off"
               :disabled="
-                isUpdateMode || (gatewayUsage === 'MARKET_DATA' && form.gatewayType !== 'PLAYBACK')
+                isUpdateMode || (gatewayUsage === 'MARKET_DATA' && !gatewayType.allowDuplication)
               "
             ></el-input>
           </el-form-item>
@@ -45,14 +45,14 @@
         <el-col :span="8">
           <el-form-item :label="`${typeLabel}类型`" prop="gatewayType">
             <el-select
-              v-model="form.gatewayType"
+              v-model="gatewayType"
               placeholder="未知"
               @change="onChooseGatewayType"
               :disabled="isUpdateMode"
             >
               <el-option
                 v-for="(item, i) in gatewayTypeOptions"
-                :label="item"
+                :label="item.name"
                 :value="item"
                 :key="i"
               ></el-option>
@@ -214,6 +214,7 @@ export default {
       subscribedContractGroups: [],
       gatewayTypeOptions: [],
       contractDefOptions: [],
+      gatewayType: '',
       contractType: '',
       gatewaySettingsMetaInfo: []
     }
@@ -236,7 +237,7 @@ export default {
             this.gatewayTypeOptions = result
               .filter((item) => item.usage.indexOf(this.gatewayUsage) > -1)
               .filter((item) => !item.adminOnly || this.$route.query.superuser)
-              .map((item) => item.name)
+              .map((item) => Object.assign({value: item.name}, item))
           })
 
           if (
@@ -254,7 +255,7 @@ export default {
         })
       }
     },
-    'form.gatewayType': function (val) {
+    'gatewayType': function (val) {
       if (
         val &&
         this.gatewayUsage === 'MARKET_DATA' &&
@@ -265,6 +266,7 @@ export default {
       }
       if (val) {
         this.contractDefOptions = []
+        this.form.gatewayType = val.name
 
         if (val !== 'SIM') {
           // 获取网关配置元信息
@@ -304,8 +306,10 @@ export default {
   methods: {
     onChooseGatewayType() {
       this.form.gatewayAdapterType = GATEWAY_ADAPTER[this.form.gatewayType]
-      if (this.gatewayUsage === 'MARKET_DATA' && this.form.gatewayType !== 'PLAYBACK') {
-        this.form.gatewayId = `${this.form.gatewayType}`
+      if (this.gatewayUsage === 'MARKET_DATA' && !this.gatewayType.allowDuplication) {
+        this.form.gatewayId = `${this.gatewayType.name}`
+      } else if (this.gatewayType.allowDuplication) {
+        this.form.gatewayId = ''
       }
     },
     async saveGateway() {

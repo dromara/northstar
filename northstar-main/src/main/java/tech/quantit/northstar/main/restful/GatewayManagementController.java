@@ -19,7 +19,7 @@ import tech.quantit.northstar.common.model.ComponentField;
 import tech.quantit.northstar.common.model.GatewayDescription;
 import tech.quantit.northstar.common.model.GatewayTypeDescription;
 import tech.quantit.northstar.common.model.ResultBean;
-import tech.quantit.northstar.domain.gateway.ContractManager;
+import tech.quantit.northstar.gateway.api.IContractManager;
 import tech.quantit.northstar.gateway.api.GatewayTypeProvider;
 import tech.quantit.northstar.main.service.GatewayService;
 import xyz.redtorch.pb.CoreField.ContractField;
@@ -32,7 +32,7 @@ public class GatewayManagementController {
 	protected GatewayService gatewayService;
 	
 	@Autowired
-	protected ContractManager contractMgr;
+	protected IContractManager contractMgr;
 	
 	@Autowired
 	protected GatewayTypeProvider gatewayTypeProvider;
@@ -109,14 +109,14 @@ public class GatewayManagementController {
 				.toList());
 	}
 	
-	@GetMapping("/sub")
-	public ResultBean<List<byte[]>> getSubscribedContractList(String gatewayId){
-		Assert.hasText(gatewayId, "网关ID不能为空");
-		return new ResultBean<>(gatewayService.getSubscribedContractList(gatewayId)
-				.stream()
-				.map(ContractField::toByteArray)
-				.toList());
-	}
+//	@GetMapping("/sub")
+//	public ResultBean<List<byte[]>> getSubscribedContractList(String gatewayId){
+//		Assert.hasText(gatewayId, "网关ID不能为空");
+//		return new ResultBean<>(gatewayService.getSubscribedContractList(gatewayId)
+//				.stream()
+//				.map(ContractField::toByteArray)
+//				.toList());
+//	}
 	
 	@GetMapping("/reset")
 	public ResultBean<Boolean> resetPlayback(String gatewayId) throws Exception{

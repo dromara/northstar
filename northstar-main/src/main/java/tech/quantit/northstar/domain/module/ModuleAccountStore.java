@@ -20,14 +20,15 @@ import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.constant.ClosingPolicy;
 import tech.quantit.northstar.common.constant.ModuleState;
 import tech.quantit.northstar.common.exception.NoSuchElementException;
-import tech.quantit.northstar.common.model.ContractDefinition;
+import tech.quantit.northstar.common.model.Identifier;
 import tech.quantit.northstar.common.model.ModuleAccountRuntimeDescription;
 import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
 import tech.quantit.northstar.common.utils.FieldUtils;
-import tech.quantit.northstar.domain.gateway.ContractManager;
+import tech.quantit.northstar.gateway.api.IContractManager;
 import tech.quantit.northstar.strategy.api.IModuleAccountStore;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreField.CancelOrderReqField;
+import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.OrderField;
 import xyz.redtorch.pb.CoreField.PositionField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
@@ -62,10 +63,10 @@ public class ModuleAccountStore implements IModuleAccountStore {
 	
 	private ClosingPolicy closingPolicy;
 	
-	private ContractManager contractMgr;
+	private IContractManager contractMgr;
 	
 	public ModuleAccountStore(String moduleName, ClosingPolicy closingPolicy, ModuleRuntimeDescription moduleRuntimeDescription,
-			ContractManager contractMgr) {
+			IContractManager contractMgr) {
 		this.sm = new ModuleStateMachine(moduleName);
 		this.closingPolicy = closingPolicy;
 		this.contractMgr = contractMgr;
@@ -135,9 +136,9 @@ public class ModuleAccountStore implements IModuleAccountStore {
 				
 				accDealVolMap.get(gatewayId).addAndGet(trade.getVolume());
 				accCloseProfitMap.get(gatewayId).addAndGet(profit);
-				ContractDefinition contractDef = contractMgr.getContractDefinition(trade.getContract().getUnifiedSymbol());
+				ContractField contract = contractMgr.getContract(Identifier.of(trade.getContract().getUnifiedSymbol())).contractField();
 				
-				double commission = contractDef.getCommissionInPrice() > 0 ? contractDef.getCommissionInPrice() : contractDef.commissionRate() * trade.getPrice() * trade.getContract().getMultiplier();
+				double commission = contract.getCommissionFee() > 0 ? contract.getCommissionFee() : contract.getCommissionRate() * trade.getPrice() * trade.getContract().getMultiplier();
 				accCommissionMap.get(gatewayId).addAndGet(commission * 2 * trade.getVolume()); // 乘2代表手续费双向计算
 				double maxProfit = Math.max(getMaxProfit(gatewayId), getAccCloseProfit(gatewayId) - getAccCommission(gatewayId));
 				maxProfitMap.put(gatewayId, maxProfit);

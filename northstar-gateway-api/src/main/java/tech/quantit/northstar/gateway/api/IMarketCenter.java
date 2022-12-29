@@ -17,4 +17,8 @@ public interface IMarketCenter extends IContractManager {
 	 */
 	void loadContractGroup(String gatewayId);
 	
+	/**
+	 * 停盘收尾处理
+	 */
+	void endOfMarketTime();
 }

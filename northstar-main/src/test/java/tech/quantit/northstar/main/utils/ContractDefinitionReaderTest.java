@@ -1,4 +1,4 @@
-package tech.quantit.northstar.common.utils;
+package tech.quantit.northstar.main.utils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -9,7 +9,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.core.io.FileUrlResource;
 import org.springframework.core.io.Resource;
 
-import tech.quantit.northstar.common.model.ContractDefinition;
+import tech.quantit.northstar.gateway.api.domain.contract.ContractDefinition;
+
 
 class ContractDefinitionReaderTest {
 

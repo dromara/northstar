@@ -81,7 +81,9 @@ public class MarketCenter implements IMarketCenter, TickDataAware{
 		}
 		List<ContractDefinition> defList = contractDefTbl.get(ins.exchange(), ins.productClass());
 		for(ContractDefinition def : defList) {
-			if(def.getSymbolPattern().matcher(ins.identifier().value()).matches()) {
+			if(def.getSymbolPattern().matcher(ins.identifier().value()).matches() 
+					&& def.getProductClass() == ins.productClass()
+					&& def.getExchange() == ins.exchange()) {
 				Contract contract = new GatewayContract(gateway, feEngine, ins.mergeToContractField(def), phFactory.newInstance(1, false, def));
 				contractMap.put(ins.identifier(), contract);
 				
@@ -220,6 +222,14 @@ public class MarketCenter implements IMarketCenter, TickDataAware{
 		if(Objects.nonNull(idxContract)) {
 			idxContract.onTick(tick);
 		}
+	}
+
+	@Override
+	public void endOfMarketTime() {
+		contractMap.values().stream()
+			.filter(TickDataAware.class::isInstance)
+			.map(TickDataAware.class::cast)
+			.forEach(TickDataAware::endOfMarket);
 	}
 
 }

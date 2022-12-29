@@ -41,176 +41,176 @@ import tech.quantit.northstar.main.handler.broadcast.SocketIOMessageEngine;
 @AutoConfigureMockMvc
 public class GatewayManagementTest {
 	
-	@Autowired
-	private MockMvc mockMvc;
-	
-	private MockHttpSession session;
-	
-	@MockBean
-	private SocketIOMessageEngine msgEngine;
-	
-	@MockBean
-	private SocketIOServer socketServer;
-	
-	@Autowired
-	private RedisTemplate<String, byte[]> redisTemplate;
-	
-	@BeforeEach
-	public void setUp() throws Exception {
-		session = new MockHttpSession();
-		long time = System.currentTimeMillis();
-		String token = MD5.create().digestHex("123456" + time);
-		mockMvc.perform(post("/northstar/auth/login?timestamp="+time).contentType(MediaType.APPLICATION_JSON).content(JSON.toJSONString(new NsUser("admin",token))).session(session))
-			.andExpect(status().isOk());
-	}
-	
-	@AfterEach
-	public void tearDown() {
-		redisTemplate.delete(redisTemplate.keys("*"));
-	}
-	
-	@Test
-	public void shouldFailWithoutAuth() throws Exception {
-		GatewayDescription gatewayDes = TestGatewayFactory.makeMktGateway("testGateway", "CTP", TestGatewayFactory.makeGatewaySettings(CtpGatewaySettings.class), false);
-		mockMvc.perform(post("/northstar/gateway").contentType(MediaType.APPLICATION_JSON).content(JSON.toJSONString(gatewayDes)))
-			.andExpect(status().is(401));
-	}
-
-	@Test
-	public void shouldCreateGateway() throws Exception {
-		GatewayDescription gatewayDes = TestGatewayFactory.makeMktGateway("CTP", "CTP", TestGatewayFactory.makeGatewaySettings(CtpGatewaySettings.class),false);
-		mockMvc.perform(post("/northstar/gateway").contentType(MediaType.APPLICATION_JSON).content(JSON.toJSONString(gatewayDes)).session(session))
-			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
-	}
-	
-	@Test
-	public void shouldFindCreatedGateway() throws Exception {
-		shouldCreateGateway();
-		
-		mockMvc.perform(get("/northstar/gateway?usage=" + GatewayUsage.MARKET_DATA).session(session))
-			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
-	}
-
-	@Test
-	public void shouldUpdateGateway() throws Exception {
-		shouldCreateGateway();
-		
-		GatewayDescription gatewayDes = TestGatewayFactory.makeMktGateway("CTP", "CTP", TestGatewayFactory.makeGatewaySettings(CtpGatewaySettings.class), true);
-		mockMvc.perform(put("/northstar/gateway").contentType(MediaType.APPLICATION_JSON).content(JSON.toJSONString(gatewayDes)).session(session))
-			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
-	}
-	
-	@Test
-	public void shouldRemoveGateway() throws Exception {
-		shouldCreateGateway();
-		
-		mockMvc.perform(delete("/northstar/gateway?gatewayId=CTP").session(session))
-			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
-	}
-	
-	@Test
-	public void shouldFailIfNotProvidingSetting() throws Exception {
-		GatewayDescription gwDes = TestGatewayFactory.makeMktGateway("CTP", "CTP", null,false);
-		mockMvc.perform(post("/northstar/gateway").contentType(MediaType.APPLICATION_JSON).content(JSON.toJSONString(gwDes)).session(session))
-			.andExpect(status().is5xxServerError())
-			.andExpect(jsonPath("$.status").value(ReturnCode.ERROR));
-	}
-	
-	@Test
-	public void shouldSuccessWhenGettingActiveState() throws Exception {
-		shouldCreateGateway();
-		
-		mockMvc.perform(get("/northstar/gateway/active?gatewayId=CTP").session(session))
-			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
-	}
-	
-	@Test
-	public void shouldSuccessWhenConnecting() throws Exception {
-		shouldCreateGateway();
-		
-		mockMvc.perform(get("/northstar/gateway/connection?gatewayId=CTP").session(session))
-			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
-	}
-	
-	@Test
-	public void shouldSuccessWhenDisconnecting() throws Exception {
-		shouldCreateGateway();
-		
-		mockMvc.perform(delete("/northstar/gateway/connection?gatewayId=CTP").session(session))
-			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
-	}
-	
-	@Test
-	public void shouldFailIfGatewayNotFound() throws Exception {
-		mockMvc.perform(get("/northstar/gateway/connection?gatewayId=ANY").session(session))
-			.andExpect(status().is5xxServerError())
-			.andExpect(jsonPath("$.status").value(ReturnCode.NO_SUCH_ELEMENT_EXCEPTION));
-		
-		mockMvc.perform(delete("/northstar/gateway/connection?gatewayId=ANY").session(session))
-			.andExpect(status().is5xxServerError())
-			.andExpect(jsonPath("$.status").value(ReturnCode.NO_SUCH_ELEMENT_EXCEPTION));
-	}
-	
-	@Test
-	public void shouldIncreaseBalance() throws Exception {
-		shouldCreateGateway();
-		
-		GatewayDescription gwDes = TestGatewayFactory.makeTrdGateway("TG2", "", "SIM", new Object(), false);
-		
-		mockMvc.perform(post("/northstar/gateway").contentType(MediaType.APPLICATION_JSON).content(JSON.toJSONString(gwDes)).session(session))
-			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
-		
-		mockMvc.perform(post("/northstar/gateway/moneyio?gatewayId=TG2&money=10000").session(session))
-			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
-	}
-	
-	@Test
-	public void shouldDecreaseBalance() throws Exception {
-		shouldIncreaseBalance();
-		
-		mockMvc.perform(post("/northstar/gateway/moneyio?gatewayId=TG2&money=-10000").session(session))
-			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
-	}
-	
-	@Test
-	public void shouldFailIfNotSimGateway() throws Exception {
-		shouldCreateGateway();
-		
-		mockMvc.perform(post("/northstar/gateway/moneyio?gatewayId=CTP&money=10000").session(session))
-			.andExpect(status().is5xxServerError())
-			.andExpect(jsonPath("$.status").value(ReturnCode.ERROR));
-	}
-	
-	@Test
-	void testGetSubscribedContractList() throws Exception {
-		shouldCreateGateway();
-		
-		mockMvc.perform(get("/northstar/gateway/sub?gatewayId=CTP").session(session))
-			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
-	}
-	
-	@Test
-	public void shouldGetGatewayTypeOptions() throws Exception {
-		mockMvc.perform(get("/northstar/gateway/types").session(session))
-			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
-	}
-	
-	@Test
-	public void shouldGetGatewaySettings() throws Exception {
-		mockMvc.perform(get("/northstar/gateway/settings?gatewayType=CTP").session(session))
-			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
-	}
+//	@Autowired
+//	private MockMvc mockMvc;
+//	
+//	private MockHttpSession session;
+//	
+//	@MockBean
+//	private SocketIOMessageEngine msgEngine;
+//	
+//	@MockBean
+//	private SocketIOServer socketServer;
+//	
+//	@Autowired
+//	private RedisTemplate<String, byte[]> redisTemplate;
+//	
+//	@BeforeEach
+//	public void setUp() throws Exception {
+//		session = new MockHttpSession();
+//		long time = System.currentTimeMillis();
+//		String token = MD5.create().digestHex("123456" + time);
+//		mockMvc.perform(post("/northstar/auth/login?timestamp="+time).contentType(MediaType.APPLICATION_JSON).content(JSON.toJSONString(new NsUser("admin",token))).session(session))
+//			.andExpect(status().isOk());
+//	}
+//	
+//	@AfterEach
+//	public void tearDown() {
+//		redisTemplate.delete(redisTemplate.keys("*"));
+//	}
+//	
+//	@Test
+//	public void shouldFailWithoutAuth() throws Exception {
+//		GatewayDescription gatewayDes = TestGatewayFactory.makeMktGateway("testGateway", "CTP", TestGatewayFactory.makeGatewaySettings(CtpGatewaySettings.class), false);
+//		mockMvc.perform(post("/northstar/gateway").contentType(MediaType.APPLICATION_JSON).content(JSON.toJSONString(gatewayDes)))
+//			.andExpect(status().is(401));
+//	}
+//
+//	@Test
+//	public void shouldCreateGateway() throws Exception {
+//		GatewayDescription gatewayDes = TestGatewayFactory.makeMktGateway("CTP", "CTP", TestGatewayFactory.makeGatewaySettings(CtpGatewaySettings.class),false);
+//		mockMvc.perform(post("/northstar/gateway").contentType(MediaType.APPLICATION_JSON).content(JSON.toJSONString(gatewayDes)).session(session))
+//			.andExpect(status().isOk())
+//			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
+//	}
+//	
+//	@Test
+//	public void shouldFindCreatedGateway() throws Exception {
+//		shouldCreateGateway();
+//		
+//		mockMvc.perform(get("/northstar/gateway?usage=" + GatewayUsage.MARKET_DATA).session(session))
+//			.andExpect(status().isOk())
+//			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
+//	}
+//
+//	@Test
+//	public void shouldUpdateGateway() throws Exception {
+//		shouldCreateGateway();
+//		
+//		GatewayDescription gatewayDes = TestGatewayFactory.makeMktGateway("CTP", "CTP", TestGatewayFactory.makeGatewaySettings(CtpGatewaySettings.class), true);
+//		mockMvc.perform(put("/northstar/gateway").contentType(MediaType.APPLICATION_JSON).content(JSON.toJSONString(gatewayDes)).session(session))
+//			.andExpect(status().isOk())
+//			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
+//	}
+//	
+//	@Test
+//	public void shouldRemoveGateway() throws Exception {
+//		shouldCreateGateway();
+//		
+//		mockMvc.perform(delete("/northstar/gateway?gatewayId=CTP").session(session))
+//			.andExpect(status().isOk())
+//			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
+//	}
+//	
+//	@Test
+//	public void shouldFailIfNotProvidingSetting() throws Exception {
+//		GatewayDescription gwDes = TestGatewayFactory.makeMktGateway("CTP", "CTP", null,false);
+//		mockMvc.perform(post("/northstar/gateway").contentType(MediaType.APPLICATION_JSON).content(JSON.toJSONString(gwDes)).session(session))
+//			.andExpect(status().is5xxServerError())
+//			.andExpect(jsonPath("$.status").value(ReturnCode.ERROR));
+//	}
+//	
+//	@Test
+//	public void shouldSuccessWhenGettingActiveState() throws Exception {
+//		shouldCreateGateway();
+//		
+//		mockMvc.perform(get("/northstar/gateway/active?gatewayId=CTP").session(session))
+//			.andExpect(status().isOk())
+//			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
+//	}
+//	
+//	@Test
+//	public void shouldSuccessWhenConnecting() throws Exception {
+//		shouldCreateGateway();
+//		
+//		mockMvc.perform(get("/northstar/gateway/connection?gatewayId=CTP").session(session))
+//			.andExpect(status().isOk())
+//			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
+//	}
+//	
+//	@Test
+//	public void shouldSuccessWhenDisconnecting() throws Exception {
+//		shouldCreateGateway();
+//		
+//		mockMvc.perform(delete("/northstar/gateway/connection?gatewayId=CTP").session(session))
+//			.andExpect(status().isOk())
+//			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
+//	}
+//	
+//	@Test
+//	public void shouldFailIfGatewayNotFound() throws Exception {
+//		mockMvc.perform(get("/northstar/gateway/connection?gatewayId=ANY").session(session))
+//			.andExpect(status().is5xxServerError())
+//			.andExpect(jsonPath("$.status").value(ReturnCode.NO_SUCH_ELEMENT_EXCEPTION));
+//		
+//		mockMvc.perform(delete("/northstar/gateway/connection?gatewayId=ANY").session(session))
+//			.andExpect(status().is5xxServerError())
+//			.andExpect(jsonPath("$.status").value(ReturnCode.NO_SUCH_ELEMENT_EXCEPTION));
+//	}
+//	
+//	@Test
+//	public void shouldIncreaseBalance() throws Exception {
+//		shouldCreateGateway();
+//		
+//		GatewayDescription gwDes = TestGatewayFactory.makeTrdGateway("TG2", "", "SIM", new Object(), false);
+//		
+//		mockMvc.perform(post("/northstar/gateway").contentType(MediaType.APPLICATION_JSON).content(JSON.toJSONString(gwDes)).session(session))
+//			.andExpect(status().isOk())
+//			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
+//		
+//		mockMvc.perform(post("/northstar/gateway/moneyio?gatewayId=TG2&money=10000").session(session))
+//			.andExpect(status().isOk())
+//			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
+//	}
+//	
+//	@Test
+//	public void shouldDecreaseBalance() throws Exception {
+//		shouldIncreaseBalance();
+//		
+//		mockMvc.perform(post("/northstar/gateway/moneyio?gatewayId=TG2&money=-10000").session(session))
+//			.andExpect(status().isOk())
+//			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
+//	}
+//	
+//	@Test
+//	public void shouldFailIfNotSimGateway() throws Exception {
+//		shouldCreateGateway();
+//		
+//		mockMvc.perform(post("/northstar/gateway/moneyio?gatewayId=CTP&money=10000").session(session))
+//			.andExpect(status().is5xxServerError())
+//			.andExpect(jsonPath("$.status").value(ReturnCode.ERROR));
+//	}
+//	
+//	@Test
+//	void testGetSubscribedContractList() throws Exception {
+//		shouldCreateGateway();
+//		
+//		mockMvc.perform(get("/northstar/gateway/sub?gatewayId=CTP").session(session))
+//			.andExpect(status().isOk())
+//			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
+//	}
+//	
+//	@Test
+//	public void shouldGetGatewayTypeOptions() throws Exception {
+//		mockMvc.perform(get("/northstar/gateway/types").session(session))
+//			.andExpect(status().isOk())
+//			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
+//	}
+//	
+//	@Test
+//	public void shouldGetGatewaySettings() throws Exception {
+//		mockMvc.perform(get("/northstar/gateway/settings?gatewayType=CTP").session(session))
+//			.andExpect(status().isOk())
+//			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
+//	}
 }
