@@ -26,14 +26,14 @@ import xyz.redtorch.pb.CoreField.TickField;
 
 class MinuteBarGeneratorTest {
 
-TestFieldFactory factory = new TestFieldFactory("testGateway");
+	TestFieldFactory factory = new TestFieldFactory("testGateway");
 	
 	@SuppressWarnings("unchecked")
 	@Test
 	void test() {
 		ContractField contract = factory.makeContract("rb2210");
 		IPeriodHelperFactory phFactory = mock(IPeriodHelperFactory.class);
-		PeriodHelper helper = new PeriodHelper(60, new GenericTradeTime());
+		PeriodHelper helper = new PeriodHelper(1, new GenericTradeTime());
 		when(phFactory.newInstance(anyInt(), anyBoolean(), any(ContractDefinition.class))).thenReturn(helper);
 		MinuteBarGenerator gen = new MinuteBarGenerator(contract, helper, mock(Consumer.class));
 		long now = System.currentTimeMillis();
