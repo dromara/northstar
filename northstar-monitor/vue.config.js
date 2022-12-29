@@ -9,13 +9,12 @@ module.exports = {
   },
   devServer: {
 	  port: 8090,
-    https: true,
     proxy: {
       '/northstar': {
-        target: `https://localhost`
+        target: `http://localhost`
       },
       '/redirect*': {
-        target: `https://localhost`,
+        target: `http://localhost`,
       },
     }
   }

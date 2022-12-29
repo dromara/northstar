@@ -1,14 +1,3 @@
-server:
-  port: 443
-  ssl:
-    enabled: true    key-alias: northstar
-    key-store-type: PKCS12
-    key-store: classpath:keystore/northstarKeyStore.p12
-    key-store-password: northstar666
-  servlet:    session:      cookie:        same-site: none
-        secure: true
-        
-
 northstar: 
   # 行情延时探测（由于有多余的性能损耗，生产环境建议禁用）
   latency-detection:
@@ -37,21 +26,46 @@ spring:
     active: ${env:prod}
 
 ---
+server:
+  port: 443
+  ssl:
+    enabled: true
+    key-alias: northstar
+    key-store-type: PKCS12
+    key-store: classpath:keystore/northstarKeyStore.p12
+    key-store-password: northstar666
+  servlet:
+    session:
+      cookie:
+        same-site: none
+        secure: true
 spring:
   redis.database: 1
   config:    activate:      on-profile: prod
       
 ---
+server:
+  port: 80
+  ssl:
+    enabled: false
 spring:
   redis.database: 1
   config:    activate:      on-profile: dev
 
 ---
+server:
+  port: 80
+  ssl:
+    enabled: false
 spring:
   redis.database: 0
   config:    activate:      on-profile: test
       
 ---
+server:
+  port: 80
+  ssl:
+    enabled: false
 spring:
   redis.database: 0
   config:
