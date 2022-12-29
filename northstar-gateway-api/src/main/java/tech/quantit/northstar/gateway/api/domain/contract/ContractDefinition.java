@@ -41,20 +41,5 @@ public class ContractDefinition {
 	 * 名称
 	 */
 	private String name;
-	/**
-	 * 合约定义类别
-	 */
-	private Type type;
 	
-	
-	public enum Type {
-		/**
-		 * 指数
-		 */
-		INDEX,
-		/**
-		 * 其他
-		 */
-		OTHERS
-	}
 }

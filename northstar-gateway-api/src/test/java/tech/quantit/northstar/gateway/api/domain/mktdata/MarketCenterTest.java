@@ -19,7 +19,6 @@ import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.model.Identifier;
 import tech.quantit.northstar.gateway.api.MarketGateway;
 import tech.quantit.northstar.gateway.api.domain.contract.ContractDefinition;
-import tech.quantit.northstar.gateway.api.domain.contract.ContractDefinition.Type;
 import tech.quantit.northstar.gateway.api.domain.contract.Instrument;
 import tech.quantit.northstar.gateway.api.domain.time.IPeriodHelperFactory;
 import tech.quantit.northstar.gateway.api.domain.time.PeriodHelper;
@@ -155,23 +154,14 @@ class MarketCenterTest {
 				.symbolPattern(Pattern.compile("rb\\d+@.+@FUTURES"))
 				.productClass(ProductClassEnum.FUTURES)
 				.exchange(ExchangeEnum.SHFE)
-				.type(Type.INDEX)
 				.build();
 		ContractDefinition def2 = ContractDefinition.builder()
 				.name("RB期权链")
 				.symbolPattern(Pattern.compile("rb.+@.+@OPTIONS"))
 				.productClass(ProductClassEnum.OPTION)
 				.exchange(ExchangeEnum.SHFE)
-				.type(Type.OTHERS)
 				.build();
-		ContractDefinition def3 = ContractDefinition.builder()
-				.name("全部合约")
-				.symbolPattern(Pattern.compile(".+"))
-				.productClass(ProductClassEnum.UNRECOGNIZED)
-				.exchange(ExchangeEnum.UNRECOGNIZED)
-				.type(Type.OTHERS)
-				.build();
-		center = new MarketCenter(List.of(def1, def2, def3), mock(FastEventEngine.class));
+		center = new MarketCenter(List.of(def1, def2), mock(FastEventEngine.class));
 		
 		when(phFactory.newInstance(anyInt(), anyBoolean(), any(ContractDefinition.class))).thenReturn(pHelper);
 		when(pHelper.getRunningBaseTimeFrame()).thenReturn(List.of(LocalTime.now().plusMinutes(1).withSecond(0).withNano(0)));
@@ -210,8 +200,8 @@ class MarketCenterTest {
 		center.addInstrument(ins3, gateway, phFactory);
 		center.loadContractGroup(GATEWAY_ID);
 		
-		assertThat(center.getContracts(GATEWAY_ID)).hasSize(6);
-		assertThat(center.getContracts("")).hasSize(6);
+		assertThat(center.getContracts(GATEWAY_ID)).hasSize(5);
+		assertThat(center.getContracts("")).hasSize(5);
 	}
 	
 	@Test 

@@ -23,7 +23,6 @@ import tech.quantit.northstar.gateway.api.IMarketCenter;
 import tech.quantit.northstar.gateway.api.MarketGateway;
 import tech.quantit.northstar.gateway.api.domain.contract.Contract;
 import tech.quantit.northstar.gateway.api.domain.contract.ContractDefinition;
-import tech.quantit.northstar.gateway.api.domain.contract.ContractDefinition.Type;
 import tech.quantit.northstar.gateway.api.domain.contract.GatewayContract;
 import tech.quantit.northstar.gateway.api.domain.contract.GroupedContract;
 import tech.quantit.northstar.gateway.api.domain.contract.IndexContract;
@@ -112,8 +111,6 @@ public class MarketCenter implements IMarketCenter, TickDataAware{
 		// 聚合期货合约
 		aggregateFutureIndexContracts(gatewayDefContractGroups.row(gatewayId), factory);
 		
-		// 聚合其他合约
-		aggregateGroupedContracts(gatewayDefContractGroups.row(gatewayId));
 	}
 	
 	private void aggregateOptionContracts(List<Contract> optContracts) {
@@ -131,7 +128,7 @@ public class MarketCenter implements IMarketCenter, TickDataAware{
 	
 	private void aggregateFutureIndexContracts(Map<ContractDefinition, List<Contract>> contractDefMap, IPeriodHelperFactory factory) {
 		for(Entry<ContractDefinition, List<Contract>> e : contractDefMap.entrySet()) {
-			if(e.getKey().getType() != Type.INDEX) {
+			if(e.getKey().getProductClass() != ProductClassEnum.FUTURES) {
 				continue;
 			}
 			ContractDefinition def = e.getKey();
@@ -162,16 +159,6 @@ public class MarketCenter implements IMarketCenter, TickDataAware{
 				.build();
 	}
 	
-	private void aggregateGroupedContracts(Map<ContractDefinition, List<Contract>> contractDefMap) {
-		for(Entry<ContractDefinition, List<Contract>> e : contractDefMap.entrySet()) {
-			if(e.getKey().getType() != Type.OTHERS) {
-				continue;
-			}
-			Contract c = new GroupedContract(e.getKey().getName(), e.getValue());
-			contractMap.put(c.identifier(), c);
-		}
-	}
-
 	/**
 	 * 查找合约
 	 */
