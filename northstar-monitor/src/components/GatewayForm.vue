@@ -111,7 +111,7 @@
               placeholder="请选择合约"
             >
               <el-option
-                v-for="item in contractDefOptions"
+                v-for="item in contractOptions"
                 :key="item.name"
                 :label="item.label"
                 :value="item"
@@ -213,7 +213,7 @@ export default {
       },
       subscribedContractGroups: [],
       gatewayTypeOptions: [],
-      contractDefOptions: [],
+      contractOptions: [],
       gatewayType: '',
       contractType: '',
       gatewaySettingsMetaInfo: []
@@ -239,23 +239,10 @@ export default {
               .filter((item) => !item.adminOnly || this.$route.query.superuser)
               .map((item) => Object.assign({value: item.name}, item))
           })
-
-          if (
-            this.contractDefOptions.length &&
-            this.form.subscribedContractGroups instanceof Array
-          ) {
-            this.subscribedContractGroups = this.form.subscribedContractGroups
-              .map((defId) =>
-                this.contractDefOptions.find(
-                  (item) => `${item.name}@${item.productClass}` === defId
-                )
-              )
-              .filter((item) => !!item)
-          }
         })
       }
     },
-    'gatewayType': function (val) {
+    'gatewayType': async function (val) {
       if (
         val &&
         this.gatewayUsage === 'MARKET_DATA' &&
@@ -265,7 +252,6 @@ export default {
         this.subscribedContractGroups = []
       }
       if (val) {
-        this.contractDefOptions = []
         this.form.gatewayType = val.name
 
         if (val !== 'SIM') {
@@ -277,29 +263,7 @@ export default {
         }
 
         // 获取合约品种列表
-        const type = { FUTURES: '期货', OPTION: '期权' }
-        contractApi.getContractProviders(val.replace('_SIM', '')).then((result) => {
-          const promiseList = result.map((pvd) => contractApi.getContractDefs(pvd))
-          Promise.all(promiseList).then((results) => {
-            results.forEach((res) => {
-              this.contractDefOptions = this.contractDefOptions.concat(res)
-              this.contractDefOptions = this.contractDefOptions.map((item) => {
-                item.value = item.name + '@' + item.productClass
-                item.label = item.name + type[item.productClass]
-                return item
-              })
-              if (this.form.subscribedContractGroups instanceof Array) {
-                this.subscribedContractGroups = this.form.subscribedContractGroups
-                  .map((defId) =>
-                    this.contractDefOptions.find(
-                      (item) => `${item.name}@${item.productClass}` === defId
-                    )
-                  )
-                  .filter((item) => !!item)
-              }
-            })
-          })
-        })
+        this.contractOptions = await contractApi.getGatewayContracts(this.gatewayType === 'PLAYBACK' ? 'CTP' : this.gatewayType);
       }
     }
   },

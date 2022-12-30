@@ -46,7 +46,7 @@ server:
   ssl:
     enabled: false
 spring:
-  redis.database: 1
+  redis.database: 0
   config:    activate:      on-profile: dev
 
 ---
@@ -55,7 +55,7 @@ server:
   ssl:
     enabled: false
 spring:
-  redis.database: 0
+  redis.database: 15
   config:    activate:      on-profile: test
       
 ---
@@ -69,7 +69,7 @@ server:
         same-site: none
         secure: true
 spring:
-  redis.database: 0
+  redis.database: 15
   config:
     activate:
       on-profile: e2e
