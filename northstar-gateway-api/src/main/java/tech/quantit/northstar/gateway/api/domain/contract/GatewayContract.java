@@ -27,6 +27,8 @@ public class GatewayContract implements Contract, TickDataAware{
 	
 	private Identifier identifier;
 	
+	private boolean hasSubscribed;
+	
 	public GatewayContract(MarketGateway gateway, FastEventEngine feEngine, ContractField contract, PeriodHelper phHelper) {
 		this.contract = contract;
 		this.gateway = gateway;
@@ -36,11 +38,13 @@ public class GatewayContract implements Contract, TickDataAware{
 
 	@Override
 	public boolean subscribe() {
+		hasSubscribed = true;
 		return gateway.subscribe(contract);
 	}
 
 	@Override
 	public boolean unsubscribe() {
+		hasSubscribed = false;
 		return gateway.unsubscribe(contract);
 	}
 
@@ -57,6 +61,11 @@ public class GatewayContract implements Contract, TickDataAware{
 	@Override
 	public boolean tradable() {
 		return true;
+	}
+	
+	@Override
+	public boolean hasSubscribed() {
+		return hasSubscribed;
 	}
 
 	@Override

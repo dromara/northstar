@@ -33,6 +33,8 @@ public class IndexContract implements Contract, TickDataAware{
 	
 	private final Identifier identifier;
 	
+	private boolean hasSubscribed;
+	
 	public IndexContract(FastEventEngine feEngine, ContractField contract, List<Contract> monthContracts, PeriodHelper phHelper) {
 		this.contract = contract;
 		this.identifier = Identifier.of(contract.getUnifiedSymbol());
@@ -48,6 +50,7 @@ public class IndexContract implements Contract, TickDataAware{
 				log.warn("[{}] 合约订阅失败", c.contractField().getUnifiedSymbol());
 			}
 		}
+		hasSubscribed = true;
 		return true;
 	}
 
@@ -58,7 +61,13 @@ public class IndexContract implements Contract, TickDataAware{
 				log.warn("[{}] 合约取消订阅失败", c.contractField().getUnifiedSymbol());
 			}
 		}
+		hasSubscribed = false;
 		return true;
+	}
+	
+	@Override
+	public boolean hasSubscribed() {
+		return hasSubscribed;
 	}
 
 	@Override
