@@ -1,14 +1,9 @@
 server:
-  port: 443
   ssl:
-    enabled: true    key-alias: northstar
+    key-alias: northstar
     key-store-type: PKCS12
     key-store: classpath:keystore/northstarKeyStore.p12
     key-store-password: northstar666
-  servlet:    session:      cookie:        same-site: none
-        secure: true
-        
-
 northstar: 
   contraceDefFile: classpath:ContractDefinition.csv
   data-service:
@@ -29,24 +24,50 @@ spring:
     host: 127.0.0.1
     port: 6379
   profiles:
-    active: ${env:prod}
+    active: ${env:dev}
 
 ---
+server:
+  port: 443
+  ssl:
+    enabled: true
+  servlet:
+    session:
+      cookie:
+        same-site: none
+        secure: true
 spring:
   redis.database: 1
   config:    activate:      on-profile: prod
       
 ---
+server:
+  port: 80
+  ssl:
+    enabled: false
 spring:
   redis.database: 1
   config:    activate:      on-profile: dev
 
 ---
+server:
+  port: 80
+  ssl:
+    enabled: false
 spring:
   redis.database: 0
   config:    activate:      on-profile: test
       
 ---
+server:
+  port: 443
+  ssl:
+    enabled: true
+  servlet:
+    session:
+      cookie:
+        same-site: none
+        secure: true
 spring:
   redis.database: 0
   config:

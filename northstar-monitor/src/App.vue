@@ -4,6 +4,8 @@
   </div>
 </template>
 <script>
+
+console.log('env:', process.env.NODE_ENV)
 export default {}
 </script>
 

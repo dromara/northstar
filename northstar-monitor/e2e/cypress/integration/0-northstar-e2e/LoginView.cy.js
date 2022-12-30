@@ -7,7 +7,7 @@
 /* eslint-disable */
 describe('登陆页-测试', () => {
     beforeEach(() => {
-        cy.visit('https://localhost:8090/#/')
+        cy.visit('https://localhost/#/')
     })
 
     it('用户名为空时，显示错误提示', () => {

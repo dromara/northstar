@@ -8,7 +8,7 @@
 
 describe('模组管理-测试', () => {
     before(() => {
-        cy.visit('https://localhost:8090')
+        cy.visit('https://localhost')
         cy.contains('用户名').parent().find('input').type('admin')
         cy.contains('密码').parent().find('input').type('123456')
         cy.contains('登陆').click()
@@ -19,7 +19,7 @@ describe('模组管理-测试', () => {
         cy.get('.el-dialog').contains('订阅合约').parent().find('.el-select').click()
         cy.get('.el-select-dropdown').contains('模拟合约').click()
         cy.get('.el-dialog').filter(':visible').find('button').last().click()
-        cy.visit('https://localhost:8090/#/tdgateway')
+        cy.visit('https://localhost/#/tdgateway')
         cy.wait(300)
         cy.get('button').contains('新建').click()
         cy.get('.el-dialog').contains('账户ID').parent().find('input').type('testAccount')
@@ -36,11 +36,11 @@ describe('模组管理-测试', () => {
         cy.get('.el-dialog').filter(':visible').find('button').contains('出入金').click()
         cy.wait(1000)
         cy.get('.el-dialog').filter(':visible').find('button').first().click()
-        cy.visit('https://localhost:8090/#/mktgateway')
+        cy.visit('https://localhost/#/mktgateway')
         cy.wait(500)
         cy.get('.el-table__row').first().contains('连线').click()
         cy.wait(1000)
-        cy.visit('https://localhost:8090/#/module')
+        cy.visit('https://localhost/#/module')
         cy.wait(300)
     })
 
@@ -83,7 +83,7 @@ describe('模组管理-测试', () => {
         })
 
         it('当账户网关被模组绑定后，尝试删除账户会报错', () => {
-            cy.visit('https://localhost:8090/#/tdgateway')
+            cy.visit('https://localhost/#/tdgateway')
             cy.wait(300)
             cy.intercept('DELETE','/northstar/gateway?gatewayId=testAccount').as('delGateway')
             cy.get('.el-table__row').first().contains('断开').click()
@@ -96,7 +96,7 @@ describe('模组管理-测试', () => {
         })
 
         it('应该可以删除模组', () => {
-            cy.visit('https://localhost:8090/#/module')
+            cy.visit('https://localhost/#/module')
             cy.wait(300)
             cy.intercept('DELETE','/northstar/module?name=TESTM').as('removeModule')
             cy.get('.el-table__row').first().contains('删除').click()
@@ -109,7 +109,7 @@ describe('模组管理-测试', () => {
 
     describe('模组状态管理-测试', () => {
         before(()=>{
-            cy.visit('https://localhost:8090/#/module')
+            cy.visit('https://localhost/#/module')
             cy.contains('新建').click()
             cy.get('.el-dialog').contains('模组名称').parent().find('input').type('TESTM')
             cy.get('.el-dialog').contains('绑定合约').parent().find('input').type('sim999@CZCE@FUTURES')

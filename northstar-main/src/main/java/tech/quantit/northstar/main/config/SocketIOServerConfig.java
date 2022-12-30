@@ -27,14 +27,17 @@ import tech.quantit.northstar.main.utils.InetAddressUtils;
 @Configuration
 public class SocketIOServerConfig implements InitializingBean {
 	
-	@Value("${server.ssl.key-store-type}")
+	@Value("${server.ssl.key-store-type:}")
 	private String keyStoreFormat;
 	
-	@Value("${server.ssl.key-store-password}")
+	@Value("${server.ssl.key-store-password:}")
 	private String keyStorePassword;
 	
-	@Value("${server.ssl.key-store}")
+	@Value("${server.ssl.key-store:}")
 	private Resource keyStore;
+	
+	@Value("${server.ssl.enabled}")
+	private boolean sslEnabled;
 
 	private UserInfo userInfo = new UserInfo();
 	
@@ -59,9 +62,11 @@ public class SocketIOServerConfig implements InitializingBean {
 		com.corundumstudio.socketio.Configuration config = new com.corundumstudio.socketio.Configuration();
         config.setHostname(realHost);
         config.setPort(51888);
-        config.setKeyStore(keyStore.getInputStream());
-        config.setKeyStoreFormat(keyStoreFormat);
-        config.setKeyStorePassword(keyStorePassword);
+        if(sslEnabled){
+        	config.setKeyStore(keyStore.getInputStream());
+        	config.setKeyStoreFormat(keyStoreFormat);
+        	config.setKeyStorePassword(keyStorePassword);
+        }
         config.setAuthorizationListener(data -> data.getUrlParams().get("auth").get(0).equals(token));
         config.setBossThreads(1);
         config.setWorkerThreads(100);
