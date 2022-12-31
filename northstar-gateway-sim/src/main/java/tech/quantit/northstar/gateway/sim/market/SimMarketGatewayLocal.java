@@ -100,8 +100,8 @@ public class SimMarketGatewayLocal implements MarketGateway{
 			SimContractGenerator contractGen = new SimContractGenerator("SIM");
 			Instrument simContract = contractGen.getContract();
 			Instrument simContract2 = contractGen.getContract2();
-			mktCenter.addInstrument(simContract, this, null);
-			mktCenter.addInstrument(simContract2, this, null);
+			mktCenter.addInstrument(simContract);
+			mktCenter.addInstrument(simContract2);
 		});
 		
 		feEngine.emitEvent(NorthstarEventType.CONNECTED, settings.getGatewayId());
@@ -130,7 +130,7 @@ public class SimMarketGatewayLocal implements MarketGateway{
 	}
 
 	@Override
-	public String gatewayType() {
+	public String channelType() {
 		return SIM.class.getName();
 	}
 

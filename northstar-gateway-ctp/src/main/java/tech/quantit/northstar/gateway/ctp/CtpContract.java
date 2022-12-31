@@ -53,6 +53,7 @@ public class CtpContract implements Instrument{
 	private String gatewayId;  						// 网关
 	
 	private Identifier identifier;
+	private ContractDefinition contractDef;
 	
 	public CtpContract(ContractField c) {
 		contractId = c.getContractId();
@@ -92,13 +93,13 @@ public class CtpContract implements Instrument{
 	@Override
 	public Identifier identifier() {
 		if(Objects.isNull(identifier)) {
-			identifier = Identifier.of(unifiedSymbol);
+			identifier = Identifier.of(contractId);
 		}
 		return identifier;
 	}
-
+	
 	@Override
-	public ContractField mergeToContractField(ContractDefinition contractDef) {
+	public ContractField contractField() {
 		return ContractField.newBuilder()
 				.setContractId(Optional.ofNullable(contractId).orElse(""))
 				.setName(Optional.ofNullable(name).orElse(""))
@@ -138,6 +139,11 @@ public class CtpContract implements Instrument{
 	@Override
 	public ExchangeEnum exchange() {
 		return exchange;
+	}
+
+	@Override
+	public void setContractDefinition(ContractDefinition contractDef) {
+		this.contractDef = contractDef;
 	}
 
 }

@@ -1,7 +1,6 @@
 package tech.quantit.northstar.gateway.api;
 
 import tech.quantit.northstar.gateway.api.domain.contract.Instrument;
-import tech.quantit.northstar.gateway.api.domain.time.IPeriodHelperFactory;
 
 public interface IMarketCenter extends IContractManager {
 
@@ -9,7 +8,13 @@ public interface IMarketCenter extends IContractManager {
 	 * 注册合约
 	 * @param ins
 	 */
-	void addInstrument(Instrument ins, MarketGateway gateway, IPeriodHelperFactory phFactory);
+	void addInstrument(Instrument ins);
+	
+	/**
+	 * 注册网关
+	 * @param gateway
+	 */
+	void addGateway(MarketGateway gateway);
 	
 	/**
 	 * 加载合约组

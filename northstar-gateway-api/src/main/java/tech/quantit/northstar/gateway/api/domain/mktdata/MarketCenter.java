@@ -71,28 +71,29 @@ public class MarketCenter implements IMarketCenter, TickDataAware{
 	 * 注册网关合约
 	 */
 	@Override
-	public synchronized void addInstrument(Instrument ins, MarketGateway gateway, IPeriodHelperFactory phFactory) {
-		String gatewayId = gateway.getGatewaySetting().getGatewayId();
-		gatewayPeriodHelperFactoryMap.computeIfAbsent(gatewayId, key -> phFactory);
-		
-		if(!contractDefTbl.contains(ins.exchange(), ins.productClass())) {
-			contractDefTbl.put(ins.exchange(), ins.productClass(), new ArrayList<>());
-		}
+	public synchronized void addInstrument(Instrument ins) {
+//		String gatewayId = gateway.getGatewaySetting().getGatewayId();
+//		gatewayPeriodHelperFactoryMap.computeIfAbsent(gatewayId, key -> phFactory);
+//		
+//		if(!contractDefTbl.contains(ins.exchange(), ins.productClass())) {
+//			contractDefTbl.put(ins.exchange(), ins.productClass(), new ArrayList<>());
+//		}
 		List<ContractDefinition> defList = contractDefTbl.get(ins.exchange(), ins.productClass());
-		for(ContractDefinition def : defList) {
-			if(def.getSymbolPattern().matcher(ins.identifier().value()).matches() 
-					&& def.getProductClass() == ins.productClass()
-					&& def.getExchange() == ins.exchange()) {
-				Contract contract = new GatewayContract(gateway, feEngine, ins.mergeToContractField(def), phFactory.newInstance(1, false, def));
-				contractMap.put(ins.identifier(), contract);
-				
-				if(!gatewayDefContractGroups.contains(gatewayId, def)) {					
-					gatewayDefContractGroups.put(gatewayId, def, new ArrayList<>());
-				}
-				gatewayDefContractGroups.get(gatewayId, def).add(contract);
-				gatewaySymbolContractTbl.put(gatewayId, contract.contractField().getSymbol(), contract);
-			}
-		}
+//		for(ContractDefinition def : defList) {
+//			if(def.getSymbolPattern().matcher(ins.identifier().value()).matches() 
+//					&& def.getProductClass() == ins.productClass()
+//					&& def.getExchange() == ins.exchange()) {
+//				ins.setContractDefinition(def);
+//				Contract contract = new GatewayContract(gateway, feEngine, ins, phFactory.newInstance(1, false, def));
+//				contractMap.put(ins.identifier(), contract);
+//				
+//				if(!gatewayDefContractGroups.contains(gatewayId, def)) {					
+//					gatewayDefContractGroups.put(gatewayId, def, new ArrayList<>());
+//				}
+//				gatewayDefContractGroups.get(gatewayId, def).add(contract);
+//				gatewaySymbolContractTbl.put(gatewayId, contract.contractField().getSymbol(), contract);
+//			}
+//		}
 	}
 
 	/**
@@ -217,6 +218,14 @@ public class MarketCenter implements IMarketCenter, TickDataAware{
 			.filter(TickDataAware.class::isInstance)
 			.map(TickDataAware.class::cast)
 			.forEach(TickDataAware::endOfMarket);
+	}
+
+	/**
+	 * 增加网关
+	 */
+	@Override
+	public void addGateway(MarketGateway gateway) {
+		
 	}
 
 }

@@ -61,7 +61,7 @@ class MarketCenterTest {
 		}
 		
 		@Override
-		public ContractField mergeToContractField(ContractDefinition contractDef) {
+		public ContractField contractField() {
 			return ContractField.newBuilder()
 					.setSymbol("rb2305")
 					.setUnifiedSymbol(identifier().value())
@@ -97,7 +97,7 @@ class MarketCenterTest {
 		}
 		
 		@Override
-		public ContractField mergeToContractField(ContractDefinition contractDef) {
+		public ContractField contractField() {
 			return ContractField.newBuilder()
 					.setSymbol("rb2310")
 					.setUnifiedSymbol(identifier().value())
@@ -133,7 +133,7 @@ class MarketCenterTest {
 		}
 		
 		@Override
-		public ContractField mergeToContractField(ContractDefinition contractDef) {
+		public ContractField contractField() {
 			return ContractField.newBuilder()
 					.setSymbol(name())
 					.setUnifiedSymbol(identifier().value())
@@ -171,9 +171,9 @@ class MarketCenterTest {
 	void testAddInstument() {
 		MarketGateway gateway = mock(MarketGateway.class);
 		when(gateway.getGatewaySetting()).thenReturn(GatewaySettingField.newBuilder().setGatewayId(GATEWAY_ID).build());
-		center.addInstrument(ins1, gateway, phFactory);
-		center.addInstrument(ins2, gateway, phFactory);
-		center.addInstrument(ins3, gateway, phFactory);
+		center.addInstrument(ins1);
+		center.addInstrument(ins2);
+		center.addInstrument(ins3);
 		
 		assertThat(center.getContracts(GATEWAY_ID)).hasSize(3);
 		assertThat(center.getContracts("")).hasSize(3);
@@ -183,9 +183,9 @@ class MarketCenterTest {
 	void testFindContract() {
 		MarketGateway gateway = mock(MarketGateway.class);
 		when(gateway.getGatewaySetting()).thenReturn(GatewaySettingField.newBuilder().setGatewayId(GATEWAY_ID).build());
-		center.addInstrument(ins1, gateway, phFactory);
-		center.addInstrument(ins2, gateway, phFactory);
-		center.addInstrument(ins3, gateway, phFactory);
+		center.addInstrument(ins1);
+		center.addInstrument(ins2);
+		center.addInstrument(ins3);
 		
 		assertThat(center.getContract(GATEWAY_ID, "rb2305").identifier()).isEqualTo(Identifier.of("rb2305@SHFE@FUTURES"));
 		assertThat(center.getContract(Identifier.of("rb2305@SHFE@FUTURES"))).isEqualTo(center.getContract(GATEWAY_ID, "rb2305"));
@@ -195,9 +195,9 @@ class MarketCenterTest {
 	void testAggregateContract() {
 		MarketGateway gateway = mock(MarketGateway.class);
 		when(gateway.getGatewaySetting()).thenReturn(GatewaySettingField.newBuilder().setGatewayId(GATEWAY_ID).build());
-		center.addInstrument(ins1, gateway, phFactory);
-		center.addInstrument(ins2, gateway, phFactory);
-		center.addInstrument(ins3, gateway, phFactory);
+		center.addInstrument(ins1);
+		center.addInstrument(ins2);
+		center.addInstrument(ins3);
 		center.loadContractGroup(GATEWAY_ID);
 		
 		assertThat(center.getContracts(GATEWAY_ID)).hasSize(5);
@@ -208,9 +208,9 @@ class MarketCenterTest {
 	void testTick() {
 		MarketGateway gateway = mock(MarketGateway.class);
 		when(gateway.getGatewaySetting()).thenReturn(GatewaySettingField.newBuilder().setGatewayId(GATEWAY_ID).build());
-		center.addInstrument(ins1, gateway, phFactory);
-		center.addInstrument(ins2, gateway, phFactory);
-		center.addInstrument(ins3, gateway, phFactory);
+		center.addInstrument(ins1);
+		center.addInstrument(ins2);
+		center.addInstrument(ins3);
 		center.loadContractGroup(GATEWAY_ID);
 		
 		TickField t = factory.makeTickField("rb2305", 5000);

@@ -1368,7 +1368,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 					.shortMarginRatio(pInstrument.getShortMarginRatio())
 					.build();
 			
-			gatewayAdapter.mktCenter.addInstrument(contract, (MarketGateway) gatewayAdapter, PHFACTORY);
+			gatewayAdapter.mktCenter.addInstrument(contract);
 			
 			if (bIsLast) {
 				logger.info("{}交易接口合约信息获取完成!共计{}条", logInfo, gatewayAdapter.mktCenter.getContracts(MKT_GATEWAY_ID).size());

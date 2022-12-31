@@ -37,10 +37,17 @@ public interface Instrument {
 	ExchangeEnum exchange();
 	
 	/**
+	 * 设置合约定义
+	 */
+	default void setContractDefinition(ContractDefinition contractDef) {
+		throw new UnsupportedOperationException();
+	}
+	
+	/**
 	 * 转换为合约信息
 	 * @return
 	 */
-	default ContractField mergeToContractField(ContractDefinition contractDef) {
+	default ContractField contractField() {
 		throw new UnsupportedOperationException();
 	}
 }

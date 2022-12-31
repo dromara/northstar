@@ -26,5 +26,5 @@ public interface MarketGateway extends Gateway {
 	 * 网关类型
 	 * @return
 	 */
-	String gatewayType();
+	String channelType();
 }

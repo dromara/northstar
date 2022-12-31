@@ -246,7 +246,7 @@ public class CtpSimGatewayAdapter extends GatewayAbstract implements MarketGatew
 	}
 
 	@Override
-	public String gatewayType() {
+	public String channelType() {
 		return CTP_SIM.class.getName();
 	}
 

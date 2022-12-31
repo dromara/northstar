@@ -59,7 +59,7 @@ public class PlaybackGatewayAdapter implements MarketGateway {
 	}
 
 	@Override
-	public String gatewayType() {
+	public String channelType() {
 		return PLAYBACK.class.getName();
 	}
 

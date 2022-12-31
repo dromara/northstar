@@ -250,7 +250,7 @@ public class CtpGatewayAdapter extends GatewayAbstract implements MarketGateway,
 
 
 	@Override
-	public String gatewayType() {
+	public String channelType() {
 		return CTP.class.getName();
 	}
 
