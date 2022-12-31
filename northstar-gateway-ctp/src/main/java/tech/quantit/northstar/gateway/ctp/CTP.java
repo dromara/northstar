@@ -4,16 +4,16 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import tech.quantit.northstar.common.GatewayType;
+import tech.quantit.northstar.common.ChannelType;
 import tech.quantit.northstar.common.constant.GatewayUsage;
-import tech.quantit.northstar.gateway.api.GatewayTypeProvider;
+import tech.quantit.northstar.gateway.api.GatewayChannelProvider;
 import xyz.redtorch.gateway.ctp.x64v6v3v15v.CtpGatewayFactory;
 
 @Component
-public class CTP implements GatewayType, InitializingBean{
+public class CTP implements ChannelType, InitializingBean{
 
 	@Autowired
-	private GatewayTypeProvider gtp;
+	private GatewayChannelProvider gtp;
 	
 	@Autowired
 	private CtpGatewayFactory factory;
@@ -30,7 +30,7 @@ public class CTP implements GatewayType, InitializingBean{
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		gtp.addGatewayType(this, factory);
+		gtp.addGatewayChannel(this, factory);
 	}
 
 }

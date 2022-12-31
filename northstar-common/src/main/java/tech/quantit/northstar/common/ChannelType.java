@@ -2,7 +2,7 @@ package tech.quantit.northstar.common;
 
 import tech.quantit.northstar.common.constant.GatewayUsage;
 
-public interface GatewayType {
+public interface ChannelType {
 
 	/**
 	 * 类别名称

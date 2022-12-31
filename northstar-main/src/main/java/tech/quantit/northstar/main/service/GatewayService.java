@@ -31,7 +31,7 @@ import tech.quantit.northstar.domain.gateway.GatewayConnection;
 import tech.quantit.northstar.gateway.api.Gateway;
 import tech.quantit.northstar.gateway.api.GatewayFactory;
 import tech.quantit.northstar.gateway.api.GatewaySettingsMetaInfoProvider;
-import tech.quantit.northstar.gateway.api.GatewayTypeProvider;
+import tech.quantit.northstar.gateway.api.GatewayChannelProvider;
 import tech.quantit.northstar.gateway.api.IContractManager;
 import tech.quantit.northstar.gateway.api.MarketGateway;
 import tech.quantit.northstar.gateway.sim.trade.SimTradeGateway;
@@ -50,7 +50,7 @@ public class GatewayService implements InitializingBean {
 	
 	private GatewayAndConnectionManager gatewayConnMgr;
 	
-	private GatewayTypeProvider gatewayTypeProvider;
+	private GatewayChannelProvider gatewayTypeProvider;
 	
 	private GatewaySettingsMetaInfoProvider gatewaySettingsProvider;
 	

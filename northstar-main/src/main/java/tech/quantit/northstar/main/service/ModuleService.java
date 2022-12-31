@@ -267,7 +267,7 @@ public class ModuleService implements InitializingBean {
 			for(ModuleAccountDescription mad : md.getModuleAccountSettingsDescription()) {
 				for(String unifiedSymbol : mad.getBindedUnifiedSymbols()) {
 					ContractField contract = contractMgr.getContract(Identifier.of(unifiedSymbol)).contractField();
-					List<BarField> bars = mdRepo.loadBars(ContractUtils.getMarketGatewayId(contract), unifiedSymbol, start, end);
+					List<BarField> bars = mdRepo.loadBars(ContractUtils.getMarketChannel(contract), unifiedSymbol, start, end);
 					module.initData(bars);
 				}
 			}

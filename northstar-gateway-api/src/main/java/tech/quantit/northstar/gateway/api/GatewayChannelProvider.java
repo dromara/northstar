@@ -6,21 +6,21 @@ import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
-import tech.quantit.northstar.common.GatewayType;
+import tech.quantit.northstar.common.ChannelType;
 
 @Component
-public class GatewayTypeProvider {
+public class GatewayChannelProvider {
 
-	Map<String, GatewayType> typeMap = new HashMap<>();
+	Map<String, ChannelType> typeMap = new HashMap<>();
 	
 	Map<String, GatewayFactory> factoryMap = new HashMap<>();
 	
-	public void addGatewayType(GatewayType gatewayType, GatewayFactory factory) {
+	public void addGatewayChannel(ChannelType gatewayType, GatewayFactory factory) {
 		typeMap.put(gatewayType.name(), gatewayType);
 		factoryMap.put(gatewayType.name(), factory);
 	}
 	
-	public GatewayType valueOf(String name) {
+	public ChannelType valueOf(String name) {
 		if(!typeMap.containsKey(name)) {
 			throw new IllegalStateException("不存在该网关类型：" + name);
 		}
@@ -34,7 +34,7 @@ public class GatewayTypeProvider {
 		return factoryMap.get(name);
 	}
 	
-	public Collection<GatewayType> getAll(){
+	public Collection<ChannelType> getAll(){
 		return typeMap.values();
 	}
 	

@@ -52,6 +52,7 @@ public class SimContract implements Instrument{
 	private String gatewayId;  						// 网关
 	
 	private Identifier identifier;
+	private ContractDefinition contractDef;
 	
 	@Override
 	public String name() {
@@ -61,13 +62,13 @@ public class SimContract implements Instrument{
 	@Override
 	public Identifier identifier() {
 		if(Objects.isNull(identifier)) {
-			identifier = Identifier.of(unifiedSymbol);
+			identifier = Identifier.of(contractId);
 		}
 		return identifier;
 	}
-
+	
 	@Override
-	public ContractField mergeToContractField(ContractDefinition contractDef) {
+	public ContractField contractField() {
 		return ContractField.newBuilder()
 				.setContractId(contractId)
 				.setName(name)
@@ -107,6 +108,11 @@ public class SimContract implements Instrument{
 	@Override
 	public ExchangeEnum exchange() {
 		return exchange;
+	}
+
+	@Override
+	public void setContractDefinition(ContractDefinition contractDef) {
+		this.contractDef = contractDef;
 	}
 
 }

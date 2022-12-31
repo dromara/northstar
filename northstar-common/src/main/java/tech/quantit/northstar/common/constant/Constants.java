@@ -5,7 +5,7 @@ public interface Constants {
 	String INDEX_SUFFIX = "0000";
 	
 	String PRIMARY_SUFFIX = "9999";
-
+	
 	String MOCK_ORDER_ID = "MockOrderId";
 	
 	String KEY_USER = "USER";

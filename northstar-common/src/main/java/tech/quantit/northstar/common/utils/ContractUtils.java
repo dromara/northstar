@@ -35,7 +35,7 @@ public class ContractUtils {
 		return resultList;
 	}
 	
-	public static String getMarketGatewayId(ContractField contract) {
+	public static String getMarketChannel(ContractField contract) {
 		return contract.getThirdPartyId().split("@")[1];
 	}
 	

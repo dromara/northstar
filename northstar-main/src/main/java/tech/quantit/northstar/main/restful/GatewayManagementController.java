@@ -20,7 +20,7 @@ import tech.quantit.northstar.common.model.GatewayDescription;
 import tech.quantit.northstar.common.model.GatewayTypeDescription;
 import tech.quantit.northstar.common.model.ResultBean;
 import tech.quantit.northstar.gateway.api.IContractManager;
-import tech.quantit.northstar.gateway.api.GatewayTypeProvider;
+import tech.quantit.northstar.gateway.api.GatewayChannelProvider;
 import tech.quantit.northstar.main.service.GatewayService;
 import xyz.redtorch.pb.CoreField.ContractField;
 
@@ -35,7 +35,7 @@ public class GatewayManagementController {
 	protected IContractManager contractMgr;
 	
 	@Autowired
-	protected GatewayTypeProvider gatewayTypeProvider;
+	protected GatewayChannelProvider gatewayTypeProvider;
 	
 	@PostMapping
 	public ResultBean<Boolean> create(@RequestBody GatewayDescription gd) throws Exception {

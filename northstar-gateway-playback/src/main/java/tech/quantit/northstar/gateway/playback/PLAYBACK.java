@@ -5,16 +5,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
 
-import tech.quantit.northstar.common.GatewayType;
+import tech.quantit.northstar.common.ChannelType;
 import tech.quantit.northstar.common.constant.GatewayUsage;
-import tech.quantit.northstar.gateway.api.GatewayTypeProvider;
+import tech.quantit.northstar.gateway.api.GatewayChannelProvider;
 
 @DependsOn({"playbackGatewayFactory"})
 @Component
-public class PLAYBACK implements GatewayType, InitializingBean{
+public class PLAYBACK implements ChannelType, InitializingBean{
 
 	@Autowired
-	private GatewayTypeProvider gtp;
+	private GatewayChannelProvider gtp;
 	
 	@Autowired
 	private PlaybackGatewayFactory factory;
@@ -36,7 +36,7 @@ public class PLAYBACK implements GatewayType, InitializingBean{
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		gtp.addGatewayType(this, factory);
+		gtp.addGatewayChannel(this, factory);
 	}
 
 }
