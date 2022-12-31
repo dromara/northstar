@@ -26,11 +26,8 @@ import tech.quantit.northstar.common.constant.DateTimeConstant;
 import tech.quantit.northstar.common.event.NorthstarEventType;
 import tech.quantit.northstar.common.exception.NoSuchElementException;
 import tech.quantit.northstar.gateway.api.GatewayAbstract;
-import tech.quantit.northstar.gateway.api.MarketGateway;
 import tech.quantit.northstar.gateway.api.domain.contract.Contract;
-import tech.quantit.northstar.gateway.api.domain.time.IPeriodHelperFactory;
 import tech.quantit.northstar.gateway.ctp.CtpContract;
-import tech.quantit.northstar.gateway.ctp.time.CnFtPeriodHelperFactory;
 import xyz.redtorch.gateway.ctp.common.CtpContractNameResolver;
 import xyz.redtorch.gateway.ctp.common.GatewayConstants;
 import xyz.redtorch.gateway.ctp.x64v6v3v15v.api.CThostFtdcAccountregisterField;
@@ -164,7 +161,6 @@ public class TdSpi extends CThostFtdcTraderSpi {
 	private static final int CONNECTION_STATUS_CONNECTING = 2;
 	private static final int CONNECTION_STATUS_DISCONNECTING = 3;
 	private static final String MKT_GATEWAY_ID = "CTP";
-	private static final IPeriodHelperFactory PHFACTORY = new CnFtPeriodHelperFactory();
 
 	private static final Logger logger = LoggerFactory.getLogger(TdSpi.class);
 
