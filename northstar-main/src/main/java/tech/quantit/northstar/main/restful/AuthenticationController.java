@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import cn.hutool.crypto.digest.MD5;
@@ -64,6 +65,11 @@ public class AuthenticationController implements InitializingBean{
 		}
 		errCnt.incrementAndGet();
 		throw new AuthenticationException("用户名或密码不正确");
+	}
+	
+	@RequestMapping(path = "/login", method = RequestMethod.HEAD)
+	public ResultBean<String> healthCheck() {
+		return new ResultBean<>("OK");
 	}
 
 	@GetMapping("/logout")

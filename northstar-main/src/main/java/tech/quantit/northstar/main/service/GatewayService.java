@@ -29,9 +29,8 @@ import tech.quantit.northstar.data.ISimAccountRepository;
 import tech.quantit.northstar.domain.gateway.GatewayAndConnectionManager;
 import tech.quantit.northstar.domain.gateway.GatewayConnection;
 import tech.quantit.northstar.gateway.api.Gateway;
-import tech.quantit.northstar.gateway.api.GatewayChannelProvider;
 import tech.quantit.northstar.gateway.api.GatewayFactory;
-import tech.quantit.northstar.gateway.api.GatewaySettingsMetaInfoProvider;
+import tech.quantit.northstar.gateway.api.GatewayMetaProvider;
 import tech.quantit.northstar.gateway.api.IContractManager;
 import tech.quantit.northstar.gateway.api.MarketGateway;
 import tech.quantit.northstar.gateway.sim.trade.SimTradeGateway;
@@ -50,9 +49,9 @@ public class GatewayService implements InitializingBean {
 	
 	private GatewayAndConnectionManager gatewayConnMgr;
 	
-	private GatewaySettingsMetaInfoProvider gatewaySettingsProvider;
+	private GatewayMetaProvider gatewayMetaProvider;
 	
-	private GatewayChannelProvider channelProvider;
+	private GatewayMetaProvider metaProvider;
 	
 	private IContractManager contractMgr;
 	
@@ -79,7 +78,7 @@ public class GatewayService implements InitializingBean {
 	private boolean doCreateGateway(GatewayDescription gatewayDescription) {
 		Gateway gateway = null;
 		GatewayConnection conn = new GatewayConnection(gatewayDescription);
-		GatewayFactory factory = channelProvider.getFactory(gatewayDescription.getChannelType());
+		GatewayFactory factory = metaProvider.getFactory(gatewayDescription.getChannelType());
 		gateway = factory.newInstance(gatewayDescription);
 		gatewayConnMgr.createPair(conn, gateway);
 		if(gatewayDescription.isAutoConnect()) {
@@ -276,7 +275,7 @@ public class GatewayService implements InitializingBean {
 	 * @return
 	 */
 	public Collection<ComponentField> getGatewaySettingsMetaInfo(ChannelType channelType) {
-		return gatewaySettingsProvider.getSettings(channelType);
+		return gatewayMetaProvider.getSettings(channelType);
 	}
 	
 	/**

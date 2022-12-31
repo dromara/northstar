@@ -16,8 +16,7 @@ import tech.quantit.northstar.data.IPlaybackRuntimeRepository;
 import tech.quantit.northstar.data.ISimAccountRepository;
 import tech.quantit.northstar.domain.account.TradeDayAccount;
 import tech.quantit.northstar.domain.gateway.GatewayAndConnectionManager;
-import tech.quantit.northstar.gateway.api.GatewaySettingsMetaInfoProvider;
-import tech.quantit.northstar.gateway.api.GatewayChannelProvider;
+import tech.quantit.northstar.gateway.api.GatewayMetaProvider;
 import tech.quantit.northstar.gateway.api.IContractManager;
 import tech.quantit.northstar.main.ExternalJarClassLoader;
 import tech.quantit.northstar.main.handler.internal.ModuleManager;
@@ -35,10 +34,6 @@ import tech.quantit.northstar.main.utils.ModuleFactory;
 	"strategyDispatcher",
 	"accountEventHandler",
 	"connectionEventHandler",
-	"ctpGatewayFactory",
-	"simGatewayFactory",
-	"ctpSimGatewayFactory",
-	"playbackGatewayFactory",
 	"moduleFactory",
 	})
 @Configuration
@@ -51,9 +46,9 @@ public class ServiceConfig {
 	
 	@Bean
 	public GatewayService gatewayService(GatewayAndConnectionManager gatewayConnMgr, IGatewayRepository gatewayRepo, 
-			IPlaybackRuntimeRepository playbackRtRepo, IModuleRepository moduleRepo, ISimAccountRepository simAccRepo, GatewayChannelProvider gtp,
-			GatewaySettingsMetaInfoProvider settingsPvd, IContractManager contractMgr) {
-		return new GatewayService(gatewayConnMgr, settingsPvd, gtp, contractMgr, gatewayRepo, simAccRepo, playbackRtRepo, moduleRepo);
+			IPlaybackRuntimeRepository playbackRtRepo, IModuleRepository moduleRepo, ISimAccountRepository simAccRepo, GatewayMetaProvider metaProvider,
+			GatewayMetaProvider settingsPvd, IContractManager contractMgr) {
+		return new GatewayService(gatewayConnMgr, settingsPvd, metaProvider, contractMgr, gatewayRepo, simAccRepo, playbackRtRepo, moduleRepo);
 	}
 	
 	@Bean

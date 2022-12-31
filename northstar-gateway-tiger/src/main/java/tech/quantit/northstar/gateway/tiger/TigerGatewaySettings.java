@@ -12,7 +12,7 @@ import tech.quantit.northstar.common.constant.FieldType;
 import tech.quantit.northstar.common.model.DynamicParams;
 import tech.quantit.northstar.common.model.GatewaySettings;
 import tech.quantit.northstar.common.model.Setting;
-import tech.quantit.northstar.gateway.api.GatewaySettingsMetaInfoProvider;
+import tech.quantit.northstar.gateway.api.GatewayMetaProvider;
 
 @Getter
 @Setter
@@ -20,7 +20,7 @@ import tech.quantit.northstar.gateway.api.GatewaySettingsMetaInfoProvider;
 public class TigerGatewaySettings extends DynamicParams implements GatewaySettings {
 
 	@Autowired
-	private GatewaySettingsMetaInfoProvider pvd;
+	private GatewayMetaProvider pvd;
 	
 	@Setting(label="用户ID", order=10, type=FieldType.TEXT)
 	private String tigerId;

@@ -46,7 +46,7 @@
           <el-form-item :label="`${typeLabel}类型`" prop="channelType">
             <el-select
               v-model="channelType"
-              placeholder="未知"
+              placeholder="请选择"
               @change="onChooseGatewayType"
               :disabled="isUpdateMode"
             >
@@ -196,8 +196,8 @@ export default {
       loading: false,
       linkedGatewayOptions: [],
       formRules: {
-        gatewayId: [{ required: true, message: '不能为空', trigger: 'blur' }],
-        channelType: [{ required: true, message: '不能为空', trigger: 'blur' }],
+        gatewayId: [{ required: true, message: '不能为空', trigger: 'blur', validator: (r,v,cb) => !this.form.gatewayId  ? cb(new Error(r.message)) : cb()}],
+        channelType: [{ required: true, message: '不能为空', trigger: 'blur',  validator: (r,v,cb) => !this.form.channelType  ? cb(new Error(r.message)) : cb()}],
         gatewayUsage: [{ required: true, message: '不能为空', trigger: 'blur' }],
         bindedMktGatewayId: [{ required: true, message: '不能为空', trigger: 'blur' }]
       },
@@ -283,6 +283,7 @@ export default {
       if (!this.form.settings || !Object.keys(this.form.settings).length) {
         throw new Error('网关配置不能为空')
       }
+      this.form.channelType = this.channelType.name
       this.$refs.gatewayForm
         .validate()
         .then(() => {

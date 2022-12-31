@@ -15,7 +15,7 @@ import tech.quantit.northstar.data.IMarketDataRepository;
 import tech.quantit.northstar.data.IPlaybackRuntimeRepository;
 import tech.quantit.northstar.data.ISimAccountRepository;
 import tech.quantit.northstar.gateway.api.GatewayFactory;
-import tech.quantit.northstar.gateway.api.GatewaySettingsMetaInfoProvider;
+import tech.quantit.northstar.gateway.api.GatewayMetaProvider;
 import tech.quantit.northstar.gateway.api.IMarketCenter;
 import tech.quantit.northstar.gateway.ctp.CtpGatewaySettings;
 import tech.quantit.northstar.gateway.ctp.CtpSimGatewaySettings;
@@ -36,38 +36,25 @@ public class GatewayConfig {
 	}
 	
 	@Bean
-	public GatewayFactory ctpGatewayFactory(FastEventEngine fastEventEngine, IMarketCenter mktCenter, IDataServiceManager dataMgr) {
-		return new CtpGatewayFactory(fastEventEngine, mktCenter, dataMgr);
-	}
-
-	@Bean
-	public GatewayFactory ctpSimGatewayFactory(FastEventEngine fastEventEngine, IMarketCenter mktCenter, IDataServiceManager dataMgr) {
-		return new CtpSimGatewayFactory(fastEventEngine, mktCenter, dataMgr);
-	}
-
-	@Bean
-	public GatewayFactory playbackGatewayFactory(FastEventEngine fastEventEngine, IMarketCenter mktCenter,
-			IHolidayManager holidayMgr, IMarketDataRepository mdRepo, IPlaybackRuntimeRepository rtRepo) {
-		return new PlaybackGatewayFactory(fastEventEngine, mktCenter, holidayMgr, rtRepo, mdRepo);
-	}
-
-	@Bean
-	public GatewayFactory simGatewayFactory(FastEventEngine fastEventEngine, SimMarket simMarket,
-			ISimAccountRepository accRepo, IMarketCenter mktCenter) {
-		return new SimGatewayFactory(fastEventEngine, simMarket, accRepo, mktCenter);
-	}
-	
-	@Bean
 	public GatewayFactory tigerGatewayFactory(FastEventEngine fastEventEngine, IMarketCenter mktCenter) {
 		return new TigerGatewayFactory();
 	}
 	
 	@Bean 
-	public GatewaySettingsMetaInfoProvider gatewaySettingsMetaInfoProvider() {
+	public GatewayMetaProvider gatewayMetaProvider(FastEventEngine fastEventEngine, IMarketCenter mktCenter, IDataServiceManager dataMgr,
+			IHolidayManager holidayMgr, IMarketDataRepository mdRepo, IPlaybackRuntimeRepository rtRepo,
+			ISimAccountRepository accRepo, SimMarket simMarket) {
 		Map<ChannelType, GatewaySettings> settingsMap = new EnumMap<>(ChannelType.class);
 		settingsMap.put(ChannelType.CTP, new CtpGatewaySettings());
 		settingsMap.put(ChannelType.CTP_SIM, new CtpSimGatewaySettings());
 		settingsMap.put(ChannelType.PLAYBACK, new PlaybackGatewaySettings());
-		return new GatewaySettingsMetaInfoProvider(settingsMap);
+		settingsMap.put(ChannelType.SIM, new GatewaySettings() {});
+		
+		Map<ChannelType, GatewayFactory> factoryMap = new EnumMap<>(ChannelType.class);
+		factoryMap.put(ChannelType.CTP, new CtpGatewayFactory(fastEventEngine, mktCenter, dataMgr));
+		factoryMap.put(ChannelType.CTP_SIM, new CtpSimGatewayFactory(fastEventEngine, mktCenter, dataMgr));
+		factoryMap.put(ChannelType.PLAYBACK, new PlaybackGatewayFactory(fastEventEngine, mktCenter, holidayMgr, rtRepo, mdRepo));
+		factoryMap.put(ChannelType.SIM, new SimGatewayFactory(fastEventEngine, simMarket, accRepo, mktCenter));
+		return new GatewayMetaProvider(settingsMap, factoryMap);
 	}
 }
