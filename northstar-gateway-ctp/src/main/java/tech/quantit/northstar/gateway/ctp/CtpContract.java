@@ -90,7 +90,6 @@ public class CtpContract implements Instrument{
 		combinationType = c.getCombinationType();
 		gatewayId = c.getGatewayId();
 				
-		identifier = Identifier.of(unifiedSymbol);
 	}
 	
 	@Override
@@ -109,7 +108,7 @@ public class CtpContract implements Instrument{
 	@Override
 	public ContractField contractField() {
 		if(Objects.isNull(contractDef)) {
-			throw new IllegalStateException("没有合约定义信息");
+			throw new IllegalStateException(contractId + " 没有合约定义信息");
 		}
 		return ContractField.newBuilder()
 				.setContractId(Optional.ofNullable(contractId).orElse(""))

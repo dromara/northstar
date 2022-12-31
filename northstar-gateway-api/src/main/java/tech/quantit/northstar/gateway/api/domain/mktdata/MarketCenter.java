@@ -73,15 +73,14 @@ public class MarketCenter implements IMarketCenter, TickDataAware{
 	 */
 	@Override
 	public synchronized void addInstrument(Instrument ins) {
-		Contract contract = new GatewayContract(this, feEngine, ins);
-		contractMap.put(ins.identifier(), contract);
-		
 		// 绑定合约定义
 		List<ContractDefinition> defList = contractDefTbl.get(ins.exchange(), ins.productClass());
 		for(ContractDefinition def : defList) {
 			if(def.getSymbolPattern().matcher(ins.identifier().value()).matches()) {
 				log.debug("[{}] 匹配合约定义 [{} {} {}]", ins.identifier().value(), def.getExchange(), def.getProductClass(), def.getSymbolPattern().pattern());
 				ins.setContractDefinition(def);
+				Contract contract = new GatewayContract(this, feEngine, ins);
+				contractMap.put(ins.identifier(), contract);
 				
 				if(!channelDefContractGroups.contains(ins.channelType(), def)) {					
 					channelDefContractGroups.put(ins.channelType(), def, new ArrayList<>());
@@ -89,6 +88,10 @@ public class MarketCenter implements IMarketCenter, TickDataAware{
 				channelDefContractGroups.get(ins.channelType(), def).add(contract);
 				gatewaySymbolContractTbl.put(contract.gatewayId(), contract.contractField().getSymbol(), contract);
 			}
+		}
+
+		if(!contractMap.containsKey(ins.identifier())) {
+			log.debug("未找到 [{}] 的合约定义，忽略该合约的注册", ins.identifier().value());
 		}
 	}
 

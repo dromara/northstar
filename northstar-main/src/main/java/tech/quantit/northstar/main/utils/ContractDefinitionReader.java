@@ -34,7 +34,7 @@ public class ContractDefinitionReader {
 						.name(tokens[headerMap.get("name")])
 						.productClass(ProductClassEnum.valueOf(tokens[headerMap.get("class")]))
 						.exchange(ExchangeEnum.valueOf(tokens[headerMap.get("exchange")]))
-						.symbolPattern(Pattern.compile(ptnStr))
+						.symbolPattern(Pattern.compile(ptnStr, Pattern.CASE_INSENSITIVE))
 						.commissionFee(commission)
 						.commissionRate(commissionInBP)
 						.tradeTimeType(tokens[headerMap.get("tradeTimeType")])

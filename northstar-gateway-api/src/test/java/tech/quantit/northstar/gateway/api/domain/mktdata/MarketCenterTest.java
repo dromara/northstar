@@ -2,13 +2,9 @@ package tech.quantit.northstar.gateway.api.domain.mktdata;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.time.LocalTime;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -23,8 +19,6 @@ import tech.quantit.northstar.gateway.api.MarketGateway;
 import tech.quantit.northstar.gateway.api.domain.contract.ContractDefinition;
 import tech.quantit.northstar.gateway.api.domain.contract.Instrument;
 import tech.quantit.northstar.gateway.api.domain.time.GenericTradeTime;
-import tech.quantit.northstar.gateway.api.domain.time.IPeriodHelperFactory;
-import tech.quantit.northstar.gateway.api.domain.time.PeriodHelper;
 import tech.quantit.northstar.gateway.api.domain.time.TradeTimeDefinition;
 import test.common.TestFieldFactory;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
@@ -38,13 +32,11 @@ class MarketCenterTest {
 	String GATEWAY_ID = "testGateway";
 	TestFieldFactory factory = new TestFieldFactory(GATEWAY_ID);
 	
-	IPeriodHelperFactory phFactory = mock(IPeriodHelperFactory.class);
-	PeriodHelper pHelper = mock(PeriodHelper.class);
 	MarketCenter center;
 	
 	Instrument ins1 = new TestContract("rb2305", "rb2305@SHFE@FUTURES", ProductClassEnum.FUTURES, ExchangeEnum.SHFE);
 	
-	Instrument ins2 = new TestContract("rb2310", "rb2310@SHFE@FUTURES", ProductClassEnum.FUTURES, ExchangeEnum.SHFE);
+	Instrument ins2 = new TestContract("sc2403", "sc2403@INE@FUTURES@PLAYBACK", ProductClassEnum.FUTURES, ExchangeEnum.INE);
 	
 	Instrument ins3 = new TestContract("rb2305C5000", "rb2305C5000@SHFE@OPTIONS", ProductClassEnum.OPTION, ExchangeEnum.SHFE);
 	
@@ -62,10 +54,14 @@ class MarketCenterTest {
 				.productClass(ProductClassEnum.OPTION)
 				.exchange(ExchangeEnum.SHFE)
 				.build();
-		center = new MarketCenter(List.of(def1, def2), mock(FastEventEngine.class));
+		ContractDefinition def3 = ContractDefinition.builder()
+				.name("SC指数")
+				.symbolPattern(Pattern.compile("sc[0-9]{3,4}@.+"))
+				.productClass(ProductClassEnum.FUTURES)
+				.exchange(ExchangeEnum.INE)
+				.build();
+		center = new MarketCenter(List.of(def1, def2, def3), mock(FastEventEngine.class));
 		
-		when(phFactory.newInstance(anyInt(), anyBoolean(), any(ContractDefinition.class))).thenReturn(pHelper);
-		when(pHelper.getRunningBaseTimeFrame()).thenReturn(List.of(LocalTime.now().plusMinutes(1).withSecond(0).withNano(0)));
 	}
 	
 	@Test
@@ -102,8 +98,8 @@ class MarketCenterTest {
 		center.addInstrument(ins3);
 		center.loadContractGroup(ChannelType.SIM);
 		
-		assertThat(center.getContracts(GATEWAY_ID)).hasSize(5);
-		assertThat(center.getContracts("")).hasSize(5);
+		assertThat(center.getContracts(GATEWAY_ID)).hasSize(6);
+		assertThat(center.getContracts("")).hasSize(6);
 	}
 	
 	@Test 
