@@ -8,9 +8,9 @@
     :show-close="false"
   >
     <GatewaySettingsForm
-      v-if="form.gatewayType !== 'PLAYBACK'"
+      v-if="form.channelType !== 'PLAYBACK'"
       :visible.sync="gatewaySettingsFormVisible"
-      :gatewayType="form.gatewayType"
+      :channelType="form.channelType"
       :gatewaySettingsMetaInfo="gatewaySettingsMetaInfo"
       :gatewaySettingsObject="form.settings"
       @onSave="(settings) => (form.settings = settings)"
@@ -30,7 +30,7 @@
               v-model="form.gatewayId"
               autocomplete="off"
               :disabled="
-                isUpdateMode || (gatewayUsage === 'MARKET_DATA' && !gatewayType.allowDuplication)
+                isUpdateMode || (gatewayUsage === 'MARKET_DATA' && !channelType.allowDuplication)
               "
             ></el-input>
           </el-form-item>
@@ -43,15 +43,15 @@
       </el-row>
       <el-row>
         <el-col :span="8">
-          <el-form-item :label="`${typeLabel}类型`" prop="gatewayType">
+          <el-form-item :label="`${typeLabel}类型`" prop="channelType">
             <el-select
-              v-model="gatewayType"
+              v-model="channelType"
               placeholder="未知"
               @change="onChooseGatewayType"
               :disabled="isUpdateMode"
             >
               <el-option
-                v-for="(item, i) in gatewayTypeOptions"
+                v-for="(item, i) in channelTypeOptions"
                 :label="item.name"
                 :value="item"
                 :key="i"
@@ -140,7 +140,7 @@
       <el-button
         type="primary"
         @click="gatewaySettingsFormVisible = true"
-        :disabled="!form.gatewayType || form.gatewayType === 'SIM'"
+        :disabled="!form.channelType || form.channelType === 'SIM'"
         >{{ typeLabel }}配置</el-button
       >
       <el-button id="saveGatewaySettings" type="primary" @click="saveGateway">保 存</el-button>
@@ -194,7 +194,7 @@ export default {
       linkedGatewayOptions: [],
       formRules: {
         gatewayId: [{ required: true, message: '不能为空', trigger: 'blur' }],
-        gatewayType: [{ required: true, message: '不能为空', trigger: 'blur' }],
+        channelType: [{ required: true, message: '不能为空', trigger: 'blur' }],
         gatewayUsage: [{ required: true, message: '不能为空', trigger: 'blur' }],
         bindedMktGatewayId: [{ required: true, message: '不能为空', trigger: 'blur' }]
       },
@@ -202,7 +202,7 @@ export default {
       form: {
         gatewayId: '',
         description: '',
-        gatewayType: '',
+        channelType: '',
         gatewayUsage: '',
         gatewayAdapterType: '',
         connectionState: CONNECTION_STATE.DISCONNECTED,
@@ -212,9 +212,9 @@ export default {
         settings: null
       },
       subscribedContractGroups: [],
-      gatewayTypeOptions: [],
+      channelTypeOptions: [],
       contractOptions: [],
-      gatewayType: '',
+      channelType: '',
       contractType: '',
       gatewaySettingsMetaInfo: []
     }
@@ -234,7 +234,7 @@ export default {
             this.linkedGatewayOptions = result
           })
           gatewayMgmtApi.getGatewayTypeDescriptions().then((result) => {
-            this.gatewayTypeOptions = result
+            this.channelTypeOptions = result
               .filter((item) => item.usage.indexOf(this.gatewayUsage) > -1)
               .filter((item) => !item.adminOnly || this.$route.query.superuser)
               .map((item) => Object.assign({value: item.name}, item))
@@ -242,7 +242,7 @@ export default {
         })
       }
     },
-    'gatewayType': async function (val) {
+    'channelType': async function (val) {
       if (
         val &&
         this.gatewayUsage === 'MARKET_DATA' &&
@@ -252,7 +252,7 @@ export default {
         this.subscribedContractGroups = []
       }
       if (val) {
-        this.form.gatewayType = val.name
+        this.form.channelType = val.name
 
         if (val !== 'SIM') {
           // 获取网关配置元信息
@@ -263,21 +263,21 @@ export default {
         }
 
         // 获取合约品种列表
-        this.contractOptions = await contractApi.getGatewayContracts(this.gatewayType === 'PLAYBACK' ? 'CTP' : this.gatewayType);
+        this.contractOptions = await contractApi.getGatewayContracts(this.channelType === 'PLAYBACK' ? 'CTP' : this.channelType);
       }
     }
   },
   methods: {
     onChooseGatewayType() {
-      this.form.gatewayAdapterType = GATEWAY_ADAPTER[this.form.gatewayType]
-      if (this.gatewayUsage === 'MARKET_DATA' && !this.gatewayType.allowDuplication) {
-        this.form.gatewayId = `${this.gatewayType.name}`
-      } else if (this.gatewayType.allowDuplication) {
+      this.form.gatewayAdapterType = GATEWAY_ADAPTER[this.form.channelType]
+      if (this.gatewayUsage === 'MARKET_DATA' && !this.channelType.allowDuplication) {
+        this.form.gatewayId = `${this.channelType.name}`
+      } else if (this.channelType.allowDuplication) {
         this.form.gatewayId = ''
       }
     },
     async saveGateway() {
-      if (this.form.gatewayType === 'SIM') {
+      if (this.form.channelType === 'SIM') {
         this.form.settings = { nothing: 0 }
       }
       if (!this.form.settings || !Object.keys(this.form.settings).length) {

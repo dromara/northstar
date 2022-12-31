@@ -2,8 +2,8 @@
   <el-dialog width="300px" title="合约查询" :visible="visible" append-to-body :before-close="close">
     <el-form label-width="100px">
       <el-form-item label="网关类别">
-        <el-select v-model="gatewayType">
-          <el-option v-for="gw in gatewayTypes" :label="gw" :value="gw" :key="gw"></el-option>
+        <el-select v-model="channelType">
+          <el-option v-for="gw in channelTypes" :label="gw" :value="gw" :key="gw"></el-option>
         </el-select>
       </el-form-item>
       <el-form-item label="合约类型">
@@ -53,16 +53,16 @@ export default {
   },
   data() {
     return {
-      gatewayType: '',
+      channelType: '',
       contractType: '',
       unifiedSymbol: '',
-      gatewayTypes: [],
+      channelTypes: [],
       contractList: [],
       contractTypeOptions: []
     }
   },
   watch: {
-    gatewayType: function (val) {
+    channelType: function (val) {
       this.contractType = ''
       this.unifiedSymbol = ''
       contractApi.getContractProviders(val).then((result) => {
@@ -81,7 +81,7 @@ export default {
   },
   mounted() {
     gatewayMgmtApi.getGatewayTypeDescriptions().then((result) => {
-      this.gatewayTypes = result.filter((item) => !item.adminOnly).map((item) => item.name)
+      this.channelTypes = result.filter((item) => !item.adminOnly).map((item) => item.name)
     })
   },
   methods: {

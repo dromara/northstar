@@ -1,6 +1,6 @@
 <template>
   <el-dialog
-    :title="`${gatewayType}网关配置`"
+    :title="`${channelType}网关配置`"
     width="300px"
     :visible="visible"
     append-to-body
@@ -54,7 +54,7 @@ export default {
       type: Boolean,
       default: false
     },
-    gatewayType: {
+    channelType: {
       type: String,
       default: ''
     },

@@ -37,7 +37,7 @@
       </el-table-column>
       <el-table-column
         :label="`${typeLabel}类型`"
-        prop="gatewayType"
+        prop="channelType"
         width="90px"
         header-align="center"
         align="center"
@@ -135,7 +135,7 @@
             v-if="
               gatewayUsage === 'TRADE' &&
               scope.row.connectionState === 'CONNECTED' &&
-              scope.row.gatewayType === 'SIM'
+              scope.row.channelType === 'SIM'
             "
             @click="handleMoneyIO(scope.row)"
             >出入金</el-button
@@ -144,7 +144,7 @@
             v-if="
               gatewayUsage === 'MARKET_DATA' &&
               scope.row.connectionState === 'DISCONNECTED' &&
-              scope.row.gatewayType === 'PLAYBACK'
+              scope.row.channelType === 'PLAYBACK'
             "
             class="ml-10 mr-10"
             title="确定要重新回放历史行情吗？"
