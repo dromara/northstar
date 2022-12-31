@@ -10,6 +10,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import lombok.extern.slf4j.Slf4j;
+import tech.quantit.northstar.common.constant.ChannelType;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.event.NorthstarEventType;
 import tech.quantit.northstar.common.model.Identifier;
@@ -17,7 +18,6 @@ import tech.quantit.northstar.gateway.api.IMarketCenter;
 import tech.quantit.northstar.gateway.api.MarketGateway;
 import tech.quantit.northstar.gateway.api.domain.contract.GatewayContract;
 import tech.quantit.northstar.gateway.api.domain.contract.Instrument;
-import tech.quantit.northstar.gateway.sim.SIM;
 import tech.quantit.northstar.gateway.sim.trade.SimContractGenerator;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.GatewaySettingField;
@@ -130,8 +130,8 @@ public class SimMarketGatewayLocal implements MarketGateway{
 	}
 
 	@Override
-	public String channelType() {
-		return SIM.class.getName();
+	public ChannelType channelType() {
+		return ChannelType.SIM;
 	}
 
 }

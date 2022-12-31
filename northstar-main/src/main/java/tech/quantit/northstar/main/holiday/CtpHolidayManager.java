@@ -12,8 +12,8 @@ import org.springframework.stereotype.Component;
 
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.IHolidayManager;
+import tech.quantit.northstar.common.constant.ChannelType;
 import tech.quantit.northstar.data.IMarketDataRepository;
-import tech.quantit.northstar.gateway.ctp.CTP;
 
 /**
  * 法定节假日管理器
@@ -65,8 +65,8 @@ public class CtpHolidayManager implements IHolidayManager, InitializingBean{
 	}
 
 	@Override
-	public String gatewayType() {
-		return CTP.class.getSimpleName();
+	public ChannelType channelType() {
+		return ChannelType.CTP;
 	}
 	
 }

@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import com.alibaba.fastjson.JSONObject;
 
+import tech.quantit.northstar.common.constant.ChannelType;
 import tech.quantit.northstar.common.constant.ConnectionState;
 import tech.quantit.northstar.common.constant.GatewayUsage;
 import tech.quantit.northstar.common.model.GatewayDescription;
@@ -19,7 +20,7 @@ public class GatewayConnectionTest {
 	public void prepare() {
 		GatewayDescription gd = GatewayDescription.builder()
 				.gatewayId("testGateway")
-				.gatewayType("CTP")
+				.channelType(ChannelType.CTP)
 				.gatewayUsage(GatewayUsage.TRADE)
 				.settings(new JSONObject())
 				.build();

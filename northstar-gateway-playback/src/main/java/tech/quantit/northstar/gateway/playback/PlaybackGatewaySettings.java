@@ -2,7 +2,6 @@ package tech.quantit.northstar.gateway.playback;
 
 import java.util.List;
 
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -19,13 +18,10 @@ import tech.quantit.northstar.gateway.api.GatewaySettingsMetaInfoProvider;
 @Getter
 @Setter
 @Component
-public class PlaybackGatewaySettings extends DynamicParams implements GatewaySettings, InitializingBean{
+public class PlaybackGatewaySettings extends DynamicParams implements GatewaySettings {
 	
 	@Autowired
 	private GatewaySettingsMetaInfoProvider pvd;
-	
-	@Autowired
-	private PLAYBACK playback;
 	
 	/**
 	 * 预热起始时间
@@ -63,8 +59,4 @@ public class PlaybackGatewaySettings extends DynamicParams implements GatewaySet
 	@Setting(label="回放合约", order=50, type=FieldType.MULTI_SELECT)
 	private List<String> unifiedSymbols;
 	
-	@Override
-	public void afterPropertiesSet() throws Exception {
-		pvd.addSettings(playback.name(), this);
-	}
 }

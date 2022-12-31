@@ -14,6 +14,7 @@ import com.alibaba.fastjson.JSON;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import tech.quantit.northstar.common.constant.ChannelType;
 import tech.quantit.northstar.common.constant.GatewayUsage;
 import tech.quantit.northstar.common.exception.NoSuchElementException;
 import tech.quantit.northstar.common.model.ComponentField;
@@ -29,9 +30,9 @@ import tech.quantit.northstar.data.ISimAccountRepository;
 import tech.quantit.northstar.domain.gateway.GatewayAndConnectionManager;
 import tech.quantit.northstar.domain.gateway.GatewayConnection;
 import tech.quantit.northstar.gateway.api.Gateway;
+import tech.quantit.northstar.gateway.api.GatewayChannelProvider;
 import tech.quantit.northstar.gateway.api.GatewayFactory;
 import tech.quantit.northstar.gateway.api.GatewaySettingsMetaInfoProvider;
-import tech.quantit.northstar.gateway.api.GatewayChannelProvider;
 import tech.quantit.northstar.gateway.api.IContractManager;
 import tech.quantit.northstar.gateway.api.MarketGateway;
 import tech.quantit.northstar.gateway.sim.trade.SimTradeGateway;
@@ -50,9 +51,9 @@ public class GatewayService implements InitializingBean {
 	
 	private GatewayAndConnectionManager gatewayConnMgr;
 	
-	private GatewayChannelProvider gatewayTypeProvider;
-	
 	private GatewaySettingsMetaInfoProvider gatewaySettingsProvider;
+	
+	private GatewayChannelProvider channelProvider;
 	
 	private IContractManager contractMgr;
 	
@@ -81,7 +82,7 @@ public class GatewayService implements InitializingBean {
 	private boolean doCreateGateway(GatewayDescription gatewayDescription) {
 		Gateway gateway = null;
 		GatewayConnection conn = new GatewayConnection(gatewayDescription);
-		GatewayFactory factory = gatewayTypeProvider.getFactory(gatewayDescription.getGatewayType());
+		GatewayFactory factory = channelProvider.getFactory(gatewayDescription.getChannelType());
 		gateway = factory.newInstance(gatewayDescription);
 		gatewayConnMgr.createPair(conn, gateway);
 		if(gatewayDescription.isAutoConnect()) {
@@ -152,9 +153,9 @@ public class GatewayService implements InitializingBean {
 		}
 		boolean flag = doDeleteGateway(gatewayId);
 		mdRepo.dropGatewayData(gatewayId);
-		if(gd.getGatewayType().equals("SIM"))
+		if(gd.getChannelType() == ChannelType.SIM)
 			simAccRepo.deleteById(gatewayId);
-		if(gd.getGatewayType().equals("PLAYBACK")) 
+		if(gd.getChannelType() == ChannelType.PLAYBACK) 
 			playbackRtRepo.deleteById(gatewayId);
 		return flag;
 	}

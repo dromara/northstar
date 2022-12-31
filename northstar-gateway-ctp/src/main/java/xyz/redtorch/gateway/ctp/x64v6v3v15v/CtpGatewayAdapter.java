@@ -8,12 +8,12 @@ import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import tech.quantit.northstar.common.constant.ChannelType;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.gateway.api.GatewayAbstract;
 import tech.quantit.northstar.gateway.api.IMarketCenter;
 import tech.quantit.northstar.gateway.api.MarketGateway;
 import tech.quantit.northstar.gateway.api.TradeGateway;
-import tech.quantit.northstar.gateway.ctp.CTP;
 import xyz.redtorch.pb.CoreEnum.GatewayTypeEnum;
 import xyz.redtorch.pb.CoreField.CancelOrderReqField;
 import xyz.redtorch.pb.CoreField.ContractField;
@@ -250,8 +250,8 @@ public class CtpGatewayAdapter extends GatewayAbstract implements MarketGateway,
 
 
 	@Override
-	public String channelType() {
-		return CTP.class.getName();
+	public ChannelType channelType() {
+		return ChannelType.CTP;
 	}
 
 }

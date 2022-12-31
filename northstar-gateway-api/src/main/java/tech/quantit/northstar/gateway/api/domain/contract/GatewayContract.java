@@ -29,7 +29,7 @@ public class GatewayContract implements Contract, TickDataAware{
 	
 	private Instrument ins;
 	
-	public GatewayContract(MarketGateway gateway, FastEventEngine feEngine, Instrument ins, PeriodHelper phHelper) {
+	public GatewayContract(FastEventEngine feEngine, Instrument ins, PeriodHelper phHelper) {
 		this.gateway = gateway;
 		this.ins = ins;
 		this.contract = ins.contractField();

@@ -17,13 +17,10 @@ import tech.quantit.northstar.gateway.api.GatewaySettingsMetaInfoProvider;
 @Getter
 @Setter
 @Component
-public class TigerGatewaySettings extends DynamicParams implements GatewaySettings, InitializingBean{
+public class TigerGatewaySettings extends DynamicParams implements GatewaySettings {
 
 	@Autowired
 	private GatewaySettingsMetaInfoProvider pvd;
-	
-	@Autowired
-	private TIGER tiger;
 	
 	@Setting(label="用户ID", order=10, type=FieldType.TEXT)
 	private String tigerId;
@@ -40,9 +37,4 @@ public class TigerGatewaySettings extends DynamicParams implements GatewaySettin
 	@Setting(label="secretKey", order=50, type=FieldType.TEXT)
 	private String secretKey;
 	
-	@Override
-	public void afterPropertiesSet() throws Exception {
-		pvd.addSettings(tiger.name(), this);
-	}
-
 }

@@ -1,5 +1,7 @@
 package tech.quantit.northstar.main.restful;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -14,15 +16,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import tech.quantit.northstar.common.constant.ChannelType;
 import tech.quantit.northstar.common.constant.GatewayUsage;
 import tech.quantit.northstar.common.model.ComponentField;
 import tech.quantit.northstar.common.model.GatewayDescription;
 import tech.quantit.northstar.common.model.GatewayTypeDescription;
 import tech.quantit.northstar.common.model.ResultBean;
 import tech.quantit.northstar.gateway.api.IContractManager;
-import tech.quantit.northstar.gateway.api.GatewayChannelProvider;
 import tech.quantit.northstar.main.service.GatewayService;
-import xyz.redtorch.pb.CoreField.ContractField;
 
 @RequestMapping("/northstar/gateway")
 @RestController
@@ -33,9 +34,6 @@ public class GatewayManagementController {
 	
 	@Autowired
 	protected IContractManager contractMgr;
-	
-	@Autowired
-	protected GatewayChannelProvider gatewayTypeProvider;
 	
 	@PostMapping
 	public ResultBean<Boolean> create(@RequestBody GatewayDescription gd) throws Exception {
@@ -103,10 +101,7 @@ public class GatewayManagementController {
 	
 	@GetMapping("/types")
 	public ResultBean<Collection<GatewayTypeDescription>> gatewayTypeOptions(){
-		return new ResultBean<>(gatewayTypeProvider.getAll()
-				.stream()
-				.map(GatewayTypeDescription::new)
-				.toList());
+		return new ResultBean<>(new ArrayList<>(Arrays.asList(ChannelType.values())).stream().map(GatewayTypeDescription::new).toList());
 	}
 	
 //	@GetMapping("/sub")
