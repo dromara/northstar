@@ -11,7 +11,7 @@ class PeriodHelperTest {
 	
 	TradeTimeDefinition demo = new TradeTimeDefinition() {
 		@Override
-		public List<PeriodSegment> getPeriodSegments() {
+		public List<PeriodSegment> tradeTimeSegments() {
 			return List.of(
 					new PeriodSegment(LocalTime.of(21, 0), LocalTime.of(2, 30)),
 					new PeriodSegment(LocalTime.of(9, 1), LocalTime.of(10, 15)),
@@ -19,6 +19,7 @@ class PeriodHelperTest {
 					new PeriodSegment(LocalTime.of(13, 31), LocalTime.of(15, 00))
 				);
 		}
+
 	};
 	
 	TradeTimeDefinition general = new GenericTradeTime();

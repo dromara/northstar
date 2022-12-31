@@ -256,14 +256,14 @@ export default {
 
         if (val !== 'SIM') {
           // 获取网关配置元信息
-          gatewayMgmtApi.getGatewaySettingsMetaInfo(val).then((result) => {
+          gatewayMgmtApi.getGatewaySettingsMetaInfo(this.form.channelType).then((result) => {
             this.gatewaySettingsMetaInfo = result
             this.gatewaySettingsMetaInfo.sort((a, b) => (a.order < b.order ? -1 : 1))
           })
         }
 
         // 获取合约品种列表
-        this.contractOptions = await contractApi.getGatewayContracts(this.channelType === 'PLAYBACK' ? 'CTP' : this.channelType);
+        this.contractOptions = await contractApi.getGatewayContracts(this.form.channelType === 'PLAYBACK' ? 'CTP' : this.form.channelType);
       }
     }
   },

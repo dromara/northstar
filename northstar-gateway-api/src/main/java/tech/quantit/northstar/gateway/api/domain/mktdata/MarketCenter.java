@@ -1,6 +1,7 @@
 package tech.quantit.northstar.gateway.api.domain.mktdata;
 
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,25 +15,22 @@ import org.apache.commons.lang3.StringUtils;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 
+import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.TickDataAware;
 import tech.quantit.northstar.common.constant.ChannelType;
-import tech.quantit.northstar.common.constant.Constants;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.exception.NoSuchElementException;
 import tech.quantit.northstar.common.model.Identifier;
-import tech.quantit.northstar.common.utils.ContractUtils;
 import tech.quantit.northstar.gateway.api.IMarketCenter;
 import tech.quantit.northstar.gateway.api.MarketGateway;
 import tech.quantit.northstar.gateway.api.domain.contract.Contract;
 import tech.quantit.northstar.gateway.api.domain.contract.ContractDefinition;
 import tech.quantit.northstar.gateway.api.domain.contract.GatewayContract;
-import tech.quantit.northstar.gateway.api.domain.contract.GroupedContract;
 import tech.quantit.northstar.gateway.api.domain.contract.IndexContract;
 import tech.quantit.northstar.gateway.api.domain.contract.Instrument;
-import tech.quantit.northstar.gateway.api.domain.time.IPeriodHelperFactory;
+import tech.quantit.northstar.gateway.api.domain.contract.OptionChainContract;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
-import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.TickField;
 
 /**
@@ -41,6 +39,7 @@ import xyz.redtorch.pb.CoreField.TickField;
  * @author KevinHuangwl
  *
  */
+@Slf4j
 public class MarketCenter implements IMarketCenter, TickDataAware{
 	
 	private static final int INIT_SIZE = 16384;
@@ -51,13 +50,13 @@ public class MarketCenter implements IMarketCenter, TickDataAware{
 
 	private final Table<ExchangeEnum, ProductClassEnum, List<ContractDefinition>> contractDefTbl = HashBasedTable.create();
 	
-	private final Table<String, ContractDefinition, List<Contract>> gatewayDefContractGroups = HashBasedTable.create();
+	private final Table<ChannelType, ContractDefinition, List<Contract>> channelDefContractGroups = HashBasedTable.create();
 	
 	private final Table<String, String, Contract> gatewaySymbolContractTbl = HashBasedTable.create(); 
 	
-	private final FastEventEngine feEngine;
+	private final Map<ChannelType, MarketGateway> gatewayMap = new EnumMap<>(ChannelType.class);
 	
-	private final Map<String, IPeriodHelperFactory> gatewayPeriodHelperFactoryMap = new HashMap<>();
+	private final FastEventEngine feEngine;
 	
 	public MarketCenter(List<ContractDefinition> contractDefs, FastEventEngine feEngine) {
 		this.feEngine = feEngine;
@@ -74,45 +73,36 @@ public class MarketCenter implements IMarketCenter, TickDataAware{
 	 */
 	@Override
 	public synchronized void addInstrument(Instrument ins) {
-//		String gatewayId = gateway.getGatewaySetting().getGatewayId();
-//		gatewayPeriodHelperFactoryMap.computeIfAbsent(gatewayId, key -> phFactory);
-//		
-//		if(!contractDefTbl.contains(ins.exchange(), ins.productClass())) {
-//			contractDefTbl.put(ins.exchange(), ins.productClass(), new ArrayList<>());
-//		}
+		Contract contract = new GatewayContract(this, feEngine, ins);
+		contractMap.put(ins.identifier(), contract);
+		
+		// 绑定合约定义
 		List<ContractDefinition> defList = contractDefTbl.get(ins.exchange(), ins.productClass());
-//		for(ContractDefinition def : defList) {
-//			if(def.getSymbolPattern().matcher(ins.identifier().value()).matches() 
-//					&& def.getProductClass() == ins.productClass()
-//					&& def.getExchange() == ins.exchange()) {
-//				ins.setContractDefinition(def);
-//				Contract contract = new GatewayContract(gateway, feEngine, ins, phFactory.newInstance(1, false, def));
-//				contractMap.put(ins.identifier(), contract);
-//				
-//				if(!gatewayDefContractGroups.contains(gatewayId, def)) {					
-//					gatewayDefContractGroups.put(gatewayId, def, new ArrayList<>());
-//				}
-//				gatewayDefContractGroups.get(gatewayId, def).add(contract);
-//				gatewaySymbolContractTbl.put(gatewayId, contract.contractField().getSymbol(), contract);
-//			}
-//		}
+		for(ContractDefinition def : defList) {
+			if(def.getSymbolPattern().matcher(ins.identifier().value()).matches()) {
+				log.debug("[{}] 匹配合约定义 [{} {} {}]", ins.identifier().value(), def.getExchange(), def.getProductClass(), def.getSymbolPattern().pattern());
+				ins.setContractDefinition(def);
+				
+				if(!channelDefContractGroups.contains(ins.channelType(), def)) {					
+					channelDefContractGroups.put(ins.channelType(), def, new ArrayList<>());
+				}
+				channelDefContractGroups.get(ins.channelType(), def).add(contract);
+				gatewaySymbolContractTbl.put(contract.gatewayId(), contract.contractField().getSymbol(), contract);
+			}
+		}
 	}
 
 	/**
 	 * 加载合约组
 	 */
 	@Override
-	public synchronized void loadContractGroup(String gatewayId) {
-		if(!gatewayPeriodHelperFactoryMap.containsKey(gatewayId)) {
-			throw new IllegalStateException(String.format("[%s] 没有合约注册信息", gatewayId));
-		}
-		IPeriodHelperFactory factory = gatewayPeriodHelperFactoryMap.get(gatewayId);
-		List<Contract> gatewayContracts = getContracts(gatewayId);
+	public synchronized void loadContractGroup(ChannelType channelType) {
+		List<Contract> gatewayContracts = getContracts(channelType);
 		// 聚合期权合约
 		aggregateOptionContracts(gatewayContracts.stream().filter(c -> c.productClass() == ProductClassEnum.OPTION).toList());
 		
 		// 聚合期货合约
-		aggregateFutureIndexContracts(gatewayDefContractGroups.row(gatewayId), factory);
+		aggregateFutureIndexContracts(channelDefContractGroups.row(channelType));
 		
 	}
 	
@@ -124,43 +114,22 @@ public class MarketCenter implements IMarketCenter, TickDataAware{
 			symbolOptionsMap.get(underlyingSymbol).add(c);
 		}
 		for(Entry<String, List<Contract>> e : symbolOptionsMap.entrySet()) {
-			Contract c = new GroupedContract(String.format("%s_期权链", e.getKey()), e.getValue());
+			Contract c = new OptionChainContract(String.format("%s_期权链", e.getKey()), e.getValue());
 			contractMap.put(c.identifier(), c);
 		}
 	}
 	
-	private void aggregateFutureIndexContracts(Map<ContractDefinition, List<Contract>> contractDefMap, IPeriodHelperFactory factory) {
+	private void aggregateFutureIndexContracts(Map<ContractDefinition, List<Contract>> contractDefMap) {
 		for(Entry<ContractDefinition, List<Contract>> e : contractDefMap.entrySet()) {
 			if(e.getKey().getProductClass() != ProductClassEnum.FUTURES) {
 				continue;
 			}
-			ContractDefinition def = e.getKey();
-			ContractField idxContractField = makeIndexContractField(e.getValue().get(0).contractField());
-			IndexContract c = new IndexContract(feEngine, idxContractField, e.getValue(), factory.newInstance(1, false, def));
+			IndexContract c = new IndexContract(feEngine, e.getValue());
 			contractMap.put(c.identifier(), c);
 		}
 	}
 	
-	private ContractField makeIndexContractField(ContractField proto) {
-		String name = proto.getName().replaceAll("\\d+", "指数");
-		String fullName = proto.getFullName().replaceAll("\\d+", "指数");
-		String originSymbol = proto.getSymbol();
-		String symbol = originSymbol.replaceAll("\\d+", Constants.INDEX_SUFFIX);
-		String contractId = proto.getContractId().replace(originSymbol, symbol);
-		String thirdPartyId = proto.getThirdPartyId().replace(originSymbol, symbol);
-		String unifiedSymbol = proto.getUnifiedSymbol().replace(originSymbol, symbol);
-		return ContractField.newBuilder(proto)
-				.setSymbol(symbol)
-				.setThirdPartyId(thirdPartyId)
-				.setContractId(contractId)
-				.setLastTradeDateOrContractMonth("")
-				.setUnifiedSymbol(unifiedSymbol)
-				.setFullName(fullName)
-				.setLongMarginRatio(0.1)
-				.setShortMarginRatio(0.1)
-				.setName(name)
-				.build();
-	}
+	
 	
 	/**
 	 * 查找合约
@@ -205,7 +174,7 @@ public class MarketCenter implements IMarketCenter, TickDataAware{
 	public List<Contract> getContracts(ChannelType channelType) {
 		return contractMap.values()
 				.stream()
-				.filter(c -> ContractUtils.getMarketChannel(c.contractField()) == channelType)
+				.filter(c -> c.channelType() == channelType)
 				.toList();
 	}
 
@@ -241,7 +210,12 @@ public class MarketCenter implements IMarketCenter, TickDataAware{
 	 */
 	@Override
 	public void addGateway(MarketGateway gateway) {
-		
+		gatewayMap.put(gateway.channelType(), gateway);
+	}
+
+	@Override
+	public MarketGateway getGateway(ChannelType channelType) {
+		return gatewayMap.get(channelType);
 	}
 
 }

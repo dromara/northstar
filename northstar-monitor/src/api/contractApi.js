@@ -1,8 +1,8 @@
 import baseService from './baseRequest'
 
 export default {
-    getGatewayContracts(gatewayId){
-        return baseService.get(`/contracts?gateway=${gatewayId}`)
+    getGatewayContracts(channelType){
+        return baseService.get(`/contracts?gateway=${channelType}`)
     },
     getSubscribedContracts(gatewayId){
         return baseService.get(`/contracts/subscribed?gateway=${gatewayId}`)

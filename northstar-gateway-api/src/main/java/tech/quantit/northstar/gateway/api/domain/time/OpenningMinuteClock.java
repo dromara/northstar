@@ -28,8 +28,8 @@ public class OpenningMinuteClock {
 	
 	private PeriodHelper helper;
 	
-	public OpenningMinuteClock(ContractField contract, PeriodHelper phHelper) {
-		helper = phHelper;
+	public OpenningMinuteClock(ContractField contract, TradeTimeDefinition tradeTimeDefinition) {
+		helper = new PeriodHelper(1, tradeTimeDefinition);
 		timeFrame = helper.getRunningBaseTimeFrame();
 		endByWholeMin = exchangesOfEndByWholeMin.contains(contract.getExchange());
 	}

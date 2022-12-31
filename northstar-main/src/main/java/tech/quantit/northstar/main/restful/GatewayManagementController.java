@@ -95,8 +95,8 @@ public class GatewayManagementController {
 	}
 	
 	@GetMapping("/settings")
-	public ResultBean<Collection<ComponentField>> getGatewaySettingsMetaInfo(String gatewayType){
-		return new ResultBean<>(gatewayService.getGatewaySettingsMetaInfo(gatewayType));
+	public ResultBean<Collection<ComponentField>> getGatewaySettingsMetaInfo(ChannelType channelType){
+		return new ResultBean<>(gatewayService.getGatewaySettingsMetaInfo(channelType));
 	}
 	
 	@GetMapping("/types")

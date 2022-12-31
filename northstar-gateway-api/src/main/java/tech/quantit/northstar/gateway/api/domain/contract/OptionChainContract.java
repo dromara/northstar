@@ -5,7 +5,9 @@ import java.util.List;
 import org.springframework.util.Assert;
 
 import lombok.extern.slf4j.Slf4j;
+import tech.quantit.northstar.common.constant.ChannelType;
 import tech.quantit.northstar.common.model.Identifier;
+import tech.quantit.northstar.gateway.api.domain.time.TradeTimeDefinition;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
 
@@ -15,7 +17,7 @@ import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
  *
  */
 @Slf4j
-public class GroupedContract implements Contract {
+public class OptionChainContract implements Contract {
 
 	private final String name;
 	
@@ -25,7 +27,7 @@ public class GroupedContract implements Contract {
 	
 	private boolean hasSubscribed;
 	
-	public GroupedContract(String name, List<Contract> memberContracts) {
+	public OptionChainContract(String name, List<Contract> memberContracts) {
 		Assert.notEmpty(memberContracts, "集合不能为空");
 		this.memberContracts = memberContracts;
 		this.identifier = Identifier.of(name);
@@ -82,5 +84,15 @@ public class GroupedContract implements Contract {
 	@Override
 	public String gatewayId() {
 		return memberContracts.get(0).gatewayId();
+	}
+
+	@Override
+	public TradeTimeDefinition tradeTimeDefinition() {
+		return memberContracts.get(0).tradeTimeDefinition();
+	}
+	
+	@Override
+	public ChannelType channelType() {
+		return memberContracts.get(0).channelType();
 	}
 }

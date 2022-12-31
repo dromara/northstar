@@ -20,7 +20,7 @@ class OpenningMinuteClockTest {
 	TradeTimeDefinition ttd = new TradeTimeDefinition() {
 		
 		@Override
-		public List<PeriodSegment> getPeriodSegments() {
+		public List<PeriodSegment> tradeTimeSegments() {
 			return List.of(new PeriodSegment(LocalTime.of(21, 0), LocalTime.of(23, 00)),
 					new PeriodSegment(LocalTime.of(9, 1), LocalTime.of(10, 15)),
 					new PeriodSegment(LocalTime.of(10, 31), LocalTime.of(11, 30)),
@@ -32,7 +32,7 @@ class OpenningMinuteClockTest {
 	
 	@BeforeEach
 	void prepare() {
-		clock = new OpenningMinuteClock(factory.makeContract("rb2210"), new PeriodHelper(1, ttd));
+		clock = new OpenningMinuteClock(factory.makeContract("rb2210"), ttd);
 	}
 
 	@Test

@@ -36,13 +36,13 @@ import tech.quantit.northstar.common.model.ModuleDealRecord;
 import tech.quantit.northstar.common.model.ModuleDescription;
 import tech.quantit.northstar.common.model.ModulePositionDescription;
 import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
-import tech.quantit.northstar.common.utils.ContractUtils;
 import tech.quantit.northstar.common.utils.MarketDataLoadingUtils;
 import tech.quantit.northstar.data.IGatewayRepository;
 import tech.quantit.northstar.data.IMarketDataRepository;
 import tech.quantit.northstar.data.IModuleRepository;
 import tech.quantit.northstar.domain.module.ModulePlaybackContext;
 import tech.quantit.northstar.gateway.api.IContractManager;
+import tech.quantit.northstar.gateway.api.domain.contract.Contract;
 import tech.quantit.northstar.main.ExternalJarClassLoader;
 import tech.quantit.northstar.main.handler.internal.ModuleManager;
 import tech.quantit.northstar.main.utils.ModuleFactory;
@@ -266,8 +266,8 @@ public class ModuleService implements InitializingBean {
 			LocalDate end = utils.getFridayOfThisWeek(date);
 			for(ModuleAccountDescription mad : md.getModuleAccountSettingsDescription()) {
 				for(String unifiedSymbol : mad.getBindedUnifiedSymbols()) {
-					ContractField contract = contractMgr.getContract(Identifier.of(unifiedSymbol)).contractField();
-					List<BarField> bars = mdRepo.loadBars(ContractUtils.getMarketChannel(contract), unifiedSymbol, start, end);
+					Contract contract = contractMgr.getContract(Identifier.of(unifiedSymbol));
+					List<BarField> bars = mdRepo.loadBars(contract.channelType(), unifiedSymbol, start, end);
 					module.initData(bars);
 				}
 			}

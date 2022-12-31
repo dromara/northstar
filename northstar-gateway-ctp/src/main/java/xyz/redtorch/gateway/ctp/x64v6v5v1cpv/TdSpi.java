@@ -22,6 +22,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import tech.quantit.northstar.common.constant.ChannelType;
 import tech.quantit.northstar.common.constant.DateTimeConstant;
 import tech.quantit.northstar.common.event.NorthstarEventType;
 import tech.quantit.northstar.common.exception.NoSuchElementException;
@@ -1395,7 +1396,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 					}
 				}
 				tradeBuilderCacheList.clear();
-				gatewayAdapter.mktCenter.loadContractGroup(gatewayId);
+				gatewayAdapter.mktCenter.loadContractGroup(ChannelType.CTP);
 				gatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.GATEWAY_READY, gatewayId);
 			}
 		} catch (Throwable t) {

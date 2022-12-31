@@ -14,7 +14,7 @@ import tech.quantit.northstar.gateway.api.domain.time.TradeTimeDefinition;
 public final class CnFtBondTradeTime implements TradeTimeDefinition {
 
 	@Override
-	public List<PeriodSegment> getPeriodSegments() {
+	public List<PeriodSegment> tradeTimeSegments() {
 		return List.of(
 				new PeriodSegment(LocalTime.of(9, 30), LocalTime.of(11, 30)),
 				new PeriodSegment(LocalTime.of(13, 1), LocalTime.of(15, 15))

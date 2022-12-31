@@ -21,7 +21,7 @@ public class PeriodHelper {
 	}
 	
 	public PeriodHelper(int numbersOfMinPerPeriod, TradeTimeDefinition tradeTimeDefinition, boolean exclusiveOpening) {
-		List<PeriodSegment> tradeTimeSegments = tradeTimeDefinition.getPeriodSegments();
+		List<PeriodSegment> tradeTimeSegments = tradeTimeDefinition.tradeTimeSegments();
 		LocalTime opening = tradeTimeSegments.get(0).startOfSegment();
 		LocalTime ending = tradeTimeSegments.get(tradeTimeSegments.size() - 1).endOfSegment();
 		LocalTime t = opening.plusMinutes(1);

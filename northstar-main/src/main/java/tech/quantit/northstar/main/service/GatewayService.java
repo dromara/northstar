@@ -275,8 +275,8 @@ public class GatewayService implements InitializingBean {
 	 * @param gatewayType
 	 * @return
 	 */
-	public Collection<ComponentField> getGatewaySettingsMetaInfo(String gatewayType) {
-		return gatewaySettingsProvider.getSettings(gatewayType);
+	public Collection<ComponentField> getGatewaySettingsMetaInfo(ChannelType channelType) {
+		return gatewaySettingsProvider.getSettings(channelType);
 	}
 	
 	/**

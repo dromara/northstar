@@ -6,9 +6,17 @@ import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import tech.quantit.northstar.common.constant.ChannelType;
 import tech.quantit.northstar.common.model.Identifier;
 import tech.quantit.northstar.gateway.api.domain.contract.ContractDefinition;
 import tech.quantit.northstar.gateway.api.domain.contract.Instrument;
+import tech.quantit.northstar.gateway.api.domain.time.TradeTimeDefinition;
+import tech.quantit.northstar.gateway.ctp.time.CnFtBondTradeTime;
+import tech.quantit.northstar.gateway.ctp.time.CnFtComTradeTime1;
+import tech.quantit.northstar.gateway.ctp.time.CnFtComTradeTime2;
+import tech.quantit.northstar.gateway.ctp.time.CnFtComTradeTime3;
+import tech.quantit.northstar.gateway.ctp.time.CnFtComTradeTime4;
+import tech.quantit.northstar.gateway.ctp.time.CnFtIndexTradeTime;
 import xyz.redtorch.pb.CoreEnum.CombinationTypeEnum;
 import xyz.redtorch.pb.CoreEnum.CurrencyEnum;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
@@ -100,6 +108,9 @@ public class CtpContract implements Instrument{
 	
 	@Override
 	public ContractField contractField() {
+		if(Objects.isNull(contractDef)) {
+			throw new IllegalStateException("没有合约定义信息");
+		}
 		return ContractField.newBuilder()
 				.setContractId(Optional.ofNullable(contractId).orElse(""))
 				.setName(Optional.ofNullable(name).orElse(""))
@@ -144,6 +155,27 @@ public class CtpContract implements Instrument{
 	@Override
 	public void setContractDefinition(ContractDefinition contractDef) {
 		this.contractDef = contractDef;
+	}
+
+	@Override
+	public TradeTimeDefinition tradeTimeDefinition() {
+		if(Objects.isNull(contractDef)) {
+			throw new IllegalStateException("没有合约定义信息");
+		}
+		return switch(contractDef.getTradeTimeType()) {
+		case "CN_FT_TT1" -> new CnFtComTradeTime1();
+		case "CN_FT_TT2" -> new CnFtComTradeTime2();
+		case "CN_FT_TT3" -> new CnFtComTradeTime3();
+		case "CN_FT_TT4" -> new CnFtComTradeTime4();
+		case "CN_FT_TT5" -> new CnFtIndexTradeTime();
+		case "CN_FT_TT6" -> new CnFtBondTradeTime();
+		default -> throw new IllegalArgumentException("Unexpected value: " + contractDef.getTradeTimeType());
+		};
+	}
+
+	@Override
+	public ChannelType channelType() {
+		return ChannelType.valueOf(thirdPartyId.split("@")[1]);
 	}
 
 }

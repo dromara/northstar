@@ -10,7 +10,7 @@ import java.util.function.Consumer;
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.constant.DateTimeConstant;
 import tech.quantit.northstar.gateway.api.domain.time.OpenningMinuteClock;
-import tech.quantit.northstar.gateway.api.domain.time.PeriodHelper;
+import tech.quantit.northstar.gateway.api.domain.time.TradeTimeDefinition;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.TickField;
@@ -32,10 +32,10 @@ public class MinuteBarGenerator {
 	
 	Consumer<BarField> onBarCallback;
 	
-	public MinuteBarGenerator(ContractField contract, PeriodHelper phHelper, Consumer<BarField> onBarCallback) {
+	public MinuteBarGenerator(ContractField contract, TradeTimeDefinition tradeTimeDefinition, Consumer<BarField> onBarCallback) {
 		this.contract = contract;
 		this.onBarCallback = onBarCallback;
-		this.clock = new OpenningMinuteClock(contract, phHelper);
+		this.clock = new OpenningMinuteClock(contract, tradeTimeDefinition);
 	}
 	
 	/**

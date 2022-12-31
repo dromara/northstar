@@ -15,13 +15,17 @@ import java.util.regex.Pattern;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import lombok.AllArgsConstructor;
+import tech.quantit.northstar.common.constant.ChannelType;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.model.Identifier;
 import tech.quantit.northstar.gateway.api.MarketGateway;
 import tech.quantit.northstar.gateway.api.domain.contract.ContractDefinition;
 import tech.quantit.northstar.gateway.api.domain.contract.Instrument;
+import tech.quantit.northstar.gateway.api.domain.time.GenericTradeTime;
 import tech.quantit.northstar.gateway.api.domain.time.IPeriodHelperFactory;
 import tech.quantit.northstar.gateway.api.domain.time.PeriodHelper;
+import tech.quantit.northstar.gateway.api.domain.time.TradeTimeDefinition;
 import test.common.TestFieldFactory;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
@@ -38,114 +42,11 @@ class MarketCenterTest {
 	PeriodHelper pHelper = mock(PeriodHelper.class);
 	MarketCenter center;
 	
-	Instrument ins1 = new Instrument() {
-		
-		@Override
-		public ProductClassEnum productClass() {
-			return ProductClassEnum.FUTURES;
-		}
-		
-		@Override
-		public String name() {
-			return "螺纹2305";
-		}
-		
-		@Override
-		public Identifier identifier() {
-			return Identifier.of("rb2305@SHFE@FUTURES");
-		}
-		
-		@Override
-		public ExchangeEnum exchange() {
-			return ExchangeEnum.SHFE;
-		}
-		
-		@Override
-		public ContractField contractField() {
-			return ContractField.newBuilder()
-					.setSymbol("rb2305")
-					.setUnifiedSymbol(identifier().value())
-					.setExchange(ExchangeEnum.SHFE)
-					.setProductClass(ProductClassEnum.FUTURES)
-					.setContractId(identifier().value())
-					.setGatewayId(GATEWAY_ID)
-					.setName(name())
-					.build();
-		}
-	};
+	Instrument ins1 = new TestContract("rb2305", "rb2305@SHFE@FUTURES", ProductClassEnum.FUTURES, ExchangeEnum.SHFE);
 	
-	Instrument ins2 = new Instrument() {
-		
-		@Override
-		public ProductClassEnum productClass() {
-			return ProductClassEnum.FUTURES;
-		}
-		
-		@Override
-		public String name() {
-			return "螺纹2310";
-		}
-		
-		@Override
-		public Identifier identifier() {
-			return Identifier.of("rb2310@SHFE@FUTURES");
-		}
-		
-		@Override
-		public ExchangeEnum exchange() {
-			return ExchangeEnum.SHFE;
-		}
-		
-		@Override
-		public ContractField contractField() {
-			return ContractField.newBuilder()
-					.setSymbol("rb2310")
-					.setUnifiedSymbol(identifier().value())
-					.setExchange(ExchangeEnum.SHFE)
-					.setProductClass(ProductClassEnum.FUTURES)
-					.setContractId(identifier().value())
-					.setGatewayId(GATEWAY_ID)
-					.setName(name())
-					.build();
-		}
-	};
+	Instrument ins2 = new TestContract("rb2310", "rb2310@SHFE@FUTURES", ProductClassEnum.FUTURES, ExchangeEnum.SHFE);
 	
-	Instrument ins3 = new Instrument() {
-		
-		@Override
-		public ProductClassEnum productClass() {
-			return ProductClassEnum.OPTION;
-		}
-		
-		@Override
-		public String name() {
-			return "rb2305C5000";
-		}
-		
-		@Override
-		public Identifier identifier() {
-			return Identifier.of("rb2305C5000@SHFE@OPTIONS");
-		}
-		
-		@Override
-		public ExchangeEnum exchange() {
-			return ExchangeEnum.SHFE;
-		}
-		
-		@Override
-		public ContractField contractField() {
-			return ContractField.newBuilder()
-					.setSymbol(name())
-					.setUnifiedSymbol(identifier().value())
-					.setExchange(ExchangeEnum.SHFE)
-					.setProductClass(ProductClassEnum.OPTION)
-					.setContractId(identifier().value())
-					.setUnderlyingSymbol("rb2305")
-					.setGatewayId(GATEWAY_ID)
-					.setName(name())
-					.build();
-		}
-	};
+	Instrument ins3 = new TestContract("rb2305C5000", "rb2305C5000@SHFE@OPTIONS", ProductClassEnum.OPTION, ExchangeEnum.SHFE);
 	
 	@BeforeEach
 	void prepare() {
@@ -186,6 +87,7 @@ class MarketCenterTest {
 		center.addInstrument(ins1);
 		center.addInstrument(ins2);
 		center.addInstrument(ins3);
+		center.loadContractGroup(ChannelType.SIM);
 		
 		assertThat(center.getContract(GATEWAY_ID, "rb2305").identifier()).isEqualTo(Identifier.of("rb2305@SHFE@FUTURES"));
 		assertThat(center.getContract(Identifier.of("rb2305@SHFE@FUTURES"))).isEqualTo(center.getContract(GATEWAY_ID, "rb2305"));
@@ -198,7 +100,7 @@ class MarketCenterTest {
 		center.addInstrument(ins1);
 		center.addInstrument(ins2);
 		center.addInstrument(ins3);
-		center.loadContractGroup(GATEWAY_ID);
+		center.loadContractGroup(ChannelType.SIM);
 		
 		assertThat(center.getContracts(GATEWAY_ID)).hasSize(5);
 		assertThat(center.getContracts("")).hasSize(5);
@@ -211,7 +113,7 @@ class MarketCenterTest {
 		center.addInstrument(ins1);
 		center.addInstrument(ins2);
 		center.addInstrument(ins3);
-		center.loadContractGroup(GATEWAY_ID);
+		center.loadContractGroup(ChannelType.SIM);
 		
 		TickField t = factory.makeTickField("rb2305", 5000);
 		assertDoesNotThrow(() -> {
@@ -219,4 +121,60 @@ class MarketCenterTest {
 		});
 	}
 	
+	@AllArgsConstructor
+	class TestContract implements Instrument {
+		
+		private String symbol;
+		private String unifiedSymbol;
+		private ProductClassEnum productClass;
+		private ExchangeEnum exchange;
+
+		@Override
+		public String name() {
+			return symbol;
+		}
+
+		@Override
+		public Identifier identifier() {
+			return Identifier.of(unifiedSymbol);
+		}
+
+		@Override
+		public ProductClassEnum productClass() {
+			return productClass;
+		}
+
+		@Override
+		public ExchangeEnum exchange() {
+			return exchange;
+		}
+
+		@Override
+		public TradeTimeDefinition tradeTimeDefinition() {
+			return new GenericTradeTime();
+		}
+
+		@Override
+		public ChannelType channelType() {
+			return ChannelType.SIM;
+		}
+
+		@Override
+		public void setContractDefinition(ContractDefinition contractDef) {
+		}
+
+		@Override
+		public ContractField contractField() {
+			return ContractField.newBuilder()
+					.setSymbol(symbol)
+					.setUnifiedSymbol(unifiedSymbol)
+					.setExchange(ExchangeEnum.SHFE)
+					.setProductClass(ProductClassEnum.FUTURES)
+					.setContractId(identifier().value())
+					.setGatewayId(GATEWAY_ID)
+					.setName(name())
+					.build();
+		}
+		
+	}
 }

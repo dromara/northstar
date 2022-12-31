@@ -1,12 +1,13 @@
 package tech.quantit.northstar.gateway.api.domain.contract;
 
 import tech.quantit.northstar.common.TickDataAware;
+import tech.quantit.northstar.common.constant.ChannelType;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.event.NorthstarEventType;
 import tech.quantit.northstar.common.model.Identifier;
-import tech.quantit.northstar.gateway.api.MarketGateway;
+import tech.quantit.northstar.gateway.api.IMarketCenter;
 import tech.quantit.northstar.gateway.api.domain.mktdata.MinuteBarGenerator;
-import tech.quantit.northstar.gateway.api.domain.time.PeriodHelper;
+import tech.quantit.northstar.gateway.api.domain.time.TradeTimeDefinition;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
@@ -23,29 +24,29 @@ public class GatewayContract implements Contract, TickDataAware{
 	
 	private ContractField contract;
 	
-	private MarketGateway gateway;
-	
 	private boolean hasSubscribed;
 	
 	private Instrument ins;
 	
-	public GatewayContract(FastEventEngine feEngine, Instrument ins, PeriodHelper phHelper) {
-		this.gateway = gateway;
+	private IMarketCenter mktCenter;
+	
+	public GatewayContract(IMarketCenter mktCenter, FastEventEngine feEngine, Instrument ins) {
 		this.ins = ins;
+		this.mktCenter = mktCenter;
 		this.contract = ins.contractField();
-		this.barGen = new MinuteBarGenerator(contract, phHelper, bar -> feEngine.emitEvent(NorthstarEventType.BAR, bar));
+		this.barGen = new MinuteBarGenerator(contract, tradeTimeDefinition(), bar -> feEngine.emitEvent(NorthstarEventType.BAR, bar));
 	}
 
 	@Override
 	public boolean subscribe() {
 		hasSubscribed = true;
-		return gateway.subscribe(contract);
+		return mktCenter.getGateway(channelType()).subscribe(contract);
 	}
 
 	@Override
 	public boolean unsubscribe() {
 		hasSubscribed = false;
-		return gateway.unsubscribe(contract);
+		return mktCenter.getGateway(channelType()).unsubscribe(contract);
 	}
 
 	@Override
@@ -70,7 +71,7 @@ public class GatewayContract implements Contract, TickDataAware{
 
 	@Override
 	public String name() {
-		return contract.getName();
+		return ins.name();
 	}
 
 	@Override
@@ -80,17 +81,27 @@ public class GatewayContract implements Contract, TickDataAware{
 
 	@Override
 	public ProductClassEnum productClass() {
-		return contract.getProductClass();
+		return ins.productClass();
 	}
 
 	@Override
 	public ExchangeEnum exchange() {
-		return contract.getExchange();
+		return ins.exchange();
 	}
 
 	@Override
 	public String gatewayId() {
 		return contract.getGatewayId();
+	}
+
+	@Override
+	public TradeTimeDefinition tradeTimeDefinition() {
+		return ins.tradeTimeDefinition();
+	}
+
+	@Override
+	public ChannelType channelType() {
+		return ins.channelType();
 	}
 
 }

@@ -1,6 +1,8 @@
 package tech.quantit.northstar.gateway.api.domain.contract;
 
+import tech.quantit.northstar.common.constant.ChannelType;
 import tech.quantit.northstar.common.model.Identifier;
+import tech.quantit.northstar.gateway.api.domain.time.TradeTimeDefinition;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
@@ -35,6 +37,18 @@ public interface Instrument {
 	 * @return
 	 */
 	ExchangeEnum exchange();
+	
+	/**
+	 * 开市时间定义
+	 * @return
+	 */
+	TradeTimeDefinition tradeTimeDefinition();
+	
+	/**
+	 * 网关渠道类型
+	 * @return
+	 */
+	ChannelType channelType();
 	
 	/**
 	 * 设置合约定义
