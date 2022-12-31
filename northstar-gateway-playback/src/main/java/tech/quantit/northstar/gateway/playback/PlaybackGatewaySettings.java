@@ -2,9 +2,6 @@ package tech.quantit.northstar.gateway.playback;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import lombok.Getter;
 import lombok.Setter;
 import tech.quantit.northstar.common.constant.FieldType;
@@ -13,15 +10,10 @@ import tech.quantit.northstar.common.constant.PlaybackSpeed;
 import tech.quantit.northstar.common.model.DynamicParams;
 import tech.quantit.northstar.common.model.GatewaySettings;
 import tech.quantit.northstar.common.model.Setting;
-import tech.quantit.northstar.gateway.api.GatewaySettingsMetaInfoProvider;
 
 @Getter
 @Setter
-@Component
 public class PlaybackGatewaySettings extends DynamicParams implements GatewaySettings {
-	
-	@Autowired
-	private GatewaySettingsMetaInfoProvider pvd;
 	
 	/**
 	 * 预热起始时间

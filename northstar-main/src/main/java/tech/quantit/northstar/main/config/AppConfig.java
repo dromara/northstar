@@ -41,25 +41,16 @@ import com.google.common.io.Files;
 
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
-import tech.quantit.northstar.common.IDataServiceManager;
-import tech.quantit.northstar.common.IHolidayManager;
 import tech.quantit.northstar.common.IMailMessageContentHandler;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.data.IGatewayRepository;
 import tech.quantit.northstar.data.IMarketDataRepository;
 import tech.quantit.northstar.data.IModuleRepository;
-import tech.quantit.northstar.data.IPlaybackRuntimeRepository;
-import tech.quantit.northstar.data.ISimAccountRepository;
 import tech.quantit.northstar.domain.account.TradeDayAccount;
 import tech.quantit.northstar.domain.gateway.GatewayAndConnectionManager;
-import tech.quantit.northstar.gateway.api.GatewayFactory;
 import tech.quantit.northstar.gateway.api.IContractManager;
 import tech.quantit.northstar.gateway.api.IMarketCenter;
 import tech.quantit.northstar.gateway.api.domain.mktdata.MarketCenter;
-import tech.quantit.northstar.gateway.playback.PlaybackGatewayFactory;
-import tech.quantit.northstar.gateway.sim.trade.SimGatewayFactory;
-import tech.quantit.northstar.gateway.sim.trade.SimMarket;
-import tech.quantit.northstar.gateway.tiger.TigerGatewayFactory;
 import tech.quantit.northstar.main.ExternalJarClassLoader;
 import tech.quantit.northstar.main.SpringContextUtil;
 import tech.quantit.northstar.main.interceptor.AuthorizationInterceptor;
@@ -67,8 +58,6 @@ import tech.quantit.northstar.main.mail.MailDeliveryManager;
 import tech.quantit.northstar.main.mail.MailSenderFactory;
 import tech.quantit.northstar.main.utils.ContractDefinitionReader;
 import tech.quantit.northstar.main.utils.ModuleFactory;
-import xyz.redtorch.gateway.ctp.x64v6v3v15v.CtpGatewayFactory;
-import xyz.redtorch.gateway.ctp.x64v6v5v1cpv.CtpSimGatewayFactory;
 
 /**
  * 配置转换器
@@ -140,41 +129,9 @@ public class AppConfig implements WebMvcConfigurer, DisposableBean {
 	}
 
 	@Bean
-	public SimMarket simMarket() {
-		return new SimMarket();
-	}
-
-	@Bean
 	public IMarketCenter marketCenter(FastEventEngine fastEventEngine) throws IOException {
 		ContractDefinitionReader reader = new ContractDefinitionReader();
 		return new MarketCenter(reader.load(contractDefRes.getFile()), fastEventEngine);
-	}
-
-	@Bean
-	public GatewayFactory ctpGatewayFactory(FastEventEngine fastEventEngine, IMarketCenter mktCenter, IDataServiceManager dataMgr) {
-		return new CtpGatewayFactory(fastEventEngine, mktCenter, dataMgr);
-	}
-
-	@Bean
-	public GatewayFactory ctpSimGatewayFactory(FastEventEngine fastEventEngine, IMarketCenter mktCenter, IDataServiceManager dataMgr) {
-		return new CtpSimGatewayFactory(fastEventEngine, mktCenter, dataMgr);
-	}
-
-	@Bean
-	public GatewayFactory playbackGatewayFactory(FastEventEngine fastEventEngine, IMarketCenter mktCenter,
-			IHolidayManager holidayMgr, IMarketDataRepository mdRepo, IPlaybackRuntimeRepository rtRepo) {
-		return new PlaybackGatewayFactory(fastEventEngine, mktCenter, holidayMgr, rtRepo, mdRepo);
-	}
-
-	@Bean
-	public GatewayFactory simGatewayFactory(FastEventEngine fastEventEngine, SimMarket simMarket,
-			ISimAccountRepository accRepo, IMarketCenter mktCenter) {
-		return new SimGatewayFactory(fastEventEngine, simMarket, accRepo, mktCenter);
-	}
-	
-	@Bean
-	public GatewayFactory tigerGatewayFactory(FastEventEngine fastEventEngine, IMarketCenter mktCenter) {
-		return new TigerGatewayFactory();
 	}
 
 	@Bean

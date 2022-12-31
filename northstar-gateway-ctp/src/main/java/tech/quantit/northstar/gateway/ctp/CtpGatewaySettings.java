@@ -1,24 +1,16 @@
 package tech.quantit.northstar.gateway.ctp;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import lombok.Getter;
 import lombok.Setter;
 import tech.quantit.northstar.common.constant.FieldType;
 import tech.quantit.northstar.common.model.DynamicParams;
 import tech.quantit.northstar.common.model.GatewaySettings;
 import tech.quantit.northstar.common.model.Setting;
-import tech.quantit.northstar.gateway.api.GatewaySettingsMetaInfoProvider;
 
 @Getter
 @Setter
-@Component
 public class CtpGatewaySettings extends DynamicParams implements GatewaySettings{
 	
-	@Autowired
-	private GatewaySettingsMetaInfoProvider pvd;
-
 	@Setting(label = "网关账户", order = 10)
 	private String userId;
 	
