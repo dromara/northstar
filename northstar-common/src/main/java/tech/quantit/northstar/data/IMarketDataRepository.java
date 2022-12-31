@@ -3,6 +3,7 @@ package tech.quantit.northstar.data;
 import java.time.LocalDate;
 import java.util.List;
 
+import tech.quantit.northstar.common.constant.ChannelType;
 import xyz.redtorch.pb.CoreField.BarField;
 
 /**
@@ -12,12 +13,6 @@ import xyz.redtorch.pb.CoreField.BarField;
  */
 public interface IMarketDataRepository {
 
-	/**
-	 * 移除网关行情数据
-	 * @param gatewayId
-	 */
-	void dropGatewayData(String gatewayId);
-	
 	/**
 	 * 保存数据
 	 * @param bar
@@ -32,7 +27,7 @@ public interface IMarketDataRepository {
 	 * @param endDate
 	 * @return
 	 */
-	List<BarField> loadBars(String gatewayId, String unifiedSymbol, LocalDate startDate, LocalDate endDate);
+	List<BarField> loadBars(ChannelType channelType, String unifiedSymbol, LocalDate startDate, LocalDate endDate);
 	
 	
 	/**

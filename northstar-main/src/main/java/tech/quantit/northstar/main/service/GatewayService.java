@@ -23,7 +23,6 @@ import tech.quantit.northstar.common.model.GatewayDescription;
 import tech.quantit.northstar.common.model.ModuleAccountDescription;
 import tech.quantit.northstar.common.model.ModuleDescription;
 import tech.quantit.northstar.data.IGatewayRepository;
-import tech.quantit.northstar.data.IMarketDataRepository;
 import tech.quantit.northstar.data.IModuleRepository;
 import tech.quantit.northstar.data.IPlaybackRuntimeRepository;
 import tech.quantit.northstar.data.ISimAccountRepository;
@@ -58,8 +57,6 @@ public class GatewayService implements InitializingBean {
 	private IContractManager contractMgr;
 	
 	private IGatewayRepository gatewayRepo;
-	
-	private IMarketDataRepository mdRepo;
 	
 	private ISimAccountRepository simAccRepo;
 	
@@ -152,7 +149,6 @@ public class GatewayService implements InitializingBean {
 			}
 		}
 		boolean flag = doDeleteGateway(gatewayId);
-		mdRepo.dropGatewayData(gatewayId);
 		if(gd.getChannelType() == ChannelType.SIM)
 			simAccRepo.deleteById(gatewayId);
 		if(gd.getChannelType() == ChannelType.PLAYBACK) 

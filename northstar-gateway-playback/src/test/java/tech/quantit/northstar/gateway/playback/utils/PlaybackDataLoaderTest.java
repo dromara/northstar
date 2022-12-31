@@ -13,6 +13,7 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import tech.quantit.northstar.common.constant.ChannelType;
 import tech.quantit.northstar.data.IMarketDataRepository;
 import test.common.TestFieldFactory;
 import xyz.redtorch.pb.CoreField.BarField;
@@ -38,7 +39,7 @@ class PlaybackDataLoaderTest {
 	@BeforeEach
 	void prepare() {
 		IMarketDataRepository mdRepo = mock(IMarketDataRepository.class);
-		when(mdRepo.loadBars(anyString(), anyString(), any(LocalDate.class), any(LocalDate.class))).thenReturn(List.of(b1,b2,b3));
+		when(mdRepo.loadBars(any(ChannelType.class), anyString(), any(LocalDate.class), any(LocalDate.class))).thenReturn(List.of(b1,b2,b3));
 		loader = new PlaybackDataLoader("testGateway", mdRepo);
 	}
 

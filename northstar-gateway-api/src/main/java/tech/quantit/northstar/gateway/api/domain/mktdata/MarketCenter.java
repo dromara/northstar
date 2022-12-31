@@ -15,10 +15,12 @@ import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 
 import tech.quantit.northstar.common.TickDataAware;
+import tech.quantit.northstar.common.constant.ChannelType;
 import tech.quantit.northstar.common.constant.Constants;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.exception.NoSuchElementException;
 import tech.quantit.northstar.common.model.Identifier;
+import tech.quantit.northstar.common.utils.ContractUtils;
 import tech.quantit.northstar.gateway.api.IMarketCenter;
 import tech.quantit.northstar.gateway.api.MarketGateway;
 import tech.quantit.northstar.gateway.api.domain.contract.Contract;
@@ -190,7 +192,21 @@ public class MarketCenter implements IMarketCenter, TickDataAware{
 		if(StringUtils.isBlank(gatewayId)) {			
 			return contractMap.values().stream().toList();
 		}
-		return contractMap.values().stream().filter(c -> StringUtils.equals(gatewayId, c.gatewayId())).toList();
+		return contractMap.values()
+				.stream()
+				.filter(c -> StringUtils.equals(gatewayId, c.gatewayId()))
+				.toList();
+	}
+	
+	/**
+	 * 获取网关合约
+	 */
+	@Override
+	public List<Contract> getContracts(ChannelType channelType) {
+		return contractMap.values()
+				.stream()
+				.filter(c -> ContractUtils.getMarketChannel(c.contractField()) == channelType)
+				.toList();
 	}
 
 	/**

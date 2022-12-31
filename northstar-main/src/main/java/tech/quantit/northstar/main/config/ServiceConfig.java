@@ -50,10 +50,10 @@ public class ServiceConfig {
 	}
 	
 	@Bean
-	public GatewayService gatewayService(GatewayAndConnectionManager gatewayConnMgr, IGatewayRepository gatewayRepo, IMarketDataRepository mdRepo,
+	public GatewayService gatewayService(GatewayAndConnectionManager gatewayConnMgr, IGatewayRepository gatewayRepo, 
 			IPlaybackRuntimeRepository playbackRtRepo, IModuleRepository moduleRepo, ISimAccountRepository simAccRepo, GatewayChannelProvider gtp,
 			GatewaySettingsMetaInfoProvider settingsPvd, IContractManager contractMgr) {
-		return new GatewayService(gatewayConnMgr, settingsPvd, gtp, contractMgr, gatewayRepo, mdRepo, simAccRepo, playbackRtRepo, moduleRepo);
+		return new GatewayService(gatewayConnMgr, settingsPvd, gtp, contractMgr, gatewayRepo, simAccRepo, playbackRtRepo, moduleRepo);
 	}
 	
 	@Bean

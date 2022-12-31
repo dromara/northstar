@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.IDataServiceManager;
+import tech.quantit.northstar.common.constant.ChannelType;
 import tech.quantit.northstar.common.constant.DateTimeConstant;
 import tech.quantit.northstar.data.IMarketDataRepository;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
@@ -25,18 +26,13 @@ public class MarketDataRepoDataServiceImpl implements IMarketDataRepository{
 	}
 	
 	@Override
-	public void dropGatewayData(String gatewayId) {
-		log.trace(EMPTY_IMPLEMENTATION_HINT);
-	}
-
-	@Override
 	public void insert(BarField bar) {
 		log.trace(EMPTY_IMPLEMENTATION_HINT);
 	}
 
 	@Override
-	public List<BarField> loadBars(String gatewayId, String unifiedSymbol, LocalDate startDate, LocalDate endDate) {
-		if(!StringUtils.equals(gatewayId, "CTP")) {
+	public List<BarField> loadBars(ChannelType channelType, String unifiedSymbol, LocalDate startDate, LocalDate endDate) {
+		if(channelType != ChannelType.CTP) {
 			log.debug("无法查询CTP网关以外的历史行情数据");
 			return Collections.emptyList();
 		}
