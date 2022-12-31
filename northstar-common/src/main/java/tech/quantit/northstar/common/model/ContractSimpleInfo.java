@@ -13,5 +13,5 @@ public class ContractSimpleInfo {
 
 	private String name;
 	
-	private String identifier;
+	private String value;
 }

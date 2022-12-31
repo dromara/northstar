@@ -9,6 +9,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
 
 import lombok.extern.slf4j.Slf4j;
+import tech.quantit.northstar.common.constant.ChannelType;
 import tech.quantit.northstar.common.constant.DateTimeConstant;
 import tech.quantit.northstar.data.ds.DataServiceManager;
 import tech.quantit.northstar.gateway.api.IMarketCenter;
@@ -38,6 +39,7 @@ public class ContractsDefaultLoader implements CommandLineRunner{
 					.forEach(contract -> mktCenter.addInstrument(new CtpContract(contract)));
 				log.info("预加载 [{}] 交易所合约信息", exchange);
 			});
+		mktCenter.loadContractGroup(ChannelType.CTP);
 	}
 
 }

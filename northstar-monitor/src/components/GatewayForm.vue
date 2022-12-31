@@ -18,7 +18,7 @@
     <PlaybackForm
       v-else
       :visible.sync="gatewaySettingsFormVisible"
-      :subscribedContractGroups="subscribedContractGroups"
+      :subscribedContracts="subscribedContracts"
       :playbackSettingsSrc="form.settings"
       @onSave="(settings) => (form.settings = settings)"
     />
@@ -80,7 +80,6 @@
                 value="MARKET_DATA"
               ></el-option>
               <el-option v-if="gatewayUsage === 'TRADE'" label="交易" value="TRADE"></el-option>
-              <!-- <el-option label="IB网关" value="beijing"></el-option> -->
             </el-select>
           </el-form-item>
         </el-col>
@@ -104,16 +103,19 @@
         <el-col :span="16" v-if="gatewayUsage === 'MARKET_DATA'">
           <el-form-item label="订阅合约">
             <el-select
-              v-model="subscribedContractGroups"
+              v-model="subscribedContracts"
               multiple
               filterable
+              remote
+              :remote-method="searchContracts"
               collapse-tags
-              placeholder="请选择合约"
+              placeholder="输入合约关键字可搜索"
+              :loading="loading"
             >
               <el-option
-                v-for="item in contractOptions"
-                :key="item.name"
-                :label="item.label"
+                v-for="(item,i) in contractOptions"
+                :key="i"
+                :label="item.name"
                 :value="item"
               >
               </el-option>
@@ -125,10 +127,10 @@
         <el-form-item label="已订阅合约">
           <div
             class="tag-wrapper"
-            v-if="subscribedContractGroups && subscribedContractGroups.length"
+            v-if="subscribedContracts && subscribedContracts.length"
           >
-            <el-tag v-for="(item, i) in subscribedContractGroups" :key="i">
-              {{ item.name + { FUTURES: '期货', OPTION: '期权' }[item.productClass] }}
+            <el-tag v-for="(item, i) in subscribedContracts" :key="i">
+              {{ item.name }}
             </el-tag>
           </div>
           <el-tag type="info" v-else>没有订阅合约</el-tag>
@@ -191,6 +193,7 @@ export default {
   },
   data() {
     return {
+      loading: false,
       linkedGatewayOptions: [],
       formRules: {
         gatewayId: [{ required: true, message: '不能为空', trigger: 'blur' }],
@@ -208,10 +211,10 @@ export default {
         connectionState: CONNECTION_STATE.DISCONNECTED,
         autoConnect: true,
         bindedMktGatewayId: '',
-        subscribedContractGroups: [],
+        subscribedContracts: [],
         settings: null
       },
-      subscribedContractGroups: [],
+      subscribedContracts: [],
       channelTypeOptions: [],
       contractOptions: [],
       channelType: '',
@@ -247,9 +250,9 @@ export default {
         val &&
         this.gatewayUsage === 'MARKET_DATA' &&
         !this.isUpdateMode &&
-        this.subscribedContractGroups
+        this.subscribedContracts
       ) {
-        this.subscribedContractGroups = []
+        this.subscribedContracts = []
       }
       if (val) {
         this.form.channelType = val.name
@@ -261,9 +264,6 @@ export default {
             this.gatewaySettingsMetaInfo.sort((a, b) => (a.order < b.order ? -1 : 1))
           })
         }
-
-        // 获取合约品种列表
-        this.contractOptions = await contractApi.getGatewayContracts(this.form.channelType === 'PLAYBACK' ? 'CTP' : this.form.channelType);
       }
     }
   },
@@ -287,9 +287,7 @@ export default {
         .validate()
         .then(() => {
           if (this.gatewayUsage === 'MARKET_DATA') {
-            this.form.subscribedContractGroups = this.subscribedContractGroups.map(
-              (item) => item.value
-            )
+            this.form.subscribedContracts = this.subscribedContracts
           }
           this.$emit('onSave', this.form)
           this.close()
@@ -298,9 +296,22 @@ export default {
           console.error(e)
         })
     },
+    searchContracts(query){
+      if (query !== '') {
+          this.loading = true;
+            // 获取合约品种列表
+          contractApi.getGatewayContracts(this.form.channelType === 'PLAYBACK' ? 'CTP' : this.form.channelType, query).then(result => {
+            this.contractOptions = result
+          }).finally(() => {
+            this.loading = false;
+          })
+        } else {
+          this.contractOptions = [];
+        }
+    },
     close() {
       this.$emit('update:visible', false)
-      this.subscribedContractGroups = []
+      this.subscribedContracts = []
     }
   }
 }

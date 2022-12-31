@@ -2,6 +2,7 @@ package tech.quantit.northstar.main.restful;
 
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,9 +27,11 @@ public class ContractController {
 	IContractManager contractMgr; 
 	
 	@GetMapping
-	public ResultBean<List<ContractSimpleInfo>> channelContracts(ChannelType channelType){
+	public ResultBean<List<ContractSimpleInfo>> channelContracts(ChannelType channelType, String query){
 		return new ResultBean<>(contractMgr.getContracts(channelType).stream()
-				.map(c -> ContractSimpleInfo.builder().name(c.name()).identifier(c.identifier().value()).build())
+				.filter(c -> StringUtils.isBlank(query) || c.name().contains(query) || c.identifier().value().contains(query))
+				.map(c -> ContractSimpleInfo.builder().name(c.name()).value(c.identifier().value()).build())
+				.sorted((a, b) -> a.getValue().compareTo(b.getValue()))
 				.toList());
 	}
 	
@@ -36,7 +39,7 @@ public class ContractController {
 	public ResultBean<List<ContractSimpleInfo>> subscribedContracts(String gatewayId){
 		return new ResultBean<>(contractMgr.getContracts(gatewayId).stream()
 				.filter(Contract::hasSubscribed)
-				.map(c -> ContractSimpleInfo.builder().name(c.name()).identifier(c.identifier().value()).build())
+				.map(c -> ContractSimpleInfo.builder().name(c.name()).value(c.identifier().value()).build())
 				.toList());
 	}
 }

@@ -83,7 +83,7 @@ public class ConnectionHandler extends AbstractEventHandler implements GenericEv
 		GatewayDescription gd = gatewayRepo.findById(gatewayId);
 		if(!gd.getSubscribedContracts().isEmpty()) {					
 			for(ContractSimpleInfo contractInfo : gd.getSubscribedContracts()) {
-				Subscribable obj = contractMgr.getContract(Identifier.of(contractInfo.getIdentifier()));
+				Subscribable obj = contractMgr.getContract(Identifier.of(contractInfo.getValue()));
 				obj.subscribe();
 			}
 		} 

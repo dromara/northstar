@@ -44,29 +44,15 @@ class ContractControllerTest {
 	}
 	
 	@Test
-	void testGetContractDefinitions() throws Exception {
-		mockMvc.perform(get("/northstar/contract/defs?provider=CTP期货").session(session))
-			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
-	}
-
-	@Test
-	void testProviderList() throws Exception {
-		mockMvc.perform(get("/northstar/contract/providers?gatewayType=CTP").session(session))
-			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
-	}
-
-	@Test
 	void testGetContractList() throws Exception {
-		mockMvc.perform(get("/northstar/contract/list?provider=CTP期货").session(session))
+		mockMvc.perform(get("/northstar/contracts?channelType=CTP").session(session))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
 	}
 
 	@Test
 	void testGetSubscribableContractList() throws Exception {
-		mockMvc.perform(get("/northstar/contract/subable?contractDefId=豆粕@FUTURES").session(session))
+		mockMvc.perform(get("/northstar/contracts/subscribed?contractDefId=豆粕@FUTURES").session(session))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
 	}
