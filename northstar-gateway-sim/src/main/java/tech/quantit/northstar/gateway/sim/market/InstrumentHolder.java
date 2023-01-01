@@ -29,7 +29,6 @@ public class InstrumentHolder {
 		.addAllAskVolume(List.of(0, 0, 0, 0, 0))
 		.addAllBidVolume(List.of(0, 0, 0, 0, 0))
 		.setUnifiedSymbol(contract.getUnifiedSymbol())
-		.setContractId(contract.getContractId())
 		.setActionDay(ldt.format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
 		.setActionTime(ldt.format(DateTimeConstant.T_FORMAT_WITH_MS_INT_FORMATTER))
 		.setActionTimestamp(ldt.toInstant(ZoneOffset.ofHours(8)).toEpochMilli());

@@ -59,7 +59,6 @@ public class PlaybackDataLoader {
 			}
 			results.add(list.get(i).toBuilder()
 					.setGatewayId(gatewayId)
-					.setContractId(unifiedSymbol + "@PLAYBACK")
 					.setOpenInterestDelta(openInterestDelta)
 					.build());
 		}

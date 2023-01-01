@@ -282,7 +282,6 @@ public class DataServiceManager implements IDataServiceManager {
 				ContractField contract = contractMgr.getContract("PLAYBACK", unifiedSymbol).contractField();
 				resultList.addFirst(BarField.newBuilder()
 						.setUnifiedSymbol(unifiedSymbol)
-						.setContractId(unifiedSymbol + "@CTP")
 						.setTradingDay(tradingDay)
 						.setActionDay(actionDay)
 						.setActionTime(actionTime)

@@ -496,7 +496,6 @@ public class MdSpi extends CThostFtdcMdSpi {
 				ContractField c = contract.contractField();
 				TickField.Builder tickBuilder = TickField.newBuilder();
 				tickBuilder.setUnifiedSymbol(c.getUnifiedSymbol());
-				tickBuilder.setContractId(c.getContractId());
 				tickBuilder.setActionDay(actionDay);
 				tickBuilder.setActionTime(actionTime);
 				long localDateTimeMillisec = dateTime.toInstant(ZoneOffset.ofHours(8)).toEpochMilli();

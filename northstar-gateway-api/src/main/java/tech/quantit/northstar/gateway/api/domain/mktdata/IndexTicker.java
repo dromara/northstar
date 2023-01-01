@@ -35,7 +35,6 @@ public class IndexTicker {
 		this.memberContracts = idxContract.memberContracts().stream().map(c -> c.contractField().getUnifiedSymbol()).collect(Collectors.toSet());
 		this.onTickCallback = onTickCallback;
 		tickBuilder.setUnifiedSymbol(idxContract.contractField().getUnifiedSymbol());
-		tickBuilder.setContractId(idxContract.contractField().getContractId());
 		tickBuilder.setGatewayId(idxContract.contractField().getGatewayId());
 		tickBuilder.addAllAskPrice(Arrays.asList(0D,0D,0D,0D,0D));
 		tickBuilder.addAllBidPrice(Arrays.asList(0D,0D,0D,0D,0D));
