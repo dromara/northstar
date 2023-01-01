@@ -238,7 +238,8 @@ export default {
     },
     onPositionChosen(pos) {
       this.dealVol = pos.position - pos.frozen
-      this.dealContractId = pos.contract.contractid
+      this.contract = {value: pos.contract.contractid, unifiedSymbol: pos.contract.unifiedsymbol, name: pos.contract.name}
+      this.symbolList = [this.contract]
       this.currentPosition = pos
       this.handleContractChange()
     },
