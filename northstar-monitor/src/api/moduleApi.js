@@ -7,9 +7,6 @@ export default {
   componentParams(metaInfo) {
     return baseService.post(`/module/strategy/params`, metaInfo)
   },
-  validateModule(module){
-    return baseService.post('/module/validate', module)
-  },
   insertModule(module) {
     return baseService.post('/module', module)
   },

@@ -265,11 +265,11 @@ public class ModuleService implements InitializingBean {
 			LocalDate start = utils.getFridayOfThisWeek(date.minusWeeks(1));
 			LocalDate end = utils.getFridayOfThisWeek(date);
 			for(ModuleAccountDescription mad : md.getModuleAccountSettingsDescription()) {
-				for(String unifiedSymbol : mad.getBindedUnifiedSymbols()) {
-					Contract contract = contractMgr.getContract(Identifier.of(unifiedSymbol));
-					List<BarField> bars = mdRepo.loadBars(contract.channelType(), unifiedSymbol, start, end);
-					module.initData(bars);
-				}
+//				for(String unifiedSymbol : mad.getBindedUnifiedSymbols()) {
+//					Contract contract = contractMgr.getContract(Identifier.of(unifiedSymbol));
+//					List<BarField> bars = mdRepo.loadBars(contract.channelType(), unifiedSymbol, start, end);
+//					module.initData(bars);
+//				}
 			}
 			date = date.plusWeeks(1);
 		}

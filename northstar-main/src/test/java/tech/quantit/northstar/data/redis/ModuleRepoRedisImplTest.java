@@ -15,6 +15,7 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 import tech.quantit.northstar.common.constant.Constants;
 import tech.quantit.northstar.common.constant.ModuleType;
+import tech.quantit.northstar.common.model.ContractSimpleInfo;
 import tech.quantit.northstar.common.model.ModuleAccountDescription;
 import tech.quantit.northstar.common.model.ModuleAccountRuntimeDescription;
 import tech.quantit.northstar.common.model.ModuleDealRecord;
@@ -46,7 +47,7 @@ class ModuleRepoRedisImplTest {
 	ModuleAccountDescription mad = ModuleAccountDescription.builder()
 			.accountGatewayId("testGateway")
 			.moduleAccountInitBalance(100000)
-			.bindedUnifiedSymbols(List.of("rb2210@SHFE@FUTURES"))
+			.bindedContracts(List.of(ContractSimpleInfo.builder().value("rb2210@SHFE@FUTURES").build()))
 			.build();
 	
 	ModuleDescription md = ModuleDescription.builder()

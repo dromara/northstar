@@ -65,7 +65,7 @@
             {{
               (() => {
                 return scope.row.moduleAccountSettingsDescription
-                  .map((item) => item.bindedUnifiedSymbols.join('，'))
+                  .map((item) => item.bindedContracts.map(item => item.name).join('，'))
                   .join('；')
               })()
             }}

@@ -98,9 +98,9 @@ public class ModuleFactory {
 		
 		for(ModuleAccountDescription mad : moduleDescription.getModuleAccountSettingsDescription()) {
 			TradeGateway tradeGateway = (TradeGateway) gatewayConnMgr.getGatewayById(mad.getAccountGatewayId());
-			List<ContractField> contracts = mad.getBindedUnifiedSymbols()
+			List<ContractField> contracts = mad.getBindedContracts()
 					.stream()
-					.map(unifiedSymbol -> contractMgr.getContract(Identifier.of(unifiedSymbol)))
+					.map(contractSimple -> contractMgr.getContract(Identifier.of(contractSimple.getValue())))
 					.map(Contract::contractField)
 					.toList();
 			ctx.bindGatewayContracts(tradeGateway, contracts);
