@@ -95,15 +95,6 @@ public class SimMarketGatewayLocal implements MarketGateway{
 			}
 		}, 500, 500, TimeUnit.MILLISECONDS);
 		
-		// 模拟返回合约
-		CompletableFuture.runAsync(()->{
-			SimContractGenerator contractGen = new SimContractGenerator("SIM");
-			Instrument simContract = contractGen.getContract();
-			Instrument simContract2 = contractGen.getContract2();
-			mktCenter.addInstrument(simContract);
-			mktCenter.addInstrument(simContract2);
-		});
-		
 		feEngine.emitEvent(NorthstarEventType.CONNECTED, settings.getGatewayId());
 		CompletableFuture.runAsync(() -> {
 			feEngine.emitEvent(NorthstarEventType.GATEWAY_READY, settings.getGatewayId());

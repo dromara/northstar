@@ -35,24 +35,4 @@ public class SimContractGenerator {
 				.build();
 	}
 	
-	public Instrument getContract2() {
-		String symbol = "sim999";
-		String name = "模拟品种999";
-		return SimContract.builder()
-				.gatewayId("SIM")
-				.contractId(symbol + "@CZCE@FUTURES@" + gatewayId)
-				.currency(CurrencyEnum.CNY)
-				.exchange(ExchangeEnum.CZCE)
-				.fullName(name)
-				.name(name)
-				.unifiedSymbol(symbol + "@CZCE@FUTURES")
-				.symbol(symbol)
-				.productClass(ProductClassEnum.FUTURES)
-				.thirdPartyId(symbol + "@SIM")
-				.multiplier(10)
-				.priceTick(0.5)
-				.longMarginRatio(0.08)
-				.shortMarginRatio(0.08)
-				.build();
-	}
 }
