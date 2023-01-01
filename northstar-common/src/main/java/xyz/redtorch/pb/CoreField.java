@@ -22208,6 +22208,26 @@ public final class CoreField {
      * @return The askVolume at the given index.
      */
     int getAskVolume(int index);
+
+    /**
+     * <pre>
+     * 合约ID
+     * </pre>
+     *
+     * <code>string contractId = 37;</code>
+     * @return The contractId.
+     */
+    java.lang.String getContractId();
+    /**
+     * <pre>
+     * 合约ID
+     * </pre>
+     *
+     * <code>string contractId = 37;</code>
+     * @return The bytes for contractId.
+     */
+    com.google.protobuf.ByteString
+        getContractIdBytes();
   }
   /**
    * <pre>
@@ -22235,6 +22255,7 @@ public final class CoreField {
       askPrice_ = emptyDoubleList();
       bidVolume_ = emptyIntList();
       askVolume_ = emptyIntList();
+      contractId_ = "";
     }
 
     @java.lang.Override
@@ -22515,6 +22536,12 @@ public final class CoreField {
                 askVolume_.addInt(input.readFixed32());
               }
               input.popLimit(limit);
+              break;
+            }
+            case 298: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              contractId_ = s;
               break;
             }
             default: {
@@ -23356,6 +23383,52 @@ public final class CoreField {
     }
     private int askVolumeMemoizedSerializedSize = -1;
 
+    public static final int CONTRACTID_FIELD_NUMBER = 37;
+    private volatile java.lang.Object contractId_;
+    /**
+     * <pre>
+     * 合约ID
+     * </pre>
+     *
+     * <code>string contractId = 37;</code>
+     * @return The contractId.
+     */
+    @java.lang.Override
+    public java.lang.String getContractId() {
+      java.lang.Object ref = contractId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        contractId_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * 合约ID
+     * </pre>
+     *
+     * <code>string contractId = 37;</code>
+     * @return The bytes for contractId.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getContractIdBytes() {
+      java.lang.Object ref = contractId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        contractId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -23494,6 +23567,9 @@ public final class CoreField {
       }
       for (int i = 0; i < askVolume_.size(); i++) {
         output.writeFixed32NoTag(askVolume_.getInt(i));
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(contractId_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 37, contractId_);
       }
       unknownFields.writeTo(output);
     }
@@ -23671,6 +23747,9 @@ public final class CoreField {
         }
         askVolumeMemoizedSerializedSize = dataSize;
       }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(contractId_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(37, contractId_);
+      }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
       return size;
@@ -23777,6 +23856,8 @@ public final class CoreField {
           .equals(other.getBidVolumeList())) return false;
       if (!getAskVolumeList()
           .equals(other.getAskVolumeList())) return false;
+      if (!getContractId()
+          .equals(other.getContractId())) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -23894,6 +23975,8 @@ public final class CoreField {
         hash = (37 * hash) + ASKVOLUME_FIELD_NUMBER;
         hash = (53 * hash) + getAskVolumeList().hashCode();
       }
+      hash = (37 * hash) + CONTRACTID_FIELD_NUMBER;
+      hash = (53 * hash) + getContractId().hashCode();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -24103,6 +24186,8 @@ public final class CoreField {
         bitField0_ = (bitField0_ & ~0x00000004);
         askVolume_ = emptyIntList();
         bitField0_ = (bitField0_ & ~0x00000008);
+        contractId_ = "";
+
         return this;
       }
 
@@ -24182,6 +24267,7 @@ public final class CoreField {
           bitField0_ = (bitField0_ & ~0x00000008);
         }
         result.askVolume_ = askVolume_;
+        result.contractId_ = contractId_;
         onBuilt();
         return result;
       }
@@ -24369,6 +24455,10 @@ public final class CoreField {
             ensureAskVolumeIsMutable();
             askVolume_.addAll(other.askVolume_);
           }
+          onChanged();
+        }
+        if (!other.getContractId().isEmpty()) {
+          contractId_ = other.contractId_;
           onChanged();
         }
         this.mergeUnknownFields(other.unknownFields);
@@ -26469,6 +26559,102 @@ public final class CoreField {
         onChanged();
         return this;
       }
+
+      private java.lang.Object contractId_ = "";
+      /**
+       * <pre>
+       * 合约ID
+       * </pre>
+       *
+       * <code>string contractId = 37;</code>
+       * @return The contractId.
+       */
+      public java.lang.String getContractId() {
+        java.lang.Object ref = contractId_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          contractId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * 合约ID
+       * </pre>
+       *
+       * <code>string contractId = 37;</code>
+       * @return The bytes for contractId.
+       */
+      public com.google.protobuf.ByteString
+          getContractIdBytes() {
+        java.lang.Object ref = contractId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          contractId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * 合约ID
+       * </pre>
+       *
+       * <code>string contractId = 37;</code>
+       * @param value The contractId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setContractId(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        contractId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * 合约ID
+       * </pre>
+       *
+       * <code>string contractId = 37;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearContractId() {
+        
+        contractId_ = getDefaultInstance().getContractId();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * 合约ID
+       * </pre>
+       *
+       * <code>string contractId = 37;</code>
+       * @param value The bytes for contractId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setContractIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        contractId_ = value;
+        onChanged();
+        return this;
+      }
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -26785,6 +26971,26 @@ public final class CoreField {
      * @return The preSettlePrice.
      */
     double getPreSettlePrice();
+
+    /**
+     * <pre>
+     * 合约ID
+     * </pre>
+     *
+     * <code>string contractId = 22;</code>
+     * @return The contractId.
+     */
+    java.lang.String getContractId();
+    /**
+     * <pre>
+     * 合约ID
+     * </pre>
+     *
+     * <code>string contractId = 22;</code>
+     * @return The bytes for contractId.
+     */
+    com.google.protobuf.ByteString
+        getContractIdBytes();
   }
   /**
    * <pre>
@@ -26808,6 +27014,7 @@ public final class CoreField {
       tradingDay_ = "";
       actionDay_ = "";
       actionTime_ = "";
+      contractId_ = "";
     }
 
     @java.lang.Override
@@ -26948,6 +27155,12 @@ public final class CoreField {
             case 169: {
 
               preSettlePrice_ = input.readDouble();
+              break;
+            }
+            case 178: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              contractId_ = s;
               break;
             }
             default: {
@@ -27452,6 +27665,52 @@ public final class CoreField {
       return preSettlePrice_;
     }
 
+    public static final int CONTRACTID_FIELD_NUMBER = 22;
+    private volatile java.lang.Object contractId_;
+    /**
+     * <pre>
+     * 合约ID
+     * </pre>
+     *
+     * <code>string contractId = 22;</code>
+     * @return The contractId.
+     */
+    @java.lang.Override
+    public java.lang.String getContractId() {
+      java.lang.Object ref = contractId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        contractId_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * 合约ID
+     * </pre>
+     *
+     * <code>string contractId = 22;</code>
+     * @return The bytes for contractId.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getContractIdBytes() {
+      java.lang.Object ref = contractId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        contractId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -27528,6 +27787,9 @@ public final class CoreField {
       }
       if (java.lang.Double.doubleToRawLongBits(preSettlePrice_) != 0) {
         output.writeDouble(21, preSettlePrice_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(contractId_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 22, contractId_);
       }
       unknownFields.writeTo(output);
     }
@@ -27617,6 +27879,9 @@ public final class CoreField {
         size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(21, preSettlePrice_);
       }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(contractId_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(22, contractId_);
+      }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
       return size;
@@ -27685,6 +27950,8 @@ public final class CoreField {
       if (java.lang.Double.doubleToLongBits(getPreSettlePrice())
           != java.lang.Double.doubleToLongBits(
               other.getPreSettlePrice())) return false;
+      if (!getContractId()
+          .equals(other.getContractId())) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -27754,6 +28021,8 @@ public final class CoreField {
       hash = (37 * hash) + PRESETTLEPRICE_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           java.lang.Double.doubleToLongBits(getPreSettlePrice()));
+      hash = (37 * hash) + CONTRACTID_FIELD_NUMBER;
+      hash = (53 * hash) + getContractId().hashCode();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -27933,6 +28202,8 @@ public final class CoreField {
 
         preSettlePrice_ = 0D;
 
+        contractId_ = "";
+
         return this;
       }
 
@@ -27980,6 +28251,7 @@ public final class CoreField {
         result.preOpenInterest_ = preOpenInterest_;
         result.preClosePrice_ = preClosePrice_;
         result.preSettlePrice_ = preSettlePrice_;
+        result.contractId_ = contractId_;
         onBuilt();
         return result;
       }
@@ -28095,6 +28367,10 @@ public final class CoreField {
         }
         if (other.getPreSettlePrice() != 0D) {
           setPreSettlePrice(other.getPreSettlePrice());
+        }
+        if (!other.getContractId().isEmpty()) {
+          contractId_ = other.contractId_;
+          onChanged();
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -29289,6 +29565,102 @@ public final class CoreField {
       public Builder clearPreSettlePrice() {
         
         preSettlePrice_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object contractId_ = "";
+      /**
+       * <pre>
+       * 合约ID
+       * </pre>
+       *
+       * <code>string contractId = 22;</code>
+       * @return The contractId.
+       */
+      public java.lang.String getContractId() {
+        java.lang.Object ref = contractId_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          contractId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * 合约ID
+       * </pre>
+       *
+       * <code>string contractId = 22;</code>
+       * @return The bytes for contractId.
+       */
+      public com.google.protobuf.ByteString
+          getContractIdBytes() {
+        java.lang.Object ref = contractId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          contractId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * 合约ID
+       * </pre>
+       *
+       * <code>string contractId = 22;</code>
+       * @param value The contractId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setContractId(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        contractId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * 合约ID
+       * </pre>
+       *
+       * <code>string contractId = 22;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearContractId() {
+        
+        contractId_ = getDefaultInstance().getContractId();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * 合约ID
+       * </pre>
+       *
+       * <code>string contractId = 22;</code>
+       * @param value The bytes for contractId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setContractIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        contractId_ = value;
         onChanged();
         return this;
       }
@@ -42141,7 +42513,7 @@ public final class CoreField {
       "Value\030\025 \001(\001\0221\n\thedgeFlag\030\026 \001(\0162\036.xyz.red" +
       "torch.pb.HedgeFlagEnum\0220\n\010contract\030\027 \001(\013" +
       "2\036.xyz.redtorch.pb.ContractField\022\021\n\tgate" +
-      "wayId\030\030 \001(\t\"\372\005\n\tTickField\022\025\n\runifiedSymb" +
+      "wayId\030\030 \001(\t\"\216\006\n\tTickField\022\025\n\runifiedSymb" +
       "ol\030\001 \001(\t\022\021\n\tgatewayId\030\002 \001(\t\022\022\n\ntradingDa" +
       "y\030\003 \001(\t\022\021\n\tactionDay\030\004 \001(\t\022\022\n\nactionTime" +
       "\030\005 \001(\t\022\027\n\017actionTimestamp\030\006 \001(\006\022\016\n\006statu" +
@@ -42160,18 +42532,19 @@ public final class CoreField {
       " \001(\001\022\020\n\010lowPrice\030\036 \001(\001\022\022\n\nupperLimit\030\037 \001" +
       "(\001\022\022\n\nlowerLimit\030  \001(\001\022\020\n\010bidPrice\030! \003(\001" +
       "\022\020\n\010askPrice\030\" \003(\001\022\021\n\tbidVolume\030# \003(\007\022\021\n" +
-      "\taskVolume\030$ \003(\007\"\306\003\n\010BarField\022\025\n\runified" +
-      "Symbol\030\001 \001(\t\022\021\n\tgatewayId\030\002 \001(\t\022\022\n\ntradi" +
-      "ngDay\030\003 \001(\t\022\021\n\tactionDay\030\004 \001(\t\022\022\n\naction" +
-      "Time\030\005 \001(\t\022\027\n\017actionTimestamp\030\006 \001(\006\022\021\n\to" +
-      "penPrice\030\007 \001(\001\022\021\n\thighPrice\030\010 \001(\001\022\020\n\010low" +
-      "Price\030\t \001(\001\022\022\n\nclosePrice\030\n \001(\001\022\024\n\014openI" +
-      "nterest\030\013 \001(\001\022\031\n\021openInterestDelta\030\014 \001(\001" +
-      "\022\016\n\006volume\030\r \001(\006\022\023\n\013volumeDelta\030\016 \001(\006\022\020\n" +
-      "\010turnover\030\017 \001(\001\022\025\n\rturnoverDelta\030\020 \001(\001\022\021" +
-      "\n\tnumTrades\030\021 \001(\006\022\026\n\016numTradesDelta\030\022 \001(" +
-      "\006\022\027\n\017preOpenInterest\030\023 \001(\001\022\025\n\rpreClosePr" +
-      "ice\030\024 \001(\001\022\026\n\016preSettlePrice\030\025 \001(\001\"_\n\016Com" +
+      "\taskVolume\030$ \003(\007\022\022\n\ncontractId\030% \001(\t\"\332\003\n" +
+      "\010BarField\022\025\n\runifiedSymbol\030\001 \001(\t\022\021\n\tgate" +
+      "wayId\030\002 \001(\t\022\022\n\ntradingDay\030\003 \001(\t\022\021\n\tactio" +
+      "nDay\030\004 \001(\t\022\022\n\nactionTime\030\005 \001(\t\022\027\n\017action" +
+      "Timestamp\030\006 \001(\006\022\021\n\topenPrice\030\007 \001(\001\022\021\n\thi" +
+      "ghPrice\030\010 \001(\001\022\020\n\010lowPrice\030\t \001(\001\022\022\n\nclose" +
+      "Price\030\n \001(\001\022\024\n\014openInterest\030\013 \001(\001\022\031\n\021ope" +
+      "nInterestDelta\030\014 \001(\001\022\016\n\006volume\030\r \001(\006\022\023\n\013" +
+      "volumeDelta\030\016 \001(\006\022\020\n\010turnover\030\017 \001(\001\022\025\n\rt" +
+      "urnoverDelta\030\020 \001(\001\022\021\n\tnumTrades\030\021 \001(\006\022\026\n" +
+      "\016numTradesDelta\030\022 \001(\006\022\027\n\017preOpenInterest" +
+      "\030\023 \001(\001\022\025\n\rpreClosePrice\030\024 \001(\001\022\026\n\016preSett" +
+      "lePrice\030\025 \001(\001\022\022\n\ncontractId\030\026 \001(\t\"_\n\016Com" +
       "monReqField\022\r\n\005reqId\030\001 \001(\t\022\022\n\noperatorId" +
       "\030\002 \001(\t\022\024\n\014targetNodeId\030\003 \001(\007\022\024\n\014sourceNo" +
       "deId\030\004 \001(\007\"B\n\016CommonRspField\022\r\n\005reqId\030\001 " +
@@ -42271,13 +42644,13 @@ public final class CoreField {
     internal_static_xyz_redtorch_pb_TickField_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_xyz_redtorch_pb_TickField_descriptor,
-        new java.lang.String[] { "UnifiedSymbol", "GatewayId", "TradingDay", "ActionDay", "ActionTime", "ActionTimestamp", "Status", "LastPrice", "AvgPrice", "TotalBidVol", "TotalAskVol", "WeightedAvgBidPrice", "WeightedAvgAskPrice", "Iopv", "YieldToMaturity", "VolumeDelta", "Volume", "Turnover", "TurnoverDelta", "NumTrades", "NumTradesDelta", "OpenInterest", "OpenInterestDelta", "PreOpenInterest", "PreClosePrice", "SettlePrice", "PreSettlePrice", "OpenPrice", "HighPrice", "LowPrice", "UpperLimit", "LowerLimit", "BidPrice", "AskPrice", "BidVolume", "AskVolume", });
+        new java.lang.String[] { "UnifiedSymbol", "GatewayId", "TradingDay", "ActionDay", "ActionTime", "ActionTimestamp", "Status", "LastPrice", "AvgPrice", "TotalBidVol", "TotalAskVol", "WeightedAvgBidPrice", "WeightedAvgAskPrice", "Iopv", "YieldToMaturity", "VolumeDelta", "Volume", "Turnover", "TurnoverDelta", "NumTrades", "NumTradesDelta", "OpenInterest", "OpenInterestDelta", "PreOpenInterest", "PreClosePrice", "SettlePrice", "PreSettlePrice", "OpenPrice", "HighPrice", "LowPrice", "UpperLimit", "LowerLimit", "BidPrice", "AskPrice", "BidVolume", "AskVolume", "ContractId", });
     internal_static_xyz_redtorch_pb_BarField_descriptor =
       getDescriptor().getMessageTypes().get(7);
     internal_static_xyz_redtorch_pb_BarField_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_xyz_redtorch_pb_BarField_descriptor,
-        new java.lang.String[] { "UnifiedSymbol", "GatewayId", "TradingDay", "ActionDay", "ActionTime", "ActionTimestamp", "OpenPrice", "HighPrice", "LowPrice", "ClosePrice", "OpenInterest", "OpenInterestDelta", "Volume", "VolumeDelta", "Turnover", "TurnoverDelta", "NumTrades", "NumTradesDelta", "PreOpenInterest", "PreClosePrice", "PreSettlePrice", });
+        new java.lang.String[] { "UnifiedSymbol", "GatewayId", "TradingDay", "ActionDay", "ActionTime", "ActionTimestamp", "OpenPrice", "HighPrice", "LowPrice", "ClosePrice", "OpenInterest", "OpenInterestDelta", "Volume", "VolumeDelta", "Turnover", "TurnoverDelta", "NumTrades", "NumTradesDelta", "PreOpenInterest", "PreClosePrice", "PreSettlePrice", "ContractId", });
     internal_static_xyz_redtorch_pb_CommonReqField_descriptor =
       getDescriptor().getMessageTypes().get(8);
     internal_static_xyz_redtorch_pb_CommonReqField_fieldAccessorTable = new
