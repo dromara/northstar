@@ -13,7 +13,6 @@ import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.constant.ChannelType;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.event.NorthstarEventType;
-import tech.quantit.northstar.common.model.Identifier;
 import tech.quantit.northstar.gateway.api.IMarketCenter;
 import tech.quantit.northstar.gateway.api.MarketGateway;
 import tech.quantit.northstar.gateway.api.domain.contract.GatewayContract;
@@ -85,7 +84,7 @@ public class SimMarketGatewayLocal implements MarketGateway{
 				for(Entry<String, InstrumentHolder> e: cache.entrySet()) {
 					TickField tick = tickGen.generateNextTick(e.getValue());
 					feEngine.emitEvent(NorthstarEventType.TICK, tick);
-					GatewayContract contract = (GatewayContract) mktCenter.getContract(Identifier.of(tick.getUnifiedSymbol()));
+					GatewayContract contract = (GatewayContract) mktCenter.getContract(tick.getGatewayId(), tick.getUnifiedSymbol());
 					contract.onTick(tick);
 				}
 			} catch (Exception e) {

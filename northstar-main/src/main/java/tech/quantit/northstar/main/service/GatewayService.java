@@ -31,7 +31,7 @@ import tech.quantit.northstar.domain.gateway.GatewayConnection;
 import tech.quantit.northstar.gateway.api.Gateway;
 import tech.quantit.northstar.gateway.api.GatewayFactory;
 import tech.quantit.northstar.gateway.api.GatewayMetaProvider;
-import tech.quantit.northstar.gateway.api.IContractManager;
+import tech.quantit.northstar.gateway.api.IMarketCenter;
 import tech.quantit.northstar.gateway.api.MarketGateway;
 import tech.quantit.northstar.gateway.sim.trade.SimTradeGateway;
 import tech.quantit.northstar.main.utils.CodecUtils;
@@ -53,7 +53,7 @@ public class GatewayService implements InitializingBean {
 	
 	private GatewayMetaProvider metaProvider;
 	
-	private IContractManager contractMgr;
+	private IMarketCenter mktCenter;
 	
 	private IGatewayRepository gatewayRepo;
 	
@@ -83,6 +83,10 @@ public class GatewayService implements InitializingBean {
 		gatewayConnMgr.createPair(conn, gateway);
 		if(gatewayDescription.isAutoConnect()) {
 			connect(gatewayDescription.getGatewayId());
+		}
+		
+		if(gateway instanceof MarketGateway mktGateway) {
+			mktCenter.addGateway(mktGateway);
 		}
 		
 		return true;

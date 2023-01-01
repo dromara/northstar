@@ -247,7 +247,7 @@ public class SimAccount implements TickDataAware{
 	}
 
 	private void onTrade(TradeField trade) {
-		Contract contract = contractMgr.getContract(Identifier.of(trade.getContract().getUnifiedSymbol()));
+		Contract contract = contractMgr.getContract(Identifier.of(trade.getContract().getContractId()));
 		ContractField contractField = contract.contractField();
 		double commission = contractField.getCommissionFee() > 0 ? contractField.getCommissionFee() : contractField.getCommissionRate() * trade.getPrice() * trade.getContract().getMultiplier();
 		totalCommission += trade.getVolume() * commission;

@@ -149,7 +149,8 @@ public class MarketCenter implements IMarketCenter, TickDataAware{
 	 * 查询合约
 	 */
 	@Override
-	public Contract getContract(String gatewayId, String symbol) {
+	public Contract getContract(String gatewayId, String symbolSrc) {
+		String symbol = symbolSrc.replaceAll("([^@]+)@.+", "$1");
 		if(!gatewaySymbolContractTbl.contains(gatewayId, symbol)) {
 			throw new NoSuchElementException(String.format("找不到合约：%s -> %s", gatewayId, symbol));
 		}
@@ -186,9 +187,8 @@ public class MarketCenter implements IMarketCenter, TickDataAware{
 	 */
 	@Override
 	public void onTick(TickField tick) {
-		Identifier id = Identifier.of(tick.getUnifiedSymbol()); 
 		// 更新普通合约
-		Contract contract = getContract(id);
+		Contract contract = getContract(tick.getGatewayId(), tick.getUnifiedSymbol());
 		if(contract instanceof TickDataAware tdAware) {
 			tdAware.onTick(tick);
 		}

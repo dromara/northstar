@@ -86,6 +86,7 @@ class MarketCenterTest {
 		center.loadContractGroup(ChannelType.SIM);
 		
 		assertThat(center.getContract(GATEWAY_ID, "rb2305").identifier()).isEqualTo(Identifier.of("rb2305@SHFE@FUTURES"));
+		assertThat(center.getContract(GATEWAY_ID, "rb2305@SHFE@FUTURES").identifier()).isEqualTo(Identifier.of("rb2305@SHFE@FUTURES"));
 		assertThat(center.getContract(Identifier.of("rb2305@SHFE@FUTURES"))).isEqualTo(center.getContract(GATEWAY_ID, "rb2305"));
 	}
 

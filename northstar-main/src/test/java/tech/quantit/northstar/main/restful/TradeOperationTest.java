@@ -61,7 +61,7 @@ public class TradeOperationTest {
 	public void shouldOpenPosition() {
 		orderReq = OrderRequest.builder()
 				.gatewayId(NAME)
-				.contractUnifiedSymbol("rb2210@SHFE@FUTURES")
+				.contractId("rb2210@SHFE@FUTURES")
 				.tradeOpr(TradeOperation.BK)
 				.price("1000")
 				.volume(1)
@@ -74,7 +74,7 @@ public class TradeOperationTest {
 	public void shouldClosePosition() {
 		orderReq = OrderRequest.builder()
 				.gatewayId(NAME)
-				.contractUnifiedSymbol("rb2210@SHFE@FUTURES")
+				.contractId("rb2210@SHFE@FUTURES")
 				.tradeOpr(TradeOperation.BP)
 				.price("1000")
 				.volume(1)

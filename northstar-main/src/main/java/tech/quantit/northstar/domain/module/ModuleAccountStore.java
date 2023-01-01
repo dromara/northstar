@@ -25,6 +25,7 @@ import tech.quantit.northstar.common.model.ModuleAccountRuntimeDescription;
 import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
 import tech.quantit.northstar.common.utils.FieldUtils;
 import tech.quantit.northstar.gateway.api.IContractManager;
+import tech.quantit.northstar.gateway.api.domain.contract.Contract;
 import tech.quantit.northstar.strategy.api.IModuleAccountStore;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreField.CancelOrderReqField;
@@ -136,9 +137,9 @@ public class ModuleAccountStore implements IModuleAccountStore {
 				
 				accDealVolMap.get(gatewayId).addAndGet(trade.getVolume());
 				accCloseProfitMap.get(gatewayId).addAndGet(profit);
-				ContractField contract = contractMgr.getContract(Identifier.of(trade.getContract().getUnifiedSymbol())).contractField();
-				
-				double commission = contract.getCommissionFee() > 0 ? contract.getCommissionFee() : contract.getCommissionRate() * trade.getPrice() * trade.getContract().getMultiplier();
+				Contract contract = contractMgr.getContract(Identifier.of(trade.getContract().getContractId()));
+				ContractField cf = contract.contractField();
+				double commission = cf.getCommissionFee() > 0 ? cf.getCommissionFee() : cf.getCommissionRate() * trade.getPrice() * trade.getContract().getMultiplier();
 				accCommissionMap.get(gatewayId).addAndGet(commission * 2 * trade.getVolume()); // 乘2代表手续费双向计算
 				double maxProfit = Math.max(getMaxProfit(gatewayId), getAccCloseProfit(gatewayId) - getAccCommission(gatewayId));
 				maxProfitMap.put(gatewayId, maxProfit);

@@ -18,6 +18,7 @@ import tech.quantit.northstar.domain.account.TradeDayAccount;
 import tech.quantit.northstar.domain.gateway.GatewayAndConnectionManager;
 import tech.quantit.northstar.gateway.api.GatewayMetaProvider;
 import tech.quantit.northstar.gateway.api.IContractManager;
+import tech.quantit.northstar.gateway.api.IMarketCenter;
 import tech.quantit.northstar.main.ExternalJarClassLoader;
 import tech.quantit.northstar.main.handler.internal.ModuleManager;
 import tech.quantit.northstar.main.mail.MailDeliveryManager;
@@ -47,8 +48,8 @@ public class ServiceConfig {
 	@Bean
 	public GatewayService gatewayService(GatewayAndConnectionManager gatewayConnMgr, IGatewayRepository gatewayRepo, 
 			IPlaybackRuntimeRepository playbackRtRepo, IModuleRepository moduleRepo, ISimAccountRepository simAccRepo, GatewayMetaProvider metaProvider,
-			GatewayMetaProvider settingsPvd, IContractManager contractMgr) {
-		return new GatewayService(gatewayConnMgr, settingsPvd, metaProvider, contractMgr, gatewayRepo, simAccRepo, playbackRtRepo, moduleRepo);
+			GatewayMetaProvider settingsPvd, IMarketCenter mktCenter) {
+		return new GatewayService(gatewayConnMgr, settingsPvd, metaProvider, mktCenter, gatewayRepo, simAccRepo, playbackRtRepo, moduleRepo);
 	}
 	
 	@Bean

@@ -1,7 +1,7 @@
 import baseService from './baseRequest'
 
 export default {
-    loadWeeklyBarData(contractId, refStartTimestamp, firstLoad){
-        return baseService.get(`/data/bar/min?contractId=${contractId}&refStartTimestamp=${refStartTimestamp}&firstLoad=${firstLoad}`)
+    loadWeeklyBarData(gatewayId, unifiedSymbol, refStartTimestamp, firstLoad){
+        return baseService.get(`/data/bar/min?gatewayId=${gatewayId}&unifiedSymbol=${unifiedSymbol}&refStartTimestamp=${refStartTimestamp}&firstLoad=${firstLoad}`)
     }
 }

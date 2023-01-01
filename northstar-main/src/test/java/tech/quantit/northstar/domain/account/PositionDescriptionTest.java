@@ -3,7 +3,6 @@ package tech.quantit.northstar.domain.account;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import java.util.List;
 
@@ -90,7 +89,7 @@ public class PositionDescriptionTest {
 		testUpdate();
 		
 		OrderRequest orderReq = OrderRequest.builder()
-				.contractUnifiedSymbol("rb2102@SHFE")
+				.contractId("rb2102@SHFE")
 				.gatewayId("testGateway")
 				.price("1234")
 				.volume(1)
@@ -107,7 +106,7 @@ public class PositionDescriptionTest {
 		testUpdate();
 		
 		OrderRequest orderReq = OrderRequest.builder()
-				.contractUnifiedSymbol("rb2102@SHFE")
+				.contractId("rb2102@SHFE")
 				.gatewayId("testGateway")
 				.price("1234")
 				.volume(3)
@@ -125,7 +124,7 @@ public class PositionDescriptionTest {
 		testUpdate();
 		
 		OrderRequest orderReq = OrderRequest.builder()
-				.contractUnifiedSymbol("AP2102@CZCE")
+				.contractId("AP2102@CZCE")
 				.gatewayId("testGateway")
 				.price("1234")
 				.volume(1)
@@ -142,7 +141,7 @@ public class PositionDescriptionTest {
 		testUpdate();
 		
 		OrderRequest orderReq = OrderRequest.builder()
-				.contractUnifiedSymbol("AP2102@CZCE")
+				.contractId("AP2102@CZCE")
 				.gatewayId("testGateway")
 				.price("1234")
 				.volume(3)
@@ -159,7 +158,7 @@ public class PositionDescriptionTest {
 		testUpdate();
 		
 		OrderRequest orderReq = OrderRequest.builder()
-				.contractUnifiedSymbol("rb2102@SHFE")
+				.contractId("rb2102@SHFE")
 				.gatewayId("testGateway")
 				.price("1234")
 				.volume(4)

@@ -546,7 +546,7 @@ public class MdSpi extends CThostFtdcMdSpi {
 				preTickMap.put(contract.identifier(), tick);
 
 				gatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.TICK, tick);
-				GatewayContract mktContract = (GatewayContract) gatewayAdapter.mktCenter.getContract(Identifier.of(tick.getUnifiedSymbol()));
+				GatewayContract mktContract = (GatewayContract) gatewayAdapter.mktCenter.getContract(tick.getGatewayId(), tick.getUnifiedSymbol());
 				mktContract.onTick(tick);
 				lastUpdateTickTime = System.currentTimeMillis();
 				

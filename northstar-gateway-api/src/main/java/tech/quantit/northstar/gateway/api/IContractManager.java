@@ -18,7 +18,7 @@ public interface IContractManager {
 	/**
 	 * 根据网关与编码获取合约
 	 * @param gatewayId
-	 * @param symbol
+	 * @param symbol		可以是symbol或unifiedSymbol 
 	 * @return
 	 */
 	Contract getContract(String gatewayId, String symbol);

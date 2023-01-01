@@ -7,14 +7,12 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import tech.quantit.northstar.common.exception.InsufficientException;
 import tech.quantit.northstar.common.exception.TradeException;
-import tech.quantit.northstar.common.model.Identifier;
 import tech.quantit.northstar.common.model.OrderRecall;
 import tech.quantit.northstar.common.model.OrderRequest;
 import tech.quantit.northstar.common.model.OrderRequest.TradeOperation;
@@ -105,7 +103,7 @@ public class TradeDayAccountTest {
 	public void testOpenPosition() throws InsufficientException {
 		testOnAccountUpdate();
 		OrderRequest orderReq = OrderRequest.builder()
-				.contractUnifiedSymbol("rb2102@SHFE")
+				.contractId("rb2102@SHFE")
 				.price("4000")
 				.volume(1)
 				.tradeOpr(TradeOperation.BK)
@@ -118,7 +116,7 @@ public class TradeDayAccountTest {
 	public void testOpenPositionWithException() throws InsufficientException {
 		testOnAccountUpdate();
 		OrderRequest orderReq = OrderRequest.builder()
-				.contractUnifiedSymbol("rb2102@SHFE")
+				.contractId("rb2102@SHFE")
 				.price("7000")
 				.volume(1)
 				.tradeOpr(TradeOperation.BK)
@@ -134,7 +132,7 @@ public class TradeDayAccountTest {
 	public void testClosePosition() throws InsufficientException {
 		testOnPositionUpdate();
 		OrderRequest orderReq = OrderRequest.builder()
-				.contractUnifiedSymbol("rb2102@SHFE")
+				.contractId("rb2102@SHFE")
 				.price("7000")
 				.volume(2)
 				.tradeOpr(TradeOperation.SP)
@@ -148,7 +146,7 @@ public class TradeDayAccountTest {
 	public void testClosePositionWithException() throws InsufficientException {
 		testOnPositionUpdate();
 		OrderRequest orderReq = OrderRequest.builder()
-				.contractUnifiedSymbol("rb2102@SHFE")
+				.contractId("rb2102@SHFE")
 				.price("7000")
 				.volume(3)
 				.tradeOpr(TradeOperation.SP)
