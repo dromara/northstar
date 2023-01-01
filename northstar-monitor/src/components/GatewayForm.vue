@@ -109,6 +109,7 @@
               remote
               :remote-method="searchContracts"
               collapse-tags
+              reserve-keyword
               placeholder="合约可搜索，空格搜索全部"
               :loading="loading"
             >

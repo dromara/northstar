@@ -1,7 +1,7 @@
 package tech.quantit.northstar.gateway.playback;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -17,7 +17,6 @@ import tech.quantit.northstar.common.constant.PlaybackPrecision;
 import tech.quantit.northstar.common.constant.PlaybackSpeed;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.model.GatewayDescription;
-import tech.quantit.northstar.common.model.Identifier;
 import tech.quantit.northstar.data.IMarketDataRepository;
 import tech.quantit.northstar.data.IPlaybackRuntimeRepository;
 import tech.quantit.northstar.gateway.api.IContractManager;
@@ -60,7 +59,7 @@ class PlaybackGatewayFactoryTest {
 	void prepare() {
 		when(clock.nextMarketMinute()).thenReturn(ldt.plusMinutes(1));
 		when(loader.loadMinuteData(eq(ldt), eq(contract))).thenReturn(List.of(bar));
-		when(contractMgr.getContract(any(Identifier.class))).thenReturn(c);
+		when(contractMgr.getContract(anyString(), anyString())).thenReturn(c);
 		when(c.contractField()).thenReturn(contract);
 		
 		settings.setStartDate("20220629");

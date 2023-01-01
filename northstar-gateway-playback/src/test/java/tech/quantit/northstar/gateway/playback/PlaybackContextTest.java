@@ -2,6 +2,7 @@ package tech.quantit.northstar.gateway.playback;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -19,7 +20,6 @@ import tech.quantit.northstar.common.constant.PlaybackPrecision;
 import tech.quantit.northstar.common.constant.PlaybackSpeed;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.event.NorthstarEventType;
-import tech.quantit.northstar.common.model.Identifier;
 import tech.quantit.northstar.data.IPlaybackRuntimeRepository;
 import tech.quantit.northstar.gateway.api.IContractManager;
 import tech.quantit.northstar.gateway.api.domain.contract.Contract;
@@ -58,7 +58,7 @@ class PlaybackContextTest {
 		when(clock.nextMarketMinute()).thenReturn(ldt.plusMinutes(1));
 		when(loader.loadMinuteData(eq(ldt), eq(contract))).thenReturn(List.of(bar));
 		when(loader.loadTradeDayDataRaw(any(LocalDate.class), any(LocalDate.class), eq(contract))).thenReturn(List.of(bar));
-		when(contractMgr.getContract(any(Identifier.class))).thenReturn(c);
+		when(contractMgr.getContract(anyString(), anyString())).thenReturn(c);
 		when(c.contractField()).thenReturn(contract);
 		
 		settings.setPreStartDate("20220629");

@@ -63,6 +63,7 @@ public class CtpContract implements Instrument{
 	private Identifier identifier;
 	private ContractDefinition contractDef;
 	
+	public CtpContract() {}
 	public CtpContract(ContractField c) {
 		contractId = c.getContractId();
 		name = c.getName();

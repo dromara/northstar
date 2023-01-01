@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -52,7 +53,8 @@ public class MarketCenter implements IMarketCenter, TickDataAware{
 	
 	private final Table<ChannelType, ContractDefinition, List<Contract>> channelDefContractGroups = HashBasedTable.create();
 	
-	private final Table<String, String, Contract> gatewaySymbolContractTbl = HashBasedTable.create(); 
+	private final Table<String, String, Contract> gatewaySymbolContractTbl = HashBasedTable.create();
+	private final Table<String, String, Contract> gatewayUnifiedSymbolContractTbl = HashBasedTable.create();
 	
 	private final Map<ChannelType, MarketGateway> gatewayMap = new EnumMap<>(ChannelType.class);
 	
@@ -87,6 +89,7 @@ public class MarketCenter implements IMarketCenter, TickDataAware{
 				}
 				channelDefContractGroups.get(ins.channelType(), def).add(contract);
 				gatewaySymbolContractTbl.put(contract.gatewayId(), contract.contractField().getSymbol(), contract);
+				gatewaySymbolContractTbl.put(contract.gatewayId(), contract.contractField().getUnifiedSymbol(), contract);
 			}
 		}
 
@@ -149,12 +152,13 @@ public class MarketCenter implements IMarketCenter, TickDataAware{
 	 * 查询合约
 	 */
 	@Override
-	public Contract getContract(String gatewayId, String symbolSrc) {
-		String symbol = symbolSrc.replaceAll("([^@]+)@.+", "$1");
-		if(!gatewaySymbolContractTbl.contains(gatewayId, symbol)) {
-			throw new NoSuchElementException(String.format("找不到合约：%s -> %s", gatewayId, symbol));
+	public Contract getContract(String gatewayId, String code) {
+		Contract c1 = gatewaySymbolContractTbl.get(gatewayId, code);
+		Contract c2 = gatewayUnifiedSymbolContractTbl.get(gatewayId, code);
+		if(Objects.isNull(c1) && Objects.isNull(c2)) {
+			throw new NoSuchElementException(String.format("找不到合约：%s -> %s", gatewayId, code));
 		}
-		return gatewaySymbolContractTbl.get(gatewayId, symbol);
+		return Optional.ofNullable(c1).orElse(c2);
 	}
 	
 	/**
