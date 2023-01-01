@@ -1,9 +1,9 @@
 import baseService from './baseRequest'
 
 export default {
-  buyOpen(gatewayId, unifiedSymbol, price, volume, stopPrice) {
+  buyOpen(gatewayId, contractId, price, volume, stopPrice) {
     return baseService.post('/trade/submit', {
-      contractUnifiedSymbol: unifiedSymbol,
+      contractId: contractId,
       price: price,
       stopPrice: stopPrice,
       volume: volume,
@@ -11,9 +11,9 @@ export default {
       gatewayId: gatewayId
     })
   },
-  sellOpen(gatewayId, unifiedSymbol, price, volume, stopPrice) {
+  sellOpen(gatewayId, contractId, price, volume, stopPrice) {
     return baseService.post('/trade/submit', {
-      contractUnifiedSymbol: unifiedSymbol,
+      contractId: contractId,
       price: price,
       stopPrice: stopPrice,
       volume: volume,
@@ -21,18 +21,18 @@ export default {
       gatewayId: gatewayId
     })
   },
-  closeLongPosition(gatewayId, unifiedSymbol, price, volume) {
+  closeLongPosition(gatewayId, contractId, price, volume) {
     return baseService.post('/trade/submit', {
-      contractUnifiedSymbol: unifiedSymbol,
+      contractId: contractId,
       price: price,
       volume: volume,
       tradeOpr: 'SP',
       gatewayId: gatewayId
     })
   },
-  closeShortPosition(gatewayId, unifiedSymbol, price, volume) {
+  closeShortPosition(gatewayId, contractId, price, volume) {
     return baseService.post('/trade/submit', {
-      contractUnifiedSymbol: unifiedSymbol,
+      contractId: contractId,
       price: price,
       volume: volume,
       tradeOpr: 'BP',

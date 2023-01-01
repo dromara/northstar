@@ -39,6 +39,7 @@ import xyz.redtorch.gateway.ctp.x64v6v3v15v.api.CThostFtdcRspUserLoginField;
 import xyz.redtorch.gateway.ctp.x64v6v3v15v.api.CThostFtdcSpecificInstrumentField;
 import xyz.redtorch.gateway.ctp.x64v6v3v15v.api.CThostFtdcUserLogoutField;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
+import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.TickField;
 
 public class MdSpi extends CThostFtdcMdSpi {
@@ -492,8 +493,10 @@ public class MdSpi extends CThostFtdcMdSpi {
 				Double averagePrice = pDepthMarketData.getAveragePrice();
 				Double settlePrice = pDepthMarketData.getSettlementPrice();
 
+				ContractField c = contract.contractField();
 				TickField.Builder tickBuilder = TickField.newBuilder();
-				tickBuilder.setUnifiedSymbol(contract.identifier().value());
+				tickBuilder.setUnifiedSymbol(c.getUnifiedSymbol());
+				tickBuilder.setContractId(c.getContractId());
 				tickBuilder.setActionDay(actionDay);
 				tickBuilder.setActionTime(actionTime);
 				long localDateTimeMillisec = dateTime.toInstant(ZoneOffset.ofHours(8)).toEpochMilli();

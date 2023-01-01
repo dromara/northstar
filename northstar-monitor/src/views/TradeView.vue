@@ -182,7 +182,7 @@ export default {
         }
       ],
       contract: '',
-      dealSymbol: '',
+      dealContractId: '',
       dealVol: '',
       dealPrice: '',
       limitPrice: '',
@@ -198,13 +198,13 @@ export default {
   watch:{
     contract: function(v){
       if(v && v.value){
-        this.dealSymbol = v.unifiedSymbol
+        this.dealContractId = v.value
       }
     }
   },
   methods: {
     handleAccountChange() {
-      this.dealSymbol = ''
+      this.dealContractId = ''
       if (!this.chosenAccount) {
         return
       }
@@ -224,7 +224,7 @@ export default {
     },
     handleContractChange() {
       this.dealPriceType = 'COUNTERPARTY_PRICE'
-      this.$store.commit('updateFocusUnifiedSymbol', this.dealSymbol.value)
+      this.$store.commit('updateFocusUnifiedSymbol', this.contract.unifiedSymbol)
     },
     searchContracts(query){
       contractApi.getSubscribedContracts(this.chosenAccount.gatewayId, query).then(result => {
@@ -238,7 +238,7 @@ export default {
     },
     onPositionChosen(pos) {
       this.dealVol = pos.position - pos.frozen
-      this.dealSymbol = pos.contract.unifiedsymbol
+      this.dealContractId = pos.contract.contractid
       this.currentPosition = pos
       this.handleContractChange()
     },
@@ -251,7 +251,7 @@ export default {
       }
       return tradeOprApi.buyOpen(
         this.chosenAccount.gatewayId,
-        this.dealSymbol,
+        this.dealContractId,
         this.bkPrice,
         this.dealVol,
         this.stopPrice
@@ -263,7 +263,7 @@ export default {
       }
       return tradeOprApi.sellOpen(
         this.chosenAccount.gatewayId,
-        this.dealSymbol,
+        this.dealContractId,
         this.skPrice,
         this.dealVol,
         this.stopPrice
@@ -273,7 +273,7 @@ export default {
       if (this.currentPosition.positiondirection === 2) {
         return tradeOprApi.closeLongPosition(
           this.chosenAccount.gatewayId,
-          this.dealSymbol,
+          this.dealContractId,
           this.closePrice,
           this.dealVol
         )
@@ -281,7 +281,7 @@ export default {
       if (this.currentPosition.positiondirection === 3) {
         return tradeOprApi.closeShortPosition(
           this.chosenAccount.gatewayId,
-          this.dealSymbol,
+          this.dealContractId,
           this.closePrice,
           this.dealVol
         )
@@ -317,7 +317,7 @@ export default {
       return this.chosenAccount.bindedMktGatewayId
     },
     marketDataUnifiedSymbol() {
-      return this.dealSymbol
+      return this.dealContractId
     },
     accountInfo() {
       return this.$store.state.accountModule.curInfo.account

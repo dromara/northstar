@@ -360,6 +360,7 @@ public class PlaybackContext {
 						.setHighPrice(tradeDayBar.getHighPrice())			// 采用K线未来值
 						.setLowPrice(tradeDayBar.getLowPrice())				// 采用K线未来值
 						.setUnifiedSymbol(srcBar.getUnifiedSymbol())
+						.setContractId(srcBar.getContractId())
 						.setTradingDay(srcBar.getTradingDay())
 						.setStatus(TickType.NORMAL_TICK.getCode())
 						.setActionDay(srcBar.getActionDay())

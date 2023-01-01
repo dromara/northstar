@@ -39,18 +39,18 @@ public class PlaybackDataLoader {
 		return enhanceData(mdRepo.loadBars(ChannelType.CTP, contract.getUnifiedSymbol(), queryStart, queryEnd)
 				.stream()
 				.filter(bar -> bar.getActionTimestamp() >= fromStartTimestamp)
-				.toList());
+				.toList(), contract.getUnifiedSymbol());
 	}
 	
 	public List<BarField> loadMinuteDataRaw(LocalDate startDate, LocalDate endDate, ContractField contract){
-		return enhanceData(mdRepo.loadBars(ChannelType.CTP, contract.getUnifiedSymbol(), startDate, endDate));
+		return enhanceData(mdRepo.loadBars(ChannelType.CTP, contract.getUnifiedSymbol(), startDate, endDate), contract.getUnifiedSymbol());
 	}
 	
 	public List<BarField> loadTradeDayDataRaw(LocalDate startDate, LocalDate endDate, ContractField contract){
-		return enhanceData(mdRepo.loadDailyBars("CTP", contract.getUnifiedSymbol(), startDate, endDate));
+		return enhanceData(mdRepo.loadDailyBars("CTP", contract.getUnifiedSymbol(), startDate, endDate), contract.getUnifiedSymbol());
 	}
 	
-	private List<BarField> enhanceData(List<BarField> list) {
+	private List<BarField> enhanceData(List<BarField> list, String unifiedSymbol) {
 		List<BarField> results = new ArrayList<>(list.size());
 		for(int i=0; i<list.size(); i++) {
 			double openInterestDelta = 0;
@@ -59,6 +59,7 @@ public class PlaybackDataLoader {
 			}
 			results.add(list.get(i).toBuilder()
 					.setGatewayId(gatewayId)
+					.setContractId(unifiedSymbol + "@PLAYBACK")
 					.setOpenInterestDelta(openInterestDelta)
 					.build());
 		}

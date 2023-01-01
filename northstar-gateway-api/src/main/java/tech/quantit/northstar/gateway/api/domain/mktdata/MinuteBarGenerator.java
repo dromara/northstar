@@ -74,6 +74,7 @@ public class MinuteBarGenerator {
 			barBuilder = BarField.newBuilder()
 					.setGatewayId(contract.getGatewayId())
 					.setUnifiedSymbol(contract.getUnifiedSymbol())
+					.setContractId(contract.getContractId())
 					.setTradingDay(tick.getTradingDay())
 					.setOpenPrice(tick.getLastPrice())
 					.setHighPrice(tick.getLastPrice())
