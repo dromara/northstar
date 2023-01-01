@@ -36,7 +36,11 @@ public class ContractController {
 	@GetMapping
 	public ResultBean<List<ContractSimpleInfo>> channelContracts(ChannelType channelType, String query){
 		List<ContractSimpleInfo> list = contractMgr.getContracts(channelType).stream()
-				.map(c -> ContractSimpleInfo.builder().name(c.name()).value(c.identifier().value()).build())
+				.map(c -> ContractSimpleInfo.builder()
+						.name(c.name())
+						.unifiedSymbol(c.contractField().getUnifiedSymbol())
+						.value(c.identifier().value())
+						.build())
 				.toList(); 
 		return new ResultBean<>(filterAndSort(list, query));
 	}

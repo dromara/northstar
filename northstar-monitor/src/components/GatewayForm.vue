@@ -30,7 +30,7 @@
               v-model="form.gatewayId"
               autocomplete="off"
               :disabled="
-                isUpdateMode || (gatewayUsage === 'MARKET_DATA' && !channelType.allowDuplication)
+                isUpdateMode || (gatewayUsage === 'MARKET_DATA' && channelType && !channelType.allowDuplication)
               "
             ></el-input>
           </el-form-item>
@@ -100,7 +100,7 @@
             </el-select>
           </el-form-item>
         </el-col>
-        <el-col :span="16" v-if="gatewayUsage === 'MARKET_DATA'">
+        <el-col :span="16" v-if="gatewayUsage === 'MARKET_DATA' && !isUpdateMode">
           <el-form-item label="订阅合约">
             <el-select
               v-model="subscribedContracts"
@@ -109,7 +109,7 @@
               remote
               :remote-method="searchContracts"
               collapse-tags
-              placeholder="输入合约关键字可搜索"
+              placeholder="合约可搜索，空格搜索全部"
               :loading="loading"
             >
               <el-option
@@ -232,6 +232,7 @@ export default {
       if (val) {
         this.form = Object.assign({}, this.gatewayDescription)
         this.form.gatewayUsage = this.gatewayUsage
+        this.subscribedContracts = this.form.subscribedContracts
         this.$nextTick(() => {
           gatewayMgmtApi.findAll('MARKET_DATA').then((result) => {
             this.linkedGatewayOptions = result
@@ -241,6 +242,7 @@ export default {
               .filter((item) => item.usage.indexOf(this.gatewayUsage) > -1)
               .filter((item) => !item.adminOnly || this.$route.query.superuser)
               .map((item) => Object.assign({value: item.name}, item))
+            this.channelType = this.channelTypeOptions.find(item => item.name === this.form.channelType)
           })
         })
       }
@@ -257,7 +259,7 @@ export default {
       if (val) {
         this.form.channelType = val.name
 
-        if (val !== 'SIM') {
+        if (val.name !== 'SIM') {
           // 获取网关配置元信息
           gatewayMgmtApi.getGatewaySettingsMetaInfo(this.form.channelType).then((result) => {
             this.gatewaySettingsMetaInfo = result

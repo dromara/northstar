@@ -198,7 +198,7 @@ export default {
   watch:{
     contract: function(v){
       if(v && v.value){
-        this.dealSymbol = v.value
+        this.dealSymbol = v.unifiedSymbol
       }
     }
   },

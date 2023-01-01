@@ -11,7 +11,16 @@ import lombok.NoArgsConstructor;
 @Builder
 public class ContractSimpleInfo {
 
+	/**
+	 * 合约名
+	 */
 	private String name;
-	
+	/**
+	 * 合约代码
+	 */
+	private String unifiedSymbol;
+	/**
+	 * 合约ID
+	 */
 	private String value;
 }

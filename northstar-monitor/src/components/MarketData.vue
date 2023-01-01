@@ -153,7 +153,6 @@ export default {
       this.fullscreenLoading = true
       try {
         const barDataList = await gatewayDataApi.loadWeeklyBarData(
-          this.curMarketGatewayId,
           this.curUnifiedSymbol,
           timestamp,
           !loadMore
