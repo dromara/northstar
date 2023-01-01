@@ -317,7 +317,7 @@ export default {
       return this.chosenAccount.bindedMktGatewayId
     },
     marketDataUnifiedSymbol() {
-      return this.dealContractId
+      return this.contract.unifiedSymbol
     },
     accountInfo() {
       return this.$store.state.accountModule.curInfo.account
