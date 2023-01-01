@@ -35,17 +35,18 @@
         <div class="ns-trade-action">
           <div class="ns-trade-action__item">
             <el-select
-              v-model="dealSymbol"
+              v-model="contract"
               filterable
-              placeholder="请选择合约"
-              value-key="unifiedSymbol"
+              remote
+              :remote-method="searchContracts"
+              placeholder="合约可搜索，空格搜索全部"
               @change="handleContractChange"
             >
               <el-option
                 v-for="(item, i) in symbolList"
                 :key="i"
                 :label="item.name"
-                :value="item.unifiedsymbol"
+                :value="item"
               >
               </el-option>
             </el-select>
@@ -146,8 +147,8 @@ import NsPriceBoard from '@/components/PriceBoard'
 import NsAccountDetail from '@/components/AccountDetail'
 import NsMarketData from '@/components/MarketData'
 import gatewayMgmtApi from '@/api/gatewayMgmtApi'
+import contractApi from '@/api/contractApi'
 import tradeOprApi from '@/api/tradeOprApi'
-import { ContractField } from '@/lib/xyz/redtorch/pb/core_field_pb'
 
 let accountCheckTimer
 
@@ -180,6 +181,7 @@ export default {
           type: 'CUSTOM_PRICE'
         }
       ],
+      contract: '',
       dealSymbol: '',
       dealVol: '',
       dealPrice: '',
@@ -191,6 +193,13 @@ export default {
       chosenAccount: '',
       currentPosition: '',
       elementHeight: 0
+    }
+  },
+  watch:{
+    contract: function(v){
+      if(v && v.value){
+        this.dealSymbol = v.value
+      }
     }
   },
   methods: {
@@ -210,24 +219,17 @@ export default {
       }
       timelyCheck()
 
-      gatewayMgmtApi
-        .getSubscribedContractList(this.chosenAccount.bindedMktGatewayId)
-        .then((list) => {
-          this.symbolList = list
-            .map((item) => ContractField.deserializeBinary(item).toObject())
-            .filter((item) => item.productclass === 2)
-            .sort((a, b) => a['unifiedsymbol'].localeCompare(b['unifiedsymbol']))
-        })
-        .catch((e) => {
-          this.$message.error(e.message)
-        })
-
       this.$store.commit('updateFocusMarketGatewayId', this.chosenAccount.bindedMktGatewayId)
       this.$store.commit('updateCurAccountId', this.chosenAccount.gatewayId)
     },
     handleContractChange() {
       this.dealPriceType = 'COUNTERPARTY_PRICE'
-      this.$store.commit('updateFocusUnifiedSymbol', this.dealSymbol)
+      this.$store.commit('updateFocusUnifiedSymbol', this.dealSymbol.value)
+    },
+    searchContracts(query){
+      contractApi.getSubscribedContracts(this.chosenAccount.gatewayId, query).then(result => {
+        this.symbolList = result
+      })
     },
     handleDealPriceTypeChange() {
       if (this.dealPriceType !== 'CUSTOM_PRICE') {

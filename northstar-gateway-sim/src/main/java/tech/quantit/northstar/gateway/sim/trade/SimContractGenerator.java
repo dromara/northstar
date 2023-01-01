@@ -15,7 +15,7 @@ public class SimContractGenerator {
 	
 	public Instrument getContract() {
 		String symbol = "sim9999";
-		String name = "模拟品种9999";
+		String name = "模拟合约";
 		return SimContract.builder()
 				.gatewayId("SIM")
 				.contractId(symbol + "@SHFE@FUTURES@" + gatewayId)

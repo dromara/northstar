@@ -4,7 +4,7 @@ export default {
     getGatewayContracts(channelType, query){
         return baseService.get(`/contracts?channelType=${channelType}&query=${query||''}`)
     },
-    getSubscribedContracts(gatewayId){
-        return baseService.get(`/contracts/subscribed?gateway=${gatewayId}`)
+    getSubscribedContracts(gatewayId, query){
+        return baseService.get(`/contracts/subscribed?gatewayId=${gatewayId}&query=${query||''}`)
     }
 }

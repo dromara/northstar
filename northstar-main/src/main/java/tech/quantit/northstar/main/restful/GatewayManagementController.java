@@ -104,15 +104,6 @@ public class GatewayManagementController {
 		return new ResultBean<>(new ArrayList<>(Arrays.asList(ChannelType.values())).stream().map(GatewayTypeDescription::new).toList());
 	}
 	
-//	@GetMapping("/sub")
-//	public ResultBean<List<byte[]>> getSubscribedContractList(String gatewayId){
-//		Assert.hasText(gatewayId, "网关ID不能为空");
-//		return new ResultBean<>(gatewayService.getSubscribedContractList(gatewayId)
-//				.stream()
-//				.map(ContractField::toByteArray)
-//				.toList());
-//	}
-	
 	@GetMapping("/reset")
 	public ResultBean<Boolean> resetPlayback(String gatewayId) throws Exception{
 		Assert.hasText(gatewayId, "网关ID不能为空");

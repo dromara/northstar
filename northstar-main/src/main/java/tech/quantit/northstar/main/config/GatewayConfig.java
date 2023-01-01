@@ -48,7 +48,6 @@ public class GatewayConfig {
 		settingsMap.put(ChannelType.CTP, new CtpGatewaySettings());
 		settingsMap.put(ChannelType.CTP_SIM, new CtpSimGatewaySettings());
 		settingsMap.put(ChannelType.PLAYBACK, new PlaybackGatewaySettings());
-		settingsMap.put(ChannelType.SIM, new GatewaySettings() {});
 		
 		Map<ChannelType, GatewayFactory> factoryMap = new EnumMap<>(ChannelType.class);
 		factoryMap.put(ChannelType.CTP, new CtpGatewayFactory(fastEventEngine, mktCenter, dataMgr));

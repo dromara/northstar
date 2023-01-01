@@ -14,8 +14,7 @@
         <el-menu-item index="1">行情管理</el-menu-item>
         <el-menu-item index="2">账户管理</el-menu-item>
         <el-menu-item index="3">模组管理</el-menu-item>
-        <!-- <el-menu-item index="5">手工期权交易</el-menu-item> -->
-        <el-menu-item index="6">手工期货交易</el-menu-item>
+        <el-menu-item index="6">手工交易</el-menu-item>
         <el-menu-item index="9" @click="systemLogger">日志跟踪</el-menu-item>
       </el-menu>
       <div class="ns-tools">

@@ -1,6 +1,7 @@
 package tech.quantit.northstar.gateway.sim.trade;
 
 import java.util.Objects;
+import java.util.Optional;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -76,31 +77,31 @@ public class SimContract implements Instrument{
 			throw new IllegalStateException("没有合约定义信息");
 		}
 		return ContractField.newBuilder()
-				.setContractId(contractId)
-				.setName(name)
-				.setFullName(fullName)
-				.setThirdPartyId(thirdPartyId)
-				.setUnifiedSymbol(unifiedSymbol)
-				.setSymbol(symbol)
-				.setExchange(exchange)
-				.setProductClass(productClass)
-				.setCurrency(currency)
+				.setContractId(Optional.ofNullable(contractId).orElse(""))
+				.setName(Optional.ofNullable(name).orElse(""))
+				.setFullName(Optional.ofNullable(fullName).orElse(""))
+				.setThirdPartyId(Optional.ofNullable(thirdPartyId).orElse(""))
+				.setUnifiedSymbol(Optional.ofNullable(unifiedSymbol).orElse(""))
+				.setSymbol(Optional.ofNullable(symbol).orElse(""))
+				.setExchange(Optional.ofNullable(exchange).orElse(ExchangeEnum.UnknownExchange))
+				.setProductClass(Optional.ofNullable(productClass).orElse(ProductClassEnum.UnknownProductClass))
+				.setCurrency(Optional.ofNullable(currency).orElse(CurrencyEnum.CNY))
 				.setMultiplier(multiplier)
 				.setPriceTick(priceTick)
 				.setLongMarginRatio(longMarginRatio)
 				.setShortMarginRatio(shortMarginRatio)
 				.setMaxMarginSideAlgorithm(maxMarginSideAlgorithm)
-				.setUnderlyingSymbol(underlyingSymbol)
+				.setUnderlyingSymbol(Optional.ofNullable(underlyingSymbol).orElse(""))
 				.setStrikePrice(strikePrice)
-				.setOptionsType(optionsType)
+				.setOptionsType(Optional.ofNullable(optionsType).orElse(OptionsTypeEnum.O_Unknown))
 				.setUnderlyingMultiplier(underlyingMultiplier)
-				.setLastTradeDateOrContractMonth(lastTradeDateOrContractMonth)
+				.setLastTradeDateOrContractMonth(Optional.ofNullable(lastTradeDateOrContractMonth).orElse(""))
 				.setMaxMarketOrderVolume(maxMarketOrderVolume)
 				.setMinMarketOrderVolume(minMarketOrderVolume)
 				.setMaxLimitOrderVolume(maxLimitOrderVolume)
 				.setMinLimitOrderVolume(minLimitOrderVolume)
-				.setCombinationType(combinationType)
-				.setGatewayId(gatewayId)
+				.setCombinationType(Optional.ofNullable(combinationType).orElse(CombinationTypeEnum.COMBT_Unknown))
+				.setGatewayId(Optional.ofNullable(gatewayId).orElse(""))
 				.setCommissionFee(contractDef.getCommissionFee())
 				.setCommissionRate(contractDef.getCommissionRate())
 				.build();
