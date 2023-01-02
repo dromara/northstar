@@ -8,11 +8,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 
 import com.alibaba.fastjson.JSONObject;
@@ -42,14 +39,13 @@ import tech.quantit.northstar.data.IMarketDataRepository;
 import tech.quantit.northstar.data.IModuleRepository;
 import tech.quantit.northstar.domain.module.ModulePlaybackContext;
 import tech.quantit.northstar.gateway.api.IContractManager;
-import tech.quantit.northstar.gateway.api.domain.contract.Contract;
 import tech.quantit.northstar.main.ExternalJarClassLoader;
+import tech.quantit.northstar.main.PostLoadAware;
 import tech.quantit.northstar.main.handler.internal.ModuleManager;
 import tech.quantit.northstar.main.utils.ModuleFactory;
 import tech.quantit.northstar.strategy.api.DynamicParamsAware;
 import tech.quantit.northstar.strategy.api.IModule;
 import tech.quantit.northstar.strategy.api.annotation.StrategicComponent;
-import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.TradeField;
 
@@ -59,7 +55,7 @@ import xyz.redtorch.pb.CoreField.TradeField;
  *
  */
 @Slf4j
-public class ModuleService implements InitializingBean {
+public class ModuleService implements PostLoadAware {
 	
 	private ApplicationContext ctx;
 	
@@ -128,49 +124,6 @@ public class ModuleService implements InitializingBean {
 		DynamicParams params = aware.getDynamicParams();
 		return params.getMetaInfo();
 	}
-	
-	/**
-	 * 校验模组配置
-	 * @param md
-	 * @return
-	 */
-//	public boolean validateModule(ModuleDescription md) {
-//		for(ModuleAccountDescription mad : md.getModuleAccountSettingsDescription()) {
-//			// 校验模组绑定合约是已订阅合约
-//			GatewayDescription accountGatewayDescription = gatewayRepo.findById(mad.getAccountGatewayId());
-//			GatewayDescription marketGatewayDescription = gatewayRepo.findById(accountGatewayDescription.getBindedMktGatewayId());
-//			Set<String> subscribedUnifiedSymbols = marketGatewayDescription
-//					.getSubscribedContractGroups()
-//					.stream()
-//					.map(contractMgr::relativeContracts)
-//					.flatMap(Collection::stream)
-//					.map(ContractField::getUnifiedSymbol)
-//					.collect(Collectors.toSet());
-//			for(String unifiedSymbol : mad.getBindedUnifiedSymbols()) {
-//				if(!subscribedUnifiedSymbols.contains(unifiedSymbol)) {
-//					throw new IllegalStateException(String.format("网关【%s】没有订阅合约【%s】", 
-//							accountGatewayDescription.getBindedMktGatewayId(), unifiedSymbol));
-//				}
-//			}
-//			
-//			// 校验模组用途与配置吻合
-//			if(md.getUsage() == ModuleUsage.PLAYBACK) {
-//				Assert.isTrue(marketGatewayDescription.getGatewayType().equals("PLAYBACK"), "回测模组应该采用【PLAYBACK】行情网关");
-//				Assert.isTrue(accountGatewayDescription.getGatewayType().equals("SIM"), "回测模组应该采用【SIM】账户网关");
-//			}
-//			if(md.getUsage() == ModuleUsage.UAT) {
-//				Assert.isTrue(accountGatewayDescription.getGatewayType().equals("SIM"), "模拟盘模组应该采用【SIM】账户网关");
-//			}
-//			if(md.getUsage() == ModuleUsage.PROD) {
-//				Assert.isTrue(!marketGatewayDescription.getGatewayType().equals("PLAYBACK"), "实盘模组不应该采用【PLAYBACK】行情网关");
-//				Assert.isTrue(!marketGatewayDescription.getGatewayType().equals("SIM"), "实盘模组不应该采用【SIM】行情网关");
-//				Assert.isTrue(!accountGatewayDescription.getGatewayType().equals("SIM"), "实盘模组不应该采用【SIM】账户网关");
-//			}
-//			
-//		}
-//		
-//		return true;
-//	}
 	
 	/**
 	 * 增加模组
@@ -340,19 +293,16 @@ public class ModuleService implements InitializingBean {
 	}
 	
 	@Override
-	public void afterPropertiesSet() throws Exception {
-		CompletableFuture.runAsync(() -> {
-			log.info("开始加载模组");
-			for(ModuleDescription md : findAllModules()) {
-				try {				
-					loadModule(md);
-				} catch (Exception e) {
-					log.warn("模组 [{}] 加载失败", md.getModuleName(), e);
-				}
+	public void postLoad() {
+		log.info("开始加载模组");
+		for(ModuleDescription md : findAllModules()) {
+			try {				
+				loadModule(md);
+			} catch (Exception e) {
+				log.warn("模组 [{}] 加载失败", md.getModuleName(), e);
 			}
-			log.info("模组加载完毕");
-		}, CompletableFuture.delayedExecutor(5, TimeUnit.SECONDS));
-		
+		}
+		log.info("模组加载完毕");		
 	}
 
 }

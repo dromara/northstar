@@ -143,8 +143,8 @@ public class MarketCenter implements IMarketCenter, TickDataAware{
 			if(c.channelType() == ChannelType.CTP) {
 				PrimaryContract pc = new PrimaryContract(c);
 				contractMap.put(pc.identifier(), pc);
-				gatewaySymbolContractTbl.put(pc.gatewayId(), c.contractField().getSymbol(), pc);
-				gatewayUnifiedSymbolContractTbl.put(pc.gatewayId(), c.contractField().getUnifiedSymbol(), pc);
+				gatewaySymbolContractTbl.put(pc.gatewayId(), pc.contractField().getSymbol(), pc);
+				gatewayUnifiedSymbolContractTbl.put(pc.gatewayId(), pc.contractField().getUnifiedSymbol(), pc);
 			}
 		}
 	}
@@ -229,6 +229,7 @@ public class MarketCenter implements IMarketCenter, TickDataAware{
 	 */
 	@Override
 	public void addGateway(MarketGateway gateway) {
+		log.info("注册网关渠道：{}", gateway.getGatewaySetting().getGatewayId());
 		gatewayMap.put(gateway.channelType(), gateway);
 	}
 

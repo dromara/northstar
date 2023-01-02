@@ -16,6 +16,8 @@ import tech.quantit.northstar.gateway.api.IMarketCenter;
 import tech.quantit.northstar.gateway.api.domain.contract.Instrument;
 import tech.quantit.northstar.gateway.ctp.CtpContract;
 import tech.quantit.northstar.gateway.sim.trade.SimContractGenerator;
+import tech.quantit.northstar.main.service.GatewayService;
+import tech.quantit.northstar.main.service.ModuleService;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 
 @Slf4j
@@ -28,6 +30,12 @@ public class ContractsDefaultLoader implements CommandLineRunner{
 	
 	@Autowired
 	private DataServiceManager dsMgr;
+	
+	@Autowired
+	private GatewayService gatewayService;
+	
+	@Autowired
+	private ModuleService moduleService;
 	
 	@Override
 	public void run(String... args) throws Exception {
@@ -48,6 +56,9 @@ public class ContractsDefaultLoader implements CommandLineRunner{
 		SimContractGenerator contractGen = new SimContractGenerator("SIM");
 		Instrument simContract = contractGen.getContract();
 		mktCenter.addInstrument(simContract);
+		
+		gatewayService.postLoad();
+		moduleService.postLoad();
 	}
 
 }

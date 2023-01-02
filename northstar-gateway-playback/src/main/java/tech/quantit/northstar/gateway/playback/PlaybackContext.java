@@ -338,7 +338,7 @@ public class PlaybackContext {
 			.filter(entry -> entry.getValue().peek().getActionTimestamp() <= currentTime)
 			.forEach(entry -> {
 				BarField bar = entry.getValue().poll();
-				TickSimulationAlgorithm algo = algoMap.get(contractMgr.getContract(bar.getGatewayId(), bar.getUnifiedSymbol()).contractField());
+				TickSimulationAlgorithm algo = algoMap.get(contractMgr.getContract(GWID, bar.getUnifiedSymbol()).contractField());
 				List<TickEntry> ticksOfBar = algo.generateFrom(bar);
 				cacheBarMap.put(entry.getKey(), bar);
 				contractTickMap.put(entry.getKey(), new LinkedList<>(convertTicks(ticksOfBar, bar)));

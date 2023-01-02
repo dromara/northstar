@@ -3,11 +3,8 @@ package tech.quantit.northstar.main.service;
 import java.io.File;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.DuplicateKeyException;
 
 import com.alibaba.fastjson.JSON;
@@ -34,6 +31,7 @@ import tech.quantit.northstar.gateway.api.GatewayMetaProvider;
 import tech.quantit.northstar.gateway.api.IMarketCenter;
 import tech.quantit.northstar.gateway.api.MarketGateway;
 import tech.quantit.northstar.gateway.sim.trade.SimTradeGateway;
+import tech.quantit.northstar.main.PostLoadAware;
 import tech.quantit.northstar.main.utils.CodecUtils;
 
 /**
@@ -45,7 +43,7 @@ import tech.quantit.northstar.main.utils.CodecUtils;
  */
 @Slf4j
 @AllArgsConstructor
-public class GatewayService implements InitializingBean {
+public class GatewayService implements PostLoadAware {
 	
 	private GatewayAndConnectionManager gatewayConnMgr;
 	
@@ -321,13 +319,17 @@ public class GatewayService implements InitializingBean {
 	}
 	
 	@Override
-	public void afterPropertiesSet() throws Exception {
-		CompletableFuture.runAsync(() -> {
+	public void postLoad() {
+		log.info("开始加载网关");
+		try {				
 			List<GatewayDescription> result = gatewayRepo.findAll();
 			// 因为依赖关系，加载要有先后顺序
 			result.stream().filter(gd -> gd.getGatewayUsage() == GatewayUsage.MARKET_DATA).map(this::decodeSettings).forEach(this::doCreateGateway);
 			result.stream().filter(gd -> gd.getGatewayUsage() == GatewayUsage.TRADE).map(this::decodeSettings).forEach(this::doCreateGateway);
-		}, CompletableFuture.delayedExecutor(2, TimeUnit.SECONDS));
+		} catch(Exception e) {
+			log.error("", e);
+		}		
+		log.info("网关加载完毕");
 	}
 
 }
