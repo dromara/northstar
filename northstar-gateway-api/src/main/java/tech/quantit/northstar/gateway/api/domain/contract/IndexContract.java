@@ -142,4 +142,10 @@ public class IndexContract implements Contract, TickDataAware{
 	public ChannelType channelType() {
 		return monthContracts.get(0).channelType();
 	}
+
+	@Override
+	public void endOfMarket() {
+		barGen.endOfBar();
+	}
+	
 }

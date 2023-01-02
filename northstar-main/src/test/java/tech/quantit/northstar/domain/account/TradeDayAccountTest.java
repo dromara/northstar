@@ -7,17 +7,20 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import tech.quantit.northstar.common.exception.InsufficientException;
 import tech.quantit.northstar.common.exception.TradeException;
+import tech.quantit.northstar.common.model.Identifier;
 import tech.quantit.northstar.common.model.OrderRecall;
 import tech.quantit.northstar.common.model.OrderRequest;
 import tech.quantit.northstar.common.model.OrderRequest.TradeOperation;
 import tech.quantit.northstar.gateway.api.IContractManager;
 import tech.quantit.northstar.gateway.api.TradeGateway;
+import tech.quantit.northstar.gateway.api.domain.contract.Contract;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreEnum.OrderStatusEnum;
 import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
@@ -46,8 +49,10 @@ public class TradeDayAccountTest {
 	public void prepare() {
 		TradeGateway gateway = mock(TradeGateway.class);
 		IContractManager contractMgr = mock(IContractManager.class);
-//		when(contractMgr.getContract(Identifier.of("rb2102@SHFE"))).thenReturn(contract);
-//		tda = new TradeDayAccount("testGateway", gateway, contractMgr);
+		Contract c = mock(Contract.class);
+		when(c.contractField()).thenReturn(contract);
+		when(contractMgr.getContract(Identifier.of("rb2102@SHFE"))).thenReturn(c);
+		tda = new TradeDayAccount("testGateway", gateway, contractMgr);
 	}
 	
 

@@ -74,6 +74,7 @@ class ModuleRepoRedisImplTest {
 	
 	@BeforeEach
 	void prepare() {
+		factory.setDatabase(15);
 		factory.afterPropertiesSet();
 		
 		redisTemplate.setConnectionFactory(factory);

@@ -46,7 +46,7 @@ server:
   ssl:
     enabled: false
 spring:
-  redis.database: 0
+  redis.database: 1
   config:    activate:      on-profile: dev
 
 ---

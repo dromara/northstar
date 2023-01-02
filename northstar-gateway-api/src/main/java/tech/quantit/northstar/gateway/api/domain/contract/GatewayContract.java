@@ -104,4 +104,8 @@ public class GatewayContract implements Contract, TickDataAware{
 		return ins.channelType();
 	}
 
+	@Override
+	public void endOfMarket() {
+		barGen.endOfBar();
+	}
 }
