@@ -30,8 +30,6 @@ public class GatewayDescription {
 	
 	private GatewayUsage gatewayUsage;
 	
-	private String gatewayAdapterType;
-	
 	private boolean autoConnect;
 	
 	private Object settings;

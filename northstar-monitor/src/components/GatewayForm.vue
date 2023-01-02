@@ -157,12 +157,6 @@ import PlaybackForm from '@/components/PlaybackForm'
 import gatewayMgmtApi from '@/api/gatewayMgmtApi'
 import contractApi from '@/api/contractApi'
 
-const GATEWAY_ADAPTER = {
-  CTP: 'xyz.redtorch.gateway.ctp.x64v6v3v15v.CtpGatewayAdapter',
-  CTP_SIM: 'xyz.redtorch.gateway.ctp.x64v6v5v1cpv.CtpSimGatewayAdapter',
-  SIM: 'tech.xuanwu.northstar.gateway.sim.SimGatewayLocalImpl',
-  PLAYBACK: 'tech.quantit.northstar.gateway.playback.PlaybackGatewayAdapter'
-}
 const CONNECTION_STATE = {
   CONNECTING: 'CONNECTING',
   CONNECTED: 'CONNECTED',
@@ -279,7 +273,6 @@ export default {
   },
   methods: {
     onChooseGatewayType() {
-      this.form.gatewayAdapterType = GATEWAY_ADAPTER[this.form.channelType]
       if (this.gatewayUsage === 'MARKET_DATA' && !this.channelType.allowDuplication) {
         this.form.gatewayId = this.channelType.name
       } else if (this.channelType.allowDuplication) {
