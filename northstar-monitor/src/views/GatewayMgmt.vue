@@ -28,14 +28,6 @@
       >
       </el-table-column>
       <el-table-column
-        :label="`${typeLabel}描述`"
-        prop="description"
-        width="120px"
-        header-align="center"
-        align="center"
-      >
-      </el-table-column>
-      <el-table-column
         :label="`${typeLabel}类型`"
         prop="channelType"
         width="90px"
@@ -84,7 +76,7 @@
       <el-table-column
         v-if="gatewayUsage !== 'TRADE'"
         label="行情反馈"
-        width="80px"
+        width="150px"
         header-align="center"
         align="center"
       >
@@ -105,13 +97,13 @@
         </template>
       </el-table-column>
       <el-table-column
-        label="适配器类型"
-        prop="gatewayAdapterType"
+        :label="`${typeLabel}描述`"
+        prop="description"
         header-align="center"
         align="center"
       >
       </el-table-column>
-      <el-table-column align="center" width="300px">
+      <el-table-column align="center" width="360px">
         <template slot="header">
           <el-button size="mini" type="primary" @click="handleCreate">新建</el-button>
         </template>

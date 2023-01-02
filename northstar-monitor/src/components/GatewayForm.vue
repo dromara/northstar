@@ -100,7 +100,7 @@
             </el-select>
           </el-form-item>
         </el-col>
-        <el-col :span="16" v-if="gatewayUsage === 'MARKET_DATA' && !isUpdateMode">
+        <el-col :span="16" v-if="gatewayUsage === 'MARKET_DATA'">
           <el-form-item label="订阅合约">
             <el-select
               v-model="subscribedContracts"
@@ -235,6 +235,7 @@ export default {
         }
         this.form.gatewayUsage = this.gatewayUsage
         this.subscribedContracts = this.form.subscribedContracts
+        this.contractOptions = this.subscribedContracts
         this.$nextTick(() => {
           gatewayMgmtApi.findAll('MARKET_DATA').then((result) => {
             this.linkedGatewayOptions = result
