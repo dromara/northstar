@@ -114,8 +114,8 @@
               :loading="loading"
             >
               <el-option
-                v-for="(item,i) in contractOptions"
-                :key="i"
+                v-for="(item) in contractOptions"
+                :key="item.value"
                 :label="item.name"
                 :value="item"
               >

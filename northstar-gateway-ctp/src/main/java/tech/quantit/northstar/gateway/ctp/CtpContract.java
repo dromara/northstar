@@ -6,6 +6,7 @@ import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import tech.quantit.northstar.common.constant.ChannelType;
 import tech.quantit.northstar.common.model.Identifier;
 import tech.quantit.northstar.gateway.api.domain.contract.ContractDefinition;
@@ -31,6 +32,7 @@ import xyz.redtorch.pb.CoreField.ContractField;
  */
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 @Builder
 public class CtpContract implements Instrument{
 
@@ -63,13 +65,12 @@ public class CtpContract implements Instrument{
 	private Identifier identifier;
 	private ContractDefinition contractDef;
 	
-	public CtpContract() {}
 	public CtpContract(ContractField c) {
 		contractId = c.getContractId();
 		name = c.getName();
 		fullName = c.getFullName();
 		thirdPartyId = c.getThirdPartyId();
-		unifiedSymbol = c.getUnderlyingSymbol();
+		unifiedSymbol = c.getUnifiedSymbol();
 		symbol = c.getSymbol();
 		exchange = c.getExchange();
 		productClass = c.getProductClass();
@@ -79,7 +80,7 @@ public class CtpContract implements Instrument{
 		longMarginRatio = c.getLongMarginRatio();
 		shortMarginRatio = c.getShortMarginRatio();
 		maxMarginSideAlgorithm = c.getMaxMarginSideAlgorithm();
-		underlyingSymbol = c.getUnifiedSymbol();
+		underlyingSymbol = c.getUnderlyingSymbol();
 		strikePrice = c.getStrikePrice();
 		optionsType = c.getOptionsType();
 		underlyingMultiplier = c.getUnderlyingMultiplier();
@@ -90,7 +91,6 @@ public class CtpContract implements Instrument{
 		minLimitOrderVolume = c.getMinLimitOrderVolume();
 		combinationType = c.getCombinationType();
 		gatewayId = c.getGatewayId();
-				
 	}
 	
 	@Override

@@ -24,6 +24,10 @@
             <i class="el-icon-s-custom"></i>
             <span slot="title">账户绑定</span>
           </el-menu-item>
+          <el-menu-item index="4">
+            <i class="el-icon-document-copy"></i>
+            <span slot="title">已关联合约</span>
+          </el-menu-item>
         </el-menu>
       </el-aside>
       <el-main class="main-compact"
@@ -49,16 +53,6 @@
                 <el-option label="实盘" value="PROD"></el-option>
               </el-select>
             </el-form-item>
-            <!-- <el-form-item label="绑定合约">
-              <el-tooltip
-                class="item"
-                effect="dark"
-                content="如有多个合约用 ; 分隔"
-                placement="bottom-end"
-              >
-                <el-input v-model="bindedContracts" :disabled="readOnly"></el-input>
-              </el-tooltip>
-            </el-form-item> -->
             <el-form-item label="平仓优化">
               <el-select v-model="form.closingPolicy" :disabled="readOnly">
                 <el-option label="先开先平" value="FIFO"></el-option>
@@ -177,6 +171,27 @@
               </el-form-item>
             </div>
           </div>
+          <div v-show="activeIndex === '4'">
+            <el-table
+              :data="jointBindedContracts"
+              style="width: 100%">
+              <el-table-column
+                prop="name"
+                label="合约名称"
+                align="center"
+                width="100px"
+                >
+              </el-table-column>
+              <el-table-column
+                prop="unifiedSymbol"
+                label="合约编码"
+                align="center">
+                <template slot-scope="scope">
+                  <span style="user-select: all;">{{scope.row.unifiedSymbol}}</span>
+                </template>
+              </el-table-column>
+            </el-table>
+          </div>
         </el-form>
       </el-main>
     </el-container>
@@ -246,7 +261,6 @@ export default {
       tradeStrategyOptionsSource: [],
       activeIndex: '1',
       choseAccounts: [],
-      bindedContracts: '',
       form: {
         moduleName: '',
         type: 'SPECULATION',
@@ -273,6 +287,9 @@ export default {
         return this.tradeStrategyOptionsSource
       }
       return this.tradeStrategyOptionsSource.filter((item) => !/示例/.test(item.componentMeta.name))
+    },
+    jointBindedContracts(){
+      return this.form.moduleAccountSettingsDescription.map(item => item.bindedContracts).reduce((jointList, list) => jointList.concat(list), [])
     }
   },
   watch: {
