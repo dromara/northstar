@@ -30,7 +30,7 @@
               v-model="form.gatewayId"
               autocomplete="off"
               :disabled="
-                isUpdateMode || (gatewayUsage === 'MARKET_DATA' && channelType && !channelType.allowDuplication)
+                isUpdateMode || disableGatewayIdEdit
               "
             ></el-input>
           </el-form-item>
@@ -197,8 +197,8 @@ export default {
       loading: false,
       linkedGatewayOptions: [],
       formRules: {
-        gatewayId: [{ required: true, message: '不能为空', trigger: 'blur', validator: (r,v,cb) => !this.form.gatewayId  ? cb(new Error(r.message)) : cb()}],
-        channelType: [{ required: true, message: '不能为空', trigger: 'blur',  validator: (r,v,cb) => !this.form.channelType  ? cb(new Error(r.message)) : cb()}],
+        gatewayId: [{ required: true, message: '不能为空', trigger: 'blur'}],
+        channelType: [{ required: true, message: '不能为空', trigger: 'blur'}],
         gatewayUsage: [{ required: true, message: '不能为空', trigger: 'blur' }],
         bindedMktGatewayId: [{ required: true, message: '不能为空', trigger: 'blur' }]
       },
@@ -226,12 +226,19 @@ export default {
   computed: {
     typeLabel() {
       return this.gatewayUsage === 'TRADE' ? '账户' : '网关'
+    },
+    disableGatewayIdEdit(){
+      return this.channelType && this.gatewayUsage === 'MARKET_DATA' && !this.channelType.allowDuplication;
     }
   },
   watch: {
     visible: function (val) {
       if (val) {
-        this.form = Object.assign({}, this.gatewayDescription)
+        if(this.isUpdateMode){
+          Object.keys(this.gatewayDescription).forEach(key => {
+            this.form[key] = this.gatewayDescription[key]
+          })
+        }
         this.form.gatewayUsage = this.gatewayUsage
         this.subscribedContracts = this.form.subscribedContracts
         this.$nextTick(() => {
@@ -274,7 +281,7 @@ export default {
     onChooseGatewayType() {
       this.form.gatewayAdapterType = GATEWAY_ADAPTER[this.form.channelType]
       if (this.gatewayUsage === 'MARKET_DATA' && !this.channelType.allowDuplication) {
-        this.form.gatewayId = `${this.channelType.name}`
+        this.form.gatewayId = this.channelType.name
       } else if (this.channelType.allowDuplication) {
         this.form.gatewayId = ''
       }
@@ -286,7 +293,6 @@ export default {
       if (!this.form.settings || !Object.keys(this.form.settings).length) {
         throw new Error('网关配置不能为空')
       }
-      this.form.channelType = this.channelType.name
       this.$refs.gatewayForm
         .validate()
         .then(() => {
@@ -304,17 +310,29 @@ export default {
       if (query !== '') {
           this.loading = true;
             // 获取合约品种列表
-          contractApi.getGatewayContracts(this.form.channelType === 'PLAYBACK' ? 'CTP' : this.form.channelType, query).then(result => {
-            this.contractOptions = result
-          }).finally(() => {
-            this.loading = false;
-          })
+          if(this.form.channelType === 'PLAYBACK'){
+            const ctpListPromise = contractApi.getGatewayContracts('CTP', query)
+            const pbListPromise = contractApi.getGatewayContracts('PLAYBACK', query)
+            Promise.all([ctpListPromise, pbListPromise]).then(([ctpResult, pbResult]) => {
+              this.contractOptions = [...ctpResult, ...pbResult]
+            }).finally(() => {
+              this.loading = false;
+            })
+          } else {
+            contractApi.getGatewayContracts(this.form.channelType, query).then(result => {
+              this.contractOptions = result
+            }).finally(() => {
+              this.loading = false;
+            })
+          }
+
         } else {
           this.contractOptions = [];
         }
     },
     close() {
       this.$emit('update:visible', false)
+      this.form = this.$options.data().form
       this.subscribedContracts = []
     }
   }
