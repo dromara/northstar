@@ -30,6 +30,7 @@ import tech.quantit.northstar.gateway.api.domain.contract.GatewayContract;
 import tech.quantit.northstar.gateway.api.domain.contract.IndexContract;
 import tech.quantit.northstar.gateway.api.domain.contract.Instrument;
 import tech.quantit.northstar.gateway.api.domain.contract.OptionChainContract;
+import tech.quantit.northstar.gateway.api.domain.contract.PrimaryContract;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
 import xyz.redtorch.pb.CoreField.TickField;
@@ -49,12 +50,12 @@ public class MarketCenter implements IMarketCenter, TickDataAware{
 	/* 成份合约 -> 指数合约 */
 	private final ConcurrentMap<Contract, IndexContract> idxContractMap = new ConcurrentHashMap<>(INIT_SIZE);
 
+	private final Table<String, String, Contract> gatewaySymbolContractTbl = HashBasedTable.create();
+	private final Table<String, String, Contract> gatewayUnifiedSymbolContractTbl = HashBasedTable.create();
+
 	private final Table<ExchangeEnum, ProductClassEnum, List<ContractDefinition>> contractDefTbl = HashBasedTable.create();
 	
 	private final Table<ChannelType, ContractDefinition, List<Contract>> channelDefContractGroups = HashBasedTable.create();
-	
-	private final Table<String, String, Contract> gatewaySymbolContractTbl = HashBasedTable.create();
-	private final Table<String, String, Contract> gatewayUnifiedSymbolContractTbl = HashBasedTable.create();
 	
 	private final Map<ChannelType, MarketGateway> gatewayMap = new EnumMap<>(ChannelType.class);
 	
@@ -132,10 +133,21 @@ public class MarketCenter implements IMarketCenter, TickDataAware{
 			}
 			IndexContract c = new IndexContract(feEngine, e.getValue());
 			contractMap.put(c.identifier(), c);
+			for(Contract memberContract : c.memberContracts()) {
+				idxContractMap.put(memberContract, c);
+			}
+			gatewaySymbolContractTbl.put(c.gatewayId(), c.contractField().getSymbol(), c);
+			gatewayUnifiedSymbolContractTbl.put(c.gatewayId(), c.contractField().getUnifiedSymbol(), c);
+			
+			// CTP主力合约生成 
+			if(c.channelType() == ChannelType.CTP) {
+				PrimaryContract pc = new PrimaryContract(c);
+				contractMap.put(pc.identifier(), pc);
+				gatewaySymbolContractTbl.put(pc.gatewayId(), c.contractField().getSymbol(), pc);
+				gatewayUnifiedSymbolContractTbl.put(pc.gatewayId(), c.contractField().getUnifiedSymbol(), pc);
+			}
 		}
 	}
-	
-	
 	
 	/**
 	 * 查找合约

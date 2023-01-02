@@ -28,6 +28,7 @@ import tech.quantit.northstar.common.constant.DateTimeConstant;
 import tech.quantit.northstar.common.constant.TickType;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.event.NorthstarEventType;
+import tech.quantit.northstar.common.model.Identifier;
 import tech.quantit.northstar.common.model.PlaybackRuntimeDescription;
 import tech.quantit.northstar.common.utils.MarketDataLoadingUtils;
 import tech.quantit.northstar.data.IPlaybackRuntimeRepository;
@@ -99,9 +100,9 @@ public class PlaybackContext {
 		this.contractMgr = contractMgr;
 		this.playbackEndDate = LocalDate.parse(settings.getEndDate(), DateTimeConstant.D_FORMAT_INT_FORMATTER);
 		
-		settings.getUnifiedSymbols()
+		settings.getPlayContracts()
 			.stream()
-			.map(unifiedSymbol -> contractMgr.getContract(GWID, unifiedSymbol))
+			.map(c -> contractMgr.getContract(Identifier.of(c.getValue())))
 			.map(Contract::contractField)
 			.forEach(contract ->  
 				algoMap.put(contract, switch(settings.getPrecision()) {
@@ -197,12 +198,12 @@ public class PlaybackContext {
 					
 					playbackTimeState = LocalDateTime.of(preloadEndDate, LocalTime.of(21, 0));
 					
-					CountDownLatch cdl = new CountDownLatch(settings.getUnifiedSymbols().size());
+					CountDownLatch cdl = new CountDownLatch(settings.getPlayContracts().size());
 					LocalDate startDate = LocalDate.parse(settings.getStartDate(), DateTimeConstant.D_FORMAT_INT_FORMATTER);
 					LocalDate endDate = LocalDate.parse(settings.getEndDate(), DateTimeConstant.D_FORMAT_INT_FORMATTER);
-					settings.getUnifiedSymbols()
+					settings.getPlayContracts()
 						.stream()
-						.map(unifiedSymbol -> contractMgr.getContract(GWID, unifiedSymbol))
+						.map(c -> contractMgr.getContract(Identifier.of(c.getValue())))
 						.map(Contract::contractField)
 						.forEach(contract -> {
 							loader.loadTradeDayDataRaw(
@@ -319,9 +320,9 @@ public class PlaybackContext {
 	// 按天加载BAR数据
 	private void loadBars() {
 		log.info("回放网关 [{}] 运行至 {}", gatewaySettings.getGatewayId(), playbackTimeState);
-		contractBarMap = settings.getUnifiedSymbols()
+		contractBarMap = settings.getPlayContracts()
 			.stream()
-			.map(unifiedSymbol -> contractMgr.getContract(GWID, unifiedSymbol))
+			.map(c -> contractMgr.getContract(Identifier.of(c.getValue())))
 			.map(Contract::contractField)
 			.collect(Collectors.toMap(
 					contract -> contract, 

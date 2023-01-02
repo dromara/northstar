@@ -66,7 +66,7 @@ class PlaybackGatewayFactoryTest {
 		settings.setEndDate("20220629");
 		settings.setPrecision(PlaybackPrecision.LOW);
 		settings.setSpeed(PlaybackSpeed.SPRINT);
-		settings.setUnifiedSymbols(List.of(contract.getUnifiedSymbol()));
+		settings.setPlayContracts(List.of());
 		
 		playbackGatewayFactory = new PlaybackGatewayFactory(feEngine, contractMgr, holidayMgr, rtRepo, mdRepo);
 	}

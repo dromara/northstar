@@ -7,6 +7,7 @@ import lombok.Setter;
 import tech.quantit.northstar.common.constant.FieldType;
 import tech.quantit.northstar.common.constant.PlaybackPrecision;
 import tech.quantit.northstar.common.constant.PlaybackSpeed;
+import tech.quantit.northstar.common.model.ContractSimpleInfo;
 import tech.quantit.northstar.common.model.DynamicParams;
 import tech.quantit.northstar.common.model.GatewaySettings;
 import tech.quantit.northstar.common.model.Setting;
@@ -49,6 +50,6 @@ public class PlaybackGatewaySettings extends DynamicParams implements GatewaySet
 	 * 回放的合约清单
 	 */
 	@Setting(label="回放合约", order=50, type=FieldType.MULTI_SELECT)
-	private List<String> unifiedSymbols;
+	private List<ContractSimpleInfo> playContracts;
 	
 }
