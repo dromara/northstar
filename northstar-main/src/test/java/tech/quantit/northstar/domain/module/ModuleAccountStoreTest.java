@@ -2,6 +2,9 @@ package tech.quantit.northstar.domain.module;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.offset;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.List;
@@ -10,13 +13,18 @@ import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import tech.quantit.northstar.common.constant.ClosingPolicy;
 import tech.quantit.northstar.common.constant.ModuleState;
+import tech.quantit.northstar.common.model.Identifier;
 import tech.quantit.northstar.common.model.ModuleAccountRuntimeDescription;
 import tech.quantit.northstar.common.model.ModulePositionDescription;
 import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
+import tech.quantit.northstar.gateway.api.IContractManager;
+import tech.quantit.northstar.gateway.api.domain.contract.Contract;
 import test.common.TestFieldFactory;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
+import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.TickField;
 import xyz.redtorch.pb.CoreField.TradeField;
 
@@ -54,11 +62,11 @@ class ModuleAccountStoreTest {
 				.moduleState(ModuleState.HOLDING_LONG)
 				.accountRuntimeDescriptionMap(mamap)
 				.build();
-//		IContractManager contractMgr = mock(ContractManager.class);
-//		when(contractMgr.getContractDefinition(anyString())).thenReturn(ContractDefinition.builder()
-//				.commissionInBasePoint(1)
-//				.build());
-//		mas = new ModuleAccountStore("testModule", ClosingPolicy.FIFO, md, contractMgr);
+		IContractManager contractMgr = mock(IContractManager.class);
+		Contract c = mock(Contract.class);
+		when(c.contractField()).thenReturn(ContractField.newBuilder().setCommissionRate(0.0001).build());
+		when(contractMgr.getContract(any(Identifier.class))).thenReturn(c);
+		mas = new ModuleAccountStore("testModule", ClosingPolicy.FIFO, md, contractMgr);
 	}
 
 	@Test

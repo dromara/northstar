@@ -49,19 +49,19 @@ class MarketDataRepoRedisImplTest {
 			: LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER);
 	
 	BarField bar1 = BarField.newBuilder()
-			.setGatewayId("testGateway")
+			.setGatewayId("CTP")
 			.setUnifiedSymbol("rb2210@SHFE@FUTURES")
 			.setTradingDay(date)
 			.build();
 	
 	BarField bar2 = BarField.newBuilder()
-			.setGatewayId("testGateway")
+			.setGatewayId("CTP")
 			.setUnifiedSymbol("rb2210@SHFE@FUTURES")
 			.setTradingDay(date)
 			.build();
 	
 	BarField bar3 = BarField.newBuilder()
-			.setGatewayId("testGateway")
+			.setGatewayId("CTP")
 			.setUnifiedSymbol("rb2210@SHFE@FUTURES")
 			.setTradingDay(date)
 			.build();
@@ -88,7 +88,7 @@ class MarketDataRepoRedisImplTest {
 		repo.insert(bar1);
 		repo.insert(bar2);
 		repo.insert(bar3);
-		assertThat(redisTemplate.hasKey(KEY_PREFIX + "testGateway:" + date + ":rb2210@SHFE@FUTURES")).isTrue();
+		assertThat(redisTemplate.hasKey(KEY_PREFIX + "CTP:" + date + ":rb2210@SHFE@FUTURES")).isTrue();
 	}
 
 	// 20:00点整时，跑该测试可能会报错
