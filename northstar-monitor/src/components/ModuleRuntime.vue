@@ -122,7 +122,7 @@
               <el-tab-pane name="dealRecord" label="交易历史"></el-tab-pane>
             </el-tabs>
             <div class="table-wrapper">
-              <el-table v-show="moduleTab === 'holding'" :data="holdingPositions" height="100%">
+              <el-table id="modulePositionTbl" v-show="moduleTab === 'holding'" :data="holdingPositions" height="100%">
                 <el-table-column prop="unifiedSymbol" label="合约" align="center" width="100px">
                   <template slot-scope="scope">{{ scope.row.contract.name }}</template>
                 </el-table-column>

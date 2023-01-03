@@ -81,7 +81,7 @@ class ModuleControllerTest {
 	MockTradeDescription mockTrade = MockTradeDescription.builder()
 			.gatewayId("CTP账户")
 			.offsetFlag(OffsetFlagEnum.OF_Open)
-			.unifiedSymbol("rb2210@SHFE@FUTURES")
+			.contractId("rb2210@SHFE@FUTURES")
 			.direction(DirectionEnum.D_Buy)
 			.price(2000)
 			.volume(1)

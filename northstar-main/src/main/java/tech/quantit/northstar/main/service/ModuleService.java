@@ -276,7 +276,7 @@ public class ModuleService implements PostLoadAware {
 	 */
 	public boolean mockTradeAdjustment(String moduleName, MockTradeDescription mockTrade) {
 		IModule module = moduleMgr.getModule(moduleName);
-		ContractField contract = contractMgr.getContract(Identifier.of(mockTrade.getUnifiedSymbol())).contractField();
+		ContractField contract = contractMgr.getContract(Identifier.of(mockTrade.getContractId())).contractField();
 		TradeField trade = TradeField.newBuilder()
 				.setOriginOrderId(Constants.MOCK_ORDER_ID)
 				.setContract(contract)

@@ -58,7 +58,7 @@ describe('模组管理-测试', () => {
             cy.get('#showDemoStrategy').click()
             cy.get('.el-dialog').contains('绑定策略').parent().find('input').click()
             cy.get('.el-select-dropdown').contains('示例-简单策略').click()
-            cy.get('.el-dialog').contains('操作间隔').parent().find('input').type(60)
+            cy.get('.el-dialog').contains('操作间隔').parent().find('input').type(600)
             cy.get('.el-dialog').contains('账户绑定').click()
             cy.get('.el-dialog').contains('绑定账号').parent().find('input').click()
             cy.get('.el-select-dropdown').contains('testAccount').click()
@@ -68,8 +68,9 @@ describe('模组管理-测试', () => {
             cy.get('.el-dialog').filter(':visible').click()
             cy.get('#saveModuleSettings').click()
             cy.wait('@createModule').should('have.nested.property', 'response.statusCode', 200)
+            cy.wait(1000)
 
-            cy.get('.el-table__row').should('have.length', 1)
+            cy.get('.el-table__row').filter(':visible').should('have.length', 1)
         })
 
         it('应该可以启用、停用模组，模组启用时删除按钮不可用，停用时删除按钮可用', () => {
@@ -142,7 +143,7 @@ describe('模组管理-测试', () => {
         it('可以手工增加模组持仓', () => {
             cy.get('#editPosition').click()
             cy.get('.el-dialog').contains('合约代码').parent().click()
-            cy.get('.el-select-dropdown').filter(':visible').contains('sim999@CZCE@FUTURES').click()
+            cy.get('.el-select-dropdown').filter(':visible').contains('模拟合约').click()
             cy.get('.el-dialog').contains('成交方向').parent().click()
             cy.wait(300)
             cy.get('.el-select-dropdown').filter(':visible').contains('多开').click()
@@ -150,40 +151,40 @@ describe('模组管理-测试', () => {
             cy.get('#editPositionVol').find('input').type(1)
             cy.get('#savePosition').click()
 
-            cy.get('.el-dialog').find('.el-table__row').filter(':visible').should('have.length', 1)
-            cy.get('.el-dialog').find('.el-table__row').filter(':visible').find('.cell').eq(2).should('have.text', '1')
+            cy.get('#modulePositionTbl').find('.el-table__row').should('have.length', 1)
+            cy.get('#modulePositionTbl').find('.el-table__row').find('.cell').eq(2).should('have.text', '1')
 
             cy.get('#editPosition').click()
             cy.get('.el-dialog').contains('合约代码').parent().click()
-            cy.get('.el-select-dropdown').filter(':visible').contains('sim999@CZCE@FUTURES').click()
+            cy.get('.el-select-dropdown').filter(':visible').contains('模拟合约').click()
             cy.get('.el-dialog').contains('成交方向').parent().click()
             cy.wait(300)
             cy.get('.el-select-dropdown').filter(':visible').contains('多开').click()
             cy.get('.el-dialog').contains('成交价').parent().find('input').type(3000)
             cy.get('#editPositionVol').find('input').type(1)
             cy.get('#savePosition').click()
-
-            cy.get('.el-dialog').find('.el-table__row').should('have.length', 1)
-            cy.get('.el-dialog').find('.el-table__row').filter(':visible').find('.cell').eq(2).should('have.text', '2')
+            cy.wait(300)
+            cy.get('#modulePositionTbl').find('.el-table__row').should('have.length', 1)
+            cy.get('#modulePositionTbl').find('.el-table__row').find('.cell').eq(2).should('have.text', '2')
         })
 
         it('可以手工减少模组持仓', () => {
             cy.get('#editPosition').click()
             cy.get('.el-dialog').contains('合约代码').parent().click()
-            cy.get('.el-select-dropdown').filter(':visible').contains('sim999@CZCE@FUTURES').click()
+            cy.get('.el-select-dropdown').filter(':visible').contains('模拟合约').click()
             cy.get('.el-dialog').contains('成交方向').parent().click()
             cy.wait(300)
             cy.get('.el-select-dropdown').contains('空平').click()
             cy.get('.el-dialog').contains('成交价').parent().find('input').type(3000)
             cy.get('#editPositionVol').find('input').type(1)
             cy.get('#savePosition').click()
-
-            cy.get('.el-dialog').find('.el-table__row').filter(':visible').should('have.length', 1)
-            cy.get('.el-dialog').find('.el-table__row').filter(':visible').find('.cell').eq(2).should('have.text', '1')
+            cy.wait(300)
+            cy.get('#modulePositionTbl').find('.el-table__row').should('have.length', 1)
+            cy.get('#modulePositionTbl').find('.el-table__row').find('.cell').eq(2).should('have.text', '1')
 
             cy.get('#editPosition').click()
             cy.get('.el-dialog').contains('合约代码').parent().click()
-            cy.get('.el-select-dropdown').filter(':visible').contains('sim999@CZCE@FUTURES').click()
+            cy.get('.el-select-dropdown').filter(':visible').contains('模拟合约').click()
             cy.get('.el-dialog').contains('成交方向').parent().click()
             cy.wait(300)
             cy.get('.el-select-dropdown').contains('空平').click()
@@ -192,7 +193,7 @@ describe('模组管理-测试', () => {
             cy.get('#savePosition').click()
             cy.wait(500)
 
-            cy.get('.el-dialog').filter(':visible').find('.el-table__row').filter(':visible').should('have.length', 0)
+            cy.get('#modulePositionTbl').find('.el-table__row').should('have.length', 0)
         })
 
         after(() => {
