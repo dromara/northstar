@@ -204,7 +204,7 @@ export default {
         gatewayUsage: '',
         gatewayAdapterType: '',
         connectionState: CONNECTION_STATE.DISCONNECTED,
-        autoConnect: true,
+        autoConnect: false,
         bindedMktGatewayId: '',
         subscribedContracts: [],
         settings: null

@@ -35,6 +35,7 @@
         <div class="ns-trade-action">
           <div class="ns-trade-action__item">
             <el-select
+              id="contractSelector"
               v-model="contract"
               filterable
               remote

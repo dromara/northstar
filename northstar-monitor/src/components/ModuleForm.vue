@@ -157,6 +157,7 @@
               </el-form-item>
               <el-form-item label="关联合约">
                 <el-select
+                  class='bindContractSelector'
                   v-model="form.moduleAccountSettingsDescription[i].bindedContracts"
                   multiple
                   filterable
