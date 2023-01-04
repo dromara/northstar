@@ -24,6 +24,7 @@ import tech.quantit.northstar.common.event.NorthstarEvent;
 import tech.quantit.northstar.common.event.NorthstarEventType;
 import tech.quantit.northstar.common.model.ComponentField;
 import tech.quantit.northstar.common.model.ComponentMetaInfo;
+import tech.quantit.northstar.common.model.ContractSimpleInfo;
 import tech.quantit.northstar.common.model.DynamicParams;
 import tech.quantit.northstar.common.model.Identifier;
 import tech.quantit.northstar.common.model.MockTradeDescription;
@@ -34,11 +35,11 @@ import tech.quantit.northstar.common.model.ModuleDescription;
 import tech.quantit.northstar.common.model.ModulePositionDescription;
 import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
 import tech.quantit.northstar.common.utils.MarketDataLoadingUtils;
-import tech.quantit.northstar.data.IGatewayRepository;
 import tech.quantit.northstar.data.IMarketDataRepository;
 import tech.quantit.northstar.data.IModuleRepository;
 import tech.quantit.northstar.domain.module.ModulePlaybackContext;
 import tech.quantit.northstar.gateway.api.IContractManager;
+import tech.quantit.northstar.gateway.api.domain.contract.Contract;
 import tech.quantit.northstar.main.ExternalJarClassLoader;
 import tech.quantit.northstar.main.PostLoadAware;
 import tech.quantit.northstar.main.handler.internal.ModuleManager;
@@ -46,6 +47,7 @@ import tech.quantit.northstar.main.utils.ModuleFactory;
 import tech.quantit.northstar.strategy.api.DynamicParamsAware;
 import tech.quantit.northstar.strategy.api.IModule;
 import tech.quantit.northstar.strategy.api.annotation.StrategicComponent;
+import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.TradeField;
 
@@ -63,8 +65,6 @@ public class ModuleService implements PostLoadAware {
 	
 	private IContractManager contractMgr;
 	
-	private IGatewayRepository gatewayRepo;
-	
 	private IModuleRepository moduleRepo;
 	
 	private IMarketDataRepository mdRepo;
@@ -75,12 +75,11 @@ public class ModuleService implements PostLoadAware {
 	
 	private ExternalJarClassLoader extJarLoader;
 	
-	public ModuleService(ApplicationContext ctx, ExternalJarClassLoader extJarLoader, IGatewayRepository gatewayRepo, IModuleRepository moduleRepo,
+	public ModuleService(ApplicationContext ctx, ExternalJarClassLoader extJarLoader, IModuleRepository moduleRepo,
 			IMarketDataRepository mdRepo, ModuleFactory moduleFactory, ModuleManager moduleMgr, IContractManager contractMgr) {
 		this.ctx = ctx;
 		this.moduleMgr = moduleMgr;
 		this.contractMgr = contractMgr;
-		this.gatewayRepo = gatewayRepo;
 		this.moduleRepo = moduleRepo;
 		this.mdRepo = mdRepo;
 		this.moduleFactory = moduleFactory;
@@ -218,11 +217,11 @@ public class ModuleService implements PostLoadAware {
 			LocalDate start = utils.getFridayOfThisWeek(date.minusWeeks(1));
 			LocalDate end = utils.getFridayOfThisWeek(date);
 			for(ModuleAccountDescription mad : md.getModuleAccountSettingsDescription()) {
-//				for(String unifiedSymbol : mad.getBindedUnifiedSymbols()) {
-//					Contract contract = contractMgr.getContract(Identifier.of(unifiedSymbol));
-//					List<BarField> bars = mdRepo.loadBars(contract.channelType(), unifiedSymbol, start, end);
-//					module.initData(bars);
-//				}
+				for(ContractSimpleInfo csi : mad.getBindedContracts()) {
+					Contract contract = contractMgr.getContract(Identifier.of(csi.getValue()));
+					List<BarField> bars = mdRepo.loadBars(contract.channelType(), csi.getUnifiedSymbol(), start, end);
+					module.initData(bars);
+				}
 			}
 			date = date.plusWeeks(1);
 		}
@@ -232,7 +231,7 @@ public class ModuleService implements PostLoadAware {
 	
 	// 把日期转换成年周，例如2022年第二周为202202
 	private int toYearWeekVal(LocalDate date) {
-		return Integer.valueOf(String.format("%d%d", date.getYear(), LocalDateTimeUtil.weekOfYear(date)));
+		return Integer.valueOf(String.format("%d%02d", date.getYear(), LocalDateTimeUtil.weekOfYear(date)));
 	}
 	
 	private void unloadModule(String moduleName) {

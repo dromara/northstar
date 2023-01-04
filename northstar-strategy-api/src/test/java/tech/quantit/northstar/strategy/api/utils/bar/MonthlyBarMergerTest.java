@@ -2,15 +2,20 @@ package tech.quantit.northstar.strategy.api.utils.bar;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.offset;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import tech.quantit.northstar.common.constant.DateTimeConstant;
+import tech.quantit.northstar.gateway.api.domain.contract.Contract;
+import tech.quantit.northstar.gateway.api.domain.time.GenericTradeTime;
 import test.common.TestFieldFactory;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.ContractField;
@@ -21,11 +26,19 @@ class MonthlyBarMergerTest {
 	
 	ContractField contract = factory.makeContract("rb2205");
 	
+	Contract c = mock(Contract.class);
+	
+	@BeforeEach
+	void prepare() {
+		when(c.contractField()).thenReturn(contract);
+		when(c.tradeTimeDefinition()).thenReturn(new GenericTradeTime());
+	}
+	
 	@Test
 	void test() {
 		List<BarField> samples = new ArrayList<>();
 		List<BarField> results = new ArrayList<>();
-		BarMerger bm = new MonthlyBarMerger(1, contract, bar -> results.add(bar));
+		BarMerger bm = new MonthlyBarMerger(1, c, bar -> results.add(bar));
 		Random rand = new Random();
 		LocalDate date = LocalDate.of(2022, 9, 17);
 		for(int i=0; i<21; i++) {
@@ -48,7 +61,7 @@ class MonthlyBarMergerTest {
 					.setNumTrades(rand.nextLong(500000000))
 					.setNumTradesDelta(rand.nextLong(500000))
 					.build();
-			bm.updateBar(bar);
+			bm.onBar(bar);
 			samples.add(bar);
 			
 			date = date.plusDays(1);

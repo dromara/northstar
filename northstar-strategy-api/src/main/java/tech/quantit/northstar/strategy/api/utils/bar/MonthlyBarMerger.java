@@ -9,8 +9,8 @@ import java.util.function.Consumer;
 import org.apache.commons.lang3.StringUtils;
 
 import tech.quantit.northstar.common.constant.DateTimeConstant;
+import tech.quantit.northstar.gateway.api.domain.contract.Contract;
 import xyz.redtorch.pb.CoreField.BarField;
-import xyz.redtorch.pb.CoreField.ContractField;
 
 /**
  * 月线合成器
@@ -23,14 +23,14 @@ public class MonthlyBarMerger extends BarMerger{
 	
 	private Set<String> yMonthSet = new HashSet<>();
 
-	public MonthlyBarMerger(int numOfMonthPerBar, ContractField bindedContract, Consumer<BarField> callback) {
-		super(0, bindedContract, callback);
+	public MonthlyBarMerger(int numOfMonthPerBar, Contract contract, Consumer<BarField> callback) {
+		super(0, contract, callback);
 		this.numOfMonthPerBar = numOfMonthPerBar;
 	}
 
 	@Override
-	public void updateBar(BarField bar) {
-		if(!StringUtils.equals(bar.getUnifiedSymbol(), bindedContract.getUnifiedSymbol())) {
+	public void onBar(BarField bar) {
+		if(!StringUtils.equals(bar.getUnifiedSymbol(), unifiedSymbol)) {
 			return;
 		}
 		
@@ -47,7 +47,7 @@ public class MonthlyBarMerger extends BarMerger{
 			return;
 		}
 		
-		doMerger(bar);
+		doMerge(bar);
 	}
 
 	@Override
