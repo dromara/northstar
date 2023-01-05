@@ -154,7 +154,8 @@ public class ModuleContext implements IModuleContext, MergedBarListener{
 	
 	private final String moduleName;
 	
-	private final BarMergerRegistry registry = new BarMergerRegistry();
+	private final BarMergerRegistry indicatorRegistry = new BarMergerRegistry();
+	private final BarMergerRegistry ctxRegistry = new BarMergerRegistry();
 	
 	private Logger mlog;
 	
@@ -465,7 +466,37 @@ public class ModuleContext implements IModuleContext, MergedBarListener{
 			return;
 		}
 		mlog.trace("Bar信息: {} {} {} {}，最新价: {}", bar.getUnifiedSymbol(), bar.getActionDay(), bar.getActionTime(), bar.getActionTimestamp(), bar.getClosePrice());
-		registry.onBar(bar);
+		indicatorFactory.getIndicatorMap().entrySet().stream().forEach(e -> e.getValue().onBar(bar));	// 普通指标的更新
+		comboIndicators.stream().forEach(combo -> combo.onBar(bar));
+		inspectedValIndicatorFactory.getIndicatorMap().entrySet().stream().forEach(e -> e.getValue().onBar(bar));	// 值透视指标的更新
+		indicatorRegistry.onBar(bar);
+		ctxRegistry.onBar(bar);
+	}
+	
+	@Override
+	public void onMergedBar(BarField bar) {
+		Consumer<Map.Entry<String,Indicator>> action = e -> {
+			Indicator indicator = e.getValue();
+			if(indicatorValBufQMap.get(indicator).size() >= bufSize.intValue()) {
+				indicatorValBufQMap.get(indicator).poll();
+			}
+			if(indicator.isReady() && indicator.timeSeriesValue(0).getTimestamp() == bar.getActionTimestamp()	// 只有时间戳一致才会被记录
+					&& (indicator.value(0) != Double.MIN_VALUE && indicator.value(0) != Double.MAX_VALUE)		// 忽略潜在的初始值
+					&& (BarUtils.isEndOfTheTradingDay(bar) || indicator.ifPlotPerBar() || !indicator.timeSeriesValue(0).isUnsettled())) {		
+				indicatorValBufQMap.get(indicator).offer(indicator.timeSeriesValue(0));	
+			}
+		};
+		try {			
+			indicatorFactory.getIndicatorMap().entrySet().stream().forEach(action);	// 记录常规指标更新值 
+			tradeStrategy.onMergedBar(bar);
+			inspectedValIndicatorFactory.getIndicatorMap().entrySet().stream().forEach(action);	// 记录透视值更新
+		} catch(Exception e) {
+			getLogger().error("", e);
+		}
+		if(barBufQMap.get(bar.getUnifiedSymbol()).size() >= bufSize.intValue()) {
+			barBufQMap.get(bar.getUnifiedSymbol()).poll();
+		}
+		barBufQMap.get(bar.getUnifiedSymbol()).offer(bar);		
 	}
 	
 	/* 此处收到的ORDER数据是所有订单回报，需要过滤 */
@@ -545,7 +576,7 @@ public class ModuleContext implements IModuleContext, MergedBarListener{
 			contractMap2.put(c, contract);
 			barBufQMap.put(c.getUnifiedSymbol(), new LinkedList<>());
 			bindedSymbolSet.add(c.getUnifiedSymbol());
-			registry.addListener(contract, numOfMinsPerBar, PeriodUnit.MINUTE, this, CallbackPriority.FOUR);
+			ctxRegistry.addListener(contract, numOfMinsPerBar, PeriodUnit.MINUTE, this, CallbackPriority.FOUR);
 		}
 	}
 	
@@ -592,7 +623,7 @@ public class ModuleContext implements IModuleContext, MergedBarListener{
 		Assert.isTrue(configuration.getIndicatorRefLength() > 0, "指标回溯长度必须大于0，当前为：" + configuration.getIndicatorRefLength());
 		Indicator in = indicatorFactory.newIndicator(configuration, valueType, indicatorFunction);
 		indicatorValBufQMap.put(in, new LinkedList<>());
-		registry.addListener(contractMap2.get(configuration.getBindedContract()), configuration.getNumOfUnits(), configuration.getPeriod(), in, CallbackPriority.ONE);
+		indicatorRegistry.addListener(contractMap2.get(configuration.getBindedContract()), configuration.getNumOfUnits(), configuration.getPeriod(), in, CallbackPriority.ONE);
 		return in;
 	}
 
@@ -607,7 +638,7 @@ public class ModuleContext implements IModuleContext, MergedBarListener{
 		Assert.isTrue(configuration.getIndicatorRefLength() > 0, "指标回溯长度必须大于0，当前为：" + configuration.getIndicatorRefLength());
 		Indicator in = indicatorFactory.newIndicator(configuration, indicatorFunction);
 		indicatorValBufQMap.put(in, new LinkedList<>());
-		registry.addListener(contractMap2.get(configuration.getBindedContract()), configuration.getNumOfUnits(), configuration.getPeriod(), in, CallbackPriority.ONE);
+		indicatorRegistry.addListener(contractMap2.get(configuration.getBindedContract()), configuration.getNumOfUnits(), configuration.getPeriod(), in, CallbackPriority.ONE);
 		return in;
 	}
 	
@@ -615,7 +646,7 @@ public class ModuleContext implements IModuleContext, MergedBarListener{
 	public synchronized void viewValueAsIndicator(Configuration configuration, AtomicDouble value) {
 		Indicator in = inspectedValIndicatorFactory.newIndicator(configuration, bar -> new TimeSeriesValue(value.get(), bar.getBar().getActionTimestamp(), bar.isUnsettled()));
 		indicatorValBufQMap.put(in, new LinkedList<>());
-		registry.addListener(contractMap2.get(configuration.getBindedContract()), configuration.getNumOfUnits(), configuration.getPeriod(), in, CallbackPriority.THREE);
+		indicatorRegistry.addListener(contractMap2.get(configuration.getBindedContract()), configuration.getNumOfUnits(), configuration.getPeriod(), in, CallbackPriority.THREE);
 	}
 
 	@Override
@@ -624,33 +655,7 @@ public class ModuleContext implements IModuleContext, MergedBarListener{
 		Contract c = contractMap2.get(comboIndicator.getConfiguration().getBindedContract());
 		int numOfUnits = comboIndicator.getConfiguration().getNumOfUnits();
 		PeriodUnit unit = comboIndicator.getConfiguration().getPeriod();
-		registry.addListener(c, numOfUnits, unit, comboIndicator, CallbackPriority.TWO);
-	}
-
-	@Override
-	public void onMergedBar(BarField bar) {
-		Consumer<Map.Entry<String,Indicator>> action = e -> {
-			Indicator indicator = e.getValue();
-			if(indicatorValBufQMap.get(indicator).size() >= bufSize.intValue()) {
-				indicatorValBufQMap.get(indicator).poll();
-			}
-			if(indicator.isReady() && indicator.timeSeriesValue(0).getTimestamp() == bar.getActionTimestamp()	// 只有时间戳一致才会被记录
-					&& (indicator.value(0) != Double.MIN_VALUE && indicator.value(0) != Double.MAX_VALUE)		// 忽略潜在的初始值
-					&& (BarUtils.isEndOfTheTradingDay(bar) || indicator.ifPlotPerBar() || !indicator.timeSeriesValue(0).isUnsettled())) {		
-				indicatorValBufQMap.get(indicator).offer(indicator.timeSeriesValue(0));	
-			}
-		};
-		try {			
-			indicatorFactory.getIndicatorMap().entrySet().stream().forEach(action);	// 记录常规指标更新值 
-			tradeStrategy.onMergedBar(bar);
-			inspectedValIndicatorFactory.getIndicatorMap().entrySet().stream().forEach(action);	// 记录透视值更新
-		} catch(Exception e) {
-			getLogger().error("", e);
-		}
-		if(barBufQMap.get(bar.getUnifiedSymbol()).size() >= bufSize.intValue()) {
-			barBufQMap.get(bar.getUnifiedSymbol()).poll();
-		}
-		barBufQMap.get(bar.getUnifiedSymbol()).offer(bar);		
+		indicatorRegistry.addListener(c, numOfUnits, unit, comboIndicator, CallbackPriority.TWO);
 	}
 
 }

@@ -1,8 +1,6 @@
 package tech.quantit.northstar.strategy.api.demo;
 
-import static tech.quantit.northstar.strategy.api.indicator.function.AverageFunctions.EMA;
 import static tech.quantit.northstar.strategy.api.indicator.function.AverageFunctions.MA;
-import static tech.quantit.northstar.strategy.api.indicator.function.ComputeFunctions.minus;
 
 import java.util.Optional;
 
@@ -129,19 +127,19 @@ public class IndicatorSampleStrategy extends AbstractStrategy	// 为了简化代
 				.period(PeriodUnit.MINUTE)
 				.build(), MA(params.slow));
 
-		// 复杂指标的创建；MACD的原始写法
-		this.macdDiff = ctx.newIndicator(Indicator.Configuration.builder()
-				.indicatorName("MACD_DIF")
-				.bindedContract(ctx.getContract(params.indicatorSymbol))
-				.numOfUnits(ctx.numOfMinPerModuleBar())
-				.period(PeriodUnit.MINUTE)
-				.build(), minus(EMA(12), EMA(26)));
-		this.macdDea = ctx.newIndicator(Indicator.Configuration.builder()
-				.indicatorName("MACD_DEA")
-				.bindedContract(ctx.getContract(params.indicatorSymbol))
-				.numOfUnits(ctx.numOfMinPerModuleBar())
-				.period(PeriodUnit.MINUTE)
-				.build(), minus(EMA(12), EMA(26)).andThen(EMA(9)));
+//		// 复杂指标的创建；MACD的原始写法
+//		this.macdDiff = ctx.newIndicator(Indicator.Configuration.builder()
+//				.indicatorName("MACD_DIF")
+//				.bindedContract(ctx.getContract(params.indicatorSymbol))
+//				.numOfUnits(ctx.numOfMinPerModuleBar())
+//				.period(PeriodUnit.MINUTE)
+//				.build(), minus(EMA(12), EMA(26)));
+//		this.macdDea = ctx.newIndicator(Indicator.Configuration.builder()
+//				.indicatorName("MACD_DEA")
+//				.bindedContract(ctx.getContract(params.indicatorSymbol))
+//				.numOfUnits(ctx.numOfMinPerModuleBar())
+//				.period(PeriodUnit.MINUTE)
+//				.build(), minus(EMA(12), EMA(26)).andThen(EMA(9)));
 
 		
 		//######## 以下写法仅用于监控台演示，因此没有赋值给类属性，同时为了简化参数也直接写死 ########//

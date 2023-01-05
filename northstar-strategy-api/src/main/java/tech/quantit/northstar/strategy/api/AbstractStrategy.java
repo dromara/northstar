@@ -105,7 +105,7 @@ public abstract class AbstractStrategy implements TradeStrategy{
 			return;
 		}
 		if(barHandlerMap.containsKey(bar.getUnifiedSymbol())) {
-			barHandlerMap.get(bar.getUnifiedSymbol()).onBar(bar);
+			barHandlerMap.get(bar.getUnifiedSymbol()).onMergedBar(bar);
 		}
 	}
 	
@@ -137,5 +137,5 @@ public abstract class AbstractStrategy implements TradeStrategy{
 	
 	protected static interface TickHandler extends TickDataAware {}
 	
-	protected static interface BarHandler extends BarDataAware {}
+	protected static interface BarHandler extends MergedBarListener {}
 }

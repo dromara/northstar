@@ -59,7 +59,9 @@ public class BarMergerRegistry implements BarDataAware{
 
 	@Override
 	public void onBar(BarField bar) {
-		mergerMap.values().forEach(merger -> merger.onBar(bar));
+		prioritizedListenerMap.forEach((priority, map) -> 
+			map.keySet().forEach(merger -> merger.onBar(bar))
+		);
 	}
 	
 	public enum CallbackPriority {

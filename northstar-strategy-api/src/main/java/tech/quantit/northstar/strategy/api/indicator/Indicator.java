@@ -16,6 +16,7 @@ import tech.quantit.northstar.common.TickDataAware;
 import tech.quantit.northstar.common.constant.IndicatorType;
 import tech.quantit.northstar.common.model.BarWrapper;
 import tech.quantit.northstar.common.model.TimeSeriesValue;
+import tech.quantit.northstar.strategy.api.BarDataAware;
 import tech.quantit.northstar.strategy.api.MergedBarListener;
 import tech.quantit.northstar.strategy.api.utils.bar.InstantBarGenerator;
 import tech.quantit.northstar.strategy.api.utils.collection.RingArray;
@@ -29,7 +30,7 @@ import xyz.redtorch.pb.CoreField.TickField;
  * @author KevinHuangwl
  *
  */
-public class Indicator implements TickDataAware, MergedBarListener {
+public class Indicator implements TickDataAware, BarDataAware, MergedBarListener {
 	
 	/**
 	 * 指标历史记录
@@ -170,6 +171,14 @@ public class Indicator implements TickDataAware, MergedBarListener {
 		default -> throw new IllegalArgumentException("Unexpected value: " + valType);
 		};
 		barListener.onBar(new TimeSeriesValue(barVal, bar.getActionTimestamp(), isUnsettled));
+	}
+	
+	/**
+	 * 依赖分钟BAR的临时值更新
+	 */
+	@Override
+	public void onBar(BarField bar) {
+		onBar(bar, true);
 	}
 	
 	/**

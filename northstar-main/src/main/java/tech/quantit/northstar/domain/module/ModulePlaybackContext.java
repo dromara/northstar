@@ -133,7 +133,8 @@ public class ModulePlaybackContext implements IModuleContext, MergedBarListener 
 	
 	private final HashSet<IComboIndicator> comboIndicators = new HashSet<>();
 	
-	private final BarMergerRegistry registry = new BarMergerRegistry();
+	private final BarMergerRegistry indicatorRegistry = new BarMergerRegistry();
+	private final BarMergerRegistry ctxRegistry = new BarMergerRegistry();
 	
 	private Consumer<ModuleRuntimeDescription> onRuntimeChangeCallback;
 	
@@ -297,7 +298,11 @@ public class ModulePlaybackContext implements IModuleContext, MergedBarListener 
 			return;
 		}
 		mlog.trace("Bar信息: {} {} {}，最新价: {}", bar.getUnifiedSymbol(), bar.getActionDay(), bar.getActionTime(), bar.getClosePrice());
-		registry.onBar(bar);
+		indicatorFactory.getIndicatorMap().entrySet().stream().forEach(e -> e.getValue().onBar(bar));	// 普通指标的更新
+		comboIndicators.stream().forEach(combo -> combo.onBar(bar));
+		inspectedValIndicatorFactory.getIndicatorMap().entrySet().stream().forEach(e -> e.getValue().onBar(bar));	// 值透视指标的更新
+		indicatorRegistry.onBar(bar);
+		ctxRegistry.onBar(bar);
 	}
 
 	@Override
@@ -364,7 +369,7 @@ public class ModulePlaybackContext implements IModuleContext, MergedBarListener 
 		Assert.isTrue(configuration.getIndicatorRefLength() > 0, "指标回溯长度必须大于0，当前为：" + configuration.getIndicatorRefLength());
 		Indicator in = indicatorFactory.newIndicator(configuration, valueType, indicatorFunction);
 		indicatorValBufQMap.put(in, new LinkedList<>());
-		registry.addListener(contractMap2.get(configuration.getBindedContract()), configuration.getNumOfUnits(), configuration.getPeriod(), in, CallbackPriority.ONE);
+		indicatorRegistry.addListener(contractMap2.get(configuration.getBindedContract()), configuration.getNumOfUnits(), configuration.getPeriod(), in, CallbackPriority.ONE);
 		return in;
 	}
 
@@ -379,7 +384,7 @@ public class ModulePlaybackContext implements IModuleContext, MergedBarListener 
 		Assert.isTrue(configuration.getIndicatorRefLength() > 0, "指标回溯长度必须大于0，当前为：" + configuration.getIndicatorRefLength());
 		Indicator in = indicatorFactory.newIndicator(configuration, indicatorFunction);
 		indicatorValBufQMap.put(in, new LinkedList<>());
-		registry.addListener(contractMap2.get(configuration.getBindedContract()), configuration.getNumOfUnits(), configuration.getPeriod(), in, CallbackPriority.ONE);
+		indicatorRegistry.addListener(contractMap2.get(configuration.getBindedContract()), configuration.getNumOfUnits(), configuration.getPeriod(), in, CallbackPriority.ONE);
 		return in;
 	}
 	
@@ -387,7 +392,7 @@ public class ModulePlaybackContext implements IModuleContext, MergedBarListener 
 	public synchronized void viewValueAsIndicator(Configuration configuration, AtomicDouble value) {
 		Indicator in = inspectedValIndicatorFactory.newIndicator(configuration, bar -> new TimeSeriesValue(value.get(), bar.getBar().getActionTimestamp(), bar.isUnsettled()));
 		indicatorValBufQMap.put(in, new LinkedList<>());
-		registry.addListener(contractMap2.get(configuration.getBindedContract()), configuration.getNumOfUnits(), configuration.getPeriod(), in, CallbackPriority.THREE);
+		indicatorRegistry.addListener(contractMap2.get(configuration.getBindedContract()), configuration.getNumOfUnits(), configuration.getPeriod(), in, CallbackPriority.THREE);
 	}
 
 	@Override
@@ -396,7 +401,7 @@ public class ModulePlaybackContext implements IModuleContext, MergedBarListener 
 		Contract c = contractMap2.get(comboIndicator.getConfiguration().getBindedContract());
 		int numOfUnits = comboIndicator.getConfiguration().getNumOfUnits();
 		PeriodUnit unit = comboIndicator.getConfiguration().getPeriod();
-		registry.addListener(c, numOfUnits, unit, comboIndicator, CallbackPriority.TWO);
+		indicatorRegistry.addListener(c, numOfUnits, unit, comboIndicator, CallbackPriority.TWO);
 	}
 	
 	@Override
@@ -498,7 +503,7 @@ public class ModulePlaybackContext implements IModuleContext, MergedBarListener 
 			barBufQMap.put(c.getUnifiedSymbol(), new LinkedList<>());
 			bindedSymbolSet.add(c.getUnifiedSymbol());
 
-			registry.addListener(contract, numOfMinsPerBar, PeriodUnit.MINUTE, this, CallbackPriority.FOUR);
+			ctxRegistry.addListener(contract, numOfMinsPerBar, PeriodUnit.MINUTE, this, CallbackPriority.FOUR);
 		}
 	}
 
