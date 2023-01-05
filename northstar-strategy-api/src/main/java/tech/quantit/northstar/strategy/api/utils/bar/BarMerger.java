@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.Objects;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -25,7 +25,7 @@ import xyz.redtorch.pb.CoreField.BarField;
 @Slf4j
 public class BarMerger implements BarDataAware{
 	
-	protected Consumer<BarField> callback;
+	protected BiConsumer<BarMerger, BarField> callback;
 	
 	protected Contract contract;
 	
@@ -41,7 +41,7 @@ public class BarMerger implements BarDataAware{
 	
 	private final BarMergingClock clock;
 	
-	public BarMerger(int numOfMinPerBar, Contract contract, Consumer<BarField> callback) {
+	public BarMerger(int numOfMinPerBar, Contract contract, BiConsumer<BarMerger, BarField> callback) {
 		this.callback = callback;
 		this.contract = contract;
 		this.numOfMinPerBar = numOfMinPerBar;
@@ -66,7 +66,7 @@ public class BarMerger implements BarDataAware{
 		curBarTimestamp = bar.getActionTimestamp();
 		
 		if(numOfMinPerBar <= 1) {
-			callback.accept(bar);
+			callback.accept(this, bar);
 			return;
 		}
 		
@@ -88,7 +88,7 @@ public class BarMerger implements BarDataAware{
 	}
 	
 	protected void doGenerate() {
-		callback.accept(barBuilder.build());
+		callback.accept(this, barBuilder.build());
 		barBuilder = null;
 	}
 	

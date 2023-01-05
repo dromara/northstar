@@ -39,7 +39,7 @@ class WeeklyBarMergerTest {
 	void test() {
 		List<BarField> samples = new ArrayList<>();
 		List<BarField> results = new ArrayList<>();
-		BarMerger bm = new WeeklyBarMerger(1, c, bar -> results.add(bar));
+		BarMerger bm = new WeeklyBarMerger(1, c, (merger,bar) -> results.add(bar));
 		Random rand = new Random();
 		LocalDate date = LocalDate.of(2022, 9, 17);
 		for(int i=0; i<21; i++) {

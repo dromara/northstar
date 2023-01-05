@@ -24,7 +24,6 @@ import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
 import tech.quantit.northstar.common.utils.FieldUtils;
 import tech.quantit.northstar.data.IGatewayRepository;
 import tech.quantit.northstar.data.IModuleRepository;
-import tech.quantit.northstar.gateway.api.IContractManager;
 import tech.quantit.northstar.domain.gateway.GatewayAndConnectionManager;
 import tech.quantit.northstar.domain.module.FirstInFirstOutClosingStrategy;
 import tech.quantit.northstar.domain.module.ModuleAccountStore;
@@ -33,6 +32,7 @@ import tech.quantit.northstar.domain.module.ModulePlaybackContext;
 import tech.quantit.northstar.domain.module.PriorBeforeAndHedgeTodayClosingStrategy;
 import tech.quantit.northstar.domain.module.PriorTodayClosingStrategy;
 import tech.quantit.northstar.domain.module.TradeModule;
+import tech.quantit.northstar.gateway.api.IContractManager;
 import tech.quantit.northstar.gateway.api.MarketGateway;
 import tech.quantit.northstar.gateway.api.TradeGateway;
 import tech.quantit.northstar.gateway.api.domain.contract.Contract;
@@ -45,7 +45,6 @@ import tech.quantit.northstar.strategy.api.IModuleAccountStore;
 import tech.quantit.northstar.strategy.api.IModuleContext;
 import tech.quantit.northstar.strategy.api.TradeStrategy;
 import tech.quantit.northstar.strategy.api.utils.trade.DealCollector;
-import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.NoticeField;
 import xyz.redtorch.pb.CoreField.TradeField;
 
@@ -98,10 +97,9 @@ public class ModuleFactory {
 		
 		for(ModuleAccountDescription mad : moduleDescription.getModuleAccountSettingsDescription()) {
 			TradeGateway tradeGateway = (TradeGateway) gatewayConnMgr.getGatewayById(mad.getAccountGatewayId());
-			List<ContractField> contracts = mad.getBindedContracts()
+			List<Contract> contracts = mad.getBindedContracts()
 					.stream()
 					.map(contractSimple -> contractMgr.getContract(Identifier.of(contractSimple.getValue())))
-					.map(Contract::contractField)
 					.toList();
 			ctx.bindGatewayContracts(tradeGateway, contracts);
 		}

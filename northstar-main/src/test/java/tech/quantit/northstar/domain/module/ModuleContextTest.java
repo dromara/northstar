@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Test;
 import tech.quantit.northstar.common.constant.SignalOperation;
 import tech.quantit.northstar.common.exception.TradeException;
 import tech.quantit.northstar.gateway.api.TradeGateway;
+import tech.quantit.northstar.gateway.api.domain.contract.Contract;
 import tech.quantit.northstar.strategy.api.ClosingStrategy;
 import tech.quantit.northstar.strategy.api.IModule;
 import tech.quantit.northstar.strategy.api.IModuleAccountStore;
@@ -67,8 +68,10 @@ class ModuleContextTest {
 	@Test
 	void testSubmitOrderReqWithException() {
 		TradeGateway gateway = mock(TradeGateway.class);
+		Contract c = mock(Contract.class);
+		when(c.contractField()).thenReturn(contract);
 		when(gateway.getGatewaySetting()).thenReturn(GatewaySettingField.newBuilder().setGatewayId("testAccount").build());
-		ctx.bindGatewayContracts(gateway, List.of(contract));
+		ctx.bindGatewayContracts(gateway, List.of(c));
 		ctx.onTick(tick);
 		assertThrows(TradeException.class, () -> {			
 			ctx.submitOrderReq(contract, SignalOperation.BUY_OPEN, PriceType.ANY_PRICE, 1, 5000);
@@ -82,8 +85,10 @@ class ModuleContextTest {
 	@Test
 	void testSubmitOrderReq() {
 		TradeGateway gateway = mock(TradeGateway.class);
+		Contract c = mock(Contract.class);
+		when(c.contractField()).thenReturn(contract);
 		when(gateway.getGatewaySetting()).thenReturn(GatewaySettingField.newBuilder().setGatewayId("testAccount").build());
-		ctx.bindGatewayContracts(gateway, List.of(contract));
+		ctx.bindGatewayContracts(gateway, List.of(c));
 		ctx.onTick(tick);
 		when(ctx.accStore.getPreBalance(anyString())).thenReturn(10000000D);
 		assertDoesNotThrow(() -> {

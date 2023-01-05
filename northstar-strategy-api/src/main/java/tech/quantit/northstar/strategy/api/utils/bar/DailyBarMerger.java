@@ -3,7 +3,7 @@ package tech.quantit.northstar.strategy.api.utils.bar;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -21,7 +21,7 @@ public class DailyBarMerger extends BarMerger{
 	
 	private Set<String> tradingDaySet = new HashSet<>();
 	
-	public DailyBarMerger(int numOfDayPerBar, Contract contract, Consumer<BarField> callback) {
+	public DailyBarMerger(int numOfDayPerBar, Contract contract, BiConsumer<BarMerger, BarField> callback) {
 		super(0, contract, callback);
 		this.numOfDayPerBar = numOfDayPerBar;
 	}
@@ -48,7 +48,7 @@ public class DailyBarMerger extends BarMerger{
 
 	@Override
 	protected void doGenerate() {
-		callback.accept(barBuilder.build());
+		callback.accept(this, barBuilder.build());
 		barBuilder = null;
 		tradingDaySet.clear();
 	}

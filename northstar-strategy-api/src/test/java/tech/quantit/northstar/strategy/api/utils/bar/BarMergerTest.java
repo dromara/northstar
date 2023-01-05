@@ -38,7 +38,7 @@ class BarMergerTest {
 	void test() {
 		List<BarField> samples = new ArrayList<>();
 		List<BarField> results = new ArrayList<>();
-		BarMerger bm = new BarMerger(2, c, bar -> results.add(bar));
+		BarMerger bm = new BarMerger(2, c, (merger,bar) -> results.add(bar));
 		Random rand = new Random();
 		LocalTime t = LocalTime.of(0, 1);
 		for(int i=0; i<21; i++) {

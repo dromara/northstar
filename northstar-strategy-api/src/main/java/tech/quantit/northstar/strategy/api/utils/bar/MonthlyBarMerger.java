@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -23,7 +23,7 @@ public class MonthlyBarMerger extends BarMerger{
 	
 	private Set<String> yMonthSet = new HashSet<>();
 
-	public MonthlyBarMerger(int numOfMonthPerBar, Contract contract, Consumer<BarField> callback) {
+	public MonthlyBarMerger(int numOfMonthPerBar, Contract contract, BiConsumer<BarMerger, BarField> callback) {
 		super(0, contract, callback);
 		this.numOfMonthPerBar = numOfMonthPerBar;
 	}
@@ -52,7 +52,7 @@ public class MonthlyBarMerger extends BarMerger{
 
 	@Override
 	protected void doGenerate() {
-		callback.accept(barBuilder.build());
+		callback.accept(this, barBuilder.build());
 		barBuilder = null;
 		yMonthSet.clear();
 	}

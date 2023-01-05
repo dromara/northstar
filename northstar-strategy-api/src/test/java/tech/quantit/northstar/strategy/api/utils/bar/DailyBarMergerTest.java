@@ -38,7 +38,7 @@ class DailyBarMergerTest {
 	void test() {
 		List<BarField> samples = new ArrayList<>();
 		List<BarField> results = new ArrayList<>();
-		BarMerger bm = new DailyBarMerger(2, c, bar -> results.add(bar));
+		BarMerger bm = new DailyBarMerger(2, c, (merger,bar) -> results.add(bar));
 		Random rand = new Random();
 		LocalDate date = LocalDate.now();
 		for(int i=0; i<21; i++) {
