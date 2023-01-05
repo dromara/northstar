@@ -100,7 +100,7 @@ public abstract class AbstractStrategy implements TradeStrategy{
 	 * 如果订阅了多个合约，则会有多个K线，因此每个K线时刻会触发多次
 	 */
 	@Override
-	public void onBar(BarField bar) {
+	public void onMergedBar(BarField bar) {
 		if(!canProceed(bar)) {
 			return;
 		}

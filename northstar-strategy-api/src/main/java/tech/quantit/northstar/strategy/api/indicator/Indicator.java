@@ -372,7 +372,6 @@ public class Indicator implements TickDataAware, MergedBarListener {
 		/**
 		 * 显示名称
 		 */
-		@NonNull
 		private String indicatorName;
 		/**
 		 * 绑定合约

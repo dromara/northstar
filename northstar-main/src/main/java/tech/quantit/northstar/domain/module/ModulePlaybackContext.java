@@ -523,7 +523,7 @@ public class ModulePlaybackContext implements IModuleContext, MergedBarListener 
 		};
 		try {			
 			indicatorFactory.getIndicatorMap().entrySet().stream().forEach(action);	// 记录常规指标更新值 
-			tradeStrategy.onBar(bar);
+			tradeStrategy.onMergedBar(bar);
 			inspectedValIndicatorFactory.getIndicatorMap().entrySet().stream().forEach(action);	// 记录透视值更新
 		} catch(Exception e) {
 			getLogger().error("", e);
