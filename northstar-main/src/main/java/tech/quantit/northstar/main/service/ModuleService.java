@@ -282,7 +282,7 @@ public class ModuleService implements InitializingBean {
 	
 	// 把日期转换成年周，例如2022年第二周为202202
 	private int toYearWeekVal(LocalDate date) {
-		return Integer.valueOf(String.format("%d%d", date.getYear(), LocalDateTimeUtil.weekOfYear(date)));
+		return date.getYear() * 100 + LocalDateTimeUtil.weekOfYear(date);
 	}
 	
 	private void unloadModule(String moduleName) {
