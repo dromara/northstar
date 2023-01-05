@@ -366,7 +366,7 @@ public class Indicator implements TickDataAware, MergedBarListener {
 	 * @author KevinHuangwl
 	 *
 	 */
-	@Builder
+	@Builder(toBuilder = true)
 	@Getter
 	public static class Configuration {
 		/**
@@ -403,6 +403,13 @@ public class Indicator implements TickDataAware, MergedBarListener {
 		
 		public String getIndicatorName() {
 			return String.format("%s_%d%s", indicatorName, numOfUnits, period.symbol);
+		}
+
+		@Override
+		public String toString() {
+			return "Configuration [indicatorName=" + indicatorName + ", bindedContract=" + bindedContract
+					+ ", numOfUnits=" + numOfUnits + ", period=" + period + ", indicatorRefLength=" + indicatorRefLength
+					+ ", plotPerBar=" + plotPerBar + "]";
 		}
 		
 	}
