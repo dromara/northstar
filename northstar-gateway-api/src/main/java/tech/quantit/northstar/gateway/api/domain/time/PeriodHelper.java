@@ -17,7 +17,7 @@ public class PeriodHelper {
 	private Set<LocalTime> endOfSections = new HashSet<>();
 	
 	public PeriodHelper(int numbersOfMinPerPeriod, TradeTimeDefinition tradeTimeDefinition) {
-		this(numbersOfMinPerPeriod, tradeTimeDefinition, false);
+		this(numbersOfMinPerPeriod, tradeTimeDefinition, true);
 	}
 	
 	public PeriodHelper(int numbersOfMinPerPeriod, TradeTimeDefinition tradeTimeDefinition, boolean exclusiveOpening) {
