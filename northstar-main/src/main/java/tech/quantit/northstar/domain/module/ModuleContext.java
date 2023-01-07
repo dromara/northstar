@@ -13,8 +13,8 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
@@ -52,6 +52,7 @@ import tech.quantit.northstar.common.utils.ContractUtils;
 import tech.quantit.northstar.common.utils.FieldUtils;
 import tech.quantit.northstar.common.utils.OrderUtils;
 import tech.quantit.northstar.gateway.api.TradeGateway;
+import tech.quantit.northstar.gateway.api.domain.contract.Contract;
 import tech.quantit.northstar.strategy.api.ClosingStrategy;
 import tech.quantit.northstar.strategy.api.IComboIndicator;
 import tech.quantit.northstar.strategy.api.IDisposablePriceListener;
@@ -59,15 +60,19 @@ import tech.quantit.northstar.strategy.api.IModule;
 import tech.quantit.northstar.strategy.api.IModuleAccountStore;
 import tech.quantit.northstar.strategy.api.IModuleContext;
 import tech.quantit.northstar.strategy.api.IndicatorFactory;
+import tech.quantit.northstar.strategy.api.MergedBarListener;
 import tech.quantit.northstar.strategy.api.TradeStrategy;
 import tech.quantit.northstar.strategy.api.constant.DisposablePriceListenerType;
 import tech.quantit.northstar.strategy.api.constant.PriceType;
 import tech.quantit.northstar.strategy.api.indicator.Indicator;
 import tech.quantit.northstar.strategy.api.indicator.Indicator.Configuration;
+import tech.quantit.northstar.strategy.api.indicator.Indicator.PeriodUnit;
 import tech.quantit.northstar.strategy.api.indicator.Indicator.ValueType;
 import tech.quantit.northstar.strategy.api.indicator.TimeSeriesUnaryOperator;
 import tech.quantit.northstar.strategy.api.log.ModuleLoggerFactory;
 import tech.quantit.northstar.strategy.api.utils.bar.BarMerger;
+import tech.quantit.northstar.strategy.api.utils.bar.BarMergerRegistry;
+import tech.quantit.northstar.strategy.api.utils.bar.BarMergerRegistry.CallbackPriority;
 import tech.quantit.northstar.strategy.api.utils.trade.DealCollector;
 import tech.quantit.northstar.strategy.api.utils.trade.DisposablePriceListener;
 import tech.quantit.northstar.strategy.api.utils.trade.TradeIntent;
@@ -92,7 +97,7 @@ import xyz.redtorch.pb.CoreField.TradeField;
  * @author KevinHuangwl
  *
  */
-public class ModuleContext implements IModuleContext{
+public class ModuleContext implements IModuleContext, MergedBarListener{
 	
 	private static final ILoggerFactory logFactory = new ModuleLoggerFactory();
 	
@@ -112,10 +117,9 @@ public class ModuleContext implements IModuleContext{
 	
 	/* unifiedSymbol -> contract */
 	private Map<String, ContractField> contractMap = new HashMap<>();
+	private Map<ContractField, Contract> contractMap2 = new HashMap<>();
 	
 	private Set<String> bindedSymbolSet = new HashSet<>();
-	/* unifiedSymbol -> barMerger */
-	private Map<String, BarMerger> contractBarMergerMap = new HashMap<>();
 	/* unifiedSymbol -> tick */
 	private Map<String, TickField> latestTickMap = new HashMap<>();
 	
@@ -149,32 +153,10 @@ public class ModuleContext implements IModuleContext{
 	
 	private final AtomicInteger bufSize = new AtomicInteger(0);
 	
-	private Consumer<BarField> barMergingCallback = bar -> {
-		Consumer<Map.Entry<String,Indicator>> action = e -> {
-			Indicator indicator = e.getValue();
-			if(indicatorValBufQMap.get(indicator).size() >= bufSize.intValue()) {
-				indicatorValBufQMap.get(indicator).poll();
-			}
-			if(indicator.isReady() && indicator.timeSeriesValue(0).getTimestamp() == bar.getActionTimestamp()	// 只有时间戳一致才会被记录
-					&& (indicator.value(0) != Double.MIN_VALUE && indicator.value(0) != Double.MAX_VALUE)		// 忽略潜在的初始值
-					&& (BarUtils.isEndOfTheTradingDay(bar) || indicator.ifPlotPerBar() || !indicator.timeSeriesValue(0).isUnsettled())) {		
-				indicatorValBufQMap.get(indicator).offer(indicator.timeSeriesValue(0));	
-			}
-		};
-		try {			
-			indicatorFactory.getIndicatorMap().entrySet().stream().forEach(action);	// 记录常规指标更新值 
-			tradeStrategy.onBar(bar);
-			inspectedValIndicatorFactory.getIndicatorMap().entrySet().stream().forEach(action);	// 记录透视值更新
-		} catch(Exception e) {
-			getLogger().error("", e);
-		}
-		if(barBufQMap.get(bar.getUnifiedSymbol()).size() >= bufSize.intValue()) {
-			barBufQMap.get(bar.getUnifiedSymbol()).poll();
-		}
-		barBufQMap.get(bar.getUnifiedSymbol()).offer(bar);
-	};
-	
 	private final String moduleName;
+	
+	private final BarMergerRegistry registry = new BarMergerRegistry();
+	private final Set<BarMerger> ctxBarMerger = new HashSet<>();
 	
 	private Logger mlog;
 	
@@ -488,7 +470,34 @@ public class ModuleContext implements IModuleContext{
 		indicatorFactory.getIndicatorMap().entrySet().stream().forEach(e -> e.getValue().onBar(bar));	// 普通指标的更新
 		comboIndicators.stream().forEach(combo -> combo.onBar(bar));
 		inspectedValIndicatorFactory.getIndicatorMap().entrySet().stream().forEach(e -> e.getValue().onBar(bar));	// 值透视指标的更新
-		contractBarMergerMap.get(bar.getUnifiedSymbol()).updateBar(bar);
+		registry.onBar(bar);
+		ctxBarMerger.forEach(merger -> merger.onBar(bar));
+	}
+	
+	@Override
+	public void onMergedBar(BarField bar) {
+		Consumer<Map.Entry<String,Indicator>> action = e -> {
+			Indicator indicator = e.getValue();
+			if(indicatorValBufQMap.get(indicator).size() >= bufSize.intValue()) {
+				indicatorValBufQMap.get(indicator).poll();
+			}
+			if(indicator.isReady() && indicator.timeSeriesValue(0).getTimestamp() == bar.getActionTimestamp()	// 只有时间戳一致才会被记录
+					&& (indicator.value(0) != Double.MIN_VALUE && indicator.value(0) != Double.MAX_VALUE)		// 忽略潜在的初始值
+					&& (BarUtils.isEndOfTheTradingDay(bar) || indicator.ifPlotPerBar() || !indicator.timeSeriesValue(0).isUnsettled())) {		
+				indicatorValBufQMap.get(indicator).offer(indicator.timeSeriesValue(0));	
+			}
+		};
+		try {			
+			indicatorFactory.getIndicatorMap().entrySet().stream().forEach(action);	// 记录常规指标更新值 
+			tradeStrategy.onMergedBar(bar);
+			inspectedValIndicatorFactory.getIndicatorMap().entrySet().stream().forEach(action);	// 记录透视值更新
+		} catch(Exception e) {
+			getLogger().error("", e);
+		}
+		if(barBufQMap.get(bar.getUnifiedSymbol()).size() >= bufSize.intValue()) {
+			barBufQMap.get(bar.getUnifiedSymbol()).poll();
+		}
+		barBufQMap.get(bar.getUnifiedSymbol()).offer(bar);		
 	}
 	
 	/* 此处收到的ORDER数据是所有订单回报，需要过滤 */
@@ -560,16 +569,19 @@ public class ModuleContext implements IModuleContext{
 	}
 
 	@Override
-	public synchronized void bindGatewayContracts(TradeGateway gateway, List<ContractField> contracts) {
-		for(ContractField c : contracts) {			
+	public synchronized void bindGatewayContracts(TradeGateway gateway, List<Contract> contracts) {
+		for(Contract contract : contracts) {
+			ContractField c = contract.contractField();
 			gatewayMap.put(c, gateway);
 			contractMap.put(c.getUnifiedSymbol(), c);
+			contractMap2.put(c, contract);
 			barBufQMap.put(c.getUnifiedSymbol(), new LinkedList<>());
 			bindedSymbolSet.add(c.getUnifiedSymbol());
-			contractBarMergerMap.put(c.getUnifiedSymbol(), new BarMerger(numOfMinsPerBar, c, barMergingCallback));
+			
+			ctxBarMerger.add(new BarMerger(numOfMinsPerBar, contract, (merger, bar) -> this.onMergedBar(bar)));
 		}
 	}
-
+	
 	@Override
 	public ContractField getContract(String unifiedSymbol) {
 		if(!contractMap.containsKey(unifiedSymbol)) {
@@ -613,6 +625,7 @@ public class ModuleContext implements IModuleContext{
 		Assert.isTrue(configuration.getIndicatorRefLength() > 0, "指标回溯长度必须大于0，当前为：" + configuration.getIndicatorRefLength());
 		Indicator in = indicatorFactory.newIndicator(configuration, valueType, indicatorFunction);
 		indicatorValBufQMap.put(in, new LinkedList<>());
+		registry.addListener(contractMap2.get(configuration.getBindedContract()), configuration.getNumOfUnits(), configuration.getPeriod(), in, CallbackPriority.ONE);
 		return in;
 	}
 
@@ -627,6 +640,7 @@ public class ModuleContext implements IModuleContext{
 		Assert.isTrue(configuration.getIndicatorRefLength() > 0, "指标回溯长度必须大于0，当前为：" + configuration.getIndicatorRefLength());
 		Indicator in = indicatorFactory.newIndicator(configuration, indicatorFunction);
 		indicatorValBufQMap.put(in, new LinkedList<>());
+		registry.addListener(contractMap2.get(configuration.getBindedContract()), configuration.getNumOfUnits(), configuration.getPeriod(), in, CallbackPriority.ONE);
 		return in;
 	}
 	
@@ -634,11 +648,16 @@ public class ModuleContext implements IModuleContext{
 	public synchronized void viewValueAsIndicator(Configuration configuration, AtomicDouble value) {
 		Indicator in = inspectedValIndicatorFactory.newIndicator(configuration, bar -> new TimeSeriesValue(value.get(), bar.getBar().getActionTimestamp(), bar.isUnsettled()));
 		indicatorValBufQMap.put(in, new LinkedList<>());
+		registry.addListener(contractMap2.get(configuration.getBindedContract()), configuration.getNumOfUnits(), configuration.getPeriod(), in, CallbackPriority.THREE);
 	}
 
 	@Override
 	public synchronized void addComboIndicator(IComboIndicator comboIndicator) {
 		comboIndicators.add(comboIndicator);
+		Contract c = contractMap2.get(comboIndicator.getConfiguration().getBindedContract());
+		int numOfUnits = comboIndicator.getConfiguration().getNumOfUnits();
+		PeriodUnit unit = comboIndicator.getConfiguration().getPeriod();
+		registry.addListener(c, numOfUnits, unit, comboIndicator, CallbackPriority.TWO);
 	}
 
 }

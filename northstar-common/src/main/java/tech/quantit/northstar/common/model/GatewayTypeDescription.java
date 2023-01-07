@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import tech.quantit.northstar.common.GatewayType;
+import tech.quantit.northstar.common.constant.ChannelType;
 import tech.quantit.northstar.common.constant.GatewayUsage;
 
 @AllArgsConstructor
@@ -13,7 +13,7 @@ import tech.quantit.northstar.common.constant.GatewayUsage;
 @Data
 public class GatewayTypeDescription {
 	
-	private GatewayType type;
+	private ChannelType type;
 	
 	public String getName() {
 		return type.name();
@@ -25,5 +25,9 @@ public class GatewayTypeDescription {
 	
 	public boolean isAdminOnly() {
 		return type.adminOnly();
+	}
+	
+	public boolean isAllowDuplication() {
+		return type.allowDuplication();
 	}
 }

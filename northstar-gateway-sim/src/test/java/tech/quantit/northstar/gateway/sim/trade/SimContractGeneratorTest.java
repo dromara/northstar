@@ -10,7 +10,6 @@ class SimContractGeneratorTest {
 	void test() {
 		SimContractGenerator gen = new SimContractGenerator("test");
 		assertThat(gen.getContract()).isNotNull();
-		assertThat(gen.getContract2()).isNotNull();
 	}
 
 }

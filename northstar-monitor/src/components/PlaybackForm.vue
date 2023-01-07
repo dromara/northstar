@@ -54,19 +54,19 @@
       </el-form-item>
       <el-form-item label="回放合约" prop="unifiedSymbols">
         <el-select
-          v-model="playbackSettings.unifiedSymbols"
+          v-model="playbackSettings.playContracts"
           multiple
           filterable
-          :disabled="playbackSettings.unifiedSymbols.length >= 10"
+          :disabled="playbackSettings.playContracts.length >= 10"
         >
           <el-option
-            v-for="(item, i) in contractOptions"
+            v-for="(item, i) in subscribedContracts"
             :label="item.name"
-            :value="item.unifiedsymbol"
+            :value="item"
             :key="i"
           ></el-option>
         </el-select>
-        <div v-if="playbackSettings.unifiedSymbols.length >= 10" class="warning-text">
+        <div v-if="playbackSettings.playContracts.length >= 10" class="warning-text">
           <i class="el-icon-warning" /> 最多只能同时选择十个合约<br />
         </div>
       </el-form-item>
@@ -79,9 +79,6 @@
 </template>
 
 <script>
-import contractApi from '@/api/contractApi'
-import { ContractField } from '@/lib/xyz/redtorch/pb/core_field_pb'
-
 import moment from 'moment'
 
 export default {
@@ -94,7 +91,7 @@ export default {
       type: Object,
       default: () => {}
     },
-    subscribedContractGroups: {
+    subscribedContracts: {
       type: Array,
       default: () => []
     }
@@ -105,7 +102,7 @@ export default {
         dateRange: [{ required: true, message: '不能为空', trigger: 'blur' }],
         precision: [{ required: true, message: '不能为空', trigger: 'blur' }],
         speed: [{ required: true, message: '不能为空', trigger: 'blur' }],
-        unifiedSymbols: [{ required: true, message: '不能为空', trigger: 'blur' }]
+        playContracts: [{ required: true, message: '不能为空', trigger: 'blur' }]
       },
       pickerOptions: {
         shortcuts: [
@@ -139,7 +136,6 @@ export default {
         ]
       },
       preStartDate: '',
-      contractOptions: [],
       playbackSettings: {
         preStartDate: '',
         dateRange: '',
@@ -147,7 +143,7 @@ export default {
         endDate: '',
         precision: '',
         speed: '',
-        unifiedSymbols: []
+        playContracts: []
       },
       isUpdateMode: false
     }
@@ -158,15 +154,6 @@ export default {
         if (this.playbackSettingsSrc) {
           this.isUpdateMode = Object.keys(this.playbackSettingsSrc).length > 0
         }
-        this.contractOptions = []
-        this.subscribedContractGroups.forEach((item) => {
-          contractApi.getSubscribableContractList(item.value).then((result) => {
-            const contracts = result
-              .map((item) => ContractField.deserializeBinary(item).toObject())
-              .sort((a, b) => a['name'].localeCompare(b['name']))
-            this.contractOptions = this.contractOptions.concat(contracts)
-          })
-        })
         if (!this.playbackSettingsSrc) {
           return
         }
@@ -178,7 +165,7 @@ export default {
         this.preStartDate = moment(this.playbackSettingsSrc.preStartDate, 'YYYYMMDD').toDate()
       }
     },
-    'playbackSettings.unifiedSymbols': function (val) {
+    'playbackSettings.playContracts': function (val) {
       if (val.length >= 10) {
         val.length = 10
       }

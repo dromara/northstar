@@ -3,26 +3,23 @@ package tech.quantit.northstar.main.service;
 import java.io.File;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.DuplicateKeyException;
 
 import com.alibaba.fastjson.JSON;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import tech.quantit.northstar.common.IContractManager;
+import tech.quantit.northstar.common.constant.ChannelType;
 import tech.quantit.northstar.common.constant.GatewayUsage;
 import tech.quantit.northstar.common.exception.NoSuchElementException;
 import tech.quantit.northstar.common.model.ComponentField;
+import tech.quantit.northstar.common.model.ContractSimpleInfo;
 import tech.quantit.northstar.common.model.GatewayDescription;
 import tech.quantit.northstar.common.model.ModuleAccountDescription;
 import tech.quantit.northstar.common.model.ModuleDescription;
 import tech.quantit.northstar.data.IGatewayRepository;
-import tech.quantit.northstar.data.IMarketDataRepository;
 import tech.quantit.northstar.data.IModuleRepository;
 import tech.quantit.northstar.data.IPlaybackRuntimeRepository;
 import tech.quantit.northstar.data.ISimAccountRepository;
@@ -30,12 +27,12 @@ import tech.quantit.northstar.domain.gateway.GatewayAndConnectionManager;
 import tech.quantit.northstar.domain.gateway.GatewayConnection;
 import tech.quantit.northstar.gateway.api.Gateway;
 import tech.quantit.northstar.gateway.api.GatewayFactory;
-import tech.quantit.northstar.gateway.api.GatewaySettingsMetaInfoProvider;
-import tech.quantit.northstar.gateway.api.GatewayTypeProvider;
+import tech.quantit.northstar.gateway.api.GatewayMetaProvider;
+import tech.quantit.northstar.gateway.api.IMarketCenter;
 import tech.quantit.northstar.gateway.api.MarketGateway;
 import tech.quantit.northstar.gateway.sim.trade.SimTradeGateway;
+import tech.quantit.northstar.main.PostLoadAware;
 import tech.quantit.northstar.main.utils.CodecUtils;
-import xyz.redtorch.pb.CoreField.ContractField;
 
 /**
  * 网关服务
@@ -46,19 +43,17 @@ import xyz.redtorch.pb.CoreField.ContractField;
  */
 @Slf4j
 @AllArgsConstructor
-public class GatewayService implements InitializingBean {
+public class GatewayService implements PostLoadAware {
 	
 	private GatewayAndConnectionManager gatewayConnMgr;
 	
-	private GatewayTypeProvider gatewayTypeProvider;
+	private GatewayMetaProvider gatewayMetaProvider;
 	
-	private GatewaySettingsMetaInfoProvider gatewaySettingsProvider;
+	private GatewayMetaProvider metaProvider;
 	
-	private IContractManager contractMgr;
+	private IMarketCenter mktCenter;
 	
 	private IGatewayRepository gatewayRepo;
-	
-	private IMarketDataRepository mdRepo;
 	
 	private ISimAccountRepository simAccRepo;
 	
@@ -81,11 +76,15 @@ public class GatewayService implements InitializingBean {
 	private boolean doCreateGateway(GatewayDescription gatewayDescription) {
 		Gateway gateway = null;
 		GatewayConnection conn = new GatewayConnection(gatewayDescription);
-		GatewayFactory factory = gatewayTypeProvider.getFactory(gatewayDescription.getGatewayType());
+		GatewayFactory factory = metaProvider.getFactory(gatewayDescription.getChannelType());
 		gateway = factory.newInstance(gatewayDescription);
 		gatewayConnMgr.createPair(conn, gateway);
 		if(gatewayDescription.isAutoConnect()) {
 			connect(gatewayDescription.getGatewayId());
+		}
+		
+		if(gateway instanceof MarketGateway mktGateway) {
+			mktCenter.addGateway(mktGateway);
 		}
 		
 		return true;
@@ -151,10 +150,9 @@ public class GatewayService implements InitializingBean {
 			}
 		}
 		boolean flag = doDeleteGateway(gatewayId);
-		mdRepo.dropGatewayData(gatewayId);
-		if(gd.getGatewayType().equals("SIM"))
+		if(gd.getChannelType() == ChannelType.SIM)
 			simAccRepo.deleteById(gatewayId);
-		if(gd.getGatewayType().equals("PLAYBACK")) 
+		if(gd.getChannelType() == ChannelType.PLAYBACK) 
 			playbackRtRepo.deleteById(gatewayId);
 		return flag;
 	}
@@ -278,8 +276,8 @@ public class GatewayService implements InitializingBean {
 	 * @param gatewayType
 	 * @return
 	 */
-	public Collection<ComponentField> getGatewaySettingsMetaInfo(String gatewayType) {
-		return gatewaySettingsProvider.getSettings(gatewayType);
+	public Collection<ComponentField> getGatewaySettingsMetaInfo(ChannelType channelType) {
+		return gatewayMetaProvider.getSettings(channelType);
 	}
 	
 	/**
@@ -287,16 +285,12 @@ public class GatewayService implements InitializingBean {
 	 * @param gatewayId
 	 * @return
 	 */
-	public List<ContractField> getSubscribedContractList(String gatewayId){
+	public List<ContractSimpleInfo> getSubscribedContractList(String gatewayId){
 		GatewayDescription gd = gatewayRepo.findById(gatewayId);
 		if(gd == null) {
 			throw new NoSuchElementException("没有找到网关：" + gatewayId);
 		}
-		List<String> subContractDefIds = gd.getSubscribedContractGroups();
-		return subContractDefIds.stream()
-				.map(defId -> contractMgr.relativeContracts(defId))
-				.flatMap(Collection::stream)
-				.toList();
+		return gd.getSubscribedContracts();
 	}
 	
 	/**
@@ -325,13 +319,17 @@ public class GatewayService implements InitializingBean {
 	}
 	
 	@Override
-	public void afterPropertiesSet() throws Exception {
-		CompletableFuture.runAsync(() -> {
+	public void postLoad() {
+		log.info("开始加载网关");
+		try {				
 			List<GatewayDescription> result = gatewayRepo.findAll();
 			// 因为依赖关系，加载要有先后顺序
 			result.stream().filter(gd -> gd.getGatewayUsage() == GatewayUsage.MARKET_DATA).map(this::decodeSettings).forEach(this::doCreateGateway);
 			result.stream().filter(gd -> gd.getGatewayUsage() == GatewayUsage.TRADE).map(this::decodeSettings).forEach(this::doCreateGateway);
-		}, CompletableFuture.delayedExecutor(2, TimeUnit.SECONDS));
+		} catch(Exception e) {
+			log.error("", e);
+		}		
+		log.info("网关加载完毕");
 	}
 
 }

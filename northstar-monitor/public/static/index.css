@@ -57,3 +57,6 @@ div::-webkit-scrollbar-track {
 .text-selectable {
   user-select: all !important;
 }
+.el-select__input{
+  color: white;
+}

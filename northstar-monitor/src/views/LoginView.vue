@@ -24,19 +24,6 @@
 import loginApi from '@/api/loginApi'
 import packageJson from '@/../package.json'
 
-const tryService = () => 
-      fetch(`${window.baseURL || ''}/redirect`)
-        .then((res) => res.json())
-        .catch(() => {
-          setTimeout(tryService, 5000)
-          this.$message({
-            type: 'error',
-            message: '服务端未启动',
-            duration: 5000
-          })
-        })
-    
-
 export default {
   data() {
     return {
@@ -58,7 +45,13 @@ export default {
         window.baseURL = location.protocol + '//' + this.domain
         window.remoteHost = this.domain
       }
-      await tryService()
+      try{
+        await loginApi.healthyCheck()
+      } catch(e){
+        console.log(e)
+        this.$message.error('服务端未启动')
+        return;
+      }
       await loginApi.login(this.userForm.name, this.userForm.pass)
       console.log('登陆成功')
       this.$router.push({

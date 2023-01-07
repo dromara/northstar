@@ -11,7 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.domain.gateway.GatewayAndConnectionManager;
 import tech.quantit.northstar.domain.gateway.GatewayConnection;
 import tech.quantit.northstar.gateway.api.Gateway;
-import tech.quantit.northstar.gateway.api.domain.GlobalMarketRegistry;
+import tech.quantit.northstar.gateway.api.IMarketCenter;
 import tech.quantit.northstar.main.holiday.CtpHolidayManager;
 import xyz.redtorch.gateway.ctp.common.GatewayConstants;
 
@@ -26,7 +26,7 @@ public class CtpScheduleTask {
 	private CtpHolidayManager holidayMgr;
 	
 	@Autowired
-	private GlobalMarketRegistry mktRegistry;
+	private IMarketCenter mktCenter;
 	
 	@Value("${spring.profiles.active}")
 	private String profile;
@@ -72,7 +72,7 @@ public class CtpScheduleTask {
 		if(holidayMgr.isHoliday(LocalDateTime.now())) {
 			return;
 		}
-		mktRegistry.finishUpBarGen();
+		mktCenter.endOfMarketTime();
 		log.debug("K线数据合成检查");
 	}
 	

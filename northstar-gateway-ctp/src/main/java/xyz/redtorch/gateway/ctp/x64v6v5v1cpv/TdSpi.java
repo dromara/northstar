@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -21,12 +22,17 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import tech.quantit.northstar.common.constant.ChannelType;
 import tech.quantit.northstar.common.constant.DateTimeConstant;
 import tech.quantit.northstar.common.event.NorthstarEventType;
+import tech.quantit.northstar.common.exception.NoSuchElementException;
 import tech.quantit.northstar.gateway.api.GatewayAbstract;
-import tech.quantit.northstar.gateway.api.domain.NormalContract;
+import tech.quantit.northstar.gateway.api.domain.contract.Contract;
+import tech.quantit.northstar.gateway.ctp.CtpContract;
 import xyz.redtorch.gateway.ctp.common.CtpContractNameResolver;
 import xyz.redtorch.gateway.ctp.common.GatewayConstants;
+import xyz.redtorch.gateway.ctp.x64v6v3v15v.CtpConstant;
+import xyz.redtorch.gateway.ctp.x64v6v3v15v.api.CThostFtdcQueryMaxOrderVolumeField;
 import xyz.redtorch.gateway.ctp.x64v6v5v1cpv.api.CThostFtdcAccountregisterField;
 import xyz.redtorch.gateway.ctp.x64v6v5v1cpv.api.CThostFtdcBatchOrderActionField;
 import xyz.redtorch.gateway.ctp.x64v6v5v1cpv.api.CThostFtdcBrokerTradingAlgosField;
@@ -152,11 +158,12 @@ import xyz.redtorch.pb.CoreField.TradeField;
 
 public class TdSpi extends CThostFtdcTraderSpi {
 
-	private static int CONNECTION_STATUS_DISCONNECTED = 0;
-	private static int CONNECTION_STATUS_CONNECTED = 1;
-	private static int CONNECTION_STATUS_CONNECTING = 2;
-	private static int CONNECTION_STATUS_DISCONNECTING = 3;
-
+	private static final int CONNECTION_STATUS_DISCONNECTED = 0;
+	private static final int CONNECTION_STATUS_CONNECTED = 1;
+	private static final int CONNECTION_STATUS_CONNECTING = 2;
+	private static final int CONNECTION_STATUS_DISCONNECTING = 3;
+	private static final String MKT_GATEWAY_ID = "CTP_SIM";
+	
 	private static final Logger logger = LoggerFactory.getLogger(TdSpi.class);
 
 	private GatewayAbstract gatewayAdapter;
@@ -339,7 +346,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 		new Thread() {
 			public void run() {
 				try {
-					Thread.sleep(15 * 1000);
+					Thread.sleep(60 * 1000);
 					if (!(isConnected() && investorNameQueried && instrumentQueried)) {
 						logger.error("{}交易接口连接超时,尝试断开", logInfo);
 						gatewayAdapter.disconnect();
@@ -696,7 +703,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 	// 前置机联机回报
 	public void OnFrontConnected() {
 		try {
-			logger.warn("{}交易接口前置机已连接", logInfo);
+			logger.info("{}交易接口前置机已连接", logInfo);
 			// 修改前置机连接状态
 			connectionStatus = CONNECTION_STATUS_CONNECTED;
 			
@@ -727,14 +734,14 @@ public class TdSpi extends CThostFtdcTraderSpi {
 	public void OnRspUserLogin(CThostFtdcRspUserLoginField pRspUserLogin, CThostFtdcRspInfoField pRspInfo, int nRequestID, boolean bIsLast) {
 		try {
 			if (pRspInfo.getErrorID() == 0) {
-				logger.warn("{}交易接口登录成功 TradingDay:{},SessionID:{},BrokerID:{},UserID:{}", logInfo, pRspUserLogin.getTradingDay(), pRspUserLogin.getSessionID(), pRspUserLogin.getBrokerID(),
+				logger.info("{}交易接口登录成功 TradingDay:{},SessionID:{},BrokerID:{},UserID:{}", logInfo, pRspUserLogin.getTradingDay(), pRspUserLogin.getSessionID(), pRspUserLogin.getBrokerID(),
 						pRspUserLogin.getUserID());
 				sessionId = pRspUserLogin.getSessionID();
 				frontId = pRspUserLogin.getFrontID();
 				// 修改登录状态为true
 				loginStatus = true;
 				tradingDay = pRspUserLogin.getTradingDay();
-				logger.warn("{}交易接口获取到的交易日为{}", logInfo, tradingDay);
+				logger.info("{}交易接口获取到的交易日为{}", logInfo, tradingDay);
 
 				// 确认结算单
 				CThostFtdcSettlementInfoConfirmField settlementInfoConfirmField = new CThostFtdcSettlementInfoConfirmField();
@@ -816,11 +823,11 @@ public class TdSpi extends CThostFtdcTraderSpi {
 		try {
 			if (pRspInfo != null) {
 				if (pRspInfo.getErrorID() == 0) {
-					logger.warn(logInfo + "交易接口客户端验证成功");
+					logger.info("{}{}", logInfo, "交易接口客户端验证成功");
 					CThostFtdcReqUserLoginField reqUserLoginField = new CThostFtdcReqUserLoginField();
 					reqUserLoginField.setBrokerID(brokerId);
-					reqUserLoginField.setUserID(this.userId);
-					reqUserLoginField.setPassword(this.password);
+					reqUserLoginField.setUserID(userId);
+					reqUserLoginField.setPassword(password);
 					cThostFtdcTraderApi.ReqUserLogin(reqUserLoginField, reqId.incrementAndGet());
 					
 				} else {
@@ -925,15 +932,18 @@ public class TdSpi extends CThostFtdcTraderSpi {
 					orderBuilder.setStatusMsg(pRspInfo.getErrorMsg());
 				}
 
-				if (instrumentQueried && gatewayAdapter.contractMap.containsKey(symbol)) {
-					orderBuilder.setContract(gatewayAdapter.contractMap.get(symbol));
+				if (instrumentQueried) {
+					ContractField contract = gatewayAdapter.mktCenter.getContract(MKT_GATEWAY_ID, symbol).contractField();
+					price = (int)(price / contract.getPriceTick()) * contract.getPriceTick();
+					orderBuilder.setContract(contract);
+					orderBuilder.setPrice(price);	// 优化价格精度
 					OrderField order = orderBuilder.build();
 					orderIdToOrderMap.put(order.getOrderId(), order);
 					gatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.ORDER, order);
 				} else {
 					ContractField.Builder contractBuilder = ContractField.newBuilder();
 					contractBuilder.setSymbol(symbol);
-					orderBuilder.setContract(gatewayAdapter.contractMap.get(symbol));
+					orderBuilder.setContract(contractBuilder.build());
 
 					orderBuilderCacheList.add(orderBuilder);
 				}
@@ -984,6 +994,8 @@ public class TdSpi extends CThostFtdcTraderSpi {
 		}
 	}
 
+	public void OnRspQueryMaxOrderVolume(CThostFtdcQueryMaxOrderVolumeField pQueryMaxOrderVolume, CThostFtdcRspInfoField pRspInfo, int nRequestID, boolean bIsLast) {
+	}
 
 	// 确认结算信息回报
 	public void OnRspSettlementInfoConfirm(CThostFtdcSettlementInfoConfirmField pSettlementInfoConfirm, CThostFtdcRspInfoField pRspInfo, int nRequestID, boolean bIsLast) {
@@ -991,7 +1003,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 			if(pRspInfo == null) {
 				logger.warn("交易结算信息为空");
 			} else if (pRspInfo.getErrorID() == 0) {
-				logger.warn("{}交易接口结算信息确认完成", logInfo);
+				logger.info("{}交易接口结算信息确认完成", logInfo);
 			} else {
 				logger.error("{}交易接口结算信息确认出错 错误ID:{},错误信息:{}", logInfo, pRspInfo.getErrorID(), pRspInfo.getErrorMsg());
 				gatewayAdapter.disconnect();
@@ -1001,7 +1013,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 			// 防止被限流
 			Thread.sleep(1000);
 
-			logger.warn("{}交易接口开始查询投资者信息", logInfo);
+			logger.info("{}交易接口开始查询投资者信息", logInfo);
 			CThostFtdcQryInvestorField pQryInvestor = new CThostFtdcQryInvestorField();
 			pQryInvestor.setInvestorID(userId);
 			pQryInvestor.setBrokerID(brokerId);
@@ -1060,14 +1072,14 @@ public class TdSpi extends CThostFtdcTraderSpi {
 			}
 			String symbol = pInvestorPosition.getInstrumentID();
 
-			if (!(instrumentQueried && gatewayAdapter.contractMap.containsKey(symbol))) {
+			if (!instrumentQueried) {
 				logger.debug("{}尚未获取到合约信息,暂时不处理持仓数据,代码{}", logInfo, symbol);
 				return;
 			}
 
-			ContractField contract = gatewayAdapter.contractMap.get(symbol);
+			Contract contract = gatewayAdapter.mktCenter.getContract(MKT_GATEWAY_ID, symbol);
 
-			String uniqueSymbol = symbol + "@" + contract.getExchange().getValueDescriptor().getName() + "@" + contract.getProductClass().getValueDescriptor().getName();
+			String uniqueSymbol = symbol + "@" + contract.exchange().getValueDescriptor().getName() + "@" + contract.productClass().getValueDescriptor().getName();
 
 			// 无法获取账户信息,使用userId作为账户ID
 			String accountCode = userId;
@@ -1085,7 +1097,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 			} else {
 				positionBuilder = PositionField.newBuilder();
 				positionBuilderMap.put(positionId, positionBuilder);
-				positionBuilder.setContract(gatewayAdapter.contractMap.get(symbol));
+				positionBuilder.setContract(contract.contractField());
 				positionBuilder.setPositionDirection(CtpConstant.posiDirectionMapReverse.getOrDefault(pInvestorPosition.getPosiDirection(), PositionDirectionEnum.PD_Unknown));
 				positionBuilder.setPositionId(positionId);
 
@@ -1271,7 +1283,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 			} else {
 				if (pInvestor != null) {
 					investorName = pInvestor.getInvestorName();
-					logger.warn("{}交易接口获取到的投资者名为:{}", logInfo, investorName);
+					logger.info("{}交易接口获取到的投资者名为:{}", logInfo, investorName);
 				} else {
 					logger.error("{}交易接口未能获取到投资者名", logInfo);
 				}
@@ -1291,7 +1303,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 				// 防止被限流
 				Thread.sleep(1000);
 				// 查询所有合约
-				logger.warn("{}交易接口开始查询合约信息", logInfo);
+				logger.info("{}交易接口开始查询合约信息", logInfo);
 				CThostFtdcQryInstrumentField cThostFtdcQryInstrumentField = new CThostFtdcQryInstrumentField();
 				cThostFtdcTraderApi.ReqQryInstrument(cThostFtdcQryInstrumentField, reqId.incrementAndGet());
 			}
@@ -1320,76 +1332,71 @@ public class TdSpi extends CThostFtdcTraderSpi {
 	public void OnRspQryInstrument(CThostFtdcInstrumentField pInstrument, CThostFtdcRspInfoField pRspInfo, int nRequestID, boolean bIsLast) {
 		try {
 			String symbol = pInstrument.getInstrumentID();
-			String name = CtpContractNameResolver.getCNSymbolName(symbol);
-			ContractField.Builder contractBuilder = ContractField.newBuilder();
-			contractBuilder.setGatewayId("CTP_SIM");
-			contractBuilder.setSymbol(symbol);
-			contractBuilder.setExchange(CtpConstant.exchangeMapReverse.getOrDefault(pInstrument.getExchangeID(), ExchangeEnum.UnknownExchange));
-			contractBuilder.setProductClass(CtpConstant.productTypeMapReverse.getOrDefault(pInstrument.getProductClass(), ProductClassEnum.UnknownProductClass));
-			contractBuilder.setUnifiedSymbol(contractBuilder.getSymbol() + "@" + contractBuilder.getExchange() + "@" + contractBuilder.getProductClass());
-			contractBuilder.setContractId(contractBuilder.getUnifiedSymbol() + "@" + gatewayId);
-			contractBuilder.setName(name != null ? name : pInstrument.getInstrumentName());
-			contractBuilder.setFullName(pInstrument.getInstrumentName());
-			contractBuilder.setThirdPartyId(contractBuilder.getSymbol() + "@CTP_SIM");
-
-			if (pInstrument.getVolumeMultiple() <= 0) {
-				contractBuilder.setMultiplier(1);
-			} else {
-				contractBuilder.setMultiplier(pInstrument.getVolumeMultiple());
-			}
-
-			contractBuilder.setPriceTick(pInstrument.getPriceTick());
-			contractBuilder.setCurrency(CurrencyEnum.CNY); // 默认人民币
-			contractBuilder.setLastTradeDateOrContractMonth(pInstrument.getExpireDate());
-			contractBuilder.setStrikePrice(pInstrument.getStrikePrice());
-			contractBuilder.setOptionsType(CtpConstant.optionTypeMapReverse.getOrDefault(pInstrument.getOptionsType(), OptionsTypeEnum.O_Unknown));
-
-			if (pInstrument.getUnderlyingInstrID() != null) {
-				contractBuilder.setUnderlyingSymbol(pInstrument.getUnderlyingInstrID());
-			}
-
-			contractBuilder.setUnderlyingMultiplier(pInstrument.getUnderlyingMultiple());
-			contractBuilder.setMaxLimitOrderVolume(pInstrument.getMaxLimitOrderVolume());
-			contractBuilder.setMaxMarketOrderVolume(pInstrument.getMaxMarketOrderVolume());
-			contractBuilder.setMinLimitOrderVolume(pInstrument.getMinLimitOrderVolume());
-			contractBuilder.setMinMarketOrderVolume(pInstrument.getMinMarketOrderVolume());
-			contractBuilder.setMaxMarginSideAlgorithm(pInstrument.getMaxMarginSideAlgorithm() == '1');
-			contractBuilder.setLongMarginRatio(pInstrument.getLongMarginRatio());
-			contractBuilder.setShortMarginRatio(pInstrument.getShortMarginRatio());
-
-			ContractField contract = contractBuilder.build();
-			gatewayAdapter.contractMap.put(contractBuilder.getSymbol(), contract);
-			gatewayAdapter.registry.register(new NormalContract(contract, System.currentTimeMillis()));
+			String name = Optional.ofNullable(CtpContractNameResolver.getCNSymbolName(symbol)).orElse(pInstrument.getInstrumentName());
+			ExchangeEnum exchange = CtpConstant.exchangeMapReverse.getOrDefault(pInstrument.getExchangeID(), ExchangeEnum.UnknownExchange);
+			ProductClassEnum productClass = CtpConstant.productTypeMapReverse.getOrDefault(pInstrument.getProductClass(), ProductClassEnum.UnknownProductClass);
+			String unifiedSymbol = String.format("%s@%s@%s", symbol, exchange, productClass);
+			String contractId = String.format("%s@%s", unifiedSymbol, gatewayId);
+			
+			CtpContract contract = CtpContract.builder()
+					.gatewayId(MKT_GATEWAY_ID)
+					.symbol(symbol)
+					.name(name)
+					.fullName(pInstrument.getInstrumentName())
+					.thirdPartyId(symbol + "@CTP")
+					.exchange(exchange)
+					.productClass(productClass)
+					.unifiedSymbol(unifiedSymbol)
+					.contractId(contractId)
+					.multiplier(Math.max(1, pInstrument.getVolumeMultiple()))
+					.priceTick(pInstrument.getPriceTick())
+					.currency(CurrencyEnum.CNY)
+					.lastTradeDateOrContractMonth(pInstrument.getExpireDate())
+					.strikePrice(pInstrument.getStrikePrice())
+					.optionsType(CtpConstant.optionTypeMapReverse.getOrDefault(pInstrument.getOptionsType(), OptionsTypeEnum.O_Unknown))
+					.underlyingSymbol(Optional.ofNullable(pInstrument.getUnderlyingInstrID()).orElse(""))
+					.underlyingMultiplier(pInstrument.getUnderlyingMultiple())
+					.maxLimitOrderVolume(pInstrument.getMaxLimitOrderVolume())
+					.minLimitOrderVolume(pInstrument.getMinLimitOrderVolume())
+					.maxMarketOrderVolume(pInstrument.getMaxMarketOrderVolume())
+					.minMarketOrderVolume(pInstrument.getMinMarketOrderVolume())
+					.maxMarginSideAlgorithm(pInstrument.getMaxMarginSideAlgorithm() == '1')
+					.longMarginRatio(pInstrument.getLongMarginRatio())
+					.shortMarginRatio(pInstrument.getShortMarginRatio())
+					.build();
+			
+			gatewayAdapter.mktCenter.addInstrument(contract);
+			
 			if (bIsLast) {
+				logger.info("{}交易接口合约信息获取完成!共计{}条", logInfo, gatewayAdapter.mktCenter.getContracts(MKT_GATEWAY_ID).size());
 				
-				logger.warn("{}交易接口合约信息获取完成!共计{}条", logInfo, gatewayAdapter.contractMap.size());
 				instrumentQueried = true;
 				this.startIntervalQuery();
 
-				logger.warn("{}交易接口开始推送缓存Order,共计{}条", logInfo, orderBuilderCacheList.size());
+				logger.info("{}交易接口开始推送缓存Order,共计{}条", logInfo, orderBuilderCacheList.size());
 				for (OrderField.Builder orderBuilder : orderBuilderCacheList) {
-					if (gatewayAdapter.contractMap.containsKey(orderBuilder.getContract().getSymbol())) {
-						orderBuilder.setContract(gatewayAdapter.contractMap.get(orderBuilder.getContract().getSymbol()));
+					try {
+						orderBuilder.setContract(gatewayAdapter.mktCenter.getContract(MKT_GATEWAY_ID, symbol).contractField());
 						OrderField order = orderBuilder.build();
 						orderIdToOrderMap.put(order.getOrderId(), order);
 						gatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.ORDER, order);
-					} else {
+					} catch(NoSuchElementException e) {
 						logger.error("{}未能正确获取到合约信息，代码{}", logInfo, orderBuilder.getContract().getSymbol());
 					}
 				}
 				orderBuilderCacheList.clear();
 
-				logger.warn("{}交易接口开始推送缓存Trade,共计{}条", logInfo, tradeBuilderCacheList.size());
+				logger.info("{}交易接口开始推送缓存Trade,共计{}条", logInfo, tradeBuilderCacheList.size());
 				for (TradeField.Builder tradeBuilder : tradeBuilderCacheList) {
-					if (gatewayAdapter.contractMap.containsKey(tradeBuilder.getContract().getSymbol())) {
-						tradeBuilder.setContract(gatewayAdapter.contractMap.get(tradeBuilder.getContract().getSymbol()));
+					try {
+						tradeBuilder.setContract(gatewayAdapter.mktCenter.getContract(MKT_GATEWAY_ID, symbol).contractField());
 						gatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.TRADE, tradeBuilder.build());
-					} else {
+					} catch(NoSuchElementException e) {
 						logger.error("{}未能正确获取到合约信息，代码{}", logInfo, tradeBuilder.getContract().getSymbol());
 					}
 				}
 				tradeBuilderCacheList.clear();
-				
+				gatewayAdapter.mktCenter.loadContractGroup(ChannelType.CTP);
 				gatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.GATEWAY_READY, gatewayId);
 			}
 		} catch (Throwable t) {
@@ -1600,20 +1607,18 @@ public class TdSpi extends CThostFtdcTraderSpi {
 			orderBuilder.setOrderPriceType(orderPriceType);
 
 			if (instrumentQueried) {
-				if (gatewayAdapter.contractMap.containsKey(symbol)) {
-					orderBuilder.setContract(gatewayAdapter.contractMap.get(symbol));
-					OrderField order = orderBuilder.build();
-					orderIdToOrderMap.put(order.getOrderId(), order);
-					gatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.ORDER, order);
-				} else {
-					logger.error("{}交易接口定单回报处理错误,未找到合约:{}", logInfo, symbol);
-				}
+				orderBuilder.setContract(gatewayAdapter.mktCenter.getContract(MKT_GATEWAY_ID, symbol).contractField());
+				OrderField order = orderBuilder.build();
+				orderIdToOrderMap.put(order.getOrderId(), order);
+				gatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.ORDER, order);
 			} else {
 				ContractField.Builder contractBuilder = ContractField.newBuilder();
 				contractBuilder.setSymbol(symbol);
 				orderBuilder.setContract(contractBuilder);
 				orderBuilderCacheList.add(orderBuilder);
 			}
+			logger.info("{}委托回报：合约{}，单号{}，方向{}，开平{}，价格{}，止损{}，手数{}，交易日{}，类型{} & {}，状态{}", logInfo, 
+					symbol, originalOrderId, direction, offsetFlag, price, stopPrice, tradedVolume, tradingDay, hedgeFlag, timeCondition, orderStatus);
 		} catch (Throwable t) {
 			logger.error("{}OnRtnOrder Exception", logInfo, t);
 		}
@@ -1683,8 +1688,11 @@ public class TdSpi extends CThostFtdcTraderSpi {
 			tradeBuilder.setTradeType(tradeType);
 			tradeBuilder.setPriceSource(priceSource);
 
-			if (instrumentQueried && gatewayAdapter.contractMap.containsKey(symbol)) {
-				tradeBuilder.setContract(gatewayAdapter.contractMap.get(symbol));
+			if (instrumentQueried) {
+				ContractField contract = gatewayAdapter.mktCenter.getContract(MKT_GATEWAY_ID, symbol).contractField();
+				price = (int)(price / contract.getPriceTick()) * contract.getPriceTick();
+				tradeBuilder.setContract(contract);
+				tradeBuilder.setPrice(price);	// 优化价格精度
 				gatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.TRADE, tradeBuilder.build());
 			} else {
 				ContractField.Builder contractBuilder = ContractField.newBuilder();
@@ -1693,7 +1701,8 @@ public class TdSpi extends CThostFtdcTraderSpi {
 				tradeBuilder.setContract(contractBuilder);
 				tradeBuilderCacheList.add(tradeBuilder);
 			}
-
+			logger.info("{}成交回报：合约{}，单号{}，方向{}，开平{}，价格{}，手数{}，交易日{}，类型{} & {}", logInfo, 
+					symbol, originalOrderId, direction, offsetFlag, price, volume, tradingDay, hedgeFlag, tradeType);
 		} catch (Throwable t) {
 			logger.error("{}OnRtnTrade Exception", logInfo, t);
 		}

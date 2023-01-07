@@ -2,7 +2,6 @@ package tech.quantit.northstar.main.config;
 
 import java.util.concurrent.ConcurrentMap;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -12,9 +11,8 @@ import tech.quantit.northstar.data.IGatewayRepository;
 import tech.quantit.northstar.data.IMarketDataRepository;
 import tech.quantit.northstar.domain.account.TradeDayAccount;
 import tech.quantit.northstar.domain.account.TradeDayAccountFactory;
-import tech.quantit.northstar.domain.gateway.ContractManager;
 import tech.quantit.northstar.domain.gateway.GatewayAndConnectionManager;
-import tech.quantit.northstar.gateway.api.domain.LatencyDetector;
+import tech.quantit.northstar.gateway.api.IContractManager;
 import tech.quantit.northstar.gateway.sim.trade.SimMarket;
 import tech.quantit.northstar.main.handler.internal.AccountHandler;
 import tech.quantit.northstar.main.handler.internal.ConnectionHandler;
@@ -32,7 +30,7 @@ public class InternalEventHandlerConfig {
 	/* Internal类事件 */
 	///////////////////
 	@Bean
-	public AccountHandler accountEventHandler(InternalEventBus eventBus, ContractManager contractMgr,
+	public AccountHandler accountEventHandler(InternalEventBus eventBus, IContractManager contractMgr,
 			ConcurrentMap<String, TradeDayAccount> accountMap, GatewayAndConnectionManager gatewayConnMgr) {
 		AccountHandler handler = new AccountHandler(accountMap, new TradeDayAccountFactory(gatewayConnMgr, contractMgr));
 		log.debug("注册：AccountHandler");
@@ -42,7 +40,7 @@ public class InternalEventHandlerConfig {
 	
 	@Bean
 	public ConnectionHandler connectionEventHandler(InternalEventBus eventBus, GatewayAndConnectionManager gatewayConnMgr,
-			ContractManager contractMgr, IGatewayRepository gatewayRepo) {
+			IContractManager contractMgr, IGatewayRepository gatewayRepo) {
 		ConnectionHandler handler = new ConnectionHandler(gatewayConnMgr, contractMgr, gatewayRepo);
 		log.debug("注册：ConnectionHandler");
 		eventBus.register(handler);
@@ -58,8 +56,8 @@ public class InternalEventHandlerConfig {
 	}
 	
 	@Bean
-	public ModuleManager moduleManager(InternalEventBus eventBus, @Autowired(required = false) LatencyDetector latencyDetector) {
-		ModuleManager moduleMgr = new ModuleManager(latencyDetector);
+	public ModuleManager moduleManager(InternalEventBus eventBus) {
+		ModuleManager moduleMgr = new ModuleManager();
 		log.debug("注册：ModuleManager");
 		eventBus.register(moduleMgr);
 		return moduleMgr;

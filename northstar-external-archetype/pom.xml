@@ -4,7 +4,7 @@
   <parent>
 		<groupId>tech.quantit</groupId>
 		<artifactId>northstar</artifactId>
-		<version>4.4</version>
+		<version>5.0</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
   <artifactId>northstar-external-archetype</artifactId>

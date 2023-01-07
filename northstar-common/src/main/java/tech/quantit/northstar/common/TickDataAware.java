@@ -9,8 +9,13 @@ import xyz.redtorch.pb.CoreField.TickField;
  * @author KevinHuangwl
  *
  */
-public interface TickDataAware extends Subscribable {
+public interface TickDataAware {
 
 	@Subscribe
 	void onTick(TickField tick);
+	
+	
+	default void endOfMarket() {
+		throw new UnsupportedOperationException();
+	}
 }

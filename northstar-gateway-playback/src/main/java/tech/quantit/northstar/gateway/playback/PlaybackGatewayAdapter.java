@@ -1,5 +1,6 @@
 package tech.quantit.northstar.gateway.playback;
 
+import tech.quantit.northstar.common.constant.ChannelType;
 import tech.quantit.northstar.gateway.api.MarketGateway;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.GatewaySettingField;
@@ -59,8 +60,8 @@ public class PlaybackGatewayAdapter implements MarketGateway {
 	}
 
 	@Override
-	public String gatewayType() {
-		return PLAYBACK.class.getName();
+	public ChannelType channelType() {
+		return ChannelType.PLAYBACK;
 	}
 
 }

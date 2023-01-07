@@ -29,5 +29,5 @@ public class ModuleAccountDescription {
 	/**
 	 * 账户关联合约名称
 	 */
-	private List<String> bindedUnifiedSymbols;
+	private List<ContractSimpleInfo> bindedContracts;
 }

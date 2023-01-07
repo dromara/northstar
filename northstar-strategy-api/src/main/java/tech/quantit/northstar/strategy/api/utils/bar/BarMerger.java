@@ -2,17 +2,20 @@ package tech.quantit.northstar.strategy.api.utils.bar;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 
 import org.apache.commons.lang3.StringUtils;
 
 import lombok.extern.slf4j.Slf4j;
+import tech.quantit.northstar.common.constant.DateTimeConstant;
+import tech.quantit.northstar.gateway.api.domain.contract.Contract;
+import tech.quantit.northstar.gateway.api.domain.time.BarMergingClock;
+import tech.quantit.northstar.gateway.api.domain.time.PeriodHelper;
+import tech.quantit.northstar.strategy.api.BarDataAware;
 import xyz.redtorch.pb.CoreField.BarField;
-import xyz.redtorch.pb.CoreField.ContractField;
 
 /**
  * 分钟线合成器
@@ -20,33 +23,39 @@ import xyz.redtorch.pb.CoreField.ContractField;
  *
  */
 @Slf4j
-public class BarMerger {
+public class BarMerger implements BarDataAware{
 	
-	private final int numOfMinPerBar;
+	protected BiConsumer<BarMerger, BarField> callback;
 	
-	protected Consumer<BarField> callback;
-	
-	protected ContractField bindedContract;
+	protected Contract contract;
 	
 	protected BarField.Builder barBuilder;
 	
 	protected long curBarTimestamp;
 	
-	private List<BarField> barCache;
+	protected final String unifiedSymbol;
 	
-	private BarField lastBar;
+	private PeriodHelper phelper;
 	
-	public BarMerger(int numOfMinPerBar, ContractField bindedContract, Consumer<BarField> callback) {
-		this.numOfMinPerBar = numOfMinPerBar;
+	private final int numOfMinPerBar;
+	
+	private final BarMergingClock clock;
+	
+	public BarMerger(int numOfMinPerBar, Contract contract, BiConsumer<BarMerger, BarField> callback) {
 		this.callback = callback;
-		this.bindedContract = bindedContract;
-		this.barCache = new ArrayList<>(numOfMinPerBar);
+		this.contract = contract;
+		this.numOfMinPerBar = numOfMinPerBar;
+		this.unifiedSymbol = contract.contractField().getUnifiedSymbol();
+		this.phelper = new PeriodHelper(numOfMinPerBar, contract.tradeTimeDefinition());
+		this.clock = new BarMergingClock(phelper.getRunningBaseTimeFrame());
 	}
 	
-	public synchronized void updateBar(BarField bar) {
-		if(!StringUtils.equals(bar.getUnifiedSymbol(), bindedContract.getUnifiedSymbol())) {
+	@Override
+	public synchronized void onBar(BarField bar) {
+		if(!StringUtils.equals(bar.getUnifiedSymbol(), unifiedSymbol)) {
 			return;
 		}
+		LocalTime barTime = LocalTime.parse(bar.getActionTime(), DateTimeConstant.T_FORMAT_FORMATTER);
 		if(bar.getActionTimestamp() < curBarTimestamp) {
 			if(log.isTraceEnabled()) {				
 				log.trace("当前计算时间：{}", LocalDateTime.ofInstant(Instant.ofEpochMilli(curBarTimestamp), ZoneId.systemDefault()));
@@ -56,42 +65,34 @@ public class BarMerger {
 		}
 		curBarTimestamp = bar.getActionTimestamp();
 		
-		boolean firstBarOfDay = Objects.isNull(lastBar) || !StringUtils.equals(lastBar.getTradingDay(), bar.getTradingDay());
-		lastBar = bar;
-		
-		if(numOfMinPerBar == 1) {
-			callback.accept(bar);
+		if(numOfMinPerBar <= 1) {
+			callback.accept(this, bar);
 			return;
 		}
 		
-		if(Objects.nonNull(barBuilder) && !StringUtils.equals(barBuilder.getTradingDay(), bar.getTradingDay())) {
+		if(clock.adjustTime(barTime) && Objects.nonNull(barBuilder)) {
 			doGenerate();
 		}
 		
-		// 忽略每天开盘首个K线的计数，使得合并数量对齐
-		if(!firstBarOfDay) {	
-			barCache.add(bar);
-		}
-				
 		if(Objects.isNull(barBuilder)) {
 			barBuilder = bar.toBuilder();
 			return;
 		}
 		
-		doMerger(bar);
+		doMerge(bar);
 		
-		if(barCache.size() == numOfMinPerBar) {
+		if(barTime.equals(clock.currentTimeBucket())) {
 			doGenerate();
+			clock.next();
 		}
 	}
 	
 	protected void doGenerate() {
-		callback.accept(barBuilder.build());
+		callback.accept(this, barBuilder.build());
 		barBuilder = null;
-		barCache.clear();
 	}
 	
-	protected void doMerger(BarField bar) {
+	protected void doMerge(BarField bar) {
 		double high = barBuilder.getHighPrice();
 		double low = barBuilder.getLowPrice();
 		long vol = barBuilder.getVolume();

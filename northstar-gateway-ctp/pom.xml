@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>tech.quantit</groupId>
 		<artifactId>northstar</artifactId>
-		<version>4.4</version>
+		<version>5.0</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 	
@@ -53,6 +53,8 @@
 						<exclude>**/xyz/redtorch/gateway/ctp/x64v6v3v15v/api/*</exclude>
 						<exclude>**/xyz/redtorch/gateway/ctp/x64v6v5v1cpv/*</exclude>
 						<exclude>**/xyz/redtorch/gateway/ctp/x64v6v5v1cpv/api/*</exclude>
+						<exclude>**/tech/quantit/northstar/gateway/ctp/*</exclude>
+						<exclude>**/tech/quantit/northstar/gateway/ctp/time/*</exclude>
 					</excludes>
 				</configuration>
 			</plugin>

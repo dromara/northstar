@@ -7,7 +7,6 @@ import java.util.Objects;
 
 import com.alibaba.fastjson.JSON;
 
-import tech.quantit.northstar.common.IContractManager;
 import tech.quantit.northstar.common.IHolidayManager;
 import tech.quantit.northstar.common.constant.DateTimeConstant;
 import tech.quantit.northstar.common.event.FastEventEngine;
@@ -17,6 +16,7 @@ import tech.quantit.northstar.data.IMarketDataRepository;
 import tech.quantit.northstar.data.IPlaybackRuntimeRepository;
 import tech.quantit.northstar.gateway.api.Gateway;
 import tech.quantit.northstar.gateway.api.GatewayFactory;
+import tech.quantit.northstar.gateway.api.IContractManager;
 import tech.quantit.northstar.gateway.playback.utils.CtpPlaybackClock;
 import tech.quantit.northstar.gateway.playback.utils.PlaybackClock;
 import tech.quantit.northstar.gateway.playback.utils.PlaybackDataLoader;

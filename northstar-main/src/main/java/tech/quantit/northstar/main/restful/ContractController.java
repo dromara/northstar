@@ -1,65 +1,70 @@
 package tech.quantit.northstar.main.restful;
 
 import java.util.List;
-import java.util.concurrent.TimeUnit;
+import java.util.Objects;
 
-import javax.validation.constraints.NotNull;
-
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.CacheControl;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import tech.quantit.northstar.common.model.ContractDefinition;
+import tech.quantit.northstar.common.constant.ChannelType;
+import tech.quantit.northstar.common.constant.GatewayUsage;
+import tech.quantit.northstar.common.exception.NoSuchElementException;
+import tech.quantit.northstar.common.model.ContractSimpleInfo;
+import tech.quantit.northstar.common.model.GatewayDescription;
 import tech.quantit.northstar.common.model.ResultBean;
-import tech.quantit.northstar.main.service.ContractService;
-import xyz.redtorch.pb.CoreField.ContractField;
+import tech.quantit.northstar.data.IGatewayRepository;
+import tech.quantit.northstar.gateway.api.IContractManager;
 
-@RequestMapping("/northstar/contract")
+/**
+ * 
+ * @author KevinHuangwl
+ *
+ */
+@RequestMapping("/northstar/contracts")
 @RestController
 public class ContractController {
+
+	@Autowired
+	IContractManager contractMgr; 
 	
 	@Autowired
-	private ContractService service;
+	IGatewayRepository gatewayRepo;
 	
-	final CacheControl cacheControl = CacheControl
-			.maxAge(1, TimeUnit.DAYS)
-		    .noTransform()
-		    .mustRevalidate();
-
-	@GetMapping("/defs")
-	@NotNull(message="合约类别名称不能为空")
-	public ResponseEntity<ResultBean<List<ContractDefinition>>> getContractDefinitions(String provider){
-		return ResponseEntity.ok()
-			      .cacheControl(cacheControl)
-			      .body(new ResultBean<>(service.getContractDefinitions(provider)));
+	@GetMapping
+	public ResultBean<List<ContractSimpleInfo>> channelContracts(ChannelType channelType, String query){
+		List<ContractSimpleInfo> list = contractMgr.getContracts(channelType).stream()
+				.map(c -> ContractSimpleInfo.builder()
+						.name(c.name())
+						.unifiedSymbol(c.contractField().getUnifiedSymbol())
+						.value(c.identifier().value())
+						.build())
+				.toList(); 
+		return new ResultBean<>(filterAndSort(list, query));
 	}
 	
-	@GetMapping("/providers")
-	@NotNull(message="网关类型不能为空")
-	public ResponseEntity<ResultBean<List<String>>> providerList(String gatewayType){
-		return ResponseEntity.ok()
-			      .cacheControl(cacheControl)
-			      .body(new ResultBean<>(service.getContractProviders(gatewayType)));
+	@GetMapping("/subscribed")
+	public ResultBean<List<ContractSimpleInfo>> subscribedContracts(String gatewayId, String query){
+		GatewayDescription gd0 = gatewayRepo.findById(gatewayId);
+		if(Objects.isNull(gd0)) {
+			throw new NoSuchElementException("找不到网关：" + gatewayId);
+		}
+		if(gd0.getGatewayUsage() == GatewayUsage.MARKET_DATA) {
+			return new ResultBean<>(filterAndSort(gd0.getSubscribedContracts(), query));
+		}
+		GatewayDescription gd = gatewayRepo.findById(gd0.getBindedMktGatewayId());
+		if(Objects.isNull(gd)) {
+			throw new NoSuchElementException("找不到网关：" + gatewayId);
+		}
+		return new ResultBean<>(filterAndSort(gd.getSubscribedContracts(), query));
 	}
 	
-	@GetMapping("/list")
-	@NotNull(message="合约类别名称不能为空")
-	public ResultBean<List<byte[]>> getContractList(String provider){
-		return new ResultBean<>(service.getContractList(provider)
-				.stream()
-				.map(ContractField::toByteArray)
-				.toList());
-	}
-	
-	@GetMapping("/subable")
-	@NotNull(message="合约定义ID不能为空")
-	public ResultBean<List<byte[]>> getSubscribableContractList(String contractDefId){
-		return new ResultBean<>(service.getSubscribableContractList(contractDefId)
-				.stream()
-				.map(ContractField::toByteArray)
-				.toList());
+	private List<ContractSimpleInfo> filterAndSort(List<ContractSimpleInfo> list, String query){
+		return list.stream()
+				.filter(c -> StringUtils.isBlank(query) || c.getName().contains(query) || c.getValue().contains(query))
+				.sorted((a, b) -> a.getValue().compareTo(b.getValue()))
+				.toList();
 	}
 }

@@ -1,5 +1,8 @@
 package tech.quantit.northstar.main.restful;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -27,7 +30,7 @@ import com.corundumstudio.socketio.SocketIOServer;
 
 import cn.hutool.crypto.digest.MD5;
 import common.TestGatewayFactory;
-import tech.quantit.northstar.CtpGatewaySettings;
+import tech.quantit.northstar.common.constant.ChannelType;
 import tech.quantit.northstar.common.constant.ClosingPolicy;
 import tech.quantit.northstar.common.constant.ModuleType;
 import tech.quantit.northstar.common.constant.ModuleUsage;
@@ -35,16 +38,21 @@ import tech.quantit.northstar.common.constant.ReturnCode;
 import tech.quantit.northstar.common.model.ComponentAndParamsPair;
 import tech.quantit.northstar.common.model.ComponentField;
 import tech.quantit.northstar.common.model.ComponentMetaInfo;
+import tech.quantit.northstar.common.model.ContractSimpleInfo;
 import tech.quantit.northstar.common.model.GatewayDescription;
+import tech.quantit.northstar.common.model.Identifier;
 import tech.quantit.northstar.common.model.MockTradeDescription;
 import tech.quantit.northstar.common.model.ModuleAccountDescription;
 import tech.quantit.northstar.common.model.ModuleDescription;
 import tech.quantit.northstar.common.model.NsUser;
-import tech.quantit.northstar.domain.gateway.ContractManager;
+import tech.quantit.northstar.gateway.api.IMarketCenter;
+import tech.quantit.northstar.gateway.api.domain.contract.Contract;
+import tech.quantit.northstar.gateway.ctp.CtpGatewaySettings;
 import tech.quantit.northstar.main.NorthstarApplication;
 import test.common.TestFieldFactory;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
+import xyz.redtorch.pb.CoreField.ContractField;
 
 @SpringBootTest(classes = NorthstarApplication.class, value="spring.profiles.active=test")
 @AutoConfigureMockMvc
@@ -73,26 +81,25 @@ class ModuleControllerTest {
 	MockTradeDescription mockTrade = MockTradeDescription.builder()
 			.gatewayId("CTP账户")
 			.offsetFlag(OffsetFlagEnum.OF_Open)
-			.unifiedSymbol("rb2210@SHFE@FUTURES")
+			.contractId("rb2210@SHFE@FUTURES")
 			.direction(DirectionEnum.D_Buy)
 			.price(2000)
 			.volume(1)
 			.build();
 	
-	@Autowired
-	private ContractManager contractMgr;
+	@MockBean
+	private IMarketCenter mktCenter;
 	
 	@BeforeEach
 	public void setUp() throws Exception {
-		contractMgr.addContract(factory.makeContract("rb2210"));
 		long time = System.currentTimeMillis();
 		String token = MD5.create().digestHex("123456" + time);
 		mockMvc.perform(post("/northstar/auth/login?timestamp="+time).contentType(MediaType.APPLICATION_JSON).content(JSON.toJSONString(new NsUser("admin",token))).session(session))
 			.andExpect(status().isOk());
-		GatewayDescription gatewayDes = TestGatewayFactory.makeMktGateway("CTP", "CTP", TestGatewayFactory.makeGatewaySettings(CtpGatewaySettings.class),false);
+		GatewayDescription gatewayDes = TestGatewayFactory.makeMktGateway("CTP", ChannelType.CTP, TestGatewayFactory.makeGatewaySettings(CtpGatewaySettings.class),false);
 		mockMvc.perform(post("/northstar/gateway").contentType(MediaType.APPLICATION_JSON).content(JSON.toJSONString(gatewayDes)).session(session));
 		
-		GatewayDescription gatewayDes2 = TestGatewayFactory.makeTrdGateway("CTP账户", "CTP", "CTP", TestGatewayFactory.makeGatewaySettings(CtpGatewaySettings.class),false);
+		GatewayDescription gatewayDes2 = TestGatewayFactory.makeTrdGateway("CTP账户", "CTP", ChannelType.CTP, TestGatewayFactory.makeGatewaySettings(CtpGatewaySettings.class),false);
 		mockMvc.perform(post("/northstar/gateway").contentType(MediaType.APPLICATION_JSON).content(JSON.toJSONString(gatewayDes2)).session(session));
 		
 		ComponentAndParamsPair cpp = ComponentAndParamsPair.builder()
@@ -108,7 +115,7 @@ class ModuleControllerTest {
 				.moduleAccountSettingsDescription(List.of(ModuleAccountDescription.builder()
 						.accountGatewayId("CTP账户")
 						.moduleAccountInitBalance(10000)
-						.bindedUnifiedSymbols(List.of("rb2210@SHFE@FUTURES"))
+						.bindedContracts(List.of(ContractSimpleInfo.builder().value("rb2210@SHFE@FUTURES").build()))
 						.build()))
 				.numOfMinPerBar(1)
 				.weeksOfDataForPreparation(1)
@@ -123,11 +130,14 @@ class ModuleControllerTest {
 				.moduleAccountSettingsDescription(List.of(ModuleAccountDescription.builder()
 						.accountGatewayId("CTP账户")
 						.moduleAccountInitBalance(10000)
-						.bindedUnifiedSymbols(List.of("rb2210@SHFE@FUTURES"))
+						.bindedContracts(List.of(ContractSimpleInfo.builder().value("rb2210@SHFE@FUTURES").build()))
 						.build()))
 				.numOfMinPerBar(10)
 				.weeksOfDataForPreparation(1)
 				.build();
+		Contract c = mock(Contract.class);
+		when(mktCenter.getContract(any(Identifier.class))).thenReturn(c);
+		when(c.contractField()).thenReturn(ContractField.newBuilder().setUnifiedSymbol("rb2210@SHFE@FUTURES").build());
 	}
 	
 	@AfterEach
@@ -149,20 +159,6 @@ class ModuleControllerTest {
 			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
 	}
 	
-	@Test
-	void testValidateModuleSuccessfully() throws Exception {
-		mockMvc.perform(post("/northstar/module/validate").contentType(MediaType.APPLICATION_JSON).content(JSON.toJSONString(md1)).session(session))
-			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
-	}
-	
-	@Test
-	void testValidateModuleWithFailure() throws Exception {
-		mockMvc.perform(post("/northstar/module/validate").contentType(MediaType.APPLICATION_JSON).content(JSON.toJSONString(md2)).session(session))
-			.andExpect(status().is5xxServerError())
-			.andExpect(jsonPath("$.message").value("模拟盘模组应该采用【SIM】账户网关"));
-	}
-
 	@Test
 	void testCreateModule() throws UnsupportedEncodingException, Exception {
 		mockMvc.perform(post("/northstar/module").contentType(MediaType.APPLICATION_JSON).content(JSON.toJSONString(md1)).session(session))

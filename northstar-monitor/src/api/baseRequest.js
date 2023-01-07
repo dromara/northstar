@@ -23,6 +23,12 @@ service.interceptors.request.use(
 service.interceptors.response.use(
   (response) => {
     const res = response.data
+    if(response.status === 200 && !res.status){
+      return
+    }
+    if(response.status !== 200){
+      throw new Error('未知异常')
+    }
     if (res.status === 555) {
       throw new Error(res.message)
     }
@@ -60,5 +66,8 @@ export default {
   },
   delete(url, config){
     return service.delete(url, mergeConfig(config))
+  },
+  head(url, config){
+    return service.head(url, mergeConfig(config))
   }
 }

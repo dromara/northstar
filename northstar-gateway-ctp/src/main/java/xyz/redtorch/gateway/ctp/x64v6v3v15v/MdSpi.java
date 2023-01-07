@@ -20,10 +20,13 @@ import org.slf4j.LoggerFactory;
 
 import tech.quantit.northstar.common.constant.DateTimeConstant;
 import tech.quantit.northstar.common.event.NorthstarEventType;
+import tech.quantit.northstar.common.model.Identifier;
 import tech.quantit.northstar.common.utils.CommonUtils;
 import tech.quantit.northstar.common.utils.MarketDateTimeUtil;
 import tech.quantit.northstar.common.utils.MessagePrinter;
 import tech.quantit.northstar.gateway.api.GatewayAbstract;
+import tech.quantit.northstar.gateway.api.domain.contract.Contract;
+import tech.quantit.northstar.gateway.api.domain.contract.GatewayContract;
 import xyz.redtorch.gateway.ctp.common.CtpDateTimeUtil;
 import xyz.redtorch.gateway.ctp.common.GatewayConstants;
 import xyz.redtorch.gateway.ctp.x64v6v3v15v.api.CThostFtdcDepthMarketDataField;
@@ -52,10 +55,10 @@ public class MdSpi extends CThostFtdcMdSpi {
 	private String logInfo;
 	private String gatewayId;
 	private String tradingDay;
-	
-	private volatile long lastUpdateTickTime;
 
-	private Map<String, TickField> preTickMap = new HashMap<>();
+	private volatile long lastUpdateTickTime = System.currentTimeMillis();
+
+	private Map<Identifier, TickField> preTickMap = new HashMap<>();
 
 	private Set<String> subscribedSymbolSet = ConcurrentHashMap.newKeySet();
 	
@@ -394,17 +397,12 @@ public class MdSpi extends CThostFtdcMdSpi {
 			try {
 				String symbol = pDepthMarketData.getInstrumentID();
 				
-				if (!gatewayAdapter.contractMap.containsKey(symbol)) {
-					logger.warn("{}行情接口收到合约{}数据,但尚未获取到合约信息,丢弃", logInfo, symbol);
-					return;
-				}
-				
 				if(!mktTimeUtil.isOpeningTime(symbol, LocalTime.now())) {
 					logger.trace("[{}] 收到非开市时间数据", symbol);
 					return;
 				}
 
-				ContractField contract = gatewayAdapter.contractMap.get(symbol);
+				Contract contract = gatewayAdapter.mktCenter.getContract(gatewayId, symbol);
 
 				String actionDay = pDepthMarketData.getActionDay();
 				actionDay = StringUtils.isEmpty(actionDay) ? LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER) : actionDay;
@@ -418,7 +416,7 @@ public class MdSpi extends CThostFtdcMdSpi {
 				 * 大商所获取的ActionDay可能是不正确的,因此这里采用本地时间修正 1.请注意，本地时间应该准确 2.使用 SimNow 7x24
 				 * 服务器获取行情时,这个修正方式可能会导致问题
 				 */
-				if (contract.getExchange() == ExchangeEnum.DCE) {
+				if (contract.exchange() == ExchangeEnum.DCE) {
 					// 只修正夜盘
 					if (updateTime > 200000 && updateTime <= 235959) {
 						actionDay = LocalDateTime.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER);
@@ -434,28 +432,27 @@ public class MdSpi extends CThostFtdcMdSpi {
 					return;
 				}
 				
-				String contractId = contract.getContractId();
 				String actionTime = dateTime.format(DateTimeConstant.T_FORMAT_WITH_MS_INT_FORMATTER);
 				double lastPrice = pDepthMarketData.getLastPrice();
 				long volume = pDepthMarketData.getVolume();	//该成交量为当日累计值
 				long volumeDelta = 0;
-				if (preTickMap.containsKey(contractId)) {
-					volumeDelta = volume - preTickMap.get(contractId).getVolume();
+				if (preTickMap.containsKey(contract.identifier())) {
+					volumeDelta = volume - preTickMap.get(contract.identifier()).getVolume();
 					volumeDelta = Math.max(0, volumeDelta);	//防止数据异常时为负数
 				}
 
 				Double turnover = pDepthMarketData.getTurnover();	//该金额为当日累计值
 				double turnoverDelta = 0;
-				if (preTickMap.containsKey(contractId)) {
-					turnoverDelta = turnover - preTickMap.get(contractId).getTurnover();
+				if (preTickMap.containsKey(contract.identifier())) {
+					turnoverDelta = turnover - preTickMap.get(contract.identifier()).getTurnover();
 				}
 
 				Long preOpenInterest = (long) pDepthMarketData.getPreOpenInterest();
 
 				double openInterest = pDepthMarketData.getOpenInterest();
 				int openInterestDelta = 0;
-				if (preTickMap.containsKey(contractId)) {
-					openInterestDelta = (int) (openInterest - preTickMap.get(contractId).getOpenInterest());
+				if (preTickMap.containsKey(contract.identifier())) {
+					openInterestDelta = (int) (openInterest - preTickMap.get(contract.identifier()).getOpenInterest());
 				}
 
 				Double preClosePrice = pDepthMarketData.getPreClosePrice();
@@ -496,10 +493,9 @@ public class MdSpi extends CThostFtdcMdSpi {
 				Double averagePrice = pDepthMarketData.getAveragePrice();
 				Double settlePrice = pDepthMarketData.getSettlementPrice();
 
+				ContractField c = contract.contractField();
 				TickField.Builder tickBuilder = TickField.newBuilder();
-				ContractField.Builder contractBuilder = contract.toBuilder();
-				contractBuilder.setContractId(contractId);
-				tickBuilder.setUnifiedSymbol(contract.getUnifiedSymbol());
+				tickBuilder.setUnifiedSymbol(c.getUnifiedSymbol());
 				tickBuilder.setActionDay(actionDay);
 				tickBuilder.setActionTime(actionTime);
 				long localDateTimeMillisec = dateTime.toInstant(ZoneOffset.ofHours(8)).toEpochMilli();
@@ -549,10 +545,11 @@ public class MdSpi extends CThostFtdcMdSpi {
 					logger.warn("异常Tick数据：{}", MessagePrinter.print(tick));
 				}
 				
-				preTickMap.put(contractId, tick);
+				preTickMap.put(contract.identifier(), tick);
 
 				gatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.TICK, tick);
-				gatewayAdapter.registry.dispatch(tick);
+				GatewayContract mktContract = (GatewayContract) gatewayAdapter.mktCenter.getContract(tick.getGatewayId(), tick.getUnifiedSymbol());
+				mktContract.onTick(tick);
 				lastUpdateTickTime = System.currentTimeMillis();
 				
 			} catch (Throwable t) {

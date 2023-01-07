@@ -8,9 +8,9 @@
     :show-close="false"
   >
     <GatewaySettingsForm
-      v-if="form.gatewayType !== 'PLAYBACK'"
+      v-if="form.channelType !== 'PLAYBACK'"
       :visible.sync="gatewaySettingsFormVisible"
-      :gatewayType="form.gatewayType"
+      :channelType="form.channelType"
       :gatewaySettingsMetaInfo="gatewaySettingsMetaInfo"
       :gatewaySettingsObject="form.settings"
       @onSave="(settings) => (form.settings = settings)"
@@ -18,7 +18,7 @@
     <PlaybackForm
       v-else
       :visible.sync="gatewaySettingsFormVisible"
-      :subscribedContractGroups="subscribedContractGroups"
+      :subscribedContracts="subscribedContracts"
       :playbackSettingsSrc="form.settings"
       @onSave="(settings) => (form.settings = settings)"
     />
@@ -30,7 +30,7 @@
               v-model="form.gatewayId"
               autocomplete="off"
               :disabled="
-                isUpdateMode || (gatewayUsage === 'MARKET_DATA' && form.gatewayType !== 'PLAYBACK')
+                isUpdateMode || disableGatewayIdEdit
               "
             ></el-input>
           </el-form-item>
@@ -43,16 +43,16 @@
       </el-row>
       <el-row>
         <el-col :span="8">
-          <el-form-item :label="`${typeLabel}类型`" prop="gatewayType">
+          <el-form-item :label="`${typeLabel}类型`" prop="channelType">
             <el-select
-              v-model="form.gatewayType"
-              placeholder="未知"
+              v-model="channelType"
+              placeholder="请选择"
               @change="onChooseGatewayType"
               :disabled="isUpdateMode"
             >
               <el-option
-                v-for="(item, i) in gatewayTypeOptions"
-                :label="item"
+                v-for="(item, i) in channelTypeOptions"
+                :label="item.name"
                 :value="item"
                 :key="i"
               ></el-option>
@@ -80,7 +80,6 @@
                 value="MARKET_DATA"
               ></el-option>
               <el-option v-if="gatewayUsage === 'TRADE'" label="交易" value="TRADE"></el-option>
-              <!-- <el-option label="IB网关" value="beijing"></el-option> -->
             </el-select>
           </el-form-item>
         </el-col>
@@ -104,16 +103,20 @@
         <el-col :span="16" v-if="gatewayUsage === 'MARKET_DATA'">
           <el-form-item label="订阅合约">
             <el-select
-              v-model="subscribedContractGroups"
+              v-model="subscribedContracts"
               multiple
               filterable
+              remote
+              :remote-method="searchContracts"
               collapse-tags
-              placeholder="请选择合约"
+              reserve-keyword
+              placeholder="合约可搜索，空格搜索全部"
+              :loading="loading"
             >
               <el-option
-                v-for="item in contractDefOptions"
-                :key="item.name"
-                :label="item.label"
+                v-for="(item) in contractOptions"
+                :key="item.value"
+                :label="item.name"
                 :value="item"
               >
               </el-option>
@@ -125,10 +128,10 @@
         <el-form-item label="已订阅合约">
           <div
             class="tag-wrapper"
-            v-if="subscribedContractGroups && subscribedContractGroups.length"
+            v-if="subscribedContracts && subscribedContracts.length"
           >
-            <el-tag v-for="(item, i) in subscribedContractGroups" :key="i">
-              {{ item.name + { FUTURES: '期货', OPTION: '期权' }[item.productClass] }}
+            <el-tag v-for="(item, i) in subscribedContracts" :key="i">
+              {{ item.name }}
             </el-tag>
           </div>
           <el-tag type="info" v-else>没有订阅合约</el-tag>
@@ -140,7 +143,7 @@
       <el-button
         type="primary"
         @click="gatewaySettingsFormVisible = true"
-        :disabled="!form.gatewayType || form.gatewayType === 'SIM'"
+        :disabled="!form.channelType || form.channelType === 'SIM'"
         >{{ typeLabel }}配置</el-button
       >
       <el-button id="saveGatewaySettings" type="primary" @click="saveGateway">保 存</el-button>
@@ -154,12 +157,6 @@ import PlaybackForm from '@/components/PlaybackForm'
 import gatewayMgmtApi from '@/api/gatewayMgmtApi'
 import contractApi from '@/api/contractApi'
 
-const GATEWAY_ADAPTER = {
-  CTP: 'xyz.redtorch.gateway.ctp.x64v6v3v15v.CtpGatewayAdapter',
-  CTP_SIM: 'xyz.redtorch.gateway.ctp.x64v6v5v1cpv.CtpSimGatewayAdapter',
-  SIM: 'tech.xuanwu.northstar.gateway.sim.SimGatewayLocalImpl',
-  PLAYBACK: 'tech.quantit.northstar.gateway.playback.PlaybackGatewayAdapter'
-}
 const CONNECTION_STATE = {
   CONNECTING: 'CONNECTING',
   CONNECTED: 'CONNECTED',
@@ -191,10 +188,11 @@ export default {
   },
   data() {
     return {
+      loading: false,
       linkedGatewayOptions: [],
       formRules: {
-        gatewayId: [{ required: true, message: '不能为空', trigger: 'blur' }],
-        gatewayType: [{ required: true, message: '不能为空', trigger: 'blur' }],
+        gatewayId: [{ required: true, message: '不能为空', trigger: 'blur'}],
+        channelType: [{ required: true, message: '不能为空', trigger: 'blur'}],
         gatewayUsage: [{ required: true, message: '不能为空', trigger: 'blur' }],
         bindedMktGatewayId: [{ required: true, message: '不能为空', trigger: 'blur' }]
       },
@@ -202,18 +200,19 @@ export default {
       form: {
         gatewayId: '',
         description: '',
-        gatewayType: '',
+        channelType: '',
         gatewayUsage: '',
         gatewayAdapterType: '',
         connectionState: CONNECTION_STATE.DISCONNECTED,
-        autoConnect: true,
+        autoConnect: false,
         bindedMktGatewayId: '',
-        subscribedContractGroups: [],
+        subscribedContracts: [],
         settings: null
       },
-      subscribedContractGroups: [],
-      gatewayTypeOptions: [],
-      contractDefOptions: [],
+      subscribedContracts: [],
+      channelTypeOptions: [],
+      contractOptions: [],
+      channelType: '',
       contractType: '',
       gatewaySettingsMetaInfo: []
     }
@@ -221,95 +220,68 @@ export default {
   computed: {
     typeLabel() {
       return this.gatewayUsage === 'TRADE' ? '账户' : '网关'
+    },
+    disableGatewayIdEdit(){
+      return this.channelType && this.gatewayUsage === 'MARKET_DATA' && !this.channelType.allowDuplication;
     }
   },
   watch: {
     visible: function (val) {
       if (val) {
-        this.form = Object.assign({}, this.gatewayDescription)
+        if(this.isUpdateMode){
+          Object.keys(this.gatewayDescription).forEach(key => {
+            this.form[key] = this.gatewayDescription[key]
+          })
+        }
         this.form.gatewayUsage = this.gatewayUsage
+        this.subscribedContracts = this.form.subscribedContracts
+        this.contractOptions = this.subscribedContracts
         this.$nextTick(() => {
           gatewayMgmtApi.findAll('MARKET_DATA').then((result) => {
             this.linkedGatewayOptions = result
           })
           gatewayMgmtApi.getGatewayTypeDescriptions().then((result) => {
-            this.gatewayTypeOptions = result
+            this.channelTypeOptions = result
               .filter((item) => item.usage.indexOf(this.gatewayUsage) > -1)
               .filter((item) => !item.adminOnly || this.$route.query.superuser)
-              .map((item) => item.name)
+              .map((item) => Object.assign({value: item.name}, item))
+            this.channelType = this.channelTypeOptions.find(item => item.name === this.form.channelType)
           })
-
-          if (
-            this.contractDefOptions.length &&
-            this.form.subscribedContractGroups instanceof Array
-          ) {
-            this.subscribedContractGroups = this.form.subscribedContractGroups
-              .map((defId) =>
-                this.contractDefOptions.find(
-                  (item) => `${item.name}@${item.productClass}` === defId
-                )
-              )
-              .filter((item) => !!item)
-          }
         })
       }
     },
-    'form.gatewayType': function (val) {
+    'channelType': async function (val) {
       if (
         val &&
         this.gatewayUsage === 'MARKET_DATA' &&
         !this.isUpdateMode &&
-        this.subscribedContractGroups
+        this.subscribedContracts
       ) {
-        this.subscribedContractGroups = []
+        this.subscribedContracts = []
       }
       if (val) {
-        this.contractDefOptions = []
+        this.form.channelType = val.name
 
-        if (val !== 'SIM') {
+        if (val.name !== 'SIM') {
           // 获取网关配置元信息
-          gatewayMgmtApi.getGatewaySettingsMetaInfo(val).then((result) => {
+          gatewayMgmtApi.getGatewaySettingsMetaInfo(this.form.channelType).then((result) => {
             this.gatewaySettingsMetaInfo = result
             this.gatewaySettingsMetaInfo.sort((a, b) => (a.order < b.order ? -1 : 1))
           })
         }
-
-        // 获取合约品种列表
-        const type = { FUTURES: '期货', OPTION: '期权' }
-        contractApi.getContractProviders(val.replace('_SIM', '')).then((result) => {
-          const promiseList = result.map((pvd) => contractApi.getContractDefs(pvd))
-          Promise.all(promiseList).then((results) => {
-            results.forEach((res) => {
-              this.contractDefOptions = this.contractDefOptions.concat(res)
-              this.contractDefOptions = this.contractDefOptions.map((item) => {
-                item.value = item.name + '@' + item.productClass
-                item.label = item.name + type[item.productClass]
-                return item
-              })
-              if (this.form.subscribedContractGroups instanceof Array) {
-                this.subscribedContractGroups = this.form.subscribedContractGroups
-                  .map((defId) =>
-                    this.contractDefOptions.find(
-                      (item) => `${item.name}@${item.productClass}` === defId
-                    )
-                  )
-                  .filter((item) => !!item)
-              }
-            })
-          })
-        })
       }
     }
   },
   methods: {
     onChooseGatewayType() {
-      this.form.gatewayAdapterType = GATEWAY_ADAPTER[this.form.gatewayType]
-      if (this.gatewayUsage === 'MARKET_DATA' && this.form.gatewayType !== 'PLAYBACK') {
-        this.form.gatewayId = `${this.form.gatewayType}`
+      if (this.gatewayUsage === 'MARKET_DATA' && !this.channelType.allowDuplication) {
+        this.form.gatewayId = this.channelType.name
+      } else if (this.channelType.allowDuplication) {
+        this.form.gatewayId = ''
       }
     },
     async saveGateway() {
-      if (this.form.gatewayType === 'SIM') {
+      if (this.form.channelType === 'SIM') {
         this.form.settings = { nothing: 0 }
       }
       if (!this.form.settings || !Object.keys(this.form.settings).length) {
@@ -319,9 +291,7 @@ export default {
         .validate()
         .then(() => {
           if (this.gatewayUsage === 'MARKET_DATA') {
-            this.form.subscribedContractGroups = this.subscribedContractGroups.map(
-              (item) => item.value
-            )
+            this.form.subscribedContracts = this.subscribedContracts
           }
           this.$emit('onSave', this.form)
           this.close()
@@ -330,9 +300,34 @@ export default {
           console.error(e)
         })
     },
+    searchContracts(query){
+      if (query !== '') {
+          this.loading = true;
+            // 获取合约品种列表
+          if(this.form.channelType === 'PLAYBACK'){
+            const ctpListPromise = contractApi.getGatewayContracts('CTP', query)
+            const pbListPromise = contractApi.getGatewayContracts('PLAYBACK', query)
+            Promise.all([ctpListPromise, pbListPromise]).then(([ctpResult, pbResult]) => {
+              this.contractOptions = [...ctpResult, ...pbResult]
+            }).finally(() => {
+              this.loading = false;
+            })
+          } else {
+            contractApi.getGatewayContracts(this.form.channelType, query).then(result => {
+              this.contractOptions = result
+            }).finally(() => {
+              this.loading = false;
+            })
+          }
+
+        } else {
+          this.contractOptions = [];
+        }
+    },
     close() {
       this.$emit('update:visible', false)
-      this.subscribedContractGroups = []
+      this.form = this.$options.data().form
+      this.subscribedContracts = []
     }
   }
 }

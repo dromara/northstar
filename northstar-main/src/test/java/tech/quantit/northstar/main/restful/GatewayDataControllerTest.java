@@ -1,5 +1,8 @@
 package tech.quantit.northstar.main.restful;
 
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -19,7 +22,10 @@ import com.corundumstudio.socketio.SocketIOServer;
 
 import cn.hutool.crypto.digest.MD5;
 import tech.quantit.northstar.common.model.NsUser;
+import tech.quantit.northstar.gateway.api.IMarketCenter;
+import tech.quantit.northstar.gateway.api.domain.contract.Contract;
 import tech.quantit.northstar.main.NorthstarApplication;
+import xyz.redtorch.pb.CoreField.ContractField;
 
 @SpringBootTest(classes = NorthstarApplication.class, value="spring.profiles.active=test")
 @AutoConfigureMockMvc
@@ -33,12 +39,20 @@ class GatewayDataControllerTest {
 	@MockBean
 	private SocketIOServer socketServer;
 	
+	@MockBean
+	private IMarketCenter contractMgr;
+	
 	@BeforeEach
 	public void setUp() throws Exception {
+		Contract contract = mock(Contract.class);
+		when(contractMgr.getContract(anyString(), anyString())).thenReturn(contract);
+		when(contract.contractField()).thenReturn(ContractField.newBuilder().setUnifiedSymbol("rb2205@SHFE@FUTURES").build());
+		
 		long time = System.currentTimeMillis();
 		String token = MD5.create().digestHex("123456" + time);
 		mockMvc.perform(post("/northstar/auth/login?timestamp="+time).contentType(MediaType.APPLICATION_JSON).content(JSON.toJSONString(new NsUser("admin",token))).session(session))
 			.andExpect(status().isOk());
+		
 	}
 	
 	@Test

@@ -14,11 +14,13 @@ import org.junit.jupiter.api.Test;
 
 import tech.quantit.northstar.common.exception.InsufficientException;
 import tech.quantit.northstar.common.exception.TradeException;
+import tech.quantit.northstar.common.model.Identifier;
 import tech.quantit.northstar.common.model.OrderRecall;
 import tech.quantit.northstar.common.model.OrderRequest;
 import tech.quantit.northstar.common.model.OrderRequest.TradeOperation;
-import tech.quantit.northstar.domain.gateway.ContractManager;
+import tech.quantit.northstar.gateway.api.IContractManager;
 import tech.quantit.northstar.gateway.api.TradeGateway;
+import tech.quantit.northstar.gateway.api.domain.contract.Contract;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreEnum.OrderStatusEnum;
 import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
@@ -46,8 +48,10 @@ public class TradeDayAccountTest {
 	@BeforeEach
 	public void prepare() {
 		TradeGateway gateway = mock(TradeGateway.class);
-		ContractManager contractMgr = mock(ContractManager.class);
-		when(contractMgr.getContract("rb2102@SHFE")).thenReturn(contract);
+		IContractManager contractMgr = mock(IContractManager.class);
+		Contract c = mock(Contract.class);
+		when(c.contractField()).thenReturn(contract);
+		when(contractMgr.getContract(Identifier.of("rb2102@SHFE"))).thenReturn(c);
 		tda = new TradeDayAccount("testGateway", gateway, contractMgr);
 	}
 	
@@ -104,7 +108,7 @@ public class TradeDayAccountTest {
 	public void testOpenPosition() throws InsufficientException {
 		testOnAccountUpdate();
 		OrderRequest orderReq = OrderRequest.builder()
-				.contractUnifiedSymbol("rb2102@SHFE")
+				.contractId("rb2102@SHFE")
 				.price("4000")
 				.volume(1)
 				.tradeOpr(TradeOperation.BK)
@@ -117,7 +121,7 @@ public class TradeDayAccountTest {
 	public void testOpenPositionWithException() throws InsufficientException {
 		testOnAccountUpdate();
 		OrderRequest orderReq = OrderRequest.builder()
-				.contractUnifiedSymbol("rb2102@SHFE")
+				.contractId("rb2102@SHFE")
 				.price("7000")
 				.volume(1)
 				.tradeOpr(TradeOperation.BK)
@@ -133,7 +137,7 @@ public class TradeDayAccountTest {
 	public void testClosePosition() throws InsufficientException {
 		testOnPositionUpdate();
 		OrderRequest orderReq = OrderRequest.builder()
-				.contractUnifiedSymbol("rb2102@SHFE")
+				.contractId("rb2102@SHFE")
 				.price("7000")
 				.volume(2)
 				.tradeOpr(TradeOperation.SP)
@@ -147,7 +151,7 @@ public class TradeDayAccountTest {
 	public void testClosePositionWithException() throws InsufficientException {
 		testOnPositionUpdate();
 		OrderRequest orderReq = OrderRequest.builder()
-				.contractUnifiedSymbol("rb2102@SHFE")
+				.contractId("rb2102@SHFE")
 				.price("7000")
 				.volume(3)
 				.tradeOpr(TradeOperation.SP)

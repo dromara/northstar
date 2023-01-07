@@ -5,12 +5,7 @@ server:
     key-store: classpath:keystore/northstarKeyStore.p12
     key-store-password: northstar666
 northstar: 
-  # 行情延时探测（由于有多余的性能损耗，生产环境建议禁用）
-  latency-detection:
-    enabled: false
-    # 采样时间间隔（单位：秒）
-    sampling-interval: 60 
-  # 历史数据服务（需要购买用户授权）
+  contraceDefFile: classpath:ContractDefinition.csv
   data-service:
     baseUrl: https://service.quantit.tech:44388
 
@@ -60,7 +55,7 @@ server:
   ssl:
     enabled: false
 spring:
-  redis.database: 0
+  redis.database: 15
   config:    activate:      on-profile: test
       
 ---
@@ -74,7 +69,7 @@ server:
         same-site: none
         secure: true
 spring:
-  redis.database: 0
+  redis.database: 15
   config:
     activate:
       on-profile: e2e

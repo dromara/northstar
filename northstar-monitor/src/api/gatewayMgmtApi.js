@@ -34,11 +34,8 @@ export default {
   getGatewayTypeDescriptions(){
     return baseService.get('/gateway/types')
   },
-  getGatewaySettingsMetaInfo(gatewayType){
-    return baseService.get('/gateway/settings?gatewayType=' + gatewayType)
-  },
-  getSubscribedContractList(gatewayId){
-    return baseService.get(`/gateway/sub?gatewayId=${gatewayId}`)
+  getGatewaySettingsMetaInfo(channelType){
+    return baseService.get('/gateway/settings?channelType=' + channelType)
   },
   resetPlayback(gatewayId){
     return baseService.get(`/gateway/reset?gatewayId=${gatewayId}`)

@@ -14,6 +14,10 @@ export default {
     return baseService.get('/auth/logout')
   },
 
+  healthyCheck(){
+    return baseService.head(`/auth/login`)
+  },
+
   test() {
     return baseService.get('/auth/test')
   }

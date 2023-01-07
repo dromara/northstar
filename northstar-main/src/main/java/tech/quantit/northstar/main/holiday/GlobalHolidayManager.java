@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import tech.quantit.northstar.common.IHolidayManager;
+import tech.quantit.northstar.common.constant.ChannelType;
 
 /**
  * 
@@ -22,9 +23,9 @@ public class GlobalHolidayManager implements InitializingBean{
 	@Autowired
 	private List<IHolidayManager> holidayMgr;
 	
-	private Map<String, IHolidayManager> holidayMgrMap;
+	private Map<ChannelType, IHolidayManager> holidayMgrMap;
 	
-	public boolean isHoliday(String gatewayType, LocalDateTime dateTime) {
+	public boolean isHoliday(ChannelType gatewayType, LocalDateTime dateTime) {
 		if(!holidayMgrMap.containsKey(gatewayType)) {
 			return dateTime.toLocalDate().getDayOfWeek().getValue() > 5;	// 当没有找到对应的HolidayManager时，只判断周末是假日	
 		}
@@ -34,6 +35,6 @@ public class GlobalHolidayManager implements InitializingBean{
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		holidayMgrMap = holidayMgr.stream()
-				.collect(Collectors.toMap(IHolidayManager::gatewayType, mgr -> mgr));
+				.collect(Collectors.toMap(IHolidayManager::channelType, mgr -> mgr));
 	}
 }

@@ -28,16 +28,8 @@
       >
       </el-table-column>
       <el-table-column
-        :label="`${typeLabel}描述`"
-        prop="description"
-        width="120px"
-        header-align="center"
-        align="center"
-      >
-      </el-table-column>
-      <el-table-column
         :label="`${typeLabel}类型`"
-        prop="gatewayType"
+        prop="channelType"
         width="90px"
         header-align="center"
         align="center"
@@ -84,7 +76,7 @@
       <el-table-column
         v-if="gatewayUsage !== 'TRADE'"
         label="行情反馈"
-        width="80px"
+        width="150px"
         header-align="center"
         align="center"
       >
@@ -105,13 +97,13 @@
         </template>
       </el-table-column>
       <el-table-column
-        label="适配器类型"
-        prop="gatewayAdapterType"
+        :label="`${typeLabel}描述`"
+        prop="description"
         header-align="center"
         align="center"
       >
       </el-table-column>
-      <el-table-column align="center" width="300px">
+      <el-table-column align="center" width="360px">
         <template slot="header">
           <el-button size="mini" type="primary" @click="handleCreate">新建</el-button>
         </template>
@@ -135,7 +127,7 @@
             v-if="
               gatewayUsage === 'TRADE' &&
               scope.row.connectionState === 'CONNECTED' &&
-              scope.row.gatewayType === 'SIM'
+              scope.row.channelType === 'SIM'
             "
             @click="handleMoneyIO(scope.row)"
             >出入金</el-button
@@ -144,7 +136,7 @@
             v-if="
               gatewayUsage === 'MARKET_DATA' &&
               scope.row.connectionState === 'DISCONNECTED' &&
-              scope.row.gatewayType === 'PLAYBACK'
+              scope.row.channelType === 'PLAYBACK'
             "
             class="ml-10 mr-10"
             title="确定要重新回放历史行情吗？"

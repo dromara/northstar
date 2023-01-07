@@ -6,6 +6,7 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 
+import tech.quantit.northstar.common.constant.ChannelType;
 import tech.quantit.northstar.common.utils.MarketDataLoadingUtils;
 import tech.quantit.northstar.data.IMarketDataRepository;
 import xyz.redtorch.pb.CoreField.BarField;
@@ -35,21 +36,21 @@ public class PlaybackDataLoader {
 			queryEnd = utils.getFridayOfThisWeek(fromStartDateTime.toLocalDate());
 			queryStart = queryEnd.minusWeeks(1);
 		}
-		return enhanceData(mdRepo.loadBars("CTP", contract.getUnifiedSymbol(), queryStart, queryEnd)
+		return enhanceData(mdRepo.loadBars(ChannelType.CTP, contract.getUnifiedSymbol(), queryStart, queryEnd)
 				.stream()
 				.filter(bar -> bar.getActionTimestamp() >= fromStartTimestamp)
-				.toList());
+				.toList(), contract.getUnifiedSymbol());
 	}
 	
 	public List<BarField> loadMinuteDataRaw(LocalDate startDate, LocalDate endDate, ContractField contract){
-		return enhanceData(mdRepo.loadBars("CTP", contract.getUnifiedSymbol(), startDate, endDate));
+		return enhanceData(mdRepo.loadBars(ChannelType.CTP, contract.getUnifiedSymbol(), startDate, endDate), contract.getUnifiedSymbol());
 	}
 	
 	public List<BarField> loadTradeDayDataRaw(LocalDate startDate, LocalDate endDate, ContractField contract){
-		return enhanceData(mdRepo.loadDailyBars("CTP", contract.getUnifiedSymbol(), startDate, endDate));
+		return enhanceData(mdRepo.loadDailyBars("CTP", contract.getUnifiedSymbol(), startDate, endDate), contract.getUnifiedSymbol());
 	}
 	
-	private List<BarField> enhanceData(List<BarField> list) {
+	private List<BarField> enhanceData(List<BarField> list, String unifiedSymbol) {
 		List<BarField> results = new ArrayList<>(list.size());
 		for(int i=0; i<list.size(); i++) {
 			double openInterestDelta = 0;

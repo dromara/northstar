@@ -18,7 +18,7 @@ import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 @Data
 public class MockTradeDescription {
 
-	private String unifiedSymbol;
+	private String contractId;
 
 	private String gatewayId;
 	

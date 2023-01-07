@@ -1,16 +1,10 @@
 import baseService from './baseRequest'
 
 export default {
-    getContractDefs(providerName){
-        return baseService.get(`/contract/defs?provider=${providerName}`)
+    getGatewayContracts(channelType, query){
+        return baseService.get(`/contracts?channelType=${channelType}&query=${query||''}`)
     },
-    getContractList(providerName){
-        return baseService.get(`/contract/list?provider=${providerName}`)
-    },
-    getContractProviders(gatewayType){
-        return baseService.get(`/contract/providers?gatewayType=${gatewayType}`)
-    },
-    getSubscribableContractList(contractDefId){
-        return baseService.get(`/contract/subable?contractDefId=${contractDefId}`)
+    getSubscribedContracts(gatewayId, query){
+        return baseService.get(`/contracts/subscribed?gatewayId=${gatewayId}&query=${query||''}`)
     }
 }

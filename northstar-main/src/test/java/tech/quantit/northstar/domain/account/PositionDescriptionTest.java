@@ -11,9 +11,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import tech.quantit.northstar.common.exception.InsufficientException;
+import tech.quantit.northstar.common.model.Identifier;
 import tech.quantit.northstar.common.model.OrderRequest;
 import tech.quantit.northstar.common.model.OrderRequest.TradeOperation;
-import tech.quantit.northstar.domain.gateway.ContractManager;
+import tech.quantit.northstar.gateway.api.IContractManager;
+import tech.quantit.northstar.gateway.api.domain.contract.Contract;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
@@ -23,7 +25,7 @@ import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 
 public class PositionDescriptionTest {
 	
-	private PositionDescription pd = new PositionDescription(mock(ContractManager.class));;
+	private PositionDescription pd = new PositionDescription(mock(IContractManager.class));;
 	ContractField contract = ContractField.newBuilder()
 			.setContractId("rb2102@SHFE")
 			.setExchange(ExchangeEnum.SHFE)
@@ -35,7 +37,7 @@ public class PositionDescriptionTest {
 			.setShortMarginRatio(0.08)
 			.build();
 	ContractField contract2 = ContractField.newBuilder()
-			.setContractId("AP2102@ZCE")
+			.setContractId("AP2102@CZCE")
 			.setExchange(ExchangeEnum.CZCE)
 			.setGatewayId("testGateway")
 			.setSymbol("AP2102")
@@ -47,13 +49,16 @@ public class PositionDescriptionTest {
 	
 	@BeforeEach
 	public void setup() {
-		when(pd.contractMgr.getContract("AP2102@CZCE")).thenReturn(contract2);
-		when(pd.contractMgr.getContract("rb2102@SHFE")).thenReturn(contract);
+		Contract c = mock(Contract.class);
+		Contract c2 = mock(Contract.class);
+		when(c.contractField()).thenReturn(contract);
+		when(c2.contractField()).thenReturn(contract2);
+		when(pd.contractMgr.getContract(Identifier.of("AP2102@CZCE"))).thenReturn(c2);
+		when(pd.contractMgr.getContract(Identifier.of("rb2102@SHFE"))).thenReturn(c);
 	}
 
 	@Test
 	public void testUpdate() {
-		
 		PositionField pf = PositionField.newBuilder()
 				.setAccountId("testGateway")
 				.setContract(contract)
@@ -90,7 +95,7 @@ public class PositionDescriptionTest {
 		testUpdate();
 		
 		OrderRequest orderReq = OrderRequest.builder()
-				.contractUnifiedSymbol("rb2102@SHFE")
+				.contractId("rb2102@SHFE")
 				.gatewayId("testGateway")
 				.price("1234")
 				.volume(1)
@@ -107,7 +112,7 @@ public class PositionDescriptionTest {
 		testUpdate();
 		
 		OrderRequest orderReq = OrderRequest.builder()
-				.contractUnifiedSymbol("rb2102@SHFE")
+				.contractId("rb2102@SHFE")
 				.gatewayId("testGateway")
 				.price("1234")
 				.volume(3)
@@ -125,7 +130,7 @@ public class PositionDescriptionTest {
 		testUpdate();
 		
 		OrderRequest orderReq = OrderRequest.builder()
-				.contractUnifiedSymbol("AP2102@CZCE")
+				.contractId("AP2102@CZCE")
 				.gatewayId("testGateway")
 				.price("1234")
 				.volume(1)
@@ -142,7 +147,7 @@ public class PositionDescriptionTest {
 		testUpdate();
 		
 		OrderRequest orderReq = OrderRequest.builder()
-				.contractUnifiedSymbol("AP2102@CZCE")
+				.contractId("AP2102@CZCE")
 				.gatewayId("testGateway")
 				.price("1234")
 				.volume(3)
@@ -159,7 +164,7 @@ public class PositionDescriptionTest {
 		testUpdate();
 		
 		OrderRequest orderReq = OrderRequest.builder()
-				.contractUnifiedSymbol("rb2102@SHFE")
+				.contractId("rb2102@SHFE")
 				.gatewayId("testGateway")
 				.price("1234")
 				.volume(4)

@@ -1,34 +1,38 @@
 package tech.quantit.northstar.gateway.api.domain.time;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import tech.quantit.northstar.common.constant.DateTimeConstant;
 import test.common.TestFieldFactory;
-import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.TickField;
 
 class OpenningMinuteClockTest {
 
 	TestFieldFactory factory = new TestFieldFactory("testGateway");
 	
+	TradeTimeDefinition ttd = new TradeTimeDefinition() {
+		
+		@Override
+		public List<PeriodSegment> tradeTimeSegments() {
+			return List.of(new PeriodSegment(LocalTime.of(21, 0), LocalTime.of(23, 00)),
+					new PeriodSegment(LocalTime.of(9, 1), LocalTime.of(10, 15)),
+					new PeriodSegment(LocalTime.of(10, 31), LocalTime.of(11, 30)),
+					new PeriodSegment(LocalTime.of(13, 31), LocalTime.of(15, 00)));
+		}
+	};
+	
 	OpenningMinuteClock clock;
 	
 	@BeforeEach
 	void prepare() {
-		PeriodHelperFactory phFactory = mock(PeriodHelperFactory.class);
-		when(phFactory.newInstance(anyInt(), anyBoolean(), any(ContractField.class))).thenReturn(new PeriodHelper(60, new CnFtComTradeTime1()));
-		clock = new OpenningMinuteClock(factory.makeContract("rb2210"), phFactory);
+		clock = new OpenningMinuteClock(factory.makeContract("rb2210"), ttd);
 	}
 
 	@Test

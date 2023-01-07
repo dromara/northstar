@@ -24,6 +24,10 @@
             <i class="el-icon-s-custom"></i>
             <span slot="title">账户绑定</span>
           </el-menu-item>
+          <el-menu-item index="4">
+            <i class="el-icon-document-copy"></i>
+            <span slot="title">已关联合约</span>
+          </el-menu-item>
         </el-menu>
       </el-aside>
       <el-main class="main-compact"
@@ -48,16 +52,6 @@
                 <el-option label="模拟盘" value="UAT"></el-option>
                 <el-option label="实盘" value="PROD"></el-option>
               </el-select>
-            </el-form-item>
-            <el-form-item label="绑定合约">
-              <el-tooltip
-                class="item"
-                effect="dark"
-                content="如有多个合约用 ; 分隔"
-                placement="bottom-end"
-              >
-                <el-input v-model="bindedContracts" :disabled="readOnly"></el-input>
-              </el-tooltip>
             </el-form-item>
             <el-form-item label="平仓优化">
               <el-select v-model="form.closingPolicy" :disabled="readOnly">
@@ -163,18 +157,41 @@
               </el-form-item>
               <el-form-item label="关联合约">
                 <el-select
-                  v-model="form.moduleAccountSettingsDescription[i].bindedUnifiedSymbols"
+                  class='bindContractSelector'
+                  v-model="form.moduleAccountSettingsDescription[i].bindedContracts"
                   multiple
+                  filterable
                 >
                   <el-option
-                    v-for="(item, i) in bindedUnifiedSymbolsOptions"
-                    :value="item.value"
-                    :label="item.label"
+                    v-for="(item, i) in bindedContractsOptions[i]"
+                    :value="item"
+                    :label="item.name"
                     :key="i"
                   />
                 </el-select>
               </el-form-item>
             </div>
+          </div>
+          <div v-show="activeIndex === '4'">
+            <el-table
+              :data="jointBindedContracts"
+              style="width: 100%">
+              <el-table-column
+                prop="name"
+                label="合约名称"
+                align="center"
+                width="100px"
+                >
+              </el-table-column>
+              <el-table-column
+                prop="unifiedSymbol"
+                label="合约编码"
+                align="center">
+                <template slot-scope="scope">
+                  <span style="user-select: all;">{{scope.row.unifiedSymbol}}</span>
+                </template>
+              </el-table-column>
+            </el-table>
           </div>
         </el-form>
       </el-main>
@@ -191,9 +208,6 @@
           重置模组
         </el-button>
       </el-popconfirm>
-      <el-button v-if="!readOnly" type="primary" @click="contractFinderVisible = true">
-        合约查询
-      </el-button>
       <el-button @click="close">取 消</el-button>
       <el-button
         id="saveModuleSettings"
@@ -210,9 +224,9 @@
 </template>
 
 <script>
-import ContractFinder from './ContractFinder'
 import gatewayMgmtApi from '../api/gatewayMgmtApi'
 import moduleApi from '../api/moduleApi'
+import contractApi from '../api/contractApi'
 
 const initComponent = async (component, arr) => {
   const paramsMap = await moduleApi.componentParams(component)
@@ -224,9 +238,6 @@ const initComponent = async (component, arr) => {
 }
 
 export default {
-  components: {
-    ContractFinder
-  },
   props: {
     readOnly: {
       type: Boolean,
@@ -247,10 +258,10 @@ export default {
       loading: false,
       showDemoStrategy: false,
       accountOptions: [],
+      bindedContractsOptions: [],
       tradeStrategyOptionsSource: [],
       activeIndex: '1',
       choseAccounts: [],
-      bindedContracts: '',
       form: {
         moduleName: '',
         type: 'SPECULATION',
@@ -269,10 +280,6 @@ export default {
     }
   },
   computed: {
-    bindedUnifiedSymbolsOptions() {
-      const unifiedSymbols = this.bindedContracts.split(/;|；/).map((item) => item.trim())
-      return unifiedSymbols.map((us) => ({ label: us.split('@')[0], value: us }))
-    },
     isUpdateMode() {
       return !!this.module
     },
@@ -281,6 +288,9 @@ export default {
         return this.tradeStrategyOptionsSource
       }
       return this.tradeStrategyOptionsSource.filter((item) => !/示例/.test(item.componentMeta.name))
+    },
+    jointBindedContracts(){
+      return this.form.moduleAccountSettingsDescription.map(item => item.bindedContracts).reduce((jointList, list) => jointList.concat(list), [])
     }
   },
   watch: {
@@ -294,7 +304,7 @@ export default {
         this.form = this.module
         this.form.strategySetting.value = this.form.strategySetting.componentMeta.name
         this.bindedContracts = this.module.moduleAccountSettingsDescription
-          .map((item) => item.bindedUnifiedSymbols.join(';'))
+          .map((item) => item.bindedContracts.join(';'))
           .join(';')
         this.choseAccounts = this.module.moduleAccountSettingsDescription.map((item) => {
           item.value = item.accountGatewayId
@@ -331,16 +341,21 @@ export default {
     handleSelect(index) {
       this.activeIndex = index
     },
-    accountSelected(val) {
+    async accountSelected(val) {
       this.form.moduleAccountSettingsDescription = []
       if (!val.length) return
       this.form.moduleAccountSettingsDescription = val.map((item) => {
         return {
           accountGatewayId: item.gatewayId,
           moduleAccountInitBalance: 0,
-          bindedUnifiedSymbols: []
+          bindedContracts: []
         }
       })
+      const loadContractsPromise = val
+        .map(item => item.bindedMktGatewayId)
+        .map(gatewayId => contractApi.getSubscribedContracts(gatewayId))
+
+      this.bindedContractsOptions = await Promise.all(loadContractsPromise)
     },
     async saveSetting(reset) {
       let pass =
@@ -354,13 +369,11 @@ export default {
         throw new Error('校验不通过')
       }
       this.form.moduleAccountSettingsDescription.forEach((desc) => {
-        if (!desc.bindedUnifiedSymbols.length) {
+        if (!desc.bindedContracts.length) {
           const errMsg = `账户【${desc.accountGatewayId}】未关联合约`
           throw new Error(errMsg)
         }
       })
-
-      await moduleApi.validateModule(this.form)
 
       const obj = JSON.parse(JSON.stringify(this.form))
       this.loading = true

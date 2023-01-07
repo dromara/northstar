@@ -35,10 +35,6 @@ public class ContractUtils {
 		return resultList;
 	}
 	
-	public static String getMarketGatewayId(ContractField contract) {
-		return contract.getThirdPartyId().split("@")[1];
-	}
-	
 	public static boolean isSame(ContractField c1, ContractField c2) {
 		return StringUtils.equals(c1.getUnifiedSymbol(), c2.getUnifiedSymbol());
 	}

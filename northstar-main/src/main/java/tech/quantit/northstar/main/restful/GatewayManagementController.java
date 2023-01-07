@@ -1,9 +1,9 @@
 package tech.quantit.northstar.main.restful;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-
-import javax.validation.constraints.NotNull;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,15 +16,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import tech.quantit.northstar.common.constant.ChannelType;
 import tech.quantit.northstar.common.constant.GatewayUsage;
 import tech.quantit.northstar.common.model.ComponentField;
 import tech.quantit.northstar.common.model.GatewayDescription;
 import tech.quantit.northstar.common.model.GatewayTypeDescription;
 import tech.quantit.northstar.common.model.ResultBean;
-import tech.quantit.northstar.domain.gateway.ContractManager;
-import tech.quantit.northstar.gateway.api.GatewayTypeProvider;
+import tech.quantit.northstar.gateway.api.IContractManager;
 import tech.quantit.northstar.main.service.GatewayService;
-import xyz.redtorch.pb.CoreField.ContractField;
 
 @RequestMapping("/northstar/gateway")
 @RestController
@@ -34,31 +33,27 @@ public class GatewayManagementController {
 	protected GatewayService gatewayService;
 	
 	@Autowired
-	protected ContractManager contractMgr;
-	
-	@Autowired
-	protected GatewayTypeProvider gatewayTypeProvider;
+	protected IContractManager contractMgr;
 	
 	@PostMapping
-	@NotNull(message="传入对象不能为空")
 	public ResultBean<Boolean> create(@RequestBody GatewayDescription gd) throws Exception {
+		Assert.notNull(gd, "网关配置对象不能为空");
 		return new ResultBean<>(gatewayService.createGateway(gd));
 	}
 	
 	@DeleteMapping
-	@NotNull(message="网关ID不能为空")
 	public ResultBean<Boolean> remove(String gatewayId) {
+		Assert.hasText(gatewayId, "网关ID不能为空");
 		return new ResultBean<>(gatewayService.deleteGateway(gatewayId));
 	}
 	
 	@PutMapping
-	@NotNull(message="传入对象不能为空")
 	public ResultBean<Boolean> modify(@RequestBody GatewayDescription gd) throws Exception {
+		Assert.notNull(gd, "网关配置对象不能为空");
 		return new ResultBean<>(gatewayService.updateGateway(gd));
 	}
 	
 	@GetMapping
-	@NotNull(message="网关用途不能为空")
 	public ResultBean<List<GatewayDescription>> list(String usage) { 
 		if(StringUtils.isBlank(usage)) {
 			return new ResultBean<>(gatewayService.findAllGatewayDescription());
@@ -70,61 +65,48 @@ public class GatewayManagementController {
 	}
 	
 	@GetMapping("/specific")
-	@NotNull(message="网关ID不能为空")
 	public ResultBean<GatewayDescription> findGatewayDescription(String gatewayId){
+		Assert.hasText(gatewayId, "网关ID不能为空");
 		return new ResultBean<>(gatewayService.findGatewayDescription(gatewayId));
 	}
 	
 	@GetMapping("/active")
-	@NotNull(message="网关ID不能为空")
 	public ResultBean<Boolean> getGatewayActive(String gatewayId){
+		Assert.hasText(gatewayId, "网关ID不能为空");
 		return new ResultBean<>(gatewayService.isActive(gatewayId));
 	}
 	
 	@GetMapping("/connection")
-	@NotNull(message="网关ID不能为空")
 	public ResultBean<Boolean> connect(String gatewayId) {
+		Assert.hasText(gatewayId, "网关ID不能为空");
 		return new ResultBean<>(gatewayService.connect(gatewayId));
 	}
 	
 	@DeleteMapping("/connection")
-	@NotNull(message="网关ID不能为空")
 	public ResultBean<Boolean> disconnect(String gatewayId) {
+		Assert.hasText(gatewayId, "网关ID不能为空");
 		return new ResultBean<>(gatewayService.disconnect(gatewayId));
 	}
 	
 	@PostMapping("/moneyio")
 	public ResultBean<Boolean> simMoneyIO(String gatewayId, int money){
-		Assert.notNull(gatewayId, "网关ID不能为空");
+		Assert.hasText(gatewayId, "网关ID不能为空");
 		return new ResultBean<>(gatewayService.simMoneyIO(gatewayId, money));
 	}
 	
 	@GetMapping("/settings")
-	@NotNull(message="网关类型不能为空")
-	public ResultBean<Collection<ComponentField>> getGatewaySettingsMetaInfo(String gatewayType){
-		return new ResultBean<>(gatewayService.getGatewaySettingsMetaInfo(gatewayType));
+	public ResultBean<Collection<ComponentField>> getGatewaySettingsMetaInfo(ChannelType channelType){
+		return new ResultBean<>(gatewayService.getGatewaySettingsMetaInfo(channelType));
 	}
 	
 	@GetMapping("/types")
 	public ResultBean<Collection<GatewayTypeDescription>> gatewayTypeOptions(){
-		return new ResultBean<>(gatewayTypeProvider.getAll()
-				.stream()
-				.map(GatewayTypeDescription::new)
-				.toList());
-	}
-	
-	@GetMapping("/sub")
-	@NotNull(message="网关ID不能为空")
-	public ResultBean<List<byte[]>> getSubscribedContractList(String gatewayId){
-		return new ResultBean<>(gatewayService.getSubscribedContractList(gatewayId)
-				.stream()
-				.map(ContractField::toByteArray)
-				.toList());
+		return new ResultBean<>(new ArrayList<>(Arrays.asList(ChannelType.values())).stream().map(GatewayTypeDescription::new).toList());
 	}
 	
 	@GetMapping("/reset")
-	@NotNull(message="网关ID不能为空")
 	public ResultBean<Boolean> resetPlayback(String gatewayId) throws Exception{
+		Assert.hasText(gatewayId, "网关ID不能为空");
 		return new ResultBean<>(gatewayService.resetPlayback(gatewayId));
 	}
 }

@@ -29,7 +29,7 @@ public class TradeOperationController {
 	@PostMapping("/submit")
 	public ResultBean<Boolean> submitOrder(@RequestBody OrderRequest req) throws InsufficientException {
 		Assert.hasText(req.getGatewayId(), "账户网关ID不能为空");
-		Assert.hasText(req.getContractUnifiedSymbol(), "合约不能为空");
+		Assert.hasText(req.getContractId(), "合约不能为空");
 		Assert.hasText(req.getPrice(), "价格不能为空");
 		Assert.isTrue(req.getVolume() > 0, "下单手数必须为正整数");
 		Assert.notNull(req.getTradeOpr(), "交易操作不能为空");

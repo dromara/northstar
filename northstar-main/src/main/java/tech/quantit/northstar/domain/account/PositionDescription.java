@@ -10,9 +10,10 @@ import org.apache.commons.lang3.StringUtils;
 
 import tech.quantit.northstar.common.exception.InsufficientException;
 import tech.quantit.northstar.common.exception.NoSuchElementException;
+import tech.quantit.northstar.common.model.Identifier;
 import tech.quantit.northstar.common.model.OrderRequest;
 import tech.quantit.northstar.common.utils.OrderUtils;
-import tech.quantit.northstar.domain.gateway.ContractManager;
+import tech.quantit.northstar.gateway.api.IContractManager;
 import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
@@ -40,9 +41,9 @@ public class PositionDescription {
 	 */
 	protected ConcurrentHashMap<String, PositionField[]> posMap = new ConcurrentHashMap<>();
 	
-	protected ContractManager contractMgr;
+	protected IContractManager contractMgr;
 	
-	public PositionDescription(ContractManager contractMgr) {
+	public PositionDescription(IContractManager contractMgr) {
 		this.contractMgr = contractMgr;
 	}
 	
@@ -51,14 +52,12 @@ public class PositionDescription {
 	 * @param pos
 	 */
 	public void update(PositionField pos) {
-		String unifiedSymbol = pos.getContract().getUnifiedSymbol();
-		if(!posMap.containsKey(unifiedSymbol)) {
-			posMap.put(unifiedSymbol, new PositionField[2]);			
-		}
+		String contractId = pos.getContract().getContractId();
+		posMap.computeIfAbsent(contractId, id -> new PositionField[2]);
 		if(pos.getPositionDirection() == PositionDirectionEnum.PD_Long) {
-			posMap.get(unifiedSymbol)[1] = pos;
+			posMap.get(contractId)[1] = pos;
 		} else if(pos.getPositionDirection() == PositionDirectionEnum.PD_Short) {
-			posMap.get(unifiedSymbol)[0] = pos;
+			posMap.get(contractId)[0] = pos;
 		}
 	}
 	
@@ -69,10 +68,10 @@ public class PositionDescription {
 		DirectionEnum orderDir = OrderUtils.resolveDirection(orderReq.getTradeOpr());
 		PositionDirectionEnum targetPosDir = OrderUtils.getClosingDirection(orderDir);
 		int i = targetPosDir == PositionDirectionEnum.PD_Long ? 1 : targetPosDir == PositionDirectionEnum.PD_Short ? 0 : -1;
-		if(!posMap.containsKey(orderReq.getContractUnifiedSymbol()) || posMap.get(orderReq.getContractUnifiedSymbol())[i] == null) {
+		if(!posMap.containsKey(orderReq.getContractId()) || posMap.get(orderReq.getContractId())[i] == null) {
 			throw new NoSuchElementException("找不到可平仓的持仓");
 		}
-		return posMap.get(orderReq.getContractUnifiedSymbol())[i];
+		return posMap.get(orderReq.getContractId())[i];
 	}
 	
 	/**
@@ -82,9 +81,9 @@ public class PositionDescription {
 	 * @throws InsufficientException 
 	 */
 	public List<SubmitOrderReqField> generateCloseOrderReq(OrderRequest orderReq) throws InsufficientException{
-		ContractField contract = contractMgr.getContract(orderReq.getContractUnifiedSymbol());
+		ContractField contract = contractMgr.getContract(Identifier.of(orderReq.getContractId())).contractField();
 		if(contract == null) {
-			throw new NoSuchElementException("不存在此合约：" + orderReq.getContractUnifiedSymbol());
+			throw new NoSuchElementException("不存在此合约：" + orderReq.getContractId());
 		}
 		PositionField pos = acquireTargetPosition(orderReq);
 		int totalAvailable = pos.getPosition() - pos.getFrozen();

@@ -3,12 +3,12 @@ package tech.quantit.northstar.strategy.api.utils.bar;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 
 import org.apache.commons.lang3.StringUtils;
 
+import tech.quantit.northstar.gateway.api.domain.contract.Contract;
 import xyz.redtorch.pb.CoreField.BarField;
-import xyz.redtorch.pb.CoreField.ContractField;
 
 /**
  * 日线合成器
@@ -21,14 +21,14 @@ public class DailyBarMerger extends BarMerger{
 	
 	private Set<String> tradingDaySet = new HashSet<>();
 	
-	public DailyBarMerger(int numOfDayPerBar, ContractField bindedContract, Consumer<BarField> callback) {
-		super(0, bindedContract, callback);
+	public DailyBarMerger(int numOfDayPerBar, Contract contract, BiConsumer<BarMerger, BarField> callback) {
+		super(0, contract, callback);
 		this.numOfDayPerBar = numOfDayPerBar;
 	}
 
 	@Override
-	public void updateBar(BarField bar) {
-		if(!StringUtils.equals(bar.getUnifiedSymbol(), bindedContract.getUnifiedSymbol())) {
+	public void onBar(BarField bar) {
+		if(!StringUtils.equals(bar.getUnifiedSymbol(), unifiedSymbol)) {
 			return;
 		}
 		
@@ -43,12 +43,12 @@ public class DailyBarMerger extends BarMerger{
 			return;
 		}
 		
-		doMerger(bar);
+		doMerge(bar);
 	}
 
 	@Override
 	protected void doGenerate() {
-		callback.accept(barBuilder.build());
+		callback.accept(this, barBuilder.build());
 		barBuilder = null;
 		tradingDaySet.clear();
 	}

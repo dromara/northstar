@@ -8,19 +8,43 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 class PeriodHelperTest {
+	
+	TradeTimeDefinition demo = new TradeTimeDefinition() {
+		@Override
+		public List<PeriodSegment> tradeTimeSegments() {
+			return List.of(
+					new PeriodSegment(LocalTime.of(21, 0), LocalTime.of(2, 30)),
+					new PeriodSegment(LocalTime.of(9, 1), LocalTime.of(10, 15)),
+					new PeriodSegment(LocalTime.of(10, 31), LocalTime.of(11, 30)),
+					new PeriodSegment(LocalTime.of(13, 31), LocalTime.of(15, 00))
+				);
+		}
 
-	PeriodHelper h1 = new PeriodHelper(60, new CnFtComTradeTime3());
-	PeriodHelper h2 = new PeriodHelper(60, new CnFtComTradeTime3(), true);
+	};
 	
+	TradeTimeDefinition general = new GenericTradeTime();
 	
+	PeriodHelper h1 = new PeriodHelper(1, demo);
+	PeriodHelper h2 = new PeriodHelper(1, demo, true);
+	PeriodHelper h3 = new PeriodHelper(60, demo, true);
+	
+	PeriodHelper h4 = new PeriodHelper(1, general);
 
 	@Test
 	void testTimeFrame() {
 		List<LocalTime> timeFrame1 = h1.getRunningBaseTimeFrame();
 		List<LocalTime> timeFrame2 = h2.getRunningBaseTimeFrame();
+		List<LocalTime> timeFrame3 = h3.getRunningBaseTimeFrame();
 		
 		assertThat(timeFrame1).hasSize(556);
 		assertThat(timeFrame2).hasSize(555);
+		assertThat(timeFrame3).hasSize(10);
+	}
+	
+	@Test
+	void testTimeFrame2() {
+		List<LocalTime> timeFrame4 = h4.getRunningBaseTimeFrame();
+		assertThat(timeFrame4).hasSize(1440);
 	}
 	
 	@Test
@@ -33,4 +57,5 @@ class PeriodHelperTest {
 		assertThat(h1.isEndOfSection(LocalTime.of(23, 0))).isFalse();
 		assertThat(h1.isEndOfSection(LocalTime.of(14, 59))).isFalse();
 	}
+	
 }

@@ -35,17 +35,19 @@
         <div class="ns-trade-action">
           <div class="ns-trade-action__item">
             <el-select
-              v-model="dealSymbol"
+              id="contractSelector"
+              v-model="contract"
               filterable
-              placeholder="请选择合约"
-              value-key="unifiedSymbol"
+              remote
+              :remote-method="searchContracts"
+              placeholder="合约可搜索，空格搜索全部"
               @change="handleContractChange"
             >
               <el-option
                 v-for="(item, i) in symbolList"
                 :key="i"
                 :label="item.name"
-                :value="item.unifiedsymbol"
+                :value="item"
               >
               </el-option>
             </el-select>
@@ -146,8 +148,8 @@ import NsPriceBoard from '@/components/PriceBoard'
 import NsAccountDetail from '@/components/AccountDetail'
 import NsMarketData from '@/components/MarketData'
 import gatewayMgmtApi from '@/api/gatewayMgmtApi'
+import contractApi from '@/api/contractApi'
 import tradeOprApi from '@/api/tradeOprApi'
-import { ContractField } from '@/lib/xyz/redtorch/pb/core_field_pb'
 
 let accountCheckTimer
 
@@ -180,7 +182,8 @@ export default {
           type: 'CUSTOM_PRICE'
         }
       ],
-      dealSymbol: '',
+      contract: '',
+      dealContractId: '',
       dealVol: '',
       dealPrice: '',
       limitPrice: '',
@@ -193,9 +196,16 @@ export default {
       elementHeight: 0
     }
   },
+  watch:{
+    contract: function(v){
+      if(v && v.value){
+        this.dealContractId = v.value
+      }
+    }
+  },
   methods: {
     handleAccountChange() {
-      this.dealSymbol = ''
+      this.dealContractId = ''
       if (!this.chosenAccount) {
         return
       }
@@ -210,24 +220,17 @@ export default {
       }
       timelyCheck()
 
-      gatewayMgmtApi
-        .getSubscribedContractList(this.chosenAccount.bindedMktGatewayId)
-        .then((list) => {
-          this.symbolList = list
-            .map((item) => ContractField.deserializeBinary(item).toObject())
-            .filter((item) => item.productclass === 2)
-            .sort((a, b) => a['unifiedsymbol'].localeCompare(b['unifiedsymbol']))
-        })
-        .catch((e) => {
-          this.$message.error(e.message)
-        })
-
       this.$store.commit('updateFocusMarketGatewayId', this.chosenAccount.bindedMktGatewayId)
       this.$store.commit('updateCurAccountId', this.chosenAccount.gatewayId)
     },
     handleContractChange() {
       this.dealPriceType = 'COUNTERPARTY_PRICE'
-      this.$store.commit('updateFocusUnifiedSymbol', this.dealSymbol)
+      this.$store.commit('updateFocusUnifiedSymbol', this.contract.unifiedSymbol)
+    },
+    searchContracts(query){
+      contractApi.getSubscribedContracts(this.chosenAccount.gatewayId, query).then(result => {
+        this.symbolList = result
+      })
     },
     handleDealPriceTypeChange() {
       if (this.dealPriceType !== 'CUSTOM_PRICE') {
@@ -236,7 +239,8 @@ export default {
     },
     onPositionChosen(pos) {
       this.dealVol = pos.position - pos.frozen
-      this.dealSymbol = pos.contract.unifiedsymbol
+      this.contract = {value: pos.contract.contractid, unifiedSymbol: pos.contract.unifiedsymbol, name: pos.contract.name}
+      this.symbolList = [this.contract]
       this.currentPosition = pos
       this.handleContractChange()
     },
@@ -249,7 +253,7 @@ export default {
       }
       return tradeOprApi.buyOpen(
         this.chosenAccount.gatewayId,
-        this.dealSymbol,
+        this.dealContractId,
         this.bkPrice,
         this.dealVol,
         this.stopPrice
@@ -261,7 +265,7 @@ export default {
       }
       return tradeOprApi.sellOpen(
         this.chosenAccount.gatewayId,
-        this.dealSymbol,
+        this.dealContractId,
         this.skPrice,
         this.dealVol,
         this.stopPrice
@@ -271,7 +275,7 @@ export default {
       if (this.currentPosition.positiondirection === 2) {
         return tradeOprApi.closeLongPosition(
           this.chosenAccount.gatewayId,
-          this.dealSymbol,
+          this.dealContractId,
           this.closePrice,
           this.dealVol
         )
@@ -279,7 +283,7 @@ export default {
       if (this.currentPosition.positiondirection === 3) {
         return tradeOprApi.closeShortPosition(
           this.chosenAccount.gatewayId,
-          this.dealSymbol,
+          this.dealContractId,
           this.closePrice,
           this.dealVol
         )
@@ -315,7 +319,7 @@ export default {
       return this.chosenAccount.bindedMktGatewayId
     },
     marketDataUnifiedSymbol() {
-      return this.dealSymbol
+      return this.contract.unifiedSymbol
     },
     accountInfo() {
       return this.$store.state.accountModule.curInfo.account

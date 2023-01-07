@@ -12,7 +12,6 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.web.client.RestTemplate;
 
 import tech.quantit.northstar.common.constant.Constants;
-import tech.quantit.northstar.data.IContractRepository;
 import tech.quantit.northstar.data.IGatewayRepository;
 import tech.quantit.northstar.data.IMailConfigRepository;
 import tech.quantit.northstar.data.IMarketDataRepository;
@@ -20,14 +19,13 @@ import tech.quantit.northstar.data.IModuleRepository;
 import tech.quantit.northstar.data.IPlaybackRuntimeRepository;
 import tech.quantit.northstar.data.ISimAccountRepository;
 import tech.quantit.northstar.data.ds.DataServiceManager;
-import tech.quantit.northstar.data.redis.ContractRepoRedisImpl;
 import tech.quantit.northstar.data.redis.GatewayRepoRedisImpl;
 import tech.quantit.northstar.data.redis.MailConfigRepoRedisImpl;
 import tech.quantit.northstar.data.redis.MarketDataRepoRedisImpl;
 import tech.quantit.northstar.data.redis.ModuleRepoRedisImpl;
 import tech.quantit.northstar.data.redis.PlaybackRuntimeRepoRedisImpl;
 import tech.quantit.northstar.data.redis.SimAccountRepoRedisImpl;
-import tech.quantit.northstar.domain.gateway.ContractManager;
+import tech.quantit.northstar.gateway.api.IContractManager;
 import xyz.redtorch.gateway.ctp.common.CtpDateTimeUtil;
 
 @Configuration
@@ -42,11 +40,6 @@ public class RepositoryConfig {
 	}
 
 	@Bean
-	public IContractRepository contractRepository(RedisTemplate<String, byte[]> redisTemplate) {
-		return new ContractRepoRedisImpl(redisTemplate);
-	}
-	
-	@Bean
 	public IGatewayRepository gatewayRepository(RedisTemplate<String, byte[]> redisTemplate) {
 		return new GatewayRepoRedisImpl(redisTemplate);
 	}
@@ -60,7 +53,7 @@ public class RepositoryConfig {
 	private String baseUrl;
 	
 	@Bean
-	public DataServiceManager dataServiceManager(RedisTemplate<String, byte[]> redisTemplate, RestTemplate restTemplate, ContractManager contractMgr) {
+	public DataServiceManager dataServiceManager(RedisTemplate<String, byte[]> redisTemplate, RestTemplate restTemplate, IContractManager contractMgr) {
 		String nsdsSecret = Optional.ofNullable(System.getenv(Constants.NS_DS_SECRET)).orElse("");
 		return new DataServiceManager(baseUrl, nsdsSecret, restTemplate, new CtpDateTimeUtil(), contractMgr);
 	}

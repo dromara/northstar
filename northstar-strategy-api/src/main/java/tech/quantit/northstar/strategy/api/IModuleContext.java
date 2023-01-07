@@ -6,7 +6,7 @@ import tech.quantit.northstar.common.TickDataAware;
 import tech.quantit.northstar.common.TransactionAware;
 import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
 import tech.quantit.northstar.gateway.api.TradeGateway;
-import xyz.redtorch.pb.CoreField.ContractField;
+import tech.quantit.northstar.gateway.api.domain.contract.Contract;
 
 public interface IModuleContext extends IModuleStrategyContext, TickDataAware, BarDataAware, TransactionAware {
 	/**
@@ -24,7 +24,7 @@ public interface IModuleContext extends IModuleStrategyContext, TickDataAware, B
 	 * @param gateway
 	 * @param contracts
 	 */
-	void bindGatewayContracts(TradeGateway gateway, List<ContractField> contracts);
+	void bindGatewayContracts(TradeGateway gateway, List<Contract> contracts);
 	/**
 	 * 设置模组
 	 * @param module

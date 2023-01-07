@@ -13,12 +13,13 @@
     </div>
     <div class="form-wrapper">
       <el-form ref="positionInfo" :model="form" label-width="70px" width="200px">
-        <el-form-item label="合约代码" prop="unifiedSymbol">
-          <el-select v-model="form.unifiedSymbol">
+        <el-form-item label="合约代码" prop="contractId">
+          <el-select v-model="form.contractId">
             <el-option
-              v-for="c in moduleAccount.bindedUnifiedSymbols"
-              :key="c"
-              :value="c"
+              v-for="c in moduleAccount.bindedContracts"
+              :key="c.value"
+              :value="c.value"
+              :label="c.name"
             ></el-option>
           </el-select>
         </el-form-item>
@@ -68,7 +69,7 @@ export default {
     return {
       form: {
         gatewayId: '',
-        unifiedSymbol: '',
+        contractId: '',
         direction: '',
         offsetFlag: '',
         price: '',
@@ -91,7 +92,7 @@ export default {
   methods: {
     async savePosition() {
       let flag =
-        this.assertTrue(this.form.unifiedSymbol, '未指定合约代码') &&
+        this.assertTrue(this.form.contractId, '未指定合约代码') &&
         this.assertTrue(this.form.direction, '未指定成交方向') &&
         this.assertTrue(this.form.price, '未设置成交价') &&
         this.assertTrue(this.form.volume, '未设置手数')

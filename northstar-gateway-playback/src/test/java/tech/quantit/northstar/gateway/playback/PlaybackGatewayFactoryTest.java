@@ -12,7 +12,6 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import tech.quantit.northstar.common.IContractManager;
 import tech.quantit.northstar.common.IHolidayManager;
 import tech.quantit.northstar.common.constant.PlaybackPrecision;
 import tech.quantit.northstar.common.constant.PlaybackSpeed;
@@ -20,6 +19,8 @@ import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.model.GatewayDescription;
 import tech.quantit.northstar.data.IMarketDataRepository;
 import tech.quantit.northstar.data.IPlaybackRuntimeRepository;
+import tech.quantit.northstar.gateway.api.IContractManager;
+import tech.quantit.northstar.gateway.api.domain.contract.Contract;
 import tech.quantit.northstar.gateway.playback.utils.PlaybackClock;
 import tech.quantit.northstar.gateway.playback.utils.PlaybackDataLoader;
 import test.common.TestFieldFactory;
@@ -52,18 +53,20 @@ class PlaybackGatewayFactoryTest {
 	BarField bar = factory.makeBarField("rb2210", 5000, 20, ldt); 
 	
 	PlaybackGatewayFactory playbackGatewayFactory;
+	Contract c = mock(Contract.class);
 	
 	@BeforeEach
 	void prepare() {
 		when(clock.nextMarketMinute()).thenReturn(ldt.plusMinutes(1));
 		when(loader.loadMinuteData(eq(ldt), eq(contract))).thenReturn(List.of(bar));
-		when(contractMgr.getContract(anyString())).thenReturn(contract);
+		when(contractMgr.getContract(anyString(), anyString())).thenReturn(c);
+		when(c.contractField()).thenReturn(contract);
 		
 		settings.setStartDate("20220629");
 		settings.setEndDate("20220629");
 		settings.setPrecision(PlaybackPrecision.LOW);
 		settings.setSpeed(PlaybackSpeed.SPRINT);
-		settings.setUnifiedSymbols(List.of(contract.getUnifiedSymbol()));
+		settings.setPlayContracts(List.of());
 		
 		playbackGatewayFactory = new PlaybackGatewayFactory(feEngine, contractMgr, holidayMgr, rtRepo, mdRepo);
 	}

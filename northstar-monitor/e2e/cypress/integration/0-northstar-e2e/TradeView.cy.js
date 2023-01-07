@@ -16,7 +16,7 @@ describe('手工期货交易-测试', () => {
         cy.contains('新建').click()
         cy.get('.el-dialog').contains('网关类型').parent().find('.el-select').click()
         cy.get('.el-select-dropdown').contains('SIM').click()
-        cy.get('.el-dialog').contains('订阅合约').parent().find('.el-select').click()
+        cy.get('.el-dialog').contains('订阅合约').parent().find('.el-select').type('模拟合约')
         cy.get('.el-select-dropdown').contains('模拟合约').click()
         cy.get('.el-dialog').filter(':visible').find('button').last().click()
         cy.visit('https://localhost/#/tdgateway')
@@ -54,15 +54,13 @@ describe('手工期货交易-测试', () => {
     })
 
     it('选中合约时，K线数据加载正常', () => {
-        cy.intercept('GET', '/northstar/data/bar/min?gatewayId=SIM&unifiedSymbol=sim999@CZCE@FUTURES&refStartTimestamp=*&firstLoad=true').as('getBars')
-        cy.get('.ns-trade-action').find('input').first().click()
-        cy.get('.el-select-dropdown').contains('模拟品种999').click()
+        cy.intercept('GET', '/northstar/data/bar/min?gatewayId=SIM&unifiedSymbol=sim9999@SHFE@FUTURES&refStartTimestamp=*&firstLoad=true').as('getBars')
+        cy.get('#contractSelector').type('sim', {force: true})
+        cy.get('.el-select-dropdown').contains('模拟合约').click()
         cy.wait('@getBars').should('have.nested.property', 'response.statusCode', 200)
     })
 
     it('限价开仓，等待成交，可以查询到委托，可用资金减少；然后撤单，挂单消失，可用资金恢复', () => {
-        cy.get('.ns-trade-action').find('input').first().click()
-        cy.get('.el-select-dropdown').contains('模拟品种999').click()
         cy.get('#priceType').click()
         cy.get('.el-select-dropdown').contains('限价').parent().click()
         cy.wait(200)
@@ -81,8 +79,6 @@ describe('手工期货交易-测试', () => {
     })
     
     it('市价开仓，立即成交，可以查询到持仓、委托、成交记录', () => {
-        cy.get('.ns-trade-action').find('input').first().click()
-        cy.get('.el-select-dropdown').contains('模拟品种999').click()
         cy.get('#priceType').click()
         cy.get('.el-select-dropdown').contains('市价').parent().click()
         cy.get('.ns-trade-button').first().click()
@@ -96,8 +92,6 @@ describe('手工期货交易-测试', () => {
     })
 
     it('排队价平仓，等待成交，可以持仓减少；然后撤单，挂单消失，可用持仓恢复', () => {
-        cy.get('.ns-trade-action').find('input').first().click()
-        cy.get('.el-select-dropdown').contains('模拟品种999').click()
         cy.contains('持仓').click()
         cy.get('.el-table__row').filter(':visible').click()
         cy.get('#priceType').click()
@@ -116,8 +110,6 @@ describe('手工期货交易-测试', () => {
     })
 
     it('对手价平仓，立即成交，可以查询到持仓、委托、成交记录', () => {
-        cy.get('.ns-trade-action').find('input').first().click()
-        cy.get('.el-select-dropdown').contains('模拟品种999').click()
         cy.contains('持仓').click()
         cy.wait(500)
         cy.get('.el-table__row').filter(':visible').click()

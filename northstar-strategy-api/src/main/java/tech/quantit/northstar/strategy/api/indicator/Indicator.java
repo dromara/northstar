@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
@@ -13,14 +12,13 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
 import reactor.core.publisher.Flux;
+import tech.quantit.northstar.common.TickDataAware;
 import tech.quantit.northstar.common.constant.IndicatorType;
 import tech.quantit.northstar.common.model.BarWrapper;
 import tech.quantit.northstar.common.model.TimeSeriesValue;
-import tech.quantit.northstar.strategy.api.utils.bar.BarMerger;
-import tech.quantit.northstar.strategy.api.utils.bar.DailyBarMerger;
+import tech.quantit.northstar.strategy.api.BarDataAware;
+import tech.quantit.northstar.strategy.api.MergedBarListener;
 import tech.quantit.northstar.strategy.api.utils.bar.InstantBarGenerator;
-import tech.quantit.northstar.strategy.api.utils.bar.MonthlyBarMerger;
-import tech.quantit.northstar.strategy.api.utils.bar.WeeklyBarMerger;
 import tech.quantit.northstar.strategy.api.utils.collection.RingArray;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.ContractField;
@@ -32,7 +30,7 @@ import xyz.redtorch.pb.CoreField.TickField;
  * @author KevinHuangwl
  *
  */
-public class Indicator {
+public class Indicator implements TickDataAware, BarDataAware, MergedBarListener {
 	
 	/**
 	 * 指标历史记录
@@ -52,8 +50,6 @@ public class Indicator {
 	
 	private BarListener barListener;
 	
-	private BarMerger barMerger;
-	
 	private InstantBarGenerator ibg;
 	
 	private boolean plotPerBar;
@@ -67,7 +63,6 @@ public class Indicator {
 		this.plotPerBar = config.plotPerBar;
 		this.ibg = new InstantBarGenerator(config.bindedContract);
 		this.valType = valType;
-		this.barMerger = config.createBarMerger(bar -> onBar(bar, false));
 		refVals = new RingArray<>(size);
 		for(int i=0; i<size; i++) {
 			refVals.update(new TimeSeriesValue(0, 0, false), false);
@@ -88,7 +83,6 @@ public class Indicator {
 		this.plotPerBar = config.plotPerBar;
 		this.ibg = new InstantBarGenerator(config.bindedContract);
 		this.valType = ValueType.NOT_SET;
-		this.barMerger = config.createBarMerger(bar -> onBar(bar, false));
 		refVals = new RingArray<>(size);
 		for(int i=0; i<size; i++) {
 			refVals.update(new TimeSeriesValue(0, 0, false), false);
@@ -153,12 +147,9 @@ public class Indicator {
 		return Optional.ofNullable(valMap.get(time));
 	}
 	
-	/**
-	 * 依赖BAR的值更新 
-	 */
-	public synchronized void onBar(BarField bar) {
-		onBar(bar, true);
-		barMerger.updateBar(bar);
+	@Override
+	public void onMergedBar(BarField bar) {
+		onBar(bar, false);
 	}
 	
 	private void onBar(BarField bar, boolean isUnsettled) {
@@ -183,9 +174,18 @@ public class Indicator {
 	}
 	
 	/**
+	 * 依赖分钟BAR的临时值更新
+	 */
+	@Override
+	public void onBar(BarField bar) {
+		onBar(bar, true);
+	}
+	
+	/**
 	 * 依赖TICK的临时值更新
 	 * @param tick
 	 */
+	@Override
 	public synchronized void onTick(TickField tick) {
 		if(!tick.getUnifiedSymbol().equals(unifiedSymbol)) {
 			return;
@@ -375,13 +375,12 @@ public class Indicator {
 	 * @author KevinHuangwl
 	 *
 	 */
-	@Builder
+	@Builder(toBuilder = true)
 	@Getter
 	public static class Configuration {
 		/**
 		 * 显示名称
 		 */
-		@NonNull
 		private String indicatorName;
 		/**
 		 * 绑定合约
@@ -413,16 +412,14 @@ public class Indicator {
 		public String getIndicatorName() {
 			return String.format("%s_%d%s", indicatorName, numOfUnits, period.symbol);
 		}
-		
-		public BarMerger createBarMerger(Consumer<BarField> callback) {
-			return switch(period) {
-			case MINUTE -> new BarMerger(numOfUnits, bindedContract, callback);
-			case HOUR -> new BarMerger(numOfUnits * 60, bindedContract, callback);
-			case DAY -> new DailyBarMerger(numOfUnits, bindedContract, callback);
-			case WEEK -> new WeeklyBarMerger(numOfUnits, bindedContract, callback);
-			case MONTH -> new MonthlyBarMerger(numOfUnits, bindedContract, callback);
-			default -> throw new IllegalArgumentException("Unexpected value: " + period);
-			};
+
+		@Override
+		public String toString() {
+			return "Configuration [indicatorName=" + indicatorName + ", bindedContract=" + bindedContract
+					+ ", numOfUnits=" + numOfUnits + ", period=" + period + ", indicatorRefLength=" + indicatorRefLength
+					+ ", plotPerBar=" + plotPerBar + "]";
 		}
+		
 	}
+
 }

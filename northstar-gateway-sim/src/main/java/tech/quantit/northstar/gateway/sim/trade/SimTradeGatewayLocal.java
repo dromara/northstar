@@ -8,11 +8,8 @@ import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.event.NorthstarEventType;
 import tech.quantit.northstar.common.exception.TradeException;
-import tech.quantit.northstar.gateway.api.domain.GlobalMarketRegistry;
-import tech.quantit.northstar.gateway.api.domain.NormalContract;
 import xyz.redtorch.pb.CoreField.AccountField;
 import xyz.redtorch.pb.CoreField.CancelOrderReqField;
-import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.GatewaySettingField;
 import xyz.redtorch.pb.CoreField.PositionField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
@@ -29,23 +26,17 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 	@Getter
 	protected SimAccount account;
 	
-	private SimContractGenerator contractGen;
-	
-	private GlobalMarketRegistry registry;
-	
 	private SimMarket simMarket;
 	
 	private String bindedMarketGatewayId;
 	
 	public SimTradeGatewayLocal(FastEventEngine feEngine, SimMarket simMarket, GatewaySettingField gatewaySetting,
-			String bindedMarketGatewayId, SimAccount account, GlobalMarketRegistry registry) {
+			String bindedMarketGatewayId, SimAccount account) {
 		this.feEngine = feEngine;
 		this.gatewaySetting = gatewaySetting;
 		this.bindedMarketGatewayId = bindedMarketGatewayId;
 		this.account = account;
 		this.simMarket = simMarket;
-		this.registry = registry;
-		this.contractGen = new SimContractGenerator(gatewaySetting.getGatewayId());
 	}
 
 	@Override
@@ -72,13 +63,6 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 			feEngine.emitEvent(NorthstarEventType.POSITION, pf);
 		}
 		
-		// 模拟返回合约
-		CompletableFuture.runAsync(()->{
-			ContractField simContract = contractGen.getContract();
-			ContractField simContract2 = contractGen.getContract2();
-			registry.register(new NormalContract(simContract, System.currentTimeMillis()));
-			registry.register(new NormalContract(simContract2, System.currentTimeMillis()));
-		});
 	}
 
 	@Override

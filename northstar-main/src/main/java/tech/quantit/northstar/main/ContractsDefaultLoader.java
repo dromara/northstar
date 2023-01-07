@@ -2,8 +2,6 @@ package tech.quantit.northstar.main;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -11,14 +9,16 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
 
 import lombok.extern.slf4j.Slf4j;
+import tech.quantit.northstar.common.constant.ChannelType;
 import tech.quantit.northstar.common.constant.DateTimeConstant;
 import tech.quantit.northstar.data.ds.DataServiceManager;
-import tech.quantit.northstar.gateway.api.domain.ContractFactory;
-import tech.quantit.northstar.gateway.api.domain.GlobalMarketRegistry;
-import tech.quantit.northstar.gateway.api.domain.NormalContract;
-import tech.quantit.northstar.gateway.api.domain.PrimaryContract;
+import tech.quantit.northstar.gateway.api.IMarketCenter;
+import tech.quantit.northstar.gateway.api.domain.contract.Instrument;
+import tech.quantit.northstar.gateway.ctp.CtpContract;
+import tech.quantit.northstar.gateway.sim.trade.SimContractGenerator;
+import tech.quantit.northstar.main.service.GatewayService;
+import tech.quantit.northstar.main.service.ModuleService;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
-import xyz.redtorch.pb.CoreField.ContractField;
 
 @Slf4j
 @Component
@@ -26,33 +26,39 @@ import xyz.redtorch.pb.CoreField.ContractField;
 public class ContractsDefaultLoader implements CommandLineRunner{
 
 	@Autowired
-	private GlobalMarketRegistry registry;
+	private IMarketCenter mktCenter;
 	
 	@Autowired
 	private DataServiceManager dsMgr;
 	
+	@Autowired
+	private GatewayService gatewayService;
+	
+	@Autowired
+	private ModuleService moduleService;
+	
 	@Override
 	public void run(String... args) throws Exception {
 		final LocalDate today = LocalDate.now();
-		Map<String, ContractField> contractMap = new ConcurrentHashMap<>();
+		// 加载CTP合约
 		List.of(ExchangeEnum.CFFEX, ExchangeEnum.SHFE, ExchangeEnum.DCE, ExchangeEnum.CZCE, ExchangeEnum.INE)
 			.parallelStream()
 			.forEach(exchange -> {
 				dsMgr.getAllContracts(exchange).stream()
 					//过滤掉过期合约
 					.filter(contract -> LocalDate.parse(contract.getLastTradeDateOrContractMonth(), DateTimeConstant.D_FORMAT_INT_FORMATTER).isAfter(today))
-					.forEach(contract -> {
-						registry.register(new NormalContract(contract, 1));
-						contractMap.put(contract.getUnifiedSymbol(), contract);
-					});
+					.forEach(contract -> mktCenter.addInstrument(new CtpContract(contract)));
 				log.info("预加载 [{}] 交易所合约信息", exchange);
 			});
-		// 构建指数合约
-		ContractFactory contractFactory = new ContractFactory(contractMap.values().stream().toList());
-		contractFactory.makeIndexContract().stream().forEach(contract -> {
-			registry.register(contract);
-			registry.register(new PrimaryContract(contract.contractField()));
-		});
+		mktCenter.loadContractGroup(ChannelType.CTP);
+		
+		// 加载模拟合约
+		SimContractGenerator contractGen = new SimContractGenerator("SIM");
+		Instrument simContract = contractGen.getContract();
+		mktCenter.addInstrument(simContract);
+		
+		gatewayService.postLoad();
+		moduleService.postLoad();
 	}
 
 }

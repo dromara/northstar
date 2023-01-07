@@ -4,5 +4,5 @@ import java.util.List;
 
 public interface TradeTimeDefinition {
 
-	List<PeriodSegment> getPeriodSegments();
+	List<PeriodSegment> tradeTimeSegments();
 }

@@ -158,7 +158,7 @@ public class BeginnerSampleStrategy implements TradeStrategy{
 	}
 
 	@Override
-	public void onBar(BarField bar) {
+	public void onMergedBar(BarField bar) {
 		log.debug("策略每分钟触发");
 	}
 

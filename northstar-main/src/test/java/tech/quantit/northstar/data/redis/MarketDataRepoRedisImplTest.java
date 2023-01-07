@@ -23,6 +23,7 @@ import org.springframework.data.redis.core.BoundListOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
+import tech.quantit.northstar.common.constant.ChannelType;
 import tech.quantit.northstar.common.constant.Constants;
 import tech.quantit.northstar.common.constant.DateTimeConstant;
 import tech.quantit.northstar.data.IMarketDataRepository;
@@ -48,25 +49,26 @@ class MarketDataRepoRedisImplTest {
 			: LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER);
 	
 	BarField bar1 = BarField.newBuilder()
-			.setGatewayId("testGateway")
+			.setGatewayId("CTP")
 			.setUnifiedSymbol("rb2210@SHFE@FUTURES")
 			.setTradingDay(date)
 			.build();
 	
 	BarField bar2 = BarField.newBuilder()
-			.setGatewayId("testGateway")
+			.setGatewayId("CTP")
 			.setUnifiedSymbol("rb2210@SHFE@FUTURES")
 			.setTradingDay(date)
 			.build();
 	
 	BarField bar3 = BarField.newBuilder()
-			.setGatewayId("testGateway")
+			.setGatewayId("CTP")
 			.setUnifiedSymbol("rb2210@SHFE@FUTURES")
 			.setTradingDay(date)
 			.build();
 	
 	@BeforeEach
 	void prepare() {
+		factory.setDatabase(15);
 		factory.afterPropertiesSet();
 		
 		redisTemplate.setConnectionFactory(factory);
@@ -82,18 +84,11 @@ class MarketDataRepoRedisImplTest {
 	}
 	
 	@Test
-	void testDropGatewayData() {
-		testInsert();
-		repo.dropGatewayData("testGateway");
-		assertThat(redisTemplate.hasKey(KEY_PREFIX + "testGateway:" + date + ":rb2210@SHFE@FUTURES")).isFalse();
-	}
-
-	@Test
 	void testInsert() {
 		repo.insert(bar1);
 		repo.insert(bar2);
 		repo.insert(bar3);
-		assertThat(redisTemplate.hasKey(KEY_PREFIX + "testGateway:" + date + ":rb2210@SHFE@FUTURES")).isTrue();
+		assertThat(redisTemplate.hasKey(KEY_PREFIX + "CTP:" + date + ":rb2210@SHFE@FUTURES")).isTrue();
 	}
 
 	// 20:00点整时，跑该测试可能会报错
@@ -102,7 +97,7 @@ class MarketDataRepoRedisImplTest {
 		testInsert();
 		LocalDate start = LocalTime.now().isAfter(LocalTime.of(20, 0)) ? LocalDate.now() : LocalDate.now().minusDays(1);
 		LocalDate end = LocalDate.now().plusWeeks(1);
-		List<BarField> result = repo.loadBars("testGateway", "rb2210@SHFE@FUTURES", start, end);
+		List<BarField> result = repo.loadBars(ChannelType.CTP, "rb2210@SHFE@FUTURES", start, end);
 		assertThat(result).hasSize(3);
 	}
 
@@ -118,7 +113,7 @@ class MarketDataRepoRedisImplTest {
 				.build()));
 		IMarketDataRepository mdRepo = new MarketDataRepoRedisImpl(mockRedisTemplate, mockDataMgr);
 		
-		mdRepo.loadBars("CTP", "testSymbol", LocalDate.of(2022, 8, 16), LocalDate.now().minusDays(1));
+		mdRepo.loadBars(ChannelType.CTP, "testSymbol", LocalDate.of(2022, 8, 16), LocalDate.now().minusDays(1));
 		verify(mockDataMgr).getMinutelyData(eq("testSymbol"), eq(LocalDate.of(2022, 8, 16)), eq(LocalDate.now().minusDays(1)));
 		verify(mockRedisTemplate, times(0)).boundListOps(anyString());
 	}
@@ -131,7 +126,7 @@ class MarketDataRepoRedisImplTest {
 		when(mockDataMgr.getMinutelyData(anyString(), any(LocalDate.class), any(LocalDate.class))).thenReturn(Collections.emptyList());
 		IMarketDataRepository mdRepo = new MarketDataRepoRedisImpl(mockRedisTemplate, mockDataMgr);
 		
-		mdRepo.loadBars("CTP", "testSymbol", LocalDate.of(2022, 8, 16), LocalDate.now().minusDays(1));
+		mdRepo.loadBars(ChannelType.CTP, "testSymbol", LocalDate.of(2022, 8, 16), LocalDate.now().minusDays(1));
 		verify(mockDataMgr).getMinutelyData(eq("testSymbol"), eq(LocalDate.of(2022, 8, 16)), eq(LocalDate.now().minusDays(1)));
 		verify(mockRedisTemplate, times(0)).boundListOps(anyString());
 	}
@@ -160,7 +155,7 @@ class MarketDataRepoRedisImplTest {
 		while(realDate.getDayOfWeek().getValue() > 5) {
 			realDate = realDate.plusDays(1);
 		}
-		mdRepo.loadBars("CTP", "testSymbol", LocalDate.of(2022, 8, 16), endDate);
+		mdRepo.loadBars(ChannelType.CTP, "testSymbol", LocalDate.of(2022, 8, 16), endDate);
 		verify(mockDataMgr).getMinutelyData(eq("testSymbol"), eq(LocalDate.of(2022, 8, 16)), eq(today));
 		verify(mockRedisTemplate).boundListOps(eq(String.format("%s%s:%s:%s", KEY_PREFIX, "CTP", realDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), "testSymbol")));
 	}
@@ -190,7 +185,7 @@ class MarketDataRepoRedisImplTest {
 		while(date.getDayOfWeek().getValue() > 5) {
 			date = date.plusDays(1);
 		}
-		mdRepo.loadBars("CTP", "testSymbol", LocalDate.of(2022, 8, 16), endDate);
+		mdRepo.loadBars(ChannelType.CTP, "testSymbol", LocalDate.of(2022, 8, 16), endDate);
 		verify(mockDataMgr).getMinutelyData(eq("testSymbol"), eq(LocalDate.of(2022, 8, 16)), eq(LocalDate.now()));
 		verify(mockRedisTemplate).boundListOps(eq(String.format("%s%s:%s:%s", KEY_PREFIX, "CTP", date.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), "testSymbol")));
 	}
@@ -211,7 +206,7 @@ class MarketDataRepoRedisImplTest {
 			endDate = endDate.plusDays(1);
 		}
 		LocalDate today = LocalDate.now();
-		mdRepo.loadBars("CTP", "testSymbol", LocalDate.of(2022, 8, 16), endDate);
+		mdRepo.loadBars(ChannelType.CTP, "testSymbol", LocalDate.of(2022, 8, 16), endDate);
 		verify(mockDataMgr).getMinutelyData(eq("testSymbol"), eq(LocalDate.of(2022, 8, 16)), eq(today));
 		verify(mockRedisTemplate).boundListOps(eq(String.format("%s%s:%s:%s", KEY_PREFIX, "CTP", today.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), "testSymbol")));
 	}
