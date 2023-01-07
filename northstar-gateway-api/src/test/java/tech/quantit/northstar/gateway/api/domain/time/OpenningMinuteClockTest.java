@@ -32,7 +32,7 @@ class OpenningMinuteClockTest {
 	
 	@BeforeEach
 	void prepare() {
-		clock = new OpenningMinuteClock(factory.makeContract("rb2210"), ttd);
+		clock = new OpenningMinuteClock(ttd);
 	}
 
 	@Test
@@ -72,6 +72,6 @@ class OpenningMinuteClockTest {
 				.build();
 		assertThat(clock.barMinute(t1)).isEqualTo(LocalTime.of(23, 0));
 		assertThat(clock.nextBarMinute()).isEqualTo(LocalTime.of(9, 1));
-		assertThat(clock.barMinute(t2)).isEqualTo(LocalTime.of(21, 0));
+		assertThat(clock.barMinute(t2)).isEqualTo(LocalTime.of(21, 1));
 	}
 }

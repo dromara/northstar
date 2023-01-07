@@ -24,11 +24,11 @@ class PeriodHelperTest {
 	
 	TradeTimeDefinition general = new GenericTradeTime();
 	
-	PeriodHelper h1 = new PeriodHelper(1, demo);
+	PeriodHelper h1 = new PeriodHelper(1, demo, false);
 	PeriodHelper h2 = new PeriodHelper(1, demo, true);
 	PeriodHelper h3 = new PeriodHelper(60, demo, true);
 	
-	PeriodHelper h4 = new PeriodHelper(1, general);
+	PeriodHelper h4 = new PeriodHelper(1, general, false);
 
 	@Test
 	void testTimeFrame() {

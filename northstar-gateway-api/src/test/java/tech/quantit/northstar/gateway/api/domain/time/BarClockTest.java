@@ -7,9 +7,9 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-class BarMergingClockTest {
+class BarClockTest {
 
-	BarMergingClock clock = new BarMergingClock(List.of(
+	BarClock clock = new BarClock(List.of(
 			LocalTime.of(22, 0), LocalTime.of(23, 0), LocalTime.of(10, 0), 
 			LocalTime.of(11, 15), LocalTime.of(14, 15), LocalTime.of(15, 0)));
 	

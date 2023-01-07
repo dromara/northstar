@@ -5,13 +5,13 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
-public class BarMergingClock {
+public class BarClock {
 
 	private final List<LocalTime> baseTimeLine;
 	
 	private int cursor;
 	
-	public BarMergingClock(List<LocalTime> baseTimeLine) {
+	public BarClock(List<LocalTime> baseTimeLine) {
 		this.baseTimeLine = baseTimeLine;
 	}
 	

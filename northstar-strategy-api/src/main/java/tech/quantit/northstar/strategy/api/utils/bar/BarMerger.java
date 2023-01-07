@@ -12,7 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.constant.DateTimeConstant;
 import tech.quantit.northstar.gateway.api.domain.contract.Contract;
-import tech.quantit.northstar.gateway.api.domain.time.BarMergingClock;
+import tech.quantit.northstar.gateway.api.domain.time.BarClock;
 import tech.quantit.northstar.gateway.api.domain.time.PeriodHelper;
 import tech.quantit.northstar.strategy.api.BarDataAware;
 import xyz.redtorch.pb.CoreField.BarField;
@@ -39,7 +39,7 @@ public class BarMerger implements BarDataAware{
 	
 	private final int numOfMinPerBar;
 	
-	private final BarMergingClock clock;
+	private final BarClock clock;
 	
 	public BarMerger(int numOfMinPerBar, Contract contract, BiConsumer<BarMerger, BarField> callback) {
 		this.callback = callback;
@@ -47,7 +47,7 @@ public class BarMerger implements BarDataAware{
 		this.numOfMinPerBar = numOfMinPerBar;
 		this.unifiedSymbol = contract.contractField().getUnifiedSymbol();
 		this.phelper = new PeriodHelper(numOfMinPerBar, contract.tradeTimeDefinition());
-		this.clock = new BarMergingClock(phelper.getRunningBaseTimeFrame());
+		this.clock = new BarClock(phelper.getRunningBaseTimeFrame());
 	}
 	
 	@Override

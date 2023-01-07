@@ -35,7 +35,7 @@ public class MinuteBarGenerator {
 	public MinuteBarGenerator(ContractField contract, TradeTimeDefinition tradeTimeDefinition, Consumer<BarField> onBarCallback) {
 		this.contract = contract;
 		this.onBarCallback = onBarCallback;
-		this.clock = new OpenningMinuteClock(contract, tradeTimeDefinition);
+		this.clock = new OpenningMinuteClock(tradeTimeDefinition);
 	}
 	
 	/**

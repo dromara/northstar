@@ -2,12 +2,8 @@ package tech.quantit.northstar.gateway.api.domain.time;
 
 import java.time.LocalTime;
 import java.util.List;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import tech.quantit.northstar.common.constant.DateTimeConstant;
-import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
-import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.TickField;
 
 /**
@@ -17,21 +13,16 @@ import xyz.redtorch.pb.CoreField.TickField;
  */
 public class OpenningMinuteClock {
 
-	// 使用整点为分钟结束的交易所
-	private static final Set<ExchangeEnum> exchangesOfEndByWholeMin = Set.of(ExchangeEnum.SHFE);
-
-	private AtomicInteger cursor = new AtomicInteger();
-	
 	private List<LocalTime> timeFrame;
-	
-	private boolean endByWholeMin;
 	
 	private PeriodHelper helper;
 	
-	public OpenningMinuteClock(ContractField contract, TradeTimeDefinition tradeTimeDefinition) {
+	private BarClock barClock;
+	
+	public OpenningMinuteClock(TradeTimeDefinition tradeTimeDefinition) {
 		helper = new PeriodHelper(1, tradeTimeDefinition);
 		timeFrame = helper.getRunningBaseTimeFrame();
-		endByWholeMin = exchangesOfEndByWholeMin.contains(contract.getExchange());
+		barClock = new BarClock(timeFrame);
 	}
 	
 	/**
@@ -42,22 +33,8 @@ public class OpenningMinuteClock {
 	 */
 	public LocalTime barMinute(TickField tick) {
 		LocalTime tickTime = LocalTime.parse(tick.getActionTime(), DateTimeConstant.T_FORMAT_WITH_MS_INT_FORMATTER);
-		LocalTime beginTimeOfTick = tickTime.withSecond(0).withNano(0);
-		LocalTime endTimeOfTick = beginTimeOfTick.plusMinutes(1);
-		if(endByWholeMin && beginTimeOfTick == tickTime) {
-			updateCursor(tickTime);
-			return tickTime;	// 整点为分钟收盘数据的情况
-		}
-		updateCursor(endTimeOfTick);
-		return endTimeOfTick;
-	}
-	
-	private void updateCursor(LocalTime t) {
-		int index = timeFrame.indexOf(t);
-		if(index < 0) {
-			throw new IllegalStateException("找不到对应的时间：" + t);
-		}
-		cursor.set(index);
+		barClock.adjustTime(tickTime);
+		return barClock.currentTimeBucket();
 	}
 	
 	/**
@@ -65,12 +42,7 @@ public class OpenningMinuteClock {
 	 * @return
 	 */
 	public LocalTime nextBarMinute() {
-		cursor.set(nextCursor());
-		return timeFrame.get(cursor.get());
-	}
-	
-	private int nextCursor() {
-		return cursor.incrementAndGet() % timeFrame.size();
+		return barClock.next();
 	}
 	
 	/**
