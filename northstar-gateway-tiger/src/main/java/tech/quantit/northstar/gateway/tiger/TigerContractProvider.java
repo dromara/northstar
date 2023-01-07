@@ -59,7 +59,7 @@ public class TigerContractProvider {
     	ContractsResponse contractsResponse = client.execute(contractsRequest);
     	contractsResponse.getItems().stream().map(item -> {
     		item.setName(symbolNameMap.get(item.getSymbol()));
-    		return new TigerContractAdapter(item);
+    		return new TigerContract(item);
     	}).forEach(c -> mktCenter.addInstrument(c));
     	log.info("加载TIGER网关 [{}] 的合约{}个", market, contractsResponse.getItems().size());
 	}

@@ -1,26 +1,30 @@
 package tech.quantit.northstar.gateway.binance;
 
+import com.alibaba.fastjson2.JSON;
+
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.model.GatewayDescription;
 import tech.quantit.northstar.gateway.api.Gateway;
 import tech.quantit.northstar.gateway.api.GatewayFactory;
-import tech.quantit.northstar.gateway.api.domain.GlobalMarketRegistry;
+import tech.quantit.northstar.gateway.api.IMarketCenter;
 
 public class BinanceGatewayFactory implements GatewayFactory{
 
 	private FastEventEngine fastEventEngine;
 	
-	private GlobalMarketRegistry registry;
+	private IMarketCenter mktCenter;
 	
-	public BinanceGatewayFactory(FastEventEngine fastEventEngine, GlobalMarketRegistry registry) {
+	public BinanceGatewayFactory(FastEventEngine fastEventEngine, IMarketCenter mktCenter) {
 		this.fastEventEngine = fastEventEngine;
-		this.registry = registry;
+		this.mktCenter = mktCenter;
 	}
 	
 	@Override
 	public Gateway newInstance(GatewayDescription gatewayDescription) {
-		// TODO Auto-generated method stub
-		return null;
+		BinanceGatewaySettings settings = JSON.parseObject(JSON.toJSONString(gatewayDescription.getSettings()), BinanceGatewaySettings.class);
+		gatewayDescription.setSettings(settings);
+		new BinanceContractProvider(settings, mktCenter).loadContractOptions();
+		return new BinanceMarketGatewayAdapter(gatewayDescription, fastEventEngine);
 	}
 
 }

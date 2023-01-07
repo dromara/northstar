@@ -1,20 +1,34 @@
 package tech.quantit.northstar.gateway.binance;
 
+import tech.quantit.northstar.common.constant.ChannelType;
+import tech.quantit.northstar.common.event.FastEventEngine;
+import tech.quantit.northstar.common.model.GatewayDescription;
 import tech.quantit.northstar.gateway.api.MarketGateway;
+import xyz.redtorch.pb.CoreEnum.GatewayTypeEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.GatewaySettingField;
 
 public class BinanceMarketGatewayAdapter implements MarketGateway {
 
+	private FastEventEngine feEngine;
+	
+	private GatewayDescription gd;
+	
+	public BinanceMarketGatewayAdapter(GatewayDescription gd, FastEventEngine feEngine) {
+		this.gd = gd;
+		this.feEngine = feEngine;
+	}
+	
 	@Override
 	public GatewaySettingField getGatewaySetting() {
-		// TODO Auto-generated method stub
-		return null;
+		return GatewaySettingField.newBuilder()
+				.setGatewayId(gd.getGatewayId())
+				.setGatewayType(GatewayTypeEnum.GTE_MarketData)
+				.build();
 	}
 
 	@Override
 	public void connect() {
-		// TODO Auto-generated method stub
 		
 	}
 
@@ -54,9 +68,8 @@ public class BinanceMarketGatewayAdapter implements MarketGateway {
 	}
 
 	@Override
-	public String gatewayType() {
-		// TODO Auto-generated method stub
-		return null;
+	public ChannelType channelType() {
+		return ChannelType.BIAN;
 	}
 
 }

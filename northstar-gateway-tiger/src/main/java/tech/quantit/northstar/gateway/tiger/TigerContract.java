@@ -17,13 +17,13 @@ import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
 
-public class TigerContractAdapter implements Instrument{
+public class TigerContract implements Instrument{
 
 	private ContractItem item; 
 	
 	private ContractDefinition contractDef;
 	
-	public TigerContractAdapter(ContractItem item) {
+	public TigerContract(ContractItem item) {
 		this.item = item;
 	}
 	
