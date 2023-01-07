@@ -94,3 +94,7 @@ OPTION,DCE,"v[0-9]{3,4}[^@].+",聚氯乙烯,0.5,,CN_FT_TT1
 OPTION,DCE,"pg[0-9]{3,4}[^@].+",液化气,1,,CN_FT_TT1
 FUTURES,SHFE,"sim[0-9]{3,4}@.+",模拟合约A,6,,
 FUTURES,CZCE,"sim[0-9]{3,4}@.+",模拟合约B,6,,
+EQUITY,SSE,.+@SSE@.+,上海A股,,3,CN_STK_TT
+EQUITY,SZSE,.+@SZSE@.+,深圳A股,,3,CN_STK_TT
+EQUITY,SEHK,.+@SEHK@.+,港股,,3,HK_STK_TT
+EQUITY,SMART,.+@SMART@.+,美股,,3,US_STK_TT

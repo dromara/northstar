@@ -8,7 +8,6 @@ public class TigerGatewayFactory implements GatewayFactory{
 
 	@Override
 	public Gateway newInstance(GatewayDescription gatewayDescription) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 

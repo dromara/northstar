@@ -2,6 +2,18 @@ package tech.quantit.northstar.common.constant;
 
 public enum ChannelType {
 	
+	PLAYBACK {
+		@Override
+		public GatewayUsage[] usage() {
+			return new GatewayUsage[] {GatewayUsage.MARKET_DATA};
+		}
+
+		@Override
+		public boolean allowDuplication() {
+			return true;
+		}
+	},
+	
 	SIM {
 		@Override
 		public GatewayUsage[] usage() {
@@ -16,6 +28,13 @@ public enum ChannelType {
 		}
 	},
 	
+	TIGER {
+		@Override
+		public GatewayUsage[] usage() {
+			return new GatewayUsage[] {GatewayUsage.MARKET_DATA};
+		}
+	},
+	
 	CTP_SIM {
 		@Override
 		public GatewayUsage[] usage() {
@@ -24,18 +43,6 @@ public enum ChannelType {
 
 		@Override
 		public boolean adminOnly() {
-			return true;
-		}
-	},
-	
-	PLAYBACK {
-		@Override
-		public GatewayUsage[] usage() {
-			return new GatewayUsage[] {GatewayUsage.MARKET_DATA};
-		}
-
-		@Override
-		public boolean allowDuplication() {
 			return true;
 		}
 	};
