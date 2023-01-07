@@ -1,7 +1,6 @@
 package tech.quantit.northstar.gateway.tiger;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import com.tigerbrokers.stock.openapi.client.struct.enums.License;
 
@@ -15,7 +14,6 @@ import tech.quantit.northstar.gateway.api.GatewayMetaProvider;
 
 @Getter
 @Setter
-@Component
 public class TigerGatewaySettings extends DynamicParams implements GatewaySettings {
 
 	@Autowired
