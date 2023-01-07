@@ -8,7 +8,7 @@
   <artifactId>northstar-gateway-tiger</artifactId>
   
   <dependencies>
-  	<dependency>
+  		<dependency>
 			<groupId>tech.quantit</groupId>
 			<artifactId>northstar-gateway-api</artifactId>
 		</dependency>

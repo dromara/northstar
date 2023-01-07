@@ -51,6 +51,7 @@
 		<module>northstar-gateway-sim</module>
 		<module>northstar-gateway-playback</module>
 		<module>northstar-gateway-tiger</module>
+		<module>northstar-gateway-binance</module>
 		<module>northstar-strategy-api</module>
 		<module>northstar-main</module>
 	</modules>
@@ -99,6 +100,11 @@
 			<dependency>
 				<groupId>tech.quantit</groupId>
 				<artifactId>northstar-gateway-tiger</artifactId>
+				<version>${northstar-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>tech.quantit</groupId>
+				<artifactId>northstar-gateway-binance</artifactId>
 				<version>${northstar-version}</version>
 			</dependency>
 			<dependency>
@@ -166,7 +172,7 @@
 			<dependency>
 			    <groupId>com.squareup.okhttp3</groupId>
 			    <artifactId>okhttp</artifactId>
-			    <version>3.14.9</version>
+			    <version>4.10.0</version>
 			</dependency>
 			<dependency>
 				<groupId>com.fasterxml.jackson.core</groupId>
