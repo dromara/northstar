@@ -274,9 +274,9 @@ public class ModuleContext implements IModuleContext, MergedBarListener{
 			return Optional.empty();
 		}
 		TickField tick = latestTickMap.get(contract.getUnifiedSymbol());
-		if(Objects.isNull(tick)) {
-			throw new IllegalStateException("没有行情时不应该发送订单");
-		}
+		Assert.notNull(tick, "没有行情时不应该发送订单");
+		Assert.isTrue(volume > 0, "下单手数应该为正数");
+		
 		double orderPrice = switch(priceType) {
 		case ANY_PRICE -> 0;
 		case LAST_PRICE -> tick.getLastPrice();

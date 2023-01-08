@@ -10,7 +10,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
@@ -185,9 +184,9 @@ public class ModulePlaybackContext implements IModuleContext, MergedBarListener 
 			return Optional.empty();
 		}
 		TickField tick = latestTickMap.get(contract.getUnifiedSymbol());
-		if(Objects.isNull(tick)) {
-			throw new IllegalStateException("没有行情时不应该发送订单。请确保行情预热时，模组应处于【停用】状态");
-		}
+		Assert.notNull(tick, "没有行情时不应该发送订单。请确保行情预热时，模组应处于【停用】状态");
+		Assert.isTrue(volume > 0, "下单手数应该为正数");
+		
 		if(mlog.isInfoEnabled()) {			
 			mlog.info("[{} {}] 策略信号：合约【{}】，操作【{}】，价格【{}】，手数【{}】，类型【{}】", 
 					tick.getActionDay(), LocalTime.parse(tick.getActionTime(), DateTimeConstant.T_FORMAT_WITH_MS_INT_FORMATTER),
