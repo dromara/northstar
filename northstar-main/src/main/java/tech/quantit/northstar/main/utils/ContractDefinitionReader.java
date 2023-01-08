@@ -1,16 +1,16 @@
 package tech.quantit.northstar.main.utils;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
+import java.io.BufferedInputStream;
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import tech.quantit.northstar.gateway.api.domain.contract.ContractDefinition;
@@ -19,13 +19,14 @@ import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
 
 public class ContractDefinitionReader {
 
-	public List<ContractDefinition> load(File definitionFilePath) throws IOException{
+	public List<ContractDefinition> load(InputStream inputStream) throws IOException{
 		List<ContractDefinition> resultList = new LinkedList<>();
-		try(BufferedReader bis = new BufferedReader(new FileReader(definitionFilePath, Charset.forName("UTF-8")))){
-			String headerLine = bis.readLine();
+		try(BufferedInputStream bis = new BufferedInputStream(inputStream)){
+			List<String> lines = IOUtils.readLines(inputStream, StandardCharsets.UTF_8);
+			String headerLine = lines.get(0);
 			Map<String, Integer> headerMap = getHeaderIndexMap(headerLine);
-			String line = null;
-			while((line = bis.readLine()) != null) {
+			for(int i=1; i<lines.size(); i++) {
+				String line = lines.get(i);
 				String[] tokens = line.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)",-1);
 				Double commission = StringUtils.isEmpty(tokens[headerMap.get("commission")]) ? 0D : Double.parseDouble(tokens[headerMap.get("commission")]);
 				Double commissionInBP = StringUtils.isEmpty(tokens[headerMap.get("commissionInBP")]) ? 0D : Double.parseDouble(tokens[headerMap.get("commissionInBP")]); 
@@ -41,7 +42,6 @@ public class ContractDefinitionReader {
 						.build());
 			}
 		}
-		
 		return resultList;
 	}
 	

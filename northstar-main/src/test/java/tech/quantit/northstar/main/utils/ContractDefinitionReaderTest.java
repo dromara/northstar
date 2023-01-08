@@ -20,7 +20,7 @@ class ContractDefinitionReaderTest {
 	void test() throws IOException {
 		String directoryName = System.getProperty("user.dir");
 		Resource res = new FileUrlResource(directoryName + "/../northstar-main/src/main/resources/ContractDefinition.csv");
-		List<ContractDefinition> results = reader.load(res.getFile());
+		List<ContractDefinition> results = reader.load(res.getInputStream());
 		assertThat(results).isNotEmpty();
 	}
 

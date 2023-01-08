@@ -131,7 +131,7 @@ public class AppConfig implements WebMvcConfigurer, DisposableBean {
 	@Bean
 	public IMarketCenter marketCenter(FastEventEngine fastEventEngine) throws IOException {
 		ContractDefinitionReader reader = new ContractDefinitionReader();
-		return new MarketCenter(reader.load(contractDefRes.getFile()), fastEventEngine);
+		return new MarketCenter(reader.load(contractDefRes.getInputStream()), fastEventEngine);
 	}
 
 	@Bean
