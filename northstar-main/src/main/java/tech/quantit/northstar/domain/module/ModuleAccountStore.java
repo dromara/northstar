@@ -110,14 +110,14 @@ public class ModuleAccountStore implements IModuleAccountStore {
 	
 	/* 更新 */
 	@Override
-	public void onOrder(OrderField order) {
+	public synchronized void onOrder(OrderField order) {
 		buyPositionTbl.values().stream().forEach(tp -> tp.onOrder(order));
 		sellPositionTbl.values().stream().forEach(tp -> tp.onOrder(order));
 		sm.onOrder(order);
 	}
 
 	@Override
-	public void onTrade(TradeField trade) {
+	public synchronized void onTrade(TradeField trade) {
 		Table<String, String, TradePosition> tbl = null;
 		if(FieldUtils.isOpen(trade.getOffsetFlag())) {
 			tbl = FieldUtils.isBuy(trade.getDirection()) ? buyPositionTbl : sellPositionTbl;
@@ -154,13 +154,13 @@ public class ModuleAccountStore implements IModuleAccountStore {
 	
 	/* 更新持仓盈亏 */
 	@Override
-	public void onTick(TickField tick) {
+	public synchronized void onTick(TickField tick) {
 		buyPositionTbl.values().stream().forEach(tp -> tp.updateTick(tick));
 		sellPositionTbl.values().stream().forEach(tp -> tp.updateTick(tick));
 	}
 
 	@Override
-	public double getInitBalance(String gatewayId) {
+	public synchronized double getInitBalance(String gatewayId) {
 		if(!initBalanceMap.containsKey(gatewayId)) {
 			throw new NoSuchElementException("找不到网关余额：" + gatewayId);
 		}
@@ -168,12 +168,12 @@ public class ModuleAccountStore implements IModuleAccountStore {
 	}
 	
 	@Override
-	public double getPreBalance(String gatewayId) {
+	public synchronized double getPreBalance(String gatewayId) {
 		return getInitBalance(gatewayId) + getAccCloseProfit(gatewayId) - getAccCommission(gatewayId);
 	}
 
 	@Override
-	public List<TradeField> getUncloseTrades(String gatewayId) {
+	public synchronized List<TradeField> getUncloseTrades(String gatewayId) {
 		Collection<TradePosition> buyOpenPositions = buyPositionTbl.row(gatewayId).values();
 		Collection<TradePosition> sellOpenPositions = sellPositionTbl.row(gatewayId).values();
 		List<TradeField> resultList = new ArrayList<>();
@@ -183,7 +183,7 @@ public class ModuleAccountStore implements IModuleAccountStore {
 	}
 	
 	@Override
-	public int getAccDealVolume(String gatewayId) {
+	public synchronized int getAccDealVolume(String gatewayId) {
 		if(!accDealVolMap.containsKey(gatewayId)) {
 			throw new NoSuchElementException("找不到网关交易数：" + gatewayId);
 		}
@@ -191,7 +191,7 @@ public class ModuleAccountStore implements IModuleAccountStore {
 	}
 
 	@Override
-	public double getAccCloseProfit(String gatewayId) {
+	public synchronized double getAccCloseProfit(String gatewayId) {
 		if(!accCloseProfitMap.containsKey(gatewayId)) {
 			throw new NoSuchElementException("找不到网关平仓盈亏：" + gatewayId);
 		}
@@ -199,13 +199,13 @@ public class ModuleAccountStore implements IModuleAccountStore {
 	}
 
 	@Override
-	public void tradeDayPreset() {
+	public synchronized void tradeDayPreset() {
 		buyPositionTbl.values().stream().forEach(TradePosition::releaseOrders);
 		sellPositionTbl.values().stream().forEach(TradePosition::releaseOrders);
 	}
 
 	@Override
-	public List<PositionField> getPositions(String gatewayId) {
+	public synchronized List<PositionField> getPositions(String gatewayId) {
 		List<PositionField> positionList = new ArrayList<>();
 		positionList.addAll(buyPositionTbl.row(gatewayId).values().stream().map(TradePosition::convertToPositionField).toList());
 		positionList.addAll(sellPositionTbl.row(gatewayId).values().stream().map(TradePosition::convertToPositionField).toList());
@@ -218,27 +218,27 @@ public class ModuleAccountStore implements IModuleAccountStore {
 	}
 
 	@Override
-	public void onSubmitOrder(SubmitOrderReqField submitOrder) {
+	public synchronized void onSubmitOrder(SubmitOrderReqField submitOrder) {
 		sm.onSubmitReq(submitOrder);
 	}
 
 	@Override
-	public void onCancelOrder(CancelOrderReqField cancelOrder) {
+	public synchronized void onCancelOrder(CancelOrderReqField cancelOrder) {
 		sm.onCancelReq(cancelOrder);
 	}
 
 	@Override
-	public double getAccCommission(String gatewayId) {
+	public synchronized double getAccCommission(String gatewayId) {
 		return accCommissionMap.get(gatewayId).get();
 	}
 
 	@Override
-	public double getMaxDrawBack(String gatewayId) {
+	public synchronized double getMaxDrawBack(String gatewayId) {
 		return Optional.ofNullable(maxDrawBackMap.get(gatewayId)).orElse(0D);
 	}
 
 	@Override
-	public double getMaxProfit(String gatewayId) {
+	public synchronized double getMaxProfit(String gatewayId) {
 		return Optional.ofNullable(maxProfitMap.get(gatewayId)).orElse(0D);
 	}
 
