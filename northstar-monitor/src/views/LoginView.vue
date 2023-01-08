@@ -33,16 +33,18 @@ export default {
       },
       domain: '',
       showHost: false,
+      isEE: false,
       version: packageJson.version
     }
   },
   mounted() {
-    this.showHost = !!(window.require && window.require('electron')) || this.$route.query.desktop
+    this.isEE = !!(window.require && window.require('electron'))
+    this.showHost = this.isEE || this.$route.query.desktop
   },
   methods: {
     async login() {
       if(this.domain){
-        window.baseURL = location.protocol + '//' + this.domain
+        window.baseURL = `${this.isEE ? 'https:' : location.protocol}` + '//' + this.domain
         window.remoteHost = this.domain
       }
       try{
