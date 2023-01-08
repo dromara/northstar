@@ -21,6 +21,7 @@ import tech.quantit.northstar.common.constant.SignalOperation;
 import tech.quantit.northstar.common.exception.TradeException;
 import tech.quantit.northstar.gateway.api.TradeGateway;
 import tech.quantit.northstar.gateway.api.domain.contract.Contract;
+import tech.quantit.northstar.gateway.api.domain.time.GenericTradeTime;
 import tech.quantit.northstar.strategy.api.ClosingStrategy;
 import tech.quantit.northstar.strategy.api.IModule;
 import tech.quantit.northstar.strategy.api.IModuleAccountStore;
@@ -70,6 +71,7 @@ class ModuleContextTest {
 		TradeGateway gateway = mock(TradeGateway.class);
 		Contract c = mock(Contract.class);
 		when(c.contractField()).thenReturn(contract);
+		when(c.tradeTimeDefinition()).thenReturn(new GenericTradeTime());
 		when(gateway.getGatewaySetting()).thenReturn(GatewaySettingField.newBuilder().setGatewayId("testAccount").build());
 		ctx.bindGatewayContracts(gateway, List.of(c));
 		ctx.onTick(tick);
@@ -87,6 +89,7 @@ class ModuleContextTest {
 		TradeGateway gateway = mock(TradeGateway.class);
 		Contract c = mock(Contract.class);
 		when(c.contractField()).thenReturn(contract);
+		when(c.tradeTimeDefinition()).thenReturn(new GenericTradeTime());
 		when(gateway.getGatewaySetting()).thenReturn(GatewaySettingField.newBuilder().setGatewayId("testAccount").build());
 		ctx.bindGatewayContracts(gateway, List.of(c));
 		ctx.onTick(tick);

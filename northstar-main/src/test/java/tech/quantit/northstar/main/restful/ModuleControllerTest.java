@@ -47,6 +47,7 @@ import tech.quantit.northstar.common.model.ModuleDescription;
 import tech.quantit.northstar.common.model.NsUser;
 import tech.quantit.northstar.gateway.api.IMarketCenter;
 import tech.quantit.northstar.gateway.api.domain.contract.Contract;
+import tech.quantit.northstar.gateway.api.domain.time.GenericTradeTime;
 import tech.quantit.northstar.gateway.ctp.CtpGatewaySettings;
 import tech.quantit.northstar.main.NorthstarApplication;
 import test.common.TestFieldFactory;
@@ -138,6 +139,7 @@ class ModuleControllerTest {
 		Contract c = mock(Contract.class);
 		when(mktCenter.getContract(any(Identifier.class))).thenReturn(c);
 		when(c.contractField()).thenReturn(ContractField.newBuilder().setUnifiedSymbol("rb2210@SHFE@FUTURES").build());
+		when(c.tradeTimeDefinition()).thenReturn(new GenericTradeTime());
 	}
 	
 	@AfterEach

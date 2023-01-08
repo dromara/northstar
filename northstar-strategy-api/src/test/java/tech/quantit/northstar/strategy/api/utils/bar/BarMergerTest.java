@@ -66,21 +66,21 @@ class BarMergerTest {
 		}
 
 		assertThat(results).hasSize(10);
-		assertThat(results.get(9).getActionDay()).isEqualTo(samples.get(19).getActionDay());
-		assertThat(results.get(9).getActionTime()).isEqualTo(samples.get(19).getActionTime());
-		assertThat(results.get(9).getActionTimestamp()).isEqualTo(samples.get(19).getActionTimestamp());
-		assertThat(results.get(9).getOpenPrice()).isCloseTo(samples.get(18).getOpenPrice(), offset(1e-6));
-		assertThat(results.get(9).getClosePrice()).isCloseTo(samples.get(19).getClosePrice(), offset(1e-6));
-		assertThat(results.get(9).getHighPrice()).isCloseTo(Math.max(samples.get(18).getHighPrice(), samples.get(19).getHighPrice()) , offset(1e-6));
-		assertThat(results.get(9).getLowPrice()).isCloseTo(Math.min(samples.get(18).getLowPrice(), samples.get(19).getLowPrice()), offset(1e-6));
-		assertThat(results.get(9).getVolume()).isEqualTo(samples.get(18).getVolume() + samples.get(19).getVolume());
-		assertThat(results.get(9).getNumTrades()).isEqualTo(samples.get(18).getNumTrades() + samples.get(19).getNumTrades());
-		assertThat(results.get(9).getOpenInterest()).isCloseTo(samples.get(19).getOpenInterest(), offset(1e-6));
-		assertThat(results.get(9).getTurnover()).isCloseTo(samples.get(18).getTurnover() + samples.get(19).getTurnover(), offset(1e-6));
-		assertThat(results.get(9).getVolumeDelta()).isEqualTo(samples.get(18).getVolumeDelta() + samples.get(19).getVolumeDelta());
-		assertThat(results.get(9).getNumTradesDelta()).isEqualTo(samples.get(18).getNumTradesDelta() + samples.get(19).getNumTradesDelta());
-		assertThat(results.get(9).getOpenInterestDelta()).isCloseTo(samples.get(18).getOpenInterestDelta() + samples.get(19).getOpenInterestDelta(), offset(1e-6));
-		assertThat(results.get(9).getTurnoverDelta()).isCloseTo(samples.get(18).getTurnoverDelta() + samples.get(19).getTurnoverDelta(), offset(1e-6));
+		assertThat(results.get(9).getActionDay()).isEqualTo(samples.get(20).getActionDay());
+		assertThat(results.get(9).getActionTime()).isEqualTo(samples.get(20).getActionTime());
+		assertThat(results.get(9).getActionTimestamp()).isEqualTo(samples.get(20).getActionTimestamp());
+		assertThat(results.get(9).getOpenPrice()).isCloseTo(samples.get(19).getOpenPrice(), offset(1e-6));
+		assertThat(results.get(9).getClosePrice()).isCloseTo(samples.get(20).getClosePrice(), offset(1e-6));
+		assertThat(results.get(9).getHighPrice()).isCloseTo(Math.max(samples.get(19).getHighPrice(), samples.get(20).getHighPrice()) , offset(1e-6));
+		assertThat(results.get(9).getLowPrice()).isCloseTo(Math.min(samples.get(19).getLowPrice(), samples.get(20).getLowPrice()), offset(1e-6));
+		assertThat(results.get(9).getVolume()).isEqualTo(samples.get(19).getVolume() + samples.get(20).getVolume());
+		assertThat(results.get(9).getNumTrades()).isEqualTo(samples.get(19).getNumTrades() + samples.get(20).getNumTrades());
+		assertThat(results.get(9).getOpenInterest()).isCloseTo(samples.get(20).getOpenInterest(), offset(1e-6));
+		assertThat(results.get(9).getTurnover()).isCloseTo(samples.get(19).getTurnover() + samples.get(20).getTurnover(), offset(1e-6));
+		assertThat(results.get(9).getVolumeDelta()).isEqualTo(samples.get(19).getVolumeDelta() + samples.get(20).getVolumeDelta());
+		assertThat(results.get(9).getNumTradesDelta()).isEqualTo(samples.get(19).getNumTradesDelta() + samples.get(20).getNumTradesDelta());
+		assertThat(results.get(9).getOpenInterestDelta()).isCloseTo(samples.get(19).getOpenInterestDelta() + samples.get(20).getOpenInterestDelta(), offset(1e-6));
+		assertThat(results.get(9).getTurnoverDelta()).isCloseTo(samples.get(19).getTurnoverDelta() + samples.get(20).getTurnoverDelta(), offset(1e-6));
 	}
 
 }
