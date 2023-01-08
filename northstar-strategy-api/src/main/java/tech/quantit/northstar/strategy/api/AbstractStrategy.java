@@ -10,6 +10,8 @@ import org.slf4j.Logger;
 import com.alibaba.fastjson.JSONObject;
 
 import tech.quantit.northstar.common.TickDataAware;
+import tech.quantit.northstar.common.utils.FieldUtils;
+import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.OrderField;
 import xyz.redtorch.pb.CoreField.TickField;
@@ -40,6 +42,14 @@ public abstract class AbstractStrategy implements TradeStrategy{
 	@Override
 	public void onTrade(TradeField trade) {
 		// 如果策略不关心成交反馈，可以不重写
+		String unifiedSymbol = trade.getContract().getUnifiedSymbol();
+		if(log.isInfoEnabled()) {
+			log.info("模组成交 [{} {} {} 操作：{}{} {}手 {}]", unifiedSymbol,
+					trade.getTradeDate(), trade.getTradeTime(), FieldUtils.chn(trade.getDirection()), FieldUtils.chn(trade.getOffsetFlag()), 
+					trade.getVolume(), trade.getPrice());
+			log.info("当前模组持仓：多[{}] 空[{}]", ctx.availablePosition(DirectionEnum.D_Buy, unifiedSymbol), ctx.availablePosition(DirectionEnum.D_Sell, unifiedSymbol));
+			log.info("当前模组状态：{}", ctx.getState());
+		}
 	}
 
 	@Override
