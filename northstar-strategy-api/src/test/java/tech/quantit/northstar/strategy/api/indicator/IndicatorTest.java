@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
 
-import tech.quantit.northstar.common.constant.IndicatorType;
 import tech.quantit.northstar.common.model.TimeSeriesValue;
 import tech.quantit.northstar.strategy.api.indicator.Indicator.Configuration;
 import tech.quantit.northstar.strategy.api.indicator.Indicator.ValueType;
@@ -53,11 +52,6 @@ class IndicatorTest {
 	@Test
 	void testBindedUnifiedSymbol() {
 		assertThat(indicator.bindedUnifiedSymbol()).isEqualTo("rb2210@SHFE@FUTURES");
-	}
-
-	@Test
-	void testGetType() {
-		assertThat(indicator.getType()).isEqualTo(IndicatorType.PRICE_BASE);
 	}
 
 	@Test

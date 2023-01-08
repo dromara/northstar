@@ -13,7 +13,6 @@ import lombok.Getter;
 import lombok.NonNull;
 import reactor.core.publisher.Flux;
 import tech.quantit.northstar.common.TickDataAware;
-import tech.quantit.northstar.common.constant.IndicatorType;
 import tech.quantit.northstar.common.model.BarWrapper;
 import tech.quantit.northstar.common.model.TimeSeriesValue;
 import tech.quantit.northstar.strategy.api.BarDataAware;
@@ -166,7 +165,8 @@ public class Indicator implements TickDataAware, BarDataAware, MergedBarListener
 		case CLOSE -> bar.getClosePrice();
 		case LOW -> bar.getLowPrice();
 		case OPEN -> bar.getOpenPrice();
-		case OPEN_INTEREST -> bar.getOpenInterestDelta();
+		case OI -> bar.getOpenInterest();
+		case OI_DELTA -> bar.getOpenInterestDelta();
 		case VOL -> bar.getVolume();
 		default -> throw new IllegalArgumentException("Unexpected value: " + valType);
 		};
@@ -219,19 +219,6 @@ public class Indicator implements TickDataAware, BarDataAware, MergedBarListener
 	 */
 	public String bindedUnifiedSymbol() {
 		return unifiedSymbol;
-	}
-	
-	/**
-	 * 指标类型
-	 * @return
-	 */
-	public IndicatorType getType() {
-		return switch(valType) {
-		case OPEN,CLOSE,HIGH,LOW -> IndicatorType.PRICE_BASE;
-		case VOL -> IndicatorType.VOLUME_BASE;
-		case OPEN_INTEREST -> IndicatorType.OPEN_INTEREST_BASE;
-		default -> IndicatorType.UNKNOWN;
-		};
 	}
 	
 	/**
@@ -325,7 +312,11 @@ public class Indicator implements TickDataAware, BarDataAware, MergedBarListener
 		/**
 		 * 持仓量
 		 */
-		OPEN_INTEREST;
+		OI,
+		/**
+		 * 持仓量变化
+		 */
+		OI_DELTA;
 	}
 	
 	/**
