@@ -466,7 +466,8 @@ proto.xyz.redtorch.pb.ExchangeEnum = {
   IDEALPRO: 21,
   OANDA: 22,
   FXCM: 23,
-  SMART: 24
+  SMART: 24,
+  GFEX: 25
 };
 
 /**

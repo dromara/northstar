@@ -112,6 +112,7 @@ public class CtpConstant {
 		exchangeMap.put(ExchangeEnum.SSE, "SSE");
 		exchangeMap.put(ExchangeEnum.SZSE, "SZSE");
 		exchangeMap.put(ExchangeEnum.INE, "INE");
+		exchangeMap.put(ExchangeEnum.GFEX, "GFEX");
 		exchangeMap.put(ExchangeEnum.UnknownExchange, "");
 		exchangeMapReverse = exchangeMap.entrySet().stream().collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
 

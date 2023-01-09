@@ -78,6 +78,10 @@ public class MarketCenter implements IMarketCenter, TickDataAware{
 	public synchronized void addInstrument(Instrument ins) {
 		// 绑定合约定义
 		List<ContractDefinition> defList = contractDefTbl.get(ins.exchange(), ins.productClass());
+		if(Objects.isNull(defList)) {
+			log.debug("未找到 [{}] 的合约定义，忽略该合约的注册", ins.identifier().value());
+			return;
+		}
 		for(ContractDefinition def : defList) {
 			if(def.getSymbolPattern().matcher(ins.identifier().value()).matches()) {
 				log.debug("[{}] 匹配合约定义 [{} {} {}]", ins.identifier().value(), def.getExchange(), def.getProductClass(), def.getSymbolPattern().pattern());

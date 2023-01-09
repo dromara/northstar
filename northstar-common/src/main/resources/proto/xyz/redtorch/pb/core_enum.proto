@@ -356,6 +356,7 @@ enum ExchangeEnum {
 	OANDA = 22;  // OANDA外汇做市商
 	FXCM = 23;  // FXCM外汇做市商
 	SMART = 24;  // IB智能路由
+	GFEX = 25;	// 广州期货交易所
 }
 
 // OptionsTypeEnum是一个期权类型类型

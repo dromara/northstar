@@ -6375,6 +6375,14 @@ public final class CoreEnum {
      * <code>SMART = 24;</code>
      */
     SMART(24),
+    /**
+     * <pre>
+     * 广州期货交易所
+     * </pre>
+     *
+     * <code>GFEX = 25;</code>
+     */
+    GFEX(25),
     UNRECOGNIZED(-1),
     ;
 
@@ -6578,6 +6586,14 @@ public final class CoreEnum {
      * <code>SMART = 24;</code>
      */
     public static final int SMART_VALUE = 24;
+    /**
+     * <pre>
+     * 广州期货交易所
+     * </pre>
+     *
+     * <code>GFEX = 25;</code>
+     */
+    public static final int GFEX_VALUE = 25;
 
 
     public final int getNumber() {
@@ -6629,6 +6645,7 @@ public final class CoreEnum {
         case 22: return OANDA;
         case 23: return FXCM;
         case 24: return SMART;
+        case 25: return GFEX;
         default: return null;
       }
     }
@@ -7342,22 +7359,22 @@ public final class CoreEnum {
       "\n\003FIM\020\016\022\007\n\003BEF\020\017\022\007\n\003THB\020\020\022\007\n\003IEP\020\021\022\007\n\003IT" +
       "L\020\022\022\007\n\003LUF\020\023\022\007\n\003NLG\020\024\022\007\n\003PTE\020\025\022\007\n\003ESP\020\026\022" +
       "\007\n\003IDR\020\027\022\007\n\003MYR\020\030\022\007\n\003NZD\020\031\022\007\n\003PHP\020\032\022\007\n\003S" +
-      "UR\020\033\022\007\n\003SGD\020\034\022\007\n\003KRW\020\035*\225\002\n\014ExchangeEnum\022" +
+      "UR\020\033\022\007\n\003SGD\020\034\022\007\n\003KRW\020\035*\237\002\n\014ExchangeEnum\022" +
       "\023\n\017UnknownExchange\020\000\022\007\n\003SSE\020\001\022\010\n\004SZSE\020\002\022" +
       "\t\n\005CFFEX\020\003\022\010\n\004SHFE\020\004\022\010\n\004CZCE\020\005\022\007\n\003DCE\020\006\022" +
       "\007\n\003SGE\020\007\022\007\n\003INE\020\010\022\010\n\004SEHK\020\t\022\010\n\004HKFE\020\n\022\007\n" +
       "\003SGX\020\013\022\t\n\005NYBOT\020\014\022\t\n\005NYMEX\020\r\022\t\n\005COMEX\020\016\022" +
       "\007\n\003CME\020\017\022\007\n\003CFE\020\020\022\n\n\006GLOBEX\020\021\022\007\n\003ICE\020\022\022\007" +
       "\n\003IPE\020\023\022\007\n\003LME\020\024\022\014\n\010IDEALPRO\020\025\022\t\n\005OANDA\020" +
-      "\026\022\010\n\004FXCM\020\027\022\t\n\005SMART\020\030*E\n\017OptionsTypeEnu" +
-      "m\022\r\n\tO_Unknown\020\000\022\021\n\rO_CallOptions\020\001\022\020\n\014O" +
-      "_PutOptions\020\002*Y\n\016StrikeModeEnum\022\017\n\013STM_U" +
-      "nknown\020\000\022\023\n\017STM_Continental\020\001\022\020\n\014STM_Ame" +
-      "rican\020\002\022\017\n\013STM_Bermuda\020\003*\224\001\n\023Combination" +
-      "TypeEnum\022\021\n\rCOMBT_Unknown\020\000\022\020\n\014COMBT_Fut" +
-      "ure\020\001\022\r\n\tCOMBT_BUL\020\002\022\r\n\tCOMBT_BER\020\003\022\r\n\tC" +
-      "OMBT_STD\020\004\022\r\n\tCOMBT_STG\020\005\022\r\n\tCOMBT_PRT\020\006" +
-      "\022\r\n\tCOMBT_CLD\020\007b\006proto3"
+      "\026\022\010\n\004FXCM\020\027\022\t\n\005SMART\020\030\022\010\n\004GFEX\020\031*E\n\017Opti" +
+      "onsTypeEnum\022\r\n\tO_Unknown\020\000\022\021\n\rO_CallOpti" +
+      "ons\020\001\022\020\n\014O_PutOptions\020\002*Y\n\016StrikeModeEnu" +
+      "m\022\017\n\013STM_Unknown\020\000\022\023\n\017STM_Continental\020\001\022" +
+      "\020\n\014STM_American\020\002\022\017\n\013STM_Bermuda\020\003*\224\001\n\023C" +
+      "ombinationTypeEnum\022\021\n\rCOMBT_Unknown\020\000\022\020\n" +
+      "\014COMBT_Future\020\001\022\r\n\tCOMBT_BUL\020\002\022\r\n\tCOMBT_" +
+      "BER\020\003\022\r\n\tCOMBT_STD\020\004\022\r\n\tCOMBT_STG\020\005\022\r\n\tC" +
+      "OMBT_PRT\020\006\022\r\n\tCOMBT_CLD\020\007b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
