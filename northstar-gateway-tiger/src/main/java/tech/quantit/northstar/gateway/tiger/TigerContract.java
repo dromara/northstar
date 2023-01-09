@@ -1,6 +1,7 @@
 package tech.quantit.northstar.gateway.tiger;
 
 import java.util.Objects;
+import java.util.Optional;
 
 import com.tigerbrokers.stock.openapi.client.https.domain.contract.item.ContractItem;
 
@@ -29,7 +30,7 @@ public class TigerContract implements Instrument{
 	
 	@Override
 	public String name() {
-		return item.getName();
+		return item.getName() + "-" + item.getSymbol();
 	}
 
 	@Override
@@ -90,12 +91,12 @@ public class TigerContract implements Instrument{
 				.setExchange(exchange())
 				.setProductClass(productClass())
 				.setContractId(identifier().value())
-				.setMultiplier(item.getMultiplier())
+				.setMultiplier(Optional.ofNullable(item.getMultiplier()).orElse(1D))
 				.setPriceTick(item.getMinTick())
-				.setLongMarginRatio(item.getLongInitialMargin())
-				.setShortMarginRatio(item.getShortInitialMargin())
-				.setLastTradeDateOrContractMonth(item.getContractMonth())
-				.setStrikePrice(item.getStrike())
+				.setLongMarginRatio(Optional.ofNullable(item.getLongInitialMargin()).orElse(0D))
+				.setShortMarginRatio(Optional.ofNullable(item.getShortInitialMargin()).orElse(0D))
+				.setLastTradeDateOrContractMonth(Optional.ofNullable(item.getContractMonth()).orElse(""))
+				.setStrikePrice(Optional.ofNullable(item.getStrike()).orElse(0D))
 				.setThirdPartyId(String.format("%s@TIGER", item.getSymbol()))
 				.setCommissionFee(contractDef.getCommissionFee())
 				.setCommissionRate(contractDef.getCommissionRate())

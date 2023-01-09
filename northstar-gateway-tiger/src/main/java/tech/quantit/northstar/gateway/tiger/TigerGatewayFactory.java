@@ -1,6 +1,6 @@
 package tech.quantit.northstar.gateway.tiger;
 
-import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson.JSON;
 
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.model.GatewayDescription;
@@ -14,6 +14,8 @@ public class TigerGatewayFactory implements GatewayFactory{
 	
 	private IMarketCenter mktCenter;
 	
+	private boolean contractLoaded;
+	
 	public TigerGatewayFactory(FastEventEngine feEngine, IMarketCenter mktCenter) {
 		this.feEngine = feEngine;
 		this.mktCenter = mktCenter;
@@ -23,7 +25,10 @@ public class TigerGatewayFactory implements GatewayFactory{
 	public Gateway newInstance(GatewayDescription gatewayDescription) {
 		TigerGatewaySettings settings = JSON.parseObject(JSON.toJSONString(gatewayDescription.getSettings()), TigerGatewaySettings.class);
 		gatewayDescription.setSettings(settings);
-		new TigerContractProvider(settings, mktCenter).loadContractOptions();
+		if(!contractLoaded) {			
+			new TigerContractProvider(settings, mktCenter).loadContractOptions();
+			contractLoaded = true;
+		}
 		return new TigerGatewayAdapter(gatewayDescription, feEngine);
 	}
 

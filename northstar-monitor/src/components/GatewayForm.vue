@@ -314,6 +314,10 @@ export default {
             })
           } else {
             contractApi.getGatewayContracts(this.form.channelType, query).then(result => {
+              if(result.length > 100){
+                this.$message.warning('返回结果多于100条，请提供更精确的筛选条件')
+                return 
+              }
               this.contractOptions = result
             }).finally(() => {
               this.loading = false;

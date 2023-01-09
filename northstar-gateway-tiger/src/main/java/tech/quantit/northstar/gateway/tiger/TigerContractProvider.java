@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
-import com.tigerbrokers.stock.openapi.client.https.client.TigerHttpClient;
 import com.tigerbrokers.stock.openapi.client.https.domain.contract.model.ContractsModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.quote.item.SymbolNameItem;
 import com.tigerbrokers.stock.openapi.client.https.request.contract.ContractsRequest;
