@@ -1,7 +1,13 @@
 package tech.quantit.northstar.gateway.tiger;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import com.alibaba.fastjson.JSONObject;
 import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
@@ -10,12 +16,15 @@ import com.tigerbrokers.stock.openapi.client.socket.WebSocketClient;
 import com.tigerbrokers.stock.openapi.client.struct.SubscribedSymbol;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Language;
 import com.tigerbrokers.stock.openapi.client.struct.enums.QuoteKeyType;
+import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
 
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.constant.ChannelType;
+import tech.quantit.northstar.common.constant.DateTimeConstant;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.event.NorthstarEventType;
 import tech.quantit.northstar.common.model.GatewayDescription;
+import tech.quantit.northstar.gateway.api.IContractManager;
 import tech.quantit.northstar.gateway.api.MarketGateway;
 import xyz.redtorch.pb.CoreEnum.CommonStatusEnum;
 import xyz.redtorch.pb.CoreEnum.GatewayTypeEnum;
@@ -37,10 +46,10 @@ public class TigerGatewayAdapter implements MarketGateway {
 	
 	private TigerSpi spi;
 	
-	public TigerGatewayAdapter(GatewayDescription gd, FastEventEngine feEngine) {
+	public TigerGatewayAdapter(GatewayDescription gd, FastEventEngine feEngine, IContractManager contractMgr) {
 		this.gd = gd;
 		this.feEngine = feEngine;
-		this.spi = new TigerSpi(feEngine); 
+		this.spi = new TigerSpi(feEngine, contractMgr); 
 		
 		TigerGatewaySettings settings = (TigerGatewaySettings) gd.getSettings();
 		ClientConfig clientConfig = ClientConfig.DEFAULT_CONFIG;
@@ -51,6 +60,7 @@ public class TigerGatewayAdapter implements MarketGateway {
         clientConfig.secretKey = settings.getSecretKey();
         clientConfig.language = Language.zh_CN;
 		this.client = WebSocketClient.getInstance().clientConfig(clientConfig).apiComposeCallback(spi);
+		ApiLogger.setEnabled(true, "logs/");
 	}
 	
 	@Override
@@ -65,6 +75,7 @@ public class TigerGatewayAdapter implements MarketGateway {
 	public void connect() {
 		client.connect();
 		feEngine.emitEvent(NorthstarEventType.CONNECTED, gd.getGatewayId());
+		feEngine.emitEvent(NorthstarEventType.GATEWAY_READY, gd.getGatewayId());
 	}
 
 	@Override
@@ -87,6 +98,7 @@ public class TigerGatewayAdapter implements MarketGateway {
 	public boolean subscribe(ContractField contract) {
 		if(contract.getProductClass() == ProductClassEnum.EQUITY) {
 			client.subscribeQuote(Set.of(contract.getSymbol()), QuoteKeyType.ALL);
+			log.info("TIGER网关订阅合约 {} {}", contract.getName(), contract.getUnifiedSymbol());
 		}
 		// TODO 期货期权暂没实现
 		return true;
@@ -113,12 +125,22 @@ public class TigerGatewayAdapter implements MarketGateway {
 
 	class TigerSpi implements ApiComposeCallback {
 		
+		static final String MKT_STAT = "marketStatus";
+		static final String ASK_P = "askPrice";
+		static final String ASK_V = "askSize";
+		static final String BID_P = "bidPrice";
+		static final String BID_V = "bidSize";
+		
+		private ConcurrentMap<String, TickField.Builder> tickBuilderMap = new ConcurrentHashMap<>();
+		
 		private FastEventEngine feEngine;
+		private IContractManager contractMgr;
 		
 		private long lastActive;
 		
-		public TigerSpi(FastEventEngine feEngine) {
+		public TigerSpi(FastEventEngine feEngine, IContractManager contractMgr) {
 			this.feEngine = feEngine;
+			this.contractMgr = contractMgr;
 		}
 
 		@Override
@@ -142,29 +164,57 @@ public class TigerGatewayAdapter implements MarketGateway {
 		@Override
 		public void quoteChange(JSONObject jsonObject) {
 			lastActive = System.currentTimeMillis();
-			if(!jsonObject.containsKey("avgPrice")) {
+			if(log.isTraceEnabled()) {
+				log.trace("数据回报：{}", jsonObject);
+			}
+			if(jsonObject.containsKey("hourTradingTag")) {
 				return;	//忽略盘前盘后数据
 			}
-			long timestamp = jsonObject.getLongValue("timestamp");
-			feEngine.emitEvent(NorthstarEventType.TICK, TickField.newBuilder()
-					.setGatewayId(gd.getGatewayId())
-					.setActionDay("")		// FIXME
-					.setActionTime("")		// FIXME
-					.setTradingDay("")		// FIXME
-					.setActionTimestamp(timestamp)
-					.setPreClosePrice(jsonObject.getDoubleValue("preClose"))
-					.setPreOpenInterest(lastActive)
-					.setPreSettlePrice(lastActive)
-					.setLastPrice(jsonObject.getDoubleValue("latestPrice"))
-					.setHighPrice(jsonObject.getDoubleValue("high"))
-					.setLowPrice(jsonObject.getDoubleValue("low"))
-					.setOpenPrice(jsonObject.getDoubleValue("open"))
-					.setVolumeDelta(jsonObject.getLongValue("volume"))
-					.addAllAskPrice(List.of(jsonObject.getDouble("askPrice")))
-					.addAllAskVolume(List.of(jsonObject.getIntValue("askSize")))
-					.addAllBidPrice(List.of(jsonObject.getDouble("bidPrice")))
-					.addAllBidVolume(List.of(jsonObject.getIntValue("bidSize")))
-					.build());
+			try {
+				
+				String symbol = jsonObject.getString("symbol");
+				long timestamp = jsonObject.getLongValue("timestamp");
+				LocalDateTime ldt = LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneId.systemDefault());
+				ZoneId londonTimeZone = ZoneId.of(ZoneOffset.ofHours(0).getId()); // 伦敦时区正好可以让所有时区的交易计算在同一天
+				tickBuilderMap.computeIfAbsent(symbol, key -> TickField.newBuilder()
+						.setGatewayId(gd.getGatewayId())
+						.addAllAskPrice(List.of(0D))
+						.addAllAskVolume(List.of(0))
+						.addAllBidPrice(List.of(0D))
+						.addAllBidVolume(List.of(0))
+						.setUnifiedSymbol(contractMgr.getContract("TIGER", symbol).contractField().getUnifiedSymbol()));
+				if(jsonObject.containsKey(ASK_P))	tickBuilderMap.get(symbol).setAskPrice(0, jsonObject.getDoubleValue(ASK_P));
+				if(jsonObject.containsKey(BID_P))	tickBuilderMap.get(symbol).setBidPrice(0, jsonObject.getDoubleValue(BID_P));
+				if(jsonObject.containsKey(ASK_V))	tickBuilderMap.get(symbol).setAskVolume(0, jsonObject.getIntValue(ASK_V));
+				if(jsonObject.containsKey(BID_V))	tickBuilderMap.get(symbol).setBidVolume(0, jsonObject.getIntValue(BID_V));
+				
+				if(jsonObject.containsKey(MKT_STAT) && jsonObject.getString(MKT_STAT).equals("交易中")) {		
+					// 交易数据更新
+					feEngine.emitEvent(NorthstarEventType.TICK, tickBuilderMap.get(symbol)
+							.setActionDay(ldt.toLocalDate().format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
+							.setActionTime(ldt.toLocalTime().format(DateTimeConstant.T_FORMAT_WITH_MS_INT_FORMATTER))		
+							.setTradingDay(LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), londonTimeZone).toLocalDate().format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
+							.setActionTimestamp(timestamp)
+							.setPreClosePrice(jsonObject.getDoubleValue("preClose"))
+							.setLastPrice(jsonObject.getDoubleValue("latestPrice"))
+							.setHighPrice(jsonObject.getDoubleValue("high"))
+							.setLowPrice(jsonObject.getDoubleValue("low"))
+							.setOpenPrice(jsonObject.getDoubleValue("open"))
+							.setVolume(jsonObject.getLongValue("volume"))
+							.build());
+				} else if(!jsonObject.containsKey(MKT_STAT)){
+					// 盘口数据更新
+					feEngine.emitEvent(NorthstarEventType.TICK, tickBuilderMap.get(symbol)
+							.setActionDay(ldt.toLocalDate().format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
+							.setActionTime(ldt.toLocalTime().format(DateTimeConstant.T_FORMAT_WITH_MS_INT_FORMATTER))		
+							.setTradingDay(LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), londonTimeZone).toLocalDate().format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
+							.setActionTimestamp(timestamp)
+							.build());
+				}
+			} catch(Exception e) {
+				log.warn("异常数据：{}", jsonObject);
+				log.error("", e);
+			}
 		}
 
 		@Override
