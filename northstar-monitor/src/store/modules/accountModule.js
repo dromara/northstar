@@ -84,7 +84,7 @@ const accountModule = {
       if (!state[gatewayId]) {
         return false
       }
-      return new Date().getTime() - state[gatewayId].lastUpdateTime < 3000
+      return new Date().getTime() - state[gatewayId].lastUpdateTime < 15000
     }
   }
 }
