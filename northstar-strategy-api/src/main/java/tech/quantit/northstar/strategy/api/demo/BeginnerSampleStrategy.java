@@ -136,7 +136,6 @@ public class BeginnerSampleStrategy implements TradeStrategy{
 			}
 			if(ctx.getState() == ModuleState.HOLDING_LONG) {	
 				ctx.submitOrderReq(TradeIntent.builder()
-						.context(ctx)
 						.contract(ctx.getContract(tick.getUnifiedSymbol()))
 						.operation(SignalOperation.SELL_CLOSE)
 						.priceType(PriceType.WAITING_PRICE)
@@ -146,7 +145,6 @@ public class BeginnerSampleStrategy implements TradeStrategy{
 			}
 			if(ctx.getState() == ModuleState.HOLDING_SHORT) {			
 				ctx.submitOrderReq(TradeIntent.builder()
-						.context(ctx)
 						.contract(ctx.getContract(tick.getUnifiedSymbol()))
 						.operation(SignalOperation.BUY_CLOSE)
 						.priceType(PriceType.WAITING_PRICE)

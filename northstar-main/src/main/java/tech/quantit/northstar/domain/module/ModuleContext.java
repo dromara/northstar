@@ -328,6 +328,7 @@ public class ModuleContext implements IModuleContext, MergedBarListener{
 	@Override
 	public void submitOrderReq(TradeIntent tradeIntent) {
 		this.tradeIntent = tradeIntent;
+		tradeIntent.setContext(this);
 	}
 
 	DateFormat fmt = new SimpleDateFormat();

@@ -44,7 +44,7 @@ class TradeIntentTest {
 	@Test
 	void testSimpleOpen() {
 		TradeIntent intent = TradeIntent.builder()
-				.context(ctx).contract(contract).operation(SignalOperation.BUY_OPEN).priceType(PriceType.OPP_PRICE).volume(1).build();
+				.contract(contract).operation(SignalOperation.BUY_OPEN).priceType(PriceType.OPP_PRICE).volume(1).build();
 		
 		assertThat(intent.hasTerminated()).isFalse();
 		intent.onTick(factory.makeTickField("rb2305", 5000));
@@ -59,7 +59,7 @@ class TradeIntentTest {
 	@Test
 	void testSimpleClose() {
 		TradeIntent intent = TradeIntent.builder()
-				.context(ctx).contract(contract).operation(SignalOperation.SELL_CLOSE).priceType(PriceType.OPP_PRICE).volume(1).build();
+				.contract(contract).operation(SignalOperation.SELL_CLOSE).priceType(PriceType.OPP_PRICE).volume(1).build();
 		
 		assertThat(intent.hasTerminated()).isFalse();
 		intent.onTick(factory.makeTickField("rb2305", 5000));
@@ -74,7 +74,7 @@ class TradeIntentTest {
 	void testTimeoutRetryOpen() {
 		when(ctx.isOrderWaitTimeout(anyString(), anyLong())).thenReturn(true, false);
 		TradeIntent intent = TradeIntent.builder()
-				.context(ctx).contract(contract).operation(SignalOperation.SELL_CLOSE).priceType(PriceType.OPP_PRICE).volume(1).build();
+				.contract(contract).operation(SignalOperation.SELL_CLOSE).priceType(PriceType.OPP_PRICE).volume(1).build();
 		
 		assertThat(intent.hasTerminated()).isFalse();
 		intent.onTick(factory.makeTickField("rb2305", 5000));
@@ -92,7 +92,7 @@ class TradeIntentTest {
 	@Test
 	void testOpenAbort() {
 		TradeIntent intent = TradeIntent.builder()
-				.context(ctx).contract(contract).operation(SignalOperation.SELL_CLOSE).priceType(PriceType.OPP_PRICE).volume(1)
+				.contract(contract).operation(SignalOperation.SELL_CLOSE).priceType(PriceType.OPP_PRICE).volume(1)
 				.abortCondition(tick -> tick.getLastPrice() - 5000 > 10)
 				.build();
 		

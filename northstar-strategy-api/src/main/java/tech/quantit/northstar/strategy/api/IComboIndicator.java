@@ -15,6 +15,9 @@ public interface IComboIndicator extends BarDataAware, TickDataAware, MergedBarL
 	Indicator.Configuration getConfiguration();
 	
 	@Override
+	default void onMergedBar(BarField bar) {}
+	
+	@Override
 	default void onBar(BarField bar) {}
 
 	@Override

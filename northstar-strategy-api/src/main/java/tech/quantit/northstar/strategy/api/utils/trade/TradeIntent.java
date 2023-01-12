@@ -11,6 +11,7 @@ import org.springframework.util.Assert;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.Setter;
 import tech.quantit.northstar.common.TickDataAware;
 import tech.quantit.northstar.common.TransactionAware;
 import tech.quantit.northstar.common.constant.SignalOperation;
@@ -30,8 +31,9 @@ import xyz.redtorch.pb.CoreField.TradeField;
  *
  */
 public class TradeIntent implements TransactionAware, TickDataAware {
-	@NonNull
-	private final IModuleStrategyContext context;
+	
+	@Setter
+	private IModuleStrategyContext context;
 	/**
 	 * 合约
 	 */
@@ -65,11 +67,10 @@ public class TradeIntent implements TransactionAware, TickDataAware {
 	private final Predicate<TickField> abortCondition;
 	
 	@Builder
-	public TradeIntent(IModuleStrategyContext context, ContractField contract, SignalOperation operation, PriceType priceType, int volume, 
+	public TradeIntent(ContractField contract, SignalOperation operation, PriceType priceType, int volume, 
 			long timeout, Predicate<TickField> abortCondition) {
 		Assert.noNullElements(List.of(context, contract, operation, priceType), "入参不能为空");
 		Assert.isTrue(volume > 0, "手数必须为正整数");
-		this.context = context;
 		this.contract = contract;
 		this.operation = operation;
 		this.priceType = priceType;
