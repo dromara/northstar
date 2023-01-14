@@ -165,6 +165,7 @@ public class Indicator implements TickDataAware, BarDataAware, MergedBarListener
 		case CLOSE -> bar.getClosePrice();
 		case LOW -> bar.getLowPrice();
 		case OPEN -> bar.getOpenPrice();
+		case BARYCENTER -> (bar.getHighPrice() + bar.getLowPrice() + bar.getClosePrice() * 2) / 4;
 		case OI -> bar.getOpenInterest();
 		case OI_DELTA -> bar.getOpenInterestDelta();
 		case VOL -> bar.getVolume();
@@ -305,6 +306,10 @@ public class Indicator implements TickDataAware, BarDataAware, MergedBarListener
 		 * 收盘价
 		 */
 		CLOSE,
+		/**
+		 * 重心价
+		 */
+		BARYCENTER,
 		/**
 		 * 成交量
 		 */
