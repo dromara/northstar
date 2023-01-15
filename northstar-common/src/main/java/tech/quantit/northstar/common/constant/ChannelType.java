@@ -31,7 +31,7 @@ public enum ChannelType {
 	TIGER {
 		@Override
 		public GatewayUsage[] usage() {
-			return new GatewayUsage[] {GatewayUsage.MARKET_DATA};
+			return new GatewayUsage[] {GatewayUsage.MARKET_DATA, GatewayUsage.TRADE};
 		}
 	},
 	

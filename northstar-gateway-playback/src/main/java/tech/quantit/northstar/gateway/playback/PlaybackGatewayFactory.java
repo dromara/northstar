@@ -46,6 +46,7 @@ public class PlaybackGatewayFactory implements GatewayFactory{
 	public Gateway newInstance(GatewayDescription gatewayDescription) {
 		PlaybackRuntimeDescription playbackRt = rtRepo.findById(gatewayDescription.getGatewayId());
 		PlaybackGatewaySettings settings = JSON.parseObject(JSON.toJSONString(gatewayDescription.getSettings()), PlaybackGatewaySettings.class);
+		gatewayDescription.setSettings(settings);
 		LocalDateTime ldt = Objects.nonNull(playbackRt) 
 				? playbackRt.getPlaybackTimeState() 
 				: LocalDateTime.of(LocalDate.parse(settings.getStartDate(), DateTimeConstant.D_FORMAT_INT_FORMATTER), LocalTime.of(20, 0));
