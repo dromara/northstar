@@ -71,6 +71,9 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 
 	@Override
 	public String submitOrder(SubmitOrderReqField submitOrderReq) throws TradeException {
+		if(!isConnected()) {
+			throw new IllegalStateException("网关未连线");
+		}
 		log.debug("[{}] 模拟网关收到下单请求", gd.getGatewayId());
 		SubmitOrderReqField orderReq = SubmitOrderReqField.newBuilder(submitOrderReq).setGatewayId(gd.getGatewayId()).build();
 		account.onSubmitOrder(orderReq);
@@ -79,6 +82,9 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 
 	@Override
 	public boolean cancelOrder(CancelOrderReqField cancelOrderReq) {
+		if(!isConnected()) {
+			throw new IllegalStateException("网关未连线");
+		}
 		log.debug("[{}] 模拟网关收到撤单请求", gd.getGatewayId());
 		account.onCancelOrder(cancelOrderReq);
 		return true;

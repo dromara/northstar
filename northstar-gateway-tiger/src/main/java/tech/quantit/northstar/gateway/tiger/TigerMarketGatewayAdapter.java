@@ -32,7 +32,11 @@ import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.NoticeField;
 import xyz.redtorch.pb.CoreField.TickField;
 
-
+/**
+ * 老虎证券行情网关适配器
+ * @author KevinHuangwl
+ *
+ */
 @Slf4j
 public class TigerMarketGatewayAdapter implements MarketGateway {
 

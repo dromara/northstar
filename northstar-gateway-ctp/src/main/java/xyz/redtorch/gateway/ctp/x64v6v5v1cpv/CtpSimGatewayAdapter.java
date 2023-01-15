@@ -118,29 +118,20 @@ public class CtpSimGatewayAdapter extends GatewayAbstract implements MarketGatew
 
 	@Override
 	public String submitOrder(SubmitOrderReqField submitOrderReq) {
-		if (gatewayDescription.getGatewayUsage() == GatewayUsage.TRADE) {
-			if (tdSpi == null || !tdSpi.isConnected()) {
-				logger.error(getLogInfo() + "交易接口尚未初始化或已断开");
-				return "";
-			}
-			return tdSpi.submitOrder(submitOrderReq);
+		if (!isConnected()) {
+			throw new IllegalStateException("网关未连线");
 		}
-		logger.warn(getLogInfo() + "不包含提交定单功能");
-		return "";
+		return tdSpi.submitOrder(submitOrderReq);
 	}
 
 	@Override
 	public boolean cancelOrder(CancelOrderReqField cancelOrderReq) {
-		if (gatewayDescription.getGatewayUsage() == GatewayUsage.TRADE) {
-			if (tdSpi == null || !tdSpi.isConnected()) {
-				logger.error(getLogInfo() + "交易接口尚未初始化或已断开");
-				return false;
-			}
-			return tdSpi.cancelOrder(cancelOrderReq);
+		if (!isConnected()) {
+			throw new IllegalStateException("网关未连线");
 		}
-		logger.warn(getLogInfo() + "不包含撤销定单功能");
-		return false;
+		return tdSpi.cancelOrder(cancelOrderReq);
 	}
+
 
 	@Override
 	public void disconnect() {
