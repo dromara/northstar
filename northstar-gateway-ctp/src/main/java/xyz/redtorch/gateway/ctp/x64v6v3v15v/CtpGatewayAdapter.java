@@ -9,15 +9,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import tech.quantit.northstar.common.constant.ChannelType;
+import tech.quantit.northstar.common.constant.GatewayUsage;
 import tech.quantit.northstar.common.event.FastEventEngine;
+import tech.quantit.northstar.common.model.GatewayDescription;
 import tech.quantit.northstar.gateway.api.GatewayAbstract;
 import tech.quantit.northstar.gateway.api.IMarketCenter;
 import tech.quantit.northstar.gateway.api.MarketGateway;
 import tech.quantit.northstar.gateway.api.TradeGateway;
-import xyz.redtorch.pb.CoreEnum.GatewayTypeEnum;
 import xyz.redtorch.pb.CoreField.CancelOrderReqField;
 import xyz.redtorch.pb.CoreField.ContractField;
-import xyz.redtorch.pb.CoreField.GatewaySettingField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 
 public class CtpGatewayAdapter extends GatewayAbstract implements MarketGateway, TradeGateway {
@@ -73,16 +73,18 @@ public class CtpGatewayAdapter extends GatewayAbstract implements MarketGateway,
 	private MdSpi mdSpi = null;
 	private TdSpi tdSpi = null;
 	
-	public CtpGatewayAdapter(FastEventEngine fastEventEngine, GatewaySettingField gatewaySetting, IMarketCenter mktCenter) {
-		super(gatewaySetting, mktCenter);
+	public CtpGatewayAdapter(FastEventEngine fastEventEngine, GatewayDescription gd, IMarketCenter mktCenter) {
+		super(gd, mktCenter);
 		
-		if (gatewaySetting.getGatewayType() == GatewayTypeEnum.GTE_Trade) {
+		switch(gd.getGatewayUsage()){
+		case TRADE: 
 			tdSpi = new TdSpi(this);
-		} else if (gatewaySetting.getGatewayType() == GatewayTypeEnum.GTE_MarketData) {
+			break;
+		case MARKET_DATA:
 			mdSpi = new MdSpi(this);
-		} else {
-			mdSpi = new MdSpi(this);
-			tdSpi = new TdSpi(this);
+			break;
+		default:
+			throw new IllegalArgumentException("Unexpected value: " + gd.getGatewayUsage());
 		}
 		
 		this.fastEventEngine = fastEventEngine;
@@ -92,7 +94,7 @@ public class CtpGatewayAdapter extends GatewayAbstract implements MarketGateway,
 	
 	@Override
 	public boolean subscribe(ContractField contractField) {
-		if (gatewaySetting.getGatewayType() == GatewayTypeEnum.GTE_MarketData || gatewaySetting.getGatewayType() == GatewayTypeEnum.GTE_TradeAndMarketData) {
+		if (gatewayDescription.getGatewayUsage() == GatewayUsage.MARKET_DATA) {
 			if (mdSpi == null) {
 				logger.error(getLogInfo() + "行情接口尚未初始化或已断开");
 				return false;
@@ -105,7 +107,7 @@ public class CtpGatewayAdapter extends GatewayAbstract implements MarketGateway,
 
 	@Override
 	public boolean unsubscribe(ContractField contractField) {
-		if (gatewaySetting.getGatewayType() == GatewayTypeEnum.GTE_MarketData || gatewaySetting.getGatewayType() == GatewayTypeEnum.GTE_TradeAndMarketData) {
+		if (gatewayDescription.getGatewayUsage() == GatewayUsage.MARKET_DATA) {
 			if (mdSpi == null) {
 				logger.error(getLogInfo() + "行情接口尚未初始化或已断开");
 				return false;
@@ -118,7 +120,7 @@ public class CtpGatewayAdapter extends GatewayAbstract implements MarketGateway,
 
 	@Override
 	public String submitOrder(SubmitOrderReqField submitOrderReq) {
-		if (gatewaySetting.getGatewayType() == GatewayTypeEnum.GTE_Trade || gatewaySetting.getGatewayType() == GatewayTypeEnum.GTE_TradeAndMarketData) {
+		if (gatewayDescription.getGatewayUsage() == GatewayUsage.TRADE) {
 			if (tdSpi == null || !tdSpi.isConnected()) {
 				logger.error(getLogInfo() + "交易接口尚未初始化或已断开");
 				return "";
@@ -131,7 +133,7 @@ public class CtpGatewayAdapter extends GatewayAbstract implements MarketGateway,
 
 	@Override
 	public boolean cancelOrder(CancelOrderReqField cancelOrderReq) {
-		if (gatewaySetting.getGatewayType() == GatewayTypeEnum.GTE_Trade || gatewaySetting.getGatewayType() == GatewayTypeEnum.GTE_TradeAndMarketData) {
+		if (gatewayDescription.getGatewayUsage() == GatewayUsage.TRADE) {
 			if (tdSpi == null || !tdSpi.isConnected()) {
 				logger.error(getLogInfo() + "交易接口尚未初始化或已断开");
 				return false;
@@ -154,7 +156,7 @@ public class CtpGatewayAdapter extends GatewayAbstract implements MarketGateway,
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
-				logger.warn("当前网关类型：{}", gatewaySetting.getGatewayType());
+				logger.warn("当前网关类型：{}", gatewayDescription.getGatewayUsage());
 				try {
 					if(tdSpiForDisconnect != null) {
 						tdSpiForDisconnect.disconnect();
@@ -177,43 +179,25 @@ public class CtpGatewayAdapter extends GatewayAbstract implements MarketGateway,
 	public void connect() {
 		lastConnectBeginTimestamp = System.currentTimeMillis();
 
-		if (gatewaySetting.getGatewayType() == GatewayTypeEnum.GTE_Trade) {
+		if (gatewayDescription.getGatewayUsage() == GatewayUsage.TRADE) {
 			if (tdSpi == null) {
 				tdSpi = new TdSpi(this);
 			}
-		} else if (gatewaySetting.getGatewayType() == GatewayTypeEnum.GTE_MarketData) {
+			tdSpi.connect();
+		} else if (gatewayDescription.getGatewayUsage() == GatewayUsage.MARKET_DATA) {
 			if (mdSpi == null) {
 				mdSpi = new MdSpi(this);
 			}
-		} else {
-			if (tdSpi == null) {
-				tdSpi = new TdSpi(this);
-			}
-			if (mdSpi == null) {
-				mdSpi = new MdSpi(this);
-			}
-		}
-
-		if (gatewaySetting.getGatewayType() == GatewayTypeEnum.GTE_Trade && tdSpi != null) {
-			tdSpi.connect();
-		} else if (gatewaySetting.getGatewayType() == GatewayTypeEnum.GTE_MarketData && mdSpi != null) {
 			mdSpi.connect();
-		} else if (gatewaySetting.getGatewayType() == GatewayTypeEnum.GTE_TradeAndMarketData && tdSpi != null && mdSpi != null) {
-			tdSpi.connect();
-			mdSpi.connect();
-		} else {
-			logger.error(getLogInfo() + "检测到SPI实例为空");
 		}
 	}
 
 	@Override
 	public boolean isConnected() {
-		if (gatewaySetting.getGatewayType() == GatewayTypeEnum.GTE_Trade && tdSpi != null) {
+		if (gatewayDescription.getGatewayUsage() == GatewayUsage.TRADE && tdSpi != null) {
 			return tdSpi.isConnected();
-		} else if (gatewaySetting.getGatewayType() == GatewayTypeEnum.GTE_MarketData && mdSpi != null) {
+		} else if (gatewayDescription.getGatewayUsage() == GatewayUsage.MARKET_DATA && mdSpi != null) {
 			return mdSpi.isConnected();
-		} else if (gatewaySetting.getGatewayType() == GatewayTypeEnum.GTE_TradeAndMarketData && tdSpi != null && mdSpi != null) {
-			return tdSpi.isConnected() && mdSpi.isConnected();
 		}
 		return false;
 	}

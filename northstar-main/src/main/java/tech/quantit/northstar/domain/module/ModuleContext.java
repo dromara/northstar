@@ -180,7 +180,7 @@ public class ModuleContext implements IModuleContext, MergedBarListener{
 	public synchronized ModuleRuntimeDescription getRuntimeDescription(boolean fullDescription) {
 		Map<String, ModuleAccountRuntimeDescription> accMap = new HashMap<>();
 		for(TradeGateway gateway : gatewayMap.values()) {
-			String gatewayId = gateway.getGatewaySetting().getGatewayId();
+			String gatewayId = gateway.gatewayId();
 			if(accMap.containsKey(gatewayId)) {
 				continue;
 			}
@@ -294,7 +294,7 @@ public class ModuleContext implements IModuleContext, MergedBarListener{
 			throw new NoSuchElementException(String.format("找不到合约 [%s] 对应网关", contract.getUnifiedSymbol()));
 		}
 		String id = UUID.randomUUID().toString();
-		String gatewayId = gatewayMap.get(contract).getGatewaySetting().getGatewayId();
+		String gatewayId = gatewayMap.get(contract).gatewayId();
 		PositionField pf = null;
 		for(PositionField pos : accStore.getPositions(gatewayId)) {
 			boolean isOppositeDir = (operation.isBuy() && FieldUtils.isShort(pos.getPositionDirection()) 
@@ -385,7 +385,7 @@ public class ModuleContext implements IModuleContext, MergedBarListener{
 		ContractField contract = orderReqMap.get(originOrderId).getContract();
 		TradeGateway gateway = gatewayMap.get(contract);
 		CancelOrderReqField cancelReq = CancelOrderReqField.newBuilder()
-				.setGatewayId(gateway.getGatewaySetting().getGatewayId())
+				.setGatewayId(gateway.gatewayId())
 				.setOriginOrderId(originOrderId)
 				.build();
 		accStore.onCancelOrder(cancelReq);
@@ -400,7 +400,7 @@ public class ModuleContext implements IModuleContext, MergedBarListener{
 	@Override
 	public synchronized int holdingNetProfit() {
 		return gatewayMap.values().stream()
-				.map(gw -> gw.getGatewaySetting().getGatewayId())
+				.map(gw -> gw.gatewayId())
 				.map(gatewayId -> accStore.getPositions(gatewayId))
 				.flatMap(Collection::stream)
 				.mapToInt(pf -> (int)pf.getPositionProfit())
@@ -410,7 +410,7 @@ public class ModuleContext implements IModuleContext, MergedBarListener{
 	@Override
 	public synchronized int availablePosition(DirectionEnum direction, String unifiedSymbol) {
 		return gatewayMap.values().stream()
-				.map(gw -> gw.getGatewaySetting().getGatewayId())
+				.map(gw -> gw.gatewayId())
 				.map(gatewayId -> accStore.getPositions(gatewayId))
 				.flatMap(Collection::stream)
 				.filter(pf -> StringUtils.equals(pf.getContract().getUnifiedSymbol(), unifiedSymbol))
@@ -422,7 +422,7 @@ public class ModuleContext implements IModuleContext, MergedBarListener{
 	@Override
 	public synchronized int availablePosition(DirectionEnum direction, String unifiedSymbol, boolean isToday) {
 		Stream<PositionField> posStream = gatewayMap.values().stream()
-				.map(gw -> gw.getGatewaySetting().getGatewayId())
+				.map(gw -> gw.gatewayId())
 				.map(gatewayId -> accStore.getPositions(gatewayId))
 				.flatMap(Collection::stream)
 				.filter(pf -> StringUtils.equals(pf.getContract().getUnifiedSymbol(), unifiedSymbol))

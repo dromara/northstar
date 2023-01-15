@@ -4,7 +4,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.Assert;
@@ -22,7 +21,7 @@ public class GatewayAndConnectionManager {
 	private Map<String, Entry> gatewayMap = new ConcurrentHashMap<>();
 
 	public void createPair(GatewayConnection conn, Gateway gateway) {
-		Assert.isTrue(StringUtils.equals(conn.getGwDescription().getGatewayId(), gateway.getGatewaySetting().getGatewayId()),
+		Assert.isTrue(StringUtils.equals(conn.getGwDescription().getGatewayId(), gateway.gatewayId()),
 				"网关名称不一致");
 		gatewayMap.put(conn.getGwDescription().getGatewayId(), new Entry(conn, gateway));
 	}
@@ -32,7 +31,7 @@ public class GatewayAndConnectionManager {
 	}
 
 	public void removePair(Gateway gateway) {
-		gatewayMap.remove(gateway.getGatewaySetting().getGatewayId());
+		gatewayMap.remove(gateway.gatewayId());
 	}
 
 	public Gateway getGatewayByConnection(GatewayConnection conn) {
@@ -40,7 +39,7 @@ public class GatewayAndConnectionManager {
 	}
 
 	public GatewayConnection getConnectionByGateway(Gateway gateway) {
-		return getGatewayConnectionById(gateway.getGatewaySetting().getGatewayId());
+		return getGatewayConnectionById(gateway.gatewayId());
 	}
 
 	public Gateway getGatewayById(String gatewayId) {
@@ -70,7 +69,7 @@ public class GatewayAndConnectionManager {
 					.values()
 					.stream()
 					.map(e -> e.conn)
-					.collect(Collectors.toList())
+					.toList()
 				);
 	}
 

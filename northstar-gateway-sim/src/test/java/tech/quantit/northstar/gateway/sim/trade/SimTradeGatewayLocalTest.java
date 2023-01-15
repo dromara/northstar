@@ -12,11 +12,11 @@ import org.junit.jupiter.api.Test;
 
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.event.NorthstarEventType;
+import tech.quantit.northstar.common.model.GatewayDescription;
 import test.common.TestFieldFactory;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreField.CancelOrderReqField;
-import xyz.redtorch.pb.CoreField.GatewaySettingField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 
 class SimTradeGatewayLocalTest {
@@ -28,11 +28,12 @@ class SimTradeGatewayLocalTest {
 	@BeforeEach
 	void prepare() {
 		FastEventEngine feEngine = mock(FastEventEngine.class);
-		GatewaySettingField settings = GatewaySettingField.newBuilder()
-				.setGatewayId("gatewayId")
+		GatewayDescription gd = GatewayDescription.builder()
+				.gatewayId("gatewayId")
+				.bindedMktGatewayId("bindedGatewayId")
 				.build();
 		SimAccount simAccount = mock(SimAccount.class);
-		gateway = new SimTradeGatewayLocal(feEngine, mock(SimMarket.class), settings, "bindedGatewayId", simAccount);
+		gateway = new SimTradeGatewayLocal(feEngine, mock(SimMarket.class), gd, simAccount);
 	}
 
 	@Test

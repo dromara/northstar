@@ -41,13 +41,14 @@ import xyz.redtorch.gateway.ctp.x64v6v3v15v.api.CThostFtdcUserLogoutField;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.TickField;
+import xyz.redtorch.pb.CoreField.GatewaySettingField.CtpApiSettingField;
 
 public class MdSpi extends CThostFtdcMdSpi {
 
-	private final static int CONNECTION_STATUS_DISCONNECTED = 0;
-	private final static int CONNECTION_STATUS_CONNECTED = 1;
-	private final static int CONNECTION_STATUS_CONNECTING = 2;
-	private final static int CONNECTION_STATUS_DISCONNECTING = 3;
+	private static final int CONNECTION_STATUS_DISCONNECTED = 0;
+	private static final int CONNECTION_STATUS_CONNECTED = 1;
+	private static final int CONNECTION_STATUS_CONNECTING = 2;
+	private static final int CONNECTION_STATUS_DISCONNECTING = 3;
 
 	private static final Logger logger = LoggerFactory.getLogger(MdSpi.class);
 
@@ -55,6 +56,7 @@ public class MdSpi extends CThostFtdcMdSpi {
 	private String logInfo;
 	private String gatewayId;
 	private String tradingDay;
+	private CtpApiSettingField settings;
 
 	private volatile long lastUpdateTickTime = System.currentTimeMillis();
 
@@ -66,7 +68,8 @@ public class MdSpi extends CThostFtdcMdSpi {
 
 	MdSpi(GatewayAbstract gatewayAdapter) {
 		this.gatewayAdapter = gatewayAdapter;
-		this.gatewayId = gatewayAdapter.getGatewaySetting().getGatewayId();
+		this.gatewayId = gatewayAdapter.gatewayId();
+		this.settings = (CtpApiSettingField) gatewayAdapter.gatewayDescription().getSettings();
 		this.logInfo = "行情网关ID-[" + this.gatewayId + "] [→] ";
 		logger.info("当前MdApi版本号：{}", CThostFtdcMdApi.GetApiVersion());
 	}
@@ -134,8 +137,8 @@ public class MdSpi extends CThostFtdcMdSpi {
 		logger.warn("{}行情接口使用临时文件夹:{}", logInfo, tempFile.getParentFile().getAbsolutePath());
 
 		try {
-			String mdHost = GatewayConstants.SMART_CONNECTOR.bestEndpoint(gatewayAdapter.getGatewaySetting().getCtpApiSetting().getBrokerId());
-			String mdPort = gatewayAdapter.getGatewaySetting().getCtpApiSetting().getMdPort();
+			String mdHost = GatewayConstants.SMART_CONNECTOR.bestEndpoint(settings.getBrokerId());
+			String mdPort = settings.getMdPort();
 			logger.info("使用IP [{}] 连接行情网关", mdHost);
 			cThostFtdcMdApi = CThostFtdcMdApi.CreateFtdcMdApi(tempFile.getAbsolutePath());
 			cThostFtdcMdApi.RegisterSpi(this);
@@ -247,18 +250,18 @@ public class MdSpi extends CThostFtdcMdSpi {
 	}
 
 	private void login() {
-		if (StringUtils.isEmpty(gatewayAdapter.getGatewaySetting().getCtpApiSetting().getBrokerId()) 
-				|| StringUtils.isEmpty(gatewayAdapter.getGatewaySetting().getCtpApiSetting().getUserId()) 
-				|| StringUtils.isEmpty(gatewayAdapter.getGatewaySetting().getCtpApiSetting().getPassword())) {
+		if (StringUtils.isEmpty(settings.getBrokerId()) 
+				|| StringUtils.isEmpty(settings.getUserId()) 
+				|| StringUtils.isEmpty(settings.getPassword())) {
 			logger.error("{}BrokerId UserID Password 不可为空", logInfo);
 			return;
 		}
 		try {
 			// 登录
 			CThostFtdcReqUserLoginField userLoginField = new CThostFtdcReqUserLoginField();
-			userLoginField.setBrokerID(gatewayAdapter.getGatewaySetting().getCtpApiSetting().getBrokerId());
-			userLoginField.setUserID(gatewayAdapter.getGatewaySetting().getCtpApiSetting().getUserId());
-			userLoginField.setPassword(gatewayAdapter.getGatewaySetting().getCtpApiSetting().getPassword());
+			userLoginField.setBrokerID(settings.getBrokerId());
+			userLoginField.setUserID(settings.getUserId());
+			userLoginField.setPassword(settings.getPassword());
 			cThostFtdcMdApi.ReqUserLogin(userLoginField, 0);
 		} catch (Throwable t) {
 			logger.error("{}登录异常", logInfo, t);

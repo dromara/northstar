@@ -45,7 +45,7 @@ public class TradeModule implements IModule {
 	
 	public TradeModule(IModuleContext context, Set<MarketGateway> mktGatewaySet, Consumer<ModuleRuntimeDescription> onRuntimeChangeCallback) {
 		this.ctx = context;
-		this.mktGatewayIdSet = mktGatewaySet.stream().map(mktGateway -> mktGateway.getGatewaySetting().getGatewayId()).collect(Collectors.toSet());
+		this.mktGatewayIdSet = mktGatewaySet.stream().map(mktGateway -> mktGateway.gatewayId()).collect(Collectors.toSet());
 		this.onRuntimeChangeCallback = onRuntimeChangeCallback;
 	}
 	

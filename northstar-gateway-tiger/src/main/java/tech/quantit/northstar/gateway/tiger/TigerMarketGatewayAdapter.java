@@ -27,16 +27,14 @@ import tech.quantit.northstar.common.model.GatewayDescription;
 import tech.quantit.northstar.gateway.api.IContractManager;
 import tech.quantit.northstar.gateway.api.MarketGateway;
 import xyz.redtorch.pb.CoreEnum.CommonStatusEnum;
-import xyz.redtorch.pb.CoreEnum.GatewayTypeEnum;
 import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
-import xyz.redtorch.pb.CoreField.GatewaySettingField;
 import xyz.redtorch.pb.CoreField.NoticeField;
 import xyz.redtorch.pb.CoreField.TickField;
 
 
 @Slf4j
-public class TigerGatewayAdapter implements MarketGateway {
+public class TigerMarketGatewayAdapter implements MarketGateway {
 
 	private GatewayDescription gd;
 	
@@ -46,7 +44,7 @@ public class TigerGatewayAdapter implements MarketGateway {
 	
 	private TigerSpi spi;
 	
-	public TigerGatewayAdapter(GatewayDescription gd, FastEventEngine feEngine, IContractManager contractMgr) {
+	public TigerMarketGatewayAdapter(GatewayDescription gd, FastEventEngine feEngine, IContractManager contractMgr) {
 		this.gd = gd;
 		this.feEngine = feEngine;
 		this.spi = new TigerSpi(feEngine, contractMgr); 
@@ -63,14 +61,6 @@ public class TigerGatewayAdapter implements MarketGateway {
 		ApiLogger.setEnabled(true, "logs/");
 	}
 	
-	@Override
-	public GatewaySettingField getGatewaySetting() {
-		return GatewaySettingField.newBuilder()
-				.setGatewayId(gd.getGatewayId())
-				.setGatewayType(GatewayTypeEnum.GTE_MarketData)
-				.build();
-	}
-
 	@Override
 	public void connect() {
 		client.connect();
@@ -121,6 +111,16 @@ public class TigerGatewayAdapter implements MarketGateway {
 	@Override
 	public ChannelType channelType() {
 		return ChannelType.TIGER;
+	}
+	
+	@Override
+	public GatewayDescription gatewayDescription() {
+		return gd;
+	}
+
+	@Override
+	public String gatewayId() {
+		return gd.getGatewayId();
 	}
 
 	class TigerSpi implements ApiComposeCallback {
@@ -304,4 +304,5 @@ public class TigerGatewayAdapter implements MarketGateway {
 		}
 		
 	}
+
 }

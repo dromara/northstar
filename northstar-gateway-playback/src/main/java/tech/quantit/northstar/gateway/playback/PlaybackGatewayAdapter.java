@@ -1,25 +1,19 @@
 package tech.quantit.northstar.gateway.playback;
 
 import tech.quantit.northstar.common.constant.ChannelType;
+import tech.quantit.northstar.common.model.GatewayDescription;
 import tech.quantit.northstar.gateway.api.MarketGateway;
 import xyz.redtorch.pb.CoreField.ContractField;
-import xyz.redtorch.pb.CoreField.GatewaySettingField;
 
 public class PlaybackGatewayAdapter implements MarketGateway {
 	
 	private PlaybackContext ctx;
 	
-	private GatewaySettingField settings;
+	private GatewayDescription gd;
 	
-	public PlaybackGatewayAdapter(PlaybackContext ctx, GatewaySettingField settings) {
+	public PlaybackGatewayAdapter(PlaybackContext ctx, GatewayDescription gd) {
 		this.ctx = ctx;
-		this.ctx.setGatewaySettings(settings);
-		this.settings = settings;
-	}
-
-	@Override
-	public GatewaySettingField getGatewaySetting() {
-		return settings;
+		this.gd = gd;
 	}
 
 	@Override
@@ -62,6 +56,16 @@ public class PlaybackGatewayAdapter implements MarketGateway {
 	@Override
 	public ChannelType channelType() {
 		return ChannelType.PLAYBACK;
+	}
+
+	@Override
+	public GatewayDescription gatewayDescription() {
+		return gd;
+	}
+
+	@Override
+	public String gatewayId() {
+		return gd.getGatewayId();
 	}
 
 }

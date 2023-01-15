@@ -11,8 +11,6 @@ import tech.quantit.northstar.gateway.api.Gateway;
 import tech.quantit.northstar.gateway.api.GatewayFactory;
 import tech.quantit.northstar.gateway.api.IMarketCenter;
 import tech.quantit.northstar.gateway.sim.market.SimMarketGatewayLocal;
-import xyz.redtorch.pb.CoreEnum.GatewayTypeEnum;
-import xyz.redtorch.pb.CoreField.GatewaySettingField;
 
 public class SimGatewayFactory implements GatewayFactory{
 	
@@ -40,11 +38,7 @@ public class SimGatewayFactory implements GatewayFactory{
 	}
 	
 	private Gateway getMarketGateway(GatewayDescription gatewayDescription) {
-		GatewaySettingField gwSettings = GatewaySettingField.newBuilder()
-				.setGatewayId(gatewayDescription.getGatewayId())
-				.setGatewayType(GatewayTypeEnum.GTE_MarketData)
-				.build();
-		return new SimMarketGatewayLocal(gwSettings, fastEventEngine, mktCenter);
+		return new SimMarketGatewayLocal(gatewayDescription, fastEventEngine, mktCenter);
 	}
 	
 	private Gateway getTradeGateway(GatewayDescription gatewayDescription) {
@@ -52,11 +46,6 @@ public class SimGatewayFactory implements GatewayFactory{
 		String accGatewayId = gatewayDescription.getGatewayId();
 		SimAccountDescription simAccountDescription = simAccountRepo.findById(accGatewayId);
 
-		GatewaySettingField gwSettings = GatewaySettingField.newBuilder()
-				.setGatewayId(gatewayDescription.getGatewayId())
-				.setGatewayType(GatewayTypeEnum.GTE_Trade)
-				.build();
-		
 		final SimAccount account;
 		if(simAccountDescription == null) {
 			account = new SimAccount(accGatewayId, mktCenter, fastEventEngine, simAccDescription -> simAccountRepo.save(simAccDescription));
@@ -67,7 +56,7 @@ public class SimGatewayFactory implements GatewayFactory{
 				throw new IllegalStateException("无法创建模拟账户", e);
 			}
 		}
-		SimTradeGateway gateway = new SimTradeGatewayLocal(fastEventEngine, simMarket, gwSettings, mdGatewayId, account);
+		SimTradeGateway gateway = new SimTradeGatewayLocal(fastEventEngine, simMarket, gatewayDescription, account);
 		simMarket.addGateway(mdGatewayId, gateway);
 		return gateway;
 	}

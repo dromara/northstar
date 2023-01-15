@@ -233,7 +233,7 @@ public class MarketCenter implements IMarketCenter, TickDataAware{
 	 */
 	@Override
 	public void addGateway(MarketGateway gateway) {
-		log.info("注册网关渠道：{}", gateway.getGatewaySetting().getGatewayId());
+		log.info("注册网关渠道：{}", gateway.gatewayId());
 		gatewayMap.put(gateway.channelType(), gateway);
 	}
 

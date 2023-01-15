@@ -20,14 +20,6 @@ public class BinanceMarketGatewayAdapter implements MarketGateway {
 	}
 	
 	@Override
-	public GatewaySettingField getGatewaySetting() {
-		return GatewaySettingField.newBuilder()
-				.setGatewayId(gd.getGatewayId())
-				.setGatewayType(GatewayTypeEnum.GTE_MarketData)
-				.build();
-	}
-
-	@Override
 	public void connect() {
 		
 	}
@@ -70,6 +62,16 @@ public class BinanceMarketGatewayAdapter implements MarketGateway {
 	@Override
 	public ChannelType channelType() {
 		return ChannelType.BIAN;
+	}
+
+	@Override
+	public GatewayDescription gatewayDescription() {
+		return gd;
+	}
+
+	@Override
+	public String gatewayId() {
+		return gd.getGatewayId();
 	}
 
 }

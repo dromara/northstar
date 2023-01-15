@@ -4,16 +4,12 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson2.JSONObject;
 
 import tech.quantit.northstar.common.IDataServiceManager;
-import tech.quantit.northstar.common.constant.GatewayUsage;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.model.GatewayDescription;
 import tech.quantit.northstar.gateway.api.Gateway;
 import tech.quantit.northstar.gateway.api.GatewayFactory;
 import tech.quantit.northstar.gateway.api.IMarketCenter;
 import tech.quantit.northstar.gateway.ctp.CtpGatewaySettings;
-import xyz.redtorch.pb.CoreEnum.GatewayAdapterTypeEnum;
-import xyz.redtorch.pb.CoreEnum.GatewayTypeEnum;
-import xyz.redtorch.pb.CoreField.GatewaySettingField;
 import xyz.redtorch.pb.CoreField.GatewaySettingField.CtpApiSettingField;
 
 public class CtpGatewayFactory implements GatewayFactory{
@@ -32,9 +28,6 @@ public class CtpGatewayFactory implements GatewayFactory{
 	
 	@Override
 	public Gateway newInstance(GatewayDescription gatewayDescription) {
-		GatewayTypeEnum gwType = gatewayDescription.getGatewayUsage() == GatewayUsage.MARKET_DATA
-				? GatewayTypeEnum.GTE_MarketData
-				: GatewayTypeEnum.GTE_Trade;
 		CtpGatewaySettings settings = JSON.parseObject(JSON.toJSONString(gatewayDescription.getSettings()), CtpGatewaySettings.class);
 		JSONObject json = dataMgr.getCtpMetaSettings(settings.getBrokerId());
 		CtpApiSettingField ctpSetting = CtpApiSettingField.newBuilder()
@@ -47,13 +40,8 @@ public class CtpGatewayFactory implements GatewayFactory{
 				.setTdPort(json.getString("tdPort"))
 				.setAuthCode(json.getString("authCode"))
 				.build();
-		return new CtpGatewayAdapter(fastEventEngine, GatewaySettingField.newBuilder()
-				.setGatewayAdapterType(GatewayAdapterTypeEnum.GAT_CTP)
-				.setGatewayId(gatewayDescription.getGatewayId())
-				.setGatewayName(gatewayDescription.getGatewayId())
-				.setCtpApiSetting(ctpSetting)
-				.setGatewayType(gwType)
-				.build(), mktCenter);
+		gatewayDescription.setSettings(ctpSetting);
+		return new CtpGatewayAdapter(fastEventEngine, gatewayDescription, mktCenter);
 	}
 
 }

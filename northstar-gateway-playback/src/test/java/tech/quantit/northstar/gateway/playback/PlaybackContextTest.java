@@ -19,6 +19,7 @@ import tech.quantit.northstar.common.constant.PlaybackPrecision;
 import tech.quantit.northstar.common.constant.PlaybackSpeed;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.model.ContractSimpleInfo;
+import tech.quantit.northstar.common.model.GatewayDescription;
 import tech.quantit.northstar.common.model.Identifier;
 import tech.quantit.northstar.data.IPlaybackRuntimeRepository;
 import tech.quantit.northstar.gateway.api.IContractManager;
@@ -28,7 +29,6 @@ import tech.quantit.northstar.gateway.playback.utils.PlaybackDataLoader;
 import test.common.TestFieldFactory;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.ContractField;
-import xyz.redtorch.pb.CoreField.GatewaySettingField;
 import xyz.redtorch.pb.CoreField.TickField;
 
 class PlaybackContextTest {
@@ -72,8 +72,10 @@ class PlaybackContextTest {
 	
 	@Test
 	void testRunning() throws InterruptedException {
-		PlaybackContext ctx = new PlaybackContext(settings, ldt, clock, loader, feEngine, rtRepo, contractMgr);
-		ctx.setGatewaySettings(GatewaySettingField.newBuilder().setGatewayId("testGateway").build());
+		PlaybackContext ctx = new PlaybackContext(GatewayDescription.builder()
+				.gatewayId("testGateway")
+				.settings(settings)
+				.build(), ldt, clock, loader, feEngine, rtRepo, contractMgr);
 		
 		assertDoesNotThrow(() -> {
 			ctx.start();

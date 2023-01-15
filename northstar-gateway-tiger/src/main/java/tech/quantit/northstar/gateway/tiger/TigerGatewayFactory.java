@@ -29,7 +29,7 @@ public class TigerGatewayFactory implements GatewayFactory{
 			new TigerContractProvider(settings, mktCenter).loadContractOptions();
 			contractLoaded = true;
 		}
-		return new TigerGatewayAdapter(gatewayDescription, feEngine, mktCenter);
+		return new TigerMarketGatewayAdapter(gatewayDescription, feEngine, mktCenter);
 	}
 
 }

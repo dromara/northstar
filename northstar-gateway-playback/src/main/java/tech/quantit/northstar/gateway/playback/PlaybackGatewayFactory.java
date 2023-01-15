@@ -20,8 +20,6 @@ import tech.quantit.northstar.gateway.api.IContractManager;
 import tech.quantit.northstar.gateway.playback.utils.CtpPlaybackClock;
 import tech.quantit.northstar.gateway.playback.utils.PlaybackClock;
 import tech.quantit.northstar.gateway.playback.utils.PlaybackDataLoader;
-import xyz.redtorch.pb.CoreEnum.GatewayTypeEnum;
-import xyz.redtorch.pb.CoreField.GatewaySettingField;
 
 public class PlaybackGatewayFactory implements GatewayFactory{
 
@@ -48,25 +46,13 @@ public class PlaybackGatewayFactory implements GatewayFactory{
 	public Gateway newInstance(GatewayDescription gatewayDescription) {
 		PlaybackRuntimeDescription playbackRt = rtRepo.findById(gatewayDescription.getGatewayId());
 		PlaybackGatewaySettings settings = JSON.parseObject(JSON.toJSONString(gatewayDescription.getSettings()), PlaybackGatewaySettings.class);
-		
-		PlaybackContext context = createPlaybackContext(gatewayDescription.getGatewayId(), settings, playbackRt);
-		GatewaySettingField settingField = createGatewaySettings(gatewayDescription);
-		return new PlaybackGatewayAdapter(context, settingField);
-	}
-	
-	private PlaybackContext createPlaybackContext(String gatewayId, PlaybackGatewaySettings settings, PlaybackRuntimeDescription playbackRt) {
 		LocalDateTime ldt = Objects.nonNull(playbackRt) 
 				? playbackRt.getPlaybackTimeState() 
 				: LocalDateTime.of(LocalDate.parse(settings.getStartDate(), DateTimeConstant.D_FORMAT_INT_FORMATTER), LocalTime.of(20, 0));
 		PlaybackClock clock = new CtpPlaybackClock(holidayMgr, ldt);
-		PlaybackDataLoader loader = new PlaybackDataLoader(gatewayId, mdRepo);
-		return new PlaybackContext(settings, ldt, clock, loader, feEngine, rtRepo, contractMgr);
+		PlaybackDataLoader loader = new PlaybackDataLoader(gatewayDescription.getGatewayId(), mdRepo);
+		PlaybackContext context = new PlaybackContext(gatewayDescription, ldt, clock, loader, feEngine, rtRepo, contractMgr);
+		return new PlaybackGatewayAdapter(context, gatewayDescription);
 	}
 	
-	private GatewaySettingField createGatewaySettings(GatewayDescription gatewayDescription) {
-		return GatewaySettingField.newBuilder()
-				.setGatewayId(gatewayDescription.getGatewayId())
-				.setGatewayType(GatewayTypeEnum.GTE_MarketData)
-				.build();
-	}
 }

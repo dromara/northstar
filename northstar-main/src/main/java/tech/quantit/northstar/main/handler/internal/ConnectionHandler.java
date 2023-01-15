@@ -20,7 +20,6 @@ import tech.quantit.northstar.domain.gateway.GatewayConnection;
 import tech.quantit.northstar.gateway.api.Gateway;
 import tech.quantit.northstar.gateway.api.IContractManager;
 import tech.quantit.northstar.gateway.api.MarketGateway;
-import xyz.redtorch.pb.CoreEnum.GatewayTypeEnum;
 
 /**
  * 处理连接相关操作
@@ -73,8 +72,8 @@ public class ConnectionHandler extends AbstractEventHandler implements GenericEv
 		} else if(e.getEvent() == NorthstarEventType.GATEWAY_READY) {
 			log.info("[{}]-已可用", gatewayId);
 			Gateway gateway = gatewayConnMgr.getGatewayById(gatewayId);
-			if(gateway instanceof MarketGateway mktGateway && gateway.getGatewaySetting().getGatewayType() == GatewayTypeEnum.GTE_MarketData) {
-				doSubscribe(mktGateway.getGatewaySetting().getGatewayId());
+			if(gateway instanceof MarketGateway mktGateway) {
+				doSubscribe(mktGateway.gatewayId());
 			}
 		}
 	}

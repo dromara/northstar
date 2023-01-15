@@ -28,6 +28,7 @@ import tech.quantit.northstar.common.constant.DateTimeConstant;
 import tech.quantit.northstar.common.constant.TickType;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.event.NorthstarEventType;
+import tech.quantit.northstar.common.model.GatewayDescription;
 import tech.quantit.northstar.common.model.Identifier;
 import tech.quantit.northstar.common.model.PlaybackRuntimeDescription;
 import tech.quantit.northstar.common.utils.MarketDataLoadingUtils;
@@ -44,7 +45,6 @@ import tech.quantit.northstar.gateway.playback.utils.PlaybackDataLoader;
 import xyz.redtorch.pb.CoreEnum.CommonStatusEnum;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.ContractField;
-import xyz.redtorch.pb.CoreField.GatewaySettingField;
 import xyz.redtorch.pb.CoreField.NoticeField;
 import xyz.redtorch.pb.CoreField.TickField;
 
@@ -70,7 +70,7 @@ public class PlaybackContext {
 	
 	private PlaybackGatewaySettings settings;
 	
-	private GatewaySettingField gatewaySettings;
+	private GatewayDescription gd;
 	
 	private final LocalDate playbackEndDate;
 	
@@ -89,9 +89,10 @@ public class PlaybackContext {
 	private boolean isLoading;
 	private Timer timer;
 	
-	public PlaybackContext(PlaybackGatewaySettings settings, LocalDateTime currentTimeState, PlaybackClock clock, 
+	public PlaybackContext(GatewayDescription gd, LocalDateTime currentTimeState, PlaybackClock clock, 
 			PlaybackDataLoader loader, FastEventEngine feEngine, IPlaybackRuntimeRepository rtRepo, IContractManager contractMgr) {
-		this.settings = settings;
+		this.gd = gd;
+		this.settings = (PlaybackGatewaySettings) gd.getSettings();
 		this.playbackTimeState = currentTimeState;
 		this.clock = clock;
 		this.loader = loader;
@@ -124,11 +125,11 @@ public class PlaybackContext {
 	 * @throws InterruptedException 
 	 */
 	public synchronized void start() {
-		feEngine.emitEvent(NorthstarEventType.CONNECTED, gatewaySettings.getGatewayId());
+		feEngine.emitEvent(NorthstarEventType.CONNECTED, gd.getGatewayId());
 		isRunning = true;
 		if(isLoading) {
 			feEngine.emitEvent(NorthstarEventType.NOTICE, NoticeField.newBuilder()
-					.setContent(String.format("[%s]-当前处于预热阶段，请稍等……", gatewaySettings.getGatewayId()))
+					.setContent(String.format("[%s]-当前处于预热阶段，请稍等……", gd.getGatewayId()))
 					.setStatus(CommonStatusEnum.COMS_WARN)
 					.setTimestamp(System.currentTimeMillis())
 					.build());
@@ -141,7 +142,7 @@ public class PlaybackContext {
 		default -> throw new IllegalArgumentException("Unexpected value: " + settings.getSpeed());
 		};
 		
-		log.info("回放网关 [{}] 连线。当前回放时间状态：{}", gatewaySettings.getGatewayId(), playbackTimeState);
+		log.info("回放网关 [{}] 连线。当前回放时间状态：{}", gd.getGatewayId(), playbackTimeState);
 		timer = new Timer();
 		timer.scheduleAtFixedRate(new TimerTask() {
 			
@@ -163,7 +164,7 @@ public class PlaybackContext {
 			
 			private boolean checkDone() {
 				if(playbackTimeState.toLocalDate().isAfter(playbackEndDate)) {
-					String infoMsg = String.format("[%s]-历史行情回放已经结束，可通过【复位】重置", gatewaySettings.getGatewayId());
+					String infoMsg = String.format("[%s]-历史行情回放已经结束，可通过【复位】重置", gd.getGatewayId());
 					log.info(infoMsg);
 					feEngine.emitEvent(NorthstarEventType.NOTICE, NoticeField.newBuilder()
 							.setContent(infoMsg)
@@ -188,13 +189,13 @@ public class PlaybackContext {
 				if(!hasPreLoaded) {	
 					isLoading = true;
 					feEngine.emitEvent(NorthstarEventType.NOTICE, NoticeField.newBuilder()
-							.setContent(String.format("[%s]-当前处于预热阶段，请稍等……", gatewaySettings.getGatewayId()))
+							.setContent(String.format("[%s]-当前处于预热阶段，请稍等……", gd.getGatewayId()))
 							.setStatus(CommonStatusEnum.COMS_WARN)
 							.setTimestamp(System.currentTimeMillis())
 							.build());
 					LocalDate preloadStartDate = utils.getFridayOfThisWeek(LocalDate.parse(settings.getPreStartDate(), DateTimeConstant.D_FORMAT_INT_FORMATTER).minusWeeks(1));
 					LocalDate preloadEndDate = playbackTimeState.toLocalDate();
-					log.debug("回放网关 [{}] 正在加载预热数据，预热时间段：{} -> {}", gatewaySettings.getGatewayId(), preloadStartDate, preloadEndDate);
+					log.debug("回放网关 [{}] 正在加载预热数据，预热时间段：{} -> {}", gd.getGatewayId(), preloadStartDate, preloadEndDate);
 					
 					playbackTimeState = LocalDateTime.of(preloadEndDate, LocalTime.of(21, 0));
 					
@@ -234,7 +235,7 @@ public class PlaybackContext {
 									queryEnd = queryEnd.plusWeeks(WEEK_DELTA);
 								}
 								
-								log.debug("回放网关 [{}] 合约 {} 数据预热完毕", gatewaySettings.getGatewayId(), contract.getUnifiedSymbol());
+								log.debug("回放网关 [{}] 合约 {} 数据预热完毕", gd.getGatewayId(), contract.getUnifiedSymbol());
 								cdl.countDown();
 								isLoading = false;
 							}).start();
@@ -247,7 +248,7 @@ public class PlaybackContext {
 						log.warn("预热加载等待被中断", e);
 					} finally {
 						feEngine.emitEvent(NorthstarEventType.NOTICE, NoticeField.newBuilder()
-								.setContent(String.format("[%s]-预热阶段结束，请重新连线，正式开始回放。", gatewaySettings.getGatewayId()))
+								.setContent(String.format("[%s]-预热阶段结束，请重新连线，正式开始回放。", gd.getGatewayId()))
 								.setStatus(CommonStatusEnum.COMS_WARN)
 								.setTimestamp(System.currentTimeMillis())
 								.build());
@@ -299,14 +300,14 @@ public class PlaybackContext {
 				if(isTickDataEmpty()) {
 					Iterator<Entry<ContractField, BarField>> itCacheBars = cacheBarMap.entrySet().iterator();
 					while(itCacheBars.hasNext()) {
-						BarField bar = BarField.newBuilder(itCacheBars.next().getValue()).setGatewayId(gatewaySettings.getGatewayId()).build();
+						BarField bar = BarField.newBuilder(itCacheBars.next().getValue()).setGatewayId(gd.getGatewayId()).build();
 						log.trace("Bar信息： {} {}， {} 价格：{}", bar.getActionDay(), bar.getActionTime(), bar.getUnifiedSymbol(), bar.getClosePrice());
 						feEngine.emitEvent(NorthstarEventType.BAR, bar);
 						itCacheBars.remove();
 					}
 					playbackTimeState = clock.nextMarketMinute();
 					rtRepo.save(PlaybackRuntimeDescription.builder()
-							.gatewayId(gatewaySettings.getGatewayId())
+							.gatewayId(gd.getGatewayId())
 							.playbackTimeState(playbackTimeState)
 							.build());
 					// 回放结束后，自动停机
@@ -319,7 +320,7 @@ public class PlaybackContext {
 	
 	// 按天加载BAR数据
 	private void loadBars() {
-		log.info("回放网关 [{}] 运行至 {}", gatewaySettings.getGatewayId(), playbackTimeState);
+		log.info("回放网关 [{}] 运行至 {}", gd.getGatewayId(), playbackTimeState);
 		contractBarMap = settings.getPlayContracts()
 			.stream()
 			.map(c -> contractMgr.getContract(Identifier.of(c.getValue())))
@@ -369,7 +370,7 @@ public class PlaybackContext {
 						.setLastPrice(e.price())
 						.addAllAskPrice(List.of(e.askPrice0(), 0D, 0D, 0D, 0D)) // 仅模拟卖一价
 						.addAllBidPrice(List.of(e.bidPrice0(), 0D, 0D, 0D, 0D)) // 仅模拟买一价
-						.setGatewayId(gatewaySettings.getGatewayId())
+						.setGatewayId(gd.getGatewayId())
 						.setVolumeDelta(e.volume())							// 采用模拟随机值
 						.setOpenInterest(srcBar.getOpenInterest())			// 采用分钟K线的模糊值
 						.setOpenInterestDelta(e.openInterestDelta())		// 采用模拟随机值
@@ -385,8 +386,8 @@ public class PlaybackContext {
 	public synchronized void stop() {
 		isRunning = false;
 		timer.cancel();
-		feEngine.emitEvent(NorthstarEventType.DISCONNECTED, gatewaySettings.getGatewayId());
-		log.info("回放网关 [{}] 断开。当前回放时间状态：{}", gatewaySettings.getGatewayId(), playbackTimeState);
+		feEngine.emitEvent(NorthstarEventType.DISCONNECTED, gd.getGatewayId());
+		log.info("回放网关 [{}] 断开。当前回放时间状态：{}", gd.getGatewayId(), playbackTimeState);
 	}
 	
 	/**
@@ -397,7 +398,4 @@ public class PlaybackContext {
 		return isRunning;
 	}
 	
-	public void setGatewaySettings(GatewaySettingField gatewaySettings) {
-		this.gatewaySettings = gatewaySettings;
-	}
 }

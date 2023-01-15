@@ -31,7 +31,6 @@ import tech.quantit.northstar.strategy.api.utils.trade.DealCollector;
 import test.common.TestFieldFactory;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
-import xyz.redtorch.pb.CoreField.GatewaySettingField;
 import xyz.redtorch.pb.CoreField.PositionField;
 import xyz.redtorch.pb.CoreField.TickField;
 
@@ -72,7 +71,7 @@ class ModuleContextTest {
 		Contract c = mock(Contract.class);
 		when(c.contractField()).thenReturn(contract);
 		when(c.tradeTimeDefinition()).thenReturn(new GenericTradeTime());
-		when(gateway.getGatewaySetting()).thenReturn(GatewaySettingField.newBuilder().setGatewayId("testAccount").build());
+		when(gateway.gatewayId()).thenReturn("testAccount");
 		ctx.bindGatewayContracts(gateway, List.of(c));
 		ctx.onTick(tick);
 		assertThrows(TradeException.class, () -> {			
@@ -90,7 +89,7 @@ class ModuleContextTest {
 		Contract c = mock(Contract.class);
 		when(c.contractField()).thenReturn(contract);
 		when(c.tradeTimeDefinition()).thenReturn(new GenericTradeTime());
-		when(gateway.getGatewaySetting()).thenReturn(GatewaySettingField.newBuilder().setGatewayId("testAccount").build());
+		when(gateway.gatewayId()).thenReturn("testAccount");
 		ctx.bindGatewayContracts(gateway, List.of(c));
 		ctx.onTick(tick);
 		when(ctx.accStore.getPreBalance(anyString())).thenReturn(10000000D);

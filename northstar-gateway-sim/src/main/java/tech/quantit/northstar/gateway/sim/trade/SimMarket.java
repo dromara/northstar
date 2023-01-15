@@ -22,12 +22,12 @@ public class SimMarket {
 	private Executor exec = Executors.newSingleThreadExecutor();	// 增加一个工作线程解耦TICK事件可能导致的死锁问题
 	
 	public synchronized void addGateway(String mdGatewayId, SimTradeGateway accountGateway) {
-		String simGatewayId = accountGateway.getGatewaySetting().getGatewayId();
+		String simGatewayId = accountGateway.gatewayId();
 		simGatewayMap.put(mdGatewayId, simGatewayId, accountGateway);
 	}
 	
 	public synchronized void removeGateway(String mdGatewayId, SimTradeGateway accountGateway) {
-		String simGatewayId = accountGateway.getGatewaySetting().getGatewayId();
+		String simGatewayId = accountGateway.gatewayId();
 		simGatewayMap.remove(mdGatewayId, simGatewayId);
 	}
 	

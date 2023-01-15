@@ -1,33 +1,31 @@
 package tech.quantit.northstar.gateway.api;
 
 import lombok.extern.slf4j.Slf4j;
+import tech.quantit.northstar.common.constant.GatewayUsage;
 import tech.quantit.northstar.common.event.FastEventEngine;
-import xyz.redtorch.pb.CoreEnum.GatewayTypeEnum;
-import xyz.redtorch.pb.CoreField.GatewaySettingField;
+import tech.quantit.northstar.common.model.GatewayDescription;
 
 @Slf4j
 public abstract class GatewayAbstract implements Gateway {
 
 	protected String gatewayId;
-	protected String gatewayName;
 	protected String logInfo;
 	protected boolean autoErrorFlag = false;
 	protected long lastConnectBeginTimestamp = 0;
 	
 	protected String gatewayTradingDay;
 
-	protected GatewaySettingField gatewaySetting;
+	protected GatewayDescription gatewayDescription;
 	
 	protected FastEventEngine fastEventEngine;
 	
 	public final IMarketCenter mktCenter;
 
-	protected GatewayAbstract(GatewaySettingField gatewaySetting, IMarketCenter mktCenter) {
+	protected GatewayAbstract(GatewayDescription gatewayDescription, IMarketCenter mktCenter) {
 		this.mktCenter = mktCenter;
-		this.gatewaySetting = gatewaySetting;
-		this.gatewayId = gatewaySetting.getGatewayId();
-		this.gatewayName = gatewaySetting.getGatewayName();
-		this.logInfo = (gatewaySetting.getGatewayType() == GatewayTypeEnum.GTE_MarketData ? "行情" : "交易") + "网关ID-[" + gatewayId + "] [→] ";
+		this.gatewayDescription = gatewayDescription;
+		this.gatewayId = gatewayDescription.getGatewayId();
+		this.logInfo = (gatewayDescription.getGatewayUsage() == GatewayUsage.MARKET_DATA ? "行情" : "交易") + "网关ID-[" + gatewayId + "] [→] ";
 		log.info(logInfo + "开始初始化");
 
 	}
@@ -36,10 +34,17 @@ public abstract class GatewayAbstract implements Gateway {
 	public boolean getAuthErrorFlag() {
 		return autoErrorFlag;
 	}
+	
+	
 
 	@Override
-	public GatewaySettingField getGatewaySetting() {
-		return gatewaySetting;
+	public GatewayDescription gatewayDescription() {
+		return gatewayDescription;
+	}
+
+	@Override
+	public String gatewayId() {
+		return gatewayId;
 	}
 
 	protected String getLogInfo() {

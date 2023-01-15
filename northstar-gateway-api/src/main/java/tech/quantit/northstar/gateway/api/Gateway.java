@@ -1,6 +1,6 @@
 package tech.quantit.northstar.gateway.api;
 
-import xyz.redtorch.pb.CoreField.GatewaySettingField;
+import tech.quantit.northstar.common.model.GatewayDescription;
 
 public interface Gateway {
 
@@ -9,7 +9,12 @@ public interface Gateway {
 	 * 
 	 * @return
 	 */
-	GatewaySettingField getGatewaySetting();
+	GatewayDescription gatewayDescription();
+	/**
+	 * 网关ID
+	 * @return
+	 */
+	String gatewayId();
 	
 	/**
 	 * 连接

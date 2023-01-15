@@ -24,7 +24,6 @@ import test.common.TestFieldFactory;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
-import xyz.redtorch.pb.CoreField.GatewaySettingField;
 import xyz.redtorch.pb.CoreField.TickField;
 
 class MarketCenterTest {
@@ -67,7 +66,7 @@ class MarketCenterTest {
 	@Test
 	void testAddInstument() {
 		MarketGateway gateway = mock(MarketGateway.class);
-		when(gateway.getGatewaySetting()).thenReturn(GatewaySettingField.newBuilder().setGatewayId(GATEWAY_ID).build());
+		when(gateway.gatewayId()).thenReturn(GATEWAY_ID);
 		center.addInstrument(ins1);
 		center.addInstrument(ins2);
 		center.addInstrument(ins3);
@@ -79,7 +78,7 @@ class MarketCenterTest {
 	@Test
 	void testFindContract() {
 		MarketGateway gateway = mock(MarketGateway.class);
-		when(gateway.getGatewaySetting()).thenReturn(GatewaySettingField.newBuilder().setGatewayId(GATEWAY_ID).build());
+		when(gateway.gatewayId()).thenReturn(GATEWAY_ID);
 		center.addInstrument(ins1);
 		center.addInstrument(ins2);
 		center.addInstrument(ins3);
@@ -93,7 +92,7 @@ class MarketCenterTest {
 	@Test
 	void testAggregateContract() {
 		MarketGateway gateway = mock(MarketGateway.class);
-		when(gateway.getGatewaySetting()).thenReturn(GatewaySettingField.newBuilder().setGatewayId(GATEWAY_ID).build());
+		when(gateway.gatewayId()).thenReturn(GATEWAY_ID);
 		center.addInstrument(ins1);
 		center.addInstrument(ins2);
 		center.addInstrument(ins3);
@@ -106,7 +105,7 @@ class MarketCenterTest {
 	@Test 
 	void testTick() {
 		MarketGateway gateway = mock(MarketGateway.class);
-		when(gateway.getGatewaySetting()).thenReturn(GatewaySettingField.newBuilder().setGatewayId(GATEWAY_ID).build());
+		when(gateway.gatewayId()).thenReturn(GATEWAY_ID);
 		center.addInstrument(ins1);
 		center.addInstrument(ins2);
 		center.addInstrument(ins3);

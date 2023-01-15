@@ -13,11 +13,11 @@ import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.constant.ChannelType;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.event.NorthstarEventType;
+import tech.quantit.northstar.common.model.GatewayDescription;
 import tech.quantit.northstar.gateway.api.IMarketCenter;
 import tech.quantit.northstar.gateway.api.MarketGateway;
 import tech.quantit.northstar.gateway.api.domain.contract.GatewayContract;
 import xyz.redtorch.pb.CoreField.ContractField;
-import xyz.redtorch.pb.CoreField.GatewaySettingField;
 import xyz.redtorch.pb.CoreField.TickField;
 
 @Slf4j
@@ -28,8 +28,6 @@ public class SimMarketGatewayLocal implements MarketGateway{
 	private ScheduledExecutorService scheduleExec = Executors.newScheduledThreadPool(0);
 	
 	private long lastActiveTime;
-	
-	private GatewaySettingField settings;
 	
 	private ScheduledFuture<?> task;
 	
@@ -42,10 +40,12 @@ public class SimMarketGatewayLocal implements MarketGateway{
 	
 	private IMarketCenter mktCenter;
 	
-	public SimMarketGatewayLocal(GatewaySettingField settings, FastEventEngine feEngine, IMarketCenter mktCenter) {
+	private GatewayDescription gd;
+	
+	public SimMarketGatewayLocal(GatewayDescription gd, FastEventEngine feEngine, IMarketCenter mktCenter) {
 		this.feEngine = feEngine;
-		this.settings = settings;
 		this.mktCenter = mktCenter;
+		this.gd = gd;
 	}
 
 	@Override
@@ -68,11 +68,6 @@ public class SimMarketGatewayLocal implements MarketGateway{
 	}
 
 	@Override
-	public GatewaySettingField getGatewaySetting() {
-		return settings;
-	}
-
-	@Override
 	public void connect() {
 		if(isConnected()) {
 			return;
@@ -92,9 +87,9 @@ public class SimMarketGatewayLocal implements MarketGateway{
 			}
 		}, 500, 500, TimeUnit.MILLISECONDS);
 		
-		feEngine.emitEvent(NorthstarEventType.CONNECTED, settings.getGatewayId());
+		feEngine.emitEvent(NorthstarEventType.CONNECTED, gd.getGatewayId());
 		CompletableFuture.runAsync(() -> {
-			feEngine.emitEvent(NorthstarEventType.GATEWAY_READY, settings.getGatewayId());
+			feEngine.emitEvent(NorthstarEventType.GATEWAY_READY, gd.getGatewayId());
 		}, CompletableFuture.delayedExecutor(2, TimeUnit.SECONDS));
 	}
 
@@ -104,7 +99,7 @@ public class SimMarketGatewayLocal implements MarketGateway{
 			task.cancel(false);
 		}
 		log.info("模拟行情断开");
-		feEngine.emitEvent(NorthstarEventType.DISCONNECTED, settings.getGatewayId());
+		feEngine.emitEvent(NorthstarEventType.DISCONNECTED, gd.getGatewayId());
 	}
 
 	@Override
@@ -120,6 +115,16 @@ public class SimMarketGatewayLocal implements MarketGateway{
 	@Override
 	public ChannelType channelType() {
 		return ChannelType.SIM;
+	}
+
+	@Override
+	public GatewayDescription gatewayDescription() {
+		return gd;
+	}
+
+	@Override
+	public String gatewayId() {
+		return gd.getGatewayId();
 	}
 
 }
