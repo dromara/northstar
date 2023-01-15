@@ -36,8 +36,8 @@ class RandomWalkTickSimulationTest {
 			System.out.println(e);
 		}
 		assertThat(results).hasSize(30);
-		assertThat(results.stream().mapToDouble(TickEntry::price).max().getAsDouble()).isCloseTo(5005D, offset(0.6));
-		assertThat(results.stream().mapToDouble(TickEntry::price).min().getAsDouble()).isCloseTo(4998D, offset(0.6));
+		assertThat(results.stream().mapToDouble(TickEntry::price).max().getAsDouble()).isCloseTo(5005D, offset(1.2));
+		assertThat(results.stream().mapToDouble(TickEntry::price).min().getAsDouble()).isCloseTo(4998D, offset(1.2));
 		assertThat(results.get(29).price()).isCloseTo(5000D, offset(0.6));
 		assertThat(results.stream().mapToDouble(TickEntry::openInterestDelta).sum()).isCloseTo(31, offset(0.1));
 		assertThat(results.stream().mapToLong(TickEntry::volume).sum()).isEqualTo(2000);

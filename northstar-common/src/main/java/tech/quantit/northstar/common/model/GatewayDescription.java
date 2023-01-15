@@ -18,7 +18,7 @@ import tech.quantit.northstar.common.constant.GatewayUsage;
  */
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
+@Builder(toBuilder = true)
 @Data
 public class GatewayDescription {
 
