@@ -143,7 +143,7 @@ public class PlaybackContext {
 		};
 		
 		log.info("回放网关 [{}] 连线。当前回放时间状态：{}", gd.getGatewayId(), playbackTimeState);
-		timer = new Timer();
+		timer = new Timer("Playback", true);
 		timer.scheduleAtFixedRate(new TimerTask() {
 			
 			private boolean isBarDataEmpty() {

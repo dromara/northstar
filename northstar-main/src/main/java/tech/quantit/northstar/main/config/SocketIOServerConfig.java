@@ -21,7 +21,6 @@ import com.corundumstudio.socketio.listener.ExceptionListener;
 
 import io.netty.channel.ChannelHandlerContext;
 import lombok.extern.slf4j.Slf4j;
-import tech.quantit.northstar.main.utils.InetAddressUtils;
 
 @Slf4j
 @Configuration
@@ -58,7 +57,6 @@ public class SocketIOServerConfig implements InitializingBean {
 	
 	private SocketIOServer makeServer() throws IOException {
 		String token = Base64.getEncoder().encodeToString(String.format("%s:%s", userInfo.getUserId(), userInfo.getPassword()).getBytes());
-		String realHost = InetAddressUtils.getInet4Address();
 		com.corundumstudio.socketio.Configuration config = new com.corundumstudio.socketio.Configuration();
         config.setPort(51888);
         if(sslEnabled){
@@ -103,7 +101,6 @@ public class SocketIOServerConfig implements InitializingBean {
 				return true;
 			}
 		});
-        log.info("WebSocket服务地址：{}:{}", realHost, 51888);
         SocketIOServer server = new SocketIOServer(config);
         server.start();
         return server;

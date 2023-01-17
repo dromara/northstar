@@ -47,12 +47,14 @@ class SimTradeGatewayLocalTest {
 
 	@Test
 	void testSubmitOrder() {
+		gateway.connect();
 		gateway.submitOrder(factory.makeOrderReq("rb2210", DirectionEnum.D_Buy, OffsetFlagEnum.OF_Close, 1, 0, 0));
 		verify(gateway.account).onSubmitOrder(any(SubmitOrderReqField.class));
 	}
 
 	@Test
 	void testCancelOrder() {
+		gateway.connect();
 		gateway.cancelOrder(factory.makeCancelReq(factory.makeOrderReq("rb2210", DirectionEnum.D_Buy, OffsetFlagEnum.OF_Close, 1, 0, 0)));
 		verify(gateway.account).onCancelOrder(any(CancelOrderReqField.class));
 	}
