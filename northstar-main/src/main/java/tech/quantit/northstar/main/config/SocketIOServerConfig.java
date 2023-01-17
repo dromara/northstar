@@ -60,7 +60,6 @@ public class SocketIOServerConfig implements InitializingBean {
 		String token = Base64.getEncoder().encodeToString(String.format("%s:%s", userInfo.getUserId(), userInfo.getPassword()).getBytes());
 		String realHost = InetAddressUtils.getInet4Address();
 		com.corundumstudio.socketio.Configuration config = new com.corundumstudio.socketio.Configuration();
-        config.setHostname(realHost);
         config.setPort(51888);
         if(sslEnabled){
         	config.setKeyStore(keyStore.getInputStream());
