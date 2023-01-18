@@ -48,7 +48,7 @@
 - 服务端采用java17（拥抱新技术） + springboot2
 
 项目架构采用事件驱动+插件式开发
-![输入图片说明](https://images.gitee.com/uploads/images/2022/0721/205844_7985317e_1676852.png "总体架构图.png")
+![输入图片说明](https://foruda.gitee.com/images/1674038693900175040/674a156d_1676852.png "总体架构图.png")
 
 ## 技术支持
 [https://www.quantit.tech/chat-group.html](https://www.quantit.tech/chat-group.html)
