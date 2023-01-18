@@ -8,7 +8,7 @@
 这是一个用户可以自行编写交易策略程序的量化交易软件。
 #### 用户监控台效果（监控台仅用于给用户提供一个可视化窗口，以方便进行程序的监控与管理）：
 ![输入图片说明](https://www.quantit.tech/assets/screenshot/preview-feature.gif "屏幕截图.png")
-#### 策略可视化研发：
+#### 策略可视化研发（可进行多周期叠加及自定义指标）：
 ![输入图片说明](https://www.quantit.tech/assets/screenshot/preview-strategy-study.gif "屏幕截图.png")
 #### 策略回测：
 ![输入图片说明](https://www.quantit.tech/assets/screenshot/preview-playback.gif "屏幕截图.png")
