@@ -34,7 +34,7 @@
         <el-form-item label="成交价" prop="price">
           <el-input v-model="form.price" type="number" autocomplete="off"></el-input>
         </el-form-item>
-        <el-form-item id="editPositionVol" label="手数" prop="volume">
+        <el-form-item id="editPositionVol" label="数量" prop="volume">
           <el-input v-model="form.volume" type="number" autocomplete="off"></el-input>
         </el-form-item>
       </el-form>
@@ -95,7 +95,7 @@ export default {
         this.assertTrue(this.form.contractId, '未指定合约代码') &&
         this.assertTrue(this.form.direction, '未指定成交方向') &&
         this.assertTrue(this.form.price, '未设置成交价') &&
-        this.assertTrue(this.form.volume, '未设置手数')
+        this.assertTrue(this.form.volume, '未设置数量')
       if (!flag) return
 
       await moduleApi.mockTradeAdjustment(this.moduleName, this.form)

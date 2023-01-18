@@ -54,11 +54,10 @@
           </div>
           <div class="ns-trade-action__item">
             <div class="ns-trade-action__complex-item">
-              <div class="ns-trade-action__complex-item-label">手数：</div>
+              <div class="ns-trade-action__complex-item-label">数量：</div>
               <el-input-number
                 v-model="dealVol"
                 :min="1"
-                :max="10"
                 controls-position="right"
               ></el-input-number>
             </div>

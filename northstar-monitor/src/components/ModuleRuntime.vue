@@ -131,7 +131,7 @@
                     { 2: '多', 3: '空' }[scope.row.positiondirection] || '未知'
                   }}</template>
                 </el-table-column>
-                <el-table-column prop="position" label="手数" align="center" width="46px" />
+                <el-table-column prop="position" label="数量" align="center" width="46px" />
                 <el-table-column prop="openprice" label="成本价" align="center">
                   <template slot-scope="scope">
                     {{ scope.row.openprice | smartFormatter }}
@@ -173,7 +173,7 @@
               >
                 <el-table-column prop="contractName" label="合约" align="center" width="100px" />
                 <el-table-column prop="direction" label="方向" align="center" width="40px" />
-                <el-table-column prop="volume" label="手数" align="center" width="46px" />
+                <el-table-column prop="volume" label="数量" align="center" width="46px" />
                 <el-table-column prop="openPrice" label="开仓价" align="center" />
                 <el-table-column prop="closePrice" label="平仓价" align="center" />
                 <el-table-column prop="dealProfit" label="平仓盈亏" align="center" width="70px">
@@ -549,7 +549,7 @@ export default {
         '开仓时间',
         '平仓价',
         '平仓时间',
-        '手数',
+        '数量',
         '交易盈亏'
       ]
       const data = this.dealRecords.map((item) => {
@@ -560,7 +560,7 @@ export default {
           开仓时间: `${item.openTrade.tradedate} ${item.openTrade.tradetime}`,
           平仓价: item.closePrice,
           平仓时间: `${item.closeTrade.tradedate} ${item.closeTrade.tradetime}`,
-          手数: item.volume,
+          数量: item.volume,
           交易盈亏: item.dealProfit
         }
       })
