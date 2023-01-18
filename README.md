@@ -4,14 +4,6 @@
 **借用组织的口号：一个人或许能走的更快，但一群人会走的更远。**  
 **本项目仅属于技术分享，不构成任何交易建议。使用者自身在交易前，需要清楚其可能面对的交易风险与相关法律规定，并为自身行为负责！**
 
-这是一个用户可以自行编写交易策略程序的量化交易软件。
-#### 用户监控台效果（监控台为用户提供一个可视化窗口，以方便进行程序的监控与管理）：
-![输入图片说明](https://www.quantit.tech/assets/screenshot/preview-feature.gif "屏幕截图.png")
-#### 策略可视化研发（可进行多周期叠加及自定义指标）：
-![输入图片说明](https://www.quantit.tech/assets/screenshot/preview-strategy-study.gif "屏幕截图.png")
-#### 策略回测：
-![输入图片说明](https://www.quantit.tech/assets/screenshot/preview-playback.gif "屏幕截图.png")
-
 ## 产品简介
 这是一个面向程序员的开源高频量化交易软件，用于期货、股票、外汇、炒币等多种交易场景，实现自动交易。暂时只对接了国内期货交易所，理论上可以对接任意交易所。
 
@@ -24,6 +16,13 @@
 - 自然易操作的自动化模组管理，轻松掌握与管理自动化策略的运行状态；
 - 可实现完全自主的风控手段；
 - 私有化部署，确保策略安全；
+
+#### 用户监控台效果（监控台为用户提供一个可视化窗口，以方便进行程序的监控与管理）：
+![输入图片说明](https://www.quantit.tech/assets/screenshot/preview-feature.gif "屏幕截图.png")
+#### 策略可视化研发（可进行多周期叠加及自定义指标）：
+![输入图片说明](https://www.quantit.tech/assets/screenshot/preview-strategy-study.gif "屏幕截图.png")
+#### 策略回测：
+![输入图片说明](https://www.quantit.tech/assets/screenshot/preview-playback.gif "屏幕截图.png")
 
 ## 适用人群
 专业量化操盘手、全栈技术爱好者、小型私募技术团队
