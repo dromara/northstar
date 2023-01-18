@@ -192,7 +192,6 @@ public class DataServiceManager implements IDataServiceManager {
 				resultList.add(contract);
 			} catch(Exception e) {
 				log.warn("无效合约数据：{}", JSON.toJSONString(item));
-				log.error("", e);
 			}
 		}
 		return resultList;

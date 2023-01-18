@@ -29,7 +29,12 @@ public class TigerGatewayFactory implements GatewayFactory{
 			new TigerContractProvider(settings, mktCenter).loadContractOptions();
 			contractLoaded = true;
 		}
-		return new TigerMarketGatewayAdapter(gatewayDescription, feEngine, mktCenter);
+		
+		return switch(gatewayDescription.getGatewayUsage()) {
+		case MARKET_DATA -> new TigerMarketGatewayAdapter(gatewayDescription, feEngine, mktCenter);
+		case TRADE -> new TigerTradeGatewayAdapter(feEngine, gatewayDescription, mktCenter);
+		default -> throw new IllegalArgumentException("未知网关用途：" + gatewayDescription.getGatewayUsage());
+		};
 	}
 
 }
