@@ -1,5 +1,5 @@
 const Appliaction = require('ee-core').Appliaction;
-const { app } = require('electron')
+const { app, globalShortcut } = require('electron')
 app.commandLine.appendSwitch('ignore-certificate-errors')    //忽略证书的检测
 class Main extends Appliaction {
 
@@ -35,6 +35,11 @@ class Main extends Appliaction {
         win.show();
       })
     }
+
+    globalShortcut.register('Shift+Ctrl+I', () => {
+      const win = this.electron.mainWindow;
+      win.webContents.openDevTools()
+    })
   }
 
   /**
