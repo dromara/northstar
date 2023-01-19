@@ -8,12 +8,13 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
+
+import org.apache.commons.lang3.StringUtils;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.https.domain.trade.item.PrimeAssetItem;
 import com.tigerbrokers.stock.openapi.client.https.domain.trade.model.TradeOrderModel;
@@ -41,6 +42,7 @@ import tech.quantit.northstar.common.event.NorthstarEventType;
 import tech.quantit.northstar.common.model.GatewayDescription;
 import tech.quantit.northstar.gateway.api.IContractManager;
 import tech.quantit.northstar.gateway.api.TradeGateway;
+import xyz.redtorch.pb.CoreEnum.CommonStatusEnum;
 import xyz.redtorch.pb.CoreEnum.CurrencyEnum;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
@@ -50,6 +52,7 @@ import xyz.redtorch.pb.CoreEnum.TimeConditionEnum;
 import xyz.redtorch.pb.CoreField.AccountField;
 import xyz.redtorch.pb.CoreField.CancelOrderReqField;
 import xyz.redtorch.pb.CoreField.ContractField;
+import xyz.redtorch.pb.CoreField.NoticeField;
 import xyz.redtorch.pb.CoreField.OrderField;
 import xyz.redtorch.pb.CoreField.PositionField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
@@ -107,10 +110,8 @@ public class TigerTradeGatewayAdapter implements TradeGateway{
 		feEngine.emitEvent(NorthstarEventType.CONNECTED, gatewayId());
 		feEngine.emitEvent(NorthstarEventType.LOGGED_IN, gatewayId());
 		timer = new Timer("TIGER_" + gatewayId(), true);
-		CompletableFuture.runAsync(() -> {
-			queryOrder(true);
-			timer.scheduleAtFixedRate(task, 0, 1000);
-		}, CompletableFuture.delayedExecutor(3, TimeUnit.SECONDS));
+		timer.scheduleAtFixedRate(task, 0, 2500);
+		new Thread(() -> queryOrder(true)).start();
 	}
 
 	@Override
@@ -225,6 +226,19 @@ public class TigerTradeGatewayAdapter implements TradeGateway{
 			default -> throw new IllegalArgumentException("Unexpected value: " + json.getString("status"));
 			};
 			
+			if(orderStatus == OrderStatusEnum.OS_Rejected) {
+				String msg = json.getString("remark");
+				if(StringUtils.isEmpty(msg)) {
+					log.warn("废单反馈：{}", json.toString(SerializerFeature.PrettyFormat));
+				} else {
+					log.warn("废单信息：{}", msg);
+					feEngine.emitEvent(NorthstarEventType.NOTICE, NoticeField.newBuilder()
+							.setStatus(CommonStatusEnum.COMS_WARN)
+							.setContent(msg)
+							.build());
+				}
+			}
+			
 			TimeConditionEnum timeCondition = switch(json.getString("timeInForce")) {
 			case "DAY" -> TimeConditionEnum.TC_GFD;
 			case "GTC" -> TimeConditionEnum.TC_GTC;
@@ -264,7 +278,7 @@ public class TigerTradeGatewayAdapter implements TradeGateway{
 			feEngine.emitEvent(NorthstarEventType.ORDER, order);
 			
 			if(tradedVol > 0) {
-				queryTrade(order, showAll);
+				queryTrade(order);
 			}
 			if(tradedVol == totalVol && pendingOrder.contains(id)) {
 				pendingOrder.remove(id);
@@ -272,15 +286,14 @@ public class TigerTradeGatewayAdapter implements TradeGateway{
 		}
 	}
 	
-	private void queryTrade(OrderField order, boolean showAll) {
+	private void queryTrade(OrderField order) {
 		log.trace("查询TIGER成交信息");	
 		
 		TigerHttpRequest request = new TigerHttpRequest(MethodName.ORDER_TRANSACTIONS);
-		// FIXME 还是要根据OrderId去查询比较靠谱，但由于接口异常原因暂时无法按orderId查询。按名称查询如果结果集过大处理会比较麻烦
 		String bizContent = AccountParamBuilder.instance()
 		    .account(settings.getAccountId())
 		    .secType(SecType.STK)
-		    .symbol(order.getContract().getSymbol())
+		    .orderId(Long.valueOf(order.getOrderId()))
 		    .limit(100)
 		    .buildJson();
 		request.setBizContent(bizContent);
@@ -294,11 +307,6 @@ public class TigerTradeGatewayAdapter implements TradeGateway{
 		for(int i=0; i<data.size(); i++) {
 			JSONObject json = data.getJSONObject(i);
 			String symbol = json.getString("symbol");
-			long orderId = json.getLongValue("orderId");
-			if(!showAll && orderId != Long.parseLong(order.getOrderId())) {
-				continue;
-			}
-			
 			feEngine.emitEvent(NorthstarEventType.TRADE, TradeField.newBuilder()
 					.setAccountId(bizContent)
 					.setGatewayId(gatewayId())
