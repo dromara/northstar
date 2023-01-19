@@ -30,7 +30,7 @@
 **详细文档请参考 [【官网文档】](https://www.quantit.tech/)**
 
 ## 运行环境
-建议使用Linux云服务器，或者Windows系统（MAC系统没有试过，需自行摸索）
+建议使用Linux云服务器，或者Windows系统（MAC系统不支持CTP、XTP动态库）
 
 ## 程序架构
 - B/S架构
