@@ -38,8 +38,7 @@ public class CtpSimGatewayFactory implements GatewayFactory{
 				.setTdPort(json.getString("tdPort"))
 				.setAuthCode(json.getString("authCode"))
 				.build();
-		gatewayDescription.setSettings(ctpSetting);
-		return new CtpSimGatewayAdapter(fastEventEngine, gatewayDescription, mktCenter);
+		return new CtpSimGatewayAdapter(fastEventEngine, gatewayDescription.toBuilder().settings(ctpSetting).build(), mktCenter);
 	}
 
 }

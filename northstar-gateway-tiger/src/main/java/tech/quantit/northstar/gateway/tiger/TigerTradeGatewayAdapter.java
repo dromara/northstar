@@ -76,20 +76,6 @@ public class TigerTradeGatewayAdapter implements TradeGateway{
 	private TigerHttpClient client;
 	private Timer timer;
 	
-	private TimerTask task = new TimerTask() {
-		
-		@Override
-		public void run() {
-			try {
-				queryOrder(false);
-				queryAccount();
-				queryPosition();
-			} catch(Exception e) {
-				log.error("", e);
-			}
-		}
-	};
-	
 	public TigerTradeGatewayAdapter(FastEventEngine feEngine, GatewayDescription gd, IContractManager contractMgr) {
 		this.feEngine = feEngine;
 		this.gd = gd;
@@ -98,7 +84,7 @@ public class TigerTradeGatewayAdapter implements TradeGateway{
 	}
 	
 	@Override
-	public void connect() {
+	public synchronized void connect() {
 		ClientConfig clientConfig = ClientConfig.DEFAULT_CONFIG;
 		clientConfig.tigerId = settings.getTigerId();
         clientConfig.defaultAccount = settings.getAccountId();
@@ -110,13 +96,27 @@ public class TigerTradeGatewayAdapter implements TradeGateway{
 		feEngine.emitEvent(NorthstarEventType.CONNECTED, gatewayId());
 		feEngine.emitEvent(NorthstarEventType.LOGGED_IN, gatewayId());
 		timer = new Timer("TIGER_" + gatewayId(), true);
-		timer.scheduleAtFixedRate(task, 0, 2500);
+		timer.scheduleAtFixedRate(new TimerTask() {
+			
+			@Override
+			public void run() {
+				try {
+					queryOrder(false);
+					queryAccount();
+					queryPosition();
+				} catch(Exception e) {
+					log.error("", e);
+				}
+			}
+			
+		}, 0, 1500);
 		new Thread(() -> queryOrder(true)).start();
 	}
 
 	@Override
-	public void disconnect() {
+	public synchronized void disconnect() {
 		timer.cancel();
+		timer = null;
 		client = null;
 		feEngine.emitEvent(NorthstarEventType.LOGGED_OUT, gatewayId());
 		feEngine.emitEvent(NorthstarEventType.DISCONNECTED, gatewayId());
@@ -182,7 +182,7 @@ public class TigerTradeGatewayAdapter implements TradeGateway{
 		}
 	}
 	
-	private void queryOrder(boolean showAll) {
+	private void queryOrder(boolean initialLoad) {
 		log.trace("查询TIGER订单信息");	
 		TigerHttpRequest request = new TigerHttpRequest(MethodName.ORDERS);
 		String bizContent = AccountParamBuilder.instance()
@@ -201,7 +201,7 @@ public class TigerTradeGatewayAdapter implements TradeGateway{
 		for(int i=0; i<items.size(); i++) {
 			JSONObject json = items.getJSONObject(i);
 			Long id = json.getLong("id");
-			if(!pendingOrder.contains(id) && !showAll) {
+			if(!pendingOrder.contains(id) && !initialLoad) {
 				continue;
 			}
 			
@@ -226,7 +226,7 @@ public class TigerTradeGatewayAdapter implements TradeGateway{
 			default -> throw new IllegalArgumentException("Unexpected value: " + json.getString("status"));
 			};
 			
-			if(orderStatus == OrderStatusEnum.OS_Rejected) {
+			if(orderStatus == OrderStatusEnum.OS_Rejected && !initialLoad) {
 				String msg = json.getString("remark");
 				if(StringUtils.isEmpty(msg)) {
 					log.warn("废单反馈：{}", json.toString(SerializerFeature.PrettyFormat));
