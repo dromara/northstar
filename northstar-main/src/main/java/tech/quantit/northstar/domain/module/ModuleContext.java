@@ -341,9 +341,9 @@ public class ModuleContext implements IModuleContext, MergedBarListener{
 		}
 		ContractField contract = orderReq.getContract();
 		TradeGateway gateway = gatewayMap.get(contract);
-		gateway.submitOrder(orderReq);
 		orderReqMap.put(orderReq.getOriginOrderId(), orderReq);
 		accStore.onSubmitOrder(orderReq);
+		gateway.submitOrder(orderReq);
 		return orderReq.getOriginOrderId();
 	}
 	

@@ -4,10 +4,13 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Optional;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -71,10 +74,12 @@ public class TigerTradeGatewayAdapter implements TradeGateway{
 	private final TigerGatewaySettings settings;
 	private final IContractManager contractMgr;
 	
-	private final Set<Long> pendingOrder = new HashSet<>();
+	private final ConcurrentMap<Long, OrderField> pendingOrders = new ConcurrentHashMap<>();
 	
 	private TigerHttpClient client;
 	private Timer timer;
+	
+	private Executor exec = Executors.newSingleThreadExecutor();
 	
 	public TigerTradeGatewayAdapter(FastEventEngine feEngine, GatewayDescription gd, IContractManager contractMgr) {
 		this.feEngine = feEngine;
@@ -101,7 +106,7 @@ public class TigerTradeGatewayAdapter implements TradeGateway{
 			@Override
 			public void run() {
 				try {
-					queryOrder(false);
+					pendingOrders.keySet().forEach(TigerTradeGatewayAdapter.this::queryOrder);
 					queryAccount();
 					queryPosition();
 				} catch(Exception e) {
@@ -110,7 +115,7 @@ public class TigerTradeGatewayAdapter implements TradeGateway{
 			}
 			
 		}, 0, 1500);
-		new Thread(() -> queryOrder(true)).start();
+		exec.execute(this::queryOrderList);
 	}
 
 	@Override
@@ -182,8 +187,59 @@ public class TigerTradeGatewayAdapter implements TradeGateway{
 		}
 	}
 	
-	private void queryOrder(boolean initialLoad) {
+	private void queryOrder(Long orderId) {
 		log.trace("查询TIGER订单信息");	
+		TigerHttpRequest request = new TigerHttpRequest(MethodName.ORDERS);
+		String bizContent = AccountParamBuilder.instance()
+		        .account(settings.getAccountId())
+		        .id(orderId)
+		        .limit(100)
+		        .buildJson();
+
+		request.setBizContent(bizContent);
+		TigerHttpResponse response = client.execute(request);
+		if(!response.isSuccess()) {
+			log.warn("查询订单返回异常：{}", response.getMessage());
+			return;
+		}
+		JSONObject data = JSON.parseObject(response.getData());
+		OrderField order = convertOrder(data);
+		switch(order.getOrderStatus()) {
+		case OS_Canceled -> {
+			pendingOrders.remove(orderId);
+			feEngine.emitEvent(NorthstarEventType.ORDER, order);
+		}
+		case OS_Rejected -> {
+			String msg = data.getString("remark");
+			if(StringUtils.isEmpty(msg)) {
+				log.warn("废单反馈：{}", data.toString(SerializerFeature.PrettyFormat));
+			} else {
+				log.warn("废单信息：{}", msg);
+				feEngine.emitEvent(NorthstarEventType.NOTICE, NoticeField.newBuilder()
+						.setStatus(CommonStatusEnum.COMS_WARN)
+						.setContent(msg)
+						.build());
+			}
+		}
+		case OS_AllTraded -> {
+			pendingOrders.remove(orderId);
+			feEngine.emitEvent(NorthstarEventType.ORDER, order);
+			queryTrade(order);
+		}
+		default -> {
+			if(pendingOrders.containsKey(orderId) && pendingOrders.get(orderId).getTradedVolume() != order.getTradedVolume()
+					|| !pendingOrders.containsKey(orderId)) {
+				pendingOrders.put(orderId, order);
+				feEngine.emitEvent(NorthstarEventType.ORDER, order);
+				if(order.getTradedVolume() > 0) {
+					queryTrade(order);
+				}
+			}
+		}
+		}
+	}
+	
+	private void queryOrderList() {
 		TigerHttpRequest request = new TigerHttpRequest(MethodName.ORDERS);
 		String bizContent = AccountParamBuilder.instance()
 		        .account(settings.getAccountId())
@@ -200,90 +256,72 @@ public class TigerTradeGatewayAdapter implements TradeGateway{
 		JSONArray items = data.getJSONArray("items");
 		for(int i=0; i<items.size(); i++) {
 			JSONObject json = items.getJSONObject(i);
-			Long id = json.getLong("id");
-			if(!pendingOrder.contains(id) && !initialLoad) {
-				continue;
-			}
-			
-			String orderId = id + "";
-			DirectionEnum direction = switch(json.getString("action")) {
-			case "BUY" -> DirectionEnum.D_Buy;
-			case "SELL" -> DirectionEnum.D_Sell;
-			default -> DirectionEnum.D_Unknown;
-			};
-			
-			OffsetFlagEnum offset = switch(direction) {
-			case D_Buy -> OffsetFlagEnum.OF_Open;
-			case D_Sell -> OffsetFlagEnum.OF_Close;
-			default -> throw new IllegalArgumentException("Unexpected value: " + direction);
-			};
-			
-			OrderStatusEnum orderStatus = switch(json.getString("status")) {
-			case "Filled" -> OrderStatusEnum.OS_AllTraded;
-			case "Cancelled" -> OrderStatusEnum.OS_Canceled;
-			case "Initial", "PendingSubmit", "Submitted" -> OrderStatusEnum.OS_Touched;
-			case "Invalid", "Inactive" -> OrderStatusEnum.OS_Rejected;
-			default -> throw new IllegalArgumentException("Unexpected value: " + json.getString("status"));
-			};
-			
-			if(orderStatus == OrderStatusEnum.OS_Rejected && !initialLoad) {
-				String msg = json.getString("remark");
-				if(StringUtils.isEmpty(msg)) {
-					log.warn("废单反馈：{}", json.toString(SerializerFeature.PrettyFormat));
-				} else {
-					log.warn("废单信息：{}", msg);
-					feEngine.emitEvent(NorthstarEventType.NOTICE, NoticeField.newBuilder()
-							.setStatus(CommonStatusEnum.COMS_WARN)
-							.setContent(msg)
-							.build());
-				}
-			}
-			
-			TimeConditionEnum timeCondition = switch(json.getString("timeInForce")) {
-			case "DAY" -> TimeConditionEnum.TC_GFD;
-			case "GTC" -> TimeConditionEnum.TC_GTC;
-			case "GTD" -> TimeConditionEnum.TC_GTD;
-			default -> throw new IllegalArgumentException("Unexpected value: " + json.getString(""));
-			};
-			
-			Instant ins = Instant.ofEpochMilli(json.getLongValue("openTime"));
-			String tradingDay = LocalDateTime.ofInstant(ins, ZoneOffset.ofHours(0)).toLocalDate().format(DateTimeConstant.D_FORMAT_INT_FORMATTER);
-			String orderDate = LocalDateTime.ofInstant(ins, ZoneId.systemDefault()).toLocalDate().format(DateTimeConstant.D_FORMAT_INT_FORMATTER);
-			String symbol = json.getString("symbol");
-			int tradedVol = json.getIntValue("filledQuantity");
-			int totalVol = json.getIntValue("totalQuantity");
-			ContractField contract = contractMgr.getContract("TIGER", symbol).contractField();
-			double price = (int) (json.getDoubleValue("limitPrice") / contract.getPriceTick()) * contract.getPriceTick();
-			if(orderStatus == OrderStatusEnum.OS_Touched) {
-				pendingOrder.add(id);
-			}
-			OrderField order = OrderField.newBuilder()
-					.setAccountId(settings.getAccountId())
-					.setGatewayId(gatewayId())
-					.setContract(contract)
-					.setOriginOrderId(orderId)
-					.setOrderId(orderId)
-					.setDirection(direction)
-					.setOffsetFlag(offset)
-					.setOrderDate(bizContent)
-					.setTotalVolume(totalVol)
-					.setTradedVolume(tradedVol)
-					.setPrice(price)
-					.setTradingDay(tradingDay)
-					.setOrderDate(orderDate)
-					.setOrderTime(LocalDateTime.ofInstant(ins, ZoneId.systemDefault()).toLocalTime().format(DateTimeConstant.T_FORMAT_FORMATTER))
-					.setTimeCondition(timeCondition)
-					.setOrderStatus(orderStatus)
-					.build();
+			OrderField order = convertOrder(json);
 			feEngine.emitEvent(NorthstarEventType.ORDER, order);
 			
-			if(tradedVol > 0) {
+			if(order.getTradedVolume() > 0) {
 				queryTrade(order);
 			}
-			if(tradedVol == totalVol && pendingOrder.contains(id)) {
-				pendingOrder.remove(id);
-			}
 		}
+	}
+	
+	private OrderField convertOrder(JSONObject json) {
+		Long id = json.getLong("id");
+		String originOrderId = Optional.ofNullable(pendingOrders.get(id).getOriginOrderId()).orElse("");
+		String orderId = id + "";
+		DirectionEnum direction = switch(json.getString("action")) {
+		case "BUY" -> DirectionEnum.D_Buy;
+		case "SELL" -> DirectionEnum.D_Sell;
+		default -> DirectionEnum.D_Unknown;
+		};
+		
+		OffsetFlagEnum offset = switch(direction) {
+		case D_Buy -> OffsetFlagEnum.OF_Open;
+		case D_Sell -> OffsetFlagEnum.OF_Close;
+		default -> throw new IllegalArgumentException("Unexpected value: " + direction);
+		};
+		
+		OrderStatusEnum orderStatus = switch(json.getString("status")) {
+		case "Filled" -> OrderStatusEnum.OS_AllTraded;
+		case "Cancelled" -> OrderStatusEnum.OS_Canceled;
+		case "Initial", "PendingSubmit", "Submitted" -> OrderStatusEnum.OS_Touched;
+		case "Invalid", "Inactive" -> OrderStatusEnum.OS_Rejected;
+		default -> throw new IllegalArgumentException("Unexpected value: " + json.getString("status"));
+		};
+		
+		TimeConditionEnum timeCondition = switch(json.getString("timeInForce")) {
+		case "DAY" -> TimeConditionEnum.TC_GFD;
+		case "GTC" -> TimeConditionEnum.TC_GTC;
+		case "GTD" -> TimeConditionEnum.TC_GTD;
+		default -> throw new IllegalArgumentException("Unexpected value: " + json.getString(""));
+		};
+		
+		Instant ins = Instant.ofEpochMilli(json.getLongValue("openTime"));
+		String tradingDay = LocalDateTime.ofInstant(ins, ZoneOffset.ofHours(0)).toLocalDate().format(DateTimeConstant.D_FORMAT_INT_FORMATTER);
+		String orderDate = LocalDateTime.ofInstant(ins, ZoneId.systemDefault()).toLocalDate().format(DateTimeConstant.D_FORMAT_INT_FORMATTER);
+		String symbol = json.getString("symbol");
+		int tradedVol = json.getIntValue("filledQuantity");
+		int totalVol = json.getIntValue("totalQuantity");
+		ContractField contract = contractMgr.getContract("TIGER", symbol).contractField();
+		double price = (int) (json.getDoubleValue("limitPrice") / contract.getPriceTick()) * contract.getPriceTick();
+		return OrderField.newBuilder()
+				.setAccountId(settings.getAccountId())
+				.setGatewayId(gatewayId())
+				.setContract(contract)
+				.setOriginOrderId(originOrderId)
+				.setOrderId(orderId)
+				.setDirection(direction)
+				.setOffsetFlag(offset)
+				.setOrderDate(orderDate)
+				.setTotalVolume(totalVol)
+				.setTradedVolume(tradedVol)
+				.setPrice(price)
+				.setTradingDay(tradingDay)
+				.setOrderDate(orderDate)
+				.setOrderTime(LocalDateTime.ofInstant(ins, ZoneId.systemDefault()).toLocalTime().format(DateTimeConstant.T_FORMAT_FORMATTER))
+				.setTimeCondition(timeCondition)
+				.setOrderStatus(orderStatus)
+				.build();
 	}
 	
 	private void queryTrade(OrderField order) {
@@ -373,7 +411,7 @@ public class TigerTradeGatewayAdapter implements TradeGateway{
 		TradeOrderResponse response = client.execute(TradeOrderRequest.newRequest(model));
 		log.info("网关[{}] 下单反馈：{}", gatewayId(), JSON.toJSONString(response));
 		Long id = response.getItem().getId();
-		pendingOrder.add(id);
+		exec.execute(() -> queryOrder(id));
 		return id + "";
 	}
 
@@ -382,6 +420,7 @@ public class TigerTradeGatewayAdapter implements TradeGateway{
 		if(!isConnected()) {
 			throw new IllegalStateException("网关未连线");
 		}
+		
 		OrderParameter params = TradeParamBuilder.instance().account(settings.getAccountId()).id(Long.valueOf(cancelOrderReq.getOriginOrderId())).secretKey(settings.getSecretKey()).build();
 		String bizContent = JSON.toJSONString(params);
 		TigerHttpRequest request = new TigerHttpRequest(MethodName.CANCEL_ORDER);
@@ -389,9 +428,10 @@ public class TigerTradeGatewayAdapter implements TradeGateway{
 		log.info("网关[{}] 撤单：{}", gatewayId(), bizContent);
 		TigerHttpResponse response = client.execute(request);
 		if(response.isSuccess()) {
-			pendingOrder.remove(Long.valueOf(cancelOrderReq.getOriginOrderId()));
+			pendingOrders.remove(Long.valueOf(cancelOrderReq.getOriginOrderId()));
 		}
 		log.info("网关[{}] 撤单反馈：{}", gatewayId(), JSON.toJSONString(response));
+		
 		return response.isSuccess();
 	}
 

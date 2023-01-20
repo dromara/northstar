@@ -54,6 +54,10 @@ public class BeginnerSampleStrategy implements TradeStrategy{
 		@Setting(label="操作间隔", type = FieldType.NUMBER, order=10, unit="秒")		// Label注解用于定义属性的元信息。可以声明单位
 		private int actionInterval;						// 属性可以为任意多个，当元素为多个时order值用于控制前端的显示顺序
 		
+		
+		@Setting(label="开仓数量", type = FieldType.NUMBER, order=20)
+		private int volume;
+		
 	}
 	
 	/***************** 以下如果看不懂，基本可以照搬 *************************/
@@ -132,14 +136,14 @@ public class BeginnerSampleStrategy implements TradeStrategy{
 			log.info("开始交易");
 			if(ctx.getState().isEmpty()) {
 				SignalOperation op = flag ? SignalOperation.BUY_OPEN : SignalOperation.SELL_OPEN;	// 随机开多或者开空
-				originOrderId = ctx.submitOrderReq(ctx.getContract(tick.getUnifiedSymbol()), op, PriceType.WAITING_PRICE, 1, tick.getLastPrice());
+				originOrderId = ctx.submitOrderReq(ctx.getContract(tick.getUnifiedSymbol()), op, PriceType.WAITING_PRICE, params.volume, tick.getLastPrice());
 			}
 			if(ctx.getState() == ModuleState.HOLDING_LONG) {	
 				ctx.submitOrderReq(TradeIntent.builder()
 						.contract(ctx.getContract(tick.getUnifiedSymbol()))
 						.operation(SignalOperation.SELL_CLOSE)
 						.priceType(PriceType.WAITING_PRICE)
-						.volume(1)
+						.volume(params.volume)
 						.timeout(3000)
 						.build());
 			}
@@ -148,7 +152,7 @@ public class BeginnerSampleStrategy implements TradeStrategy{
 						.contract(ctx.getContract(tick.getUnifiedSymbol()))
 						.operation(SignalOperation.BUY_CLOSE)
 						.priceType(PriceType.WAITING_PRICE)
-						.volume(1)
+						.volume(params.volume)
 						.timeout(3000)
 						.build());
 			}
