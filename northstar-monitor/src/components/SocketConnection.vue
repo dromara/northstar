@@ -49,24 +49,7 @@ export default {
   },
   async mounted() {
     this.wsHost = window.remoteHost || location.hostname
-    if (this.wsHost === 'localhost' || this.wsHost === '127.0.0.1') {
-      fetch(`${location.protocol}//${this.wsHost}/redirect`)
-        .then((res) => res.json())
-        .then((res) => {
-          this.wsHost = res
-          this.initSocket()
-        })
-        .catch(() => {
-          this.$message({
-            type: 'error',
-            message: '服务端未启动',
-            duration: 0
-          })
-        })
-      return
-    } else {
-      setTimeout(this.initSocket, 500)
-    }
+    this.initSocket()
   },
   methods: {
     initSocket() {
