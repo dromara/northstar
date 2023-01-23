@@ -43,7 +43,8 @@ public class ModuleAccountRuntimeDescription {
 	/**
 	 * 模组持仓描述
 	 */
-	private ModulePositionDescription positionDescription;
+	@Builder.Default
+	private ModulePositionDescription positionDescription = new ModulePositionDescription();
 	/**
 	 * 最大盈利
 	 */

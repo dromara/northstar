@@ -53,6 +53,11 @@ public class TradeIntent implements TransactionAware, TickDataAware {
 	@Getter
 	private final PriceType priceType;
 	/**
+	 * 价格
+	 */
+	@Getter
+	private final double price;
+	/**
 	 * 目标手数
 	 */
 	@Getter
@@ -67,13 +72,14 @@ public class TradeIntent implements TransactionAware, TickDataAware {
 	private final Predicate<TickField> abortCondition;
 	
 	@Builder
-	public TradeIntent(ContractField contract, SignalOperation operation, PriceType priceType, int volume, 
+	public TradeIntent(ContractField contract, SignalOperation operation, PriceType priceType, double price, int volume, 
 			long timeout, Predicate<TickField> abortCondition) {
 		Assert.noNullElements(List.of(contract, operation, priceType), "入参不能为空");
 		Assert.isTrue(volume > 0, "手数必须为正整数");
 		this.contract = contract;
 		this.operation = operation;
 		this.priceType = priceType;
+		this.price = price;
 		this.volume = volume;
 		this.timeout = timeout;
 		this.abortCondition = abortCondition;

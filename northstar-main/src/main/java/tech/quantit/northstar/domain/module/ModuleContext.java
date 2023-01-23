@@ -400,7 +400,7 @@ public class ModuleContext implements IModuleContext, MergedBarListener{
 	@Override
 	public synchronized int holdingNetProfit() {
 		return gatewayMap.values().stream()
-				.map(gw -> gw.gatewayId())
+				.map(TradeGateway::gatewayId)
 				.map(gatewayId -> accStore.getPositions(gatewayId))
 				.flatMap(Collection::stream)
 				.mapToInt(pf -> (int)pf.getPositionProfit())
@@ -410,7 +410,7 @@ public class ModuleContext implements IModuleContext, MergedBarListener{
 	@Override
 	public synchronized int availablePosition(DirectionEnum direction, String unifiedSymbol) {
 		return gatewayMap.values().stream()
-				.map(gw -> gw.gatewayId())
+				.map(TradeGateway::gatewayId)
 				.map(gatewayId -> accStore.getPositions(gatewayId))
 				.flatMap(Collection::stream)
 				.filter(pf -> StringUtils.equals(pf.getContract().getUnifiedSymbol(), unifiedSymbol))
@@ -422,7 +422,7 @@ public class ModuleContext implements IModuleContext, MergedBarListener{
 	@Override
 	public synchronized int availablePosition(DirectionEnum direction, String unifiedSymbol, boolean isToday) {
 		Stream<PositionField> posStream = gatewayMap.values().stream()
-				.map(gw -> gw.gatewayId())
+				.map(TradeGateway::gatewayId)
 				.map(gatewayId -> accStore.getPositions(gatewayId))
 				.flatMap(Collection::stream)
 				.filter(pf -> StringUtils.equals(pf.getContract().getUnifiedSymbol(), unifiedSymbol))
