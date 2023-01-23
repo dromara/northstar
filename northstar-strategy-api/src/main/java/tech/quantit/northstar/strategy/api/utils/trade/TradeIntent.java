@@ -101,7 +101,7 @@ public class TradeIntent implements TransactionAware, TickDataAware {
 		if(hasTerminated())
 			return;
 		if(orderIdRef.isEmpty()) {
-			orderIdRef = context.submitOrderReq(contract, operation, priceType, volume - accVol, tick.getLastPrice());
+			orderIdRef = context.submitOrderReq(contract, operation, priceType, volume - accVol, price);
 		} else if (context.isOrderWaitTimeout(orderIdRef.get(), timeout)) {
 			context.cancelOrder(orderIdRef.get());
 		}
