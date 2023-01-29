@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -26,6 +27,7 @@ import com.alibaba.fastjson2.JSONObject;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.IDataServiceManager;
+import tech.quantit.northstar.common.constant.ChannelType;
 import tech.quantit.northstar.common.constant.DateTimeConstant;
 import tech.quantit.northstar.common.utils.LocalEnvUtils;
 import tech.quantit.northstar.common.utils.MarketDateTimeUtil;
@@ -61,12 +63,21 @@ public class DataServiceManager implements IDataServiceManager {
 	
 	private IContractManager contractMgr;
 	
+	private EnumMap<ExchangeEnum, ChannelType> exchangeChannelType = new EnumMap<>(ExchangeEnum.class);
+	
 	public DataServiceManager(String baseUrl, String secret, RestTemplate restTemplate, MarketDateTimeUtil dtUtil, IContractManager contractMgr) {
 		this.baseUrl =  baseUrl;
 		this.userToken = secret;
 		this.dtUtil = dtUtil;
 		this.restTemplate = restTemplate;
 		this.contractMgr = contractMgr;
+		
+		exchangeChannelType.put(ExchangeEnum.SHFE, ChannelType.CTP);
+		exchangeChannelType.put(ExchangeEnum.CFFEX, ChannelType.CTP);
+		exchangeChannelType.put(ExchangeEnum.DCE, ChannelType.CTP);
+		exchangeChannelType.put(ExchangeEnum.CZCE, ChannelType.CTP);
+		exchangeChannelType.put(ExchangeEnum.INE, ChannelType.CTP);
+		
 		log.info("采用外部数据源加载历史数据");
 		register();
 	}
@@ -177,11 +188,11 @@ public class DataServiceManager implements IDataServiceManager {
 						.setSymbol(symbol)
 						.setExchange(exchange)
 						.setCurrency(CurrencyEnum.CNY)
-						.setContractId(unifiedSymbol + "@PLAYBACK")
+						.setContractId(unifiedSymbol + "@" + channelName(exchange))
 						.setFullName(name)
 						.setName(name)
-						.setGatewayId("PLAYBACK")
-						.setThirdPartyId(symbol + "@CTP")
+						.setGatewayId(channelName(exchange))
+						.setThirdPartyId(symbol + "@" + channelName(exchange))
 						.setLastTradeDateOrContractMonth(getValue("delist_date", fieldIndexMap, item, ""))
 						.setLongMarginRatio(0.1)
 						.setShortMarginRatio(0.1)
@@ -195,6 +206,10 @@ public class DataServiceManager implements IDataServiceManager {
 			}
 		}
 		return resultList;
+	}
+	
+	private String channelName(ExchangeEnum exchange) {
+		return exchangeChannelType.get(exchange).name();
 	}
 	
 	/**
