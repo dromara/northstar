@@ -146,7 +146,7 @@ public class DataServiceManager implements IDataServiceManager {
 	@Override
 	public List<LocalDate> getHolidays(ExchangeEnum exchange, LocalDate startDate, LocalDate endDate) {
 		DataSet dataSet = getTradeCalendar(exchange.toString(), startDate, endDate);
-		if(Objects.isNull(dataSet.getFields())) {
+		if(Objects.isNull(dataSet) || Objects.isNull(dataSet.getFields())) {
 			return Collections.emptyList();
 		}
 		List<String> resultList = new LinkedList<>();
@@ -293,7 +293,8 @@ public class DataServiceManager implements IDataServiceManager {
 			
 			try {				
 				String unifiedSymbol = getValue("ns_code", fieldIndexMap, item, "");
-				ContractField contract = contractMgr.getContract("PLAYBACK", unifiedSymbol).contractField();
+				ChannelType channelType = getExchange(unifiedSymbol);
+				ContractField contract = contractMgr.getContract(channelType.name(), unifiedSymbol).contractField();
 				resultList.addFirst(BarField.newBuilder()
 						.setUnifiedSymbol(unifiedSymbol)
 						.setTradingDay(tradingDay)
@@ -304,7 +305,7 @@ public class DataServiceManager implements IDataServiceManager {
 						.setClosePrice(normalizeValue(Double.parseDouble(getValue("close", fieldIndexMap, item, "0")), contract.getPriceTick()))
 						.setLowPrice(normalizeValue(Double.parseDouble(getValue("low", fieldIndexMap, item, "0")), contract.getPriceTick()))
 						.setOpenPrice(normalizeValue(Double.parseDouble(getValue("open", fieldIndexMap, item, "0")), contract.getPriceTick()))
-						.setGatewayId("CTP行情")
+						.setGatewayId(contract.getGatewayId())
 						.setOpenInterestDelta(Double.parseDouble(getValue("oi_chg", fieldIndexMap, item, "0")))
 						.setOpenInterest(Double.parseDouble(getValue("oi", fieldIndexMap, item, "0")))
 						.setVolume((long) Double.parseDouble(getValue("vol", fieldIndexMap, item, "0")))
@@ -322,6 +323,11 @@ public class DataServiceManager implements IDataServiceManager {
 		return resultList;
 	}
 	
+	private ChannelType getExchange(String unifiedSymbol) {
+		ExchangeEnum exchange = ExchangeEnum.valueOf(unifiedSymbol.replaceAll("[^@]+@([^@]+)@[^@]+", "$1"));
+		return exchangeChannelType.get(exchange);
+	}
+
 	private double normalizeValue(double val, double priceTick) {
 		return (int)(val / priceTick) * priceTick;
 	}

@@ -2,6 +2,7 @@ package tech.quantit.northstar.main.restful;
 
 import java.time.LocalDate;
 import java.time.Period;
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,11 +39,15 @@ public class GatewayDataController {
 			start = start.minusWeeks(1);
 		}
 		LocalDate end = utils.getCurrentTradeDay(refStartTimestamp, firstLoad);
-		return new ResultBean<>(
-				mdRepo.loadBars(contract.channelType(), contract.contractField().getUnifiedSymbol(), start, end)
-				.stream()
-				.map(BarField::toByteArray)
-				.toList());
+		List<BarField> result = Collections.emptyList();
+		for(int i=0; i<3; i++) {
+			result = mdRepo.loadBars(contract.channelType(), contract.contractField().getUnifiedSymbol(), start.minusWeeks(i), end.minusWeeks(i));
+			if(!result.isEmpty()) {
+				break;
+			}
+		}
+		
+		return new ResultBean<>(result.stream().map(BarField::toByteArray).toList());
 	}
 	
 }
