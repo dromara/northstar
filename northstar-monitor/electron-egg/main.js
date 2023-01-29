@@ -29,16 +29,19 @@ class Main extends Appliaction {
     // do some things
     // 延迟加载，无白屏
     const winOpt = this.config.windowsOption;
+    const win = this.electron.mainWindow;
     if (winOpt.show == false) {
-      const win = this.electron.mainWindow;
       win.once('ready-to-show', () => {
         win.show();
       })
     }
 
     globalShortcut.register('Shift+Ctrl+I', () => {
-      const win = this.electron.mainWindow;
       win.webContents.openDevTools()
+    })
+
+    globalShortcut.register('Shift+F5', () => {
+      win.reload()
     })
   }
 
