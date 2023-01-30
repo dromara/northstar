@@ -326,9 +326,13 @@ public class ModuleContext implements IModuleContext, MergedBarListener{
 	}
 	
 	@Override
-	public void submitOrderReq(TradeIntent tradeIntent) {
+	public synchronized void submitOrderReq(TradeIntent tradeIntent) {
 		this.tradeIntent = tradeIntent;
 		tradeIntent.setContext(this);
+		TickField tick = latestTickMap.get(tradeIntent.getContract().getUnifiedSymbol());
+		Assert.notNull(tick, "没有行情时不应该发送订单");
+		Assert.isTrue(tradeIntent.getVolume() > 0, "下单手数应该为正数");
+		tradeIntent.onTick(tick);
 	}
 
 	DateFormat fmt = new SimpleDateFormat();
@@ -593,6 +597,9 @@ public class ModuleContext implements IModuleContext, MergedBarListener{
 
 	@Override
 	public ModuleState getState() {
+		if(mlog.isTraceEnabled()) {			
+			mlog.trace("当前状态：{}", accStore.getModuleState());
+		}
 		return accStore.getModuleState();
 	}
 	

@@ -112,21 +112,23 @@ public class OrderTradeQueryProxy {
 		default -> throw new IllegalArgumentException("Unexpected value: " + json.getString(""));
 		};
 		
+		String symbol = json.getString("symbol");
+		ContractField contract = contractMgr.getContract("TIGER", symbol).contractField();
 		String orderMsg = json.getString("remark");
-		if(orderStatus == OrderStatusEnum.OS_Rejected) {
+		if(orderStatus == OrderStatusEnum.OS_Rejected && !orderIds.containsKey(id)) {
 			if(StringUtils.isEmpty(orderMsg)) {
 				log.warn("废单反馈：{}", json.toString(SerializerFeature.PrettyFormat));
 			} else {
-				log.warn("废单信息：{}", orderMsg);
+				long openTime = json.getLongValue("openTime");
+				LocalDateTime ldt = LocalDateTime.ofInstant(Instant.ofEpochMilli(openTime), ZoneId.systemDefault());
+				log.warn("废单信息：{} {} {}", ldt, contract.getName(), orderMsg);
 			}
 		}
 		Instant ins = Instant.ofEpochMilli(json.getLongValue("openTime"));
 		String tradingDay = LocalDateTime.ofInstant(ins, ZoneOffset.ofHours(0)).toLocalDate().format(DateTimeConstant.D_FORMAT_INT_FORMATTER);
 		String orderDate = LocalDateTime.ofInstant(ins, ZoneId.systemDefault()).toLocalDate().format(DateTimeConstant.D_FORMAT_INT_FORMATTER);
-		String symbol = json.getString("symbol");
 		int tradedVol = json.getIntValue("filledQuantity");
 		int totalVol = json.getIntValue("totalQuantity");
-		ContractField contract = contractMgr.getContract("TIGER", symbol).contractField();
 		double price = (int) (json.getDoubleValue("limitPrice") / contract.getPriceTick()) * contract.getPriceTick();
 		return OrderField.newBuilder()
 				.setAccountId(accountId)
