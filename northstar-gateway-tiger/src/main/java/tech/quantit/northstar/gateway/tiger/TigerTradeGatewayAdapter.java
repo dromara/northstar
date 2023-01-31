@@ -1,5 +1,6 @@
 package tech.quantit.northstar.gateway.tiger;
 
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Timer;
@@ -45,8 +46,10 @@ import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
 import xyz.redtorch.pb.CoreField.AccountField;
 import xyz.redtorch.pb.CoreField.CancelOrderReqField;
 import xyz.redtorch.pb.CoreField.ContractField;
+import xyz.redtorch.pb.CoreField.OrderField;
 import xyz.redtorch.pb.CoreField.PositionField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
+import xyz.redtorch.pb.CoreField.TradeField;
 
 /**
  * 老虎证券交易网关适配器
@@ -87,8 +90,18 @@ public class TigerTradeGatewayAdapter implements TradeGateway{
         clientConfig.language = Language.zh_CN;
 		client = TigerHttpClient.getInstance().clientConfig(clientConfig);
 		proxy = new OrderTradeQueryProxy(client, contractMgr, gatewayId(), settings.getAccountId());
+		List<OrderField> orders = proxy.getDeltaOrder();
+		List<String> symbols = orders.stream().map(OrderField::getContract).map(ContractField::getSymbol).distinct().toList();
+		
 		feEngine.emitEvent(NorthstarEventType.CONNECTED, gatewayId());
 		feEngine.emitEvent(NorthstarEventType.LOGGED_IN, gatewayId());
+		
+		orders.forEach(order -> feEngine.emitEvent(NorthstarEventType.ORDER, order));
+		symbols.forEach(symbol -> {
+			List<TradeField> trades = proxy.getTrades(symbol);
+			trades.forEach(trade -> feEngine.emitEvent(NorthstarEventType.TRADE, trade));
+		});
+		
 		timer = new Timer("TIGER_" + gatewayId(), true);
 		timer.scheduleAtFixedRate(new TimerTask() {
 			
@@ -102,7 +115,7 @@ public class TigerTradeGatewayAdapter implements TradeGateway{
 					log.error("", e);
 				}
 			}
-		}, 0, 1500);
+		}, 3000, 1500);
 	}
 	
 	private void doQueryOrderAndTrade() {

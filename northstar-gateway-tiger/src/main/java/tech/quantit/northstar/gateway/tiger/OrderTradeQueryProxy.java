@@ -38,6 +38,7 @@ import xyz.redtorch.pb.CoreField.TradeField;
 @Slf4j
 public class OrderTradeQueryProxy {
 
+	private static final long EXPIRY = 24 * 3600 * 1000;	// 一天以内
 	private final TigerHttpClient client;
 	private final IContractManager contractMgr;
 	private final String accountId;
@@ -71,6 +72,10 @@ public class OrderTradeQueryProxy {
 		List<OrderField> resultList = new ArrayList<>(100);
 		for(int i=0; i<items.size(); i++) {
 			JSONObject json = items.getJSONObject(i);
+			long openTime = getOpenTime(json);
+			if(expired(openTime)) {
+				continue;
+			}
 			Long id = json.getLong("id");
 			OrderField order = convertOrder(json);
 			OrderField oldOrder = orderIds.get(id);
@@ -80,6 +85,14 @@ public class OrderTradeQueryProxy {
 			}
 		}
 		return resultList;
+	}
+	
+	private boolean expired(long time) {
+		return System.currentTimeMillis() - time > EXPIRY;
+	}
+	
+	private long getOpenTime(JSONObject json) {
+		return json.getLongValue("openTime");
 	}
 	
 	private OrderField convertOrder(JSONObject json) {
@@ -119,12 +132,12 @@ public class OrderTradeQueryProxy {
 			if(StringUtils.isEmpty(orderMsg)) {
 				log.warn("废单反馈：{}", json.toString(SerializerFeature.PrettyFormat));
 			} else {
-				long openTime = json.getLongValue("openTime");
+				long openTime = getOpenTime(json);
 				LocalDateTime ldt = LocalDateTime.ofInstant(Instant.ofEpochMilli(openTime), ZoneId.systemDefault());
 				log.warn("废单信息：{} {} {}", ldt, contract.getName(), orderMsg);
 			}
 		}
-		Instant ins = Instant.ofEpochMilli(json.getLongValue("openTime"));
+		Instant ins = Instant.ofEpochMilli(getOpenTime(json));
 		String tradingDay = LocalDateTime.ofInstant(ins, ZoneOffset.ofHours(0)).toLocalDate().format(DateTimeConstant.D_FORMAT_INT_FORMATTER);
 		String orderDate = LocalDateTime.ofInstant(ins, ZoneId.systemDefault()).toLocalDate().format(DateTimeConstant.D_FORMAT_INT_FORMATTER);
 		int tradedVol = json.getIntValue("filledQuantity");
@@ -149,6 +162,26 @@ public class OrderTradeQueryProxy {
 				.build();
 	}
 	
+	public List<TradeField> getTrades(String symbol) {
+		log.trace("查询TIGER成交信息");	
+		
+		TigerHttpRequest request = new TigerHttpRequest(MethodName.ORDER_TRANSACTIONS);
+		String bizContent = AccountParamBuilder.instance()
+		    .account(accountId)
+		    .secType(SecType.STK)
+		    .symbol(symbol)
+		    .limit(100)
+		    .buildJson();
+		request.setBizContent(bizContent);
+		TigerHttpResponse response = client.execute(request);
+		if(!response.isSuccess()) {
+			log.warn("查询成交返回异常：{}", response.getMessage());
+			throw new IllegalStateException(response.getMessage());
+		}
+		
+		return resolveData(response);
+	}
+	
 	public List<TradeField> getDeltaTrade(Long id) {
 		log.trace("查询TIGER成交信息");	
 		
@@ -163,9 +196,13 @@ public class OrderTradeQueryProxy {
 		TigerHttpResponse response = client.execute(request);
 		if(!response.isSuccess()) {
 			log.warn("查询成交返回异常：{}", response.getMessage());
-			throw new IllegalStateException();
+			throw new IllegalStateException(response.getMessage());
 		}
 
+		return resolveData(response);
+	}
+	
+	private List<TradeField> resolveData(TigerHttpResponse response){
 		JSONArray data = JSON.parseObject(response.getData()).getJSONArray("items");
 		List<TradeField> resultList = new ArrayList<>();
 		for(int i=0; i<data.size(); i++) {
