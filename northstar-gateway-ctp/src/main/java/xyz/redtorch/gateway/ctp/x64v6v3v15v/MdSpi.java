@@ -26,7 +26,6 @@ import tech.quantit.northstar.common.utils.MarketDateTimeUtil;
 import tech.quantit.northstar.common.utils.MessagePrinter;
 import tech.quantit.northstar.gateway.api.GatewayAbstract;
 import tech.quantit.northstar.gateway.api.domain.contract.Contract;
-import tech.quantit.northstar.gateway.api.domain.contract.GatewayContract;
 import xyz.redtorch.gateway.ctp.common.CtpDateTimeUtil;
 import xyz.redtorch.gateway.ctp.common.GatewayConstants;
 import xyz.redtorch.gateway.ctp.x64v6v3v15v.api.CThostFtdcDepthMarketDataField;
@@ -40,8 +39,8 @@ import xyz.redtorch.gateway.ctp.x64v6v3v15v.api.CThostFtdcSpecificInstrumentFiel
 import xyz.redtorch.gateway.ctp.x64v6v3v15v.api.CThostFtdcUserLogoutField;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
-import xyz.redtorch.pb.CoreField.TickField;
 import xyz.redtorch.pb.CoreField.GatewaySettingField.CtpApiSettingField;
+import xyz.redtorch.pb.CoreField.TickField;
 
 public class MdSpi extends CThostFtdcMdSpi {
 
@@ -551,8 +550,7 @@ public class MdSpi extends CThostFtdcMdSpi {
 				preTickMap.put(contract.identifier(), tick);
 
 				gatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.TICK, tick);
-				GatewayContract mktContract = (GatewayContract) gatewayAdapter.mktCenter.getContract(tick.getGatewayId(), tick.getUnifiedSymbol());
-				mktContract.onTick(tick);
+				gatewayAdapter.mktCenter.onTick(tick);
 				lastUpdateTickTime = System.currentTimeMillis();
 				
 			} catch (Throwable t) {

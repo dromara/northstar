@@ -1,9 +1,10 @@
 package tech.quantit.northstar.gateway.api;
 
+import tech.quantit.northstar.common.TickDataAware;
 import tech.quantit.northstar.common.constant.ChannelType;
 import tech.quantit.northstar.gateway.api.domain.contract.Instrument;
 
-public interface IMarketCenter extends IContractManager {
+public interface IMarketCenter extends IContractManager, TickDataAware {
 
 	/**
 	 * 注册合约

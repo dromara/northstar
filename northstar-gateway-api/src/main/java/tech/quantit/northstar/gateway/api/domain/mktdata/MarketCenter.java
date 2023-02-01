@@ -42,7 +42,7 @@ import xyz.redtorch.pb.CoreField.TickField;
  *
  */
 @Slf4j
-public class MarketCenter implements IMarketCenter, TickDataAware{
+public class MarketCenter implements IMarketCenter{
 	
 	private static final int INIT_SIZE = 16384;
 	/* id -> 合约 */

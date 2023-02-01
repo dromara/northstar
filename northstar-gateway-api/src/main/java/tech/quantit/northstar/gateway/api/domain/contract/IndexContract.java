@@ -42,7 +42,10 @@ public class IndexContract implements Contract, TickDataAware{
 		this.contract = makeIndexContractField(monthContracts.get(0).contractField());
 		this.identifier = Identifier.of(contract.getContractId());
 		this.barGen = new MinuteBarGenerator(contract, monthContracts.get(0).tradeTimeDefinition(), bar -> feEngine.emitEvent(NorthstarEventType.BAR, bar));
-		this.ticker = new IndexTicker(this, barGen::update);
+		this.ticker = new IndexTicker(this, t -> {
+			feEngine.emitEvent(NorthstarEventType.TICK, t);
+			barGen.update(t);
+		});
 	}
 	
 	private ContractField makeIndexContractField(ContractField proto) {
