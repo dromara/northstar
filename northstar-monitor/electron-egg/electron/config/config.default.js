@@ -126,8 +126,13 @@ module.exports = (appInfo) => {
    * 主进程
    */     
   config.mainServer = {
+    protocol: 'https://',
     host: '127.0.0.1',
     port: 7072,
+    ssl: {
+      key: '/public/ssl/localhost+1.key',
+      cert: '/public/ssl/localhost+1.pem'
+    }
   }; 
 
   /**
