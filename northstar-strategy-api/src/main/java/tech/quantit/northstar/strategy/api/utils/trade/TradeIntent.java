@@ -91,6 +91,8 @@ public class TradeIntent implements TransactionAware, TickDataAware {
 	
 	private boolean terminated;
 	
+	private long lastCancelReqTime;
+	
 	@Override
 	public synchronized void onTick(TickField tick) {
 		if(!StringUtils.equals(tick.getUnifiedSymbol(), contract.getUnifiedSymbol())) 
@@ -102,8 +104,9 @@ public class TradeIntent implements TransactionAware, TickDataAware {
 			return;
 		if(orderIdRef.isEmpty()) {
 			orderIdRef = context.submitOrderReq(contract, operation, priceType, volume - accVol, price);
-		} else if (context.isOrderWaitTimeout(orderIdRef.get(), timeout)) {
+		} else if (context.isOrderWaitTimeout(orderIdRef.get(), timeout) && System.currentTimeMillis() - lastCancelReqTime > 3000) {
 			context.cancelOrder(orderIdRef.get());
+			lastCancelReqTime = System.currentTimeMillis();
 		}
 	}
 
