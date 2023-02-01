@@ -65,7 +65,7 @@ public class OrderTradeQueryProxy {
 		TigerHttpResponse response = client.execute(request);
 		if(!response.isSuccess()) {
 			log.warn("查询订单返回异常：{}", response.getMessage());
-			throw new IllegalStateException();
+			throw new IllegalStateException(response.getMessage());
 		}
 		JSONObject data = JSON.parseObject(response.getData());
 		JSONArray items = data.getJSONArray("items");

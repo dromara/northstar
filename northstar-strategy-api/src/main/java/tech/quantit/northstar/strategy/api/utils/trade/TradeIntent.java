@@ -89,7 +89,7 @@ public class TradeIntent implements TransactionAware, TickDataAware {
 
 	private int accVol;
 	
-	private boolean aborted;
+	private boolean terminated;
 	
 	@Override
 	public synchronized void onTick(TickField tick) {
@@ -97,7 +97,7 @@ public class TradeIntent implements TransactionAware, TickDataAware {
 			return;
 
 		if(Objects.nonNull(abortCondition))
-			aborted = abortCondition.test(tick);
+			terminated = abortCondition.test(tick);
 		if(hasTerminated())
 			return;
 		if(orderIdRef.isEmpty()) {
@@ -113,7 +113,8 @@ public class TradeIntent implements TransactionAware, TickDataAware {
 		orderIdRef
 			.filter(id -> StringUtils.equals(id, order.getOriginOrderId()))
 			.ifPresent(id -> {
-				if(OrderUtils.isDoneOrder(order)) {				
+				if(OrderUtils.isDoneOrder(order)) {	
+					terminated = true;
 					orderIdRef = Optional.empty();
 				}
 			});
@@ -125,6 +126,6 @@ public class TradeIntent implements TransactionAware, TickDataAware {
 	}
 
 	public boolean hasTerminated() {
-		return aborted || accVol == volume;
+		return terminated || accVol == volume;
 	}
 }
