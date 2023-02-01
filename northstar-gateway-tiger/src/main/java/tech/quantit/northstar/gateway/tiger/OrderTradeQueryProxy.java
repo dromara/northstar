@@ -210,7 +210,8 @@ public class OrderTradeQueryProxy {
 			String symbol = json.getString("symbol");
 			ContractField contract = contractMgr.getContract("TIGER", symbol).contractField();
 			Long tradeId = json.getLong("id");
-			if(tradeIds.contains(tradeId)) {
+			Long tradeTime = json.getLongValue("transactionTime");
+			if(tradeIds.contains(tradeId) || expired(tradeTime)) {
 				continue;
 			}
 			tradeIds.add(tradeId);
@@ -237,7 +238,7 @@ public class OrderTradeQueryProxy {
 					.setVolume(json.getIntValue("filledQuantity"))
 					.setTradeDate(json.getString("transactedAt").split(" ")[0])
 					.setTradeTime(json.getString("transactedAt").split(" ")[1])
-					.setTradeTimestamp(json.getLongValue("transactionTime"))
+					.setTradeTimestamp(tradeTime)
 					.setContract(contractMgr.getContract("TIGER", symbol).contractField())
 					.build();
 			resultList.add(trade);

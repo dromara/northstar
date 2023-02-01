@@ -114,9 +114,8 @@ class ModuleContextTest {
 				.volume(10)
 				.priceType(PriceType.ANY_PRICE)
 				.build();
-		ctx.submitOrderReq(ti);
 		assertThrows(TradeException.class, () -> {
-			ctx.onTick(tick);
+			ctx.submitOrderReq(ti);
 		});
 	}
 	

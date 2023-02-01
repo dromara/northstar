@@ -15,6 +15,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import tech.quantit.northstar.common.constant.ModuleState;
 import tech.quantit.northstar.common.constant.SignalOperation;
 import tech.quantit.northstar.strategy.api.IModuleStrategyContext;
 import tech.quantit.northstar.strategy.api.constant.PriceType;
@@ -39,6 +40,7 @@ class TradeIntentTest {
 	void prepare() {
 		when(ctx.submitOrderReq(any(ContractField.class), any(SignalOperation.class), any(PriceType.class), anyInt(), any(Double.class)))
 			.thenReturn(Optional.of(ORDER_ID));
+		when(ctx.getState()).thenReturn(ModuleState.EMPTY);
 	}
 
 	@Test

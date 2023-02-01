@@ -102,7 +102,7 @@ public class TradeIntent implements TransactionAware, TickDataAware {
 			terminated = abortCondition.test(tick);
 		if(hasTerminated())
 			return;
-		if(orderIdRef.isEmpty()) {
+		if(orderIdRef.isEmpty() && !context.getState().isOrdering()) {
 			orderIdRef = context.submitOrderReq(contract, operation, priceType, volume - accVol, price);
 		} else if (context.isOrderWaitTimeout(orderIdRef.get(), timeout) && System.currentTimeMillis() - lastCancelReqTime > 3000) {
 			context.cancelOrder(orderIdRef.get());
@@ -117,7 +117,6 @@ public class TradeIntent implements TransactionAware, TickDataAware {
 			.filter(id -> StringUtils.equals(id, order.getOriginOrderId()))
 			.ifPresent(id -> {
 				if(OrderUtils.isDoneOrder(order)) {	
-					terminated = true;
 					orderIdRef = Optional.empty();
 				}
 			});
