@@ -56,7 +56,7 @@ import xyz.redtorch.pb.CoreField.TickField;
 @Slf4j
 public class PlaybackContext {
 	
-	private static final String GWID = "PLAYBACK";
+	private static final String GWID = "CTP";
 	
 	private IPlaybackRuntimeRepository rtRepo;
 	
