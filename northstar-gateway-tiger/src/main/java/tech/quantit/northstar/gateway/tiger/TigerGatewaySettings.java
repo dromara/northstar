@@ -25,7 +25,7 @@ public class TigerGatewaySettings extends DynamicParams implements GatewaySettin
 	@Setting(label="证书类型", order=40, type=FieldType.SELECT, optionsVal = {"TBNZ", "TBSG"})
 	private License license;
 	
-	@Setting(label="secretKey", order=50, type=FieldType.TEXT)
+	@Setting(label="secretKey", order=50, type=FieldType.TEXT, required = false)
 	private String secretKey;
 	
 }

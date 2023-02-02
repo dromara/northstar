@@ -9,7 +9,7 @@
     destroy-on-close
   >
     <el-form :model="gatewaySettings" label-width="100px" width="200px">
-      <el-form-item v-for="(item, i) in gatewaySettingsMetaInfo" :label="item.label" :key="i">
+      <el-form-item v-for="(item, i) in gatewaySettingsMetaInfo" :label="item.label" :key="i" :required="item.required">
         <el-input
           v-if="['TEXT', 'PASSWORD', 'NUMBER'].indexOf(item.type) > -1"
           v-model="gatewaySettings[item.name]"
@@ -89,7 +89,7 @@ export default {
     },
     saveSettings() {
       this.gatewaySettingsMetaInfo.forEach((item) => {
-        if (!this.gatewaySettings[item.name]) {
+        if (!this.gatewaySettings[item.name] && item.required) {
           throw new Error(`【${item.label}】不能为空`)
         }
       })

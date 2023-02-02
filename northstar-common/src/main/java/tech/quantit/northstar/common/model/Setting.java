@@ -52,4 +52,9 @@ public @interface Setting {
 	 * @return
 	 */
 	FieldType type() default FieldType.TEXT;
+	/**
+	 * 是否必填
+	 * @return
+	 */
+	boolean required() default true;
 }

@@ -28,4 +28,6 @@ public class ComponentField {
 	
 	private String placeholder;
 	
+	private boolean required;
+	
 }
