@@ -19,7 +19,8 @@ public class FirstInFirstOutClosingStrategy implements ClosingStrategy{
 	public OffsetFlagEnum resolveOperation(SignalOperation opr, PositionField position) {
 		if(opr.isOpen())	return OffsetFlagEnum.OF_Open;
 		if(position.getPosition() - position.getFrozen() < 1) {
-			throw new IllegalStateException("没有足够持仓可用");
+			String msg = String.format("持仓数量：%d，冻结数据：%d", position.getPosition(), position.getFrozen());
+			throw new IllegalStateException("没有足够持仓可用：" + msg);
 		}
 		ContractField contract = position.getContract();
 		if(contract.getExchange() == ExchangeEnum.SHFE) {			
