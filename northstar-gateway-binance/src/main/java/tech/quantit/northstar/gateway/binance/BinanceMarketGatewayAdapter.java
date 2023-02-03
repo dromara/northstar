@@ -61,7 +61,7 @@ public class BinanceMarketGatewayAdapter implements MarketGateway {
 
 	@Override
 	public ChannelType channelType() {
-		return ChannelType.BIAN;
+		return null;
 	}
 
 	@Override

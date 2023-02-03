@@ -49,7 +49,8 @@ public class BinanceContract implements Instrument{
 
 	@Override
 	public ChannelType channelType() {
-		return ChannelType.BIAN;
+//		return ChannelType.BIAN;
+		return null;	// FIXME
 	}
 
 	@Override
