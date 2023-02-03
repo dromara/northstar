@@ -34,14 +34,7 @@ public enum ChannelType {
 			return new GatewayUsage[] {GatewayUsage.MARKET_DATA, GatewayUsage.TRADE};
 		}
 	},
-	
-	BIAN {
-		@Override
-		public GatewayUsage[] usage() {
-			return new GatewayUsage[] {GatewayUsage.MARKET_DATA};
-		}
-	},
-	
+
 	CTP_SIM {
 		@Override
 		public GatewayUsage[] usage() {
