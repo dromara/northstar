@@ -20,7 +20,6 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -39,6 +38,8 @@ import tech.quantit.northstar.common.constant.Constants;
 import tech.quantit.northstar.common.constant.DateTimeConstant;
 import tech.quantit.northstar.common.constant.ModuleState;
 import tech.quantit.northstar.common.constant.SignalOperation;
+import tech.quantit.northstar.common.event.NorthstarEvent;
+import tech.quantit.northstar.common.event.NorthstarEventType;
 import tech.quantit.northstar.common.exception.NoSuchElementException;
 import tech.quantit.northstar.common.exception.TradeException;
 import tech.quantit.northstar.common.model.BarWrapper;
@@ -53,6 +54,7 @@ import tech.quantit.northstar.common.utils.FieldUtils;
 import tech.quantit.northstar.common.utils.OrderUtils;
 import tech.quantit.northstar.gateway.api.TradeGateway;
 import tech.quantit.northstar.gateway.api.domain.contract.Contract;
+import tech.quantit.northstar.main.mail.MailDeliveryManager;
 import tech.quantit.northstar.strategy.api.ClosingStrategy;
 import tech.quantit.northstar.strategy.api.IComboIndicator;
 import tech.quantit.northstar.strategy.api.IDisposablePriceListener;
@@ -76,6 +78,7 @@ import tech.quantit.northstar.strategy.api.utils.bar.BarMergerRegistry.CallbackP
 import tech.quantit.northstar.strategy.api.utils.trade.DealCollector;
 import tech.quantit.northstar.strategy.api.utils.trade.DisposablePriceListener;
 import tech.quantit.northstar.strategy.api.utils.trade.TradeIntent;
+import xyz.redtorch.pb.CoreEnum.CommonStatusEnum;
 import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.ForceCloseReasonEnum;
@@ -86,6 +89,7 @@ import xyz.redtorch.pb.CoreEnum.VolumeConditionEnum;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.CancelOrderReqField;
 import xyz.redtorch.pb.CoreField.ContractField;
+import xyz.redtorch.pb.CoreField.NoticeField;
 import xyz.redtorch.pb.CoreField.OrderField;
 import xyz.redtorch.pb.CoreField.PositionField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
@@ -143,8 +147,6 @@ public class ModuleContext implements IModuleContext, MergedBarListener{
 	
 	private Consumer<ModuleDealRecord> onDealCallback;
 	
-	private BiConsumer<ModuleContext, TradeField> onModuleTradeCallback;
-	
 	private final IndicatorFactory indicatorFactory = new IndicatorFactory();
 	
 	private final IndicatorFactory inspectedValIndicatorFactory = new IndicatorFactory();
@@ -160,9 +162,11 @@ public class ModuleContext implements IModuleContext, MergedBarListener{
 	
 	private Logger mlog;
 	
+	private MailDeliveryManager mailMgr;
+	
 	public ModuleContext(String name, TradeStrategy tradeStrategy, IModuleAccountStore accStore, ClosingStrategy closingStrategy, int numOfMinsPerBar, 
 			int bufSize, DealCollector dealCollector, Consumer<ModuleRuntimeDescription> onRuntimeChangeCallback, Consumer<ModuleDealRecord> onDealCallback,
-			BiConsumer<ModuleContext, TradeField> onModuleTradeCallback) {
+			MailDeliveryManager mailMgr) {
 		this.moduleName = name;
 		this.mlog = logFactory.getLogger(name);
 		this.tradeStrategy = tradeStrategy;
@@ -172,7 +176,7 @@ public class ModuleContext implements IModuleContext, MergedBarListener{
 		this.dealCollector = dealCollector;
 		this.onRuntimeChangeCallback = onRuntimeChangeCallback;
 		this.onDealCallback = onDealCallback;
-		this.onModuleTradeCallback = onModuleTradeCallback;
+		this.mailMgr = mailMgr;
 		this.bufSize.set(bufSize);
 	}
 
@@ -536,7 +540,7 @@ public class ModuleContext implements IModuleContext, MergedBarListener{
 		}
 		accStore.onTrade(trade);
 		tradeStrategy.onTrade(trade);
-		onModuleTradeCallback.accept(this, trade);
+		onTradeNotification(trade);
 		onRuntimeChangeCallback.accept(getRuntimeDescription(false));
 		dealCollector.onTrade(trade).ifPresent(list -> list.stream().forEach(this.onDealCallback::accept));
 		
@@ -550,6 +554,19 @@ public class ModuleContext implements IModuleContext, MergedBarListener{
 				tradeIntent = null;
 			}
 		}
+	}
+	
+	private void onTradeNotification(TradeField trade) {
+		StringBuilder sb = new StringBuilder();
+		sb.append("模组成交:\n");
+		sb.append(String.format(" 模组：%s%n", getModuleName()));
+		sb.append(String.format(" 合约：%s%n", trade.getContract().getFullName()));
+		sb.append(String.format(" 操作：%s%n", FieldUtils.chn(trade.getDirection()) + FieldUtils.chn(trade.getOffsetFlag())));
+		sb.append(String.format(" 成交价：%s%n", trade.getPrice()));
+		sb.append(String.format(" 手数：%s%n", trade.getVolume()));
+		sb.append(String.format(" 成交时间：%s%n", trade.getTradeTime()));
+		sb.append(String.format(" 委托ID：%s%n", trade.getOriginOrderId()));
+		sendNotification(sb.toString());
 	}
 
 	@Override
@@ -666,6 +683,15 @@ public class ModuleContext implements IModuleContext, MergedBarListener{
 		int numOfUnits = comboIndicator.getConfiguration().getNumOfUnits();
 		PeriodUnit unit = comboIndicator.getConfiguration().getPeriod();
 		registry.addListener(c, numOfUnits, unit, comboIndicator, CallbackPriority.TWO);
+	}
+
+	@Override
+	public void sendNotification(String content) {
+		mailMgr.onEvent(new NorthstarEvent(NorthstarEventType.NOTICE, NoticeField.newBuilder()
+				.setTimestamp(System.currentTimeMillis())
+				.setContent(content)
+				.setStatus(CommonStatusEnum.COMS_INFO)
+				.build()));
 	}
 
 }

@@ -4,14 +4,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import tech.quantit.northstar.common.constant.ClosingPolicy;
 import tech.quantit.northstar.common.constant.ModuleUsage;
-import tech.quantit.northstar.common.event.NorthstarEvent;
-import tech.quantit.northstar.common.event.NorthstarEventType;
 import tech.quantit.northstar.common.model.ComponentAndParamsPair;
 import tech.quantit.northstar.common.model.ComponentField;
 import tech.quantit.northstar.common.model.DynamicParams;
@@ -21,7 +18,6 @@ import tech.quantit.northstar.common.model.ModuleAccountRuntimeDescription;
 import tech.quantit.northstar.common.model.ModuleDealRecord;
 import tech.quantit.northstar.common.model.ModuleDescription;
 import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
-import tech.quantit.northstar.common.utils.FieldUtils;
 import tech.quantit.northstar.data.IGatewayRepository;
 import tech.quantit.northstar.data.IModuleRepository;
 import tech.quantit.northstar.domain.gateway.GatewayAndConnectionManager;
@@ -45,7 +41,6 @@ import tech.quantit.northstar.strategy.api.IModuleAccountStore;
 import tech.quantit.northstar.strategy.api.IModuleContext;
 import tech.quantit.northstar.strategy.api.TradeStrategy;
 import tech.quantit.northstar.strategy.api.utils.trade.DealCollector;
-import xyz.redtorch.pb.CoreField.NoticeField;
 import xyz.redtorch.pb.CoreField.TradeField;
 
 public class ModuleFactory {
@@ -65,22 +60,6 @@ public class ModuleFactory {
 	private Consumer<ModuleRuntimeDescription> onRuntimeChangeCallback = rt -> moduleRepo.saveRuntime(rt);
 	
 	private Consumer<ModuleDealRecord> onDealChangeCallback = dealRecord -> moduleRepo.saveDealRecord(dealRecord);
-	
-	private BiConsumer<ModuleContext, TradeField> onModuleTradeCallback = (ctx, trade) -> {
-		StringBuilder sb = new StringBuilder();
-		sb.append("模组成交:\n");
-		sb.append(String.format(" 模组：%s%n", ctx.getModuleName()));
-		sb.append(String.format(" 合约：%s%n", trade.getContract().getFullName()));
-		sb.append(String.format(" 操作：%s%n", FieldUtils.chn(trade.getDirection()) + FieldUtils.chn(trade.getOffsetFlag())));
-		sb.append(String.format(" 成交价：%s%n", trade.getPrice()));
-		sb.append(String.format(" 手数：%s%n", trade.getVolume()));
-		sb.append(String.format(" 成交时间：%s%n", trade.getTradeTime()));
-		sb.append(String.format(" 委托ID：%s%n", trade.getOriginOrderId()));
-		mailMgr.onEvent(new NorthstarEvent(NorthstarEventType.NOTICE, NoticeField.newBuilder()
-				.setTimestamp(System.currentTimeMillis())
-				.setContent(sb.toString())
-				.build()));
-	};
 	
 	public ModuleFactory(ExternalJarClassLoader extJarLoader, IModuleRepository moduleRepo, IGatewayRepository gatewayRepo, 
 			GatewayAndConnectionManager gatewayConnMgr, IContractManager contractMgr, MailDeliveryManager mailMgr) {
@@ -139,7 +118,7 @@ public class ModuleFactory {
 					onRuntimeChangeCallback, onDealChangeCallback);
 		}
 		return new ModuleContext(moduleDescription.getModuleName(), strategy, accStore, closingStrategy, numOfMinPerBar,
-				moduleBufDataSize, dc, onRuntimeChangeCallback, onDealChangeCallback, onModuleTradeCallback);
+				moduleBufDataSize, dc, onRuntimeChangeCallback, onDealChangeCallback, mailMgr);
 	}
 	
 	@SuppressWarnings("unchecked")

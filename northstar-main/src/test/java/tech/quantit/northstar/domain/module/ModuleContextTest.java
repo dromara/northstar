@@ -9,7 +9,6 @@ import static org.mockito.Mockito.when;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -27,14 +26,15 @@ import tech.quantit.northstar.gateway.api.IContractManager;
 import tech.quantit.northstar.gateway.api.TradeGateway;
 import tech.quantit.northstar.gateway.api.domain.contract.Contract;
 import tech.quantit.northstar.gateway.api.domain.time.GenericTradeTime;
+import tech.quantit.northstar.main.mail.MailDeliveryManager;
 import tech.quantit.northstar.strategy.api.ClosingStrategy;
 import tech.quantit.northstar.strategy.api.IModule;
 import tech.quantit.northstar.strategy.api.IModuleAccountStore;
 import tech.quantit.northstar.strategy.api.TradeStrategy;
 import tech.quantit.northstar.strategy.api.constant.PriceType;
-import tech.quantit.northstar.strategy.api.indicator.TimeSeriesUnaryOperator;
 import tech.quantit.northstar.strategy.api.indicator.Indicator.Configuration;
 import tech.quantit.northstar.strategy.api.indicator.Indicator.ValueType;
+import tech.quantit.northstar.strategy.api.indicator.TimeSeriesUnaryOperator;
 import tech.quantit.northstar.strategy.api.indicator.function.AverageFunctions;
 import tech.quantit.northstar.strategy.api.utils.trade.DealCollector;
 import tech.quantit.northstar.strategy.api.utils.trade.TradeIntent;
@@ -86,7 +86,7 @@ class ModuleContextTest {
 		IModuleAccountStore accStore = new ModuleAccountStore(NAME, closingStrategy.getClosingPolicy(), mrd, contractMgr);
 		
 		ctx = new ModuleContext(NAME, strategy, accStore, closingStrategy, 3, 100, mock(DealCollector.class), 
-				mock(Consumer.class), mock(Consumer.class), mock(BiConsumer.class));
+				mock(Consumer.class), mock(Consumer.class), mock(MailDeliveryManager.class));
 		ctx.setModule(module);
 		ctx.bindGatewayContracts(gateway, List.of(c));
 		ctx.onTrade(TradeField.newBuilder()

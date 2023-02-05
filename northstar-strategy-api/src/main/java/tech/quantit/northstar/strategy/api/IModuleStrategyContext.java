@@ -170,4 +170,9 @@ public interface IModuleStrategyContext {
 	 * @param comboIndicator
 	 */
 	void addComboIndicator(IComboIndicator comboIndicator);
+	/**
+	 * 发消息提示
+	 * @param content
+	 */
+	void sendNotification(String content);
 }

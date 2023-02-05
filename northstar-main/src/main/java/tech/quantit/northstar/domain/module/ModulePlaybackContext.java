@@ -539,4 +539,9 @@ public class ModulePlaybackContext implements IModuleContext, MergedBarListener 
 		barBufQMap.get(bar.getUnifiedSymbol()).offer(bar);		
 	}
 
+	@Override
+	public void sendNotification(String content) {
+		// 回测时不实现该方法
+	}
+
 }
