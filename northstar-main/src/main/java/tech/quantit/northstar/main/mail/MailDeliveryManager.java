@@ -56,6 +56,14 @@ public class MailDeliveryManager {
 				|| event.getData() instanceof OrderField order && order.getOrderStatus() == OrderStatusEnum.OS_AllTraded) {
 			return;
 		}
+		String title = switch(event.getEvent()) {
+		case CONNECTED -> "网关连线提示";
+		case DISCONNECTED -> "网关断线提示";
+		case TRADE -> "成交提示";
+		case ORDER -> "订单提示";
+		case NOTICE -> "消息提示";
+		default -> throw new IllegalArgumentException("Unexpected value: " + event.getEvent());
+		};
 		
 		String content = switch(event.getEvent()) {
 		case CONNECTED -> contentHandler.onConnected((String) event.getData());
@@ -68,7 +76,7 @@ public class MailDeliveryManager {
 		exec.execute(() -> {
 			MimeMessageHelper msg = new MimeMessageHelper(sender.createMimeMessage(), UTF8);
 			try {
-				msg.setSubject("Northstar邮件提示");
+				msg.setSubject("Northstar" + title);
 				msg.setFrom(emailConfig.getEmailUsername());
 				for(String mailTo : emailConfig.getSubscriberList()) {
 					msg.addTo(mailTo);

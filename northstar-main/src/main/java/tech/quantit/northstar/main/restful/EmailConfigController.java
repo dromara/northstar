@@ -1,5 +1,7 @@
 package tech.quantit.northstar.main.restful;
 
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -8,11 +10,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import tech.quantit.northstar.common.event.FastEventEngine;
+import tech.quantit.northstar.common.event.NorthstarEvent;
 import tech.quantit.northstar.common.event.NorthstarEventType;
 import tech.quantit.northstar.common.model.MailConfigDescription;
 import tech.quantit.northstar.common.model.ResultBean;
-import tech.quantit.northstar.main.service.EmailConfigService;
+import tech.quantit.northstar.data.IMailConfigRepository;
+import tech.quantit.northstar.main.mail.MailDeliveryManager;
 import xyz.redtorch.pb.CoreEnum.CommonStatusEnum;
 import xyz.redtorch.pb.CoreField.NoticeField;
 
@@ -22,34 +25,43 @@ import xyz.redtorch.pb.CoreField.NoticeField;
  */
 @RequestMapping("/northstar/email")
 @RestController
-public class EmailConfigController {
+public class EmailConfigController implements InitializingBean{
 	
 	@Autowired
-	private EmailConfigService service;
-
+	private MailDeliveryManager mailMgr;
+	
 	@Autowired
-	private FastEventEngine feEngine;
+	private IMailConfigRepository mailConfigRepo;
 	
 	@PostMapping
 	public ResultBean<Boolean> save(@RequestBody MailConfigDescription configDescription){
 		Assert.notNull(configDescription, "邮件配置信息不能为空");
-		service.saveConfig(configDescription);
+		mailConfigRepo.save(configDescription);
 		return new ResultBean<>(Boolean.TRUE);
 	}
 	
 	@GetMapping
 	public ResultBean<MailConfigDescription> get(){
-		return new ResultBean<>(service.getConfig());
+		return new ResultBean<>(mailConfigRepo.get());
+	}
+	
+	@GetMapping("testable")
+	public ResultBean<Boolean> testable(){
+		MailConfigDescription cfg = mailConfigRepo.get();
+		return new ResultBean<>(StringUtils.isNotEmpty(cfg.getEmailPassword()) && StringUtils.isNotEmpty(cfg.getEmailUsername()) && !cfg.getSubscriberList().isEmpty());
 	}
 	
 	@GetMapping("test")
 	public void testMail() {
-		NoticeField notice = NoticeField.newBuilder()
+		mailMgr.onEvent(new NorthstarEvent(NorthstarEventType.NOTICE, NoticeField.newBuilder()
 				.setStatus(CommonStatusEnum.COMS_INFO)
+				.setContent("邮件测试")
 				.setTimestamp(System.currentTimeMillis())
-				.setContent("just testing")
-				.build();
-		
-		feEngine.emitEvent(NorthstarEventType.NOTICE, notice);
+				.build()));
+	}
+
+	@Override
+	public void afterPropertiesSet() throws Exception {
+		mailMgr.setEmailConfig(mailConfigRepo.get());
 	}
 }

@@ -62,6 +62,7 @@
       </el-form-item>
     </el-form>
     <div slot="footer" class="dialog-footer">
+      <el-button type="primary" @click="test">邮件测试</el-button>
       <el-button @click="close">取 消</el-button>
       <el-button type="primary" @click="saveMailConfig">保 存</el-button>
     </div>
@@ -95,13 +96,19 @@ export default {
         emailPassword: [{ required: true, message: '不能为空', trigger: 'blur' }],
         subscriberList: [{ required: true, message: '不能为空', trigger: 'blur' }],
         interestTopicList: [{ required: true, message: '不能为空', trigger: 'blur' }]
-      }
+      },
+      testable: false
     }
   },
   watch: {
     subscriberListSrc: function (val) {
       if (val) {
         this.form.subscriberList = val.split(/;|；/).map((mail) => mail.trim())
+      }
+    },
+    visible: function(val){
+      if(val){
+        mailConfigApi.testable().then(result => this.testable = result)
       }
     }
   },
@@ -125,6 +132,9 @@ export default {
     },
     close() {
       this.$emit('update:visible', false)
+    },
+    test(){
+      mailConfigApi.test()
     }
   }
 }
