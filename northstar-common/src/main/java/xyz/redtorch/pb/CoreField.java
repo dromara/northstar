@@ -41224,24 +41224,12 @@ public final class CoreField {
     long getTimestamp();
 
     /**
-     * <code>string summary = 3;</code>
-     * @return The summary.
-     */
-    java.lang.String getSummary();
-    /**
-     * <code>string summary = 3;</code>
-     * @return The bytes for summary.
-     */
-    com.google.protobuf.ByteString
-        getSummaryBytes();
-
-    /**
-     * <code>string content = 4;</code>
+     * <code>string content = 3;</code>
      * @return The content.
      */
     java.lang.String getContent();
     /**
-     * <code>string content = 4;</code>
+     * <code>string content = 3;</code>
      * @return The bytes for content.
      */
     com.google.protobuf.ByteString
@@ -41261,7 +41249,6 @@ public final class CoreField {
     }
     private NoticeField() {
       status_ = 0;
-      summary_ = "";
       content_ = "";
     }
 
@@ -41307,12 +41294,6 @@ public final class CoreField {
               break;
             }
             case 26: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              summary_ = s;
-              break;
-            }
-            case 34: {
               java.lang.String s = input.readStringRequireUtf8();
 
               content_ = s;
@@ -41380,48 +41361,10 @@ public final class CoreField {
       return timestamp_;
     }
 
-    public static final int SUMMARY_FIELD_NUMBER = 3;
-    private volatile java.lang.Object summary_;
-    /**
-     * <code>string summary = 3;</code>
-     * @return The summary.
-     */
-    @java.lang.Override
-    public java.lang.String getSummary() {
-      java.lang.Object ref = summary_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        summary_ = s;
-        return s;
-      }
-    }
-    /**
-     * <code>string summary = 3;</code>
-     * @return The bytes for summary.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getSummaryBytes() {
-      java.lang.Object ref = summary_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        summary_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    public static final int CONTENT_FIELD_NUMBER = 4;
+    public static final int CONTENT_FIELD_NUMBER = 3;
     private volatile java.lang.Object content_;
     /**
-     * <code>string content = 4;</code>
+     * <code>string content = 3;</code>
      * @return The content.
      */
     @java.lang.Override
@@ -41438,7 +41381,7 @@ public final class CoreField {
       }
     }
     /**
-     * <code>string content = 4;</code>
+     * <code>string content = 3;</code>
      * @return The bytes for content.
      */
     @java.lang.Override
@@ -41476,11 +41419,8 @@ public final class CoreField {
       if (timestamp_ != 0L) {
         output.writeFixed64(2, timestamp_);
       }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(summary_)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, summary_);
-      }
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(content_)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, content_);
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, content_);
       }
       unknownFields.writeTo(output);
     }
@@ -41499,11 +41439,8 @@ public final class CoreField {
         size += com.google.protobuf.CodedOutputStream
           .computeFixed64Size(2, timestamp_);
       }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(summary_)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, summary_);
-      }
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(content_)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, content_);
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, content_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -41523,8 +41460,6 @@ public final class CoreField {
       if (status_ != other.status_) return false;
       if (getTimestamp()
           != other.getTimestamp()) return false;
-      if (!getSummary()
-          .equals(other.getSummary())) return false;
       if (!getContent()
           .equals(other.getContent())) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
@@ -41543,8 +41478,6 @@ public final class CoreField {
       hash = (37 * hash) + TIMESTAMP_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           getTimestamp());
-      hash = (37 * hash) + SUMMARY_FIELD_NUMBER;
-      hash = (53 * hash) + getSummary().hashCode();
       hash = (37 * hash) + CONTENT_FIELD_NUMBER;
       hash = (53 * hash) + getContent().hashCode();
       hash = (29 * hash) + unknownFields.hashCode();
@@ -41684,8 +41617,6 @@ public final class CoreField {
 
         timestamp_ = 0L;
 
-        summary_ = "";
-
         content_ = "";
 
         return this;
@@ -41716,7 +41647,6 @@ public final class CoreField {
         xyz.redtorch.pb.CoreField.NoticeField result = new xyz.redtorch.pb.CoreField.NoticeField(this);
         result.status_ = status_;
         result.timestamp_ = timestamp_;
-        result.summary_ = summary_;
         result.content_ = content_;
         onBuilt();
         return result;
@@ -41771,10 +41701,6 @@ public final class CoreField {
         }
         if (other.getTimestamp() != 0L) {
           setTimestamp(other.getTimestamp());
-        }
-        if (!other.getSummary().isEmpty()) {
-          summary_ = other.summary_;
-          onChanged();
         }
         if (!other.getContent().isEmpty()) {
           content_ = other.content_;
@@ -41894,85 +41820,9 @@ public final class CoreField {
         return this;
       }
 
-      private java.lang.Object summary_ = "";
-      /**
-       * <code>string summary = 3;</code>
-       * @return The summary.
-       */
-      public java.lang.String getSummary() {
-        java.lang.Object ref = summary_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          summary_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <code>string summary = 3;</code>
-       * @return The bytes for summary.
-       */
-      public com.google.protobuf.ByteString
-          getSummaryBytes() {
-        java.lang.Object ref = summary_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          summary_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <code>string summary = 3;</code>
-       * @param value The summary to set.
-       * @return This builder for chaining.
-       */
-      public Builder setSummary(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
-        summary_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>string summary = 3;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearSummary() {
-        
-        summary_ = getDefaultInstance().getSummary();
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>string summary = 3;</code>
-       * @param value The bytes for summary to set.
-       * @return This builder for chaining.
-       */
-      public Builder setSummaryBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
-        summary_ = value;
-        onChanged();
-        return this;
-      }
-
       private java.lang.Object content_ = "";
       /**
-       * <code>string content = 4;</code>
+       * <code>string content = 3;</code>
        * @return The content.
        */
       public java.lang.String getContent() {
@@ -41988,7 +41838,7 @@ public final class CoreField {
         }
       }
       /**
-       * <code>string content = 4;</code>
+       * <code>string content = 3;</code>
        * @return The bytes for content.
        */
       public com.google.protobuf.ByteString
@@ -42005,7 +41855,7 @@ public final class CoreField {
         }
       }
       /**
-       * <code>string content = 4;</code>
+       * <code>string content = 3;</code>
        * @param value The content to set.
        * @return This builder for chaining.
        */
@@ -42020,7 +41870,7 @@ public final class CoreField {
         return this;
       }
       /**
-       * <code>string content = 4;</code>
+       * <code>string content = 3;</code>
        * @return This builder for chaining.
        */
       public Builder clearContent() {
@@ -42030,7 +41880,7 @@ public final class CoreField {
         return this;
       }
       /**
-       * <code>string content = 4;</code>
+       * <code>string content = 3;</code>
        * @param value The bytes for content to set.
        * @return This builder for chaining.
        */
@@ -42370,10 +42220,10 @@ public final class CoreField {
       "ost\030\001 \001(\t\022\014\n\004port\030\002 \001(\007\022\020\n\010clientId\030\003 \001(" +
       "\007\"_\n\010LogField\022/\n\010logLevel\030\001 \001(\0162\035.xyz.re" +
       "dtorch.pb.LogLevelEnum\022\021\n\ttimestamp\030\002 \001(" +
-      "\006\022\017\n\007content\030\003 \001(\t\"u\n\013NoticeField\0221\n\006sta" +
+      "\006\022\017\n\007content\030\003 \001(\t\"d\n\013NoticeField\0221\n\006sta" +
       "tus\030\001 \001(\0162!.xyz.redtorch.pb.CommonStatus" +
-      "Enum\022\021\n\ttimestamp\030\002 \001(\006\022\017\n\007summary\030\003 \001(\t" +
-      "\022\017\n\007content\030\004 \001(\tb\006proto3"
+      "Enum\022\021\n\ttimestamp\030\002 \001(\006\022\017\n\007content\030\003 \001(\t" +
+      "b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -42481,7 +42331,7 @@ public final class CoreField {
     internal_static_xyz_redtorch_pb_NoticeField_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_xyz_redtorch_pb_NoticeField_descriptor,
-        new java.lang.String[] { "Status", "Timestamp", "Summary", "Content", });
+        new java.lang.String[] { "Status", "Timestamp", "Content", });
     xyz.redtorch.pb.CoreEnum.getDescriptor();
   }
 
