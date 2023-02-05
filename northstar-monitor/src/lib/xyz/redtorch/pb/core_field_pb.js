@@ -9778,7 +9778,8 @@ proto.xyz.redtorch.pb.NoticeField.toObject = function(includeInstance, msg) {
   var f, obj = {
     status: jspb.Message.getFieldWithDefault(msg, 1, 0),
     timestamp: jspb.Message.getFieldWithDefault(msg, 2, 0),
-    content: jspb.Message.getFieldWithDefault(msg, 3, "")
+    summary: jspb.Message.getFieldWithDefault(msg, 3, ""),
+    content: jspb.Message.getFieldWithDefault(msg, 4, "")
   };
 
   if (includeInstance) {
@@ -9825,6 +9826,10 @@ proto.xyz.redtorch.pb.NoticeField.deserializeBinaryFromReader = function(msg, re
       break;
     case 3:
       var value = /** @type {string} */ (reader.readString());
+      msg.setSummary(value);
+      break;
+    case 4:
+      var value = /** @type {string} */ (reader.readString());
       msg.setContent(value);
       break;
     default:
@@ -9870,10 +9875,17 @@ proto.xyz.redtorch.pb.NoticeField.serializeBinaryToWriter = function(message, wr
       f
     );
   }
-  f = message.getContent();
+  f = message.getSummary();
   if (f.length > 0) {
     writer.writeString(
       3,
+      f
+    );
+  }
+  f = message.getContent();
+  if (f.length > 0) {
+    writer.writeString(
+      4,
       f
     );
   }
@@ -9917,10 +9929,10 @@ proto.xyz.redtorch.pb.NoticeField.prototype.setTimestamp = function(value) {
 
 
 /**
- * optional string content = 3;
+ * optional string summary = 3;
  * @return {string}
  */
-proto.xyz.redtorch.pb.NoticeField.prototype.getContent = function() {
+proto.xyz.redtorch.pb.NoticeField.prototype.getSummary = function() {
   return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 3, ""));
 };
 
@@ -9929,8 +9941,26 @@ proto.xyz.redtorch.pb.NoticeField.prototype.getContent = function() {
  * @param {string} value
  * @return {!proto.xyz.redtorch.pb.NoticeField} returns this
  */
-proto.xyz.redtorch.pb.NoticeField.prototype.setContent = function(value) {
+proto.xyz.redtorch.pb.NoticeField.prototype.setSummary = function(value) {
   return jspb.Message.setProto3StringField(this, 3, value);
+};
+
+
+/**
+ * optional string content = 4;
+ * @return {string}
+ */
+proto.xyz.redtorch.pb.NoticeField.prototype.getContent = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 4, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.xyz.redtorch.pb.NoticeField} returns this
+ */
+proto.xyz.redtorch.pb.NoticeField.prototype.setContent = function(value) {
+  return jspb.Message.setProto3StringField(this, 4, value);
 };
 
 

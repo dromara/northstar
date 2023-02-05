@@ -309,7 +309,6 @@ message GatewaySettingField {
 	ConnectStatusEnum status = 10;
 	fixed64 version = 11;
 	string autoConnectTimeRanges = 12;
-	
 }
 
 message LogField {
@@ -321,6 +320,7 @@ message LogField {
 message NoticeField {
 	CommonStatusEnum status = 1;
 	fixed64 timestamp = 2;
-	string content = 3;
+	string summary = 3;
+	string content = 4;
 }
 
