@@ -13,7 +13,7 @@
           <el-input placeholder="域名或IP地址" v-model="domain"/>
         </el-form-item>
         <el-form-item>
-          <el-button @click="login">登陆</el-button>
+          <el-button @click="login">登录</el-button>
         </el-form-item>
       </el-form>
     </div>
@@ -55,7 +55,7 @@ export default {
         return;
       }
       await loginApi.login(this.userForm.name, this.userForm.pass)
-      console.log('登陆成功')
+      console.log('登录成功')
       this.$router.push({
         name: 'mktgateway',
         query: { auth: window.btoa(`${this.userForm.name}:${this.userForm.pass}`) }

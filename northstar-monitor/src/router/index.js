@@ -77,7 +77,7 @@ router.beforeEach(async (to, from, next) => {
     console.log('test fail')
     Message({
       type: 'error',
-      message: '认证失败！请登陆！',
+      message: '认证失败！请登录！',
       duration: 3000
     })
     next('/')

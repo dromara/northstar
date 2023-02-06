@@ -27,7 +27,7 @@
         <el-button
           class="mr-10"
           icon="el-icon-switch-button"
-          title="退出登陆"
+          title="退出登录"
           circle
           @click="logout"
         ></el-button>
@@ -88,7 +88,7 @@ export default {
     },
     logout() {
       loginApi.logout()
-      this.$message.success('退出登陆')
+      this.$message.success('退出登录')
       this.$router.push({ name: 'login' })
     }
   }

@@ -44,7 +44,7 @@ service.interceptors.response.use(
     let errMsg = error.response && error.response.data ? error.response.data.message : '网络出错'
     if(error.response.status === 401){
       router.push({name: 'login'})
-      errMsg = '会话过期，请重新登陆'
+      errMsg = '会话过期，请重新登录'
     }
     return Promise.reject(new Error(errMsg))
   }

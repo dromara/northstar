@@ -11,7 +11,7 @@ describe('模组管理-测试', () => {
         cy.visit('https://localhost')
         cy.contains('用户名').parent().find('input').type('admin')
         cy.contains('密码').parent().find('input').type('123456')
-        cy.contains('登陆').click()
+        cy.contains('登录').click()
         cy.wait(500)
         cy.contains('新建').click()
         cy.get('.el-dialog').contains('网关类型').parent().find('.el-select').click()
