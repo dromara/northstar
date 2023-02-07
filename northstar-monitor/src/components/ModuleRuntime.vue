@@ -208,10 +208,10 @@
         <div>
           <el-select class="ml-10 mt-5" v-model="unifiedSymbolOfChart" placeholder="请选择合约">
             <el-option
-              v-for="(item, i) in contractOptions"
+              v-for="(item, i) in bindedContracts"
               :key="i"
-              :label="item"
-              :value="item"
+              :label="item.name"
+              :value="item.unifiedSymbol"
             ></el-option>
           </el-select>
           <el-select
@@ -349,6 +349,7 @@ export default {
       activeAccount: '',
       dealRecords: [],
       barDataMap: {},
+      bindedContracts: [],
       chart: null,
       loading: false,
       moduleRuntime: '',
@@ -374,6 +375,11 @@ export default {
       if (val) {
         this.moduleRuntime = this.moduleRuntimeSrc
         this.activeAccount = this.accountOptions[0]
+        this.bindedContracts = []
+        this.module.moduleAccountSettingsDescription.forEach(account => {
+          const contracts = account.bindedContracts
+          this.bindedContracts = this.bindedContracts.concat(contracts)
+        })
         setTimeout(() => {
           this.initChart()
           this.refresh()
@@ -490,9 +496,6 @@ export default {
       )
       return positions.filter((item) => item.position > 0)
     },
-    contractOptions() {
-      return Object.keys(this.barDataMap)
-    },
     indicatorOptions() {
       if (!this.moduleRuntime.indicatorMap) return []
       return this.moduleRuntime.indicatorMap[this.unifiedSymbolOfChart]
@@ -594,7 +597,6 @@ export default {
       this.chart.removeTechnicalIndicator(this.indicator.paneId, 'VAL_' + this.indicator.name)
       delete this.indicatorMap[this.indicator.name]
       this.saveIndicators()
-      console.log('移除指标', this.indicator)
     },
     renderIndicator(indicator) {
       const colorIndex = Object.keys(this.indicatorMap).indexOf(indicator.name)
