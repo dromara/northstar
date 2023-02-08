@@ -124,7 +124,7 @@
             <div style="height: 1px" />
             <div class="table-wrapper">
               <el-table id="modulePositionTbl" v-show="moduleTab === 'holding'" :data="holdingPositions" height="100%">
-                <el-table-column prop="unifiedSymbol" label="合约" align="center" width="100px" fixed>
+                <el-table-column prop="unifiedSymbol" label="合约" align="center" width="100px" >
                   <template slot-scope="scope">{{ scope.row.contract.name }}</template>
                 </el-table-column>
                 <el-table-column prop="positionDir" label="方向" align="center" width="50px"
@@ -172,9 +172,9 @@
                 :data="accountDealRecords"
                 height="100%"
               >
-                <el-table-column prop="contractName" label="合约" align="center" width="100px" fixed/>
-                <el-table-column prop="direction" label="方向" align="center" width="46px" fixed/>
-                <el-table-column prop="volume" label="数量" align="center" min-width="46px" fixed/>
+                <el-table-column prop="contractName" label="合约" align="center" width="100px" />
+                <el-table-column prop="direction" label="方向" align="center" width="46px" />
+                <el-table-column prop="volume" label="数量" align="center" min-width="60px"  />
                 <el-table-column prop="openPrice" label="开仓价" align="center" />
                 <el-table-column prop="closePrice" label="平仓价" align="center" />
                 <el-table-column label="平仓盈亏" align="center" width="70px">
@@ -736,9 +736,6 @@ export default {
 }
 </style>
 <style>
-.el-table__fixed-right::before, .el-table__fixed::before{
-  height: 0px !important;
-}
 .el-tabs__header {
   margin: 0;
 }
