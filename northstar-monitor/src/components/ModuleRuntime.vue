@@ -121,17 +121,18 @@
               <el-tab-pane name="holding" label="模组持仓"></el-tab-pane>
               <el-tab-pane name="dealRecord" label="交易历史"></el-tab-pane>
             </el-tabs>
+            <div style="height: 1px" />
             <div class="table-wrapper">
               <el-table id="modulePositionTbl" v-show="moduleTab === 'holding'" :data="holdingPositions" height="100%">
-                <el-table-column prop="unifiedSymbol" label="合约" align="center" width="100px">
+                <el-table-column prop="unifiedSymbol" label="合约" align="center" width="100px" fixed>
                   <template slot-scope="scope">{{ scope.row.contract.name }}</template>
                 </el-table-column>
-                <el-table-column prop="positionDir" label="方向" align="center" width="40px"
+                <el-table-column prop="positionDir" label="方向" align="center" width="50px"
                   ><template slot-scope="scope">{{
                     { 2: '多', 3: '空' }[scope.row.positiondirection] || '未知'
                   }}</template>
                 </el-table-column>
-                <el-table-column prop="position" label="数量" align="center" width="46px" />
+                <el-table-column prop="position" label="数量" align="center" min-width="46px" />
                 <el-table-column prop="openprice" label="成本价" align="center">
                   <template slot-scope="scope">
                     {{ scope.row.openprice | smartFormatter }}
@@ -171,17 +172,26 @@
                 :data="accountDealRecords"
                 height="100%"
               >
-                <el-table-column prop="contractName" label="合约" align="center" width="100px" />
-                <el-table-column prop="direction" label="方向" align="center" width="40px" />
-                <el-table-column prop="volume" label="数量" align="center" width="46px" />
+                <el-table-column prop="contractName" label="合约" align="center" width="100px" fixed/>
+                <el-table-column prop="direction" label="方向" align="center" width="46px" fixed/>
+                <el-table-column prop="volume" label="数量" align="center" min-width="46px" fixed/>
                 <el-table-column prop="openPrice" label="开仓价" align="center" />
                 <el-table-column prop="closePrice" label="平仓价" align="center" />
-                <el-table-column prop="dealProfit" label="平仓盈亏" align="center" width="70px">
+                <el-table-column label="平仓盈亏" align="center" width="70px">
                   <template slot-scope="scope">
                     {{ scope.row.dealProfit | formatter }}
                   </template>
                 </el-table-column>
-                <el-table-column prop="tradingDay" label="交易日" align="center" width="100px" />
+                <el-table-column label="开仓时间" align="center" width="132px" >
+                  <template slot-scope="scope">
+                    {{ `${scope.row.openTrade.tradedate} ${scope.row.openTrade.tradetime}` }}
+                  </template>
+                </el-table-column>
+                <el-table-column label="平仓时间" align="center" width="132px" >
+                  <template slot-scope="scope">
+                    {{ `${scope.row.closeTrade.tradedate} ${scope.row.closeTrade.tradetime}` }}
+                  </template>
+                </el-table-column>
               </el-table>
             </div>
             <div class="performance-min">
@@ -726,6 +736,9 @@ export default {
 }
 </style>
 <style>
+.el-table__fixed-right::before, .el-table__fixed::before{
+  height: 0px !important;
+}
 .el-tabs__header {
   margin: 0;
 }
