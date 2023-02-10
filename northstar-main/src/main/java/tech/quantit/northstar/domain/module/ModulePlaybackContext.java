@@ -14,6 +14,8 @@ import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -223,9 +225,11 @@ public class ModulePlaybackContext implements IModuleContext, MergedBarListener 
 				.setTradeTime(LocalTime.parse(lastTick.getActionTime(), DateTimeConstant.T_FORMAT_WITH_MS_INT_FORMATTER).format(DateTimeConstant.T_FORMAT_FORMATTER))
 				.build();
 		accStore.onTrade(trade);
-		onRuntimeChangeCallback.accept(getRuntimeDescription(false));
 		dealCollector.onTrade(trade).ifPresent(list -> list.stream().forEach(this.onDealCallback::accept));
-		tradeStrategy.onTrade(trade);
+		CompletableFuture.runAsync(() -> {
+			tradeStrategy.onTrade(trade);
+			onRuntimeChangeCallback.accept(getRuntimeDescription(false));
+		}, CompletableFuture.delayedExecutor(500, TimeUnit.MILLISECONDS));
 		return Optional.of(id);
 	}
 	

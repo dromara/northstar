@@ -99,7 +99,7 @@ public class ListenerSampleStrategy extends AbstractStrategy implements TradeStr
 	}
 	
 	private long nextActionTime;
-	private Optional<String> originOrderId;
+	private Optional<String> originOrderId = Optional.empty();
 	
 	private static final int TICK_STOP = -5;		// 五个价位止损
 	private static final int TICK_EARN = 10;	// 十个价位止盈
