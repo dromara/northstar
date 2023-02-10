@@ -294,18 +294,22 @@ export default {
     }
   },
   watch: {
-    visible: function (val) {
+    visible: async function (val) {
       if (val) {
         Object.assign(this.$data, this.$options.data())
-        this.initData()
+        this.showDemoStrategy = this.isUpdateMode
+        await this.initData()
         if (!this.module) {
           return
         }
         this.form = this.module
         this.form.strategySetting.value = this.form.strategySetting.componentMeta.name
-        this.bindedContracts = this.module.moduleAccountSettingsDescription
-          .map((item) => item.bindedContracts.join(';'))
-          .join(';')
+        const selectedAcc = this.module.moduleAccountSettingsDescription
+          .map((item) => this.accountOptions.filter(acc => acc.gatewayId === item.accountGatewayId)[0])
+        const loadContractsPromise = selectedAcc
+          .map(item => item.bindedMktGatewayId)
+          .map(gatewayId => contractApi.getSubscribedContracts(gatewayId))
+        this.bindedContractsOptions = await Promise.all(loadContractsPromise)
         this.choseAccounts = this.module.moduleAccountSettingsDescription.map((item) => {
           item.value = item.accountGatewayId
           return item
@@ -322,13 +326,7 @@ export default {
     }
   },
   methods: {
-    initData() {
-      gatewayMgmtApi.findAll('TRADE').then((result) => {
-        this.accountOptions = result.map((item) => {
-          item.value = item.gatewayId
-          return item
-        })
-      })
+    async initData() {
       moduleApi.getStrategies().then((strategyMetas) => {
         strategyMetas.forEach(async (i) => initComponent(i, this.tradeStrategyOptionsSource))
         setTimeout(() => {
@@ -337,6 +335,11 @@ export default {
           )
         }, 500)
       })
+      const result = await gatewayMgmtApi.findAll('TRADE')
+      this.accountOptions = result.map((item) => {
+          item.value = item.gatewayId
+          return item
+        })
     },
     handleSelect(index) {
       this.activeIndex = index
