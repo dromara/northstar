@@ -1,6 +1,8 @@
 package tech.quantit.northstar.gateway.tiger;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Timer;
@@ -71,6 +73,8 @@ public class TigerTradeGatewayAdapter implements TradeGateway{
 	private Timer timer;
 	
 	private Executor exec = Executors.newSingleThreadExecutor();
+	
+	private Map<String, PositionField> lastPositions = new HashMap<>();
 	
 	public TigerTradeGatewayAdapter(FastEventEngine feEngine, GatewayDescription gd, IContractManager contractMgr) {
 		this.feEngine = feEngine;
@@ -182,12 +186,13 @@ public class TigerTradeGatewayAdapter implements TradeGateway{
 		}
 		// 解析具体字段
 		JSONArray positions = JSON.parseObject(response.getData()).getJSONArray("items");
+		Map<String, PositionField> positionMap = new HashMap<>();
 		for(int i=0; i<positions.size(); i++) {
 			JSONObject json = positions.getJSONObject(i);
 			ContractField contract = contractMgr.getContract("TIGER", json.getString("symbol")).contractField();
 			String positionId = String.format("%s@%s@%s", contract.getUnifiedSymbol(), PositionDirectionEnum.PD_Long, gatewayId());
 			double openPrice = (int)(json.getDoubleValue("averageCost") / contract.getPriceTick()) * contract.getPriceTick();
-			feEngine.emitEvent(NorthstarEventType.POSITION, PositionField.newBuilder()
+			PositionField pf = PositionField.newBuilder()
 					.setAccountId(settings.getAccountId())
 					.setGatewayId(gatewayId())
 					.setPositionId(positionId)
@@ -198,8 +203,16 @@ public class TigerTradeGatewayAdapter implements TradeGateway{
 					.setPrice(openPrice)
 					.setPositionDirection(PositionDirectionEnum.PD_Long)
 					.setPriceDiff(json.getDoubleValue("latestPrice") - openPrice)
-					.build());
+					.build();
+			positionMap.put(positionId, pf);
+			feEngine.emitEvent(NorthstarEventType.POSITION, pf);
+			lastPositions.remove(positionId);
 		}
+	
+		lastPositions.values().forEach(pf -> {
+			feEngine.emitEvent(NorthstarEventType.POSITION, pf.toBuilder().setPosition(0).build());
+		});
+		lastPositions = positionMap;
 	}
 	
 	@Override
