@@ -129,9 +129,9 @@ public class ModulePlaybackContext implements IModuleContext, MergedBarListener 
 	
 	private Logger mlog;
 	
-	private final IndicatorFactory indicatorFactory = new IndicatorFactory();
+	private final IndicatorFactory indicatorFactory = new IndicatorFactory(this);
 	
-	private final IndicatorFactory inspectedValIndicatorFactory = new IndicatorFactory();
+	private final IndicatorFactory inspectedValIndicatorFactory = new IndicatorFactory(this);
 	
 	private final HashSet<IComboIndicator> comboIndicators = new HashSet<>();
 	
