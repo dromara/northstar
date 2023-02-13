@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
+import com.google.common.collect.Streams;
 import com.google.common.util.concurrent.AtomicDouble;
 
 import tech.quantit.northstar.common.model.BarWrapper;
@@ -119,31 +120,28 @@ public class WAVE {
 			if(!bar.isUnsettled()) {
 				cacheBars.offerFirst(bar.getBar());
 				maVals.offerFirst(avg.getValue());
-				if(cacheBars.size() > 3) {
-					BarField bar0 = cacheBars.get(0);
-					BarField bar1 = cacheBars.get(1);
-					BarField bar2 = cacheBars.get(2);
-					Double v0 = maVals.get(0);
-					Double v1 = maVals.get(1);
-					Double v2 = maVals.get(2);
-					if(!currentLong.get() 
-						&& bar0.getClosePrice() > v0 && bar1.getClosePrice() > v1 && bar2.getClosePrice() > v2) {
+				if(cacheBars.size() > m) {
+					List<BarField> firstMBars = cacheBars.subList(0, m).stream().toList();
+					List<Double> firstMVals = maVals.subList(0, m).stream().toList();
+					int sum = Streams.zip(firstMBars.stream(), firstMVals.stream(), (bf, maVal) -> bf.getClosePrice() > maVal ? 1 : -1)
+								.mapToInt(Integer::intValue)
+								.sum();
+					if(!currentLong.get() && sum == m) {
 						currentLong.set(true);
 						double latelyLow = cacheBars.stream().mapToDouble(BarField::getLowPrice).min().orElse(0);
 						cacheBars.clear();
 						maVals.clear();
-						cacheBars.addAll(List.of(bar0, bar1, bar2));
-						maVals.addAll(List.of(v0, v1, v2));
+						cacheBars.addAll(firstMBars);
+						maVals.addAll(firstMVals);
 						return new TimeSeriesValue(latelyLow, bar.getBar().getActionTimestamp());
 					}
-					if(currentLong.get() 
-						&& bar0.getClosePrice() < v0 && bar1.getClosePrice() < v1 && bar2.getClosePrice() < v2) {
+					if(currentLong.get() && sum == -m) {
 						currentLong.set(false);
 						double latelyHigh = cacheBars.stream().mapToDouble(BarField::getHighPrice).max().orElse(0);
 						cacheBars.clear();
 						maVals.clear();
-						cacheBars.addAll(List.of(bar0, bar1, bar2));
-						maVals.addAll(List.of(v0, v1, v2));
+						cacheBars.addAll(firstMBars);
+						maVals.addAll(firstMVals);
 						return new TimeSeriesValue(latelyHigh, bar.getBar().getActionTimestamp());
 					}
 				}
