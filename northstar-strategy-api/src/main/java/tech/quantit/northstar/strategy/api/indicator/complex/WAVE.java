@@ -107,9 +107,10 @@ public class WAVE {
 	 * 基于MA均线定义波浪
 	 * @param n
 	 * @param m
+	 * @param useClosePrice	波浪端点采用收盘价
 	 * @return
 	 */
-	public static Function<BarWrapper, TimeSeriesValue> ma(int n, int m) {
+	public static Function<BarWrapper, TimeSeriesValue> ma(int n, int m, boolean useClosePrice) {
 		final TimeSeriesUnaryOperator maFn = AverageFunctions.MA(n);
 		final LinkedList<BarField> cacheBars = new LinkedList<>();
 		final LinkedList<Double> maVals = new LinkedList<>();
@@ -128,7 +129,9 @@ public class WAVE {
 								.sum();
 					if(!currentLong.get() && sum == m) {
 						currentLong.set(true);
-						double latelyLow = cacheBars.stream().mapToDouble(BarField::getLowPrice).min().orElse(0);
+						double latelyLow = useClosePrice 
+								? cacheBars.stream().mapToDouble(BarField::getClosePrice).min().orElse(0) 
+								: cacheBars.stream().mapToDouble(BarField::getLowPrice).min().orElse(0);
 						cacheBars.clear();
 						maVals.clear();
 						cacheBars.addAll(firstMBars);
@@ -137,7 +140,9 @@ public class WAVE {
 					}
 					if(currentLong.get() && sum == -m) {
 						currentLong.set(false);
-						double latelyHigh = cacheBars.stream().mapToDouble(BarField::getHighPrice).max().orElse(0);
+						double latelyHigh = useClosePrice
+								? cacheBars.stream().mapToDouble(BarField::getClosePrice).max().orElse(0)
+								: cacheBars.stream().mapToDouble(BarField::getHighPrice).max().orElse(0);
 						cacheBars.clear();
 						maVals.clear();
 						cacheBars.addAll(firstMBars);
