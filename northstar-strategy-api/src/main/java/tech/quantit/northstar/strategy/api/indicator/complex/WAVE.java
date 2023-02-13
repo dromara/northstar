@@ -3,6 +3,9 @@ package tech.quantit.northstar.strategy.api.indicator.complex;
 import static tech.quantit.northstar.strategy.api.indicator.function.StatsFunctions.HHV;
 import static tech.quantit.northstar.strategy.api.indicator.function.StatsFunctions.LLV;
 
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
 import com.google.common.util.concurrent.AtomicDouble;
@@ -10,6 +13,8 @@ import com.google.common.util.concurrent.AtomicDouble;
 import tech.quantit.northstar.common.model.BarWrapper;
 import tech.quantit.northstar.common.model.TimeSeriesValue;
 import tech.quantit.northstar.strategy.api.indicator.TimeSeriesUnaryOperator;
+import tech.quantit.northstar.strategy.api.indicator.function.AverageFunctions;
+import xyz.redtorch.pb.CoreField.BarField;
 
 /**
  * 波浪指标
@@ -21,7 +26,7 @@ public class WAVE {
 	private static final TimeSeriesValue TV_PLACEHOLDER = new TimeSeriesValue(0, 0);
 	
 	/**
-	 * 威廉波浪计算函数
+	 * 基于威廉指标定义波浪
 	 * @param n
 	 * @param m
 	 * @return	
@@ -63,7 +68,7 @@ public class WAVE {
 	}
 	
 	/**
-	 * MACD波浪计算函数
+	 * 基于MACD定义波浪
 	 * @param n1
 	 * @param n2
 	 * @param m
@@ -92,6 +97,56 @@ public class WAVE {
 			if(!bar.isUnsettled()) {
 				lastDif.set(difVal.getValue());
 				lastDea.set(deaVal.getValue());
+			}
+			return result;
+		};
+	}
+	
+	/**
+	 * 基于MA均线定义波浪
+	 * @param n
+	 * @param m
+	 * @return
+	 */
+	public static Function<BarWrapper, TimeSeriesValue> ma(int n, int m) {
+		final TimeSeriesUnaryOperator maFn = AverageFunctions.MA(n);
+		final LinkedList<BarField> cacheBars = new LinkedList<>();
+		final LinkedList<Double> maVals = new LinkedList<>();
+		final AtomicBoolean currentLong = new AtomicBoolean();
+		return bar -> {
+			TimeSeriesValue result = TV_PLACEHOLDER;
+			TimeSeriesValue avg = maFn.apply(new TimeSeriesValue(bar.getBar().getClosePrice(), bar.getBar().getActionTimestamp(), bar.isUnsettled()));
+			if(!bar.isUnsettled()) {
+				cacheBars.offerFirst(bar.getBar());
+				maVals.offerFirst(avg.getValue());
+				if(cacheBars.size() > 3) {
+					BarField bar0 = cacheBars.get(0);
+					BarField bar1 = cacheBars.get(1);
+					BarField bar2 = cacheBars.get(2);
+					Double v0 = maVals.get(0);
+					Double v1 = maVals.get(1);
+					Double v2 = maVals.get(2);
+					if(!currentLong.get() 
+						&& bar0.getClosePrice() > v0 && bar1.getClosePrice() > v1 && bar2.getClosePrice() > v2) {
+						currentLong.set(true);
+						double latelyLow = cacheBars.stream().mapToDouble(BarField::getLowPrice).min().orElse(0);
+						cacheBars.clear();
+						maVals.clear();
+						cacheBars.addAll(List.of(bar0, bar1, bar2));
+						maVals.addAll(List.of(v0, v1, v2));
+						return new TimeSeriesValue(latelyLow, bar.getBar().getActionTimestamp());
+					}
+					if(currentLong.get() 
+						&& bar0.getClosePrice() < v0 && bar1.getClosePrice() < v1 && bar2.getClosePrice() < v2) {
+						currentLong.set(false);
+						double latelyHigh = cacheBars.stream().mapToDouble(BarField::getHighPrice).max().orElse(0);
+						cacheBars.clear();
+						maVals.clear();
+						cacheBars.addAll(List.of(bar0, bar1, bar2));
+						maVals.addAll(List.of(v0, v1, v2));
+						return new TimeSeriesValue(latelyHigh, bar.getBar().getActionTimestamp());
+					}
+				}
 			}
 			return result;
 		};
