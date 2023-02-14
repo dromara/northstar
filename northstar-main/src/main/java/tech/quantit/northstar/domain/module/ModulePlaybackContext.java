@@ -548,4 +548,9 @@ public class ModulePlaybackContext implements IModuleContext, MergedBarListener 
 		// 回测时不实现该方法
 	}
 
+	@Override
+	public List<Contract> bindedContracts(boolean tradableOnly) {
+		return contractMap2.values().stream().filter(c -> !tradableOnly || c.tradable()).toList();
+	}
+
 }
