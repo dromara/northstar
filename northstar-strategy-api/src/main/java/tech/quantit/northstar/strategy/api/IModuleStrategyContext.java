@@ -1,6 +1,5 @@
 package tech.quantit.northstar.strategy.api;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -12,7 +11,6 @@ import tech.quantit.northstar.common.constant.ModuleState;
 import tech.quantit.northstar.common.constant.SignalOperation;
 import tech.quantit.northstar.common.model.BarWrapper;
 import tech.quantit.northstar.common.model.TimeSeriesValue;
-import tech.quantit.northstar.gateway.api.domain.contract.Contract;
 import tech.quantit.northstar.strategy.api.constant.DisposablePriceListenerType;
 import tech.quantit.northstar.strategy.api.constant.PriceType;
 import tech.quantit.northstar.strategy.api.indicator.Indicator;
@@ -177,10 +175,4 @@ public interface IModuleStrategyContext {
 	 * @param content
 	 */
 	void sendNotification(String content);
-	/**
-	 * 模组绑定的全部合约
-	 * @param tradableOnly	是否只返回可交易合约
-	 * @return
-	 */
-	List<Contract> bindedContracts(boolean tradableOnly);
 }

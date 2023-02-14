@@ -694,9 +694,4 @@ public class ModuleContext implements IModuleContext, MergedBarListener{
 				.build()));
 	}
 
-	@Override
-	public List<Contract> bindedContracts(boolean tradableOnly) {
-		return contractMap2.values().stream().filter(c -> !tradableOnly || c.tradable()).toList();
-	}
-
 }
