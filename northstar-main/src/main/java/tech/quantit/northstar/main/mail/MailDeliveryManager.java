@@ -75,16 +75,16 @@ public class MailDeliveryManager {
 		};
 		exec.execute(() -> {
 			MimeMessageHelper msg = new MimeMessageHelper(sender.createMimeMessage(), UTF8);
-			try {
-				msg.setSubject("Northstar" + title);
-				msg.setFrom(emailConfig.getEmailUsername());
-				for(String mailTo : emailConfig.getSubscriberList()) {
+			for(String mailTo : emailConfig.getSubscriberList()) {
+				try {
+					msg.setSubject("Northstar" + title);
+					msg.setFrom(emailConfig.getEmailUsername());
 					msg.addTo(mailTo);
+					msg.setText(content);
+					sender.send(msg.getMimeMessage());
+				} catch (MessagingException e) {
+					log.error("邮件发送异常", e);
 				}
-				msg.setText(content);
-				sender.send(msg.getMimeMessage());
-			} catch (MessagingException e) {
-				log.error("邮件发送异常", e);
 			}
 		});
 	}
