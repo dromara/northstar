@@ -42,9 +42,15 @@ public interface IMailMessageContentHandler {
 	
 	default String onEvent(NoticeField notice) {
 		StringBuilder sb = new StringBuilder();
-		sb.append("[系统消息]:\n");
+		String msgLevel = switch(notice.getStatus()) {
+		case COMS_ERROR -> "错误";
+		case COMS_INFO -> "提示";
+		case COMS_SUCCESS -> "消息";
+		case COMS_WARN -> "警告";
+		default -> throw new IllegalStateException("未定义类型：" + notice.getStatus());
+		};
+		sb.append("[系统" + msgLevel + "]:\n");
 		sb.append(notice.getContent());
-		sb.append(String.format("消息级别：%s%n", notice.getStatus()));
 		return sb.toString();
 	}
 	
