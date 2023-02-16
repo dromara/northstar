@@ -266,8 +266,9 @@
               </el-form-item>
               <el-form-item label="线形" size="mini">
                 <el-select style="width: 100px" v-model="indicator.lineStyle">
-                  <el-option value="line" label="折线" key="1">折线</el-option>
-                  <el-option value="bar" label="柱形" key="2">柱形</el-option>
+                  <el-option value="line" label="折线" key="1"></el-option>
+                  <el-option value="bar" label="柱形" key="2"></el-option>
+                  <el-option value="circle" label="圆点" key="3"></el-option>
                 </el-select>
               </el-form-item>
               <el-form-item style="margin-bottom: 0">

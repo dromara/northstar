@@ -53,6 +53,15 @@ const createStyle = (indicator, colorIndex) => {
         var preVal = (prev.technicalIndicatorData || {}).value;
         return preVal > value;
       }
+    },
+    'circle': {
+      key: 'value',
+      title: `${indicator.name}: `, 
+      type: 'circle',
+      isStroke: false,
+      color: function color(data, options) {
+        return options.circle.color;
+      }
     }
   }
   return styleMap[indicator.lineStyle]
@@ -78,6 +87,9 @@ exports.default = (indicator, colorIndex) => {
         upColor: '#EF5350',
         downColor: '#26A69A',
         noChangeColor: '#888888'
+      },
+      circle: {
+        color: '#FFFA70'
       },
     },
     calcTechnicalIndicator: (kLineDataList) => {
