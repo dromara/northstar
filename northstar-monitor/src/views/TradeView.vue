@@ -227,9 +227,13 @@ export default {
       this.$store.commit('updateFocusUnifiedSymbol', this.contract.unifiedSymbol)
     },
     searchContracts(query){
-      contractApi.getSubscribedContracts(this.chosenAccount.gatewayId, query).then(result => {
-        this.symbolList = result
-      })
+      if(this.chosenAccount.gatewayId){
+        contractApi.getSubscribedContracts(this.chosenAccount.gatewayId, query).then(result => {
+          this.symbolList = result
+        })
+      } else {
+        this.$message.warning('请先选择账户')
+      }
     },
     handleDealPriceTypeChange() {
       if (this.dealPriceType !== 'CUSTOM_PRICE') {
