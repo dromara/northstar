@@ -4,8 +4,6 @@ import java.util.EnumSet;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-import javax.mail.MessagingException;
-
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 
@@ -82,8 +80,9 @@ public class MailDeliveryManager {
 					msg.addTo(mailTo);
 					msg.setText(content);
 					sender.send(msg.getMimeMessage());
-				} catch (MessagingException e) {
+				} catch (Exception e) {
 					log.error("邮件发送异常", e);
+					break;
 				}
 			}
 		});
