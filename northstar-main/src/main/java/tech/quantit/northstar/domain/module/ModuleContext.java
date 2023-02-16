@@ -498,7 +498,6 @@ public class ModuleContext implements IModuleContext, MergedBarListener{
 		};
 		try {			
 			indicatorFactory.getIndicatorMap().entrySet().stream().forEach(action);	// 记录常规指标更新值 
-			tradeStrategy.onMergedBar(bar);
 			inspectedValIndicatorFactory.getIndicatorMap().entrySet().stream().forEach(action);	// 记录透视值更新
 		} catch(Exception e) {
 			getLogger().error("", e);
@@ -599,7 +598,7 @@ public class ModuleContext implements IModuleContext, MergedBarListener{
 			contractMap2.put(c, contract);
 			barBufQMap.put(c.getUnifiedSymbol(), new LinkedList<>());
 			bindedSymbolSet.add(c.getUnifiedSymbol());
-			
+			registry.addListener(contract, numOfMinsPerBar, PeriodUnit.MINUTE, tradeStrategy, CallbackPriority.THREE);
 			ctxBarMerger.add(new BarMerger(numOfMinsPerBar, contract, (merger, bar) -> this.onMergedBar(bar)));
 		}
 	}
@@ -673,7 +672,7 @@ public class ModuleContext implements IModuleContext, MergedBarListener{
 	public synchronized void viewValueAsIndicator(Configuration configuration, AtomicDouble value) {
 		Indicator in = inspectedValIndicatorFactory.newIndicator(configuration, bar -> new TimeSeriesValue(value.get(), bar.getBar().getActionTimestamp(), bar.isUnsettled()));
 		indicatorValBufQMap.put(in, new LinkedList<>());
-		registry.addListener(contractMap2.get(configuration.getBindedContract()), configuration.getNumOfUnits(), configuration.getPeriod(), in, CallbackPriority.THREE);
+		registry.addListener(contractMap2.get(configuration.getBindedContract()), configuration.getNumOfUnits(), configuration.getPeriod(), in, CallbackPriority.FOUR);
 	}
 
 	@Override
