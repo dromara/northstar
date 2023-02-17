@@ -30,10 +30,9 @@ public class BarMergerRegistry implements BarDataAware{
 		);
 	
 	public BarMergerRegistry() {
-		prioritizedListenerMap.put(CallbackPriority.ONE, HashMultimap.create());
-		prioritizedListenerMap.put(CallbackPriority.TWO, HashMultimap.create());
-		prioritizedListenerMap.put(CallbackPriority.THREE, HashMultimap.create());
-		prioritizedListenerMap.put(CallbackPriority.FOUR, HashMultimap.create());
+		for(CallbackPriority cp : CallbackPriority.values()) {
+			prioritizedListenerMap.put(cp, HashMultimap.create());
+		}
 	}
 	
 	public void addListener(Contract contract, int numOfUnit, PeriodUnit unit, MergedBarListener listener, CallbackPriority priority) {
@@ -66,6 +65,7 @@ public class BarMergerRegistry implements BarDataAware{
 		ONE,
 		TWO,
 		THREE,
-		FOUR;
+		FOUR,
+		FIVE;
 	}
 }

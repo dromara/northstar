@@ -72,7 +72,6 @@ import tech.quantit.northstar.strategy.api.indicator.Indicator.PeriodUnit;
 import tech.quantit.northstar.strategy.api.indicator.Indicator.ValueType;
 import tech.quantit.northstar.strategy.api.indicator.TimeSeriesUnaryOperator;
 import tech.quantit.northstar.strategy.api.log.ModuleLoggerFactory;
-import tech.quantit.northstar.strategy.api.utils.bar.BarMerger;
 import tech.quantit.northstar.strategy.api.utils.bar.BarMergerRegistry;
 import tech.quantit.northstar.strategy.api.utils.bar.BarMergerRegistry.CallbackPriority;
 import tech.quantit.northstar.strategy.api.utils.trade.DealCollector;
@@ -158,7 +157,6 @@ public class ModuleContext implements IModuleContext, MergedBarListener{
 	private final String moduleName;
 	
 	private final BarMergerRegistry registry = new BarMergerRegistry();
-	private final Set<BarMerger> ctxBarMerger = new HashSet<>();
 	
 	private Logger mlog;
 	
@@ -480,7 +478,6 @@ public class ModuleContext implements IModuleContext, MergedBarListener{
 		comboIndicators.stream().forEach(combo -> combo.onBar(bar));
 		inspectedValIndicatorFactory.getIndicatorMap().entrySet().stream().forEach(e -> e.getValue().onBar(bar));	// 值透视指标的更新
 		registry.onBar(bar);
-		ctxBarMerger.forEach(merger -> merger.onBar(bar));
 	}
 	
 	@Override
@@ -599,7 +596,7 @@ public class ModuleContext implements IModuleContext, MergedBarListener{
 			barBufQMap.put(c.getUnifiedSymbol(), new LinkedList<>());
 			bindedSymbolSet.add(c.getUnifiedSymbol());
 			registry.addListener(contract, numOfMinsPerBar, PeriodUnit.MINUTE, tradeStrategy, CallbackPriority.THREE);
-			ctxBarMerger.add(new BarMerger(numOfMinsPerBar, contract, (merger, bar) -> this.onMergedBar(bar)));
+			registry.addListener(contract, numOfMinsPerBar, PeriodUnit.MINUTE, this, CallbackPriority.FIVE);
 		}
 	}
 	
