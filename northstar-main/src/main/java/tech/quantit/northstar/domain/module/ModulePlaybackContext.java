@@ -136,7 +136,7 @@ public class ModulePlaybackContext implements IModuleContext, MergedBarListener 
 	private final HashSet<IComboIndicator> comboIndicators = new HashSet<>();
 	
 	private final BarMergerRegistry registry = new BarMergerRegistry();
-	private final Set<BarMerger> ctxBarMerger = new HashSet<>();
+	private final Set<BarMerger> ctxBarMerger = new HashSet<>();	// ctx的BarMerger无法合并到BarMergerRegistry，否则会引起数据更新次序混乱
 	
 	private Consumer<ModuleRuntimeDescription> onRuntimeChangeCallback;
 	
