@@ -20,30 +20,37 @@ import xyz.redtorch.pb.CoreField.BarField;
  *
  */
 public class BarMergerRegistry implements BarDataAware{
+	
+	private Map<Identifier, BarMerger> mergerMap = new HashMap<>();
 
-	protected Map<Identifier, BarMerger> mergerMap = new HashMap<>();
-	protected Map<CallbackPriority, HashMultimap<BarMerger, MergedBarListener>> prioritizedListenerMap = new EnumMap<>(CallbackPriority.class);
+	protected Map<ListenerType, HashMultimap<BarMerger, MergedBarListener>> listenTypeMap = new EnumMap<>(ListenerType.class);
+	
+	protected HashMultimap<BarMerger, MergedBarListener> mergerListenerMap = HashMultimap.create();
 	
 	private BiConsumer<BarMerger, BarField> onMergedCallback = (merger, bar) -> 
-		prioritizedListenerMap.entrySet().forEach(e -> 
-			e.getValue().get(merger).forEach(listener -> listener.onMergedBar(bar))
-		);
+		mergerListenerMap.get(merger).forEach(listener -> listener.onMergedBar(bar));
 	
 	public BarMergerRegistry() {
-		prioritizedListenerMap.put(CallbackPriority.ONE, HashMultimap.create());
-		prioritizedListenerMap.put(CallbackPriority.TWO, HashMultimap.create());
-		prioritizedListenerMap.put(CallbackPriority.THREE, HashMultimap.create());
-		prioritizedListenerMap.put(CallbackPriority.FOUR, HashMultimap.create());
+		listenTypeMap.put(ListenerType.INDICATOR, HashMultimap.create());
+		listenTypeMap.put(ListenerType.COMBO_INDICATOR, HashMultimap.create());
+		listenTypeMap.put(ListenerType.CONTEXT, HashMultimap.create());
+		listenTypeMap.put(ListenerType.INSPECTABLE_VAL, HashMultimap.create());
+		listenTypeMap.put(ListenerType.STRATEGY, HashMultimap.create());
 	}
 	
-	public void addListener(Contract contract, int numOfUnit, PeriodUnit unit, MergedBarListener listener, CallbackPriority priority) {
-		Identifier identifier = makeIdentifier(contract, numOfUnit, unit);
-		mergerMap.computeIfAbsent(identifier, k -> makeBarMerger(contract, numOfUnit, unit));
-		prioritizedListenerMap.get(priority).put(mergerMap.get(identifier), listener);
+	public void addListener(Contract contract, int numOfUnit, PeriodUnit unit, MergedBarListener listener, ListenerType type) {
+		Identifier identifier = makeIdentifier(type, contract, numOfUnit, unit);
+		BarMerger merger = mergerMap.get(identifier);
+		if(merger == null) {
+			merger = makeBarMerger(contract, numOfUnit, unit);
+			mergerMap.put(identifier, merger);
+		}
+		listenTypeMap.get(type).put(merger, listener);
+		mergerListenerMap.put(merger, listener);
 	}
 	
-	private Identifier makeIdentifier(Contract contract, int numOfUnit, PeriodUnit unit) {
-		return Identifier.of(String.format("%s_%d_%s", contract.contractField().getUnifiedSymbol(), numOfUnit, unit.symbol()));
+	private Identifier makeIdentifier(ListenerType type, Contract contract, int numOfUnit, PeriodUnit unit) {
+		return Identifier.of(String.format("%s_%s_%d_%s", type, contract.contractField().getUnifiedSymbol(), numOfUnit, unit.symbol()));
 	}
 	
 	private BarMerger makeBarMerger(Contract contract, int numOfUnit, PeriodUnit unit) {
@@ -59,13 +66,18 @@ public class BarMergerRegistry implements BarDataAware{
 
 	@Override
 	public void onBar(BarField bar) {
-		mergerMap.values().forEach(merger -> merger.onBar(bar));
+		listenTypeMap.get(ListenerType.INDICATOR).keySet().forEach(merger -> merger.onBar(bar));
+		listenTypeMap.get(ListenerType.COMBO_INDICATOR).keySet().forEach(merger -> merger.onBar(bar));
+		listenTypeMap.get(ListenerType.STRATEGY).keySet().forEach(merger -> merger.onBar(bar));
+		listenTypeMap.get(ListenerType.INSPECTABLE_VAL).keySet().forEach(merger -> merger.onBar(bar));
+		listenTypeMap.get(ListenerType.CONTEXT).keySet().forEach(merger -> merger.onBar(bar));
 	}
 	
-	public enum CallbackPriority {
-		ONE,
-		TWO,
-		THREE,
-		FOUR;
+	public enum ListenerType {
+		INDICATOR,
+		COMBO_INDICATOR,
+		CONTEXT,
+		INSPECTABLE_VAL,
+		STRATEGY;
 	}
 }
