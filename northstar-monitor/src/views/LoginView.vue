@@ -10,7 +10,7 @@
           <el-input type="password" v-model="userForm.pass" autocomplete="off" clearable></el-input>
         </el-form-item>
         <el-form-item v-if="showHost" label="服务端地址">
-          <el-input placeholder="域名或IP地址" v-model="domain"/>
+          <el-input autocomplete placeholder="域名或IP地址" v-model="domain"/>
         </el-form-item>
         <el-form-item>
           <el-button @click="login">登录</el-button>
@@ -40,12 +40,14 @@ export default {
   mounted() {
     this.isEE = !!(window.require && window.require('electron'))
     this.showHost = this.isEE || this.$route.query.desktop
+    this.domain = localStorage.getItem('domain') || ''
   },
   methods: {
     async login() {
       if(this.domain){
         window.baseURL = `${this.isEE ? 'https:' : location.protocol}` + '//' + this.domain
         window.remoteHost = this.domain
+        localStorage.setItem('domain', this.domain)
       }
       try{
         await loginApi.healthyCheck()

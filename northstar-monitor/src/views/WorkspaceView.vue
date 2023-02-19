@@ -75,6 +75,9 @@ export default {
   mounted() {
     this.curPage = pageOptsRevert[this.$route.name]
   },
+  destroyed() {
+    this.$nextTick(() => location.reload())
+  },
   methods: {
     handleSelect(index, params) {
       if (index === this.curPage) {
