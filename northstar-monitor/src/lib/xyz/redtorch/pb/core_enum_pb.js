@@ -192,7 +192,9 @@ proto.xyz.redtorch.pb.ProductClassEnum = {
   SPREAD: 12,
   FUND: 13,
   EFP: 14,
-  SPOTOPTION: 15
+  SPOTOPTION: 15,
+  MARGIN: 16,
+  SWAP: 17
 };
 
 /**
@@ -435,7 +437,10 @@ proto.xyz.redtorch.pb.CurrencyEnum = {
   PHP: 26,
   SUR: 27,
   SGD: 28,
-  KRW: 29
+  KRW: 29,
+  USDT: 30,
+  BUSD: 31,
+  USDC: 32
 };
 
 /**
@@ -467,7 +472,10 @@ proto.xyz.redtorch.pb.ExchangeEnum = {
   OANDA: 22,
   FXCM: 23,
   SMART: 24,
-  GFEX: 25
+  GFEX: 25,
+  BINANCE: 26,
+  OKX: 27,
+  GATE: 28
 };
 
 /**
