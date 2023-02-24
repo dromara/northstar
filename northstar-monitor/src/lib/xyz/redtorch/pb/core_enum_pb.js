@@ -475,7 +475,8 @@ proto.xyz.redtorch.pb.ExchangeEnum = {
   GFEX: 25,
   BINANCE: 26,
   OKX: 27,
-  GATE: 28
+  GATE: 28,
+  BSE: 29
 };
 
 /**

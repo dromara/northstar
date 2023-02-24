@@ -6492,6 +6492,14 @@ public final class CoreEnum {
      * <code>GATE = 28;</code>
      */
     GATE(28),
+    /**
+     * <pre>
+     * 北京证券交易所
+     * </pre>
+     *
+     * <code>BSE = 29;</code>
+     */
+    BSE(29),
     UNRECOGNIZED(-1),
     ;
 
@@ -6727,6 +6735,14 @@ public final class CoreEnum {
      * <code>GATE = 28;</code>
      */
     public static final int GATE_VALUE = 28;
+    /**
+     * <pre>
+     * 北京证券交易所
+     * </pre>
+     *
+     * <code>BSE = 29;</code>
+     */
+    public static final int BSE_VALUE = 29;
 
 
     public final int getNumber() {
@@ -6782,6 +6798,7 @@ public final class CoreEnum {
         case 26: return BINANCE;
         case 27: return OKX;
         case 28: return GATE;
+        case 29: return BSE;
         default: return null;
       }
     }
@@ -7496,7 +7513,7 @@ public final class CoreEnum {
       "\n\003THB\020\020\022\007\n\003IEP\020\021\022\007\n\003ITL\020\022\022\007\n\003LUF\020\023\022\007\n\003NL" +
       "G\020\024\022\007\n\003PTE\020\025\022\007\n\003ESP\020\026\022\007\n\003IDR\020\027\022\007\n\003MYR\020\030\022" +
       "\007\n\003NZD\020\031\022\007\n\003PHP\020\032\022\007\n\003SUR\020\033\022\007\n\003SGD\020\034\022\007\n\003K" +
-      "RW\020\035\022\010\n\004USDT\020\036\022\010\n\004BUSD\020\037\022\010\n\004USDC\020 *\277\002\n\014E" +
+      "RW\020\035\022\010\n\004USDT\020\036\022\010\n\004BUSD\020\037\022\010\n\004USDC\020 *\310\002\n\014E" +
       "xchangeEnum\022\023\n\017UnknownExchange\020\000\022\007\n\003SSE\020" +
       "\001\022\010\n\004SZSE\020\002\022\t\n\005CFFEX\020\003\022\010\n\004SHFE\020\004\022\010\n\004CZCE" +
       "\020\005\022\007\n\003DCE\020\006\022\007\n\003SGE\020\007\022\007\n\003INE\020\010\022\010\n\004SEHK\020\t\022" +
@@ -7504,15 +7521,16 @@ public final class CoreEnum {
       "\022\t\n\005COMEX\020\016\022\007\n\003CME\020\017\022\007\n\003CFE\020\020\022\n\n\006GLOBEX\020" +
       "\021\022\007\n\003ICE\020\022\022\007\n\003IPE\020\023\022\007\n\003LME\020\024\022\014\n\010IDEALPRO" +
       "\020\025\022\t\n\005OANDA\020\026\022\010\n\004FXCM\020\027\022\t\n\005SMART\020\030\022\010\n\004GF" +
-      "EX\020\031\022\013\n\007BINANCE\020\032\022\007\n\003OKX\020\033\022\010\n\004GATE\020\034*E\n\017" +
-      "OptionsTypeEnum\022\r\n\tO_Unknown\020\000\022\021\n\rO_Call" +
-      "Options\020\001\022\020\n\014O_PutOptions\020\002*Y\n\016StrikeMod" +
-      "eEnum\022\017\n\013STM_Unknown\020\000\022\023\n\017STM_Continenta" +
-      "l\020\001\022\020\n\014STM_American\020\002\022\017\n\013STM_Bermuda\020\003*\224" +
-      "\001\n\023CombinationTypeEnum\022\021\n\rCOMBT_Unknown\020" +
-      "\000\022\020\n\014COMBT_Future\020\001\022\r\n\tCOMBT_BUL\020\002\022\r\n\tCO" +
-      "MBT_BER\020\003\022\r\n\tCOMBT_STD\020\004\022\r\n\tCOMBT_STG\020\005\022" +
-      "\r\n\tCOMBT_PRT\020\006\022\r\n\tCOMBT_CLD\020\007b\006proto3"
+      "EX\020\031\022\013\n\007BINANCE\020\032\022\007\n\003OKX\020\033\022\010\n\004GATE\020\034\022\007\n\003" +
+      "BSE\020\035*E\n\017OptionsTypeEnum\022\r\n\tO_Unknown\020\000\022" +
+      "\021\n\rO_CallOptions\020\001\022\020\n\014O_PutOptions\020\002*Y\n\016" +
+      "StrikeModeEnum\022\017\n\013STM_Unknown\020\000\022\023\n\017STM_C" +
+      "ontinental\020\001\022\020\n\014STM_American\020\002\022\017\n\013STM_Be" +
+      "rmuda\020\003*\224\001\n\023CombinationTypeEnum\022\021\n\rCOMBT" +
+      "_Unknown\020\000\022\020\n\014COMBT_Future\020\001\022\r\n\tCOMBT_BU" +
+      "L\020\002\022\r\n\tCOMBT_BER\020\003\022\r\n\tCOMBT_STD\020\004\022\r\n\tCOM" +
+      "BT_STG\020\005\022\r\n\tCOMBT_PRT\020\006\022\r\n\tCOMBT_CLD\020\007b\006" +
+      "proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
