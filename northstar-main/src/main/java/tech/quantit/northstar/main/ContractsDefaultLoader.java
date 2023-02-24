@@ -1,8 +1,8 @@
 package tech.quantit.northstar.main;
 
 import java.time.LocalDate;
-import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
@@ -18,7 +18,6 @@ import tech.quantit.northstar.gateway.ctp.CtpContract;
 import tech.quantit.northstar.gateway.sim.trade.SimContractGenerator;
 import tech.quantit.northstar.main.service.GatewayService;
 import tech.quantit.northstar.main.service.ModuleService;
-import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 
 @Slf4j
 @Component
@@ -41,12 +40,13 @@ public class ContractsDefaultLoader implements CommandLineRunner{
 	public void run(String... args) throws Exception {
 		final LocalDate today = LocalDate.now();
 		// 加载CTP合约
-		List.of(ExchangeEnum.CFFEX, ExchangeEnum.SHFE, ExchangeEnum.DCE, ExchangeEnum.CZCE, ExchangeEnum.INE)
+		dsMgr.getUserAvailableExchanges()
 			.parallelStream()
 			.forEach(exchange -> {
 				dsMgr.getAllContracts(exchange).stream()
 					//过滤掉过期合约
-					.filter(contract -> LocalDate.parse(contract.getLastTradeDateOrContractMonth(), DateTimeConstant.D_FORMAT_INT_FORMATTER).isAfter(today))
+					.filter(contract -> StringUtils.isEmpty(contract.getLastTradeDateOrContractMonth())
+							|| LocalDate.parse(contract.getLastTradeDateOrContractMonth(), DateTimeConstant.D_FORMAT_INT_FORMATTER).isAfter(today))
 					.forEach(contract -> mktCenter.addInstrument(new CtpContract(contract)));
 				log.info("预加载 [{}] 交易所合约信息", exchange);
 			});

@@ -12,6 +12,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpEntity;
@@ -225,6 +226,16 @@ public class DataServiceManager implements IDataServiceManager {
 	public JSONObject getCtpMetaSettings(String brokerId) {
 		URI uri = URI.create(String.format("%s/ctp/settings?brokerId=%s", baseUrl, brokerId));
 		return execute(uri, JSONObject.class).getBody();
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<ExchangeEnum> getUserAvailableExchanges() {
+		URI uri = URI.create(String.format("%s/contracts/availableEx", baseUrl));
+		return Optional.ofNullable(execute(uri, List.class).getBody()).orElse(Collections.emptyList())
+				.stream()
+				.map(ex -> ExchangeEnum.valueOf((String)ex))
+				.toList();
 	}
 	
 	private DataSet getTradeCalendar(String exchange, LocalDate startDate, LocalDate endDate){

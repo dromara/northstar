@@ -69,4 +69,10 @@ public interface IDataServiceManager {
 	 * @return
 	 */
 	JSONObject getCtpMetaSettings(String brokerId);
+	
+	/**
+	 * 获取用户可请求的交易所数据
+	 * @return
+	 */
+	List<ExchangeEnum> getUserAvailableExchanges();
 }
