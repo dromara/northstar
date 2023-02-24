@@ -116,6 +116,8 @@ enum ProductClassEnum {
     FUND = 13;  // 基金
     EFP = 14;  // 期转现
 	SPOTOPTION = 15;  // 现货期权
+	MARGIN = 16; // 币币杠杆
+	SWAP = 17;     // 永续合约
 }
 
 enum DirectionEnum{
@@ -327,6 +329,9 @@ enum CurrencyEnum {
 	SUR = 27;  // 俄罗斯卢布
 	SGD = 28;  // 新加坡元
 	KRW = 29;  // 韩国元
+	USDT = 30;  // 美元稳定币
+  	BUSD = 31;  // 币安稳定币
+  	USDC = 32;  // 去中心化稳定币
 }
 
 // ExchangeEnum是一个交易所类型
@@ -357,6 +362,9 @@ enum ExchangeEnum {
 	FXCM = 23;  // FXCM外汇做市商
 	SMART = 24;  // IB智能路由
 	GFEX = 25;	// 广州期货交易所
+	BINANCE = 26;  // 币安交易所
+  	OKX = 27;  // 欧易交易所
+  	GATE = 28;  // 芝麻开门交易所
 }
 
 // OptionsTypeEnum是一个期权类型类型
