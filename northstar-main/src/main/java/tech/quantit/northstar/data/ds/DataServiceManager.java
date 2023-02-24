@@ -77,6 +77,11 @@ public class DataServiceManager implements IDataServiceManager {
 		exchangeChannelType.put(ExchangeEnum.DCE, ChannelType.CTP);
 		exchangeChannelType.put(ExchangeEnum.CZCE, ChannelType.CTP);
 		exchangeChannelType.put(ExchangeEnum.INE, ChannelType.CTP);
+		exchangeChannelType.put(ExchangeEnum.GFEX, ChannelType.CTP);
+		
+		exchangeChannelType.put(ExchangeEnum.SSE, ChannelType.PLAYBACK);
+		exchangeChannelType.put(ExchangeEnum.SZSE, ChannelType.PLAYBACK);
+		exchangeChannelType.put(ExchangeEnum.BSE, ChannelType.PLAYBACK);
 		
 		log.info("采用外部数据源加载历史数据");
 		register();
@@ -179,9 +184,10 @@ public class DataServiceManager implements IDataServiceManager {
 		for(String[] item : dataSet.getItems()) {
 			String unifiedSymbol = getValue("ns_code", fieldIndexMap, item, "");
 			String symbol = unifiedSymbol.split("@")[0];
+			ProductClassEnum productClass = ProductClassEnum.valueOf(unifiedSymbol.split("@")[2]);
 			String name = getValue("name", fieldIndexMap, item, "");
-			String unitDesc = getValue("quote_unit_desc", fieldIndexMap, item, "");
-			
+			String unitDesc = getValue("quote_unit_desc", fieldIndexMap, item, "0.01");
+			double marginRate = ProductClassEnum.EQUITY == productClass ? 1 : 0.1;
 			try {				
 				ContractField contract = ContractField.newBuilder()
 						.setUnifiedSymbol(unifiedSymbol)
@@ -194,10 +200,10 @@ public class DataServiceManager implements IDataServiceManager {
 						.setGatewayId(channelName(exchange))
 						.setThirdPartyId(symbol + "@" + channelName(exchange))
 						.setLastTradeDateOrContractMonth(getValue("delist_date", fieldIndexMap, item, ""))
-						.setLongMarginRatio(0.1)
-						.setShortMarginRatio(0.1)
-						.setProductClass(ProductClassEnum.FUTURES)
-						.setMultiplier(Double.parseDouble(getValue("per_unit", fieldIndexMap, item, "0")))
+						.setLongMarginRatio(marginRate)
+						.setShortMarginRatio(marginRate)
+						.setProductClass(productClass)
+						.setMultiplier(Double.parseDouble(getValue("per_unit", fieldIndexMap, item, "1")))
 						.setPriceTick(Double.parseDouble(unitDesc.replaceAll("(\\d+\\.?[\\d+]?)[^\\d]+", "$1")))
 						.build();
 				resultList.add(contract);
