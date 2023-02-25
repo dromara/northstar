@@ -308,7 +308,12 @@ export default {
             const ctpListPromise = contractApi.getGatewayContracts('CTP', query)
             const pbListPromise = contractApi.getGatewayContracts('PLAYBACK', query)
             Promise.all([ctpListPromise, pbListPromise]).then(([ctpResult, pbResult]) => {
-              this.contractOptions = [...ctpResult, ...pbResult]
+              const result = [...ctpResult, ...pbResult]
+              if(result.length > 100){
+                this.$message.warning('返回结果多于100条，请提供更精确的筛选条件')
+                return 
+              }
+              this.contractOptions = result
             }).finally(() => {
               this.loading = false;
             })
