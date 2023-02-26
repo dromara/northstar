@@ -25,8 +25,6 @@ import xyz.redtorch.pb.CoreField.TickField;
 @Slf4j
 public class SocketIOMessageEngine {
 	
-	private static final int LATENCY_TOLERANCE = 60000;
-	
 	private SocketIOServer server;
 	
 	public SocketIOMessageEngine(SocketIOServer server) {
@@ -39,14 +37,13 @@ public class SocketIOMessageEngine {
 	public void emitEvent(NorthstarEvent event) throws SecurityException, IllegalArgumentException, InterruptedException {
 		// 为了避免接收端信息拥塞，把行情数据按合约分房间分发数据，可以提升客户端的接收效率
 		if(event.getData() instanceof TickField tick) {
-			// 非实时TICK数据不会分发
-			if(!isRealTimeTick(tick))	
-				return; 
+			String rmid = String.format("%s@%s", tick.getUnifiedSymbol(), tick.getGatewayId());
 			log.trace("TICK数据分发：[{} {} {} 价格：{}]", tick.getUnifiedSymbol(), tick.getActionDay(), tick.getActionTime(), tick.getLastPrice());
-			server.getRoomOperations(tick.getUnifiedSymbol()).sendEvent(NorthstarEventType.TICK.toString(), Base64.encode(tick.toByteArray()));
+			server.getRoomOperations(rmid).sendEvent(NorthstarEventType.TICK.toString(), Base64.encode(tick.toByteArray()));
 		} else if(event.getData() instanceof BarField bar) {
-			log.trace("BAR数据分发：[{} {} {} 价格：{}]", bar.getUnifiedSymbol(), bar.getActionDay(), bar.getActionTime(), bar.getClosePrice());
-			server.getRoomOperations(bar.getUnifiedSymbol()).sendEvent(NorthstarEventType.BAR.toString(), Base64.encode(bar.toByteArray()));
+			String rmid = String.format("%s@%s", bar.getUnifiedSymbol(), bar.getGatewayId());
+			log.trace("BAR数据分发：[{} {} {} 价格：{}]", rmid, bar.getActionDay(), bar.getActionTime(), bar.getClosePrice());
+			server.getRoomOperations(rmid).sendEvent(NorthstarEventType.BAR.toString(), Base64.encode(bar.toByteArray()));
 		} else if(event.getData() instanceof AccountField account) {
 			log.trace("账户信息分发: [{}]", MessagePrinter.print(account));
 			server.getBroadcastOperations().sendEvent(event.getEvent().toString(), Base64.encode(account.toByteArray()));
@@ -56,10 +53,6 @@ public class SocketIOMessageEngine {
 		} else if(event.getData() instanceof Message message) {			
 			server.getBroadcastOperations().sendEvent(event.getEvent().toString(), Base64.encode(message.toByteArray()));
 		}
-	}
-	
-	private boolean isRealTimeTick(TickField tick) {
-		return System.currentTimeMillis() - tick.getActionTimestamp() < LATENCY_TOLERANCE;
 	}
 	
 	/*************************************************/

@@ -38,7 +38,7 @@ export default {
     }
   },
   watch: {
-    '$store.state.marketCurrentDataModule.curUnifiedSymbol': function (val, oldVal) {
+    '$store.state.marketCurrentDataModule.curRoomId': function (val, oldVal) {
       if (oldVal) {
         this.socket.emit('logout', oldVal)
       }
