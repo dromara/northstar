@@ -22,10 +22,9 @@
             ></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="行情延时">
-          <span>{{ latency }}</span>
-          <span> 毫秒</span>
-          <span v-if="latency > 60000">（非实时行情）</span>
+        <el-form-item label="行情延迟">
+          <span v-if="latency < 60000">{{ latency }} 毫秒</span>
+          <span v-else>（非实时行情）</span>
         </el-form-item>
       </el-form>
     </div>
