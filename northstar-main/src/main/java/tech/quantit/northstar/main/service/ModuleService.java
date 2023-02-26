@@ -39,7 +39,6 @@ import tech.quantit.northstar.data.IMarketDataRepository;
 import tech.quantit.northstar.data.IModuleRepository;
 import tech.quantit.northstar.domain.module.ModulePlaybackContext;
 import tech.quantit.northstar.gateway.api.IContractManager;
-import tech.quantit.northstar.gateway.api.domain.contract.Contract;
 import tech.quantit.northstar.main.ExternalJarClassLoader;
 import tech.quantit.northstar.main.PostLoadAware;
 import tech.quantit.northstar.main.handler.internal.ModuleManager;
@@ -218,8 +217,7 @@ public class ModuleService implements PostLoadAware {
 			LocalDate end = utils.getFridayOfThisWeek(date);
 			for(ModuleAccountDescription mad : md.getModuleAccountSettingsDescription()) {
 				for(ContractSimpleInfo csi : mad.getBindedContracts()) {
-					Contract contract = contractMgr.getContract(Identifier.of(csi.getValue()));
-					List<BarField> bars = mdRepo.loadBars(contract.channelType(), csi.getUnifiedSymbol(), start, end);
+					List<BarField> bars = mdRepo.loadBars(csi.getUnifiedSymbol(), start, end);
 					module.initData(bars);
 				}
 			}

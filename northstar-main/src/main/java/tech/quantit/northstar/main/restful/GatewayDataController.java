@@ -41,7 +41,7 @@ public class GatewayDataController {
 		LocalDate end = utils.getCurrentTradeDay(refStartTimestamp, firstLoad);
 		List<BarField> result = Collections.emptyList();
 		for(int i=0; i<3; i++) {
-			result = mdRepo.loadBars(contract.channelType(), contract.contractField().getUnifiedSymbol(), start.minusWeeks(i), end.minusWeeks(i));
+			result = mdRepo.loadBars(contract.contractField().getUnifiedSymbol(), start.minusWeeks(i), end.minusWeeks(i));
 			if(!result.isEmpty()) {
 				break;
 			}
