@@ -39,7 +39,7 @@ class MarketDataRepoRedisImplTest {
 	
 	static IMarketDataRepository repo;
 	
-	String KEY_PREFIX = Constants.APP_NAME + "BarData:";
+	String KEY_PREFIX = Constants.APP_NAME + "BarData";
 	
 	TestFieldFactory fieldFactory = new TestFieldFactory("test");
 	
@@ -87,7 +87,7 @@ class MarketDataRepoRedisImplTest {
 		repo.insert(bar1);
 		repo.insert(bar2);
 		repo.insert(bar3);
-		assertThat(redisTemplate.hasKey(KEY_PREFIX + "CTP:" + date + ":rb2210@SHFE@FUTURES")).isTrue();
+		assertThat(redisTemplate.hasKey(KEY_PREFIX + ":" + date + ":rb2210@SHFE@FUTURES")).isTrue();
 	}
 
 	// 20:00点整时，跑该测试可能会报错
@@ -156,7 +156,7 @@ class MarketDataRepoRedisImplTest {
 		}
 		mdRepo.loadBars("testSymbol", LocalDate.of(2022, 8, 16), endDate);
 		verify(mockDataMgr).getMinutelyData(eq("testSymbol"), eq(LocalDate.of(2022, 8, 16)), eq(today));
-		verify(mockRedisTemplate).boundListOps(eq(String.format("%s%s:%s:%s", KEY_PREFIX, "CTP", realDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), "testSymbol")));
+		verify(mockRedisTemplate).boundListOps(eq(String.format("%s:%s:%s", KEY_PREFIX, realDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), "testSymbol")));
 	}
 	
 	// 日期范围覆盖当天，数据服务有当天数据
@@ -186,7 +186,7 @@ class MarketDataRepoRedisImplTest {
 		}
 		mdRepo.loadBars("testSymbol", LocalDate.of(2022, 8, 16), endDate);
 		verify(mockDataMgr).getMinutelyData(eq("testSymbol"), eq(LocalDate.of(2022, 8, 16)), eq(LocalDate.now()));
-		verify(mockRedisTemplate).boundListOps(eq(String.format("%s%s:%s:%s", KEY_PREFIX, "CTP", date.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), "testSymbol")));
+		verify(mockRedisTemplate).boundListOps(eq(String.format("%s:%s:%s", KEY_PREFIX, date.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), "testSymbol")));
 	}
 	
 	// 日期范围覆盖当天，数据服务无数据
@@ -207,7 +207,7 @@ class MarketDataRepoRedisImplTest {
 		LocalDate today = LocalDate.now();
 		mdRepo.loadBars("testSymbol", LocalDate.of(2022, 8, 16), endDate);
 		verify(mockDataMgr).getMinutelyData(eq("testSymbol"), eq(LocalDate.of(2022, 8, 16)), eq(today));
-		verify(mockRedisTemplate).boundListOps(eq(String.format("%s%s:%s:%s", KEY_PREFIX, "CTP", today.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), "testSymbol")));
+		verify(mockRedisTemplate).boundListOps(eq(String.format("%s:%s:%s", KEY_PREFIX, today.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), "testSymbol")));
 	}
 	
 }

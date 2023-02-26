@@ -46,7 +46,7 @@ public class MarketDataRepoRedisImpl extends MarketDataRepoDataServiceImpl {
 	 */
 	@Override
 	public void insert(BarField bar) {
-		String key = String.format("%s%s:%s:%s", KEY_PREFIX, bar.getGatewayId(), bar.getTradingDay(), bar.getUnifiedSymbol());
+		String key = String.format("%s:%s:%s", KEY_PREFIX, bar.getTradingDay(), bar.getUnifiedSymbol());
 		redisTemplate.boundListOps(key).rightPush(bar.toByteArray());
 		redisTemplate.expireAt(key, LocalDateTime.of(LocalDate.parse(bar.getTradingDay(), DateTimeConstant.D_FORMAT_INT_FORMATTER), LocalTime.of(20, 0)).toInstant(ZoneOffset.ofHours(8)));
 	}
