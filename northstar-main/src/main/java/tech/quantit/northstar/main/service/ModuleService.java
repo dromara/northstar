@@ -295,6 +295,7 @@ public class ModuleService implements PostLoadAware {
 		for(ModuleDescription md : findAllModules()) {
 			try {				
 				loadModule(md);
+				Thread.sleep(10000); // 每十秒只能加载一个模组，避免数据服务被限流导致数据缺失
 			} catch (Exception e) {
 				log.warn("模组 [{}] 加载失败", md.getModuleName(), e);
 			}
