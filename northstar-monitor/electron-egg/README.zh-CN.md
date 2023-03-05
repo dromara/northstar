@@ -140,7 +140,7 @@ ee-core：[https://github.com/wallace5303/ee-core](https://github.com/wallace530
 <img src="https://oss.dev33.cn/sa-token/link/easy-es2.png" title="傻瓜级ElasticSearch搜索引擎ORM框架" width="15%">
 </a>
 <a href="https://gitee.com/dromara/northstar" target="_blank">
-<img src="https://oss.dev33.cn/sa-token/link/northstar_logo.png" title="Northstar盈富量化交易平台" width="15%">
+<img src="https://oss.dev33.cn/sa-token/link/northstar_logo.png" title="Northstar盈富量化平台" width="15%">
 </a>
 <a href="https://hertzbeat.com/" target="_blank">
 <img src="https://oss.dev33.cn/sa-token/link/hertzbeat_brand.jpg" title="易用友好的云监控系统" width="15%">
