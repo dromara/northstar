@@ -284,6 +284,13 @@ export default {
       if (this.form.channelType === 'SIM') {
         this.form.settings = { nothing: 0 }
       }
+      if (this.form.channelType === 'PLAYBACK'){
+        if(this.subscribedContracts.length > 10){
+          this.$message.warning('回放合约数量不能多于10个')
+          return 
+        }
+        this.form.settings.playContracts = this.subscribedContracts
+      }
       if (!this.form.settings || !Object.keys(this.form.settings).length) {
         throw new Error('网关配置不能为空')
       }

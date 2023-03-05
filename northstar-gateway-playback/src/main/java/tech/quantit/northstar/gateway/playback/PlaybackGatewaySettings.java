@@ -49,7 +49,6 @@ public class PlaybackGatewaySettings extends DynamicParams implements GatewaySet
 	/**
 	 * 回放的合约清单
 	 */
-	@Setting(label="回放合约", order=50, type=FieldType.MULTI_SELECT)
-	private List<ContractSimpleInfo> playContracts;
+	private List<ContractSimpleInfo> playContracts;	// 该配置项不需要页面设置，默认与网关订阅合约保持一致
 	
 }
