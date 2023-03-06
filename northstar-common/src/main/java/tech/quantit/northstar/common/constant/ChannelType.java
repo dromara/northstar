@@ -45,8 +45,13 @@ public enum ChannelType {
 		public boolean adminOnly() {
 			return true;
 		}
+	},
+	OKX {
+		@Override
+		public GatewayUsage[] usage() {
+			return new GatewayUsage[] {GatewayUsage.MARKET_DATA, GatewayUsage.TRADE};
+		}
 	};
-
 	public abstract GatewayUsage[] usage();
 
 	
