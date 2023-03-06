@@ -189,7 +189,7 @@ public class DataServiceManager implements IDataServiceManager {
 			String name = getValue("name", fieldIndexMap, item, "");
 			String unitDesc = getValue("quote_unit_desc", fieldIndexMap, item, "1");
 			double marginRate = ProductClassEnum.EQUITY == productClass ? 1 : 0.1;
-			double priceTick = ProductClassEnum.EQUITY == productClass ? 0.01 : Double.parseDouble(unitDesc.replaceAll("(\\d+\\.?[\\d+]?)[^\\d]+", "$1"));
+			double priceTick = ProductClassEnum.EQUITY == productClass ? 0.01 : Double.parseDouble(unitDesc.replaceAll("[^\\d\\.]+", ""));
 			try {				
 				ContractField contract = ContractField.newBuilder()
 						.setUnifiedSymbol(unifiedSymbol)
