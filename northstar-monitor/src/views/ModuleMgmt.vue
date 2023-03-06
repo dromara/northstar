@@ -12,6 +12,7 @@
       :moduleRuntimeSrc="curTableIndex > -1 ? curModule.runtime : ''"
     />
     <el-table height="100%" :data="moduleList">
+      <el-table-column type="index" width="42px" />
       <el-table-column label="模组名称" prop="moduleName" sortable align="center" width="180px" />
       <el-table-column label="模组类型" prop="type" sortable align="center" width="100px">
         <template slot-scope="scope">
