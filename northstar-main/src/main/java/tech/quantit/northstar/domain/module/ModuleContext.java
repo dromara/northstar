@@ -488,6 +488,9 @@ public class ModuleContext implements IModuleContext, MergedBarListener{
 	public void onMergedBar(BarField bar) {
 		Consumer<Map.Entry<String,Indicator>> action = e -> {
 			Indicator indicator = e.getValue();
+			if(!StringUtils.equals(indicator.bindedUnifiedSymbol(), bar.getUnifiedSymbol())) {
+				return;
+			}
 			if(indicatorValBufQMap.get(indicator).size() >= bufSize.intValue()) {
 				indicatorValBufQMap.get(indicator).poll();
 			}
