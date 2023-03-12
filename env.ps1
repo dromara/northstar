@@ -19,12 +19,8 @@ If(!(test-path $DistPath)){
 }
 #JDK17下载地址
 $JDK17DownloadUrl = "https://download.oracle.com/java/17/latest/jdk-17_windows-x64_bin.msi"
-#Node14下载地址
-$Node14DownloadUrl = "https://registry.npmmirror.com/-/binary/node/latest-v14.x/node-v14.19.0-x64.msi"
 #Redis下载地址
 $RedisDownloadUrl = "https://gitee.com/dromara/northstar/attach_files/1077290/download"
-#Maven下载地址
-$MavenDownloadUrl = "https://mirrors.bfsu.edu.cn/apache/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.zip"
 
 # 检查环境  
 function checkCommand([string] $name, [string] $checkPattern){
@@ -79,38 +75,11 @@ If(checkCommand java.exe 17*){
 	setEnvironment Java "$jdkPath\bin"
 }
 
-# Node14环境安装  
-If(checkCommand node.exe 14*){
-	"Node14 installed"
-} else {
-	downloadAndInstallMSI $Node14DownloadUrl $BasePath node-v14.19.0-x64.msi
-	$nodePath = "C:\Program Files\nodejs"
-	setEnvironment Node $nodePath
-	npm config set registry https://registry.npm.taobao.org
-	npm config set unsafe-perm=true
-}
-
 # Redis环境安装
 If(checkService redis){
 	"Redis installed"
 } else {
 	downloadAndInstallMSI $RedisDownloadUrl $BasePath Redis-x64-3.0.504.msi
-}
-
-# Maven环境安装  
-If(checkCommand mvn *){
-	"Maven installed"
-} else {
-	$targetFile = "apache-maven-3.6.3-bin.zip"
-	if(!(test-path "C:\northstar_env\apache-maven-3.6.3")){
-		"Start downloading $targetFile"
-		Invoke-WebRequest -Uri $MavenDownloadUrl -OutFile "$BasePath$targetFile"
-		Expand-Archive $BasePath$targetFile -DestinationPath $BasePath
-		"Unzipped $targetFile"
-		Remove-Item "$BasePath$targetFile"
-	}
-	$mvnPath = getInstallPath $BasePath *maven*
-	setEnvironment Maven "$mvnPath\bin"
 }
 
 $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User") 
