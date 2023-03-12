@@ -329,6 +329,10 @@ public class ModuleContext implements IModuleContext, MergedBarListener{
 	
 	@Override
 	public synchronized void submitOrderReq(TradeIntent tradeIntent) {
+		if(!module.isEnabled()) {
+			mlog.info("策略处于停用状态，忽略委托单");
+			return;
+		}
 		this.tradeIntent = tradeIntent;
 		tradeIntent.setContext(this);
 		TickField tick = latestTickMap.get(tradeIntent.getContract().getUnifiedSymbol());
