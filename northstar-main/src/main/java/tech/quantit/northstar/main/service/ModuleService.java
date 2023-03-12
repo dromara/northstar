@@ -216,10 +216,13 @@ public class ModuleService implements PostLoadAware {
 			LocalDate start = utils.getFridayOfThisWeek(date.minusWeeks(1));
 			LocalDate end = utils.getFridayOfThisWeek(date);
 			for(ModuleAccountDescription mad : md.getModuleAccountSettingsDescription()) {
+				List<BarField> mergeList = new ArrayList<>();
 				for(ContractSimpleInfo csi : mad.getBindedContracts()) {
 					List<BarField> bars = mdRepo.loadBars(csi.getUnifiedSymbol(), start, end);
-					module.initData(bars);
+					mergeList.addAll(bars);
 				}
+				mergeList.sort((a,b) -> a.getActionTimestamp() < b.getActionTimestamp() ? -1 : 1);
+				module.initData(mergeList);
 			}
 			date = date.plusWeeks(1);
 		}
