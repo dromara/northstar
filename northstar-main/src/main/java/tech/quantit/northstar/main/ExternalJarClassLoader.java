@@ -70,19 +70,17 @@ public class ExternalJarClassLoader extends URLClassLoader {
 	 * @method init
 	 */
 	private void init() {
-
 		// 解析jar包每一项
 		Enumeration<JarEntry> en = jarFile.entries();
-		InputStream input = null;
-		try {
-			while (en.hasMoreElements()) {
-				JarEntry je = en.nextElement();
-				String name = je.getName();
+		while (en.hasMoreElements()) {
+			JarEntry je = en.nextElement();
+			String name = je.getName();
+			try(InputStream input = jarFile.getInputStream(je)){
 				// 这里添加了路径扫描限制
 				if (name.endsWith(".class")) {
 					log.debug("加载扩展包中的类：{}", name);
-					String className = name.replace(".class", "").replaceAll("/", ".");
-					input = jarFile.getInputStream(je);
+					String className = name.replace(".class", "").replace("/", ".");
+					
 					ByteArrayOutputStream baos = new ByteArrayOutputStream();
 					int bufferSize = 4096;
 					byte[] buffer = new byte[bufferSize];
@@ -93,19 +91,10 @@ public class ExternalJarClassLoader extends URLClassLoader {
 					byte[] classBytes = baos.toByteArray();
 					classBytesMap.put(className, classBytes);
 				}
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		} finally {
-			if (input != null) {
-				try {
-					input.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
+			} catch (IOException e) {
+				log.error("类加载异常", e);
 			}
 		}
-
 		// 将jar中的每一个class字节码进行Class载入
 		for (Map.Entry<String, byte[]> entry : classBytesMap.entrySet()) {
 			String key = entry.getKey();
@@ -117,9 +106,8 @@ public class ExternalJarClassLoader extends URLClassLoader {
 			}
 			cacheClassMap.put(key, aClass);
 		}
-
 	}
-
+	
 	/**
 	 * 方法描述 初始化spring bean
 	 * 
