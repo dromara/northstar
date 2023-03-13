@@ -510,6 +510,7 @@ public class ModuleContext implements IModuleContext, MergedBarListener{
 			barBufQMap.get(bar.getUnifiedSymbol()).poll();
 		}
 		barBufQMap.get(bar.getUnifiedSymbol()).offer(bar);		
+		onRuntimeChangeCallback.accept(getRuntimeDescription(false));
 	}
 	
 	/* 此处收到的ORDER数据是所有订单回报，需要过滤 */
