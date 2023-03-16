@@ -7,20 +7,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 import tech.quantit.northstar.common.utils.MarketDataLoadingUtils;
-import tech.quantit.northstar.data.IMarketDataRepository;
+import tech.quantit.northstar.gateway.api.utils.MarketDataRepoFactory;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.ContractField;
 
 public class PlaybackDataLoader {
 
-	private IMarketDataRepository mdRepo;
+	private MarketDataRepoFactory mdRepoFactory;
 	
 	private String gatewayId;
 	
 	private MarketDataLoadingUtils utils = new MarketDataLoadingUtils();
 	
-	public PlaybackDataLoader(String playbackGatewayId, IMarketDataRepository mdRepo) {
-		this.mdRepo = mdRepo;
+	public PlaybackDataLoader(String playbackGatewayId, MarketDataRepoFactory mdRepoFactory) {
+		this.mdRepoFactory = mdRepoFactory;
 		this.gatewayId = playbackGatewayId;
 	}
 	
@@ -35,18 +35,18 @@ public class PlaybackDataLoader {
 			queryEnd = utils.getFridayOfThisWeek(fromStartDateTime.toLocalDate());
 			queryStart = queryEnd.minusWeeks(1);
 		}
-		return enhanceData(mdRepo.loadBars(contract.getUnifiedSymbol(), queryStart, queryEnd)
+		return enhanceData(mdRepoFactory.getInstance(contract.getGatewayId()).loadBars(contract.getUnifiedSymbol(), queryStart, queryEnd)
 				.stream()
 				.filter(bar -> bar.getActionTimestamp() >= fromStartTimestamp)
 				.toList(), contract.getUnifiedSymbol());
 	}
 	
 	public List<BarField> loadMinuteDataRaw(LocalDate startDate, LocalDate endDate, ContractField contract){
-		return enhanceData(mdRepo.loadBars(contract.getUnifiedSymbol(), startDate, endDate), contract.getUnifiedSymbol());
+		return enhanceData(mdRepoFactory.getInstance(contract.getGatewayId()).loadBars(contract.getUnifiedSymbol(), startDate, endDate), contract.getUnifiedSymbol());
 	}
 	
 	public List<BarField> loadTradeDayDataRaw(LocalDate startDate, LocalDate endDate, ContractField contract){
-		return enhanceData(mdRepo.loadDailyBars(contract.getUnifiedSymbol(), startDate, endDate), contract.getUnifiedSymbol());
+		return enhanceData(mdRepoFactory.getInstance(contract.getGatewayId()).loadDailyBars(contract.getUnifiedSymbol(), startDate, endDate), contract.getUnifiedSymbol());
 	}
 	
 	private List<BarField> enhanceData(List<BarField> list, String unifiedSymbol) {

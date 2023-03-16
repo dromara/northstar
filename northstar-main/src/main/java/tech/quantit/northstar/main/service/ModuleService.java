@@ -35,10 +35,10 @@ import tech.quantit.northstar.common.model.ModuleDescription;
 import tech.quantit.northstar.common.model.ModulePositionDescription;
 import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
 import tech.quantit.northstar.common.utils.MarketDataLoadingUtils;
-import tech.quantit.northstar.data.IMarketDataRepository;
 import tech.quantit.northstar.data.IModuleRepository;
 import tech.quantit.northstar.domain.module.ModulePlaybackContext;
 import tech.quantit.northstar.gateway.api.IContractManager;
+import tech.quantit.northstar.gateway.api.utils.MarketDataRepoFactory;
 import tech.quantit.northstar.main.ExternalJarClassLoader;
 import tech.quantit.northstar.main.PostLoadAware;
 import tech.quantit.northstar.main.handler.internal.ModuleManager;
@@ -66,7 +66,7 @@ public class ModuleService implements PostLoadAware {
 	
 	private IModuleRepository moduleRepo;
 	
-	private IMarketDataRepository mdRepo;
+	private MarketDataRepoFactory mdRepoFactory;
 	
 	private MarketDataLoadingUtils utils = new MarketDataLoadingUtils();
 	
@@ -75,12 +75,12 @@ public class ModuleService implements PostLoadAware {
 	private ExternalJarClassLoader extJarLoader;
 	
 	public ModuleService(ApplicationContext ctx, ExternalJarClassLoader extJarLoader, IModuleRepository moduleRepo,
-			IMarketDataRepository mdRepo, ModuleFactory moduleFactory, ModuleManager moduleMgr, IContractManager contractMgr) {
+			MarketDataRepoFactory mdRepoFactory, ModuleFactory moduleFactory, ModuleManager moduleMgr, IContractManager contractMgr) {
 		this.ctx = ctx;
 		this.moduleMgr = moduleMgr;
 		this.contractMgr = contractMgr;
 		this.moduleRepo = moduleRepo;
-		this.mdRepo = mdRepo;
+		this.mdRepoFactory = mdRepoFactory;
 		this.moduleFactory = moduleFactory;
 		this.extJarLoader = extJarLoader;
 	}
@@ -218,7 +218,7 @@ public class ModuleService implements PostLoadAware {
 			for(ModuleAccountDescription mad : md.getModuleAccountSettingsDescription()) {
 				List<BarField> mergeList = new ArrayList<>();
 				for(ContractSimpleInfo csi : mad.getBindedContracts()) {
-					List<BarField> bars = mdRepo.loadBars(csi.getUnifiedSymbol(), start, end);
+					List<BarField> bars = mdRepoFactory.getInstance(mad.getAccountGatewayId()).loadBars(csi.getUnifiedSymbol(), start, end);
 					mergeList.addAll(bars);
 				}
 				mergeList.sort((a,b) -> a.getActionTimestamp() < b.getActionTimestamp() ? -1 : 1);

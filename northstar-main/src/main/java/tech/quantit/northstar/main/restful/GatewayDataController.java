@@ -16,9 +16,9 @@ import tech.quantit.northstar.common.model.GatewayDescription;
 import tech.quantit.northstar.common.model.ResultBean;
 import tech.quantit.northstar.common.utils.MarketDataLoadingUtils;
 import tech.quantit.northstar.data.IGatewayRepository;
-import tech.quantit.northstar.data.IMarketDataRepository;
 import tech.quantit.northstar.gateway.api.IContractManager;
 import tech.quantit.northstar.gateway.api.domain.contract.Contract;
+import tech.quantit.northstar.gateway.api.utils.MarketDataRepoFactory;
 import xyz.redtorch.pb.CoreField.BarField;
 
 @RequestMapping("/northstar/data")
@@ -26,7 +26,7 @@ import xyz.redtorch.pb.CoreField.BarField;
 public class GatewayDataController {
 
 	@Autowired
-	private IMarketDataRepository mdRepo;
+	private MarketDataRepoFactory mdRepoFactory;
 	
 	@Autowired
 	private IGatewayRepository gatewayRepo;
@@ -51,7 +51,7 @@ public class GatewayDataController {
 		LocalDate end = utils.getCurrentTradeDay(refStartTimestamp, firstLoad);
 		List<BarField> result = Collections.emptyList();
 		for(int i=0; i<3; i++) {
-			result = mdRepo.loadBars(contract.contractField().getUnifiedSymbol(), start.minusWeeks(i), end.minusWeeks(i));
+			result = mdRepoFactory.getInstance(gatewayId).loadBars(contract.contractField().getUnifiedSymbol(), start.minusWeeks(i), end.minusWeeks(i));
 			if(!result.isEmpty()) {
 				break;
 			}

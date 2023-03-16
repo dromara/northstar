@@ -10,7 +10,7 @@ import tech.quantit.northstar.common.event.AbstractEventHandler;
 import tech.quantit.northstar.common.event.GenericEventHandler;
 import tech.quantit.northstar.common.event.NorthstarEvent;
 import tech.quantit.northstar.common.event.NorthstarEventType;
-import tech.quantit.northstar.data.IMarketDataRepository;
+import tech.quantit.northstar.gateway.api.utils.MarketDataRepoFactory;
 import xyz.redtorch.pb.CoreField.BarField;
 
 /**
@@ -20,12 +20,12 @@ import xyz.redtorch.pb.CoreField.BarField;
  */
 public class MarketDataHandler extends AbstractEventHandler implements GenericEventHandler{
 
-	private IMarketDataRepository mdRepo;
+	private MarketDataRepoFactory mdRepoFactory;
 	
 	private ThreadPoolExecutor exec = new ThreadPoolExecutor(5, 10, 60, TimeUnit.SECONDS, new ArrayBlockingQueue<>(500));
 	
-	public MarketDataHandler(IMarketDataRepository mdRepo) {
-		this.mdRepo = mdRepo;
+	public MarketDataHandler(MarketDataRepoFactory mdRepoFactory) {
+		this.mdRepoFactory = mdRepoFactory;
 	}
 	
 	@Override
@@ -36,7 +36,7 @@ public class MarketDataHandler extends AbstractEventHandler implements GenericEv
 	@Override
 	protected void doHandle(NorthstarEvent e) {
 		if(e.getData() instanceof BarField bar && bar.getActionDay().equals(LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER))) {
-			exec.execute(() -> mdRepo.insert(bar)); 
+			exec.execute(() -> mdRepoFactory.getInstance(bar.getGatewayId()).insert(bar)); 
 		}
 	}
 

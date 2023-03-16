@@ -13,7 +13,8 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import tech.quantit.northstar.data.IMarketDataRepository;
+import tech.quantit.northstar.gateway.api.IMarketDataRepository;
+import tech.quantit.northstar.gateway.api.utils.MarketDataRepoFactory;
 import test.common.TestFieldFactory;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.ContractField;
@@ -37,9 +38,12 @@ class PlaybackDataLoaderTest {
 	
 	@BeforeEach
 	void prepare() {
+		MarketDataRepoFactory mdRepoFactory = mock(MarketDataRepoFactory.class);
 		IMarketDataRepository mdRepo = mock(IMarketDataRepository.class);
+		when(mdRepoFactory.getInstance(anyString())).thenReturn(mdRepo);
 		when(mdRepo.loadBars(anyString(), any(LocalDate.class), any(LocalDate.class))).thenReturn(List.of(b1,b2,b3));
-		loader = new PlaybackDataLoader("testGateway", mdRepo);
+		
+		loader = new PlaybackDataLoader("testGateway", mdRepoFactory);
 	}
 
 	@Test

@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.IHolidayManager;
 import tech.quantit.northstar.common.constant.ChannelType;
-import tech.quantit.northstar.data.IMarketDataRepository;
+import tech.quantit.northstar.gateway.api.utils.MarketDataRepoFactory;
 
 /**
  * 法定节假日管理器
@@ -27,15 +27,15 @@ public class CtpHolidayManager implements IHolidayManager, InitializingBean{
 	protected Set<LocalDate> holidaySet = new HashSet<>();
 
 	@Autowired
-	private IMarketDataRepository repo;
+	private MarketDataRepoFactory mdRepoFactory;
 	
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		LocalDate today = LocalDate.now();
 		// 加载前后一年的假期数据
-		addHoliday(repo.findHodidayInLaw("CTP", today.getYear() - 1));
-		addHoliday(repo.findHodidayInLaw("CTP", today.getYear()));
-		addHoliday(repo.findHodidayInLaw("CTP", today.getYear() + 1));
+		addHoliday(mdRepoFactory.getInstance(ChannelType.CTP).findHodidayInLaw("CTP", today.getYear() - 1));
+		addHoliday(mdRepoFactory.getInstance(ChannelType.CTP).findHodidayInLaw("CTP", today.getYear()));
+		addHoliday(mdRepoFactory.getInstance(ChannelType.CTP).findHodidayInLaw("CTP", today.getYear() + 1));
 	}
 	
 	private void addHoliday(List<LocalDate> holidays) {

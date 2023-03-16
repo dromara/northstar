@@ -7,7 +7,7 @@ import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.IDataServiceManager;
 import tech.quantit.northstar.common.constant.DateTimeConstant;
-import tech.quantit.northstar.data.IMarketDataRepository;
+import tech.quantit.northstar.gateway.api.IMarketDataRepository;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreField.BarField;
 

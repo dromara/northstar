@@ -1,4 +1,4 @@
-package tech.quantit.northstar.data;
+package tech.quantit.northstar.gateway.api;
 
 import java.time.LocalDate;
 import java.util.List;

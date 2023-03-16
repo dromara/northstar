@@ -25,8 +25,8 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 import tech.quantit.northstar.common.constant.Constants;
 import tech.quantit.northstar.common.constant.DateTimeConstant;
-import tech.quantit.northstar.data.IMarketDataRepository;
 import tech.quantit.northstar.data.ds.DataServiceManager;
+import tech.quantit.northstar.gateway.api.IMarketDataRepository;
 import test.common.TestFieldFactory;
 import xyz.redtorch.pb.CoreField.BarField;
 

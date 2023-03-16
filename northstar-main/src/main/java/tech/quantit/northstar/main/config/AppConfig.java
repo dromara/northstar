@@ -44,7 +44,6 @@ import okhttp3.OkHttpClient;
 import tech.quantit.northstar.common.IMailMessageContentHandler;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.data.IGatewayRepository;
-import tech.quantit.northstar.data.IMarketDataRepository;
 import tech.quantit.northstar.data.IModuleRepository;
 import tech.quantit.northstar.domain.account.TradeDayAccount;
 import tech.quantit.northstar.domain.gateway.GatewayAndConnectionManager;
@@ -94,23 +93,23 @@ public class AppConfig implements WebMvcConfigurer, DisposableBean {
 		}
 	}
 
-	@Bean
-	public CorsFilter corsFilter() {
+    @Bean
+    CorsFilter corsFilter() {
 
-		CorsConfiguration config = new CorsConfiguration();
-		// 设置允许跨域请求的域名
-		config.addAllowedOriginPattern("*");
-		// 是否允许证书 不再默认开启
-		config.setAllowCredentials(true);
-		// 设置允许的方法
-		config.addAllowedMethod("*");
-		// 允许任何头
-		config.addAllowedHeader("*");
-		config.addExposedHeader("token");
-		UrlBasedCorsConfigurationSource configSource = new UrlBasedCorsConfigurationSource();
-		configSource.registerCorsConfiguration("/**", config);
-		return new CorsFilter(configSource);
-	}
+        CorsConfiguration config = new CorsConfiguration();
+        // 设置允许跨域请求的域名
+        config.addAllowedOriginPattern("*");
+        // 是否允许证书 不再默认开启
+        config.setAllowCredentials(true);
+        // 设置允许的方法
+        config.addAllowedMethod("*");
+        // 允许任何头
+        config.addAllowedHeader("*");
+        config.addExposedHeader("token");
+        UrlBasedCorsConfigurationSource configSource = new UrlBasedCorsConfigurationSource();
+        configSource.registerCorsConfiguration("/**", config);
+        return new CorsFilter(configSource);
+    }
 
 	@Override
 	public void addInterceptors(InterceptorRegistry registry) {
@@ -118,45 +117,45 @@ public class AppConfig implements WebMvcConfigurer, DisposableBean {
 				.excludePathPatterns("/auth/login");
 	}
 
-	@Bean
-	public GatewayAndConnectionManager gatewayAndConnectionManager() {
-		return new GatewayAndConnectionManager();
-	}
+    @Bean
+    GatewayAndConnectionManager gatewayAndConnectionManager() {
+        return new GatewayAndConnectionManager();
+    }
 
-	@Bean
-	public ConcurrentMap<String, TradeDayAccount> accountMap() {
-		return new ConcurrentHashMap<>();
-	}
+    @Bean
+    ConcurrentMap<String, TradeDayAccount> accountMap() {
+        return new ConcurrentHashMap<>();
+    }
 
-	@Bean
-	public IMarketCenter marketCenter(FastEventEngine fastEventEngine) throws IOException {
-		ContractDefinitionReader reader = new ContractDefinitionReader();
-		return new MarketCenter(reader.load(contractDefRes.getInputStream()), fastEventEngine);
-	}
+    @Bean
+    IMarketCenter marketCenter(FastEventEngine fastEventEngine) throws IOException {
+        ContractDefinitionReader reader = new ContractDefinitionReader();
+        return new MarketCenter(reader.load(contractDefRes.getInputStream()), fastEventEngine);
+    }
 
-	@Bean
-	public ExternalJarClassLoader extJarListener(SpringContextUtil springContextUtil) throws MalformedURLException {
-		ApplicationHome appHome = new ApplicationHome(getClass());
-		File appPath = appHome.getDir();
-		ExternalJarClassLoader clzLoader = null;
-		for (File file : appPath.listFiles()) {
-			if (file.getName().contains("northstar-external")
-					&& Files.getFileExtension(file.getName()).equalsIgnoreCase("jar") && !file.isDirectory()) {
-				log.info("加载northstar-external扩展包");
-				clzLoader = new ExternalJarClassLoader(new URL[] { file.toURI().toURL() }, getClass().getClassLoader());
-				clzLoader.initBean();
-				break;
-			}
-		}
-		return clzLoader;
-	}
+    @Bean
+    ExternalJarClassLoader extJarListener(SpringContextUtil springContextUtil) throws MalformedURLException {
+        ApplicationHome appHome = new ApplicationHome(getClass());
+        File appPath = appHome.getDir();
+        ExternalJarClassLoader clzLoader = null;
+        for (File file : appPath.listFiles()) {
+            if (file.getName().contains("northstar-external")
+                    && Files.getFileExtension(file.getName()).equalsIgnoreCase("jar") && !file.isDirectory()) {
+                log.info("加载northstar-external扩展包");
+                clzLoader = new ExternalJarClassLoader(new URL[]{file.toURI().toURL()}, getClass().getClassLoader());
+                clzLoader.initBean();
+                break;
+            }
+        }
+        return clzLoader;
+    }
 
-	@Bean
-	public ModuleFactory moduleFactory(@Autowired(required = false) ExternalJarClassLoader extJarLoader, IGatewayRepository gatewayRepo,
-			IModuleRepository moduleRepo, IMarketDataRepository mdRepo, GatewayAndConnectionManager gatewayConnMgr, IContractManager contractMgr,
-			MailDeliveryManager mailMgr) {
-		return new ModuleFactory(extJarLoader, moduleRepo, gatewayRepo, gatewayConnMgr, contractMgr, mailMgr);
-	}
+    @Bean
+    ModuleFactory moduleFactory(@Autowired(required = false) ExternalJarClassLoader extJarLoader, IGatewayRepository gatewayRepo,
+                                          IModuleRepository moduleRepo, GatewayAndConnectionManager gatewayConnMgr, IContractManager contractMgr,
+                                          MailDeliveryManager mailMgr) {
+        return new ModuleFactory(extJarLoader, moduleRepo, gatewayRepo, gatewayConnMgr, contractMgr, mailMgr);
+    }
 
 	private static OkHttpClient getUnsafeOkHttpClient() {
 		try {
@@ -193,26 +192,26 @@ public class AppConfig implements WebMvcConfigurer, DisposableBean {
 		}
 	}
 
-	@Bean
-	public RestTemplate restTemplate() {
-		return new RestTemplateBuilder()
-				.requestFactory(() -> new OkHttp3ClientHttpRequestFactory(getUnsafeOkHttpClient()))
-				.setReadTimeout(Duration.ofSeconds(30))
-				.setConnectTimeout(Duration.ofSeconds(5))
-				.build();
-	}
+    @Bean
+    RestTemplate restTemplate() {
+        return new RestTemplateBuilder()
+                .requestFactory(() -> new OkHttp3ClientHttpRequestFactory(getUnsafeOkHttpClient()))
+                .setReadTimeout(Duration.ofSeconds(30))
+                .setConnectTimeout(Duration.ofSeconds(5))
+                .build();
+    }
 
-	@ConditionalOnMissingBean(IMailMessageContentHandler.class)
-	@Bean
-	public IMailMessageContentHandler messageDeliveryHandler() {
-		return new IMailMessageContentHandler() {
-		};
-	}
+    @ConditionalOnMissingBean(IMailMessageContentHandler.class)
+    @Bean
+    IMailMessageContentHandler messageDeliveryHandler() {
+        return new IMailMessageContentHandler() {
+        };
+    }
 
-	@Bean
-	public MailDeliveryManager mailDeliveryManager(IMailMessageContentHandler handler) {
-		return new MailDeliveryManager(new MailSenderFactory(), handler);
-	}
+    @Bean
+    MailDeliveryManager mailDeliveryManager(IMailMessageContentHandler handler) {
+        return new MailDeliveryManager(new MailSenderFactory(), handler);
+    }
 
 	@Override
 	public void destroy() throws Exception {

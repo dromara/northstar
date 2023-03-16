@@ -23,33 +23,33 @@ import tech.quantit.northstar.main.handler.broadcast.SocketIOMessageEngine;
 @Configuration
 public class EngineConfig {
 
-	@Bean
-	public SocketIOMessageEngine messageEngine(SocketIOServer server) {
-		log.debug("创建SocketIOMessageEngine");
-		return new SocketIOMessageEngine(server);
-	}
-	
-	@Bean
-	public FastEventEngine eventEngine() {
-		log.debug("创建EventEngine");
-		return new DisruptorFastEventEngine(WaitStrategyEnum.BlockingWaitStrategy);
-	}
-	
-	@Bean
-	public InternalEventBus internalEventBus() {
-		log.debug("创建InternalEventBus");
-		return new InternalEventBus();
-	}
-	
-	@Bean
-	public StrategyEventBus strategyEventBus() {
-		log.debug("创建StrategyEventBus");
-		return new StrategyEventBus();
-	}
+    @Bean
+    SocketIOMessageEngine messageEngine(SocketIOServer server) {
+        log.debug("创建SocketIOMessageEngine");
+        return new SocketIOMessageEngine(server);
+    }
 
-	@Bean 
-	public PlaybackEventBus playbackEventBus() {
-		log.debug("创建PlaybackEventBus");
-		return new PlaybackEventBus();
-	}
+    @Bean
+    FastEventEngine eventEngine() {
+        log.debug("创建EventEngine");
+        return new DisruptorFastEventEngine(WaitStrategyEnum.BlockingWaitStrategy);
+    }
+
+    @Bean
+    InternalEventBus internalEventBus() {
+        log.debug("创建InternalEventBus");
+        return new InternalEventBus();
+    }
+
+    @Bean
+    StrategyEventBus strategyEventBus() {
+        log.debug("创建StrategyEventBus");
+        return new StrategyEventBus();
+    }
+
+    @Bean
+    PlaybackEventBus playbackEventBus() {
+        log.debug("创建PlaybackEventBus");
+        return new PlaybackEventBus();
+    }
 }
