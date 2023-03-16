@@ -242,10 +242,12 @@
             v-model="indicator.paneId"
             placeholder="请选择绘图位置"
           >
-            <el-option :key="1" label="主图" value="candle_pane" />
-            <el-option :key="2" label="副图1" value="pane1" />
-            <el-option :key="3" label="副图2" value="pane2" />
-            <el-option :key="4" label="副图3" value="pane3" />
+            <el-option :key="0" label="主图" value="candle_pane" />
+            <el-option :key="1" label="副图1" value="pane1" />
+            <el-option :key="2" label="副图2" value="pane2" />
+            <el-option :key="3" label="副图3" value="pane3" />
+            <el-option :key="4" label="副图4" value="pane4" />
+            <el-option :key="5" label="副图5" value="pane5" />
           </el-select>
           <el-button icon="el-icon-plus" title="绘制指标" @click.native="addIndicator"></el-button>
           <el-button
