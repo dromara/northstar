@@ -329,6 +329,10 @@ public class ModuleContext implements IModuleContext, MergedBarListener{
 	
 	@Override
 	public synchronized void submitOrderReq(TradeIntent tradeIntent) {
+		if(!module.isEnabled()) {
+			mlog.info("策略处于停用状态，忽略委托单");
+			return;
+		}
 		this.tradeIntent = tradeIntent;
 		tradeIntent.setContext(this);
 		TickField tick = latestTickMap.get(tradeIntent.getContract().getUnifiedSymbol());
@@ -484,6 +488,9 @@ public class ModuleContext implements IModuleContext, MergedBarListener{
 	public void onMergedBar(BarField bar) {
 		Consumer<Map.Entry<String,Indicator>> action = e -> {
 			Indicator indicator = e.getValue();
+			if(!StringUtils.equals(indicator.bindedUnifiedSymbol(), bar.getUnifiedSymbol())) {
+				return;
+			}
 			if(indicatorValBufQMap.get(indicator).size() >= bufSize.intValue()) {
 				indicatorValBufQMap.get(indicator).poll();
 			}
@@ -503,6 +510,7 @@ public class ModuleContext implements IModuleContext, MergedBarListener{
 			barBufQMap.get(bar.getUnifiedSymbol()).poll();
 		}
 		barBufQMap.get(bar.getUnifiedSymbol()).offer(bar);		
+		onRuntimeChangeCallback.accept(getRuntimeDescription(false));
 	}
 	
 	/* 此处收到的ORDER数据是所有订单回报，需要过滤 */

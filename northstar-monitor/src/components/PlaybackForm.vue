@@ -52,24 +52,6 @@
           <el-option label="超速" value="RUSH" key="3"></el-option>
         </el-select>
       </el-form-item>
-      <el-form-item label="回放合约" prop="unifiedSymbols">
-        <el-select
-          v-model="playbackSettings.playContracts"
-          multiple
-          filterable
-          :disabled="playbackSettings.playContracts.length >= 10"
-        >
-          <el-option
-            v-for="(item, i) in subscribedContracts"
-            :label="item.name"
-            :value="item"
-            :key="i"
-          ></el-option>
-        </el-select>
-        <div v-if="playbackSettings.playContracts.length >= 10" class="warning-text">
-          <i class="el-icon-warning" /> 最多只能同时选择十个合约<br />
-        </div>
-      </el-form-item>
     </el-form>
     <div slot="footer" class="dialog-footer">
       <el-button @click="close">取 消</el-button>

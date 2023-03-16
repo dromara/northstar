@@ -45,7 +45,7 @@ module.exports = (appInfo) => {
    * 主窗口
    */
   config.windowsOption = {
-    title: 'Northstar盈富量化交易平台',
+    title: 'Northstar盈富量化平台',
     width: 1920,
     height: 1080,
     minWidth: 1024,
@@ -54,6 +54,7 @@ module.exports = (appInfo) => {
       //webSecurity: false, // 跨域问题 -> 打开注释
       contextIsolation: false, // false -> 可在渲染进程中使用electron的api，true->需要bridge.js(contextBridge)
       nodeIntegration: true,
+      enableRemoteModule: true,
       //preload: path.join(appInfo.baseDir, 'preload', 'bridge.js'),
     },
     frame: true,
@@ -151,7 +152,7 @@ module.exports = (appInfo) => {
     },
     tray: {
       enable: true,
-      title: 'Northstar盈富量化交易平台',
+      title: 'Northstar盈富量化平台',
       icon: '/public/images/tray_logo.png'
     },
     security: {

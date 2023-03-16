@@ -12,6 +12,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpEntity;
@@ -77,6 +78,11 @@ public class DataServiceManager implements IDataServiceManager {
 		exchangeChannelType.put(ExchangeEnum.DCE, ChannelType.CTP);
 		exchangeChannelType.put(ExchangeEnum.CZCE, ChannelType.CTP);
 		exchangeChannelType.put(ExchangeEnum.INE, ChannelType.CTP);
+		exchangeChannelType.put(ExchangeEnum.GFEX, ChannelType.CTP);
+		
+		exchangeChannelType.put(ExchangeEnum.SSE, ChannelType.PLAYBACK);
+		exchangeChannelType.put(ExchangeEnum.SZSE, ChannelType.PLAYBACK);
+		exchangeChannelType.put(ExchangeEnum.BSE, ChannelType.PLAYBACK);
 		
 		log.info("采用外部数据源加载历史数据");
 		register();
@@ -179,9 +185,11 @@ public class DataServiceManager implements IDataServiceManager {
 		for(String[] item : dataSet.getItems()) {
 			String unifiedSymbol = getValue("ns_code", fieldIndexMap, item, "");
 			String symbol = unifiedSymbol.split("@")[0];
+			ProductClassEnum productClass = ProductClassEnum.valueOf(unifiedSymbol.split("@")[2]);
 			String name = getValue("name", fieldIndexMap, item, "");
-			String unitDesc = getValue("quote_unit_desc", fieldIndexMap, item, "");
-			
+			String unitDesc = getValue("quote_unit_desc", fieldIndexMap, item, "1");
+			double marginRate = ProductClassEnum.EQUITY == productClass ? 1 : 0.1;
+			double priceTick = ProductClassEnum.EQUITY == productClass ? 0.01 : Double.parseDouble(unitDesc.replaceAll("[^\\d\\.]+", ""));
 			try {				
 				ContractField contract = ContractField.newBuilder()
 						.setUnifiedSymbol(unifiedSymbol)
@@ -194,11 +202,11 @@ public class DataServiceManager implements IDataServiceManager {
 						.setGatewayId(channelName(exchange))
 						.setThirdPartyId(symbol + "@" + channelName(exchange))
 						.setLastTradeDateOrContractMonth(getValue("delist_date", fieldIndexMap, item, ""))
-						.setLongMarginRatio(0.1)
-						.setShortMarginRatio(0.1)
-						.setProductClass(ProductClassEnum.FUTURES)
-						.setMultiplier(Double.parseDouble(getValue("per_unit", fieldIndexMap, item, "0")))
-						.setPriceTick(Double.parseDouble(unitDesc.replaceAll("(\\d+\\.?[\\d+]?)[^\\d]+", "$1")))
+						.setLongMarginRatio(marginRate)
+						.setShortMarginRatio(marginRate)
+						.setProductClass(productClass)
+						.setMultiplier(Double.parseDouble(getValue("per_unit", fieldIndexMap, item, "1")))
+						.setPriceTick(priceTick)
 						.build();
 				resultList.add(contract);
 			} catch(Exception e) {
@@ -219,6 +227,16 @@ public class DataServiceManager implements IDataServiceManager {
 	public JSONObject getCtpMetaSettings(String brokerId) {
 		URI uri = URI.create(String.format("%s/ctp/settings?brokerId=%s", baseUrl, brokerId));
 		return execute(uri, JSONObject.class).getBody();
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<ExchangeEnum> getUserAvailableExchanges() {
+		URI uri = URI.create(String.format("%s/contracts/availableEx", baseUrl));
+		return Optional.ofNullable(execute(uri, List.class).getBody()).orElse(Collections.emptyList())
+				.stream()
+				.map(ex -> ExchangeEnum.valueOf((String)ex))
+				.toList();
 	}
 	
 	private DataSet getTradeCalendar(String exchange, LocalDate startDate, LocalDate endDate){
@@ -295,6 +313,13 @@ public class DataServiceManager implements IDataServiceManager {
 				String unifiedSymbol = getValue("ns_code", fieldIndexMap, item, "");
 				ChannelType channelType = getExchange(unifiedSymbol);
 				ContractField contract = contractMgr.getContract(channelType.name(), unifiedSymbol).contractField();
+				
+				double openInterest = 0;
+				double openInterestDelta = 0;
+				if(unifiedSymbol.endsWith(ProductClassEnum.FUTURES.toString())) {
+					openInterest = Double.parseDouble(getValue("oi", fieldIndexMap, item, "0"));
+					openInterestDelta = Double.parseDouble(getValue("oi_chg", fieldIndexMap, item, "0"));
+				}
 				resultList.addFirst(BarField.newBuilder()
 						.setUnifiedSymbol(unifiedSymbol)
 						.setTradingDay(tradingDay)
@@ -306,13 +331,13 @@ public class DataServiceManager implements IDataServiceManager {
 						.setLowPrice(normalizeValue(Double.parseDouble(getValue("low", fieldIndexMap, item, "0")), contract.getPriceTick()))
 						.setOpenPrice(normalizeValue(Double.parseDouble(getValue("open", fieldIndexMap, item, "0")), contract.getPriceTick()))
 						.setGatewayId(contract.getGatewayId())
-						.setOpenInterestDelta(Double.parseDouble(getValue("oi_chg", fieldIndexMap, item, "0")))
-						.setOpenInterest(Double.parseDouble(getValue("oi", fieldIndexMap, item, "0")))
+						.setOpenInterestDelta(openInterestDelta)
+						.setOpenInterest(openInterest)
 						.setVolume((long) Double.parseDouble(getValue("vol", fieldIndexMap, item, "0")))
 						.setTurnover(Double.parseDouble(getValue("amount", fieldIndexMap, item, "0")))
 						.setPreClosePrice(Double.parseDouble(getValue("pre_close", fieldIndexMap, item, "0")))
 						.setPreSettlePrice(Double.parseDouble(getValue("pre_settle", fieldIndexMap, item, "0")))
-						.setPreOpenInterest(Double.parseDouble(getValue("oi", fieldIndexMap, item, "0")) - Double.parseDouble(getValue("oi_chg", fieldIndexMap, item, "0")))
+						.setPreOpenInterest(openInterest - openInterestDelta)
 						.build());
 			} catch(Exception e) {
 				log.warn("无效合约行情数据：{}", JSON.toJSONString(item));

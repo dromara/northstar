@@ -14,7 +14,6 @@ import org.springframework.data.redis.core.BoundListOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 
 import lombok.extern.slf4j.Slf4j;
-import tech.quantit.northstar.common.constant.ChannelType;
 import tech.quantit.northstar.common.constant.Constants;
 import tech.quantit.northstar.common.constant.DateTimeConstant;
 import tech.quantit.northstar.data.ds.DataServiceManager;
@@ -31,7 +30,7 @@ public class MarketDataRepoRedisImpl extends MarketDataRepoDataServiceImpl {
 
 	private RedisTemplate<String, byte[]> redisTemplate;
 	
-	private static final String KEY_PREFIX = Constants.APP_NAME + "BarData:";
+	private static final String KEY_PREFIX = Constants.APP_NAME + "BarData";
 	
 	public MarketDataRepoRedisImpl(RedisTemplate<String, byte[]> redisTemplate, DataServiceManager dsMgr) {
 		super(dsMgr);
@@ -47,7 +46,7 @@ public class MarketDataRepoRedisImpl extends MarketDataRepoDataServiceImpl {
 	 */
 	@Override
 	public void insert(BarField bar) {
-		String key = String.format("%s%s:%s:%s", KEY_PREFIX, bar.getGatewayId(), bar.getTradingDay(), bar.getUnifiedSymbol());
+		String key = String.format("%s:%s:%s", KEY_PREFIX, bar.getTradingDay(), bar.getUnifiedSymbol());
 		redisTemplate.boundListOps(key).rightPush(bar.toByteArray());
 		redisTemplate.expireAt(key, LocalDateTime.of(LocalDate.parse(bar.getTradingDay(), DateTimeConstant.D_FORMAT_INT_FORMATTER), LocalTime.of(20, 0)).toInstant(ZoneOffset.ofHours(8)));
 	}
@@ -56,13 +55,13 @@ public class MarketDataRepoRedisImpl extends MarketDataRepoDataServiceImpl {
 	 * 当天的数据查询redis，非当天数据查询数据服务
 	 */
 	@Override
-	public List<BarField> loadBars(ChannelType channelType, String unifiedSymbol, LocalDate startDate, LocalDate endDate0) {
-		log.debug("加载 [{}] 历史行情数据：{}，{} -> {}", channelType, unifiedSymbol, startDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), endDate0.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
+	public List<BarField> loadBars(String unifiedSymbol, LocalDate startDate, LocalDate endDate0) {
+		log.debug("加载 [{}] 历史行情数据：{} -> {}", unifiedSymbol, startDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), endDate0.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
 		LocalDate today = LocalDate.now();
 		LocalDate endDate = today.isAfter(endDate0) ? endDate0 : today;
 		LinkedList<BarField> resultList = new LinkedList<>();
 		if(endDate.isAfter(startDate)) {
-			List<BarField> list = super.loadBars(channelType, unifiedSymbol, startDate, endDate)
+			List<BarField> list = super.loadBars(unifiedSymbol, startDate, endDate)
 					.stream()
 					.sorted((a, b) -> a.getActionTimestamp() < b.getActionTimestamp() ? -1 : 1)
 					.toList();
@@ -73,7 +72,7 @@ public class MarketDataRepoRedisImpl extends MarketDataRepoDataServiceImpl {
 		LocalDate localQueryDate = today;
 		if(resultList.isEmpty()) {
 			while(resultList.isEmpty() && endDate0.isAfter(localQueryDate)) {
-				resultList.addAll(findBarData(localQueryDate, channelType, unifiedSymbol));
+				resultList.addAll(findBarData(localQueryDate, unifiedSymbol));
 				localQueryDate = localQueryDate.plusDays(1);
 			}
 		} else {			
@@ -82,18 +81,18 @@ public class MarketDataRepoRedisImpl extends MarketDataRepoDataServiceImpl {
 				do {					
 					localQueryDate = localQueryDate.plusDays(1);
 				} while(localQueryDate.getDayOfWeek().getValue() > 5);
-				resultList.addAll(findBarData(localQueryDate, channelType, unifiedSymbol));
+				resultList.addAll(findBarData(localQueryDate, unifiedSymbol));
 			} else {
-				resultList.addAll(findBarData(localQueryDate, channelType, unifiedSymbol));
+				resultList.addAll(findBarData(localQueryDate, unifiedSymbol));
 			}
 		}
 		
 		return resultList;
 	}
 	
-	private List<BarField> findBarData(LocalDate date, ChannelType channelType, String unifiedSymbol){
-		log.debug("加载 [{}] 本地行情数据：{}，{}", channelType, unifiedSymbol, date.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
-		String key = String.format("%s%s:%s:%s", KEY_PREFIX, channelType, date.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), unifiedSymbol);
+	private List<BarField> findBarData(LocalDate date, String unifiedSymbol){
+		log.debug("加载 [{}] 本地行情数据：{}", unifiedSymbol, date.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
+		String key = String.format("%s:%s:%s", KEY_PREFIX, date.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), unifiedSymbol);
 		BoundListOperations<String, byte[]> list = redisTemplate.boundListOps(key);
 		return Optional
 				.ofNullable(list.range(0, list.size()))

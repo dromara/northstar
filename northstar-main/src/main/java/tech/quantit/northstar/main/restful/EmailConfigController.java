@@ -37,6 +37,7 @@ public class EmailConfigController implements InitializingBean{
 	public ResultBean<Boolean> save(@RequestBody MailConfigDescription configDescription){
 		Assert.notNull(configDescription, "邮件配置信息不能为空");
 		mailConfigRepo.save(configDescription);
+		mailMgr.setEmailConfig(configDescription);
 		return new ResultBean<>(Boolean.TRUE);
 	}
 	

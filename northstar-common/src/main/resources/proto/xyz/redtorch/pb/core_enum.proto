@@ -365,6 +365,7 @@ enum ExchangeEnum {
 	BINANCE = 26;  // 币安交易所
   	OKX = 27;  // 欧易交易所
   	GATE = 28;  // 芝麻开门交易所
+  	BSE = 29;  // 北京证券交易所
 }
 
 // OptionsTypeEnum是一个期权类型类型

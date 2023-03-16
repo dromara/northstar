@@ -5,6 +5,7 @@ const marketCurrentDataModule = {
   state: () => ({
     curMarketGatewayId: '',
     curUnifiedSymbol: '',
+    curRoomId: '',
     curTick: {
       askpriceList: [0, 0, 0, 0, 0],
       askvolumeList: [0, 0, 0, 0, 0],
@@ -32,7 +33,9 @@ const marketCurrentDataModule = {
       state.lastBar = null
       state.curBar = null
       state.curUnifiedSymbol = unifiedsymbol
+      state.curRoomId = `${unifiedsymbol}@${state.curMarketGatewayId}`
       console.log('当前curUnifiedSymbol', unifiedsymbol)
+      console.log('当前ws房间ID：' + state.curRoomId)
     },
     updateTick(state, tick) {
       if (

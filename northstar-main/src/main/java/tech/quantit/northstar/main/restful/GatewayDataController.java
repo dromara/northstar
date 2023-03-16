@@ -11,8 +11,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import tech.quantit.northstar.common.constant.ChannelType;
+import tech.quantit.northstar.common.model.GatewayDescription;
 import tech.quantit.northstar.common.model.ResultBean;
 import tech.quantit.northstar.common.utils.MarketDataLoadingUtils;
+import tech.quantit.northstar.data.IGatewayRepository;
 import tech.quantit.northstar.data.IMarketDataRepository;
 import tech.quantit.northstar.gateway.api.IContractManager;
 import tech.quantit.northstar.gateway.api.domain.contract.Contract;
@@ -26,6 +29,9 @@ public class GatewayDataController {
 	private IMarketDataRepository mdRepo;
 	
 	@Autowired
+	private IGatewayRepository gatewayRepo;
+	
+	@Autowired
 	private IContractManager contractMgr;
 	
 	private MarketDataLoadingUtils utils = new MarketDataLoadingUtils();
@@ -33,6 +39,10 @@ public class GatewayDataController {
 	@GetMapping("/bar/min")
 	public ResultBean<List<byte[]>> loadWeeklyBarData(String gatewayId, String unifiedSymbol, long refStartTimestamp, boolean firstLoad){
 		Assert.notNull(unifiedSymbol, "合约代码不能为空");
+		GatewayDescription gd = gatewayRepo.findById(gatewayId);
+		if(gd.getChannelType() == ChannelType.PLAYBACK) {
+			return new ResultBean<>(Collections.emptyList());
+		}
 		Contract contract = contractMgr.getContract(gatewayId, unifiedSymbol);
 		LocalDate start = utils.getFridayOfLastWeek(refStartTimestamp);
 		if(firstLoad && Period.between(start, LocalDate.now()).getDays() < 7) {
@@ -41,7 +51,7 @@ public class GatewayDataController {
 		LocalDate end = utils.getCurrentTradeDay(refStartTimestamp, firstLoad);
 		List<BarField> result = Collections.emptyList();
 		for(int i=0; i<3; i++) {
-			result = mdRepo.loadBars(contract.channelType(), contract.contractField().getUnifiedSymbol(), start.minusWeeks(i), end.minusWeeks(i));
+			result = mdRepo.loadBars(contract.contractField().getUnifiedSymbol(), start.minusWeeks(i), end.minusWeeks(i));
 			if(!result.isEmpty()) {
 				break;
 			}

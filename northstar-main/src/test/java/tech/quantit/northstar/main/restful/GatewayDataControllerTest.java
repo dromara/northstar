@@ -21,7 +21,10 @@ import com.alibaba.fastjson.JSON;
 import com.corundumstudio.socketio.SocketIOServer;
 
 import cn.hutool.crypto.digest.MD5;
+import tech.quantit.northstar.common.constant.ChannelType;
+import tech.quantit.northstar.common.model.GatewayDescription;
 import tech.quantit.northstar.common.model.NsUser;
+import tech.quantit.northstar.data.IGatewayRepository;
 import tech.quantit.northstar.gateway.api.IMarketCenter;
 import tech.quantit.northstar.gateway.api.domain.contract.Contract;
 import tech.quantit.northstar.main.NorthstarApplication;
@@ -42,11 +45,16 @@ class GatewayDataControllerTest {
 	@MockBean
 	private IMarketCenter contractMgr;
 	
+	@MockBean
+	private IGatewayRepository gatewayRepo;
+	
 	@BeforeEach
 	public void setUp() throws Exception {
 		Contract contract = mock(Contract.class);
 		when(contractMgr.getContract(anyString(), anyString())).thenReturn(contract);
 		when(contract.contractField()).thenReturn(ContractField.newBuilder().setUnifiedSymbol("rb2205@SHFE@FUTURES").build());
+		
+		when(gatewayRepo.findById(anyString())).thenReturn(GatewayDescription.builder().channelType(ChannelType.CTP).build());
 		
 		long time = System.currentTimeMillis();
 		String token = MD5.create().digestHex("123456" + time);

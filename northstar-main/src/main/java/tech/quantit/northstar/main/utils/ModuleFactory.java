@@ -101,6 +101,7 @@ public class ModuleFactory {
 	private IModuleContext makeModuleContext(ModuleDescription moduleDescription, ModuleRuntimeDescription moduleRuntimeDescription) throws Exception {
 		ComponentAndParamsPair strategyComponent = moduleDescription.getStrategySetting();
 		TradeStrategy strategy = resolveComponent(strategyComponent);
+		strategy.setComputedState(moduleRuntimeDescription.getDataState());
 		IModuleAccountStore accStore = makeAccountStore(moduleDescription, moduleRuntimeDescription);
 		ClosingStrategy closingStrategy = getClosingStrategy(moduleDescription.getClosingPolicy());
 		int numOfMinPerBar = moduleDescription.getNumOfMinPerBar();

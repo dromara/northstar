@@ -1,6 +1,8 @@
 const Appliaction = require('ee-core').Appliaction;
 const { app, globalShortcut } = require('electron')
+require('@electron/remote/main').initialize()
 app.commandLine.appendSwitch('ignore-certificate-errors')    //忽略证书的检测
+
 class Main extends Appliaction {
 
   constructor() {
@@ -36,12 +38,24 @@ class Main extends Appliaction {
       })
     }
 
-    globalShortcut.register('Shift+Ctrl+I', () => {
-      win.webContents.openDevTools()
+    win.on('focus', () => {
+      globalShortcut.register('Shift+F5', () => {
+        win.reload()
+      })
+
+      globalShortcut.register('Shift+Ctrl+I', () => {
+        win.webContents.openDevTools()
+      })
+
+      globalShortcut.register('Ctrl+F', () => {
+        win.webContents.send('on-find', '')
+      })
     })
 
-    globalShortcut.register('Shift+F5', () => {
-      win.reload()
+    win.on('blur', () => {
+      globalShortcut.unregister('Shift+F5')
+      globalShortcut.unregister('Ctrl+F')
+      globalShortcut.unregister('Shift+Ctrl+I')
     })
   }
 

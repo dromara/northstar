@@ -284,6 +284,13 @@ export default {
       if (this.form.channelType === 'SIM') {
         this.form.settings = { nothing: 0 }
       }
+      if (this.form.channelType === 'PLAYBACK'){
+        if(this.subscribedContracts.length > 10){
+          this.$message.warning('回放合约数量不能多于10个')
+          return 
+        }
+        this.form.settings.playContracts = this.subscribedContracts
+      }
       if (!this.form.settings || !Object.keys(this.form.settings).length) {
         throw new Error('网关配置不能为空')
       }
@@ -308,7 +315,12 @@ export default {
             const ctpListPromise = contractApi.getGatewayContracts('CTP', query)
             const pbListPromise = contractApi.getGatewayContracts('PLAYBACK', query)
             Promise.all([ctpListPromise, pbListPromise]).then(([ctpResult, pbResult]) => {
-              this.contractOptions = [...ctpResult, ...pbResult]
+              const result = [...ctpResult, ...pbResult]
+              if(result.length > 100){
+                this.$message.warning('返回结果多于100条，请提供更精确的筛选条件')
+                return 
+              }
+              this.contractOptions = result
             }).finally(() => {
               this.loading = false;
             })

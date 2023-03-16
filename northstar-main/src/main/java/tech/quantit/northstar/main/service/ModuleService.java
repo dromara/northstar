@@ -39,7 +39,6 @@ import tech.quantit.northstar.data.IMarketDataRepository;
 import tech.quantit.northstar.data.IModuleRepository;
 import tech.quantit.northstar.domain.module.ModulePlaybackContext;
 import tech.quantit.northstar.gateway.api.IContractManager;
-import tech.quantit.northstar.gateway.api.domain.contract.Contract;
 import tech.quantit.northstar.main.ExternalJarClassLoader;
 import tech.quantit.northstar.main.PostLoadAware;
 import tech.quantit.northstar.main.handler.internal.ModuleManager;
@@ -217,11 +216,13 @@ public class ModuleService implements PostLoadAware {
 			LocalDate start = utils.getFridayOfThisWeek(date.minusWeeks(1));
 			LocalDate end = utils.getFridayOfThisWeek(date);
 			for(ModuleAccountDescription mad : md.getModuleAccountSettingsDescription()) {
+				List<BarField> mergeList = new ArrayList<>();
 				for(ContractSimpleInfo csi : mad.getBindedContracts()) {
-					Contract contract = contractMgr.getContract(Identifier.of(csi.getValue()));
-					List<BarField> bars = mdRepo.loadBars(contract.channelType(), csi.getUnifiedSymbol(), start, end);
-					module.initData(bars);
+					List<BarField> bars = mdRepo.loadBars(csi.getUnifiedSymbol(), start, end);
+					mergeList.addAll(bars);
 				}
+				mergeList.sort((a,b) -> a.getActionTimestamp() < b.getActionTimestamp() ? -1 : 1);
+				module.initData(mergeList);
 			}
 			date = date.plusWeeks(1);
 		}
@@ -297,6 +298,7 @@ public class ModuleService implements PostLoadAware {
 		for(ModuleDescription md : findAllModules()) {
 			try {				
 				loadModule(md);
+				Thread.sleep(10000); // 每十秒只能加载一个模组，避免数据服务被限流导致数据缺失
 			} catch (Exception e) {
 				log.warn("模组 [{}] 加载失败", md.getModuleName(), e);
 			}

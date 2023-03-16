@@ -3,7 +3,6 @@ package tech.quantit.northstar.main;
 import java.time.LocalDateTime;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -17,7 +16,7 @@ import xyz.redtorch.gateway.ctp.common.GatewayConstants;
 
 @Slf4j
 @Component
-public class CtpScheduleTask {
+public class AppScheduleTask {
 	
 	@Autowired
 	private GatewayAndConnectionManager gatewayConnMgr;
@@ -27,9 +26,6 @@ public class CtpScheduleTask {
 	
 	@Autowired
 	private IMarketCenter mktCenter;
-	
-	@Value("${spring.profiles.active}")
-	private String profile;
 
 	@Scheduled(cron="0 0/1 0-1,9-14,21-23 ? * 1-5")
 	public void timelyCheckConnection() {

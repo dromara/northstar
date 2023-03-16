@@ -1,4 +1,4 @@
-# Northstar 盈富量化交易平台网页监控端
+# Northstar 盈富量化平台网页监控端
 
 ## 参考项目
 [KLineChart](https://github.com/liihuu/KLineChart)，一个很牛逼的K线控件库。

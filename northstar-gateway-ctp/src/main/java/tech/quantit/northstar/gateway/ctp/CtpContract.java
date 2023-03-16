@@ -167,7 +167,7 @@ public class CtpContract implements Instrument{
 		case "CN_FT_TT2" -> new CnFtComTradeTime2();
 		case "CN_FT_TT3" -> new CnFtComTradeTime3();
 		case "CN_FT_TT4" -> new CnFtComTradeTime4();
-		case "CN_FT_TT5" -> new CnFtIndexTradeTime();
+		case "CN_FT_TT5","CN_STK_TT" -> new CnFtIndexTradeTime();
 		case "CN_FT_TT6" -> new CnFtBondTradeTime();
 		default -> throw new IllegalArgumentException("Unexpected value: " + contractDef.getTradeTimeType());
 		};
