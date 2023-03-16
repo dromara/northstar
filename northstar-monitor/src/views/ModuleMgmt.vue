@@ -194,7 +194,7 @@ export default {
     },
     findAll() {
       moduleApi.getAllModules().then((results) => {
-        this.$store.commit('updateList', results)
+        this.$store.commit('updateList', results.sort((a,b) => a.moduleName.localeCompare(b.moduleName)))
         this.moduleList.map((item) => {
           const retriableRequest = () => {
             moduleApi.getModuleRuntime(item.moduleName).then(
