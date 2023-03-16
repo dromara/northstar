@@ -71,6 +71,8 @@ FUTURES,INE,"lu[0-9]{3,4}@.+",燃油,,0.1,CN_FT_TT1
 FUTURES,INE,"nr[0-9]{3,4}@.+",20号胶,,0.2,CN_FT_TT1
 FUTURES,SHFE,"ss[0-9]{3,4}@.+",不锈钢,,1,CN_FT_TT2
 FUTURES,GFEX,"si[0-9]{3,4}@.+",工业硅,,1,CN_FT_TT4
+OPTION,DCE,"y[0-9]{3,4}[^@].+",豆油,0.5,,CN_FT_TT1
+OPTION,SHFE,"ag[0-9]{3,4}[^@].+",白银,0.6,,CN_FT_TT3
 OPTION,DCE,"a[0-9]{3,4}[^@].+",豆一,0.5,,CN_FT_TT1
 OPTION,DCE,"b[0-9]{3,4}[^@].+",豆二,0.2,,CN_FT_TT1
 OPTION,GFEX,"si[0-9]{3,4}[^@].+",工业硅,2,,CN_FT_TT4
