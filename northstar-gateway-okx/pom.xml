@@ -11,7 +11,7 @@
         <dependency>
             <groupId>io.github.ztnozdormu</groupId>
             <artifactId>w3-okx</artifactId>
-            <version>0.0.1</version>
+            <version>0.0.2</version>
         </dependency>
         <dependency>
             <groupId>tech.quantit</groupId>
