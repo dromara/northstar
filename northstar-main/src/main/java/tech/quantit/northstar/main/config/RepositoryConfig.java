@@ -8,6 +8,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
@@ -61,6 +62,7 @@ public class RepositoryConfig {
     private String w3BaseUrl;
 
     @Bean
+    @Primary
     DataServiceManager dataServiceManager(RedisTemplate<String, byte[]> redisTemplate, RestTemplate restTemplate, IContractManager contractMgr) {
         String nsdsSecret = Optional.ofNullable(System.getenv(Constants.NS_DS_SECRET)).orElse("");
         return new DataServiceManager(baseUrl, nsdsSecret, restTemplate, new CtpDateTimeUtil(), contractMgr);
@@ -76,7 +78,7 @@ public class RepositoryConfig {
         IMarketDataRepository defaultMarketRepo = new MarketDataRepoRedisImpl(redisTemplate, dsMgr);
         IMarketDataRepository w3MarketRepo = new W3MarketDataRepoDataServiceImpl(w3dsMgr);
         Map<ChannelType, IMarketDataRepository> channelRepoMap = new EnumMap<>(ChannelType.class);
-        channelRepoMap.put(ChannelType.PLAYBACK, defaultMarketRepo);
+        channelRepoMap.put(ChannelType.PLAYBACK, w3MarketRepo);
         channelRepoMap.put(ChannelType.CTP, defaultMarketRepo);
         channelRepoMap.put(ChannelType.OKX, w3MarketRepo);
         return new MarketDataRepoFactory(channelRepoMap, gatewayRepo);
