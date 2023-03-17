@@ -58,7 +58,7 @@ public class RepositoryConfig {
 	
 	@Value("${northstar.data-service.baseUrl}")
 	private String baseUrl;
-    @Value("${northstar.data-service.baseUrl}")
+    @Value("${northstar.data-service.w3BaseUrl}")
     private String w3BaseUrl;
 
     @Bean
