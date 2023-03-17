@@ -30,8 +30,12 @@ public class MarketDataRepoDataServiceImpl implements IMarketDataRepository{
 	@Override
 	public List<BarField> loadBars(String unifiedSymbol, LocalDate startDate, LocalDate endDate) {
 		log.debug("从数据服务加载历史行情分钟数据：{}，{} -> {}", unifiedSymbol, startDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), endDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
-		try {			
-			return dsMgr.getMinutelyData(unifiedSymbol, startDate, endDate);
+		try {
+			List<BarField> list = dsMgr.getMinutelyData(unifiedSymbol, startDate, endDate);
+			list = list.stream()
+					.sorted((a, b) -> a.getActionTimestamp() < b.getActionTimestamp() ? -1 : 1)
+					.toList();
+			return list;
 		} catch (Exception e) {
 			log.warn("第三方数据服务暂时不可用：{}", e.getMessage(), e);
 			return Collections.emptyList();
@@ -42,7 +46,11 @@ public class MarketDataRepoDataServiceImpl implements IMarketDataRepository{
 	public List<BarField> loadDailyBars(String unifiedSymbol, LocalDate startDate, LocalDate endDate) {
 		log.debug("从数据服务加载历史行情日数据：{}，{} -> {}", unifiedSymbol, startDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), endDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
 		try {
-			return dsMgr.getDailyData(unifiedSymbol, startDate, endDate);
+			List<BarField> list = dsMgr.getDailyData(unifiedSymbol, startDate, endDate);
+			list = list.stream()
+					.sorted((a, b) -> a.getActionTimestamp() < b.getActionTimestamp() ? -1 : 1)
+					.toList();
+			return list;
 		} catch (Exception e) {
 			log.warn("第三方数据服务暂时不可用：{}", e.getMessage(), e);
 			return Collections.emptyList();
