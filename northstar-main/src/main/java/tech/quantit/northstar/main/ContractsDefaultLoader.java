@@ -1,6 +1,7 @@
 package tech.quantit.northstar.main;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,12 +13,15 @@ import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.constant.ChannelType;
 import tech.quantit.northstar.common.constant.DateTimeConstant;
 import tech.quantit.northstar.data.ds.DataServiceManager;
+import tech.quantit.northstar.data.ds.W3DataServiceManager;
 import tech.quantit.northstar.gateway.api.IMarketCenter;
 import tech.quantit.northstar.gateway.api.domain.contract.Instrument;
 import tech.quantit.northstar.gateway.ctp.CtpContract;
+import tech.quantit.northstar.gateway.okx.OkxContract;
 import tech.quantit.northstar.gateway.sim.trade.SimContractGenerator;
 import tech.quantit.northstar.main.service.GatewayService;
 import tech.quantit.northstar.main.service.ModuleService;
+import xyz.redtorch.pb.CoreEnum;
 
 @Slf4j
 @Component
@@ -29,7 +33,8 @@ public class ContractsDefaultLoader implements CommandLineRunner{
 	
 	@Autowired
 	private DataServiceManager dsMgr;
-	
+	@Autowired
+	private W3DataServiceManager w3dsMgr;
 	@Autowired
 	private GatewayService gatewayService;
 	
@@ -51,7 +56,15 @@ public class ContractsDefaultLoader implements CommandLineRunner{
 				log.info("预加载 [{}] 交易所合约信息", exchange);
 			});
 		mktCenter.loadContractGroup(ChannelType.CTP);
-		
+		// 加载币圈OKX市场合约
+		List.of(CoreEnum.ExchangeEnum.OKX)
+				.parallelStream()
+				.forEach(exchange -> {
+					w3dsMgr.getAllContracts(exchange)
+							.forEach(contract -> mktCenter.addInstrument(new OkxContract(contract)));
+					log.info("预加载 [{}] w3交易所合约信息", exchange);
+				});
+
 		// 加载模拟合约
 		SimContractGenerator contractGen = new SimContractGenerator("SIM");
 		Instrument simContract = contractGen.getContract();
