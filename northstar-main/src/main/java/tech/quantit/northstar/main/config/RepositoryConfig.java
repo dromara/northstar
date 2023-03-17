@@ -78,7 +78,7 @@ public class RepositoryConfig {
         IMarketDataRepository defaultMarketRepo = new MarketDataRepoRedisImpl(redisTemplate, dsMgr);
         IMarketDataRepository w3MarketRepo = new W3MarketDataRepoDataServiceImpl(w3dsMgr);
         Map<ChannelType, IMarketDataRepository> channelRepoMap = new EnumMap<>(ChannelType.class);
-        channelRepoMap.put(ChannelType.PLAYBACK, w3MarketRepo);
+        channelRepoMap.put(ChannelType.PLAYBACK, defaultMarketRepo);
         channelRepoMap.put(ChannelType.CTP, defaultMarketRepo);
         channelRepoMap.put(ChannelType.OKX, w3MarketRepo);
         return new MarketDataRepoFactory(channelRepoMap, gatewayRepo);
