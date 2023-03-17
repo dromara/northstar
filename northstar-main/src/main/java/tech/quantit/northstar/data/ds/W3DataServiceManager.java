@@ -37,7 +37,7 @@ import java.util.*;
  */
 
 @Slf4j
-public class OKXDataServiceManager implements IDataServiceManager {
+public class W3DataServiceManager implements IDataServiceManager {
 
     private String userToken;
 
@@ -56,7 +56,7 @@ public class OKXDataServiceManager implements IDataServiceManager {
 
     private EnumMap<ExchangeEnum, ChannelType> exchangeChannelType = new EnumMap<>(ExchangeEnum.class);
 
-    public OKXDataServiceManager(String w3BaseUrl, String secret, RestTemplate restTemplate, MarketDateTimeUtil dtUtil, IContractManager contractMgr) {
+    public W3DataServiceManager(String w3BaseUrl, String secret, RestTemplate restTemplate, MarketDateTimeUtil dtUtil, IContractManager contractMgr) {
         this.w3BaseUrl = w3BaseUrl;
         this.userToken = secret;
         this.dtUtil = dtUtil;
