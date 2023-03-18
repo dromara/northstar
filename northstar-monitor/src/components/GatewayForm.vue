@@ -1,7 +1,7 @@
 <template>
   <el-dialog
     id="gatewayForm"
-    :title="isUpdateMode ? '修改' : '新增'"
+    :title="readOnly ? '查看' : isUpdateMode ? '修改' : '新增'"
     :visible="visible"
     width="768px"
     :close-on-click-modal="false"
@@ -30,14 +30,14 @@
               v-model="form.gatewayId"
               autocomplete="off"
               :disabled="
-                isUpdateMode || disableGatewayIdEdit
+                readOnly || isUpdateMode || disableGatewayIdEdit
               "
             ></el-input>
           </el-form-item>
         </el-col>
         <el-col :span="16">
           <el-form-item :label="`${typeLabel}描述`" prop="description">
-            <el-input v-model="form.description" autocomplete="off" class="mxw-340"></el-input>
+            <el-input v-model="form.description" autocomplete="off" class="mxw-340" :disabled="readOnly"></el-input>
           </el-form-item>
         </el-col>
       </el-row>
@@ -48,7 +48,7 @@
               v-model="channelType"
               placeholder="请选择"
               @change="onChooseGatewayType"
-              :disabled="isUpdateMode"
+              :disabled="isUpdateMode || readOnly"
             >
               <el-option
                 v-for="(item, i) in channelTypeOptions"
@@ -61,7 +61,7 @@
         </el-col>
         <el-col :span="5">
           <el-form-item label="自动连接">
-            <el-switch v-model="form.autoConnect"></el-switch>
+            <el-switch v-model="form.autoConnect" :disabled="readOnly"></el-switch>
           </el-form-item>
         </el-col>
       </el-row>
@@ -89,6 +89,7 @@
               v-model="form.bindedMktGatewayId"
               placeholder="请选择"
               @change="onChooseGatewayType"
+              :disabled="readOnly"
             >
               <el-option
                 :id="`bindedGatewayOption_${item.gatewayId}`"
@@ -112,6 +113,7 @@
               reserve-keyword
               placeholder="合约可搜索，空格搜索全部"
               :loading="loading"
+              :disabled="readOnly"
             >
               <el-option
                 v-for="(item) in contractOptions"
@@ -142,11 +144,12 @@
       <el-button @click="close">取 消</el-button>
       <el-button
         type="primary"
+        v-if="!readOnly"
         @click="gatewaySettingsFormVisible = true"
         :disabled="!form.channelType || form.channelType === 'SIM'"
         >{{ typeLabel }}配置</el-button
       >
-      <el-button id="saveGatewaySettings" type="primary" @click="saveGateway">保 存</el-button>
+      <el-button v-if="!readOnly" id="saveGatewaySettings" type="primary" @click="saveGateway">保 存</el-button>
     </div>
   </el-dialog>
 </template>
@@ -178,6 +181,10 @@ export default {
       default: () => {}
     },
     isUpdateMode: {
+      type: Boolean,
+      default: false
+    },
+    readOnly: {
       type: Boolean,
       default: false
     },
@@ -227,6 +234,7 @@ export default {
   },
   watch: {
     visible: function (val) {
+      console.log('readOnly', this.readOnly)
       if (val) {
         if(this.isUpdateMode){
           Object.keys(this.gatewayDescription).forEach(key => {

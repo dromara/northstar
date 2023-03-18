@@ -5,6 +5,7 @@
       :gatewayDescription="curGatewayDescription"
       :gatewayUsage="gatewayUsage"
       :isUpdateMode="curTableIndex > -1"
+      :readOnly="isReadOnly"
       @onSave="handleSave"
     />
     <NsSimBalanceForm
@@ -145,17 +146,23 @@
             <el-button size="mini" slot="reference" type="warning"> 复位 </el-button>
           </el-popconfirm>
           <el-button
+            v-if="scope.row.connectionState === 'DISCONNECTED'"
             size="mini"
             @click="handleEdit(scope.$index, scope.row)"
-            :disabled="scope.row.connectionState !== 'DISCONNECTED'"
             >修改</el-button
           >
+          <el-button
+            v-if="scope.row.connectionState !== 'DISCONNECTED'"
+            size="mini"
+            @click="handleView(scope.$index, scope.row)"
+          >查看</el-button>
           <el-popconfirm
             class="ml-10"
             title="确定移除吗？"
             @confirm="handleDelete(scope.$index, scope.row)"
           >
             <el-button
+              v-if="scope.row.connectionState === 'DISCONNECTED'"
               size="mini"
               type="danger"
               slot="reference"
@@ -191,6 +198,7 @@ export default {
     return {
       dialogFormVisible: false,
       simBalanceFormVisible: false,
+      isReadOnly: false,
       curTableIndex: -1,
       curGatewayDescription: {},
       tableData: [],
@@ -235,6 +243,7 @@ export default {
     },
     handleCreate() {
       this.dialogFormVisible = true
+      this.isReadOnly = false
       this.curTableIndex = -1
       this.curGatewayDescription = {}
     },
@@ -242,6 +251,13 @@ export default {
       this.curTableIndex = index
       this.curGatewayDescription = row
       this.dialogFormVisible = true
+      this.isReadOnly = false
+    },
+    handleView(index, row) {
+      this.curTableIndex = index
+      this.curGatewayDescription = row
+      this.dialogFormVisible = true
+      this.isReadOnly = true
     },
     async handleDelete(index, row) {
       await gatewayMgmtApi.remove(row.gatewayId)
