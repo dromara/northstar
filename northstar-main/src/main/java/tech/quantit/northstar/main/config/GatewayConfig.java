@@ -29,15 +29,15 @@ import xyz.redtorch.gateway.ctp.x64v6v3v15v.CtpGatewayFactory;
 import xyz.redtorch.gateway.ctp.x64v6v5v1cpv.CtpSimGatewayFactory;
 
 @Configuration
-public class GatewayConfig {
+class GatewayConfig {
 
 	@Bean
-	public SimMarket simMarket() {
+	SimMarket simMarket() {
 		return new SimMarket();
 	}
 	
 	@Bean 
-	public GatewayMetaProvider gatewayMetaProvider(FastEventEngine fastEventEngine, IMarketCenter mktCenter, IDataServiceManager dataMgr,
+	GatewayMetaProvider gatewayMetaProvider(FastEventEngine fastEventEngine, IMarketCenter mktCenter, IDataServiceManager dataMgr,
 			IHolidayManager holidayMgr, IMarketDataRepository mdRepo, IPlaybackRuntimeRepository rtRepo,
 			ISimAccountRepository accRepo, SimMarket simMarket) {
 		Map<ChannelType, GatewaySettings> settingsMap = new EnumMap<>(ChannelType.class);

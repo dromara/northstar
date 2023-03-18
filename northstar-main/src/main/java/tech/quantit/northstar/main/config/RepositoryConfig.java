@@ -30,51 +30,51 @@ import xyz.redtorch.gateway.ctp.common.CtpDateTimeUtil;
 
 @Configuration
 public class RepositoryConfig {
-	
-	@Bean
-	public RedisTemplate<String, byte[]> redisTemplate(RedisConnectionFactory factory) {
-		RedisTemplate<String, byte[]> redisTemplate = new RedisTemplate<>();
-		redisTemplate.setConnectionFactory(factory);
-		redisTemplate.setKeySerializer(new StringRedisSerializer(StandardCharsets.UTF_8));
-		return redisTemplate;
-	}
 
-	@Bean
-	public IGatewayRepository gatewayRepository(RedisTemplate<String, byte[]> redisTemplate) {
-		return new GatewayRepoRedisImpl(redisTemplate);
-	}
-	
-	@Bean
-	public IModuleRepository moduleRepository(RedisTemplate<String, byte[]> redisTemplate) {
-		return new ModuleRepoRedisImpl(redisTemplate);
-	}
+    @Bean
+    RedisTemplate<String, byte[]> redisTemplate(RedisConnectionFactory factory) {
+        RedisTemplate<String, byte[]> redisTemplate = new RedisTemplate<>();
+        redisTemplate.setConnectionFactory(factory);
+        redisTemplate.setKeySerializer(new StringRedisSerializer(StandardCharsets.UTF_8));
+        return redisTemplate;
+    }
+
+    @Bean
+    IGatewayRepository gatewayRepository(RedisTemplate<String, byte[]> redisTemplate) {
+        return new GatewayRepoRedisImpl(redisTemplate);
+    }
+
+    @Bean
+    IModuleRepository moduleRepository(RedisTemplate<String, byte[]> redisTemplate) {
+        return new ModuleRepoRedisImpl(redisTemplate);
+    }
 	
 	@Value("${northstar.data-service.baseUrl}")
 	private String baseUrl;
-	
-	@Bean
-	public DataServiceManager dataServiceManager(RedisTemplate<String, byte[]> redisTemplate, RestTemplate restTemplate, IContractManager contractMgr) {
-		String nsdsSecret = Optional.ofNullable(System.getenv(Constants.NS_DS_SECRET)).orElse("");
-		return new DataServiceManager(baseUrl, nsdsSecret, restTemplate, new CtpDateTimeUtil(), contractMgr);
-	}
-	
-	@Bean
-	public IMarketDataRepository marketDataRepository(RedisTemplate<String, byte[]> redisTemplate, DataServiceManager dsMgr) {
-		return new MarketDataRepoRedisImpl(redisTemplate, dsMgr);
-	}
-	
-	@Bean
-	public ISimAccountRepository simAccountRepository(RedisTemplate<String, byte[]> redisTemplate) {
-		return new SimAccountRepoRedisImpl(redisTemplate);
-	}
-	
-	@Bean 
-	public IPlaybackRuntimeRepository playbackRuntimeRepository(RedisTemplate<String, byte[]> redisTemplate) {
-		return new PlaybackRuntimeRepoRedisImpl(redisTemplate);
-	}
 
-	@Bean
-	public IMailConfigRepository mailConfigRepository(RedisTemplate<String, byte[]> redisTemplate) {
-		return new MailConfigRepoRedisImpl(redisTemplate);
-	}
+    @Bean
+    DataServiceManager dataServiceManager(RedisTemplate<String, byte[]> redisTemplate, RestTemplate restTemplate, IContractManager contractMgr) {
+        String nsdsSecret = Optional.ofNullable(System.getenv(Constants.NS_DS_SECRET)).orElse("");
+        return new DataServiceManager(baseUrl, nsdsSecret, restTemplate, new CtpDateTimeUtil(), contractMgr);
+    }
+
+    @Bean
+    IMarketDataRepository marketDataRepository(RedisTemplate<String, byte[]> redisTemplate, DataServiceManager dsMgr) {
+        return new MarketDataRepoRedisImpl(redisTemplate, dsMgr);
+    }
+
+    @Bean
+    ISimAccountRepository simAccountRepository(RedisTemplate<String, byte[]> redisTemplate) {
+        return new SimAccountRepoRedisImpl(redisTemplate);
+    }
+
+    @Bean
+    IPlaybackRuntimeRepository playbackRuntimeRepository(RedisTemplate<String, byte[]> redisTemplate) {
+        return new PlaybackRuntimeRepoRedisImpl(redisTemplate);
+    }
+
+    @Bean
+    IMailConfigRepository mailConfigRepository(RedisTemplate<String, byte[]> redisTemplate) {
+        return new MailConfigRepoRedisImpl(redisTemplate);
+    }
 }

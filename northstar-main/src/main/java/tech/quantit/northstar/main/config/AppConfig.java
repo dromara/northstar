@@ -67,7 +67,7 @@ import tech.quantit.northstar.main.utils.ModuleFactory;
  */
 @Slf4j
 @Configuration
-public class AppConfig implements WebMvcConfigurer, DisposableBean {
+class AppConfig implements WebMvcConfigurer, DisposableBean {
 
 	@Autowired
 	private SocketIOServer socketServer;
@@ -95,7 +95,7 @@ public class AppConfig implements WebMvcConfigurer, DisposableBean {
 	}
 
 	@Bean
-	public CorsFilter corsFilter() {
+	CorsFilter corsFilter() {
 
 		CorsConfiguration config = new CorsConfiguration();
 		// 设置允许跨域请求的域名
@@ -119,23 +119,23 @@ public class AppConfig implements WebMvcConfigurer, DisposableBean {
 	}
 
 	@Bean
-	public GatewayAndConnectionManager gatewayAndConnectionManager() {
+	GatewayAndConnectionManager gatewayAndConnectionManager() {
 		return new GatewayAndConnectionManager();
 	}
 
 	@Bean
-	public ConcurrentMap<String, TradeDayAccount> accountMap() {
+	ConcurrentMap<String, TradeDayAccount> accountMap() {
 		return new ConcurrentHashMap<>();
 	}
 
 	@Bean
-	public IMarketCenter marketCenter(FastEventEngine fastEventEngine) throws IOException {
+	IMarketCenter marketCenter(FastEventEngine fastEventEngine) throws IOException {
 		ContractDefinitionReader reader = new ContractDefinitionReader();
 		return new MarketCenter(reader.load(contractDefRes.getInputStream()), fastEventEngine);
 	}
 
 	@Bean
-	public ExternalJarClassLoader extJarListener(SpringContextUtil springContextUtil) throws MalformedURLException {
+	ExternalJarClassLoader extJarListener(SpringContextUtil springContextUtil) throws MalformedURLException {
 		ApplicationHome appHome = new ApplicationHome(getClass());
 		File appPath = appHome.getDir();
 		ExternalJarClassLoader clzLoader = null;
@@ -152,7 +152,7 @@ public class AppConfig implements WebMvcConfigurer, DisposableBean {
 	}
 
 	@Bean
-	public ModuleFactory moduleFactory(@Autowired(required = false) ExternalJarClassLoader extJarLoader, IGatewayRepository gatewayRepo,
+	ModuleFactory moduleFactory(@Autowired(required = false) ExternalJarClassLoader extJarLoader, IGatewayRepository gatewayRepo,
 			IModuleRepository moduleRepo, IMarketDataRepository mdRepo, GatewayAndConnectionManager gatewayConnMgr, IContractManager contractMgr,
 			MailDeliveryManager mailMgr) {
 		return new ModuleFactory(extJarLoader, moduleRepo, gatewayRepo, gatewayConnMgr, contractMgr, mailMgr);
@@ -194,7 +194,7 @@ public class AppConfig implements WebMvcConfigurer, DisposableBean {
 	}
 
 	@Bean
-	public RestTemplate restTemplate() {
+	RestTemplate restTemplate() {
 		return new RestTemplateBuilder()
 				.requestFactory(() -> new OkHttp3ClientHttpRequestFactory(getUnsafeOkHttpClient()))
 				.setReadTimeout(Duration.ofSeconds(30))
@@ -204,13 +204,13 @@ public class AppConfig implements WebMvcConfigurer, DisposableBean {
 
 	@ConditionalOnMissingBean(IMailMessageContentHandler.class)
 	@Bean
-	public IMailMessageContentHandler messageDeliveryHandler() {
+	IMailMessageContentHandler messageDeliveryHandler() {
 		return new IMailMessageContentHandler() {
 		};
 	}
 
 	@Bean
-	public MailDeliveryManager mailDeliveryManager(IMailMessageContentHandler handler) {
+	MailDeliveryManager mailDeliveryManager(IMailMessageContentHandler handler) {
 		return new MailDeliveryManager(new MailSenderFactory(), handler);
 	}
 

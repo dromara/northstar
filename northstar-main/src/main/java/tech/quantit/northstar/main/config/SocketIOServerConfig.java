@@ -42,7 +42,7 @@ public class SocketIOServerConfig implements InitializingBean {
 	
 	@Bean
 	@ConditionalOnExpression("!'${spring.profiles.active}'.equals('test')")
-    public SocketIOServer socketIOServer() {
+    SocketIOServer socketIOServer() {
 		try {
 			return makeServer();
 		} catch (IOException e) {
@@ -51,7 +51,7 @@ public class SocketIOServerConfig implements InitializingBean {
     }
 	
 	@Bean
-	public UserInfo userInfo() {
+	UserInfo userInfo() {
 		return userInfo;
 	}
 	
@@ -107,7 +107,7 @@ public class SocketIOServerConfig implements InitializingBean {
 	}
 	
 	@Bean
-	public SpringAnnotationScanner springAnnotationScanner(SocketIOServer socketServer) {
+	SpringAnnotationScanner springAnnotationScanner(SocketIOServer socketServer) {
 		return new SpringAnnotationScanner(socketServer);
 	}
 

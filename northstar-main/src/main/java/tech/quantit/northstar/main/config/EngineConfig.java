@@ -21,34 +21,34 @@ import tech.quantit.northstar.main.handler.broadcast.SocketIOMessageEngine;
  */
 @Slf4j
 @Configuration
-public class EngineConfig {
+class EngineConfig {
 
 	@Bean
-	public SocketIOMessageEngine messageEngine(SocketIOServer server) {
+	SocketIOMessageEngine messageEngine(SocketIOServer server) {
 		log.debug("创建SocketIOMessageEngine");
 		return new SocketIOMessageEngine(server);
 	}
 	
 	@Bean
-	public FastEventEngine eventEngine() {
+	FastEventEngine eventEngine() {
 		log.debug("创建EventEngine");
 		return new DisruptorFastEventEngine(WaitStrategyEnum.BlockingWaitStrategy);
 	}
 	
 	@Bean
-	public InternalEventBus internalEventBus() {
+	InternalEventBus internalEventBus() {
 		log.debug("创建InternalEventBus");
 		return new InternalEventBus();
 	}
 	
 	@Bean
-	public StrategyEventBus strategyEventBus() {
+	StrategyEventBus strategyEventBus() {
 		log.debug("创建StrategyEventBus");
 		return new StrategyEventBus();
 	}
 
 	@Bean 
-	public PlaybackEventBus playbackEventBus() {
+	PlaybackEventBus playbackEventBus() {
 		log.debug("创建PlaybackEventBus");
 		return new PlaybackEventBus();
 	}
