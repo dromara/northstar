@@ -16,6 +16,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import cn.hutool.core.date.LocalDateTimeUtil;
 import lombok.extern.slf4j.Slf4j;
+import tech.quantit.northstar.common.constant.ChannelType;
 import tech.quantit.northstar.common.constant.Constants;
 import tech.quantit.northstar.common.constant.DateTimeConstant;
 import tech.quantit.northstar.common.constant.ModuleState;
@@ -26,6 +27,7 @@ import tech.quantit.northstar.common.model.ComponentField;
 import tech.quantit.northstar.common.model.ComponentMetaInfo;
 import tech.quantit.northstar.common.model.ContractSimpleInfo;
 import tech.quantit.northstar.common.model.DynamicParams;
+import tech.quantit.northstar.common.model.GatewayDescription;
 import tech.quantit.northstar.common.model.Identifier;
 import tech.quantit.northstar.common.model.MockTradeDescription;
 import tech.quantit.northstar.common.model.ModuleAccountDescription;
@@ -35,6 +37,7 @@ import tech.quantit.northstar.common.model.ModuleDescription;
 import tech.quantit.northstar.common.model.ModulePositionDescription;
 import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
 import tech.quantit.northstar.common.utils.MarketDataLoadingUtils;
+import tech.quantit.northstar.data.IGatewayRepository;
 import tech.quantit.northstar.data.IMarketDataRepository;
 import tech.quantit.northstar.data.IModuleRepository;
 import tech.quantit.northstar.domain.module.ModulePlaybackContext;
@@ -74,11 +77,14 @@ public class ModuleService implements PostLoadAware {
 	
 	private ExternalJarClassLoader extJarLoader;
 	
-	public ModuleService(ApplicationContext ctx, ExternalJarClassLoader extJarLoader, IModuleRepository moduleRepo,
-			IMarketDataRepository mdRepo, ModuleFactory moduleFactory, ModuleManager moduleMgr, IContractManager contractMgr) {
+	private IGatewayRepository gatewayRepo;
+	
+	public ModuleService(ApplicationContext ctx, ExternalJarClassLoader extJarLoader, IModuleRepository moduleRepo, IMarketDataRepository mdRepo, 
+			IGatewayRepository gatewayRepo, ModuleFactory moduleFactory, ModuleManager moduleMgr, IContractManager contractMgr) {
 		this.ctx = ctx;
 		this.moduleMgr = moduleMgr;
 		this.contractMgr = contractMgr;
+		this.gatewayRepo = gatewayRepo;
 		this.moduleRepo = moduleRepo;
 		this.mdRepo = mdRepo;
 		this.moduleFactory = moduleFactory;
@@ -130,6 +136,7 @@ public class ModuleService implements PostLoadAware {
 	 * @throws Exception 
 	 */
 	public ModuleDescription createModule(ModuleDescription md) throws Exception {
+		checkAccountWithCorrectUsage(md);
 		Map<String, ModuleAccountRuntimeDescription> accRtsMap = new HashMap<>();
 		if(md.getUsage() == ModuleUsage.PLAYBACK) {
 			accRtsMap.put(ModulePlaybackContext.PLAYBACK_GATEWAY, ModuleAccountRuntimeDescription.builder()
@@ -161,6 +168,37 @@ public class ModuleService implements PostLoadAware {
 		return md;
 	}
 	
+	private void checkAccountWithCorrectUsage(ModuleDescription md) {
+		for(ModuleAccountDescription mad : md.getModuleAccountSettingsDescription()) {
+			GatewayDescription accgd = gatewayRepo.findById(mad.getAccountGatewayId());
+			GatewayDescription mktgd = gatewayRepo.findById(accgd.getBindedMktGatewayId());
+			switch(md.getUsage()) {
+			case PLAYBACK -> {
+				if(mktgd.getChannelType() != ChannelType.PLAYBACK) {
+					throw new IllegalArgumentException(String.format("账户 [%s] 不能用于回测", mktgd.getGatewayId()));
+				}
+			}
+			case PROD -> {
+				if(mktgd.getChannelType() == ChannelType.SIM) {
+					throw new IllegalArgumentException("模拟行情不能用于实盘");
+				}
+				if(accgd.getChannelType() == ChannelType.SIM) {
+					throw new IllegalArgumentException("模拟账户不能用于实盘");
+				}
+				if(mktgd.getChannelType() == ChannelType.PLAYBACK) {
+					throw new IllegalArgumentException("历史行情不能用于实盘");
+				}
+			}
+			case UAT -> {
+				if(accgd.getChannelType() != ChannelType.SIM) {
+					throw new IllegalArgumentException("模拟盘只能使用模拟账户");
+				}
+			}
+			default -> throw new IllegalStateException("未知用途:" + md.getUsage());
+			}
+		}
+	}
+
 	/**
 	 * 修改模组
 	 * @param md
@@ -168,6 +206,7 @@ public class ModuleService implements PostLoadAware {
 	 * @throws Exception 
 	 */
 	public ModuleDescription modifyModule(ModuleDescription md, boolean reset) throws Exception {
+		checkAccountWithCorrectUsage(md);
 		if(reset) {
 			removeModule(md.getModuleName());
 			return createModule(md);
