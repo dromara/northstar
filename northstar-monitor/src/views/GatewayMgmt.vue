@@ -157,12 +157,12 @@
             @click="handleView(scope.$index, scope.row)"
           >查看</el-button>
           <el-popconfirm
+            v-if="scope.row.connectionState === 'DISCONNECTED'"
             class="ml-10"
             title="确定移除吗？"
             @confirm="handleDelete(scope.$index, scope.row)"
           >
             <el-button
-              v-if="scope.row.connectionState === 'DISCONNECTED'"
               size="mini"
               type="danger"
               slot="reference"
