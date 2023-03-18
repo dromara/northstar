@@ -200,6 +200,7 @@ public class ModuleService implements PostLoadAware {
 	
 	private void loadModule(ModuleDescription md) throws Exception {
 		ModuleRuntimeDescription mrd = moduleRepo.findRuntimeByName(md.getModuleName());
+		autoUpdate(md, mrd);
 		int weeksOfDataForPreparation = md.getWeeksOfDataForPreparation();
 		LocalDate date = LocalDate.now().minusWeeks(weeksOfDataForPreparation);
 		
@@ -230,6 +231,26 @@ public class ModuleService implements PostLoadAware {
 		moduleMgr.addModule(module);
 	}
 	
+	private void autoUpdate(ModuleDescription md, ModuleRuntimeDescription mrd) {
+		Map<String, ModuleAccountRuntimeDescription> oldMardMap = mrd.getAccountRuntimeDescriptionMap();
+		Map<String, ModuleAccountRuntimeDescription> newMardMap = new HashMap<>();
+		for(ModuleAccountDescription mad : md.getModuleAccountSettingsDescription()) {
+			if(oldMardMap.containsKey(mad.getAccountGatewayId())) {
+				ModuleAccountRuntimeDescription oldMard = oldMardMap.get(mad.getAccountGatewayId());
+				oldMard.setInitBalance(mad.getModuleAccountInitBalance());
+				newMardMap.put(mad.getAccountGatewayId(), oldMard);
+			} else {
+				newMardMap.put(mad.getAccountGatewayId(), ModuleAccountRuntimeDescription.builder()
+						.accountId(mad.getAccountGatewayId())
+						.initBalance(mad.getModuleAccountInitBalance())
+						.preBalance(mad.getModuleAccountInitBalance())
+						.positionDescription(new ModulePositionDescription())
+						.build());
+			}
+		}
+		mrd.setAccountRuntimeDescriptionMap(newMardMap);
+	}
+
 	// 把日期转换成年周，例如2022年第二周为202202
 	private int toYearWeekVal(LocalDate date) {
 		return date.getYear() * 100 + LocalDateTimeUtil.weekOfYear(date);
