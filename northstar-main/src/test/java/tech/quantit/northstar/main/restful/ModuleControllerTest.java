@@ -125,7 +125,7 @@ class ModuleControllerTest {
 		md2 = ModuleDescription.builder()
 				.moduleName("testModule")
 				.type(ModuleType.SPECULATION)
-				.usage(ModuleUsage.UAT)
+				.usage(ModuleUsage.PROD)
 				.strategySetting(cpp)
 				.closingPolicy(ClosingPolicy.FIFO)
 				.moduleAccountSettingsDescription(List.of(ModuleAccountDescription.builder()

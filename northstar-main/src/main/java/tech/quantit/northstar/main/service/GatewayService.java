@@ -83,7 +83,7 @@ public class GatewayService implements PostLoadAware {
 			connect(gatewayDescription.getGatewayId());
 		}
 		
-		if(gateway instanceof MarketGateway mktGateway) {
+		if(gatewayDescription.getGatewayUsage() == GatewayUsage.MARKET_DATA && gateway instanceof MarketGateway mktGateway) {
 			mktCenter.addGateway(mktGateway);
 		}
 		
