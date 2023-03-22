@@ -274,7 +274,15 @@ public class ModuleService implements PostLoadAware {
 		Map<String, ModuleAccountRuntimeDescription> oldMardMap = mrd.getAccountRuntimeDescriptionMap();
 		Map<String, ModuleAccountRuntimeDescription> newMardMap = new HashMap<>();
 		for(ModuleAccountDescription mad : md.getModuleAccountSettingsDescription()) {
-			if(oldMardMap.containsKey(mad.getAccountGatewayId())) {
+			if(md.getUsage() == ModuleUsage.PLAYBACK) {
+				newMardMap.put(ModulePlaybackContext.PLAYBACK_GATEWAY, ModuleAccountRuntimeDescription.builder()
+						.accountId(ModulePlaybackContext.PLAYBACK_GATEWAY)
+						.initBalance(mad.getModuleAccountInitBalance())
+						.preBalance(mad.getModuleAccountInitBalance())
+						.positionDescription(new ModulePositionDescription())
+						.build());
+				break;
+			} else if(oldMardMap.containsKey(mad.getAccountGatewayId())) {
 				ModuleAccountRuntimeDescription oldMard = oldMardMap.get(mad.getAccountGatewayId());
 				oldMard.setInitBalance(mad.getModuleAccountInitBalance());
 				newMardMap.put(mad.getAccountGatewayId(), oldMard);
