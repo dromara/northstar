@@ -19,6 +19,8 @@ import tech.quantit.northstar.gateway.api.IMarketCenter;
 import tech.quantit.northstar.gateway.api.utils.MarketDataRepoFactory;
 import tech.quantit.northstar.gateway.ctp.CtpGatewaySettings;
 import tech.quantit.northstar.gateway.ctp.CtpSimGatewaySettings;
+import tech.quantit.northstar.gateway.okx.OkxGatewayFactory;
+import tech.quantit.northstar.gateway.okx.OkxGatewaySettings;
 import tech.quantit.northstar.gateway.playback.PlaybackGatewayFactory;
 import tech.quantit.northstar.gateway.playback.PlaybackGatewaySettings;
 import tech.quantit.northstar.gateway.sim.trade.SimGatewayFactory;
@@ -45,6 +47,7 @@ public class GatewayConfig {
         settingsMap.put(ChannelType.CTP_SIM, new CtpSimGatewaySettings());
         settingsMap.put(ChannelType.PLAYBACK, new PlaybackGatewaySettings());
         settingsMap.put(ChannelType.TIGER, new TigerGatewaySettings());
+        settingsMap.put(ChannelType.OKX, new OkxGatewaySettings());
 
         Map<ChannelType, GatewayFactory> factoryMap = new EnumMap<>(ChannelType.class);
         factoryMap.put(ChannelType.CTP, new CtpGatewayFactory(fastEventEngine, mktCenter, dataMgr));
@@ -52,6 +55,7 @@ public class GatewayConfig {
         factoryMap.put(ChannelType.PLAYBACK, new PlaybackGatewayFactory(fastEventEngine, mktCenter, holidayMgr, rtRepo, mdRepoFactory));
         factoryMap.put(ChannelType.SIM, new SimGatewayFactory(fastEventEngine, simMarket, accRepo, mktCenter));
         factoryMap.put(ChannelType.TIGER, new TigerGatewayFactory(fastEventEngine, mktCenter));
+        factoryMap.put(ChannelType.OKX, new OkxGatewayFactory(fastEventEngine, mktCenter));
         return new GatewayMetaProvider(settingsMap, factoryMap);
     }
 }

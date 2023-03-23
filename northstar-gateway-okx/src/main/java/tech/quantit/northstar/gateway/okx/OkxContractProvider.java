@@ -78,12 +78,12 @@ public class OkxContractProvider {
         }catch (Exception e){
 
         }
+        if (currencyEnum == null) {
+            return null;
+        }
         // 暂只获取USDT的交易对
         if(!currencyEnum.equals(CoreEnum.CurrencyEnum.USDT)){
             return null;
-        }
-        if (currencyEnum == null) {
-           return null;
         }
         String symbol = obj.getString("instFamily").toUpperCase();
         Long listTime = obj.getLongValue("listTime");

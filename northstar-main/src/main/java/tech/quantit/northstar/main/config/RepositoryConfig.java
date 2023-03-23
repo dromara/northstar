@@ -8,6 +8,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
@@ -21,6 +22,8 @@ import tech.quantit.northstar.data.IModuleRepository;
 import tech.quantit.northstar.data.IPlaybackRuntimeRepository;
 import tech.quantit.northstar.data.ISimAccountRepository;
 import tech.quantit.northstar.data.ds.DataServiceManager;
+import tech.quantit.northstar.data.ds.W3DataServiceManager;
+import tech.quantit.northstar.data.ds.W3MarketDataRepoDataServiceImpl;
 import tech.quantit.northstar.data.redis.GatewayRepoRedisImpl;
 import tech.quantit.northstar.data.redis.MailConfigRepoRedisImpl;
 import tech.quantit.northstar.data.redis.MarketDataRepoRedisImpl;
@@ -55,21 +58,29 @@ public class RepositoryConfig {
 	
 	@Value("${northstar.data-service.baseUrl}")
 	private String baseUrl;
+    @Value("${northstar.data-service.w3BaseUrl}")
+    private String w3BaseUrl;
 
     @Bean
+    @Primary
     DataServiceManager dataServiceManager(RedisTemplate<String, byte[]> redisTemplate, RestTemplate restTemplate, IContractManager contractMgr) {
         String nsdsSecret = Optional.ofNullable(System.getenv(Constants.NS_DS_SECRET)).orElse("");
         return new DataServiceManager(baseUrl, nsdsSecret, restTemplate, new CtpDateTimeUtil(), contractMgr);
     }
+    @Bean
+    W3DataServiceManager w3DataServiceManager(RestTemplate restTemplate, IContractManager contractMgr) {
+        String nsdsSecret = Optional.ofNullable(System.getenv(Constants.NS_DS_SECRET)).orElse("");
+        return new W3DataServiceManager(w3BaseUrl, nsdsSecret, restTemplate, new CtpDateTimeUtil(), contractMgr);
+    }
 
     @Bean
-    MarketDataRepoFactory marketDataRepository(RedisTemplate<String, byte[]> redisTemplate, DataServiceManager dsMgr, IGatewayRepository gatewayRepo) {
+    MarketDataRepoFactory marketDataRepository(RedisTemplate<String, byte[]> redisTemplate, DataServiceManager dsMgr,W3DataServiceManager w3dsMgr, IGatewayRepository gatewayRepo) {
         IMarketDataRepository defaultMarketRepo = new MarketDataRepoRedisImpl(redisTemplate, dsMgr);
-        
+        IMarketDataRepository w3MarketRepo = new W3MarketDataRepoDataServiceImpl(w3dsMgr);
         Map<ChannelType, IMarketDataRepository> channelRepoMap = new EnumMap<>(ChannelType.class);
         channelRepoMap.put(ChannelType.PLAYBACK, defaultMarketRepo);
         channelRepoMap.put(ChannelType.CTP, defaultMarketRepo);
-//        channelRepoMap.put(ChannelType.OKX, ???);
+        channelRepoMap.put(ChannelType.OKX, w3MarketRepo);
         return new MarketDataRepoFactory(channelRepoMap, gatewayRepo);
     }
 

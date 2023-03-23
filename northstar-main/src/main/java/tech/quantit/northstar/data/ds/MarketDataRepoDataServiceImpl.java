@@ -30,7 +30,7 @@ public class MarketDataRepoDataServiceImpl implements IMarketDataRepository{
 	@Override
 	public List<BarField> loadBars(String unifiedSymbol, LocalDate startDate, LocalDate endDate) {
 		log.debug("从数据服务加载历史行情分钟数据：{}，{} -> {}", unifiedSymbol, startDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), endDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
-		try {			
+		try {
 			return dsMgr.getMinutelyData(unifiedSymbol, startDate, endDate);
 		} catch (Exception e) {
 			log.warn("第三方数据服务暂时不可用：{}", e.getMessage(), e);

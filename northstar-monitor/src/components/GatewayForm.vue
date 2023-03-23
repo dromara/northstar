@@ -314,15 +314,16 @@ export default {
           if(this.form.channelType === 'PLAYBACK'){
             const ctpListPromise = contractApi.getGatewayContracts('CTP', query)
             const pbListPromise = contractApi.getGatewayContracts('PLAYBACK', query)
-            Promise.all([ctpListPromise, pbListPromise]).then(([ctpResult, pbResult]) => {
-              const result = [...ctpResult, ...pbResult]
-              if(result.length > 100){
-                this.$message.warning('返回结果多于100条，请提供更精确的筛选条件')
-                return 
-              }
-              this.contractOptions = result
+            const okxListPromise = contractApi.getGatewayContracts('OKX', query)
+            Promise.all([ctpListPromise, pbListPromise, okxListPromise]).then(([ctpResult, pbResult, okxResult]) => {
+                 const result = [...ctpResult, ...pbResult, ...okxResult]
+                 if(result.length > 100){
+                     this.$message.warning('返回结果多于100条，请提供更精确的筛选条件')
+                     return
+                 }
+                 this.contractOptions = result
             }).finally(() => {
-              this.loading = false;
+                 this.loading = false;
             })
           } else {
             contractApi.getGatewayContracts(this.form.channelType, query).then(result => {

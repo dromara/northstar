@@ -8,8 +8,10 @@ northstar:
   contraceDefFile: classpath:ContractDefinition.csv
   data-service:
     baseUrl: https://service.quantit.tech:44388
+    w3BaseUrl: http://localhost:19001
 
-logging:  level: 
+logging:
+  level: 
     root: info
     # 行情数据入口
     '[xyz.redtorch.gateway.ctp.x64v6v3v15v]': info
@@ -17,7 +19,8 @@ logging:  level:
     '[tech.quantit.northstar.main.handler.broadcast]': info
     # K线数据验证
     '[tech.quantit.northstar.gateway.api.domain]': info
-  file:    path: logs/
+  file:
+    path: logs/
   
 spring:
   redis:
@@ -38,7 +41,9 @@ server:
         secure: true
 spring:
   redis.database: 1
-  config:    activate:      on-profile: prod
+  config:
+    activate:
+      on-profile: prod
       
 ---
 server:
@@ -47,7 +52,9 @@ server:
     enabled: false
 spring:
   redis.database: 1
-  config:    activate:      on-profile: dev
+  config:
+    activate:
+      on-profile: dev
 
 ---
 server:
@@ -56,7 +63,9 @@ server:
     enabled: false
 spring:
   redis.database: 15
-  config:    activate:      on-profile: test
+  config:
+    activate:
+      on-profile: test
       
 ---
 server:
