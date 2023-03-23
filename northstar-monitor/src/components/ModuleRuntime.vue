@@ -432,6 +432,7 @@ export default {
       if (val) {
         this.updateChart()
         this.loadIndicators()
+        this.holdingVisibleOnChart = false
       }
     },
     holdingVisibleOnChart: function (val) {
