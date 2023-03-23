@@ -27,39 +27,41 @@ import tech.quantit.northstar.main.service.LogService;
 import tech.quantit.northstar.main.service.ModuleService;
 import tech.quantit.northstar.main.utils.ModuleFactory;
 
-@DependsOn({
-	"internalDispatcher",
-	"broadcastEventDispatcher",
-	"strategyDispatcher",
+@DependsOn({ 
+	"internalDispatcher", 
+	"broadcastEventDispatcher", 
+	"strategyDispatcher", 
 	"accountEventHandler",
-	"connectionEventHandler",
-	"moduleFactory",
-	})
+	"connectionEventHandler", 
+	"moduleFactory" })
 @Configuration
 public class ServiceConfig {
 
-    @Bean
-    AccountService accountService(ConcurrentMap<String, TradeDayAccount> accountMap) {
-        return new AccountService(accountMap);
-    }
+	@Bean
+	AccountService accountService(ConcurrentMap<String, TradeDayAccount> accountMap) {
+		return new AccountService(accountMap);
+	}
 
-    @Bean
-    GatewayService gatewayService(GatewayAndConnectionManager gatewayConnMgr, IGatewayRepository gatewayRepo,
-                                                IPlaybackRuntimeRepository playbackRtRepo, IModuleRepository moduleRepo, ISimAccountRepository simAccRepo, GatewayMetaProvider metaProvider,
-                                                GatewayMetaProvider settingsPvd, IMarketCenter mktCenter) {
-        return new GatewayService(gatewayConnMgr, settingsPvd, metaProvider, mktCenter, gatewayRepo, simAccRepo, playbackRtRepo, moduleRepo);
-    }
+	@Bean
+	GatewayService gatewayService(GatewayAndConnectionManager gatewayConnMgr, IGatewayRepository gatewayRepo,
+			IPlaybackRuntimeRepository playbackRtRepo, IModuleRepository moduleRepo, ISimAccountRepository simAccRepo,
+			GatewayMetaProvider metaProvider, GatewayMetaProvider settingsPvd, IMarketCenter mktCenter) {
+		return new GatewayService(gatewayConnMgr, settingsPvd, metaProvider, mktCenter, gatewayRepo, simAccRepo,
+				playbackRtRepo, moduleRepo);
+	}
 
-    @Bean
-    ModuleService moduleService(ApplicationContext ctx, ExternalJarClassLoader extJarLoader, IModuleRepository moduleRepo,
-                                              IGatewayRepository gatewayRepo, IMarketDataRepository mdRepo, ModuleFactory moduleFactory, ModuleManager moduleMgr,
-                                              IContractManager contractMgr, GatewayAndConnectionManager gatewayConnMgr, FastEventEngine feEngine) {
-        return new ModuleService(ctx, extJarLoader, moduleRepo, mdRepo, gatewayRepo, moduleFactory, moduleMgr, contractMgr, gatewayConnMgr, feEngine);
-    }
+	@Bean
+	ModuleService moduleService(ApplicationContext ctx, ExternalJarClassLoader extJarLoader,
+			IModuleRepository moduleRepo, IGatewayRepository gatewayRepo, IMarketDataRepository mdRepo,
+			ModuleFactory moduleFactory, ModuleManager moduleMgr, IContractManager contractMgr,
+			GatewayAndConnectionManager gatewayConnMgr, FastEventEngine feEngine) {
+		return new ModuleService(ctx, extJarLoader, moduleRepo, mdRepo, gatewayRepo, moduleFactory, moduleMgr,
+				contractMgr, gatewayConnMgr, feEngine);
+	}
 
-    @Bean
-    LogService logService(LoggingSystem loggingSystem) {
-        return new LogService(loggingSystem);
-    }
-	
+	@Bean
+	LogService logService(LoggingSystem loggingSystem) {
+		return new LogService(loggingSystem);
+	}
+
 }
