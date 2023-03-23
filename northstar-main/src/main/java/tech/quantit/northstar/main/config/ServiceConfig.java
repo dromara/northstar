@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 
+import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.data.IGatewayRepository;
 import tech.quantit.northstar.data.IMarketDataRepository;
 import tech.quantit.northstar.data.IModuleRepository;
@@ -52,8 +53,8 @@ public class ServiceConfig {
     @Bean
     ModuleService moduleService(ApplicationContext ctx, ExternalJarClassLoader extJarLoader, IModuleRepository moduleRepo,
                                               IGatewayRepository gatewayRepo, IMarketDataRepository mdRepo, ModuleFactory moduleFactory, ModuleManager moduleMgr,
-                                              IContractManager contractMgr) {
-        return new ModuleService(ctx, extJarLoader, moduleRepo, mdRepo, gatewayRepo, moduleFactory, moduleMgr, contractMgr);
+                                              IContractManager contractMgr, GatewayAndConnectionManager gatewayConnMgr, FastEventEngine feEngine) {
+        return new ModuleService(ctx, extJarLoader, moduleRepo, mdRepo, gatewayRepo, moduleFactory, moduleMgr, contractMgr, gatewayConnMgr, feEngine);
     }
 
     @Bean

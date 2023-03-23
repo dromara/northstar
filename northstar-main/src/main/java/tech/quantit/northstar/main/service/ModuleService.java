@@ -21,6 +21,7 @@ import tech.quantit.northstar.common.constant.Constants;
 import tech.quantit.northstar.common.constant.DateTimeConstant;
 import tech.quantit.northstar.common.constant.ModuleState;
 import tech.quantit.northstar.common.constant.ModuleUsage;
+import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.event.NorthstarEvent;
 import tech.quantit.northstar.common.event.NorthstarEventType;
 import tech.quantit.northstar.common.model.ComponentField;
@@ -40,6 +41,8 @@ import tech.quantit.northstar.common.utils.MarketDataLoadingUtils;
 import tech.quantit.northstar.data.IGatewayRepository;
 import tech.quantit.northstar.data.IMarketDataRepository;
 import tech.quantit.northstar.data.IModuleRepository;
+import tech.quantit.northstar.domain.gateway.GatewayAndConnectionManager;
+import tech.quantit.northstar.domain.gateway.GatewayConnection;
 import tech.quantit.northstar.domain.module.ModulePlaybackContext;
 import tech.quantit.northstar.gateway.api.IContractManager;
 import tech.quantit.northstar.main.ExternalJarClassLoader;
@@ -49,8 +52,10 @@ import tech.quantit.northstar.main.utils.ModuleFactory;
 import tech.quantit.northstar.strategy.api.DynamicParamsAware;
 import tech.quantit.northstar.strategy.api.IModule;
 import tech.quantit.northstar.strategy.api.annotation.StrategicComponent;
+import xyz.redtorch.pb.CoreEnum.CommonStatusEnum;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.ContractField;
+import xyz.redtorch.pb.CoreField.NoticeField;
 import xyz.redtorch.pb.CoreField.TradeField;
 
 /**
@@ -79,14 +84,21 @@ public class ModuleService implements PostLoadAware {
 	
 	private IGatewayRepository gatewayRepo;
 	
+	private GatewayAndConnectionManager gatewayConnMgr;
+	
+	private FastEventEngine feEngine;
+	
 	public ModuleService(ApplicationContext ctx, ExternalJarClassLoader extJarLoader, IModuleRepository moduleRepo, IMarketDataRepository mdRepo, 
-			IGatewayRepository gatewayRepo, ModuleFactory moduleFactory, ModuleManager moduleMgr, IContractManager contractMgr) {
+			IGatewayRepository gatewayRepo, ModuleFactory moduleFactory, ModuleManager moduleMgr, IContractManager contractMgr,
+			GatewayAndConnectionManager gatewayConnMgr, FastEventEngine feEngine) {
 		this.ctx = ctx;
 		this.moduleMgr = moduleMgr;
 		this.contractMgr = contractMgr;
+		this.gatewayConnMgr = gatewayConnMgr;
 		this.gatewayRepo = gatewayRepo;
 		this.moduleRepo = moduleRepo;
 		this.mdRepo = mdRepo;
+		this.feEngine = feEngine;
 		this.moduleFactory = moduleFactory;
 		this.extJarLoader = extJarLoader;
 	}
@@ -315,7 +327,23 @@ public class ModuleService implements PostLoadAware {
 	 */
 	public boolean toggleModule(String name) {
 		IModule module = moduleMgr.getModule(name);
+		ModuleDescription md = moduleRepo.findSettingsByName(name);
+		List<ModuleAccountDescription> madList = md.getModuleAccountSettingsDescription();
 		boolean flag = !module.isEnabled();
+		if(flag) {
+			for(ModuleAccountDescription mad : madList) {
+				GatewayConnection conn = gatewayConnMgr.getGatewayConnectionById(mad.getAccountGatewayId());
+				if(!conn.isConnected()) {
+					GatewayDescription gd = gatewayRepo.findById(mad.getAccountGatewayId());
+					if(!gd.isAutoConnect() && md.getUsage() != ModuleUsage.PLAYBACK) {
+						feEngine.emitEvent(NorthstarEventType.NOTICE, NoticeField.newBuilder()
+								.setStatus(CommonStatusEnum.COMS_WARN)
+								.setContent(String.format("提示：【%s】当前没有连线，会影响信号执行。请确保账户已连接或者设为自动连接", mad.getAccountGatewayId()))
+								.build());
+					}
+				}
+			}
+		}
 		module.setEnabled(flag);
 		return flag;
 	}
