@@ -102,7 +102,7 @@
           </el-form-item>
         </el-col>
         <el-col :span="16" v-if="gatewayUsage === 'MARKET_DATA'">
-          <el-form-item label="订阅合约">
+          <el-form-item v-show="channelType" label="订阅合约">
             <el-select
               v-model="subscribedContracts"
               multiple
