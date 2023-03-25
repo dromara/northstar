@@ -1,6 +1,6 @@
 {
   "name": "northstar-monitor",
-  "version": "5.1.4",
+  "version": "5.1.5",
   "private": true,
   "main": "electron/main.js",
   "scripts": {
@@ -11,7 +11,8 @@
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
     "install-all": "npm i && cd electron-egg && npm i",
-    "build-all": "npm run build && cd electron-egg && npm run rd && npm run build-wz-64"
+    "build-all": "npm run build && cd electron-egg && npm run rd && npm run build-wz-64",
+    "patch-update": "npm version patch && cd electron-egg && npm version patch"
   },
   "dependencies": {
     "axios": "^0.21.1",
