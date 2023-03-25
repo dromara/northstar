@@ -115,6 +115,9 @@ public class ModulePlaybackContext implements IModuleContext, MergedBarListener 
 	/* unifiedSymbol -> barQ */
 	private Map<String, Queue<BarField>> barBufQMap = new HashMap<>();
 	
+	/* contract -> gateway */
+	private Map<ContractField, TradeGateway> gatewayMap = new HashMap<>();
+	
 	/* indicator -> values */
 	private Map<Indicator, Queue<TimeSeriesValue>> indicatorValBufQMap = new HashMap<>(); 
 	
@@ -409,6 +412,11 @@ public class ModulePlaybackContext implements IModuleContext, MergedBarListener 
 	public TradeStrategy getTradeStrategy() {
 		return tradeStrategy;
 	}
+	
+	@Override
+	public TradeGateway getTradeGateway(ContractField contract) {
+		return gatewayMap.get(contract);
+	}
 
 	@Override
 	public synchronized ModuleRuntimeDescription getRuntimeDescription(boolean fullDescription) {
@@ -499,6 +507,7 @@ public class ModulePlaybackContext implements IModuleContext, MergedBarListener 
 	public synchronized void bindGatewayContracts(TradeGateway gateway, List<Contract> contracts) {
 		for(Contract contract : contracts) {
 			ContractField c = contract.contractField();
+			gatewayMap.put(c, gateway);
 			contractMap.put(c.getUnifiedSymbol(), c);
 			contractMap2.put(c, contract);
 			barBufQMap.put(c.getUnifiedSymbol(), new LinkedList<>());

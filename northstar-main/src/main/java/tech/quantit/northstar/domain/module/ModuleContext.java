@@ -577,6 +577,11 @@ public class ModuleContext implements IModuleContext, MergedBarListener{
 	public TradeStrategy getTradeStrategy() {
 		return tradeStrategy;
 	}
+	
+	@Override
+	public TradeGateway getTradeGateway(ContractField contract) {
+		return gatewayMap.get(contract);
+	}
 
 	@Override
 	public synchronized void disabledModule() {

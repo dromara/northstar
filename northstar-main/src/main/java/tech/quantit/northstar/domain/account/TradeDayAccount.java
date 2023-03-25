@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
 
+import lombok.Getter;
 import tech.quantit.northstar.common.exception.InsufficientException;
 import tech.quantit.northstar.common.exception.TradeException;
 import tech.quantit.northstar.common.model.Identifier;
@@ -45,7 +46,7 @@ public class TradeDayAccount {
 	private IContractManager contractMgr;
 	
 	private String accountId;
-	
+	@Getter
 	protected TradeGateway gateway;
 	
 	public TradeDayAccount(String gatewayId, TradeGateway gateway, IContractManager contractMgr) {

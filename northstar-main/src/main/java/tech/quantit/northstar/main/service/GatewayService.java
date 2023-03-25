@@ -30,9 +30,11 @@ import tech.quantit.northstar.gateway.api.GatewayFactory;
 import tech.quantit.northstar.gateway.api.GatewayMetaProvider;
 import tech.quantit.northstar.gateway.api.IMarketCenter;
 import tech.quantit.northstar.gateway.api.MarketGateway;
+import tech.quantit.northstar.gateway.api.TradeGateway;
 import tech.quantit.northstar.gateway.sim.trade.SimTradeGateway;
 import tech.quantit.northstar.main.PostLoadAware;
 import tech.quantit.northstar.main.utils.CodecUtils;
+import tech.quantit.northstar.strategy.api.AccountCenter;
 
 /**
  * 网关服务
@@ -85,6 +87,10 @@ public class GatewayService implements PostLoadAware {
 		
 		if(gatewayDescription.getGatewayUsage() == GatewayUsage.MARKET_DATA && gateway instanceof MarketGateway mktGateway) {
 			mktCenter.addGateway(mktGateway);
+		}
+		
+		if(gatewayDescription.getGatewayUsage() == GatewayUsage.TRADE) {
+			AccountCenter.getInstance().register((TradeGateway) gateway);
 		}
 		
 		return true;

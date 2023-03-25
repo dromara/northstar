@@ -7,6 +7,7 @@ import tech.quantit.northstar.common.TransactionAware;
 import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
 import tech.quantit.northstar.gateway.api.TradeGateway;
 import tech.quantit.northstar.gateway.api.domain.contract.Contract;
+import xyz.redtorch.pb.CoreField.ContractField;
 
 public interface IModuleContext extends IModuleStrategyContext, TickDataAware, BarDataAware, TransactionAware {
 	/**
@@ -14,6 +15,11 @@ public interface IModuleContext extends IModuleStrategyContext, TickDataAware, B
 	 * @return
 	 */
 	TradeStrategy getTradeStrategy();
+	/**
+	 * 获取交易网关
+	 * @return
+	 */
+	TradeGateway getTradeGateway(ContractField contract);
 	/**
 	 * 获取模组状态
 	 * @return
