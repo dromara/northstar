@@ -1,8 +1,6 @@
 package tech.quantit.northstar.gateway.api.domain.mktdata;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.ZoneOffset;
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -22,7 +20,7 @@ public class MinuteBarGenerator {
 
 	private static final long MAX_TIME_GAP = 90000; //90秒TICK过期判定
 
-	private LocalTime cutoffTime;
+	private LocalDateTime cutoffTime;
 	
 	private ContractField contract;
 	
@@ -55,7 +53,7 @@ public class MinuteBarGenerator {
 		}
 		
 		// 忽略非行情数据
-		if(tick.getStatus() < 1) {
+		if(tick.getStatus() < 1 && !clock.isValidOpenningTick(tick)) {
 			return;
 		}
 		
@@ -65,12 +63,10 @@ public class MinuteBarGenerator {
 			cutoffTime = clock.barMinute(tick);
 		}
 		
-		if(!clock.isEndOfSection(cutoffTime) && !tickTime(tick).isBefore(cutoffTime)) {
+		if(!clock.isEndOfSection(cutoffTime.toLocalTime()) && tick.getActionTimestamp() >= cutoffTime.toInstant(ZoneOffset.ofHours(8)).toEpochMilli()) {
 			finishOfBar();
-			cutoffTime = clock.nextBarMinute();
 		}
 		if(Objects.isNull(barBuilder)) {
-			LocalDateTime barTime = LocalDateTime.of(LocalDate.parse(tick.getActionDay(), DateTimeConstant.D_FORMAT_INT_FORMATTER), cutoffTime);
 			barBuilder = BarField.newBuilder()
 					.setGatewayId(contract.getGatewayId())
 					.setUnifiedSymbol(contract.getUnifiedSymbol())
@@ -81,9 +77,9 @@ public class MinuteBarGenerator {
 					.setPreClosePrice(tick.getPreClosePrice())
 					.setPreOpenInterest(tick.getPreOpenInterest())
 					.setPreSettlePrice(tick.getPreSettlePrice())
-					.setActionTimestamp(barTime.toInstant(ZoneOffset.ofHours(8)).toEpochMilli())
 					.setActionDay(tick.getActionDay())
-					.setActionTime(cutoffTime.format(DateTimeConstant.T_FORMAT_FORMATTER));
+					.setActionTime(cutoffTime.format(DateTimeConstant.T_FORMAT_FORMATTER))
+					.setActionTimestamp(cutoffTime.toInstant(ZoneOffset.ofHours(8)).toEpochMilli());
 		}
 		
 		barBuilder.setHighPrice(Math.max(tick.getLastPrice(), barBuilder.getHighPrice()));
@@ -94,10 +90,6 @@ public class MinuteBarGenerator {
 		barBuilder.setVolume(tick.getVolumeDelta() + barBuilder.getVolume());
 		barBuilder.setTurnover(tick.getTurnoverDelta() + barBuilder.getTurnover());
 		barBuilder.setNumTrades(tick.getNumTradesDelta() + barBuilder.getNumTrades());
-	}
-	
-	private LocalTime tickTime(TickField tick) {
-		return LocalTime.parse(tick.getActionTime(), DateTimeConstant.T_FORMAT_WITH_MS_INT_FORMATTER);
 	}
 	
 	/**
