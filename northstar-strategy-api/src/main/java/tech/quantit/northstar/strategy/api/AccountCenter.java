@@ -22,12 +22,12 @@ public class AccountCenter {
 	
 	private AccountCenter() {}
 	
-	public void register(TradeGateway gateway) {
+	public synchronized void register(TradeGateway gateway) {
 		gatewayAccountMap.put(gateway, new Account());
 	}
 	
-	public Account getAccount(TradeGateway gateway) {
-		if(gatewayAccountMap.containsKey(gateway)) {
+	public synchronized Account getAccount(TradeGateway gateway) {
+		if(!gatewayAccountMap.containsKey(gateway)) {
 			throw new NoSuchElementException("找不到对应的账户：" + gateway.gatewayId());
 		}
 		return gatewayAccountMap.get(gateway);

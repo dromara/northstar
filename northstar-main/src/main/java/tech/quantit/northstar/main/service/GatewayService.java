@@ -81,18 +81,15 @@ public class GatewayService implements PostLoadAware {
 		GatewayFactory factory = metaProvider.getFactory(gatewayDescription.getChannelType());
 		gateway = factory.newInstance(gatewayDescription);
 		gatewayConnMgr.createPair(conn, gateway);
-		if(gatewayDescription.isAutoConnect()) {
-			connect(gatewayDescription.getGatewayId());
-		}
-		
-		if(gatewayDescription.getGatewayUsage() == GatewayUsage.MARKET_DATA && gateway instanceof MarketGateway mktGateway) {
-			mktCenter.addGateway(mktGateway);
-		}
-		
 		if(gatewayDescription.getGatewayUsage() == GatewayUsage.TRADE) {
 			AccountCenter.getInstance().register((TradeGateway) gateway);
 		}
-		
+		if(gatewayDescription.isAutoConnect()) {
+			connect(gatewayDescription.getGatewayId());
+		}
+		if(gatewayDescription.getGatewayUsage() == GatewayUsage.MARKET_DATA && gateway instanceof MarketGateway mktGateway) {
+			mktCenter.addGateway(mktGateway);
+		}
 		return true;
 	}
 	
