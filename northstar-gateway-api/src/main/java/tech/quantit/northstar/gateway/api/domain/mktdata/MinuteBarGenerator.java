@@ -59,14 +59,11 @@ public class MinuteBarGenerator {
 		
 		lastTick = tick;
 		
-		if(Objects.isNull(cutoffTime)) {
-			cutoffTime = clock.barMinute(tick);
-		}
-		
-		if(!clock.isEndOfSection(cutoffTime.toLocalTime()) && tick.getActionTimestamp() >= cutoffTime.toInstant(ZoneOffset.ofHours(8)).toEpochMilli()) {
+		if(Objects.nonNull(cutoffTime) && !clock.isEndOfSection(cutoffTime.toLocalTime()) && tick.getActionTimestamp() >= cutoffTime.toInstant(ZoneOffset.ofHours(8)).toEpochMilli()) {
 			finishOfBar();
 		}
 		if(Objects.isNull(barBuilder)) {
+			cutoffTime = clock.barMinute(tick);
 			barBuilder = BarField.newBuilder()
 					.setGatewayId(contract.getGatewayId())
 					.setUnifiedSymbol(contract.getUnifiedSymbol())
