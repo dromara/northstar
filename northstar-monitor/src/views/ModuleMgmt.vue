@@ -49,7 +49,7 @@
           }}
         </template>
       </el-table-column>
-      <el-table-column label="绑定账户" align="center" width="minmax(120px,300px)">
+      <el-table-column label="绑定账户" sortable align="center" width="minmax(120px,300px)">
         <template slot-scope="scope">
           {{
             (() => {
@@ -60,7 +60,7 @@
           }}
         </template>
       </el-table-column>
-      <el-table-column label="绑定合约" align="center" width="minmax(120px, 400px)">
+      <el-table-column label="绑定合约" sortable align="center" width="minmax(120px, 400px)">
         <template slot-scope="scope">
           <span class="text-selectable">
             {{
@@ -73,7 +73,21 @@
           </span>
         </template>
       </el-table-column>
-
+      <el-table-column label="持仓状态" sortable align="center" width="100px">
+        <template slot-scope="scope">
+          <el-tag size="small">{{
+            !scope.row.runtime ? '-' :
+                {
+                  HOLDING_LONG: '持多单',
+                  HOLDING_SHORT: '持空单',
+                  EMPTY: '无持仓',
+                  EMPTY_HEDGE: '对冲锁仓',
+                  HOLDING_HEDGE: '对冲持仓',
+                  PENDING_ORDER: '等待成交'
+                }[scope.row.runtime.moduleState]
+              }}</el-tag>
+        </template>
+      </el-table-column>
       <el-table-column
         label="当前状态"
         prop="runtime.enabled"
@@ -91,7 +105,7 @@
           </span>
         </template>
       </el-table-column>
-      <el-table-column align="center" width="420px">
+      <el-table-column align="center" width="400px">
         <template slot="header">
           <el-button size="mini" type="primary" @click="handleCreate">新建</el-button>
         </template>
