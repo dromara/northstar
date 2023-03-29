@@ -25,8 +25,6 @@ public class OptionChainContract implements Contract {
 	
 	private final Identifier identifier;
 	
-	private boolean hasSubscribed;
-	
 	public OptionChainContract(String name, List<Contract> memberContracts) {
 		Assert.notEmpty(memberContracts, "集合不能为空");
 		this.memberContracts = memberContracts;
@@ -41,7 +39,6 @@ public class OptionChainContract implements Contract {
 				log.warn("[{}] 合约订阅失败", c.contractField().getUnifiedSymbol());
 			}
 		}
-		hasSubscribed = true;
 		return true;
 	}
 
@@ -52,15 +49,9 @@ public class OptionChainContract implements Contract {
 				log.warn("[{}] 合约取消订阅失败", c.contractField().getUnifiedSymbol());
 			}
 		}
-		hasSubscribed = false;
 		return true;
 	}
 	
-	@Override
-	public boolean hasSubscribed() {
-		return hasSubscribed;
-	}
-
 	@Override
 	public String name() {
 		return name;

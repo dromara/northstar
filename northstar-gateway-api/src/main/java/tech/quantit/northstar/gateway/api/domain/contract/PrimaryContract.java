@@ -17,23 +17,21 @@ public class PrimaryContract implements Contract {
 	
 	private IndexContract idxContract;
 	
+	// 借用指数合约的合约信息
 	public PrimaryContract(IndexContract idxContract) {
 		this.idxContract = idxContract;
 	}
 
 	@Override
 	public boolean subscribe() {
-		return idxContract.subscribe();
+		// 主力合约仅作为合约符号用于回测，不能订阅
+		return true;
 	}
 
 	@Override
 	public boolean unsubscribe() {
-		return idxContract.unsubscribe();
-	}
-
-	@Override
-	public boolean hasSubscribed() {
-		return idxContract.hasSubscribed();
+		// 主力合约仅作为合约符号用于回测，不能退订
+		return true;
 	}
 
 	@Override
