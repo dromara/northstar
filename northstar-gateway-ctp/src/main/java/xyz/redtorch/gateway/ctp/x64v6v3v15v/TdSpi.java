@@ -1314,7 +1314,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 			ExchangeEnum exchange = CtpConstant.exchangeMapReverse.getOrDefault(pInstrument.getExchangeID(), ExchangeEnum.UnknownExchange);
 			ProductClassEnum productClass = CtpConstant.productTypeMapReverse.getOrDefault(pInstrument.getProductClass(), ProductClassEnum.UnknownProductClass);
 			String unifiedSymbol = String.format("%s@%s@%s", symbol, exchange, productClass);
-			String contractId = String.format("%s@%s", unifiedSymbol, gatewayId);
+			String contractId = String.format("%s@%s", unifiedSymbol, MKT_GATEWAY_ID);
 			
 			CtpContract contract = CtpContract.builder()
 					.gatewayId(MKT_GATEWAY_ID)
