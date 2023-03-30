@@ -217,6 +217,8 @@ public class MarketCenter implements IMarketCenter{
 		IndexContract idxContract = idxContractMap.get(contract);
 		if(Objects.nonNull(idxContract)) {
 			idxContract.onTick(tick);
+		} else if(contract.productClass() == ProductClassEnum.FUTURES){
+			log.trace("没有找到 [{}] 对应的指数合约", contract.identifier());
 		}
 	}
 
