@@ -1,5 +1,7 @@
 package tech.quantit.northstar.gateway.api.domain.contract;
 
+import java.util.Objects;
+
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.TickDataAware;
 import tech.quantit.northstar.common.constant.ChannelType;
@@ -103,4 +105,22 @@ public class GatewayContract implements Contract, TickDataAware{
 	public void endOfMarket() {
 		barGen.endOfBar();
 	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(contract.getContractId());
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		GatewayContract other = (GatewayContract) obj;
+		return Objects.equals(contract.getContractId(), other.contract.getContractId());
+	}
+	
 }

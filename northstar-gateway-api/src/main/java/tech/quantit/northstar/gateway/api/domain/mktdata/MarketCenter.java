@@ -110,16 +110,27 @@ public class MarketCenter implements IMarketCenter{
 	public synchronized void loadContractGroup(ChannelType channelType) {
 		List<Contract> gatewayContracts = getContracts(channelType);
 		// 聚合期权合约
-		aggregateOptionContracts(gatewayContracts.stream().filter(c -> c.productClass() == ProductClassEnum.OPTION).toList());
+		try {
+			aggregateOptionContracts(gatewayContracts.stream().filter(c -> c.productClass() == ProductClassEnum.OPTION).toList());
+		} catch (Exception e) {
+			log.error("聚合期权链合约时出错", e);
+		}
 		
 		// 聚合期货合约
-		aggregateFutureIndexContracts(channelDefContractGroups.row(channelType));
+		try {
+			aggregateFutureIndexContracts(channelDefContractGroups.row(channelType));
+		} catch (Exception e) {
+			log.error("聚合期货指数合约时出错", e);
+		}
 		
 	}
 	
 	private void aggregateOptionContracts(List<Contract> optContracts) {
 		Map<String, List<Contract>> symbolOptionsMap = new HashMap<>();
 		for(Contract c : optContracts) {
+			if(c instanceof OptionChainContract) {
+				continue;
+			}
 			String underlyingSymbol = c.contractField().getUnderlyingSymbol();
 			symbolOptionsMap.computeIfAbsent(underlyingSymbol, key -> new ArrayList<>());
 			symbolOptionsMap.get(underlyingSymbol).add(c);
