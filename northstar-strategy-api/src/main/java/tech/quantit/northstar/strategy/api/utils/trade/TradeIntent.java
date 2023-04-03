@@ -76,6 +76,7 @@ public class TradeIntent implements TransactionAware, TickDataAware {
 			long timeout, Predicate<TickField> abortCondition) {
 		Assert.noNullElements(List.of(contract, operation, priceType), "入参不能为空");
 		Assert.isTrue(volume > 0, "手数必须为正整数");
+		Assert.isTrue(timeout > 0, "订单等待时长必须为正整数");
 		this.contract = contract;
 		this.operation = operation;
 		this.priceType = priceType;
