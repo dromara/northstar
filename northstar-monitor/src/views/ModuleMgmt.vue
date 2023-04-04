@@ -3,7 +3,7 @@
     <ModuleForm
       :visible.sync="moduleFormVisible"
       :readOnly="curTableIndex > -1 && curModule.runtime && curModule.runtime.enabled"
-      :module="curModule"
+      :module="curModule ? JSON.parse(JSON.stringify(curModule)) : null"
       @onSave="saveModule"
     />
     <ModuleRuntime

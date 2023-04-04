@@ -4,6 +4,7 @@
     :visible="visible"
     class="module-dialog"
     v-loading="loading"
+    :close-on-click-modal="!isUpdateMode"
     element-loading-background="rgba(0, 0, 0, 0.3)"
     width="540px"
     @close="close"
