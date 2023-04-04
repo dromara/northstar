@@ -10,7 +10,7 @@ body {
 }
 
 .ns-page {
-  margin: 15px;
+  padding: 15px;
   width: 100%;
   display: flex;
 }

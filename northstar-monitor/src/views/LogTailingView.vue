@@ -189,6 +189,7 @@ export default {
 }
 .ns-page-body {
   overflow: auto;
+  overflow-wrap: anywhere;
 }
 .ns-page-body-placeholder {
   height: 100%;
