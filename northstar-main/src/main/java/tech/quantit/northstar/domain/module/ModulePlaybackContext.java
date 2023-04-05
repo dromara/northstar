@@ -198,15 +198,19 @@ public class ModulePlaybackContext implements IModuleContext, MergedBarListener 
 		String id = UUID.randomUUID().toString();
 		String gatewayId = PLAYBACK_GATEWAY;
 		PositionField pf = null;
-		for(PositionField pos : accStore.getPositions(gatewayId)) {
-			boolean isOppositeDir = (operation.isBuy() && FieldUtils.isShort(pos.getPositionDirection()) 
-					|| operation.isSell() && FieldUtils.isLong(pos.getPositionDirection()));
-			if(ContractUtils.isSame(pos.getContract(), contract) && isOppositeDir) {
-				pf = pos;
+		if(operation.isClose()) {
+			for(PositionField pos : accStore.getPositions(gatewayId)) {
+				boolean isOppositeDir = (operation.isBuy() && FieldUtils.isShort(pos.getPositionDirection()) 
+						|| operation.isSell() && FieldUtils.isLong(pos.getPositionDirection()));
+				if(ContractUtils.isSame(pos.getContract(), contract) && isOppositeDir) {
+					pf = pos;
+				}
 			}
-		}
-		if(pf == null && operation.isClose()) {
-			throw new IllegalStateException("没有找到对应的持仓进行操作");
+			if(pf == null) {
+				mlog.warn("委托信息：{} {} {}手", contract.getUnifiedSymbol(), operation, volume);
+				mlog.warn("持仓信息：{}", accStore);
+				throw new IllegalStateException("没有找到对应的持仓进行操作");
+			}
 		}
 		TickField lastTick = latestTickMap.get(contract.getUnifiedSymbol());
 		TradeField trade = TradeField.newBuilder()
