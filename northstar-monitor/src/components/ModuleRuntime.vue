@@ -603,8 +603,11 @@ export default {
     addIndicator() {
       if (!this.indicator.name) return
       this.indicatorMap[this.indicator.name] = Object.assign({}, this.indicator)
-      this.renderIndicator(this.indicator)
+      const indicatorMap = JSON.parse(JSON.stringify(this.indicatorMap))
+      this.clearIndicators()
+      this.indicatorMap = indicatorMap;
       this.saveIndicators()
+      this.loadIndicators()
     },
     removeIndicator() {
       if (!this.indicator.name) return
@@ -663,13 +666,18 @@ export default {
         localStorage.getItem(`module_${this.module.moduleName}_${this.unifiedSymbolOfChart}`) ||
         '{}'
       this.indicatorMap = JSON.parse(dataStr)
-      Object.keys(this.indicatorMap).forEach((indicatorName) => {
-        if (this.moduleRuntime.indicatorMap[this.unifiedSymbolOfChart].indexOf(indicatorName) < 0) {
-          return
-        }
-        this.indicator = Object.assign({}, this.indicatorMap[indicatorName])
-        this.renderIndicator(this.indicator)
-      })
+      for(let i=2; i<6; i++){
+        const paneId = 'pane' + i
+        Object.keys(this.indicatorMap).forEach((indicatorName) => {
+          if (this.moduleRuntime.indicatorMap[this.unifiedSymbolOfChart].indexOf(indicatorName) < 0) {
+            return
+          }
+          this.indicator = Object.assign({}, this.indicatorMap[indicatorName])
+          if(this.indicator.paneId === paneId || this.indicator.paneId === 'candle_pane'){
+            this.renderIndicator(this.indicator)
+          }
+        })
+      }
     },
     saveIndicators() {
       localStorage.setItem(
