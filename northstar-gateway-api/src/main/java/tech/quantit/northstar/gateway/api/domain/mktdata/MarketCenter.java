@@ -109,9 +109,13 @@ public class MarketCenter implements IMarketCenter{
 	@Override
 	public synchronized void loadContractGroup(ChannelType channelType) {
 		List<Contract> gatewayContracts = getContracts(channelType);
+		Map<String, Contract> symbolContractMap = new HashMap<>();
+		for(Contract c : gatewayContracts) {
+			symbolContractMap.put(c.contractField().getSymbol(), c);
+		}
 		// 聚合期权合约
 		try {
-			aggregateOptionContracts(gatewayContracts.stream().filter(c -> c.productClass() == ProductClassEnum.OPTION).toList());
+			aggregateOptionContracts(gatewayContracts.stream().filter(c -> c.productClass() == ProductClassEnum.OPTION).toList(), symbolContractMap);
 		} catch (Exception e) {
 			log.error("聚合期权链合约时出错", e);
 		}
@@ -125,7 +129,7 @@ public class MarketCenter implements IMarketCenter{
 		
 	}
 	
-	private void aggregateOptionContracts(List<Contract> optContracts) {
+	private void aggregateOptionContracts(List<Contract> optContracts, Map<String,Contract> symbolContractMap) {
 		Map<String, List<Contract>> symbolOptionsMap = new HashMap<>();
 		for(Contract c : optContracts) {
 			if(c instanceof OptionChainContract) {
@@ -136,7 +140,11 @@ public class MarketCenter implements IMarketCenter{
 			symbolOptionsMap.get(underlyingSymbol).add(c);
 		}
 		for(Entry<String, List<Contract>> e : symbolOptionsMap.entrySet()) {
-			Contract c = new OptionChainContract(String.format("%s_期权链", e.getKey()), e.getValue());
+			if(!symbolContractMap.containsKey(e.getKey())) {
+				log.warn("找不到{}对应的合约信息", e.getKey());
+				continue;
+			}
+			Contract c = new OptionChainContract(symbolContractMap.get(e.getKey()), e.getValue());
 			contractMap.put(c.identifier(), c);
 		}
 	}
