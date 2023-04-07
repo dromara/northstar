@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.dao.DuplicateKeyException;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -312,6 +313,9 @@ public class GatewayService implements PostLoadAware {
 	}
 	
 	private GatewayDescription decodeSettings(GatewayDescription gd) {
+		if(gd.getSettings() instanceof JSONObject) {
+			return gd;
+		}
 		String decodeStr = CodecUtils.decrypt((String) gd.getSettings());
 		if(!JSON.isValid(decodeStr)) {
 			throw new IllegalStateException("解码字符串非法，很可能是临时文件夹" + System.getProperty("user.home") + File.separator
@@ -324,14 +328,22 @@ public class GatewayService implements PostLoadAware {
 	@Override
 	public void postLoad() {
 		log.info("开始加载网关");
-		try {				
-			List<GatewayDescription> result = gatewayRepo.findAll();
-			// 因为依赖关系，加载要有先后顺序
-			result.stream().filter(gd -> gd.getGatewayUsage() == GatewayUsage.MARKET_DATA).map(this::decodeSettings).forEach(this::doCreateGateway);
-			result.stream().filter(gd -> gd.getGatewayUsage() == GatewayUsage.TRADE).map(this::decodeSettings).forEach(this::doCreateGateway);
-		} catch(Exception e) {
-			log.error("", e);
-		}		
+		List<GatewayDescription> result = gatewayRepo.findAll();
+		// 因为网关有依赖关系，必须先初始化行情网关
+		result.stream().filter(gd -> gd.getGatewayUsage() == GatewayUsage.MARKET_DATA).map(this::decodeSettings).forEach(gd -> {
+			try {
+				doCreateGateway(decodeSettings(gd));
+			} catch(Exception e) {
+				log.error("", e);
+			}
+		});
+		result.stream().filter(gd -> gd.getGatewayUsage() == GatewayUsage.TRADE).map(this::decodeSettings).forEach(gd -> {
+			try {
+				doCreateGateway(decodeSettings(gd));
+			} catch(Exception e) {
+				log.error("", e);
+			}
+		});
 		log.info("网关加载完毕");
 	}
 
