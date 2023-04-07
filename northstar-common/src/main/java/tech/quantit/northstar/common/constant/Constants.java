@@ -8,6 +8,8 @@ public interface Constants {
 	
 	String MOCK_ORDER_ID = "MockOrderId";
 	
+	String OPTION_CHAIN_PREFIX = "OCC#";	// 期权链前缀
+	
 	String KEY_USER = "USER";
 	
 	String APP_NAME ="NS:";

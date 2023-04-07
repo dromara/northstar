@@ -1,5 +1,6 @@
 package tech.quantit.northstar.main.restful;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -10,13 +11,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import tech.quantit.northstar.common.constant.ChannelType;
+import tech.quantit.northstar.common.constant.Constants;
 import tech.quantit.northstar.common.constant.GatewayUsage;
 import tech.quantit.northstar.common.exception.NoSuchElementException;
 import tech.quantit.northstar.common.model.ContractSimpleInfo;
 import tech.quantit.northstar.common.model.GatewayDescription;
+import tech.quantit.northstar.common.model.Identifier;
 import tech.quantit.northstar.common.model.ResultBean;
 import tech.quantit.northstar.data.IGatewayRepository;
 import tech.quantit.northstar.gateway.api.IContractManager;
+import tech.quantit.northstar.gateway.api.domain.contract.Contract;
+import tech.quantit.northstar.gateway.api.domain.contract.IndexContract;
+import tech.quantit.northstar.gateway.api.domain.contract.OptionChainContract;
+import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
 
 /**
  * 
@@ -36,6 +43,7 @@ public class ContractController {
 	@GetMapping
 	public ResultBean<List<ContractSimpleInfo>> channelContracts(ChannelType channelType, String query){
 		List<ContractSimpleInfo> list = contractMgr.getContracts(channelType).stream()
+				.filter(c -> c.productClass() != ProductClassEnum.OPTION || c.identifier().value().startsWith(Constants.OPTION_CHAIN_PREFIX))
 				.map(c -> ContractSimpleInfo.builder()
 						.name(c.name())
 						.unifiedSymbol(c.contractField().getUnifiedSymbol())
@@ -58,7 +66,30 @@ public class ContractController {
 		if(Objects.isNull(gd)) {
 			throw new NoSuchElementException("找不到网关：" + gatewayId);
 		}
-		return new ResultBean<>(filterAndSort(gd.getSubscribedContracts(), query));
+		List<ContractSimpleInfo> subscribedContracts = gd.getSubscribedContracts();
+		List<ContractSimpleInfo> actualSubContracts = new ArrayList<>(subscribedContracts);
+		subscribedContracts.forEach(csi -> {
+			Contract contract = contractMgr.getContract(Identifier.of(csi.getValue()));
+			if(contract instanceof IndexContract idxContract) {
+				actualSubContracts.addAll(idxContract.memberContracts().stream()
+					.map(c -> ContractSimpleInfo.builder()
+							.name(c.name())
+							.unifiedSymbol(c.contractField().getUnifiedSymbol())
+							.value(c.identifier().toString())
+							.build())
+					.toList());
+			}
+			if(contract instanceof OptionChainContract optChainContract) {
+				actualSubContracts.addAll(optChainContract.memberContracts().stream()
+						.map(c -> ContractSimpleInfo.builder()
+								.name(c.name())
+								.unifiedSymbol(c.contractField().getUnifiedSymbol())
+								.value(c.identifier().toString())
+								.build())
+						.toList());
+			}
+		});
+		return new ResultBean<>(filterAndSort(actualSubContracts, query));
 	}
 	
 	private List<ContractSimpleInfo> filterAndSort(List<ContractSimpleInfo> list, String query){

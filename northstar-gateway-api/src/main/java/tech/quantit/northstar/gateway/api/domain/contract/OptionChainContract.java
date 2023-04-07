@@ -6,6 +6,7 @@ import org.springframework.util.Assert;
 
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.constant.ChannelType;
+import tech.quantit.northstar.common.constant.Constants;
 import tech.quantit.northstar.common.model.Identifier;
 import tech.quantit.northstar.gateway.api.domain.time.TradeTimeDefinition;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
@@ -29,7 +30,7 @@ public class OptionChainContract implements Contract {
 	public OptionChainContract(Contract underlyingContract, List<Contract> memberContracts) {
 		Assert.notEmpty(memberContracts, "集合不能为空");
 		this.memberContracts = memberContracts;
-		this.identifier = Identifier.of("FC_" + underlyingContract.identifier().value());
+		this.identifier = Identifier.of(Constants.OPTION_CHAIN_PREFIX + underlyingContract.identifier().value());
 		this.name = underlyingContract.name() + "期权链";
 	}
 
@@ -53,6 +54,11 @@ public class OptionChainContract implements Contract {
 		return true;
 	}
 	
+	@Override
+	public List<Contract> memberContracts() {
+		return memberContracts;
+	}
+
 	@Override
 	public ContractField contractField() {
 		ContractField seed = memberContracts.get(0).contractField();
