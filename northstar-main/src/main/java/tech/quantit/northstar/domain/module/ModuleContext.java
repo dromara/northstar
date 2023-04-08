@@ -337,6 +337,7 @@ public class ModuleContext implements IModuleContext, MergedBarListener{
 			mlog.info("策略处于停用状态，忽略委托单");
 			return;
 		}
+		mlog.info("收到下单意图：{}", tradeIntent);
 		this.tradeIntent = tradeIntent;
 		tradeIntent.setContext(this);
 		TickField tick = latestTickMap.get(tradeIntent.getContract().getUnifiedSymbol());

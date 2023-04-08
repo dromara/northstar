@@ -101,8 +101,10 @@ public class TradeIntent implements TransactionAware, TickDataAware {
 
 		if(Objects.nonNull(abortCondition))
 			terminated = abortCondition.test(tick);
-		if(hasTerminated())
+		if(hasTerminated()) {
+			context.getLogger().trace("交易意图已终止");
 			return;
+		}
 		if(orderIdRef.isEmpty() && !context.getState().isOrdering()) {
 			orderIdRef = context.submitOrderReq(contract, operation, priceType, volume - accVol, price);
 		} else if (orderIdRef.isPresent() && context.isOrderWaitTimeout(orderIdRef.get(), timeout) && System.currentTimeMillis() - lastCancelReqTime > 3000) {
