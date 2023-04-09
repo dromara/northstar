@@ -67,13 +67,15 @@ public class TradeIntent implements TransactionAware, TickDataAware {
 	 */
 	private final long timeout;
 	/**
-	 * 放弃条件，例如价格与初始值差异过大
+	 * 价差过大的放弃条件
 	 */
-	private final Predicate<TickField> abortCondition;
+	private final Predicate<Double> priceDiffConditionToAbort;
+	
+	private Double initialPrice;
 	
 	@Builder
 	public TradeIntent(ContractField contract, SignalOperation operation, PriceType priceType, double price, int volume, 
-			long timeout, Predicate<TickField> abortCondition) {
+			long timeout, Predicate<Double> priceDiffConditionToAbort) {
 		Assert.noNullElements(List.of(contract, operation, priceType), "入参不能为空");
 		Assert.isTrue(volume > 0, "手数必须为正整数");
 		Assert.isTrue(timeout > 0, "订单等待时长必须为正整数");
@@ -83,7 +85,7 @@ public class TradeIntent implements TransactionAware, TickDataAware {
 		this.price = price;
 		this.volume = volume;
 		this.timeout = timeout;
-		this.abortCondition = abortCondition;
+		this.priceDiffConditionToAbort = priceDiffConditionToAbort;
 	}
 	
 	private Optional<String> orderIdRef = Optional.empty();
@@ -99,10 +101,16 @@ public class TradeIntent implements TransactionAware, TickDataAware {
 		if(!StringUtils.equals(tick.getUnifiedSymbol(), contract.getUnifiedSymbol())) 
 			return;
 
-		if(Objects.nonNull(abortCondition))
-			terminated = abortCondition.test(tick);
+		if(Objects.isNull(initialPrice)) {
+			initialPrice = tick.getLastPrice();
+		}
+		if(Objects.nonNull(priceDiffConditionToAbort)) {
+			double priceDiff = Math.abs(tick.getLastPrice() - initialPrice);
+			terminated = priceDiffConditionToAbort.test(priceDiff);
+			context.getLogger().info("{} {} 价差中止条件已经满足，当前价差为{}", tick.getActionDay(), tick.getActionTime(), priceDiff);
+		}
 		if(hasTerminated()) {
-			context.getLogger().trace("交易意图已终止");
+			context.getLogger().debug("交易意图已终止");
 			return;
 		}
 		if(orderIdRef.isEmpty() && !context.getState().isOrdering()) {

@@ -14,6 +14,7 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
 
 import tech.quantit.northstar.common.constant.ModuleState;
 import tech.quantit.northstar.common.constant.SignalOperation;
@@ -41,6 +42,7 @@ class TradeIntentTest {
 		when(ctx.submitOrderReq(any(ContractField.class), any(SignalOperation.class), any(PriceType.class), anyInt(), any(Double.class)))
 			.thenReturn(Optional.of(ORDER_ID));
 		when(ctx.getState()).thenReturn(ModuleState.EMPTY);
+		when(ctx.getLogger()).thenReturn(mock(Logger.class));
 	}
 
 	@Test
@@ -95,7 +97,7 @@ class TradeIntentTest {
 	void testOpenAbort() {
 		TradeIntent intent = TradeIntent.builder()
 				.contract(contract).operation(SignalOperation.SELL_CLOSE).priceType(PriceType.OPP_PRICE).volume(1).timeout(3000)
-				.abortCondition(tick -> tick.getLastPrice() - 5000 > 10)
+				.priceDiffConditionToAbort(diff -> diff > 10)
 				.build();
 		intent.setContext(ctx);
 		intent.onTick(factory.makeTickField("rb2305", 5000));
