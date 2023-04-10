@@ -31,8 +31,6 @@ import tech.quantit.northstar.gateway.api.domain.contract.Contract;
 import tech.quantit.northstar.gateway.ctp.CtpContract;
 import xyz.redtorch.gateway.ctp.common.CtpContractNameResolver;
 import xyz.redtorch.gateway.ctp.common.GatewayConstants;
-import xyz.redtorch.gateway.ctp.x64v6v3v15v.CtpConstant;
-import xyz.redtorch.gateway.ctp.x64v6v3v15v.api.CThostFtdcQueryMaxOrderVolumeField;
 import xyz.redtorch.gateway.ctp.x64v6v5v1cpv.api.CThostFtdcAccountregisterField;
 import xyz.redtorch.gateway.ctp.x64v6v5v1cpv.api.CThostFtdcBatchOrderActionField;
 import xyz.redtorch.gateway.ctp.x64v6v5v1cpv.api.CThostFtdcBrokerTradingAlgosField;
@@ -150,12 +148,12 @@ import xyz.redtorch.pb.CoreEnum.VolumeConditionEnum;
 import xyz.redtorch.pb.CoreField.AccountField;
 import xyz.redtorch.pb.CoreField.CancelOrderReqField;
 import xyz.redtorch.pb.CoreField.ContractField;
+import xyz.redtorch.pb.CoreField.GatewaySettingField.CtpApiSettingField;
 import xyz.redtorch.pb.CoreField.NoticeField;
 import xyz.redtorch.pb.CoreField.OrderField;
 import xyz.redtorch.pb.CoreField.PositionField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TradeField;
-import xyz.redtorch.pb.CoreField.GatewaySettingField.CtpApiSettingField;
 
 public class TdSpi extends CThostFtdcTraderSpi {
 
@@ -991,9 +989,6 @@ public class TdSpi extends CThostFtdcTraderSpi {
 		}
 	}
 
-	public void OnRspQueryMaxOrderVolume(CThostFtdcQueryMaxOrderVolumeField pQueryMaxOrderVolume, CThostFtdcRspInfoField pRspInfo, int nRequestID, boolean bIsLast) {
-	}
-
 	// 确认结算信息回报
 	public void OnRspSettlementInfoConfirm(CThostFtdcSettlementInfoConfirmField pSettlementInfoConfirm, CThostFtdcRspInfoField pRspInfo, int nRequestID, boolean bIsLast) {
 		try {
@@ -1340,7 +1335,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 					.symbol(symbol)
 					.name(name)
 					.fullName(pInstrument.getInstrumentName())
-					.thirdPartyId(symbol + "@CTP")
+					.thirdPartyId(symbol + "@" + MKT_GATEWAY_ID)
 					.exchange(exchange)
 					.productClass(productClass)
 					.unifiedSymbol(unifiedSymbol)

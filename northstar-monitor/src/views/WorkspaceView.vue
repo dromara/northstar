@@ -79,14 +79,14 @@ export default {
     this.$nextTick(() => location.reload())
   },
   methods: {
-    handleSelect(index, params) {
+    handleSelect(index) {
       if (index === this.curPage) {
         return
       }
       this.curPage = index
       this.$router.push({
         name: pageOpts[index],
-        query: Object.assign({ auth: this.$route.query.auth }, params)
+        query: this.$route.query
       })
     },
     logout() {
