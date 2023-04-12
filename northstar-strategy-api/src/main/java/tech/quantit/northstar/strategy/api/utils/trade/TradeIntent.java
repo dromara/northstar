@@ -107,7 +107,9 @@ public class TradeIntent implements TransactionAware, TickDataAware {
 		if(Objects.nonNull(priceDiffConditionToAbort)) {
 			double priceDiff = Math.abs(tick.getLastPrice() - initialPrice);
 			terminated = priceDiffConditionToAbort.test(priceDiff);
-			context.getLogger().info("{} {} 价差中止条件已经满足，当前价差为{}", tick.getActionDay(), tick.getActionTime(), priceDiff);
+			if(terminated) {
+				context.getLogger().info("{} {} 价差中止条件已经满足，当前价差为{}", tick.getActionDay(), tick.getActionTime(), priceDiff);
+			}
 		}
 		if(hasTerminated()) {
 			context.getLogger().debug("交易意图已终止");
