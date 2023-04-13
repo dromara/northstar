@@ -242,4 +242,9 @@ public class ModuleAccountStore implements IModuleAccountStore {
 		return Optional.ofNullable(maxProfitMap.get(gatewayId)).orElse(0D);
 	}
 
+	@Override
+	public String toString() {
+		return "ModuleAccountStore [buyPositionTbl=" + buyPositionTbl + ", sellPositionTbl=" + sellPositionTbl + "]";
+	}
+	
 }

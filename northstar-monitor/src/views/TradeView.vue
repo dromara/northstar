@@ -297,6 +297,7 @@ export default {
   beforeDestroy() {
     clearTimeout(accountCheckTimer)
     this.$store.commit('resetMarketCurrentDataModule')
+    this.$store.commit('resetAccountModule')
   },
   async created() {
     this.accountOptions = await gatewayMgmtApi.findAll('TRADE')

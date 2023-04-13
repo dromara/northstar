@@ -70,9 +70,10 @@ const createStyle = (indicator, colorIndex) => {
 exports.default = (indicator, colorIndex) => {
   const name = indicator.name
   const plot = createStyle(indicator, colorIndex)
+  const prefix = indicator.paneId === 'candle_pane' ? '主图_' : `副图${indicator.paneId.replace('pane','')}_`
   return {
     name: 'VAL_' + name,
-    shortName: '模组计算值',
+    shortName: `${prefix}模组计算值`,
     plots: [plot],
     precision: 2,
     styles: {

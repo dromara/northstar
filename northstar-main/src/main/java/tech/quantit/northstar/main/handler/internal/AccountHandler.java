@@ -12,6 +12,7 @@ import tech.quantit.northstar.common.event.NorthstarEventType;
 import tech.quantit.northstar.common.exception.NoSuchElementException;
 import tech.quantit.northstar.domain.account.TradeDayAccount;
 import tech.quantit.northstar.domain.account.TradeDayAccountFactory;
+import tech.quantit.northstar.strategy.api.AccountCenter;
 import xyz.redtorch.pb.CoreField.AccountField;
 import xyz.redtorch.pb.CoreField.OrderField;
 import xyz.redtorch.pb.CoreField.PositionField;
@@ -60,6 +61,7 @@ public class AccountHandler extends AbstractEventHandler implements GenericEvent
 			checkAccount(af.getGatewayId(), e.getEvent());
 			TradeDayAccount account = accountMap.get(af.getGatewayId());
 			account.onAccountUpdate(af);
+			AccountCenter.getInstance().getAccount(account.getGateway()).syncAmount(af);
 		}
 		case POSITION -> {
 			PositionField pf = (PositionField) e.getData();

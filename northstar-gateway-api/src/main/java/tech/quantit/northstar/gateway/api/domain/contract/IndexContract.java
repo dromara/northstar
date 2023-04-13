@@ -35,8 +35,6 @@ public class IndexContract implements Contract, TickDataAware{
 	
 	private final Identifier identifier;
 	
-	private boolean hasSubscribed;
-	
 	public IndexContract(FastEventEngine feEngine, List<Contract> monthContracts) {
 		this.monthContracts = monthContracts;
 		this.contract = makeIndexContractField(monthContracts.get(0).contractField());
@@ -71,31 +69,26 @@ public class IndexContract implements Contract, TickDataAware{
 
 	@Override
 	public boolean subscribe() {
+		log.debug("订阅：{}", identifier.value());
 		for(Contract c : monthContracts) {
 			if(!c.subscribe()) {
 				log.warn("[{}] 合约订阅失败", c.contractField().getUnifiedSymbol());
 			}
 		}
-		hasSubscribed = true;
 		return true;
 	}
 
 	@Override
 	public boolean unsubscribe() {
+		log.debug("退订：{}", identifier.value());
 		for(Contract c : monthContracts) {
 			if(!c.unsubscribe()) {
 				log.warn("[{}] 合约取消订阅失败", c.contractField().getUnifiedSymbol());
 			}
 		}
-		hasSubscribed = false;
 		return true;
 	}
 	
-	@Override
-	public boolean hasSubscribed() {
-		return hasSubscribed;
-	}
-
 	@Override
 	public void onTick(TickField tick) {
 		ticker.update(tick);

@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 
+import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.data.IGatewayRepository;
 import tech.quantit.northstar.data.IModuleRepository;
 import tech.quantit.northstar.data.IPlaybackRuntimeRepository;
@@ -26,14 +27,13 @@ import tech.quantit.northstar.main.service.LogService;
 import tech.quantit.northstar.main.service.ModuleService;
 import tech.quantit.northstar.main.utils.ModuleFactory;
 
-@DependsOn({
-	"internalDispatcher",
-	"broadcastEventDispatcher",
-	"strategyDispatcher",
+@DependsOn({ 
+	"internalDispatcher", 
+	"broadcastEventDispatcher", 
+	"strategyDispatcher", 
 	"accountEventHandler",
-	"connectionEventHandler",
-	"moduleFactory",
-	})
+	"connectionEventHandler", 
+	"moduleFactory" })
 @Configuration
 public class ServiceConfig {
 

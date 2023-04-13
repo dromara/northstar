@@ -31,7 +31,7 @@ import xyz.redtorch.gateway.ctp.x64v6v3v15v.CtpGatewayFactory;
 import xyz.redtorch.gateway.ctp.x64v6v5v1cpv.CtpSimGatewayFactory;
 
 @Configuration
-public class GatewayConfig {
+class GatewayConfig {
 
     @Bean
     SimMarket simMarket() {

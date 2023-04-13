@@ -4,6 +4,7 @@
     :visible="visible"
     class="module-dialog"
     v-loading="loading"
+    :close-on-click-modal="!isUpdateMode"
     element-loading-background="rgba(0, 0, 0, 0.3)"
     width="540px"
     @close="close"
@@ -41,13 +42,13 @@
               ></el-input>
             </el-form-item>
             <el-form-item label="模组类型">
-              <el-select v-model="form.type" :disabled="readOnly || isUpdateMode">
+              <el-select v-model="form.type" :disabled="readOnly">
                 <el-option label="投机" value="SPECULATION"></el-option>
                 <el-option label="套利" value="ARBITRAGE"></el-option>
               </el-select>
             </el-form-item>
             <el-form-item label="模组用途">
-              <el-select v-model="form.usage" :disabled="readOnly || isUpdateMode">
+              <el-select v-model="form.usage" :disabled="readOnly">
                 <el-option label="回测" value="PLAYBACK"></el-option>
                 <el-option label="模拟盘" value="UAT"></el-option>
                 <el-option label="实盘" value="PROD"></el-option>
@@ -133,7 +134,7 @@
                 v-model="choseAccounts"
                 placeholder="请选择账户"
                 multiple
-                :disabled="readOnly || isUpdateMode"
+                :disabled="readOnly"
                 @change="accountSelected"
               >
                 <el-option
@@ -152,7 +153,7 @@
                 <el-input
                   v-model="form.moduleAccountSettingsDescription[i].moduleAccountInitBalance"
                   type="number"
-                  :disabled="readOnly || isUpdateMode"
+                  :disabled="readOnly"
                 />
               </el-form-item>
               <el-form-item label="关联合约">

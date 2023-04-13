@@ -11,7 +11,6 @@ import cn.hutool.core.codec.Base64;
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.event.NorthstarEvent;
 import tech.quantit.northstar.common.event.NorthstarEventType;
-import tech.quantit.northstar.common.utils.MessagePrinter;
 import xyz.redtorch.pb.CoreField.AccountField;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.PositionField;
@@ -45,10 +44,10 @@ public class SocketIOMessageEngine {
 			log.trace("BAR数据分发：[{} {} {} 价格：{}]", rmid, bar.getActionDay(), bar.getActionTime(), bar.getClosePrice());
 			server.getRoomOperations(rmid).sendEvent(NorthstarEventType.BAR.toString(), Base64.encode(bar.toByteArray()));
 		} else if(event.getData() instanceof AccountField account) {
-			log.trace("账户信息分发: [{}]", MessagePrinter.print(account));
+			log.trace("账户信息分发: [{} {} {}]", account.getAccountId(), account.getGatewayId(), account.getBalance());
 			server.getBroadcastOperations().sendEvent(event.getEvent().toString(), Base64.encode(account.toByteArray()));
 		} else if(event.getData() instanceof PositionField position) {
-			log.trace("持仓信息分发: [{}]", MessagePrinter.print(position));
+			log.trace("持仓信息分发: [{} {} {}]", position.getAccountId(), position.getGatewayId(), position.getPositionId());
 			server.getBroadcastOperations().sendEvent(event.getEvent().toString(), Base64.encode(position.toByteArray()));
 		} else if(event.getData() instanceof Message message) {			
 			server.getBroadcastOperations().sendEvent(event.getEvent().toString(), Base64.encode(message.toByteArray()));

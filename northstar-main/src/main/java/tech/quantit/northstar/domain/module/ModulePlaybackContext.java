@@ -115,6 +115,9 @@ public class ModulePlaybackContext implements IModuleContext, MergedBarListener 
 	/* unifiedSymbol -> barQ */
 	private Map<String, Queue<BarField>> barBufQMap = new HashMap<>();
 	
+	/* contract -> gateway */
+	private Map<ContractField, TradeGateway> gatewayMap = new HashMap<>();
+	
 	/* indicator -> values */
 	private Map<Indicator, Queue<TimeSeriesValue>> indicatorValBufQMap = new HashMap<>(); 
 	
@@ -195,15 +198,19 @@ public class ModulePlaybackContext implements IModuleContext, MergedBarListener 
 		String id = UUID.randomUUID().toString();
 		String gatewayId = PLAYBACK_GATEWAY;
 		PositionField pf = null;
-		for(PositionField pos : accStore.getPositions(gatewayId)) {
-			boolean isOppositeDir = (operation.isBuy() && FieldUtils.isShort(pos.getPositionDirection()) 
-					|| operation.isSell() && FieldUtils.isLong(pos.getPositionDirection()));
-			if(ContractUtils.isSame(pos.getContract(), contract) && isOppositeDir) {
-				pf = pos;
+		if(operation.isClose()) {
+			for(PositionField pos : accStore.getPositions(gatewayId)) {
+				boolean isOppositeDir = (operation.isBuy() && FieldUtils.isShort(pos.getPositionDirection()) 
+						|| operation.isSell() && FieldUtils.isLong(pos.getPositionDirection()));
+				if(ContractUtils.isSame(pos.getContract(), contract) && isOppositeDir) {
+					pf = pos;
+				}
 			}
-		}
-		if(pf == null && operation.isClose()) {
-			throw new IllegalStateException("没有找到对应的持仓进行操作");
+			if(pf == null) {
+				mlog.warn("委托信息：{} {} {}手", contract.getUnifiedSymbol(), operation, volume);
+				mlog.warn("持仓信息：{}", accStore);
+				throw new IllegalStateException("没有找到对应的持仓进行操作");
+			}
 		}
 		TickField lastTick = latestTickMap.get(contract.getUnifiedSymbol());
 		TradeField trade = TradeField.newBuilder()
@@ -299,7 +306,7 @@ public class ModulePlaybackContext implements IModuleContext, MergedBarListener 
 		if(!bindedSymbolSet.contains(bar.getUnifiedSymbol())) {
 			return;
 		}
-		mlog.trace("Bar信息: {} {} {}，最新价: {}", bar.getUnifiedSymbol(), bar.getActionDay(), bar.getActionTime(), bar.getClosePrice());
+		mlog.trace("分钟Bar信息: {} {} {}，最新价: {}", bar.getUnifiedSymbol(), bar.getActionDay(), bar.getActionTime(), bar.getClosePrice());
 		indicatorFactory.getIndicatorMap().entrySet().stream().forEach(e -> e.getValue().onBar(bar));	// 普通指标的更新
 		comboIndicators.stream().forEach(combo -> combo.onBar(bar));
 		inspectedValIndicatorFactory.getIndicatorMap().entrySet().stream().forEach(e -> e.getValue().onBar(bar));	// 值透视指标的更新
@@ -409,6 +416,11 @@ public class ModulePlaybackContext implements IModuleContext, MergedBarListener 
 	public TradeStrategy getTradeStrategy() {
 		return tradeStrategy;
 	}
+	
+	@Override
+	public TradeGateway getTradeGateway(ContractField contract) {
+		return gatewayMap.get(contract);
+	}
 
 	@Override
 	public synchronized ModuleRuntimeDescription getRuntimeDescription(boolean fullDescription) {
@@ -499,6 +511,7 @@ public class ModulePlaybackContext implements IModuleContext, MergedBarListener 
 	public synchronized void bindGatewayContracts(TradeGateway gateway, List<Contract> contracts) {
 		for(Contract contract : contracts) {
 			ContractField c = contract.contractField();
+			gatewayMap.put(c, gateway);
 			contractMap.put(c.getUnifiedSymbol(), c);
 			contractMap2.put(c, contract);
 			barBufQMap.put(c.getUnifiedSymbol(), new LinkedList<>());
@@ -516,6 +529,7 @@ public class ModulePlaybackContext implements IModuleContext, MergedBarListener 
 
 	@Override
 	public void onMergedBar(BarField bar) {
+		mlog.debug("合并Bar信息: {} {} {} {}，最新价: {}", bar.getUnifiedSymbol(), bar.getActionDay(), bar.getActionTime(), bar.getActionTimestamp(), bar.getClosePrice());
 		Consumer<Map.Entry<String,Indicator>> action = e -> {
 			Indicator indicator = e.getValue();
 			if(!StringUtils.equals(indicator.bindedUnifiedSymbol(), bar.getUnifiedSymbol())) {

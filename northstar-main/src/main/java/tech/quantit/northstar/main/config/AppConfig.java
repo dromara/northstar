@@ -66,7 +66,7 @@ import tech.quantit.northstar.main.utils.ModuleFactory;
  */
 @Slf4j
 @Configuration
-public class AppConfig implements WebMvcConfigurer, DisposableBean {
+class AppConfig implements WebMvcConfigurer, DisposableBean {
 
 	@Autowired
 	private SocketIOServer socketServer;
@@ -93,8 +93,8 @@ public class AppConfig implements WebMvcConfigurer, DisposableBean {
 		}
 	}
 
-    @Bean
-    CorsFilter corsFilter() {
+	@Bean
+	CorsFilter corsFilter() {
 
         CorsConfiguration config = new CorsConfiguration();
         // 设置允许跨域请求的域名
@@ -117,45 +117,45 @@ public class AppConfig implements WebMvcConfigurer, DisposableBean {
 				.excludePathPatterns("/auth/login");
 	}
 
-    @Bean
-    GatewayAndConnectionManager gatewayAndConnectionManager() {
-        return new GatewayAndConnectionManager();
-    }
+	@Bean
+	GatewayAndConnectionManager gatewayAndConnectionManager() {
+		return new GatewayAndConnectionManager();
+	}
 
-    @Bean
-    ConcurrentMap<String, TradeDayAccount> accountMap() {
-        return new ConcurrentHashMap<>();
-    }
+	@Bean
+	ConcurrentMap<String, TradeDayAccount> accountMap() {
+		return new ConcurrentHashMap<>();
+	}
 
-    @Bean
-    IMarketCenter marketCenter(FastEventEngine fastEventEngine) throws IOException {
-        ContractDefinitionReader reader = new ContractDefinitionReader();
-        return new MarketCenter(reader.load(contractDefRes.getInputStream()), fastEventEngine);
-    }
+	@Bean
+	IMarketCenter marketCenter(FastEventEngine fastEventEngine) throws IOException {
+		ContractDefinitionReader reader = new ContractDefinitionReader();
+		return new MarketCenter(reader.load(contractDefRes.getInputStream()), fastEventEngine);
+	}
 
-    @Bean
-    ExternalJarClassLoader extJarListener(SpringContextUtil springContextUtil) throws MalformedURLException {
-        ApplicationHome appHome = new ApplicationHome(getClass());
-        File appPath = appHome.getDir();
-        ExternalJarClassLoader clzLoader = null;
-        for (File file : appPath.listFiles()) {
-            if (file.getName().contains("northstar-external")
-                    && Files.getFileExtension(file.getName()).equalsIgnoreCase("jar") && !file.isDirectory()) {
-                log.info("加载northstar-external扩展包");
-                clzLoader = new ExternalJarClassLoader(new URL[]{file.toURI().toURL()}, getClass().getClassLoader());
-                clzLoader.initBean();
-                break;
-            }
-        }
-        return clzLoader;
-    }
+	@Bean
+	ExternalJarClassLoader extJarListener(SpringContextUtil springContextUtil) throws MalformedURLException {
+		ApplicationHome appHome = new ApplicationHome(getClass());
+		File appPath = appHome.getDir();
+		ExternalJarClassLoader clzLoader = null;
+		for (File file : appPath.listFiles()) {
+			if (file.getName().contains("northstar-external")
+					&& Files.getFileExtension(file.getName()).equalsIgnoreCase("jar") && !file.isDirectory()) {
+				log.info("加载northstar-external扩展包");
+				clzLoader = new ExternalJarClassLoader(new URL[] { file.toURI().toURL() }, getClass().getClassLoader());
+				clzLoader.initBean();
+				break;
+			}
+		}
+		return clzLoader;
+	}
 
-    @Bean
-    ModuleFactory moduleFactory(@Autowired(required = false) ExternalJarClassLoader extJarLoader, IGatewayRepository gatewayRepo,
-                                          IModuleRepository moduleRepo, GatewayAndConnectionManager gatewayConnMgr, IContractManager contractMgr,
-                                          MailDeliveryManager mailMgr) {
-        return new ModuleFactory(extJarLoader, moduleRepo, gatewayRepo, gatewayConnMgr, contractMgr, mailMgr);
-    }
+	@Bean
+	ModuleFactory moduleFactory(@Autowired(required = false) ExternalJarClassLoader extJarLoader, IGatewayRepository gatewayRepo,
+			IModuleRepository moduleRepo, IMarketDataRepository mdRepo, GatewayAndConnectionManager gatewayConnMgr, IContractManager contractMgr,
+			MailDeliveryManager mailMgr) {
+		return new ModuleFactory(extJarLoader, moduleRepo, gatewayRepo, gatewayConnMgr, contractMgr, mailMgr);
+	}
 
 	private static OkHttpClient getUnsafeOkHttpClient() {
 		try {
@@ -192,26 +192,26 @@ public class AppConfig implements WebMvcConfigurer, DisposableBean {
 		}
 	}
 
-    @Bean
-    RestTemplate restTemplate() {
-        return new RestTemplateBuilder()
-                .requestFactory(() -> new OkHttp3ClientHttpRequestFactory(getUnsafeOkHttpClient()))
-                .setReadTimeout(Duration.ofSeconds(30))
-                .setConnectTimeout(Duration.ofSeconds(5))
-                .build();
-    }
+	@Bean
+	RestTemplate restTemplate() {
+		return new RestTemplateBuilder()
+				.requestFactory(() -> new OkHttp3ClientHttpRequestFactory(getUnsafeOkHttpClient()))
+				.setReadTimeout(Duration.ofSeconds(30))
+				.setConnectTimeout(Duration.ofSeconds(5))
+				.build();
+	}
 
-    @ConditionalOnMissingBean(IMailMessageContentHandler.class)
-    @Bean
-    IMailMessageContentHandler messageDeliveryHandler() {
-        return new IMailMessageContentHandler() {
-        };
-    }
+	@ConditionalOnMissingBean(IMailMessageContentHandler.class)
+	@Bean
+	IMailMessageContentHandler messageDeliveryHandler() {
+		return new IMailMessageContentHandler() {
+		};
+	}
 
-    @Bean
-    MailDeliveryManager mailDeliveryManager(IMailMessageContentHandler handler) {
-        return new MailDeliveryManager(new MailSenderFactory(), handler);
-    }
+	@Bean
+	MailDeliveryManager mailDeliveryManager(IMailMessageContentHandler handler) {
+		return new MailDeliveryManager(new MailSenderFactory(), handler);
+	}
 
 	@Override
 	public void destroy() throws Exception {

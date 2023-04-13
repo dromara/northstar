@@ -6,10 +6,12 @@ import org.springframework.util.Assert;
 
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.constant.ChannelType;
+import tech.quantit.northstar.common.constant.Constants;
 import tech.quantit.northstar.common.model.Identifier;
 import tech.quantit.northstar.gateway.api.domain.time.TradeTimeDefinition;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
+import xyz.redtorch.pb.CoreField.ContractField;
 
 /**
  * 组合合约
@@ -25,13 +27,11 @@ public class OptionChainContract implements Contract {
 	
 	private final Identifier identifier;
 	
-	private boolean hasSubscribed;
-	
-	public OptionChainContract(String name, List<Contract> memberContracts) {
+	public OptionChainContract(Contract underlyingContract, List<Contract> memberContracts) {
 		Assert.notEmpty(memberContracts, "集合不能为空");
 		this.memberContracts = memberContracts;
-		this.identifier = Identifier.of(name);
-		this.name = name;
+		this.identifier = Identifier.of(Constants.OPTION_CHAIN_PREFIX + underlyingContract.identifier().value());
+		this.name = underlyingContract.name() + "期权链";
 	}
 
 	@Override
@@ -41,7 +41,6 @@ public class OptionChainContract implements Contract {
 				log.warn("[{}] 合约订阅失败", c.contractField().getUnifiedSymbol());
 			}
 		}
-		hasSubscribed = true;
 		return true;
 	}
 
@@ -52,13 +51,25 @@ public class OptionChainContract implements Contract {
 				log.warn("[{}] 合约取消订阅失败", c.contractField().getUnifiedSymbol());
 			}
 		}
-		hasSubscribed = false;
 		return true;
 	}
 	
 	@Override
-	public boolean hasSubscribed() {
-		return hasSubscribed;
+	public List<Contract> memberContracts() {
+		return memberContracts;
+	}
+
+	@Override
+	public ContractField contractField() {
+		ContractField seed = memberContracts.get(0).contractField();
+		String unifiedSymbol = String.format("%s@%s@%s", name, seed.getExchange(), seed.getProductClass());
+		return ContractField.newBuilder(seed)
+				.setName(name)
+				.setFullName(name)
+				.setUnifiedSymbol(unifiedSymbol)
+				.setSymbol(name)
+				.setContractId(identifier.value())
+				.build();
 	}
 
 	@Override

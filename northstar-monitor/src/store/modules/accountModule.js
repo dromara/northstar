@@ -73,6 +73,9 @@ const accountModule = {
       if (gatewayId === state.curAccountId) {
         state.curInfo.orders = Object.assign({}, state[gatewayId].orders)
       }
+    },
+    resetAccountModule(state){
+      Object.assign(state, accountModule.state())
     }
   },
   actions: {},

@@ -18,27 +18,27 @@ import tech.quantit.northstar.main.handler.broadcast.SocketIOMessageEngine;
  *
  */
 @Configuration
-public class FastEventDispatcherConfig {
+class FastEventDispatcherConfig {
 
-    @Bean
-    NorthstarEventDispatcher internalDispatcher(FastEventEngine ee, InternalEventBus eb) {
-        NorthstarEventDispatcher handler = new InternalDispatcher(eb);
-        ee.addHandler(handler);
-        return handler;
-    }
-
-    @Bean
-    NorthstarEventDispatcher strategyDispatcher(FastEventEngine ee, StrategyEventBus eb) {
-        NorthstarEventDispatcher handler = new StrategyDispatcher(eb);
-        ee.addHandler(handler);
-        return handler;
-    }
-
-    @Bean
-    NorthstarEventDispatcher broadcastEventDispatcher(FastEventEngine ee, SocketIOMessageEngine msgEngine) {
-        NorthstarEventDispatcher handler = new BroadcastDispatcher(msgEngine);
-        ee.addHandler(handler);
-        return handler;
-    }
+	@Bean
+	NorthstarEventDispatcher internalDispatcher(FastEventEngine ee, InternalEventBus eb) {
+		NorthstarEventDispatcher handler = new InternalDispatcher(eb);
+		ee.addHandler(handler);
+		return handler;
+	}
+	
+	@Bean
+	NorthstarEventDispatcher strategyDispatcher(FastEventEngine ee, StrategyEventBus eb) {
+		NorthstarEventDispatcher handler = new StrategyDispatcher(eb);
+		ee.addHandler(handler);
+		return handler;
+	}
+	
+	@Bean
+	NorthstarEventDispatcher broadcastEventDispatcher(FastEventEngine ee, SocketIOMessageEngine msgEngine) {
+		NorthstarEventDispatcher handler = new BroadcastDispatcher(msgEngine);
+		ee.addHandler(handler);
+		return handler;
+	}
 	
 }

@@ -242,10 +242,12 @@
             v-model="indicator.paneId"
             placeholder="请选择绘图位置"
           >
-            <el-option :key="1" label="主图" value="candle_pane" />
-            <el-option :key="2" label="副图1" value="pane1" />
-            <el-option :key="3" label="副图2" value="pane2" />
-            <el-option :key="4" label="副图3" value="pane3" />
+            <el-option :key="0" label="主图" value="candle_pane" />
+            <el-option :key="1" label="副图1" value="pane1" />
+            <el-option :key="2" label="副图2" value="pane2" />
+            <el-option :key="3" label="副图3" value="pane3" />
+            <el-option :key="4" label="副图4" value="pane4" />
+            <el-option :key="5" label="副图5" value="pane5" />
           </el-select>
           <el-button icon="el-icon-plus" title="绘制指标" @click.native="addIndicator"></el-button>
           <el-button
@@ -430,6 +432,7 @@ export default {
       if (val) {
         this.updateChart()
         this.loadIndicators()
+        this.holdingVisibleOnChart = false
       }
     },
     holdingVisibleOnChart: function (val) {
@@ -600,8 +603,11 @@ export default {
     addIndicator() {
       if (!this.indicator.name) return
       this.indicatorMap[this.indicator.name] = Object.assign({}, this.indicator)
-      this.renderIndicator(this.indicator)
+      const indicatorMap = JSON.parse(JSON.stringify(this.indicatorMap))
+      this.clearIndicators()
+      this.indicatorMap = indicatorMap;
       this.saveIndicators()
+      this.loadIndicators()
     },
     removeIndicator() {
       if (!this.indicator.name) return
@@ -660,13 +666,18 @@ export default {
         localStorage.getItem(`module_${this.module.moduleName}_${this.unifiedSymbolOfChart}`) ||
         '{}'
       this.indicatorMap = JSON.parse(dataStr)
-      Object.keys(this.indicatorMap).forEach((indicatorName) => {
-        if (this.moduleRuntime.indicatorMap[this.unifiedSymbolOfChart].indexOf(indicatorName) < 0) {
-          return
-        }
-        this.indicator = Object.assign({}, this.indicatorMap[indicatorName])
-        this.renderIndicator(this.indicator)
-      })
+      for(let i=2; i<6; i++){
+        const paneId = 'pane' + i
+        Object.keys(this.indicatorMap).forEach((indicatorName) => {
+          if (this.moduleRuntime.indicatorMap[this.unifiedSymbolOfChart].indexOf(indicatorName) < 0) {
+            return
+          }
+          this.indicator = Object.assign({}, this.indicatorMap[indicatorName])
+          if(this.indicator.paneId === paneId || this.indicator.paneId === 'candle_pane'){
+            this.renderIndicator(this.indicator)
+          }
+        })
+      }
     },
     saveIndicators() {
       localStorage.setItem(

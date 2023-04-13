@@ -1,9 +1,11 @@
 package tech.quantit.northstar.gateway.api.domain.time;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.List;
 
-import tech.quantit.northstar.common.constant.DateTimeConstant;
 import xyz.redtorch.pb.CoreField.TickField;
 
 /**
@@ -17,32 +19,29 @@ public class OpenningMinuteClock {
 	
 	private PeriodHelper helper;
 	
-	private BarClock barClock;
-	
 	public OpenningMinuteClock(TradeTimeDefinition tradeTimeDefinition) {
 		helper = new PeriodHelper(1, tradeTimeDefinition);
 		timeFrame = helper.getRunningBaseTimeFrame();
-		barClock = new BarClock(timeFrame);
 	}
 	
 	/**
 	 * 根据TICK时间计算所属的BAR时间
-	 * 参考CTP接口数据为计算依据
 	 * @param tick
 	 * @return
 	 */
-	public LocalTime barMinute(TickField tick) {
-		LocalTime tickTime = LocalTime.parse(tick.getActionTime(), DateTimeConstant.T_FORMAT_WITH_MS_INT_FORMATTER);
-		barClock.adjustTime(tickTime);
-		return barClock.currentTimeBucket();
+	public LocalDateTime barMinute(TickField tick) {
+		LocalDateTime tickDateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(tick.getActionTimestamp()), ZoneId.systemDefault());
+		return tickDateTime.withSecond(0).plusMinutes(1);
 	}
 	
 	/**
-	 * 下一个BAR时间
+	 * 是否为合法的开市TICK
 	 * @return
 	 */
-	public LocalTime nextBarMinute() {
-		return barClock.next();
+	public boolean isValidOpenningTick(TickField tick) {
+		LocalDateTime ldt = barMinute(tick);
+		LocalTime barTime = ldt.toLocalTime();
+		return timeFrame.indexOf(barTime) >= 0;
 	}
 	
 	/**

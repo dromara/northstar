@@ -39,21 +39,21 @@ public class SocketIOServerConfig implements InitializingBean {
 	private boolean sslEnabled;
 
 	private UserInfo userInfo = new UserInfo();
-
-    @Bean
-    @ConditionalOnExpression("!'${spring.profiles.active}'.equals('test')")
+	
+	@Bean
+	@ConditionalOnExpression("!'${spring.profiles.active}'.equals('test')")
     SocketIOServer socketIOServer() {
-        try {
-            return makeServer();
-        } catch (IOException e) {
-            throw new RuntimeException("请检查本机网络环境是否正常", e);
-        }
+		try {
+			return makeServer();
+		} catch (IOException e) {
+			throw new RuntimeException("请检查本机网络环境是否正常", e);
+		}
     }
-
-    @Bean
-    UserInfo userInfo() {
-        return userInfo;
-    }
+	
+	@Bean
+	UserInfo userInfo() {
+		return userInfo;
+	}
 	
 	private SocketIOServer makeServer() throws IOException {
 		String token = Base64.getEncoder().encodeToString(String.format("%s:%s", userInfo.getUserId(), userInfo.getPassword()).getBytes());
@@ -105,11 +105,11 @@ public class SocketIOServerConfig implements InitializingBean {
         server.start();
         return server;
 	}
-
-    @Bean
-    SpringAnnotationScanner springAnnotationScanner(SocketIOServer socketServer) {
-        return new SpringAnnotationScanner(socketServer);
-    }
+	
+	@Bean
+	SpringAnnotationScanner springAnnotationScanner(SocketIOServer socketServer) {
+		return new SpringAnnotationScanner(socketServer);
+	}
 
 	@Override
 	public void afterPropertiesSet() throws Exception {

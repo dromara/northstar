@@ -112,6 +112,7 @@ private TestFieldFactory factory = new TestFieldFactory("回测账户");
 				.contract(contract)
 				.operation(SignalOperation.BUY_OPEN)
 				.volume(1)
+				.timeout(3000)
 				.priceType(PriceType.ANY_PRICE)
 				.build();
 		ctx.submitOrderReq(ti);

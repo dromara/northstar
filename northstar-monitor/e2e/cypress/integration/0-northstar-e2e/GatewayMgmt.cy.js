@@ -38,8 +38,8 @@ describe('网关管理-测试', () => {
         it('应该可以连线与断开网关，连线后修改、删除按钮不可用', () => {
             cy.get('.el-table__row').first().contains('连线').click()
             cy.get('.el-table__row').first().contains('已连接')
-            cy.get('.el-table__row').first().contains('修改').should('be.disabled')
-            cy.get('.el-table__row').first().contains('删除').should('be.disabled')
+            cy.get('.el-table__row').first().contains('修改').should('not.exist')
+            cy.get('.el-table__row').first().contains('删除').should('not.exist')
             cy.get('.el-table__row').first().contains('断开').click()
             cy.get('.el-table__row').first().contains('已断开')
             cy.get('.el-table__row').first().contains('修改').should('be.enabled')
@@ -92,8 +92,8 @@ describe('网关管理-测试', () => {
         it('应该可以连线、断开网关，连线后修改、删除按钮不可用', () => {
             cy.get('.el-table__row').first().contains('连线').click()
             cy.get('.el-table__row').first().contains('已连接')
-            cy.get('.el-table__row').first().contains('修改').should('be.disabled')
-            cy.get('.el-table__row').first().contains('删除').should('be.disabled')
+            cy.get('.el-table__row').first().contains('修改').should('not.exist')
+            cy.get('.el-table__row').first().contains('删除').should('not.exist')
             cy.get('.el-table__row').first().contains('断开').click()
             cy.get('.el-table__row').first().contains('已断开')
             cy.get('.el-table__row').first().contains('修改').should('be.enabled')

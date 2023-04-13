@@ -167,6 +167,7 @@ class MarketCenterTest {
 					.setExchange(ExchangeEnum.SHFE)
 					.setProductClass(ProductClassEnum.FUTURES)
 					.setContractId(identifier().value())
+					.setUnderlyingSymbol(symbol.replaceAll("([A-z]+[0-9]+)[CP][0-9]+", "$1"))
 					.setGatewayId(GATEWAY_ID)
 					.setName(name())
 					.build();

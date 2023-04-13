@@ -109,23 +109,42 @@ public class MarketCenter implements IMarketCenter{
 	@Override
 	public synchronized void loadContractGroup(ChannelType channelType) {
 		List<Contract> gatewayContracts = getContracts(channelType);
+		Map<String, Contract> symbolContractMap = new HashMap<>();
+		for(Contract c : gatewayContracts) {
+			symbolContractMap.put(c.contractField().getSymbol(), c);
+		}
 		// 聚合期权合约
-		aggregateOptionContracts(gatewayContracts.stream().filter(c -> c.productClass() == ProductClassEnum.OPTION).toList());
+		try {
+			aggregateOptionContracts(gatewayContracts.stream().filter(c -> c.productClass() == ProductClassEnum.OPTION).toList(), symbolContractMap);
+		} catch (Exception e) {
+			log.error("聚合期权链合约时出错", e);
+		}
 		
 		// 聚合期货合约
-		aggregateFutureIndexContracts(channelDefContractGroups.row(channelType));
+		try {
+			aggregateFutureIndexContracts(channelDefContractGroups.row(channelType));
+		} catch (Exception e) {
+			log.error("聚合期货指数合约时出错", e);
+		}
 		
 	}
 	
-	private void aggregateOptionContracts(List<Contract> optContracts) {
+	private void aggregateOptionContracts(List<Contract> optContracts, Map<String,Contract> symbolContractMap) {
 		Map<String, List<Contract>> symbolOptionsMap = new HashMap<>();
 		for(Contract c : optContracts) {
+			if(c instanceof OptionChainContract) {
+				continue;
+			}
 			String underlyingSymbol = c.contractField().getUnderlyingSymbol();
 			symbolOptionsMap.computeIfAbsent(underlyingSymbol, key -> new ArrayList<>());
 			symbolOptionsMap.get(underlyingSymbol).add(c);
 		}
 		for(Entry<String, List<Contract>> e : symbolOptionsMap.entrySet()) {
-			Contract c = new OptionChainContract(String.format("%s_期权链", e.getKey()), e.getValue());
+			if(!symbolContractMap.containsKey(e.getKey())) {
+				log.warn("找不到{}对应的合约信息", e.getKey());
+				continue;
+			}
+			Contract c = new OptionChainContract(symbolContractMap.get(e.getKey()), e.getValue());
 			contractMap.put(c.identifier(), c);
 		}
 	}
@@ -217,6 +236,8 @@ public class MarketCenter implements IMarketCenter{
 		IndexContract idxContract = idxContractMap.get(contract);
 		if(Objects.nonNull(idxContract)) {
 			idxContract.onTick(tick);
+		} else if(contract.productClass() == ProductClassEnum.FUTURES){
+			log.trace("没有找到 [{}] 对应的指数合约", contract.identifier());
 		}
 	}
 

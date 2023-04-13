@@ -1,5 +1,8 @@
 package tech.quantit.northstar.gateway.api.domain.contract;
 
+import java.util.Objects;
+
+import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.TickDataAware;
 import tech.quantit.northstar.common.constant.ChannelType;
 import tech.quantit.northstar.common.event.FastEventEngine;
@@ -18,13 +21,12 @@ import xyz.redtorch.pb.CoreField.TickField;
  * @author KevinHuangwl
  *
  */
+@Slf4j
 public class GatewayContract implements Contract, TickDataAware{
 
 	private MinuteBarGenerator barGen;
 	
 	private ContractField contract;
-	
-	private boolean hasSubscribed;
 	
 	private Instrument ins;
 	
@@ -39,13 +41,13 @@ public class GatewayContract implements Contract, TickDataAware{
 
 	@Override
 	public boolean subscribe() {
-		hasSubscribed = true;
+		log.debug("订阅：{}", contract.getContractId());
 		return mktCenter.getGateway(channelType()).subscribe(contract);
 	}
 
 	@Override
 	public boolean unsubscribe() {
-		hasSubscribed = false;
+		log.debug("退订：{}", contract.getContractId());
 		return mktCenter.getGateway(channelType()).unsubscribe(contract);
 	}
 
@@ -64,11 +66,6 @@ public class GatewayContract implements Contract, TickDataAware{
 		return true;
 	}
 	
-	@Override
-	public boolean hasSubscribed() {
-		return hasSubscribed;
-	}
-
 	@Override
 	public String name() {
 		return ins.name();
@@ -108,4 +105,22 @@ public class GatewayContract implements Contract, TickDataAware{
 	public void endOfMarket() {
 		barGen.endOfBar();
 	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(contract.getContractId());
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		GatewayContract other = (GatewayContract) obj;
+		return Objects.equals(contract.getContractId(), other.contract.getContractId());
+	}
+	
 }

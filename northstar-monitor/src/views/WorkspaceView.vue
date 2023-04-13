@@ -11,9 +11,9 @@
         active-text-color="#ffd04b"
         :default-active="curPage"
       >
-        <el-menu-item index="1">行情管理</el-menu-item>
-        <el-menu-item index="2">账户管理</el-menu-item>
-        <el-menu-item index="3">模组管理</el-menu-item>
+        <el-menu-item id="tabMarketData" index="1">行情管理</el-menu-item>
+        <el-menu-item id="tabAccount" index="2">账户管理</el-menu-item>
+        <el-menu-item id="tabModule" index="3">模组管理</el-menu-item>
         <el-menu-item index="6">手工交易</el-menu-item>
         <el-menu-item index="9" @click="systemLogger">日志跟踪</el-menu-item>
       </el-menu>
@@ -79,14 +79,14 @@ export default {
     this.$nextTick(() => location.reload())
   },
   methods: {
-    handleSelect(index, params) {
+    handleSelect(index) {
       if (index === this.curPage) {
         return
       }
       this.curPage = index
       this.$router.push({
         name: pageOpts[index],
-        query: Object.assign({ auth: this.$route.query.auth }, params)
+        query: this.$route.query
       })
     },
     logout() {

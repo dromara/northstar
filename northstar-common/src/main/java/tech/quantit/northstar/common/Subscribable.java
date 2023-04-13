@@ -19,9 +19,4 @@ public interface Subscribable {
 	 */
 	boolean unsubscribe();
 	
-	/**
-	 * 已订阅
-	 * @return
-	 */
-	boolean hasSubscribed();
 }
