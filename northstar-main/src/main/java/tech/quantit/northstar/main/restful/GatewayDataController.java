@@ -40,7 +40,7 @@ public class GatewayDataController {
 	public ResultBean<List<byte[]>> loadWeeklyBarData(String gatewayId, String unifiedSymbol, long refStartTimestamp, boolean firstLoad){
 		Assert.notNull(unifiedSymbol, "合约代码不能为空");
 		GatewayDescription gd = gatewayRepo.findById(gatewayId);
-		if(gd.getChannelType() == ChannelType.PLAYBACK) {
+		if(gd.getChannelType() == ChannelType.PLAYBACK || gd.getChannelType() == ChannelType.SIM) {
 			return new ResultBean<>(Collections.emptyList());
 		}
 		Contract contract = contractMgr.getContract(gatewayId, unifiedSymbol);

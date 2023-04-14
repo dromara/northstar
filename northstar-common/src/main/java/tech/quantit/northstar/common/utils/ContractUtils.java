@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
+import tech.quantit.northstar.common.constant.ChannelType;
 import tech.quantit.northstar.common.constant.Constants;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
@@ -37,5 +38,9 @@ public class ContractUtils {
 	
 	public static boolean isSame(ContractField c1, ContractField c2) {
 		return StringUtils.equals(c1.getUnifiedSymbol(), c2.getUnifiedSymbol());
+	}
+	
+	public static ChannelType channelTypeOf(ContractField c) {
+		return ChannelType.valueOf(c.getThirdPartyId().split("@")[1]);
 	}
 }

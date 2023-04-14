@@ -33,8 +33,8 @@ public class ContractsDefaultLoader implements CommandLineRunner{
 	
 	@Autowired
 	private DataServiceManager dsMgr;
-	@Autowired
-	private W3DataServiceManager w3dsMgr;
+//	@Autowired
+//	private W3DataServiceManager w3dsMgr;
 	@Autowired
 	private GatewayService gatewayService;
 	
@@ -57,13 +57,13 @@ public class ContractsDefaultLoader implements CommandLineRunner{
 			});
 		mktCenter.loadContractGroup(ChannelType.CTP);
 		// 加载币圈OKX市场合约
-		List.of(CoreEnum.ExchangeEnum.OKX)
-				.parallelStream()
-				.forEach(exchange -> {
-					w3dsMgr.getAllContracts(exchange)
-							.forEach(contract -> mktCenter.addInstrument(new OkxContract(contract)));
-					log.info("预加载 [{}] w3交易所合约信息", exchange);
-				});
+//		List.of(CoreEnum.ExchangeEnum.OKX)
+//				.parallelStream()
+//				.forEach(exchange -> {
+//					w3dsMgr.getAllContracts(exchange)
+//							.forEach(contract -> mktCenter.addInstrument(new OkxContract(contract)));
+//					log.info("预加载 [{}] w3交易所合约信息", exchange);
+//				});
 
 		// 加载模拟合约
 		SimContractGenerator contractGen = new SimContractGenerator("SIM");

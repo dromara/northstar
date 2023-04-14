@@ -27,6 +27,9 @@ public class MarketDataRepoFactory {
 	
 	public IMarketDataRepository getInstance(String gatewayId) {
 		GatewayDescription gd = gatewayRepo.findById(gatewayId);
+		if(gd == null) {
+			throw new IllegalStateException("没有该网关的数据来源：" + gatewayId);
+		}
 		return getInstance(gd.getChannelType());
 	}
 }

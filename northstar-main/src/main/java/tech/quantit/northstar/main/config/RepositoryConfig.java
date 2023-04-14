@@ -67,20 +67,21 @@ public class RepositoryConfig {
         String nsdsSecret = Optional.ofNullable(System.getenv(Constants.NS_DS_SECRET)).orElse("");
         return new DataServiceManager(baseUrl, nsdsSecret, restTemplate, new CtpDateTimeUtil(), contractMgr);
     }
-    @Bean
-    W3DataServiceManager w3DataServiceManager(RestTemplate restTemplate, IContractManager contractMgr) {
-        String nsdsSecret = Optional.ofNullable(System.getenv(Constants.NS_DS_SECRET)).orElse("");
-        return new W3DataServiceManager(w3BaseUrl, nsdsSecret, restTemplate, new CtpDateTimeUtil(), contractMgr);
-    }
+    
+//    @Bean
+//    W3DataServiceManager w3DataServiceManager(RestTemplate restTemplate, IContractManager contractMgr) {
+//        String nsdsSecret = Optional.ofNullable(System.getenv(Constants.NS_DS_SECRET)).orElse("");
+//        return new W3DataServiceManager(w3BaseUrl, nsdsSecret, restTemplate, new CtpDateTimeUtil(), contractMgr);
+//    }
 
     @Bean
-    MarketDataRepoFactory marketDataRepository(RedisTemplate<String, byte[]> redisTemplate, DataServiceManager dsMgr,W3DataServiceManager w3dsMgr, IGatewayRepository gatewayRepo) {
+    MarketDataRepoFactory marketDataRepository(RedisTemplate<String, byte[]> redisTemplate, DataServiceManager dsMgr, IGatewayRepository gatewayRepo) {
         IMarketDataRepository defaultMarketRepo = new MarketDataRepoRedisImpl(redisTemplate, dsMgr);
-        IMarketDataRepository w3MarketRepo = new W3MarketDataRepoDataServiceImpl(w3dsMgr);
+//        IMarketDataRepository w3MarketRepo = new W3MarketDataRepoDataServiceImpl(w3dsMgr);
         Map<ChannelType, IMarketDataRepository> channelRepoMap = new EnumMap<>(ChannelType.class);
         channelRepoMap.put(ChannelType.PLAYBACK, defaultMarketRepo);
         channelRepoMap.put(ChannelType.CTP, defaultMarketRepo);
-        channelRepoMap.put(ChannelType.OKX, w3MarketRepo);
+//        channelRepoMap.put(ChannelType.OKX, w3MarketRepo);
         return new MarketDataRepoFactory(channelRepoMap, gatewayRepo);
     }
 
