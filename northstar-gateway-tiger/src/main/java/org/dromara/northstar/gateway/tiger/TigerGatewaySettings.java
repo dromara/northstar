@@ -1,4 +1,4 @@
-package tech.quantit.northstar.gateway.tiger;
+package org.dromara.northstar.gateway.tiger;
 
 import com.tigerbrokers.stock.openapi.client.struct.enums.License;
 

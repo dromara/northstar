@@ -3,6 +3,8 @@ package org.dromara.northstar.main.config;
 import java.util.EnumMap;
 import java.util.Map;
 
+import org.dromara.northstar.gateway.tiger.TigerGatewayFactory;
+import org.dromara.northstar.gateway.tiger.TigerGatewaySettings;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -25,8 +27,6 @@ import tech.quantit.northstar.gateway.playback.PlaybackGatewayFactory;
 import tech.quantit.northstar.gateway.playback.PlaybackGatewaySettings;
 import tech.quantit.northstar.gateway.sim.trade.SimGatewayFactory;
 import tech.quantit.northstar.gateway.sim.trade.SimMarket;
-import tech.quantit.northstar.gateway.tiger.TigerGatewayFactory;
-import tech.quantit.northstar.gateway.tiger.TigerGatewaySettings;
 import xyz.redtorch.gateway.ctp.x64v6v3v15v.CtpGatewayFactory;
 import xyz.redtorch.gateway.ctp.x64v6v5v1cpv.CtpSimGatewayFactory;
 

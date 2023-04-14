@@ -1,4 +1,4 @@
-package tech.quantit.northstar.gateway.tiger.time;
+package org.dromara.northstar.gateway.tiger.time;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;

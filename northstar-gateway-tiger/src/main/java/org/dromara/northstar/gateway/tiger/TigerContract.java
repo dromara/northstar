@@ -1,7 +1,11 @@
-package tech.quantit.northstar.gateway.tiger;
+package org.dromara.northstar.gateway.tiger;
 
 import java.util.Objects;
 import java.util.Optional;
+
+import org.dromara.northstar.gateway.tiger.time.CnStockTradeTime;
+import org.dromara.northstar.gateway.tiger.time.HkStockTradeTime;
+import org.dromara.northstar.gateway.tiger.time.UsStockTradeTime;
 
 import com.tigerbrokers.stock.openapi.client.https.domain.contract.item.ContractItem;
 
@@ -10,9 +14,6 @@ import tech.quantit.northstar.common.model.Identifier;
 import tech.quantit.northstar.gateway.api.domain.contract.ContractDefinition;
 import tech.quantit.northstar.gateway.api.domain.contract.Instrument;
 import tech.quantit.northstar.gateway.api.domain.time.TradeTimeDefinition;
-import tech.quantit.northstar.gateway.tiger.time.CnStockTradeTime;
-import tech.quantit.northstar.gateway.tiger.time.HkStockTradeTime;
-import tech.quantit.northstar.gateway.tiger.time.UsStockTradeTime;
 import xyz.redtorch.pb.CoreEnum.CurrencyEnum;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreEnum.ProductClassEnum;

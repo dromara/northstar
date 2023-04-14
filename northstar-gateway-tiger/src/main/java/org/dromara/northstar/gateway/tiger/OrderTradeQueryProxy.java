@@ -1,4 +1,4 @@
-package tech.quantit.northstar.gateway.tiger;
+package org.dromara.northstar.gateway.tiger;
 
 import java.time.Instant;
 import java.time.LocalDateTime;

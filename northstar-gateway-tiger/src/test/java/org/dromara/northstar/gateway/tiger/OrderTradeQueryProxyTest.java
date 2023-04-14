@@ -1,4 +1,4 @@
-package tech.quantit.northstar.gateway.tiger;
+package org.dromara.northstar.gateway.tiger;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -6,6 +6,8 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import org.dromara.northstar.gateway.tiger.OrderTradeQueryProxy;
+import org.dromara.northstar.gateway.tiger.TigerHttpClient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
