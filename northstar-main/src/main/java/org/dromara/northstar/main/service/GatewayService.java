@@ -7,6 +7,7 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.dromara.northstar.domain.gateway.GatewayAndConnectionManager;
 import org.dromara.northstar.domain.gateway.GatewayConnection;
+import org.dromara.northstar.gateway.sim.trade.SimTradeGateway;
 import org.dromara.northstar.main.PostLoadAware;
 import org.dromara.northstar.main.utils.CodecUtils;
 import org.dromara.northstar.strategy.api.AccountCenter;
@@ -35,7 +36,6 @@ import tech.quantit.northstar.gateway.api.GatewayMetaProvider;
 import tech.quantit.northstar.gateway.api.IMarketCenter;
 import tech.quantit.northstar.gateway.api.MarketGateway;
 import tech.quantit.northstar.gateway.api.TradeGateway;
-import tech.quantit.northstar.gateway.sim.trade.SimTradeGateway;
 
 /**
  * 网关服务

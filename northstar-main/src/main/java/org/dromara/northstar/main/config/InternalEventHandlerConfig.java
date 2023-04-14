@@ -5,6 +5,7 @@ import java.util.concurrent.ConcurrentMap;
 import org.dromara.northstar.domain.account.TradeDayAccount;
 import org.dromara.northstar.domain.account.TradeDayAccountFactory;
 import org.dromara.northstar.domain.gateway.GatewayAndConnectionManager;
+import org.dromara.northstar.gateway.sim.trade.SimMarket;
 import org.dromara.northstar.main.handler.internal.AccountHandler;
 import org.dromara.northstar.main.handler.internal.ConnectionHandler;
 import org.dromara.northstar.main.handler.internal.MailBindedEventHandler;
@@ -20,7 +21,6 @@ import tech.quantit.northstar.common.event.InternalEventBus;
 import tech.quantit.northstar.data.IGatewayRepository;
 import tech.quantit.northstar.gateway.api.IContractManager;
 import tech.quantit.northstar.gateway.api.utils.MarketDataRepoFactory;
-import tech.quantit.northstar.gateway.sim.trade.SimMarket;
 
 @Slf4j
 @Configuration

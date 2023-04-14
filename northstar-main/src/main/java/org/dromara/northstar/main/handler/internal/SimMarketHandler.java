@@ -1,10 +1,11 @@
 package org.dromara.northstar.main.handler.internal;
 
+import org.dromara.northstar.gateway.sim.trade.SimMarket;
+
 import tech.quantit.northstar.common.event.AbstractEventHandler;
 import tech.quantit.northstar.common.event.GenericEventHandler;
 import tech.quantit.northstar.common.event.NorthstarEvent;
 import tech.quantit.northstar.common.event.NorthstarEventType;
-import tech.quantit.northstar.gateway.sim.trade.SimMarket;
 import xyz.redtorch.pb.CoreField.TickField;
 
 public class SimMarketHandler extends AbstractEventHandler implements GenericEventHandler{
