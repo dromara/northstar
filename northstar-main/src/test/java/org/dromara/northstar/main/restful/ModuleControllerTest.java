@@ -74,7 +74,7 @@ class ModuleControllerTest {
 	
 	ModuleDescription md2;
 	
-	String strategy = "{\"name\":\"示例信号策略\",\"className\":\"tech.quantit.northstar.strategy.api.demo.BeginnerSampleStrategy\"}";
+	String strategy = "{\"name\":\"示例信号策略\",\"className\":\"org.dromara.northstar.strategy.api.demo.BeginnerSampleStrategy\"}";
 	String strategyParams = "{\"label\":\"操作间隔\",\"name\":\"actionInterval\",\"order\":10,\"type\":\"Number\",\"value\":60,\"unit\":\"秒\",\"options\":[]}";
 	
 	TestFieldFactory factory = new TestFieldFactory("CTP账户");

@@ -8,7 +8,6 @@ import static org.mockito.Mockito.when;
 import java.time.LocalDateTime;
 
 import org.dromara.northstar.common.IHolidayManager;
-import org.dromara.northstar.gateway.playback.utils.CtpPlaybackClock;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

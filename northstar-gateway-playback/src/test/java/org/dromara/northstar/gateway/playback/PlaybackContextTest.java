@@ -21,8 +21,6 @@ import org.dromara.northstar.common.model.Identifier;
 import org.dromara.northstar.data.IPlaybackRuntimeRepository;
 import org.dromara.northstar.gateway.api.IContractManager;
 import org.dromara.northstar.gateway.api.domain.contract.Contract;
-import org.dromara.northstar.gateway.playback.PlaybackContext;
-import org.dromara.northstar.gateway.playback.PlaybackGatewaySettings;
 import org.dromara.northstar.gateway.playback.utils.PlaybackClock;
 import org.dromara.northstar.gateway.playback.utils.PlaybackDataLoader;
 import org.junit.jupiter.api.BeforeEach;
