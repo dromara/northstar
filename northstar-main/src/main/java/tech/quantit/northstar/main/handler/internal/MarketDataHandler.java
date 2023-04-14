@@ -5,6 +5,9 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.codec.binary.StringUtils;
+
+import tech.quantit.northstar.common.constant.ChannelType;
 import tech.quantit.northstar.common.constant.DateTimeConstant;
 import tech.quantit.northstar.common.event.AbstractEventHandler;
 import tech.quantit.northstar.common.event.GenericEventHandler;
@@ -36,7 +39,10 @@ public class MarketDataHandler extends AbstractEventHandler implements GenericEv
 	@Override
 	protected void doHandle(NorthstarEvent e) {
 		if(e.getData() instanceof BarField bar && bar.getActionDay().equals(LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER))) {
-			exec.execute(() -> mdRepoFactory.getInstance(bar.getGatewayId()).insert(bar)); 
+			ChannelType channelType = ChannelType.valueOf(bar.getGatewayId());
+			if(channelType != ChannelType.SIM && StringUtils.equals(LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER), bar.getActionDay())) {
+				exec.execute(() -> mdRepoFactory.getInstance(channelType).insert(bar)); 
+			}
 		}
 	}
 
