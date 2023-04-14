@@ -15,7 +15,7 @@
   	<dependency>
 		<groupId>org.dromara</groupId>
 		<artifactId>northstar-strategy-api</artifactId>
-		<version>5.1</version>
+		<version>6.0</version>
 		<scope>provided</scope>
 	</dependency>
 	<dependency>
