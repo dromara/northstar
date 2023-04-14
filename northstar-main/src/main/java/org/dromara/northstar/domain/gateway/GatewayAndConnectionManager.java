@@ -6,10 +6,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.lang3.StringUtils;
+import org.dromara.northstar.common.exception.NoSuchElementException;
+import org.dromara.northstar.gateway.api.Gateway;
 import org.springframework.util.Assert;
-
-import tech.quantit.northstar.common.exception.NoSuchElementException;
-import tech.quantit.northstar.gateway.api.Gateway;
 
 /**
  * 用于管理与缓存网关对象

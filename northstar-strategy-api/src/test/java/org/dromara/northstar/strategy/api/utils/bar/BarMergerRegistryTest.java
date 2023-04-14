@@ -4,14 +4,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import org.dromara.northstar.gateway.api.domain.contract.Contract;
+import org.dromara.northstar.gateway.api.domain.time.GenericTradeTime;
 import org.dromara.northstar.strategy.api.MergedBarListener;
 import org.dromara.northstar.strategy.api.indicator.Indicator.PeriodUnit;
 import org.dromara.northstar.strategy.api.utils.bar.BarMergerRegistry;
 import org.dromara.northstar.strategy.api.utils.bar.BarMergerRegistry.ListenerType;
 import org.junit.jupiter.api.Test;
 
-import tech.quantit.northstar.gateway.api.domain.contract.Contract;
-import tech.quantit.northstar.gateway.api.domain.time.GenericTradeTime;
 import test.common.TestFieldFactory;
 import xyz.redtorch.pb.CoreField.ContractField;
 

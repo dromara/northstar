@@ -17,8 +17,15 @@ import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
+import org.dromara.northstar.common.IMailMessageContentHandler;
+import org.dromara.northstar.common.event.FastEventEngine;
+import org.dromara.northstar.data.IGatewayRepository;
+import org.dromara.northstar.data.IModuleRepository;
 import org.dromara.northstar.domain.account.TradeDayAccount;
 import org.dromara.northstar.domain.gateway.GatewayAndConnectionManager;
+import org.dromara.northstar.gateway.api.IContractManager;
+import org.dromara.northstar.gateway.api.IMarketCenter;
+import org.dromara.northstar.gateway.api.domain.mktdata.MarketCenter;
 import org.dromara.northstar.main.ExternalJarClassLoader;
 import org.dromara.northstar.main.SpringContextUtil;
 import org.dromara.northstar.main.interceptor.AuthorizationInterceptor;
@@ -50,13 +57,6 @@ import com.google.common.io.Files;
 
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
-import tech.quantit.northstar.common.IMailMessageContentHandler;
-import tech.quantit.northstar.common.event.FastEventEngine;
-import tech.quantit.northstar.data.IGatewayRepository;
-import tech.quantit.northstar.data.IModuleRepository;
-import tech.quantit.northstar.gateway.api.IContractManager;
-import tech.quantit.northstar.gateway.api.IMarketCenter;
-import tech.quantit.northstar.gateway.api.domain.mktdata.MarketCenter;
 
 /**
  * 配置转换器

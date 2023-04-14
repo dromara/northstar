@@ -71,11 +71,11 @@
 					<excludes>
 						<exclude>**/xyz/redtorch/pb/*</exclude>
 						<exclude>**/test/common/*</exclude>
-						<exclude>**/tech/quantit/northstar/common/constant/*</exclude>
-						<exclude>**/tech/quantit/northstar/common/event/*</exclude>
-						<exclude>**/tech/quantit/northstar/common/exception/*</exclude>
-						<exclude>**/tech/quantit/northstar/common/model/*</exclude>
-						<exclude>**/tech/quantit/northstar/common/*</exclude>
+						<exclude>**/org/dromara/northstar/common/constant/*</exclude>
+						<exclude>**/org/dromara/northstar/common/event/*</exclude>
+						<exclude>**/org/dromara/northstar/common/exception/*</exclude>
+						<exclude>**/org/dromara/northstar/common/model/*</exclude>
+						<exclude>**/org/dromara/northstar/common/*</exclude>
 					</excludes>
 				</configuration>
 			</plugin>

@@ -7,15 +7,15 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
+import org.dromara.northstar.common.event.FastEventEngine;
+import org.dromara.northstar.common.event.NorthstarEventType;
+import org.dromara.northstar.common.model.GatewayDescription;
 import org.dromara.northstar.gateway.sim.trade.SimAccount;
 import org.dromara.northstar.gateway.sim.trade.SimMarket;
 import org.dromara.northstar.gateway.sim.trade.SimTradeGatewayLocal;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import tech.quantit.northstar.common.event.FastEventEngine;
-import tech.quantit.northstar.common.event.NorthstarEventType;
-import tech.quantit.northstar.common.model.GatewayDescription;
 import test.common.TestFieldFactory;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;

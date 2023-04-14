@@ -3,16 +3,15 @@ package org.dromara.northstar.gateway.sim.trade;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
+import org.dromara.northstar.common.constant.ChannelType;
+import org.dromara.northstar.common.constant.GatewayUsage;
+import org.dromara.northstar.common.event.FastEventEngine;
+import org.dromara.northstar.common.model.GatewayDescription;
+import org.dromara.northstar.data.ISimAccountRepository;
+import org.dromara.northstar.gateway.api.IMarketCenter;
 import org.dromara.northstar.gateway.sim.trade.SimGatewayFactory;
 import org.dromara.northstar.gateway.sim.trade.SimMarket;
 import org.junit.jupiter.api.Test;
-
-import tech.quantit.northstar.common.constant.ChannelType;
-import tech.quantit.northstar.common.constant.GatewayUsage;
-import tech.quantit.northstar.common.event.FastEventEngine;
-import tech.quantit.northstar.common.model.GatewayDescription;
-import tech.quantit.northstar.data.ISimAccountRepository;
-import tech.quantit.northstar.gateway.api.IMarketCenter;
 
 class SimGatewayFactoryTest {
 

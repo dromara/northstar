@@ -4,10 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalTime;
 
+import org.dromara.northstar.common.constant.TickType;
+import org.dromara.northstar.common.utils.MarketDateTimeUtil;
 import org.junit.jupiter.api.Test;
-
-import tech.quantit.northstar.common.constant.TickType;
-import tech.quantit.northstar.common.utils.MarketDateTimeUtil;
 
 class CtpMarketTimeUtilTest {
 	

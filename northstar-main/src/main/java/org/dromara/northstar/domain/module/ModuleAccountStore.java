@@ -9,6 +9,15 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.dromara.northstar.common.constant.ClosingPolicy;
+import org.dromara.northstar.common.constant.ModuleState;
+import org.dromara.northstar.common.exception.NoSuchElementException;
+import org.dromara.northstar.common.model.Identifier;
+import org.dromara.northstar.common.model.ModuleAccountRuntimeDescription;
+import org.dromara.northstar.common.model.ModuleRuntimeDescription;
+import org.dromara.northstar.common.utils.FieldUtils;
+import org.dromara.northstar.gateway.api.IContractManager;
+import org.dromara.northstar.gateway.api.domain.contract.Contract;
 import org.dromara.northstar.strategy.api.IModuleAccountStore;
 import org.springframework.util.Assert;
 
@@ -18,15 +27,6 @@ import com.google.common.util.concurrent.AtomicDouble;
 import com.google.protobuf.InvalidProtocolBufferException;
 
 import lombok.extern.slf4j.Slf4j;
-import tech.quantit.northstar.common.constant.ClosingPolicy;
-import tech.quantit.northstar.common.constant.ModuleState;
-import tech.quantit.northstar.common.exception.NoSuchElementException;
-import tech.quantit.northstar.common.model.Identifier;
-import tech.quantit.northstar.common.model.ModuleAccountRuntimeDescription;
-import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
-import tech.quantit.northstar.common.utils.FieldUtils;
-import tech.quantit.northstar.gateway.api.IContractManager;
-import tech.quantit.northstar.gateway.api.domain.contract.Contract;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreField.CancelOrderReqField;
 import xyz.redtorch.pb.CoreField.ContractField;

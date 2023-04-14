@@ -5,8 +5,26 @@ import java.util.Collection;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.dromara.northstar.common.constant.ChannelType;
+import org.dromara.northstar.common.constant.GatewayUsage;
+import org.dromara.northstar.common.exception.NoSuchElementException;
+import org.dromara.northstar.common.model.ComponentField;
+import org.dromara.northstar.common.model.ContractSimpleInfo;
+import org.dromara.northstar.common.model.GatewayDescription;
+import org.dromara.northstar.common.model.ModuleAccountDescription;
+import org.dromara.northstar.common.model.ModuleDescription;
+import org.dromara.northstar.data.IGatewayRepository;
+import org.dromara.northstar.data.IModuleRepository;
+import org.dromara.northstar.data.IPlaybackRuntimeRepository;
+import org.dromara.northstar.data.ISimAccountRepository;
 import org.dromara.northstar.domain.gateway.GatewayAndConnectionManager;
 import org.dromara.northstar.domain.gateway.GatewayConnection;
+import org.dromara.northstar.gateway.api.Gateway;
+import org.dromara.northstar.gateway.api.GatewayFactory;
+import org.dromara.northstar.gateway.api.GatewayMetaProvider;
+import org.dromara.northstar.gateway.api.IMarketCenter;
+import org.dromara.northstar.gateway.api.MarketGateway;
+import org.dromara.northstar.gateway.api.TradeGateway;
 import org.dromara.northstar.gateway.sim.trade.SimTradeGateway;
 import org.dromara.northstar.main.PostLoadAware;
 import org.dromara.northstar.main.utils.CodecUtils;
@@ -18,24 +36,6 @@ import com.alibaba.fastjson.JSONObject;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import tech.quantit.northstar.common.constant.ChannelType;
-import tech.quantit.northstar.common.constant.GatewayUsage;
-import tech.quantit.northstar.common.exception.NoSuchElementException;
-import tech.quantit.northstar.common.model.ComponentField;
-import tech.quantit.northstar.common.model.ContractSimpleInfo;
-import tech.quantit.northstar.common.model.GatewayDescription;
-import tech.quantit.northstar.common.model.ModuleAccountDescription;
-import tech.quantit.northstar.common.model.ModuleDescription;
-import tech.quantit.northstar.data.IGatewayRepository;
-import tech.quantit.northstar.data.IModuleRepository;
-import tech.quantit.northstar.data.IPlaybackRuntimeRepository;
-import tech.quantit.northstar.data.ISimAccountRepository;
-import tech.quantit.northstar.gateway.api.Gateway;
-import tech.quantit.northstar.gateway.api.GatewayFactory;
-import tech.quantit.northstar.gateway.api.GatewayMetaProvider;
-import tech.quantit.northstar.gateway.api.IMarketCenter;
-import tech.quantit.northstar.gateway.api.MarketGateway;
-import tech.quantit.northstar.gateway.api.TradeGateway;
 
 /**
  * 网关服务

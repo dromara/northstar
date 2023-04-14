@@ -2,8 +2,9 @@ package org.dromara.northstar.main.config;
 
 import java.util.Optional;
 
+import org.dromara.northstar.common.constant.Constants;
+
 import lombok.Getter;
-import tech.quantit.northstar.common.constant.Constants;
 
 /**
  * 用户信息

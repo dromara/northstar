@@ -1,8 +1,8 @@
 package org.dromara.northstar.strategy.api.utils.trade;
 
+import org.dromara.northstar.common.utils.FieldUtils;
 import org.dromara.northstar.strategy.api.IModuleStrategyContext;
 
-import tech.quantit.northstar.common.utils.FieldUtils;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.TickField;

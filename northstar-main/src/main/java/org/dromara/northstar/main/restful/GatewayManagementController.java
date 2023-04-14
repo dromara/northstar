@@ -6,6 +6,13 @@ import java.util.Collection;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.dromara.northstar.common.constant.ChannelType;
+import org.dromara.northstar.common.constant.GatewayUsage;
+import org.dromara.northstar.common.model.ComponentField;
+import org.dromara.northstar.common.model.GatewayDescription;
+import org.dromara.northstar.common.model.GatewayTypeDescription;
+import org.dromara.northstar.common.model.ResultBean;
+import org.dromara.northstar.gateway.api.IContractManager;
 import org.dromara.northstar.main.service.GatewayService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
@@ -16,14 +23,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import tech.quantit.northstar.common.constant.ChannelType;
-import tech.quantit.northstar.common.constant.GatewayUsage;
-import tech.quantit.northstar.common.model.ComponentField;
-import tech.quantit.northstar.common.model.GatewayDescription;
-import tech.quantit.northstar.common.model.GatewayTypeDescription;
-import tech.quantit.northstar.common.model.ResultBean;
-import tech.quantit.northstar.gateway.api.IContractManager;
 
 @RequestMapping("/northstar/gateway")
 @RestController

@@ -6,6 +6,15 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
+import org.dromara.northstar.common.constant.Constants;
+import org.dromara.northstar.common.constant.ModuleType;
+import org.dromara.northstar.common.model.ContractSimpleInfo;
+import org.dromara.northstar.common.model.ModuleAccountDescription;
+import org.dromara.northstar.common.model.ModuleAccountRuntimeDescription;
+import org.dromara.northstar.common.model.ModuleDealRecord;
+import org.dromara.northstar.common.model.ModuleDescription;
+import org.dromara.northstar.common.model.ModuleRuntimeDescription;
+import org.dromara.northstar.data.IModuleRepository;
 import org.dromara.northstar.data.redis.ModuleRepoRedisImpl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,15 +23,6 @@ import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactor
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
-import tech.quantit.northstar.common.constant.Constants;
-import tech.quantit.northstar.common.constant.ModuleType;
-import tech.quantit.northstar.common.model.ContractSimpleInfo;
-import tech.quantit.northstar.common.model.ModuleAccountDescription;
-import tech.quantit.northstar.common.model.ModuleAccountRuntimeDescription;
-import tech.quantit.northstar.common.model.ModuleDealRecord;
-import tech.quantit.northstar.common.model.ModuleDescription;
-import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
-import tech.quantit.northstar.data.IModuleRepository;
 import test.common.TestFieldFactory;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;

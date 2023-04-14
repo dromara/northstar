@@ -45,7 +45,7 @@
 				<artifactId>jacoco-maven-plugin</artifactId>
 				<configuration>
 					<excludes>
-						<exclude>**/tech/quantit/northstar/gateway/api/*</exclude>
+						<exclude>**/org/dromara/northstar/gateway/api/*</exclude>
 					</excludes>
 				</configuration>
 			</plugin>

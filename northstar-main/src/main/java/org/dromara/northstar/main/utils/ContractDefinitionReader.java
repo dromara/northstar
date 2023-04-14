@@ -12,8 +12,8 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.dromara.northstar.gateway.api.domain.contract.ContractDefinition;
 
-import tech.quantit.northstar.gateway.api.domain.contract.ContractDefinition;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
 

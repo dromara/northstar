@@ -2,8 +2,9 @@ package org.dromara.northstar.strategy.api;
 
 import java.util.List;
 
-import tech.quantit.northstar.common.event.NorthstarEvent;
-import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
+import org.dromara.northstar.common.event.NorthstarEvent;
+import org.dromara.northstar.common.model.ModuleRuntimeDescription;
+
 import xyz.redtorch.pb.CoreField.BarField;
 
 /**

@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.dromara.northstar.gateway.api.IMarketCenter;
+
 import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.https.domain.contract.model.ContractsModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.quote.item.SymbolNameItem;
@@ -15,7 +17,6 @@ import com.tigerbrokers.stock.openapi.client.struct.enums.Language;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Market;
 
 import lombok.extern.slf4j.Slf4j;
-import tech.quantit.northstar.gateway.api.IMarketCenter;
 
 @Slf4j
 public class TigerContractProvider {

@@ -1,9 +1,9 @@
 package org.dromara.northstar.domain.module;
 
+import org.dromara.northstar.common.constant.ClosingPolicy;
+import org.dromara.northstar.common.constant.SignalOperation;
 import org.dromara.northstar.strategy.api.ClosingStrategy;
 
-import tech.quantit.northstar.common.constant.ClosingPolicy;
-import tech.quantit.northstar.common.constant.SignalOperation;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreField.ContractField;

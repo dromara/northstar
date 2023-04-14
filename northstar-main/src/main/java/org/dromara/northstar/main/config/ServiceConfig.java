@@ -2,8 +2,17 @@ package org.dromara.northstar.main.config;
 
 import java.util.concurrent.ConcurrentMap;
 
+import org.dromara.northstar.common.event.FastEventEngine;
+import org.dromara.northstar.data.IGatewayRepository;
+import org.dromara.northstar.data.IModuleRepository;
+import org.dromara.northstar.data.IPlaybackRuntimeRepository;
+import org.dromara.northstar.data.ISimAccountRepository;
 import org.dromara.northstar.domain.account.TradeDayAccount;
 import org.dromara.northstar.domain.gateway.GatewayAndConnectionManager;
+import org.dromara.northstar.gateway.api.GatewayMetaProvider;
+import org.dromara.northstar.gateway.api.IContractManager;
+import org.dromara.northstar.gateway.api.IMarketCenter;
+import org.dromara.northstar.gateway.api.utils.MarketDataRepoFactory;
 import org.dromara.northstar.main.ExternalJarClassLoader;
 import org.dromara.northstar.main.handler.internal.ModuleManager;
 import org.dromara.northstar.main.service.AccountService;
@@ -16,16 +25,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
-
-import tech.quantit.northstar.common.event.FastEventEngine;
-import tech.quantit.northstar.data.IGatewayRepository;
-import tech.quantit.northstar.data.IModuleRepository;
-import tech.quantit.northstar.data.IPlaybackRuntimeRepository;
-import tech.quantit.northstar.data.ISimAccountRepository;
-import tech.quantit.northstar.gateway.api.GatewayMetaProvider;
-import tech.quantit.northstar.gateway.api.IContractManager;
-import tech.quantit.northstar.gateway.api.IMarketCenter;
-import tech.quantit.northstar.gateway.api.utils.MarketDataRepoFactory;
 
 @DependsOn({ 
 	"internalDispatcher", 

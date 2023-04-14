@@ -12,6 +12,8 @@ import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 
+import org.dromara.northstar.common.constant.ModuleState;
+import org.dromara.northstar.common.constant.SignalOperation;
 import org.dromara.northstar.strategy.api.IModuleStrategyContext;
 import org.dromara.northstar.strategy.api.constant.PriceType;
 import org.dromara.northstar.strategy.api.utils.trade.TradeIntent;
@@ -19,8 +21,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 
-import tech.quantit.northstar.common.constant.ModuleState;
-import tech.quantit.northstar.common.constant.SignalOperation;
 import test.common.TestFieldFactory;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;

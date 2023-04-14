@@ -6,6 +6,10 @@ import static org.dromara.northstar.strategy.api.indicator.function.ComputeFunct
 
 import java.util.Optional;
 
+import org.dromara.northstar.common.constant.FieldType;
+import org.dromara.northstar.common.constant.SignalOperation;
+import org.dromara.northstar.common.model.DynamicParams;
+import org.dromara.northstar.common.model.Setting;
 import org.dromara.northstar.strategy.api.AbstractStrategy;
 import org.dromara.northstar.strategy.api.TradeStrategy;
 import org.dromara.northstar.strategy.api.annotation.StrategicComponent;
@@ -14,10 +18,6 @@ import org.dromara.northstar.strategy.api.indicator.Indicator;
 import org.dromara.northstar.strategy.api.indicator.Indicator.PeriodUnit;
 import org.dromara.northstar.strategy.api.indicator.complex.MACD;
 
-import tech.quantit.northstar.common.constant.FieldType;
-import tech.quantit.northstar.common.constant.SignalOperation;
-import tech.quantit.northstar.common.model.DynamicParams;
-import tech.quantit.northstar.common.model.Setting;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.TickField;
 

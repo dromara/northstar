@@ -4,14 +4,14 @@ import java.time.LocalDateTime;
 
 import org.dromara.northstar.domain.gateway.GatewayAndConnectionManager;
 import org.dromara.northstar.domain.gateway.GatewayConnection;
+import org.dromara.northstar.gateway.api.Gateway;
+import org.dromara.northstar.gateway.api.IMarketCenter;
 import org.dromara.northstar.main.holiday.CtpHolidayManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import lombok.extern.slf4j.Slf4j;
-import tech.quantit.northstar.gateway.api.Gateway;
-import tech.quantit.northstar.gateway.api.IMarketCenter;
 import xyz.redtorch.gateway.ctp.common.GatewayConstants;
 
 @Slf4j

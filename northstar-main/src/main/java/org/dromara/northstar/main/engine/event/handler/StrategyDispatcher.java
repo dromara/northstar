@@ -1,8 +1,8 @@
 package org.dromara.northstar.main.engine.event.handler;
 
-import tech.quantit.northstar.common.event.NorthstarEvent;
-import tech.quantit.northstar.common.event.StrategyEventBus;
-import tech.quantit.northstar.common.event.FastEventEngine.NorthstarEventDispatcher;
+import org.dromara.northstar.common.event.NorthstarEvent;
+import org.dromara.northstar.common.event.StrategyEventBus;
+import org.dromara.northstar.common.event.FastEventEngine.NorthstarEventDispatcher;
 
 public class StrategyDispatcher implements NorthstarEventDispatcher {
 

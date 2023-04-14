@@ -8,6 +8,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.dromara.northstar.NorthstarApplication;
+import org.dromara.northstar.common.constant.ChannelType;
+import org.dromara.northstar.common.constant.GatewayUsage;
+import org.dromara.northstar.common.constant.ReturnCode;
+import org.dromara.northstar.common.model.GatewayDescription;
+import org.dromara.northstar.common.model.NsUser;
 import org.dromara.northstar.gateway.ctp.CtpGatewaySettings;
 import org.dromara.northstar.main.handler.broadcast.SocketIOMessageEngine;
 import org.junit.jupiter.api.AfterEach;
@@ -27,11 +32,6 @@ import com.corundumstudio.socketio.SocketIOServer;
 
 import cn.hutool.crypto.digest.MD5;
 import common.TestGatewayFactory;
-import tech.quantit.northstar.common.constant.ChannelType;
-import tech.quantit.northstar.common.constant.GatewayUsage;
-import tech.quantit.northstar.common.constant.ReturnCode;
-import tech.quantit.northstar.common.model.GatewayDescription;
-import tech.quantit.northstar.common.model.NsUser;
 
 /**
  * GatewayManagement接口黑盒测试类

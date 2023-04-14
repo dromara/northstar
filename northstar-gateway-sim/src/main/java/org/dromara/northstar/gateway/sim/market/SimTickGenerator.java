@@ -7,9 +7,9 @@ import java.time.ZoneOffset;
 import java.util.Random;
 
 import org.apache.commons.lang3.StringUtils;
+import org.dromara.northstar.common.constant.DateTimeConstant;
+import org.dromara.northstar.common.constant.TickType;
 
-import tech.quantit.northstar.common.constant.DateTimeConstant;
-import tech.quantit.northstar.common.constant.TickType;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.TickField;
 

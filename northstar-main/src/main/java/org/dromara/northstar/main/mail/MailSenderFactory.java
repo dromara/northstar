@@ -2,10 +2,9 @@ package org.dromara.northstar.main.mail;
 
 import java.util.Properties;
 
+import org.dromara.northstar.common.model.MailConfigDescription;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
-
-import tech.quantit.northstar.common.model.MailConfigDescription;
 
 public class MailSenderFactory {
 

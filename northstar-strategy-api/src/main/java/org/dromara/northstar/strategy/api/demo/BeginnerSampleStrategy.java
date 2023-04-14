@@ -4,6 +4,11 @@ import java.util.Optional;
 import java.util.TimerTask;
 import java.util.concurrent.ThreadLocalRandom;
 
+import org.dromara.northstar.common.constant.FieldType;
+import org.dromara.northstar.common.constant.ModuleState;
+import org.dromara.northstar.common.constant.SignalOperation;
+import org.dromara.northstar.common.model.DynamicParams;
+import org.dromara.northstar.common.model.Setting;
 import org.dromara.northstar.strategy.api.IModuleContext;
 import org.dromara.northstar.strategy.api.IModuleStrategyContext;
 import org.dromara.northstar.strategy.api.TradeStrategy;
@@ -15,11 +20,6 @@ import org.slf4j.Logger;
 
 import com.alibaba.fastjson.JSONObject;
 
-import tech.quantit.northstar.common.constant.FieldType;
-import tech.quantit.northstar.common.constant.ModuleState;
-import tech.quantit.northstar.common.constant.SignalOperation;
-import tech.quantit.northstar.common.model.DynamicParams;
-import tech.quantit.northstar.common.model.Setting;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.OrderField;
 import xyz.redtorch.pb.CoreField.TickField;

@@ -3,9 +3,8 @@ package org.dromara.northstar.strategy.api.indicator.complex;
 import static org.dromara.northstar.strategy.api.indicator.function.AverageFunctions.*;
 import static org.dromara.northstar.strategy.api.indicator.function.StatsFunctions.*;
 
+import org.dromara.northstar.common.model.TimeSeriesValue;
 import org.dromara.northstar.strategy.api.indicator.TimeSeriesUnaryOperator;
-
-import tech.quantit.northstar.common.model.TimeSeriesValue;
 
 /**
  * MID:MA(CLOSE,N);//求N个周期的收盘价均线，称为布林通道中轨

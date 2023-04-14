@@ -3,12 +3,11 @@ package org.dromara.northstar.main.handler.internal;
 import java.util.EnumSet;
 import java.util.Set;
 
+import org.dromara.northstar.common.event.AbstractEventHandler;
+import org.dromara.northstar.common.event.GenericEventHandler;
+import org.dromara.northstar.common.event.NorthstarEvent;
+import org.dromara.northstar.common.event.NorthstarEventType;
 import org.dromara.northstar.main.mail.MailDeliveryManager;
-
-import tech.quantit.northstar.common.event.AbstractEventHandler;
-import tech.quantit.northstar.common.event.GenericEventHandler;
-import tech.quantit.northstar.common.event.NorthstarEvent;
-import tech.quantit.northstar.common.event.NorthstarEventType;
 
 public class MailBindedEventHandler extends AbstractEventHandler implements GenericEventHandler{
 

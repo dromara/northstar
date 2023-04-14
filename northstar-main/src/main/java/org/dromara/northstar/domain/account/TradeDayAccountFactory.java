@@ -1,9 +1,8 @@
 package org.dromara.northstar.domain.account;
 
 import org.dromara.northstar.domain.gateway.GatewayAndConnectionManager;
-
-import tech.quantit.northstar.gateway.api.IContractManager;
-import tech.quantit.northstar.gateway.api.TradeGateway;
+import org.dromara.northstar.gateway.api.IContractManager;
+import org.dromara.northstar.gateway.api.TradeGateway;
 
 public class TradeDayAccountFactory {
 	

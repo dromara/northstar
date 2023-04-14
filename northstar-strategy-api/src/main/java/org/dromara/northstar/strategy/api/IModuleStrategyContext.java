@@ -3,6 +3,10 @@ package org.dromara.northstar.strategy.api;
 import java.util.Optional;
 import java.util.function.Function;
 
+import org.dromara.northstar.common.constant.ModuleState;
+import org.dromara.northstar.common.constant.SignalOperation;
+import org.dromara.northstar.common.model.BarWrapper;
+import org.dromara.northstar.common.model.TimeSeriesValue;
 import org.dromara.northstar.strategy.api.constant.DisposablePriceListenerType;
 import org.dromara.northstar.strategy.api.constant.PriceType;
 import org.dromara.northstar.strategy.api.indicator.Indicator;
@@ -13,10 +17,6 @@ import org.slf4j.Logger;
 
 import com.google.common.util.concurrent.AtomicDouble;
 
-import tech.quantit.northstar.common.constant.ModuleState;
-import tech.quantit.northstar.common.constant.SignalOperation;
-import tech.quantit.northstar.common.model.BarWrapper;
-import tech.quantit.northstar.common.model.TimeSeriesValue;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.TradeField;

@@ -2,11 +2,10 @@ package org.dromara.northstar.strategy.api.indicator.complex;
 
 import static org.dromara.northstar.strategy.api.indicator.function.AverageFunctions.SMA;
 
+import org.dromara.northstar.common.model.TimeSeriesValue;
 import org.dromara.northstar.strategy.api.indicator.TimeSeriesUnaryOperator;
 
 import com.google.common.util.concurrent.AtomicDouble;
-
-import tech.quantit.northstar.common.model.TimeSeriesValue;
 
 /**
  * LC := REF(CLOSE,1);//前一周期收盘价

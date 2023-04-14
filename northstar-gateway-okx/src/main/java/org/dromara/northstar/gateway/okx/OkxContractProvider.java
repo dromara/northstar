@@ -8,7 +8,6 @@ import io.github.ztnozdormu.common.exceptions.ExchangeClientException;
 import io.github.ztnozdormu.common.exceptions.ExchangeConnectorException;
 import io.github.ztnozdormu.okx.impl.OKXSpotClientImpl;
 import lombok.extern.slf4j.Slf4j;
-import tech.quantit.northstar.gateway.api.IMarketCenter;
 import xyz.redtorch.pb.CoreEnum;
 import xyz.redtorch.pb.CoreField;
 
@@ -17,6 +16,8 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.LinkedHashMap;
 import java.util.Objects;
+
+import org.dromara.northstar.gateway.api.IMarketCenter;
 
 
 @Slf4j

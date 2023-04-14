@@ -2,11 +2,12 @@ package org.dromara.northstar.strategy.api;
 
 import java.util.List;
 
-import tech.quantit.northstar.common.TickDataAware;
-import tech.quantit.northstar.common.TransactionAware;
-import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
-import tech.quantit.northstar.gateway.api.TradeGateway;
-import tech.quantit.northstar.gateway.api.domain.contract.Contract;
+import org.dromara.northstar.common.TickDataAware;
+import org.dromara.northstar.common.TransactionAware;
+import org.dromara.northstar.common.model.ModuleRuntimeDescription;
+import org.dromara.northstar.gateway.api.TradeGateway;
+import org.dromara.northstar.gateway.api.domain.contract.Contract;
+
 import xyz.redtorch.pb.CoreField.ContractField;
 
 public interface IModuleContext extends IModuleStrategyContext, TickDataAware, BarDataAware, TransactionAware {

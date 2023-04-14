@@ -5,12 +5,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.io.IOException;
 import java.util.List;
 
+import org.dromara.northstar.gateway.api.domain.contract.ContractDefinition;
 import org.dromara.northstar.main.utils.ContractDefinitionReader;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.FileUrlResource;
 import org.springframework.core.io.Resource;
-
-import tech.quantit.northstar.gateway.api.domain.contract.ContractDefinition;
 
 
 class ContractDefinitionReaderTest {

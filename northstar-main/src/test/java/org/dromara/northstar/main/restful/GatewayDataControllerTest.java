@@ -8,6 +8,12 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.dromara.northstar.NorthstarApplication;
+import org.dromara.northstar.common.constant.ChannelType;
+import org.dromara.northstar.common.model.GatewayDescription;
+import org.dromara.northstar.common.model.NsUser;
+import org.dromara.northstar.data.IGatewayRepository;
+import org.dromara.northstar.gateway.api.IMarketCenter;
+import org.dromara.northstar.gateway.api.domain.contract.Contract;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,12 +28,6 @@ import com.alibaba.fastjson.JSON;
 import com.corundumstudio.socketio.SocketIOServer;
 
 import cn.hutool.crypto.digest.MD5;
-import tech.quantit.northstar.common.constant.ChannelType;
-import tech.quantit.northstar.common.model.GatewayDescription;
-import tech.quantit.northstar.common.model.NsUser;
-import tech.quantit.northstar.data.IGatewayRepository;
-import tech.quantit.northstar.gateway.api.IMarketCenter;
-import tech.quantit.northstar.gateway.api.domain.contract.Contract;
 import xyz.redtorch.pb.CoreField.ContractField;
 
 @SpringBootTest(classes = NorthstarApplication.class, value="spring.profiles.active=test")

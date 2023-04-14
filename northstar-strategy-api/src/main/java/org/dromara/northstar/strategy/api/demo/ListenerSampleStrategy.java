@@ -4,6 +4,10 @@ import java.util.Optional;
 import java.util.TimerTask;
 import java.util.concurrent.ThreadLocalRandom;
 
+import org.dromara.northstar.common.constant.ModuleState;
+import org.dromara.northstar.common.constant.SignalOperation;
+import org.dromara.northstar.common.model.DynamicParams;
+import org.dromara.northstar.common.utils.FieldUtils;
 import org.dromara.northstar.strategy.api.AbstractStrategy;
 import org.dromara.northstar.strategy.api.IModuleContext;
 import org.dromara.northstar.strategy.api.TradeStrategy;
@@ -14,10 +18,6 @@ import org.dromara.northstar.strategy.api.utils.time.TickBasedTimer;
 
 import com.alibaba.fastjson.JSONObject;
 
-import tech.quantit.northstar.common.constant.ModuleState;
-import tech.quantit.northstar.common.constant.SignalOperation;
-import tech.quantit.northstar.common.model.DynamicParams;
-import tech.quantit.northstar.common.utils.FieldUtils;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.OrderField;
 import xyz.redtorch.pb.CoreField.TickField;

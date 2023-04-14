@@ -2,11 +2,10 @@ package org.dromara.northstar.strategy.api.indicator.complex;
 
 import java.util.function.Function;
 
+import org.dromara.northstar.common.model.BarWrapper;
+import org.dromara.northstar.common.model.TimeSeriesValue;
 import org.dromara.northstar.strategy.api.indicator.TimeSeriesUnaryOperator;
 import org.dromara.northstar.strategy.api.indicator.function.AverageFunctions;
-
-import tech.quantit.northstar.common.model.BarWrapper;
-import tech.quantit.northstar.common.model.TimeSeriesValue;
 
 /**
  * 瀑布线

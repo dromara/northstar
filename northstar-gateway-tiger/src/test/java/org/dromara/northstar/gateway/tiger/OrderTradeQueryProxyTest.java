@@ -6,6 +6,8 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import org.dromara.northstar.gateway.api.IContractManager;
+import org.dromara.northstar.gateway.api.domain.contract.Contract;
 import org.dromara.northstar.gateway.tiger.OrderTradeQueryProxy;
 import org.dromara.northstar.gateway.tiger.TigerHttpClient;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,8 +19,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerHttpRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.TigerHttpResponse;
 
-import tech.quantit.northstar.gateway.api.IContractManager;
-import tech.quantit.northstar.gateway.api.domain.contract.Contract;
 import test.common.TestFieldFactory;
 
 class OrderTradeQueryProxyTest {

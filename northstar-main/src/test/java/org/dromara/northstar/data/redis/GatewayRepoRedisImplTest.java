@@ -5,6 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.nio.charset.StandardCharsets;
 
+import org.dromara.northstar.common.constant.Constants;
+import org.dromara.northstar.common.model.GatewayDescription;
+import org.dromara.northstar.data.IGatewayRepository;
 import org.dromara.northstar.data.redis.GatewayRepoRedisImpl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,9 +16,6 @@ import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactor
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
-import tech.quantit.northstar.common.constant.Constants;
-import tech.quantit.northstar.common.model.GatewayDescription;
-import tech.quantit.northstar.data.IGatewayRepository;
 import test.common.TestFieldFactory;
 
 class GatewayRepoRedisImplTest {

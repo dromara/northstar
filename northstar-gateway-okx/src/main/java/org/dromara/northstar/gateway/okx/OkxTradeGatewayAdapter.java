@@ -2,11 +2,6 @@ package org.dromara.northstar.gateway.okx;
 
 
 import lombok.extern.slf4j.Slf4j;
-import tech.quantit.northstar.common.event.FastEventEngine;
-import tech.quantit.northstar.common.event.NorthstarEventType;
-import tech.quantit.northstar.common.model.GatewayDescription;
-import tech.quantit.northstar.gateway.api.IContractManager;
-import tech.quantit.northstar.gateway.api.TradeGateway;
 import xyz.redtorch.pb.CoreField.CancelOrderReqField;
 import xyz.redtorch.pb.CoreField.PositionField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
@@ -18,6 +13,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+
+import org.dromara.northstar.common.event.FastEventEngine;
+import org.dromara.northstar.common.event.NorthstarEventType;
+import org.dromara.northstar.common.model.GatewayDescription;
+import org.dromara.northstar.gateway.api.IContractManager;
+import org.dromara.northstar.gateway.api.TradeGateway;
 
 /**
  * OKX交易网关适配器  TODO

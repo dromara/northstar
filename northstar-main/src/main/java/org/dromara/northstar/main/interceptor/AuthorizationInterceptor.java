@@ -3,11 +3,11 @@ package org.dromara.northstar.main.interceptor;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.dromara.northstar.common.constant.Constants;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 import lombok.extern.slf4j.Slf4j;
-import tech.quantit.northstar.common.constant.Constants;
 
 @Slf4j
 public class AuthorizationInterceptor implements HandlerInterceptor{

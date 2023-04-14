@@ -7,16 +7,16 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 
+import org.dromara.northstar.common.exception.InsufficientException;
+import org.dromara.northstar.common.model.Identifier;
+import org.dromara.northstar.common.model.OrderRequest;
+import org.dromara.northstar.common.model.OrderRequest.TradeOperation;
 import org.dromara.northstar.domain.account.PositionDescription;
+import org.dromara.northstar.gateway.api.IContractManager;
+import org.dromara.northstar.gateway.api.domain.contract.Contract;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import tech.quantit.northstar.common.exception.InsufficientException;
-import tech.quantit.northstar.common.model.Identifier;
-import tech.quantit.northstar.common.model.OrderRequest;
-import tech.quantit.northstar.common.model.OrderRequest.TradeOperation;
-import tech.quantit.northstar.gateway.api.IContractManager;
-import tech.quantit.northstar.gateway.api.domain.contract.Contract;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;

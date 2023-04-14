@@ -2,12 +2,12 @@ package org.dromara.northstar.strategy.api.indicator;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.dromara.northstar.common.model.TimeSeriesValue;
 import org.dromara.northstar.strategy.api.indicator.Indicator;
 import org.dromara.northstar.strategy.api.indicator.Indicator.Configuration;
 import org.dromara.northstar.strategy.api.indicator.Indicator.ValueType;
 import org.junit.jupiter.api.Test;
 
-import tech.quantit.northstar.common.model.TimeSeriesValue;
 import test.common.TestFieldFactory;
 
 class IndicatorTest {

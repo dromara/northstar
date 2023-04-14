@@ -4,9 +4,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.math3.stat.StatUtils;
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
+import org.dromara.northstar.common.model.TimeSeriesValue;
 import org.dromara.northstar.strategy.api.indicator.TimeSeriesUnaryOperator;
-
-import tech.quantit.northstar.common.model.TimeSeriesValue;
 
 /**
  * 统计函数

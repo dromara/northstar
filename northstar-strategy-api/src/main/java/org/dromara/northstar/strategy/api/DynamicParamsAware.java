@@ -1,6 +1,6 @@
 package org.dromara.northstar.strategy.api;
 
-import tech.quantit.northstar.common.model.DynamicParams;
+import org.dromara.northstar.common.model.DynamicParams;
 
 public interface DynamicParamsAware {
 

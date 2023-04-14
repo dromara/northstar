@@ -3,13 +3,13 @@ package org.dromara.northstar.strategy.api.utils.trade;
 import java.util.Objects;
 import java.util.function.Predicate;
 
+import org.dromara.northstar.common.constant.SignalOperation;
+import org.dromara.northstar.common.utils.FieldUtils;
 import org.dromara.northstar.strategy.api.IDisposablePriceListener;
 import org.dromara.northstar.strategy.api.IModuleStrategyContext;
 import org.dromara.northstar.strategy.api.constant.PriceType;
 
 import lombok.Builder;
-import tech.quantit.northstar.common.constant.SignalOperation;
-import tech.quantit.northstar.common.utils.FieldUtils;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.TickField;

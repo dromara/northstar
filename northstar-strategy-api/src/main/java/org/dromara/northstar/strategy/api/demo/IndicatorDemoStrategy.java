@@ -6,6 +6,8 @@ import static org.dromara.northstar.strategy.api.indicator.function.AverageFunct
 import static org.dromara.northstar.strategy.api.indicator.function.StatsFunctions.HHV;
 import static org.dromara.northstar.strategy.api.indicator.function.StatsFunctions.LLV;
 
+import org.dromara.northstar.common.model.DynamicParams;
+import org.dromara.northstar.common.model.Setting;
 import org.dromara.northstar.strategy.api.AbstractStrategy;
 import org.dromara.northstar.strategy.api.TradeStrategy;
 import org.dromara.northstar.strategy.api.annotation.StrategicComponent;
@@ -21,8 +23,6 @@ import org.dromara.northstar.strategy.api.indicator.complex.WAVE;
 
 import com.google.common.util.concurrent.AtomicDouble;
 
-import tech.quantit.northstar.common.model.DynamicParams;
-import tech.quantit.northstar.common.model.Setting;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.ContractField;
 

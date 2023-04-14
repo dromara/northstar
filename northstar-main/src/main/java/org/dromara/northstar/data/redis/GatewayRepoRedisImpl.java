@@ -3,13 +3,12 @@ package org.dromara.northstar.data.redis;
 import java.util.List;
 import java.util.Set;
 
+import org.dromara.northstar.common.constant.Constants;
+import org.dromara.northstar.common.model.GatewayDescription;
+import org.dromara.northstar.data.IGatewayRepository;
 import org.springframework.data.redis.core.RedisTemplate;
 
 import com.alibaba.fastjson2.JSON;
-
-import tech.quantit.northstar.common.constant.Constants;
-import tech.quantit.northstar.common.model.GatewayDescription;
-import tech.quantit.northstar.data.IGatewayRepository;
 
 /**
  *

@@ -9,6 +9,8 @@ import static org.mockito.Mockito.verify;
 
 import java.util.function.Consumer;
 
+import org.dromara.northstar.common.event.FastEventEngine;
+import org.dromara.northstar.common.event.NorthstarEventType;
 import org.dromara.northstar.gateway.sim.trade.CloseTradeRequest;
 import org.dromara.northstar.gateway.sim.trade.OpenTradeRequest;
 import org.dromara.northstar.gateway.sim.trade.SimAccount;
@@ -16,8 +18,6 @@ import org.dromara.northstar.gateway.sim.trade.TradePosition;
 import org.dromara.northstar.gateway.sim.trade.TradeRequest;
 import org.junit.jupiter.api.Test;
 
-import tech.quantit.northstar.common.event.FastEventEngine;
-import tech.quantit.northstar.common.event.NorthstarEventType;
 import test.common.TestFieldFactory;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;

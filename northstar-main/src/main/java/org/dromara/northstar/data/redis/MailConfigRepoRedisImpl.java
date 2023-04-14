@@ -2,13 +2,12 @@ package org.dromara.northstar.data.redis;
 
 import java.util.Optional;
 
+import org.dromara.northstar.common.constant.Constants;
+import org.dromara.northstar.common.model.MailConfigDescription;
+import org.dromara.northstar.data.IMailConfigRepository;
 import org.springframework.data.redis.core.RedisTemplate;
 
 import com.alibaba.fastjson2.JSON;
-
-import tech.quantit.northstar.common.constant.Constants;
-import tech.quantit.northstar.common.model.MailConfigDescription;
-import tech.quantit.northstar.data.IMailConfigRepository;
 
 public class MailConfigRepoRedisImpl implements IMailConfigRepository{
 

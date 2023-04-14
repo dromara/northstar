@@ -4,12 +4,11 @@ import static org.dromara.northstar.strategy.api.indicator.function.AverageFunct
 
 import java.util.function.Function;
 
+import org.dromara.northstar.common.model.BarWrapper;
+import org.dromara.northstar.common.model.TimeSeriesValue;
 import org.dromara.northstar.strategy.api.indicator.TimeSeriesUnaryOperator;
 
 import com.google.common.util.concurrent.AtomicDouble;
-
-import tech.quantit.northstar.common.model.BarWrapper;
-import tech.quantit.northstar.common.model.TimeSeriesValue;
 
 /**
  * TR : MAX(MAX((HIGH-LOW),ABS(REF(CLOSE,1)-HIGH)),ABS(REF(CLOSE,1)-LOW));//求最高价减去最低价，一个周期前的收盘价减去最高价的绝对值，一个周期前的收盘价减去最低价的绝对值，这三个值中的最大值

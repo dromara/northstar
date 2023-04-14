@@ -4,12 +4,11 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+import org.dromara.northstar.common.model.BarWrapper;
+import org.dromara.northstar.common.model.TimeSeriesValue;
 import org.dromara.northstar.strategy.api.indicator.Indicator;
 import org.dromara.northstar.strategy.api.indicator.TimeSeriesUnaryOperator;
 import org.dromara.northstar.strategy.api.indicator.Indicator.ValueType;
-
-import tech.quantit.northstar.common.model.BarWrapper;
-import tech.quantit.northstar.common.model.TimeSeriesValue;
 
 /**
  * 指标工厂

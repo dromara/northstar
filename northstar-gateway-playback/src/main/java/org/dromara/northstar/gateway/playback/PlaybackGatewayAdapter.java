@@ -1,8 +1,9 @@
 package org.dromara.northstar.gateway.playback;
 
-import tech.quantit.northstar.common.constant.ChannelType;
-import tech.quantit.northstar.common.model.GatewayDescription;
-import tech.quantit.northstar.gateway.api.MarketGateway;
+import org.dromara.northstar.common.constant.ChannelType;
+import org.dromara.northstar.common.model.GatewayDescription;
+import org.dromara.northstar.gateway.api.MarketGateway;
+
 import xyz.redtorch.pb.CoreField.ContractField;
 
 public class PlaybackGatewayAdapter implements MarketGateway {

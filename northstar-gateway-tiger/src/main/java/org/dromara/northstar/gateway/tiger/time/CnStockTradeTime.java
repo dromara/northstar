@@ -3,8 +3,8 @@ package org.dromara.northstar.gateway.tiger.time;
 import java.time.LocalTime;
 import java.util.List;
 
-import tech.quantit.northstar.gateway.api.domain.time.PeriodSegment;
-import tech.quantit.northstar.gateway.api.domain.time.TradeTimeDefinition;
+import org.dromara.northstar.gateway.api.domain.time.PeriodSegment;
+import org.dromara.northstar.gateway.api.domain.time.TradeTimeDefinition;
 
 /**
  * A股连续交易时段 

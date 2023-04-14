@@ -10,18 +10,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.dromara.northstar.common.constant.ClosingPolicy;
+import org.dromara.northstar.common.constant.ModuleState;
+import org.dromara.northstar.common.model.Identifier;
+import org.dromara.northstar.common.model.ModuleAccountRuntimeDescription;
+import org.dromara.northstar.common.model.ModulePositionDescription;
+import org.dromara.northstar.common.model.ModuleRuntimeDescription;
 import org.dromara.northstar.domain.module.ModuleAccountStore;
+import org.dromara.northstar.gateway.api.IContractManager;
+import org.dromara.northstar.gateway.api.domain.contract.Contract;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import tech.quantit.northstar.common.constant.ClosingPolicy;
-import tech.quantit.northstar.common.constant.ModuleState;
-import tech.quantit.northstar.common.model.Identifier;
-import tech.quantit.northstar.common.model.ModuleAccountRuntimeDescription;
-import tech.quantit.northstar.common.model.ModulePositionDescription;
-import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
-import tech.quantit.northstar.gateway.api.IContractManager;
-import tech.quantit.northstar.gateway.api.domain.contract.Contract;
 import test.common.TestFieldFactory;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;

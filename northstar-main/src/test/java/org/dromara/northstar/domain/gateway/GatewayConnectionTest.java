@@ -2,16 +2,15 @@ package org.dromara.northstar.domain.gateway;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.dromara.northstar.common.constant.ChannelType;
+import org.dromara.northstar.common.constant.ConnectionState;
+import org.dromara.northstar.common.constant.GatewayUsage;
+import org.dromara.northstar.common.model.GatewayDescription;
 import org.dromara.northstar.domain.gateway.GatewayConnection;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.alibaba.fastjson.JSONObject;
-
-import tech.quantit.northstar.common.constant.ChannelType;
-import tech.quantit.northstar.common.constant.ConnectionState;
-import tech.quantit.northstar.common.constant.GatewayUsage;
-import tech.quantit.northstar.common.model.GatewayDescription;
 
 public class GatewayConnectionTest {
 	

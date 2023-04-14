@@ -1,5 +1,9 @@
 package org.dromara.northstar.main.config;
 
+import org.dromara.northstar.common.event.FastEventEngine;
+import org.dromara.northstar.common.event.InternalEventBus;
+import org.dromara.northstar.common.event.PlaybackEventBus;
+import org.dromara.northstar.common.event.StrategyEventBus;
 import org.dromara.northstar.main.engine.event.DisruptorFastEventEngine;
 import org.dromara.northstar.main.engine.event.DisruptorFastEventEngine.WaitStrategyEnum;
 import org.dromara.northstar.main.handler.broadcast.SocketIOMessageEngine;
@@ -9,10 +13,6 @@ import org.springframework.context.annotation.Configuration;
 import com.corundumstudio.socketio.SocketIOServer;
 
 import lombok.extern.slf4j.Slf4j;
-import tech.quantit.northstar.common.event.FastEventEngine;
-import tech.quantit.northstar.common.event.InternalEventBus;
-import tech.quantit.northstar.common.event.PlaybackEventBus;
-import tech.quantit.northstar.common.event.StrategyEventBus;
 
 /**
  * 引擎配置

@@ -1,13 +1,14 @@
 package org.dromara.northstar.gateway.binance;
 
+import org.dromara.northstar.common.constant.ChannelType;
+import org.dromara.northstar.common.model.Identifier;
+import org.dromara.northstar.gateway.api.domain.contract.ContractDefinition;
+import org.dromara.northstar.gateway.api.domain.contract.Instrument;
+import org.dromara.northstar.gateway.api.domain.time.GenericTradeTime;
+import org.dromara.northstar.gateway.api.domain.time.TradeTimeDefinition;
+
 import com.alibaba.fastjson2.JSONObject;
 
-import tech.quantit.northstar.common.constant.ChannelType;
-import tech.quantit.northstar.common.model.Identifier;
-import tech.quantit.northstar.gateway.api.domain.contract.ContractDefinition;
-import tech.quantit.northstar.gateway.api.domain.contract.Instrument;
-import tech.quantit.northstar.gateway.api.domain.time.GenericTradeTime;
-import tech.quantit.northstar.gateway.api.domain.time.TradeTimeDefinition;
 import xyz.redtorch.pb.CoreEnum.CurrencyEnum;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreEnum.ProductClassEnum;

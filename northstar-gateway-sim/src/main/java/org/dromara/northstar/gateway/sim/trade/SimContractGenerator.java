@@ -1,6 +1,7 @@
 package org.dromara.northstar.gateway.sim.trade;
 
-import tech.quantit.northstar.gateway.api.domain.contract.Instrument;
+import org.dromara.northstar.gateway.api.domain.contract.Instrument;
+
 import xyz.redtorch.pb.CoreEnum.CurrencyEnum;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreEnum.ProductClassEnum;

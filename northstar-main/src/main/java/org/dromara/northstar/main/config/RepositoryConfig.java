@@ -5,6 +5,13 @@ import java.util.EnumMap;
 import java.util.Map;
 import java.util.Optional;
 
+import org.dromara.northstar.common.constant.ChannelType;
+import org.dromara.northstar.common.constant.Constants;
+import org.dromara.northstar.data.IGatewayRepository;
+import org.dromara.northstar.data.IMailConfigRepository;
+import org.dromara.northstar.data.IModuleRepository;
+import org.dromara.northstar.data.IPlaybackRuntimeRepository;
+import org.dromara.northstar.data.ISimAccountRepository;
 import org.dromara.northstar.data.ds.DataServiceManager;
 import org.dromara.northstar.data.ds.W3DataServiceManager;
 import org.dromara.northstar.data.ds.W3MarketDataRepoDataServiceImpl;
@@ -14,6 +21,9 @@ import org.dromara.northstar.data.redis.MarketDataRepoRedisImpl;
 import org.dromara.northstar.data.redis.ModuleRepoRedisImpl;
 import org.dromara.northstar.data.redis.PlaybackRuntimeRepoRedisImpl;
 import org.dromara.northstar.data.redis.SimAccountRepoRedisImpl;
+import org.dromara.northstar.gateway.api.IContractManager;
+import org.dromara.northstar.gateway.api.IMarketDataRepository;
+import org.dromara.northstar.gateway.api.utils.MarketDataRepoFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,16 +33,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.web.client.RestTemplate;
 
-import tech.quantit.northstar.common.constant.ChannelType;
-import tech.quantit.northstar.common.constant.Constants;
-import tech.quantit.northstar.data.IGatewayRepository;
-import tech.quantit.northstar.data.IMailConfigRepository;
-import tech.quantit.northstar.data.IModuleRepository;
-import tech.quantit.northstar.data.IPlaybackRuntimeRepository;
-import tech.quantit.northstar.data.ISimAccountRepository;
-import tech.quantit.northstar.gateway.api.IContractManager;
-import tech.quantit.northstar.gateway.api.IMarketDataRepository;
-import tech.quantit.northstar.gateway.api.utils.MarketDataRepoFactory;
 import xyz.redtorch.gateway.ctp.common.CtpDateTimeUtil;
 
 @Configuration

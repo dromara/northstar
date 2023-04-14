@@ -7,12 +7,11 @@ import java.util.function.Function;
 import java.util.stream.LongStream;
 
 import org.apache.commons.lang3.StringUtils;
+import org.dromara.northstar.common.model.BarWrapper;
+import org.dromara.northstar.common.model.TimeSeriesValue;
 import org.dromara.northstar.strategy.api.indicator.TimeSeriesUnaryOperator;
 
 import com.google.common.util.concurrent.AtomicDouble;
-
-import tech.quantit.northstar.common.model.BarWrapper;
-import tech.quantit.northstar.common.model.TimeSeriesValue;
 
 /**
  * 均线函数

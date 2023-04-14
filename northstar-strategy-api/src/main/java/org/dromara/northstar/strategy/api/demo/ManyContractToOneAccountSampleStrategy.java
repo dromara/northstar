@@ -1,16 +1,16 @@
 package org.dromara.northstar.strategy.api.demo;
 
 import org.apache.commons.lang3.StringUtils;
+import org.dromara.northstar.common.constant.FieldType;
+import org.dromara.northstar.common.constant.ModuleState;
+import org.dromara.northstar.common.constant.SignalOperation;
+import org.dromara.northstar.common.model.DynamicParams;
+import org.dromara.northstar.common.model.Setting;
 import org.dromara.northstar.strategy.api.AbstractStrategy;
 import org.dromara.northstar.strategy.api.TradeStrategy;
 import org.dromara.northstar.strategy.api.annotation.StrategicComponent;
 import org.dromara.northstar.strategy.api.constant.PriceType;
 
-import tech.quantit.northstar.common.constant.FieldType;
-import tech.quantit.northstar.common.constant.ModuleState;
-import tech.quantit.northstar.common.constant.SignalOperation;
-import tech.quantit.northstar.common.model.DynamicParams;
-import tech.quantit.northstar.common.model.Setting;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreField.TickField;
 import xyz.redtorch.pb.CoreField.TradeField;

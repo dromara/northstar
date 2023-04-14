@@ -1,6 +1,11 @@
 package org.dromara.northstar.main.restful;
 
 import org.apache.commons.lang3.StringUtils;
+import org.dromara.northstar.common.event.NorthstarEvent;
+import org.dromara.northstar.common.event.NorthstarEventType;
+import org.dromara.northstar.common.model.MailConfigDescription;
+import org.dromara.northstar.common.model.ResultBean;
+import org.dromara.northstar.data.IMailConfigRepository;
 import org.dromara.northstar.main.mail.MailDeliveryManager;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,11 +16,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import tech.quantit.northstar.common.event.NorthstarEvent;
-import tech.quantit.northstar.common.event.NorthstarEventType;
-import tech.quantit.northstar.common.model.MailConfigDescription;
-import tech.quantit.northstar.common.model.ResultBean;
-import tech.quantit.northstar.data.IMailConfigRepository;
 import xyz.redtorch.pb.CoreEnum.CommonStatusEnum;
 import xyz.redtorch.pb.CoreField.NoticeField;
 

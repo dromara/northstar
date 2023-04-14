@@ -3,7 +3,7 @@ package org.dromara.northstar.strategy.api.indicator;
 import java.util.Objects;
 import java.util.function.UnaryOperator;
 
-import tech.quantit.northstar.common.model.TimeSeriesValue;
+import org.dromara.northstar.common.model.TimeSeriesValue;
 
 /**
  * 

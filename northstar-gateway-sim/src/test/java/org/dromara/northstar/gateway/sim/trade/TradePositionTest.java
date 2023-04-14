@@ -6,10 +6,10 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.List;
 
+import org.dromara.northstar.common.constant.ClosingPolicy;
 import org.dromara.northstar.gateway.sim.trade.TradePosition;
 import org.junit.jupiter.api.Test;
 
-import tech.quantit.northstar.common.constant.ClosingPolicy;
 import test.common.TestFieldFactory;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;

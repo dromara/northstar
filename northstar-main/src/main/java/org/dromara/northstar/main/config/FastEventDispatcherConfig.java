@@ -1,16 +1,15 @@
 package org.dromara.northstar.main.config;
 
+import org.dromara.northstar.common.event.FastEventEngine;
+import org.dromara.northstar.common.event.InternalEventBus;
+import org.dromara.northstar.common.event.StrategyEventBus;
+import org.dromara.northstar.common.event.FastEventEngine.NorthstarEventDispatcher;
 import org.dromara.northstar.main.engine.event.handler.BroadcastDispatcher;
 import org.dromara.northstar.main.engine.event.handler.InternalDispatcher;
 import org.dromara.northstar.main.engine.event.handler.StrategyDispatcher;
 import org.dromara.northstar.main.handler.broadcast.SocketIOMessageEngine;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import tech.quantit.northstar.common.event.FastEventEngine;
-import tech.quantit.northstar.common.event.FastEventEngine.NorthstarEventDispatcher;
-import tech.quantit.northstar.common.event.InternalEventBus;
-import tech.quantit.northstar.common.event.StrategyEventBus;
 
 /**
  * 事件处理器配置

@@ -1,11 +1,12 @@
 package org.dromara.northstar.gateway.ctp;
 
+import org.dromara.northstar.common.constant.FieldType;
+import org.dromara.northstar.common.model.DynamicParams;
+import org.dromara.northstar.common.model.GatewaySettings;
+import org.dromara.northstar.common.model.Setting;
+
 import lombok.Getter;
 import lombok.Setter;
-import tech.quantit.northstar.common.constant.FieldType;
-import tech.quantit.northstar.common.model.DynamicParams;
-import tech.quantit.northstar.common.model.GatewaySettings;
-import tech.quantit.northstar.common.model.Setting;
 
 @Getter
 @Setter

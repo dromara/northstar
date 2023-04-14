@@ -7,9 +7,9 @@ import java.util.Map;
 import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
+import org.dromara.northstar.common.constant.ClosingPolicy;
+import org.dromara.northstar.common.utils.FieldUtils;
 
-import tech.quantit.northstar.common.constant.ClosingPolicy;
-import tech.quantit.northstar.common.utils.FieldUtils;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreEnum.OrderStatusEnum;

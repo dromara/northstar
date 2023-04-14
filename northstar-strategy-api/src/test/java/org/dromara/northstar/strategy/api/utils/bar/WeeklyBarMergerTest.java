@@ -11,14 +11,14 @@ import java.util.List;
 import java.util.Random;
 
 import org.apache.commons.math3.stat.StatUtils;
+import org.dromara.northstar.common.constant.DateTimeConstant;
+import org.dromara.northstar.gateway.api.domain.contract.Contract;
+import org.dromara.northstar.gateway.api.domain.time.GenericTradeTime;
 import org.dromara.northstar.strategy.api.utils.bar.BarMerger;
 import org.dromara.northstar.strategy.api.utils.bar.WeeklyBarMerger;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import tech.quantit.northstar.common.constant.DateTimeConstant;
-import tech.quantit.northstar.gateway.api.domain.contract.Contract;
-import tech.quantit.northstar.gateway.api.domain.time.GenericTradeTime;
 import test.common.TestFieldFactory;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.ContractField;

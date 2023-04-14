@@ -1,9 +1,10 @@
 package org.dromara.northstar.gateway.binance;
 
-import tech.quantit.northstar.common.constant.ChannelType;
-import tech.quantit.northstar.common.event.FastEventEngine;
-import tech.quantit.northstar.common.model.GatewayDescription;
-import tech.quantit.northstar.gateway.api.MarketGateway;
+import org.dromara.northstar.common.constant.ChannelType;
+import org.dromara.northstar.common.event.FastEventEngine;
+import org.dromara.northstar.common.model.GatewayDescription;
+import org.dromara.northstar.gateway.api.MarketGateway;
+
 import xyz.redtorch.pb.CoreEnum.GatewayTypeEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.GatewaySettingField;

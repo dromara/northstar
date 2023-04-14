@@ -5,12 +5,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.dromara.northstar.common.IHolidayManager;
+import org.dromara.northstar.common.constant.ChannelType;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import tech.quantit.northstar.common.IHolidayManager;
-import tech.quantit.northstar.common.constant.ChannelType;
 
 /**
  * 

@@ -1,7 +1,8 @@
 package org.dromara.northstar.strategy.api;
 
-import tech.quantit.northstar.common.constant.ClosingPolicy;
-import tech.quantit.northstar.common.constant.SignalOperation;
+import org.dromara.northstar.common.constant.ClosingPolicy;
+import org.dromara.northstar.common.constant.SignalOperation;
+
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreField.PositionField;
 

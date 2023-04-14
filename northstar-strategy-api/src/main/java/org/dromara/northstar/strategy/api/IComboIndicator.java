@@ -1,8 +1,8 @@
 package org.dromara.northstar.strategy.api;
 
+import org.dromara.northstar.common.TickDataAware;
 import org.dromara.northstar.strategy.api.indicator.Indicator;
 
-import tech.quantit.northstar.common.TickDataAware;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.TickField;
 

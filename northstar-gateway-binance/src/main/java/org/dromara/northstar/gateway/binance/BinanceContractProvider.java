@@ -1,5 +1,7 @@
 package org.dromara.northstar.gateway.binance;
 
+import org.dromara.northstar.gateway.api.IMarketCenter;
+
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
@@ -8,7 +10,6 @@ import com.binance.connector.client.exceptions.BinanceConnectorException;
 import com.binance.connector.client.impl.UMFuturesClientImpl;
 
 import lombok.extern.slf4j.Slf4j;
-import tech.quantit.northstar.gateway.api.IMarketCenter;
 
 
 @Slf4j

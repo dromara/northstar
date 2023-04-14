@@ -2,11 +2,11 @@ package org.dromara.northstar.domain.module;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.dromara.northstar.common.constant.Constants;
+import org.dromara.northstar.common.constant.ModuleState;
 import org.dromara.northstar.domain.module.ModuleStateMachine;
 import org.junit.jupiter.api.Test;
 
-import tech.quantit.northstar.common.constant.Constants;
-import tech.quantit.northstar.common.constant.ModuleState;
 import test.common.TestFieldFactory;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;

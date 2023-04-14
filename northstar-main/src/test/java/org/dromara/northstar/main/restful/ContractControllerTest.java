@@ -8,6 +8,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.dromara.northstar.NorthstarApplication;
+import org.dromara.northstar.common.constant.GatewayUsage;
+import org.dromara.northstar.common.constant.ReturnCode;
+import org.dromara.northstar.common.model.GatewayDescription;
+import org.dromara.northstar.common.model.NsUser;
+import org.dromara.northstar.data.IGatewayRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,11 +27,6 @@ import com.alibaba.fastjson.JSON;
 import com.corundumstudio.socketio.SocketIOServer;
 
 import cn.hutool.crypto.digest.MD5;
-import tech.quantit.northstar.common.constant.GatewayUsage;
-import tech.quantit.northstar.common.constant.ReturnCode;
-import tech.quantit.northstar.common.model.GatewayDescription;
-import tech.quantit.northstar.common.model.NsUser;
-import tech.quantit.northstar.data.IGatewayRepository;
 
 @SpringBootTest(classes = NorthstarApplication.class, value="spring.profiles.active=test")
 @AutoConfigureMockMvc

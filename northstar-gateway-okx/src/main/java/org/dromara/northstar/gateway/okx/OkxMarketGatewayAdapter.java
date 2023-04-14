@@ -6,13 +6,6 @@ import com.alibaba.fastjson.JSONObject;
 import io.github.ztnozdormu.common.utils.WebSocketCallback;
 import io.github.ztnozdormu.okx.impl.OKXWebsocketClientImpl;
 import lombok.extern.slf4j.Slf4j;
-import tech.quantit.northstar.common.constant.ChannelType;
-import tech.quantit.northstar.common.constant.DateTimeConstant;
-import tech.quantit.northstar.common.event.FastEventEngine;
-import tech.quantit.northstar.common.event.NorthstarEventType;
-import tech.quantit.northstar.common.model.GatewayDescription;
-import tech.quantit.northstar.gateway.api.IContractManager;
-import tech.quantit.northstar.gateway.api.MarketGateway;
 import xyz.redtorch.pb.CoreEnum;
 import xyz.redtorch.pb.CoreField;
 import xyz.redtorch.pb.CoreField.ContractField;
@@ -26,6 +19,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+
+import org.dromara.northstar.common.constant.ChannelType;
+import org.dromara.northstar.common.constant.DateTimeConstant;
+import org.dromara.northstar.common.event.FastEventEngine;
+import org.dromara.northstar.common.event.NorthstarEventType;
+import org.dromara.northstar.common.model.GatewayDescription;
+import org.dromara.northstar.gateway.api.IContractManager;
+import org.dromara.northstar.gateway.api.MarketGateway;
 
 @Slf4j
 public class OkxMarketGatewayAdapter implements MarketGateway {

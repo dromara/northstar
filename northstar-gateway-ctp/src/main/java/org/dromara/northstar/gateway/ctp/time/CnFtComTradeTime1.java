@@ -3,8 +3,8 @@ package org.dromara.northstar.gateway.ctp.time;
 import java.time.LocalTime;
 import java.util.List;
 
-import tech.quantit.northstar.gateway.api.domain.time.PeriodSegment;
-import tech.quantit.northstar.gateway.api.domain.time.TradeTimeDefinition;
+import org.dromara.northstar.gateway.api.domain.time.PeriodSegment;
+import org.dromara.northstar.gateway.api.domain.time.TradeTimeDefinition;
 
 /**
  * 国内商品期货一类品种交易时间（有夜盘，23:00收盘）

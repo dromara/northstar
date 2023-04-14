@@ -2,9 +2,10 @@ package org.dromara.northstar.strategy.api;
 
 import java.util.List;
 
-import tech.quantit.northstar.common.TickDataAware;
-import tech.quantit.northstar.common.TransactionAware;
-import tech.quantit.northstar.common.constant.ModuleState;
+import org.dromara.northstar.common.TickDataAware;
+import org.dromara.northstar.common.TransactionAware;
+import org.dromara.northstar.common.constant.ModuleState;
+
 import xyz.redtorch.pb.CoreField.CancelOrderReqField;
 import xyz.redtorch.pb.CoreField.PositionField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;

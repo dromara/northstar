@@ -4,11 +4,10 @@ import static org.dromara.northstar.strategy.api.indicator.function.AverageFunct
 
 import java.util.function.Function;
 
+import org.dromara.northstar.common.model.BarWrapper;
+import org.dromara.northstar.common.model.TimeSeriesValue;
 import org.dromara.northstar.strategy.api.indicator.TimeSeriesUnaryOperator;
 import org.dromara.northstar.strategy.api.indicator.function.ComputeFunctions;
-
-import tech.quantit.northstar.common.model.BarWrapper;
-import tech.quantit.northstar.common.model.TimeSeriesValue;
 
 /**
  * DIFF : EMA(CLOSE,SHORT) - EMA(CLOSE,LONG);//短周期与长周期的收盘价的指数平滑移动平均值做差。

@@ -5,6 +5,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+import org.dromara.northstar.common.event.NorthstarEventType;
+import org.dromara.northstar.common.model.MailConfigDescription;
+import org.dromara.northstar.data.IMailConfigRepository;
 import org.dromara.northstar.data.redis.MailConfigRepoRedisImpl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,10 +15,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
-
-import tech.quantit.northstar.common.event.NorthstarEventType;
-import tech.quantit.northstar.common.model.MailConfigDescription;
-import tech.quantit.northstar.data.IMailConfigRepository;
 
 class MailConfigRepoRedisImplTest {
 

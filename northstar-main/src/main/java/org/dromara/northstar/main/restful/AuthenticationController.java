@@ -6,6 +6,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 import javax.servlet.http.HttpSession;
 
 import org.apache.commons.lang3.StringUtils;
+import org.dromara.northstar.common.constant.Constants;
+import org.dromara.northstar.common.exception.AuthenticationException;
+import org.dromara.northstar.common.model.NsUser;
+import org.dromara.northstar.common.model.ResultBean;
 import org.dromara.northstar.main.config.UserInfo;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,10 +23,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import cn.hutool.crypto.digest.MD5;
 import lombok.extern.slf4j.Slf4j;
-import tech.quantit.northstar.common.constant.Constants;
-import tech.quantit.northstar.common.exception.AuthenticationException;
-import tech.quantit.northstar.common.model.NsUser;
-import tech.quantit.northstar.common.model.ResultBean;
 
 /**
  * 身份认证

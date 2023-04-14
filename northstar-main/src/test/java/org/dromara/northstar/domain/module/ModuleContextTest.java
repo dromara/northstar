@@ -11,9 +11,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
+import org.dromara.northstar.common.constant.Constants;
+import org.dromara.northstar.common.constant.ModuleState;
+import org.dromara.northstar.common.constant.SignalOperation;
+import org.dromara.northstar.common.exception.TradeException;
+import org.dromara.northstar.common.model.ModuleAccountRuntimeDescription;
+import org.dromara.northstar.common.model.ModuleRuntimeDescription;
 import org.dromara.northstar.domain.module.FirstInFirstOutClosingStrategy;
 import org.dromara.northstar.domain.module.ModuleAccountStore;
 import org.dromara.northstar.domain.module.ModuleContext;
+import org.dromara.northstar.gateway.api.IContractManager;
+import org.dromara.northstar.gateway.api.TradeGateway;
+import org.dromara.northstar.gateway.api.domain.contract.Contract;
+import org.dromara.northstar.gateway.api.domain.time.GenericTradeTime;
 import org.dromara.northstar.main.mail.MailDeliveryManager;
 import org.dromara.northstar.strategy.api.ClosingStrategy;
 import org.dromara.northstar.strategy.api.IModule;
@@ -31,16 +41,6 @@ import org.junit.jupiter.api.Test;
 
 import com.alibaba.fastjson.JSONObject;
 
-import tech.quantit.northstar.common.constant.Constants;
-import tech.quantit.northstar.common.constant.ModuleState;
-import tech.quantit.northstar.common.constant.SignalOperation;
-import tech.quantit.northstar.common.exception.TradeException;
-import tech.quantit.northstar.common.model.ModuleAccountRuntimeDescription;
-import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
-import tech.quantit.northstar.gateway.api.IContractManager;
-import tech.quantit.northstar.gateway.api.TradeGateway;
-import tech.quantit.northstar.gateway.api.domain.contract.Contract;
-import tech.quantit.northstar.gateway.api.domain.time.GenericTradeTime;
 import test.common.TestFieldFactory;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;

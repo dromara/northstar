@@ -8,14 +8,14 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
+import org.dromara.northstar.common.model.BarWrapper;
+import org.dromara.northstar.common.model.TimeSeriesValue;
 import org.dromara.northstar.strategy.api.indicator.TimeSeriesUnaryOperator;
 import org.dromara.northstar.strategy.api.indicator.function.AverageFunctions;
 
 import com.google.common.collect.Streams;
 import com.google.common.util.concurrent.AtomicDouble;
 
-import tech.quantit.northstar.common.model.BarWrapper;
-import tech.quantit.northstar.common.model.TimeSeriesValue;
 import xyz.redtorch.pb.CoreField.BarField;
 
 /**

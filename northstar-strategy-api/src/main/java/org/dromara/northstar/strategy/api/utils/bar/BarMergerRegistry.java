@@ -5,14 +5,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
+import org.dromara.northstar.common.model.Identifier;
+import org.dromara.northstar.gateway.api.domain.contract.Contract;
 import org.dromara.northstar.strategy.api.BarDataAware;
 import org.dromara.northstar.strategy.api.MergedBarListener;
 import org.dromara.northstar.strategy.api.indicator.Indicator.PeriodUnit;
 
 import com.google.common.collect.HashMultimap;
 
-import tech.quantit.northstar.common.model.Identifier;
-import tech.quantit.northstar.gateway.api.domain.contract.Contract;
 import xyz.redtorch.pb.CoreField.BarField;
 
 /**

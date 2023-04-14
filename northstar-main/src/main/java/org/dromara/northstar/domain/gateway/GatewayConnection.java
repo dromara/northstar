@@ -1,7 +1,7 @@
 package org.dromara.northstar.domain.gateway;
 
-import tech.quantit.northstar.common.constant.ConnectionState;
-import tech.quantit.northstar.common.model.GatewayDescription;
+import org.dromara.northstar.common.constant.ConnectionState;
+import org.dromara.northstar.common.model.GatewayDescription;
 
 /**
  * 网关连接

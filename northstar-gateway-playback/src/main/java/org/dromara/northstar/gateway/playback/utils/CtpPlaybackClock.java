@@ -3,7 +3,7 @@ package org.dromara.northstar.gateway.playback.utils;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
-import tech.quantit.northstar.common.IHolidayManager;
+import org.dromara.northstar.common.IHolidayManager;
 
 /**
  * CTP时钟

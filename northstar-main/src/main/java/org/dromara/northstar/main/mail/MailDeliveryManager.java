@@ -4,14 +4,14 @@ import java.util.EnumSet;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
+import org.dromara.northstar.common.IMailMessageContentHandler;
+import org.dromara.northstar.common.event.NorthstarEvent;
+import org.dromara.northstar.common.event.NorthstarEventType;
+import org.dromara.northstar.common.model.MailConfigDescription;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 
 import lombok.extern.slf4j.Slf4j;
-import tech.quantit.northstar.common.IMailMessageContentHandler;
-import tech.quantit.northstar.common.event.NorthstarEvent;
-import tech.quantit.northstar.common.event.NorthstarEventType;
-import tech.quantit.northstar.common.model.MailConfigDescription;
 import xyz.redtorch.pb.CoreEnum.OrderStatusEnum;
 import xyz.redtorch.pb.CoreField.NoticeField;
 import xyz.redtorch.pb.CoreField.OrderField;

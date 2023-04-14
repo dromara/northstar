@@ -2,12 +2,6 @@ package org.dromara.northstar.gateway.okx;
 
 
 
-import tech.quantit.northstar.common.constant.ChannelType;
-import tech.quantit.northstar.common.model.Identifier;
-import tech.quantit.northstar.gateway.api.domain.contract.ContractDefinition;
-import tech.quantit.northstar.gateway.api.domain.contract.Instrument;
-import tech.quantit.northstar.gateway.api.domain.time.GenericTradeTime;
-import tech.quantit.northstar.gateway.api.domain.time.TradeTimeDefinition;
 import xyz.redtorch.pb.CoreEnum;
 import xyz.redtorch.pb.CoreEnum.CurrencyEnum;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
@@ -16,6 +10,13 @@ import xyz.redtorch.pb.CoreField.ContractField;
 
 import java.util.Objects;
 import java.util.Optional;
+
+import org.dromara.northstar.common.constant.ChannelType;
+import org.dromara.northstar.common.model.Identifier;
+import org.dromara.northstar.gateway.api.domain.contract.ContractDefinition;
+import org.dromara.northstar.gateway.api.domain.contract.Instrument;
+import org.dromara.northstar.gateway.api.domain.time.GenericTradeTime;
+import org.dromara.northstar.gateway.api.domain.time.TradeTimeDefinition;
 
 public class OkxContract implements Instrument {
 
