@@ -9,6 +9,7 @@ import org.dromara.northstar.domain.gateway.GatewayAndConnectionManager;
 import org.dromara.northstar.domain.gateway.GatewayConnection;
 import org.dromara.northstar.main.PostLoadAware;
 import org.dromara.northstar.main.utils.CodecUtils;
+import org.dromara.northstar.strategy.api.AccountCenter;
 import org.springframework.dao.DuplicateKeyException;
 
 import com.alibaba.fastjson.JSON;
@@ -35,7 +36,6 @@ import tech.quantit.northstar.gateway.api.IMarketCenter;
 import tech.quantit.northstar.gateway.api.MarketGateway;
 import tech.quantit.northstar.gateway.api.TradeGateway;
 import tech.quantit.northstar.gateway.sim.trade.SimTradeGateway;
-import tech.quantit.northstar.strategy.api.AccountCenter;
 
 /**
  * 网关服务

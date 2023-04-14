@@ -7,6 +7,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.LinkedList;
 
 import org.apache.commons.lang3.StringUtils;
+import org.dromara.northstar.strategy.api.log.ModuleLoggerFactory;
 import org.springframework.boot.logging.LogLevel;
 import org.springframework.boot.logging.LoggingSystem;
 
@@ -14,7 +15,6 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import cn.hutool.core.io.FileUtil;
 import tech.quantit.northstar.common.model.LogDescription;
-import tech.quantit.northstar.strategy.api.log.ModuleLoggerFactory;
 
 public class LogService {
 	

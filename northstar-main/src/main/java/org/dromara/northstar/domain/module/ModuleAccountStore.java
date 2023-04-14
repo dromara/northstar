@@ -9,6 +9,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.dromara.northstar.strategy.api.IModuleAccountStore;
 import org.springframework.util.Assert;
 
 import com.google.common.collect.HashBasedTable;
@@ -26,7 +27,6 @@ import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
 import tech.quantit.northstar.common.utils.FieldUtils;
 import tech.quantit.northstar.gateway.api.IContractManager;
 import tech.quantit.northstar.gateway.api.domain.contract.Contract;
-import tech.quantit.northstar.strategy.api.IModuleAccountStore;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreField.CancelOrderReqField;
 import xyz.redtorch.pb.CoreField.ContractField;

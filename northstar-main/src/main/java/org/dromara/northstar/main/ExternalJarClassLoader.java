@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
+import org.dromara.northstar.strategy.api.annotation.StrategicComponent;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.stereotype.Component;
@@ -22,7 +23,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import lombok.extern.slf4j.Slf4j;
-import tech.quantit.northstar.strategy.api.annotation.StrategicComponent;
 
 @Slf4j
 public class ExternalJarClassLoader extends URLClassLoader {

@@ -5,12 +5,13 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import org.dromara.northstar.strategy.api.IModule;
+import org.dromara.northstar.strategy.api.IModuleContext;
+
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.event.NorthstarEvent;
 import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
 import tech.quantit.northstar.gateway.api.MarketGateway;
-import tech.quantit.northstar.strategy.api.IModule;
-import tech.quantit.northstar.strategy.api.IModuleContext;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.OrderField;
 import xyz.redtorch.pb.CoreField.TickField;

@@ -3,12 +3,12 @@ package org.dromara.northstar.domain.module;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.dromara.northstar.domain.module.PriorTodayClosingStrategy;
+import org.dromara.northstar.strategy.api.ClosingStrategy;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import tech.quantit.northstar.common.constant.ClosingPolicy;
 import tech.quantit.northstar.common.constant.SignalOperation;
-import tech.quantit.northstar.strategy.api.ClosingStrategy;
 import test.common.TestFieldFactory;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreField.ContractField;

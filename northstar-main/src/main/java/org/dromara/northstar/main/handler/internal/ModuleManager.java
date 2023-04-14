@@ -4,12 +4,13 @@ import java.util.EnumSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.dromara.northstar.strategy.api.IModule;
+
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.event.AbstractEventHandler;
 import tech.quantit.northstar.common.event.NorthstarEvent;
 import tech.quantit.northstar.common.event.NorthstarEventType;
 import tech.quantit.northstar.common.exception.NoSuchElementException;
-import tech.quantit.northstar.strategy.api.IModule;
 
 @Slf4j
 public class ModuleManager extends AbstractEventHandler{

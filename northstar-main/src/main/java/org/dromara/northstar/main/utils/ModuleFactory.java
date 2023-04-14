@@ -17,6 +17,13 @@ import org.dromara.northstar.domain.module.PriorTodayClosingStrategy;
 import org.dromara.northstar.domain.module.TradeModule;
 import org.dromara.northstar.main.ExternalJarClassLoader;
 import org.dromara.northstar.main.mail.MailDeliveryManager;
+import org.dromara.northstar.strategy.api.ClosingStrategy;
+import org.dromara.northstar.strategy.api.DynamicParamsAware;
+import org.dromara.northstar.strategy.api.IModule;
+import org.dromara.northstar.strategy.api.IModuleAccountStore;
+import org.dromara.northstar.strategy.api.IModuleContext;
+import org.dromara.northstar.strategy.api.TradeStrategy;
+import org.dromara.northstar.strategy.api.utils.trade.DealCollector;
 
 import tech.quantit.northstar.common.constant.ClosingPolicy;
 import tech.quantit.northstar.common.constant.ModuleUsage;
@@ -35,13 +42,6 @@ import tech.quantit.northstar.gateway.api.IContractManager;
 import tech.quantit.northstar.gateway.api.MarketGateway;
 import tech.quantit.northstar.gateway.api.TradeGateway;
 import tech.quantit.northstar.gateway.api.domain.contract.Contract;
-import tech.quantit.northstar.strategy.api.ClosingStrategy;
-import tech.quantit.northstar.strategy.api.DynamicParamsAware;
-import tech.quantit.northstar.strategy.api.IModule;
-import tech.quantit.northstar.strategy.api.IModuleAccountStore;
-import tech.quantit.northstar.strategy.api.IModuleContext;
-import tech.quantit.northstar.strategy.api.TradeStrategy;
-import tech.quantit.northstar.strategy.api.utils.trade.DealCollector;
 import xyz.redtorch.pb.CoreField.TradeField;
 
 public class ModuleFactory {
