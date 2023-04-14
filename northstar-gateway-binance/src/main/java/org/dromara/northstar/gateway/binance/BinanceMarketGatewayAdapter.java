@@ -1,4 +1,4 @@
-package tech.quantit.northstar.gateway.binance;
+package org.dromara.northstar.gateway.binance;
 
 import tech.quantit.northstar.common.constant.ChannelType;
 import tech.quantit.northstar.common.event.FastEventEngine;

@@ -1,4 +1,4 @@
-package tech.quantit.northstar.gateway.binance;
+package org.dromara.northstar.gateway.binance;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
