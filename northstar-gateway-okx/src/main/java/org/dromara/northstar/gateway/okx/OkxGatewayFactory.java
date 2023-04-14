@@ -1,4 +1,4 @@
-package tech.quantit.northstar.gateway.okx;
+package org.dromara.northstar.gateway.okx;
 
 import com.alibaba.fastjson2.JSON;
 import tech.quantit.northstar.common.event.FastEventEngine;

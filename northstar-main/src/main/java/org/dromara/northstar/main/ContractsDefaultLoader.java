@@ -6,6 +6,7 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.dromara.northstar.data.ds.DataServiceManager;
 import org.dromara.northstar.data.ds.W3DataServiceManager;
+import org.dromara.northstar.gateway.okx.OkxContract;
 import org.dromara.northstar.gateway.sim.trade.SimContractGenerator;
 import org.dromara.northstar.main.service.GatewayService;
 import org.dromara.northstar.main.service.ModuleService;
@@ -20,7 +21,6 @@ import tech.quantit.northstar.common.constant.DateTimeConstant;
 import tech.quantit.northstar.gateway.api.IMarketCenter;
 import tech.quantit.northstar.gateway.api.domain.contract.Instrument;
 import tech.quantit.northstar.gateway.ctp.CtpContract;
-import tech.quantit.northstar.gateway.okx.OkxContract;
 import xyz.redtorch.pb.CoreEnum;
 
 @Slf4j

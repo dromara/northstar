@@ -1,4 +1,4 @@
-package tech.quantit.northstar.gateway.okx;
+package org.dromara.northstar.gateway.okx;
 
 import cn.hutool.core.text.StrPool;
 import com.alibaba.fastjson2.JSON;
