@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.List;
 
+import org.dromara.northstar.domain.module.TradePosition;
 import org.junit.jupiter.api.Test;
 
 import tech.quantit.northstar.common.constant.ClosingPolicy;

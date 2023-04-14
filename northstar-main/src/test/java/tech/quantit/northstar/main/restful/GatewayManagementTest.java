@@ -7,6 +7,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import org.dromara.northstar.NorthstarApplication;
+import org.dromara.northstar.main.handler.broadcast.SocketIOMessageEngine;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,8 +32,6 @@ import tech.quantit.northstar.common.constant.ReturnCode;
 import tech.quantit.northstar.common.model.GatewayDescription;
 import tech.quantit.northstar.common.model.NsUser;
 import tech.quantit.northstar.gateway.ctp.CtpGatewaySettings;
-import tech.quantit.northstar.main.NorthstarApplication;
-import tech.quantit.northstar.main.handler.broadcast.SocketIOMessageEngine;
 
 /**
  * GatewayManagement接口黑盒测试类

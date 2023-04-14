@@ -15,6 +15,8 @@ import java.time.LocalTime;
 import java.util.Collections;
 import java.util.List;
 
+import org.dromara.northstar.data.ds.DataServiceManager;
+import org.dromara.northstar.data.redis.MarketDataRepoRedisImpl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,7 +27,6 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 import tech.quantit.northstar.common.constant.Constants;
 import tech.quantit.northstar.common.constant.DateTimeConstant;
-import tech.quantit.northstar.data.ds.DataServiceManager;
 import tech.quantit.northstar.gateway.api.IMarketDataRepository;
 import test.common.TestFieldFactory;
 import xyz.redtorch.pb.CoreField.BarField;

@@ -13,6 +13,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 
+import org.dromara.northstar.NorthstarApplication;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -49,7 +50,6 @@ import tech.quantit.northstar.gateway.api.IMarketCenter;
 import tech.quantit.northstar.gateway.api.domain.contract.Contract;
 import tech.quantit.northstar.gateway.api.domain.time.GenericTradeTime;
 import tech.quantit.northstar.gateway.ctp.CtpGatewaySettings;
-import tech.quantit.northstar.main.NorthstarApplication;
 import test.common.TestFieldFactory;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;

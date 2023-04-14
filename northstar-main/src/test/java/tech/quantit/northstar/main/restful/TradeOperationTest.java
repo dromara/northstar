@@ -6,6 +6,10 @@ import static org.mockito.Mockito.when;
 
 import java.util.concurrent.ConcurrentMap;
 
+import org.dromara.northstar.NorthstarApplication;
+import org.dromara.northstar.domain.account.TradeDayAccount;
+import org.dromara.northstar.main.handler.broadcast.SocketIOMessageEngine;
+import org.dromara.northstar.main.restful.TradeOperationController;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,9 +22,6 @@ import com.corundumstudio.socketio.SocketIOServer;
 import tech.quantit.northstar.common.event.FastEventEngine;
 import tech.quantit.northstar.common.model.OrderRequest;
 import tech.quantit.northstar.common.model.OrderRequest.TradeOperation;
-import tech.quantit.northstar.domain.account.TradeDayAccount;
-import tech.quantit.northstar.main.NorthstarApplication;
-import tech.quantit.northstar.main.handler.broadcast.SocketIOMessageEngine;
 
 @SpringBootTest(classes = NorthstarApplication.class, value="spring.profiles.active=test")
 public class TradeOperationTest {

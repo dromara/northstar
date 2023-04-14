@@ -2,6 +2,7 @@ package tech.quantit.northstar.domain.module;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.dromara.northstar.domain.module.PriorTodayClosingStrategy;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

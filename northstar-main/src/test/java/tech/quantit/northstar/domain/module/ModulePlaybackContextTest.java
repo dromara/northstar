@@ -10,6 +10,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
+import org.dromara.northstar.domain.module.FirstInFirstOutClosingStrategy;
+import org.dromara.northstar.domain.module.ModuleAccountStore;
+import org.dromara.northstar.domain.module.ModulePlaybackContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

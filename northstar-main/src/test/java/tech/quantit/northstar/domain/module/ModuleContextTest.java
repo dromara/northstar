@@ -11,6 +11,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
+import org.dromara.northstar.domain.module.FirstInFirstOutClosingStrategy;
+import org.dromara.northstar.domain.module.ModuleAccountStore;
+import org.dromara.northstar.domain.module.ModuleContext;
+import org.dromara.northstar.main.mail.MailDeliveryManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -26,7 +30,6 @@ import tech.quantit.northstar.gateway.api.IContractManager;
 import tech.quantit.northstar.gateway.api.TradeGateway;
 import tech.quantit.northstar.gateway.api.domain.contract.Contract;
 import tech.quantit.northstar.gateway.api.domain.time.GenericTradeTime;
-import tech.quantit.northstar.main.mail.MailDeliveryManager;
 import tech.quantit.northstar.strategy.api.ClosingStrategy;
 import tech.quantit.northstar.strategy.api.IModule;
 import tech.quantit.northstar.strategy.api.IModuleAccountStore;

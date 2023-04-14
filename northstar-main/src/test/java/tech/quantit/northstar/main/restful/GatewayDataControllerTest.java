@@ -7,6 +7,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import org.dromara.northstar.NorthstarApplication;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +28,6 @@ import tech.quantit.northstar.common.model.NsUser;
 import tech.quantit.northstar.data.IGatewayRepository;
 import tech.quantit.northstar.gateway.api.IMarketCenter;
 import tech.quantit.northstar.gateway.api.domain.contract.Contract;
-import tech.quantit.northstar.main.NorthstarApplication;
 import xyz.redtorch.pb.CoreField.ContractField;
 
 @SpringBootTest(classes = NorthstarApplication.class, value="spring.profiles.active=test")

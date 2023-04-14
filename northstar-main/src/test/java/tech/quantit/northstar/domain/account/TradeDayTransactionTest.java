@@ -2,6 +2,7 @@ package tech.quantit.northstar.domain.account;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.dromara.northstar.domain.account.TradeDayTransaction;
 import org.junit.jupiter.api.Test;
 
 import xyz.redtorch.pb.CoreField.TradeField;
