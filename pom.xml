@@ -3,9 +3,9 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>tech.quantit</groupId>
+	<groupId>org.dromara</groupId>
 	<artifactId>northstar</artifactId>
-	<version>5.1</version>
+	<version>6.0</version>
 	<name>northstar</name>
 	<packaging>pom</packaging>
 	<description>盈富量化交易平台</description>
@@ -70,52 +70,52 @@
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
-				<groupId>tech.quantit</groupId>
+				<groupId>org.dromara</groupId>
 				<artifactId>northstar-common</artifactId>
 				<version>${northstar-version}</version>
 			</dependency>
 			<dependency>
-				<groupId>tech.quantit</groupId>
+				<groupId>org.dromara</groupId>
 				<artifactId>northstar-strategy-api</artifactId>
 				<version>${northstar-version}</version>
 			</dependency>
 			<dependency>
-				<groupId>tech.quantit</groupId>
+				<groupId>org.dromara</groupId>
 				<artifactId>northstar-gateway-api</artifactId>
 				<version>${northstar-version}</version>
 			</dependency>
 			<dependency>
-				<groupId>tech.quantit</groupId>
+				<groupId>org.dromara</groupId>
 				<artifactId>northstar-gateway-ctp</artifactId>
 				<version>${northstar-version}</version>
 			</dependency>
 			<dependency>
-				<groupId>tech.quantit</groupId>
+				<groupId>org.dromara</groupId>
 				<artifactId>northstar-gateway-sim</artifactId>
 				<version>${northstar-version}</version>
 			</dependency>
 			<dependency>
-				<groupId>tech.quantit</groupId>
+				<groupId>org.dromara</groupId>
 				<artifactId>northstar-gateway-playback</artifactId>
 				<version>${northstar-version}</version>
 			</dependency>
 			<dependency>
-				<groupId>tech.quantit</groupId>
+				<groupId>org.dromara</groupId>
 				<artifactId>northstar-gateway-tiger</artifactId>
 				<version>${northstar-version}</version>
 			</dependency>
 			<dependency>
-				<groupId>tech.quantit</groupId>
+				<groupId>org.dromara</groupId>
 				<artifactId>northstar-gateway-binance</artifactId>
 				<version>${northstar-version}</version>
 			</dependency>
 			<dependency>
-				<groupId>tech.quantit</groupId>
+				<groupId>org.dromara</groupId>
 				<artifactId>northstar-gateway-okx</artifactId>
 				<version>${northstar-version}</version>
 			</dependency>
 			<dependency>
-				<groupId>tech.quantit</groupId>
+				<groupId>org.dromara</groupId>
 				<artifactId>northstar-main</artifactId>
 				<version>${northstar-version}</version>
 			</dependency>

@@ -13,7 +13,7 @@
   </properties>
   <dependencies>
   	<dependency>
-		<groupId>tech.quantit</groupId>
+		<groupId>org.dromara</groupId>
 		<artifactId>northstar-strategy-api</artifactId>
 		<version>5.1</version>
 		<scope>provided</scope>
