@@ -2,11 +2,12 @@ package common;
 
 import java.util.List;
 
+import org.dromara.northstar.gateway.ctp.CtpGatewaySettings;
+
 import tech.quantit.northstar.common.constant.ChannelType;
 import tech.quantit.northstar.common.constant.GatewayUsage;
 import tech.quantit.northstar.common.model.GatewayDescription;
 import tech.quantit.northstar.common.model.GatewaySettings;
-import tech.quantit.northstar.gateway.ctp.CtpGatewaySettings;
 
 public class TestGatewayFactory {
 

@@ -1,5 +1,7 @@
 package xyz.redtorch.gateway.ctp.x64v6v3v15v;
 
+import org.dromara.northstar.gateway.ctp.CtpGatewaySettings;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson2.JSONObject;
 
@@ -9,7 +11,6 @@ import tech.quantit.northstar.common.model.GatewayDescription;
 import tech.quantit.northstar.gateway.api.Gateway;
 import tech.quantit.northstar.gateway.api.GatewayFactory;
 import tech.quantit.northstar.gateway.api.IMarketCenter;
-import tech.quantit.northstar.gateway.ctp.CtpGatewaySettings;
 import xyz.redtorch.pb.CoreField.GatewaySettingField.CtpApiSettingField;
 
 public class CtpGatewayFactory implements GatewayFactory{

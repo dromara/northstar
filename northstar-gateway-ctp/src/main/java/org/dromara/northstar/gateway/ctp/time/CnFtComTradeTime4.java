@@ -1,4 +1,4 @@
-package tech.quantit.northstar.gateway.ctp.time;
+package org.dromara.northstar.gateway.ctp.time;
 
 import java.time.LocalTime;
 import java.util.List;

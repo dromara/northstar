@@ -1,4 +1,4 @@
-package tech.quantit.northstar.gateway.ctp;
+package org.dromara.northstar.gateway.ctp;
 
 import lombok.Getter;
 import lombok.Setter;

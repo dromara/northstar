@@ -1,7 +1,14 @@
-package tech.quantit.northstar.gateway.ctp;
+package org.dromara.northstar.gateway.ctp;
 
 import java.util.Objects;
 import java.util.Optional;
+
+import org.dromara.northstar.gateway.ctp.time.CnFtBondTradeTime;
+import org.dromara.northstar.gateway.ctp.time.CnFtComTradeTime1;
+import org.dromara.northstar.gateway.ctp.time.CnFtComTradeTime2;
+import org.dromara.northstar.gateway.ctp.time.CnFtComTradeTime3;
+import org.dromara.northstar.gateway.ctp.time.CnFtComTradeTime4;
+import org.dromara.northstar.gateway.ctp.time.CnFtIndexTradeTime;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,12 +19,6 @@ import tech.quantit.northstar.common.model.Identifier;
 import tech.quantit.northstar.gateway.api.domain.contract.ContractDefinition;
 import tech.quantit.northstar.gateway.api.domain.contract.Instrument;
 import tech.quantit.northstar.gateway.api.domain.time.TradeTimeDefinition;
-import tech.quantit.northstar.gateway.ctp.time.CnFtBondTradeTime;
-import tech.quantit.northstar.gateway.ctp.time.CnFtComTradeTime1;
-import tech.quantit.northstar.gateway.ctp.time.CnFtComTradeTime2;
-import tech.quantit.northstar.gateway.ctp.time.CnFtComTradeTime3;
-import tech.quantit.northstar.gateway.ctp.time.CnFtComTradeTime4;
-import tech.quantit.northstar.gateway.ctp.time.CnFtIndexTradeTime;
 import xyz.redtorch.pb.CoreEnum.CombinationTypeEnum;
 import xyz.redtorch.pb.CoreEnum.CurrencyEnum;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;

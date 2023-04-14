@@ -3,6 +3,8 @@ package org.dromara.northstar.main.config;
 import java.util.EnumMap;
 import java.util.Map;
 
+import org.dromara.northstar.gateway.ctp.CtpGatewaySettings;
+import org.dromara.northstar.gateway.ctp.CtpSimGatewaySettings;
 import org.dromara.northstar.gateway.okx.OkxGatewayFactory;
 import org.dromara.northstar.gateway.okx.OkxGatewaySettings;
 import org.dromara.northstar.gateway.playback.PlaybackGatewayFactory;
@@ -25,8 +27,6 @@ import tech.quantit.northstar.gateway.api.GatewayFactory;
 import tech.quantit.northstar.gateway.api.GatewayMetaProvider;
 import tech.quantit.northstar.gateway.api.IMarketCenter;
 import tech.quantit.northstar.gateway.api.utils.MarketDataRepoFactory;
-import tech.quantit.northstar.gateway.ctp.CtpGatewaySettings;
-import tech.quantit.northstar.gateway.ctp.CtpSimGatewaySettings;
 import xyz.redtorch.gateway.ctp.x64v6v3v15v.CtpGatewayFactory;
 import xyz.redtorch.gateway.ctp.x64v6v5v1cpv.CtpSimGatewayFactory;
 
