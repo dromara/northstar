@@ -38,9 +38,11 @@ public class MarketDataHandler extends AbstractEventHandler implements GenericEv
 
 	@Override
 	protected void doHandle(NorthstarEvent e) {
-		if(e.getData() instanceof BarField bar && bar.getActionDay().equals(LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER))) {
+		if(e.getData() instanceof BarField bar 
+				&& bar.getActionDay().equals(LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
+				&& StringUtils.equals(LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER), bar.getActionDay())) {
 			ChannelType channelType = ChannelType.valueOf(bar.getGatewayId());
-			if(channelType != ChannelType.SIM && StringUtils.equals(LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER), bar.getActionDay())) {
+			if(channelType != ChannelType.SIM) {
 				exec.execute(() -> mdRepoFactory.getInstance(channelType).insert(bar)); 
 			}
 		}
