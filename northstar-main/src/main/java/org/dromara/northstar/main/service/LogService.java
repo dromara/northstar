@@ -18,7 +18,7 @@ import cn.hutool.core.io.FileUtil;
 
 public class LogService {
 	
-	private static final String NORTHSTAR_ROOT = "tech.quantit.northstar";
+	private static final String NORTHSTAR_ROOT = "org.dromara.northstar";
 	
 	private ModuleLoggerFactory moduleLoggerFactory = new ModuleLoggerFactory();
 	
