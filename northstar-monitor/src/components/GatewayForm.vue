@@ -84,7 +84,7 @@
           </el-form-item>
         </el-col>
         <el-col :span="8" v-if="gatewayUsage === 'TRADE'">
-          <el-form-item label="行情网关" prop="bindedMktGatewayId">
+          <el-form-item v-show="channelType" label="行情网关" prop="bindedMktGatewayId">
             <el-select
               v-model="form.bindedMktGatewayId"
               placeholder="请选择"
