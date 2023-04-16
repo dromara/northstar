@@ -376,10 +376,10 @@ public class PlaybackContext {
 						.setLastPrice(e.price())
 						.addAllAskPrice(List.of(e.askPrice0(), 0D, 0D, 0D, 0D)) // 仅模拟卖一价
 						.addAllBidPrice(List.of(e.bidPrice0(), 0D, 0D, 0D, 0D)) // 仅模拟买一价
-						.addAllAskVolume(List.of(ThreadLocalRandom.current().nextInt(500))) // 随机模拟卖一量
-						.addAllBidVolume(List.of(ThreadLocalRandom.current().nextInt(500))) // 随机模拟买一量
+						.addAllAskVolume(List.of(ThreadLocalRandom.current().nextInt(10,500))) // 随机模拟卖一量
+						.addAllBidVolume(List.of(ThreadLocalRandom.current().nextInt(10,500))) // 随机模拟买一量
 						.setGatewayId(gd.getGatewayId())
-						.setVolumeDelta(e.volume())							// 采用模拟随机值
+						.setVolumeDelta(Math.max(1, e.volume()))			// 采用模拟随机值
 						.setOpenInterest(srcBar.getOpenInterest())			// 采用分钟K线的模糊值
 						.setOpenInterestDelta(e.openInterestDelta())		// 采用模拟随机值
 						.setTurnoverDelta(srcBar.getTurnoverDelta())		// 采用分钟K线的模糊值
