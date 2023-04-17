@@ -570,6 +570,7 @@ public class ModuleContext implements IModuleContext, MergedBarListener{
 		StringBuilder sb = new StringBuilder();
 		sb.append("模组成交:\n");
 		sb.append(String.format(" 模组：%s%n", getModuleName()));
+		sb.append(String.format(" 网关：%s%n", trade.getGatewayId()));
 		sb.append(String.format(" 合约：%s%n", trade.getContract().getFullName()));
 		sb.append(String.format(" 操作：%s%n", FieldUtils.chn(trade.getDirection()) + FieldUtils.chn(trade.getOffsetFlag())));
 		sb.append(String.format(" 成交价：%s%n", trade.getPrice()));
