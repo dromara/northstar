@@ -1,7 +1,5 @@
 package org.dromara.northstar.common;
 
-import com.google.common.eventbus.Subscribe;
-
 import xyz.redtorch.pb.CoreField.TickField;
 
 /**
@@ -11,7 +9,7 @@ import xyz.redtorch.pb.CoreField.TickField;
  */
 public interface TickDataAware {
 
-	@Subscribe
+	
 	void onTick(TickField tick);
 	
 	

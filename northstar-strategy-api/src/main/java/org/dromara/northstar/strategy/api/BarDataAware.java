@@ -1,7 +1,5 @@
 package org.dromara.northstar.strategy.api;
 
-import com.google.common.eventbus.Subscribe;
-
 import xyz.redtorch.pb.CoreField.BarField;
 
 /**
@@ -11,6 +9,6 @@ import xyz.redtorch.pb.CoreField.BarField;
  */
 public interface BarDataAware {
 	
-	@Subscribe
+	
 	void onBar(BarField bar);
 }
