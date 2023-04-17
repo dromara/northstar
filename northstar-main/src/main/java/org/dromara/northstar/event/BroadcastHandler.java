@@ -1,13 +1,14 @@
 package org.dromara.northstar.event;
 
-import java.util.HashSet;
+import java.util.EnumSet;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
+import org.dromara.northstar.common.event.AbstractEventHandler;
+import org.dromara.northstar.common.event.GenericEventHandler;
 import org.dromara.northstar.common.event.NorthstarEvent;
 import org.dromara.northstar.common.event.NorthstarEventType;
-import org.springframework.stereotype.Component;
-import org.dromara.northstar.common.event.FastEventEngine;
-import org.dromara.northstar.common.event.FastEventEngine.NorthstarEventDispatcher;
 
 import com.corundumstudio.socketio.SocketIOClient;
 import com.corundumstudio.socketio.SocketIOServer;
@@ -24,37 +25,26 @@ import xyz.redtorch.pb.CoreField.PositionField;
 import xyz.redtorch.pb.CoreField.TickField;
 
 @Slf4j
-@Component
-public class BroadcastDispatcher implements NorthstarEventDispatcher {
+public class BroadcastHandler extends AbstractEventHandler implements GenericEventHandler {
 	
 	private SocketIOServer socketServer;
 	
-	private static Set<NorthstarEventType> eventSet = new HashSet<>() {
-		private static final long serialVersionUID = 1L;
-		{
-			add(NorthstarEventType.TICK);
-			add(NorthstarEventType.BAR);
-			add(NorthstarEventType.ACCOUNT);
-			add(NorthstarEventType.ORDER);
-			add(NorthstarEventType.POSITION);
-			add(NorthstarEventType.TRADE);
-			add(NorthstarEventType.NOTICE);
-		}
-	};
+	private ExecutorService exec = Executors.newSingleThreadExecutor();
 	
-	public BroadcastDispatcher(SocketIOServer socketServer, FastEventEngine feEngine) {
+	private static final Set<NorthstarEventType> TARGET_TYPE = EnumSet.of(
+			NorthstarEventType.TICK, 
+			NorthstarEventType.BAR,
+			NorthstarEventType.ACCOUNT,
+			NorthstarEventType.POSITION,
+			NorthstarEventType.TRADE,
+			NorthstarEventType.ORDER,
+			NorthstarEventType.NOTICE
+	); 
+	
+	public BroadcastHandler(SocketIOServer socketServer) {
 		this.socketServer = socketServer;
-		feEngine.addHandler(this);
 	}
-
-	@Override
-	public void onEvent(NorthstarEvent event, long sequence, boolean endOfBatch) throws Exception {
-		if(!eventSet.contains(event.getEvent())) {
-			return;
-		}
-		emitEvent(event);
-	}
-
+	
 	/*****************************************************/
 	/**					消息发送端					  		**/
 	/*****************************************************/
@@ -103,4 +93,20 @@ public class BroadcastDispatcher implements NorthstarEventDispatcher {
     	log.info("【离开房间】-[{}]离开房间{}", client.getSessionId(), room);
     	client.leaveRoom(room);
     }
+
+	@Override
+	public boolean canHandle(NorthstarEventType eventType) {
+		return TARGET_TYPE.contains(eventType);
+	}
+
+	@Override
+	protected void doHandle(NorthstarEvent e) {
+		exec.execute(() -> {
+			try {
+				BroadcastHandler.this.emitEvent(e);
+			} catch (SecurityException | IllegalArgumentException | InterruptedException ex) {
+				log.error("数据分发异常", ex);
+			}
+		});
+	}
 }

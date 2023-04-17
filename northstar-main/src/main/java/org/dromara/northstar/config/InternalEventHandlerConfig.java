@@ -7,6 +7,7 @@ import org.dromara.northstar.domain.account.TradeDayAccount;
 import org.dromara.northstar.domain.account.TradeDayAccountFactory;
 import org.dromara.northstar.domain.gateway.GatewayAndConnectionManager;
 import org.dromara.northstar.event.AccountHandler;
+import org.dromara.northstar.event.BroadcastHandler;
 import org.dromara.northstar.event.ConnectionHandler;
 import org.dromara.northstar.event.MailBindedEventHandler;
 import org.dromara.northstar.event.MarketDataHandler;
@@ -19,19 +20,24 @@ import org.dromara.northstar.main.mail.MailDeliveryManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import com.corundumstudio.socketio.SocketIOServer;
+
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Configuration
 class InternalEventHandlerConfig {
 	
-	///////////////////
-	/* Internal类事件 */
-	///////////////////
 	@Bean
 	AccountHandler accountEventHandler(IContractManager contractMgr, ConcurrentMap<String, TradeDayAccount> accountMap, GatewayAndConnectionManager gatewayConnMgr) {
 		log.debug("注册：AccountHandler");
 		return new AccountHandler(accountMap, new TradeDayAccountFactory(gatewayConnMgr, contractMgr));
+	}
+	
+	@Bean
+	BroadcastHandler broadcastEventHandler(SocketIOServer socketServer) {
+		log.debug("注册：BroadcastHandler");
+		return new BroadcastHandler(socketServer);
 	}
 	
 	@Bean
@@ -63,8 +69,5 @@ class InternalEventHandlerConfig {
 		log.debug("注册：MailBindedEventHandler");
 		return new MailBindedEventHandler(mailMgr);
 	}
-	//////////////////////
-	/* Internal类事件结束 */
-	//////////////////////
 	
 }
