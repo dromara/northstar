@@ -14,7 +14,7 @@ import org.dromara.northstar.gateway.api.GatewayMetaProvider;
 import org.dromara.northstar.gateway.api.IContractManager;
 import org.dromara.northstar.gateway.api.IMarketCenter;
 import org.dromara.northstar.gateway.api.utils.MarketDataRepoFactory;
-import org.dromara.northstar.utils.ModuleFactory;
+import org.dromara.northstar.module.ModuleFactory;
 import org.dromara.northstar.web.service.AccountService;
 import org.dromara.northstar.web.service.GatewayService;
 import org.dromara.northstar.web.service.LogService;

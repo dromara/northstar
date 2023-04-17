@@ -46,7 +46,6 @@ import org.dromara.northstar.common.utils.FieldUtils;
 import org.dromara.northstar.common.utils.OrderUtils;
 import org.dromara.northstar.gateway.api.TradeGateway;
 import org.dromara.northstar.gateway.api.domain.contract.Contract;
-import org.dromara.northstar.notification.MailDeliveryManager;
 import org.dromara.northstar.strategy.api.ClosingStrategy;
 import org.dromara.northstar.strategy.api.IComboIndicator;
 import org.dromara.northstar.strategy.api.IDisposablePriceListener;
@@ -69,6 +68,7 @@ import org.dromara.northstar.strategy.api.utils.bar.BarMergerRegistry.ListenerTy
 import org.dromara.northstar.strategy.api.utils.trade.DealCollector;
 import org.dromara.northstar.strategy.api.utils.trade.DisposablePriceListener;
 import org.dromara.northstar.strategy.api.utils.trade.TradeIntent;
+import org.dromara.northstar.support.notification.MailDeliveryManager;
 import org.slf4j.ILoggerFactory;
 import org.slf4j.Logger;
 

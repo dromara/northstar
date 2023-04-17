@@ -6,7 +6,7 @@ import org.dromara.northstar.common.event.NorthstarEventType;
 import org.dromara.northstar.common.model.MailConfigDescription;
 import org.dromara.northstar.common.model.ResultBean;
 import org.dromara.northstar.data.IMailConfigRepository;
-import org.dromara.northstar.notification.MailDeliveryManager;
+import org.dromara.northstar.support.notification.MailDeliveryManager;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;

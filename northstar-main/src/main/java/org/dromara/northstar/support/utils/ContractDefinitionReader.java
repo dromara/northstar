@@ -1,4 +1,4 @@
-package org.dromara.northstar.utils;
+package org.dromara.northstar.support.utils;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;

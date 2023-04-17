@@ -27,7 +27,7 @@ import org.dromara.northstar.gateway.api.MarketGateway;
 import org.dromara.northstar.gateway.api.TradeGateway;
 import org.dromara.northstar.gateway.sim.trade.SimTradeGateway;
 import org.dromara.northstar.strategy.api.AccountCenter;
-import org.dromara.northstar.utils.CodecUtils;
+import org.dromara.northstar.support.utils.CodecUtils;
 import org.dromara.northstar.web.PostLoadAware;
 import org.springframework.dao.DuplicateKeyException;
 

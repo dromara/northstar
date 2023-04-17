@@ -1,12 +1,12 @@
-package org.dromara.northstar;
+package org.dromara.northstar.support.job;
 
 import java.time.LocalDateTime;
 
-import org.dromara.northstar.account.CtpHolidayManager;
 import org.dromara.northstar.account.GatewayAndConnectionManager;
 import org.dromara.northstar.account.GatewayConnection;
 import org.dromara.northstar.gateway.api.Gateway;
 import org.dromara.northstar.gateway.api.IMarketCenter;
+import org.dromara.northstar.support.holiday.CtpHolidayManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;

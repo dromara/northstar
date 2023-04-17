@@ -15,6 +15,7 @@ import org.springframework.util.Assert;
  * @author KevinHuangwl
  *
  */
+@Deprecated
 public class GatewayAndConnectionManager {
 
 	private Map<String, Entry> gatewayMap = new ConcurrentHashMap<>();

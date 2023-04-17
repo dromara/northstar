@@ -16,7 +16,7 @@ import org.dromara.northstar.event.SimMarketHandler;
 import org.dromara.northstar.gateway.api.IContractManager;
 import org.dromara.northstar.gateway.api.utils.MarketDataRepoFactory;
 import org.dromara.northstar.gateway.sim.trade.SimMarket;
-import org.dromara.northstar.notification.MailDeliveryManager;
+import org.dromara.northstar.support.notification.MailDeliveryManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

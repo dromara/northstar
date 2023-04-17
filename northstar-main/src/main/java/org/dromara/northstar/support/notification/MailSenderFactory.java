@@ -1,4 +1,4 @@
-package org.dromara.northstar.notification;
+package org.dromara.northstar.support.notification;
 
 import java.util.Properties;
 

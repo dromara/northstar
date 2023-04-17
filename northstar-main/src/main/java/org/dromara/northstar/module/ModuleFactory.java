@@ -1,4 +1,4 @@
-package org.dromara.northstar.utils;
+package org.dromara.northstar.module;
 
 import java.util.HashMap;
 import java.util.List;
@@ -26,14 +26,6 @@ import org.dromara.northstar.gateway.api.IContractManager;
 import org.dromara.northstar.gateway.api.MarketGateway;
 import org.dromara.northstar.gateway.api.TradeGateway;
 import org.dromara.northstar.gateway.api.domain.contract.Contract;
-import org.dromara.northstar.module.FirstInFirstOutClosingStrategy;
-import org.dromara.northstar.module.ModuleAccountStore;
-import org.dromara.northstar.module.ModuleContext;
-import org.dromara.northstar.module.ModulePlaybackContext;
-import org.dromara.northstar.module.PriorBeforeAndHedgeTodayClosingStrategy;
-import org.dromara.northstar.module.PriorTodayClosingStrategy;
-import org.dromara.northstar.module.TradeModule;
-import org.dromara.northstar.notification.MailDeliveryManager;
 import org.dromara.northstar.strategy.api.ClosingStrategy;
 import org.dromara.northstar.strategy.api.DynamicParamsAware;
 import org.dromara.northstar.strategy.api.IModule;
@@ -41,6 +33,7 @@ import org.dromara.northstar.strategy.api.IModuleAccountStore;
 import org.dromara.northstar.strategy.api.IModuleContext;
 import org.dromara.northstar.strategy.api.TradeStrategy;
 import org.dromara.northstar.strategy.api.utils.trade.DealCollector;
+import org.dromara.northstar.support.notification.MailDeliveryManager;
 
 import xyz.redtorch.pb.CoreField.TradeField;
 

@@ -13,6 +13,7 @@ import xyz.redtorch.pb.CoreField.OrderField;
  * @author KevinHuangwl
  *
  */
+@Deprecated
 public class TradeDayOrder {
 
 	/**

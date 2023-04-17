@@ -34,11 +34,11 @@ import org.dromara.northstar.data.IModuleRepository;
 import org.dromara.northstar.event.ModuleManager;
 import org.dromara.northstar.gateway.api.IContractManager;
 import org.dromara.northstar.gateway.api.utils.MarketDataRepoFactory;
+import org.dromara.northstar.module.ModuleFactory;
 import org.dromara.northstar.module.ModulePlaybackContext;
 import org.dromara.northstar.strategy.api.DynamicParamsAware;
 import org.dromara.northstar.strategy.api.IModule;
 import org.dromara.northstar.strategy.api.annotation.StrategicComponent;
-import org.dromara.northstar.utils.ModuleFactory;
 import org.dromara.northstar.web.PostLoadAware;
 import org.springframework.context.ApplicationContext;
 

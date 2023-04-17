@@ -1,4 +1,4 @@
-package org.dromara.northstar.utils;
+package org.dromara.northstar.support.utils;
 
 import java.util.ArrayList;
 import java.util.HashMap;

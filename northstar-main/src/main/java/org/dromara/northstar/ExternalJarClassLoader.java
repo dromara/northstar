@@ -15,7 +15,7 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 import org.dromara.northstar.strategy.api.annotation.StrategicComponent;
-import org.dromara.northstar.utils.SpringContextUtil;
+import org.dromara.northstar.support.utils.SpringContextUtil;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.stereotype.Component;

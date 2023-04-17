@@ -3,6 +3,7 @@ package org.dromara.northstar.account;
 import org.dromara.northstar.gateway.api.IContractManager;
 import org.dromara.northstar.gateway.api.TradeGateway;
 
+@Deprecated
 public class TradeDayAccountFactory {
 	
 	private IContractManager contractMgr;

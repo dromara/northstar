@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.util.List;
 
 import org.dromara.northstar.gateway.api.domain.contract.ContractDefinition;
-import org.dromara.northstar.utils.ContractDefinitionReader;
+import org.dromara.northstar.support.utils.ContractDefinitionReader;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.FileUrlResource;
 import org.springframework.core.io.Resource;

@@ -12,6 +12,7 @@ import xyz.redtorch.pb.CoreField.TradeField;
  * @author KevinHuangwl
  *
  */
+@Deprecated
 public class TradeDayTransaction {
 
 	private ConcurrentLinkedQueue<TradeField> tradeQ = new ConcurrentLinkedQueue<>();

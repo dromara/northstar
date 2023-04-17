@@ -36,6 +36,7 @@ import xyz.redtorch.pb.CoreField.TradeField;
  * @author KevinHuangwl
  *
  */
+@Deprecated
 public class TradeDayAccount {
 	
 	protected TradeDayTransaction tdTransaction = new TradeDayTransaction();

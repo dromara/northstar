@@ -8,6 +8,7 @@ import org.dromara.northstar.common.model.GatewayDescription;
  * @author KevinHuangwl
  *
  */
+@Deprecated
 public class GatewayConnection {
 	
 	protected GatewayDescription gwDescription;

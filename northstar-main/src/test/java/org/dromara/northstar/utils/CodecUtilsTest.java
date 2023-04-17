@@ -2,7 +2,7 @@ package org.dromara.northstar.utils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.dromara.northstar.utils.CodecUtils;
+import org.dromara.northstar.support.utils.CodecUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

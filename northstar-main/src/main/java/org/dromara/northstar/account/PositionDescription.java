@@ -33,6 +33,7 @@ import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
  * @author KevinHuangwl
  *
  */
+@Deprecated
 public class PositionDescription {
 
 	/**

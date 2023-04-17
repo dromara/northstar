@@ -24,7 +24,6 @@ import org.dromara.northstar.gateway.api.domain.time.GenericTradeTime;
 import org.dromara.northstar.module.FirstInFirstOutClosingStrategy;
 import org.dromara.northstar.module.ModuleAccountStore;
 import org.dromara.northstar.module.ModuleContext;
-import org.dromara.northstar.notification.MailDeliveryManager;
 import org.dromara.northstar.strategy.api.ClosingStrategy;
 import org.dromara.northstar.strategy.api.IModule;
 import org.dromara.northstar.strategy.api.IModuleAccountStore;
@@ -36,6 +35,7 @@ import org.dromara.northstar.strategy.api.indicator.Indicator.ValueType;
 import org.dromara.northstar.strategy.api.indicator.function.AverageFunctions;
 import org.dromara.northstar.strategy.api.utils.trade.DealCollector;
 import org.dromara.northstar.strategy.api.utils.trade.TradeIntent;
+import org.dromara.northstar.support.notification.MailDeliveryManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
