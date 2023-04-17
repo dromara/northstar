@@ -2,10 +2,10 @@ package org.dromara.northstar.config;
 
 import java.util.concurrent.ConcurrentMap;
 
+import org.dromara.northstar.account.GatewayAndConnectionManager;
+import org.dromara.northstar.account.TradeDayAccount;
+import org.dromara.northstar.account.TradeDayAccountFactory;
 import org.dromara.northstar.data.IGatewayRepository;
-import org.dromara.northstar.domain.account.TradeDayAccount;
-import org.dromara.northstar.domain.account.TradeDayAccountFactory;
-import org.dromara.northstar.domain.gateway.GatewayAndConnectionManager;
 import org.dromara.northstar.event.AccountHandler;
 import org.dromara.northstar.event.BroadcastHandler;
 import org.dromara.northstar.event.ConnectionHandler;
@@ -16,7 +16,7 @@ import org.dromara.northstar.event.SimMarketHandler;
 import org.dromara.northstar.gateway.api.IContractManager;
 import org.dromara.northstar.gateway.api.utils.MarketDataRepoFactory;
 import org.dromara.northstar.gateway.sim.trade.SimMarket;
-import org.dromara.northstar.main.mail.MailDeliveryManager;
+import org.dromara.northstar.notification.MailDeliveryManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

@@ -4,6 +4,8 @@ import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.dromara.northstar.account.GatewayAndConnectionManager;
+import org.dromara.northstar.account.GatewayConnection;
 import org.dromara.northstar.common.Subscribable;
 import org.dromara.northstar.common.event.AbstractEventHandler;
 import org.dromara.northstar.common.event.GenericEventHandler;
@@ -14,8 +16,6 @@ import org.dromara.northstar.common.model.ContractSimpleInfo;
 import org.dromara.northstar.common.model.GatewayDescription;
 import org.dromara.northstar.common.model.Identifier;
 import org.dromara.northstar.data.IGatewayRepository;
-import org.dromara.northstar.domain.gateway.GatewayAndConnectionManager;
-import org.dromara.northstar.domain.gateway.GatewayConnection;
 import org.dromara.northstar.gateway.api.Gateway;
 import org.dromara.northstar.gateway.api.IContractManager;
 import org.dromara.northstar.gateway.api.MarketGateway;

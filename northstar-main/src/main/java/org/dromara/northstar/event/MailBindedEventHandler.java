@@ -7,7 +7,7 @@ import org.dromara.northstar.common.event.AbstractEventHandler;
 import org.dromara.northstar.common.event.GenericEventHandler;
 import org.dromara.northstar.common.event.NorthstarEvent;
 import org.dromara.northstar.common.event.NorthstarEventType;
-import org.dromara.northstar.main.mail.MailDeliveryManager;
+import org.dromara.northstar.notification.MailDeliveryManager;
 
 public class MailBindedEventHandler extends AbstractEventHandler implements GenericEventHandler{
 
