@@ -1,4 +1,4 @@
-package org.dromara.northstar.main.config;
+package org.dromara.northstar.config;
 
 import java.io.IOException;
 import java.util.Base64;

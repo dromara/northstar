@@ -1,20 +1,19 @@
-package org.dromara.northstar.main.config;
+package org.dromara.northstar.config;
 
 import java.util.concurrent.ConcurrentMap;
 
-import org.dromara.northstar.common.event.FastEventEngine;
 import org.dromara.northstar.data.IGatewayRepository;
 import org.dromara.northstar.data.IModuleRepository;
 import org.dromara.northstar.data.IPlaybackRuntimeRepository;
 import org.dromara.northstar.data.ISimAccountRepository;
 import org.dromara.northstar.domain.account.TradeDayAccount;
 import org.dromara.northstar.domain.gateway.GatewayAndConnectionManager;
+import org.dromara.northstar.event.ModuleManager;
 import org.dromara.northstar.gateway.api.GatewayMetaProvider;
 import org.dromara.northstar.gateway.api.IContractManager;
 import org.dromara.northstar.gateway.api.IMarketCenter;
 import org.dromara.northstar.gateway.api.utils.MarketDataRepoFactory;
 import org.dromara.northstar.main.ExternalJarClassLoader;
-import org.dromara.northstar.main.handler.internal.ModuleManager;
 import org.dromara.northstar.main.service.AccountService;
 import org.dromara.northstar.main.service.GatewayService;
 import org.dromara.northstar.main.service.LogService;
@@ -28,8 +27,6 @@ import org.springframework.context.annotation.DependsOn;
 
 @DependsOn({ 
 	"internalDispatcher", 
-	"broadcastEventDispatcher", 
-	"strategyDispatcher", 
 	"accountEventHandler",
 	"connectionEventHandler", 
 	"moduleFactory" })

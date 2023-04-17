@@ -14,7 +14,6 @@ import org.dromara.northstar.common.constant.ReturnCode;
 import org.dromara.northstar.common.model.GatewayDescription;
 import org.dromara.northstar.common.model.NsUser;
 import org.dromara.northstar.gateway.ctp.CtpGatewaySettings;
-import org.dromara.northstar.main.handler.broadcast.SocketIOMessageEngine;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -46,9 +45,6 @@ public class GatewayManagementTest {
 	private MockMvc mockMvc;
 	
 	private MockHttpSession session;
-	
-	@MockBean
-	private SocketIOMessageEngine msgEngine;
 	
 	@MockBean
 	private SocketIOServer socketServer;

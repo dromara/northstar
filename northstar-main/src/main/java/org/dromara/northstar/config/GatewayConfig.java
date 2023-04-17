@@ -1,4 +1,4 @@
-package org.dromara.northstar.main.config;
+package org.dromara.northstar.config;
 
 import java.util.EnumMap;
 import java.util.Map;

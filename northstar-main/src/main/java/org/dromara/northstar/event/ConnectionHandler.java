@@ -1,4 +1,4 @@
-package org.dromara.northstar.main.handler.internal;
+package org.dromara.northstar.event;
 
 import java.util.EnumSet;
 import java.util.HashSet;

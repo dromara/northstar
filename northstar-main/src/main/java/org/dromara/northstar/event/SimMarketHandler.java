@@ -1,4 +1,4 @@
-package org.dromara.northstar.main.handler.internal;
+package org.dromara.northstar.event;
 
 import org.dromara.northstar.common.event.AbstractEventHandler;
 import org.dromara.northstar.common.event.GenericEventHandler;

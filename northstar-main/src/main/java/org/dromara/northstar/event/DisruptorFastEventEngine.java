@@ -1,4 +1,4 @@
-package org.dromara.northstar.main.engine.event;
+package org.dromara.northstar.event;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -9,7 +9,6 @@ import org.dromara.northstar.common.event.FastEventEngine;
 import org.dromara.northstar.common.event.NorthstarEvent;
 import org.dromara.northstar.common.event.NorthstarEventType;
 import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.InitializingBean;
 
 import com.lmax.disruptor.BatchEventProcessor;
 import com.lmax.disruptor.BlockingWaitStrategy;
@@ -35,7 +34,7 @@ import xyz.redtorch.pb.CoreField.NoticeField;
  *
  */
 @Slf4j
-public class DisruptorFastEventEngine implements FastEventEngine, InitializingBean, DisposableBean {
+public class DisruptorFastEventEngine implements FastEventEngine, DisposableBean {
 
 	private static final ExecutorService executor = Executors.newCachedThreadPool(DaemonThreadFactory.INSTANCE);
 	private static final int BUF_SIZE = 65536;
@@ -70,21 +69,14 @@ public class DisruptorFastEventEngine implements FastEventEngine, InitializingBe
 		
 	};
 	
-	private WaitStrategyEnum strategy;
-	
-	public DisruptorFastEventEngine(WaitStrategyEnum strategy) {
-		this.strategy = strategy;
-	}
-	
-	@Override
-	public void afterPropertiesSet() throws Exception {
+	public DisruptorFastEventEngine(WaitStrategyEnum strategy) throws Exception {
 		WaitStrategy s = (WaitStrategy) strategy.getStrategyClass().getDeclaredConstructor().newInstance();
 		disruptor = new Disruptor<>(new NorthstarEventFactory(), BUF_SIZE, DaemonThreadFactory.INSTANCE,
 				ProducerType.MULTI, s);
 		ringBuffer = disruptor.start();
-		log.debug("启动事件引擎");
+		log.info("启动事件引擎");
 	}
-
+	
 	@Override
 	public void addHandler(NorthstarEventDispatcher handler) {
 		log.debug("加载：{}", handler);
@@ -121,7 +113,6 @@ public class DisruptorFastEventEngine implements FastEventEngine, InitializingBe
 	@Override
 	public void destroy() throws Exception {
 		disruptor.halt();
-		
 	}
 
 	@Override

@@ -10,7 +10,7 @@ import org.dromara.northstar.common.constant.Constants;
 import org.dromara.northstar.common.exception.AuthenticationException;
 import org.dromara.northstar.common.model.NsUser;
 import org.dromara.northstar.common.model.ResultBean;
-import org.dromara.northstar.main.config.UserInfo;
+import org.dromara.northstar.config.UserInfo;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;

@@ -14,7 +14,8 @@
     "build-all": "npm run build && cd electron-egg && npm run rd && npm run build-wz-64",
     "patch-update": "npm version patch && cd electron-egg && npm version patch",
     "major-update": "npm version major && cd electron-egg && npm version major",
-    "minor-update": "npm version minor && cd electron-egg && npm version minor"
+    "minor-update": "npm version minor && cd electron-egg && npm version minor",
+    "e2e": "cd e2e && npm run e2e"
   },
   "dependencies": {
     "axios": "^0.21.1",

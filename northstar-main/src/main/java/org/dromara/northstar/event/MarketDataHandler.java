@@ -1,4 +1,4 @@
-package org.dromara.northstar.main.handler.internal;
+package org.dromara.northstar.event;
 
 import java.time.LocalDate;
 import java.util.concurrent.ArrayBlockingQueue;

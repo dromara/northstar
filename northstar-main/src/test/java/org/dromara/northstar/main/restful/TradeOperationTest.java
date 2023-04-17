@@ -11,8 +11,6 @@ import org.dromara.northstar.common.event.FastEventEngine;
 import org.dromara.northstar.common.model.OrderRequest;
 import org.dromara.northstar.common.model.OrderRequest.TradeOperation;
 import org.dromara.northstar.domain.account.TradeDayAccount;
-import org.dromara.northstar.main.handler.broadcast.SocketIOMessageEngine;
-import org.dromara.northstar.main.restful.TradeOperationController;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,9 +37,6 @@ public class TradeOperationTest {
 	FastEventEngine feEngine;
 	
 	OrderRequest orderReq;
-	
-	@MockBean
-	private SocketIOMessageEngine msgEngine;
 	
 	@MockBean
 	private SocketIOServer socketServer;
