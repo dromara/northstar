@@ -3,6 +3,7 @@ package org.dromara.northstar.gateway.sim.trade;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
+import org.dromara.northstar.common.constant.ConnectionState;
 import org.dromara.northstar.common.event.FastEventEngine;
 import org.dromara.northstar.common.event.NorthstarEventType;
 import org.dromara.northstar.common.exception.TradeException;
@@ -29,6 +30,8 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 	
 	private GatewayDescription gd;
 	
+	private ConnectionState connState = ConnectionState.DISCONNECTED;
+	
 	public SimTradeGatewayLocal(FastEventEngine feEngine, SimMarket simMarket, GatewayDescription gd, SimAccount account) {
 		this.feEngine = feEngine;
 		this.account = account;
@@ -41,7 +44,7 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 		log.debug("[{}] 模拟网关连线", gd.getGatewayId());
 		connected = true;
 		account.setConnected(connected);
-		feEngine.emitEvent(NorthstarEventType.CONNECTED, gd.getGatewayId());
+		connState = ConnectionState.CONNECTED;
 		feEngine.emitEvent(NorthstarEventType.LOGGED_IN, gd.getGatewayId());
 		CompletableFuture.runAsync(() -> {
 			feEngine.emitEvent(NorthstarEventType.GATEWAY_READY, gd.getGatewayId());
@@ -67,7 +70,12 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 		log.debug("[{}] 模拟网关断开", gd.getGatewayId());
 		connected = false;
 		account.setConnected(connected);
-		feEngine.emitEvent(NorthstarEventType.DISCONNECTED, gd.getGatewayId());
+		connState = ConnectionState.DISCONNECTED;
+	}
+	
+	@Override
+	public ConnectionState getConnectionState() {
+		return connState;
 	}
 
 	@Override

@@ -20,6 +20,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.dromara.northstar.common.constant.ChannelType;
+import org.dromara.northstar.common.constant.ConnectionState;
 import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.common.event.NorthstarEventType;
 import org.dromara.northstar.common.exception.NoSuchElementException;
@@ -157,10 +158,6 @@ import xyz.redtorch.pb.CoreField.TradeField;
 
 public class TdSpi extends CThostFtdcTraderSpi {
 
-	private static final int CONNECTION_STATUS_DISCONNECTED = 0;
-	private static final int CONNECTION_STATUS_CONNECTED = 1;
-	private static final int CONNECTION_STATUS_CONNECTING = 2;
-	private static final int CONNECTION_STATUS_DISCONNECTING = 3;
 	private static final String MKT_GATEWAY_ID = "CTP_SIM";
 	
 	private static final Logger logger = LoggerFactory.getLogger(TdSpi.class);
@@ -196,10 +193,8 @@ public class TdSpi extends CThostFtdcTraderSpi {
 		logger.info("当前TdApi版本号：{}", CThostFtdcTraderApi.GetApiVersion());
 	}
 	
-	
 	private CThostFtdcTraderApi cThostFtdcTraderApi;
 
-	private int connectionStatus = CONNECTION_STATUS_DISCONNECTED; // 避免重复调用
 	private boolean loginStatus = false; // 登陆状态
 	private String tradingDay;
 
@@ -267,21 +262,19 @@ public class TdSpi extends CThostFtdcTraderSpi {
 	}
 
 	public void connect() {
-		if (isConnected() || connectionStatus == CONNECTION_STATUS_CONNECTING) {
+		if (isConnected() || gatewayAdapter.getConnectionState() == ConnectionState.CONNECTING) {
 			logger.warn("{}交易接口已经连接或正在连接，不再重复连接", logInfo);
 			return;
 		}
 		
-		if (connectionStatus == CONNECTION_STATUS_CONNECTED) {
+		if (gatewayAdapter.getConnectionState() == ConnectionState.CONNECTED) {
 			reqAuth();
 			return;
 		}
-		
-		connectionStatus = CONNECTION_STATUS_CONNECTING;
+		gatewayAdapter.setConnectionState(ConnectionState.CONNECTING);
 		loginStatus = false;
 		instrumentQueried = false;
 		investorNameQueried = false;
-		gatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.CONNECTING, gatewayId);
 
 		if (cThostFtdcTraderApi != null) {
 			try {
@@ -358,13 +351,12 @@ public class TdSpi extends CThostFtdcTraderSpi {
 	public void disconnect() {
 		try {
 			this.stopQuery();
-			if (cThostFtdcTraderApi != null && connectionStatus != CONNECTION_STATUS_DISCONNECTING) {
+			if (cThostFtdcTraderApi != null && gatewayAdapter.getConnectionState() != ConnectionState.DISCONNECTING) {
 				logger.warn("{}交易接口实例开始关闭并释放", logInfo);
 				loginStatus = false;
 				instrumentQueried = false;
 				investorNameQueried = false;
-				connectionStatus = CONNECTION_STATUS_DISCONNECTING;
-				gatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.DISCONNECTING, gatewayId);
+				gatewayAdapter.setConnectionState(ConnectionState.DISCONNECTING);
 				gatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.LOGGING_OUT, gatewayId);
 				try {
 					if (cThostFtdcTraderApi != null) {
@@ -391,9 +383,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 				} catch (Throwable t) {
 					logger.error("{}交易接口实例关闭并释放异常", logInfo, t);
 				}
-
-				connectionStatus = CONNECTION_STATUS_DISCONNECTED;
-				gatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.DISCONNECTED, gatewayId);
+				gatewayAdapter.setConnectionState(ConnectionState.DISCONNECTED);
 				logger.warn("{}交易接口实例关闭并异步释放", logInfo);
 			} else {
 				logger.warn("{}交易接口实例不存在或正在关闭释放,无需操作", logInfo);
@@ -405,7 +395,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 	}
 
 	public boolean isConnected() {
-		return connectionStatus == CONNECTION_STATUS_CONNECTED && loginStatus;
+		return gatewayAdapter.getConnectionState() == ConnectionState.CONNECTED && loginStatus;
 	}
 
 	public String getTradingDay() {
@@ -700,9 +690,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 		try {
 			logger.info("{}交易接口前置机已连接", logInfo);
 			// 修改前置机连接状态
-			connectionStatus = CONNECTION_STATUS_CONNECTED;
-			
-			gatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.CONNECTED, gatewayId);
+			gatewayAdapter.setConnectionState(ConnectionState.CONNECTED);
 			
 			reqAuth();
 			
@@ -716,8 +704,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 		try {
 			logger.warn("{}交易接口前置机已断开, 原因:{}", logInfo, nReason);
 			gatewayAdapter.disconnect();
-			
-			gatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.DISCONNECTED, gatewayId);
+			gatewayAdapter.setConnectionState(ConnectionState.DISCONNECTED);
 			gatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.LOGGED_OUT, gatewayId);
 			
 		} catch (Throwable t) {

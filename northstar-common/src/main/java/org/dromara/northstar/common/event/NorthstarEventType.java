@@ -43,14 +43,6 @@ public enum NorthstarEventType {
 	 */
 	BALANCE,
 	/**
-	 * 连线中
-	 */
-	CONNECTING,
-	/**
-	 * 连线成功
-	 */
-	CONNECTED,
-	/**
 	 * 登陆中
 	 */
 	LOGGING_IN,
@@ -70,13 +62,5 @@ public enum NorthstarEventType {
 	 * 网关就绪
 	 */
 	GATEWAY_READY,
-	/**
-	 * 断开中
-	 */
-	DISCONNECTING,
-	/**
-	 * 断开成功
-	 */
-	DISCONNECTED,
 	
 }

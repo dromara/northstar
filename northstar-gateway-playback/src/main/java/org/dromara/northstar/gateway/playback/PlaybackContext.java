@@ -126,7 +126,6 @@ public class PlaybackContext {
 	 * @throws InterruptedException 
 	 */
 	public synchronized void start() {
-		feEngine.emitEvent(NorthstarEventType.CONNECTED, gd.getGatewayId());
 		isRunning = true;
 		if(isLoading) {
 			feEngine.emitEvent(NorthstarEventType.NOTICE, NoticeField.newBuilder()
@@ -394,7 +393,6 @@ public class PlaybackContext {
 	public synchronized void stop() {
 		isRunning = false;
 		timer.cancel();
-		feEngine.emitEvent(NorthstarEventType.DISCONNECTED, gd.getGatewayId());
 		log.info("回放网关 [{}] 断开。当前回放时间状态：{}", gd.getGatewayId(), playbackTimeState);
 	}
 	

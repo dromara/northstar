@@ -1,15 +1,5 @@
 package org.dromara.northstar.gateway.okx;
 
-import cn.hutool.core.text.StrPool;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import io.github.ztnozdormu.common.utils.WebSocketCallback;
-import io.github.ztnozdormu.okx.impl.OKXWebsocketClientImpl;
-import lombok.extern.slf4j.Slf4j;
-import xyz.redtorch.pb.CoreEnum;
-import xyz.redtorch.pb.CoreField;
-import xyz.redtorch.pb.CoreField.ContractField;
-
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -21,12 +11,24 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.dromara.northstar.common.constant.ChannelType;
+import org.dromara.northstar.common.constant.ConnectionState;
 import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.common.event.FastEventEngine;
 import org.dromara.northstar.common.event.NorthstarEventType;
 import org.dromara.northstar.common.model.GatewayDescription;
 import org.dromara.northstar.gateway.api.IContractManager;
 import org.dromara.northstar.gateway.api.MarketGateway;
+
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+
+import cn.hutool.core.text.StrPool;
+import io.github.ztnozdormu.common.utils.WebSocketCallback;
+import io.github.ztnozdormu.okx.impl.OKXWebsocketClientImpl;
+import lombok.extern.slf4j.Slf4j;
+import xyz.redtorch.pb.CoreEnum;
+import xyz.redtorch.pb.CoreField;
+import xyz.redtorch.pb.CoreField.ContractField;
 
 @Slf4j
 public class OkxMarketGatewayAdapter implements MarketGateway {
@@ -41,6 +43,7 @@ public class OkxMarketGatewayAdapter implements MarketGateway {
 
     private final Map<String, Integer> subscribeConnectionIds = new HashMap<>();
 
+    private ConnectionState connState = ConnectionState.DISCONNECTED;
 
     public OkxMarketGatewayAdapter(GatewayDescription gd, FastEventEngine feEngine, IContractManager contractMgr) {
         this.gd = gd;
@@ -52,21 +55,20 @@ public class OkxMarketGatewayAdapter implements MarketGateway {
     @Override
     public void connect() {
         spi.lastActive = System.currentTimeMillis(); // 默认连接
-        feEngine.emitEvent(NorthstarEventType.CONNECTED, gd.getGatewayId());
+        connState = ConnectionState.CONNECTED;
         feEngine.emitEvent(NorthstarEventType.GATEWAY_READY, gd.getGatewayId());
     }
 
     @Override
     public void disconnect() {
         client.closeAllConnections();
-        feEngine.emitEvent(NorthstarEventType.DISCONNECTED, gd.getGatewayId());
+        connState = ConnectionState.DISCONNECTED;
     }
-
+    
     @Override
-    public boolean isConnected() {
-        System.out.println(client.isConnected());
-        return client.isConnected();
-    }
+	public ConnectionState getConnectionState() {
+		return connState;
+	}
 
     @Override
     public boolean getAuthErrorFlag() {

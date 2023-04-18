@@ -13,6 +13,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.dromara.northstar.common.constant.ConnectionState;
 import org.dromara.northstar.common.event.FastEventEngine;
 import org.dromara.northstar.common.event.NorthstarEventType;
 import org.dromara.northstar.common.model.GatewayDescription;
@@ -72,6 +73,8 @@ public class TigerTradeGatewayAdapter implements TradeGateway{
 	private OrderTradeQueryProxy proxy;
 	private Timer timer;
 	
+	private ConnectionState connState = ConnectionState.DISCONNECTED;
+	
 	private Executor exec = Executors.newSingleThreadExecutor();
 	
 	private Map<String, PositionField> lastPositions = new HashMap<>();
@@ -97,7 +100,7 @@ public class TigerTradeGatewayAdapter implements TradeGateway{
 		List<OrderField> orders = proxy.getDeltaOrder();
 		List<String> symbols = orders.stream().map(OrderField::getContract).map(ContractField::getSymbol).distinct().toList();
 		
-		feEngine.emitEvent(NorthstarEventType.CONNECTED, gatewayId());
+		connState = ConnectionState.CONNECTED;
 		feEngine.emitEvent(NorthstarEventType.LOGGED_IN, gatewayId());
 		
 		orders.forEach(order -> feEngine.emitEvent(NorthstarEventType.ORDER, order));
@@ -141,7 +144,7 @@ public class TigerTradeGatewayAdapter implements TradeGateway{
 		client = null;
 		proxy = null;
 		feEngine.emitEvent(NorthstarEventType.LOGGED_OUT, gatewayId());
-		feEngine.emitEvent(NorthstarEventType.DISCONNECTED, gatewayId());
+		connState = ConnectionState.DISCONNECTED;
 	}
 	
 	private void queryAccount() {
@@ -216,8 +219,8 @@ public class TigerTradeGatewayAdapter implements TradeGateway{
 	}
 	
 	@Override
-	public boolean isConnected() {
-		return client != null;
+	public ConnectionState getConnectionState() {
+		return connState;
 	}
 
 	@Override
@@ -227,7 +230,7 @@ public class TigerTradeGatewayAdapter implements TradeGateway{
 
 	@Override
 	public String submitOrder(SubmitOrderReqField submitOrderReq) {
-		if(!isConnected()) {
+		if(connState != ConnectionState.CONNECTED) {
 			throw new IllegalStateException("网关未连线");
 		}
 		
@@ -269,7 +272,7 @@ public class TigerTradeGatewayAdapter implements TradeGateway{
 
 	@Override
 	public boolean cancelOrder(CancelOrderReqField cancelOrderReq) {
-		if(!isConnected()) {
+		if(connState != ConnectionState.CONNECTED) {
 			throw new IllegalStateException("网关未连线");
 		}
 		for(Entry<Long, String> e : orderIdMap.entrySet()) {

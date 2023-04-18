@@ -14,8 +14,8 @@ public class MailBindedEventHandler extends AbstractEventHandler implements Gene
 	private MailDeliveryManager mailMgr;
 	
 	private static final Set<NorthstarEventType> TARGET_TYPE = EnumSet.of(
-			NorthstarEventType.CONNECTED,
-			NorthstarEventType.DISCONNECTED,
+			NorthstarEventType.LOGGED_IN,
+			NorthstarEventType.LOGGED_OUT,
 			NorthstarEventType.NOTICE,
 			NorthstarEventType.TRADE,
 			NorthstarEventType.ORDER

@@ -10,6 +10,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import org.dromara.northstar.common.constant.ChannelType;
+import org.dromara.northstar.common.constant.ConnectionState;
 import org.dromara.northstar.common.event.FastEventEngine;
 import org.dromara.northstar.common.event.NorthstarEventType;
 import org.dromara.northstar.common.model.GatewayDescription;
@@ -43,6 +44,8 @@ public class SimMarketGatewayLocal implements MarketGateway{
 	
 	private GatewayDescription gd;
 	
+	private ConnectionState connState = ConnectionState.DISCONNECTED;
+	
 	public SimMarketGatewayLocal(GatewayDescription gd, FastEventEngine feEngine, IMarketCenter mktCenter) {
 		this.feEngine = feEngine;
 		this.mktCenter = mktCenter;
@@ -70,7 +73,7 @@ public class SimMarketGatewayLocal implements MarketGateway{
 
 	@Override
 	public void connect() {
-		if(isConnected()) {
+		if(connState == ConnectionState.CONNECTED) {
 			return;
 		}
 		log.info("模拟行情连线");
@@ -88,10 +91,9 @@ public class SimMarketGatewayLocal implements MarketGateway{
 			}
 		}, 500, 500, TimeUnit.MILLISECONDS);
 		
-		feEngine.emitEvent(NorthstarEventType.CONNECTED, gd.getGatewayId());
-		CompletableFuture.runAsync(() -> {
-			feEngine.emitEvent(NorthstarEventType.GATEWAY_READY, gd.getGatewayId());
-		}, CompletableFuture.delayedExecutor(2, TimeUnit.SECONDS));
+		connState = ConnectionState.CONNECTED;
+		CompletableFuture.runAsync(() -> feEngine.emitEvent(NorthstarEventType.GATEWAY_READY, gd.getGatewayId()), 
+				CompletableFuture.delayedExecutor(2, TimeUnit.SECONDS));
 	}
 
 	@Override
@@ -100,14 +102,14 @@ public class SimMarketGatewayLocal implements MarketGateway{
 			task.cancel(false);
 		}
 		log.info("模拟行情断开");
-		feEngine.emitEvent(NorthstarEventType.DISCONNECTED, gd.getGatewayId());
+		connState = ConnectionState.DISCONNECTED;
 	}
 
 	@Override
-	public boolean isConnected() {
-		return isActive();
+	public ConnectionState getConnectionState() {
+		return connState;
 	}
-
+	 
 	@Override
 	public boolean getAuthErrorFlag() {
 		return false;

@@ -1,11 +1,6 @@
 package org.dromara.northstar.gateway.okx;
 
 
-import lombok.extern.slf4j.Slf4j;
-import xyz.redtorch.pb.CoreField.CancelOrderReqField;
-import xyz.redtorch.pb.CoreField.PositionField;
-import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
@@ -14,11 +9,17 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
+import org.dromara.northstar.common.constant.ConnectionState;
 import org.dromara.northstar.common.event.FastEventEngine;
 import org.dromara.northstar.common.event.NorthstarEventType;
 import org.dromara.northstar.common.model.GatewayDescription;
 import org.dromara.northstar.gateway.api.IContractManager;
 import org.dromara.northstar.gateway.api.TradeGateway;
+
+import lombok.extern.slf4j.Slf4j;
+import xyz.redtorch.pb.CoreField.CancelOrderReqField;
+import xyz.redtorch.pb.CoreField.PositionField;
+import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 
 /**
  * OKX交易网关适配器  TODO
@@ -42,6 +43,8 @@ public class OkxTradeGatewayAdapter implements TradeGateway{
 	private Executor exec = Executors.newSingleThreadExecutor();
 
 	private Map<String, PositionField> lastPositions = new HashMap<>();
+	
+	private ConnectionState connState = ConnectionState.DISCONNECTED;
 
 	public OkxTradeGatewayAdapter(FastEventEngine feEngine, GatewayDescription gd, IContractManager contractMgr) {
 		this.feEngine = feEngine;
@@ -52,6 +55,7 @@ public class OkxTradeGatewayAdapter implements TradeGateway{
 	
 	@Override
 	public synchronized void connect() {
+		connState = ConnectionState.CONNECTED;
 //		ClientConfig clientConfig = ClientConfig.DEFAULT_CONFIG;
 //		clientConfig.tigerId = settings.getTigerId();
 //        clientConfig.defaultAccount = settings.getAccountId();
@@ -108,9 +112,14 @@ public class OkxTradeGatewayAdapter implements TradeGateway{
 //		client = null;
 //		proxy = null;
 		feEngine.emitEvent(NorthstarEventType.LOGGED_OUT, gatewayId());
-		feEngine.emitEvent(NorthstarEventType.DISCONNECTED, gatewayId());
+		connState = ConnectionState.DISCONNECTED;
 	}
 	
+	@Override
+	public ConnectionState getConnectionState() {
+		return connState;
+	}
+	 
 	private void queryAccount() {
 		log.trace("查询TIGER账户信息");
 //		PrimeAssetRequest assetRequest = PrimeAssetRequest.buildPrimeAssetRequest(settings.getAccountId());
@@ -180,12 +189,6 @@ public class OkxTradeGatewayAdapter implements TradeGateway{
 //			feEngine.emitEvent(NorthstarEventType.POSITION, pf.toBuilder().setPosition(0).build());
 //		});
 //		lastPositions = positionMap;
-	}
-	
-	@Override
-	public boolean isConnected() {
-
-		return false;//client != null;
 	}
 
 	@Override

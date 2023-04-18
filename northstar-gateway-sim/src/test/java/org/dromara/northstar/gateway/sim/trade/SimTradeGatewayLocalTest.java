@@ -2,17 +2,12 @@ package org.dromara.northstar.gateway.sim.trade;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
+import org.dromara.northstar.common.constant.ConnectionState;
 import org.dromara.northstar.common.event.FastEventEngine;
-import org.dromara.northstar.common.event.NorthstarEventType;
 import org.dromara.northstar.common.model.GatewayDescription;
-import org.dromara.northstar.gateway.sim.trade.SimAccount;
-import org.dromara.northstar.gateway.sim.trade.SimMarket;
-import org.dromara.northstar.gateway.sim.trade.SimTradeGatewayLocal;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -42,10 +37,10 @@ class SimTradeGatewayLocalTest {
 	@Test
 	void testConnectAndDisConnect() {
 		gateway.connect();
-		verify(gateway.feEngine).emitEvent(eq(NorthstarEventType.CONNECTED), anyString());
+		assertThat(gateway.getConnectionState()).isEqualTo(ConnectionState.CONNECTED);
 		
 		gateway.disconnect();
-		verify(gateway.feEngine).emitEvent(eq(NorthstarEventType.DISCONNECTED), anyString());
+		assertThat(gateway.getConnectionState()).isEqualTo(ConnectionState.DISCONNECTED);
 	}
 
 	@Test

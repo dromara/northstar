@@ -1,6 +1,7 @@
 package org.dromara.northstar.gateway.playback;
 
 import org.dromara.northstar.common.constant.ChannelType;
+import org.dromara.northstar.common.constant.ConnectionState;
 import org.dromara.northstar.common.model.GatewayDescription;
 import org.dromara.northstar.gateway.api.MarketGateway;
 
@@ -12,6 +13,8 @@ public class PlaybackGatewayAdapter implements MarketGateway {
 	
 	private GatewayDescription gd;
 	
+	private ConnectionState connState = ConnectionState.DISCONNECTED;
+	
 	public PlaybackGatewayAdapter(PlaybackContext ctx, GatewayDescription gd) {
 		this.ctx = ctx;
 		this.gd = gd;
@@ -19,17 +22,19 @@ public class PlaybackGatewayAdapter implements MarketGateway {
 
 	@Override
 	public void connect() {
+		connState = ConnectionState.CONNECTED;
 		ctx.start();
 	}
 
 	@Override
 	public void disconnect() {
 		ctx.stop();
+		connState = ConnectionState.DISCONNECTED;
 	}
-
+	
 	@Override
-	public boolean isConnected() {
-		return ctx.isRunning();
+	public ConnectionState getConnectionState() {
+		return connState;
 	}
 
 	@Override

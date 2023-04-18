@@ -10,6 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.dromara.northstar.common.constant.ChannelType;
+import org.dromara.northstar.common.constant.ConnectionState;
 import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.common.event.FastEventEngine;
 import org.dromara.northstar.common.event.NorthstarEventType;
@@ -49,6 +50,8 @@ public class TigerMarketGatewayAdapter implements MarketGateway {
 	
 	private TigerSpi spi;
 	
+	private ConnectionState connState = ConnectionState.DISCONNECTED;
+	
 	public TigerMarketGatewayAdapter(GatewayDescription gd, FastEventEngine feEngine, IContractManager contractMgr) {
 		this.gd = gd;
 		this.feEngine = feEngine;
@@ -69,19 +72,19 @@ public class TigerMarketGatewayAdapter implements MarketGateway {
 	@Override
 	public void connect() {
 		client.connect();
-		feEngine.emitEvent(NorthstarEventType.CONNECTED, gd.getGatewayId());
+		connState = ConnectionState.CONNECTED;
 		feEngine.emitEvent(NorthstarEventType.GATEWAY_READY, gd.getGatewayId());
 	}
 
 	@Override
 	public void disconnect() {
 		client.disconnect();
-		feEngine.emitEvent(NorthstarEventType.DISCONNECTED, gd.getGatewayId());
+		connState = ConnectionState.DISCONNECTED;
 	}
 
 	@Override
-	public boolean isConnected() {
-		return client.isConnected();
+	public ConnectionState getConnectionState() {
+		return connState;
 	}
 
 	@Override

@@ -3,9 +3,11 @@ package xyz.redtorch.gateway.ctp.x64v6v5v1cpv;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;
 
 import org.apache.commons.io.FileUtils;
 import org.dromara.northstar.common.constant.ChannelType;
+import org.dromara.northstar.common.constant.ConnectionState;
 import org.dromara.northstar.common.constant.GatewayUsage;
 import org.dromara.northstar.common.event.FastEventEngine;
 import org.dromara.northstar.common.model.GatewayDescription;
@@ -181,8 +183,7 @@ public class CtpSimGatewayAdapter extends GatewayAbstract implements MarketGatew
 		}
 	}
 
-	@Override
-	public boolean isConnected() {
+	private boolean isConnected() {
 		if (gatewayDescription.getGatewayUsage() == GatewayUsage.TRADE && tdSpi != null) {
 			return tdSpi.isConnected();
 		} else if (gatewayDescription.getGatewayUsage() == GatewayUsage.MARKET_DATA && mdSpi != null) {
@@ -212,9 +213,7 @@ public class CtpSimGatewayAdapter extends GatewayAbstract implements MarketGatew
 		if (!targetFile.getParentFile().exists()) {
 			targetFile.getParentFile().mkdirs();
 		}
-		if (targetFile.exists()) {
-			targetFile.delete();
-		}
+		Files.deleteIfExists(targetFile.toPath());
 		FileUtils.copyURLToFile(sourceURL, targetFile);
 
 		targetFile.deleteOnExit();
@@ -223,6 +222,11 @@ public class CtpSimGatewayAdapter extends GatewayAbstract implements MarketGatew
 	@Override
 	public ChannelType channelType() {
 		return ChannelType.CTP_SIM;
+	}
+
+	@Override
+	public ConnectionState getConnectionState() {
+		return connState;
 	}
 
 }

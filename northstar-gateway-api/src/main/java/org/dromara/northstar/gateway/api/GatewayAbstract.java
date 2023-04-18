@@ -1,5 +1,6 @@
 package org.dromara.northstar.gateway.api;
 
+import org.dromara.northstar.common.constant.ConnectionState;
 import org.dromara.northstar.common.constant.GatewayUsage;
 import org.dromara.northstar.common.event.FastEventEngine;
 import org.dromara.northstar.common.model.GatewayDescription;
@@ -20,6 +21,8 @@ public abstract class GatewayAbstract implements Gateway {
 	
 	protected FastEventEngine fastEventEngine;
 	
+	protected ConnectionState connState = ConnectionState.DISCONNECTED;
+	
 	public final IMarketCenter mktCenter;
 
 	protected GatewayAbstract(GatewayDescription gatewayDescription, IMarketCenter mktCenter) {
@@ -35,8 +38,6 @@ public abstract class GatewayAbstract implements Gateway {
 	public boolean getAuthErrorFlag() {
 		return autoErrorFlag;
 	}
-	
-	
 
 	@Override
 	public GatewayDescription gatewayDescription() {
@@ -58,5 +59,9 @@ public abstract class GatewayAbstract implements Gateway {
 	
 	public void setAuthErrorFlag(boolean flag){
 		autoErrorFlag = flag;
+	}
+	
+	public void setConnectionState(ConnectionState state) {
+		connState = state;
 	}
 }

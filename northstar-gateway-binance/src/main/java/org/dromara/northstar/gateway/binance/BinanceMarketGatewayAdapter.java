@@ -1,13 +1,12 @@
 package org.dromara.northstar.gateway.binance;
 
 import org.dromara.northstar.common.constant.ChannelType;
+import org.dromara.northstar.common.constant.ConnectionState;
 import org.dromara.northstar.common.event.FastEventEngine;
 import org.dromara.northstar.common.model.GatewayDescription;
 import org.dromara.northstar.gateway.api.MarketGateway;
 
-import xyz.redtorch.pb.CoreEnum.GatewayTypeEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
-import xyz.redtorch.pb.CoreField.GatewaySettingField;
 
 public class BinanceMarketGatewayAdapter implements MarketGateway {
 
@@ -29,12 +28,6 @@ public class BinanceMarketGatewayAdapter implements MarketGateway {
 	public void disconnect() {
 		// TODO Auto-generated method stub
 		
-	}
-
-	@Override
-	public boolean isConnected() {
-		// TODO Auto-generated method stub
-		return false;
 	}
 
 	@Override
@@ -73,6 +66,12 @@ public class BinanceMarketGatewayAdapter implements MarketGateway {
 	@Override
 	public String gatewayId() {
 		return gd.getGatewayId();
+	}
+
+	@Override
+	public ConnectionState getConnectionState() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

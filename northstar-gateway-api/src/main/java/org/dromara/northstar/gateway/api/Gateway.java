@@ -1,5 +1,6 @@
 package org.dromara.northstar.gateway.api;
 
+import org.dromara.northstar.common.constant.ConnectionState;
 import org.dromara.northstar.common.model.GatewayDescription;
 
 public interface Gateway {
@@ -27,17 +28,16 @@ public interface Gateway {
 	void disconnect();
 
 	/**
-	 * 网关连接状态
-	 * 
-	 * @return
-	 */
-	boolean isConnected();
-
-	/**
 	 * 获取登录错误标记
 	 * 
 	 * @return
 	 */
 	boolean getAuthErrorFlag();
+	
+	/**
+	 * 获取连接状态
+	 * @return
+	 */
+	ConnectionState getConnectionState();
 
 }

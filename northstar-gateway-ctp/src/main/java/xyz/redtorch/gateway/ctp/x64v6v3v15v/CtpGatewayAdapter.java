@@ -3,9 +3,11 @@ package xyz.redtorch.gateway.ctp.x64v6v3v15v;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;
 
 import org.apache.commons.io.FileUtils;
 import org.dromara.northstar.common.constant.ChannelType;
+import org.dromara.northstar.common.constant.ConnectionState;
 import org.dromara.northstar.common.constant.GatewayUsage;
 import org.dromara.northstar.common.event.FastEventEngine;
 import org.dromara.northstar.common.model.GatewayDescription;
@@ -23,7 +25,7 @@ import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 public class CtpGatewayAdapter extends GatewayAbstract implements MarketGateway, TradeGateway {
 
 	private static final Logger logger = LoggerFactory.getLogger(CtpGatewayAdapter.class);
-
+	
 	static {
 		String envTmpDir = "";
 		String tempLibPath = "";
@@ -90,8 +92,6 @@ public class CtpGatewayAdapter extends GatewayAbstract implements MarketGateway,
 		this.fastEventEngine = fastEventEngine;
 	}
 	
-	
-	
 	@Override
 	public boolean subscribe(ContractField contractField) {
 		if (gatewayDescription.getGatewayUsage() == GatewayUsage.MARKET_DATA) {
@@ -136,7 +136,6 @@ public class CtpGatewayAdapter extends GatewayAbstract implements MarketGateway,
 
 	@Override
 	public void disconnect() {
-
 		lastConnectBeginTimestamp = 0;
 
 		final TdSpi tdSpiForDisconnect = tdSpi;
@@ -182,8 +181,7 @@ public class CtpGatewayAdapter extends GatewayAbstract implements MarketGateway,
 		}
 	}
 
-	@Override
-	public boolean isConnected() {
+	private boolean isConnected() {
 		if (gatewayDescription.getGatewayUsage() == GatewayUsage.TRADE && tdSpi != null) {
 			return tdSpi.isConnected();
 		} else if (gatewayDescription.getGatewayUsage() == GatewayUsage.MARKET_DATA && mdSpi != null) {
@@ -213,19 +211,20 @@ public class CtpGatewayAdapter extends GatewayAbstract implements MarketGateway,
 		if (!targetFile.getParentFile().exists()) {
 			targetFile.getParentFile().mkdirs();
 		}
-		if (targetFile.exists()) {
-			targetFile.delete();
-		}
+		Files.deleteIfExists(targetFile.toPath());
 		FileUtils.copyURLToFile(sourceURL, targetFile);
 
 		targetFile.deleteOnExit();
 	}
 
-
-
 	@Override
 	public ChannelType channelType() {
 		return ChannelType.CTP;
+	}
+
+	@Override
+	public ConnectionState getConnectionState() {
+		return connState;
 	}
 
 }
