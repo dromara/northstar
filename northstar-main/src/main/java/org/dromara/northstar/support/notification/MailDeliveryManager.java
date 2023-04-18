@@ -55,8 +55,8 @@ public class MailDeliveryManager {
 			return;
 		}
 		String title = switch(event.getEvent()) {
-		case CONNECTED -> "网关连线提示";
-		case DISCONNECTED -> "网关断线提示";
+		case LOGGED_IN -> "网关连线提示";
+		case LOGGED_OUT -> "网关断线提示";
 		case TRADE -> "成交提示";
 		case ORDER -> "订单提示";
 		case NOTICE -> "消息提示";
@@ -64,8 +64,8 @@ public class MailDeliveryManager {
 		};
 		
 		String content = switch(event.getEvent()) {
-		case CONNECTED -> contentHandler.onConnected((String) event.getData());
-		case DISCONNECTED -> contentHandler.onDisconnected((String) event.getData());
+		case LOGGED_IN -> contentHandler.onConnected((String) event.getData());
+		case LOGGED_OUT -> contentHandler.onDisconnected((String) event.getData());
 		case TRADE -> contentHandler.onEvent((TradeField) event.getData());
 		case ORDER -> contentHandler.onEvent((OrderField) event.getData());
 		case NOTICE -> contentHandler.onEvent((NoticeField) event.getData());

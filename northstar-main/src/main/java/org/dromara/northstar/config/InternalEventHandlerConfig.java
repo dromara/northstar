@@ -1,10 +1,7 @@
 package org.dromara.northstar.config;
 
-import java.util.concurrent.ConcurrentMap;
-
-import org.dromara.northstar.account.GatewayAndConnectionManager;
-import org.dromara.northstar.account.TradeDayAccount;
-import org.dromara.northstar.account.TradeDayAccountFactory;
+import org.dromara.northstar.account.AccountManager;
+import org.dromara.northstar.account.GatewayManager;
 import org.dromara.northstar.data.IGatewayRepository;
 import org.dromara.northstar.event.AccountHandler;
 import org.dromara.northstar.event.BroadcastHandler;
@@ -29,9 +26,9 @@ import lombok.extern.slf4j.Slf4j;
 class InternalEventHandlerConfig {
 	
 	@Bean
-	AccountHandler accountEventHandler(IContractManager contractMgr, ConcurrentMap<String, TradeDayAccount> accountMap, GatewayAndConnectionManager gatewayConnMgr) {
+	AccountHandler accountEventHandler(AccountManager accountMgr) {
 		log.debug("注册：AccountHandler");
-		return new AccountHandler(accountMap, new TradeDayAccountFactory(gatewayConnMgr, contractMgr));
+		return new AccountHandler(accountMgr);
 	}
 	
 	@Bean
@@ -41,9 +38,9 @@ class InternalEventHandlerConfig {
 	}
 	
 	@Bean
-	ConnectionHandler connectionEventHandler(GatewayAndConnectionManager gatewayConnMgr, IContractManager contractMgr, IGatewayRepository gatewayRepo) {
+	ConnectionHandler connectionEventHandler(GatewayManager gatewayMgr, IContractManager contractMgr, IGatewayRepository gatewayRepo) {
 		log.debug("注册：ConnectionHandler");
-		return new ConnectionHandler(gatewayConnMgr, contractMgr, gatewayRepo);
+		return new ConnectionHandler(gatewayMgr, contractMgr, gatewayRepo);
 	}
 	
 	@Bean

@@ -5,10 +5,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import org.dromara.northstar.common.event.NorthstarEventType;
 import org.dromara.northstar.common.model.MailConfigDescription;
 import org.dromara.northstar.data.IMailConfigRepository;
-import org.dromara.northstar.data.redis.MailConfigRepoRedisImpl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -47,7 +45,6 @@ class MailConfigRepoRedisImplTest {
 				.emailSMTPHost("smtp.126.com")
 				.emailUsername("something@126.com")
 				.subscriberList(List.of("someone@qq.com"))
-				.interestTopicList(List.of(NorthstarEventType.DISCONNECTED))
 				.build();
 		
 		repo.save(mailConfig);

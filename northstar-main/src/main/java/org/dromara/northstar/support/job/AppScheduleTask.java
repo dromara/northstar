@@ -2,8 +2,8 @@ package org.dromara.northstar.support.job;
 
 import java.time.LocalDateTime;
 
-import org.dromara.northstar.account.GatewayAndConnectionManager;
-import org.dromara.northstar.account.GatewayConnection;
+import org.dromara.northstar.account.GatewayManager;
+import org.dromara.northstar.common.constant.ConnectionState;
 import org.dromara.northstar.gateway.api.Gateway;
 import org.dromara.northstar.gateway.api.IMarketCenter;
 import org.dromara.northstar.support.holiday.CtpHolidayManager;
@@ -19,7 +19,7 @@ import xyz.redtorch.gateway.ctp.common.GatewayConstants;
 public class AppScheduleTask {
 	
 	@Autowired
-	private GatewayAndConnectionManager gatewayConnMgr;
+	private GatewayManager gatewayMgr;
 	
 	@Autowired
 	private CtpHolidayManager holidayMgr;
@@ -50,14 +50,9 @@ public class AppScheduleTask {
 	}
 	
 	private void connectIfNotConnected() {
-		for(GatewayConnection conn : gatewayConnMgr.getAllConnections()) {
-			if(conn.isConnected() || !conn.getGwDescription().isAutoConnect()) {
-				continue;
-			}
-			Gateway gateway = gatewayConnMgr.getGatewayByConnection(conn);
-			gateway.connect();
-			log.info("网关[{}]，自动连线", conn.getGwDescription().getGatewayId());
-		}
+		gatewayMgr.allGateways().stream()
+			.filter(gw -> gw.getConnectionState() != ConnectionState.CONNECTED)
+			.forEach(Gateway::connect);
 	}
 	
 	/**

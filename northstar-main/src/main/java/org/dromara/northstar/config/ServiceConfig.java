@@ -3,7 +3,7 @@ package org.dromara.northstar.config;
 import java.util.concurrent.ConcurrentMap;
 
 import org.dromara.northstar.ExternalJarClassLoader;
-import org.dromara.northstar.account.GatewayAndConnectionManager;
+import org.dromara.northstar.account.GatewayManager;
 import org.dromara.northstar.account.TradeDayAccount;
 import org.dromara.northstar.data.IGatewayRepository;
 import org.dromara.northstar.data.IModuleRepository;
@@ -39,10 +39,10 @@ public class ServiceConfig {
     }
 
     @Bean
-    GatewayService gatewayService(GatewayAndConnectionManager gatewayConnMgr, IGatewayRepository gatewayRepo,
+    GatewayService gatewayService(GatewayManager gatewayMgr, IGatewayRepository gatewayRepo,
                                                 IPlaybackRuntimeRepository playbackRtRepo, IModuleRepository moduleRepo, ISimAccountRepository simAccRepo, GatewayMetaProvider metaProvider,
                                                 GatewayMetaProvider settingsPvd, IMarketCenter mktCenter) {
-        return new GatewayService(gatewayConnMgr, settingsPvd, metaProvider, mktCenter, gatewayRepo, simAccRepo, playbackRtRepo, moduleRepo);
+        return new GatewayService(gatewayMgr, settingsPvd, metaProvider, mktCenter, gatewayRepo, simAccRepo, playbackRtRepo, moduleRepo);
     }
 
     @Bean

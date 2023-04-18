@@ -3,16 +3,18 @@ package org.dromara.northstar.web.service;
 import java.io.File;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
-import org.dromara.northstar.account.GatewayAndConnectionManager;
-import org.dromara.northstar.account.GatewayConnection;
+import org.dromara.northstar.account.GatewayManager;
 import org.dromara.northstar.common.constant.ChannelType;
+import org.dromara.northstar.common.constant.ConnectionState;
 import org.dromara.northstar.common.constant.GatewayUsage;
 import org.dromara.northstar.common.exception.NoSuchElementException;
 import org.dromara.northstar.common.model.ComponentField;
 import org.dromara.northstar.common.model.ContractSimpleInfo;
 import org.dromara.northstar.common.model.GatewayDescription;
+import org.dromara.northstar.common.model.Identifier;
 import org.dromara.northstar.common.model.ModuleAccountDescription;
 import org.dromara.northstar.common.model.ModuleDescription;
 import org.dromara.northstar.data.IGatewayRepository;
@@ -48,7 +50,7 @@ import lombok.extern.slf4j.Slf4j;
 @AllArgsConstructor
 public class GatewayService implements PostLoadAware {
 	
-	private GatewayAndConnectionManager gatewayConnMgr;
+	private GatewayManager gatewayMgr;
 	
 	private GatewayMetaProvider gatewayMetaProvider;
 	
@@ -78,10 +80,9 @@ public class GatewayService implements PostLoadAware {
 	
 	private boolean doCreateGateway(GatewayDescription gatewayDescription) {
 		Gateway gateway = null;
-		GatewayConnection conn = new GatewayConnection(gatewayDescription);
 		GatewayFactory factory = metaProvider.getFactory(gatewayDescription.getChannelType());
 		gateway = factory.newInstance(gatewayDescription);
-		gatewayConnMgr.createPair(conn, gateway);
+		gatewayMgr.add(gateway);
 		if(gatewayDescription.getGatewayUsage() == GatewayUsage.TRADE) {
 			AccountCenter.getInstance().register((TradeGateway) gateway);
 		}
@@ -128,19 +129,20 @@ public class GatewayService implements PostLoadAware {
 	 */
 	public boolean deleteGateway(String gatewayId) {
 		log.info("移除网关[{}]", gatewayId);
-		GatewayConnection conn = null;
-		if(gatewayConnMgr.exist(gatewayId)) {
-			conn = gatewayConnMgr.getGatewayConnectionById(gatewayId);
+		Gateway gateway = null;
+		Identifier id = Identifier.of(gatewayId);
+		if(gatewayMgr.contains(id)) {
+			gateway = gatewayMgr.get(id);
 		} else {
 			throw new NoSuchElementException("没有该网关记录：" +  gatewayId);
 		}
-		if(conn.isConnected()) {
+		if(gateway.getConnectionState() == ConnectionState.CONNECTED) {
 			throw new IllegalStateException("非断开状态的网关不能删除");
 		}
-		GatewayDescription gd = conn.getGwDescription();
-		if(gd.getGatewayUsage() == GatewayUsage.MARKET_DATA) {			
-			for(GatewayConnection gc : gatewayConnMgr.getAllConnections()) {
-				if(StringUtils.equals(gc.getGwDescription().getBindedMktGatewayId(), gatewayId)) {
+		GatewayDescription gd = gatewayRepo.findById(gatewayId);
+		if(gateway instanceof MarketGateway) {			
+			for(GatewayDescription gwd : gatewayRepo.findAll()) {
+				if(StringUtils.equals(gwd.getBindedMktGatewayId(), gatewayId)) {
 					throw new IllegalStateException("仍有账户网关与本行情网关存在绑定关系，请先解除绑定！");
 				}
 			}
@@ -162,9 +164,9 @@ public class GatewayService implements PostLoadAware {
 	}
 	
 	private boolean doDeleteGateway(String gatewayId) {
-		GatewayConnection conn = gatewayConnMgr.getGatewayConnectionById(gatewayId);
-		Gateway gateway = gatewayConnMgr.getGatewayByConnection(conn);
-		gatewayConnMgr.removePair(conn);
+		Identifier id = Identifier.of(gatewayId);
+		Gateway gateway = gatewayMgr.get(id);
+		gatewayMgr.remove(id);
 		gatewayRepo.deleteById(gatewayId);
 		if(gateway instanceof SimTradeGateway simGateway) {
 			simGateway.destory();
@@ -178,9 +180,7 @@ public class GatewayService implements PostLoadAware {
 	 * @throws Exception 
 	 */
 	public List<GatewayDescription> findAllGatewayDescription() {
-		return gatewayConnMgr.getAllConnections().stream()
-				.map(GatewayConnection::getGwDescription)
-				.toList();
+		return gatewayRepo.findAll();
 	}
 	
 	/**
@@ -189,7 +189,7 @@ public class GatewayService implements PostLoadAware {
 	 * @return
 	 */
 	public GatewayDescription findGatewayDescription(String gatewayId) {
-		return gatewayConnMgr.getGatewayConnectionById(gatewayId).getGwDescription();
+		return gatewayRepo.findById(gatewayId);
 	}
 	
 	/**
@@ -198,9 +198,12 @@ public class GatewayService implements PostLoadAware {
 	 * @throws Exception 
 	 */
 	public List<GatewayDescription> findAllMarketGatewayDescription() {
-		return gatewayConnMgr.getAllConnections().stream()
-				.map(GatewayConnection::getGwDescription)
-				.filter(gwDescription -> gwDescription.getGatewayUsage() == GatewayUsage.MARKET_DATA)
+		return gatewayRepo.findAll().stream()
+				.filter(gd -> gd.getGatewayUsage() == GatewayUsage.MARKET_DATA)
+				.map(gd -> {
+					gd.setConnectionState(gatewayMgr.get(Identifier.of(gd.getGatewayId())).getConnectionState());
+					return gd;
+				})
 				.toList();
 	}
 	
@@ -210,9 +213,12 @@ public class GatewayService implements PostLoadAware {
 	 * @throws Exception 
 	 */
 	public List<GatewayDescription> findAllTraderGatewayDescription() {
-		return gatewayConnMgr.getAllConnections().stream()
-				.map(GatewayConnection::getGwDescription)
-				.filter(gwDescription -> gwDescription.getGatewayUsage() != GatewayUsage.MARKET_DATA)
+		return gatewayRepo.findAll().stream()
+				.filter(gd -> gd.getGatewayUsage() == GatewayUsage.TRADE)
+				.map(gd -> {
+					gd.setConnectionState(gatewayMgr.get(Identifier.of(gd.getGatewayId())).getConnectionState());
+					return gd;
+				})
 				.toList();
 	}
 	
@@ -222,13 +228,11 @@ public class GatewayService implements PostLoadAware {
 	 */
 	public boolean connect(String gatewayId) {
 		log.info("连接网关[{}]", gatewayId);
-		if(gatewayConnMgr.exist(gatewayId)) {
-			Gateway gateway = gatewayConnMgr.getGatewayById(gatewayId);
-			gateway.connect();
-		} else {
+		Gateway gateway = gatewayMgr.get(Identifier.of(gatewayId));
+		if(Objects.isNull(gateway)) {
 			throw new NoSuchElementException("没有该网关记录：" +  gatewayId);
 		}
-		
+		gateway.connect();
 		return true;
 	}
 	
@@ -238,12 +242,11 @@ public class GatewayService implements PostLoadAware {
 	 */
 	public boolean disconnect(String gatewayId) {
 		log.info("断开网关[{}]", gatewayId);
-		if(gatewayConnMgr.exist(gatewayId)) {
-			gatewayConnMgr.getGatewayById(gatewayId).disconnect();
-		} else {
+		Gateway gateway = gatewayMgr.get(Identifier.of(gatewayId));
+		if(Objects.isNull(gateway)) {
 			throw new NoSuchElementException("没有该网关记录：" +  gatewayId);
 		}
-		
+		gateway.disconnect();
 		return true;
 	}
 	
@@ -253,7 +256,10 @@ public class GatewayService implements PostLoadAware {
 	 * @return
 	 */
 	public boolean simMoneyIO(String gatewayId, int money) {
-		SimTradeGateway gateway = (SimTradeGateway) gatewayConnMgr.getGatewayById(gatewayId);
+		SimTradeGateway gateway = (SimTradeGateway) gatewayMgr.get(Identifier.of(gatewayId));
+		if(Objects.isNull(gateway)) {
+			throw new NoSuchElementException("没有该网关记录：" +  gatewayId);
+		}
 		gateway.moneyIO(money);
 		if(money != 0) {			
 			log.info("模拟账户[{}]，{}金：{}", gatewayId, money>0 ? "入": "出", Math.abs(money));
@@ -268,7 +274,7 @@ public class GatewayService implements PostLoadAware {
 	 */
 	public boolean isActive(String gatewayId) {
 		try {
-			MarketGateway gateway = (MarketGateway) gatewayConnMgr.getGatewayById(gatewayId);
+			MarketGateway gateway = (MarketGateway) gatewayMgr.get(Identifier.of(gatewayId));
 			return gateway.isActive();
 		} catch (ClassCastException e) {
 			throw new IllegalStateException(gatewayId + "不是一个行情网关", e);
