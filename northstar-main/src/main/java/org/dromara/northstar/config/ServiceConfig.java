@@ -2,15 +2,9 @@ package org.dromara.northstar.config;
 
 import org.dromara.northstar.ExternalJarClassLoader;
 import org.dromara.northstar.account.AccountManager;
-import org.dromara.northstar.account.GatewayManager;
-import org.dromara.northstar.data.IGatewayRepository;
 import org.dromara.northstar.data.IModuleRepository;
-import org.dromara.northstar.data.IPlaybackRuntimeRepository;
-import org.dromara.northstar.data.ISimAccountRepository;
 import org.dromara.northstar.event.ModuleManager;
-import org.dromara.northstar.gateway.api.GatewayMetaProvider;
 import org.dromara.northstar.gateway.api.IContractManager;
-import org.dromara.northstar.gateway.api.IMarketCenter;
 import org.dromara.northstar.gateway.api.utils.MarketDataRepoFactory;
 import org.dromara.northstar.module.ModuleFactory;
 import org.dromara.northstar.web.service.AccountService;
@@ -37,10 +31,8 @@ public class ServiceConfig {
     }
 
     @Bean
-    GatewayService gatewayService(GatewayManager gatewayMgr, IGatewayRepository gatewayRepo,
-                                                IPlaybackRuntimeRepository playbackRtRepo, IModuleRepository moduleRepo, ISimAccountRepository simAccRepo, GatewayMetaProvider metaProvider,
-                                                GatewayMetaProvider settingsPvd, IMarketCenter mktCenter) {
-        return new GatewayService(gatewayMgr, settingsPvd, metaProvider, mktCenter, gatewayRepo, simAccRepo, playbackRtRepo, moduleRepo);
+    GatewayService gatewayService() {
+        return new GatewayService();
     }
 
     @Bean

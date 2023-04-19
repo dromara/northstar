@@ -21,6 +21,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
+import org.dromara.northstar.common.constant.ConnectionState;
 import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.common.constant.TickType;
 import org.dromara.northstar.common.event.FastEventEngine;
@@ -43,6 +44,7 @@ import org.dromara.northstar.gateway.playback.utils.PlaybackDataLoader;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import xyz.redtorch.pb.CoreEnum.CommonStatusEnum;
 import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
@@ -82,6 +84,8 @@ public class PlaybackContext {
 	private Table<ContractField, LocalDate, BarField> tradeDayBarMap = HashBasedTable.create();
 	
 	private Map<ContractField, TickSimulationAlgorithm> algoMap = new HashMap<>();
+	@Setter
+	private PlaybackGatewayAdapter gatewayAdapter;
 	
 	// 回放时间戳状态
 	private LocalDateTime playbackTimeState;
@@ -394,6 +398,7 @@ public class PlaybackContext {
 		isRunning = false;
 		timer.cancel();
 		log.info("回放网关 [{}] 断开。当前回放时间状态：{}", gd.getGatewayId(), playbackTimeState);
+		gatewayAdapter.setConnectionState(ConnectionState.DISCONNECTED);
 	}
 	
 	/**

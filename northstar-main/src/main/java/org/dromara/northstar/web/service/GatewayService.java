@@ -6,7 +6,9 @@ import java.util.List;
 import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
+import org.dromara.northstar.account.AccountManager;
 import org.dromara.northstar.account.GatewayManager;
+import org.dromara.northstar.account.TradeAccount;
 import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.constant.ConnectionState;
 import org.dromara.northstar.common.constant.GatewayUsage;
@@ -31,12 +33,12 @@ import org.dromara.northstar.gateway.sim.trade.SimTradeGateway;
 import org.dromara.northstar.strategy.api.AccountCenter;
 import org.dromara.northstar.support.utils.CodecUtils;
 import org.dromara.northstar.web.PostLoadAware;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -47,24 +49,25 @@ import lombok.extern.slf4j.Slf4j;
  *
  */
 @Slf4j
-@AllArgsConstructor
 public class GatewayService implements PostLoadAware {
-	
+	@Autowired
 	private GatewayManager gatewayMgr;
-	
+	@Autowired
 	private GatewayMetaProvider gatewayMetaProvider;
-	
+	@Autowired
 	private GatewayMetaProvider metaProvider;
-	
+	@Autowired
 	private IMarketCenter mktCenter;
-	
+	@Autowired
 	private IGatewayRepository gatewayRepo;
-	
+	@Autowired
 	private ISimAccountRepository simAccRepo;
-	
+	@Autowired
 	private IPlaybackRuntimeRepository playbackRtRepo;
-	
+	@Autowired
 	private IModuleRepository moduleRepo;
+	@Autowired
+	private AccountManager accountMgr;
 	
 	/**
 	 * 创建网关
@@ -84,7 +87,11 @@ public class GatewayService implements PostLoadAware {
 		gateway = factory.newInstance(gatewayDescription);
 		gatewayMgr.add(gateway);
 		if(gatewayDescription.getGatewayUsage() == GatewayUsage.TRADE) {
-			AccountCenter.getInstance().register((TradeGateway) gateway);
+			AccountCenter.getInstance().register((TradeGateway) gateway); //FIXME to be removed	
+			MarketGateway mktGateway = (MarketGateway) gatewayMgr.get(Identifier.of(gatewayDescription.getBindedMktGatewayId()));
+			TradeGateway tdGateway = (TradeGateway) gateway;
+			TradeAccount account = new TradeAccount(mktGateway, tdGateway, gatewayDescription);
+			accountMgr.add(account);
 		}
 		if(gatewayDescription.isAutoConnect()) {
 			connect(gatewayDescription.getGatewayId());

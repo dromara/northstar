@@ -7,6 +7,7 @@ import java.util.Objects;
 import org.dromara.northstar.common.exception.NoSuchElementException;
 import org.dromara.northstar.gateway.api.TradeGateway;
 
+@Deprecated
 public class AccountCenter {
 
 	private static AccountCenter instance;
