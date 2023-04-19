@@ -18,7 +18,7 @@ public class PlaybackGatewayAdapter implements MarketGateway {
 	public PlaybackGatewayAdapter(PlaybackContext ctx, GatewayDescription gd) {
 		this.ctx = ctx;
 		this.gd = gd;
-		ctx.setGatewayAdapter(this);
+		ctx.setOnStopCallback(() -> connState = ConnectionState.DISCONNECTED);
 	}
 
 	@Override
@@ -31,10 +31,6 @@ public class PlaybackGatewayAdapter implements MarketGateway {
 	public void disconnect() {
 		ctx.stop();
 		connState = ConnectionState.DISCONNECTED;
-	}
-	
-	public void setConnectionState(ConnectionState state) {
-		connState = state;
 	}
 	
 	@Override

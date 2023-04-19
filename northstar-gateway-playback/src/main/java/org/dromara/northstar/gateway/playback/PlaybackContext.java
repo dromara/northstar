@@ -21,7 +21,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
-import org.dromara.northstar.common.constant.ConnectionState;
 import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.common.constant.TickType;
 import org.dromara.northstar.common.event.FastEventEngine;
@@ -85,7 +84,7 @@ public class PlaybackContext {
 	
 	private Map<ContractField, TickSimulationAlgorithm> algoMap = new HashMap<>();
 	@Setter
-	private PlaybackGatewayAdapter gatewayAdapter;
+	private Runnable onStopCallback;
 	
 	// 回放时间戳状态
 	private LocalDateTime playbackTimeState;
@@ -398,7 +397,9 @@ public class PlaybackContext {
 		isRunning = false;
 		timer.cancel();
 		log.info("回放网关 [{}] 断开。当前回放时间状态：{}", gd.getGatewayId(), playbackTimeState);
-		gatewayAdapter.setConnectionState(ConnectionState.DISCONNECTED);
+		if(Objects.nonNull(onStopCallback)) {
+			onStopCallback.run();
+		}
 	}
 	
 	/**
