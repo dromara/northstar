@@ -1,4 +1,4 @@
-package org.dromara.northstar.module;
+package org.dromara.northstar.module.legacy;
 
 import java.util.Objects;
 

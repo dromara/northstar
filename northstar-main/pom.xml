@@ -145,13 +145,10 @@
 				<artifactId>jacoco-maven-plugin</artifactId>
 				<configuration>
 					<excludes>
-						<exclude>**/org/dromara/northstar/main/*</exclude>
-						<exclude>**/org/dromara/northstar/main/config/*</exclude>
-						<exclude>**/org/dromara/northstar/main/factories/*</exclude>
-						<exclude>**/org/dromara/northstar/main/interceptor/*</exclude>
-						<exclude>**/org/dromara/northstar/main/handler/**/*</exclude>
-						<exclude>**/org/dromara/northstar/main/persistence/**/*</exclude>
-						<exclude>**/org/dromara/northstar/main/restful/common/*</exclude>
+						<exclude>**/org/dromara/northstar/*</exclude>
+						<exclude>**/org/dromara/northstar/config/*</exclude>
+						<exclude>**/org/dromara/northstar/web/handler/**/*</exclude>
+						<exclude>**/org/dromara/northstar/data/**/*</exclude>
 					</excludes>
 				</configuration>
 			</plugin>

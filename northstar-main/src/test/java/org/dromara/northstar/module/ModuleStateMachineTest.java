@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.dromara.northstar.common.constant.Constants;
 import org.dromara.northstar.common.constant.ModuleState;
-import org.dromara.northstar.module.ModuleStateMachine;
+import org.dromara.northstar.module.legacy.ModuleStateMachine;
 import org.junit.jupiter.api.Test;
 
 import test.common.TestFieldFactory;

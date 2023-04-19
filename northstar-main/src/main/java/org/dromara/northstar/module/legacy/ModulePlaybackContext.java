@@ -1,4 +1,4 @@
-package org.dromara.northstar.module;
+package org.dromara.northstar.module.legacy;
 
 import java.time.LocalTime;
 import java.util.ArrayList;

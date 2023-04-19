@@ -24,7 +24,7 @@ import org.dromara.northstar.data.IModuleRepository;
 import org.dromara.northstar.gateway.api.IContractManager;
 import org.dromara.northstar.gateway.api.IMarketCenter;
 import org.dromara.northstar.gateway.api.domain.mktdata.MarketCenter;
-import org.dromara.northstar.module.ModuleFactory;
+import org.dromara.northstar.module.legacy.ModuleFactory;
 import org.dromara.northstar.support.notification.MailDeliveryManager;
 import org.dromara.northstar.support.notification.MailSenderFactory;
 import org.dromara.northstar.support.utils.ContractDefinitionReader;

@@ -1,4 +1,4 @@
-package org.dromara.northstar.module;
+package org.dromara.northstar.module.legacy;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;

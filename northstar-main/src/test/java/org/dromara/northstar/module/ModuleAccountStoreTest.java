@@ -18,7 +18,7 @@ import org.dromara.northstar.common.model.ModulePositionDescription;
 import org.dromara.northstar.common.model.ModuleRuntimeDescription;
 import org.dromara.northstar.gateway.api.IContractManager;
 import org.dromara.northstar.gateway.api.domain.contract.Contract;
-import org.dromara.northstar.module.ModuleAccountStore;
+import org.dromara.northstar.module.legacy.ModuleAccountStore;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

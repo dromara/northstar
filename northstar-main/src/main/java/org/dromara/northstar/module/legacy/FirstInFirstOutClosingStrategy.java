@@ -1,4 +1,4 @@
-package org.dromara.northstar.module;
+package org.dromara.northstar.module.legacy;
 
 import org.dromara.northstar.common.constant.ClosingPolicy;
 import org.dromara.northstar.common.constant.SignalOperation;
@@ -9,7 +9,12 @@ import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.PositionField;
 
-public class PriorTodayClosingStrategy implements ClosingStrategy{
+/**
+ * 先开先平策略
+ * @author KevinHuangwl
+ *
+ */
+public class FirstInFirstOutClosingStrategy implements ClosingStrategy{
 
 	@Override
 	public OffsetFlagEnum resolveOperation(SignalOperation opr, PositionField position) {
@@ -20,6 +25,7 @@ public class PriorTodayClosingStrategy implements ClosingStrategy{
 		}
 		ContractField contract = position.getContract();
 		if(contract.getExchange() == ExchangeEnum.SHFE) {			
+			if(position.getYdPosition() - position.getYdFrozen() > 0)	return OffsetFlagEnum.OF_Close;
 			if(position.getTdPosition() - position.getTdFrozen() > 0)	return OffsetFlagEnum.OF_CloseToday;
 		}
 		return OffsetFlagEnum.OF_Close;
@@ -27,6 +33,7 @@ public class PriorTodayClosingStrategy implements ClosingStrategy{
 
 	@Override
 	public ClosingPolicy getClosingPolicy() {
-		return ClosingPolicy.PRIOR_TODAY;
+		return ClosingPolicy.FIFO;
 	}
+
 }
