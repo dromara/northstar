@@ -1,8 +1,8 @@
 package org.dromara.northstar.account;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import org.dromara.northstar.common.ObjectManager;
 import org.dromara.northstar.common.model.Identifier;
@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class AccountManager implements ObjectManager<TradeAccount>{
 
-	private Map<Identifier, TradeAccount> accountMap = new HashMap<>();
+	private ConcurrentMap<Identifier, TradeAccount> accountMap = new ConcurrentHashMap<>();
 	
 	@Override
 	public void add(TradeAccount account) {

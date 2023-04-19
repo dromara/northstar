@@ -9,8 +9,6 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
@@ -18,8 +16,7 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 import org.dromara.northstar.ExternalJarClassLoader;
-import org.dromara.northstar.account.GatewayAndConnectionManager;
-import org.dromara.northstar.account.TradeDayAccount;
+import org.dromara.northstar.account.GatewayManager;
 import org.dromara.northstar.common.IMailMessageContentHandler;
 import org.dromara.northstar.common.event.FastEventEngine;
 import org.dromara.northstar.data.IGatewayRepository;
@@ -118,16 +115,6 @@ public class AppConfig implements WebMvcConfigurer, DisposableBean {
 	}
 
     @Bean
-    GatewayAndConnectionManager gatewayAndConnectionManager() {
-        return new GatewayAndConnectionManager();
-    }
-
-    @Bean
-    ConcurrentMap<String, TradeDayAccount> accountMap() {
-        return new ConcurrentHashMap<>();
-    }
-
-    @Bean
     IMarketCenter marketCenter(FastEventEngine fastEventEngine) throws IOException {
         ContractDefinitionReader reader = new ContractDefinitionReader();
         return new MarketCenter(reader.load(contractDefRes.getInputStream()), fastEventEngine);
@@ -152,9 +139,9 @@ public class AppConfig implements WebMvcConfigurer, DisposableBean {
 
     @Bean
     ModuleFactory moduleFactory(@Autowired(required = false) ExternalJarClassLoader extJarLoader, IGatewayRepository gatewayRepo,
-                                          IModuleRepository moduleRepo, GatewayAndConnectionManager gatewayConnMgr, IContractManager contractMgr,
+                                          IModuleRepository moduleRepo, GatewayManager gatewayMgr, IContractManager contractMgr,
                                           MailDeliveryManager mailMgr) {
-        return new ModuleFactory(extJarLoader, moduleRepo, gatewayRepo, gatewayConnMgr, contractMgr, mailMgr);
+        return new ModuleFactory(extJarLoader, moduleRepo, gatewayRepo, gatewayMgr, contractMgr, mailMgr);
     }
 
 	private static OkHttpClient getUnsafeOkHttpClient() {

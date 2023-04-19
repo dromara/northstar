@@ -1,10 +1,8 @@
 package org.dromara.northstar.config;
 
-import java.util.concurrent.ConcurrentMap;
-
 import org.dromara.northstar.ExternalJarClassLoader;
+import org.dromara.northstar.account.AccountManager;
 import org.dromara.northstar.account.GatewayManager;
-import org.dromara.northstar.account.TradeDayAccount;
 import org.dromara.northstar.data.IGatewayRepository;
 import org.dromara.northstar.data.IModuleRepository;
 import org.dromara.northstar.data.IPlaybackRuntimeRepository;
@@ -34,8 +32,8 @@ import org.springframework.context.annotation.DependsOn;
 public class ServiceConfig {
 
     @Bean
-    AccountService accountService(ConcurrentMap<String, TradeDayAccount> accountMap) {
-        return new AccountService(accountMap);
+    AccountService accountService(AccountManager accountMgr, IContractManager contractMgr) {
+        return new AccountService(accountMgr, contractMgr);
     }
 
     @Bean

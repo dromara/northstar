@@ -8,7 +8,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import org.dromara.northstar.ExternalJarClassLoader;
-import org.dromara.northstar.account.GatewayAndConnectionManager;
+import org.dromara.northstar.account.GatewayManager;
 import org.dromara.northstar.common.constant.ClosingPolicy;
 import org.dromara.northstar.common.constant.ModuleUsage;
 import org.dromara.northstar.common.model.ComponentAndParamsPair;
@@ -45,7 +45,7 @@ public class ModuleFactory {
 	
 	private IGatewayRepository gatewayRepo;
 	
-	private GatewayAndConnectionManager gatewayConnMgr;
+	private GatewayManager gatewayMgr;
 	
 	private IContractManager contractMgr;
 	
@@ -56,11 +56,11 @@ public class ModuleFactory {
 	private Consumer<ModuleDealRecord> onDealChangeCallback = dealRecord -> moduleRepo.saveDealRecord(dealRecord);
 	
 	public ModuleFactory(ExternalJarClassLoader extJarLoader, IModuleRepository moduleRepo, IGatewayRepository gatewayRepo, 
-			GatewayAndConnectionManager gatewayConnMgr, IContractManager contractMgr, MailDeliveryManager mailMgr) {
+			GatewayManager gatewayMgr, IContractManager contractMgr, MailDeliveryManager mailMgr) {
 		this.extJarLoader = extJarLoader;
 		this.moduleRepo = moduleRepo;
 		this.gatewayRepo = gatewayRepo;
-		this.gatewayConnMgr = gatewayConnMgr;
+		this.gatewayMgr = gatewayMgr;
 		this.contractMgr = contractMgr;
 		this.mailMgr = mailMgr;
 	}
@@ -69,7 +69,7 @@ public class ModuleFactory {
 		IModuleContext ctx = makeModuleContext(moduleDescription, moduleRuntimeDescription);
 		
 		for(ModuleAccountDescription mad : moduleDescription.getModuleAccountSettingsDescription()) {
-			TradeGateway tradeGateway = (TradeGateway) gatewayConnMgr.getGatewayById(mad.getAccountGatewayId());
+			TradeGateway tradeGateway = (TradeGateway) gatewayMgr.get(Identifier.of(mad.getAccountGatewayId()));
 			List<Contract> contracts = mad.getBindedContracts()
 					.stream()
 					.map(contractSimple -> contractMgr.getContract(Identifier.of(contractSimple.getValue())))
@@ -81,7 +81,7 @@ public class ModuleFactory {
 				.map(ModuleAccountDescription::getAccountGatewayId)
 				.map(accGatewayId -> gatewayRepo.findById(accGatewayId))
 				.map(gd -> gatewayRepo.findById(gd.getBindedMktGatewayId()))
-				.map(gd -> gatewayConnMgr.getGatewayById(gd.getGatewayId()))
+				.map(gd -> gatewayMgr.get(Identifier.of(gd.getGatewayId())))
 				.map(MarketGateway.class::cast)
 				.collect(Collectors.toSet());
 		
