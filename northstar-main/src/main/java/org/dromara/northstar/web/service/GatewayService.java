@@ -30,7 +30,6 @@ import org.dromara.northstar.gateway.api.IMarketCenter;
 import org.dromara.northstar.gateway.api.MarketGateway;
 import org.dromara.northstar.gateway.api.TradeGateway;
 import org.dromara.northstar.gateway.sim.trade.SimTradeGateway;
-import org.dromara.northstar.strategy.api.AccountCenter;
 import org.dromara.northstar.support.utils.CodecUtils;
 import org.dromara.northstar.web.PostLoadAware;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,7 +86,6 @@ public class GatewayService implements PostLoadAware {
 		gateway = factory.newInstance(gatewayDescription);
 		gatewayMgr.add(gateway);
 		if(gatewayDescription.getGatewayUsage() == GatewayUsage.TRADE) {
-			AccountCenter.getInstance().register((TradeGateway) gateway); //FIXME to be removed	
 			MarketGateway mktGateway = (MarketGateway) gatewayMgr.get(Identifier.of(gatewayDescription.getBindedMktGatewayId()));
 			TradeGateway tdGateway = (TradeGateway) gateway;
 			TradeAccount account = new TradeAccount(mktGateway, tdGateway, gatewayDescription);
