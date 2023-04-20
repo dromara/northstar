@@ -8,9 +8,7 @@
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 	
-	<artifactId>northstar-gateway-ctp</artifactId>
-
-	<name>northstar-gateway-ctp</name>
+	<artifactId>northstar-gateway-common</artifactId>
 
 	<properties>
 	</properties>
@@ -21,20 +19,16 @@
 			<artifactId>northstar-common</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.dromara</groupId>
-			<artifactId>northstar-gateway-common</artifactId>
-		</dependency>
-		<dependency>
-		    <groupId>com.alibaba</groupId>
-		    <artifactId>fastjson</artifactId>
-		</dependency>
-		<dependency>
+	        <groupId>org.projectlombok</groupId>
+	        <artifactId>lombok</artifactId>
+	    </dependency>
+	    <dependency>
 		    <groupId>commons-io</groupId>
 		    <artifactId>commons-io</artifactId>
 		</dependency>
-		<dependency>
-		    <groupId>org.apache.commons</groupId>
-		    <artifactId>commons-lang3</artifactId>
+	    <dependency>
+		    <groupId>org.slf4j</groupId>
+		    <artifactId>slf4j-api</artifactId>
 		</dependency>
 	</dependencies>
 
@@ -49,12 +43,7 @@
 				<artifactId>jacoco-maven-plugin</artifactId>
 				<configuration>
 					<excludes>
-						<exclude>**/xyz/redtorch/gateway/ctp/x64v6v3v15v/*</exclude>
-						<exclude>**/xyz/redtorch/gateway/ctp/x64v6v3v15v/api/*</exclude>
-						<exclude>**/xyz/redtorch/gateway/ctp/x64v6v5v1cpv/*</exclude>
-						<exclude>**/xyz/redtorch/gateway/ctp/x64v6v5v1cpv/api/*</exclude>
-						<exclude>**/org/dromara/northstar/gateway/ctp/*</exclude>
-						<exclude>**/org/dromara/northstar/gateway/ctp/time/*</exclude>
+						<exclude>**/org/dromara/northstar/gateway/api/*</exclude>
 					</excludes>
 				</configuration>
 			</plugin>

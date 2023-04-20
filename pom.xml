@@ -47,7 +47,7 @@
 		<module>northstar-external-archetype</module>
 		<module>northstar-monitor</module>
 		<module>northstar-common</module>
-		<module>northstar-gateway-api</module>
+		<module>northstar-gateway-common</module>
 		<module>northstar-gateway-ctp</module>
 		<module>northstar-gateway-sim</module>
 		<module>northstar-gateway-playback</module>
@@ -81,7 +81,7 @@
 			</dependency>
 			<dependency>
 				<groupId>org.dromara</groupId>
-				<artifactId>northstar-gateway-api</artifactId>
+				<artifactId>northstar-gateway-common</artifactId>
 				<version>${northstar-version}</version>
 			</dependency>
 			<dependency>

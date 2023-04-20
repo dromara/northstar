@@ -10,7 +10,7 @@
   <dependencies>
   		<dependency>
 			<groupId>org.dromara</groupId>
-			<artifactId>northstar-gateway-api</artifactId>
+			<artifactId>northstar-gateway-common</artifactId>
 		</dependency>
 		<dependency>
 		    <groupId>com.alibaba</groupId>
