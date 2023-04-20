@@ -16,8 +16,6 @@ import org.dromara.northstar.gateway.common.IMarketCenter;
 import org.dromara.northstar.gateway.common.utils.MarketDataRepoFactory;
 import org.dromara.northstar.gateway.ctp.CtpGatewaySettings;
 import org.dromara.northstar.gateway.ctp.CtpSimGatewaySettings;
-import org.dromara.northstar.gateway.okx.OkxGatewayFactory;
-import org.dromara.northstar.gateway.okx.OkxGatewaySettings;
 import org.dromara.northstar.gateway.playback.PlaybackGatewayFactory;
 import org.dromara.northstar.gateway.playback.PlaybackGatewaySettings;
 import org.dromara.northstar.gateway.sim.trade.SimGatewayFactory;
@@ -47,7 +45,7 @@ class GatewayConfig {
         settingsMap.put(ChannelType.CTP_SIM, new CtpSimGatewaySettings());
         settingsMap.put(ChannelType.PLAYBACK, new PlaybackGatewaySettings());
         settingsMap.put(ChannelType.TIGER, new TigerGatewaySettings());
-        settingsMap.put(ChannelType.OKX, new OkxGatewaySettings());
+//        settingsMap.put(ChannelType.OKX, new OkxGatewaySettings());
 
         Map<ChannelType, GatewayFactory> factoryMap = new EnumMap<>(ChannelType.class);
         factoryMap.put(ChannelType.CTP, new CtpGatewayFactory(fastEventEngine, mktCenter, dataMgr));
@@ -55,7 +53,7 @@ class GatewayConfig {
         factoryMap.put(ChannelType.PLAYBACK, new PlaybackGatewayFactory(fastEventEngine, mktCenter, holidayMgr, rtRepo, mdRepoFactory));
         factoryMap.put(ChannelType.SIM, new SimGatewayFactory(fastEventEngine, simMarket, accRepo, mktCenter));
         factoryMap.put(ChannelType.TIGER, new TigerGatewayFactory(fastEventEngine, mktCenter));
-        factoryMap.put(ChannelType.OKX, new OkxGatewayFactory(fastEventEngine, mktCenter));
+//        factoryMap.put(ChannelType.OKX, new OkxGatewayFactory(fastEventEngine, mktCenter));
         return new GatewayMetaProvider(settingsMap, factoryMap);
     }
 }
