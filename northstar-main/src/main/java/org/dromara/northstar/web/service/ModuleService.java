@@ -31,9 +31,9 @@ import org.dromara.northstar.common.model.ModulePositionDescription;
 import org.dromara.northstar.common.model.ModuleRuntimeDescription;
 import org.dromara.northstar.common.utils.MarketDataLoadingUtils;
 import org.dromara.northstar.data.IModuleRepository;
-import org.dromara.northstar.event.ModuleManager;
 import org.dromara.northstar.gateway.IContractManager;
 import org.dromara.northstar.gateway.common.utils.MarketDataRepoFactory;
+import org.dromara.northstar.module.ModuleManager;
 import org.dromara.northstar.module.legacy.ModuleFactory;
 import org.dromara.northstar.module.legacy.ModulePlaybackContext;
 import org.dromara.northstar.strategy.DynamicParamsAware;
@@ -227,7 +227,7 @@ public class ModuleService implements PostLoadAware {
 			date = date.plusWeeks(1);
 		}
 		module.setEnabled(mrd.isEnabled());
-		moduleMgr.addModule(module);
+		moduleMgr.add(module);
 	}
 	
 	// 把日期转换成年周，例如2022年第二周为202202
@@ -236,7 +236,7 @@ public class ModuleService implements PostLoadAware {
 	}
 	
 	private void unloadModule(String moduleName) {
-		moduleMgr.removeModule(moduleName);
+		moduleMgr.remove(Identifier.of(moduleName));
 		moduleRepo.deleteSettingsByName(moduleName);
 	}
 	
@@ -246,7 +246,7 @@ public class ModuleService implements PostLoadAware {
 	 * @return
 	 */
 	public boolean toggleModule(String name) {
-		IModule module = moduleMgr.getModule(name);
+		IModule module = moduleMgr.get(Identifier.of(name));
 		boolean flag = !module.isEnabled();
 		module.setEnabled(flag);
 		return flag;
@@ -258,7 +258,7 @@ public class ModuleService implements PostLoadAware {
 	 * @return
 	 */
 	public ModuleRuntimeDescription getModuleRealTimeInfo(String name) {
-		return moduleMgr.getModule(name).getRuntimeDescription();
+		return moduleMgr.get(Identifier.of(name)).getRuntimeDescription();
 	}
 	
 	/**
@@ -275,7 +275,7 @@ public class ModuleService implements PostLoadAware {
 	 * @return
 	 */
 	public boolean mockTradeAdjustment(String moduleName, MockTradeDescription mockTrade) {
-		IModule module = moduleMgr.getModule(moduleName);
+		IModule module = moduleMgr.get(Identifier.of(moduleName));
 		ContractField contract = contractMgr.getContract(Identifier.of(mockTrade.getContractId())).contractField();
 		TradeField trade = TradeField.newBuilder()
 				.setOriginOrderId(Constants.MOCK_ORDER_ID)

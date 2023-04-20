@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 public class InternalDispatcher implements NorthstarEventDispatcher {
 
 	@Autowired
-	private ModuleManager moduleMgr;
+	private ModuleHandler moduleHandler;
 	@Autowired
 	private SimMarketHandler simMarketHandler;
 	@Autowired
@@ -31,7 +31,7 @@ public class InternalDispatcher implements NorthstarEventDispatcher {
 	@Override
 	public void onEvent(NorthstarEvent event, long sequence, boolean endOfBatch) throws Exception {
 		// 按优先级进行事件分发
-		moduleMgr.onEvent(event);
+		moduleHandler.onEvent(event);
 		simMarketHandler.onEvent(event);
 		bcHandler.onEvent(event);
 		accountHandler.onEvent(event);
