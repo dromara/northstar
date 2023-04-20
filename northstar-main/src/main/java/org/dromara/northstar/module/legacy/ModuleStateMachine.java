@@ -10,7 +10,7 @@ import org.dromara.northstar.common.constant.ClosingPolicy;
 import org.dromara.northstar.common.constant.ModuleState;
 import org.dromara.northstar.common.utils.FieldUtils;
 import org.dromara.northstar.common.utils.OrderUtils;
-import org.dromara.northstar.strategy.IModuleStateMachine;
+import org.dromara.northstar.module.IModuleStateMachine;
 
 import lombok.extern.slf4j.Slf4j;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;

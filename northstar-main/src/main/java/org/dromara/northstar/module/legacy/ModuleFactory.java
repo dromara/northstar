@@ -26,7 +26,7 @@ import org.dromara.northstar.gateway.Contract;
 import org.dromara.northstar.gateway.IContractManager;
 import org.dromara.northstar.gateway.MarketGateway;
 import org.dromara.northstar.gateway.TradeGateway;
-import org.dromara.northstar.strategy.ClosingStrategy;
+import org.dromara.northstar.module.ClosingStrategy;
 import org.dromara.northstar.strategy.DynamicParamsAware;
 import org.dromara.northstar.strategy.IModule;
 import org.dromara.northstar.strategy.IModuleAccountStore;

@@ -24,7 +24,6 @@ import org.dromara.northstar.module.legacy.DealCollector;
 import org.dromara.northstar.module.legacy.FirstInFirstOutClosingStrategy;
 import org.dromara.northstar.module.legacy.ModuleAccountStore;
 import org.dromara.northstar.module.legacy.ModulePlaybackContext;
-import org.dromara.northstar.strategy.ClosingStrategy;
 import org.dromara.northstar.strategy.IModule;
 import org.dromara.northstar.strategy.IModuleAccountStore;
 import org.dromara.northstar.strategy.TimeSeriesUnaryOperator;

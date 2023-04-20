@@ -40,7 +40,7 @@ import org.dromara.northstar.common.utils.OrderUtils;
 import org.dromara.northstar.gateway.Contract;
 import org.dromara.northstar.gateway.TradeGateway;
 import org.dromara.northstar.indicator.IndicatorFactory;
-import org.dromara.northstar.strategy.ClosingStrategy;
+import org.dromara.northstar.module.ClosingStrategy;
 import org.dromara.northstar.strategy.IComboIndicator;
 import org.dromara.northstar.strategy.IDisposablePriceListener;
 import org.dromara.northstar.strategy.IModule;

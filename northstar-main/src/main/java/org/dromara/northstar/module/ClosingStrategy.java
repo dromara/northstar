@@ -1,4 +1,4 @@
-package org.dromara.northstar.strategy;
+package org.dromara.northstar.module;
 
 import org.dromara.northstar.common.constant.ClosingPolicy;
 import org.dromara.northstar.common.constant.SignalOperation;

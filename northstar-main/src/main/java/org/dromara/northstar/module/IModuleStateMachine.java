@@ -1,4 +1,4 @@
-package org.dromara.northstar.strategy;
+package org.dromara.northstar.module;
 
 import org.dromara.northstar.common.TransactionAware;
 import org.dromara.northstar.common.constant.ModuleState;
