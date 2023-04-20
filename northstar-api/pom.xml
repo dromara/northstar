@@ -8,8 +8,7 @@
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
-	<artifactId>northstar-common</artifactId>
-	<name>northstar-common</name>
+	<artifactId>northstar-api</artifactId>
 
 	<properties>
 
