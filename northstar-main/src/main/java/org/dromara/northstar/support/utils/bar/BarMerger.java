@@ -8,11 +8,11 @@ import java.util.Objects;
 import java.util.function.BiConsumer;
 
 import org.apache.commons.lang3.StringUtils;
+import org.dromara.northstar.common.BarDataAware;
 import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.gateway.Contract;
 import org.dromara.northstar.gateway.common.domain.time.BarClock;
 import org.dromara.northstar.gateway.common.domain.time.PeriodHelper;
-import org.dromara.northstar.strategy.BarDataAware;
 
 import lombok.extern.slf4j.Slf4j;
 import xyz.redtorch.pb.CoreField.BarField;

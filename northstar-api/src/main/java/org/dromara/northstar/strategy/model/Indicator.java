@@ -8,10 +8,10 @@ import java.util.function.Function;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
+import org.dromara.northstar.common.BarDataAware;
 import org.dromara.northstar.common.TickDataAware;
 import org.dromara.northstar.common.model.BarWrapper;
 import org.dromara.northstar.common.model.TimeSeriesValue;
-import org.dromara.northstar.strategy.BarDataAware;
 import org.dromara.northstar.strategy.MergedBarListener;
 
 import lombok.Builder;

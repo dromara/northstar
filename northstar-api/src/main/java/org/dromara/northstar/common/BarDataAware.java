@@ -1,4 +1,4 @@
-package org.dromara.northstar.strategy;
+package org.dromara.northstar.common;
 
 import xyz.redtorch.pb.CoreField.BarField;
 

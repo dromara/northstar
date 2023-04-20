@@ -1,5 +1,6 @@
 package org.dromara.northstar.strategy;
 
+import org.dromara.northstar.common.BarDataAware;
 import org.dromara.northstar.common.TickDataAware;
 
 import xyz.redtorch.pb.CoreField.BarField;

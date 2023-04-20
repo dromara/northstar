@@ -2,6 +2,7 @@ package org.dromara.northstar.strategy;
 
 import java.util.List;
 
+import org.dromara.northstar.common.BarDataAware;
 import org.dromara.northstar.common.TickDataAware;
 import org.dromara.northstar.common.TransactionAware;
 import org.dromara.northstar.common.model.ModuleRuntimeDescription;
