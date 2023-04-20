@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 
 import org.dromara.northstar.common.model.Identifier;
-import org.dromara.northstar.gateway.api.domain.contract.Contract;
+import org.dromara.northstar.gateway.common.domain.contract.Contract;
 import org.dromara.northstar.strategy.api.BarDataAware;
 import org.dromara.northstar.strategy.api.MergedBarListener;
 import org.dromara.northstar.strategy.api.indicator.Indicator.PeriodUnit;

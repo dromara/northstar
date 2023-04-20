@@ -4,8 +4,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.dromara.northstar.common.TransactionAware;
-import org.dromara.northstar.gateway.api.MarketGateway;
-import org.dromara.northstar.gateway.api.TradeGateway;
+import org.dromara.northstar.gateway.common.MarketGateway;
+import org.dromara.northstar.gateway.common.TradeGateway;
 
 import xyz.redtorch.pb.CoreField.AccountField;
 import xyz.redtorch.pb.CoreField.CancelOrderReqField;

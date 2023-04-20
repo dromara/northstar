@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 
 import org.dromara.northstar.common.event.NorthstarEvent;
 import org.dromara.northstar.common.model.ModuleRuntimeDescription;
-import org.dromara.northstar.gateway.api.MarketGateway;
+import org.dromara.northstar.gateway.common.MarketGateway;
 import org.dromara.northstar.strategy.api.IModule;
 import org.dromara.northstar.strategy.api.IModuleContext;
 

@@ -2,9 +2,9 @@ package org.dromara.northstar.gateway.binance;
 
 import org.dromara.northstar.common.event.FastEventEngine;
 import org.dromara.northstar.common.model.GatewayDescription;
-import org.dromara.northstar.gateway.api.Gateway;
-import org.dromara.northstar.gateway.api.GatewayFactory;
-import org.dromara.northstar.gateway.api.IMarketCenter;
+import org.dromara.northstar.gateway.common.Gateway;
+import org.dromara.northstar.gateway.common.GatewayFactory;
+import org.dromara.northstar.gateway.common.IMarketCenter;
 
 import com.alibaba.fastjson2.JSON;
 

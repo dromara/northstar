@@ -1,6 +1,6 @@
 package org.dromara.northstar.gateway.binance;
 
-import org.dromara.northstar.gateway.api.IMarketCenter;
+import org.dromara.northstar.gateway.common.IMarketCenter;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;

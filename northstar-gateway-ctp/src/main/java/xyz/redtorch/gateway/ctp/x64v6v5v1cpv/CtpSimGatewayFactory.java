@@ -3,9 +3,9 @@ package xyz.redtorch.gateway.ctp.x64v6v5v1cpv;
 import org.dromara.northstar.common.IDataServiceManager;
 import org.dromara.northstar.common.event.FastEventEngine;
 import org.dromara.northstar.common.model.GatewayDescription;
-import org.dromara.northstar.gateway.api.Gateway;
-import org.dromara.northstar.gateway.api.GatewayFactory;
-import org.dromara.northstar.gateway.api.IMarketCenter;
+import org.dromara.northstar.gateway.common.Gateway;
+import org.dromara.northstar.gateway.common.GatewayFactory;
+import org.dromara.northstar.gateway.common.IMarketCenter;
 import org.dromara.northstar.gateway.ctp.CtpGatewaySettings;
 
 import com.alibaba.fastjson.JSON;

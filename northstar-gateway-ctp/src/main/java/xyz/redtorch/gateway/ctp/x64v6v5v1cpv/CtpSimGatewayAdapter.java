@@ -11,10 +11,10 @@ import org.dromara.northstar.common.constant.ConnectionState;
 import org.dromara.northstar.common.constant.GatewayUsage;
 import org.dromara.northstar.common.event.FastEventEngine;
 import org.dromara.northstar.common.model.GatewayDescription;
-import org.dromara.northstar.gateway.api.GatewayAbstract;
-import org.dromara.northstar.gateway.api.IMarketCenter;
-import org.dromara.northstar.gateway.api.MarketGateway;
-import org.dromara.northstar.gateway.api.TradeGateway;
+import org.dromara.northstar.gateway.common.GatewayAbstract;
+import org.dromara.northstar.gateway.common.IMarketCenter;
+import org.dromara.northstar.gateway.common.MarketGateway;
+import org.dromara.northstar.gateway.common.TradeGateway;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

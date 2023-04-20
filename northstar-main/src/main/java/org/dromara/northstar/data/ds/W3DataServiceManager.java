@@ -12,7 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.dromara.northstar.common.IDataServiceManager;
 import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.utils.MarketDateTimeUtil;
-import org.dromara.northstar.gateway.api.IContractManager;
+import org.dromara.northstar.gateway.common.IContractManager;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;

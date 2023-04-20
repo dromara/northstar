@@ -19,7 +19,7 @@ import org.dromara.northstar.common.constant.Constants;
 import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.data.ds.DataServiceManager;
 import org.dromara.northstar.data.redis.MarketDataRepoRedisImpl;
-import org.dromara.northstar.gateway.api.IMarketDataRepository;
+import org.dromara.northstar.gateway.common.IMarketDataRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

@@ -7,9 +7,9 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 
 import org.dromara.northstar.common.model.Identifier;
-import org.dromara.northstar.gateway.api.Gateway;
-import org.dromara.northstar.gateway.api.MarketGateway;
-import org.dromara.northstar.gateway.api.TradeGateway;
+import org.dromara.northstar.gateway.common.Gateway;
+import org.dromara.northstar.gateway.common.MarketGateway;
+import org.dromara.northstar.gateway.common.TradeGateway;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

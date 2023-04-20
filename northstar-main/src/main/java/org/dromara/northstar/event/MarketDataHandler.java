@@ -12,7 +12,7 @@ import org.dromara.northstar.common.event.AbstractEventHandler;
 import org.dromara.northstar.common.event.GenericEventHandler;
 import org.dromara.northstar.common.event.NorthstarEvent;
 import org.dromara.northstar.common.event.NorthstarEventType;
-import org.dromara.northstar.gateway.api.utils.MarketDataRepoFactory;
+import org.dromara.northstar.gateway.common.utils.MarketDataRepoFactory;
 
 import xyz.redtorch.pb.CoreField.BarField;
 

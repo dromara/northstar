@@ -5,8 +5,8 @@ import java.util.List;
 import org.dromara.northstar.common.TickDataAware;
 import org.dromara.northstar.common.TransactionAware;
 import org.dromara.northstar.common.model.ModuleRuntimeDescription;
-import org.dromara.northstar.gateway.api.TradeGateway;
-import org.dromara.northstar.gateway.api.domain.contract.Contract;
+import org.dromara.northstar.gateway.common.TradeGateway;
+import org.dromara.northstar.gateway.common.domain.contract.Contract;
 
 import xyz.redtorch.pb.CoreField.ContractField;
 

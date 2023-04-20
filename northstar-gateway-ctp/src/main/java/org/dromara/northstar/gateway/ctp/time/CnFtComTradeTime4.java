@@ -3,8 +3,8 @@ package org.dromara.northstar.gateway.ctp.time;
 import java.time.LocalTime;
 import java.util.List;
 
-import org.dromara.northstar.gateway.api.domain.time.PeriodSegment;
-import org.dromara.northstar.gateway.api.domain.time.TradeTimeDefinition;
+import org.dromara.northstar.gateway.common.domain.time.PeriodSegment;
+import org.dromara.northstar.gateway.common.domain.time.TradeTimeDefinition;
 
 /**
  * 国内商品期货四类品种交易时间（无夜盘）

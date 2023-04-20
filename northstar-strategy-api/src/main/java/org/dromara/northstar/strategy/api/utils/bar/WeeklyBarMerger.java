@@ -8,7 +8,7 @@ import java.util.function.BiConsumer;
 
 import org.apache.commons.lang3.StringUtils;
 import org.dromara.northstar.common.constant.DateTimeConstant;
-import org.dromara.northstar.gateway.api.domain.contract.Contract;
+import org.dromara.northstar.gateway.common.domain.contract.Contract;
 
 import cn.hutool.core.date.LocalDateTimeUtil;
 import xyz.redtorch.pb.CoreField.BarField;

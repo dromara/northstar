@@ -13,10 +13,10 @@ import java.util.Optional;
 
 import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.model.Identifier;
-import org.dromara.northstar.gateway.api.domain.contract.ContractDefinition;
-import org.dromara.northstar.gateway.api.domain.contract.Instrument;
-import org.dromara.northstar.gateway.api.domain.time.GenericTradeTime;
-import org.dromara.northstar.gateway.api.domain.time.TradeTimeDefinition;
+import org.dromara.northstar.gateway.common.domain.contract.ContractDefinition;
+import org.dromara.northstar.gateway.common.domain.contract.Instrument;
+import org.dromara.northstar.gateway.common.domain.time.GenericTradeTime;
+import org.dromara.northstar.gateway.common.domain.time.TradeTimeDefinition;
 
 public class OkxContract implements Instrument {
 

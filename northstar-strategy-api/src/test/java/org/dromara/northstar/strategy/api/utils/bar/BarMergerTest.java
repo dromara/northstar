@@ -11,8 +11,8 @@ import java.util.List;
 import java.util.Random;
 
 import org.dromara.northstar.common.constant.DateTimeConstant;
-import org.dromara.northstar.gateway.api.domain.contract.Contract;
-import org.dromara.northstar.gateway.api.domain.time.GenericTradeTime;
+import org.dromara.northstar.gateway.common.domain.contract.Contract;
+import org.dromara.northstar.gateway.common.domain.time.GenericTradeTime;
 import org.dromara.northstar.strategy.api.utils.bar.BarMerger;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

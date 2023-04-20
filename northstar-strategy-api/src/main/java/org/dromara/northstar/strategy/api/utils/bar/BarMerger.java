@@ -9,9 +9,9 @@ import java.util.function.BiConsumer;
 
 import org.apache.commons.lang3.StringUtils;
 import org.dromara.northstar.common.constant.DateTimeConstant;
-import org.dromara.northstar.gateway.api.domain.contract.Contract;
-import org.dromara.northstar.gateway.api.domain.time.BarClock;
-import org.dromara.northstar.gateway.api.domain.time.PeriodHelper;
+import org.dromara.northstar.gateway.common.domain.contract.Contract;
+import org.dromara.northstar.gateway.common.domain.time.BarClock;
+import org.dromara.northstar.gateway.common.domain.time.PeriodHelper;
 import org.dromara.northstar.strategy.api.BarDataAware;
 
 import lombok.extern.slf4j.Slf4j;

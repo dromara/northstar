@@ -4,8 +4,8 @@ import java.time.LocalDateTime;
 
 import org.dromara.northstar.account.GatewayManager;
 import org.dromara.northstar.common.constant.ConnectionState;
-import org.dromara.northstar.gateway.api.Gateway;
-import org.dromara.northstar.gateway.api.IMarketCenter;
+import org.dromara.northstar.gateway.common.Gateway;
+import org.dromara.northstar.gateway.common.IMarketCenter;
 import org.dromara.northstar.support.holiday.CtpHolidayManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;

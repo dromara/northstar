@@ -5,9 +5,9 @@ import org.dromara.northstar.common.event.FastEventEngine;
 import org.dromara.northstar.common.model.GatewayDescription;
 import org.dromara.northstar.common.model.SimAccountDescription;
 import org.dromara.northstar.data.ISimAccountRepository;
-import org.dromara.northstar.gateway.api.Gateway;
-import org.dromara.northstar.gateway.api.GatewayFactory;
-import org.dromara.northstar.gateway.api.IMarketCenter;
+import org.dromara.northstar.gateway.common.Gateway;
+import org.dromara.northstar.gateway.common.GatewayFactory;
+import org.dromara.northstar.gateway.common.IMarketCenter;
 import org.dromara.northstar.gateway.sim.market.SimMarketGatewayLocal;
 
 import com.google.protobuf.InvalidProtocolBufferException;

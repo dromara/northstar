@@ -11,8 +11,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.dromara.northstar.common.model.GatewayDescription;
-import org.dromara.northstar.gateway.api.MarketGateway;
-import org.dromara.northstar.gateway.api.TradeGateway;
+import org.dromara.northstar.gateway.common.MarketGateway;
+import org.dromara.northstar.gateway.common.TradeGateway;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

@@ -10,7 +10,7 @@ import java.util.List;
 
 import org.dromara.northstar.common.IDataServiceManager;
 import org.dromara.northstar.common.constant.DateTimeConstant;
-import org.dromara.northstar.gateway.api.IMarketDataRepository;
+import org.dromara.northstar.gateway.common.IMarketDataRepository;
 
 @Slf4j
 public class W3MarketDataRepoDataServiceImpl implements IMarketDataRepository {
