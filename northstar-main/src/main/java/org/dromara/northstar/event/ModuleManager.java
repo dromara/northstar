@@ -8,7 +8,7 @@ import org.dromara.northstar.common.event.AbstractEventHandler;
 import org.dromara.northstar.common.event.NorthstarEvent;
 import org.dromara.northstar.common.event.NorthstarEventType;
 import org.dromara.northstar.common.exception.NoSuchElementException;
-import org.dromara.northstar.strategy.api.IModule;
+import org.dromara.northstar.strategy.IModule;
 
 import lombok.extern.slf4j.Slf4j;
 

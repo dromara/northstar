@@ -11,12 +11,12 @@ import java.util.regex.Pattern;
 import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.event.FastEventEngine;
 import org.dromara.northstar.common.model.Identifier;
-import org.dromara.northstar.gateway.common.MarketGateway;
-import org.dromara.northstar.gateway.common.domain.contract.ContractDefinition;
-import org.dromara.northstar.gateway.common.domain.contract.Instrument;
+import org.dromara.northstar.gateway.Instrument;
+import org.dromara.northstar.gateway.MarketGateway;
+import org.dromara.northstar.gateway.TradeTimeDefinition;
 import org.dromara.northstar.gateway.common.domain.mktdata.MarketCenter;
 import org.dromara.northstar.gateway.common.domain.time.GenericTradeTime;
-import org.dromara.northstar.gateway.common.domain.time.TradeTimeDefinition;
+import org.dromara.northstar.gateway.model.ContractDefinition;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

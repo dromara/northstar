@@ -8,9 +8,10 @@ import org.dromara.northstar.common.constant.Constants;
 import org.dromara.northstar.common.event.FastEventEngine;
 import org.dromara.northstar.common.event.NorthstarEventType;
 import org.dromara.northstar.common.model.Identifier;
+import org.dromara.northstar.gateway.Contract;
+import org.dromara.northstar.gateway.TradeTimeDefinition;
 import org.dromara.northstar.gateway.common.domain.mktdata.IndexTicker;
 import org.dromara.northstar.gateway.common.domain.mktdata.MinuteBarGenerator;
-import org.dromara.northstar.gateway.common.domain.time.TradeTimeDefinition;
 
 import lombok.extern.slf4j.Slf4j;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;

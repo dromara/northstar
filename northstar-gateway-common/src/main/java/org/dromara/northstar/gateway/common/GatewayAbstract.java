@@ -4,6 +4,8 @@ import org.dromara.northstar.common.constant.ConnectionState;
 import org.dromara.northstar.common.constant.GatewayUsage;
 import org.dromara.northstar.common.event.FastEventEngine;
 import org.dromara.northstar.common.model.GatewayDescription;
+import org.dromara.northstar.gateway.Gateway;
+import org.dromara.northstar.gateway.IMarketCenter;
 
 import lombok.extern.slf4j.Slf4j;
 

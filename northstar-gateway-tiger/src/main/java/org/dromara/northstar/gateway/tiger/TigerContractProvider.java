@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.dromara.northstar.gateway.common.IMarketCenter;
+import org.dromara.northstar.gateway.IMarketCenter;
 
 import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.https.domain.contract.model.ContractsModel;

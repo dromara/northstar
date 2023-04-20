@@ -12,8 +12,8 @@ import java.util.function.Consumer;
 
 import org.dromara.northstar.common.event.FastEventEngine;
 import org.dromara.northstar.common.model.Identifier;
-import org.dromara.northstar.gateway.common.IContractManager;
-import org.dromara.northstar.gateway.common.domain.contract.Contract;
+import org.dromara.northstar.gateway.Contract;
+import org.dromara.northstar.gateway.IContractManager;
 import org.dromara.northstar.gateway.sim.trade.SimAccount;
 import org.dromara.northstar.gateway.sim.trade.TradePosition;
 import org.junit.jupiter.api.BeforeEach;

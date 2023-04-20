@@ -3,7 +3,7 @@ package org.dromara.northstar.gateway.okx;
 import java.time.LocalDate;
 import java.util.List;
 
-import org.dromara.northstar.gateway.common.IMarketDataRepository;
+import org.dromara.northstar.data.IMarketDataRepository;
 
 import xyz.redtorch.pb.CoreField.BarField;
 

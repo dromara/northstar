@@ -12,7 +12,7 @@ import org.dromara.northstar.common.model.ComponentField;
 import org.dromara.northstar.common.model.GatewayDescription;
 import org.dromara.northstar.common.model.GatewayTypeDescription;
 import org.dromara.northstar.common.model.ResultBean;
-import org.dromara.northstar.gateway.common.IContractManager;
+import org.dromara.northstar.gateway.IContractManager;
 import org.dromara.northstar.web.service.GatewayService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;

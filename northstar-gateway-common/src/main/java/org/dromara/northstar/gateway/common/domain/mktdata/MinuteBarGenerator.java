@@ -6,8 +6,8 @@ import java.util.Objects;
 import java.util.function.Consumer;
 
 import org.dromara.northstar.common.constant.DateTimeConstant;
+import org.dromara.northstar.gateway.TradeTimeDefinition;
 import org.dromara.northstar.gateway.common.domain.time.OpenningMinuteClock;
-import org.dromara.northstar.gateway.common.domain.time.TradeTimeDefinition;
 
 import lombok.extern.slf4j.Slf4j;
 import xyz.redtorch.pb.CoreField.BarField;

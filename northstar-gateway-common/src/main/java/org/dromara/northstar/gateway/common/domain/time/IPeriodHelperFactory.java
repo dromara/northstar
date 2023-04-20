@@ -1,6 +1,6 @@
 package org.dromara.northstar.gateway.common.domain.time;
 
-import org.dromara.northstar.gateway.common.domain.contract.ContractDefinition;
+import org.dromara.northstar.gateway.model.ContractDefinition;
 
 public interface IPeriodHelperFactory {
 

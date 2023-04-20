@@ -8,7 +8,7 @@ import java.util.LinkedList;
 
 import org.apache.commons.lang3.StringUtils;
 import org.dromara.northstar.common.model.LogDescription;
-import org.dromara.northstar.strategy.api.log.ModuleLoggerFactory;
+import org.dromara.northstar.support.log.ModuleLoggerFactory;
 import org.springframework.boot.logging.LogLevel;
 import org.springframework.boot.logging.LoggingSystem;
 

@@ -2,7 +2,7 @@ package org.dromara.northstar.module.legacy;
 
 import org.dromara.northstar.common.constant.ClosingPolicy;
 import org.dromara.northstar.common.constant.SignalOperation;
-import org.dromara.northstar.strategy.api.ClosingStrategy;
+import org.dromara.northstar.strategy.ClosingStrategy;
 
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;

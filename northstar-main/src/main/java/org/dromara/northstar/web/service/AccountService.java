@@ -14,7 +14,7 @@ import org.dromara.northstar.common.model.Identifier;
 import org.dromara.northstar.common.model.OrderRecall;
 import org.dromara.northstar.common.model.OrderRequest;
 import org.dromara.northstar.common.utils.OrderUtils;
-import org.dromara.northstar.gateway.common.IContractManager;
+import org.dromara.northstar.gateway.IContractManager;
 
 import lombok.extern.slf4j.Slf4j;
 import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;

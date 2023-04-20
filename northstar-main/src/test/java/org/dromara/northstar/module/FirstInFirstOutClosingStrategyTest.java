@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.dromara.northstar.common.constant.ClosingPolicy;
 import org.dromara.northstar.common.constant.SignalOperation;
 import org.dromara.northstar.module.legacy.FirstInFirstOutClosingStrategy;
-import org.dromara.northstar.strategy.api.ClosingStrategy;
+import org.dromara.northstar.strategy.ClosingStrategy;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

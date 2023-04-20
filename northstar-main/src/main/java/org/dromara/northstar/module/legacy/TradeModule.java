@@ -7,9 +7,9 @@ import java.util.stream.Collectors;
 
 import org.dromara.northstar.common.event.NorthstarEvent;
 import org.dromara.northstar.common.model.ModuleRuntimeDescription;
-import org.dromara.northstar.gateway.common.MarketGateway;
-import org.dromara.northstar.strategy.api.IModule;
-import org.dromara.northstar.strategy.api.IModuleContext;
+import org.dromara.northstar.gateway.MarketGateway;
+import org.dromara.northstar.strategy.IModule;
+import org.dromara.northstar.strategy.IModuleContext;
 
 import lombok.extern.slf4j.Slf4j;
 import xyz.redtorch.pb.CoreField.BarField;

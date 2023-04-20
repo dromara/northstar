@@ -1,6 +1,6 @@
 package org.dromara.northstar.gateway.sim.trade;
 
-import org.dromara.northstar.gateway.common.TradeGateway;
+import org.dromara.northstar.gateway.TradeGateway;
 
 public interface SimTradeGateway extends TradeGateway{
 

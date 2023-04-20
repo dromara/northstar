@@ -6,6 +6,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.dromara.northstar.gateway.TradeTimeDefinition;
+import org.dromara.northstar.gateway.model.PeriodSegment;
+
 /**
  * K线周期分割器
  * @author KevinHuangwl

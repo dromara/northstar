@@ -4,7 +4,7 @@ import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.constant.ConnectionState;
 import org.dromara.northstar.common.event.FastEventEngine;
 import org.dromara.northstar.common.model.GatewayDescription;
-import org.dromara.northstar.gateway.common.MarketGateway;
+import org.dromara.northstar.gateway.MarketGateway;
 
 import xyz.redtorch.pb.CoreField.ContractField;
 

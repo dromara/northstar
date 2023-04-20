@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.dromara.northstar.common.constant.ChannelType;
-import org.dromara.northstar.gateway.common.IMarketDataRepository;
+import org.dromara.northstar.data.IMarketDataRepository;
 import org.dromara.northstar.gateway.common.utils.MarketDataRepoFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

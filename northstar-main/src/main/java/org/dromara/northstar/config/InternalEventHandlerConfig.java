@@ -10,7 +10,7 @@ import org.dromara.northstar.event.MailBindedEventHandler;
 import org.dromara.northstar.event.MarketDataHandler;
 import org.dromara.northstar.event.ModuleManager;
 import org.dromara.northstar.event.SimMarketHandler;
-import org.dromara.northstar.gateway.common.IContractManager;
+import org.dromara.northstar.gateway.IContractManager;
 import org.dromara.northstar.gateway.common.utils.MarketDataRepoFactory;
 import org.dromara.northstar.gateway.sim.trade.SimMarket;
 import org.dromara.northstar.support.notification.MailDeliveryManager;

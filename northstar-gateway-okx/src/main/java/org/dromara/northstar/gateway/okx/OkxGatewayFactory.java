@@ -2,9 +2,9 @@ package org.dromara.northstar.gateway.okx;
 
 import org.dromara.northstar.common.event.FastEventEngine;
 import org.dromara.northstar.common.model.GatewayDescription;
-import org.dromara.northstar.gateway.common.Gateway;
-import org.dromara.northstar.gateway.common.GatewayFactory;
-import org.dromara.northstar.gateway.common.IMarketCenter;
+import org.dromara.northstar.gateway.Gateway;
+import org.dromara.northstar.gateway.GatewayFactory;
+import org.dromara.northstar.gateway.IMarketCenter;
 
 import com.alibaba.fastjson2.JSON;
 

@@ -5,15 +5,15 @@ import java.util.Optional;
 
 import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.model.Identifier;
-import org.dromara.northstar.gateway.common.domain.contract.ContractDefinition;
-import org.dromara.northstar.gateway.common.domain.contract.Instrument;
-import org.dromara.northstar.gateway.common.domain.time.TradeTimeDefinition;
+import org.dromara.northstar.gateway.Instrument;
+import org.dromara.northstar.gateway.TradeTimeDefinition;
 import org.dromara.northstar.gateway.ctp.time.CnFtBondTradeTime;
 import org.dromara.northstar.gateway.ctp.time.CnFtComTradeTime1;
 import org.dromara.northstar.gateway.ctp.time.CnFtComTradeTime2;
 import org.dromara.northstar.gateway.ctp.time.CnFtComTradeTime3;
 import org.dromara.northstar.gateway.ctp.time.CnFtComTradeTime4;
 import org.dromara.northstar.gateway.ctp.time.CnFtIndexTradeTime;
+import org.dromara.northstar.gateway.model.ContractDefinition;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

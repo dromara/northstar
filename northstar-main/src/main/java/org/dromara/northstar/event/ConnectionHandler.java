@@ -14,9 +14,9 @@ import org.dromara.northstar.common.model.ContractSimpleInfo;
 import org.dromara.northstar.common.model.GatewayDescription;
 import org.dromara.northstar.common.model.Identifier;
 import org.dromara.northstar.data.IGatewayRepository;
-import org.dromara.northstar.gateway.common.Gateway;
-import org.dromara.northstar.gateway.common.IContractManager;
-import org.dromara.northstar.gateway.common.MarketGateway;
+import org.dromara.northstar.gateway.Gateway;
+import org.dromara.northstar.gateway.IContractManager;
+import org.dromara.northstar.gateway.MarketGateway;
 
 import lombok.extern.slf4j.Slf4j;
 

@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalTime;
 
-import org.dromara.northstar.gateway.common.domain.time.PeriodSegment;
+import org.dromara.northstar.gateway.model.PeriodSegment;
 import org.junit.jupiter.api.Test;
 
 class PeriodSegmentTest {

@@ -4,7 +4,7 @@ import org.dromara.northstar.ExternalJarClassLoader;
 import org.dromara.northstar.account.AccountManager;
 import org.dromara.northstar.data.IModuleRepository;
 import org.dromara.northstar.event.ModuleManager;
-import org.dromara.northstar.gateway.common.IContractManager;
+import org.dromara.northstar.gateway.IContractManager;
 import org.dromara.northstar.gateway.common.utils.MarketDataRepoFactory;
 import org.dromara.northstar.module.legacy.ModuleFactory;
 import org.dromara.northstar.web.service.AccountService;

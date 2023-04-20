@@ -5,10 +5,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.time.LocalTime;
 import java.util.List;
 
+import org.dromara.northstar.gateway.TradeTimeDefinition;
 import org.dromara.northstar.gateway.common.domain.time.GenericTradeTime;
 import org.dromara.northstar.gateway.common.domain.time.PeriodHelper;
-import org.dromara.northstar.gateway.common.domain.time.PeriodSegment;
-import org.dromara.northstar.gateway.common.domain.time.TradeTimeDefinition;
+import org.dromara.northstar.gateway.model.PeriodSegment;
 import org.junit.jupiter.api.Test;
 
 class PeriodHelperTest {

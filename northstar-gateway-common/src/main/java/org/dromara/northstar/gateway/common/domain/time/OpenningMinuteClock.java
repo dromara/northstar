@@ -6,6 +6,8 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.List;
 
+import org.dromara.northstar.gateway.TradeTimeDefinition;
+
 import xyz.redtorch.pb.CoreField.TickField;
 
 /**

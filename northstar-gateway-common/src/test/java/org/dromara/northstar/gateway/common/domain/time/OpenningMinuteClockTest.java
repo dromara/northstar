@@ -9,9 +9,9 @@ import java.time.ZoneOffset;
 import java.util.List;
 
 import org.dromara.northstar.common.constant.DateTimeConstant;
+import org.dromara.northstar.gateway.TradeTimeDefinition;
 import org.dromara.northstar.gateway.common.domain.time.OpenningMinuteClock;
-import org.dromara.northstar.gateway.common.domain.time.PeriodSegment;
-import org.dromara.northstar.gateway.common.domain.time.TradeTimeDefinition;
+import org.dromara.northstar.gateway.model.PeriodSegment;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

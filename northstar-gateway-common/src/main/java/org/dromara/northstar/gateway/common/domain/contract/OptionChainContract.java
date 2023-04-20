@@ -5,7 +5,8 @@ import java.util.List;
 import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.constant.Constants;
 import org.dromara.northstar.common.model.Identifier;
-import org.dromara.northstar.gateway.common.domain.time.TradeTimeDefinition;
+import org.dromara.northstar.gateway.Contract;
+import org.dromara.northstar.gateway.TradeTimeDefinition;
 import org.springframework.util.Assert;
 
 import lombok.extern.slf4j.Slf4j;

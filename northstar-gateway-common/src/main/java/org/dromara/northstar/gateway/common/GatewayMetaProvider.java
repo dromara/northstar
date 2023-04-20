@@ -7,6 +7,7 @@ import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.model.ComponentField;
 import org.dromara.northstar.common.model.DynamicParams;
 import org.dromara.northstar.common.model.GatewaySettings;
+import org.dromara.northstar.gateway.GatewayFactory;
 
 public class GatewayMetaProvider {
 	

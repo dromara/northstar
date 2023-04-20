@@ -32,13 +32,13 @@ import org.dromara.northstar.common.model.ModuleRuntimeDescription;
 import org.dromara.northstar.common.utils.MarketDataLoadingUtils;
 import org.dromara.northstar.data.IModuleRepository;
 import org.dromara.northstar.event.ModuleManager;
-import org.dromara.northstar.gateway.common.IContractManager;
+import org.dromara.northstar.gateway.IContractManager;
 import org.dromara.northstar.gateway.common.utils.MarketDataRepoFactory;
 import org.dromara.northstar.module.legacy.ModuleFactory;
 import org.dromara.northstar.module.legacy.ModulePlaybackContext;
-import org.dromara.northstar.strategy.api.DynamicParamsAware;
-import org.dromara.northstar.strategy.api.IModule;
-import org.dromara.northstar.strategy.api.annotation.StrategicComponent;
+import org.dromara.northstar.strategy.DynamicParamsAware;
+import org.dromara.northstar.strategy.IModule;
+import org.dromara.northstar.strategy.StrategicComponent;
 import org.dromara.northstar.web.PostLoadAware;
 import org.springframework.context.ApplicationContext;
 

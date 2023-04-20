@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.dromara.northstar.common.IDataServiceManager;
 import org.dromara.northstar.common.constant.DateTimeConstant;
-import org.dromara.northstar.gateway.common.IMarketDataRepository;
+import org.dromara.northstar.data.IMarketDataRepository;
 
 import lombok.extern.slf4j.Slf4j;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;

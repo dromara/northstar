@@ -16,9 +16,9 @@ import org.dromara.northstar.common.model.Identifier;
 import org.dromara.northstar.common.model.ModuleAccountRuntimeDescription;
 import org.dromara.northstar.common.model.ModuleRuntimeDescription;
 import org.dromara.northstar.common.utils.FieldUtils;
-import org.dromara.northstar.gateway.common.IContractManager;
-import org.dromara.northstar.gateway.common.domain.contract.Contract;
-import org.dromara.northstar.strategy.api.IModuleAccountStore;
+import org.dromara.northstar.gateway.Contract;
+import org.dromara.northstar.gateway.IContractManager;
+import org.dromara.northstar.strategy.IModuleAccountStore;
 import org.springframework.util.Assert;
 
 import com.google.common.collect.HashBasedTable;

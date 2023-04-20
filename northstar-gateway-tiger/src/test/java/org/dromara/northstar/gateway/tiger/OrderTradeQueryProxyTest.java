@@ -6,8 +6,8 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import org.dromara.northstar.gateway.common.IContractManager;
-import org.dromara.northstar.gateway.common.domain.contract.Contract;
+import org.dromara.northstar.gateway.Contract;
+import org.dromara.northstar.gateway.IContractManager;
 import org.dromara.northstar.gateway.tiger.OrderTradeQueryProxy;
 import org.dromara.northstar.gateway.tiger.TigerHttpClient;
 import org.junit.jupiter.api.BeforeEach;

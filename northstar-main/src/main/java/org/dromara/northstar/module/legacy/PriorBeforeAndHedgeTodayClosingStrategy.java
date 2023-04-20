@@ -4,7 +4,7 @@ import java.util.Objects;
 
 import org.dromara.northstar.common.constant.ClosingPolicy;
 import org.dromara.northstar.common.constant.SignalOperation;
-import org.dromara.northstar.strategy.api.ClosingStrategy;
+import org.dromara.northstar.strategy.ClosingStrategy;
 
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreField.PositionField;

@@ -15,8 +15,8 @@ import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.common.event.FastEventEngine;
 import org.dromara.northstar.common.event.NorthstarEventType;
 import org.dromara.northstar.common.model.GatewayDescription;
-import org.dromara.northstar.gateway.common.IContractManager;
-import org.dromara.northstar.gateway.common.MarketGateway;
+import org.dromara.northstar.gateway.IContractManager;
+import org.dromara.northstar.gateway.MarketGateway;
 
 import com.alibaba.fastjson.JSONObject;
 import com.tigerbrokers.stock.openapi.client.config.ClientConfig;

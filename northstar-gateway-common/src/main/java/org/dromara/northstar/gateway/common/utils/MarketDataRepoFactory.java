@@ -5,7 +5,7 @@ import java.util.Map;
 import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.model.GatewayDescription;
 import org.dromara.northstar.data.IGatewayRepository;
-import org.dromara.northstar.gateway.common.IMarketDataRepository;
+import org.dromara.northstar.data.IMarketDataRepository;
 
 public class MarketDataRepoFactory {
 	

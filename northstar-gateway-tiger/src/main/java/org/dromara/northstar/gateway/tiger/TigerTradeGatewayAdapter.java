@@ -17,8 +17,8 @@ import org.dromara.northstar.common.constant.ConnectionState;
 import org.dromara.northstar.common.event.FastEventEngine;
 import org.dromara.northstar.common.event.NorthstarEventType;
 import org.dromara.northstar.common.model.GatewayDescription;
-import org.dromara.northstar.gateway.common.IContractManager;
-import org.dromara.northstar.gateway.common.TradeGateway;
+import org.dromara.northstar.gateway.IContractManager;
+import org.dromara.northstar.gateway.TradeGateway;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;

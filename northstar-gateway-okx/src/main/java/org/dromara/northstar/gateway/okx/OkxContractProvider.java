@@ -17,7 +17,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.LinkedHashMap;
 import java.util.Objects;
 
-import org.dromara.northstar.gateway.common.IMarketCenter;
+import org.dromara.northstar.gateway.IMarketCenter;
 
 
 @Slf4j

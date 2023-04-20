@@ -21,10 +21,6 @@
 		</dependency>
 		<dependency>
 			<groupId>org.dromara</groupId>
-			<artifactId>northstar-strategy-api</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.dromara</groupId>
 			<artifactId>northstar-gateway-ctp</artifactId>
 		</dependency>
 		<dependency>

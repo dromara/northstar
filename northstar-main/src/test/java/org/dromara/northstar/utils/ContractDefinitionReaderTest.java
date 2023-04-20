@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.io.IOException;
 import java.util.List;
 
-import org.dromara.northstar.gateway.common.domain.contract.ContractDefinition;
+import org.dromara.northstar.gateway.model.ContractDefinition;
 import org.dromara.northstar.support.utils.ContractDefinitionReader;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.FileUrlResource;

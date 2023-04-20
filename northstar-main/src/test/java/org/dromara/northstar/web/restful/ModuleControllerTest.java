@@ -29,8 +29,8 @@ import org.dromara.northstar.common.model.MockTradeDescription;
 import org.dromara.northstar.common.model.ModuleAccountDescription;
 import org.dromara.northstar.common.model.ModuleDescription;
 import org.dromara.northstar.common.model.NsUser;
-import org.dromara.northstar.gateway.common.IMarketCenter;
-import org.dromara.northstar.gateway.common.domain.contract.Contract;
+import org.dromara.northstar.gateway.Contract;
+import org.dromara.northstar.gateway.IMarketCenter;
 import org.dromara.northstar.gateway.common.domain.time.GenericTradeTime;
 import org.dromara.northstar.gateway.ctp.CtpGatewaySettings;
 import org.junit.jupiter.api.AfterEach;
@@ -74,7 +74,7 @@ class ModuleControllerTest {
 	
 	ModuleDescription md2;
 	
-	String strategy = "{\"name\":\"示例信号策略\",\"className\":\"org.dromara.northstar.strategy.api.demo.BeginnerSampleStrategy\"}";
+	String strategy = "{\"name\":\"示例信号策略\",\"className\":\"org.dromara.northstar.demo.strategy.BeginnerSampleStrategy\"}";
 	String strategyParams = "{\"label\":\"操作间隔\",\"name\":\"actionInterval\",\"order\":10,\"type\":\"Number\",\"value\":60,\"unit\":\"秒\",\"options\":[]}";
 	
 	TestFieldFactory factory = new TestFieldFactory("CTP账户");

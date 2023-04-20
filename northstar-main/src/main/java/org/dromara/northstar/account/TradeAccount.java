@@ -11,9 +11,9 @@ import java.util.UUID;
 import org.dromara.northstar.common.exception.NoSuchElementException;
 import org.dromara.northstar.common.model.GatewayDescription;
 import org.dromara.northstar.common.utils.OrderUtils;
-import org.dromara.northstar.gateway.common.MarketGateway;
-import org.dromara.northstar.gateway.common.TradeGateway;
-import org.dromara.northstar.strategy.api.IAccount;
+import org.dromara.northstar.gateway.MarketGateway;
+import org.dromara.northstar.gateway.TradeGateway;
+import org.dromara.northstar.strategy.IAccount;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;

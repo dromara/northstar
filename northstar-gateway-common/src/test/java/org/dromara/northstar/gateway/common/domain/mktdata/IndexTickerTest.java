@@ -16,7 +16,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
 
 import org.dromara.northstar.common.constant.DateTimeConstant;
-import org.dromara.northstar.gateway.common.domain.contract.Contract;
+import org.dromara.northstar.gateway.Contract;
 import org.dromara.northstar.gateway.common.domain.contract.IndexContract;
 import org.dromara.northstar.gateway.common.domain.mktdata.IndexTicker;
 import org.junit.jupiter.api.BeforeEach;

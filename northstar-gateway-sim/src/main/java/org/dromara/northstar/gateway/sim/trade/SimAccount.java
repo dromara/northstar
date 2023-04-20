@@ -18,8 +18,8 @@ import org.dromara.northstar.common.model.Identifier;
 import org.dromara.northstar.common.model.SimAccountDescription;
 import org.dromara.northstar.common.utils.FieldUtils;
 import org.dromara.northstar.common.utils.MessagePrinter;
-import org.dromara.northstar.gateway.common.IContractManager;
-import org.dromara.northstar.gateway.common.domain.contract.Contract;
+import org.dromara.northstar.gateway.Contract;
+import org.dromara.northstar.gateway.IContractManager;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 
