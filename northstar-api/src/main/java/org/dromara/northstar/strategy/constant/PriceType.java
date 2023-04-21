@@ -23,18 +23,4 @@ public enum PriceType {
 		this.name = name;
 	}
 	
-	private static Map<String, PriceType> map = new HashMap<>() {
-		private static final long serialVersionUID = -5075741267974469725L;
-
-		{
-			put("市价", ANY_PRICE);
-			put("对手价", OPP_PRICE);
-			put("最新价", LAST_PRICE);
-			put("排队价", WAITING_PRICE);
-			put("限价", LIMIT_PRICE);
-		}
-	};
-	public static PriceType parse(String name) {
-		return map.get(name);
-	} 
 }

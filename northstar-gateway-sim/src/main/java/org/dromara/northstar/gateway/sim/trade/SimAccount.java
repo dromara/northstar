@@ -90,7 +90,7 @@ public class SimAccount implements TickDataAware{
 			if(tMap.containsKey(uncloseTrade.getContract())) {
 				tMap.get(uncloseTrade.getContract()).onTrade(uncloseTrade);
 			}else {
-				tMap.put(uncloseTrade.getContract(), new TradePosition(List.of(uncloseTrade), ClosingPolicy.FIFO));
+				tMap.put(uncloseTrade.getContract(), new TradePosition(List.of(uncloseTrade), ClosingPolicy.FIRST_IN_FIRST_OUT));
 			}
 		}
 	}
@@ -231,7 +231,7 @@ public class SimAccount implements TickDataAware{
 		if(tMap.containsKey(trade.getContract())) {
 			tMap.get(trade.getContract()).onTrade(trade);
 		} else {
-			tMap.put(trade.getContract(), new TradePosition(List.of(trade), ClosingPolicy.FIFO));
+			tMap.put(trade.getContract(), new TradePosition(List.of(trade), ClosingPolicy.FIRST_IN_FIRST_OUT));
 		}
 		onTrade(trade);
 		savingCallback.accept(getDescription());

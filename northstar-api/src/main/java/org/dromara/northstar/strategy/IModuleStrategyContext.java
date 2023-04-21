@@ -1,14 +1,11 @@
 package org.dromara.northstar.strategy;
 
-import java.util.Optional;
 import java.util.function.Function;
 
 import org.dromara.northstar.common.constant.ModuleState;
-import org.dromara.northstar.common.constant.SignalOperation;
 import org.dromara.northstar.common.model.BarWrapper;
 import org.dromara.northstar.common.model.TimeSeriesValue;
 import org.dromara.northstar.strategy.constant.DisposablePriceListenerType;
-import org.dromara.northstar.strategy.constant.PriceType;
 import org.dromara.northstar.strategy.model.Indicator;
 import org.dromara.northstar.strategy.model.Indicator.ValueType;
 import org.dromara.northstar.strategy.model.TradeIntent;
@@ -21,11 +18,6 @@ import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.TradeField;
 
 public interface IModuleStrategyContext {
-	/**
-	 * 获取模组名称
-	 * @return
-	 */
-	String getModuleName();
 	/**
 	 * 为条件添加日志解释
 	 * @param expression		判断条件
@@ -40,16 +32,6 @@ public interface IModuleStrategyContext {
 	 * @return					返回合约信息
 	 */
 	ContractField getContract(String unifiedSymbol);
-	/**
-	 * 委托下单（精简接口）
-	 * @param contract			交易合约			
-	 * @param operation			操作信号
-	 * @param priceType			价格类型
-	 * @param volume			手数
-	 * @param price				委托价（市价为0）
-	 * @return	originOrderId	订单ID
-	 */
-	Optional<String> submitOrderReq(ContractField contract, SignalOperation operation, PriceType priceType, int volume, double price);
 	/**
 	 * 委托下单（根据配置自动处理撤单追单）
 	 * @param tradeIntent		交易意图
@@ -84,43 +66,22 @@ public interface IModuleStrategyContext {
 	 */
 	IDisposablePriceListener priceTriggerOut(TradeField trade, DisposablePriceListenerType listenerType, int numOfPriceTickToTrigger);
 	/**
-	 * 判断订单是否已经超时
-	 * 该方法用于撤单场景
-	 * @param originOrderId		订单ID
-	 * @param timeout			超时毫秒数
-	 * @return
-	 */
-	boolean isOrderWaitTimeout(String originOrderId, long timeout);
-	/**
-	 * 撤单
-	 * @param originOrderId		订单ID
-	 */
-	void cancelOrder(String originOrderId);
-	/**
 	 * 获取模组周期设置
 	 * @return
 	 */
-	int numOfMinPerModuleBar();
+	int numOfMinPerMergedBar();
 	/**
-	 * 模组持仓净盈亏
+	 * 获取合约绑定的物理账户对象
+	 * @param contract
 	 * @return
 	 */
-	int holdingNetProfit();
+	IAccount getAccount(ContractField contract);
 	/**
-	 * 模组可用持仓（全部）
-	 * @param direction			持仓方向
-	 * @param unifiedSymbol 	合约编码
+	 * 
+	 * @param contract
 	 * @return
 	 */
-	int availablePosition(DirectionEnum direction, String unifiedSymbol);
-	/**
-	 * 模组可用持仓（明细）
-	 * @param direction			持仓方向
-	 * @param unifiedSymbol		合约编码
-	 * @param isToday			是否为当天持仓
-	 * @return
-	 */
-	int availablePosition(DirectionEnum direction, String unifiedSymbol, boolean isToday);
+	IModuleAccount getModuleAccount(ContractField contract);
 	/**
 	 * 获取模组状态
 	 * @return
@@ -173,5 +134,5 @@ public interface IModuleStrategyContext {
 	 * 发消息提示
 	 * @param content
 	 */
-	void sendNotification(String content);
+	IMessageSender getMessageSender();
 }

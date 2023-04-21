@@ -11,7 +11,6 @@ import org.slf4j.Logger;
 
 import com.alibaba.fastjson.JSONObject;
 
-import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.OrderField;
 import xyz.redtorch.pb.CoreField.TickField;
@@ -47,7 +46,7 @@ public abstract class AbstractStrategy implements TradeStrategy{
 			log.info("模组成交 [{} {} {} 操作：{}{} {}手 {}]", unifiedSymbol,
 					trade.getTradeDate(), trade.getTradeTime(), FieldUtils.chn(trade.getDirection()), FieldUtils.chn(trade.getOffsetFlag()), 
 					trade.getVolume(), trade.getPrice());
-			log.info("当前模组持仓：多[{}] 空[{}]", ctx.availablePosition(DirectionEnum.D_Buy, unifiedSymbol), ctx.availablePosition(DirectionEnum.D_Sell, unifiedSymbol));
+			log.info("当前模组净持仓：[{}]", ctx.getModuleAccount(trade.getContract()).getUncloseNetPosition(unifiedSymbol));
 			log.info("当前模组状态：{}", ctx.getState());
 		}
 	}

@@ -112,7 +112,7 @@ public class TradePosition {
 		int restVol = trade.getVolume();
 		int factor = FieldUtils.directionFactor(dir);
 		while(restVol > 0 && !trades.isEmpty()) {
-			if(closingPolicy == ClosingPolicy.PRIOR_TODAY) {
+			if(closingPolicy == ClosingPolicy.FIRST_IN_LAST_OUT) {
 				TradeField t = trades.pollLast();
 				if(t.getVolume() > restVol) {
 					trades.offerLast(t.toBuilder().setVolume(t.getVolume() - restVol).build());

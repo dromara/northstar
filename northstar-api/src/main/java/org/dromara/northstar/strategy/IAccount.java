@@ -7,6 +7,7 @@ import org.dromara.northstar.common.TransactionAware;
 import org.dromara.northstar.gateway.MarketGateway;
 import org.dromara.northstar.gateway.TradeGateway;
 
+import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
 import xyz.redtorch.pb.CoreField.AccountField;
 import xyz.redtorch.pb.CoreField.CancelOrderReqField;
 import xyz.redtorch.pb.CoreField.PositionField;
@@ -74,6 +75,13 @@ public interface IAccount extends TransactionAware{
 	 * @return				净持仓：正数代表净多头，负数代表净空头
 	 */
 	int netPosition(String unifiedSymbol);
+	/**
+	 * 获取某合约的持仓信息
+	 * @param posDirection
+	 * @param unifiedSymbol
+	 * @return
+	 */
+	PositionField getPosition(PositionDirectionEnum posDirection, String unifiedSymbol);
 	/**
 	 * 获取账户绑定的行情网关
 	 * @return

@@ -14,9 +14,8 @@ import java.util.Optional;
 
 import org.dromara.northstar.common.constant.ModuleState;
 import org.dromara.northstar.common.constant.SignalOperation;
-import org.dromara.northstar.strategy.IModuleStrategyContext;
+import org.dromara.northstar.strategy.IModuleContext;
 import org.dromara.northstar.strategy.constant.PriceType;
-import org.dromara.northstar.strategy.model.TradeIntent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -30,7 +29,7 @@ import xyz.redtorch.pb.CoreField.OrderField;
 
 class TradeIntentTest {
 	
-	IModuleStrategyContext ctx = mock(IModuleStrategyContext.class);
+	IModuleContext ctx = mock(IModuleContext.class);
 	
 	TestFieldFactory factory = new TestFieldFactory("testGateway");
 	

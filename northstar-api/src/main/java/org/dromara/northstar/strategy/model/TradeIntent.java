@@ -10,7 +10,7 @@ import org.dromara.northstar.common.TickDataAware;
 import org.dromara.northstar.common.TransactionAware;
 import org.dromara.northstar.common.constant.SignalOperation;
 import org.dromara.northstar.common.utils.OrderUtils;
-import org.dromara.northstar.strategy.IModuleStrategyContext;
+import org.dromara.northstar.strategy.IModuleContext;
 import org.dromara.northstar.strategy.constant.PriceType;
 import org.springframework.util.Assert;
 
@@ -33,7 +33,7 @@ import xyz.redtorch.pb.CoreField.TradeField;
 public class TradeIntent implements TransactionAware, TickDataAware {
 	
 	@Setter
-	private IModuleStrategyContext context;
+	private IModuleContext context;
 	/**
 	 * 合约
 	 */

@@ -1,11 +1,10 @@
 package org.dromara.northstar.strategy;
 
-import java.util.List;
-
 import org.dromara.northstar.common.event.NorthstarEvent;
+import org.dromara.northstar.common.model.ModuleDescription;
 import org.dromara.northstar.common.model.ModuleRuntimeDescription;
 
-import xyz.redtorch.pb.CoreField.BarField;
+import xyz.redtorch.pb.CoreField.ContractField;
 
 /**
  * 模组抽象接口
@@ -19,40 +18,36 @@ public interface IModule {
 	 * @return
 	 */
 	String getName();
-	
 	/**
 	 * 设置运行状态
 	 * @param enabled
 	 */
 	void setEnabled(boolean enabled);
-	
 	/**
 	 * 获取运行状态
 	 * @return
 	 */
 	boolean isEnabled();
-	
-	/**
-	 * 模组初始化
-	 */
-	void initModule();
-	
-	/**
-	 * 模组数据初始化
-	 * @param historyBars
-	 */
-	void initData(List<BarField> historyBars);
-	
 	/**
 	 * 监听事件
 	 * @param event
 	 */
 	void onEvent(NorthstarEvent event);
-	
+	/**
+	 * 获取合约关联的交易账户
+	 * @param contract
+	 * @return
+	 */
+	IAccount getAccount(ContractField contract);
 	/**
 	 * 获取模组状态描述
 	 * @return
 	 */
 	ModuleRuntimeDescription getRuntimeDescription();
+	/**
+	 * 获取模组描述
+	 * @return
+	 */
+	ModuleDescription getModuleDescription();
 	
 }
