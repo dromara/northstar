@@ -173,6 +173,7 @@ public class TestFieldFactory {
 				.setDirection(dir)
 				.setOffsetFlag(offset)
 				.setTradingDay(tradingDay)
+				.setTradeTimestamp(LocalDateTime.of(LocalDate.parse(tradingDay, DateTimeConstant.D_FORMAT_INT_FORMATTER), LocalTime.now()).toInstant(ZoneOffset.ofHours(8)).toEpochMilli())
 				.setGatewayId(gatewayId)
 				.build();
 	}

@@ -96,6 +96,14 @@ public class FieldUtils {
 		return dir1 != dir2 && dir1 != DirectionEnum.D_Unknown && dir2 != DirectionEnum.D_Unknown;
 	}
 	
+	public static DirectionEnum getOpposite(DirectionEnum dir) {
+		return switch (dir) {
+		case D_Buy -> DirectionEnum.D_Sell;
+		case D_Sell -> DirectionEnum.D_Buy;
+		default -> throw new IllegalArgumentException("Unexpected value: " + dir);
+		};
+	}
+	
 	public static boolean isOpen(OffsetFlagEnum offsetFlag) {
 		return offsetFlag == OffsetFlagEnum.OF_Open;
 	}
