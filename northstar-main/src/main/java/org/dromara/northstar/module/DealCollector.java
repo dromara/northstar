@@ -1,4 +1,4 @@
-package org.dromara.northstar.module.legacy;
+package org.dromara.northstar.module;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -43,7 +43,7 @@ public class DealCollector {
 
 		// 平仓处理
 		List<ModuleDealRecord> resultList = new ArrayList<>();
-		if(closingPolicy == ClosingPolicy.PRIOR_TODAY) {
+		if(closingPolicy == ClosingPolicy.FIRST_IN_LAST_OUT) {
 			while(true) {
 				TradeField openTrade = getCloseMap(trade.getDirection()).get(trade.getContract().getUnifiedSymbol()).pollLast();
 				if(openTrade.getVolume() < trade.getVolume()) {

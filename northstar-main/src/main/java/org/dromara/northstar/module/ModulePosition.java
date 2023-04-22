@@ -1,16 +1,18 @@
-package org.dromara.northstar.module.legacy;
+package org.dromara.northstar.module;
 
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.BiConsumer;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.codec.binary.StringUtils;
+import org.dromara.northstar.common.TickDataAware;
+import org.dromara.northstar.common.TransactionAware;
 import org.dromara.northstar.common.constant.ClosingPolicy;
 import org.dromara.northstar.common.utils.ContractUtils;
 import org.dromara.northstar.common.utils.FieldUtils;
-import org.springframework.util.Assert;
 
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
@@ -23,57 +25,67 @@ import xyz.redtorch.pb.CoreField.TickField;
 import xyz.redtorch.pb.CoreField.TradeField;
 
 /**
- * 交易持仓，代表某个合约一个方向的持仓汇总信息
- * 负责计算加减仓与浮动盈亏
+ * 模组持仓
+ * 一个实例代表一个合约在一个方向模组中持仓信息
  * @author KevinHuangwl
  *
  */
-@Deprecated
-public class TradePosition {
+public class ModulePosition implements TickDataAware, TransactionAware{
 
 	/* 旧成交在队首，新成交在队尾 */
 	private final LinkedList<TradeField> trades = new LinkedList<>();
 	
 	private final Map<String, OrderField> pendingOrderMap = new HashMap<>();
 
-	private final DirectionEnum dir;
+	private final DirectionEnum direction;
 	
 	private final ContractField contract;
 	
 	private TickField lastTick;
 	
+	private String tradingDay;
+	
 	private ClosingPolicy closingPolicy;
+	/* 开平仓匹配回调 */
+	private BiConsumer<TradeField, TradeField> onDealCallback;
 
-	public TradePosition(List<TradeField> trades, ClosingPolicy closingPolicy) {
-		Assert.notEmpty(trades, "不能传入空集合");
+	public ModulePosition(ContractField contract, DirectionEnum direction, ClosingPolicy closingPolicy, BiConsumer<TradeField, TradeField> onDealCallback) {
+		this.contract = contract;
+		this.direction = direction;
 		this.closingPolicy = closingPolicy;
-		this.trades.addAll(trades.stream().filter(trade -> FieldUtils.isOpen(trade.getOffsetFlag())).toList());
-		this.trades.sort((a, b) -> a.getTradeTimestamp() < b.getTradeTimestamp() ? -1 : 1);
-		this.dir = trades.get(0).getDirection();
-		this.contract = trades.get(0).getContract();
-		for(TradeField trade : trades) {			
-			Assert.isTrue(dir == trade.getDirection() && ContractUtils.isSame(contract, trade.getContract()), "传入的数据不一致");
-		}
+		this.onDealCallback = onDealCallback;
 	}
 	
-	/**
-	 * 更新行情
-	 * @param tick
-	 */
-	public void updateTick(TickField tick) {
-		if(contract.getUnifiedSymbol().equals(tick.getUnifiedSymbol())) {
-			lastTick = tick;
+	public ModulePosition(ContractField contract, DirectionEnum direction, ClosingPolicy closingPolicy, BiConsumer<TradeField, TradeField> onDealCallback,
+			List<TradeField> nonclosedTrades) {
+		this(contract, direction, closingPolicy, onDealCallback);
+		trades.addAll(nonclosedTrades.stream()
+				.filter(trade -> trade.getDirection() == direction)
+				.filter(trade -> StringUtils.equals(trade.getContract().getContractId(), contract.getContractId()))
+				.toList());
+	}
+	
+	@Override
+	public void onTick(TickField tick) {
+		if(!StringUtils.equals(contract.getUnifiedSymbol(), tick.getUnifiedSymbol())) {
+			return;
 		}
+		if(!StringUtils.equals(tradingDay, tick.getTradingDay())) {
+			pendingOrderMap.clear();
+			tradingDay = tick.getTradingDay();
+		}
+		lastTick = tick;
 	}
 	
 	/**
 	 * 订单处理
 	 * @param order
 	 */
+	@Override
 	public void onOrder(OrderField order) {
 		if(!ContractUtils.isSame(contract, order.getContract())				//合约不一致 
 				|| !FieldUtils.isClose(order.getOffsetFlag())				//不是平仓订单 
-				|| !FieldUtils.isOpposite(dir, order.getDirection())		//不是反向订单
+				|| !FieldUtils.isOpposite(direction, order.getDirection())		//不是反向订单
 				|| order.getOrderStatus() == OrderStatusEnum.OS_Rejected	//废单
 			) {
 			return;
@@ -88,58 +100,56 @@ public class TradePosition {
 	/**
 	 * 加减仓处理
 	 * @param trade
-	 * @return			返回平仓盈亏
 	 */
-	public double onTrade(TradeField trade) {
+	@Override
+	public void onTrade(TradeField trade) {
 		if(!ContractUtils.isSame(contract, trade.getContract())) {
-			return 0D;
+			return;
 		}
-		if(FieldUtils.isClose(trade.getOffsetFlag()) && FieldUtils.isOpposite(dir, trade.getDirection()))	//平仓时，方向要反向
+		if(FieldUtils.isClose(trade.getOffsetFlag()) && FieldUtils.isOpposite(direction, trade.getDirection()))	//平仓时，方向要反向
 		{
-			return closingOpenTrade(trade);
+			closingOpenTrade(trade);
 		}
-		if(FieldUtils.isOpen(trade.getOffsetFlag()) && trade.getDirection() == dir) //开仓时，方向要同向 
+		if(FieldUtils.isOpen(trade.getOffsetFlag()) && trade.getDirection() == direction) //开仓时，方向要同向 
 		{
 			trades.add(trade);
 		}
-		return 0D;
 	}
 	
-	private double closingOpenTrade(TradeField trade) {
-		double sumProfit = 0;
-		int restVol = trade.getVolume();
-		int factor = FieldUtils.directionFactor(dir);
+	private void closingOpenTrade(TradeField closeTrade) {
+		int restVol = closeTrade.getVolume();
 		while(restVol > 0 && !trades.isEmpty()) {
 			if(closingPolicy == ClosingPolicy.FIRST_IN_LAST_OUT) {
-				TradeField t = trades.pollLast();
-				if(t.getVolume() > restVol) {
-					trades.offerLast(t.toBuilder().setVolume(t.getVolume() - restVol).build());
-					sumProfit += factor * (trade.getPrice() - t.getPrice()) * restVol * contract.getMultiplier();
+				TradeField openTrade = trades.pollLast();
+				if(openTrade.getVolume() > restVol) {
+					TradeField partOfOpenTrade = TradeField.newBuilder(openTrade).setVolume(closeTrade.getVolume()).build();
+					trades.offerLast(openTrade.toBuilder().setVolume(openTrade.getVolume() - restVol).build());
 					restVol = 0;
+					onDealCallback.accept(partOfOpenTrade, closeTrade);
 				} else {
-					restVol -= t.getVolume();
-					sumProfit += factor * (trade.getPrice() - t.getPrice()) * t.getVolume() * contract.getMultiplier();
+					restVol -= openTrade.getVolume();
+					onDealCallback.accept(openTrade, TradeField.newBuilder(closeTrade).setVolume(openTrade.getVolume()).build());
 				}
 			} else {
-				TradeField t = trades.pollFirst();
-				if(t.getVolume() > restVol) {
-					trades.offerFirst(t.toBuilder().setVolume(t.getVolume() - restVol).build());
-					sumProfit += factor * (trade.getPrice() - t.getPrice()) * restVol * contract.getMultiplier();
+				TradeField openTrade = trades.pollFirst();
+				if(openTrade.getVolume() > restVol) {
+					TradeField partOfOpenTrade = TradeField.newBuilder(openTrade).setVolume(closeTrade.getVolume()).build();
+					trades.offerFirst(openTrade.toBuilder().setVolume(openTrade.getVolume() - restVol).build());
 					restVol = 0;
+					onDealCallback.accept(partOfOpenTrade, closeTrade);
 				} else {
-					restVol -= t.getVolume();
-					sumProfit += factor * (trade.getPrice() - t.getPrice()) * t.getVolume() * contract.getMultiplier();
+					restVol -= openTrade.getVolume();
+					onDealCallback.accept(openTrade, TradeField.newBuilder(closeTrade).setVolume(openTrade.getVolume()).build());
 				}
 			}
 		}
-		return sumProfit;
 	}
 	
 	/**
 	 * 获取未平仓原始成交
 	 * @return
 	 */
-	public List<TradeField> getUncloseTrades(){
+	public List<TradeField> getNonclosedTrades(){
 		return trades;
 	}
 	
@@ -232,7 +242,7 @@ public class TradePosition {
 	 */
 	public double profit() {
 		if(Objects.isNull(lastTick)) return 0;
-		int factor = FieldUtils.directionFactor(dir);
+		int factor = FieldUtils.directionFactor(direction);
 		double priceDiff = factor * (lastTick.getLastPrice() - avgOpenPrice());
 		return priceDiff * totalVolume() * contract.getMultiplier();
 	}
@@ -242,7 +252,7 @@ public class TradePosition {
 	 * @return
 	 */
 	public double totalMargin() {
-		double ratio = FieldUtils.isBuy(dir) ? contract.getLongMarginRatio() : contract.getShortMarginRatio();
+		double ratio = FieldUtils.isBuy(direction) ? contract.getLongMarginRatio() : contract.getShortMarginRatio();
 		return totalVolume() * avgOpenPrice() * contract.getMultiplier() * ratio;
 	}
 	
@@ -251,7 +261,7 @@ public class TradePosition {
 	 * @return
 	 */
 	public PositionField convertToPositionField() {
-		int factor = FieldUtils.directionFactor(dir);
+		int factor = FieldUtils.directionFactor(direction);
 		double lastPrice = lastTick == null ? 0 : lastTick.getLastPrice();
 		double priceDiff = lastTick == null ? 0 : factor * (lastTick.getLastPrice() - avgOpenPrice());
 		return PositionField.newBuilder()
@@ -271,16 +281,8 @@ public class TradePosition {
 				.setPriceDiff(priceDiff)
 				.setPositionProfit(profit())
 				.setOpenPositionProfit(profit())
-				.setPositionDirection(FieldUtils.isBuy(dir) ? PositionDirectionEnum.PD_Long : PositionDirectionEnum.PD_Short)
+				.setPositionDirection(FieldUtils.isBuy(direction) ? PositionDirectionEnum.PD_Long : PositionDirectionEnum.PD_Short)
 				.build();
-	}
-	
-	/**
-	 * 清理全部委托
-	 * 场景：委托单跨交易日时，需要在开盘时处理
-	 */
-	public void releaseOrders() {
-		pendingOrderMap.clear();
 	}
 
 }

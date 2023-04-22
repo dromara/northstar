@@ -5,6 +5,7 @@ import org.dromara.northstar.strategy.constant.PriceType;
 import lombok.extern.slf4j.Slf4j;
 import xyz.redtorch.pb.CoreField.TickField;
 
+@Deprecated
 @Slf4j
 public class PriceResolver {
 	

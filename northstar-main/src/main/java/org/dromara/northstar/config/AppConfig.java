@@ -17,7 +17,6 @@ import javax.net.ssl.X509TrustManager;
 
 import org.dromara.northstar.ExternalJarClassLoader;
 import org.dromara.northstar.account.GatewayManager;
-import org.dromara.northstar.common.IMailMessageContentHandler;
 import org.dromara.northstar.common.event.FastEventEngine;
 import org.dromara.northstar.data.IGatewayRepository;
 import org.dromara.northstar.data.IModuleRepository;
@@ -25,6 +24,7 @@ import org.dromara.northstar.gateway.IContractManager;
 import org.dromara.northstar.gateway.IMarketCenter;
 import org.dromara.northstar.gateway.common.domain.mktdata.MarketCenter;
 import org.dromara.northstar.module.legacy.ModuleFactory;
+import org.dromara.northstar.support.notification.IMailMessageContentHandler;
 import org.dromara.northstar.support.notification.MailDeliveryManager;
 import org.dromara.northstar.support.notification.MailSenderFactory;
 import org.dromara.northstar.support.utils.ContractDefinitionReader;

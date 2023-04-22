@@ -30,5 +30,5 @@ public class ModulePositionDescription {
 	 * 也可以理解为物理持仓
 	 */
 	@Builder.Default
-	private List<byte[]> uncloseTrades = Collections.emptyList();
+	private List<byte[]> nonclosedTrades = Collections.emptyList();
 }

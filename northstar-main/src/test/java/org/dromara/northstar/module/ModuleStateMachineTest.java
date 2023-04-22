@@ -1,11 +1,21 @@
 package org.dromara.northstar.module;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.dromara.northstar.common.constant.Constants;
 import org.dromara.northstar.common.constant.ModuleState;
-import org.dromara.northstar.module.legacy.ModuleStateMachine;
+import org.dromara.northstar.common.model.ModuleAccountRuntimeDescription;
+import org.dromara.northstar.common.model.ModuleRuntimeDescription;
+import org.dromara.northstar.strategy.IModuleContext;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
 
 import test.common.TestFieldFactory;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
@@ -33,22 +43,40 @@ class ModuleStateMachineTest {
 	
 	CancelOrderReqField cancelReq = factory.makeCancelReq(orderReq);
 	
+	IModuleContext ctx = mock(IModuleContext.class);
+	
+	ModuleRuntimeDescription mrd;
+	
+	Map<String, ModuleAccountRuntimeDescription> moduleRtMap = new HashMap<>();
+	
+	ModuleAccountRuntimeDescription mard1 = ModuleAccountRuntimeDescription.builder().accountId("acc1").build();
+	ModuleAccountRuntimeDescription mard2 = ModuleAccountRuntimeDescription.builder().accountId("acc2").build();
+	
+	@BeforeEach
+	void prepare() {
+		moduleRtMap.put("acc1", mard1);
+		moduleRtMap.put("acc2", mard2);
+		mrd = ModuleRuntimeDescription.builder().accountRuntimeDescriptionMap(moduleRtMap).build();
+		when(ctx.getRuntimeDescription(false)).thenReturn(mrd);
+		when(ctx.getLogger()).thenReturn(mock(Logger.class));
+	}
+	
 	@Test
 	void shouldGetEmpty() {
-		ModuleStateMachine msm = new ModuleStateMachine("test");
+		ModuleStateMachine msm = new ModuleStateMachine(ctx);
 		assertThat(msm.getState()).isEqualTo(ModuleState.EMPTY);
 	}
 
 	@Test
 	void shouldGetPlacingOrder() {
-		ModuleStateMachine msm = new ModuleStateMachine("test");
+		ModuleStateMachine msm = new ModuleStateMachine(ctx);
 		msm.onSubmitReq(orderReq);
 		assertThat(msm.getState()).isEqualTo(ModuleState.PLACING_ORDER);
 	}
 	
 	@Test
 	void shouldGetPendingOrder() {
-		ModuleStateMachine msm = new ModuleStateMachine("test");
+		ModuleStateMachine msm = new ModuleStateMachine(ctx);
 		msm.onSubmitReq(orderReq);
 		msm.onOrder(order);
 		msm.onOrder(order2);
@@ -57,32 +85,36 @@ class ModuleStateMachineTest {
 	
 	@Test
 	void shouldGetLong() {
-		ModuleStateMachine msm = new ModuleStateMachine("test");
+		ModuleStateMachine msm = new ModuleStateMachine(ctx);
 		msm.onSubmitReq(orderReq);
 		msm.onOrder(order);
+		mard1.getPositionDescription().setNonclosedTrades(List.of(trade.toByteArray()));
 		msm.onTrade(trade);
 		assertThat(msm.getState()).isEqualTo(ModuleState.HOLDING_LONG);
 	}
 	
 	@Test
 	void shouldGetShort() {
-		ModuleStateMachine msm = new ModuleStateMachine("test");
+		ModuleStateMachine msm = new ModuleStateMachine(ctx);
 		msm.onSubmitReq(orderReq2);
 		msm.onOrder(order4);
+		mard1.getPositionDescription().setNonclosedTrades(List.of(trade2.toByteArray()));
 		msm.onTrade(trade2);
 		assertThat(msm.getState()).isEqualTo(ModuleState.HOLDING_SHORT);
 	}
 	
 	@Test
 	void shouldGetHedgeEmpty() {
-		ModuleStateMachine msm = new ModuleStateMachine("test");
+		ModuleStateMachine msm = new ModuleStateMachine(ctx);
 		msm.onSubmitReq(orderReq);
 		msm.onOrder(order);
+		mard1.getPositionDescription().setNonclosedTrades(List.of(trade.toByteArray()));
 		msm.onTrade(trade);
 		assertThat(msm.getState()).isEqualTo(ModuleState.HOLDING_LONG);
 		
 		msm.onSubmitReq(orderReq2);
 		msm.onOrder(order4);
+		mard1.getPositionDescription().setNonclosedTrades(List.of(trade.toByteArray(), trade2.toByteArray()));
 		msm.onTrade(trade2);
 		assertThat(msm.getState()).isEqualTo(ModuleState.EMPTY_HEDGE);
 	}
@@ -97,9 +129,10 @@ class ModuleStateMachineTest {
 				.setVolume(3)
 				.build();
 		
-		ModuleStateMachine msm = new ModuleStateMachine("test");
+		ModuleStateMachine msm = new ModuleStateMachine(ctx);
 		msm.onSubmitReq(orderReq);
 		msm.onOrder(order);
+		mard1.getPositionDescription().setNonclosedTrades(List.of(trade.toByteArray(), trade3.toByteArray()));
 		msm.onTrade(trade);
 		msm.onTrade(trade3);
 		assertThat(msm.getState()).isEqualTo(ModuleState.HOLDING_HEDGE);
@@ -107,7 +140,7 @@ class ModuleStateMachineTest {
 	
 	@Test
 	void shouldGetCancelling() {
-		ModuleStateMachine msm = new ModuleStateMachine("test");
+		ModuleStateMachine msm = new ModuleStateMachine(ctx);
 		msm.onSubmitReq(orderReq);
 		msm.onOrder(order);
 		msm.onCancelReq(cancelReq);

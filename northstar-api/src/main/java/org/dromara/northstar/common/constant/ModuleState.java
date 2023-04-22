@@ -38,11 +38,7 @@ public enum ModuleState {
 	/**
 	 * 撤单
 	 */
-	RETRIEVING_FOR_CANCEL,
-	/**
-	 * 撤单重试
-	 */
-	RETRIEVING_FOR_RETRY;
+	RETRIEVING_FOR_CANCEL;
 	
 	
 	public boolean isHolding() {
@@ -50,7 +46,7 @@ public enum ModuleState {
 	}
 	
 	public boolean isWaiting() {
-		return this == PENDING_ORDER || this == RETRIEVING_FOR_CANCEL || this == RETRIEVING_FOR_RETRY;
+		return this == PENDING_ORDER || this == RETRIEVING_FOR_CANCEL;
 	}
 	
 	public boolean isOrdering() {

@@ -27,9 +27,10 @@ import org.dromara.northstar.gateway.IContractManager;
 import org.dromara.northstar.gateway.MarketGateway;
 import org.dromara.northstar.gateway.TradeGateway;
 import org.dromara.northstar.module.ClosingStrategy;
-import org.dromara.northstar.module.IModuleAccountStore;
+import org.dromara.northstar.module.DealCollector;
 import org.dromara.northstar.strategy.DynamicParamsAware;
 import org.dromara.northstar.strategy.IModule;
+import org.dromara.northstar.strategy.IModuleAccount;
 import org.dromara.northstar.strategy.IModuleContext;
 import org.dromara.northstar.strategy.TradeStrategy;
 import org.dromara.northstar.support.notification.MailDeliveryManager;
@@ -87,15 +88,15 @@ public class ModuleFactory {
 		return new TradeModule(ctx, mktGatewaySet, onRuntimeChangeCallback);
 	}
 	
-	private IModuleAccountStore makeAccountStore(ModuleDescription moduleDescription, ModuleRuntimeDescription moduleRuntimeDescription) {
-		return new ModuleAccountStore(moduleDescription.getModuleName(), moduleDescription.getClosingPolicy(), moduleRuntimeDescription, contractMgr);
+	private IModuleAccount makeAccountStore(ModuleDescription moduleDescription, ModuleRuntimeDescription moduleRuntimeDescription) {
+		return new ModuleAccount(moduleDescription.getModuleName(), moduleDescription.getClosingPolicy(), moduleRuntimeDescription, contractMgr);
 	}
 	
 	private IModuleContext makeModuleContext(ModuleDescription moduleDescription, ModuleRuntimeDescription moduleRuntimeDescription) throws Exception {
 		ComponentAndParamsPair strategyComponent = moduleDescription.getStrategySetting();
 		TradeStrategy strategy = resolveComponent(strategyComponent);
 		strategy.setComputedState(moduleRuntimeDescription.getDataState());
-		IModuleAccountStore accStore = makeAccountStore(moduleDescription, moduleRuntimeDescription);
+		IModuleAccount accStore = makeAccountStore(moduleDescription, moduleRuntimeDescription);
 		ClosingStrategy closingStrategy = getClosingStrategy(moduleDescription.getClosingPolicy());
 		int numOfMinPerBar = moduleDescription.getNumOfMinPerBar();
 		
@@ -107,7 +108,7 @@ public class ModuleFactory {
 		}
 		int moduleBufDataSize = Math.max(100, moduleDescription.getModuleCacheDataSize());	// 至少缓存100个数据
 		if(moduleDescription.getUsage() == ModuleUsage.PLAYBACK) {
-			IModuleAccountStore pbAccStore = new ModuleAccountStore(moduleDescription.getModuleName(), moduleDescription.getClosingPolicy(), moduleRuntimeDescription, contractMgr);
+			IModuleAccount pbAccStore = new ModuleAccount(moduleDescription.getModuleName(), moduleDescription.getClosingPolicy(), moduleRuntimeDescription, contractMgr);
 			return new ModulePlaybackContext(moduleDescription.getModuleName(), strategy, pbAccStore, numOfMinPerBar, moduleBufDataSize, dc,
 					onRuntimeChangeCallback, onDealChangeCallback);
 		}

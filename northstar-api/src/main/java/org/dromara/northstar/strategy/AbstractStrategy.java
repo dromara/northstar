@@ -46,7 +46,7 @@ public abstract class AbstractStrategy implements TradeStrategy{
 			log.info("模组成交 [{} {} {} 操作：{}{} {}手 {}]", unifiedSymbol,
 					trade.getTradeDate(), trade.getTradeTime(), FieldUtils.chn(trade.getDirection()), FieldUtils.chn(trade.getOffsetFlag()), 
 					trade.getVolume(), trade.getPrice());
-			log.info("当前模组净持仓：[{}]", ctx.getModuleAccount(trade.getContract()).getUncloseNetPosition(unifiedSymbol));
+			log.info("当前模组净持仓：[{}]", ctx.getModuleAccount(trade.getContract()).getNonclosedNetPosition(unifiedSymbol));
 			log.info("当前模组状态：{}", ctx.getState());
 		}
 	}

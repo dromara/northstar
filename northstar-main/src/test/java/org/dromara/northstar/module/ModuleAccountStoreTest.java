@@ -18,7 +18,7 @@ import org.dromara.northstar.common.model.ModulePositionDescription;
 import org.dromara.northstar.common.model.ModuleRuntimeDescription;
 import org.dromara.northstar.gateway.Contract;
 import org.dromara.northstar.gateway.IContractManager;
-import org.dromara.northstar.module.legacy.ModuleAccountStore;
+import org.dromara.northstar.module.legacy.ModuleAccount;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -39,7 +39,7 @@ class ModuleAccountStoreTest {
 	
 	TickField tick = factory.makeTickField("rb2205", 1000);
 	
-	ModuleAccountStore mas;
+	ModuleAccount mas;
 	
 	@BeforeEach
 	void prepare() {
@@ -67,7 +67,7 @@ class ModuleAccountStoreTest {
 		Contract c = mock(Contract.class);
 		when(c.contractField()).thenReturn(ContractField.newBuilder().setCommissionRate(0.0001).build());
 		when(contractMgr.getContract(any(Identifier.class))).thenReturn(c);
-		mas = new ModuleAccountStore("testModule", ClosingPolicy.FIFO, md, contractMgr);
+		mas = new ModuleAccount("testModule", ClosingPolicy.FIFO, md, contractMgr);
 	}
 
 	@Test

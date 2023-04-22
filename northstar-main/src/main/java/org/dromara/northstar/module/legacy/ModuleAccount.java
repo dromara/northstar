@@ -18,7 +18,8 @@ import org.dromara.northstar.common.model.ModuleRuntimeDescription;
 import org.dromara.northstar.common.utils.FieldUtils;
 import org.dromara.northstar.gateway.Contract;
 import org.dromara.northstar.gateway.IContractManager;
-import org.dromara.northstar.module.IModuleAccountStore;
+import org.dromara.northstar.module.ModuleStateMachine;
+import org.dromara.northstar.strategy.IModuleAccount;
 import org.springframework.util.Assert;
 
 import com.google.common.collect.HashBasedTable;
@@ -42,7 +43,7 @@ import xyz.redtorch.pb.CoreField.TradeField;
  *
  */
 @Slf4j
-public class ModuleAccountStore implements IModuleAccountStore {
+public class ModuleAccount implements IModuleAccount {
 
 	/* gatewayId -> unifiedSymbol -> position */
 	private Table<String, String, TradePosition> buyPositionTbl = HashBasedTable.create();
@@ -66,7 +67,7 @@ public class ModuleAccountStore implements IModuleAccountStore {
 	
 	private IContractManager contractMgr;
 	
-	public ModuleAccountStore(String moduleName, ClosingPolicy closingPolicy, ModuleRuntimeDescription moduleRuntimeDescription,
+	public ModuleAccount(String moduleName, ClosingPolicy closingPolicy, ModuleRuntimeDescription moduleRuntimeDescription,
 			IContractManager contractMgr) {
 		this.sm = new ModuleStateMachine(moduleName);
 		this.closingPolicy = closingPolicy;
@@ -78,7 +79,7 @@ public class ModuleAccountStore implements IModuleAccountStore {
 			accCommissionMap.put(mad.getAccountId(), new AtomicDouble(mad.getAccCommission()));
 			
 			List<TradeField> allTrades = mad.getPositionDescription()
-					.getUncloseTrades()
+					.getNonclosedTrades()
 					.stream()
 					.map(this::parseFrom)
 					.filter(Objects::nonNull)
@@ -173,12 +174,12 @@ public class ModuleAccountStore implements IModuleAccountStore {
 	}
 
 	@Override
-	public synchronized List<TradeField> getUncloseTrades(String gatewayId) {
+	public synchronized List<TradeField> getNonclosedTrades(String gatewayId) {
 		Collection<TradePosition> buyOpenPositions = buyPositionTbl.row(gatewayId).values();
 		Collection<TradePosition> sellOpenPositions = sellPositionTbl.row(gatewayId).values();
 		List<TradeField> resultList = new ArrayList<>();
-		buyOpenPositions.stream().forEach(tp -> resultList.addAll(tp.getUncloseTrades()));
-		sellOpenPositions.stream().forEach(tp -> resultList.addAll(tp.getUncloseTrades()));
+		buyOpenPositions.stream().forEach(tp -> resultList.addAll(tp.getNonclosedTrades()));
+		sellOpenPositions.stream().forEach(tp -> resultList.addAll(tp.getNonclosedTrades()));
 		return resultList;
 	}
 	
@@ -244,7 +245,25 @@ public class ModuleAccountStore implements IModuleAccountStore {
 
 	@Override
 	public String toString() {
-		return "ModuleAccountStore [buyPositionTbl=" + buyPositionTbl + ", sellPositionTbl=" + sellPositionTbl + "]";
+		return "ModuleAccount [buyPositionTbl=" + buyPositionTbl + ", sellPositionTbl=" + sellPositionTbl + "]";
+	}
+
+	@Override
+	public List<TradeField> getNonclosedTrades(String unifiedSymbol, DirectionEnum direction) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public int getNonclosedPosition(String unifiedSymbol, DirectionEnum direction) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public int getNonclosedNetPosition(String unifiedSymbol) {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 	
 }

@@ -1,4 +1,4 @@
-package org.dromara.northstar.module.legacy;
+package org.dromara.northstar.module;
 
 import java.util.Objects;
 import java.util.function.Predicate;
@@ -6,8 +6,9 @@ import java.util.function.Predicate;
 import org.dromara.northstar.common.constant.SignalOperation;
 import org.dromara.northstar.common.utils.FieldUtils;
 import org.dromara.northstar.strategy.IDisposablePriceListener;
-import org.dromara.northstar.strategy.IModuleStrategyContext;
+import org.dromara.northstar.strategy.IModuleContext;
 import org.dromara.northstar.strategy.constant.PriceType;
+import org.dromara.northstar.strategy.model.TradeIntent;
 
 import lombok.Builder;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
@@ -33,7 +34,7 @@ public final class DisposablePriceListener implements IDisposablePriceListener {
 	
 	private Runnable callback;
 	
-	public static DisposablePriceListener create(IModuleStrategyContext ctx, ContractField contract, DirectionEnum openDir, double basePrice, int numOfPriceTickToTrigger, int volume) {
+	public static DisposablePriceListener create(IModuleContext ctx, ContractField contract, DirectionEnum openDir, double basePrice, int numOfPriceTickToTrigger, int volume) {
 		if(numOfPriceTickToTrigger == 0) {
 			throw new IllegalArgumentException("无效的止盈止损位");
 		}
@@ -52,8 +53,14 @@ public final class DisposablePriceListener implements IDisposablePriceListener {
 				.desc(desc)
 				.testFunc(testFunc) 	
 				.action(() -> {
-					if(ctx.availablePosition(openDir, contract.getUnifiedSymbol()) > 0) {
-						ctx.submitOrderReq(contract, closeOpr, PriceType.ANY_PRICE, volume, 0);
+					if(ctx.getModuleAccount(contract).getNonclosedPosition(contract.getUnifiedSymbol(), openDir) > 0) {
+						ctx.submitOrderReq(TradeIntent.builder()
+								.contract(contract)
+								.operation(closeOpr)
+								.priceType(PriceType.OPP_PRICE)
+								.volume(volume)
+								.timeout(3000)	// 由于止损要求尽快成交，因此若3秒无成交则撤单重试
+								.build());
 					}
 				})
 				.build();

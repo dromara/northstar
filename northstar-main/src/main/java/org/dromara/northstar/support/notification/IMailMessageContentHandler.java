@@ -1,4 +1,4 @@
-package org.dromara.northstar.common;
+package org.dromara.northstar.support.notification;
 
 import org.dromara.northstar.common.utils.FieldUtils;
 

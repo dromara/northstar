@@ -48,10 +48,12 @@ import org.dromara.northstar.gateway.Contract;
 import org.dromara.northstar.gateway.TradeGateway;
 import org.dromara.northstar.indicator.IndicatorFactory;
 import org.dromara.northstar.module.ClosingStrategy;
-import org.dromara.northstar.module.IModuleAccountStore;
+import org.dromara.northstar.module.DealCollector;
+import org.dromara.northstar.module.DisposablePriceListener;
 import org.dromara.northstar.strategy.IComboIndicator;
 import org.dromara.northstar.strategy.IDisposablePriceListener;
 import org.dromara.northstar.strategy.IModule;
+import org.dromara.northstar.strategy.IModuleAccount;
 import org.dromara.northstar.strategy.IModuleContext;
 import org.dromara.northstar.strategy.MergedBarListener;
 import org.dromara.northstar.strategy.TimeSeriesUnaryOperator;
@@ -104,7 +106,7 @@ public class ModuleContext implements IModuleContext, MergedBarListener{
 	
 	protected TradeStrategy tradeStrategy;
 	
-	protected IModuleAccountStore accStore;
+	protected IModuleAccount accStore;
 	
 	protected ClosingStrategy closingStrategy;
 	
@@ -160,7 +162,7 @@ public class ModuleContext implements IModuleContext, MergedBarListener{
 	
 	private MailDeliveryManager mailMgr;
 	
-	public ModuleContext(String name, TradeStrategy tradeStrategy, IModuleAccountStore accStore, ClosingStrategy closingStrategy, int numOfMinsPerBar, 
+	public ModuleContext(String name, TradeStrategy tradeStrategy, IModuleAccount accStore, ClosingStrategy closingStrategy, int numOfMinsPerBar, 
 			int bufSize, DealCollector dealCollector, Consumer<ModuleRuntimeDescription> onRuntimeChangeCallback, Consumer<ModuleDealRecord> onDealCallback,
 			MailDeliveryManager mailMgr) {
 		this.moduleName = name;

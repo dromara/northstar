@@ -4,7 +4,6 @@ import java.util.EnumSet;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-import org.dromara.northstar.common.IMailMessageContentHandler;
 import org.dromara.northstar.common.event.NorthstarEvent;
 import org.dromara.northstar.common.event.NorthstarEventType;
 import org.dromara.northstar.common.model.MailConfigDescription;

@@ -47,7 +47,7 @@ public interface IModuleAccount extends TickDataAware, TransactionAware {
 	 * @param gatewayId		账户ID
 	 * @return
 	 */
-	List<TradeField> getUncloseTrades(String gatewayId);
+	List<TradeField> getNonclosedTrades(String gatewayId);
 	/**
 	 * 获取指定的未平仓成交 
 	 * @param gatewayId		账户ID
@@ -55,20 +55,20 @@ public interface IModuleAccount extends TickDataAware, TransactionAware {
 	 * @param direction		成交方向
 	 * @return
 	 */
-	List<TradeField> getUncloseTrades(String unifiedSymbol, DirectionEnum direction);
+	List<TradeField> getNonclosedTrades(String unifiedSymbol, DirectionEnum direction);
 	/**
 	 * 获取指定合约指定方向的持仓数
 	 * @param unifiedSymbol 	
 	 * @param direction
 	 * @return
 	 */
-	int getUnclosePosition(String unifiedSymbol, DirectionEnum direction);
+	int getNonclosedPosition(String unifiedSymbol, DirectionEnum direction);
 	/**
 	 * 获取指定合约的净持仓数量
 	 * @param unifiedSymbol
 	 * @return				正数代表净多头持仓，负数代表净空头持仓
 	 */
-	int getUncloseNetPosition(String unifiedSymbol);
+	int getNonclosedNetPosition(String unifiedSymbol);
 	/**
 	 * 获取累计开平仓手数
 	 * @param gatewayId		账户ID

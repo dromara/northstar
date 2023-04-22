@@ -37,7 +37,7 @@ public class ContractUtils {
 	}
 	
 	public static boolean isSame(ContractField c1, ContractField c2) {
-		return StringUtils.equals(c1.getUnifiedSymbol(), c2.getUnifiedSymbol());
+		return StringUtils.equals(c1.getContractId(), c2.getContractId());
 	}
 	
 	public static ChannelType channelTypeOf(ContractField c) {

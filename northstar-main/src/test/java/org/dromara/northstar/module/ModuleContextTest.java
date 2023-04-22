@@ -22,11 +22,11 @@ import org.dromara.northstar.gateway.IContractManager;
 import org.dromara.northstar.gateway.TradeGateway;
 import org.dromara.northstar.gateway.common.domain.time.GenericTradeTime;
 import org.dromara.northstar.indicator.function.AverageFunctions;
-import org.dromara.northstar.module.legacy.DealCollector;
 import org.dromara.northstar.module.legacy.FirstInFirstOutClosingStrategy;
-import org.dromara.northstar.module.legacy.ModuleAccountStore;
+import org.dromara.northstar.module.legacy.ModuleAccount;
 import org.dromara.northstar.module.legacy.ModuleContext;
 import org.dromara.northstar.strategy.IModule;
+import org.dromara.northstar.strategy.IModuleAccount;
 import org.dromara.northstar.strategy.TimeSeriesUnaryOperator;
 import org.dromara.northstar.strategy.TradeStrategy;
 import org.dromara.northstar.strategy.constant.PriceType;
@@ -84,7 +84,7 @@ class ModuleContextTest {
 				.accountRuntimeDescriptionMap(accRtsMap)
 				.dataState(new JSONObject())
 				.build();
-		IModuleAccountStore accStore = new ModuleAccountStore(NAME, closingStrategy.getClosingPolicy(), mrd, contractMgr);
+		IModuleAccount accStore = new ModuleAccount(NAME, closingStrategy.getClosingPolicy(), mrd, contractMgr);
 		
 		ctx = new ModuleContext(NAME, strategy, accStore, closingStrategy, 3, 100, mock(DealCollector.class), 
 				mock(Consumer.class), mock(Consumer.class), mock(MailDeliveryManager.class));
