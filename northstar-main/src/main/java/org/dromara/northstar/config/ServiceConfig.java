@@ -6,7 +6,7 @@ import org.dromara.northstar.data.IModuleRepository;
 import org.dromara.northstar.gateway.IContractManager;
 import org.dromara.northstar.gateway.common.utils.MarketDataRepoFactory;
 import org.dromara.northstar.module.ModuleManager;
-import org.dromara.northstar.module.legacy.ModuleFactory;
+import org.dromara.northstar.support.notification.MailDeliveryManager;
 import org.dromara.northstar.web.service.AccountService;
 import org.dromara.northstar.web.service.GatewayService;
 import org.dromara.northstar.web.service.LogService;
@@ -37,9 +37,9 @@ public class ServiceConfig {
 
     @Bean
     ModuleService moduleService(ApplicationContext ctx, ExternalJarClassLoader extJarLoader, IModuleRepository moduleRepo,
-                                              MarketDataRepoFactory mdRepoFactory, ModuleFactory moduleFactory, ModuleManager moduleMgr,
-                                              IContractManager contractMgr) {
-        return new ModuleService(ctx, extJarLoader, moduleRepo, mdRepoFactory, moduleFactory, moduleMgr, contractMgr);
+                                              MarketDataRepoFactory mdRepoFactory, AccountManager accountMgr, ModuleManager moduleMgr,
+                                              IContractManager contractMgr, MailDeliveryManager mailMgr) {
+        return new ModuleService(ctx, extJarLoader, moduleRepo, mailMgr, mdRepoFactory, moduleMgr, contractMgr, accountMgr);
     }
 
     @Bean

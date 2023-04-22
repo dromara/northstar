@@ -49,5 +49,9 @@ public interface IModule {
 	 * @return
 	 */
 	ModuleDescription getModuleDescription();
-	
+	/**
+	 * 获取模组上下文
+	 * @return
+	 */
+	IModuleContext getModuleContext();
 }

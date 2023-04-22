@@ -53,7 +53,7 @@ public final class DisposablePriceListener implements IDisposablePriceListener {
 				.desc(desc)
 				.testFunc(testFunc) 	
 				.action(() -> {
-					if(ctx.getModuleAccount(contract).getNonclosedPosition(contract.getUnifiedSymbol(), openDir) > 0) {
+					if(ctx.getModuleAccount().getNonclosedPosition(contract.getUnifiedSymbol(), openDir) > 0) {
 						ctx.submitOrderReq(TradeIntent.builder()
 								.contract(contract)
 								.operation(closeOpr)

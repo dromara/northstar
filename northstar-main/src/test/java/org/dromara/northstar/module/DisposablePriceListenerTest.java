@@ -1,10 +1,10 @@
-package org.dromara.northstar.module.legacy;
+package org.dromara.northstar.module;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
 import org.dromara.northstar.module.DisposablePriceListener;
-import org.dromara.northstar.strategy.IModuleStrategyContext;
+import org.dromara.northstar.strategy.IModuleContext;
 import org.junit.jupiter.api.Test;
 
 import test.common.TestFieldFactory;
@@ -18,7 +18,7 @@ class DisposablePriceListenerTest {
 	
 	ContractField contract = factory.makeContract("rb2210"); 
 
-	IModuleStrategyContext ctx = mock(IModuleStrategyContext.class);
+	IModuleContext ctx = mock(IModuleContext.class);
 	
 	@Test
 	void testBuyEarn() {

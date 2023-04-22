@@ -7,6 +7,7 @@ import java.util.concurrent.Executors;
 import org.dromara.northstar.common.event.NorthstarEvent;
 import org.dromara.northstar.common.event.NorthstarEventType;
 import org.dromara.northstar.common.model.MailConfigDescription;
+import org.dromara.northstar.strategy.IMessageSender;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 
@@ -17,7 +18,7 @@ import xyz.redtorch.pb.CoreField.OrderField;
 import xyz.redtorch.pb.CoreField.TradeField;
 
 @Slf4j
-public class MailDeliveryManager {
+public class MailDeliveryManager implements IMessageSenderManager{
 	
 	private MailConfigDescription emailConfig;
 	
@@ -84,6 +85,44 @@ public class MailDeliveryManager {
 				log.error("邮件发送异常", e);
 			}
 		});
+	}
+
+	@Override
+	public IMessageSender getSender() {
+		return new IMessageSender() {
+			
+			@Override
+			public void send(String receiver, String content) {
+				exec.execute(() -> {
+					MimeMessageHelper msg = new MimeMessageHelper(sender.createMimeMessage(), UTF8);
+					try {
+						msg.setSubject("Northstar消息");
+						msg.setFrom(emailConfig.getEmailUsername());
+						msg.setTo(receiver);
+						msg.setText(content);
+						sender.send(msg.getMimeMessage());
+					} catch (Exception e) {
+						log.error("邮件发送异常", e);
+					}
+				});
+			}
+			
+			@Override
+			public void send(String receiver, String title, String content) {
+				exec.execute(() -> {
+					MimeMessageHelper msg = new MimeMessageHelper(sender.createMimeMessage(), UTF8);
+					try {
+						msg.setSubject("Northstar信息：" + title);
+						msg.setFrom(emailConfig.getEmailUsername());
+						msg.setTo(receiver);
+						msg.setText(content);
+						sender.send(msg.getMimeMessage());
+					} catch (Exception e) {
+						log.error("邮件发送异常", e);
+					}
+				});				
+			}
+		};
 	}
 	
 }

@@ -77,11 +77,11 @@ public interface IModuleStrategyContext {
 	 */
 	IAccount getAccount(ContractField contract);
 	/**
-	 * 
+	 * 获取模组账户
 	 * @param contract
 	 * @return
 	 */
-	IModuleAccount getModuleAccount(ContractField contract);
+	IModuleAccount getModuleAccount();
 	/**
 	 * 获取模组状态
 	 * @return
@@ -135,4 +135,9 @@ public interface IModuleStrategyContext {
 	 * @param content
 	 */
 	IMessageSender getMessageSender();
+	/**
+	 * 设置自定义的风控策略
+	 * @param filter
+	 */
+	void setOrderRequestFilter(OrderRequestFilter filter);
 }

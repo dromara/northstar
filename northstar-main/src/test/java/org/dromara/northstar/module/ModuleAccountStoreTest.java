@@ -52,7 +52,7 @@ class ModuleAccountStoreTest {
 				.accCommission(10)
 				.accDealVolume(3)
 				.positionDescription(ModulePositionDescription.builder()
-						.uncloseTrades(List.of(trade.toByteArray(), trade2.toByteArray()))
+						.nonclosedTrades(List.of(trade.toByteArray(), trade2.toByteArray()))
 						.build())
 				.build();
 		mamap.put(mad.getAccountId(), mad);
@@ -67,7 +67,7 @@ class ModuleAccountStoreTest {
 		Contract c = mock(Contract.class);
 		when(c.contractField()).thenReturn(ContractField.newBuilder().setCommissionRate(0.0001).build());
 		when(contractMgr.getContract(any(Identifier.class))).thenReturn(c);
-		mas = new ModuleAccount("testModule", ClosingPolicy.FIFO, md, contractMgr);
+		mas = new ModuleAccount("testModule", ClosingPolicy.FIRST_IN_FIRST_OUT, md, contractMgr);
 	}
 
 	@Test
@@ -82,7 +82,7 @@ class ModuleAccountStoreTest {
 		assertThat(mas.getInitBalance("testAccount")).isEqualTo(100000);
 		assertThat(mas.getAccCloseProfit("testAccount")).isEqualTo(4200);
 		assertThat(mas.getAccDealVolume("testAccount")).isEqualTo(5);
-		assertThat(mas.getUncloseTrades("testAccount")).hasSize(1);
+		assertThat(mas.getNonclosedTrades("testAccount")).hasSize(1);
 		assertThat(mas.getPreBalance("testAccount")).isCloseTo(104185.2, offset(1e-4));
 	}
 
@@ -98,7 +98,7 @@ class ModuleAccountStoreTest {
 
 	@Test
 	void testGetUncloseTrades() {
-		assertThat(mas.getUncloseTrades("testAccount")).hasSize(2);
+		assertThat(mas.getNonclosedTrades("testAccount")).hasSize(2);
 	}
 
 	@Test

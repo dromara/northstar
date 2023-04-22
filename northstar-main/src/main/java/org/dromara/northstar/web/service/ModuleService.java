@@ -11,12 +11,14 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import org.dromara.northstar.ExternalJarClassLoader;
+import org.dromara.northstar.account.AccountManager;
 import org.dromara.northstar.common.constant.Constants;
 import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.common.constant.ModuleState;
 import org.dromara.northstar.common.constant.ModuleUsage;
 import org.dromara.northstar.common.event.NorthstarEvent;
 import org.dromara.northstar.common.event.NorthstarEventType;
+import org.dromara.northstar.common.model.ComponentAndParamsPair;
 import org.dromara.northstar.common.model.ComponentField;
 import org.dromara.northstar.common.model.ComponentMetaInfo;
 import org.dromara.northstar.common.model.ContractSimpleInfo;
@@ -33,12 +35,17 @@ import org.dromara.northstar.common.utils.MarketDataLoadingUtils;
 import org.dromara.northstar.data.IModuleRepository;
 import org.dromara.northstar.gateway.IContractManager;
 import org.dromara.northstar.gateway.common.utils.MarketDataRepoFactory;
+import org.dromara.northstar.module.ModuleContext;
 import org.dromara.northstar.module.ModuleManager;
-import org.dromara.northstar.module.legacy.ModuleFactory;
-import org.dromara.northstar.module.legacy.ModulePlaybackContext;
+import org.dromara.northstar.module.PlaybackModuleContext;
+import org.dromara.northstar.module.TradeModule;
 import org.dromara.northstar.strategy.DynamicParamsAware;
 import org.dromara.northstar.strategy.IModule;
+import org.dromara.northstar.strategy.IModuleContext;
 import org.dromara.northstar.strategy.StrategicComponent;
+import org.dromara.northstar.strategy.TradeStrategy;
+import org.dromara.northstar.support.log.ModuleLoggerFactory;
+import org.dromara.northstar.support.notification.MailDeliveryManager;
 import org.dromara.northstar.web.PostLoadAware;
 import org.springframework.context.ApplicationContext;
 
@@ -68,21 +75,26 @@ public class ModuleService implements PostLoadAware {
 	
 	private MarketDataRepoFactory mdRepoFactory;
 	
+	private MailDeliveryManager mailMgr;
+	
 	private MarketDataLoadingUtils utils = new MarketDataLoadingUtils();
 	
-	private ModuleFactory moduleFactory;
+	private ModuleLoggerFactory moduleLoggerFactory = new ModuleLoggerFactory();
 	
 	private ExternalJarClassLoader extJarLoader;
 	
-	public ModuleService(ApplicationContext ctx, ExternalJarClassLoader extJarLoader, IModuleRepository moduleRepo,
-			MarketDataRepoFactory mdRepoFactory, ModuleFactory moduleFactory, ModuleManager moduleMgr, IContractManager contractMgr) {
+	private AccountManager accountMgr;
+	
+	public ModuleService(ApplicationContext ctx, ExternalJarClassLoader extJarLoader, IModuleRepository moduleRepo, MailDeliveryManager mailMgr,
+			MarketDataRepoFactory mdRepoFactory, ModuleManager moduleMgr, IContractManager contractMgr, AccountManager accountMgr) {
 		this.ctx = ctx;
 		this.moduleMgr = moduleMgr;
 		this.contractMgr = contractMgr;
 		this.moduleRepo = moduleRepo;
 		this.mdRepoFactory = mdRepoFactory;
-		this.moduleFactory = moduleFactory;
 		this.extJarLoader = extJarLoader;
+		this.mailMgr = mailMgr;
+		this.accountMgr = accountMgr;
 	}
 
 	/**
@@ -132,8 +144,8 @@ public class ModuleService implements PostLoadAware {
 	public ModuleDescription createModule(ModuleDescription md) throws Exception {
 		Map<String, ModuleAccountRuntimeDescription> accRtsMap = new HashMap<>();
 		if(md.getUsage() == ModuleUsage.PLAYBACK) {
-			accRtsMap.put(ModulePlaybackContext.PLAYBACK_GATEWAY, ModuleAccountRuntimeDescription.builder()
-					.accountId(ModulePlaybackContext.PLAYBACK_GATEWAY)
+			accRtsMap.put(PlaybackModuleContext.PLAYBACK_GATEWAY, ModuleAccountRuntimeDescription.builder()
+					.accountId(PlaybackModuleContext.PLAYBACK_GATEWAY)
 					.initBalance(md.getModuleAccountSettingsDescription().get(0).getModuleAccountInitBalance())
 					.preBalance(md.getModuleAccountSettingsDescription().get(0).getModuleAccountInitBalance())
 					.positionDescription(new ModulePositionDescription())
@@ -203,8 +215,11 @@ public class ModuleService implements PostLoadAware {
 		int weeksOfDataForPreparation = md.getWeeksOfDataForPreparation();
 		LocalDate date = LocalDate.now().minusWeeks(weeksOfDataForPreparation);
 		
-		IModule module = moduleFactory.newInstance(md, mrd);
-		module.initModule();
+		ComponentAndParamsPair strategyComponent = md.getStrategySetting();
+		TradeStrategy strategy = resolveComponent(strategyComponent);
+		strategy.setComputedState(mrd.getDataState());
+		IModuleContext moduleCtx = new ModuleContext(strategy, md, mrd, contractMgr, moduleRepo, moduleLoggerFactory, mailMgr);
+		
 		log.info("模组[{}] 初始化数据起始计算日为：{}", md.getModuleName(), date);
 		LocalDateTime nowDateTime = LocalDateTime.now();
 		LocalDate now = nowDateTime.getDayOfWeek().getValue() > 5 || nowDateTime.getDayOfWeek().getValue() == 5 && nowDateTime.toLocalTime().isAfter(LocalTime.of(20, 30))
@@ -222,12 +237,40 @@ public class ModuleService implements PostLoadAware {
 					mergeList.addAll(bars);
 				}
 				mergeList.sort((a,b) -> a.getActionTimestamp() < b.getActionTimestamp() ? -1 : 1);
-				module.initData(mergeList);
+				moduleCtx.initData(mergeList);
 			}
 			date = date.plusWeeks(1);
 		}
-		module.setEnabled(mrd.isEnabled());
+		moduleCtx.setEnabled(mrd.isEnabled());
+		
+		IModule module = new TradeModule(md, moduleCtx, accountMgr, contractMgr);
 		moduleMgr.add(module);
+	}
+	
+	@SuppressWarnings("unchecked")
+	private <T extends DynamicParamsAware> T resolveComponent(ComponentAndParamsPair metaInfo) throws Exception {
+		Map<String, ComponentField> fieldMap = new HashMap<>();
+		for(ComponentField cf : metaInfo.getInitParams()) {
+			fieldMap.put(cf.getName(), cf);
+		}
+		String clzName = metaInfo.getComponentMeta().getClassName();
+		String paramClzName = clzName + "$InitParams";
+		Class<?> type = null;
+		Class<?> paramType = null;
+		if(extJarLoader != null) {
+			type = extJarLoader.loadClass(clzName);
+			paramType = extJarLoader.loadClass(paramClzName);
+		}
+		if(type == null) {
+			type = Class.forName(clzName);
+			paramType = Class.forName(paramClzName);
+		}
+		
+		DynamicParamsAware obj = (DynamicParamsAware) type.getDeclaredConstructor().newInstance();
+		DynamicParams paramObj = (DynamicParams) paramType.getDeclaredConstructor().newInstance();
+		paramObj.resolveFromSource(fieldMap);
+		obj.initWithParams(paramObj);
+		return (T) obj;
 	}
 	
 	// 把日期转换成年周，例如2022年第二周为202202

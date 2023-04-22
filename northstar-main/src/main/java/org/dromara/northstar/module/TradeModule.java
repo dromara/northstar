@@ -102,4 +102,9 @@ public class TradeModule implements IModule {
 		return md;
 	}
 
+	@Override
+	public IModuleContext getModuleContext() {
+		return ctx;
+	}
+
 }
