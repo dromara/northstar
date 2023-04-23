@@ -93,7 +93,7 @@
                 {{ accountInfo.initBalance | formatter }}
               </el-descriptions-item>
               <el-descriptions-item label="当前余额">
-                {{ (accountInfo.preBalance + holdingProfit) | formatter }}
+                {{ (accountInfo.initBalance + accountInfo.accCloseProfit - accountInfo.accCommission + holdingProfit) | formatter }}
               </el-descriptions-item>
               <el-descriptions-item label="持仓盈亏">
                 {{ holdingProfit | formatter }}
