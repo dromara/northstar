@@ -1,7 +1,5 @@
 package org.dromara.northstar.demo.strategy;
 
-import java.util.Optional;
-import java.util.TimerTask;
 import java.util.concurrent.ThreadLocalRandom;
 
 import org.dromara.northstar.common.constant.FieldType;
@@ -9,7 +7,6 @@ import org.dromara.northstar.common.constant.ModuleState;
 import org.dromara.northstar.common.constant.SignalOperation;
 import org.dromara.northstar.common.model.DynamicParams;
 import org.dromara.northstar.common.model.Setting;
-import org.dromara.northstar.module.legacy.TickBasedTimer;
 import org.dromara.northstar.strategy.IModuleContext;
 import org.dromara.northstar.strategy.IModuleStrategyContext;
 import org.dromara.northstar.strategy.StrategicComponent;
@@ -88,39 +85,11 @@ public class BeginnerSampleStrategy implements TradeStrategy{
 	}
 	/***************** 以上如果看不懂，基本可以照搬 *************************/
 	
-	// 从88行至112行 这是自行管理撤单的逻辑。还可以通过下单时使用TradeIntent，直接定义下单意图，让框架来处理撤单追单逻辑，例如138行与148行示例。
-	private TickBasedTimer timer = new TickBasedTimer();
-	private TimerTask runningTask = null;
-	private TimerTask withdrawOrderIfTimeout = new TimerTask() {
-		@Override
-		public void run() {
-			originOrderId.ifPresent(ctx::cancelOrder);
-		}
-	};
-	
-	@Override
-	public void onOrder(OrderField order) {
-		if(runningTask == null && ctx.getState().isWaiting()) {
-			runningTask = withdrawOrderIfTimeout;
-			timer.schedule(runningTask, 5000);		// 5秒超时撤单
-		}
-	}
-
-	@Override
-	public void onTrade(TradeField trade) {
-		originOrderId.ifPresent(id -> {			
-			if(trade.getOriginOrderId().equals(id)) {
-				runningTask = null;
-			}
-		});
-	}
-	
+	// 从行至112行 这是自行管理撤单的逻辑。还可以通过下单时使用TradeIntent，直接定义下单意图，让框架来处理撤单追单逻辑，例如138行与148行示例。
 	private long nextActionTime;
-	private Optional<String> originOrderId = Optional.empty();
 	
 	@Override
 	public void onTick(TickField tick) {
-		timer.onTick(tick);
 		
 		log.debug("TICK触发: C:{} D:{} T:{} P:{} V:{} OI:{} OID:{}", 
 				tick.getUnifiedSymbol(), tick.getActionDay(), tick.getActionTime(), 
@@ -136,13 +105,19 @@ public class BeginnerSampleStrategy implements TradeStrategy{
 			log.info("开始交易");
 			if(ctx.getState().isEmpty()) {
 				SignalOperation op = flag ? SignalOperation.BUY_OPEN : SignalOperation.SELL_OPEN;	// 随机开多或者开空
-				originOrderId = ctx.submitOrderReq(ctx.getContract(tick.getUnifiedSymbol()), op, PriceType.WAITING_PRICE, params.volume, tick.getLastPrice());
+				ctx.submitOrderReq(TradeIntent.builder()
+						.contract(ctx.getContract(tick.getUnifiedSymbol()))
+						.operation(op)
+						.volume(params.volume)
+						.priceType(PriceType.WAITING_PRICE)
+						.timeout(3000)
+						.build());
 			}
 			if(ctx.getState() == ModuleState.HOLDING_LONG) {	
 				ctx.submitOrderReq(TradeIntent.builder()
 						.contract(ctx.getContract(tick.getUnifiedSymbol()))
 						.operation(SignalOperation.SELL_CLOSE)
-						.priceType(PriceType.WAITING_PRICE)
+						.priceType(PriceType.OPP_PRICE)
 						.volume(params.volume)
 						.timeout(3000)
 						.build());
@@ -162,6 +137,16 @@ public class BeginnerSampleStrategy implements TradeStrategy{
 	@Override
 	public void onMergedBar(BarField bar) {
 		log.debug("策略每分钟触发");
+	}
+
+	@Override
+	public void onOrder(OrderField order) {
+		// 委托单状态变动回调
+	}
+
+	@Override
+	public void onTrade(TradeField trade) {
+		// 成交回调
 	}
 
 }

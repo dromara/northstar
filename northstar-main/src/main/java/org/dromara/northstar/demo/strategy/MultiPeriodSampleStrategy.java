@@ -11,6 +11,7 @@ import org.dromara.northstar.strategy.StrategicComponent;
 import org.dromara.northstar.strategy.TradeStrategy;
 import org.dromara.northstar.strategy.constant.PriceType;
 import org.dromara.northstar.strategy.model.Indicator;
+import org.dromara.northstar.strategy.model.TradeIntent;
 
 import xyz.redtorch.pb.CoreField.BarField;
 
@@ -50,25 +51,45 @@ public class MultiPeriodSampleStrategy extends AbstractStrategy	// 为了简化�
 			case EMPTY -> {
 				// 快线在慢线之上开多，快线在慢线之下开空
 				if(shouldBuy()) {					
-					ctx.submitOrderReq(ctx.getContract(bar.getUnifiedSymbol()), SignalOperation.BUY_OPEN, PriceType.ANY_PRICE, 1, 0);
-					log.info("[{} {}] {}", ctx.getModuleName(), NAME, SignalOperation.BUY_OPEN.text());
+					ctx.submitOrderReq(TradeIntent.builder()
+							.contract(ctx.getContract(bar.getUnifiedSymbol()))
+							.operation(SignalOperation.BUY_OPEN)
+							.priceType(PriceType.ANY_PRICE)
+							.volume(1)
+							.timeout(3000)
+							.build());
 				}
 				if(shouldSell()) {
-					ctx.submitOrderReq(ctx.getContract(bar.getUnifiedSymbol()), SignalOperation.SELL_OPEN, PriceType.ANY_PRICE, 1, 0);
-					log.info("[{} {}] {}", ctx.getModuleName(), NAME, SignalOperation.BUY_OPEN.text());
+					ctx.submitOrderReq(TradeIntent.builder()
+							.contract(ctx.getContract(bar.getUnifiedSymbol()))
+							.operation(SignalOperation.SELL_OPEN)
+							.priceType(PriceType.ANY_PRICE)
+							.volume(1)
+							.timeout(3000)
+							.build());
 				}
 					
 			}
 			case HOLDING_LONG -> {
 				if(fastLine1.value(0) < slowLine1.value(0)) {
-					ctx.submitOrderReq(ctx.getContract(bar.getUnifiedSymbol()), SignalOperation.SELL_CLOSE, PriceType.ANY_PRICE, 1, 0);
-					log.info("[{} {}] 平多", ctx.getModuleName(), NAME);
+					ctx.submitOrderReq(TradeIntent.builder()
+							.contract(ctx.getContract(bar.getUnifiedSymbol()))
+							.operation(SignalOperation.SELL_CLOSE)
+							.priceType(PriceType.ANY_PRICE)
+							.volume(1)
+							.timeout(3000)
+							.build());
 				}
 			}
 			case HOLDING_SHORT -> {
 				if(fastLine1.value(0) > slowLine1.value(0)) {
-					ctx.submitOrderReq(ctx.getContract(bar.getUnifiedSymbol()), SignalOperation.BUY_CLOSE, PriceType.ANY_PRICE, 1, 0);
-					log.info("[{} {}] 平空", ctx.getModuleName(), NAME);
+					ctx.submitOrderReq(TradeIntent.builder()
+							.contract(ctx.getContract(bar.getUnifiedSymbol()))
+							.operation(SignalOperation.BUY_CLOSE)
+							.priceType(PriceType.ANY_PRICE)
+							.volume(1)
+							.timeout(3000)
+							.build());
 				}
 			}
 			default -> { /* 其他情况不处理 */}

@@ -53,56 +53,56 @@ public class IndicatorDemoStrategy extends AbstractStrategy	// 为了简化代�
 		// BOLL指标
 		BOLL boll = BOLL.of(20, 2);
 		ContractField c = ctx.getContract(params.indicatorSymbol);
-		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("BOLL_UPPER").bindedContract(c).build(), boll.upper());
-		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("BOLL_LOWER").bindedContract(c).build(), boll.lower());
-		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("BOLL_MID").bindedContract(c).build(), boll.mid());
+		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerMergedBar()).indicatorName("BOLL_UPPER").bindedContract(c).build(), boll.upper());
+		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerMergedBar()).indicatorName("BOLL_LOWER").bindedContract(c).build(), boll.lower());
+		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerMergedBar()).indicatorName("BOLL_MID").bindedContract(c).build(), boll.mid());
 		
 		KDJ kdj = KDJ.of(9, 3, 3);
-		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("K").bindedContract(c).build(), kdj.k());
-		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("D").bindedContract(c).build(), kdj.d());
-		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("J").bindedContract(c).build(), kdj.j());
+		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerMergedBar()).indicatorName("K").bindedContract(c).build(), kdj.k());
+		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerMergedBar()).indicatorName("D").bindedContract(c).build(), kdj.d());
+		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerMergedBar()).indicatorName("J").bindedContract(c).build(), kdj.j());
 		
 		LWR lwr = LWR.of(9, 3, 3);
-		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("LWR1").bindedContract(c).build(), lwr.fast());
-		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("LWR2").bindedContract(c).build(), lwr.slow());
+		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerMergedBar()).indicatorName("LWR1").bindedContract(c).build(), lwr.fast());
+		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerMergedBar()).indicatorName("LWR2").bindedContract(c).build(), lwr.slow());
 		
 		MACD macd = MACD.of(12, 26, 9);
-		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("MACD_DIF").bindedContract(c).build(), macd.diff());
-		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("MACD_DEA").bindedContract(c).build(), macd.dea());
-		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("MACD").bindedContract(c).build(), macd.post());
-		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("WAVE1").bindedContract(c).build(), WAVE.wr(20, 3));
-		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("WAVE2").bindedContract(c).build(), WAVE.macd(10, 20, 3));
+		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerMergedBar()).indicatorName("MACD_DIF").bindedContract(c).build(), macd.diff());
+		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerMergedBar()).indicatorName("MACD_DEA").bindedContract(c).build(), macd.dea());
+		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerMergedBar()).indicatorName("MACD").bindedContract(c).build(), macd.post());
+		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerMergedBar()).indicatorName("WAVE1").bindedContract(c).build(), WAVE.wr(20, 3));
+		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerMergedBar()).indicatorName("WAVE2").bindedContract(c).build(), WAVE.macd(10, 20, 3));
 		
-		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("RSI1").bindedContract(c).build(), RSI.line(7));
-		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("RSI2").bindedContract(c).build(), RSI.line(14));
+		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerMergedBar()).indicatorName("RSI1").bindedContract(c).build(), RSI.line(7));
+		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerMergedBar()).indicatorName("RSI2").bindedContract(c).build(), RSI.line(14));
 		
-		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("ATR").bindedContract(c).build(), ATR.of(20));
+		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerMergedBar()).indicatorName("ATR").bindedContract(c).build(), ATR.of(20));
 		
-		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("SMA").bindedContract(c).build(), SMA(20, 2));
-		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("SETTLE").bindedContract(c).build(), SETTLE());
-		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("WMA").bindedContract(c).build(), WMA(72));
-		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("HHV").bindedContract(c).build(), HHV(72));
-		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("LLV").bindedContract(c).build(), LLV(72));
+		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerMergedBar()).indicatorName("SMA").bindedContract(c).build(), SMA(20, 2));
+		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerMergedBar()).indicatorName("SETTLE").bindedContract(c).build(), SETTLE());
+		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerMergedBar()).indicatorName("WMA").bindedContract(c).build(), WMA(72));
+		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerMergedBar()).indicatorName("HHV").bindedContract(c).build(), HHV(72));
+		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerMergedBar()).indicatorName("LLV").bindedContract(c).build(), LLV(72));
 		
-		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("PB1").bindedContract(c).build(), PBX.line(4));
-		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("PB2").bindedContract(c).build(), PBX.line(6));
-		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("PB3").bindedContract(c).build(), PBX.line(9));
-		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("PB4").bindedContract(c).build(), PBX.line(13));
-		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("PB5").bindedContract(c).build(), PBX.line(18));
-		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("PB6").bindedContract(c).build(), PBX.line(24));
+		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerMergedBar()).indicatorName("PB1").bindedContract(c).build(), PBX.line(4));
+		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerMergedBar()).indicatorName("PB2").bindedContract(c).build(), PBX.line(6));
+		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerMergedBar()).indicatorName("PB3").bindedContract(c).build(), PBX.line(9));
+		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerMergedBar()).indicatorName("PB4").bindedContract(c).build(), PBX.line(13));
+		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerMergedBar()).indicatorName("PB5").bindedContract(c).build(), PBX.line(18));
+		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerMergedBar()).indicatorName("PB6").bindedContract(c).build(), PBX.line(24));
 		
-		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("PBW1").bindedContract(c).build(), PBX.wline(4));
-		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("PBW2").bindedContract(c).build(), PBX.wline(6));
-		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("PBW3").bindedContract(c).build(), PBX.wline(9));
-		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("PBW4").bindedContract(c).build(), PBX.wline(13));
-		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("PBW5").bindedContract(c).build(), PBX.wline(18));
-		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("PBW6").bindedContract(c).build(), PBX.wline(24));
+		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerMergedBar()).indicatorName("PBW1").bindedContract(c).build(), PBX.wline(4));
+		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerMergedBar()).indicatorName("PBW2").bindedContract(c).build(), PBX.wline(6));
+		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerMergedBar()).indicatorName("PBW3").bindedContract(c).build(), PBX.wline(9));
+		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerMergedBar()).indicatorName("PBW4").bindedContract(c).build(), PBX.wline(13));
+		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerMergedBar()).indicatorName("PBW5").bindedContract(c).build(), PBX.wline(18));
+		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerMergedBar()).indicatorName("PBW6").bindedContract(c).build(), PBX.wline(24));
 
 		// 复合指标
-		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("WMA_HHV").bindedContract(c).build(), WMA(72).andThen(HHV(72)));
-		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("WMA_LLV").bindedContract(c).build(), WMA(72).andThen(LLV(72)));
+		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerMergedBar()).indicatorName("WMA_HHV").bindedContract(c).build(), WMA(72).andThen(HHV(72)));
+		ctx.newIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerMergedBar()).indicatorName("WMA_LLV").bindedContract(c).build(), WMA(72).andThen(LLV(72)));
 		
-		ctx.viewValueAsIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerModuleBar()).indicatorName("VAL").bindedContract(c).build(), valueHolder);
+		ctx.viewValueAsIndicator(Configuration.builder().numOfUnits(ctx.numOfMinPerMergedBar()).indicatorName("VAL").bindedContract(c).build(), valueHolder);
 	}
 	
 	@Override

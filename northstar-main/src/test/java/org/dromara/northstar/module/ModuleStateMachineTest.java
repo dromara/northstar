@@ -92,10 +92,9 @@ class ModuleStateMachineTest {
 		assertThat(msm.getState()).isEqualTo(ModuleState.HOLDING_SHORT);
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Test
 	void shouldGetHedgeEmpty() {
-		when(macc.getNonclosedTrades()).thenReturn(List.of(trade), List.of(trade, trade2));
+		when(macc.getNonclosedTrades()).thenReturn(List.of(trade));
 		ModuleStateMachine msm = new ModuleStateMachine(ctx);
 		msm.setModuleAccount(macc);
 		msm.onSubmitReq(orderReq);
@@ -103,6 +102,7 @@ class ModuleStateMachineTest {
 		msm.onTrade(trade);
 		assertThat(msm.getState()).isEqualTo(ModuleState.HOLDING_LONG);
 		
+		when(macc.getNonclosedTrades()).thenReturn(List.of(trade, trade2));
 		msm.onSubmitReq(orderReq2);
 		msm.onOrder(order4);
 		msm.onTrade(trade2);

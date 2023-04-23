@@ -4,8 +4,6 @@ import static org.dromara.northstar.indicator.function.AverageFunctions.EMA;
 import static org.dromara.northstar.indicator.function.AverageFunctions.MA;
 import static org.dromara.northstar.indicator.function.ComputeFunctions.minus;
 
-import java.util.Optional;
-
 import org.dromara.northstar.common.constant.FieldType;
 import org.dromara.northstar.common.constant.SignalOperation;
 import org.dromara.northstar.common.model.DynamicParams;
@@ -17,6 +15,7 @@ import org.dromara.northstar.strategy.TradeStrategy;
 import org.dromara.northstar.strategy.constant.PriceType;
 import org.dromara.northstar.strategy.model.Indicator;
 import org.dromara.northstar.strategy.model.Indicator.PeriodUnit;
+import org.dromara.northstar.strategy.model.TradeIntent;
 
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.TickField;
@@ -45,8 +44,6 @@ public class IndicatorSampleStrategy extends AbstractStrategy	// 为了简化代
 
 	private Indicator macdDea;
 
-	private Optional<String> originOrderId;
-
 	@Override
 	public void onMergedBar(BarField bar) {
 		log.debug("{} K线数据： 开 [{}], 高 [{}], 低 [{}], 收 [{}]",
@@ -60,39 +57,57 @@ public class IndicatorSampleStrategy extends AbstractStrategy	// 为了简化代
 			case EMPTY -> {
 				// 快线在慢线之上开多，快线在慢线之下开空
 				if(shouldBuy()) {
-					originOrderId = ctx.submitOrderReq(ctx.getContract(bar.getUnifiedSymbol()), SignalOperation.BUY_OPEN, PriceType.ANY_PRICE, 1, 0);
-					log.info("[{} {}] {}", ctx.getModuleName(), NAME, SignalOperation.BUY_OPEN.text());
+					ctx.submitOrderReq(TradeIntent.builder()
+							.contract(ctx.getContract(bar.getUnifiedSymbol()))
+							.operation(SignalOperation.BUY_OPEN)
+							.priceType(PriceType.OPP_PRICE)
+							.volume(1)
+							.timeout(5000)
+							.build());
+					log.info("多开");
 				}
 				if(shouldSell()) {
-					originOrderId = ctx.submitOrderReq(ctx.getContract(bar.getUnifiedSymbol()), SignalOperation.SELL_OPEN, PriceType.ANY_PRICE, 1, 0);
-					log.info("[{} {}] {}", ctx.getModuleName(), NAME, SignalOperation.BUY_OPEN.text());
+					ctx.submitOrderReq(TradeIntent.builder()
+							.contract(ctx.getContract(bar.getUnifiedSymbol()))
+							.operation(SignalOperation.SELL_OPEN)
+							.priceType(PriceType.OPP_PRICE)
+							.volume(1)
+							.timeout(5000)
+							.build());
+					log.info("空开");
 				}
 
 			}
 			case HOLDING_LONG -> {
 				if(fastLine.value(0) < slowLine.value(0)) {
-					originOrderId = ctx.submitOrderReq(ctx.getContract(bar.getUnifiedSymbol()), SignalOperation.SELL_CLOSE, PriceType.ANY_PRICE, 1, 0);
-					log.info("[{} {}] 平多", ctx.getModuleName(), NAME);
+					ctx.submitOrderReq(TradeIntent.builder()
+							.contract(ctx.getContract(bar.getUnifiedSymbol()))
+							.operation(SignalOperation.SELL_CLOSE)
+							.priceType(PriceType.OPP_PRICE)
+							.volume(1)
+							.timeout(5000)
+							.build());
+					log.info("平多");
 				}
 			}
 			case HOLDING_SHORT -> {
 				if(fastLine.value(0) > slowLine.value(0)) {
-					originOrderId = ctx.submitOrderReq(ctx.getContract(bar.getUnifiedSymbol()), SignalOperation.BUY_CLOSE, PriceType.ANY_PRICE, 1, 0);
-					log.info("[{} {}] 平空", ctx.getModuleName(), NAME);
+					ctx.submitOrderReq(TradeIntent.builder()
+							.contract(ctx.getContract(bar.getUnifiedSymbol()))
+							.operation(SignalOperation.BUY_CLOSE)
+							.priceType(PriceType.OPP_PRICE)
+							.volume(1)
+							.timeout(5000)
+							.build());
+					log.info("平空");
 				}
 			}
 			default -> { /* 其他情况不处理 */}
 		}
 	}
 
-	private int orderWaitTimeout = 60000 * 3;
 	@Override
 	public void onTick(TickField tick) {
-		// 超时撤单
-		if(ctx.getState().isWaiting() && ctx.isOrderWaitTimeout(originOrderId.get(), orderWaitTimeout)) {
-			ctx.cancelOrder(originOrderId.get());
-		}
-		
 		log.info("时间：{} {} 价格：{} 指标值：{}", tick.getActionDay(), tick.getActionTime(), tick.getLastPrice(), fastLine.value(0));
 	}
 
@@ -120,13 +135,13 @@ public class IndicatorSampleStrategy extends AbstractStrategy	// 为了简化代
 		this.fastLine = ctx.newIndicator(Indicator.Configuration.builder()
 				.indicatorName("快线")
 				.bindedContract(ctx.getContract(params.indicatorSymbol))
-				.numOfUnits(ctx.numOfMinPerModuleBar())
+				.numOfUnits(ctx.numOfMinPerMergedBar())
 				.period(PeriodUnit.MINUTE)
 				.build(), MA(params.fast));
 		this.slowLine = ctx.newIndicator(Indicator.Configuration.builder()
 				.indicatorName("慢线")
 				.bindedContract(ctx.getContract(params.indicatorSymbol))
-				.numOfUnits(ctx.numOfMinPerModuleBar())
+				.numOfUnits(ctx.numOfMinPerMergedBar())
 				.period(PeriodUnit.MINUTE)
 				.build(), MA(params.slow));
 
@@ -134,13 +149,13 @@ public class IndicatorSampleStrategy extends AbstractStrategy	// 为了简化代
 		this.macdDiff = ctx.newIndicator(Indicator.Configuration.builder()
 				.indicatorName("MACD_DIF")
 				.bindedContract(ctx.getContract(params.indicatorSymbol))
-				.numOfUnits(ctx.numOfMinPerModuleBar())
+				.numOfUnits(ctx.numOfMinPerMergedBar())
 				.period(PeriodUnit.MINUTE)
 				.build(), minus(EMA(12), EMA(26)));
 		this.macdDea = ctx.newIndicator(Indicator.Configuration.builder()
 				.indicatorName("MACD_DEA")
 				.bindedContract(ctx.getContract(params.indicatorSymbol))
-				.numOfUnits(ctx.numOfMinPerModuleBar())
+				.numOfUnits(ctx.numOfMinPerMergedBar())
 				.period(PeriodUnit.MINUTE)
 				.build(), minus(EMA(12), EMA(26)).andThen(EMA(9)));
 
@@ -152,19 +167,19 @@ public class IndicatorSampleStrategy extends AbstractStrategy	// 为了简化代
 		ctx.newIndicator(Indicator.Configuration.builder()
 				.indicatorName("MACD_DIF2")
 				.bindedContract(ctx.getContract(params.indicatorSymbol))
-				.numOfUnits(ctx.numOfMinPerModuleBar())
+				.numOfUnits(ctx.numOfMinPerMergedBar())
 				.period(PeriodUnit.MINUTE)
 				.build(), macd.diff());
 		ctx.newIndicator(Indicator.Configuration.builder()
 				.indicatorName("MACD_DEA2")
 				.bindedContract(ctx.getContract(params.indicatorSymbol))
-				.numOfUnits(ctx.numOfMinPerModuleBar())
+				.numOfUnits(ctx.numOfMinPerMergedBar())
 				.period(PeriodUnit.MINUTE)
 				.build(), macd.dea());
 		ctx.newIndicator(Indicator.Configuration.builder()
 				.indicatorName("MACD_POST")
 				.bindedContract(ctx.getContract(params.indicatorSymbol))
-				.numOfUnits(ctx.numOfMinPerModuleBar())
+				.numOfUnits(ctx.numOfMinPerMergedBar())
 				.period(PeriodUnit.MINUTE)
 				.build(), macd.post());
 	}
