@@ -51,7 +51,7 @@ class InternalEventHandlerConfig {
 	}
 	
 	@Bean
-	ModuleHandler moduleManager(ModuleManager moduleMgr) {
+	ModuleHandler moduleHandler(ModuleManager moduleMgr) {
 		log.debug("注册：ModuleManager");
 		return new ModuleHandler(moduleMgr);
 	}

@@ -1,6 +1,7 @@
 package org.dromara.northstar.module;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -33,9 +34,9 @@ public class TradeModule implements IModule {
 	
 	private IModuleContext ctx;
 	
-	private Set<String> unifiedSymbolSet;
+	private Set<String> unifiedSymbolSet = new HashSet<>();
 	
-	private Set<String> accountIdSet;
+	private Set<String> accountIdSet = new HashSet<>();
 	
 	private ModuleDescription md;
 	

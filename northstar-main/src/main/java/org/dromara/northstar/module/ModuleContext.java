@@ -89,57 +89,57 @@ import xyz.redtorch.pb.CoreField.TradeField;
 
 public class ModuleContext implements IModuleContext{
 	
-	private IModule module;
+	protected IModule module;
 	
-	private ModuleLoggerFactory loggerFactory;
+	protected Logger logger;
 	
-	private IMessageSenderManager senderMgr;
+	protected IMessageSenderManager senderMgr;
 	
-	private TradeStrategy tradeStrategy;
+	protected TradeStrategy tradeStrategy;
 	
-	private Set<DisposablePriceListener> listenerSet = new HashSet<>();
+	protected Set<DisposablePriceListener> listenerSet = new HashSet<>();
 	
-	private IModuleRepository moduleRepo;
+	protected IModuleRepository moduleRepo;
 	
-	private IModuleAccount moduleAccount;
+	protected IModuleAccount moduleAccount;
 	
 	/* originOrderId -> orderReq */
 	private Map<String, SubmitOrderReqField> orderReqMap = new HashMap<>();
 	
 	/* unifiedSymbol -> contract */
-	private Map<String, ContractField> contractMap = new HashMap<>();
-	private Map<ContractField, Contract> contractMap2 = new HashMap<>();
+	protected Map<String, ContractField> contractMap = new HashMap<>();
+	protected Map<ContractField, Contract> contractMap2 = new HashMap<>();
 	
 	/* unifiedSymbol -> tick */
-	private Map<String, TickField> latestTickMap = new HashMap<>();
+	protected Map<String, TickField> latestTickMap = new HashMap<>();
 	
 	/* unifiedSymbol -> barQ */
-	private Map<String, Queue<BarField>> barBufQMap = new HashMap<>();
+	protected Map<String, Queue<BarField>> barBufQMap = new HashMap<>();
 	
 	/* indicator -> values */
-	private Map<Indicator, Queue<TimeSeriesValue>> indicatorValBufQMap = new HashMap<>(); 
+	protected Map<Indicator, Queue<TimeSeriesValue>> indicatorValBufQMap = new HashMap<>(); 
 	
-	private TradeIntent tradeIntent;	// 交易意图
+	protected TradeIntent tradeIntent;	// 交易意图
 	
-	private IndicatorFactory indicatorFactory;
+	protected IndicatorFactory indicatorFactory;
 	
-	private IndicatorFactory inspectedValIndicatorFactory;
+	protected IndicatorFactory inspectedValIndicatorFactory;
 	
-	private final HashSet<IComboIndicator> comboIndicators = new HashSet<>();
+	protected final HashSet<IComboIndicator> comboIndicators = new HashSet<>();
 	
-	private final AtomicInteger bufSize = new AtomicInteger(0);
+	protected final AtomicInteger bufSize = new AtomicInteger(0);
 	
-	private final BarMergerRegistry registry = new BarMergerRegistry();
+	protected final BarMergerRegistry registry = new BarMergerRegistry();
 	
-	private boolean enabled;
+	protected boolean enabled;
 	
-	private String tradingDay = "";
+	protected String tradingDay = "";
 	
 	public ModuleContext(TradeStrategy tradeStrategy, ModuleDescription moduleDescription, ModuleRuntimeDescription moduleRtDescription,
 			IContractManager contractMgr, IModuleRepository moduleRepo, ModuleLoggerFactory loggerFactory, IMessageSenderManager senderMgr) {
 		this.tradeStrategy = tradeStrategy;
 		this.moduleRepo = moduleRepo;
-		this.loggerFactory = loggerFactory;
+		this.logger = loggerFactory.getLogger(moduleDescription.getModuleName());
 		this.senderMgr = senderMgr;
 		this.moduleAccount = new ModuleAccount(moduleDescription, moduleRtDescription, new ModuleStateMachine(this), moduleRepo, contractMgr);
 		moduleDescription.getModuleAccountSettingsDescription().stream()
@@ -229,7 +229,7 @@ public class ModuleContext implements IModuleContext{
 
 	@Override
 	public Logger getLogger() {
-		return loggerFactory.getLogger(module.getName());
+		return logger;
 	}
 
 	@Override

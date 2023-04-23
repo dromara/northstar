@@ -218,7 +218,7 @@ public class ModuleService implements PostLoadAware {
 		strategy.setComputedState(mrd.getDataState());
 		IModuleContext moduleCtx = null;
 		if(md.getUsage() == ModuleUsage.PLAYBACK) {
-			moduleCtx = new PlaybackModuleContext(strategy, md, mrd, contractMgr, moduleRepo, moduleLoggerFactory, mailMgr);
+			moduleCtx = new PlaybackModuleContext(strategy, md, mrd, contractMgr, moduleRepo, moduleLoggerFactory);
 		} else {
 			moduleCtx = new ModuleContext(strategy, md, mrd, contractMgr, moduleRepo, moduleLoggerFactory, mailMgr);
 		}
@@ -244,9 +244,8 @@ public class ModuleService implements PostLoadAware {
 			}
 			date = date.plusWeeks(1);
 		}
-		moduleCtx.setEnabled(mrd.isEnabled());
-		
 		IModule module = new TradeModule(md, moduleCtx, accountMgr, contractMgr);
+		moduleCtx.setEnabled(mrd.isEnabled());
 		moduleMgr.add(module);
 	}
 	

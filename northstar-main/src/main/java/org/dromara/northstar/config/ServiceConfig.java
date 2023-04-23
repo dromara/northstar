@@ -21,7 +21,8 @@ import org.springframework.context.annotation.DependsOn;
 	"internalDispatcher", 
 	"accountEventHandler",
 	"connectionEventHandler", 
-	"moduleFactory" })
+	"extJarListener",
+})
 @Configuration
 public class ServiceConfig {
 
