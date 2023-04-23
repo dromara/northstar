@@ -1,4 +1,4 @@
-package org.dromara.northstar.demo.strategy;
+package org.dromara.northstar.strategy.example;
 
 import java.util.concurrent.ThreadLocalRandom;
 

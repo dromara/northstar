@@ -54,6 +54,7 @@
 		<module>northstar-gateway-tiger</module>
 		<module>northstar-gateway-binance</module>
 		<module>northstar-gateway-okx</module>
+		<module>northstar-strategy-example</module>
 		<module>northstar-main</module>
 	</modules>
 
@@ -76,6 +77,11 @@
 			<dependency>
 				<groupId>org.dromara</groupId>
 				<artifactId>northstar-gateway-common</artifactId>
+				<version>${northstar-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.dromara</groupId>
+				<artifactId>northstar-strategy-example</artifactId>
 				<version>${northstar-version}</version>
 			</dependency>
 			<dependency>

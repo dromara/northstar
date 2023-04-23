@@ -1,4 +1,4 @@
-package org.dromara.northstar.demo.strategy;
+package org.dromara.northstar.strategy.example;
 
 import static org.dromara.northstar.indicator.function.AverageFunctions.*;
 import static org.dromara.northstar.indicator.function.ComputeFunctions.*;
