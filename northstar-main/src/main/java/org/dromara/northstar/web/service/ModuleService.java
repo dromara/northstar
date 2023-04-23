@@ -218,6 +218,17 @@ public class ModuleService implements PostLoadAware {
 		strategy.setComputedState(mrd.getDataState());
 		IModuleContext moduleCtx = null;
 		if(md.getUsage() == ModuleUsage.PLAYBACK) {
+			Map<String, ModuleAccountRuntimeDescription> mardMap = new HashMap<>();
+			mardMap.put(PlaybackModuleContext.PLAYBACK_GATEWAY, ModuleAccountRuntimeDescription.builder()
+					.accountId(PlaybackModuleContext.PLAYBACK_GATEWAY)
+					.initBalance(md.getModuleAccountSettingsDescription().get(0).getModuleAccountInitBalance())
+					.build());
+			mrd = ModuleRuntimeDescription.builder()
+					.moduleName(md.getModuleName())
+					.moduleState(ModuleState.EMPTY)
+					.dataState(new JSONObject())
+					.accountRuntimeDescriptionMap(mardMap)
+					.build();
 			moduleCtx = new PlaybackModuleContext(strategy, md, mrd, contractMgr, moduleRepo, moduleLoggerFactory);
 		} else {
 			moduleCtx = new ModuleContext(strategy, md, mrd, contractMgr, moduleRepo, moduleLoggerFactory, mailMgr);

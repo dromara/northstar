@@ -88,7 +88,7 @@ class ModuleAccountTest {
 		when(c.contractField()).thenReturn(trade.getContract());
 		when(contractMgr.getContract(any(Identifier.class))).thenReturn(c);
 		when(ctx.getLogger()).thenReturn(mock(Logger.class));
-		macc = new ModuleAccount(md, mrd, new ModuleStateMachine(ctx), moduleRepo, contractMgr);
+		macc = new ModuleAccount(md, mrd, new ModuleStateMachine(ctx), moduleRepo, contractMgr, mock(Logger.class));
 	}
 
 	@Test

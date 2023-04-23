@@ -28,6 +28,7 @@ import org.dromara.northstar.common.constant.Constants;
 import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.common.constant.ModuleState;
 import org.dromara.northstar.common.constant.SignalOperation;
+import org.dromara.northstar.common.exception.InsufficientException;
 import org.dromara.northstar.common.model.BarWrapper;
 import org.dromara.northstar.common.model.ContractSimpleInfo;
 import org.dromara.northstar.common.model.Identifier;
@@ -141,7 +142,7 @@ public class ModuleContext implements IModuleContext{
 		this.moduleRepo = moduleRepo;
 		this.logger = loggerFactory.getLogger(moduleDescription.getModuleName());
 		this.senderMgr = senderMgr;
-		this.moduleAccount = new ModuleAccount(moduleDescription, moduleRtDescription, new ModuleStateMachine(this), moduleRepo, contractMgr);
+		this.moduleAccount = new ModuleAccount(moduleDescription, moduleRtDescription, new ModuleStateMachine(this), moduleRepo, contractMgr, logger);
 		moduleDescription.getModuleAccountSettingsDescription().stream()
 			.forEach(mad -> {
 				for(ContractSimpleInfo csi : mad.getBindedContracts()) {
@@ -541,7 +542,11 @@ public class ModuleContext implements IModuleContext{
 		if(getLogger().isInfoEnabled()) {			
 			getLogger().info("发单：{}，{}", orderReq.getOriginOrderId(), fmt.format(new Date(orderReq.getActionTimestamp())));
 		}
-		moduleAccount.onSubmitOrder(orderReq);
+		try {
+			moduleAccount.onSubmitOrder(orderReq);
+		} catch (InsufficientException e) {
+			throw new InsufficientException(String.format("模组 [%s] 下单失败，原因：%s", module.getName(), e.getMessage()));
+		}
 		ContractField contract = orderReq.getContract();
 		String originOrderId = module.getAccount(contract).submitOrder(orderReq);
 		orderReqMap.put(originOrderId, orderReq);

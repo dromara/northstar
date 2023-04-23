@@ -11,6 +11,7 @@ import java.util.function.BiConsumer;
 
 import org.apache.commons.codec.binary.StringUtils;
 import org.dromara.northstar.common.constant.ModuleState;
+import org.dromara.northstar.common.exception.InsufficientException;
 import org.dromara.northstar.common.model.Identifier;
 import org.dromara.northstar.common.model.ModuleAccountRuntimeDescription;
 import org.dromara.northstar.common.model.ModuleDealRecord;
@@ -21,6 +22,7 @@ import org.dromara.northstar.data.IModuleRepository;
 import org.dromara.northstar.gateway.Contract;
 import org.dromara.northstar.gateway.IContractManager;
 import org.dromara.northstar.strategy.IModuleAccount;
+import org.slf4j.Logger;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
@@ -62,12 +64,16 @@ public class ModuleAccount implements IModuleAccount{
 	private Map<String, Double> maxDrawBackMap = new HashMap<>();
 	/* direction -> gatewayId -> positionList */
 	private Table<DirectionEnum, String, List<ModulePosition>> posTable = HashBasedTable.create();
-	
+	/* direction -> unifiedSymbol -> position */ 
+	private Table<DirectionEnum, String, ModulePosition> posTable2 = HashBasedTable.create();
 	private String tradingDay;
 	
+	private Logger logger;
+	
 	public ModuleAccount(ModuleDescription moduleDescription, ModuleRuntimeDescription moduleRtDescription, ModuleStateMachine stateMachine,
-			IModuleRepository moduleRepo, IContractManager contractMgr) {
+			IModuleRepository moduleRepo, IContractManager contractMgr, Logger moduleLogger) {
 		this.stateMachine = stateMachine;
+		this.logger = moduleLogger;
 		stateMachine.setModuleAccount(this);
 		BiConsumer<TradeField, TradeField> onDealCallback = (openTrade, closeTrade) -> {
 			synchronized (this) {
@@ -110,8 +116,14 @@ public class ModuleAccount implements IModuleAccount{
 				.forEach(contractSimple -> {
 					Contract contract = contractMgr.getContract(Identifier.of(contractSimple.getValue()));
 					ContractField cf = contract.contractField();
-					posTable.get(DirectionEnum.D_Buy, mard.getAccountId()).add(new ModulePosition(cf, DirectionEnum.D_Buy, moduleDescription.getClosingPolicy(), onDealCallback));
-					posTable.get(DirectionEnum.D_Sell, mard.getAccountId()).add(new ModulePosition(cf, DirectionEnum.D_Sell, moduleDescription.getClosingPolicy(), onDealCallback));
+					
+					ModulePosition buyPos = new ModulePosition(cf, DirectionEnum.D_Buy, moduleDescription.getClosingPolicy(), onDealCallback);
+					posTable.get(DirectionEnum.D_Buy, mard.getAccountId()).add(buyPos);
+					posTable2.put(DirectionEnum.D_Buy, cf.getUnifiedSymbol(), buyPos);
+					
+					ModulePosition sellPos = new ModulePosition(cf, DirectionEnum.D_Sell, moduleDescription.getClosingPolicy(), onDealCallback);
+					posTable.get(DirectionEnum.D_Sell, mard.getAccountId()).add(sellPos);
+					posTable2.put(DirectionEnum.D_Sell, cf.getUnifiedSymbol(), sellPos);
 				});
 			
 			mard.getPositionDescription().getNonclosedTrades().stream()
@@ -247,10 +259,46 @@ public class ModuleAccount implements IModuleAccount{
 	public ModuleState getModuleState() {
 		return stateMachine.getState();
 	}
-
+	
+	/**
+	 * 模组账户可用金额（近似计算）
+	 * @return
+	 */
+	public double accountAvailableAmount(String gatewayId) {
+		// 由于只有在开仓时才检查金额是否足够，因此可以忽略持仓浮盈的计算
+		return getInitBalance(gatewayId) + getAccCloseProfit(gatewayId) - getAccCommission(gatewayId);
+	}
+	
 	@Override
 	public void onSubmitOrder(SubmitOrderReqField submitOrder) {
+		if(FieldUtils.isOpen(submitOrder.getOffsetFlag())) {
+			checkIfHasSufficientAmount(submitOrder);
+		} else {
+			checkIfHasSufficientPosition(submitOrder);
+		}
 		stateMachine.onSubmitReq(submitOrder);
+	}
+
+	private void checkIfHasSufficientPosition(SubmitOrderReqField submitOrder) {
+		ContractField contract =  submitOrder.getContract();
+		int available = posTable2.get(FieldUtils.getOpposite(submitOrder.getDirection()), contract.getUnifiedSymbol()).totalAvailable();
+		if(available < submitOrder.getVolume()) {
+			logger.warn("模组账户可用持仓为：{}，委托手数：{}", available, submitOrder.getVolume());
+			throw new InsufficientException("模组账户可用持仓不足，无法平仓");
+		}
+	}
+
+	private void checkIfHasSufficientAmount(SubmitOrderReqField submitOrder) {
+		double margin = switch(submitOrder.getDirection()) {
+		case D_Buy -> submitOrder.getContract().getLongMarginRatio();
+		case D_Sell -> submitOrder.getContract().getShortMarginRatio();
+		default -> throw new IllegalStateException("开仓方向不合法");
+		};
+		double cost = submitOrder.getPrice() * submitOrder.getVolume() * submitOrder.getContract().getMultiplier() * margin;
+		if(accountAvailableAmount(submitOrder.getGatewayId()) < cost) {
+			logger.warn("模组账户可用资金为：{}，开仓成本为：{}", accountAvailableAmount(submitOrder.getGatewayId()), cost);
+			throw new InsufficientException("模组账户可用资金不足，无法开仓");
+		}
 	}
 
 	@Override
