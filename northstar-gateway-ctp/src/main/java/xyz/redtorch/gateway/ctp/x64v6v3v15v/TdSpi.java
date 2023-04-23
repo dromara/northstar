@@ -27,6 +27,7 @@ import org.dromara.northstar.common.exception.NoSuchElementException;
 import org.dromara.northstar.gateway.Contract;
 import org.dromara.northstar.gateway.common.GatewayAbstract;
 import org.dromara.northstar.gateway.ctp.CtpContract;
+import org.dromara.northstar.gateway.ctp.CtpGatewaySettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -166,7 +167,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 	private GatewayAbstract gatewayAdapter;
 	private String logInfo;
 	private String gatewayId;
-	private CtpApiSettingField settings;
+	private CtpGatewaySettings settings;
 
 	private String investorName = "";
 
@@ -188,7 +189,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 
 	TdSpi(GatewayAbstract gatewayAdapter) {
 		this.gatewayAdapter = gatewayAdapter;
-		this.settings = (CtpApiSettingField) gatewayAdapter.gatewayDescription().getSettings();
+		this.settings = (CtpGatewaySettings) gatewayAdapter.gatewayDescription().getSettings();
 		this.gatewayId = gatewayAdapter.gatewayId();
 		this.logInfo = "交易网关ID-[" + this.gatewayId + "] [→] ";
 		logger.info("当前TdApi版本号：{}", CThostFtdcTraderApi.GetApiVersion());

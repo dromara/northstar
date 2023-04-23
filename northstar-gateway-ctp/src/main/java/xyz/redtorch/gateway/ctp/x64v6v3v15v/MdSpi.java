@@ -24,6 +24,7 @@ import org.dromara.northstar.common.utils.MarketDateTimeUtil;
 import org.dromara.northstar.common.utils.MessagePrinter;
 import org.dromara.northstar.gateway.Contract;
 import org.dromara.northstar.gateway.common.GatewayAbstract;
+import org.dromara.northstar.gateway.ctp.CtpGatewaySettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,7 +41,6 @@ import xyz.redtorch.gateway.ctp.x64v6v3v15v.api.CThostFtdcSpecificInstrumentFiel
 import xyz.redtorch.gateway.ctp.x64v6v3v15v.api.CThostFtdcUserLogoutField;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
-import xyz.redtorch.pb.CoreField.GatewaySettingField.CtpApiSettingField;
 import xyz.redtorch.pb.CoreField.TickField;
 
 public class MdSpi extends CThostFtdcMdSpi {
@@ -51,7 +51,7 @@ public class MdSpi extends CThostFtdcMdSpi {
 	private String logInfo;
 	private String gatewayId;
 	private String tradingDay;
-	private CtpApiSettingField settings;
+	private CtpGatewaySettings settings;
 
 	private volatile long lastUpdateTickTime = System.currentTimeMillis();
 
@@ -64,7 +64,7 @@ public class MdSpi extends CThostFtdcMdSpi {
 	MdSpi(GatewayAbstract gatewayAdapter) {
 		this.gatewayAdapter = gatewayAdapter;
 		this.gatewayId = gatewayAdapter.gatewayId();
-		this.settings = (CtpApiSettingField) gatewayAdapter.gatewayDescription().getSettings();
+		this.settings = (CtpGatewaySettings) gatewayAdapter.gatewayDescription().getSettings();
 		this.logInfo = "行情网关ID-[" + this.gatewayId + "] [→] ";
 		logger.info("当前MdApi版本号：{}", CThostFtdcMdApi.GetApiVersion());
 	}

@@ -5,6 +5,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.dromara.northstar.common.ObjectManager;
+import org.dromara.northstar.common.constant.GatewayUsage;
 import org.dromara.northstar.common.model.Identifier;
 import org.dromara.northstar.gateway.Gateway;
 import org.dromara.northstar.gateway.MarketGateway;
@@ -38,6 +39,7 @@ public class GatewayManager implements ObjectManager<Gateway> {
 
 	public List<TradeGateway> tradeGateways() {
 		return gatewayMap.values().stream()
+				.filter(gw -> gw.gatewayDescription().getGatewayUsage() == GatewayUsage.TRADE)
 				.filter(TradeGateway.class::isInstance)
 				.map(TradeGateway.class::cast)
 				.toList();
@@ -45,6 +47,7 @@ public class GatewayManager implements ObjectManager<Gateway> {
 	
 	public List<MarketGateway> marketGateways() {
 		return gatewayMap.values().stream()
+				.filter(gw -> gw.gatewayDescription().getGatewayUsage() == GatewayUsage.MARKET_DATA)
 				.filter(MarketGateway.class::isInstance)
 				.map(MarketGateway.class::cast)
 				.toList();

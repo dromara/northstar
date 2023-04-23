@@ -27,6 +27,7 @@ import org.dromara.northstar.common.exception.NoSuchElementException;
 import org.dromara.northstar.gateway.Contract;
 import org.dromara.northstar.gateway.common.GatewayAbstract;
 import org.dromara.northstar.gateway.ctp.CtpContract;
+import org.dromara.northstar.gateway.ctp.CtpSimGatewaySettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -149,7 +150,6 @@ import xyz.redtorch.pb.CoreEnum.VolumeConditionEnum;
 import xyz.redtorch.pb.CoreField.AccountField;
 import xyz.redtorch.pb.CoreField.CancelOrderReqField;
 import xyz.redtorch.pb.CoreField.ContractField;
-import xyz.redtorch.pb.CoreField.GatewaySettingField.CtpApiSettingField;
 import xyz.redtorch.pb.CoreField.NoticeField;
 import xyz.redtorch.pb.CoreField.OrderField;
 import xyz.redtorch.pb.CoreField.PositionField;
@@ -165,7 +165,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 	private GatewayAbstract gatewayAdapter;
 	private String logInfo;
 	private String gatewayId;
-	private CtpApiSettingField settings;
+	private CtpSimGatewaySettings settings;
 
 	private String investorName = "";
 
@@ -187,7 +187,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 
 	TdSpi(GatewayAbstract gatewayAdapter) {
 		this.gatewayAdapter = gatewayAdapter;
-		this.settings = (CtpApiSettingField) gatewayAdapter.gatewayDescription().getSettings();
+		this.settings = (CtpSimGatewaySettings) gatewayAdapter.gatewayDescription().getSettings();
 		this.gatewayId = gatewayAdapter.gatewayId();
 		this.logInfo = "交易网关ID-[" + this.gatewayId + "] [→] ";
 		logger.info("当前TdApi版本号：{}", CThostFtdcTraderApi.GetApiVersion());

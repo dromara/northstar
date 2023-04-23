@@ -21,4 +21,11 @@ public class CtpSimGatewaySettings extends DynamicParams implements GatewaySetti
 	@Setting(label = "期货公司", type = FieldType.SELECT, options = {"宏源仿真"}, optionsVal = {"3070"}, placeholder = "请选择", order = 30)
 	private String brokerId;
 
+	private String appId;
+	
+	private String mdPort;
+	
+	private String tdPort;
+	
+	private String authCode;
 }
