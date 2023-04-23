@@ -1,20 +1,20 @@
 package org.dromara.northstar.demo.strategy;
 
-import static org.dromara.northstar.indicator.function.AverageFunctions.EMA;
-import static org.dromara.northstar.indicator.function.AverageFunctions.MA;
-import static org.dromara.northstar.indicator.function.ComputeFunctions.minus;
+import static org.dromara.northstar.indicator.function.AverageFunctions.*;
+import static org.dromara.northstar.indicator.function.ComputeFunctions.*;
 
+import org.dromara.northstar.indicator.complex.MACD;
 import org.dromara.northstar.common.constant.FieldType;
 import org.dromara.northstar.common.constant.SignalOperation;
 import org.dromara.northstar.common.model.DynamicParams;
 import org.dromara.northstar.common.model.Setting;
-import org.dromara.northstar.indicator.complex.MACD;
 import org.dromara.northstar.strategy.AbstractStrategy;
+import org.dromara.northstar.strategy.IIndicator;
 import org.dromara.northstar.strategy.StrategicComponent;
 import org.dromara.northstar.strategy.TradeStrategy;
+import org.dromara.northstar.strategy.constant.PeriodUnit;
 import org.dromara.northstar.strategy.constant.PriceType;
-import org.dromara.northstar.strategy.model.Indicator;
-import org.dromara.northstar.strategy.model.Indicator.PeriodUnit;
+import org.dromara.northstar.strategy.model.Configuration;
 import org.dromara.northstar.strategy.model.TradeIntent;
 
 import xyz.redtorch.pb.CoreField.BarField;
@@ -36,13 +36,13 @@ public class IndicatorSampleStrategy extends AbstractStrategy	// 为了简化代
 
 	private InitParams params;	// 策略的参数配置信息
 
-	private Indicator fastLine;
+	private IIndicator fastLine;
 
-	private Indicator slowLine;
+	private IIndicator slowLine;
 
-	private Indicator macdDiff;
+	private IIndicator macdDiff;
 
-	private Indicator macdDea;
+	private IIndicator macdDea;
 
 	@Override
 	public void onMergedBar(BarField bar) {
@@ -132,13 +132,13 @@ public class IndicatorSampleStrategy extends AbstractStrategy	// 为了简化代
 	@Override
 	protected void initIndicators() {
 		// 简单指标的创建
-		this.fastLine = ctx.newIndicator(Indicator.Configuration.builder()
+		this.fastLine = ctx.newIndicator(Configuration.builder()
 				.indicatorName("快线")
 				.bindedContract(ctx.getContract(params.indicatorSymbol))
 				.numOfUnits(ctx.numOfMinPerMergedBar())
 				.period(PeriodUnit.MINUTE)
 				.build(), MA(params.fast));
-		this.slowLine = ctx.newIndicator(Indicator.Configuration.builder()
+		this.slowLine = ctx.newIndicator(Configuration.builder()
 				.indicatorName("慢线")
 				.bindedContract(ctx.getContract(params.indicatorSymbol))
 				.numOfUnits(ctx.numOfMinPerMergedBar())
@@ -146,13 +146,13 @@ public class IndicatorSampleStrategy extends AbstractStrategy	// 为了简化代
 				.build(), MA(params.slow));
 
 		// 复杂指标的创建；MACD的原始写法
-		this.macdDiff = ctx.newIndicator(Indicator.Configuration.builder()
+		this.macdDiff = ctx.newIndicator(Configuration.builder()
 				.indicatorName("MACD_DIF")
 				.bindedContract(ctx.getContract(params.indicatorSymbol))
 				.numOfUnits(ctx.numOfMinPerMergedBar())
 				.period(PeriodUnit.MINUTE)
 				.build(), minus(EMA(12), EMA(26)));
-		this.macdDea = ctx.newIndicator(Indicator.Configuration.builder()
+		this.macdDea = ctx.newIndicator(Configuration.builder()
 				.indicatorName("MACD_DEA")
 				.bindedContract(ctx.getContract(params.indicatorSymbol))
 				.numOfUnits(ctx.numOfMinPerMergedBar())
@@ -164,19 +164,19 @@ public class IndicatorSampleStrategy extends AbstractStrategy	// 为了简化代
 		
 		// MACD的另一种写法，对MACD的计算函数做进一步封装
 		MACD macd = MACD.of(12, 26, 9);
-		ctx.newIndicator(Indicator.Configuration.builder()
+		ctx.newIndicator(Configuration.builder()
 				.indicatorName("MACD_DIF2")
 				.bindedContract(ctx.getContract(params.indicatorSymbol))
 				.numOfUnits(ctx.numOfMinPerMergedBar())
 				.period(PeriodUnit.MINUTE)
 				.build(), macd.diff());
-		ctx.newIndicator(Indicator.Configuration.builder()
+		ctx.newIndicator(Configuration.builder()
 				.indicatorName("MACD_DEA2")
 				.bindedContract(ctx.getContract(params.indicatorSymbol))
 				.numOfUnits(ctx.numOfMinPerMergedBar())
 				.period(PeriodUnit.MINUTE)
 				.build(), macd.dea());
-		ctx.newIndicator(Indicator.Configuration.builder()
+		ctx.newIndicator(Configuration.builder()
 				.indicatorName("MACD_POST")
 				.bindedContract(ctx.getContract(params.indicatorSymbol))
 				.numOfUnits(ctx.numOfMinPerMergedBar())

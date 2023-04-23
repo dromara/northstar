@@ -14,8 +14,6 @@ import org.apache.commons.math3.stat.StatUtils;
 import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.gateway.Contract;
 import org.dromara.northstar.gateway.common.domain.time.GenericTradeTime;
-import org.dromara.northstar.support.utils.bar.BarMerger;
-import org.dromara.northstar.support.utils.bar.WeeklyBarMerger;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

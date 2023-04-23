@@ -19,7 +19,7 @@ import org.dromara.northstar.indicator.complex.WAVE;
 import org.dromara.northstar.strategy.AbstractStrategy;
 import org.dromara.northstar.strategy.StrategicComponent;
 import org.dromara.northstar.strategy.TradeStrategy;
-import org.dromara.northstar.strategy.model.Indicator.Configuration;
+import org.dromara.northstar.strategy.model.Configuration;
 
 import com.google.common.util.concurrent.AtomicDouble;
 

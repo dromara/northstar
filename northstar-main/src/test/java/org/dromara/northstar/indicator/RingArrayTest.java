@@ -1,10 +1,9 @@
-package org.dromara.northstar.strategy.model;
+package org.dromara.northstar.indicator;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.concurrent.ThreadLocalRandom;
 
-import org.dromara.northstar.strategy.model.RingArray;
 import org.junit.jupiter.api.Test;
 
 class RingArrayTest {

@@ -2,7 +2,7 @@ package org.dromara.northstar.strategy;
 
 import org.dromara.northstar.common.BarDataAware;
 import org.dromara.northstar.common.TickDataAware;
-import org.dromara.northstar.strategy.model.Indicator;
+import org.dromara.northstar.strategy.model.Configuration;
 
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.TickField;
@@ -14,7 +14,7 @@ import xyz.redtorch.pb.CoreField.TickField;
  */
 public interface IComboIndicator extends BarDataAware, TickDataAware, MergedBarListener{
 
-	Indicator.Configuration getConfiguration();
+	Configuration getConfiguration();
 	
 	@Override
 	default void onMergedBar(BarField bar) {}

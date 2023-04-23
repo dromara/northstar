@@ -9,7 +9,7 @@ import org.dromara.northstar.common.BarDataAware;
 import org.dromara.northstar.common.model.Identifier;
 import org.dromara.northstar.gateway.Contract;
 import org.dromara.northstar.strategy.MergedBarListener;
-import org.dromara.northstar.strategy.model.Indicator.PeriodUnit;
+import org.dromara.northstar.strategy.constant.PeriodUnit;
 
 import com.google.common.collect.HashMultimap;
 

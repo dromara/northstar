@@ -7,8 +7,7 @@ import static org.mockito.Mockito.when;
 import org.dromara.northstar.gateway.Contract;
 import org.dromara.northstar.gateway.common.domain.time.GenericTradeTime;
 import org.dromara.northstar.strategy.MergedBarListener;
-import org.dromara.northstar.strategy.model.Indicator.PeriodUnit;
-import org.dromara.northstar.support.utils.bar.BarMergerRegistry;
+import org.dromara.northstar.strategy.constant.PeriodUnit;
 import org.dromara.northstar.support.utils.bar.BarMergerRegistry.ListenerType;
 import org.junit.jupiter.api.Test;
 

@@ -6,8 +6,8 @@ import org.dromara.northstar.common.constant.ModuleState;
 import org.dromara.northstar.common.model.BarWrapper;
 import org.dromara.northstar.common.model.TimeSeriesValue;
 import org.dromara.northstar.strategy.constant.DisposablePriceListenerType;
-import org.dromara.northstar.strategy.model.Indicator;
-import org.dromara.northstar.strategy.model.Indicator.ValueType;
+import org.dromara.northstar.strategy.constant.ValueType;
+import org.dromara.northstar.strategy.model.Configuration;
 import org.dromara.northstar.strategy.model.TradeIntent;
 import org.slf4j.Logger;
 
@@ -104,27 +104,27 @@ public interface IModuleStrategyContext {
 	 * @param indicatorFunction
 	 * @return
 	 */
-	Indicator newIndicator(Indicator.Configuration configuration, ValueType valueType, TimeSeriesUnaryOperator indicatorFunction);
+	IIndicator newIndicator(Configuration configuration, ValueType valueType, TimeSeriesUnaryOperator indicatorFunction);
 	/**
 	 * 创建指标
 	 * @param configuration
 	 * @param indicatorFunction
 	 * @return
 	 */
-	Indicator newIndicator(Indicator.Configuration configuration, TimeSeriesUnaryOperator indicatorFunction);
+	IIndicator newIndicator(Configuration configuration, TimeSeriesUnaryOperator indicatorFunction);
 	/**
 	 * 创建指标
 	 * @param configuration
 	 * @param indicatorFunction
 	 * @return
 	 */
-	Indicator newIndicator(Indicator.Configuration configuration, Function<BarWrapper, TimeSeriesValue> indicatorFunction);
+	IIndicator newIndicator(Configuration configuration, Function<BarWrapper, TimeSeriesValue> indicatorFunction);
 	/**
 	 * 用指标方式透视值
 	 * @param configuration
 	 * @param value
 	 */
-	void viewValueAsIndicator(Indicator.Configuration configuration, AtomicDouble value);
+	void viewValueAsIndicator(Configuration configuration, AtomicDouble value);
 	/**
 	 * 绑定组合指标
 	 * @param comboIndicator

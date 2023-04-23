@@ -41,12 +41,13 @@ public class ConnectionHandler extends AbstractEventHandler implements GenericEv
 
 	@Override
 	public void doHandle(NorthstarEvent e) {
-		Identifier gatewayId = Identifier.of((String) e.getData());
-		if(!gatewayMgr.contains(gatewayId)) {
+		String gatewayId = (String) e.getData();
+		Identifier id = Identifier.of(gatewayId);
+		if(!gatewayMgr.contains(id)) {
 			throw new NoSuchElementException("没有找到相关的网关：" + gatewayId);
 		}
 		log.info("[{}]-已可用", gatewayId);
-		Gateway gateway = gatewayMgr.get(gatewayId);
+		Gateway gateway = gatewayMgr.get(id);
 		if(gateway instanceof MarketGateway mktGateway) {
 			doSubscribe(mktGateway.gatewayId());
 		}

@@ -1,25 +1,18 @@
-package org.dromara.northstar.strategy.model;
+package org.dromara.northstar.indicator;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
-import org.dromara.northstar.common.BarDataAware;
-import org.dromara.northstar.common.TickDataAware;
 import org.dromara.northstar.common.model.BarWrapper;
 import org.dromara.northstar.common.model.TimeSeriesValue;
-import org.dromara.northstar.strategy.MergedBarListener;
+import org.dromara.northstar.strategy.IIndicator;
+import org.dromara.northstar.strategy.constant.ValueType;
+import org.dromara.northstar.strategy.model.Configuration;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NonNull;
 import reactor.core.publisher.Flux;
 import xyz.redtorch.pb.CoreField.BarField;
-import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.TickField;
 
 /**
@@ -28,7 +21,7 @@ import xyz.redtorch.pb.CoreField.TickField;
  * @author KevinHuangwl
  *
  */
-public class Indicator implements TickDataAware, BarDataAware, MergedBarListener {
+public class Indicator implements IIndicator {
 	
 	/**
 	 * 指标历史记录
@@ -52,14 +45,14 @@ public class Indicator implements TickDataAware, BarDataAware, MergedBarListener
 	
 	private boolean plotPerBar;
 	
-	private Indicator.Configuration config;
+	private Configuration config;
 	
-	public Indicator(Indicator.Configuration config, ValueType valType, UnaryOperator<TimeSeriesValue> valueUpdateHandler) {
-		this.size = config.indicatorRefLength;
+	public Indicator(Configuration config, ValueType valType, UnaryOperator<TimeSeriesValue> valueUpdateHandler) {
+		this.size = config.getIndicatorRefLength();
 		this.config = config;
-		this.unifiedSymbol = config.bindedContract.getUnifiedSymbol();
-		this.plotPerBar = config.plotPerBar;
-		this.ibg = new InstantBarGenerator(config.bindedContract);
+		this.unifiedSymbol = config.getBindedContract().getUnifiedSymbol();
+		this.plotPerBar = config.isPlotPerBar();
+		this.ibg = new InstantBarGenerator(config.getBindedContract());
 		this.valType = valType;
 		refVals = new RingArray<>(size);
 		for(int i=0; i<size; i++) {
@@ -74,12 +67,12 @@ public class Indicator implements TickDataAware, BarDataAware, MergedBarListener
 		.subscribe(this::updateVal);
 	}
 	
-	public Indicator(Indicator.Configuration config, Function<BarWrapper, TimeSeriesValue> valueUpdateHandler) {
-		this.size = config.indicatorRefLength;
+	public Indicator(Configuration config, Function<BarWrapper, TimeSeriesValue> valueUpdateHandler) {
+		this.size = config.getIndicatorRefLength();
 		this.config = config;
-		this.unifiedSymbol = config.bindedContract.getUnifiedSymbol();
-		this.plotPerBar = config.plotPerBar;
-		this.ibg = new InstantBarGenerator(config.bindedContract);
+		this.unifiedSymbol = config.getBindedContract().getUnifiedSymbol();
+		this.plotPerBar = config.isPlotPerBar();
+		this.ibg = new InstantBarGenerator(config.getBindedContract());
 		this.valType = ValueType.NOT_SET;
 		refVals = new RingArray<>(size);
 		for(int i=0; i<size; i++) {
@@ -106,6 +99,7 @@ public class Indicator implements TickDataAware, BarDataAware, MergedBarListener
 	 * 如此类推
 	 * @return
 	 */
+	@Override
 	public double value(int numOfStepBack) {
 		return timeSeriesValue(numOfStepBack).getValue();
 	}
@@ -115,34 +109,12 @@ public class Indicator implements TickDataAware, BarDataAware, MergedBarListener
 	 * @param numOfStepBack
 	 * @return
 	 */
+	@Override
 	public TimeSeriesValue timeSeriesValue(int numOfStepBack) {
 		if(Math.abs(numOfStepBack) > size) {
 			throw new IllegalArgumentException("回溯步长[" + numOfStepBack + "]超过记录长度");
 		}
-		return refVals.get(-numOfStepBack);
-	}
-	
-	/**
-	 * 获取指标回溯值 
-	 * @param time		指标值对应的时间戳
-	 * @return
-	 */
-	public Optional<Double> valueOn(long time){
-		return timeSeriesValueOn(time).map(TimeSeriesValue::getValue); 
-	}
-	
-	/**
-	 * 获取指标回溯值
-	 * @param time		指标值对应的时间戳
-	 * @return
-	 */
-	public Optional<TimeSeriesValue> timeSeriesValueOn(long time){
-		Map<Long, TimeSeriesValue> valMap = new HashMap<>();
-		for(Object obj : refVals.toArray()) {
-			TimeSeriesValue val = (TimeSeriesValue) obj;
-			valMap.put(val.getTimestamp(), val);
-		}
-		return Optional.ofNullable(valMap.get(time));
+		return refVals.get(numOfStepBack);
 	}
 	
 	@Override
@@ -197,7 +169,7 @@ public class Indicator implements TickDataAware, BarDataAware, MergedBarListener
 	 * 值更新
 	 * @param newVal
 	 */
-	public synchronized void updateVal(TimeSeriesValue tv) {
+	protected synchronized void updateVal(TimeSeriesValue tv) {
 		if(tv.getTimestamp() == 0) 	return;	// 时间戳为零会视为无效记录 
 		refVals.update(tv, tv.isUnsettled());
 		if(!tv.isUnsettled()) {			
@@ -209,6 +181,7 @@ public class Indicator implements TickDataAware, BarDataAware, MergedBarListener
 	 * 指标是否已完成初始化
 	 * @return
 	 */
+	@Override
 	public boolean isReady() {
 		return actualUpdate >= size;
 	}
@@ -217,6 +190,7 @@ public class Indicator implements TickDataAware, BarDataAware, MergedBarListener
 	 * 指标绑定合约
 	 * @return
 	 */
+	@Override
 	public String bindedUnifiedSymbol() {
 		return unifiedSymbol;
 	}
@@ -225,6 +199,7 @@ public class Indicator implements TickDataAware, BarDataAware, MergedBarListener
 	 * 获取最高值的回溯步长
 	 * @return		
 	 */
+	@Override
 	public int highestPosition() {
 		int stepback = 0;
 		double highestVal = Double.MIN_VALUE;
@@ -241,6 +216,7 @@ public class Indicator implements TickDataAware, BarDataAware, MergedBarListener
 	 * 获取最低值的回溯步长
 	 * @return		
 	 */
+	@Override
 	public int lowestPosition() {
 		int stepback = 0;
 		double lowestVal = Double.MAX_VALUE;
@@ -257,6 +233,7 @@ public class Indicator implements TickDataAware, BarDataAware, MergedBarListener
 	 * 获取系列值
 	 * @return
 	 */
+	@Override
 	public List<TimeSeriesValue> getData(){
 		return Stream.of(refVals.toArray())
 				.map(TimeSeriesValue.class::cast)
@@ -267,6 +244,7 @@ public class Indicator implements TickDataAware, BarDataAware, MergedBarListener
 	 * 指标名称
 	 * @return
 	 */
+	@Override
 	public String name() {
 		return config.getIndicatorName();
 	}
@@ -275,146 +253,13 @@ public class Indicator implements TickDataAware, BarDataAware, MergedBarListener
 	 * 跨周期
 	 * @return
 	 */
+	@Override
 	public boolean ifPlotPerBar() {
 		return plotPerBar;
 	}
 	
-	/**
-	 * 指标取值类型
-	 * @author KevinHuangwl
-	 *
-	 */
-	public enum ValueType {
-		/**
-		 * 未设置
-		 */
-		NOT_SET,
-		/**
-		 * 最高价
-		 */
-		HIGH,
-		/**
-		 * 最低价
-		 */
-		LOW,
-		/**
-		 * 开盘价
-		 */
-		OPEN,
-		/**
-		 * 收盘价
-		 */
-		CLOSE,
-		/**
-		 * 重心价
-		 */
-		BARYCENTER,
-		/**
-		 * 成交量
-		 */
-		VOL,
-		/**
-		 * 持仓量
-		 */
-		OI,
-		/**
-		 * 持仓量变化
-		 */
-		OI_DELTA;
-	}
-	
-	/**
-	 * 周期单位
-	 * @author KevinHuangwl
-	 *
-	 */
-	public enum PeriodUnit{
-		/**
-		 * 分钟
-		 */
-		MINUTE("m"),
-		/**
-		 * 小时
-		 */
-		HOUR("hr"),
-		/**
-		 * 天
-		 */
-		DAY("d"),
-		/**
-		 * 周
-		 */
-		WEEK("wk"),
-		/**
-		 * 月
-		 */
-		MONTH("M");
-		
-		String symbol;
-		private PeriodUnit(String unitSymbol) {
-			symbol = unitSymbol;
-		}
-		
-		public String symbol() {
-			return symbol;
-		}
-	}
-	
 	private interface BarListener {
-	
+		
 		void onBar(Object obj);
 	}
-	
-	/**
-	 * 指标配置
-	 * @author KevinHuangwl
-	 *
-	 */
-	@Builder(toBuilder = true)
-	@Getter
-	public static class Configuration {
-		/**
-		 * 显示名称
-		 */
-		private String indicatorName;
-		/**
-		 * 绑定合约
-		 */
-		@NonNull
-		private ContractField bindedContract;
-		/**
-		 * N个周期
-		 */
-		@Builder.Default
-		private int numOfUnits = 1;
-		/**
-		 * 周期单位
-		 */
-		@Builder.Default
-		private PeriodUnit period = PeriodUnit.MINUTE;
-		/**
-		 * 可回溯长度
-		 */
-		@Builder.Default
-		private int indicatorRefLength = 16;
-		/**
-		 * 跨周期指标映射到每根K线
-		 */
-		@Builder.Default
-		private boolean plotPerBar = false;
-		
-		
-		public String getIndicatorName() {
-			return String.format("%s_%d%s", indicatorName, numOfUnits, period.symbol);
-		}
-
-		@Override
-		public String toString() {
-			return "Configuration [indicatorName=" + indicatorName + ", bindedContract=" + bindedContract
-					+ ", numOfUnits=" + numOfUnits + ", period=" + period + ", indicatorRefLength=" + indicatorRefLength
-					+ ", plotPerBar=" + plotPerBar + "]";
-		}
-		
-	}
-
 }

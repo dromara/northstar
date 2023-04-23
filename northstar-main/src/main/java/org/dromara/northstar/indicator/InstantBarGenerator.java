@@ -1,4 +1,4 @@
-package org.dromara.northstar.strategy.model;
+package org.dromara.northstar.indicator;
 
 import java.util.Objects;
 import java.util.Optional;
