@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.codec.binary.StringUtils;
 import org.dromara.northstar.common.exception.NoSuchElementException;
+import org.dromara.northstar.common.exception.TradeException;
 import org.dromara.northstar.strategy.IModule;
 import org.dromara.northstar.strategy.OrderRequestFilter;
 
@@ -49,6 +50,7 @@ public class DefaultOrderFilter implements OrderRequestFilter {
 		if(contractReqCounterMap.get(orderReq.getContract().getUnifiedSymbol()).getAndIncrement() > MAX_ORDER_REQ_PER_DAY) {
 			module.getModuleContext().getLogger().warn("模组 [{}] 触发 [{}] 合约的日内免费申报上限。自动停用模组。", module.getName(), orderReq.getContract().getName());
 			module.setEnabled(false);
+			throw new TradeException("中止委托发单");
 		}
 		module.getAccount(orderReq.getContract()).submitOrder(orderReq);
 	}

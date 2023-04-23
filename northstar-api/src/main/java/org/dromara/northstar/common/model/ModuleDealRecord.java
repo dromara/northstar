@@ -39,4 +39,6 @@ public class ModuleDealRecord {
 	 * 平仓成交
 	 */
 	private byte[] closeTrade;
+	
+	
 }

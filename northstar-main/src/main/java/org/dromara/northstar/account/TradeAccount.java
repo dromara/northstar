@@ -14,6 +14,7 @@ import org.dromara.northstar.common.utils.OrderUtils;
 import org.dromara.northstar.gateway.MarketGateway;
 import org.dromara.northstar.gateway.TradeGateway;
 import org.dromara.northstar.strategy.IAccount;
+import org.dromara.northstar.strategy.OrderRequestFilter;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
@@ -59,6 +60,8 @@ public class TradeAccount implements IAccount {
 	/* 预锁定金额 */
 	private Map<UUID, Double> frozenAmountMap = new HashMap<>();
 	
+	private OrderRequestFilter orderReqFilter;
+	
 	public TradeAccount(MarketGateway marketGateway, TradeGateway tradeGateway, GatewayDescription gatewayDescription) {
 		this.marketGateway = marketGateway;
 		this.tradeGateway = tradeGateway;
@@ -82,6 +85,9 @@ public class TradeAccount implements IAccount {
 
 	@Override
 	public String submitOrder(SubmitOrderReqField orderReq) {
+		if(Objects.nonNull(orderReqFilter)) {
+			orderReqFilter.doFilter(orderReq);
+		}
 		return tradeGateway.submitOrder(orderReq);
 	}
 
@@ -167,5 +173,10 @@ public class TradeAccount implements IAccount {
 			throw new NoSuchElementException(String.format("不存在 [%s] 合约的 [%s] 持仓", unifiedSymbol, posDirection));
 		}
 		return posTable.get(posDirection, unifiedSymbol);
+	}
+
+	@Override
+	public void setOrderRequestFilter(OrderRequestFilter filter) {
+		orderReqFilter = filter;
 	}
 }

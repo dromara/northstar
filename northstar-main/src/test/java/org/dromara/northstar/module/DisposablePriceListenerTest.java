@@ -3,7 +3,6 @@ package org.dromara.northstar.module;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
-import org.dromara.northstar.module.DisposablePriceListener;
 import org.dromara.northstar.strategy.IModuleContext;
 import org.junit.jupiter.api.Test;
 

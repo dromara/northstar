@@ -1,8 +1,11 @@
 package org.dromara.northstar.module;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -25,7 +28,6 @@ import org.dromara.northstar.common.constant.Constants;
 import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.common.constant.ModuleState;
 import org.dromara.northstar.common.constant.SignalOperation;
-import org.dromara.northstar.common.exception.NoSuchElementException;
 import org.dromara.northstar.common.model.BarWrapper;
 import org.dromara.northstar.common.model.ContractSimpleInfo;
 import org.dromara.northstar.common.model.Identifier;
@@ -35,13 +37,11 @@ import org.dromara.northstar.common.model.ModulePositionDescription;
 import org.dromara.northstar.common.model.ModuleRuntimeDescription;
 import org.dromara.northstar.common.model.TimeSeriesValue;
 import org.dromara.northstar.common.utils.BarUtils;
-import org.dromara.northstar.common.utils.ContractUtils;
 import org.dromara.northstar.common.utils.FieldUtils;
 import org.dromara.northstar.common.utils.OrderUtils;
 import org.dromara.northstar.data.IModuleRepository;
 import org.dromara.northstar.gateway.Contract;
 import org.dromara.northstar.gateway.IContractManager;
-import org.dromara.northstar.gateway.TradeGateway;
 import org.dromara.northstar.indicator.IndicatorFactory;
 import org.dromara.northstar.strategy.IAccount;
 import org.dromara.northstar.strategy.IComboIndicator;
@@ -79,6 +79,7 @@ import xyz.redtorch.pb.CoreEnum.OrderPriceTypeEnum;
 import xyz.redtorch.pb.CoreEnum.TimeConditionEnum;
 import xyz.redtorch.pb.CoreEnum.VolumeConditionEnum;
 import xyz.redtorch.pb.CoreField.BarField;
+import xyz.redtorch.pb.CoreField.CancelOrderReqField;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.OrderField;
 import xyz.redtorch.pb.CoreField.PositionField;
@@ -104,9 +105,6 @@ public class ModuleContext implements IModuleContext{
 	
 	/* originOrderId -> orderReq */
 	private Map<String, SubmitOrderReqField> orderReqMap = new HashMap<>();
-	
-	/* contract -> gateway */
-	private Map<ContractField, TradeGateway> gatewayMap = new HashMap<>();
 	
 	/* unifiedSymbol -> contract */
 	private Map<String, ContractField> contractMap = new HashMap<>();
@@ -137,15 +135,13 @@ public class ModuleContext implements IModuleContext{
 	
 	private String tradingDay = "";
 	
-	private OrderRequestFilter orderReqFilter;
-	
 	public ModuleContext(TradeStrategy tradeStrategy, ModuleDescription moduleDescription, ModuleRuntimeDescription moduleRtDescription,
 			IContractManager contractMgr, IModuleRepository moduleRepo, ModuleLoggerFactory loggerFactory, IMessageSenderManager senderMgr) {
 		this.tradeStrategy = tradeStrategy;
 		this.moduleRepo = moduleRepo;
 		this.loggerFactory = loggerFactory;
 		this.senderMgr = senderMgr;
-		this.moduleAccount = new ModuleAccount(moduleDescription, moduleRtDescription, moduleRepo);
+		this.moduleAccount = new ModuleAccount(moduleDescription, moduleRtDescription, new ModuleStateMachine(this), moduleRepo, contractMgr);
 		moduleDescription.getModuleAccountSettingsDescription().stream()
 			.forEach(mad -> {
 				for(ContractSimpleInfo csi : mad.getBindedContracts()) {
@@ -409,11 +405,8 @@ public class ModuleContext implements IModuleContext{
 	@Override
 	public ModuleRuntimeDescription getRuntimeDescription(boolean fullDescription) {
 		Map<String, ModuleAccountRuntimeDescription> accMap = new HashMap<>();
-		for(TradeGateway gateway : gatewayMap.values()) {
-			String gatewayId = gateway.gatewayId();
-			if(accMap.containsKey(gatewayId)) {
-				continue;
-			}
+		module.getModuleDescription().getModuleAccountSettingsDescription().forEach(mad -> {
+			String gatewayId = mad.getAccountGatewayId();
 			ModulePositionDescription posDescription = ModulePositionDescription.builder()
 					.logicalPositions(moduleAccount.getPositions(gatewayId).stream().map(PositionField::toByteArray).toList())
 					.nonclosedTrades(moduleAccount.getNonclosedTrades(gatewayId).stream().map(TradeField::toByteArray).toList())
@@ -422,7 +415,6 @@ public class ModuleContext implements IModuleContext{
 			ModuleAccountRuntimeDescription accDescription = ModuleAccountRuntimeDescription.builder()
 					.accountId(gatewayId)
 					.initBalance(moduleAccount.getInitBalance(gatewayId))
-					.preBalance(moduleAccount.getPreBalance(gatewayId))
 					.accCloseProfit(moduleAccount.getAccCloseProfit(gatewayId))
 					.accDealVolume(moduleAccount.getAccDealVolume(gatewayId))
 					.accCommission(moduleAccount.getAccCommission(gatewayId))
@@ -431,7 +423,7 @@ public class ModuleContext implements IModuleContext{
 					.positionDescription(posDescription)
 					.build();
 			accMap.put(gatewayId, accDescription);
-		}
+		});
 		
 		ModuleRuntimeDescription mad = ModuleRuntimeDescription.builder()
 				.moduleName(module.getName())
@@ -505,8 +497,7 @@ public class ModuleContext implements IModuleContext{
 	}
 
 	@Override
-	public Optional<String> submitOrderReq(ContractField contract, SignalOperation operation, PriceType priceType,
-			int volume, double price) {
+	public Optional<String> submitOrderReq(ContractField contract, SignalOperation operation, PriceType priceType, int volume, double price) {
 		if(!module.isEnabled()) {
 			getLogger().info("策略处于停用状态，忽略委托单");
 			return Optional.empty();
@@ -515,45 +506,22 @@ public class ModuleContext implements IModuleContext{
 		Assert.notNull(tick, "没有行情时不应该发送订单");
 		Assert.isTrue(volume > 0, "下单手数应该为正数");
 		
-		double orderPrice = switch(priceType) {
-		case ANY_PRICE -> 0;
-		case LAST_PRICE -> tick.getLastPrice();
-		case LIMIT_PRICE -> price;
-		case OPP_PRICE -> operation.isBuy() ? tick.getAskPrice(0) : tick.getBidPrice(0);
-		case WAITING_PRICE -> operation.isBuy() ? tick.getBidPrice(0) : tick.getAskPrice(0);
-		default -> throw new IllegalArgumentException("Unexpected value: " + priceType);
-		};
+		double orderPrice = priceType.resolvePrice(tick, operation, price);
 		if(getLogger().isInfoEnabled()) {
 			getLogger().info("[{} {}] 策略信号：合约【{}】，操作【{}】，价格【{}】，手数【{}】，类型【{}】", 
 					tick.getActionDay(), LocalTime.parse(tick.getActionTime(), DateTimeConstant.T_FORMAT_WITH_MS_INT_FORMATTER),
 					contract.getUnifiedSymbol(), operation.text(), orderPrice, volume, priceType);
 		}
-		if(!gatewayMap.containsKey(contract)) {
-			throw new NoSuchElementException(String.format("找不到合约 [%s] 对应网关", contract.getUnifiedSymbol()));
-		}
 		String id = UUID.randomUUID().toString();
-		String gatewayId = gatewayMap.get(contract).gatewayId();
-		PositionField pf = null;
-		if(operation.isClose()) {
-			for(PositionField pos : accStore.getPositions(gatewayId)) {
-				boolean isOppositeDir = (operation.isBuy() && FieldUtils.isShort(pos.getPositionDirection()) 
-						|| operation.isSell() && FieldUtils.isLong(pos.getPositionDirection()));
-				if(ContractUtils.isSame(pos.getContract(), contract) && isOppositeDir) {
-					pf = pos;
-				}
-			}
-			if(pf == null) {
-				getLogger().warn("委托信息：{} {} {}手", contract.getUnifiedSymbol(), operation, volume);
-				getLogger().warn("持仓信息：{}", accStore);
-				throw new IllegalStateException("没有找到对应的持仓进行操作");
-			}
-		}
+		String gatewayId = contract.getGatewayId();
+		DirectionEnum direction = OrderUtils.resolveDirection(operation);
+		List<TradeField> nonclosedTrades = moduleAccount.getNonclosedTrades(contract.getUnifiedSymbol(), FieldUtils.getOpposite(direction));
 		return Optional.of(submitOrderReq(SubmitOrderReqField.newBuilder()
 				.setOriginOrderId(id)
 				.setContract(contract)
 				.setGatewayId(gatewayId)
-				.setDirection(OrderUtils.resolveDirection(operation))
-				.setOffsetFlag(closingStrategy.resolveOperation(operation, pf))
+				.setDirection(direction)
+				.setOffsetFlag(module.getModuleDescription().getClosingPolicy().resolveOffsetFlag(operation, contract, nonclosedTrades, tick.getTradingDay()))
 				.setPrice(orderPrice)
 				.setVolume(volume)		//	当信号交易量大于零时，优先使用信号交易量
 				.setHedgeFlag(HedgeFlagEnum.HF_Speculation)
@@ -565,6 +533,19 @@ public class ModuleContext implements IModuleContext{
 				.setActionTimestamp(latestTickMap.get(contract.getUnifiedSymbol()).getActionTimestamp())
 				.setMinVolume(1)
 				.build()));
+	}
+	
+	private DateFormat fmt = new SimpleDateFormat();
+	
+	private String submitOrderReq(SubmitOrderReqField orderReq) {
+		if(getLogger().isInfoEnabled()) {			
+			getLogger().info("发单：{}，{}", orderReq.getOriginOrderId(), fmt.format(new Date(orderReq.getActionTimestamp())));
+		}
+		moduleAccount.onSubmitOrder(orderReq);
+		ContractField contract = orderReq.getContract();
+		String originOrderId = module.getAccount(contract).submitOrder(orderReq);
+		orderReqMap.put(originOrderId, orderReq);
+		return originOrderId;
 	}
 
 	@Override
@@ -580,7 +561,18 @@ public class ModuleContext implements IModuleContext{
 
 	@Override
 	public void cancelOrder(String originOrderId) {
-		//TODO
+		if(!orderReqMap.containsKey(originOrderId)) {
+			getLogger().debug("找不到订单：{}", originOrderId);
+			return;
+		}
+		getLogger().info("撤单：{}", originOrderId);
+		ContractField contract = orderReqMap.get(originOrderId).getContract();
+		CancelOrderReqField cancelReq = CancelOrderReqField.newBuilder()
+				.setGatewayId(contract.getGatewayId())
+				.setOriginOrderId(originOrderId)
+				.build();
+		moduleAccount.onCancelOrder(cancelReq);
+		module.getAccount(contract).cancelOrder(cancelReq);
 	}
 
 	@Override
@@ -596,7 +588,7 @@ public class ModuleContext implements IModuleContext{
 
 	@Override
 	public void setOrderRequestFilter(OrderRequestFilter filter) {
-		this.orderReqFilter = filter;
+		contractMap.values().forEach(c -> module.getAccount(c).setOrderRequestFilter(filter));
 	}
 
 }

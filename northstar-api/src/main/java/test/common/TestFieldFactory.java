@@ -79,6 +79,7 @@ public class TestFieldFactory {
 				.setShortMarginRatio(0.08)
 				.setMultiplier(10)
 				.setPriceTick(1)
+				.setCommissionRate(0.0001)
 				.setProductClass(ProductClassEnum.FUTURES)
 				.setUnifiedSymbol(symbol + "@SHFE@FUTURES")
 				.setSymbol(symbol)

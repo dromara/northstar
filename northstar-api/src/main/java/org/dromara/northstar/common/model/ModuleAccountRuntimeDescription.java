@@ -25,10 +25,6 @@ public class ModuleAccountRuntimeDescription {
 	 */
 	private double initBalance;
 	/**
-	 * 期初余额（开仓前计算）
-	 */
-	private double preBalance;
-	/**
 	 * 累计平仓盈亏
 	 */
 	private double accCloseProfit;

@@ -23,7 +23,7 @@ public enum ClosingPolicy {
 	FIRST_IN_FIRST_OUT("先开先平") {
 		
 		@Override
-		public OffsetFlagEnum resolveOperation(SignalOperation operation, ContractField contract, List<TradeField> nonclosedTrades,
+		public OffsetFlagEnum resolveOffsetFlag(SignalOperation operation, ContractField contract, List<TradeField> nonclosedTrades,
 				String tradingDay) {
 			if(operation.isOpen()) {
 				return OffsetFlagEnum.OF_Open;
@@ -43,7 +43,7 @@ public enum ClosingPolicy {
 	FIRST_IN_LAST_OUT("平今优先") {
 		
 		@Override
-		public OffsetFlagEnum resolveOperation(SignalOperation operation, ContractField contract, List<TradeField> nonclosedTrades,
+		public OffsetFlagEnum resolveOffsetFlag(SignalOperation operation, ContractField contract, List<TradeField> nonclosedTrades,
 				String tradingDay) {
 			if(operation.isOpen()) {
 				return OffsetFlagEnum.OF_Open;
@@ -64,7 +64,7 @@ public enum ClosingPolicy {
 	CLOSE_NONTODAY_HEGDE_TODAY("平昨锁今") {
 		
 		@Override
-		public OffsetFlagEnum resolveOperation(SignalOperation operation, ContractField contract, List<TradeField> nonclosedTrades,
+		public OffsetFlagEnum resolveOffsetFlag(SignalOperation operation, ContractField contract, List<TradeField> nonclosedTrades,
 				String tradingDay) {
 			if(operation.isOpen()) {
 				return OffsetFlagEnum.OF_Open;
@@ -96,5 +96,5 @@ public enum ClosingPolicy {
 		}
 	}
 	
-	public abstract OffsetFlagEnum resolveOperation(SignalOperation operation, ContractField contract, List<TradeField> nonclosedTrades, String tradingDay);
+	public abstract OffsetFlagEnum resolveOffsetFlag(SignalOperation operation, ContractField contract, List<TradeField> nonclosedTrades, String tradingDay);
 }

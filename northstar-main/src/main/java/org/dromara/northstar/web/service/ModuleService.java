@@ -147,7 +147,6 @@ public class ModuleService implements PostLoadAware {
 			accRtsMap.put(PlaybackModuleContext.PLAYBACK_GATEWAY, ModuleAccountRuntimeDescription.builder()
 					.accountId(PlaybackModuleContext.PLAYBACK_GATEWAY)
 					.initBalance(md.getModuleAccountSettingsDescription().get(0).getModuleAccountInitBalance())
-					.preBalance(md.getModuleAccountSettingsDescription().get(0).getModuleAccountInitBalance())
 					.positionDescription(new ModulePositionDescription())
 					.build());
 		} else {
@@ -155,7 +154,6 @@ public class ModuleService implements PostLoadAware {
 					.map(masd -> ModuleAccountRuntimeDescription.builder()
 							.accountId(masd.getAccountGatewayId())
 							.initBalance(masd.getModuleAccountInitBalance())
-							.preBalance(masd.getModuleAccountInitBalance())
 							.positionDescription(new ModulePositionDescription())
 							.build())
 					.collect(Collectors.toMap(ModuleAccountRuntimeDescription::getAccountId, mard -> mard));
@@ -218,7 +216,12 @@ public class ModuleService implements PostLoadAware {
 		ComponentAndParamsPair strategyComponent = md.getStrategySetting();
 		TradeStrategy strategy = resolveComponent(strategyComponent);
 		strategy.setComputedState(mrd.getDataState());
-		IModuleContext moduleCtx = new ModuleContext(strategy, md, mrd, contractMgr, moduleRepo, moduleLoggerFactory, mailMgr);
+		IModuleContext moduleCtx = null;
+		if(md.getUsage() == ModuleUsage.PLAYBACK) {
+			moduleCtx = new PlaybackModuleContext(strategy, md, mrd, contractMgr, moduleRepo, moduleLoggerFactory, mailMgr);
+		} else {
+			moduleCtx = new ModuleContext(strategy, md, mrd, contractMgr, moduleRepo, moduleLoggerFactory, mailMgr);
+		}
 		
 		log.info("模组[{}] 初始化数据起始计算日为：{}", md.getModuleName(), date);
 		LocalDateTime nowDateTime = LocalDateTime.now();

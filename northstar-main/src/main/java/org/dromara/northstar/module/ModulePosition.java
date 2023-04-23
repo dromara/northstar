@@ -14,6 +14,7 @@ import org.dromara.northstar.common.constant.ClosingPolicy;
 import org.dromara.northstar.common.utils.ContractUtils;
 import org.dromara.northstar.common.utils.FieldUtils;
 
+import lombok.Getter;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreEnum.OrderStatusEnum;
@@ -39,15 +40,17 @@ public class ModulePosition implements TickDataAware, TransactionAware{
 
 	private final DirectionEnum direction;
 	
-	private final ContractField contract;
-	
 	private TickField lastTick;
 	
 	private String tradingDay;
 	
 	private ClosingPolicy closingPolicy;
+	
 	/* 开平仓匹配回调 */
 	private BiConsumer<TradeField, TradeField> onDealCallback;
+	
+	@Getter
+	private final ContractField contract;
 
 	public ModulePosition(ContractField contract, DirectionEnum direction, ClosingPolicy closingPolicy, BiConsumer<TradeField, TradeField> onDealCallback) {
 		this.contract = contract;
@@ -285,4 +288,7 @@ public class ModulePosition implements TickDataAware, TransactionAware{
 				.build();
 	}
 
+	public void releaseOrder() {
+		pendingOrderMap.clear();
+	}
 }

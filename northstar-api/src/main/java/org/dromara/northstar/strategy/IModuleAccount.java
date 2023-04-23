@@ -25,12 +25,6 @@ public interface IModuleAccount extends TickDataAware, TransactionAware {
 	 */
 	double getInitBalance(String gatewayId);
 	/**
-	 * 期初余额
-	 * @param gatewayId		账户ID
-	 * @return
-	 */
-	double getPreBalance(String gatewayId);
-	/**
 	 * 累计交易手续费
 	 * @param gatewayId		账户ID
 	 * @return
@@ -42,6 +36,11 @@ public interface IModuleAccount extends TickDataAware, TransactionAware {
 	 * @return
 	 */
 	List<PositionField> getPositions(String gatewayId);
+	/**
+	 * 获取全部未平仓成交
+	 * @return
+	 */
+	List<TradeField> getNonclosedTrades();
 	/**
 	 * 获取全部未平仓成交
 	 * @param gatewayId		账户ID

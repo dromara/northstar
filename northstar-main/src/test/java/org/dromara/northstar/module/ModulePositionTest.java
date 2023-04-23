@@ -34,6 +34,7 @@ TestFieldFactory factory = new TestFieldFactory("testGateway");
 	OrderField order1 = factory.makeOrderField("rb2205@SHFE", 5300, 1, DirectionEnum.D_Sell, OffsetFlagEnum.OF_CloseToday);
 	OrderField order2 = factory.makeOrderField("rb2205@SHFE", 5300, 1, DirectionEnum.D_Sell, OffsetFlagEnum.OF_CloseYesterday);
 	
+	@SuppressWarnings("unchecked")
 	BiConsumer<TradeField, TradeField> onDealCallback = mock(BiConsumer.class);
 	
 	// 用例：行情更新，持仓利润更新

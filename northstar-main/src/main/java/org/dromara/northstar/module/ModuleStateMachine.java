@@ -1,16 +1,13 @@
 package org.dromara.northstar.module;
 
 import java.util.List;
-import java.util.Objects;
 
 import org.apache.commons.codec.binary.StringUtils;
 import org.dromara.northstar.common.TransactionAware;
 import org.dromara.northstar.common.constant.ModuleState;
-import org.dromara.northstar.common.model.ModuleRuntimeDescription;
 import org.dromara.northstar.common.utils.OrderUtils;
+import org.dromara.northstar.strategy.IModuleAccount;
 import org.dromara.northstar.strategy.IModuleContext;
-
-import com.google.protobuf.InvalidProtocolBufferException;
 
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
@@ -31,6 +28,8 @@ public class ModuleStateMachine implements TransactionAware {
 	private ModuleState curState = ModuleState.EMPTY;
 	
 	private ModuleState prevState;
+
+	private IModuleAccount moduleAccount;
 	
 	private IModuleContext ctx;
 	
@@ -63,19 +62,7 @@ public class ModuleStateMachine implements TransactionAware {
 	}
 	
 	private void updateState() {
-		ModuleRuntimeDescription mrd = ctx.getRuntimeDescription(false);
-		List<TradeField> nonclosedTrade = mrd.getAccountRuntimeDescriptionMap().values().stream()
-											.flatMap(mard -> mard.getPositionDescription().getNonclosedTrades().stream())
-											.map(bytes -> {
-												try {
-													return TradeField.parseFrom(bytes);
-												} catch (InvalidProtocolBufferException e) {
-													ctx.getLogger().error("", e);
-													return null;
-												}
-											})
-											.filter(Objects::nonNull)
-											.toList();
+		List<TradeField> nonclosedTrade = moduleAccount.getNonclosedTrades();
 		if(nonclosedTrade.isEmpty()) {
 			setState(ModuleState.EMPTY);
 		} else {
@@ -119,6 +106,11 @@ public class ModuleStateMachine implements TransactionAware {
 			throw new IllegalStateException("当前状态异常：" + curState);
 		}
 		setState(ModuleState.RETRIEVING_FOR_CANCEL);
+	}
+	
+	public void setModuleAccount(IModuleAccount moduleAccount) {
+		this.moduleAccount = moduleAccount;
+		updateState();
 	}
 
 }

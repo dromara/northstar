@@ -26,7 +26,7 @@ class ClosingPolicyTest {
         String tradingDay = "20230421";
         List<TradeField> nonclosedTrades = List.of();
 
-        OffsetFlagEnum result = ClosingPolicy.FIRST_IN_FIRST_OUT.resolveOperation(SignalOperation.BUY_OPEN, contract, nonclosedTrades, tradingDay);
+        OffsetFlagEnum result = ClosingPolicy.FIRST_IN_FIRST_OUT.resolveOffsetFlag(SignalOperation.BUY_OPEN, contract, nonclosedTrades, tradingDay);
         assertEquals(OffsetFlagEnum.OF_Open, result);
     }
 
@@ -35,7 +35,7 @@ class ClosingPolicyTest {
         String tradingDay = "20230422";
         List<TradeField> nonclosedTrades = List.of(trade2);
 
-        OffsetFlagEnum result = ClosingPolicy.FIRST_IN_FIRST_OUT.resolveOperation(SignalOperation.BUY_CLOSE, contract, new ArrayList<>(nonclosedTrades), tradingDay);
+        OffsetFlagEnum result = ClosingPolicy.FIRST_IN_FIRST_OUT.resolveOffsetFlag(SignalOperation.BUY_CLOSE, contract, new ArrayList<>(nonclosedTrades), tradingDay);
         assertEquals(OffsetFlagEnum.OF_CloseToday, result);
     }
 
@@ -43,10 +43,10 @@ class ClosingPolicyTest {
     void testFirstInFirstOutClose() {
         String tradingDay = "20230422";
         
-        OffsetFlagEnum result = ClosingPolicy.FIRST_IN_FIRST_OUT.resolveOperation(SignalOperation.SELL_CLOSE, contract, new ArrayList<>(List.of(trade1)), tradingDay);
+        OffsetFlagEnum result = ClosingPolicy.FIRST_IN_FIRST_OUT.resolveOffsetFlag(SignalOperation.SELL_CLOSE, contract, new ArrayList<>(List.of(trade1)), tradingDay);
         assertEquals(OffsetFlagEnum.OF_Close, result);
         
-        OffsetFlagEnum result2 = ClosingPolicy.FIRST_IN_FIRST_OUT.resolveOperation(SignalOperation.SELL_CLOSE, contract, new ArrayList<>(List.of(trade1, trade2)), tradingDay);
+        OffsetFlagEnum result2 = ClosingPolicy.FIRST_IN_FIRST_OUT.resolveOffsetFlag(SignalOperation.SELL_CLOSE, contract, new ArrayList<>(List.of(trade1, trade2)), tradingDay);
         assertEquals(OffsetFlagEnum.OF_Close, result2);
     }
     
@@ -55,7 +55,7 @@ class ClosingPolicyTest {
         String tradingDay = "20230421";
         List<TradeField> nonclosedTrades = List.of();
 
-        OffsetFlagEnum result = ClosingPolicy.FIRST_IN_LAST_OUT.resolveOperation(SignalOperation.BUY_OPEN, contract, nonclosedTrades, tradingDay);
+        OffsetFlagEnum result = ClosingPolicy.FIRST_IN_LAST_OUT.resolveOffsetFlag(SignalOperation.BUY_OPEN, contract, nonclosedTrades, tradingDay);
         assertEquals(OffsetFlagEnum.OF_Open, result);
     }
 
@@ -63,10 +63,10 @@ class ClosingPolicyTest {
     void testFirstInLastOutCloseToday() {
         String tradingDay = "20230422";
         
-        OffsetFlagEnum result = ClosingPolicy.FIRST_IN_LAST_OUT.resolveOperation(SignalOperation.BUY_CLOSE, contract, new ArrayList<>(List.of(trade2)), tradingDay);
+        OffsetFlagEnum result = ClosingPolicy.FIRST_IN_LAST_OUT.resolveOffsetFlag(SignalOperation.BUY_CLOSE, contract, new ArrayList<>(List.of(trade2)), tradingDay);
         assertEquals(OffsetFlagEnum.OF_CloseToday, result);
         
-        OffsetFlagEnum result2 = ClosingPolicy.FIRST_IN_LAST_OUT.resolveOperation(SignalOperation.BUY_CLOSE, contract, new ArrayList<>(List.of(trade1, trade2)), tradingDay);
+        OffsetFlagEnum result2 = ClosingPolicy.FIRST_IN_LAST_OUT.resolveOffsetFlag(SignalOperation.BUY_CLOSE, contract, new ArrayList<>(List.of(trade1, trade2)), tradingDay);
         assertEquals(OffsetFlagEnum.OF_CloseToday, result2);
     }
 
@@ -75,7 +75,7 @@ class ClosingPolicyTest {
         String tradingDay = "20230422";
         List<TradeField> nonclosedTrades = List.of(trade1);
 
-        OffsetFlagEnum result = ClosingPolicy.FIRST_IN_LAST_OUT.resolveOperation(SignalOperation.SELL_CLOSE, contract, new ArrayList<>(nonclosedTrades), tradingDay);
+        OffsetFlagEnum result = ClosingPolicy.FIRST_IN_LAST_OUT.resolveOffsetFlag(SignalOperation.SELL_CLOSE, contract, new ArrayList<>(nonclosedTrades), tradingDay);
         assertEquals(OffsetFlagEnum.OF_Close, result);
     }
     
@@ -83,10 +83,10 @@ class ClosingPolicyTest {
     void testCloseNonTodayHedgeTodayOpen() {
     	String tradingDay = "20230422";
 
-        OffsetFlagEnum result = ClosingPolicy.CLOSE_NONTODAY_HEGDE_TODAY.resolveOperation(SignalOperation.SELL_OPEN, contract, List.of(), tradingDay);
+        OffsetFlagEnum result = ClosingPolicy.CLOSE_NONTODAY_HEGDE_TODAY.resolveOffsetFlag(SignalOperation.SELL_OPEN, contract, List.of(), tradingDay);
         assertEquals(OffsetFlagEnum.OF_Open, result);
         
-        OffsetFlagEnum result2 = ClosingPolicy.CLOSE_NONTODAY_HEGDE_TODAY.resolveOperation(SignalOperation.SELL_CLOSE, contract, new ArrayList<>(List.of(trade2)), tradingDay);
+        OffsetFlagEnum result2 = ClosingPolicy.CLOSE_NONTODAY_HEGDE_TODAY.resolveOffsetFlag(SignalOperation.SELL_CLOSE, contract, new ArrayList<>(List.of(trade2)), tradingDay);
         assertEquals(OffsetFlagEnum.OF_Open, result2);
     }
 
@@ -94,10 +94,10 @@ class ClosingPolicyTest {
     void testCloseNonTodayHedgeTodayClose() {
     	String tradingDay = "20230422";
 
-        OffsetFlagEnum result = ClosingPolicy.CLOSE_NONTODAY_HEGDE_TODAY.resolveOperation(SignalOperation.SELL_CLOSE, contract, new ArrayList<>(List.of(trade1)), tradingDay);
+        OffsetFlagEnum result = ClosingPolicy.CLOSE_NONTODAY_HEGDE_TODAY.resolveOffsetFlag(SignalOperation.SELL_CLOSE, contract, new ArrayList<>(List.of(trade1)), tradingDay);
         assertEquals(OffsetFlagEnum.OF_Close, result);
         
-        OffsetFlagEnum result2 = ClosingPolicy.CLOSE_NONTODAY_HEGDE_TODAY.resolveOperation(SignalOperation.SELL_CLOSE, contract, new ArrayList<>(List.of(trade1, trade2)), tradingDay);
+        OffsetFlagEnum result2 = ClosingPolicy.CLOSE_NONTODAY_HEGDE_TODAY.resolveOffsetFlag(SignalOperation.SELL_CLOSE, contract, new ArrayList<>(List.of(trade1, trade2)), tradingDay);
         assertEquals(OffsetFlagEnum.OF_Close, result2);
     }
     
