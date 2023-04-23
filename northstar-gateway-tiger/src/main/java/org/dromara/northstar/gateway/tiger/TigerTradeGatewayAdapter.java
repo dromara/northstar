@@ -294,6 +294,7 @@ public class TigerTradeGatewayAdapter implements TradeGateway{
 
 	@Override
 	public GatewayDescription gatewayDescription() {
+		gd.setConnectionState(getConnectionState());
 		return gd;
 	}
 

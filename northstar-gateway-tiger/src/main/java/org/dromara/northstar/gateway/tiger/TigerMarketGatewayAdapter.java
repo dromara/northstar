@@ -123,6 +123,7 @@ public class TigerMarketGatewayAdapter implements MarketGateway {
 	
 	@Override
 	public GatewayDescription gatewayDescription() {
+		gd.setConnectionState(getConnectionState());
 		return gd;
 	}
 

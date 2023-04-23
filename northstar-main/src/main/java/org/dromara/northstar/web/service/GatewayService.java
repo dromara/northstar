@@ -185,7 +185,7 @@ public class GatewayService implements PostLoadAware {
 	 * @throws Exception 
 	 */
 	public List<GatewayDescription> findAllGatewayDescription() {
-		return gatewayRepo.findAll();
+		return gatewayMgr.allGateways().stream().map(Gateway::gatewayDescription).toList();
 	}
 	
 	/**
@@ -194,7 +194,11 @@ public class GatewayService implements PostLoadAware {
 	 * @return
 	 */
 	public GatewayDescription findGatewayDescription(String gatewayId) {
-		return gatewayRepo.findById(gatewayId);
+		return gatewayMgr.allGateways().stream()
+					.filter(gw -> StringUtils.equals(gatewayId, gw.gatewayId()))
+					.findAny()
+					.orElseThrow()
+					.gatewayDescription();
 	}
 	
 	/**
@@ -203,13 +207,7 @@ public class GatewayService implements PostLoadAware {
 	 * @throws Exception 
 	 */
 	public List<GatewayDescription> findAllMarketGatewayDescription() {
-		return gatewayRepo.findAll().stream()
-				.filter(gd -> gd.getGatewayUsage() == GatewayUsage.MARKET_DATA)
-				.map(gd -> {
-					gd.setConnectionState(gatewayMgr.get(Identifier.of(gd.getGatewayId())).getConnectionState());
-					return gd;
-				})
-				.toList();
+		return gatewayMgr.marketGateways().stream().map(MarketGateway::gatewayDescription).toList();
 	}
 	
 	/**
@@ -218,13 +216,7 @@ public class GatewayService implements PostLoadAware {
 	 * @throws Exception 
 	 */
 	public List<GatewayDescription> findAllTraderGatewayDescription() {
-		return gatewayRepo.findAll().stream()
-				.filter(gd -> gd.getGatewayUsage() == GatewayUsage.TRADE)
-				.map(gd -> {
-					gd.setConnectionState(gatewayMgr.get(Identifier.of(gd.getGatewayId())).getConnectionState());
-					return gd;
-				})
-				.toList();
+		return gatewayMgr.tradeGateways().stream().map(TradeGateway::gatewayDescription).toList();
 	}
 	
 	/**

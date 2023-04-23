@@ -43,6 +43,7 @@ public abstract class GatewayAbstract implements Gateway {
 
 	@Override
 	public GatewayDescription gatewayDescription() {
+		gatewayDescription.setConnectionState(connState);
 		return gatewayDescription;
 	}
 

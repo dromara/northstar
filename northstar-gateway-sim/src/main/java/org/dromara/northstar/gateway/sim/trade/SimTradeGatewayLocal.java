@@ -121,6 +121,7 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 
 	@Override
 	public GatewayDescription gatewayDescription() {
+		gd.setConnectionState(getConnectionState());
 		return gd;
 	}
 

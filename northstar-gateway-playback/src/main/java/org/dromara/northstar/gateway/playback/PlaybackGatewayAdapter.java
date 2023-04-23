@@ -67,6 +67,7 @@ public class PlaybackGatewayAdapter implements MarketGateway {
 
 	@Override
 	public GatewayDescription gatewayDescription() {
+		gd.setConnectionState(getConnectionState());
 		return gd;
 	}
 

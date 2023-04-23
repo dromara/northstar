@@ -140,6 +140,7 @@ export default {
           return
         }
         Object.assign(this.playbackSettings, this.playbackSettingsSrc)
+        console.log(this.playbackSettings)
         this.playbackSettings.dateRange = [
           moment(this.playbackSettingsSrc.startDate, 'YYYYMMDD').toDate(),
           moment(this.playbackSettingsSrc.endDate, 'YYYYMMDD').toDate()

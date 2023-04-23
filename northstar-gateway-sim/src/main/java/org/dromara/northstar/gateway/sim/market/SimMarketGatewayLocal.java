@@ -122,6 +122,7 @@ public class SimMarketGatewayLocal implements MarketGateway{
 
 	@Override
 	public GatewayDescription gatewayDescription() {
+		gd.setConnectionState(getConnectionState());
 		return gd;
 	}
 

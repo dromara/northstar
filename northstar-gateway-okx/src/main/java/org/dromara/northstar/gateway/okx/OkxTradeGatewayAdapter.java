@@ -263,6 +263,7 @@ public class OkxTradeGatewayAdapter implements TradeGateway{
 
 	@Override
 	public GatewayDescription gatewayDescription() {
+		gd.setConnectionState(getConnectionState());
 		return gd;
 	}
 

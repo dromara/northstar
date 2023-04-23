@@ -234,7 +234,6 @@ export default {
   },
   watch: {
     visible: function (val) {
-      console.log('readOnly', this.readOnly)
       if (val) {
         if(this.isUpdateMode){
           Object.keys(this.gatewayDescription).forEach(key => {

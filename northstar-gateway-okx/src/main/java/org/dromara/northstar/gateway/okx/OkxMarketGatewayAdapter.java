@@ -115,6 +115,7 @@ public class OkxMarketGatewayAdapter implements MarketGateway {
 
     @Override
     public GatewayDescription gatewayDescription() {
+    	gd.setConnectionState(getConnectionState());
         return gd;
     }
 
