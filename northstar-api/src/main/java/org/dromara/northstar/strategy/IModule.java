@@ -3,6 +3,7 @@ package org.dromara.northstar.strategy;
 import org.dromara.northstar.common.event.NorthstarEvent;
 import org.dromara.northstar.common.model.ModuleDescription;
 import org.dromara.northstar.common.model.ModuleRuntimeDescription;
+import org.dromara.northstar.gateway.Contract;
 
 import xyz.redtorch.pb.CoreField.ContractField;
 
@@ -38,6 +39,12 @@ public interface IModule {
 	 * @param contract
 	 * @return
 	 */
+	IAccount getAccount(Contract contract);
+	/**
+	 * 获取合约关联的交易账户
+	 * @param contract
+	 * @return
+	 */
 	IAccount getAccount(ContractField contract);
 	/**
 	 * 获取模组状态描述
@@ -54,4 +61,9 @@ public interface IModule {
 	 * @return
 	 */
 	IModuleContext getModuleContext();
+	/**
+	 * 设置订单过滤器
+	 * @param filter
+	 */
+	void setOrderRequestFilter(OrderRequestFilter filter);
 }

@@ -1,6 +1,7 @@
 package org.dromara.northstar.gateway.common.domain.contract;
 
 import java.util.List;
+import java.util.Objects;
 
 import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.constant.Constants;
@@ -107,4 +108,23 @@ public class OptionChainContract implements Contract {
 	public ChannelType channelType() {
 		return memberContracts.get(0).channelType();
 	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(name);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		OptionChainContract other = (OptionChainContract) obj;
+		return Objects.equals(name, other.name);
+	}
+	
+	
 }

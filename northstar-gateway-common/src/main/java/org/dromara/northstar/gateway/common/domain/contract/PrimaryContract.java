@@ -1,5 +1,7 @@
 package org.dromara.northstar.gateway.common.domain.contract;
 
+import java.util.Objects;
+
 import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.constant.Constants;
 import org.dromara.northstar.common.model.Identifier;
@@ -84,4 +86,23 @@ public class PrimaryContract implements Contract {
 				.build();
 	}
 
+	@Override
+	public int hashCode() {
+		return Objects.hash(identifier());
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		PrimaryContract other = (PrimaryContract) obj;
+		return Objects.equals(identifier(), other.identifier());
+	}
+
+	
+	
 }

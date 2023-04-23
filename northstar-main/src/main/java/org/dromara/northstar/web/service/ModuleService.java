@@ -256,6 +256,7 @@ public class ModuleService implements PostLoadAware {
 			date = date.plusWeeks(1);
 		}
 		IModule module = new TradeModule(md, moduleCtx, accountMgr, contractMgr);
+		strategy.setContext(moduleCtx);
 		moduleCtx.setEnabled(mrd.isEnabled());
 		moduleMgr.add(module);
 	}

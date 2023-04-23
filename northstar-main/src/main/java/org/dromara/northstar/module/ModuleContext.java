@@ -27,6 +27,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.dromara.northstar.common.constant.Constants;
 import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.common.constant.ModuleState;
+import org.dromara.northstar.common.constant.ModuleUsage;
 import org.dromara.northstar.common.constant.SignalOperation;
 import org.dromara.northstar.common.exception.InsufficientException;
 import org.dromara.northstar.common.model.BarWrapper;
@@ -136,10 +137,13 @@ public class ModuleContext implements IModuleContext{
 	
 	protected String tradingDay = "";
 	
+	protected IContractManager contractMgr;
+	
 	public ModuleContext(TradeStrategy tradeStrategy, ModuleDescription moduleDescription, ModuleRuntimeDescription moduleRtDescription,
 			IContractManager contractMgr, IModuleRepository moduleRepo, ModuleLoggerFactory loggerFactory, IMessageSenderManager senderMgr) {
 		this.tradeStrategy = tradeStrategy;
 		this.moduleRepo = moduleRepo;
+		this.contractMgr = contractMgr;
 		this.logger = loggerFactory.getLogger(moduleDescription.getModuleName());
 		this.senderMgr = senderMgr;
 		this.moduleAccount = new ModuleAccount(moduleDescription, moduleRtDescription, new ModuleStateMachine(this), moduleRepo, contractMgr, logger);
@@ -210,7 +214,8 @@ public class ModuleContext implements IModuleContext{
 
 	@Override
 	public IAccount getAccount(ContractField contract) {
-		return module.getAccount(contract);
+		Contract c = contractMgr.getContract(Identifier.of(contract.getContractId()));
+		return module.getAccount(c);
 	}
 
 	@Override
@@ -407,7 +412,9 @@ public class ModuleContext implements IModuleContext{
 	public ModuleRuntimeDescription getRuntimeDescription(boolean fullDescription) {
 		Map<String, ModuleAccountRuntimeDescription> accMap = new HashMap<>();
 		module.getModuleDescription().getModuleAccountSettingsDescription().forEach(mad -> {
-			String gatewayId = mad.getAccountGatewayId();
+			String gatewayId = module.getModuleDescription().getUsage() == ModuleUsage.PLAYBACK 
+					? PlaybackModuleContext.PLAYBACK_GATEWAY 
+					: mad.getAccountGatewayId();
 			ModulePositionDescription posDescription = ModulePositionDescription.builder()
 					.logicalPositions(moduleAccount.getPositions(gatewayId).stream().map(PositionField::toByteArray).toList())
 					.nonclosedTrades(moduleAccount.getNonclosedTrades(gatewayId).stream().map(TradeField::toByteArray).toList())
@@ -548,7 +555,8 @@ public class ModuleContext implements IModuleContext{
 			throw new InsufficientException(String.format("模组 [%s] 下单失败，原因：%s", module.getName(), e.getMessage()));
 		}
 		ContractField contract = orderReq.getContract();
-		String originOrderId = module.getAccount(contract).submitOrder(orderReq);
+		Contract c = contractMgr.getContract(Identifier.of(contract.getContractId()));
+		String originOrderId = module.getAccount(c).submitOrder(orderReq);
 		orderReqMap.put(originOrderId, orderReq);
 		return originOrderId;
 	}
@@ -572,12 +580,13 @@ public class ModuleContext implements IModuleContext{
 		}
 		getLogger().info("撤单：{}", originOrderId);
 		ContractField contract = orderReqMap.get(originOrderId).getContract();
+		Contract c = contractMgr.getContract(Identifier.of(contract.getContractId()));
 		CancelOrderReqField cancelReq = CancelOrderReqField.newBuilder()
 				.setGatewayId(contract.getGatewayId())
 				.setOriginOrderId(originOrderId)
 				.build();
 		moduleAccount.onCancelOrder(cancelReq);
-		module.getAccount(contract).cancelOrder(cancelReq);
+		module.getAccount(c).cancelOrder(cancelReq);
 	}
 
 	@Override
@@ -593,7 +602,7 @@ public class ModuleContext implements IModuleContext{
 
 	@Override
 	public void setOrderRequestFilter(OrderRequestFilter filter) {
-		contractMap.values().forEach(c -> module.getAccount(c).setOrderRequestFilter(filter));
+		module.setOrderRequestFilter(filter);
 	}
 
 }

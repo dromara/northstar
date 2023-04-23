@@ -84,8 +84,7 @@ public class BeginnerSampleStrategy implements TradeStrategy{
 		this.inspectableState = stateObj;
 	}
 	/***************** 以上如果看不懂，基本可以照搬 *************************/
-	
-	// 从行至112行 这是自行管理撤单的逻辑。还可以通过下单时使用TradeIntent，直接定义下单意图，让框架来处理撤单追单逻辑，例如138行与148行示例。
+
 	private long nextActionTime;
 	
 	@Override

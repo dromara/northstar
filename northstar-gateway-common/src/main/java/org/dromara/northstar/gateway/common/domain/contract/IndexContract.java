@@ -1,7 +1,9 @@
 package org.dromara.northstar.gateway.common.domain.contract;
 
 import java.util.List;
+import java.util.Objects;
 
+import org.apache.commons.lang3.StringUtils;
 import org.dromara.northstar.common.TickDataAware;
 import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.constant.Constants;
@@ -144,6 +146,23 @@ public class IndexContract implements Contract, TickDataAware{
 	@Override
 	public void endOfMarket() {
 		barGen.endOfBar();
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(contract.getContractId());
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		IndexContract other = (IndexContract) obj;
+		return StringUtils.equals(contract.getContractId(), other.contract.getContractId());
 	}
 	
 }

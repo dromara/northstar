@@ -16,6 +16,7 @@ import org.dromara.northstar.gateway.IContractManager;
 import org.dromara.northstar.strategy.IAccount;
 import org.dromara.northstar.strategy.IModule;
 import org.dromara.northstar.strategy.IModuleContext;
+import org.dromara.northstar.strategy.OrderRequestFilter;
 
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.ContractField;
@@ -40,17 +41,20 @@ public class TradeModule implements IModule {
 	
 	private ModuleDescription md;
 	
-	private Map<ContractField, IAccount> contractAccountMap = new HashMap<>();
+	private Map<Contract, IAccount> contractAccountMap = new HashMap<>();
+	
+	private IContractManager contractMgr;
 	
 	public TradeModule(ModuleDescription moduleDescription, IModuleContext ctx, AccountManager accountMgr, IContractManager contractMgr) {
 		this.ctx = ctx;
+		this.contractMgr = contractMgr;
 		this.md = moduleDescription;
 		moduleDescription.getModuleAccountSettingsDescription().forEach(mad -> {
 			mad.getBindedContracts().forEach(contract -> {
 				unifiedSymbolSet.add(contract.getUnifiedSymbol());
 				accountIdSet.add(mad.getAccountGatewayId());
 				Contract c = contractMgr.getContract(Identifier.of(contract.getValue()));
-				contractAccountMap.put(c.contractField(), accountMgr.get(Identifier.of(mad.getAccountGatewayId())));
+				contractAccountMap.put(c, accountMgr.get(Identifier.of(mad.getAccountGatewayId())));
 			});
 		});
 		ctx.setModule(this);
@@ -91,11 +95,17 @@ public class TradeModule implements IModule {
 	}
 
 	@Override
-	public IAccount getAccount(ContractField contract) {
+	public IAccount getAccount(Contract contract) {
 		if(!contractAccountMap.containsKey(contract)) {
-			throw new NoSuchElementException("[" + contract.getContractId() + "] 找不到绑定的账户");
+			throw new NoSuchElementException("[" + contract.identifier().value() + "] 找不到绑定的账户");
 		}
 		return contractAccountMap.get(contract);
+	}
+	
+	@Override
+	public IAccount getAccount(ContractField contract) {
+		Contract c = contractMgr.getContract(Identifier.of(contract.getContractId()));
+		return getAccount(c);
 	}
 
 	@Override
@@ -107,5 +117,12 @@ public class TradeModule implements IModule {
 	public IModuleContext getModuleContext() {
 		return ctx;
 	}
+
+	@Override
+	public void setOrderRequestFilter(OrderRequestFilter filter) {
+		contractAccountMap.values().forEach(acc -> acc.setOrderRequestFilter(filter));
+	}
+
+	
 
 }

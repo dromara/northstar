@@ -43,7 +43,7 @@
       <el-table-column label="平仓优化" prop="closingPolicy" align="center" sortable width="100px">
         <template slot-scope="scope">
           {{
-            { FIFO: '先开先平', PRIOR_TODAY: '平今优先', PRIOR_BEFORE_HEGDE_TODAY: '平昨锁今' }[
+            { FIRST_IN_FIRST_OUT: '先开先平', FIRST_IN_LAST_OUT: '平今优先', CLOSE_NONTODAY_HEGDE_TODAY: '平昨锁今' }[
               scope.row.closingPolicy
             ]
           }}
