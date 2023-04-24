@@ -26,18 +26,19 @@ public class DefaultOrderFilter implements OrderRequestFilter {
 	
 	public DefaultOrderFilter(IModule module) {
 		this.module = module;
+		prepareCounters();
 	}
 
 	@Override
 	public void onTick(TickField tick) {
 		if(!StringUtils.equals(tradingDay, tick.getTradingDay())) {
 			tradingDay = tick.getTradingDay();
-			contractReqCounterMap.clear();
 			prepareCounters();
 		}
 	}
 	
 	private void prepareCounters() {
+		contractReqCounterMap.clear();
 		module.getModuleDescription().getModuleAccountSettingsDescription().stream().flatMap(mard -> mard.getBindedContracts().stream())
 			.forEach(contract -> contractReqCounterMap.put(contract.getUnifiedSymbol(), new AtomicInteger()));
 	}
@@ -52,7 +53,6 @@ public class DefaultOrderFilter implements OrderRequestFilter {
 			module.setEnabled(false);
 			throw new TradeException("中止委托发单");
 		}
-		module.getAccount(orderReq.getContract()).submitOrder(orderReq);
 	}
 
 }

@@ -6,6 +6,8 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 
+import org.dromara.northstar.common.constant.GatewayUsage;
+import org.dromara.northstar.common.model.GatewayDescription;
 import org.dromara.northstar.common.model.Identifier;
 import org.dromara.northstar.gateway.Gateway;
 import org.dromara.northstar.gateway.MarketGateway;
@@ -24,7 +26,9 @@ class GatewayManagerTest {
     void setUp() {
         gatewayManager = new GatewayManager();
         when(gateway.gatewayId()).thenReturn("tdGateway");
+        when(gateway.gatewayDescription()).thenReturn(GatewayDescription.builder().gatewayUsage(GatewayUsage.TRADE).build());
         when(marketGateway.gatewayId()).thenReturn("mktGateway");
+        when(marketGateway.gatewayDescription()).thenReturn(GatewayDescription.builder().gatewayUsage(GatewayUsage.MARKET_DATA).build());
     }
 
     @Test

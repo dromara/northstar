@@ -527,7 +527,7 @@ public class ModuleContext implements IModuleContext{
 					contract.getUnifiedSymbol(), operation.text(), orderPrice, volume, priceType);
 		}
 		String id = UUID.randomUUID().toString();
-		String gatewayId = contract.getGatewayId();
+		String gatewayId = getAccount(contract).accountId();
 		DirectionEnum direction = OrderUtils.resolveDirection(operation);
 		List<TradeField> nonclosedTrades = moduleAccount.getNonclosedTrades(contract.getUnifiedSymbol(), FieldUtils.getOpposite(direction));
 		return Optional.of(submitOrderReq(SubmitOrderReqField.newBuilder()

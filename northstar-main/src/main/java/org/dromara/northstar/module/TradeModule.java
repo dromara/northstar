@@ -4,8 +4,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 import org.dromara.northstar.account.AccountManager;
+import org.dromara.northstar.common.constant.ConnectionState;
 import org.dromara.northstar.common.event.NorthstarEvent;
 import org.dromara.northstar.common.exception.NoSuchElementException;
 import org.dromara.northstar.common.model.Identifier;
@@ -13,11 +15,13 @@ import org.dromara.northstar.common.model.ModuleDescription;
 import org.dromara.northstar.common.model.ModuleRuntimeDescription;
 import org.dromara.northstar.gateway.Contract;
 import org.dromara.northstar.gateway.IContractManager;
+import org.dromara.northstar.gateway.TradeGateway;
 import org.dromara.northstar.strategy.IAccount;
 import org.dromara.northstar.strategy.IModule;
 import org.dromara.northstar.strategy.IModuleContext;
 import org.dromara.northstar.strategy.OrderRequestFilter;
 
+import lombok.extern.slf4j.Slf4j;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.OrderField;
@@ -31,6 +35,7 @@ import xyz.redtorch.pb.CoreField.TradeField;
  * @author KevinHuangwl
  *
  */
+@Slf4j
 public class TradeModule implements IModule {
 	
 	private IModuleContext ctx;
@@ -67,6 +72,15 @@ public class TradeModule implements IModule {
 
 	@Override
 	public void setEnabled(boolean enabled) {
+		if(enabled) {
+			contractAccountMap.values().forEach(acc -> {
+				TradeGateway gateway = acc.getTradeGateway();
+				if(gateway.getConnectionState() != ConnectionState.CONNECTED) {
+					log.warn("模组 [{}] 启动时，检测到账户网关 [{}] 没有连线，将自动连线", getName(), gateway.gatewayId());
+					CompletableFuture.runAsync(gateway::connect);
+				}
+			});
+		}
 		ctx.setEnabled(enabled);
 	}
 

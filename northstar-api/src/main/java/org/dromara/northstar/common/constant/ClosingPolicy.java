@@ -32,7 +32,7 @@ public enum ClosingPolicy {
 			checkNonclosedTrades(nonclosedTrades, contract);
 			List<TradeField> wrapList = new ArrayList<>(nonclosedTrades);
 			wrapList.sort((a, b) -> a.getTradeTimestamp() < b.getTradeTimestamp() ? -1 : 1);
-			if(StringUtils.equals(tradingDay, nonclosedTrades.get(0).getTradingDay())) {
+			if(StringUtils.equals(tradingDay, wrapList.get(0).getTradingDay())) {
 				return OffsetFlagEnum.OF_CloseToday;
 			}
 			return OffsetFlagEnum.OF_Close;
@@ -53,7 +53,7 @@ public enum ClosingPolicy {
 			checkNonclosedTrades(nonclosedTrades, contract);
 			List<TradeField> wrapList = new ArrayList<>(nonclosedTrades);
 			wrapList.sort((a, b) -> a.getTradeTimestamp() > b.getTradeTimestamp() ? -1 : 1);
-			if(StringUtils.equals(tradingDay, nonclosedTrades.get(0).getTradingDay())) {
+			if(StringUtils.equals(tradingDay, wrapList.get(0).getTradingDay())) {
 				return OffsetFlagEnum.OF_CloseToday;
 			}
 			return OffsetFlagEnum.OF_Close;
@@ -75,7 +75,7 @@ public enum ClosingPolicy {
 			checkNonclosedTrades(nonclosedTrades, contract);
 			List<TradeField> wrapList = new ArrayList<>(nonclosedTrades);
 			wrapList.sort((a, b) -> a.getTradeTimestamp() < b.getTradeTimestamp() ? -1 : 1);
-			if(StringUtils.equals(tradingDay, nonclosedTrades.get(0).getTradingDay())) {
+			if(StringUtils.equals(tradingDay, wrapList.get(0).getTradingDay())) {
 				return OffsetFlagEnum.OF_Open;
 			}
 			return OffsetFlagEnum.OF_Close;
