@@ -143,4 +143,12 @@ public class TradeIntent implements TransactionAware, TickDataAware {
 	public boolean hasTerminated() {
 		return terminated || accVol == volume;
 	}
+
+	@Override
+	public String toString() {
+		return String.format("TradeIntent [contract=%s, operation=%s, priceType=%s, price=%s, volume=%s, timeout=%s]", 
+				contract.getContractId(), operation, priceType, price, volume, timeout);
+	}
+	
+	
 }

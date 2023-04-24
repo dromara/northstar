@@ -170,12 +170,8 @@ public class GatewayService implements PostLoadAware {
 	
 	private boolean doDeleteGateway(String gatewayId) {
 		Identifier id = Identifier.of(gatewayId);
-		Gateway gateway = gatewayMgr.get(id);
 		gatewayMgr.remove(id);
 		gatewayRepo.deleteById(gatewayId);
-		if(gateway instanceof SimTradeGateway simGateway) {
-			simGateway.destory();
-		}
 		return true;
 	}
 	

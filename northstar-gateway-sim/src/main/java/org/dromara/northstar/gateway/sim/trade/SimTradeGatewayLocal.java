@@ -15,6 +15,7 @@ import xyz.redtorch.pb.CoreField.AccountField;
 import xyz.redtorch.pb.CoreField.CancelOrderReqField;
 import xyz.redtorch.pb.CoreField.PositionField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
+import xyz.redtorch.pb.CoreField.TickField;
 
 @Slf4j
 public class SimTradeGatewayLocal implements SimTradeGateway{
@@ -26,16 +27,13 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 	@Getter
 	protected SimAccount account;
 	
-	private SimMarket simMarket;
-	
 	private GatewayDescription gd;
 	
 	private ConnectionState connState = ConnectionState.DISCONNECTED;
 	
-	public SimTradeGatewayLocal(FastEventEngine feEngine, SimMarket simMarket, GatewayDescription gd, SimAccount account) {
+	public SimTradeGatewayLocal(FastEventEngine feEngine, GatewayDescription gd, SimAccount account) {
 		this.feEngine = feEngine;
 		this.account = account;
-		this.simMarket = simMarket;
 		this.gd = gd;
 	}
 
@@ -115,11 +113,6 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 	}
 
 	@Override
-	public void destory() {
-		simMarket.removeGateway(gd.getBindedMktGatewayId(), this);
-	}
-
-	@Override
 	public GatewayDescription gatewayDescription() {
 		gd.setConnectionState(getConnectionState());
 		return gd;
@@ -128,6 +121,11 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 	@Override
 	public String gatewayId() {
 		return gd.getGatewayId();
+	}
+
+	@Override
+	public void onTick(TickField tick) {
+		account.onTick(tick);
 	}
 
 }

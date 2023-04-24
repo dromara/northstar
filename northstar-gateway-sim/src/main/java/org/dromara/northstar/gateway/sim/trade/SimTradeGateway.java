@@ -1,8 +1,9 @@
 package org.dromara.northstar.gateway.sim.trade;
 
+import org.dromara.northstar.common.TickDataAware;
 import org.dromara.northstar.gateway.TradeGateway;
 
-public interface SimTradeGateway extends TradeGateway{
+public interface SimTradeGateway extends TradeGateway, TickDataAware{
 
 	/**
 	 * 出入金
@@ -11,8 +12,4 @@ public interface SimTradeGateway extends TradeGateway{
 	 */
 	int moneyIO(int money);
 	
-	/**
-	 * 销毁
-	 */
-	void destory();
 }

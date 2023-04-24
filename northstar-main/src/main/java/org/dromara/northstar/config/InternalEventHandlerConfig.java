@@ -12,7 +12,6 @@ import org.dromara.northstar.event.ModuleHandler;
 import org.dromara.northstar.event.SimMarketHandler;
 import org.dromara.northstar.gateway.IContractManager;
 import org.dromara.northstar.gateway.common.utils.MarketDataRepoFactory;
-import org.dromara.northstar.gateway.sim.trade.SimMarket;
 import org.dromara.northstar.module.ModuleManager;
 import org.dromara.northstar.support.notification.MailDeliveryManager;
 import org.springframework.context.annotation.Bean;
@@ -45,9 +44,9 @@ class InternalEventHandlerConfig {
 	}
 	
 	@Bean
-	SimMarketHandler simMarketHandler(SimMarket market) {
+	SimMarketHandler simMarketHandler(GatewayManager gatewayMgr) {
 		log.debug("注册：SimMarketHandler");
-		return new SimMarketHandler(market);
+		return new SimMarketHandler(gatewayMgr);
 	}
 	
 	@Bean

@@ -9,8 +9,6 @@ import org.dromara.northstar.common.event.FastEventEngine;
 import org.dromara.northstar.common.model.GatewayDescription;
 import org.dromara.northstar.data.ISimAccountRepository;
 import org.dromara.northstar.gateway.IMarketCenter;
-import org.dromara.northstar.gateway.sim.trade.SimGatewayFactory;
-import org.dromara.northstar.gateway.sim.trade.SimMarket;
 import org.junit.jupiter.api.Test;
 
 class SimGatewayFactoryTest {
@@ -18,8 +16,7 @@ class SimGatewayFactoryTest {
 	@Test
 	void test() {
 		ISimAccountRepository accRepo = mock(ISimAccountRepository.class);
-		SimMarket simMarket = mock(SimMarket.class);
-		SimGatewayFactory factory = new SimGatewayFactory(mock(FastEventEngine.class), simMarket, accRepo, mock(IMarketCenter.class));
+		SimGatewayFactory factory = new SimGatewayFactory(mock(FastEventEngine.class), accRepo, mock(IMarketCenter.class));
 		GatewayDescription gd = GatewayDescription.builder().gatewayId("gatewayid").channelType(ChannelType.SIM)
 				.gatewayUsage(GatewayUsage.TRADE).build();
 		assertThat(factory.newInstance(gd)).isNotNull();

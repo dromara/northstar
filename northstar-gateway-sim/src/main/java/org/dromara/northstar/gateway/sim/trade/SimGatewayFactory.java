@@ -14,16 +14,13 @@ import com.google.protobuf.InvalidProtocolBufferException;
 
 public class SimGatewayFactory implements GatewayFactory{
 	
-	private SimMarket simMarket;
-	
 	private FastEventEngine fastEventEngine;
 	
 	private ISimAccountRepository simAccountRepo;
 	
 	private IMarketCenter mktCenter;
 	
-	public SimGatewayFactory(FastEventEngine fastEventEngine, SimMarket simMarket, ISimAccountRepository repo, IMarketCenter mktCenter) {
-		this.simMarket = simMarket;
+	public SimGatewayFactory(FastEventEngine fastEventEngine, ISimAccountRepository repo, IMarketCenter mktCenter) {
 		this.fastEventEngine = fastEventEngine;
 		this.simAccountRepo = repo;
 		this.mktCenter = mktCenter;
@@ -42,7 +39,6 @@ public class SimGatewayFactory implements GatewayFactory{
 	}
 	
 	private Gateway getTradeGateway(GatewayDescription gatewayDescription) {
-		String mdGatewayId = gatewayDescription.getBindedMktGatewayId();
 		String accGatewayId = gatewayDescription.getGatewayId();
 		SimAccountDescription simAccountDescription = simAccountRepo.findById(accGatewayId);
 
@@ -56,9 +52,7 @@ public class SimGatewayFactory implements GatewayFactory{
 				throw new IllegalStateException("无法创建模拟账户", e);
 			}
 		}
-		SimTradeGateway gateway = new SimTradeGatewayLocal(fastEventEngine, simMarket, gatewayDescription, account);
-		simMarket.addGateway(mdGatewayId, gateway);
-		return gateway;
+		return new SimTradeGatewayLocal(fastEventEngine, gatewayDescription, account);
 	}
 
 }

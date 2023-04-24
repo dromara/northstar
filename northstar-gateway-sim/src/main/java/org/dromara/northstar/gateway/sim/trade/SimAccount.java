@@ -23,6 +23,7 @@ import org.dromara.northstar.gateway.IContractManager;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 
+import lombok.extern.slf4j.Slf4j;
 import xyz.redtorch.pb.CoreEnum.CurrencyEnum;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OrderStatusEnum;
@@ -35,6 +36,7 @@ import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TickField;
 import xyz.redtorch.pb.CoreField.TradeField;
 
+@Slf4j
 public class SimAccount implements TickDataAware{
 	
 	private String gatewayId;
@@ -261,6 +263,7 @@ public class SimAccount implements TickDataAware{
 	private long lastReportTime;
 	@Override
 	public void onTick(TickField tick) {
+		log.trace("模拟网关行情事件：{} {} {} {}", tick.getActionDay(), tick.getActionTime(), tick.getUnifiedSymbol(), tick.getLastPrice());
 		openReqMap.values().stream().forEach(req -> req.onTick(tick));
 		closeReqMap.values().stream().forEach(req -> req.onTick(tick));
 		longMap.values().stream().forEach(tp -> tp.updateTick(tick));
