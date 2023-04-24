@@ -5,11 +5,13 @@ import java.util.function.Consumer;
 import org.dromara.northstar.common.event.FastEventEngine;
 import org.dromara.northstar.common.utils.FieldUtils;
 
+import lombok.extern.slf4j.Slf4j;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.OrderField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TradeField;
 
+@Slf4j
 public class OpenTradeRequest extends TradeRequest {
 	
 	private SimAccount account;
@@ -38,7 +40,13 @@ public class OpenTradeRequest extends TradeRequest {
 
 	@Override
 	protected boolean canMakeOrder() {
-		return frozenAmount() < this.account.available();
+		double available = account.available();
+		double frozen = frozenAmount();
+		boolean valid = frozen <= available;
+		if(!valid) {
+			log.warn("[{}] 资金不足。可用资金：{}，实际需要：{}", account.gatewayId(), account.available(), frozen);
+		}
+		return valid;
 	}
 
 	@Override
