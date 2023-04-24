@@ -44,12 +44,10 @@ public class PlaybackModuleContext extends ModuleContext implements IModuleConte
 		public void send(String receiver, String title, String content) {/* 占位不实现 */}
 	};
 	
-	private static final IModuleRepository mockModuleRepo = new MockModuleRepository();
-	
 	public PlaybackModuleContext(TradeStrategy tradeStrategy, ModuleDescription moduleDescription,
 			ModuleRuntimeDescription moduleRtDescription, IContractManager contractMgr, IModuleRepository moduleRepo,
 			ModuleLoggerFactory loggerFactory) {
-		super(tradeStrategy, moduleDescription, moduleRtDescription, contractMgr, mockModuleRepo, loggerFactory, mockSenderMgr);
+		super(tradeStrategy, moduleDescription, moduleRtDescription, contractMgr, new MockModuleRepository(moduleRepo), loggerFactory, mockSenderMgr);
 	}
 
 	@Override
@@ -81,6 +79,7 @@ public class PlaybackModuleContext extends ModuleContext implements IModuleConte
 			getLogger().info("策略处于停用状态，忽略委托单");
 			return Optional.empty();
 		}
+		getLogger().debug("回测上下文收到下单请求");
 		TickField lastTick = latestTickMap.get(contract.getUnifiedSymbol());
 		Assert.notNull(lastTick, "没有行情时不应该发送订单");
 		Assert.isTrue(volume > 0, "下单手数应该为正数");
@@ -119,6 +118,12 @@ public class PlaybackModuleContext extends ModuleContext implements IModuleConte
 	private static class MockModuleRepository implements IModuleRepository{
 		
 		static UnsupportedOperationException uoe() { return new UnsupportedOperationException(); }
+		
+		private IModuleRepository mdRepoReal;
+		
+		public MockModuleRepository(IModuleRepository mdRepoReal) {
+			this.mdRepoReal = mdRepoReal;
+		}
 
 		@Override
 		public void saveSettings(ModuleDescription moduleSettingsDescription) { throw uoe();}
@@ -142,7 +147,9 @@ public class PlaybackModuleContext extends ModuleContext implements IModuleConte
 		public void deleteRuntimeByName(String moduleName) { throw uoe();}
 
 		@Override
-		public void saveDealRecord(ModuleDealRecord dealRecord) { throw uoe();}
+		public void saveDealRecord(ModuleDealRecord dealRecord) { 
+			mdRepoReal.saveDealRecord(dealRecord);
+		}
 
 		@Override
 		public List<ModuleDealRecord> findAllDealRecords(String moduleName) { throw uoe();}

@@ -40,7 +40,7 @@ TestFieldFactory factory = new TestFieldFactory("testGateway");
 	// 用例：行情更新，持仓利润更新
 	@Test
 	void shouldUpdateProfit() {
-		ModulePosition mp = new ModulePosition(openTrade.getContract(), openTrade.getDirection(), ClosingPolicy.FIRST_IN_LAST_OUT, onDealCallback, List.of(openTrade));
+		ModulePosition mp = new ModulePosition("testGateway", openTrade.getContract(), openTrade.getDirection(), ClosingPolicy.FIRST_IN_LAST_OUT, onDealCallback, List.of(openTrade));
 		mp.onTick(tick1);
 		assertThat(mp.profit()).isCloseTo(2220D, offset(1e-6));
 	}
@@ -48,7 +48,7 @@ TestFieldFactory factory = new TestFieldFactory("testGateway");
 	// 用例：忽略非相关行情
 	@Test
 	void shouldNotUpdateProfit() {
-		ModulePosition mp = new ModulePosition(openTrade.getContract(), openTrade.getDirection(), ClosingPolicy.FIRST_IN_LAST_OUT, onDealCallback, List.of(openTrade));
+		ModulePosition mp = new ModulePosition("testGateway", openTrade.getContract(), openTrade.getDirection(), ClosingPolicy.FIRST_IN_LAST_OUT, onDealCallback, List.of(openTrade));
 		mp.onTick(tick2);
 		assertThat(mp.profit()).isCloseTo(0D, offset(1e-6));
 	}
@@ -56,7 +56,7 @@ TestFieldFactory factory = new TestFieldFactory("testGateway");
 	// 用例：加仓
 	@Test
 	void shouldAddPosition() {
-		ModulePosition mp = new ModulePosition(openTrade.getContract(), openTrade.getDirection(), ClosingPolicy.FIRST_IN_LAST_OUT, onDealCallback, List.of(openTrade));
+		ModulePosition mp = new ModulePosition("testGateway", openTrade.getContract(), openTrade.getDirection(), ClosingPolicy.FIRST_IN_LAST_OUT, onDealCallback, List.of(openTrade));
 		mp.onTrade(openTrade1);
 		mp.onTrade(openTrade2);
 		mp.onTick(tick1);
@@ -70,7 +70,7 @@ TestFieldFactory factory = new TestFieldFactory("testGateway");
 	// 用例：平仓
 	@Test
 	void shouldClosePosition() {
-		ModulePosition mp = new ModulePosition(openTrade.getContract(), openTrade.getDirection(), ClosingPolicy.FIRST_IN_LAST_OUT, onDealCallback, List.of(openTrade));
+		ModulePosition mp = new ModulePosition("testGateway", openTrade.getContract(), openTrade.getDirection(), ClosingPolicy.FIRST_IN_LAST_OUT, onDealCallback, List.of(openTrade));
 		mp.onTrade(closeTrade);
 		assertThat(mp.tdAvailable()).isZero();
 		assertThat(mp.ydAvailable()).isZero();
@@ -80,7 +80,7 @@ TestFieldFactory factory = new TestFieldFactory("testGateway");
 	// 用例：减仓，平今优先
 	@Test
 	void shouldReduceTdPosition() {
-		ModulePosition mp = new ModulePosition(openTrade.getContract(), openTrade.getDirection(), ClosingPolicy.FIRST_IN_LAST_OUT, onDealCallback, List.of(openTrade));
+		ModulePosition mp = new ModulePosition("testGateway", openTrade.getContract(), openTrade.getDirection(), ClosingPolicy.FIRST_IN_LAST_OUT, onDealCallback, List.of(openTrade));
 		mp.onTrade(openTrade1);
 		mp.onTick(tick1);
 		mp.onTrade(closeTrade);
@@ -94,7 +94,7 @@ TestFieldFactory factory = new TestFieldFactory("testGateway");
 	// 用例：减仓，先开先平
 	@Test
 	void shouldReduceYdPosition() {
-		ModulePosition mp = new ModulePosition(openTrade.getContract(), openTrade.getDirection(), ClosingPolicy.FIRST_IN_FIRST_OUT, onDealCallback, List.of(openTrade));
+		ModulePosition mp = new ModulePosition("testGateway", openTrade.getContract(), openTrade.getDirection(), ClosingPolicy.FIRST_IN_FIRST_OUT, onDealCallback, List.of(openTrade));
 		mp.onTrade(openTrade1);
 		mp.onTick(tick1);
 		mp.onTrade(closeTrade);
@@ -108,7 +108,7 @@ TestFieldFactory factory = new TestFieldFactory("testGateway");
 	// 用例：平仓委托，冻结持仓；撤销委托，解冻持仓
 	@Test
 	void shouldHandlerOrder() {
-		ModulePosition mp = new ModulePosition(openTrade.getContract(), openTrade.getDirection(), ClosingPolicy.FIRST_IN_LAST_OUT, onDealCallback, List.of(openTrade));
+		ModulePosition mp = new ModulePosition("testGateway", openTrade.getContract(), openTrade.getDirection(), ClosingPolicy.FIRST_IN_LAST_OUT, onDealCallback, List.of(openTrade));
 		mp.onTick(tick1);
 		mp.onTrade(openTrade1);
 		mp.onOrder(order1);
@@ -124,7 +124,7 @@ TestFieldFactory factory = new TestFieldFactory("testGateway");
 	// 用例：平仓委托，冻结持仓；撤销委托，解冻持仓
 	@Test
 	void shouldHandlerOrder2() {
-		ModulePosition mp = new ModulePosition(openTrade.getContract(), openTrade.getDirection(), ClosingPolicy.FIRST_IN_LAST_OUT, onDealCallback, List.of(openTrade));
+		ModulePosition mp = new ModulePosition("testGateway", openTrade.getContract(), openTrade.getDirection(), ClosingPolicy.FIRST_IN_LAST_OUT, onDealCallback, List.of(openTrade));
 		mp.onTick(tick1);
 		mp.onTrade(openTrade1);
 		mp.onOrder(order2);
@@ -140,7 +140,7 @@ TestFieldFactory factory = new TestFieldFactory("testGateway");
 	// 用例：占用保证金
 	@Test
 	void shouldTakeMargin() {
-		ModulePosition mp = new ModulePosition(openTrade.getContract(), openTrade.getDirection(), ClosingPolicy.FIRST_IN_LAST_OUT, onDealCallback, List.of(openTrade));
+		ModulePosition mp = new ModulePosition("testGateway", openTrade.getContract(), openTrade.getDirection(), ClosingPolicy.FIRST_IN_LAST_OUT, onDealCallback, List.of(openTrade));
 		mp.onTrade(openTrade1);
 		assertThat(mp.totalMargin()).isCloseTo(12240, offset(1e-6));
 	}

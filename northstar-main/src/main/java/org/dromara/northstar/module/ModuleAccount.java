@@ -62,10 +62,8 @@ public class ModuleAccount implements IModuleAccount{
 	private Map<String, Double> maxProfitMap = new HashMap<>();
 	/* gatewayId -> maxDrawBack */
 	private Map<String, Double> maxDrawBackMap = new HashMap<>();
-	/* direction -> gatewayId -> positionList */
-	private Table<DirectionEnum, String, List<ModulePosition>> posTable = HashBasedTable.create();
 	/* direction -> unifiedSymbol -> position */ 
-	private Table<DirectionEnum, String, ModulePosition> posTable2 = HashBasedTable.create();
+	private Table<DirectionEnum, String, ModulePosition> posTable = HashBasedTable.create();
 	private String tradingDay;
 	
 	private Logger logger;
@@ -107,23 +105,17 @@ public class ModuleAccount implements IModuleAccount{
 			maxProfitMap.put(mard.getAccountId(), 0D);
 			maxDrawBackMap.put(mard.getAccountId(), 0D);
 			
-			posTable.put(DirectionEnum.D_Buy, mard.getAccountId(), new ArrayList<>());
-			posTable.put(DirectionEnum.D_Sell, mard.getAccountId(), new ArrayList<>());
-			
 			moduleDescription.getModuleAccountSettingsDescription().stream()
-				.filter(mad -> StringUtils.equals(mad.getAccountGatewayId(), mard.getAccountId()))
 				.flatMap(mad -> mad.getBindedContracts().stream())
 				.forEach(contractSimple -> {
 					Contract contract = contractMgr.getContract(Identifier.of(contractSimple.getValue()));
 					ContractField cf = contract.contractField();
 					
-					ModulePosition buyPos = new ModulePosition(cf, DirectionEnum.D_Buy, moduleDescription.getClosingPolicy(), onDealCallback);
-					posTable.get(DirectionEnum.D_Buy, mard.getAccountId()).add(buyPos);
-					posTable2.put(DirectionEnum.D_Buy, cf.getUnifiedSymbol(), buyPos);
+					ModulePosition buyPos = new ModulePosition(mard.getAccountId(), cf, DirectionEnum.D_Buy, moduleDescription.getClosingPolicy(), onDealCallback);
+					posTable.put(DirectionEnum.D_Buy, cf.getUnifiedSymbol(), buyPos);
 					
-					ModulePosition sellPos = new ModulePosition(cf, DirectionEnum.D_Sell, moduleDescription.getClosingPolicy(), onDealCallback);
-					posTable.get(DirectionEnum.D_Sell, mard.getAccountId()).add(sellPos);
-					posTable2.put(DirectionEnum.D_Sell, cf.getUnifiedSymbol(), sellPos);
+					ModulePosition sellPos = new ModulePosition(mard.getAccountId(), cf, DirectionEnum.D_Sell, moduleDescription.getClosingPolicy(), onDealCallback);
+					posTable.put(DirectionEnum.D_Sell, cf.getUnifiedSymbol(), sellPos);
 				});
 			
 			mard.getPositionDescription().getNonclosedTrades().stream()
@@ -148,15 +140,15 @@ public class ModuleAccount implements IModuleAccount{
 			tradingDay = tick.getTradingDay();
 			tradeDayPreset();
 		}
-		posTable.values().stream().flatMap(List::stream).forEach(mp -> mp.onTick(tick));
+		posTable.values().stream().forEach(mp -> mp.onTick(tick));
 	}
 
 	@Override
 	public void onOrder(OrderField order) {
 		if(FieldUtils.isOpen(order.getOffsetFlag())) {
-			posTable.get(order.getDirection(), order.getGatewayId()).forEach(mp -> mp.onOrder(order));
+			posTable.get(order.getDirection(), order.getContract().getUnifiedSymbol()).onOrder(order);
 		} else {
-			posTable.get(FieldUtils.getOpposite(order.getDirection()), order.getGatewayId()).forEach(mp -> mp.onOrder(order));
+			posTable.get(FieldUtils.getOpposite(order.getDirection()), order.getContract().getUnifiedSymbol()).onOrder(order);
 		}
 		stateMachine.onOrder(order);
 	}
@@ -164,9 +156,9 @@ public class ModuleAccount implements IModuleAccount{
 	@Override
 	public void onTrade(TradeField trade) {
 		if(FieldUtils.isOpen(trade.getOffsetFlag())) {
-			posTable.get(trade.getDirection(), trade.getGatewayId()).forEach(mp -> mp.onTrade(trade));
+			posTable.get(trade.getDirection(), trade.getContract().getUnifiedSymbol()).onTrade(trade);
 		} else {
-			posTable.get(FieldUtils.getOpposite(trade.getDirection()), trade.getGatewayId()).forEach(mp -> mp.onTrade(trade));
+			posTable.get(FieldUtils.getOpposite(trade.getDirection()), trade.getContract().getUnifiedSymbol()).onTrade(trade);
 		}
 		stateMachine.onTrade(trade);
 	}
@@ -184,8 +176,8 @@ public class ModuleAccount implements IModuleAccount{
 	@Override
 	public List<PositionField> getPositions(String gatewayId) {
 		List<PositionField> result = new ArrayList<>();
-		result.addAll(posTable.get(DirectionEnum.D_Buy, gatewayId).stream().map(ModulePosition::convertToPositionField).toList());
-		result.addAll(posTable.get(DirectionEnum.D_Sell, gatewayId).stream().map(ModulePosition::convertToPositionField).toList());
+		result.addAll(posTable.row(DirectionEnum.D_Buy).values().stream().map(ModulePosition::convertToPositionField).filter(pos -> StringUtils.equals(gatewayId, pos.getGatewayId())).toList());
+		result.addAll(posTable.row(DirectionEnum.D_Sell).values().stream().map(ModulePosition::convertToPositionField).filter(pos -> StringUtils.equals(gatewayId, pos.getGatewayId())).toList());
 		return result;
 	}
 
@@ -200,15 +192,14 @@ public class ModuleAccount implements IModuleAccount{
 	@Override
 	public List<TradeField> getNonclosedTrades(String gatewayId) {
 		List<TradeField> result = new ArrayList<>();
-		result.addAll(posTable.get(DirectionEnum.D_Buy, gatewayId).stream().flatMap(mp -> mp.getNonclosedTrades().stream()).toList());
-		result.addAll(posTable.get(DirectionEnum.D_Sell, gatewayId).stream().flatMap(mp -> mp.getNonclosedTrades().stream()).toList());
+		result.addAll(posTable.row(DirectionEnum.D_Buy).values().stream().flatMap(mp -> mp.getNonclosedTrades().stream()).toList());
+		result.addAll(posTable.row(DirectionEnum.D_Sell).values().stream().flatMap(mp -> mp.getNonclosedTrades().stream()).toList());
 		return result;
 	}
 
 	@Override
 	public List<TradeField> getNonclosedTrades(String unifiedSymbol, DirectionEnum direction) {
 		return posTable.row(direction).values().stream()
-				.flatMap(List::stream)
 				.filter(mp -> StringUtils.equals(unifiedSymbol, mp.getContract().getUnifiedSymbol()))
 				.flatMap(mp -> mp.getNonclosedTrades().stream())
 				.toList();
@@ -217,7 +208,6 @@ public class ModuleAccount implements IModuleAccount{
 	@Override
 	public int getNonclosedPosition(String unifiedSymbol, DirectionEnum direction) {
 		return posTable.row(direction).values().stream()
-				.flatMap(List::stream)
 				.filter(mp -> StringUtils.equals(unifiedSymbol, mp.getContract().getUnifiedSymbol()))
 				.mapToInt(ModulePosition::totalVolume)
 				.sum();
@@ -252,7 +242,7 @@ public class ModuleAccount implements IModuleAccount{
 
 	@Override
 	public void tradeDayPreset() {
-		posTable.values().stream().flatMap(List::stream).forEach(ModulePosition::releaseOrder);
+		posTable.values().stream().forEach(ModulePosition::releaseOrder);
 	}
 
 	@Override
@@ -281,7 +271,7 @@ public class ModuleAccount implements IModuleAccount{
 
 	private void checkIfHasSufficientPosition(SubmitOrderReqField submitOrder) {
 		ContractField contract =  submitOrder.getContract();
-		int available = posTable2.get(FieldUtils.getOpposite(submitOrder.getDirection()), contract.getUnifiedSymbol()).totalAvailable();
+		int available = posTable.get(FieldUtils.getOpposite(submitOrder.getDirection()), contract.getUnifiedSymbol()).totalAvailable();
 		if(available < submitOrder.getVolume()) {
 			logger.warn("模组账户可用持仓为：{}，委托手数：{}", available, submitOrder.getVolume());
 			throw new InsufficientException("模组账户可用持仓不足，无法平仓");

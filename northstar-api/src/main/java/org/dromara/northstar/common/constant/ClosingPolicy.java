@@ -1,5 +1,6 @@
 package org.dromara.northstar.common.constant;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -29,7 +30,8 @@ public enum ClosingPolicy {
 				return OffsetFlagEnum.OF_Open;
 			}
 			checkNonclosedTrades(nonclosedTrades, contract);
-			nonclosedTrades.sort((a, b) -> a.getTradeTimestamp() < b.getTradeTimestamp() ? -1 : 1);
+			List<TradeField> wrapList = new ArrayList<>(nonclosedTrades);
+			wrapList.sort((a, b) -> a.getTradeTimestamp() < b.getTradeTimestamp() ? -1 : 1);
 			if(StringUtils.equals(tradingDay, nonclosedTrades.get(0).getTradingDay())) {
 				return OffsetFlagEnum.OF_CloseToday;
 			}
@@ -49,7 +51,8 @@ public enum ClosingPolicy {
 				return OffsetFlagEnum.OF_Open;
 			}
 			checkNonclosedTrades(nonclosedTrades, contract);
-			nonclosedTrades.sort((a, b) -> a.getTradeTimestamp() > b.getTradeTimestamp() ? -1 : 1);
+			List<TradeField> wrapList = new ArrayList<>(nonclosedTrades);
+			wrapList.sort((a, b) -> a.getTradeTimestamp() > b.getTradeTimestamp() ? -1 : 1);
 			if(StringUtils.equals(tradingDay, nonclosedTrades.get(0).getTradingDay())) {
 				return OffsetFlagEnum.OF_CloseToday;
 			}
@@ -70,7 +73,8 @@ public enum ClosingPolicy {
 				return OffsetFlagEnum.OF_Open;
 			}
 			checkNonclosedTrades(nonclosedTrades, contract);
-			nonclosedTrades.sort((a, b) -> a.getTradeTimestamp() < b.getTradeTimestamp() ? -1 : 1);
+			List<TradeField> wrapList = new ArrayList<>(nonclosedTrades);
+			wrapList.sort((a, b) -> a.getTradeTimestamp() < b.getTradeTimestamp() ? -1 : 1);
 			if(StringUtils.equals(tradingDay, nonclosedTrades.get(0).getTradingDay())) {
 				return OffsetFlagEnum.OF_Open;
 			}

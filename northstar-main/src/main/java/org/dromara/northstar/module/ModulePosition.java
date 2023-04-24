@@ -49,19 +49,23 @@ public class ModulePosition implements TickDataAware, TransactionAware{
 	/* 开平仓匹配回调 */
 	private BiConsumer<TradeField, TradeField> onDealCallback;
 	
+	private String gatewayId;
+	
 	@Getter
 	private final ContractField contract;
 
-	public ModulePosition(ContractField contract, DirectionEnum direction, ClosingPolicy closingPolicy, BiConsumer<TradeField, TradeField> onDealCallback) {
+	public ModulePosition(String gatewayId, ContractField contract, DirectionEnum direction, ClosingPolicy closingPolicy, 
+			BiConsumer<TradeField, TradeField> onDealCallback) {
+		this.gatewayId = gatewayId;
 		this.contract = contract;
 		this.direction = direction;
 		this.closingPolicy = closingPolicy;
 		this.onDealCallback = onDealCallback;
 	}
 	
-	public ModulePosition(ContractField contract, DirectionEnum direction, ClosingPolicy closingPolicy, BiConsumer<TradeField, TradeField> onDealCallback,
+	public ModulePosition(String gatewayId, ContractField contract, DirectionEnum direction, ClosingPolicy closingPolicy, BiConsumer<TradeField, TradeField> onDealCallback,
 			List<TradeField> nonclosedTrades) {
-		this(contract, direction, closingPolicy, onDealCallback);
+		this(gatewayId, contract, direction, closingPolicy, onDealCallback);
 		trades.addAll(nonclosedTrades.stream()
 				.filter(trade -> trade.getDirection() == direction)
 				.filter(trade -> StringUtils.equals(trade.getContract().getContractId(), contract.getContractId()))
@@ -268,6 +272,8 @@ public class ModulePosition implements TickDataAware, TransactionAware{
 		double lastPrice = lastTick == null ? 0 : lastTick.getLastPrice();
 		double priceDiff = lastTick == null ? 0 : factor * (lastTick.getLastPrice() - avgOpenPrice());
 		return PositionField.newBuilder()
+				.setGatewayId(gatewayId)
+				.setAccountId(gatewayId)
 				.setContract(contract)
 				.setFrozen(totalVolume() - totalAvailable())
 				.setTdFrozen(tdVolume() - tdAvailable())
