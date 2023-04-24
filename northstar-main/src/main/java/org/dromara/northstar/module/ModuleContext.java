@@ -176,7 +176,7 @@ public class ModuleContext implements IModuleContext{
 	}
 
 	@Override
-	public void submitOrderReq(TradeIntent tradeIntent) {
+	public synchronized void submitOrderReq(TradeIntent tradeIntent) {
 		if(!module.isEnabled()) {
 			getLogger().info("策略处于停用状态，忽略委托单");
 			return;
@@ -289,7 +289,7 @@ public class ModuleContext implements IModuleContext{
 	}
 
 	@Override
-	public void onTick(TickField tick) {
+	public synchronized void onTick(TickField tick) {
 		getLogger().trace("TICK信息: {} {} {} {}，最新价: {}", 
 				tick.getUnifiedSymbol(), tick.getActionDay(), tick.getActionTime(), tick.getActionTimestamp(), tick.getLastPrice());
 		if(Objects.nonNull(tradeIntent) && !tradeIntent.hasTerminated()) {
@@ -313,7 +313,7 @@ public class ModuleContext implements IModuleContext{
 	}
 
 	@Override
-	public void onBar(BarField bar) {
+	public synchronized void onBar(BarField bar) {
 		getLogger().trace("分钟Bar信息: {} {} {} {}，最新价: {}", bar.getUnifiedSymbol(), bar.getActionDay(), bar.getActionTime(), bar.getActionTimestamp(), bar.getClosePrice());
 		indicatorFactory.getIndicatorMap().entrySet().stream().forEach(e -> e.getValue().onBar(bar));	// 普通指标的更新
 		comboIndicators.stream().forEach(combo -> combo.onBar(bar));
@@ -322,7 +322,7 @@ public class ModuleContext implements IModuleContext{
 	}
 	
 	@Override
-	public void onMergedBar(BarField bar) {
+	public synchronized void onMergedBar(BarField bar) {
 		getLogger().debug("合并Bar信息: {} {} {} {}，最新价: {}", bar.getUnifiedSymbol(), bar.getActionDay(), bar.getActionTime(), bar.getActionTimestamp(), bar.getClosePrice());
 		Consumer<Map.Entry<String,Indicator>> action = e -> {
 			Indicator indicator = e.getValue();
@@ -354,7 +354,7 @@ public class ModuleContext implements IModuleContext{
 	}
 
 	@Override
-	public void onOrder(OrderField order) {
+	public synchronized void onOrder(OrderField order) {
 		if(!orderReqMap.containsKey(order.getOriginOrderId())) {
 			return;
 		}
@@ -369,7 +369,7 @@ public class ModuleContext implements IModuleContext{
 	}
 
 	@Override
-	public void onTrade(TradeField trade) {
+	public synchronized void onTrade(TradeField trade) {
 		if(!orderReqMap.containsKey(trade.getOriginOrderId()) && !StringUtils.equals(trade.getOriginOrderId(), Constants.MOCK_ORDER_ID)) {
 			return;
 		}
@@ -415,7 +415,7 @@ public class ModuleContext implements IModuleContext{
 	}
 
 	@Override
-	public ModuleRuntimeDescription getRuntimeDescription(boolean fullDescription) {
+	public synchronized ModuleRuntimeDescription getRuntimeDescription(boolean fullDescription) {
 		Map<String, ModuleAccountRuntimeDescription> accMap = new HashMap<>();
 		module.getModuleDescription().getModuleAccountSettingsDescription().forEach(mad -> {
 			String gatewayId = module.getModuleDescription().getUsage() == ModuleUsage.PLAYBACK 
@@ -511,7 +511,7 @@ public class ModuleContext implements IModuleContext{
 	}
 
 	@Override
-	public Optional<String> submitOrderReq(ContractField contract, SignalOperation operation, PriceType priceType, int volume, double price) {
+	public synchronized Optional<String> submitOrderReq(ContractField contract, SignalOperation operation, PriceType priceType, int volume, double price) {
 		if(!module.isEnabled()) {
 			getLogger().info("策略处于停用状态，忽略委托单");
 			return Optional.empty();
@@ -579,7 +579,7 @@ public class ModuleContext implements IModuleContext{
 	}
 
 	@Override
-	public void cancelOrder(String originOrderId) {
+	public synchronized void cancelOrder(String originOrderId) {
 		if(!orderReqMap.containsKey(originOrderId)) {
 			getLogger().debug("找不到订单：{}", originOrderId);
 			return;
