@@ -23,6 +23,7 @@ import org.dromara.northstar.common.model.ComponentField;
 import org.dromara.northstar.common.model.ComponentMetaInfo;
 import org.dromara.northstar.common.model.ContractSimpleInfo;
 import org.dromara.northstar.common.model.DynamicParams;
+import org.dromara.northstar.common.model.GatewayDescription;
 import org.dromara.northstar.common.model.Identifier;
 import org.dromara.northstar.common.model.MockTradeDescription;
 import org.dromara.northstar.common.model.ModuleAccountDescription;
@@ -40,6 +41,7 @@ import org.dromara.northstar.module.ModuleManager;
 import org.dromara.northstar.module.PlaybackModuleContext;
 import org.dromara.northstar.module.TradeModule;
 import org.dromara.northstar.strategy.DynamicParamsAware;
+import org.dromara.northstar.strategy.IAccount;
 import org.dromara.northstar.strategy.IModule;
 import org.dromara.northstar.strategy.IModuleContext;
 import org.dromara.northstar.strategy.StrategicComponent;
@@ -233,7 +235,8 @@ public class ModuleService implements PostLoadAware {
 		} else {
 			moduleCtx = new ModuleContext(strategy, md, mrd, contractMgr, moduleRepo, moduleLoggerFactory, mailMgr);
 		}
-		
+		moduleMgr.add(new TradeModule(md, moduleCtx, accountMgr, contractMgr));
+		strategy.setContext(moduleCtx);
 		log.info("模组[{}] 初始化数据起始计算日为：{}", md.getModuleName(), date);
 		LocalDateTime nowDateTime = LocalDateTime.now();
 		LocalDate now = nowDateTime.getDayOfWeek().getValue() > 5 || nowDateTime.getDayOfWeek().getValue() == 5 && nowDateTime.toLocalTime().isAfter(LocalTime.of(20, 30))
@@ -245,9 +248,11 @@ public class ModuleService implements PostLoadAware {
 			LocalDate start = utils.getFridayOfThisWeek(date.minusWeeks(1));
 			LocalDate end = utils.getFridayOfThisWeek(date);
 			for(ModuleAccountDescription mad : md.getModuleAccountSettingsDescription()) {
+				IAccount account = accountMgr.get(Identifier.of(mad.getAccountGatewayId()));
+				GatewayDescription gd = account.getMarketGateway().gatewayDescription();
 				List<BarField> mergeList = new ArrayList<>();
 				for(ContractSimpleInfo csi : mad.getBindedContracts()) {
-					List<BarField> bars = mdRepoFactory.getInstance(mad.getAccountGatewayId()).loadBars(csi.getUnifiedSymbol(), start, end);
+					List<BarField> bars = mdRepoFactory.getInstance(gd.getChannelType()).loadBars(csi.getUnifiedSymbol(), start, end);
 					mergeList.addAll(bars);
 				}
 				mergeList.sort((a,b) -> a.getActionTimestamp() < b.getActionTimestamp() ? -1 : 1);
@@ -255,10 +260,7 @@ public class ModuleService implements PostLoadAware {
 			}
 			date = date.plusWeeks(1);
 		}
-		IModule module = new TradeModule(md, moduleCtx, accountMgr, contractMgr);
-		strategy.setContext(moduleCtx);
 		moduleCtx.setEnabled(mrd.isEnabled());
-		moduleMgr.add(module);
 	}
 	
 	@SuppressWarnings("unchecked")

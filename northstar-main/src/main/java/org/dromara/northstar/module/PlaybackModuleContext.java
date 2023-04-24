@@ -7,6 +7,7 @@ import java.util.UUID;
 
 import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.common.constant.SignalOperation;
+import org.dromara.northstar.common.model.ModuleDealRecord;
 import org.dromara.northstar.common.model.ModuleDescription;
 import org.dromara.northstar.common.model.ModuleRuntimeDescription;
 import org.dromara.northstar.common.utils.FieldUtils;
@@ -43,10 +44,12 @@ public class PlaybackModuleContext extends ModuleContext implements IModuleConte
 		public void send(String receiver, String title, String content) {/* 占位不实现 */}
 	};
 	
+	private static final IModuleRepository mockModuleRepo = new MockModuleRepository();
+	
 	public PlaybackModuleContext(TradeStrategy tradeStrategy, ModuleDescription moduleDescription,
 			ModuleRuntimeDescription moduleRtDescription, IContractManager contractMgr, IModuleRepository moduleRepo,
 			ModuleLoggerFactory loggerFactory) {
-		super(tradeStrategy, moduleDescription, moduleRtDescription, contractMgr, moduleRepo, loggerFactory, mockSenderMgr);
+		super(tradeStrategy, moduleDescription, moduleRtDescription, contractMgr, mockModuleRepo, loggerFactory, mockSenderMgr);
 	}
 
 	@Override
@@ -57,17 +60,17 @@ public class PlaybackModuleContext extends ModuleContext implements IModuleConte
 	
 	@Override
 	public void cancelOrder(String originOrderId) {
-		// 回测上下文不需要撤单
+		/* 回测上下文不需要撤单 */
 	}
 	
 	@Override
 	public synchronized void onOrder(OrderField order) {
-		// 回测上下文不接收外部的订单数据
+		/* 回测上下文不接收外部的订单数据 */
 	}
 
 	@Override
 	public synchronized void onTrade(TradeField trade) {
-		// 回测上下文不接收外部的成交数据
+		/* 回测上下文不接收外部的成交数据 */
 	}
 	
 	// 所有的委托都会立马转为成交单
@@ -112,4 +115,39 @@ public class PlaybackModuleContext extends ModuleContext implements IModuleConte
 		return Optional.of(id);
 	}
 
+	
+	private static class MockModuleRepository implements IModuleRepository{
+		
+		static UnsupportedOperationException uoe() { return new UnsupportedOperationException(); }
+
+		@Override
+		public void saveSettings(ModuleDescription moduleSettingsDescription) { throw uoe();}
+
+		@Override
+		public ModuleDescription findSettingsByName(String moduleName) { throw uoe();}
+
+		@Override
+		public List<ModuleDescription> findAllSettings() { throw uoe();}
+
+		@Override
+		public void deleteSettingsByName(String moduleName) { throw uoe();}
+
+		@Override
+		public void saveRuntime(ModuleRuntimeDescription moduleDescription) {/* 空实现不作持久化 */}
+
+		@Override
+		public ModuleRuntimeDescription findRuntimeByName(String moduleName) { throw uoe();}
+
+		@Override
+		public void deleteRuntimeByName(String moduleName) { throw uoe();}
+
+		@Override
+		public void saveDealRecord(ModuleDealRecord dealRecord) { throw uoe();}
+
+		@Override
+		public List<ModuleDealRecord> findAllDealRecords(String moduleName) { throw uoe();}
+
+		@Override
+		public void removeAllDealRecords(String moduleName) { throw uoe();}
+	}
 }

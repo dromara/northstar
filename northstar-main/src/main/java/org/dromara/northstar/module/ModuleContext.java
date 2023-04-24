@@ -146,6 +146,7 @@ public class ModuleContext implements IModuleContext{
 		this.contractMgr = contractMgr;
 		this.logger = loggerFactory.getLogger(moduleDescription.getModuleName());
 		this.senderMgr = senderMgr;
+		this.bufSize.set(moduleDescription.getModuleCacheDataSize());
 		this.moduleAccount = new ModuleAccount(moduleDescription, moduleRtDescription, new ModuleStateMachine(this), moduleRepo, contractMgr, logger);
 		moduleDescription.getModuleAccountSettingsDescription().stream()
 			.forEach(mad -> {
@@ -154,6 +155,9 @@ public class ModuleContext implements IModuleContext{
 					ContractField cf = contract.contractField();
 					contractMap.put(csi.getUnifiedSymbol(), cf);
 					contractMap2.put(cf, contract);
+					barBufQMap.put(cf.getUnifiedSymbol(), new LinkedList<>());
+					registry.addListener(contract, moduleDescription.getNumOfMinPerBar(), PeriodUnit.MINUTE, tradeStrategy, ListenerType.STRATEGY);
+					registry.addListener(contract, moduleDescription.getNumOfMinPerBar(), PeriodUnit.MINUTE, this, ListenerType.CONTEXT);
 				}
 			});
 	}
@@ -344,7 +348,9 @@ public class ModuleContext implements IModuleContext{
 			barBufQMap.get(bar.getUnifiedSymbol()).poll();
 		}
 		barBufQMap.get(bar.getUnifiedSymbol()).offer(bar);		
-		moduleRepo.saveRuntime(getRuntimeDescription(false));
+		if(isEnabled()) {
+			moduleRepo.saveRuntime(getRuntimeDescription(false));
+		}
 	}
 
 	@Override
