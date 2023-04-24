@@ -51,6 +51,7 @@ public class AppScheduleTask {
 	
 	private void connectIfNotConnected() {
 		gatewayMgr.allGateways().stream()
+			.filter(gw -> gw.gatewayDescription().isAutoConnect())
 			.filter(gw -> gw.getConnectionState() != ConnectionState.CONNECTED)
 			.forEach(Gateway::connect);
 	}
