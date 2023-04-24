@@ -10,14 +10,14 @@
 	<artifactId>northstar-main</artifactId>
 	<name>northstar-main</name>
 
-	<properties>
-		<!-- <springfox-swagger-version></springfox-swagger-version> -->
-	</properties>
-
 	<dependencies>
 		<dependency>
 			<groupId>org.dromara</groupId>
 			<artifactId>northstar-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.dromara</groupId>
+			<artifactId>northstar-gateway-common</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.dromara</groupId>
