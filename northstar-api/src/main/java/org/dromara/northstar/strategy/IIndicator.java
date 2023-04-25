@@ -6,6 +6,7 @@ import org.dromara.northstar.common.BarDataAware;
 import org.dromara.northstar.common.TickDataAware;
 import org.dromara.northstar.common.model.TimeSeriesValue;
 
+@Deprecated
 public interface IIndicator extends TickDataAware, BarDataAware, MergedBarListener {
 
 	/**

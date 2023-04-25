@@ -12,6 +12,7 @@ import org.dromara.northstar.strategy.TimeSeriesUnaryOperator;
  * @author KevinHuangwl
  *
  */
+@Deprecated
 public interface ComputeFunctions {
 
 	/**

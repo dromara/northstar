@@ -23,6 +23,7 @@ import xyz.redtorch.pb.CoreField.BarField;
  * @author KevinHuangwl
  *
  */
+@Deprecated
 public class WAVE {
 
 	private static final TimeSeriesValue TV_PLACEHOLDER = new TimeSeriesValue(0, 0);

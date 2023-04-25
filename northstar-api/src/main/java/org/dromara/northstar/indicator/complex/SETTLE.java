@@ -19,6 +19,7 @@ import com.google.common.util.concurrent.AtomicDouble;
  * @author KevinHuangwl
  *
  */
+@Deprecated
 public class SETTLE {
 	
 	private static final TimeSeriesValue TV_PLACEHOLDER = new TimeSeriesValue(0, 0);

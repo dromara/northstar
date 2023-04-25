@@ -19,6 +19,7 @@ import com.google.common.util.concurrent.AtomicDouble;
  * @author KevinHuangwl
  *
  */
+@Deprecated
 public interface AverageFunctions {
 	
 	/**

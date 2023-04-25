@@ -14,6 +14,7 @@ import org.dromara.northstar.strategy.TimeSeriesUnaryOperator;
  * @author KevinHuangwl
  *
  */
+@Deprecated
 public final class BOLL {
 
     private int x;

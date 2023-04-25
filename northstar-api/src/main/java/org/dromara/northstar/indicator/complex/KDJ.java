@@ -17,6 +17,7 @@ import org.dromara.northstar.strategy.TimeSeriesUnaryOperator;
  * D:SMA(K,M2,1);//K的M1日移动平均值，1为权重
  * J:3*K-2*D;
  */
+@Deprecated
 public class KDJ {
 
 	private int n;

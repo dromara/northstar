@@ -10,6 +10,7 @@ import org.dromara.northstar.common.model.TimeSeriesValue;
  * @author KevinHuangwl
  *
  */
+@Deprecated
 @FunctionalInterface
 public interface TimeSeriesUnaryOperator extends UnaryOperator<TimeSeriesValue> {
 	
