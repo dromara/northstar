@@ -1,27 +1,28 @@
 package org.dromara.northstar.indicator;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 public class RingArray<T> {
 
-	private Object[] array;
+	private T[] array;
 	
 	private int cursor;
 	
 	private boolean lastFlag = true;
 	
+	@SuppressWarnings("unchecked")
 	public RingArray(int size) {
-		this.array = new Object[size];
+		this.array = (T[]) new Object[size];
 	}
 	
 	public T get() {
 		return get(0);
 	}
 	
-	@SuppressWarnings("unchecked")
 	public T get(int index) {
-		return (T) array[getIndex(index)];
+		return array[getIndex(index)];
 	}
 	
 	/**
@@ -29,19 +30,22 @@ public class RingArray<T> {
 	 * @param obj	返回旧值
 	 * @return
 	 */
-	public void update(T obj, boolean unsettled) {
-		if(unsettled) {
-			if(lastFlag != unsettled) {
-				cursor = getIndex(1);
-			}
-			array[cursor] = obj;
-			lastFlag = unsettled;
-			return;
+	public Optional<T> update(T obj, boolean unstable) {
+		if(unstable) {
+			int index = lastFlag != unstable ? 1 : 0;
+			lastFlag = unstable;
+			return Optional.ofNullable(update(obj, index));
 		}
-		int incr = lastFlag == unsettled ? 1 : 0;
-		cursor = getIndex(incr);
-		array[cursor] = obj;	
-		lastFlag = unsettled;
+		int index = lastFlag == unstable ? 1 : 0;
+		lastFlag = unstable;
+		return Optional.ofNullable(update(obj, index));
+	}
+	
+	private T update(T obj, int index) {
+		cursor = getIndex(index);
+		T old = array[cursor];
+		array[cursor] = obj;
+		return old;
 	}
 	
 	private int getIndex(int incr) {
@@ -51,7 +55,7 @@ public class RingArray<T> {
 	public Object[] toArray() {
 		Object[] result = new Object[array.length];
 		for(int i=0; i<array.length; i++) {
-			result[i] = get(-(i+1));
+			result[i] = get(-i);
 		}
 		return result;
 	}

@@ -1,5 +1,7 @@
 package org.dromara.northstar.strategy.constant;
 
+import xyz.redtorch.pb.CoreField.BarField;
+
 /**
  * 指标取值类型
  * @author KevinHuangwl
@@ -7,39 +9,77 @@ package org.dromara.northstar.strategy.constant;
  */
 public enum ValueType {
 	/**
-	 * 未设置
-	 */
-	NOT_SET,
-	/**
 	 * 最高价
 	 */
-	HIGH,
+	HIGH {
+		@Override
+		public double resolve(BarField bar) {
+			return bar.getHighPrice();
+		}
+	},
 	/**
 	 * 最低价
 	 */
-	LOW,
+	LOW {
+		@Override
+		public double resolve(BarField bar) {
+			return bar.getLowPrice();
+		}
+	},
 	/**
 	 * 开盘价
 	 */
-	OPEN,
+	OPEN {
+		@Override
+		public double resolve(BarField bar) {
+			return bar.getOpenPrice();
+		}
+	},
 	/**
 	 * 收盘价
 	 */
-	CLOSE,
+	CLOSE {
+		@Override
+		public double resolve(BarField bar) {
+			return bar.getClosePrice();
+		}
+	},
 	/**
 	 * 重心价
 	 */
-	BARYCENTER,
+	BARYCENTER {
+		@Override
+		public double resolve(BarField bar) {
+			return (bar.getHighPrice() + bar.getClosePrice() + bar.getClosePrice() * 2) / 4;
+		}
+	},
 	/**
 	 * 成交量
 	 */
-	VOL,
+	VOL {
+		@Override
+		public double resolve(BarField bar) {
+			return bar.getVolume();
+		}
+	},
 	/**
 	 * 持仓量
 	 */
-	OI,
+	OI {
+		@Override
+		public double resolve(BarField bar) {
+			return bar.getOpenInterest();
+		}
+	},
 	/**
 	 * 持仓量变化
 	 */
-	OI_DELTA;
+	OI_DELTA {
+		@Override
+		public double resolve(BarField bar) {
+			return bar.getOpenInterestDelta();
+		}
+	};
+	
+	public abstract double resolve(BarField bar);
 }
