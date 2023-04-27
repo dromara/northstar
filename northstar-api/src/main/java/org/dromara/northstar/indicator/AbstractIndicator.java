@@ -1,5 +1,6 @@
 package org.dromara.northstar.indicator;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -19,8 +20,15 @@ public abstract class AbstractIndicator implements Indicator {
 	
 	@Override
 	public void update(Num num) {
-		ringBuf.update(num, num.unstable());
+		ringBuf.update(evaluate(num), num.unstable());
 	}
+	
+	/**
+	 * 具体的指标只需要提供值更新算法
+	 * @param num
+	 * @return
+	 */
+	protected abstract Num evaluate(Num num);
 
 	@Override
 	public Num get(int step) {
@@ -55,4 +63,8 @@ public abstract class AbstractIndicator implements Indicator {
 		return cfg;
 	}
 	
+	@Override
+	public List<Indicator> dependencies() {
+		return Collections.emptyList();
+	}
 }

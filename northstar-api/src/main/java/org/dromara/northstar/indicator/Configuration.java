@@ -11,14 +11,22 @@ import xyz.redtorch.pb.CoreField.ContractField;
  *
  */
 public record Configuration(String indicatorName, ContractField contract, int numOfUnits, PeriodUnit period,
-		ValueType valueType, int cacheLength, boolean ifPlotPerBar){
-	
-	public String indicatorName() {
-		return String.format("%s_%d%s", indicatorName, numOfUnits, period.symbol());
-	}
+		ValueType valueType, int cacheLength, boolean ifPlotPerBar, boolean visible){
 	
 	public static Builder builder() {
 		return new Builder();
+	}
+	
+	public Builder toBuilder() {
+		Builder b = builder();
+		b.indicatorName = this.indicatorName;
+		b.contract = this.contract;
+		b.numOfUnits = this.numOfUnits;
+		b.period = this.period;
+		b.valueType = this.valueType;
+		b.cacheLength = this.cacheLength;
+		b.ifPlotPerBar = this.ifPlotPerBar;
+		return b; 
 	}
 	
 	public static class Builder {
@@ -50,7 +58,10 @@ public record Configuration(String indicatorName, ContractField contract, int nu
 		 * 跨周期指标映射到每根K线
 		 */
 		private boolean ifPlotPerBar;
-		
+		/**
+		 * 是否在模组图表中显示
+		 */
+		private boolean visible = true;
 		
 		public Builder indicatorName(String name) {
 			this.indicatorName = name;
@@ -87,8 +98,13 @@ public record Configuration(String indicatorName, ContractField contract, int nu
 			return this;
 		}
 		
+		public Builder visible(boolean visible) {
+			this.visible = visible;
+			return this;
+		}
+		
 		public Configuration build() {
-			return new Configuration(indicatorName, contract, numOfUnits, period, valueType, cacheLength, ifPlotPerBar);
+			return new Configuration(indicatorName, contract, numOfUnits, period, valueType, cacheLength, ifPlotPerBar, visible);
 		}
 	}
 }

@@ -233,14 +233,23 @@ public class ModuleContext implements IModuleContext{
 
 	@Override
 	public void registerIndicator(Indicator indicator) {
+		checkIndicator(indicator);
 		Configuration cfg = indicator.getConfiguration();
-		Assert.isTrue(cfg.numOfUnits() > 0, "周期数必须大于0，当前为：" + cfg.numOfUnits());
-		Assert.isTrue(cfg.cacheLength() > 0, "指标回溯长度必须大于0，当前为：" + cfg.cacheLength());
 		Contract c = contractMap2.get(cfg.contract());
 		IndicatorValueUpdateHelper helper = new IndicatorValueUpdateHelper(indicator);
 		indicatorHelperSet.add(helper);
-		indicatorValBufQMap.put(indicator, new LinkedList<>());
 		registry.addListener(c, cfg.numOfUnits(), cfg.period(), helper, ListenerType.INDICATOR);
+	}
+	
+	public void checkIndicator(Indicator indicator) {
+		// 递归子指标
+		for(Indicator in : indicator.dependencies()) {
+			checkIndicator(in);
+		}
+		Configuration cfg = indicator.getConfiguration();
+		Assert.isTrue(cfg.numOfUnits() > 0, "周期数必须大于0，当前为：" + cfg.numOfUnits());
+		Assert.isTrue(cfg.cacheLength() > 0, "指标回溯长度必须大于0，当前为：" + cfg.cacheLength());
+		indicatorValBufQMap.put(indicator, new LinkedList<>());
 	}
 	
 	@Override
@@ -282,18 +291,7 @@ public class ModuleContext implements IModuleContext{
 	public synchronized void onMergedBar(BarField bar) {
 		getLogger().debug("合并Bar信息: {} {} {} {}，最新价: {}", bar.getUnifiedSymbol(), bar.getActionDay(), bar.getActionTime(), bar.getActionTimestamp(), bar.getClosePrice());
 		try {			
-			indicatorHelperSet.stream().map(IndicatorValueUpdateHelper::getIndicator).forEach(indicator -> {
-				if(!StringUtils.equals(indicator.getConfiguration().contract().getUnifiedSymbol(), bar.getUnifiedSymbol())) {
-					return;
-				}
-				if(indicatorValBufQMap.get(indicator).size() >= bufSize.intValue()) {
-					indicatorValBufQMap.get(indicator).poll();
-				}
-				if(indicator.isReady() 
-						&& (BarUtils.isEndOfTheTradingDay(bar) || indicator.getConfiguration().ifPlotPerBar() || !indicator.get(0).unstable())) {		
-					indicatorValBufQMap.get(indicator).offer(new TimeSeriesValue(indicator.get(0).value(), bar.getActionTimestamp()));	
-				}
-			});
+			indicatorHelperSet.stream().map(IndicatorValueUpdateHelper::getIndicator).forEach(indicator -> visualize(indicator, bar));
 		} catch(Exception e) {
 			getLogger().error("", e);
 		}
@@ -303,6 +301,22 @@ public class ModuleContext implements IModuleContext{
 		barBufQMap.get(bar.getUnifiedSymbol()).offer(bar);		
 		if(isEnabled()) {
 			moduleRepo.saveRuntime(getRuntimeDescription(false));
+		}
+	}
+	
+	private void visualize(Indicator indicator, BarField bar) {
+		for(Indicator in : indicator.dependencies()) {
+			visualize(in, bar);
+		}
+		if(!StringUtils.equals(indicator.getConfiguration().contract().getUnifiedSymbol(), bar.getUnifiedSymbol())) {
+			return;
+		}
+		if(indicatorValBufQMap.get(indicator).size() >= bufSize.intValue()) {
+			indicatorValBufQMap.get(indicator).poll();
+		}
+		if(indicator.isReady() && indicator.getConfiguration().visible()
+				&& (BarUtils.isEndOfTheTradingDay(bar) || indicator.getConfiguration().ifPlotPerBar() || !indicator.get(0).unstable())) {		
+			indicatorValBufQMap.get(indicator).offer(new TimeSeriesValue(indicator.get(0).value(), bar.getActionTimestamp()));	
 		}
 	}
 
@@ -414,11 +428,14 @@ public class ModuleContext implements IModuleContext{
 			indicatorValBufQMap.entrySet().forEach(e -> {
 				Indicator in = e.getKey();
 				String unifiedSymbol = in.getConfiguration().contract().getUnifiedSymbol();
-				String indicatorName = in.getConfiguration().indicatorName();
+				Configuration cfg = in.getConfiguration();
+				String indicatorName = String.format("%s_%d%s", cfg.indicatorName(), cfg.numOfUnits(), cfg.period().symbol());
 				if(!indicatorMap.containsKey(unifiedSymbol)) {
 					indicatorMap.put(unifiedSymbol, new ArrayList<>());
 				}
-				indicatorMap.get(unifiedSymbol).add(indicatorName);
+				if(cfg.visible()) {
+					indicatorMap.get(unifiedSymbol).add(indicatorName);
+				}
 				Collections.sort(indicatorMap.get(unifiedSymbol));
 				
 				e.getValue().stream().forEach(tv -> {
