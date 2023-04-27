@@ -8,7 +8,6 @@ import java.util.concurrent.ThreadLocalRandom;
 import org.dromara.northstar.indicator.Configuration;
 import org.dromara.northstar.indicator.Indicator;
 import org.dromara.northstar.indicator.Num;
-import org.dromara.northstar.indicator.trend.MAIndicator;
 import org.junit.jupiter.api.Test;
 
 class MAIndicatorTest {
@@ -20,9 +19,9 @@ class MAIndicatorTest {
 		for (double v : data) {
 			ma5.update(Num.of(v));
 		}
-		assertThat(ma5.value(0).value()).isEqualTo(8.0);
-		assertThat(ma5.value(-1).value()).isEqualTo(7.0);
-		assertThat(ma5.value(-2).value()).isEqualTo(6.0);
+		assertThat(ma5.value(0)).isEqualTo(8.0);
+		assertThat(ma5.value(-1)).isEqualTo(7.0);
+		assertThat(ma5.value(-2)).isEqualTo(6.0);
 	}
 
 	@Test
@@ -32,9 +31,9 @@ class MAIndicatorTest {
 		for (double v : data) {
 			ma2.update(Num.of(v));
 		}
-		assertThat(ma2.value(0).value()).isCloseTo(4.5, offset(1e-9));
-		assertThat(ma2.value(-1).value()).isCloseTo(3.5, offset(1e-9));
-		assertThat(ma2.value(-2).value()).isCloseTo(2.5, offset(1e-9));
+		assertThat(ma2.value(0)).isCloseTo(4.5, offset(1e-9));
+		assertThat(ma2.value(-1)).isCloseTo(3.5, offset(1e-9));
+		assertThat(ma2.value(-2)).isCloseTo(2.5, offset(1e-9));
 	}
 
 	@Test
@@ -47,8 +46,8 @@ class MAIndicatorTest {
 			}
 			ma5.update(Num.of(v));
 		}
-		assertThat(ma5.value(0).value()).isCloseTo(8.0, offset(1e-9));
-		assertThat(ma5.value(-1).value()).isCloseTo(7.0, offset(1e-9));
-		assertThat(ma5.value(-2).value()).isCloseTo(6.0, offset(1e-9));
+		assertThat(ma5.value(0)).isCloseTo(8.0, offset(1e-9));
+		assertThat(ma5.value(-1)).isCloseTo(7.0, offset(1e-9));
+		assertThat(ma5.value(-2)).isCloseTo(6.0, offset(1e-9));
 	}
 }
