@@ -9,6 +9,11 @@ import org.dromara.northstar.indicator.Indicator;
 import org.dromara.northstar.indicator.Num;
 import org.dromara.northstar.indicator.RingArray;
 
+/**
+ * MA算术平均线
+ * @author KevinHuangwl
+ *
+ */
 public class MAIndicator extends AbstractIndicator implements Indicator {
 
 	private RingArray<Num> sample;

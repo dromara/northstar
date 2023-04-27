@@ -8,6 +8,11 @@ import org.dromara.northstar.indicator.Configuration;
 import org.dromara.northstar.indicator.Indicator;
 import org.dromara.northstar.indicator.Num;
 
+/**
+ * EMA指数加权平均线
+ * @author KevinHuangwl
+ *
+ */
 public class EMAIndicator extends AbstractIndicator implements Indicator{
 	
 	private double factor;

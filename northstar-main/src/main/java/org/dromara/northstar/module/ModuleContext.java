@@ -290,8 +290,8 @@ public class ModuleContext implements IModuleContext{
 					indicatorValBufQMap.get(indicator).poll();
 				}
 				if(indicator.isReady() 
-						&& (BarUtils.isEndOfTheTradingDay(bar) || indicator.getConfiguration().ifPlotPerBar() || !indicator.value(0).unstable())) {		
-					indicatorValBufQMap.get(indicator).offer(new TimeSeriesValue(indicator.value(0).value(), bar.getActionTimestamp()));	
+						&& (BarUtils.isEndOfTheTradingDay(bar) || indicator.getConfiguration().ifPlotPerBar() || !indicator.get(0).unstable())) {		
+					indicatorValBufQMap.get(indicator).offer(new TimeSeriesValue(indicator.get(0).value(), bar.getActionTimestamp()));	
 				}
 			});
 		} catch(Exception e) {

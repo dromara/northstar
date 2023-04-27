@@ -1,10 +1,10 @@
 package org.dromara.northstar.indicator.trend;
 
 /**
- * SMA扩展指数加权移动平均线
+ * MACD指标
  * @author KevinHuangwl
  *
  */
-public class SMAIndicator {
+public class MACDIndicator {
 
 }
