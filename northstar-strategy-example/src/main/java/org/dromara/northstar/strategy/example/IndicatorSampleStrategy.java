@@ -1,20 +1,14 @@
 package org.dromara.northstar.strategy.example;
 
-import static org.dromara.northstar.indicator.function.AverageFunctions.*;
-import static org.dromara.northstar.indicator.function.ComputeFunctions.*;
-
-import org.dromara.northstar.indicator.complex.MACD;
 import org.dromara.northstar.common.constant.FieldType;
 import org.dromara.northstar.common.constant.SignalOperation;
 import org.dromara.northstar.common.model.DynamicParams;
 import org.dromara.northstar.common.model.Setting;
+import org.dromara.northstar.indicator.Indicator;
 import org.dromara.northstar.strategy.AbstractStrategy;
-import org.dromara.northstar.strategy.IIndicator;
 import org.dromara.northstar.strategy.StrategicComponent;
 import org.dromara.northstar.strategy.TradeStrategy;
-import org.dromara.northstar.strategy.constant.PeriodUnit;
 import org.dromara.northstar.strategy.constant.PriceType;
-import org.dromara.northstar.strategy.model.Configuration;
 import org.dromara.northstar.strategy.model.TradeIntent;
 
 import xyz.redtorch.pb.CoreField.BarField;
@@ -36,13 +30,13 @@ public class IndicatorSampleStrategy extends AbstractStrategy	// 为了简化代
 
 	private InitParams params;	// 策略的参数配置信息
 
-	private IIndicator fastLine;
+	private Indicator fastLine;
 
-	private IIndicator slowLine;
+	private Indicator slowLine;
 
-	private IIndicator macdDiff;
+	private Indicator macdDiff;
 
-	private IIndicator macdDea;
+	private Indicator macdDea;
 
 	@Override
 	public void onMergedBar(BarField bar) {

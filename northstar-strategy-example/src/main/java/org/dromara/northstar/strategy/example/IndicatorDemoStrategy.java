@@ -39,7 +39,7 @@ public class IndicatorDemoStrategy extends AbstractStrategy	// 为了简化代�
 	protected void initIndicators() {
 		//######## 以下写法仅用于监控台演示，因此没有赋值给类属性，同时为了简化参数也直接写死 ########//
 		ctx.registerIndicator(new MAIndicator(makeConfig("MA5"), 5));	// MA5
-		ctx.registerIndicator(new EMAIndicator(makeConfig("EMA"), 5));
+		ctx.registerIndicator(new EMAIndicator(makeConfig("EMA5"), 5));	// EMA5
 	}
 	
 	private Configuration makeConfig(String name) {
