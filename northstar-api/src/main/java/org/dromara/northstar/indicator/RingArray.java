@@ -60,7 +60,19 @@ public class RingArray<T> {
 		return result;
 	}
 	
+	/**
+	 * 实际大小
+	 * @return
+	 */
 	public int size() {
 		return (int) Stream.of(array).filter(Objects::nonNull).count();
+	}
+	
+	/**
+	 * 最大长度
+	 * @return
+	 */
+	public int length() {
+		return array.length;
 	}
 }

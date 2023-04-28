@@ -1,5 +1,7 @@
 package org.dromara.northstar.indicator.trend;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 import org.dromara.northstar.indicator.AbstractIndicator;
@@ -36,6 +38,14 @@ public class MAIndicator extends AbstractIndicator implements Indicator {
 		sample.update(newVal, newVal.unstable()).ifPresent(val -> sum -= val.value());	// 减去旧的值
 		sum += newVal.value();															// 加上新的值
 		return Num.of(sum / sample.size(), num.timestamp(), num.unstable());
+	}
+	
+	@Override
+	public List<Indicator> dependencies() {
+		if(Objects.isNull(srcIndicator)) {
+			return Collections.emptyList();
+		}
+		return List.of(srcIndicator);
 	}
 	
 }

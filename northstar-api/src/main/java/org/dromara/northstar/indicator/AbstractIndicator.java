@@ -59,7 +59,7 @@ public abstract class AbstractIndicator implements Indicator {
 	 */
 	@Override
 	public boolean isReady() {
-		return ringBuf.toArray().length == ringBuf.size();
+		return ringBuf.length() == ringBuf.size();
 	}
 
 	@Override
