@@ -7,6 +7,7 @@ import org.dromara.northstar.indicator.Configuration;
 import org.dromara.northstar.indicator.Indicator;
 import org.dromara.northstar.indicator.Num;
 import org.dromara.northstar.indicator.helper.DiffIndicator;
+import org.springframework.util.Assert;
 
 /**
  * MACD指标
@@ -35,6 +36,7 @@ public class MACDIndicator extends AbstractIndicator implements Indicator{
 	 */
 	public MACDIndicator(Configuration cfg, int shortBarCount, int longBarCount, int signalBarCount) {
 		super(cfg);
+		Assert.isTrue(shortBarCount < longBarCount, "长短周期设置不正确");
 		Indicator shortTermLine = new EMAIndicator(cfg.toBuilder().indicatorName(cfg.indicatorName() + "_fast").visible(false).build(), shortBarCount);
 		Indicator longTermLine = new EMAIndicator(cfg.toBuilder().indicatorName(cfg.indicatorName() + "_slow").visible(false).build(), longBarCount);
 		

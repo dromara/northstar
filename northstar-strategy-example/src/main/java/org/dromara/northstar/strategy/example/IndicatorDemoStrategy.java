@@ -3,7 +3,10 @@ package org.dromara.northstar.strategy.example;
 import org.dromara.northstar.common.model.DynamicParams;
 import org.dromara.northstar.common.model.Setting;
 import org.dromara.northstar.indicator.Configuration;
+import org.dromara.northstar.indicator.trend.EMAIndicator;
 import org.dromara.northstar.indicator.trend.MACDIndicator;
+import org.dromara.northstar.indicator.trend.MAIndicator;
+import org.dromara.northstar.indicator.trend.SMAIndicator;
 import org.dromara.northstar.strategy.AbstractStrategy;
 import org.dromara.northstar.strategy.StrategicComponent;
 import org.dromara.northstar.strategy.TradeStrategy;
@@ -37,8 +40,9 @@ public class IndicatorDemoStrategy extends AbstractStrategy	// 为了简化代�
 	@Override
 	protected void initIndicators() {
 		//######## 以下写法仅用于监控台演示，因此没有赋值给类属性，同时为了简化参数也直接写死 ########//
-//		ctx.registerIndicator(new MAIndicator(makeConfig("MA5"), 5));	// MA5
-//		ctx.registerIndicator(new EMAIndicator(makeConfig("EMA5"), 5));	// EMA5
+		ctx.registerIndicator(new MAIndicator(makeConfig("MA5"), 5));	// MA5
+		ctx.registerIndicator(new EMAIndicator(makeConfig("EMA5"), 5));	// EMA5
+		ctx.registerIndicator(new SMAIndicator(makeConfig("SMA10"), 10, 2));
 		ctx.registerIndicator(new MACDIndicator(makeConfig("MACD"), 12, 26, 9));
 	}
 	

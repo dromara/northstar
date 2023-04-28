@@ -26,7 +26,7 @@ public abstract class AbstractIndicator implements Indicator {
 	
 	@Override
 	public void update(Num num) {
-		if(num.timestamp() <= ringBuf.get().timestamp()) {
+		if(ringBuf.size() > 0 && num.timestamp() <= ringBuf.get().timestamp() && num.unstable() == ringBuf.get().unstable()) {
 			return;	// 通过时间戳比对，确保同一个指标只能被同一个时间的值更新一次
 		}
 		ringBuf.update(evaluate(num), num.unstable());

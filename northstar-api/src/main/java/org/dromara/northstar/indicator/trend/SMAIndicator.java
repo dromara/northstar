@@ -6,6 +6,7 @@ import org.dromara.northstar.indicator.AbstractIndicator;
 import org.dromara.northstar.indicator.Configuration;
 import org.dromara.northstar.indicator.Indicator;
 import org.dromara.northstar.indicator.Num;
+import org.springframework.util.Assert;
 
 /**
  * SMA扩展指数加权移动平均线
@@ -20,6 +21,7 @@ public class SMAIndicator extends AbstractIndicator implements Indicator{
 	
 	public SMAIndicator(Configuration cfg, int barCount, int weight) {
 		super(cfg);
+		Assert.isTrue(barCount > weight, "更新权重设置异常");
 		this.factor = (double) weight / barCount;
 	}
 	
