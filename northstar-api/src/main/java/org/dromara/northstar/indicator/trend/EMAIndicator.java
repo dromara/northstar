@@ -45,7 +45,7 @@ public class EMAIndicator extends AbstractIndicator implements Indicator{
 		double newVal = Objects.isNull(srcIndicator) ? num.value() : srcIndicator.value(0);
 		double preVal = ringBuf.get().unstable() ? ringBuf.get(-1).value() : ringBuf.get(0).value(); 
 		double val = factor * newVal + (1 - factor) * preVal;
-		return Num.of(val, num.unstable());
+		return Num.of(val, num.timestamp(), num.unstable());
 	}
 
 }

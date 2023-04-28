@@ -47,10 +47,14 @@ class RingArrayTest {
     	RingArray<Num> ringArray = new RingArray<>(5);
     	assertThat(ringArray.toArray()).hasSize(5);
     	assertThat(ringArray.size()).isZero();
-        ringArray.update(Num.of(1), false);
-        ringArray.update(Num.of(2), false);
-        ringArray.update(Num.of(3), false);
-        Num[] expected = new Num[] {Num.of(3), Num.of(2), Num.of(1), null, null};
+    	long t = 0L;
+    	Num n1 = Num.of(1, t++);
+    	Num n2 = Num.of(2, t++);
+    	Num n3 = Num.of(3, t++);
+        ringArray.update(n1, false);
+        ringArray.update(n2, false);
+        ringArray.update(n3, false);
+        Num[] expected = new Num[] {n3, n2, n1, null, null};
         assertArrayEquals(expected, ringArray.toArray());
     }
 

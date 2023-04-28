@@ -7,6 +7,12 @@ import java.util.stream.Stream;
 
 import cn.hutool.core.lang.Assert;
 
+/**
+ * 抽象的指标
+ * 代表的是一个单值指标
+ * @author KevinHuangwl
+ *
+ */
 public abstract class AbstractIndicator implements Indicator {
 	
 	protected RingArray<Num> ringBuf;
@@ -20,6 +26,9 @@ public abstract class AbstractIndicator implements Indicator {
 	
 	@Override
 	public void update(Num num) {
+		if(num.timestamp() <= ringBuf.get().timestamp()) {
+			return;	// 通过时间戳比对，确保同一个指标只能被同一个时间的值更新一次
+		}
 		ringBuf.update(evaluate(num), num.unstable());
 	}
 	
@@ -35,7 +44,7 @@ public abstract class AbstractIndicator implements Indicator {
 		Assert.isTrue(step <= 0, "回溯步长不是正数");
 		Assert.isTrue(step > -cfg.cacheLength(), "回溯长度超过指标缓存大小");
 		if(Objects.isNull(ringBuf.get(step))) {
-			return Num.of(Double.NaN);
+			return Num.of(Double.NaN, 0);
 		}
 		return ringBuf.get(step);
 	}

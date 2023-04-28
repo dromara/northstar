@@ -27,7 +27,7 @@ public class IndicatorValueUpdateHelper implements MergedBarListener, BarDataAwa
 		if(!StringUtils.equals(cfg.contract().getUnifiedSymbol(), bar.getUnifiedSymbol())) {
 			return;
 		}
-		recursiveUpdate(indicator, Num.of(cfg.valueType().resolve(bar)));
+		recursiveUpdate(indicator, Num.of(cfg.valueType().resolve(bar), bar.getActionTimestamp()));
 	}
 
 	@Override
@@ -35,7 +35,7 @@ public class IndicatorValueUpdateHelper implements MergedBarListener, BarDataAwa
 		if(!StringUtils.equals(cfg.contract().getUnifiedSymbol(), bar.getUnifiedSymbol())) {
 			return;
 		}
-		recursiveUpdate(indicator, Num.of(cfg.valueType().resolve(bar), true));
+		recursiveUpdate(indicator, Num.of(cfg.valueType().resolve(bar), bar.getActionTimestamp(), true));
 	}
 
 	@Override
