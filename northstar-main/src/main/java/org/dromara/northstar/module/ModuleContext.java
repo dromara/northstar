@@ -314,7 +314,7 @@ public class ModuleContext implements IModuleContext{
 		if(indicatorValBufQMap.get(indicator).size() >= bufSize.intValue()) {
 			indicatorValBufQMap.get(indicator).poll();
 		}
-		if(indicator.isReady() && indicator.getConfiguration().visible()
+		if(indicator.isReady() && indicator.getConfiguration().visible() && indicator.get(0).timestamp() == bar.getActionTimestamp()
 				&& (BarUtils.isEndOfTheTradingDay(bar) || indicator.getConfiguration().ifPlotPerBar() || !indicator.get(0).unstable())) {		
 			indicatorValBufQMap.get(indicator).offer(new TimeSeriesValue(indicator.get(0).value(), bar.getActionTimestamp()));	
 		}

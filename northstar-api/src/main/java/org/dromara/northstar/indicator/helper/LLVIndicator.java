@@ -1,5 +1,38 @@
 package org.dromara.northstar.indicator.helper;
 
-public class LLVIndicator {
+import java.util.List;
 
+import org.dromara.northstar.indicator.AbstractIndicator;
+import org.dromara.northstar.indicator.Configuration;
+import org.dromara.northstar.indicator.Indicator;
+import org.dromara.northstar.indicator.Num;
+
+/**
+ * 最小值指标
+ * @author KevinHuangwl
+ *
+ */
+public class LLVIndicator extends AbstractIndicator implements Indicator{
+
+	private Indicator srcIndicator;
+	
+	public LLVIndicator(Configuration cfg, Indicator indicator) {
+		super(cfg);
+		this.srcIndicator = indicator;
+	}
+	
+	@Override
+	public List<Indicator> dependencies() {
+		return List.of(srcIndicator);
+	}
+
+	@Override
+	protected Num evaluate(Num num) {
+		if(!srcIndicator.isReady()) {
+			return Num.of(Double.NaN, 0, num.unstable());
+		}
+		double val = srcIndicator.getData().stream().filter(nm -> !nm.isNaN()).mapToDouble(Num::value).min().getAsDouble();
+		return Num.of(val, num.timestamp(), num.unstable());
+	}
+	
 }

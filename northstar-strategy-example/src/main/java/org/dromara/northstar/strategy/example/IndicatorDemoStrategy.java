@@ -3,6 +3,9 @@ package org.dromara.northstar.strategy.example;
 import org.dromara.northstar.common.model.DynamicParams;
 import org.dromara.northstar.common.model.Setting;
 import org.dromara.northstar.indicator.Configuration;
+import org.dromara.northstar.indicator.helper.HHVIndicator;
+import org.dromara.northstar.indicator.helper.LLVIndicator;
+import org.dromara.northstar.indicator.helper.SimpleValueIndicator;
 import org.dromara.northstar.indicator.trend.EMAIndicator;
 import org.dromara.northstar.indicator.trend.MACDIndicator;
 import org.dromara.northstar.indicator.trend.MAIndicator;
@@ -13,6 +16,7 @@ import org.dromara.northstar.indicator.volume.VWAPIndicator;
 import org.dromara.northstar.strategy.AbstractStrategy;
 import org.dromara.northstar.strategy.StrategicComponent;
 import org.dromara.northstar.strategy.TradeStrategy;
+import org.dromara.northstar.strategy.constant.ValueType;
 
 import com.google.common.util.concurrent.AtomicDouble;
 
@@ -42,14 +46,20 @@ public class IndicatorDemoStrategy extends AbstractStrategy	// 为了简化代�
 
 	@Override
 	protected void initIndicators() {
+		ContractField c = ctx.getContract(params.indicatorSymbol);
 		//######## 以下写法仅用于监控台演示，因此没有赋值给类属性，同时为了简化参数也直接写死 ########//
 		ctx.registerIndicator(new MAIndicator(makeConfig("MA5"), 5));	// MA5
 		ctx.registerIndicator(new EMAIndicator(makeConfig("EMA5"), 5));	// EMA5
 		ctx.registerIndicator(new SMAIndicator(makeConfig("SMA10"), 10, 2));
 		ctx.registerIndicator(new MACDIndicator(makeConfig("MACD"), 12, 26, 9));
 		ctx.registerIndicator(new BOLLIndicator(makeConfig("BOLL"), 20, 2));	
-		ctx.registerIndicator(new IntraDaySettlePriceIndicator(makeConfig("SP")));		// 日内均价
-		ctx.registerIndicator(new VWAPIndicator(makeConfig("VWAP"), 100));	// 成交加权均价
+		ctx.registerIndicator(new IntraDaySettlePriceIndicator(makeConfig("SP")));	// 日内均价
+		ctx.registerIndicator(new VWAPIndicator(makeConfig("VWAP"), 100));			// 成交加权均价
+	
+		ctx.registerIndicator(new HHVIndicator(makeConfig("HHV"), 
+				new SimpleValueIndicator(Configuration.builder().contract(c).valueType(ValueType.HIGH).cacheLength(10).visible(false).build())));	// 10个周期内的最高价
+		ctx.registerIndicator(new LLVIndicator(makeConfig("LLV"),
+				new SimpleValueIndicator(Configuration.builder().contract(c).valueType(ValueType.LOW).cacheLength(10).visible(false).build())));	// 10个周期内的最低价
 	}
 	
 	private Configuration makeConfig(String name) {
