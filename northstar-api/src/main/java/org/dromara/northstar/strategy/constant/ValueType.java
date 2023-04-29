@@ -79,6 +79,15 @@ public enum ValueType {
 		public double resolve(BarField bar) {
 			return bar.getOpenInterestDelta();
 		}
+	},
+	/**
+	 * 交易日
+	 */
+	TRADE_DATE {
+		@Override
+		public double resolve(BarField bar) {
+			return Double.valueOf(bar.getTradingDay());
+		}
 	};
 	
 	public abstract double resolve(BarField bar);

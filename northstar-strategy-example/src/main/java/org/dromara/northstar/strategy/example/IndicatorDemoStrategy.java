@@ -8,6 +8,8 @@ import org.dromara.northstar.indicator.trend.MACDIndicator;
 import org.dromara.northstar.indicator.trend.MAIndicator;
 import org.dromara.northstar.indicator.trend.SMAIndicator;
 import org.dromara.northstar.indicator.volatility.BOLLIndicator;
+import org.dromara.northstar.indicator.volume.IntraDaySettlePriceIndicator;
+import org.dromara.northstar.indicator.volume.VWAPIndicator;
 import org.dromara.northstar.strategy.AbstractStrategy;
 import org.dromara.northstar.strategy.StrategicComponent;
 import org.dromara.northstar.strategy.TradeStrategy;
@@ -45,7 +47,9 @@ public class IndicatorDemoStrategy extends AbstractStrategy	// 为了简化代�
 		ctx.registerIndicator(new EMAIndicator(makeConfig("EMA5"), 5));	// EMA5
 		ctx.registerIndicator(new SMAIndicator(makeConfig("SMA10"), 10, 2));
 		ctx.registerIndicator(new MACDIndicator(makeConfig("MACD"), 12, 26, 9));
-		ctx.registerIndicator(new BOLLIndicator(makeConfig("BOLL"), 20, 2));
+		ctx.registerIndicator(new BOLLIndicator(makeConfig("BOLL"), 20, 2));	
+		ctx.registerIndicator(new IntraDaySettlePriceIndicator(makeConfig("SP")));		// 日内均价
+		ctx.registerIndicator(new VWAPIndicator(makeConfig("VWAP"), 100));	// 成交加权均价
 	}
 	
 	private Configuration makeConfig(String name) {
