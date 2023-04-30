@@ -29,7 +29,7 @@ public class HHVIndicator extends AbstractIndicator implements Indicator{
 	@Override
 	protected Num evaluate(Num num) {
 		if(!srcIndicator.isReady()) {
-			return Num.of(Double.NaN, 0, num.unstable());
+			return Num.NaN();
 		}
 		double val = srcIndicator.getData().stream().filter(nm -> !nm.isNaN()).mapToDouble(Num::value).max().getAsDouble();
 		return Num.of(val, num.timestamp(), num.unstable());

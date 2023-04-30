@@ -37,7 +37,7 @@ public class StandardDeviationIndicator extends AbstractIndicator implements Ind
 	protected Num evaluate(Num num) {
 		sample.update(num, num.unstable());
 		if(sample.toArray().length != sample.size()) {
-			return Num.of(0, 0, num.unstable());
+			return Num.NaN();
 		}
 		double[] data = Stream.of(sample.toArray()).map(Num.class::cast).mapToDouble(Num::value).toArray();
 		double std = new StandardDeviation().evaluate(data);

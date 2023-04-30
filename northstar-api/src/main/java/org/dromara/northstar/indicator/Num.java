@@ -18,6 +18,10 @@ public record Num(double value, long timestamp, boolean unstable) {
 		return new Num(value, timestamp, unstable);
 	}
 	
+	public static Num NaN() {
+		return Num.of(Double.NaN, 0, true);
+	}
+	
 	public boolean isNaN() {
 		return Double.isNaN(value);
 	}

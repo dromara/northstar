@@ -33,7 +33,7 @@ public class VWAPIndicator extends AbstractIndicator implements Indicator{
 	@Override
 	protected Num evaluate(Num num) {
 		if(!volume.isReady()) {
-			return Num.of(0, 0);
+			return Num.NaN();
 		}
 		double accVol = volume.getData().stream().mapToDouble(Num::value).sum();
 		List<Num> volumes = volume.getData();
