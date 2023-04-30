@@ -12,6 +12,7 @@ import xyz.redtorch.pb.CoreField.TickField;
  * @author KevinHuangwl
  *
  */
+@Deprecated
 public interface IComboIndicator extends BarDataAware, TickDataAware, MergedBarListener{
 
 	Configuration getConfiguration();

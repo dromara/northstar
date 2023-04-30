@@ -33,9 +33,7 @@ public class BarMergerRegistry implements BarDataAware{
 	
 	public BarMergerRegistry() {
 		listenTypeMap.put(ListenerType.INDICATOR, HashMultimap.create());
-		listenTypeMap.put(ListenerType.COMBO_INDICATOR, HashMultimap.create());
 		listenTypeMap.put(ListenerType.CONTEXT, HashMultimap.create());
-		listenTypeMap.put(ListenerType.INSPECTABLE_VAL, HashMultimap.create());
 		listenTypeMap.put(ListenerType.STRATEGY, HashMultimap.create());
 	}
 	
@@ -68,17 +66,13 @@ public class BarMergerRegistry implements BarDataAware{
 	@Override
 	public void onBar(BarField bar) {
 		listenTypeMap.get(ListenerType.INDICATOR).keySet().forEach(merger -> merger.onBar(bar));
-		listenTypeMap.get(ListenerType.COMBO_INDICATOR).keySet().forEach(merger -> merger.onBar(bar));
 		listenTypeMap.get(ListenerType.STRATEGY).keySet().forEach(merger -> merger.onBar(bar));
-		listenTypeMap.get(ListenerType.INSPECTABLE_VAL).keySet().forEach(merger -> merger.onBar(bar));
 		listenTypeMap.get(ListenerType.CONTEXT).keySet().forEach(merger -> merger.onBar(bar));
 	}
 	
 	public enum ListenerType {
 		INDICATOR,
-		COMBO_INDICATOR,
 		CONTEXT,
-		INSPECTABLE_VAL,
 		STRATEGY;
 	}
 }

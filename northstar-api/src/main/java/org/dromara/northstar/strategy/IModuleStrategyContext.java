@@ -1,17 +1,10 @@
 package org.dromara.northstar.strategy;
 
-import java.util.function.Function;
-
 import org.dromara.northstar.common.constant.ModuleState;
-import org.dromara.northstar.common.model.BarWrapper;
-import org.dromara.northstar.common.model.TimeSeriesValue;
+import org.dromara.northstar.indicator.Indicator;
 import org.dromara.northstar.strategy.constant.DisposablePriceListenerType;
-import org.dromara.northstar.strategy.constant.ValueType;
-import org.dromara.northstar.strategy.model.Configuration;
 import org.dromara.northstar.strategy.model.TradeIntent;
 import org.slf4j.Logger;
-
-import com.google.common.util.concurrent.AtomicDouble;
 
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
@@ -98,38 +91,10 @@ public interface IModuleStrategyContext {
 	 */
 	Logger getLogger();
 	/**
-	 * 创建指标
-	 * @param configuration
-	 * @param valueType
-	 * @param indicatorFunction
-	 * @return
+	 * 注册指标
+	 * @param indicator
 	 */
-	IIndicator newIndicator(Configuration configuration, ValueType valueType, TimeSeriesUnaryOperator indicatorFunction);
-	/**
-	 * 创建指标
-	 * @param configuration
-	 * @param indicatorFunction
-	 * @return
-	 */
-	IIndicator newIndicator(Configuration configuration, TimeSeriesUnaryOperator indicatorFunction);
-	/**
-	 * 创建指标
-	 * @param configuration
-	 * @param indicatorFunction
-	 * @return
-	 */
-	IIndicator newIndicator(Configuration configuration, Function<BarWrapper, TimeSeriesValue> indicatorFunction);
-	/**
-	 * 用指标方式透视值
-	 * @param configuration
-	 * @param value
-	 */
-	void viewValueAsIndicator(Configuration configuration, AtomicDouble value);
-	/**
-	 * 绑定组合指标
-	 * @param comboIndicator
-	 */
-	void addComboIndicator(IComboIndicator comboIndicator);
+	void registerIndicator(Indicator indicator);
 	/**
 	 * 发消息提示
 	 * @param content
