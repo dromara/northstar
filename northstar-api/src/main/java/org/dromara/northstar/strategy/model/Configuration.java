@@ -12,6 +12,7 @@ import xyz.redtorch.pb.CoreField.ContractField;
  * @author KevinHuangwl
  *
  */
+@Deprecated
 @Builder(toBuilder = true)
 @Getter
 public class Configuration {

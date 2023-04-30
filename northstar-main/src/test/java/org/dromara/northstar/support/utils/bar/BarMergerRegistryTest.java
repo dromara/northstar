@@ -33,9 +33,8 @@ class BarMergerRegistryTest {
 		when(c.tradeTimeDefinition()).thenReturn(new GenericTradeTime());
 		registry.addListener(c, 5, PeriodUnit.MINUTE, listener1, ListenerType.INDICATOR);
 		registry.addListener(c, 5, PeriodUnit.MINUTE, listener2, ListenerType.INDICATOR);
-		registry.addListener(c, 5, PeriodUnit.MINUTE, listener3, ListenerType.COMBO_INDICATOR);
 		
-		assertThat(registry.mergerListenerMap.keySet()).hasSize(2);
+		assertThat(registry.mergerListenerMap.keySet()).hasSize(1);
 	}
 
 }

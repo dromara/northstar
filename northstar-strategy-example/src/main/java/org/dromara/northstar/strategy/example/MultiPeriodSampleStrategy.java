@@ -1,17 +1,14 @@
 package org.dromara.northstar.strategy.example;
 
-import static org.dromara.northstar.indicator.function.AverageFunctions.MA;
-
 import org.dromara.northstar.common.constant.FieldType;
 import org.dromara.northstar.common.constant.SignalOperation;
 import org.dromara.northstar.common.model.DynamicParams;
 import org.dromara.northstar.common.model.Setting;
+import org.dromara.northstar.indicator.Indicator;
 import org.dromara.northstar.strategy.AbstractStrategy;
-import org.dromara.northstar.strategy.IIndicator;
 import org.dromara.northstar.strategy.StrategicComponent;
 import org.dromara.northstar.strategy.TradeStrategy;
 import org.dromara.northstar.strategy.constant.PriceType;
-import org.dromara.northstar.strategy.model.Configuration;
 import org.dromara.northstar.strategy.model.TradeIntent;
 
 import xyz.redtorch.pb.CoreField.BarField;
@@ -33,10 +30,10 @@ public class MultiPeriodSampleStrategy extends AbstractStrategy	// 为了简化�
 	
 	private InitParams params;	// 策略的参数配置信息
 	
-	private IIndicator fastLine1;	// 主周期快线
-	private IIndicator slowLine1;	// 主周期慢线
-	private IIndicator fastLine2;	// 参考周期快线
-	private IIndicator slowLine2;	// 参考周期慢线 
+	private Indicator fastLine1;	// 主周期快线
+	private Indicator slowLine1;	// 主周期慢线
+	private Indicator fastLine2;	// 参考周期快线
+	private Indicator slowLine2;	// 参考周期慢线 
 	
 	@Override
 	public void onMergedBar(BarField bar) {
@@ -107,28 +104,28 @@ public class MultiPeriodSampleStrategy extends AbstractStrategy	// 为了简化�
 	
 	@Override
 	protected void initIndicators() {
-		// 主周期线
-		this.fastLine1 = ctx.newIndicator(Configuration.builder()
-				.indicatorName("快线")
-				.bindedContract(ctx.getContract(params.indicatorSymbol))
-				.build(), MA(params.fast));
-		this.slowLine1 = ctx.newIndicator(Configuration.builder()
-				.indicatorName("慢线")
-				.bindedContract(ctx.getContract(params.indicatorSymbol))
-				.build(), MA(params.slow));
-		
-		// 参考周期线
-		this.fastLine2 = ctx.newIndicator(Configuration.builder()
-				.indicatorName("快线")
-				.numOfUnits(params.refPeriod)
-				.bindedContract(ctx.getContract(params.indicatorSymbol))
-				.build(), MA(params.fast));
-		this.slowLine2 = ctx.newIndicator(Configuration.builder()
-				.indicatorName("慢线")
-				.numOfUnits(params.refPeriod)
-				.plotPerBar(true)
-				.bindedContract(ctx.getContract(params.indicatorSymbol))
-				.build(), MA(params.slow));
+//		// 主周期线
+//		this.fastLine1 = ctx.newIndicator(Configuration.builder()
+//				.indicatorName("快线")
+//				.bindedContract(ctx.getContract(params.indicatorSymbol))
+//				.build(), MA(params.fast));
+//		this.slowLine1 = ctx.newIndicator(Configuration.builder()
+//				.indicatorName("慢线")
+//				.bindedContract(ctx.getContract(params.indicatorSymbol))
+//				.build(), MA(params.slow));
+//		
+//		// 参考周期线
+//		this.fastLine2 = ctx.newIndicator(Configuration.builder()
+//				.indicatorName("快线")
+//				.numOfUnits(params.refPeriod)
+//				.bindedContract(ctx.getContract(params.indicatorSymbol))
+//				.build(), MA(params.fast));
+//		this.slowLine2 = ctx.newIndicator(Configuration.builder()
+//				.indicatorName("慢线")
+//				.numOfUnits(params.refPeriod)
+//				.plotPerBar(true)
+//				.bindedContract(ctx.getContract(params.indicatorSymbol))
+//				.build(), MA(params.slow));
 	}
 	
 	@Override

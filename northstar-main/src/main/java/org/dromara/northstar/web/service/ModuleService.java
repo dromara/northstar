@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
@@ -18,6 +19,7 @@ import org.dromara.northstar.common.constant.ModuleState;
 import org.dromara.northstar.common.constant.ModuleUsage;
 import org.dromara.northstar.common.event.NorthstarEvent;
 import org.dromara.northstar.common.event.NorthstarEventType;
+import org.dromara.northstar.common.exception.NoSuchElementException;
 import org.dromara.northstar.common.model.ComponentAndParamsPair;
 import org.dromara.northstar.common.model.ComponentField;
 import org.dromara.northstar.common.model.ComponentMetaInfo;
@@ -317,7 +319,11 @@ public class ModuleService implements PostLoadAware {
 	 * @return
 	 */
 	public ModuleRuntimeDescription getModuleRealTimeInfo(String name) {
-		return moduleMgr.get(Identifier.of(name)).getRuntimeDescription();
+		IModule module = moduleMgr.get(Identifier.of(name));
+		if(Objects.isNull(module)) {
+			throw new NoSuchElementException("没有找到模组：" + name);
+		}
+		return module.getRuntimeDescription();
 	}
 	
 	/**

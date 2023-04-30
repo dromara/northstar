@@ -218,36 +218,28 @@ public class TdSpi extends CThostFtdcTraderSpi {
 			logger.error("{}定时查询线程已存在,首先终止", logInfo);
 			stopQuery();
 		}
-		this.intervalQueryThread = new Thread() {
-			public void run() {
-				Thread.currentThread().setName("CTP Gateway Interval Query Thread, " + gatewayId + " " + System.currentTimeMillis());
-				while (!Thread.currentThread().isInterrupted()) {
-					try {
-						if (cThostFtdcTraderApi == null) {
-							logger.error("{}定时查询线程检测到API实例不存在,退出", logInfo);
-							break;
-						}
-
-						if (loginStatus) {
-							queryAccount();
-							Thread.sleep(1250);
-							queryPosition();
-							Thread.sleep(1250);
-						} else {
-							logger.warn("{}尚未登陆,跳过查询", logInfo);
-						}
-
-					} catch (InterruptedException e) {
-						logger.warn("{}定时查询线程睡眠时检测到中断,退出线程", logInfo, e);
+		new Thread(() -> {
+			while (!Thread.currentThread().isInterrupted() && loginStatus) {
+				try {
+					if (cThostFtdcTraderApi == null) {
+						logger.error("{}定时查询线程检测到API实例不存在,退出", logInfo);
 						break;
-					} catch (Exception e) {
-						logger.error("{}定时查询线程发生异常", logInfo, e);
 					}
+					queryAccount();
+					Thread.sleep(1250);
+					queryPosition();
+					Thread.sleep(1250);
+				} catch (InterruptedException e) {
+					logger.warn("{}定时查询线程睡眠时检测到中断,退出线程", logInfo, e);
+					Thread.currentThread().interrupt();
+				} catch (Exception e) {
+					logger.error("{}定时查询线程发生异常", logInfo, e);
 				}
-			};
-		};
-		this.intervalQueryThread.start();
-
+			}
+			if (!loginStatus) {
+				logger.warn("{}尚未登陆,跳过查询", logInfo);
+			}
+		}).start();
 	}
 
 	private void stopQuery() {
@@ -282,20 +274,15 @@ public class TdSpi extends CThostFtdcTraderSpi {
 				cThostFtdcTraderApi = null;
 				cThostFtdcTraderApiForRelease.RegisterSpi(null);
 
-				new Thread() {
-					public void run() {
-						Thread.currentThread().setName("GatewayId " + gatewayId + " TD API Release Thread, Time " + System.currentTimeMillis());
-
-						try {
-							logger.warn("交易接口异步释放启动！");
-							cThostFtdcTraderApiForRelease.Release();
-							logger.warn("交易接口异步释放完成！");
-						} catch (Throwable t) {
-							logger.error("交易接口异步释放发生异常！", t);
-						}
+				new Thread(() -> {
+					try {
+						logger.warn("交易接口异步释放启动！");
+						cThostFtdcTraderApiForRelease.Release();
+						logger.warn("交易接口异步释放完成！");
+					} catch (Throwable t) {
+						logger.error("交易接口异步释放发生异常！", t);
 					}
-				}.start();
-
+				}).start();
 				Thread.sleep(100);
 			} catch (Throwable t) {
 				logger.warn("{}交易接口连接前释放异常", logInfo, t);
@@ -331,21 +318,17 @@ public class TdSpi extends CThostFtdcTraderSpi {
 			logger.error("{}交易接口连接异常", logInfo, t);
 		}
 
-		new Thread() {
-			public void run() {
-				try {
-					Thread.sleep(60 * 1000);
-					if (!(isConnected() && investorNameQueried && instrumentQueried)) {
-						logger.error("{}交易接口连接超时,尝试断开", logInfo);
-						gatewayAdapter.disconnect();
-					}
-				} catch (Throwable t) {
-					logger.error("{}交易接口处理连接超时线程异常", logInfo, t);
+		new Thread(() -> {
+			try {
+				Thread.sleep(60000);
+				if (!(isConnected() && investorNameQueried && instrumentQueried)) {
+					logger.error("{}交易接口连接超时,尝试断开", logInfo);
+					gatewayAdapter.disconnect();
 				}
+			} catch (Throwable t) {
+				logger.error("{}交易接口处理连接超时线程异常", logInfo, t);
 			}
-
-		}.start();
-
+		}).start();
 	}
 
 	public void disconnect() {
@@ -364,20 +347,15 @@ public class TdSpi extends CThostFtdcTraderSpi {
 						cThostFtdcTraderApi = null;
 						cThostFtdcTraderApiForRelease.RegisterSpi(null);
 
-						new Thread() {
-							public void run() {
-								Thread.currentThread().setName("GatewayId " + gatewayId + " TD API Release Thread,Start Time " + System.currentTimeMillis());
-
-								try {
-									logger.warn("交易接口异步释放启动！");
-									cThostFtdcTraderApiForRelease.Release();
-									logger.warn("交易接口异步释放完成！");
-								} catch (Throwable t) {
-									logger.error("交易接口异步释放发生异常！", t);
-								}
+						new Thread(() -> {
+							try {
+								logger.warn("交易接口异步释放启动！");
+								cThostFtdcTraderApiForRelease.Release();
+								logger.warn("交易接口异步释放完成！");
+							} catch (Throwable t) {
+								logger.error("交易接口异步释放发生异常！", t);
 							}
-						}.start();
-
+						}).start();
 					}
 					Thread.sleep(100);
 				} catch (Throwable t) {
