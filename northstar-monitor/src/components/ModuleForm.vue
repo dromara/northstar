@@ -56,11 +56,11 @@
             </el-form-item>
             <el-form-item label="平仓优化">
               <el-select v-model="form.closingPolicy" :disabled="readOnly">
-                <el-option label="先开先平" value="FIFO"></el-option>
-                <el-option label="平今优先" value="PRIOR_TODAY"></el-option>
+                <el-option label="先开先平" value="FIRST_IN_FIRST_OUT"></el-option>
+                <el-option label="平今优先" value="FIRST_IN_LAST_OUT"></el-option>
                 <el-option
                   label="平昨锁今"
-                  value="PRIOR_BEFORE_HEGDE_TODAY"
+                  value="CLOSE_NONTODAY_HEGDE_TODAY"
                   :disabled="form.usage !== 'PROD'"
                 ></el-option>
               </el-select>
@@ -270,7 +270,7 @@ export default {
         numOfMinPerBar: 1,
         weeksOfDataForPreparation: 0,
         moduleCacheDataSize: 500,
-        closingPolicy: 'FIFO',
+        closingPolicy: 'FIRST_IN_FIRST_OUT',
         moduleAccountSettingsDescription: [],
         strategySetting: {
           componentMeta: {},
@@ -322,7 +322,7 @@ export default {
         this.form.weeksOfDataForPreparation = 0
       }
       if (val === 'PLAYBACK' || val === 'UAT') {
-        this.form.closingPolicy = 'FIFO'
+        this.form.closingPolicy = 'FIRST_IN_FIRST_OUT'
       }
     }
   },

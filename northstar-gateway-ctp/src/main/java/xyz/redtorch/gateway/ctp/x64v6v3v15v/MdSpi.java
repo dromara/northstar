@@ -15,17 +15,19 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.dromara.northstar.common.constant.ConnectionState;
+import org.dromara.northstar.common.constant.DateTimeConstant;
+import org.dromara.northstar.common.event.NorthstarEventType;
+import org.dromara.northstar.common.model.Identifier;
+import org.dromara.northstar.common.utils.CommonUtils;
+import org.dromara.northstar.common.utils.MarketDateTimeUtil;
+import org.dromara.northstar.common.utils.MessagePrinter;
+import org.dromara.northstar.gateway.Contract;
+import org.dromara.northstar.gateway.common.GatewayAbstract;
+import org.dromara.northstar.gateway.ctp.CtpGatewaySettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import tech.quantit.northstar.common.constant.DateTimeConstant;
-import tech.quantit.northstar.common.event.NorthstarEventType;
-import tech.quantit.northstar.common.model.Identifier;
-import tech.quantit.northstar.common.utils.CommonUtils;
-import tech.quantit.northstar.common.utils.MarketDateTimeUtil;
-import tech.quantit.northstar.common.utils.MessagePrinter;
-import tech.quantit.northstar.gateway.api.GatewayAbstract;
-import tech.quantit.northstar.gateway.api.domain.contract.Contract;
 import xyz.redtorch.gateway.ctp.common.CtpDateTimeUtil;
 import xyz.redtorch.gateway.ctp.common.GatewayConstants;
 import xyz.redtorch.gateway.ctp.x64v6v3v15v.api.CThostFtdcDepthMarketDataField;
@@ -39,15 +41,9 @@ import xyz.redtorch.gateway.ctp.x64v6v3v15v.api.CThostFtdcSpecificInstrumentFiel
 import xyz.redtorch.gateway.ctp.x64v6v3v15v.api.CThostFtdcUserLogoutField;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
-import xyz.redtorch.pb.CoreField.GatewaySettingField.CtpApiSettingField;
 import xyz.redtorch.pb.CoreField.TickField;
 
 public class MdSpi extends CThostFtdcMdSpi {
-
-	private static final int CONNECTION_STATUS_DISCONNECTED = 0;
-	private static final int CONNECTION_STATUS_CONNECTED = 1;
-	private static final int CONNECTION_STATUS_CONNECTING = 2;
-	private static final int CONNECTION_STATUS_DISCONNECTING = 3;
 
 	private static final Logger logger = LoggerFactory.getLogger(MdSpi.class);
 
@@ -55,7 +51,7 @@ public class MdSpi extends CThostFtdcMdSpi {
 	private String logInfo;
 	private String gatewayId;
 	private String tradingDay;
-	private CtpApiSettingField settings;
+	private CtpGatewaySettings settings;
 
 	private volatile long lastUpdateTickTime = System.currentTimeMillis();
 
@@ -68,29 +64,27 @@ public class MdSpi extends CThostFtdcMdSpi {
 	MdSpi(GatewayAbstract gatewayAdapter) {
 		this.gatewayAdapter = gatewayAdapter;
 		this.gatewayId = gatewayAdapter.gatewayId();
-		this.settings = (CtpApiSettingField) gatewayAdapter.gatewayDescription().getSettings();
+		this.settings = (CtpGatewaySettings) gatewayAdapter.gatewayDescription().getSettings();
 		this.logInfo = "行情网关ID-[" + this.gatewayId + "] [→] ";
 		logger.info("当前MdApi版本号：{}", CThostFtdcMdApi.GetApiVersion());
 	}
 
 	private CThostFtdcMdApi cThostFtdcMdApi;
 
-	private int connectionStatus = CONNECTION_STATUS_DISCONNECTED; // 避免重复调用
 	private boolean loginStatus = false; // 登陆状态
 
 	public void connect() {
-		if (isConnected() || connectionStatus == CONNECTION_STATUS_CONNECTING) {
+		if (isConnected() || gatewayAdapter.getConnectionState() == ConnectionState.CONNECTING) {
 			return;
 		}
 
-		if (connectionStatus == CONNECTION_STATUS_CONNECTED) {
+		if (gatewayAdapter.getConnectionState() == ConnectionState.CONNECTED) {
 			login();
 			return;
 		}
 
-		connectionStatus = CONNECTION_STATUS_CONNECTING;
+		gatewayAdapter.setConnectionState(ConnectionState.CONNECTING);
 		loginStatus = false;
-		gatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.CONNECTING, gatewayId);
 
 		if (cThostFtdcMdApi != null) {
 			try {
@@ -167,11 +161,10 @@ public class MdSpi extends CThostFtdcMdSpi {
 
 	// 关闭
 	public void disconnect() {
-		if (cThostFtdcMdApi != null && connectionStatus != CONNECTION_STATUS_DISCONNECTING) {
+		if (cThostFtdcMdApi != null && gatewayAdapter.getConnectionState() != ConnectionState.DISCONNECTING) {
 			logger.warn("{}行情接口实例开始关闭并释放", logInfo);
 			loginStatus = false;
-			connectionStatus = CONNECTION_STATUS_DISCONNECTING;
-			gatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.DISCONNECTING, gatewayId);
+			gatewayAdapter.setConnectionState(ConnectionState.DISCONNECTING);
 			if (cThostFtdcMdApi != null) {
 				try {
 					CThostFtdcMdApi cThostFtdcMdApiForRelease = cThostFtdcMdApi;
@@ -194,8 +187,7 @@ public class MdSpi extends CThostFtdcMdSpi {
 					logger.error("{}行情接口实例关闭并释放异常", logInfo, t);
 				}
 			}
-			connectionStatus = CONNECTION_STATUS_DISCONNECTED;
-			gatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.DISCONNECTED, gatewayId);
+			gatewayAdapter.setConnectionState(ConnectionState.DISCONNECTED);
 			logger.warn("{}行情接口实例关闭并释放", logInfo);
 		} else {
 			logger.warn("{}行情接口实例不存在,无需关闭释放", logInfo);
@@ -205,7 +197,7 @@ public class MdSpi extends CThostFtdcMdSpi {
 
 	// 返回接口状态
 	public boolean isConnected() {
-		return connectionStatus == CONNECTION_STATUS_CONNECTED && loginStatus;
+		return gatewayAdapter.getConnectionState() == ConnectionState.CONNECTED && loginStatus;
 	}
 
 	// 获取交易日
@@ -273,8 +265,7 @@ public class MdSpi extends CThostFtdcMdSpi {
 		try {
 			logger.info(logInfo + "行情接口前置机已连接");
 			// 修改前置机连接状态
-			connectionStatus = CONNECTION_STATUS_CONNECTED;
-			
+			gatewayAdapter.setConnectionState(ConnectionState.CONNECTED);
 			login();
 			
 		} catch (Throwable t) {
@@ -287,9 +278,8 @@ public class MdSpi extends CThostFtdcMdSpi {
 		try {
 			logger.warn("{}行情接口前置机已断开, 原因:{}", logInfo, nReason);
 			gatewayAdapter.disconnect();
-			
-			gatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.DISCONNECTED, gatewayId);
-			
+			gatewayAdapter.setConnectionState(ConnectionState.DISCONNECTED);
+			gatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.LOGGED_OUT, gatewayId);
 		} catch (Throwable t) {
 			logger.error("{} OnFrontDisconnected Exception", logInfo, t);
 		}
@@ -310,8 +300,7 @@ public class MdSpi extends CThostFtdcMdSpi {
 					String[] symbolArray = subscribedSymbolSet.toArray(new String[subscribedSymbolSet.size()]);
 					cThostFtdcMdApi.SubscribeMarketData(symbolArray, subscribedSymbolSet.size());
 				}
-				
-				gatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.CONNECTED, gatewayId);
+				gatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.LOGGED_IN, gatewayId);
 				gatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.GATEWAY_READY, gatewayId);
 			} else {
 				logger.warn("{}行情接口登录回报错误 错误ID:{},错误信息:{}", logInfo, pRspInfo.getErrorID(), pRspInfo.getErrorMsg());

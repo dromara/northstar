@@ -6,8 +6,8 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.regex.Pattern;
 
-import tech.quantit.northstar.common.constant.TickType;
-import tech.quantit.northstar.common.utils.MarketDateTimeUtil;
+import org.dromara.northstar.common.constant.TickType;
+import org.dromara.northstar.common.utils.MarketDateTimeUtil;
 
 public class CtpDateTimeUtil implements MarketDateTimeUtil{
 

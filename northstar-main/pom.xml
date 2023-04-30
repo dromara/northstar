@@ -2,42 +2,46 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>tech.quantit</groupId>
+		<groupId>org.dromara</groupId>
 		<artifactId>northstar</artifactId>
-		<version>5.1</version>
+		<version>6.0</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 	<artifactId>northstar-main</artifactId>
 	<name>northstar-main</name>
 
-	<properties>
-		<!-- <springfox-swagger-version></springfox-swagger-version> -->
-	</properties>
-
 	<dependencies>
 		<dependency>
-			<groupId>tech.quantit</groupId>
-			<artifactId>northstar-common</artifactId>
+			<groupId>org.dromara</groupId>
+			<artifactId>northstar-api</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>tech.quantit</groupId>
-			<artifactId>northstar-strategy-api</artifactId>
+			<groupId>org.dromara</groupId>
+			<artifactId>northstar-gateway-common</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>tech.quantit</groupId>
+			<groupId>org.dromara</groupId>
 			<artifactId>northstar-gateway-ctp</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>tech.quantit</groupId>
+			<groupId>org.dromara</groupId>
 			<artifactId>northstar-gateway-sim</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>tech.quantit</groupId>
+			<groupId>org.dromara</groupId>
 			<artifactId>northstar-gateway-playback</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>tech.quantit</groupId>
+			<groupId>org.dromara</groupId>
 			<artifactId>northstar-gateway-tiger</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.dromara</groupId>
+			<artifactId>northstar-gateway-okx</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.dromara</groupId>
+			<artifactId>northstar-strategy-example</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -141,13 +145,10 @@
 				<artifactId>jacoco-maven-plugin</artifactId>
 				<configuration>
 					<excludes>
-						<exclude>**/tech/quantit/northstar/main/*</exclude>
-						<exclude>**/tech/quantit/northstar/main/config/*</exclude>
-						<exclude>**/tech/quantit/northstar/main/factories/*</exclude>
-						<exclude>**/tech/quantit/northstar/main/interceptor/*</exclude>
-						<exclude>**/tech/quantit/northstar/main/handler/**/*</exclude>
-						<exclude>**/tech/quantit/northstar/main/persistence/**/*</exclude>
-						<exclude>**/tech/quantit/northstar/main/restful/common/*</exclude>
+						<exclude>**/org/dromara/northstar/*</exclude>
+						<exclude>**/org/dromara/northstar/config/*</exclude>
+						<exclude>**/org/dromara/northstar/web/handler/**/*</exclude>
+						<exclude>**/org/dromara/northstar/data/**/*</exclude>
 					</excludes>
 				</configuration>
 			</plugin>

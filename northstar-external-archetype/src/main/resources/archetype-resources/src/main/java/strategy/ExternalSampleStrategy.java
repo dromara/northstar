@@ -3,17 +3,17 @@
 #set( $symbol_escape = '\' )
 package ${package}.strategy;
 
-import tech.quantit.northstar.common.constant.FieldType;
-import tech.quantit.northstar.common.constant.SignalOperation;
-import tech.quantit.northstar.common.model.DynamicParams;
-import tech.quantit.northstar.common.model.Setting;
-import tech.quantit.northstar.strategy.api.AbstractStrategy;
-import tech.quantit.northstar.strategy.api.TradeStrategy;
-import tech.quantit.northstar.strategy.api.annotation.StrategicComponent;
-import tech.quantit.northstar.strategy.api.constant.PriceType;
-import tech.quantit.northstar.strategy.api.indicator.Indicator;
-import tech.quantit.northstar.strategy.api.indicator.Indicator.Configuration;
-import tech.quantit.northstar.strategy.api.indicator.function.AverageFunctions;
+import org.dromara.northstar.common.constant.FieldType;
+import org.dromara.northstar.common.constant.SignalOperation;
+import org.dromara.northstar.common.model.DynamicParams;
+import org.dromara.northstar.common.model.Setting;
+import org.dromara.northstar.strategy.api.AbstractStrategy;
+import org.dromara.northstar.strategy.api.TradeStrategy;
+import org.dromara.northstar.strategy.api.annotation.StrategicComponent;
+import org.dromara.northstar.strategy.api.constant.PriceType;
+import org.dromara.northstar.strategy.api.indicator.Indicator;
+import org.dromara.northstar.strategy.api.indicator.Indicator.Configuration;
+import org.dromara.northstar.strategy.api.indicator.function.AverageFunctions;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.ContractField;
 

@@ -8,10 +8,13 @@ northstar:
   contraceDefFile: classpath:ContractDefinition.csv
   data-service:
     baseUrl: https://service.quantit.tech:44388
-
-logging:  level: 
+    w3BaseUrl: http://localhost
+    
+logging:
+  level: 
     root: info
-  file:    path: logs/
+  file:
+    path: logs/
   
 spring:
   redis:
@@ -32,7 +35,9 @@ server:
         secure: true
 spring:
   redis.database: 1
-  config:    activate:      on-profile: prod
+  config:
+    activate:
+      on-profile: prod
       
 ---
 server:
@@ -41,7 +46,9 @@ server:
     enabled: false
 spring:
   redis.database: 1
-  config:    activate:      on-profile: dev
+  config:
+    activate:
+      on-profile: dev
 
 ---
 server:
@@ -50,7 +57,9 @@ server:
     enabled: false
 spring:
   redis.database: 15
-  config:    activate:      on-profile: test
+  config:
+    activate:
+      on-profile: test
       
 ---
 server:

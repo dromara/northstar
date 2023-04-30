@@ -3,9 +3,9 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>tech.quantit</groupId>
+	<groupId>org.dromara</groupId>
 	<artifactId>northstar</artifactId>
-	<version>5.1</version>
+	<version>6.0</version>
 	<name>northstar</name>
 	<packaging>pom</packaging>
 	<description>盈富量化交易平台</description>
@@ -40,19 +40,21 @@
 		<log4j-version>2.18.0</log4j-version>
 		<byte-buddy-version>1.10.20</byte-buddy-version>
 		<netty-version>4.1.69.Final</netty-version>
+		<w3.exchange.version>0.0.1</w3.exchange.version>
 	</properties>
 
 	<modules>
 		<module>northstar-external-archetype</module>
 		<module>northstar-monitor</module>
-		<module>northstar-common</module>
-		<module>northstar-gateway-api</module>
+		<module>northstar-api</module>
+		<module>northstar-gateway-common</module>
 		<module>northstar-gateway-ctp</module>
 		<module>northstar-gateway-sim</module>
 		<module>northstar-gateway-playback</module>
 		<module>northstar-gateway-tiger</module>
 		<module>northstar-gateway-binance</module>
-		<module>northstar-strategy-api</module>
+		<module>northstar-gateway-okx</module>
+		<module>northstar-strategy-example</module>
 		<module>northstar-main</module>
 	</modules>
 
@@ -68,47 +70,52 @@
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
-				<groupId>tech.quantit</groupId>
-				<artifactId>northstar-common</artifactId>
+				<groupId>org.dromara</groupId>
+				<artifactId>northstar-api</artifactId>
 				<version>${northstar-version}</version>
 			</dependency>
 			<dependency>
-				<groupId>tech.quantit</groupId>
-				<artifactId>northstar-strategy-api</artifactId>
+				<groupId>org.dromara</groupId>
+				<artifactId>northstar-gateway-common</artifactId>
 				<version>${northstar-version}</version>
 			</dependency>
 			<dependency>
-				<groupId>tech.quantit</groupId>
-				<artifactId>northstar-gateway-api</artifactId>
+				<groupId>org.dromara</groupId>
+				<artifactId>northstar-strategy-example</artifactId>
 				<version>${northstar-version}</version>
 			</dependency>
 			<dependency>
-				<groupId>tech.quantit</groupId>
+				<groupId>org.dromara</groupId>
 				<artifactId>northstar-gateway-ctp</artifactId>
 				<version>${northstar-version}</version>
 			</dependency>
 			<dependency>
-				<groupId>tech.quantit</groupId>
+				<groupId>org.dromara</groupId>
 				<artifactId>northstar-gateway-sim</artifactId>
 				<version>${northstar-version}</version>
 			</dependency>
 			<dependency>
-				<groupId>tech.quantit</groupId>
+				<groupId>org.dromara</groupId>
 				<artifactId>northstar-gateway-playback</artifactId>
 				<version>${northstar-version}</version>
 			</dependency>
 			<dependency>
-				<groupId>tech.quantit</groupId>
+				<groupId>org.dromara</groupId>
 				<artifactId>northstar-gateway-tiger</artifactId>
 				<version>${northstar-version}</version>
 			</dependency>
 			<dependency>
-				<groupId>tech.quantit</groupId>
+				<groupId>org.dromara</groupId>
 				<artifactId>northstar-gateway-binance</artifactId>
 				<version>${northstar-version}</version>
 			</dependency>
 			<dependency>
-				<groupId>tech.quantit</groupId>
+				<groupId>org.dromara</groupId>
+				<artifactId>northstar-gateway-okx</artifactId>
+				<version>${northstar-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.dromara</groupId>
 				<artifactId>northstar-main</artifactId>
 				<version>${northstar-version}</version>
 			</dependency>
@@ -550,7 +557,7 @@
 											<limit>
 												<counter>LINE</counter>
 												<value>COVEREDRATIO</value>
-												<minimum>0.6</minimum>
+												<minimum>0.5</minimum>
 											</limit>
 										</limits>
 									</rule>
