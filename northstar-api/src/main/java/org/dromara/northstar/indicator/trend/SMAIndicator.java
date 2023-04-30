@@ -42,12 +42,16 @@ public class SMAIndicator extends AbstractIndicator implements Indicator{
 	
 	@Override
 	protected Num evaluate(Num num) {
-		if(ringBuf.size() == 0 || ringBuf.size() == 1 && ringBuf.get().unstable()) {	// 当计算样本没有值，或只有一个不稳定值时
-			return num;
+		Num newVal = Objects.isNull(srcIndicator) ? num : srcIndicator.get(0);
+		if(newVal.isNaN() || ringBuf.size() == 0 || ringBuf.size() == 1 && ringBuf.get().unstable()) {
+			// 当计算样本没有值，或只有一个不稳定值时
+			return newVal;
 		}
-		double newVal = Objects.isNull(srcIndicator) ? num.value() : srcIndicator.value(0);
-		double preVal = ringBuf.get().unstable() ? ringBuf.get(-1).value() : ringBuf.get(0).value(); 
-		double val = factor * newVal + (1 - factor) * preVal;
+		Num preVal = ringBuf.get().unstable() ? get(-1) : get(0); 
+		if(preVal.isNaN()) {
+			return newVal;
+		}
+		double val = factor * newVal.value() + (1 - factor) * preVal.value();
 		return Num.of(val, num.timestamp(), num.unstable());
 	}
 

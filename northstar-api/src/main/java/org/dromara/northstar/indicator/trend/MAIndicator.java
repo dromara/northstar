@@ -35,6 +35,9 @@ public class MAIndicator extends AbstractIndicator implements Indicator {
 
 	protected Num evaluate(Num num) {
 		Num newVal = Objects.isNull(srcIndicator) ? num : srcIndicator.get(0);
+		if(newVal.isNaN()) {
+			return newVal;
+		}
 		sample.update(newVal, newVal.unstable()).ifPresent(val -> sum -= val.value());	// 减去旧的值
 		sum += newVal.value();															// 加上新的值
 		return Num.of(sum / sample.size(), num.timestamp(), num.unstable());

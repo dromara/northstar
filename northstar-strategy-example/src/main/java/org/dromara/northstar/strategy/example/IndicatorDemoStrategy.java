@@ -3,6 +3,7 @@ package org.dromara.northstar.strategy.example;
 import org.dromara.northstar.common.model.DynamicParams;
 import org.dromara.northstar.common.model.Setting;
 import org.dromara.northstar.indicator.Configuration;
+import org.dromara.northstar.indicator.Indicator;
 import org.dromara.northstar.indicator.helper.HHVIndicator;
 import org.dromara.northstar.indicator.helper.LLVIndicator;
 import org.dromara.northstar.indicator.helper.SimpleValueIndicator;
@@ -11,6 +12,7 @@ import org.dromara.northstar.indicator.trend.MACDIndicator;
 import org.dromara.northstar.indicator.trend.MAIndicator;
 import org.dromara.northstar.indicator.trend.SMAIndicator;
 import org.dromara.northstar.indicator.volatility.BOLLIndicator;
+import org.dromara.northstar.indicator.volatility.TrueRangeIndicator;
 import org.dromara.northstar.indicator.volume.IntraDaySettlePriceIndicator;
 import org.dromara.northstar.indicator.volume.VWAPIndicator;
 import org.dromara.northstar.strategy.AbstractStrategy;
@@ -60,6 +62,11 @@ public class IndicatorDemoStrategy extends AbstractStrategy	// 为了简化代�
 				new SimpleValueIndicator(Configuration.builder().contract(c).valueType(ValueType.HIGH).cacheLength(10).visible(false).build())));	// 10个周期内的最高价
 		ctx.registerIndicator(new LLVIndicator(makeConfig("LLV"),
 				new SimpleValueIndicator(Configuration.builder().contract(c).valueType(ValueType.LOW).cacheLength(10).visible(false).build())));	// 10个周期内的最低价
+		
+		Indicator tr = new TrueRangeIndicator(makeConfig("TR"));
+		Indicator atr = new MAIndicator(makeConfig("ATR"), tr, 26);
+		ctx.registerIndicator(tr);
+		ctx.registerIndicator(atr);
 	}
 	
 	private Configuration makeConfig(String name) {
