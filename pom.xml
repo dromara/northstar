@@ -40,6 +40,7 @@
 		<log4j-version>2.18.0</log4j-version>
 		<byte-buddy-version>1.10.20</byte-buddy-version>
 		<netty-version>4.1.69.Final</netty-version>
+		<h2-version>2.1.214</h2-version>
 		<w3.exchange.version>0.0.1</w3.exchange.version>
 	</properties>
 
@@ -142,6 +143,11 @@
 				<version>${springboot-version}</version>
 			</dependency>
 			<dependency>
+			   <groupId>org.springframework.boot</groupId>
+			   <artifactId>spring-boot-starter-data-jpa</artifactId>
+			   <version>${springboot-version}</version>
+			</dependency>
+			<dependency>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-configuration-processor</artifactId>
 				<version>${springboot-version}</version>
@@ -156,6 +162,17 @@
 				<artifactId>commons-lang3</artifactId>
 				<version>${commons-lang3-version}</version>
 			</dependency>
+			<dependency>
+		        <groupId>com.h2database</groupId>
+		        <artifactId>h2</artifactId>
+		        <version>${h2-version}</version>
+		        <scope>runtime</scope>
+		    </dependency>
+		    <dependency>
+		        <groupId>com.baomidou</groupId>
+		        <artifactId>mybatis-plus-boot-starter</artifactId>
+		        <version>3.5.3.1</version>
+		    </dependency>
 			<dependency>
 				<groupId>org.projectlombok</groupId>
 				<artifactId>lombok</artifactId>
