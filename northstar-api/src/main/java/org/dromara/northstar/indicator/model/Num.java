@@ -1,4 +1,4 @@
-package org.dromara.northstar.indicator;
+package org.dromara.northstar.indicator.model;
 
 /**
  * 值对象

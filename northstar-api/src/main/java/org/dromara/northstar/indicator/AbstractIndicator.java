@@ -5,6 +5,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+import org.dromara.northstar.indicator.model.Configuration;
+import org.dromara.northstar.indicator.model.Num;
+import org.dromara.northstar.indicator.model.RingArray;
+
 import cn.hutool.core.lang.Assert;
 
 /**

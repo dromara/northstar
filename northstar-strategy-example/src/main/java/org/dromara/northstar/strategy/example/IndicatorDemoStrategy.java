@@ -2,12 +2,12 @@ package org.dromara.northstar.strategy.example;
 
 import org.dromara.northstar.common.model.DynamicParams;
 import org.dromara.northstar.common.model.Setting;
-import org.dromara.northstar.indicator.Configuration;
 import org.dromara.northstar.indicator.Indicator;
-import org.dromara.northstar.indicator.ValueType;
+import org.dromara.northstar.indicator.constant.ValueType;
 import org.dromara.northstar.indicator.helper.HHVIndicator;
 import org.dromara.northstar.indicator.helper.LLVIndicator;
 import org.dromara.northstar.indicator.helper.SimpleValueIndicator;
+import org.dromara.northstar.indicator.model.Configuration;
 import org.dromara.northstar.indicator.momentum.KDIndicator;
 import org.dromara.northstar.indicator.momentum.RSIIndicator;
 import org.dromara.northstar.indicator.trend.EMAIndicator;

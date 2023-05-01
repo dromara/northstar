@@ -4,11 +4,11 @@ import java.util.List;
 import java.util.Objects;
 
 import org.dromara.northstar.indicator.AbstractIndicator;
-import org.dromara.northstar.indicator.Configuration;
 import org.dromara.northstar.indicator.Indicator;
-import org.dromara.northstar.indicator.Num;
-import org.dromara.northstar.indicator.ValueType;
+import org.dromara.northstar.indicator.constant.ValueType;
 import org.dromara.northstar.indicator.helper.SimpleValueIndicator;
+import org.dromara.northstar.indicator.model.Configuration;
+import org.dromara.northstar.indicator.model.Num;
 import org.springframework.util.Assert;
 
 /**

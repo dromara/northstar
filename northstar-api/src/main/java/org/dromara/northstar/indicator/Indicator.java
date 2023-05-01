@@ -2,6 +2,9 @@ package org.dromara.northstar.indicator;
 
 import java.util.List;
 
+import org.dromara.northstar.indicator.model.Configuration;
+import org.dromara.northstar.indicator.model.Num;
+
 public interface Indicator {
 
 	/**

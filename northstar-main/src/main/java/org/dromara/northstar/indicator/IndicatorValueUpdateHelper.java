@@ -3,6 +3,8 @@ package org.dromara.northstar.indicator;
 import org.apache.commons.codec.binary.StringUtils;
 import org.dromara.northstar.common.BarDataAware;
 import org.dromara.northstar.common.TickDataAware;
+import org.dromara.northstar.indicator.model.Configuration;
+import org.dromara.northstar.indicator.model.Num;
 import org.dromara.northstar.strategy.MergedBarListener;
 
 import xyz.redtorch.pb.CoreField.BarField;

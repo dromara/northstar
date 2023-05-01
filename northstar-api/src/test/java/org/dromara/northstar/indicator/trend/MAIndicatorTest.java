@@ -5,9 +5,9 @@ import static org.assertj.core.api.Assertions.offset;
 
 import java.util.concurrent.ThreadLocalRandom;
 
-import org.dromara.northstar.indicator.Configuration;
 import org.dromara.northstar.indicator.Indicator;
-import org.dromara.northstar.indicator.Num;
+import org.dromara.northstar.indicator.model.Configuration;
+import org.dromara.northstar.indicator.model.Num;
 import org.junit.jupiter.api.Test;
 
 class MAIndicatorTest {

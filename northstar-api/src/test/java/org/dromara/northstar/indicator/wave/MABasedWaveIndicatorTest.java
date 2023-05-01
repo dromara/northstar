@@ -6,8 +6,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
-import org.dromara.northstar.indicator.Configuration;
 import org.dromara.northstar.indicator.helper.SimpleValueIndicator;
+import org.dromara.northstar.indicator.model.Configuration;
 import org.dromara.northstar.indicator.wave.MABasedWaveIndicator.EndpointType;
 import org.junit.jupiter.api.Test;
 
