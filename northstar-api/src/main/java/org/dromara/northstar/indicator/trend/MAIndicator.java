@@ -5,10 +5,10 @@ import java.util.List;
 import java.util.Objects;
 
 import org.dromara.northstar.indicator.AbstractIndicator;
-import org.dromara.northstar.indicator.Configuration;
 import org.dromara.northstar.indicator.Indicator;
-import org.dromara.northstar.indicator.Num;
-import org.dromara.northstar.indicator.RingArray;
+import org.dromara.northstar.indicator.model.Configuration;
+import org.dromara.northstar.indicator.model.Num;
+import org.dromara.northstar.indicator.model.RingArray;
 
 /**
  * MA算术平均线

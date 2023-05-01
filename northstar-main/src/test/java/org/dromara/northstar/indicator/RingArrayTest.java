@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.concurrent.ThreadLocalRandom;
 
+import org.dromara.northstar.indicator.model.RingArray;
 import org.junit.jupiter.api.Test;
 
 class RingArrayTest {

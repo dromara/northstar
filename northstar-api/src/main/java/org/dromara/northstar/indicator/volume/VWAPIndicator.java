@@ -3,11 +3,11 @@ package org.dromara.northstar.indicator.volume;
 import java.util.List;
 
 import org.dromara.northstar.indicator.AbstractIndicator;
-import org.dromara.northstar.indicator.Configuration;
 import org.dromara.northstar.indicator.Indicator;
-import org.dromara.northstar.indicator.Num;
+import org.dromara.northstar.indicator.constant.ValueType;
 import org.dromara.northstar.indicator.helper.SimpleValueIndicator;
-import org.dromara.northstar.strategy.constant.ValueType;
+import org.dromara.northstar.indicator.model.Configuration;
+import org.dromara.northstar.indicator.model.Num;
 
 /**
  * 成交量加权平均价格（Volume Weighted Average Price）
@@ -33,7 +33,7 @@ public class VWAPIndicator extends AbstractIndicator implements Indicator{
 	@Override
 	protected Num evaluate(Num num) {
 		if(!volume.isReady()) {
-			return Num.of(0, 0);
+			return Num.NaN();
 		}
 		double accVol = volume.getData().stream().mapToDouble(Num::value).sum();
 		List<Num> volumes = volume.getData();

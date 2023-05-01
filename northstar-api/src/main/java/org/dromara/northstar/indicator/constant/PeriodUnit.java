@@ -1,4 +1,4 @@
-package org.dromara.northstar.strategy.constant;
+package org.dromara.northstar.indicator.constant;
 
 /**
  * 周期单位

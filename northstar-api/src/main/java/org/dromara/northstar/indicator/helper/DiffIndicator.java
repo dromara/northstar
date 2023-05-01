@@ -3,9 +3,9 @@ package org.dromara.northstar.indicator.helper;
 import java.util.List;
 
 import org.dromara.northstar.indicator.AbstractIndicator;
-import org.dromara.northstar.indicator.Configuration;
 import org.dromara.northstar.indicator.Indicator;
-import org.dromara.northstar.indicator.Num;
+import org.dromara.northstar.indicator.model.Configuration;
+import org.dromara.northstar.indicator.model.Num;
 
 /**
  * 求两指标值之差

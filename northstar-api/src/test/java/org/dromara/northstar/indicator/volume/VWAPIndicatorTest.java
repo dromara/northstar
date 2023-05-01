@@ -2,9 +2,9 @@ package org.dromara.northstar.indicator.volume;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import org.dromara.northstar.indicator.Configuration;
 import org.dromara.northstar.indicator.Indicator;
-import org.dromara.northstar.indicator.Num;
+import org.dromara.northstar.indicator.model.Configuration;
+import org.dromara.northstar.indicator.model.Num;
 import org.junit.jupiter.api.Test;
 
 class VWAPIndicatorTest {

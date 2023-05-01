@@ -3,9 +3,9 @@ package org.dromara.northstar.indicator.helper;
 import java.util.List;
 
 import org.dromara.northstar.indicator.AbstractIndicator;
-import org.dromara.northstar.indicator.Configuration;
 import org.dromara.northstar.indicator.Indicator;
-import org.dromara.northstar.indicator.Num;
+import org.dromara.northstar.indicator.model.Configuration;
+import org.dromara.northstar.indicator.model.Num;
 
 /**
  * 最小值指标
@@ -29,7 +29,7 @@ public class LLVIndicator extends AbstractIndicator implements Indicator{
 	@Override
 	protected Num evaluate(Num num) {
 		if(!srcIndicator.isReady()) {
-			return Num.of(Double.NaN, 0, num.unstable());
+			return Num.NaN();
 		}
 		double val = srcIndicator.getData().stream().filter(nm -> !nm.isNaN()).mapToDouble(Num::value).min().getAsDouble();
 		return Num.of(val, num.timestamp(), num.unstable());

@@ -5,6 +5,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+import org.dromara.northstar.indicator.model.Configuration;
+import org.dromara.northstar.indicator.model.Num;
+import org.dromara.northstar.indicator.model.RingArray;
+
 import cn.hutool.core.lang.Assert;
 
 /**
@@ -29,7 +33,10 @@ public abstract class AbstractIndicator implements Indicator {
 		if(ringBuf.size() > 0 && num.timestamp() <= ringBuf.get().timestamp() && num.unstable() == ringBuf.get().unstable()) {
 			return;	// 通过时间戳比对，确保同一个指标只能被同一个时间的值更新一次
 		}
-		ringBuf.update(evaluate(num), num.unstable());
+		Num updateNum = evaluate(num);
+		if(!updateNum.isNaN()) {
+			ringBuf.update(updateNum, num.unstable());
+		}
 	}
 	
 	/**
@@ -44,7 +51,7 @@ public abstract class AbstractIndicator implements Indicator {
 		Assert.isTrue(step <= 0, "回溯步长不是正数");
 		Assert.isTrue(step > -cfg.cacheLength(), "回溯长度超过指标缓存大小");
 		if(Objects.isNull(ringBuf.get(step))) {
-			return Num.of(Double.NaN, 0);
+			return Num.NaN();
 		}
 		return ringBuf.get(step);
 	}

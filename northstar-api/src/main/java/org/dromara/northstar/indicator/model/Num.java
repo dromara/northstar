@@ -1,4 +1,4 @@
-package org.dromara.northstar.indicator;
+package org.dromara.northstar.indicator.model;
 
 /**
  * 值对象
@@ -16,6 +16,10 @@ public record Num(double value, long timestamp, boolean unstable) {
 	
 	public static Num of(double value, long timestamp, boolean unstable) {
 		return new Num(value, timestamp, unstable);
+	}
+	
+	public static Num NaN() {
+		return Num.of(Double.NaN, 0, true);
 	}
 	
 	public boolean isNaN() {

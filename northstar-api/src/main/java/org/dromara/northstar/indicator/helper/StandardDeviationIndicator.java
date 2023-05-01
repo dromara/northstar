@@ -7,10 +7,10 @@ import java.util.stream.Stream;
 
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 import org.dromara.northstar.indicator.AbstractIndicator;
-import org.dromara.northstar.indicator.Configuration;
 import org.dromara.northstar.indicator.Indicator;
-import org.dromara.northstar.indicator.Num;
-import org.dromara.northstar.indicator.RingArray;
+import org.dromara.northstar.indicator.model.Configuration;
+import org.dromara.northstar.indicator.model.Num;
+import org.dromara.northstar.indicator.model.RingArray;
 
 /**
  * 标准差指标
@@ -37,7 +37,7 @@ public class StandardDeviationIndicator extends AbstractIndicator implements Ind
 	protected Num evaluate(Num num) {
 		sample.update(num, num.unstable());
 		if(sample.toArray().length != sample.size()) {
-			return Num.of(0, 0, num.unstable());
+			return Num.NaN();
 		}
 		double[] data = Stream.of(sample.toArray()).map(Num.class::cast).mapToDouble(Num::value).toArray();
 		double std = new StandardDeviation().evaluate(data);

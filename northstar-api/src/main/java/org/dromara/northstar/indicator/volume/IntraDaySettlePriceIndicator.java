@@ -4,12 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.dromara.northstar.indicator.AbstractIndicator;
-import org.dromara.northstar.indicator.Configuration;
 import org.dromara.northstar.indicator.Indicator;
-import org.dromara.northstar.indicator.Num;
+import org.dromara.northstar.indicator.constant.PeriodUnit;
+import org.dromara.northstar.indicator.constant.ValueType;
 import org.dromara.northstar.indicator.helper.SimpleValueIndicator;
-import org.dromara.northstar.strategy.constant.PeriodUnit;
-import org.dromara.northstar.strategy.constant.ValueType;
+import org.dromara.northstar.indicator.model.Configuration;
+import org.dromara.northstar.indicator.model.Num;
 
 /**
  * 日内成交量加权均价，近似于SETTLE
