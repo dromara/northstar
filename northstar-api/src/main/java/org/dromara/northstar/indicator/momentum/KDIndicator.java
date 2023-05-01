@@ -6,11 +6,11 @@ import org.dromara.northstar.indicator.AbstractIndicator;
 import org.dromara.northstar.indicator.Configuration;
 import org.dromara.northstar.indicator.Indicator;
 import org.dromara.northstar.indicator.Num;
+import org.dromara.northstar.indicator.ValueType;
 import org.dromara.northstar.indicator.helper.HHVIndicator;
 import org.dromara.northstar.indicator.helper.LLVIndicator;
 import org.dromara.northstar.indicator.helper.SimpleValueIndicator;
 import org.dromara.northstar.indicator.trend.SMAIndicator;
-import org.dromara.northstar.strategy.constant.ValueType;
 
 /**
  * KD指标

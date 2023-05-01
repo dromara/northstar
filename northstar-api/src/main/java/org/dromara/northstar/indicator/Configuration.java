@@ -1,8 +1,5 @@
 package org.dromara.northstar.indicator;
 
-import org.dromara.northstar.strategy.constant.PeriodUnit;
-import org.dromara.northstar.strategy.constant.ValueType;
-
 import xyz.redtorch.pb.CoreField.ContractField;
 
 /**

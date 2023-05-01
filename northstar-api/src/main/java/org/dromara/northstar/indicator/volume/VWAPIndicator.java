@@ -6,8 +6,8 @@ import org.dromara.northstar.indicator.AbstractIndicator;
 import org.dromara.northstar.indicator.Configuration;
 import org.dromara.northstar.indicator.Indicator;
 import org.dromara.northstar.indicator.Num;
+import org.dromara.northstar.indicator.ValueType;
 import org.dromara.northstar.indicator.helper.SimpleValueIndicator;
-import org.dromara.northstar.strategy.constant.ValueType;
 
 /**
  * 成交量加权平均价格（Volume Weighted Average Price）

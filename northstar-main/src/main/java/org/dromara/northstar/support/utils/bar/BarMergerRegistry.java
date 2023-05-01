@@ -8,8 +8,8 @@ import java.util.function.BiConsumer;
 import org.dromara.northstar.common.BarDataAware;
 import org.dromara.northstar.common.model.Identifier;
 import org.dromara.northstar.gateway.Contract;
+import org.dromara.northstar.indicator.PeriodUnit;
 import org.dromara.northstar.strategy.MergedBarListener;
-import org.dromara.northstar.strategy.constant.PeriodUnit;
 
 import com.google.common.collect.HashMultimap;
 

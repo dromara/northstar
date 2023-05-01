@@ -6,9 +6,9 @@ import org.dromara.northstar.indicator.AbstractIndicator;
 import org.dromara.northstar.indicator.Configuration;
 import org.dromara.northstar.indicator.Indicator;
 import org.dromara.northstar.indicator.Num;
+import org.dromara.northstar.indicator.ValueType;
 import org.dromara.northstar.indicator.helper.SimpleValueIndicator;
 import org.dromara.northstar.indicator.trend.SMAIndicator;
-import org.dromara.northstar.strategy.constant.ValueType;
 
 /**
  * RSI指标，本质上是一个单值指标
