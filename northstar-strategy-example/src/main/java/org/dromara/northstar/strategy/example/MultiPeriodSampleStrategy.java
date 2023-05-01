@@ -5,6 +5,8 @@ import org.dromara.northstar.common.constant.SignalOperation;
 import org.dromara.northstar.common.model.DynamicParams;
 import org.dromara.northstar.common.model.Setting;
 import org.dromara.northstar.indicator.Indicator;
+import org.dromara.northstar.indicator.model.Configuration;
+import org.dromara.northstar.indicator.trend.MAIndicator;
 import org.dromara.northstar.strategy.AbstractStrategy;
 import org.dromara.northstar.strategy.StrategicComponent;
 import org.dromara.northstar.strategy.TradeStrategy;
@@ -12,6 +14,7 @@ import org.dromara.northstar.strategy.constant.PriceType;
 import org.dromara.northstar.strategy.model.TradeIntent;
 
 import xyz.redtorch.pb.CoreField.BarField;
+import xyz.redtorch.pb.CoreField.ContractField;
 
 /**
  * 本示例用于展示一个多周期指标的策略
@@ -54,7 +57,7 @@ public class MultiPeriodSampleStrategy extends AbstractStrategy	// 为了简化�
 							.operation(SignalOperation.BUY_OPEN)
 							.priceType(PriceType.ANY_PRICE)
 							.volume(1)
-							.timeout(3000)
+							.timeout(300000)
 							.build());
 				}
 				if(shouldSell()) {
@@ -63,7 +66,7 @@ public class MultiPeriodSampleStrategy extends AbstractStrategy	// 为了简化�
 							.operation(SignalOperation.SELL_OPEN)
 							.priceType(PriceType.ANY_PRICE)
 							.volume(1)
-							.timeout(3000)
+							.timeout(300000)
 							.build());
 				}
 					
@@ -75,7 +78,7 @@ public class MultiPeriodSampleStrategy extends AbstractStrategy	// 为了简化�
 							.operation(SignalOperation.SELL_CLOSE)
 							.priceType(PriceType.ANY_PRICE)
 							.volume(1)
-							.timeout(3000)
+							.timeout(300000)
 							.build());
 				}
 			}
@@ -86,7 +89,7 @@ public class MultiPeriodSampleStrategy extends AbstractStrategy	// 为了简化�
 							.operation(SignalOperation.BUY_CLOSE)
 							.priceType(PriceType.ANY_PRICE)
 							.volume(1)
-							.timeout(3000)
+							.timeout(300000)
 							.build());
 				}
 			}
@@ -104,28 +107,35 @@ public class MultiPeriodSampleStrategy extends AbstractStrategy	// 为了简化�
 	
 	@Override
 	protected void initIndicators() {
-//		// 主周期线
-//		this.fastLine1 = ctx.newIndicator(Configuration.builder()
-//				.indicatorName("快线")
-//				.bindedContract(ctx.getContract(params.indicatorSymbol))
-//				.build(), MA(params.fast));
-//		this.slowLine1 = ctx.newIndicator(Configuration.builder()
-//				.indicatorName("慢线")
-//				.bindedContract(ctx.getContract(params.indicatorSymbol))
-//				.build(), MA(params.slow));
-//		
-//		// 参考周期线
-//		this.fastLine2 = ctx.newIndicator(Configuration.builder()
-//				.indicatorName("快线")
-//				.numOfUnits(params.refPeriod)
-//				.bindedContract(ctx.getContract(params.indicatorSymbol))
-//				.build(), MA(params.fast));
-//		this.slowLine2 = ctx.newIndicator(Configuration.builder()
-//				.indicatorName("慢线")
-//				.numOfUnits(params.refPeriod)
-//				.plotPerBar(true)
-//				.bindedContract(ctx.getContract(params.indicatorSymbol))
-//				.build(), MA(params.slow));
+		ContractField c = ctx.getContract(params.indicatorSymbol);
+		// 主周期线
+		this.fastLine1 = new MAIndicator(Configuration.builder()
+				.indicatorName("快线")
+				.contract(c)
+				.numOfUnits(ctx.numOfMinPerMergedBar())
+				.build(), params.fast);
+		this.slowLine1 = new MAIndicator(Configuration.builder()
+				.indicatorName("慢线")
+				.contract(c)
+				.numOfUnits(ctx.numOfMinPerMergedBar())
+				.build(), params.slow);
+		
+		// 参考周期线
+		this.fastLine2 = new MAIndicator(Configuration.builder()
+				.indicatorName("快线")
+				.contract(c)
+				.numOfUnits(params.refPeriod)
+				.build(), params.fast);
+		this.slowLine2 = new MAIndicator(Configuration.builder()
+				.indicatorName("慢线")
+				.contract(c)
+				.numOfUnits(params.refPeriod)
+				.build(), params.slow);
+		
+		ctx.registerIndicator(fastLine1);
+		ctx.registerIndicator(fastLine2);
+		ctx.registerIndicator(slowLine1);
+		ctx.registerIndicator(slowLine2);
 	}
 	
 	@Override

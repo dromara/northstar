@@ -69,8 +69,9 @@ public abstract class TradeRequest implements TickDataAware, Cancellable {
 		.setSequenceNo("1");
 		OrderField order;
 		if(canMakeOrder()) {
-			log.info("成功下单：{}, {}, {}, {}, {}手, 委托价：{}, 止损价：{}", submitOrderReq.getOriginOrderId(), submitOrderReq.getContract().getName(), submitOrderReq.getDirection(),
-					submitOrderReq.getOffsetFlag(), submitOrderReq.getVolume(), submitOrderReq.getPrice(), submitOrderReq.getStopPrice());
+			log.info("成功下单：{}，{}，{}，{}手，委托价：{}，订单ID：{}", 
+					submitOrderReq.getContract().getName(), submitOrderReq.getDirection(), submitOrderReq.getOffsetFlag(), 
+					submitOrderReq.getVolume(), submitOrderReq.getPrice(), submitOrderReq.getOriginOrderId());
 			order = orderBuilder.setStatusMsg("已报单").setOrderStatus(OrderStatusEnum.OS_Unknown).build();
 		} else {
 			order = orderBuilder.setStatusMsg("废单").setOrderStatus(OrderStatusEnum.OS_Rejected).build();
@@ -138,8 +139,8 @@ public abstract class TradeRequest implements TickDataAware, Cancellable {
 					.setTradeTime(LocalTime.parse(tick.getActionTime(), DateTimeConstant.T_FORMAT_WITH_MS_INT_FORMATTER).format(DateTimeConstant.T_FORMAT_FORMATTER))
 					.setVolume(order.getTotalVolume())
 					.build();
-			log.info("模拟成交：{}，{}，{}，{}，{}手，{}，{}", trade.getOriginOrderId(), trade.getContract().getName(), 
-					trade.getDirection(), trade.getOffsetFlag(), trade.getVolume(), trade.getPrice(), trade.getTradingDay());
+			log.info("模拟成交：{}，{}，{}，{}手，成交价：{}，订单ID：{}", trade.getContract().getName(), trade.getDirection(), 
+					trade.getOffsetFlag(), trade.getVolume(), trade.getPrice(), trade.getOriginOrderId());
 			feEngine.emitEvent(NorthstarEventType.TRADE, trade);
 			doneCallback.accept(this);
 			onTrade(trade);
