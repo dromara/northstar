@@ -52,7 +52,7 @@ public class MABasedWaveIndicator extends AbstractIndicator implements Indicator
 
 	@Override
 	protected Num evaluate(Num num) {
-		if (!maLine.isReady()) {
+		if (!maLine.isReady() || num.unstable()) {
 			return Num.NaN();
 		}
 		// 各关键值的初始化
@@ -84,6 +84,7 @@ public class MABasedWaveIndicator extends AbstractIndicator implements Indicator
 			}
 			if(isValidTurnAround) {
 				isGoingUp = false;
+				sectionMin = sectionMax;	// 重置最小值
 				return Num.of(sectionMax, num.timestamp(), num.unstable());
 			}
 		}
@@ -99,6 +100,7 @@ public class MABasedWaveIndicator extends AbstractIndicator implements Indicator
 			}
 			if(isValidTurnAround) {
 				isGoingUp = true;
+				sectionMax = sectionMin; 	// 重置最大值
 				return Num.of(sectionMin, num.timestamp(), num.unstable());
 			}
 		}

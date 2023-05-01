@@ -37,7 +37,7 @@ public class TrueRangeIndicator extends AbstractIndicator implements Indicator{
 
 	@Override
 	protected Num evaluate(Num num) {
-		if(!isReady()) {
+		if(!close.isReady()) {
 			return Num.NaN();
 		}
 		double difHighLow = high.value(0) - low.value(0);
