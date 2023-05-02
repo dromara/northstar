@@ -1,9 +1,6 @@
 package org.dromara.northstar.data.jdbc;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZoneOffset;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -30,8 +27,7 @@ public class MarketDataRepoAdapter implements IMarketDataRepository{
 	
 	@Override
 	public void insert(BarField bar) {
-		long expiredAt = LocalDateTime.of(LocalDate.parse(bar.getTradingDay(), DateTimeConstant.D_FORMAT_INT_FORMATTER), LocalTime.of(20, 0)).toInstant(ZoneOffset.ofHours(8)).toEpochMilli();
-		delegate.save(new BarDO(bar.getUnifiedSymbol(), bar.getTradingDay(), expiredAt, bar.toByteArray()));
+		delegate.save(BarDO.convertFrom(bar));
 	}
 
 	@Override
@@ -75,20 +71,11 @@ public class MarketDataRepoAdapter implements IMarketDataRepository{
 		log.debug("加载 [{}] 本地行情数据：{}", unifiedSymbol, tradingDay);
 		return delegate.findByUnifiedSymbolAndTradingDay(unifiedSymbol, tradingDay)
 				.stream()
-				.map(bar -> convert(bar.getBarData()))
+				.map(BarDO::convertTo)
 				.filter(Objects::nonNull)
 				.toList();
 	}
 	
-	private BarField convert(byte[] data) {
-		try {
-			return BarField.parseFrom(data);
-		} catch (Exception e) {
-			log.warn("", e);
-			return null;
-		}
-	}
-
 	@Override
 	public List<BarField> loadDailyBars(String unifiedSymbol, LocalDate startDate, LocalDate endDate) {
 		return dataServiceDelegate.loadDailyBars(unifiedSymbol, startDate, endDate);

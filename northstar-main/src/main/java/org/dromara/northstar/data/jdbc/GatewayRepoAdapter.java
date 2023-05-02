@@ -8,8 +8,6 @@ import org.dromara.northstar.common.model.GatewayDescription;
 import org.dromara.northstar.data.IGatewayRepository;
 import org.dromara.northstar.data.jdbc.model.GatewayDescriptionDO;
 
-import com.alibaba.fastjson2.JSON;
-
 public class GatewayRepoAdapter implements IGatewayRepository{
 	
 	private GatewayDescriptionRepository delegate;
@@ -23,12 +21,12 @@ public class GatewayRepoAdapter implements IGatewayRepository{
 		if(delegate.existsById(gatewayDescription.getGatewayId())) {
 			throw new IllegalStateException("已存在同名网关，不能重复创建");
 		}
-		delegate.save(new GatewayDescriptionDO(gatewayDescription.getGatewayId(), JSON.toJSONString(gatewayDescription)));
+		delegate.save(GatewayDescriptionDO.convertFrom(gatewayDescription));
 	}
 
 	@Override
 	public void save(GatewayDescription gatewayDescription) {
-		delegate.save(new GatewayDescriptionDO(gatewayDescription.getGatewayId(), JSON.toJSONString(gatewayDescription)));
+		delegate.save(GatewayDescriptionDO.convertFrom(gatewayDescription));
 	}
 
 	@Override
@@ -42,7 +40,7 @@ public class GatewayRepoAdapter implements IGatewayRepository{
 		Iterator<GatewayDescriptionDO> itResults = delegate.findAll().iterator();
 		while(itResults.hasNext()) {
 			GatewayDescriptionDO obj = itResults.next();
-			list.add(JSON.parseObject(obj.getDataStr(), GatewayDescription.class));
+			list.add(obj.convertTo());
 		}
 		return list;
 	}
@@ -50,7 +48,7 @@ public class GatewayRepoAdapter implements IGatewayRepository{
 	@Override
 	public GatewayDescription findById(String gatewayId) {
 		GatewayDescriptionDO gdDo = delegate.findById(gatewayId).orElseThrow();
-		return JSON.parseObject(gdDo.getDataStr(), GatewayDescription.class);
+		return gdDo.convertTo();
 	}
 
 
