@@ -15,9 +15,9 @@ public interface IModuleRepository {
 
 	/**
 	 * 保存模组配置信息
-	 * @param moduleSettingsDescription
+	 * @param moduleDescription
 	 */
-	void saveSettings(ModuleDescription moduleSettingsDescription);
+	void saveSettings(ModuleDescription moduleDescription);
 	/**
 	 * 查询模组配置信息
 	 * @param moduleName
@@ -36,9 +36,9 @@ public interface IModuleRepository {
 	void deleteSettingsByName(String moduleName);
 	/**
 	 * 保存模组运行状态信息
-	 * @param moduleDescription
+	 * @param moduleRtDescription
 	 */
-	void saveRuntime(ModuleRuntimeDescription moduleDescription);
+	void saveRuntime(ModuleRuntimeDescription moduleRtDescription);
 	/**
 	 * 获取模组运行状态信息
 	 * @param moduleName
