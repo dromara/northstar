@@ -3,6 +3,7 @@ package org.dromara.northstar.data.jdbc.model;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Index;
+import javax.persistence.Lob;
 import javax.persistence.Table;
 
 import org.dromara.northstar.common.model.GatewayDescription;
@@ -24,7 +25,7 @@ public class GatewayDescriptionDO {
 
 	@Id
 	private String gatewayId;
-	
+	@Lob
 	private String dataStr;
 	
 	public static GatewayDescriptionDO convertFrom(GatewayDescription gd) {

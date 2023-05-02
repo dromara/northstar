@@ -2,6 +2,7 @@ package org.dromara.northstar.data.jdbc.model;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Lob;
 import javax.persistence.Table;
 
 import lombok.AllArgsConstructor;
@@ -17,6 +18,6 @@ public class MailConfigDescriptionDO {
 
 	@Id
 	private String id;
-
+	@Lob
 	private String dataStr;
 }

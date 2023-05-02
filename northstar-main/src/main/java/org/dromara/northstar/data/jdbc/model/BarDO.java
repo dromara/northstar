@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneOffset;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -37,7 +38,7 @@ public class BarDO {
 	private String tradingDay;
 	
 	private long expiredAt;
-	
+	@Column(length = 1024)
 	private byte[] barData;
 
 	public BarDO(String unifiedSymbol, String tradingDay, long expiredAt, byte[] barData) {

@@ -3,6 +3,7 @@ package org.dromara.northstar.data.jdbc.model;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Index;
+import javax.persistence.Lob;
 import javax.persistence.Table;
 
 import org.dromara.northstar.common.model.SimAccountDescription;
@@ -24,7 +25,7 @@ public class SimAccountDescriptionDO {
 
 	@Id
 	private String gatewayId;
-	
+	@Lob
 	private String dataStr;
 	
 	public static SimAccountDescriptionDO convertFrom(SimAccountDescription simAccountDescription) {
