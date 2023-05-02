@@ -8,7 +8,7 @@ import java.util.Objects;
 import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.data.IMarketDataRepository;
 import org.dromara.northstar.data.ds.MarketDataServiceImpl;
-import org.dromara.northstar.data.jdbc.model.BarDO;
+import org.dromara.northstar.data.jdbc.entity.BarDO;
 
 import lombok.extern.slf4j.Slf4j;
 import xyz.redtorch.pb.CoreField.BarField;

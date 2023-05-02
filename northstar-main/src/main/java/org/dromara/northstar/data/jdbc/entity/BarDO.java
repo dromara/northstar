@@ -1,4 +1,4 @@
-package org.dromara.northstar.data.jdbc.model;
+package org.dromara.northstar.data.jdbc.entity;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;

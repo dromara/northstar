@@ -4,7 +4,7 @@ import java.util.Objects;
 
 import org.dromara.northstar.common.model.MailConfigDescription;
 import org.dromara.northstar.data.IMailConfigRepository;
-import org.dromara.northstar.data.jdbc.model.MailConfigDescriptionDO;
+import org.dromara.northstar.data.jdbc.entity.MailConfigDescriptionDO;
 
 import com.alibaba.fastjson2.JSON;
 

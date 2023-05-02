@@ -2,7 +2,7 @@ package org.dromara.northstar.data.jdbc;
 
 import org.dromara.northstar.common.model.SimAccountDescription;
 import org.dromara.northstar.data.ISimAccountRepository;
-import org.dromara.northstar.data.jdbc.model.SimAccountDescriptionDO;
+import org.dromara.northstar.data.jdbc.entity.SimAccountDescriptionDO;
 
 public class SimAccountRepoAdapter implements ISimAccountRepository {
 	

@@ -1,4 +1,4 @@
-package org.dromara.northstar.data.jdbc.model;
+package org.dromara.northstar.data.jdbc.entity;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;

@@ -2,7 +2,7 @@ package org.dromara.northstar.data.jdbc;
 
 import org.dromara.northstar.common.model.PlaybackRuntimeDescription;
 import org.dromara.northstar.data.IPlaybackRuntimeRepository;
-import org.dromara.northstar.data.jdbc.model.PlaybackRuntimeDescriptionDO;
+import org.dromara.northstar.data.jdbc.entity.PlaybackRuntimeDescriptionDO;
 
 public class PlaybackRuntimeRepoAdapter implements IPlaybackRuntimeRepository{
 

@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.dromara.northstar.common.model.GatewayDescription;
 import org.dromara.northstar.data.IGatewayRepository;
-import org.dromara.northstar.data.jdbc.model.GatewayDescriptionDO;
+import org.dromara.northstar.data.jdbc.entity.GatewayDescriptionDO;
 
 public class GatewayRepoAdapter implements IGatewayRepository{
 	
