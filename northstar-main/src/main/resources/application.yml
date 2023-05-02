@@ -17,6 +17,9 @@ logging:
     path: logs/
   
 spring:
+  datasource:
+    dbcp2:
+      default-schema: classpath:ddl.sql
   redis:
     host: 127.0.0.1
     port: 6379

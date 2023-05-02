@@ -5,7 +5,7 @@ import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.Table;
 
-import org.dromara.northstar.common.model.GatewayDescription;
+import org.dromara.northstar.common.model.SimAccountDescription;
 
 import com.alibaba.fastjson2.JSON;
 
@@ -17,21 +17,21 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 @Entity
-@Table(name="GATEWAY", indexes = {
+@Table(name="SIM_ACCOUNT", indexes = {
 		@Index(name="idx_gatewayId", columnList = "gatewayId")
 })
-public class GatewayDescriptionDO {
+public class SimAccountDescriptionDO {
 
 	@Id
 	private String gatewayId;
 	
 	private String dataStr;
 	
-	public static GatewayDescriptionDO convertFrom(GatewayDescription gd) {
-		return new GatewayDescriptionDO(gd.getGatewayId(), JSON.toJSONString(gd));
+	public static SimAccountDescriptionDO convertFrom(SimAccountDescription simAccountDescription) {
+		return new SimAccountDescriptionDO(simAccountDescription.getGatewayId(), JSON.toJSONString(simAccountDescription));
 	}
 	
-	public GatewayDescription convertTo() {
-		return JSON.parseObject(dataStr, GatewayDescription.class);
+	public SimAccountDescription convertTo() {
+		return JSON.parseObject(dataStr, SimAccountDescription.class);
 	}
 }

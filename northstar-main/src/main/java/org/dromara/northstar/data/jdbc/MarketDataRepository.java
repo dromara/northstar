@@ -7,7 +7,7 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface MarketDataRepository extends CrudRepository<BarDO, String> {
+public interface MarketDataRepository extends CrudRepository<BarDO, Integer> {
 
 	List<BarDO> findByUnifiedSymbolAndTradingDay(String unifiedSymbol, String tradingDay);
 }

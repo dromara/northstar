@@ -8,6 +8,8 @@ import java.time.ZoneOffset;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.Index;
+import javax.persistence.Table;
 
 import org.dromara.northstar.common.constant.DateTimeConstant;
 
@@ -20,6 +22,10 @@ import xyz.redtorch.pb.CoreField.BarField;
 @NoArgsConstructor
 @Data
 @Entity
+@Table(name="BAR", indexes = {
+		@Index(name="idx_unifiedSymbol", columnList = "unifiedSymbol"),
+		@Index(name="idx_tradingDay", columnList = "tradingDay")
+})
 public class BarDO {
 	
 	@Id
