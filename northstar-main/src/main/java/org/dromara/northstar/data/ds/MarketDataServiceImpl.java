@@ -13,13 +13,13 @@ import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreField.BarField;
 
 @Slf4j
-public class MarketDataRepoDataServiceImpl implements IMarketDataRepository{
+public class MarketDataServiceImpl implements IMarketDataRepository{
 
 	private static final String EMPTY_IMPLEMENTATION_HINT = "采用历史行情数据服务适配器时，不实现该方法";
 	
 	private IDataServiceManager dsMgr;
 	
-	public MarketDataRepoDataServiceImpl(IDataServiceManager dsMgr) {
+	public MarketDataServiceImpl(IDataServiceManager dsMgr) {
 		this.dsMgr = dsMgr;
 	}
 	

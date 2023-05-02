@@ -1,0 +1,13 @@
+package org.dromara.northstar.data.jdbc;
+
+import java.util.List;
+
+import org.dromara.northstar.data.jdbc.model.BarDO;
+import org.springframework.data.repository.CrudRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface MarketDataRepository extends CrudRepository<BarDO, String> {
+
+	List<BarDO> findByUnifiedSymbolAndTradingDay(String unifiedSymbol, String tradingDay);
+}
