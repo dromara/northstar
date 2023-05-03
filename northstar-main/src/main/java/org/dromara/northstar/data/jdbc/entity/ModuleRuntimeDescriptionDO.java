@@ -19,7 +19,7 @@ import lombok.NoArgsConstructor;
 @Data
 @Entity
 @Table(name="MODULE_RT", indexes = {
-		@Index(name="idx_moduleName", columnList = "moduleName"),
+		@Index(name="idx_rt_moduleName", columnList = "moduleName"),
 })
 public class ModuleRuntimeDescriptionDO {
 

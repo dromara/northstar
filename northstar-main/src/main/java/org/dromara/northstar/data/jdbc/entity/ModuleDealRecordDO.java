@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 @Data
 @Entity
 @Table(name="MODULE_DEAL", indexes = {
-		@Index(name="idx_moduleName", columnList = "moduleName"),
+		@Index(name="idx_deal_moduleName", columnList = "moduleName"),
 		@Index(name="idx_createTime", columnList = "createTime"),
 })
 public class ModuleDealRecordDO {

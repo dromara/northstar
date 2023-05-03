@@ -1,26 +1,28 @@
 package org.dromara.northstar.data.jdbc;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
+import org.dromara.northstar.common.IDataServiceManager;
 import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.data.IMarketDataRepository;
-import org.dromara.northstar.data.ds.MarketDataServiceImpl;
 import org.dromara.northstar.data.jdbc.entity.BarDO;
 
 import lombok.extern.slf4j.Slf4j;
+import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreField.BarField;
 
 @Slf4j
 public class MarketDataRepoAdapter implements IMarketDataRepository{
 
-	private MarketDataServiceImpl dataServiceDelegate;
+	private IDataServiceManager dataServiceDelegate;
 	
 	private MarketDataRepository delegate;
 	
-	public MarketDataRepoAdapter(MarketDataRepository delegate, MarketDataServiceImpl dataServiceDelegate) {
+	public MarketDataRepoAdapter(MarketDataRepository delegate, IDataServiceManager dataServiceDelegate) {
 		this.delegate = delegate;
 		this.dataServiceDelegate = dataServiceDelegate;
 	}
@@ -37,7 +39,7 @@ public class MarketDataRepoAdapter implements IMarketDataRepository{
 		LocalDate endDate = today.isAfter(endDate0) ? endDate0 : today;
 		LinkedList<BarField> resultList = new LinkedList<>();
 		if(endDate.isAfter(startDate)) {
-			List<BarField> list = dataServiceDelegate.loadBars(unifiedSymbol, startDate, endDate)
+			List<BarField> list = dataServiceDelegate.getMinutelyData(unifiedSymbol, startDate, endDate)
 					.stream()
 					.sorted((a, b) -> a.getActionTimestamp() < b.getActionTimestamp() ? -1 : 1)
 					.toList();
@@ -69,21 +71,37 @@ public class MarketDataRepoAdapter implements IMarketDataRepository{
 	private List<BarField> findBarData(LocalDate date, String unifiedSymbol){
 		String tradingDay = date.format(DateTimeConstant.D_FORMAT_INT_FORMATTER);
 		log.debug("加载 [{}] 本地行情数据：{}", unifiedSymbol, tradingDay);
-		return delegate.findByUnifiedSymbolAndTradingDay(unifiedSymbol, tradingDay)
-				.stream()
-				.map(BarDO::convertTo)
-				.filter(Objects::nonNull)
-				.toList();
+		try {
+			return delegate.findByUnifiedSymbolAndTradingDay(unifiedSymbol, tradingDay)
+					.stream()
+					.map(BarDO::convertTo)
+					.filter(Objects::nonNull)
+					.toList();
+		} catch (Exception e) {
+			log.error("{}", e.getMessage());
+			return Collections.emptyList();
+		}
 	}
 	
 	@Override
 	public List<BarField> loadDailyBars(String unifiedSymbol, LocalDate startDate, LocalDate endDate) {
-		return dataServiceDelegate.loadDailyBars(unifiedSymbol, startDate, endDate);
+		try {
+			return dataServiceDelegate.getDailyData(unifiedSymbol, startDate, endDate);
+		} catch (Exception e) {
+			log.error("{}", e.getMessage());
+			return Collections.emptyList();
+		}
 	}
+	
 
 	@Override
-	public List<LocalDate> findHodidayInLaw(String gatewayType, int year) {
-		return dataServiceDelegate.findHodidayInLaw(gatewayType, year);
+	public List<LocalDate> findHodidayInLaw(String exchangeStr, int year) {
+		try {
+			return dataServiceDelegate.getHolidays(ExchangeEnum.valueOf(exchangeStr), LocalDate.of(year, 1, 1), LocalDate.of(year, 12, 31));
+		} catch (Exception e) {
+			log.error("{}", e.getMessage());
+			return Collections.emptyList();
+		}
 	}
 
 }

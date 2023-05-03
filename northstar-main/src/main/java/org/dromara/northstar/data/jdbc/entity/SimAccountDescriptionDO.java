@@ -19,12 +19,12 @@ import lombok.NoArgsConstructor;
 @Data
 @Entity
 @Table(name="SIM_ACCOUNT", indexes = {
-		@Index(name="idx_gatewayId", columnList = "gatewayId")
+		@Index(name="idx_accountId", columnList = "accountId")
 })
 public class SimAccountDescriptionDO {
 
 	@Id
-	private String gatewayId;
+	private String accountId;
 	@Lob
 	private String dataStr;
 	

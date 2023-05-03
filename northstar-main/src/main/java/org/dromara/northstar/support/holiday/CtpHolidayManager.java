@@ -33,9 +33,9 @@ public class CtpHolidayManager implements IHolidayManager, InitializingBean{
 	public void afterPropertiesSet() throws Exception {
 		LocalDate today = LocalDate.now();
 		// 加载前后一年的假期数据
-		addHoliday(mdRepoFactory.getInstance(ChannelType.CTP).findHodidayInLaw("CTP", today.getYear() - 1));
-		addHoliday(mdRepoFactory.getInstance(ChannelType.CTP).findHodidayInLaw("CTP", today.getYear()));
-		addHoliday(mdRepoFactory.getInstance(ChannelType.CTP).findHodidayInLaw("CTP", today.getYear() + 1));
+		addHoliday(mdRepoFactory.getInstance(ChannelType.CTP).findHodidayInLaw("SHFE", today.getYear() - 1));
+		addHoliday(mdRepoFactory.getInstance(ChannelType.CTP).findHodidayInLaw("SHFE", today.getYear()));
+		addHoliday(mdRepoFactory.getInstance(ChannelType.CTP).findHodidayInLaw("SHFE", today.getYear() + 1));
 	}
 	
 	private void addHoliday(List<LocalDate> holidays) {

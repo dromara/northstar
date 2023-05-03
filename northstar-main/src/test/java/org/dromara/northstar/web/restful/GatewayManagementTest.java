@@ -14,14 +14,12 @@ import org.dromara.northstar.common.constant.ReturnCode;
 import org.dromara.northstar.common.model.GatewayDescription;
 import org.dromara.northstar.common.model.NsUser;
 import org.dromara.northstar.gateway.ctp.CtpGatewaySettings;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.web.servlet.MockMvc;
@@ -49,9 +47,6 @@ public class GatewayManagementTest {
 	@MockBean
 	private SocketIOServer socketServer;
 	
-	@Autowired
-	private RedisTemplate<String, byte[]> redisTemplate;
-	
 	@BeforeEach
 	public void setUp() throws Exception {
 		session = new MockHttpSession();
@@ -59,11 +54,6 @@ public class GatewayManagementTest {
 		String token = MD5.create().digestHex("123456" + time);
 		mockMvc.perform(post("/northstar/auth/login?timestamp="+time).contentType(MediaType.APPLICATION_JSON).content(JSON.toJSONString(new NsUser("admin",token))).session(session))
 			.andExpect(status().isOk());
-	}
-	
-	@AfterEach
-	public void tearDown() {
-		redisTemplate.delete(redisTemplate.keys("*"));
 	}
 	
 	@Test

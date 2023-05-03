@@ -27,7 +27,7 @@ public class MailConfigRepoAdapter implements IMailConfigRepository{
 	public MailConfigDescription get() {
 		MailConfigDescriptionDO mcdDo = delegate.findById(THE_ONE).orElse(null);
 		if(Objects.isNull(mcdDo)) {
-			return null;
+			return new MailConfigDescription();
 		}
 		return JSON.parseObject(mcdDo.getDataStr(), MailConfigDescription.class);
 	}

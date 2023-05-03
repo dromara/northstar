@@ -10,9 +10,9 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
+import org.dromara.northstar.common.IDataServiceManager;
 import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.data.IMarketDataRepository;
-import org.dromara.northstar.data.ds.MarketDataServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,8 +55,8 @@ class MarketDataRepoAdapterTest {
 	
 	@BeforeEach
 	void prepare() {
-		MarketDataServiceImpl dataService =  mock(MarketDataServiceImpl.class);
-		when(dataService.loadBars(anyString(), any(LocalDate.class), any(LocalDate.class))).thenReturn(List.of());
+		IDataServiceManager dataService =  mock(IDataServiceManager.class);
+		when(dataService.getMinutelyData(anyString(), any(LocalDate.class), any(LocalDate.class))).thenReturn(List.of());
 		repo = new MarketDataRepoAdapter(delegate, dataService);
 	}
 	

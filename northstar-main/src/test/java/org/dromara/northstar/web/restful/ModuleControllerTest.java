@@ -33,14 +33,12 @@ import org.dromara.northstar.gateway.Contract;
 import org.dromara.northstar.gateway.IMarketCenter;
 import org.dromara.northstar.gateway.common.domain.time.GenericTradeTime;
 import org.dromara.northstar.gateway.ctp.CtpGatewaySettings;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.web.servlet.MockMvc;
@@ -66,9 +64,6 @@ class ModuleControllerTest {
 	
 	@MockBean
 	private SocketIOServer socketServer;
-	
-	@Autowired
-	private RedisTemplate<String, byte[]> redisTemplate;
 	
 	ModuleDescription md1;
 	
@@ -140,11 +135,6 @@ class ModuleControllerTest {
 		when(mktCenter.getContract(any(Identifier.class))).thenReturn(c);
 		when(c.contractField()).thenReturn(ContractField.newBuilder().setUnifiedSymbol("rb2210@SHFE@FUTURES").build());
 		when(c.tradeTimeDefinition()).thenReturn(new GenericTradeTime());
-	}
-	
-	@AfterEach
-	public void tearDown() {
-		redisTemplate.delete(redisTemplate.keys("*"));
 	}
 	
 	@Test

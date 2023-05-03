@@ -110,6 +110,7 @@ public class DataServiceManager implements IDataServiceManager {
 	 */
 	@Override
 	public List<BarField> getMinutelyData(String unifiedSymbol, LocalDate startDate, LocalDate endDate) {
+		log.debug("从数据服务加载历史行情1分钟数据：{}，{} -> {}", unifiedSymbol, startDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), endDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
 		return commonGetData("min", unifiedSymbol, startDate, endDate);
 	}
 	
@@ -122,6 +123,7 @@ public class DataServiceManager implements IDataServiceManager {
 	 */
 	@Override
 	public List<BarField> getQuarterlyData(String unifiedSymbol, LocalDate startDate, LocalDate endDate) {
+		log.debug("从数据服务加载历史行情15分钟数据：{}，{} -> {}", unifiedSymbol, startDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), endDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
 		return commonGetData("quarter", unifiedSymbol, startDate, endDate);
 	}
 	
@@ -134,6 +136,7 @@ public class DataServiceManager implements IDataServiceManager {
 	 */
 	@Override
 	public List<BarField> getHourlyData(String unifiedSymbol, LocalDate startDate, LocalDate endDate) {
+		log.debug("从数据服务加载历史行情1小时数据：{}，{} -> {}", unifiedSymbol, startDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), endDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
 		return commonGetData("hour", unifiedSymbol, startDate, endDate);
 	}
 	
@@ -146,6 +149,7 @@ public class DataServiceManager implements IDataServiceManager {
 	 */
 	@Override
 	public List<BarField> getDailyData(String unifiedSymbol, LocalDate startDate, LocalDate endDate) {
+		log.debug("从数据服务加载历史行情日线数据：{}，{} -> {}", unifiedSymbol, startDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), endDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
 		return commonGetData("day", unifiedSymbol, startDate, endDate);
 	}
 	
@@ -269,7 +273,7 @@ public class DataServiceManager implements IDataServiceManager {
 			return restTemplate.exchange(uri, HttpMethod.GET, reqEntity, clz);
 		} catch (HttpServerErrorException e) {
 			JSONObject entity = JSON.parseObject(e.getResponseBodyAsString());
-			throw new IllegalStateException(entity.getString("message"));
+			throw new IllegalStateException("第三方数据服务暂时不可用:" + entity.getString("message"));
 		} catch (Exception e) {
 			throw new IllegalStateException("数据服务连接异常", e);
 		}
