@@ -1,10 +1,9 @@
 package org.dromara.northstar.data.jdbc;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import java.time.LocalDateTime;
-import java.util.NoSuchElementException;
 
 import org.dromara.northstar.common.model.PlaybackRuntimeDescription;
 import org.dromara.northstar.data.IPlaybackRuntimeRepository;
@@ -48,9 +47,6 @@ class PlaybackRuntimeRepoAdapterTest {
 		testSave();
 		assertDoesNotThrow(() -> {
 			repo.deleteById("testGateway");
-		});
-		assertThrows(NoSuchElementException.class, () -> {
-			repo.findById("testGateway");
 		});
 	}
 

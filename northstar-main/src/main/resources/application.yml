@@ -17,12 +17,10 @@ logging:
     path: logs/
   
 spring:
-  datasource:
-    dbcp2:
-      default-schema: classpath:ddl.sql
-  redis:
-    host: 127.0.0.1
-    port: 6379
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
   profiles:
     active: ${env:dev}
 
@@ -37,7 +35,6 @@ server:
         same-site: none
         secure: true
 spring:
-  redis.database: 1
   config:
     activate:
       on-profile: prod
@@ -48,7 +45,6 @@ server:
   ssl:
     enabled: false
 spring:
-  redis.database: 1
   config:
     activate:
       on-profile: dev
@@ -59,7 +55,6 @@ server:
   ssl:
     enabled: false
 spring:
-  redis.database: 15
   config:
     activate:
       on-profile: test
@@ -75,7 +70,8 @@ server:
         same-site: none
         secure: true
 spring:
-  redis.database: 15
+  datasource:
+    url: jdbc:h2:mem:testdb
   config:
     activate:
       on-profile: e2e

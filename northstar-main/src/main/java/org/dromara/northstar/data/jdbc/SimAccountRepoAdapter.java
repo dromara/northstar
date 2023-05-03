@@ -34,7 +34,9 @@ public class SimAccountRepoAdapter implements ISimAccountRepository {
 
 	@Override
 	public void deleteById(String accountId) {
-		delegate.deleteById(accountId);
+		if(delegate.existsById(accountId)) {
+			delegate.deleteById(accountId);
+		}
 	}
 
 }

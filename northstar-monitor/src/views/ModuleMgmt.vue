@@ -107,7 +107,7 @@
       </el-table-column>
       <el-table-column align="center" width="400px">
         <template slot="header">
-          <el-button size="mini" type="primary" @click="handleCreate">新建</el-button>
+          <el-button id="createModule" size="mini" type="primary" @click="handleCreate">新建</el-button>
         </template>
         <template slot-scope="scope">
           <el-button
