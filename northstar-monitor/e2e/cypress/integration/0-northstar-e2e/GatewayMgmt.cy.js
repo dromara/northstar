@@ -55,9 +55,6 @@ describe('网关管理-测试', () => {
             cy.get('.el-table__row').should('have.length', 0)
         })
 
-        after(() => {
-            cy.request('https://localhost/resetDB')
-        })
     })
     
     describe('账户网关管理-基础测试', () => {
@@ -109,9 +106,6 @@ describe('网关管理-测试', () => {
             cy.get('.el-table__row').should('have.length', 0)
         })
 
-        after(() => {
-            cy.request('https://localhost/resetDB')
-        })
     })
 
     describe('网关管理-级联测试', () => {
@@ -144,7 +138,7 @@ describe('网关管理-测试', () => {
         })
         after(() => {
             cy.request('DELETE', 'https://localhost/northstar/gateway?gatewayId=testAccount')
-            cy.request('https://localhost/resetDB')
+            cy.request('DELETE', 'https://localhost/northstar/gateway?gatewayId=SIM')
         })
     })
 

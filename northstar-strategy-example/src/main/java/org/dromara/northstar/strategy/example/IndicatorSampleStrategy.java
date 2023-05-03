@@ -5,6 +5,9 @@ import org.dromara.northstar.common.constant.SignalOperation;
 import org.dromara.northstar.common.model.DynamicParams;
 import org.dromara.northstar.common.model.Setting;
 import org.dromara.northstar.indicator.Indicator;
+import org.dromara.northstar.indicator.model.Configuration;
+import org.dromara.northstar.indicator.trend.EMAIndicator;
+import org.dromara.northstar.indicator.trend.MACDIndicator;
 import org.dromara.northstar.strategy.AbstractStrategy;
 import org.dromara.northstar.strategy.StrategicComponent;
 import org.dromara.northstar.strategy.TradeStrategy;
@@ -12,6 +15,7 @@ import org.dromara.northstar.strategy.constant.PriceType;
 import org.dromara.northstar.strategy.model.TradeIntent;
 
 import xyz.redtorch.pb.CoreField.BarField;
+import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.TickField;
 
 /**
@@ -125,57 +129,28 @@ public class IndicatorSampleStrategy extends AbstractStrategy	// 为了简化代
 
 	@Override
 	protected void initIndicators() {
-//		// 简单指标的创建
-//		this.fastLine = ctx.newIndicator(Configuration.builder()
-//				.indicatorName("快线")
-//				.bindedContract(ctx.getContract(params.indicatorSymbol))
-//				.numOfUnits(ctx.numOfMinPerMergedBar())
-//				.period(PeriodUnit.MINUTE)
-//				.build(), MA(params.fast));
-//		this.slowLine = ctx.newIndicator(Configuration.builder()
-//				.indicatorName("慢线")
-//				.bindedContract(ctx.getContract(params.indicatorSymbol))
-//				.numOfUnits(ctx.numOfMinPerMergedBar())
-//				.period(PeriodUnit.MINUTE)
-//				.build(), MA(params.slow));
-//
-//		// 复杂指标的创建；MACD的原始写法
-//		this.macdDiff = ctx.newIndicator(Configuration.builder()
-//				.indicatorName("MACD_DIF")
-//				.bindedContract(ctx.getContract(params.indicatorSymbol))
-//				.numOfUnits(ctx.numOfMinPerMergedBar())
-//				.period(PeriodUnit.MINUTE)
-//				.build(), minus(EMA(12), EMA(26)));
-//		this.macdDea = ctx.newIndicator(Configuration.builder()
-//				.indicatorName("MACD_DEA")
-//				.bindedContract(ctx.getContract(params.indicatorSymbol))
-//				.numOfUnits(ctx.numOfMinPerMergedBar())
-//				.period(PeriodUnit.MINUTE)
-//				.build(), minus(EMA(12), EMA(26)).andThen(EMA(9)));
-//
-//		
-//		//######## 以下写法仅用于监控台演示，因此没有赋值给类属性，同时为了简化参数也直接写死 ########//
-//		
-//		// MACD的另一种写法，对MACD的计算函数做进一步封装
-//		MACD macd = MACD.of(12, 26, 9);
-//		ctx.newIndicator(Configuration.builder()
-//				.indicatorName("MACD_DIF2")
-//				.bindedContract(ctx.getContract(params.indicatorSymbol))
-//				.numOfUnits(ctx.numOfMinPerMergedBar())
-//				.period(PeriodUnit.MINUTE)
-//				.build(), macd.diff());
-//		ctx.newIndicator(Configuration.builder()
-//				.indicatorName("MACD_DEA2")
-//				.bindedContract(ctx.getContract(params.indicatorSymbol))
-//				.numOfUnits(ctx.numOfMinPerMergedBar())
-//				.period(PeriodUnit.MINUTE)
-//				.build(), macd.dea());
-//		ctx.newIndicator(Configuration.builder()
-//				.indicatorName("MACD_POST")
-//				.bindedContract(ctx.getContract(params.indicatorSymbol))
-//				.numOfUnits(ctx.numOfMinPerMergedBar())
-//				.period(PeriodUnit.MINUTE)
-//				.build(), macd.post());
+		ContractField c = ctx.getContract(params.indicatorSymbol);
+		// 指标的创建
+		this.fastLine = new EMAIndicator(Configuration.builder()
+				.contract(c)
+				.indicatorName("EMA10")
+				.numOfUnits(ctx.numOfMinPerMergedBar()).build(), 10);
+		this.slowLine = new EMAIndicator(Configuration.builder()
+				.contract(c)
+				.indicatorName("EMA20")
+				.numOfUnits(ctx.numOfMinPerMergedBar()).build(), 20);
+		MACDIndicator macd = new MACDIndicator(Configuration.builder()
+				.contract(c)
+				.indicatorName("MACD")
+				.numOfUnits(ctx.numOfMinPerMergedBar())
+				.build(), 12, 26, 9);
+		this.macdDiff = macd.getDiffLine();
+		this.macdDea = macd.getDeaLine();
+
+		// 指标的注册
+		ctx.registerIndicator(fastLine);
+		ctx.registerIndicator(slowLine);
+		ctx.registerIndicator(macd);
 	}
 
 	public static class InitParams extends DynamicParams {			

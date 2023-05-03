@@ -1,12 +1,13 @@
-package org.dromara.northstar.data.redis;
+package org.dromara.northstar.data.jdbc;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
-import org.dromara.northstar.common.constant.Constants;
 import org.dromara.northstar.common.constant.ModuleType;
 import org.dromara.northstar.common.model.ContractSimpleInfo;
 import org.dromara.northstar.common.model.ModuleAccountDescription;
@@ -15,28 +16,27 @@ import org.dromara.northstar.common.model.ModuleDealRecord;
 import org.dromara.northstar.common.model.ModuleDescription;
 import org.dromara.northstar.common.model.ModuleRuntimeDescription;
 import org.dromara.northstar.data.IModuleRepository;
-import org.dromara.northstar.data.redis.ModuleRepoRedisImpl;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import test.common.TestFieldFactory;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreField.TradeField;
 
-class ModuleRepoRedisImplTest {
+@DataJpaTest
+class ModuleRepoAdapterTest {
+	
+	@Autowired
+	ModuleDealRecordRepository mdrDelegate;
+	@Autowired
+	ModuleDescriptionRepository mdDelegate;
+	@Autowired
+	ModuleRuntimeDescriptionRepository mrdDelegate;
 
-	static LettuceConnectionFactory factory = new LettuceConnectionFactory();
-	
-	static RedisTemplate<String, byte[]> redisTemplate = new RedisTemplate<>();
-	
 	static IModuleRepository repo;
-	
-	String KEY_PREFIX = Constants.APP_NAME + "Module:";
 	
 	TestFieldFactory fieldFactory = new TestFieldFactory("test");
 	
@@ -75,81 +75,75 @@ class ModuleRepoRedisImplTest {
 	
 	@BeforeEach
 	void prepare() {
-		factory.setDatabase(15);
-		factory.afterPropertiesSet();
-		
-		redisTemplate.setConnectionFactory(factory);
-		redisTemplate.setKeySerializer(new StringRedisSerializer(StandardCharsets.UTF_8));
-		redisTemplate.afterPropertiesSet();
-		
-		repo = new ModuleRepoRedisImpl(redisTemplate);
-	}
-	
-	@AfterEach
-	void cleanup() {
-		redisTemplate.delete(redisTemplate.keys("*"));
+		repo = new ModuleRepoAdapter(mdDelegate, mrdDelegate, mdrDelegate);
 	}
 	
 	@Test
 	void testSaveSettings() {
-		repo.saveSettings(md);
-		assertThat(redisTemplate.hasKey(KEY_PREFIX + "Settings:" + moduleName)).isTrue();
+		assertDoesNotThrow(() -> {
+			repo.saveSettings(md);
+		});
 	}
 
 	@Test
 	void testFindSettingsByName() {
-		repo.saveSettings(md);
+		testSaveSettings();
 		assertThat(repo.findSettingsByName(moduleName)).isEqualTo(md);
 	}
 
 	@Test
 	void testFindAllSettings() {
-		repo.saveSettings(md);
+		testSaveSettings();
 		assertThat(repo.findAllSettings()).isNotEmpty();
 	}
 
 	@Test
 	void testDeleteSettingsByName() {
-		repo.saveSettings(md);
+		testSaveSettings();
 		repo.deleteSettingsByName(moduleName);
-		assertThat(redisTemplate.hasKey(KEY_PREFIX + "Settings:" + moduleName)).isFalse();
+		assertThat(repo.findAllSettings()).isEmpty();
 	}
 
 	@Test
 	void testSaveRuntime() {
-		repo.saveRuntime(mrd);
-		assertThat(redisTemplate.hasKey(KEY_PREFIX + "Runtime:" + moduleName)).isTrue();
+		assertDoesNotThrow(() -> {
+			repo.saveRuntime(mrd);
+		});
 	}
 
 	@Test
 	void testFindRuntimeByName() {
-		repo.saveRuntime(mrd);
+		testSaveRuntime();
 		assertThat(repo.findRuntimeByName(moduleName)).isEqualTo(mrd);
 	}
 
 	@Test
 	void testDeleteRuntimeByName() {
-		repo.saveRuntime(mrd);
+		testSaveRuntime();
 		repo.deleteRuntimeByName(moduleName);
-		assertThat(redisTemplate.hasKey(KEY_PREFIX + "Runtime:" + moduleName)).isFalse();
+		assertThrows(NoSuchElementException.class, () -> {
+			repo.findRuntimeByName(moduleName);
+		});
 	}
 
 	@Test
 	void testSaveDealRecord() {
-		repo.saveDealRecord(mdr);
-		assertThat(redisTemplate.hasKey(KEY_PREFIX + "DealRecord:" + moduleName)).isTrue();
+		assertDoesNotThrow(() -> {
+			repo.saveDealRecord(mdr);
+		});
 	}
 
 	@Test
 	void testFindAllDealRecords() {
-		repo.saveDealRecord(mdr);
+		testSaveDealRecord();
 		assertThat(repo.findAllDealRecords(moduleName)).isNotEmpty();
 	}
 
 	@Test
 	void testRemoveAllDealRecords() {
+		testSaveDealRecord();
 		repo.removeAllDealRecords(moduleName);
-		assertThat(redisTemplate.hasKey(KEY_PREFIX + "DealRecord:" + moduleName)).isFalse();
+		assertThat(repo.findAllDealRecords(moduleName)).isEmpty();
 	}
 
 }

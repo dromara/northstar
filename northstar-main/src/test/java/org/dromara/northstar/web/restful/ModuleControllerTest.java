@@ -29,6 +29,10 @@ import org.dromara.northstar.common.model.MockTradeDescription;
 import org.dromara.northstar.common.model.ModuleAccountDescription;
 import org.dromara.northstar.common.model.ModuleDescription;
 import org.dromara.northstar.common.model.NsUser;
+import org.dromara.northstar.data.jdbc.GatewayDescriptionRepository;
+import org.dromara.northstar.data.jdbc.ModuleDealRecordRepository;
+import org.dromara.northstar.data.jdbc.ModuleDescriptionRepository;
+import org.dromara.northstar.data.jdbc.ModuleRuntimeDescriptionRepository;
 import org.dromara.northstar.gateway.Contract;
 import org.dromara.northstar.gateway.IMarketCenter;
 import org.dromara.northstar.gateway.common.domain.time.GenericTradeTime;
@@ -40,7 +44,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.web.servlet.MockMvc;
@@ -64,11 +67,20 @@ class ModuleControllerTest {
 	
 	private MockHttpSession session = new MockHttpSession();
 	
-	@MockBean
-	private SocketIOServer socketServer;
+	@Autowired
+	private ModuleDescriptionRepository mdRepo;
 	
 	@Autowired
-	private RedisTemplate<String, byte[]> redisTemplate;
+	private ModuleRuntimeDescriptionRepository mrdRepo;
+	
+	@Autowired
+	private ModuleDealRecordRepository mdrRepo;
+	
+	@Autowired
+	private GatewayDescriptionRepository gwRepo;
+	
+	@MockBean
+	private SocketIOServer socketServer;
 	
 	ModuleDescription md1;
 	
@@ -116,7 +128,7 @@ class ModuleControllerTest {
 				.moduleAccountSettingsDescription(List.of(ModuleAccountDescription.builder()
 						.accountGatewayId("CTP账户")
 						.moduleAccountInitBalance(10000)
-						.bindedContracts(List.of(ContractSimpleInfo.builder().value("rb2210@SHFE@FUTURES").build()))
+						.bindedContracts(List.of(ContractSimpleInfo.builder().unifiedSymbol("rb2210@SHFE@FUTURES").value("rb2210@SHFE@FUTURES@CTP").build()))
 						.build()))
 				.numOfMinPerBar(1)
 				.weeksOfDataForPreparation(1)
@@ -131,7 +143,7 @@ class ModuleControllerTest {
 				.moduleAccountSettingsDescription(List.of(ModuleAccountDescription.builder()
 						.accountGatewayId("CTP账户")
 						.moduleAccountInitBalance(10000)
-						.bindedContracts(List.of(ContractSimpleInfo.builder().value("rb2210@SHFE@FUTURES").build()))
+						.bindedContracts(List.of(ContractSimpleInfo.builder().unifiedSymbol("rb2210@SHFE@FUTURES").value("rb2210@SHFE@FUTURES@CTP").build()))
 						.build()))
 				.numOfMinPerBar(10)
 				.weeksOfDataForPreparation(1)
@@ -143,8 +155,11 @@ class ModuleControllerTest {
 	}
 	
 	@AfterEach
-	public void tearDown() {
-		redisTemplate.delete(redisTemplate.keys("*"));
+	void cleanUp() {
+		mdRepo.deleteAll();
+		mrdRepo.deleteAll();
+		mdrRepo.deleteAll();
+		gwRepo.deleteAll();
 	}
 	
 	@Test

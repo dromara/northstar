@@ -11,6 +11,8 @@ import java.util.Objects;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
+import javax.transaction.Transactional;
+
 import org.dromara.northstar.ExternalJarClassLoader;
 import org.dromara.northstar.account.AccountManager;
 import org.dromara.northstar.common.constant.Constants;
@@ -197,6 +199,7 @@ public class ModuleService implements PostLoadAware {
 	 * @param name
 	 * @return
 	 */
+	@Transactional
 	public boolean removeModule(String name) {
 		unloadModule(name);
 		moduleRepo.deleteRuntimeByName(name);
