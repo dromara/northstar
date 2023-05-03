@@ -29,10 +29,15 @@ import org.dromara.northstar.common.model.MockTradeDescription;
 import org.dromara.northstar.common.model.ModuleAccountDescription;
 import org.dromara.northstar.common.model.ModuleDescription;
 import org.dromara.northstar.common.model.NsUser;
+import org.dromara.northstar.data.jdbc.GatewayDescriptionRepository;
+import org.dromara.northstar.data.jdbc.ModuleDealRecordRepository;
+import org.dromara.northstar.data.jdbc.ModuleDescriptionRepository;
+import org.dromara.northstar.data.jdbc.ModuleRuntimeDescriptionRepository;
 import org.dromara.northstar.gateway.Contract;
 import org.dromara.northstar.gateway.IMarketCenter;
 import org.dromara.northstar.gateway.common.domain.time.GenericTradeTime;
 import org.dromara.northstar.gateway.ctp.CtpGatewaySettings;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,6 +66,18 @@ class ModuleControllerTest {
 	private MockMvc mockMvc;
 	
 	private MockHttpSession session = new MockHttpSession();
+	
+	@Autowired
+	private ModuleDescriptionRepository mdRepo;
+	
+	@Autowired
+	private ModuleRuntimeDescriptionRepository mrdRepo;
+	
+	@Autowired
+	private ModuleDealRecordRepository mdrRepo;
+	
+	@Autowired
+	private GatewayDescriptionRepository gwRepo;
 	
 	@MockBean
 	private SocketIOServer socketServer;
@@ -111,7 +128,7 @@ class ModuleControllerTest {
 				.moduleAccountSettingsDescription(List.of(ModuleAccountDescription.builder()
 						.accountGatewayId("CTP账户")
 						.moduleAccountInitBalance(10000)
-						.bindedContracts(List.of(ContractSimpleInfo.builder().value("rb2210@SHFE@FUTURES").build()))
+						.bindedContracts(List.of(ContractSimpleInfo.builder().unifiedSymbol("rb2210@SHFE@FUTURES").value("rb2210@SHFE@FUTURES@CTP").build()))
 						.build()))
 				.numOfMinPerBar(1)
 				.weeksOfDataForPreparation(1)
@@ -126,7 +143,7 @@ class ModuleControllerTest {
 				.moduleAccountSettingsDescription(List.of(ModuleAccountDescription.builder()
 						.accountGatewayId("CTP账户")
 						.moduleAccountInitBalance(10000)
-						.bindedContracts(List.of(ContractSimpleInfo.builder().value("rb2210@SHFE@FUTURES").build()))
+						.bindedContracts(List.of(ContractSimpleInfo.builder().unifiedSymbol("rb2210@SHFE@FUTURES").value("rb2210@SHFE@FUTURES@CTP").build()))
 						.build()))
 				.numOfMinPerBar(10)
 				.weeksOfDataForPreparation(1)
@@ -135,6 +152,14 @@ class ModuleControllerTest {
 		when(mktCenter.getContract(any(Identifier.class))).thenReturn(c);
 		when(c.contractField()).thenReturn(ContractField.newBuilder().setUnifiedSymbol("rb2210@SHFE@FUTURES").build());
 		when(c.tradeTimeDefinition()).thenReturn(new GenericTradeTime());
+	}
+	
+	@AfterEach
+	void cleanUp() {
+		mdRepo.deleteAll();
+		mrdRepo.deleteAll();
+		mdrRepo.deleteAll();
+		gwRepo.deleteAll();
 	}
 	
 	@Test

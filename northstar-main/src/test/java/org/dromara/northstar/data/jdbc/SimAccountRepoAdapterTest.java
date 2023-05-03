@@ -62,7 +62,7 @@ class SimAccountRepoAdapterTest {
 	void testDeleteById() {
 		repo.save(simAcc);
 		repo.deleteById(accountId);
-		assertThrows(NoSuchElementException.class, () -> repo.findById(accountId));
+		assertThat(delegate.findAll().iterator().hasNext()).isFalse();
 	}
 
 }

@@ -1,5 +1,8 @@
 package org.dromara.northstar.data.jdbc;
 
+import java.util.Collections;
+import java.util.Objects;
+
 import org.dromara.northstar.common.model.SimAccountDescription;
 import org.dromara.northstar.data.ISimAccountRepository;
 import org.dromara.northstar.data.jdbc.entity.SimAccountDescriptionDO;
@@ -19,7 +22,14 @@ public class SimAccountRepoAdapter implements ISimAccountRepository {
 
 	@Override
 	public SimAccountDescription findById(String accountId) {
-		return delegate.findById(accountId).orElseThrow().convertTo();
+		SimAccountDescriptionDO obj = delegate.findById(accountId).orElse(null);
+		if(Objects.isNull(obj)) {
+			SimAccountDescription simAccount = new SimAccountDescription();
+			simAccount.setGatewayId(accountId);
+			simAccount.setOpenTrades(Collections.emptyList());
+			return simAccount;
+		}
+		return obj.convertTo();
 	}
 
 	@Override
