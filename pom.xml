@@ -9,6 +9,7 @@
 	<name>northstar</name>
 	<packaging>pom</packaging>
 	<description>盈富量化交易平台</description>
+	<url>https://gitee.com/dromara/northstar</url>
 
 	<properties>
 		<java.version>17</java.version>
@@ -502,7 +503,7 @@
 				<executions>
 					<execution>
 						<id>ossrh</id>
-						<phase>deploy</phase>
+						<phase>verify</phase>
 						<goals>
 							<goal>sign</goal>
 						</goals>
