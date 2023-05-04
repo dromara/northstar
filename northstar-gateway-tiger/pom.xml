@@ -3,10 +3,12 @@
   <parent>
     <groupId>org.dromara</groupId>
     <artifactId>northstar</artifactId>
-    <version>6.0.0</version>
+    <version>6.0.0.ALPHA1</version>
   </parent>
   <artifactId>northstar-gateway-tiger</artifactId>
-  
+  <properties>
+    <maven.deploy.skip>true</maven.deploy.skip>
+  </properties>
   <dependencies>
   		<dependency>
 			<groupId>org.dromara</groupId>

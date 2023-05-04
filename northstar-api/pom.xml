@@ -4,10 +4,8 @@
 	<parent>
 		<groupId>org.dromara</groupId>
 		<artifactId>northstar</artifactId>
-		<version>6.0.0</version>
-		<relativePath>../pom.xml</relativePath>
+		<version>6.0.0.ALPHA1</version>
 	</parent>
-
 	<artifactId>northstar-api</artifactId>
 	<name>northstar-api</name>
 	<description>Northstar盈富量化平台API</description>
@@ -63,51 +61,6 @@
 		</dependency>
 	</dependencies>
 	
-	<issueManagement>
-		<system>Gitee Issue</system>
-		<url>https://gitee.com/dromara/northstar/issues</url>
-	</issueManagement>
-
-	<organization>
-		<name>dromara</name>
-		<url>https://dromara.org</url>
-	</organization>
-
-	<licenses>
-		<license>
-			<name>GPL-3.0</name>
-			<url>https://gitee.com/dromara/northstar/blob/master/LICENSE</url>
-		</license>
-	</licenses>
-
-	<scm>
-		<connection>scm:git@gitee.com:dromara/northstar.git</connection>
-		<developerConnection>scm:git@gitee.com:dromara/northstar.git</developerConnection>
-		<url>git@gitee.com:dromara/northstar.git</url>
-	</scm>
-
-	<developers>
-		<developer>
-			<name>KevinHuangwl</name>
-			<email>kevinbauer@163.com</email>
-			<organization>dromara.org</organization>
-			<roles>
-				<role>author</role>
-			</roles>
-		</developer>
-	</developers>
-	
-	<distributionManagement>
-		<snapshotRepository>
-			<id>ossrh</id>
-			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
-		</snapshotRepository>
-		<repository>
-			<id>ossrh</id>
-			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-		</repository>
-	</distributionManagement>
-
 	<build>
 		<plugins>
 			<plugin>
@@ -124,96 +77,6 @@
 						<exclude>**/org/dromara/northstar/**</exclude>
 					</excludes>
 				</configuration>
-			</plugin>
-			<!-- Source -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-source-plugin</artifactId>
-				<version>3.2.1</version>
-				<executions>
-					<execution>
-						<id>ossrh</id>
-						<phase>package</phase>
-						<goals>
-							<goal>jar-no-fork</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<!-- Javadoc -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>3.4.0</version>
-				<configuration>
-					<additionalOptions>-Xdoclint:none</additionalOptions>
-					<tags>
-						<tag>
-							<name>apiNote</name>
-							<placement>a</placement>
-							<head>API Note:</head>
-						</tag>
-						<tag>
-							<name>implSpec</name>
-							<placement>a</placement>
-							<head>Implementation Requirements:</head>
-						</tag>
-						<tag>
-							<name>implNote</name>
-							<placement>a</placement>
-							<head>Implementation Note:</head>
-						</tag>
-						<tag>
-							<name>inheritDoc</name>
-							<placement>a</placement>
-							<head>Implementation Note:</head>
-						</tag>
-						<tag>
-							<name>param</name>
-						</tag>
-						<tag>
-							<name>return</name>
-						</tag>
-						<tag>
-							<name>throws</name>
-						</tag>
-						<tag>
-							<name>since</name>
-						</tag>
-						<tag>
-							<name>version</name>
-						</tag>
-						<tag>
-							<name>serialData</name>
-						</tag>
-						<tag>
-							<name>see</name>
-						</tag>
-					</tags>
-				</configuration>
-				<executions>
-					<execution>
-						<phase>package</phase>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<!-- Gpg Signature -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-gpg-plugin</artifactId>
-				<version>1.5</version>
-				<executions>
-					<execution>
-						<id>ossrh</id>
-						<phase>deploy</phase>
-						<goals>
-							<goal>sign</goal>
-						</goals>
-					</execution>
-				</executions>
 			</plugin>
 		</plugins>
 	</build>

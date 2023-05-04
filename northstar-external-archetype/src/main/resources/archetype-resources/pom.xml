@@ -16,7 +16,6 @@
 		<groupId>org.dromara</groupId>
 		<artifactId>northstar-api</artifactId>
 		<version>${version}</version>
-		<scope>provided</scope>
 	</dependency>
 	<dependency>
 	    <groupId>org.junit.jupiter</groupId>

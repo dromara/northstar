@@ -4,16 +4,14 @@
 	<parent>
 		<groupId>org.dromara</groupId>
 		<artifactId>northstar</artifactId>
-		<version>6.0.0</version>
-		<relativePath>../pom.xml</relativePath>
+		<version>6.0.0.ALPHA1</version>
 	</parent>
-
 	<artifactId>northstar-gateway-playback</artifactId>
-
 	<name>northstar-gateway-playback</name>
-
+	
 	<properties>
-	</properties>
+    	<maven.deploy.skip>true</maven.deploy.skip>
+    </properties>
 
 	<dependencies>
 		<dependency>
