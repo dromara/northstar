@@ -3,6 +3,7 @@ package org.dromara.northstar.data.jdbc;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import org.dromara.northstar.common.model.ModuleDealRecord;
 import org.dromara.northstar.common.model.ModuleDescription;
@@ -34,7 +35,7 @@ public class ModuleRepoAdapter implements IModuleRepository{
 
 	@Override
 	public ModuleDescription findSettingsByName(String moduleName) {
-		ModuleDescriptionDO obj = mdDelegate.findById(moduleName).orElseThrow();
+		ModuleDescriptionDO obj = mdDelegate.findById(moduleName).orElseThrow(() -> new NoSuchElementException("找不到模组配置：" + moduleName));
 		return obj.convertTo();
 	}
 
@@ -60,7 +61,7 @@ public class ModuleRepoAdapter implements IModuleRepository{
 
 	@Override
 	public ModuleRuntimeDescription findRuntimeByName(String moduleName) {
-		ModuleRuntimeDescriptionDO obj = mrdDelegate.findById(moduleName).orElseThrow();
+		ModuleRuntimeDescriptionDO obj = mrdDelegate.findById(moduleName).orElseThrow(() -> new NoSuchElementException("找不到模组运行时：" + moduleName));
 		return obj.convertTo();
 	}
 

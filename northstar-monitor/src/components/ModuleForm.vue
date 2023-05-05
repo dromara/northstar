@@ -305,11 +305,8 @@ export default {
         }
         this.form = this.module
         this.form.strategySetting.value = this.form.strategySetting.componentMeta.name
-        const selectedAcc = this.module.moduleAccountSettingsDescription
-          .map((item) => this.accountOptions.filter(acc => acc.gatewayId === item.accountGatewayId)[0])
-        const loadContractsPromise = selectedAcc
-          .map(item => item.bindedMktGatewayId)
-          .map(gatewayId => contractApi.getSubscribedContracts(gatewayId))
+        const selectedAcc = this.module.moduleAccountSettingsDescription.map((item) => this.accountOptions.filter(acc => acc.gatewayId === item.accountGatewayId)[0])
+        const loadContractsPromise = selectedAcc.map(item => contractApi.getSubscribedContracts(item.gatewayId))
         this.bindedContractsOptions = await Promise.all(loadContractsPromise)
         this.choseAccounts = this.module.moduleAccountSettingsDescription.map((item) => {
           item.value = item.accountGatewayId
@@ -355,10 +352,7 @@ export default {
           bindedContracts: []
         }
       })
-      const loadContractsPromise = val
-        .map(item => item.bindedMktGatewayId)
-        .map(gatewayId => contractApi.getSubscribedContracts(gatewayId))
-
+      const loadContractsPromise = val.map(item => contractApi.getSubscribedContracts(item.gatewayId))
       this.bindedContractsOptions = await Promise.all(loadContractsPromise)
     },
     async saveSetting(reset) {

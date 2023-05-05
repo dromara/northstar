@@ -2,13 +2,11 @@ package org.dromara.northstar.web.restful;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
 import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.constant.Constants;
 import org.dromara.northstar.common.constant.GatewayUsage;
-import org.dromara.northstar.common.exception.NoSuchElementException;
 import org.dromara.northstar.common.model.ContractSimpleInfo;
 import org.dromara.northstar.common.model.GatewayDescription;
 import org.dromara.northstar.common.model.Identifier;
@@ -56,16 +54,10 @@ public class ContractController {
 	@GetMapping("/subscribed")
 	public ResultBean<List<ContractSimpleInfo>> subscribedContracts(String gatewayId, String query){
 		GatewayDescription gd0 = gatewayRepo.findById(gatewayId);
-		if(Objects.isNull(gd0)) {
-			throw new NoSuchElementException("找不到网关：" + gatewayId);
-		}
 		if(gd0.getGatewayUsage() == GatewayUsage.MARKET_DATA) {
 			return new ResultBean<>(filterAndSort(gd0.getSubscribedContracts(), query));
 		}
 		GatewayDescription gd = gatewayRepo.findById(gd0.getBindedMktGatewayId());
-		if(Objects.isNull(gd)) {
-			throw new NoSuchElementException("找不到网关：" + gatewayId);
-		}
 		List<ContractSimpleInfo> subscribedContracts = gd.getSubscribedContracts();
 		List<ContractSimpleInfo> actualSubContracts = new ArrayList<>(subscribedContracts);
 		subscribedContracts.forEach(csi -> {

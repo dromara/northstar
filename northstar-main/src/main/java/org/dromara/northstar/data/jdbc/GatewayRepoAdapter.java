@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.dromara.northstar.common.exception.NoSuchElementException;
 import org.dromara.northstar.common.model.GatewayDescription;
 import org.dromara.northstar.data.IGatewayRepository;
 import org.dromara.northstar.data.jdbc.entity.GatewayDescriptionDO;
@@ -47,7 +48,7 @@ public class GatewayRepoAdapter implements IGatewayRepository{
 
 	@Override
 	public GatewayDescription findById(String gatewayId) {
-		GatewayDescriptionDO gdDo = delegate.findById(gatewayId).orElseThrow();
+		GatewayDescriptionDO gdDo = delegate.findById(gatewayId).orElseThrow(() -> new NoSuchElementException("找不到网关：" + gatewayId));
 		return gdDo.convertTo();
 	}
 
