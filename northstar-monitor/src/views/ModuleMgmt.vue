@@ -49,7 +49,7 @@
           }}
         </template>
       </el-table-column>
-      <el-table-column label="绑定账户" sortable align="center" width="minmax(120px,300px)">
+      <el-table-column label="绑定账户" sortable align="center" width="minmax(100px, 200px)" min-width="100px">
         <template slot-scope="scope">
           {{
             (() => {
@@ -60,7 +60,7 @@
           }}
         </template>
       </el-table-column>
-      <el-table-column label="绑定合约" sortable align="center" width="minmax(120px, 400px)">
+      <el-table-column label="绑定合约" sortable align="center" width="minmax(100px, auto)" min-width="100px">
         <template slot-scope="scope">
           <span class="text-selectable">
             {{
