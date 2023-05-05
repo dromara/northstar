@@ -9,11 +9,6 @@
   <artifactId>northstar-external-archetype</artifactId>
   <packaging>maven-archetype</packaging>
   <name>northstar-external-archetype</name>
-    
-  <url>http://maven.apache.org</url>
-  <properties>
-    <maven.deploy.skip>true</maven.deploy.skip>
-  </properties>
   <build>
     <extensions>
       <extension>
