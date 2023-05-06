@@ -4,8 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.util.NoSuchElementException;
-
+import org.dromara.northstar.common.exception.NoSuchElementException;
 import org.dromara.northstar.common.model.GatewayDescription;
 import org.dromara.northstar.data.IGatewayRepository;
 import org.junit.jupiter.api.BeforeEach;
