@@ -9,6 +9,9 @@
   <artifactId>northstar-external-archetype</artifactId>
   <packaging>maven-archetype</packaging>
   <name>northstar-external-archetype</name>
+  <properties>
+    <maven.deploy.skip>true</maven.deploy.skip>
+  </properties>
   <build>
     <extensions>
       <extension>
