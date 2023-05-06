@@ -1,6 +1,9 @@
 package org.dromara.northstar.support.notification;
 
+import java.util.Collections;
 import java.util.EnumSet;
+import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -47,6 +50,14 @@ public class MailDeliveryManager implements IMessageSenderManager{
 		this.sender = factory.newInstance(emailConfig);
 		interestedEvents.clear();
 		emailConfig.getInterestTopicList().stream().forEach(interestedEvents::add);
+	}
+	
+	@Override
+	public List<String> getSubscribers(){
+		if(Objects.isNull(emailConfig)) {
+			return Collections.emptyList();
+		}
+		return emailConfig.getSubscriberList();
 	}
 	
 	public void onEvent(NorthstarEvent event) {

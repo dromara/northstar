@@ -1,6 +1,7 @@
 package org.dromara.northstar.module;
 
 import java.time.LocalTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -35,13 +36,27 @@ public class PlaybackModuleContext extends ModuleContext implements IModuleConte
 	
 	public static final String PLAYBACK_GATEWAY = "回测账户";
 	
-	private static final IMessageSenderManager mockSenderMgr = () -> new IMessageSender() {
+	private static final IMessageSender sender = new IMessageSender() {
 		
 		@Override
 		public void send(String receiver, String content) {/* 占位不实现 */}
 		
 		@Override
 		public void send(String receiver, String title, String content) {/* 占位不实现 */}
+	};
+	
+	private static final IMessageSenderManager mockSenderMgr = new IMessageSenderManager() {
+
+		@Override
+		public IMessageSender getSender() {
+			return sender;
+		}
+
+		@Override
+		public List<String> getSubscribers() {
+			return Collections.emptyList();
+		}
+		
 	};
 	
 	public PlaybackModuleContext(TradeStrategy tradeStrategy, ModuleDescription moduleDescription,

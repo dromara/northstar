@@ -13,7 +13,8 @@ import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TradeField;
 
 /**
- * 
+ * 模组账户代表一个模组内部的逻辑账户
+ * 若模组绑定了多个实体账户，也被看作是一个逻辑账户
  * @author KevinHuangwl
  *
  */

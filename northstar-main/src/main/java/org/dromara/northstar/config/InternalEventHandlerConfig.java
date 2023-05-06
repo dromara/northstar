@@ -6,6 +6,7 @@ import org.dromara.northstar.data.IGatewayRepository;
 import org.dromara.northstar.event.AccountHandler;
 import org.dromara.northstar.event.BroadcastHandler;
 import org.dromara.northstar.event.ConnectionHandler;
+import org.dromara.northstar.event.IllegalOrderHandler;
 import org.dromara.northstar.event.MailBindedEventHandler;
 import org.dromara.northstar.event.MarketDataHandler;
 import org.dromara.northstar.event.ModuleHandler;
@@ -65,6 +66,12 @@ class InternalEventHandlerConfig {
 	MailBindedEventHandler mailBindedEventHandler(MailDeliveryManager mailMgr) {
 		log.debug("注册：MailBindedEventHandler");
 		return new MailBindedEventHandler(mailMgr);
+	}
+	
+	@Bean
+	IllegalOrderHandler illegalOrderHandler() {
+		log.debug("注册：IllegalOrderHandler");
+		return new IllegalOrderHandler();
 	}
 	
 }

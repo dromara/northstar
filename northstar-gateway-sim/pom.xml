@@ -4,17 +4,15 @@
 	<parent>
 		<groupId>org.dromara</groupId>
 		<artifactId>northstar</artifactId>
-		<version>6.0.0</version>
-		<relativePath>../pom.xml</relativePath>
+		<version>6.0.0.BETA2</version>
 	</parent>
 	
 	<artifactId>northstar-gateway-sim</artifactId>
-
 	<name>northstar-gateway-sim</name>
 
 	<properties>
-	</properties>
-
+   		<maven.deploy.skip>true</maven.deploy.skip>
+    </properties>
 	<dependencies>
 		<dependency>
 			<groupId>org.dromara</groupId>

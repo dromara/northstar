@@ -81,7 +81,7 @@ public interface IAccount extends TransactionAware{
 	 * @param unifiedSymbol
 	 * @return
 	 */
-	PositionField getPosition(PositionDirectionEnum posDirection, String unifiedSymbol);
+	Optional<PositionField> getPosition(PositionDirectionEnum posDirection, String unifiedSymbol);
 	/**
 	 * 获取账户绑定的行情网关
 	 * @return
