@@ -23,6 +23,8 @@ public class InternalDispatcher implements NorthstarEventDispatcher {
 	private MarketDataHandler mdHandler;
 	@Autowired
 	private BroadcastHandler bcHandler;
+	@Autowired
+	private IllegalOrderHandler illOrderHandler;
 	
 	public InternalDispatcher(FastEventEngine feEngine) {
 		feEngine.addHandler(this);
@@ -38,6 +40,7 @@ public class InternalDispatcher implements NorthstarEventDispatcher {
 		connHandler.onEvent(event);
 		mdHandler.onEvent(event);
 		mailHandler.onEvent(event);
+		illOrderHandler.onEvent(event);
 	}
 
 }

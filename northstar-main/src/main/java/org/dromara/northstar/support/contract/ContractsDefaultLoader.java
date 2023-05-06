@@ -1,4 +1,4 @@
-package org.dromara.northstar.support.job;
+package org.dromara.northstar.support.contract;
 
 import java.time.LocalDate;
 
