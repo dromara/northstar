@@ -8,7 +8,6 @@ import java.util.Optional;
 import java.util.Queue;
 import java.util.UUID;
 
-import org.dromara.northstar.common.exception.NoSuchElementException;
 import org.dromara.northstar.common.model.GatewayDescription;
 import org.dromara.northstar.common.utils.OrderUtils;
 import org.dromara.northstar.gateway.MarketGateway;
@@ -168,11 +167,11 @@ public class TradeAccount implements IAccount {
 		return tradeGateway;
 	}
 
-	public synchronized PositionField getPosition(PositionDirectionEnum posDirection, String unifiedSymbol) {
+	public synchronized Optional<PositionField> getPosition(PositionDirectionEnum posDirection, String unifiedSymbol) {
 		if(!posTable.contains(posDirection, unifiedSymbol)) {
-			throw new NoSuchElementException(String.format("不存在 [%s] 合约的 [%s] 持仓", unifiedSymbol, posDirection));
+			return Optional.empty();
 		}
-		return posTable.get(posDirection, unifiedSymbol);
+		return Optional.of(posTable.get(posDirection, unifiedSymbol));
 	}
 
 	@Override

@@ -1,26 +1,50 @@
 package org.dromara.northstar.support.job;
 
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.time.LocalTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.dromara.northstar.account.AccountManager;
 import org.dromara.northstar.common.constant.ModuleState;
+import org.dromara.northstar.common.model.ContractSimpleInfo;
+import org.dromara.northstar.common.model.Identifier;
+import org.dromara.northstar.common.model.ModuleAccountDescription;
 import org.dromara.northstar.event.IllegalOrderHandler;
+import org.dromara.northstar.gateway.Contract;
+import org.dromara.northstar.gateway.IContractManager;
 import org.dromara.northstar.module.ModuleManager;
+import org.dromara.northstar.strategy.IAccount;
 import org.dromara.northstar.strategy.IModule;
 import org.dromara.northstar.support.notification.IMessageSenderManager;
+import org.dromara.northstar.support.utils.ExceptionLogChecker;
+import org.dromara.northstar.support.utils.PositionChecker;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.FileAppender;
+import lombok.extern.slf4j.Slf4j;
+import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
+import xyz.redtorch.pb.CoreField.PositionField;
 
 /**
  * 模组运行时检查任务
  * @author KevinHuangwl
  *
  */
-
+@Slf4j
 @Component
-public class ModuleCheckingTask {
+public class ModuleCheckingTask implements InitializingBean {
+	
+	@Autowired
+	private IContractManager contractMgr;
 
 	@Autowired
 	private ModuleManager moduleMgr;
@@ -34,6 +58,8 @@ public class ModuleCheckingTask {
 	@Autowired
 	private IllegalOrderHandler illOrderHandler;
 	
+	private PositionChecker posChkr;
+	
 	private Map<IModule, ModuleState> moduleStateMap = new HashMap<>();
 	
 	/**
@@ -43,6 +69,7 @@ public class ModuleCheckingTask {
 	 */
 	@Scheduled(cron="0 0 0/1 ? * 1-5")
 	public void checkModuleState() {
+		log.debug("检查模组状态");
 		moduleMgr.allModules().forEach(m -> {
 			ModuleState state = m.getModuleContext().getState();
 			if(state.isEmpty() || state.isHolding()) {
@@ -58,6 +85,7 @@ public class ModuleCheckingTask {
 	 */
 	@Scheduled(cron="0 15 0/1 ? * 1-5")
 	public void doubleCheckModuleState() {
+		log.debug("模组状态复查");
 		moduleMgr.allModules().forEach(m -> {
 			ModuleState state = m.getModuleContext().getState();
 			if(moduleStateMap.get(m).equals(state)) {
@@ -75,21 +103,78 @@ public class ModuleCheckingTask {
 	 */
 	@Scheduled(cron="0 0 0/1 ? * 1-5")
 	public void checkHoldingLogicalAndPhysical() {
-		
+		log.debug("核对模组的逻辑持仓与物理持仓是否一致");
+		moduleMgr.allModules().forEach(m -> {
+			for(ModuleAccountDescription mad : m.getModuleDescription().getModuleAccountSettingsDescription()) {
+				for(ContractSimpleInfo csi : mad.getBindedContracts()) {
+					Contract contract = contractMgr.getContract(Identifier.of(csi.getValue()));
+					IAccount account = m.getAccount(contract);
+					account.getPosition(PositionDirectionEnum.PD_Long, csi.getUnifiedSymbol()).ifPresent(this::doCheckPosition);
+					account.getPosition(PositionDirectionEnum.PD_Short, csi.getUnifiedSymbol()).ifPresent(this::doCheckPosition);
+				}
+			}
+		});
 	}
+	
+	private void doCheckPosition(PositionField position) {
+		try {
+			posChkr.checkPositionEquivalence(position);
+		} catch (IllegalStateException e) {
+			msgMgr.getSubscribers().forEach(sub -> 
+				msgMgr.getSender().send(sub, String.format("[持仓不匹配警报] %s %s", position.getContract().getName(), position.getPositionDirection()), e.getMessage())
+			);
+		}
+	}
+	
 	/**
 	 * 检查当天的程序日志中是否存在异常日志，如存在则转发报告
+	 * 周一至五，每隔一小时检查 
+	 * @throws IOException 
 	 */
-	@Scheduled(cron="0 0/1 0-1,9-14,21-23 ? * 1-5")
-	public void checkAppException() {
-		
+	@Scheduled(cron="0 0 0/1 ? * 1-5")
+	public void checkAppException() throws IOException {
+		log.debug("检查当天的程序日志中是否存在异常日志");
+		Logger logger = (Logger) log;
+		FileAppender<ILoggingEvent> fileAppender = (FileAppender<ILoggingEvent>) logger.getLoggerContext().getLogger("ROOT").getAppender("FILE");
+		File logFile = new File(fileAppender.getFile());
+		FileReader fr = new FileReader(logFile);
+		ExceptionLogChecker checker = new ExceptionLogChecker(fr);
+		LocalTime endTime = LocalTime.now();
+		LocalTime startTime = endTime.minusHours(1);
+		List<String> errorLines = checker.getExceptionLog(startTime, endTime);
+		if(!errorLines.isEmpty()) {
+			StringBuilder sb = new StringBuilder();
+			errorLines.forEach(line -> sb.append(line + "%n"));
+			msgMgr.getSubscribers().forEach(sub -> 
+				msgMgr.getSender().send(sub, String.format("[程序异常日志警报] %s - %s，%d条异常记录", startTime, endTime, errorLines.size()), sb.toString())
+			);
+		}
 	}
 	/**
 	 * 检查当天的模组日志中是否存在异常日志，如存在则转发报告
+	 * 周一至五，每隔一小时检查 
+	 * @throws IOException 
 	 */
-	@Scheduled(cron="0 0/1 0-1,9-14,21-23 ? * 1-5")
-	public void checkModuleException() {
-		
+	@Scheduled(cron="0 0 0/1 ? * 1-5")
+	public void checkModuleException() throws IOException {
+		log.debug("检查当天的模组日志中是否存在异常日志");
+		for(IModule module : moduleMgr.allModules()) {
+			Logger logger = (Logger) module.getModuleContext().getLogger();
+			FileAppender<ILoggingEvent> fileAppender = (FileAppender<ILoggingEvent>) logger.getAppender(module.getName());
+			File logFile = new File(fileAppender.getFile());
+			FileReader fr = new FileReader(logFile);
+			ExceptionLogChecker checker = new ExceptionLogChecker(fr);
+			LocalTime endTime = LocalTime.now();
+			LocalTime startTime = endTime.minusHours(1);
+			List<String> errorLines = checker.getExceptionLog(startTime, endTime);
+			if(!errorLines.isEmpty()) {
+				StringBuilder sb = new StringBuilder();
+				errorLines.forEach(line -> sb.append(line + "%n"));
+				msgMgr.getSubscribers().forEach(sub -> 
+					msgMgr.getSender().send(sub, String.format("[模组异常日志警报] %s %s - %s，%d条异常记录", module.getName(), startTime, endTime, errorLines.size()), sb.toString())
+				);
+			}
+		}
 	}
 	/**
 	 * 检查风险度，超过95%则发出警报
@@ -97,6 +182,7 @@ public class ModuleCheckingTask {
 	 */
 	@Scheduled(cron="0 0 0/2 ? * 1-5")
 	public void checkDegreeOfRisk() {
+		log.debug("检查风险度");
 		accountMgr.allAccounts().stream()
 			.filter(account -> account.degreeOfRisk() > 0.95)
 			.forEach(account -> 
@@ -110,6 +196,7 @@ public class ModuleCheckingTask {
 	 */
 	@Scheduled(cron="0 0 0/1 ? * 1-5")
 	public void checkIllegalOrder() {
+		log.debug("检查废单");
 		StringBuilder sb = new StringBuilder();
 		illOrderHandler.getIllegalOrders().forEach(order -> 
 			sb.append(String.format("%s %s %s %s%n", order.getContract().getName(), order.getOrderDate(), order.getOrderTime(), order.getStatusMsg()))
@@ -120,5 +207,9 @@ public class ModuleCheckingTask {
 				msgMgr.getSender().send(sub, "[当天废单列表警报]", sb.toString())
 			);
 		}
+	}
+	@Override
+	public void afterPropertiesSet() throws Exception {
+		this.posChkr = new PositionChecker(moduleMgr);
 	}
 }

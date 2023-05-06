@@ -111,7 +111,8 @@ public class AccountService {
 		DirectionEnum orderDir = OrderUtils.resolveDirection(orderReq.getTradeOpr());
 		PositionDirectionEnum targetPosDir = OrderUtils.getClosingDirection(orderDir);
 		TradeAccount account = accountMgr.get(Identifier.of(orderReq.getGatewayId()));
-		PositionField pos = account.getPosition(targetPosDir, contract.getUnifiedSymbol());
+		PositionField pos = account.getPosition(targetPosDir, contract.getUnifiedSymbol())
+				.orElseThrow(() -> new NoSuchElementException(String.format("不存在 [%s] 合约 [%s] 持仓", contract.getUnifiedSymbol(), targetPosDir)));
 		int totalAvailable = pos.getPosition() - pos.getFrozen();
 		int tdAvailable = pos.getTdPosition() - pos.getTdFrozen();
 		if(totalAvailable < orderReq.getVolume()) {
