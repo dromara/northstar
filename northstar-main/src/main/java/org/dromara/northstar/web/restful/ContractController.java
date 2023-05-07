@@ -67,7 +67,7 @@ public class ContractController {
 					.map(c -> ContractSimpleInfo.builder()
 							.name(c.name())
 							.unifiedSymbol(c.contractField().getUnifiedSymbol())
-							.value(c.identifier().toString())
+							.value(c.identifier().value())
 							.build())
 					.toList());
 			}
@@ -76,7 +76,7 @@ public class ContractController {
 						.map(c -> ContractSimpleInfo.builder()
 								.name(c.name())
 								.unifiedSymbol(c.contractField().getUnifiedSymbol())
-								.value(c.identifier().toString())
+								.value(c.identifier().value())
 								.build())
 						.toList());
 			}
@@ -88,6 +88,7 @@ public class ContractController {
 		return list.stream()
 				.filter(c -> StringUtils.isBlank(query) || c.getName().contains(query) || c.getValue().contains(query))
 				.sorted((a, b) -> a.getValue().compareTo(b.getValue()))
+				.distinct()
 				.toList();
 	}
 }
