@@ -492,8 +492,8 @@ public class TdSpi extends CThostFtdcTraderSpi {
 
 			cThostFtdcInputOrderField.setOrderRef(orderRef + "");
 
-			logger.info("{}交易接口发单记录：InstrumentID:{}, LimitPrice:{}, VolumeTotalOriginal:{}, OrderPriceType:{}, Direction:{}, CombOffsetFlag:{},\n" //
-					+ "OrderRef:{}, InvestorID:{}, UserID:{}, BrokerID:{}, ExchangeID:{}, CombHedgeFlag:{}, ContingentCondition:{}, ForceCloseReason:{},\n" //
+			logger.info("{}交易接口发单记录：InstrumentID:{}, LimitPrice:{}, VolumeTotalOriginal:{}, OrderPriceType:{}, Direction:{}, CombOffsetFlag:{}," //
+					+ "OrderRef:{}, InvestorID:{}, UserID:{}, BrokerID:{}, ExchangeID:{}, CombHedgeFlag:{}, ContingentCondition:{}, ForceCloseReason:{}," //
 					+ "IsAutoSuspend:{}, IsSwapOrder:{}, MinVolume:{}, TimeCondition:{}, VolumeCondition:{}, StopPrice:{}", //
 					logInfo, //
 					cThostFtdcInputOrderField.getInstrumentID(), //

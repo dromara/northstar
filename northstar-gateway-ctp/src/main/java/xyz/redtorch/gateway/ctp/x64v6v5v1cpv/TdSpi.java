@@ -488,27 +488,9 @@ public class TdSpi extends CThostFtdcTraderSpi {
 
 			cThostFtdcInputOrderField.setOrderRef(orderRef + "");
 
-			logger.info("{}交易接口发单记录->{\n" //
-					+ "InstrumentID:{},\n" //
-					+ "LimitPrice:{},\n" //
-					+ "VolumeTotalOriginal:{},\n" //
-					+ "OrderPriceType:{},\n" //
-					+ "Direction:{},\n" //
-					+ "CombOffsetFlag:{},\n" //
-					+ "OrderRef:{},\n" //
-					+ "InvestorID:{},\n" //
-					+ "UserID:{},\n" //
-					+ "BrokerID:{},\n" //
-					+ "ExchangeID:{},\n" //
-					+ "CombHedgeFlag:{},\n" //
-					+ "ContingentCondition:{},\n" //
-					+ "ForceCloseReason:{},\n" //
-					+ "IsAutoSuspend:{},\n" //
-					+ "IsSwapOrder:{},\n" //
-					+ "MinVolume:{},\n" //
-					+ "TimeCondition:{},\n" //
-					+ "VolumeCondition:{},\n" //
-					+ "StopPrice:{}}", //
+			logger.info("{}交易接口发单记录：InstrumentID:{}, LimitPrice:{}, VolumeTotalOriginal:{}, OrderPriceType:{}, Direction:{}, CombOffsetFlag:{}," //
+					+ "OrderRef:{}, InvestorID:{}, UserID:{}, BrokerID:{}, ExchangeID:{}, CombHedgeFlag:{}, ContingentCondition:{}, ForceCloseReason:{}," //
+					+ "IsAutoSuspend:{}, IsSwapOrder:{}, MinVolume:{}, TimeCondition:{}, VolumeCondition:{}, StopPrice:{}", //
 					logInfo, //
 					cThostFtdcInputOrderField.getInstrumentID(), //
 					cThostFtdcInputOrderField.getLimitPrice(), //
