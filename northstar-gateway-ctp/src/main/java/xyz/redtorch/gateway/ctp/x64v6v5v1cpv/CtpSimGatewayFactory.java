@@ -6,7 +6,7 @@ import org.dromara.northstar.common.model.GatewayDescription;
 import org.dromara.northstar.gateway.Gateway;
 import org.dromara.northstar.gateway.GatewayFactory;
 import org.dromara.northstar.gateway.IMarketCenter;
-import org.dromara.northstar.gateway.ctp.CtpGatewaySettings;
+import org.dromara.northstar.gateway.ctp.CtpSimGatewaySettings;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson2.JSONObject;
@@ -25,7 +25,7 @@ public class CtpSimGatewayFactory implements GatewayFactory{
 
 	@Override
 	public Gateway newInstance(GatewayDescription gatewayDescription) {
-		CtpGatewaySettings settings = JSON.parseObject(JSON.toJSONString(gatewayDescription.getSettings()), CtpGatewaySettings.class);
+		CtpSimGatewaySettings settings = JSON.parseObject(JSON.toJSONString(gatewayDescription.getSettings()), CtpSimGatewaySettings.class);
 		JSONObject json = dataMgr.getCtpMetaSettings(settings.getBrokerId());
 		settings.setAppId(json.getString("appId"));
 		settings.setAuthCode(json.getString("authCode"));
