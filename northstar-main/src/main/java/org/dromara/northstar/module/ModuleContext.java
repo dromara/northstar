@@ -311,12 +311,14 @@ public class ModuleContext implements IModuleContext{
 		if(!StringUtils.equals(indicator.getConfiguration().contract().getUnifiedSymbol(), bar.getUnifiedSymbol())) {
 			return;
 		}
-		if(indicatorValBufQMap.get(indicator).size() >= bufSize.intValue()) {
-			indicatorValBufQMap.get(indicator).poll();
+		LinkedList<TimeSeriesValue> list = (LinkedList<TimeSeriesValue>) indicatorValBufQMap.get(indicator);
+		if(list.size() >= bufSize.intValue()) {
+			list.poll();
 		}
 		if(indicator.isReady() && indicator.getConfiguration().visible() && indicator.get(0).timestamp() == bar.getActionTimestamp()
+				&& (list.isEmpty() || list.peekLast().getTimestamp() != bar.getActionTimestamp())
 				&& (BarUtils.isEndOfTheTradingDay(bar) || indicator.getConfiguration().ifPlotPerBar() || !indicator.get(0).unstable())) {		
-			indicatorValBufQMap.get(indicator).offer(new TimeSeriesValue(indicator.get(0).value(), bar.getActionTimestamp()));	
+			list.offer(new TimeSeriesValue(indicator.get(0).value(), bar.getActionTimestamp()));	
 		}
 	}
 
