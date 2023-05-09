@@ -32,7 +32,7 @@ import xyz.redtorch.pb.CoreField.TickField;
 public class ExternalSampleStrategy extends AbstractStrategy	// 为了简化代码，引入一个通用的基础抽象类
 	implements TradeStrategy{
 
-	protected static final String NAME = "示例外置策略";
+	protected static final String NAME = "示例-外置策略";
 	
 	private InitParams params;	// 策略的参数配置信息
 

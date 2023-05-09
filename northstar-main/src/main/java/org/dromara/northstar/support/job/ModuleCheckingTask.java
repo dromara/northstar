@@ -88,6 +88,9 @@ public class ModuleCheckingTask implements InitializingBean {
 		log.debug("模组状态复查");
 		moduleMgr.allModules().forEach(m -> {
 			ModuleState state = m.getModuleContext().getState();
+			if(!moduleStateMap.containsKey(m)) {
+				return;
+			}
 			if(moduleStateMap.get(m).equals(state)) {
 				msgMgr.getSubscribers().forEach(sub -> 
 					msgMgr.getSender().send(sub, "[模组状态警报]：" + m.getName(), String.format("当前模组状态为：%s，已经维持了一段时间，请人为介入判断是否正常", state))

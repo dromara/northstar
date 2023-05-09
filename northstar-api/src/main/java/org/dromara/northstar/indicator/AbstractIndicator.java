@@ -30,7 +30,7 @@ public abstract class AbstractIndicator implements Indicator {
 	
 	@Override
 	public void update(Num num) {
-		if(ringBuf.size() > 0 && num.timestamp() <= ringBuf.get().timestamp() && num.unstable() == ringBuf.get().unstable()) {
+		if(ringBuf.size() > 0 && (num.timestamp() < get(0).timestamp() || num.timestamp() == get(0).timestamp() && !get(0).unstable())) {
 			return;	// 通过时间戳比对，确保同一个指标只能被同一个时间的值更新一次
 		}
 		Num updateNum = evaluate(num);
@@ -71,7 +71,7 @@ public abstract class AbstractIndicator implements Indicator {
 
 	@Override
 	public List<Num> getData() {
-		return Stream.of(ringBuf.toArray()).map(Num.class::cast).toList();
+		return Stream.of(ringBuf.toArray()).filter(Objects::nonNull).map(Num.class::cast).toList();
 	}
 	
 	@Override

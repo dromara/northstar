@@ -4,11 +4,14 @@
   <parent>
 	<groupId>org.dromara</groupId>
 	<artifactId>northstar</artifactId>
-	<version>6.0.0.BETA2</version>
+	<version>6.0.0.BETA3</version>
   </parent>
   <artifactId>northstar-external-archetype</artifactId>
   <packaging>maven-archetype</packaging>
   <name>northstar-external-archetype</name>
+  <properties>
+    <maven.deploy.skip>true</maven.deploy.skip>
+  </properties>
   <build>
     <extensions>
       <extension>

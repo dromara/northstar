@@ -14,6 +14,7 @@ import org.dromara.northstar.data.IModuleRepository;
 import org.dromara.northstar.data.IPlaybackRuntimeRepository;
 import org.dromara.northstar.data.ISimAccountRepository;
 import org.dromara.northstar.data.ds.DataServiceManager;
+import org.dromara.northstar.data.jdbc.DefaultEmptyMarketDataRepo;
 import org.dromara.northstar.data.jdbc.GatewayDescriptionRepository;
 import org.dromara.northstar.data.jdbc.GatewayRepoAdapter;
 import org.dromara.northstar.data.jdbc.MailConfigDescriptionRepository;
@@ -62,10 +63,12 @@ public class RepositoryConfig {
     @Bean
     MarketDataRepoFactory marketDataRepoFactory(IDataServiceManager dsDelegate, MarketDataRepository dbDelegate, IGatewayRepository gatewayRepo) {
         IMarketDataRepository defaultMarketRepo = new MarketDataRepoAdapter(dbDelegate, dsDelegate);
+        IMarketDataRepository defaultEmptyMktRepo = new DefaultEmptyMarketDataRepo();
 //        IMarketDataRepository w3MarketRepo = new W3MarketDataRepoDataServiceImpl(w3dsMgr);
         Map<ChannelType, IMarketDataRepository> channelRepoMap = new EnumMap<>(ChannelType.class);
         channelRepoMap.put(ChannelType.PLAYBACK, defaultMarketRepo);
         channelRepoMap.put(ChannelType.CTP, defaultMarketRepo);
+        channelRepoMap.put(ChannelType.CTP_SIM, defaultEmptyMktRepo);
 //        channelRepoMap.put(ChannelType.OKX, w3MarketRepo);
         return new MarketDataRepoFactory(channelRepoMap, gatewayRepo);
     }
