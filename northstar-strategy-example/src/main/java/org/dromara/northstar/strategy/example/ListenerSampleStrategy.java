@@ -14,8 +14,6 @@ import org.dromara.northstar.strategy.constant.DisposablePriceListenerType;
 import org.dromara.northstar.strategy.constant.PriceType;
 import org.dromara.northstar.strategy.model.TradeIntent;
 
-import com.alibaba.fastjson.JSONObject;
-
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.TickField;
 import xyz.redtorch.pb.CoreField.TradeField;
@@ -57,15 +55,6 @@ public class ListenerSampleStrategy extends AbstractStrategy implements TradeStr
 		log = ctx.getLogger();
 	}
 	
-	@Override
-	public JSONObject getComputedState() {
-		return inspectableState;
-	}
-
-	@Override
-	public void setComputedState(JSONObject stateObj) {
-		this.inspectableState = stateObj;
-	}
 	/***************** 以上如果看不懂，基本可以照搬 *************************/
 	
 	@Override

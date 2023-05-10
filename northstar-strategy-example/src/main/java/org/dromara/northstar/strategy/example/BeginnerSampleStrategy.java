@@ -38,7 +38,7 @@ public class BeginnerSampleStrategy implements TradeStrategy{
 	
 	private IModuleStrategyContext ctx;		// 模组的操作上下文
 	
-	private JSONObject inspectableState = new JSONObject(); 	// 可透视状态计算信息
+	private JSONObject storeObj = new JSONObject(); 	// 可透视状态计算信息
 	
 	private Logger log;
 	
@@ -75,13 +75,13 @@ public class BeginnerSampleStrategy implements TradeStrategy{
 	}
 	
 	@Override
-	public JSONObject getComputedState() {
-		return inspectableState;
+	public JSONObject getStoreObject() {
+		return storeObj;
 	}
 
 	@Override
-	public void setComputedState(JSONObject stateObj) {
-		this.inspectableState = stateObj;
+	public void setStoreObject(JSONObject storeObj) {
+		this.storeObj = storeObj;
 	}
 	/***************** 以上如果看不懂，基本可以照搬 *************************/
 

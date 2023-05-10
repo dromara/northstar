@@ -412,7 +412,7 @@ public class ModuleContext implements IModuleContext{
 				.moduleName(module.getName())
 				.enabled(module.isEnabled())
 				.moduleState(moduleAccount.getModuleState())
-				.dataState(tradeStrategy.getComputedState())
+				.dataState(tradeStrategy.getStoreObject())
 				.accountRuntimeDescriptionMap(accMap)
 				.build();
 		if(fullDescription) {

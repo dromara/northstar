@@ -223,7 +223,7 @@ public class ModuleService implements PostLoadAware {
 		
 		ComponentAndParamsPair strategyComponent = md.getStrategySetting();
 		TradeStrategy strategy = resolveComponent(strategyComponent);
-		strategy.setComputedState(mrd.getDataState());
+		strategy.setStoreObject(mrd.getDataState());
 		IModuleContext moduleCtx = null;
 		if(md.getUsage() == ModuleUsage.PLAYBACK) {
 			Map<String, ModuleAccountRuntimeDescription> mardMap = new HashMap<>();
