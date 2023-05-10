@@ -183,6 +183,7 @@ public class ModuleService implements PostLoadAware {
 	 * @return
 	 * @throws Exception 
 	 */
+	@Transactional
 	public ModuleDescription modifyModule(ModuleDescription md, boolean reset) throws Exception {
 		if(reset) {
 			removeModule(md.getModuleName());
@@ -298,6 +299,7 @@ public class ModuleService implements PostLoadAware {
 	private int toYearWeekVal(LocalDate date) {
 		return date.getYear() * 100 + LocalDateTimeUtil.weekOfYear(date);
 	}
+	
 	
 	private void unloadModule(String moduleName) {
 		moduleMgr.remove(Identifier.of(moduleName));
