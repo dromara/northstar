@@ -2,13 +2,10 @@ package org.dromara.northstar.strategy;
 
 import org.dromara.northstar.common.constant.ModuleState;
 import org.dromara.northstar.indicator.Indicator;
-import org.dromara.northstar.strategy.constant.DisposablePriceListenerType;
 import org.dromara.northstar.strategy.model.TradeIntent;
 import org.slf4j.Logger;
 
-import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
-import xyz.redtorch.pb.CoreField.TradeField;
 
 public interface IModuleStrategyContext {
 	/**
@@ -30,34 +27,6 @@ public interface IModuleStrategyContext {
 	 * @param tradeIntent		交易意图
 	 */
 	void submitOrderReq(TradeIntent tradeIntent);
-	/**
-	 * 止损止盈操作，达到价位会自动触发平仓逻辑
-	 * 自动失效条件：
-	 * 1. 触发一次后失效
-	 * 2. 模组净持仓为零时
-	 * 可通过 DisposablePriceListener.invalidate 方法主动失效
-	 * 【注意】：止盈止损单没有实现状态持仓化，程序重启会导致其丢失，注意处理
-	 * @param unifiedSymbol				合约编码
-	 * @param openDir					开仓方向
-	 * @param listenerType				监听类型
-	 * @param basePrice					基准价格
-	 * @param numOfPriceTickToTrigger	触发价差
-	 * return 							监听对象
-	 */
-	IDisposablePriceListener priceTriggerOut(String unifiedSymbol, DirectionEnum openDir, DisposablePriceListenerType listenerType, double basePrice, int numOfPriceTickToTrigger, int volume);
-	/**
-	 * 止损止盈操作，达到价位会自动触发平仓逻辑
-	 * 自动失效条件：
-	 * 1. 触发一次后失效
-	 * 2. 模组净持仓为零时
-	 * 可通过 DisposablePriceListener.invalidate 方法主动失效
-	 * 【注意】：止盈止损单没有实现状态持仓化，程序重启会导致其丢失，注意处理
-	 * @param trade						成交对象
-	 * @param listenerType				监听类型
-	 * @param numOfPriceTickToTrigger	触发价差
-	 * return 							监听对象
-	 */
-	IDisposablePriceListener priceTriggerOut(TradeField trade, DisposablePriceListenerType listenerType, int numOfPriceTickToTrigger);
 	/**
 	 * 获取模组周期设置
 	 * @return
