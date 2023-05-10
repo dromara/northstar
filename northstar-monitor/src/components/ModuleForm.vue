@@ -200,7 +200,7 @@
 
     <div slot="footer" class="dialog-footer">
       <el-popconfirm
-        v-if="!readOnly && isUpdateMode && form.usage !== 'PROD'"
+        v-if="!readOnly && isUpdateMode"
         class="mr-10"
         title="确定重置吗？"
         @confirm="saveSettingAndClose(true)"

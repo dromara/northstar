@@ -189,12 +189,28 @@ public class ModuleService implements PostLoadAware {
 			removeModule(md.getModuleName());
 			return createModule(md);
 		}
+		validateModify(md);
 		unloadModule(md.getModuleName());
 		loadModule(md);
 		moduleRepo.saveSettings(md);
 		return md;
 	}
 	
+	private void validateModify(ModuleDescription md) {
+		ModuleRuntimeDescription mrdOld = moduleRepo.findRuntimeByName(md.getModuleName());
+		Map<String, ModuleAccountRuntimeDescription> mardMap = mrdOld.getAccountRuntimeDescriptionMap();
+		boolean valid = true;
+		for(ModuleAccountDescription mad : md.getModuleAccountSettingsDescription()) {
+			if(!mardMap.containsKey(mad.getAccountGatewayId())) {
+				valid = false;
+				break;
+			}
+		}
+		if(mardMap.size() != md.getModuleAccountSettingsDescription().size() || !valid) {
+			throw new IllegalStateException("模组账户信息有重大变动，无法保存修改。如确实要修改，请使用【重置模组】");
+		}
+	}
+
 	/**
 	 * 删除模组
 	 * @param name
