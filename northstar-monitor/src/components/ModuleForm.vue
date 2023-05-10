@@ -308,10 +308,8 @@ export default {
         const selectedAcc = this.module.moduleAccountSettingsDescription.map((item) => this.accountOptions.filter(acc => acc.gatewayId === item.accountGatewayId)[0])
         const loadContractsPromise = selectedAcc.map(item => contractApi.getSubscribedContracts(item.gatewayId))
         this.bindedContractsOptions = await Promise.all(loadContractsPromise)
-        this.choseAccounts = this.module.moduleAccountSettingsDescription.map((item) => {
-          item.value = item.accountGatewayId
-          return item
-        })
+        const selectedAccounts = this.module.moduleAccountSettingsDescription.map(item => item.accountGatewayId)
+        this.choseAccounts = this.accountOptions.filter(item => selectedAccounts.indexOf(item.gatewayId) >= 0)
       }
     },
     'form.usage': function (val) {
