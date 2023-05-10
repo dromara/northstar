@@ -205,7 +205,7 @@
         title="确定重置吗？"
         @confirm="saveSettingAndClose(true)"
       >
-        <el-button slot="reference" size="mini" type="warning" title="模组状态将重置为初始状态">
+        <el-button id="resetModuleSettings" slot="reference" size="mini" type="warning" title="模组状态将重置为初始状态">
           重置模组
         </el-button>
       </el-popconfirm>
