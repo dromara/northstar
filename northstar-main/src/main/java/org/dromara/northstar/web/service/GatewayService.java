@@ -145,7 +145,7 @@ public class GatewayService implements PostLoadAware {
 			throw new IllegalStateException("非断开状态的网关不能删除");
 		}
 		GatewayDescription gd = gatewayRepo.findById(gatewayId);
-		if(gateway instanceof MarketGateway) {			
+		if(gd.getGatewayUsage() == GatewayUsage.MARKET_DATA) {			
 			for(GatewayDescription gwd : gatewayRepo.findAll()) {
 				if(StringUtils.equals(gwd.getBindedMktGatewayId(), gatewayId)) {
 					throw new IllegalStateException("仍有账户网关与本行情网关存在绑定关系，请先解除绑定！");
