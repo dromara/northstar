@@ -1315,12 +1315,13 @@ public class TdSpi extends CThostFtdcTraderSpi {
 				logger.info("{}交易接口开始推送缓存Order,共计{}条", logInfo, orderBuilderCacheList.size());
 				for (OrderField.Builder orderBuilder : orderBuilderCacheList) {
 					try {
-						orderBuilder.setContract(gatewayAdapter.mktCenter.getContract(MKT_GATEWAY_ID, symbol).contractField());
+						orderBuilder.setContract(gatewayAdapter.mktCenter.getContract(MKT_GATEWAY_ID, orderBuilder.getContract().getSymbol()).contractField());
 						OrderField order = orderBuilder.build();
 						orderIdToOrderMap.put(order.getOrderId(), order);
 						gatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.ORDER, order);
 					} catch(NoSuchElementException e) {
 						logger.error("{}未能正确获取到合约信息，代码{}", logInfo, orderBuilder.getContract().getSymbol());
+						logger.error("", e);
 					}
 				}
 				orderBuilderCacheList.clear();
@@ -1328,10 +1329,11 @@ public class TdSpi extends CThostFtdcTraderSpi {
 				logger.info("{}交易接口开始推送缓存Trade,共计{}条", logInfo, tradeBuilderCacheList.size());
 				for (TradeField.Builder tradeBuilder : tradeBuilderCacheList) {
 					try {
-						tradeBuilder.setContract(gatewayAdapter.mktCenter.getContract(MKT_GATEWAY_ID, symbol).contractField());
+						tradeBuilder.setContract(gatewayAdapter.mktCenter.getContract(MKT_GATEWAY_ID, tradeBuilder.getContract().getSymbol()).contractField());
 						gatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.TRADE, tradeBuilder.build());
 					} catch(NoSuchElementException e) {
 						logger.error("{}未能正确获取到合约信息，代码{}", logInfo, tradeBuilder.getContract().getSymbol());
+						logger.error("", e);
 					}
 				}
 				tradeBuilderCacheList.clear();
