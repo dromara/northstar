@@ -11,6 +11,8 @@ import org.slf4j.Logger;
 
 import com.alibaba.fastjson.JSONObject;
 
+import lombok.Getter;
+import lombok.Setter;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.OrderField;
 import xyz.redtorch.pb.CoreField.TickField;
@@ -18,10 +20,12 @@ import xyz.redtorch.pb.CoreField.TradeField;
 
 public abstract class AbstractStrategy implements TradeStrategy{
 	
+	// 模组计算状态
+	@Getter
+	@Setter
+	protected JSONObject storeObject;
 	// 模组上下文
 	protected IModuleStrategyContext ctx;
-	// 模组计算状态
-	protected JSONObject inspectableState;
 	// 处理器，unifiedSymbol -> handler
 	protected Map<String, TickHandler> tickHandlerMap = new HashMap<>();
 	// 处理器，unifiedSymbol -> handler
@@ -59,16 +63,6 @@ public abstract class AbstractStrategy implements TradeStrategy{
 		initMultiContractHandler();
 	}
 
-	@Override
-	public JSONObject getComputedState() {
-		return inspectableState;
-	}
-
-	@Override
-	public void setComputedState(JSONObject stateObj) {
-		this.inspectableState = stateObj;
-	}
-	
 	/**
 	 * 指标初始化
 	 */

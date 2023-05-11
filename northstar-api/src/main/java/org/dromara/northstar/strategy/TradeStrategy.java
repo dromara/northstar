@@ -16,12 +16,12 @@ public interface TradeStrategy extends TickDataAware, MergedBarListener, Transac
 	 * 获取计算状态
 	 * @return
 	 */
-	JSONObject getComputedState();
+	JSONObject getStoreObject();
 	/**
 	 * 设置计算状态
-	 * @param stateObj
+	 * @param storeObj
 	 */
-	void setComputedState(JSONObject stateObj);
+	void setStoreObject(JSONObject storeObj);
 	
 	/* 响应事件 */
 	/**

@@ -46,14 +46,12 @@ import org.dromara.northstar.indicator.IndicatorValueUpdateHelper;
 import org.dromara.northstar.indicator.constant.PeriodUnit;
 import org.dromara.northstar.indicator.model.Configuration;
 import org.dromara.northstar.strategy.IAccount;
-import org.dromara.northstar.strategy.IDisposablePriceListener;
 import org.dromara.northstar.strategy.IMessageSender;
 import org.dromara.northstar.strategy.IModule;
 import org.dromara.northstar.strategy.IModuleAccount;
 import org.dromara.northstar.strategy.IModuleContext;
 import org.dromara.northstar.strategy.OrderRequestFilter;
 import org.dromara.northstar.strategy.TradeStrategy;
-import org.dromara.northstar.strategy.constant.DisposablePriceListenerType;
 import org.dromara.northstar.strategy.constant.PriceType;
 import org.dromara.northstar.strategy.model.TradeIntent;
 import org.dromara.northstar.support.log.ModuleLoggerFactory;
@@ -91,8 +89,6 @@ public class ModuleContext implements IModuleContext{
 	protected IMessageSenderManager senderMgr;
 	
 	protected TradeStrategy tradeStrategy;
-	
-	protected Set<DisposablePriceListener> listenerSet = new HashSet<>();
 	
 	protected IModuleRepository moduleRepo;
 	
@@ -180,27 +176,6 @@ public class ModuleContext implements IModuleContext{
 	}
 
 	@Override
-	public IDisposablePriceListener priceTriggerOut(String unifiedSymbol, DirectionEnum openDir,
-			DisposablePriceListenerType listenerType, double basePrice, int numOfPriceTickToTrigger, int volume) {
-		int factor = switch(listenerType) {
-		case TAKE_PROFIT -> 1;
-		case STOP_LOSS -> -1;
-		default -> throw new IllegalArgumentException("Unexpected value: " + listenerType);
-		};
-		DisposablePriceListener listener = DisposablePriceListener.create(this, getContract(unifiedSymbol), openDir, basePrice, factor * Math.abs(numOfPriceTickToTrigger), volume);
-		if(getLogger().isInfoEnabled())
-			getLogger().info("增加【{}】", listener.description());
-		listenerSet.add(listener);
-		return listener;
-	}
-
-	@Override
-	public IDisposablePriceListener priceTriggerOut(TradeField trade, DisposablePriceListenerType listenerType,
-			int numOfPriceTickToTrigger) {
-		return priceTriggerOut(trade.getContract().getUnifiedSymbol(), trade.getDirection(), listenerType, trade.getPrice(), numOfPriceTickToTrigger, trade.getVolume());
-	}
-
-	@Override
 	public int numOfMinPerMergedBar() {
 		return module.getModuleDescription().getNumOfMinPerBar();
 	}
@@ -270,14 +245,7 @@ public class ModuleContext implements IModuleContext{
 		indicatorHelperSet.forEach(helper -> helper.onTick(tick));
 		moduleAccount.onTick(tick);
 		latestTickMap.put(tick.getUnifiedSymbol(), tick);
-		listenerSet.stream()
-			.filter(listener -> listener.shouldBeTriggered(tick))
-			.forEach(listener -> {
-				getLogger().info("触发【{}】", listener.description());
-				listener.execute();
-			});
 		tradeStrategy.onTick(tick);
-		listenerSet = listenerSet.stream().filter(DisposablePriceListener::isValid).collect(Collectors.toSet());
 	}
 
 	@Override
@@ -353,10 +321,6 @@ public class ModuleContext implements IModuleContext{
 		tradeStrategy.onTrade(trade);
 		moduleRepo.saveRuntime(getRuntimeDescription(false));
 		
-		if(getState().isEmpty() && !listenerSet.isEmpty()) {
-			getLogger().info("净持仓为零，止盈止损监听器被清除");
-			listenerSet.clear();
-		}
 		if(Objects.nonNull(tradeIntent)) {
 			tradeIntent.onTrade(trade);
 			if(tradeIntent.hasTerminated()) {
@@ -412,7 +376,7 @@ public class ModuleContext implements IModuleContext{
 				.moduleName(module.getName())
 				.enabled(module.isEnabled())
 				.moduleState(moduleAccount.getModuleState())
-				.dataState(tradeStrategy.getComputedState())
+				.dataState(tradeStrategy.getStoreObject())
 				.accountRuntimeDescriptionMap(accMap)
 				.build();
 		if(fullDescription) {

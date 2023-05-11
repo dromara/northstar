@@ -200,12 +200,12 @@
 
     <div slot="footer" class="dialog-footer">
       <el-popconfirm
-        v-if="!readOnly && isUpdateMode && form.usage !== 'PROD'"
+        v-if="!readOnly && isUpdateMode"
         class="mr-10"
         title="确定重置吗？"
         @confirm="saveSettingAndClose(true)"
       >
-        <el-button slot="reference" size="mini" type="warning" title="模组状态将重置为初始状态">
+        <el-button id="resetModuleSettings" slot="reference" size="mini" type="warning" title="模组状态将重置为初始状态">
           重置模组
         </el-button>
       </el-popconfirm>
@@ -308,10 +308,8 @@ export default {
         const selectedAcc = this.module.moduleAccountSettingsDescription.map((item) => this.accountOptions.filter(acc => acc.gatewayId === item.accountGatewayId)[0])
         const loadContractsPromise = selectedAcc.map(item => contractApi.getSubscribedContracts(item.gatewayId))
         this.bindedContractsOptions = await Promise.all(loadContractsPromise)
-        this.choseAccounts = this.module.moduleAccountSettingsDescription.map((item) => {
-          item.value = item.accountGatewayId
-          return item
-        })
+        const selectedAccounts = this.module.moduleAccountSettingsDescription.map(item => item.accountGatewayId)
+        this.choseAccounts = this.accountOptions.filter(item => selectedAccounts.indexOf(item.gatewayId) >= 0)
       }
     },
     'form.usage': function (val) {

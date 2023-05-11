@@ -72,6 +72,25 @@ describe('模组管理-测试', () => {
             cy.get('.el-table__row').filter(':visible').should('have.length', 1)
         })
 
+        it('应该可以修改模组', () => {
+            cy.intercept('PUT','/northstar/module?reset=false').as('updateModule')
+            cy.get('.el-table__row').contains('修改').click()
+            cy.get('.el-dialog').contains('账户绑定').click()
+            cy.get('.el-dialog').contains('模组分配金额').parent().find('input').clear().type('40000')
+            cy.get('#saveModuleSettings').click()
+            cy.wait('@updateModule').should('have.nested.property', 'response.statusCode', 200)
+            cy.wait(1000)
+        })
+
+        it('应该可以重置模组', () => {
+            cy.intercept('PUT','/northstar/module?reset=true').as('resetModule')
+            cy.get('.el-table__row').contains('修改').click()
+            cy.wait(500)
+            cy.get('#resetModuleSettings').click()
+            cy.get('.el-popconfirm').filter(':visible').find('button').contains('确定').click()
+            cy.wait('@resetModule').should('have.nested.property', 'response.statusCode', 200)
+        })
+
         it('应该可以启用、停用模组，模组启用时删除按钮不可用，停用时删除按钮可用', () => {
             cy.get('.el-table__row').contains('已停用')
             cy.get('.el-table__row').contains('删除').should('be.enabled')
