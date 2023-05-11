@@ -518,7 +518,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 					cThostFtdcInputOrderField.getStopPrice());
 			cThostFtdcTraderApi.ReqOrderInsert(cThostFtdcInputOrderField, reqId.incrementAndGet());
 
-			return orderId;
+			return submitOrderReq.getOriginOrderId();
 		} catch (Throwable t) {
 			logger.error("{}交易接口发单错误", logInfo, t);
 			return null;
