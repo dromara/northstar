@@ -1,11 +1,11 @@
 package org.dromara.northstar.module;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -485,11 +485,9 @@ public class ModuleContext implements IModuleContext{
 				.build()));
 	}
 	
-	private DateFormat fmt = new SimpleDateFormat();
-	
 	private String submitOrderReq(SubmitOrderReqField orderReq) {
 		if(getLogger().isInfoEnabled()) {			
-			getLogger().info("发单：{}，{}", orderReq.getOriginOrderId(), fmt.format(new Date(orderReq.getActionTimestamp())));
+			getLogger().info("发单：{}，{}", orderReq.getOriginOrderId(), LocalDateTime.ofInstant(Instant.ofEpochMilli(orderReq.getActionTimestamp()), ZoneId.systemDefault()));
 		}
 		try {
 			moduleAccount.onSubmitOrder(orderReq);
