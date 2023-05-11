@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -51,7 +50,6 @@ public class MarketCenter implements IMarketCenter{
 	private final ConcurrentMap<Contract, IndexContract> idxContractMap = new ConcurrentHashMap<>(INIT_SIZE);
 
 	private final Table<String, String, Contract> gatewaySymbolContractTbl = HashBasedTable.create();
-	private final Table<String, String, Contract> gatewayUnifiedSymbolContractTbl = HashBasedTable.create();
 
 	private final Table<ExchangeEnum, ProductClassEnum, List<ContractDefinition>> contractDefTbl = HashBasedTable.create();
 	
@@ -160,14 +158,14 @@ public class MarketCenter implements IMarketCenter{
 				idxContractMap.put(memberContract, c);
 			}
 			gatewaySymbolContractTbl.put(c.gatewayId(), c.contractField().getSymbol(), c);
-			gatewayUnifiedSymbolContractTbl.put(c.gatewayId(), c.contractField().getUnifiedSymbol(), c);
+			gatewaySymbolContractTbl.put(c.gatewayId(), c.contractField().getUnifiedSymbol(), c);
 			
 			// CTP主力合约生成 
 			if(c.channelType() == ChannelType.CTP) {
 				PrimaryContract pc = new PrimaryContract(c);
 				contractMap.put(pc.identifier(), pc);
 				gatewaySymbolContractTbl.put(pc.gatewayId(), pc.contractField().getSymbol(), pc);
-				gatewayUnifiedSymbolContractTbl.put(pc.gatewayId(), pc.contractField().getUnifiedSymbol(), pc);
+				gatewaySymbolContractTbl.put(pc.gatewayId(), pc.contractField().getUnifiedSymbol(), pc);
 			}
 		}
 	}
@@ -188,12 +186,10 @@ public class MarketCenter implements IMarketCenter{
 	 */
 	@Override
 	public Contract getContract(String gatewayId, String code) {
-		Contract c1 = gatewaySymbolContractTbl.get(gatewayId, code);
-		Contract c2 = gatewayUnifiedSymbolContractTbl.get(gatewayId, code);
-		if(Objects.isNull(c1) && Objects.isNull(c2)) {
+		if(!gatewaySymbolContractTbl.contains(gatewayId, code)) {
 			throw new NoSuchElementException(String.format("找不到合约：%s -> %s", gatewayId, code));
 		}
-		return Optional.ofNullable(c1).orElse(c2);
+		return gatewaySymbolContractTbl.get(gatewayId, code);
 	}
 	
 	/**
