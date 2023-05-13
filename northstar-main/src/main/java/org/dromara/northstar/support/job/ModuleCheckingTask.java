@@ -5,8 +5,10 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.time.LocalTime;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.dromara.northstar.account.AccountManager;
 import org.dromara.northstar.common.constant.ModuleState;
@@ -62,6 +64,8 @@ public class ModuleCheckingTask implements InitializingBean {
 	
 	private Map<IModule, ModuleState> moduleStateMap = new HashMap<>();
 	
+	private Set<String> warningCacheSet = new HashSet<>();
+	
 	/**
 	 * 检查模组状态
 	 * 如果模组状态不等于期望状态，则等待复查
@@ -93,7 +97,7 @@ public class ModuleCheckingTask implements InitializingBean {
 			}
 			if(moduleStateMap.get(m).equals(state)) {
 				msgMgr.getSubscribers().forEach(sub -> 
-					msgMgr.getSender().send(sub, "[模组状态警报]：" + m.getName(), String.format("当前模组状态为：%s，已经维持了一段时间，请人为介入判断是否正常", state))
+					doSmartSend(sub, "[模组状态警报]：" + m.getName(), String.format("当前模组状态为：%s，已经维持了一段时间，请人为介入判断是否正常", state))
 				);
 			} else {
 				moduleStateMap.remove(m);
@@ -124,7 +128,7 @@ public class ModuleCheckingTask implements InitializingBean {
 			posChkr.checkPositionEquivalence(position);
 		} catch (IllegalStateException e) {
 			msgMgr.getSubscribers().forEach(sub -> 
-				msgMgr.getSender().send(sub, String.format("[持仓不匹配警报] %s %s", position.getContract().getName(), position.getPositionDirection()), e.getMessage())
+				doSmartSend(sub, String.format("[持仓不匹配警报] %s %s", position.getContract().getName(), position.getPositionDirection()), e.getMessage())
 			);
 		}
 	}
@@ -149,7 +153,7 @@ public class ModuleCheckingTask implements InitializingBean {
 			StringBuilder sb = new StringBuilder();
 			errorLines.forEach(line -> sb.append(line + "%n"));
 			msgMgr.getSubscribers().forEach(sub -> 
-				msgMgr.getSender().send(sub, String.format("[程序异常日志警报] %s - %s，%d条异常记录", startTime, endTime, errorLines.size()), sb.toString())
+				doSmartSend(sub, String.format("[程序异常日志警报] %s - %s，%d条异常记录", startTime, endTime, errorLines.size()), sb.toString())
 			);
 		}
 	}
@@ -174,7 +178,7 @@ public class ModuleCheckingTask implements InitializingBean {
 				StringBuilder sb = new StringBuilder();
 				errorLines.forEach(line -> sb.append(line + "%n"));
 				msgMgr.getSubscribers().forEach(sub -> 
-					msgMgr.getSender().send(sub, String.format("[模组异常日志警报] %s %s - %s，%d条异常记录", module.getName(), startTime, endTime, errorLines.size()), sb.toString())
+					doSmartSend(sub, String.format("[模组异常日志警报] %s %s - %s，%d条异常记录", module.getName(), startTime, endTime, errorLines.size()), sb.toString())
 				);
 			}
 		}
@@ -190,7 +194,7 @@ public class ModuleCheckingTask implements InitializingBean {
 			.filter(account -> account.degreeOfRisk() > 0.95)
 			.forEach(account -> 
 				msgMgr.getSubscribers().forEach(sub -> 
-					msgMgr.getSender().send(sub, "[账户风险度警报]：" + account.accountId(), String.format("当前账户风险率为：%d%", (int)(account.degreeOfRisk() * 100)))
+					doSmartSend(sub, "[账户风险度警报]：" + account.accountId(), String.format("当前账户风险率为：%d%", (int)(account.degreeOfRisk() * 100)))
 				)
 			);
 	}
@@ -207,10 +211,28 @@ public class ModuleCheckingTask implements InitializingBean {
 		
 		if(sb.length() > 0) {
 			msgMgr.getSubscribers().forEach(sub -> 
-				msgMgr.getSender().send(sub, "[当天废单列表警报]", sb.toString())
+				doSmartSend(sub, "[当天废单列表警报]", sb.toString())
 			);
 		}
 	}
+	
+	private void doSmartSend(String subscriber, String title, String msg) {
+		String combine = title + "@" + msg;
+		if(!warningCacheSet.contains(combine)) {
+			msgMgr.getSender().send(subscriber, title, msg);
+			warningCacheSet.add(combine);
+		}
+	}
+	
+	/**
+	 * 检查废单
+	 */
+	@Scheduled(cron="0 45 8,12,20 ? * 1-5")
+	public void resetWarningCache() {
+		log.debug("清除报警缓存");
+		warningCacheSet.clear();
+	}
+	
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		this.posChkr = new PositionChecker(moduleMgr);
