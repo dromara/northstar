@@ -31,7 +31,6 @@ import com.google.protobuf.InvalidProtocolBufferException;
 
 import lombok.extern.slf4j.Slf4j;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
-import xyz.redtorch.pb.CoreField.CancelOrderReqField;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.OrderField;
 import xyz.redtorch.pb.CoreField.PositionField;
@@ -290,7 +289,7 @@ public class ModuleAccount implements IModuleAccount{
 		}
 	}
 
-	public void onCancelOrder(CancelOrderReqField cancelOrder) {
+	public void onCancelOrder() {
 		stateMachine.onCancelReq();
 	}
 
