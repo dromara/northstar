@@ -71,11 +71,12 @@ public class TestFieldFactory {
 	public ContractField makeContract(String symbol) {
 		return ContractField.newBuilder()
 				.setGatewayId(gatewayId)
+				.setChannelType(ChannelType.SIM.toString())
 				.setCurrency(CurrencyEnum.CNY)
 				.setContractId(symbol + "@SHFE@FUTURES@" + gatewayId)
 				.setExchange(ExchangeEnum.SHFE)
 				.setFullName(symbol)
-				.setThirdPartyId(symbol + "@CTP")
+				.setThirdPartyId(symbol + "@" + ChannelType.SIM)
 				.setLongMarginRatio(0.08)
 				.setShortMarginRatio(0.08)
 				.setMultiplier(10)
