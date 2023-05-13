@@ -67,6 +67,7 @@ public class MinuteBarGenerator {
 			cutoffTime = clock.barMinute(tick);
 			barBuilder = BarField.newBuilder()
 					.setGatewayId(contract.getGatewayId())
+					.setChannelType(tick.getChannelType())
 					.setUnifiedSymbol(contract.getUnifiedSymbol())
 					.setTradingDay(tick.getTradingDay())
 					.setOpenPrice(tick.getLastPrice())
