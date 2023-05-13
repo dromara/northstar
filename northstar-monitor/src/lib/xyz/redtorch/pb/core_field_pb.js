@@ -765,7 +765,8 @@ proto.xyz.redtorch.pb.ContractField.toObject = function(includeInstance, msg) {
     combinationtype: jspb.Message.getFieldWithDefault(msg, 26, 0),
     gatewayid: jspb.Message.getFieldWithDefault(msg, 27, ""),
     commissionfee: jspb.Message.getFloatingPointFieldWithDefault(msg, 28, 0.0),
-    commissionrate: jspb.Message.getFloatingPointFieldWithDefault(msg, 29, 0.0)
+    commissionrate: jspb.Message.getFloatingPointFieldWithDefault(msg, 29, 0.0),
+    channeltype: jspb.Message.getFieldWithDefault(msg, 30, "")
   };
 
   if (includeInstance) {
@@ -909,6 +910,10 @@ proto.xyz.redtorch.pb.ContractField.deserializeBinaryFromReader = function(msg, 
     case 29:
       var value = /** @type {number} */ (reader.readDouble());
       msg.setCommissionrate(value);
+      break;
+    case 30:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setChanneltype(value);
       break;
     default:
       reader.skipField();
@@ -1125,6 +1130,13 @@ proto.xyz.redtorch.pb.ContractField.serializeBinaryToWriter = function(message, 
   if (f !== 0.0) {
     writer.writeDouble(
       29,
+      f
+    );
+  }
+  f = message.getChanneltype();
+  if (f.length > 0) {
+    writer.writeString(
+      30,
       f
     );
   }
@@ -1614,6 +1626,24 @@ proto.xyz.redtorch.pb.ContractField.prototype.getCommissionrate = function() {
  */
 proto.xyz.redtorch.pb.ContractField.prototype.setCommissionrate = function(value) {
   return jspb.Message.setProto3FloatField(this, 29, value);
+};
+
+
+/**
+ * optional string channelType = 30;
+ * @return {string}
+ */
+proto.xyz.redtorch.pb.ContractField.prototype.getChanneltype = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 30, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.xyz.redtorch.pb.ContractField} returns this
+ */
+proto.xyz.redtorch.pb.ContractField.prototype.setChanneltype = function(value) {
+  return jspb.Message.setProto3StringField(this, 30, value);
 };
 
 
