@@ -31,7 +31,6 @@ import com.google.protobuf.InvalidProtocolBufferException;
 
 import lombok.extern.slf4j.Slf4j;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
-import xyz.redtorch.pb.CoreField.CancelOrderReqField;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.OrderField;
 import xyz.redtorch.pb.CoreField.PositionField;
@@ -259,14 +258,13 @@ public class ModuleAccount implements IModuleAccount{
 		return getInitBalance(gatewayId) + getAccCloseProfit(gatewayId) - getAccCommission(gatewayId);
 	}
 	
-	@Override
 	public void onSubmitOrder(SubmitOrderReqField submitOrder) {
 		if(FieldUtils.isOpen(submitOrder.getOffsetFlag())) {
 			checkIfHasSufficientAmount(submitOrder);
 		} else {
 			checkIfHasSufficientPosition(submitOrder);
 		}
-		stateMachine.onSubmitReq(submitOrder);
+		stateMachine.onSubmitReq();
 	}
 
 	private void checkIfHasSufficientPosition(SubmitOrderReqField submitOrder) {
@@ -291,9 +289,8 @@ public class ModuleAccount implements IModuleAccount{
 		}
 	}
 
-	@Override
-	public void onCancelOrder(CancelOrderReqField cancelOrder) {
-		stateMachine.onCancelReq(cancelOrder);
+	public void onCancelOrder() {
+		stateMachine.onCancelReq();
 	}
 
 }

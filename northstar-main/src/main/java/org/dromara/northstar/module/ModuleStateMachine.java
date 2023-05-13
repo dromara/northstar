@@ -12,9 +12,7 @@ import org.dromara.northstar.strategy.IModuleContext;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreEnum.OrderStatusEnum;
-import xyz.redtorch.pb.CoreField.CancelOrderReqField;
 import xyz.redtorch.pb.CoreField.OrderField;
-import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TradeField;
 
 /**
@@ -93,7 +91,7 @@ public class ModuleStateMachine implements TransactionAware {
 		this.curState = newState;
 	}
 
-	public void onSubmitReq(SubmitOrderReqField orderReq) {
+	public void onSubmitReq() {
 		if(curState.isOrdering()) {
 			throw new IllegalStateException("当前状态异常：" + curState);
 		}
@@ -101,11 +99,15 @@ public class ModuleStateMachine implements TransactionAware {
 		setState(ModuleState.PLACING_ORDER);
 	}
 
-	public void onCancelReq(CancelOrderReqField cancelReq) {
+	public void onCancelReq() {
 		if(!curState.isOrdering()) {
 			throw new IllegalStateException("当前状态异常：" + curState);
 		}
-		setState(ModuleState.RETRIEVING_FOR_CANCEL);
+		if(curState == ModuleState.PENDING_ORDER) {
+			setState(ModuleState.RETRIEVING_FOR_CANCEL);
+		} else if (curState == ModuleState.PLACING_ORDER) {
+			setState(prevState);
+		}
 	}
 	
 	public void setModuleAccount(IModuleAccount moduleAccount) {

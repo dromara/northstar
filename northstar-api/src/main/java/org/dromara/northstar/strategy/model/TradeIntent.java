@@ -70,7 +70,9 @@ public class TradeIntent implements TransactionAware, TickDataAware {
 	 * 价差过大的放弃条件
 	 */
 	private final Predicate<Double> priceDiffConditionToAbort;
-	
+	/**
+	 * 意图初始价
+	 */
 	private Double initialPrice;
 	
 	@Builder
@@ -100,7 +102,7 @@ public class TradeIntent implements TransactionAware, TickDataAware {
 	public synchronized void onTick(TickField tick) {
 		if(!StringUtils.equals(tick.getUnifiedSymbol(), contract.getUnifiedSymbol())) 
 			return;
-
+		
 		if(Objects.isNull(initialPrice)) {
 			initialPrice = tick.getLastPrice();
 		}
@@ -108,7 +110,8 @@ public class TradeIntent implements TransactionAware, TickDataAware {
 			double priceDiff = Math.abs(tick.getLastPrice() - initialPrice);
 			terminated = priceDiffConditionToAbort.test(priceDiff);
 			if(terminated) {
-				context.getLogger().info("{} {} 价差中止条件已经满足，当前价差为{}", tick.getActionDay(), tick.getActionTime(), priceDiff);
+				context.getLogger().info("{} {} 价差过大中止交易意图，当前价差为{}", tick.getActionDay(), tick.getActionTime(), priceDiff);
+				orderIdRef.ifPresent(context::cancelOrder);
 			}
 		}
 		if(hasTerminated()) {
@@ -117,9 +120,9 @@ public class TradeIntent implements TransactionAware, TickDataAware {
 		}
 		if(orderIdRef.isEmpty() && !context.getState().isOrdering()) {
 			orderIdRef = context.submitOrderReq(contract, operation, priceType, volume - accVol, price);
-		} else if (orderIdRef.isPresent() && context.isOrderWaitTimeout(orderIdRef.get(), timeout) && System.currentTimeMillis() - lastCancelReqTime > 3000) {
+		} else if (orderIdRef.isPresent() && context.isOrderWaitTimeout(orderIdRef.get(), timeout) && tick.getActionTimestamp() - lastCancelReqTime > 3000) {
 			context.cancelOrder(orderIdRef.get());
-			lastCancelReqTime = System.currentTimeMillis();
+			lastCancelReqTime = tick.getActionTimestamp();
 		}
 	}
 
@@ -143,12 +146,11 @@ public class TradeIntent implements TransactionAware, TickDataAware {
 	public boolean hasTerminated() {
 		return terminated || accVol == volume;
 	}
-
+	
 	@Override
 	public String toString() {
 		return String.format("TradeIntent [contract=%s, operation=%s, priceType=%s, price=%s, volume=%s, timeout=%s]", 
 				contract.getContractId(), operation, priceType, price, volume, timeout);
 	}
-	
 	
 }

@@ -13,39 +13,39 @@ public interface IDataServiceManager {
 
 	/**
 	 * 获取1分钟K线数据
-	 * @param unifiedSymbol
+	 * @param contract
 	 * @param startDate
 	 * @param endDate
 	 * @return
 	 */
-	List<BarField> getMinutelyData(String unifiedSymbol, LocalDate startDate, LocalDate endDate);
+	List<BarField> getMinutelyData(ContractField contract, LocalDate startDate, LocalDate endDate);
 	
 	/**
 	 * 获取15分钟K线数据
-	 * @param unifiedSymbol
+	 * @param contract
 	 * @param startDate
 	 * @param endDate
 	 * @return
 	 */
-	List<BarField> getQuarterlyData(String unifiedSymbol, LocalDate startDate, LocalDate endDate);
+	List<BarField> getQuarterlyData(ContractField contract, LocalDate startDate, LocalDate endDate);
 	
 	/**
 	 * 获取1小时K线数据
-	 * @param unifiedSymbol
+	 * @param contract
 	 * @param startDate
 	 * @param endDate
 	 * @return
 	 */
-	List<BarField> getHourlyData(String unifiedSymbol, LocalDate startDate, LocalDate endDate);
+	List<BarField> getHourlyData(ContractField contract, LocalDate startDate, LocalDate endDate);
 	
 	/**
 	 * 获取日K线数据
-	 * @param unifiedSymbol
+	 * @param contract
 	 * @param startDate
 	 * @param endDate
 	 * @return
 	 */
-	List<BarField> getDailyData(String unifiedSymbol, LocalDate startDate, LocalDate endDate);
+	List<BarField> getDailyData(ContractField contract, LocalDate startDate, LocalDate endDate);
 	
 	/**
 	 * 获取查询范围内的节假日（包括周末）

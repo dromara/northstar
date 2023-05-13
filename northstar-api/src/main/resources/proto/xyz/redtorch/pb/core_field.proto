@@ -44,6 +44,7 @@ message ContractField {
 	string gatewayId = 27;  // 网关
 	double commissionFee = 28;  // 手续费
 	double commissionRate = 29; // 手续费率
+	string channelType = 30;	// 渠道来源
 }
 
 // 账户
@@ -201,6 +202,7 @@ message TickField {
 	repeated double askPrice = 34;  // 卖价
 	repeated fixed32 bidVolume = 35;  // 买量
 	repeated fixed32 askVolume = 36;  // 卖量
+	string channelType = 37;	// 渠道来源
 }
 
 // Bar
@@ -226,6 +228,7 @@ message BarField {
 	double preOpenInterest = 19;// 昨持仓
 	double preClosePrice = 20;  // 前收盘价
 	double preSettlePrice = 21;  // 昨结算价
+	string channelType = 22;	// 渠道来源
 }
 
 // 通用请求

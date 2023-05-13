@@ -167,7 +167,7 @@ public class OkxMarketGatewayAdapter implements MarketGateway {
                             .addAllAskVolume(List.of(0))
                             .addAllBidPrice(List.of(0D))
                             .addAllBidVolume(List.of(0))
-                            .setUnifiedSymbol(contractMgr.getContract("OKX", "BTC").contractField().getUnifiedSymbol()));
+                            .setUnifiedSymbol(contractMgr.getContract(ChannelType.OKX, "BTC").contractField().getUnifiedSymbol()));
                     if (dj.containsKey(ASK_P)) tickBuilderMap.get(symbol).setAskPrice(0, dj.getDoubleValue(ASK_P));
                     if (dj.containsKey(BID_P)) tickBuilderMap.get(symbol).setBidPrice(0, dj.getDoubleValue(BID_P));
                     if (dj.containsKey(ASK_V)) tickBuilderMap.get(symbol).setAskVolume(0, dj.getIntValue(ASK_V));

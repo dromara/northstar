@@ -13,6 +13,7 @@ import java.util.Objects;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
+import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.gateway.IContractManager;
 
@@ -126,7 +127,7 @@ public class OrderTradeQueryProxy {
 		};
 		
 		String symbol = json.getString("symbol");
-		ContractField contract = contractMgr.getContract("TIGER", symbol).contractField();
+		ContractField contract = contractMgr.getContract(ChannelType.TIGER, symbol).contractField();
 		String orderMsg = json.getString("remark");
 		if(orderStatus == OrderStatusEnum.OS_Rejected && !orderIds.containsKey(id)) {
 			if(StringUtils.isEmpty(orderMsg)) {
@@ -208,7 +209,7 @@ public class OrderTradeQueryProxy {
 		for(int i=0; i<data.size(); i++) {
 			JSONObject json = data.getJSONObject(i);
 			String symbol = json.getString("symbol");
-			ContractField contract = contractMgr.getContract("TIGER", symbol).contractField();
+			ContractField contract = contractMgr.getContract(ChannelType.TIGER, symbol).contractField();
 			Long tradeId = json.getLong("id");
 			Long tradeTime = json.getLongValue("transactionTime");
 			if(tradeIds.contains(tradeId) || expired(tradeTime)) {
@@ -239,7 +240,7 @@ public class OrderTradeQueryProxy {
 					.setTradeDate(json.getString("transactedAt").split(" ")[0])
 					.setTradeTime(json.getString("transactedAt").split(" ")[1])
 					.setTradeTimestamp(tradeTime)
-					.setContract(contractMgr.getContract("TIGER", symbol).contractField())
+					.setContract(contractMgr.getContract(ChannelType.TIGER, symbol).contractField())
 					.build();
 			resultList.add(trade);
 		}

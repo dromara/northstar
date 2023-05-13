@@ -7,6 +7,7 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 import org.dromara.northstar.account.AccountManager;
+import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.constant.ConnectionState;
 import org.dromara.northstar.common.event.NorthstarEvent;
 import org.dromara.northstar.common.exception.NoSuchElementException;
@@ -40,7 +41,8 @@ public class TradeModule implements IModule {
 	
 	private IModuleContext ctx;
 	
-	private Set<String> unifiedSymbolSet = new HashSet<>();
+	/* unifiedSymbol -> channelType */
+	private Map<String, ChannelType> symbolChannelMap = new HashMap<>();
 	
 	private Set<String> accountIdSet = new HashSet<>();
 	
@@ -54,14 +56,14 @@ public class TradeModule implements IModule {
 		this.ctx = ctx;
 		this.contractMgr = contractMgr;
 		this.md = moduleDescription;
-		moduleDescription.getModuleAccountSettingsDescription().forEach(mad -> {
+		moduleDescription.getModuleAccountSettingsDescription().forEach(mad -> 
 			mad.getBindedContracts().forEach(contract -> {
-				unifiedSymbolSet.add(contract.getUnifiedSymbol());
+				symbolChannelMap.put(contract.getUnifiedSymbol(), contract.getChannelType());
 				accountIdSet.add(mad.getAccountGatewayId());
 				Contract c = contractMgr.getContract(Identifier.of(contract.getValue()));
 				contractAccountMap.put(c, accountMgr.get(Identifier.of(mad.getAccountGatewayId())));
-			});
-		});
+			})
+		);
 		ctx.setModule(this);
 	}
 	
@@ -92,9 +94,9 @@ public class TradeModule implements IModule {
 	@Override
 	public synchronized void onEvent(NorthstarEvent event) {
 		Object data = event.getData();
-		if(data instanceof TickField tick && unifiedSymbolSet.contains(tick.getUnifiedSymbol())) {
+		if(data instanceof TickField tick && symbolChannelMap.containsKey(tick.getUnifiedSymbol()) && symbolChannelMap.get(tick.getUnifiedSymbol()).toString().equals(tick.getChannelType())) {
 			ctx.onTick(tick);
-		} else if (data instanceof BarField bar && unifiedSymbolSet.contains(bar.getUnifiedSymbol())) {
+		} else if (data instanceof BarField bar && symbolChannelMap.containsKey(bar.getUnifiedSymbol()) && symbolChannelMap.get(bar.getUnifiedSymbol()).toString().equals(bar.getChannelType())) {
 			ctx.onBar(bar);
 		} else if (data instanceof OrderField order && accountIdSet.contains(order.getGatewayId())) {
 			ctx.onOrder(order);

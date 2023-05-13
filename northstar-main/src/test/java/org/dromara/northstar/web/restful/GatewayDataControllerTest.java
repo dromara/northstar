@@ -1,5 +1,6 @@
 package org.dromara.northstar.web.restful;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -51,7 +52,7 @@ class GatewayDataControllerTest {
 	@BeforeEach
 	public void setUp() throws Exception {
 		Contract contract = mock(Contract.class);
-		when(contractMgr.getContract(anyString(), anyString())).thenReturn(contract);
+		when(contractMgr.getContract(any(), anyString())).thenReturn(contract);
 		when(contract.contractField()).thenReturn(ContractField.newBuilder().setUnifiedSymbol("rb2205@SHFE@FUTURES").build());
 		
 		when(gatewayRepo.findById(anyString())).thenReturn(GatewayDescription.builder().channelType(ChannelType.CTP).build());

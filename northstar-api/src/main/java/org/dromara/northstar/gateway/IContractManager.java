@@ -16,11 +16,11 @@ public interface IContractManager {
 	
 	/**
 	 * 根据网关与编码获取合约
-	 * @param gatewayId
+	 * @param channelType
 	 * @param symbol		可以是symbol或unifiedSymbol 
 	 * @return
 	 */
-	Contract getContract(String gatewayId, String symbol);
+	Contract getContract(ChannelType channelType, String symbol);
 	
 	/**
 	 * 根据网关ID获取合约

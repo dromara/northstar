@@ -20,7 +20,6 @@ import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.common.utils.LocalEnvUtils;
 import org.dromara.northstar.common.utils.MarketDateTimeUtil;
-import org.dromara.northstar.gateway.IContractManager;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -62,16 +61,13 @@ public class DataServiceManager implements IDataServiceManager {
 	
 	private RestTemplate restTemplate;
 	
-	private IContractManager contractMgr;
-	
 	private EnumMap<ExchangeEnum, ChannelType> exchangeChannelType = new EnumMap<>(ExchangeEnum.class);
 	
-	public DataServiceManager(String baseUrl, String secret, RestTemplate restTemplate, MarketDateTimeUtil dtUtil, IContractManager contractMgr) {
+	public DataServiceManager(String baseUrl, String secret, RestTemplate restTemplate, MarketDateTimeUtil dtUtil) {
 		this.baseUrl =  baseUrl;
 		this.userToken = secret;
 		this.dtUtil = dtUtil;
 		this.restTemplate = restTemplate;
-		this.contractMgr = contractMgr;
 		
 		exchangeChannelType.put(ExchangeEnum.SHFE, ChannelType.CTP);
 		exchangeChannelType.put(ExchangeEnum.CFFEX, ChannelType.CTP);
@@ -109,9 +105,9 @@ public class DataServiceManager implements IDataServiceManager {
 	 * @return
 	 */
 	@Override
-	public List<BarField> getMinutelyData(String unifiedSymbol, LocalDate startDate, LocalDate endDate) {
-		log.debug("从数据服务加载历史行情1分钟数据：{}，{} -> {}", unifiedSymbol, startDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), endDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
-		return commonGetData("min", unifiedSymbol, startDate, endDate);
+	public List<BarField> getMinutelyData(ContractField contract, LocalDate startDate, LocalDate endDate) {
+		log.debug("从数据服务加载历史行情1分钟数据：{}，{} -> {}", contract.getUnifiedSymbol(), startDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), endDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
+		return commonGetData("min", contract, startDate, endDate);
 	}
 	
 	/**
@@ -122,9 +118,9 @@ public class DataServiceManager implements IDataServiceManager {
 	 * @return
 	 */
 	@Override
-	public List<BarField> getQuarterlyData(String unifiedSymbol, LocalDate startDate, LocalDate endDate) {
-		log.debug("从数据服务加载历史行情15分钟数据：{}，{} -> {}", unifiedSymbol, startDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), endDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
-		return commonGetData("quarter", unifiedSymbol, startDate, endDate);
+	public List<BarField> getQuarterlyData(ContractField contract, LocalDate startDate, LocalDate endDate) {
+		log.debug("从数据服务加载历史行情15分钟数据：{}，{} -> {}", contract.getUnifiedSymbol(), startDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), endDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
+		return commonGetData("quarter", contract, startDate, endDate);
 	}
 	
 	/**
@@ -135,9 +131,9 @@ public class DataServiceManager implements IDataServiceManager {
 	 * @return
 	 */
 	@Override
-	public List<BarField> getHourlyData(String unifiedSymbol, LocalDate startDate, LocalDate endDate) {
-		log.debug("从数据服务加载历史行情1小时数据：{}，{} -> {}", unifiedSymbol, startDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), endDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
-		return commonGetData("hour", unifiedSymbol, startDate, endDate);
+	public List<BarField> getHourlyData(ContractField contract, LocalDate startDate, LocalDate endDate) {
+		log.debug("从数据服务加载历史行情1小时数据：{}，{} -> {}", contract.getUnifiedSymbol(), startDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), endDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
+		return commonGetData("hour", contract, startDate, endDate);
 	}
 	
 	/**
@@ -148,9 +144,9 @@ public class DataServiceManager implements IDataServiceManager {
 	 * @return
 	 */
 	@Override
-	public List<BarField> getDailyData(String unifiedSymbol, LocalDate startDate, LocalDate endDate) {
-		log.debug("从数据服务加载历史行情日线数据：{}，{} -> {}", unifiedSymbol, startDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), endDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
-		return commonGetData("day", unifiedSymbol, startDate, endDate);
+	public List<BarField> getDailyData(ContractField contract, LocalDate startDate, LocalDate endDate) {
+		log.debug("从数据服务加载历史行情日线数据：{}，{} -> {}", contract.getUnifiedSymbol(), startDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), endDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
+		return commonGetData("day", contract, startDate, endDate);
 	}
 	
 	@Override
@@ -203,6 +199,7 @@ public class DataServiceManager implements IDataServiceManager {
 						.setContractId(unifiedSymbol + "@" + channelName(exchange))
 						.setFullName(name)
 						.setName(name)
+						.setChannelType(ChannelType.PLAYBACK.toString())
 						.setGatewayId(channelName(exchange))
 						.setThirdPartyId(symbol + "@" + channelName(exchange))
 						.setLastTradeDateOrContractMonth(getValue("delist_date", fieldIndexMap, item, ""))
@@ -212,7 +209,26 @@ public class DataServiceManager implements IDataServiceManager {
 						.setMultiplier(Double.parseDouble(getValue("per_unit", fieldIndexMap, item, "1")))
 						.setPriceTick(priceTick)
 						.build();
+				ContractField playbackContract = ContractField.newBuilder()
+						.setUnifiedSymbol(unifiedSymbol)
+						.setSymbol(symbol)
+						.setExchange(exchange)
+						.setCurrency(CurrencyEnum.CNY)
+						.setContractId(unifiedSymbol + "@" + ChannelType.PLAYBACK.toString())
+						.setFullName(name)
+						.setName(name)
+						.setChannelType(ChannelType.PLAYBACK.toString())
+						.setGatewayId(ChannelType.PLAYBACK.toString())
+						.setThirdPartyId(symbol + "@" + ChannelType.PLAYBACK.toString())
+						.setLastTradeDateOrContractMonth(getValue("delist_date", fieldIndexMap, item, ""))
+						.setLongMarginRatio(marginRate)
+						.setShortMarginRatio(marginRate)
+						.setProductClass(productClass)
+						.setMultiplier(Double.parseDouble(getValue("per_unit", fieldIndexMap, item, "1")))
+						.setPriceTick(priceTick)
+						.build();
 				resultList.add(contract);
+				resultList.add(playbackContract);
 			} catch(Exception e) {
 				log.warn("无效合约数据：{}", JSON.toJSONString(item));
 			}
@@ -252,10 +268,10 @@ public class DataServiceManager implements IDataServiceManager {
 		return execute(uri, DataSet.class).getBody();
 	}
 	
-	private List<BarField> commonGetData(String type, String unifiedSymbol, LocalDate startDate, LocalDate endDate){
-		URI uri = URI.create(String.format("%s/data/%s?unifiedSymbol=%s&startDate=%s&endDate=%s", baseUrl, type, unifiedSymbol, 
+	private List<BarField> commonGetData(String type, ContractField contract, LocalDate startDate, LocalDate endDate){
+		URI uri = URI.create(String.format("%s/data/%s?unifiedSymbol=%s&startDate=%s&endDate=%s", baseUrl, type, contract.getUnifiedSymbol(), 
 				startDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), endDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER)));
-		return convertDataSet(execute(uri, DataSet.class).getBody());
+		return convertDataSet(execute(uri, DataSet.class).getBody(), contract);
 	}
 	
 	private <T> ResponseEntity<T> execute(URI uri, Class<T> clz) {
@@ -279,7 +295,7 @@ public class DataServiceManager implements IDataServiceManager {
 		}
 	}
 	
-	private List<BarField> convertDataSet(DataSet dataSet) {
+	private List<BarField> convertDataSet(DataSet dataSet, ContractField contract) {
 		if(Objects.isNull(dataSet.getFields())) {
 			log.warn("数据服务查询不到相关数据");
 			return Collections.emptyList();
@@ -314,18 +330,14 @@ public class DataServiceManager implements IDataServiceManager {
 			}
 			
 			try {				
-				String unifiedSymbol = getValue("ns_code", fieldIndexMap, item, "");
-				ChannelType channelType = getExchange(unifiedSymbol);
-				ContractField contract = contractMgr.getContract(channelType.name(), unifiedSymbol).contractField();
-				
 				double openInterest = 0;
 				double openInterestDelta = 0;
-				if(unifiedSymbol.endsWith(ProductClassEnum.FUTURES.toString())) {
+				if(contract.getProductClass() == ProductClassEnum.FUTURES) {
 					openInterest = Double.parseDouble(getValue("oi", fieldIndexMap, item, "0"));
 					openInterestDelta = Double.parseDouble(getValue("oi_chg", fieldIndexMap, item, "0"));
 				}
 				resultList.addFirst(BarField.newBuilder()
-						.setUnifiedSymbol(unifiedSymbol)
+						.setUnifiedSymbol(contract.getUnifiedSymbol())
 						.setTradingDay(tradingDay)
 						.setActionDay(actionDay)
 						.setActionTime(actionTime)
@@ -335,6 +347,7 @@ public class DataServiceManager implements IDataServiceManager {
 						.setLowPrice(normalizeValue(Double.parseDouble(getValue("low", fieldIndexMap, item, "0")), contract.getPriceTick()))
 						.setOpenPrice(normalizeValue(Double.parseDouble(getValue("open", fieldIndexMap, item, "0")), contract.getPriceTick()))
 						.setGatewayId(contract.getGatewayId())
+						.setChannelType(contract.getChannelType())
 						.setOpenInterestDelta(openInterestDelta)
 						.setOpenInterest(openInterest)
 						.setVolume((long) Double.parseDouble(getValue("vol", fieldIndexMap, item, "0")))
@@ -350,11 +363,6 @@ public class DataServiceManager implements IDataServiceManager {
 		}
 		
 		return resultList;
-	}
-	
-	private ChannelType getExchange(String unifiedSymbol) {
-		ExchangeEnum exchange = ExchangeEnum.valueOf(unifiedSymbol.replaceAll("[^@]+@([^@]+)@[^@]+", "$1"));
-		return exchangeChannelType.get(exchange);
 	}
 
 	private double normalizeValue(double val, double priceTick) {

@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import org.dromara.northstar.gateway.common.domain.contract.IndexContract;
 
 import lombok.extern.slf4j.Slf4j;
+import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.TickField;
 
 @Slf4j
@@ -35,8 +36,10 @@ public class IndexTicker {
 		this.idxContract = idxContract;
 		this.memberContracts = idxContract.memberContracts().stream().map(c -> c.contractField().getUnifiedSymbol()).collect(Collectors.toSet());
 		this.onTickCallback = onTickCallback;
-		tickBuilder.setUnifiedSymbol(idxContract.contractField().getUnifiedSymbol());
-		tickBuilder.setGatewayId(idxContract.contractField().getGatewayId());
+		ContractField cf = idxContract.contractField();
+		tickBuilder.setUnifiedSymbol(cf.getUnifiedSymbol());
+		tickBuilder.setGatewayId(cf.getGatewayId());
+		tickBuilder.setChannelType(cf.getChannelType());
 		tickBuilder.addAllAskPrice(Arrays.asList(0D,0D,0D,0D,0D));
 		tickBuilder.addAllBidPrice(Arrays.asList(0D,0D,0D,0D,0D));
 		tickBuilder.addAllAskVolume(Arrays.asList(0,0,0,0,0));

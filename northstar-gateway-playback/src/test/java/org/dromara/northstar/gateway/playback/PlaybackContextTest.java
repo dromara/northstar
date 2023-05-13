@@ -59,7 +59,7 @@ class PlaybackContextTest {
 		when(loader.loadMinuteData(eq(ldt), eq(contract))).thenReturn(List.of(bar));
 		when(loader.loadTradeDayDataRaw(any(LocalDate.class), any(LocalDate.class), eq(contract))).thenReturn(List.of(bar));
 		when(contractMgr.getContract(any(Identifier.class))).thenReturn(c);
-		when(contractMgr.getContract(anyString(), anyString())).thenReturn(c);
+		when(contractMgr.getContract(any(), anyString())).thenReturn(c);
 		when(c.contractField()).thenReturn(contract);
 		
 		settings.setPreStartDate("20220629");

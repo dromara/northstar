@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
 
+import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.constant.DateTimeConstant;
 
 import xyz.redtorch.pb.CoreField.ContractField;
@@ -25,6 +26,7 @@ public class InstrumentHolder {
 		.setSettlePrice(InstrumentBasePrice.getBasePrice(contract))
 		.setPreSettlePrice(InstrumentBasePrice.getBasePrice(contract))
 		.setGatewayId(contract.getGatewayId())
+		.setChannelType(ChannelType.SIM.toString())
 		.addAllAskPrice(List.of(0D, 0D, 0D, 0D, 0D))
 		.addAllBidPrice(List.of(0D, 0D, 0D, 0D, 0D))
 		.addAllAskVolume(List.of(0, 0, 0, 0, 0))

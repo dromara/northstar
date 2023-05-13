@@ -29,7 +29,6 @@ import org.dromara.northstar.data.jdbc.PlaybackRuntimeRepoAdapter;
 import org.dromara.northstar.data.jdbc.PlaybackRuntimeRepository;
 import org.dromara.northstar.data.jdbc.SimAccountRepoAdapter;
 import org.dromara.northstar.data.jdbc.SimAccountRepository;
-import org.dromara.northstar.gateway.IContractManager;
 import org.dromara.northstar.gateway.common.utils.MarketDataRepoFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -49,9 +48,9 @@ public class RepositoryConfig {
 
     @Bean
     @Primary
-    DataServiceManager dataServiceManager(RestTemplate restTemplate, IContractManager contractMgr) {
+    DataServiceManager dataServiceManager(RestTemplate restTemplate) {
         String nsdsSecret = Optional.ofNullable(System.getenv(Constants.NS_DS_SECRET)).orElse("");
-        return new DataServiceManager(baseUrl, nsdsSecret, restTemplate, new CtpDateTimeUtil(), contractMgr);
+        return new DataServiceManager(baseUrl, nsdsSecret, restTemplate, new CtpDateTimeUtil());
     }
     
 //    @Bean

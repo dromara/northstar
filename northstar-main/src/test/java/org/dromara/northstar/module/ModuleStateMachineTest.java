@@ -57,14 +57,14 @@ class ModuleStateMachineTest {
 	@Test
 	void shouldGetPlacingOrder() {
 		ModuleStateMachine msm = new ModuleStateMachine(ctx);
-		msm.onSubmitReq(orderReq);
+		msm.onSubmitReq();
 		assertThat(msm.getState()).isEqualTo(ModuleState.PLACING_ORDER);
 	}
 	
 	@Test
 	void shouldGetPendingOrder() {
 		ModuleStateMachine msm = new ModuleStateMachine(ctx);
-		msm.onSubmitReq(orderReq);
+		msm.onSubmitReq();
 		msm.onOrder(order);
 		msm.onOrder(order2);
 		assertThat(msm.getState()).isEqualTo(ModuleState.PENDING_ORDER);
@@ -75,7 +75,7 @@ class ModuleStateMachineTest {
 		when(macc.getNonclosedTrades()).thenReturn(List.of(trade));
 		ModuleStateMachine msm = new ModuleStateMachine(ctx);
 		msm.setModuleAccount(macc);
-		msm.onSubmitReq(orderReq);
+		msm.onSubmitReq();
 		msm.onOrder(order);
 		msm.onTrade(trade);
 		assertThat(msm.getState()).isEqualTo(ModuleState.HOLDING_LONG);
@@ -86,7 +86,7 @@ class ModuleStateMachineTest {
 		when(macc.getNonclosedTrades()).thenReturn(List.of(trade2));
 		ModuleStateMachine msm = new ModuleStateMachine(ctx);
 		msm.setModuleAccount(macc);
-		msm.onSubmitReq(orderReq2);
+		msm.onSubmitReq();
 		msm.onOrder(order4);
 		msm.onTrade(trade2);
 		assertThat(msm.getState()).isEqualTo(ModuleState.HOLDING_SHORT);
@@ -97,13 +97,13 @@ class ModuleStateMachineTest {
 		when(macc.getNonclosedTrades()).thenReturn(List.of(trade));
 		ModuleStateMachine msm = new ModuleStateMachine(ctx);
 		msm.setModuleAccount(macc);
-		msm.onSubmitReq(orderReq);
+		msm.onSubmitReq();
 		msm.onOrder(order);
 		msm.onTrade(trade);
 		assertThat(msm.getState()).isEqualTo(ModuleState.HOLDING_LONG);
 		
 		when(macc.getNonclosedTrades()).thenReturn(List.of(trade, trade2));
-		msm.onSubmitReq(orderReq2);
+		msm.onSubmitReq();
 		msm.onOrder(order4);
 		msm.onTrade(trade2);
 		assertThat(msm.getState()).isEqualTo(ModuleState.EMPTY_HEDGE);
@@ -122,7 +122,7 @@ class ModuleStateMachineTest {
 		when(macc.getNonclosedTrades()).thenReturn(List.of(trade), List.of(trade, trade3));
 		ModuleStateMachine msm = new ModuleStateMachine(ctx);
 		msm.setModuleAccount(macc);
-		msm.onSubmitReq(orderReq);
+		msm.onSubmitReq();
 		msm.onOrder(order);
 		msm.onTrade(trade);
 		msm.onTrade(trade3);
@@ -132,9 +132,9 @@ class ModuleStateMachineTest {
 	@Test
 	void shouldGetCancelling() {
 		ModuleStateMachine msm = new ModuleStateMachine(ctx);
-		msm.onSubmitReq(orderReq);
+		msm.onSubmitReq();
 		msm.onOrder(order);
-		msm.onCancelReq(cancelReq);
+		msm.onCancelReq();
 		assertThat(msm.getState()).isEqualTo(ModuleState.RETRIEVING_FOR_CANCEL);
 		msm.onOrder(order3);
 		assertThat(msm.getState()).isEqualTo(ModuleState.EMPTY);

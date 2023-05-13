@@ -1,11 +1,11 @@
 package org.dromara.northstar.module;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -92,7 +92,7 @@ public class ModuleContext implements IModuleContext{
 	
 	protected IModuleRepository moduleRepo;
 	
-	protected IModuleAccount moduleAccount;
+	protected ModuleAccount moduleAccount;
 	
 	/* originOrderId -> orderReq */
 	private Map<String, SubmitOrderReqField> orderReqMap = new HashMap<>();
@@ -171,8 +171,7 @@ public class ModuleContext implements IModuleContext{
 		tradeIntent.setContext(this);
 		TickField tick = latestTickMap.get(tradeIntent.getContract().getUnifiedSymbol());
 		Assert.notNull(tick, "没有行情时不应该发送订单");
-		Assert.isTrue(tradeIntent.getVolume() > 0, "下单手数应该为正数");
-		tradeIntent.onTick(tick);
+        tradeIntent.onTick(tick);
 	}
 
 	@Override
@@ -236,8 +235,10 @@ public class ModuleContext implements IModuleContext{
 	public synchronized void onTick(TickField tick) {
 		getLogger().trace("TICK信息: {} {} {} {}，最新价: {}", 
 				tick.getUnifiedSymbol(), tick.getActionDay(), tick.getActionTime(), tick.getActionTimestamp(), tick.getLastPrice());
-		if(Objects.nonNull(tradeIntent) && !tradeIntent.hasTerminated()) {
+		if(Objects.nonNull(tradeIntent)) {
 			tradeIntent.onTick(tick);
+			if(tradeIntent.hasTerminated()) 
+				tradeIntent = null;
 		}
 		if(!StringUtils.equals(tradingDay, tick.getTradingDay())) {
 			tradingDay = tick.getTradingDay();
@@ -323,9 +324,8 @@ public class ModuleContext implements IModuleContext{
 		
 		if(Objects.nonNull(tradeIntent)) {
 			tradeIntent.onTrade(trade);
-			if(tradeIntent.hasTerminated()) {
+			if(tradeIntent.hasTerminated()) 
 				tradeIntent = null;
-			}
 		}
 	}
 
@@ -485,11 +485,9 @@ public class ModuleContext implements IModuleContext{
 				.build()));
 	}
 	
-	private DateFormat fmt = new SimpleDateFormat();
-	
 	private String submitOrderReq(SubmitOrderReqField orderReq) {
 		if(getLogger().isInfoEnabled()) {			
-			getLogger().info("发单：{}，{}", orderReq.getOriginOrderId(), fmt.format(new Date(orderReq.getActionTimestamp())));
+			getLogger().info("发单：{}，{}", orderReq.getOriginOrderId(), LocalDateTime.ofInstant(Instant.ofEpochMilli(orderReq.getActionTimestamp()), ZoneId.systemDefault()));
 		}
 		try {
 			moduleAccount.onSubmitOrder(orderReq);
@@ -527,7 +525,7 @@ public class ModuleContext implements IModuleContext{
 				.setGatewayId(contract.getGatewayId())
 				.setOriginOrderId(originOrderId)
 				.build();
-		moduleAccount.onCancelOrder(cancelReq);
+		moduleAccount.onCancelOrder();
 		module.getAccount(c).cancelOrder(cancelReq);
 	}
 

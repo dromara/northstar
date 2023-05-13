@@ -1,7 +1,9 @@
 package org.dromara.northstar.web.restful;
 
-import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.dromara.northstar.common.constant.ChannelType;
@@ -45,6 +47,7 @@ public class ContractController {
 				.map(c -> ContractSimpleInfo.builder()
 						.name(c.name())
 						.unifiedSymbol(c.contractField().getUnifiedSymbol())
+						.channelType(c.channelType())
 						.value(c.identifier().value())
 						.build())
 				.toList(); 
@@ -59,7 +62,7 @@ public class ContractController {
 		}
 		GatewayDescription gd = gatewayRepo.findById(gd0.getBindedMktGatewayId());
 		List<ContractSimpleInfo> subscribedContracts = gd.getSubscribedContracts();
-		List<ContractSimpleInfo> actualSubContracts = new ArrayList<>(subscribedContracts);
+		Set<ContractSimpleInfo> actualSubContracts = new HashSet<>(subscribedContracts);
 		subscribedContracts.forEach(csi -> {
 			Contract contract = contractMgr.getContract(Identifier.of(csi.getValue()));
 			if(contract instanceof IndexContract idxContract) {
@@ -67,6 +70,7 @@ public class ContractController {
 					.map(c -> ContractSimpleInfo.builder()
 							.name(c.name())
 							.unifiedSymbol(c.contractField().getUnifiedSymbol())
+							.channelType(c.channelType())
 							.value(c.identifier().value())
 							.build())
 					.toList());
@@ -84,7 +88,7 @@ public class ContractController {
 		return new ResultBean<>(filterAndSort(actualSubContracts, query));
 	}
 	
-	private List<ContractSimpleInfo> filterAndSort(List<ContractSimpleInfo> list, String query){
+	private List<ContractSimpleInfo> filterAndSort(Collection<ContractSimpleInfo> list, String query){
 		return list.stream()
 				.filter(c -> StringUtils.isBlank(query) || c.getName().contains(query) || c.getValue().contains(query))
 				.sorted((a, b) -> a.getValue().compareTo(b.getValue()))

@@ -8,8 +8,6 @@ import static org.mockito.Mockito.when;
 
 import org.dromara.northstar.gateway.Contract;
 import org.dromara.northstar.gateway.IContractManager;
-import org.dromara.northstar.gateway.tiger.OrderTradeQueryProxy;
-import org.dromara.northstar.gateway.tiger.TigerHttpClient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -34,7 +32,7 @@ class OrderTradeQueryProxyTest {
 		IContractManager contractMgr = mock(IContractManager.class);
 		Contract contract = mock(Contract.class);
 		when(contract.contractField()).thenReturn(factory.makeContract("rb2205"));
-		when(contractMgr.getContract(anyString(), anyString())).thenReturn(contract);
+		when(contractMgr.getContract(any(), anyString())).thenReturn(contract);
 		proxy = new OrderTradeQueryProxy(client, contractMgr, "testGateway", "testAccount");
 	}
 

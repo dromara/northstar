@@ -103,6 +103,7 @@ public class SimContract implements Instrument{
 				.setMinLimitOrderVolume(minLimitOrderVolume)
 				.setCombinationType(Optional.ofNullable(combinationType).orElse(CombinationTypeEnum.COMBT_Unknown))
 				.setGatewayId(Optional.ofNullable(gatewayId).orElse(""))
+				.setChannelType(ChannelType.SIM.toString())
 				.setCommissionFee(contractDef.getCommissionFee())
 				.setCommissionRate(contractDef.getCommissionRate())
 				.build();

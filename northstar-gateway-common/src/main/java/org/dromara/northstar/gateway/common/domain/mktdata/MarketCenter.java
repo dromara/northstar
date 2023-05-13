@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -50,8 +49,7 @@ public class MarketCenter implements IMarketCenter{
 	/* 成份合约 -> 指数合约 */
 	private final ConcurrentMap<Contract, IndexContract> idxContractMap = new ConcurrentHashMap<>(INIT_SIZE);
 
-	private final Table<String, String, Contract> gatewaySymbolContractTbl = HashBasedTable.create();
-	private final Table<String, String, Contract> gatewayUnifiedSymbolContractTbl = HashBasedTable.create();
+	private final Table<ChannelType, String, Contract> channelSymbolContractTbl = HashBasedTable.create();
 
 	private final Table<ExchangeEnum, ProductClassEnum, List<ContractDefinition>> contractDefTbl = HashBasedTable.create();
 	
@@ -93,8 +91,8 @@ public class MarketCenter implements IMarketCenter{
 					channelDefContractGroups.put(ins.channelType(), def, new ArrayList<>());
 				}
 				channelDefContractGroups.get(ins.channelType(), def).add(contract);
-				gatewaySymbolContractTbl.put(contract.gatewayId(), contract.contractField().getSymbol(), contract);
-				gatewaySymbolContractTbl.put(contract.gatewayId(), contract.contractField().getUnifiedSymbol(), contract);
+				channelSymbolContractTbl.put(contract.channelType(), contract.contractField().getSymbol(), contract);
+				channelSymbolContractTbl.put(contract.channelType(), contract.contractField().getUnifiedSymbol(), contract);
 			}
 		}
 
@@ -159,15 +157,15 @@ public class MarketCenter implements IMarketCenter{
 			for(Contract memberContract : c.memberContracts()) {
 				idxContractMap.put(memberContract, c);
 			}
-			gatewaySymbolContractTbl.put(c.gatewayId(), c.contractField().getSymbol(), c);
-			gatewayUnifiedSymbolContractTbl.put(c.gatewayId(), c.contractField().getUnifiedSymbol(), c);
+			channelSymbolContractTbl.put(c.channelType(), c.contractField().getSymbol(), c);
+			channelSymbolContractTbl.put(c.channelType(), c.contractField().getUnifiedSymbol(), c);
 			
 			// CTP主力合约生成 
 			if(c.channelType() == ChannelType.CTP) {
 				PrimaryContract pc = new PrimaryContract(c);
 				contractMap.put(pc.identifier(), pc);
-				gatewaySymbolContractTbl.put(pc.gatewayId(), pc.contractField().getSymbol(), pc);
-				gatewayUnifiedSymbolContractTbl.put(pc.gatewayId(), pc.contractField().getUnifiedSymbol(), pc);
+				channelSymbolContractTbl.put(pc.channelType(), pc.contractField().getSymbol(), pc);
+				channelSymbolContractTbl.put(pc.channelType(), pc.contractField().getUnifiedSymbol(), pc);
 			}
 		}
 	}
@@ -187,13 +185,11 @@ public class MarketCenter implements IMarketCenter{
 	 * 查询合约
 	 */
 	@Override
-	public Contract getContract(String gatewayId, String code) {
-		Contract c1 = gatewaySymbolContractTbl.get(gatewayId, code);
-		Contract c2 = gatewayUnifiedSymbolContractTbl.get(gatewayId, code);
-		if(Objects.isNull(c1) && Objects.isNull(c2)) {
-			throw new NoSuchElementException(String.format("找不到合约：%s -> %s", gatewayId, code));
+	public Contract getContract(ChannelType channelType, String code) {
+		if(!channelSymbolContractTbl.contains(channelType, code)) {
+			throw new NoSuchElementException(String.format("找不到合约：%s -> %s", channelType, code));
 		}
-		return Optional.ofNullable(c1).orElse(c2);
+		return channelSymbolContractTbl.get(channelType, code);
 	}
 	
 	/**
@@ -227,7 +223,7 @@ public class MarketCenter implements IMarketCenter{
 	@Override
 	public void onTick(TickField tick) {
 		// 更新普通合约
-		Contract contract = getContract(tick.getGatewayId(), tick.getUnifiedSymbol());
+		Contract contract = getContract(ChannelType.valueOf(tick.getChannelType()), tick.getUnifiedSymbol());
 		if(contract instanceof TickDataAware tdAware) {
 			tdAware.onTick(tick);
 		}

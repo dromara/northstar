@@ -2,6 +2,8 @@ package org.dromara.northstar.support.job;
 
 import java.time.LocalDateTime;
 
+import javax.transaction.Transactional;
+
 import org.dromara.northstar.account.GatewayManager;
 import org.dromara.northstar.common.constant.ConnectionState;
 import org.dromara.northstar.data.jdbc.MarketDataRepository;
@@ -88,6 +90,7 @@ public class AppScheduleTask {
 	 * 移除过期行情数据
 	 */
 	@Scheduled(cron="0 30 20 ? * 1-5")
+	@Transactional
 	public void removeExpiredData() {
 		mdRepo.deleteByExpiredAtBefore(System.currentTimeMillis());
 		log.debug("移除过期行情数据");

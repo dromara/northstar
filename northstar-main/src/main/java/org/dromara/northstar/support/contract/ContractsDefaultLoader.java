@@ -52,6 +52,7 @@ public class ContractsDefaultLoader implements CommandLineRunner{
 				log.info("预加载 [{}] 交易所合约信息", exchange);
 			});
 		mktCenter.loadContractGroup(ChannelType.CTP);
+		mktCenter.loadContractGroup(ChannelType.PLAYBACK);
 		// 加载币圈OKX市场合约
 //		List.of(CoreEnum.ExchangeEnum.OKX)
 //				.parallelStream()
