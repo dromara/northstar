@@ -47,6 +47,7 @@ public class ContractController {
 				.map(c -> ContractSimpleInfo.builder()
 						.name(c.name())
 						.unifiedSymbol(c.contractField().getUnifiedSymbol())
+						.channelType(c.channelType())
 						.value(c.identifier().value())
 						.build())
 				.toList(); 
@@ -69,6 +70,7 @@ public class ContractController {
 					.map(c -> ContractSimpleInfo.builder()
 							.name(c.name())
 							.unifiedSymbol(c.contractField().getUnifiedSymbol())
+							.channelType(c.channelType())
 							.value(c.identifier().value())
 							.build())
 					.toList());

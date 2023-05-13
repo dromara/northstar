@@ -2,6 +2,8 @@ package org.dromara.northstar.common.model;
 
 import java.util.Objects;
 
+import org.dromara.northstar.common.constant.ChannelType;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -23,6 +25,10 @@ public class ContractSimpleInfo {
 	 * 合约代码
 	 */
 	private String unifiedSymbol;
+	/**
+	 * 渠道类型
+	 */
+	private ChannelType channelType;
 	/**
 	 * 合约ID
 	 */
