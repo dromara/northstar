@@ -15,6 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.constant.ConnectionState;
 import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.common.event.NorthstarEventType;
@@ -524,6 +525,7 @@ public class MdSpi extends CThostFtdcMdSpi {
 				tickBuilder.addAllBidPrice(bidPriceList);
 				tickBuilder.addAllBidVolume(bidVolumeList);
 				tickBuilder.setGatewayId(gatewayId);
+				tickBuilder.setChannelType(ChannelType.CTP.toString());
 
 				TickField tick = tickBuilder.build();
 				
