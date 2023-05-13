@@ -318,22 +318,7 @@ export default {
       if (query !== '') {
           this.loading = true;
             // 获取合约品种列表
-          if(this.form.channelType === 'PLAYBACK'){
-            const ctpListPromise = contractApi.getGatewayContracts('CTP', query)
-            const pbListPromise = contractApi.getGatewayContracts('PLAYBACK', query)
-            const okxListPromise = contractApi.getGatewayContracts('OKX', query)
-            Promise.all([ctpListPromise, pbListPromise, okxListPromise]).then(([ctpResult, pbResult, okxResult]) => {
-                 const result = [...ctpResult, ...pbResult, ...okxResult]
-                 if(result.length > 100){
-                     this.$message.warning('返回结果多于100条，请提供更精确的筛选条件')
-                     return
-                 }
-                 this.contractOptions = result
-            }).finally(() => {
-                 this.loading = false;
-            })
-          } else {
-            contractApi.getGatewayContracts(this.form.channelType, query).then(result => {
+          contractApi.getGatewayContracts(this.form.channelType, query).then(result => {
               if(result.length > 100){
                 this.$message.warning('返回结果多于100条，请提供更精确的筛选条件')
                 return 
@@ -342,8 +327,6 @@ export default {
             }).finally(() => {
               this.loading = false;
             })
-          }
-
         } else {
           this.contractOptions = [];
         }
