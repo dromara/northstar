@@ -7,9 +7,7 @@ import org.dromara.northstar.common.TransactionAware;
 import org.dromara.northstar.common.constant.ModuleState;
 
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
-import xyz.redtorch.pb.CoreField.CancelOrderReqField;
 import xyz.redtorch.pb.CoreField.PositionField;
-import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TradeField;
 
 /**
@@ -102,14 +100,4 @@ public interface IModuleAccount extends TickDataAware, TransactionAware {
 	 * @return
 	 */
 	ModuleState getModuleState();
-	/**
-	 * 响应下单
-	 * @param submitOrder
-	 */
-	void onSubmitOrder(SubmitOrderReqField submitOrder);
-	/**
-	 * 响应撤单
-	 * @param cancelOrder
-	 */
-	void onCancelOrder(CancelOrderReqField cancelOrder);
 }

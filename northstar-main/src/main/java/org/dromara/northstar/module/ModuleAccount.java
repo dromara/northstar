@@ -259,14 +259,13 @@ public class ModuleAccount implements IModuleAccount{
 		return getInitBalance(gatewayId) + getAccCloseProfit(gatewayId) - getAccCommission(gatewayId);
 	}
 	
-	@Override
 	public void onSubmitOrder(SubmitOrderReqField submitOrder) {
 		if(FieldUtils.isOpen(submitOrder.getOffsetFlag())) {
 			checkIfHasSufficientAmount(submitOrder);
 		} else {
 			checkIfHasSufficientPosition(submitOrder);
 		}
-		stateMachine.onSubmitReq(submitOrder);
+		stateMachine.onSubmitReq();
 	}
 
 	private void checkIfHasSufficientPosition(SubmitOrderReqField submitOrder) {
@@ -291,9 +290,8 @@ public class ModuleAccount implements IModuleAccount{
 		}
 	}
 
-	@Override
 	public void onCancelOrder(CancelOrderReqField cancelOrder) {
-		stateMachine.onCancelReq(cancelOrder);
+		stateMachine.onCancelReq();
 	}
 
 }
