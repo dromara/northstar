@@ -41,6 +41,6 @@ public class ContractUtils {
 	}
 	
 	public static ChannelType channelTypeOf(ContractField c) {
-		return ChannelType.valueOf(c.getThirdPartyId().split("@")[1]);
+		return ChannelType.valueOf(c.getChannelType());
 	}
 }
