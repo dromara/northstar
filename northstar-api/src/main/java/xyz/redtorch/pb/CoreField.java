@@ -22208,6 +22208,26 @@ public final class CoreField {
      * @return The askVolume at the given index.
      */
     int getAskVolume(int index);
+
+    /**
+     * <pre>
+     * 渠道来源
+     * </pre>
+     *
+     * <code>string channelType = 37;</code>
+     * @return The channelType.
+     */
+    java.lang.String getChannelType();
+    /**
+     * <pre>
+     * 渠道来源
+     * </pre>
+     *
+     * <code>string channelType = 37;</code>
+     * @return The bytes for channelType.
+     */
+    com.google.protobuf.ByteString
+        getChannelTypeBytes();
   }
   /**
    * <pre>
@@ -22235,6 +22255,7 @@ public final class CoreField {
       askPrice_ = emptyDoubleList();
       bidVolume_ = emptyIntList();
       askVolume_ = emptyIntList();
+      channelType_ = "";
     }
 
     @java.lang.Override
@@ -22515,6 +22536,12 @@ public final class CoreField {
                 askVolume_.addInt(input.readFixed32());
               }
               input.popLimit(limit);
+              break;
+            }
+            case 298: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              channelType_ = s;
               break;
             }
             default: {
@@ -23356,6 +23383,52 @@ public final class CoreField {
     }
     private int askVolumeMemoizedSerializedSize = -1;
 
+    public static final int CHANNELTYPE_FIELD_NUMBER = 37;
+    private volatile java.lang.Object channelType_;
+    /**
+     * <pre>
+     * 渠道来源
+     * </pre>
+     *
+     * <code>string channelType = 37;</code>
+     * @return The channelType.
+     */
+    @java.lang.Override
+    public java.lang.String getChannelType() {
+      java.lang.Object ref = channelType_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        channelType_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * 渠道来源
+     * </pre>
+     *
+     * <code>string channelType = 37;</code>
+     * @return The bytes for channelType.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getChannelTypeBytes() {
+      java.lang.Object ref = channelType_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        channelType_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -23494,6 +23567,9 @@ public final class CoreField {
       }
       for (int i = 0; i < askVolume_.size(); i++) {
         output.writeFixed32NoTag(askVolume_.getInt(i));
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(channelType_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 37, channelType_);
       }
       unknownFields.writeTo(output);
     }
@@ -23671,6 +23747,9 @@ public final class CoreField {
         }
         askVolumeMemoizedSerializedSize = dataSize;
       }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(channelType_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(37, channelType_);
+      }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
       return size;
@@ -23777,6 +23856,8 @@ public final class CoreField {
           .equals(other.getBidVolumeList())) return false;
       if (!getAskVolumeList()
           .equals(other.getAskVolumeList())) return false;
+      if (!getChannelType()
+          .equals(other.getChannelType())) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -23894,6 +23975,8 @@ public final class CoreField {
         hash = (37 * hash) + ASKVOLUME_FIELD_NUMBER;
         hash = (53 * hash) + getAskVolumeList().hashCode();
       }
+      hash = (37 * hash) + CHANNELTYPE_FIELD_NUMBER;
+      hash = (53 * hash) + getChannelType().hashCode();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -24103,6 +24186,8 @@ public final class CoreField {
         bitField0_ = (bitField0_ & ~0x00000004);
         askVolume_ = emptyIntList();
         bitField0_ = (bitField0_ & ~0x00000008);
+        channelType_ = "";
+
         return this;
       }
 
@@ -24182,6 +24267,7 @@ public final class CoreField {
           bitField0_ = (bitField0_ & ~0x00000008);
         }
         result.askVolume_ = askVolume_;
+        result.channelType_ = channelType_;
         onBuilt();
         return result;
       }
@@ -24369,6 +24455,10 @@ public final class CoreField {
             ensureAskVolumeIsMutable();
             askVolume_.addAll(other.askVolume_);
           }
+          onChanged();
+        }
+        if (!other.getChannelType().isEmpty()) {
+          channelType_ = other.channelType_;
           onChanged();
         }
         this.mergeUnknownFields(other.unknownFields);
@@ -26469,6 +26559,102 @@ public final class CoreField {
         onChanged();
         return this;
       }
+
+      private java.lang.Object channelType_ = "";
+      /**
+       * <pre>
+       * 渠道来源
+       * </pre>
+       *
+       * <code>string channelType = 37;</code>
+       * @return The channelType.
+       */
+      public java.lang.String getChannelType() {
+        java.lang.Object ref = channelType_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          channelType_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * 渠道来源
+       * </pre>
+       *
+       * <code>string channelType = 37;</code>
+       * @return The bytes for channelType.
+       */
+      public com.google.protobuf.ByteString
+          getChannelTypeBytes() {
+        java.lang.Object ref = channelType_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          channelType_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * 渠道来源
+       * </pre>
+       *
+       * <code>string channelType = 37;</code>
+       * @param value The channelType to set.
+       * @return This builder for chaining.
+       */
+      public Builder setChannelType(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        channelType_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * 渠道来源
+       * </pre>
+       *
+       * <code>string channelType = 37;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearChannelType() {
+        
+        channelType_ = getDefaultInstance().getChannelType();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * 渠道来源
+       * </pre>
+       *
+       * <code>string channelType = 37;</code>
+       * @param value The bytes for channelType to set.
+       * @return This builder for chaining.
+       */
+      public Builder setChannelTypeBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        channelType_ = value;
+        onChanged();
+        return this;
+      }
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -26785,6 +26971,26 @@ public final class CoreField {
      * @return The preSettlePrice.
      */
     double getPreSettlePrice();
+
+    /**
+     * <pre>
+     * 渠道来源
+     * </pre>
+     *
+     * <code>string channelType = 22;</code>
+     * @return The channelType.
+     */
+    java.lang.String getChannelType();
+    /**
+     * <pre>
+     * 渠道来源
+     * </pre>
+     *
+     * <code>string channelType = 22;</code>
+     * @return The bytes for channelType.
+     */
+    com.google.protobuf.ByteString
+        getChannelTypeBytes();
   }
   /**
    * <pre>
@@ -26808,6 +27014,7 @@ public final class CoreField {
       tradingDay_ = "";
       actionDay_ = "";
       actionTime_ = "";
+      channelType_ = "";
     }
 
     @java.lang.Override
@@ -26948,6 +27155,12 @@ public final class CoreField {
             case 169: {
 
               preSettlePrice_ = input.readDouble();
+              break;
+            }
+            case 178: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              channelType_ = s;
               break;
             }
             default: {
@@ -27452,6 +27665,52 @@ public final class CoreField {
       return preSettlePrice_;
     }
 
+    public static final int CHANNELTYPE_FIELD_NUMBER = 22;
+    private volatile java.lang.Object channelType_;
+    /**
+     * <pre>
+     * 渠道来源
+     * </pre>
+     *
+     * <code>string channelType = 22;</code>
+     * @return The channelType.
+     */
+    @java.lang.Override
+    public java.lang.String getChannelType() {
+      java.lang.Object ref = channelType_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        channelType_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * 渠道来源
+     * </pre>
+     *
+     * <code>string channelType = 22;</code>
+     * @return The bytes for channelType.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getChannelTypeBytes() {
+      java.lang.Object ref = channelType_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        channelType_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -27528,6 +27787,9 @@ public final class CoreField {
       }
       if (java.lang.Double.doubleToRawLongBits(preSettlePrice_) != 0) {
         output.writeDouble(21, preSettlePrice_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(channelType_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 22, channelType_);
       }
       unknownFields.writeTo(output);
     }
@@ -27617,6 +27879,9 @@ public final class CoreField {
         size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(21, preSettlePrice_);
       }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(channelType_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(22, channelType_);
+      }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
       return size;
@@ -27685,6 +27950,8 @@ public final class CoreField {
       if (java.lang.Double.doubleToLongBits(getPreSettlePrice())
           != java.lang.Double.doubleToLongBits(
               other.getPreSettlePrice())) return false;
+      if (!getChannelType()
+          .equals(other.getChannelType())) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -27754,6 +28021,8 @@ public final class CoreField {
       hash = (37 * hash) + PRESETTLEPRICE_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           java.lang.Double.doubleToLongBits(getPreSettlePrice()));
+      hash = (37 * hash) + CHANNELTYPE_FIELD_NUMBER;
+      hash = (53 * hash) + getChannelType().hashCode();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -27933,6 +28202,8 @@ public final class CoreField {
 
         preSettlePrice_ = 0D;
 
+        channelType_ = "";
+
         return this;
       }
 
@@ -27980,6 +28251,7 @@ public final class CoreField {
         result.preOpenInterest_ = preOpenInterest_;
         result.preClosePrice_ = preClosePrice_;
         result.preSettlePrice_ = preSettlePrice_;
+        result.channelType_ = channelType_;
         onBuilt();
         return result;
       }
@@ -28095,6 +28367,10 @@ public final class CoreField {
         }
         if (other.getPreSettlePrice() != 0D) {
           setPreSettlePrice(other.getPreSettlePrice());
+        }
+        if (!other.getChannelType().isEmpty()) {
+          channelType_ = other.channelType_;
+          onChanged();
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -29289,6 +29565,102 @@ public final class CoreField {
       public Builder clearPreSettlePrice() {
         
         preSettlePrice_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object channelType_ = "";
+      /**
+       * <pre>
+       * 渠道来源
+       * </pre>
+       *
+       * <code>string channelType = 22;</code>
+       * @return The channelType.
+       */
+      public java.lang.String getChannelType() {
+        java.lang.Object ref = channelType_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          channelType_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * 渠道来源
+       * </pre>
+       *
+       * <code>string channelType = 22;</code>
+       * @return The bytes for channelType.
+       */
+      public com.google.protobuf.ByteString
+          getChannelTypeBytes() {
+        java.lang.Object ref = channelType_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          channelType_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * 渠道来源
+       * </pre>
+       *
+       * <code>string channelType = 22;</code>
+       * @param value The channelType to set.
+       * @return This builder for chaining.
+       */
+      public Builder setChannelType(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        channelType_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * 渠道来源
+       * </pre>
+       *
+       * <code>string channelType = 22;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearChannelType() {
+        
+        channelType_ = getDefaultInstance().getChannelType();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * 渠道来源
+       * </pre>
+       *
+       * <code>string channelType = 22;</code>
+       * @param value The bytes for channelType to set.
+       * @return This builder for chaining.
+       */
+      public Builder setChannelTypeBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        channelType_ = value;
         onChanged();
         return this;
       }
@@ -42141,7 +42513,7 @@ public final class CoreField {
       "Value\030\025 \001(\001\0221\n\thedgeFlag\030\026 \001(\0162\036.xyz.red" +
       "torch.pb.HedgeFlagEnum\0220\n\010contract\030\027 \001(\013" +
       "2\036.xyz.redtorch.pb.ContractField\022\021\n\tgate" +
-      "wayId\030\030 \001(\t\"\372\005\n\tTickField\022\025\n\runifiedSymb" +
+      "wayId\030\030 \001(\t\"\217\006\n\tTickField\022\025\n\runifiedSymb" +
       "ol\030\001 \001(\t\022\021\n\tgatewayId\030\002 \001(\t\022\022\n\ntradingDa" +
       "y\030\003 \001(\t\022\021\n\tactionDay\030\004 \001(\t\022\022\n\nactionTime" +
       "\030\005 \001(\t\022\027\n\017actionTimestamp\030\006 \001(\006\022\016\n\006statu" +
@@ -42160,70 +42532,71 @@ public final class CoreField {
       " \001(\001\022\020\n\010lowPrice\030\036 \001(\001\022\022\n\nupperLimit\030\037 \001" +
       "(\001\022\022\n\nlowerLimit\030  \001(\001\022\020\n\010bidPrice\030! \003(\001" +
       "\022\020\n\010askPrice\030\" \003(\001\022\021\n\tbidVolume\030# \003(\007\022\021\n" +
-      "\taskVolume\030$ \003(\007\"\306\003\n\010BarField\022\025\n\runified" +
-      "Symbol\030\001 \001(\t\022\021\n\tgatewayId\030\002 \001(\t\022\022\n\ntradi" +
-      "ngDay\030\003 \001(\t\022\021\n\tactionDay\030\004 \001(\t\022\022\n\naction" +
-      "Time\030\005 \001(\t\022\027\n\017actionTimestamp\030\006 \001(\006\022\021\n\to" +
-      "penPrice\030\007 \001(\001\022\021\n\thighPrice\030\010 \001(\001\022\020\n\010low" +
-      "Price\030\t \001(\001\022\022\n\nclosePrice\030\n \001(\001\022\024\n\014openI" +
-      "nterest\030\013 \001(\001\022\031\n\021openInterestDelta\030\014 \001(\001" +
-      "\022\016\n\006volume\030\r \001(\006\022\023\n\013volumeDelta\030\016 \001(\006\022\020\n" +
-      "\010turnover\030\017 \001(\001\022\025\n\rturnoverDelta\030\020 \001(\001\022\021" +
-      "\n\tnumTrades\030\021 \001(\006\022\026\n\016numTradesDelta\030\022 \001(" +
-      "\006\022\027\n\017preOpenInterest\030\023 \001(\001\022\025\n\rpreClosePr" +
-      "ice\030\024 \001(\001\022\026\n\016preSettlePrice\030\025 \001(\001\"_\n\016Com" +
-      "monReqField\022\r\n\005reqId\030\001 \001(\t\022\022\n\noperatorId" +
-      "\030\002 \001(\t\022\024\n\014targetNodeId\030\003 \001(\007\022\024\n\014sourceNo" +
-      "deId\030\004 \001(\007\"B\n\016CommonRspField\022\r\n\005reqId\030\001 " +
-      "\001(\t\022\017\n\007errorId\030\002 \001(\007\022\020\n\010errorMsg\030\003 \001(\t\"\300" +
-      "\006\n\023SubmitOrderReqField\022\025\n\roriginOrderId\030" +
-      "\001 \001(\t\022\023\n\013accountCode\030\002 \001(\t\022/\n\010currency\030\003" +
-      " \001(\0162\035.xyz.redtorch.pb.CurrencyEnum\0220\n\010c" +
-      "ontract\030\004 \001(\0132\036.xyz.redtorch.pb.Contract" +
-      "Field\022\021\n\tgatewayId\030\005 \001(\t\022\016\n\006volume\030\006 \001(\007" +
-      "\022\r\n\005price\030\007 \001(\001\022;\n\016orderPriceType\030\010 \001(\0162" +
-      "#.xyz.redtorch.pb.OrderPriceTypeEnum\0221\n\t" +
-      "direction\030\t \001(\0162\036.xyz.redtorch.pb.Direct" +
-      "ionEnum\0223\n\noffsetFlag\030\n \001(\0162\037.xyz.redtor" +
-      "ch.pb.OffsetFlagEnum\0221\n\thedgeFlag\030\013 \001(\0162" +
-      "\036.xyz.redtorch.pb.HedgeFlagEnum\0229\n\rtimeC" +
-      "ondition\030\014 \001(\0162\".xyz.redtorch.pb.TimeCon" +
-      "ditionEnum\022\017\n\007gtdDate\030\r \001(\t\022=\n\017volumeCon" +
-      "dition\030\016 \001(\0162$.xyz.redtorch.pb.VolumeCon" +
-      "ditionEnum\022\021\n\tminVolume\030\017 \001(\007\022E\n\023conting" +
-      "entCondition\030\020 \001(\0162(.xyz.redtorch.pb.Con" +
-      "tingentConditionEnum\022\021\n\tstopPrice\030\021 \001(\001\022" +
-      "?\n\020forceCloseReason\030\022 \001(\0162%.xyz.redtorch" +
-      ".pb.ForceCloseReasonEnum\022\023\n\013autoSuspend\030" +
-      "\023 \001(\007\022\026\n\016userForceClose\030\024 \001(\007\022\021\n\tswapOrd" +
-      "er\030\025 \001(\007\022\027\n\017actionTimestamp\030\026 \001(\006\"P\n\023Can" +
-      "celOrderReqField\022\021\n\tgatewayId\030\001 \001(\t\022\017\n\007o" +
-      "rderId\030\002 \001(\t\022\025\n\roriginOrderId\030\003 \001(\t\"\373\005\n\023" +
-      "GatewaySettingField\022\021\n\tgatewayId\030\001 \001(\t\022\023" +
-      "\n\013gatewayName\030\002 \001(\t\022\032\n\022gatewayDescriptio" +
-      "n\030\004 \001(\t\022\032\n\022implementClassName\030\005 \001(\t\0225\n\013g" +
-      "atewayType\030\006 \001(\0162 .xyz.redtorch.pb.Gatew" +
-      "ayTypeEnum\022C\n\022gatewayAdapterType\030\007 \001(\0162\'" +
-      ".xyz.redtorch.pb.GatewayAdapterTypeEnum\022" +
-      "N\n\rctpApiSetting\030\010 \001(\01327.xyz.redtorch.pb" +
-      ".GatewaySettingField.CtpApiSettingField\022" +
-      "L\n\014ibApiSetting\030\t \001(\01326.xyz.redtorch.pb." +
-      "GatewaySettingField.IbApiSettingField\0222\n" +
-      "\006status\030\n \001(\0162\".xyz.redtorch.pb.ConnectS" +
-      "tatusEnum\022\017\n\007version\030\013 \001(\006\022\035\n\025autoConnec" +
-      "tTimeRanges\030\014 \001(\t\032\302\001\n\022CtpApiSettingField" +
-      "\022\016\n\006userId\030\001 \001(\t\022\020\n\010password\030\002 \001(\t\022\020\n\010br" +
-      "okerId\030\003 \001(\t\022\016\n\006tdHost\030\004 \001(\t\022\016\n\006tdPort\030\005" +
-      " \001(\t\022\016\n\006mdHost\030\006 \001(\t\022\016\n\006mdPort\030\007 \001(\t\022\020\n\010" +
-      "authCode\030\010 \001(\t\022\027\n\017userProductInfo\030\t \001(\t\022" +
-      "\r\n\005appId\030\n \001(\t\032A\n\021IbApiSettingField\022\014\n\004h" +
-      "ost\030\001 \001(\t\022\014\n\004port\030\002 \001(\007\022\020\n\010clientId\030\003 \001(" +
-      "\007\"_\n\010LogField\022/\n\010logLevel\030\001 \001(\0162\035.xyz.re" +
-      "dtorch.pb.LogLevelEnum\022\021\n\ttimestamp\030\002 \001(" +
-      "\006\022\017\n\007content\030\003 \001(\t\"d\n\013NoticeField\0221\n\006sta" +
-      "tus\030\001 \001(\0162!.xyz.redtorch.pb.CommonStatus" +
-      "Enum\022\021\n\ttimestamp\030\002 \001(\006\022\017\n\007content\030\003 \001(\t" +
-      "b\006proto3"
+      "\taskVolume\030$ \003(\007\022\023\n\013channelType\030% \001(\t\"\333\003" +
+      "\n\010BarField\022\025\n\runifiedSymbol\030\001 \001(\t\022\021\n\tgat" +
+      "ewayId\030\002 \001(\t\022\022\n\ntradingDay\030\003 \001(\t\022\021\n\tacti" +
+      "onDay\030\004 \001(\t\022\022\n\nactionTime\030\005 \001(\t\022\027\n\017actio" +
+      "nTimestamp\030\006 \001(\006\022\021\n\topenPrice\030\007 \001(\001\022\021\n\th" +
+      "ighPrice\030\010 \001(\001\022\020\n\010lowPrice\030\t \001(\001\022\022\n\nclos" +
+      "ePrice\030\n \001(\001\022\024\n\014openInterest\030\013 \001(\001\022\031\n\021op" +
+      "enInterestDelta\030\014 \001(\001\022\016\n\006volume\030\r \001(\006\022\023\n" +
+      "\013volumeDelta\030\016 \001(\006\022\020\n\010turnover\030\017 \001(\001\022\025\n\r" +
+      "turnoverDelta\030\020 \001(\001\022\021\n\tnumTrades\030\021 \001(\006\022\026" +
+      "\n\016numTradesDelta\030\022 \001(\006\022\027\n\017preOpenInteres" +
+      "t\030\023 \001(\001\022\025\n\rpreClosePrice\030\024 \001(\001\022\026\n\016preSet" +
+      "tlePrice\030\025 \001(\001\022\023\n\013channelType\030\026 \001(\t\"_\n\016C" +
+      "ommonReqField\022\r\n\005reqId\030\001 \001(\t\022\022\n\noperator" +
+      "Id\030\002 \001(\t\022\024\n\014targetNodeId\030\003 \001(\007\022\024\n\014source" +
+      "NodeId\030\004 \001(\007\"B\n\016CommonRspField\022\r\n\005reqId\030" +
+      "\001 \001(\t\022\017\n\007errorId\030\002 \001(\007\022\020\n\010errorMsg\030\003 \001(\t" +
+      "\"\300\006\n\023SubmitOrderReqField\022\025\n\roriginOrderI" +
+      "d\030\001 \001(\t\022\023\n\013accountCode\030\002 \001(\t\022/\n\010currency" +
+      "\030\003 \001(\0162\035.xyz.redtorch.pb.CurrencyEnum\0220\n" +
+      "\010contract\030\004 \001(\0132\036.xyz.redtorch.pb.Contra" +
+      "ctField\022\021\n\tgatewayId\030\005 \001(\t\022\016\n\006volume\030\006 \001" +
+      "(\007\022\r\n\005price\030\007 \001(\001\022;\n\016orderPriceType\030\010 \001(" +
+      "\0162#.xyz.redtorch.pb.OrderPriceTypeEnum\0221" +
+      "\n\tdirection\030\t \001(\0162\036.xyz.redtorch.pb.Dire" +
+      "ctionEnum\0223\n\noffsetFlag\030\n \001(\0162\037.xyz.redt" +
+      "orch.pb.OffsetFlagEnum\0221\n\thedgeFlag\030\013 \001(" +
+      "\0162\036.xyz.redtorch.pb.HedgeFlagEnum\0229\n\rtim" +
+      "eCondition\030\014 \001(\0162\".xyz.redtorch.pb.TimeC" +
+      "onditionEnum\022\017\n\007gtdDate\030\r \001(\t\022=\n\017volumeC" +
+      "ondition\030\016 \001(\0162$.xyz.redtorch.pb.VolumeC" +
+      "onditionEnum\022\021\n\tminVolume\030\017 \001(\007\022E\n\023conti" +
+      "ngentCondition\030\020 \001(\0162(.xyz.redtorch.pb.C" +
+      "ontingentConditionEnum\022\021\n\tstopPrice\030\021 \001(" +
+      "\001\022?\n\020forceCloseReason\030\022 \001(\0162%.xyz.redtor" +
+      "ch.pb.ForceCloseReasonEnum\022\023\n\013autoSuspen" +
+      "d\030\023 \001(\007\022\026\n\016userForceClose\030\024 \001(\007\022\021\n\tswapO" +
+      "rder\030\025 \001(\007\022\027\n\017actionTimestamp\030\026 \001(\006\"P\n\023C" +
+      "ancelOrderReqField\022\021\n\tgatewayId\030\001 \001(\t\022\017\n" +
+      "\007orderId\030\002 \001(\t\022\025\n\roriginOrderId\030\003 \001(\t\"\373\005" +
+      "\n\023GatewaySettingField\022\021\n\tgatewayId\030\001 \001(\t" +
+      "\022\023\n\013gatewayName\030\002 \001(\t\022\032\n\022gatewayDescript" +
+      "ion\030\004 \001(\t\022\032\n\022implementClassName\030\005 \001(\t\0225\n" +
+      "\013gatewayType\030\006 \001(\0162 .xyz.redtorch.pb.Gat" +
+      "ewayTypeEnum\022C\n\022gatewayAdapterType\030\007 \001(\016" +
+      "2\'.xyz.redtorch.pb.GatewayAdapterTypeEnu" +
+      "m\022N\n\rctpApiSetting\030\010 \001(\01327.xyz.redtorch." +
+      "pb.GatewaySettingField.CtpApiSettingFiel" +
+      "d\022L\n\014ibApiSetting\030\t \001(\01326.xyz.redtorch.p" +
+      "b.GatewaySettingField.IbApiSettingField\022" +
+      "2\n\006status\030\n \001(\0162\".xyz.redtorch.pb.Connec" +
+      "tStatusEnum\022\017\n\007version\030\013 \001(\006\022\035\n\025autoConn" +
+      "ectTimeRanges\030\014 \001(\t\032\302\001\n\022CtpApiSettingFie" +
+      "ld\022\016\n\006userId\030\001 \001(\t\022\020\n\010password\030\002 \001(\t\022\020\n\010" +
+      "brokerId\030\003 \001(\t\022\016\n\006tdHost\030\004 \001(\t\022\016\n\006tdPort" +
+      "\030\005 \001(\t\022\016\n\006mdHost\030\006 \001(\t\022\016\n\006mdPort\030\007 \001(\t\022\020" +
+      "\n\010authCode\030\010 \001(\t\022\027\n\017userProductInfo\030\t \001(" +
+      "\t\022\r\n\005appId\030\n \001(\t\032A\n\021IbApiSettingField\022\014\n" +
+      "\004host\030\001 \001(\t\022\014\n\004port\030\002 \001(\007\022\020\n\010clientId\030\003 " +
+      "\001(\007\"_\n\010LogField\022/\n\010logLevel\030\001 \001(\0162\035.xyz." +
+      "redtorch.pb.LogLevelEnum\022\021\n\ttimestamp\030\002 " +
+      "\001(\006\022\017\n\007content\030\003 \001(\t\"d\n\013NoticeField\0221\n\006s" +
+      "tatus\030\001 \001(\0162!.xyz.redtorch.pb.CommonStat" +
+      "usEnum\022\021\n\ttimestamp\030\002 \001(\006\022\017\n\007content\030\003 \001" +
+      "(\tb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -42271,13 +42644,13 @@ public final class CoreField {
     internal_static_xyz_redtorch_pb_TickField_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_xyz_redtorch_pb_TickField_descriptor,
-        new java.lang.String[] { "UnifiedSymbol", "GatewayId", "TradingDay", "ActionDay", "ActionTime", "ActionTimestamp", "Status", "LastPrice", "AvgPrice", "TotalBidVol", "TotalAskVol", "WeightedAvgBidPrice", "WeightedAvgAskPrice", "Iopv", "YieldToMaturity", "VolumeDelta", "Volume", "Turnover", "TurnoverDelta", "NumTrades", "NumTradesDelta", "OpenInterest", "OpenInterestDelta", "PreOpenInterest", "PreClosePrice", "SettlePrice", "PreSettlePrice", "OpenPrice", "HighPrice", "LowPrice", "UpperLimit", "LowerLimit", "BidPrice", "AskPrice", "BidVolume", "AskVolume", });
+        new java.lang.String[] { "UnifiedSymbol", "GatewayId", "TradingDay", "ActionDay", "ActionTime", "ActionTimestamp", "Status", "LastPrice", "AvgPrice", "TotalBidVol", "TotalAskVol", "WeightedAvgBidPrice", "WeightedAvgAskPrice", "Iopv", "YieldToMaturity", "VolumeDelta", "Volume", "Turnover", "TurnoverDelta", "NumTrades", "NumTradesDelta", "OpenInterest", "OpenInterestDelta", "PreOpenInterest", "PreClosePrice", "SettlePrice", "PreSettlePrice", "OpenPrice", "HighPrice", "LowPrice", "UpperLimit", "LowerLimit", "BidPrice", "AskPrice", "BidVolume", "AskVolume", "ChannelType", });
     internal_static_xyz_redtorch_pb_BarField_descriptor =
       getDescriptor().getMessageTypes().get(7);
     internal_static_xyz_redtorch_pb_BarField_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_xyz_redtorch_pb_BarField_descriptor,
-        new java.lang.String[] { "UnifiedSymbol", "GatewayId", "TradingDay", "ActionDay", "ActionTime", "ActionTimestamp", "OpenPrice", "HighPrice", "LowPrice", "ClosePrice", "OpenInterest", "OpenInterestDelta", "Volume", "VolumeDelta", "Turnover", "TurnoverDelta", "NumTrades", "NumTradesDelta", "PreOpenInterest", "PreClosePrice", "PreSettlePrice", });
+        new java.lang.String[] { "UnifiedSymbol", "GatewayId", "TradingDay", "ActionDay", "ActionTime", "ActionTimestamp", "OpenPrice", "HighPrice", "LowPrice", "ClosePrice", "OpenInterest", "OpenInterestDelta", "Volume", "VolumeDelta", "Turnover", "TurnoverDelta", "NumTrades", "NumTradesDelta", "PreOpenInterest", "PreClosePrice", "PreSettlePrice", "ChannelType", });
     internal_static_xyz_redtorch_pb_CommonReqField_descriptor =
       getDescriptor().getMessageTypes().get(8);
     internal_static_xyz_redtorch_pb_CommonReqField_fieldAccessorTable = new

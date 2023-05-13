@@ -5184,7 +5184,8 @@ proto.xyz.redtorch.pb.TickField.toObject = function(includeInstance, msg) {
     bidpriceList: (f = jspb.Message.getRepeatedFloatingPointField(msg, 33)) == null ? undefined : f,
     askpriceList: (f = jspb.Message.getRepeatedFloatingPointField(msg, 34)) == null ? undefined : f,
     bidvolumeList: (f = jspb.Message.getRepeatedField(msg, 35)) == null ? undefined : f,
-    askvolumeList: (f = jspb.Message.getRepeatedField(msg, 36)) == null ? undefined : f
+    askvolumeList: (f = jspb.Message.getRepeatedField(msg, 36)) == null ? undefined : f,
+    channeltype: jspb.Message.getFieldWithDefault(msg, 37, "")
   };
 
   if (includeInstance) {
@@ -5372,6 +5373,10 @@ proto.xyz.redtorch.pb.TickField.deserializeBinaryFromReader = function(msg, read
       for (var i = 0; i < values.length; i++) {
         msg.addAskvolume(values[i]);
       }
+      break;
+    case 37:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setChanneltype(value);
       break;
     default:
       reader.skipField();
@@ -5651,6 +5656,13 @@ proto.xyz.redtorch.pb.TickField.serializeBinaryToWriter = function(message, writ
   if (f.length > 0) {
     writer.writePackedFixed32(
       36,
+      f
+    );
+  }
+  f = message.getChanneltype();
+  if (f.length > 0) {
+    writer.writeString(
+      37,
       f
     );
   }
@@ -6381,6 +6393,24 @@ proto.xyz.redtorch.pb.TickField.prototype.clearAskvolumeList = function() {
 };
 
 
+/**
+ * optional string channelType = 37;
+ * @return {string}
+ */
+proto.xyz.redtorch.pb.TickField.prototype.getChanneltype = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 37, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.xyz.redtorch.pb.TickField} returns this
+ */
+proto.xyz.redtorch.pb.TickField.prototype.setChanneltype = function(value) {
+  return jspb.Message.setProto3StringField(this, 37, value);
+};
+
+
 
 
 
@@ -6433,7 +6463,8 @@ proto.xyz.redtorch.pb.BarField.toObject = function(includeInstance, msg) {
     numtradesdelta: jspb.Message.getFieldWithDefault(msg, 18, 0),
     preopeninterest: jspb.Message.getFloatingPointFieldWithDefault(msg, 19, 0.0),
     precloseprice: jspb.Message.getFloatingPointFieldWithDefault(msg, 20, 0.0),
-    presettleprice: jspb.Message.getFloatingPointFieldWithDefault(msg, 21, 0.0)
+    presettleprice: jspb.Message.getFloatingPointFieldWithDefault(msg, 21, 0.0),
+    channeltype: jspb.Message.getFieldWithDefault(msg, 22, "")
   };
 
   if (includeInstance) {
@@ -6553,6 +6584,10 @@ proto.xyz.redtorch.pb.BarField.deserializeBinaryFromReader = function(msg, reade
     case 21:
       var value = /** @type {number} */ (reader.readDouble());
       msg.setPresettleprice(value);
+      break;
+    case 22:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setChanneltype(value);
       break;
     default:
       reader.skipField();
@@ -6727,6 +6762,13 @@ proto.xyz.redtorch.pb.BarField.serializeBinaryToWriter = function(message, write
   if (f !== 0.0) {
     writer.writeDouble(
       21,
+      f
+    );
+  }
+  f = message.getChanneltype();
+  if (f.length > 0) {
+    writer.writeString(
+      22,
       f
     );
   }
@@ -7108,6 +7150,24 @@ proto.xyz.redtorch.pb.BarField.prototype.getPresettleprice = function() {
  */
 proto.xyz.redtorch.pb.BarField.prototype.setPresettleprice = function(value) {
   return jspb.Message.setProto3FloatField(this, 21, value);
+};
+
+
+/**
+ * optional string channelType = 22;
+ * @return {string}
+ */
+proto.xyz.redtorch.pb.BarField.prototype.getChanneltype = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 22, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.xyz.redtorch.pb.BarField} returns this
+ */
+proto.xyz.redtorch.pb.BarField.prototype.setChanneltype = function(value) {
+  return jspb.Message.setProto3StringField(this, 22, value);
 };
 
 
