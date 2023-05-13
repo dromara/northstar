@@ -83,7 +83,7 @@ public class SimMarketGatewayLocal implements MarketGateway{
 				for(Entry<String, InstrumentHolder> e: cache.entrySet()) {
 					TickField tick = tickGen.generateNextTick(e.getValue());
 					feEngine.emitEvent(NorthstarEventType.TICK, tick);
-					GatewayContract contract = (GatewayContract) mktCenter.getContract(tick.getGatewayId(), tick.getUnifiedSymbol());
+					GatewayContract contract = (GatewayContract) mktCenter.getContract(ChannelType.SIM, tick.getUnifiedSymbol());
 					contract.onTick(tick);
 				}
 			} catch (Exception e) {

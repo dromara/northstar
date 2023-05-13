@@ -14,7 +14,6 @@ import org.dromara.northstar.common.model.Identifier;
 import org.dromara.northstar.gateway.Instrument;
 import org.dromara.northstar.gateway.MarketGateway;
 import org.dromara.northstar.gateway.TradeTimeDefinition;
-import org.dromara.northstar.gateway.common.domain.mktdata.MarketCenter;
 import org.dromara.northstar.gateway.common.domain.time.GenericTradeTime;
 import org.dromara.northstar.gateway.model.ContractDefinition;
 import org.junit.jupiter.api.BeforeEach;
@@ -85,9 +84,9 @@ class MarketCenterTest {
 		center.addInstrument(ins3);
 		center.loadContractGroup(ChannelType.SIM);
 		
-		assertThat(center.getContract(GATEWAY_ID, "rb2305").identifier()).isEqualTo(Identifier.of("rb2305@SHFE@FUTURES"));
-		assertThat(center.getContract(GATEWAY_ID, "rb2305@SHFE@FUTURES").identifier()).isEqualTo(Identifier.of("rb2305@SHFE@FUTURES"));
-		assertThat(center.getContract(Identifier.of("rb2305@SHFE@FUTURES"))).isEqualTo(center.getContract(GATEWAY_ID, "rb2305"));
+		assertThat(center.getContract(ChannelType.SIM, "rb2305").identifier()).isEqualTo(Identifier.of("rb2305@SHFE@FUTURES"));
+		assertThat(center.getContract(ChannelType.SIM, "rb2305@SHFE@FUTURES").identifier()).isEqualTo(Identifier.of("rb2305@SHFE@FUTURES"));
+		assertThat(center.getContract(Identifier.of("rb2305@SHFE@FUTURES"))).isEqualTo(center.getContract(ChannelType.SIM, "rb2305"));
 	}
 
 	@Test

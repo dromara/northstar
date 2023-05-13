@@ -1,13 +1,16 @@
 package org.dromara.northstar.data.ds;
 
-import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.JSONObject;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.ztnozdormu.common.enums.FrequencyType;
-import io.github.ztnozdormu.common.utils.ExResult;
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
+import java.net.URI;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
 import org.apache.commons.lang3.StringUtils;
 import org.dromara.northstar.common.IDataServiceManager;
 import org.dromara.northstar.common.constant.ChannelType;
@@ -20,16 +23,20 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import io.github.ztnozdormu.common.enums.FrequencyType;
+import io.github.ztnozdormu.common.utils.ExResult;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import xyz.redtorch.pb.CoreEnum.CurrencyEnum;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.ContractField;
-
-import java.net.URI;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.*;
 
 /**
  * 币圈历史数据服务接口管理器
@@ -227,7 +234,7 @@ public class W3DataServiceManager implements IDataServiceManager {
         for (JSONObject jsonObject : array) {
             try {
                 String unifiedSymbol = jsonObject.getString("unifiedSymbol");
-                ContractField contract = contractMgr.getContract(jsonObject.getString("gatewayId"), unifiedSymbol).contractField();
+                ContractField contract = contractMgr.getContract(ChannelType.OKX, unifiedSymbol).contractField();
                 resultList.addFirst(BarField.newBuilder().setUnifiedSymbol(unifiedSymbol).setTradingDay(jsonObject.getString("tradingDay")).setActionDay(jsonObject.getString("actionDay")).setActionTime(jsonObject.getString("actionTime")).setActionTimestamp(jsonObject.getLongValue("actionTimestamp")).setHighPrice(normalizeValue(jsonObject.getDoubleValue("highPrice"), contract.getPriceTick())).setClosePrice(normalizeValue(jsonObject.getDoubleValue("closePrice"), contract.getPriceTick())).setLowPrice(normalizeValue(jsonObject.getDoubleValue("lowPrice"), contract.getPriceTick())).setOpenPrice(normalizeValue(jsonObject.getDoubleValue("openPrice"), contract.getPriceTick())).setGatewayId(contract.getGatewayId()).setOpenInterestDelta(jsonObject.getDoubleValue("openInterestDelta")).setOpenInterest(jsonObject.getDoubleValue("openInterest")).setVolume(jsonObject.getLongValue("volume")).setTurnover(jsonObject.getDouble("turnover")).setPreClosePrice(jsonObject.getDoubleValue("preClosePrice")).setPreSettlePrice(jsonObject.getDoubleValue("preSettlePrice")).setPreOpenInterest(jsonObject.getDoubleValue("preOpenInterest")).build());
             } catch (Exception e) {
                 log.warn("无效合约行情数据：{}", jsonObject.toJSONString());

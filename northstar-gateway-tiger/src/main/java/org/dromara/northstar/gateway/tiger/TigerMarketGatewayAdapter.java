@@ -191,7 +191,7 @@ public class TigerMarketGatewayAdapter implements MarketGateway {
 						.addAllAskVolume(List.of(0))
 						.addAllBidPrice(List.of(0D))
 						.addAllBidVolume(List.of(0))
-						.setUnifiedSymbol(contractMgr.getContract("TIGER", symbol).contractField().getUnifiedSymbol()));
+						.setUnifiedSymbol(contractMgr.getContract(ChannelType.TIGER, symbol).contractField().getUnifiedSymbol()));
 				if(jsonObject.containsKey(ASK_P))	tickBuilderMap.get(symbol).setAskPrice(0, jsonObject.getDoubleValue(ASK_P));
 				if(jsonObject.containsKey(BID_P))	tickBuilderMap.get(symbol).setBidPrice(0, jsonObject.getDoubleValue(BID_P));
 				if(jsonObject.containsKey(ASK_V))	tickBuilderMap.get(symbol).setAskVolume(0, jsonObject.getIntValue(ASK_V));

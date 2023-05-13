@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
+import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.common.constant.TickType;
 
@@ -89,6 +90,7 @@ public class TestFieldFactory {
 	public TickField makeTickField(String symbol, double price) {
 		return TickField.newBuilder()
 				.setGatewayId(gatewayId)
+				.setChannelType(ChannelType.SIM.toString())
 				.setUnifiedSymbol(symbol + "@SHFE@FUTURES")
 				.setActionDay(LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
 				.setActionTime(LocalTime.now().format(DateTimeConstant.T_FORMAT_WITH_MS_INT_FORMATTER))
@@ -107,6 +109,7 @@ public class TestFieldFactory {
 		double dif3 = ThreadLocalRandom.current().nextDouble(deltaRange);
 		return BarField.newBuilder()
 				.setGatewayId(gatewayId)
+				.setChannelType(ChannelType.SIM.toString())
 				.setUnifiedSymbol(symbol)
 				.setUnifiedSymbol(symbol + "@SHFE@FUTURES")
 				.setActionDay(ldt.toLocalDate().format(DateTimeConstant.D_FORMAT_INT_FORMATTER))

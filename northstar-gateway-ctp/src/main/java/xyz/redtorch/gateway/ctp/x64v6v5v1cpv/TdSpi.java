@@ -158,8 +158,6 @@ import xyz.redtorch.pb.CoreField.TradeField;
 
 public class TdSpi extends CThostFtdcTraderSpi {
 
-	private static final String MKT_GATEWAY_ID = "CTP_SIM";
-	
 	private static final Logger logger = LoggerFactory.getLogger(TdSpi.class);
 
 	private GatewayAbstract gatewayAdapter;
@@ -875,7 +873,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 				}
 
 				if (instrumentQueried) {
-					ContractField contract = gatewayAdapter.mktCenter.getContract(MKT_GATEWAY_ID, symbol).contractField();
+					ContractField contract = gatewayAdapter.mktCenter.getContract(ChannelType.CTP_SIM, symbol).contractField();
 					price = (int)(price / contract.getPriceTick()) * contract.getPriceTick();
 					orderBuilder.setContract(contract);
 					orderBuilder.setPrice(price);	// 优化价格精度
@@ -1016,7 +1014,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 				return;
 			}
 
-			Contract contract = gatewayAdapter.mktCenter.getContract(MKT_GATEWAY_ID, symbol);
+			Contract contract = gatewayAdapter.mktCenter.getContract(ChannelType.CTP_SIM, symbol);
 
 			String uniqueSymbol = symbol + "@" + contract.exchange().getValueDescriptor().getName() + "@" + contract.productClass().getValueDescriptor().getName();
 
@@ -1275,14 +1273,15 @@ public class TdSpi extends CThostFtdcTraderSpi {
 			ExchangeEnum exchange = CtpConstant.exchangeMapReverse.getOrDefault(pInstrument.getExchangeID(), ExchangeEnum.UnknownExchange);
 			ProductClassEnum productClass = CtpConstant.productTypeMapReverse.getOrDefault(pInstrument.getProductClass(), ProductClassEnum.UnknownProductClass);
 			String unifiedSymbol = String.format("%s@%s@%s", symbol, exchange, productClass);
-			String contractId = String.format("%s@%s", unifiedSymbol, MKT_GATEWAY_ID);
+			String contractId = String.format("%s@%s", unifiedSymbol, ChannelType.CTP_SIM);
 			
 			CtpContract contract = CtpContract.builder()
-					.gatewayId(MKT_GATEWAY_ID)
+					.gatewayId(gatewayId)
+					.channelType(ChannelType.CTP_SIM.toString())
 					.symbol(symbol)
 					.name(name)
 					.fullName(pInstrument.getInstrumentName())
-					.thirdPartyId(symbol + "@" + MKT_GATEWAY_ID)
+					.thirdPartyId(symbol + "@" + ChannelType.CTP_SIM)
 					.exchange(exchange)
 					.productClass(productClass)
 					.unifiedSymbol(unifiedSymbol)
@@ -1307,7 +1306,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 			gatewayAdapter.mktCenter.addInstrument(contract);
 			
 			if (bIsLast) {
-				logger.info("{}交易接口合约信息获取完成!共计{}条", logInfo, gatewayAdapter.mktCenter.getContracts(MKT_GATEWAY_ID).size());
+				logger.info("{}交易接口合约信息获取完成!共计{}条", logInfo, gatewayAdapter.mktCenter.getContracts(ChannelType.CTP_SIM).size());
 				
 				instrumentQueried = true;
 				this.startIntervalQuery();
@@ -1315,7 +1314,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 				logger.info("{}交易接口开始推送缓存Order,共计{}条", logInfo, orderBuilderCacheList.size());
 				for (OrderField.Builder orderBuilder : orderBuilderCacheList) {
 					try {
-						orderBuilder.setContract(gatewayAdapter.mktCenter.getContract(MKT_GATEWAY_ID, orderBuilder.getContract().getSymbol()).contractField());
+						orderBuilder.setContract(gatewayAdapter.mktCenter.getContract(ChannelType.CTP_SIM, orderBuilder.getContract().getSymbol()).contractField());
 						OrderField order = orderBuilder.build();
 						orderIdToOrderMap.put(order.getOrderId(), order);
 						gatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.ORDER, order);
@@ -1329,7 +1328,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 				logger.info("{}交易接口开始推送缓存Trade,共计{}条", logInfo, tradeBuilderCacheList.size());
 				for (TradeField.Builder tradeBuilder : tradeBuilderCacheList) {
 					try {
-						tradeBuilder.setContract(gatewayAdapter.mktCenter.getContract(MKT_GATEWAY_ID, tradeBuilder.getContract().getSymbol()).contractField());
+						tradeBuilder.setContract(gatewayAdapter.mktCenter.getContract(ChannelType.CTP_SIM, tradeBuilder.getContract().getSymbol()).contractField());
 						gatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.TRADE, tradeBuilder.build());
 					} catch(NoSuchElementException e) {
 						logger.error("{}未能正确获取到合约信息，代码{}", logInfo, tradeBuilder.getContract().getSymbol());
@@ -1548,7 +1547,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 			orderBuilder.setOrderPriceType(orderPriceType);
 
 			if (instrumentQueried) {
-				orderBuilder.setContract(gatewayAdapter.mktCenter.getContract(MKT_GATEWAY_ID, symbol).contractField());
+				orderBuilder.setContract(gatewayAdapter.mktCenter.getContract(ChannelType.CTP_SIM, symbol).contractField());
 				OrderField order = orderBuilder.build();
 				orderIdToOrderMap.put(order.getOrderId(), order);
 				gatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.ORDER, order);
@@ -1630,7 +1629,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 			tradeBuilder.setPriceSource(priceSource);
 
 			if (instrumentQueried) {
-				ContractField contract = gatewayAdapter.mktCenter.getContract(MKT_GATEWAY_ID, symbol).contractField();
+				ContractField contract = gatewayAdapter.mktCenter.getContract(ChannelType.CTP_SIM, symbol).contractField();
 				price = (int)(price / contract.getPriceTick()) * contract.getPriceTick();
 				tradeBuilder.setContract(contract);
 				tradeBuilder.setPrice(price);	// 优化价格精度

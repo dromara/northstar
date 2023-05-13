@@ -25,7 +25,6 @@ import org.dromara.northstar.common.utils.MarketDateTimeUtil;
 import org.dromara.northstar.common.utils.MessagePrinter;
 import org.dromara.northstar.gateway.Contract;
 import org.dromara.northstar.gateway.common.GatewayAbstract;
-import org.dromara.northstar.gateway.common.domain.contract.GatewayContract;
 import org.dromara.northstar.gateway.ctp.CtpSimGatewaySettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -394,7 +393,7 @@ public class MdSpi extends CThostFtdcMdSpi {
 					return;
 				}
 
-				Contract contract = gatewayAdapter.mktCenter.getContract(gatewayId, symbol);
+				Contract contract = gatewayAdapter.mktCenter.getContract(ChannelType.CTP_SIM, symbol);
 
 				String actionDay = pDepthMarketData.getActionDay();
 				actionDay = StringUtils.isEmpty(actionDay) ? LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER) : actionDay;
@@ -541,8 +540,7 @@ public class MdSpi extends CThostFtdcMdSpi {
 				preTickMap.put(contract.identifier(), tick);
 
 				gatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.TICK, tick);
-				GatewayContract mktContract = (GatewayContract) gatewayAdapter.mktCenter.getContract(tick.getGatewayId(), tick.getUnifiedSymbol());
-				mktContract.onTick(tick);
+				gatewayAdapter.mktCenter.onTick(tick);
 				lastUpdateTickTime = System.currentTimeMillis();
 
 			} catch (Throwable t) {

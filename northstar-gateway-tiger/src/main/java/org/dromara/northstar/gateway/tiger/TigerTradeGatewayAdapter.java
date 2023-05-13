@@ -13,6 +13,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.constant.ConnectionState;
 import org.dromara.northstar.common.event.FastEventEngine;
 import org.dromara.northstar.common.event.NorthstarEventType;
@@ -192,7 +193,7 @@ public class TigerTradeGatewayAdapter implements TradeGateway{
 		Map<String, PositionField> positionMap = new HashMap<>();
 		for(int i=0; i<positions.size(); i++) {
 			JSONObject json = positions.getJSONObject(i);
-			ContractField contract = contractMgr.getContract("TIGER", json.getString("symbol")).contractField();
+			ContractField contract = contractMgr.getContract(ChannelType.TIGER, json.getString("symbol")).contractField();
 			String positionId = String.format("%s@%s@%s", contract.getUnifiedSymbol(), PositionDirectionEnum.PD_Long, gatewayId());
 			double openPrice = (int)(json.getDoubleValue("averageCost") / contract.getPriceTick()) * contract.getPriceTick();
 			PositionField pf = PositionField.newBuilder()

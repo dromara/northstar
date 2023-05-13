@@ -47,7 +47,6 @@ import com.google.common.collect.Table;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import xyz.redtorch.pb.CoreEnum.CommonStatusEnum;
-import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.NoticeField;
@@ -334,10 +333,6 @@ public class PlaybackContext {
 					contract -> new LinkedList<>(loader.loadMinuteData(playbackTimeState, contract))));
 	}
 	
-	private String gatewayOf(String unifiedSymbol) {
-		return unifiedSymbol.endsWith(ProductClassEnum.EQUITY.toString()) ? "PLAYBACK" : "CTP";
-	}
-	
 	// 按分钟加载TICK数据 
 	private void loadTicks() {
 		long currentTime = playbackTimeState.toInstant(ZoneOffset.ofHours(8)).toEpochMilli(); 
@@ -348,7 +343,7 @@ public class PlaybackContext {
 			.forEach(entry -> {
 				BarField bar = entry.getValue().poll();
 				
-				TickSimulationAlgorithm algo = algoMap.get(contractMgr.getContract(gatewayOf(bar.getUnifiedSymbol()), bar.getUnifiedSymbol()).contractField());
+				TickSimulationAlgorithm algo = algoMap.get(contractMgr.getContract(ChannelType.PLAYBACK, bar.getUnifiedSymbol()).contractField());
 				List<TickEntry> ticksOfBar = algo.generateFrom(bar);
 				cacheBarMap.put(entry.getKey(), bar);
 				contractTickMap.put(entry.getKey(), new LinkedList<>(convertTicks(ticksOfBar, bar)));
@@ -356,7 +351,7 @@ public class PlaybackContext {
 	}
 	
 	private List<TickField> convertTicks(List<TickEntry> ticks, BarField srcBar) {
-		ContractField contract = contractMgr.getContract(gatewayOf(srcBar.getUnifiedSymbol()), srcBar.getUnifiedSymbol()).contractField();
+		ContractField contract = contractMgr.getContract(ChannelType.PLAYBACK, srcBar.getUnifiedSymbol()).contractField();
 		BarField tradeDayBar = tradeDayBarMap.get(contract, LocalDate.parse(srcBar.getTradingDay(), DateTimeConstant.D_FORMAT_INT_FORMATTER));
 		if(Objects.isNull(tradeDayBar)) {
 			return Collections.emptyList();

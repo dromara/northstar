@@ -43,7 +43,7 @@ public class GatewayDataController {
 		if(gd.getChannelType() == ChannelType.PLAYBACK || gd.getChannelType() == ChannelType.SIM) {
 			return new ResultBean<>(Collections.emptyList());
 		}
-		Contract contract = contractMgr.getContract(gatewayId, unifiedSymbol);
+		Contract contract = contractMgr.getContract(gd.getChannelType(), unifiedSymbol);
 		LocalDate start = utils.getFridayOfLastWeek(refStartTimestamp);
 		if(firstLoad && Period.between(start, LocalDate.now()).getDays() < 7) {
 			start = start.minusWeeks(1);

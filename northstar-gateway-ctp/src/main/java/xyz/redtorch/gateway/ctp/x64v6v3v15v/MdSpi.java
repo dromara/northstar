@@ -394,7 +394,7 @@ public class MdSpi extends CThostFtdcMdSpi {
 					return;
 				}
 
-				Contract contract = gatewayAdapter.mktCenter.getContract(gatewayId, symbol);
+				Contract contract = gatewayAdapter.mktCenter.getContract(ChannelType.CTP, symbol);
 
 				String actionDay = pDepthMarketData.getActionDay();
 				actionDay = StringUtils.isEmpty(actionDay) ? LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER) : actionDay;

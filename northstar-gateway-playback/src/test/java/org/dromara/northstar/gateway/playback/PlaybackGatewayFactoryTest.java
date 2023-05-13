@@ -63,7 +63,7 @@ class PlaybackGatewayFactoryTest {
 	void prepare() {
 		when(clock.nextMarketMinute()).thenReturn(ldt.plusMinutes(1));
 		when(loader.loadMinuteData(eq(ldt), eq(contract))).thenReturn(List.of(bar));
-		when(contractMgr.getContract(anyString(), anyString())).thenReturn(c);
+		when(contractMgr.getContract(any(), anyString())).thenReturn(c);
 		when(c.contractField()).thenReturn(contract);
 		when(mdRepoFactory.getInstance(any(ChannelType.class))).thenReturn(mdRepo);
 		when(mdRepoFactory.getInstance(anyString())).thenReturn(mdRepo);
