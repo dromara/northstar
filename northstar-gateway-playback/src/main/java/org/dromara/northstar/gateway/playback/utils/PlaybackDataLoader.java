@@ -39,7 +39,7 @@ public class PlaybackDataLoader {
 			queryStart = queryEnd.minusWeeks(1);
 		}
 		ChannelType channel = ContractUtils.channelTypeOf(contract);
-		return enhanceData(mdRepoFactory.getInstance(channel).loadBars(contract.getUnifiedSymbol(), queryStart, queryEnd)
+		return enhanceData(mdRepoFactory.getInstance(channel).loadBars(contract, queryStart, queryEnd)
 				.stream()
 				.filter(bar -> bar.getActionTimestamp() >= fromStartTimestamp)
 				.toList(), contract.getUnifiedSymbol());
@@ -47,12 +47,12 @@ public class PlaybackDataLoader {
 	
 	public List<BarField> loadMinuteDataRaw(LocalDate startDate, LocalDate endDate, ContractField contract){
 		ChannelType channel = ContractUtils.channelTypeOf(contract);
-		return enhanceData(mdRepoFactory.getInstance(channel).loadBars(contract.getUnifiedSymbol(), startDate, endDate), contract.getUnifiedSymbol());
+		return enhanceData(mdRepoFactory.getInstance(channel).loadBars(contract, startDate, endDate), contract.getUnifiedSymbol());
 	}
 	
 	public List<BarField> loadTradeDayDataRaw(LocalDate startDate, LocalDate endDate, ContractField contract){
 		ChannelType channel = ContractUtils.channelTypeOf(contract);
-		return enhanceData(mdRepoFactory.getInstance(channel).loadDailyBars(contract.getUnifiedSymbol(), startDate, endDate), contract.getUnifiedSymbol());
+		return enhanceData(mdRepoFactory.getInstance(channel).loadDailyBars(contract, startDate, endDate), contract.getUnifiedSymbol());
 	}
 	
 	private List<BarField> enhanceData(List<BarField> list, String unifiedSymbol) {
@@ -64,6 +64,7 @@ public class PlaybackDataLoader {
 			}
 			results.add(list.get(i).toBuilder()
 					.setGatewayId(gatewayId)
+					.setChannelType(ChannelType.PLAYBACK.toString())
 					.setOpenInterestDelta(openInterestDelta)
 					.build());
 		}

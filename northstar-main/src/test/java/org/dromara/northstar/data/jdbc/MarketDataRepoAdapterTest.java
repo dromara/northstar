@@ -2,7 +2,6 @@ package org.dromara.northstar.data.jdbc;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -20,6 +19,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import test.common.TestFieldFactory;
 import xyz.redtorch.pb.CoreField.BarField;
+import xyz.redtorch.pb.CoreField.ContractField;
 
 @DataJpaTest
 class MarketDataRepoAdapterTest {
@@ -30,6 +30,8 @@ class MarketDataRepoAdapterTest {
 	MarketDataRepository delegate;
 
 	TestFieldFactory fieldFactory = new TestFieldFactory("test");
+	
+	ContractField c = fieldFactory.makeContract("rb2210");
 	
 	String date = LocalTime.now().isAfter(LocalTime.of(20, 0)) 
 			? LocalDate.now().plusDays(1).format(DateTimeConstant.D_FORMAT_INT_FORMATTER)
@@ -56,7 +58,7 @@ class MarketDataRepoAdapterTest {
 	@BeforeEach
 	void prepare() {
 		IDataServiceManager dataService =  mock(IDataServiceManager.class);
-		when(dataService.getMinutelyData(anyString(), any(LocalDate.class), any(LocalDate.class))).thenReturn(List.of());
+		when(dataService.getMinutelyData(any(), any(LocalDate.class), any(LocalDate.class))).thenReturn(List.of());
 		repo = new MarketDataRepoAdapter(delegate, dataService);
 	}
 	
@@ -66,7 +68,7 @@ class MarketDataRepoAdapterTest {
 		repo.insert(bar2);
 		repo.insert(bar3);
 		
-		assertThat(repo.loadBars("rb2210@SHFE@FUTURES", LocalDate.now(), LocalDate.now().plusDays(7))).hasSize(3);
+		assertThat(repo.loadBars(c, LocalDate.now(), LocalDate.now().plusDays(7))).hasSize(3);
 	}
 
 }

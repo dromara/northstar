@@ -21,6 +21,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
+import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.common.constant.TickType;
 import org.dromara.northstar.common.event.FastEventEngine;
@@ -381,6 +382,7 @@ public class PlaybackContext {
 						.addAllAskVolume(List.of(ThreadLocalRandom.current().nextInt(10,500))) // 随机模拟卖一量
 						.addAllBidVolume(List.of(ThreadLocalRandom.current().nextInt(10,500))) // 随机模拟买一量
 						.setGatewayId(gd.getGatewayId())
+						.setChannelType(ChannelType.PLAYBACK.toString())
 						.setVolumeDelta(Math.max(1, e.volume()))			// 采用模拟随机值
 						.setOpenInterest(srcBar.getOpenInterest())			// 采用分钟K线的模糊值
 						.setOpenInterestDelta(e.openInterestDelta())		// 采用模拟随机值

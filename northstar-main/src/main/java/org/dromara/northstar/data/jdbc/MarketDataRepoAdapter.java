@@ -14,6 +14,7 @@ import org.dromara.northstar.data.jdbc.entity.BarDO;
 import lombok.extern.slf4j.Slf4j;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreField.BarField;
+import xyz.redtorch.pb.CoreField.ContractField;
 
 @Slf4j
 public class MarketDataRepoAdapter implements IMarketDataRepository{
@@ -33,13 +34,13 @@ public class MarketDataRepoAdapter implements IMarketDataRepository{
 	}
 
 	@Override
-	public List<BarField> loadBars(String unifiedSymbol, LocalDate startDate, LocalDate endDate0) {
-		log.debug("加载 [{}] 历史行情数据：{} -> {}", unifiedSymbol, startDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), endDate0.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
+	public List<BarField> loadBars(ContractField contract, LocalDate startDate, LocalDate endDate0) {
+		log.debug("加载 [{}] 历史行情数据：{} -> {}", contract.getUnifiedSymbol(), startDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), endDate0.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
 		LocalDate today = LocalDate.now();
 		LocalDate endDate = today.isAfter(endDate0) ? endDate0 : today;
 		LinkedList<BarField> resultList = new LinkedList<>();
 		if(endDate.isAfter(startDate)) {
-			List<BarField> list = dataServiceDelegate.getMinutelyData(unifiedSymbol, startDate, endDate)
+			List<BarField> list = dataServiceDelegate.getMinutelyData(contract, startDate, endDate)
 					.stream()
 					.sorted((a, b) -> a.getActionTimestamp() < b.getActionTimestamp() ? -1 : 1)
 					.toList();
@@ -50,7 +51,7 @@ public class MarketDataRepoAdapter implements IMarketDataRepository{
 		LocalDate localQueryDate = today;
 		if(resultList.isEmpty()) {
 			while(resultList.isEmpty() && endDate0.isAfter(localQueryDate)) {
-				resultList.addAll(findBarData(localQueryDate, unifiedSymbol));
+				resultList.addAll(findBarData(localQueryDate, contract.getUnifiedSymbol()));
 				localQueryDate = localQueryDate.plusDays(1);
 			}
 		} else {			
@@ -59,9 +60,9 @@ public class MarketDataRepoAdapter implements IMarketDataRepository{
 				do {					
 					localQueryDate = localQueryDate.plusDays(1);
 				} while(localQueryDate.getDayOfWeek().getValue() > 5);
-				resultList.addAll(findBarData(localQueryDate, unifiedSymbol));
+				resultList.addAll(findBarData(localQueryDate, contract.getUnifiedSymbol()));
 			} else {
-				resultList.addAll(findBarData(localQueryDate, unifiedSymbol));
+				resultList.addAll(findBarData(localQueryDate, contract.getUnifiedSymbol()));
 			}
 		}
 		
@@ -84,9 +85,9 @@ public class MarketDataRepoAdapter implements IMarketDataRepository{
 	}
 	
 	@Override
-	public List<BarField> loadDailyBars(String unifiedSymbol, LocalDate startDate, LocalDate endDate) {
+	public List<BarField> loadDailyBars(ContractField contract, LocalDate startDate, LocalDate endDate) {
 		try {
-			return dataServiceDelegate.getDailyData(unifiedSymbol, startDate, endDate);
+			return dataServiceDelegate.getDailyData(contract, startDate, endDate);
 		} catch (Exception e) {
 			log.error("{}", e.getMessage());
 			return Collections.emptyList();

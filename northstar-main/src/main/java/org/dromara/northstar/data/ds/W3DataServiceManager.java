@@ -79,8 +79,8 @@ public class W3DataServiceManager implements IDataServiceManager {
      * @return
      */
     @Override
-    public List<BarField> getMinutelyData(String unifiedSymbol, LocalDate startDate, LocalDate endDate) {
-        return commonGetData(FrequencyType.MIN_1.value(), unifiedSymbol, startDate, endDate);
+    public List<BarField> getMinutelyData(ContractField contract, LocalDate startDate, LocalDate endDate) {
+        return commonGetData(FrequencyType.MIN_1.value(), contract.getUnifiedSymbol(), startDate, endDate);
     }
 
     /**
@@ -92,8 +92,8 @@ public class W3DataServiceManager implements IDataServiceManager {
      * @return
      */
     @Override
-    public List<BarField> getQuarterlyData(String unifiedSymbol, LocalDate startDate, LocalDate endDate) {
-        return commonGetData("quarter", unifiedSymbol, startDate, endDate);
+    public List<BarField> getQuarterlyData(ContractField contract, LocalDate startDate, LocalDate endDate) {
+        return commonGetData("quarter", contract.getUnifiedSymbol(), startDate, endDate);
     }
 
     /**
@@ -105,8 +105,8 @@ public class W3DataServiceManager implements IDataServiceManager {
      * @return
      */
     @Override
-    public List<BarField> getHourlyData(String unifiedSymbol, LocalDate startDate, LocalDate endDate) {
-        return commonGetData("hour", unifiedSymbol, startDate, endDate);
+    public List<BarField> getHourlyData(ContractField contract, LocalDate startDate, LocalDate endDate) {
+        return commonGetData("hour", contract.getUnifiedSymbol(), startDate, endDate);
     }
 
     /**
@@ -118,8 +118,8 @@ public class W3DataServiceManager implements IDataServiceManager {
      * @return
      */
     @Override
-    public List<BarField> getDailyData(String unifiedSymbol, LocalDate startDate, LocalDate endDate) {
-        return commonGetData("day", unifiedSymbol, startDate, endDate);
+    public List<BarField> getDailyData(ContractField contract, LocalDate startDate, LocalDate endDate) {
+        return commonGetData("day", contract.getUnifiedSymbol(), startDate, endDate);
     }
 
     /**

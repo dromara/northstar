@@ -2,7 +2,7 @@ package org.dromara.northstar.gateway.playback.utils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -42,7 +42,7 @@ class PlaybackDataLoaderTest {
 		MarketDataRepoFactory mdRepoFactory = mock(MarketDataRepoFactory.class);
 		IMarketDataRepository mdRepo = mock(IMarketDataRepository.class);
 		when(mdRepoFactory.getInstance(any(ChannelType.class))).thenReturn(mdRepo);
-		when(mdRepo.loadBars(anyString(), any(LocalDate.class), any(LocalDate.class))).thenReturn(List.of(b1,b2,b3));
+		when(mdRepo.loadBars(eq(c1), any(LocalDate.class), any(LocalDate.class))).thenReturn(List.of(b1,b2,b3));
 		
 		loader = new PlaybackDataLoader("testGateway", mdRepoFactory);
 	}

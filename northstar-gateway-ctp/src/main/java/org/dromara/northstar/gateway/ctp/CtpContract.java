@@ -62,6 +62,7 @@ public class CtpContract implements Instrument{
 	private int minLimitOrderVolume;  				// 限价单最小下单量
 	private CombinationTypeEnum combinationType; 	// 组合类型
 	private String gatewayId;  						// 网关
+	private String channelType;						// 渠道来源
 	
 	private Identifier identifier;
 	private ContractDefinition contractDef;
@@ -92,6 +93,7 @@ public class CtpContract implements Instrument{
 		minLimitOrderVolume = c.getMinLimitOrderVolume();
 		combinationType = c.getCombinationType();
 		gatewayId = c.getGatewayId();
+		channelType = c.getChannelType();
 	}
 	
 	@Override
@@ -140,6 +142,7 @@ public class CtpContract implements Instrument{
 				.setGatewayId(Optional.ofNullable(gatewayId).orElse(""))
 				.setCommissionFee(contractDef.getCommissionFee())
 				.setCommissionRate(contractDef.getCommissionRate())
+				.setChannelType(channelType)
 				.build();
 	}
 

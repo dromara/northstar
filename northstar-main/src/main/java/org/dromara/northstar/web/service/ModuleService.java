@@ -38,6 +38,7 @@ import org.dromara.northstar.common.model.ModulePositionDescription;
 import org.dromara.northstar.common.model.ModuleRuntimeDescription;
 import org.dromara.northstar.common.utils.MarketDataLoadingUtils;
 import org.dromara.northstar.data.IModuleRepository;
+import org.dromara.northstar.gateway.Contract;
 import org.dromara.northstar.gateway.IContractManager;
 import org.dromara.northstar.gateway.common.utils.MarketDataRepoFactory;
 import org.dromara.northstar.module.ModuleContext;
@@ -274,7 +275,8 @@ public class ModuleService implements PostLoadAware {
 				GatewayDescription gd = account.getMarketGateway().gatewayDescription();
 				List<BarField> mergeList = new ArrayList<>();
 				for(ContractSimpleInfo csi : mad.getBindedContracts()) {
-					List<BarField> bars = mdRepoFactory.getInstance(gd.getChannelType()).loadBars(csi.getUnifiedSymbol(), start, end);
+					Contract c = contractMgr.getContract(Identifier.of(csi.getValue()));
+					List<BarField> bars = mdRepoFactory.getInstance(gd.getChannelType()).loadBars(c.contractField(), start, end);
 					mergeList.addAll(bars);
 				}
 				mergeList.sort((a,b) -> a.getActionTimestamp() < b.getActionTimestamp() ? -1 : 1);

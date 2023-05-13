@@ -6,6 +6,7 @@ import java.util.List;
 import org.dromara.northstar.data.IMarketDataRepository;
 
 import xyz.redtorch.pb.CoreField.BarField;
+import xyz.redtorch.pb.CoreField.ContractField;
 
 public class OkxMarketDataRepoImpl implements IMarketDataRepository{
 
@@ -16,13 +17,13 @@ public class OkxMarketDataRepoImpl implements IMarketDataRepository{
 	}
 
 	@Override
-	public List<BarField> loadBars(String unifiedSymbol, LocalDate startDate, LocalDate endDate) {
+	public List<BarField> loadBars(ContractField contract, LocalDate startDate, LocalDate endDate) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public List<BarField> loadDailyBars(String unifiedSymbol, LocalDate startDate, LocalDate endDate) {
+	public List<BarField> loadDailyBars(ContractField contract, LocalDate startDate, LocalDate endDate) {
 		// TODO Auto-generated method stub
 		return null;
 	}
