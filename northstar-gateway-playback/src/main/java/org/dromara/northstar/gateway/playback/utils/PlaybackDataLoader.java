@@ -11,9 +11,11 @@ import org.dromara.northstar.common.utils.ContractUtils;
 import org.dromara.northstar.common.utils.MarketDataLoadingUtils;
 import org.dromara.northstar.gateway.common.utils.MarketDataRepoFactory;
 
+import lombok.extern.slf4j.Slf4j;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.ContractField;
 
+@Slf4j
 public class PlaybackDataLoader {
 
 	private MarketDataRepoFactory mdRepoFactory;
@@ -28,6 +30,9 @@ public class PlaybackDataLoader {
 	}
 	
 	public List<BarField> loadMinuteData(LocalDateTime fromStartDateTime, ContractField contract){
+		if(log.isTraceEnabled()) {
+			log.trace("正在读取 [{}] 至 {} 一周内的1分钟K线回放数据", contract.getName(), fromStartDateTime);
+		}
 		LocalDate queryStart;
 		LocalDate queryEnd;
 		long fromStartTimestamp = fromStartDateTime.toInstant(ZoneOffset.ofHours(8)).toEpochMilli();
@@ -46,11 +51,17 @@ public class PlaybackDataLoader {
 	}
 	
 	public List<BarField> loadMinuteDataRaw(LocalDate startDate, LocalDate endDate, ContractField contract){
+		if(log.isTraceEnabled()) {
+			log.trace("正在读取 [{}] {} 至 {} 的1分钟K线回放数据", contract.getName(), startDate, endDate);
+		}
 		ChannelType channel = ContractUtils.channelTypeOf(contract);
 		return enhanceData(mdRepoFactory.getInstance(channel).loadBars(contract, startDate, endDate), contract.getUnifiedSymbol());
 	}
 	
 	public List<BarField> loadTradeDayDataRaw(LocalDate startDate, LocalDate endDate, ContractField contract){
+		if(log.isTraceEnabled()) {
+			log.trace("正在读取 [{}] {} 至 {} 的日K线回放数据", contract.getName(), startDate, endDate);
+		}
 		ChannelType channel = ContractUtils.channelTypeOf(contract);
 		return enhanceData(mdRepoFactory.getInstance(channel).loadDailyBars(contract, startDate, endDate), contract.getUnifiedSymbol());
 	}
@@ -67,6 +78,9 @@ public class PlaybackDataLoader {
 					.setChannelType(ChannelType.PLAYBACK.toString())
 					.setOpenInterestDelta(openInterestDelta)
 					.build());
+		}
+		if(results.isEmpty()) {
+			log.warn("[{}] 回放数据为空", unifiedSymbol);
 		}
 		return results;
 	}
