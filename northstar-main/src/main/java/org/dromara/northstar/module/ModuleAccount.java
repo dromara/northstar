@@ -89,6 +89,7 @@ public class ModuleAccount implements IModuleAccount{
 				moduleRepo.saveDealRecord(ModuleDealRecord.builder()
 						.moduleName(moduleDescription.getModuleName())
 						.moduleAccountId(closeTrade.getAccountId())
+						.contractName(contract.getName())
 						.dealProfit(profit)
 						.openTrade(openTrade.toByteArray())
 						.closeTrade(closeTrade.toByteArray())
