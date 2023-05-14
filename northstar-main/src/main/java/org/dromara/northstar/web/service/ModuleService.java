@@ -198,6 +198,9 @@ public class ModuleService implements PostLoadAware {
 	}
 	
 	private void validateModify(ModuleDescription md) {
+		if(md.getUsage() == ModuleUsage.PLAYBACK) {
+			return;
+		}
 		ModuleRuntimeDescription mrdOld = moduleRepo.findRuntimeByName(md.getModuleName());
 		Map<String, ModuleAccountRuntimeDescription> mardMap = mrdOld.getAccountRuntimeDescriptionMap();
 		boolean valid = true;
