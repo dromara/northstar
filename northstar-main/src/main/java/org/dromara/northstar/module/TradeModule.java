@@ -75,10 +75,10 @@ public class TradeModule implements IModule {
 	@Override
 	public void setEnabled(boolean enabled) {
 		if(enabled) {
-			contractAccountMap.values().forEach(acc -> {
+			contractAccountMap.values().stream().distinct().forEach(acc -> {
 				TradeGateway gateway = acc.getTradeGateway();
 				if(gateway.getConnectionState() != ConnectionState.CONNECTED) {
-					log.warn("模组 [{}] 启动时，检测到账户网关 [{}] 没有连线，将自动连线", getName(), gateway.gatewayId());
+					log.warn("模组 [{}] 启动时，检测到账户 [{}] 没有连线，将自动连线", getName(), gateway.gatewayId());
 					CompletableFuture.runAsync(gateway::connect);
 				}
 			});
