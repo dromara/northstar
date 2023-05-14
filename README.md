@@ -42,7 +42,7 @@
 - 服务端采用java17（拥抱新技术） + springboot2
 
 项目架构采用事件驱动+插件式开发
-![输入图片说明](https://foruda.gitee.com/images/1674038693900175040/674a156d_1676852.png "总体架构图.png")
+![输入图片说明](https://foruda.gitee.com/images/1684034911905355451/683de173_1676852.png "总体架构图")
 
 ## 技术支持
 ![](https://foruda.gitee.com/images/1674909142629211020/033daa70_1676852.jpeg "微信公众号.jpg")
