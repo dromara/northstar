@@ -29,7 +29,11 @@ public enum ClosingPolicy {
 			if(operation.isOpen()) {
 				return OffsetFlagEnum.OF_Open;
 			}
-			checkNonclosedTrades(nonclosedTrades, contract);
+			try {
+				checkNonclosedTrades(nonclosedTrades, contract);
+			} catch(Exception e) {
+				throw new IllegalStateException(String.format("合约 [%s]，[%s]操作异常。原因：%s", contract.getName(), operation, e.getMessage()));
+			}
 			List<TradeField> wrapList = new ArrayList<>(nonclosedTrades);
 			wrapList.sort((a, b) -> a.getTradeTimestamp() < b.getTradeTimestamp() ? -1 : 1);
 			if(StringUtils.equals(tradingDay, wrapList.get(0).getTradingDay())) {
@@ -50,7 +54,11 @@ public enum ClosingPolicy {
 			if(operation.isOpen()) {
 				return OffsetFlagEnum.OF_Open;
 			}
-			checkNonclosedTrades(nonclosedTrades, contract);
+			try {
+				checkNonclosedTrades(nonclosedTrades, contract);
+			} catch(Exception e) {
+				throw new IllegalStateException(String.format("合约 [%s]，[%s]操作异常。原因：%s", contract.getName(), operation, e.getMessage()));
+			}
 			List<TradeField> wrapList = new ArrayList<>(nonclosedTrades);
 			wrapList.sort((a, b) -> a.getTradeTimestamp() > b.getTradeTimestamp() ? -1 : 1);
 			if(StringUtils.equals(tradingDay, wrapList.get(0).getTradingDay())) {
@@ -72,7 +80,11 @@ public enum ClosingPolicy {
 			if(operation.isOpen()) {
 				return OffsetFlagEnum.OF_Open;
 			}
-			checkNonclosedTrades(nonclosedTrades, contract);
+			try {
+				checkNonclosedTrades(nonclosedTrades, contract);
+			} catch(Exception e) {
+				throw new IllegalStateException(String.format("合约 [%s]，[%s]操作异常。原因：%s", contract.getName(), operation, e.getMessage()));
+			}
 			List<TradeField> wrapList = new ArrayList<>(nonclosedTrades);
 			wrapList.sort((a, b) -> a.getTradeTimestamp() < b.getTradeTimestamp() ? -1 : 1);
 			if(StringUtils.equals(tradingDay, wrapList.get(0).getTradingDay())) {
