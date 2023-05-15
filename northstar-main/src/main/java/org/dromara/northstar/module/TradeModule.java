@@ -7,7 +7,6 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 import org.dromara.northstar.account.AccountManager;
-import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.constant.ConnectionState;
 import org.dromara.northstar.common.event.NorthstarEvent;
 import org.dromara.northstar.common.exception.NoSuchElementException;
@@ -16,6 +15,7 @@ import org.dromara.northstar.common.model.ModuleDescription;
 import org.dromara.northstar.common.model.ModuleRuntimeDescription;
 import org.dromara.northstar.gateway.Contract;
 import org.dromara.northstar.gateway.IContractManager;
+import org.dromara.northstar.gateway.MarketGateway;
 import org.dromara.northstar.gateway.TradeGateway;
 import org.dromara.northstar.strategy.IAccount;
 import org.dromara.northstar.strategy.IModule;
@@ -41,10 +41,11 @@ public class TradeModule implements IModule {
 	
 	private IModuleContext ctx;
 	
-	/* unifiedSymbol -> channelType */
-	private Map<String, ChannelType> symbolChannelMap = new HashMap<>();
+	private Set<String> mktGatewayIdSet = new HashSet<>();
 	
 	private Set<String> accountIdSet = new HashSet<>();
+	
+	private Set<String> bindedSymbolSet = new HashSet<>();
 	
 	private ModuleDescription md;
 	
@@ -56,14 +57,16 @@ public class TradeModule implements IModule {
 		this.ctx = ctx;
 		this.contractMgr = contractMgr;
 		this.md = moduleDescription;
-		moduleDescription.getModuleAccountSettingsDescription().forEach(mad -> 
+		moduleDescription.getModuleAccountSettingsDescription().forEach(mad -> { 
+			MarketGateway mktGateway = accountMgr.get(Identifier.of(mad.getAccountGatewayId())).getMarketGateway();
+			mktGatewayIdSet.add(mktGateway.gatewayId());
+			accountIdSet.add(mad.getAccountGatewayId());
 			mad.getBindedContracts().forEach(contract -> {
-				symbolChannelMap.put(contract.getUnifiedSymbol(), contract.getChannelType());
-				accountIdSet.add(mad.getAccountGatewayId());
 				Contract c = contractMgr.getContract(Identifier.of(contract.getValue()));
+				bindedSymbolSet.add(contract.getUnifiedSymbol());
 				contractAccountMap.put(c, accountMgr.get(Identifier.of(mad.getAccountGatewayId())));
-			})
-		);
+			});
+		});
 		ctx.setModule(this);
 	}
 	
@@ -94,9 +97,9 @@ public class TradeModule implements IModule {
 	@Override
 	public synchronized void onEvent(NorthstarEvent event) {
 		Object data = event.getData();
-		if(data instanceof TickField tick && symbolChannelMap.containsKey(tick.getUnifiedSymbol()) && symbolChannelMap.get(tick.getUnifiedSymbol()).toString().equals(tick.getChannelType())) {
+		if(data instanceof TickField tick && bindedSymbolSet.contains(tick.getUnifiedSymbol()) && mktGatewayIdSet.contains(tick.getGatewayId())) {
 			ctx.onTick(tick);
-		} else if (data instanceof BarField bar && symbolChannelMap.containsKey(bar.getUnifiedSymbol()) && symbolChannelMap.get(bar.getUnifiedSymbol()).toString().equals(bar.getChannelType())) {
+		} else if (data instanceof BarField bar && bindedSymbolSet.contains(bar.getUnifiedSymbol()) && mktGatewayIdSet.contains(bar.getGatewayId())) {
 			ctx.onBar(bar);
 		} else if (data instanceof OrderField order && accountIdSet.contains(order.getGatewayId())) {
 			ctx.onOrder(order);
