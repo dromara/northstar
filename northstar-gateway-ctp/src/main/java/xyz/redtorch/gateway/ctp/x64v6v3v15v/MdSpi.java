@@ -524,7 +524,7 @@ public class MdSpi extends CThostFtdcMdSpi {
 				tickBuilder.addAllAskVolume(askVolumeList);
 				tickBuilder.addAllBidPrice(bidPriceList);
 				tickBuilder.addAllBidVolume(bidVolumeList);
-				tickBuilder.setGatewayId(ChannelType.CTP.toString());
+				tickBuilder.setGatewayId(gatewayId);
 				tickBuilder.setChannelType(ChannelType.CTP.toString());
 
 				TickField tick = tickBuilder.build();
