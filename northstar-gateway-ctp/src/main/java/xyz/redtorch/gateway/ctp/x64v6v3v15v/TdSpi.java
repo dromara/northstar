@@ -322,7 +322,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 
 		new Thread(() -> {
 			try {
-				Thread.sleep(60000);
+				Thread.sleep(30000);
 				if (!(isConnected() && investorNameQueried && instrumentQueried)) {
 					logger.error("{}交易接口连接超时,尝试断开", logInfo);
 					gatewayAdapter.disconnect();
