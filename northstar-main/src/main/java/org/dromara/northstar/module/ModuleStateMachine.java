@@ -37,7 +37,7 @@ public class ModuleStateMachine implements TransactionAware {
 
 	@Override
 	public void onOrder(OrderField order) {
-		if(!curState.isOrdering()) {
+		if(!curState.isOrdering() && !OrderUtils.isDoneOrder(order) && OrderUtils.isValidOrder(order)) {
 			throw new IllegalStateException("当前状态异常：" + curState);
 		}
 		if(curState.isOrdering() && !OrderUtils.isValidOrder(order)) {
