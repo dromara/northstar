@@ -18,6 +18,7 @@ import org.dromara.northstar.strategy.OrderRequestFilter;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 
+import lombok.extern.slf4j.Slf4j;
 import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
 import xyz.redtorch.pb.CoreField.AccountField;
 import xyz.redtorch.pb.CoreField.CancelOrderReqField;
@@ -33,6 +34,7 @@ import xyz.redtorch.pb.CoreField.TradeField;
  * @author KevinHuangwl
  *
  */
+@Slf4j
 public class TradeAccount implements IAccount {
 
 	private TradeGateway tradeGateway;
@@ -84,8 +86,11 @@ public class TradeAccount implements IAccount {
 
 	@Override
 	public String submitOrder(SubmitOrderReqField orderReq) {
+		log.info("交易账户 [{}] 收到委托请求", accountId());
 		if(Objects.nonNull(orderReqFilter)) {
+			log.debug("交易账户 [{}] 进行风控检查");
 			orderReqFilter.doFilter(orderReq);
+			log.debug("交易账户 [{}] 完成风控检查");
 		}
 		return tradeGateway.submitOrder(orderReq);
 	}

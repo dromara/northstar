@@ -105,6 +105,7 @@ public class TradeIntent implements TransactionAware, TickDataAware {
 		
 		if(Objects.isNull(initialPrice)) {
 			initialPrice = tick.getLastPrice();
+			context.getLogger().debug("交易意图初始价位：{}", initialPrice);
 		}
 		if(Objects.nonNull(priceDiffConditionToAbort)) {
 			double priceDiff = Math.abs(tick.getLastPrice() - initialPrice);
@@ -119,8 +120,10 @@ public class TradeIntent implements TransactionAware, TickDataAware {
 			return;
 		}
 		if(orderIdRef.isEmpty() && !context.getState().isOrdering()) {
+			context.getLogger().debug("交易意图自动发单");
 			orderIdRef = context.submitOrderReq(contract, operation, priceType, volume - accVol, price);
 		} else if (orderIdRef.isPresent() && context.isOrderWaitTimeout(orderIdRef.get(), timeout) && tick.getActionTimestamp() - lastCancelReqTime > 3000) {
+			context.getLogger().debug("交易意图自动撤单");
 			context.cancelOrder(orderIdRef.get());
 			lastCancelReqTime = tick.getActionTimestamp();
 		}

@@ -166,11 +166,14 @@ public class ModuleContext implements IModuleContext{
 			getLogger().info("策略处于停用状态，忽略委托单");
 			return;
 		}
+		TickField tick = latestTickMap.get(tradeIntent.getContract().getUnifiedSymbol());
+		if(Objects.isNull(tick)) {
+			getLogger().warn("没有TICK行情数据时，忽略下单请求");
+			return;
+		}
 		getLogger().info("收到下单意图：{}", tradeIntent);
 		this.tradeIntent = tradeIntent;
 		tradeIntent.setContext(this);
-		TickField tick = latestTickMap.get(tradeIntent.getContract().getUnifiedSymbol());
-		Assert.notNull(tick, "没有行情时不应该发送订单");
         tradeIntent.onTick(tick);
 	}
 
@@ -181,7 +184,7 @@ public class ModuleContext implements IModuleContext{
 
 	@Override
 	public IAccount getAccount(ContractField contract) {
-		Contract c = contractMgr.getContract(Identifier.of(contract.getContractId()));
+		Contract c = contractMap2.get(contract);
 		return module.getAccount(c);
 	}
 
@@ -495,8 +498,7 @@ public class ModuleContext implements IModuleContext{
 			throw new InsufficientException(String.format("模组 [%s] 下单失败，原因：%s", module.getName(), e.getMessage()));
 		}
 		ContractField contract = orderReq.getContract();
-		Contract c = contractMgr.getContract(Identifier.of(contract.getContractId()));
-		String originOrderId = module.getAccount(c).submitOrder(orderReq);
+		String originOrderId = module.getAccount(contract).submitOrder(orderReq);
 		orderReqMap.put(originOrderId, orderReq);
 		return originOrderId;
 	}
