@@ -80,7 +80,7 @@ public class PlaybackDataLoader {
 					.build());
 		}
 		if(results.isEmpty()) {
-			log.warn("[{}] 回放数据为空", unifiedSymbol);
+			log.warn("当前查询时间 [{}] 合约数据为空", unifiedSymbol);
 		}
 		return results;
 	}
