@@ -46,7 +46,7 @@ public class DefaultOrderFilter implements OrderRequestFilter {
 	@Override
 	public void doFilter(SubmitOrderReqField orderReq) {
 		if(!contractReqCounterMap.containsKey(orderReq.getContract().getUnifiedSymbol())) {
-			throw new NoSuchElementException(orderReq.getContract().getUnifiedSymbol());
+			throw new NoSuchElementException(String.format("模组没包含合约：%s。 可选合约：%s", orderReq.getContract().getUnifiedSymbol(), contractReqCounterMap.keySet()));
 		}
 		if(contractReqCounterMap.get(orderReq.getContract().getUnifiedSymbol()).getAndIncrement() > MAX_ORDER_REQ_PER_DAY) {
 			module.getModuleContext().getLogger().warn("模组 [{}] 触发 [{}] 合约的日内免费申报上限。自动停用模组。", module.getName(), orderReq.getContract().getName());

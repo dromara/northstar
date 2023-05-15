@@ -164,6 +164,8 @@ public class TdSpi extends CThostFtdcTraderSpi {
 	private String logInfo;
 	private String gatewayId;
 	private CtpSimGatewaySettings settings;
+	
+	private AtomicInteger loadContracts = new AtomicInteger();
 
 	private String investorName = "";
 
@@ -265,6 +267,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 		loginStatus = false;
 		instrumentQueried = false;
 		investorNameQueried = false;
+		loadContracts.set(0);
 
 		if (cThostFtdcTraderApi != null) {
 			try {
@@ -318,7 +321,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 
 		new Thread(() -> {
 			try {
-				Thread.sleep(60000);
+				Thread.sleep(30000);
 				if (!(isConnected() && investorNameQueried && instrumentQueried)) {
 					logger.error("{}交易接口连接超时,尝试断开", logInfo);
 					gatewayAdapter.disconnect();
@@ -1304,9 +1307,10 @@ public class TdSpi extends CThostFtdcTraderSpi {
 					.build();
 			
 			gatewayAdapter.mktCenter.addInstrument(contract);
+			loadContracts.incrementAndGet();
 			
 			if (bIsLast) {
-				logger.info("{}交易接口合约信息获取完成!共计{}条", logInfo, gatewayAdapter.mktCenter.getContracts(ChannelType.CTP_SIM).size());
+				logger.info("{}交易接口合约信息获取完成!共计{}条", logInfo, loadContracts.get());
 				
 				instrumentQueried = true;
 				this.startIntervalQuery();
