@@ -165,6 +165,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 	private String logInfo;
 	private String gatewayId;
 	private CtpGatewaySettings settings;
+	private AtomicInteger loadContracts = new AtomicInteger();
 
 	private String investorName = "";
 
@@ -268,7 +269,8 @@ public class TdSpi extends CThostFtdcTraderSpi {
 		loginStatus = false;
 		instrumentQueried = false;
 		investorNameQueried = false;
-
+		loadContracts.set(0);
+		
 		if (cThostFtdcTraderApi != null) {
 			try {
 				CThostFtdcTraderApi cThostFtdcTraderApiForRelease = cThostFtdcTraderApi;
@@ -1311,9 +1313,10 @@ public class TdSpi extends CThostFtdcTraderSpi {
 					.build();
 			
 			gatewayAdapter.mktCenter.addInstrument(contract);
+			loadContracts.incrementAndGet();
 			
 			if (bIsLast) {
-				logger.info("{}交易接口合约信息获取完成!共计{}条", logInfo, gatewayAdapter.mktCenter.getContracts(ChannelType.CTP.toString()).size());
+				logger.info("{}交易接口合约信息获取完成!共计{}条", logInfo, loadContracts.get());
 				
 				instrumentQueried = true;
 				this.startIntervalQuery();
