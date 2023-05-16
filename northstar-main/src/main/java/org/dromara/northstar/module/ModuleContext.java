@@ -135,6 +135,7 @@ public class ModuleContext implements IModuleContext{
 		this.senderMgr = senderMgr;
 		this.bufSize.set(moduleDescription.getModuleCacheDataSize());
 		this.moduleAccount = new ModuleAccount(moduleDescription, moduleRtDescription, new ModuleStateMachine(this), moduleRepo, contractMgr, logger);
+		this.orderReqFilter = new DefaultOrderFilter(moduleDescription.getModuleAccountSettingsDescription().stream().flatMap(mad -> mad.getBindedContracts().stream()).toList(), this);
 		moduleDescription.getModuleAccountSettingsDescription().stream()
 			.forEach(mad -> {
 				for(ContractSimpleInfo csi : mad.getBindedContracts()) {
@@ -448,7 +449,6 @@ public class ModuleContext implements IModuleContext{
 	@Override
 	public void setModule(IModule module) {
 		this.module = module;
-		setOrderRequestFilter(new DefaultOrderFilter(module));
 	}
 
 	@Override
