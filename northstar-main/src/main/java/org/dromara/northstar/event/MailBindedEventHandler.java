@@ -7,9 +7,15 @@ import org.dromara.northstar.common.event.AbstractEventHandler;
 import org.dromara.northstar.common.event.GenericEventHandler;
 import org.dromara.northstar.common.event.NorthstarEvent;
 import org.dromara.northstar.common.event.NorthstarEventType;
+import org.dromara.northstar.common.utils.OrderUtils;
 import org.dromara.northstar.support.notification.MailDeliveryManager;
 
+import xyz.redtorch.pb.CoreField.OrderField;
+import xyz.redtorch.pb.CoreField.TradeField;
+
 public class MailBindedEventHandler extends AbstractEventHandler implements GenericEventHandler{
+	
+	private static final int ONE_MIN = 60000;
 
 	private MailDeliveryManager mailMgr;
 	
@@ -32,6 +38,10 @@ public class MailBindedEventHandler extends AbstractEventHandler implements Gene
 
 	@Override
 	protected void doHandle(NorthstarEvent e) {
+		if(e.getData() instanceof TradeField trade && Math.abs(System.currentTimeMillis() - trade.getTradeTimestamp()) > ONE_MIN
+				|| e.getData() instanceof OrderField order && !OrderUtils.isValidOrder(order)) {
+			return;
+		}
 		mailMgr.onEvent(e);
 	}
 
