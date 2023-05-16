@@ -48,7 +48,11 @@ public class DefaultOrderFilter implements OrderRequestFilter {
 		if(!contractReqCounterMap.containsKey(orderReq.getContract().getUnifiedSymbol())) {
 			throw new NoSuchElementException(String.format("模组没包含合约：%s。 可选合约：%s", orderReq.getContract().getUnifiedSymbol(), contractReqCounterMap.keySet()));
 		}
-		if(contractReqCounterMap.get(orderReq.getContract().getUnifiedSymbol()).getAndIncrement() > MAX_ORDER_REQ_PER_DAY) {
+		String unifiedSymbol = orderReq.getContract().getUnifiedSymbol();
+		if(module.getModuleContext().getLogger().isDebugEnabled()) {
+			module.getModuleContext().getLogger().debug("默认订单过滤器正进行风控过滤，[{}] 当天 [{}] 合约的剩余发单次数为：{}", tradingDay, unifiedSymbol, contractReqCounterMap.get(unifiedSymbol).get());
+		}
+		if(contractReqCounterMap.get(unifiedSymbol).getAndIncrement() > MAX_ORDER_REQ_PER_DAY) {
 			module.getModuleContext().getLogger().warn("模组 [{}] 触发 [{}] 合约的日内免费申报上限。自动停用模组。", module.getName(), orderReq.getContract().getName());
 			module.setEnabled(false);
 			throw new TradeException("中止委托发单");
