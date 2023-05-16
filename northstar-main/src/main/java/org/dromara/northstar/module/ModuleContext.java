@@ -203,6 +203,7 @@ public class ModuleContext implements IModuleContext{
 
 	@Override
 	public void disabledModule() {
+		getLogger().warn("策略层主动停用模组");
 		setEnabled(false);
 	}
 
