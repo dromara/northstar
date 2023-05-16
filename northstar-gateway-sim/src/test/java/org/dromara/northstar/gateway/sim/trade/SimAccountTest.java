@@ -14,8 +14,6 @@ import org.dromara.northstar.common.event.FastEventEngine;
 import org.dromara.northstar.common.model.Identifier;
 import org.dromara.northstar.gateway.Contract;
 import org.dromara.northstar.gateway.IContractManager;
-import org.dromara.northstar.gateway.sim.trade.SimAccount;
-import org.dromara.northstar.gateway.sim.trade.TradePosition;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -75,8 +73,8 @@ class SimAccountTest {
 	void shouldMakeCloseOrder() {
 		TradePosition pos = mock(TradePosition.class);
 		when(pos.totalAvailable()).thenReturn(1);
-		ConcurrentMap<ContractField, TradePosition> longMap = new ConcurrentHashMap<>();
-		longMap.put(factory.makeContract("rb2210"), pos);
+		ConcurrentMap<String, TradePosition> longMap = new ConcurrentHashMap<>();
+		longMap.put(factory.makeContract("rb2210").getContractId(), pos);
 		account.longMap = longMap;
 		account.onSubmitOrder(factory.makeOrderReq("rb2210", DirectionEnum.D_Sell, OffsetFlagEnum.OF_Close, 1, 1000, 0));
 		
@@ -90,8 +88,8 @@ class SimAccountTest {
 		});
 		
 		TradePosition pos = mock(TradePosition.class);
-		ConcurrentMap<ContractField, TradePosition> longMap = new ConcurrentHashMap<>();
-		longMap.put(factory.makeContract("rb2210"), pos);
+		ConcurrentMap<String, TradePosition> longMap = new ConcurrentHashMap<>();
+		longMap.put(factory.makeContract("rb2210").getContractId(), pos);
 		account.longMap = longMap;
 		account.onSubmitOrder(factory.makeOrderReq("rb2210", DirectionEnum.D_Sell, OffsetFlagEnum.OF_Close, 1, 1000, 0));
 		
