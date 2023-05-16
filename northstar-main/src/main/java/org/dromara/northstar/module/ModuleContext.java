@@ -265,7 +265,7 @@ public class ModuleContext implements IModuleContext{
 		try {			
 			indicatorHelperSet.stream().map(IndicatorValueUpdateHelper::getIndicator).forEach(indicator -> visualize(indicator, bar));
 		} catch(Exception e) {
-			getLogger().error("", e);
+			getLogger().error(e.getMessage(), e);
 		}
 		if(barBufQMap.get(bar.getUnifiedSymbol()).size() >= bufSize.intValue()) {
 			barBufQMap.get(bar.getUnifiedSymbol()).poll();
