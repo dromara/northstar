@@ -13,7 +13,6 @@ import org.dromara.northstar.common.utils.OrderUtils;
 import org.dromara.northstar.gateway.MarketGateway;
 import org.dromara.northstar.gateway.TradeGateway;
 import org.dromara.northstar.strategy.IAccount;
-import org.dromara.northstar.strategy.OrderRequestFilter;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
@@ -61,8 +60,6 @@ public class TradeAccount implements IAccount {
 	/* 预锁定金额 */
 	private Map<UUID, Double> frozenAmountMap = new HashMap<>();
 	
-	private OrderRequestFilter orderReqFilter;
-	
 	public TradeAccount(MarketGateway marketGateway, TradeGateway tradeGateway, GatewayDescription gatewayDescription) {
 		this.marketGateway = marketGateway;
 		this.tradeGateway = tradeGateway;
@@ -87,11 +84,6 @@ public class TradeAccount implements IAccount {
 	@Override
 	public String submitOrder(SubmitOrderReqField orderReq) {
 		log.info("交易账户 [{}] 收到委托请求", accountId());
-		if(Objects.nonNull(orderReqFilter)) {
-			log.debug("交易账户 [{}] 进行风控检查");
-			orderReqFilter.doFilter(orderReq);
-			log.debug("交易账户 [{}] 完成风控检查");
-		}
 		return tradeGateway.submitOrder(orderReq);
 	}
 
@@ -179,8 +171,4 @@ public class TradeAccount implements IAccount {
 		return Optional.of(posTable.get(posDirection, unifiedSymbol));
 	}
 
-	@Override
-	public void setOrderRequestFilter(OrderRequestFilter filter) {
-		orderReqFilter = filter;
-	}
 }

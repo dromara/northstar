@@ -61,9 +61,4 @@ public interface IModule {
 	 * @return
 	 */
 	IModuleContext getModuleContext();
-	/**
-	 * 设置订单过滤器
-	 * @param filter
-	 */
-	void setOrderRequestFilter(OrderRequestFilter filter);
 }

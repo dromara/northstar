@@ -20,7 +20,6 @@ import org.dromara.northstar.gateway.TradeGateway;
 import org.dromara.northstar.strategy.IAccount;
 import org.dromara.northstar.strategy.IModule;
 import org.dromara.northstar.strategy.IModuleContext;
-import org.dromara.northstar.strategy.OrderRequestFilter;
 
 import lombok.extern.slf4j.Slf4j;
 import xyz.redtorch.pb.CoreField.BarField;
@@ -140,12 +139,5 @@ public class TradeModule implements IModule {
 	public IModuleContext getModuleContext() {
 		return ctx;
 	}
-
-	@Override
-	public void setOrderRequestFilter(OrderRequestFilter filter) {
-		contractAccountMap.values().forEach(acc -> acc.setOrderRequestFilter(filter));
-	}
-
-	
 
 }

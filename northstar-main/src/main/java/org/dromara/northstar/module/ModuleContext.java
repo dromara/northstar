@@ -124,6 +124,8 @@ public class ModuleContext implements IModuleContext{
 	
 	protected IContractManager contractMgr;
 	
+	protected OrderRequestFilter orderReqFilter;
+	
 	public ModuleContext(TradeStrategy tradeStrategy, ModuleDescription moduleDescription, ModuleRuntimeDescription moduleRtDescription,
 			IContractManager contractMgr, IModuleRepository moduleRepo, ModuleLoggerFactory loggerFactory, IMessageSenderManager senderMgr) {
 		this.tradeStrategy = tradeStrategy;
@@ -469,7 +471,7 @@ public class ModuleContext implements IModuleContext{
 		String gatewayId = getAccount(contract).accountId();
 		DirectionEnum direction = OrderUtils.resolveDirection(operation);
 		List<TradeField> nonclosedTrades = moduleAccount.getNonclosedTrades(contract.getUnifiedSymbol(), FieldUtils.getOpposite(direction));
-		return Optional.of(submitOrderReq(SubmitOrderReqField.newBuilder()
+		return Optional.ofNullable(submitOrderReq(SubmitOrderReqField.newBuilder()
 				.setOriginOrderId(id)
 				.setContract(contract)
 				.setGatewayId(gatewayId)
@@ -495,7 +497,16 @@ public class ModuleContext implements IModuleContext{
 		try {
 			moduleAccount.onSubmitOrder(orderReq);
 		} catch (InsufficientException e) {
-			throw new InsufficientException(String.format("模组 [%s] 下单失败，原因：%s", module.getName(), e.getMessage()));
+			getLogger().error("发单失败。原因：" + e.getMessage(), e);
+			return null;
+		}
+		try {
+			if(Objects.nonNull(orderReqFilter)) {
+				orderReqFilter.doFilter(orderReq);
+			}
+		} catch (Exception e) {
+			getLogger().error("发单失败。原因：" + e.getMessage(), e);
+			return null;
 		}
 		ContractField contract = orderReq.getContract();
 		String originOrderId = module.getAccount(contract).submitOrder(orderReq);
@@ -533,6 +544,7 @@ public class ModuleContext implements IModuleContext{
 
 	@Override
 	public void setEnabled(boolean enabled) {
+		getLogger().info("【{}】 模组", enabled ? "启用" : "停用");
 		this.enabled = enabled;
 		moduleRepo.saveRuntime(getRuntimeDescription(false));
 	}
@@ -544,7 +556,7 @@ public class ModuleContext implements IModuleContext{
 
 	@Override
 	public void setOrderRequestFilter(OrderRequestFilter filter) {
-		module.setOrderRequestFilter(filter);
+		this.orderReqFilter = filter;
 	}
 
 }
