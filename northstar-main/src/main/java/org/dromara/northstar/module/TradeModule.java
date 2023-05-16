@@ -97,14 +97,18 @@ public class TradeModule implements IModule {
 	@Override
 	public synchronized void onEvent(NorthstarEvent event) {
 		Object data = event.getData();
-		if(data instanceof TickField tick && bindedSymbolSet.contains(tick.getUnifiedSymbol()) && mktGatewayIdSet.contains(tick.getGatewayId())) {
-			ctx.onTick(tick);
-		} else if (data instanceof BarField bar && bindedSymbolSet.contains(bar.getUnifiedSymbol()) && mktGatewayIdSet.contains(bar.getGatewayId())) {
-			ctx.onBar(bar);
-		} else if (data instanceof OrderField order && accountIdSet.contains(order.getGatewayId())) {
-			ctx.onOrder(order);
-		} else if (data instanceof TradeField trade && accountIdSet.contains(trade.getGatewayId())) {
-			ctx.onTrade(trade);
+		try {
+			if(data instanceof TickField tick && bindedSymbolSet.contains(tick.getUnifiedSymbol()) && mktGatewayIdSet.contains(tick.getGatewayId())) {
+				ctx.onTick(tick);
+			} else if (data instanceof BarField bar && bindedSymbolSet.contains(bar.getUnifiedSymbol()) && mktGatewayIdSet.contains(bar.getGatewayId())) {
+				ctx.onBar(bar);
+			} else if (data instanceof OrderField order && accountIdSet.contains(order.getGatewayId())) {
+				ctx.onOrder(order);
+			} else if (data instanceof TradeField trade && accountIdSet.contains(trade.getGatewayId())) {
+				ctx.onTrade(trade);
+			}
+		} catch (Exception e) {
+			ctx.getLogger().error(e.getMessage(), e);
 		}
 	}
 
