@@ -20,7 +20,6 @@ import org.dromara.northstar.gateway.TradeGateway;
 import org.dromara.northstar.strategy.IAccount;
 import org.dromara.northstar.strategy.IModule;
 import org.dromara.northstar.strategy.IModuleContext;
-import org.dromara.northstar.strategy.OrderRequestFilter;
 
 import lombok.extern.slf4j.Slf4j;
 import xyz.redtorch.pb.CoreField.BarField;
@@ -97,14 +96,18 @@ public class TradeModule implements IModule {
 	@Override
 	public synchronized void onEvent(NorthstarEvent event) {
 		Object data = event.getData();
-		if(data instanceof TickField tick && bindedSymbolSet.contains(tick.getUnifiedSymbol()) && mktGatewayIdSet.contains(tick.getGatewayId())) {
-			ctx.onTick(tick);
-		} else if (data instanceof BarField bar && bindedSymbolSet.contains(bar.getUnifiedSymbol()) && mktGatewayIdSet.contains(bar.getGatewayId())) {
-			ctx.onBar(bar);
-		} else if (data instanceof OrderField order && accountIdSet.contains(order.getGatewayId())) {
-			ctx.onOrder(order);
-		} else if (data instanceof TradeField trade && accountIdSet.contains(trade.getGatewayId())) {
-			ctx.onTrade(trade);
+		try {
+			if(data instanceof TickField tick && bindedSymbolSet.contains(tick.getUnifiedSymbol()) && mktGatewayIdSet.contains(tick.getGatewayId())) {
+				ctx.onTick(tick);
+			} else if (data instanceof BarField bar && bindedSymbolSet.contains(bar.getUnifiedSymbol()) && mktGatewayIdSet.contains(bar.getGatewayId())) {
+				ctx.onBar(bar);
+			} else if (data instanceof OrderField order && accountIdSet.contains(order.getGatewayId())) {
+				ctx.onOrder(order);
+			} else if (data instanceof TradeField trade && accountIdSet.contains(trade.getGatewayId())) {
+				ctx.onTrade(trade);
+			}
+		} catch (Exception e) {
+			ctx.getLogger().error(e.getMessage(), e);
 		}
 	}
 
@@ -136,12 +139,5 @@ public class TradeModule implements IModule {
 	public IModuleContext getModuleContext() {
 		return ctx;
 	}
-
-	@Override
-	public void setOrderRequestFilter(OrderRequestFilter filter) {
-		contractAccountMap.values().forEach(acc -> acc.setOrderRequestFilter(filter));
-	}
-
-	
 
 }

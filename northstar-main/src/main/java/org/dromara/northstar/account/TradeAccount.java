@@ -13,11 +13,11 @@ import org.dromara.northstar.common.utils.OrderUtils;
 import org.dromara.northstar.gateway.MarketGateway;
 import org.dromara.northstar.gateway.TradeGateway;
 import org.dromara.northstar.strategy.IAccount;
-import org.dromara.northstar.strategy.OrderRequestFilter;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 
+import lombok.extern.slf4j.Slf4j;
 import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
 import xyz.redtorch.pb.CoreField.AccountField;
 import xyz.redtorch.pb.CoreField.CancelOrderReqField;
@@ -33,6 +33,7 @@ import xyz.redtorch.pb.CoreField.TradeField;
  * @author KevinHuangwl
  *
  */
+@Slf4j
 public class TradeAccount implements IAccount {
 
 	private TradeGateway tradeGateway;
@@ -59,8 +60,6 @@ public class TradeAccount implements IAccount {
 	/* 预锁定金额 */
 	private Map<UUID, Double> frozenAmountMap = new HashMap<>();
 	
-	private OrderRequestFilter orderReqFilter;
-	
 	public TradeAccount(MarketGateway marketGateway, TradeGateway tradeGateway, GatewayDescription gatewayDescription) {
 		this.marketGateway = marketGateway;
 		this.tradeGateway = tradeGateway;
@@ -84,9 +83,7 @@ public class TradeAccount implements IAccount {
 
 	@Override
 	public String submitOrder(SubmitOrderReqField orderReq) {
-		if(Objects.nonNull(orderReqFilter)) {
-			orderReqFilter.doFilter(orderReq);
-		}
+		log.info("交易账户 [{}] 收到委托请求", accountId());
 		return tradeGateway.submitOrder(orderReq);
 	}
 
@@ -174,8 +171,4 @@ public class TradeAccount implements IAccount {
 		return Optional.of(posTable.get(posDirection, unifiedSymbol));
 	}
 
-	@Override
-	public void setOrderRequestFilter(OrderRequestFilter filter) {
-		orderReqFilter = filter;
-	}
 }

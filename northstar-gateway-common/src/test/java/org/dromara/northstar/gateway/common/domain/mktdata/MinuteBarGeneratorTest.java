@@ -11,8 +11,8 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.function.Consumer;
 
+import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.constant.DateTimeConstant;
-import org.dromara.northstar.gateway.common.domain.mktdata.MinuteBarGenerator;
 import org.dromara.northstar.gateway.common.domain.time.GenericTradeTime;
 import org.junit.jupiter.api.Test;
 
@@ -41,6 +41,7 @@ class MinuteBarGeneratorTest {
 			long barTime = time - time % 60000 + 60000;
 			TickField tick1 = TickField.newBuilder()
 					.setUnifiedSymbol(contract.getUnifiedSymbol())
+					.setChannelType(ChannelType.SIM.toString())
 					.setActionDay(tickDateTime.format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
 					.setActionTime(tickDateTime.format(DateTimeConstant.T_FORMAT_WITH_MS_INT_FORMATTER))
 					.setActionTimestamp(time)

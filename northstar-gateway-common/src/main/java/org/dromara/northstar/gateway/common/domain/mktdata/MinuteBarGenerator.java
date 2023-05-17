@@ -5,6 +5,7 @@ import java.time.ZoneOffset;
 import java.util.Objects;
 import java.util.function.Consumer;
 
+import org.apache.commons.lang3.StringUtils;
 import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.gateway.TradeTimeDefinition;
 import org.dromara.northstar.gateway.common.domain.time.OpenningMinuteClock;
@@ -44,8 +45,14 @@ public class MinuteBarGenerator {
 	 */
 	public synchronized void update(TickField tick) {
 		// 如果tick为空或者合约不匹配则返回
-		if (tick == null || !contract.getUnifiedSymbol().equals(tick.getUnifiedSymbol())) {
-			log.warn("合约不匹配,当前Bar合约{}", contract.getUnifiedSymbol());
+		if (tick == null) {
+			return;
+		}
+		boolean sameSymbol = StringUtils.equals(contract.getUnifiedSymbol(), tick.getUnifiedSymbol());
+		boolean sameChannel = StringUtils.equals(contract.getChannelType(), tick.getChannelType());
+		if(!(sameSymbol && sameChannel)) {
+			if(!sameSymbol)	log.warn("合约不匹配，期望 [{}]，实际 [{}]", contract.getUnifiedSymbol(), tick.getUnifiedSymbol());
+			if(!sameChannel) log.warn("[{}] 合约渠道不匹配，期望 [{}]，实际 [{}]", contract.getUnifiedSymbol(), contract.getChannelType(), tick.getChannelType());
 			return;
 		}
 		if (System.currentTimeMillis() - tick.getActionTimestamp() > MAX_TIME_GAP) {
@@ -66,9 +73,9 @@ public class MinuteBarGenerator {
 		if(Objects.isNull(barBuilder)) {
 			cutoffTime = clock.barMinute(tick);
 			barBuilder = BarField.newBuilder()
-					.setGatewayId(contract.getGatewayId())
+					.setGatewayId(tick.getGatewayId())
 					.setChannelType(tick.getChannelType())
-					.setUnifiedSymbol(contract.getUnifiedSymbol())
+					.setUnifiedSymbol(tick.getUnifiedSymbol())
 					.setTradingDay(tick.getTradingDay())
 					.setOpenPrice(tick.getLastPrice())
 					.setHighPrice(tick.getLastPrice())

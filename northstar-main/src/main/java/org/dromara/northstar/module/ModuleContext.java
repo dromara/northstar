@@ -124,6 +124,8 @@ public class ModuleContext implements IModuleContext{
 	
 	protected IContractManager contractMgr;
 	
+	protected OrderRequestFilter orderReqFilter;
+	
 	public ModuleContext(TradeStrategy tradeStrategy, ModuleDescription moduleDescription, ModuleRuntimeDescription moduleRtDescription,
 			IContractManager contractMgr, IModuleRepository moduleRepo, ModuleLoggerFactory loggerFactory, IMessageSenderManager senderMgr) {
 		this.tradeStrategy = tradeStrategy;
@@ -133,6 +135,7 @@ public class ModuleContext implements IModuleContext{
 		this.senderMgr = senderMgr;
 		this.bufSize.set(moduleDescription.getModuleCacheDataSize());
 		this.moduleAccount = new ModuleAccount(moduleDescription, moduleRtDescription, new ModuleStateMachine(this), moduleRepo, contractMgr, logger);
+		this.orderReqFilter = new DefaultOrderFilter(moduleDescription.getModuleAccountSettingsDescription().stream().flatMap(mad -> mad.getBindedContracts().stream()).toList(), this);
 		moduleDescription.getModuleAccountSettingsDescription().stream()
 			.forEach(mad -> {
 				for(ContractSimpleInfo csi : mad.getBindedContracts()) {
@@ -166,11 +169,14 @@ public class ModuleContext implements IModuleContext{
 			getLogger().info("策略处于停用状态，忽略委托单");
 			return;
 		}
+		TickField tick = latestTickMap.get(tradeIntent.getContract().getUnifiedSymbol());
+		if(Objects.isNull(tick)) {
+			getLogger().warn("没有TICK行情数据时，忽略下单请求");
+			return;
+		}
 		getLogger().info("收到下单意图：{}", tradeIntent);
 		this.tradeIntent = tradeIntent;
 		tradeIntent.setContext(this);
-		TickField tick = latestTickMap.get(tradeIntent.getContract().getUnifiedSymbol());
-		Assert.notNull(tick, "没有行情时不应该发送订单");
         tradeIntent.onTick(tick);
 	}
 
@@ -181,7 +187,7 @@ public class ModuleContext implements IModuleContext{
 
 	@Override
 	public IAccount getAccount(ContractField contract) {
-		Contract c = contractMgr.getContract(Identifier.of(contract.getContractId()));
+		Contract c = contractMap2.get(contract);
 		return module.getAccount(c);
 	}
 
@@ -197,6 +203,7 @@ public class ModuleContext implements IModuleContext{
 
 	@Override
 	public void disabledModule() {
+		getLogger().warn("策略层主动停用模组");
 		setEnabled(false);
 	}
 
@@ -262,7 +269,7 @@ public class ModuleContext implements IModuleContext{
 		try {			
 			indicatorHelperSet.stream().map(IndicatorValueUpdateHelper::getIndicator).forEach(indicator -> visualize(indicator, bar));
 		} catch(Exception e) {
-			getLogger().error("", e);
+			getLogger().error(e.getMessage(), e);
 		}
 		if(barBufQMap.get(bar.getUnifiedSymbol()).size() >= bufSize.intValue()) {
 			barBufQMap.get(bar.getUnifiedSymbol()).poll();
@@ -443,7 +450,6 @@ public class ModuleContext implements IModuleContext{
 	@Override
 	public void setModule(IModule module) {
 		this.module = module;
-		setOrderRequestFilter(new DefaultOrderFilter(module));
 	}
 
 	@Override
@@ -466,7 +472,7 @@ public class ModuleContext implements IModuleContext{
 		String gatewayId = getAccount(contract).accountId();
 		DirectionEnum direction = OrderUtils.resolveDirection(operation);
 		List<TradeField> nonclosedTrades = moduleAccount.getNonclosedTrades(contract.getUnifiedSymbol(), FieldUtils.getOpposite(direction));
-		return Optional.of(submitOrderReq(SubmitOrderReqField.newBuilder()
+		return Optional.ofNullable(submitOrderReq(SubmitOrderReqField.newBuilder()
 				.setOriginOrderId(id)
 				.setContract(contract)
 				.setGatewayId(gatewayId)
@@ -492,11 +498,19 @@ public class ModuleContext implements IModuleContext{
 		try {
 			moduleAccount.onSubmitOrder(orderReq);
 		} catch (InsufficientException e) {
-			throw new InsufficientException(String.format("模组 [%s] 下单失败，原因：%s", module.getName(), e.getMessage()));
+			getLogger().error("发单失败。原因：" + e.getMessage(), e);
+			return null;
+		}
+		try {
+			if(Objects.nonNull(orderReqFilter)) {
+				orderReqFilter.doFilter(orderReq);
+			}
+		} catch (Exception e) {
+			getLogger().error("发单失败。原因：" + e.getMessage(), e);
+			return null;
 		}
 		ContractField contract = orderReq.getContract();
-		Contract c = contractMgr.getContract(Identifier.of(contract.getContractId()));
-		String originOrderId = module.getAccount(c).submitOrder(orderReq);
+		String originOrderId = module.getAccount(contract).submitOrder(orderReq);
 		orderReqMap.put(originOrderId, orderReq);
 		return originOrderId;
 	}
@@ -531,6 +545,7 @@ public class ModuleContext implements IModuleContext{
 
 	@Override
 	public void setEnabled(boolean enabled) {
+		getLogger().info("【{}】 模组", enabled ? "启用" : "停用");
 		this.enabled = enabled;
 		moduleRepo.saveRuntime(getRuntimeDescription(false));
 	}
@@ -542,7 +557,7 @@ public class ModuleContext implements IModuleContext{
 
 	@Override
 	public void setOrderRequestFilter(OrderRequestFilter filter) {
-		module.setOrderRequestFilter(filter);
+		this.orderReqFilter = filter;
 	}
 
 }

@@ -335,6 +335,7 @@ public class ModuleService implements PostLoadAware {
 	public boolean toggleModule(String name) {
 		IModule module = moduleMgr.get(Identifier.of(name));
 		boolean flag = !module.isEnabled();
+		log.info("切换模组启停状态：[{}] {} -> {}", name, module.isEnabled(), flag);
 		module.setEnabled(flag);
 		return flag;
 	}

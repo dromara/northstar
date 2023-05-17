@@ -45,8 +45,9 @@ public class SimAccount implements TickDataAware{
 	protected ConcurrentMap<String, OpenTradeRequest> openReqMap = new ConcurrentHashMap<>();
 	protected ConcurrentMap<String, CloseTradeRequest> closeReqMap = new ConcurrentHashMap<>();
 
-	protected ConcurrentMap<ContractField, TradePosition> longMap = new ConcurrentHashMap<>();
-	protected ConcurrentMap<ContractField, TradePosition> shortMap = new ConcurrentHashMap<>();
+	// contractId -> position
+	protected ConcurrentMap<String, TradePosition> longMap = new ConcurrentHashMap<>();
+	protected ConcurrentMap<String, TradePosition> shortMap = new ConcurrentHashMap<>();
 	
 	protected volatile double totalCloseProfit;
 	
@@ -88,11 +89,11 @@ public class SimAccount implements TickDataAware{
 		this.totalWithdraw = simAccDescription.getTotalWithdraw();
 		for(byte[] uncloseTradeData : simAccDescription.getOpenTrades()) {
 			TradeField uncloseTrade = TradeField.parseFrom(uncloseTradeData);
-			Map<ContractField, TradePosition> tMap = getOpeningMap(uncloseTrade.getDirection());
-			if(tMap.containsKey(uncloseTrade.getContract())) {
-				tMap.get(uncloseTrade.getContract()).onTrade(uncloseTrade);
+			Map<String, TradePosition> tMap = getOpeningMap(uncloseTrade.getDirection());
+			if(tMap.containsKey(uncloseTrade.getContract().getContractId())) {
+				tMap.get(uncloseTrade.getContract().getContractId()).onTrade(uncloseTrade);
 			}else {
-				tMap.put(uncloseTrade.getContract(), new TradePosition(List.of(uncloseTrade), ClosingPolicy.FIRST_IN_FIRST_OUT));
+				tMap.put(uncloseTrade.getContract().getContractId(), new TradePosition(List.of(uncloseTrade), ClosingPolicy.FIRST_IN_FIRST_OUT));
 			}
 		}
 	}
@@ -197,7 +198,7 @@ public class SimAccount implements TickDataAware{
 		}
 	}
 	
-	private Map<ContractField, TradePosition> getOpeningMap(DirectionEnum direction){
+	private Map<String, TradePosition> getOpeningMap(DirectionEnum direction){
 		return switch(direction) {
 		case D_Buy -> longMap;
 		case D_Sell -> shortMap;
@@ -205,7 +206,7 @@ public class SimAccount implements TickDataAware{
 		};
 	}
 	
-	private Map<ContractField, TradePosition> getClosingMap(DirectionEnum direction){
+	private Map<String, TradePosition> getClosingMap(DirectionEnum direction){
 		return switch(direction) {
 		case D_Buy -> shortMap;
 		case D_Sell -> longMap;
@@ -214,7 +215,7 @@ public class SimAccount implements TickDataAware{
 	}
 	
 	private TradePosition getClosingPositionByReq(SubmitOrderReqField orderReq) {
-		TradePosition pos = getClosingMap(orderReq.getDirection()).get(orderReq.getContract());
+		TradePosition pos = getClosingMap(orderReq.getDirection()).get(orderReq.getContract().getContractId());
 		if(pos == null)
 			throw new IllegalStateException("没有找到可以平仓的合约");
 		return pos;
@@ -229,22 +230,22 @@ public class SimAccount implements TickDataAware{
 	}
 	
 	public void onOpenTrade(TradeField trade) {
-		Map<ContractField, TradePosition> tMap = getOpeningMap(trade.getDirection());
-		if(tMap.containsKey(trade.getContract())) {
-			tMap.get(trade.getContract()).onTrade(trade);
+		Map<String, TradePosition> tMap = getOpeningMap(trade.getDirection());
+		if(tMap.containsKey(trade.getContract().getContractId())) {
+			tMap.get(trade.getContract().getContractId()).onTrade(trade);
 		} else {
-			tMap.put(trade.getContract(), new TradePosition(List.of(trade), ClosingPolicy.FIRST_IN_FIRST_OUT));
+			tMap.put(trade.getContract().getContractId(), new TradePosition(List.of(trade), ClosingPolicy.FIRST_IN_FIRST_OUT));
 		}
 		onTrade(trade);
 		savingCallback.accept(getDescription());
 	}
 	
 	public void onCloseTrade(TradeField trade) {
-		Map<ContractField, TradePosition> tMap = getClosingMap(trade.getDirection());
-		if(!tMap.containsKey(trade.getContract())) {
+		Map<String, TradePosition> tMap = getClosingMap(trade.getDirection());
+		if(!tMap.containsKey(trade.getContract().getContractId())) {
 			throw new IllegalStateException("没有对应持仓可以对冲当前成交：" + MessagePrinter.print(trade));
 		}
-		addCloseProfit(tMap.get(trade.getContract()).onTrade(trade));
+		addCloseProfit(tMap.get(trade.getContract().getContractId()).onTrade(trade));
 		onTrade(trade);
 		savingCallback.accept(getDescription());
 	}
@@ -281,10 +282,10 @@ public class SimAccount implements TickDataAware{
 		reportPosition(shortMap);
 	}
 	
-	private void reportPosition(Map<ContractField, TradePosition> posMap) {
-		Iterator<Entry<ContractField, TradePosition>> itEntry = posMap.entrySet().iterator();
+	private void reportPosition(Map<String, TradePosition> posMap) {
+		Iterator<Entry<String, TradePosition>> itEntry = posMap.entrySet().iterator();
 		while(itEntry.hasNext()) {
-			Entry<ContractField, TradePosition> e = itEntry.next();
+			Entry<String, TradePosition> e = itEntry.next();
 			PositionField pf = e.getValue().convertToPositionField(this);
 			feEngine.emitEvent(NorthstarEventType.POSITION, pf);
 			if(pf.getPosition() == 0) {

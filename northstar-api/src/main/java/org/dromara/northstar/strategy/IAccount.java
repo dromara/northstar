@@ -92,9 +92,4 @@ public interface IAccount extends TransactionAware{
 	 * @return
 	 */
 	TradeGateway getTradeGateway();
-	/**
-	 * 设定委托过滤器
-	 * @param filter
-	 */
-	void setOrderRequestFilter(OrderRequestFilter filter);
 }
