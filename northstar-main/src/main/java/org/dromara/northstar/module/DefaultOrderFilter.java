@@ -48,7 +48,7 @@ public class DefaultOrderFilter implements OrderRequestFilter {
 		}
 		String unifiedSymbol = orderReq.getContract().getUnifiedSymbol();
 		if(ctx.getLogger().isDebugEnabled()) {
-			ctx.getLogger().debug("当天 [{}] 合约的剩余发单次数为：{}", unifiedSymbol, contractReqCounterMap.get(unifiedSymbol).get());
+			ctx.getLogger().debug("当天 [{}] 合约的剩余发单次数为：{}", unifiedSymbol, MAX_ORDER_REQ_PER_DAY - contractReqCounterMap.get(unifiedSymbol).get());
 		}
 		if(contractReqCounterMap.get(unifiedSymbol).getAndIncrement() > MAX_ORDER_REQ_PER_DAY) {
 			ctx.getLogger().warn("模组触发 [{}] 合约的日内免费申报上限。自动停用模组。", orderReq.getContract().getName());
