@@ -6,6 +6,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.cert.CertificateException;
 import java.time.Duration;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -192,7 +193,7 @@ public class AppConfig implements WebMvcConfigurer, DisposableBean {
     
     @Bean
     CommandLineRunner printVersionInfo(BuildProperties buildProperties) {
-    	return args -> log.info("Version: {}, Build Time: {}", buildProperties.getVersion(), buildProperties.getTime());
+    	return args -> log.info("Version: {}, Build Time: {}", buildProperties.getVersion(), buildProperties.getTime().atOffset(ZoneOffset.ofHours(8)));
 	}
 
 	@Override
