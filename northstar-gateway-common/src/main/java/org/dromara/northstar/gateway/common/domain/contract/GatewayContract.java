@@ -106,7 +106,7 @@ public class GatewayContract implements Contract, TickDataAware{
 
 	@Override
 	public void endOfMarket() {
-		barGen.endOfBar();
+		barGen.forceEndOfBar();
 	}
 
 	@Override

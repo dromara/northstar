@@ -199,7 +199,7 @@ public class DataServiceManager implements IDataServiceManager {
 						.setContractId(unifiedSymbol + "@" + channelName(exchange))
 						.setFullName(name)
 						.setName(name)
-						.setChannelType(ChannelType.PLAYBACK.toString())
+						.setChannelType(channelName(exchange))
 						.setGatewayId(channelName(exchange))
 						.setThirdPartyId(symbol + "@" + channelName(exchange))
 						.setLastTradeDateOrContractMonth(getValue("delist_date", fieldIndexMap, item, ""))

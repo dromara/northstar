@@ -145,7 +145,7 @@ public class IndexContract implements Contract, TickDataAware{
 
 	@Override
 	public void endOfMarket() {
-		barGen.endOfBar();
+		barGen.forceEndOfBar();
 	}
 
 	@Override

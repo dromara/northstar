@@ -6,6 +6,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.cert.CertificateException;
 import java.time.Duration;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -28,7 +29,9 @@ import org.dromara.northstar.web.interceptor.AuthorizationInterceptor;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.info.BuildProperties;
 import org.springframework.boot.system.ApplicationHome;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
@@ -187,6 +190,11 @@ public class AppConfig implements WebMvcConfigurer, DisposableBean {
     MailDeliveryManager mailDeliveryManager(IMailMessageContentHandler handler) {
         return new MailDeliveryManager(new MailSenderFactory(), handler);
     }
+    
+    @Bean
+    CommandLineRunner printVersionInfo(BuildProperties buildProperties) {
+    	return args -> log.info("Version: {}, Build Time: {}", buildProperties.getVersion(), buildProperties.getTime().atOffset(ZoneOffset.ofHours(8)));
+	}
 
 	@Override
 	public void destroy() throws Exception {

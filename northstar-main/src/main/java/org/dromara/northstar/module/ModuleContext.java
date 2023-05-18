@@ -498,7 +498,8 @@ public class ModuleContext implements IModuleContext{
 		try {
 			moduleAccount.onSubmitOrder(orderReq);
 		} catch (InsufficientException e) {
-			getLogger().error("发单失败。原因：" + e.getMessage(), e);
+			getLogger().error("发单失败。原因：{}", e.getMessage());
+			tradeIntent = null;
 			return null;
 		}
 		try {
@@ -506,7 +507,8 @@ public class ModuleContext implements IModuleContext{
 				orderReqFilter.doFilter(orderReq);
 			}
 		} catch (Exception e) {
-			getLogger().error("发单失败。原因：" + e.getMessage(), e);
+			getLogger().error("发单失败。原因：{}", e.getMessage());
+			tradeIntent = null;
 			return null;
 		}
 		ContractField contract = orderReq.getContract();
