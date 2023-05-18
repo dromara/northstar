@@ -118,7 +118,7 @@ public class MinuteBarGenerator {
 	/**
 	 * 小节收盘检查
 	 */
-	public synchronized void endOfBar() {
+	public synchronized void forceEndOfBar() {
 		if(Objects.isNull(lastTick) || System.currentTimeMillis() - lastTick.getActionTimestamp() < MAX_TIME_GAP) {
 			return;
 		}
