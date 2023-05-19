@@ -230,7 +230,21 @@ export default {
           retriableRequest()
           return item
         })
+        this.timer = setTimeout(this.autoRefreshList, 30000)
       })
+    },
+    async autoRefreshList() {
+      const modules = await moduleApi.getAllModules()
+      if(modules.length > 0){
+        const moduleRtPromises =  modules.map(m => moduleApi.getModuleRuntime(m.moduleName))
+        const moduleRts = await Promise.all(moduleRtPromises)
+        const moduleRtMap = {}
+        moduleRts.forEach(rt => moduleRtMap[rt.moduleName] = rt)
+        modules.forEach(item => item.runtime = moduleRtMap[item.moduleName])
+        this.$store.commit('updateList', [])      // 确保界面有刷新，直接提交新对象时会刷新失败
+        this.$store.commit('updateList', modules)
+      }
+      this.timer = setTimeout(this.autoRefreshList, 30000)   // 每30秒刷新一次
     },
     async saveModule(module) {
       console.log(module)
