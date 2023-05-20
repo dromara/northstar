@@ -23,8 +23,6 @@ import org.dromara.northstar.indicator.trend.SMAIndicator;
  */
 public class KDIndicator extends AbstractIndicator implements Indicator{
 
-	private static String ERR_MSG = "KD指标是一个多值指标，不能直接调用该指标方法，应该获取具有的指标线进行调用";
-	
 	private Indicator rsv;
 	private Indicator k;
 	private Indicator d;
@@ -41,21 +39,14 @@ public class KDIndicator extends AbstractIndicator implements Indicator{
 		return num;
 	}
 	
+	/**
+	 * KD指标是一个多值指标，不能直接调用该指标方法，应该获取具体的指标线进行调用
+	 */
 	@Override
 	public Num get(int step) {
-		throw new UnsupportedOperationException(ERR_MSG);
+		return Num.NaN();
 	}
 
-	@Override
-	public double value(int step) {
-		throw new UnsupportedOperationException(ERR_MSG);
-	}
-
-	@Override
-	public List<Num> getData() {
-		throw new UnsupportedOperationException(ERR_MSG);
-	}
-	
 	@Override
 	public List<Indicator> dependencies() {
 		return List.of(d);
