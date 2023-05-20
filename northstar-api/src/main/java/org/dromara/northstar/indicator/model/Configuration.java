@@ -2,6 +2,7 @@ package org.dromara.northstar.indicator.model;
 
 import org.dromara.northstar.indicator.constant.PeriodUnit;
 import org.dromara.northstar.indicator.constant.ValueType;
+import org.springframework.util.Assert;
 
 import xyz.redtorch.pb.CoreField.ContractField;
 
@@ -104,6 +105,10 @@ public record Configuration(String indicatorName, ContractField contract, int nu
 		}
 		
 		public Configuration build() {
+			if(visible) {
+				Assert.hasText(indicatorName, "指标名称未设置");
+				Assert.notNull(contract, indicatorName + " 未绑定计算合约");
+			}
 			return new Configuration(indicatorName, contract, numOfUnits, period, valueType, cacheLength, ifPlotPerBar, visible);
 		}
 	}
