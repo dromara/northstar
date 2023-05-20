@@ -19,8 +19,6 @@ If(!(test-path $DistPath)){
 }
 #JDK17下载地址
 $JDK17DownloadUrl = "https://download.oracle.com/java/17/latest/jdk-17_windows-x64_bin.msi"
-#Redis下载地址
-$RedisDownloadUrl = "https://gitee.com/dromara/northstar/attach_files/1077290/download"
 
 # 检查环境  
 function checkCommand([string] $name, [string] $checkPattern){
@@ -73,13 +71,6 @@ If(checkCommand java.exe 17*){
 	$programPath = "C:\Program Files\Java"
 	$jdkPath = getInstallPath $programPath jdk-17*
 	setEnvironment Java "$jdkPath\bin"
-}
-
-# Redis环境安装
-If(checkService redis){
-	"Redis installed"
-} else {
-	downloadAndInstallMSI $RedisDownloadUrl $BasePath Redis-x64-3.0.504.msi
 }
 
 $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User") 
