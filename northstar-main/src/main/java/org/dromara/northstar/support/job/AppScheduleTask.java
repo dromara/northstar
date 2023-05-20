@@ -28,7 +28,7 @@ public class AppScheduleTask {
 	/**
 	 * K线数据合成检查
 	 */
-	@Scheduled(cron="10 0/1 * ? * 1-6")
+	@Scheduled(cron="0 0/1 * ? * 1-6")
 	public void sectionFinishUp() {
 		mktCenter.endOfMarketTime();
 		log.debug("K线数据合成检查");

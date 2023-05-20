@@ -20,7 +20,7 @@ public class MinuteBarGenerator {
 
 	private BarField.Builder barBuilder;
 
-	private static final long MAX_TIME_GAP = 90000; //90秒TICK过期判定
+	private static final long MAX_TIME_GAP = 15000; //15秒TICK过期判定
 
 	private LocalDateTime cutoffTime;
 	
