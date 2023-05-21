@@ -12,7 +12,6 @@ import org.dromara.northstar.common.model.PlaybackRuntimeDescription;
 import org.dromara.northstar.data.IPlaybackRuntimeRepository;
 import org.dromara.northstar.gateway.Gateway;
 import org.dromara.northstar.gateway.GatewayFactory;
-import org.dromara.northstar.gateway.GatewayMetaProvider;
 import org.dromara.northstar.gateway.IContractManager;
 import org.dromara.northstar.gateway.playback.utils.CtpPlaybackClock;
 import org.dromara.northstar.gateway.playback.utils.PlaybackClock;
@@ -26,14 +25,14 @@ public class PlaybackGatewayFactory implements GatewayFactory{
 	
 	private FastEventEngine feEngine;
 	
-	private GatewayMetaProvider gatewayMetaProvider;
+	private PlaybackDataServiceManager dsMgr;
 	
 	private IContractManager contractMgr;
 	
 	public PlaybackGatewayFactory(FastEventEngine feEngine, IContractManager contractMgr, 
-			IPlaybackRuntimeRepository rtRepo, GatewayMetaProvider gatewayMetaProvider) {
+			IPlaybackRuntimeRepository rtRepo, PlaybackDataServiceManager dsMgr) {
 		this.rtRepo = rtRepo;
-		this.gatewayMetaProvider = gatewayMetaProvider;
+		this.dsMgr = dsMgr;
 		this.feEngine = feEngine;
 		this.contractMgr = contractMgr;
 	}
@@ -47,7 +46,7 @@ public class PlaybackGatewayFactory implements GatewayFactory{
 				? playbackRt.getPlaybackTimeState() 
 				: LocalDateTime.of(LocalDate.parse(settings.getStartDate(), DateTimeConstant.D_FORMAT_INT_FORMATTER), LocalTime.of(20, 0));
 		PlaybackClock clock = new CtpPlaybackClock(ldt);
-		PlaybackDataLoader loader = new PlaybackDataLoader(gatewayDescription.getGatewayId(), gatewayMetaProvider);
+		PlaybackDataLoader loader = new PlaybackDataLoader(gatewayDescription.getGatewayId(), dsMgr);
 		PlaybackContext context = new PlaybackContext(gatewayDescription, ldt, clock, loader, feEngine, rtRepo, contractMgr);
 		return new PlaybackGatewayAdapter(context, gatewayDescription);
 	}

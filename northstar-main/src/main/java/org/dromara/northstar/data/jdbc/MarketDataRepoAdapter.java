@@ -7,25 +7,26 @@ import java.util.List;
 import java.util.Objects;
 
 import org.dromara.northstar.common.IDataServiceManager;
+import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.data.IMarketDataRepository;
 import org.dromara.northstar.data.jdbc.entity.BarDO;
+import org.dromara.northstar.gateway.GatewayMetaProvider;
 
 import lombok.extern.slf4j.Slf4j;
-import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.ContractField;
 
 @Slf4j
 public class MarketDataRepoAdapter implements IMarketDataRepository{
 
-	private IDataServiceManager dataServiceDelegate;
+	private GatewayMetaProvider gatewayMetaProvider;
 	
 	private MarketDataRepository delegate;
 	
-	public MarketDataRepoAdapter(MarketDataRepository delegate, IDataServiceManager dataServiceDelegate) {
+	public MarketDataRepoAdapter(MarketDataRepository delegate, GatewayMetaProvider gatewayMetaProvider) {
 		this.delegate = delegate;
-		this.dataServiceDelegate = dataServiceDelegate;
+		this.gatewayMetaProvider = gatewayMetaProvider;
 	}
 	
 	@Override
@@ -39,6 +40,7 @@ public class MarketDataRepoAdapter implements IMarketDataRepository{
 		LocalDate today = LocalDate.now();
 		LocalDate endDate = today.isAfter(endDate0) ? endDate0 : today;
 		LinkedList<BarField> resultList = new LinkedList<>();
+		IDataServiceManager dataServiceDelegate = gatewayMetaProvider.getMarketDataRepo(ChannelType.valueOf(contract.getChannelType()));
 		if(endDate.isAfter(startDate)) {
 			List<BarField> list = dataServiceDelegate.getMinutelyData(contract, startDate, endDate)
 					.stream()
@@ -86,6 +88,7 @@ public class MarketDataRepoAdapter implements IMarketDataRepository{
 	
 	@Override
 	public List<BarField> loadDailyBars(ContractField contract, LocalDate startDate, LocalDate endDate) {
+		IDataServiceManager dataServiceDelegate = gatewayMetaProvider.getMarketDataRepo(ChannelType.valueOf(contract.getChannelType()));
 		try {
 			return dataServiceDelegate.getDailyData(contract, startDate, endDate);
 		} catch (Exception e) {
@@ -94,15 +97,4 @@ public class MarketDataRepoAdapter implements IMarketDataRepository{
 		}
 	}
 	
-
-	@Override
-	public List<LocalDate> findHodidayInLaw(String exchangeStr, int year) {
-		try {
-			return dataServiceDelegate.getHolidays(ExchangeEnum.valueOf(exchangeStr), LocalDate.of(year, 1, 1), LocalDate.of(year, 12, 31));
-		} catch (Exception e) {
-			log.error("{}", e.getMessage());
-			return Collections.emptyList();
-		}
-	}
-
 }

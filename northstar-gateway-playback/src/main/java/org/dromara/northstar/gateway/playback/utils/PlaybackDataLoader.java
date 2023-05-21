@@ -7,9 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.dromara.northstar.common.constant.ChannelType;
-import org.dromara.northstar.common.utils.ContractUtils;
 import org.dromara.northstar.common.utils.MarketDataLoadingUtils;
-import org.dromara.northstar.gateway.GatewayMetaProvider;
+import org.dromara.northstar.gateway.playback.PlaybackDataServiceManager;
 
 import lombok.extern.slf4j.Slf4j;
 import xyz.redtorch.pb.CoreField.BarField;
@@ -18,14 +17,14 @@ import xyz.redtorch.pb.CoreField.ContractField;
 @Slf4j
 public class PlaybackDataLoader {
 
-	private GatewayMetaProvider gatewayMetaProvider;
+	private PlaybackDataServiceManager dsMgr;
 	
 	private String gatewayId;
 	
 	private MarketDataLoadingUtils utils = new MarketDataLoadingUtils();
 	
-	public PlaybackDataLoader(String playbackGatewayId, GatewayMetaProvider gatewayMetaProvider) {
-		this.gatewayMetaProvider = gatewayMetaProvider;
+	public PlaybackDataLoader(String playbackGatewayId, PlaybackDataServiceManager dsMgr) {
+		this.dsMgr = dsMgr;
 		this.gatewayId = playbackGatewayId;
 	}
 	
@@ -43,8 +42,7 @@ public class PlaybackDataLoader {
 			queryEnd = utils.getFridayOfThisWeek(fromStartDateTime.toLocalDate());
 			queryStart = queryEnd.minusWeeks(1);
 		}
-		ChannelType channel = ContractUtils.channelTypeOf(contract);
-		return enhanceData(gatewayMetaProvider.getMarketDataRepo(channel).loadBars(contract, queryStart, queryEnd)
+		return enhanceData(dsMgr.getMinutelyData(contract, queryStart, queryEnd)
 				.stream()
 				.filter(bar -> bar.getActionTimestamp() >= fromStartTimestamp)
 				.toList(), contract.getUnifiedSymbol());
@@ -54,16 +52,14 @@ public class PlaybackDataLoader {
 		if(log.isTraceEnabled()) {
 			log.trace("正在读取 [{}] {} 至 {} 的1分钟K线回放数据", contract.getName(), startDate, endDate);
 		}
-		ChannelType channel = ContractUtils.channelTypeOf(contract);
-		return enhanceData(gatewayMetaProvider.getMarketDataRepo(channel).loadBars(contract, startDate, endDate), contract.getUnifiedSymbol());
+		return enhanceData(dsMgr.getMinutelyData(contract, startDate, endDate), contract.getUnifiedSymbol());
 	}
 	
 	public List<BarField> loadTradeDayDataRaw(LocalDate startDate, LocalDate endDate, ContractField contract){
 		if(log.isTraceEnabled()) {
 			log.trace("正在读取 [{}] {} 至 {} 的日K线回放数据", contract.getName(), startDate, endDate);
 		}
-		ChannelType channel = ContractUtils.channelTypeOf(contract);
-		return enhanceData(gatewayMetaProvider.getMarketDataRepo(channel).loadDailyBars(contract, startDate, endDate), contract.getUnifiedSymbol());
+		return enhanceData(dsMgr.getMinutelyData(contract, startDate, endDate), contract.getUnifiedSymbol());
 	}
 	
 	private List<BarField> enhanceData(List<BarField> list, String unifiedSymbol) {

@@ -10,8 +10,8 @@ import org.dromara.northstar.common.model.GatewayDescription;
 import org.dromara.northstar.common.model.ResultBean;
 import org.dromara.northstar.common.utils.MarketDataLoadingUtils;
 import org.dromara.northstar.data.IGatewayRepository;
+import org.dromara.northstar.data.IMarketDataRepository;
 import org.dromara.northstar.gateway.Contract;
-import org.dromara.northstar.gateway.GatewayMetaProvider;
 import org.dromara.northstar.gateway.IContractManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
@@ -26,7 +26,7 @@ import xyz.redtorch.pb.CoreField.BarField;
 public class GatewayDataController {
 
 	@Autowired
-	private GatewayMetaProvider gatewayMetaProvider;
+	private IMarketDataRepository mdRepo;
 	
 	@Autowired
 	private IGatewayRepository gatewayRepo;
@@ -51,7 +51,7 @@ public class GatewayDataController {
 		LocalDate end = utils.getCurrentTradeDay(refStartTimestamp, firstLoad);
 		List<BarField> result = Collections.emptyList();
 		for(int i=0; i<3; i++) {
-			result = gatewayMetaProvider.getMarketDataRepo(ChannelType.valueOf(gatewayId)).loadBars(contract.contractField(), start.minusWeeks(i), end.minusWeeks(i));
+			result = mdRepo.loadBars(contract.contractField(), start.minusWeeks(i), end.minusWeeks(i));
 			if(!result.isEmpty()) {
 				break;
 			}

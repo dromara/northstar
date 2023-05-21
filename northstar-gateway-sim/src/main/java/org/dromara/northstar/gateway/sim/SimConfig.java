@@ -11,11 +11,6 @@ import org.springframework.context.annotation.Configuration;
 public class SimConfig{
 
 	@Bean
-	DefaultEmptyMarketDataRepo defaultEmptyMarketRepo() {
-		return new DefaultEmptyMarketDataRepo();
-	}
-	
-	@Bean
 	SimGatewayFactory simGatewayFactory(FastEventEngine feEngine, ISimAccountRepository simAccountRepo, IMarketCenter marketCenter) {
 		return new SimGatewayFactory(feEngine, simAccountRepo, marketCenter);
 	}

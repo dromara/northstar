@@ -11,7 +11,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.dromara.northstar.common.IHolidayManager;
-import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.constant.PlaybackPrecision;
 import org.dromara.northstar.common.constant.PlaybackSpeed;
 import org.dromara.northstar.common.event.FastEventEngine;
@@ -37,6 +36,7 @@ class PlaybackGatewayFactoryTest {
 	FastEventEngine feEngine = mock(FastEventEngine.class);
 	PlaybackDataLoader loader = mock(PlaybackDataLoader.class);
 	PlaybackClock clock = mock(PlaybackClock.class);
+	PlaybackDataServiceManager dsMgr = mock(PlaybackDataServiceManager.class);
 	
 	LocalDateTime ldt = LocalDateTime.of(2022, 6, 29, 9, 0);
 	TestFieldFactory factory = new TestFieldFactory("testGateway");
@@ -65,7 +65,7 @@ class PlaybackGatewayFactoryTest {
 		when(loader.loadMinuteData(eq(ldt), eq(contract))).thenReturn(List.of(bar));
 		when(contractMgr.getContract(any(), anyString())).thenReturn(c);
 		when(c.contractField()).thenReturn(contract);
-		when(gatewayMetaProvider.getMarketDataRepo(any(ChannelType.class))).thenReturn(mdRepo);
+		
 		
 		settings.setStartDate("20220629");
 		settings.setEndDate("20220629");
@@ -73,7 +73,7 @@ class PlaybackGatewayFactoryTest {
 		settings.setSpeed(PlaybackSpeed.SPRINT);
 		settings.setPlayContracts(List.of());
 		
-		playbackGatewayFactory = new PlaybackGatewayFactory(feEngine, contractMgr, rtRepo, gatewayMetaProvider);
+		playbackGatewayFactory = new PlaybackGatewayFactory(feEngine, contractMgr, rtRepo, dsMgr);
 	}
 	
 	@Test

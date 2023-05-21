@@ -1,5 +1,6 @@
 package org.dromara.northstar.gateway.playback.utils;
 
+import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
@@ -36,6 +37,11 @@ public class CtpPlaybackClock implements PlaybackClock {
 
 	private boolean withinSection(LocalDateTime ldt) {
 		int secondOfDay = ldt.toLocalTime().toSecondOfDay();
+		if(ldt.getDayOfWeek() == DayOfWeek.SUNDAY 
+				|| ldt.getDayOfWeek() == DayOfWeek.SATURDAY && secondOfDay > t1End
+				|| ldt.getDayOfWeek() == DayOfWeek.MONDAY && secondOfDay < t1End) {
+			return false;
+		}
 		return secondOfDay >= t1Start && secondOfDay < t1End
 			|| secondOfDay >= t2Start && secondOfDay < t2End
 			|| secondOfDay >= t3Start && secondOfDay < t3End

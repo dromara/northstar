@@ -8,12 +8,12 @@ import java.util.Set;
 
 import org.dromara.northstar.common.IHolidayManager;
 import org.dromara.northstar.common.constant.ChannelType;
-import org.dromara.northstar.gateway.GatewayMetaProvider;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import lombok.extern.slf4j.Slf4j;
+import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 
 /**
  * 法定节假日管理器
@@ -27,15 +27,15 @@ public class CtpHolidayManager implements IHolidayManager, InitializingBean{
 	protected Set<LocalDate> holidaySet = new HashSet<>();
 
 	@Autowired
-	private GatewayMetaProvider gatewayMetaProvider;
+	private CtpDataServiceManager dsMgr;
 	
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		LocalDate today = LocalDate.now();
 		// 加载前后一年的假期数据
-		addHoliday(gatewayMetaProvider.getMarketDataRepo(ChannelType.CTP).findHodidayInLaw("SHFE", today.getYear() - 1));
-		addHoliday(gatewayMetaProvider.getMarketDataRepo(ChannelType.CTP).findHodidayInLaw("SHFE", today.getYear()));
-		addHoliday(gatewayMetaProvider.getMarketDataRepo(ChannelType.CTP).findHodidayInLaw("SHFE", today.getYear() + 1));
+		addHoliday(dsMgr.getHolidays(ExchangeEnum.SHFE, LocalDate.of(today.getYear() - 1, 1, 1), LocalDate.of(today.getYear() - 1, 12, 31)));
+		addHoliday(dsMgr.getHolidays(ExchangeEnum.SHFE, LocalDate.of(today.getYear(), 1, 1), LocalDate.of(today.getYear(), 12, 31)));
+		addHoliday(dsMgr.getHolidays(ExchangeEnum.SHFE, LocalDate.of(today.getYear() + 1, 1, 1), LocalDate.of(today.getYear() + 1, 12, 31)));
 	}
 	
 	private void addHoliday(List<LocalDate> holidays) {

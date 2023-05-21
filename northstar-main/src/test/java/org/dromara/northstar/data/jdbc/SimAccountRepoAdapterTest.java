@@ -1,11 +1,9 @@
 package org.dromara.northstar.data.jdbc;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Iterator;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 import org.dromara.northstar.common.model.SimAccountDescription;
 import org.dromara.northstar.data.ISimAccountRepository;

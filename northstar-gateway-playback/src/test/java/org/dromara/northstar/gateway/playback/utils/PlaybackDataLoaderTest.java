@@ -10,9 +10,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import org.dromara.northstar.common.constant.ChannelType;
-import org.dromara.northstar.data.IMarketDataRepository;
-import org.dromara.northstar.gateway.GatewayMetaProvider;
+import org.dromara.northstar.gateway.playback.PlaybackDataServiceManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -39,12 +37,10 @@ class PlaybackDataLoaderTest {
 	
 	@BeforeEach
 	void prepare() {
-		GatewayMetaProvider gatewayMetaProvider = mock(GatewayMetaProvider.class);
-		IMarketDataRepository mdRepo = mock(IMarketDataRepository.class);
-		when(gatewayMetaProvider.getMarketDataRepo(any(ChannelType.class))).thenReturn(mdRepo);
-		when(mdRepo.loadBars(eq(c1), any(LocalDate.class), any(LocalDate.class))).thenReturn(List.of(b1,b2,b3));
+		PlaybackDataServiceManager dsMgr = mock(PlaybackDataServiceManager.class);
+		when(dsMgr.getMinutelyData(eq(c1), any(LocalDate.class), any(LocalDate.class))).thenReturn(List.of(b1,b2,b3));
 		
-		loader = new PlaybackDataLoader("testGateway", gatewayMetaProvider);
+		loader = new PlaybackDataLoader("testGateway", dsMgr);
 	}
 
 	@Test

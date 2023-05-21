@@ -27,7 +27,6 @@ import org.dromara.northstar.common.model.ComponentField;
 import org.dromara.northstar.common.model.ComponentMetaInfo;
 import org.dromara.northstar.common.model.ContractSimpleInfo;
 import org.dromara.northstar.common.model.DynamicParams;
-import org.dromara.northstar.common.model.GatewayDescription;
 import org.dromara.northstar.common.model.Identifier;
 import org.dromara.northstar.common.model.MockTradeDescription;
 import org.dromara.northstar.common.model.ModuleAccountDescription;
@@ -37,16 +36,15 @@ import org.dromara.northstar.common.model.ModuleDescription;
 import org.dromara.northstar.common.model.ModulePositionDescription;
 import org.dromara.northstar.common.model.ModuleRuntimeDescription;
 import org.dromara.northstar.common.utils.MarketDataLoadingUtils;
+import org.dromara.northstar.data.IMarketDataRepository;
 import org.dromara.northstar.data.IModuleRepository;
 import org.dromara.northstar.gateway.Contract;
-import org.dromara.northstar.gateway.GatewayMetaProvider;
 import org.dromara.northstar.gateway.IContractManager;
 import org.dromara.northstar.module.ModuleContext;
 import org.dromara.northstar.module.ModuleManager;
 import org.dromara.northstar.module.PlaybackModuleContext;
 import org.dromara.northstar.module.TradeModule;
 import org.dromara.northstar.strategy.DynamicParamsAware;
-import org.dromara.northstar.strategy.IAccount;
 import org.dromara.northstar.strategy.IModule;
 import org.dromara.northstar.strategy.IModuleContext;
 import org.dromara.northstar.strategy.StrategicComponent;
@@ -80,7 +78,7 @@ public class ModuleService implements PostLoadAware {
 	
 	private IModuleRepository moduleRepo;
 	
-	private GatewayMetaProvider gatewayMetaProvider;
+	private IMarketDataRepository mdRepo;
 	
 	private MailDeliveryManager mailMgr;
 	
@@ -93,12 +91,12 @@ public class ModuleService implements PostLoadAware {
 	private AccountManager accountMgr;
 	
 	public ModuleService(ApplicationContext ctx, ExternalJarClassLoader extJarLoader, IModuleRepository moduleRepo, MailDeliveryManager mailMgr,
-			GatewayMetaProvider gatewayMetaProvider, ModuleManager moduleMgr, IContractManager contractMgr, AccountManager accountMgr) {
+			IMarketDataRepository mdRepo, ModuleManager moduleMgr, IContractManager contractMgr, AccountManager accountMgr) {
 		this.ctx = ctx;
 		this.moduleMgr = moduleMgr;
 		this.contractMgr = contractMgr;
 		this.moduleRepo = moduleRepo;
-		this.gatewayMetaProvider = gatewayMetaProvider;
+		this.mdRepo = mdRepo;
 		this.extJarLoader = extJarLoader;
 		this.mailMgr = mailMgr;
 		this.accountMgr = accountMgr;
@@ -274,12 +272,10 @@ public class ModuleService implements PostLoadAware {
 			LocalDate start = utils.getFridayOfThisWeek(date.minusWeeks(1));
 			LocalDate end = utils.getFridayOfThisWeek(date);
 			for(ModuleAccountDescription mad : md.getModuleAccountSettingsDescription()) {
-				IAccount account = accountMgr.get(Identifier.of(mad.getAccountGatewayId()));
-				GatewayDescription gd = account.getMarketGateway().gatewayDescription();
 				List<BarField> mergeList = new ArrayList<>();
 				for(ContractSimpleInfo csi : mad.getBindedContracts()) {
 					Contract c = contractMgr.getContract(Identifier.of(csi.getValue()));
-					List<BarField> bars = gatewayMetaProvider.getMarketDataRepo(gd.getChannelType()).loadBars(c.contractField(), start, end);
+					List<BarField> bars = mdRepo.loadBars(c.contractField(), start, end);
 					mergeList.addAll(bars);
 				}
 				mergeList.sort((a,b) -> a.getActionTimestamp() < b.getActionTimestamp() ? -1 : 1);

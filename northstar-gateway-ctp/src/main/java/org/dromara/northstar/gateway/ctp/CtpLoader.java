@@ -16,7 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Component
 @ConditionalOnExpression("!'${spring.profiles.active}'.equals('test')")
-public class CtpContractsLoader implements CommandLineRunner{
+public class CtpLoader implements CommandLineRunner{
 
 	@Autowired
 	private IMarketCenter mktCenter;

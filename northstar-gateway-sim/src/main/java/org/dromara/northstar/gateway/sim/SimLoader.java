@@ -27,12 +27,9 @@ public class SimLoader implements CommandLineRunner{
 	@Autowired
 	private SimGatewayFactory simGatewayFactory;
 	
-	@Autowired
-	private DefaultEmptyMarketDataRepo defaultEmptyRepo;
-	
 	@Override
 	public void run(String... args) throws Exception {
-		gatewayMetaProvider.add(ChannelType.SIM, null, simGatewayFactory, defaultEmptyRepo);
+		gatewayMetaProvider.add(ChannelType.SIM, null, simGatewayFactory, null);
 		
 		log.debug("加载模拟合约");
 		// 加载模拟合约
