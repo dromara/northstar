@@ -48,7 +48,6 @@
 		<module>northstar-external-archetype</module>
 		<module>northstar-monitor</module>
 		<module>northstar-api</module>
-		<module>northstar-gateway-common</module>
 		<module>northstar-gateway-ctp</module>
 		<module>northstar-gateway-sim</module>
 		<module>northstar-gateway-playback</module>

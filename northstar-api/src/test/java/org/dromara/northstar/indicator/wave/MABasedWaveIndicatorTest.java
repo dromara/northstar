@@ -20,10 +20,13 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
+import xyz.redtorch.pb.CoreField.ContractField;
+
 class MABasedWaveIndicatorTest {
 	
+	ContractField contract = ContractField.newBuilder().build();
 	// 单元测试中的简化配置，不能在实际场景使用
-	Configuration cfg = Configuration.builder().cacheLength(3).build();
+	Configuration cfg = Configuration.builder().contract(contract).cacheLength(3).build();
 	SimpleValueIndicator maLine = new SimpleValueIndicator(cfg);
 	MABasedWaveIndicator indicator = new MABasedWaveIndicator(cfg, maLine, 2, EndpointType.HIGH_LOW);
 	
