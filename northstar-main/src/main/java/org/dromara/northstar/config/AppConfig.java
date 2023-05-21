@@ -19,7 +19,7 @@ import javax.net.ssl.X509TrustManager;
 import org.dromara.northstar.ExternalJarClassLoader;
 import org.dromara.northstar.common.event.FastEventEngine;
 import org.dromara.northstar.gateway.IMarketCenter;
-import org.dromara.northstar.gateway.common.domain.mktdata.MarketCenter;
+import org.dromara.northstar.gateway.mktdata.MarketCenter;
 import org.dromara.northstar.support.notification.IMailMessageContentHandler;
 import org.dromara.northstar.support.notification.MailDeliveryManager;
 import org.dromara.northstar.support.notification.MailSenderFactory;

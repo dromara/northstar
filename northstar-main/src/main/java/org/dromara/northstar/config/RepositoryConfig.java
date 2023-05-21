@@ -29,7 +29,7 @@ import org.dromara.northstar.data.jdbc.PlaybackRuntimeRepoAdapter;
 import org.dromara.northstar.data.jdbc.PlaybackRuntimeRepository;
 import org.dromara.northstar.data.jdbc.SimAccountRepoAdapter;
 import org.dromara.northstar.data.jdbc.SimAccountRepository;
-import org.dromara.northstar.gateway.common.utils.MarketDataRepoFactory;
+import org.dromara.northstar.gateway.utils.MarketDataRepoFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

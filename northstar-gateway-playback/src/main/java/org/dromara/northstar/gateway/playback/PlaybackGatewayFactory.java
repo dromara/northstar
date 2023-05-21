@@ -14,10 +14,10 @@ import org.dromara.northstar.data.IPlaybackRuntimeRepository;
 import org.dromara.northstar.gateway.Gateway;
 import org.dromara.northstar.gateway.GatewayFactory;
 import org.dromara.northstar.gateway.IContractManager;
-import org.dromara.northstar.gateway.common.utils.MarketDataRepoFactory;
 import org.dromara.northstar.gateway.playback.utils.CtpPlaybackClock;
 import org.dromara.northstar.gateway.playback.utils.PlaybackClock;
 import org.dromara.northstar.gateway.playback.utils.PlaybackDataLoader;
+import org.dromara.northstar.gateway.utils.MarketDataRepoFactory;
 
 import com.alibaba.fastjson.JSON;
 

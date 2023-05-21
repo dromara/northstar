@@ -24,7 +24,7 @@ import org.dromara.northstar.common.utils.CommonUtils;
 import org.dromara.northstar.common.utils.MarketDateTimeUtil;
 import org.dromara.northstar.common.utils.MessagePrinter;
 import org.dromara.northstar.gateway.Contract;
-import org.dromara.northstar.gateway.common.GatewayAbstract;
+import org.dromara.northstar.gateway.GatewayAbstract;
 import org.dromara.northstar.gateway.ctp.CtpGatewaySettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

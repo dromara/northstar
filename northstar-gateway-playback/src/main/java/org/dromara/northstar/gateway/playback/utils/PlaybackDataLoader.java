@@ -9,7 +9,7 @@ import java.util.List;
 import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.utils.ContractUtils;
 import org.dromara.northstar.common.utils.MarketDataLoadingUtils;
-import org.dromara.northstar.gateway.common.utils.MarketDataRepoFactory;
+import org.dromara.northstar.gateway.utils.MarketDataRepoFactory;
 
 import lombok.extern.slf4j.Slf4j;
 import xyz.redtorch.pb.CoreField.BarField;

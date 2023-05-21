@@ -8,7 +8,7 @@ import java.util.Set;
 
 import org.dromara.northstar.common.IHolidayManager;
 import org.dromara.northstar.common.constant.ChannelType;
-import org.dromara.northstar.gateway.common.utils.MarketDataRepoFactory;
+import org.dromara.northstar.gateway.utils.MarketDataRepoFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

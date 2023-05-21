@@ -17,7 +17,7 @@
         </dependency>
         <dependency>
             <groupId>org.dromara</groupId>
-            <artifactId>northstar-gateway-common</artifactId>
+            <artifactId>northstar-api</artifactId>
         </dependency>
         <dependency>
             <groupId>com.alibaba</groupId>

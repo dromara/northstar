@@ -25,7 +25,7 @@ import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.common.event.NorthstarEventType;
 import org.dromara.northstar.common.exception.NoSuchElementException;
 import org.dromara.northstar.gateway.Contract;
-import org.dromara.northstar.gateway.common.GatewayAbstract;
+import org.dromara.northstar.gateway.GatewayAbstract;
 import org.dromara.northstar.gateway.ctp.CtpContract;
 import org.dromara.northstar.gateway.ctp.CtpGatewaySettings;
 import org.slf4j.Logger;
