@@ -8,14 +8,12 @@ import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.gateway.IMarketCenter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
-@ConditionalOnExpression("!'${spring.profiles.active}'.equals('test')")
 public class CtpLoader implements CommandLineRunner{
 
 	@Autowired

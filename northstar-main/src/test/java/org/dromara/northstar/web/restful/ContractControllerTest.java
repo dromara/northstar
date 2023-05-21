@@ -13,6 +13,7 @@ import org.dromara.northstar.common.constant.ReturnCode;
 import org.dromara.northstar.common.model.GatewayDescription;
 import org.dromara.northstar.common.model.NsUser;
 import org.dromara.northstar.data.IGatewayRepository;
+import org.dromara.northstar.event.BroadcastHandler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +40,9 @@ class ContractControllerTest {
 	
 	@MockBean
 	private SocketIOServer socketServer;
+	
+	@MockBean
+	private BroadcastHandler bcHandler;
 	
 	@MockBean
 	private IGatewayRepository gatewayRepo;

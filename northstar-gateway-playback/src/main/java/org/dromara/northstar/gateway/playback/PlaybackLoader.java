@@ -33,7 +33,7 @@ public class PlaybackLoader implements CommandLineRunner{
 	
 	@Override
 	public void run(String... args) throws Exception {
-		gatewayMetaProvider.add(ChannelType.PLAYBACK, new PlaybackGatewaySettings(), playbackGatewayFactory, null);
+		gatewayMetaProvider.add(ChannelType.PLAYBACK, new PlaybackGatewaySettings(), playbackGatewayFactory, dsMgr);
 		
 		log.debug("加载回测合约");
 		final LocalDate today = LocalDate.now();

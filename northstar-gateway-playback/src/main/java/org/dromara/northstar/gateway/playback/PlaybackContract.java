@@ -74,4 +74,9 @@ public class PlaybackContract implements Instrument {
 		return ChannelType.valueOf(contract.getChannelType());
 	}
 
+	@Override
+	public ContractField contractField() {
+		return contract;
+	}
+
 }

@@ -21,17 +21,11 @@ import org.dromara.northstar.data.jdbc.PlaybackRuntimeRepository;
 import org.dromara.northstar.data.jdbc.SimAccountRepoAdapter;
 import org.dromara.northstar.data.jdbc.SimAccountRepository;
 import org.dromara.northstar.gateway.GatewayMetaProvider;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class RepositoryConfig {
-
-	@Value("${northstar.data-service.baseUrl}")
-	private String baseUrl;
-    @Value("${northstar.data-service.w3BaseUrl}")
-    private String w3BaseUrl;
 
     @Bean
     IGatewayRepository gatewayRepo(GatewayDescriptionRepository delelgate) {

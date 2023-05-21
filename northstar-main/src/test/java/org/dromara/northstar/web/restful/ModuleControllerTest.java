@@ -33,9 +33,14 @@ import org.dromara.northstar.data.jdbc.GatewayDescriptionRepository;
 import org.dromara.northstar.data.jdbc.ModuleDealRecordRepository;
 import org.dromara.northstar.data.jdbc.ModuleDescriptionRepository;
 import org.dromara.northstar.data.jdbc.ModuleRuntimeDescriptionRepository;
+import org.dromara.northstar.event.BroadcastHandler;
 import org.dromara.northstar.gateway.Contract;
+import org.dromara.northstar.gateway.GatewayMetaProvider;
 import org.dromara.northstar.gateway.IMarketCenter;
+import org.dromara.northstar.gateway.playback.PlaybackDataServiceManager;
+import org.dromara.northstar.gateway.playback.PlaybackGatewayFactory;
 import org.dromara.northstar.gateway.playback.PlaybackGatewaySettings;
+import org.dromara.northstar.gateway.sim.trade.SimGatewayFactory;
 import org.dromara.northstar.gateway.time.GenericTradeTime;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -82,6 +87,21 @@ class ModuleControllerTest {
 	@MockBean
 	private SocketIOServer socketServer;
 	
+	@MockBean
+	private BroadcastHandler bcHandler;
+	
+	@Autowired
+	private SimGatewayFactory simGatewayFactory;
+	
+	@Autowired
+	GatewayMetaProvider gatewayMetaProvider;
+	
+	@Autowired
+	PlaybackGatewayFactory playbackGatewayFactory;
+	
+	@Autowired
+	PlaybackDataServiceManager dsMgr;
+	
 	ModuleDescription md1;
 	
 	ModuleDescription md2;
@@ -94,7 +114,7 @@ class ModuleControllerTest {
 	MockTradeDescription mockTrade = MockTradeDescription.builder()
 			.gatewayId("CTP账户")
 			.offsetFlag(OffsetFlagEnum.OF_Open)
-			.contractId("rb2210@SHFE@FUTURES")
+			.contractId("rb0000@SHFE@FUTURES")
 			.direction(DirectionEnum.D_Buy)
 			.price(2000)
 			.volume(1)
@@ -105,14 +125,22 @@ class ModuleControllerTest {
 	
 	@BeforeEach
 	public void setUp() throws Exception {
+		gatewayMetaProvider.add(ChannelType.PLAYBACK, new PlaybackGatewaySettings(), playbackGatewayFactory, dsMgr);
+		gatewayMetaProvider.add(ChannelType.SIM, null, simGatewayFactory, null);
+		
+		Contract c = mock(Contract.class);
+		when(mktCenter.getContract(any(Identifier.class))).thenReturn(c);
+		when(c.contractField()).thenReturn(ContractField.newBuilder().setChannelType("PLAYBACK").setUnifiedSymbol("rb0000@SHFE@FUTURES").build());
+		when(c.tradeTimeDefinition()).thenReturn(new GenericTradeTime());
+		
 		long time = System.currentTimeMillis();
 		String token = MD5.create().digestHex("123456" + time);
 		mockMvc.perform(post("/northstar/auth/login?timestamp="+time).contentType(MediaType.APPLICATION_JSON).content(JSON.toJSONString(new NsUser("admin",token))).session(session))
 			.andExpect(status().isOk());
-		GatewayDescription gatewayDes = TestGatewayFactory.makeMktGateway("CTP", ChannelType.CTP, TestGatewayFactory.makeGatewaySettings(PlaybackGatewaySettings.class),false);
+		GatewayDescription gatewayDes = TestGatewayFactory.makeMktGateway("PB", ChannelType.PLAYBACK, TestGatewayFactory.makeGatewaySettings(PlaybackGatewaySettings.class),false);
 		mockMvc.perform(post("/northstar/gateway").contentType(MediaType.APPLICATION_JSON).content(JSON.toJSONString(gatewayDes)).session(session));
 		
-		GatewayDescription gatewayDes2 = TestGatewayFactory.makeTrdGateway("CTP账户", "CTP", ChannelType.CTP, TestGatewayFactory.makeGatewaySettings(PlaybackGatewaySettings.class),false);
+		GatewayDescription gatewayDes2 = TestGatewayFactory.makeTrdGateway("CTP账户", "PB", ChannelType.SIM, TestGatewayFactory.makeGatewaySettings(null), false);
 		mockMvc.perform(post("/northstar/gateway").contentType(MediaType.APPLICATION_JSON).content(JSON.toJSONString(gatewayDes2)).session(session));
 		
 		ComponentAndParamsPair cpp = ComponentAndParamsPair.builder()
@@ -128,7 +156,7 @@ class ModuleControllerTest {
 				.moduleAccountSettingsDescription(List.of(ModuleAccountDescription.builder()
 						.accountGatewayId("CTP账户")
 						.moduleAccountInitBalance(10000)
-						.bindedContracts(List.of(ContractSimpleInfo.builder().unifiedSymbol("rb2210@SHFE@FUTURES").value("rb2210@SHFE@FUTURES@CTP").build()))
+						.bindedContracts(List.of(ContractSimpleInfo.builder().unifiedSymbol("rb0000@SHFE@FUTURES").value("rb0000@SHFE@FUTURES@CTP").build()))
 						.build()))
 				.numOfMinPerBar(1)
 				.weeksOfDataForPreparation(1)
@@ -143,15 +171,11 @@ class ModuleControllerTest {
 				.moduleAccountSettingsDescription(List.of(ModuleAccountDescription.builder()
 						.accountGatewayId("CTP账户")
 						.moduleAccountInitBalance(10000)
-						.bindedContracts(List.of(ContractSimpleInfo.builder().unifiedSymbol("rb2210@SHFE@FUTURES").value("rb2210@SHFE@FUTURES@CTP").build()))
+						.bindedContracts(List.of(ContractSimpleInfo.builder().unifiedSymbol("rb0000@SHFE@FUTURES").value("rb0000@SHFE@FUTURES@CTP").build()))
 						.build()))
 				.numOfMinPerBar(10)
 				.weeksOfDataForPreparation(1)
 				.build();
-		Contract c = mock(Contract.class);
-		when(mktCenter.getContract(any(Identifier.class))).thenReturn(c);
-		when(c.contractField()).thenReturn(ContractField.newBuilder().setUnifiedSymbol("rb2210@SHFE@FUTURES").build());
-		when(c.tradeTimeDefinition()).thenReturn(new GenericTradeTime());
 	}
 	
 	@AfterEach
