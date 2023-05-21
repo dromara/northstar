@@ -9,7 +9,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 
-import org.apache.commons.codec.binary.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.dromara.northstar.common.constant.ModuleState;
 import org.dromara.northstar.common.exception.InsufficientException;
 import org.dromara.northstar.common.model.Identifier;
