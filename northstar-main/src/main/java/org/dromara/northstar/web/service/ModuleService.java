@@ -7,8 +7,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import javax.transaction.Transactional;
@@ -39,8 +39,8 @@ import org.dromara.northstar.common.model.ModuleRuntimeDescription;
 import org.dromara.northstar.common.utils.MarketDataLoadingUtils;
 import org.dromara.northstar.data.IModuleRepository;
 import org.dromara.northstar.gateway.Contract;
+import org.dromara.northstar.gateway.GatewayMetaProvider;
 import org.dromara.northstar.gateway.IContractManager;
-import org.dromara.northstar.gateway.utils.MarketDataRepoFactory;
 import org.dromara.northstar.module.ModuleContext;
 import org.dromara.northstar.module.ModuleManager;
 import org.dromara.northstar.module.PlaybackModuleContext;
@@ -80,7 +80,7 @@ public class ModuleService implements PostLoadAware {
 	
 	private IModuleRepository moduleRepo;
 	
-	private MarketDataRepoFactory mdRepoFactory;
+	private GatewayMetaProvider gatewayMetaProvider;
 	
 	private MailDeliveryManager mailMgr;
 	
@@ -93,12 +93,12 @@ public class ModuleService implements PostLoadAware {
 	private AccountManager accountMgr;
 	
 	public ModuleService(ApplicationContext ctx, ExternalJarClassLoader extJarLoader, IModuleRepository moduleRepo, MailDeliveryManager mailMgr,
-			MarketDataRepoFactory mdRepoFactory, ModuleManager moduleMgr, IContractManager contractMgr, AccountManager accountMgr) {
+			GatewayMetaProvider gatewayMetaProvider, ModuleManager moduleMgr, IContractManager contractMgr, AccountManager accountMgr) {
 		this.ctx = ctx;
 		this.moduleMgr = moduleMgr;
 		this.contractMgr = contractMgr;
 		this.moduleRepo = moduleRepo;
-		this.mdRepoFactory = mdRepoFactory;
+		this.gatewayMetaProvider = gatewayMetaProvider;
 		this.extJarLoader = extJarLoader;
 		this.mailMgr = mailMgr;
 		this.accountMgr = accountMgr;
@@ -279,7 +279,7 @@ public class ModuleService implements PostLoadAware {
 				List<BarField> mergeList = new ArrayList<>();
 				for(ContractSimpleInfo csi : mad.getBindedContracts()) {
 					Contract c = contractMgr.getContract(Identifier.of(csi.getValue()));
-					List<BarField> bars = mdRepoFactory.getInstance(gd.getChannelType()).loadBars(c.contractField(), start, end);
+					List<BarField> bars = gatewayMetaProvider.getMarketDataRepo(gd.getChannelType()).loadBars(c.contractField(), start, end);
 					mergeList.addAll(bars);
 				}
 				mergeList.sort((a,b) -> a.getActionTimestamp() < b.getActionTimestamp() ? -1 : 1);

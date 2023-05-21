@@ -1,7 +1,5 @@
 package org.dromara.northstar.web.restful;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -12,6 +10,7 @@ import org.dromara.northstar.common.model.ComponentField;
 import org.dromara.northstar.common.model.GatewayDescription;
 import org.dromara.northstar.common.model.GatewayTypeDescription;
 import org.dromara.northstar.common.model.ResultBean;
+import org.dromara.northstar.gateway.GatewayMetaProvider;
 import org.dromara.northstar.gateway.IContractManager;
 import org.dromara.northstar.web.service.GatewayService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +26,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/northstar/gateway")
 @RestController
 public class GatewayManagementController {
+	
+	@Autowired
+	GatewayMetaProvider gatewayMetaProvider;
 	
 	@Autowired
 	protected GatewayService gatewayService;
@@ -100,7 +102,7 @@ public class GatewayManagementController {
 	
 	@GetMapping("/types")
 	public ResultBean<Collection<GatewayTypeDescription>> gatewayTypeOptions(){
-		return new ResultBean<>(new ArrayList<>(Arrays.asList(ChannelType.values())).stream().map(GatewayTypeDescription::new).toList());
+		return new ResultBean<>(gatewayMetaProvider.availableChannel().stream().map(GatewayTypeDescription::new).toList());
 	}
 	
 	@GetMapping("/reset")

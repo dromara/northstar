@@ -6,6 +6,7 @@ import java.time.LocalTime;
 
 import org.dromara.northstar.common.constant.TickType;
 import org.dromara.northstar.common.utils.MarketDateTimeUtil;
+import org.dromara.northstar.gateway.ctp.CtpDateTimeUtil;
 import org.junit.jupiter.api.Test;
 
 class CtpMarketTimeUtilTest {

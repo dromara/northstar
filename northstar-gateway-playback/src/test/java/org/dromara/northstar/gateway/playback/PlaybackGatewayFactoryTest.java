@@ -19,10 +19,10 @@ import org.dromara.northstar.common.model.GatewayDescription;
 import org.dromara.northstar.data.IMarketDataRepository;
 import org.dromara.northstar.data.IPlaybackRuntimeRepository;
 import org.dromara.northstar.gateway.Contract;
+import org.dromara.northstar.gateway.GatewayMetaProvider;
 import org.dromara.northstar.gateway.IContractManager;
 import org.dromara.northstar.gateway.playback.utils.PlaybackClock;
 import org.dromara.northstar.gateway.playback.utils.PlaybackDataLoader;
-import org.dromara.northstar.gateway.utils.MarketDataRepoFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -47,7 +47,7 @@ class PlaybackGatewayFactoryTest {
 	
 	IHolidayManager holidayMgr = mock(IHolidayManager.class);
 	IMarketDataRepository mdRepo = mock(IMarketDataRepository.class);
-	MarketDataRepoFactory mdRepoFactory = mock(MarketDataRepoFactory.class);
+	GatewayMetaProvider gatewayMetaProvider = mock(GatewayMetaProvider.class);
 	
 	TickField t1 = factory.makeTickField("rb2210", 5000);
 	TickField t2 = factory.makeTickField("rb2210", 5001);
@@ -65,8 +65,7 @@ class PlaybackGatewayFactoryTest {
 		when(loader.loadMinuteData(eq(ldt), eq(contract))).thenReturn(List.of(bar));
 		when(contractMgr.getContract(any(), anyString())).thenReturn(c);
 		when(c.contractField()).thenReturn(contract);
-		when(mdRepoFactory.getInstance(any(ChannelType.class))).thenReturn(mdRepo);
-		when(mdRepoFactory.getInstance(anyString())).thenReturn(mdRepo);
+		when(gatewayMetaProvider.getMarketDataRepo(any(ChannelType.class))).thenReturn(mdRepo);
 		
 		settings.setStartDate("20220629");
 		settings.setEndDate("20220629");
@@ -74,7 +73,7 @@ class PlaybackGatewayFactoryTest {
 		settings.setSpeed(PlaybackSpeed.SPRINT);
 		settings.setPlayContracts(List.of());
 		
-		playbackGatewayFactory = new PlaybackGatewayFactory(feEngine, contractMgr, holidayMgr, rtRepo, mdRepoFactory);
+		playbackGatewayFactory = new PlaybackGatewayFactory(feEngine, contractMgr, rtRepo, gatewayMetaProvider);
 	}
 	
 	@Test

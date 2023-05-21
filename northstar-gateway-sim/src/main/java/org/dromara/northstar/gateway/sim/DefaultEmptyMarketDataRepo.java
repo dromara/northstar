@@ -1,4 +1,4 @@
-package org.dromara.northstar.data.jdbc;
+package org.dromara.northstar.gateway.sim;
 
 import java.time.LocalDate;
 import java.util.Collections;

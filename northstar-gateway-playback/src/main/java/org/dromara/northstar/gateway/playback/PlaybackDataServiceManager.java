@@ -1,4 +1,4 @@
-package org.dromara.northstar.data.ds;
+package org.dromara.northstar.gateway.playback;
 
 import java.net.URI;
 import java.time.LocalDate;
@@ -6,7 +6,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
-import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -45,7 +44,7 @@ import xyz.redtorch.pb.CoreField.ContractField;
  */
 
 @Slf4j
-public class DataServiceManager implements IDataServiceManager {
+public class PlaybackDataServiceManager implements IDataServiceManager {
 	
 	private String userToken;
 	
@@ -61,25 +60,11 @@ public class DataServiceManager implements IDataServiceManager {
 	
 	private RestTemplate restTemplate;
 	
-	private EnumMap<ExchangeEnum, ChannelType> exchangeChannelType = new EnumMap<>(ExchangeEnum.class);
-	
-	public DataServiceManager(String baseUrl, String secret, RestTemplate restTemplate, MarketDateTimeUtil dtUtil) {
+	public PlaybackDataServiceManager(String baseUrl, String secret, RestTemplate restTemplate, MarketDateTimeUtil dtUtil) {
 		this.baseUrl =  baseUrl;
 		this.userToken = secret;
 		this.dtUtil = dtUtil;
 		this.restTemplate = restTemplate;
-		
-		exchangeChannelType.put(ExchangeEnum.SHFE, ChannelType.CTP);
-		exchangeChannelType.put(ExchangeEnum.CFFEX, ChannelType.CTP);
-		exchangeChannelType.put(ExchangeEnum.DCE, ChannelType.CTP);
-		exchangeChannelType.put(ExchangeEnum.CZCE, ChannelType.CTP);
-		exchangeChannelType.put(ExchangeEnum.INE, ChannelType.CTP);
-		exchangeChannelType.put(ExchangeEnum.GFEX, ChannelType.CTP);
-		
-		exchangeChannelType.put(ExchangeEnum.SSE, ChannelType.PLAYBACK);
-		exchangeChannelType.put(ExchangeEnum.SZSE, ChannelType.PLAYBACK);
-		exchangeChannelType.put(ExchangeEnum.BSE, ChannelType.PLAYBACK);
-		
 		log.info("采用外部数据源加载历史数据");
 		register();
 	}
@@ -191,24 +176,6 @@ public class DataServiceManager implements IDataServiceManager {
 			double marginRate = ProductClassEnum.EQUITY == productClass ? 1 : 0.1;
 			double priceTick = ProductClassEnum.EQUITY == productClass ? 0.01 : Double.parseDouble(unitDesc.replaceAll("[^\\d\\.]+", ""));
 			try {				
-				ContractField contract = ContractField.newBuilder()
-						.setUnifiedSymbol(unifiedSymbol)
-						.setSymbol(symbol)
-						.setExchange(exchange)
-						.setCurrency(CurrencyEnum.CNY)
-						.setContractId(unifiedSymbol + "@" + channelName(exchange))
-						.setFullName(name)
-						.setName(name)
-						.setChannelType(channelName(exchange))
-						.setGatewayId(channelName(exchange))
-						.setThirdPartyId(symbol + "@" + channelName(exchange))
-						.setLastTradeDateOrContractMonth(getValue("delist_date", fieldIndexMap, item, ""))
-						.setLongMarginRatio(marginRate)
-						.setShortMarginRatio(marginRate)
-						.setProductClass(productClass)
-						.setMultiplier(Double.parseDouble(getValue("per_unit", fieldIndexMap, item, "1")))
-						.setPriceTick(priceTick)
-						.build();
 				ContractField playbackContract = ContractField.newBuilder()
 						.setUnifiedSymbol(unifiedSymbol)
 						.setSymbol(symbol)
@@ -227,7 +194,6 @@ public class DataServiceManager implements IDataServiceManager {
 						.setMultiplier(Double.parseDouble(getValue("per_unit", fieldIndexMap, item, "1")))
 						.setPriceTick(priceTick)
 						.build();
-				resultList.add(contract);
 				resultList.add(playbackContract);
 			} catch(Exception e) {
 				log.warn("无效合约数据：{}", JSON.toJSONString(item));
@@ -236,9 +202,6 @@ public class DataServiceManager implements IDataServiceManager {
 		return resultList;
 	}
 	
-	private String channelName(ExchangeEnum exchange) {
-		return exchangeChannelType.get(exchange).name();
-	}
 	
 	/**
 	 * 获取CTP信息

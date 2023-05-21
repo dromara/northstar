@@ -11,8 +11,8 @@ import org.dromara.northstar.event.MailBindedEventHandler;
 import org.dromara.northstar.event.MarketDataHandler;
 import org.dromara.northstar.event.ModuleHandler;
 import org.dromara.northstar.event.SimMarketHandler;
+import org.dromara.northstar.gateway.GatewayMetaProvider;
 import org.dromara.northstar.gateway.IContractManager;
-import org.dromara.northstar.gateway.utils.MarketDataRepoFactory;
 import org.dromara.northstar.module.ModuleManager;
 import org.dromara.northstar.support.notification.MailDeliveryManager;
 import org.springframework.context.annotation.Bean;
@@ -57,9 +57,9 @@ class InternalEventHandlerConfig {
 	}
 	
 	@Bean 
-	MarketDataHandler marketDataHandler(MarketDataRepoFactory mdRepoFactory) {
+	MarketDataHandler marketDataHandler(GatewayMetaProvider gatewayMetaProvider) {
 		log.debug("注册：MarketDataHandler");
-		return new MarketDataHandler(mdRepoFactory);
+		return new MarketDataHandler(gatewayMetaProvider);
 	}
 	
 	@Bean

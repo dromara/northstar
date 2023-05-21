@@ -9,7 +9,7 @@ import org.dromara.northstar.common.event.AbstractEventHandler;
 import org.dromara.northstar.common.event.GenericEventHandler;
 import org.dromara.northstar.common.event.NorthstarEvent;
 import org.dromara.northstar.common.event.NorthstarEventType;
-import org.dromara.northstar.gateway.utils.MarketDataRepoFactory;
+import org.dromara.northstar.gateway.GatewayMetaProvider;
 
 import xyz.redtorch.pb.CoreField.BarField;
 
@@ -20,12 +20,12 @@ import xyz.redtorch.pb.CoreField.BarField;
  */
 public class MarketDataHandler extends AbstractEventHandler implements GenericEventHandler{
 
-	private MarketDataRepoFactory mdRepoFactory;
+	private GatewayMetaProvider gatewayMetaProvider;
 	
 	private ThreadPoolExecutor exec = new ThreadPoolExecutor(5, 10, 60, TimeUnit.SECONDS, new ArrayBlockingQueue<>(500));
 	
-	public MarketDataHandler(MarketDataRepoFactory mdRepoFactory) {
-		this.mdRepoFactory = mdRepoFactory;
+	public MarketDataHandler(GatewayMetaProvider gatewayMetaProvider) {
+		this.gatewayMetaProvider = gatewayMetaProvider;
 	}
 	
 	@Override
@@ -38,7 +38,7 @@ public class MarketDataHandler extends AbstractEventHandler implements GenericEv
 		if(e.getData() instanceof BarField bar && System.currentTimeMillis() - bar.getActionTimestamp() < 120000) {
 			ChannelType channelType = ChannelType.valueOf(bar.getChannelType());
 			if(channelType != ChannelType.SIM) {
-				exec.execute(() -> mdRepoFactory.getInstance(channelType).insert(bar)); 
+				exec.execute(() -> gatewayMetaProvider.getMarketDataRepo(channelType).insert(bar)); 
 			}
 		}
 	}
