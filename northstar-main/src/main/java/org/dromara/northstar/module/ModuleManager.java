@@ -42,4 +42,9 @@ public class ModuleManager implements ObjectManager<IModule>{
 	public List<IModule> allModules(){
 		return moduleMap.values().stream().toList();
 	}
+
+	@Override
+	public List<IModule> findAll() {
+		return allModules();
+	}
 }

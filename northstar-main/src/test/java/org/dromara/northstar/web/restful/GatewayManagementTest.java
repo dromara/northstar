@@ -14,7 +14,7 @@ import org.dromara.northstar.common.constant.ReturnCode;
 import org.dromara.northstar.common.model.GatewayDescription;
 import org.dromara.northstar.common.model.NsUser;
 import org.dromara.northstar.data.jdbc.GatewayDescriptionRepository;
-import org.dromara.northstar.gateway.ctp.CtpGatewaySettings;
+import org.dromara.northstar.gateway.playback.PlaybackGatewaySettings;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -68,14 +68,14 @@ class GatewayManagementTest {
 	
 	@Test
 	void shouldFailWithoutAuth() throws Exception {
-		GatewayDescription gatewayDes = TestGatewayFactory.makeMktGateway("testGateway", ChannelType.CTP, TestGatewayFactory.makeGatewaySettings(CtpGatewaySettings.class), false);
+		GatewayDescription gatewayDes = TestGatewayFactory.makeMktGateway("testGateway", ChannelType.CTP, TestGatewayFactory.makeGatewaySettings(PlaybackGatewaySettings.class), false);
 		mockMvc.perform(post("/northstar/gateway").contentType(MediaType.APPLICATION_JSON).content(JSON.toJSONString(gatewayDes)))
 			.andExpect(status().is(401));
 	}
 
 	@Test
 	void shouldCreateGateway() throws Exception {
-		GatewayDescription gatewayDes = TestGatewayFactory.makeMktGateway("CTP", ChannelType.CTP, TestGatewayFactory.makeGatewaySettings(CtpGatewaySettings.class),false);
+		GatewayDescription gatewayDes = TestGatewayFactory.makeMktGateway("CTP", ChannelType.CTP, TestGatewayFactory.makeGatewaySettings(PlaybackGatewaySettings.class),false);
 		mockMvc.perform(post("/northstar/gateway").contentType(MediaType.APPLICATION_JSON).content(JSON.toJSONString(gatewayDes)).session(session))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
@@ -94,7 +94,7 @@ class GatewayManagementTest {
 	void shouldUpdateGateway() throws Exception {
 		shouldCreateGateway();
 		
-		GatewayDescription gatewayDes = TestGatewayFactory.makeMktGateway("CTP", ChannelType.CTP, TestGatewayFactory.makeGatewaySettings(CtpGatewaySettings.class), true);
+		GatewayDescription gatewayDes = TestGatewayFactory.makeMktGateway("CTP", ChannelType.CTP, TestGatewayFactory.makeGatewaySettings(PlaybackGatewaySettings.class), true);
 		mockMvc.perform(put("/northstar/gateway").contentType(MediaType.APPLICATION_JSON).content(JSON.toJSONString(gatewayDes)).session(session))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));

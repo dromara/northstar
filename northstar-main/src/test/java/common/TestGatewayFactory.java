@@ -6,16 +6,13 @@ import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.constant.GatewayUsage;
 import org.dromara.northstar.common.model.GatewayDescription;
 import org.dromara.northstar.common.model.GatewaySettings;
-import org.dromara.northstar.gateway.ctp.CtpGatewaySettings;
+import org.dromara.northstar.gateway.playback.PlaybackGatewaySettings;
 
 public class TestGatewayFactory {
 
 	public static GatewaySettings makeGatewaySettings(Class<? extends GatewaySettings> type) {
-		if(type == CtpGatewaySettings.class) {
-			CtpGatewaySettings settings = new CtpGatewaySettings();
-			settings.setBrokerId("1080");
-			settings.setUserId("kevin");
-			settings.setPassword("123456");
+		if(type == PlaybackGatewaySettings.class) {
+			PlaybackGatewaySettings settings = new PlaybackGatewaySettings();
 			return settings;
 		}
 		return null;

@@ -30,4 +30,9 @@ public class GatewayMetaProvider {
 		}	
 		return factoryMap.get(gatewayType);
 	}
+	
+	public void add(ChannelType channelType, GatewaySettings settings, GatewayFactory factory) {
+		settingsMap.put(channelType, settings);
+		factoryMap.put(channelType, factory);
+	}
 }

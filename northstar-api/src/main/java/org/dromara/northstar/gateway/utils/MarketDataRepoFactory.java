@@ -32,4 +32,8 @@ public class MarketDataRepoFactory {
 		}
 		return getInstance(gd.getChannelType());
 	}
+	
+	public void add(ChannelType channelType, IMarketDataRepository mktRepo) {
+		channelRepoMap.put(channelType, mktRepo);
+	}
 }

@@ -35,7 +35,7 @@ import org.dromara.northstar.data.jdbc.ModuleDescriptionRepository;
 import org.dromara.northstar.data.jdbc.ModuleRuntimeDescriptionRepository;
 import org.dromara.northstar.gateway.Contract;
 import org.dromara.northstar.gateway.IMarketCenter;
-import org.dromara.northstar.gateway.ctp.CtpGatewaySettings;
+import org.dromara.northstar.gateway.playback.PlaybackGatewaySettings;
 import org.dromara.northstar.gateway.time.GenericTradeTime;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -109,10 +109,10 @@ class ModuleControllerTest {
 		String token = MD5.create().digestHex("123456" + time);
 		mockMvc.perform(post("/northstar/auth/login?timestamp="+time).contentType(MediaType.APPLICATION_JSON).content(JSON.toJSONString(new NsUser("admin",token))).session(session))
 			.andExpect(status().isOk());
-		GatewayDescription gatewayDes = TestGatewayFactory.makeMktGateway("CTP", ChannelType.CTP, TestGatewayFactory.makeGatewaySettings(CtpGatewaySettings.class),false);
+		GatewayDescription gatewayDes = TestGatewayFactory.makeMktGateway("CTP", ChannelType.CTP, TestGatewayFactory.makeGatewaySettings(PlaybackGatewaySettings.class),false);
 		mockMvc.perform(post("/northstar/gateway").contentType(MediaType.APPLICATION_JSON).content(JSON.toJSONString(gatewayDes)).session(session));
 		
-		GatewayDescription gatewayDes2 = TestGatewayFactory.makeTrdGateway("CTP账户", "CTP", ChannelType.CTP, TestGatewayFactory.makeGatewaySettings(CtpGatewaySettings.class),false);
+		GatewayDescription gatewayDes2 = TestGatewayFactory.makeTrdGateway("CTP账户", "CTP", ChannelType.CTP, TestGatewayFactory.makeGatewaySettings(PlaybackGatewaySettings.class),false);
 		mockMvc.perform(post("/northstar/gateway").contentType(MediaType.APPLICATION_JSON).content(JSON.toJSONString(gatewayDes2)).session(session));
 		
 		ComponentAndParamsPair cpp = ComponentAndParamsPair.builder()
