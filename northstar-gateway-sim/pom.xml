@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.dromara</groupId>
 		<artifactId>northstar</artifactId>
-		<version>6.0.0.RC1</version>
+		<version>6.0.0.RC2</version>
 	</parent>
 	
 	<artifactId>northstar-gateway-sim</artifactId>
@@ -17,10 +17,6 @@
 		<dependency>
 			<groupId>org.dromara</groupId>
 			<artifactId>northstar-api</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.dromara</groupId>
-			<artifactId>northstar-gateway-common</artifactId>
 		</dependency>
 		<dependency>
 		    <groupId>com.alibaba</groupId>

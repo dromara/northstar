@@ -1,17 +1,14 @@
 package org.dromara.northstar.data.jdbc;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.List;
 
-import org.dromara.northstar.common.IDataServiceManager;
 import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.data.IMarketDataRepository;
+import org.dromara.northstar.gateway.GatewayMetaProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,9 +54,8 @@ class MarketDataRepoAdapterTest {
 	
 	@BeforeEach
 	void prepare() {
-		IDataServiceManager dataService =  mock(IDataServiceManager.class);
-		when(dataService.getMinutelyData(any(), any(LocalDate.class), any(LocalDate.class))).thenReturn(List.of());
-		repo = new MarketDataRepoAdapter(delegate, dataService);
+		GatewayMetaProvider pvd =  mock(GatewayMetaProvider.class);
+		repo = new MarketDataRepoAdapter(delegate, pvd);
 	}
 	
 	@Test

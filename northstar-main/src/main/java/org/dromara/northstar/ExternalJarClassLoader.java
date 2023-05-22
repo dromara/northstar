@@ -26,6 +26,7 @@ import org.springframework.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
+@Deprecated
 public class ExternalJarClassLoader extends URLClassLoader {
 
 	// 属于本类加载器加载的jar包

@@ -1,9 +1,8 @@
 package org.dromara.northstar.gateway.playback.utils;
 
+import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-
-import org.dromara.northstar.common.IHolidayManager;
 
 /**
  * CTP时钟
@@ -11,8 +10,6 @@ import org.dromara.northstar.common.IHolidayManager;
  *
  */
 public class CtpPlaybackClock implements PlaybackClock {
-	
-	private IHolidayManager holidayMgr;
 	
 	private LocalDateTime ldt;
 	
@@ -25,8 +22,7 @@ public class CtpPlaybackClock implements PlaybackClock {
 	private int t4Start = LocalTime.of(21, 0).toSecondOfDay();
 	private int t4End = LocalTime.of(23, 59, 59).toSecondOfDay();
 	
-	public CtpPlaybackClock(IHolidayManager holidayMgr, LocalDateTime ldt) {
-		this.holidayMgr = holidayMgr;
+	public CtpPlaybackClock(LocalDateTime ldt) {
 		this.ldt = ldt;
 	}
 
@@ -41,7 +37,9 @@ public class CtpPlaybackClock implements PlaybackClock {
 
 	private boolean withinSection(LocalDateTime ldt) {
 		int secondOfDay = ldt.toLocalTime().toSecondOfDay();
-		if(holidayMgr.isHoliday(ldt)) {
+		if(ldt.getDayOfWeek() == DayOfWeek.SUNDAY 
+				|| ldt.getDayOfWeek() == DayOfWeek.SATURDAY && secondOfDay > t1End
+				|| ldt.getDayOfWeek() == DayOfWeek.MONDAY && secondOfDay < t1End) {
 			return false;
 		}
 		return secondOfDay >= t1Start && secondOfDay < t1End

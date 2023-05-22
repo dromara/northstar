@@ -4,8 +4,10 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import org.dromara.northstar.common.event.NorthstarEvent;
 import org.dromara.northstar.common.event.NorthstarEventType;
@@ -113,7 +115,8 @@ public class MailDeliveryManager implements IMessageSenderManager{
 						msg.setText(content);
 						sender.send(msg.getMimeMessage());
 					} catch (Exception e) {
-						log.error("邮件发送异常", e);
+						log.error("邮件发送异常：{} {}", e.getClass().getName(), e.getMessage());
+						CompletableFuture.runAsync(() -> send(receiver, content), CompletableFuture.delayedExecutor(10, TimeUnit.SECONDS));
 					}
 				});
 			}
@@ -129,7 +132,8 @@ public class MailDeliveryManager implements IMessageSenderManager{
 						msg.setText(content);
 						sender.send(msg.getMimeMessage());
 					} catch (Exception e) {
-						log.error("邮件发送异常", e);
+						log.error("邮件发送异常：{} {}", e.getClass().getName(), e.getMessage());
+						CompletableFuture.runAsync(() -> send(receiver, title, content), CompletableFuture.delayedExecutor(10, TimeUnit.SECONDS));
 					}
 				});				
 			}

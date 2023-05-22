@@ -10,11 +10,15 @@ import org.dromara.northstar.indicator.model.Configuration;
 import org.dromara.northstar.indicator.model.Num;
 import org.junit.jupiter.api.Test;
 
+import xyz.redtorch.pb.CoreField.ContractField;
+
 class MAIndicatorTest {
+	
+	ContractField c = ContractField.newBuilder().build();
 
 	@Test
 	void testMA() {
-		Indicator ma5 = new MAIndicator(Configuration.builder().cacheLength(10).build(), 5);
+		Indicator ma5 = new MAIndicator(Configuration.builder().contract(c).cacheLength(10).build(), 5);
 		double[] data = { 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0 };
 		long t = 0L;
 		for (double v : data) {
@@ -27,7 +31,7 @@ class MAIndicatorTest {
 
 	@Test
 	void testMAWithSmallPeriod() {
-		Indicator ma2 = new MAIndicator(Configuration.builder().cacheLength(10).build(), 2);
+		Indicator ma2 = new MAIndicator(Configuration.builder().contract(c).cacheLength(10).build(), 2);
 		double[] data = { 1.0, 2.0, 3.0, 4.0, 5.0 };
 		long t = 0L;
 		for (double v : data) {
@@ -40,7 +44,7 @@ class MAIndicatorTest {
 
 	@Test
 	void testMAWithVolatileValue() {
-		Indicator ma5 = new MAIndicator(Configuration.builder().cacheLength(10).build(), 5);
+		Indicator ma5 = new MAIndicator(Configuration.builder().contract(c).cacheLength(10).build(), 5);
 		double[] data = { 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0 };
 		long t = 0L;
 		for (double v : data) {

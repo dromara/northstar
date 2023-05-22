@@ -13,6 +13,7 @@ import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.model.GatewayDescription;
 import org.dromara.northstar.common.model.NsUser;
 import org.dromara.northstar.data.IGatewayRepository;
+import org.dromara.northstar.event.BroadcastHandler;
 import org.dromara.northstar.gateway.Contract;
 import org.dromara.northstar.gateway.IMarketCenter;
 import org.junit.jupiter.api.BeforeEach;
@@ -49,24 +50,26 @@ class GatewayDataControllerTest {
 	@MockBean
 	private IGatewayRepository gatewayRepo;
 	
+	@MockBean
+	private BroadcastHandler bcHandler;
+	
 	@BeforeEach
 	public void setUp() throws Exception {
 		Contract contract = mock(Contract.class);
 		when(contractMgr.getContract(any(), anyString())).thenReturn(contract);
-		when(contract.contractField()).thenReturn(ContractField.newBuilder().setUnifiedSymbol("rb2205@SHFE@FUTURES").build());
+		when(contract.contractField()).thenReturn(ContractField.newBuilder().setChannelType("PLAYBACK").setUnifiedSymbol("rb2205@SHFE@FUTURES").build());
 		
-		when(gatewayRepo.findById(anyString())).thenReturn(GatewayDescription.builder().channelType(ChannelType.CTP).build());
+		when(gatewayRepo.findById(anyString())).thenReturn(GatewayDescription.builder().channelType(ChannelType.PLAYBACK).build());
 		
 		long time = System.currentTimeMillis();
 		String token = MD5.create().digestHex("123456" + time);
 		mockMvc.perform(post("/northstar/auth/login?timestamp="+time).contentType(MediaType.APPLICATION_JSON).content(JSON.toJSONString(new NsUser("admin",token))).session(session))
 			.andExpect(status().isOk());
-		
 	}
 	
 	@Test
 	void testLoadWeeklyBarData() throws Exception {
-		mockMvc.perform(get("/northstar/data/bar/min?gatewayId=testGateway&unifiedSymbol=rb2205@SHFE@FUTURES&firstLoad=true&refStartTimestamp="+System.currentTimeMillis()).session(session))
+		mockMvc.perform(get("/northstar/data/bar/min?gatewayId=OTHER&unifiedSymbol=rb2205@SHFE@FUTURES&firstLoad=true&refStartTimestamp="+System.currentTimeMillis()).session(session))
 			.andExpect(status().isOk());
 	}
 

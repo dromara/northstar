@@ -24,12 +24,12 @@ import org.dromara.northstar.common.utils.CommonUtils;
 import org.dromara.northstar.common.utils.MarketDateTimeUtil;
 import org.dromara.northstar.common.utils.MessagePrinter;
 import org.dromara.northstar.gateway.Contract;
-import org.dromara.northstar.gateway.common.GatewayAbstract;
+import org.dromara.northstar.gateway.GatewayAbstract;
+import org.dromara.northstar.gateway.ctp.CtpDateTimeUtil;
 import org.dromara.northstar.gateway.ctp.CtpSimGatewaySettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import xyz.redtorch.gateway.ctp.common.CtpDateTimeUtil;
 import xyz.redtorch.gateway.ctp.common.GatewayConstants;
 import xyz.redtorch.gateway.ctp.x64v6v5v1cpv.api.CThostFtdcDepthMarketDataField;
 import xyz.redtorch.gateway.ctp.x64v6v5v1cpv.api.CThostFtdcForQuoteRspField;

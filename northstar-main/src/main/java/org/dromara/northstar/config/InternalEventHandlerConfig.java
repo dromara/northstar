@@ -3,6 +3,7 @@ package org.dromara.northstar.config;
 import org.dromara.northstar.account.AccountManager;
 import org.dromara.northstar.account.GatewayManager;
 import org.dromara.northstar.data.IGatewayRepository;
+import org.dromara.northstar.data.IMarketDataRepository;
 import org.dromara.northstar.event.AccountHandler;
 import org.dromara.northstar.event.BroadcastHandler;
 import org.dromara.northstar.event.ConnectionHandler;
@@ -12,7 +13,6 @@ import org.dromara.northstar.event.MarketDataHandler;
 import org.dromara.northstar.event.ModuleHandler;
 import org.dromara.northstar.event.SimMarketHandler;
 import org.dromara.northstar.gateway.IContractManager;
-import org.dromara.northstar.gateway.common.utils.MarketDataRepoFactory;
 import org.dromara.northstar.module.ModuleManager;
 import org.dromara.northstar.support.notification.MailDeliveryManager;
 import org.springframework.context.annotation.Bean;
@@ -57,9 +57,9 @@ class InternalEventHandlerConfig {
 	}
 	
 	@Bean 
-	MarketDataHandler marketDataHandler(MarketDataRepoFactory mdRepoFactory) {
+	MarketDataHandler marketDataHandler(IMarketDataRepository mdRepo) {
 		log.debug("注册：MarketDataHandler");
-		return new MarketDataHandler(mdRepoFactory);
+		return new MarketDataHandler(mdRepo);
 	}
 	
 	@Bean

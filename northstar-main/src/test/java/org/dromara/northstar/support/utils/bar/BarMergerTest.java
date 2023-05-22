@@ -12,7 +12,7 @@ import java.util.Random;
 
 import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.gateway.Contract;
-import org.dromara.northstar.gateway.common.domain.time.GenericTradeTime;
+import org.dromara.northstar.gateway.time.GenericTradeTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

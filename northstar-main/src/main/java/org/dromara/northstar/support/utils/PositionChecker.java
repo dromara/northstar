@@ -1,5 +1,7 @@
 package org.dromara.northstar.support.utils;
 
+import java.util.stream.Collectors;
+
 import org.dromara.northstar.module.ModuleManager;
 
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
@@ -28,11 +30,17 @@ public class PositionChecker {
 		case PD_Short -> DirectionEnum.D_Sell;
 		default -> throw new IllegalArgumentException("Unexpected value: " + position.getPositionDirection());
 		};
-		int totalPosition = moduleMgr.allModules().stream()
-			.mapToInt(m -> m.getModuleContext().getModuleAccount().getNonclosedPosition(position.getContract().getUnifiedSymbol(), direction))
-			.sum();
+		int totalPosition = moduleMgr.allModules()
+									.stream()
+									.filter(m -> m.getModuleDescription().getModuleAccountSettingsDescription()
+													.stream()
+													.map(mad -> mad.getAccountGatewayId())
+													.collect(Collectors.toSet()).contains(position.getGatewayId()))
+									.mapToInt(m -> m.getModuleContext().getModuleAccount().getNonclosedPosition(position.getContract().getUnifiedSymbol(), direction))
+									.sum();
 		if(totalPosition != position.getPosition()) {
-			throw new IllegalStateException(String.format("[%s] 逻辑持仓与实际持仓不一致。逻辑持仓数：%d，实际持仓数：%d", position.getContract().getName(), totalPosition, position.getPosition()));
+			throw new IllegalStateException(String.format("[%s %s] 逻辑持仓与实际持仓不一致。逻辑持仓数：%d，实际持仓数：%d", 
+					position.getGatewayId(), position.getContract().getName(), totalPosition, position.getPosition()));
 		}
 	}
 }

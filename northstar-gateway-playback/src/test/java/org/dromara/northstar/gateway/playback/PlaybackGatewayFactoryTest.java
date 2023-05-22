@@ -11,7 +11,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.dromara.northstar.common.IHolidayManager;
-import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.constant.PlaybackPrecision;
 import org.dromara.northstar.common.constant.PlaybackSpeed;
 import org.dromara.northstar.common.event.FastEventEngine;
@@ -19,8 +18,8 @@ import org.dromara.northstar.common.model.GatewayDescription;
 import org.dromara.northstar.data.IMarketDataRepository;
 import org.dromara.northstar.data.IPlaybackRuntimeRepository;
 import org.dromara.northstar.gateway.Contract;
+import org.dromara.northstar.gateway.GatewayMetaProvider;
 import org.dromara.northstar.gateway.IContractManager;
-import org.dromara.northstar.gateway.common.utils.MarketDataRepoFactory;
 import org.dromara.northstar.gateway.playback.utils.PlaybackClock;
 import org.dromara.northstar.gateway.playback.utils.PlaybackDataLoader;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,6 +36,7 @@ class PlaybackGatewayFactoryTest {
 	FastEventEngine feEngine = mock(FastEventEngine.class);
 	PlaybackDataLoader loader = mock(PlaybackDataLoader.class);
 	PlaybackClock clock = mock(PlaybackClock.class);
+	PlaybackDataServiceManager dsMgr = mock(PlaybackDataServiceManager.class);
 	
 	LocalDateTime ldt = LocalDateTime.of(2022, 6, 29, 9, 0);
 	TestFieldFactory factory = new TestFieldFactory("testGateway");
@@ -47,7 +47,7 @@ class PlaybackGatewayFactoryTest {
 	
 	IHolidayManager holidayMgr = mock(IHolidayManager.class);
 	IMarketDataRepository mdRepo = mock(IMarketDataRepository.class);
-	MarketDataRepoFactory mdRepoFactory = mock(MarketDataRepoFactory.class);
+	GatewayMetaProvider gatewayMetaProvider = mock(GatewayMetaProvider.class);
 	
 	TickField t1 = factory.makeTickField("rb2210", 5000);
 	TickField t2 = factory.makeTickField("rb2210", 5001);
@@ -65,8 +65,7 @@ class PlaybackGatewayFactoryTest {
 		when(loader.loadMinuteData(eq(ldt), eq(contract))).thenReturn(List.of(bar));
 		when(contractMgr.getContract(any(), anyString())).thenReturn(c);
 		when(c.contractField()).thenReturn(contract);
-		when(mdRepoFactory.getInstance(any(ChannelType.class))).thenReturn(mdRepo);
-		when(mdRepoFactory.getInstance(anyString())).thenReturn(mdRepo);
+		
 		
 		settings.setStartDate("20220629");
 		settings.setEndDate("20220629");
@@ -74,7 +73,7 @@ class PlaybackGatewayFactoryTest {
 		settings.setSpeed(PlaybackSpeed.SPRINT);
 		settings.setPlayContracts(List.of());
 		
-		playbackGatewayFactory = new PlaybackGatewayFactory(feEngine, contractMgr, holidayMgr, rtRepo, mdRepoFactory);
+		playbackGatewayFactory = new PlaybackGatewayFactory(feEngine, contractMgr, rtRepo, dsMgr);
 	}
 	
 	@Test

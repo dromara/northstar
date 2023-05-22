@@ -4,6 +4,10 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
+
+import org.dromara.northstar.common.model.ModuleAccountDescription;
+import org.dromara.northstar.common.model.ModuleDescription;
 import org.dromara.northstar.module.ModuleManager;
 import org.dromara.northstar.strategy.IModule;
 import org.dromara.northstar.strategy.IModuleAccount;
@@ -32,9 +36,16 @@ class PositionCheckerTest {
 	
 	@BeforeEach
 	void prepare() {
+		ModuleAccountDescription mad = ModuleAccountDescription.builder()
+				.accountGatewayId("testGateway")
+				.build();
+		ModuleDescription md = ModuleDescription.builder()
+				.moduleAccountSettingsDescription(List.of(mad))
+				.build();
 		when(ctx.getModuleAccount()).thenReturn(moduleAccount);
 		when(module.getModuleContext()).thenReturn(ctx);
 		when(module.getName()).thenReturn("testModule");
+		when(module.getModuleDescription()).thenReturn(md);
 		moduleMgr.add(module);
 		
 		checker = new PositionChecker(moduleMgr);
@@ -45,6 +56,7 @@ class PositionCheckerTest {
 		PositionField accountPos = PositionField.newBuilder()
 				.setContract(contract)
 				.setPositionDirection(PositionDirectionEnum.PD_Long)
+				.setGatewayId("testGateway")
 				.build();
 	
 		when(moduleAccount.getNonclosedPosition(contract.getUnifiedSymbol(), DirectionEnum.D_Buy)).thenReturn(2);
@@ -59,6 +71,7 @@ class PositionCheckerTest {
 		PositionField accountPos = PositionField.newBuilder()
 				.setContract(contract)
 				.setPositionDirection(PositionDirectionEnum.PD_Long)
+				.setGatewayId("testGateway")
 				.setPosition(2)
 				.build();
 	
@@ -74,6 +87,7 @@ class PositionCheckerTest {
 		PositionField accountPos = PositionField.newBuilder()
 				.setContract(contract)
 				.setPositionDirection(PositionDirectionEnum.PD_Long)
+				.setGatewayId("testGateway")
 				.setPosition(2)
 				.build();
 	

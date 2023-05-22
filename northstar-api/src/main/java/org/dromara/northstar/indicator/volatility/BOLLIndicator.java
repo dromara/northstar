@@ -19,8 +19,6 @@ import org.dromara.northstar.indicator.trend.MAIndicator;
  */
 public class BOLLIndicator extends AbstractIndicator implements Indicator{
 
-	private static String ERR_MSG = "布林带指标是一个多值指标，不能直接调用该指标方法，应该获取具有的指标线进行调用";
-	
 	private Indicator mid;		// 中轨
 	private Indicator std;		// 标准差
 	private Indicator upper;	// 上轨
@@ -48,19 +46,12 @@ public class BOLLIndicator extends AbstractIndicator implements Indicator{
 		return std.get(0);
 	}
 	
+	/**
+	 * 布林带指标是一个多值指标，不能直接调用该指标方法，应该获取具有的指标线进行调用
+	 */
 	@Override
 	public Num get(int step) {
-		throw new UnsupportedOperationException(ERR_MSG);
-	}
-
-	@Override
-	public double value(int step) {
-		throw new UnsupportedOperationException(ERR_MSG);
-	}
-
-	@Override
-	public List<Num> getData() {
-		throw new UnsupportedOperationException(ERR_MSG);
+		return Num.NaN();
 	}
 
 	public Indicator getMid() {
