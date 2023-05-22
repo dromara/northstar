@@ -13,7 +13,7 @@ public class ExternalConfig {
 
 	static {
 		log.info("=====================================================");
-		log.info("==             加载northstar-external               ==");
+		log.info("               加载northstar-external                 ");
 		log.info("=====================================================");
 	}
 }

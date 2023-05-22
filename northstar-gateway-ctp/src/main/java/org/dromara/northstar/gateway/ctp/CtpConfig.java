@@ -21,7 +21,7 @@ public class CtpConfig {
 	
 	static {
 		log.info("=====================================================");
-		log.info("==                加载gateway-ctp                  ==");
+		log.info("                  加载gateway-ctp                    ");
 		log.info("=====================================================");
 	}
 
