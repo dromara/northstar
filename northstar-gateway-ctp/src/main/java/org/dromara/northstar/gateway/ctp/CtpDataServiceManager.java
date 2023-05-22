@@ -291,7 +291,7 @@ public class CtpDataServiceManager implements IDataServiceManager {
 			JSONObject entity = JSON.parseObject(e.getResponseBodyAsString());
 			throw new IllegalStateException("第三方数据服务暂时不可用:" + entity.getString("message"));
 		} catch (Exception e) {
-			throw new IllegalStateException("数据服务连接异常", e);
+			throw new IllegalStateException("数据服务连接异常:" + uri, e);
 		}
 	}
 	

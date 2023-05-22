@@ -5,6 +5,7 @@ import java.util.Optional;
 import org.dromara.northstar.common.constant.Constants;
 import org.dromara.northstar.common.event.FastEventEngine;
 import org.dromara.northstar.gateway.IMarketCenter;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,12 +27,20 @@ public class CtpConfig {
 	}
 	
 	@Bean
-	CtpGatewayFactory ctpGatewayFactory(FastEventEngine feEngine, IMarketCenter mktCenter, CtpDataServiceManager dsMgr) {
+	CtpSimDataServiceManager ctpSimDataServiceManager(RestTemplate restTemplate) {
+		String nsdsSecret = Optional.ofNullable(System.getenv(Constants.NS_DS_SECRET)).orElse("");
+		return new CtpSimDataServiceManager(baseUrl, nsdsSecret, restTemplate, new CtpDateTimeUtil());
+	}
+	
+	@Bean
+	CtpGatewayFactory ctpGatewayFactory(FastEventEngine feEngine, IMarketCenter mktCenter,
+			@Qualifier("ctpDataServiceManager") CtpDataServiceManager dsMgr) {
 		return new CtpGatewayFactory(feEngine, mktCenter, dsMgr);
 	}
 	
 	@Bean
-	CtpSimGatewayFactory ctpSimGatewayFactory(FastEventEngine feEngine, IMarketCenter mktCenter, CtpDataServiceManager dsMgr) {
+	CtpSimGatewayFactory ctpSimGatewayFactory(FastEventEngine feEngine, IMarketCenter mktCenter, 
+			@Qualifier("ctpSimDataServiceManager") CtpSimDataServiceManager dsMgr) {
 		return new CtpSimGatewayFactory(feEngine, mktCenter, dsMgr);
 	}
 }

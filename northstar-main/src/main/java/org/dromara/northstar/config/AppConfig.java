@@ -1,9 +1,6 @@
 package org.dromara.northstar.config;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.security.cert.CertificateException;
 import java.time.Duration;
 import java.time.ZoneOffset;
@@ -16,7 +13,6 @@ import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
-import org.dromara.northstar.ExternalJarClassLoader;
 import org.dromara.northstar.common.event.FastEventEngine;
 import org.dromara.northstar.gateway.IMarketCenter;
 import org.dromara.northstar.gateway.mktdata.MarketCenter;
@@ -24,7 +20,6 @@ import org.dromara.northstar.support.notification.IMailMessageContentHandler;
 import org.dromara.northstar.support.notification.MailDeliveryManager;
 import org.dromara.northstar.support.notification.MailSenderFactory;
 import org.dromara.northstar.support.utils.ContractDefinitionReader;
-import org.dromara.northstar.support.utils.SpringContextUtil;
 import org.dromara.northstar.web.interceptor.AuthorizationInterceptor;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +27,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.info.BuildProperties;
-import org.springframework.boot.system.ApplicationHome;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -48,7 +42,6 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.corundumstudio.socketio.SocketIOServer;
-import com.google.common.io.Files;
 
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
@@ -118,23 +111,6 @@ public class AppConfig implements WebMvcConfigurer, DisposableBean {
         return new MarketCenter(reader.load(contractDefRes.getInputStream()), fastEventEngine);
     }
 
-//    @Bean
-//    ExternalJarClassLoader extJarListener(SpringContextUtil springContextUtil) throws MalformedURLException {
-//        ApplicationHome appHome = new ApplicationHome(getClass());
-//        File appPath = appHome.getDir();
-//        ExternalJarClassLoader clzLoader = null;
-//        for (File file : appPath.listFiles()) {
-//            if (file.getName().contains("northstar-external")
-//                    && Files.getFileExtension(file.getName()).equalsIgnoreCase("jar") && !file.isDirectory()) {
-//                log.info("加载northstar-external扩展包");
-//                clzLoader = new ExternalJarClassLoader(new URL[]{file.toURI().toURL()}, getClass().getClassLoader());
-//                clzLoader.initBean();
-//                break;
-//            }
-//        }
-//        return clzLoader;
-//    }
-
 	private static OkHttpClient getUnsafeOkHttpClient() {
 		try {
 			// Create a trust manager that does not validate certificate chains
@@ -174,8 +150,8 @@ public class AppConfig implements WebMvcConfigurer, DisposableBean {
     RestTemplate restTemplate() {
         return new RestTemplateBuilder()
                 .requestFactory(() -> new OkHttp3ClientHttpRequestFactory(getUnsafeOkHttpClient()))
-                .setReadTimeout(Duration.ofSeconds(30))
-                .setConnectTimeout(Duration.ofSeconds(5))
+                .setReadTimeout(Duration.ofSeconds(60))
+                .setConnectTimeout(Duration.ofSeconds(10))
                 .build();
     }
 

@@ -6,10 +6,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.annotation.Resource;
+
 import org.dromara.northstar.common.IHolidayManager;
 import org.dromara.northstar.common.constant.ChannelType;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +27,7 @@ public class CtpHolidayManager implements IHolidayManager, InitializingBean{
 
 	protected Set<LocalDate> holidaySet = new HashSet<>();
 
-	@Autowired
+	@Resource(name = "ctpDataServiceManager")
 	private CtpDataServiceManager dsMgr;
 	
 	@Override

@@ -2,15 +2,20 @@ package org.dromara.northstar.gateway.ctp;
 
 import java.time.LocalDate;
 
+import javax.annotation.Resource;
+
 import org.apache.commons.lang3.StringUtils;
 import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.constant.DateTimeConstant;
+import org.dromara.northstar.gateway.GatewayMetaProvider;
 import org.dromara.northstar.gateway.IMarketCenter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 import lombok.extern.slf4j.Slf4j;
+import xyz.redtorch.gateway.ctp.x64v6v3v15v.CtpGatewayFactory;
+import xyz.redtorch.gateway.ctp.x64v6v5v1cpv.CtpSimGatewayFactory;
 
 @Slf4j
 @Component
@@ -19,15 +24,31 @@ public class CtpLoader implements CommandLineRunner{
 	@Autowired
 	private IMarketCenter mktCenter;
 	
-	@Autowired
+	@Resource(name = "ctpDataServiceManager")
 	private CtpDataServiceManager dsMgr;
+	
+	@Resource(name = "ctpSimDataServiceManager")
+	private CtpSimDataServiceManager simDsMgr;
+	
+	@Autowired
+	private GatewayMetaProvider gatewayMetaProvider;
+	
+	@Autowired
+	private CtpGatewayFactory ctpFactory;
+	
+	@Autowired
+	private CtpSimGatewayFactory ctpSimFactory;
+	
 	
 	@Override
 	public void run(String... args) throws Exception {
+		gatewayMetaProvider.add(ChannelType.CTP, new CtpGatewaySettings(), ctpFactory, dsMgr);
+		gatewayMetaProvider.add(ChannelType.CTP_SIM, new CtpSimGatewaySettings(), ctpSimFactory, simDsMgr);
+		
 		final LocalDate today = LocalDate.now();
 		// 加载CTP合约
 		dsMgr.getUserAvailableExchanges()
-			.parallelStream()
+			.stream()
 			.forEach(exchange -> {
 				dsMgr.getAllContracts(exchange).stream()
 					//过滤掉过期合约

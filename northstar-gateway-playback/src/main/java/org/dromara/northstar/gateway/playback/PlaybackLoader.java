@@ -39,7 +39,7 @@ public class PlaybackLoader implements CommandLineRunner{
 		final LocalDate today = LocalDate.now();
 		// 加载CTP合约
 		dsMgr.getUserAvailableExchanges()
-			.parallelStream()
+			.stream()
 			.forEach(exchange -> {
 				dsMgr.getAllContracts(exchange).stream()
 					//过滤掉过期合约
