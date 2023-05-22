@@ -86,18 +86,18 @@ public class ModuleService implements PostLoadAware {
 	
 	private ModuleLoggerFactory moduleLoggerFactory = new ModuleLoggerFactory();
 	
-	private ExternalJarClassLoader extJarLoader;
+//	private ExternalJarClassLoader extJarLoader;
 	
 	private AccountManager accountMgr;
 	
-	public ModuleService(ApplicationContext ctx, ExternalJarClassLoader extJarLoader, IModuleRepository moduleRepo, MailDeliveryManager mailMgr,
+	public ModuleService(ApplicationContext ctx, IModuleRepository moduleRepo, MailDeliveryManager mailMgr,
 			IMarketDataRepository mdRepo, ModuleManager moduleMgr, IContractManager contractMgr, AccountManager accountMgr) {
 		this.ctx = ctx;
 		this.moduleMgr = moduleMgr;
 		this.contractMgr = contractMgr;
 		this.moduleRepo = moduleRepo;
 		this.mdRepo = mdRepo;
-		this.extJarLoader = extJarLoader;
+//		this.extJarLoader = extJarLoader;
 		this.mailMgr = mailMgr;
 		this.accountMgr = accountMgr;
 	}
@@ -129,9 +129,9 @@ public class ModuleService implements PostLoadAware {
 	public Map<String, ComponentField> getComponentParams(ComponentMetaInfo metaInfo) throws ClassNotFoundException {
 		String className = metaInfo.getClassName();
 		Class<?> clz = null;
-		if(extJarLoader != null) {
-			clz = extJarLoader.loadClass(className);
-		}
+//		if(extJarLoader != null) {
+//			clz = extJarLoader.loadClass(className);
+//		}
 		if(clz == null) {			
 			clz = Class.forName(className);
 		}
@@ -296,10 +296,10 @@ public class ModuleService implements PostLoadAware {
 		String paramClzName = clzName + "$InitParams";
 		Class<?> type = null;
 		Class<?> paramType = null;
-		if(extJarLoader != null) {
-			type = extJarLoader.loadClass(clzName);
-			paramType = extJarLoader.loadClass(paramClzName);
-		}
+//		if(extJarLoader != null) {
+//			type = extJarLoader.loadClass(clzName);
+//			paramType = extJarLoader.loadClass(paramClzName);
+//		}
 		if(type == null) {
 			type = Class.forName(clzName);
 			paramType = Class.forName(paramClzName);

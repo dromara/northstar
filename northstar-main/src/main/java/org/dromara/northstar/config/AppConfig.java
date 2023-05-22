@@ -118,22 +118,22 @@ public class AppConfig implements WebMvcConfigurer, DisposableBean {
         return new MarketCenter(reader.load(contractDefRes.getInputStream()), fastEventEngine);
     }
 
-    @Bean
-    ExternalJarClassLoader extJarListener(SpringContextUtil springContextUtil) throws MalformedURLException {
-        ApplicationHome appHome = new ApplicationHome(getClass());
-        File appPath = appHome.getDir();
-        ExternalJarClassLoader clzLoader = null;
-        for (File file : appPath.listFiles()) {
-            if (file.getName().contains("northstar-external")
-                    && Files.getFileExtension(file.getName()).equalsIgnoreCase("jar") && !file.isDirectory()) {
-                log.info("加载northstar-external扩展包");
-                clzLoader = new ExternalJarClassLoader(new URL[]{file.toURI().toURL()}, getClass().getClassLoader());
-                clzLoader.initBean();
-                break;
-            }
-        }
-        return clzLoader;
-    }
+//    @Bean
+//    ExternalJarClassLoader extJarListener(SpringContextUtil springContextUtil) throws MalformedURLException {
+//        ApplicationHome appHome = new ApplicationHome(getClass());
+//        File appPath = appHome.getDir();
+//        ExternalJarClassLoader clzLoader = null;
+//        for (File file : appPath.listFiles()) {
+//            if (file.getName().contains("northstar-external")
+//                    && Files.getFileExtension(file.getName()).equalsIgnoreCase("jar") && !file.isDirectory()) {
+//                log.info("加载northstar-external扩展包");
+//                clzLoader = new ExternalJarClassLoader(new URL[]{file.toURI().toURL()}, getClass().getClassLoader());
+//                clzLoader.initBean();
+//                break;
+//            }
+//        }
+//        return clzLoader;
+//    }
 
 	private static OkHttpClient getUnsafeOkHttpClient() {
 		try {

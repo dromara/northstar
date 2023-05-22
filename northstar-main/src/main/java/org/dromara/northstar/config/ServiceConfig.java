@@ -21,7 +21,6 @@ import org.springframework.context.annotation.DependsOn;
 	"internalDispatcher", 
 	"accountEventHandler",
 	"connectionEventHandler", 
-	"extJarListener",
 })
 @Configuration
 public class ServiceConfig {
@@ -37,10 +36,10 @@ public class ServiceConfig {
     }
 
     @Bean
-    ModuleService moduleService(ApplicationContext ctx, ExternalJarClassLoader extJarLoader, IModuleRepository moduleRepo,
+    ModuleService moduleService(ApplicationContext ctx, IModuleRepository moduleRepo,
                                               IMarketDataRepository mdRepo, AccountManager accountMgr, ModuleManager moduleMgr,
                                               IContractManager contractMgr, MailDeliveryManager mailMgr) {
-        return new ModuleService(ctx, extJarLoader, moduleRepo, mailMgr, mdRepo, moduleMgr, contractMgr, accountMgr);
+        return new ModuleService(ctx, moduleRepo, mailMgr, mdRepo, moduleMgr, contractMgr, accountMgr);
     }
 
     @Bean
