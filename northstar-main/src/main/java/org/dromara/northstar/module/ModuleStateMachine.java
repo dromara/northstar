@@ -2,7 +2,7 @@ package org.dromara.northstar.module;
 
 import java.util.List;
 
-import org.apache.commons.codec.binary.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.dromara.northstar.common.TransactionAware;
 import org.dromara.northstar.common.constant.ModuleState;
 import org.dromara.northstar.common.utils.OrderUtils;

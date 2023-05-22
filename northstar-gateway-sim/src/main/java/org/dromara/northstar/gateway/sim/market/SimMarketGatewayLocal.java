@@ -16,7 +16,7 @@ import org.dromara.northstar.common.event.NorthstarEventType;
 import org.dromara.northstar.common.model.GatewayDescription;
 import org.dromara.northstar.gateway.IMarketCenter;
 import org.dromara.northstar.gateway.MarketGateway;
-import org.dromara.northstar.gateway.common.domain.contract.GatewayContract;
+import org.dromara.northstar.gateway.contract.GatewayContract;
 
 import lombok.extern.slf4j.Slf4j;
 import xyz.redtorch.pb.CoreField.ContractField;

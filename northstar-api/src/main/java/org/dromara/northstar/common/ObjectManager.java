@@ -1,5 +1,7 @@
 package org.dromara.northstar.common;
 
+import java.util.List;
+
 import org.dromara.northstar.common.model.Identifier;
 
 public interface ObjectManager<T> {
@@ -11,4 +13,6 @@ public interface ObjectManager<T> {
 	T get(Identifier id);
 	
 	boolean contains(Identifier id);
+	
+	List<T> findAll();
 }

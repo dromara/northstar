@@ -2,9 +2,9 @@ package org.dromara.northstar.config;
 
 import org.dromara.northstar.ExternalJarClassLoader;
 import org.dromara.northstar.account.AccountManager;
+import org.dromara.northstar.data.IMarketDataRepository;
 import org.dromara.northstar.data.IModuleRepository;
 import org.dromara.northstar.gateway.IContractManager;
-import org.dromara.northstar.gateway.common.utils.MarketDataRepoFactory;
 import org.dromara.northstar.module.ModuleManager;
 import org.dromara.northstar.support.notification.MailDeliveryManager;
 import org.dromara.northstar.web.service.AccountService;
@@ -21,7 +21,6 @@ import org.springframework.context.annotation.DependsOn;
 	"internalDispatcher", 
 	"accountEventHandler",
 	"connectionEventHandler", 
-	"extJarListener",
 })
 @Configuration
 public class ServiceConfig {
@@ -37,10 +36,10 @@ public class ServiceConfig {
     }
 
     @Bean
-    ModuleService moduleService(ApplicationContext ctx, ExternalJarClassLoader extJarLoader, IModuleRepository moduleRepo,
-                                              MarketDataRepoFactory mdRepoFactory, AccountManager accountMgr, ModuleManager moduleMgr,
+    ModuleService moduleService(ApplicationContext ctx, IModuleRepository moduleRepo,
+                                              IMarketDataRepository mdRepo, AccountManager accountMgr, ModuleManager moduleMgr,
                                               IContractManager contractMgr, MailDeliveryManager mailMgr) {
-        return new ModuleService(ctx, extJarLoader, moduleRepo, mailMgr, mdRepoFactory, moduleMgr, contractMgr, accountMgr);
+        return new ModuleService(ctx, moduleRepo, mailMgr, mdRepo, moduleMgr, contractMgr, accountMgr);
     }
 
     @Bean

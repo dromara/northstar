@@ -6,9 +6,12 @@ import org.dromara.northstar.indicator.model.Configuration;
 import org.dromara.northstar.indicator.model.Num;
 import org.junit.jupiter.api.Test;
 
+import xyz.redtorch.pb.CoreField.ContractField;
+
 class SimpleValueIndicatorTest {
 	
-	SimpleValueIndicator in = new SimpleValueIndicator(Configuration.builder().build());
+	ContractField contract = ContractField.newBuilder().build();
+	SimpleValueIndicator in = new SimpleValueIndicator(Configuration.builder().contract(contract).build());
 
 	@Test
 	void testNaN() {

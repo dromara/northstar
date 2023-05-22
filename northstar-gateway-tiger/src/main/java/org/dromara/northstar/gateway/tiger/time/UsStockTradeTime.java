@@ -7,8 +7,8 @@ import java.time.Month;
 import java.util.List;
 
 import org.dromara.northstar.gateway.TradeTimeDefinition;
-import org.dromara.northstar.gateway.common.domain.time.DateUtils;
 import org.dromara.northstar.gateway.model.PeriodSegment;
+import org.dromara.northstar.gateway.time.DateUtils;
 
 /**
  * 美股连续交易时段

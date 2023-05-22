@@ -61,4 +61,9 @@ public class GatewayManager implements ObjectManager<Gateway> {
 	public boolean contains(Identifier id) {
 		return gatewayMap.containsKey(id);
 	}
+
+	@Override
+	public List<Gateway> findAll() {
+		return allGateways();
+	}
 }

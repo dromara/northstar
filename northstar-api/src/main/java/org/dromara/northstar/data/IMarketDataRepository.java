@@ -38,11 +38,4 @@ public interface IMarketDataRepository {
 	 */
 	List<BarField> loadDailyBars(ContractField contract, LocalDate startDate, LocalDate endDate);
 	
-	/**
-	 * 查询某年的法定节假日（即不包含周末的非交易日）
-	 * @param gatewayType
-	 * @param year
-	 * @return
-	 */
-	List<LocalDate> findHodidayInLaw(String gatewayType, int year);
 }

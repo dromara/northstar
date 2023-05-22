@@ -7,8 +7,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import javax.transaction.Transactional;
@@ -27,7 +27,6 @@ import org.dromara.northstar.common.model.ComponentField;
 import org.dromara.northstar.common.model.ComponentMetaInfo;
 import org.dromara.northstar.common.model.ContractSimpleInfo;
 import org.dromara.northstar.common.model.DynamicParams;
-import org.dromara.northstar.common.model.GatewayDescription;
 import org.dromara.northstar.common.model.Identifier;
 import org.dromara.northstar.common.model.MockTradeDescription;
 import org.dromara.northstar.common.model.ModuleAccountDescription;
@@ -37,16 +36,15 @@ import org.dromara.northstar.common.model.ModuleDescription;
 import org.dromara.northstar.common.model.ModulePositionDescription;
 import org.dromara.northstar.common.model.ModuleRuntimeDescription;
 import org.dromara.northstar.common.utils.MarketDataLoadingUtils;
+import org.dromara.northstar.data.IMarketDataRepository;
 import org.dromara.northstar.data.IModuleRepository;
 import org.dromara.northstar.gateway.Contract;
 import org.dromara.northstar.gateway.IContractManager;
-import org.dromara.northstar.gateway.common.utils.MarketDataRepoFactory;
 import org.dromara.northstar.module.ModuleContext;
 import org.dromara.northstar.module.ModuleManager;
 import org.dromara.northstar.module.PlaybackModuleContext;
 import org.dromara.northstar.module.TradeModule;
 import org.dromara.northstar.strategy.DynamicParamsAware;
-import org.dromara.northstar.strategy.IAccount;
 import org.dromara.northstar.strategy.IModule;
 import org.dromara.northstar.strategy.IModuleContext;
 import org.dromara.northstar.strategy.StrategicComponent;
@@ -80,7 +78,7 @@ public class ModuleService implements PostLoadAware {
 	
 	private IModuleRepository moduleRepo;
 	
-	private MarketDataRepoFactory mdRepoFactory;
+	private IMarketDataRepository mdRepo;
 	
 	private MailDeliveryManager mailMgr;
 	
@@ -88,18 +86,18 @@ public class ModuleService implements PostLoadAware {
 	
 	private ModuleLoggerFactory moduleLoggerFactory = new ModuleLoggerFactory();
 	
-	private ExternalJarClassLoader extJarLoader;
+//	private ExternalJarClassLoader extJarLoader;
 	
 	private AccountManager accountMgr;
 	
-	public ModuleService(ApplicationContext ctx, ExternalJarClassLoader extJarLoader, IModuleRepository moduleRepo, MailDeliveryManager mailMgr,
-			MarketDataRepoFactory mdRepoFactory, ModuleManager moduleMgr, IContractManager contractMgr, AccountManager accountMgr) {
+	public ModuleService(ApplicationContext ctx, IModuleRepository moduleRepo, MailDeliveryManager mailMgr,
+			IMarketDataRepository mdRepo, ModuleManager moduleMgr, IContractManager contractMgr, AccountManager accountMgr) {
 		this.ctx = ctx;
 		this.moduleMgr = moduleMgr;
 		this.contractMgr = contractMgr;
 		this.moduleRepo = moduleRepo;
-		this.mdRepoFactory = mdRepoFactory;
-		this.extJarLoader = extJarLoader;
+		this.mdRepo = mdRepo;
+//		this.extJarLoader = extJarLoader;
 		this.mailMgr = mailMgr;
 		this.accountMgr = accountMgr;
 	}
@@ -131,9 +129,9 @@ public class ModuleService implements PostLoadAware {
 	public Map<String, ComponentField> getComponentParams(ComponentMetaInfo metaInfo) throws ClassNotFoundException {
 		String className = metaInfo.getClassName();
 		Class<?> clz = null;
-		if(extJarLoader != null) {
-			clz = extJarLoader.loadClass(className);
-		}
+//		if(extJarLoader != null) {
+//			clz = extJarLoader.loadClass(className);
+//		}
 		if(clz == null) {			
 			clz = Class.forName(className);
 		}
@@ -274,12 +272,10 @@ public class ModuleService implements PostLoadAware {
 			LocalDate start = utils.getFridayOfThisWeek(date.minusWeeks(1));
 			LocalDate end = utils.getFridayOfThisWeek(date);
 			for(ModuleAccountDescription mad : md.getModuleAccountSettingsDescription()) {
-				IAccount account = accountMgr.get(Identifier.of(mad.getAccountGatewayId()));
-				GatewayDescription gd = account.getMarketGateway().gatewayDescription();
 				List<BarField> mergeList = new ArrayList<>();
 				for(ContractSimpleInfo csi : mad.getBindedContracts()) {
 					Contract c = contractMgr.getContract(Identifier.of(csi.getValue()));
-					List<BarField> bars = mdRepoFactory.getInstance(gd.getChannelType()).loadBars(c.contractField(), start, end);
+					List<BarField> bars = mdRepo.loadBars(c.contractField(), start, end);
 					mergeList.addAll(bars);
 				}
 				mergeList.sort((a,b) -> a.getActionTimestamp() < b.getActionTimestamp() ? -1 : 1);
@@ -300,10 +296,10 @@ public class ModuleService implements PostLoadAware {
 		String paramClzName = clzName + "$InitParams";
 		Class<?> type = null;
 		Class<?> paramType = null;
-		if(extJarLoader != null) {
-			type = extJarLoader.loadClass(clzName);
-			paramType = extJarLoader.loadClass(paramClzName);
-		}
+//		if(extJarLoader != null) {
+//			type = extJarLoader.loadClass(clzName);
+//			paramType = extJarLoader.loadClass(paramClzName);
+//		}
 		if(type == null) {
 			type = Class.forName(clzName);
 			paramType = Class.forName(paramClzName);

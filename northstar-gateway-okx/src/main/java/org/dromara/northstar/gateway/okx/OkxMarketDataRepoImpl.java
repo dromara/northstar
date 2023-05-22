@@ -28,10 +28,4 @@ public class OkxMarketDataRepoImpl implements IMarketDataRepository{
 		return null;
 	}
 
-	@Override
-	public List<LocalDate> findHodidayInLaw(String gatewayType, int year) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 }

@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.apache.commons.codec.binary.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.dromara.northstar.common.exception.NoSuchElementException;
 import org.dromara.northstar.common.exception.TradeException;
 import org.dromara.northstar.common.model.ContractSimpleInfo;

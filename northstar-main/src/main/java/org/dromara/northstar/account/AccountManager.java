@@ -42,4 +42,9 @@ public class AccountManager implements ObjectManager<TradeAccount>{
 		return accountMap.values().stream().toList();
 	}
 
+	@Override
+	public List<TradeAccount> findAll() {
+		return allAccounts();
+	}
+
 }
