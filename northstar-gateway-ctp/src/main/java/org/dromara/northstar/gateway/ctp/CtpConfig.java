@@ -11,11 +11,19 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
 
+import lombok.extern.slf4j.Slf4j;
 import xyz.redtorch.gateway.ctp.x64v6v3v15v.CtpGatewayFactory;
 import xyz.redtorch.gateway.ctp.x64v6v5v1cpv.CtpSimGatewayFactory;
 
+@Slf4j
 @Configuration
 public class CtpConfig {
+	
+	static {
+		log.info("=====================================================");
+		log.info("==                加载gateway-ctp                  ==");
+		log.info("=====================================================");
+	}
 
 	@Value("${northstar.data-service.baseUrl}")
 	private String baseUrl;

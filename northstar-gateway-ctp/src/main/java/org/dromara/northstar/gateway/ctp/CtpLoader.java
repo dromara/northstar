@@ -20,7 +20,7 @@ import xyz.redtorch.gateway.ctp.x64v6v5v1cpv.CtpSimGatewayFactory;
 @Slf4j
 @Component
 public class CtpLoader implements CommandLineRunner{
-
+	
 	@Autowired
 	private IMarketCenter mktCenter;
 	

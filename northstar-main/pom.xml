@@ -127,6 +127,7 @@
     			<artifactId>spring-boot-maven-plugin</artifactId>
     			<configuration>
     				<outputDirectory>../northstar-dist</outputDirectory>
+    				<layout>ZIP</layout>
     			</configuration>
 			</plugin>
 			<plugin>
