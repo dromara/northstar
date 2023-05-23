@@ -13,7 +13,6 @@ import java.util.stream.Collectors;
 
 import javax.transaction.Transactional;
 
-import org.dromara.northstar.ExternalJarClassLoader;
 import org.dromara.northstar.account.AccountManager;
 import org.dromara.northstar.common.constant.Constants;
 import org.dromara.northstar.common.constant.DateTimeConstant;
