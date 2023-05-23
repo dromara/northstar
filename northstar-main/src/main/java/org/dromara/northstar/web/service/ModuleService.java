@@ -85,8 +85,6 @@ public class ModuleService implements PostLoadAware {
 	
 	private ModuleLoggerFactory moduleLoggerFactory = new ModuleLoggerFactory();
 	
-//	private ExternalJarClassLoader extJarLoader;
-	
 	private AccountManager accountMgr;
 	
 	public ModuleService(ApplicationContext ctx, IModuleRepository moduleRepo, MailDeliveryManager mailMgr,
@@ -96,7 +94,6 @@ public class ModuleService implements PostLoadAware {
 		this.contractMgr = contractMgr;
 		this.moduleRepo = moduleRepo;
 		this.mdRepo = mdRepo;
-//		this.extJarLoader = extJarLoader;
 		this.mailMgr = mailMgr;
 		this.accountMgr = accountMgr;
 	}
@@ -127,13 +124,7 @@ public class ModuleService implements PostLoadAware {
 	 */
 	public Map<String, ComponentField> getComponentParams(ComponentMetaInfo metaInfo) throws ClassNotFoundException {
 		String className = metaInfo.getClassName();
-		Class<?> clz = null;
-//		if(extJarLoader != null) {
-//			clz = extJarLoader.loadClass(className);
-//		}
-		if(clz == null) {			
-			clz = Class.forName(className);
-		}
+		Class<?> clz = Class.forName(className);
 		DynamicParamsAware aware = (DynamicParamsAware) ctx.getBean(clz);
 		DynamicParams params = aware.getDynamicParams();
 		return params.getMetaInfo();
@@ -293,17 +284,8 @@ public class ModuleService implements PostLoadAware {
 		}
 		String clzName = metaInfo.getComponentMeta().getClassName();
 		String paramClzName = clzName + "$InitParams";
-		Class<?> type = null;
-		Class<?> paramType = null;
-//		if(extJarLoader != null) {
-//			type = extJarLoader.loadClass(clzName);
-//			paramType = extJarLoader.loadClass(paramClzName);
-//		}
-		if(type == null) {
-			type = Class.forName(clzName);
-			paramType = Class.forName(paramClzName);
-		}
-		
+		Class<?> type = Class.forName(clzName);
+		Class<?> paramType = Class.forName(paramClzName);
 		DynamicParamsAware obj = (DynamicParamsAware) type.getDeclaredConstructor().newInstance();
 		DynamicParams paramObj = (DynamicParams) paramType.getDeclaredConstructor().newInstance();
 		paramObj.resolveFromSource(fieldMap);
