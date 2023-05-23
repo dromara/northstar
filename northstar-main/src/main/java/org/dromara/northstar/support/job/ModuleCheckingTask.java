@@ -204,7 +204,7 @@ public class ModuleCheckingTask implements InitializingBean {
 	}
 	
 	/**
-	 * 检查废单
+	 * 清除报警缓存
 	 */
 	@Scheduled(cron="0 45 8,12,20 ? * 1-5")
 	public void resetWarningCache() {
