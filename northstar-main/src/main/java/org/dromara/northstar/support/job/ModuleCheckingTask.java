@@ -197,7 +197,7 @@ public class ModuleCheckingTask implements InitializingBean {
 	private void doSmartSend(String subscriber, String title, String msg) {
 		String combine = title + "@" + msg;
 		if(!warningCacheSet.contains(combine)) {
-			String realMsg = String.format("警报来源：%s%n%s", InetAddressUtils.getHostname(), msg);
+			String realMsg = String.format("%s%n%n警报来源：%s%n", msg, InetAddressUtils.getHostname());
 			msgMgr.getSender().send(subscriber, title, realMsg);
 			warningCacheSet.add(combine);
 		}

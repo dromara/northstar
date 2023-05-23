@@ -115,7 +115,8 @@ public class MailDeliveryManager implements IMessageSenderManager{
 						msg.setText(content);
 						sender.send(msg.getMimeMessage());
 					} catch (Exception e) {
-						log.error("邮件发送异常：{} {}", e.getClass().getName(), e.getMessage());
+						log.error("邮件发送异常：{} {}", e.getClass().getSimpleName(), e.getMessage());
+						log.warn("稍后重试：{} {}", receiver, content);
 						CompletableFuture.runAsync(() -> send(receiver, content), CompletableFuture.delayedExecutor(10, TimeUnit.SECONDS));
 					}
 				});
@@ -132,7 +133,8 @@ public class MailDeliveryManager implements IMessageSenderManager{
 						msg.setText(content);
 						sender.send(msg.getMimeMessage());
 					} catch (Exception e) {
-						log.error("邮件发送异常：{} {}", e.getClass().getName(), e.getMessage());
+						log.error("邮件发送异常：{} {}", e.getClass().getSimpleName(), e.getMessage());
+						log.warn("稍后重试：{} {} {}", receiver, title, content);
 						CompletableFuture.runAsync(() -> send(receiver, title, content), CompletableFuture.delayedExecutor(10, TimeUnit.SECONDS));
 					}
 				});				

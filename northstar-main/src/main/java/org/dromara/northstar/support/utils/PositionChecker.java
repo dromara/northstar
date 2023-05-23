@@ -46,7 +46,7 @@ public class PositionChecker {
 		if(totalPosition != position.getPosition()) {
 			log.warn("{} {}头 实际持仓数：{}", position.getContract().getName(), FieldUtils.chn(direction), position.getPosition());
 			modules.forEach(m -> 
-				log.warn("{} {}头 持仓为：{}", m.getName(), FieldUtils.chn(direction), 
+				log.warn("模组 [{}] {}头 持仓为：{}", m.getName(), FieldUtils.chn(direction), 
 						m.getModuleContext().getModuleAccount().getNonclosedPosition(position.getContract().getUnifiedSymbol(), direction))
 			);
 			throw new IllegalStateException(String.format("[%s %s %s头] 逻辑持仓与实际持仓不一致。逻辑持仓数：%d，实际持仓数：%d", 
