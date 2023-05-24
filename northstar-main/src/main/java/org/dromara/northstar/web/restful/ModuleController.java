@@ -3,7 +3,6 @@ package org.dromara.northstar.web.restful;
 import java.util.List;
 import java.util.Map;
 
-import org.dromara.northstar.common.constant.ReturnCode;
 import org.dromara.northstar.common.exception.NoSuchElementException;
 import org.dromara.northstar.common.model.ComponentField;
 import org.dromara.northstar.common.model.ComponentMetaInfo;
@@ -120,7 +119,7 @@ public class ModuleController {
 		try {			
 			return new ResultBean<>(service.getModuleRealTimeInfo(name));
 		} catch(NoSuchElementException e) {
-			return new ResultBean<>(ReturnCode.NO_SUCH_ELEMENT_EXCEPTION, "模组加载中");
+			return new ResultBean<>(null);
 		}
 	}
 	

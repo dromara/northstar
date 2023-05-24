@@ -176,9 +176,7 @@ export default {
     ...mapGetters(['moduleList'])
   },
   mounted() {
-    if (!this.moduleList.length) {
-      this.findAll()
-    }
+    this.autoRefreshList()
   },
   beforeDestroy() {
     clearTimeout(this.timer)
@@ -206,43 +204,16 @@ export default {
         this.moduleList.filter((item) => item.moduleName !== row.moduleName)
       )
     },
-    findAll() {
-      moduleApi.getAllModules().then((results) => {
-        this.$store.commit('updateList', results.sort((a,b) => a.moduleName.localeCompare(b.moduleName)))
-        this.moduleList.map((item) => {
-          const retriableRequest = () => {
-            moduleApi.getModuleRuntime(item.moduleName).then(
-              (rt) => {
-                this.moduleList.find((item, index, array) => {
-                  if (item.moduleName === rt.moduleName) {
-                    array[index] = Object.assign({ runtime: rt }, item)
-                    this.$store.commit('updateList', [...array])
-                  }
-                })
-              },
-              (e) => {
-                console.warn('请求异常：' + e.message)
-                console.log('10秒稍后自动重试')
-                setTimeout(retriableRequest, 10000)
-              }
-            )
-          }
-          retriableRequest()
-          return item
-        })
-        this.timer = setTimeout(this.autoRefreshList, 30000)
-      })
-    },
     async autoRefreshList() {
       const modules = await moduleApi.getAllModules()
       if(modules.length > 0){
         const moduleRtPromises =  modules.map(m => moduleApi.getModuleRuntime(m.moduleName))
         const moduleRts = await Promise.all(moduleRtPromises)
         const moduleRtMap = {}
-        moduleRts.forEach(rt => moduleRtMap[rt.moduleName] = rt)
+        moduleRts.filter(rt => !!rt).forEach(rt => moduleRtMap[rt.moduleName] = rt)
         modules.forEach(item => item.runtime = moduleRtMap[item.moduleName])
         this.$store.commit('updateList', [])      // 确保界面有刷新，直接提交新对象时会刷新失败
-        this.$store.commit('updateList', modules)
+        this.$store.commit('updateList', modules.sort((a,b) => a.moduleName.localeCompare(b.moduleName)))
       }
       this.timer = setTimeout(this.autoRefreshList, 30000)   // 每30秒刷新一次
     },
