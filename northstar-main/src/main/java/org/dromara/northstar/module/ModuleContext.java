@@ -559,4 +559,16 @@ public class ModuleContext implements IModuleContext{
 		this.orderReqFilter = filter;
 	}
 
+	private boolean isReady;
+	
+	@Override
+	public boolean isReady() {
+		return isReady;
+	}
+
+	@Override
+	public void onReady() {
+		isReady = true;
+	}
+
 }

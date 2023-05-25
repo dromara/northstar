@@ -62,4 +62,13 @@ public interface IModuleContext extends IModuleStrategyContext, MergedBarListene
 	 * @return
 	 */
 	boolean isEnabled();
+	/**
+	 * 是否已完成初始化
+	 * @return
+	 */
+	boolean isReady();
+	/**
+	 * 完成初始化
+	 */
+	void onReady();
 }

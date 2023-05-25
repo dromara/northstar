@@ -273,6 +273,7 @@ public class ModuleService implements PostLoadAware {
 			date = date.plusWeeks(1);
 		}
 		moduleCtx.setEnabled(mrd.isEnabled());
+		moduleCtx.onReady();
 	}
 	
 	@SuppressWarnings("unchecked")

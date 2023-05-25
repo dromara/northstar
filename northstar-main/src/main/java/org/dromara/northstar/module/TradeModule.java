@@ -113,6 +113,9 @@ public class TradeModule implements IModule {
 
 	@Override
 	public ModuleRuntimeDescription getRuntimeDescription() {
+		if(!ctx.isReady()) {
+			return null;
+		}
 		return ctx.getRuntimeDescription(true);
 	}
 
