@@ -261,16 +261,15 @@ public class ModuleService implements PostLoadAware {
 				&& toYearWeekVal(now) >= toYearWeekVal(date)) {
 			LocalDate start = utils.getFridayOfThisWeek(date.minusWeeks(1));
 			LocalDate end = utils.getFridayOfThisWeek(date);
+			List<BarField> mergeList = new ArrayList<>();
 			for(ModuleAccountDescription mad : md.getModuleAccountSettingsDescription()) {
-				List<BarField> mergeList = new ArrayList<>();
 				for(ContractSimpleInfo csi : mad.getBindedContracts()) {
 					Contract c = contractMgr.getContract(Identifier.of(csi.getValue()));
 					List<BarField> bars = mdRepo.loadBars(c.contractField(), start, end);
 					mergeList.addAll(bars);
 				}
-				mergeList.sort((a,b) -> a.getActionTimestamp() < b.getActionTimestamp() ? -1 : 1);
-				moduleCtx.initData(mergeList);
 			}
+			moduleCtx.initData(mergeList.parallelStream().sorted((a,b) -> a.getActionTimestamp() < b.getActionTimestamp() ? -1 : 1).toList());
 			date = date.plusWeeks(1);
 		}
 		moduleCtx.setEnabled(mrd.isEnabled());
