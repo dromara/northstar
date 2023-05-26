@@ -6,7 +6,13 @@
 ![输入图片说明](https://foruda.gitee.com/images/1681303466386742642/f1c0a30e_1676852.jpeg "GVP.jpg")
 
 ## 产品简介
-这是一个面向程序员的量化交易软件，用于期货、股票、外汇、炒币等多种交易场景，实现自动交易。已对接了CTP接口（国内期货）、老虎证券接口（美股港股）。
+这是一个面向程序员的量化交易软件，用于期货、股票、外汇、炒币等多种交易场景，实现自动交易。
+
+已对接的网关示例：
+- CTP网关：[https://gitee.com/NorthstarQuant/northstar-gateway-ctp](https://gitee.com/NorthstarQuant/northstar-gateway-ctp)
+- 老虎网关：[https://gitee.com/NorthstarQuant/northstar-gateway-tiger](https://gitee.com/NorthstarQuant/northstar-gateway-tiger)
+- OKX网关：[https://gitee.com/NorthstarQuant/northstar-gateway-okx](https://gitee.com/NorthstarQuant/northstar-gateway-okx)
+- 币安网关：[https://gitee.com/NorthstarQuant/northstar-gateway-binance](https://gitee.com/NorthstarQuant/northstar-gateway-binance)
 
 **功能特性：**
 - 一站式平台，可适配对接不同的交易所；
@@ -37,9 +43,9 @@
 - B/S架构
 - northstar项目为服务端（包含了web网页监控端）
 - 交互协议HTTP + websocket
-- 数据库、缓存为Redis（历史行情数据主要依赖数据服务，本地仅保存少量账户配置信息）
+- 数据库、缓存为H2（历史行情数据主要依赖数据服务，本地仅保存少量账户配置信息）
 - 前端采用node14 + vue2.x
-- 服务端采用java17（拥抱新技术） + springboot2
+- 服务端采用java17 + springboot2
 
 项目架构采用事件驱动+插件式开发
 ![输入图片说明](https://foruda.gitee.com/images/1684034911905355451/683de173_1676852.png "总体架构图")

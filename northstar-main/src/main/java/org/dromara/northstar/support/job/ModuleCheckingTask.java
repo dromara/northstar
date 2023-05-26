@@ -23,6 +23,7 @@ import org.dromara.northstar.strategy.IAccount;
 import org.dromara.northstar.strategy.IModule;
 import org.dromara.northstar.support.notification.IMessageSenderManager;
 import org.dromara.northstar.support.utils.ExceptionLogChecker;
+import org.dromara.northstar.support.utils.InetAddressUtils;
 import org.dromara.northstar.support.utils.PositionChecker;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -134,30 +135,6 @@ public class ModuleCheckingTask implements InitializingBean {
 	}
 	
 	/**
-	 * 检查当天的程序日志中是否存在异常日志，如存在则转发报告
-	 * 周一至五，每隔一小时检查 
-	 * @throws IOException 
-	 */
-	@Scheduled(cron="0 0 0/1 ? * 1-5")
-	public void checkAppException() throws IOException {
-		log.debug("检查当天的程序日志中是否存在异常日志");
-		Logger logger = (Logger) log;
-		FileAppender<ILoggingEvent> fileAppender = (FileAppender<ILoggingEvent>) logger.getLoggerContext().getLogger("ROOT").getAppender("FILE");
-		File logFile = new File(fileAppender.getFile());
-		FileReader fr = new FileReader(logFile);
-		ExceptionLogChecker checker = new ExceptionLogChecker(fr);
-		LocalTime endTime = LocalTime.now();
-		LocalTime startTime = endTime.minusHours(1);
-		List<String> errorLines = checker.getExceptionLog(startTime, endTime);
-		if(!errorLines.isEmpty()) {
-			StringBuilder sb = new StringBuilder();
-			errorLines.forEach(line -> sb.append(line + "%n"));
-			msgMgr.getSubscribers().forEach(sub -> 
-				doSmartSend(sub, String.format("[程序异常日志警报] %s - %s，%d条异常记录", startTime, endTime, errorLines.size()), sb.toString())
-			);
-		}
-	}
-	/**
 	 * 检查当天的模组日志中是否存在异常日志，如存在则转发报告
 	 * 周一至五，每隔一小时检查 
 	 * @throws IOException 
@@ -178,7 +155,8 @@ public class ModuleCheckingTask implements InitializingBean {
 				StringBuilder sb = new StringBuilder();
 				errorLines.forEach(line -> sb.append(line + "%n"));
 				msgMgr.getSubscribers().forEach(sub -> 
-					doSmartSend(sub, String.format("[模组异常日志警报] %s %s - %s，%d条异常记录", module.getName(), startTime, endTime, errorLines.size()), sb.toString())
+					doSmartSend(sub, String.format("[模组异常日志警报] %s %d-%d时，%d条异常记录", module.getName(),
+							startTime.getHour(), endTime.getHour(), errorLines.size()), sb.toString())
 				);
 			}
 		}
@@ -219,13 +197,14 @@ public class ModuleCheckingTask implements InitializingBean {
 	private void doSmartSend(String subscriber, String title, String msg) {
 		String combine = title + "@" + msg;
 		if(!warningCacheSet.contains(combine)) {
-			msgMgr.getSender().send(subscriber, title, msg);
+			String realMsg = String.format("%s%n%n警报来源：%s%n", msg, InetAddressUtils.getHostname());
+			msgMgr.getSender().send(subscriber, title, realMsg);
 			warningCacheSet.add(combine);
 		}
 	}
 	
 	/**
-	 * 检查废单
+	 * 清除报警缓存
 	 */
 	@Scheduled(cron="0 45 8,12,20 ? * 1-5")
 	public void resetWarningCache() {

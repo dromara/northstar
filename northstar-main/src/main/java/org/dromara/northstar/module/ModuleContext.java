@@ -346,12 +346,9 @@ public class ModuleContext implements IModuleContext{
 		getLogger().debug("合约{} 初始化数据 {} {} -> {} {}", barData.get(0).getUnifiedSymbol(),
 				barData.get(0).getActionDay(), barData.get(0).getActionTime(), 
 				barData.get(barData.size() - 1).getActionDay(), barData.get(barData.size() - 1).getActionTime());
-		boolean flag = enabled;
-		enabled = false;
 		for(BarField bar : barData) {
 			onBar(bar);
 		}
-		enabled = flag;
 	}
 
 	@Override
@@ -560,6 +557,18 @@ public class ModuleContext implements IModuleContext{
 	@Override
 	public void setOrderRequestFilter(OrderRequestFilter filter) {
 		this.orderReqFilter = filter;
+	}
+
+	private boolean isReady;
+	
+	@Override
+	public boolean isReady() {
+		return isReady;
+	}
+
+	@Override
+	public void onReady() {
+		isReady = true;
 	}
 
 }

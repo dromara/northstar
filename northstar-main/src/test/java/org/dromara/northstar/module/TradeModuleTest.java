@@ -68,7 +68,7 @@ class TradeModuleTest {
     void getRuntimeDescription() {
         ModuleRuntimeDescription moduleRuntimeDescription = mock(ModuleRuntimeDescription.class);
         when(moduleContext.getRuntimeDescription(true)).thenReturn(moduleRuntimeDescription);
-
+        when(moduleContext.isReady()).thenReturn(Boolean.TRUE);
         assertEquals(moduleRuntimeDescription, tradeModule.getRuntimeDescription());
     }
 

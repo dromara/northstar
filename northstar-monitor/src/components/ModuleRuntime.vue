@@ -455,7 +455,7 @@ export default {
     },
     accountInfo() {
       if (!this.activeAccount) return {}
-      return this.moduleRuntime.accountRuntimeDescriptionMap[this.activeAccount]
+      return this.moduleRuntime.accountRuntimeDescriptionMap[this.activeAccount] || {}
     },
     accountSettings() {
       if (!this.activeAccount) return {}
