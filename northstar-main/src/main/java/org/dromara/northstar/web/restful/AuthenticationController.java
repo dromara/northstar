@@ -13,6 +13,7 @@ import org.dromara.northstar.common.model.ResultBean;
 import org.dromara.northstar.config.UserInfo;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -39,6 +40,9 @@ public class AuthenticationController implements InitializingBean{
 	
 	@Autowired
 	protected HttpSession session;
+	
+	@Value("${northstar.socketio}")
+	protected int socketioPort;
 	
 	private LocalDate errDate = LocalDate.now();
 	private AtomicInteger errCnt = new AtomicInteger();
@@ -71,7 +75,12 @@ public class AuthenticationController implements InitializingBean{
 	public ResultBean<String> healthCheck() {
 		return new ResultBean<>("OK");
 	}
-
+	
+	@GetMapping("/socketio")
+	public ResultBean<Integer> socketioPort(){
+		return new ResultBean<>(socketioPort);
+	}
+	
 	@GetMapping("/logout")
 	public void logout() {
 		session.invalidate();

@@ -9,16 +9,16 @@ export default {
       password: md5(password + salt)
     })
   },
-
   logout(){
     return baseService.get('/auth/logout')
   },
-
   healthyCheck(){
     return baseService.head(`/auth/login`)
   },
-
   test() {
     return baseService.get('/auth/test')
+  },
+  socketioPort(){
+    return baseService.get('/auth/socketio')
   }
 }
