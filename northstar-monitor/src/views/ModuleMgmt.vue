@@ -169,11 +169,19 @@ export default {
       ModuleRuntimeVisible: false,
       curTableIndex: -1,
       curModule: null,
-      timer: -1
+      timer: -1,
+      delayTimer: -1,
     }
   },
   computed: {
     ...mapGetters(['moduleList'])
+  },
+  created(){
+    if(!this.moduleList.length){
+      moduleApi.getAllModules().then(modules => {
+        this.$store.commit('updateList', modules.sort((a,b) => a.moduleName.localeCompare(b.moduleName)))
+      })
+    }
   },
   mounted() {
     this.autoRefreshList()
@@ -234,8 +242,11 @@ export default {
       this.$store.commit('updateList', [...this.moduleList])
     },
     async toggle(index, row) {
-      await moduleApi.toggleModuleState(row.moduleName)
+      clearTimeout(this.timer)
+      clearTimeout(this.delayTimer)
       row.runtime.enabled = !row.runtime.enabled
+      await moduleApi.toggleModuleState(row.moduleName)
+      this.delayTimer = setTimeout(this.autoRefreshList, 1000)
     },
     tailModuleLog(row) {
       this.$parent.handleSelect('9', { module: row.moduleName })

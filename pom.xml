@@ -41,7 +41,6 @@
 		<byte-buddy-version>1.10.20</byte-buddy-version>
 		<netty-version>4.1.69.Final</netty-version>
 		<h2-version>2.1.214</h2-version>
-		<w3.exchange.version>0.0.1</w3.exchange.version>
 	</properties>
 
 	<modules>
@@ -142,11 +141,6 @@
 		        <artifactId>h2</artifactId>
 		        <version>${h2-version}</version>
 		        <scope>runtime</scope>
-		    </dependency>
-		    <dependency>
-		        <groupId>com.baomidou</groupId>
-		        <artifactId>mybatis-plus-boot-starter</artifactId>
-		        <version>3.5.3.1</version>
 		    </dependency>
 			<dependency>
 				<groupId>org.projectlombok</groupId>
@@ -496,32 +490,6 @@
 					<artifactId>maven-resources-plugin</artifactId>
         			<version>3.2.0</version>
 				</plugin>
-				<plugin>
-			      <groupId>org.apache.maven.plugins</groupId>
-			      <artifactId>maven-antrun-plugin</artifactId>
-			      <version>1.8</version>
-			      <executions>
-			        <execution>
-			          <id>move-artifact</id>
-			          <phase>package</phase>
-			          <goals>
-			            <goal>run</goal>
-			          </goals>
-			          <configuration>
-			            <target>
-			              <property name="outputDir" value="../northstar-dist" />
-			              <copy todir="${outputDir}" overwrite="true">
-			                <fileset dir="${project.build.directory}">
-			                  <include name="**/*.jar" />
-			                  <exclude name="**/*-javadoc.jar"/>
-			                  <exclude name="**/*-sources.jar"/>
-			                </fileset>
-			              </copy>
-			            </target>
-			          </configuration>
-			        </execution>
-			      </executions>
-			    </plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>

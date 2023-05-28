@@ -59,7 +59,7 @@ public class PlaybackDataLoader {
 		if(log.isTraceEnabled()) {
 			log.trace("正在读取 [{}] {} 至 {} 的日K线回放数据", contract.getName(), startDate, endDate);
 		}
-		return enhanceData(dsMgr.getMinutelyData(contract, startDate, endDate), contract.getUnifiedSymbol());
+		return enhanceData(dsMgr.getDailyData(contract, startDate, endDate), contract.getUnifiedSymbol());
 	}
 	
 	private List<BarField> enhanceData(List<BarField> list, String unifiedSymbol) {

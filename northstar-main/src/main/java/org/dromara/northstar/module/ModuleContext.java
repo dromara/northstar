@@ -110,6 +110,8 @@ public class ModuleContext implements IModuleContext{
 	/* indicator -> values */
 	protected Map<Indicator, Queue<TimeSeriesValue>> indicatorValBufQMap = new HashMap<>(); 
 	
+	protected Set<String> indicatorNameSet = new HashSet<>();
+	
 	protected Set<IndicatorValueUpdateHelper> indicatorHelperSet = new HashSet<>();
 	
 	protected TradeIntent tradeIntent;	// 交易意图
@@ -228,8 +230,11 @@ public class ModuleContext implements IModuleContext{
 			checkIndicator(in);
 		}
 		Configuration cfg = indicator.getConfiguration();
+		String indicatorName = String.format("%s_%d%s", cfg.indicatorName(), cfg.numOfUnits(), cfg.period().symbol());
 		Assert.isTrue(cfg.numOfUnits() > 0, "周期数必须大于0，当前为：" + cfg.numOfUnits());
 		Assert.isTrue(cfg.cacheLength() > 0, "指标回溯长度必须大于0，当前为：" + cfg.cacheLength());
+		Assert.isFalse(indicatorNameSet.contains(indicatorName), "指标 [{}] 已存在。不能重名", indicatorName);
+		indicatorNameSet.add(indicatorName);
 		indicatorValBufQMap.put(indicator, new LinkedList<>());
 	}
 	
