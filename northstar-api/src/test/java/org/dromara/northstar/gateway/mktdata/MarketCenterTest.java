@@ -14,7 +14,6 @@ import org.dromara.northstar.common.model.Identifier;
 import org.dromara.northstar.gateway.Instrument;
 import org.dromara.northstar.gateway.MarketGateway;
 import org.dromara.northstar.gateway.TradeTimeDefinition;
-import org.dromara.northstar.gateway.mktdata.MarketCenter;
 import org.dromara.northstar.gateway.model.ContractDefinition;
 import org.dromara.northstar.gateway.time.GenericTradeTime;
 import org.junit.jupiter.api.BeforeEach;
@@ -60,8 +59,8 @@ class MarketCenterTest {
 				.productClass(ProductClassEnum.FUTURES)
 				.exchange(ExchangeEnum.INE)
 				.build();
-		center = new MarketCenter(List.of(def1, def2, def3), mock(FastEventEngine.class));
-		
+		center = new MarketCenter(mock(FastEventEngine.class));
+		center.addDefinitions(List.of(def1, def2, def3));
 	}
 	
 	@Test

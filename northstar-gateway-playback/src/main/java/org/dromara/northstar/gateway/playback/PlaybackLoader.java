@@ -31,11 +31,15 @@ public class PlaybackLoader implements CommandLineRunner{
 	@Autowired
 	IMarketCenter mktCenter;
 	
+	@Autowired
+	PlaybackContractDefProvider contractDefPvd;
+	
 	@Override
 	public void run(String... args) throws Exception {
 		gatewayMetaProvider.add(ChannelType.PLAYBACK, new PlaybackGatewaySettings(), playbackGatewayFactory, dsMgr);
 		
 		log.debug("加载回测合约");
+		mktCenter.addDefinitions(contractDefPvd.get());
 		final LocalDate today = LocalDate.now();
 		// 加载CTP合约
 		dsMgr.getUserAvailableExchanges()

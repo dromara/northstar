@@ -27,10 +27,14 @@ public class SimLoader implements CommandLineRunner{
 	@Autowired
 	private SimGatewayFactory simGatewayFactory;
 	
+	@Autowired
+	private SimContractDefProvider contractDefPvd;
+	
 	@Override
 	public void run(String... args) throws Exception {
 		gatewayMetaProvider.add(ChannelType.SIM, null, simGatewayFactory, null);
-		
+
+		mktCenter.addDefinitions(contractDefPvd.get());
 		log.debug("加载模拟合约");
 		// 加载模拟合约
 		SimContractGenerator contractGen = new SimContractGenerator("SIM");
