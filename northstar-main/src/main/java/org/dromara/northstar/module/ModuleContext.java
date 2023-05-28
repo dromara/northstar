@@ -110,7 +110,7 @@ public class ModuleContext implements IModuleContext{
 	/* indicator -> values */
 	protected Map<Indicator, Queue<TimeSeriesValue>> indicatorValBufQMap = new HashMap<>(); 
 	
-	protected Set<String> indicatorNameSet = new HashSet<>();
+	protected Map<String, Indicator> indicatorNameMap = new HashMap<>();
 	
 	protected Set<IndicatorValueUpdateHelper> indicatorHelperSet = new HashSet<>();
 	
@@ -233,8 +233,8 @@ public class ModuleContext implements IModuleContext{
 		String indicatorName = String.format("%s_%d%s", cfg.indicatorName(), cfg.numOfUnits(), cfg.period().symbol());
 		Assert.isTrue(cfg.numOfUnits() > 0, "周期数必须大于0，当前为：" + cfg.numOfUnits());
 		Assert.isTrue(cfg.cacheLength() > 0, "指标回溯长度必须大于0，当前为：" + cfg.cacheLength());
-		Assert.isFalse(indicatorNameSet.contains(indicatorName), "指标 [{}] 已存在。不能重名", indicatorName);
-		indicatorNameSet.add(indicatorName);
+		Assert.isTrue(!indicatorNameMap.containsKey(indicatorName) || indicator.equals(indicatorNameMap.get(indicatorName)), "指标 [{}] 已存在。不能重名", indicatorName);
+		indicatorNameMap.put(indicatorName, indicator);
 		indicatorValBufQMap.put(indicator, new LinkedList<>());
 	}
 	
