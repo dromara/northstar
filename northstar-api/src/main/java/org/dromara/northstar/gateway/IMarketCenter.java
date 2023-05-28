@@ -1,9 +1,17 @@
 package org.dromara.northstar.gateway;
 
+import java.util.List;
+
 import org.dromara.northstar.common.TickDataAware;
 import org.dromara.northstar.common.constant.ChannelType;
+import org.dromara.northstar.gateway.model.ContractDefinition;
 
 public interface IMarketCenter extends IContractManager, TickDataAware {
+	
+	/**
+	 * 增加合约定义
+	 */
+	void addDefinitions(List<ContractDefinition> contractDefs);
 
 	/**
 	 * 注册合约

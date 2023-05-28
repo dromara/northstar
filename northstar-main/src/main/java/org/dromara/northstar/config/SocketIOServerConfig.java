@@ -37,6 +37,9 @@ public class SocketIOServerConfig implements InitializingBean {
 	
 	@Value("${server.ssl.enabled}")
 	private boolean sslEnabled;
+	
+	@Value("${northstar.socketio}")
+	private int socketioPort;
 
 	private UserInfo userInfo = new UserInfo();
 	
@@ -58,7 +61,7 @@ public class SocketIOServerConfig implements InitializingBean {
 	private SocketIOServer makeServer() throws IOException {
 		String token = Base64.getEncoder().encodeToString(String.format("%s:%s", userInfo.getUserId(), userInfo.getPassword()).getBytes());
 		com.corundumstudio.socketio.Configuration config = new com.corundumstudio.socketio.Configuration();
-        config.setPort(51888);
+        config.setPort(socketioPort);
         if(sslEnabled){
         	config.setKeyStore(keyStore.getInputStream());
         	config.setKeyStoreFormat(keyStoreFormat);

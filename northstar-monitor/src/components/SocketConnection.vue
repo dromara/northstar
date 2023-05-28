@@ -34,7 +34,8 @@ export default {
   data() {
     return {
       socket: null,
-      wsHost: ''
+      wsHost: '',
+      wsPort: 0
     }
   },
   watch: {
@@ -49,12 +50,14 @@ export default {
   },
   async mounted() {
     this.wsHost = window.remoteHost || location.hostname
+    this.wsHost = this.wsHost.split(":")[0]
+    this.wsPort = window.socketioPort
     this.initSocket()
   },
   methods: {
     initSocket() {
       const wsProtocal = process.env.NODE_ENV === 'development' ? 'ws' : 'wss'
-      const wsEndpoint = `${wsProtocal}://${this.wsHost}:51888`
+      const wsEndpoint = `${wsProtocal}://${this.wsHost}:${this.wsPort}`
       const token = this.$route.query.auth
       console.log('准备连接websocket：' + wsEndpoint, ' token:' + token)
       this.socket = io(wsEndpoint, {

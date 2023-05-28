@@ -59,8 +59,15 @@ public class MarketCenter implements IMarketCenter{
 	
 	private final FastEventEngine feEngine;
 	
-	public MarketCenter(List<ContractDefinition> contractDefs, FastEventEngine feEngine) {
+	public MarketCenter(FastEventEngine feEngine) {
 		this.feEngine = feEngine;
+	}
+	
+	/**
+	 * 增加合约定义
+	 */
+	@Override
+	public void addDefinitions(List<ContractDefinition> contractDefs) {
 		for(ContractDefinition def : contractDefs) {
 			if(!contractDefTbl.contains(def.getExchange(), def.getProductClass())) {				
 				contractDefTbl.put(def.getExchange(), def.getProductClass(), new ArrayList<>(512));

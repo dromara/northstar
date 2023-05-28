@@ -19,18 +19,15 @@ import org.dromara.northstar.gateway.mktdata.MarketCenter;
 import org.dromara.northstar.support.notification.IMailMessageContentHandler;
 import org.dromara.northstar.support.notification.MailDeliveryManager;
 import org.dromara.northstar.support.notification.MailSenderFactory;
-import org.dromara.northstar.support.utils.ContractDefinitionReader;
 import org.dromara.northstar.web.interceptor.AuthorizationInterceptor;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.info.BuildProperties;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.Resource;
 import org.springframework.http.client.OkHttp3ClientHttpRequestFactory;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -58,9 +55,6 @@ public class AppConfig implements WebMvcConfigurer, DisposableBean {
 
 	@Autowired
 	private SocketIOServer socketServer;
-	
-	@Value("${northstar.contraceDefFile}")
-	private Resource contractDefRes;
 	
 	@Override
 	public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
@@ -107,8 +101,7 @@ public class AppConfig implements WebMvcConfigurer, DisposableBean {
 
     @Bean
     IMarketCenter marketCenter(FastEventEngine fastEventEngine) throws IOException {
-        ContractDefinitionReader reader = new ContractDefinitionReader();
-        return new MarketCenter(reader.load(contractDefRes.getInputStream()), fastEventEngine);
+        return new MarketCenter(fastEventEngine);
     }
 
 	private static OkHttpClient getUnsafeOkHttpClient() {
