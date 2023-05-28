@@ -175,6 +175,13 @@ export default {
   computed: {
     ...mapGetters(['moduleList'])
   },
+  created(){
+    if(!this.moduleList.length){
+      moduleApi.getAllModules().then(modules => {
+        this.$store.commit('updateList', modules.sort((a,b) => a.moduleName.localeCompare(b.moduleName)))
+      })
+    }
+  },
   mounted() {
     this.autoRefreshList()
   },
