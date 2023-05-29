@@ -58,6 +58,7 @@ export default {
       }
       await loginApi.login(this.userForm.name, this.userForm.pass)
       window.socketioPort = await loginApi.socketioPort()
+      localStorage.setItem('socketioPort', window.socketioPort)
       console.log('登录成功')
       this.$router.push({
         name: 'mktgateway',
