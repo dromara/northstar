@@ -84,7 +84,7 @@
                   EMPTY_HEDGE: '对冲锁仓',
                   HOLDING_HEDGE: '对冲持仓',
                   PENDING_ORDER: '等待成交'
-                }[scope.row.runtime.moduleState]
+                }[scope.row.runtime.moduleState] || '-'
               }}</el-tag>
         </template>
       </el-table-column>
@@ -139,7 +139,7 @@
             >{{ scope.row.runtime.enabled ? '查看' : '修改' }}</el-button
           >
           <el-popconfirm
-            v-if="scope.row.runtime && !scope.row.runtime.enabled"
+            v-if="!scope.row.runtime || !scope.row.runtime.enabled"
             class="ml-10"
             title="确定移除吗？"
             @confirm="handleDelete(scope.$index, scope.row)"
@@ -195,9 +195,20 @@ export default {
       this.curTableIndex = -1
       this.curModule = null
     },
-    handlePerf(index, row) {
+    async handlePerf(index, row) {
       this.curTableIndex = index
       this.curModule = row
+      const loading = this.$loading({
+          lock: true,
+          text: 'Loading',
+          spinner: 'el-icon-loading',
+          background: 'rgba(0, 0, 0, 0.6)'
+        });
+      try{
+        this.curModule.runtime = await moduleApi.getModuleRuntime(row.moduleName)
+      } finally {
+        loading.close()
+      }
       this.ModuleRuntimeVisible = true
     },
     handleRow(index, row) {
@@ -213,17 +224,32 @@ export default {
       )
     },
     async autoRefreshList() {
-      const modules = await moduleApi.getAllModules()
-      if(modules.length > 0){
-        const moduleRtPromises =  modules.map(m => moduleApi.getModuleRuntime(m.moduleName))
-        const moduleRts = await Promise.all(moduleRtPromises)
-        const moduleRtMap = {}
-        moduleRts.filter(rt => !!rt).forEach(rt => moduleRtMap[rt.moduleName] = rt)
-        modules.forEach(item => item.runtime = moduleRtMap[item.moduleName])
+      moduleApi.getAllModules().then(modules => {
+        if(modules.length > 0){
+          const statusPromises = modules.map(m => moduleApi.getModuleStatus(m.moduleName))
+          const statePromises = modules.map(m => moduleApi.getModuleState(m.moduleName))
+
+          Promise.all([...statusPromises, ...statePromises]).then(results => {
+            const statuses = results.slice(0, modules.length);
+            const states = results.slice(modules.length);
+
+            // 将对应的状态和状态组合在一起
+            const combinedResults = modules.map((module, index) => ({
+                ...module,
+                runtime: statuses[index] !== null ? {
+                  moduleState: states[index],
+                  enabled: statuses[index]
+                } : null,
+            }));
+            this.updateModuleList(combinedResults)
+          });
+        }
+      })
+      this.timer = setTimeout(this.autoRefreshList, 30000)   // 每30秒刷新一次
+    },
+    updateModuleList(modules){
         this.$store.commit('updateList', [])      // 确保界面有刷新，直接提交新对象时会刷新失败
         this.$store.commit('updateList', modules.sort((a,b) => a.moduleName.localeCompare(b.moduleName)))
-      }
-      this.timer = setTimeout(this.autoRefreshList, 30000)   // 每30秒刷新一次
     },
     async saveModule(module) {
       console.log(module)

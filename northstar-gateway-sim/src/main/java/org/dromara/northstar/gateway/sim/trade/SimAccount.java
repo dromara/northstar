@@ -217,7 +217,7 @@ public class SimAccount implements TickDataAware{
 	private TradePosition getClosingPositionByReq(SubmitOrderReqField orderReq) {
 		TradePosition pos = getClosingMap(orderReq.getDirection()).get(orderReq.getContract().getContractId());
 		if(pos == null)
-			throw new IllegalStateException("没有找到可以平仓的合约");
+			throw new IllegalStateException(String.format("[%s] 没有找到可以平仓的合约", gatewayId));
 		return pos;
 	}
 	
@@ -243,7 +243,7 @@ public class SimAccount implements TickDataAware{
 	public void onCloseTrade(TradeField trade) {
 		Map<String, TradePosition> tMap = getClosingMap(trade.getDirection());
 		if(!tMap.containsKey(trade.getContract().getContractId())) {
-			throw new IllegalStateException("没有对应持仓可以对冲当前成交：" + MessagePrinter.print(trade));
+			throw new IllegalStateException(String.format("[%s] 没有对应持仓可以对冲当前成交：%s", gatewayId, MessagePrinter.print(trade)));
 		}
 		addCloseProfit(tMap.get(trade.getContract().getContractId()).onTrade(trade));
 		onTrade(trade);

@@ -25,6 +25,12 @@ export default {
   getModuleRuntime(name) {
     return baseService.get('/module/rt/info?name=' + name)
   },
+  getModuleState(name){
+    return baseService.get('/module/rt/state?name=' + name)
+  },
+  getModuleStatus(name){
+    return baseService.get('/module/rt/status?name=' + name)
+  },
   getModuleDealRecords(name) {
     return baseService.get('/module/deal/records?name=' + name)
   },

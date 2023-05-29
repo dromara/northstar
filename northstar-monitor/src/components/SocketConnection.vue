@@ -35,7 +35,7 @@ export default {
     return {
       socket: null,
       wsHost: '',
-      wsPort: 0
+      wsPort: 51688
     }
   },
   watch: {
@@ -51,7 +51,7 @@ export default {
   async mounted() {
     this.wsHost = window.remoteHost || location.hostname
     this.wsHost = this.wsHost.split(":")[0]
-    this.wsPort = window.socketioPort
+    this.wsPort = window.socketioPort || localStorage.getItem('socketioPort')
     this.initSocket()
   },
   methods: {
