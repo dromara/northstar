@@ -139,7 +139,7 @@
             >{{ scope.row.runtime.enabled ? '查看' : '修改' }}</el-button
           >
           <el-popconfirm
-            v-if="scope.row.runtime && !scope.row.runtime.enabled"
+            v-if="!scope.row.runtime || !scope.row.runtime.enabled"
             class="ml-10"
             title="确定移除吗？"
             @confirm="handleDelete(scope.$index, scope.row)"
