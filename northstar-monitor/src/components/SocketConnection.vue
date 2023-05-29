@@ -35,7 +35,7 @@ export default {
     return {
       socket: null,
       wsHost: '',
-      wsPort: 0
+      wsPort: 51688
     }
   },
   watch: {
