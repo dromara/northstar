@@ -195,9 +195,20 @@ export default {
       this.curTableIndex = -1
       this.curModule = null
     },
-    handlePerf(index, row) {
+    async handlePerf(index, row) {
       this.curTableIndex = index
       this.curModule = row
+      const loading = this.$loading({
+          lock: true,
+          text: 'Loading',
+          spinner: 'el-icon-loading',
+          background: 'rgba(0, 0, 0, 0.6)'
+        });
+      try{
+        this.curModule.runtime = await moduleApi.getModuleRuntime(row.moduleName)
+      } finally {
+        loading.close()
+      }
       this.ModuleRuntimeVisible = true
     },
     handleRow(index, row) {
