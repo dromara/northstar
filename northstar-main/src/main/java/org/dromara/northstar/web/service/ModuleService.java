@@ -20,7 +20,6 @@ import org.dromara.northstar.common.constant.ModuleState;
 import org.dromara.northstar.common.constant.ModuleUsage;
 import org.dromara.northstar.common.event.NorthstarEvent;
 import org.dromara.northstar.common.event.NorthstarEventType;
-import org.dromara.northstar.common.exception.NoSuchElementException;
 import org.dromara.northstar.common.model.ComponentAndParamsPair;
 import org.dromara.northstar.common.model.ComponentField;
 import org.dromara.northstar.common.model.ComponentMetaInfo;
@@ -325,7 +324,8 @@ public class ModuleService implements PostLoadAware {
 	public ModuleRuntimeDescription getModuleRealTimeInfo(String name) {
 		IModule module = moduleMgr.get(Identifier.of(name));
 		if(Objects.isNull(module)) {
-			throw new NoSuchElementException("没有找到模组：" + name);
+			log.warn("没有找到模组：{}", name);
+			return null;
 		}
 		return module.getRuntimeDescription();
 	}
@@ -338,7 +338,8 @@ public class ModuleService implements PostLoadAware {
 	public ModuleState getModuleState(String name) {
 		IModule module = moduleMgr.get(Identifier.of(name));
 		if(Objects.isNull(module)) {
-			throw new NoSuchElementException("没有找到模组：" + name);
+			log.warn("没有找到模组：{}", name);
+			return null;
 		}
 		return module.getModuleContext().getState();
 	}
@@ -348,10 +349,15 @@ public class ModuleService implements PostLoadAware {
 	 * @param name
 	 * @return
 	 */
-	public boolean hasModuleEnabled(String name) {
+	public Boolean hasModuleEnabled(String name) {
 		IModule module = moduleMgr.get(Identifier.of(name));
 		if(Objects.isNull(module)) {
-			throw new NoSuchElementException("没有找到模组：" + name);
+			log.warn("没有找到模组：{}", name);
+			return null;
+		}
+		if(!module.getModuleContext().isReady()) {
+			log.info("模组 [{}] 仍在加载中", name);
+			return null;
 		}
 		return module.isEnabled();
 	}

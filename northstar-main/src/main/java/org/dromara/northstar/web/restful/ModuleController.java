@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.dromara.northstar.common.constant.ModuleState;
-import org.dromara.northstar.common.exception.NoSuchElementException;
 import org.dromara.northstar.common.model.ComponentField;
 import org.dromara.northstar.common.model.ComponentMetaInfo;
 import org.dromara.northstar.common.model.MockTradeDescription;
@@ -117,11 +116,7 @@ public class ModuleController {
 	@GetMapping("/rt/info")
 	public ResultBean<ModuleRuntimeDescription> getModuleRealTimeInfo(String name){
 		Assert.notNull(name, "模组名称不能为空");
-		try {			
-			return new ResultBean<>(service.getModuleRealTimeInfo(name));
-		} catch(NoSuchElementException e) {
-			return new ResultBean<>(null);
-		}
+		return new ResultBean<>(service.getModuleRealTimeInfo(name));
 	}
 	
 	/**
