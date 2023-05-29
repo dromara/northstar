@@ -331,6 +331,32 @@ public class ModuleService implements PostLoadAware {
 	}
 	
 	/**
+	 * 模组持仓状态
+	 * @param name
+	 * @return
+	 */
+	public ModuleState getModuleState(String name) {
+		IModule module = moduleMgr.get(Identifier.of(name));
+		if(Objects.isNull(module)) {
+			throw new NoSuchElementException("没有找到模组：" + name);
+		}
+		return module.getModuleContext().getState();
+	}
+	
+	/**
+	 * 模组启停状态
+	 * @param name
+	 * @return
+	 */
+	public boolean hasModuleEnabled(String name) {
+		IModule module = moduleMgr.get(Identifier.of(name));
+		if(Objects.isNull(module)) {
+			throw new NoSuchElementException("没有找到模组：" + name);
+		}
+		return module.isEnabled();
+	}
+	
+	/**
 	 * 模组交易历史
 	 * @param name
 	 * @return
