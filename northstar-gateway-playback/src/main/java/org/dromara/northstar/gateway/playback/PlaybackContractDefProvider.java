@@ -120,6 +120,6 @@ public class PlaybackContractDefProvider {
 	
 	private ContractDefinition build(String name, ExchangeEnum exchange, ProductClassEnum productClass, String pattern, String time, int commissionInCent){
 		return ContractDefinition.builder().name(name).exchange(exchange).productClass(productClass)
-				.symbolPattern(Pattern.compile(pattern)).tradeTimeType(time).commissionRate(commissionInCent / 100D).build();
+				.symbolPattern(Pattern.compile(pattern)).tradeTimeType(time).commissionFee(commissionInCent / 100D).build();
 	}
 }

@@ -99,6 +99,21 @@ public class MailDeliveryManager implements IMessageSenderManager{
 			}
 		});
 	}
+	
+	public void sendTestMail() {
+		MimeMessageHelper msg = new MimeMessageHelper(sender.createMimeMessage(), UTF8);
+		try {
+			msg.setSubject("Northstar邮件测试");
+			msg.setFrom(emailConfig.getEmailUsername());
+			for(String mailTo : emailConfig.getSubscriberList()) {
+				msg.addTo(mailTo);
+			}
+			msg.setText("Hello world!!!");
+			sender.send(msg.getMimeMessage());
+		} catch (Exception e) {
+			log.error("邮件发送异常", e);
+		}
+	}
 
 	@Override
 	public IMessageSender getSender() {

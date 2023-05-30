@@ -124,7 +124,6 @@ export default {
     saveMailConfig() {
       this.$refs.mailSettings.validate((valid) => {
         if (valid) {
-          console.log(this.form)
           mailConfigApi.saveConfig(this.form)
           this.close()
         }
@@ -134,7 +133,12 @@ export default {
       this.$emit('update:visible', false)
     },
     test(){
-      mailConfigApi.test()
+      this.$refs.mailSettings.validate(async (valid) => {
+        if (valid) {
+          await mailConfigApi.saveConfig(this.form)
+          await mailConfigApi.test()
+        }
+      })
     }
   }
 }
