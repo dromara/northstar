@@ -82,7 +82,7 @@ describe('手工期货交易-测试', () => {
         cy.get('#priceType').click()
         cy.get('.el-select-dropdown').contains('市价').parent().click()
         cy.get('.ns-trade-button').first().click()
-        cy.wait(500)
+        cy.wait(1000)
         cy.contains('持仓').click()
         cy.get('.el-table__row').filter(':visible').should('have.length', 1)
         cy.contains('委托').click()
