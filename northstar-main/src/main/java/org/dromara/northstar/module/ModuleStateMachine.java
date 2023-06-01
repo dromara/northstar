@@ -87,6 +87,9 @@ public class ModuleStateMachine implements TransactionAware {
 	}
 	
 	private void setState(ModuleState newState) {
+		if(curState == newState) {
+			return;
+		}
 		ctx.getLogger().info("状态机切换：[{}] => [{}]", curState, newState);
 		this.curState = newState;
 	}
