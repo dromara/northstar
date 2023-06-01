@@ -76,7 +76,10 @@ public class PlaybackContract implements Instrument {
 
 	@Override
 	public ContractField contractField() {
-		return contract;
+		return ContractField.newBuilder(contract)
+					.setCommissionFee(contractDef.getCommissionFee())
+					.setCommissionRate(contractDef.getCommissionRate())
+					.build();
 	}
 
 }
