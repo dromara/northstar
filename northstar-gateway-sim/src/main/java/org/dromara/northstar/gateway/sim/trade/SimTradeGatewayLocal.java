@@ -54,15 +54,6 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 		simAccountRepo.save(account.getAccountDescription());
 	};
 	
-	private TimerTask reportTask = new TimerTask() {
-		
-		@Override
-		public void run() {
-			feEngine.emitEvent(NorthstarEventType.ACCOUNT, account.accountField());
-			account.getPositionManager().positionFields().forEach(pf -> feEngine.emitEvent(NorthstarEventType.POSITION, pf));
-		}
-	};
-	
 	private Timer statusReportTimer;
 	
 	private OrderReqManager orderReqMgr =  new OrderReqManager();
@@ -85,7 +76,15 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 			feEngine.emitEvent(NorthstarEventType.GATEWAY_READY, gd.getGatewayId());
 		}, CompletableFuture.delayedExecutor(2, TimeUnit.SECONDS));
 		statusReportTimer = new Timer("SimGatewayTimelyReport", true);
-		statusReportTimer.scheduleAtFixedRate(reportTask, 5000, 2000);
+		statusReportTimer.scheduleAtFixedRate(new TimerTask() {
+			
+			@Override
+			public void run() {
+				feEngine.emitEvent(NorthstarEventType.ACCOUNT, account.accountField());
+				account.getPositionManager().positionFields().forEach(pf -> feEngine.emitEvent(NorthstarEventType.POSITION, pf));
+			}
+			
+		}, 5000, 2000);
 	}
 
 	@Override
