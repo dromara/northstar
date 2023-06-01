@@ -10,6 +10,7 @@ import java.util.List;
 import org.dromara.northstar.common.constant.ConnectionState;
 import org.dromara.northstar.common.event.FastEventEngine;
 import org.dromara.northstar.common.model.GatewayDescription;
+import org.dromara.northstar.data.ISimAccountRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -34,7 +35,7 @@ class SimTradeGatewayLocalTest {
 		PositionManager posMgr = mock(PositionManager.class);
 		when(simAccount.getPositionManager()).thenReturn(posMgr);
 		when(posMgr.positionFields()).thenReturn(List.of());
-		gateway = new SimTradeGatewayLocal(feEngine, gd, simAccount);
+		gateway = new SimTradeGatewayLocal(feEngine, gd, simAccount, mock(ISimAccountRepository.class));
 	}
 
 	@Test
