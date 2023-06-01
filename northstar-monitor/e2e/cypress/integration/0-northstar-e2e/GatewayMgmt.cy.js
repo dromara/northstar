@@ -79,7 +79,7 @@ describe('网关管理-测试', () => {
             cy.get('.el-dialog').contains('账户类型').parent().find('.el-select').click()
             cy.get('.el-select-dropdown').filter(':visible').contains('SIM').click()
             cy.get('.el-dialog').contains('行情网关').parent().find('.el-select').click()
-            cy.get('.el-select-dropdown').filter(':visible').last().contains('SIM').click()
+            cy.get('#bindedGatewayOption_SIM').click()
             cy.get('.el-dialog').filter(':visible').find('button').last().click()
             cy.wait('@createGateway').should('have.nested.property', 'response.statusCode', 200)
 
