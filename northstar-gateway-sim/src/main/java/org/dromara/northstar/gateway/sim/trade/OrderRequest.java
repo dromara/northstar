@@ -34,6 +34,8 @@ public class OrderRequest implements TickDataAware{
 	
 	private OrderField.Builder orderBuilder;
 	
+	private boolean hasCancelled;
+	
 	public OrderRequest(SimGatewayAccount account, SubmitOrderReqField submitOrderReq, 
 			Consumer<OrderField> onOrderCallback, Consumer<Transaction> onTradeCallback) {
 		this.account = account;
@@ -41,7 +43,6 @@ public class OrderRequest implements TickDataAware{
 		this.onOrderCallback = onOrderCallback;
 		this.onTradeCallback = onTradeCallback;
 		this.orderBuilder = OrderField.newBuilder()
-				.setActiveTime(String.valueOf(System.currentTimeMillis()))
 				.setOrderId(submitOrderReq.getGatewayId() + "_" + UUID.randomUUID().toString())
 				.setContract(submitOrderReq.getContract())
 				.setPrice(submitOrderReq.getPrice())
@@ -51,6 +52,8 @@ public class OrderRequest implements TickDataAware{
 				.setVolumeCondition(submitOrderReq.getVolumeCondition())
 				.setOrderDate(LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
 				.setOrderTime(LocalTime.now().format(DateTimeConstant.T_FORMAT_FORMATTER))
+				.setActiveTime(LocalTime.now().format(DateTimeConstant.T_FORMAT_FORMATTER))
+				.setUpdateTime(LocalTime.now().format(DateTimeConstant.T_FORMAT_FORMATTER))
 				.setAccountId(submitOrderReq.getGatewayId())
 				.setTotalVolume(submitOrderReq.getVolume())
 				.setOffsetFlag(submitOrderReq.getOffsetFlag())
@@ -128,11 +131,20 @@ public class OrderRequest implements TickDataAware{
 	}
 	
 	public boolean hasDone() {
-		return submitOrderReq.getVolume() == tradedVolume;
+		return hasCancelled || submitOrderReq.getVolume() == tradedVolume;
 	}
 
 	public Type orderType() {
 		return submitOrderReq.getOffsetFlag() == OffsetFlagEnum.OF_Open ? Type.OPEN : Type.CLOSE;
+	}
+	
+	public void cancelOrder() {
+		onOrderCallback.accept(orderBuilder.setStatusMsg("已撤单")
+										.setOrderStatus(OrderStatusEnum.OS_Canceled)
+										.setCancelTime(LocalTime.now().format(DateTimeConstant.T_FORMAT_FORMATTER))
+										.setUpdateTime(LocalTime.now().format(DateTimeConstant.T_FORMAT_FORMATTER))
+										.build());
+		hasCancelled = true;
 	}
 	
 	/**

@@ -40,6 +40,7 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 	private Consumer<OrderField> onOrderCallback = order -> {
 		account.getPositionManager().onOrder(order);
 		feEngine.emitEvent(NorthstarEventType.ORDER, order);
+		log.info("订单反馈：{} {} {} {} {}", order.getOrderDate(), order.getUpdateTime(), order.getOriginOrderId(), order.getOrderStatus(), order.getStatusMsg());
 	};
 	
 	private Consumer<Transaction> onTradeCallback = trans -> {
@@ -133,6 +134,7 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 			account.onWithdraw(Math.abs(money));
 		}
 		simAccountRepo.save(account.getAccountDescription());
+		feEngine.emitEvent(NorthstarEventType.ACCOUNT, account.accountField());
 		return (int) account.balance();
 	}
 

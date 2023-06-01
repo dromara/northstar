@@ -34,7 +34,12 @@ public class OrderReqManager implements TickDataAware{
 	}
 	
 	public synchronized boolean cancelOrder(String originOrderId) {
-		return Objects.nonNull(orderMap.remove(originOrderId));
+		OrderRequest orderReq = orderMap.remove(originOrderId);
+		if(Objects.isNull(orderReq)) {
+			return false;
+		}
+		orderReq.cancelOrder();
+		return true;
 	}
 	
 	public synchronized double totalFrozenAmount() {
