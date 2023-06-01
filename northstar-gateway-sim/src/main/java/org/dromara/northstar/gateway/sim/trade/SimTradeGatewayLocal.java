@@ -2,6 +2,7 @@ package org.dromara.northstar.gateway.sim.trade;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 import org.dromara.northstar.common.constant.ConnectionState;
 import org.dromara.northstar.common.event.FastEventEngine;
@@ -13,9 +14,11 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import xyz.redtorch.pb.CoreField.AccountField;
 import xyz.redtorch.pb.CoreField.CancelOrderReqField;
+import xyz.redtorch.pb.CoreField.OrderField;
 import xyz.redtorch.pb.CoreField.PositionField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TickField;
+import xyz.redtorch.pb.CoreField.TradeField;
 
 @Slf4j
 public class SimTradeGatewayLocal implements SimTradeGateway{
@@ -25,13 +28,31 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 	@Getter
 	private boolean connected;
 	@Getter
-	protected SimAccount account;
+	protected SimGatewayAccount account;
 	
 	private GatewayDescription gd;
 	
 	private ConnectionState connState = ConnectionState.DISCONNECTED;
 	
-	public SimTradeGatewayLocal(FastEventEngine feEngine, GatewayDescription gd, SimAccount account) {
+	private Consumer<OrderField> onOrderCallback = order -> {
+		account.getPositionManager().onOrder(order);
+		feEngine.emitEvent(NorthstarEventType.ORDER, order);
+	};
+	
+	private Consumer<Transaction> onTradeCallback = trans -> {
+		TradeField trade = trans.tradeField();
+		account.onTrade(trade);
+		feEngine.emitEvent(NorthstarEventType.TRADE, trade);
+		
+		log.info("模拟成交：{}，{}，{}，{}手，成交价：{}，订单ID：{}", trade.getContract().getName(), trade.getDirection(), 
+				trade.getOffsetFlag(), trade.getVolume(), trade.getPrice(), trade.getOriginOrderId());
+	};
+	
+	private long lastEmitStatus;
+	
+	private OrderReqManager orderReqMgr =  new OrderReqManager();
+	
+	public SimTradeGatewayLocal(FastEventEngine feEngine, GatewayDescription gd, SimGatewayAccount account) {
 		this.feEngine = feEngine;
 		this.account = account;
 		this.gd = gd;
@@ -41,7 +62,6 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 	public void connect() {
 		log.debug("[{}] 模拟网关连线", gd.getGatewayId());
 		connected = true;
-		account.setConnected(connected);
 		connState = ConnectionState.CONNECTED;
 		feEngine.emitEvent(NorthstarEventType.LOGGED_IN, gd.getGatewayId());
 		CompletableFuture.runAsync(() -> {
@@ -57,7 +77,7 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 		AccountField af = account.accountField();
 		feEngine.emitEvent(NorthstarEventType.ACCOUNT, af);
 		
-		for(PositionField pf : account.positionFields()) {
+		for(PositionField pf : account.getPositionManager().positionFields()) {
 			feEngine.emitEvent(NorthstarEventType.POSITION, pf);
 		}
 		
@@ -67,7 +87,6 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 	public void disconnect() {
 		log.debug("[{}] 模拟网关断开", gd.getGatewayId());
 		connected = false;
-		account.setConnected(connected);
 		connState = ConnectionState.DISCONNECTED;
 	}
 	
@@ -81,10 +100,12 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 		if(!isConnected()) {
 			throw new IllegalStateException("网关未连线");
 		}
-		log.debug("[{}] 模拟网关收到下单请求", gd.getGatewayId());
-		SubmitOrderReqField orderReq = SubmitOrderReqField.newBuilder(submitOrderReq).setGatewayId(gd.getGatewayId()).build();
-		account.onSubmitOrder(orderReq);
-		return orderReq.getOriginOrderId();
+		log.info("[{}] 模拟网关收到下单请求", gd.getGatewayId());
+		OrderRequest orderReq = new OrderRequest(account, submitOrderReq, onOrderCallback, onTradeCallback);
+		if(orderReq.validate()) {
+			orderReqMgr.submitOrder(orderReq);
+		}
+		return submitOrderReq.getOriginOrderId();
 	}
 
 	@Override
@@ -92,17 +113,17 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 		if(!isConnected()) {
 			throw new IllegalStateException("网关未连线");
 		}
-		log.debug("[{}] 模拟网关收到撤单请求", gd.getGatewayId());
-		account.onCancelOrder(cancelOrderReq);
+		log.info("[{}] 模拟网关收到撤单请求", gd.getGatewayId());
+		orderReqMgr.cancelOrder(cancelOrderReq.getOriginOrderId());
 		return true;
 	}
 
 	@Override
 	public int moneyIO(int money) {
 		if(money >= 0) {			
-			account.depositMoney(money);
+			account.onDeposit(money);
 		} else {
-			account.withdrawMoney(Math.abs(money));
+			account.onWithdraw(money);
 		}
 		return (int) account.balance();
 	}
@@ -125,7 +146,13 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 
 	@Override
 	public void onTick(TickField tick) {
-		account.onTick(tick);
+		orderReqMgr.onTick(tick);
+		account.getPositionManager().onTick(tick);
+		if(tick.getActionTimestamp() - lastEmitStatus > 1000) {
+			feEngine.emitEvent(NorthstarEventType.ACCOUNT, account.accountField());
+			account.getPositionManager().positionFields().forEach(pf -> feEngine.emitEvent(NorthstarEventType.POSITION, pf));
+			lastEmitStatus = tick.getActionTimestamp();
+		}
 	}
 
 }

@@ -10,8 +10,6 @@ import org.dromara.northstar.gateway.GatewayFactory;
 import org.dromara.northstar.gateway.IMarketCenter;
 import org.dromara.northstar.gateway.sim.market.SimMarketGatewayLocal;
 
-import com.google.protobuf.InvalidProtocolBufferException;
-
 public class SimGatewayFactory implements GatewayFactory{
 	
 	private FastEventEngine fastEventEngine;
@@ -42,15 +40,11 @@ public class SimGatewayFactory implements GatewayFactory{
 		String accGatewayId = gatewayDescription.getGatewayId();
 		SimAccountDescription simAccountDescription = simAccountRepo.findById(accGatewayId);
 
-		final SimAccount account;
+		final SimGatewayAccount account;
 		if(simAccountDescription == null) {
-			account = new SimAccount(accGatewayId, mktCenter, fastEventEngine, simAccDescription -> simAccountRepo.save(simAccDescription));
+			account = new SimGatewayAccount(accGatewayId);
 		} else {
-			try {
-				account = new SimAccount(simAccountDescription, mktCenter, fastEventEngine, simAccDescription -> simAccountRepo.save(simAccDescription));
-			} catch (InvalidProtocolBufferException e) {
-				throw new IllegalStateException("无法创建模拟账户", e);
-			}
+			account = new SimGatewayAccount(simAccountDescription);
 		}
 		return new SimTradeGatewayLocal(fastEventEngine, gatewayDescription, account);
 	}

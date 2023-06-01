@@ -3,11 +3,7 @@ package org.dromara.northstar.gateway.sim.trade;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.offset;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.util.List;
-
-import org.dromara.northstar.common.constant.ClosingPolicy;
 import org.junit.jupiter.api.Test;
 
 import test.common.TestFieldFactory;
@@ -37,44 +33,35 @@ class TradePositionTest {
 	@Test
 	void shouldInitSuccessfully() {
 		assertDoesNotThrow(() -> {
-			new TradePosition(List.of(openTrade), ClosingPolicy.FIRST_IN_LAST_OUT);
-		});
-	}
-	
-	@Test
-	void shouldFailInit() {
-		assertThrows(IllegalArgumentException.class, ()->{
-			new TradePosition(List.of(), ClosingPolicy.FIRST_IN_LAST_OUT);
-		});
-		
-		assertThrows(IllegalArgumentException.class, ()->{
-			new TradePosition(List.of(openTrade, openTrade2), ClosingPolicy.FIRST_IN_LAST_OUT);
+			new TradePosition(openTrade.getContract(), DirectionEnum.D_Buy);
 		});
 	}
 	
 	// 用例：行情更新，持仓利润更新
 	@Test
 	void shouldUpdateProfit() {
-		TradePosition tp = new TradePosition(List.of(openTrade), ClosingPolicy.FIRST_IN_LAST_OUT);
-		tp.updateTick(tick1);
+		TradePosition tp = new TradePosition(openTrade.getContract(), DirectionEnum.D_Buy);
+		tp.onTrade(openTrade);
+		tp.onTick(tick1);
 		assertThat(tp.profit()).isCloseTo(2220D, offset(1e-6));
 	}
 	
 	// 用例：忽略非相关行情
 	@Test
 	void shouldNotUpdateProfit() {
-		TradePosition tp = new TradePosition(List.of(openTrade), ClosingPolicy.FIRST_IN_LAST_OUT);
-		tp.updateTick(tick2);
+		TradePosition tp = new TradePosition(openTrade.getContract(), DirectionEnum.D_Buy);
+		tp.onTrade(openTrade);
+		tp.onTick(tick2);
 		assertThat(tp.profit()).isCloseTo(0D, offset(1e-6));
 	}
 	
 	// 用例：加仓
 	@Test
 	void shouldAddPosition() {
-		TradePosition tp = new TradePosition(List.of(openTrade), ClosingPolicy.FIRST_IN_LAST_OUT);
+		TradePosition tp = new TradePosition(openTrade.getContract(), DirectionEnum.D_Buy);
+		tp.onTrade(openTrade);
 		tp.onTrade(openTrade1);
-		tp.onTrade(openTrade2);
-		tp.updateTick(tick1);
+		tp.onTick(tick1);
 		assertThat(tp.tdAvailable()).isEqualTo(1);
 		assertThat(tp.ydAvailable()).isEqualTo(2);
 		assertThat(tp.totalVolume()).isEqualTo(3);
@@ -85,34 +72,22 @@ class TradePositionTest {
 	// 用例：平仓
 	@Test
 	void shouldClosePosition() {
-		TradePosition tp = new TradePosition(List.of(openTrade), ClosingPolicy.FIRST_IN_LAST_OUT);
+		TradePosition tp = new TradePosition(openTrade.getContract(), DirectionEnum.D_Buy);
+		tp.onTrade(openTrade);
 		tp.onTrade(closeTrade);
 		assertThat(tp.tdAvailable()).isZero();
 		assertThat(tp.ydAvailable()).isZero();
 		assertThat(tp.totalVolume()).isZero();
 	}
 		
-	// 用例：减仓，平今优先
-	@Test
-	void shouldReduceTdPosition() {
-		TradePosition tp = new TradePosition(List.of(openTrade), ClosingPolicy.FIRST_IN_LAST_OUT);
-		tp.onTrade(openTrade1);
-		tp.updateTick(tick1);
-		assertThat(tp.onTrade(closeTrade)).isCloseTo(1000D, offset(1e-6));
-		assertThat(tp.tdAvailable()).isEqualTo(0);
-		assertThat(tp.ydAvailable()).isEqualTo(1);
-		assertThat(tp.totalVolume()).isEqualTo(1);
-		assertThat(tp.avgOpenPrice()).isCloseTo(5000, offset(1e-6));
-		assertThat(tp.profit()).isCloseTo(1110D, offset(1e-6));
-	}
-	
 	// 用例：减仓，先开先平
 	@Test
 	void shouldReduceYdPosition() {
-		TradePosition tp = new TradePosition(List.of(openTrade), ClosingPolicy.FIRST_IN_FIRST_OUT);
+		TradePosition tp = new TradePosition(openTrade.getContract(), DirectionEnum.D_Buy);
+		tp.onTrade(openTrade);
 		tp.onTrade(openTrade1);
-		tp.updateTick(tick1);
-		assertThat(tp.onTrade(closeTrade)).isCloseTo(4000D, offset(1e-6));
+		tp.onTick(tick1);
+		assertThat(tp.onTrade(closeTrade).stream().mapToDouble(Deal::profit).sum()).isCloseTo(4000D, offset(1e-6));
 		assertThat(tp.tdAvailable()).isEqualTo(1);
 		assertThat(tp.ydAvailable()).isEqualTo(0);
 		assertThat(tp.totalVolume()).isEqualTo(1);
@@ -123,10 +98,11 @@ class TradePositionTest {
 	// 用例：平仓委托，冻结持仓；撤销委托，解冻持仓
 	@Test
 	void shouldHandlerOrder() {
-		TradePosition tp = new TradePosition(List.of(openTrade), ClosingPolicy.FIRST_IN_FIRST_OUT);
+		TradePosition tp = new TradePosition(openTrade.getContract(), DirectionEnum.D_Buy);
+		tp.onTrade(openTrade);
 		tp.onTrade(openTrade1);
 		tp.onOrder(order1);
-		tp.updateTick(tick1);
+		tp.onTick(tick1);
 		assertThat(tp.totalVolume()).isEqualTo(3);
 		assertThat(tp.totalAvailable()).isEqualTo(2);
 		assertThat(tp.tdVolume()).isEqualTo(1);
@@ -138,10 +114,11 @@ class TradePositionTest {
 	// 用例：平仓委托，冻结持仓；撤销委托，解冻持仓
 	@Test
 	void shouldHandlerOrder2() {
-		TradePosition tp = new TradePosition(List.of(openTrade), ClosingPolicy.FIRST_IN_FIRST_OUT);
+		TradePosition tp = new TradePosition(openTrade.getContract(), DirectionEnum.D_Buy);
+		tp.onTrade(openTrade);
 		tp.onTrade(openTrade1);
 		tp.onOrder(order2);
-		tp.updateTick(tick1);
+		tp.onTick(tick1);
 		assertThat(tp.totalVolume()).isEqualTo(3);
 		assertThat(tp.totalAvailable()).isEqualTo(2);
 		assertThat(tp.tdVolume()).isEqualTo(1);
@@ -153,7 +130,8 @@ class TradePositionTest {
 	// 用例：占用保证金
 	@Test
 	void shouldTakeMargin() {
-		TradePosition tp = new TradePosition(List.of(openTrade), ClosingPolicy.FIRST_IN_FIRST_OUT);
+		TradePosition tp = new TradePosition(openTrade.getContract(), DirectionEnum.D_Buy);
+		tp.onTrade(openTrade);
 		tp.onTrade(openTrade1);
 		assertThat(tp.totalMargin()).isCloseTo(12240, offset(1e-6));
 	}
