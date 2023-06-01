@@ -457,7 +457,9 @@ public class ModuleContext implements IModuleContext{
 	@Override
 	public synchronized Optional<String> submitOrderReq(ContractField contract, SignalOperation operation, PriceType priceType, int volume, double price) {
 		if(!module.isEnabled()) {
-			getLogger().info("策略处于停用状态，忽略委托单");
+			if(isReady()) {
+				getLogger().info("策略处于停用状态，忽略委托单");
+			}
 			return Optional.empty();
 		}
 		TickField tick = latestTickMap.get(contract.getUnifiedSymbol());
