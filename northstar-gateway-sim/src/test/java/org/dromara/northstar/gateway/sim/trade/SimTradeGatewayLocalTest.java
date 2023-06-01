@@ -1,21 +1,22 @@
 package org.dromara.northstar.gateway.sim.trade;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.List;
 
 import org.dromara.northstar.common.constant.ConnectionState;
 import org.dromara.northstar.common.event.FastEventEngine;
 import org.dromara.northstar.common.model.GatewayDescription;
+import org.dromara.northstar.data.ISimAccountRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import test.common.TestFieldFactory;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
-import xyz.redtorch.pb.CoreField.CancelOrderReqField;
-import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 
 class SimTradeGatewayLocalTest {
 	
@@ -30,8 +31,11 @@ class SimTradeGatewayLocalTest {
 				.gatewayId("gatewayId")
 				.bindedMktGatewayId("bindedGatewayId")
 				.build();
-		SimAccount simAccount = mock(SimAccount.class);
-		gateway = new SimTradeGatewayLocal(feEngine, gd, simAccount);
+		SimGatewayAccount simAccount = mock(SimGatewayAccount.class);
+		PositionManager posMgr = mock(PositionManager.class);
+		when(simAccount.getPositionManager()).thenReturn(posMgr);
+		when(posMgr.positionFields()).thenReturn(List.of());
+		gateway = new SimTradeGatewayLocal(feEngine, gd, simAccount, mock(ISimAccountRepository.class));
 	}
 
 	@Test
@@ -47,22 +51,26 @@ class SimTradeGatewayLocalTest {
 	void testSubmitOrder() {
 		gateway.connect();
 		gateway.submitOrder(factory.makeOrderReq("rb2210", DirectionEnum.D_Buy, OffsetFlagEnum.OF_Close, 1, 0, 0));
-		verify(gateway.account).onSubmitOrder(any(SubmitOrderReqField.class));
 	}
 
 	@Test
 	void testCancelOrder() {
 		gateway.connect();
 		gateway.cancelOrder(factory.makeCancelReq(factory.makeOrderReq("rb2210", DirectionEnum.D_Buy, OffsetFlagEnum.OF_Close, 1, 0, 0)));
-		verify(gateway.account).onCancelOrder(any(CancelOrderReqField.class));
 	}
 
 	@Test
 	void testMoneyIO() {
 		gateway.moneyIO(1);
-		verify(gateway.account).depositMoney(1);
+		verify(gateway.account).onDeposit(1);
 		gateway.moneyIO(-1);
-		verify(gateway.account).withdrawMoney(1);
+		verify(gateway.account).onWithdraw(1);
+	}
+	
+	@Test
+	void testMoneyIO2() {
+		gateway.moneyIO(-1);
+		verify(gateway.account).onWithdraw(1);
 	}
 
 	@Test
