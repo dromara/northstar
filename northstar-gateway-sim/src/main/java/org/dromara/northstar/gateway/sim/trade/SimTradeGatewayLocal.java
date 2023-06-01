@@ -1,5 +1,7 @@
 package org.dromara.northstar.gateway.sim.trade;
 
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -13,10 +15,8 @@ import org.dromara.northstar.data.ISimAccountRepository;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import xyz.redtorch.pb.CoreField.AccountField;
 import xyz.redtorch.pb.CoreField.CancelOrderReqField;
 import xyz.redtorch.pb.CoreField.OrderField;
-import xyz.redtorch.pb.CoreField.PositionField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TickField;
 import xyz.redtorch.pb.CoreField.TradeField;
@@ -54,7 +54,16 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 		simAccountRepo.save(account.getAccountDescription());
 	};
 	
-	private long lastEmitStatus;
+	private TimerTask reportTask = new TimerTask() {
+		
+		@Override
+		public void run() {
+			feEngine.emitEvent(NorthstarEventType.ACCOUNT, account.accountField());
+			account.getPositionManager().positionFields().forEach(pf -> feEngine.emitEvent(NorthstarEventType.POSITION, pf));
+		}
+	};
+	
+	private Timer statusReportTimer;
 	
 	private OrderReqManager orderReqMgr =  new OrderReqManager();
 	
@@ -75,20 +84,8 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 		CompletableFuture.runAsync(() -> {
 			feEngine.emitEvent(NorthstarEventType.GATEWAY_READY, gd.getGatewayId());
 		}, CompletableFuture.delayedExecutor(2, TimeUnit.SECONDS));
-		// 阻塞一下，防止账户回报比连线回报要快导致异常
-		try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-			log.error("", e);
-		}
-		
-		AccountField af = account.accountField();
-		feEngine.emitEvent(NorthstarEventType.ACCOUNT, af);
-		
-		for(PositionField pf : account.getPositionManager().positionFields()) {
-			feEngine.emitEvent(NorthstarEventType.POSITION, pf);
-		}
-		
+		statusReportTimer = new Timer("SimGatewayTimelyReport", true);
+		statusReportTimer.scheduleAtFixedRate(reportTask, 5000, 2000);
 	}
 
 	@Override
@@ -96,6 +93,7 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 		log.debug("[{}] 模拟网关断开", gd.getGatewayId());
 		connected = false;
 		connState = ConnectionState.DISCONNECTED;
+		statusReportTimer.cancel();
 	}
 	
 	@Override
@@ -158,11 +156,6 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 	public void onTick(TickField tick) {
 		orderReqMgr.onTick(tick);
 		account.getPositionManager().onTick(tick);
-		if(tick.getActionTimestamp() - lastEmitStatus > 1000) {
-			feEngine.emitEvent(NorthstarEventType.ACCOUNT, account.accountField());
-			account.getPositionManager().positionFields().forEach(pf -> feEngine.emitEvent(NorthstarEventType.POSITION, pf));
-			lastEmitStatus = tick.getActionTimestamp();
-		}
 	}
 
 }
