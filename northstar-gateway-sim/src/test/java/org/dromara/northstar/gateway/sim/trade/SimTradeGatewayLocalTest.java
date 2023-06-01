@@ -3,6 +3,9 @@ package org.dromara.northstar.gateway.sim.trade;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.List;
 
 import org.dromara.northstar.common.constant.ConnectionState;
 import org.dromara.northstar.common.event.FastEventEngine;
@@ -28,6 +31,9 @@ class SimTradeGatewayLocalTest {
 				.bindedMktGatewayId("bindedGatewayId")
 				.build();
 		SimGatewayAccount simAccount = mock(SimGatewayAccount.class);
+		PositionManager posMgr = mock(PositionManager.class);
+		when(simAccount.getPositionManager()).thenReturn(posMgr);
+		when(posMgr.positionFields()).thenReturn(List.of());
 		gateway = new SimTradeGatewayLocal(feEngine, gd, simAccount);
 	}
 
@@ -56,6 +62,12 @@ class SimTradeGatewayLocalTest {
 	void testMoneyIO() {
 		gateway.moneyIO(1);
 		verify(gateway.account).onDeposit(1);
+		gateway.moneyIO(-1);
+		verify(gateway.account).onWithdraw(1);
+	}
+	
+	@Test
+	void testMoneyIO2() {
 		gateway.moneyIO(-1);
 		verify(gateway.account).onWithdraw(1);
 	}

@@ -56,6 +56,7 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 		this.feEngine = feEngine;
 		this.account = account;
 		this.gd = gd;
+		account.setOrderReqMgr(orderReqMgr);
 	}
 
 	@Override
@@ -123,7 +124,7 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 		if(money >= 0) {			
 			account.onDeposit(money);
 		} else {
-			account.onWithdraw(money);
+			account.onWithdraw(Math.abs(money));
 		}
 		return (int) account.balance();
 	}
