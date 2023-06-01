@@ -87,6 +87,8 @@ public class OrderRequest implements TickDataAware{
 						.dealTick(tick)
 						.orderReq(submitOrderReq)
 						.build());
+				
+				tradedVolume = submitOrderReq.getVolume();
 			}
 		}
 	}
@@ -108,7 +110,7 @@ public class OrderRequest implements TickDataAware{
 				orderBuilder.setStatusMsg("已报单").setOrderStatus(OrderStatusEnum.OS_Unknown);
 			}
 		} else {
-			int availablePos = account.getPositionManager().getAvailablePosition(submitOrderReq.getDirection(), submitOrderReq.getContract().getUnifiedSymbol());
+			int availablePos = account.getPositionManager().getAvailablePosition(submitOrderReq.getDirection(), submitOrderReq.getContract().getUnifiedSymbol(), true);
 			if(submitOrderReq.getVolume() > availablePos) {
 				log.warn("可用持仓不足，无法平仓。可用：{}，实际平仓：{}", availablePos, submitOrderReq.getVolume());
 				orderBuilder.setStatusMsg("废单").setOrderStatus(OrderStatusEnum.OS_Rejected);

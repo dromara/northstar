@@ -16,7 +16,7 @@ import xyz.redtorch.pb.CoreField.TickField;
  */
 public class OrderReqManager implements TickDataAware{
 
-	private Map<String, OrderRequest> orderMap = new HashMap<>();
+	protected Map<String, OrderRequest> orderMap = new HashMap<>();
 	
 	@Override
 	public void onTick(TickField tick) {
@@ -24,6 +24,12 @@ public class OrderReqManager implements TickDataAware{
 	}
 	
 	public synchronized void submitOrder(OrderRequest orderReq) {
+		orderMap.values().stream()
+			.filter(OrderRequest::hasDone)
+			.map(OrderRequest::originOrderId)
+			.toList()
+			.forEach(id -> orderMap.remove(id));
+		
 		orderMap.put(orderReq.originOrderId(), orderReq);
 	}
 	

@@ -98,8 +98,12 @@ public class PositionManager implements TransactionAware, TickDataAware {
 		return positionFields().stream().mapToDouble(PositionField::getExchangeMargin).sum();
 	}
 
-	public int getAvailablePosition(DirectionEnum direction, String unifiedSymbol) {
-		return getPosition(direction, unifiedSymbol, false).totalAvailable();
+	public int getAvailablePosition(DirectionEnum direction, String unifiedSymbol, boolean reverse) {
+		TradePosition tp = getPosition(direction, unifiedSymbol, reverse);
+		if(Objects.isNull(tp)) {
+			throw new NoSuchElementException(String.format("找不到%s头持仓：%s", FieldUtils.chn(direction), unifiedSymbol));
+		}		
+		return tp.totalAvailable();
 	}
 	
 	private TradePosition getPosition(DirectionEnum dir, String unifiedSymbol, boolean reverse){

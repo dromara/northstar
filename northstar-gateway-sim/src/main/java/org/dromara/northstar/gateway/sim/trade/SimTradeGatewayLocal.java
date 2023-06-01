@@ -9,6 +9,7 @@ import org.dromara.northstar.common.event.FastEventEngine;
 import org.dromara.northstar.common.event.NorthstarEventType;
 import org.dromara.northstar.common.exception.TradeException;
 import org.dromara.northstar.common.model.GatewayDescription;
+import org.dromara.northstar.data.ISimAccountRepository;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +35,8 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 	
 	private ConnectionState connState = ConnectionState.DISCONNECTED;
 	
+	private ISimAccountRepository simAccountRepo;
+	
 	private Consumer<OrderField> onOrderCallback = order -> {
 		account.getPositionManager().onOrder(order);
 		feEngine.emitEvent(NorthstarEventType.ORDER, order);
@@ -46,16 +49,19 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 		
 		log.info("模拟成交：{}，{}，{}，{}手，成交价：{}，订单ID：{}", trade.getContract().getName(), trade.getDirection(), 
 				trade.getOffsetFlag(), trade.getVolume(), trade.getPrice(), trade.getOriginOrderId());
+		
+		simAccountRepo.save(account.getAccountDescription());
 	};
 	
 	private long lastEmitStatus;
 	
 	private OrderReqManager orderReqMgr =  new OrderReqManager();
 	
-	public SimTradeGatewayLocal(FastEventEngine feEngine, GatewayDescription gd, SimGatewayAccount account) {
+	public SimTradeGatewayLocal(FastEventEngine feEngine, GatewayDescription gd, SimGatewayAccount account, ISimAccountRepository simAccountRepo) {
 		this.feEngine = feEngine;
 		this.account = account;
 		this.gd = gd;
+		this.simAccountRepo = simAccountRepo;
 		account.setOrderReqMgr(orderReqMgr);
 	}
 
@@ -126,6 +132,7 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 		} else {
 			account.onWithdraw(Math.abs(money));
 		}
+		simAccountRepo.save(account.getAccountDescription());
 		return (int) account.balance();
 	}
 
