@@ -203,7 +203,8 @@ public class ModuleAccount implements IModuleAccount{
 	 * 模组账户可用金额（近似计算）
 	 * @return
 	 */
-	public double accountAvailableAmount(String gatewayId) {
+	@Override
+	public double availableAmount() {
 		// 由于只有在开仓时才检查金额是否足够，因此可以忽略持仓浮盈的计算
 		return initBalance + accCloseProfit - accCommission;
 	}
@@ -233,8 +234,8 @@ public class ModuleAccount implements IModuleAccount{
 		default -> throw new IllegalStateException("开仓方向不合法");
 		};
 		double cost = submitOrder.getPrice() * submitOrder.getVolume() * submitOrder.getContract().getMultiplier() * margin;
-		if(accountAvailableAmount(submitOrder.getGatewayId()) < cost) {
-			logger.warn("模组账户可用资金为：{}，开仓成本为：{}", accountAvailableAmount(submitOrder.getGatewayId()), cost);
+		if(availableAmount() < cost) {
+			logger.warn("模组账户可用资金为：{}，开仓成本为：{}", availableAmount(), cost);
 			throw new InsufficientException("模组账户可用资金不足，无法开仓");
 		}
 	}

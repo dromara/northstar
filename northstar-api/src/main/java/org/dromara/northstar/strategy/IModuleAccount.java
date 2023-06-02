@@ -13,7 +13,12 @@ import xyz.redtorch.pb.CoreEnum.DirectionEnum;
  *
  */
 public interface IModuleAccount extends TickDataAware, TransactionAware {
-
+	
+	/**
+	 * 可用金额
+	 * @return
+	 */
+	double availableAmount();
 	/**
 	 * 获取指定合约指定方向的持仓数
 	 * @param unifiedSymbol 	
