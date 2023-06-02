@@ -1,12 +1,8 @@
 package org.dromara.northstar.module;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 
 import org.apache.commons.lang3.StringUtils;
@@ -26,9 +22,9 @@ import org.slf4j.Logger;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
-import com.google.common.util.concurrent.AtomicDouble;
 import com.google.protobuf.InvalidProtocolBufferException;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
@@ -48,19 +44,18 @@ import xyz.redtorch.pb.CoreField.TradeField;
 public class ModuleAccount implements IModuleAccount{
 
 	private ModuleStateMachine stateMachine;
-	
-	/* gatewayId -> accCommission */
-	private Map<String, AtomicDouble> accCommissionMap = new HashMap<>();	// 使用Atomic是方便累加操作
-	/* gatewayId -> initBalance*/
-	private Map<String, Double> initBalanceMap = new HashMap<>();
-	/* gatewayId -> accDeal */
-	private Map<String, AtomicInteger> accDealVolMap = new HashMap<>();		// 使用Atomic是方便累加操作
-	/* gatewayId -> accCloseProfit */
-	private Map<String, AtomicDouble> accCloseProfitMap = new HashMap<>();	// 使用Atomic是方便累加操作
-	/* gatewayId -> maxProfit */
-	private Map<String, Double> maxProfitMap = new HashMap<>();
-	/* gatewayId -> maxDrawBack */
-	private Map<String, Double> maxDrawBackMap = new HashMap<>();
+	@Getter
+	private double initBalance;
+	@Getter
+	private double accCommission;
+	@Getter
+	private int accDealVolume;
+	@Getter
+	private double accCloseProfit;
+	@Getter
+	private double maxProfit;
+	@Getter
+	private double maxDrawback;
 	/* direction -> unifiedSymbol -> position */ 
 	private Table<DirectionEnum, String, ModulePosition> posTable = HashBasedTable.create();
 	private String tradingDay;
@@ -77,15 +72,12 @@ public class ModuleAccount implements IModuleAccount{
 				int factor = FieldUtils.directionFactor(openTrade.getDirection());
 				ContractField contract = closeTrade.getContract();
 				double profit = factor * (closeTrade.getPrice() - openTrade.getPrice()) * closeTrade.getVolume() * contract.getMultiplier();
-				String gatewayId = closeTrade.getGatewayId();
-				accDealVolMap.get(gatewayId).addAndGet(closeTrade.getVolume());
-				accCloseProfitMap.get(gatewayId).addAndGet(profit);
+				accDealVolume += closeTrade.getVolume();
+				accCloseProfit += profit;
 				double commission = contract.getCommissionFee() > 0 ? contract.getCommissionFee() : contract.getCommissionRate() * closeTrade.getPrice() * contract.getMultiplier();
-				accCommissionMap.get(gatewayId).addAndGet(commission * 2 * closeTrade.getVolume()); // 乘2代表手续费双向计算
-				double maxProfit = Math.max(getMaxProfit(gatewayId), getAccCloseProfit(gatewayId) - getAccCommission(gatewayId));
-				maxProfitMap.put(gatewayId, maxProfit);
-				double maxDrawBack = Math.min(getMaxDrawBack(gatewayId), getAccCloseProfit(gatewayId) - getAccCommission(gatewayId) - maxProfit);
-				maxDrawBackMap.put(gatewayId, maxDrawBack);
+				accCommission += commission * 2 * closeTrade.getVolume(); // 乘2代表手续费双向计算
+				maxProfit = Math.max(maxProfit, accCloseProfit - accCommission);
+				maxDrawback = Math.min(maxDrawback, accCloseProfit - accCommission - maxProfit);
 				moduleRepo.saveDealRecord(ModuleDealRecord.builder()
 						.moduleName(moduleDescription.getModuleName())
 						.moduleAccountId(closeTrade.getAccountId())
@@ -97,32 +89,30 @@ public class ModuleAccount implements IModuleAccount{
 			}
 		};
 		
-		for(ModuleAccountRuntimeDescription mard : moduleRtDescription.getAccountRuntimeDescriptionMap().values()) {
-			initBalanceMap.put(mard.getAccountId(), mard.getInitBalance());
-			accDealVolMap.put(mard.getAccountId(), new AtomicInteger(mard.getAccDealVolume()));
-			accCloseProfitMap.put(mard.getAccountId(), new AtomicDouble(mard.getAccCloseProfit()));
-			accCommissionMap.put(mard.getAccountId(), new AtomicDouble(mard.getAccCommission()));
-			maxProfitMap.put(mard.getAccountId(), 0D);
-			maxDrawBackMap.put(mard.getAccountId(), 0D);
-			
-			moduleDescription.getModuleAccountSettingsDescription().stream()
-				.flatMap(mad -> mad.getBindedContracts().stream())
-				.forEach(contractSimple -> {
-					Contract contract = contractMgr.getContract(Identifier.of(contractSimple.getValue()));
-					ContractField cf = contract.contractField();
-					
-					ModulePosition buyPos = new ModulePosition(mard.getAccountId(), cf, DirectionEnum.D_Buy, moduleDescription.getClosingPolicy(), onDealCallback);
-					posTable.put(DirectionEnum.D_Buy, cf.getUnifiedSymbol(), buyPos);
-					
-					ModulePosition sellPos = new ModulePosition(mard.getAccountId(), cf, DirectionEnum.D_Sell, moduleDescription.getClosingPolicy(), onDealCallback);
-					posTable.put(DirectionEnum.D_Sell, cf.getUnifiedSymbol(), sellPos);
-				});
-			
-			mard.getPositionDescription().getNonclosedTrades().stream()
-				.map(this::parseFrom)
-				.filter(Objects::nonNull)
-				.forEach(this::onTrade);
-		}
+		ModuleAccountRuntimeDescription mard = moduleRtDescription.getAccountRuntimeDescription();
+		this.initBalance = mard.getInitBalance();
+		this.accCloseProfit = mard.getAccCloseProfit();
+		this.accCommission = mard.getAccCommission();
+		this.accDealVolume = mard.getAccDealVolume();
+		this.maxDrawback = mard.getMaxDrawback();
+		this.maxProfit = mard.getMaxProfit();
+		moduleDescription.getModuleAccountSettingsDescription().stream()
+			.flatMap(mad -> mad.getBindedContracts().stream())
+			.forEach(contractSimple -> {
+				Contract contract = contractMgr.getContract(Identifier.of(contractSimple.getValue()));
+				ContractField cf = contract.contractField();
+				
+				ModulePosition buyPos = new ModulePosition(moduleRtDescription.getModuleName(), cf, DirectionEnum.D_Buy, moduleDescription.getClosingPolicy(), onDealCallback);
+				posTable.put(DirectionEnum.D_Buy, cf.getUnifiedSymbol(), buyPos);
+				
+				ModulePosition sellPos = new ModulePosition(moduleRtDescription.getModuleName(), cf, DirectionEnum.D_Sell, moduleDescription.getClosingPolicy(), onDealCallback);
+				posTable.put(DirectionEnum.D_Sell, cf.getUnifiedSymbol(), sellPos);
+			});
+		
+		mard.getPositionDescription().getNonclosedTrades().stream()
+			.map(this::parseFrom)
+			.filter(Objects::nonNull)
+			.forEach(this::onTrade);
 	}
 	
 	private TradeField parseFrom(byte[] data) {
@@ -163,41 +153,21 @@ public class ModuleAccount implements IModuleAccount{
 		stateMachine.onTrade(trade);
 	}
 
-	@Override
-	public double getInitBalance(String gatewayId) {
-		return initBalanceMap.get(gatewayId);
-	}
-
-	@Override
-	public double getAccCommission(String gatewayId) {
-		return accCommissionMap.get(gatewayId).get();
-	}
-
-	@Override
-	public List<PositionField> getPositions(String gatewayId) {
+	public List<PositionField> getPositions() {
 		List<PositionField> result = new ArrayList<>();
-		result.addAll(posTable.row(DirectionEnum.D_Buy).values().stream().map(ModulePosition::convertToPositionField).filter(pos -> StringUtils.equals(gatewayId, pos.getGatewayId())).toList());
-		result.addAll(posTable.row(DirectionEnum.D_Sell).values().stream().map(ModulePosition::convertToPositionField).filter(pos -> StringUtils.equals(gatewayId, pos.getGatewayId())).toList());
+		result.addAll(posTable.row(DirectionEnum.D_Buy).values().stream().map(ModulePosition::convertToPositionField).toList());
+		result.addAll(posTable.row(DirectionEnum.D_Sell).values().stream().map(ModulePosition::convertToPositionField).toList());
 		return result;
 	}
 
-	@Override
-	public List<TradeField> getNonclosedTrades() {
-		return initBalanceMap.keySet().stream()
-				.map(this::getNonclosedTrades)
-				.flatMap(List::stream)
-				.toList();
-	}
 	
-	@Override
-	public List<TradeField> getNonclosedTrades(String gatewayId) {
+	public List<TradeField> getNonclosedTrades() {
 		List<TradeField> result = new ArrayList<>();
 		result.addAll(posTable.row(DirectionEnum.D_Buy).values().stream().flatMap(mp -> mp.getNonclosedTrades().stream()).toList());
 		result.addAll(posTable.row(DirectionEnum.D_Sell).values().stream().flatMap(mp -> mp.getNonclosedTrades().stream()).toList());
 		return result;
 	}
 
-	@Override
 	public List<TradeField> getNonclosedTrades(String unifiedSymbol, DirectionEnum direction) {
 		return posTable.row(direction).values().stream()
 				.filter(mp -> StringUtils.equals(unifiedSymbol, mp.getContract().getUnifiedSymbol()))
@@ -220,27 +190,6 @@ public class ModuleAccount implements IModuleAccount{
 		return longPos - shortPos;
 	}
 
-	@Override
-	public int getAccDealVolume(String gatewayId) {
-		return accDealVolMap.get(gatewayId).get();
-	}
-
-	@Override
-	public double getAccCloseProfit(String gatewayId) {
-		return accCloseProfitMap.get(gatewayId).get();
-	}
-
-	@Override
-	public double getMaxDrawBack(String gatewayId) {
-		return Optional.ofNullable(maxDrawBackMap.get(gatewayId)).orElse(0D);
-	}
-
-	@Override
-	public double getMaxProfit(String gatewayId) {
-		return Optional.ofNullable(maxProfitMap.get(gatewayId)).orElse(0D);
-	}
-
-	@Override
 	public void tradeDayPreset() {
 		posTable.values().stream().forEach(ModulePosition::releaseOrder);
 	}
@@ -256,7 +205,7 @@ public class ModuleAccount implements IModuleAccount{
 	 */
 	public double accountAvailableAmount(String gatewayId) {
 		// 由于只有在开仓时才检查金额是否足够，因此可以忽略持仓浮盈的计算
-		return getInitBalance(gatewayId) + getAccCloseProfit(gatewayId) - getAccCommission(gatewayId);
+		return initBalance + accCloseProfit - accCommission;
 	}
 	
 	public void onSubmitOrder(SubmitOrderReqField submitOrder) {

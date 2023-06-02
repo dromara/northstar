@@ -6,7 +6,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.dromara.northstar.common.TransactionAware;
 import org.dromara.northstar.common.constant.ModuleState;
 import org.dromara.northstar.common.utils.OrderUtils;
-import org.dromara.northstar.strategy.IModuleAccount;
 import org.dromara.northstar.strategy.IModuleContext;
 
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
@@ -27,7 +26,7 @@ public class ModuleStateMachine implements TransactionAware {
 	
 	private ModuleState prevState;
 
-	private IModuleAccount moduleAccount;
+	private ModuleAccount moduleAccount;
 	
 	private IModuleContext ctx;
 	
@@ -113,7 +112,7 @@ public class ModuleStateMachine implements TransactionAware {
 		}
 	}
 	
-	public void setModuleAccount(IModuleAccount moduleAccount) {
+	public void setModuleAccount(ModuleAccount moduleAccount) {
 		this.moduleAccount = moduleAccount;
 		updateState();
 	}

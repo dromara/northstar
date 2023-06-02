@@ -49,14 +49,14 @@ public class ModulePosition implements TickDataAware, TransactionAware{
 	/* 开平仓匹配回调 */
 	private BiConsumer<TradeField, TradeField> onDealCallback;
 	
-	private String gatewayId;
+	private String moduleName;
 	
 	@Getter
 	private final ContractField contract;
 
-	public ModulePosition(String gatewayId, ContractField contract, DirectionEnum direction, ClosingPolicy closingPolicy, 
+	public ModulePosition(String moduleName, ContractField contract, DirectionEnum direction, ClosingPolicy closingPolicy, 
 			BiConsumer<TradeField, TradeField> onDealCallback) {
-		this.gatewayId = gatewayId;
+		this.moduleName = moduleName;
 		this.contract = contract;
 		this.direction = direction;
 		this.closingPolicy = closingPolicy;
@@ -272,8 +272,8 @@ public class ModulePosition implements TickDataAware, TransactionAware{
 		double lastPrice = lastTick == null ? 0 : lastTick.getLastPrice();
 		double priceDiff = lastTick == null ? 0 : factor * (lastTick.getLastPrice() - avgOpenPrice());
 		return PositionField.newBuilder()
-				.setGatewayId(gatewayId)
-				.setAccountId(gatewayId)
+				.setGatewayId(moduleName)
+				.setAccountId(moduleName)
 				.setContract(contract)
 				.setFrozen(totalVolume() - totalAvailable())
 				.setTdFrozen(tdVolume() - tdAvailable())

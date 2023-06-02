@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.List;
-import java.util.Map;
 import java.util.NoSuchElementException;
 
 import org.dromara.northstar.common.constant.ModuleType;
@@ -47,7 +46,6 @@ class ModuleRepoAdapterTest {
 	
 	ModuleAccountDescription mad = ModuleAccountDescription.builder()
 			.accountGatewayId("testGateway")
-			.moduleAccountInitBalance(100000)
 			.bindedContracts(List.of(ContractSimpleInfo.builder().value("rb2210@SHFE@FUTURES").build()))
 			.build();
 	
@@ -58,13 +56,12 @@ class ModuleRepoAdapterTest {
 			.build();
 	
 	ModuleAccountRuntimeDescription mard = ModuleAccountRuntimeDescription.builder()
-			.accountId("testModuleAcc")
 			.initBalance(100000)
 			.build();
 	
 	ModuleRuntimeDescription mrd = ModuleRuntimeDescription.builder()
 			.moduleName(moduleName)
-			.accountRuntimeDescriptionMap(Map.of("testModuleAcc", mard))
+			.accountRuntimeDescription(mard)
 			.build();
 	
 	ModuleDealRecord mdr = ModuleDealRecord.builder()

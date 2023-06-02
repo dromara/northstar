@@ -25,7 +25,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.dromara.northstar.common.constant.Constants;
 import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.common.constant.ModuleState;
-import org.dromara.northstar.common.constant.ModuleUsage;
 import org.dromara.northstar.common.constant.SignalOperation;
 import org.dromara.northstar.common.exception.InsufficientException;
 import org.dromara.northstar.common.model.ContractSimpleInfo;
@@ -358,35 +357,25 @@ public class ModuleContext implements IModuleContext{
 
 	@Override
 	public synchronized ModuleRuntimeDescription getRuntimeDescription(boolean fullDescription) {
-		Map<String, ModuleAccountRuntimeDescription> accMap = new HashMap<>();
-		module.getModuleDescription().getModuleAccountSettingsDescription().forEach(mad -> {
-			String gatewayId = module.getModuleDescription().getUsage() == ModuleUsage.PLAYBACK 
-					? PlaybackModuleContext.PLAYBACK_GATEWAY 
-					: mad.getAccountGatewayId();
-			ModulePositionDescription posDescription = ModulePositionDescription.builder()
-					.logicalPositions(moduleAccount.getPositions(gatewayId).stream().map(PositionField::toByteArray).toList())
-					.nonclosedTrades(moduleAccount.getNonclosedTrades(gatewayId).stream().map(TradeField::toByteArray).toList())
-					.build();
-			
-			ModuleAccountRuntimeDescription accDescription = ModuleAccountRuntimeDescription.builder()
-					.accountId(gatewayId)
-					.initBalance(moduleAccount.getInitBalance(gatewayId))
-					.accCloseProfit(moduleAccount.getAccCloseProfit(gatewayId))
-					.accDealVolume(moduleAccount.getAccDealVolume(gatewayId))
-					.accCommission(moduleAccount.getAccCommission(gatewayId))
-					.maxDrawBack(moduleAccount.getMaxDrawBack(gatewayId))
-					.maxProfit(moduleAccount.getMaxProfit(gatewayId))
-					.positionDescription(posDescription)
-					.build();
-			accMap.put(gatewayId, accDescription);
-		});
-		
+		ModulePositionDescription posDescription = ModulePositionDescription.builder()
+				.logicalPositions(moduleAccount.getPositions().stream().map(PositionField::toByteArray).toList())
+				.nonclosedTrades(moduleAccount.getNonclosedTrades().stream().map(TradeField::toByteArray).toList())
+				.build();
+		ModuleAccountRuntimeDescription accRtDescription = ModuleAccountRuntimeDescription.builder()
+				.initBalance(moduleAccount.getInitBalance())
+				.accCloseProfit(moduleAccount.getAccCloseProfit())
+				.accDealVolume(moduleAccount.getAccDealVolume())
+				.accCommission(moduleAccount.getAccCommission())
+				.maxDrawback(moduleAccount.getMaxDrawback())
+				.maxProfit(moduleAccount.getMaxProfit())
+				.positionDescription(posDescription)
+				.build();
 		ModuleRuntimeDescription mad = ModuleRuntimeDescription.builder()
 				.moduleName(module.getName())
 				.enabled(module.isEnabled())
 				.moduleState(moduleAccount.getModuleState())
 				.dataState(tradeStrategy.getStoreObject())
-				.accountRuntimeDescriptionMap(accMap)
+				.accountRuntimeDescription(accRtDescription)
 				.build();
 		if(fullDescription) {
 			Map<String, List<String>> indicatorMap = new HashMap<>();
