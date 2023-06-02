@@ -504,6 +504,8 @@ public class ModuleContext implements IModuleContext{
 		} catch (InsufficientException e) {
 			getLogger().error("发单失败。原因：{}", e.getMessage());
 			tradeIntent = null;
+			getLogger().warn("模组余额不足，主动停用模组");
+			setEnabled(false);
 			return null;
 		}
 		try {
