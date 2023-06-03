@@ -49,14 +49,12 @@
           }}
         </template>
       </el-table-column>
-      <el-table-column label="绑定账户" sortable align="center" width="minmax(100px, 200px)" min-width="100px">
+      <el-table-column label="绑定账户" sortable :sort-method="sortAccount" align="center" width="minmax(100px, 200px)" min-width="100px">
         <template slot-scope="scope">
           {{
-            (() => {
-              return scope.row.moduleAccountSettingsDescription
+            scope.row.moduleAccountSettingsDescription
                 .map((item) => item.accountGatewayId)
                 .join('；')
-            })()
           }}
         </template>
       </el-table-column>
@@ -276,6 +274,11 @@ export default {
     },
     tailModuleLog(row) {
       this.$parent.handleSelect('9', { module: row.moduleName })
+    },
+    sortAccount(a, b){
+      const ra = a.moduleAccountSettingsDescription.map((item) => item.accountGatewayId).join('；')
+      const rb = b.moduleAccountSettingsDescription.map((item) => item.accountGatewayId).join('；')
+      return ra.localeCompare(rb)
     }
   }
 }

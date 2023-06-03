@@ -3,7 +3,7 @@
     <ModulePositionForm
       v-if="module.usage !== 'PLAYBACK'"
       :visible.sync="positionFormVisible"
-      :moduleAccount="accountSettings"
+      :contractOptions="moduleBindedContracts"
       :moduleName="module.moduleName"
       @save="onSave"
     />
@@ -43,12 +43,6 @@
                 @click="exportDealRecord"
                 >导出交易</el-button
               >
-              <!-- <el-button
-                class="compact mb-10"
-                icon="el-icon-info"
-                @click="performanceVisible = true"
-                >模组绩效</el-button
-              > -->
             </template>
             <el-descriptions-item label="名称">{{ moduleRuntime.moduleName }}</el-descriptions-item>
             <el-descriptions-item label="启停状态"
@@ -68,146 +62,142 @@
                 }[moduleRuntime.moduleState]
               }}</el-tag>
             </el-descriptions-item>
+            <el-descriptions-item label="初始金额">
+              {{ accountInfo.initBalance | formatter }}
+            </el-descriptions-item>
             <el-descriptions-item label="总盈亏">{{
               totalProfit | formatter
             }}</el-descriptions-item>
+            <el-descriptions-item label="当前余额">
+              {{
+                (accountInfo.initBalance +
+                  accountInfo.accCloseProfit -
+                  accountInfo.accCommission +
+                  holdingProfit)
+                  | formatter
+              }}
+            </el-descriptions-item>
+            <el-descriptions-item label="总手续费">
+              {{ accountInfo.accCommission | formatter }}
+            </el-descriptions-item>
+            <el-descriptions-item label="总持仓盈亏">
+              {{ holdingProfit | formatter }}
+            </el-descriptions-item>
+            <el-descriptions-item label="总平仓盈亏">
+              {{ accountInfo.accCloseProfit | formatter }}
+            </el-descriptions-item>
+            <el-descriptions-item label="交易笔数">
+              {{ dealRecords.length || 0 }}
+            </el-descriptions-item>
             <el-descriptions-item label="胜率">
               {{ `${(winningRatio * 100).toFixed(1)} %` }}
             </el-descriptions-item>
             <el-descriptions-item label="盈亏比">{{ earningPerLoss }}</el-descriptions-item>
+            <el-descriptions-item label="最大回撤">
+              {{ accountInfo.maxDrawback | formatter }}
+            </el-descriptions-item>
+            <el-descriptions-item label="平均盈亏">
+              {{ accountInfo.avgEarning | formatter }}
+            </el-descriptions-item>
+            <el-descriptions-item label="盈亏标准差">
+              {{ accountInfo.stdEarning | formatter }}
+            </el-descriptions-item>
           </el-descriptions>
-          <el-tabs v-model="activeAccount">
-            <el-tab-pane
-              v-for="item in accountOptions"
-              :key="item"
-              :name="item"
-              :label="item"
-            ></el-tab-pane>
+          <el-tabs v-model="moduleTab" :stretch="true">
+            <el-tab-pane name="holding" label="模组持仓"></el-tab-pane>
+            <el-tab-pane name="dealRecord" label="交易历史"></el-tab-pane>
           </el-tabs>
-          <div class="pt-10">
-            <el-descriptions class="margin-top" :column="3">
-              <el-descriptions-item label="账户ID">
-                {{ accountInfo.accountId }}
-              </el-descriptions-item>
-              <el-descriptions-item label="初始余额">
-                {{ accountInfo.initBalance | formatter }}
-              </el-descriptions-item>
-              <el-descriptions-item label="当前余额">
-                {{ (accountInfo.initBalance + accountInfo.accCloseProfit - accountInfo.accCommission + holdingProfit) | formatter }}
-              </el-descriptions-item>
-              <el-descriptions-item label="持仓盈亏">
-                {{ holdingProfit | formatter }}
-              </el-descriptions-item>
-              <el-descriptions-item label="累计平仓盈亏">
-                {{ accountInfo.accCloseProfit | formatter }}
-              </el-descriptions-item>
-              <el-descriptions-item label="累计手续费">
-                {{ accountInfo.accCommission | formatter }}
-              </el-descriptions-item>
-              <el-descriptions-item label="合计盈亏">
-                {{
-                  (accountInfo.accCloseProfit - accountInfo.accCommission + holdingProfit)
-                    | formatter
-                }}
-              </el-descriptions-item>
-              <el-descriptions-item label="交易笔数">
-                {{ accountDealRecords.length || 0 }}
-              </el-descriptions-item>
-              <el-descriptions-item label="最大回撤">
-                {{ accountInfo.maxDrawBack | formatter }}
-              </el-descriptions-item>
-            </el-descriptions>
-            <el-tabs v-model="moduleTab" :stretch="true">
-              <el-tab-pane name="holding" label="模组持仓"></el-tab-pane>
-              <el-tab-pane name="dealRecord" label="交易历史"></el-tab-pane>
-            </el-tabs>
-            <div style="height: 1px" />
-            <div class="table-wrapper">
-              <el-table id="modulePositionTbl" v-show="moduleTab === 'holding'" :data="holdingPositions" height="100%">
-                <el-table-column prop="unifiedSymbol" label="合约" align="center" width="100px" >
-                  <template slot-scope="scope">{{ scope.row.contract.name }}</template>
-                </el-table-column>
-                <el-table-column prop="positionDir" label="方向" align="center" width="50px"
-                  ><template slot-scope="scope">{{
-                    { 2: '多', 3: '空' }[scope.row.positiondirection] || '未知'
-                  }}</template>
-                </el-table-column>
-                <el-table-column prop="position" label="数量" align="center" min-width="46px" />
-                <el-table-column prop="openprice" label="成本价" align="center">
-                  <template slot-scope="scope">
-                    {{ scope.row.openprice | smartFormatter }}
-                  </template>
-                </el-table-column>
-                <el-table-column prop="lastprice" label="现价" align="center">
-                  <template slot-scope="scope">
-                    {{ scope.row.lastprice | smartFormatter }}
-                  </template>
-                </el-table-column>
-                <el-table-column prop="positionprofit" label="持仓盈亏" align="center">
-                  <template slot-scope="scope">
-                    {{ scope.row.positionprofit | formatter }}
-                  </template>
-                </el-table-column>
-                <el-table-column
-                  v-if="module.usage !== 'PLAYBACK'"
-                  label="操作"
-                  align="center"
-                  width="50px"
-                >
-                  <template slot="header">
-                    <el-button
-                      id="editPosition"
-                      class="compact"
-                      title="调整持仓"
-                      size="mini"
-                      icon="el-icon-edit"
-                      @click="positionFormVisible = true"
-                    ></el-button>
-                  </template>
-                </el-table-column>
-              </el-table>
-              <el-table
-                ref="dealTbl"
-                v-show="moduleTab === 'dealRecord'"
-                :data="accountDealRecords"
-                height="100%"
+          <div style="height: 1px" />
+          <div class="table-wrapper">
+            <el-table
+              id="modulePositionTbl"
+              v-show="moduleTab === 'holding'"
+              :data="holdingPositions"
+              height="100%"
+            >
+              <el-table-column prop="unifiedSymbol" label="合约" align="center" width="100px">
+                <template slot-scope="scope">{{ scope.row.contract.name }}</template>
+              </el-table-column>
+              <el-table-column prop="positionDir" label="方向" align="center" width="50px"
+                ><template slot-scope="scope">{{
+                  { 2: '多', 3: '空' }[scope.row.positiondirection] || '未知'
+                }}</template>
+              </el-table-column>
+              <el-table-column prop="position" label="数量" align="center" min-width="46px" />
+              <el-table-column prop="openprice" label="成本价" align="center">
+                <template slot-scope="scope">
+                  {{ scope.row.openprice | smartFormatter }}
+                </template>
+              </el-table-column>
+              <el-table-column prop="lastprice" label="现价" align="center">
+                <template slot-scope="scope">
+                  {{ scope.row.lastprice | smartFormatter }}
+                </template>
+              </el-table-column>
+              <el-table-column prop="positionprofit" label="持仓盈亏" align="center">
+                <template slot-scope="scope">
+                  {{ scope.row.positionprofit | formatter }}
+                </template>
+              </el-table-column>
+              <el-table-column
+                v-if="module.usage !== 'PLAYBACK'"
+                label="操作"
+                align="center"
+                width="50px"
               >
-                <el-table-column prop="contractName" label="合约" align="center" width="100px" />
-                <el-table-column prop="direction" label="方向" align="center" width="46px" />
-                <el-table-column prop="volume" label="数量" align="center" min-width="60px"  />
-                <el-table-column prop="openPrice" label="开仓价" align="center" />
-                <el-table-column prop="closePrice" label="平仓价" align="center" />
-                <el-table-column label="平仓盈亏" align="center" width="70px">
-                  <template slot-scope="scope">
-                    {{ scope.row.dealProfit | formatter }}
-                  </template>
-                </el-table-column>
-                <el-table-column label="开仓时间" align="center" width="132px" >
-                  <template slot-scope="scope">
-                    {{ `${scope.row.openTrade.tradedate} ${scope.row.openTrade.tradetime}` }}
-                  </template>
-                </el-table-column>
-                <el-table-column label="平仓时间" align="center" width="132px" >
-                  <template slot-scope="scope">
-                    {{ `${scope.row.closeTrade.tradedate} ${scope.row.closeTrade.tradetime}` }}
-                  </template>
-                </el-table-column>
-              </el-table>
-            </div>
-            <div class="performance-min">
-              <el-button
-                class="compact btn-enlarge"
-                title="放大盈亏曲线"
-                size="mini"
-                icon="el-icon-zoom-in"
-                @click="performanceVisible = true"
-              ></el-button>
-              <ModulePerformance
-                :visible.sync="performanceVisible"
-                :moduleInitBalance="accountInfo.initBalance"
-                :moduleDealRecords="dealRecords"
-              />
-            </div>
+                <template slot="header">
+                  <el-button
+                    id="editPosition"
+                    class="compact"
+                    title="调整持仓"
+                    size="mini"
+                    icon="el-icon-edit"
+                    @click="positionFormVisible = true"
+                  ></el-button>
+                </template>
+              </el-table-column>
+            </el-table>
+            <el-table
+              ref="dealTbl"
+              v-show="moduleTab === 'dealRecord'"
+              :data="dealRecords"
+              height="100%"
+            >
+              <el-table-column prop="contractName" label="合约" align="center" width="100px" />
+              <el-table-column prop="direction" label="方向" align="center" width="46px" />
+              <el-table-column prop="volume" label="数量" align="center" min-width="60px" />
+              <el-table-column prop="openPrice" label="开仓价" align="center" />
+              <el-table-column prop="closePrice" label="平仓价" align="center" />
+              <el-table-column label="平仓盈亏" align="center" width="70px">
+                <template slot-scope="scope">
+                  {{ scope.row.dealProfit | formatter }}
+                </template>
+              </el-table-column>
+              <el-table-column label="开仓时间" align="center" width="132px">
+                <template slot-scope="scope">
+                  {{ `${scope.row.openTrade.tradedate} ${scope.row.openTrade.tradetime}` }}
+                </template>
+              </el-table-column>
+              <el-table-column label="平仓时间" align="center" width="132px">
+                <template slot-scope="scope">
+                  {{ `${scope.row.closeTrade.tradedate} ${scope.row.closeTrade.tradetime}` }}
+                </template>
+              </el-table-column>
+            </el-table>
+          </div>
+          <div class="performance-min">
+            <el-button
+              class="compact btn-enlarge"
+              title="放大盈亏曲线"
+              size="mini"
+              icon="el-icon-zoom-in"
+              @click="performanceVisible = true"
+            ></el-button>
+            <ModulePerformance
+              :visible.sync="performanceVisible"
+              :moduleInitBalance="accountInfo.initBalance"
+              :moduleDealRecords="dealRecords"
+            />
           </div>
         </div>
       </div>
@@ -274,7 +264,9 @@
                 </el-select>
               </el-form-item>
               <el-form-item style="margin-bottom: 0">
-                  <el-button style="float:right" type="warning" @click.native="clearIndicators">清空指标</el-button>
+                <el-button style="float: right" type="warning" @click.native="clearIndicators"
+                  >清空指标</el-button
+                >
               </el-form-item>
             </el-form>
             <el-button
@@ -359,7 +351,6 @@ export default {
       performanceVisible: false,
       holdingVisibleOnChart: false,
       moduleTab: 'holding',
-      activeAccount: '',
       dealRecords: [],
       barDataMap: {},
       bindedContracts: [],
@@ -387,9 +378,8 @@ export default {
     visible: function (val) {
       if (val) {
         this.moduleRuntime = this.moduleRuntimeSrc
-        this.activeAccount = this.accountOptions[0]
         this.bindedContracts = []
-        this.module.moduleAccountSettingsDescription.forEach(account => {
+        this.module.moduleAccountSettingsDescription.forEach((account) => {
           const contracts = account.bindedContracts
           this.bindedContracts = this.bindedContracts.concat(contracts)
         })
@@ -449,40 +439,19 @@ export default {
     symbolOptions() {
       return Object.keys(this.barDataMap) || []
     },
-    accountOptions() {
-      if (!this.moduleRuntime) return []
-      return Object.keys(this.moduleRuntime.accountRuntimeDescriptionMap)
-    },
     accountInfo() {
-      if (!this.activeAccount) return {}
-      return this.moduleRuntime.accountRuntimeDescriptionMap[this.activeAccount] || {}
+      return this.moduleRuntime.accountRuntimeDescription || {}
     },
-    accountSettings() {
-      if (!this.activeAccount) return {}
-      return this.module.moduleAccountSettingsDescription.find(
-        (item) => item.accountGatewayId === this.activeAccount
-      )
-    },
-    accountDealRecords() {
-      if (!this.activeAccount) return []
-      return this.dealRecords.filter((item) => item.moduleAccountId === this.activeAccount)
+    moduleBindedContracts() {
+      if(!this.module.moduleAccountSettingsDescription) return []
+      return this.module.moduleAccountSettingsDescription.reduce((contracts, mad) => contracts.concat(mad.bindedContracts), [])
     },
     holdingProfit() {
-      if (!this.activeAccount) return 0
       return this.holdingPositions.map((item) => item.positionprofit).reduce((a, b) => a + b, 0)
     },
     totalProfit() {
       if (!this.moduleRuntime) return 0
-      return Object.values(this.moduleRuntime.accountRuntimeDescriptionMap)
-        .map((accountInfo) => {
-          const holdingProfit = accountInfo.positionDescription.logicalPositions
-            .map((data) => PositionField.deserializeBinary(data).toObject())
-            .filter((item) => item.position > 0)
-            .map((item) => item.positionprofit)
-            .reduce((a, b) => a + b, 0)
-          return accountInfo.accCloseProfit - accountInfo.accCommission + holdingProfit
-        })
-        .reduce((a, b) => a + b, 0)
+      return this.holdingProfit + this.accountInfo.accCloseProfit - this.accountInfo.accCommission
     },
     winningRatio() {
       if (!this.dealRecords.length) return 0
@@ -504,7 +473,7 @@ export default {
       return `${avgProfit} : ${avgLoss}`
     },
     holdingPositions() {
-      if (!this.activeAccount) return []
+      if(!this.accountInfo.positionDescription)  return []
       const positions = this.accountInfo.positionDescription.logicalPositions.map((data) =>
         PositionField.deserializeBinary(data).toObject()
       )
@@ -605,7 +574,7 @@ export default {
       this.indicatorMap[this.indicator.name] = Object.assign({}, this.indicator)
       const indicatorMap = JSON.parse(JSON.stringify(this.indicatorMap))
       this.clearIndicators()
-      this.indicatorMap = indicatorMap;
+      this.indicatorMap = indicatorMap
       this.saveIndicators()
       this.loadIndicators()
     },
@@ -655,8 +624,8 @@ export default {
           this.chart.createShape(makeHoldingSegment(i), 'candle_pane')
         })
     },
-    clearIndicators(){
-      Object.keys(this.indicatorMap).forEach(indicatorName => {
+    clearIndicators() {
+      Object.keys(this.indicatorMap).forEach((indicatorName) => {
         this.indicator = this.indicatorMap[indicatorName]
         this.removeIndicator()
       })
@@ -666,14 +635,16 @@ export default {
         localStorage.getItem(`module_${this.module.moduleName}_${this.unifiedSymbolOfChart}`) ||
         '{}'
       this.indicatorMap = JSON.parse(dataStr)
-      for(let i=2; i<6; i++){
+      for (let i = 2; i < 6; i++) {
         const paneId = 'pane' + i
         Object.keys(this.indicatorMap).forEach((indicatorName) => {
-          if (this.moduleRuntime.indicatorMap[this.unifiedSymbolOfChart].indexOf(indicatorName) < 0) {
+          if (
+            this.moduleRuntime.indicatorMap[this.unifiedSymbolOfChart].indexOf(indicatorName) < 0
+          ) {
             return
           }
           this.indicator = Object.assign({}, this.indicatorMap[indicatorName])
-          if(this.indicator.paneId === paneId || this.indicator.paneId === 'candle_pane'){
+          if (this.indicator.paneId === paneId || this.indicator.paneId === 'candle_pane') {
             this.renderIndicator(this.indicator)
           }
         })
@@ -698,12 +669,12 @@ export default {
 
 <style scoped>
 .table-wrapper {
-  height: calc((100vh - 382px) * 0.5);
+  height: calc((100vh - 326px) * 0.5);
   min-height: 150px;
 }
 .performance-min {
   position: relative;
-  height: calc((100vh - 382px) * 0.5);
+  height: calc((100vh - 326px) * 0.5);
 }
 @media screen and (max-height: 600px) {
   .performance-min {

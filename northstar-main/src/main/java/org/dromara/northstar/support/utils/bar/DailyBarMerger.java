@@ -1,12 +1,16 @@
 package org.dromara.northstar.support.utils.bar;
 
+import java.time.LocalTime;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.BiConsumer;
 
 import org.apache.commons.lang3.StringUtils;
+import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.gateway.Contract;
+import org.dromara.northstar.gateway.model.PeriodSegment;
 
 import xyz.redtorch.pb.CoreField.BarField;
 
@@ -32,18 +36,26 @@ public class DailyBarMerger extends BarMerger{
 			return;
 		}
 		
-		if(Objects.nonNull(barBuilder) && tradingDaySet.size() == numOfDayPerBar && !tradingDaySet.contains(bar.getTradingDay())) {
+		tradingDaySet.add(bar.getTradingDay());
+		
+		if(Objects.nonNull(barBuilder) && tradingDaySet.size() == numOfDayPerBar && isLastBarOfDay(bar)) {
+			doMerge(bar);
 			doGenerate();
+			return;
 		}
 		
-		tradingDaySet.add(bar.getTradingDay());
-
 		if(Objects.isNull(barBuilder)) {
 			barBuilder = bar.toBuilder();
 			return;
 		}
 		
 		doMerge(bar);
+	}
+
+	private boolean isLastBarOfDay(BarField bar) {
+		List<PeriodSegment> segments = contract.tradeTimeDefinition().tradeTimeSegments();
+		LocalTime time = segments.get(segments.size() - 1).endOfSegment();
+		return LocalTime.parse(bar.getActionTime(), DateTimeConstant.T_FORMAT_FORMATTER).equals(time);
 	}
 
 	@Override

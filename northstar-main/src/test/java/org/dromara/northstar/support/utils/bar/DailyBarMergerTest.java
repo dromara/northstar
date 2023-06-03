@@ -6,13 +6,15 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.gateway.Contract;
-import org.dromara.northstar.gateway.time.GenericTradeTime;
+import org.dromara.northstar.gateway.TradeTimeDefinition;
+import org.dromara.northstar.gateway.model.PeriodSegment;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -31,7 +33,13 @@ class DailyBarMergerTest {
 	@BeforeEach
 	void prepare() {
 		when(c.contractField()).thenReturn(contract);
-		when(c.tradeTimeDefinition()).thenReturn(new GenericTradeTime());
+		when(c.tradeTimeDefinition()).thenReturn(new TradeTimeDefinition() {
+			
+			@Override
+			public List<PeriodSegment> tradeTimeSegments() {
+				return List.of(new PeriodSegment(LocalTime.of(9, 0), LocalTime.of(15, 0)));
+			}
+		});
 	}
 	
 	@Test
@@ -45,7 +53,7 @@ class DailyBarMergerTest {
 			BarField bar = BarField.newBuilder()
 					.setUnifiedSymbol("rb2205@SHFE@FUTURES")
 					.setActionDay(date.format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
-					.setActionTime(String.valueOf(i))
+					.setActionTime("15:00:00")
 					.setActionTimestamp(i)
 					.setTradingDay(date.format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
 					.setOpenPrice(rand.nextDouble(5000))

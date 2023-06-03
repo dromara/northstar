@@ -51,6 +51,19 @@ public class ModuleDescription {
 	 */
 	private ClosingPolicy closingPolicy;
 	/**
+	 * 初始分配金额
+	 */
+	private double initBalance;
+	/**
+	 * 默认手数
+	 */
+	@Builder.Default
+	private int defaultVolume = 1;
+	/**
+	 * 下单超价设置
+	 */
+	private int orderPlusTick;
+	/**
 	 * 模组账户配置信息 
 	 */
 	private List<ModuleAccountDescription> moduleAccountSettingsDescription;

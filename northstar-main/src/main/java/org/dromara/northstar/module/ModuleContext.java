@@ -22,15 +22,16 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 import org.dromara.northstar.common.constant.Constants;
 import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.common.constant.ModuleState;
-import org.dromara.northstar.common.constant.ModuleUsage;
 import org.dromara.northstar.common.constant.SignalOperation;
 import org.dromara.northstar.common.exception.InsufficientException;
 import org.dromara.northstar.common.model.ContractSimpleInfo;
 import org.dromara.northstar.common.model.Identifier;
 import org.dromara.northstar.common.model.ModuleAccountRuntimeDescription;
+import org.dromara.northstar.common.model.ModuleDealRecord;
 import org.dromara.northstar.common.model.ModuleDescription;
 import org.dromara.northstar.common.model.ModulePositionDescription;
 import org.dromara.northstar.common.model.ModuleRuntimeDescription;
@@ -118,7 +119,7 @@ public class ModuleContext implements IModuleContext{
 	
 	protected final AtomicInteger bufSize = new AtomicInteger(0);
 	
-	protected final BarMergerRegistry registry = new BarMergerRegistry();
+	protected final BarMergerRegistry registry;
 	
 	protected boolean enabled;
 	
@@ -129,10 +130,12 @@ public class ModuleContext implements IModuleContext{
 	protected OrderRequestFilter orderReqFilter;
 	
 	public ModuleContext(TradeStrategy tradeStrategy, ModuleDescription moduleDescription, ModuleRuntimeDescription moduleRtDescription,
-			IContractManager contractMgr, IModuleRepository moduleRepo, ModuleLoggerFactory loggerFactory, IMessageSenderManager senderMgr) {
+			IContractManager contractMgr, IModuleRepository moduleRepo, ModuleLoggerFactory loggerFactory, IMessageSenderManager senderMgr,
+			BarMergerRegistry barMergerRegistry) {
 		this.tradeStrategy = tradeStrategy;
 		this.moduleRepo = moduleRepo;
 		this.contractMgr = contractMgr;
+		this.registry = barMergerRegistry;
 		this.logger = loggerFactory.getLogger(moduleDescription.getModuleName());
 		this.senderMgr = senderMgr;
 		this.bufSize.set(moduleDescription.getModuleCacheDataSize());
@@ -231,10 +234,13 @@ public class ModuleContext implements IModuleContext{
 		}
 		Configuration cfg = indicator.getConfiguration();
 		String indicatorName = String.format("%s_%d%s", cfg.indicatorName(), cfg.numOfUnits(), cfg.period().symbol());
+		logger.info("检查指标配置信息：{}", indicatorName);
 		Assert.isTrue(cfg.numOfUnits() > 0, "周期数必须大于0，当前为：" + cfg.numOfUnits());
 		Assert.isTrue(cfg.cacheLength() > 0, "指标回溯长度必须大于0，当前为：" + cfg.cacheLength());
-		Assert.isTrue(!indicatorNameMap.containsKey(indicatorName) || indicator.equals(indicatorNameMap.get(indicatorName)), "指标 [{}] 已存在。不能重名", indicatorName);
-		indicatorNameMap.put(indicatorName, indicator);
+		if(cfg.visible()) {		// 不显示的指标可以不做重名校验
+			Assert.isTrue(!indicatorNameMap.containsKey(indicatorName) || indicator.equals(indicatorNameMap.get(indicatorName)), "指标 [{}] 已存在。不能重名", indicatorName);
+			indicatorNameMap.put(indicatorName, indicator);
+		}
 		indicatorValBufQMap.put(indicator, new LinkedList<>());
 	}
 	
@@ -358,37 +364,33 @@ public class ModuleContext implements IModuleContext{
 
 	@Override
 	public synchronized ModuleRuntimeDescription getRuntimeDescription(boolean fullDescription) {
-		Map<String, ModuleAccountRuntimeDescription> accMap = new HashMap<>();
-		module.getModuleDescription().getModuleAccountSettingsDescription().forEach(mad -> {
-			String gatewayId = module.getModuleDescription().getUsage() == ModuleUsage.PLAYBACK 
-					? PlaybackModuleContext.PLAYBACK_GATEWAY 
-					: mad.getAccountGatewayId();
-			ModulePositionDescription posDescription = ModulePositionDescription.builder()
-					.logicalPositions(moduleAccount.getPositions(gatewayId).stream().map(PositionField::toByteArray).toList())
-					.nonclosedTrades(moduleAccount.getNonclosedTrades(gatewayId).stream().map(TradeField::toByteArray).toList())
-					.build();
-			
-			ModuleAccountRuntimeDescription accDescription = ModuleAccountRuntimeDescription.builder()
-					.accountId(gatewayId)
-					.initBalance(moduleAccount.getInitBalance(gatewayId))
-					.accCloseProfit(moduleAccount.getAccCloseProfit(gatewayId))
-					.accDealVolume(moduleAccount.getAccDealVolume(gatewayId))
-					.accCommission(moduleAccount.getAccCommission(gatewayId))
-					.maxDrawBack(moduleAccount.getMaxDrawBack(gatewayId))
-					.maxProfit(moduleAccount.getMaxProfit(gatewayId))
-					.positionDescription(posDescription)
-					.build();
-			accMap.put(gatewayId, accDescription);
-		});
-		
+		ModulePositionDescription posDescription = ModulePositionDescription.builder()
+				.logicalPositions(moduleAccount.getPositions().stream().map(PositionField::toByteArray).toList())
+				.nonclosedTrades(moduleAccount.getNonclosedTrades().stream().map(TradeField::toByteArray).toList())
+				.build();
+		ModuleAccountRuntimeDescription accRtDescription = ModuleAccountRuntimeDescription.builder()
+				.initBalance(moduleAccount.getInitBalance())
+				.accCloseProfit(moduleAccount.getAccCloseProfit())
+				.accDealVolume(moduleAccount.getAccDealVolume())
+				.accCommission(moduleAccount.getAccCommission())
+				.maxDrawback(moduleAccount.getMaxDrawback())
+				.maxProfit(moduleAccount.getMaxProfit())
+				.positionDescription(posDescription)
+				.build();
 		ModuleRuntimeDescription mad = ModuleRuntimeDescription.builder()
 				.moduleName(module.getName())
 				.enabled(module.isEnabled())
 				.moduleState(moduleAccount.getModuleState())
 				.dataState(tradeStrategy.getStoreObject())
-				.accountRuntimeDescriptionMap(accMap)
+				.accountRuntimeDescription(accRtDescription)
 				.build();
 		if(fullDescription) {
+			List<ModuleDealRecord> dealRecords = moduleRepo.findAllDealRecords(module.getName());
+			double avgProfit = dealRecords.stream().mapToDouble(ModuleDealRecord::getDealProfit).average().orElse(0D);
+			double stdProfit = new StandardDeviation().evaluate(dealRecords.stream().mapToDouble(ModuleDealRecord::getDealProfit).toArray());
+			accRtDescription.setAvgEarning(avgProfit);
+			accRtDescription.setStdEarning(stdProfit);
+			
 			Map<String, List<String>> indicatorMap = new HashMap<>();
 			Map<String, LinkedHashMap<Long, JSONObject>> symbolTimeObject = new HashMap<>();
 			barBufQMap.entrySet().forEach(e -> 
@@ -457,7 +459,9 @@ public class ModuleContext implements IModuleContext{
 	@Override
 	public synchronized Optional<String> submitOrderReq(ContractField contract, SignalOperation operation, PriceType priceType, int volume, double price) {
 		if(!module.isEnabled()) {
-			getLogger().info("策略处于停用状态，忽略委托单");
+			if(isReady()) {
+				getLogger().info("策略处于停用状态，忽略委托单");
+			}
 			return Optional.empty();
 		}
 		TickField tick = latestTickMap.get(contract.getUnifiedSymbol());
@@ -473,6 +477,8 @@ public class ModuleContext implements IModuleContext{
 		String id = UUID.randomUUID().toString();
 		String gatewayId = getAccount(contract).accountId();
 		DirectionEnum direction = OrderUtils.resolveDirection(operation);
+		int factor = FieldUtils.directionFactor(direction);
+		double plusPrice = module.getModuleDescription().getOrderPlusTick() * contract.getPriceTick(); // 超价设置
 		List<TradeField> nonclosedTrades = moduleAccount.getNonclosedTrades(contract.getUnifiedSymbol(), FieldUtils.getOpposite(direction));
 		return Optional.ofNullable(submitOrderReq(SubmitOrderReqField.newBuilder()
 				.setOriginOrderId(id)
@@ -480,7 +486,7 @@ public class ModuleContext implements IModuleContext{
 				.setGatewayId(gatewayId)
 				.setDirection(direction)
 				.setOffsetFlag(module.getModuleDescription().getClosingPolicy().resolveOffsetFlag(operation, contract, nonclosedTrades, tick.getTradingDay()))
-				.setPrice(orderPrice)
+				.setPrice(orderPrice + factor * plusPrice)	// 自动加上超价
 				.setVolume(volume)		//	当信号交易量大于零时，优先使用信号交易量
 				.setHedgeFlag(HedgeFlagEnum.HF_Speculation)
 				.setTimeCondition(priceType == PriceType.ANY_PRICE ? TimeConditionEnum.TC_IOC : TimeConditionEnum.TC_GFD)
@@ -502,6 +508,8 @@ public class ModuleContext implements IModuleContext{
 		} catch (InsufficientException e) {
 			getLogger().error("发单失败。原因：{}", e.getMessage());
 			tradeIntent = null;
+			getLogger().warn("模组余额不足，主动停用模组");
+			setEnabled(false);
 			return null;
 		}
 		try {
@@ -574,6 +582,11 @@ public class ModuleContext implements IModuleContext{
 	@Override
 	public void onReady() {
 		isReady = true;
+	}
+
+	@Override
+	public int getDefaultVolume() {
+		return module.getModuleDescription().getDefaultVolume();
 	}
 
 }

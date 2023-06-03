@@ -4,7 +4,7 @@
     :visible="visible"
     class="module-dialog"
     v-loading="loading"
-    :close-on-click-modal="!isUpdateMode"
+    :close-on-click-modal="readOnly"
     element-loading-background="rgba(0, 0, 0, 0.3)"
     width="540px"
     @close="close"
@@ -40,6 +40,13 @@
                 :maxlength="16"
                 :disabled="readOnly || isUpdateMode"
               ></el-input>
+            </el-form-item>
+            <el-form-item label="分配金额">
+              <el-input
+                  v-model="form.initBalance"
+                  type="number"
+                  :disabled="readOnly"
+                />
             </el-form-item>
             <el-form-item label="模组类型">
               <el-select v-model="form.type" :disabled="readOnly">
@@ -80,6 +87,13 @@
             <el-form-item label="缓存数据量">
               <el-input-number :disabled="readOnly" v-model="form.moduleCacheDataSize" :min="100">
               </el-input-number>
+            </el-form-item>
+            <el-form-item label="默认下单数">
+              <el-input-number :disabled="readOnly" v-model="form.defaultVolume" :min="1" />
+            </el-form-item>
+            <el-form-item label="下单超价">
+              <el-input-number :disabled="readOnly" v-model="form.orderPlusTick" :min="0" />
+              <span class="ml-10">Tick</span>
             </el-form-item>
           </div>
           <div v-show="activeIndex === '2'">
@@ -149,13 +163,6 @@
               <el-divider content-position="left"
                 >账户：{{ form.moduleAccountSettingsDescription[i].accountGatewayId }}</el-divider
               >
-              <el-form-item label="模组分配金额">
-                <el-input
-                  v-model="form.moduleAccountSettingsDescription[i].moduleAccountInitBalance"
-                  type="number"
-                  :disabled="readOnly"
-                />
-              </el-form-item>
               <el-form-item label="关联合约">
                 <el-select
                   class='bindContractSelector'
@@ -271,6 +278,9 @@ export default {
         weeksOfDataForPreparation: 0,
         moduleCacheDataSize: 500,
         closingPolicy: 'FIRST_IN_FIRST_OUT',
+        initBalance: 0,
+        defaultVolume: 1,
+        orderPlusTick: 0,
         moduleAccountSettingsDescription: [],
         strategySetting: {
           componentMeta: {},

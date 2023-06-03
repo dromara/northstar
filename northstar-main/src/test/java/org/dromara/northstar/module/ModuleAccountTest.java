@@ -5,9 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.dromara.northstar.common.constant.ClosingPolicy;
 import org.dromara.northstar.common.constant.ModuleState;
@@ -54,7 +52,6 @@ class ModuleAccountTest {
 	
 	@BeforeEach
 	void prepare() {
-		Map<String, ModuleAccountRuntimeDescription> mamap = new HashMap<>();
 		ModuleAccountDescription mad = ModuleAccountDescription.builder()
 				.accountGatewayId("testAccount")
 				.bindedContracts(List.of(csi))
@@ -62,11 +59,11 @@ class ModuleAccountTest {
 		
 		ModuleDescription md = ModuleDescription.builder()
 				.closingPolicy(ClosingPolicy.FIRST_IN_FIRST_OUT)
+				.initBalance(100000)
 				.moduleAccountSettingsDescription(List.of(mad))
 				.build();
 		
 		ModuleAccountRuntimeDescription mard = ModuleAccountRuntimeDescription.builder()
-				.accountId("testAccount")
 				.initBalance(100000)
 				.accCloseProfit(200)
 				.accCommission(10)
@@ -75,13 +72,12 @@ class ModuleAccountTest {
 						.nonclosedTrades(List.of(trade.toByteArray(), trade2.toByteArray()))
 						.build())
 				.build();
-		mamap.put(mard.getAccountId(), mard);
 		
 		ModuleRuntimeDescription mrd = ModuleRuntimeDescription.builder()
 				.moduleName("testModule")
 				.enabled(true)
 				.moduleState(ModuleState.HOLDING_LONG)
-				.accountRuntimeDescriptionMap(mamap)
+				.accountRuntimeDescription(mard)
 				.build();
 		IContractManager contractMgr = mock(IContractManager.class);
 		Contract c = mock(Contract.class);
@@ -100,36 +96,36 @@ class ModuleAccountTest {
 	void testOnTrade() {
 		macc.onTrade(closeTrade);
 		assertThat(macc.getModuleState()).isEqualTo(ModuleState.HOLDING_SHORT);
-		assertThat(macc.getInitBalance("testAccount")).isEqualTo(100000);
-		assertThat(macc.getAccCloseProfit("testAccount")).isEqualTo(4200);
-		assertThat(macc.getAccDealVolume("testAccount")).isEqualTo(5);
-		assertThat(macc.getNonclosedTrades("testAccount")).hasSize(1);
+		assertThat(macc.getInitBalance()).isEqualTo(100000);
+		assertThat(macc.getAccCloseProfit()).isEqualTo(4200);
+		assertThat(macc.getAccDealVolume()).isEqualTo(5);
+		assertThat(macc.getNonclosedTrades()).hasSize(1);
 	}
 
 	@Test
 	void testGetInitBalance() {
-		assertThat(macc.getInitBalance("testAccount")).isEqualTo(100000);
+		assertThat(macc.getInitBalance()).isEqualTo(100000);
 	}
 
 	@Test
 	void testGetUncloseTrades() {
-		assertThat(macc.getNonclosedTrades("testAccount")).hasSize(2);
+		assertThat(macc.getNonclosedTrades()).hasSize(2);
 	}
 
 	@Test
 	void testGetAccDealVolume() {
-		assertThat(macc.getAccDealVolume("testAccount")).isEqualTo(3);
+		assertThat(macc.getAccDealVolume()).isEqualTo(3);
 	}
 
 	@Test
 	void testGetAccCloseProfit() {
-		assertThat(macc.getAccCloseProfit("testAccount")).isEqualTo(200);
+		assertThat(macc.getAccCloseProfit()).isEqualTo(200);
 	}
 
 	@Test
 	void testGetPositions() {
 		macc.onTick(tick);
-		assertThat(macc.getPositions("testAccount")).hasSize(2);
+		assertThat(macc.getPositions()).hasSize(2);
 	}
 
 }

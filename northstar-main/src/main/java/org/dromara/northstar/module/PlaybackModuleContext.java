@@ -8,6 +8,7 @@ import java.util.UUID;
 
 import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.common.constant.SignalOperation;
+import org.dromara.northstar.common.exception.InsufficientException;
 import org.dromara.northstar.common.model.ModuleDealRecord;
 import org.dromara.northstar.common.model.ModuleDescription;
 import org.dromara.northstar.common.model.ModuleRuntimeDescription;
@@ -22,13 +23,20 @@ import org.dromara.northstar.strategy.constant.PriceType;
 import org.dromara.northstar.strategy.model.TradeIntent;
 import org.dromara.northstar.support.log.ModuleLoggerFactory;
 import org.dromara.northstar.support.notification.IMessageSenderManager;
+import org.dromara.northstar.support.utils.bar.BarMergerRegistry;
 
 import cn.hutool.core.lang.Assert;
+import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
+import xyz.redtorch.pb.CoreEnum.ForceCloseReasonEnum;
 import xyz.redtorch.pb.CoreEnum.HedgeFlagEnum;
+import xyz.redtorch.pb.CoreEnum.OrderPriceTypeEnum;
 import xyz.redtorch.pb.CoreEnum.PriceSourceEnum;
+import xyz.redtorch.pb.CoreEnum.TimeConditionEnum;
+import xyz.redtorch.pb.CoreEnum.VolumeConditionEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.OrderField;
+import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TickField;
 import xyz.redtorch.pb.CoreField.TradeField;
 
@@ -61,8 +69,8 @@ public class PlaybackModuleContext extends ModuleContext implements IModuleConte
 	
 	public PlaybackModuleContext(TradeStrategy tradeStrategy, ModuleDescription moduleDescription,
 			ModuleRuntimeDescription moduleRtDescription, IContractManager contractMgr, IModuleRepository moduleRepo,
-			ModuleLoggerFactory loggerFactory) {
-		super(tradeStrategy, moduleDescription, moduleRtDescription, contractMgr, new MockModuleRepository(moduleRepo), loggerFactory, mockSenderMgr);
+			ModuleLoggerFactory loggerFactory, BarMergerRegistry barMergerRegistry) {
+		super(tradeStrategy, moduleDescription, moduleRtDescription, contractMgr, new MockModuleRepository(moduleRepo), loggerFactory, mockSenderMgr, barMergerRegistry);
 	}
 
 	@Override
@@ -108,6 +116,33 @@ public class PlaybackModuleContext extends ModuleContext implements IModuleConte
 		String id = UUID.randomUUID().toString();
 		DirectionEnum direction = OrderUtils.resolveDirection(operation);
 		List<TradeField> nonclosedTrades = moduleAccount.getNonclosedTrades(contract.getUnifiedSymbol(), FieldUtils.getOpposite(direction));
+		String gatewayId = getAccount(contract).accountId();
+		try {
+			moduleAccount.onSubmitOrder(SubmitOrderReqField.newBuilder()
+					.setOriginOrderId(id)
+					.setContract(contract)
+					.setGatewayId(gatewayId)
+					.setDirection(direction)
+					.setOffsetFlag(module.getModuleDescription().getClosingPolicy().resolveOffsetFlag(operation, contract, nonclosedTrades, lastTick.getTradingDay()))
+					.setPrice(orderPrice)
+					.setVolume(volume)		//	当信号交易量大于零时，优先使用信号交易量
+					.setHedgeFlag(HedgeFlagEnum.HF_Speculation)
+					.setTimeCondition(priceType == PriceType.ANY_PRICE ? TimeConditionEnum.TC_IOC : TimeConditionEnum.TC_GFD)
+					.setOrderPriceType(priceType == PriceType.ANY_PRICE ? OrderPriceTypeEnum.OPT_AnyPrice : OrderPriceTypeEnum.OPT_LimitPrice)
+					.setVolumeCondition(VolumeConditionEnum.VC_AV)
+					.setForceCloseReason(ForceCloseReasonEnum.FCR_NotForceClose)
+					.setContingentCondition(ContingentConditionEnum.CC_Immediately)
+					.setActionTimestamp(latestTickMap.get(contract.getUnifiedSymbol()).getActionTimestamp())
+					.setMinVolume(1)
+					.build());
+		} catch (InsufficientException e) {
+			getLogger().error("发单失败。原因：{}", e.getMessage());
+			tradeIntent = null;
+			getLogger().warn("模组余额不足，主动停用模组");
+			setEnabled(false);
+			return Optional.empty();
+		}
+		
 		TradeField trade = TradeField.newBuilder()
 				.setGatewayId(PLAYBACK_GATEWAY)
 				.setAccountId(PLAYBACK_GATEWAY)
@@ -167,7 +202,9 @@ public class PlaybackModuleContext extends ModuleContext implements IModuleConte
 		}
 
 		@Override
-		public List<ModuleDealRecord> findAllDealRecords(String moduleName) { throw uoe();}
+		public List<ModuleDealRecord> findAllDealRecords(String moduleName) {
+			return mdRepoReal.findAllDealRecords(moduleName);
+		}
 
 		@Override
 		public void removeAllDealRecords(String moduleName) { throw uoe();}

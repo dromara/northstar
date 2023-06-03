@@ -16,7 +16,7 @@
         <el-form-item label="合约代码" prop="contractId">
           <el-select v-model="form.contractId">
             <el-option
-              v-for="c in moduleAccount.bindedContracts"
+              v-for="c in contractOptions"
               :key="c.value"
               :value="c.value"
               :label="c.name"
@@ -56,7 +56,7 @@ export default {
       type: Boolean,
       default: false
     },
-    moduleAccount: {
+    contractOptions: {
       type: Object,
       default: () => {}
     },
@@ -68,7 +68,6 @@ export default {
   data() {
     return {
       form: {
-        gatewayId: '',
         contractId: '',
         direction: '',
         offsetFlag: '',
@@ -79,11 +78,6 @@ export default {
     }
   },
   watch: {
-    visible: function (val) {
-      if (val) {
-        this.form.gatewayId = this.moduleAccount.accountGatewayId
-      }
-    },
     directionComb: function (val) {
       this.form.direction = val[0]
       this.form.offsetFlag = val[1]

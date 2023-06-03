@@ -129,6 +129,7 @@ class ModuleControllerTest {
 		gatewayMetaProvider.add(ChannelType.SIM, null, simGatewayFactory, null);
 		
 		Contract c = mock(Contract.class);
+		when(c.channelType()).thenReturn(ChannelType.PLAYBACK);
 		when(mktCenter.getContract(any(Identifier.class))).thenReturn(c);
 		when(c.contractField()).thenReturn(ContractField.newBuilder().setChannelType("PLAYBACK").setUnifiedSymbol("rb0000@SHFE@FUTURES").build());
 		when(c.tradeTimeDefinition()).thenReturn(new GenericTradeTime());
@@ -155,7 +156,6 @@ class ModuleControllerTest {
 				.closingPolicy(ClosingPolicy.FIRST_IN_FIRST_OUT)
 				.moduleAccountSettingsDescription(List.of(ModuleAccountDescription.builder()
 						.accountGatewayId("CTP账户")
-						.moduleAccountInitBalance(10000)
 						.bindedContracts(List.of(ContractSimpleInfo.builder().unifiedSymbol("rb0000@SHFE@FUTURES").value("rb0000@SHFE@FUTURES@CTP").build()))
 						.build()))
 				.numOfMinPerBar(1)
@@ -170,7 +170,6 @@ class ModuleControllerTest {
 				.closingPolicy(ClosingPolicy.FIRST_IN_FIRST_OUT)
 				.moduleAccountSettingsDescription(List.of(ModuleAccountDescription.builder()
 						.accountGatewayId("CTP账户")
-						.moduleAccountInitBalance(10000)
 						.bindedContracts(List.of(ContractSimpleInfo.builder().unifiedSymbol("rb0000@SHFE@FUTURES").value("rb0000@SHFE@FUTURES@CTP").build()))
 						.build()))
 				.numOfMinPerBar(10)

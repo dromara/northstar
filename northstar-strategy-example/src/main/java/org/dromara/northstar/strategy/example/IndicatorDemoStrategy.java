@@ -24,9 +24,6 @@ import org.dromara.northstar.strategy.AbstractStrategy;
 import org.dromara.northstar.strategy.StrategicComponent;
 import org.dromara.northstar.strategy.TradeStrategy;
 
-import com.google.common.util.concurrent.AtomicDouble;
-
-import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.ContractField;
 
 /**
@@ -42,14 +39,6 @@ public class IndicatorDemoStrategy extends AbstractStrategy	// 为了简化代�
 	
 	private InitParams params;	// 策略的参数配置信息
 	
-	private final AtomicDouble valueHolder = new AtomicDouble();
-	
-	@Override
-	public void onMergedBar(BarField bar) {
-		// 当夜盘时值为0，日盘时值为1
-		valueHolder.set(bar.getActionDay().equals(bar.getTradingDay()) ? 1 : 0);
-	}
-
 	@Override
 	protected void initIndicators() {
 		ContractField c = ctx.getContract(params.indicatorSymbol);
@@ -60,9 +49,9 @@ public class IndicatorDemoStrategy extends AbstractStrategy	// 为了简化代�
 		ctx.registerIndicator(new SMAIndicator(makeConfig("SMA10"), 10, 2));
 		// 指标的难度级数：基础（指标嵌套）
 		ctx.registerIndicator(new HHVIndicator(makeConfig("HHV"), 
-				new SimpleValueIndicator(Configuration.builder().contract(c).valueType(ValueType.HIGH).cacheLength(10).visible(false).build())));	// 10个周期内的最高价
+				new SimpleValueIndicator(Configuration.builder().indicatorName("H").contract(c).valueType(ValueType.HIGH).cacheLength(10).visible(false).build())));	// 10个周期内的最高价
 		ctx.registerIndicator(new LLVIndicator(makeConfig("LLV"),
-				new SimpleValueIndicator(Configuration.builder().contract(c).valueType(ValueType.LOW).cacheLength(10).visible(false).build())));	// 10个周期内的最低价
+				new SimpleValueIndicator(Configuration.builder().indicatorName("L").contract(c).valueType(ValueType.LOW).cacheLength(10).visible(false).build())));	// 10个周期内的最低价
 		
 		// 指标的难度级数：进阶（伪多值指标，内部手动更新值）
 		ctx.registerIndicator(new RSIIndicator(makeConfig("RSI1"), 7));
