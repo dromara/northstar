@@ -38,7 +38,7 @@ public class ModuleRuntimeDescription {
 	/**
 	 * 模组账户描述
 	 */
-	private Map<String, ModuleAccountRuntimeDescription> accountRuntimeDescriptionMap;
+	private ModuleAccountRuntimeDescription accountRuntimeDescription;
 	/**
 	 * 合约指标集
 	 */

@@ -37,7 +37,6 @@ describe('监控台日志-测试', () => {
         cy.get('.el-dialog').contains('账户绑定').click()
         cy.get('.el-dialog').contains('绑定账号').parent().find('input').click()
         cy.get('.el-select-dropdown').contains('testAccount').click()
-        cy.get('.el-dialog').contains('模组分配金额').parent().find('input').clear().type('20000')
         cy.get('.el-dialog').filter(':visible').find('.el-select').filter(':visible').last().click()
         cy.get('.el-select-dropdown').contains('模拟合约').click()
         cy.get('.el-dialog').filter(':visible').click()

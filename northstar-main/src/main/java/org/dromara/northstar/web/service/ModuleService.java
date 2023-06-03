@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import javax.transaction.Transactional;
 
@@ -43,6 +42,7 @@ import org.dromara.northstar.module.ModuleManager;
 import org.dromara.northstar.module.PlaybackModuleContext;
 import org.dromara.northstar.module.TradeModule;
 import org.dromara.northstar.strategy.DynamicParamsAware;
+import org.dromara.northstar.strategy.IAccount;
 import org.dromara.northstar.strategy.IModule;
 import org.dromara.northstar.strategy.IModuleContext;
 import org.dromara.northstar.strategy.StrategicComponent;
@@ -136,27 +136,15 @@ public class ModuleService implements PostLoadAware {
 	 * @throws Exception 
 	 */
 	public ModuleDescription createModule(ModuleDescription md) throws Exception {
-		Map<String, ModuleAccountRuntimeDescription> accRtsMap = new HashMap<>();
-		if(md.getUsage() == ModuleUsage.PLAYBACK) {
-			accRtsMap.put(PlaybackModuleContext.PLAYBACK_GATEWAY, ModuleAccountRuntimeDescription.builder()
-					.accountId(PlaybackModuleContext.PLAYBACK_GATEWAY)
-					.initBalance(md.getModuleAccountSettingsDescription().get(0).getModuleAccountInitBalance())
-					.positionDescription(new ModulePositionDescription())
-					.build());
-		} else {
-			accRtsMap = md.getModuleAccountSettingsDescription().stream()
-					.map(masd -> ModuleAccountRuntimeDescription.builder()
-							.accountId(masd.getAccountGatewayId())
-							.initBalance(masd.getModuleAccountInitBalance())
-							.positionDescription(new ModulePositionDescription())
-							.build())
-					.collect(Collectors.toMap(ModuleAccountRuntimeDescription::getAccountId, mard -> mard));
-		}
+		ModuleAccountRuntimeDescription mard = ModuleAccountRuntimeDescription.builder()
+				.initBalance(md.getInitBalance())
+				.positionDescription(new ModulePositionDescription())
+				.build();
 		ModuleRuntimeDescription mad = ModuleRuntimeDescription.builder()
 				.moduleName(md.getModuleName())
 				.enabled(false)
 				.moduleState(ModuleState.EMPTY)
-				.accountRuntimeDescriptionMap(accRtsMap)
+				.accountRuntimeDescription(mard)
 				.dataState(new JSONObject())
 				.build();
 		moduleRepo.saveRuntime(mad);
@@ -177,31 +165,12 @@ public class ModuleService implements PostLoadAware {
 			removeModule(md.getModuleName());
 			return createModule(md);
 		}
-		validateModify(md);
 		unloadModule(md.getModuleName());
 		loadModule(md);
 		moduleRepo.saveSettings(md);
 		return md;
 	}
 	
-	private void validateModify(ModuleDescription md) {
-		if(md.getUsage() == ModuleUsage.PLAYBACK) {
-			return;
-		}
-		ModuleRuntimeDescription mrdOld = moduleRepo.findRuntimeByName(md.getModuleName());
-		Map<String, ModuleAccountRuntimeDescription> mardMap = mrdOld.getAccountRuntimeDescriptionMap();
-		boolean valid = true;
-		for(ModuleAccountDescription mad : md.getModuleAccountSettingsDescription()) {
-			if(!mardMap.containsKey(mad.getAccountGatewayId())) {
-				valid = false;
-				break;
-			}
-		}
-		if(mardMap.size() != md.getModuleAccountSettingsDescription().size() || !valid) {
-			throw new IllegalStateException("模组账户信息有重大变动，无法保存修改。如确实要修改，请使用【重置模组】");
-		}
-	}
-
 	/**
 	 * 删除模组
 	 * @param name
@@ -233,16 +202,13 @@ public class ModuleService implements PostLoadAware {
 		strategy.setStoreObject(mrd.getDataState());
 		IModuleContext moduleCtx = null;
 		if(md.getUsage() == ModuleUsage.PLAYBACK) {
-			Map<String, ModuleAccountRuntimeDescription> mardMap = new HashMap<>();
-			mardMap.put(PlaybackModuleContext.PLAYBACK_GATEWAY, ModuleAccountRuntimeDescription.builder()
-					.accountId(PlaybackModuleContext.PLAYBACK_GATEWAY)
-					.initBalance(md.getModuleAccountSettingsDescription().get(0).getModuleAccountInitBalance())
-					.build());
 			mrd = ModuleRuntimeDescription.builder()
 					.moduleName(md.getModuleName())
 					.moduleState(ModuleState.EMPTY)
 					.dataState(new JSONObject())
-					.accountRuntimeDescriptionMap(mardMap)
+					.accountRuntimeDescription(ModuleAccountRuntimeDescription.builder()
+							.initBalance(md.getInitBalance())
+							.build())
 					.build();
 			moduleCtx = new PlaybackModuleContext(strategy, md, mrd, contractMgr, moduleRepo, moduleLoggerFactory);
 		} else {
@@ -377,13 +343,15 @@ public class ModuleService implements PostLoadAware {
 	 */
 	public boolean mockTradeAdjustment(String moduleName, MockTradeDescription mockTrade) {
 		IModule module = moduleMgr.get(Identifier.of(moduleName));
-		ContractField contract = contractMgr.getContract(Identifier.of(mockTrade.getContractId())).contractField();
+		Contract c = contractMgr.getContract(Identifier.of(mockTrade.getContractId()));
+		ContractField contract = c.contractField();
+		IAccount account = module.getAccount(c);
 		TradeField trade = TradeField.newBuilder()
 				.setOriginOrderId(Constants.MOCK_ORDER_ID)
 				.setContract(contract)
 				.setTradeDate(LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER) + "MT")
 				.setTradingDay(LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER) + "MT")
-				.setGatewayId(mockTrade.getGatewayId())
+				.setGatewayId(account.accountId())
 				.setDirection(mockTrade.getDirection())
 				.setOffsetFlag(mockTrade.getOffsetFlag())
 				.setPrice(mockTrade.getPrice())

@@ -17,10 +17,6 @@ import lombok.NoArgsConstructor;
 public class ModuleAccountRuntimeDescription {
 	
 	/**
-	 * 账户ID
-	 */
-	private String accountId;
-	/**
 	 * 初始余额
 	 */
 	private double initBalance;
@@ -48,5 +44,13 @@ public class ModuleAccountRuntimeDescription {
 	/**
 	 * 最大回撤
 	 */
-	private double maxDrawBack;
+	private double maxDrawback;
+	/**
+	 * 平均盈亏
+	 */
+	private double avgEarning;
+	/**
+	 * 盈亏标准差
+	 */
+	private double stdEarning;
 }

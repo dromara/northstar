@@ -74,4 +74,9 @@ public interface IModuleStrategyContext {
 	 * @param filter
 	 */
 	void setOrderRequestFilter(OrderRequestFilter filter);
+	/**
+	 * 获取默认交易手数
+	 * @return
+	 */
+	int getDefaultVolume();
 }

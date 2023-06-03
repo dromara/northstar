@@ -23,10 +23,6 @@ public class ModuleAccountDescription {
 	 */
 	private String accountGatewayId;
 	/**
-	 * 模组账户初始金额
-	 */
-	private int moduleAccountInitBalance;
-	/**
 	 * 账户关联合约名称
 	 */
 	private List<ContractSimpleInfo> bindedContracts;
