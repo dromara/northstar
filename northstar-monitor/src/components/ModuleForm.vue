@@ -72,13 +72,6 @@
                 ></el-option>
               </el-select>
             </el-form-item>
-            <el-form-item label="默认手数">
-              <el-input-number :disabled="readOnly" v-model="form.defaultVolume" :min="1" />
-            </el-form-item>
-            <el-form-item label="下单超价">
-              <el-input-number :disabled="readOnly" v-model="form.orderPlusTick" :min="0" />
-              <span class="ml-10">Tick</span>
-            </el-form-item>
             <el-form-item label="K线周期">
               <el-input-number :disabled="readOnly" v-model="form.numOfMinPerBar" :min="1" />
               <span class="ml-10">分钟</span>
@@ -94,6 +87,13 @@
             <el-form-item label="缓存数据量">
               <el-input-number :disabled="readOnly" v-model="form.moduleCacheDataSize" :min="100">
               </el-input-number>
+            </el-form-item>
+            <el-form-item label="默认下单数">
+              <el-input-number :disabled="readOnly" v-model="form.defaultVolume" :min="1" />
+            </el-form-item>
+            <el-form-item label="下单超价">
+              <el-input-number :disabled="readOnly" v-model="form.orderPlusTick" :min="0" />
+              <span class="ml-10">Tick</span>
             </el-form-item>
           </div>
           <div v-show="activeIndex === '2'">

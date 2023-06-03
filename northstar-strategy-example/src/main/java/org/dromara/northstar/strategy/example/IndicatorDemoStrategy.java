@@ -60,9 +60,9 @@ public class IndicatorDemoStrategy extends AbstractStrategy	// 为了简化代�
 		ctx.registerIndicator(new SMAIndicator(makeConfig("SMA10"), 10, 2));
 		// 指标的难度级数：基础（指标嵌套）
 		ctx.registerIndicator(new HHVIndicator(makeConfig("HHV"), 
-				new SimpleValueIndicator(Configuration.builder().contract(c).valueType(ValueType.HIGH).cacheLength(10).visible(false).build())));	// 10个周期内的最高价
+				new SimpleValueIndicator(Configuration.builder().indicatorName("H").contract(c).valueType(ValueType.HIGH).cacheLength(10).visible(false).build())));	// 10个周期内的最高价
 		ctx.registerIndicator(new LLVIndicator(makeConfig("LLV"),
-				new SimpleValueIndicator(Configuration.builder().contract(c).valueType(ValueType.LOW).cacheLength(10).visible(false).build())));	// 10个周期内的最低价
+				new SimpleValueIndicator(Configuration.builder().indicatorName("L").contract(c).valueType(ValueType.LOW).cacheLength(10).visible(false).build())));	// 10个周期内的最低价
 		
 		// 指标的难度级数：进阶（伪多值指标，内部手动更新值）
 		ctx.registerIndicator(new RSIIndicator(makeConfig("RSI1"), 7));

@@ -1,5 +1,7 @@
 package org.dromara.northstar.strategy.example;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
 import org.dromara.northstar.common.constant.FieldType;
@@ -7,40 +9,21 @@ import org.dromara.northstar.common.constant.ModuleState;
 import org.dromara.northstar.common.constant.SignalOperation;
 import org.dromara.northstar.common.model.DynamicParams;
 import org.dromara.northstar.common.model.Setting;
-import org.dromara.northstar.strategy.IModuleContext;
-import org.dromara.northstar.strategy.IModuleStrategyContext;
+import org.dromara.northstar.strategy.AbstractStrategy;
 import org.dromara.northstar.strategy.StrategicComponent;
 import org.dromara.northstar.strategy.TradeStrategy;
 import org.dromara.northstar.strategy.constant.PriceType;
 import org.dromara.northstar.strategy.model.TradeIntent;
-import org.slf4j.Logger;
 
-import com.alibaba.fastjson.JSONObject;
-
-import xyz.redtorch.pb.CoreField.BarField;
-import xyz.redtorch.pb.CoreField.OrderField;
+import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.TickField;
-import xyz.redtorch.pb.CoreField.TradeField;
 
-/**
- * 本示例用于展示写一个策略的必要元素，以及最基本的开平仓操作、超时撤单操作
- * 
- * ## 风险提示：该策略仅作技术分享，据此交易，风险自担 ##
- * @author KevinHuangwl
- *
- */
-@StrategicComponent(BeginnerSampleStrategy.NAME)		// 该注解是用于给策略命名用的，所有的策略都要带上这个注解
-public class BeginnerSampleStrategy implements TradeStrategy{
-	
-	protected static final String NAME = "示例-简单策略";	// 之所以要这样定义一个常量，是为了方便日志输出时可以带上策略名称
+@StrategicComponent(DualAccountSampleStrategy.NAME)		// 该注解是用于给策略命名用的，所有的策略都要带上这个注解
+public class DualAccountSampleStrategy extends AbstractStrategy implements TradeStrategy {
+
+	protected static final String NAME = "示例-多账户简单策略";	// 之所以要这样定义一个常量，是为了方便日志输出时可以带上策略名称
 	
 	private InitParams params;	// 策略的参数配置信息
-	
-	private IModuleStrategyContext ctx;		// 模组的操作上下文
-	
-	private JSONObject storeObj = new JSONObject(); 	// 可透视状态计算信息
-	
-	private Logger log;
 	
 	/**
 	 * 定义该策略的参数。该类每个策略必须自己重写一个，类名必须为InitParams，必须继承DynamicParams，必须是个static类。
@@ -64,31 +47,17 @@ public class BeginnerSampleStrategy implements TradeStrategy{
 		this.params = (InitParams) params;
 	}
 	
-	@Override
-	public void setContext(IModuleContext context) {
-		ctx = context;
-		log = ctx.getLogger();
-	}
-	
-	@Override
-	public JSONObject getStoreObject() {
-		return storeObj;
-	}
-
-	@Override
-	public void setStoreObject(JSONObject storeObj) {
-		this.storeObj = storeObj;
-	}
 	/***************** 以上如果看不懂，基本可以照搬 *************************/
 
 	private long nextActionTime;
 	
+	private Set<String> symbolSet = new HashSet<>();
+	
+	private ContractField chosen;
+	
 	@Override
 	public void onTick(TickField tick) {
-		
-		log.debug("TICK触发: C:{} D:{} T:{} P:{} V:{} OI:{} OID:{}", 
-				tick.getUnifiedSymbol(), tick.getActionDay(), tick.getActionTime(), 
-				tick.getLastPrice(), tick.getVolume(), tick.getOpenInterest(), tick.getOpenInterestDelta());
+		symbolSet.add(tick.getUnifiedSymbol());
 		long now = tick.getActionTimestamp();
 		// 启用后，等待10秒才开始交易
 		if(nextActionTime == 0) {
@@ -100,8 +69,9 @@ public class BeginnerSampleStrategy implements TradeStrategy{
 			log.info("开始交易");
 			if(ctx.getState().isEmpty()) {
 				SignalOperation op = flag ? SignalOperation.BUY_OPEN : SignalOperation.SELL_OPEN;	// 随机开多或者开空
+				chosen = randomPick();
 				ctx.submitOrderReq(TradeIntent.builder()
-						.contract(ctx.getContract(tick.getUnifiedSymbol()))
+						.contract(chosen)
 						.operation(op)
 						.volume(ctx.getDefaultVolume())
 						.priceType(PriceType.WAITING_PRICE)
@@ -111,7 +81,7 @@ public class BeginnerSampleStrategy implements TradeStrategy{
 			}
 			if(ctx.getState() == ModuleState.HOLDING_LONG) {	
 				ctx.submitOrderReq(TradeIntent.builder()
-						.contract(ctx.getContract(tick.getUnifiedSymbol()))
+						.contract(chosen)
 						.operation(SignalOperation.SELL_CLOSE)
 						.priceType(PriceType.OPP_PRICE)
 						.volume(ctx.getDefaultVolume())
@@ -120,7 +90,7 @@ public class BeginnerSampleStrategy implements TradeStrategy{
 			}
 			if(ctx.getState() == ModuleState.HOLDING_SHORT) {			
 				ctx.submitOrderReq(TradeIntent.builder()
-						.contract(ctx.getContract(tick.getUnifiedSymbol()))
+						.contract(chosen)
 						.operation(SignalOperation.BUY_CLOSE)
 						.priceType(PriceType.WAITING_PRICE)
 						.volume(ctx.getDefaultVolume())
@@ -129,20 +99,10 @@ public class BeginnerSampleStrategy implements TradeStrategy{
 			}
 		}
 	}
-
-	@Override
-	public void onMergedBar(BarField bar) {
-		log.debug("策略每分钟触发");
-	}
-
-	@Override
-	public void onOrder(OrderField order) {
-		// 委托单状态变动回调
-	}
-
-	@Override
-	public void onTrade(TradeField trade) {
-		// 成交回调
+	
+	private ContractField randomPick() {
+		int index = ThreadLocalRandom.current().nextInt(symbolSet.size());
+		return ctx.getContract(symbolSet.stream().toList().get(index));
 	}
 
 }

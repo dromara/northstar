@@ -232,10 +232,13 @@ public class ModuleContext implements IModuleContext{
 		}
 		Configuration cfg = indicator.getConfiguration();
 		String indicatorName = String.format("%s_%d%s", cfg.indicatorName(), cfg.numOfUnits(), cfg.period().symbol());
+		logger.info("检查指标配置信息：{}", indicatorName);
 		Assert.isTrue(cfg.numOfUnits() > 0, "周期数必须大于0，当前为：" + cfg.numOfUnits());
 		Assert.isTrue(cfg.cacheLength() > 0, "指标回溯长度必须大于0，当前为：" + cfg.cacheLength());
-		Assert.isTrue(!indicatorNameMap.containsKey(indicatorName) || indicator.equals(indicatorNameMap.get(indicatorName)), "指标 [{}] 已存在。不能重名", indicatorName);
-		indicatorNameMap.put(indicatorName, indicator);
+		if(cfg.visible()) {		// 不显示的指标可以不做重名校验
+			Assert.isTrue(!indicatorNameMap.containsKey(indicatorName) || indicator.equals(indicatorNameMap.get(indicatorName)), "指标 [{}] 已存在。不能重名", indicatorName);
+			indicatorNameMap.put(indicatorName, indicator);
+		}
 		indicatorValBufQMap.put(indicator, new LinkedList<>());
 	}
 	
