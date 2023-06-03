@@ -201,7 +201,9 @@ public class PlaybackModuleContext extends ModuleContext implements IModuleConte
 		}
 
 		@Override
-		public List<ModuleDealRecord> findAllDealRecords(String moduleName) { throw uoe();}
+		public List<ModuleDealRecord> findAllDealRecords(String moduleName) {
+			return mdRepoReal.findAllDealRecords(moduleName);
+		}
 
 		@Override
 		public void removeAllDealRecords(String moduleName) { throw uoe();}

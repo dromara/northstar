@@ -22,6 +22,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 import org.dromara.northstar.common.constant.Constants;
 import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.common.constant.ModuleState;
@@ -30,6 +31,7 @@ import org.dromara.northstar.common.exception.InsufficientException;
 import org.dromara.northstar.common.model.ContractSimpleInfo;
 import org.dromara.northstar.common.model.Identifier;
 import org.dromara.northstar.common.model.ModuleAccountRuntimeDescription;
+import org.dromara.northstar.common.model.ModuleDealRecord;
 import org.dromara.northstar.common.model.ModuleDescription;
 import org.dromara.northstar.common.model.ModulePositionDescription;
 import org.dromara.northstar.common.model.ModuleRuntimeDescription;
@@ -378,6 +380,12 @@ public class ModuleContext implements IModuleContext{
 				.accountRuntimeDescription(accRtDescription)
 				.build();
 		if(fullDescription) {
+			List<ModuleDealRecord> dealRecords = moduleRepo.findAllDealRecords(module.getName());
+			double avgProfit = dealRecords.stream().mapToDouble(ModuleDealRecord::getDealProfit).average().orElse(0D);
+			double stdProfit = new StandardDeviation().evaluate(dealRecords.stream().mapToDouble(ModuleDealRecord::getDealProfit).toArray());
+			accRtDescription.setAvgEarning(avgProfit);
+			accRtDescription.setStdEarning(stdProfit);
+			
 			Map<String, List<String>> indicatorMap = new HashMap<>();
 			Map<String, LinkedHashMap<Long, JSONObject>> symbolTimeObject = new HashMap<>();
 			barBufQMap.entrySet().forEach(e -> 
@@ -464,6 +472,8 @@ public class ModuleContext implements IModuleContext{
 		String id = UUID.randomUUID().toString();
 		String gatewayId = getAccount(contract).accountId();
 		DirectionEnum direction = OrderUtils.resolveDirection(operation);
+		int factor = FieldUtils.directionFactor(direction);
+		double plusPrice = module.getModuleDescription().getOrderPlusTick() * contract.getPriceTick(); // 超价设置
 		List<TradeField> nonclosedTrades = moduleAccount.getNonclosedTrades(contract.getUnifiedSymbol(), FieldUtils.getOpposite(direction));
 		return Optional.ofNullable(submitOrderReq(SubmitOrderReqField.newBuilder()
 				.setOriginOrderId(id)
@@ -471,7 +481,7 @@ public class ModuleContext implements IModuleContext{
 				.setGatewayId(gatewayId)
 				.setDirection(direction)
 				.setOffsetFlag(module.getModuleDescription().getClosingPolicy().resolveOffsetFlag(operation, contract, nonclosedTrades, tick.getTradingDay()))
-				.setPrice(orderPrice)
+				.setPrice(orderPrice + factor * plusPrice)	// 自动加上超价
 				.setVolume(volume)		//	当信号交易量大于零时，优先使用信号交易量
 				.setHedgeFlag(HedgeFlagEnum.HF_Speculation)
 				.setTimeCondition(priceType == PriceType.ANY_PRICE ? TimeConditionEnum.TC_IOC : TimeConditionEnum.TC_GFD)
@@ -567,6 +577,11 @@ public class ModuleContext implements IModuleContext{
 	@Override
 	public void onReady() {
 		isReady = true;
+	}
+
+	@Override
+	public int getDefaultVolume() {
+		return module.getModuleDescription().getDefaultVolume();
 	}
 
 }

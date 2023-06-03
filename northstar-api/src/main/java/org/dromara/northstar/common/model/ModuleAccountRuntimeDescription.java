@@ -45,4 +45,12 @@ public class ModuleAccountRuntimeDescription {
 	 * 最大回撤
 	 */
 	private double maxDrawback;
+	/**
+	 * 平均盈亏
+	 */
+	private double avgEarning;
+	/**
+	 * 盈亏标准差
+	 */
+	private double stdEarning;
 }

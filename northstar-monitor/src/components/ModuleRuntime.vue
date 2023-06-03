@@ -3,7 +3,7 @@
     <ModulePositionForm
       v-if="module.usage !== 'PLAYBACK'"
       :visible.sync="positionFormVisible"
-      :moduleAccount="accountSettings"
+      :contractOptions="moduleBindedContracts"
       :moduleName="module.moduleName"
       @save="onSave"
     />
@@ -43,12 +43,6 @@
                 @click="exportDealRecord"
                 >导出交易</el-button
               >
-              <!-- <el-button
-                class="compact mb-10"
-                icon="el-icon-info"
-                @click="performanceVisible = true"
-                >模组绩效</el-button
-              > -->
             </template>
             <el-descriptions-item label="名称">{{ moduleRuntime.moduleName }}</el-descriptions-item>
             <el-descriptions-item label="启停状态"
@@ -93,20 +87,20 @@
               {{ accountInfo.accCloseProfit | formatter }}
             </el-descriptions-item>
             <el-descriptions-item label="交易笔数">
-              {{ accountDealRecords.length || 0 }}
+              {{ dealRecords.length || 0 }}
             </el-descriptions-item>
             <el-descriptions-item label="胜率">
               {{ `${(winningRatio * 100).toFixed(1)} %` }}
             </el-descriptions-item>
             <el-descriptions-item label="盈亏比">{{ earningPerLoss }}</el-descriptions-item>
             <el-descriptions-item label="最大回撤">
-              {{ accountInfo.maxDrawBack | formatter }}
+              {{ accountInfo.maxDrawback | formatter }}
             </el-descriptions-item>
             <el-descriptions-item label="平均盈亏">
-              {{ avgProfit | formatter }}
+              {{ accountInfo.avgEarning | formatter }}
             </el-descriptions-item>
             <el-descriptions-item label="盈亏标准差">
-              {{ stdProfit | formatter }}
+              {{ accountInfo.stdEarning | formatter }}
             </el-descriptions-item>
           </el-descriptions>
           <el-tabs v-model="moduleTab" :stretch="true">
@@ -166,7 +160,7 @@
             <el-table
               ref="dealTbl"
               v-show="moduleTab === 'dealRecord'"
-              :data="accountDealRecords"
+              :data="dealRecords"
               height="100%"
             >
               <el-table-column prop="contractName" label="合约" align="center" width="100px" />
@@ -357,7 +351,6 @@ export default {
       performanceVisible: false,
       holdingVisibleOnChart: false,
       moduleTab: 'holding',
-      activeAccount: '',
       dealRecords: [],
       barDataMap: {},
       bindedContracts: [],
@@ -385,7 +378,6 @@ export default {
     visible: function (val) {
       if (val) {
         this.moduleRuntime = this.moduleRuntimeSrc
-        this.activeAccount = this.accountOptions[0]
         this.bindedContracts = []
         this.module.moduleAccountSettingsDescription.forEach((account) => {
           const contracts = account.bindedContracts
@@ -450,23 +442,16 @@ export default {
     accountInfo() {
       return this.moduleRuntime.accountRuntimeDescription || {}
     },
-    accountSettings() {
-      if (!this.activeAccount) return {}
-      return this.module.moduleAccountSettingsDescription.find(
-        (item) => item.accountGatewayId === this.activeAccount
-      )
-    },
-    accountDealRecords() {
-      if (!this.activeAccount) return []
-      return this.dealRecords.filter((item) => item.moduleAccountId === this.activeAccount)
+    moduleBindedContracts() {
+      if(!this.module.moduleAccountSettingsDescription) return []
+      return this.module.moduleAccountSettingsDescription.reduce((contracts, mad) => contracts.concat(mad.bindedContracts), [])
     },
     holdingProfit() {
-      if (!this.activeAccount) return 0
       return this.holdingPositions.map((item) => item.positionprofit).reduce((a, b) => a + b, 0)
     },
     totalProfit() {
       if (!this.moduleRuntime) return 0
-      return 999
+      return this.holdingProfit + this.accountInfo.accCloseProfit - this.accountInfo.accCommission
     },
     winningRatio() {
       if (!this.dealRecords.length) return 0
@@ -488,7 +473,7 @@ export default {
       return `${avgProfit} : ${avgLoss}`
     },
     holdingPositions() {
-      if (!this.activeAccount) return []
+      if(!this.accountInfo.positionDescription)  return []
       const positions = this.accountInfo.positionDescription.logicalPositions.map((data) =>
         PositionField.deserializeBinary(data).toObject()
       )
