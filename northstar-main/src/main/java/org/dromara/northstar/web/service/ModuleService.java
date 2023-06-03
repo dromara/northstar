@@ -42,6 +42,7 @@ import org.dromara.northstar.module.ModuleManager;
 import org.dromara.northstar.module.PlaybackModuleContext;
 import org.dromara.northstar.module.TradeModule;
 import org.dromara.northstar.strategy.DynamicParamsAware;
+import org.dromara.northstar.strategy.IAccount;
 import org.dromara.northstar.strategy.IModule;
 import org.dromara.northstar.strategy.IModuleContext;
 import org.dromara.northstar.strategy.StrategicComponent;
@@ -342,13 +343,15 @@ public class ModuleService implements PostLoadAware {
 	 */
 	public boolean mockTradeAdjustment(String moduleName, MockTradeDescription mockTrade) {
 		IModule module = moduleMgr.get(Identifier.of(moduleName));
-		ContractField contract = contractMgr.getContract(Identifier.of(mockTrade.getContractId())).contractField();
+		Contract c = contractMgr.getContract(Identifier.of(mockTrade.getContractId()));
+		ContractField contract = c.contractField();
+		IAccount account = module.getAccount(c);
 		TradeField trade = TradeField.newBuilder()
 				.setOriginOrderId(Constants.MOCK_ORDER_ID)
 				.setContract(contract)
 				.setTradeDate(LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER) + "MT")
 				.setTradingDay(LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER) + "MT")
-				.setGatewayId(mockTrade.getGatewayId())
+				.setGatewayId(account.accountId())
 				.setDirection(mockTrade.getDirection())
 				.setOffsetFlag(mockTrade.getOffsetFlag())
 				.setPrice(mockTrade.getPrice())
