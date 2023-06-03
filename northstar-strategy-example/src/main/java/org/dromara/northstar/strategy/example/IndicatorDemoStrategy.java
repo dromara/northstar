@@ -24,9 +24,6 @@ import org.dromara.northstar.strategy.AbstractStrategy;
 import org.dromara.northstar.strategy.StrategicComponent;
 import org.dromara.northstar.strategy.TradeStrategy;
 
-import com.google.common.util.concurrent.AtomicDouble;
-
-import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.ContractField;
 
 /**
@@ -42,14 +39,6 @@ public class IndicatorDemoStrategy extends AbstractStrategy	// 为了简化代�
 	
 	private InitParams params;	// 策略的参数配置信息
 	
-	private final AtomicDouble valueHolder = new AtomicDouble();
-	
-	@Override
-	public void onMergedBar(BarField bar) {
-		// 当夜盘时值为0，日盘时值为1
-		valueHolder.set(bar.getActionDay().equals(bar.getTradingDay()) ? 1 : 0);
-	}
-
 	@Override
 	protected void initIndicators() {
 		ContractField c = ctx.getContract(params.indicatorSymbol);

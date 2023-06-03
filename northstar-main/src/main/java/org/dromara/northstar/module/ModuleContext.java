@@ -119,7 +119,7 @@ public class ModuleContext implements IModuleContext{
 	
 	protected final AtomicInteger bufSize = new AtomicInteger(0);
 	
-	protected final BarMergerRegistry registry = new BarMergerRegistry();
+	protected final BarMergerRegistry registry;
 	
 	protected boolean enabled;
 	
@@ -130,10 +130,12 @@ public class ModuleContext implements IModuleContext{
 	protected OrderRequestFilter orderReqFilter;
 	
 	public ModuleContext(TradeStrategy tradeStrategy, ModuleDescription moduleDescription, ModuleRuntimeDescription moduleRtDescription,
-			IContractManager contractMgr, IModuleRepository moduleRepo, ModuleLoggerFactory loggerFactory, IMessageSenderManager senderMgr) {
+			IContractManager contractMgr, IModuleRepository moduleRepo, ModuleLoggerFactory loggerFactory, IMessageSenderManager senderMgr,
+			BarMergerRegistry barMergerRegistry) {
 		this.tradeStrategy = tradeStrategy;
 		this.moduleRepo = moduleRepo;
 		this.contractMgr = contractMgr;
+		this.registry = barMergerRegistry;
 		this.logger = loggerFactory.getLogger(moduleDescription.getModuleName());
 		this.senderMgr = senderMgr;
 		this.bufSize.set(moduleDescription.getModuleCacheDataSize());

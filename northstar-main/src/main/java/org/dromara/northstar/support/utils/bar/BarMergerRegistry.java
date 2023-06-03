@@ -6,8 +6,10 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 
 import org.dromara.northstar.common.BarDataAware;
+import org.dromara.northstar.common.IDataServiceManager;
 import org.dromara.northstar.common.model.Identifier;
 import org.dromara.northstar.gateway.Contract;
+import org.dromara.northstar.gateway.GatewayMetaProvider;
 import org.dromara.northstar.indicator.constant.PeriodUnit;
 import org.dromara.northstar.strategy.MergedBarListener;
 
@@ -30,8 +32,11 @@ public class BarMergerRegistry implements BarDataAware{
 	
 	private BiConsumer<BarMerger, BarField> onMergedCallback = (merger, bar) -> 
 		mergerListenerMap.get(merger).forEach(listener -> listener.onMergedBar(bar));
+		
+	private GatewayMetaProvider gatewayMetaProvider;
 	
-	public BarMergerRegistry() {
+	public BarMergerRegistry(GatewayMetaProvider gatewayMetaProvider) {
+		this.gatewayMetaProvider = gatewayMetaProvider;
 		listenTypeMap.put(ListenerType.INDICATOR, HashMultimap.create());
 		listenTypeMap.put(ListenerType.CONTEXT, HashMultimap.create());
 		listenTypeMap.put(ListenerType.STRATEGY, HashMultimap.create());
@@ -53,12 +58,13 @@ public class BarMergerRegistry implements BarDataAware{
 	}
 	
 	private BarMerger makeBarMerger(Contract contract, int numOfUnit, PeriodUnit unit) {
+		IDataServiceManager dsMgr = gatewayMetaProvider.getMarketDataRepo(contract.channelType());
 		return switch(unit) {
 		case MINUTE -> new BarMerger(numOfUnit, contract, onMergedCallback);
 		case HOUR -> new BarMerger(numOfUnit * 60, contract, onMergedCallback);
 		case DAY -> new DailyBarMerger(numOfUnit, contract, onMergedCallback);
-		case WEEK -> new WeeklyBarMerger(numOfUnit, contract, onMergedCallback);
-		case MONTH -> new MonthlyBarMerger(numOfUnit, contract, onMergedCallback);
+		case WEEK -> new WeeklyBarMerger(numOfUnit, contract, onMergedCallback, dsMgr);
+		case MONTH -> new MonthlyBarMerger(numOfUnit, contract, onMergedCallback, dsMgr);
 		default -> throw new IllegalArgumentException("Unexpected value: " + unit);
 		};
 	}

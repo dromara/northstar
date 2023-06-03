@@ -2,21 +2,26 @@ package org.dromara.northstar.support.utils.bar;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.offset;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import org.dromara.northstar.common.IDataServiceManager;
 import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.gateway.Contract;
-import org.dromara.northstar.gateway.time.GenericTradeTime;
+import org.dromara.northstar.gateway.TradeTimeDefinition;
+import org.dromara.northstar.gateway.model.PeriodSegment;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import test.common.TestFieldFactory;
+import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.ContractField;
 
@@ -28,24 +33,33 @@ class MonthlyBarMergerTest {
 	
 	Contract c = mock(Contract.class);
 	
+	IDataServiceManager dsMgr = mock(IDataServiceManager.class);
+	
 	@BeforeEach
 	void prepare() {
 		when(c.contractField()).thenReturn(contract);
-		when(c.tradeTimeDefinition()).thenReturn(new GenericTradeTime());
+		when(c.tradeTimeDefinition()).thenReturn(new TradeTimeDefinition() {
+			
+			@Override
+			public List<PeriodSegment> tradeTimeSegments() {
+				return List.of(new PeriodSegment(LocalTime.of(9, 0), LocalTime.of(15, 0)));
+			}
+		});
+		when(dsMgr.getHolidays(any(ExchangeEnum.class), any(LocalDate.class), any(LocalDate.class))).thenReturn(List.of());
 	}
 	
 	@Test
 	void test() {
 		List<BarField> samples = new ArrayList<>();
 		List<BarField> results = new ArrayList<>();
-		BarMerger bm = new MonthlyBarMerger(1, c, (merger,bar) -> results.add(bar));
+		BarMerger bm = new MonthlyBarMerger(1, c, (merger,bar) -> results.add(bar), dsMgr);
 		Random rand = new Random();
 		LocalDate date = LocalDate.of(2022, 9, 17);
 		for(int i=0; i<21; i++) {
 			BarField bar = BarField.newBuilder()
 					.setUnifiedSymbol("rb2205@SHFE@FUTURES")
 					.setActionDay(date.format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
-					.setActionTime(String.valueOf(i))
+					.setActionTime("15:00:00")
 					.setActionTimestamp(i)
 					.setTradingDay(date.format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
 					.setOpenPrice(rand.nextDouble(5000))

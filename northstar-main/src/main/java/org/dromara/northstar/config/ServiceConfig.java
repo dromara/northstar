@@ -3,6 +3,7 @@ package org.dromara.northstar.config;
 import org.dromara.northstar.account.AccountManager;
 import org.dromara.northstar.data.IMarketDataRepository;
 import org.dromara.northstar.data.IModuleRepository;
+import org.dromara.northstar.gateway.GatewayMetaProvider;
 import org.dromara.northstar.gateway.IContractManager;
 import org.dromara.northstar.module.ModuleManager;
 import org.dromara.northstar.support.notification.MailDeliveryManager;
@@ -37,8 +38,8 @@ public class ServiceConfig {
     @Bean
     ModuleService moduleService(ApplicationContext ctx, IModuleRepository moduleRepo,
                                               IMarketDataRepository mdRepo, AccountManager accountMgr, ModuleManager moduleMgr,
-                                              IContractManager contractMgr, MailDeliveryManager mailMgr) {
-        return new ModuleService(ctx, moduleRepo, mailMgr, mdRepo, moduleMgr, contractMgr, accountMgr);
+                                              IContractManager contractMgr, MailDeliveryManager mailMgr, GatewayMetaProvider gatewayMetaPvd) {
+        return new ModuleService(ctx, moduleRepo, mailMgr, mdRepo, moduleMgr, contractMgr, accountMgr, gatewayMetaPvd);
     }
 
     @Bean

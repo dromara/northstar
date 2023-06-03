@@ -129,6 +129,7 @@ class ModuleControllerTest {
 		gatewayMetaProvider.add(ChannelType.SIM, null, simGatewayFactory, null);
 		
 		Contract c = mock(Contract.class);
+		when(c.channelType()).thenReturn(ChannelType.PLAYBACK);
 		when(mktCenter.getContract(any(Identifier.class))).thenReturn(c);
 		when(c.contractField()).thenReturn(ContractField.newBuilder().setChannelType("PLAYBACK").setUnifiedSymbol("rb0000@SHFE@FUTURES").build());
 		when(c.tradeTimeDefinition()).thenReturn(new GenericTradeTime());

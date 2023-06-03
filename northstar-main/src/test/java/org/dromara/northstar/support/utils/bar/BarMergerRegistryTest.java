@@ -1,14 +1,19 @@
 package org.dromara.northstar.support.utils.bar;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import org.dromara.northstar.common.IDataServiceManager;
+import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.gateway.Contract;
+import org.dromara.northstar.gateway.GatewayMetaProvider;
 import org.dromara.northstar.gateway.time.GenericTradeTime;
 import org.dromara.northstar.indicator.constant.PeriodUnit;
 import org.dromara.northstar.strategy.MergedBarListener;
 import org.dromara.northstar.support.utils.bar.BarMergerRegistry.ListenerType;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import test.common.TestFieldFactory;
@@ -16,7 +21,7 @@ import xyz.redtorch.pb.CoreField.ContractField;
 
 class BarMergerRegistryTest {
 	
-	BarMergerRegistry registry = new BarMergerRegistry();
+	BarMergerRegistry registry;
 
 	TestFieldFactory factory = new TestFieldFactory("gateway");
 	
@@ -25,6 +30,14 @@ class BarMergerRegistryTest {
 	MergedBarListener listener1 = mock(MergedBarListener.class);
 	MergedBarListener listener2 = mock(MergedBarListener.class);
 	MergedBarListener listener3 = mock(MergedBarListener.class);
+	
+	@BeforeEach
+	void prepare() {
+		GatewayMetaProvider pvd = mock(GatewayMetaProvider.class);
+		IDataServiceManager dsMgr = mock(IDataServiceManager.class);
+		when(pvd.getMarketDataRepo(any(ChannelType.class))).thenReturn(dsMgr);
+		registry = new BarMergerRegistry(pvd);
+	}
 	
 	@Test
 	void test() {

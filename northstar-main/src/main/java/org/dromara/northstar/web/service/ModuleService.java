@@ -36,6 +36,7 @@ import org.dromara.northstar.common.utils.MarketDataLoadingUtils;
 import org.dromara.northstar.data.IMarketDataRepository;
 import org.dromara.northstar.data.IModuleRepository;
 import org.dromara.northstar.gateway.Contract;
+import org.dromara.northstar.gateway.GatewayMetaProvider;
 import org.dromara.northstar.gateway.IContractManager;
 import org.dromara.northstar.module.ModuleContext;
 import org.dromara.northstar.module.ModuleManager;
@@ -49,6 +50,7 @@ import org.dromara.northstar.strategy.StrategicComponent;
 import org.dromara.northstar.strategy.TradeStrategy;
 import org.dromara.northstar.support.log.ModuleLoggerFactory;
 import org.dromara.northstar.support.notification.MailDeliveryManager;
+import org.dromara.northstar.support.utils.bar.BarMergerRegistry;
 import org.dromara.northstar.web.PostLoadAware;
 import org.springframework.context.ApplicationContext;
 
@@ -86,8 +88,10 @@ public class ModuleService implements PostLoadAware {
 	
 	private AccountManager accountMgr;
 	
-	public ModuleService(ApplicationContext ctx, IModuleRepository moduleRepo, MailDeliveryManager mailMgr,
-			IMarketDataRepository mdRepo, ModuleManager moduleMgr, IContractManager contractMgr, AccountManager accountMgr) {
+	private GatewayMetaProvider gatewayMetaProvider;
+	
+	public ModuleService(ApplicationContext ctx, IModuleRepository moduleRepo, MailDeliveryManager mailMgr, IMarketDataRepository mdRepo, 
+			ModuleManager moduleMgr, IContractManager contractMgr, AccountManager accountMgr, GatewayMetaProvider gatewayMetaProvider) {
 		this.ctx = ctx;
 		this.moduleMgr = moduleMgr;
 		this.contractMgr = contractMgr;
@@ -95,6 +99,7 @@ public class ModuleService implements PostLoadAware {
 		this.mdRepo = mdRepo;
 		this.mailMgr = mailMgr;
 		this.accountMgr = accountMgr;
+		this.gatewayMetaProvider = gatewayMetaProvider;
 	}
 
 	/**
@@ -210,9 +215,9 @@ public class ModuleService implements PostLoadAware {
 							.initBalance(md.getInitBalance())
 							.build())
 					.build();
-			moduleCtx = new PlaybackModuleContext(strategy, md, mrd, contractMgr, moduleRepo, moduleLoggerFactory);
+			moduleCtx = new PlaybackModuleContext(strategy, md, mrd, contractMgr, moduleRepo, moduleLoggerFactory, new BarMergerRegistry(gatewayMetaProvider));
 		} else {
-			moduleCtx = new ModuleContext(strategy, md, mrd, contractMgr, moduleRepo, moduleLoggerFactory, mailMgr);
+			moduleCtx = new ModuleContext(strategy, md, mrd, contractMgr, moduleRepo, moduleLoggerFactory, mailMgr, new BarMergerRegistry(gatewayMetaProvider));
 		}
 		moduleMgr.add(new TradeModule(md, moduleCtx, accountMgr, contractMgr));
 		strategy.setContext(moduleCtx);

@@ -23,6 +23,7 @@ import org.dromara.northstar.strategy.constant.PriceType;
 import org.dromara.northstar.strategy.model.TradeIntent;
 import org.dromara.northstar.support.log.ModuleLoggerFactory;
 import org.dromara.northstar.support.notification.IMessageSenderManager;
+import org.dromara.northstar.support.utils.bar.BarMergerRegistry;
 
 import cn.hutool.core.lang.Assert;
 import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
@@ -68,8 +69,8 @@ public class PlaybackModuleContext extends ModuleContext implements IModuleConte
 	
 	public PlaybackModuleContext(TradeStrategy tradeStrategy, ModuleDescription moduleDescription,
 			ModuleRuntimeDescription moduleRtDescription, IContractManager contractMgr, IModuleRepository moduleRepo,
-			ModuleLoggerFactory loggerFactory) {
-		super(tradeStrategy, moduleDescription, moduleRtDescription, contractMgr, new MockModuleRepository(moduleRepo), loggerFactory, mockSenderMgr);
+			ModuleLoggerFactory loggerFactory, BarMergerRegistry barMergerRegistry) {
+		super(tradeStrategy, moduleDescription, moduleRtDescription, contractMgr, new MockModuleRepository(moduleRepo), loggerFactory, mockSenderMgr, barMergerRegistry);
 	}
 
 	@Override
