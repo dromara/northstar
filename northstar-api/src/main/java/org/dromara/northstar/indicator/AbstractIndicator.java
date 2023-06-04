@@ -48,7 +48,7 @@ public abstract class AbstractIndicator implements Indicator {
 
 	@Override
 	public Num get(int step) {
-		Assert.isTrue(step <= 0, "回溯步长不是正数");
+		Assert.isTrue(step <= 0, "回溯步长不能是正数");
 		Assert.isTrue(step > -cfg.cacheLength(), "回溯长度超过指标缓存大小");
 		if(Objects.isNull(ringBuf.get(step))) {
 			return Num.NaN();
