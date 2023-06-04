@@ -171,7 +171,9 @@ public class ModuleContext implements IModuleContext{
 	@Override
 	public synchronized void submitOrderReq(TradeIntent tradeIntent) {
 		if(!module.isEnabled()) {
-			getLogger().info("策略处于停用状态，忽略委托单");
+			if(isReady()) {
+				getLogger().info("策略处于停用状态，忽略委托单");
+			}
 			return;
 		}
 		TickField tick = latestTickMap.get(tradeIntent.getContract().getUnifiedSymbol());
