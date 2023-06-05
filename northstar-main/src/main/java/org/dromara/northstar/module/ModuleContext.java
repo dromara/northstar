@@ -63,6 +63,8 @@ import org.slf4j.Logger;
 
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.Table;
 
 import cn.hutool.core.lang.Assert;
 import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
@@ -111,7 +113,8 @@ public class ModuleContext implements IModuleContext{
 	/* indicator -> values */
 	protected Map<Indicator, Queue<TimeSeriesValue>> indicatorValBufQMap = new HashMap<>(); 
 	
-	protected Map<String, Indicator> indicatorNameMap = new HashMap<>();
+	/* unifiedSymbol -> indicatorName -> indicator */
+	protected Table<String, String, Indicator> indicatorNameTbl = HashBasedTable.create();
 	
 	protected Set<IndicatorValueUpdateHelper> indicatorHelperSet = new HashSet<>();
 	
@@ -171,7 +174,9 @@ public class ModuleContext implements IModuleContext{
 	@Override
 	public synchronized void submitOrderReq(TradeIntent tradeIntent) {
 		if(!module.isEnabled()) {
-			getLogger().info("策略处于停用状态，忽略委托单");
+			if(isReady()) {
+				getLogger().info("策略处于停用状态，忽略委托单");
+			}
 			return;
 		}
 		TickField tick = latestTickMap.get(tradeIntent.getContract().getUnifiedSymbol());
@@ -233,13 +238,14 @@ public class ModuleContext implements IModuleContext{
 			checkIndicator(in);
 		}
 		Configuration cfg = indicator.getConfiguration();
+		String unifiedSymbol = cfg.contract().getUnifiedSymbol();
 		String indicatorName = String.format("%s_%d%s", cfg.indicatorName(), cfg.numOfUnits(), cfg.period().symbol());
 		logger.info("检查指标配置信息：{}", indicatorName);
 		Assert.isTrue(cfg.numOfUnits() > 0, "周期数必须大于0，当前为：" + cfg.numOfUnits());
 		Assert.isTrue(cfg.cacheLength() > 0, "指标回溯长度必须大于0，当前为：" + cfg.cacheLength());
 		if(cfg.visible()) {		// 不显示的指标可以不做重名校验
-			Assert.isTrue(!indicatorNameMap.containsKey(indicatorName) || indicator.equals(indicatorNameMap.get(indicatorName)), "指标 [{}] 已存在。不能重名", indicatorName);
-			indicatorNameMap.put(indicatorName, indicator);
+			Assert.isTrue(!indicatorNameTbl.contains(unifiedSymbol, indicatorName) || indicator.equals(indicatorNameTbl.get(unifiedSymbol, indicatorName)), "指标 [{} -> {}] 已存在。不能重名", unifiedSymbol, indicatorName);
+			indicatorNameTbl.put(unifiedSymbol, indicatorName, indicator);
 		}
 		indicatorValBufQMap.put(indicator, new LinkedList<>());
 	}
