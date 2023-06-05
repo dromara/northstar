@@ -33,7 +33,7 @@ public class OpenningMinuteClock {
 	 */
 	public LocalDateTime barMinute(TickField tick) {
 		LocalDateTime tickDateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(tick.getActionTimestamp()), ZoneId.systemDefault());
-		return tickDateTime.withSecond(0).plusMinutes(1);
+		return tickDateTime.withSecond(0).withNano(0).plusMinutes(1);
 	}
 	
 	/**
