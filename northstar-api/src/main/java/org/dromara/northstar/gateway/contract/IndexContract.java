@@ -51,10 +51,10 @@ public class IndexContract implements Contract, TickDataAware{
 	}
 	
 	private ContractField makeIndexContractField(ContractField proto) {
-		String name = proto.getName().replaceAll("\\d+", "指数");
-		String fullName = proto.getFullName().replaceAll("\\d+", "指数");
+		String name = proto.getName().replaceAll("\\d+$", "指数");
+		String fullName = proto.getFullName().replaceAll("\\d+$", "指数");
 		String originSymbol = proto.getSymbol();
-		String symbol = originSymbol.replaceAll("\\d+", Constants.INDEX_SUFFIX);
+		String symbol = originSymbol.replaceAll("\\d+$", Constants.INDEX_SUFFIX);
 		String contractId = proto.getContractId().replace(originSymbol, symbol);
 		String thirdPartyId = proto.getThirdPartyId().replace(originSymbol, symbol);
 		String unifiedSymbol = proto.getUnifiedSymbol().replace(originSymbol, symbol);

@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -239,12 +240,15 @@ public class ModuleService implements PostLoadAware {
 					mergeList.addAll(bars);
 				}
 			}
-			moduleCtx.initData(mergeList.parallelStream().sorted((a,b) -> a.getActionTimestamp() < b.getActionTimestamp() ? -1 : 1).toList());
+			moduleCtx.initData(mergeList.parallelStream().sorted(sortFunction).toList());
 			date = date.plusWeeks(1);
 		}
 		moduleCtx.setEnabled(mrd.isEnabled());
 		moduleCtx.onReady();
 	}
+	
+	private Comparator<BarField> sortFunction = (a, b) -> a.getActionTimestamp() < b.getActionTimestamp() ? -1 
+													: a.getActionTimestamp() > b.getActionTimestamp() ? 1 : 0;
 	
 	@SuppressWarnings("unchecked")
 	private <T extends DynamicParamsAware> T resolveComponent(ComponentAndParamsPair metaInfo) throws Exception {
