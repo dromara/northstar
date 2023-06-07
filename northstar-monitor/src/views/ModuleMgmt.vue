@@ -106,6 +106,14 @@
       <el-table-column align="center" width="400px">
         <template slot="header">
           <el-button id="createModule" size="mini" type="primary" @click="handleCreate">新建</el-button>
+          <el-popconfirm
+            v-if="env==='development'"
+            class="ml-10"
+            title="确定全部重置吗？"
+            @confirm="resetAll"
+          >
+            <el-button slot="reference"  size="mini" type="primary">全部重置</el-button>
+          </el-popconfirm>
         </template>
         <template slot-scope="scope">
           <el-button
@@ -169,6 +177,7 @@ export default {
       curModule: null,
       timer: -1,
       delayTimer: -1,
+      env: process.env.NODE_ENV
     }
   },
   computed: {
@@ -264,6 +273,11 @@ export default {
         this.moduleList[this.curTableIndex] = module
       }
       this.$store.commit('updateList', [...this.moduleList])
+    },
+    resetAll(){
+      this.moduleList.forEach(module => {
+        moduleApi.updateModule(module, true)
+      })
     },
     async toggle(index, row) {
       clearTimeout(this.timer)
