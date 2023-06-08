@@ -54,6 +54,7 @@ import org.dromara.northstar.support.notification.MailDeliveryManager;
 import org.dromara.northstar.support.utils.bar.BarMergerRegistry;
 import org.dromara.northstar.web.PostLoadAware;
 import org.springframework.context.ApplicationContext;
+import org.springframework.util.StringUtils;
 
 import com.alibaba.fastjson.JSONObject;
 
@@ -355,11 +356,14 @@ public class ModuleService implements PostLoadAware {
 		Contract c = contractMgr.getContract(Identifier.of(mockTrade.getContractId()));
 		ContractField contract = c.contractField();
 		IAccount account = module.getAccount(c);
+		String tradingDay = StringUtils.hasText(mockTrade.getTradeDate()) ? mockTrade.getTradeDate() : LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER);
+		
 		TradeField trade = TradeField.newBuilder()
 				.setOriginOrderId(Constants.MOCK_ORDER_ID)
 				.setContract(contract)
-				.setTradeDate(LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER) + "MT")
-				.setTradingDay(LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER) + "MT")
+				.setTradeDate(LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
+				.setTradeTime(LocalTime.now().format(DateTimeConstant.T_FORMAT_FORMATTER))
+				.setTradingDay(tradingDay)
 				.setGatewayId(account.accountId())
 				.setDirection(mockTrade.getDirection())
 				.setOffsetFlag(mockTrade.getOffsetFlag())
