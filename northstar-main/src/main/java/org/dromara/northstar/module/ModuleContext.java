@@ -380,6 +380,7 @@ public class ModuleContext implements IModuleContext{
 				.accDealVolume(moduleAccount.getAccDealVolume())
 				.accCommission(moduleAccount.getAccCommission())
 				.maxDrawback(moduleAccount.getMaxDrawback())
+				.maxDrawbackPercentage(moduleAccount.getMaxDrawbackPercentage())
 				.maxProfit(moduleAccount.getMaxProfit())
 				.positionDescription(posDescription)
 				.build();
