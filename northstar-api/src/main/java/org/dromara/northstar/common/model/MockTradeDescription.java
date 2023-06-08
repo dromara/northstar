@@ -29,4 +29,6 @@ public class MockTradeDescription {
 	private DirectionEnum direction;
 	
 	private OffsetFlagEnum offsetFlag;
+
+	private String tradeDate;
 }

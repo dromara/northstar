@@ -4,10 +4,8 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 import org.dromara.northstar.common.event.NorthstarEvent;
 import org.dromara.northstar.common.event.NorthstarEventType;
@@ -130,9 +128,7 @@ public class MailDeliveryManager implements IMessageSenderManager{
 						msg.setText(content);
 						sender.send(msg.getMimeMessage());
 					} catch (Exception e) {
-						log.error("邮件发送异常：{} {}", e.getClass().getSimpleName(), e.getMessage());
-						log.warn("稍后重试：{} {}", receiver, content);
-						CompletableFuture.runAsync(() -> send(receiver, content), CompletableFuture.delayedExecutor(10, TimeUnit.SECONDS));
+						log.error("邮件发送异常。邮件内容：{}， 异常原因：{} {}",  content, e.getClass().getSimpleName(), e.getMessage());
 					}
 				});
 			}
@@ -148,9 +144,7 @@ public class MailDeliveryManager implements IMessageSenderManager{
 						msg.setText(content);
 						sender.send(msg.getMimeMessage());
 					} catch (Exception e) {
-						log.error("邮件发送异常：{} {}", e.getClass().getSimpleName(), e.getMessage());
-						log.warn("稍后重试：{} {} {}", receiver, title, content);
-						CompletableFuture.runAsync(() -> send(receiver, title, content), CompletableFuture.delayedExecutor(10, TimeUnit.SECONDS));
+						log.error("邮件发送异常。邮件内容：【{}】 {}， 异常原因：{} {}", title, content, e.getClass().getSimpleName(), e.getMessage());
 					}
 				});				
 			}

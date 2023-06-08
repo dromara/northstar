@@ -56,6 +56,10 @@ public class ModuleAccount implements IModuleAccount{
 	private double maxProfit;
 	@Getter
 	private double maxDrawback;
+	@Getter
+	private double maxDrawbackPercentage;
+	
+	private double maxTotalBalance;
 	/* direction -> unifiedSymbol -> position */ 
 	private Table<DirectionEnum, String, ModulePosition> posTable = HashBasedTable.create();
 	private String tradingDay;
@@ -77,7 +81,10 @@ public class ModuleAccount implements IModuleAccount{
 				double commission = contract.getCommissionFee() > 0 ? contract.getCommissionFee() : contract.getCommissionRate() * closeTrade.getPrice() * contract.getMultiplier();
 				accCommission += commission * 2 * closeTrade.getVolume(); // 乘2代表手续费双向计算
 				maxProfit = Math.max(maxProfit, accCloseProfit - accCommission);
-				maxDrawback = Math.min(maxDrawback, accCloseProfit - accCommission - maxProfit);
+				maxTotalBalance = Math.max(maxTotalBalance, initBalance + maxProfit);
+				double drawback = accCloseProfit - accCommission - maxProfit;
+				maxDrawback = Math.min(maxDrawback, drawback);
+				maxDrawbackPercentage = Math.max(maxDrawbackPercentage, Math.abs(maxDrawback / maxTotalBalance));
 				moduleRepo.saveDealRecord(ModuleDealRecord.builder()
 						.moduleName(moduleDescription.getModuleName())
 						.moduleAccountId(closeTrade.getAccountId())
@@ -96,6 +103,7 @@ public class ModuleAccount implements IModuleAccount{
 		this.accDealVolume = mard.getAccDealVolume();
 		this.maxDrawback = mard.getMaxDrawback();
 		this.maxProfit = mard.getMaxProfit();
+		this.maxDrawbackPercentage = mard.getMaxDrawbackPercentage();
 		moduleDescription.getModuleAccountSettingsDescription().stream()
 			.flatMap(mad -> mad.getBindedContracts().stream())
 			.forEach(contractSimple -> {

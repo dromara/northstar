@@ -96,12 +96,13 @@
             <el-descriptions-item label="最大回撤">
               {{ accountInfo.maxDrawback | formatter }}
             </el-descriptions-item>
-            <el-descriptions-item label="平均盈亏">
-              {{ accountInfo.avgEarning | formatter }}
+            <el-descriptions-item label="最大回撤比">
+              {{ `${Math.ceil(accountInfo.maxDrawbackPercentage * 100 || 0)}%` }}
             </el-descriptions-item>
             <el-descriptions-item label="盈亏标准差">
               {{ accountInfo.stdEarning | formatter }}
             </el-descriptions-item>
+            
           </el-descriptions>
           <el-tabs v-model="moduleTab" :stretch="true">
             <el-tab-pane name="holding" label="模组持仓"></el-tab-pane>

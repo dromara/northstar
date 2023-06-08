@@ -46,6 +46,10 @@ public class ModuleAccountRuntimeDescription {
 	 */
 	private double maxDrawback;
 	/**
+	 * 最大回撤比
+	 */
+	private double maxDrawbackPercentage;
+	/**
 	 * 平均盈亏
 	 */
 	private double avgEarning;

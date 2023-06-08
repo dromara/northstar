@@ -106,6 +106,30 @@
       <el-table-column align="center" width="400px">
         <template slot="header">
           <el-button id="createModule" size="mini" type="primary" @click="handleCreate">新建</el-button>
+          <el-popconfirm
+            v-if="env==='development'"
+            class="ml-10"
+            title="确定全部启用吗？"
+            @confirm="enableAll"
+          >
+            <el-button slot="reference" size="mini" type="success">启用</el-button>
+          </el-popconfirm>
+          <el-popconfirm
+            v-if="env==='development'"
+            class="ml-10"
+            title="确定全部停用吗？"
+            @confirm="disableAll"
+          >
+            <el-button slot="reference" size="mini" type="danger">停用</el-button>
+          </el-popconfirm>
+          <el-popconfirm
+            v-if="env==='development'"
+            class="ml-10"
+            title="确定全部重置吗？"
+            @confirm="resetAll"
+          >
+            <el-button slot="reference"  size="mini" type="primary">重置</el-button>
+          </el-popconfirm>
         </template>
         <template slot-scope="scope">
           <el-button
@@ -169,6 +193,7 @@ export default {
       curModule: null,
       timer: -1,
       delayTimer: -1,
+      env: process.env.NODE_ENV
     }
   },
   computed: {
@@ -264,6 +289,27 @@ export default {
         this.moduleList[this.curTableIndex] = module
       }
       this.$store.commit('updateList', [...this.moduleList])
+    },
+    resetAll(){
+      this.moduleList.forEach(module => {
+        moduleApi.updateModule(module, true)
+      })
+    },
+    enableAll(){
+      this.moduleList.forEach((module) => {
+        if(!module.runtime.enabled){
+          moduleApi.toggleModuleState(module.moduleName)
+          module.runtime.enabled = true
+        }
+      })
+    },
+    disableAll(){
+      this.moduleList.forEach((module) => {
+         if(module.runtime.enabled){
+          moduleApi.toggleModuleState(module.moduleName)
+          module.runtime.enabled = false
+        }
+      })
     },
     async toggle(index, row) {
       clearTimeout(this.timer)

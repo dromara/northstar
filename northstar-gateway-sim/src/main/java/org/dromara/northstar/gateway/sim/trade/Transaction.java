@@ -58,7 +58,7 @@ public class Transaction {
 				default -> throw new IllegalArgumentException("Unexpected value: " + orderReq.getDirection());
 			};
 		} else {
-			dealPrice = orderReq.getPrice() > 0 ? orderReq.getPrice() : dealTick.getLastPrice();
+			dealPrice = dealTick.getLastPrice();
 		}
 		return dealPrice;
 	}
