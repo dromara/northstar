@@ -661,7 +661,11 @@ export default {
       this.saveIndicators()
       clearTimeout(this.timer)
       Object.assign(this.$data, this.$options.data())
-      dispose('module-k-line')
+      try{
+        dispose('module-k-line')
+      } catch (e){
+        console.error(e)
+      }
       this.$emit('update:visible', false)
     }
   }
