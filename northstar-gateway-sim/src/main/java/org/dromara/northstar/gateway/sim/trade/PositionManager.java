@@ -72,7 +72,7 @@ public class PositionManager implements TransactionAware, TickDataAware {
 			if(Objects.isNull(tp)) {
 				throw new NoSuchElementException(String.format("找不到%s头持仓：%s", FieldUtils.chn(dir), unifiedSymbol));
 			}
-			tp.onTrade(trade);
+			tp.onTrade(trade).forEach(account::onDeal);
 		}
 	}
 	

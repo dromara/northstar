@@ -105,7 +105,7 @@ public class SimGatewayAccount {
 		// 计算平仓盈亏
 		totalCloseProfit += deal.profit();
 		TradeField trade = deal.getCloseTrade();
-		log.info("{} {} {} {}手 平仓盈亏费：{}", trade.getTradeDate(), trade.getTradeTime(), trade.getContract().getName(), trade.getVolume(), deal.profit());
+		log.info("{} {} {} {}手 平仓盈亏：{}", trade.getTradeDate(), trade.getTradeTime(), trade.getContract().getName(), trade.getVolume(), deal.profit());
 	}
 	
 	public void onDeposit(double amount) {
