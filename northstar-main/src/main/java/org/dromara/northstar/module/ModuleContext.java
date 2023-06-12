@@ -18,6 +18,8 @@ import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -320,8 +322,9 @@ public class ModuleContext implements IModuleContext{
 		if(!orderReqMap.containsKey(order.getOriginOrderId())) {
 			return;
 		}
-		if(!OrderUtils.isValidOrder(order)) {
-			orderReqMap.remove(order.getOriginOrderId());
+		if(!OrderUtils.isValidOrder(order) || OrderUtils.isDoneOrder(order)) {
+			// 延时3秒再移除订单信息，避免移除了订单信息后，成交无法匹配的问题
+			CompletableFuture.runAsync(() -> orderReqMap.remove(order.getOriginOrderId()), CompletableFuture.delayedExecutor(3, TimeUnit.SECONDS));	
 		}
 		moduleAccount.onOrder(order);
 		tradeStrategy.onOrder(order);
@@ -334,13 +337,10 @@ public class ModuleContext implements IModuleContext{
 	public synchronized void onTrade(TradeField trade) {
 		if(!orderReqMap.containsKey(trade.getOriginOrderId()) && !StringUtils.equals(trade.getOriginOrderId(), Constants.MOCK_ORDER_ID)) {
 			return;
-		}
-		if(orderReqMap.containsKey(trade.getOriginOrderId())) {
-			if(getLogger().isInfoEnabled()) {				
-				getLogger().info("成交：{}， 操作：{}{}， 价格：{}， 手数：{}", trade.getOriginOrderId(), FieldUtils.chn(trade.getDirection()), 
-						FieldUtils.chn(trade.getOffsetFlag()), trade.getPrice(), trade.getVolume());
-			}
-			orderReqMap.remove(trade.getOriginOrderId());
+		} 
+		if(orderReqMap.containsKey(trade.getOriginOrderId()) && getLogger().isInfoEnabled()) {
+			getLogger().info("成交：{}， 操作：{}{}， 价格：{}， 手数：{}", trade.getOriginOrderId(), FieldUtils.chn(trade.getDirection()), 
+					FieldUtils.chn(trade.getOffsetFlag()), trade.getPrice(), trade.getVolume());
 		}
 		moduleAccount.onTrade(trade);
 		tradeStrategy.onTrade(trade);
