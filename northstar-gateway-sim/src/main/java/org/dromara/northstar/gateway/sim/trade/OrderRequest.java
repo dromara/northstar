@@ -104,10 +104,10 @@ public class OrderRequest implements TickDataAware{
 			double cost = cost();
 			double available = account.available();
 			if(cost > available) {
-				log.warn("可用资金不足，无法开仓。可用：{}，实际开仓：{}", available, cost);
+				log.warn("[{}] 可用资金不足，无法开仓。可用：{}，实际开仓：{}", submitOrderReq.getGatewayId(), available, cost);
 				orderBuilder.setStatusMsg("废单").setOrderStatus(OrderStatusEnum.OS_Rejected);
 			} else {
-				log.info("成功下单：{}，{}，{}，{}手，委托价：{}，订单ID：{}", 
+				log.info("[{}] 成功下单：{}，{}，{}，{}手，委托价：{}，订单ID：{}", submitOrderReq.getGatewayId(),
 						submitOrderReq.getContract().getName(), submitOrderReq.getDirection(), submitOrderReq.getOffsetFlag(), 
 						submitOrderReq.getVolume(), submitOrderReq.getPrice(), submitOrderReq.getOriginOrderId());
 				orderBuilder.setStatusMsg("已报单").setOrderStatus(OrderStatusEnum.OS_Unknown);
@@ -115,10 +115,10 @@ public class OrderRequest implements TickDataAware{
 		} else {
 			int availablePos = account.getPositionManager().getAvailablePosition(submitOrderReq.getDirection(), submitOrderReq.getContract().getUnifiedSymbol(), true);
 			if(submitOrderReq.getVolume() > availablePos) {
-				log.warn("可用持仓不足，无法平仓。可用：{}，实际平仓：{}", availablePos, submitOrderReq.getVolume());
+				log.warn("[{}] 可用持仓不足，无法平仓。可用：{}，实际平仓：{}", submitOrderReq.getGatewayId(), availablePos, submitOrderReq.getVolume());
 				orderBuilder.setStatusMsg("废单").setOrderStatus(OrderStatusEnum.OS_Rejected);
 			} else {
-				log.info("成功下单：{}，{}，{}，{}手，委托价：{}，订单ID：{}", 
+				log.info("[{}] 成功下单：{}，{}，{}，{}手，委托价：{}，订单ID：{}", submitOrderReq.getGatewayId(),
 						submitOrderReq.getContract().getName(), submitOrderReq.getDirection(), submitOrderReq.getOffsetFlag(), 
 						submitOrderReq.getVolume(), submitOrderReq.getPrice(), submitOrderReq.getOriginOrderId());
 				orderBuilder.setStatusMsg("已报单").setOrderStatus(OrderStatusEnum.OS_Unknown);

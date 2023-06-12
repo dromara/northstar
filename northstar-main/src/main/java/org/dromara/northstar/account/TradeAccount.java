@@ -83,7 +83,7 @@ public class TradeAccount implements IAccount {
 
 	@Override
 	public String submitOrder(SubmitOrderReqField orderReq) {
-		log.info("交易账户 [{}] 收到委托请求", accountId());
+		log.info("[{}] 收到委托请求", accountId());
 		return tradeGateway.submitOrder(orderReq);
 	}
 
