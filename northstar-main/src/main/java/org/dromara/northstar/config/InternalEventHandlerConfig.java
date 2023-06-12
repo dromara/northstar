@@ -45,9 +45,9 @@ class InternalEventHandlerConfig {
 	}
 	
 	@Bean
-	SimMarketHandler simMarketHandler(GatewayManager gatewayMgr) {
+	SimMarketHandler simMarketHandler(GatewayManager gatewayMgr, AccountManager accountMgr) {
 		log.debug("注册：SimMarketHandler");
-		return new SimMarketHandler(gatewayMgr);
+		return new SimMarketHandler(gatewayMgr, accountMgr);
 	}
 	
 	@Bean
