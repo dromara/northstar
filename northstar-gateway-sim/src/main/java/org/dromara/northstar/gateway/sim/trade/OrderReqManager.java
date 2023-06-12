@@ -19,7 +19,7 @@ public class OrderReqManager implements TickDataAware{
 	protected Map<String, OrderRequest> orderMap = new HashMap<>();
 	
 	@Override
-	public void onTick(TickField tick) {
+	public synchronized void onTick(TickField tick) {
 		orderMap.values().parallelStream().forEach(orderReq -> orderReq.onTick(tick));
 	}
 	
