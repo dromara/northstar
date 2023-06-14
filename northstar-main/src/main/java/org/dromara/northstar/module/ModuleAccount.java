@@ -248,8 +248,4 @@ public class ModuleAccount implements IModuleAccount{
 		}
 	}
 
-	public void onCancelOrder() {
-		stateMachine.onCancelReq();
-	}
-
 }

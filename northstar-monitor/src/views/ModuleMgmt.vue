@@ -294,6 +294,8 @@ export default {
       this.moduleList.forEach(module => {
         moduleApi.updateModule(module, true)
       })
+      clearTimeout(this.timer)
+      setTimeout(this.autoRefreshList, 1000)
     },
     enableAll(){
       this.moduleList.forEach((module) => {

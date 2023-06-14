@@ -134,8 +134,6 @@ class ModuleStateMachineTest {
 		ModuleStateMachine msm = new ModuleStateMachine(ctx);
 		msm.onSubmitReq();
 		msm.onOrder(order);
-		msm.onCancelReq();
-		assertThat(msm.getState()).isEqualTo(ModuleState.RETRIEVING_FOR_CANCEL);
 		msm.onOrder(order3);
 		assertThat(msm.getState()).isEqualTo(ModuleState.EMPTY);
 	}
