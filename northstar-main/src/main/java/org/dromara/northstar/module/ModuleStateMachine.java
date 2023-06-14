@@ -24,8 +24,6 @@ public class ModuleStateMachine implements TransactionAware {
 	
 	private ModuleState curState = ModuleState.EMPTY;
 	
-	private ModuleState prevState;
-
 	private ModuleAccount moduleAccount;
 	
 	private IModuleContext ctx;
@@ -39,8 +37,8 @@ public class ModuleStateMachine implements TransactionAware {
 	@Override
 	public void onOrder(OrderField order) {
 		ctx.getLogger().info("收到订单反馈：{}", order.getOrderStatus());
-		if(curState.isOrdering() && !OrderUtils.isValidOrder(order)) {
-			setState(prevState);
+		if(order.getOrderStatus() == OrderStatusEnum.OS_Rejected || order.getOrderStatus() == OrderStatusEnum.OS_Canceled) {
+			updateState();
 		} else if(order.getOrderStatus() == OrderStatusEnum.OS_AllTraded) {
 			shouldUpdateState = true;
 		} else if(OrderUtils.isValidOrder(order)) {
@@ -103,7 +101,6 @@ public class ModuleStateMachine implements TransactionAware {
 		if(curState.isOrdering()) {
 			throw new IllegalStateException(String.format("当前状态：%s，不能继续下单", curState));
 		}
-		prevState = curState;
 		setState(ModuleState.PLACING_ORDER);
 	}
 
