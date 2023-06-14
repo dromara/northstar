@@ -30,21 +30,25 @@ public class ModuleStateMachine implements TransactionAware {
 	
 	private IModuleContext ctx;
 	
+	private boolean shouldUpdateState;
+	
 	public ModuleStateMachine(IModuleContext ctx) {
 		this.ctx = ctx;
 	}
 
 	@Override
 	public void onOrder(OrderField order) {
-		if(!curState.isOrdering() && !OrderUtils.isDoneOrder(order) && OrderUtils.isValidOrder(order)) {
-			throw new IllegalStateException(String.format("当前状态异常：%s，收到订单：%s %s", curState, order.getOrderStatus(), order.getStatusMsg()));
-		}
+		ctx.getLogger().info("收到订单反馈：{}", order.getOrderStatus());
 		if(curState.isOrdering() && !OrderUtils.isValidOrder(order)) {
 			setState(prevState);
-		}
-		if(OrderUtils.isValidOrder(order) && order.getOrderStatus() != OrderStatusEnum.OS_AllTraded) {
+		} else if(order.getOrderStatus() == OrderStatusEnum.OS_AllTraded) {
+			shouldUpdateState = true;
+		} else if(OrderUtils.isValidOrder(order)) {
 			setState(ModuleState.PENDING_ORDER);
+		} else {
+			throw new IllegalStateException(String.format("当前状态异常：%s，收到订单：%s %s", curState, order.getOrderStatus(), order.getStatusMsg()));
 		}
+		
 	}
 
 	@Override
@@ -55,7 +59,10 @@ public class ModuleStateMachine implements TransactionAware {
 		if(trade.getOffsetFlag() == OffsetFlagEnum.OF_Unknown) {
 			throw new IllegalArgumentException("操作意图不明确");
 		}
-		updateState();
+		if(shouldUpdateState) {
+			updateState();
+			shouldUpdateState = false;
+		}
 	}
 	
 	private void updateState() {

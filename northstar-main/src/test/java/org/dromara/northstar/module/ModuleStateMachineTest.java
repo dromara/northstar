@@ -30,9 +30,12 @@ class ModuleStateMachineTest {
 	SubmitOrderReqField orderReq2 = factory.makeOrderReq("rb2205", DirectionEnum.D_Sell, OffsetFlagEnum.OF_Open, 2, 1000, 0);
 	
 	OrderField order = factory.makeOrderField("rb2205", 1000, 2, DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open, OrderStatusEnum.OS_Unknown);
+	OrderField order2a = factory.makeOrderField("rb2205", 1000, 2, DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open, OrderStatusEnum.OS_PartTradedNotQueueing);
+	OrderField order2b = factory.makeOrderField("rb2205", 1000, 2, DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open, OrderStatusEnum.OS_PartTradedQueueing);
 	OrderField order2 = factory.makeOrderField("rb2205", 1000, 2, DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open, OrderStatusEnum.OS_AllTraded);
 	OrderField order3 = factory.makeOrderField("rb2205", 1000, 2, DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open, OrderStatusEnum.OS_Canceled);
 	OrderField order4 = factory.makeOrderField("rb2205", 1000, 2, DirectionEnum.D_Sell, OffsetFlagEnum.OF_Open, OrderStatusEnum.OS_Touched);
+	OrderField order5 = factory.makeOrderField("rb2205", 1000, 2, DirectionEnum.D_Sell, OffsetFlagEnum.OF_Open, OrderStatusEnum.OS_AllTraded);
 	
 	TradeField trade = factory.makeTradeField("rb2205", 1000, 2, DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open);
 	TradeField trade2 = factory.makeTradeField("rb2205", 1000, 2, DirectionEnum.D_Sell, OffsetFlagEnum.OF_Open);
@@ -66,7 +69,10 @@ class ModuleStateMachineTest {
 		ModuleStateMachine msm = new ModuleStateMachine(ctx);
 		msm.onSubmitReq();
 		msm.onOrder(order);
-		msm.onOrder(order2);
+		assertThat(msm.getState()).isEqualTo(ModuleState.PENDING_ORDER);
+		msm.onOrder(order2a);
+		assertThat(msm.getState()).isEqualTo(ModuleState.PENDING_ORDER);
+		msm.onOrder(order2b);
 		assertThat(msm.getState()).isEqualTo(ModuleState.PENDING_ORDER);
 	}
 	
@@ -77,6 +83,7 @@ class ModuleStateMachineTest {
 		msm.setModuleAccount(macc);
 		msm.onSubmitReq();
 		msm.onOrder(order);
+		msm.onOrder(order2);
 		msm.onTrade(trade);
 		assertThat(msm.getState()).isEqualTo(ModuleState.HOLDING_LONG);
 	}
@@ -88,6 +95,7 @@ class ModuleStateMachineTest {
 		msm.setModuleAccount(macc);
 		msm.onSubmitReq();
 		msm.onOrder(order4);
+		msm.onOrder(order5);
 		msm.onTrade(trade2);
 		assertThat(msm.getState()).isEqualTo(ModuleState.HOLDING_SHORT);
 	}
@@ -99,12 +107,14 @@ class ModuleStateMachineTest {
 		msm.setModuleAccount(macc);
 		msm.onSubmitReq();
 		msm.onOrder(order);
+		msm.onOrder(order2);
 		msm.onTrade(trade);
 		assertThat(msm.getState()).isEqualTo(ModuleState.HOLDING_LONG);
 		
 		when(macc.getNonclosedTrades()).thenReturn(List.of(trade, trade2));
 		msm.onSubmitReq();
 		msm.onOrder(order4);
+		msm.onOrder(order5);
 		msm.onTrade(trade2);
 		assertThat(msm.getState()).isEqualTo(ModuleState.EMPTY_HEDGE);
 	}
@@ -124,8 +134,11 @@ class ModuleStateMachineTest {
 		msm.setModuleAccount(macc);
 		msm.onSubmitReq();
 		msm.onOrder(order);
+		msm.onOrder(order2);
 		msm.onTrade(trade);
-		msm.onTrade(trade3);
+		msm.onOrder(order4);
+		msm.onOrder(order5);
+		msm.onTrade(trade2);
 		assertThat(msm.getState()).isEqualTo(ModuleState.HOLDING_HEDGE);
 	}
 	
