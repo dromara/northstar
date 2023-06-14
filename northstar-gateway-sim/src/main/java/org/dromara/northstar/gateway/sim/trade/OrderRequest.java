@@ -76,6 +76,9 @@ public class OrderRequest implements TickDataAware{
 		if(hasDone())	
 			return; 
 		synchronized(this) {
+			if(hasDone()) {
+				return;
+			}
 			if(submitOrderReq.getOrderPriceType() == OrderPriceTypeEnum.OPT_AnyPrice
 					|| FieldUtils.isSell(submitOrderReq.getDirection()) && tick.getBidPrice(0) >= submitOrderReq.getPrice()
 					|| FieldUtils.isBuy(submitOrderReq.getDirection()) && tick.getAskPrice(0) <= submitOrderReq.getPrice()) {

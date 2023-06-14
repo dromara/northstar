@@ -94,6 +94,17 @@ public class PlaybackModuleContext extends ModuleContext implements IModuleConte
 		/* 回测上下文不接收外部的成交数据 */
 	}
 	
+	@Override
+	public boolean isOrderWaitTimeout(String originOrderId, long timeout) {
+		if(!orderReqMap.containsKey(originOrderId)) {
+			return false;
+		}
+		
+		SubmitOrderReqField orderReq = orderReqMap.get(originOrderId);
+		TickField lastTick = latestTickMap.get(orderReq.getContract().getUnifiedSymbol());
+		return lastTick.getActionTimestamp() - orderReq.getActionTimestamp() > timeout;
+	}
+	
 	// 所有的委托都会立马转为成交单
 	@Override
 	public synchronized Optional<String> submitOrderReq(ContractField contract, SignalOperation operation, PriceType priceType, int volume,

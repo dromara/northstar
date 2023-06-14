@@ -100,7 +100,7 @@ public class ModuleContext implements IModuleContext{
 	protected ModuleAccount moduleAccount;
 	
 	/* originOrderId -> orderReq */
-	private Map<String, SubmitOrderReqField> orderReqMap = new HashMap<>();
+	protected Map<String, SubmitOrderReqField> orderReqMap = new HashMap<>();
 	
 	/* unifiedSymbol -> contract */
 	protected Map<String, ContractField> contractMap = new HashMap<>();
@@ -501,7 +501,7 @@ public class ModuleContext implements IModuleContext{
 				.setVolumeCondition(VolumeConditionEnum.VC_AV)
 				.setForceCloseReason(ForceCloseReasonEnum.FCR_NotForceClose)
 				.setContingentCondition(ContingentConditionEnum.CC_Immediately)
-				.setActionTimestamp(latestTickMap.get(contract.getUnifiedSymbol()).getActionTimestamp())
+				.setActionTimestamp(System.currentTimeMillis())
 				.setMinVolume(1)
 				.build()));
 	}
@@ -541,14 +541,17 @@ public class ModuleContext implements IModuleContext{
 		}
 		
 		SubmitOrderReqField orderReq = orderReqMap.get(originOrderId);
-		TickField lastTick = latestTickMap.get(orderReq.getContract().getUnifiedSymbol());
-		return lastTick.getActionTimestamp() - orderReq.getActionTimestamp() > timeout;
+		return System.currentTimeMillis() - orderReq.getActionTimestamp() > timeout;
 	}
 
 	@Override
 	public synchronized void cancelOrder(String originOrderId) {
 		if(!orderReqMap.containsKey(originOrderId)) {
 			getLogger().debug("找不到订单：{}", originOrderId);
+			return;
+		}
+		if(!getState().isOrdering()) {
+			getLogger().info("非下单状态，忽略撤单请求");
 			return;
 		}
 		getLogger().info("撤单：{}", originOrderId);
@@ -558,7 +561,6 @@ public class ModuleContext implements IModuleContext{
 				.setGatewayId(contract.getGatewayId())
 				.setOriginOrderId(originOrderId)
 				.build();
-		moduleAccount.onCancelOrder();
 		module.getAccount(c).cancelOrder(cancelReq);
 	}
 

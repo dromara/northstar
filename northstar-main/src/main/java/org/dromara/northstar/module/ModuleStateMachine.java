@@ -37,7 +37,7 @@ public class ModuleStateMachine implements TransactionAware {
 	@Override
 	public void onOrder(OrderField order) {
 		if(!curState.isOrdering() && !OrderUtils.isDoneOrder(order) && OrderUtils.isValidOrder(order)) {
-			throw new IllegalStateException("当前状态异常：" + curState);
+			throw new IllegalStateException(String.format("当前状态异常：%s，收到订单：%s %s", curState, order.getOrderStatus(), order.getStatusMsg()));
 		}
 		if(curState.isOrdering() && !OrderUtils.isValidOrder(order)) {
 			setState(prevState);
@@ -95,23 +95,12 @@ public class ModuleStateMachine implements TransactionAware {
 
 	public void onSubmitReq() {
 		if(curState.isOrdering()) {
-			throw new IllegalStateException("当前状态异常：" + curState);
+			throw new IllegalStateException(String.format("当前状态：%s，不能继续下单", curState));
 		}
 		prevState = curState;
 		setState(ModuleState.PLACING_ORDER);
 	}
 
-	public void onCancelReq() {
-		if(!curState.isOrdering()) {
-			throw new IllegalStateException("当前状态异常：" + curState);
-		}
-		if(curState == ModuleState.PENDING_ORDER) {
-			setState(ModuleState.RETRIEVING_FOR_CANCEL);
-		} else if (curState == ModuleState.PLACING_ORDER) {
-			setState(prevState);
-		}
-	}
-	
 	public void setModuleAccount(ModuleAccount moduleAccount) {
 		this.moduleAccount = moduleAccount;
 		updateState();
