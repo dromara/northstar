@@ -27,6 +27,8 @@ import org.slf4j.Logger;
 import test.common.TestFieldFactory;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
+import xyz.redtorch.pb.CoreEnum.OrderStatusEnum;
+import xyz.redtorch.pb.CoreField.OrderField;
 import xyz.redtorch.pb.CoreField.TickField;
 import xyz.redtorch.pb.CoreField.TradeField;
 
@@ -34,6 +36,8 @@ class ModuleAccountTest {
 	
 	TestFieldFactory factory = new TestFieldFactory("testAccount");
 	
+	OrderField order = factory.makeOrderField("rb2205", 1000, 2, DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open, OrderStatusEnum.OS_AllTraded);
+	OrderField order2 = factory.makeOrderField("rb2205", 1000, 2, DirectionEnum.D_Sell, OffsetFlagEnum.OF_Open, OrderStatusEnum.OS_AllTraded);
 	TradeField trade = factory.makeTradeField("rb2205", 1000, 2, DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open);
 	TradeField trade2 = factory.makeTradeField("rb2205", 1000, 2, DirectionEnum.D_Sell, OffsetFlagEnum.OF_Open);
 	TradeField closeTrade = factory.makeTradeField("rb2205", 1200, 2, DirectionEnum.D_Sell, OffsetFlagEnum.OF_Close);
@@ -94,6 +98,7 @@ class ModuleAccountTest {
 
 	@Test
 	void testOnTrade() {
+		macc.onOrder(order);
 		macc.onTrade(closeTrade);
 		assertThat(macc.getModuleState()).isEqualTo(ModuleState.HOLDING_SHORT);
 		assertThat(macc.getInitBalance()).isEqualTo(100000);

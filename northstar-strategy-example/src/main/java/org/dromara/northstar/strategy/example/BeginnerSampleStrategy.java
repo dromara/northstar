@@ -105,7 +105,7 @@ public class BeginnerSampleStrategy implements TradeStrategy{
 						.operation(op)
 						.volume(ctx.getDefaultVolume())
 						.priceType(PriceType.WAITING_PRICE)
-						.timeout(3000)
+						.timeout(45000)
 						.build());
 				return;
 			}
@@ -122,7 +122,7 @@ public class BeginnerSampleStrategy implements TradeStrategy{
 				ctx.submitOrderReq(TradeIntent.builder()
 						.contract(ctx.getContract(tick.getUnifiedSymbol()))
 						.operation(SignalOperation.BUY_CLOSE)
-						.priceType(PriceType.WAITING_PRICE)
+						.priceType(PriceType.OPP_PRICE)
 						.volume(ctx.getDefaultVolume())
 						.timeout(3000)
 						.build());

@@ -121,6 +121,8 @@ public class ModuleAccount implements IModuleAccount{
 			.map(this::parseFrom)
 			.filter(Objects::nonNull)
 			.forEach(this::onTrade);
+		
+		stateMachine.updateState();
 	}
 	
 	private TradeField parseFrom(byte[] data) {
