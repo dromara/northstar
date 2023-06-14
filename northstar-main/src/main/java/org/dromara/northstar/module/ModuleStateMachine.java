@@ -48,7 +48,6 @@ public class ModuleStateMachine implements TransactionAware {
 		} else {
 			throw new IllegalStateException(String.format("当前状态异常：%s，收到订单：%s %s", curState, order.getOrderStatus(), order.getStatusMsg()));
 		}
-		
 	}
 
 	@Override
@@ -65,7 +64,7 @@ public class ModuleStateMachine implements TransactionAware {
 		}
 	}
 	
-	private void updateState() {
+	public void updateState() {
 		List<TradeField> nonclosedTrade = moduleAccount.getNonclosedTrades();
 		if(nonclosedTrade.isEmpty()) {
 			setState(ModuleState.EMPTY);
