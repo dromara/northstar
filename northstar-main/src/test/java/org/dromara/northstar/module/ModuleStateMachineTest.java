@@ -144,7 +144,9 @@ class ModuleStateMachineTest {
 	
 	@Test
 	void shouldGetCancelling() {
+		when(macc.getNonclosedTrades()).thenReturn(List.of());
 		ModuleStateMachine msm = new ModuleStateMachine(ctx);
+		msm.setModuleAccount(macc);
 		msm.onSubmitReq();
 		msm.onOrder(order);
 		msm.onOrder(order3);
