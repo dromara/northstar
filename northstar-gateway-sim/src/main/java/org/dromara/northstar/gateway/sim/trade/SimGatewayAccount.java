@@ -97,7 +97,8 @@ public class SimGatewayAccount {
 		ContractField contractField = trade.getContract();
 		double commission = contractField.getCommissionFee() > 0 ? contractField.getCommissionFee() : contractField.getCommissionRate() * trade.getPrice() * trade.getContract().getMultiplier();
 		double sumCommission = trade.getVolume() * commission;
-		log.info("{} {} {} {}手 交易手续费：{}", trade.getTradeDate(), trade.getTradeTime(), trade.getContract().getName(), trade.getVolume(), sumCommission);
+		log.info("[{}] {} {} {} {}手 交易手续费：{}", gatewayId, trade.getTradeDate(), trade.getTradeTime(), trade.getContract().getName(), 
+				trade.getVolume(), sumCommission);
 		totalCommission += sumCommission;
 	}
 	
@@ -105,7 +106,8 @@ public class SimGatewayAccount {
 		// 计算平仓盈亏
 		totalCloseProfit += deal.profit();
 		TradeField trade = deal.getCloseTrade();
-		log.info("{} {} {} {}手 平仓盈亏：{}", trade.getTradeDate(), trade.getTradeTime(), trade.getContract().getName(), trade.getVolume(), deal.profit());
+		log.info("[{}] {} {} {} {}手 平仓盈亏：{}，最新账户余额：{}", gatewayId, trade.getTradeDate(), trade.getTradeTime(), trade.getContract().getName(),
+				trade.getVolume(), deal.profit(), balance());
 	}
 	
 	public void onDeposit(double amount) {
