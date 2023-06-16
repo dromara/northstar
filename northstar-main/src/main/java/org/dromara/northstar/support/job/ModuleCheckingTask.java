@@ -153,7 +153,7 @@ public class ModuleCheckingTask implements InitializingBean {
 			List<String> errorLines = checker.getExceptionLog(startTime, endTime);
 			if(!errorLines.isEmpty()) {
 				StringBuilder sb = new StringBuilder();
-				errorLines.forEach(line -> sb.append(line + "%n"));
+				errorLines.forEach(line -> sb.append(line + "\n"));
 				msgMgr.getSubscribers().forEach(sub -> 
 					doSmartSend(sub, String.format("[模组异常日志警报] %s %d-%d时，%d条异常记录", module.getName(),
 							startTime.getHour(), endTime.getHour(), errorLines.size()), sb.toString())
