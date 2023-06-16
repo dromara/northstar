@@ -67,7 +67,7 @@ public class AppScheduleTask {
 		List<String> errorLines = checker.getExceptionLog(startTime, endTime);
 		if(!errorLines.isEmpty()) {
 			StringBuilder sb = new StringBuilder();
-			errorLines.forEach(line -> sb.append(line + "%n"));
+			errorLines.forEach(line -> sb.append(line + "\n"));
 			sb.append(String.format("%n%n警报来源：%s", InetAddressUtils.getHostname()));
 			msgMgr.getSubscribers().forEach(sub -> 
 				msgMgr.getSender().send(sub, String.format("[程序异常日志警报] %d-%d时，%d条异常记录", 

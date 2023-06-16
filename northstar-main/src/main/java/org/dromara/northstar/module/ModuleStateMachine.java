@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.dromara.northstar.common.TransactionAware;
+import org.dromara.northstar.common.constant.Constants;
 import org.dromara.northstar.common.constant.ModuleState;
 import org.dromara.northstar.common.utils.OrderUtils;
 import org.dromara.northstar.strategy.IModuleContext;
@@ -56,7 +57,7 @@ public class ModuleStateMachine implements TransactionAware {
 		if(trade.getOffsetFlag() == OffsetFlagEnum.OF_Unknown) {
 			throw new IllegalArgumentException("操作意图不明确");
 		}
-		if(shouldUpdateState) {
+		if(shouldUpdateState || StringUtils.equals(trade.getOriginOrderId(), Constants.MOCK_ORDER_ID)) {
 			updateState();
 			shouldUpdateState = false;
 		}
