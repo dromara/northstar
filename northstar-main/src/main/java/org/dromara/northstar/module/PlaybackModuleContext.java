@@ -31,6 +31,7 @@ import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.ForceCloseReasonEnum;
 import xyz.redtorch.pb.CoreEnum.HedgeFlagEnum;
 import xyz.redtorch.pb.CoreEnum.OrderPriceTypeEnum;
+import xyz.redtorch.pb.CoreEnum.OrderStatusEnum;
 import xyz.redtorch.pb.CoreEnum.PriceSourceEnum;
 import xyz.redtorch.pb.CoreEnum.TimeConditionEnum;
 import xyz.redtorch.pb.CoreEnum.VolumeConditionEnum;
@@ -153,6 +154,24 @@ public class PlaybackModuleContext extends ModuleContext implements IModuleConte
 			setEnabled(false);
 			return Optional.empty();
 		}
+		
+		OrderField order = OrderField.newBuilder()
+				.setGatewayId(PLAYBACK_GATEWAY)
+				.setAccountId(PLAYBACK_GATEWAY)
+				.setContract(contract)
+				.setTotalVolume(volume)
+				.setTradedVolume(volume)
+				.setPrice(lastTick.getLastPrice())
+				.setDirection(OrderUtils.resolveDirection(operation))
+				.setHedgeFlag(HedgeFlagEnum.HF_Speculation)
+				.setOffsetFlag(module.getModuleDescription().getClosingPolicy().resolveOffsetFlag(operation, contract, nonclosedTrades, lastTick.getTradingDay()))
+				.setTradingDay(lastTick.getTradingDay())
+				.setOrderDate(lastTick.getActionDay())
+				.setOrderTime(lastTick.getActionTime())
+				.setOrderStatus(OrderStatusEnum.OS_AllTraded)
+				.build();
+		moduleAccount.onOrder(order);
+		tradeStrategy.onOrder(order);
 		
 		TradeField trade = TradeField.newBuilder()
 				.setGatewayId(PLAYBACK_GATEWAY)
