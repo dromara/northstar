@@ -13,6 +13,7 @@ import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
+import org.apache.commons.lang3.StringUtils;
 import org.dromara.northstar.common.event.FastEventEngine;
 import org.dromara.northstar.gateway.IMarketCenter;
 import org.dromara.northstar.gateway.mktdata.MarketCenter;
@@ -22,6 +23,7 @@ import org.dromara.northstar.support.notification.MailSenderFactory;
 import org.dromara.northstar.web.interceptor.AuthorizationInterceptor;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.info.BuildProperties;
@@ -55,6 +57,9 @@ public class AppConfig implements WebMvcConfigurer, DisposableBean {
 
 	@Autowired
 	private SocketIOServer socketServer;
+	
+	@Value("${spring.profiles.active}")
+	private String profile;
 	
 	@Override
 	public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
@@ -95,8 +100,9 @@ public class AppConfig implements WebMvcConfigurer, DisposableBean {
 
 	@Override
 	public void addInterceptors(InterceptorRegistry registry) {
-		registry.addInterceptor(new AuthorizationInterceptor()).addPathPatterns("/**")
-				.excludePathPatterns("/auth/login");
+		if(!StringUtils.equals(profile, "e2e")) {
+			registry.addInterceptor(new AuthorizationInterceptor()).addPathPatterns("/**").excludePathPatterns("/auth/login");
+		}
 	}
 
     @Bean
