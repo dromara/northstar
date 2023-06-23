@@ -1,4 +1,4 @@
-package org.dromara.northstar.ai;
+package org.dromara.northstar.strategy.ai;
 
 public enum Action {
 	/**

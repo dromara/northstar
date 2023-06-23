@@ -1,4 +1,4 @@
-package org.dromara.northstar.ai;
+package org.dromara.northstar.strategy.ai;
 
 import com.alibaba.fastjson.JSONObject;
 
