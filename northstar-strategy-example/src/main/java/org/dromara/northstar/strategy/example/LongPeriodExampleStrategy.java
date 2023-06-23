@@ -18,8 +18,8 @@ import xyz.redtorch.pb.CoreField.ContractField;
  * @author KevinHuangwl
  *
  */
-@StrategicComponent(LongPeriodSampleStrategy.NAME)
-public class LongPeriodSampleStrategy extends AbstractStrategy implements TradeStrategy{
+@StrategicComponent(LongPeriodExampleStrategy.NAME)
+public class LongPeriodExampleStrategy extends AbstractStrategy implements TradeStrategy{
 
 	protected static final String NAME = "示例-大周期指标演示";
 	
