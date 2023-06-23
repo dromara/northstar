@@ -14,6 +14,7 @@ import java.util.Objects;
 import javax.transaction.Transactional;
 
 import org.dromara.northstar.account.AccountManager;
+import org.dromara.northstar.common.IModuleService;
 import org.dromara.northstar.common.constant.Constants;
 import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.common.constant.ModuleState;
@@ -70,7 +71,7 @@ import xyz.redtorch.pb.CoreField.TradeField;
  *
  */
 @Slf4j
-public class ModuleService implements PostLoadAware {
+public class ModuleService implements IModuleService, PostLoadAware {
 	
 	private ApplicationContext ctx;
 	
@@ -142,6 +143,7 @@ public class ModuleService implements PostLoadAware {
 	 * @return
 	 * @throws Exception 
 	 */
+	@Override
 	public ModuleDescription createModule(ModuleDescription md) throws Exception {
 		ModuleAccountRuntimeDescription mard = ModuleAccountRuntimeDescription.builder()
 				.initBalance(md.getInitBalance())
@@ -167,6 +169,7 @@ public class ModuleService implements PostLoadAware {
 	 * @throws Exception 
 	 */
 	@Transactional
+	@Override
 	public ModuleDescription modifyModule(ModuleDescription md, boolean reset) throws Exception {
 		if(reset) {
 			removeModule(md.getModuleName());
@@ -184,6 +187,7 @@ public class ModuleService implements PostLoadAware {
 	 * @return
 	 */
 	@Transactional
+	@Override
 	public boolean removeModule(String name) {
 		unloadModule(name);
 		moduleRepo.deleteRuntimeByName(name);
