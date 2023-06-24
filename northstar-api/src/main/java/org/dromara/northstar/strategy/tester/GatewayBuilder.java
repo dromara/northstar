@@ -23,15 +23,12 @@ public class GatewayBuilder {
 	
 	private ObjectManager<Gateway> gatewayMgr;
 	
-	private ModuleTesterContext ctx;
-	
-	public GatewayBuilder(IGatewayService gatewayService, ObjectManager<Gateway> gatewayMgr, ModuleTesterContext ctx) {
+	public GatewayBuilder(IGatewayService gatewayService, ObjectManager<Gateway> gatewayMgr) {
 		this.gatewayService = gatewayService;
 		this.gatewayMgr = gatewayMgr;
-		this.ctx = ctx;
 	}
 	
-	public MarketGateway createPlaybackGateway(ContractSimpleInfo csi) {
+	public MarketGateway createPlaybackGateway(ContractSimpleInfo csi, ModuleTesterContext ctx) {
 		String gatewayId = "历史回放_" + csi.getName();
 		JSONObject settings = new JSONObject();
 		settings.put("preStartDate", ctx.preStartDate().format(DateTimeConstant.D_FORMAT_INT_FORMATTER));

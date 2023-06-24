@@ -39,26 +39,25 @@ import xyz.redtorch.pb.CoreField.ContractField;
 @Slf4j
 public abstract class AbstractTester {
 	
-	private IContractManager contractMgr;
+	protected IContractManager contractMgr;
 	
-	private GatewayBuilder gatewayBuilder;
+	protected GatewayBuilder gatewayBuilder;
 	
-	private ModuleBuilder moduleBuilder;
+	protected ModuleBuilder moduleBuilder;
 	
-	private IGatewayService gatewayService;
+	protected IGatewayService gatewayService;
 	
-	private IModuleService moduleService;
+	protected IModuleService moduleService;
 	
-	private ModuleTesterContext ctx;
+	protected ModuleTesterContext ctx;
 	
 	protected AbstractTester(GatewayBuilder gatewayBuilder, ModuleBuilder moduleBuilder, IContractManager contractMgr,
-			IGatewayService gatewayService, IModuleService moduleService, ModuleTesterContext ctx) {
+			IGatewayService gatewayService, IModuleService moduleService) {
 		this.contractMgr = contractMgr;
 		this.gatewayBuilder = gatewayBuilder;
 		this.moduleBuilder = moduleBuilder;
 		this.gatewayService = gatewayService;
 		this.moduleService = moduleService;
-		this.ctx = ctx;
 	}
 	
 	// 策略配置
@@ -106,7 +105,7 @@ public abstract class AbstractTester {
 					.unifiedSymbol(cf.getUnifiedSymbol())
 					.value(c.identifier().value())
 					.build();
-			MarketGateway mktGateway = gatewayBuilder.createPlaybackGateway(csi);
+			MarketGateway mktGateway = gatewayBuilder.createPlaybackGateway(csi, ctx);
 			TradeGateway tdGateway = gatewayBuilder.createSimGateway(mktGateway);
 			tdGateway.connect();
 			gatewayService.simMoneyIO(tdGateway.gatewayId(), ctx.symbolTestAmount().get(symbol));

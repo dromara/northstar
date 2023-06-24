@@ -106,7 +106,7 @@ class ModuleControllerTest {
 	
 	ModuleDescription md2;
 	
-	String strategy = "{\"name\":\"示例信号策略\",\"className\":\"org.dromara.northstar.strategy.example.BeginnerSampleStrategy\"}";
+	String strategy = "{\"name\":\"示例信号策略\",\"className\":\"org.dromara.northstar.strategy.example.BeginnerExampleStrategy\"}";
 	String strategyParams = "{\"label\":\"操作间隔\",\"name\":\"actionInterval\",\"order\":10,\"type\":\"Number\",\"value\":60,\"unit\":\"秒\",\"options\":[]}";
 	
 	TestFieldFactory factory = new TestFieldFactory("CTP账户");
