@@ -199,6 +199,13 @@ public class ModuleAccount implements IModuleAccount{
 		int shortPos = getNonclosedPosition(unifiedSymbol, DirectionEnum.D_Sell);
 		return longPos - shortPos;
 	}
+	
+	@Override
+	public double totalHoldingProfit() {
+		return posTable.values().stream()
+				.mapToDouble(mp -> mp.profit())
+				.sum();
+	}
 
 	public void tradeDayPreset() {
 		posTable.values().stream().forEach(ModulePosition::releaseOrder);
