@@ -363,6 +363,7 @@ public class ModuleService implements PostLoadAware {
 				.setContract(contract)
 				.setTradeDate(LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
 				.setTradeTime(LocalTime.now().format(DateTimeConstant.T_FORMAT_FORMATTER))
+				.setTradeTimestamp(System.currentTimeMillis())
 				.setTradingDay(tradingDay)
 				.setGatewayId(account.accountId())
 				.setDirection(mockTrade.getDirection())
