@@ -66,7 +66,7 @@ spring:
     url: jdbc:h2:mem:testdb
   config:
     activate:
-      on-profile: test
+      on-profile: test,unittest,train
       
 ---
 server:

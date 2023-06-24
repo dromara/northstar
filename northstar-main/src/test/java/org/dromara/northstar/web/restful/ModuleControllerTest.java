@@ -63,7 +63,7 @@ import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
 
-@SpringBootTest(classes = NorthstarApplication.class, value="spring.profiles.active=test")
+@SpringBootTest(classes = NorthstarApplication.class, value="spring.profiles.active=unittest")
 @AutoConfigureMockMvc
 class ModuleControllerTest {
 	
