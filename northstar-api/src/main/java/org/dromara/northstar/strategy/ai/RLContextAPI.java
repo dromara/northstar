@@ -1,5 +1,7 @@
 package org.dromara.northstar.strategy.ai;
 
+import org.dromara.northstar.strategy.model.FeedbackDefinition;
+
 import retrofit2.Call;
 
 public interface RLContextAPI {
@@ -18,12 +20,12 @@ public interface RLContextAPI {
 	 * 训练模型
 	 * @return
 	 */
-	Call<Integer> train();
+	Call<Integer> train(FeedbackDefinition feedback);
 	/**
 	 * 执行运算
 	 * @return
 	 */
-	Call<Integer> evaluate();
+	Call<Integer> evaluate(FeedbackDefinition feedback);
 	/**
 	 * 导出模型
 	 * @return
