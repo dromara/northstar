@@ -15,6 +15,7 @@ import javax.net.ssl.X509TrustManager;
 
 import org.apache.commons.lang3.StringUtils;
 import org.dromara.northstar.common.event.FastEventEngine;
+import org.dromara.northstar.common.utils.LocalEnvUtils;
 import org.dromara.northstar.gateway.IMarketCenter;
 import org.dromara.northstar.gateway.mktdata.MarketCenter;
 import org.dromara.northstar.support.notification.IMailMessageContentHandler;
@@ -22,6 +23,7 @@ import org.dromara.northstar.support.notification.MailDeliveryManager;
 import org.dromara.northstar.support.notification.MailSenderFactory;
 import org.dromara.northstar.web.interceptor.AuthorizationInterceptor;
 import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
@@ -30,6 +32,7 @@ import org.springframework.boot.info.BuildProperties;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.http.client.OkHttp3ClientHttpRequestFactory;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -53,13 +56,16 @@ import okhttp3.OkHttpClient;
  */
 @Slf4j
 @Configuration
-public class AppConfig implements WebMvcConfigurer, DisposableBean {
+public class AppConfig implements WebMvcConfigurer, InitializingBean, DisposableBean {
 
 	@Autowired
 	private SocketIOServer socketServer;
 	
 	@Value("${spring.profiles.active}")
 	private String profile;
+	
+	@Autowired
+	private Environment env;
 	
 	@Override
 	public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
@@ -174,6 +180,12 @@ public class AppConfig implements WebMvcConfigurer, DisposableBean {
 	@Override
 	public void destroy() throws Exception {
 		socketServer.stop();		
+	}
+
+	@Override
+	public void afterPropertiesSet() throws Exception {
+		LocalEnvUtils.setEnvironment(env);
+		log.info("设置全局环境信息");
 	}
 
 }
