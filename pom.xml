@@ -110,7 +110,6 @@
 				<artifactId>spring-boot-starter-web</artifactId>
 				<version>${springboot-version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-starter-mail</artifactId>
@@ -161,6 +160,11 @@
 				<groupId>com.google.guava</groupId>
 				<artifactId>guava</artifactId>
 				<version>${guava-version}</version>
+			</dependency>
+			<dependency>
+			    <groupId>org.springframework.retry</groupId>
+			    <artifactId>spring-retry</artifactId>
+			    <version>2.0.1</version>
 			</dependency>
 			<dependency>
 			    <groupId>com.squareup.okhttp3</groupId>
