@@ -362,7 +362,7 @@ public class ModuleService implements PostLoadAware {
 				.setOriginOrderId(Constants.MOCK_ORDER_ID)
 				.setContract(contract)
 				.setTradeDate(LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
-				.setTradeTime(LocalTime.now().format(DateTimeConstant.T_FORMAT_FORMATTER))
+				.setTradeTime(LocalTime.now().format(DateTimeConstant.T_FORMAT_FORMATTER) + "MT")
 				.setTradeTimestamp(System.currentTimeMillis())
 				.setTradingDay(tradingDay)
 				.setGatewayId(account.accountId())
