@@ -37,7 +37,6 @@
 		<socketio-client-version>1.0.0</socketio-client-version>
 		<hutool-version>5.7.22</hutool-version>
 		<jackson-version>2.12.5</jackson-version>
-		<log4j-version>2.18.0</log4j-version>
 		<byte-buddy-version>1.10.20</byte-buddy-version>
 		<netty-version>4.1.69.Final</netty-version>
 		<h2-version>2.1.214</h2-version>
@@ -270,16 +269,6 @@
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-math3</artifactId>
 				<version>${commons-math-version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.logging.log4j</groupId>
-				<artifactId>log4j-api</artifactId>
-				<version>${log4j-version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.logging.log4j</groupId>
-				<artifactId>log4j-to-slf4j</artifactId>
-				<version>${log4j-version}</version>
 			</dependency>
 			<!-- netty -->
 			<dependency>
