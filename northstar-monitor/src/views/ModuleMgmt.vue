@@ -193,7 +193,8 @@ export default {
       curModule: null,
       timer: -1,
       delayTimer: -1,
-      env: process.env.NODE_ENV
+      env: process.env.NODE_ENV,
+      lock: false
     }
   },
   computed: {
@@ -248,6 +249,7 @@ export default {
     },
     async autoRefreshList() {
       moduleApi.getAllModules().then(modules => {
+        this.lock = false
         if(modules.length > 0){
           const statusPromises = modules.map(m => moduleApi.getModuleStatus(m.moduleName))
           const statePromises = modules.map(m => moduleApi.getModuleState(m.moduleName))
@@ -264,7 +266,9 @@ export default {
                   enabled: statuses[index]
                 } : null,
             }));
-            this.updateModuleList(combinedResults)
+            if(!this.lock){
+              this.updateModuleList(combinedResults)
+            }
           });
         }
       })
@@ -314,6 +318,7 @@ export default {
       })
     },
     async toggle(index, row) {
+      this.lock = true
       clearTimeout(this.timer)
       clearTimeout(this.delayTimer)
       row.runtime.enabled = !row.runtime.enabled
