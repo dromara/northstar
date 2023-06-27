@@ -282,6 +282,7 @@
             :title="`${holdingVisibleOnChart ? '隐藏持仓线' : '显示持仓线'}`"
             @click.native="holdingVisibleOnChart = !holdingVisibleOnChart"
           ></el-button>
+          <el-button icon="el-icon-download" title="下载数据" @click.native="exportData"></el-button>
         </div>
         <div
           id="module-k-line"
@@ -307,6 +308,7 @@ import { jStat } from 'jstat'
 import { parse } from 'json2csv'
 
 import { PositionField, TradeField } from '@/lib/xyz/redtorch/pb/core_field_pb'
+import moment from 'moment'
 
 const makeHoldingSegment = (deal) => {
   return {
@@ -481,7 +483,7 @@ export default {
       return positions.filter((item) => item.position > 0)
     },
     indicatorOptions() {
-      if (!this.moduleRuntime.indicatorMap) return []
+      if (!this.moduleRuntime.indicatorMap || !this.unifiedSymbolOfChart) return []
       return this.moduleRuntime.indicatorMap[this.unifiedSymbolOfChart]
     }
   },
@@ -526,6 +528,28 @@ export default {
             table.bodyWrapper.scrollTop = table.bodyWrapper.scrollHeight
           }
         })
+      })
+    },
+    exportData(){
+      const fields = [
+        'time',
+        'open',
+        'high',
+        'low',
+        'close',
+        'volume',
+        'openInterest',
+        ...this.indicatorOptions
+      ]
+      Object.keys(this.barDataMap).map(symbol => {
+        const dataList = this.barDataMap[symbol].map(data => {
+          return fields.reduce((obj, field) => {
+            obj[field] = field === 'time' ? moment(data['timestamp']).format('yyyyMMDD HH:mm') : data[field]
+            return obj
+          }, {})
+        })
+        const csvData = parse(dataList, {fields})
+        downloadData(csvData, `${symbol}_数据.csv`, 'text/csv,charset=UTF-8')
       })
     },
     exportDealRecord() {
