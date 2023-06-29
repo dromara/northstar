@@ -73,11 +73,6 @@ server:
   port: 443
   ssl:
     enabled: true
-  servlet:
-    session:
-      cookie:
-        same-site: none
-        secure: true
 spring:
   datasource:
     url: jdbc:h2:mem:testdb
