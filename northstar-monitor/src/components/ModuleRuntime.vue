@@ -539,14 +539,25 @@ export default {
         'close',
         'volume',
         'openInterest',
-        ...this.indicatorOptions
+        ...this.indicatorOptions,
+        'holding'
       ]
       Object.keys(this.barDataMap).map(symbol => {
         const dataList = this.barDataMap[symbol].map(data => {
-          return fields.reduce((obj, field) => {
+          const timeFrameObj = fields.reduce((obj, field) => {
             obj[field] = field === 'time' ? moment(data['timestamp']).format('yyyyMMDD HH:mm') : data[field]
             return obj
           }, {})
+          timeFrameObj['holding'] = 0
+          this.dealRecords.forEach(deal => {
+            const openTime = deal.openTrade.tradetimestamp
+            const closeTime = deal.closeTrade.tradetimestamp
+            if(data['timestamp'] > openTime && data['timestamp'] < closeTime){
+              const factor = deal.direction === '多' ? 1 : -1
+              timeFrameObj['holding'] += factor * deal.volume
+            }
+          })
+          return timeFrameObj
         })
         const csvData = parse(dataList, {fields})
         downloadData(csvData, `${symbol}_数据.csv`, 'text/csv,charset=UTF-8')
