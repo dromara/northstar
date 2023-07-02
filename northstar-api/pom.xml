@@ -32,10 +32,6 @@
 			<artifactId>fastjson</artifactId>
 		</dependency>
 		<dependency>
-		    <groupId>com.squareup.retrofit2</groupId>
-		    <artifactId>retrofit</artifactId>
-		</dependency>
-		<dependency>
 		    <groupId>com.lmax</groupId>
 		    <artifactId>disruptor</artifactId>
 		</dependency>
