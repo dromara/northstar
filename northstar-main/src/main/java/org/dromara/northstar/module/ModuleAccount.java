@@ -79,7 +79,8 @@ public class ModuleAccount implements IModuleAccount{
 				accDealVolume += closeTrade.getVolume();
 				accCloseProfit += profit;
 				double commission = contract.getCommissionFee() > 0 ? contract.getCommissionFee() : contract.getCommissionRate() * closeTrade.getPrice() * contract.getMultiplier();
-				accCommission += commission * 2 * closeTrade.getVolume(); // 乘2代表手续费双向计算
+				double dealCommission = commission * 2 * closeTrade.getVolume(); // 乘2代表手续费双向计算
+				accCommission += dealCommission;
 				maxProfit = Math.max(maxProfit, accCloseProfit - accCommission);
 				maxTotalBalance = Math.max(maxTotalBalance, initBalance + maxProfit);
 				double drawback = accCloseProfit - accCommission - maxProfit;
@@ -89,7 +90,7 @@ public class ModuleAccount implements IModuleAccount{
 						.moduleName(moduleDescription.getModuleName())
 						.moduleAccountId(closeTrade.getAccountId())
 						.contractName(contract.getName())
-						.dealProfit(profit)
+						.dealProfit(profit - dealCommission)
 						.openTrade(openTrade.toByteArray())
 						.closeTrade(closeTrade.toByteArray())
 						.build());
