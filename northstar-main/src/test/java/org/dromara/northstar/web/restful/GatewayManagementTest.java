@@ -38,7 +38,7 @@ import common.TestGatewayFactory;
  * @author KevinHuangwl
  *
  */
-@SpringBootTest(classes = NorthstarApplication.class, value="spring.profiles.active=test")
+@SpringBootTest(classes = NorthstarApplication.class, value="spring.profiles.active=unittest")
 @AutoConfigureMockMvc
 class GatewayManagementTest {
 	

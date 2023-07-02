@@ -54,7 +54,7 @@ public class ModuleAccountRuntimeDescription {
 	 */
 	private double avgEarning;
 	/**
-	 * 盈亏标准差
+	 * 年化收益率
 	 */
-	private double stdEarning;
+	private double annualizedRateOfReturn;
 }

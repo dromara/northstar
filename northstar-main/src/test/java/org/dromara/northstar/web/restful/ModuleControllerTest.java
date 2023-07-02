@@ -63,7 +63,7 @@ import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
 
-@SpringBootTest(classes = NorthstarApplication.class, value="spring.profiles.active=test")
+@SpringBootTest(classes = NorthstarApplication.class, value="spring.profiles.active=unittest")
 @AutoConfigureMockMvc
 class ModuleControllerTest {
 	
@@ -106,7 +106,7 @@ class ModuleControllerTest {
 	
 	ModuleDescription md2;
 	
-	String strategy = "{\"name\":\"示例信号策略\",\"className\":\"org.dromara.northstar.strategy.example.BeginnerSampleStrategy\"}";
+	String strategy = "{\"name\":\"示例信号策略\",\"className\":\"org.dromara.northstar.strategy.example.BeginnerExampleStrategy\"}";
 	String strategyParams = "{\"label\":\"操作间隔\",\"name\":\"actionInterval\",\"order\":10,\"type\":\"Number\",\"value\":60,\"unit\":\"秒\",\"options\":[]}";
 	
 	TestFieldFactory factory = new TestFieldFactory("CTP账户");

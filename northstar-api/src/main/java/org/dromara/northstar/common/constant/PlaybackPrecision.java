@@ -6,8 +6,20 @@ package org.dromara.northstar.common.constant;
  *
  */
 public enum PlaybackPrecision {
-	EXTREME,
+	/**
+	 * 每分钟1TICK
+	 */
+	LITE,	
+	/**
+	 * 每分钟4TICK
+	 */
 	LOW,
+	/**
+	 * 每分钟30TICK
+	 */
 	MEDIUM,
+	/**
+	 * 每分钟120TICK
+	 */
 	HIGH;
 }

@@ -1,9 +1,12 @@
 package org.dromara.northstar.module;
 
+import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -24,7 +27,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 import org.dromara.northstar.common.constant.Constants;
 import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.common.constant.ModuleState;
@@ -67,6 +69,7 @@ import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
+import com.google.protobuf.InvalidProtocolBufferException;
 
 import cn.hutool.core.lang.Assert;
 import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
@@ -316,7 +319,7 @@ public class ModuleContext implements IModuleContext{
 			list.offer(new TimeSeriesValue(indicator.get(0).value(), bar.getActionTimestamp()));	
 		}
 	}
-
+	
 	@Override
 	public synchronized void onOrder(OrderField order) {
 		if(!orderReqMap.containsKey(order.getOriginOrderId())) {
@@ -394,9 +397,16 @@ public class ModuleContext implements IModuleContext{
 		if(fullDescription) {
 			List<ModuleDealRecord> dealRecords = moduleRepo.findAllDealRecords(module.getName());
 			double avgProfit = dealRecords.stream().mapToDouble(ModuleDealRecord::getDealProfit).average().orElse(0D);
-			double stdProfit = new StandardDeviation().evaluate(dealRecords.stream().mapToDouble(ModuleDealRecord::getDealProfit).toArray());
+			double annualizedRateOfReturn = 0;
+			if(!dealRecords.isEmpty()) {
+				LocalDate startDate = LocalDate.parse(parse(dealRecords.get(0).getOpenTrade()).getTradeDate(), DateTimeConstant.D_FORMAT_INT_FORMATTER);
+				LocalDate endDate = LocalDate.parse(parse(dealRecords.get(dealRecords.size() - 1).getCloseTrade()).getTradeDate(), DateTimeConstant.D_FORMAT_INT_FORMATTER);
+				long days = ChronoUnit.DAYS.between(startDate, endDate);
+				double totalEarning = moduleAccount.getAccCloseProfit() - moduleAccount.getAccCommission();
+				annualizedRateOfReturn = (totalEarning / moduleAccount.getInitBalance()) / days * 365;  
+			}
 			accRtDescription.setAvgEarning(avgProfit);
-			accRtDescription.setStdEarning(stdProfit);
+			accRtDescription.setAnnualizedRateOfReturn(annualizedRateOfReturn);
 			
 			Map<String, List<String>> indicatorMap = new HashMap<>();
 			Map<String, LinkedHashMap<Long, JSONObject>> symbolTimeObject = new HashMap<>();
@@ -443,6 +453,14 @@ public class ModuleContext implements IModuleContext{
 			mad.setDataMap(dataMap);
 		}
 		return mad;
+	}
+	
+	private TradeField parse(byte[] data) {
+		try {
+			return TradeField.parseFrom(data);
+		} catch (InvalidProtocolBufferException e) {
+			throw new IllegalStateException(e);
+		}
 	}
 	
 	private JSONObject assignBar(BarField bar) {

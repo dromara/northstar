@@ -135,7 +135,6 @@ export default {
       this.updateInterval = parseInt(localStorage.getItem(LOG_UPDATE_INTERVAL) || 1000)
       this.numOfLinesInView = parseInt(localStorage.getItem(LOG_NUM_OF_LINES_IN_VIEW) || 500)
       const moduleName = this.$route.params.module
-      console.log('route', this.$route)
       if (moduleName) {
         this.mode = 'module'
         this.moduleName = moduleName

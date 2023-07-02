@@ -13,6 +13,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.lang3.StringUtils;
 import org.dromara.northstar.common.IDataServiceManager;
 import org.dromara.northstar.common.constant.ChannelType;
@@ -23,6 +25,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
@@ -65,11 +68,12 @@ public class PlaybackDataServiceManager implements IDataServiceManager {
 		this.userToken = secret;
 		this.dtUtil = dtUtil;
 		this.restTemplate = restTemplate;
-		log.info("采用外部数据源加载历史数据");
-		register();
 	}
 	
-	private void register() {
+	@PostConstruct
+	@Retryable
+	public void register() {
+		log.info("采用外部数据源加载历史数据");
 		HttpHeaders headers = new HttpHeaders();
 		headers.add("X-PCNAME", LocalEnvUtils.getPCName());
 		headers.add("X-MACHINE", LocalEnvUtils.getMACAddress());
@@ -89,6 +93,7 @@ public class PlaybackDataServiceManager implements IDataServiceManager {
 	 * @param endDate
 	 * @return
 	 */
+	@Retryable
 	@Override
 	public List<BarField> getMinutelyData(ContractField contract, LocalDate startDate, LocalDate endDate) {
 		log.debug("从数据服务加载历史行情1分钟数据：{}，{} -> {}", contract.getUnifiedSymbol(), startDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), endDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
@@ -102,6 +107,7 @@ public class PlaybackDataServiceManager implements IDataServiceManager {
 	 * @param endDate
 	 * @return
 	 */
+	@Retryable
 	@Override
 	public List<BarField> getQuarterlyData(ContractField contract, LocalDate startDate, LocalDate endDate) {
 		log.debug("从数据服务加载历史行情15分钟数据：{}，{} -> {}", contract.getUnifiedSymbol(), startDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), endDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
@@ -115,6 +121,7 @@ public class PlaybackDataServiceManager implements IDataServiceManager {
 	 * @param endDate
 	 * @return
 	 */
+	@Retryable
 	@Override
 	public List<BarField> getHourlyData(ContractField contract, LocalDate startDate, LocalDate endDate) {
 		log.debug("从数据服务加载历史行情1小时数据：{}，{} -> {}", contract.getUnifiedSymbol(), startDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), endDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
@@ -128,12 +135,14 @@ public class PlaybackDataServiceManager implements IDataServiceManager {
 	 * @param endDate
 	 * @return
 	 */
+	@Retryable
 	@Override
 	public List<BarField> getDailyData(ContractField contract, LocalDate startDate, LocalDate endDate) {
 		log.debug("从数据服务加载历史行情日线数据：{}，{} -> {}", contract.getUnifiedSymbol(), startDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), endDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
 		return commonGetData("day", contract, startDate, endDate);
 	}
 	
+	@Retryable
 	@Override
 	public List<LocalDate> getHolidays(ExchangeEnum exchange, LocalDate startDate, LocalDate endDate) {
 		DataSet dataSet = getTradeCalendar(exchange.toString(), startDate, endDate);
@@ -155,6 +164,7 @@ public class PlaybackDataServiceManager implements IDataServiceManager {
 				.toList();
 	}
 
+	@Retryable
 	@Override
 	public List<ContractField> getAllContracts(ExchangeEnum exchange) {
 		ResponseEntity<DataSet> result = execute(URI.create(String.format("%s/contracts/?exchange=%s", baseUrl, exchange)), DataSet.class);
@@ -206,12 +216,14 @@ public class PlaybackDataServiceManager implements IDataServiceManager {
 	/**
 	 * 获取CTP信息
 	 */
+	@Retryable
 	@Override
 	public JSONObject getCtpMetaSettings(String brokerId) {
 		URI uri = URI.create(String.format("%s/ctp/settings?brokerId=%s", baseUrl, brokerId));
 		return execute(uri, JSONObject.class).getBody();
 	}
 	
+	@Retryable
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<ExchangeEnum> getUserAvailableExchanges() {

@@ -26,8 +26,8 @@ import xyz.redtorch.pb.CoreField.TickField;
  * @author KevinHuangwl
  *
  */
-@StrategicComponent(IndicatorSampleStrategy.NAME)
-public class IndicatorSampleStrategy extends AbstractStrategy	// 为了简化代码，引入一个通用的基础抽象类
+@StrategicComponent(IndicatorExampleStrategy.NAME)
+public class IndicatorExampleStrategy extends AbstractStrategy	// 为了简化代码，引入一个通用的基础抽象类
 		implements TradeStrategy{
 
 	protected static final String NAME = "示例-指标策略";

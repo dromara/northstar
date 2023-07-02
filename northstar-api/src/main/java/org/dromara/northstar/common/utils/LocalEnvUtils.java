@@ -6,6 +6,8 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Enumeration;
 
+import org.springframework.core.env.Environment;
+
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -51,6 +53,17 @@ public class LocalEnvUtils {
 		    }
 		}
 		throw new IllegalStateException("没有查到MAC信息");
+	}
+	
+	
+	private static Environment env;
+	
+	public static void setEnvironment(Environment env) {
+		LocalEnvUtils.env = env;
+	}
+	
+	public static Environment getEnvironment() {
+		return LocalEnvUtils.env;
 	}
 	
 }
