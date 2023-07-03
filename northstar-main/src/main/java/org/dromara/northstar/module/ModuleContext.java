@@ -107,7 +107,7 @@ public class ModuleContext implements IModuleContext{
 	
 	/* unifiedSymbol -> contract */
 	protected Map<String, ContractField> contractMap = new HashMap<>();
-	protected Map<ContractField, Contract> contractMap2 = new HashMap<>();
+	protected Map<String, Contract> contractMap2 = new HashMap<>();
 	
 	/* unifiedSymbol -> tick */
 	protected Map<String, TickField> latestTickMap = new HashMap<>();
@@ -155,7 +155,7 @@ public class ModuleContext implements IModuleContext{
 					Contract contract = contractMgr.getContract(Identifier.of(csi.getValue()));
 					ContractField cf = contract.contractField();
 					contractMap.put(csi.getUnifiedSymbol(), cf);
-					contractMap2.put(cf, contract);
+					contractMap2.put(csi.getUnifiedSymbol(), contract);
 					barBufQMap.put(cf.getUnifiedSymbol(), new LinkedList<>());
 					registry.addListener(contract, moduleDescription.getNumOfMinPerBar(), PeriodUnit.MINUTE, tradeStrategy, ListenerType.STRATEGY);
 					registry.addListener(contract, moduleDescription.getNumOfMinPerBar(), PeriodUnit.MINUTE, this, ListenerType.CONTEXT);
@@ -205,10 +205,10 @@ public class ModuleContext implements IModuleContext{
 
 	@Override
 	public synchronized IAccount getAccount(ContractField contract) {
-		if(!contractMap2.containsKey(contract)) {
+		if(!contractMap2.containsKey(contract.getUnifiedSymbol())) {
 			throw new NoSuchElementException("模组没有绑定合约：" + contract.getUnifiedSymbol());
 		}
-		Contract c = contractMap2.get(contract);
+		Contract c = contractMap2.get(contract.getUnifiedSymbol());
 		return module.getAccount(c);
 	}
 
@@ -237,7 +237,7 @@ public class ModuleContext implements IModuleContext{
 	public void registerIndicator(Indicator indicator) {
 		checkIndicator(indicator);
 		Configuration cfg = indicator.getConfiguration();
-		Contract c = contractMap2.get(cfg.contract());
+		Contract c = contractMap2.get(cfg.contract().getUnifiedSymbol());
 		IndicatorValueUpdateHelper helper = new IndicatorValueUpdateHelper(indicator);
 		indicatorHelperSet.add(helper);
 		registry.addListener(c, cfg.numOfUnits(), cfg.period(), helper, ListenerType.INDICATOR);
