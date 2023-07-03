@@ -1,6 +1,5 @@
 package org.dromara.northstar.module;
 
-import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -32,6 +31,7 @@ import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.common.constant.ModuleState;
 import org.dromara.northstar.common.constant.SignalOperation;
 import org.dromara.northstar.common.exception.InsufficientException;
+import org.dromara.northstar.common.exception.NoSuchElementException;
 import org.dromara.northstar.common.model.ContractSimpleInfo;
 import org.dromara.northstar.common.model.Identifier;
 import org.dromara.northstar.common.model.ModuleAccountRuntimeDescription;
@@ -172,7 +172,10 @@ public class ModuleContext implements IModuleContext{
 	}
 
 	@Override
-	public ContractField getContract(String unifiedSymbol) {
+	public synchronized ContractField getContract(String unifiedSymbol) {
+		if(!contractMap.containsKey(unifiedSymbol)) {
+			throw new NoSuchElementException("模组没有绑定合约：" + unifiedSymbol);
+		}
 		return contractMap.get(unifiedSymbol);
 	}
 
@@ -201,7 +204,10 @@ public class ModuleContext implements IModuleContext{
 	}
 
 	@Override
-	public IAccount getAccount(ContractField contract) {
+	public synchronized IAccount getAccount(ContractField contract) {
+		if(!contractMap2.containsKey(contract)) {
+			throw new NoSuchElementException("模组没有绑定合约：" + contract.getUnifiedSymbol());
+		}
 		Contract c = contractMap2.get(contract);
 		return module.getAccount(c);
 	}
