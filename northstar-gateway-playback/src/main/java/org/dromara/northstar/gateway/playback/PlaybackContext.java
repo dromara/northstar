@@ -111,7 +111,7 @@ public class PlaybackContext {
 			.map(Contract::contractField)
 			.forEach(contract ->  
 				algoMap.put(contract, switch(settings.getPrecision()) {
-					case EXTREME -> new SimpleCloseSimulation(contract.getPriceTick());
+					case LITE -> new SimpleCloseSimulation(contract.getPriceTick());
 					case LOW -> new SimplePriceSimulation(contract.getPriceTick());
 					case MEDIUM -> new RandomWalkTickSimulation(30, contract.getPriceTick());
 					case HIGH -> new RandomWalkTickSimulation(120, contract.getPriceTick());

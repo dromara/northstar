@@ -216,7 +216,7 @@
           重置模组
         </el-button>
       </el-popconfirm>
-      <el-button @click="close">取 消</el-button>
+      <el-button id="closeModuleSettings" @click="close">取 消</el-button>
       <el-button
         id="saveModuleSettings"
         v-if="!readOnly"

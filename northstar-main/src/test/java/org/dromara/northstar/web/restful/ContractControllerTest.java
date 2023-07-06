@@ -29,7 +29,7 @@ import com.corundumstudio.socketio.SocketIOServer;
 
 import cn.hutool.crypto.digest.MD5;
 
-@SpringBootTest(classes = NorthstarApplication.class, value="spring.profiles.active=test")
+@SpringBootTest(classes = NorthstarApplication.class, value="spring.profiles.active=unittest")
 @AutoConfigureMockMvc
 class ContractControllerTest {
 

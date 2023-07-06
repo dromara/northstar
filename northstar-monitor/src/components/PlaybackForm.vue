@@ -39,7 +39,7 @@
       </el-form-item>
       <el-form-item label="回放精度" prop="precision">
         <el-select v-model="playbackSettings.precision">
-          <el-option label="极低（每分钟1个TICK）" value="EXTREME" key="0"></el-option>
+          <el-option label="极低（每分钟1个TICK）" value="LITE" key="0"></el-option>
           <el-option label="低（每分钟4个TICK）" value="LOW" key="1"></el-option>
           <el-option label="中（每分钟30个TICK）" value="MEDIUM" key="2"></el-option>
           <el-option label="高（每分钟120个TICK）" value="HIGH" key="3"></el-option>

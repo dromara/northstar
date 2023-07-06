@@ -1,8 +1,10 @@
 package org.dromara.northstar.module;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.BiConsumer;
 
 import org.apache.commons.lang3.StringUtils;
@@ -64,6 +66,8 @@ public class ModuleAccount implements IModuleAccount{
 	private Table<DirectionEnum, String, ModulePosition> posTable = HashBasedTable.create();
 	private String tradingDay;
 	
+	private Set<String> bindedContracts = new HashSet<>();
+	
 	private Logger logger;
 	
 	public ModuleAccount(ModuleDescription moduleDescription, ModuleRuntimeDescription moduleRtDescription, ModuleStateMachine stateMachine,
@@ -79,7 +83,8 @@ public class ModuleAccount implements IModuleAccount{
 				accDealVolume += closeTrade.getVolume();
 				accCloseProfit += profit;
 				double commission = contract.getCommissionFee() > 0 ? contract.getCommissionFee() : contract.getCommissionRate() * closeTrade.getPrice() * contract.getMultiplier();
-				accCommission += commission * 2 * closeTrade.getVolume(); // 乘2代表手续费双向计算
+				double dealCommission = commission * 2 * closeTrade.getVolume(); // 乘2代表手续费双向计算
+				accCommission += dealCommission;
 				maxProfit = Math.max(maxProfit, accCloseProfit - accCommission);
 				maxTotalBalance = Math.max(maxTotalBalance, initBalance + maxProfit);
 				double drawback = accCloseProfit - accCommission - maxProfit;
@@ -89,7 +94,7 @@ public class ModuleAccount implements IModuleAccount{
 						.moduleName(moduleDescription.getModuleName())
 						.moduleAccountId(closeTrade.getAccountId())
 						.contractName(contract.getName())
-						.dealProfit(profit)
+						.dealProfit(profit - dealCommission)
 						.openTrade(openTrade.toByteArray())
 						.closeTrade(closeTrade.toByteArray())
 						.build());
@@ -115,6 +120,8 @@ public class ModuleAccount implements IModuleAccount{
 				
 				ModulePosition sellPos = new ModulePosition(moduleRtDescription.getModuleName(), cf, DirectionEnum.D_Sell, moduleDescription.getClosingPolicy(), onDealCallback);
 				posTable.put(DirectionEnum.D_Sell, cf.getUnifiedSymbol(), sellPos);
+				
+				bindedContracts.add(cf.getUnifiedSymbol());
 			});
 		
 		mard.getPositionDescription().getNonclosedTrades().stream()
@@ -155,6 +162,9 @@ public class ModuleAccount implements IModuleAccount{
 
 	@Override
 	public void onTrade(TradeField trade) {
+		if(!bindedContracts.contains(trade.getContract().getUnifiedSymbol())) {
+			throw new IllegalStateException("模组账户绑定的合约与成交记录不一致：" + String.format("成交记录为[%s]", trade.getContract().getUnifiedSymbol()));
+		}
 		if(FieldUtils.isOpen(trade.getOffsetFlag())) {
 			posTable.get(trade.getDirection(), trade.getContract().getUnifiedSymbol()).onTrade(trade);
 		} else {
@@ -198,6 +208,13 @@ public class ModuleAccount implements IModuleAccount{
 		int longPos = getNonclosedPosition(unifiedSymbol, DirectionEnum.D_Buy);
 		int shortPos = getNonclosedPosition(unifiedSymbol, DirectionEnum.D_Sell);
 		return longPos - shortPos;
+	}
+	
+	@Override
+	public double totalHoldingProfit() {
+		return posTable.values().stream()
+				.mapToDouble(mp -> mp.profit())
+				.sum();
 	}
 
 	public void tradeDayPreset() {

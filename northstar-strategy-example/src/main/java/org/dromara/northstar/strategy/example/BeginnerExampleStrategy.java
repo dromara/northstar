@@ -29,8 +29,8 @@ import xyz.redtorch.pb.CoreField.TradeField;
  * @author KevinHuangwl
  *
  */
-@StrategicComponent(BeginnerSampleStrategy.NAME)		// 该注解是用于给策略命名用的，所有的策略都要带上这个注解
-public class BeginnerSampleStrategy implements TradeStrategy{
+@StrategicComponent(BeginnerExampleStrategy.NAME)		// 该注解是用于给策略命名用的，所有的策略都要带上这个注解
+public class BeginnerExampleStrategy implements TradeStrategy{
 	
 	protected static final String NAME = "示例-简单策略";	// 之所以要这样定义一个常量，是为了方便日志输出时可以带上策略名称
 	
@@ -100,6 +100,9 @@ public class BeginnerSampleStrategy implements TradeStrategy{
 			log.info("开始交易");
 			if(ctx.getState().isEmpty()) {
 				SignalOperation op = flag ? SignalOperation.BUY_OPEN : SignalOperation.SELL_OPEN;	// 随机开多或者开空
+				if(ctx.getState() == ModuleState.EMPTY_HEDGE) {
+					op = flag ? SignalOperation.BUY_CLOSE : SignalOperation.SELL_CLOSE;
+				}
 				ctx.submitOrderReq(TradeIntent.builder()
 						.contract(ctx.getContract(tick.getUnifiedSymbol()))
 						.operation(op)
@@ -109,19 +112,21 @@ public class BeginnerSampleStrategy implements TradeStrategy{
 						.build());
 				return;
 			}
-			if(ctx.getState() == ModuleState.HOLDING_LONG) {	
+			if(ctx.getState() == ModuleState.HOLDING_LONG) {
+				SignalOperation op = flag ? SignalOperation.SELL_CLOSE : SignalOperation.SELL_OPEN;
 				ctx.submitOrderReq(TradeIntent.builder()
 						.contract(ctx.getContract(tick.getUnifiedSymbol()))
-						.operation(SignalOperation.SELL_CLOSE)
+						.operation(op)
 						.priceType(PriceType.OPP_PRICE)
 						.volume(ctx.getDefaultVolume())
 						.timeout(3000)
 						.build());
 			}
-			if(ctx.getState() == ModuleState.HOLDING_SHORT) {			
+			if(ctx.getState() == ModuleState.HOLDING_SHORT) {		
+				SignalOperation op = flag ? SignalOperation.BUY_CLOSE : SignalOperation.BUY_OPEN;
 				ctx.submitOrderReq(TradeIntent.builder()
 						.contract(ctx.getContract(tick.getUnifiedSymbol()))
-						.operation(SignalOperation.BUY_CLOSE)
+						.operation(op)
 						.priceType(PriceType.OPP_PRICE)
 						.volume(ctx.getDefaultVolume())
 						.timeout(3000)

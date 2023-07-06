@@ -44,7 +44,7 @@ public class SocketIOServerConfig implements InitializingBean {
 	private UserInfo userInfo = new UserInfo();
 	
 	@Bean
-	@ConditionalOnExpression("!'${spring.profiles.active}'.equals('test')")
+	@ConditionalOnExpression("!'${spring.profiles.active}'.equals('unittest')")
     SocketIOServer socketIOServer() {
 		try {
 			return makeServer();

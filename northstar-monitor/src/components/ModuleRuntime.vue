@@ -99,8 +99,8 @@
             <el-descriptions-item label="最大回撤比">
               {{ `${Math.ceil(accountInfo.maxDrawbackPercentage * 100 || 0)}%` }}
             </el-descriptions-item>
-            <el-descriptions-item label="盈亏标准差">
-              {{ accountInfo.stdEarning | formatter }}
+            <el-descriptions-item label="年化收益率">
+              {{ `${accountInfo.annualizedRateOfReturn * 100 | formatter}%` }}
             </el-descriptions-item>
             
           </el-descriptions>
@@ -282,6 +282,7 @@
             :title="`${holdingVisibleOnChart ? '隐藏持仓线' : '显示持仓线'}`"
             @click.native="holdingVisibleOnChart = !holdingVisibleOnChart"
           ></el-button>
+          <el-button icon="el-icon-download" title="下载数据" @click.native="exportData"></el-button>
         </div>
         <div
           id="module-k-line"
@@ -307,6 +308,7 @@ import { jStat } from 'jstat'
 import { parse } from 'json2csv'
 
 import { PositionField, TradeField } from '@/lib/xyz/redtorch/pb/core_field_pb'
+import moment from 'moment'
 
 const makeHoldingSegment = (deal) => {
   return {
@@ -481,7 +483,7 @@ export default {
       return positions.filter((item) => item.position > 0)
     },
     indicatorOptions() {
-      if (!this.moduleRuntime.indicatorMap) return []
+      if (!this.moduleRuntime.indicatorMap || !this.unifiedSymbolOfChart) return []
       return this.moduleRuntime.indicatorMap[this.unifiedSymbolOfChart]
     }
   },
@@ -526,6 +528,39 @@ export default {
             table.bodyWrapper.scrollTop = table.bodyWrapper.scrollHeight
           }
         })
+      })
+    },
+    exportData(){
+      const fields = [
+        'time',
+        'open',
+        'high',
+        'low',
+        'close',
+        'volume',
+        'openInterest',
+        ...this.indicatorOptions,
+        'holding'
+      ]
+      Object.keys(this.barDataMap).map(symbol => {
+        const dataList = this.barDataMap[symbol].map(data => {
+          const timeFrameObj = fields.reduce((obj, field) => {
+            obj[field] = field === 'time' ? moment(data['timestamp']).format('yyyyMMDD HH:mm') : data[field]
+            return obj
+          }, {})
+          timeFrameObj['holding'] = 0
+          this.dealRecords.forEach(deal => {
+            const openTime = deal.openTrade.tradetimestamp
+            const closeTime = deal.closeTrade.tradetimestamp
+            if(data['timestamp'] > openTime && data['timestamp'] < closeTime){
+              const factor = deal.direction === '多' ? 1 : -1
+              timeFrameObj['holding'] += factor * deal.volume
+            }
+          })
+          return timeFrameObj
+        })
+        const csvData = parse(dataList, {fields})
+        downloadData(csvData, `${symbol}_数据.csv`, 'text/csv,charset=UTF-8')
       })
     },
     exportDealRecord() {

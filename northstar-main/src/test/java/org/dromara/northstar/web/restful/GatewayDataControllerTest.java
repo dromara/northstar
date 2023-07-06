@@ -32,7 +32,7 @@ import com.corundumstudio.socketio.SocketIOServer;
 import cn.hutool.crypto.digest.MD5;
 import xyz.redtorch.pb.CoreField.ContractField;
 
-@SpringBootTest(classes = NorthstarApplication.class, value="spring.profiles.active=test")
+@SpringBootTest(classes = NorthstarApplication.class, value="spring.profiles.active=unittest")
 @AutoConfigureMockMvc
 class GatewayDataControllerTest {
 

@@ -9,6 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.dromara.northstar.account.AccountManager;
 import org.dromara.northstar.account.GatewayManager;
 import org.dromara.northstar.account.TradeAccount;
+import org.dromara.northstar.common.IGatewayService;
 import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.constant.ConnectionState;
 import org.dromara.northstar.common.constant.GatewayUsage;
@@ -48,7 +49,7 @@ import lombok.extern.slf4j.Slf4j;
  *
  */
 @Slf4j
-public class GatewayService implements PostLoadAware {
+public class GatewayService implements IGatewayService, PostLoadAware {
 	@Autowired
 	private GatewayManager gatewayMgr;
 	@Autowired
@@ -73,6 +74,7 @@ public class GatewayService implements PostLoadAware {
 	 * @return
 	 * @throws Exception 
 	 */
+	@Override
 	public boolean createGateway(GatewayDescription gatewayDescription) {
 		log.info("创建网关[{}]", gatewayDescription.getGatewayId());
 		doSaveGatewayDescription(gatewayDescription);
@@ -120,6 +122,7 @@ public class GatewayService implements PostLoadAware {
 	 * @return
 	 * @throws Exception 
 	 */
+	@Override
 	public boolean updateGateway(GatewayDescription gatewayDescription) {
 		log.info("更新网关[{}]", gatewayDescription.getGatewayId());
 		doDeleteGateway(gatewayDescription.getGatewayId());
@@ -132,6 +135,7 @@ public class GatewayService implements PostLoadAware {
 	 * 移除网关
 	 * @return
 	 */
+	@Override
 	public boolean deleteGateway(String gatewayId) {
 		log.info("移除网关[{}]", gatewayId);
 		Gateway gateway = null;
@@ -219,6 +223,7 @@ public class GatewayService implements PostLoadAware {
 	 * 连接网关
 	 * @return
 	 */
+	@Override
 	public boolean connect(String gatewayId) {
 		log.info("连接网关[{}]", gatewayId);
 		Gateway gateway = gatewayMgr.get(Identifier.of(gatewayId));
@@ -233,6 +238,7 @@ public class GatewayService implements PostLoadAware {
 	 * 断开网关
 	 * @return
 	 */
+	@Override
 	public boolean disconnect(String gatewayId) {
 		log.info("断开网关[{}]", gatewayId);
 		Gateway gateway = gatewayMgr.get(Identifier.of(gatewayId));
@@ -248,6 +254,7 @@ public class GatewayService implements PostLoadAware {
 	 * @param money
 	 * @return
 	 */
+	@Override
 	public boolean simMoneyIO(String gatewayId, int money) {
 		SimTradeGateway gateway = (SimTradeGateway) gatewayMgr.get(Identifier.of(gatewayId));
 		if(Objects.isNull(gateway)) {

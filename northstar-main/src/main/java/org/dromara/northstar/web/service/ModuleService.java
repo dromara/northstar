@@ -15,6 +15,7 @@ import java.util.Objects;
 import javax.transaction.Transactional;
 
 import org.dromara.northstar.account.AccountManager;
+import org.dromara.northstar.common.IModuleService;
 import org.dromara.northstar.common.constant.Constants;
 import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.common.constant.ModuleState;
@@ -71,7 +72,7 @@ import xyz.redtorch.pb.CoreField.TradeField;
  *
  */
 @Slf4j
-public class ModuleService implements PostLoadAware {
+public class ModuleService implements IModuleService, PostLoadAware {
 	
 	private ApplicationContext ctx;
 	
@@ -143,6 +144,7 @@ public class ModuleService implements PostLoadAware {
 	 * @return
 	 * @throws Exception 
 	 */
+	@Override
 	public ModuleDescription createModule(ModuleDescription md) throws Exception {
 		ModuleAccountRuntimeDescription mard = ModuleAccountRuntimeDescription.builder()
 				.initBalance(md.getInitBalance())
@@ -168,7 +170,9 @@ public class ModuleService implements PostLoadAware {
 	 * @throws Exception 
 	 */
 	@Transactional
+	@Override
 	public ModuleDescription modifyModule(ModuleDescription md, boolean reset) throws Exception {
+		validateChange(md);
 		if(reset) {
 			removeModule(md.getModuleName());
 			return createModule(md);
@@ -179,12 +183,25 @@ public class ModuleService implements PostLoadAware {
 		return md;
 	}
 	
+	// 更新合法性校验：持仓状态下，模组不允许更新
+	private void validateChange(ModuleDescription md) {
+		IModule module = moduleMgr.get(Identifier.of(md.getModuleName()));
+		md.getModuleAccountSettingsDescription().stream()
+			.flatMap(mad -> mad.getBindedContracts().stream())
+			.forEach(csi -> {
+				if(module.getModuleContext().getModuleAccount().getNonclosedNetPosition(csi.getUnifiedSymbol()) != 0) {
+					throw new IllegalStateException("模组在持仓状态下，不能进行修改操作");
+				}
+			});
+	}
+	
 	/**
 	 * 删除模组
 	 * @param name
 	 * @return
 	 */
 	@Transactional
+	@Override
 	public boolean removeModule(String name) {
 		unloadModule(name);
 		moduleRepo.deleteRuntimeByName(name);

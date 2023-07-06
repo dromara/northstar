@@ -6,7 +6,6 @@ server:
     key-store-password: northstar666
 northstar: 
   socketio: 51688
-  contraceDefFile: classpath:ContractDefinition.csv
   data-service:
     baseUrl: https://service.quantit.tech:44388
     
@@ -67,21 +66,17 @@ spring:
     url: jdbc:h2:mem:testdb
   config:
     activate:
-      on-profile: test
+      on-profile: test,unittest,train
       
 ---
 server:
   port: 443
   ssl:
     enabled: true
-  servlet:
-    session:
-      cookie:
-        same-site: none
-        secure: true
 spring:
   datasource:
     url: jdbc:h2:mem:testdb
   config:
     activate:
       on-profile: e2e
+

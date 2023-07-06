@@ -1,10 +1,11 @@
 <template>
-  <el-dialog title="盈亏曲线" :visible="visible" width="80%" append-to-body :before-close="close">
+  <el-dialog title="盈亏曲线" :visible="visible" width="80%" append-to-body top="5vh" :before-close="close">
     <div class="perf-chart-wrapper">
       <module-performance
         ref="chartContainer"
         :moduleInitBalance="moduleInitBalance"
         :moduleDealRecords="moduleDealRecords"
+        :largeView="true"
       />
     </div>
   </el-dialog>
@@ -50,6 +51,6 @@ export default {
 
 <style>
 .perf-chart-wrapper {
-  height: 600px;
+  height: 80vh;
 }
 </style>

@@ -1,9 +1,11 @@
 package org.dromara.northstar.module;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -24,12 +26,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 import org.dromara.northstar.common.constant.Constants;
 import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.common.constant.ModuleState;
 import org.dromara.northstar.common.constant.SignalOperation;
 import org.dromara.northstar.common.exception.InsufficientException;
+import org.dromara.northstar.common.exception.NoSuchElementException;
 import org.dromara.northstar.common.model.ContractSimpleInfo;
 import org.dromara.northstar.common.model.Identifier;
 import org.dromara.northstar.common.model.ModuleAccountRuntimeDescription;
@@ -67,6 +69,7 @@ import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
+import com.google.protobuf.InvalidProtocolBufferException;
 
 import cn.hutool.core.lang.Assert;
 import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
@@ -104,7 +107,7 @@ public class ModuleContext implements IModuleContext{
 	
 	/* unifiedSymbol -> contract */
 	protected Map<String, ContractField> contractMap = new HashMap<>();
-	protected Map<ContractField, Contract> contractMap2 = new HashMap<>();
+	protected Map<String, Contract> contractMap2 = new HashMap<>();
 	
 	/* unifiedSymbol -> tick */
 	protected Map<String, TickField> latestTickMap = new HashMap<>();
@@ -152,7 +155,7 @@ public class ModuleContext implements IModuleContext{
 					Contract contract = contractMgr.getContract(Identifier.of(csi.getValue()));
 					ContractField cf = contract.contractField();
 					contractMap.put(csi.getUnifiedSymbol(), cf);
-					contractMap2.put(cf, contract);
+					contractMap2.put(csi.getUnifiedSymbol(), contract);
 					barBufQMap.put(cf.getUnifiedSymbol(), new LinkedList<>());
 					registry.addListener(contract, moduleDescription.getNumOfMinPerBar(), PeriodUnit.MINUTE, tradeStrategy, ListenerType.STRATEGY);
 					registry.addListener(contract, moduleDescription.getNumOfMinPerBar(), PeriodUnit.MINUTE, this, ListenerType.CONTEXT);
@@ -169,7 +172,10 @@ public class ModuleContext implements IModuleContext{
 	}
 
 	@Override
-	public ContractField getContract(String unifiedSymbol) {
+	public synchronized ContractField getContract(String unifiedSymbol) {
+		if(!contractMap.containsKey(unifiedSymbol)) {
+			throw new NoSuchElementException("模组没有绑定合约：" + unifiedSymbol);
+		}
 		return contractMap.get(unifiedSymbol);
 	}
 
@@ -198,8 +204,11 @@ public class ModuleContext implements IModuleContext{
 	}
 
 	@Override
-	public IAccount getAccount(ContractField contract) {
-		Contract c = contractMap2.get(contract);
+	public synchronized IAccount getAccount(ContractField contract) {
+		if(!contractMap2.containsKey(contract.getUnifiedSymbol())) {
+			throw new NoSuchElementException("模组没有绑定合约：" + contract.getUnifiedSymbol());
+		}
+		Contract c = contractMap2.get(contract.getUnifiedSymbol());
 		return module.getAccount(c);
 	}
 
@@ -228,7 +237,7 @@ public class ModuleContext implements IModuleContext{
 	public void registerIndicator(Indicator indicator) {
 		checkIndicator(indicator);
 		Configuration cfg = indicator.getConfiguration();
-		Contract c = contractMap2.get(cfg.contract());
+		Contract c = contractMap2.get(cfg.contract().getUnifiedSymbol());
 		IndicatorValueUpdateHelper helper = new IndicatorValueUpdateHelper(indicator);
 		indicatorHelperSet.add(helper);
 		registry.addListener(c, cfg.numOfUnits(), cfg.period(), helper, ListenerType.INDICATOR);
@@ -316,7 +325,7 @@ public class ModuleContext implements IModuleContext{
 			list.offer(new TimeSeriesValue(indicator.get(0).value(), bar.getActionTimestamp()));	
 		}
 	}
-
+	
 	@Override
 	public synchronized void onOrder(OrderField order) {
 		if(!orderReqMap.containsKey(order.getOriginOrderId())) {
@@ -394,9 +403,16 @@ public class ModuleContext implements IModuleContext{
 		if(fullDescription) {
 			List<ModuleDealRecord> dealRecords = moduleRepo.findAllDealRecords(module.getName());
 			double avgProfit = dealRecords.stream().mapToDouble(ModuleDealRecord::getDealProfit).average().orElse(0D);
-			double stdProfit = new StandardDeviation().evaluate(dealRecords.stream().mapToDouble(ModuleDealRecord::getDealProfit).toArray());
+			double annualizedRateOfReturn = 0;
+			if(!dealRecords.isEmpty()) {
+				LocalDate startDate = LocalDate.parse(parse(dealRecords.get(0).getOpenTrade()).getTradeDate(), DateTimeConstant.D_FORMAT_INT_FORMATTER);
+				LocalDate endDate = LocalDate.parse(parse(dealRecords.get(dealRecords.size() - 1).getCloseTrade()).getTradeDate(), DateTimeConstant.D_FORMAT_INT_FORMATTER);
+				long days = ChronoUnit.DAYS.between(startDate, endDate);
+				double totalEarning = moduleAccount.getAccCloseProfit() - moduleAccount.getAccCommission();
+				annualizedRateOfReturn = (totalEarning / moduleAccount.getInitBalance()) / days * 365;  
+			}
 			accRtDescription.setAvgEarning(avgProfit);
-			accRtDescription.setStdEarning(stdProfit);
+			accRtDescription.setAnnualizedRateOfReturn(annualizedRateOfReturn);
 			
 			Map<String, List<String>> indicatorMap = new HashMap<>();
 			Map<String, LinkedHashMap<Long, JSONObject>> symbolTimeObject = new HashMap<>();
@@ -443,6 +459,14 @@ public class ModuleContext implements IModuleContext{
 			mad.setDataMap(dataMap);
 		}
 		return mad;
+	}
+	
+	private TradeField parse(byte[] data) {
+		try {
+			return TradeField.parseFrom(data);
+		} catch (InvalidProtocolBufferException e) {
+			throw new IllegalStateException(e);
+		}
 	}
 	
 	private JSONObject assignBar(BarField bar) {

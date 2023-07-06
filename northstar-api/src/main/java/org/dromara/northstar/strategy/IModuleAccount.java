@@ -15,6 +15,11 @@ import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 public interface IModuleAccount extends TickDataAware, TransactionAware {
 	
 	/**
+	 * 总持仓盈亏
+	 * @return
+	 */
+	double totalHoldingProfit();
+	/**
 	 * 可用金额
 	 * @return
 	 */

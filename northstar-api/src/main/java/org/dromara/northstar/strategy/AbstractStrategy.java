@@ -62,6 +62,10 @@ public abstract class AbstractStrategy implements TradeStrategy{
 		initIndicators();
 		initMultiContractHandler();
 	}
+	
+	public IModuleContext getContext() {
+		return (IModuleContext) ctx;
+	}
 
 	/**
 	 * 指标初始化

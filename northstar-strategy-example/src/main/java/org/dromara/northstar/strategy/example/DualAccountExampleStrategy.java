@@ -18,8 +18,8 @@ import org.dromara.northstar.strategy.model.TradeIntent;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.TickField;
 
-@StrategicComponent(DualAccountSampleStrategy.NAME)		// 该注解是用于给策略命名用的，所有的策略都要带上这个注解
-public class DualAccountSampleStrategy extends AbstractStrategy implements TradeStrategy {
+@StrategicComponent(DualAccountExampleStrategy.NAME)		// 该注解是用于给策略命名用的，所有的策略都要带上这个注解
+public class DualAccountExampleStrategy extends AbstractStrategy implements TradeStrategy {
 
 	protected static final String NAME = "示例-多账户简单策略";	// 之所以要这样定义一个常量，是为了方便日志输出时可以带上策略名称
 	

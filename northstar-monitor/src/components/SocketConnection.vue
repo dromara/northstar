@@ -24,11 +24,11 @@ export default {
   props: {
     username: {
       type: String,
-      default: ''
+      default: 'admin'
     },
     password: {
       type: String,
-      default: ''
+      default: '123456'
     }
   },
   data() {
@@ -48,17 +48,17 @@ export default {
       }
     }
   },
-  async mounted() {
+  mounted() {
     this.wsHost = window.remoteHost || location.hostname
     this.wsHost = this.wsHost.split(":")[0]
-    this.wsPort = window.socketioPort || localStorage.getItem('socketioPort')
+    this.wsPort = window.socketioPort || localStorage.getItem('socketioPort') || 51688
     this.initSocket()
   },
   methods: {
     initSocket() {
       const wsProtocal = process.env.NODE_ENV === 'development' ? 'ws' : 'wss'
       const wsEndpoint = `${wsProtocal}://${this.wsHost}:${this.wsPort}`
-      const token = this.$route.query.auth
+      const token = this.$route.query.auth || window.btoa(`${this.username}:${this.password}`)
       console.log('准备连接websocket：' + wsEndpoint, ' token:' + token)
       this.socket = io(wsEndpoint, {
         transports: ['websocket'],

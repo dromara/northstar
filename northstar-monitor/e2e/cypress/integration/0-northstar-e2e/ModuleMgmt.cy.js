@@ -183,7 +183,16 @@ describe('模组管理-测试', () => {
             cy.get('#modulePositionTbl').find('.el-table__row').find('.cell').eq(2).should('have.text', '2')
         })
 
+        it('持仓状态下，无法修改模组', () => {
+            cy.visit('https://localhost/#/module')
+            cy.get('.el-table__row').contains('修改').click()
+            cy.get('#saveModuleSettings').click()
+            cy.get('.el-message--error').contains('不能进行修改')
+            cy.get('#closeModuleSettings').click()
+        })
+
         it('可以手工减少模组持仓', () => {
+            cy.get('.el-table__row').contains('运行状态').click()
             cy.get('#editPosition').click()
             cy.get('.el-dialog').contains('合约代码').parent().click()
             cy.get('.el-select-dropdown').filter(':visible').contains('模拟合约').click()
