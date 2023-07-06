@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.dromara</groupId>
 		<artifactId>northstar</artifactId>
-		<version>6.1.0.Alpha</version>
+		<version>6.1.0.Beta</version>
 	</parent>
 	
 	<artifactId>northstar-gateway-sim</artifactId>
