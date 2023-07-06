@@ -1,8 +1,10 @@
 package org.dromara.northstar.module;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.BiConsumer;
 
 import org.apache.commons.lang3.StringUtils;
@@ -64,6 +66,8 @@ public class ModuleAccount implements IModuleAccount{
 	private Table<DirectionEnum, String, ModulePosition> posTable = HashBasedTable.create();
 	private String tradingDay;
 	
+	private Set<String> bindedContracts = new HashSet<>();
+	
 	private Logger logger;
 	
 	public ModuleAccount(ModuleDescription moduleDescription, ModuleRuntimeDescription moduleRtDescription, ModuleStateMachine stateMachine,
@@ -116,6 +120,8 @@ public class ModuleAccount implements IModuleAccount{
 				
 				ModulePosition sellPos = new ModulePosition(moduleRtDescription.getModuleName(), cf, DirectionEnum.D_Sell, moduleDescription.getClosingPolicy(), onDealCallback);
 				posTable.put(DirectionEnum.D_Sell, cf.getUnifiedSymbol(), sellPos);
+				
+				bindedContracts.add(cf.getUnifiedSymbol());
 			});
 		
 		mard.getPositionDescription().getNonclosedTrades().stream()
@@ -156,6 +162,9 @@ public class ModuleAccount implements IModuleAccount{
 
 	@Override
 	public void onTrade(TradeField trade) {
+		if(!bindedContracts.contains(trade.getContract().getUnifiedSymbol())) {
+			throw new IllegalStateException("模组账户绑定的合约与成交记录不一致：" + String.format("成交记录为[%s]", trade.getContract().getUnifiedSymbol()));
+		}
 		if(FieldUtils.isOpen(trade.getOffsetFlag())) {
 			posTable.get(trade.getDirection(), trade.getContract().getUnifiedSymbol()).onTrade(trade);
 		} else {

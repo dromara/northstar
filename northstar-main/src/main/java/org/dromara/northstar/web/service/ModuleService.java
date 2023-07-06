@@ -172,6 +172,7 @@ public class ModuleService implements IModuleService, PostLoadAware {
 	@Transactional
 	@Override
 	public ModuleDescription modifyModule(ModuleDescription md, boolean reset) throws Exception {
+		validateChange(md);
 		if(reset) {
 			removeModule(md.getModuleName());
 			return createModule(md);
@@ -180,6 +181,18 @@ public class ModuleService implements IModuleService, PostLoadAware {
 		loadModule(md);
 		moduleRepo.saveSettings(md);
 		return md;
+	}
+	
+	// 更新合法性校验：持仓状态下，模组不允许更新
+	private void validateChange(ModuleDescription md) {
+		IModule module = moduleMgr.get(Identifier.of(md.getModuleName()));
+		md.getModuleAccountSettingsDescription().stream()
+			.flatMap(mad -> mad.getBindedContracts().stream())
+			.forEach(csi -> {
+				if(module.getModuleContext().getModuleAccount().getNonclosedNetPosition(csi.getUnifiedSymbol()) != 0) {
+					throw new IllegalStateException("模组在持仓状态下，不能进行修改操作");
+				}
+			});
 	}
 	
 	/**
