@@ -48,6 +48,7 @@
 		<module>northstar-api</module>
 		<module>northstar-gateway-sim</module>
 		<module>northstar-gateway-playback</module>
+		<module>northstar-rl</module>
 		<module>northstar-strategy-example</module>
 		<module>northstar-main</module>
 	</modules>
