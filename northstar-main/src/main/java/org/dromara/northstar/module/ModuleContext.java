@@ -72,6 +72,8 @@ import com.google.common.collect.Table;
 import com.google.protobuf.InvalidProtocolBufferException;
 
 import cn.hutool.core.lang.Assert;
+import lombok.Getter;
+import lombok.Setter;
 import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.ForceCloseReasonEnum;
@@ -90,6 +92,8 @@ import xyz.redtorch.pb.CoreField.TradeField;
 
 public class ModuleContext implements IModuleContext{
 	
+	@Getter
+	@Setter
 	protected IModule module;
 	
 	protected Logger logger;
@@ -480,11 +484,6 @@ public class ModuleContext implements IModuleContext{
 		json.put("openInterest", bar.getOpenInterest());
 		json.put("timestamp", bar.getActionTimestamp());
 		return json;
-	}
-
-	@Override
-	public void setModule(IModule module) {
-		this.module = module;
 	}
 
 	@Override

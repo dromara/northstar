@@ -48,8 +48,14 @@ public class BeginnerExampleStrategy implements TradeStrategy{
 	 */
 	public static class InitParams extends DynamicParams {			// 每个策略都要有一个用于定义初始化参数的内部类，类名称不能改
 		
-		@Setting(label="操作间隔", type = FieldType.NUMBER, order=10, unit="秒")		// Label注解用于定义属性的元信息。可以声明单位
+		@Setting(label="操作间隔", type = FieldType.NUMBER, order = 10, unit = "秒")		// Label注解用于定义属性的元信息。可以声明单位
 		private int actionInterval;						// 属性可以为任意多个，当元素为多个时order值用于控制前端的显示顺序
+		
+		@Setting(label="锁仓演示", type = FieldType.SELECT, options = {"启用","禁用"}, optionsVal = {"true","false"}, order = 20)
+		private boolean showHedge;
+		
+		@Setting(label="价格类型", type = FieldType.SELECT, options = {"对手价","排队价"}, optionsVal = {"OPP_PRICE", "WAITING_PRICE"}, order = 30)
+		private String priceType = "OPP_PRICE";
 		
 	}
 	
@@ -107,27 +113,27 @@ public class BeginnerExampleStrategy implements TradeStrategy{
 						.contract(ctx.getContract(tick.getUnifiedSymbol()))
 						.operation(op)
 						.volume(ctx.getDefaultVolume())
-						.priceType(PriceType.WAITING_PRICE)
-						.timeout(45000)
+						.priceType(PriceType.valueOf(params.priceType))
+						.timeout(30000)
 						.build());
 				return;
 			}
 			if(ctx.getState() == ModuleState.HOLDING_LONG) {
-				SignalOperation op = flag ? SignalOperation.SELL_CLOSE : SignalOperation.SELL_OPEN;
+				SignalOperation op = params.showHedge ? SignalOperation.SELL_OPEN : SignalOperation.SELL_CLOSE;
 				ctx.submitOrderReq(TradeIntent.builder()
 						.contract(ctx.getContract(tick.getUnifiedSymbol()))
 						.operation(op)
-						.priceType(PriceType.OPP_PRICE)
+						.priceType(PriceType.valueOf(params.priceType))
 						.volume(ctx.getDefaultVolume())
 						.timeout(3000)
 						.build());
 			}
 			if(ctx.getState() == ModuleState.HOLDING_SHORT) {		
-				SignalOperation op = flag ? SignalOperation.BUY_CLOSE : SignalOperation.BUY_OPEN;
+				SignalOperation op = params.showHedge ? SignalOperation.BUY_OPEN : SignalOperation.BUY_CLOSE;
 				ctx.submitOrderReq(TradeIntent.builder()
 						.contract(ctx.getContract(tick.getUnifiedSymbol()))
 						.operation(op)
-						.priceType(PriceType.OPP_PRICE)
+						.priceType(PriceType.valueOf(params.priceType))
 						.volume(ctx.getDefaultVolume())
 						.timeout(3000)
 						.build());
