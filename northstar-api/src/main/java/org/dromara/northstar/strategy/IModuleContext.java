@@ -30,6 +30,11 @@ public interface IModuleContext extends IModuleStrategyContext, MergedBarListene
 	 */
 	void setModule(IModule module);
 	/**
+	 * 获取模组
+	 * @return
+	 */
+	IModule getModule();
+	/**
 	 * 委托下单（精简接口）
 	 * @param contract			交易合约			
 	 * @param operation			操作信号
