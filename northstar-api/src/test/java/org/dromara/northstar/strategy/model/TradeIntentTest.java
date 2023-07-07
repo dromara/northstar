@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -14,6 +15,7 @@ import java.util.Optional;
 
 import org.dromara.northstar.common.constant.ModuleState;
 import org.dromara.northstar.common.constant.SignalOperation;
+import org.dromara.northstar.strategy.IModuleAccount;
 import org.dromara.northstar.strategy.IModuleContext;
 import org.dromara.northstar.strategy.constant.PriceType;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,6 +33,8 @@ class TradeIntentTest {
 	
 	IModuleContext ctx = mock(IModuleContext.class);
 	
+	IModuleAccount macc = mock(IModuleAccount.class);
+	
 	TestFieldFactory factory = new TestFieldFactory("testGateway");
 	
 	ContractField contract = factory.makeContract("rb2305");
@@ -42,7 +46,9 @@ class TradeIntentTest {
 		when(ctx.submitOrderReq(any(ContractField.class), any(SignalOperation.class), any(PriceType.class), anyInt(), any(Double.class)))
 			.thenReturn(Optional.of(ORDER_ID));
 		when(ctx.getState()).thenReturn(ModuleState.EMPTY);
+		when(ctx.getModuleAccount()).thenReturn(macc);
 		when(ctx.getLogger()).thenReturn(mock(Logger.class));
+		when(macc.getNonclosedPosition(anyString(), any(DirectionEnum.class), eq(true))).thenReturn(1);
 	}
 
 	@Test
