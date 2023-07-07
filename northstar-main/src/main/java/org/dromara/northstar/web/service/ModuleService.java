@@ -172,11 +172,11 @@ public class ModuleService implements IModuleService, PostLoadAware {
 	@Transactional
 	@Override
 	public ModuleDescription modifyModule(ModuleDescription md, boolean reset) throws Exception {
-		validateChange(md);
 		if(reset) {
 			removeModule(md.getModuleName());
 			return createModule(md);
 		}
+		validateChange(md);
 		unloadModule(md.getModuleName());
 		loadModule(md);
 		moduleRepo.saveSettings(md);
