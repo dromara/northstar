@@ -1,6 +1,7 @@
 <template>
   <div class="wrapper">
-    <div class="logo"><img width="700px" src="../assets/logo.png" />v{{ version }}</div>
+    <div class="version">版本号：v{{ version }}</div>
+    <div class="logo"><img width="700px" src="../assets/logo.png" /></div>
     <div class="panel" v-on:keydown.enter="login">
       <el-form :model="userForm" status-icon label-width="100px" class="demo-userForm">
         <el-form-item label="用户名">
@@ -70,15 +71,42 @@ export default {
 </script>
 
 <style>
-.panel {
-  /* width: 20%; */
-  width: 300px;
-  min-width: 300px;
-  margin: auto;
+.version{
+  position: fixed;
+  right: 20px;
+  top: 20px;
 }
-.wrapper {
-  display: flex;
-  margin: auto;
-  flex-direction: column;
+/* 桌面端样式 */
+@media screen and (min-width: 768px) {
+  .panel {
+    /* width: 20%; */
+    width: 300px;
+    min-width: 300px;
+    margin: auto;
+  }
+  .wrapper {
+    display: flex;
+    margin: auto;
+    flex-direction: column;
+  }
+}
+
+/* 移动端样式 */
+@media screen and (max-width: 767px) {
+  .wrapper {
+    display: flex;
+    margin: auto;
+    flex-direction: column;
+  }
+  .panel {
+    width: 80vw;
+    padding: 0 5vw;
+  }
+  .logo{
+    margin: 20px auto;
+  }
+  .logo img{
+    width: 80vw;
+  }
 }
 </style>
