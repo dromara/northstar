@@ -3,7 +3,7 @@
     <MailConfigForm :visible.sync="mailSettingFormVisible" />
     <div class="ns-header">
       <el-menu
-        class="el-menu-demo"
+        class="ns-menu"
         mode="horizontal"
         @select="handleSelect"
         background-color="#545c64"
@@ -101,35 +101,48 @@ export default {
 
 <style scoped>
 .ns-workspace {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-}
-.ns-header {
-  border-bottom: solid 1px #e6e6e6;
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-}
-.ns-body {
-  height: 100%;
-  width: 100%;
-  display: flex;
-  overflow: hidden;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  .ns-header {
+    border-bottom: solid 1px #e6e6e6;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+  }
+  .ns-body {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    overflow: hidden;
+  }
+
+  .el-menu.el-menu--horizontal {
+    border-bottom: none;
+  }
+  .ns-trmkt-wrapper {
+    display: flex;
+    width: 100%;
+  }
+  .ns-tools {
+    align-items: center;
+    line-height: 60px;
+    padding-right: 10px;
+  }
+/* 桌面端样式 */
+@media screen and (min-width: 768px) {
+  
 }
 
-.el-menu.el-menu--horizontal {
-  border-bottom: none;
+/* 移动端样式 */
+@media screen and (max-width: 767px) {
+  .ns-tools button,
+  .ns-menu li:nth-child(1),
+  .ns-menu li:nth-child(2),
+  .ns-menu li:nth-child(5){
+    display: none;
+  }
 }
-.ns-trmkt-wrapper {
-  display: flex;
-  width: 100%;
-}
-.ns-tools {
-  align-items: center;
-  line-height: 60px;
-  padding-right: 10px;
-}
-.mail-button-wrapper {
-}
+
 </style>
