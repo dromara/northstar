@@ -142,9 +142,8 @@ export default {
 /* 移动端样式 */
 @media screen and (max-width: 767px) {
   .ns-tools button,
-  .ns-menu li:nth-child(1),
-  .ns-menu li:nth-child(2),
-  .ns-menu li:nth-child(5){
+  .ns-menu li:not(:nth-child(3))
+  {
     display: none;
   }
 }

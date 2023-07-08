@@ -13,31 +13,7 @@
     />
     <div v-if="isMobile" class="card-wrapper">
       <el-card class="box-card" v-for="(item, i) in moduleList" :key="i">
-        <div slot="header" class="clearfix">
-          <span>{{ item.moduleName }}</span>
-          <el-button
-              v-if="item.runtime"
-              style="float: right; padding: 3px 5px; margin-left: 8px"
-              @click="handlePerf(i, item)"
-              >运行状态</el-button
-            >
-            <el-button
-              v-if="item.runtime && item.runtime.enabled"
-              style="float: right; padding: 3px 5px"
-              type="danger"
-              @click.native="toggle(i, item)"
-              >停用</el-button
-            >
-            <el-button
-              v-if="item.runtime && !item.runtime.enabled"
-              style="float: right; padding: 3px 5px"
-              type="success"
-              @click.native="toggle(i, item)"
-            >
-              启用
-            </el-button>
-        </div>
-        <el-descriptions :column="2" >
+        <el-descriptions :title="item.moduleName" :column="1" border>
           <el-descriptions-item label="持仓状态">
             <el-tag size="small">{{
             !item.runtime ? '-' :
@@ -57,6 +33,29 @@
             </span>
           </el-descriptions-item>
         </el-descriptions>
+        <div class="card-buttons">
+          <el-button
+              v-if="item.runtime"
+              style="float: right; padding: 3px 5px; margin-left: 8px"
+              @click="handlePerf(i, item)"
+              >运行状态</el-button
+            >
+            <el-button
+              v-if="item.runtime && item.runtime.enabled"
+              style="float: right; padding: 3px 5px; margin: 0"
+              type="danger"
+              @click.native="toggle(i, item)"
+              >停用</el-button
+            >
+            <el-button
+              v-if="item.runtime && !item.runtime.enabled"
+              style="float: right; padding: 3px 5px; margin: 0"
+              type="success"
+              @click.native="toggle(i, item)"
+            >
+              启用
+            </el-button>
+        </div>
       </el-card>
     </div>
     <el-table v-else height="100%" :data="moduleList">
@@ -405,15 +404,26 @@ export default {
   }
   .card-wrapper{
     width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
     overflow: auto;
   }
   .box-card{
+    width: 48%;
     margin-bottom: 20px;
+  }
+  .card-buttons{
+    margin: 10px 0px;
+    height: 20px;
   }
   .el-card__header{
     padding: 12px 20px;
   }
   .el-card__body{
+    padding-bottom: 10px;
+  }
+  .el-descriptions__header{
     padding-bottom: 10px;
   }
 }
