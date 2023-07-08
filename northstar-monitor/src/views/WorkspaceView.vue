@@ -47,6 +47,7 @@ import MailConfigForm from '@/components/MailConfigForm'
 import packageJson from '@/../package.json'
 
 import loginApi from '@/api/loginApi'
+import MediaListener from '@/utils/media-utils'
 
 const pageOpts = {
   1: 'mktgateway',
@@ -74,6 +75,9 @@ export default {
   },
   mounted() {
     this.curPage = pageOptsRevert[this.$route.name]
+    if(MediaListener.isMobile()){
+      this.curPage = '3'
+    }
   },
   destroyed() {
     this.$nextTick(() => location.reload())
