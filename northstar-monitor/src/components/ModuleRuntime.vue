@@ -15,7 +15,7 @@
     <div class="module-rt-wrapper">
       <div class="side-panel">
         <div class="description-wrapper">
-          <el-descriptions class="margin-top" :column="3">
+          <el-descriptions class="margin-top" :column="`${isMobile ? 2 : 3}`">
             <template slot="title">
               模组信息
               <el-tag
@@ -776,7 +776,7 @@ export default {
 }
 
 /* 桌面端样式 */
-@media screen and (min-width: 768px) {
+@media screen and (min-width: 661px) {
   .side-panel {
     min-width: 520px;
     flex: 1;
@@ -784,7 +784,7 @@ export default {
 }
 
 /* 移动端样式 */
-@media screen and (max-width: 767px) {
+@media screen and (max-width: 660px) {
   .side-panel {
     width: 100%;
     flex: 1;
@@ -794,7 +794,4 @@ export default {
     overflow-y: auto;
   }
 }
-</style>
-<style>
-
 </style>

@@ -394,14 +394,14 @@ export default {
 
 <style>
 /* 桌面端样式 */
-@media screen and (min-width: 768px) {
+@media screen and (min-width: 661px) {
   #moduleCards {
     display: none;
   }
 }
 
 /* 移动端样式 */
-@media screen and (max-width: 767px) {
+@media screen and (max-width: 660px) {
   #moduleTable{
     display: none;
   }

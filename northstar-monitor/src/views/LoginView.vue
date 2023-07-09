@@ -77,7 +77,7 @@ export default {
   top: 20px;
 }
 /* 桌面端样式 */
-@media screen and (min-width: 768px) {
+@media screen and (min-width: 661px) {
   .panel {
     /* width: 20%; */
     width: 300px;
@@ -92,7 +92,7 @@ export default {
 }
 
 /* 移动端样式 */
-@media screen and (max-width: 767px) {
+@media screen and (max-width: 660px) {
   .wrapper {
     display: flex;
     margin: auto;

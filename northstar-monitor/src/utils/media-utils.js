@@ -10,7 +10,7 @@ export default class MediaListener {
     }
 
     isMobile(){
-        return window.matchMedia("(max-width: 767px)").matches 
+        return window.matchMedia("(max-width: 660px)").matches 
     }
 
     destroy(){

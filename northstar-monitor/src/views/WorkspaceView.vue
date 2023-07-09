@@ -142,12 +142,12 @@ export default {
     padding-right: 10px;
   }
 /* 桌面端样式 */
-@media screen and (min-width: 768px) {
+@media screen and (min-width: 661px) {
   
 }
 
 /* 移动端样式 */
-@media screen and (max-width: 767px) {
+@media screen and (max-width: 660px) {
   .ns-tools button,
   .ns-menu li:not(:nth-child(3))
   {
