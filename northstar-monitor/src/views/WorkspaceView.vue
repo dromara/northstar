@@ -61,6 +61,8 @@ const pageOpts = {
 const pageOptsRevert = {}
 Object.keys(pageOpts).forEach((key) => (pageOptsRevert[pageOpts[key]] = key))
 
+
+
 export default {
   components: {
     SocketConnection,
@@ -75,11 +77,16 @@ export default {
   },
   mounted() {
     this.curPage = pageOptsRevert[this.$route.name]
-    if(MediaListener.isMobile()){
-      this.curPage = '3'
+    const resizeHandler = () => {
+      if(this.listener.isMobile()){
+        this.handleSelect('3', ['3'])
+      }
     }
+    this.listener = new MediaListener(resizeHandler)
+    resizeHandler()
   },
   destroyed() {
+    this.listener.destroy()
     this.$nextTick(() => location.reload())
   },
   methods: {

@@ -243,7 +243,7 @@ export default {
       delayTimer: -1,
       env: process.env.NODE_ENV,
       lock: false,
-      isMobile: MediaListener.isMobile()
+      isMobile: false
     }
   },
   computed: {
@@ -258,11 +258,14 @@ export default {
   },
   mounted() {
     this.autoRefreshList()
-    MediaListener.onResize = () => {
-      this.isMobile = MediaListener.isMobile()
+    const resizeHandler = () => {
+      this.isMobile = this.listener.isMobile()
     }
+    this.listener = new MediaListener(resizeHandler)
+    resizeHandler()
   },
   beforeDestroy() {
+    this.listener.destroy()
     clearTimeout(this.timer)
   },
   methods: {
