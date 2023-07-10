@@ -3,6 +3,7 @@ package org.dromara.northstar.support.utils;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.dromara.northstar.common.model.ContractSimpleInfo;
 import org.dromara.northstar.common.utils.FieldUtils;
 import org.dromara.northstar.module.ModuleManager;
 import org.dromara.northstar.strategy.IModule;
@@ -35,13 +36,18 @@ public class PositionChecker {
 		case PD_Short -> DirectionEnum.D_Sell;
 		default -> throw new IllegalArgumentException("Unexpected value: " + position.getPositionDirection());
 		};
-		
+		String unifiedSymbol = position.getContract().getUnifiedSymbol();
 		List<IModule> modules = moduleMgr.allModules()
 									.stream()
 									.filter(m -> hasLinkageBetweenModuleAndPosition(m, position))
+									.filter(m -> m.getModuleDescription().getModuleAccountSettingsDescription()
+											.stream()
+											.flatMap(mad -> mad.getBindedContracts().stream())
+											.map(ContractSimpleInfo::getUnifiedSymbol)
+											.collect(Collectors.toSet()).contains(unifiedSymbol))
 									.toList();
 		int totalPosition = modules.stream()
-									.mapToInt(m -> m.getModuleContext().getModuleAccount().getNonclosedPosition(position.getContract().getUnifiedSymbol(), direction))
+									.mapToInt(m -> m.getModuleContext().getModuleAccount().getNonclosedPosition(unifiedSymbol, direction))
 									.sum();
 		if(totalPosition != position.getPosition()) {
 			log.warn("{} {}头 实际持仓数：{}", position.getContract().getName(), FieldUtils.chn(direction), position.getPosition());

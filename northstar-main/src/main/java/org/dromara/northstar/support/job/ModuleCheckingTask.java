@@ -117,8 +117,18 @@ public class ModuleCheckingTask implements InitializingBean {
 				for(ContractSimpleInfo csi : mad.getBindedContracts()) {
 					Contract contract = contractMgr.getContract(Identifier.of(csi.getValue()));
 					IAccount account = m.getAccount(contract);
-					account.getPosition(PositionDirectionEnum.PD_Long, csi.getUnifiedSymbol()).ifPresent(this::doCheckPosition);
-					account.getPosition(PositionDirectionEnum.PD_Short, csi.getUnifiedSymbol()).ifPresent(this::doCheckPosition);
+					PositionField longPosPlaceholder = PositionField.newBuilder()
+							.setGatewayId(account.accountId())
+							.setContract(contract.contractField())
+							.setPositionDirection(PositionDirectionEnum.PD_Long)
+							.build();
+					PositionField shortPosPlaceholder = PositionField.newBuilder()
+							.setGatewayId(account.accountId())
+							.setContract(contract.contractField())
+							.setPositionDirection(PositionDirectionEnum.PD_Short)
+							.build();
+					account.getPosition(PositionDirectionEnum.PD_Long, csi.getUnifiedSymbol()).ifPresentOrElse(this::doCheckPosition, () -> this.doCheckPosition(longPosPlaceholder));
+					account.getPosition(PositionDirectionEnum.PD_Short, csi.getUnifiedSymbol()).ifPresentOrElse(this::doCheckPosition, () -> this.doCheckPosition(shortPosPlaceholder));
 				}
 			}
 		});

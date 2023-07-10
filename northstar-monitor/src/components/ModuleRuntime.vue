@@ -15,7 +15,7 @@
     <div class="module-rt-wrapper">
       <div class="side-panel">
         <div class="description-wrapper">
-          <el-descriptions class="margin-top" :column="3">
+          <el-descriptions class="margin-top" :column="`${isMobile ? 2 : 3}`">
             <template slot="title">
               模组信息
               <el-tag
@@ -25,7 +25,7 @@
                 >{{ { PLAYBACK: '回测', UAT: '模拟盘', PROD: '实盘' }[module.usage] }}</el-tag
               >
             </template>
-            <template slot="extra">
+            <template v-if="!isMobile" slot="extra">
               <el-switch
                 class="ml-10"
                 v-model="isManualUpdate"
@@ -125,12 +125,12 @@
                 }}</template>
               </el-table-column>
               <el-table-column prop="position" label="数量" align="center" min-width="46px" />
-              <el-table-column prop="openprice" label="成本价" align="center">
+              <el-table-column v-if="!isMobile" prop="openprice" label="成本价" align="center">
                 <template slot-scope="scope">
                   {{ scope.row.openprice | smartFormatter }}
                 </template>
               </el-table-column>
-              <el-table-column prop="lastprice" label="现价" align="center">
+              <el-table-column v-if="!isMobile" prop="lastprice" label="现价" align="center">
                 <template slot-scope="scope">
                   {{ scope.row.lastprice | smartFormatter }}
                 </template>
@@ -188,6 +188,7 @@
           </div>
           <div class="performance-min">
             <el-button
+              v-if="!isMobile"
               class="compact btn-enlarge"
               title="放大盈亏曲线"
               size="mini"
@@ -202,7 +203,7 @@
           </div>
         </div>
       </div>
-      <div class="kline-wrapper">
+      <div v-if="!isMobile" class="kline-wrapper">
         <div class="kline-header">
           模组当前引用的K线数据（模组仅缓存最近的{{ module.moduleCacheDataSize }}根K线数据）
         </div>
@@ -306,6 +307,7 @@ import KLineUtils from '@/utils/kline-utils.js'
 import { downloadData } from '@/utils/file-utils.js'
 import { jStat } from 'jstat'
 import { parse } from 'json2csv'
+import MediaListener from '@/utils/media-utils'
 
 import { PositionField, TradeField } from '@/lib/xyz/redtorch/pb/core_field_pb'
 import moment from 'moment'
@@ -369,7 +371,8 @@ export default {
       },
       indicatorMap: {},
       timer: '',
-      isManualUpdate: true
+      isManualUpdate: true,
+      isMobile: false
     }
   },
   filters: {
@@ -380,12 +383,16 @@ export default {
   watch: {
     visible: function (val) {
       if (val) {
+        this.isMobile = this.listener.isMobile()
         this.moduleRuntime = this.moduleRuntimeSrc
         this.bindedContracts = []
         this.module.moduleAccountSettingsDescription.forEach((account) => {
           const contracts = account.bindedContracts
           this.bindedContracts = this.bindedContracts.concat(contracts)
         })
+        if(this.isMobile){
+          return;
+        }
         setTimeout(() => {
           this.initChart()
           this.refresh()
@@ -493,8 +500,12 @@ export default {
         this.chart.resize()
       }
     })
+    this.listener = new MediaListener(() => {
+      this.isMobile = this.listener.isMobile()
+    })
   },
   beforeDestroy() {
+    this.listener.destroy()
     clearTimeout(this.timer)
   },
   methods: {
@@ -736,10 +747,6 @@ export default {
   border-top: 1px solid;
   border-bottom: 1px solid;
 }
-.side-panel {
-  min-width: 520px;
-  flex: 1;
-}
 .cell-content {
   position: absolute;
   bottom: 0;
@@ -757,8 +764,6 @@ export default {
   margin: 10px 0;
   z-index: 999;
 }
-</style>
-<style>
 .el-tabs__header {
   margin: 0;
 }
@@ -768,5 +773,25 @@ export default {
 .description-wrapper {
   padding: 10px;
   height: calc(100% - 20px);
+}
+
+/* 桌面端样式 */
+@media screen and (min-width: 661px) {
+  .side-panel {
+    min-width: 520px;
+    flex: 1;
+  }
+}
+
+/* 移动端样式 */
+@media screen and (max-width: 660px) {
+  .side-panel {
+    width: 100%;
+    flex: 1;
+  }
+  .el-descriptions{
+    height: 185px;
+    overflow-y: auto;
+  }
 }
 </style>

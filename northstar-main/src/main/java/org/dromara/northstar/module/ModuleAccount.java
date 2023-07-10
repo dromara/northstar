@@ -197,12 +197,18 @@ public class ModuleAccount implements IModuleAccount{
 
 	@Override
 	public int getNonclosedPosition(String unifiedSymbol, DirectionEnum direction) {
+		if(!posTable.contains(direction, unifiedSymbol)) {
+			return 0;
+		}
 		return posTable.get(direction, unifiedSymbol).totalVolume();
 	}
 	
 	@Override
 	public int getNonclosedPosition(String unifiedSymbol, DirectionEnum direction, boolean isPresentTradingDay) {
 		ModulePosition mp = posTable.get(direction, unifiedSymbol);
+		if(mp == null) {
+			return 0;
+		}
 		return isPresentTradingDay ? mp.tdVolume() : mp.ydVolume();
 	}
 	
