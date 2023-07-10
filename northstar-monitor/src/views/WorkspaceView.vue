@@ -61,8 +61,6 @@ const pageOpts = {
 const pageOptsRevert = {}
 Object.keys(pageOpts).forEach((key) => (pageOptsRevert[pageOpts[key]] = key))
 
-
-
 export default {
   components: {
     SocketConnection,
@@ -74,6 +72,19 @@ export default {
       mailSettingFormVisible: false,
       version: packageJson.version
     }
+  },
+  beforeRouteEnter(to, from, next){
+    const listener = new MediaListener(() => {})
+    if(listener.isMobile() && to.name !== 'module'){
+      const newTo = {
+        path: '/module',
+        query: to.query,
+        params: to.params
+      }
+      next(newTo)
+      return
+    }
+    next()
   },
   mounted() {
     this.curPage = pageOptsRevert[this.$route.name]
