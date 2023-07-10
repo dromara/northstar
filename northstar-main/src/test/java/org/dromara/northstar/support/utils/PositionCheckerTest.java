@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 
+import org.dromara.northstar.common.model.ContractSimpleInfo;
 import org.dromara.northstar.common.model.ModuleAccountDescription;
 import org.dromara.northstar.common.model.ModuleDescription;
 import org.dromara.northstar.module.ModuleManager;
@@ -38,6 +39,7 @@ class PositionCheckerTest {
 	void prepare() {
 		ModuleAccountDescription mad = ModuleAccountDescription.builder()
 				.accountGatewayId("testGateway")
+				.bindedContracts(List.of(ContractSimpleInfo.builder().unifiedSymbol(contract.getUnifiedSymbol()).build()))
 				.build();
 		ModuleDescription md = ModuleDescription.builder()
 				.moduleAccountSettingsDescription(List.of(mad))
