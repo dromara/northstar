@@ -102,7 +102,7 @@ public class ModuleAccount implements IModuleAccount{
 		};
 		
 		ModuleAccountRuntimeDescription mard = moduleRtDescription.getAccountRuntimeDescription();
-		this.initBalance = mard.getInitBalance();
+		this.initBalance = moduleDescription.getInitBalance();
 		this.accCloseProfit = mard.getAccCloseProfit();
 		this.accCommission = mard.getAccCommission();
 		this.accDealVolume = mard.getAccDealVolume();
