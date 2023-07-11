@@ -542,6 +542,7 @@ export default {
       })
     },
     exportData(){
+
       const fields = [
         'time',
         'open',
@@ -550,7 +551,7 @@ export default {
         'close',
         'volume',
         'openInterest',
-        ...this.indicatorOptions,
+        ...(this.indicatorOptions || []),
         'holding'
       ]
       Object.keys(this.barDataMap).map(symbol => {
