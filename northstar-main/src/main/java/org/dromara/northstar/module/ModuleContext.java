@@ -496,7 +496,7 @@ public class ModuleContext implements IModuleContext{
 		}
 		TickField tick = latestTickMap.get(contract.getUnifiedSymbol());
 		Assert.notNull(tick, "没有行情时不应该发送订单");
-		Assert.isTrue(volume > 0, "下单手数应该为正数");
+		Assert.isTrue(volume > 0, "下单手数应该为正数。当前为" + volume);
 		
 		double orderPrice = priceType.resolvePrice(tick, operation, price);
 		if(getLogger().isInfoEnabled()) {
