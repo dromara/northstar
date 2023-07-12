@@ -11,8 +11,12 @@
       :module="curTableIndex > -1 ? curModule : ''"
       :moduleRuntimeSrc="curTableIndex > -1 ? curModule.runtime : ''"
     />
+    <div v-if="isMobile">
+      <el-input placeholder="可按模组名称筛选" prefix-icon="el-icon-search" v-model="query" class="card-searcher" clearable>
+      </el-input>
+    </div>
     <div v-if="isMobile" class="card-wrapper">
-      <el-card class="box-card" v-for="(item, i) in moduleList" :key="i">
+      <el-card class="box-card" v-for="(item, i) in filterModuleList" :key="i">
         <el-descriptions :title="item.moduleName" :column="1" border>
           <el-descriptions-item label="持仓状态">
             <el-tag size="small">{{
@@ -31,6 +35,9 @@
             <span :class="!item.runtime ? '' : item.runtime.enabled ? 'color-green' : 'color-red'">
               {{ !item.runtime ? '加载中' : item.runtime.enabled ? '运行中' : '已停用' }}
             </span>
+          </el-descriptions-item>
+          <el-descriptions-item label="模组周期">
+            {{ `${item.numOfMinPerBar} 分钟` }}
           </el-descriptions-item>
         </el-descriptions>
         <div class="card-buttons">
@@ -243,11 +250,18 @@ export default {
       delayTimer: -1,
       env: process.env.NODE_ENV,
       lock: false,
-      isMobile: false
+      isMobile: false,
+      query: ''
     }
   },
   computed: {
-    ...mapGetters(['moduleList'])
+    ...mapGetters(['moduleList']),
+    filterModuleList(){
+      if(!this.query){
+        return this.moduleList
+      }
+      return this.moduleList.filter(item => item.moduleName.indexOf(this.query) !== -1)
+    }
   },
   created(){
     if(!this.moduleList.length){
@@ -402,6 +416,10 @@ export default {
 
 /* 移动端样式 */
 @media screen and (max-width: 660px) {
+  .ns-page{
+    display: flex;
+    flex-direction: column;
+  }
   #moduleTable{
     display: none;
   }
@@ -412,9 +430,14 @@ export default {
     justify-content: space-between;
     overflow: auto;
   }
+  .card-searcher{
+    margin-bottom: 10px;
+    max-height: 28px;
+  }
   .box-card{
     width: 48%;
     margin-bottom: 20px;
+    max-height: 200px;
   }
   .card-buttons{
     margin: 10px 0px;
