@@ -44,6 +44,7 @@ describe('网关管理-测试', () => {
             cy.get('.el-table__row').first().contains('已断开')
             cy.get('.el-table__row').first().contains('修改').should('be.enabled')
             cy.get('.el-table__row').first().contains('删除').should('be.enabled')
+            cy.wait(2100)
         })
 
         it('应该可以删除SIM行情网关', () => {
@@ -66,7 +67,7 @@ describe('网关管理-测试', () => {
             cy.get('.el-select-dropdown').contains('模拟合约').click()
             cy.get('.el-dialog').filter(':visible').find('button').last().click()
             cy.visit('https://localhost/#/tdgateway')
-            cy.wait(300)
+            cy.wait(1000)
         })
         beforeEach(() => {
             cy.Cookies.preserveOnce('JSESSIONID')
@@ -95,6 +96,7 @@ describe('网关管理-测试', () => {
             cy.get('.el-table__row').first().contains('已断开')
             cy.get('.el-table__row').first().contains('修改').should('be.enabled')
             cy.get('.el-table__row').first().contains('删除').should('be.enabled')
+            cy.wait(2100)
         })
 
         it('应该可以删除SIM账户', () => {
@@ -106,7 +108,12 @@ describe('网关管理-测试', () => {
             cy.get('.el-table__row').should('have.length', 0)
         })
 
+        after(() => {
+            cy.request('DELETE', 'https://localhost/northstar/gateway?gatewayId=SIM')
+        })
     })
+
+    
 
     describe('网关管理-级联测试', () => {
         beforeEach(() => {
@@ -125,7 +132,7 @@ describe('网关管理-测试', () => {
             cy.get('.el-dialog').contains('账户类型').parent().find('.el-select').click()
             cy.get('.el-select-dropdown').filter(':visible').contains('SIM').click()
             cy.get('.el-dialog').contains('行情网关').parent().find('.el-select').click()
-            cy.get('.el-select-dropdown').filter(':visible').last().contains('SIM').click()
+            cy.get('#bindedGatewayOption_SIM').click()
             cy.get('.el-dialog').filter(':visible').find('button').last().click()
             cy.visit('https://localhost/#/mktgateway')
             cy.wait(300)
@@ -135,6 +142,7 @@ describe('网关管理-测试', () => {
             cy.get('.el-popconfirm').find('button').contains('确定').click()
 
             cy.get('.el-message--error').contains('请先解除绑定')
+            cy.wait(1000)
         })
         after(() => {
             cy.request('DELETE', 'https://localhost/northstar/gateway?gatewayId=testAccount')
