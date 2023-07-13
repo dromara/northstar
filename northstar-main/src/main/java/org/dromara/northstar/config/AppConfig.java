@@ -173,6 +173,7 @@ public class AppConfig implements WebMvcConfigurer, InitializingBean, Disposable
     }
     
     @Bean
+    @ConditionalOnExpression("systemEnvironment['IDEA_INITIAL_DIRECTORY'] == null")
     CommandLineRunner printVersionInfo(BuildProperties buildProperties) {
     	return args -> log.info("Version: {}, Build Time: {}", buildProperties.getVersion(), buildProperties.getTime().atOffset(ZoneOffset.ofHours(8)));
 	}
