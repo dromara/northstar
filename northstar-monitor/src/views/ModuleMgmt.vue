@@ -372,7 +372,7 @@ export default {
     },
     enableAll(){
       this.moduleList.forEach((module) => {
-        if(!module.runtime.enabled){
+        if(module.runtime && !module.runtime.enabled){
           moduleApi.toggleModuleState(module.moduleName)
           module.runtime.enabled = true
         }
@@ -380,7 +380,7 @@ export default {
     },
     disableAll(){
       this.moduleList.forEach((module) => {
-         if(module.runtime.enabled){
+         if(module.runtime && module.runtime.enabled){
           moduleApi.toggleModuleState(module.moduleName)
           module.runtime.enabled = false
         }
