@@ -3,6 +3,8 @@ package org.dromara.northstar.strategy.model;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
 import org.apache.commons.lang3.StringUtils;
@@ -167,19 +169,22 @@ public class TradeIntent implements TransactionAware, TickDataAware {
 		orderIdRef
 			.filter(id -> StringUtils.equals(id, order.getOriginOrderId()))
 			.ifPresent(id -> {
-				if(OrderUtils.isDoneOrder(order)) {	
-					orderIdRef = Optional.empty();
+				if(OrderUtils.isDoneOrder(order)) {
+					// 延时3秒再移除订单信息，避免移除了订单信息后，成交无法匹配的问题
+					CompletableFuture.runAsync(() -> orderIdRef = Optional.empty(), CompletableFuture.delayedExecutor(3, TimeUnit.SECONDS));
 				}
 			});
 	}
 
 	@Override
 	public synchronized void onTrade(TradeField trade) {
-		accVol += trade.getVolume();
+		orderIdRef
+			.filter(id -> StringUtils.equals(id, trade.getOriginOrderId()))
+			.ifPresent(id -> accVol += trade.getVolume());
 	}
 
-	public boolean hasTerminated() {
-		return terminated || accVol == volume;
+	public synchronized boolean hasTerminated() {
+		return terminated || accVol >= volume;
 	}
 	
 	@Override

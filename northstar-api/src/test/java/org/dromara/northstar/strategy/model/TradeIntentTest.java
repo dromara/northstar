@@ -28,6 +28,7 @@ import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreEnum.OrderStatusEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.OrderField;
+import xyz.redtorch.pb.CoreField.TradeField;
 
 class TradeIntentTest {
 	
@@ -59,7 +60,8 @@ class TradeIntentTest {
 		assertThat(intent.hasTerminated()).isFalse();
 		intent.onTick(factory.makeTickField("rb2305", 5000));
 		intent.onTick(factory.makeTickField("rb2305", 5000));
-		intent.onTrade(factory.makeTradeField("rb2305", 5000, 1, DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open));
+		TradeField trade = factory.makeTradeField("rb2305", 5000, 1, DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open);
+		intent.onTrade(trade.toBuilder().setOriginOrderId(ORDER_ID).build());
 		assertThat(intent.hasTerminated()).isTrue();
 		
 		verify(ctx, times(1)).submitOrderReq(any(ContractField.class), any(SignalOperation.class), any(PriceType.class), anyInt(), any(Double.class));
@@ -73,7 +75,8 @@ class TradeIntentTest {
 		intent.setContext(ctx);		
 		assertThat(intent.hasTerminated()).isFalse();
 		intent.onTick(factory.makeTickField("rb2305", 5000));
-		intent.onTrade(factory.makeTradeField("rb2305", 5000, 1, DirectionEnum.D_Sell, OffsetFlagEnum.OF_Close));
+		TradeField trade = factory.makeTradeField("rb2305", 5000, 1, DirectionEnum.D_Sell, OffsetFlagEnum.OF_Close);
+		intent.onTrade(trade.toBuilder().setOriginOrderId(ORDER_ID).build());
 		assertThat(intent.hasTerminated()).isTrue();
 		
 		verify(ctx, times(1)).submitOrderReq(any(ContractField.class), any(SignalOperation.class), any(PriceType.class), anyInt(), any(Double.class));
@@ -81,7 +84,7 @@ class TradeIntentTest {
 	}
 	
 	@Test
-	void testTimeoutRetryOpen() {
+	void testTimeoutRetryOpen() throws InterruptedException {
 		when(ctx.isOrderWaitTimeout(anyString(), anyLong())).thenReturn(true, false);
 		TradeIntent intent = TradeIntent.builder()
 				.contract(contract).operation(SignalOperation.SELL_CLOSE).priceType(PriceType.OPP_PRICE).volume(1).timeout(3000).build();
@@ -90,9 +93,11 @@ class TradeIntentTest {
 		intent.onTick(factory.makeTickField("rb2305", 5000));
 		intent.onTick(factory.makeTickField("rb2305", 5000));
 		intent.onOrder(OrderField.newBuilder().setOriginOrderId(ORDER_ID).setOrderStatus(OrderStatusEnum.OS_Canceled).build());
+		Thread.sleep(3100);
 		assertThat(intent.hasTerminated()).isFalse();
 		intent.onTick(factory.makeTickField("rb2305", 5000));
-		intent.onTrade(factory.makeTradeField("rb2305", 5000, 1, DirectionEnum.D_Sell, OffsetFlagEnum.OF_Close));
+		TradeField trade = factory.makeTradeField("rb2305", 5000, 1, DirectionEnum.D_Sell, OffsetFlagEnum.OF_Close);
+		intent.onTrade(trade.toBuilder().setOriginOrderId(ORDER_ID).build());
 		assertThat(intent.hasTerminated()).isTrue();
 		
 		verify(ctx, times(2)).submitOrderReq(any(ContractField.class), any(SignalOperation.class), any(PriceType.class), anyInt(), any(Double.class));

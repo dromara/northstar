@@ -72,9 +72,8 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 		connected = true;
 		connState = ConnectionState.CONNECTED;
 		feEngine.emitEvent(NorthstarEventType.LOGGED_IN, gd.getGatewayId());
-		CompletableFuture.runAsync(() -> {
-			feEngine.emitEvent(NorthstarEventType.GATEWAY_READY, gd.getGatewayId());
-		}, CompletableFuture.delayedExecutor(2, TimeUnit.SECONDS));
+		CompletableFuture.runAsync(() -> feEngine.emitEvent(NorthstarEventType.GATEWAY_READY, gd.getGatewayId()),
+				CompletableFuture.delayedExecutor(2, TimeUnit.SECONDS));
 		statusReportTimer = new Timer("SimGatewayTimelyReport", true);
 		statusReportTimer.scheduleAtFixedRate(new TimerTask() {
 			
