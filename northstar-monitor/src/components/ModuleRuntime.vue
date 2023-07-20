@@ -391,6 +391,7 @@ export default {
           this.bindedContracts = this.bindedContracts.concat(contracts)
         })
         if(this.isMobile){
+          this.loadDealRecord()
           return;
         }
         setTimeout(() => {
