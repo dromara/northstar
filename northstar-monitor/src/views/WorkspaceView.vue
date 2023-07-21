@@ -160,7 +160,9 @@ export default {
 /* 移动端样式 */
 @media screen and (max-width: 660px) {
   .ns-tools button,
-  .ns-menu li:not(:nth-child(3))
+  .ns-menu li:nth-child(1),
+  .ns-menu li:nth-child(2),
+  .ns-menu li:nth-child(5)
   {
     display: none;
   }
