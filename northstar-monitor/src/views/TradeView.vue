@@ -365,13 +365,12 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
 .ns-trade-wrapper {
   display: flex;
 }
 .ns-trade {
   width: 100%;
-  max-width: 450px;
   margin: auto;
   height: 100%;
   display: flex;
@@ -403,6 +402,7 @@ export default {
   height: 100%;
   max-height: 236px;
   display: flex;
+  padding: 0 20px;
 }
 .ns-trade-action__item {
   height: 100%;
@@ -419,11 +419,12 @@ export default {
 .ns-trade-action {
   display: flex;
   flex-direction: column;
-  padding: 10px 20px;
+  padding: 10px 0;
 }
 .ns-trade-info {
-  width: 80%;
-  padding: 10px 20px;
+  width: 100%;
+  padding: 10px 0px;
+  padding-left: 20px;
   min-height: 200px;
 }
 .ns-account-table {
@@ -452,5 +453,40 @@ export default {
   width: 100%;
   height: 100%;
   padding: 0 20px;
+}
+
+/* 桌面端样式 */
+@media screen and (min-width: 661px) {
+  .ns-trade{
+    max-width: 450px;
+  }
+}
+
+/* 移动端样式 */
+@media screen and (max-width: 660px) {
+  .ns-trade__md-wrapper{
+    display: none;
+  }
+  .ns-page {
+    padding: 0;
+  }
+  .ns-trade {
+    width: 100%;
+    margin: auto;
+    height: 100%;
+    display: flex;
+    overflow: hidden;
+    flex-direction: column;
+    background-color: rgba(67, 74, 80, 1);
+  }
+  .ns-trade-button{
+    padding: 0 10px;
+  }
+  .ns-trade__trade-btn-wrap{
+    margin: 0 10px;
+  }
+  .ns-trade-action__item{
+    max-width: 40vw;
+  }
 }
 </style>
