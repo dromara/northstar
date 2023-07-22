@@ -35,7 +35,7 @@ public abstract class AbstractIndicator implements Indicator {
 		}
 		Num updateNum = evaluate(num);
 		if(!updateNum.isNaN()) {
-			ringBuf.update(updateNum, num.unstable());
+			ringBuf.update(updateNum, updateNum.unstable());
 		}
 	}
 	

@@ -11,7 +11,61 @@
       :module="curTableIndex > -1 ? curModule : ''"
       :moduleRuntimeSrc="curTableIndex > -1 ? curModule.runtime : ''"
     />
-    <el-table height="100%" :data="moduleList">
+    <div v-if="isMobile">
+      <el-input placeholder="可按模组名称筛选" prefix-icon="el-icon-search" v-model="query" class="card-searcher" clearable>
+      </el-input>
+    </div>
+    <div v-if="isMobile" class="card-wrapper">
+      <el-card class="box-card" v-for="(item, i) in filterModuleList" :key="i">
+        <el-descriptions :title="item.moduleName" :column="1" border>
+          <el-descriptions-item label="持仓状态">
+            <el-tag size="small">{{
+            !item.runtime ? '-' :
+                {
+                  HOLDING_LONG: '持多单',
+                  HOLDING_SHORT: '持空单',
+                  EMPTY: '无持仓',
+                  EMPTY_HEDGE: '对冲锁仓',
+                  HOLDING_HEDGE: '对冲持仓',
+                  PENDING_ORDER: '等待成交'
+                }[item.runtime.moduleState] || '-'
+              }}</el-tag>
+          </el-descriptions-item>
+          <el-descriptions-item label="当前状态">
+            <span :class="!item.runtime ? '' : item.runtime.enabled ? 'color-green' : 'color-red'">
+              {{ !item.runtime ? '加载中' : item.runtime.enabled ? '运行中' : '已停用' }}
+            </span>
+          </el-descriptions-item>
+          <el-descriptions-item label="模组周期">
+            {{ `${item.numOfMinPerBar} 分钟` }}
+          </el-descriptions-item>
+        </el-descriptions>
+        <div class="card-buttons">
+          <el-button
+              v-if="item.runtime"
+              style="float: right; padding: 3px 5px; margin-left: 8px"
+              @click="handlePerf(i, item)"
+              >运行状态</el-button
+            >
+            <el-button
+              v-if="item.runtime && item.runtime.enabled"
+              style="float: right; padding: 3px 5px; margin: 0"
+              type="danger"
+              @click.native="toggle(i, item)"
+              >停用</el-button
+            >
+            <el-button
+              v-if="item.runtime && !item.runtime.enabled"
+              style="float: right; padding: 3px 5px; margin: 0"
+              type="success"
+              @click.native="toggle(i, item)"
+            >
+              启用
+            </el-button>
+        </div>
+      </el-card>
+    </div>
+    <el-table v-else height="100%" :data="moduleList">
       <el-table-column type="index" width="42px" />
       <el-table-column label="模组名称" prop="moduleName" sortable align="center" width="180px" />
       <el-table-column label="模组类型" prop="type" sortable align="center" width="100px">
@@ -179,6 +233,7 @@ import ModuleForm from '@/components/ModuleForm'
 import ModuleRuntime from '@/components/ModuleRuntime'
 import { mapGetters } from 'vuex'
 import moduleApi from '@/api/moduleApi'
+import MediaListener from '@/utils/media-utils'
 
 export default {
   components: {
@@ -194,11 +249,19 @@ export default {
       timer: -1,
       delayTimer: -1,
       env: process.env.NODE_ENV,
-      lock: false
+      lock: false,
+      isMobile: false,
+      query: ''
     }
   },
   computed: {
-    ...mapGetters(['moduleList'])
+    ...mapGetters(['moduleList']),
+    filterModuleList(){
+      if(!this.query){
+        return this.moduleList
+      }
+      return this.moduleList.filter(item => item.moduleName.indexOf(this.query) !== -1)
+    }
   },
   created(){
     if(!this.moduleList.length){
@@ -209,8 +272,14 @@ export default {
   },
   mounted() {
     this.autoRefreshList()
+    const resizeHandler = () => {
+      this.isMobile = this.listener.isMobile()
+    }
+    this.listener = new MediaListener(resizeHandler)
+    resizeHandler()
   },
   beforeDestroy() {
+    this.listener.destroy()
     clearTimeout(this.timer)
   },
   methods: {
@@ -303,7 +372,7 @@ export default {
     },
     enableAll(){
       this.moduleList.forEach((module) => {
-        if(!module.runtime.enabled){
+        if(module.runtime && !module.runtime.enabled){
           moduleApi.toggleModuleState(module.moduleName)
           module.runtime.enabled = true
         }
@@ -311,7 +380,7 @@ export default {
     },
     disableAll(){
       this.moduleList.forEach((module) => {
-         if(module.runtime.enabled){
+         if(module.runtime && module.runtime.enabled){
           moduleApi.toggleModuleState(module.moduleName)
           module.runtime.enabled = false
         }
@@ -337,4 +406,51 @@ export default {
 }
 </script>
 
-<style></style>
+<style>
+/* 桌面端样式 */
+@media screen and (min-width: 661px) {
+  #moduleCards {
+    display: none;
+  }
+}
+
+/* 移动端样式 */
+@media screen and (max-width: 660px) {
+  .ns-page{
+    display: flex;
+    flex-direction: column;
+  }
+  #moduleTable{
+    display: none;
+  }
+  .card-wrapper{
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    overflow: auto;
+  }
+  .card-searcher{
+    margin-bottom: 10px;
+    max-height: 28px;
+  }
+  .box-card{
+    width: 48%;
+    margin-bottom: 20px;
+    max-height: 200px;
+  }
+  .card-buttons{
+    margin: 10px 0px;
+    height: 20px;
+  }
+  .el-card__header{
+    padding: 12px 20px;
+  }
+  .el-card__body{
+    padding-bottom: 10px;
+  }
+  .el-descriptions__header{
+    padding-bottom: 10px;
+  }
+}
+</style>

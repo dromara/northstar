@@ -72,6 +72,8 @@ import com.google.common.collect.Table;
 import com.google.protobuf.InvalidProtocolBufferException;
 
 import cn.hutool.core.lang.Assert;
+import lombok.Getter;
+import lombok.Setter;
 import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.ForceCloseReasonEnum;
@@ -90,6 +92,8 @@ import xyz.redtorch.pb.CoreField.TradeField;
 
 public class ModuleContext implements IModuleContext{
 	
+	@Getter
+	@Setter
 	protected IModule module;
 	
 	protected Logger logger;
@@ -483,11 +487,6 @@ public class ModuleContext implements IModuleContext{
 	}
 
 	@Override
-	public void setModule(IModule module) {
-		this.module = module;
-	}
-
-	@Override
 	public synchronized Optional<String> submitOrderReq(ContractField contract, SignalOperation operation, PriceType priceType, int volume, double price) {
 		if(!module.isEnabled()) {
 			if(isReady()) {
@@ -497,7 +496,7 @@ public class ModuleContext implements IModuleContext{
 		}
 		TickField tick = latestTickMap.get(contract.getUnifiedSymbol());
 		Assert.notNull(tick, "没有行情时不应该发送订单");
-		Assert.isTrue(volume > 0, "下单手数应该为正数");
+		Assert.isTrue(volume > 0, "下单手数应该为正数。当前为" + volume);
 		
 		double orderPrice = priceType.resolvePrice(tick, operation, price);
 		if(getLogger().isInfoEnabled()) {

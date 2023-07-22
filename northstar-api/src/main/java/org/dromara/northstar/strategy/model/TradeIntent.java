@@ -3,6 +3,8 @@ package org.dromara.northstar.strategy.model;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
 import org.apache.commons.lang3.StringUtils;
@@ -18,6 +20,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
+import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.OrderField;
 import xyz.redtorch.pb.CoreField.TickField;
@@ -121,12 +124,43 @@ public class TradeIntent implements TransactionAware, TickDataAware {
 		}
 		if(orderIdRef.isEmpty() && !context.getState().isOrdering()) {
 			context.getLogger().debug("交易意图自动发单");
-			orderIdRef = context.submitOrderReq(contract, operation, priceType, volume - accVol, price);
+			orderIdRef = context.submitOrderReq(contract, operation, priceType, orderVol(), price);
 		} else if (orderIdRef.isPresent() && context.isOrderWaitTimeout(orderIdRef.get(), timeout) && tick.getActionTimestamp() - lastCancelReqTime > 3000) {
 			context.getLogger().debug("交易意图自动撤单");
 			context.cancelOrder(orderIdRef.get());
 			lastCancelReqTime = tick.getActionTimestamp();
 		}
+	}
+	
+	private int orderVol() {
+		// 开仓信号下，不需要分拆计算
+		if(operation.isOpen()) {
+			return restVol();
+		}
+		// 平仓信号下，要确保发单数量不超过今仓昨仓数量
+		// 例如平仓数量为2，今仓为1，昨仓为1。就要分拆成先后两次下单
+		// 分拆过程中还要考虑模组当前的平仓优化策略
+		DirectionEnum direction = switch (operation) {
+		case BUY_CLOSE -> DirectionEnum.D_Sell;
+		case SELL_CLOSE -> DirectionEnum.D_Buy;
+		default -> throw new IllegalArgumentException("Unexpected value: " + operation);
+		};
+		int tdVol = context.getModuleAccount().getNonclosedPosition(contract.getUnifiedSymbol(), direction, true);
+		int ydVol = context.getModuleAccount().getNonclosedPosition(contract.getUnifiedSymbol(), direction, false);
+		// 其中一个为零时，不需要分拆计算
+		if(tdVol * ydVol == 0) {
+			return restVol();
+		}
+		return switch(context.getModule().getModuleDescription().getClosingPolicy()) {
+		case CLOSE_NONTODAY_HEGDE_TODAY -> ydVol > 0 ? Math.min(ydVol, restVol()) : restVol();
+		case FIRST_IN_FIRST_OUT -> Math.min(ydVol, restVol());
+		case FIRST_IN_LAST_OUT -> Math.min(tdVol, restVol()); 
+		default -> throw new IllegalStateException("未定义类型：" + context.getModule().getModuleDescription().getClosingPolicy());
+		};
+	}
+	
+	private int restVol() {
+		return volume - accVol;
 	}
 
 	@Override
@@ -135,19 +169,22 @@ public class TradeIntent implements TransactionAware, TickDataAware {
 		orderIdRef
 			.filter(id -> StringUtils.equals(id, order.getOriginOrderId()))
 			.ifPresent(id -> {
-				if(OrderUtils.isDoneOrder(order)) {	
-					orderIdRef = Optional.empty();
+				if(OrderUtils.isDoneOrder(order)) {
+					// 延时3秒再移除订单信息，避免移除了订单信息后，成交无法匹配的问题
+					CompletableFuture.runAsync(() -> orderIdRef = Optional.empty(), CompletableFuture.delayedExecutor(3, TimeUnit.SECONDS));
 				}
 			});
 	}
 
 	@Override
 	public synchronized void onTrade(TradeField trade) {
-		accVol += trade.getVolume();
+		orderIdRef
+			.filter(id -> StringUtils.equals(id, trade.getOriginOrderId()))
+			.ifPresent(id -> accVol += trade.getVolume());
 	}
 
-	public boolean hasTerminated() {
-		return terminated || accVol == volume;
+	public synchronized boolean hasTerminated() {
+		return terminated || accVol >= volume;
 	}
 	
 	@Override

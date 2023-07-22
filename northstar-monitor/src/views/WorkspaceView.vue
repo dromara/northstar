@@ -3,7 +3,7 @@
     <MailConfigForm :visible.sync="mailSettingFormVisible" />
     <div class="ns-header">
       <el-menu
-        class="el-menu-demo"
+        class="ns-menu"
         mode="horizontal"
         @select="handleSelect"
         background-color="#545c64"
@@ -47,6 +47,7 @@ import MailConfigForm from '@/components/MailConfigForm'
 import packageJson from '@/../package.json'
 
 import loginApi from '@/api/loginApi'
+import MediaListener from '@/utils/media-utils'
 
 const pageOpts = {
   1: 'mktgateway',
@@ -72,10 +73,31 @@ export default {
       version: packageJson.version
     }
   },
+  beforeRouteEnter(to, from, next){
+    const listener = new MediaListener(() => {})
+    if(listener.isMobile() && to.name !== 'module'){
+      const newTo = {
+        path: '/module',
+        query: to.query,
+        params: to.params
+      }
+      next(newTo)
+      return
+    }
+    next()
+  },
   mounted() {
     this.curPage = pageOptsRevert[this.$route.name]
+    const resizeHandler = () => {
+      if(this.listener.isMobile() && this.$route.name !== 'module' && this.$route.name !== 'manualfttd'){
+        this.handleSelect('3', ['3'])
+      }
+    }
+    this.listener = new MediaListener(resizeHandler)
+    resizeHandler()
   },
   destroyed() {
+    this.listener.destroy()
     this.$nextTick(() => location.reload())
   },
   methods: {
@@ -101,35 +123,49 @@ export default {
 
 <style scoped>
 .ns-workspace {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-}
-.ns-header {
-  border-bottom: solid 1px #e6e6e6;
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-}
-.ns-body {
-  height: 100%;
-  width: 100%;
-  display: flex;
-  overflow: hidden;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  .ns-header {
+    border-bottom: solid 1px #e6e6e6;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+  }
+  .ns-body {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    overflow: hidden;
+  }
+
+  .el-menu.el-menu--horizontal {
+    border-bottom: none;
+  }
+  .ns-trmkt-wrapper {
+    display: flex;
+    width: 100%;
+  }
+  .ns-tools {
+    align-items: center;
+    line-height: 60px;
+    padding-right: 10px;
+  }
+/* 桌面端样式 */
+@media screen and (min-width: 661px) {
+  
 }
 
-.el-menu.el-menu--horizontal {
-  border-bottom: none;
+/* 移动端样式 */
+@media screen and (max-width: 660px) {
+  .ns-tools button,
+  .ns-menu li:nth-child(1),
+  .ns-menu li:nth-child(2),
+  .ns-menu li:nth-child(5)
+  {
+    display: none;
+  }
 }
-.ns-trmkt-wrapper {
-  display: flex;
-  width: 100%;
-}
-.ns-tools {
-  align-items: center;
-  line-height: 60px;
-  padding-right: 10px;
-}
-.mail-button-wrapper {
-}
+
 </style>

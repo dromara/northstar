@@ -27,6 +27,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.info.BuildProperties;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -173,6 +174,7 @@ public class AppConfig implements WebMvcConfigurer, InitializingBean, Disposable
     }
     
     @Bean
+    @ConditionalOnExpression("systemEnvironment['IDEA_INITIAL_DIRECTORY'] == null")
     CommandLineRunner printVersionInfo(BuildProperties buildProperties) {
     	return args -> log.info("Version: {}, Build Time: {}", buildProperties.getVersion(), buildProperties.getTime().atOffset(ZoneOffset.ofHours(8)));
 	}

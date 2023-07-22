@@ -11,6 +11,7 @@ import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.common.utils.FieldUtils;
 
 import lombok.extern.slf4j.Slf4j;
+import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreEnum.OrderPriceTypeEnum;
 import xyz.redtorch.pb.CoreEnum.OrderStatusEnum;
@@ -116,7 +117,8 @@ public class OrderRequest implements TickDataAware{
 				orderBuilder.setStatusMsg("已报单").setOrderStatus(OrderStatusEnum.OS_Unknown);
 			}
 		} else {
-			int availablePos = account.getPositionManager().getAvailablePosition(submitOrderReq.getDirection(), submitOrderReq.getContract().getUnifiedSymbol(), true);
+			DirectionEnum posDir = FieldUtils.getOpposite(submitOrderReq.getDirection());
+			int availablePos = account.getPositionManager().getAvailablePosition(posDir, submitOrderReq.getContract().getUnifiedSymbol());
 			if(submitOrderReq.getVolume() > availablePos) {
 				log.warn("[{}] 可用持仓不足，无法平仓。可用：{}，实际平仓：{}", submitOrderReq.getGatewayId(), availablePos, submitOrderReq.getVolume());
 				orderBuilder.setStatusMsg("废单").setOrderStatus(OrderStatusEnum.OS_Rejected);

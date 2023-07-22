@@ -123,12 +123,14 @@
               :key="param.field"
             >
               <el-select
-                v-if="param.type === 'Options'"
+                v-if="['SELECT', 'MULTI_SELECT'].indexOf(param.type) > -1"
                 v-model="form.strategySetting.initParams[index]['value']"
                 :class="param.unit ? 'with-unit' : ''"
+                :multiple="param.type === 'MULTI_SELECT'"
+                collapse-tags
                 :disabled="readOnly"
               >
-                <el-option v-for="(item, i) in param.options" :value="item" :key="i">{{
+                <el-option v-for="(item, i) in param.options" :value="param.optionsVal[i]" :key="i">{{
                   item
                 }}</el-option>
               </el-select>

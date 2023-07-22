@@ -102,7 +102,7 @@ public class ModuleAccount implements IModuleAccount{
 		};
 		
 		ModuleAccountRuntimeDescription mard = moduleRtDescription.getAccountRuntimeDescription();
-		this.initBalance = mard.getInitBalance();
+		this.initBalance = moduleDescription.getInitBalance();
 		this.accCloseProfit = mard.getAccCloseProfit();
 		this.accCommission = mard.getAccCommission();
 		this.accDealVolume = mard.getAccDealVolume();
@@ -197,12 +197,21 @@ public class ModuleAccount implements IModuleAccount{
 
 	@Override
 	public int getNonclosedPosition(String unifiedSymbol, DirectionEnum direction) {
-		return posTable.row(direction).values().stream()
-				.filter(mp -> StringUtils.equals(unifiedSymbol, mp.getContract().getUnifiedSymbol()))
-				.mapToInt(ModulePosition::totalVolume)
-				.sum();
+		if(!posTable.contains(direction, unifiedSymbol)) {
+			return 0;
+		}
+		return posTable.get(direction, unifiedSymbol).totalVolume();
 	}
-
+	
+	@Override
+	public int getNonclosedPosition(String unifiedSymbol, DirectionEnum direction, boolean isPresentTradingDay) {
+		ModulePosition mp = posTable.get(direction, unifiedSymbol);
+		if(mp == null) {
+			return 0;
+		}
+		return isPresentTradingDay ? mp.tdVolume() : mp.ydVolume();
+	}
+	
 	@Override
 	public int getNonclosedNetPosition(String unifiedSymbol) {
 		int longPos = getNonclosedPosition(unifiedSymbol, DirectionEnum.D_Buy);
