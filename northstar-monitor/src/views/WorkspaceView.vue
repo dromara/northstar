@@ -89,7 +89,7 @@ export default {
   mounted() {
     this.curPage = pageOptsRevert[this.$route.name]
     const resizeHandler = () => {
-      if(this.listener.isMobile()){
+      if(this.listener.isMobile() && this.$route.name !== 'module' && this.$route.name !== 'manualfttd'){
         this.handleSelect('3', ['3'])
       }
     }
