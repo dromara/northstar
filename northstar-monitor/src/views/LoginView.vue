@@ -24,6 +24,9 @@
 <script>
 import loginApi from '@/api/loginApi'
 import packageJson from '@/../package.json'
+import MediaListener from '@/utils/media-utils'
+
+const listener = new MediaListener(() => {})
 
 export default {
   data() {
@@ -62,7 +65,7 @@ export default {
       localStorage.setItem('socketioPort', window.socketioPort)
       console.log('登录成功')
       this.$router.push({
-        name: 'mktgateway',
+        name: `${listener.isMobile() ? 'module' : 'mktgateway'}`,
         query: { auth: window.btoa(`${this.userForm.name}:${this.userForm.pass}`) }
       })
     }
