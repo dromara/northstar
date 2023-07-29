@@ -684,7 +684,7 @@ export default {
         localStorage.getItem(`module_${this.module.moduleName}_${this.unifiedSymbolOfChart}`) ||
         '{}'
       this.indicatorMap = JSON.parse(dataStr)
-      for (let i = 2; i < 6; i++) {
+      for (let i = 1; i < 6; i++) {
         const paneId = 'pane' + i
         Object.keys(this.indicatorMap).forEach((indicatorName) => {
           if (
