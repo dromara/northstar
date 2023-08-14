@@ -255,7 +255,7 @@ public class ModuleContext implements IModuleContext{
 		Configuration cfg = indicator.getConfiguration();
 		String unifiedSymbol = cfg.contract().getUnifiedSymbol();
 		String indicatorName = String.format("%s_%d%s", cfg.indicatorName(), cfg.numOfUnits(), cfg.period().symbol());
-		logger.info("检查指标配置信息：{}", indicatorName);
+		logger.trace("检查指标配置信息：{}", indicatorName);
 		Assert.isTrue(cfg.numOfUnits() > 0, "周期数必须大于0，当前为：" + cfg.numOfUnits());
 		Assert.isTrue(cfg.cacheLength() > 0, "指标回溯长度必须大于0，当前为：" + cfg.cacheLength());
 		if(cfg.visible()) {		// 不显示的指标可以不做重名校验
