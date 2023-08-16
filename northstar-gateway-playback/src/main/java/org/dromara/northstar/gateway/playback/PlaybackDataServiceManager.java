@@ -217,7 +217,6 @@ public class PlaybackDataServiceManager implements IDataServiceManager {
 	 * 获取CTP信息
 	 */
 	@Retryable
-	@Override
 	public JSONObject getCtpMetaSettings(String brokerId) {
 		URI uri = URI.create(String.format("%s/ctp/settings?brokerId=%s", baseUrl, brokerId));
 		return execute(uri, JSONObject.class).getBody();
@@ -225,7 +224,6 @@ public class PlaybackDataServiceManager implements IDataServiceManager {
 	
 	@Retryable
 	@SuppressWarnings("unchecked")
-	@Override
 	public List<ExchangeEnum> getUserAvailableExchanges() {
 		URI uri = URI.create(String.format("%s/contracts/availableEx", baseUrl));
 		return Optional.ofNullable(execute(uri, List.class).getBody()).orElse(Collections.emptyList())
