@@ -16,8 +16,6 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
-import com.alibaba.fastjson2.JSONObject;
-
 import lombok.extern.slf4j.Slf4j;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreField.BarField;
@@ -43,9 +41,6 @@ public class SimLoader implements CommandLineRunner{
 	private IDataServiceManager mockDsMgr = new IDataServiceManager() {
 		
 		@Override
-		public List<ExchangeEnum> getUserAvailableExchanges() { return Collections.emptyList();}
-		
-		@Override
 		public List<BarField> getQuarterlyData(ContractField contract, LocalDate startDate, LocalDate endDate) { return Collections.emptyList();}
 		
 		@Override
@@ -59,9 +54,6 @@ public class SimLoader implements CommandLineRunner{
 		
 		@Override
 		public List<BarField> getDailyData(ContractField contract, LocalDate startDate, LocalDate endDate) { return Collections.emptyList();}
-		
-		@Override
-		public JSONObject getCtpMetaSettings(String brokerId) { return new JSONObject(); }
 		
 		@Override
 		public List<ContractField> getAllContracts(ExchangeEnum exchange) { return Collections.emptyList();}

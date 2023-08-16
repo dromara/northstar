@@ -3,8 +3,6 @@ package org.dromara.northstar.common;
 import java.time.LocalDate;
 import java.util.List;
 
-import com.alibaba.fastjson2.JSONObject;
-
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.ContractField;
@@ -63,16 +61,4 @@ public interface IDataServiceManager {
 	 */
 	List<ContractField> getAllContracts(ExchangeEnum exchange);
 	
-	/**
-	 * 获取CTP信息
-	 * @param brokerId
-	 * @return
-	 */
-	JSONObject getCtpMetaSettings(String brokerId);
-	
-	/**
-	 * 获取用户可请求的交易所数据
-	 * @return
-	 */
-	List<ExchangeEnum> getUserAvailableExchanges();
 }
