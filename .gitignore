@@ -39,3 +39,4 @@ build/
 .vscode/
 /pom.xml.versionsBackup
 /northstar-dist/
+/.metadata/
