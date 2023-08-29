@@ -21,5 +21,10 @@
 	    <version>5.8.2</version>
 	    <scope>test</scope>
 	</dependency>
+	<dependency>
+		<groupId>org.apache.httpcomponents</groupId>
+		<artifactId>httpclient</artifactId>
+		<version>4.5.14</version>
+	</dependency>
   </dependencies>
 </project>
