@@ -44,7 +44,7 @@ public class RLStrategy extends AbstractStrategy{
 	
 	private InitParams params;
 
-	private String url = "http://localhost:5001/get-action";
+	private String getActionUrl = "http://localhost:5001/get-action";
 
 	private CloseableHttpClient httpClient = HttpClients.createDefault();
 
@@ -67,7 +67,7 @@ public class RLStrategy extends AbstractStrategy{
 		jsonData.put("low_price", bar.getLowPrice());
 		jsonData.put("close_price", bar.getClosePrice());
 		String jsonContent = jsonData.toString();
-        HttpPost httpPost = new HttpPost(url);
+        HttpPost httpPost = new HttpPost(getActionUrl);
 
 
 		try {
@@ -149,6 +149,6 @@ public class RLStrategy extends AbstractStrategy{
 
 	public static class InitParams extends DynamicParams {
 		@Setting(label="指标合约", order=0)
-		private String indicatorSymbol;				
+		private String indicatorSymbol;		
 	}
 }
