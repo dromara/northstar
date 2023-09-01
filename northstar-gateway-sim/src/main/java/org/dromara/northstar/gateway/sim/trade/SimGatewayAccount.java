@@ -96,7 +96,7 @@ public class SimGatewayAccount {
 		double commission = contractField.getCommissionFee() > 0 ? contractField.getCommissionFee() : contractField.getCommissionRate() * trade.getPrice() * trade.getContract().getMultiplier();
 		double sumCommission = trade.getVolume() * commission;
 		totalCommission += sumCommission;
-		log.info("[{}] {} {} {} {}手 交易手续费：{}", gatewayId, trade.getTradeDate(), trade.getTradeTime(), trade.getContract().getName(), 
+		log.info("[{}] {} {} {} {}手 单边交易手续费：{}", gatewayId, trade.getTradeDate(), trade.getTradeTime(), trade.getContract().getName(), 
 				trade.getVolume(), sumCommission);
 		
 		positionManager.onTrade(trade);
