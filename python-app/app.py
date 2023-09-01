@@ -9,4 +9,3 @@ def get_action():
     return jsonify({"action": random.choice([-1, 0, 1])})
 
 app.run(port=5001)
-    
