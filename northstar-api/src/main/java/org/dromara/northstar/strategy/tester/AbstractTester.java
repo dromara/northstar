@@ -44,7 +44,7 @@ import lombok.extern.slf4j.Slf4j;
 import xyz.redtorch.pb.CoreField.ContractField;
 
 @Slf4j
-public abstract class AbstractTester {
+public abstract class AbstractTester implements ModuleTesterContext{
 	
 	protected IContractManager contractMgr;
 	
@@ -55,8 +55,6 @@ public abstract class AbstractTester {
 	protected IGatewayService gatewayService;
 	
 	protected IModuleService moduleService;
-	
-	protected ModuleTesterContext ctx;
 	
 	protected AbstractTester(ObjectManager<Gateway> gatewayMgr, ObjectManager<IModule> moduleMgr, IContractManager contractMgr, 
 			IGatewayService gatewayService, IModuleService moduleService) {
@@ -93,7 +91,7 @@ public abstract class AbstractTester {
 	// 开始测试 
 	public void start() {
 		String currentSymbol = load();
-		for(String symbol : ctx.testSymbols()) {
+		for(String symbol : testSymbols()) {
 			if(StringUtils.isNotEmpty(currentSymbol) && !StringUtils.equals(symbol, currentSymbol)) {
 				continue;
 			}
@@ -112,10 +110,10 @@ public abstract class AbstractTester {
 					.unifiedSymbol(cf.getUnifiedSymbol())
 					.value(c.identifier().value())
 					.build();
-			MarketGateway mktGateway = createPlaybackGateway(csi, ctx);
+			MarketGateway mktGateway = createPlaybackGateway(csi, this);
 			TradeGateway tdGateway = createSimGateway(mktGateway);
 			tdGateway.connect();
-			gatewayService.simMoneyIO(tdGateway.gatewayId(), ctx.symbolTestAmount().get(symbol));
+			gatewayService.simMoneyIO(tdGateway.gatewayId(), symbolTestAmount().get(symbol));
 			ModuleAccountDescription mad = ModuleAccountDescription.builder()
 					.accountGatewayId(tdGateway.gatewayId())
 					.bindedContracts(List.of(csi))
@@ -127,7 +125,7 @@ public abstract class AbstractTester {
 			List<IModule> testModules = IntStream.of(testPeriods())
 					.mapToObj(min -> ModuleDescription.builder()
 							.moduleName(String.format("%s%d分钟", symbol, min))
-							.initBalance(ctx.symbolTestAmount().get(symbol))
+							.initBalance(symbolTestAmount().get(symbol))
 							.usage(ModuleUsage.PLAYBACK)
 							.type(ModuleType.SPECULATION)
 							.closingPolicy(ClosingPolicy.FIRST_IN_FIRST_OUT)
