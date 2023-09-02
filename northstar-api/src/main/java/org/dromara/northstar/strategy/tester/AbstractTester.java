@@ -156,8 +156,12 @@ public abstract class AbstractTester {
 			pause(1);
 			mktGateway.connect();
 			while (mktGateway.isActive() && testModules.stream().anyMatch(IModule::isEnabled)) {
-				pause(60);
 				log.info("{} 回测中", idxSymbol);
+				pause(30);
+			}
+			log.info("回测结束");
+			if(mktGateway.isActive()) {				
+				mktGateway.disconnect();
 			}
 			pause(30); // 等待计算结束
 
@@ -175,6 +179,7 @@ public abstract class AbstractTester {
 				}
 			}
 		}
+		// 清空测试状态
 		save("");
 	}
 	
