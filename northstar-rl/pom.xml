@@ -6,9 +6,8 @@
 	<artifactId>northstar</artifactId>
 	<version>6.2.0.Alpha</version>
   </parent>
-  <artifactId>northstar-strategy-example</artifactId>
+  <artifactId>northstar-rl</artifactId>
   <properties>
-    <maven.deploy.skip>true</maven.deploy.skip>
   </properties>
   <dependencies>
   	<dependency>
@@ -16,15 +15,14 @@
 		<artifactId>northstar-api</artifactId>
 	</dependency>
 	<dependency>
+		<groupId>com.alibaba</groupId>
+		<artifactId>fastjson</artifactId>
+	</dependency>
+	<dependency>
 	    <groupId>org.junit.jupiter</groupId>
 	    <artifactId>junit-jupiter</artifactId>
 	    <version>5.8.2</version>
 	    <scope>test</scope>
-	</dependency>
-	<dependency>
-		<groupId>org.apache.httpcomponents</groupId>
-		<artifactId>httpclient</artifactId>
-		<version>4.5.14</version>
 	</dependency>
   </dependencies>
 </project>
