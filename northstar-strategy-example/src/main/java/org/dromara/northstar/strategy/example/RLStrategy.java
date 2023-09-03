@@ -44,9 +44,15 @@ public class RLStrategy extends AbstractStrategy{
 	
 	private InitParams params;
 
+	private boolean isTrain;
+
 	private String getActionUrl = "http://localhost:5001/get-action";
 
 	private CloseableHttpClient httpClient = HttpClients.createDefault();
+
+	private float lastReward = 0;
+
+	private float beginTotalAsset = 100000;
 
 	@Override
 	public void onTick(TickField tick) {
@@ -66,6 +72,7 @@ public class RLStrategy extends AbstractStrategy{
 		jsonData.put("high_price", bar.getHighPrice());
 		jsonData.put("low_price", bar.getLowPrice());
 		jsonData.put("close_price", bar.getClosePrice());
+		jsonData.put("last_reward", lastReward);
 		String jsonContent = jsonData.toString();
         HttpPost httpPost = new HttpPost(getActionUrl);
 
@@ -75,65 +82,80 @@ public class RLStrategy extends AbstractStrategy{
 			httpPost.setEntity(entity);
 			CloseableHttpResponse response = httpClient.execute(httpPost);
 			HttpEntity responseEntity = response.getEntity();
+
 			if (responseEntity != null) {
 				String jsonResponse = EntityUtils.toString(responseEntity);
 				JSONObject jsonObject = JSON.parseObject(jsonResponse);
 				Integer actionID = jsonObject.getInteger("action"); // 1: 买；0: 持仓；-1: 卖
 				log.info("actionID: {}", actionID);
-				switch (ctx.getState()) {
-					case EMPTY -> {
-						if (actionID == 1) {
-							ctx.submitOrderReq(TradeIntent.builder()
-									.contract(ctx.getContract(bar.getUnifiedSymbol()))
-									.operation(SignalOperation.BUY_OPEN)
-									.priceType(PriceType.OPP_PRICE)
-									.volume(1)
-									.timeout(5000)
-									.build());
-							log.info("多开");
-						} else if (actionID == -1) {
-							ctx.submitOrderReq(TradeIntent.builder()
-									.contract(ctx.getContract(bar.getUnifiedSymbol()))
-									.operation(SignalOperation.SELL_OPEN)
-									.priceType(PriceType.OPP_PRICE)
-									.volume(1)
-									.timeout(5000)
-									.build());
-							log.info("空开");
-						}
-					}
-					case HOLDING_LONG -> {
-						if (actionID == -1) {
-							ctx.submitOrderReq(TradeIntent.builder()
-									.contract(ctx.getContract(bar.getUnifiedSymbol()))
-									.operation(SignalOperation.SELL_CLOSE)
-									.priceType(PriceType.OPP_PRICE)
-									.volume(1)
-									.timeout(5000)
-									.build());
-							log.info("平多");
-						}
-					}
-					case HOLDING_SHORT -> {
-						if (actionID == 1) {
-							ctx.submitOrderReq(TradeIntent.builder()
-									.contract(ctx.getContract(bar.getUnifiedSymbol()))
-									.operation(SignalOperation.BUY_CLOSE)
-									.priceType(PriceType.OPP_PRICE)
-									.volume(1)
-									.timeout(5000)
-									.build());
-							log.info("平空");
-						}
-					}
-					default -> {
-						log.info("当前状态：{}，不交易", ctx.getState());
-					}
-				}
+
+				// 根据actionID执行交易
+				executeTrade(bar, actionID);
+
+				// 记录reward
+				lastReward = getReward(bar, actionID);
+
 			}
 		} catch (ParseException | IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	private void executeTrade(BarField bar, int actionID) {
+		switch (ctx.getState()) {
+			case EMPTY -> {
+				if (actionID == 1) {
+					ctx.submitOrderReq(TradeIntent.builder()
+							.contract(ctx.getContract(bar.getUnifiedSymbol()))
+							.operation(SignalOperation.BUY_OPEN)
+							.priceType(PriceType.OPP_PRICE)
+							.volume(1)
+							.timeout(5000)
+							.build());
+					log.info("多开");
+				} else if (actionID == -1) {
+					ctx.submitOrderReq(TradeIntent.builder()
+							.contract(ctx.getContract(bar.getUnifiedSymbol()))
+							.operation(SignalOperation.SELL_OPEN)
+							.priceType(PriceType.OPP_PRICE)
+							.volume(1)
+							.timeout(5000)
+							.build());
+					log.info("空开");
+				}
+			}
+			case HOLDING_LONG -> {
+				if (actionID == -1) {
+					ctx.submitOrderReq(TradeIntent.builder()
+							.contract(ctx.getContract(bar.getUnifiedSymbol()))
+							.operation(SignalOperation.SELL_CLOSE)
+							.priceType(PriceType.OPP_PRICE)
+							.volume(1)
+							.timeout(5000)
+							.build());
+					log.info("平多");
+				}
+			}
+			case HOLDING_SHORT -> {
+				if (actionID == 1) {
+					ctx.submitOrderReq(TradeIntent.builder()
+							.contract(ctx.getContract(bar.getUnifiedSymbol()))
+							.operation(SignalOperation.BUY_CLOSE)
+							.priceType(PriceType.OPP_PRICE)
+							.volume(1)
+							.timeout(5000)
+							.build());
+					log.info("平空");
+				}
+			}
+			default -> {
+				log.info("当前状态：{}，不交易", ctx.getState());
+			}
+		}
+	}
+
+	private int getReward(BarField bar, int actionID){
+		return 0;
 	}
 	
 	/***************** 以下如果看不懂，基本可以照搬 *************************/

@@ -1,15 +1,16 @@
 import math
-import gym
+import gymnasium as gym
+from gymnasium import Space
 import numpy as np
 
 class TradingEnv(gym.Env):
-    def __init__( self,
+    def __init__(self,
                   trading_fee_rate=0.0001,
                   
                  ):
         self.current_hold = 0
         self.observation_space = gym.spaces.Box(low=0, high=np.inf, shape=(4,), dtype=np.float32)
-        self.action_space = spaces.Discrete(3, dtype=np.float32)
+        self.action_space = Space.Discrete(3, dtype=np.float32)
         
         self.state = self._initiate_state()
         
