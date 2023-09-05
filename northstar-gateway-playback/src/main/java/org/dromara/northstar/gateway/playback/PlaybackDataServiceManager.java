@@ -21,6 +21,7 @@ import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.common.utils.LocalEnvUtils;
 import org.dromara.northstar.common.utils.MarketDateTimeUtil;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -94,6 +95,7 @@ public class PlaybackDataServiceManager implements IDataServiceManager {
 	 * @return
 	 */
 	@Retryable
+	@Cacheable(cacheNames = "bars", key = "'Minutely_' + #contract.getUnifiedSymbol() + '_' + #startDate + '_' + #endDate")
 	@Override
 	public List<BarField> getMinutelyData(ContractField contract, LocalDate startDate, LocalDate endDate) {
 		log.debug("从数据服务加载历史行情1分钟数据：{}，{} -> {}", contract.getUnifiedSymbol(), startDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), endDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
@@ -108,6 +110,7 @@ public class PlaybackDataServiceManager implements IDataServiceManager {
 	 * @return
 	 */
 	@Retryable
+	@Cacheable(cacheNames = "bars", key = "'Quarterly_' + #contract.getUnifiedSymbol() + '_' + #startDate + '_' + #endDate")
 	@Override
 	public List<BarField> getQuarterlyData(ContractField contract, LocalDate startDate, LocalDate endDate) {
 		log.debug("从数据服务加载历史行情15分钟数据：{}，{} -> {}", contract.getUnifiedSymbol(), startDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), endDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
@@ -122,6 +125,7 @@ public class PlaybackDataServiceManager implements IDataServiceManager {
 	 * @return
 	 */
 	@Retryable
+	@Cacheable(cacheNames = "bars", key = "'Hourly_' + #contract.getUnifiedSymbol() + '_' + #startDate + '_' + #endDate")
 	@Override
 	public List<BarField> getHourlyData(ContractField contract, LocalDate startDate, LocalDate endDate) {
 		log.debug("从数据服务加载历史行情1小时数据：{}，{} -> {}", contract.getUnifiedSymbol(), startDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), endDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
@@ -136,6 +140,7 @@ public class PlaybackDataServiceManager implements IDataServiceManager {
 	 * @return
 	 */
 	@Retryable
+	@Cacheable(cacheNames = "bars", key = "'Daily_' + #contract.getUnifiedSymbol() + '_' + #startDate + '_' + #endDate")
 	@Override
 	public List<BarField> getDailyData(ContractField contract, LocalDate startDate, LocalDate endDate) {
 		log.debug("从数据服务加载历史行情日线数据：{}，{} -> {}", contract.getUnifiedSymbol(), startDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), endDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
