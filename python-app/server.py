@@ -15,6 +15,7 @@ obs = env.reset()
 
 last_action = [0]
 
+
 @app.route('/init-info', methods=['POST'])
 def init_info():
     data = request.get_json()

@@ -9,7 +9,6 @@ class TradingEnv(gym.Env):
                  ):
         self.observation_space = gym.spaces.Box(low=0, high=np.inf, shape=(4,), dtype=np.float32)
         self.action_space = gym.spaces.Discrete(3)
-        
         self.state = self._initiate_state()
 
     def _initiate_state(self):
@@ -37,6 +36,4 @@ class TradingEnv(gym.Env):
     
     def step(self, action):
         return self.state, self.last_reward, False, {}
-        
-        
-        
+

@@ -117,7 +117,7 @@ public class RLStrategy extends AbstractStrategy{
 			if (responseEntity != null) {
 				String jsonResponse = EntityUtils.toString(responseEntity);
 				JSONObject jsonObject = JSON.parseObject(jsonResponse);
-				Integer actionID = jsonObject.getInteger("action"); // 1: 买；0: 持仓；-1: 卖
+				Integer actionID = jsonObject.getInteger("action"); // 0: 持仓；1：买；2: 卖
 				log.info("actionID: {}", actionID);
 
 				// 根据actionID执行交易
@@ -132,9 +132,12 @@ public class RLStrategy extends AbstractStrategy{
 	}
 
 	private void executeTrade(BarField bar, int actionID) {
+		log.info("execute trade...");
 		switch (ctx.getState()) {
 			case EMPTY -> {
-				if (actionID == 1) {
+				if (actionID == 0) {
+					log.info("actionID=0, EMPTY, 持仓");
+				} else if (actionID == 1) {
 					ctx.submitOrderReq(TradeIntent.builder()
 							.contract(ctx.getContract(bar.getUnifiedSymbol()))
 							.operation(SignalOperation.BUY_OPEN)
@@ -142,8 +145,8 @@ public class RLStrategy extends AbstractStrategy{
 							.volume(1)
 							.timeout(5000)
 							.build());
-					log.info("多开");
-				} else if (actionID == -1) {
+					log.info("actionID=1, EMPTY, 多开");
+				} else if (actionID == 2) {
 					ctx.submitOrderReq(TradeIntent.builder()
 							.contract(ctx.getContract(bar.getUnifiedSymbol()))
 							.operation(SignalOperation.SELL_OPEN)
@@ -155,7 +158,11 @@ public class RLStrategy extends AbstractStrategy{
 				}
 			}
 			case HOLDING_LONG -> {
-				if (actionID == -1) {
+				if (actionID == 0) {
+					log.info("actionID=0, HOLDING_LONG, 持仓");
+				} else if (actionID == 1) {
+					log.info("actionID=1, HOLDING_LONG, 持仓");
+				} else if (actionID == 2) {
 					ctx.submitOrderReq(TradeIntent.builder()
 							.contract(ctx.getContract(bar.getUnifiedSymbol()))
 							.operation(SignalOperation.SELL_CLOSE)
@@ -163,11 +170,13 @@ public class RLStrategy extends AbstractStrategy{
 							.volume(1)
 							.timeout(5000)
 							.build());
-					log.info("平多");
+					log.info("actionID=2, HOLDING_LONG, 平多");
 				}
 			}
 			case HOLDING_SHORT -> {
-				if (actionID == 1) {
+				if (actionID == 0) {
+					log.info("actionID=0, HOLDING_SHORT, 持仓");
+				} else if (actionID == 1) {
 					ctx.submitOrderReq(TradeIntent.builder()
 							.contract(ctx.getContract(bar.getUnifiedSymbol()))
 							.operation(SignalOperation.BUY_CLOSE)
@@ -175,7 +184,9 @@ public class RLStrategy extends AbstractStrategy{
 							.volume(1)
 							.timeout(5000)
 							.build());
-					log.info("平空");
+					log.info("actionID=1, HOLDING_SHORT, 平空");
+				} else if (actionID == 2) {
+					log.info("actionID=2, HOLDING_SHORT, 持仓");
 				}
 			}
 			default -> {
@@ -202,6 +213,8 @@ public class RLStrategy extends AbstractStrategy{
 	public static class InitParams extends DynamicParams {
 		@Setting(label="指标合约", order=0)
 		private String indicatorSymbol;
+
+
 
 		@Setting(label="算法名称", order=1)
 		private String agentName;
