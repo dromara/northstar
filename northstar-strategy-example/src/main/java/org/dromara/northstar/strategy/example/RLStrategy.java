@@ -46,13 +46,44 @@ public class RLStrategy extends AbstractStrategy{
 
 	private boolean isTrain;
 
-	private String getActionUrl = "http://localhost:5001/get-action";
 
+	private String getActionUrl = "http://localhost:5001/get-action";
+	private String initInfoUrl = "http://localhost:5001/init-info";
+ 
 	private CloseableHttpClient httpClient = HttpClients.createDefault();
 
 	private float lastReward = 0;
 
 	private float beginTotalAsset = 100000;
+
+	// public RLStrategy() {
+	// 	try {
+	// 		JSONObject jsonData = new JSONObject();
+	// 		jsonData.put("is_train", isTrain);
+	// 		jsonData.put("agent_name", params.agentName);
+
+	// 		String jsonContent = jsonData.toString();
+	// 		HttpPost httpPost = new HttpPost(initInfoUrl);
+	// 		StringEntity entity = new StringEntity(jsonContent);
+	// 		httpPost.setEntity(entity);
+	// 		CloseableHttpResponse response = httpClient.execute(httpPost);
+	// 		HttpEntity responseEntity = response.getEntity();
+
+	// 		if (responseEntity != null) {
+	// 			String jsonResponse = EntityUtils.toString(responseEntity);
+	// 			JSONObject jsonObject = JSON.parseObject(jsonResponse);
+	// 			Boolean success = jsonObject.getBoolean("success");
+
+	// 			if (success) {
+	// 				log.info("初始化成功");
+	// 			} else {
+	// 				log.error(jsonObject.getString("message"));
+	// 			}
+	// 		}
+	// 	} catch (ParseException | IOException e) {
+	// 		e.printStackTrace();
+	// 	}
+	// }
 
 	@Override
 	public void onTick(TickField tick) {
@@ -66,18 +97,18 @@ public class RLStrategy extends AbstractStrategy{
 		log.debug("策略每分钟触发");
 		log.debug("{} K线数据： 开 [{}], 高 [{}], 低 [{}], 收 [{}]",
 				bar.getUnifiedSymbol(), bar.getOpenPrice(), bar.getHighPrice(), bar.getLowPrice(), bar.getClosePrice());
-		
-		JSONObject jsonData = new JSONObject();
-		jsonData.put("open_price", bar.getOpenPrice());
-		jsonData.put("high_price", bar.getHighPrice());
-		jsonData.put("low_price", bar.getLowPrice());
-		jsonData.put("close_price", bar.getClosePrice());
-		jsonData.put("last_reward", lastReward);
-		String jsonContent = jsonData.toString();
-        HttpPost httpPost = new HttpPost(getActionUrl);
 
 
 		try {
+			JSONObject jsonData = new JSONObject();
+			jsonData.put("open_price", bar.getOpenPrice());
+			jsonData.put("high_price", bar.getHighPrice());
+			jsonData.put("low_price", bar.getLowPrice());
+			jsonData.put("close_price", bar.getClosePrice());
+			jsonData.put("last_reward", lastReward);
+			String jsonContent = jsonData.toString();
+			HttpPost httpPost = new HttpPost(getActionUrl);
+			httpPost.setHeader("Content-Type", "application/json");
 			StringEntity entity = new StringEntity(jsonContent);
 			httpPost.setEntity(entity);
 			CloseableHttpResponse response = httpClient.execute(httpPost);
@@ -94,7 +125,6 @@ public class RLStrategy extends AbstractStrategy{
 
 				// 记录reward
 				lastReward = getReward(bar, actionID);
-
 			}
 		} catch (ParseException | IOException e) {
 			e.printStackTrace();
@@ -171,6 +201,9 @@ public class RLStrategy extends AbstractStrategy{
 
 	public static class InitParams extends DynamicParams {
 		@Setting(label="指标合约", order=0)
-		private String indicatorSymbol;		
+		private String indicatorSymbol;
+
+		@Setting(label="算法名称", order=1)
+		private String agentName;
 	}
 }

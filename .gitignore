@@ -40,3 +40,5 @@ build/
 /pom.xml.versionsBackup
 /northstar-dist/
 /.metadata/
+
+__pycache__/

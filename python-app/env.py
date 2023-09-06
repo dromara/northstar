@@ -5,18 +5,20 @@ import numpy as np
 
 class TradingEnv(gym.Env):
     def __init__(self,
-                  trading_fee_rate=0.0001,
-                  
+                 
                  ):
-        self.current_hold = 0
         self.observation_space = gym.spaces.Box(low=0, high=np.inf, shape=(4,), dtype=np.float32)
-        self.action_space = Space.Discrete(3, dtype=np.float32)
+        self.action_space = gym.spaces.Discrete(3)
         
         self.state = self._initiate_state()
-        
-        self.trading_fee_rate = trading_fee_rate
-    
-    
+
+    def _initiate_state(self):
+        return [
+            0, # open price
+            0, # high price
+            0, # low price
+            0, # closed price
+        ]
      
     def reset(self):
         self.state = self._initiate_state()
@@ -24,10 +26,17 @@ class TradingEnv(gym.Env):
     def render(self, mode="human", close=False):
         return self.state
     
+    def update_data(self, data):
+        self.state = [
+            data['open_price'],
+            data['high_price'],
+            data['low_price'],
+            data['close_price']
+        ]
+        self.last_reward = data['last_reward']
+    
     def step(self, action):
-        self.step += 1
-        
-        state = self.get_price(self.step)
+        return self.state, self.last_reward, False, {}
         
         
         
