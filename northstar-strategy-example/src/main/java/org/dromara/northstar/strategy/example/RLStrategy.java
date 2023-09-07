@@ -44,46 +44,17 @@ public class RLStrategy extends AbstractStrategy{
 	
 	private InitParams params;
 
-	private boolean isTrain;
+	// private boolean isTrain;
 
 
 	private String getActionUrl = "http://localhost:5001/get-action";
 	private String initInfoUrl = "http://localhost:5001/init-info";
+	
  
 	private CloseableHttpClient httpClient = HttpClients.createDefault();
 
 	private float lastReward = 0;
 
-	private float beginTotalAsset = 100000;
-
-	// public RLStrategy() {
-	// 	try {
-	// 		JSONObject jsonData = new JSONObject();
-	// 		jsonData.put("is_train", isTrain);
-	// 		jsonData.put("agent_name", params.agentName);
-
-	// 		String jsonContent = jsonData.toString();
-	// 		HttpPost httpPost = new HttpPost(initInfoUrl);
-	// 		StringEntity entity = new StringEntity(jsonContent);
-	// 		httpPost.setEntity(entity);
-	// 		CloseableHttpResponse response = httpClient.execute(httpPost);
-	// 		HttpEntity responseEntity = response.getEntity();
-
-	// 		if (responseEntity != null) {
-	// 			String jsonResponse = EntityUtils.toString(responseEntity);
-	// 			JSONObject jsonObject = JSON.parseObject(jsonResponse);
-	// 			Boolean success = jsonObject.getBoolean("success");
-
-	// 			if (success) {
-	// 				log.info("初始化成功");
-	// 			} else {
-	// 				log.error(jsonObject.getString("message"));
-	// 			}
-	// 		}
-	// 	} catch (ParseException | IOException e) {
-	// 		e.printStackTrace();
-	// 	}
-	// }
 
 	@Override
 	public void onTick(TickField tick) {
@@ -95,12 +66,14 @@ public class RLStrategy extends AbstractStrategy{
 	@Override
 	public void onMergedBar(BarField bar) {
 		log.debug("策略每分钟触发");
-		log.debug("{} K线数据： 开 [{}], 高 [{}], 低 [{}], 收 [{}]",
-				bar.getUnifiedSymbol(), bar.getOpenPrice(), bar.getHighPrice(), bar.getLowPrice(), bar.getClosePrice());
-
+		log.debug("{} K线数据： 开 [{}], 高 [{}], 低 [{}], 收 [{}]", 
+				 bar.getUnifiedSymbol(), bar.getOpenPrice(), bar.getHighPrice(), bar.getLowPrice(), bar.getClosePrice());
+		
+		
 
 		try {
 			JSONObject jsonData = new JSONObject();
+			jsonData.put("unified_symbol", bar.getUnifiedSymbol());
 			jsonData.put("open_price", bar.getOpenPrice());
 			jsonData.put("high_price", bar.getHighPrice());
 			jsonData.put("low_price", bar.getLowPrice());
@@ -117,14 +90,16 @@ public class RLStrategy extends AbstractStrategy{
 			if (responseEntity != null) {
 				String jsonResponse = EntityUtils.toString(responseEntity);
 				JSONObject jsonObject = JSON.parseObject(jsonResponse);
-				Integer actionID = jsonObject.getInteger("action"); // 0: 持仓；1：买；2: 卖
-				log.info("actionID: {}", actionID);
+				
+				if (params.isTrain) {
+					Integer actionID = jsonObject.getInteger("action"); // 0: 持仓；1：买；2: 卖
+					log.info("actionID: {}", actionID);
+					executeTrade(bar, actionID); // 根据actionID执行交易
+					lastReward = getReward(bar, actionID); // 记录reward
+				} else {
+					
+				}
 
-				// 根据actionID执行交易
-				executeTrade(bar, actionID);
-
-				// 记录reward
-				lastReward = getReward(bar, actionID);
 			}
 		} catch (ParseException | IOException e) {
 			e.printStackTrace();
@@ -208,15 +183,52 @@ public class RLStrategy extends AbstractStrategy{
 	@Override
 	public void initWithParams(DynamicParams params) {
 		this.params = (InitParams) params;
+		
+
+		// 将参数传给Python端
+		try {
+			JSONObject jsonData = new JSONObject();
+			jsonData.put("indicator_symbol", this.params.indicatorSymbol);
+			jsonData.put("agent_name", this.params.agentName);
+			jsonData.put("is_train", this.params.isTrain);
+			jsonData.put("model_version", this.params.modelVersion);
+
+			String jsonContent = jsonData.toString();
+			HttpPost httpPost = new HttpPost(initInfoUrl);
+			httpPost.setHeader("Content-Type", "application/json");
+			StringEntity entity = new StringEntity(jsonContent);
+			httpPost.setEntity(entity);
+			CloseableHttpResponse response = httpClient.execute(httpPost);
+			HttpEntity responseEntity = response.getEntity();
+
+			// if (responseEntity != null) {
+			// 	String jsonResponse = EntityUtils.toString(responseEntity);
+			// 	JSONObject jsonObject = JSON.parseObject(jsonResponse);
+			// 	Boolean success = jsonObject.getBoolean("success");
+
+			// 	if (success) {
+			// 		log.info("初始化成功");
+			// 	} else {
+			// 		log.error(jsonObject.getString("message"));
+			// 	}
+			// }
+		} catch (ParseException | IOException e) {
+			e.printStackTrace();
+		}
+
 	}
 
 	public static class InitParams extends DynamicParams {
 		@Setting(label="指标合约", order=0)
 		private String indicatorSymbol;
 
-
-
 		@Setting(label="算法名称", order=1)
 		private String agentName;
+
+		@Setting(label="是否训练", order=2)
+		private boolean isTrain;
+
+		@Setting(label="模型版本", order=3)
+		private String modelVersion;
 	}
 }
