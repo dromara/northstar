@@ -43,6 +43,7 @@ public class SimTickGenerator {
 
 	public TickField generateNextTick(LocalDateTime ldt) {
 		double priceTick = contract.getPriceTick() == 0 ? 1 : contract.getPriceTick();
+		seed += Math.random();
 		TickField.Builder tb = TickField.newBuilder()
 				.setLastPrice(lastPrice)
 				.setPreSettlePrice(lastPrice)
