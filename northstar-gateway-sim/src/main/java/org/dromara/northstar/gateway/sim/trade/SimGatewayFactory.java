@@ -1,5 +1,7 @@
 package org.dromara.northstar.gateway.sim.trade;
 
+import java.util.Map;
+
 import org.dromara.northstar.common.constant.GatewayUsage;
 import org.dromara.northstar.common.event.FastEventEngine;
 import org.dromara.northstar.common.model.GatewayDescription;
@@ -9,6 +11,7 @@ import org.dromara.northstar.gateway.Gateway;
 import org.dromara.northstar.gateway.GatewayFactory;
 import org.dromara.northstar.gateway.IMarketCenter;
 import org.dromara.northstar.gateway.sim.market.SimMarketGatewayLocal;
+import org.dromara.northstar.gateway.sim.market.SimTickGenerator;
 
 public class SimGatewayFactory implements GatewayFactory{
 	
@@ -18,10 +21,13 @@ public class SimGatewayFactory implements GatewayFactory{
 	
 	private IMarketCenter mktCenter;
 	
-	public SimGatewayFactory(FastEventEngine fastEventEngine, ISimAccountRepository repo, IMarketCenter mktCenter) {
+	private Map<String, SimTickGenerator> tickGenMap;
+	
+	public SimGatewayFactory(FastEventEngine fastEventEngine, ISimAccountRepository repo, IMarketCenter mktCenter, Map<String, SimTickGenerator> tickGenMap) {
 		this.fastEventEngine = fastEventEngine;
 		this.simAccountRepo = repo;
 		this.mktCenter = mktCenter;
+		this.tickGenMap = tickGenMap;
 	}
 
 	@Override
@@ -33,7 +39,7 @@ public class SimGatewayFactory implements GatewayFactory{
 	}
 	
 	private Gateway getMarketGateway(GatewayDescription gatewayDescription) {
-		return new SimMarketGatewayLocal(gatewayDescription, fastEventEngine, mktCenter);
+		return new SimMarketGatewayLocal(gatewayDescription, fastEventEngine, mktCenter, tickGenMap);
 	}
 	
 	private Gateway getTradeGateway(GatewayDescription gatewayDescription) {

@@ -1,12 +1,13 @@
 package org.dromara.northstar.gateway.sim.market;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 import org.apache.commons.lang3.StringUtils;
+import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.common.constant.TickType;
 
@@ -22,15 +23,39 @@ import xyz.redtorch.pb.CoreField.TickField;
  */
 public class SimTickGenerator {
 	
+	private Double initPrice = 5000D + ThreadLocalRandom.current().nextDouble(-2000, 3000);
+	
+	private Double lastPrice = initPrice;
+	
 	private Random rand = new Random();
+	
+	private double seed = Math.random();
+	
+	private ContractField contract;
+	
+	public SimTickGenerator(ContractField contract) {
+		this.contract = contract;
+	}
+	
+	public ContractField contract() {
+		return contract;
+	}
 
-	public TickField generateNextTick(InstrumentHolder ins) {
-		double seed = ins.getSeed() + Math.random();
-		ins.setSeed(seed);
-		ContractField contract = ins.getContract();
+	public TickField generateNextTick(LocalDateTime ldt) {
 		double priceTick = contract.getPriceTick() == 0 ? 1 : contract.getPriceTick();
-		TickField.Builder tb = ins.getLastTick();
-		double lastPrice = tb.getLastPrice();
+		TickField.Builder tb = TickField.newBuilder()
+				.setLastPrice(lastPrice)
+				.setPreSettlePrice(lastPrice)
+				.setGatewayId(contract.getGatewayId())
+				.setChannelType(ChannelType.SIM.toString())
+				.addAllAskPrice(List.of(0D, 0D, 0D, 0D, 0D))
+				.addAllBidPrice(List.of(0D, 0D, 0D, 0D, 0D))
+				.addAllAskVolume(List.of(0, 0, 0, 0, 0))
+				.addAllBidVolume(List.of(0, 0, 0, 0, 0))
+				.setUnifiedSymbol(contract.getUnifiedSymbol())
+				.setActionDay(ldt.format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
+				.setActionTime(ldt.format(DateTimeConstant.T_FORMAT_WITH_MS_INT_FORMATTER))
+				.setActionTimestamp(ldt.toInstant(ZoneOffset.ofHours(8)).toEpochMilli());
 		int lastNumberOfTick = (int) (lastPrice * 100) / (int)(priceTick * 100);
 		int deltaTick = generateDeltaTick(seed);
 		double latestPrice = (lastNumberOfTick + deltaTick) * priceTick;
@@ -39,30 +64,26 @@ public class SimTickGenerator {
 		int deltaVol = generateDeltaVol(seed);
 		int deltaInterest = generateDeltaOpenInterest();
 		
-		long rawMillisec = System.currentTimeMillis();
-		long adjustMillisec = rawMillisec - rawMillisec % 500;
-		LocalDateTime ldt = LocalDateTime.from(Instant.ofEpochMilli(adjustMillisec).atZone(ZoneId.systemDefault()));
 		String newActionDay = ldt.format(DateTimeConstant.D_FORMAT_INT_FORMATTER);
 		String oldActionDay = tb.getActionDay();
 		double high = StringUtils.equals(newActionDay, oldActionDay) ? Math.max(tb.getHighPrice(), latestPrice) : Math.max(0, latestPrice);
 		double low = StringUtils.equals(newActionDay, oldActionDay) ? Math.min(tb.getLowPrice(), latestPrice) : Math.min(Integer.MAX_VALUE, latestPrice);
-		
-		tb.setActionDay(ldt.format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
-			.setTradingDay(ldt.format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
-			.setActionTime(ldt.format(DateTimeConstant.T_FORMAT_WITH_MS_INT_FORMATTER))
-			.setActionTimestamp(ldt.toInstant(ZoneOffset.ofHours(8)).toEpochMilli())
-			.setAskPrice(0, askPrice)
-			.setBidPrice(0, bidPrice)
-			.setOpenInterest(tb.getOpenInterest() + deltaInterest)
-			.setOpenInterestDelta(deltaInterest)
-			.setVolume(tb.getVolume() + deltaVol)
-			.setVolumeDelta(deltaVol)
-			.setHighPrice(high)
-			.setLowPrice(low)
-			.setStatus(TickType.NORMAL_TICK.getCode())
-			.setLastPrice(latestPrice);
-		ins.setLastTick(tb);
-		return tb.build();
+		lastPrice = latestPrice;
+		return tb.setActionDay(ldt.format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
+				.setTradingDay(ldt.format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
+				.setActionTime(ldt.format(DateTimeConstant.T_FORMAT_WITH_MS_INT_FORMATTER))
+				.setActionTimestamp(ldt.toInstant(ZoneOffset.ofHours(8)).toEpochMilli())
+				.setAskPrice(0, askPrice)
+				.setBidPrice(0, bidPrice)
+				.setOpenInterest(tb.getOpenInterest() + deltaInterest)
+				.setOpenInterestDelta(deltaInterest)
+				.setVolume(tb.getVolume() + deltaVol)
+				.setVolumeDelta(deltaVol)
+				.setHighPrice(high)
+				.setLowPrice(low)
+				.setStatus(TickType.NORMAL_TICK.getCode())
+				.setLastPrice(latestPrice)
+				.build();
 	}
 	
 	private int generateDeltaTick(double seed) {
