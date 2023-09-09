@@ -1,9 +1,9 @@
 package org.dromara.northstar.gateway.sim.market;
 
+import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -33,35 +33,29 @@ public class SimMarketGatewayLocal implements MarketGateway{
 	
 	private ScheduledFuture<?> task;
 	
-	private SimTickGenerator tickGen = new SimTickGenerator();
-	
-	/**
-	 * unifiedSymbol --> InstrumentHolder
-	 */
-	private ConcurrentMap<String, InstrumentHolder> cache = new ConcurrentHashMap<>();
-	
 	private IMarketCenter mktCenter;
 	
 	private GatewayDescription gd;
 	
 	private ConnectionState connState = ConnectionState.DISCONNECTED;
 	
-	public SimMarketGatewayLocal(GatewayDescription gd, FastEventEngine feEngine, IMarketCenter mktCenter) {
+	private Map<String, SimTickGenerator> tickGenMap;
+	
+	public SimMarketGatewayLocal(GatewayDescription gd, FastEventEngine feEngine, IMarketCenter mktCenter, Map<String, SimTickGenerator> tickGenMap) {
 		this.feEngine = feEngine;
 		this.mktCenter = mktCenter;
 		this.gd = gd;
+		this.tickGenMap = tickGenMap;
 	}
 
 	@Override
 	public boolean subscribe(ContractField contract) {
-		cache.putIfAbsent(contract.getUnifiedSymbol(), new InstrumentHolder(contract));
 		log.info("模拟订阅合约：{}", contract.getSymbol());
 		return true;
 	}
 
 	@Override
 	public boolean unsubscribe(ContractField contract) {
-		cache.remove(contract.getUnifiedSymbol());
 		log.info("模拟退订合约：{}", contract.getSymbol());
 		return true;
 	}
@@ -80,8 +74,8 @@ public class SimMarketGatewayLocal implements MarketGateway{
 		task = scheduleExec.scheduleAtFixedRate(()->{
 			lastActiveTime = System.currentTimeMillis();
 			try {				
-				for(Entry<String, InstrumentHolder> e: cache.entrySet()) {
-					TickField tick = tickGen.generateNextTick(e.getValue());
+				for(Entry<String, SimTickGenerator> e: tickGenMap.entrySet()) {
+					TickField tick = e.getValue().generateNextTick(LocalDateTime.now());
 					feEngine.emitEvent(NorthstarEventType.TICK, tick);
 					GatewayContract contract = (GatewayContract) mktCenter.getContract(ChannelType.SIM, tick.getUnifiedSymbol());
 					contract.onTick(tick);
