@@ -55,6 +55,7 @@ public class RLStrategy extends AbstractStrategy{
 
 	private float lastReward = 0;
 
+	private boolean firstRun = true;
 
 	@Override
 	public void onTick(TickField tick) {
@@ -68,9 +69,23 @@ public class RLStrategy extends AbstractStrategy{
 		log.debug("策略每分钟触发");
 		log.debug("{} K线数据： 开 [{}], 高 [{}], 低 [{}], 收 [{}]", 
 				 bar.getUnifiedSymbol(), bar.getOpenPrice(), bar.getHighPrice(), bar.getLowPrice(), bar.getClosePrice());
-		
-		
 
+		if (firstRun) { // 第一次运行，初始化信息
+			firstRun = !initInfo();
+			log.info("firstRun: {}", firstRun);
+		} else {
+			int actionID = getAction(bar);
+			executeTrade(bar, actionID);
+			float reward = getReward(bar, actionID);
+			log.info("actionID: {}, reward: {}", actionID, reward);
+		}
+	}
+
+	private float getReward(BarField bar, Integer actionID) {
+		return 0;
+	}
+
+	private int getAction(BarField bar) {
 		try {
 			JSONObject jsonData = new JSONObject();
 			jsonData.put("unified_symbol", bar.getUnifiedSymbol());
@@ -94,16 +109,51 @@ public class RLStrategy extends AbstractStrategy{
 				if (params.isTrain) {
 					Integer actionID = jsonObject.getInteger("action"); // 0: 持仓；1：买；2: 卖
 					log.info("actionID: {}", actionID);
-					executeTrade(bar, actionID); // 根据actionID执行交易
-					lastReward = getReward(bar, actionID); // 记录reward
-				} else {
-					
-				}
+					return actionID;
+				} 
 
 			}
 		} catch (ParseException | IOException e) {
 			e.printStackTrace();
 		}
+		return 0;
+	}
+
+	private boolean initInfo() {
+		log.info("init info...");
+		// 将参数传给Python端
+		try {
+			JSONObject jsonData = new JSONObject();
+			jsonData.put("indicator_symbol", this.params.indicatorSymbol);
+			jsonData.put("agent_name", this.params.agentName);
+			jsonData.put("is_train", this.params.isTrain);
+			jsonData.put("model_version", this.params.modelVersion);
+
+			String jsonContent = jsonData.toString();
+			HttpPost httpPost = new HttpPost(initInfoUrl);
+			httpPost.setHeader("Content-Type", "application/json");
+			StringEntity entity = new StringEntity(jsonContent);
+			httpPost.setEntity(entity);
+			CloseableHttpResponse response = httpClient.execute(httpPost);
+			HttpEntity responseEntity = response.getEntity();
+
+			if (responseEntity != null) {
+				String jsonResponse = EntityUtils.toString(responseEntity);
+				JSONObject jsonObject = JSON.parseObject(jsonResponse);
+				Boolean success = jsonObject.getBoolean("success");
+
+				if (success) {
+					log.info("初始化成功");
+					return true;
+				} else {
+					log.error(jsonObject.getString("message"));
+					return false;
+				}
+			}
+		} catch (ParseException | IOException e) {
+			e.printStackTrace();
+		}
+		return false;
 	}
 
 	private void executeTrade(BarField bar, int actionID) {
@@ -169,10 +219,6 @@ public class RLStrategy extends AbstractStrategy{
 			}
 		}
 	}
-
-	private int getReward(BarField bar, int actionID){
-		return 0;
-	}
 	
 	/***************** 以下如果看不懂，基本可以照搬 *************************/
 	@Override
@@ -183,39 +229,6 @@ public class RLStrategy extends AbstractStrategy{
 	@Override
 	public void initWithParams(DynamicParams params) {
 		this.params = (InitParams) params;
-		
-
-		// 将参数传给Python端
-		try {
-			JSONObject jsonData = new JSONObject();
-			jsonData.put("indicator_symbol", this.params.indicatorSymbol);
-			jsonData.put("agent_name", this.params.agentName);
-			jsonData.put("is_train", this.params.isTrain);
-			jsonData.put("model_version", this.params.modelVersion);
-
-			String jsonContent = jsonData.toString();
-			HttpPost httpPost = new HttpPost(initInfoUrl);
-			httpPost.setHeader("Content-Type", "application/json");
-			StringEntity entity = new StringEntity(jsonContent);
-			httpPost.setEntity(entity);
-			CloseableHttpResponse response = httpClient.execute(httpPost);
-			HttpEntity responseEntity = response.getEntity();
-
-			// if (responseEntity != null) {
-			// 	String jsonResponse = EntityUtils.toString(responseEntity);
-			// 	JSONObject jsonObject = JSON.parseObject(jsonResponse);
-			// 	Boolean success = jsonObject.getBoolean("success");
-
-			// 	if (success) {
-			// 		log.info("初始化成功");
-			// 	} else {
-			// 		log.error(jsonObject.getString("message"));
-			// 	}
-			// }
-		} catch (ParseException | IOException e) {
-			e.printStackTrace();
-		}
-
 	}
 
 	public static class InitParams extends DynamicParams {
