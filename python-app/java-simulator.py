@@ -11,8 +11,8 @@ def init_info():
         "model_version": 1
     }
     post_response = requests.post(url, json=data)
-    print(post_response.json)    
-    assert 0
+    print(post_response.json())    
+    # assert 0
     
 def get_action():
     url = "http://localhost:5001/get-action"
@@ -25,7 +25,7 @@ def get_action():
         "last_reward": 0
     }
     post_response = requests.post(url, json=data)
-    print(post_response.json)
+    print(post_response.json())
 
 def simulate():
     init_info()
