@@ -42,3 +42,4 @@ build/
 /.metadata/
 
 __pycache__/
+/python-app/models

@@ -11,7 +11,6 @@ def init_info():
 @app.route("/get-action", methods=["POST"])
 def get_action():
     data = request.json
-    print(data)
     return server.get_action(data)
     
 app.run(port=5001)

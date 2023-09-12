@@ -1,5 +1,8 @@
+import random
 from time import sleep
 import requests
+
+SLEEP_TIME = 0.1
 
 def init_info():
     # send request to server
@@ -18,21 +21,21 @@ def get_action():
     url = "http://localhost:5001/get-action"
     data = {
         "unified_symbol": "rb0000@SHFE@FUTURES",
-        "open_price": 100,
-        "high_price": 100,
-        "low_price": 100,
-        "close_price": 100,
-        "last_reward": 0
+        "open_price": random.random(),
+        "high_price": random.random(),
+        "low_price": random.random(),
+        "close_price": random.random(),
+        "last_reward": random.random(),
     }
     post_response = requests.post(url, json=data)
     print(post_response.json())
 
 def simulate():
     init_info()
-    sleep(1)
+    sleep(SLEEP_TIME)
     
     for i in range(1000):
         get_action()
-        sleep(1)
+        sleep(SLEEP_TIME)
         
 simulate()
