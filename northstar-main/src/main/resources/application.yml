@@ -52,6 +52,10 @@ server:
   ssl:
     enabled: false
 spring:
+  cache:
+    type: ehcache
+    ehcache:
+      config: classpath:ehcache.xml
   config:
     activate:
       on-profile: dev
@@ -62,6 +66,10 @@ server:
   ssl:
     enabled: false
 spring:
+  cache:
+    type: ehcache
+    ehcache:
+      config: classpath:ehcache.xml
   datasource:
     url: jdbc:h2:mem:testdb
   config:

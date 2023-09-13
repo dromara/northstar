@@ -30,12 +30,32 @@ public class MinuteBarGenerator {
 	
 	private TickField lastTick;
 	
-	Consumer<BarField> onBarCallback;
+	private Consumer<BarField> onBarCallback;
 	
+	private boolean allowHistoricTick;
+	
+	/**
+	 * 用于实盘数据
+	 * @param contract
+	 * @param tradeTimeDefinition
+	 * @param onBarCallback
+	 */
 	public MinuteBarGenerator(ContractField contract, TradeTimeDefinition tradeTimeDefinition, Consumer<BarField> onBarCallback) {
+		this(contract, tradeTimeDefinition, onBarCallback, false);
+	}
+	
+	/**
+	 * 用于仿真数据
+	 * @param contract
+	 * @param tradeTimeDefinition
+	 * @param onBarCallback
+	 * @param allowHistoricTick
+	 */
+	public MinuteBarGenerator(ContractField contract, TradeTimeDefinition tradeTimeDefinition, Consumer<BarField> onBarCallback, boolean allowHistoricTick) {
 		this.contract = contract;
 		this.onBarCallback = onBarCallback;
 		this.clock = new OpenningMinuteClock(tradeTimeDefinition);
+		this.allowHistoricTick = allowHistoricTick;
 	}
 	
 	/**
@@ -55,7 +75,7 @@ public class MinuteBarGenerator {
 			if(!sameChannel) log.warn("[{}] 合约渠道不匹配，期望 [{}]，实际 [{}]", contract.getUnifiedSymbol(), contract.getChannelType(), tick.getChannelType());
 			return;
 		}
-		if (System.currentTimeMillis() - tick.getActionTimestamp() > MAX_TIME_GAP) {
+		if (System.currentTimeMillis() - tick.getActionTimestamp() > MAX_TIME_GAP && !allowHistoricTick) {
 			log.debug("忽略过期数据: {} {} {}", tick.getUnifiedSymbol(), tick.getActionDay(), tick.getActionTime());
 			return;
 		}
@@ -67,7 +87,8 @@ public class MinuteBarGenerator {
 		
 		lastTick = tick;
 		
-		if(Objects.nonNull(cutoffTime) && !clock.isEndOfSection(cutoffTime.toLocalTime()) && tick.getActionTimestamp() >= cutoffTime.toInstant(ZoneOffset.ofHours(8)).toEpochMilli()) {
+		if(Objects.nonNull(cutoffTime) && tick.getActionTimestamp() >= cutoffTime.toInstant(ZoneOffset.ofHours(8)).toEpochMilli()
+				&& (!clock.isEndOfSection(cutoffTime.toLocalTime()) || allowHistoricTick)) {
 			finishOfBar();
 		}
 		if(Objects.isNull(barBuilder)) {
