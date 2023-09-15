@@ -52,6 +52,7 @@ class Server:
         self.is_train = data["is_train"]
         indicator_symbol = data["indicator_symbol"]
         model_version = data["model_version"]
+        print(data)
         # print(data)
         # if train, load model from scratch; else, load model from file
         if self.is_train:

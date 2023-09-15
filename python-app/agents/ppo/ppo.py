@@ -6,6 +6,17 @@ import torch
 import torch.nn as nn
 from torch.distributions import Categorical
 
+def set_device():
+    # set device to cpu or cuda
+    device = torch.device('cpu')
+    if(torch.cuda.is_available()): 
+        device = torch.device('cuda:0') 
+        torch.cuda.empty_cache()
+        print(f"Device set to : {str(torch.cuda.get_device_name(device))}")
+    else:
+        print("Device set to : cpu")
+    return device
+
 
 class RolloutBuffer:
     def __init__(self):
@@ -101,14 +112,16 @@ class PPO:
         self.K_epochs = K_epochs
         
         self.buffer = RolloutBuffer()
+        
+        self.device = set_device()
 
-        self.policy = ActorCritic(state_dim, action_dim).to(device)
+        self.policy = ActorCritic(state_dim, action_dim).to(self.device)
         self.optimizer = torch.optim.Adam([
                         {'params': self.policy.actor.parameters(), 'lr': lr_actor},
                         {'params': self.policy.critic.parameters(), 'lr': lr_critic}
                     ])
 
-        self.policy_old = ActorCritic(state_dim, action_dim).to(device)
+        self.policy_old = ActorCritic(state_dim, action_dim).to(self.device)
         self.policy_old.load_state_dict(self.policy.state_dict())
         
         self.MseLoss = nn.MSELoss()
@@ -116,7 +129,7 @@ class PPO:
 
     def select_action(self, state, last_reward):
         with torch.no_grad():
-            state = torch.FloatTensor(state).to(device)
+            state = torch.FloatTensor(state).to(self.device)
             action, action_logprob, state_val = self.policy_old.act(state)
         
         # self.buffer.states.append(state)
@@ -149,14 +162,14 @@ class PPO:
             rewards.insert(0, discounted_reward)
             
         # Normalizing the rewards
-        rewards = torch.tensor(rewards, dtype=torch.float32).to(device)
+        rewards = torch.tensor(rewards, dtype=torch.float32).to(self.device)
         rewards = (rewards - rewards.mean()) / (rewards.std() + 1e-7)
 
         # convert list to tensor
-        old_states = torch.squeeze(torch.stack(self.buffer.states, dim=0)).detach().to(device)
-        old_actions = torch.squeeze(torch.stack(self.buffer.actions, dim=0)).detach().to(device)
-        old_logprobs = torch.squeeze(torch.stack(self.buffer.logprobs, dim=0)).detach().to(device)
-        old_state_values = torch.squeeze(torch.stack(self.buffer.state_values, dim=0)).detach().to(device)
+        old_states = torch.squeeze(torch.stack(self.buffer.states, dim=0)).detach().to(self.device)
+        old_actions = torch.squeeze(torch.stack(self.buffer.actions, dim=0)).detach().to(self.device)
+        old_logprobs = torch.squeeze(torch.stack(self.buffer.logprobs, dim=0)).detach().to(self.device)
+        old_state_values = torch.squeeze(torch.stack(self.buffer.state_values, dim=0)).detach().to(self.device)
 
         # calculate advantages
         advantages = rewards.detach() - old_state_values.detach()
