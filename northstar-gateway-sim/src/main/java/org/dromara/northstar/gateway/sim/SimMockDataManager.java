@@ -60,7 +60,7 @@ public class SimMockDataManager implements IDataServiceManager{
 
 	@Override
 	public List<LocalDate> getHolidays(ExchangeEnum exchange, LocalDate startDate, LocalDate endDate) {
-		throw new UnsupportedOperationException();
+		return Collections.emptyList();
 	}
 
 	@Override
