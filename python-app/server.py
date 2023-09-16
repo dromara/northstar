@@ -6,13 +6,15 @@ import torch as th
 import gymnasium as gym
 from flask import Flask, request, jsonify
 from agents.ppo import PPO, RolloutBuffer
+from agents.dqn import DQN
 from stable_baselines3.common.utils import obs_as_tensor
 from env import TradingEnv
 
 app = Flask(__name__)
 
 AGENTS = {
-    "ppo": PPO
+    "ppo": PPO,
+    "dqn": DQN,
 }
 
 class Server:
@@ -20,7 +22,6 @@ class Server:
         self.agent_name = None
         self.is_train = None
         self.models = {}
-        self.rollout_buffer = RolloutBuffer()
         self.action = None
         self.state_dim = 4
         self.action_dim = 3

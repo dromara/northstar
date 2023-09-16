@@ -5,17 +5,7 @@ Referenced the code from nikhilbarhate: https://github.com/nikhilbarhate99/PPO-P
 import torch
 import torch.nn as nn
 from torch.distributions import Categorical
-
-def set_device():
-    # set device to cpu or cuda
-    device = torch.device('cpu')
-    if(torch.cuda.is_available()): 
-        device = torch.device('cuda:0') 
-        torch.cuda.empty_cache()
-        print(f"Device set to : {str(torch.cuda.get_device_name(device))}")
-    else:
-        print("Device set to : cpu")
-    return device
+from ..base import BaseRL
 
 
 class RolloutBuffer:
@@ -97,7 +87,7 @@ class ActorCritic(nn.Module):
         return action_logprobs, state_values, dist_entropy
 
 
-class PPO:
+class PPO(BaseRL):
     def __init__(self, 
                  state_dim, 
                  action_dim, 
@@ -136,7 +126,6 @@ class PPO:
         # self.buffer.actions.append(action)
         # self.buffer.logprobs.append(action_logprob)
         # self.buffer.state_values.append(state_val)
-        
         self.buffer.add(action, state, action_logprob, last_reward, state_val, False)
 
         return action.item()
