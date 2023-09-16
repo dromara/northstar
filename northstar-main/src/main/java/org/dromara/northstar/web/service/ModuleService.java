@@ -19,6 +19,7 @@ import org.dromara.northstar.common.IModuleService;
 import org.dromara.northstar.common.constant.Constants;
 import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.common.constant.ModuleState;
+import org.dromara.northstar.common.constant.ModuleType;
 import org.dromara.northstar.common.constant.ModuleUsage;
 import org.dromara.northstar.common.event.NorthstarEvent;
 import org.dromara.northstar.common.event.NorthstarEventType;
@@ -41,6 +42,7 @@ import org.dromara.northstar.data.IModuleRepository;
 import org.dromara.northstar.gateway.Contract;
 import org.dromara.northstar.gateway.GatewayMetaProvider;
 import org.dromara.northstar.gateway.IContractManager;
+import org.dromara.northstar.module.ArbitrageModuleContext;
 import org.dromara.northstar.module.ModuleContext;
 import org.dromara.northstar.module.ModuleManager;
 import org.dromara.northstar.module.PlaybackModuleContext;
@@ -61,6 +63,7 @@ import org.springframework.util.StringUtils;
 import com.alibaba.fastjson.JSONObject;
 
 import cn.hutool.core.date.LocalDateTimeUtil;
+import cn.hutool.core.lang.Assert;
 import lombok.extern.slf4j.Slf4j;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.ContractField;
@@ -150,16 +153,16 @@ public class ModuleService implements IModuleService, PostLoadAware {
 				.initBalance(md.getInitBalance())
 				.positionDescription(new ModulePositionDescription())
 				.build();
-		ModuleRuntimeDescription mad = ModuleRuntimeDescription.builder()
+		ModuleRuntimeDescription mrd = ModuleRuntimeDescription.builder()
 				.moduleName(md.getModuleName())
 				.enabled(false)
 				.moduleState(ModuleState.EMPTY)
 				.accountRuntimeDescription(mard)
 				.dataState(new JSONObject())
 				.build();
-		moduleRepo.saveRuntime(mad);
+		loadModule(md, mrd);
+		moduleRepo.saveRuntime(mrd);
 		moduleRepo.saveSettings(md);
-		loadModule(md);
 		return md;
 	}
 	
@@ -178,7 +181,7 @@ public class ModuleService implements IModuleService, PostLoadAware {
 		}
 		validateChange(md);
 		unloadModule(md.getModuleName());
-		loadModule(md);
+		loadModule(md, moduleRepo.findRuntimeByName(md.getModuleName()));
 		moduleRepo.saveSettings(md);
 		return md;
 	}
@@ -217,13 +220,13 @@ public class ModuleService implements IModuleService, PostLoadAware {
 		return moduleRepo.findAllSettings();
 	}
 	
-	private void loadModule(ModuleDescription md) throws Exception {
-		ModuleRuntimeDescription mrd = moduleRepo.findRuntimeByName(md.getModuleName());
+	private void loadModule(ModuleDescription md, ModuleRuntimeDescription mrd) throws Exception {
 		int weeksOfDataForPreparation = md.getWeeksOfDataForPreparation();
 		LocalDate date = LocalDate.now().minusWeeks(weeksOfDataForPreparation);
 		
 		ComponentAndParamsPair strategyComponent = md.getStrategySetting();
 		TradeStrategy strategy = resolveComponent(strategyComponent);
+		Assert.isTrue(strategy.type() == md.getType(), "该策略只能用于类型为[{}]的模组", strategy.type());
 		strategy.setStoreObject(mrd.getDataState());
 		IModuleContext moduleCtx = null;
 		if(md.getUsage() == ModuleUsage.PLAYBACK) {
@@ -237,7 +240,11 @@ public class ModuleService implements IModuleService, PostLoadAware {
 					.build();
 			moduleCtx = new PlaybackModuleContext(strategy, md, mrd, contractMgr, moduleRepo, moduleLoggerFactory, new BarMergerRegistry(gatewayMetaProvider));
 		} else {
-			moduleCtx = new ModuleContext(strategy, md, mrd, contractMgr, moduleRepo, moduleLoggerFactory, mailMgr, new BarMergerRegistry(gatewayMetaProvider));
+			if(md.getType() == ModuleType.ARBITRAGE) {
+				moduleCtx = new ArbitrageModuleContext(strategy, md, mrd, contractMgr, moduleRepo, moduleLoggerFactory, mailMgr, new BarMergerRegistry(gatewayMetaProvider));
+			} else {				
+				moduleCtx = new ModuleContext(strategy, md, mrd, contractMgr, moduleRepo, moduleLoggerFactory, mailMgr, new BarMergerRegistry(gatewayMetaProvider));
+			}
 		}
 		moduleMgr.add(new TradeModule(md, moduleCtx, accountMgr, contractMgr));
 		strategy.setContext(moduleCtx);
@@ -398,7 +405,8 @@ public class ModuleService implements IModuleService, PostLoadAware {
 		log.info("开始加载模组");
 		for(ModuleDescription md : findAllModules()) {
 			try {				
-				loadModule(md);
+				ModuleRuntimeDescription mrd = moduleRepo.findRuntimeByName(md.getModuleName());
+				loadModule(md, mrd);
 				if(md.getUsage() != ModuleUsage.PLAYBACK) {
 					Thread.sleep(10000); // 每十秒只能加载一个模组，避免数据服务被限流导致数据缺失
 				}

@@ -2,6 +2,7 @@ package org.dromara.northstar.strategy;
 
 import org.dromara.northstar.common.TickDataAware;
 import org.dromara.northstar.common.TransactionAware;
+import org.dromara.northstar.common.constant.ModuleType;
 
 import com.alibaba.fastjson.JSONObject;
 
@@ -11,6 +12,13 @@ import xyz.redtorch.pb.CoreField.TickField;
 public interface TradeStrategy extends TickDataAware, MergedBarListener, TransactionAware, ContextAware, DynamicParamsAware{
 	
 	/* 状态与设置信息 */
+	/**
+	 * 适用模组类型
+	 * @return
+	 */
+	default ModuleType type() {
+		return ModuleType.SPECULATION;
+	}
 	
 	/**
 	 * 获取计算状态

@@ -109,14 +109,14 @@ public class ModuleContext implements IModuleContext{
 	protected ModuleAccount moduleAccount;
 	
 	/* originOrderId -> orderReq */
-	protected Map<String, SubmitOrderReqField> orderReqMap = new HashMap<>();
+	protected ConcurrentMap<String, SubmitOrderReqField> orderReqMap = new ConcurrentHashMap<>();
 	
 	/* unifiedSymbol -> contract */
 	protected Map<String, ContractField> contractMap = new HashMap<>();
 	protected Map<String, Contract> contractMap2 = new HashMap<>();
 	
 	/* unifiedSymbol -> tick */
-	protected Map<String, TickField> latestTickMap = new HashMap<>();
+	protected ConcurrentMap<String, TickField> latestTickMap = new ConcurrentHashMap<>();
 	
 	/* unifiedSymbol -> barQ */
 	protected Map<String, Queue<BarField>> barBufQMap = new HashMap<>();
@@ -496,7 +496,7 @@ public class ModuleContext implements IModuleContext{
 	}
 
 	@Override
-	public synchronized Optional<String> submitOrderReq(ContractField contract, SignalOperation operation, PriceType priceType, int volume, double price) {
+	public Optional<String> submitOrderReq(ContractField contract, SignalOperation operation, PriceType priceType, int volume, double price) {
 		if(!module.isEnabled()) {
 			if(isReady()) {
 				getLogger().info("策略处于停用状态，忽略委托单");
