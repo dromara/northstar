@@ -192,14 +192,14 @@ public class ModuleService implements IModuleService, PostLoadAware {
 	private void validateChange(ModuleDescription md) {
 		IModule module = moduleMgr.get(Identifier.of(md.getModuleName()));
 		ModuleDescription md0 = module.getModuleDescription();
-		if(module.getModuleContext().getState().isEmpty()) {
+		if(!module.getModuleContext().getState().isEmpty()) {
 			Set<String> accountNames = md.getModuleAccountSettingsDescription().stream().map(ModuleAccountDescription::getAccountGatewayId).collect(Collectors.toSet());
 			Set<String> accountNames0 = md0.getModuleAccountSettingsDescription().stream().map(ModuleAccountDescription::getAccountGatewayId).collect(Collectors.toSet());
-			Assert.isTrue(accountNames.equals(accountNames0), "模组在持仓状态下，不能进行修改绑定账户");
+			Assert.isTrue(accountNames.equals(accountNames0), "模组在持仓状态下，不能修改绑定账户");
 			
 			Set<String> bindedContracts = md.getModuleAccountSettingsDescription().stream().flatMap(mad -> mad.getBindedContracts().stream()).map(ContractSimpleInfo::getUnifiedSymbol).collect(Collectors.toSet());
 			Set<String> bindedContracts0 = md0.getModuleAccountSettingsDescription().stream().flatMap(mad -> mad.getBindedContracts().stream()).map(ContractSimpleInfo::getUnifiedSymbol).collect(Collectors.toSet());
-			Assert.isTrue(bindedContracts.equals(bindedContracts0), "模组在持仓状态下，不能进行修改绑定合约");
+			Assert.isTrue(bindedContracts.equals(bindedContracts0), "模组在持仓状态下，不能修改绑定合约");
 		}
 	}
 	
