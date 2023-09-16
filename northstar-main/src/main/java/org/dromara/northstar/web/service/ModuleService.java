@@ -10,7 +10,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 import java.util.Objects;
+import java.util.Set;
 
 import javax.transaction.Transactional;
 
@@ -186,16 +188,19 @@ public class ModuleService implements IModuleService, PostLoadAware {
 		return md;
 	}
 	
-	// 更新合法性校验：持仓状态下，模组不允许更新
+	// 更新合法性校验：持仓状态下，模组不允许修改绑定的账户与合约信息
 	private void validateChange(ModuleDescription md) {
 		IModule module = moduleMgr.get(Identifier.of(md.getModuleName()));
-		md.getModuleAccountSettingsDescription().stream()
-			.flatMap(mad -> mad.getBindedContracts().stream())
-			.forEach(csi -> {
-				if(module.getModuleContext().getModuleAccount().getNonclosedNetPosition(csi.getUnifiedSymbol()) != 0) {
-					throw new IllegalStateException("模组在持仓状态下，不能进行修改操作");
-				}
-			});
+		ModuleDescription md0 = module.getModuleDescription();
+		if(module.getModuleContext().getState().isEmpty()) {
+			Set<String> accountNames = md.getModuleAccountSettingsDescription().stream().map(ModuleAccountDescription::getAccountGatewayId).collect(Collectors.toSet());
+			Set<String> accountNames0 = md0.getModuleAccountSettingsDescription().stream().map(ModuleAccountDescription::getAccountGatewayId).collect(Collectors.toSet());
+			Assert.isTrue(accountNames.equals(accountNames0), "模组在持仓状态下，不能进行修改绑定账户");
+			
+			Set<String> bindedContracts = md.getModuleAccountSettingsDescription().stream().flatMap(mad -> mad.getBindedContracts().stream()).map(ContractSimpleInfo::getUnifiedSymbol).collect(Collectors.toSet());
+			Set<String> bindedContracts0 = md0.getModuleAccountSettingsDescription().stream().flatMap(mad -> mad.getBindedContracts().stream()).map(ContractSimpleInfo::getUnifiedSymbol).collect(Collectors.toSet());
+			Assert.isTrue(bindedContracts.equals(bindedContracts0), "模组在持仓状态下，不能进行修改绑定合约");
+		}
 	}
 	
 	/**
