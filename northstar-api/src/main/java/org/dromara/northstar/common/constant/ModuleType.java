@@ -4,9 +4,20 @@ public enum ModuleType {
 	/**
 	 * 投机
 	 */
-	SPECULATION, 
+	SPECULATION("投机"), 
 	/**
 	 * 套利类
 	 */
-	ARBITRAGE;
+	ARBITRAGE("套利");
+	
+	
+	private String name;
+	private ModuleType(String name) {
+		this.name = name;
+	}
+	
+	@Override
+	public String toString() {
+		return name;
+	}
 }

@@ -78,11 +78,13 @@ public class GatewayService implements IGatewayService, PostLoadAware {
 	public boolean createGateway(GatewayDescription gatewayDescription) {
 		log.info("创建网关[{}]", gatewayDescription.getGatewayId());
 		doSaveGatewayDescription(gatewayDescription);
-		
-		return doCreateGateway(gatewayDescription);
+		doCreateGateway(gatewayDescription);
+		if(gatewayDescription.isAutoConnect()) 
+			connect(gatewayDescription.getGatewayId());
+		return true;
 	}
 	
-	private boolean doCreateGateway(GatewayDescription gatewayDescription) {
+	private void doCreateGateway(GatewayDescription gatewayDescription) {
 		Gateway gateway = null;
 		GatewayFactory factory = metaProvider.getFactory(gatewayDescription.getChannelType());
 		gateway = factory.newInstance(gatewayDescription);
@@ -93,13 +95,9 @@ public class GatewayService implements IGatewayService, PostLoadAware {
 			TradeAccount account = new TradeAccount(mktGateway, tdGateway, gatewayDescription);
 			accountMgr.add(account);
 		}
-		if(gatewayDescription.isAutoConnect()) {
-			connect(gatewayDescription.getGatewayId());
-		}
 		if(gatewayDescription.getGatewayUsage() == GatewayUsage.MARKET_DATA && gateway instanceof MarketGateway mktGateway) {
 			mktCenter.addGateway(mktGateway);
 		}
-		return true;
 	}
 	
 	private void doSaveGatewayDescription(GatewayDescription gatewayDescription) {
@@ -128,7 +126,10 @@ public class GatewayService implements IGatewayService, PostLoadAware {
 		doDeleteGateway(gatewayDescription.getGatewayId());
 		doSaveGatewayDescription(gatewayDescription);
 		// 先删除旧的，再重新创建新的
-		return doCreateGateway(gatewayDescription);
+		doCreateGateway(gatewayDescription);
+		if(gatewayDescription.isAutoConnect()) 
+			connect(gatewayDescription.getGatewayId());
+		return true;
 	}
 	
 	/**
@@ -347,10 +348,24 @@ public class GatewayService implements IGatewayService, PostLoadAware {
 		result.stream().filter(gd -> gd.getGatewayUsage() == GatewayUsage.TRADE).map(this::decodeSettings).forEach(gd -> {
 			try {
 				doCreateGateway(decodeSettings(gd));
+				if(gd.isAutoConnect())
+					connect(gd.getGatewayId());
 			} catch(Exception e) {
 				log.error("", e);
 			}
 		});
+		log.info("等待网关合约加载");
+		try {
+			Thread.sleep(10000);
+		} catch (InterruptedException e) {
+			log.warn("", e);
+		}
+		// 先确保交易网关加载了合约信息，再连线行情网关
+		result.stream()
+			.filter(gd -> gd.getGatewayUsage() == GatewayUsage.MARKET_DATA)
+			.filter(GatewayDescription::isAutoConnect)
+			.map(GatewayDescription::getGatewayId)
+			.forEach(this::connect);
 		log.info("网关加载完毕");
 	}
 
