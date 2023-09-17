@@ -151,6 +151,7 @@ public class ModuleService implements IModuleService, PostLoadAware {
 	 */
 	@Override
 	public ModuleDescription createModule(ModuleDescription md) throws Exception {
+		log.info("增加模组 [{}]", md.getModuleName());
 		ModuleAccountRuntimeDescription mard = ModuleAccountRuntimeDescription.builder()
 				.initBalance(md.getInitBalance())
 				.positionDescription(new ModulePositionDescription())
@@ -178,9 +179,11 @@ public class ModuleService implements IModuleService, PostLoadAware {
 	@Override
 	public ModuleDescription modifyModule(ModuleDescription md, boolean reset) throws Exception {
 		if(reset) {
+			log.info("重置模组 [{}]", md.getModuleName());
 			removeModule(md.getModuleName());
 			return createModule(md);
 		}
+		log.info("更新模组 [{}]", md.getModuleName());
 		validateChange(md);
 		unloadModule(md.getModuleName());
 		loadModule(md, moduleRepo.findRuntimeByName(md.getModuleName()));
@@ -211,6 +214,7 @@ public class ModuleService implements IModuleService, PostLoadAware {
 	@Transactional
 	@Override
 	public boolean removeModule(String name) {
+		log.info("删除模组 [{}]", name);
 		unloadModule(name);
 		moduleRepo.deleteRuntimeByName(name);
 		moduleRepo.removeAllDealRecords(name);
