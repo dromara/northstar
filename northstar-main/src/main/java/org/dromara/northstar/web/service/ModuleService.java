@@ -412,9 +412,6 @@ public class ModuleService implements IModuleService, PostLoadAware {
 			try {				
 				ModuleRuntimeDescription mrd = moduleRepo.findRuntimeByName(md.getModuleName());
 				loadModule(md, mrd);
-				if(md.getUsage() != ModuleUsage.PLAYBACK) {
-					Thread.sleep(10000); // 每十秒只能加载一个模组，避免数据服务被限流导致数据缺失
-				}
 			} catch (Exception e) {
 				log.warn(String.format("模组 [%s] 加载失败。原因：", md.getModuleName()), e);
 			}
