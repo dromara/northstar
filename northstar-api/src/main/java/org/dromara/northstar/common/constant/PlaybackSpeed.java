@@ -11,11 +11,11 @@ public enum PlaybackSpeed {
 	 */
 	NORMAL,
 	/**
-	 * 快速度
+	 * 快速
 	 */
 	SPRINT,
 	/**
-	 * 超速度
+	 * 极速
 	 */
 	RUSH;
 }

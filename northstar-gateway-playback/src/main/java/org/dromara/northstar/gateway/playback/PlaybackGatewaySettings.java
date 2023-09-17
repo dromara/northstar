@@ -45,7 +45,7 @@ public class PlaybackGatewaySettings extends DynamicParams implements GatewaySet
 	/**
 	 * 回放速度
 	 */
-	@Setting(label="回放速度", order=40, type=FieldType.SELECT, options = {"正常", "快速", "超速"}, optionsVal = {"NORMAL", "SPRINT", "RUSH"})
+	@Setting(label="回放速度", order=40, type=FieldType.SELECT, options = {"正常", "快速", "极速"}, optionsVal = {"NORMAL", "SPRINT", "RUSH"})
 	private PlaybackSpeed speed;
 	/**
 	 * 回放的合约清单

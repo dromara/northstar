@@ -127,6 +127,7 @@
                 v-model="form.strategySetting.initParams[index]['value']"
                 :class="param.unit ? 'with-unit' : ''"
                 :multiple="param.type === 'MULTI_SELECT'"
+                :placeholder="form.strategySetting.initParams[index]['placeholder']"
                 collapse-tags
                 :disabled="readOnly"
               >
@@ -139,6 +140,7 @@
                 v-model="form.strategySetting.initParams[index]['value']"
                 :class="param.unit ? 'with-unit' : ''"
                 :type="param.type.toLowerCase()"
+                :placeholder="form.strategySetting.initParams[index]['placeholder']"
                 :disabled="readOnly"
               />
               <span v-if="param.unit" class="value-unit"> {{ param.unit }}</span>

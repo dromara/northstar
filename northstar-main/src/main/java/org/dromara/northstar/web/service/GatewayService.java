@@ -309,6 +309,7 @@ public class GatewayService implements IGatewayService, PostLoadAware {
 	 * @return
 	 * @throws Exception 
 	 */
+	@Override
 	public boolean resetPlayback(String gatewayId) {
 		log.info("复位 [{}] 行情回放网关", gatewayId);
 		GatewayDescription gd = gatewayRepo.findById(gatewayId);

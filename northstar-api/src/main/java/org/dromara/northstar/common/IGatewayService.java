@@ -42,5 +42,13 @@ public interface IGatewayService {
 	 * @return
 	 */
 	boolean simMoneyIO(String gatewayId, int money);
+	
+	/**
+	 * 复位重置回放网关
+	 * @param gatewayId
+	 * @return
+	 * @throws Exception 
+	 */
+	boolean resetPlayback(String gatewayId);
 
 }
