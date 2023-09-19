@@ -16,17 +16,10 @@ import com.alibaba.fastjson.JSONObject;
 
 import xyz.redtorch.pb.CoreField.BarField;
 
-public class Agent {
+public class RLAgent {
     private String getActionUrl = "http://localhost:5001/get-action";
 	private String initInfoUrl = "http://localhost:5001/init-info";
 
-    
-    private String indicatorSymbol;
-    private String agentName;
-    private boolean isTrain;
-    private String modelVersion;
-
- 
 	private CloseableHttpClient httpClient = HttpClients.createDefault();
 
     public boolean initInfo(
@@ -35,10 +28,6 @@ public class Agent {
         boolean isTrain,
         String modelVersion
     ) {
-        this.indicatorSymbol = indicatorSymbol;
-        this.agentName = agentName;
-        this.isTrain = isTrain;
-        this.modelVersion = modelVersion;
 		// 将参数传给Python端
 		try {
 			JSONObject jsonData = new JSONObject();
@@ -89,10 +78,8 @@ public class Agent {
 				String jsonResponse = EntityUtils.toString(responseEntity);
 				JSONObject jsonObject = JSON.parseObject(jsonResponse);
 				
-				if (this.isTrain) {
-					Integer actionID = jsonObject.getInteger("action"); // 0: 持仓；1：买；2: 卖
-					return actionID;
-				} 
+				Integer actionID = jsonObject.getInteger("action"); // 0: 持仓；1：买；2: 卖
+				return actionID;
 
 			}
 		} catch (ParseException | IOException e) {
