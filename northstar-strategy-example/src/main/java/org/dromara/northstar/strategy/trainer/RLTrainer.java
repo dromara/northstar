@@ -13,13 +13,17 @@ import org.dromara.northstar.strategy.IModule;
 
 public class RLTrainer extends AbstractSerialTrainer {
 
-    protected RLTrainer(ObjectManager<Gateway> gatewayMgr, ObjectManager<IModule> moduleMgr,
-            IContractManager contractMgr, IGatewayService gatewayService, IModuleService moduleService) {
-        super(gatewayMgr, moduleMgr, contractMgr, gatewayService, moduleService);
-        //TODO Auto-generated constructor stub
-        
-        
-    }
+    // protected RLTrainer(ObjectManager<Gateway> gatewayMgr, ObjectManager<IModule> moduleMgr,
+    //         IContractManager contractMgr, IGatewayService gatewayService, IModuleService moduleService) {
+    //     super(gatewayMgr, moduleMgr, contractMgr, gatewayService, moduleService);
+    //     //TODO Auto-generated constructor stub
+    // }
+
+    // protected RLTrainer(ObjectManager<Gateway> gatewayMgr, ObjectManager<IModule> moduleMgr,
+    //         IContractManager contractMgr, IGatewayService gatewayService, IModuleService moduleService) {
+    //     super(gatewayMgr, moduleMgr, contractMgr, gatewayService, moduleService);
+    //     //TODO Auto-generated constructor stub
+    // }
 
     @Override
     public DynamicParams strategyParams(ContractSimpleInfo csi) {

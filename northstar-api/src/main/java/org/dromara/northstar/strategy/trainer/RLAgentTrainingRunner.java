@@ -1,5 +1,11 @@
 package org.dromara.northstar.strategy.trainer;
 
+import org.dromara.northstar.common.IGatewayService;
+import org.dromara.northstar.common.IModuleService;
+import org.dromara.northstar.common.ObjectManager;
+import org.dromara.northstar.gateway.Gateway;
+import org.dromara.northstar.gateway.IContractManager;
+import org.dromara.northstar.strategy.IModule;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -14,9 +20,15 @@ import lombok.extern.slf4j.Slf4j;
 @ConditionalOnProperty(prefix = "spring.profiles", name = "active", havingValue = "train")
 @Component
 public class RLAgentTrainingRunner implements CommandLineRunner{
+
+	private ObjectManager<Gateway> gatewayMgr = new GatewayManager();
+	private ObjectManager<IModule> moduleMgr;
+	private IContractManager contractMgr;
+	private IGatewayService gatewayService;
+	private IModuleService moduleService;
 	
 	@Autowired
-	private AbstractTrainer trainer;
+	private AbstractTrainer trainer = new RLTrainer(gatewayMgr, moduleMgr, contractMgr, gatewayService, moduleService);
 	
 	@Override
 	public void run(String... args) throws Exception {
@@ -24,7 +36,7 @@ public class RLAgentTrainingRunner implements CommandLineRunner{
 			log.info("模组强化学习训练准备开始");
 			try {
 				Thread.sleep(5000);
-				trainer.start();
+				// trainer.start();
 			} catch (InterruptedException e) {
 				log.warn("", e);
 			}
