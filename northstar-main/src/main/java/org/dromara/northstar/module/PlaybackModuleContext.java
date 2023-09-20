@@ -12,7 +12,7 @@ import org.dromara.northstar.common.exception.InsufficientException;
 import org.dromara.northstar.common.model.ModuleDealRecord;
 import org.dromara.northstar.common.model.ModuleDescription;
 import org.dromara.northstar.common.model.ModuleRuntimeDescription;
-import org.dromara.northstar.common.utils.FieldUtils;
+import org.dromara.northstar.common.model.Tuple;
 import org.dromara.northstar.common.utils.OrderUtils;
 import org.dromara.northstar.data.IModuleRepository;
 import org.dromara.northstar.gateway.IContractManager;
@@ -30,6 +30,7 @@ import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.ForceCloseReasonEnum;
 import xyz.redtorch.pb.CoreEnum.HedgeFlagEnum;
+import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreEnum.OrderPriceTypeEnum;
 import xyz.redtorch.pb.CoreEnum.OrderStatusEnum;
 import xyz.redtorch.pb.CoreEnum.PriceSourceEnum;
@@ -37,6 +38,7 @@ import xyz.redtorch.pb.CoreEnum.TimeConditionEnum;
 import xyz.redtorch.pb.CoreEnum.VolumeConditionEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.OrderField;
+import xyz.redtorch.pb.CoreField.PositionField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TickField;
 import xyz.redtorch.pb.CoreField.TradeField;
@@ -108,8 +110,8 @@ public class PlaybackModuleContext extends ModuleContext implements IModuleConte
 	
 	// 所有的委托都会立马转为成交单
 	@Override
-	public synchronized Optional<String> submitOrderReq(ContractField contract, SignalOperation operation, PriceType priceType, int volume,
-			double price) {
+	public synchronized Optional<String> submitOrderReq(ContractField contract, SignalOperation operation, PriceType priceType, 
+			int volume, double price) {
 		if(!module.isEnabled()) {
 			getLogger().info("策略处于停用状态，忽略委托单");
 			return Optional.empty();
@@ -127,7 +129,9 @@ public class PlaybackModuleContext extends ModuleContext implements IModuleConte
 		}
 		String id = UUID.randomUUID().toString();
 		DirectionEnum direction = OrderUtils.resolveDirection(operation);
-		List<TradeField> nonclosedTrades = moduleAccount.getNonclosedTrades(contract.getUnifiedSymbol(), FieldUtils.getOpposite(direction));
+		PositionField pos = getAccount(contract).getPosition(OrderUtils.getClosingDirection(direction), contract.getUnifiedSymbol())
+				.orElse(PositionField.newBuilder().setContract(contract).build());
+		Tuple<OffsetFlagEnum, Integer> tuple = module.getModuleDescription().getClosingPolicy().resolve(operation, pos, volume);
 		String gatewayId = getAccount(contract).accountId();
 		try {
 			moduleAccount.onSubmitOrder(SubmitOrderReqField.newBuilder()
@@ -135,9 +139,9 @@ public class PlaybackModuleContext extends ModuleContext implements IModuleConte
 					.setContract(contract)
 					.setGatewayId(gatewayId)
 					.setDirection(direction)
-					.setOffsetFlag(module.getModuleDescription().getClosingPolicy().resolveOffsetFlag(operation, contract, nonclosedTrades, lastTick.getTradingDay()))
+					.setOffsetFlag(tuple.t1())
+					.setVolume(tuple.t2())		
 					.setPrice(orderPrice)
-					.setVolume(volume)		//	当信号交易量大于零时，优先使用信号交易量
 					.setHedgeFlag(HedgeFlagEnum.HF_Speculation)
 					.setTimeCondition(priceType == PriceType.ANY_PRICE ? TimeConditionEnum.TC_IOC : TimeConditionEnum.TC_GFD)
 					.setOrderPriceType(priceType == PriceType.ANY_PRICE ? OrderPriceTypeEnum.OPT_AnyPrice : OrderPriceTypeEnum.OPT_LimitPrice)
@@ -159,12 +163,12 @@ public class PlaybackModuleContext extends ModuleContext implements IModuleConte
 				.setGatewayId(PLAYBACK_GATEWAY)
 				.setAccountId(PLAYBACK_GATEWAY)
 				.setContract(contract)
-				.setTotalVolume(volume)
-				.setTradedVolume(volume)
+				.setTotalVolume(tuple.t2())
+				.setTradedVolume(tuple.t2())
 				.setPrice(lastTick.getLastPrice())
 				.setDirection(OrderUtils.resolveDirection(operation))
 				.setHedgeFlag(HedgeFlagEnum.HF_Speculation)
-				.setOffsetFlag(module.getModuleDescription().getClosingPolicy().resolveOffsetFlag(operation, contract, nonclosedTrades, lastTick.getTradingDay()))
+				.setOffsetFlag(tuple.t1())
 				.setTradingDay(lastTick.getTradingDay())
 				.setOrderDate(lastTick.getActionDay())
 				.setOrderTime(lastTick.getActionTime())
@@ -177,13 +181,13 @@ public class PlaybackModuleContext extends ModuleContext implements IModuleConte
 				.setGatewayId(PLAYBACK_GATEWAY)
 				.setAccountId(PLAYBACK_GATEWAY)
 				.setContract(contract)
-				.setVolume(volume)
+				.setVolume(tuple.t2())
 				.setPrice(lastTick.getLastPrice())
 				.setTradeId(System.currentTimeMillis()+"")
 				.setTradeTimestamp(lastTick.getActionTimestamp())
 				.setDirection(OrderUtils.resolveDirection(operation))
 				.setHedgeFlag(HedgeFlagEnum.HF_Speculation)
-				.setOffsetFlag(module.getModuleDescription().getClosingPolicy().resolveOffsetFlag(operation, contract, nonclosedTrades, lastTick.getTradingDay()))
+				.setOffsetFlag(tuple.t1())
 				.setPriceSource(PriceSourceEnum.PSRC_LastPrice)
 				.setTradeDate(lastTick.getActionDay())
 				.setTradingDay(lastTick.getTradingDay())

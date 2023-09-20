@@ -2,18 +2,17 @@ package org.dromara.northstar.module;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.dromara.northstar.common.constant.ClosingPolicy;
 import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.common.constant.SignalOperation;
 import org.dromara.northstar.common.model.ModuleDescription;
 import org.dromara.northstar.common.model.ModuleRuntimeDescription;
+import org.dromara.northstar.common.model.Tuple;
 import org.dromara.northstar.common.utils.FieldUtils;
 import org.dromara.northstar.common.utils.OrderUtils;
 import org.dromara.northstar.data.IModuleRepository;
@@ -31,13 +30,14 @@ import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.ForceCloseReasonEnum;
 import xyz.redtorch.pb.CoreEnum.HedgeFlagEnum;
+import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreEnum.OrderPriceTypeEnum;
 import xyz.redtorch.pb.CoreEnum.TimeConditionEnum;
 import xyz.redtorch.pb.CoreEnum.VolumeConditionEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
+import xyz.redtorch.pb.CoreField.PositionField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TickField;
-import xyz.redtorch.pb.CoreField.TradeField;
 
 public class ArbitrageModuleContext extends ModuleContext implements IModuleContext{
 	
@@ -99,15 +99,17 @@ public class ArbitrageModuleContext extends ModuleContext implements IModuleCont
 		DirectionEnum direction = OrderUtils.resolveDirection(operation);
 		int factor = FieldUtils.directionFactor(direction);
 		double plusPrice = module.getModuleDescription().getOrderPlusTick() * contract.getPriceTick(); // 超价设置
-		List<TradeField> nonclosedTrades = moduleAccount.getNonclosedTrades(contract.getUnifiedSymbol(), FieldUtils.getOpposite(direction));
+		PositionField pos = getAccount(contract).getPosition(OrderUtils.getClosingDirection(direction), contract.getUnifiedSymbol())
+				.orElse(PositionField.newBuilder().setContract(contract).build());
+		Tuple<OffsetFlagEnum, Integer> tuple = module.getModuleDescription().getClosingPolicy().resolve(operation, pos, volume);
 		SubmitOrderReqField orderReq = SubmitOrderReqField.newBuilder()
 				.setOriginOrderId(id)
 				.setContract(contract)
 				.setGatewayId(gatewayId)
 				.setDirection(direction)
-				.setOffsetFlag(ClosingPolicy.FIRST_IN_FIRST_OUT.resolveOffsetFlag(operation, contract, nonclosedTrades, tick.getTradingDay()))
+				.setOffsetFlag(tuple.t1())
+				.setVolume(tuple.t2())		
 				.setPrice(orderPrice + factor * plusPrice)	// 自动加上超价
-				.setVolume(volume)		//	当信号交易量大于零时，优先使用信号交易量
 				.setHedgeFlag(HedgeFlagEnum.HF_Speculation)
 				.setTimeCondition(priceType == PriceType.ANY_PRICE ? TimeConditionEnum.TC_IOC : TimeConditionEnum.TC_GFD)
 				.setOrderPriceType(priceType == PriceType.ANY_PRICE ? OrderPriceTypeEnum.OPT_AnyPrice : OrderPriceTypeEnum.OPT_LimitPrice)

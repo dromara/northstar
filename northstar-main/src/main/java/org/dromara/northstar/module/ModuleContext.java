@@ -42,6 +42,7 @@ import org.dromara.northstar.common.model.ModuleDescription;
 import org.dromara.northstar.common.model.ModulePositionDescription;
 import org.dromara.northstar.common.model.ModuleRuntimeDescription;
 import org.dromara.northstar.common.model.TimeSeriesValue;
+import org.dromara.northstar.common.model.Tuple;
 import org.dromara.northstar.common.utils.BarUtils;
 import org.dromara.northstar.common.utils.FieldUtils;
 import org.dromara.northstar.common.utils.OrderUtils;
@@ -80,6 +81,7 @@ import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.ForceCloseReasonEnum;
 import xyz.redtorch.pb.CoreEnum.HedgeFlagEnum;
+import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreEnum.OrderPriceTypeEnum;
 import xyz.redtorch.pb.CoreEnum.TimeConditionEnum;
 import xyz.redtorch.pb.CoreEnum.VolumeConditionEnum;
@@ -200,7 +202,7 @@ public class ModuleContext implements IModuleContext{
 			return;
 		}
 		getLogger().info("收到下单意图：{}", tradeIntent);
-		tradeIntentMap.put(tradingDay, tradeIntent);
+		tradeIntentMap.put(tradeIntent.getContract().getUnifiedSymbol(), tradeIntent);
 		tradeIntent.setContext(this);
         tradeIntent.onTick(tick);
 	}
@@ -518,15 +520,17 @@ public class ModuleContext implements IModuleContext{
 		DirectionEnum direction = OrderUtils.resolveDirection(operation);
 		int factor = FieldUtils.directionFactor(direction);
 		double plusPrice = module.getModuleDescription().getOrderPlusTick() * contract.getPriceTick(); // 超价设置
-		List<TradeField> nonclosedTrades = moduleAccount.getNonclosedTrades(contract.getUnifiedSymbol(), FieldUtils.getOpposite(direction));
+		PositionField pos = getAccount(contract).getPosition(OrderUtils.getClosingDirection(direction), contract.getUnifiedSymbol())
+				.orElse(PositionField.newBuilder().setContract(contract).build());
+		Tuple<OffsetFlagEnum, Integer> tuple = module.getModuleDescription().getClosingPolicy().resolve(operation, pos, volume);
 		return Optional.ofNullable(submitOrderReq(SubmitOrderReqField.newBuilder()
 				.setOriginOrderId(id)
 				.setContract(contract)
 				.setGatewayId(gatewayId)
 				.setDirection(direction)
-				.setOffsetFlag(module.getModuleDescription().getClosingPolicy().resolveOffsetFlag(operation, contract, nonclosedTrades, tick.getTradingDay()))
+				.setOffsetFlag(tuple.t1())
+				.setVolume(tuple.t2())		
 				.setPrice(orderPrice + factor * plusPrice)	// 自动加上超价
-				.setVolume(volume)		//	当信号交易量大于零时，优先使用信号交易量
 				.setHedgeFlag(HedgeFlagEnum.HF_Speculation)
 				.setTimeCondition(priceType == PriceType.ANY_PRICE ? TimeConditionEnum.TC_IOC : TimeConditionEnum.TC_GFD)
 				.setOrderPriceType(priceType == PriceType.ANY_PRICE ? OrderPriceTypeEnum.OPT_AnyPrice : OrderPriceTypeEnum.OPT_LimitPrice)

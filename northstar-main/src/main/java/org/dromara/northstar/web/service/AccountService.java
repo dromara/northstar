@@ -19,7 +19,6 @@ import org.dromara.northstar.gateway.IContractManager;
 import lombok.extern.slf4j.Slf4j;
 import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
-import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreEnum.ForceCloseReasonEnum;
 import xyz.redtorch.pb.CoreEnum.HedgeFlagEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
@@ -115,6 +114,7 @@ public class AccountService {
 				.orElseThrow(() -> new NoSuchElementException(String.format("不存在 [%s] 合约 [%s] 持仓", contract.getUnifiedSymbol(), targetPosDir)));
 		int totalAvailable = pos.getPosition() - pos.getFrozen();
 		int tdAvailable = pos.getTdPosition() - pos.getTdFrozen();
+		int ydAvailable = pos.getYdPosition() - pos.getYdFrozen();
 		if(totalAvailable < orderReq.getVolume()) {
 			throw new InsufficientException("持仓不足，无法平仓");
 		}
@@ -135,26 +135,21 @@ public class AccountService {
 		.setMinVolume(1)
 		.setGatewayId(orderReq.getGatewayId());
 		
-		if(pos.getContract().getExchange() == ExchangeEnum.SHFE && tdAvailable > 0) {
-			if(tdAvailable >= orderReq.getVolume()) {
-				result.add(sb.setVolume(orderReq.getVolume())
-						.setOffsetFlag(OffsetFlagEnum.OF_CloseToday)
-						.build());
-				return result;
-			}
-			
-			result.add(sb.setVolume(tdAvailable)
-					.setOffsetFlag(OffsetFlagEnum.OF_CloseToday)
-					.build());
-			result.add(sb.setVolume(orderReq.getVolume() - tdAvailable)
-					.setOffsetFlag(OffsetFlagEnum.OF_CloseYesterday)
-					.build());
-			return result;
-		}
+		int consume = 0;
 		
-		result.add(sb.setVolume(orderReq.getVolume())
-				.setOffsetFlag(OffsetFlagEnum.OF_Close)
-				.build());
+		while(consume < orderReq.getVolume()) {
+			if(ydAvailable > 0) {
+				consume = Math.min(ydAvailable, orderReq.getVolume() - consume);
+				ydAvailable -= consume;
+				result.add(sb.setVolume(consume).setOffsetFlag(OffsetFlagEnum.OF_CloseYesterday).build());
+			} else if(tdAvailable > 0) {
+				consume = Math.min(tdAvailable, orderReq.getVolume() - consume);
+				tdAvailable -= consume;
+				result.add(sb.setVolume(consume).setOffsetFlag(OffsetFlagEnum.OF_CloseToday).build());
+			} else {
+				throw new TradeException();
+			}
+		}
 		return result;
 	}
 	

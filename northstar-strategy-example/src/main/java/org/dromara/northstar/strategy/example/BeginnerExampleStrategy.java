@@ -114,7 +114,7 @@ public class BeginnerExampleStrategy implements TradeStrategy{
 						.operation(op)
 						.volume(ctx.getDefaultVolume())
 						.priceType(PriceType.valueOf(params.priceType))
-						.timeout(30000)
+						.timeout(10000)
 						.build());
 				return;
 			}
