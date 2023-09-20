@@ -135,17 +135,19 @@ public class AccountService {
 		.setMinVolume(1)
 		.setGatewayId(orderReq.getGatewayId());
 		
-		int consume = 0;
+		int totalConsume = 0;
 		
-		while(consume < orderReq.getVolume()) {
+		while(totalConsume < orderReq.getVolume()) {
 			if(ydAvailable > 0) {
-				consume = Math.min(ydAvailable, orderReq.getVolume() - consume);
+				int consume = Math.min(ydAvailable, orderReq.getVolume() - totalConsume);
 				ydAvailable -= consume;
 				result.add(sb.setVolume(consume).setOffsetFlag(OffsetFlagEnum.OF_CloseYesterday).build());
+				totalConsume += consume;
 			} else if(tdAvailable > 0) {
-				consume = Math.min(tdAvailable, orderReq.getVolume() - consume);
+				int consume = Math.min(tdAvailable, orderReq.getVolume() - totalConsume);
 				tdAvailable -= consume;
 				result.add(sb.setVolume(consume).setOffsetFlag(OffsetFlagEnum.OF_CloseToday).build());
+				totalConsume += consume;
 			} else {
 				throw new TradeException();
 			}
