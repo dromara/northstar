@@ -68,7 +68,7 @@ public class ArbitrageModuleContext extends ModuleContext implements IModuleCont
 				return;
 			}
 			getLogger().info("收到下单意图：{}", tradeIntent);
-			tradeIntentMap.put(tradingDay, tradeIntent);
+			tradeIntentMap.put(tradeIntent.getContract().getUnifiedSymbol(), tradeIntent);
 			tradeIntent.setContext(this);
 	        tradeIntent.onTick(tick);	
 		});
