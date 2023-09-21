@@ -284,6 +284,7 @@ public class ModuleContext implements IModuleContext{
 			tradeIntent.onTick(tick);
 			if(tradeIntent.hasTerminated()) {
 				tradeIntentMap.remove(tick.getUnifiedSymbol());
+				getLogger().debug("移除交易意图：{}", tick.getUnifiedSymbol());
 			}
 		}
 		if(!StringUtils.equals(tradingDay, tick.getTradingDay())) {
