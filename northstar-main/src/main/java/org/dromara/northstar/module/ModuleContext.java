@@ -523,6 +523,13 @@ public class ModuleContext implements IModuleContext{
 		PositionField pos = getAccount(contract).getPosition(OrderUtils.getClosingDirection(direction), contract.getUnifiedSymbol())
 				.orElse(PositionField.newBuilder().setContract(contract).build());
 		Tuple<OffsetFlagEnum, Integer> tuple = module.getModuleDescription().getClosingPolicy().resolve(operation, pos, volume);
+		PositionField updatePos = null;
+		switch(tuple.t1()) {
+		case OF_CloseYesterday -> updatePos = pos.toBuilder().setYdFrozen(tuple.t2()).build();
+		case OF_CloseToday -> updatePos = pos.toBuilder().setTdFrozen(tuple.t2()).build();
+		default -> throw new IllegalStateException("不应该出现的状态：" + tuple.t1());
+		}
+		getAccount(contract).onPosition(updatePos);
 		return Optional.ofNullable(submitOrderReq(SubmitOrderReqField.newBuilder()
 				.setOriginOrderId(id)
 				.setContract(contract)
