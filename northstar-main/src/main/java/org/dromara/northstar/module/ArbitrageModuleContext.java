@@ -54,8 +54,9 @@ public class ArbitrageModuleContext extends ModuleContext implements IModuleCont
 	 * 套利模组上下文为了实现同时发单，利用了多线程处理下单过程
 	 */
 	@Override
-	public void submitOrderReq(TradeIntent tradeIntent) {
+	public synchronized void submitOrderReq(TradeIntent tradeIntent) {
 		exec.execute(() -> {
+			getLogger().info("下单交由子线程处理");
 			if(!module.isEnabled()) {
 				if(isReady()) {
 					getLogger().info("策略处于停用状态，忽略委托单");
@@ -68,9 +69,13 @@ public class ArbitrageModuleContext extends ModuleContext implements IModuleCont
 				return;
 			}
 			getLogger().info("收到下单意图：{}", tradeIntent);
-			tradeIntentMap.put(tradeIntent.getContract().getUnifiedSymbol(), tradeIntent);
-			tradeIntent.setContext(this);
-	        tradeIntent.onTick(tick);	
+			try {				
+				tradeIntentMap.put(tradeIntent.getContract().getUnifiedSymbol(), tradeIntent);
+				tradeIntent.setContext(this);
+				tradeIntent.onTick(tick);	
+			} catch (Exception e) {
+				getLogger().error("发单异常", e);
+			}
 		});
 	}
 
