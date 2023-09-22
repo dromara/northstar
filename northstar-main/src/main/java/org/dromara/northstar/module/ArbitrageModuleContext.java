@@ -10,12 +10,14 @@ import java.util.concurrent.Executors;
 
 import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.common.constant.SignalOperation;
+import org.dromara.northstar.common.model.Identifier;
 import org.dromara.northstar.common.model.ModuleDescription;
 import org.dromara.northstar.common.model.ModuleRuntimeDescription;
 import org.dromara.northstar.common.model.Tuple;
 import org.dromara.northstar.common.utils.FieldUtils;
 import org.dromara.northstar.common.utils.OrderUtils;
 import org.dromara.northstar.data.IModuleRepository;
+import org.dromara.northstar.gateway.Contract;
 import org.dromara.northstar.gateway.IContractManager;
 import org.dromara.northstar.strategy.IModuleContext;
 import org.dromara.northstar.strategy.TradeStrategy;
@@ -34,6 +36,7 @@ import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreEnum.OrderPriceTypeEnum;
 import xyz.redtorch.pb.CoreEnum.TimeConditionEnum;
 import xyz.redtorch.pb.CoreEnum.VolumeConditionEnum;
+import xyz.redtorch.pb.CoreField.CancelOrderReqField;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.PositionField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
@@ -69,13 +72,9 @@ public class ArbitrageModuleContext extends ModuleContext implements IModuleCont
 				return;
 			}
 			getLogger().info("收到下单意图：{}", tradeIntent);
-			try {				
-				tradeIntentMap.put(tradeIntent.getContract().getUnifiedSymbol(), tradeIntent);
-				tradeIntent.setContext(this);
-				tradeIntent.onTick(tick);	
-			} catch (Exception e) {
-				getLogger().error("发单异常", e);
-			}
+			tradeIntentMap.put(tradeIntent.getContract().getUnifiedSymbol(), tradeIntent);
+			tradeIntent.setContext(this);
+			tradeIntent.onTick(tick);	
 		});
 	}
 
@@ -144,6 +143,25 @@ public class ArbitrageModuleContext extends ModuleContext implements IModuleCont
 		String originOrderId = module.getAccount(contract).submitOrder(orderReq);
 		orderReqMap.put(originOrderId, orderReq);
 		return Optional.of(originOrderId);
+	}
+
+	/**
+	 * 套利模组上下文实际下单时，与投机模组上下文的区别在于，少了状态机的拦截，以实现及时撤单
+	 */
+	@Override
+	public void cancelOrder(String originOrderId) {
+		if(!orderReqMap.containsKey(originOrderId)) {
+			getLogger().debug("找不到订单：{}", originOrderId);
+			return;
+		}
+		getLogger().info("撤单：{}", originOrderId);
+		ContractField contract = orderReqMap.get(originOrderId).getContract();
+		Contract c = contractMgr.getContract(Identifier.of(contract.getContractId()));
+		CancelOrderReqField cancelReq = CancelOrderReqField.newBuilder()
+				.setGatewayId(contract.getGatewayId())
+				.setOriginOrderId(originOrderId)
+				.build();
+		module.getAccount(c).cancelOrder(cancelReq);
 	}
 	
 }
