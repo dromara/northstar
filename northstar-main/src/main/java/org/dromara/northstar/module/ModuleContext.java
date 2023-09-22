@@ -181,7 +181,7 @@ public class ModuleContext implements IModuleContext{
 	}
 
 	@Override
-	public synchronized ContractField getContract(String unifiedSymbol) {
+	public ContractField getContract(String unifiedSymbol) {
 		if(!contractMap.containsKey(unifiedSymbol)) {
 			throw new NoSuchElementException("模组没有绑定合约：" + unifiedSymbol);
 		}
@@ -189,7 +189,7 @@ public class ModuleContext implements IModuleContext{
 	}
 
 	@Override
-	public synchronized void submitOrderReq(TradeIntent tradeIntent) {
+	public void submitOrderReq(TradeIntent tradeIntent) {
 		if(!module.isEnabled()) {
 			if(isReady()) {
 				getLogger().info("策略处于停用状态，忽略委托单");
@@ -213,7 +213,7 @@ public class ModuleContext implements IModuleContext{
 	}
 
 	@Override
-	public synchronized IAccount getAccount(ContractField contract) {
+	public IAccount getAccount(ContractField contract) {
 		if(!contractMap2.containsKey(contract.getUnifiedSymbol())) {
 			throw new NoSuchElementException("模组没有绑定合约：" + contract.getUnifiedSymbol());
 		}
@@ -276,7 +276,7 @@ public class ModuleContext implements IModuleContext{
 	}
 
 	@Override
-	public synchronized void onTick(TickField tick) {
+	public void onTick(TickField tick) {
 		getLogger().trace("TICK信息: {} {} {} {}，最新价: {}", 
 				tick.getUnifiedSymbol(), tick.getActionDay(), tick.getActionTime(), tick.getActionTimestamp(), tick.getLastPrice());
 		if(tradeIntentMap.containsKey(tick.getUnifiedSymbol())) {
@@ -297,14 +297,14 @@ public class ModuleContext implements IModuleContext{
 	}
 
 	@Override
-	public synchronized void onBar(BarField bar) {
+	public void onBar(BarField bar) {
 		getLogger().trace("分钟Bar信息: {} {} {} {}，最新价: {}", bar.getUnifiedSymbol(), bar.getActionDay(), bar.getActionTime(), bar.getActionTimestamp(), bar.getClosePrice());
 		indicatorHelperSet.forEach(helper -> helper.onBar(bar));
 		registry.onBar(bar);		
 	}
 	
 	@Override
-	public synchronized void onMergedBar(BarField bar) {
+	public void onMergedBar(BarField bar) {
 		getLogger().debug("合并Bar信息: {} {} {} {}，最新价: {}", bar.getUnifiedSymbol(), bar.getActionDay(), bar.getActionTime(), bar.getActionTimestamp(), bar.getClosePrice());
 		try {			
 			indicatorHelperSet.stream().map(IndicatorValueUpdateHelper::getIndicator).forEach(indicator -> visualize(indicator, bar));
@@ -339,7 +339,7 @@ public class ModuleContext implements IModuleContext{
 	}
 	
 	@Override
-	public synchronized void onOrder(OrderField order) {
+	public void onOrder(OrderField order) {
 		if(!orderReqMap.containsKey(order.getOriginOrderId())) {
 			return;
 		}
@@ -356,7 +356,7 @@ public class ModuleContext implements IModuleContext{
 	}
 
 	@Override
-	public synchronized void onTrade(TradeField trade) {
+	public void onTrade(TradeField trade) {
 		if(!orderReqMap.containsKey(trade.getOriginOrderId()) && !StringUtils.equals(trade.getOriginOrderId(), Constants.MOCK_ORDER_ID)) {
 			return;
 		} 
@@ -394,7 +394,7 @@ public class ModuleContext implements IModuleContext{
 	}
 
 	@Override
-	public synchronized ModuleRuntimeDescription getRuntimeDescription(boolean fullDescription) {
+	public ModuleRuntimeDescription getRuntimeDescription(boolean fullDescription) {
 		ModulePositionDescription posDescription = ModulePositionDescription.builder()
 				.logicalPositions(moduleAccount.getPositions().stream().map(PositionField::toByteArray).toList())
 				.nonclosedTrades(moduleAccount.getNonclosedTrades().stream().map(TradeField::toByteArray).toList())
@@ -590,7 +590,7 @@ public class ModuleContext implements IModuleContext{
 	}
 
 	@Override
-	public synchronized void cancelOrder(String originOrderId) {
+	public void cancelOrder(String originOrderId) {
 		if(!orderReqMap.containsKey(originOrderId)) {
 			getLogger().debug("找不到订单：{}", originOrderId);
 			return;

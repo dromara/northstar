@@ -54,7 +54,7 @@ public class ArbitrageModuleContext extends ModuleContext implements IModuleCont
 	 * 套利模组上下文为了实现同时发单，利用了多线程处理下单过程
 	 */
 	@Override
-	public synchronized void submitOrderReq(TradeIntent tradeIntent) {
+	public void submitOrderReq(TradeIntent tradeIntent) {
 		exec.execute(() -> {
 			getLogger().info("下单交由子线程处理");
 			if(!module.isEnabled()) {
