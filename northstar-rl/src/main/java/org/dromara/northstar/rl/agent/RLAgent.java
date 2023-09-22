@@ -10,6 +10,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+import org.dromara.northstar.rl.RLReward;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -56,7 +57,7 @@ public class RLAgent {
 		return false;
 	}
 
-    public int getAction(BarField bar, float lastReward) {
+    public int getAction(BarField bar, double lastReward) {
 
 		try {
 			JSONObject jsonData = new JSONObject();
@@ -88,8 +89,8 @@ public class RLAgent {
 		return 0;
 	}
 
-    public float getReward(BarField bar, int actionID) {
-        return 0;
+    public double getReward(BarField bar, BarField lastBar, int actionID, String rewardType) {
+        return RLReward.rewardGenerator(bar, lastBar, actionID, rewardType);
     }
 
 }
