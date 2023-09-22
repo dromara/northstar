@@ -596,7 +596,7 @@ public class ModuleContext implements IModuleContext{
 			return;
 		}
 		if(!getState().isOrdering()) {
-			getLogger().info("非下单状态，忽略撤单请求");
+			getLogger().info("非下单状态，忽略撤单请求：{}", originOrderId);
 			return;
 		}
 		getLogger().info("撤单：{}", originOrderId);
