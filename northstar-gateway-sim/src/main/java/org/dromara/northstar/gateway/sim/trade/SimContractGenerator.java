@@ -15,8 +15,8 @@ public class SimContractGenerator {
 	}
 	
 	public Instrument getContract() {
-		String symbol = "sim9999";
-		String name = "模拟合约";
+		String symbol = "sim9901";
+		String name = "模拟合约9901";
 		return SimContract.builder()
 				.gatewayId("SIM")
 				.contractId(symbol + "@SHFE@FUTURES@" + gatewayId)
@@ -32,7 +32,29 @@ public class SimContractGenerator {
 				.priceTick(1)
 				.longMarginRatio(0.08)
 				.shortMarginRatio(0.08)
-				.lastTradeDateOrContractMonth(name)
+				.lastTradeDateOrContractMonth("20990101")
+				.build();
+	}
+	
+	public Instrument getContract2() {
+		String symbol = "sim9902";
+		String name = "模拟合约9902";
+		return SimContract.builder()
+				.gatewayId("SIM")
+				.contractId(symbol + "@SHFE@FUTURES@" + gatewayId)
+				.currency(CurrencyEnum.CNY)
+				.exchange(ExchangeEnum.SHFE)
+				.fullName(name)
+				.name(name)
+				.unifiedSymbol(symbol + "@SHFE@FUTURES")
+				.symbol(symbol)
+				.productClass(ProductClassEnum.FUTURES)
+				.thirdPartyId(symbol + "@SIM")
+				.multiplier(10)
+				.priceTick(1)
+				.longMarginRatio(0.08)
+				.shortMarginRatio(0.08)
+				.lastTradeDateOrContractMonth("20990201")
 				.build();
 	}
 	

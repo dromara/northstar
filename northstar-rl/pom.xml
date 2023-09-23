@@ -6,14 +6,17 @@
 	<artifactId>northstar</artifactId>
 	<version>6.2.0.Beta</version>
   </parent>
-  <artifactId>northstar-strategy-example</artifactId>
+  <artifactId>northstar-rl</artifactId>
   <properties>
-    <maven.deploy.skip>true</maven.deploy.skip>
   </properties>
   <dependencies>
   	<dependency>
 		<groupId>org.dromara</groupId>
 		<artifactId>northstar-api</artifactId>
+	</dependency>
+	<dependency>
+		<groupId>com.alibaba</groupId>
+		<artifactId>fastjson</artifactId>
 	</dependency>
 	<dependency>
 	    <groupId>org.junit.jupiter</groupId>

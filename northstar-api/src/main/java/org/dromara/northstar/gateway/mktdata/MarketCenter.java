@@ -257,7 +257,7 @@ public class MarketCenter implements IMarketCenter{
 	 */
 	@Override
 	public void addGateway(MarketGateway gateway) {
-		log.info("注册网关渠道：{}", gateway.gatewayId());
+		log.info("注册网关：{}", gateway.gatewayId());
 		gatewayMap.put(gateway.channelType(), gateway);
 	}
 

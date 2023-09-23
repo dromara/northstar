@@ -37,9 +37,6 @@
         <el-form-item id="editPositionVol" label="数量" prop="volume">
           <el-input v-model="form.volume" type="number" autocomplete="off"></el-input>
         </el-form-item>
-        <el-form-item v-if="form.offsetFlag === 'OF_Open'" label="交易日" prop="volume">
-          <el-input v-model="form.tradeDate" type="text" autocomplete="off" placeholder="YYYYMMDD，默认为当天"></el-input>
-        </el-form-item>
       </el-form>
     </div>
 

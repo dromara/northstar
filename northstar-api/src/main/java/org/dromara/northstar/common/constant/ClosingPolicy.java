@@ -1,15 +1,11 @@
 package org.dromara.northstar.common.constant;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-
-import org.apache.commons.lang3.StringUtils;
+import org.dromara.northstar.common.exception.TradeException;
+import org.dromara.northstar.common.model.Tuple;
 
 import lombok.Getter;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
-import xyz.redtorch.pb.CoreField.ContractField;
-import xyz.redtorch.pb.CoreField.TradeField;
+import xyz.redtorch.pb.CoreField.PositionField;
 
 /**
  * 平仓策略
@@ -22,49 +18,33 @@ public enum ClosingPolicy {
 	 * 按开仓的时间顺序平仓
 	 */
 	FIRST_IN_FIRST_OUT("先开先平") {
-		
+
 		@Override
-		public OffsetFlagEnum resolveOffsetFlag(SignalOperation operation, ContractField contract, List<TradeField> nonclosedTrades,
-				String tradingDay) {
-			if(operation.isOpen()) {
-				return OffsetFlagEnum.OF_Open;
-			}
-			try {
-				checkNonclosedTrades(nonclosedTrades, contract);
-			} catch(Exception e) {
-				throw new IllegalStateException(String.format("合约 [%s]，[%s]操作异常。原因：%s", contract.getName(), operation, e.getMessage()));
-			}
-			List<TradeField> wrapList = new ArrayList<>(nonclosedTrades);
-			wrapList.sort((a, b) -> a.getTradeTimestamp() < b.getTradeTimestamp() ? -1 : 1);
-			if(StringUtils.equals(tradingDay, wrapList.get(0).getTradingDay())) {
-				return OffsetFlagEnum.OF_CloseToday;
-			}
-			return OffsetFlagEnum.OF_Close;
+		public Tuple<OffsetFlagEnum, Integer> resolve(SignalOperation operation, PositionField position, int signalVol) {
+			if(operation.isOpen())
+				return Tuple.of(OffsetFlagEnum.OF_Open, signalVol);
+			if(position.getYdPosition() - position.getYdFrozen() > 0)
+				return Tuple.of(OffsetFlagEnum.OF_CloseYesterday, Math.min(position.getYdPosition() - position.getYdFrozen(), signalVol));
+			if(position.getTdPosition() - position.getTdFrozen() > 0)
+				return Tuple.of(OffsetFlagEnum.OF_CloseToday, Math.min(position.getTdPosition() - position.getTdFrozen(), signalVol));
+			throw new TradeException(String.format("%s没有足够持仓可平仓，平仓数：%d手，实际可用：%d手", position.getContract().getName(), signalVol, position.getPosition() - position.getFrozen()));
 		}
-		
+
 	},
 	/**
 	 * 按开仓的时间倒序平仓
 	 */
 	FIRST_IN_LAST_OUT("平今优先") {
-		
+
 		@Override
-		public OffsetFlagEnum resolveOffsetFlag(SignalOperation operation, ContractField contract, List<TradeField> nonclosedTrades,
-				String tradingDay) {
-			if(operation.isOpen()) {
-				return OffsetFlagEnum.OF_Open;
-			}
-			try {
-				checkNonclosedTrades(nonclosedTrades, contract);
-			} catch(Exception e) {
-				throw new IllegalStateException(String.format("合约 [%s]，[%s]操作异常。原因：%s", contract.getName(), operation, e.getMessage()));
-			}
-			List<TradeField> wrapList = new ArrayList<>(nonclosedTrades);
-			wrapList.sort((a, b) -> a.getTradeTimestamp() > b.getTradeTimestamp() ? -1 : 1);
-			if(StringUtils.equals(tradingDay, wrapList.get(0).getTradingDay())) {
-				return OffsetFlagEnum.OF_CloseToday;
-			}
-			return OffsetFlagEnum.OF_Close;
+		public Tuple<OffsetFlagEnum, Integer> resolve(SignalOperation operation, PositionField position, int signalVol) {
+			if(operation.isOpen())
+				return Tuple.of(OffsetFlagEnum.OF_Open, signalVol);
+			if(position.getTdPosition() - position.getTdFrozen() > 0)
+				return Tuple.of(OffsetFlagEnum.OF_CloseToday, Math.min(position.getTdPosition() - position.getTdFrozen(), signalVol));
+			if(position.getYdPosition() - position.getYdFrozen() > 0)
+				return Tuple.of(OffsetFlagEnum.OF_CloseYesterday, Math.min(position.getYdPosition() - position.getYdFrozen(), signalVol));
+			throw new IllegalStateException(String.format("%s没有足够持仓可平仓，平仓数：%d手，实际可用：%d手", position.getContract().getName(), signalVol, position.getPosition() - position.getFrozen()));
 		}
 		
 	},
@@ -73,26 +53,14 @@ public enum ClosingPolicy {
 	 * 注意：这里只有锁仓逻辑，没有解锁逻辑
 	 */
 	CLOSE_NONTODAY_HEGDE_TODAY("平昨锁今") {
-		
+
 		@Override
-		public OffsetFlagEnum resolveOffsetFlag(SignalOperation operation, ContractField contract, List<TradeField> nonclosedTrades,
-				String tradingDay) {
-			if(operation.isOpen()) {
-				return OffsetFlagEnum.OF_Open;
-			}
-			try {
-				checkNonclosedTrades(nonclosedTrades, contract);
-			} catch(Exception e) {
-				throw new IllegalStateException(String.format("合约 [%s]，[%s]操作异常。原因：%s", contract.getName(), operation, e.getMessage()));
-			}
-			List<TradeField> wrapList = new ArrayList<>(nonclosedTrades);
-			wrapList.sort((a, b) -> a.getTradeTimestamp() < b.getTradeTimestamp() ? -1 : 1);
-			if(StringUtils.equals(tradingDay, wrapList.get(0).getTradingDay())) {
-				return OffsetFlagEnum.OF_Open;
-			}
-			return OffsetFlagEnum.OF_Close;
+		public Tuple<OffsetFlagEnum, Integer> resolve(SignalOperation operation, PositionField position, int signalVol) {
+			if(operation.isClose() && position.getYdPosition() - position.getYdFrozen() > 0)
+				return Tuple.of(OffsetFlagEnum.OF_CloseYesterday, Math.min(position.getYdPosition() - position.getYdFrozen(), signalVol));
+			return Tuple.of(OffsetFlagEnum.OF_Open, signalVol);
 		}
-		
+
 	};
 
 	@Getter
@@ -101,16 +69,6 @@ public enum ClosingPolicy {
 		this.name = name;
 	}
 	
-	protected void checkNonclosedTrades(List<TradeField> nonclosedTrades, ContractField contract) {
-		if(Objects.isNull(nonclosedTrades) || nonclosedTrades.isEmpty()) {
-			throw new IllegalArgumentException("平仓时，持仓列表不能为空");
-		}
-		for(TradeField trade : nonclosedTrades) {
-			if(!StringUtils.equals(trade.getContract().getContractId(), contract.getContractId())) {
-				throw new IllegalArgumentException(String.format("持仓列表中包含其他合约。期望：%s, 实际：%s", contract.getContractId(), trade.getContract().getContractId()) );
-			}
-		}
-	}
+	public abstract Tuple<OffsetFlagEnum, Integer> resolve(SignalOperation operation, PositionField position, int signalVol);
 	
-	public abstract OffsetFlagEnum resolveOffsetFlag(SignalOperation operation, ContractField contract, List<TradeField> nonclosedTrades, String tradingDay);
 }

@@ -21,6 +21,8 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -40,6 +42,7 @@ import org.dromara.northstar.common.model.ModuleDescription;
 import org.dromara.northstar.common.model.ModulePositionDescription;
 import org.dromara.northstar.common.model.ModuleRuntimeDescription;
 import org.dromara.northstar.common.model.TimeSeriesValue;
+import org.dromara.northstar.common.model.Tuple;
 import org.dromara.northstar.common.utils.BarUtils;
 import org.dromara.northstar.common.utils.FieldUtils;
 import org.dromara.northstar.common.utils.OrderUtils;
@@ -78,6 +81,7 @@ import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.ForceCloseReasonEnum;
 import xyz.redtorch.pb.CoreEnum.HedgeFlagEnum;
+import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreEnum.OrderPriceTypeEnum;
 import xyz.redtorch.pb.CoreEnum.TimeConditionEnum;
 import xyz.redtorch.pb.CoreEnum.VolumeConditionEnum;
@@ -107,14 +111,14 @@ public class ModuleContext implements IModuleContext{
 	protected ModuleAccount moduleAccount;
 	
 	/* originOrderId -> orderReq */
-	protected Map<String, SubmitOrderReqField> orderReqMap = new HashMap<>();
+	protected ConcurrentMap<String, SubmitOrderReqField> orderReqMap = new ConcurrentHashMap<>();
 	
 	/* unifiedSymbol -> contract */
 	protected Map<String, ContractField> contractMap = new HashMap<>();
 	protected Map<String, Contract> contractMap2 = new HashMap<>();
 	
 	/* unifiedSymbol -> tick */
-	protected Map<String, TickField> latestTickMap = new HashMap<>();
+	protected ConcurrentMap<String, TickField> latestTickMap = new ConcurrentHashMap<>();
 	
 	/* unifiedSymbol -> barQ */
 	protected Map<String, Queue<BarField>> barBufQMap = new HashMap<>();
@@ -127,7 +131,8 @@ public class ModuleContext implements IModuleContext{
 	
 	protected Set<IndicatorValueUpdateHelper> indicatorHelperSet = new HashSet<>();
 	
-	protected TradeIntent tradeIntent;	// 交易意图
+	/* unifiedSymbol -> tradeIntent */
+	protected ConcurrentMap<String, TradeIntent> tradeIntentMap = new ConcurrentHashMap<>();	// 交易意图
 	
 	protected final AtomicInteger bufSize = new AtomicInteger(0);
 	
@@ -176,7 +181,7 @@ public class ModuleContext implements IModuleContext{
 	}
 
 	@Override
-	public synchronized ContractField getContract(String unifiedSymbol) {
+	public ContractField getContract(String unifiedSymbol) {
 		if(!contractMap.containsKey(unifiedSymbol)) {
 			throw new NoSuchElementException("模组没有绑定合约：" + unifiedSymbol);
 		}
@@ -184,7 +189,7 @@ public class ModuleContext implements IModuleContext{
 	}
 
 	@Override
-	public synchronized void submitOrderReq(TradeIntent tradeIntent) {
+	public void submitOrderReq(TradeIntent tradeIntent) {
 		if(!module.isEnabled()) {
 			if(isReady()) {
 				getLogger().info("策略处于停用状态，忽略委托单");
@@ -197,7 +202,7 @@ public class ModuleContext implements IModuleContext{
 			return;
 		}
 		getLogger().info("收到下单意图：{}", tradeIntent);
-		this.tradeIntent = tradeIntent;
+		tradeIntentMap.put(tradeIntent.getContract().getUnifiedSymbol(), tradeIntent);
 		tradeIntent.setContext(this);
         tradeIntent.onTick(tick);
 	}
@@ -208,7 +213,7 @@ public class ModuleContext implements IModuleContext{
 	}
 
 	@Override
-	public synchronized IAccount getAccount(ContractField contract) {
+	public IAccount getAccount(ContractField contract) {
 		if(!contractMap2.containsKey(contract.getUnifiedSymbol())) {
 			throw new NoSuchElementException("模组没有绑定合约：" + contract.getUnifiedSymbol());
 		}
@@ -271,13 +276,16 @@ public class ModuleContext implements IModuleContext{
 	}
 
 	@Override
-	public synchronized void onTick(TickField tick) {
+	public void onTick(TickField tick) {
 		getLogger().trace("TICK信息: {} {} {} {}，最新价: {}", 
 				tick.getUnifiedSymbol(), tick.getActionDay(), tick.getActionTime(), tick.getActionTimestamp(), tick.getLastPrice());
-		if(Objects.nonNull(tradeIntent)) {
+		if(tradeIntentMap.containsKey(tick.getUnifiedSymbol())) {
+			TradeIntent tradeIntent = tradeIntentMap.get(tick.getUnifiedSymbol());
 			tradeIntent.onTick(tick);
-			if(tradeIntent.hasTerminated()) 
-				tradeIntent = null;
+			if(tradeIntent.hasTerminated()) {
+				tradeIntentMap.remove(tick.getUnifiedSymbol());
+				getLogger().debug("移除交易意图：{}", tick.getUnifiedSymbol());
+			}
 		}
 		if(!StringUtils.equals(tradingDay, tick.getTradingDay())) {
 			tradingDay = tick.getTradingDay();
@@ -289,14 +297,14 @@ public class ModuleContext implements IModuleContext{
 	}
 
 	@Override
-	public synchronized void onBar(BarField bar) {
+	public void onBar(BarField bar) {
 		getLogger().trace("分钟Bar信息: {} {} {} {}，最新价: {}", bar.getUnifiedSymbol(), bar.getActionDay(), bar.getActionTime(), bar.getActionTimestamp(), bar.getClosePrice());
 		indicatorHelperSet.forEach(helper -> helper.onBar(bar));
 		registry.onBar(bar);		
 	}
 	
 	@Override
-	public synchronized void onMergedBar(BarField bar) {
+	public void onMergedBar(BarField bar) {
 		getLogger().debug("合并Bar信息: {} {} {} {}，最新价: {}", bar.getUnifiedSymbol(), bar.getActionDay(), bar.getActionTime(), bar.getActionTimestamp(), bar.getClosePrice());
 		try {			
 			indicatorHelperSet.stream().map(IndicatorValueUpdateHelper::getIndicator).forEach(indicator -> visualize(indicator, bar));
@@ -331,7 +339,7 @@ public class ModuleContext implements IModuleContext{
 	}
 	
 	@Override
-	public synchronized void onOrder(OrderField order) {
+	public void onOrder(OrderField order) {
 		if(!orderReqMap.containsKey(order.getOriginOrderId())) {
 			return;
 		}
@@ -341,13 +349,14 @@ public class ModuleContext implements IModuleContext{
 		}
 		moduleAccount.onOrder(order);
 		tradeStrategy.onOrder(order);
-		if(Objects.nonNull(tradeIntent)) {
+		if(tradeIntentMap.containsKey(order.getContract().getUnifiedSymbol())) {
+			TradeIntent tradeIntent = tradeIntentMap.get(order.getContract().getUnifiedSymbol());
 			tradeIntent.onOrder(order);
-		}		
+		}
 	}
 
 	@Override
-	public synchronized void onTrade(TradeField trade) {
+	public void onTrade(TradeField trade) {
 		if(!orderReqMap.containsKey(trade.getOriginOrderId()) && !StringUtils.equals(trade.getOriginOrderId(), Constants.MOCK_ORDER_ID)) {
 			return;
 		} 
@@ -359,10 +368,13 @@ public class ModuleContext implements IModuleContext{
 		tradeStrategy.onTrade(trade);
 		moduleRepo.saveRuntime(getRuntimeDescription(false));
 		
-		if(Objects.nonNull(tradeIntent)) {
+		String unifiedSymbol = trade.getContract().getUnifiedSymbol();
+		if(tradeIntentMap.containsKey(unifiedSymbol)) {
+			TradeIntent tradeIntent = tradeIntentMap.get(unifiedSymbol);
 			tradeIntent.onTrade(trade);
-			if(tradeIntent.hasTerminated()) 
-				tradeIntent = null;
+			if(tradeIntent.hasTerminated()) {
+				tradeIntentMap.remove(unifiedSymbol);
+			}
 		}
 	}
 
@@ -382,7 +394,7 @@ public class ModuleContext implements IModuleContext{
 	}
 
 	@Override
-	public synchronized ModuleRuntimeDescription getRuntimeDescription(boolean fullDescription) {
+	public ModuleRuntimeDescription getRuntimeDescription(boolean fullDescription) {
 		ModulePositionDescription posDescription = ModulePositionDescription.builder()
 				.logicalPositions(moduleAccount.getPositions().stream().map(PositionField::toByteArray).toList())
 				.nonclosedTrades(moduleAccount.getNonclosedTrades().stream().map(TradeField::toByteArray).toList())
@@ -486,8 +498,9 @@ public class ModuleContext implements IModuleContext{
 		return json;
 	}
 
+	@SuppressWarnings("incomplete-switch")
 	@Override
-	public synchronized Optional<String> submitOrderReq(ContractField contract, SignalOperation operation, PriceType priceType, int volume, double price) {
+	public Optional<String> submitOrderReq(ContractField contract, SignalOperation operation, PriceType priceType, int volume, double price) {
 		if(!module.isEnabled()) {
 			if(isReady()) {
 				getLogger().info("策略处于停用状态，忽略委托单");
@@ -509,15 +522,24 @@ public class ModuleContext implements IModuleContext{
 		DirectionEnum direction = OrderUtils.resolveDirection(operation);
 		int factor = FieldUtils.directionFactor(direction);
 		double plusPrice = module.getModuleDescription().getOrderPlusTick() * contract.getPriceTick(); // 超价设置
-		List<TradeField> nonclosedTrades = moduleAccount.getNonclosedTrades(contract.getUnifiedSymbol(), FieldUtils.getOpposite(direction));
+		PositionField pos = getAccount(contract).getPosition(OrderUtils.getClosingDirection(direction), contract.getUnifiedSymbol())
+				.orElse(PositionField.newBuilder().setContract(contract).build());
+		Tuple<OffsetFlagEnum, Integer> tuple = module.getModuleDescription().getClosingPolicy().resolve(operation, pos, volume);
+		if(tuple.t1() == OffsetFlagEnum.OF_CloseToday) {
+			PositionField updatePos = pos.toBuilder().setTdFrozen(tuple.t2()).build();
+			getAccount(contract).onPosition(updatePos);
+		} else if(tuple.t1() == OffsetFlagEnum.OF_CloseYesterday) {
+			PositionField updatePos = pos.toBuilder().setYdFrozen(tuple.t2()).build();
+			getAccount(contract).onPosition(updatePos);
+		}
 		return Optional.ofNullable(submitOrderReq(SubmitOrderReqField.newBuilder()
 				.setOriginOrderId(id)
 				.setContract(contract)
 				.setGatewayId(gatewayId)
 				.setDirection(direction)
-				.setOffsetFlag(module.getModuleDescription().getClosingPolicy().resolveOffsetFlag(operation, contract, nonclosedTrades, tick.getTradingDay()))
+				.setOffsetFlag(tuple.t1())
+				.setVolume(tuple.t2())		
 				.setPrice(orderPrice + factor * plusPrice)	// 自动加上超价
-				.setVolume(volume)		//	当信号交易量大于零时，优先使用信号交易量
 				.setHedgeFlag(HedgeFlagEnum.HF_Speculation)
 				.setTimeCondition(priceType == PriceType.ANY_PRICE ? TimeConditionEnum.TC_IOC : TimeConditionEnum.TC_GFD)
 				.setOrderPriceType(priceType == PriceType.ANY_PRICE ? OrderPriceTypeEnum.OPT_AnyPrice : OrderPriceTypeEnum.OPT_LimitPrice)
@@ -537,7 +559,7 @@ public class ModuleContext implements IModuleContext{
 			moduleAccount.onSubmitOrder(orderReq);
 		} catch (InsufficientException e) {
 			getLogger().error("发单失败。原因：{}", e.getMessage());
-			tradeIntent = null;
+			tradeIntentMap.remove(orderReq.getContract().getUnifiedSymbol());
 			getLogger().warn("模组余额不足，主动停用模组");
 			setEnabled(false);
 			return null;
@@ -548,7 +570,7 @@ public class ModuleContext implements IModuleContext{
 			}
 		} catch (Exception e) {
 			getLogger().error("发单失败。原因：{}", e.getMessage());
-			tradeIntent = null;
+			tradeIntentMap.remove(orderReq.getContract().getUnifiedSymbol());
 			return null;
 		}
 		ContractField contract = orderReq.getContract();
@@ -568,13 +590,13 @@ public class ModuleContext implements IModuleContext{
 	}
 
 	@Override
-	public synchronized void cancelOrder(String originOrderId) {
+	public void cancelOrder(String originOrderId) {
 		if(!orderReqMap.containsKey(originOrderId)) {
 			getLogger().debug("找不到订单：{}", originOrderId);
 			return;
 		}
 		if(!getState().isOrdering()) {
-			getLogger().info("非下单状态，忽略撤单请求");
+			getLogger().info("非下单状态，忽略撤单请求：{}", originOrderId);
 			return;
 		}
 		getLogger().info("撤单：{}", originOrderId);

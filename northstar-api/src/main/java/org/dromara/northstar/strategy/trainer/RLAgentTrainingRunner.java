@@ -1,4 +1,4 @@
-package org.dromara.northstar.strategy.tester;
+package org.dromara.northstar.strategy.trainer;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -11,25 +11,26 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Order(Ordered.LOWEST_PRECEDENCE)
-@ConditionalOnProperty(prefix = "spring.profiles", name = "active", havingValue = "test")
+@ConditionalOnProperty(prefix = "spring.profiles", name = "active", havingValue = "train")
 @Component
-public class ModuleTesterRunner implements CommandLineRunner {
-
+public class RLAgentTrainingRunner implements CommandLineRunner{
+	
 	@Autowired
-	AbstractTester tester;
-
+	private AbstractTrainer trainer;
+	
 	@Override
 	public void run(String... args) throws Exception {
 		new Thread(() -> {
-			log.info("模组自动化测试准备开始");
+			log.info("模组强化学习训练准备开始");
 			try {
 				Thread.sleep(5000);
-				tester.start();
+				trainer.start();
 			} catch (InterruptedException e) {
 				log.warn("", e);
 			}
 			
-			log.info("模组自动化测试结束");
+			log.info("模组强化学习训练结束");
 		}).start();
 	}
+
 }

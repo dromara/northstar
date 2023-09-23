@@ -15,7 +15,7 @@ public class SimContractDefProvider {
 	public List<ContractDefinition> get(){
 		return List.of(
 			ContractDefinition.builder()
-				.name("模拟合约A")
+				.name("模拟合约")
 				.exchange(ExchangeEnum.SHFE)
 				.productClass(ProductClassEnum.FUTURES)
 				.symbolPattern(Pattern.compile("sim[0-9]{3,4}@.+"))

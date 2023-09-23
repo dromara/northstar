@@ -56,8 +56,8 @@
           <el-option value="TRADE" key="1">成交事件</el-option>
           <el-option value="ORDER" key="2">订单事件</el-option>
           <el-option value="NOTICE" key="3">消息事件</el-option>
-          <el-option value="CONNECTED" key="4">连线事件</el-option>
-          <el-option value="DISCONNECTED" key="5">离线事件</el-option>
+          <el-option value="LOGGED_IN" key="4">连线事件</el-option>
+          <el-option value="LOGGED_OUT" key="5">离线事件</el-option>
         </el-select>
       </el-form-item>
     </el-form>

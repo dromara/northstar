@@ -7,7 +7,6 @@ import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.event.FastEventEngine;
 import org.dromara.northstar.data.ISimAccountRepository;
 import org.dromara.northstar.gateway.IMarketCenter;
-import org.dromara.northstar.gateway.Instrument;
 import org.dromara.northstar.gateway.sim.market.SimTickGenerator;
 import org.dromara.northstar.gateway.sim.trade.SimContractGenerator;
 import org.dromara.northstar.gateway.sim.trade.SimGatewayFactory;
@@ -24,9 +23,9 @@ public class SimConfig{
 	Map<String, SimTickGenerator> tickGeneratorMap(IMarketCenter marketCenter, SimContractDefProvider contractDefPvd){
 		// 加载模拟合约
 		SimContractGenerator contractGen = new SimContractGenerator("SIM");
-		Instrument simContract = contractGen.getContract();
 		marketCenter.addDefinitions(contractDefPvd.get());
-		marketCenter.addInstrument(simContract);
+		marketCenter.addInstrument(contractGen.getContract());
+		marketCenter.addInstrument(contractGen.getContract2());
 		log.debug("加载模拟合约");
 		return marketCenter.getContracts(ChannelType.SIM).stream()
 				.map(c -> new SimTickGenerator(c.contractField()))
