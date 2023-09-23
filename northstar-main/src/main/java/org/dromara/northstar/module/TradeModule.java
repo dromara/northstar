@@ -96,6 +96,9 @@ public class TradeModule implements IModule {
 	@Override
 	public synchronized void onEvent(NorthstarEvent event) {
 		Object data = event.getData();
+		if(!ctx.isReady()) {
+			return;
+		}
 		try {
 			if(data instanceof TickField tick && bindedSymbolSet.contains(tick.getUnifiedSymbol()) && mktGatewayIdSet.contains(tick.getGatewayId())) {
 				ctx.onTick(tick);
