@@ -498,7 +498,6 @@ public class ModuleContext implements IModuleContext{
 		return json;
 	}
 
-	@SuppressWarnings("incomplete-switch")
 	@Override
 	public Optional<String> submitOrderReq(ContractField contract, SignalOperation operation, PriceType priceType, int volume, double price) {
 		if(!module.isEnabled()) {

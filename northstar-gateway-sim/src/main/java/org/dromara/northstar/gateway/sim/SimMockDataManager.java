@@ -34,7 +34,7 @@ public class SimMockDataManager implements IDataServiceManager{
 		List<BarField> resultList = new ArrayList<>(60*24);
 		MinuteBarGenerator barGen = new MinuteBarGenerator(contract, new GenericTradeTime(), resultList::add, true);
 		LocalDateTime cutoff = LocalDateTime.of(endDate, LocalTime.now());
-		LocalDateTime ldt = cutoff.minusDays(1);
+		LocalDateTime ldt = cutoff.minusDays(1).withNano(0);
 		while(ldt.isBefore(cutoff)) {
 			TickField tick = tickGen.generateNextTick(ldt);
 			barGen.update(tick);
