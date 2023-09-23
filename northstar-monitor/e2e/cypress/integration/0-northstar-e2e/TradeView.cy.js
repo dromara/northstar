@@ -54,7 +54,7 @@ describe('手工期货交易-测试', () => {
     })
 
     it('选中合约时，K线数据加载正常', () => {
-        cy.intercept('GET', '/northstar/data/bar/min?gatewayId=SIM&unifiedSymbol=sim9999@SHFE@FUTURES&refStartTimestamp=*&firstLoad=true').as('getBars')
+        cy.intercept('GET', '/northstar/data/bar/min?gatewayId=SIM&unifiedSymbol=sim9901@SHFE@FUTURES&refStartTimestamp=*&firstLoad=true').as('getBars')
         cy.get('#contractSelector').type('sim', {force: true})
         cy.get('.el-select-dropdown').contains('模拟合约').click()
         cy.wait('@getBars').should('have.nested.property', 'response.statusCode', 200)
