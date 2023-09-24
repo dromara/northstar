@@ -24,20 +24,20 @@ public abstract class DynamicParams {
 			ComponentField cf = e.getValue();
 			boolean flag = f.canAccess(this);
 			f.setAccessible(true);
-			if(FieldType.NUMBER == cf.getType()) {
-				if(f.getType() == int.class) {
-					f.setInt(this,cf.getValue() == null ? 0 : cf.getValue() instanceof String ? Integer.parseInt((String) cf.getValue()) : (int)cf.getValue());
-				} else if (f.getType() == long.class) {
-					f.setLong(this, cf.getValue() == null ? 0 : cf.getValue() instanceof String ? Long.parseLong((String) cf.getValue()) : (long)cf.getValue());
-				} else if (f.getType() == float.class) {
-					f.setFloat(this, cf.getValue() == null ? 0 : cf.getValue() instanceof String ? Float.parseFloat((String) cf.getValue()) : (float)cf.getValue());
-				} else if (f.getType() == double.class) {
-					f.setDouble(this, cf.getValue() == null ? 0 : cf.getValue() instanceof String ? Double.parseDouble((String) cf.getValue()) : (double)cf.getValue());
-				} else if (f.getType() == short.class) {
-					f.setShort(this, cf.getValue() == null ? 0 : cf.getValue() instanceof String ? Short.parseShort((String) cf.getValue()) : (short)cf.getValue());
-				}
+			if(f.getType() == int.class) {
+				f.setInt(this,cf.getValue() == null ? 0 : cf.getValue() instanceof String ? Integer.parseInt((String) cf.getValue()) : (int)cf.getValue());
+			} else if (f.getType() == long.class) {
+				f.setLong(this, cf.getValue() == null ? 0 : cf.getValue() instanceof String ? Long.parseLong((String) cf.getValue()) : (long)cf.getValue());
+			} else if (f.getType() == float.class) {
+				f.setFloat(this, cf.getValue() == null ? 0 : cf.getValue() instanceof String ? Float.parseFloat((String) cf.getValue()) : (float)cf.getValue());
+			} else if (f.getType() == double.class) {
+				f.setDouble(this, cf.getValue() == null ? 0 : cf.getValue() instanceof String ? Double.parseDouble((String) cf.getValue()) : (double)cf.getValue());
+			} else if (f.getType() == short.class) {
+				f.setShort(this, cf.getValue() == null ? 0 : cf.getValue() instanceof String ? Short.parseShort((String) cf.getValue()) : (short)cf.getValue());
 			} else if(f.getType() == boolean.class) {
 				f.set(this, Boolean.parseBoolean((String) cf.getValue()));
+			} else if(f.getType() == String.class) {
+				f.set(this, cf.getValue().toString());
 			} else {
 				f.set(this, cf.getValue());
 			}
