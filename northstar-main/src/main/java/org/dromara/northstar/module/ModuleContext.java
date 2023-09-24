@@ -11,7 +11,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -22,6 +21,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -121,10 +122,10 @@ public class ModuleContext implements IModuleContext{
 	protected ConcurrentMap<String, TickField> latestTickMap = new ConcurrentHashMap<>();
 	
 	/* unifiedSymbol -> barQ */
-	protected Map<String, Queue<BarField>> barBufQMap = new HashMap<>();
+	protected ConcurrentMap<String, Queue<BarField>> barBufQMap = new ConcurrentHashMap<>();
 	
 	/* indicator -> values */
-	protected Map<Indicator, Queue<TimeSeriesValue>> indicatorValBufQMap = new HashMap<>(); 
+	protected ConcurrentMap<Indicator, Queue<TimeSeriesValue>> indicatorValBufQMap = new ConcurrentHashMap<>(); 
 	
 	/* unifiedSymbol -> indicatorName -> indicator */
 	protected Table<String, String, Indicator> indicatorNameTbl = HashBasedTable.create();
@@ -165,7 +166,7 @@ public class ModuleContext implements IModuleContext{
 					ContractField cf = contract.contractField();
 					contractMap.put(csi.getUnifiedSymbol(), cf);
 					contractMap2.put(csi.getUnifiedSymbol(), contract);
-					barBufQMap.put(cf.getUnifiedSymbol(), new LinkedList<>());
+					barBufQMap.put(cf.getUnifiedSymbol(), new ConcurrentLinkedQueue<>());
 					registry.addListener(contract, moduleDescription.getNumOfMinPerBar(), PeriodUnit.MINUTE, tradeStrategy, ListenerType.STRATEGY);
 					registry.addListener(contract, moduleDescription.getNumOfMinPerBar(), PeriodUnit.MINUTE, this, ListenerType.CONTEXT);
 				}
@@ -267,7 +268,7 @@ public class ModuleContext implements IModuleContext{
 			Assert.isTrue(!indicatorNameTbl.contains(unifiedSymbol, indicatorName) || indicator.equals(indicatorNameTbl.get(unifiedSymbol, indicatorName)), "指标 [{} -> {}] 已存在。不能重名", unifiedSymbol, indicatorName);
 			indicatorNameTbl.put(unifiedSymbol, indicatorName, indicator);
 		}
-		indicatorValBufQMap.put(indicator, new LinkedList<>());
+		indicatorValBufQMap.put(indicator, new ConcurrentLinkedDeque<>());
 	}
 	
 	@Override
@@ -327,7 +328,7 @@ public class ModuleContext implements IModuleContext{
 		if(!StringUtils.equals(indicator.getConfiguration().contract().getUnifiedSymbol(), bar.getUnifiedSymbol())) {
 			return;
 		}
-		LinkedList<TimeSeriesValue> list = (LinkedList<TimeSeriesValue>) indicatorValBufQMap.get(indicator);
+		ConcurrentLinkedDeque<TimeSeriesValue> list = (ConcurrentLinkedDeque<TimeSeriesValue>) indicatorValBufQMap.get(indicator);
 		if(list.size() >= bufSize.intValue()) {
 			list.poll();
 		}

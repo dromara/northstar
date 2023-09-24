@@ -4,16 +4,12 @@
   <parent>
 	<groupId>org.dromara</groupId>
 	<artifactId>northstar</artifactId>
-	<version>6.2.0.RC</version>
+	<version>6.2.0.RC2</version>
   </parent>
   <artifactId>northstar-rl</artifactId>
   <properties>
   </properties>
   <dependencies>
-  	<dependency>
-		<groupId>org.dromara</groupId>
-		<artifactId>northstar-api</artifactId>
-	</dependency>
 	<dependency>
 		<groupId>com.alibaba</groupId>
 		<artifactId>fastjson</artifactId>

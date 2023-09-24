@@ -12,7 +12,6 @@ import org.dromara.northstar.common.exception.InsufficientException;
 import org.dromara.northstar.common.model.ModuleDealRecord;
 import org.dromara.northstar.common.model.ModuleDescription;
 import org.dromara.northstar.common.model.ModuleRuntimeDescription;
-import org.dromara.northstar.common.model.Tuple;
 import org.dromara.northstar.common.utils.OrderUtils;
 import org.dromara.northstar.data.IModuleRepository;
 import org.dromara.northstar.gateway.IContractManager;
@@ -38,7 +37,6 @@ import xyz.redtorch.pb.CoreEnum.TimeConditionEnum;
 import xyz.redtorch.pb.CoreEnum.VolumeConditionEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.OrderField;
-import xyz.redtorch.pb.CoreField.PositionField;
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 import xyz.redtorch.pb.CoreField.TickField;
 import xyz.redtorch.pb.CoreField.TradeField;
@@ -129,9 +127,7 @@ public class PlaybackModuleContext extends ModuleContext implements IModuleConte
 		}
 		String id = UUID.randomUUID().toString();
 		DirectionEnum direction = OrderUtils.resolveDirection(operation);
-		PositionField pos = getAccount(contract).getPosition(OrderUtils.getClosingDirection(direction), contract.getUnifiedSymbol())
-				.orElse(PositionField.newBuilder().setContract(contract).build());
-		Tuple<OffsetFlagEnum, Integer> tuple = module.getModuleDescription().getClosingPolicy().resolve(operation, pos, volume);
+		OffsetFlagEnum offsetFlag = operation.isOpen() ? OffsetFlagEnum.OF_Open : OffsetFlagEnum.OF_Close;
 		String gatewayId = getAccount(contract).accountId();
 		try {
 			moduleAccount.onSubmitOrder(SubmitOrderReqField.newBuilder()
@@ -139,8 +135,8 @@ public class PlaybackModuleContext extends ModuleContext implements IModuleConte
 					.setContract(contract)
 					.setGatewayId(gatewayId)
 					.setDirection(direction)
-					.setOffsetFlag(tuple.t1())
-					.setVolume(tuple.t2())		
+					.setOffsetFlag(offsetFlag)
+					.setVolume(volume)		
 					.setPrice(orderPrice)
 					.setHedgeFlag(HedgeFlagEnum.HF_Speculation)
 					.setTimeCondition(priceType == PriceType.ANY_PRICE ? TimeConditionEnum.TC_IOC : TimeConditionEnum.TC_GFD)
@@ -163,12 +159,12 @@ public class PlaybackModuleContext extends ModuleContext implements IModuleConte
 				.setGatewayId(PLAYBACK_GATEWAY)
 				.setAccountId(PLAYBACK_GATEWAY)
 				.setContract(contract)
-				.setTotalVolume(tuple.t2())
-				.setTradedVolume(tuple.t2())
+				.setTotalVolume(volume)
+				.setTradedVolume(volume)
 				.setPrice(lastTick.getLastPrice())
 				.setDirection(OrderUtils.resolveDirection(operation))
 				.setHedgeFlag(HedgeFlagEnum.HF_Speculation)
-				.setOffsetFlag(tuple.t1())
+				.setOffsetFlag(offsetFlag)
 				.setTradingDay(lastTick.getTradingDay())
 				.setOrderDate(lastTick.getActionDay())
 				.setOrderTime(lastTick.getActionTime())
@@ -181,13 +177,13 @@ public class PlaybackModuleContext extends ModuleContext implements IModuleConte
 				.setGatewayId(PLAYBACK_GATEWAY)
 				.setAccountId(PLAYBACK_GATEWAY)
 				.setContract(contract)
-				.setVolume(tuple.t2())
+				.setVolume(volume)
 				.setPrice(lastTick.getLastPrice())
 				.setTradeId(System.currentTimeMillis()+"")
 				.setTradeTimestamp(lastTick.getActionTimestamp())
 				.setDirection(OrderUtils.resolveDirection(operation))
 				.setHedgeFlag(HedgeFlagEnum.HF_Speculation)
-				.setOffsetFlag(tuple.t1())
+				.setOffsetFlag(offsetFlag)
 				.setPriceSource(PriceSourceEnum.PSRC_LastPrice)
 				.setTradeDate(lastTick.getActionDay())
 				.setTradingDay(lastTick.getTradingDay())
