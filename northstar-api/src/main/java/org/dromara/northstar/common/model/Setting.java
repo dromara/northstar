@@ -6,6 +6,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
+import org.dromara.northstar.common.SettingOptionsProvider;
 import org.dromara.northstar.common.constant.FieldType;
 
 /**
@@ -42,6 +43,11 @@ public @interface Setting {
 	 * @return
 	 */
 	String[] optionsVal() default {};
+	/**
+	 * 配置项实现类（此接口的实现类提供的值将覆盖options与optionsVal的值）
+	 * @return
+	 */
+	Class<? extends SettingOptionsProvider> optionProvider() default SettingOptionsProvider.class;
 	/**
 	 * 占位文字
 	 * @return

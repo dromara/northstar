@@ -2,14 +2,20 @@ package org.dromara.northstar.common.model;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.dromara.northstar.common.SettingOptionsProvider;
 import org.dromara.northstar.common.constant.FieldType;
+
+import com.alibaba.fastjson2.JSON;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Getter
 @Setter
 public abstract class DynamicParams {
@@ -39,7 +45,12 @@ public abstract class DynamicParams {
 			} else if(f.getType() == String.class) {
 				f.set(this, cf.getValue().toString());
 			} else {
-				f.set(this, cf.getValue());
+				try {
+					f.set(this, JSON.parseObject(cf.getValue().toString(), f.getType()));
+				} catch (Exception ex) {
+					log.warn("{} 不能转换为 {}", cf.getValue(), f.getType());
+					log.error("", ex);
+				}
 			}
 			
 			f.setAccessible(flag);
@@ -60,6 +71,23 @@ public abstract class DynamicParams {
 				String unit = anno.unit();
 				String[] options = anno.options();
 				String[] optionsVal = anno.optionsVal();
+				Class<? extends SettingOptionsProvider> pvdClz = anno.optionProvider();
+				if(!pvdClz.isInterface()) {
+					try {
+						SettingOptionsProvider pvd = pvdClz.getDeclaredConstructor().newInstance();
+						List<OptionItem> items = pvd.optionVals();
+						if(!items.isEmpty()) {
+							options = new String[items.size()];
+							optionsVal = new String[items.size()];
+							for(int i=0; i < items.size(); i++) {
+								options[i] = items.get(i).label();
+								optionsVal[i] = items.get(i).value();
+							}
+						}
+					} catch (Exception e) {
+						log.error("", e);
+					}
+				}
 				FieldType type = anno.type();
 				String placeholder = anno.placeholder();
 				boolean required = anno.required();
