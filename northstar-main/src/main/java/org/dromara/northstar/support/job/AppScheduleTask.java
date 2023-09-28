@@ -69,10 +69,8 @@ public class AppScheduleTask {
 			StringBuilder sb = new StringBuilder();
 			errorLines.forEach(line -> sb.append(line + "\n"));
 			sb.append(String.format("%n%n警报来源：%s", InetAddressUtils.getHostname()));
-			msgMgr.getSubscribers().forEach(sub -> 
-				msgMgr.getSender().send(sub, String.format("[程序异常日志警报] %d-%d时，%d条异常记录", 
-						startTime.getHour(), endTime.getHour(), errorLines.size()), sb.toString())
-			);
+			msgMgr.getSender(true).send(String.format("[程序异常日志警报] %d-%d时，%d条异常记录", 
+					startTime.getHour(), endTime.getHour(), errorLines.size()), sb.toString());
 		}
 	}
 	

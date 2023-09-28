@@ -272,8 +272,8 @@ public class ModuleContext implements IModuleContext{
 	}
 	
 	@Override
-	public IMessageSender getMessageSender() {
-		return senderMgr.getSender();
+	public IMessageSender getMessageSender(boolean inheritSubscriber) {
+		return senderMgr.getSender(inheritSubscriber);
 	}
 
 	@Override

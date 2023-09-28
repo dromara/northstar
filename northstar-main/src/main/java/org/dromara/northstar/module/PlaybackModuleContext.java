@@ -51,19 +51,22 @@ public class PlaybackModuleContext extends ModuleContext implements IModuleConte
 		public void send(String receiver, String content) {/* 占位不实现 */}
 		
 		@Override
-		public void send(String receiver, String title, String content) {/* 占位不实现 */}
+		public void send(String content) {/* 占位不实现 */}
+		
+		@Override
+		public void addReceiver(String receiver) {/* 占位不实现 */}
 	};
 	
 	private static final IMessageSenderManager mockSenderMgr = new IMessageSenderManager() {
 
 		@Override
-		public IMessageSender getSender() {
-			return sender;
+		public List<String> getSubscribers() {
+			return Collections.emptyList();
 		}
 
 		@Override
-		public List<String> getSubscribers() {
-			return Collections.emptyList();
+		public IMessageSender getSender(boolean inheritSubscribers) {
+			return sender;
 		}
 		
 	};

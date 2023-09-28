@@ -97,9 +97,7 @@ public class ModuleCheckingTask implements InitializingBean {
 				return;
 			}
 			if(moduleStateMap.get(m).equals(state)) {
-				msgMgr.getSubscribers().forEach(sub -> 
-					doSmartSend(sub, "[模组状态警报]：" + m.getName(), String.format("当前模组状态为：%s，已经维持了一段时间，请人为介入判断是否正常", state))
-				);
+				doSmartSend("[模组状态警报]：" + m.getName(), String.format("当前模组状态为：%s，已经维持了一段时间，请人为介入判断是否正常", state));
 			} else {
 				moduleStateMap.remove(m);
 			}
@@ -138,9 +136,7 @@ public class ModuleCheckingTask implements InitializingBean {
 		try {
 			posChkr.checkPositionEquivalence(position);
 		} catch (IllegalStateException e) {
-			msgMgr.getSubscribers().forEach(sub -> 
-				doSmartSend(sub, String.format("[持仓不匹配警报] %s %s", position.getContract().getName(), position.getPositionDirection()), e.getMessage())
-			);
+			doSmartSend(String.format("[持仓不匹配警报] %s %s", position.getContract().getName(), position.getPositionDirection()), e.getMessage());
 		}
 	}
 	
@@ -164,10 +160,8 @@ public class ModuleCheckingTask implements InitializingBean {
 			if(!errorLines.isEmpty()) {
 				StringBuilder sb = new StringBuilder();
 				errorLines.forEach(line -> sb.append(line + "\n"));
-				msgMgr.getSubscribers().forEach(sub -> 
-					doSmartSend(sub, String.format("[模组异常日志警报] %s %d-%d时，%d条异常记录", module.getName(),
-							startTime.getHour(), endTime.getHour(), errorLines.size()), sb.toString())
-				);
+				doSmartSend(String.format("[模组异常日志警报] %s %d-%d时，%d条异常记录", module.getName(),
+						startTime.getHour(), endTime.getHour(), errorLines.size()), sb.toString());
 			}
 		}
 	}
@@ -181,9 +175,7 @@ public class ModuleCheckingTask implements InitializingBean {
 		accountMgr.allAccounts().stream()
 			.filter(account -> account.degreeOfRisk() > 0.95)
 			.forEach(account -> 
-				msgMgr.getSubscribers().forEach(sub -> 
-					doSmartSend(sub, "[账户风险度警报]：" + account.accountId(), String.format("当前账户风险率为：%d%", (int)(account.degreeOfRisk() * 100)))
-				)
+				doSmartSend("[账户风险度警报]：" + account.accountId(), String.format("当前账户风险率为：%d%", (int)(account.degreeOfRisk() * 100)))
 			);
 	}
 	/**
@@ -198,17 +190,15 @@ public class ModuleCheckingTask implements InitializingBean {
 		);
 		
 		if(sb.length() > 0) {
-			msgMgr.getSubscribers().forEach(sub -> 
-				doSmartSend(sub, "[当天废单列表警报]", sb.toString())
-			);
+			doSmartSend("[当天废单列表警报]", sb.toString());
 		}
 	}
 	
-	private void doSmartSend(String subscriber, String title, String msg) {
+	private void doSmartSend(String title, String msg) {
 		String combine = title + "@" + msg;
 		if(!warningCacheSet.contains(combine)) {
 			String realMsg = String.format("%s%n%n警报来源：%s%n", msg, InetAddressUtils.getHostname());
-			msgMgr.getSender().send(subscriber, title, realMsg);
+			msgMgr.getSender(true).send(title, realMsg);
 			warningCacheSet.add(combine);
 		}
 	}
