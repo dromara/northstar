@@ -5,12 +5,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 
 import org.dromara.northstar.common.SettingOptionsProvider;
 import org.dromara.northstar.common.constant.FieldType;
 
 import com.alibaba.fastjson2.JSON;
 
+import cn.hutool.core.bean.BeanUtil;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -28,32 +30,30 @@ public abstract class DynamicParams {
 		for(Entry<String, ComponentField> e : fieldMap.entrySet()) {
 			Field f = this.getClass().getDeclaredField(e.getKey());
 			ComponentField cf = e.getValue();
-			boolean flag = f.canAccess(this);
-			f.setAccessible(true);
-			if(f.getType() == int.class) {
-				f.setInt(this,cf.getValue() == null ? 0 : cf.getValue() instanceof String ? Integer.parseInt((String) cf.getValue()) : (int)cf.getValue());
-			} else if (f.getType() == long.class) {
-				f.setLong(this, cf.getValue() == null ? 0 : cf.getValue() instanceof String ? Long.parseLong((String) cf.getValue()) : (long)cf.getValue());
-			} else if (f.getType() == float.class) {
-				f.setFloat(this, cf.getValue() == null ? 0 : cf.getValue() instanceof String ? Float.parseFloat((String) cf.getValue()) : (float)cf.getValue());
-			} else if (f.getType() == double.class) {
-				f.setDouble(this, cf.getValue() == null ? 0 : cf.getValue() instanceof String ? Double.parseDouble((String) cf.getValue()) : (double)cf.getValue());
-			} else if (f.getType() == short.class) {
-				f.setShort(this, cf.getValue() == null ? 0 : cf.getValue() instanceof String ? Short.parseShort((String) cf.getValue()) : (short)cf.getValue());
-			} else if(f.getType() == boolean.class) {
-				f.set(this, Boolean.parseBoolean((String) cf.getValue()));
-			} else if(f.getType() == String.class) {
-				f.set(this, cf.getValue().toString());
-			} else {
-				try {
-					f.set(this, JSON.parseObject(cf.getValue().toString(), f.getType()));
-				} catch (Exception ex) {
-					log.warn("{} 不能转换为 {}", cf.getValue(), f.getType());
-					log.error("", ex);
+			if(Objects.nonNull(cf.getValue())) {
+				if(f.getType() == int.class) {
+					BeanUtil.setFieldValue(this, f.getName(), Integer.parseInt((String) cf.getValue()));
+				} else if (f.getType() == long.class) {
+					BeanUtil.setFieldValue(this, f.getName(), Long.parseLong((String) cf.getValue()));
+				} else if (f.getType() == float.class) {
+					BeanUtil.setFieldValue(this, f.getName(), Float.parseFloat((String) cf.getValue()));
+				} else if (f.getType() == double.class) {
+					BeanUtil.setFieldValue(this, f.getName(), Double.parseDouble((String) cf.getValue()));
+				} else if (f.getType() == short.class) {
+					BeanUtil.setFieldValue(this, f.getName(), Short.parseShort((String) cf.getValue()));
+				} else if(f.getType() == boolean.class) {
+					BeanUtil.setFieldValue(this, f.getName(), Boolean.parseBoolean((String) cf.getValue()));
+				} else if(f.getType() == String.class) {
+					BeanUtil.setFieldValue(this, f.getName(), cf.getValue());
+				} else {
+					try {
+						BeanUtil.setFieldValue(this, f.getName(), JSON.parseObject(cf.getValue().toString(), f.getType()));
+					} catch (Exception ex) {
+						log.warn("{} 不能转换为 {}", cf.getValue(), f.getType());
+						log.error("", ex);
+					}
 				}
 			}
-			
-			f.setAccessible(flag);
 		}
 		
 		return this;
