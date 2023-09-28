@@ -10,8 +10,6 @@ import java.util.Objects;
 import org.dromara.northstar.common.SettingOptionsProvider;
 import org.dromara.northstar.common.constant.FieldType;
 
-import com.alibaba.fastjson2.JSON;
-
 import cn.hutool.core.bean.BeanUtil;
 import lombok.Getter;
 import lombok.Setter;
@@ -31,28 +29,7 @@ public abstract class DynamicParams {
 			Field f = this.getClass().getDeclaredField(e.getKey());
 			ComponentField cf = e.getValue();
 			if(Objects.nonNull(cf.getValue())) {
-				if(f.getType() == int.class) {
-					BeanUtil.setFieldValue(this, f.getName(), Integer.parseInt((String) cf.getValue()));
-				} else if (f.getType() == long.class) {
-					BeanUtil.setFieldValue(this, f.getName(), Long.parseLong((String) cf.getValue()));
-				} else if (f.getType() == float.class) {
-					BeanUtil.setFieldValue(this, f.getName(), Float.parseFloat((String) cf.getValue()));
-				} else if (f.getType() == double.class) {
-					BeanUtil.setFieldValue(this, f.getName(), Double.parseDouble((String) cf.getValue()));
-				} else if (f.getType() == short.class) {
-					BeanUtil.setFieldValue(this, f.getName(), Short.parseShort((String) cf.getValue()));
-				} else if(f.getType() == boolean.class) {
-					BeanUtil.setFieldValue(this, f.getName(), Boolean.parseBoolean((String) cf.getValue()));
-				} else if(f.getType() == String.class) {
-					BeanUtil.setFieldValue(this, f.getName(), cf.getValue());
-				} else {
-					try {
-						BeanUtil.setFieldValue(this, f.getName(), JSON.parseObject(cf.getValue().toString(), f.getType()));
-					} catch (Exception ex) {
-						log.warn("{} 不能转换为 {}", cf.getValue(), f.getType());
-						log.error("", ex);
-					}
-				}
+				BeanUtil.setFieldValue(this, f.getName(), cf.getValue());
 			}
 		}
 		
