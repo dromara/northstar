@@ -62,6 +62,9 @@
 - 本项目为技术分享，对交易行为并不负责
 - 使用者需要自行开发交易策略并需要一定的JAVA基础
 
+## 如何贡献代码
+本项目欢迎提PR，可先fork到自己的项目中，然后提PR。为避免PR被拒绝，建议PR之前与作者进行充分的沟通
+
 ## 特别鸣谢
 [redtorch](https://github.com/sun0x00/redtorch)作者，本项目保留了小部分其源码，同时感谢redtorch作者的技术分享。  
 [klinechart](https://klinecharts.com/zh-CN)作者，提供了优秀的K线前端库，并提供了相关的技术支持。  
