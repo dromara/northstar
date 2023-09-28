@@ -4,15 +4,18 @@ public interface IMessageSender {
 
 	/**
 	 * 发送信息
-	 * @param receiver	接收人
 	 * @param title		标题
 	 * @param message	内容
 	 */
-	void send(String receiver, String title, String content);
+	void send(String title, String content);
 	/**
 	 * 发送信息
-	 * @param receiver	接收人
 	 * @param content	内容
 	 */
-	void send(String receiver, String content);
+	void send(String content);
+	/**
+	 * 设置接收人
+	 * @param receiver
+	 */
+	void addReceiver(String receiver);
 }

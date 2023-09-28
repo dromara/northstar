@@ -2,10 +2,14 @@ package org.dromara.northstar.support.notification;
 
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+
+import javax.mail.MessagingException;
 
 import org.dromara.northstar.common.event.NorthstarEvent;
 import org.dromara.northstar.common.event.NorthstarEventType;
@@ -114,17 +118,21 @@ public class MailDeliveryManager implements IMessageSenderManager{
 	}
 
 	@Override
-	public IMessageSender getSender() {
+	public IMessageSender getSender(boolean inheritSubscribers) {
+		final Set<String> receivers = new HashSet<>();
+		if(inheritSubscribers) {
+			receivers.addAll(emailConfig.getSubscriberList());
+		}
 		return new IMessageSender() {
 			
 			@Override
-			public void send(String receiver, String content) {
+			public void send(String content) {
 				exec.execute(() -> {
 					MimeMessageHelper msg = new MimeMessageHelper(sender.createMimeMessage(), UTF8);
 					try {
 						msg.setSubject("Northstar消息");
 						msg.setFrom(emailConfig.getEmailUsername());
-						msg.setTo(receiver);
+						receivers.forEach(addr -> this.addReceiver(msg, addr));
 						msg.setText(content);
 						sender.send(msg.getMimeMessage());
 					} catch (Exception e) {
@@ -134,19 +142,32 @@ public class MailDeliveryManager implements IMessageSenderManager{
 			}
 			
 			@Override
-			public void send(String receiver, String title, String content) {
+			public void send(String title, String content) {
 				exec.execute(() -> {
 					MimeMessageHelper msg = new MimeMessageHelper(sender.createMimeMessage(), UTF8);
 					try {
 						msg.setSubject("Northstar信息：" + title);
 						msg.setFrom(emailConfig.getEmailUsername());
-						msg.setTo(receiver);
+						receivers.forEach(addr -> this.addReceiver(msg, addr));
 						msg.setText(content);
 						sender.send(msg.getMimeMessage());
 					} catch (Exception e) {
 						log.error("邮件发送异常。邮件内容：【{}】 {}， 异常原因：{} {}", title, content, e.getClass().getSimpleName(), e.getMessage());
 					}
 				});				
+			}
+
+			@Override
+			public void addReceiver(String receiver) {
+				receivers.add(receiver);
+			}
+			
+			private void addReceiver(MimeMessageHelper msg, String receiver) {
+				try {
+					msg.addTo(receiver);
+				} catch (MessagingException e) {
+					log.error("添加收件人异常", e);
+				}
 			}
 		};
 	}
