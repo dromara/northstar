@@ -1,11 +1,11 @@
 package org.dromara.northstar.module;
 
 import java.time.LocalTime;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.dromara.northstar.common.MessageSenderSettings;
 import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.common.constant.SignalOperation;
 import org.dromara.northstar.common.exception.InsufficientException;
@@ -55,14 +55,12 @@ public class PlaybackModuleContext extends ModuleContext implements IModuleConte
 		
 		@Override
 		public void addReceiver(String receiver) {/* 占位不实现 */}
+
+		@Override
+		public void setSenderSettings(MessageSenderSettings settings) {/* 占位不实现 */}
 	};
 	
 	private static final IMessageSenderManager mockSenderMgr = new IMessageSenderManager() {
-
-		@Override
-		public List<String> getSubscribers() {
-			return Collections.emptyList();
-		}
 
 		@Override
 		public IMessageSender getSender(boolean inheritSubscribers) {

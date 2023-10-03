@@ -1,15 +1,12 @@
 package org.dromara.northstar.config;
 
 import org.dromara.northstar.data.IGatewayRepository;
-import org.dromara.northstar.data.IMailConfigRepository;
 import org.dromara.northstar.data.IMarketDataRepository;
 import org.dromara.northstar.data.IModuleRepository;
 import org.dromara.northstar.data.IPlaybackRuntimeRepository;
 import org.dromara.northstar.data.ISimAccountRepository;
 import org.dromara.northstar.data.jdbc.GatewayDescriptionRepository;
 import org.dromara.northstar.data.jdbc.GatewayRepoAdapter;
-import org.dromara.northstar.data.jdbc.MailConfigDescriptionRepository;
-import org.dromara.northstar.data.jdbc.MailConfigRepoAdapter;
 import org.dromara.northstar.data.jdbc.MarketDataRepoAdapter;
 import org.dromara.northstar.data.jdbc.MarketDataRepository;
 import org.dromara.northstar.data.jdbc.ModuleDealRecordRepository;
@@ -35,11 +32,6 @@ public class RepositoryConfig {
     @Bean
     IModuleRepository moduleRepo(ModuleDealRecordRepository mdrRepo, ModuleDescriptionRepository mdRepo, ModuleRuntimeDescriptionRepository mrdRepo) {
     	return new ModuleRepoAdapter(mdRepo, mrdRepo, mdrRepo);
-    }
-    
-    @Bean
-    IMailConfigRepository mailConfigRepo(MailConfigDescriptionRepository delegate) {
-    	return new MailConfigRepoAdapter(delegate);
     }
     
     @Bean
