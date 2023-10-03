@@ -8,11 +8,11 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+import org.dromara.northstar.common.GatewaySettings;
 import org.dromara.northstar.common.IDataServiceManager;
 import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.model.ComponentField;
 import org.dromara.northstar.common.model.DynamicParams;
-import org.dromara.northstar.common.model.GatewaySettings;
 
 import lombok.extern.slf4j.Slf4j;
 

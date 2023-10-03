@@ -2,12 +2,12 @@ package org.dromara.northstar.gateway.playback;
 
 import java.util.List;
 
+import org.dromara.northstar.common.GatewaySettings;
 import org.dromara.northstar.common.constant.FieldType;
 import org.dromara.northstar.common.constant.PlaybackPrecision;
 import org.dromara.northstar.common.constant.PlaybackSpeed;
 import org.dromara.northstar.common.model.ContractSimpleInfo;
 import org.dromara.northstar.common.model.DynamicParams;
-import org.dromara.northstar.common.model.GatewaySettings;
 import org.dromara.northstar.common.model.Setting;
 
 import lombok.Getter;
