@@ -5,12 +5,12 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneOffset;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Index;
+import javax.persistence.Lob;
 import javax.persistence.Table;
 
 import org.dromara.northstar.common.constant.DateTimeConstant;
@@ -39,7 +39,7 @@ public class BarDO {
 	private String tradingDay;
 	
 	private long expiredAt;
-	@Column(length = 1024)
+	@Lob
 	private byte[] barData;
 
 	public BarDO(String unifiedSymbol, String tradingDay, long expiredAt, byte[] barData) {

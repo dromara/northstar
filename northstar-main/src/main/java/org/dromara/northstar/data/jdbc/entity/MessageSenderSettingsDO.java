@@ -3,7 +3,6 @@ package org.dromara.northstar.data.jdbc.entity;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Lob;
-import javax.persistence.Table;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -13,11 +12,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 @Entity
-@Table(name="MAIL_CONFIG")
-public class MailConfigDescriptionDO {
+public class MessageSenderSettingsDO {
 
 	@Id
-	private String id;
+	private String className;
+	
 	@Lob
-	private String dataStr;
+	private String settingsData;
 }

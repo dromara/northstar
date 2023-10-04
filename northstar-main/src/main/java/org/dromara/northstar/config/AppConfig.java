@@ -18,9 +18,6 @@ import org.dromara.northstar.common.event.FastEventEngine;
 import org.dromara.northstar.common.utils.LocalEnvUtils;
 import org.dromara.northstar.gateway.IMarketCenter;
 import org.dromara.northstar.gateway.mktdata.MarketCenter;
-import org.dromara.northstar.support.notification.IMailMessageContentHandler;
-import org.dromara.northstar.support.notification.MailDeliveryManager;
-import org.dromara.northstar.support.notification.MailSenderFactory;
 import org.dromara.northstar.web.interceptor.AuthorizationInterceptor;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -28,7 +25,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.info.BuildProperties;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
@@ -161,18 +157,6 @@ public class AppConfig implements WebMvcConfigurer, InitializingBean, Disposable
                 .build();
     }
 
-    @ConditionalOnMissingBean(IMailMessageContentHandler.class)
-    @Bean
-    IMailMessageContentHandler messageDeliveryHandler() {
-        return new IMailMessageContentHandler() {
-        };
-    }
-
-    @Bean
-    MailDeliveryManager mailDeliveryManager(IMailMessageContentHandler handler) {
-        return new MailDeliveryManager(new MailSenderFactory(), handler);
-    }
-    
     @Bean
     @ConditionalOnExpression("systemEnvironment['IDEA_INITIAL_DIRECTORY'] == null")
     CommandLineRunner printVersionInfo(BuildProperties buildProperties) {

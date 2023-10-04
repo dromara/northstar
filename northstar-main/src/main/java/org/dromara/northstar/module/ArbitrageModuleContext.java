@@ -24,7 +24,6 @@ import org.dromara.northstar.strategy.TradeStrategy;
 import org.dromara.northstar.strategy.constant.PriceType;
 import org.dromara.northstar.strategy.model.TradeIntent;
 import org.dromara.northstar.support.log.ModuleLoggerFactory;
-import org.dromara.northstar.support.notification.IMessageSenderManager;
 import org.dromara.northstar.support.utils.bar.BarMergerRegistry;
 
 import cn.hutool.core.lang.Assert;
@@ -48,9 +47,8 @@ public class ArbitrageModuleContext extends ModuleContext implements IModuleCont
 
 	public ArbitrageModuleContext(TradeStrategy tradeStrategy, ModuleDescription moduleDescription,
 			ModuleRuntimeDescription moduleRtDescription, IContractManager contractMgr, IModuleRepository moduleRepo,
-			ModuleLoggerFactory loggerFactory, IMessageSenderManager senderMgr, BarMergerRegistry barMergerRegistry) {
-		super(tradeStrategy, moduleDescription, moduleRtDescription, contractMgr, moduleRepo, loggerFactory, senderMgr,
-				barMergerRegistry);
+			ModuleLoggerFactory loggerFactory, BarMergerRegistry barMergerRegistry) {
+		super(tradeStrategy, moduleDescription, moduleRtDescription, contractMgr, moduleRepo, loggerFactory, barMergerRegistry);
 	}
 
 	/**

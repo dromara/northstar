@@ -1,6 +1,6 @@
 <template>
   <div class="ns-workspace">
-    <MailConfigForm :visible.sync="mailSettingFormVisible" />
+    <MessageConfigForm :visible.sync="mailSettingFormVisible" />
     <div class="ns-header">
       <el-menu
         class="ns-menu"
@@ -43,7 +43,7 @@
 
 <script>
 import SocketConnection from '@/components/SocketConnection'
-import MailConfigForm from '@/components/MailConfigForm'
+import MessageConfigForm from '@/components/MessageConfigForm'
 import packageJson from '@/../package.json'
 
 import loginApi from '@/api/loginApi'
@@ -64,7 +64,7 @@ Object.keys(pageOpts).forEach((key) => (pageOptsRevert[pageOpts[key]] = key))
 export default {
   components: {
     SocketConnection,
-    MailConfigForm
+    MessageConfigForm
   },
   data() {
     return {

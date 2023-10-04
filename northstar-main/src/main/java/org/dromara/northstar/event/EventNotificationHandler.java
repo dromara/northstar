@@ -1,6 +1,7 @@
 package org.dromara.northstar.event;
 
-import java.util.EnumSet;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.dromara.northstar.common.event.AbstractEventHandler;
@@ -8,32 +9,27 @@ import org.dromara.northstar.common.event.GenericEventHandler;
 import org.dromara.northstar.common.event.NorthstarEvent;
 import org.dromara.northstar.common.event.NorthstarEventType;
 import org.dromara.northstar.common.utils.OrderUtils;
-import org.dromara.northstar.support.notification.MailDeliveryManager;
+import org.dromara.northstar.strategy.IMessageSender;
 
 import xyz.redtorch.pb.CoreField.OrderField;
 import xyz.redtorch.pb.CoreField.TradeField;
 
-public class MailBindedEventHandler extends AbstractEventHandler implements GenericEventHandler{
+public class EventNotificationHandler extends AbstractEventHandler implements GenericEventHandler{
 	
 	private static final int ONE_MIN = 60000;
 
-	private MailDeliveryManager mailMgr;
+	private IMessageSender sender;
 	
-	private static final Set<NorthstarEventType> TARGET_TYPE = EnumSet.of(
-			NorthstarEventType.LOGGED_IN,
-			NorthstarEventType.LOGGED_OUT,
-			NorthstarEventType.NOTICE,
-			NorthstarEventType.TRADE,
-			NorthstarEventType.ORDER
-	); 
+	private Set<NorthstarEventType> subEvents = new HashSet<>();
 	
-	public MailBindedEventHandler(MailDeliveryManager mailMgr) {
-		this.mailMgr = mailMgr;
+	public EventNotificationHandler(IMessageSender sender, List<NorthstarEventType> subEvents) {
+		this.sender = sender;
+		this.subEvents.addAll(subEvents);
 	}
 	
 	@Override
 	public boolean canHandle(NorthstarEventType eventType) {
-		return TARGET_TYPE.contains(eventType);
+		return subEvents.contains(eventType);
 	}
 
 	@Override
@@ -42,7 +38,7 @@ public class MailBindedEventHandler extends AbstractEventHandler implements Gene
 				|| e.getData() instanceof OrderField order && !OrderUtils.isValidOrder(order)) {
 			return;
 		}
-		mailMgr.onEvent(e);
+		sender.onEvent(e);
 	}
 
 }

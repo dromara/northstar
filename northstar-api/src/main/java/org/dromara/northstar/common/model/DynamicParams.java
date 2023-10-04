@@ -68,7 +68,8 @@ public abstract class DynamicParams {
 				FieldType type = anno.type();
 				String placeholder = anno.placeholder();
 				boolean required = anno.required();
-				fieldMap.put(fieldName, new ComponentField(label,fieldName, order, type, null, unit, options, optionsVal, placeholder, required));
+				Object value = BeanUtil.getFieldValue(this, f.getName());
+				fieldMap.put(fieldName, new ComponentField(label,fieldName, order, type, value, unit, options, optionsVal, placeholder, required));
 			}
 		}
 		return fieldMap;

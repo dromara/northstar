@@ -4,17 +4,19 @@ import org.dromara.northstar.account.AccountManager;
 import org.dromara.northstar.account.GatewayManager;
 import org.dromara.northstar.data.IGatewayRepository;
 import org.dromara.northstar.data.IMarketDataRepository;
+import org.dromara.northstar.data.IMessageSenderRepository;
 import org.dromara.northstar.event.AccountHandler;
 import org.dromara.northstar.event.BroadcastHandler;
 import org.dromara.northstar.event.ConnectionHandler;
+import org.dromara.northstar.event.EventNotificationHandler;
 import org.dromara.northstar.event.IllegalOrderHandler;
-import org.dromara.northstar.event.MailBindedEventHandler;
 import org.dromara.northstar.event.MarketDataHandler;
 import org.dromara.northstar.event.ModuleHandler;
 import org.dromara.northstar.event.SimMarketHandler;
 import org.dromara.northstar.gateway.IContractManager;
 import org.dromara.northstar.module.ModuleManager;
-import org.dromara.northstar.support.notification.MailDeliveryManager;
+import org.dromara.northstar.strategy.IMessageSender;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -63,9 +65,10 @@ class InternalEventHandlerConfig {
 	}
 	
 	@Bean
-	MailBindedEventHandler mailBindedEventHandler(MailDeliveryManager mailMgr) {
-		log.debug("注册：MailBindedEventHandler");
-		return new MailBindedEventHandler(mailMgr);
+	@ConditionalOnBean(IMessageSender.class)
+	EventNotificationHandler eventNotificationHandler(IMessageSender sender, IMessageSenderRepository repo) {
+		log.debug("注册：EventNotificationHandler");
+		return new EventNotificationHandler(sender, repo.getSubEvents());
 	}
 	
 	@Bean
