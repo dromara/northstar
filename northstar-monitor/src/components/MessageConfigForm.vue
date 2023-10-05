@@ -30,12 +30,14 @@
           :show-password="item.type === 'PASSWORD'"
           :placeholder="item.placeholder"
           autocomplete="off"
+          clearable
         ></el-input>
         <el-date-picker
           v-if="item.type === 'DATE'"
           v-model="settings[item.name].value"
           type="date"
           placeholder="选择日期"
+          clearable
         >
         </el-date-picker>
         <el-select
@@ -43,6 +45,7 @@
           v-model="settings[item.name].value"
           :multiple="item.type === 'MULTI_SELECT'"
           collapse-tags
+          clearable
         >
           <el-option
             v-for="(val, i) in item.optionsVal"
@@ -95,6 +98,12 @@ export default {
       alertingApi.saveEvents(this.subEvents)
     },
     saveConfig() {
+      Object.values(this.settings).forEach((item) => {
+        console.log(item)
+        if (!this.settings[item.name].value && item.required) {
+          throw new Error(`【${item.label}】不能为空`)
+        }
+      })
       alertingApi.saveSettings(this.settings)
       this.close()
     },

@@ -14,6 +14,7 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 import org.apache.commons.lang3.StringUtils;
+import org.dromara.northstar.common.constant.GlobalSpringContext;
 import org.dromara.northstar.common.event.FastEventEngine;
 import org.dromara.northstar.common.utils.LocalEnvUtils;
 import org.dromara.northstar.gateway.IMarketCenter;
@@ -27,6 +28,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.info.BuildProperties;
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
@@ -63,6 +65,9 @@ public class AppConfig implements WebMvcConfigurer, InitializingBean, Disposable
 	
 	@Autowired
 	private Environment env;
+	
+	@Autowired
+	private ApplicationContext springCtx;
 	
 	@Override
 	public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
@@ -172,6 +177,7 @@ public class AppConfig implements WebMvcConfigurer, InitializingBean, Disposable
 	public void afterPropertiesSet() throws Exception {
 		LocalEnvUtils.setEnvironment(env);
 		log.info("设置全局环境信息");
+		GlobalSpringContext.INSTANCE.set(springCtx);
 	}
 
 }
