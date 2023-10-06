@@ -22,7 +22,7 @@
       </el-form-item>
     </el-form>
     <el-form :model="settings" label-width="100px" width="160px">
-      <el-form-item v-for="(item, i) in Object.values(this.settings)" :label="item.label" :key="i" :required="item.required">
+      <el-form-item v-for="(item, i) in fields" :label="item.label" :key="i" :required="item.required">
         <el-input
           v-if="['TEXT', 'PASSWORD', 'NUMBER'].indexOf(item.type) > -1"
           v-model="settings[item.name].value"
@@ -56,10 +56,13 @@
         </el-select>
       </el-form-item>
     </el-form>
+    <div v-if="!fields.length" class="warning-text">
+      <i class="el-icon-warning" /> 消息告警功能仅对会员开放
+    </div>
     <div slot="footer" class="dialog-footer">
-      <el-button type="primary" @click="test">消息测试</el-button>
+      <el-button v-if="fields.length" type="primary" @click="test">消息测试</el-button>
       <el-button @click="close">取 消</el-button>
-      <el-button type="primary" @click="saveConfig">保 存</el-button>
+      <el-button v-if="fields.length" type="primary" @click="saveConfig">保 存</el-button>
     </div>
   </el-dialog>
 </template>
@@ -91,6 +94,14 @@ export default {
   watch: {
     'subEvents.length': function(){
       this.saveSubEvents()
+    }
+  },
+  computed:{
+    fields(){
+      if(!Object.values(this.settings).length){
+        return []
+      }
+      return Object.values(this.settings).sort((a,b) => a.order < b.order ? -1 : 1)
     }
   },
   methods: {

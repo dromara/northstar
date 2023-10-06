@@ -1,11 +1,14 @@
 package org.dromara.northstar.web.restful;
 
+import java.time.LocalTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.dromara.northstar.common.MessageSenderSettings;
+import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.common.event.NorthstarEventType;
 import org.dromara.northstar.common.model.ComponentField;
 import org.dromara.northstar.common.model.DynamicParams;
@@ -77,6 +80,8 @@ public class AlertingController {
 		return new ResultBean<>(true);
 	}
 	
+	private AtomicInteger testCounter = new AtomicInteger();
+	
 	@PostMapping("/test")
 	public ResultBean<Boolean> testSettings(@RequestBody Map<String,ComponentField> settings){
 		Assert.notNull(meta, COMMON_ERR);
@@ -84,7 +89,7 @@ public class AlertingController {
 		try {
 			MessageSenderSettings newSettings = (MessageSenderSettings) params.resolveFromSource(settings);
 			BeanUtils.copyProperties(newSettings, meta);
-			sender.send("告警测试");
+			sender.send(String.format("%s 告警测试%d", LocalTime.now().format(DateTimeConstant.T_FORMAT_FORMATTER), testCounter.incrementAndGet()));
 		} catch (Exception e) {
 			throw new IllegalStateException("配置信息解析异常", e);
 		}
