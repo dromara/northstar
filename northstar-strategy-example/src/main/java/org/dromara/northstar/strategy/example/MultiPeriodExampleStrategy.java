@@ -154,13 +154,13 @@ public class MultiPeriodExampleStrategy extends AbstractStrategy	// 为了简化
 		private String indicatorSymbol;
 		
 		@Setting(label="快线周期", type = FieldType.NUMBER, order=1)		
-		private int fast;						
+		private int fast = 5;						
 		
 		@Setting(label="慢线周期", type = FieldType.NUMBER, order=2)		
-		private int slow;
+		private int slow = 10;
 		
 		@Setting(label="参考周期", type = FieldType.NUMBER, order=10)
-		private int refPeriod;
+		private int refPeriod = 15;
 	}
 
 }
