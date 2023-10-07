@@ -35,6 +35,7 @@ import org.dromara.northstar.common.constant.ModuleState;
 import org.dromara.northstar.common.constant.SignalOperation;
 import org.dromara.northstar.common.exception.InsufficientException;
 import org.dromara.northstar.common.exception.NoSuchElementException;
+import org.dromara.northstar.common.model.AccountRuntimeDescription;
 import org.dromara.northstar.common.model.ContractSimpleInfo;
 import org.dromara.northstar.common.model.Identifier;
 import org.dromara.northstar.common.model.ModuleAccountRuntimeDescription;
@@ -398,14 +399,28 @@ public class ModuleContext implements IModuleContext{
 				.maxDrawbackPercentage(moduleAccount.getMaxDrawbackPercentage())
 				.maxProfit(moduleAccount.getMaxProfit())
 				.positionDescription(posDescription)
+				.availableAmount(moduleAccount.availableAmount())
 				.build();
+		List<AccountRuntimeDescription> accRts = contractMap.values().stream()
+				.map(this::getAccount)
+				.collect(Collectors.toSet())
+				.stream()
+				.map(acc -> AccountRuntimeDescription.builder()
+						.name(acc.accountId())
+						.balance(acc.accountBalance())
+						.availableAmount(acc.availableAmount())
+						.build())
+				.toList();
 		ModuleRuntimeDescription mad = ModuleRuntimeDescription.builder()
 				.moduleName(module.getName())
 				.enabled(module.isEnabled())
 				.moduleState(moduleAccount.getModuleState())
-				.dataState(tradeStrategy.getStoreObject())
-				.accountRuntimeDescription(accRtDescription)
+				.storeObject(tradeStrategy.getStoreObject())
+				.strategyInfos(tradeStrategy.strategyInfos())
+				.moduleAccountRuntime(accRtDescription)
+				.accountRuntimes(accRts)
 				.build();
+		
 		if(fullDescription) {
 			List<ModuleDealRecord> dealRecords = moduleRepo.findAllDealRecords(module.getName());
 			double avgProfit = dealRecords.stream().mapToDouble(ModuleDealRecord::getDealProfit).average().orElse(0D);

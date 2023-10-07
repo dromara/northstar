@@ -57,4 +57,9 @@ public class ModuleAccountRuntimeDescription {
 	 * 年化收益率
 	 */
 	private double annualizedRateOfReturn;
+	/**
+	 * 可用余额
+	 */
+	private double availableAmount;
+	
 }

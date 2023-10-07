@@ -156,8 +156,8 @@ public class ModuleService implements IModuleService, PostLoadAware {
 				.moduleName(md.getModuleName())
 				.enabled(false)
 				.moduleState(ModuleState.EMPTY)
-				.accountRuntimeDescription(mard)
-				.dataState(new JSONObject())
+				.moduleAccountRuntime(mard)
+				.storeObject(new JSONObject())
 				.build();
 		loadModule(md, mrd);
 		moduleRepo.saveRuntime(mrd);
@@ -232,14 +232,14 @@ public class ModuleService implements IModuleService, PostLoadAware {
 		ComponentAndParamsPair strategyComponent = md.getStrategySetting();
 		TradeStrategy strategy = resolveComponent(strategyComponent);
 		Assert.isTrue(strategy.type() == md.getType(), "该策略只能用于类型为[{}]的模组", strategy.type());
-		strategy.setStoreObject(mrd.getDataState());
+		strategy.setStoreObject(mrd.getStoreObject());
 		IModuleContext moduleCtx = null;
 		if(md.getUsage() == ModuleUsage.PLAYBACK) {
 			mrd = ModuleRuntimeDescription.builder()
 					.moduleName(md.getModuleName())
 					.moduleState(ModuleState.EMPTY)
-					.dataState(new JSONObject())
-					.accountRuntimeDescription(ModuleAccountRuntimeDescription.builder()
+					.storeObject(new JSONObject())
+					.moduleAccountRuntime(ModuleAccountRuntimeDescription.builder()
 							.initBalance(md.getInitBalance())
 							.build())
 					.build();

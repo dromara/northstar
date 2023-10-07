@@ -1,11 +1,13 @@
 package org.dromara.northstar.strategy.example;
 
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 import org.dromara.northstar.common.constant.FieldType;
 import org.dromara.northstar.common.constant.ModuleState;
 import org.dromara.northstar.common.constant.SignalOperation;
 import org.dromara.northstar.common.model.DynamicParams;
+import org.dromara.northstar.common.model.ItemDescription;
 import org.dromara.northstar.common.model.Setting;
 import org.dromara.northstar.strategy.IModuleContext;
 import org.dromara.northstar.strategy.IModuleStrategyContext;
@@ -156,4 +158,17 @@ public class BeginnerExampleStrategy implements TradeStrategy{
 		// 成交回调
 	}
 
+	@Override
+	public List<ItemDescription> strategyInfos() {
+		// 用户可以通过该方法，把策略内部非指标化的计算值暴露给监控台
+		JSONObject json = new JSONObject();
+		json.put("key1", "value");
+		json.put("key2", "value");
+		return List.of(
+				ItemDescription.builder().name("示例数值").value(10000.998877).order(1).build(),
+				ItemDescription.builder().name("示例文本").value("提示信息").order(2).build(),
+				ItemDescription.builder().name("示例对象").value(json).order(3).build()
+				);
+	}
+	
 }

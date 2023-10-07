@@ -101,7 +101,7 @@ public class ModuleAccount implements IModuleAccount{
 			}
 		};
 		
-		ModuleAccountRuntimeDescription mard = moduleRtDescription.getAccountRuntimeDescription();
+		ModuleAccountRuntimeDescription mard = moduleRtDescription.getModuleAccountRuntime();
 		this.initBalance = moduleDescription.getInitBalance();
 		this.accCloseProfit = mard.getAccCloseProfit();
 		this.accCommission = mard.getAccCommission();
@@ -242,7 +242,12 @@ public class ModuleAccount implements IModuleAccount{
 	@Override
 	public double availableAmount() {
 		// 由于只有在开仓时才检查金额是否足够，因此可以忽略持仓浮盈的计算
-		return initBalance + accCloseProfit - accCommission;
+		return initBalance + accCloseProfit - accCommission - holdingMargin();
+	}
+	
+	// 持仓占用
+	private double holdingMargin() {
+		return posTable.values().stream().mapToDouble(ModulePosition::totalMargin).sum();
 	}
 	
 	public void onSubmitOrder(SubmitOrderReqField submitOrder) {
