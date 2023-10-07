@@ -14,7 +14,7 @@
     />
     <div class="module-rt-wrapper">
       <div class="side-panel">
-        <div class="description-wrapper">
+        <div class="side-panel_content">
           <el-descriptions class="margin-top" :column="`${isMobile ? 2 : 3}`">
             <template slot="title">
               模组用途
@@ -66,9 +66,6 @@
                     }[moduleRuntime.moduleState]
                   }}</el-tag>
                 </el-descriptions-item>
-                <el-descriptions-item label="初始金额">
-                  {{ moduleInfo.initBalance | formatter }}
-                </el-descriptions-item>
                 <el-descriptions-item label="当前余额">
                   {{
                     (moduleInfo.initBalance +
@@ -87,17 +84,20 @@
                       moduleInfo.accCommission +
                       holdingProfit) - moduleInfo.availableAmount | formatter }}
                 </el-descriptions-item>
+                <el-descriptions-item label="初始金额">
+                  {{ moduleInfo.initBalance | formatter }}
+                </el-descriptions-item>
                 <el-descriptions-item label="总盈亏">
                   {{ totalProfit | formatter }}
+                </el-descriptions-item>
+                <el-descriptions-item label="总平仓盈亏">
+                  {{ moduleInfo.accCloseProfit | formatter }}
                 </el-descriptions-item>
                 <el-descriptions-item label="总手续费">
                   {{ moduleInfo.accCommission | formatter }}
                 </el-descriptions-item>
                 <el-descriptions-item label="总持仓盈亏">
                   {{ holdingProfit | formatter }}
-                </el-descriptions-item>
-                <el-descriptions-item label="总平仓盈亏">
-                  {{ moduleInfo.accCloseProfit | formatter }}
                 </el-descriptions-item>
                 <el-descriptions-item label="交易笔数">
                   {{ dealRecords.length || 0 }}
@@ -106,14 +106,14 @@
                   {{ `${(winningRatio * 100).toFixed(1)} %` }}
                 </el-descriptions-item>
                 <el-descriptions-item label="盈亏比">{{ earningPerLoss }}</el-descriptions-item>
+                <el-descriptions-item label="年化收益率">
+                  {{ `${moduleInfo.annualizedRateOfReturn * 100 | formatter}%` }}
+                </el-descriptions-item>
                 <el-descriptions-item label="最大回撤">
                   {{ moduleInfo.maxDrawback | formatter }}
                 </el-descriptions-item>
                 <el-descriptions-item label="最大回撤比">
                   {{ `${Math.ceil(moduleInfo.maxDrawbackPercentage * 100 || 0)}%` }}
-                </el-descriptions-item>
-                <el-descriptions-item label="年化收益率">
-                  {{ `${moduleInfo.annualizedRateOfReturn * 100 | formatter}%` }}
                 </el-descriptions-item>
               </el-descriptions>
             </el-tab-pane>
@@ -763,13 +763,18 @@ export default {
 </script>
 
 <style scoped>
+.side-panel {
+    padding: 10px;
+    flex: 1;
+  }
+
 .table-wrapper {
-  height: calc((100vh - 326px) * 0.5);
+  flex: 1;
   min-height: 150px;
 }
 .performance-min {
   position: relative;
-  height: calc((100vh - 326px) * 0.5);
+  height: 280px;
 }
 @media screen and (max-height: 600px) {
   .performance-min {
@@ -814,9 +819,10 @@ export default {
 .el-dialog.is-fullscreen {
   overflow: hidden;
 }
-.description-wrapper {
-  padding: 10px;
-  height: calc(100% - 20px);
+.side-panel_content {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 /* 桌面端样式 */
