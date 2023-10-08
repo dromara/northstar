@@ -47,75 +47,77 @@
           </el-descriptions>
           <el-tabs v-model="infoTab" :stretch="true">
             <el-tab-pane name="moduleInfo" label="模组信息">
-              <el-descriptions class="margin-top" :column="`${isMobile ? 2 : 3}`">
-                <el-descriptions-item label="名称">{{ moduleRuntime.moduleName }}</el-descriptions-item>
-                <el-descriptions-item label="启停状态"
-                  ><el-tag size="small" :type="`${moduleRuntime.enabled ? 'success' : 'danger'}`">{{
-                    moduleRuntime.enabled ? '启用' : '停用'
-                  }}</el-tag></el-descriptions-item
-                >
-                <el-descriptions-item label="盘口状态">
-                  <el-tag size="small">{{
-                    {
-                      HOLDING_LONG: '持多单',
-                      HOLDING_SHORT: '持空单',
-                      EMPTY: '无持仓',
-                      EMPTY_HEDGE: '对冲锁仓',
-                      HOLDING_HEDGE: '对冲持仓',
-                      PENDING_ORDER: '等待成交'
-                    }[moduleRuntime.moduleState]
-                  }}</el-tag>
-                </el-descriptions-item>
-                <el-descriptions-item label="当前余额">
-                  {{
-                    (moduleInfo.initBalance +
-                      moduleInfo.accCloseProfit -
-                      moduleInfo.accCommission +
-                      holdingProfit)
-                      | formatter
-                  }}
-                </el-descriptions-item>
-                <el-descriptions-item label="可用金额">
-                  {{ moduleInfo.availableAmount | formatter }}
-                </el-descriptions-item>
-                <el-descriptions-item label="占用金额">
-                  {{ (moduleInfo.initBalance +
-                      moduleInfo.accCloseProfit -
-                      moduleInfo.accCommission +
-                      holdingProfit) - moduleInfo.availableAmount | formatter }}
-                </el-descriptions-item>
-                <el-descriptions-item label="初始金额">
-                  {{ moduleInfo.initBalance | formatter }}
-                </el-descriptions-item>
-                <el-descriptions-item label="总盈亏">
-                  {{ totalProfit | formatter }}
-                </el-descriptions-item>
-                <el-descriptions-item label="总平仓盈亏">
-                  {{ moduleInfo.accCloseProfit | formatter }}
-                </el-descriptions-item>
-                <el-descriptions-item label="总手续费">
-                  {{ moduleInfo.accCommission | formatter }}
-                </el-descriptions-item>
-                <el-descriptions-item label="总持仓盈亏">
-                  {{ holdingProfit | formatter }}
-                </el-descriptions-item>
-                <el-descriptions-item label="交易笔数">
-                  {{ dealRecords.length || 0 }}
-                </el-descriptions-item>
-                <el-descriptions-item label="胜率">
-                  {{ `${(winningRatio * 100).toFixed(1)} %` }}
-                </el-descriptions-item>
-                <el-descriptions-item label="盈亏比">{{ earningPerLoss }}</el-descriptions-item>
-                <el-descriptions-item label="年化收益率">
-                  {{ `${moduleInfo.annualizedRateOfReturn * 100 | formatter}%` }}
-                </el-descriptions-item>
-                <el-descriptions-item label="最大回撤">
-                  {{ moduleInfo.maxDrawback | formatter }}
-                </el-descriptions-item>
-                <el-descriptions-item label="最大回撤比">
-                  {{ `${Math.ceil(moduleInfo.maxDrawbackPercentage * 100 || 0)}%` }}
-                </el-descriptions-item>
-              </el-descriptions>
+              <div class="description-wrapper">
+                <el-descriptions class="margin-top" :column="`${isMobile ? 2 : 3}`">
+                  <el-descriptions-item label="名称">{{ moduleRuntime.moduleName }}</el-descriptions-item>
+                  <el-descriptions-item label="启停状态"
+                    ><el-tag size="small" :type="`${moduleRuntime.enabled ? 'success' : 'danger'}`">{{
+                      moduleRuntime.enabled ? '启用' : '停用'
+                    }}</el-tag></el-descriptions-item
+                  >
+                  <el-descriptions-item label="盘口状态">
+                    <el-tag size="small">{{
+                      {
+                        HOLDING_LONG: '持多单',
+                        HOLDING_SHORT: '持空单',
+                        EMPTY: '无持仓',
+                        EMPTY_HEDGE: '对冲锁仓',
+                        HOLDING_HEDGE: '对冲持仓',
+                        PENDING_ORDER: '等待成交'
+                      }[moduleRuntime.moduleState]
+                    }}</el-tag>
+                  </el-descriptions-item>
+                  <el-descriptions-item label="当前余额">
+                    {{
+                      (moduleInfo.initBalance +
+                        moduleInfo.accCloseProfit -
+                        moduleInfo.accCommission +
+                        holdingProfit)
+                        | formatter
+                    }}
+                  </el-descriptions-item>
+                  <el-descriptions-item label="可用金额">
+                    {{ moduleInfo.availableAmount | formatter }}
+                  </el-descriptions-item>
+                  <el-descriptions-item label="占用金额">
+                    {{ (moduleInfo.initBalance +
+                        moduleInfo.accCloseProfit -
+                        moduleInfo.accCommission +
+                        holdingProfit) - moduleInfo.availableAmount | formatter }}
+                  </el-descriptions-item>
+                  <el-descriptions-item label="初始金额">
+                    {{ moduleInfo.initBalance | formatter }}
+                  </el-descriptions-item>
+                  <el-descriptions-item label="总盈亏">
+                    {{ totalProfit | formatter }}
+                  </el-descriptions-item>
+                  <el-descriptions-item label="总平仓盈亏">
+                    {{ moduleInfo.accCloseProfit | formatter }}
+                  </el-descriptions-item>
+                  <el-descriptions-item label="总手续费">
+                    {{ moduleInfo.accCommission | formatter }}
+                  </el-descriptions-item>
+                  <el-descriptions-item label="总持仓盈亏">
+                    {{ holdingProfit | formatter }}
+                  </el-descriptions-item>
+                  <el-descriptions-item label="交易笔数">
+                    {{ dealRecords.length || 0 }}
+                  </el-descriptions-item>
+                  <el-descriptions-item label="胜率">
+                    {{ `${(winningRatio * 100).toFixed(1)} %` }}
+                  </el-descriptions-item>
+                  <el-descriptions-item label="盈亏比">{{ earningPerLoss }}</el-descriptions-item>
+                  <el-descriptions-item label="年化收益率">
+                    {{ `${moduleInfo.annualizedRateOfReturn * 100 | formatter}%` }}
+                  </el-descriptions-item>
+                  <el-descriptions-item label="最大回撤">
+                    {{ moduleInfo.maxDrawback | formatter }}
+                  </el-descriptions-item>
+                  <el-descriptions-item label="最大回撤比">
+                    {{ `${Math.ceil(moduleInfo.maxDrawbackPercentage * 100 || 0)}%` }}
+                  </el-descriptions-item>
+                </el-descriptions>
+              </div>
             </el-tab-pane>
             <el-tab-pane name="accountInfo" label="账户信息">
               <el-descriptions v-for="(item,i) in accountInfo" :key="i" column="2">
@@ -131,11 +133,26 @@
               </el-descriptions>
             </el-tab-pane>
             <el-tab-pane name="strategyInfo" label="策略信息">
-              <el-descriptions class="margin-top" :column="`${isMobile ? 1 : 2}`">
-                <el-descriptions-item v-for="(item, i) in strategyInfo" :label="item.name" :key="i">
-                  {{ item.value }}
-                </el-descriptions-item>
-              </el-descriptions>
+              <div class="description-wrapper">
+                <el-descriptions class="margin-top" :column="`${isMobile ? 1 : 2}`">
+                  <el-descriptions-item v-for="(item, i) in strategyInfo" :label="item.name" :key="i">
+                    <el-popover v-if="(item.value instanceof Array)"
+                      placement="right"
+                      trigger="click">
+                      <el-table :data="item.value" >
+                        <el-table-column width="70" property="name" label="描述">
+                          <template slot-scope="row">
+                            {{ row.name || row.$index + 1 }}
+                          </template>
+                        </el-table-column>
+                        <el-table-column width="80" property="value" label="数值"></el-table-column>
+                      </el-table>
+                      <el-button slot="reference" :disabled="!item.value.length">{{ item.value.length ? '明细' : '无数据'}}</el-button>
+                    </el-popover>
+                    <span v-else>{{ item.value }}</span>
+                  </el-descriptions-item>
+                </el-descriptions>
+              </div>
             </el-tab-pane>
           </el-tabs>
           
@@ -771,6 +788,10 @@ export default {
 .table-wrapper {
   flex: 1;
   min-height: 150px;
+}
+.description-wrapper {
+  max-height: 250px;
+  overflow: auto;
 }
 .performance-min {
   position: relative;
