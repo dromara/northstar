@@ -13,7 +13,6 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Queue;
@@ -448,16 +447,17 @@ public class ModuleContext implements IModuleContext{
 			
 			indicatorValBufQMap.entrySet().forEach(e -> {
 				Indicator in = e.getKey();
+				String symbolName = in.getConfiguration().contract().getName();
 				String unifiedSymbol = in.getConfiguration().contract().getUnifiedSymbol();
 				Configuration cfg = in.getConfiguration();
 				String indicatorName = String.format("%s_%d%s", cfg.indicatorName(), cfg.numOfUnits(), cfg.period().symbol());
-				if(!indicatorMap.containsKey(unifiedSymbol)) {
-					indicatorMap.put(unifiedSymbol, new ArrayList<>());
+				if(!indicatorMap.containsKey(symbolName)) {
+					indicatorMap.put(symbolName, new ArrayList<>());
 				}
 				if(cfg.visible()) {
-					indicatorMap.get(unifiedSymbol).add(indicatorName);
+					indicatorMap.get(symbolName).add(indicatorName);
 				}
-				Collections.sort(indicatorMap.get(unifiedSymbol));
+				Collections.sort(indicatorMap.get(symbolName));
 				
 				e.getValue().stream().forEach(tv -> {
 					if(!symbolTimeObject.containsKey(unifiedSymbol)
@@ -468,7 +468,7 @@ public class ModuleContext implements IModuleContext{
 				});
 			});
 			Map<String, JSONArray> dataMap = barBufQMap.entrySet().stream().collect(Collectors.toMap(
-					Entry::getKey, 
+					e -> getContract(e.getKey()).getName(), 
 					e -> {
 						if(!symbolTimeObject.containsKey(e.getKey())) 							
 							return new JSONArray();

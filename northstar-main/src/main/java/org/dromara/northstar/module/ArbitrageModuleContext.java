@@ -2,11 +2,14 @@ package org.dromara.northstar.module;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.common.constant.SignalOperation;
@@ -26,6 +29,9 @@ import org.dromara.northstar.strategy.model.TradeIntent;
 import org.dromara.northstar.support.log.ModuleLoggerFactory;
 import org.dromara.northstar.support.utils.bar.BarMergerRegistry;
 
+import com.alibaba.fastjson2.JSONArray;
+import com.alibaba.fastjson2.JSONObject;
+
 import cn.hutool.core.lang.Assert;
 import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
@@ -35,6 +41,7 @@ import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreEnum.OrderPriceTypeEnum;
 import xyz.redtorch.pb.CoreEnum.TimeConditionEnum;
 import xyz.redtorch.pb.CoreEnum.VolumeConditionEnum;
+import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.CancelOrderReqField;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.PositionField;
@@ -161,5 +168,43 @@ public class ArbitrageModuleContext extends ModuleContext implements IModuleCont
 				.build();
 		module.getAccount(c).cancelOrder(cancelReq);
 	}
+
+	@Override
+	public ModuleRuntimeDescription getRuntimeDescription(boolean fullDescription) {
+		ModuleRuntimeDescription mrd = super.getRuntimeDescription(fullDescription);
+		if(fullDescription) {
+			if(contractMap.size() == 2) {
+				Iterator<ContractField> it = contractMap.values().iterator();
+				ContractField c1 = it.next();
+				ContractField c2 = it.next();
+				ContractField nearMonth = Long.valueOf(c1.getLastTradeDateOrContractMonth()) < Long.valueOf(c2.getLastTradeDateOrContractMonth()) ? c1 : c2;
+				ContractField farMonth = c1 == nearMonth ? c2 : c1;
+				String combName = String.format("%s-%s", nearMonth.getName(), farMonth.getName());
+				Map<Long, BarField> timeBarMap = barBufQMap.get(nearMonth.getUnifiedSymbol())
+						.stream()
+						.collect(Collectors.toMap(BarField::getActionTimestamp, bar -> bar));
+				JSONArray combBarArr = new JSONArray();
+				barBufQMap.get(farMonth.getUnifiedSymbol()).forEach(bar -> {
+					BarField nearBar = timeBarMap.get(bar.getActionTimestamp());
+					if(Objects.nonNull(nearBar)) {
+						combBarArr.add(compute(nearBar, bar));
+					}
+				});
+				mrd.getDataMap().put(combName, combBarArr);
+			} else {
+				getLogger().warn("多于两个合约时，无法进行价差处理");
+			}
+		}
+		return mrd;
+	}
 	
+	private JSONObject compute(BarField bar1, BarField bar2) {
+		JSONObject json = new JSONObject();
+		json.put("open", (bar1.getOpenPrice() - bar2.getOpenPrice()) / bar2.getOpenPrice() * 100);
+		json.put("low", (bar1.getLowPrice() - bar2.getLowPrice()) / bar2.getLowPrice() * 100);
+		json.put("high", (bar1.getHighPrice() - bar2.getHighPrice()) / bar2.getHighPrice() * 100);
+		json.put("close", (bar1.getClosePrice() - bar2.getClosePrice()) / bar2.getClosePrice() * 100);
+		json.put("timestamp", bar1.getActionTimestamp());
+		return json;
+	}
 }

@@ -264,8 +264,8 @@
             <el-option
               v-for="(item, i) in bindedContracts"
               :key="i"
-              :label="item.name"
-              :value="item.unifiedSymbol"
+              :label="item"
+              :value="item"
             ></el-option>
           </el-select>
           <el-select
@@ -411,7 +411,6 @@ export default {
       moduleTab: 'holding',
       dealRecords: [],
       barDataMap: {},
-      bindedContracts: [],
       chart: null,
       loading: false,
       moduleRuntime: '',
@@ -438,11 +437,6 @@ export default {
       if (val) {
         this.isMobile = this.listener.isMobile()
         this.moduleRuntime = this.moduleRuntimeSrc
-        this.bindedContracts = []
-        this.module.moduleAccountSettingsDescription.forEach((account) => {
-          const contracts = account.bindedContracts
-          this.bindedContracts = this.bindedContracts.concat(contracts)
-        })
         if(this.isMobile){
           this.loadDealRecord()
           return;
@@ -500,7 +494,7 @@ export default {
     }
   },
   computed: {
-    symbolOptions() {
+    bindedContracts() {
       return Object.keys(this.barDataMap) || []
     },
     strategyInfo(){
