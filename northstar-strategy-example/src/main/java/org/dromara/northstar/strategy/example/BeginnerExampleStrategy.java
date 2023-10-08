@@ -7,8 +7,11 @@ import org.dromara.northstar.common.constant.FieldType;
 import org.dromara.northstar.common.constant.ModuleState;
 import org.dromara.northstar.common.constant.SignalOperation;
 import org.dromara.northstar.common.model.DynamicParams;
-import org.dromara.northstar.common.model.ItemDescription;
+import org.dromara.northstar.common.model.ListValue;
+import org.dromara.northstar.common.model.NumberValue;
 import org.dromara.northstar.common.model.Setting;
+import org.dromara.northstar.common.model.StringValue;
+import org.dromara.northstar.common.model.Value;
 import org.dromara.northstar.strategy.IModuleContext;
 import org.dromara.northstar.strategy.IModuleStrategyContext;
 import org.dromara.northstar.strategy.StrategicComponent;
@@ -159,15 +162,13 @@ public class BeginnerExampleStrategy implements TradeStrategy{
 	}
 
 	@Override
-	public List<ItemDescription> strategyInfos() {
+	public List<Value> strategyInfos() {
 		// 用户可以通过该方法，把策略内部非指标化的计算值暴露给监控台
-		JSONObject json = new JSONObject();
-		json.put("key1", "value");
-		json.put("key2", "value");
+		// 比如可以监控放量的价位都都出现在哪些价位等，用线性指标无法很好表示的离散值
 		return List.of(
-				ItemDescription.builder().name("示例数值").value(10000.998877).order(1).build(),
-				ItemDescription.builder().name("示例文本").value("提示信息").order(2).build(),
-				ItemDescription.builder().name("示例对象").value(json).order(3).build()
+				new NumberValue("示例数值", 1000.889977),
+				new StringValue("示例文本", "样例数据"),
+				new ListValue("示例列表", List.of(new NumberValue("", 123), new NumberValue("", 456)))
 				);
 	}
 	

@@ -58,5 +58,5 @@ public class ModuleRuntimeDescription {
 	/**
 	 * 策略信息描述
 	 */
-	private List<ItemDescription> strategyInfos;
+	private List<Value> strategyInfos;
 }

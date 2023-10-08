@@ -9,12 +9,10 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ItemDescription {
-
+public class NumberValue implements Value{
+	
 	private String name;
-	
-	private Object value;
-	
-	private int order;
+
+	private double value;
 	
 }
