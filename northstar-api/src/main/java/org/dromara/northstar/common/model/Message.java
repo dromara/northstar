@@ -18,24 +18,21 @@ public class Message {
 	
 	private String content;
 	
-	private String[] receivers;
-
-	public Message(String title, String content, String[] receivers) {
+	public Message(String title, String content) {
 		this.title = title;
 		this.content = content;
-		this.receivers = receivers;
 		dateTime = LocalDateTime.now();
 	}
 	
-	public Message(NoticeField notice, String[] receivers) {
-		this(String.format("Northstar消息通知 - [%s]", notice.getStatus().toString()), notice.getContent(), receivers);
+	public Message(NoticeField notice) {
+		this(String.format("Northstar消息通知 - [%s]", notice.getStatus().toString()), notice.getContent());
 	}
 	
-	public Message(OrderField order, String[] receivers) {
-		this(String.format("Northstar下单通知 - [%s]", order.getGatewayId()), MessagePrinter.print(order), receivers);
+	public Message(OrderField order) {
+		this(String.format("Northstar下单通知 - [%s]", order.getGatewayId()), MessagePrinter.print(order));
 	}
 	
-	public Message(TradeField trade, String[] receivers) {
-		this(String.format("Northstar成交通知 - [%s]", trade.getGatewayId()), MessagePrinter.print(trade), receivers);
+	public Message(TradeField trade) {
+		this(String.format("Northstar成交通知 - [%s]", trade.getGatewayId()), MessagePrinter.print(trade));
 	}
 }
