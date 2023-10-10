@@ -1,7 +1,5 @@
 package org.dromara.northstar.event;
 
-import java.util.Objects;
-
 import org.dromara.northstar.common.event.FastEventEngine;
 import org.dromara.northstar.common.event.FastEventEngine.NorthstarEventDispatcher;
 import org.dromara.northstar.common.event.NorthstarEvent;
@@ -19,7 +17,7 @@ public class InternalDispatcher implements NorthstarEventDispatcher {
 	private AccountHandler accountHandler;
 	@Autowired
 	private ConnectionHandler connHandler;
-	@Autowired(required = false)
+	@Autowired
 	private EventNotificationHandler notificationHandler;
 	@Autowired
 	private MarketDataHandler mdHandler;
@@ -42,9 +40,7 @@ public class InternalDispatcher implements NorthstarEventDispatcher {
 		connHandler.onEvent(event);
 		mdHandler.onEvent(event);
 		illOrderHandler.onEvent(event);
-		if(Objects.nonNull(notificationHandler)) {			
-			notificationHandler.onEvent(event);
-		}
+		notificationHandler.onEvent(event);
 	}
 
 }

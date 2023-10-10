@@ -42,19 +42,22 @@ public class AlertingController {
 	@Autowired
 	private IMessageSenderRepository repo;
 	
+	@Autowired
+	private Set<NorthstarEventType> subEvents;
+	
 	@GetMapping("/events")
 	public ResultBean<List<NorthstarEventType>> subEvents(){
-		return new ResultBean<>(repo.getSubEvents());
+		return new ResultBean<>(subEvents.stream().toList());
 	}
 	
 	@PostMapping("/events")
 	public ResultBean<Boolean> saveSubEvents(@RequestBody List<NorthstarEventType> events){
-		Set<NorthstarEventType> oldEvents = new HashSet<>(repo.getSubEvents());
 		Set<NorthstarEventType> newEvents = new HashSet<>(events);
-		if(!newEvents.equals(oldEvents)) {
-			for(int i=0; i<3; i++)	// 重要事情说三遍
-			{ log.warn("【注意】系统订阅的消息事件有变更，需要重启才能生效"); }
+		if(!newEvents.equals(subEvents)) {
 			repo.save(events);
+			subEvents.clear();
+			subEvents.addAll(events);
+			log.info("全局订阅事件变更：{}", events);
 		}
 		return new ResultBean<>(true);
 	}

@@ -1,7 +1,12 @@
 package org.dromara.northstar.config;
 
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.dromara.northstar.account.AccountManager;
 import org.dromara.northstar.account.GatewayManager;
+import org.dromara.northstar.common.event.NorthstarEventType;
 import org.dromara.northstar.data.IGatewayRepository;
 import org.dromara.northstar.data.IMarketDataRepository;
 import org.dromara.northstar.data.IMessageSenderRepository;
@@ -16,7 +21,6 @@ import org.dromara.northstar.event.SimMarketHandler;
 import org.dromara.northstar.gateway.IContractManager;
 import org.dromara.northstar.module.ModuleManager;
 import org.dromara.northstar.strategy.IMessageSender;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -65,10 +69,9 @@ class InternalEventHandlerConfig {
 	}
 	
 	@Bean
-	@ConditionalOnBean(IMessageSender.class)
-	EventNotificationHandler eventNotificationHandler(IMessageSender sender, IMessageSenderRepository repo) {
+	EventNotificationHandler eventNotificationHandler(IMessageSender sender, Set<NorthstarEventType> subEvents) {
 		log.debug("注册：EventNotificationHandler");
-		return new EventNotificationHandler(sender, repo.getSubEvents());
+		return new EventNotificationHandler(sender, subEvents);
 	}
 	
 	@Bean
@@ -77,4 +80,12 @@ class InternalEventHandlerConfig {
 		return new IllegalOrderHandler();
 	}
 	
+	@Bean
+	Set<NorthstarEventType> notificationEvents(IMessageSenderRepository repo){
+		List<NorthstarEventType> records = repo.getSubEvents();
+		if(repo.getSubEvents() != null) {
+			return records.stream().collect(Collectors.toSet());
+		}
+		return Set.of(NorthstarEventType.LOGGED_IN, NorthstarEventType.LOGGED_OUT, NorthstarEventType.ORDER, NorthstarEventType.TRADE, NorthstarEventType.NOTICE);
+	}
 }

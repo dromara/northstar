@@ -1,7 +1,6 @@
 package org.dromara.northstar.data.jdbc;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 import org.dromara.northstar.common.MessageSenderSettings;
@@ -63,13 +62,8 @@ public class MessageSenderSettingsRepoAdapter implements IMessageSenderRepositor
 	@Override
 	public List<NorthstarEventType> getSubEvents() {
 		Optional<SubscriptionEventsDO> sub = notificationRepo.findById(SubscriptionEventsDO.FIXED_ID);
-		if(sub.isEmpty() || Objects.isNull(sub.get().getSubEvents())) {
-			return List.of(
-					NorthstarEventType.LOGGED_IN, 
-					NorthstarEventType.LOGGED_OUT,
-					NorthstarEventType.NOTICE,
-					NorthstarEventType.ORDER,
-					NorthstarEventType.TRADE);	// 默认订阅事件
+		if(sub.isEmpty()) {
+			return null;
 		}
 		String listStr = sub.get().getSubEvents();
 		return JSON.parseObject(listStr, new TypeReference<List<NorthstarEventType>>() {});

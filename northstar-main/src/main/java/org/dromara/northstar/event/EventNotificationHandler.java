@@ -1,7 +1,6 @@
 package org.dromara.northstar.event;
 
-import java.util.HashSet;
-import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import org.dromara.northstar.common.event.AbstractEventHandler;
@@ -20,11 +19,11 @@ public class EventNotificationHandler extends AbstractEventHandler implements Ge
 
 	private IMessageSender sender;
 	
-	private Set<NorthstarEventType> subEvents = new HashSet<>();
+	private Set<NorthstarEventType> subEvents;
 	
-	public EventNotificationHandler(IMessageSender sender, List<NorthstarEventType> subEvents) {
+	public EventNotificationHandler(IMessageSender sender, Set<NorthstarEventType> subEvents) {
 		this.sender = sender;
-		this.subEvents.addAll(subEvents);
+		this.subEvents = subEvents;
 	}
 	
 	@Override
@@ -34,7 +33,8 @@ public class EventNotificationHandler extends AbstractEventHandler implements Ge
 
 	@Override
 	protected void doHandle(NorthstarEvent e) {
-		if(e.getData() instanceof TradeField trade && Math.abs(System.currentTimeMillis() - trade.getTradeTimestamp()) > ONE_MIN
+		if(Objects.isNull(sender) 
+				|| e.getData() instanceof TradeField trade && Math.abs(System.currentTimeMillis() - trade.getTradeTimestamp()) > ONE_MIN
 				|| e.getData() instanceof OrderField order && !OrderUtils.isValidOrder(order)) {
 			return;
 		}
