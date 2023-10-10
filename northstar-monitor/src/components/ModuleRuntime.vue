@@ -435,6 +435,8 @@ export default {
   watch: {
     visible: function (val) {
       if (val) {
+        this.isManualUpdate = localStorage.getItem(`autoUpdate_${this.module.moduleName}`) === 'true'
+        this.unifiedSymbolOfChart = localStorage.getItem(`chartSymbol_${this.module.moduleName}`)
         this.isMobile = this.listener.isMobile()
         this.moduleRuntime = this.moduleRuntimeSrc
         if(this.isMobile){
@@ -465,6 +467,9 @@ export default {
         }
         this.timer = setTimeout(autoUpdate, 5000)
       }
+      if(this.visible){
+        localStorage.setItem(`autoUpdate_${this.module.moduleName}`, val)
+      }
     },
     moduleTab: function (val) {
       if (val === 'dealRecord') {
@@ -481,6 +486,9 @@ export default {
         this.updateChart()
         this.loadIndicators()
         this.holdingVisibleOnChart = false
+      }
+      if(this.visible){
+        localStorage.setItem(`chartSymbol_${this.module.moduleName}`, val)
       }
     },
     holdingVisibleOnChart: function (val) {
@@ -666,7 +674,7 @@ export default {
       setTimeout(this.refresh, 500)
     },
     updateChart() {
-      if (this.unifiedSymbolOfChart) {
+      if (this.unifiedSymbolOfChart && this.chart) {
         this.chart.clearData()
         this.chart.applyNewData(this.barDataMap[this.unifiedSymbolOfChart])
       }
@@ -734,7 +742,7 @@ export default {
     },
     loadIndicators() {
       const dataStr =
-        localStorage.getItem(`module_${this.module.moduleName}_${this.unifiedSymbolOfChart}`) ||
+        localStorage.getItem(`indicatorMap_${this.module.moduleName}_${this.unifiedSymbolOfChart}`) ||
         '{}'
       this.indicatorMap = JSON.parse(dataStr)
       for (let i = 1; i < 6; i++) {
@@ -754,20 +762,20 @@ export default {
     },
     saveIndicators() {
       localStorage.setItem(
-        `module_${this.module.moduleName}_${this.unifiedSymbolOfChart}`,
+        `indicatorMap_${this.module.moduleName}_${this.unifiedSymbolOfChart}`,
         JSON.stringify(this.indicatorMap)
       )
     },
     close() {
       this.saveIndicators()
       clearTimeout(this.timer)
-      Object.assign(this.$data, this.$options.data())
       try{
         dispose('module-k-line')
       } catch (e){
         console.error(e)
       }
       this.$emit('update:visible', false)
+      Object.assign(this.$data, this.$options.data())
     }
   }
 }
