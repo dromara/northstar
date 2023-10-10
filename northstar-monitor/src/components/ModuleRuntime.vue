@@ -434,9 +434,12 @@ export default {
   },
   watch: {
     visible: function (val) {
+      if(!localStorage.getItem(`autoUpdate_${this.module.moduleName}`)){
+        localStorage.setItem(`autoUpdate_${this.module.moduleName}`, true)
+      }
       if (val) {
         this.isManualUpdate = localStorage.getItem(`autoUpdate_${this.module.moduleName}`) === 'true'
-        this.unifiedSymbolOfChart = localStorage.getItem(`chartSymbol_${this.module.moduleName}`)
+        this.unifiedSymbolOfChart = localStorage.getItem(`chartSymbol_${this.module.moduleName}`) || ''
         this.isMobile = this.listener.isMobile()
         this.moduleRuntime = this.moduleRuntimeSrc
         if(this.isMobile){
@@ -775,7 +778,9 @@ export default {
         console.error(e)
       }
       this.$emit('update:visible', false)
-      Object.assign(this.$data, this.$options.data())
+      setTimeout(() => {
+        Object.assign(this.$data, this.$options.data())
+      }, 500)
     }
   }
 }
