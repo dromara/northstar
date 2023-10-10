@@ -1,4 +1,4 @@
-package org.dromara.northstar.support.utils;
+package org.dromara.northstar.common.utils;
 
 import java.net.Inet4Address;
 import java.net.InetAddress;

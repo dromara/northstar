@@ -13,7 +13,6 @@ import org.dromara.northstar.data.jdbc.MarketDataRepository;
 import org.dromara.northstar.gateway.IMarketCenter;
 import org.dromara.northstar.strategy.IMessageSender;
 import org.dromara.northstar.support.utils.ExceptionLogChecker;
-import org.dromara.northstar.support.utils.InetAddressUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -73,7 +72,6 @@ public class AppScheduleTask {
 		if(!errorLines.isEmpty()) {
 			StringBuilder sb = new StringBuilder();
 			errorLines.forEach(line -> sb.append(line + "\n"));
-			sb.append(String.format("%n%n警报来源：%s", InetAddressUtils.getHostname()));
 			msgSender.send(String.format("[程序异常日志警报] %d-%d时，%d条异常记录", 
 					startTime.getHour(), endTime.getHour(), errorLines.size()), sb.toString());
 		}

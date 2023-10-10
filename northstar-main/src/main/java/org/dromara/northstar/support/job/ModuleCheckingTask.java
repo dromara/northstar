@@ -24,7 +24,6 @@ import org.dromara.northstar.strategy.IAccount;
 import org.dromara.northstar.strategy.IMessageSender;
 import org.dromara.northstar.strategy.IModule;
 import org.dromara.northstar.support.utils.ExceptionLogChecker;
-import org.dromara.northstar.support.utils.InetAddressUtils;
 import org.dromara.northstar.support.utils.PositionChecker;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -202,8 +201,7 @@ public class ModuleCheckingTask implements InitializingBean {
 		}
 		String combine = title + "@" + msg;
 		if(!warningCacheSet.contains(combine)) {
-			String realMsg = String.format("%s%n%n警报来源：%s%n", msg, InetAddressUtils.getHostname());
-			msgSender.send(title, realMsg);
+			msgSender.send(title, msg);
 			warningCacheSet.add(combine);
 		}
 	}
