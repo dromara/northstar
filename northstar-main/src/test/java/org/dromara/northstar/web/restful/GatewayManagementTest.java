@@ -16,6 +16,7 @@ import org.dromara.northstar.common.model.NsUser;
 import org.dromara.northstar.data.jdbc.GatewayDescriptionRepository;
 import org.dromara.northstar.event.BroadcastHandler;
 import org.dromara.northstar.gateway.playback.PlaybackGatewaySettings;
+import org.dromara.northstar.strategy.IMessageSender;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -54,6 +55,9 @@ class GatewayManagementTest {
 	
 	@MockBean
 	private SocketIOServer socketServer;
+	
+	@MockBean
+	private IMessageSender sender;
 	
 	@MockBean
 	private BroadcastHandler bcHandler;

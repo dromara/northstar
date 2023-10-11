@@ -16,6 +16,7 @@ import org.dromara.northstar.data.IGatewayRepository;
 import org.dromara.northstar.event.BroadcastHandler;
 import org.dromara.northstar.gateway.Contract;
 import org.dromara.northstar.gateway.IMarketCenter;
+import org.dromara.northstar.strategy.IMessageSender;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -48,6 +49,9 @@ class GatewayDataControllerTest {
 	
 	@MockBean
 	private IMarketCenter contractMgr;
+	
+	@MockBean
+	private IMessageSender sender;
 	
 	@MockBean
 	private IGatewayRepository gatewayRepo;
