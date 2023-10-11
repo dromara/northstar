@@ -140,12 +140,12 @@
                       placement="right"
                       trigger="click">
                       <el-table :data="item.value" >
-                        <el-table-column width="70" property="name" label="描述">
-                          <template slot-scope="row">
-                            {{ row.name || row.$index + 1 }}
+                        <el-table-column width="100" property="name" label="描述">
+                          <template slot-scope="scope">
+                            {{ scope.row.name || scope.$index + 1 }}
                           </template>
                         </el-table-column>
-                        <el-table-column width="80" property="value" label="数值"></el-table-column>
+                        <el-table-column width="100" property="value" label="数值"></el-table-column>
                       </el-table>
                       <el-button slot="reference" :disabled="!item.value.length">{{ item.value.length ? '明细' : '无数据'}}</el-button>
                     </el-popover>
