@@ -1,15 +1,12 @@
 package org.dromara.northstar.common.utils;
 
-import java.io.IOException;
+import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
-import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
-import java.util.List;
 
-import org.apache.commons.io.IOUtils;
 import org.springframework.core.env.Environment;
 
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +16,38 @@ public class LocalEnvUtils {
 
 	private LocalEnvUtils() {
 	}
+	
+	public static String getInet4Address() throws SocketException {
+		log.info("正在自动获取IP");
+		Enumeration<NetworkInterface> allNetworkInterfaces = NetworkInterface.getNetworkInterfaces();
+		while(allNetworkInterfaces.hasMoreElements()) {
+			NetworkInterface netIntf = allNetworkInterfaces.nextElement();
+			if(netIntf.isLoopback()||netIntf.isVirtual()||!netIntf.isUp()||netIntf.getDisplayName().contains("VM")){
+                continue;
+            }
+			Enumeration<InetAddress> inetAddrs = netIntf.getInetAddresses();
+			while(inetAddrs.hasMoreElements()) {
+				InetAddress inetAddr = inetAddrs.nextElement();
+				if(inetAddr instanceof Inet4Address inet4) {
+					return inet4.getHostAddress();
+				}
+			}
+		}
+		throw new SocketException("没有找到IPv4的IP信息");
+	}
+	
+	public static String getHostname() {
+		String hostname = "Unknown";
+		try {
+            // 获取本地主机的 InetAddress 实例
+            InetAddress localHost = InetAddress.getLocalHost();
+            // 获取主机名
+            hostname = localHost.getHostName();
+        } catch (UnknownHostException e) {
+            log.error("无法获取主机名: " + e.getMessage());
+        }
+		return hostname;
+	}
 
 	public static String getPCName() {
 		try {
@@ -26,6 +55,18 @@ public class LocalEnvUtils {
 		} catch (UnknownHostException e) {
 			return "unknowHost";
 		}
+	}
+	
+	private static byte[] getMACAddressBytes() throws SocketException {
+		Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
+		while (networkInterfaces.hasMoreElements()) {
+		    NetworkInterface ni = networkInterfaces.nextElement();
+		    byte[] hardwareAddress = ni.getHardwareAddress();
+		    if (hardwareAddress != null) {
+		        return hardwareAddress;
+		    }
+		}
+		throw new IllegalStateException("没有查到MAC信息");
 	}
 	
 	public static String getMACAddress() {
@@ -38,46 +79,12 @@ public class LocalEnvUtils {
 	        }
 	        macAddr = String.join("-", hexadecimalFormat);
 		} catch (Exception e) {
-			log.warn("无法通过JAVA接口获取MAC地址", e);
+			log.warn("", e);
 		}
 		
-		if(System.getProperties().getProperty("os.name").toUpperCase().indexOf("LINUX") != -1) {
-			try {
-				macAddr = getMACStringFromLinux();
-			} catch (IOException e) {
-				log.warn("无法通过Linux命令行获取MAC地址", e);
-			}
-		}
-		
+		log.info("当前系统MAC地址：{}", macAddr);
 		return macAddr;
 	}
-	
-	private static String getMACStringFromLinux() throws IOException {
-		Process process = Runtime.getRuntime().exec("ifconfig | grep ether");
-		List<String> lines = IOUtils.readLines(process.getInputStream(), StandardCharsets.UTF_8);
-		if(lines.isEmpty()) {
-			return "";
-		}
-		return lines.get(0).trim().split("\\s+")[1];
-	}
-	
-	private static byte[] getMACAddressBytes() throws SocketException, UnknownHostException {
-		byte[] hardwareAddress = NetworkInterface.getByInetAddress(InetAddress.getLocalHost()).getHardwareAddress();
-		if(hardwareAddress != null) {
-			return hardwareAddress; 
-		}
-		
-		Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
-		while (networkInterfaces.hasMoreElements()) {
-		    NetworkInterface ni = networkInterfaces.nextElement();
-		    hardwareAddress = ni.getHardwareAddress();
-		    if (hardwareAddress != null) {
-		        return hardwareAddress;
-		    }
-		}
-		throw new IllegalStateException("没有查到MAC信息");
-	}
-	
 	
 	private static Environment env;
 	

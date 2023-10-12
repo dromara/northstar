@@ -21,6 +21,7 @@ import org.dromara.northstar.event.SimMarketHandler;
 import org.dromara.northstar.gateway.IContractManager;
 import org.dromara.northstar.module.ModuleManager;
 import org.dromara.northstar.strategy.IMessageSender;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -69,7 +70,7 @@ class InternalEventHandlerConfig {
 	}
 	
 	@Bean
-	EventNotificationHandler eventNotificationHandler(IMessageSender sender, Set<NorthstarEventType> subEvents) {
+	EventNotificationHandler eventNotificationHandler(@Autowired(required = false) IMessageSender sender, Set<NorthstarEventType> subEvents) {
 		log.debug("注册：EventNotificationHandler");
 		return new EventNotificationHandler(sender, subEvents);
 	}
