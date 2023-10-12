@@ -4,6 +4,7 @@ import java.time.LocalTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -64,7 +65,9 @@ public class AlertingController {
 	
 	@GetMapping("/settings")
 	public ResultBean<Map<String, ComponentField>> alertingSettingsMeta(){
-		Assert.notNull(meta, COMMON_ERR);
+		if(Objects.isNull(meta)) {
+			return new ResultBean<>(Map.of());
+		}
 		DynamicParams params = (DynamicParams) meta;
 		return new ResultBean<>(params.getMetaInfo());
 	}
