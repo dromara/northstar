@@ -1,7 +1,6 @@
 package org.dromara.northstar.module;
 
 import java.time.LocalTime;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -15,13 +14,11 @@ import org.dromara.northstar.common.model.ModuleRuntimeDescription;
 import org.dromara.northstar.common.utils.OrderUtils;
 import org.dromara.northstar.data.IModuleRepository;
 import org.dromara.northstar.gateway.IContractManager;
-import org.dromara.northstar.strategy.IMessageSender;
 import org.dromara.northstar.strategy.IModuleContext;
 import org.dromara.northstar.strategy.TradeStrategy;
 import org.dromara.northstar.strategy.constant.PriceType;
 import org.dromara.northstar.strategy.model.TradeIntent;
 import org.dromara.northstar.support.log.ModuleLoggerFactory;
-import org.dromara.northstar.support.notification.IMessageSenderManager;
 import org.dromara.northstar.support.utils.bar.BarMergerRegistry;
 
 import cn.hutool.core.lang.Assert;
@@ -45,36 +42,10 @@ public class PlaybackModuleContext extends ModuleContext implements IModuleConte
 	
 	public static final String PLAYBACK_GATEWAY = "回测账户";
 	
-	private static final IMessageSender sender = new IMessageSender() {
-		
-		@Override
-		public void send(String receiver, String content) {/* 占位不实现 */}
-		
-		@Override
-		public void send(String content) {/* 占位不实现 */}
-		
-		@Override
-		public void addReceiver(String receiver) {/* 占位不实现 */}
-	};
-	
-	private static final IMessageSenderManager mockSenderMgr = new IMessageSenderManager() {
-
-		@Override
-		public List<String> getSubscribers() {
-			return Collections.emptyList();
-		}
-
-		@Override
-		public IMessageSender getSender(boolean inheritSubscribers) {
-			return sender;
-		}
-		
-	};
-	
 	public PlaybackModuleContext(TradeStrategy tradeStrategy, ModuleDescription moduleDescription,
 			ModuleRuntimeDescription moduleRtDescription, IContractManager contractMgr, IModuleRepository moduleRepo,
 			ModuleLoggerFactory loggerFactory, BarMergerRegistry barMergerRegistry) {
-		super(tradeStrategy, moduleDescription, moduleRtDescription, contractMgr, new MockModuleRepository(moduleRepo), loggerFactory, mockSenderMgr, barMergerRegistry);
+		super(tradeStrategy, moduleDescription, moduleRtDescription, contractMgr, new MockModuleRepository(moduleRepo), loggerFactory, barMergerRegistry);
 	}
 
 	@Override

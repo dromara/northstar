@@ -13,7 +13,6 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Queue;
@@ -35,6 +34,7 @@ import org.dromara.northstar.common.constant.ModuleState;
 import org.dromara.northstar.common.constant.SignalOperation;
 import org.dromara.northstar.common.exception.InsufficientException;
 import org.dromara.northstar.common.exception.NoSuchElementException;
+import org.dromara.northstar.common.model.AccountRuntimeDescription;
 import org.dromara.northstar.common.model.ContractSimpleInfo;
 import org.dromara.northstar.common.model.Identifier;
 import org.dromara.northstar.common.model.ModuleAccountRuntimeDescription;
@@ -55,7 +55,6 @@ import org.dromara.northstar.indicator.IndicatorValueUpdateHelper;
 import org.dromara.northstar.indicator.constant.PeriodUnit;
 import org.dromara.northstar.indicator.model.Configuration;
 import org.dromara.northstar.strategy.IAccount;
-import org.dromara.northstar.strategy.IMessageSender;
 import org.dromara.northstar.strategy.IModule;
 import org.dromara.northstar.strategy.IModuleAccount;
 import org.dromara.northstar.strategy.IModuleContext;
@@ -64,7 +63,6 @@ import org.dromara.northstar.strategy.TradeStrategy;
 import org.dromara.northstar.strategy.constant.PriceType;
 import org.dromara.northstar.strategy.model.TradeIntent;
 import org.dromara.northstar.support.log.ModuleLoggerFactory;
-import org.dromara.northstar.support.notification.IMessageSenderManager;
 import org.dromara.northstar.support.utils.bar.BarMergerRegistry;
 import org.dromara.northstar.support.utils.bar.BarMergerRegistry.ListenerType;
 import org.slf4j.Logger;
@@ -102,8 +100,6 @@ public class ModuleContext implements IModuleContext{
 	protected IModule module;
 	
 	protected Logger logger;
-	
-	protected IMessageSenderManager senderMgr;
 	
 	protected TradeStrategy tradeStrategy;
 	
@@ -148,14 +144,12 @@ public class ModuleContext implements IModuleContext{
 	protected OrderRequestFilter orderReqFilter;
 	
 	public ModuleContext(TradeStrategy tradeStrategy, ModuleDescription moduleDescription, ModuleRuntimeDescription moduleRtDescription,
-			IContractManager contractMgr, IModuleRepository moduleRepo, ModuleLoggerFactory loggerFactory, IMessageSenderManager senderMgr,
-			BarMergerRegistry barMergerRegistry) {
+			IContractManager contractMgr, IModuleRepository moduleRepo, ModuleLoggerFactory loggerFactory, BarMergerRegistry barMergerRegistry) {
 		this.tradeStrategy = tradeStrategy;
 		this.moduleRepo = moduleRepo;
 		this.contractMgr = contractMgr;
 		this.registry = barMergerRegistry;
 		this.logger = loggerFactory.getLogger(moduleDescription.getModuleName());
-		this.senderMgr = senderMgr;
 		this.bufSize.set(moduleDescription.getModuleCacheDataSize());
 		this.moduleAccount = new ModuleAccount(moduleDescription, moduleRtDescription, new ModuleStateMachine(this), moduleRepo, contractMgr, logger);
 		this.orderReqFilter = new DefaultOrderFilter(moduleDescription.getModuleAccountSettingsDescription().stream().flatMap(mad -> mad.getBindedContracts().stream()).toList(), this);
@@ -271,11 +265,6 @@ public class ModuleContext implements IModuleContext{
 		indicatorValBufQMap.put(indicator, new ConcurrentLinkedDeque<>());
 	}
 	
-	@Override
-	public IMessageSender getMessageSender(boolean inheritSubscriber) {
-		return senderMgr.getSender(inheritSubscriber);
-	}
-
 	@Override
 	public void onTick(TickField tick) {
 		getLogger().trace("TICK信息: {} {} {} {}，最新价: {}", 
@@ -409,14 +398,28 @@ public class ModuleContext implements IModuleContext{
 				.maxDrawbackPercentage(moduleAccount.getMaxDrawbackPercentage())
 				.maxProfit(moduleAccount.getMaxProfit())
 				.positionDescription(posDescription)
+				.availableAmount(moduleAccount.availableAmount())
 				.build();
+		List<AccountRuntimeDescription> accRts = contractMap.values().stream()
+				.map(this::getAccount)
+				.collect(Collectors.toSet())
+				.stream()
+				.map(acc -> AccountRuntimeDescription.builder()
+						.name(acc.accountId())
+						.balance(acc.accountBalance())
+						.availableAmount(acc.availableAmount())
+						.build())
+				.toList();
 		ModuleRuntimeDescription mad = ModuleRuntimeDescription.builder()
 				.moduleName(module.getName())
 				.enabled(module.isEnabled())
 				.moduleState(moduleAccount.getModuleState())
-				.dataState(tradeStrategy.getStoreObject())
-				.accountRuntimeDescription(accRtDescription)
+				.storeObject(tradeStrategy.getStoreObject())
+				.strategyInfos(tradeStrategy.strategyInfos())
+				.moduleAccountRuntime(accRtDescription)
+				.accountRuntimes(accRts)
 				.build();
+		
 		if(fullDescription) {
 			List<ModuleDealRecord> dealRecords = moduleRepo.findAllDealRecords(module.getName());
 			double avgProfit = dealRecords.stream().mapToDouble(ModuleDealRecord::getDealProfit).average().orElse(0D);
@@ -444,16 +447,17 @@ public class ModuleContext implements IModuleContext{
 			
 			indicatorValBufQMap.entrySet().forEach(e -> {
 				Indicator in = e.getKey();
+				String symbolName = in.getConfiguration().contract().getName();
 				String unifiedSymbol = in.getConfiguration().contract().getUnifiedSymbol();
 				Configuration cfg = in.getConfiguration();
 				String indicatorName = String.format("%s_%d%s", cfg.indicatorName(), cfg.numOfUnits(), cfg.period().symbol());
-				if(!indicatorMap.containsKey(unifiedSymbol)) {
-					indicatorMap.put(unifiedSymbol, new ArrayList<>());
+				if(!indicatorMap.containsKey(symbolName)) {
+					indicatorMap.put(symbolName, new ArrayList<>());
 				}
 				if(cfg.visible()) {
-					indicatorMap.get(unifiedSymbol).add(indicatorName);
+					indicatorMap.get(symbolName).add(indicatorName);
 				}
-				Collections.sort(indicatorMap.get(unifiedSymbol));
+				Collections.sort(indicatorMap.get(symbolName));
 				
 				e.getValue().stream().forEach(tv -> {
 					if(!symbolTimeObject.containsKey(unifiedSymbol)
@@ -464,7 +468,7 @@ public class ModuleContext implements IModuleContext{
 				});
 			});
 			Map<String, JSONArray> dataMap = barBufQMap.entrySet().stream().collect(Collectors.toMap(
-					Entry::getKey, 
+					e -> getContract(e.getKey()).getName(), 
 					e -> {
 						if(!symbolTimeObject.containsKey(e.getKey())) 							
 							return new JSONArray();

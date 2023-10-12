@@ -61,7 +61,7 @@ class ModuleRepoAdapterTest {
 	
 	ModuleRuntimeDescription mrd = ModuleRuntimeDescription.builder()
 			.moduleName(moduleName)
-			.accountRuntimeDescription(mard)
+			.moduleAccountRuntime(mard)
 			.build();
 	
 	ModuleDealRecord mdr = ModuleDealRecord.builder()

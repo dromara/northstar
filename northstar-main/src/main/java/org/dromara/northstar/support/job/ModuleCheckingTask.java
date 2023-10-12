@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import org.dromara.northstar.account.AccountManager;
@@ -20,10 +21,9 @@ import org.dromara.northstar.gateway.Contract;
 import org.dromara.northstar.gateway.IContractManager;
 import org.dromara.northstar.module.ModuleManager;
 import org.dromara.northstar.strategy.IAccount;
+import org.dromara.northstar.strategy.IMessageSender;
 import org.dromara.northstar.strategy.IModule;
-import org.dromara.northstar.support.notification.IMessageSenderManager;
 import org.dromara.northstar.support.utils.ExceptionLogChecker;
-import org.dromara.northstar.support.utils.InetAddressUtils;
 import org.dromara.northstar.support.utils.PositionChecker;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,8 +55,8 @@ public class ModuleCheckingTask implements InitializingBean {
 	@Autowired
 	private AccountManager accountMgr;
 	
-	@Autowired
-	private IMessageSenderManager msgMgr;
+	@Autowired(required = false)
+	private IMessageSender msgSender;
 	
 	@Autowired
 	private IllegalOrderHandler illOrderHandler;
@@ -195,10 +195,13 @@ public class ModuleCheckingTask implements InitializingBean {
 	}
 	
 	private void doSmartSend(String title, String msg) {
+		if(Objects.isNull(msgSender)) {
+			log.warn("没有提供消息告警发送器，告警信息将无法发送");
+			return;
+		}
 		String combine = title + "@" + msg;
 		if(!warningCacheSet.contains(combine)) {
-			String realMsg = String.format("%s%n%n警报来源：%s%n", msg, InetAddressUtils.getHostname());
-			msgMgr.getSender(true).send(title, realMsg);
+			msgSender.send(title, msg);
 			warningCacheSet.add(combine);
 		}
 	}

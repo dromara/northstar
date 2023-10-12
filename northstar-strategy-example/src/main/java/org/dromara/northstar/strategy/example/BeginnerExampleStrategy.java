@@ -1,12 +1,17 @@
 package org.dromara.northstar.strategy.example;
 
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 import org.dromara.northstar.common.constant.FieldType;
 import org.dromara.northstar.common.constant.ModuleState;
 import org.dromara.northstar.common.constant.SignalOperation;
 import org.dromara.northstar.common.model.DynamicParams;
+import org.dromara.northstar.common.model.ListValue;
+import org.dromara.northstar.common.model.NumberValue;
 import org.dromara.northstar.common.model.Setting;
+import org.dromara.northstar.common.model.StringValue;
+import org.dromara.northstar.common.model.Value;
 import org.dromara.northstar.strategy.IModuleContext;
 import org.dromara.northstar.strategy.IModuleStrategyContext;
 import org.dromara.northstar.strategy.StrategicComponent;
@@ -49,7 +54,7 @@ public class BeginnerExampleStrategy implements TradeStrategy{
 	public static class InitParams extends DynamicParams {			// 每个策略都要有一个用于定义初始化参数的内部类，类名称不能改
 		
 		@Setting(label="操作间隔", type = FieldType.NUMBER, order = 10, unit = "秒")		// Label注解用于定义属性的元信息。可以声明单位
-		private int actionInterval;						// 属性可以为任意多个，当元素为多个时order值用于控制前端的显示顺序
+		private int actionInterval = 60;						// 属性可以为任意多个，当元素为多个时order值用于控制前端的显示顺序
 		
 		@Setting(label="锁仓演示", type = FieldType.SELECT, options = {"启用","禁用"}, optionsVal = {"true","false"}, order = 20)
 		private boolean showHedge;
@@ -156,4 +161,15 @@ public class BeginnerExampleStrategy implements TradeStrategy{
 		// 成交回调
 	}
 
+	@Override
+	public List<Value> strategyInfos() {
+		// 用户可以通过该方法，把策略内部非指标化的计算值暴露给监控台
+		// 比如可以监控放量的价位都都出现在哪些价位等，用线性指标无法很好表示的离散值
+		return List.of(
+				new NumberValue("示例数值", 1000.889977),
+				new StringValue("示例文本", "样例数据"),
+				new ListValue("示例列表", List.of(new NumberValue("", 123), new NumberValue("", 456)))
+				);
+	}
+	
 }

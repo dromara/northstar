@@ -81,7 +81,7 @@ class ModuleAccountTest {
 				.moduleName("testModule")
 				.enabled(true)
 				.moduleState(ModuleState.HOLDING_LONG)
-				.accountRuntimeDescription(mard)
+				.moduleAccountRuntime(mard)
 				.build();
 		IContractManager contractMgr = mock(IContractManager.class);
 		Contract c = mock(Contract.class);

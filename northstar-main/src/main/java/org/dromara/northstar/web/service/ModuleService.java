@@ -10,9 +10,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.stream.Collectors;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.transaction.Transactional;
 
@@ -56,7 +56,6 @@ import org.dromara.northstar.strategy.IModuleContext;
 import org.dromara.northstar.strategy.StrategicComponent;
 import org.dromara.northstar.strategy.TradeStrategy;
 import org.dromara.northstar.support.log.ModuleLoggerFactory;
-import org.dromara.northstar.support.notification.MailDeliveryManager;
 import org.dromara.northstar.support.utils.bar.BarMergerRegistry;
 import org.dromara.northstar.web.PostLoadAware;
 import org.springframework.context.ApplicationContext;
@@ -89,8 +88,6 @@ public class ModuleService implements IModuleService, PostLoadAware {
 	
 	private IMarketDataRepository mdRepo;
 	
-	private MailDeliveryManager mailMgr;
-	
 	private MarketDataLoadingUtils utils = new MarketDataLoadingUtils();
 	
 	private ModuleLoggerFactory moduleLoggerFactory = new ModuleLoggerFactory();
@@ -99,14 +96,13 @@ public class ModuleService implements IModuleService, PostLoadAware {
 	
 	private GatewayMetaProvider gatewayMetaProvider;
 	
-	public ModuleService(ApplicationContext ctx, IModuleRepository moduleRepo, MailDeliveryManager mailMgr, IMarketDataRepository mdRepo, 
+	public ModuleService(ApplicationContext ctx, IModuleRepository moduleRepo, IMarketDataRepository mdRepo, 
 			ModuleManager moduleMgr, IContractManager contractMgr, AccountManager accountMgr, GatewayMetaProvider gatewayMetaProvider) {
 		this.ctx = ctx;
 		this.moduleMgr = moduleMgr;
 		this.contractMgr = contractMgr;
 		this.moduleRepo = moduleRepo;
 		this.mdRepo = mdRepo;
-		this.mailMgr = mailMgr;
 		this.accountMgr = accountMgr;
 		this.gatewayMetaProvider = gatewayMetaProvider;
 	}
@@ -160,8 +156,8 @@ public class ModuleService implements IModuleService, PostLoadAware {
 				.moduleName(md.getModuleName())
 				.enabled(false)
 				.moduleState(ModuleState.EMPTY)
-				.accountRuntimeDescription(mard)
-				.dataState(new JSONObject())
+				.moduleAccountRuntime(mard)
+				.storeObject(new JSONObject())
 				.build();
 		loadModule(md, mrd);
 		moduleRepo.saveRuntime(mrd);
@@ -236,23 +232,23 @@ public class ModuleService implements IModuleService, PostLoadAware {
 		ComponentAndParamsPair strategyComponent = md.getStrategySetting();
 		TradeStrategy strategy = resolveComponent(strategyComponent);
 		Assert.isTrue(strategy.type() == md.getType(), "该策略只能用于类型为[{}]的模组", strategy.type());
-		strategy.setStoreObject(mrd.getDataState());
+		strategy.setStoreObject(mrd.getStoreObject());
 		IModuleContext moduleCtx = null;
 		if(md.getUsage() == ModuleUsage.PLAYBACK) {
 			mrd = ModuleRuntimeDescription.builder()
 					.moduleName(md.getModuleName())
 					.moduleState(ModuleState.EMPTY)
-					.dataState(new JSONObject())
-					.accountRuntimeDescription(ModuleAccountRuntimeDescription.builder()
+					.storeObject(new JSONObject())
+					.moduleAccountRuntime(ModuleAccountRuntimeDescription.builder()
 							.initBalance(md.getInitBalance())
 							.build())
 					.build();
 			moduleCtx = new PlaybackModuleContext(strategy, md, mrd, contractMgr, moduleRepo, moduleLoggerFactory, new BarMergerRegistry(gatewayMetaProvider));
 		} else {
 			if(md.getType() == ModuleType.ARBITRAGE) {
-				moduleCtx = new ArbitrageModuleContext(strategy, md, mrd, contractMgr, moduleRepo, moduleLoggerFactory, mailMgr, new BarMergerRegistry(gatewayMetaProvider));
+				moduleCtx = new ArbitrageModuleContext(strategy, md, mrd, contractMgr, moduleRepo, moduleLoggerFactory, new BarMergerRegistry(gatewayMetaProvider));
 			} else {				
-				moduleCtx = new ModuleContext(strategy, md, mrd, contractMgr, moduleRepo, moduleLoggerFactory, mailMgr, new BarMergerRegistry(gatewayMetaProvider));
+				moduleCtx = new ModuleContext(strategy, md, mrd, contractMgr, moduleRepo, moduleLoggerFactory, new BarMergerRegistry(gatewayMetaProvider));
 			}
 		}
 		moduleMgr.add(new TradeModule(md, moduleCtx, accountMgr, contractMgr));

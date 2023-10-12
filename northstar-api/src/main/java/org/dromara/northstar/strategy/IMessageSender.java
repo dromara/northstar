@@ -1,5 +1,7 @@
 package org.dromara.northstar.strategy;
 
+import org.dromara.northstar.common.event.NorthstarEvent;
+
 public interface IMessageSender {
 
 	/**
@@ -14,8 +16,8 @@ public interface IMessageSender {
 	 */
 	void send(String content);
 	/**
-	 * 设置接收人
-	 * @param receiver
+	 * 处理系统事件
+	 * @param e
 	 */
-	void addReceiver(String receiver);
+	void onEvent(NorthstarEvent e);
 }

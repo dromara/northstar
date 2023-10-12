@@ -1,21 +1,22 @@
 package org.dromara.northstar.config;
 
 import org.dromara.northstar.data.IGatewayRepository;
-import org.dromara.northstar.data.IMailConfigRepository;
 import org.dromara.northstar.data.IMarketDataRepository;
+import org.dromara.northstar.data.IMessageSenderRepository;
 import org.dromara.northstar.data.IModuleRepository;
 import org.dromara.northstar.data.IPlaybackRuntimeRepository;
 import org.dromara.northstar.data.ISimAccountRepository;
 import org.dromara.northstar.data.jdbc.GatewayDescriptionRepository;
 import org.dromara.northstar.data.jdbc.GatewayRepoAdapter;
-import org.dromara.northstar.data.jdbc.MailConfigDescriptionRepository;
-import org.dromara.northstar.data.jdbc.MailConfigRepoAdapter;
 import org.dromara.northstar.data.jdbc.MarketDataRepoAdapter;
 import org.dromara.northstar.data.jdbc.MarketDataRepository;
+import org.dromara.northstar.data.jdbc.MessageSenderSettingsRepoAdapter;
+import org.dromara.northstar.data.jdbc.MessageSenderSettingsRepository;
 import org.dromara.northstar.data.jdbc.ModuleDealRecordRepository;
 import org.dromara.northstar.data.jdbc.ModuleDescriptionRepository;
 import org.dromara.northstar.data.jdbc.ModuleRepoAdapter;
 import org.dromara.northstar.data.jdbc.ModuleRuntimeDescriptionRepository;
+import org.dromara.northstar.data.jdbc.NotificationEventRepository;
 import org.dromara.northstar.data.jdbc.PlaybackRuntimeRepoAdapter;
 import org.dromara.northstar.data.jdbc.PlaybackRuntimeRepository;
 import org.dromara.northstar.data.jdbc.SimAccountRepoAdapter;
@@ -38,11 +39,6 @@ public class RepositoryConfig {
     }
     
     @Bean
-    IMailConfigRepository mailConfigRepo(MailConfigDescriptionRepository delegate) {
-    	return new MailConfigRepoAdapter(delegate);
-    }
-    
-    @Bean
     IPlaybackRuntimeRepository playbackRtRepo(PlaybackRuntimeRepository delegate) {
     	return new PlaybackRuntimeRepoAdapter(delegate);
     }
@@ -55,5 +51,10 @@ public class RepositoryConfig {
     @Bean
     IMarketDataRepository marketDataRepo(MarketDataRepository mdRepo, GatewayMetaProvider pvd) {
     	return new MarketDataRepoAdapter(mdRepo, pvd);
+    }
+    
+    @Bean
+    IMessageSenderRepository msgSenderRepo(MessageSenderSettingsRepository delegate, NotificationEventRepository notificationRepo) {
+    	return new MessageSenderSettingsRepoAdapter(delegate, notificationRepo);
     }
 }

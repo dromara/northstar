@@ -1,20 +1,27 @@
 package org.dromara.northstar.config;
 
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.dromara.northstar.account.AccountManager;
 import org.dromara.northstar.account.GatewayManager;
+import org.dromara.northstar.common.event.NorthstarEventType;
 import org.dromara.northstar.data.IGatewayRepository;
 import org.dromara.northstar.data.IMarketDataRepository;
+import org.dromara.northstar.data.IMessageSenderRepository;
 import org.dromara.northstar.event.AccountHandler;
 import org.dromara.northstar.event.BroadcastHandler;
 import org.dromara.northstar.event.ConnectionHandler;
+import org.dromara.northstar.event.EventNotificationHandler;
 import org.dromara.northstar.event.IllegalOrderHandler;
-import org.dromara.northstar.event.MailBindedEventHandler;
 import org.dromara.northstar.event.MarketDataHandler;
 import org.dromara.northstar.event.ModuleHandler;
 import org.dromara.northstar.event.SimMarketHandler;
 import org.dromara.northstar.gateway.IContractManager;
 import org.dromara.northstar.module.ModuleManager;
-import org.dromara.northstar.support.notification.MailDeliveryManager;
+import org.dromara.northstar.strategy.IMessageSender;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -63,9 +70,9 @@ class InternalEventHandlerConfig {
 	}
 	
 	@Bean
-	MailBindedEventHandler mailBindedEventHandler(MailDeliveryManager mailMgr) {
-		log.debug("注册：MailBindedEventHandler");
-		return new MailBindedEventHandler(mailMgr);
+	EventNotificationHandler eventNotificationHandler(@Autowired(required = false) IMessageSender sender, Set<NorthstarEventType> subEvents) {
+		log.debug("注册：EventNotificationHandler");
+		return new EventNotificationHandler(sender, subEvents);
 	}
 	
 	@Bean
@@ -74,4 +81,12 @@ class InternalEventHandlerConfig {
 		return new IllegalOrderHandler();
 	}
 	
+	@Bean
+	Set<NorthstarEventType> notificationEvents(IMessageSenderRepository repo){
+		List<NorthstarEventType> records = repo.getSubEvents();
+		if(repo.getSubEvents() != null) {
+			return records.stream().collect(Collectors.toSet());
+		}
+		return Set.of(NorthstarEventType.LOGGED_IN, NorthstarEventType.LOGGED_OUT, NorthstarEventType.ORDER, NorthstarEventType.TRADE, NorthstarEventType.NOTICE);
+	}
 }

@@ -42,6 +42,7 @@ import org.dromara.northstar.gateway.playback.PlaybackGatewayFactory;
 import org.dromara.northstar.gateway.playback.PlaybackGatewaySettings;
 import org.dromara.northstar.gateway.sim.trade.SimGatewayFactory;
 import org.dromara.northstar.gateway.time.GenericTradeTime;
+import org.dromara.northstar.strategy.IMessageSender;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -85,6 +86,9 @@ class ModuleControllerTest {
 	
 	@Autowired
 	private GatewayDescriptionRepository gwRepo;
+	
+	@MockBean
+	private IMessageSender sender;
 	
 	@MockBean
 	private SocketIOServer socketServer;

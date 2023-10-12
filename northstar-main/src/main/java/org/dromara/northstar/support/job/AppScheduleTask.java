@@ -5,14 +5,14 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Objects;
 
 import javax.transaction.Transactional;
 
 import org.dromara.northstar.data.jdbc.MarketDataRepository;
 import org.dromara.northstar.gateway.IMarketCenter;
-import org.dromara.northstar.support.notification.IMessageSenderManager;
+import org.dromara.northstar.strategy.IMessageSender;
 import org.dromara.northstar.support.utils.ExceptionLogChecker;
-import org.dromara.northstar.support.utils.InetAddressUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -37,8 +37,8 @@ public class AppScheduleTask {
 	@Autowired
 	private MarketDataRepository mdRepo;
 	
-	@Autowired
-	private IMessageSenderManager msgMgr;
+	@Autowired(required = false)
+	private IMessageSender msgSender;
 
 	/**
 	 * K线数据合成检查
@@ -56,6 +56,10 @@ public class AppScheduleTask {
 	 */
 	@Scheduled(cron="0 0 0/1 ? * 1-5")
 	public void checkAppException() throws IOException {
+		if(Objects.isNull(msgSender)) {
+			log.warn("没有提供消息告警发送器，告警信息将无法发送");
+			return;
+		}
 		log.debug("检查当天的程序日志中是否存在异常日志");
 		Logger logger = (Logger) log;
 		FileAppender<ILoggingEvent> fileAppender = (FileAppender<ILoggingEvent>) logger.getLoggerContext().getLogger("ROOT").getAppender("FILE");
@@ -68,8 +72,7 @@ public class AppScheduleTask {
 		if(!errorLines.isEmpty()) {
 			StringBuilder sb = new StringBuilder();
 			errorLines.forEach(line -> sb.append(line + "\n"));
-			sb.append(String.format("%n%n警报来源：%s", InetAddressUtils.getHostname()));
-			msgMgr.getSender(true).send(String.format("[程序异常日志警报] %d-%d时，%d条异常记录", 
+			msgSender.send(String.format("[程序异常日志警报] %d-%d时，%d条异常记录", 
 					startTime.getHour(), endTime.getHour(), errorLines.size()), sb.toString());
 		}
 	}

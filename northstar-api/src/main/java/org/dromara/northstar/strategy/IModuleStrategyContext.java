@@ -65,11 +65,6 @@ public interface IModuleStrategyContext {
 	 */
 	void registerIndicator(Indicator indicator);
 	/**
-	 * 获取消息发送器
-	 * @param inheritSubscribers	是否继承全局接收人
-	 */
-	IMessageSender getMessageSender(boolean inheritSubscribers);
-	/**
 	 * 设置自定义的风控策略
 	 * @param filter
 	 */

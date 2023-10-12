@@ -168,10 +168,10 @@ public abstract class AbstractTester implements ModuleTesterContext{
 			///////////////////////////////////////
 			for(IModule m : testModules) {
 				ModuleRuntimeDescription mrd = m.getModuleContext().getRuntimeDescription(false);
-				double totalEarning = mrd.getAccountRuntimeDescription().getAccCloseProfit() - mrd.getAccountRuntimeDescription().getAccCommission();
-				double earningRiskRate = totalEarning / Math.abs(mrd.getAccountRuntimeDescription().getMaxDrawback());
-				if (mrd.getAccountRuntimeDescription().getAccCloseProfit() < 0 
-						|| mrd.getAccountRuntimeDescription().getMaxDrawbackPercentage() > 0.5
+				double totalEarning = mrd.getModuleAccountRuntime().getAccCloseProfit() - mrd.getModuleAccountRuntime().getAccCommission();
+				double earningRiskRate = totalEarning / Math.abs(mrd.getModuleAccountRuntime().getMaxDrawback());
+				if (mrd.getModuleAccountRuntime().getAccCloseProfit() < 0 
+						|| mrd.getModuleAccountRuntime().getMaxDrawbackPercentage() > 0.5
 						|| earningRiskRate < 2 ) { 
 					moduleService.removeModule(m.getName());
 				}

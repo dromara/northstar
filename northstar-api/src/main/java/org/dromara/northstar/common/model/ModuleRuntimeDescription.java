@@ -38,7 +38,11 @@ public class ModuleRuntimeDescription {
 	/**
 	 * 模组账户描述
 	 */
-	private ModuleAccountRuntimeDescription accountRuntimeDescription;
+	private ModuleAccountRuntimeDescription moduleAccountRuntime;
+	/**
+	 * 模组关联账户描述
+	 */
+	private List<AccountRuntimeDescription> accountRuntimes;
 	/**
 	 * 合约指标集
 	 */
@@ -48,7 +52,11 @@ public class ModuleRuntimeDescription {
 	 */
 	private Map<String, JSONArray> dataMap;
 	/**
-	 * 模组计算状态（非指标化数据）
+	 * 模组计算状态（持久化数据）
 	 */
-	private JSONObject dataState;
+	private JSONObject storeObject;
+	/**
+	 * 策略信息描述
+	 */
+	private List<Value> strategyInfos;
 }

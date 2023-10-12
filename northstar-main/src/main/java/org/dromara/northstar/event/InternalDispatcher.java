@@ -18,7 +18,7 @@ public class InternalDispatcher implements NorthstarEventDispatcher {
 	@Autowired
 	private ConnectionHandler connHandler;
 	@Autowired
-	private MailBindedEventHandler mailHandler;
+	private EventNotificationHandler notificationHandler;
 	@Autowired
 	private MarketDataHandler mdHandler;
 	@Autowired
@@ -39,8 +39,8 @@ public class InternalDispatcher implements NorthstarEventDispatcher {
 		accountHandler.onEvent(event);
 		connHandler.onEvent(event);
 		mdHandler.onEvent(event);
-		mailHandler.onEvent(event);
 		illOrderHandler.onEvent(event);
+		notificationHandler.onEvent(event);
 	}
 
 }

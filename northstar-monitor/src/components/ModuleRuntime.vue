@@ -9,15 +9,15 @@
     />
     <ModulePerformancePopup
       :visible.sync="performanceVisible"
-      :moduleInitBalance="accountInfo.initBalance"
+      :moduleInitBalance="moduleInfo.initBalance"
       :moduleDealRecords="dealRecords"
     />
     <div class="module-rt-wrapper">
       <div class="side-panel">
-        <div class="description-wrapper">
+        <div class="side-panel_content">
           <el-descriptions class="margin-top" :column="`${isMobile ? 2 : 3}`">
             <template slot="title">
-              模组信息
+              模组用途
               <el-tag
                 class="ml-10"
                 :type="{ PLAYBACK: 'info', UAT: 'warning', PROD: '' }[module.usage]"
@@ -44,66 +44,118 @@
                 >导出交易</el-button
               >
             </template>
-            <el-descriptions-item label="名称">{{ moduleRuntime.moduleName }}</el-descriptions-item>
-            <el-descriptions-item label="启停状态"
-              ><el-tag size="small" :type="`${moduleRuntime.enabled ? 'success' : 'danger'}`">{{
-                moduleRuntime.enabled ? '启用' : '停用'
-              }}</el-tag></el-descriptions-item
-            >
-            <el-descriptions-item label="盘口状态">
-              <el-tag size="small">{{
-                {
-                  HOLDING_LONG: '持多单',
-                  HOLDING_SHORT: '持空单',
-                  EMPTY: '无持仓',
-                  EMPTY_HEDGE: '对冲锁仓',
-                  HOLDING_HEDGE: '对冲持仓',
-                  PENDING_ORDER: '等待成交'
-                }[moduleRuntime.moduleState]
-              }}</el-tag>
-            </el-descriptions-item>
-            <el-descriptions-item label="初始金额">
-              {{ accountInfo.initBalance | formatter }}
-            </el-descriptions-item>
-            <el-descriptions-item label="总盈亏">{{
-              totalProfit | formatter
-            }}</el-descriptions-item>
-            <el-descriptions-item label="当前余额">
-              {{
-                (accountInfo.initBalance +
-                  accountInfo.accCloseProfit -
-                  accountInfo.accCommission +
-                  holdingProfit)
-                  | formatter
-              }}
-            </el-descriptions-item>
-            <el-descriptions-item label="总手续费">
-              {{ accountInfo.accCommission | formatter }}
-            </el-descriptions-item>
-            <el-descriptions-item label="总持仓盈亏">
-              {{ holdingProfit | formatter }}
-            </el-descriptions-item>
-            <el-descriptions-item label="总平仓盈亏">
-              {{ accountInfo.accCloseProfit | formatter }}
-            </el-descriptions-item>
-            <el-descriptions-item label="交易笔数">
-              {{ dealRecords.length || 0 }}
-            </el-descriptions-item>
-            <el-descriptions-item label="胜率">
-              {{ `${(winningRatio * 100).toFixed(1)} %` }}
-            </el-descriptions-item>
-            <el-descriptions-item label="盈亏比">{{ earningPerLoss }}</el-descriptions-item>
-            <el-descriptions-item label="最大回撤">
-              {{ accountInfo.maxDrawback | formatter }}
-            </el-descriptions-item>
-            <el-descriptions-item label="最大回撤比">
-              {{ `${Math.ceil(accountInfo.maxDrawbackPercentage * 100 || 0)}%` }}
-            </el-descriptions-item>
-            <el-descriptions-item label="年化收益率">
-              {{ `${accountInfo.annualizedRateOfReturn * 100 | formatter}%` }}
-            </el-descriptions-item>
-            
           </el-descriptions>
+          <el-tabs v-model="infoTab" :stretch="true">
+            <el-tab-pane name="moduleInfo" label="模组信息">
+              <div class="description-wrapper">
+                <el-descriptions class="margin-top" :column="`${isMobile ? 2 : 3}`">
+                  <el-descriptions-item label="名称">{{ moduleRuntime.moduleName }}</el-descriptions-item>
+                  <el-descriptions-item label="启停状态"
+                    ><el-tag size="small" :type="`${moduleRuntime.enabled ? 'success' : 'danger'}`">{{
+                      moduleRuntime.enabled ? '启用' : '停用'
+                    }}</el-tag></el-descriptions-item
+                  >
+                  <el-descriptions-item label="盘口状态">
+                    <el-tag size="small">{{
+                      {
+                        HOLDING_LONG: '持多单',
+                        HOLDING_SHORT: '持空单',
+                        EMPTY: '无持仓',
+                        EMPTY_HEDGE: '对冲锁仓',
+                        HOLDING_HEDGE: '对冲持仓',
+                        PENDING_ORDER: '等待成交'
+                      }[moduleRuntime.moduleState]
+                    }}</el-tag>
+                  </el-descriptions-item>
+                  <el-descriptions-item label="当前余额">
+                    {{
+                      (moduleInfo.initBalance +
+                        moduleInfo.accCloseProfit -
+                        moduleInfo.accCommission +
+                        holdingProfit)
+                        | formatter
+                    }}
+                  </el-descriptions-item>
+                  <el-descriptions-item label="可用金额">
+                    {{ moduleInfo.availableAmount | formatter }}
+                  </el-descriptions-item>
+                  <el-descriptions-item label="占用金额">
+                    {{ (moduleInfo.initBalance +
+                        moduleInfo.accCloseProfit -
+                        moduleInfo.accCommission +
+                        holdingProfit) - moduleInfo.availableAmount | formatter }}
+                  </el-descriptions-item>
+                  <el-descriptions-item label="初始金额">
+                    {{ moduleInfo.initBalance | formatter }}
+                  </el-descriptions-item>
+                  <el-descriptions-item label="总盈亏">
+                    {{ totalProfit | formatter }}
+                  </el-descriptions-item>
+                  <el-descriptions-item label="总平仓盈亏">
+                    {{ moduleInfo.accCloseProfit | formatter }}
+                  </el-descriptions-item>
+                  <el-descriptions-item label="总手续费">
+                    {{ moduleInfo.accCommission | formatter }}
+                  </el-descriptions-item>
+                  <el-descriptions-item label="总持仓盈亏">
+                    {{ holdingProfit | formatter }}
+                  </el-descriptions-item>
+                  <el-descriptions-item label="交易笔数">
+                    {{ dealRecords.length || 0 }}
+                  </el-descriptions-item>
+                  <el-descriptions-item label="胜率">
+                    {{ `${(winningRatio * 100).toFixed(1)} %` }}
+                  </el-descriptions-item>
+                  <el-descriptions-item label="盈亏比">{{ earningPerLoss }}</el-descriptions-item>
+                  <el-descriptions-item label="年化收益率">
+                    {{ `${moduleInfo.annualizedRateOfReturn * 100 | formatter}%` }}
+                  </el-descriptions-item>
+                  <el-descriptions-item label="最大回撤">
+                    {{ moduleInfo.maxDrawback | formatter }}
+                  </el-descriptions-item>
+                  <el-descriptions-item label="最大回撤比">
+                    {{ `${Math.ceil(moduleInfo.maxDrawbackPercentage * 100 || 0)}%` }}
+                  </el-descriptions-item>
+                </el-descriptions>
+              </div>
+            </el-tab-pane>
+            <el-tab-pane name="accountInfo" label="账户信息">
+              <el-descriptions v-for="(item,i) in accountInfo" :key="i" column="2">
+                <template slot="title">
+                  {{item.name}}
+                </template>
+                <el-descriptions-item label="账户余额">
+                  {{ item.balance | formatter }}
+                </el-descriptions-item>
+                <el-descriptions-item label="可用金额">
+                  {{ item.availableAmount | formatter }}
+                </el-descriptions-item>
+              </el-descriptions>
+            </el-tab-pane>
+            <el-tab-pane name="strategyInfo" label="策略信息">
+              <div class="description-wrapper">
+                <el-descriptions class="margin-top" :column="`${isMobile ? 1 : 2}`">
+                  <el-descriptions-item v-for="(item, i) in strategyInfo" :label="item.name" :key="i">
+                    <el-popover v-if="(item.value instanceof Array)"
+                      placement="right"
+                      trigger="click">
+                      <el-table :data="item.value" >
+                        <el-table-column width="100" property="name" label="描述">
+                          <template slot-scope="scope">
+                            {{ scope.row.name || scope.$index + 1 }}
+                          </template>
+                        </el-table-column>
+                        <el-table-column width="100" property="value" label="数值"></el-table-column>
+                      </el-table>
+                      <el-button slot="reference" :disabled="!item.value.length">{{ item.value.length ? '明细' : '无数据'}}</el-button>
+                    </el-popover>
+                    <span v-else>{{ item.value }}</span>
+                  </el-descriptions-item>
+                </el-descriptions>
+              </div>
+            </el-tab-pane>
+          </el-tabs>
+          
           <el-tabs v-model="moduleTab" :stretch="true">
             <el-tab-pane name="holding" label="模组持仓"></el-tab-pane>
             <el-tab-pane name="dealRecord" label="交易历史"></el-tab-pane>
@@ -197,7 +249,7 @@
             ></el-button>
             <ModulePerformance
               :visible.sync="performanceVisible"
-              :moduleInitBalance="accountInfo.initBalance"
+              :moduleInitBalance="moduleInfo.initBalance"
               :moduleDealRecords="dealRecords"
             />
           </div>
@@ -212,8 +264,8 @@
             <el-option
               v-for="(item, i) in bindedContracts"
               :key="i"
-              :label="item.name"
-              :value="item.unifiedSymbol"
+              :label="item"
+              :value="item"
             ></el-option>
           </el-select>
           <el-select
@@ -355,10 +407,10 @@ export default {
       positionFormVisible: false,
       performanceVisible: false,
       holdingVisibleOnChart: false,
+      infoTab: 'moduleInfo',
       moduleTab: 'holding',
       dealRecords: [],
       barDataMap: {},
-      bindedContracts: [],
       chart: null,
       loading: false,
       moduleRuntime: '',
@@ -382,14 +434,14 @@ export default {
   },
   watch: {
     visible: function (val) {
+      if(!localStorage.getItem(`autoUpdate_${this.module.moduleName}`)){
+        localStorage.setItem(`autoUpdate_${this.module.moduleName}`, true)
+      }
       if (val) {
+        this.isManualUpdate = localStorage.getItem(`autoUpdate_${this.module.moduleName}`) === 'true'
+        this.unifiedSymbolOfChart = localStorage.getItem(`chartSymbol_${this.module.moduleName}`) || ''
         this.isMobile = this.listener.isMobile()
         this.moduleRuntime = this.moduleRuntimeSrc
-        this.bindedContracts = []
-        this.module.moduleAccountSettingsDescription.forEach((account) => {
-          const contracts = account.bindedContracts
-          this.bindedContracts = this.bindedContracts.concat(contracts)
-        })
         if(this.isMobile){
           this.loadDealRecord()
           return;
@@ -418,6 +470,9 @@ export default {
         }
         this.timer = setTimeout(autoUpdate, 5000)
       }
+      if(this.visible){
+        localStorage.setItem(`autoUpdate_${this.module.moduleName}`, val)
+      }
     },
     moduleTab: function (val) {
       if (val === 'dealRecord') {
@@ -435,6 +490,9 @@ export default {
         this.loadIndicators()
         this.holdingVisibleOnChart = false
       }
+      if(this.visible){
+        localStorage.setItem(`chartSymbol_${this.module.moduleName}`, val)
+      }
     },
     holdingVisibleOnChart: function (val) {
       if (val) {
@@ -447,11 +505,17 @@ export default {
     }
   },
   computed: {
-    symbolOptions() {
+    bindedContracts() {
       return Object.keys(this.barDataMap) || []
     },
+    strategyInfo(){
+      return this.moduleRuntime.strategyInfos || []
+    },
+    moduleInfo(){
+      return this.moduleRuntime.moduleAccountRuntime || {}
+    },
     accountInfo() {
-      return this.moduleRuntime.accountRuntimeDescription || {}
+      return this.moduleRuntime.accountRuntimes || []
     },
     moduleBindedContracts() {
       if(!this.module.moduleAccountSettingsDescription) return []
@@ -462,7 +526,7 @@ export default {
     },
     totalProfit() {
       if (!this.moduleRuntime) return 0
-      return this.holdingProfit + this.accountInfo.accCloseProfit - this.accountInfo.accCommission
+      return this.holdingProfit + this.moduleInfo.accCloseProfit - this.moduleInfo.accCommission
     },
     winningRatio() {
       if (!this.dealRecords.length) return 0
@@ -484,8 +548,8 @@ export default {
       return `${avgProfit} : ${avgLoss}`
     },
     holdingPositions() {
-      if(!this.accountInfo.positionDescription)  return []
-      const positions = this.accountInfo.positionDescription.logicalPositions.map((data) =>
+      if(!this.moduleInfo.positionDescription)  return []
+      const positions = this.moduleInfo.positionDescription.logicalPositions.map((data) =>
         PositionField.deserializeBinary(data).toObject()
       )
       return positions.filter((item) => item.position > 0)
@@ -613,7 +677,7 @@ export default {
       setTimeout(this.refresh, 500)
     },
     updateChart() {
-      if (this.unifiedSymbolOfChart) {
+      if (this.unifiedSymbolOfChart && this.chart) {
         this.chart.clearData()
         this.chart.applyNewData(this.barDataMap[this.unifiedSymbolOfChart])
       }
@@ -681,7 +745,7 @@ export default {
     },
     loadIndicators() {
       const dataStr =
-        localStorage.getItem(`module_${this.module.moduleName}_${this.unifiedSymbolOfChart}`) ||
+        localStorage.getItem(`indicatorMap_${this.module.moduleName}_${this.unifiedSymbolOfChart}`) ||
         '{}'
       this.indicatorMap = JSON.parse(dataStr)
       for (let i = 1; i < 6; i++) {
@@ -701,33 +765,44 @@ export default {
     },
     saveIndicators() {
       localStorage.setItem(
-        `module_${this.module.moduleName}_${this.unifiedSymbolOfChart}`,
+        `indicatorMap_${this.module.moduleName}_${this.unifiedSymbolOfChart}`,
         JSON.stringify(this.indicatorMap)
       )
     },
     close() {
       this.saveIndicators()
       clearTimeout(this.timer)
-      Object.assign(this.$data, this.$options.data())
       try{
         dispose('module-k-line')
       } catch (e){
         console.error(e)
       }
       this.$emit('update:visible', false)
+      setTimeout(() => {
+        Object.assign(this.$data, this.$options.data())
+      }, 500)
     }
   }
 }
 </script>
 
 <style scoped>
+.side-panel {
+    padding: 10px;
+    flex: 1;
+  }
+
 .table-wrapper {
-  height: calc((100vh - 326px) * 0.5);
+  flex: 1;
   min-height: 150px;
+}
+.description-wrapper {
+  max-height: 250px;
+  overflow: auto;
 }
 .performance-min {
   position: relative;
-  height: calc((100vh - 326px) * 0.5);
+  height: 280px;
 }
 @media screen and (max-height: 600px) {
   .performance-min {
@@ -772,9 +847,10 @@ export default {
 .el-dialog.is-fullscreen {
   overflow: hidden;
 }
-.description-wrapper {
-  padding: 10px;
-  height: calc(100% - 20px);
+.side-panel_content {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 /* 桌面端样式 */

@@ -1,8 +1,11 @@
 package org.dromara.northstar.strategy;
 
+import java.util.List;
+
 import org.dromara.northstar.common.TickDataAware;
 import org.dromara.northstar.common.TransactionAware;
 import org.dromara.northstar.common.constant.ModuleType;
+import org.dromara.northstar.common.model.Value;
 
 import com.alibaba.fastjson.JSONObject;
 
@@ -44,4 +47,11 @@ public interface TradeStrategy extends TickDataAware, MergedBarListener, Transac
 	 * @param bar
 	 */
 	void onMergedBar(BarField bar);
+	/**
+	 * 获取策略信息
+	 * @return
+	 */
+	default List<Value> strategyInfos() {
+		return List.of();
+	}
 }
