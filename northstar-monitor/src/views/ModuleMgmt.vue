@@ -17,7 +17,7 @@
     </div>
     <div v-if="isMobile" class="card-wrapper">
       <el-card class="box-card" v-for="(item, i) in filterModuleList" :key="i">
-        <el-descriptions :title="item.moduleName" :column="1" border>
+        <el-descriptions :title="item.moduleName" :column="2" border >
           <el-descriptions-item label="持仓状态">
             <el-tag size="small">{{
             !item.runtime ? '-' :
@@ -39,29 +39,44 @@
           <el-descriptions-item label="模组周期">
             {{ `${item.numOfMinPerBar} 分钟` }}
           </el-descriptions-item>
+          <el-descriptions-item label="交易策略">
+            {{ item.strategySetting.componentMeta.name | truncateDesc }}
+          </el-descriptions-item>
+          <el-descriptions-item label="绑定合约">
+            {{
+              (() => {
+                return item.moduleAccountSettingsDescription
+                  .map((item) => item.bindedContracts.map(item => item.name).join('，'))
+                  .join('；')
+              })()
+            }}
+          </el-descriptions-item>
         </el-descriptions>
         <div class="card-buttons">
           <el-button
-              v-if="item.runtime"
-              style="float: right; padding: 3px 5px; margin-left: 8px"
-              @click="handlePerf(i, item)"
-              >运行状态</el-button
-            >
-            <el-button
               v-if="item.runtime && item.runtime.enabled"
-              style="float: right; padding: 3px 5px; margin: 0"
               type="danger"
               @click.native="toggle(i, item)"
               >停用</el-button
             >
             <el-button
               v-if="item.runtime && !item.runtime.enabled"
-              style="float: right; padding: 3px 5px; margin: 0"
               type="success"
               @click.native="toggle(i, item)"
             >
               启用
             </el-button>
+          <el-button
+              v-if="item.runtime"
+              @click="handlePerf(i, item)"
+              >运行状态</el-button
+            >
+            <el-button
+            v-if="item.runtime"
+            size="mini"
+            @click="handleRow(i, item)"
+            >{{ item.runtime.enabled ? '查看' : '修改' }}</el-button
+          >
         </div>
       </el-card>
     </div>
@@ -254,6 +269,11 @@ export default {
       query: ''
     }
   },
+  filters:{
+    truncateDesc: function(val){
+      return val.length < 5 ? val : val.substring(0,4) + '..'
+    }
+  },
   computed: {
     ...mapGetters(['moduleList']),
     filterModuleList(){
@@ -435,19 +455,20 @@ export default {
     max-height: 28px;
   }
   .box-card{
-    width: 48%;
+    width: 100%;
     margin-bottom: 20px;
     max-height: 200px;
   }
   .card-buttons{
     margin: 10px 0px;
-    height: 20px;
+    display: flex;
+    justify-content: flex-end;
   }
   .el-card__header{
     padding: 12px 20px;
   }
   .el-card__body{
-    padding-bottom: 10px;
+    padding: 16px 16px 10px 16px;
   }
   .el-descriptions__header{
     padding-bottom: 10px;

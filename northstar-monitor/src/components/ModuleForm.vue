@@ -6,33 +6,33 @@
     v-loading="loading"
     :close-on-click-modal="readOnly"
     element-loading-background="rgba(0, 0, 0, 0.3)"
-    width="540px"
+    :width="`${isMobile ? 'calc(100% - 30px)' : '540px'}`"
     @close="close"
   >
     <ContractFinder :visible.sync="contractFinderVisible" />
     <el-container>
-      <el-aside width="150px" :style="{ overflow: 'hidden' }">
+      <el-aside :width="`${isMobile ? '60px' : '150px'}`" :style="{ overflow: 'hidden' }">
         <el-menu :default-active="activeIndex" @select="handleSelect">
           <el-menu-item index="1">
             <i class="el-icon-setting"></i>
-            <span slot="title">基础信息</span>
+            <span v-if="!isMobile" slot="title">基础信息</span>
           </el-menu-item>
           <el-menu-item index="2">
             <i class="el-icon-s-opportunity"></i>
-            <span slot="title">交易策略</span>
+            <span v-if="!isMobile" slot="title">交易策略</span>
           </el-menu-item>
           <el-menu-item index="3">
             <i class="el-icon-s-custom"></i>
-            <span slot="title">账户绑定</span>
+            <span v-if="!isMobile" slot="title">账户绑定</span>
           </el-menu-item>
           <el-menu-item index="4">
             <i class="el-icon-document-copy"></i>
-            <span slot="title">已关联合约</span>
+            <span v-if="!isMobile" slot="title">已关联合约</span>
           </el-menu-item>
         </el-menu>
       </el-aside>
       <el-main class="main-compact"
-        ><el-form :model="form" label-width="100px" class="module-form" inline>
+        ><el-form :model="form" label-width="100px" :label-position="`${compactMode ? 'top' : 'right'}`" class="module-form" >
           <div v-show="activeIndex === '1'">
             <el-form-item label="模组名称">
               <el-input
@@ -98,7 +98,7 @@
           </div>
           <div v-show="activeIndex === '2'">
             <el-form-item>
-              <el-checkbox id="showDemoStrategy" v-model="showDemoStrategy"
+              <el-checkbox slot="label" id="showDemoStrategy" v-model="showDemoStrategy"
                 >显示示例策略</el-checkbox
               >
             </el-form-item>
@@ -239,6 +239,7 @@
 import gatewayMgmtApi from '../api/gatewayMgmtApi'
 import moduleApi from '../api/moduleApi'
 import contractApi from '../api/contractApi'
+import MediaListener from '@/utils/media-utils'
 
 const initComponent = async (component, arr) => {
   const paramsMap = await moduleApi.componentParams(component)
@@ -269,6 +270,7 @@ export default {
       contractFinderVisible: false,
       loading: false,
       showDemoStrategy: false,
+      isMobile: false,
       accountOptions: [],
       bindedContractsOptions: [],
       tradeStrategyOptionsSource: [],
@@ -298,6 +300,9 @@ export default {
     isUpdateMode() {
       return !!this.module
     },
+    compactMode(){
+      return window.innerWidth < 450
+    },
     tradeStrategyOptions() {
       if (this.showDemoStrategy) {
         return this.tradeStrategyOptionsSource
@@ -308,6 +313,11 @@ export default {
       return this.form.moduleAccountSettingsDescription.map(item => item.bindedContracts).reduce((jointList, list) => jointList.concat(list), [])
     }
   },
+  created(){
+    this.listener = new MediaListener(() => {
+      this.isMobile = this.listener.isMobile()
+    })
+  },
   watch: {
     visible: async function (val) {
       if (val) {
@@ -317,6 +327,7 @@ export default {
         if (!this.module) {
           return
         }
+        this.isMobile = this.listener.isMobile()
         this.form = this.module
         this.form.strategySetting.value = this.form.strategySetting.componentMeta.name
         const selectedAcc = this.module.moduleAccountSettingsDescription.map((item) => this.accountOptions.filter(acc => acc.gatewayId === item.accountGatewayId)[0])
@@ -439,5 +450,11 @@ export default {
 }
 .module-form .with-unit {
   width: 100px;
+}
+
+</style>
+<style >
+.el-form--label-top .el-form-item__label{
+  padding: 0;
 }
 </style>
