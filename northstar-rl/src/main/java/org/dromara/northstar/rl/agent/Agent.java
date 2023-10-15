@@ -1,7 +1,6 @@
 package org.dromara.northstar.rl.agent;
 
 import java.io.IOException;
-import java.util.Map;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.ParseException;
@@ -18,13 +17,18 @@ import com.alibaba.fastjson.JSONObject;
 
 import xyz.redtorch.pb.CoreField.BarField;
 
-public class RLAgent {
-    private String getActionUrl = "http://localhost:5001/get-action";
-	private String initInfoUrl = "http://localhost:5001/init-info";
+public class Agent {
+    protected String getActionUrl = "http://localhost:5001/get-action";
+	protected String initInfoUrl = "http://localhost:5001/init-info";
 
-	private CloseableHttpClient httpClient = HttpClients.createDefault();
+	protected CloseableHttpClient httpClient = HttpClients.createDefault();
 
-    public boolean initInfo(Map<String, String> params) {
+    public boolean initInfo(
+        String indicatorSymbol,
+        String agentName,
+        boolean isTrain,
+        String modelVersion
+    ) {
 		// 将参数传给Python端
 		try {
 			JSONObject jsonData = new JSONObject();
@@ -88,5 +92,4 @@ public class RLAgent {
     public double getReward(BarField bar, BarField lastBar, int actionID, String rewardType) {
         return RLReward.rewardGenerator(bar, lastBar, actionID, rewardType);
     }
-
 }

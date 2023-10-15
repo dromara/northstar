@@ -1,4 +1,4 @@
-package org.dromara.northstar.rl;
+package org.dromara.northstar.rl.reward;
 
 import xyz.redtorch.pb.CoreField.BarField;
 
