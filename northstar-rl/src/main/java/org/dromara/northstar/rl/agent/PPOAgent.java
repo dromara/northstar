@@ -30,18 +30,17 @@ public class PPOAgent implements Agent {
     
     @Override
     public JSONObject createAgent() {
-        JSONObject jsonData = new JSONObject();
-        jsonData.put("indicator_symbol", this.indicatorSymbol);
-        jsonData.put("agent_name", this.agentName);
-        jsonData.put("state_dim", this.stateDim);
-        jsonData.put("action_dim", this.actionDim);
-        jsonData.put("lr_actor", this.lrActor);
-        jsonData.put("lr_critic", this.lrCritic);
-        jsonData.put("gamma", this.gamma);
-        jsonData.put("k_epochs", this.kEpochs);
-        jsonData.put("eps_clip", this.epsClip);
-        jsonData.put("is_train", this.isTrain);
-        jsonData.put("model_version", this.modelVersion);
-        return jsonData;
+        JSONObject agentData = new JSONObject();
+        agentData.put("indicatorSymbol", this.indicatorSymbol);
+        agentData.put("agentName", this.agentName);
+        agentData.put("stateDim", this.stateDim);
+        agentData.put("actionDim", this.actionDim);
+        agentData.put("lrActor", this.lrActor);
+        agentData.put("lrCritic", this.lrCritic);
+        agentData.put("gamma", this.gamma);
+        agentData.put("kEpochs", this.kEpochs);
+        agentData.put("epsClip", this.epsClip);
+        agentData.put("isTrain", this.isTrain);
+        return agentData;
     }
 }
