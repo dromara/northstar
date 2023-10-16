@@ -1,30 +1,46 @@
 package org.dromara.northstar.rl.agent;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.util.EntityUtils;
-import org.dromara.northstar.rl.agent.Agent;
 import com.alibaba.fastjson.JSONObject;
 
 public class PPOAgent implements Agent {
+    public String indicatorSymbol;
+    public String agentName;
+    public int stateDim;
+    public int actionDim;
+    public double lrActor;
+    public double lrCritic;
+    public double gamma;
+    public int kEpochs;
+    public double epsClip;
+    public boolean isTrain;
+    public String modelVersion;
+
+    public PPOAgent(PPOAgentDescription agentDescription) {
+        this.indicatorSymbol = agentDescription.getIndicatorSymbol();
+        this.agentName = agentDescription.getAgentName();
+        this.stateDim = agentDescription.getStateDim();
+        this.actionDim = agentDescription.getActionDim();
+        this.lrActor = agentDescription.getLrActor();
+        this.lrCritic = agentDescription.getLrCritic();
+        this.gamma = agentDescription.getGamma();
+        this.kEpochs = agentDescription.getKEpochs();
+        this.epsClip = agentDescription.getEpsClip();
+        this.isTrain = agentDescription.isTrain();
+    }
     
-    public JSONObject createAgent(PPOAgentDescription agentDescription) {
-
+    public JSONObject createAgent() {
         JSONObject jsonData = new JSONObject();
-        jsonData.put("indicator_symbol", agentDescription.getIndicatorSymbol());
-        jsonData.put("agent_name", agentDescription.getAgentName());
-        jsonData.put("state_dim", agentDescription.getStateDim());
-        jsonData.put("action_dim", agentDescription.getActionDim());
-        jsonData.put("lr_actor", agentDescription.getLrActor());
-        jsonData.put("lr_critic", agentDescription.getLrCritic());
-        jsonData.put("gamma", agentDescription.getGamma());
-        jsonData.put("K_epochs", agentDescription.getKEpochs());
-        jsonData.put("eps_clip", agentDescription.getEpsClip());
-        jsonData.put("is_train", agentDescription.isTrain());
-        jsonData.put("model_version", agentDescription.getModelVersion());
-
+        jsonData.put("indicator_symbol", this.indicatorSymbol);
+        jsonData.put("agent_name", this.agentName);
+        jsonData.put("state_dim", this.stateDim);
+        jsonData.put("action_dim", this.actionDim);
+        jsonData.put("lr_actor", this.lrActor);
+        jsonData.put("lr_critic", this.lrCritic);
+        jsonData.put("gamma", this.gamma);
+        jsonData.put("k_epochs", this.kEpochs);
+        jsonData.put("eps_clip", this.epsClip);
+        jsonData.put("is_train", this.isTrain);
+        jsonData.put("model_version", this.modelVersion);
         return jsonData;
     }
 }
