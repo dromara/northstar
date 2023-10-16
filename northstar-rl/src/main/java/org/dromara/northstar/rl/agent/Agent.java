@@ -17,79 +17,79 @@ import com.alibaba.fastjson.JSONObject;
 
 import xyz.redtorch.pb.CoreField.BarField;
 
-public class Agent {
+public interface Agent {
     protected String getActionUrl = "http://localhost:5001/get-action";
 	protected String initInfoUrl = "http://localhost:5001/init-info";
 
 	protected CloseableHttpClient httpClient = HttpClients.createDefault();
 
-    public boolean initInfo(
-        String indicatorSymbol,
-        String agentName,
-        boolean isTrain,
-        String modelVersion
-    ) {
-		// 将参数传给Python端
-		try {
-			JSONObject jsonData = new JSONObject();
-			jsonData.put("indicator_symbol", indicatorSymbol);
-			jsonData.put("agent_name", agentName);
-			jsonData.put("is_train", isTrain);
-			jsonData.put("model_version", modelVersion);
+    // public boolean initInfo(
+    //     String indicatorSymbol,
+    //     String agentName,
+    //     boolean isTrain,
+    //     String modelVersion
+    // ) {
+	// 	// 将参数传给Python端
+	// 	try {
+	// 		JSONObject jsonData = new JSONObject();
+	// 		jsonData.put("indicator_symbol", indicatorSymbol);
+	// 		jsonData.put("agent_name", agentName);
+	// 		jsonData.put("is_train", isTrain);
+	// 		jsonData.put("model_version", modelVersion);
 
-			String jsonContent = jsonData.toString();
-			HttpPost httpPost = new HttpPost(initInfoUrl);
-			httpPost.setHeader("Content-Type", "application/json");
-			StringEntity entity = new StringEntity(jsonContent);
-			httpPost.setEntity(entity);
-			CloseableHttpResponse response = httpClient.execute(httpPost);
-			HttpEntity responseEntity = response.getEntity();
+	// 		String jsonContent = jsonData.toString();
+	// 		HttpPost httpPost = new HttpPost(initInfoUrl);
+	// 		httpPost.setHeader("Content-Type", "application/json");
+	// 		StringEntity entity = new StringEntity(jsonContent);
+	// 		httpPost.setEntity(entity);
+	// 		CloseableHttpResponse response = httpClient.execute(httpPost);
+	// 		HttpEntity responseEntity = response.getEntity();
 
-			if (responseEntity != null) {
-				String jsonResponse = EntityUtils.toString(responseEntity);
-				JSONObject jsonObject = JSON.parseObject(jsonResponse);
-				boolean success = jsonObject.getBoolean("success");
-                return success;
-			}
-		} catch (ParseException | IOException e) {
-			e.printStackTrace();
-		}
-		return false;
-	}
+	// 		if (responseEntity != null) {
+	// 			String jsonResponse = EntityUtils.toString(responseEntity);
+	// 			JSONObject jsonObject = JSON.parseObject(jsonResponse);
+	// 			boolean success = jsonObject.getBoolean("success");
+    //             return success;
+	// 		}
+	// 	} catch (ParseException | IOException e) {
+	// 		e.printStackTrace();
+	// 	}
+	// 	return false;
+	// }
 
-    public int getAction(BarField bar, double lastReward) {
+    // public int getAction(BarField bar, double lastReward) {
 
-		try {
-			JSONObject jsonData = new JSONObject();
-			jsonData.put("unified_symbol", bar.getUnifiedSymbol());
-			jsonData.put("open_price", bar.getOpenPrice());
-			jsonData.put("high_price", bar.getHighPrice());
-			jsonData.put("low_price", bar.getLowPrice());
-			jsonData.put("close_price", bar.getClosePrice());
-			jsonData.put("last_reward", lastReward);
-			String jsonContent = jsonData.toString();
-			HttpPost httpPost = new HttpPost(getActionUrl);
-			httpPost.setHeader("Content-Type", "application/json");
-			StringEntity entity = new StringEntity(jsonContent);
-			httpPost.setEntity(entity);
-			CloseableHttpResponse response = httpClient.execute(httpPost);
-			HttpEntity responseEntity = response.getEntity();
+	// 	try {
+	// 		JSONObject jsonData = new JSONObject();
+	// 		jsonData.put("unified_symbol", bar.getUnifiedSymbol());
+	// 		jsonData.put("open_price", bar.getOpenPrice());
+	// 		jsonData.put("high_price", bar.getHighPrice());
+	// 		jsonData.put("low_price", bar.getLowPrice());
+	// 		jsonData.put("close_price", bar.getClosePrice());
+	// 		jsonData.put("last_reward", lastReward);
+	// 		String jsonContent = jsonData.toString();
+	// 		HttpPost httpPost = new HttpPost(getActionUrl);
+	// 		httpPost.setHeader("Content-Type", "application/json");
+	// 		StringEntity entity = new StringEntity(jsonContent);
+	// 		httpPost.setEntity(entity);
+	// 		CloseableHttpResponse response = httpClient.execute(httpPost);
+	// 		HttpEntity responseEntity = response.getEntity();
 
-			if (responseEntity != null) {
-				String jsonResponse = EntityUtils.toString(responseEntity);
-				JSONObject jsonObject = JSON.parseObject(jsonResponse);
+	// 		if (responseEntity != null) {
+	// 			String jsonResponse = EntityUtils.toString(responseEntity);
+	// 			JSONObject jsonObject = JSON.parseObject(jsonResponse);
 				
-				Integer actionID = jsonObject.getInteger("action"); // 0: 持仓；1：买；2: 卖
-				return actionID;
+	// 			Integer actionID = jsonObject.getInteger("action"); // 0: 持仓；1：买；2: 卖
+	// 			return actionID;
 
-			}
-		} catch (ParseException | IOException e) {
-			e.printStackTrace();
-		}
-		return 0;
-	}
+	// 		}
+	// 	} catch (ParseException | IOException e) {
+	// 		e.printStackTrace();
+	// 	}
+	// 	return 0;
+	// }
 
-    public double getReward(BarField bar, BarField lastBar, int actionID, String rewardType) {
-        return RLReward.rewardGenerator(bar, lastBar, actionID, rewardType);
-    }
+    // public double getReward(BarField bar, BarField lastBar, int actionID, String rewardType) {
+    //     return RLReward.rewardGenerator(bar, lastBar, actionID, rewardType);
+    // }
 }
