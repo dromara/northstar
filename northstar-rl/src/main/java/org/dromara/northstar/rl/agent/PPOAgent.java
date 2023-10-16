@@ -28,6 +28,7 @@ public class PPOAgent implements Agent {
         this.isTrain = agentDescription.isTrain();
     }
     
+    @Override
     public JSONObject createAgent() {
         JSONObject jsonData = new JSONObject();
         jsonData.put("indicator_symbol", this.indicatorSymbol);

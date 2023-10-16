@@ -1,6 +1,7 @@
 package org.dromara.northstar.rl.reward;
 
 import com.alibaba.fastjson2.JSONObject;
+import xyz.redtorch.pb.CoreField.BarField;
 
 public class DummyReward implements Reward{
     private String rewardType;
@@ -9,13 +10,19 @@ public class DummyReward implements Reward{
         this.rewardType = dummyRewardDescription.getRewardType();
     }
 
+    @Override
     public JSONObject createReward() {
         JSONObject rewardData = new JSONObject();
         rewardData.put("rewardType", this.rewardType);
         return rewardData;
     }
     
-    public double getReward() {
-        return 0.0;
+    @Override
+    public JSONObject getReward(BarField bar, BarField lastBar) {
+        double reward = 0;
+        JSONObject rewardData = new JSONObject();
+        rewardData.put("reward", reward);
+        return rewardData;
     }
+
 }

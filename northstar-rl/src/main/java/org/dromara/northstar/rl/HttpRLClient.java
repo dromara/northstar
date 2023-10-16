@@ -66,7 +66,7 @@ public class HttpRLClient {
         JSONObject stateData = this.state.getState(bar);
         JSONObject rewardData = this.reward.getReward(bar, lastBar);
 
-        JSONObject mergedData = mergeJSON(stateData, rewardData)
+        JSONObject mergedData = mergeJSON(stateData, rewardData);
         try {
             HttpPost httpPost = new HttpPost(getActionUrl);
             httpPost.setHeader("Content-Type", "application/json");
