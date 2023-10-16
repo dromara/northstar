@@ -1,6 +1,6 @@
 package org.dromara.northstar.rl.reward;
 
 public interface Reward {
-    
-    public double getReward();
+
+    public double createReward();
 }
