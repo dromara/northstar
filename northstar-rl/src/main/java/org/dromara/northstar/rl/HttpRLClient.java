@@ -4,8 +4,7 @@ public class HttpRLClient {
     public boolean createClient(
         State state,
         Reward reward,
-        Agent agent,
-        AgentDescription agentDescription,
+        Agent agent
     ) {
 
     }
