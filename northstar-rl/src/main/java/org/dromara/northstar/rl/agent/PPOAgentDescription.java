@@ -11,7 +11,8 @@ import lombok.NoArgsConstructor;
 @Data
 public class PPOAgentDescription {
 
-    private String indicatorSymbol;
+    @Builder.Default
+    private String indicatorSymbol = "hello";
 
     @Builder.Default
     private String agentName = "ppo";

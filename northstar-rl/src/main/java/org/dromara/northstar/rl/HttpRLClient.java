@@ -19,7 +19,6 @@ import xyz.redtorch.pb.CoreField.BarField;
 public class HttpRLClient {
     protected String getActionUrl = "http://localhost:5001/get-action";
 	protected String initInfoUrl = "http://localhost:5001/init-info";
-    // protected CloseableHttpClient httpClient = HttpClients.createDefault();
     protected State state;
     protected Agent agent;
     protected Reward reward;
