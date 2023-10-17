@@ -19,7 +19,7 @@ import xyz.redtorch.pb.CoreField.BarField;
 public class HttpRLClient {
     protected String getActionUrl = "http://localhost:5001/get-action";
 	protected String initInfoUrl = "http://localhost:5001/init-info";
-    protected CloseableHttpClient httpClient = HttpClients.createDefault();
+    // protected CloseableHttpClient httpClient = HttpClients.createDefault();
     protected State state;
     protected Agent agent;
     protected Reward reward;
@@ -39,6 +39,7 @@ public class HttpRLClient {
         String jsonContent = mergedData.toString();
         
         try {
+            CloseableHttpClient httpClient = HttpClients.createDefault();
             HttpPost httpPost = new HttpPost(initInfoUrl);
             httpPost.setHeader("Content-Type", "application/json");
             StringEntity entity = new StringEntity(jsonContent);
@@ -66,6 +67,7 @@ public class HttpRLClient {
 
         JSONObject mergedData = mergeJSON(stateData, rewardData);
         try {
+            CloseableHttpClient httpClient = HttpClients.createDefault();
             HttpPost httpPost = new HttpPost(getActionUrl);
             httpPost.setHeader("Content-Type", "application/json");
             StringEntity entity = new StringEntity(mergedData.toString());
