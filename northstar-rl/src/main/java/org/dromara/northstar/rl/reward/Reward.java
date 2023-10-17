@@ -1,6 +1,6 @@
 package org.dromara.northstar.rl.reward;
 
-import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson.JSONObject;
 
 import xyz.redtorch.pb.CoreField.BarField;
 

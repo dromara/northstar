@@ -1,6 +1,6 @@
 package org.dromara.northstar.rl.agent;
 
-import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson.JSONObject;
 
 public class PPOAgent implements Agent {
     public String indicatorSymbol;

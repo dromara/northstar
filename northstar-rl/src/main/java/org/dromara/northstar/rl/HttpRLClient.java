@@ -1,7 +1,5 @@
 package org.dromara.northstar.rl;
 
-import javax.swing.text.html.parser.Entity;
-
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -13,8 +11,8 @@ import org.dromara.northstar.rl.agent.Agent;
 import org.dromara.northstar.rl.reward.Reward;
 import org.dromara.northstar.rl.state.State;
 
-import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 
 import xyz.redtorch.pb.CoreField.BarField;
 

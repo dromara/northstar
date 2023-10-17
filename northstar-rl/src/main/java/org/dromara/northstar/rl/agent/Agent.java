@@ -1,7 +1,7 @@
 package org.dromara.northstar.rl.agent;
 
 
-import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson.JSONObject;
 
 
 public interface Agent {
