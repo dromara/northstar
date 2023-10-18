@@ -15,7 +15,7 @@
     <div class="module-rt-wrapper">
       <div class="side-panel">
         <div class="side-panel_content">
-          <el-descriptions class="margin-top" :column="`${isMobile ? 2 : 3}`">
+          <el-descriptions class="margin-top panel-header" :column="`${isMobile ? 2 : 3}`">
             <template slot="title">
               模组用途
               <el-tag
@@ -25,7 +25,7 @@
                 >{{ { PLAYBACK: '回测', UAT: '模拟盘', PROD: '实盘' }[module.usage] }}</el-tag
               >
             </template>
-            <template v-if="!isMobile" slot="extra">
+            <template slot="extra">
               <el-switch
                 class="ml-10"
                 v-model="isManualUpdate"
@@ -38,6 +38,7 @@
                 >刷新数据</el-button
               >
               <el-button
+                v-if="!isMobile"
                 class="compact mb-10 ml-10"
                 icon="el-icon-download"
                 @click="exportDealRecord"
@@ -134,7 +135,7 @@
             </el-tab-pane>
             <el-tab-pane name="strategyInfo" label="策略信息">
               <div class="description-wrapper">
-                <el-descriptions class="margin-top" :column="`${isMobile ? 1 : 2}`">
+                <el-descriptions class="margin-top" column="2">
                   <el-descriptions-item v-for="(item, i) in strategyInfo" :label="item.name" :key="i">
                     <el-popover v-if="(item.value instanceof Array)"
                       placement="right"
@@ -796,10 +797,6 @@ export default {
   flex: 1;
   min-height: 150px;
 }
-.description-wrapper {
-  max-height: 250px;
-  overflow: auto;
-}
 .performance-min {
   position: relative;
   height: 280px;
@@ -859,17 +856,27 @@ export default {
     min-width: 520px;
     flex: 1;
   }
+  .description-wrapper {
+    max-height: 250px;
+    overflow: auto;
+  }
 }
 
 /* 移动端样式 */
 @media screen and (max-width: 660px) {
   .side-panel {
     width: 100%;
+    padding: 10px 0;
     flex: 1;
   }
-  .el-descriptions{
-    height: 185px;
-    overflow-y: auto;
+  .panel-header{
+    height: 30px;
+    min-height: 30px;
+    overflow: hidden;
+  }
+  .description-wrapper {
+    max-height: 180px;
+    overflow: auto;
   }
 }
 </style>

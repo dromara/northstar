@@ -12,6 +12,7 @@ import org.dromara.northstar.common.model.GatewayTypeDescription;
 import org.dromara.northstar.common.model.ResultBean;
 import org.dromara.northstar.gateway.GatewayMetaProvider;
 import org.dromara.northstar.gateway.IContractManager;
+import org.dromara.northstar.support.utils.NamingValidator;
 import org.dromara.northstar.web.service.GatewayService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
@@ -36,9 +37,12 @@ public class GatewayManagementController {
 	@Autowired
 	protected IContractManager contractMgr;
 	
+	private NamingValidator validator = new NamingValidator();
+	
 	@PostMapping
 	public ResultBean<Boolean> create(@RequestBody GatewayDescription gd) throws Exception {
 		Assert.notNull(gd, "网关配置对象不能为空");
+		Assert.isTrue(validator.isValid(gd.getGatewayId()), "网关名称仅支持中英文、数字、及下划线等字符");
 		return new ResultBean<>(gatewayService.createGateway(gd));
 	}
 	
@@ -51,6 +55,7 @@ public class GatewayManagementController {
 	@PutMapping
 	public ResultBean<Boolean> modify(@RequestBody GatewayDescription gd) throws Exception {
 		Assert.notNull(gd, "网关配置对象不能为空");
+		Assert.isTrue(validator.isValid(gd.getGatewayId()), "网关名称仅支持中英文、数字、及下划线等字符");
 		return new ResultBean<>(gatewayService.updateGateway(gd));
 	}
 	

@@ -120,6 +120,9 @@ public class ModuleContext implements IModuleContext{
 	/* unifiedSymbol -> barQ */
 	protected ConcurrentMap<String, Queue<BarField>> barBufQMap = new ConcurrentHashMap<>();
 	
+	/* unifiedSymbol -> barTime */
+	protected ConcurrentMap<String, Long> barFilterMap = new ConcurrentHashMap<>();
+	
 	/* indicator -> values */
 	protected ConcurrentMap<Indicator, Queue<TimeSeriesValue>> indicatorValBufQMap = new ConcurrentHashMap<>(); 
 	
@@ -288,7 +291,12 @@ public class ModuleContext implements IModuleContext{
 
 	@Override
 	public void onBar(BarField bar) {
+		if(barFilterMap.containsKey(bar.getUnifiedSymbol()) && barFilterMap.get(bar.getUnifiedSymbol()) >= bar.getActionTimestamp()) {
+			//过滤掉可能存在的重复数据
+			return;
+		}
 		getLogger().trace("分钟Bar信息: {} {} {} {}，最新价: {}", bar.getUnifiedSymbol(), bar.getActionDay(), bar.getActionTime(), bar.getActionTimestamp(), bar.getClosePrice());
+		barFilterMap.put(bar.getUnifiedSymbol(), bar.getActionTimestamp());
 		indicatorHelperSet.forEach(helper -> helper.onBar(bar));
 		registry.onBar(bar);		
 	}

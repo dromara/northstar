@@ -11,6 +11,7 @@ import org.dromara.northstar.common.model.ModuleDealRecord;
 import org.dromara.northstar.common.model.ModuleDescription;
 import org.dromara.northstar.common.model.ModuleRuntimeDescription;
 import org.dromara.northstar.common.model.ResultBean;
+import org.dromara.northstar.support.utils.NamingValidator;
 import org.dromara.northstar.web.service.ModuleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
@@ -31,6 +32,8 @@ public class ModuleController {
 
 	@Autowired
 	private ModuleService service;
+	
+	private NamingValidator validator = new NamingValidator();
 	
 	/**
 	 * 查询所有定义的信号策略
@@ -62,6 +65,7 @@ public class ModuleController {
 	@PostMapping
 	public ResultBean<ModuleDescription> createModule(@RequestBody ModuleDescription module) throws Exception{
 		Assert.notNull(module, "模组对象不能为空");
+		Assert.isTrue(validator.isValid(module.getModuleName()), "模组名称仅支持中英文、数字、及下划线等字符");
 		return new ResultBean<>(service.createModule(module));
 	}
 	
@@ -74,6 +78,7 @@ public class ModuleController {
 	@PutMapping
 	public ResultBean<ModuleDescription> updateModule(@RequestBody ModuleDescription module, boolean reset) throws Exception{
 		Assert.notNull(module, "模组对象不能为空");
+		Assert.isTrue(validator.isValid(module.getModuleName()), "模组名称仅支持中英文、数字、及下划线等字符");
 		return new ResultBean<>(service.modifyModule(module, reset));
 	}
 	

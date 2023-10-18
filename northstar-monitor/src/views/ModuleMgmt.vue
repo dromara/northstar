@@ -11,13 +11,14 @@
       :module="curTableIndex > -1 ? curModule : ''"
       :moduleRuntimeSrc="curTableIndex > -1 ? curModule.runtime : ''"
     />
-    <div v-if="isMobile">
-      <el-input placeholder="可按模组名称筛选" prefix-icon="el-icon-search" v-model="query" class="card-searcher" clearable>
+    <div class="mobile-header" v-if="isMobile">
+      <el-input placeholder="可按模组名称筛选" prefix-icon="el-icon-search" v-model="query" clearable>
       </el-input>
+      <el-button icon="el-icon-plus" title="新建模组" size="mini" @click.native="handleCreate"></el-button>
     </div>
     <div v-if="isMobile" class="card-wrapper">
       <el-card class="box-card" v-for="(item, i) in filterModuleList" :key="i">
-        <el-descriptions :title="item.moduleName" :column="1" border>
+        <el-descriptions :title="item.moduleName" :column="2" border >
           <el-descriptions-item label="持仓状态">
             <el-tag size="small">{{
             !item.runtime ? '-' :
@@ -39,29 +40,52 @@
           <el-descriptions-item label="模组周期">
             {{ `${item.numOfMinPerBar} 分钟` }}
           </el-descriptions-item>
+          <el-descriptions-item label="交易策略">
+            {{ item.strategySetting.componentMeta.name }}
+          </el-descriptions-item>
+          <el-descriptions-item label="绑定合约">
+            {{
+              (() => {
+                return item.moduleAccountSettingsDescription
+                  .map((item) => item.bindedContracts.map(item => item.name).join('，'))
+                  .join('；')
+              })()
+            }}
+          </el-descriptions-item>
         </el-descriptions>
         <div class="card-buttons">
           <el-button
-              v-if="item.runtime"
-              style="float: right; padding: 3px 5px; margin-left: 8px"
-              @click="handlePerf(i, item)"
-              >运行状态</el-button
-            >
-            <el-button
               v-if="item.runtime && item.runtime.enabled"
-              style="float: right; padding: 3px 5px; margin: 0"
               type="danger"
               @click.native="toggle(i, item)"
-              >停用</el-button
-            >
-            <el-button
+              >停用
+          </el-button>
+          <el-button
               v-if="item.runtime && !item.runtime.enabled"
-              style="float: right; padding: 3px 5px; margin: 0"
               type="success"
               @click.native="toggle(i, item)"
             >
               启用
-            </el-button>
+          </el-button>
+          <el-button
+              v-if="item.runtime"
+              @click="handlePerf(i, item)"
+              >运行状态
+          </el-button>
+          <el-button
+            v-if="item.runtime"
+            size="mini"
+            @click="handleRow(i, item)"
+            >{{ item.runtime.enabled ? '查看' : '修改' }}</el-button
+          >
+          <el-popconfirm
+            v-if="!item.runtime || !item.runtime.enabled"
+            class="ml-10"
+            title="确定移除吗？"
+            @confirm="handleDelete(i, item)"
+          >
+            <el-button slot="reference" size="mini" type="danger"> 删除 </el-button>
+          </el-popconfirm>
         </div>
       </el-card>
     </div>
@@ -159,7 +183,7 @@
       </el-table-column>
       <el-table-column align="center" width="400px">
         <template slot="header">
-          <el-button id="createModule" size="mini" type="primary" @click="handleCreate">新建</el-button>
+          <el-button id="createModule" size="mini" type="primary" @click.native="handleCreate">新建</el-button>
           <el-popconfirm
             v-if="env==='development'"
             class="ml-10"
@@ -430,27 +454,37 @@ export default {
     justify-content: space-between;
     overflow: auto;
   }
-  .card-searcher{
-    margin-bottom: 10px;
-    max-height: 28px;
-  }
   .box-card{
-    width: 48%;
+    width: 100%;
     margin-bottom: 20px;
     max-height: 200px;
   }
   .card-buttons{
     margin: 10px 0px;
-    height: 20px;
+    display: flex;
+    justify-content: flex-end;
   }
   .el-card__header{
     padding: 12px 20px;
   }
   .el-card__body{
-    padding-bottom: 10px;
+    padding: 16px 16px 10px 16px;
   }
   .el-descriptions__header{
     padding-bottom: 10px;
+  }
+  .mobile-header{
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 20px;
+  }
+  .mobile-header div:first-child{
+    margin-right: 40px;
+  }
+  td {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: clip;
   }
 }
 </style>
