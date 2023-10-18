@@ -11,9 +11,10 @@
       :module="curTableIndex > -1 ? curModule : ''"
       :moduleRuntimeSrc="curTableIndex > -1 ? curModule.runtime : ''"
     />
-    <div v-if="isMobile">
-      <el-input placeholder="可按模组名称筛选" prefix-icon="el-icon-search" v-model="query" class="card-searcher" clearable>
+    <div class="mobile-header" v-if="isMobile">
+      <el-input placeholder="可按模组名称筛选" prefix-icon="el-icon-search" v-model="query" clearable>
       </el-input>
+      <el-button icon="el-icon-plus" title="新建模组" size="mini" @click.native="handleCreate"></el-button>
     </div>
     <div v-if="isMobile" class="card-wrapper">
       <el-card class="box-card" v-for="(item, i) in filterModuleList" :key="i">
@@ -40,7 +41,7 @@
             {{ `${item.numOfMinPerBar} 分钟` }}
           </el-descriptions-item>
           <el-descriptions-item label="交易策略">
-            {{ item.strategySetting.componentMeta.name | truncateDesc }}
+            {{ item.strategySetting.componentMeta.name }}
           </el-descriptions-item>
           <el-descriptions-item label="绑定合约">
             {{
@@ -57,26 +58,34 @@
               v-if="item.runtime && item.runtime.enabled"
               type="danger"
               @click.native="toggle(i, item)"
-              >停用</el-button
-            >
-            <el-button
+              >停用
+          </el-button>
+          <el-button
               v-if="item.runtime && !item.runtime.enabled"
               type="success"
               @click.native="toggle(i, item)"
             >
               启用
-            </el-button>
+          </el-button>
           <el-button
               v-if="item.runtime"
               @click="handlePerf(i, item)"
-              >运行状态</el-button
-            >
-            <el-button
+              >运行状态
+          </el-button>
+          <el-button
             v-if="item.runtime"
             size="mini"
             @click="handleRow(i, item)"
             >{{ item.runtime.enabled ? '查看' : '修改' }}</el-button
           >
+          <el-popconfirm
+            v-if="!item.runtime || !item.runtime.enabled"
+            class="ml-10"
+            title="确定移除吗？"
+            @confirm="handleDelete(i, item)"
+          >
+            <el-button slot="reference" size="mini" type="danger"> 删除 </el-button>
+          </el-popconfirm>
         </div>
       </el-card>
     </div>
@@ -174,7 +183,7 @@
       </el-table-column>
       <el-table-column align="center" width="400px">
         <template slot="header">
-          <el-button id="createModule" size="mini" type="primary" @click="handleCreate">新建</el-button>
+          <el-button id="createModule" size="mini" type="primary" @click.native="handleCreate">新建</el-button>
           <el-popconfirm
             v-if="env==='development'"
             class="ml-10"
@@ -267,11 +276,6 @@ export default {
       lock: false,
       isMobile: false,
       query: ''
-    }
-  },
-  filters:{
-    truncateDesc: function(val){
-      return val.length < 5 ? val : val.substring(0,4) + '..'
     }
   },
   computed: {
@@ -450,10 +454,6 @@ export default {
     justify-content: space-between;
     overflow: auto;
   }
-  .card-searcher{
-    margin-bottom: 10px;
-    max-height: 28px;
-  }
   .box-card{
     width: 100%;
     margin-bottom: 20px;
@@ -472,6 +472,19 @@ export default {
   }
   .el-descriptions__header{
     padding-bottom: 10px;
+  }
+  .mobile-header{
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 20px;
+  }
+  .mobile-header div:first-child{
+    margin-right: 40px;
+  }
+  td {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: clip;
   }
 }
 </style>

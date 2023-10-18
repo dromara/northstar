@@ -6,7 +6,7 @@
     v-loading="loading"
     :close-on-click-modal="readOnly"
     element-loading-background="rgba(0, 0, 0, 0.3)"
-    :width="`${isMobile ? 'calc(100% - 30px)' : '540px'}`"
+    :width="`${isMobile ? '80%' : '540px'}`"
     @close="close"
   >
     <ContractFinder :visible.sync="contractFinderVisible" />
@@ -301,7 +301,7 @@ export default {
       return !!this.module
     },
     compactMode(){
-      return window.innerWidth < 450
+      return this.isMobile && window.innerWidth < 450
     },
     tradeStrategyOptions() {
       if (this.showDemoStrategy) {
@@ -324,10 +324,10 @@ export default {
         Object.assign(this.$data, this.$options.data())
         this.showDemoStrategy = this.isUpdateMode
         await this.initData()
+        this.isMobile = this.listener.isMobile()
         if (!this.module) {
           return
         }
-        this.isMobile = this.listener.isMobile()
         this.form = this.module
         this.form.strategySetting.value = this.form.strategySetting.componentMeta.name
         const selectedAcc = this.module.moduleAccountSettingsDescription.map((item) => this.accountOptions.filter(acc => acc.gatewayId === item.accountGatewayId)[0])
