@@ -1,5 +1,6 @@
 package org.dromara.northstar.config;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -87,6 +88,7 @@ class InternalEventHandlerConfig {
 		if(repo.getSubEvents() != null) {
 			return records.stream().collect(Collectors.toSet());
 		}
-		return Set.of(NorthstarEventType.LOGGED_IN, NorthstarEventType.LOGGED_OUT, NorthstarEventType.ORDER, NorthstarEventType.TRADE, NorthstarEventType.NOTICE);
+		Set<NorthstarEventType> defaultEvents = Set.of(NorthstarEventType.LOGGED_IN, NorthstarEventType.LOGGED_OUT, NorthstarEventType.ORDER, NorthstarEventType.TRADE, NorthstarEventType.NOTICE);
+		return new HashSet<>(defaultEvents);
 	}
 }
