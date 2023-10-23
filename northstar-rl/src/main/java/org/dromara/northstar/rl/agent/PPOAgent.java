@@ -3,6 +3,7 @@ package org.dromara.northstar.rl.agent;
 import com.alibaba.fastjson.JSONObject;
 
 public class PPOAgent implements Agent {
+    public String modelPath;
     public String indicatorSymbol;
     public String agentName;
     public int stateDim;
@@ -16,6 +17,7 @@ public class PPOAgent implements Agent {
     public String modelVersion;
 
     public PPOAgent(PPOAgentDescription agentDescription) {
+        this.modelPath = agentDescription.getModelPath();
         this.indicatorSymbol = agentDescription.getIndicatorSymbol();
         this.agentName = agentDescription.getAgentName();
         this.stateDim = agentDescription.getStateDim();
@@ -31,16 +33,22 @@ public class PPOAgent implements Agent {
     @Override
     public JSONObject createAgent() {
         JSONObject agentData = new JSONObject();
-        agentData.put("indicatorSymbol", this.indicatorSymbol);
-        agentData.put("agentName", this.agentName);
-        agentData.put("stateDim", this.stateDim);
-        agentData.put("actionDim", this.actionDim);
-        agentData.put("lrActor", this.lrActor);
-        agentData.put("lrCritic", this.lrCritic);
-        agentData.put("gamma", this.gamma);
-        agentData.put("kEpochs", this.kEpochs);
-        agentData.put("epsClip", this.epsClip);
-        agentData.put("isTrain", this.isTrain);
+        if (this.isTrain) {
+            agentData.put("indicatorSymbol", this.indicatorSymbol);
+            agentData.put("agentName", this.agentName);
+            agentData.put("stateDim", this.stateDim);
+            agentData.put("actionDim", this.actionDim);
+            agentData.put("lrActor", this.lrActor);
+            agentData.put("lrCritic", this.lrCritic);
+            agentData.put("gamma", this.gamma);
+            agentData.put("kEpochs", this.kEpochs);
+            agentData.put("epsClip", this.epsClip);
+            agentData.put("isTrain", this.isTrain);
+        }
+        else {
+            agentData.put("modelPath", this.modelPath);
+            agentData.put("isTrain", this.isTrain);
+        }
         return agentData;
     }
 }

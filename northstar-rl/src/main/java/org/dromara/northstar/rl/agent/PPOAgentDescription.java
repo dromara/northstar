@@ -12,7 +12,10 @@ import lombok.NoArgsConstructor;
 public class PPOAgentDescription {
 
     @Builder.Default
-    private String indicatorSymbol = "hello";
+    private String modelPath = "hello";
+
+    @Builder.Default
+    private String indicatorSymbol = "rb0000@SHFE@FUTURES";
 
     @Builder.Default
     private String agentName = "ppo";
@@ -39,7 +42,7 @@ public class PPOAgentDescription {
     private double epsClip = 0.2;
 
     @Builder.Default
-    private boolean isTrain = false;
+    private boolean isTrain = true;
 
     @Builder.Default
     private String modelVersion = "1";
