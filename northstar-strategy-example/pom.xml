@@ -16,6 +16,11 @@
 		<artifactId>northstar-api</artifactId>
 	</dependency>
 	<dependency>
+		<groupId>org.dromara</groupId>
+		<artifactId>northstar-rl</artifactId>
+		<version>6.2.0.Alpha</version>
+	</dependency>
+	<dependency>
 	    <groupId>org.junit.jupiter</groupId>
 	    <artifactId>junit-jupiter</artifactId>
 	    <version>5.8.2</version>

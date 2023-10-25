@@ -31,7 +31,7 @@ import lombok.extern.slf4j.Slf4j;
  *
  */
 @Slf4j
-public abstract class AbstractSerialTrainer extends AbstractTrainer implements RLAgentTrainingContext{
+public abstract class AbstractSerialTrainer extends AbstractTrainer implements RLAgentTrainingContext {
 
 	protected AbstractSerialTrainer(ObjectManager<Gateway> gatewayMgr, ObjectManager<IModule> moduleMgr,
 			IContractManager contractMgr, IGatewayService gatewayService, IModuleService moduleService) {
