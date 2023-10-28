@@ -3,7 +3,6 @@ package org.dromara.northstar.gateway.playback;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -20,8 +19,6 @@ import org.dromara.northstar.data.IPlaybackRuntimeRepository;
 import org.dromara.northstar.gateway.Contract;
 import org.dromara.northstar.gateway.GatewayMetaProvider;
 import org.dromara.northstar.gateway.IContractManager;
-import org.dromara.northstar.gateway.playback.utils.PlaybackClock;
-import org.dromara.northstar.gateway.playback.utils.PlaybackDataLoader;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -34,8 +31,6 @@ class PlaybackGatewayFactoryTest {
 	
 	IPlaybackRuntimeRepository rtRepo = mock(IPlaybackRuntimeRepository.class);
 	FastEventEngine feEngine = mock(FastEventEngine.class);
-	PlaybackDataLoader loader = mock(PlaybackDataLoader.class);
-	PlaybackClock clock = mock(PlaybackClock.class);
 	PlaybackDataServiceManager dsMgr = mock(PlaybackDataServiceManager.class);
 	
 	LocalDateTime ldt = LocalDateTime.of(2022, 6, 29, 9, 0);
@@ -61,8 +56,6 @@ class PlaybackGatewayFactoryTest {
 	
 	@BeforeEach
 	void prepare() {
-		when(clock.nextMarketMinute()).thenReturn(ldt.plusMinutes(1));
-		when(loader.loadMinuteData(eq(ldt), eq(contract))).thenReturn(List.of(bar));
 		when(contractMgr.getContract(any(), anyString())).thenReturn(c);
 		when(c.contractField()).thenReturn(contract);
 		
