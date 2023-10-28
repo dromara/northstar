@@ -11,6 +11,7 @@ import java.util.TimerTask;
 import java.util.concurrent.CountDownLatch;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.dromara.northstar.common.IDataServiceManager;
 import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.constant.DateTimeConstant;
@@ -88,7 +89,12 @@ public class PlaybackContextV2 implements IPlaybackContext{
 					return;
 				}
 				// 预加载数据
-				if(!hasPreLoaded) {	
+				if(!hasPreLoaded) {
+					if(StringUtils.equals(settings.getStartDate(), settings.getPreStartDate())) {
+						hasPreLoaded = true;
+						playbackTradeDate = LocalDate.parse(settings.getStartDate(), DateTimeConstant.D_FORMAT_INT_FORMATTER);
+						return;
+					}
 					feEngine.emitEvent(NorthstarEventType.NOTICE, NoticeField.newBuilder()
 							.setContent(String.format("[%s]-当前处于预热阶段，请稍等……", gatewayId))
 							.setStatus(CommonStatusEnum.COMS_WARN)
