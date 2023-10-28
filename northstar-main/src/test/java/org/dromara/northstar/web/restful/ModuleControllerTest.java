@@ -1,6 +1,7 @@
 package org.dromara.northstar.web.restful;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -137,6 +138,7 @@ class ModuleControllerTest {
 		Contract c = mock(Contract.class);
 		when(c.channelType()).thenReturn(ChannelType.PLAYBACK);
 		when(mktCenter.getContract(any(Identifier.class))).thenReturn(c);
+		when(mktCenter.getContract(any(ChannelType.class), anyString())).thenReturn(c);
 		when(c.contractField()).thenReturn(ContractField.newBuilder().setChannelType("PLAYBACK").setUnifiedSymbol("rb0000@SHFE@FUTURES").build());
 		when(c.tradeTimeDefinition()).thenReturn(new GenericTradeTime());
 		

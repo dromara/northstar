@@ -497,6 +497,7 @@ export default {
     },
     holdingVisibleOnChart: function (val) {
       if (val) {
+        console.log('显示持仓线')
         this.visualizeTradeRecords()
       } else {
         if (this.chart) {
@@ -726,7 +727,7 @@ export default {
     visualizeTradeRecords() {
       this.chart.removeShape()
       this.dealRecords
-        .filter((deal) => deal.closeTrade.contract.unifiedsymbol === this.unifiedSymbolOfChart)
+        .filter((deal) => deal.contractName === this.unifiedSymbolOfChart)
         .filter((deal) => {
           const dealTime = deal.closeTrade.tradetimestamp
           const dataHeadTime = this.barDataMap[this.unifiedSymbolOfChart].length

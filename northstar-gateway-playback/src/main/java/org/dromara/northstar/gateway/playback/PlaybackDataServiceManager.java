@@ -5,9 +5,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -154,7 +154,7 @@ public class PlaybackDataServiceManager implements IDataServiceManager {
 		if(Objects.isNull(dataSet) || Objects.isNull(dataSet.getFields())) {
 			return Collections.emptyList();
 		}
-		List<String> resultList = new LinkedList<>();
+		List<String> resultList = new ArrayList<>();
 		Map<String, Integer> keyIndexMap = new HashMap<>();
 		for(int i=0; i<dataSet.getFields().length; i++) {
 			keyIndexMap.put(dataSet.getFields()[i], i);
@@ -177,7 +177,7 @@ public class PlaybackDataServiceManager implements IDataServiceManager {
 		if(Objects.isNull(dataSet.getFields())) {
 			return Collections.emptyList();
 		}
-		LinkedList<ContractField> resultList = new LinkedList<>();
+		List<ContractField> resultList = new ArrayList<>();
 		Map<String, Integer> fieldIndexMap = new HashMap<>();
 		for(int i=0; i<dataSet.getFields().length; i++) {
 			fieldIndexMap.put(dataSet.getFields()[i], i);
@@ -278,7 +278,7 @@ public class PlaybackDataServiceManager implements IDataServiceManager {
 			log.warn("数据服务查询不到相关数据");
 			return Collections.emptyList();
 		}
-		LinkedList<BarField> resultList = new LinkedList<>();
+		List<BarField> resultList = new ArrayList<>();
 		Map<String, Integer> fieldIndexMap = new HashMap<>();
 		for(int i=0; i<dataSet.getFields().length; i++) {
 			fieldIndexMap.put(dataSet.getFields()[i], i);
@@ -314,7 +314,7 @@ public class PlaybackDataServiceManager implements IDataServiceManager {
 					openInterest = Double.parseDouble(getValue("oi", fieldIndexMap, item, "0"));
 					openInterestDelta = Double.parseDouble(getValue("oi_chg", fieldIndexMap, item, "0"));
 				}
-				resultList.addFirst(BarField.newBuilder()
+				resultList.add(BarField.newBuilder()
 						.setUnifiedSymbol(contract.getUnifiedSymbol())
 						.setTradingDay(tradingDay)
 						.setActionDay(actionDay)
@@ -325,7 +325,7 @@ public class PlaybackDataServiceManager implements IDataServiceManager {
 						.setLowPrice(normalizeValue(Double.parseDouble(getValue("low", fieldIndexMap, item, "0")), contract.getPriceTick()))
 						.setOpenPrice(normalizeValue(Double.parseDouble(getValue("open", fieldIndexMap, item, "0")), contract.getPriceTick()))
 						.setGatewayId(contract.getGatewayId())
-						.setChannelType(contract.getChannelType())
+						.setChannelType(ChannelType.PLAYBACK.toString())
 						.setOpenInterestDelta(openInterestDelta)
 						.setOpenInterest(openInterest)
 						.setVolume((long) Double.parseDouble(getValue("vol", fieldIndexMap, item, "0")))
