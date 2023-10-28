@@ -13,9 +13,6 @@ import org.dromara.northstar.data.IPlaybackRuntimeRepository;
 import org.dromara.northstar.gateway.Gateway;
 import org.dromara.northstar.gateway.GatewayFactory;
 import org.dromara.northstar.gateway.IContractManager;
-import org.dromara.northstar.gateway.playback.utils.CtpPlaybackClock;
-import org.dromara.northstar.gateway.playback.utils.PlaybackClock;
-import org.dromara.northstar.gateway.playback.utils.PlaybackDataLoader;
 
 import com.alibaba.fastjson.JSON;
 
@@ -45,9 +42,7 @@ public class PlaybackGatewayFactory implements GatewayFactory{
 		LocalDateTime ldt = Objects.nonNull(playbackRt) 
 				? playbackRt.getPlaybackTimeState() 
 				: LocalDateTime.of(LocalDate.parse(settings.getStartDate(), DateTimeConstant.D_FORMAT_INT_FORMATTER), LocalTime.of(20, 0));
-		PlaybackClock clock = new CtpPlaybackClock(ldt);
-		PlaybackDataLoader loader = new PlaybackDataLoader(gatewayDescription.getGatewayId(), dsMgr);
-		PlaybackContext context = new PlaybackContext(gatewayDescription, ldt, clock, loader, feEngine, rtRepo, contractMgr);
+		IPlaybackContext context = new PlaybackContextV2(gatewayDescription, ldt, dsMgr, feEngine, rtRepo, contractMgr);
 		return new PlaybackGatewayAdapter(context, gatewayDescription);
 	}
 	

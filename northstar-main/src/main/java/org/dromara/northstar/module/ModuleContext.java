@@ -270,8 +270,9 @@ public class ModuleContext implements IModuleContext{
 	
 	@Override
 	public void onTick(TickField tick) {
-		getLogger().trace("TICK信息: {} {} {} {}，最新价: {}", 
-				tick.getUnifiedSymbol(), tick.getActionDay(), tick.getActionTime(), tick.getActionTimestamp(), tick.getLastPrice());
+		getLogger().trace("TICK信息: {} {} {} {}，最新价：{}，累计成交：{}，成交量：{}，累计持仓：{}，持仓量：{}", 
+				tick.getUnifiedSymbol(), tick.getActionDay(), tick.getActionTime(), tick.getActionTimestamp(), 
+				tick.getLastPrice(), tick.getVolume(), tick.getVolumeDelta(), tick.getOpenInterest(), tick.getOpenInterestDelta());
 		if(tradeIntentMap.containsKey(tick.getUnifiedSymbol())) {
 			TradeIntent tradeIntent = tradeIntentMap.get(tick.getUnifiedSymbol());
 			tradeIntent.onTick(tick);
@@ -295,7 +296,8 @@ public class ModuleContext implements IModuleContext{
 			//过滤掉可能存在的重复数据
 			return;
 		}
-		getLogger().trace("分钟Bar信息: {} {} {} {}，最新价: {}", bar.getUnifiedSymbol(), bar.getActionDay(), bar.getActionTime(), bar.getActionTimestamp(), bar.getClosePrice());
+		getLogger().trace("分钟Bar信息: {} {} {} {}，最新价: {}，成交量：{}，累计持仓：{}，持仓量：{}", bar.getUnifiedSymbol(), bar.getActionDay(), bar.getActionTime(), bar.getActionTimestamp(), 
+				bar.getClosePrice(), bar.getVolume(), bar.getOpenInterest(), bar.getOpenInterestDelta());
 		barFilterMap.put(bar.getUnifiedSymbol(), bar.getActionTimestamp());
 		indicatorHelperSet.forEach(helper -> helper.onBar(bar));
 		registry.onBar(bar);		

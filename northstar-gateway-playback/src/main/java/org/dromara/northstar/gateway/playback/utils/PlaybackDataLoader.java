@@ -15,6 +15,7 @@ import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.ContractField;
 
 @Slf4j
+@Deprecated(forRemoval = true)
 public class PlaybackDataLoader {
 
 	private PlaybackDataServiceManager dsMgr;

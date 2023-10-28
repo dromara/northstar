@@ -2,6 +2,7 @@ package org.dromara.northstar.gateway.playback.utils;
 
 import java.time.LocalDateTime;
 
+@Deprecated(forRemoval = true)
 public interface PlaybackClock {
 
 	/**

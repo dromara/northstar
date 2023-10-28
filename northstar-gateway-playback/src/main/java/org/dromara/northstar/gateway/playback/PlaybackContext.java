@@ -44,7 +44,6 @@ import org.dromara.northstar.gateway.playback.utils.PlaybackDataLoader;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import xyz.redtorch.pb.CoreEnum.CommonStatusEnum;
 import xyz.redtorch.pb.CoreField.BarField;
@@ -58,7 +57,8 @@ import xyz.redtorch.pb.CoreField.TickField;
  *
  */
 @Slf4j
-public class PlaybackContext {
+@Deprecated(forRemoval = true)
+public class PlaybackContext implements IPlaybackContext{
 	
 	private IPlaybackRuntimeRepository rtRepo;
 	
@@ -83,7 +83,7 @@ public class PlaybackContext {
 	private Table<ContractField, LocalDate, BarField> tradeDayBarMap = HashBasedTable.create();
 	
 	private Map<ContractField, TickSimulationAlgorithm> algoMap = new HashMap<>();
-	@Setter
+
 	private Runnable onStopCallback;
 	
 	// 回放时间戳状态
@@ -128,6 +128,7 @@ public class PlaybackContext {
 	 * 开始回放
 	 * @throws InterruptedException 
 	 */
+	@Override
 	public synchronized void start() {
 		isRunning = true;
 		if(isLoading) {
@@ -390,6 +391,7 @@ public class PlaybackContext {
 	/**
 	 * 暂停回放
 	 */
+	@Override
 	public synchronized void stop() {
 		isRunning = false;
 		timer.cancel();
@@ -403,8 +405,14 @@ public class PlaybackContext {
 	 * 是否在运行
 	 * @return
 	 */
+	@Override
 	public boolean isRunning() {
 		return isRunning;
+	}
+
+	@Override
+	public void onStopCallback(Runnable callback) {
+		onStopCallback = callback;
 	}
 	
 }

@@ -9,6 +9,7 @@ import java.time.LocalTime;
  * @author KevinHuangwl
  *
  */
+@Deprecated(forRemoval = true)
 public class CtpPlaybackClock implements PlaybackClock {
 	
 	private LocalDateTime ldt;

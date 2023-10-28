@@ -9,16 +9,16 @@ import xyz.redtorch.pb.CoreField.ContractField;
 
 public class PlaybackGatewayAdapter implements MarketGateway {
 	
-	private PlaybackContext ctx;
+	private IPlaybackContext ctx;
 	
 	private GatewayDescription gd;
 	
 	private ConnectionState connState = ConnectionState.DISCONNECTED;
 	
-	public PlaybackGatewayAdapter(PlaybackContext ctx, GatewayDescription gd) {
+	public PlaybackGatewayAdapter(IPlaybackContext ctx, GatewayDescription gd) {
 		this.ctx = ctx;
 		this.gd = gd;
-		ctx.setOnStopCallback(() -> connState = ConnectionState.DISCONNECTED);
+		ctx.onStopCallback(() -> connState = ConnectionState.DISCONNECTED);
 	}
 
 	@Override
