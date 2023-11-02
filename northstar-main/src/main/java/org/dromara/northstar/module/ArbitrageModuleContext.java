@@ -3,6 +3,7 @@ package org.dromara.northstar.module;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -191,8 +192,28 @@ public class ArbitrageModuleContext extends ModuleContext implements IModuleCont
 					}
 				});
 				mrd.getDataMap().put(combName, combBarArr);
-			} else {
-				getLogger().warn("多于两个合约时，无法进行价差处理");
+			} else if (contractMap.size() == 3) {
+				List<ContractField> contracts = contractMap.values().stream()
+						.sorted((a,b) -> a.getUnifiedSymbol().compareTo(b.getUnifiedSymbol()))
+						.toList();
+				ContractField near = contracts.get(0);
+				ContractField mid = contracts.get(1);
+				ContractField far = contracts.get(2);
+				Map<Long, BarField> midTimeBarMap = barBufQMap.get(mid.getUnifiedSymbol())
+						.stream()
+						.collect(Collectors.toMap(BarField::getActionTimestamp, bar -> bar));
+				Map<Long, BarField> farTimeBarMap = barBufQMap.get(far.getUnifiedSymbol())
+						.stream()
+						.collect(Collectors.toMap(BarField::getActionTimestamp, bar -> bar));
+				JSONArray combBarArr = new JSONArray();
+				barBufQMap.get(near.getUnifiedSymbol()).forEach(nearBar -> {
+					BarField midBar = midTimeBarMap.get(nearBar.getActionTimestamp());
+					BarField farBar = farTimeBarMap.get(nearBar.getActionTimestamp());
+					if(Objects.nonNull(midBar) && Objects.nonNull(farBar)) {
+						combBarArr.add(compute(nearBar, midBar, farBar));
+					}
+				});
+				mrd.getDataMap().put("蝶式价差率", combBarArr);
 			}
 		}
 		return mrd;
@@ -205,6 +226,16 @@ public class ArbitrageModuleContext extends ModuleContext implements IModuleCont
 		json.put("high", (bar1.getHighPrice() - bar2.getHighPrice()) / bar2.getHighPrice() * 100);
 		json.put("close", (bar1.getClosePrice() - bar2.getClosePrice()) / bar2.getClosePrice() * 100);
 		json.put("timestamp", bar1.getActionTimestamp());
+		return json;
+	}
+	
+	private JSONObject compute(BarField near, BarField mid, BarField far) {
+		JSONObject json = new JSONObject();
+		json.put("open", (near.getOpenPrice() / mid.getOpenPrice() - mid.getOpenPrice() / far.getOpenPrice()) * 100);
+		json.put("low", (near.getLowPrice() / mid.getLowPrice() - mid.getLowPrice() / far.getLowPrice()) * 100);
+		json.put("high", (near.getHighPrice() / mid.getHighPrice() - mid.getHighPrice() / far.getHighPrice()) * 100);
+		json.put("close", (near.getClosePrice() / mid.getClosePrice() - mid.getClosePrice() / far.getClosePrice()) * 100);
+		json.put("timestamp", near.getActionTimestamp());
 		return json;
 	}
 }

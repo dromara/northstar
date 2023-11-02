@@ -140,7 +140,7 @@
                     <el-popover v-if="(item.value instanceof Array)"
                       placement="right"
                       trigger="click">
-                      <el-table :data="item.value" >
+                      <el-table :data="item.value" max-height="300px">
                         <el-table-column width="100" property="name" label="描述">
                           <template slot-scope="scope">
                             {{ scope.row.name || scope.$index + 1 }}

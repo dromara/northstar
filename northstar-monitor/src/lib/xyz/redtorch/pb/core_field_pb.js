@@ -766,7 +766,9 @@ proto.xyz.redtorch.pb.ContractField.toObject = function(includeInstance, msg) {
     gatewayid: jspb.Message.getFieldWithDefault(msg, 27, ""),
     commissionfee: jspb.Message.getFloatingPointFieldWithDefault(msg, 28, 0.0),
     commissionrate: jspb.Message.getFloatingPointFieldWithDefault(msg, 29, 0.0),
-    channeltype: jspb.Message.getFieldWithDefault(msg, 30, "")
+    channeltype: jspb.Message.getFieldWithDefault(msg, 30, ""),
+    priceprecision: jspb.Message.getFieldWithDefault(msg, 31, 0),
+    quantityprecision: jspb.Message.getFieldWithDefault(msg, 32, 0)
   };
 
   if (includeInstance) {
@@ -914,6 +916,14 @@ proto.xyz.redtorch.pb.ContractField.deserializeBinaryFromReader = function(msg, 
     case 30:
       var value = /** @type {string} */ (reader.readString());
       msg.setChanneltype(value);
+      break;
+    case 31:
+      var value = /** @type {number} */ (reader.readSint32());
+      msg.setPriceprecision(value);
+      break;
+    case 32:
+      var value = /** @type {number} */ (reader.readSint32());
+      msg.setQuantityprecision(value);
       break;
     default:
       reader.skipField();
@@ -1137,6 +1147,20 @@ proto.xyz.redtorch.pb.ContractField.serializeBinaryToWriter = function(message, 
   if (f.length > 0) {
     writer.writeString(
       30,
+      f
+    );
+  }
+  f = message.getPriceprecision();
+  if (f !== 0) {
+    writer.writeSint32(
+      31,
+      f
+    );
+  }
+  f = message.getQuantityprecision();
+  if (f !== 0) {
+    writer.writeSint32(
+      32,
       f
     );
   }
@@ -1644,6 +1668,42 @@ proto.xyz.redtorch.pb.ContractField.prototype.getChanneltype = function() {
  */
 proto.xyz.redtorch.pb.ContractField.prototype.setChanneltype = function(value) {
   return jspb.Message.setProto3StringField(this, 30, value);
+};
+
+
+/**
+ * optional sint32 pricePrecision = 31;
+ * @return {number}
+ */
+proto.xyz.redtorch.pb.ContractField.prototype.getPriceprecision = function() {
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 31, 0));
+};
+
+
+/**
+ * @param {number} value
+ * @return {!proto.xyz.redtorch.pb.ContractField} returns this
+ */
+proto.xyz.redtorch.pb.ContractField.prototype.setPriceprecision = function(value) {
+  return jspb.Message.setProto3IntField(this, 31, value);
+};
+
+
+/**
+ * optional sint32 quantityPrecision = 32;
+ * @return {number}
+ */
+proto.xyz.redtorch.pb.ContractField.prototype.getQuantityprecision = function() {
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 32, 0));
+};
+
+
+/**
+ * @param {number} value
+ * @return {!proto.xyz.redtorch.pb.ContractField} returns this
+ */
+proto.xyz.redtorch.pb.ContractField.prototype.setQuantityprecision = function(value) {
+  return jspb.Message.setProto3IntField(this, 32, value);
 };
 
 

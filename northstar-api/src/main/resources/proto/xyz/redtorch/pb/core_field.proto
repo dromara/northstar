@@ -45,6 +45,8 @@ message ContractField {
 	double commissionFee = 28;  // 手续费
 	double commissionRate = 29; // 手续费率
 	string channelType = 30;	// 渠道来源
+	sint32 pricePrecision = 31; // 价格精度 
+	sint32 quantityPrecision = 32; // 成交量精度
 }
 
 // 账户

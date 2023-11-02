@@ -34,7 +34,7 @@ public class EventNotificationHandler extends AbstractEventHandler implements Ge
 	protected void doHandle(NorthstarEvent e) {
 		if(Objects.isNull(sender) 
 				|| e.getData() instanceof TradeField trade && StringUtils.isBlank(trade.getOriginOrderId())
-				|| e.getData() instanceof OrderField order && !OrderUtils.isValidOrder(order)) {
+				|| e.getData() instanceof OrderField order && (StringUtils.isBlank(order.getOriginOrderId()) || !OrderUtils.isValidOrder(order))) {
 			return;
 		}
 		sender.onEvent(e);
