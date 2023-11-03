@@ -39,3 +39,7 @@ build/
 .vscode/
 /pom.xml.versionsBackup
 /northstar-dist/
+/.metadata/
+
+__pycache__/
+/python-app
