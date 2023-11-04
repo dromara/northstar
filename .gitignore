@@ -41,5 +41,5 @@ build/
 /northstar-dist/
 /.metadata/
 
-__pycache__/
-/python-app
+**/__pycache__/
+northstar-rl/python-app/models
