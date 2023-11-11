@@ -13,7 +13,7 @@ import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
 
 /**
- * 主力合约
+ * 主连合约
  * @author KevinHuangwl
  *
  */
@@ -40,7 +40,7 @@ public class PrimaryContract implements Contract {
 
 	@Override
 	public String name() {
-		return idxContract.name().replace("指数", "主力");
+		return idxContract.name().replace("指数", "主连");
 	}
 
 	@Override

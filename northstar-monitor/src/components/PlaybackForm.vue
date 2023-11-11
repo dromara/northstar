@@ -162,9 +162,15 @@ export default {
       this.$refs.playbackSettings.validate((valid) => {
         if (valid) {
           const [start, end] = this.playbackSettings.dateRange
-          this.playbackSettings.startDate = moment(start).format('yyyyMMDD')
+          const startDate = moment(start)
+          const preStartDate = moment(this.preStartDate || start)
+          if(preStartDate.isAfter(startDate)){
+            this.$message.error('预热起始日不能晚于' + startDate.format('yyyy-MM-DD'))
+            return
+          }
+          this.playbackSettings.startDate = startDate.format('yyyyMMDD')
           this.playbackSettings.endDate = moment(end).format('yyyyMMDD')
-          this.playbackSettings.preStartDate = moment(this.preStartDate || start).format('yyyyMMDD')
+          this.playbackSettings.preStartDate = preStartDate.format('yyyyMMDD')
           let obj = {}
           Object.assign(obj, this.playbackSettings)
           this.$emit('onSave', obj)

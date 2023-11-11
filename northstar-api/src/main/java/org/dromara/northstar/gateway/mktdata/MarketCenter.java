@@ -167,8 +167,8 @@ public class MarketCenter implements IMarketCenter{
 			channelSymbolContractTbl.put(c.channelType(), c.contractField().getSymbol(), c);
 			channelSymbolContractTbl.put(c.channelType(), c.contractField().getUnifiedSymbol(), c);
 			
-			// CTP主力合约生成 
-			if(c.channelType() == ChannelType.CTP) {
+			// CTP主连合约生成 
+			if(c.channelType() == ChannelType.PLAYBACK) {
 				PrimaryContract pc = new PrimaryContract(c);
 				contractMap.put(pc.identifier(), pc);
 				channelSymbolContractTbl.put(pc.channelType(), pc.contractField().getSymbol(), pc);

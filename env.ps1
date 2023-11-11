@@ -7,13 +7,16 @@ Add-Type -AssemblyName System.IO.Compression
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
-# 程序包目录
-$DistPath = "c:\\northstar_dist\" 
-# 下载到northstar_env目录，如无该目录则创建;  
-$BasePath = "c:\\northstar_env\"
+
+# 下载到northstar_env目录，如无该目录则创建;
+echo "Checking c:\northstar_env\"  
+$BasePath = "c:\northstar_env\"
 If(!(test-path $BasePath)){
    New-Item -Path $BasePath -ItemType Directory
 }
+# 程序包目录
+echo "Checking c:\northstar_dist\"
+$DistPath = "c:\northstar_dist\" 
 If(!(test-path $DistPath)){
 	New-Item -Path $DistPath -ItemType Directory
 }
