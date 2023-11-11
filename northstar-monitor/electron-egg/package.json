@@ -1,6 +1,6 @@
 {
   "name": "northstar-desktop",
-  "version": "6.2.3",
+  "version": "6.2.4",
   "description": "A fast, desktop software development framework",
   "main": "main.js",
   "scripts": {
