@@ -31,7 +31,6 @@ class PlaybackGatewayFactoryTest {
 	
 	IPlaybackRuntimeRepository rtRepo = mock(IPlaybackRuntimeRepository.class);
 	FastEventEngine feEngine = mock(FastEventEngine.class);
-	PlaybackDataServiceManager dsMgr = mock(PlaybackDataServiceManager.class);
 	
 	LocalDateTime ldt = LocalDateTime.of(2022, 6, 29, 9, 0);
 	TestFieldFactory factory = new TestFieldFactory("testGateway");
@@ -66,7 +65,7 @@ class PlaybackGatewayFactoryTest {
 		settings.setSpeed(PlaybackSpeed.SPRINT);
 		settings.setPlayContracts(List.of());
 		
-		playbackGatewayFactory = new PlaybackGatewayFactory(feEngine, contractMgr, rtRepo, dsMgr);
+		playbackGatewayFactory = new PlaybackGatewayFactory(feEngine, contractMgr, rtRepo);
 	}
 	
 	@Test

@@ -18,13 +18,9 @@ public class SimLoader implements CommandLineRunner{
 	@Autowired
 	private SimGatewayFactory simGatewayFactory;
 	
-	@Autowired
-	private SimMockDataManager mockDsMgr;
-	
 	@Override
 	public void run(String... args) throws Exception {
-		gatewayMetaProvider.add(ChannelType.SIM, null, simGatewayFactory, mockDsMgr);
-
+		gatewayMetaProvider.add(ChannelType.SIM, null, simGatewayFactory);
 	}
 
 }

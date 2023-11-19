@@ -22,14 +22,10 @@ public class PlaybackGatewayFactory implements GatewayFactory{
 	
 	private FastEventEngine feEngine;
 	
-	private PlaybackDataServiceManager dsMgr;
-	
 	private IContractManager contractMgr;
 	
-	public PlaybackGatewayFactory(FastEventEngine feEngine, IContractManager contractMgr, 
-			IPlaybackRuntimeRepository rtRepo, PlaybackDataServiceManager dsMgr) {
+	public PlaybackGatewayFactory(FastEventEngine feEngine, IContractManager contractMgr, IPlaybackRuntimeRepository rtRepo) {
 		this.rtRepo = rtRepo;
-		this.dsMgr = dsMgr;
 		this.feEngine = feEngine;
 		this.contractMgr = contractMgr;
 	}
@@ -42,7 +38,7 @@ public class PlaybackGatewayFactory implements GatewayFactory{
 		LocalDateTime ldt = Objects.nonNull(playbackRt) 
 				? playbackRt.getPlaybackTimeState() 
 				: LocalDateTime.of(LocalDate.parse(settings.getStartDate(), DateTimeConstant.D_FORMAT_INT_FORMATTER), LocalTime.of(20, 0));
-		IPlaybackContext context = new PlaybackContextV2(gatewayDescription, ldt, dsMgr, feEngine, rtRepo, contractMgr);
+		IPlaybackContext context = new PlaybackContextV2(gatewayDescription, ldt, feEngine, rtRepo, contractMgr);
 		return new PlaybackGatewayAdapter(context, gatewayDescription);
 	}
 	

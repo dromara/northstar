@@ -1,4 +1,4 @@
-package org.dromara.northstar.gateway.playback;
+package org.dromara.northstar.gateway.mktdata;
 
 import java.net.URI;
 import java.time.LocalDate;
@@ -41,15 +41,9 @@ import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.ContractField;
 
-/**
- * 历史数据服务接口管理器
- * @author KevinHuangwl
- *
- */
-
 @Slf4j
-public class PlaybackDataServiceManager implements IDataSource {
-	
+public class NorthstarDataServiceDataSource implements IDataSource{
+
 	private String userToken;
 	
 	private String dummyToken;
@@ -64,7 +58,7 @@ public class PlaybackDataServiceManager implements IDataSource {
 	
 	private RestTemplate restTemplate;
 	
-	public PlaybackDataServiceManager(String baseUrl, String secret, RestTemplate restTemplate, MarketDateTimeUtil dtUtil) {
+	public NorthstarDataServiceDataSource(String baseUrl, String secret, RestTemplate restTemplate, MarketDateTimeUtil dtUtil) {
 		this.baseUrl =  baseUrl;
 		this.userToken = secret;
 		this.dtUtil = dtUtil;
@@ -364,5 +358,4 @@ public class PlaybackDataServiceManager implements IDataSource {
 		
 		private String message;
 	}
-
 }

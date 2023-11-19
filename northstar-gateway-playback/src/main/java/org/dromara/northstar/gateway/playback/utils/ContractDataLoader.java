@@ -11,12 +11,13 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.lang3.StringUtils;
-import org.dromara.northstar.common.IDataServiceManager;
+import org.dromara.northstar.common.IDataSource;
 import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.common.constant.PlaybackPrecision;
 import org.dromara.northstar.common.constant.TickType;
 import org.dromara.northstar.common.utils.MarketDataLoadingUtils;
+import org.dromara.northstar.gateway.Contract;
 import org.dromara.northstar.gateway.playback.ticker.RandomWalkTickSimulation;
 import org.dromara.northstar.gateway.playback.ticker.SimpleCloseSimulation;
 import org.dromara.northstar.gateway.playback.ticker.SimplePriceSimulation;
@@ -31,10 +32,9 @@ import xyz.redtorch.pb.CoreField.TickField;
 
 public class ContractDataLoader {
 	
-	private IDataServiceManager dsMgr;
-	
+	private IDataSource dsMgr;
 	@Getter
-	private ContractField contract;
+	private Contract contract;
 	
 	private MarketDataLoadingUtils utils = new MarketDataLoadingUtils();
 	
@@ -46,15 +46,16 @@ public class ContractDataLoader {
 	
 	private TickSimulationAlgorithm tickGenAlgo;
 	
-	public ContractDataLoader(String gatewayId, ContractField contract, IDataServiceManager dsMgr, PlaybackPrecision precision) {
+	public ContractDataLoader(String gatewayId, Contract contract, PlaybackPrecision precision) {
 		this.contract = contract;
-		this.dsMgr = dsMgr;
+		this.dsMgr = contract.dataSource();
 		this.gatewayId = gatewayId;
+		ContractField cf = contract.contractField();
 		this.tickGenAlgo = switch(precision) {
-		case LITE -> new SimpleCloseSimulation(contract.getPriceTick());
-		case LOW -> new SimplePriceSimulation(contract.getPriceTick());
-		case MEDIUM -> new RandomWalkTickSimulation(30, contract.getPriceTick());
-		case HIGH -> new RandomWalkTickSimulation(120, contract.getPriceTick());
+		case LITE -> new SimpleCloseSimulation(cf.getPriceTick());
+		case LOW -> new SimplePriceSimulation(cf.getPriceTick());
+		case MEDIUM -> new RandomWalkTickSimulation(30, cf.getPriceTick());
+		case HIGH -> new RandomWalkTickSimulation(120, cf.getPriceTick());
 		default -> throw new IllegalArgumentException("Unexpected value: " + precision);
 		};
 	}
@@ -63,7 +64,7 @@ public class ContractDataLoader {
 		barQ.clear();
 		LocalDate thisFriday = utils.getFridayOfThisWeek(tradingDay);
 		LocalDate lastFriday = thisFriday.minusWeeks(1);
-		List<BarField> dailyData = Lists.reverse(dsMgr.getMinutelyData(contract, lastFriday, thisFriday)); // 原数据是倒序的
+		List<BarField> dailyData = Lists.reverse(dsMgr.getMinutelyData(contract.contractField(), lastFriday, thisFriday)); // 原数据是倒序的
 		if(dailyData.isEmpty()) {
 			return;
 		}
@@ -94,7 +95,7 @@ public class ContractDataLoader {
 		tickQ.clear();
 		LocalDate end = utils.getFridayOfThisWeek(tradingDay);
 		LocalDate start = end.minusWeeks(2);
-		List<BarField> dailyData = Lists.reverse(dsMgr.getDailyData(contract, start, end));
+		List<BarField> dailyData = Lists.reverse(dsMgr.getDailyData(contract.contractField(), start, end));
 		for(int i=1; i<dailyData.size(); i++) {
 			BarField dayBar = dailyData.get(dailyData.size() - i);
 			if(StringUtils.equals(dayBar.getTradingDay(), tradingDay.format(DateTimeConstant.D_FORMAT_INT_FORMATTER))) {

@@ -7,7 +7,10 @@ import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.ContractField;
 
-public interface IDataServiceManager {
+/**
+ * 历史数据源接口
+ */
+public interface IDataSource {
 
 	/**
 	 * 获取1分钟K线数据

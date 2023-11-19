@@ -13,7 +13,7 @@ import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-import org.dromara.northstar.common.IDataServiceManager;
+import org.dromara.northstar.common.IDataSource;
 import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.gateway.Contract;
 import org.dromara.northstar.gateway.model.PeriodSegment;
@@ -32,11 +32,11 @@ public class WeeklyBarMerger extends BarMerger{
 	
 	private Set<String> yearWeekSet = new HashSet<>();
 	
-	private IDataServiceManager dsMgr;
+	private IDataSource dsMgr;
 	/* year -> dateSet */
 	private Map<Integer, Set<LocalDate>> yearHolidays = new HashMap<>();
 
-	public WeeklyBarMerger(int numOfWeekPerBar, Contract contract, BiConsumer<BarMerger, BarField> callback, IDataServiceManager dsMgr) {
+	public WeeklyBarMerger(int numOfWeekPerBar, Contract contract, BiConsumer<BarMerger, BarField> callback, IDataSource dsMgr) {
 		super(0, contract, callback);
 		this.dsMgr = dsMgr;
 		this.numOfWeekPerBar = numOfWeekPerBar;

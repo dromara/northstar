@@ -36,23 +36,23 @@ public class PlaybackLoader implements CommandLineRunner{
 	
 	@Override
 	public void run(String... args) throws Exception {
-		gatewayMetaProvider.add(ChannelType.PLAYBACK, new PlaybackGatewaySettings(), playbackGatewayFactory, dsMgr);
-		
-		log.debug("加载回测合约");
+		gatewayMetaProvider.add(ChannelType.PLAYBACK, new PlaybackGatewaySettings(), playbackGatewayFactory);
 		mktCenter.addDefinitions(contractDefPvd.get());
-		final LocalDate today = LocalDate.now();
-		// 加载CTP合约
-		dsMgr.getUserAvailableExchanges()
-			.stream()
-			.forEach(exchange -> {
-				dsMgr.getAllContracts(exchange).stream()
-					//过滤掉过期合约
-					.filter(contract -> StringUtils.isEmpty(contract.getLastTradeDateOrContractMonth())
-							|| LocalDate.parse(contract.getLastTradeDateOrContractMonth(), DateTimeConstant.D_FORMAT_INT_FORMATTER).isAfter(today))
-					.forEach(contract -> mktCenter.addInstrument(new PlaybackContract(contract)));
-				log.info("预加载 [{}] 交易所合约信息", exchange);
-			});
-		mktCenter.loadContractGroup(ChannelType.PLAYBACK);
+		
+//		log.debug("加载回测合约");
+//		final LocalDate today = LocalDate.now();
+//		// 加载CTP合约
+//		dsMgr.getUserAvailableExchanges()
+//			.stream()
+//			.forEach(exchange -> {
+//				dsMgr.getAllContracts(exchange).stream()
+//					//过滤掉过期合约
+//					.filter(contract -> StringUtils.isEmpty(contract.getLastTradeDateOrContractMonth())
+//							|| LocalDate.parse(contract.getLastTradeDateOrContractMonth(), DateTimeConstant.D_FORMAT_INT_FORMATTER).isAfter(today))
+//					.forEach(contract -> mktCenter.addInstrument(new PlaybackContract(contract)));
+//				log.info("预加载 [{}] 交易所合约信息", exchange);
+//			});
+//		mktCenter.loadContractGroup(ChannelType.PLAYBACK);
 	}
 
 }

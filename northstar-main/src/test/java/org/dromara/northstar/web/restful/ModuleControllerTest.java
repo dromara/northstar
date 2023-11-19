@@ -132,8 +132,8 @@ class ModuleControllerTest {
 	
 	@BeforeEach
 	public void setUp() throws Exception {
-		gatewayMetaProvider.add(ChannelType.PLAYBACK, new PlaybackGatewaySettings(), playbackGatewayFactory, dsMgr);
-		gatewayMetaProvider.add(ChannelType.SIM, null, simGatewayFactory, null);
+		gatewayMetaProvider.add(ChannelType.PLAYBACK, new PlaybackGatewaySettings(), playbackGatewayFactory);
+		gatewayMetaProvider.add(ChannelType.SIM, null, simGatewayFactory);
 		
 		Contract c = mock(Contract.class);
 		when(c.channelType()).thenReturn(ChannelType.PLAYBACK);

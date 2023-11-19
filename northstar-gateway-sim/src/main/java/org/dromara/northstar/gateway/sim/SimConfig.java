@@ -38,9 +38,4 @@ public class SimConfig{
 		return new SimGatewayFactory(feEngine, simAccountRepo, marketCenter, tickGenMap);
 	}
 	
-	@Bean
-	SimMockDataManager simMockDataManager(Map<String, SimTickGenerator> tickGenMap) {
-		return new SimMockDataManager(tickGenMap);
-	}
-	
 }
