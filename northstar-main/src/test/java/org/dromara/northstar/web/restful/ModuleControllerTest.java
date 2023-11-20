@@ -136,6 +136,7 @@ class ModuleControllerTest {
 		gatewayMetaProvider.add(ChannelType.SIM, null, simGatewayFactory);
 		
 		Contract c = mock(Contract.class);
+		when(c.dataSource()).thenReturn(dsMgr);
 		when(c.channelType()).thenReturn(ChannelType.PLAYBACK);
 		when(mktCenter.getContract(any(Identifier.class))).thenReturn(c);
 		when(mktCenter.getContract(any(ChannelType.class), anyString())).thenReturn(c);
