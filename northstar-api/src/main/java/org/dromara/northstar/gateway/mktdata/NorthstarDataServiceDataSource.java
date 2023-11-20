@@ -211,16 +211,6 @@ public class NorthstarDataServiceDataSource implements IDataSource{
 		return resultList;
 	}
 	
-	
-	/**
-	 * 获取CTP信息
-	 */
-	@Retryable
-	public JSONObject getCtpMetaSettings(String brokerId) {
-		URI uri = URI.create(String.format("%s/ctp/settings?brokerId=%s", baseUrl, brokerId));
-		return execute(uri, JSONObject.class).getBody();
-	}
-	
 	@Retryable
 	@SuppressWarnings("unchecked")
 	public List<ExchangeEnum> getUserAvailableExchanges() {
