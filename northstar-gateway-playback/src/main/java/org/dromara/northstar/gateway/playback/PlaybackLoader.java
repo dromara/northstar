@@ -44,7 +44,7 @@ public class PlaybackLoader implements CommandLineRunner{
 		log.debug("加载回测合约");
 		final LocalDate today = LocalDate.now();
 		// 加载CTP合约
-		datasources.forEach(ds -> {
+		datasources.forEach(ds -> 
 			ds.getUserAvailableExchanges().forEach(exchange -> {
 				ds.getAllContracts(exchange).stream()
 					//过滤掉过期合约
@@ -52,8 +52,8 @@ public class PlaybackLoader implements CommandLineRunner{
 							|| LocalDate.parse(contract.getLastTradeDateOrContractMonth(), DateTimeConstant.D_FORMAT_INT_FORMATTER).isAfter(today))
 					.forEach(contract -> mktCenter.addInstrument(new PlaybackContract(contract, ds)));
 				log.info("预加载 [{}] 交易所合约信息", exchange);
-			});
-		});
+			})
+		);
 			
 		mktCenter.loadContractGroup(ChannelType.PLAYBACK);
 	}
