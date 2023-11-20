@@ -64,4 +64,9 @@ public interface IDataSource {
 	 */
 	List<ContractField> getAllContracts(ExchangeEnum exchange);
 	
+	/**
+	 * 用户可用交易所
+	 * @return
+	 */
+	List<ExchangeEnum> getUserAvailableExchanges();
 }

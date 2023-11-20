@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import org.dromara.northstar.common.IDataSource;
 import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.event.FastEventEngine;
 import org.dromara.northstar.common.model.Identifier;
@@ -33,11 +34,13 @@ class MarketCenterTest {
 	
 	MarketCenter center;
 	
-	Instrument ins1 = new TestContract("rb2305", "rb2305@SHFE@FUTURES", ProductClassEnum.FUTURES, ExchangeEnum.SHFE);
+	IDataSource dataSrc = mock(IDataSource.class);
 	
-	Instrument ins2 = new TestContract("sc2403", "sc2403@INE@FUTURES@PLAYBACK", ProductClassEnum.FUTURES, ExchangeEnum.INE);
+	Instrument ins1 = new TestContract("rb2305", "rb2305@SHFE@FUTURES", ProductClassEnum.FUTURES, ExchangeEnum.SHFE, dataSrc);
 	
-	Instrument ins3 = new TestContract("rb2305C5000", "rb2305C5000@SHFE@OPTIONS", ProductClassEnum.OPTION, ExchangeEnum.SHFE);
+	Instrument ins2 = new TestContract("sc2403", "sc2403@INE@FUTURES@PLAYBACK", ProductClassEnum.FUTURES, ExchangeEnum.INE, dataSrc);
+	
+	Instrument ins3 = new TestContract("rb2305C5000", "rb2305C5000@SHFE@OPTIONS", ProductClassEnum.OPTION, ExchangeEnum.SHFE, dataSrc);
 	
 	@BeforeEach
 	void prepare() {
@@ -61,6 +64,7 @@ class MarketCenterTest {
 				.build();
 		center = new MarketCenter(mock(FastEventEngine.class));
 		center.addDefinitions(List.of(def1, def2, def3));
+		
 	}
 	
 	@Test
@@ -124,12 +128,13 @@ class MarketCenterTest {
 		private String unifiedSymbol;
 		private ProductClassEnum productClass;
 		private ExchangeEnum exchange;
+		private IDataSource dataSrc;
 
 		@Override
 		public String name() {
 			return symbol;
 		}
-
+		
 		@Override
 		public Identifier identifier() {
 			return Identifier.of(unifiedSymbol);
@@ -171,6 +176,11 @@ class MarketCenterTest {
 					.setGatewayId(GATEWAY_ID)
 					.setName(name())
 					.build();
+		}
+
+		@Override
+		public IDataSource dataSource() {
+			return dataSrc;
 		}
 		
 	}
