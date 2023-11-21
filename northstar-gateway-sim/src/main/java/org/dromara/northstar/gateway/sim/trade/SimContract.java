@@ -1,8 +1,5 @@
 package org.dromara.northstar.gateway.sim.trade;
 
-import java.time.LocalDate;
-import java.util.Collections;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -11,6 +8,7 @@ import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.model.Identifier;
 import org.dromara.northstar.gateway.Instrument;
 import org.dromara.northstar.gateway.TradeTimeDefinition;
+import org.dromara.northstar.gateway.mktdata.EmptyDataSource;
 import org.dromara.northstar.gateway.model.ContractDefinition;
 import org.dromara.northstar.gateway.time.GenericTradeTime;
 
@@ -22,7 +20,6 @@ import xyz.redtorch.pb.CoreEnum.CurrencyEnum;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreEnum.OptionsTypeEnum;
 import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
-import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.ContractField;
 
 /**
@@ -141,43 +138,7 @@ public class SimContract implements Instrument{
 
 	@Override
 	public IDataSource dataSource() {
-		return new IDataSource() {
-			
-			@Override
-			public List<ExchangeEnum> getUserAvailableExchanges() {
-				return Collections.emptyList();
-			}
-			
-			@Override
-			public List<BarField> getQuarterlyData(ContractField contract, LocalDate startDate, LocalDate endDate) {
-				return Collections.emptyList();
-			}
-			
-			@Override
-			public List<BarField> getMinutelyData(ContractField contract, LocalDate startDate, LocalDate endDate) {
-				return Collections.emptyList();
-			}
-			
-			@Override
-			public List<BarField> getHourlyData(ContractField contract, LocalDate startDate, LocalDate endDate) {
-				return Collections.emptyList();
-			}
-			
-			@Override
-			public List<LocalDate> getHolidays(ExchangeEnum exchange, LocalDate startDate, LocalDate endDate) {
-				return Collections.emptyList();
-			}
-			
-			@Override
-			public List<BarField> getDailyData(ContractField contract, LocalDate startDate, LocalDate endDate) {
-				return Collections.emptyList();
-			}
-			
-			@Override
-			public List<ContractField> getAllContracts(ExchangeEnum exchange) {
-				return Collections.emptyList();
-			}
-		};
+		return new EmptyDataSource();
 	}
 
 }
