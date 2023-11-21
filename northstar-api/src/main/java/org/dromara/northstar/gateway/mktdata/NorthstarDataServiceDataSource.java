@@ -1,4 +1,4 @@
-package org.dromara.northstar.gateway.playback;
+package org.dromara.northstar.gateway.mktdata;
 
 import java.net.URI;
 import java.time.LocalDate;
@@ -16,7 +16,7 @@ import java.util.Optional;
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang3.StringUtils;
-import org.dromara.northstar.common.IDataServiceManager;
+import org.dromara.northstar.common.IDataSource;
 import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.common.utils.LocalEnvUtils;
@@ -41,15 +41,9 @@ import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.ContractField;
 
-/**
- * 历史数据服务接口管理器
- * @author KevinHuangwl
- *
- */
-
 @Slf4j
-public class PlaybackDataServiceManager implements IDataServiceManager {
-	
+public class NorthstarDataServiceDataSource implements IDataSource{
+
 	private String userToken;
 	
 	private String dummyToken;
@@ -64,7 +58,7 @@ public class PlaybackDataServiceManager implements IDataServiceManager {
 	
 	private RestTemplate restTemplate;
 	
-	public PlaybackDataServiceManager(String baseUrl, String secret, RestTemplate restTemplate, MarketDateTimeUtil dtUtil) {
+	public NorthstarDataServiceDataSource(String baseUrl, String secret, RestTemplate restTemplate, MarketDateTimeUtil dtUtil) {
 		this.baseUrl =  baseUrl;
 		this.userToken = secret;
 		this.dtUtil = dtUtil;
@@ -196,12 +190,12 @@ public class PlaybackDataServiceManager implements IDataServiceManager {
 						.setSymbol(symbol)
 						.setExchange(exchange)
 						.setCurrency(CurrencyEnum.CNY)
-						.setContractId(unifiedSymbol + "@" + ChannelType.PLAYBACK.toString())
 						.setFullName(name)
 						.setName(name)
-						.setChannelType(ChannelType.PLAYBACK.toString())
-						.setGatewayId(ChannelType.PLAYBACK.toString())
-						.setThirdPartyId(symbol + "@" + ChannelType.PLAYBACK.toString())
+//						.setContractId(unifiedSymbol + "@" + ChannelType.PLAYBACK.toString())
+//						.setChannelType(ChannelType.PLAYBACK.toString())
+//						.setGatewayId(ChannelType.PLAYBACK.toString())
+//						.setThirdPartyId(symbol + "@" + ChannelType.PLAYBACK.toString())
 						.setLastTradeDateOrContractMonth(getValue("delist_date", fieldIndexMap, item, ""))
 						.setLongMarginRatio(marginRate)
 						.setShortMarginRatio(marginRate)
@@ -215,16 +209,6 @@ public class PlaybackDataServiceManager implements IDataServiceManager {
 			}
 		}
 		return resultList;
-	}
-	
-	
-	/**
-	 * 获取CTP信息
-	 */
-	@Retryable
-	public JSONObject getCtpMetaSettings(String brokerId) {
-		URI uri = URI.create(String.format("%s/ctp/settings?brokerId=%s", baseUrl, brokerId));
-		return execute(uri, JSONObject.class).getBody();
 	}
 	
 	@Retryable
@@ -364,5 +348,4 @@ public class PlaybackDataServiceManager implements IDataServiceManager {
 		
 		private String message;
 	}
-
 }

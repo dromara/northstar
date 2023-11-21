@@ -2,13 +2,14 @@ package org.dromara.northstar.data.jdbc;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 
 import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.data.IMarketDataRepository;
-import org.dromara.northstar.gateway.GatewayMetaProvider;
+import org.dromara.northstar.gateway.Contract;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,17 +55,19 @@ class MarketDataRepoAdapterTest {
 	
 	@BeforeEach
 	void prepare() {
-		GatewayMetaProvider pvd =  mock(GatewayMetaProvider.class);
-		repo = new MarketDataRepoAdapter(delegate, pvd);
+		repo = new MarketDataRepoAdapter(delegate);
 	}
 	
 	@Test
 	void testInsert() {
+		Contract contract = mock(Contract.class);
+		when(contract.contractField()).thenReturn(c);
+		
 		repo.insert(bar1);
 		repo.insert(bar2);
 		repo.insert(bar3);
 		
-		assertThat(repo.loadBars(c, LocalDate.now(), LocalDate.now().plusDays(7))).hasSize(3);
+		assertThat(repo.loadBars(contract, LocalDate.now(), LocalDate.now().plusDays(7))).hasSize(3);
 	}
 
 }

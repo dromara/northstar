@@ -3,10 +3,12 @@ package org.dromara.northstar.gateway.sim.trade;
 import java.util.Objects;
 import java.util.Optional;
 
+import org.dromara.northstar.common.IDataSource;
 import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.model.Identifier;
 import org.dromara.northstar.gateway.Instrument;
 import org.dromara.northstar.gateway.TradeTimeDefinition;
+import org.dromara.northstar.gateway.mktdata.EmptyDataSource;
 import org.dromara.northstar.gateway.model.ContractDefinition;
 import org.dromara.northstar.gateway.time.GenericTradeTime;
 
@@ -132,6 +134,11 @@ public class SimContract implements Instrument{
 	@Override
 	public ChannelType channelType() {
 		return ChannelType.SIM;
+	}
+
+	@Override
+	public IDataSource dataSource() {
+		return new EmptyDataSource();
 	}
 
 }

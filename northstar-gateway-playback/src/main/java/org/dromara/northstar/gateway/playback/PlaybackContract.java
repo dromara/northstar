@@ -2,6 +2,7 @@ package org.dromara.northstar.gateway.playback;
 
 import java.util.Objects;
 
+import org.dromara.northstar.common.IDataSource;
 import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.model.Identifier;
 import org.dromara.northstar.gateway.Instrument;
@@ -24,8 +25,16 @@ public class PlaybackContract implements Instrument {
 	
 	private ContractDefinition contractDef;
 	
-	public PlaybackContract(ContractField contract) {
-		this.contract = contract;
+	private IDataSource dataSrc;
+	
+	public PlaybackContract(ContractField contract, IDataSource dataSrc) {
+		this.contract = contract.toBuilder()
+				.setContractId(contract.getUnifiedSymbol() + "@" + ChannelType.PLAYBACK.toString())
+				.setChannelType(ChannelType.PLAYBACK.toString())
+				.setGatewayId(ChannelType.PLAYBACK.toString())
+				.setThirdPartyId(contract.getSymbol() + "@" + ChannelType.PLAYBACK.toString())
+				.build();
+		this.dataSrc = dataSrc;
 	}
 
 	@Override
@@ -80,6 +89,11 @@ public class PlaybackContract implements Instrument {
 					.setCommissionFee(contractDef.getCommissionFee())
 					.setCommissionRate(contractDef.getCommissionRate())
 					.build();
+	}
+
+	@Override
+	public IDataSource dataSource() {
+		return dataSrc;
 	}
 
 }

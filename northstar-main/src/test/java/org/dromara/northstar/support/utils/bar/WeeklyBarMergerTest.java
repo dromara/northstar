@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Random;
 
 import org.apache.commons.math3.stat.StatUtils;
-import org.dromara.northstar.common.IDataServiceManager;
+import org.dromara.northstar.common.IDataSource;
 import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.gateway.Contract;
 import org.dromara.northstar.gateway.TradeTimeDefinition;
@@ -34,7 +34,7 @@ class WeeklyBarMergerTest {
 	
 	Contract c = mock(Contract.class);
 	
-	IDataServiceManager dsMgr = mock(IDataServiceManager.class);
+	IDataSource dsMgr = mock(IDataSource.class);
 	
 	@BeforeEach
 	void prepare() {

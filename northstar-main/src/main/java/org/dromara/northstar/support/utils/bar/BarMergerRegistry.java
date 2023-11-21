@@ -6,10 +6,9 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 
 import org.dromara.northstar.common.BarDataAware;
-import org.dromara.northstar.common.IDataServiceManager;
+import org.dromara.northstar.common.IDataSource;
 import org.dromara.northstar.common.model.Identifier;
 import org.dromara.northstar.gateway.Contract;
-import org.dromara.northstar.gateway.GatewayMetaProvider;
 import org.dromara.northstar.indicator.constant.PeriodUnit;
 import org.dromara.northstar.strategy.MergedBarListener;
 
@@ -33,10 +32,7 @@ public class BarMergerRegistry implements BarDataAware{
 	private BiConsumer<BarMerger, BarField> onMergedCallback = (merger, bar) -> 
 		mergerListenerMap.get(merger).forEach(listener -> listener.onMergedBar(bar));
 		
-	private GatewayMetaProvider gatewayMetaProvider;
-	
-	public BarMergerRegistry(GatewayMetaProvider gatewayMetaProvider) {
-		this.gatewayMetaProvider = gatewayMetaProvider;
+	public BarMergerRegistry() {
 		listenTypeMap.put(ListenerType.INDICATOR, HashMultimap.create());
 		listenTypeMap.put(ListenerType.CONTEXT, HashMultimap.create());
 		listenTypeMap.put(ListenerType.STRATEGY, HashMultimap.create());
@@ -58,7 +54,7 @@ public class BarMergerRegistry implements BarDataAware{
 	}
 	
 	private BarMerger makeBarMerger(Contract contract, int numOfUnit, PeriodUnit unit) {
-		IDataServiceManager dsMgr = gatewayMetaProvider.getMarketDataRepo(contract.channelType());
+		IDataSource dsMgr = contract.dataSource();
 		return switch(unit) {
 		case MINUTE -> new BarMerger(numOfUnit, contract, onMergedCallback);
 		case HOUR -> new BarMerger(numOfUnit * 60, contract, onMergedCallback);

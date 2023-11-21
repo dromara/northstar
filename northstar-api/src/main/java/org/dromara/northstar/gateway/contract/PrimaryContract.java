@@ -2,6 +2,7 @@ package org.dromara.northstar.gateway.contract;
 
 import java.util.Objects;
 
+import org.dromara.northstar.common.IDataSource;
 import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.constant.Constants;
 import org.dromara.northstar.common.model.Identifier;
@@ -24,6 +25,11 @@ public class PrimaryContract implements Contract {
 	// 借用指数合约的合约信息
 	public PrimaryContract(IndexContract idxContract) {
 		this.idxContract = idxContract;
+	}
+	
+	@Override
+	public IDataSource dataSource() {
+		return idxContract.dataSource();
 	}
 
 	@Override

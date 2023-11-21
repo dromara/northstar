@@ -12,7 +12,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-import org.dromara.northstar.common.IDataServiceManager;
 import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.common.event.FastEventEngine;
@@ -55,7 +54,7 @@ public class PlaybackContextV2 implements IPlaybackContext{
 	private boolean isRunning;
 	private Timer timer;
 	
-	public PlaybackContextV2(GatewayDescription gd, LocalDateTime currentTimeState, IDataServiceManager dsMgr,
+	public PlaybackContextV2(GatewayDescription gd, LocalDateTime currentTimeState, 
 			FastEventEngine feEngine, IPlaybackRuntimeRepository rtRepo, IContractManager contractMgr) {
 		this.rtRepo = rtRepo;
 		this.feEngine = feEngine;
@@ -65,7 +64,7 @@ public class PlaybackContextV2 implements IPlaybackContext{
 		this.playbackEndDate = LocalDate.parse(settings.getEndDate(), DateTimeConstant.D_FORMAT_INT_FORMATTER);
 		this.loaders = settings.getPlayContracts().stream()
 				.map(csi -> contractMgr.getContract(ChannelType.PLAYBACK, csi.getUnifiedSymbol()))
-				.map(c -> new ContractDataLoader(gatewayId, c.contractField(), dsMgr, settings.getPrecision()))
+				.map(c -> new ContractDataLoader(gatewayId, c, settings.getPrecision()))
 				.collect(Collectors.toSet());
 	}
 	
@@ -123,7 +122,7 @@ public class PlaybackContextV2 implements IPlaybackContext{
 								}
 								loadDate = loadDate.plusDays(1);
 							}
-							log.debug("回放网关 [{}] 合约 {} 数据预热完毕", gatewayId, loader.getContract().getUnifiedSymbol());
+							log.debug("回放网关 [{}] 合约 {} 数据预热完毕", gatewayId, loader.getContract().contractField().getUnifiedSymbol());
 							cdl.countDown();
 						}).start()
 					);

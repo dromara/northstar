@@ -1,5 +1,6 @@
 package org.dromara.northstar.gateway;
 
+import org.dromara.northstar.common.IDataSource;
 import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.model.Identifier;
 import org.dromara.northstar.gateway.model.ContractDefinition;
@@ -50,6 +51,14 @@ public interface Instrument {
 	 * @return
 	 */
 	ChannelType channelType();
+	
+	/**
+	 * 数据源
+	 * @return
+	 */
+	default IDataSource dataSource() {
+		throw new UnsupportedOperationException();
+	}
 	
 	/**
 	 * 设置合约定义

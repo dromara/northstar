@@ -38,7 +38,7 @@ import org.dromara.northstar.event.BroadcastHandler;
 import org.dromara.northstar.gateway.Contract;
 import org.dromara.northstar.gateway.GatewayMetaProvider;
 import org.dromara.northstar.gateway.IMarketCenter;
-import org.dromara.northstar.gateway.playback.PlaybackDataServiceManager;
+import org.dromara.northstar.gateway.mktdata.NorthstarDataServiceDataSource;
 import org.dromara.northstar.gateway.playback.PlaybackGatewayFactory;
 import org.dromara.northstar.gateway.playback.PlaybackGatewaySettings;
 import org.dromara.northstar.gateway.sim.trade.SimGatewayFactory;
@@ -107,7 +107,7 @@ class ModuleControllerTest {
 	PlaybackGatewayFactory playbackGatewayFactory;
 	
 	@Autowired
-	PlaybackDataServiceManager dsMgr;
+	NorthstarDataServiceDataSource dsMgr;
 	
 	ModuleDescription md1;
 	
@@ -132,10 +132,11 @@ class ModuleControllerTest {
 	
 	@BeforeEach
 	public void setUp() throws Exception {
-		gatewayMetaProvider.add(ChannelType.PLAYBACK, new PlaybackGatewaySettings(), playbackGatewayFactory, dsMgr);
-		gatewayMetaProvider.add(ChannelType.SIM, null, simGatewayFactory, null);
+		gatewayMetaProvider.add(ChannelType.PLAYBACK, new PlaybackGatewaySettings(), playbackGatewayFactory);
+		gatewayMetaProvider.add(ChannelType.SIM, null, simGatewayFactory);
 		
 		Contract c = mock(Contract.class);
+		when(c.dataSource()).thenReturn(dsMgr);
 		when(c.channelType()).thenReturn(ChannelType.PLAYBACK);
 		when(mktCenter.getContract(any(Identifier.class))).thenReturn(c);
 		when(mktCenter.getContract(any(ChannelType.class), anyString())).thenReturn(c);

@@ -9,7 +9,6 @@ import java.util.Objects;
 import java.util.Set;
 
 import org.dromara.northstar.common.GatewaySettings;
-import org.dromara.northstar.common.IDataServiceManager;
 import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.model.ComponentField;
 import org.dromara.northstar.common.model.DynamicParams;
@@ -24,8 +23,6 @@ public class GatewayMetaProvider {
 	
 	private Map<ChannelType, GatewayFactory> factoryMap = new EnumMap<>(ChannelType.class);
 	
-	private Map<ChannelType, IDataServiceManager> mdRepoMap = new EnumMap<>(ChannelType.class);
-	
 	
 	public Collection<ComponentField> getSettings(ChannelType channelType) {
 		return  ((DynamicParams)settingsMap.get(channelType)).getMetaInfo().values();
@@ -38,21 +35,12 @@ public class GatewayMetaProvider {
 		return factoryMap.get(channelType);
 	}
 	
-	public IDataServiceManager getMarketDataRepo(ChannelType channelType) {
-		if(mdRepoMap.containsKey(channelType)) {
-			return mdRepoMap.get(channelType);
-		}
-		throw new IllegalStateException("没有该渠道的数据来源：" + channelType);
-	}
-	
-	public void add(ChannelType channelType, GatewaySettings settings, GatewayFactory factory, IDataServiceManager dsMgr) {
+	public void add(ChannelType channelType, GatewaySettings settings, GatewayFactory factory) {
 		log.info("注册 [{}] 渠道元信息", channelType);
 		if(Objects.nonNull(settings))
 			settingsMap.put(channelType, settings);
 		if(Objects.nonNull(factory))
 			factoryMap.put(channelType, factory);
-		if(Objects.nonNull(dsMgr))
-			mdRepoMap.put(channelType, dsMgr);
 	}
 	
 	public List<ChannelType> availableChannel() {

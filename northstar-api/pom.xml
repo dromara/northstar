@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.dromara</groupId>
 		<artifactId>northstar</artifactId>
-		<version>6.2.4.Final</version>
+		<version>6.3.0.RC</version>
 	</parent>
 	<artifactId>northstar-api</artifactId>
 	<name>northstar-api</name>
@@ -15,6 +15,14 @@
 	</properties>
 
 	<dependencies>
+		<dependency>
+		    <groupId>org.springframework</groupId>
+		    <artifactId>spring-web</artifactId>
+		</dependency>
+		<dependency>
+		    <groupId>org.springframework.retry</groupId>
+		    <artifactId>spring-retry</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>

@@ -2,6 +2,7 @@ package org.dromara.northstar.gateway.contract;
 
 import java.util.Objects;
 
+import org.dromara.northstar.common.IDataSource;
 import org.dromara.northstar.common.TickDataAware;
 import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.event.FastEventEngine;
@@ -40,6 +41,11 @@ public class GatewayContract implements Contract, TickDataAware{
 		this.mktCenter = mktCenter;
 		this.contract = ins.contractField();
 		this.barGen = new MinuteBarGenerator(contract, tradeTimeDefinition(), bar -> feEngine.emitEvent(NorthstarEventType.BAR, bar));
+	}
+	
+	@Override
+	public IDataSource dataSource() {
+		return ins.dataSource();
 	}
 
 	@Override

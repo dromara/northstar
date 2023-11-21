@@ -21,7 +21,6 @@ import org.dromara.northstar.data.jdbc.PlaybackRuntimeRepoAdapter;
 import org.dromara.northstar.data.jdbc.PlaybackRuntimeRepository;
 import org.dromara.northstar.data.jdbc.SimAccountRepoAdapter;
 import org.dromara.northstar.data.jdbc.SimAccountRepository;
-import org.dromara.northstar.gateway.GatewayMetaProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -49,8 +48,8 @@ public class RepositoryConfig {
     }
     
     @Bean
-    IMarketDataRepository marketDataRepo(MarketDataRepository mdRepo, GatewayMetaProvider pvd) {
-    	return new MarketDataRepoAdapter(mdRepo, pvd);
+    IMarketDataRepository marketDataRepo(MarketDataRepository mdRepo) {
+    	return new MarketDataRepoAdapter(mdRepo);
     }
     
     @Bean

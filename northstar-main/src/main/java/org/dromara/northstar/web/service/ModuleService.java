@@ -42,7 +42,6 @@ import org.dromara.northstar.common.utils.MarketDataLoadingUtils;
 import org.dromara.northstar.data.IMarketDataRepository;
 import org.dromara.northstar.data.IModuleRepository;
 import org.dromara.northstar.gateway.Contract;
-import org.dromara.northstar.gateway.GatewayMetaProvider;
 import org.dromara.northstar.gateway.IContractManager;
 import org.dromara.northstar.module.ArbitrageModuleContext;
 import org.dromara.northstar.module.ModuleContext;
@@ -94,17 +93,14 @@ public class ModuleService implements IModuleService, PostLoadAware {
 	
 	private AccountManager accountMgr;
 	
-	private GatewayMetaProvider gatewayMetaProvider;
-	
 	public ModuleService(ApplicationContext ctx, IModuleRepository moduleRepo, IMarketDataRepository mdRepo, 
-			ModuleManager moduleMgr, IContractManager contractMgr, AccountManager accountMgr, GatewayMetaProvider gatewayMetaProvider) {
+			ModuleManager moduleMgr, IContractManager contractMgr, AccountManager accountMgr) {
 		this.ctx = ctx;
 		this.moduleMgr = moduleMgr;
 		this.contractMgr = contractMgr;
 		this.moduleRepo = moduleRepo;
 		this.mdRepo = mdRepo;
 		this.accountMgr = accountMgr;
-		this.gatewayMetaProvider = gatewayMetaProvider;
 	}
 
 	/**
@@ -243,12 +239,12 @@ public class ModuleService implements IModuleService, PostLoadAware {
 							.initBalance(md.getInitBalance())
 							.build())
 					.build();
-			moduleCtx = new PlaybackModuleContext(strategy, md, mrd, contractMgr, moduleRepo, moduleLoggerFactory, new BarMergerRegistry(gatewayMetaProvider));
+			moduleCtx = new PlaybackModuleContext(strategy, md, mrd, contractMgr, moduleRepo, moduleLoggerFactory, new BarMergerRegistry());
 		} else {
 			if(md.getType() == ModuleType.ARBITRAGE) {
-				moduleCtx = new ArbitrageModuleContext(strategy, md, mrd, contractMgr, moduleRepo, moduleLoggerFactory, new BarMergerRegistry(gatewayMetaProvider));
+				moduleCtx = new ArbitrageModuleContext(strategy, md, mrd, contractMgr, moduleRepo, moduleLoggerFactory, new BarMergerRegistry());
 			} else {				
-				moduleCtx = new ModuleContext(strategy, md, mrd, contractMgr, moduleRepo, moduleLoggerFactory, new BarMergerRegistry(gatewayMetaProvider));
+				moduleCtx = new ModuleContext(strategy, md, mrd, contractMgr, moduleRepo, moduleLoggerFactory, new BarMergerRegistry());
 			}
 		}
 		moduleMgr.add(new TradeModule(md, moduleCtx, accountMgr, contractMgr));
@@ -267,7 +263,7 @@ public class ModuleService implements IModuleService, PostLoadAware {
 			for(ModuleAccountDescription mad : md.getModuleAccountSettingsDescription()) {
 				for(ContractSimpleInfo csi : mad.getBindedContracts()) {
 					Contract c = contractMgr.getContract(Identifier.of(csi.getValue()));
-					List<BarField> bars = mdRepo.loadBars(c.contractField(), start, end);
+					List<BarField> bars = mdRepo.loadBars(c, start, end);
 					mergeList.addAll(bars);
 				}
 			}

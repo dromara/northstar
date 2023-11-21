@@ -12,7 +12,7 @@ import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-import org.dromara.northstar.common.IDataServiceManager;
+import org.dromara.northstar.common.IDataSource;
 import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.gateway.Contract;
 import org.dromara.northstar.gateway.model.PeriodSegment;
@@ -30,12 +30,12 @@ public class MonthlyBarMerger extends BarMerger{
 	
 	private Set<String> yMonthSet = new HashSet<>();
 	
-	private IDataServiceManager dsMgr;
+	private IDataSource dsMgr;
 	
 	/* year -> dateSet */
 	private Map<Integer, Set<LocalDate>> yearHolidays = new HashMap<>();
 
-	public MonthlyBarMerger(int numOfMonthPerBar, Contract contract, BiConsumer<BarMerger, BarField> callback, IDataServiceManager dsMgr) {
+	public MonthlyBarMerger(int numOfMonthPerBar, Contract contract, BiConsumer<BarMerger, BarField> callback, IDataSource dsMgr) {
 		super(0, contract, callback);
 		this.dsMgr = dsMgr;
 		this.numOfMonthPerBar = numOfMonthPerBar;

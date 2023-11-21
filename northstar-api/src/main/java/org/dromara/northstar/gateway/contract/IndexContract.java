@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
+import org.dromara.northstar.common.IDataSource;
 import org.dromara.northstar.common.TickDataAware;
 import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.constant.Constants;
@@ -39,9 +40,12 @@ public class IndexContract implements Contract, TickDataAware{
 	
 	private final Identifier identifier;
 	
+	private final IDataSource dataSrc;
+	
 	public IndexContract(FastEventEngine feEngine, List<Contract> monthContracts) {
 		this.monthContracts = monthContracts;
 		this.contract = makeIndexContractField(monthContracts.get(0).contractField());
+		this.dataSrc = monthContracts.get(0).dataSource();
 		this.identifier = Identifier.of(contract.getContractId());
 		this.barGen = new MinuteBarGenerator(contract, monthContracts.get(0).tradeTimeDefinition(), bar -> feEngine.emitEvent(NorthstarEventType.BAR, bar));
 		this.ticker = new IndexTicker(this, t -> {
@@ -69,6 +73,12 @@ public class IndexContract implements Contract, TickDataAware{
 				.setShortMarginRatio(0.1)
 				.setName(name)
 				.build();
+	}
+	
+
+	@Override
+	public IDataSource dataSource() {
+		return dataSrc;
 	}
 
 	@Override
