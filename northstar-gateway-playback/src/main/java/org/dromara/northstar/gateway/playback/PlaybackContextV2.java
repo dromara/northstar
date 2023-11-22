@@ -164,9 +164,6 @@ public class PlaybackContextV2 implements IPlaybackContext{
 					
 					loaders.forEach(loader -> loader.loadBarsAndTicks(playbackTradeDate));
 					playbackTradeDate = playbackTradeDate.plusDays(1);
-					while(playbackTradeDate.getDayOfWeek().getValue() > 5) {
-						playbackTradeDate = playbackTradeDate.plusDays(1);	
-					}
 				}
 
 				// 回放数据
