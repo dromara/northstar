@@ -3,6 +3,9 @@ package org.dromara.northstar.common;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.retry.annotation.Retryable;
+
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.ContractField;
@@ -19,6 +22,8 @@ public interface IDataSource {
 	 * @param endDate
 	 * @return
 	 */
+	@Retryable
+	@Cacheable(cacheNames = "bars", key = "'Minutely_' + #contract.getUnifiedSymbol() + '_' + #startDate + '_' + #endDate")
 	List<BarField> getMinutelyData(ContractField contract, LocalDate startDate, LocalDate endDate);
 	
 	/**
@@ -28,6 +33,8 @@ public interface IDataSource {
 	 * @param endDate
 	 * @return
 	 */
+	@Retryable
+	@Cacheable(cacheNames = "bars", key = "'Quarterly_' + #contract.getUnifiedSymbol() + '_' + #startDate + '_' + #endDate")
 	List<BarField> getQuarterlyData(ContractField contract, LocalDate startDate, LocalDate endDate);
 	
 	/**
@@ -37,6 +44,8 @@ public interface IDataSource {
 	 * @param endDate
 	 * @return
 	 */
+	@Retryable
+	@Cacheable(cacheNames = "bars", key = "'Hourly_' + #contract.getUnifiedSymbol() + '_' + #startDate + '_' + #endDate")
 	List<BarField> getHourlyData(ContractField contract, LocalDate startDate, LocalDate endDate);
 	
 	/**
@@ -46,6 +55,8 @@ public interface IDataSource {
 	 * @param endDate
 	 * @return
 	 */
+	@Retryable
+	@Cacheable(cacheNames = "bars", key = "'Daily_' + #contract.getUnifiedSymbol() + '_' + #startDate + '_' + #endDate")
 	List<BarField> getDailyData(ContractField contract, LocalDate startDate, LocalDate endDate);
 	
 	/**
@@ -55,6 +66,7 @@ public interface IDataSource {
 	 * @param endDate
 	 * @return
 	 */
+	@Retryable
 	List<LocalDate> getHolidays(ExchangeEnum exchange, LocalDate startDate, LocalDate endDate);
 	
 	/**
@@ -62,11 +74,13 @@ public interface IDataSource {
 	 * @param exchange
 	 * @return
 	 */
+	@Retryable
 	List<ContractField> getAllContracts(ExchangeEnum exchange);
 	
 	/**
 	 * 用户可用交易所
 	 * @return
 	 */
+	@Retryable
 	List<ExchangeEnum> getUserAvailableExchanges();
 }

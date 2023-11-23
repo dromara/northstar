@@ -21,7 +21,6 @@ import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.common.utils.LocalEnvUtils;
 import org.dromara.northstar.common.utils.MarketDateTimeUtil;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -88,8 +87,6 @@ public class NorthstarDataServiceDataSource implements IDataSource{
 	 * @param endDate
 	 * @return
 	 */
-	@Retryable
-	@Cacheable(cacheNames = "bars", key = "'Minutely_' + #contract.getUnifiedSymbol() + '_' + #startDate + '_' + #endDate")
 	@Override
 	public List<BarField> getMinutelyData(ContractField contract, LocalDate startDate, LocalDate endDate) {
 		log.debug("从数据服务加载历史行情1分钟数据：{}，{} -> {}", contract.getUnifiedSymbol(), startDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), endDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
@@ -103,8 +100,6 @@ public class NorthstarDataServiceDataSource implements IDataSource{
 	 * @param endDate
 	 * @return
 	 */
-	@Retryable
-	@Cacheable(cacheNames = "bars", key = "'Quarterly_' + #contract.getUnifiedSymbol() + '_' + #startDate + '_' + #endDate")
 	@Override
 	public List<BarField> getQuarterlyData(ContractField contract, LocalDate startDate, LocalDate endDate) {
 		log.debug("从数据服务加载历史行情15分钟数据：{}，{} -> {}", contract.getUnifiedSymbol(), startDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), endDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
@@ -118,8 +113,6 @@ public class NorthstarDataServiceDataSource implements IDataSource{
 	 * @param endDate
 	 * @return
 	 */
-	@Retryable
-	@Cacheable(cacheNames = "bars", key = "'Hourly_' + #contract.getUnifiedSymbol() + '_' + #startDate + '_' + #endDate")
 	@Override
 	public List<BarField> getHourlyData(ContractField contract, LocalDate startDate, LocalDate endDate) {
 		log.debug("从数据服务加载历史行情1小时数据：{}，{} -> {}", contract.getUnifiedSymbol(), startDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), endDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
@@ -133,15 +126,13 @@ public class NorthstarDataServiceDataSource implements IDataSource{
 	 * @param endDate
 	 * @return
 	 */
-	@Retryable
-	@Cacheable(cacheNames = "bars", key = "'Daily_' + #contract.getUnifiedSymbol() + '_' + #startDate + '_' + #endDate")
 	@Override
 	public List<BarField> getDailyData(ContractField contract, LocalDate startDate, LocalDate endDate) {
 		log.debug("从数据服务加载历史行情日线数据：{}，{} -> {}", contract.getUnifiedSymbol(), startDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), endDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
 		return commonGetData("day", contract, startDate, endDate);
 	}
 	
-	@Retryable
+
 	@Override
 	public List<LocalDate> getHolidays(ExchangeEnum exchange, LocalDate startDate, LocalDate endDate) {
 		DataSet dataSet = getTradeCalendar(exchange.toString(), startDate, endDate);
@@ -163,7 +154,6 @@ public class NorthstarDataServiceDataSource implements IDataSource{
 				.toList();
 	}
 
-	@Retryable
 	@Override
 	public List<ContractField> getAllContracts(ExchangeEnum exchange) {
 		ResponseEntity<DataSet> result = execute(URI.create(String.format("%s/contracts/?exchange=%s", baseUrl, exchange)), DataSet.class);
@@ -211,7 +201,6 @@ public class NorthstarDataServiceDataSource implements IDataSource{
 		return resultList;
 	}
 	
-	@Retryable
 	@SuppressWarnings("unchecked")
 	public List<ExchangeEnum> getUserAvailableExchanges() {
 		URI uri = URI.create(String.format("%s/contracts/availableEx", baseUrl));
