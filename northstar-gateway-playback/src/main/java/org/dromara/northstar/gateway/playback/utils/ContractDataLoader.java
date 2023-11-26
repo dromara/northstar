@@ -94,7 +94,7 @@ public class ContractDataLoader {
 		loadBars(tradingDay);
 		tickQ.clear();
 		LocalDate end = utils.getFridayOfThisWeek(tradingDay);
-		LocalDate start = end.minusWeeks(2);
+		LocalDate start = end.minusWeeks(1);
 		List<BarField> dailyData = Lists.reverse(dsMgr.getDailyData(contract.contractField(), start, end));
 		for(int i=1; i<dailyData.size(); i++) {
 			BarField dayBar = dailyData.get(dailyData.size() - i);
