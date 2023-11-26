@@ -63,8 +63,9 @@ public class ContractDataLoader {
 	public void loadBars(LocalDate tradingDay) {
 		barQ.clear();
 		LocalDate thisFriday = utils.getFridayOfThisWeek(tradingDay);
-		LocalDate lastFriday = thisFriday.minusWeeks(1);
-		List<BarField> dailyData = Lists.reverse(dsMgr.getMinutelyData(contract.contractField(), lastFriday, thisFriday)); // 原数据是倒序的
+		LocalDate queryFrom = tradingDay.isAfter(thisFriday) ? thisFriday : thisFriday.minusWeeks(1);
+		LocalDate queryTo = tradingDay.isAfter(thisFriday) ? thisFriday.plusWeeks(1) : thisFriday;
+		List<BarField> dailyData = Lists.reverse(dsMgr.getMinutelyData(contract.contractField(), queryFrom, queryTo)); // 原数据是倒序的
 		if(dailyData.isEmpty()) {
 			return;
 		}
@@ -93,9 +94,10 @@ public class ContractDataLoader {
 	public void loadBarsAndTicks(LocalDate tradingDay){
 		loadBars(tradingDay);
 		tickQ.clear();
-		LocalDate end = utils.getFridayOfThisWeek(tradingDay);
-		LocalDate start = end.minusWeeks(1);
-		List<BarField> dailyData = Lists.reverse(dsMgr.getDailyData(contract.contractField(), start, end));
+		LocalDate thisFriday = utils.getFridayOfThisWeek(tradingDay);
+		LocalDate queryFrom = tradingDay.isAfter(thisFriday) ? thisFriday : thisFriday.minusWeeks(1);
+		LocalDate queryTo = tradingDay.isAfter(thisFriday) ? thisFriday.plusWeeks(1) : thisFriday;
+		List<BarField> dailyData = Lists.reverse(dsMgr.getDailyData(contract.contractField(), queryFrom, queryTo));
 		for(int i=1; i<dailyData.size(); i++) {
 			BarField dayBar = dailyData.get(dailyData.size() - i);
 			if(StringUtils.equals(dayBar.getTradingDay(), tradingDay.format(DateTimeConstant.D_FORMAT_INT_FORMATTER))) {
