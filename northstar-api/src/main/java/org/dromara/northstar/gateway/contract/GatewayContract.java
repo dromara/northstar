@@ -71,11 +71,6 @@ public class GatewayContract implements IContract, TickDataAware{
 	}
 
 	@Override
-	public boolean tradable() {
-		return true;
-	}
-	
-	@Override
 	public String name() {
 		return ins.name();
 	}
