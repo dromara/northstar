@@ -2,6 +2,7 @@ package org.dromara.northstar.common.model.core;
 
 import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.gateway.Gateway;
+import org.dromara.northstar.gateway.model.ContractDefinition;
 
 import lombok.Builder;
 import xyz.redtorch.pb.CoreEnum.CombinationTypeEnum;
@@ -10,7 +11,7 @@ import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreEnum.OptionsTypeEnum;
 import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
 
-@Builder
+@Builder(toBuilder = true)
 public record Contract(
 		String contractId,  	// ID，通常是  <合约代码@交易所代码@产品类型@网关ID>
 		String name,  			// 简称
@@ -35,8 +36,7 @@ public record Contract(
 		int maxLimitOrderVolume,  // 限价单最大下单量
 		int minLimitOrderVolume,  // 限价单最小下单量
 		CombinationTypeEnum combinationType, // 组合类型
-		double commissionFee,  // 手续费
-		double commissionRate, // 手续费率
+		ContractDefinition contractDefinition,
 		int pricePrecision, 	// 价格精度(保留N位小数) 
 		int quantityPrecision,	// 成交量精度(保留N位小数)
 		Gateway gateway,

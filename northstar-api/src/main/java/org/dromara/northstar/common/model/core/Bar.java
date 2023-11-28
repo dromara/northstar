@@ -17,6 +17,7 @@ public record Bar(
 		LocalDate actionDay,
 		LocalTime actionTime,
 		LocalDate tradingDay,
+		long actionTimestamp,
 		double openPrice,
 		double highPrice,
 		double lowPrice,

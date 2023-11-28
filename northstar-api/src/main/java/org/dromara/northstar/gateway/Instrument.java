@@ -3,11 +3,11 @@ package org.dromara.northstar.gateway;
 import org.dromara.northstar.common.IDataSource;
 import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.model.Identifier;
+import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.gateway.model.ContractDefinition;
 
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
-import xyz.redtorch.pb.CoreField.ContractField;
 
 /**
  * （可交易的）投资品种
@@ -41,12 +41,6 @@ public interface Instrument {
 	ExchangeEnum exchange();
 	
 	/**
-	 * 开市时间定义
-	 * @return
-	 */
-	TradeTimeDefinition tradeTimeDefinition();
-	
-	/**
 	 * 网关渠道类型
 	 * @return
 	 */
@@ -71,7 +65,7 @@ public interface Instrument {
 	 * 转换为合约信息
 	 * @return
 	 */
-	default ContractField contractField() {
+	default Contract contract() {
 		throw new UnsupportedOperationException();
 	}
 }

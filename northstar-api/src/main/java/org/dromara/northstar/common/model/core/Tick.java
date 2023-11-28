@@ -19,6 +19,7 @@ public record Tick(
 		LocalDate actionDay,
 		LocalTime actionTime,
 		LocalDate tradingDay,
+		long actionTimestamp,
 		double lastPrice,
 		double avgPrice,
 		double iopv,

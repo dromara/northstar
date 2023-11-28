@@ -11,16 +11,15 @@ import org.dromara.northstar.common.constant.Constants;
 import org.dromara.northstar.common.event.FastEventEngine;
 import org.dromara.northstar.common.event.NorthstarEventType;
 import org.dromara.northstar.common.model.Identifier;
+import org.dromara.northstar.common.model.core.Contract;
+import org.dromara.northstar.common.model.core.Tick;
 import org.dromara.northstar.gateway.IContract;
-import org.dromara.northstar.gateway.TradeTimeDefinition;
 import org.dromara.northstar.gateway.mktdata.IndexTicker;
 import org.dromara.northstar.gateway.mktdata.MinuteBarGenerator;
 
 import lombok.extern.slf4j.Slf4j;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
-import xyz.redtorch.pb.CoreField.ContractField;
-import xyz.redtorch.pb.CoreField.TickField;
 
 /**
  * 指数合约
@@ -36,7 +35,7 @@ public class IndexContract implements IContract, TickDataAware{
 	
 	private final IndexTicker ticker;
 	
-	private final ContractField contract;
+	private final Contract contract;
 	
 	private final Identifier identifier;
 	
@@ -44,34 +43,34 @@ public class IndexContract implements IContract, TickDataAware{
 	
 	public IndexContract(FastEventEngine feEngine, List<IContract> monthContracts) {
 		this.monthContracts = monthContracts;
-		this.contract = makeIndexContractField(monthContracts.get(0).contractField());
+		this.contract = makeIndexContractField(monthContracts.get(0).contract());
 		this.dataSrc = monthContracts.get(0).dataSource();
-		this.identifier = Identifier.of(contract.getContractId());
-		this.barGen = new MinuteBarGenerator(contract, monthContracts.get(0).tradeTimeDefinition(), bar -> feEngine.emitEvent(NorthstarEventType.BAR, bar));
+		this.identifier = Identifier.of(contract.contractId());
+		this.barGen = new MinuteBarGenerator(contract, bar -> feEngine.emitEvent(NorthstarEventType.BAR, bar));
 		this.ticker = new IndexTicker(this, t -> {
 			feEngine.emitEvent(NorthstarEventType.TICK, t);
 			barGen.update(t);
 		});
 	}
 	
-	private ContractField makeIndexContractField(ContractField proto) {
-		String name = proto.getName().replaceAll("\\d+$", "指数");
-		String fullName = proto.getFullName().replaceAll("\\d+$", "指数");
-		String originSymbol = proto.getSymbol();
+	private Contract makeIndexContractField(Contract proto) {
+		String name = proto.name().replaceAll("\\d+$", "指数");
+		String fullName = proto.fullName().replaceAll("\\d+$", "指数");
+		String originSymbol = proto.symbol();
 		String symbol = originSymbol.replaceAll("\\d+$", Constants.INDEX_SUFFIX);
-		String contractId = proto.getContractId().replace(originSymbol, symbol);
-		String thirdPartyId = proto.getThirdPartyId().replace(originSymbol, symbol);
-		String unifiedSymbol = proto.getUnifiedSymbol().replace(originSymbol, symbol);
-		return ContractField.newBuilder(proto)
-				.setSymbol(symbol)
-				.setThirdPartyId(thirdPartyId)
-				.setContractId(contractId)
-				.setLastTradeDateOrContractMonth("")
-				.setUnifiedSymbol(unifiedSymbol)
-				.setFullName(fullName)
-				.setLongMarginRatio(0.1)
-				.setShortMarginRatio(0.1)
-				.setName(name)
+		String contractId = proto.contractId().replace(originSymbol, symbol);
+		String thirdPartyId = proto.thirdPartyId().replace(originSymbol, symbol);
+		String unifiedSymbol = proto.unifiedSymbol().replace(originSymbol, symbol);
+		return proto.toBuilder()
+				.symbol(symbol)
+				.thirdPartyId(thirdPartyId)
+				.contractId(contractId)
+				.lastTradeDateOrContractMonth("")
+				.unifiedSymbol(unifiedSymbol)
+				.fullName(fullName)
+				.longMarginRatio(proto.longMarginRatio())
+				.shortMarginRatio(proto.shortMarginRatio())
+				.name(name)
 				.build();
 	}
 	
@@ -86,7 +85,7 @@ public class IndexContract implements IContract, TickDataAware{
 		log.debug("订阅：{}", identifier.value());
 		for(IContract c : monthContracts) {
 			if(!c.subscribe()) {
-				log.warn("[{}] 合约订阅失败", c.contractField().getUnifiedSymbol());
+				log.warn("[{}] 合约订阅失败", c.contract().unifiedSymbol());
 			}
 		}
 		return true;
@@ -97,14 +96,14 @@ public class IndexContract implements IContract, TickDataAware{
 		log.debug("退订：{}", identifier.value());
 		for(IContract c : monthContracts) {
 			if(!c.unsubscribe()) {
-				log.warn("[{}] 合约取消订阅失败", c.contractField().getUnifiedSymbol());
+				log.warn("[{}] 合约取消订阅失败", c.contract().unifiedSymbol());
 			}
 		}
 		return true;
 	}
 	
 	@Override
-	public void onTick(TickField tick) {
+	public void onTick(Tick tick) {
 		ticker.update(tick);
 	}
 
@@ -114,13 +113,13 @@ public class IndexContract implements IContract, TickDataAware{
 	}
 
 	@Override
-	public ContractField contractField() {
+	public Contract contract() {
 		return contract;
 	}
 
 	@Override
 	public String name() {
-		return contract.getName();
+		return contract.name();
 	}
 
 	@Override
@@ -130,22 +129,17 @@ public class IndexContract implements IContract, TickDataAware{
 
 	@Override
 	public ProductClassEnum productClass() {
-		return contract.getProductClass();
+		return contract.productClass();
 	}
 
 	@Override
 	public ExchangeEnum exchange() {
-		return contract.getExchange();
+		return contract.exchange();
 	}
 
 	@Override
 	public String gatewayId() {
-		return contract.getGatewayId();
-	}
-
-	@Override
-	public TradeTimeDefinition tradeTimeDefinition() {
-		return monthContracts.get(0).tradeTimeDefinition();
+		return contract.gateway().gatewayId();
 	}
 
 	@Override
@@ -160,7 +154,7 @@ public class IndexContract implements IContract, TickDataAware{
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(contract.getContractId());
+		return Objects.hash(contract.contractId());
 	}
 
 	@Override
@@ -172,7 +166,7 @@ public class IndexContract implements IContract, TickDataAware{
 		if (getClass() != obj.getClass())
 			return false;
 		IndexContract other = (IndexContract) obj;
-		return StringUtils.equals(contract.getContractId(), other.contract.getContractId());
+		return StringUtils.equals(contract.contractId(), other.contract.contractId());
 	}
 	
 }

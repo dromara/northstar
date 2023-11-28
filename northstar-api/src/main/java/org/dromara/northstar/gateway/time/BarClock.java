@@ -5,6 +5,7 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
+@Deprecated
 public class BarClock {
 
 	private final List<LocalTime> baseTimeLine;

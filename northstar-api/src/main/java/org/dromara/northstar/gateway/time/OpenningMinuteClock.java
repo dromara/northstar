@@ -15,6 +15,7 @@ import xyz.redtorch.pb.CoreField.TickField;
  * @author KevinHuangwl
  *
  */
+@Deprecated
 public class OpenningMinuteClock {
 
 	private List<LocalTime> timeFrame;

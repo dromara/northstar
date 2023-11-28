@@ -14,6 +14,7 @@ import org.dromara.northstar.gateway.model.PeriodSegment;
  * @author KevinHuangwl
  *
  */
+@Deprecated
 public class PeriodHelper {
 	
 	private List<LocalTime> baseTimeFrame = new ArrayList<>(256); // 基准时间线

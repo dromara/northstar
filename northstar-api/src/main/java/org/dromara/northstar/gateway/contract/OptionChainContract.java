@@ -6,14 +6,13 @@ import java.util.Objects;
 import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.constant.Constants;
 import org.dromara.northstar.common.model.Identifier;
+import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.gateway.IContract;
-import org.dromara.northstar.gateway.TradeTimeDefinition;
 import org.springframework.util.Assert;
 
 import lombok.extern.slf4j.Slf4j;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
-import xyz.redtorch.pb.CoreField.ContractField;
 
 /**
  * 组合合约
@@ -40,7 +39,7 @@ public class OptionChainContract implements IContract {
 	public boolean subscribe() {
 		for(IContract c : memberContracts) {
 			if(!c.subscribe()) {
-				log.warn("[{}] 合约订阅失败", c.contractField().getUnifiedSymbol());
+				log.warn("[{}] 合约订阅失败", c.contract().unifiedSymbol());
 			}
 		}
 		return true;
@@ -50,7 +49,7 @@ public class OptionChainContract implements IContract {
 	public boolean unsubscribe() {
 		for(IContract c : memberContracts) {
 			if(!c.unsubscribe()) {
-				log.warn("[{}] 合约取消订阅失败", c.contractField().getUnifiedSymbol());
+				log.warn("[{}] 合约取消订阅失败", c.contract().unifiedSymbol());
 			}
 		}
 		return true;
@@ -62,15 +61,15 @@ public class OptionChainContract implements IContract {
 	}
 
 	@Override
-	public ContractField contractField() {
-		ContractField seed = memberContracts.get(0).contractField();
-		String unifiedSymbol = String.format("%s@%s@%s", name, seed.getExchange(), seed.getProductClass());
-		return ContractField.newBuilder(seed)
-				.setName(name)
-				.setFullName(name)
-				.setUnifiedSymbol(unifiedSymbol)
-				.setSymbol(name)
-				.setContractId(identifier.value())
+	public Contract contract() {
+		Contract seed = memberContracts.get(0).contract();
+		String unifiedSymbol = String.format("%s@%s@%s", name, seed.exchange(), seed.productClass());
+		return seed.toBuilder()
+				.name(name)
+				.fullName(name)
+				.unifiedSymbol(unifiedSymbol)
+				.symbol(name)
+				.contractId(identifier.value())
 				.build();
 	}
 
@@ -99,11 +98,6 @@ public class OptionChainContract implements IContract {
 		return memberContracts.get(0).gatewayId();
 	}
 
-	@Override
-	public TradeTimeDefinition tradeTimeDefinition() {
-		return memberContracts.get(0).tradeTimeDefinition();
-	}
-	
 	@Override
 	public ChannelType channelType() {
 		return memberContracts.get(0).channelType();

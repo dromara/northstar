@@ -1,6 +1,6 @@
 package org.dromara.northstar.common;
 
-import xyz.redtorch.pb.CoreField.TickField;
+import org.dromara.northstar.common.model.core.Tick;
 
 /**
  * TICK行情组件
@@ -10,7 +10,7 @@ import xyz.redtorch.pb.CoreField.TickField;
 public interface TickDataAware {
 
 	
-	void onTick(TickField tick);
+	void onTick(Tick tick);
 	
 	
 	default void endOfMarket() {

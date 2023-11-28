@@ -4,6 +4,7 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.Month;
 
+@Deprecated
 public class DateUtils {
 
 	private DateUtils() {}

@@ -2,9 +2,8 @@ package org.dromara.northstar.strategy;
 
 import org.dromara.northstar.common.BarDataAware;
 import org.dromara.northstar.common.TickDataAware;
-
-import xyz.redtorch.pb.CoreField.BarField;
-import xyz.redtorch.pb.CoreField.TickField;
+import org.dromara.northstar.common.model.core.Bar;
+import org.dromara.northstar.common.model.core.Tick;
 
 /**
  * 嵌入式策略接口
@@ -18,12 +17,12 @@ public interface IEmbededRule extends BarDataAware, TickDataAware {
 	 * 响应TICK数据
 	 */
 	@Override
-	default void onTick(TickField tick) {}
+	default void onTick(Tick tick) {}
 
 	/**
 	 * 响应BAR数据
 	 */
 	@Override
-	default void onBar(BarField bar) {}
+	default void onBar(Bar bar) {}
 
 }
