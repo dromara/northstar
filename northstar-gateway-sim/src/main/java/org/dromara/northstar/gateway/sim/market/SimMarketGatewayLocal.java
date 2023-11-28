@@ -14,6 +14,7 @@ import org.dromara.northstar.common.constant.ConnectionState;
 import org.dromara.northstar.common.event.FastEventEngine;
 import org.dromara.northstar.common.event.NorthstarEventType;
 import org.dromara.northstar.common.model.GatewayDescription;
+import org.dromara.northstar.common.model.core.Tick;
 import org.dromara.northstar.gateway.IMarketCenter;
 import org.dromara.northstar.gateway.MarketGateway;
 import org.dromara.northstar.gateway.contract.GatewayContract;
@@ -75,10 +76,10 @@ public class SimMarketGatewayLocal implements MarketGateway{
 			lastActiveTime = System.currentTimeMillis();
 			try {				
 				for(Entry<String, SimTickGenerator> e: tickGenMap.entrySet()) {
-					TickField tick = e.getValue().generateNextTick(LocalDateTime.now());
+					Tick tick = e.getValue().generateNextTick(LocalDateTime.now(), this);
 					feEngine.emitEvent(NorthstarEventType.TICK, tick);
-					GatewayContract contract = (GatewayContract) mktCenter.getContract(ChannelType.SIM, tick.getUnifiedSymbol());
-					contract.onTick(tick);
+					GatewayContract contract = (GatewayContract) mktCenter.getContract(ChannelType.SIM, tick.contract().unifiedSymbol());
+//					contract.onTick(tick);
 				}
 			} catch (Exception e) {
 				log.error("模拟行情TICK生成异常", e);

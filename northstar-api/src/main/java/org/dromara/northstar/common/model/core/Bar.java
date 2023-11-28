@@ -13,6 +13,7 @@ import lombok.Builder;
 @Builder
 public record Bar(
 		Gateway gateway,
+		Contract contract,
 		LocalDate actionDay,
 		LocalTime actionTime,
 		LocalDate tradingDay,

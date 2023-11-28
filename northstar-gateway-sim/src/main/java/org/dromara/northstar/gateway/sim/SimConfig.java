@@ -28,8 +28,8 @@ public class SimConfig{
 		marketCenter.addInstrument(contractGen.getContract2());
 		log.debug("加载模拟合约");
 		return marketCenter.getContracts(ChannelType.SIM).stream()
-				.map(c -> new SimTickGenerator(c.contractField()))
-				.collect(Collectors.toMap(c -> c.contract().getUnifiedSymbol(), c -> c));
+				.map(c -> new SimTickGenerator(c.contract()))
+				.collect(Collectors.toMap(c -> c.tickSymbol(), c -> c));
 	}
 
 	@Bean

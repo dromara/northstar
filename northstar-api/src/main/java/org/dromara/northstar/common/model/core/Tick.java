@@ -5,6 +5,7 @@ import java.time.LocalTime;
 import java.util.List;
 
 import org.dromara.northstar.common.constant.ChannelType;
+import org.dromara.northstar.common.constant.TickType;
 import org.dromara.northstar.gateway.Gateway;
 
 import com.alibaba.fastjson.JSONObject;
@@ -14,6 +15,7 @@ import lombok.Builder;
 @Builder
 public record Tick(
 		Gateway gateway,
+		Contract contract,
 		LocalDate actionDay,
 		LocalTime actionTime,
 		LocalDate tradingDay,
@@ -39,6 +41,7 @@ public record Tick(
 		List<Double> askPrice,  	// 卖价
 		List<Integer> bidVolume,  		// 买量
 		List<Integer> askVolume,  		// 卖量
+		TickType type,
 		JSONObject otherInfo,	// 额外信息
 		ChannelType channelType	// 渠道来源
 	) {
