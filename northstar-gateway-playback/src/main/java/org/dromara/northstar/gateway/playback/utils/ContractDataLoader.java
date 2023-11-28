@@ -17,7 +17,7 @@ import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.common.constant.PlaybackPrecision;
 import org.dromara.northstar.common.constant.TickType;
 import org.dromara.northstar.common.utils.MarketDataLoadingUtils;
-import org.dromara.northstar.gateway.Contract;
+import org.dromara.northstar.gateway.IContract;
 import org.dromara.northstar.gateway.playback.ticker.RandomWalkTickSimulation;
 import org.dromara.northstar.gateway.playback.ticker.SimpleCloseSimulation;
 import org.dromara.northstar.gateway.playback.ticker.SimplePriceSimulation;
@@ -34,7 +34,7 @@ public class ContractDataLoader {
 	
 	private IDataSource dsMgr;
 	@Getter
-	private Contract contract;
+	private IContract contract;
 	
 	private MarketDataLoadingUtils utils = new MarketDataLoadingUtils();
 	
@@ -46,7 +46,7 @@ public class ContractDataLoader {
 	
 	private TickSimulationAlgorithm tickGenAlgo;
 	
-	public ContractDataLoader(String gatewayId, Contract contract, PlaybackPrecision precision) {
+	public ContractDataLoader(String gatewayId, IContract contract, PlaybackPrecision precision) {
 		this.contract = contract;
 		this.dsMgr = contract.dataSource();
 		this.gatewayId = gatewayId;

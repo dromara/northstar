@@ -14,7 +14,7 @@ import org.dromara.northstar.common.model.GatewayDescription;
 import org.dromara.northstar.common.model.NsUser;
 import org.dromara.northstar.data.IGatewayRepository;
 import org.dromara.northstar.event.BroadcastHandler;
-import org.dromara.northstar.gateway.Contract;
+import org.dromara.northstar.gateway.IContract;
 import org.dromara.northstar.gateway.IMarketCenter;
 import org.dromara.northstar.strategy.IMessageSender;
 import org.junit.jupiter.api.AfterAll;
@@ -61,7 +61,7 @@ class GatewayDataControllerTest {
 	
 	@BeforeEach
 	public void setUp() throws Exception {
-		Contract contract = mock(Contract.class);
+		IContract contract = mock(IContract.class);
 		when(contractMgr.getContract(any(), anyString())).thenReturn(contract);
 		when(contract.contractField()).thenReturn(ContractField.newBuilder().setChannelType("PLAYBACK").setUnifiedSymbol("rb2205@SHFE@FUTURES").build());
 		

@@ -17,7 +17,7 @@ import org.dromara.northstar.common.model.ContractSimpleInfo;
 import org.dromara.northstar.common.model.Identifier;
 import org.dromara.northstar.common.model.ModuleAccountDescription;
 import org.dromara.northstar.event.IllegalOrderHandler;
-import org.dromara.northstar.gateway.Contract;
+import org.dromara.northstar.gateway.IContract;
 import org.dromara.northstar.gateway.IContractManager;
 import org.dromara.northstar.module.ModuleManager;
 import org.dromara.northstar.strategy.IAccount;
@@ -113,7 +113,7 @@ public class ModuleCheckingTask implements InitializingBean {
 		moduleMgr.allModules().forEach(m -> {
 			for(ModuleAccountDescription mad : m.getModuleDescription().getModuleAccountSettingsDescription()) {
 				for(ContractSimpleInfo csi : mad.getBindedContracts()) {
-					Contract contract = contractMgr.getContract(Identifier.of(csi.getValue()));
+					IContract contract = contractMgr.getContract(Identifier.of(csi.getValue()));
 					IAccount account = m.getAccount(contract);
 					PositionField longPosPlaceholder = PositionField.newBuilder()
 							.setGatewayId(account.accountId())

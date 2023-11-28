@@ -16,9 +16,8 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
 
 import org.dromara.northstar.common.constant.DateTimeConstant;
-import org.dromara.northstar.gateway.Contract;
+import org.dromara.northstar.gateway.IContract;
 import org.dromara.northstar.gateway.contract.IndexContract;
-import org.dromara.northstar.gateway.mktdata.IndexTicker;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -32,9 +31,9 @@ class IndexTickerTest {
 	
 	@BeforeEach
 	void prepare() {
-		Contract c1 = mock(Contract.class);
-		Contract c2 = mock(Contract.class);
-		Contract c3 = mock(Contract.class);
+		IContract c1 = mock(IContract.class);
+		IContract c2 = mock(IContract.class);
+		IContract c3 = mock(IContract.class);
 		when(c1.contractField()).thenReturn(factory.makeContract("rb2210"));
 		when(c2.contractField()).thenReturn(factory.makeContract("rb2201"));
 		when(c3.contractField()).thenReturn(factory.makeContract("rb2205"));

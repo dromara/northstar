@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Random;
 
 import org.dromara.northstar.common.constant.DateTimeConstant;
-import org.dromara.northstar.gateway.Contract;
+import org.dromara.northstar.gateway.IContract;
 import org.dromara.northstar.gateway.time.GenericTradeTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,7 +26,7 @@ class BarMergerTest {
 	
 	ContractField contract = factory.makeContract("rb2205");
 	
-	Contract c = mock(Contract.class);
+	IContract c = mock(IContract.class);
 	
 	@BeforeEach
 	void prepare() {

@@ -19,7 +19,7 @@ import org.dromara.northstar.common.model.Identifier;
 import org.dromara.northstar.common.model.ModuleAccountDescription;
 import org.dromara.northstar.common.model.ModuleDescription;
 import org.dromara.northstar.common.model.ModuleRuntimeDescription;
-import org.dromara.northstar.gateway.Contract;
+import org.dromara.northstar.gateway.IContract;
 import org.dromara.northstar.gateway.Gateway;
 import org.dromara.northstar.gateway.IContractManager;
 import org.dromara.northstar.gateway.MarketGateway;
@@ -64,7 +64,7 @@ abstract class AbstractTrainer extends AbstractTester implements RLAgentTraining
 		return testSymbols().stream()
 				.map(symbol -> symbol + "0000")
 				.map(idxSymbol -> contractMgr.getContract(ChannelType.PLAYBACK, idxSymbol))
-				.map(Contract::contractField)
+				.map(IContract::contractField)
 				.map(cf -> ContractSimpleInfo.builder()
 					.name(cf.getName())
 					.channelType(ChannelType.PLAYBACK)

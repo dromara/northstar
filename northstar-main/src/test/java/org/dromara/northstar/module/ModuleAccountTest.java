@@ -17,7 +17,7 @@ import org.dromara.northstar.common.model.ModuleDescription;
 import org.dromara.northstar.common.model.ModulePositionDescription;
 import org.dromara.northstar.common.model.ModuleRuntimeDescription;
 import org.dromara.northstar.data.IModuleRepository;
-import org.dromara.northstar.gateway.Contract;
+import org.dromara.northstar.gateway.IContract;
 import org.dromara.northstar.gateway.IContractManager;
 import org.dromara.northstar.strategy.IModuleContext;
 import org.junit.jupiter.api.BeforeEach;
@@ -84,7 +84,7 @@ class ModuleAccountTest {
 				.moduleAccountRuntime(mard)
 				.build();
 		IContractManager contractMgr = mock(IContractManager.class);
-		Contract c = mock(Contract.class);
+		IContract c = mock(IContract.class);
 		when(c.contractField()).thenReturn(trade.getContract());
 		when(contractMgr.getContract(any(Identifier.class))).thenReturn(c);
 		when(ctx.getLogger()).thenReturn(mock(Logger.class));

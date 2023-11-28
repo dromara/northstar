@@ -30,7 +30,7 @@ import org.dromara.northstar.common.model.Identifier;
 import org.dromara.northstar.common.model.ModuleAccountDescription;
 import org.dromara.northstar.common.model.ModuleDescription;
 import org.dromara.northstar.common.model.ModuleRuntimeDescription;
-import org.dromara.northstar.gateway.Contract;
+import org.dromara.northstar.gateway.IContract;
 import org.dromara.northstar.gateway.Gateway;
 import org.dromara.northstar.gateway.IContractManager;
 import org.dromara.northstar.gateway.MarketGateway;
@@ -102,7 +102,7 @@ public abstract class AbstractTester implements ModuleTesterContext{
 			/// 			准备工作 				///
 			///////////////////////////////////////
 			String idxSymbol = symbol + "0000";
-			Contract c = contractMgr.getContract(ChannelType.PLAYBACK, idxSymbol);
+			IContract c = contractMgr.getContract(ChannelType.PLAYBACK, idxSymbol);
 			ContractField cf = c.contractField();
 			ContractSimpleInfo csi = ContractSimpleInfo.builder()
 					.name(cf.getName())

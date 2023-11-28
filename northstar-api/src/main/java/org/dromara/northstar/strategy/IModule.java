@@ -3,7 +3,7 @@ package org.dromara.northstar.strategy;
 import org.dromara.northstar.common.event.NorthstarEvent;
 import org.dromara.northstar.common.model.ModuleDescription;
 import org.dromara.northstar.common.model.ModuleRuntimeDescription;
-import org.dromara.northstar.gateway.Contract;
+import org.dromara.northstar.gateway.IContract;
 
 import xyz.redtorch.pb.CoreField.ContractField;
 
@@ -39,7 +39,7 @@ public interface IModule {
 	 * @param contract
 	 * @return
 	 */
-	IAccount getAccount(Contract contract);
+	IAccount getAccount(IContract contract);
 	/**
 	 * 获取合约关联的交易账户
 	 * @param contract

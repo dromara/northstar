@@ -9,7 +9,7 @@ import java.time.LocalTime;
 
 import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.data.IMarketDataRepository;
-import org.dromara.northstar.gateway.Contract;
+import org.dromara.northstar.gateway.IContract;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,7 +60,7 @@ class MarketDataRepoAdapterTest {
 	
 	@Test
 	void testInsert() {
-		Contract contract = mock(Contract.class);
+		IContract contract = mock(IContract.class);
 		when(contract.contractField()).thenReturn(c);
 		
 		repo.insert(bar1);

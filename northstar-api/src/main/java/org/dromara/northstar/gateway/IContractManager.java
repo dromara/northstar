@@ -12,7 +12,7 @@ public interface IContractManager {
 	 * @param identifier
 	 * @return
 	 */
-	Contract getContract(Identifier identifier);
+	IContract getContract(Identifier identifier);
 	
 	/**
 	 * 根据网关与编码获取合约
@@ -20,19 +20,19 @@ public interface IContractManager {
 	 * @param symbol		可以是symbol或unifiedSymbol 
 	 * @return
 	 */
-	Contract getContract(ChannelType channelType, String symbol);
+	IContract getContract(ChannelType channelType, String symbol);
 	
 	/**
 	 * 根据网关ID获取合约
 	 * @param gatewayId
 	 * @return
 	 */
-	List<Contract> getContracts(String gatewayId);
+	List<IContract> getContracts(String gatewayId);
 	
 	/**
 	 * 根据网关渠道获取合约
 	 * @param channelType
 	 * @return
 	 */
-	List<Contract> getContracts(ChannelType channelType);
+	List<IContract> getContracts(ChannelType channelType);
 }

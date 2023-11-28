@@ -35,7 +35,7 @@ import org.dromara.northstar.data.jdbc.ModuleDealRecordRepository;
 import org.dromara.northstar.data.jdbc.ModuleDescriptionRepository;
 import org.dromara.northstar.data.jdbc.ModuleRuntimeDescriptionRepository;
 import org.dromara.northstar.event.BroadcastHandler;
-import org.dromara.northstar.gateway.Contract;
+import org.dromara.northstar.gateway.IContract;
 import org.dromara.northstar.gateway.GatewayMetaProvider;
 import org.dromara.northstar.gateway.IMarketCenter;
 import org.dromara.northstar.gateway.mktdata.NorthstarDataServiceDataSource;
@@ -135,7 +135,7 @@ class ModuleControllerTest {
 		gatewayMetaProvider.add(ChannelType.PLAYBACK, new PlaybackGatewaySettings(), playbackGatewayFactory);
 		gatewayMetaProvider.add(ChannelType.SIM, null, simGatewayFactory);
 		
-		Contract c = mock(Contract.class);
+		IContract c = mock(IContract.class);
 		when(c.dataSource()).thenReturn(dsMgr);
 		when(c.channelType()).thenReturn(ChannelType.PLAYBACK);
 		when(mktCenter.getContract(any(Identifier.class))).thenReturn(c);

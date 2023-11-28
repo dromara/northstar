@@ -40,6 +40,7 @@ public record Contract(
 		int pricePrecision, 	// 价格精度(保留N位小数) 
 		int quantityPrecision,	// 成交量精度(保留N位小数)
 		Gateway gateway,
+		boolean tradable,
 		ChannelType channelType	// 渠道来源
 	) {
 

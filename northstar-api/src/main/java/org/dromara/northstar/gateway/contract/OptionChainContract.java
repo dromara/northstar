@@ -6,7 +6,7 @@ import java.util.Objects;
 import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.constant.Constants;
 import org.dromara.northstar.common.model.Identifier;
-import org.dromara.northstar.gateway.Contract;
+import org.dromara.northstar.gateway.IContract;
 import org.dromara.northstar.gateway.TradeTimeDefinition;
 import org.springframework.util.Assert;
 
@@ -21,15 +21,15 @@ import xyz.redtorch.pb.CoreField.ContractField;
  *
  */
 @Slf4j
-public class OptionChainContract implements Contract {
+public class OptionChainContract implements IContract {
 
 	private final String name;
 	
-	private final List<Contract> memberContracts;
+	private final List<IContract> memberContracts;
 	
 	private final Identifier identifier;
 	
-	public OptionChainContract(Contract underlyingContract, List<Contract> memberContracts) {
+	public OptionChainContract(IContract underlyingContract, List<IContract> memberContracts) {
 		Assert.notEmpty(memberContracts, "集合不能为空");
 		this.memberContracts = memberContracts;
 		this.identifier = Identifier.of(Constants.OPTION_CHAIN_PREFIX + underlyingContract.identifier().value());
@@ -38,7 +38,7 @@ public class OptionChainContract implements Contract {
 
 	@Override
 	public boolean subscribe() {
-		for(Contract c : memberContracts) {
+		for(IContract c : memberContracts) {
 			if(!c.subscribe()) {
 				log.warn("[{}] 合约订阅失败", c.contractField().getUnifiedSymbol());
 			}
@@ -48,7 +48,7 @@ public class OptionChainContract implements Contract {
 
 	@Override
 	public boolean unsubscribe() {
-		for(Contract c : memberContracts) {
+		for(IContract c : memberContracts) {
 			if(!c.unsubscribe()) {
 				log.warn("[{}] 合约取消订阅失败", c.contractField().getUnifiedSymbol());
 			}
@@ -57,7 +57,7 @@ public class OptionChainContract implements Contract {
 	}
 	
 	@Override
-	public List<Contract> memberContracts() {
+	public List<IContract> memberContracts() {
 		return memberContracts;
 	}
 

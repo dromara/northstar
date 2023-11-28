@@ -21,7 +21,7 @@ import org.dromara.northstar.common.model.Tuple;
 import org.dromara.northstar.common.utils.FieldUtils;
 import org.dromara.northstar.common.utils.OrderUtils;
 import org.dromara.northstar.data.IModuleRepository;
-import org.dromara.northstar.gateway.Contract;
+import org.dromara.northstar.gateway.IContract;
 import org.dromara.northstar.gateway.IContractManager;
 import org.dromara.northstar.strategy.IModuleContext;
 import org.dromara.northstar.strategy.TradeStrategy;
@@ -162,7 +162,7 @@ public class ArbitrageModuleContext extends ModuleContext implements IModuleCont
 		}
 		getLogger().info("撤单：{}", originOrderId);
 		ContractField contract = orderReqMap.get(originOrderId).getContract();
-		Contract c = contractMgr.getContract(Identifier.of(contract.getContractId()));
+		IContract c = contractMgr.getContract(Identifier.of(contract.getContractId()));
 		CancelOrderReqField cancelReq = CancelOrderReqField.newBuilder()
 				.setGatewayId(contract.getGatewayId())
 				.setOriginOrderId(originOrderId)

@@ -3,7 +3,7 @@ package org.dromara.northstar.data;
 import java.time.LocalDate;
 import java.util.List;
 
-import org.dromara.northstar.gateway.Contract;
+import org.dromara.northstar.gateway.IContract;
 
 import xyz.redtorch.pb.CoreField.BarField;
 
@@ -27,7 +27,7 @@ public interface IMarketDataRepository {
 	 * @param endDate
 	 * @return
 	 */
-	List<BarField> loadBars(Contract contract, LocalDate startDate, LocalDate endDate);
+	List<BarField> loadBars(IContract contract, LocalDate startDate, LocalDate endDate);
 	
 	
 	/**
@@ -37,6 +37,6 @@ public interface IMarketDataRepository {
 	 * @param endDate
 	 * @return
 	 */
-	List<BarField> loadDailyBars(Contract contract, LocalDate startDate, LocalDate endDate);
+	List<BarField> loadDailyBars(IContract contract, LocalDate startDate, LocalDate endDate);
 	
 }

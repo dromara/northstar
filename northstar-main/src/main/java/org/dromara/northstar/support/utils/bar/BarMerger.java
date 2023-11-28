@@ -10,7 +10,7 @@ import java.util.function.BiConsumer;
 import org.apache.commons.lang3.StringUtils;
 import org.dromara.northstar.common.BarDataAware;
 import org.dromara.northstar.common.constant.DateTimeConstant;
-import org.dromara.northstar.gateway.Contract;
+import org.dromara.northstar.gateway.IContract;
 import org.dromara.northstar.gateway.time.BarClock;
 import org.dromara.northstar.gateway.time.PeriodHelper;
 
@@ -27,7 +27,7 @@ public class BarMerger implements BarDataAware{
 	
 	protected BiConsumer<BarMerger, BarField> callback;
 	
-	protected Contract contract;
+	protected IContract contract;
 	
 	protected BarField.Builder barBuilder;
 	
@@ -41,7 +41,7 @@ public class BarMerger implements BarDataAware{
 	
 	private final BarClock clock;
 	
-	public BarMerger(int numOfMinPerBar, Contract contract, BiConsumer<BarMerger, BarField> callback) {
+	public BarMerger(int numOfMinPerBar, IContract contract, BiConsumer<BarMerger, BarField> callback) {
 		this.callback = callback;
 		this.contract = contract;
 		this.numOfMinPerBar = numOfMinPerBar;

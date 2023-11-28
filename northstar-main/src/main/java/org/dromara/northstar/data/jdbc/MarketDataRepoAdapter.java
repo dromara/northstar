@@ -10,7 +10,7 @@ import org.dromara.northstar.common.IDataSource;
 import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.data.IMarketDataRepository;
 import org.dromara.northstar.data.jdbc.entity.BarDO;
-import org.dromara.northstar.gateway.Contract;
+import org.dromara.northstar.gateway.IContract;
 
 import lombok.extern.slf4j.Slf4j;
 import xyz.redtorch.pb.CoreField.BarField;
@@ -31,7 +31,7 @@ public class MarketDataRepoAdapter implements IMarketDataRepository{
 	}
 
 	@Override
-	public List<BarField> loadBars(Contract contract, LocalDate startDate, LocalDate endDate0) {
+	public List<BarField> loadBars(IContract contract, LocalDate startDate, LocalDate endDate0) {
 		log.debug("加载 [{}] 历史行情数据：{} -> {}", contract.contractField().getUnifiedSymbol(), startDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), endDate0.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
 		LocalDate today = LocalDate.now();
 		LocalDate endDate = today.isAfter(endDate0) ? endDate0 : today;
@@ -84,7 +84,7 @@ public class MarketDataRepoAdapter implements IMarketDataRepository{
 	}
 	
 	@Override
-	public List<BarField> loadDailyBars(Contract contract, LocalDate startDate, LocalDate endDate) {
+	public List<BarField> loadDailyBars(IContract contract, LocalDate startDate, LocalDate endDate) {
 		IDataSource dataServiceDelegate = contract.dataSource();
 		try {
 			return dataServiceDelegate.getDailyData(contract.contractField(), startDate, endDate);

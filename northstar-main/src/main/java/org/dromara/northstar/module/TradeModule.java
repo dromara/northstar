@@ -13,7 +13,7 @@ import org.dromara.northstar.common.exception.NoSuchElementException;
 import org.dromara.northstar.common.model.Identifier;
 import org.dromara.northstar.common.model.ModuleDescription;
 import org.dromara.northstar.common.model.ModuleRuntimeDescription;
-import org.dromara.northstar.gateway.Contract;
+import org.dromara.northstar.gateway.IContract;
 import org.dromara.northstar.gateway.IContractManager;
 import org.dromara.northstar.gateway.MarketGateway;
 import org.dromara.northstar.gateway.TradeGateway;
@@ -48,7 +48,7 @@ public class TradeModule implements IModule {
 	
 	private ModuleDescription md;
 	
-	private Map<Contract, IAccount> contractAccountMap = new HashMap<>();
+	private Map<IContract, IAccount> contractAccountMap = new HashMap<>();
 	
 	private IContractManager contractMgr;
 	
@@ -61,7 +61,7 @@ public class TradeModule implements IModule {
 			mktGatewayIdSet.add(mktGateway.gatewayId());
 			accountIdSet.add(mad.getAccountGatewayId());
 			mad.getBindedContracts().forEach(contract -> {
-				Contract c = contractMgr.getContract(Identifier.of(contract.getValue()));
+				IContract c = contractMgr.getContract(Identifier.of(contract.getValue()));
 				bindedSymbolSet.add(contract.getUnifiedSymbol());
 				contractAccountMap.put(c, accountMgr.get(Identifier.of(mad.getAccountGatewayId())));
 			});
@@ -123,7 +123,7 @@ public class TradeModule implements IModule {
 	}
 
 	@Override
-	public IAccount getAccount(Contract contract) {
+	public IAccount getAccount(IContract contract) {
 		if(!contractAccountMap.containsKey(contract)) {
 			throw new NoSuchElementException("[" + contract.identifier().value() + "] 找不到绑定的账户");
 		}
@@ -132,7 +132,7 @@ public class TradeModule implements IModule {
 	
 	@Override
 	public IAccount getAccount(ContractField contract) {
-		Contract c = contractMgr.getContract(Identifier.of(contract.getContractId()));
+		IContract c = contractMgr.getContract(Identifier.of(contract.getContractId()));
 		return getAccount(c);
 	}
 

@@ -17,7 +17,7 @@ import org.dromara.northstar.common.model.ModuleDescription;
 import org.dromara.northstar.common.model.ModuleRuntimeDescription;
 import org.dromara.northstar.common.utils.FieldUtils;
 import org.dromara.northstar.data.IModuleRepository;
-import org.dromara.northstar.gateway.Contract;
+import org.dromara.northstar.gateway.IContract;
 import org.dromara.northstar.gateway.IContractManager;
 import org.dromara.northstar.strategy.IModuleAccount;
 import org.slf4j.Logger;
@@ -112,7 +112,7 @@ public class ModuleAccount implements IModuleAccount{
 		moduleDescription.getModuleAccountSettingsDescription().stream()
 			.flatMap(mad -> mad.getBindedContracts().stream())
 			.forEach(contractSimple -> {
-				Contract contract = contractMgr.getContract(Identifier.of(contractSimple.getValue()));
+				IContract contract = contractMgr.getContract(Identifier.of(contractSimple.getValue()));
 				ContractField cf = contract.contractField();
 				
 				ModulePosition buyPos = new ModulePosition(moduleRtDescription.getModuleName(), cf, DirectionEnum.D_Buy, moduleDescription.getClosingPolicy(), onDealCallback);

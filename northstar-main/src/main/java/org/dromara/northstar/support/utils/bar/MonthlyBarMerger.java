@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.dromara.northstar.common.IDataSource;
 import org.dromara.northstar.common.constant.DateTimeConstant;
-import org.dromara.northstar.gateway.Contract;
+import org.dromara.northstar.gateway.IContract;
 import org.dromara.northstar.gateway.model.PeriodSegment;
 
 import xyz.redtorch.pb.CoreField.BarField;
@@ -35,7 +35,7 @@ public class MonthlyBarMerger extends BarMerger{
 	/* year -> dateSet */
 	private Map<Integer, Set<LocalDate>> yearHolidays = new HashMap<>();
 
-	public MonthlyBarMerger(int numOfMonthPerBar, Contract contract, BiConsumer<BarMerger, BarField> callback, IDataSource dsMgr) {
+	public MonthlyBarMerger(int numOfMonthPerBar, IContract contract, BiConsumer<BarMerger, BarField> callback, IDataSource dsMgr) {
 		super(0, contract, callback);
 		this.dsMgr = dsMgr;
 		this.numOfMonthPerBar = numOfMonthPerBar;

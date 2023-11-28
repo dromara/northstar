@@ -5,7 +5,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import org.dromara.northstar.common.IDataSource;
-import org.dromara.northstar.gateway.Contract;
+import org.dromara.northstar.gateway.IContract;
 import org.dromara.northstar.gateway.time.GenericTradeTime;
 import org.dromara.northstar.indicator.constant.PeriodUnit;
 import org.dromara.northstar.strategy.MergedBarListener;
@@ -29,7 +29,7 @@ class BarMergerRegistryTest {
 	
 	@Test
 	void test() {
-		Contract c = mock(Contract.class);
+		IContract c = mock(IContract.class);
 		when(c.dataSource()).thenReturn(mock(IDataSource.class));
 		when(c.contractField()).thenReturn(contract);
 		when(c.tradeTimeDefinition()).thenReturn(new GenericTradeTime());

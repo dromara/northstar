@@ -48,7 +48,7 @@ import org.dromara.northstar.common.utils.BarUtils;
 import org.dromara.northstar.common.utils.FieldUtils;
 import org.dromara.northstar.common.utils.OrderUtils;
 import org.dromara.northstar.data.IModuleRepository;
-import org.dromara.northstar.gateway.Contract;
+import org.dromara.northstar.gateway.IContract;
 import org.dromara.northstar.gateway.IContractManager;
 import org.dromara.northstar.indicator.Indicator;
 import org.dromara.northstar.indicator.IndicatorValueUpdateHelper;
@@ -112,7 +112,7 @@ public class ModuleContext implements IModuleContext{
 	
 	/* unifiedSymbol -> contract */
 	protected Map<String, ContractField> contractMap = new HashMap<>();
-	protected Map<String, Contract> contractMap2 = new HashMap<>();
+	protected Map<String, IContract> contractMap2 = new HashMap<>();
 	
 	/* unifiedSymbol -> tick */
 	protected ConcurrentMap<String, TickField> latestTickMap = new ConcurrentHashMap<>();
@@ -159,7 +159,7 @@ public class ModuleContext implements IModuleContext{
 		moduleDescription.getModuleAccountSettingsDescription().stream()
 			.forEach(mad -> {
 				for(ContractSimpleInfo csi : mad.getBindedContracts()) {
-					Contract contract = contractMgr.getContract(Identifier.of(csi.getValue()));
+					IContract contract = contractMgr.getContract(Identifier.of(csi.getValue()));
 					ContractField cf = contract.contractField();
 					contractMap.put(csi.getUnifiedSymbol(), cf);
 					contractMap2.put(csi.getUnifiedSymbol(), contract);
@@ -215,7 +215,7 @@ public class ModuleContext implements IModuleContext{
 		if(!contractMap2.containsKey(contract.getUnifiedSymbol())) {
 			throw new NoSuchElementException("模组没有绑定合约：" + contract.getUnifiedSymbol());
 		}
-		Contract c = contractMap2.get(contract.getUnifiedSymbol());
+		IContract c = contractMap2.get(contract.getUnifiedSymbol());
 		return module.getAccount(c);
 	}
 
@@ -244,7 +244,7 @@ public class ModuleContext implements IModuleContext{
 	public void registerIndicator(Indicator indicator) {
 		checkIndicator(indicator);
 		Configuration cfg = indicator.getConfiguration();
-		Contract c = contractMap2.get(cfg.contract().getUnifiedSymbol());
+		IContract c = contractMap2.get(cfg.contract().getUnifiedSymbol());
 		IndicatorValueUpdateHelper helper = new IndicatorValueUpdateHelper(indicator);
 		indicatorHelperSet.add(helper);
 		registry.addListener(c, cfg.numOfUnits(), cfg.period(), helper, ListenerType.INDICATOR);
@@ -615,7 +615,7 @@ public class ModuleContext implements IModuleContext{
 		}
 		getLogger().info("撤单：{}", originOrderId);
 		ContractField contract = orderReqMap.get(originOrderId).getContract();
-		Contract c = contractMgr.getContract(Identifier.of(contract.getContractId()));
+		IContract c = contractMgr.getContract(Identifier.of(contract.getContractId()));
 		CancelOrderReqField cancelReq = CancelOrderReqField.newBuilder()
 				.setGatewayId(contract.getGatewayId())
 				.setOriginOrderId(originOrderId)

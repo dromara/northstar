@@ -11,7 +11,7 @@ import org.dromara.northstar.common.constant.Constants;
 import org.dromara.northstar.common.event.FastEventEngine;
 import org.dromara.northstar.common.event.NorthstarEventType;
 import org.dromara.northstar.common.model.Identifier;
-import org.dromara.northstar.gateway.Contract;
+import org.dromara.northstar.gateway.IContract;
 import org.dromara.northstar.gateway.TradeTimeDefinition;
 import org.dromara.northstar.gateway.mktdata.IndexTicker;
 import org.dromara.northstar.gateway.mktdata.MinuteBarGenerator;
@@ -28,9 +28,9 @@ import xyz.redtorch.pb.CoreField.TickField;
  *
  */
 @Slf4j
-public class IndexContract implements Contract, TickDataAware{
+public class IndexContract implements IContract, TickDataAware{
 
-	private final List<Contract> monthContracts;
+	private final List<IContract> monthContracts;
 	
 	private final MinuteBarGenerator barGen;
 	
@@ -42,7 +42,7 @@ public class IndexContract implements Contract, TickDataAware{
 	
 	private final IDataSource dataSrc;
 	
-	public IndexContract(FastEventEngine feEngine, List<Contract> monthContracts) {
+	public IndexContract(FastEventEngine feEngine, List<IContract> monthContracts) {
 		this.monthContracts = monthContracts;
 		this.contract = makeIndexContractField(monthContracts.get(0).contractField());
 		this.dataSrc = monthContracts.get(0).dataSource();
@@ -84,7 +84,7 @@ public class IndexContract implements Contract, TickDataAware{
 	@Override
 	public boolean subscribe() {
 		log.debug("订阅：{}", identifier.value());
-		for(Contract c : monthContracts) {
+		for(IContract c : monthContracts) {
 			if(!c.subscribe()) {
 				log.warn("[{}] 合约订阅失败", c.contractField().getUnifiedSymbol());
 			}
@@ -95,7 +95,7 @@ public class IndexContract implements Contract, TickDataAware{
 	@Override
 	public boolean unsubscribe() {
 		log.debug("退订：{}", identifier.value());
-		for(Contract c : monthContracts) {
+		for(IContract c : monthContracts) {
 			if(!c.unsubscribe()) {
 				log.warn("[{}] 合约取消订阅失败", c.contractField().getUnifiedSymbol());
 			}
@@ -109,7 +109,7 @@ public class IndexContract implements Contract, TickDataAware{
 	}
 
 	@Override
-	public List<Contract> memberContracts() {
+	public List<IContract> memberContracts() {
 		return monthContracts;
 	}
 

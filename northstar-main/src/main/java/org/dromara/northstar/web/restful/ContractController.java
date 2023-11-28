@@ -14,7 +14,7 @@ import org.dromara.northstar.common.model.GatewayDescription;
 import org.dromara.northstar.common.model.Identifier;
 import org.dromara.northstar.common.model.ResultBean;
 import org.dromara.northstar.data.IGatewayRepository;
-import org.dromara.northstar.gateway.Contract;
+import org.dromara.northstar.gateway.IContract;
 import org.dromara.northstar.gateway.IContractManager;
 import org.dromara.northstar.gateway.contract.IndexContract;
 import org.dromara.northstar.gateway.contract.OptionChainContract;
@@ -64,7 +64,7 @@ public class ContractController {
 		List<ContractSimpleInfo> subscribedContracts = gd.getSubscribedContracts();
 		Set<ContractSimpleInfo> actualSubContracts = new HashSet<>(subscribedContracts);
 		subscribedContracts.forEach(csi -> {
-			Contract contract = contractMgr.getContract(Identifier.of(csi.getValue()));
+			IContract contract = contractMgr.getContract(Identifier.of(csi.getValue()));
 			if(contract instanceof IndexContract idxContract) {
 				actualSubContracts.addAll(idxContract.memberContracts().stream()
 					.map(c -> ContractSimpleInfo.builder()

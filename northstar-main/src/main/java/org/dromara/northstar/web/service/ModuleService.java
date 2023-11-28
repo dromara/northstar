@@ -41,7 +41,7 @@ import org.dromara.northstar.common.model.ModuleRuntimeDescription;
 import org.dromara.northstar.common.utils.MarketDataLoadingUtils;
 import org.dromara.northstar.data.IMarketDataRepository;
 import org.dromara.northstar.data.IModuleRepository;
-import org.dromara.northstar.gateway.Contract;
+import org.dromara.northstar.gateway.IContract;
 import org.dromara.northstar.gateway.IContractManager;
 import org.dromara.northstar.module.ArbitrageModuleContext;
 import org.dromara.northstar.module.ModuleContext;
@@ -262,7 +262,7 @@ public class ModuleService implements IModuleService, PostLoadAware {
 			List<BarField> mergeList = new ArrayList<>();
 			for(ModuleAccountDescription mad : md.getModuleAccountSettingsDescription()) {
 				for(ContractSimpleInfo csi : mad.getBindedContracts()) {
-					Contract c = contractMgr.getContract(Identifier.of(csi.getValue()));
+					IContract c = contractMgr.getContract(Identifier.of(csi.getValue()));
 					List<BarField> bars = mdRepo.loadBars(c, start, end);
 					mergeList.addAll(bars);
 				}
@@ -379,7 +379,7 @@ public class ModuleService implements IModuleService, PostLoadAware {
 	 */
 	public boolean mockTradeAdjustment(String moduleName, MockTradeDescription mockTrade) {
 		IModule module = moduleMgr.get(Identifier.of(moduleName));
-		Contract c = contractMgr.getContract(Identifier.of(mockTrade.getContractId()));
+		IContract c = contractMgr.getContract(Identifier.of(mockTrade.getContractId()));
 		ContractField contract = c.contractField();
 		IAccount account = module.getAccount(c);
 		String tradingDay = StringUtils.hasText(mockTrade.getTradeDate()) ? mockTrade.getTradeDate() : LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER);

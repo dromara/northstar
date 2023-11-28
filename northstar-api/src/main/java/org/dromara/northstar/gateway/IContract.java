@@ -11,7 +11,7 @@ import xyz.redtorch.pb.CoreField.ContractField;
  * @author KevinHuangwl
  *
  */
-public interface Contract extends Subscribable, Instrument {
+public interface IContract extends Subscribable, Instrument {
 	
 	/**
 	 * 网关ID
@@ -23,7 +23,7 @@ public interface Contract extends Subscribable, Instrument {
 	 * 获取成份合约
 	 * @return
 	 */
-	default List<Contract> memberContracts() {
+	default List<IContract> memberContracts() {
 		throw new UnsupportedOperationException();
 	}
 	

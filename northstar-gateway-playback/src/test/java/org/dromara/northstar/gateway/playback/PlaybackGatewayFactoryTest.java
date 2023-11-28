@@ -16,7 +16,7 @@ import org.dromara.northstar.common.event.FastEventEngine;
 import org.dromara.northstar.common.model.GatewayDescription;
 import org.dromara.northstar.data.IMarketDataRepository;
 import org.dromara.northstar.data.IPlaybackRuntimeRepository;
-import org.dromara.northstar.gateway.Contract;
+import org.dromara.northstar.gateway.IContract;
 import org.dromara.northstar.gateway.GatewayMetaProvider;
 import org.dromara.northstar.gateway.IContractManager;
 import org.junit.jupiter.api.BeforeEach;
@@ -51,7 +51,7 @@ class PlaybackGatewayFactoryTest {
 	BarField bar = factory.makeBarField("rb2210", 5000, 20, ldt); 
 	
 	PlaybackGatewayFactory playbackGatewayFactory;
-	Contract c = mock(Contract.class);
+	IContract c = mock(IContract.class);
 	
 	@BeforeEach
 	void prepare() {

@@ -8,7 +8,7 @@ import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.event.FastEventEngine;
 import org.dromara.northstar.common.event.NorthstarEventType;
 import org.dromara.northstar.common.model.Identifier;
-import org.dromara.northstar.gateway.Contract;
+import org.dromara.northstar.gateway.IContract;
 import org.dromara.northstar.gateway.IMarketCenter;
 import org.dromara.northstar.gateway.Instrument;
 import org.dromara.northstar.gateway.TradeTimeDefinition;
@@ -26,7 +26,7 @@ import xyz.redtorch.pb.CoreField.TickField;
  *
  */
 @Slf4j
-public class GatewayContract implements Contract, TickDataAware{
+public class GatewayContract implements IContract, TickDataAware{
 
 	private MinuteBarGenerator barGen;
 	

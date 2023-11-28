@@ -9,7 +9,7 @@ import java.util.function.BiConsumer;
 
 import org.apache.commons.lang3.StringUtils;
 import org.dromara.northstar.common.constant.DateTimeConstant;
-import org.dromara.northstar.gateway.Contract;
+import org.dromara.northstar.gateway.IContract;
 import org.dromara.northstar.gateway.model.PeriodSegment;
 
 import xyz.redtorch.pb.CoreField.BarField;
@@ -25,7 +25,7 @@ public class DailyBarMerger extends BarMerger{
 	
 	private Set<String> tradingDaySet = new HashSet<>();
 	
-	public DailyBarMerger(int numOfDayPerBar, Contract contract, BiConsumer<BarMerger, BarField> callback) {
+	public DailyBarMerger(int numOfDayPerBar, IContract contract, BiConsumer<BarMerger, BarField> callback) {
 		super(0, contract, callback);
 		this.numOfDayPerBar = numOfDayPerBar;
 	}

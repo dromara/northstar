@@ -6,7 +6,7 @@ import org.dromara.northstar.common.IDataSource;
 import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.constant.Constants;
 import org.dromara.northstar.common.model.Identifier;
-import org.dromara.northstar.gateway.Contract;
+import org.dromara.northstar.gateway.IContract;
 import org.dromara.northstar.gateway.TradeTimeDefinition;
 
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
@@ -18,7 +18,7 @@ import xyz.redtorch.pb.CoreField.ContractField;
  * @author KevinHuangwl
  *
  */
-public class PrimaryContract implements Contract {
+public class PrimaryContract implements IContract {
 	
 	private IndexContract idxContract;
 	

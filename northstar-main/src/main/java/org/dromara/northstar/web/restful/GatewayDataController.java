@@ -11,7 +11,7 @@ import org.dromara.northstar.common.model.ResultBean;
 import org.dromara.northstar.common.utils.MarketDataLoadingUtils;
 import org.dromara.northstar.data.IGatewayRepository;
 import org.dromara.northstar.data.IMarketDataRepository;
-import org.dromara.northstar.gateway.Contract;
+import org.dromara.northstar.gateway.IContract;
 import org.dromara.northstar.gateway.IContractManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
@@ -43,7 +43,7 @@ public class GatewayDataController {
 		if(gd.getChannelType() == ChannelType.PLAYBACK || gd.getChannelType() == ChannelType.SIM) {
 			return new ResultBean<>(Collections.emptyList());
 		}
-		Contract contract = contractMgr.getContract(gd.getChannelType(), unifiedSymbol);
+		IContract contract = contractMgr.getContract(gd.getChannelType(), unifiedSymbol);
 		LocalDate start = utils.getFridayOfLastWeek(refStartTimestamp);
 		if(firstLoad && Period.between(start, LocalDate.now()).getDays() < 7) {
 			start = start.minusWeeks(1);
