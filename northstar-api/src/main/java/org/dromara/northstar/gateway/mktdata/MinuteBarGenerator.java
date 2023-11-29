@@ -84,7 +84,7 @@ public class MinuteBarGenerator {
 			volumeDelta = 0;
 			turnoverDelta = 0;
 			proto = Bar.builder()
-					.gateway(tick.gateway())
+					.gatewayId(tick.gatewayId())
 					.channelType(tick.channelType())
 					.contract(tick.contract())
 					.actionDay(MIDNIGHT.equals(cutoffTime) ? tick.actionDay().plusDays(1) : tick.actionDay())
@@ -109,7 +109,7 @@ public class MinuteBarGenerator {
 			return;
 		}
 		onBarCallback.accept(Bar.builder()
-				.gateway(proto.gateway())
+				.gatewayId(proto.gatewayId())
 				.channelType(proto.channelType())
 				.contract(proto.contract())
 				.actionDay(proto.actionDay())

@@ -18,15 +18,15 @@ import org.dromara.northstar.common.event.FastEventEngine;
 import org.dromara.northstar.common.event.NorthstarEventType;
 import org.dromara.northstar.common.model.GatewayDescription;
 import org.dromara.northstar.common.model.PlaybackRuntimeDescription;
+import org.dromara.northstar.common.model.core.Bar;
+import org.dromara.northstar.common.model.core.Notice;
+import org.dromara.northstar.common.model.core.Tick;
 import org.dromara.northstar.data.IPlaybackRuntimeRepository;
 import org.dromara.northstar.gateway.IContractManager;
 import org.dromara.northstar.gateway.playback.utils.ContractDataLoader;
 
 import lombok.extern.slf4j.Slf4j;
 import xyz.redtorch.pb.CoreEnum.CommonStatusEnum;
-import xyz.redtorch.pb.CoreField.BarField;
-import xyz.redtorch.pb.CoreField.NoticeField;
-import xyz.redtorch.pb.CoreField.TickField;
 
 @Slf4j
 public class PlaybackContextV2 implements IPlaybackContext{
@@ -94,10 +94,9 @@ public class PlaybackContextV2 implements IPlaybackContext{
 						playbackTradeDate = LocalDate.parse(settings.getStartDate(), DateTimeConstant.D_FORMAT_INT_FORMATTER);
 						return;
 					}
-					feEngine.emitEvent(NorthstarEventType.NOTICE, NoticeField.newBuilder()
-							.setContent(String.format("[%s]-当前处于预热阶段，请稍等……", gatewayId))
-							.setStatus(CommonStatusEnum.COMS_WARN)
-							.setTimestamp(System.currentTimeMillis())
+					feEngine.emitEvent(NorthstarEventType.NOTICE, Notice.builder()
+							.content(String.format("[%s]-当前处于预热阶段，请稍等……", gatewayId))
+							.status(CommonStatusEnum.COMS_WARN)
 							.build());
 					LocalDate preloadStartDate = LocalDate.parse(settings.getPreStartDate(), DateTimeConstant.D_FORMAT_INT_FORMATTER);
 					LocalDate preloadEndDate = playbackTimeState.toLocalDate();
@@ -117,12 +116,12 @@ public class PlaybackContextV2 implements IPlaybackContext{
 								}
 								loader.loadBars(loadDate);
 								while(loader.hasMoreBar()) {
-									BarField bar = loader.nextBar(true);
+									Bar bar = loader.nextBar(true);
 									feEngine.emitEvent(NorthstarEventType.BAR, bar);
 								}
 								loadDate = loadDate.plusDays(1);
 							}
-							log.debug("回放网关 [{}] 合约 {} 数据预热完毕", gatewayId, loader.getContract().contractField().getUnifiedSymbol());
+							log.debug("回放网关 [{}] 合约 {} 数据预热完毕", gatewayId, loader.getContract().contract().unifiedSymbol());
 							cdl.countDown();
 						}).start()
 					);
@@ -133,10 +132,9 @@ public class PlaybackContextV2 implements IPlaybackContext{
 					} catch (InterruptedException e) {
 						log.warn("预热加载等待被中断", e);
 					} finally {
-						feEngine.emitEvent(NorthstarEventType.NOTICE, NoticeField.newBuilder()
-								.setContent(String.format("[%s]-预热阶段结束，请重新连线，正式开始回放。", gatewayId))
-								.setStatus(CommonStatusEnum.COMS_WARN)
-								.setTimestamp(System.currentTimeMillis())
+						feEngine.emitEvent(NorthstarEventType.NOTICE, Notice.builder()
+								.content(String.format("[%s]-预热阶段结束，请重新连线，正式开始回放。", gatewayId))
+								.status(CommonStatusEnum.COMS_WARN)
 								.build());
 						stop();
 					}
@@ -154,10 +152,9 @@ public class PlaybackContextV2 implements IPlaybackContext{
 						stop();
 						String infoMsg = String.format("[%s]-历史行情回放已经结束，可通过【复位】重置", gatewayId);
 						log.info(infoMsg);
-						feEngine.emitEvent(NorthstarEventType.NOTICE, NoticeField.newBuilder()
-								.setContent(infoMsg)
-								.setStatus(CommonStatusEnum.COMS_WARN)
-								.setTimestamp(System.currentTimeMillis())
+						feEngine.emitEvent(NorthstarEventType.NOTICE, Notice.builder()
+								.content(infoMsg)
+								.status(CommonStatusEnum.COMS_WARN)
 								.build());
 						return;
 					}
@@ -168,28 +165,22 @@ public class PlaybackContextV2 implements IPlaybackContext{
 
 				// 回放数据
 				loaders.stream().filter(ContractDataLoader::hasMoreBar).forEach(loader -> {
-					BarField bar = loader.nextBar(false);
+					Bar bar = loader.nextBar(false);
 					if(loader.hasMoreTick()) {
-						TickField tick = loader.nextTick(false);
-						if(tick.getActionTimestamp() <= bar.getActionTimestamp()) {
+						Tick tick = loader.nextTick(false);
+						if(tick.actionTimestamp() <= bar.actionTimestamp()) {
 							feEngine.emitEvent(NorthstarEventType.TICK, loader.nextTick(true));
 							return;
 						}
 					}
 					feEngine.emitEvent(NorthstarEventType.BAR, loader.nextBar(true));
-					LocalDateTime ldt = barDateTime(bar);
+					LocalDateTime ldt = LocalDateTime.of(bar.actionDay(), bar.actionTime());
 					if(playbackTimeState.isBefore(ldt)) {
 						playbackTimeState = ldt;
 					}
 				});
 			}
 		}, 0, rate);
-	}
-	
-	private LocalDateTime barDateTime(BarField bar) {
-		LocalDate date = LocalDate.parse(bar.getActionDay(), DateTimeConstant.D_FORMAT_INT_FORMATTER);
-		LocalTime time = LocalTime.parse(bar.getActionTime(), DateTimeConstant.T_FORMAT_FORMATTER);
-		return LocalDateTime.of(date, time);
 	}
 	
 	@Override

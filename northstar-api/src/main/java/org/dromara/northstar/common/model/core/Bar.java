@@ -4,15 +4,14 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 import org.dromara.northstar.common.constant.ChannelType;
-import org.dromara.northstar.gateway.Gateway;
 
 import com.alibaba.fastjson.JSONObject;
 
 import lombok.Builder;
 
-@Builder
+@Builder(toBuilder = true)
 public record Bar(
-		Gateway gateway,
+		String gatewayId,
 		Contract contract,
 		LocalDate actionDay,
 		LocalTime actionTime,

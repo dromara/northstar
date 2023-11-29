@@ -62,7 +62,7 @@ public class IndexTicker {
 				//进行运算
 				calculate();
 				onTickCallback.accept(Tick.builder()
-						.gateway(tick.gateway())
+						.gatewayId(tick.gatewayId())
 						.contract(idxContract.contract())
 						.actionDay(tick.actionDay())
 						.actionTime(tick.actionTime())

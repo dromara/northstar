@@ -3,6 +3,7 @@ package org.dromara.northstar.gateway.mktdata;
 import java.net.URI;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -19,8 +20,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.dromara.northstar.common.IDataSource;
 import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.constant.DateTimeConstant;
+import org.dromara.northstar.common.model.core.Bar;
+import org.dromara.northstar.common.model.core.Contract;
+import org.dromara.northstar.common.utils.DateTimeUtils;
 import org.dromara.northstar.common.utils.LocalEnvUtils;
-import org.dromara.northstar.common.utils.MarketDateTimeUtil;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -37,8 +40,6 @@ import lombok.extern.slf4j.Slf4j;
 import xyz.redtorch.pb.CoreEnum.CurrencyEnum;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
-import xyz.redtorch.pb.CoreField.BarField;
-import xyz.redtorch.pb.CoreField.ContractField;
 
 @Slf4j
 public class NorthstarDataServiceDataSource implements IDataSource{
@@ -53,14 +54,13 @@ public class NorthstarDataServiceDataSource implements IDataSource{
 	
 	private DateTimeFormatter dtfmt2 = DateTimeFormatter.ofPattern("yyyyMMdd HH:mm:ss");
 	
-	private MarketDateTimeUtil dtUtil;
+	private DateTimeUtils dateTimeUtils = new DateTimeUtils();
 	
 	private RestTemplate restTemplate;
 	
-	public NorthstarDataServiceDataSource(String baseUrl, String secret, RestTemplate restTemplate, MarketDateTimeUtil dtUtil) {
+	public NorthstarDataServiceDataSource(String baseUrl, String secret, RestTemplate restTemplate) {
 		this.baseUrl =  baseUrl;
 		this.userToken = secret;
-		this.dtUtil = dtUtil;
 		this.restTemplate = restTemplate;
 	}
 	
@@ -88,8 +88,8 @@ public class NorthstarDataServiceDataSource implements IDataSource{
 	 * @return
 	 */
 	@Override
-	public List<BarField> getMinutelyData(ContractField contract, LocalDate startDate, LocalDate endDate) {
-		log.debug("从数据服务加载历史行情1分钟数据：{}，{} -> {}", contract.getUnifiedSymbol(), startDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), endDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
+	public List<Bar> getMinutelyData(Contract contract, LocalDate startDate, LocalDate endDate) {
+		log.debug("从数据服务加载历史行情1分钟数据：{}，{} -> {}", contract.unifiedSymbol(), startDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), endDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
 		return commonGetData("min", contract, startDate, endDate);
 	}
 	
@@ -101,8 +101,8 @@ public class NorthstarDataServiceDataSource implements IDataSource{
 	 * @return
 	 */
 	@Override
-	public List<BarField> getQuarterlyData(ContractField contract, LocalDate startDate, LocalDate endDate) {
-		log.debug("从数据服务加载历史行情15分钟数据：{}，{} -> {}", contract.getUnifiedSymbol(), startDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), endDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
+	public List<Bar> getQuarterlyData(Contract contract, LocalDate startDate, LocalDate endDate) {
+		log.debug("从数据服务加载历史行情15分钟数据：{}，{} -> {}", contract.unifiedSymbol(), startDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), endDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
 		return commonGetData("quarter", contract, startDate, endDate);
 	}
 	
@@ -114,8 +114,8 @@ public class NorthstarDataServiceDataSource implements IDataSource{
 	 * @return
 	 */
 	@Override
-	public List<BarField> getHourlyData(ContractField contract, LocalDate startDate, LocalDate endDate) {
-		log.debug("从数据服务加载历史行情1小时数据：{}，{} -> {}", contract.getUnifiedSymbol(), startDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), endDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
+	public List<Bar> getHourlyData(Contract contract, LocalDate startDate, LocalDate endDate) {
+		log.debug("从数据服务加载历史行情1小时数据：{}，{} -> {}", contract.unifiedSymbol(), startDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), endDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
 		return commonGetData("hour", contract, startDate, endDate);
 	}
 	
@@ -127,8 +127,8 @@ public class NorthstarDataServiceDataSource implements IDataSource{
 	 * @return
 	 */
 	@Override
-	public List<BarField> getDailyData(ContractField contract, LocalDate startDate, LocalDate endDate) {
-		log.debug("从数据服务加载历史行情日线数据：{}，{} -> {}", contract.getUnifiedSymbol(), startDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), endDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
+	public List<Bar> getDailyData(Contract contract, LocalDate startDate, LocalDate endDate) {
+		log.debug("从数据服务加载历史行情日线数据：{}，{} -> {}", contract.unifiedSymbol(), startDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), endDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
 		return commonGetData("day", contract, startDate, endDate);
 	}
 	
@@ -155,13 +155,13 @@ public class NorthstarDataServiceDataSource implements IDataSource{
 	}
 
 	@Override
-	public List<ContractField> getAllContracts(ExchangeEnum exchange) {
+	public List<Contract> getAllContracts(ExchangeEnum exchange) {
 		ResponseEntity<DataSet> result = execute(URI.create(String.format("%s/contracts/?exchange=%s", baseUrl, exchange)), DataSet.class);
 		DataSet dataSet = result.getBody();
 		if(Objects.isNull(dataSet.getFields())) {
 			return Collections.emptyList();
 		}
-		List<ContractField> resultList = new ArrayList<>();
+		List<Contract> resultList = new ArrayList<>();
 		Map<String, Integer> fieldIndexMap = new HashMap<>();
 		for(int i=0; i<dataSet.getFields().length; i++) {
 			fieldIndexMap.put(dataSet.getFields()[i], i);
@@ -175,23 +175,19 @@ public class NorthstarDataServiceDataSource implements IDataSource{
 			double marginRate = ProductClassEnum.EQUITY == productClass ? 1 : 0.1;
 			double priceTick = ProductClassEnum.EQUITY == productClass ? 0.01 : Double.parseDouble(unitDesc.replaceAll("[^\\d\\.]+", ""));
 			try {				
-				ContractField playbackContract = ContractField.newBuilder()
-						.setUnifiedSymbol(unifiedSymbol)
-						.setSymbol(symbol)
-						.setExchange(exchange)
-						.setCurrency(CurrencyEnum.CNY)
-						.setFullName(name)
-						.setName(name)
-//						.setContractId(unifiedSymbol + "@" + ChannelType.PLAYBACK.toString())
-//						.setChannelType(ChannelType.PLAYBACK.toString())
-//						.setGatewayId(ChannelType.PLAYBACK.toString())
-//						.setThirdPartyId(symbol + "@" + ChannelType.PLAYBACK.toString())
-						.setLastTradeDateOrContractMonth(getValue("delist_date", fieldIndexMap, item, ""))
-						.setLongMarginRatio(marginRate)
-						.setShortMarginRatio(marginRate)
-						.setProductClass(productClass)
-						.setMultiplier(Double.parseDouble(getValue("per_unit", fieldIndexMap, item, "1")))
-						.setPriceTick(priceTick)
+				Contract playbackContract = Contract.builder()
+						.unifiedSymbol(unifiedSymbol)
+						.symbol(symbol)
+						.exchange(exchange)
+						.currency(CurrencyEnum.CNY)
+						.name(name)
+						.fullName(name)
+						.lastTradeDateOrContractMonth(getValue("delist_date", fieldIndexMap, item, ""))
+						.longMarginRatio(marginRate)
+						.shortMarginRatio(marginRate)
+						.productClass(productClass)
+						.multiplier(Double.parseDouble(getValue("per_unit", fieldIndexMap, item, "1")))
+						.priceTick(priceTick)
 						.build();
 				resultList.add(playbackContract);
 			} catch(Exception e) {
@@ -219,8 +215,8 @@ public class NorthstarDataServiceDataSource implements IDataSource{
 		return execute(uri, DataSet.class).getBody();
 	}
 	
-	private List<BarField> commonGetData(String type, ContractField contract, LocalDate startDate, LocalDate endDate){
-		URI uri = URI.create(String.format("%s/data/%s?unifiedSymbol=%s&startDate=%s&endDate=%s", baseUrl, type, contract.getUnifiedSymbol(), 
+	private List<Bar> commonGetData(String type, Contract contract, LocalDate startDate, LocalDate endDate){
+		URI uri = URI.create(String.format("%s/data/%s?unifiedSymbol=%s&startDate=%s&endDate=%s", baseUrl, type, contract.unifiedSymbol(), 
 				startDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), endDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER)));
 		return convertDataSet(execute(uri, DataSet.class).getBody(), contract);
 	}
@@ -246,12 +242,12 @@ public class NorthstarDataServiceDataSource implements IDataSource{
 		}
 	}
 	
-	private List<BarField> convertDataSet(DataSet dataSet, ContractField contract) {
+	private List<Bar> convertDataSet(DataSet dataSet, Contract contract) {
 		if(Objects.isNull(dataSet.getFields())) {
 			log.warn("数据服务查询不到相关数据");
 			return Collections.emptyList();
 		}
-		List<BarField> resultList = new ArrayList<>();
+		List<Bar> resultList = new ArrayList<>();
 		Map<String, Integer> fieldIndexMap = new HashMap<>();
 		for(int i=0; i<dataSet.getFields().length; i++) {
 			fieldIndexMap.put(dataSet.getFields()[i], i);
@@ -259,53 +255,53 @@ public class NorthstarDataServiceDataSource implements IDataSource{
 		for(String[] item : dataSet.getItems()) {
 			String tradeDateTime = getValue("trade_time", fieldIndexMap, item, "");
 			LocalDateTime dateTime = null;
-			String actionDay = "";
-			String actionTime = "";
-			String tradingDay = "";
+			LocalDate actionDay = null;
+			LocalDate tradingDay = null;
+			LocalTime actionTime = null;
 			long timestamp = 0;
 			
 			if(StringUtils.isNotBlank(tradeDateTime)) {
 				dateTime = LocalDateTime.parse(tradeDateTime, dtfmt);
-				actionDay = dateTime.format(DateTimeConstant.D_FORMAT_INT_FORMATTER);
-				actionTime = dateTime.format(DateTimeConstant.T_FORMAT_FORMATTER);
-				tradingDay = dtUtil.getTradingDay(dateTime).format(DateTimeConstant.D_FORMAT_INT_FORMATTER);
+				actionDay = dateTime.toLocalDate();
+				actionTime = dateTime.toLocalTime();
+				tradingDay = dateTimeUtils.convertTradingDayForCNMarket(actionDay, actionTime);
 				timestamp = dateTime.toInstant(ZoneOffset.ofHours(8)).toEpochMilli();
 			}
 			
 			if(StringUtils.isNotBlank(getValue("trade_date", fieldIndexMap, item, ""))) {
-				tradingDay = getValue("trade_date", fieldIndexMap, item, "");
-				dateTime = LocalDateTime.parse(tradingDay + " 09:00:00", dtfmt2);
-				actionDay = dateTime.format(DateTimeConstant.D_FORMAT_INT_FORMATTER);
-				actionTime = dateTime.format(DateTimeConstant.T_FORMAT_FORMATTER);
+				String tradingDate = getValue("trade_date", fieldIndexMap, item, "");
+				dateTime = LocalDateTime.parse(tradingDate + " 09:00:00", dtfmt2);
+				actionDay = dateTime.toLocalDate();
+				actionTime = dateTime.toLocalTime();
+				tradingDay = actionDay;
 				timestamp = dateTime.toInstant(ZoneOffset.ofHours(8)).toEpochMilli();
 			}
 			
 			try {				
 				double openInterest = 0;
 				double openInterestDelta = 0;
-				if(contract.getProductClass() == ProductClassEnum.FUTURES) {
+				if(contract.productClass() == ProductClassEnum.FUTURES) {
 					openInterest = Double.parseDouble(getValue("oi", fieldIndexMap, item, "0"));
 					openInterestDelta = Double.parseDouble(getValue("oi_chg", fieldIndexMap, item, "0"));
 				}
-				resultList.add(BarField.newBuilder()
-						.setUnifiedSymbol(contract.getUnifiedSymbol())
-						.setTradingDay(tradingDay)
-						.setActionDay(actionDay)
-						.setActionTime(actionTime)
-						.setActionTimestamp(timestamp)
-						.setHighPrice(normalizeValue(Double.parseDouble(getValue("high", fieldIndexMap, item, "0")), contract.getPriceTick()))
-						.setClosePrice(normalizeValue(Double.parseDouble(getValue("close", fieldIndexMap, item, "0")), contract.getPriceTick()))
-						.setLowPrice(normalizeValue(Double.parseDouble(getValue("low", fieldIndexMap, item, "0")), contract.getPriceTick()))
-						.setOpenPrice(normalizeValue(Double.parseDouble(getValue("open", fieldIndexMap, item, "0")), contract.getPriceTick()))
-						.setGatewayId(contract.getGatewayId())
-						.setChannelType(ChannelType.PLAYBACK.toString())
-						.setOpenInterestDelta(openInterestDelta)
-						.setOpenInterest(openInterest)
-						.setVolume((long) Double.parseDouble(getValue("vol", fieldIndexMap, item, "0")))
-						.setTurnover(Double.parseDouble(getValue("amount", fieldIndexMap, item, "0")))
-						.setPreClosePrice(Double.parseDouble(getValue("pre_close", fieldIndexMap, item, "0")))
-						.setPreSettlePrice(Double.parseDouble(getValue("pre_settle", fieldIndexMap, item, "0")))
-						.setPreOpenInterest(openInterest - openInterestDelta)
+				resultList.add(Bar.builder()
+						.contract(contract)
+						.tradingDay(tradingDay)
+						.actionDay(actionDay)
+						.actionTime(actionTime)
+						.actionTimestamp(timestamp)
+						.highPrice(normalizeValue(Double.parseDouble(getValue("high", fieldIndexMap, item, "0")), contract.priceTick()))
+						.closePrice(normalizeValue(Double.parseDouble(getValue("close", fieldIndexMap, item, "0")), contract.priceTick()))
+						.lowPrice(normalizeValue(Double.parseDouble(getValue("low", fieldIndexMap, item, "0")), contract.priceTick()))
+						.openPrice(normalizeValue(Double.parseDouble(getValue("open", fieldIndexMap, item, "0")), contract.priceTick()))
+						.channelType(ChannelType.PLAYBACK)
+						.openInterestDelta(openInterestDelta)
+						.openInterest(openInterest)
+						.volume((long) Double.parseDouble(getValue("vol", fieldIndexMap, item, "0")))
+						.turnover(Double.parseDouble(getValue("amount", fieldIndexMap, item, "0")))
+						.preClosePrice(Double.parseDouble(getValue("pre_close", fieldIndexMap, item, "0")))
+						.preSettlePrice(Double.parseDouble(getValue("pre_settle", fieldIndexMap, item, "0")))
+						.preOpenInterest(openInterest - openInterestDelta)
 						.build());
 			} catch(Exception e) {
 				log.warn("无效合约行情数据：{}", JSON.toJSONString(item));
@@ -315,7 +311,7 @@ public class NorthstarDataServiceDataSource implements IDataSource{
 		
 		return resultList;
 	}
-
+	
 	private double normalizeValue(double val, double priceTick) {
 		return (int)(val / priceTick) * priceTick;
 	}

@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.constant.TickType;
-import org.dromara.northstar.gateway.Gateway;
 
 import com.alibaba.fastjson.JSONObject;
 
@@ -14,7 +13,7 @@ import lombok.Builder;
 
 @Builder
 public record Tick(
-		Gateway gateway,
+		String gatewayId,
 		Contract contract,
 		LocalDate actionDay,
 		LocalTime actionTime,

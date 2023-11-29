@@ -48,8 +48,8 @@ public class PlaybackLoader implements CommandLineRunner{
 			ds.getUserAvailableExchanges().forEach(exchange -> {
 				ds.getAllContracts(exchange).stream()
 					//过滤掉过期合约
-					.filter(contract -> StringUtils.isEmpty(contract.getLastTradeDateOrContractMonth())
-							|| LocalDate.parse(contract.getLastTradeDateOrContractMonth(), DateTimeConstant.D_FORMAT_INT_FORMATTER).isAfter(today))
+					.filter(contract -> StringUtils.isEmpty(contract.lastTradeDateOrContractMonth())
+							|| LocalDate.parse(contract.lastTradeDateOrContractMonth(), DateTimeConstant.D_FORMAT_INT_FORMATTER).isAfter(today))
 					.forEach(contract -> mktCenter.addInstrument(new PlaybackContract(contract, ds)));
 				log.info("预加载 [{}] 交易所合约信息", exchange);
 			})
