@@ -10,7 +10,6 @@ import java.util.Objects;
 import javax.transaction.Transactional;
 
 import org.dromara.northstar.data.jdbc.MarketDataRepository;
-import org.dromara.northstar.gateway.IMarketCenter;
 import org.dromara.northstar.strategy.IMessageSender;
 import org.dromara.northstar.support.utils.ExceptionLogChecker;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,23 +31,11 @@ import lombok.extern.slf4j.Slf4j;
 public class AppScheduleTask {
 	
 	@Autowired
-	private IMarketCenter mktCenter;
-	
-	@Autowired
 	private MarketDataRepository mdRepo;
 	
 	@Autowired(required = false)
 	private IMessageSender msgSender;
 
-	/**
-	 * K线数据合成检查
-	 */
-	@Scheduled(cron="0 0/1 * ? * 1-6")
-	public void sectionFinishUp() {
-		mktCenter.endOfMarketTime();
-		log.debug("K线数据合成检查");
-	}
-	
 	/**
 	 * 检查当天的程序日志中是否存在异常日志，如存在则转发报告
 	 * 周一至五，每隔一小时检查 

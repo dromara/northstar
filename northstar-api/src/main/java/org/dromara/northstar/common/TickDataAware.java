@@ -12,8 +12,4 @@ public interface TickDataAware {
 	
 	void onTick(Tick tick);
 	
-	
-	default void endOfMarket() {
-		throw new UnsupportedOperationException();
-	}
 }

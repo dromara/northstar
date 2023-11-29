@@ -8,10 +8,10 @@ import org.dromara.northstar.common.TickDataAware;
 import org.dromara.northstar.common.TransactionAware;
 import org.dromara.northstar.common.constant.SignalOperation;
 import org.dromara.northstar.common.model.ModuleRuntimeDescription;
+import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.strategy.constant.PriceType;
 
 import xyz.redtorch.pb.CoreField.BarField;
-import xyz.redtorch.pb.CoreField.ContractField;
 
 public interface IModuleContext extends IModuleStrategyContext, MergedBarListener, TickDataAware, BarDataAware, TransactionAware {
 	/**
@@ -43,7 +43,7 @@ public interface IModuleContext extends IModuleStrategyContext, MergedBarListene
 	 * @param price				委托价（市价为0）
 	 * @return	originOrderId	订单ID
 	 */
-	Optional<String> submitOrderReq(ContractField contract, SignalOperation operation, PriceType priceType, int volume, double price);
+	Optional<String> submitOrderReq(Contract contract, SignalOperation operation, PriceType priceType, int volume, double price);
 	/**
 	 * 判断订单是否已经超时
 	 * 该方法用于撤单场景

@@ -30,8 +30,9 @@ import org.dromara.northstar.common.model.Identifier;
 import org.dromara.northstar.common.model.ModuleAccountDescription;
 import org.dromara.northstar.common.model.ModuleDescription;
 import org.dromara.northstar.common.model.ModuleRuntimeDescription;
-import org.dromara.northstar.gateway.IContract;
+import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.gateway.Gateway;
+import org.dromara.northstar.gateway.IContract;
 import org.dromara.northstar.gateway.IContractManager;
 import org.dromara.northstar.gateway.MarketGateway;
 import org.dromara.northstar.gateway.TradeGateway;
@@ -41,7 +42,6 @@ import org.springframework.beans.BeanUtils;
 import com.alibaba.fastjson2.JSONObject;
 
 import lombok.extern.slf4j.Slf4j;
-import xyz.redtorch.pb.CoreField.ContractField;
 
 @Slf4j
 public abstract class AbstractTester implements ModuleTesterContext{
@@ -103,11 +103,11 @@ public abstract class AbstractTester implements ModuleTesterContext{
 			///////////////////////////////////////
 			String idxSymbol = symbol + "0000";
 			IContract c = contractMgr.getContract(ChannelType.PLAYBACK, idxSymbol);
-			ContractField cf = c.contractField();
+			Contract cf = c.contract();
 			ContractSimpleInfo csi = ContractSimpleInfo.builder()
-					.name(cf.getName())
+					.name(cf.name())
 					.channelType(ChannelType.PLAYBACK)
-					.unifiedSymbol(cf.getUnifiedSymbol())
+					.unifiedSymbol(cf.unifiedSymbol())
 					.value(c.identifier().value())
 					.build();
 			MarketGateway mktGateway = createPlaybackGateway(csi, this);

@@ -16,6 +16,7 @@ import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.event.FastEventEngine;
 import org.dromara.northstar.common.exception.NoSuchElementException;
 import org.dromara.northstar.common.model.Identifier;
+import org.dromara.northstar.common.model.core.Tick;
 import org.dromara.northstar.gateway.IContract;
 import org.dromara.northstar.gateway.IMarketCenter;
 import org.dromara.northstar.gateway.Instrument;
@@ -32,7 +33,6 @@ import com.google.common.collect.Table;
 import lombok.extern.slf4j.Slf4j;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
-import xyz.redtorch.pb.CoreField.TickField;
 
 /**
  * 市场中心
@@ -98,8 +98,8 @@ public class MarketCenter implements IMarketCenter{
 					channelDefContractGroups.put(ins.channelType(), def, new ArrayList<>());
 				}
 				channelDefContractGroups.get(ins.channelType(), def).add(contract);
-				channelSymbolContractTbl.put(contract.channelType(), contract.contractField().getSymbol(), contract);
-				channelSymbolContractTbl.put(contract.channelType(), contract.contractField().getUnifiedSymbol(), contract);
+				channelSymbolContractTbl.put(contract.channelType(), contract.contract().symbol(), contract);
+				channelSymbolContractTbl.put(contract.channelType(), contract.contract().unifiedSymbol(), contract);
 			}
 		}
 
@@ -116,7 +116,7 @@ public class MarketCenter implements IMarketCenter{
 		List<IContract> gatewayContracts = getContracts(channelType);
 		Map<String, IContract> symbolContractMap = new HashMap<>();
 		for(IContract c : gatewayContracts) {
-			symbolContractMap.put(c.contractField().getSymbol(), c);
+			symbolContractMap.put(c.contract().symbol(), c);
 		}
 		// 聚合期权合约
 		try {
@@ -140,7 +140,7 @@ public class MarketCenter implements IMarketCenter{
 			if(c instanceof OptionChainContract) {
 				continue;
 			}
-			String underlyingSymbol = c.contractField().getUnderlyingSymbol();
+			String underlyingSymbol = c.contract().underlyingSymbol();
 			symbolOptionsMap.computeIfAbsent(underlyingSymbol, key -> new ArrayList<>());
 			symbolOptionsMap.get(underlyingSymbol).add(c);
 		}
@@ -164,15 +164,15 @@ public class MarketCenter implements IMarketCenter{
 			for(IContract memberContract : c.memberContracts()) {
 				idxContractMap.put(memberContract, c);
 			}
-			channelSymbolContractTbl.put(c.channelType(), c.contractField().getSymbol(), c);
-			channelSymbolContractTbl.put(c.channelType(), c.contractField().getUnifiedSymbol(), c);
+			channelSymbolContractTbl.put(c.channelType(), c.contract().symbol(), c);
+			channelSymbolContractTbl.put(c.channelType(), c.contract().unifiedSymbol(), c);
 			
 			// CTP主连合约生成 
 			if(c.channelType() == ChannelType.PLAYBACK) {
 				PrimaryContract pc = new PrimaryContract(c);
 				contractMap.put(pc.identifier(), pc);
-				channelSymbolContractTbl.put(pc.channelType(), pc.contractField().getSymbol(), pc);
-				channelSymbolContractTbl.put(pc.channelType(), pc.contractField().getUnifiedSymbol(), pc);
+				channelSymbolContractTbl.put(pc.channelType(), pc.contract().symbol(), pc);
+				channelSymbolContractTbl.put(pc.channelType(), pc.contract().unifiedSymbol(), pc);
 			}
 		}
 	}
@@ -228,9 +228,9 @@ public class MarketCenter implements IMarketCenter{
 	 * 更新行情
 	 */
 	@Override
-	public void onTick(TickField tick) {
+	public void onTick(Tick tick) {
 		// 更新普通合约
-		IContract contract = getContract(ChannelType.valueOf(tick.getChannelType()), tick.getUnifiedSymbol());
+		IContract contract = getContract(tick.channelType(), tick.contract().unifiedSymbol());
 		if(contract instanceof TickDataAware tdAware) {
 			tdAware.onTick(tick);
 		}
@@ -242,14 +242,6 @@ public class MarketCenter implements IMarketCenter{
 		} else if(contract.productClass() == ProductClassEnum.FUTURES){
 			log.trace("没有找到 [{}] 对应的指数合约", contract.identifier());
 		}
-	}
-
-	@Override
-	public void endOfMarketTime() {
-		contractMap.values().stream()
-			.filter(TickDataAware.class::isInstance)
-			.map(TickDataAware.class::cast)
-			.forEach(TickDataAware::endOfMarket);
 	}
 
 	/**

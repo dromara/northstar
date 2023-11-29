@@ -11,6 +11,7 @@ import org.dromara.northstar.common.constant.Constants;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
 
+@Deprecated
 public class ContractUtils {
 
 	private ContractUtils() {}

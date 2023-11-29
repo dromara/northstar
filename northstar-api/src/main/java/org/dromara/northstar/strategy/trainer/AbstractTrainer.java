@@ -64,12 +64,12 @@ abstract class AbstractTrainer extends AbstractTester implements RLAgentTraining
 		return testSymbols().stream()
 				.map(symbol -> symbol + "0000")
 				.map(idxSymbol -> contractMgr.getContract(ChannelType.PLAYBACK, idxSymbol))
-				.map(IContract::contractField)
-				.map(cf -> ContractSimpleInfo.builder()
-					.name(cf.getName())
+				.map(IContract::contract)
+				.map(c -> ContractSimpleInfo.builder()
+					.name(c.name())
 					.channelType(ChannelType.PLAYBACK)
-					.unifiedSymbol(cf.getUnifiedSymbol())
-					.value(cf.getContractId())
+					.unifiedSymbol(c.unifiedSymbol())
+					.value(c.contractId())
 					.build())
 				.toList();
 	}

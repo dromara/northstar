@@ -12,6 +12,7 @@ import xyz.redtorch.pb.CoreField.TickField;
  * @author KevinHuangwl
  *
  */
+@Deprecated
 public class TradeUtils {
 
 	/**

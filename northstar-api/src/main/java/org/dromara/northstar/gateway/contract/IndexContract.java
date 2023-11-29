@@ -148,11 +148,6 @@ public class IndexContract implements IContract, TickDataAware{
 	}
 
 	@Override
-	public void endOfMarket() {
-		barGen.forceEndOfBar();
-	}
-
-	@Override
 	public int hashCode() {
 		return Objects.hash(contract.contractId());
 	}

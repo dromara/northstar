@@ -1,5 +1,7 @@
 package org.dromara.northstar.common.model.core;
 
+import java.util.Objects;
+
 import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.gateway.Gateway;
 import org.dromara.northstar.gateway.model.ContractDefinition;
@@ -43,5 +45,22 @@ public record Contract(
 		boolean tradable,
 		ChannelType channelType	// 渠道来源
 	) {
+	
+	@Override
+	public int hashCode() {
+		return Objects.hash(contractId);
+	}
 
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Contract other = (Contract) obj;
+		return Objects.equals(contractId, other.contractId);
+	}
+	
 }

@@ -6,6 +6,9 @@ import java.util.Map;
 import java.util.Queue;
 
 import org.dromara.northstar.common.TickDataAware;
+import org.dromara.northstar.common.model.core.Order;
+import org.dromara.northstar.common.model.core.Tick;
+import org.dromara.northstar.common.model.core.Trade;
 import org.dromara.northstar.common.utils.FieldUtils;
 import org.slf4j.Logger;
 
@@ -14,9 +17,6 @@ import com.alibaba.fastjson.JSONObject;
 import lombok.Getter;
 import lombok.Setter;
 import xyz.redtorch.pb.CoreField.BarField;
-import xyz.redtorch.pb.CoreField.OrderField;
-import xyz.redtorch.pb.CoreField.TickField;
-import xyz.redtorch.pb.CoreField.TradeField;
 
 public abstract class AbstractStrategy implements TradeStrategy{
 	
@@ -38,18 +38,18 @@ public abstract class AbstractStrategy implements TradeStrategy{
 	private Queue<BarField> barCache = new LinkedList<>();
 	
 	@Override
-	public void onOrder(OrderField order) {
+	public void onOrder(Order order) {
 		// 如果策略不关心订单反馈，可以不重写
 	}
 
 	@Override
-	public void onTrade(TradeField trade) {
+	public void onTrade(Trade trade) {
 		// 如果策略不关心成交反馈，可以不重写
-		String unifiedSymbol = trade.getContract().getUnifiedSymbol();
+		String unifiedSymbol = trade.contract().unifiedSymbol();
 		if(log.isInfoEnabled()) {
 			log.info("模组成交 [{} {} {} 操作：{}{} {}手 {}]", unifiedSymbol,
-					trade.getTradeDate(), trade.getTradeTime(), FieldUtils.chn(trade.getDirection()), FieldUtils.chn(trade.getOffsetFlag()), 
-					trade.getVolume(), trade.getPrice());
+					trade.tradeDate(), trade.tradeTime(), FieldUtils.chn(trade.direction()), FieldUtils.chn(trade.offsetFlag()), 
+					trade.volume(), trade.price());
 			log.info("当前模组净持仓：[{}]", ctx.getModuleAccount().getNonclosedNetPosition(unifiedSymbol));
 			log.info("当前模组状态：{}", ctx.getState());
 		}
@@ -83,12 +83,12 @@ public abstract class AbstractStrategy implements TradeStrategy{
 	 * 如果订阅了多个合约，则会有多个TICK，因此每个TICK时刻会触发多次
 	 */
 	@Override
-	public void onTick(TickField tick) {
+	public void onTick(Tick tick) {
 		if(!canProceed()) {
 			return;
 		}
-		if(tickHandlerMap.containsKey(tick.getUnifiedSymbol())) {
-			tickHandlerMap.get(tick.getUnifiedSymbol()).onTick(tick);
+		if(tickHandlerMap.containsKey(tick.contract().unifiedSymbol())) {
+			tickHandlerMap.get(tick.contract().unifiedSymbol()).onTick(tick);
 		}
 	}
 	

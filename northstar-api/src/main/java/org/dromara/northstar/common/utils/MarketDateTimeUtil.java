@@ -6,6 +6,7 @@ import java.time.LocalTime;
 
 import org.dromara.northstar.common.constant.TickType;
 
+@Deprecated
 public interface MarketDateTimeUtil {
 	
 	/**

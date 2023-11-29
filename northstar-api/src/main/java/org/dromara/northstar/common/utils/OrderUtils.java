@@ -2,11 +2,11 @@ package org.dromara.northstar.common.utils;
 
 import org.dromara.northstar.common.constant.SignalOperation;
 import org.dromara.northstar.common.model.OrderRequest.TradeOperation;
+import org.dromara.northstar.common.model.core.Order;
 
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OrderStatusEnum;
 import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
-import xyz.redtorch.pb.CoreField.OrderField;
 
 public class OrderUtils {
 	
@@ -42,11 +42,11 @@ public class OrderUtils {
 		throw new IllegalArgumentException("无法确定[" + dir + "]的对应持仓方向");
 	}
 
-	public static boolean isValidOrder(OrderField order) {
-		return order.getOrderStatus() != OrderStatusEnum.OS_Rejected && order.getOrderStatus() != OrderStatusEnum.OS_Canceled;
+	public static boolean isValidOrder(Order order) {
+		return order.orderStatus() != OrderStatusEnum.OS_Rejected && order.orderStatus() != OrderStatusEnum.OS_Canceled;
 	}
 	
-	public static boolean isDoneOrder(OrderField order) {
-		return order.getOrderStatus() == OrderStatusEnum.OS_Canceled || order.getOrderStatus() == OrderStatusEnum.OS_AllTraded;
+	public static boolean isDoneOrder(Order order) {
+		return order.orderStatus() == OrderStatusEnum.OS_Canceled || order.orderStatus() == OrderStatusEnum.OS_AllTraded;
 	}
 }

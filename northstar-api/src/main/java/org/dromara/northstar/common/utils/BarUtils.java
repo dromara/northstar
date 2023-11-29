@@ -16,6 +16,7 @@ import xyz.redtorch.pb.CoreField.BarField;
  * @author KevinHuangwl
  *
  */
+@Deprecated
 public class BarUtils {
 
 	/**

@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.dromara.northstar.common.exception.TradeException;
 import org.dromara.northstar.common.model.Tuple;
+import org.dromara.northstar.common.model.core.Contract;
 import org.junit.jupiter.api.Test;
 
 import test.common.TestFieldFactory;
@@ -14,8 +15,7 @@ import xyz.redtorch.pb.CoreField.PositionField;
 
 class ClosingPolicyTest {
 	
-	TestFieldFactory factory = new TestFieldFactory("testAccount");
-	ContractField contract = factory.makeContract("rb2210");
+//	Contract contract = factory.makeContract("rb2210");
 	
 	PositionField pos0 = PositionField.newBuilder()
 			.setContract(contract)

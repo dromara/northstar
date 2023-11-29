@@ -37,8 +37,4 @@ public interface IMarketCenter extends IContractManager, TickDataAware {
 	 */
 	void loadContractGroup(ChannelType channelType);
 	
-	/**
-	 * 停盘收尾处理
-	 */
-	void endOfMarketTime();
 }
