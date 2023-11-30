@@ -9,13 +9,13 @@ import java.util.concurrent.ConcurrentMap;
 import org.dromara.northstar.common.TickDataAware;
 import org.dromara.northstar.common.TransactionAware;
 import org.dromara.northstar.common.exception.NoSuchElementException;
+import org.dromara.northstar.common.model.core.Order;
+import org.dromara.northstar.common.model.core.Position;
+import org.dromara.northstar.common.model.core.Tick;
+import org.dromara.northstar.common.model.core.Trade;
 import org.dromara.northstar.common.utils.FieldUtils;
 
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
-import xyz.redtorch.pb.CoreField.OrderField;
-import xyz.redtorch.pb.CoreField.PositionField;
-import xyz.redtorch.pb.CoreField.TickField;
-import xyz.redtorch.pb.CoreField.TradeField;
 
 /**
  * 管理持仓
@@ -34,36 +34,36 @@ public class PositionManager implements TransactionAware, TickDataAware {
 		this.account = account;
 	}
 	
-	public PositionManager(SimGatewayAccount account, List<TradeField> nonclosedTrade) {
+	public PositionManager(SimGatewayAccount account, List<Trade> nonclosedTrade) {
 		this.account = account;
 		nonclosedTrade.forEach(this::onTrade);
 	}
 
 	@Override
-	public void onTick(TickField tick) {
+	public void onTick(Tick tick) {
 		buyPosMap.values().forEach(tp -> tp.onTick(tick));
 		sellPosMap.values().forEach(tp -> tp.onTick(tick));
 	}
 
 	@Override
-	public void onOrder(OrderField order) {
-		if(FieldUtils.isClose(order.getOffsetFlag())) {
-			TradePosition pos = getPosition(order.getDirection(), order.getContract().getUnifiedSymbol(), true);
+	public void onOrder(Order order) {
+		if(FieldUtils.isClose(order.offsetFlag())) {
+			TradePosition pos = getPosition(order.direction(), order.contract().unifiedSymbol(), true);
 			if(Objects.isNull(pos)) {
-				throw new NoSuchElementException(String.format("找不到%s头持仓：%s", FieldUtils.chn(order.getDirection()), order.getContract().getUnifiedSymbol()));
+				throw new NoSuchElementException(String.format("找不到%s头持仓：%s", FieldUtils.chn(order.direction()), order.contract().unifiedSymbol()));
 			}
 			pos.onOrder(order);
 		}
 	}
 
 	@Override
-	public void onTrade(TradeField trade) {
-		DirectionEnum dir = trade.getDirection();
-		String unifiedSymbol = trade.getContract().getUnifiedSymbol();
-		if(FieldUtils.isOpen(trade.getOffsetFlag())) {
+	public void onTrade(Trade trade) {
+		DirectionEnum dir = trade.direction();
+		String unifiedSymbol = trade.contract().unifiedSymbol();
+		if(FieldUtils.isOpen(trade.offsetFlag())) {
 			TradePosition tp = getPosition(dir, unifiedSymbol, false);
 			if(Objects.isNull(tp)) {
-				tp = new TradePosition(trade.getContract(), dir);
+				tp = new TradePosition(trade.contract(), dir);
 				getPosMap(dir, false).put(unifiedSymbol, tp);
 			}
 			tp.onTrade(trade);
@@ -76,26 +76,26 @@ public class PositionManager implements TransactionAware, TickDataAware {
 		}
 	}
 	
-	public List<PositionField> positionFields() {
-		List<PositionField> resultList = new ArrayList<>();
-		resultList.addAll(buyPosMap.values().stream().map(tp -> tp.convertToPositionField(account.getAccountDescription().getGatewayId())).toList());
-		resultList.addAll(sellPosMap.values().stream().map(tp -> tp.convertToPositionField(account.getAccountDescription().getGatewayId())).toList());
+	public List<Position> positionFields() {
+		List<Position> resultList = new ArrayList<>();
+		resultList.addAll(buyPosMap.values().stream().map(tp -> tp.convertToPosition(account.getAccountDescription().getGatewayId())).toList());
+		resultList.addAll(sellPosMap.values().stream().map(tp -> tp.convertToPosition(account.getAccountDescription().getGatewayId())).toList());
 		return resultList;
 	}
 	
-	public List<TradeField> getNonclosedTrade() {
-		List<TradeField> resultList = new ArrayList<>();
+	public List<Trade> getNonclosedTrade() {
+		List<Trade> resultList = new ArrayList<>();
 		resultList.addAll(buyPosMap.values().stream().flatMap(tp -> tp.getUncloseTrades().stream()).toList());
 		resultList.addAll(sellPosMap.values().stream().flatMap(tp -> tp.getUncloseTrades().stream()).toList());
 		return resultList;
 	}
 	
 	public double totalHoldingProfit() {
-		return positionFields().stream().mapToDouble(PositionField::getPositionProfit).sum();
+		return positionFields().stream().mapToDouble(Position::positionProfit).sum();
 	}
 	
 	public double totalMargin() {
-		return positionFields().stream().mapToDouble(PositionField::getExchangeMargin).sum();
+		return positionFields().stream().mapToDouble(Position::exchangeMargin).sum();
 	}
 
 	public int getAvailablePosition(DirectionEnum direction, String unifiedSymbol) {

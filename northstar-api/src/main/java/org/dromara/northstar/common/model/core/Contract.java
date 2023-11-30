@@ -3,7 +3,6 @@ package org.dromara.northstar.common.model.core;
 import java.util.Objects;
 
 import org.dromara.northstar.common.constant.ChannelType;
-import org.dromara.northstar.gateway.Gateway;
 import org.dromara.northstar.gateway.model.ContractDefinition;
 
 import lombok.Builder;
@@ -15,6 +14,7 @@ import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
 
 @Builder(toBuilder = true)
 public record Contract(
+		String gatewayId,
 		String contractId,  	// ID，通常是  <合约代码@交易所代码@产品类型@网关ID>
 		String name,  			// 简称
 		String fullName,  		// 全称
@@ -41,7 +41,6 @@ public record Contract(
 		ContractDefinition contractDefinition,
 		int pricePrecision, 	// 价格精度(保留N位小数) 
 		int quantityPrecision,	// 成交量精度(保留N位小数)
-		Gateway gateway,
 		boolean tradable,
 		ChannelType channelType	// 渠道来源
 	) {

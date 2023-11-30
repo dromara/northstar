@@ -14,14 +14,13 @@ import org.dromara.northstar.common.constant.ConnectionState;
 import org.dromara.northstar.common.event.FastEventEngine;
 import org.dromara.northstar.common.event.NorthstarEventType;
 import org.dromara.northstar.common.model.GatewayDescription;
+import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.common.model.core.Tick;
 import org.dromara.northstar.gateway.IMarketCenter;
 import org.dromara.northstar.gateway.MarketGateway;
 import org.dromara.northstar.gateway.contract.GatewayContract;
 
 import lombok.extern.slf4j.Slf4j;
-import xyz.redtorch.pb.CoreField.ContractField;
-import xyz.redtorch.pb.CoreField.TickField;
 
 @Slf4j
 public class SimMarketGatewayLocal implements MarketGateway{
@@ -50,14 +49,14 @@ public class SimMarketGatewayLocal implements MarketGateway{
 	}
 
 	@Override
-	public boolean subscribe(ContractField contract) {
-		log.info("模拟订阅合约：{}", contract.getSymbol());
+	public boolean subscribe(Contract contract) {
+		log.info("模拟订阅合约：{}", contract.symbol());
 		return true;
 	}
 
 	@Override
-	public boolean unsubscribe(ContractField contract) {
-		log.info("模拟退订合约：{}", contract.getSymbol());
+	public boolean unsubscribe(Contract contract) {
+		log.info("模拟退订合约：{}", contract.symbol());
 		return true;
 	}
 
@@ -79,7 +78,7 @@ public class SimMarketGatewayLocal implements MarketGateway{
 					Tick tick = e.getValue().generateNextTick(LocalDateTime.now(), this);
 					feEngine.emitEvent(NorthstarEventType.TICK, tick);
 					GatewayContract contract = (GatewayContract) mktCenter.getContract(ChannelType.SIM, tick.contract().unifiedSymbol());
-//					contract.onTick(tick);
+					contract.onTick(tick);
 				}
 			} catch (Exception e) {
 				log.error("模拟行情TICK生成异常", e);

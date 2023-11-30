@@ -60,7 +60,7 @@ public class SimTickGenerator {
 		return Tick.builder()
 				.lastPrice(lastPrice)
 				.preSettlePrice(lastPrice)
-				.gateway(gateway)
+				.gatewayId(gateway.gatewayId())
 				.channelType(ChannelType.SIM)
 				.askPrice(List.of(askPrice, 0D, 0D, 0D, 0D))
 				.bidPrice(List.of(bidPrice, 0D, 0D, 0D, 0D))
@@ -75,7 +75,7 @@ public class SimTickGenerator {
 				.volumeDelta(deltaVol)
 				.highPrice(high)
 				.lowPrice(low)
-				.type(TickType.NORMAL_TICK)
+				.type(TickType.MARKET_TICK)
 				.lastPrice(latestPrice)
 				.build();
 	}

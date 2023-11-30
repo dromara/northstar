@@ -3,8 +3,6 @@ package org.dromara.northstar.common.model.core;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-import org.dromara.northstar.gateway.Gateway;
-
 import lombok.Builder;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.HedgeFlagEnum;
@@ -12,9 +10,9 @@ import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreEnum.PriceSourceEnum;
 import xyz.redtorch.pb.CoreEnum.TradeTypeEnum;
 
-@Builder
+@Builder(toBuilder = true)
 public record Trade(
-		Gateway gateway,
+		String gatewayId,
 		String originOrderId,
 		String orderId,
 		DirectionEnum direction,  	// 方向

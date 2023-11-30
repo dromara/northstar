@@ -91,7 +91,7 @@ public class GatewayContract implements IContract, TickDataAware{
 
 	@Override
 	public String gatewayId() {
-		return contract.gateway().gatewayId();
+		return contract.gatewayId();
 	}
 
 	@Override

@@ -4,6 +4,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import xyz.redtorch.pb.CoreField.BarField;
 
+@Deprecated
 @EqualsAndHashCode
 @Getter
 public class BarWrapper implements Comparable<BarWrapper>{

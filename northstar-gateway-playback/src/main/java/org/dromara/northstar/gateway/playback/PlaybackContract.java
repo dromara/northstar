@@ -20,6 +20,7 @@ public class PlaybackContract implements Instrument {
 	
 	public PlaybackContract(Contract contract, IDataSource dataSrc) {
 		this.contract = contract.toBuilder()
+				.gatewayId(ChannelType.PLAYBACK.toString())
 				.contractId(contract.unifiedSymbol() + "@" + ChannelType.PLAYBACK)
 				.channelType(ChannelType.PLAYBACK)
 				.thirdPartyId(contract.symbol() + "@" + ChannelType.PLAYBACK)

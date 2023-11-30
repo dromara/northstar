@@ -1,8 +1,8 @@
 package org.dromara.northstar.common.model;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
+
+import org.dromara.northstar.common.model.core.Trade;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -42,32 +42,6 @@ public class SimAccountDescription {
 	/**
 	 * 未平仓（开仓）成交
 	 */
-	private List<byte[]> openTrades;
-	
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		SimAccountDescription other = (SimAccountDescription) obj;
-		for(int i=0; i<openTrades.size(); i++) {
-			if(!Arrays.equals(openTrades.get(i), other.openTrades.get(i))) {
-				return false;
-			}
-		}
-		return Objects.equals(gatewayId, other.gatewayId)
-				&& Double.doubleToLongBits(totalCloseProfit) == Double.doubleToLongBits(other.totalCloseProfit)
-				&& Double.doubleToLongBits(totalCommission) == Double.doubleToLongBits(other.totalCommission)
-				&& Double.doubleToLongBits(totalDeposit) == Double.doubleToLongBits(other.totalDeposit)
-				&& Double.doubleToLongBits(totalWithdraw) == Double.doubleToLongBits(other.totalWithdraw);
-	}
-	@Override
-	public int hashCode() {
-		return Objects.hash(gatewayId, openTrades, totalCloseProfit, totalCommission, totalDeposit, totalWithdraw);
-	}
-	
+	private List<Trade> openTrades;
 	
 }
