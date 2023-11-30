@@ -8,11 +8,10 @@ import org.dromara.northstar.common.event.AbstractEventHandler;
 import org.dromara.northstar.common.event.GenericEventHandler;
 import org.dromara.northstar.common.event.NorthstarEvent;
 import org.dromara.northstar.common.event.NorthstarEventType;
+import org.dromara.northstar.common.model.core.Order;
+import org.dromara.northstar.common.model.core.Trade;
 import org.dromara.northstar.common.utils.OrderUtils;
 import org.dromara.northstar.strategy.IMessageSender;
-
-import xyz.redtorch.pb.CoreField.OrderField;
-import xyz.redtorch.pb.CoreField.TradeField;
 
 public class EventNotificationHandler extends AbstractEventHandler implements GenericEventHandler{
 	
@@ -33,8 +32,8 @@ public class EventNotificationHandler extends AbstractEventHandler implements Ge
 	@Override
 	protected void doHandle(NorthstarEvent e) {
 		if(Objects.isNull(sender) 
-				|| e.getData() instanceof TradeField trade && StringUtils.isBlank(trade.getOriginOrderId())
-				|| e.getData() instanceof OrderField order && (StringUtils.isBlank(order.getOriginOrderId()) || !OrderUtils.isValidOrder(order))) {
+				|| e.getData() instanceof Trade trade && StringUtils.isBlank(trade.originOrderId())
+				|| e.getData() instanceof Order order && (StringUtils.isBlank(order.originOrderId()) || !OrderUtils.isValidOrder(order))) {
 			return;
 		}
 		sender.onEvent(e);

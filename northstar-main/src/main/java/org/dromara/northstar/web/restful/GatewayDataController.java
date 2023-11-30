@@ -8,6 +8,7 @@ import java.util.List;
 import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.model.GatewayDescription;
 import org.dromara.northstar.common.model.ResultBean;
+import org.dromara.northstar.common.model.core.Bar;
 import org.dromara.northstar.common.utils.MarketDataLoadingUtils;
 import org.dromara.northstar.data.IGatewayRepository;
 import org.dromara.northstar.data.IMarketDataRepository;
@@ -49,7 +50,7 @@ public class GatewayDataController {
 			start = start.minusWeeks(1);
 		}
 		LocalDate end = utils.getCurrentTradeDay(refStartTimestamp, firstLoad);
-		List<BarField> result = Collections.emptyList();
+		List<Bar> result = Collections.emptyList();
 		for(int i=0; i<3; i++) {
 			result = mdRepo.loadBars(contract, start.minusWeeks(i), end.minusWeeks(i));
 			if(!result.isEmpty()) {
@@ -57,7 +58,10 @@ public class GatewayDataController {
 			}
 		}
 		
-		return new ResultBean<>(result.stream().map(BarField::toByteArray).toList());
+		return new ResultBean<>(result.stream()
+				.map(Bar::toBarField)
+				.map(BarField::toByteArray)
+				.toList());
 	}
 	
 }

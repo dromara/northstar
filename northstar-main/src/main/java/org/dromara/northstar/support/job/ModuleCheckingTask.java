@@ -16,6 +16,7 @@ import org.dromara.northstar.common.constant.ModuleState;
 import org.dromara.northstar.common.model.ContractSimpleInfo;
 import org.dromara.northstar.common.model.Identifier;
 import org.dromara.northstar.common.model.ModuleAccountDescription;
+import org.dromara.northstar.common.model.core.Position;
 import org.dromara.northstar.event.IllegalOrderHandler;
 import org.dromara.northstar.gateway.IContract;
 import org.dromara.northstar.gateway.IContractManager;
@@ -35,7 +36,6 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.FileAppender;
 import lombok.extern.slf4j.Slf4j;
 import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
-import xyz.redtorch.pb.CoreField.PositionField;
 
 /**
  * 模组运行时检查任务
@@ -115,15 +115,15 @@ public class ModuleCheckingTask implements InitializingBean {
 				for(ContractSimpleInfo csi : mad.getBindedContracts()) {
 					IContract contract = contractMgr.getContract(Identifier.of(csi.getValue()));
 					IAccount account = m.getAccount(contract);
-					PositionField longPosPlaceholder = PositionField.newBuilder()
-							.setGatewayId(account.accountId())
-							.setContract(contract.contractField())
-							.setPositionDirection(PositionDirectionEnum.PD_Long)
+					Position longPosPlaceholder = Position.builder()
+							.gatewayId(account.accountId())
+							.contract(contract.contract())
+							.positionDirection(PositionDirectionEnum.PD_Long)
 							.build();
-					PositionField shortPosPlaceholder = PositionField.newBuilder()
-							.setGatewayId(account.accountId())
-							.setContract(contract.contractField())
-							.setPositionDirection(PositionDirectionEnum.PD_Short)
+					Position shortPosPlaceholder = Position.builder()
+							.gatewayId(account.accountId())
+							.contract(contract.contract())
+							.positionDirection(PositionDirectionEnum.PD_Short)
 							.build();
 					account.getPosition(PositionDirectionEnum.PD_Long, csi.getUnifiedSymbol()).ifPresentOrElse(this::doCheckPosition, () -> this.doCheckPosition(longPosPlaceholder));
 					account.getPosition(PositionDirectionEnum.PD_Short, csi.getUnifiedSymbol()).ifPresentOrElse(this::doCheckPosition, () -> this.doCheckPosition(shortPosPlaceholder));
@@ -132,11 +132,11 @@ public class ModuleCheckingTask implements InitializingBean {
 		});
 	}
 	
-	private void doCheckPosition(PositionField position) {
+	private void doCheckPosition(Position position) {
 		try {
 			posChkr.checkPositionEquivalence(position);
 		} catch (IllegalStateException e) {
-			doSmartSend(String.format("[持仓不匹配警报] %s %s", position.getContract().getName(), position.getPositionDirection()), e.getMessage());
+			doSmartSend(String.format("[持仓不匹配警报] %s %s", position.contract().name(), position.positionDirection()), e.getMessage());
 		}
 	}
 	
@@ -186,7 +186,7 @@ public class ModuleCheckingTask implements InitializingBean {
 		log.debug("检查废单");
 		StringBuilder sb = new StringBuilder();
 		illOrderHandler.getIllegalOrders().forEach(order -> 
-			sb.append(String.format("%s %s %s %s%n", order.getContract().getName(), order.getOrderDate(), order.getOrderTime(), order.getStatusMsg()))
+			sb.append(String.format("%s %s %s %s%n", order.contract().name(), order.updateDate(), order.updateTime(), order.statusMsg()))
 		);
 		
 		if(sb.length() > 0) {

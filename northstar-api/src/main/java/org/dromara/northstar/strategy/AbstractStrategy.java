@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Queue;
 
 import org.dromara.northstar.common.TickDataAware;
+import org.dromara.northstar.common.model.core.Bar;
 import org.dromara.northstar.common.model.core.Order;
 import org.dromara.northstar.common.model.core.Tick;
 import org.dromara.northstar.common.model.core.Trade;
@@ -16,7 +17,6 @@ import com.alibaba.fastjson.JSONObject;
 
 import lombok.Getter;
 import lombok.Setter;
-import xyz.redtorch.pb.CoreField.BarField;
 
 public abstract class AbstractStrategy implements TradeStrategy{
 	
@@ -35,7 +35,7 @@ public abstract class AbstractStrategy implements TradeStrategy{
 	// 预热K线数据量（该预热数据量与模组的设置并不相等，该属性用于策略内部判断接收了多少数据，而模组的预热设置用于外部投喂了多少数据）
 	protected int numOfBarsToPrepare;
 	
-	private Queue<BarField> barCache = new LinkedList<>();
+	private Queue<Bar> barCache = new LinkedList<>();
 	
 	@Override
 	public void onOrder(Order order) {
@@ -107,12 +107,12 @@ public abstract class AbstractStrategy implements TradeStrategy{
 	 * 如果订阅了多个合约，则会有多个K线，因此每个K线时刻会触发多次
 	 */
 	@Override
-	public void onMergedBar(BarField bar) {
+	public void onMergedBar(Bar bar) {
 		if(!canProceed(bar)) {
 			return;
 		}
-		if(barHandlerMap.containsKey(bar.getUnifiedSymbol())) {
-			barHandlerMap.get(bar.getUnifiedSymbol()).onMergedBar(bar);
+		if(barHandlerMap.containsKey(bar.contract().unifiedSymbol())) {
+			barHandlerMap.get(bar.contract().unifiedSymbol()).onMergedBar(bar);
 		}
 	}
 	
@@ -120,9 +120,9 @@ public abstract class AbstractStrategy implements TradeStrategy{
 		return barCache.isEmpty() && numOfBarsToPrepare == 0;
 	}
 	
-	protected boolean canProceed(BarField bar) {
+	protected boolean canProceed(Bar bar) {
 		if(barCache.size() < numOfBarsToPrepare) {
-			if(barCache.isEmpty() || barCache.peek().getUnifiedSymbol().equals(bar.getUnifiedSymbol())) {
+			if(barCache.isEmpty() || barCache.peek().contract().equals(bar.contract())) {
 				barCache.offer(bar);
 			}
 			return false;

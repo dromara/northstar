@@ -11,6 +11,7 @@ import xyz.redtorch.pb.CoreEnum.CurrencyEnum;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreEnum.OptionsTypeEnum;
 import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
+import xyz.redtorch.pb.CoreField.ContractField;
 
 @Builder(toBuilder = true)
 public record Contract(
@@ -44,6 +45,38 @@ public record Contract(
 		boolean tradable,
 		ChannelType channelType	// 渠道来源
 	) {
+	
+	public ContractField toContractField() {
+		return ContractField.newBuilder()
+				.setGatewayId(gatewayId)
+				.setContractId(contractId)
+				.setName(name)
+				.setFullName(fullName)
+				.setThirdPartyId(thirdPartyId)
+				.setUnifiedSymbol(unifiedSymbol)
+				.setSymbol(symbol)
+				.setExchange(exchange)
+				.setProductClass(productClass)
+				.setCurrency(currency)
+				.setMultiplier(multiplier)
+				.setPriceTick(priceTick)
+				.setLongMarginRatio(longMarginRatio)
+				.setShortMarginRatio(shortMarginRatio)
+				.setUnderlyingSymbol(underlyingSymbol)
+				.setStrikePrice(strikePrice)
+				.setOptionsType(optionsType)
+				.setUnderlyingMultiplier(underlyingMultiplier)
+				.setLastTradeDateOrContractMonth(lastTradeDateOrContractMonth)
+				.setMaxMarketOrderVolume(maxMarketOrderVolume)
+				.setMinMarketOrderVolume(minMarketOrderVolume)
+				.setMaxLimitOrderVolume(maxLimitOrderVolume)
+				.setMinLimitOrderVolume(minLimitOrderVolume)
+				.setCombinationType(combinationType)
+				.setPricePrecision(pricePrecision)
+				.setQuantityPrecision(quantityPrecision)
+				.setChannelType(channelType.toString())
+				.build();
+	}
 	
 	@Override
 	public int hashCode() {

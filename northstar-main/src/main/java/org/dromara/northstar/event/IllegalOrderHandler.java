@@ -4,14 +4,13 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Queue;
 
-import org.apache.commons.lang3.StringUtils;
 import org.dromara.northstar.common.event.AbstractEventHandler;
 import org.dromara.northstar.common.event.GenericEventHandler;
 import org.dromara.northstar.common.event.NorthstarEvent;
 import org.dromara.northstar.common.event.NorthstarEventType;
+import org.dromara.northstar.common.model.core.Order;
 
 import xyz.redtorch.pb.CoreEnum.OrderStatusEnum;
-import xyz.redtorch.pb.CoreField.OrderField;
 
 /**
  * 废单收集器
@@ -21,7 +20,7 @@ import xyz.redtorch.pb.CoreField.OrderField;
  */
 public class IllegalOrderHandler extends AbstractEventHandler implements GenericEventHandler{
 	
-	private Queue<OrderField> records = new LinkedList<>();
+	private Queue<Order> records = new LinkedList<>();
 
 	@Override
 	public boolean canHandle(NorthstarEventType eventType) {
@@ -30,16 +29,16 @@ public class IllegalOrderHandler extends AbstractEventHandler implements Generic
 
 	@Override
 	protected void doHandle(NorthstarEvent e) {
-		OrderField order = (OrderField) e.getData();
-		if(!records.isEmpty() && !StringUtils.equals(records.peek().getTradingDay(), order.getTradingDay())) {
+		Order order = (Order) e.getData();
+		if(!records.isEmpty() && !records.peek().tradingDay().equals(order.tradingDay())) {
 			records.clear(); 	// 每日清零
 		}
-		if(order.getOrderStatus() == OrderStatusEnum.OS_Rejected) {
+		if(order.orderStatus() == OrderStatusEnum.OS_Rejected) {
 			records.add(order);
 		}
 	}
 	
-	public Collection<OrderField> getIllegalOrders(){
+	public Collection<Order> getIllegalOrders(){
 		return records;
 	}
 }

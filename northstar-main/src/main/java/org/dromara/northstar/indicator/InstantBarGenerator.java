@@ -3,6 +3,8 @@ package org.dromara.northstar.indicator;
 import java.util.Objects;
 import java.util.Optional;
 
+import org.dromara.northstar.common.model.core.Bar;
+import org.dromara.northstar.common.model.core.Tick;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.TickField;
@@ -23,7 +25,7 @@ public class InstantBarGenerator {
 		this.contract = contract;
 	}
 
-	public synchronized Optional<BarField> update(TickField tick) {
+	public synchronized Optional<Bar> update(Tick tick) {
 		if (!contract.getUnifiedSymbol().equals(tick.getUnifiedSymbol())) {
 			throw new IllegalArgumentException("合约不匹配，期望合约：" + contract.getUnifiedSymbol() + "，实际合约：" + tick.getUnifiedSymbol());
 		}

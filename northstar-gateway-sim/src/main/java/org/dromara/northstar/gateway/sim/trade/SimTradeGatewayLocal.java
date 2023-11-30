@@ -47,7 +47,7 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 		account.onTrade(trade);
 		feEngine.emitEvent(NorthstarEventType.TRADE, trade);
 		
-		log.info("[{}] 模拟成交：{}，{}，{}，{}手，成交价：{}，订单ID：{}", trade.gatewayId(), trade.contract().name(), trade.direction(), 
+		log.info("[{}] 模拟成交：{}，{}，{}，{}手，成交价：{}，订单ID：{}", trade.gatewayId(), trade.contract().name(), trade.direction(),
 				trade.offsetFlag(), trade.volume(), trade.price(), trade.originOrderId());
 		
 		simAccountRepo.save(account.getAccountDescription());

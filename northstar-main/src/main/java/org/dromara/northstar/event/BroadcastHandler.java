@@ -9,13 +9,19 @@ import org.dromara.northstar.common.event.AbstractEventHandler;
 import org.dromara.northstar.common.event.GenericEventHandler;
 import org.dromara.northstar.common.event.NorthstarEvent;
 import org.dromara.northstar.common.event.NorthstarEventType;
+import org.dromara.northstar.common.model.core.Account;
+import org.dromara.northstar.common.model.core.Bar;
+import org.dromara.northstar.common.model.core.Notice;
+import org.dromara.northstar.common.model.core.Order;
+import org.dromara.northstar.common.model.core.Position;
+import org.dromara.northstar.common.model.core.Tick;
+import org.dromara.northstar.common.model.core.Trade;
 
 import com.corundumstudio.socketio.SocketIOClient;
 import com.corundumstudio.socketio.SocketIOServer;
 import com.corundumstudio.socketio.annotation.OnConnect;
 import com.corundumstudio.socketio.annotation.OnDisconnect;
 import com.corundumstudio.socketio.annotation.OnEvent;
-import com.google.protobuf.Message;
 
 import cn.hutool.core.codec.Base64;
 import lombok.extern.slf4j.Slf4j;
@@ -50,23 +56,31 @@ public class BroadcastHandler extends AbstractEventHandler implements GenericEve
 	/*****************************************************/
 	public void emitEvent(NorthstarEvent event) throws SecurityException, IllegalArgumentException, InterruptedException {
 		// 为了避免接收端信息拥塞，把行情数据按合约分房间分发数据，可以提升客户端的接收效率
-		if(event.getData() instanceof TickField tick) {
+		if(event.getData() instanceof Tick t) {
+			TickField tick = t.toTickField();
 			String rmid = String.format("%s@%s", tick.getUnifiedSymbol(), tick.getGatewayId());
 			log.trace("TICK数据分发：[{} {} {} 价格：{}]", tick.getUnifiedSymbol(), tick.getActionDay(), tick.getActionTime(), tick.getLastPrice());
 			socketServer.getRoomOperations(rmid).sendEvent(NorthstarEventType.TICK.toString(), Base64.encode(tick.toByteArray()));
-		} else if(event.getData() instanceof BarField bar) {
+		} else if(event.getData() instanceof Bar b) {
+			BarField bar = b.toBarField();
 			String rmid = String.format("%s@%s", bar.getUnifiedSymbol(), bar.getGatewayId());
 			log.trace("BAR数据分发：[{} {} {} 价格：{}]", rmid, bar.getActionDay(), bar.getActionTime(), bar.getClosePrice());
 			socketServer.getRoomOperations(rmid).sendEvent(NorthstarEventType.BAR.toString(), Base64.encode(bar.toByteArray()));
-		} else if(event.getData() instanceof AccountField account) {
+		} else if(event.getData() instanceof Account acc) {
+			AccountField account = acc.toAccountField();
 			log.trace("账户信息分发: [{} {} {}]", account.getAccountId(), account.getGatewayId(), account.getBalance());
 			socketServer.getBroadcastOperations().sendEvent(event.getEvent().toString(), Base64.encode(account.toByteArray()));
-		} else if(event.getData() instanceof PositionField position) {
+		} else if(event.getData() instanceof Position pos) {
+			PositionField position = pos.toPositionField();
 			log.trace("持仓信息分发: [{} {} {}]", position.getAccountId(), position.getGatewayId(), position.getPositionId());
 			socketServer.getBroadcastOperations().sendEvent(event.getEvent().toString(), Base64.encode(position.toByteArray()));
-		} else if(event.getData() instanceof Message message) {			
-			socketServer.getBroadcastOperations().sendEvent(event.getEvent().toString(), Base64.encode(message.toByteArray()));
-		}
+		} else if(event.getData() instanceof Order od) {
+			socketServer.getBroadcastOperations().sendEvent(event.getEvent().toString(), Base64.encode(od.toOrderField().toByteArray()));
+		} else if(event.getData() instanceof Trade tr) {
+			socketServer.getBroadcastOperations().sendEvent(event.getEvent().toString(), Base64.encode(tr.toTradeField().toByteArray()));
+		} else if(event.getData() instanceof Notice note) {
+			socketServer.getBroadcastOperations().sendEvent(event.getEvent().toString(), Base64.encode(note.toNoticeField().toByteArray()));
+		} 
 	}
 	
 	/*************************************************/

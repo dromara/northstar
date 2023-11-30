@@ -3,7 +3,6 @@ package org.dromara.northstar.web.service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -38,6 +37,9 @@ import org.dromara.northstar.common.model.ModuleDealRecord;
 import org.dromara.northstar.common.model.ModuleDescription;
 import org.dromara.northstar.common.model.ModulePositionDescription;
 import org.dromara.northstar.common.model.ModuleRuntimeDescription;
+import org.dromara.northstar.common.model.core.Bar;
+import org.dromara.northstar.common.model.core.Contract;
+import org.dromara.northstar.common.model.core.Trade;
 import org.dromara.northstar.common.utils.MarketDataLoadingUtils;
 import org.dromara.northstar.data.IMarketDataRepository;
 import org.dromara.northstar.data.IModuleRepository;
@@ -65,9 +67,6 @@ import com.alibaba.fastjson.JSONObject;
 import cn.hutool.core.date.LocalDateTimeUtil;
 import cn.hutool.core.lang.Assert;
 import lombok.extern.slf4j.Slf4j;
-import xyz.redtorch.pb.CoreField.BarField;
-import xyz.redtorch.pb.CoreField.ContractField;
-import xyz.redtorch.pb.CoreField.TradeField;
 
 /**
  * 
@@ -76,25 +75,25 @@ import xyz.redtorch.pb.CoreField.TradeField;
  */
 @Slf4j
 public class ModuleService implements IModuleService, PostLoadAware {
-	
+
 	private ApplicationContext ctx;
-	
+
 	private ModuleManager moduleMgr;
-	
+
 	private IContractManager contractMgr;
-	
+
 	private IModuleRepository moduleRepo;
-	
+
 	private IMarketDataRepository mdRepo;
-	
+
 	private MarketDataLoadingUtils utils = new MarketDataLoadingUtils();
-	
+
 	private ModuleLoggerFactory moduleLoggerFactory = new ModuleLoggerFactory();
-	
+
 	private AccountManager accountMgr;
-	
-	public ModuleService(ApplicationContext ctx, IModuleRepository moduleRepo, IMarketDataRepository mdRepo, 
-			ModuleManager moduleMgr, IContractManager contractMgr, AccountManager accountMgr) {
+
+	public ModuleService(ApplicationContext ctx, IModuleRepository moduleRepo, IMarketDataRepository mdRepo,
+						 ModuleManager moduleMgr, IContractManager contractMgr, AccountManager accountMgr) {
 		this.ctx = ctx;
 		this.moduleMgr = moduleMgr;
 		this.contractMgr = contractMgr;
@@ -110,7 +109,7 @@ public class ModuleService implements IModuleService, PostLoadAware {
 	public List<ComponentMetaInfo> getRegisteredTradeStrategies(){
 		return getComponentMeta();
 	}
-	
+
 	private List<ComponentMetaInfo> getComponentMeta() {
 		Map<String, Object> objMap = ctx.getBeansWithAnnotation(StrategicComponent.class);
 		List<ComponentMetaInfo> result = new ArrayList<>(objMap.size());
@@ -120,7 +119,7 @@ public class ModuleService implements IModuleService, PostLoadAware {
 		}
 		return result;
 	}
-	
+
 	/**
 	 * 获取策略配置元信息
 	 * @param metaInfo
@@ -134,12 +133,12 @@ public class ModuleService implements IModuleService, PostLoadAware {
 		DynamicParams params = aware.getDynamicParams();
 		return params.getMetaInfo();
 	}
-	
+
 	/**
 	 * 增加模组
 	 * @param md
 	 * @return
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	@Override
 	public ModuleDescription createModule(ModuleDescription md) throws Exception {
@@ -160,12 +159,12 @@ public class ModuleService implements IModuleService, PostLoadAware {
 		moduleRepo.saveSettings(md);
 		return md;
 	}
-	
+
 	/**
 	 * 修改模组
 	 * @param md
 	 * @return
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	@Transactional
 	@Override
@@ -182,7 +181,7 @@ public class ModuleService implements IModuleService, PostLoadAware {
 		moduleRepo.saveSettings(md);
 		return md;
 	}
-	
+
 	// 更新合法性校验：持仓状态下，模组不允许修改绑定的账户与合约信息
 	private void validateChange(ModuleDescription md) {
 		IModule module = moduleMgr.get(Identifier.of(md.getModuleName()));
@@ -191,13 +190,13 @@ public class ModuleService implements IModuleService, PostLoadAware {
 			Set<String> accountNames = md.getModuleAccountSettingsDescription().stream().map(ModuleAccountDescription::getAccountGatewayId).collect(Collectors.toSet());
 			Set<String> accountNames0 = md0.getModuleAccountSettingsDescription().stream().map(ModuleAccountDescription::getAccountGatewayId).collect(Collectors.toSet());
 			Assert.isTrue(accountNames.equals(accountNames0), "模组在持仓状态下，不能修改绑定账户");
-			
+
 			Set<String> bindedContracts = md.getModuleAccountSettingsDescription().stream().flatMap(mad -> mad.getBindedContracts().stream()).map(ContractSimpleInfo::getUnifiedSymbol).collect(Collectors.toSet());
 			Set<String> bindedContracts0 = md0.getModuleAccountSettingsDescription().stream().flatMap(mad -> mad.getBindedContracts().stream()).map(ContractSimpleInfo::getUnifiedSymbol).collect(Collectors.toSet());
 			Assert.isTrue(bindedContracts.equals(bindedContracts0), "模组在持仓状态下，不能修改绑定合约");
 		}
 	}
-	
+
 	/**
 	 * 删除模组
 	 * @param name
@@ -212,7 +211,7 @@ public class ModuleService implements IModuleService, PostLoadAware {
 		moduleRepo.removeAllDealRecords(name);
 		return true;
 	}
-	
+
 	/**
 	 * 查询模组
 	 * @return
@@ -220,11 +219,11 @@ public class ModuleService implements IModuleService, PostLoadAware {
 	public List<ModuleDescription> findAllModules() {
 		return moduleRepo.findAllSettings();
 	}
-	
+
 	private void loadModule(ModuleDescription md, ModuleRuntimeDescription mrd) throws Exception {
 		int weeksOfDataForPreparation = md.getWeeksOfDataForPreparation();
 		LocalDate date = LocalDate.now().minusWeeks(weeksOfDataForPreparation);
-		
+
 		ComponentAndParamsPair strategyComponent = md.getStrategySetting();
 		TradeStrategy strategy = resolveComponent(strategyComponent);
 		Assert.isTrue(strategy.type() == md.getType(), "该策略只能用于类型为[{}]的模组", strategy.type());
@@ -243,7 +242,7 @@ public class ModuleService implements IModuleService, PostLoadAware {
 		} else {
 			if(md.getType() == ModuleType.ARBITRAGE) {
 				moduleCtx = new ArbitrageModuleContext(strategy, md, mrd, contractMgr, moduleRepo, moduleLoggerFactory, new BarMergerRegistry());
-			} else {				
+			} else {
 				moduleCtx = new ModuleContext(strategy, md, mrd, contractMgr, moduleRepo, moduleLoggerFactory, new BarMergerRegistry());
 			}
 		}
@@ -259,11 +258,11 @@ public class ModuleService implements IModuleService, PostLoadAware {
 				&& toYearWeekVal(now) >= toYearWeekVal(date)) {
 			LocalDate start = utils.getFridayOfThisWeek(date.minusWeeks(1));
 			LocalDate end = utils.getFridayOfThisWeek(date);
-			List<BarField> mergeList = new ArrayList<>();
+			List<Bar> mergeList = new ArrayList<>();
 			for(ModuleAccountDescription mad : md.getModuleAccountSettingsDescription()) {
 				for(ContractSimpleInfo csi : mad.getBindedContracts()) {
 					IContract c = contractMgr.getContract(Identifier.of(csi.getValue()));
-					List<BarField> bars = mdRepo.loadBars(c, start, end);
+					List<Bar> bars = mdRepo.loadBars(c, start, end);
 					mergeList.addAll(bars);
 				}
 			}
@@ -273,10 +272,10 @@ public class ModuleService implements IModuleService, PostLoadAware {
 		moduleCtx.setEnabled(mrd.isEnabled());
 		moduleCtx.onReady();
 	}
-	
-	private Comparator<BarField> sortFunction = (a, b) -> a.getActionTimestamp() < b.getActionTimestamp() ? -1 
-													: a.getActionTimestamp() > b.getActionTimestamp() ? 1 : 0;
-	
+
+	private Comparator<Bar> sortFunction = (a, b) -> a.actionTimestamp() < b.actionTimestamp() ? -1
+			: a.actionTimestamp() > b.actionTimestamp() ? 1 : 0;
+
 	@SuppressWarnings("unchecked")
 	private <T extends DynamicParamsAware> T resolveComponent(ComponentAndParamsPair metaInfo) throws Exception {
 		Map<String, ComponentField> fieldMap = new HashMap<>();
@@ -293,18 +292,18 @@ public class ModuleService implements IModuleService, PostLoadAware {
 		obj.initWithParams(paramObj);
 		return (T) obj;
 	}
-	
+
 	// 把日期转换成年周，例如2022年第二周为202202
 	private int toYearWeekVal(LocalDate date) {
 		return date.getYear() * 100 + LocalDateTimeUtil.weekOfYear(date);
 	}
-	
-	
+
+
 	private void unloadModule(String moduleName) {
 		moduleMgr.remove(Identifier.of(moduleName));
 		moduleRepo.deleteSettingsByName(moduleName);
 	}
-	
+
 	/**
 	 * 模组启停
 	 * @param name
@@ -317,7 +316,7 @@ public class ModuleService implements IModuleService, PostLoadAware {
 		module.setEnabled(flag);
 		return flag;
 	}
-	
+
 	/**
 	 * 模组运行时状态
 	 * @param name
@@ -331,7 +330,7 @@ public class ModuleService implements IModuleService, PostLoadAware {
 		}
 		return module.getRuntimeDescription();
 	}
-	
+
 	/**
 	 * 模组持仓状态
 	 * @param name
@@ -345,7 +344,7 @@ public class ModuleService implements IModuleService, PostLoadAware {
 		}
 		return module.getModuleContext().getState();
 	}
-	
+
 	/**
 	 * 模组启停状态
 	 * @param name
@@ -363,7 +362,7 @@ public class ModuleService implements IModuleService, PostLoadAware {
 		}
 		return module.isEnabled();
 	}
-	
+
 	/**
 	 * 模组交易历史
 	 * @param name
@@ -372,7 +371,7 @@ public class ModuleService implements IModuleService, PostLoadAware {
 	public List<ModuleDealRecord> getDealRecords(String name){
 		return moduleRepo.findAllDealRecords(name);
 	}
-	
+
 	/**
 	 * 持仓调整
 	 * @return
@@ -380,39 +379,39 @@ public class ModuleService implements IModuleService, PostLoadAware {
 	public boolean mockTradeAdjustment(String moduleName, MockTradeDescription mockTrade) {
 		IModule module = moduleMgr.get(Identifier.of(moduleName));
 		IContract c = contractMgr.getContract(Identifier.of(mockTrade.getContractId()));
-		ContractField contract = c.contractField();
+		Contract contract = c.contract();
 		IAccount account = module.getAccount(c);
 		String tradingDay = StringUtils.hasText(mockTrade.getTradeDate()) ? mockTrade.getTradeDate() : LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER);
-		
-		TradeField trade = TradeField.newBuilder()
-				.setOriginOrderId(Constants.MOCK_ORDER_ID)
-				.setContract(contract)
-				.setTradeDate(LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
-				.setTradeTime(LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm")) + "MT")
-				.setTradeTimestamp(System.currentTimeMillis())
-				.setTradingDay(tradingDay)
-				.setGatewayId(account.accountId())
-				.setDirection(mockTrade.getDirection())
-				.setOffsetFlag(mockTrade.getOffsetFlag())
-				.setPrice(mockTrade.getPrice())
-				.setVolume(mockTrade.getVolume())
+
+		Trade trade = Trade.builder()
+				.originOrderId(Constants.MOCK_ORDER_ID)
+				.contract(contract)
+				.tradeDate(LocalDate.now())
+				.tradeTime(LocalTime.now())
+				.tradeTimestamp(System.currentTimeMillis())
+				.tradingDay(LocalDate.parse(tradingDay, DateTimeConstant.D_FORMAT_INT_FORMATTER))
+				.gatewayId(account.accountId())
+				.direction(mockTrade.getDirection())
+				.offsetFlag(mockTrade.getOffsetFlag())
+				.price(mockTrade.getPrice())
+				.volume(mockTrade.getVolume())
 				.build();
 		module.onEvent(new NorthstarEvent(NorthstarEventType.TRADE, trade));
 		return true;
 	}
-	
+
 	@Override
 	public void postLoad() {
 		log.info("开始加载模组");
 		for(ModuleDescription md : findAllModules()) {
-			try {				
+			try {
 				ModuleRuntimeDescription mrd = moduleRepo.findRuntimeByName(md.getModuleName());
 				loadModule(md, mrd);
 			} catch (Exception e) {
 				log.warn(String.format("模组 [%s] 加载失败。原因：", md.getModuleName()), e);
 			}
 		}
-		log.info("模组加载完毕");		
+		log.info("模组加载完毕");
 	}
 
 }

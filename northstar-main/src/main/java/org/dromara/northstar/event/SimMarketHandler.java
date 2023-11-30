@@ -11,10 +11,9 @@ import org.dromara.northstar.common.event.GenericEventHandler;
 import org.dromara.northstar.common.event.NorthstarEvent;
 import org.dromara.northstar.common.event.NorthstarEventType;
 import org.dromara.northstar.common.model.Identifier;
+import org.dromara.northstar.common.model.core.Tick;
 import org.dromara.northstar.gateway.MarketGateway;
 import org.dromara.northstar.gateway.sim.trade.SimTradeGateway;
-
-import xyz.redtorch.pb.CoreField.TickField;
 
 public class SimMarketHandler extends AbstractEventHandler implements GenericEventHandler{
 
@@ -37,14 +36,14 @@ public class SimMarketHandler extends AbstractEventHandler implements GenericEve
 	@Override
 	protected void doHandle(NorthstarEvent e) {
 		if(NorthstarEventType.TICK == e.getEvent()) {			
-			TickField tick = (TickField) e.getData();
+			Tick tick = (Tick) e.getData();
 			exec.execute(() -> 
 				gatewayMgr.tradeGateways().stream()
 					.filter(SimTradeGateway.class::isInstance)
 					.map(SimTradeGateway.class::cast)
 					.forEach(gw -> {
 						MarketGateway mktGateway = accountMgr.get(Identifier.of(gw.gatewayId())).getMarketGateway();
-						if(StringUtils.equals(mktGateway.gatewayId(), tick.getGatewayId())) {
+						if(StringUtils.equals(mktGateway.gatewayId(), tick.gatewayId())) {
 							gw.onTick(tick);
 						}
 					})
