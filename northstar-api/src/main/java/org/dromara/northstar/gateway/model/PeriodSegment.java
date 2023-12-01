@@ -2,6 +2,7 @@ package org.dromara.northstar.gateway.model;
 
 import java.time.LocalTime;
 
+@Deprecated
 public class PeriodSegment {
 	
 	private LocalTime start;

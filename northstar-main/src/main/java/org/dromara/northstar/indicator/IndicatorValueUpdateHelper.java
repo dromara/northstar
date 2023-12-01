@@ -25,7 +25,7 @@ public class IndicatorValueUpdateHelper implements MergedBarListener, BarDataAwa
 	
 	@Override
 	public void onMergedBar(Bar bar) {
-		if(!StringUtils.equals(cfg.contract().getUnifiedSymbol(), bar.contract().unifiedSymbol())) {
+		if(!StringUtils.equals(cfg.contract().unifiedSymbol(), bar.contract().unifiedSymbol())) {
 			return;
 		}
 		recursiveUpdate(indicator, bar, false);
@@ -33,7 +33,7 @@ public class IndicatorValueUpdateHelper implements MergedBarListener, BarDataAwa
 
 	@Override
 	public void onBar(Bar bar) {
-		if(!StringUtils.equals(cfg.contract().getUnifiedSymbol(), bar.contract().unifiedSymbol())) {
+		if(!StringUtils.equals(cfg.contract().unifiedSymbol(), bar.contract().unifiedSymbol())) {
 			return;
 		}
 		recursiveUpdate(indicator, bar, true);
@@ -41,7 +41,7 @@ public class IndicatorValueUpdateHelper implements MergedBarListener, BarDataAwa
 
 	@Override
 	public void onTick(Tick tick) {
-		if(!StringUtils.equals(cfg.contract().getUnifiedSymbol(), tick.contract().unifiedSymbol())) {
+		if(!StringUtils.equals(cfg.contract().unifiedSymbol(), tick.contract().unifiedSymbol())) {
 			return;
 		}
 		inbarGen.update(tick).ifPresent(this::onBar);

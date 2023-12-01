@@ -11,6 +11,7 @@ import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
 @AllArgsConstructor
 @Builder
 @Data
+@Deprecated
 public class ContractDefinition {
 
 	/**

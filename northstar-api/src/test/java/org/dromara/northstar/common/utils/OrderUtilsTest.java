@@ -3,7 +3,6 @@ package org.dromara.northstar.common.utils;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.dromara.northstar.common.model.OrderRequest.TradeOperation;
-import org.dromara.northstar.common.utils.OrderUtils;
 import org.junit.jupiter.api.Test;
 
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
