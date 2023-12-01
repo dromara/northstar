@@ -2,9 +2,11 @@ package org.dromara.northstar.common.model.core;
 
 import java.util.regex.Pattern;
 
+import lombok.Builder;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
 
+@Builder
 public record ContractDefinition(
 		/**
 		 * 品种类别

@@ -1,9 +1,14 @@
 package org.dromara.northstar.gateway.playback;
 
+import java.time.LocalTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
-import org.dromara.northstar.gateway.model.ContractDefinition;
+import org.dromara.northstar.common.model.core.ContractDefinition;
+import org.dromara.northstar.common.model.core.TimeSlot;
+import org.dromara.northstar.common.model.core.TradeTimeDefinition;
 import org.springframework.stereotype.Component;
 
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
@@ -112,14 +117,40 @@ public class PlaybackContractDefProvider {
 			build("线材", SHFE, FUT, "wr[0-9]{3,4}@.+", TT4, 0.4)
 		);
 	}
+	
+	private TimeSlot tsNight1 = TimeSlot.builder().start(LocalTime.of(21, 0)).end(LocalTime.of(23, 0)).build();
+	private TimeSlot tsNight2 = TimeSlot.builder().start(LocalTime.of(21, 0)).end(LocalTime.of(1, 0)).build();
+	private TimeSlot tsNight3 = TimeSlot.builder().start(LocalTime.of(21, 0)).end(LocalTime.of(2, 30)).build();
+	
+	private TimeSlot tsDay1 = TimeSlot.builder().start(LocalTime.of(9, 0)).end(LocalTime.of(10, 15)).build();
+	private TimeSlot tsDay2 = TimeSlot.builder().start(LocalTime.of(10, 30)).end(LocalTime.of(11, 30)).build();
+	private TimeSlot tsDay3 = TimeSlot.builder().start(LocalTime.of(9, 30)).end(LocalTime.of(11, 30)).build();
+	
+	private TimeSlot tsNoon1 = TimeSlot.builder().start(LocalTime.of(13, 30)).end(LocalTime.of(15, 00)).build();
+	private TimeSlot tsNoon2 = TimeSlot.builder().start(LocalTime.of(13, 30)).end(LocalTime.of(15, 15)).build();
+	
+	private Map<String, TradeTimeDefinition> timeDefMap = new HashMap<>() {
+		private static final long serialVersionUID = 1L;
+
+		{
+			put(TT1, TradeTimeDefinition.builder().timeSlots(List.of(tsNight1, tsDay1, tsDay2, tsNoon1)).build());
+			put(TT2, TradeTimeDefinition.builder().timeSlots(List.of(tsNight2, tsDay1, tsDay2, tsNoon1)).build());
+			put(TT3, TradeTimeDefinition.builder().timeSlots(List.of(tsNight3, tsDay1, tsDay2, tsNoon1)).build());
+			put(TT4, TradeTimeDefinition.builder().timeSlots(List.of(tsDay1, tsDay2, tsNoon1)).build());
+			put(TT5, TradeTimeDefinition.builder().timeSlots(List.of(tsDay3, tsNoon1)).build());
+			put(TT6, TradeTimeDefinition.builder().timeSlots(List.of(tsDay1, tsDay2, tsNoon2)).build());
+		}
+	};
 
 	private ContractDefinition build(String name, ExchangeEnum exchange, ProductClassEnum productClass, String pattern, String time, double commissionInBP){
+		TradeTimeDefinition tradeTimeDef = timeDefMap.get(time);
 		return ContractDefinition.builder().name(name).exchange(exchange).productClass(productClass)
-				.symbolPattern(Pattern.compile(pattern)).tradeTimeType(time).commissionRate(commissionInBP / 10000D).build();
+				.symbolPattern(Pattern.compile(pattern)).tradeTimeDef(tradeTimeDef).commissionRate(commissionInBP / 10000D).build();
 	}
 	
 	private ContractDefinition build(String name, ExchangeEnum exchange, ProductClassEnum productClass, String pattern, String time, int commissionInCent){
+		TradeTimeDefinition tradeTimeDef = timeDefMap.get(time);
 		return ContractDefinition.builder().name(name).exchange(exchange).productClass(productClass)
-				.symbolPattern(Pattern.compile(pattern)).tradeTimeType(time).commissionFee(commissionInCent / 100D).build();
+				.symbolPattern(Pattern.compile(pattern)).tradeTimeDef(tradeTimeDef).commissionFee(commissionInCent / 100D).build();
 	}
 }

@@ -3,7 +3,6 @@ package org.dromara.northstar.common.model.core;
 import java.util.Objects;
 
 import org.dromara.northstar.common.constant.ChannelType;
-import org.dromara.northstar.gateway.model.ContractDefinition;
 
 import lombok.Builder;
 import xyz.redtorch.pb.CoreEnum.CombinationTypeEnum;
@@ -77,10 +76,10 @@ public record Contract(
 				.setChannelType(channelType.toString())
 				.build();
 	}
-	
+
 	@Override
 	public int hashCode() {
-		return Objects.hash(contractId);
+		return Objects.hash(contractId, fullName, name, symbol, unifiedSymbol);
 	}
 
 	@Override
@@ -92,7 +91,9 @@ public record Contract(
 		if (getClass() != obj.getClass())
 			return false;
 		Contract other = (Contract) obj;
-		return Objects.equals(contractId, other.contractId);
+		return Objects.equals(contractId, other.contractId) && Objects.equals(fullName, other.fullName)
+				&& Objects.equals(name, other.name) && Objects.equals(symbol, other.symbol)
+				&& Objects.equals(unifiedSymbol, other.unifiedSymbol);
 	}
 	
 }

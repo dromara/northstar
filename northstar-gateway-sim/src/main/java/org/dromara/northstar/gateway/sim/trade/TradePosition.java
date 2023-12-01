@@ -50,7 +50,7 @@ public class TradePosition {
 	 * @param tick
 	 */
 	public void onTick(Tick tick) {
-		if(contract.unifiedSymbol().equals(tick.contract().unifiedSymbol())) {
+		if(contract.equals(tick.contract())) {
 			lastTick = tick;
 		}
 	}
@@ -60,7 +60,7 @@ public class TradePosition {
 	 * @param order
 	 */
 	public void onOrder(Order order) {
-		if(!contract.contractId().equals(order.contract().contractId())	//合约不一致 
+		if(!contract.equals(order.contract())	//合约不一致 
 				|| !FieldUtils.isClose(order.offsetFlag())				//不是平仓订单 
 				|| !FieldUtils.isOpposite(dir, order.direction())		//不是反向订单
 				|| order.orderStatus() == OrderStatusEnum.OS_Rejected	//废单
@@ -80,7 +80,7 @@ public class TradePosition {
 	 * @return			返回平仓盈亏
 	 */
 	public List<Deal> onTrade(Trade trade) {
-		if(!contract.contractId().equals(trade.contract().contractId())) {
+		if(!contract.equals(trade.contract())) {
 			throw new IllegalArgumentException(String.format("不是同一个合约。期望：%s，实际：%s", contract.contractId(), trade.contract().contractId()));
 		}
 		if(FieldUtils.isClose(trade.offsetFlag()) && FieldUtils.isOpposite(dir, trade.direction()))	//平仓时，方向要反向

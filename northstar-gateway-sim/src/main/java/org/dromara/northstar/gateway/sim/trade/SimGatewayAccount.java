@@ -14,7 +14,7 @@ import xyz.redtorch.pb.CoreEnum.CurrencyEnum;
 @Slf4j
 public class SimGatewayAccount {
 
-	private String gatewayId;
+	private final String gatewayId;
 	@Getter
 	private PositionManager positionManager;
 	@Setter
@@ -83,8 +83,8 @@ public class SimGatewayAccount {
 	public void onTrade(Trade trade) {
 		// 计算手续费
 		Contract contract = trade.contract();
-		double commission = contract.contractDefinition().getCommissionFee() > 0 
-				? contract.contractDefinition().getCommissionFee() : contract.contractDefinition().getCommissionRate() * trade.price() * trade.contract().multiplier();
+		double commission = contract.contractDefinition().commissionFee() > 0
+				? contract.contractDefinition().commissionFee() : contract.contractDefinition().commissionRate() * trade.price() * trade.contract().multiplier();
 		double sumCommission = trade.volume() * commission;
 		totalCommission += sumCommission;
 		log.info("[{}] {} {} {} {}手 单边交易手续费：{}", gatewayId, trade.tradeDate(), trade.tradeTime(), trade.contract().name(), 

@@ -4,7 +4,7 @@ import org.dromara.northstar.common.IDataSource;
 import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.model.Identifier;
 import org.dromara.northstar.common.model.core.Contract;
-import org.dromara.northstar.gateway.model.ContractDefinition;
+import org.dromara.northstar.common.model.core.ContractDefinition;
 
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreEnum.ProductClassEnum;

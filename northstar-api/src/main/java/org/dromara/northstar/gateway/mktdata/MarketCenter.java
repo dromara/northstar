@@ -16,6 +16,7 @@ import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.event.FastEventEngine;
 import org.dromara.northstar.common.exception.NoSuchElementException;
 import org.dromara.northstar.common.model.Identifier;
+import org.dromara.northstar.common.model.core.ContractDefinition;
 import org.dromara.northstar.common.model.core.Tick;
 import org.dromara.northstar.gateway.IContract;
 import org.dromara.northstar.gateway.IMarketCenter;
@@ -25,7 +26,6 @@ import org.dromara.northstar.gateway.contract.GatewayContract;
 import org.dromara.northstar.gateway.contract.IndexContract;
 import org.dromara.northstar.gateway.contract.OptionChainContract;
 import org.dromara.northstar.gateway.contract.PrimaryContract;
-import org.dromara.northstar.gateway.model.ContractDefinition;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
@@ -69,10 +69,10 @@ public class MarketCenter implements IMarketCenter{
 	@Override
 	public void addDefinitions(List<ContractDefinition> contractDefs) {
 		for(ContractDefinition def : contractDefs) {
-			if(!contractDefTbl.contains(def.getExchange(), def.getProductClass())) {				
-				contractDefTbl.put(def.getExchange(), def.getProductClass(), new ArrayList<>(512));
+			if(!contractDefTbl.contains(def.exchange(), def.productClass())) {				
+				contractDefTbl.put(def.exchange(), def.productClass(), new ArrayList<>(512));
 			}
-			contractDefTbl.get(def.getExchange(), def.getProductClass()).add(def);
+			contractDefTbl.get(def.exchange(), def.productClass()).add(def);
 		}
 	}
 	
@@ -88,8 +88,8 @@ public class MarketCenter implements IMarketCenter{
 			return;
 		}
 		for(ContractDefinition def : defList) {
-			if(def.getSymbolPattern().matcher(ins.identifier().value()).matches()) {
-				log.debug("[{}] 匹配合约定义 [{} {} {}]", ins.identifier().value(), def.getExchange(), def.getProductClass(), def.getSymbolPattern().pattern());
+			if(def.symbolPattern().matcher(ins.identifier().value()).matches()) {
+				log.debug("[{}] 匹配合约定义 [{} {} {}]", ins.identifier().value(), def.exchange(), def.productClass(), def.symbolPattern().pattern());
 				ins.setContractDefinition(def);
 				IContract contract = new GatewayContract(this, feEngine, ins);
 				contractMap.put(ins.identifier(), contract);
@@ -156,7 +156,7 @@ public class MarketCenter implements IMarketCenter{
 	
 	private void aggregateFutureIndexContracts(Map<ContractDefinition, List<IContract>> contractDefMap) {
 		for(Entry<ContractDefinition, List<IContract>> e : contractDefMap.entrySet()) {
-			if(e.getKey().getProductClass() != ProductClassEnum.FUTURES) {
+			if(e.getKey().productClass() != ProductClassEnum.FUTURES) {
 				continue;
 			}
 			IndexContract c = new IndexContract(feEngine, e.getValue());
