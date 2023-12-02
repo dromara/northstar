@@ -2,6 +2,7 @@ package org.dromara.northstar.strategy.example;
 
 import org.dromara.northstar.common.model.DynamicParams;
 import org.dromara.northstar.common.model.Setting;
+import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.indicator.Indicator;
 import org.dromara.northstar.indicator.constant.ValueType;
 import org.dromara.northstar.indicator.helper.HHVIndicator;
@@ -24,8 +25,6 @@ import org.dromara.northstar.strategy.AbstractStrategy;
 import org.dromara.northstar.strategy.StrategicComponent;
 import org.dromara.northstar.strategy.TradeStrategy;
 
-import xyz.redtorch.pb.CoreField.ContractField;
-
 /**
  * 本策略没有交易逻辑，仅用于做指标演示
  * @author KevinHuangwl
@@ -41,7 +40,7 @@ public class IndicatorDemoStrategy extends AbstractStrategy	// 为了简化代�
 	
 	@Override
 	protected void initIndicators() {
-		ContractField c = ctx.getContract(params.indicatorSymbol);
+		Contract c = ctx.getContract(params.indicatorSymbol);
 		//######## 以下写法仅用于监控台演示，因此没有赋值给类属性，同时为了简化参数也直接写死 ########//
 		// 指标的难度级数：基础（单值指标）
 		ctx.registerIndicator(new MAIndicator(makeConfig("MA5"), 5));	// MA5
@@ -80,7 +79,7 @@ public class IndicatorDemoStrategy extends AbstractStrategy	// 为了简化代�
 	}
 	
 	private Configuration makeConfig(String name) {
-		ContractField c = ctx.getContract(params.indicatorSymbol);
+		Contract c = ctx.getContract(params.indicatorSymbol);
 		return Configuration.builder().contract(c).indicatorName(name).numOfUnits(ctx.numOfMinPerMergedBar()).build();
 	}
 	

@@ -5,32 +5,41 @@ import static org.assertj.core.api.Assertions.offset;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDate;
+
+import org.dromara.northstar.common.model.core.Contract;
+import org.dromara.northstar.common.model.core.Trade;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import test.common.TestFieldFactory;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
-import xyz.redtorch.pb.CoreField.TradeField;
 
 class SimGatewayAccountTest {
-	
-	SimGatewayAccount account = new SimGatewayAccount("testAccount");
 
-	TestFieldFactory factory = new TestFieldFactory("testGateway");
-	TradeField openTrade = factory.makeTradeField("rb2205", 5000, 2, DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open, "20220404");
-	TradeField closeTrade = factory.makeTradeField("rb2205", 5200, 2, DirectionEnum.D_Sell, OffsetFlagEnum.OF_Close);
-	
+	SimGatewayAccount account = new SimGatewayAccount("testAccount");
+	Contract c1 = Contract.builder().symbol("rb2205").multiplier(10).longMarginRatio(0.08).shortMarginRatio(0.08).build();
+
+	Trade openTrade = Trade.builder()
+			.contract(c1).price(5000).volume(2).direction(DirectionEnum.D_Buy)
+			.tradingDay(LocalDate.now().minusDays(1))
+			.offsetFlag(OffsetFlagEnum.OF_Open).build();
+
+	Trade closeTrade = Trade.builder()
+			.contract(c1).price(5200).volume(2).direction(DirectionEnum.D_Sell)
+			.tradingDay(LocalDate.now())
+			.offsetFlag(OffsetFlagEnum.OF_Close).build();
+
 	@BeforeEach
 	void prepare() {
 		OrderReqManager orderReqMgr = mock(OrderReqManager.class);
 		when(orderReqMgr.totalFrozenAmount()).thenReturn(0D);
 		account.setOrderReqMgr(orderReqMgr);
 	}
-	
+
 	@Test
 	void testAccountField() {
-		assertThat(account.accountField()).isNotNull();
+		assertThat(account.account()).isNotNull();
 	}
 
 	@Test
@@ -55,7 +64,7 @@ class SimGatewayAccountTest {
 	@Test
 	void testOnTrade() {
 		account.onTrade(openTrade);
-		
+
 		assertThat(account.balance()).isCloseTo(-10, offset(1e-4));
 	}
 
@@ -69,14 +78,14 @@ class SimGatewayAccountTest {
 	@Test
 	void testOnDeposit() {
 		account.onDeposit(10);
-		
+
 		assertThat(account.balance()).isCloseTo(10, offset(1e-4));
 	}
 
 	@Test
 	void testOnWithdraw() {
 		account.onWithdraw(10);
-		
+
 		assertThat(account.balance()).isCloseTo(-10, offset(1e-4));
 	}
 

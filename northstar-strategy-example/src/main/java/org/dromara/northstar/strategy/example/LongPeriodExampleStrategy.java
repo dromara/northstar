@@ -4,14 +4,13 @@ import java.util.Set;
 
 import org.dromara.northstar.common.model.DynamicParams;
 import org.dromara.northstar.common.model.Setting;
+import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.indicator.constant.PeriodUnit;
 import org.dromara.northstar.indicator.helper.SimpleValueIndicator;
 import org.dromara.northstar.indicator.model.Configuration;
 import org.dromara.northstar.strategy.AbstractStrategy;
 import org.dromara.northstar.strategy.StrategicComponent;
 import org.dromara.northstar.strategy.TradeStrategy;
-
-import xyz.redtorch.pb.CoreField.ContractField;
 
 /**
  * 大周期指标演示
@@ -33,7 +32,7 @@ public class LongPeriodExampleStrategy extends AbstractStrategy implements Trade
 			throw new IllegalArgumentException("只能设置60分钟或120分钟作为K线周期");
 		}
 		
-		ContractField c = ctx.getContract(params.indicatorSymbol);
+		Contract c = ctx.getContract(params.indicatorSymbol);
 		ctx.registerIndicator(new SimpleValueIndicator(Configuration.builder().indicatorName("C").contract(c).period(PeriodUnit.DAY).build()));
 		ctx.registerIndicator(new SimpleValueIndicator(Configuration.builder().indicatorName("C").numOfUnits(2).contract(c).period(PeriodUnit.DAY).build()));
 		ctx.registerIndicator(new SimpleValueIndicator(Configuration.builder().indicatorName("C").contract(c).period(PeriodUnit.WEEK).build()));

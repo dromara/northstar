@@ -1,6 +1,7 @@
 package org.dromara.northstar.gateway.sim.trade;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -10,11 +11,13 @@ import java.util.List;
 import org.dromara.northstar.common.constant.ConnectionState;
 import org.dromara.northstar.common.event.FastEventEngine;
 import org.dromara.northstar.common.model.GatewayDescription;
+import org.dromara.northstar.common.model.core.Contract;
+import org.dromara.northstar.common.model.core.ContractDefinition;
+import org.dromara.northstar.common.model.core.SubmitOrderReq;
 import org.dromara.northstar.data.ISimAccountRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import test.common.TestFieldFactory;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 
@@ -22,7 +25,14 @@ class SimTradeGatewayLocalTest {
 	
 	private SimTradeGatewayLocal gateway;
 	
-	private TestFieldFactory factory = new TestFieldFactory("test");
+	Contract c1 = Contract.builder().symbol("rb2205@SHFE").multiplier(10).longMarginRatio(0.08).shortMarginRatio(0.08)
+			.contractDefinition(ContractDefinition.builder().commissionFee(2).build()).build();
+	SubmitOrderReq submitOrder = SubmitOrderReq.builder()
+			.contract(c1)
+			.direction(DirectionEnum.D_Buy)
+			.offsetFlag(OffsetFlagEnum.OF_Close)
+			.volume(1)
+			.build();
 	
 	@BeforeEach
 	void prepare() {
@@ -50,13 +60,18 @@ class SimTradeGatewayLocalTest {
 	@Test
 	void testSubmitOrder() {
 		gateway.connect();
-		gateway.submitOrder(factory.makeOrderReq("rb2210", DirectionEnum.D_Buy, OffsetFlagEnum.OF_Close, 1, 0, 0));
+		assertDoesNotThrow(() -> {			
+			gateway.submitOrder(submitOrder);
+		});
 	}
 
 	@Test
 	void testCancelOrder() {
 		gateway.connect();
-		gateway.cancelOrder(factory.makeCancelReq(factory.makeOrderReq("rb2210", DirectionEnum.D_Buy, OffsetFlagEnum.OF_Close, 1, 0, 0)));
+		String id = gateway.submitOrder(submitOrder);
+		assertDoesNotThrow(() -> {			
+			gateway.cancelOrder(id);
+		});
 	}
 
 	@Test

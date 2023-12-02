@@ -21,11 +21,11 @@ public record ContractDefinition(
 		 */
 		Pattern symbolPattern,
 		/**
-		 * 手续费
+		 * 手续费（单位：元）
 		 */
 		double commissionFee,
 		/**
-		 * 手续费率（万分比）
+		 * 手续费率
 		 */
 		double commissionRate,
 		/**
