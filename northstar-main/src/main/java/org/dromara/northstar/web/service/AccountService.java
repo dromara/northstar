@@ -22,13 +22,10 @@ import org.dromara.northstar.gateway.IContractManager;
 import lombok.extern.slf4j.Slf4j;
 import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
-import xyz.redtorch.pb.CoreEnum.ForceCloseReasonEnum;
-import xyz.redtorch.pb.CoreEnum.HedgeFlagEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreEnum.OrderPriceTypeEnum;
 import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
 import xyz.redtorch.pb.CoreEnum.TimeConditionEnum;
-import xyz.redtorch.pb.CoreEnum.VolumeConditionEnum;
 
 /**
  * 账户服务
@@ -82,23 +79,6 @@ public class AccountService {
 		}
 		DirectionEnum orderDir = OrderUtils.resolveDirection(orderReq.getTradeOpr());
 		double price = Double.parseDouble(orderReq.getPrice());
-//		return SubmitOrderReq.newBuilder()
-//				.setOriginOrderId(UUID.randomUUID().toString())
-//				.setContract(contract)
-//				.setPrice(price)
-//				.setStopPrice(StringUtils.isNotBlank(orderReq.getStopPrice()) ? Double.parseDouble(orderReq.getStopPrice()) : 0D)
-//				.setOrderPriceType(price <= 0 ? OrderPriceTypeEnum.OPT_AnyPrice : OrderPriceTypeEnum.OPT_LimitPrice)
-//				.setDirection(orderDir)
-//				.setVolume(orderReq.getVolume())
-//				.setOffsetFlag(OffsetFlagEnum.OF_Open)
-//				.setHedgeFlag(HedgeFlagEnum.HF_Speculation)
-//				.setTimeCondition(TimeConditionEnum.TC_GFD)
-//				.setVolumeCondition(VolumeConditionEnum.VC_AV)
-//				.setForceCloseReason(ForceCloseReasonEnum.FCR_NotForceClose)
-//				.setContingentCondition(ContingentConditionEnum.CC_Immediately)
-//				.setMinVolume(1)
-//				.setGatewayId(orderReq.getGatewayId())
-//				.build();
 		return SubmitOrderReq.builder()
 				.originOrderId(UUID.randomUUID().toString())
 				.contract(contract)
@@ -108,10 +88,7 @@ public class AccountService {
 				.direction(orderDir)
 				.volume(orderReq.getVolume())
 				.offsetFlag(OffsetFlagEnum.OF_Open)
-				.hedgeFlag(HedgeFlagEnum.HF_Speculation)
 				.timeCondition(TimeConditionEnum.TC_GFD)
-				.volumeCondition(VolumeConditionEnum.VC_AV)
-				.forceCloseReason(ForceCloseReasonEnum.FCR_NotForceClose)
 				.contingentCondition(ContingentConditionEnum.CC_Immediately)
 				.minVolume(1)
 				.gatewayId(orderReq.getGatewayId())
@@ -126,7 +103,7 @@ public class AccountService {
 		DirectionEnum orderDir = OrderUtils.resolveDirection(orderReq.getTradeOpr());
 		PositionDirectionEnum targetPosDir = OrderUtils.getClosingDirection(orderDir);
 		TradeAccount account = accountMgr.get(Identifier.of(orderReq.getGatewayId()));
-		Position pos = account.getPosition(targetPosDir, contract.unifiedSymbol())
+		Position pos = account.getPosition(targetPosDir, contract)
 				.orElseThrow(() -> new NoSuchElementException(String.format("不存在 [%s] 合约 [%s] 持仓", contract.unifiedSymbol(), targetPosDir)));
 		int totalAvailable = pos.position() - pos.frozen();
 		int tdAvailable = pos.tdPosition() - pos.tdFrozen();
@@ -143,10 +120,7 @@ public class AccountService {
 				.stopPrice(StringUtils.isNotBlank(orderReq.getStopPrice()) ? Double.parseDouble(orderReq.getStopPrice()) : 0D)
 				.orderPriceType(price <= 0 ? OrderPriceTypeEnum.OPT_AnyPrice : OrderPriceTypeEnum.OPT_LimitPrice)
 				.direction(orderDir)
-				.hedgeFlag(HedgeFlagEnum.HF_Speculation)
 				.timeCondition(TimeConditionEnum.TC_GFD)
-				.volumeCondition(VolumeConditionEnum.VC_AV)
-				.forceCloseReason(ForceCloseReasonEnum.FCR_NotForceClose)
 				.contingentCondition(ContingentConditionEnum.CC_Immediately)
 				.minVolume(1)
 				.gatewayId(orderReq.getGatewayId())

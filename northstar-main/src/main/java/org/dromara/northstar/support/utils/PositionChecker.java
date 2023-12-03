@@ -36,7 +36,6 @@ public class PositionChecker {
 		case PD_Short -> DirectionEnum.D_Sell;
 		default -> throw new IllegalArgumentException("Unexpected value: " + position.positionDirection());
 		};
-		String unifiedSymbol = position.contract().unifiedSymbol();
 		List<IModule> modules = moduleMgr.allModules()
 									.stream()
 									.filter(m -> hasLinkageBetweenModuleAndPosition(m, position))
@@ -44,16 +43,16 @@ public class PositionChecker {
 											.stream()
 											.flatMap(mad -> mad.getBindedContracts().stream())
 											.map(ContractSimpleInfo::getUnifiedSymbol)
-											.collect(Collectors.toSet()).contains(unifiedSymbol))
+											.collect(Collectors.toSet()).contains(position.contract().unifiedSymbol()))
 									.toList();
 		int totalPosition = modules.stream()
-									.mapToInt(m -> m.getModuleContext().getModuleAccount().getNonclosedPosition(unifiedSymbol, direction))
+									.mapToInt(m -> m.getModuleContext().getModuleAccount().getNonclosedPosition(position.contract(), direction))
 									.sum();
 		if(totalPosition != position.position()) {
 			log.warn("{} {}头 实际持仓数：{}", position.contract().name(), FieldUtils.chn(direction), position.position());
 			modules.forEach(m -> 
 				log.warn("模组 [{}] {}头 持仓为：{}", m.getName(), FieldUtils.chn(direction), 
-						m.getModuleContext().getModuleAccount().getNonclosedPosition(position.contract().unifiedSymbol(), direction))
+						m.getModuleContext().getModuleAccount().getNonclosedPosition(position.contract(), direction))
 			);
 			throw new IllegalStateException(String.format("[%s %s %s头] 逻辑持仓与实际持仓不一致。逻辑持仓数：%d，实际持仓数：%d", 
 					position.gatewayId(), position.contract().name(), FieldUtils.chn(direction), totalPosition, position.position()));

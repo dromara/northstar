@@ -9,7 +9,12 @@ import java.util.Queue;
 import java.util.UUID;
 
 import org.dromara.northstar.common.model.GatewayDescription;
-import org.dromara.northstar.common.model.core.*;
+import org.dromara.northstar.common.model.core.Account;
+import org.dromara.northstar.common.model.core.Contract;
+import org.dromara.northstar.common.model.core.Order;
+import org.dromara.northstar.common.model.core.Position;
+import org.dromara.northstar.common.model.core.SubmitOrderReq;
+import org.dromara.northstar.common.model.core.Trade;
 import org.dromara.northstar.common.utils.OrderUtils;
 import org.dromara.northstar.gateway.MarketGateway;
 import org.dromara.northstar.gateway.TradeGateway;
@@ -38,7 +43,7 @@ public class TradeAccount implements IAccount {
 	private GatewayDescription gatewayDescription;
 	
 	/* 持仓信息 */
-	private Table<PositionDirectionEnum, String, Position> posTable = HashBasedTable.create();
+	private Table<PositionDirectionEnum, Contract, Position> posTable = HashBasedTable.create();
 	
 	/* 账户信息 */
 	private Account accountField;
@@ -134,7 +139,7 @@ public class TradeAccount implements IAccount {
 
 	@Override
 	public synchronized void onPosition(Position position) {
-		posTable.put(position.positionDirection(), position.contract().unifiedSymbol(), position);
+		posTable.put(position.positionDirection(), position.contract(), position);
 	}
 
 	@Override
@@ -143,9 +148,9 @@ public class TradeAccount implements IAccount {
 	}
 
 	@Override
-	public synchronized int netPosition(String unifiedSymbol) {
-		int longPosition = posTable.contains(PositionDirectionEnum.PD_Long, unifiedSymbol) ? posTable.get(PositionDirectionEnum.PD_Long, unifiedSymbol).position() : 0;
-		int shortPosition = posTable.contains(PositionDirectionEnum.PD_Short, unifiedSymbol) ? posTable.get(PositionDirectionEnum.PD_Short, unifiedSymbol).position() : 0;
+	public synchronized int netPosition(Contract contract) {
+		int longPosition = posTable.contains(PositionDirectionEnum.PD_Long, contract) ? posTable.get(PositionDirectionEnum.PD_Long, contract).position() : 0;
+		int shortPosition = posTable.contains(PositionDirectionEnum.PD_Short, contract) ? posTable.get(PositionDirectionEnum.PD_Short, contract).position() : 0;
 		return longPosition - shortPosition;
 	}
 
@@ -159,11 +164,11 @@ public class TradeAccount implements IAccount {
 		return tradeGateway;
 	}
 
-	public synchronized Optional<Position> getPosition(PositionDirectionEnum posDirection, String unifiedSymbol) {
-		if(!posTable.contains(posDirection, unifiedSymbol)) {
+	public synchronized Optional<Position> getPosition(PositionDirectionEnum posDirection, Contract contract) {
+		if(!posTable.contains(posDirection, contract)) {
 			return Optional.empty();
 		}
-		return Optional.of(posTable.get(posDirection, unifiedSymbol));
+		return Optional.of(posTable.get(posDirection, contract));
 	}
 
 }

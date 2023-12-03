@@ -125,8 +125,8 @@ public class ModuleCheckingTask implements InitializingBean {
 							.contract(contract.contract())
 							.positionDirection(PositionDirectionEnum.PD_Short)
 							.build();
-					account.getPosition(PositionDirectionEnum.PD_Long, csi.getUnifiedSymbol()).ifPresentOrElse(this::doCheckPosition, () -> this.doCheckPosition(longPosPlaceholder));
-					account.getPosition(PositionDirectionEnum.PD_Short, csi.getUnifiedSymbol()).ifPresentOrElse(this::doCheckPosition, () -> this.doCheckPosition(shortPosPlaceholder));
+					account.getPosition(PositionDirectionEnum.PD_Long, contract.contract()).ifPresentOrElse(this::doCheckPosition, () -> this.doCheckPosition(longPosPlaceholder));
+					account.getPosition(PositionDirectionEnum.PD_Short, contract.contract()).ifPresentOrElse(this::doCheckPosition, () -> this.doCheckPosition(shortPosPlaceholder));
 				}
 			}
 		});

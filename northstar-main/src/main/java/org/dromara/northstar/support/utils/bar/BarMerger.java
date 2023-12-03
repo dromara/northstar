@@ -1,21 +1,21 @@
 package org.dromara.northstar.support.utils.bar;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
-import java.util.Objects;
-import java.util.function.BiConsumer;
+import java.time.ZoneOffset;
+import java.util.*;
 
-import org.apache.commons.lang3.StringUtils;
 import org.dromara.northstar.common.BarDataAware;
-import org.dromara.northstar.common.constant.DateTimeConstant;
-import org.dromara.northstar.gateway.IContract;
-import org.dromara.northstar.gateway.time.BarClock;
-import org.dromara.northstar.gateway.time.PeriodHelper;
+import org.dromara.northstar.common.model.core.Bar;
+import org.dromara.northstar.common.model.core.Contract;
+import org.dromara.northstar.common.model.core.TimeSlot;
+import org.dromara.northstar.common.utils.DateTimeUtils;
+import org.dromara.northstar.strategy.MergedBarListener;
 
 import lombok.extern.slf4j.Slf4j;
-import xyz.redtorch.pb.CoreField.BarField;
 
 /**
  * 分钟线合成器
@@ -25,100 +25,191 @@ import xyz.redtorch.pb.CoreField.BarField;
 @Slf4j
 public class BarMerger implements BarDataAware{
 	
-	protected BiConsumer<BarMerger, BarField> callback;
-	
-	protected IContract contract;
-	
-	protected BarField.Builder barBuilder;
+	protected final Contract contract;
 	
 	protected long curBarTimestamp;
 	
-	protected final String unifiedSymbol;
-	
-	private PeriodHelper phelper;
-	
 	private final int numOfMinPerBar;
 	
-	private final BarClock clock;
+	private LocalDateTime cutoffDateTime;
 	
-	public BarMerger(int numOfMinPerBar, IContract contract, BiConsumer<BarMerger, BarField> callback) {
-		this.callback = callback;
+	protected Bar protoBar;
+	
+	protected final Set<MergedBarListener> listeners = new HashSet<>();
+	
+	/**
+	 * 把分钟时间对齐，并保存一份映射表，以快速得到任意时刻的K线结算时间
+	 */
+	protected final Map<LocalTime, LocalTime> barTimeMap;
+	
+	public BarMerger(int numOfMinPerBar, Contract contract) { 
 		this.contract = contract;
 		this.numOfMinPerBar = numOfMinPerBar;
-		this.unifiedSymbol = contract.contractField().getUnifiedSymbol();
-		this.phelper = new PeriodHelper(numOfMinPerBar, contract.tradeTimeDefinition());
-		this.clock = new BarClock(phelper.getRunningBaseTimeFrame());
+		this.barTimeMap = genBarTimeMap();
+	}
+
+	// 该方法用于生成分钟线时间对齐的映射表
+	// 先从合约定义中获取交易时间段，然后每分钟取整点分钟时间，作为key，对应的K线结算时间作为value
+	// 例如：交易时间段为 09:00-11:30, 13:30-15:00
+	// 假设numOfMinPerBar为5，则生成的映射表为：09:00 -> 09:05, 09:01 -> 09:05, 09:02 -> 09:05, 09:03 -> 09:05, 09:04 -> 09:05, 09:05 -> 09:05, 09:06 -> 09:10... 
+	private Map<LocalTime, LocalTime> genBarTimeMap() {
+		Map<LocalTime, LocalTime> tMap = new LinkedHashMap<>();
+		List<LocalTime> valueTimeList = new ArrayList<>();
+		LocalDate dummyDate = LocalDate.now();	// 引入日期解决跨日计算问题
+		LocalDateTime ldtStart = null;
+		LocalDateTime ldtEnd = null;
+		int count = 0;
+		// 先根据交易时间段生成K线时间点列表
+		for(TimeSlot tslot : contract.contractDefinition().tradeTimeDef().timeSlots()) {
+			boolean overnight = !tslot.end().isAfter(tslot.start()); 
+			ldtStart = LocalDateTime.of(dummyDate, tslot.start());
+			ldtEnd = LocalDateTime.of(overnight ? dummyDate.plusDays(1) : dummyDate, tslot.end());
+			LocalDateTime ldt = ldtStart;
+			while(!ldt.isAfter(ldtEnd)) {
+				if(count == numOfMinPerBar || count > 0 && ldt.toLocalTime().equals(endOfTradeDateTime())) {					
+					valueTimeList.add(DateTimeUtils.fromCacheTime(ldt.toLocalTime()));
+					count = 0;
+				}
+				ldt = ldt.plusMinutes(1);
+				if(!ldt.isAfter(ldtEnd)) {					
+					count++;
+				}
+			}
+		}
+		// 再一次循环，生成映射表
+		int i = 0;
+		LocalDateTime preldt = null;
+		for(TimeSlot tslot : contract.contractDefinition().tradeTimeDef().timeSlots()) {
+			boolean overnight = !tslot.end().isAfter(tslot.start()); 
+			ldtStart = LocalDateTime.of(dummyDate, tslot.start());
+			ldtEnd = LocalDateTime.of(overnight ? dummyDate.plusDays(1) : dummyDate, tslot.end());
+			LocalDateTime ldt = ldtStart;
+			while(!ldt.isAfter(ldtEnd)) {
+				LocalTime barTime = valueTimeList.get(i);
+				LocalDateTime barDateTime = LocalDateTime.of(ldt.toLocalDate(), barTime);
+				if(Objects.nonNull(preldt) && preldt.isAfter(barDateTime)) {
+					barDateTime = LocalDateTime.of(ldtEnd.toLocalDate(), barTime);
+				}
+				if(!ldt.isAfter(barDateTime)) {
+					preldt = barDateTime;
+					LocalTime t = DateTimeUtils.fromCacheTime(ldt.toLocalTime());
+					tMap.put(t, barTime);
+					if(t.equals(barTime)) {
+						i++;
+					}
+				}
+				ldt = ldt.plusMinutes(1);
+			}
+		}
+		return tMap;
+	}
+
+	private LocalTime endOfTradeDateTime() {
+		List<TimeSlot> timeSlots = contract.contractDefinition().tradeTimeDef().timeSlots();
+		return timeSlots.get(timeSlots.size() - 1).end();
+	}
+
+	public synchronized void addListener(MergedBarListener listener) {
+		listeners.add(listener);
+	}
+	
+	protected LocalDateTime toCutoffDateTime(Bar bar) {
+		LocalTime keyTime = bar.actionTime().withSecond(0).withNano(0);
+		if(!barTimeMap.containsKey(keyTime)) {
+			throw new IllegalStateException(String.format("[%s] 没有对应的K线时间", bar.actionTime()));
+		}
+		LocalTime cutoffTime = barTimeMap.get(keyTime);
+		if(cutoffTime.isBefore(bar.actionTime())) {
+			return LocalDateTime.of(bar.actionDay().plusDays(1), cutoffTime);
+		}
+		return LocalDateTime.of(bar.actionDay(), cutoffTime);
 	}
 	
 	@Override
-	public synchronized void onBar(BarField bar) {
-		if(!StringUtils.equals(bar.getUnifiedSymbol(), unifiedSymbol)) {
-			return;
-		}
-		LocalTime barTime = LocalTime.parse(bar.getActionTime(), DateTimeConstant.T_FORMAT_FORMATTER);
-		if(bar.getActionTimestamp() < curBarTimestamp) {
+	public synchronized void onBar(Bar bar) {
+		if(!contract.equals(bar.contract()) || !barTimeMap.containsKey(bar.actionTime())) {
 			if(log.isTraceEnabled()) {				
-				log.trace("当前计算时间：{}", LocalDateTime.ofInstant(Instant.ofEpochMilli(curBarTimestamp), ZoneId.systemDefault()));
-				log.trace("忽略过时数据：{} {} {} {}", bar.getUnifiedSymbol(), bar.getActionDay(), bar.getActionTime(), bar.getActionTimestamp());
+				log.trace("[{}] K线合成器忽略Bar数据 [{}]", contract.unifiedSymbol(), String.format("%s:%s:%s", bar.contract().unifiedSymbol(), bar.actionDay(), bar.actionTime()));
 			}
 			return;
 		}
-		curBarTimestamp = bar.getActionTimestamp();
+		LocalDateTime barDateTime = LocalDateTime.of(bar.actionDay(), bar.actionTime());
+		if(Objects.isNull(cutoffDateTime)) {
+			cutoffDateTime = toCutoffDateTime(bar);
+		}
 		
-		if(numOfMinPerBar <= 1) {
-			callback.accept(this, bar);
+		if(bar.actionTimestamp() < curBarTimestamp) {
+			if(log.isTraceEnabled()) {				
+				log.trace("当前计算时间：{}", LocalDateTime.ofInstant(Instant.ofEpochMilli(curBarTimestamp), ZoneId.systemDefault()));
+				log.trace("忽略过时数据：{} {} {} {}", bar.contract().unifiedSymbol(), bar.actionDay(), bar.actionTime(), bar.actionTimestamp());
+			}
+			return;
+		}
+		curBarTimestamp = bar.actionTimestamp();
+		
+		if(Objects.nonNull(protoBar) && !barDateTime.isAfter(cutoffDateTime)) {
+			doMerge(bar);
+		}
+		
+		if(Objects.nonNull(protoBar) && !barDateTime.isBefore(cutoffDateTime)) {
+			doGenerate();
 			return;
 		}
 		
-		if(clock.adjustTime(barTime) && Objects.nonNull(barBuilder)) {
-			doGenerate();
-		}
-		
-		if(Objects.isNull(barBuilder)) {
-			barBuilder = bar.toBuilder();
-			return;
-		}
-		
-		doMerge(bar);
-		
-		if(barTime.equals(clock.currentTimeBucket())) {
-			doGenerate();
-			clock.next();
+		if(Objects.isNull(protoBar)) {
+			cutoffDateTime = toCutoffDateTime(bar);
+			protoBar = Bar.builder()
+					.gatewayId(bar.gatewayId())
+					.contract(contract)
+					.actionDay(cutoffDateTime.toLocalDate())
+					.actionTime(cutoffDateTime.toLocalTime())
+					.actionTimestamp(cutoffDateTime.toInstant(ZoneOffset.ofHours(8)).toEpochMilli())
+					.tradingDay(bar.tradingDay())
+					.channelType(bar.channelType())
+					.openPrice(bar.openPrice())
+					.highPrice(bar.highPrice())
+					.lowPrice(bar.lowPrice())
+					.closePrice(bar.closePrice())
+					.volumeDelta(bar.volumeDelta())
+					.openInterestDelta(bar.openInterestDelta())
+					.turnoverDelta(bar.turnoverDelta())
+					.preClosePrice(bar.preClosePrice())
+					.preOpenInterest(bar.preOpenInterest())
+					.preSettlePrice(bar.preSettlePrice())
+					.build();
+			
+			if(barDateTime.isEqual(cutoffDateTime)){
+				doGenerate();
+			}
 		}
 	}
 	
 	protected void doGenerate() {
-		callback.accept(this, barBuilder.build());
-		barBuilder = null;
+		listeners.forEach(listener -> listener.onMergedBar(protoBar));
+		protoBar = null;
 	}
 	
-	protected void doMerge(BarField bar) {
-		double high = barBuilder.getHighPrice();
-		double low = barBuilder.getLowPrice();
-		long vol = barBuilder.getVolume();
-		long volumeDelta = barBuilder.getVolumeDelta();
-		long numOfTrade = barBuilder.getNumTrades();
-		long numOfTradeDelta = barBuilder.getNumTradesDelta();
-		double turnover = barBuilder.getTurnover();
-		double turnoverDelta = barBuilder.getTurnoverDelta();
-		double openInterestDelta = barBuilder.getOpenInterestDelta();
+	protected void doMerge(Bar bar) {
+		double high = protoBar.highPrice();
+		double low = protoBar.lowPrice();
+		long volumeDelta = protoBar.volumeDelta();
+		double turnoverDelta = protoBar.turnoverDelta();
+		double openInterestDelta = protoBar.openInterestDelta();
 		
-		barBuilder
-			.setActionDay(bar.getActionDay())
-			.setActionTime(bar.getActionTime())
-			.setActionTimestamp(bar.getActionTimestamp())
-			.setTradingDay(bar.getTradingDay())
-			.setClosePrice(bar.getClosePrice())
-			.setHighPrice(Math.max(high, bar.getHighPrice()))
-			.setLowPrice(Math.min(low, bar.getLowPrice()))
-			.setVolume(vol + bar.getVolume())
-			.setVolumeDelta(volumeDelta + bar.getVolumeDelta())
-			.setOpenInterest(bar.getOpenInterest())
-			.setOpenInterestDelta(openInterestDelta + bar.getOpenInterestDelta())
-			.setNumTrades(numOfTrade + bar.getNumTrades())
-			.setNumTradesDelta(numOfTradeDelta + bar.getNumTradesDelta())
-			.setTurnover(turnover + bar.getTurnover())
-			.setTurnoverDelta(turnoverDelta + bar.getTurnoverDelta());
+        protoBar = protoBar.toBuilder()
+        		.actionDay(bar.actionDay())
+        		.actionTime(bar.actionTime())
+        		.actionTimestamp(bar.actionTimestamp())
+				.closePrice(bar.closePrice())
+				.highPrice(Math.max(high, bar.highPrice()))
+				.lowPrice(Math.min(low, bar.lowPrice()))
+				.volume(bar.volume())
+				.volumeDelta(volumeDelta + bar.volumeDelta())
+				.openInterest(bar.openInterest())
+				.openInterestDelta(openInterestDelta + bar.openInterestDelta())
+				.turnover(bar.turnover())
+				.turnoverDelta(turnoverDelta + bar.turnoverDelta())
+				.build();		
 	}
-
+	
 }
