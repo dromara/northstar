@@ -74,8 +74,6 @@ class TradeModuleTest {
 
     @Test
     void getAccount() {
-        // 添加您的测试用例，根据您的实际需求进行测试。
-        // 这可能包括创建 ContractField 对象并根据预期结果来验证 getAccount() 方法的返回值。
     }
 
     @Test

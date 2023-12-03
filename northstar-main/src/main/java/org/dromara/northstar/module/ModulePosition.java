@@ -76,7 +76,7 @@ public class ModulePosition implements TickDataAware, TransactionAware{
 		if(!contract.equals(tick.contract())) {
 			return;
 		}
-		if(!tradingDay.equals(tick.tradingDay())) {
+		if(Objects.isNull(tradingDay) || !tradingDay.equals(tick.tradingDay())) {
 			pendingOrderMap.clear();
 			tradingDay = tick.tradingDay();
 		}

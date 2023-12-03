@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.BiConsumer;
 
@@ -129,7 +130,7 @@ public class ModuleAccount implements IModuleAccount{
 	
 	@Override
 	public void onTick(Tick tick) {
-		if(!tradingDay.isEqual(tick.tradingDay())) {
+		if(Objects.isNull(tradingDay) || !tradingDay.isEqual(tick.tradingDay())) {
 			tradingDay = tick.tradingDay();
 			tradeDayPreset();
 		}

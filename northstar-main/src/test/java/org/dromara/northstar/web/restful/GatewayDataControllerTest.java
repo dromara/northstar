@@ -12,6 +12,7 @@ import org.dromara.northstar.NorthstarApplication;
 import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.model.GatewayDescription;
 import org.dromara.northstar.common.model.NsUser;
+import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.data.IGatewayRepository;
 import org.dromara.northstar.event.BroadcastHandler;
 import org.dromara.northstar.gateway.IContract;
@@ -33,7 +34,6 @@ import com.corundumstudio.socketio.SocketIOServer;
 
 import cn.hutool.crypto.digest.MD5;
 import net.sf.ehcache.CacheManager;
-import xyz.redtorch.pb.CoreField.ContractField;
 
 @SpringBootTest(classes = NorthstarApplication.class, value="spring.profiles.active=unittest")
 @AutoConfigureMockMvc
@@ -63,7 +63,7 @@ class GatewayDataControllerTest {
 	public void setUp() throws Exception {
 		IContract contract = mock(IContract.class);
 		when(contractMgr.getContract(any(), anyString())).thenReturn(contract);
-		when(contract.contract()).thenReturn(ContractField.newBuilder().setChannelType("PLAYBACK").setUnifiedSymbol("rb2205@SHFE@FUTURES").build());
+		when(contract.contract()).thenReturn(Contract.builder().channelType(ChannelType.PLAYBACK).unifiedSymbol("rb2205@SHFE@FUTURES").build());
 		
 		when(gatewayRepo.findById(anyString())).thenReturn(GatewayDescription.builder().channelType(ChannelType.PLAYBACK).build());
 		

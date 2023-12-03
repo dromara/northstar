@@ -3,72 +3,69 @@ package org.dromara.northstar.module;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
+import org.dromara.northstar.common.model.core.Contract;
+import org.dromara.northstar.common.model.core.Tick;
 import org.dromara.northstar.strategy.IModuleContext;
 import org.junit.jupiter.api.Test;
 
-import test.common.TestFieldFactory;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
-import xyz.redtorch.pb.CoreField.ContractField;
-import xyz.redtorch.pb.CoreField.TickField;
 
 class DisposablePriceListenerTest {
-	
-	TestFieldFactory factory = new TestFieldFactory("testGateway");
-	
-	ContractField contract = factory.makeContract("rb2210"); 
+
+	Contract contract = Contract.builder().unifiedSymbol("rb2210").multiplier(10).priceTick(1).build();
 
 	IModuleContext ctx = mock(IModuleContext.class);
-	
+
 	@Test
 	void testBuyEarn() {
 		DisposablePriceListener listener = DisposablePriceListener.create(ctx, contract, DirectionEnum.D_Buy, 5000D, 100, 1);
-		TickField t1 = factory.makeTickField("rb2210", 5099);
+		Tick t1 = Tick.builder().contract(contract).lastPrice(5099).build();
 		assertThat(listener.shouldBeTriggered(t1)).isFalse();
 
-		TickField t2 = factory.makeTickField("rb2210", 5100);
+		Tick t2 = Tick.builder().contract(contract).lastPrice(5100).build();
 		assertThat(listener.shouldBeTriggered(t2)).isTrue();
-		
-		TickField t3 = factory.makeTickField("rb2210", 4800);
+
+		Tick t3 = Tick.builder().contract(contract).lastPrice(4800).build();
 		assertThat(listener.shouldBeTriggered(t3)).isFalse();
 	}
-	
-	@Test 
+
+	@Test
 	void testBuyLoss(){
 		DisposablePriceListener listener = DisposablePriceListener.create(ctx, contract, DirectionEnum.D_Buy, 5000D, -100, 1);
-		TickField t1 = factory.makeTickField("rb2210", 4901);
+		Tick t1 = Tick.builder().contract(contract).lastPrice(4901).build();
 		assertThat(listener.shouldBeTriggered(t1)).isFalse();
 
-		TickField t2 = factory.makeTickField("rb2210", 4900);
+		Tick t2 = Tick.builder().contract(contract).lastPrice(4900).build();
 		assertThat(listener.shouldBeTriggered(t2)).isTrue();
-		
-		TickField t3 = factory.makeTickField("rb2210", 5100);
+
+		Tick t3 = Tick.builder().contract(contract).lastPrice(5100).build();
 		assertThat(listener.shouldBeTriggered(t3)).isFalse();
 	}
 
-	
+
 	@Test
 	void testSellEarn() {
 		DisposablePriceListener listener = DisposablePriceListener.create(ctx, contract, DirectionEnum.D_Sell, 5000D, 100, 1);
-		TickField t1 = factory.makeTickField("rb2210", 4901);
+		Tick t1 = Tick.builder().contract(contract).lastPrice(4901).build();
 		assertThat(listener.shouldBeTriggered(t1)).isFalse();
 
-		TickField t2 = factory.makeTickField("rb2210", 4900);
+		Tick t2 = Tick.builder().contract(contract).lastPrice(4900).build();
 		assertThat(listener.shouldBeTriggered(t2)).isTrue();
-		
-		TickField t3 = factory.makeTickField("rb2210", 5100);
+
+		Tick t3 = Tick.builder().contract(contract).lastPrice(5100).build();
 		assertThat(listener.shouldBeTriggered(t3)).isFalse();
 	}
-	
+
 	@Test
 	void testSellLoss() {
 		DisposablePriceListener listener = DisposablePriceListener.create(ctx, contract, DirectionEnum.D_Sell, 5000D, -100, 1);
-		TickField t1 = factory.makeTickField("rb2210", 5099);
+		Tick t1 = Tick.builder().contract(contract).lastPrice(5099).build();
 		assertThat(listener.shouldBeTriggered(t1)).isFalse();
 
-		TickField t2 = factory.makeTickField("rb2210", 5100);
+		Tick t2 = Tick.builder().contract(contract).lastPrice(5100).build();
 		assertThat(listener.shouldBeTriggered(t2)).isTrue();
-		
-		TickField t3 = factory.makeTickField("rb2210", 4800);
+
+		Tick t3 = Tick.builder().contract(contract).lastPrice(4800).build();
 		assertThat(listener.shouldBeTriggered(t3)).isFalse();
 	}
 }
