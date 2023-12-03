@@ -248,10 +248,7 @@ public class TradePosition {
 				.lastPrice(lastPrice)
 				.openPrice(avgOpenPrice())
 				.openPriceDiff(priceDiff)
-				.price(avgOpenPrice())
-				.priceDiff(priceDiff)
 				.positionProfit(profit())
-				.openPositionProfit(profit())
 				.positionDirection(posDir)
 				.build();
 	}

@@ -49,7 +49,6 @@ public class OrderRequest implements TickDataAware{
 				.direction(submitOrderReq.direction())
 				.originOrderId(submitOrderReq.originOrderId())
 				.gatewayId(submitOrderReq.gatewayId())
-				.volumeCondition(submitOrderReq.volumeCondition())
 				.updateDate(LocalDate.now())
 				.updateTime(LocalTime.now())
 				.totalVolume(submitOrderReq.volume())

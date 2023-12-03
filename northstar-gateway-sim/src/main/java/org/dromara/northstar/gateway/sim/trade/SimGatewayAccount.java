@@ -51,7 +51,6 @@ public class SimGatewayAccount {
 				.commission(totalCommission)
 				.gatewayId(gatewayId)
 				.currency(CurrencyEnum.CNY)
-				.name("模拟账户")
 				.deposit(totalDeposit)
 				.withdraw(totalWithdraw)
 				.margin(orderReqMgr.totalFrozenAmount())

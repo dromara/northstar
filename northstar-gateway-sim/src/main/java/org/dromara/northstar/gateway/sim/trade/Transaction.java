@@ -30,7 +30,6 @@ public class Transaction {
 				.tradeTimestamp(dealTick.actionTimestamp())
 				.direction(orderReq.direction())
 				.gatewayId(orderReq.gatewayId())
-				.hedgeFlag(orderReq.hedgeFlag())
 				.offsetFlag(orderReq.offsetFlag())
 				.orderId(orderReq.originOrderId())
 				.originOrderId(orderReq.originOrderId())
