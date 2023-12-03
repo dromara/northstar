@@ -8,28 +8,22 @@ import xyz.redtorch.pb.CoreField.AccountField;
 @Builder
 public record Account(
         String accountId,
-        String code,
-        String name,
-        String holder,
-        CurrencyEnum currency,
-        double preBalance,
-        double balance,
-        double available,
-        double commission,
-        double margin,
-        double closeProfit,
-        double positionProfit,
-        double deposit,
-        double withdraw,
+        CurrencyEnum currency,	// 币种
+        double preBalance,		// 昨日账户结算净值
+        double balance,			// 账户余额
+        double available,		// 可用资金
+        double commission,		// 今日手续费
+        double margin,			// 保证金占用
+        double closeProfit,		// 平仓盈亏
+        double positionProfit,	// 持仓盈亏
+        double deposit,			// 入金金额
+        double withdraw,		// 出金金额
         String gatewayId
 ) {
 
 	public AccountField toAccountField() {
 		return CoreField.AccountField.newBuilder()
 				.setAccountId(accountId)
-				.setCode(code)
-				.setName(name)
-				.setHolder(holder)
 				.setCurrency(currency)
 				.setPreBalance(preBalance)
 				.setBalance(balance)

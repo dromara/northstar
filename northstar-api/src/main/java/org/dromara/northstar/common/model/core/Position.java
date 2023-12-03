@@ -7,28 +7,24 @@ import xyz.redtorch.pb.CoreField.PositionField;
 
 @Builder
 public record Position(
-        String positionId,
+        String positionId,						// 仓位ID，通常是<合约代码@交易所代码@产品类型@方向@投机套保标志@账户@币种@网关>
         String accountId,
-        PositionDirectionEnum positionDirection,
-        int position,
-        int frozen,
-        int ydPosition,
-        int ydFrozen,
-        int tdPosition,
-        int tdFrozen,
-        double lastPrice,
-        double price,
-        double priceDiff,
-        double openPrice,
-        double openPriceDiff,
-        double positionProfit,
-        double positionProfitRatio,
-        double openPositionProfit,
-        double openPositionProfitRatio,
-        double useMargin,
-        double exchangeMargin,
-        double contractValue,
-        HedgeFlagEnum hedgeFlag,
+        PositionDirectionEnum positionDirection,	// 仓位方向
+        int position,							// 持仓数量
+        int frozen,								// 冻结数量
+        int ydPosition,							// 昨持仓数量
+        int ydFrozen,							// 昨仓冻结数量
+        int tdPosition,							// 今持仓数量
+        int tdFrozen,							// 今仓冻结数量
+        double lastPrice,						// 最新价
+        double openPrice,						// 开仓均价
+        double openPriceDiff,					// 开仓均价浮动盈亏
+        double positionProfit,					// 持仓盈亏
+        double positionProfitRatio,				// 持仓盈亏比例
+        double useMargin,						// 占用保证金
+        double exchangeMargin,					// 交易所保证金
+        double contractValue,					// 合约价值
+        HedgeFlagEnum hedgeFlag,				// 投机套保标志
         Contract contract,
         String gatewayId
 ) {
@@ -45,14 +41,10 @@ public record Position(
 				.setTdPosition(tdPosition)
 				.setTdFrozen(tdFrozen)
 				.setLastPrice(lastPrice)
-				.setPrice(price)
-				.setPriceDiff(priceDiff)
 				.setOpenPrice(openPrice)
 				.setOpenPriceDiff(openPriceDiff)
 				.setPositionProfit(positionProfit)
 				.setPositionProfitRatio(positionProfitRatio)
-				.setOpenPositionProfit(openPositionProfit)
-				.setOpenPositionProfitRatio(openPositionProfitRatio)
 				.setUseMargin(useMargin)
 				.setExchangeMargin(exchangeMargin)
 				.setContractValue(contractValue)

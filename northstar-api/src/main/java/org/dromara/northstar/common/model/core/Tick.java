@@ -16,19 +16,19 @@ import xyz.redtorch.pb.CoreField.TickField;
 @Builder
 public record Tick(
 		String gatewayId,
-		Contract contract,
-		LocalDate actionDay,
-		LocalTime actionTime,
-		LocalDate tradingDay,
-		long actionTimestamp,
-		double lastPrice,
-		double avgPrice,
-		double iopv,
-		long volumeDelta,
-		long volume,              // 总成交量
-		double turnover,          // 成交总额
-		double turnoverDelta,    // 成交总额变化
-		double openInterest,      // 持仓量
+		Contract contract,			// 合约
+		LocalDate actionDay,		// 行情归属日
+		LocalTime actionTime,		// 行情归属时间
+		LocalDate tradingDay,		// 交易日
+		long actionTimestamp,		// 行情归属时间戳
+		double lastPrice,			// 最新价
+		double avgPrice,			// 均价
+		double iopv,				// IOPV(ETF净值估值)
+		long volumeDelta,			// 成交量变化
+		long volume,              // 当天总成交量
+		double turnover,          // 成交额变化
+		double turnoverDelta,    // 当天成交总额变化
+		double openInterest,      // 总持仓量
 		double openInterestDelta,      // 持仓量变化
 		double settlePrice,      // 结算价
 		double preOpenInterest,        // 昨持仓
@@ -43,7 +43,7 @@ public record Tick(
 		List<Double> askPrice,      // 卖价
 		List<Integer> bidVolume,          // 买量
 		List<Integer> askVolume,          // 卖量
-		TickType type,
+		TickType type,			// 行情类型
 		JSONObject otherInfo,    // 额外信息
 		ChannelType channelType    // 渠道来源
 ) {

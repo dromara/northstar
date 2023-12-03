@@ -1,5 +1,6 @@
 package org.dromara.northstar.common.model.core;
 
+import com.alibaba.fastjson.JSONObject;
 import lombok.Builder;
 import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
 import xyz.redtorch.pb.CoreEnum.CurrencyEnum;
@@ -13,28 +14,22 @@ import xyz.redtorch.pb.CoreEnum.VolumeConditionEnum;
 
 @Builder(toBuilder = true)
 public record SubmitOrderReq(
-		String originOrderId,
-		String accountCode,
-		CurrencyEnum currency,
-		Contract contract,
+		String originOrderId,        // 本地订单ID
+		CurrencyEnum currency,        // 币种
+		Contract contract,            // 合约
 		String gatewayId,
-		int volume,
-		double price,
-		OrderPriceTypeEnum orderPriceType,
-		DirectionEnum direction,
-		OffsetFlagEnum offsetFlag,
-		HedgeFlagEnum hedgeFlag,
-		TimeConditionEnum timeCondition,
-		String gtdDate,
-		VolumeConditionEnum volumeCondition,
-		int minVolume,
-		ContingentConditionEnum contingentCondition,
-		double stopPrice,
-		ForceCloseReasonEnum forceCloseReason,
-		int autoSuspend,
-		int userForceClose,
-		int swapOrder,
-		long actionTimestamp
+		int volume,                    // 下单数量
+		double price,                // 下单价格
+		OrderPriceTypeEnum orderPriceType,    // 定单价格类型
+		DirectionEnum direction,    // 买卖方向
+		OffsetFlagEnum offsetFlag,    // 开平标识
+		TimeConditionEnum timeCondition,    // 时效
+		String gtdDate,                // GTD日期
+		int minVolume,                // 最小成交量
+		ContingentConditionEnum contingentCondition,    // 触发条件
+		double stopPrice,            // 止损价
+		JSONObject extInfo,            // 扩展信息
+		long actionTimestamp        // 操作时间戳
 		) {
 
 }

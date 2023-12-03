@@ -13,5 +13,9 @@ public enum TickType {
 	 * 开市行情
 	 */
 	MARKET_TICK,
+	/**
+	 * 盘前竞价行情
+	 */
+	PRE_MARKET_TICK;
 	
 }

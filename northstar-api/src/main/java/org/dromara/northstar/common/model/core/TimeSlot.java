@@ -9,6 +9,7 @@ import lombok.Builder;
  */
 @Builder
 public record TimeSlot(
+		
 		/**
 		 * 开始时间
 		 */

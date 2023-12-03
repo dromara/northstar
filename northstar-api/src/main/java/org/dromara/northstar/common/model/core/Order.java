@@ -18,8 +18,8 @@ import xyz.redtorch.pb.CoreField.OrderField;
 @Builder(toBuilder = true)
 public record Order(
 		String gatewayId,
-		String originOrderId,
-		String orderId,
+		String originOrderId,		// 本地订单ID
+		String orderId,				// 网关订单ID
 		DirectionEnum direction,    // 方向
 		OffsetFlagEnum offsetFlag,  // 开平
 		HedgeFlagEnum hedgeFlag,    // 投机套保标识

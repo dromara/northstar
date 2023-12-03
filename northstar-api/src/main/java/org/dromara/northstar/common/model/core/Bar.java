@@ -15,20 +15,20 @@ import xyz.redtorch.pb.CoreField.BarField;
 public record Bar(
 		String gatewayId,
 		Contract contract,
-		LocalDate actionDay,
-		LocalTime actionTime,
-		LocalDate tradingDay,
-		long actionTimestamp,
-		double openPrice,
-		double highPrice,
-		double lowPrice,
-		double closePrice,
-		double openInterest,  		// 最后持仓量
-		double openInterestDelta,  	// 持仓量（Bar）
-		long volume,  				// 最后总成交量
-		long volumeDelta,  			// 成交量（Bar）
-		double turnover,  			// 最后成交总额
-		double turnoverDelta,  		// 成交总额（Bar）
+		LocalDate actionDay,		// K线归属日
+		LocalTime actionTime,		// K线归属时间
+		LocalDate tradingDay,		// 交易日
+		long actionTimestamp,		// K线归属时间戳
+		double openPrice,			// 开盘价
+		double highPrice,			// 最高价
+		double lowPrice,			// 最低价
+		double closePrice,			// 收盘价
+		double openInterest,  		// 当天累计持仓量
+		double openInterestDelta,  	// K线持仓量变化
+		long volume,  				// 当天总成交量
+		long volumeDelta,  			// K线成交量
+		double turnover,  			// 当天成交总额
+		double turnoverDelta,  		// K线成交总额
 		double preOpenInterest,		// 昨持仓
 		double preClosePrice,  		// 前收盘价
 		double preSettlePrice,  	// 昨结算价
