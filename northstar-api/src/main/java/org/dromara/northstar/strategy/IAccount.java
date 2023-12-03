@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import org.dromara.northstar.common.TransactionAware;
 import org.dromara.northstar.common.model.core.Account;
+import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.common.model.core.Position;
 import org.dromara.northstar.common.model.core.SubmitOrderReq;
 import org.dromara.northstar.gateway.MarketGateway;
@@ -73,14 +74,14 @@ public interface IAccount extends TransactionAware{
 	 * @param unifiedSymbol	合约代码
 	 * @return				净持仓：正数代表净多头，负数代表净空头
 	 */
-	int netPosition(String unifiedSymbol);
+	int netPosition(Contract contract);
 	/**
 	 * 获取某合约的持仓信息
 	 * @param posDirection
 	 * @param unifiedSymbol
 	 * @return
 	 */
-	Optional<Position> getPosition(PositionDirectionEnum posDirection, String unifiedSymbol);
+	Optional<Position> getPosition(PositionDirectionEnum posDirection, Contract contract);
 	/**
 	 * 获取账户绑定的行情网关
 	 * @return

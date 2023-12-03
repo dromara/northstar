@@ -3,9 +3,8 @@ package org.dromara.northstar.strategy;
 import org.dromara.northstar.common.event.NorthstarEvent;
 import org.dromara.northstar.common.model.ModuleDescription;
 import org.dromara.northstar.common.model.ModuleRuntimeDescription;
+import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.gateway.IContract;
-
-import xyz.redtorch.pb.CoreField.ContractField;
 
 /**
  * 模组抽象接口
@@ -45,7 +44,7 @@ public interface IModule {
 	 * @param contract
 	 * @return
 	 */
-	IAccount getAccount(ContractField contract);
+	IAccount getAccount(Contract contract);
 	/**
 	 * 获取模组状态描述
 	 * @return

@@ -6,8 +6,6 @@ import java.time.LocalTime;
 import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.constant.DateTimeConstant;
 
-import com.alibaba.fastjson.JSONObject;
-
 import lombok.Builder;
 import xyz.redtorch.pb.CoreField.BarField;
 
@@ -32,8 +30,7 @@ public record Bar(
 		double preOpenInterest,		// 昨持仓
 		double preClosePrice,  		// 前收盘价
 		double preSettlePrice,  	// 昨结算价
-		ChannelType channelType,	// 渠道来源
-		JSONObject otherInfo		// 额外信息
+		ChannelType channelType		// 渠道来源
 	) {
 
 	public BarField toBarField() {

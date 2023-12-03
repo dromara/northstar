@@ -9,6 +9,7 @@ import org.springframework.util.Assert;
 
 public class DateTimeUtils {
 
+	private static final Map<LocalTime, LocalTime> cacheTimeMap = new HashMap<>();
 	private static final LocalTime DAILY_CUTOFF = DateTimeUtils.fromCacheTime(19, 0);
 	
 	public LocalDate convertTradingDayForCNMarket(LocalDate actionDay, LocalTime actionTime) {
@@ -21,8 +22,6 @@ public class DateTimeUtils {
 		return actionDay.plusDays(8 - actionDay.getDayOfWeek().getValue());
 	}
 	
-	private static final Map<LocalTime, LocalTime> cacheTimeMap = new HashMap<>();
-	
 	public static LocalTime fromCacheTime(LocalTime time) {
 		Assert.isTrue(time.getSecond() == 0 && time.getNano() == 0, "只能缓存整分钟");
 		cacheTimeMap.putIfAbsent(time, time);
@@ -30,6 +29,6 @@ public class DateTimeUtils {
 	}
 	
 	public static LocalTime fromCacheTime(int hour, int min) {
-		return fromCacheTime(DateTimeUtils.fromCacheTime(hour, min));
+		return fromCacheTime(LocalTime.of(hour, min));
 	}
 }
