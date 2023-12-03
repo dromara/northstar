@@ -6,43 +6,47 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.dromara.northstar.common.model.SimAccountDescription;
+import org.dromara.northstar.common.model.core.Contract;
+import org.dromara.northstar.common.model.core.Trade;
 import org.dromara.northstar.data.ISimAccountRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
-import test.common.TestFieldFactory;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
-import xyz.redtorch.pb.CoreField.TradeField;
 
 @DataJpaTest
 class SimAccountRepoAdapterTest {
-	
+
 	@Autowired
 	SimAccountRepository delegate;
-	
+
 	static ISimAccountRepository repo;
-	
-	TestFieldFactory fieldFactory = new TestFieldFactory("test");
-	
+
 	String accountId = "testAccount";
-	
-	TradeField trade = fieldFactory.makeTradeField("rb2210", 1000, 2, DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open);
-	
+
+	Trade trade = Trade.builder()
+			.contract(Contract.builder().unifiedSymbol("rb2401").build())
+			.volume(1000)
+			.price(2)
+			.direction(DirectionEnum.D_Buy)
+			.offsetFlag(OffsetFlagEnum.OF_Open)
+			.build();
+
 	SimAccountDescription simAcc = SimAccountDescription.builder()
 			.gatewayId(accountId)
 			.totalDeposit(10000)
 			.totalCommission(30)
-			.openTrades(List.of(trade.toByteArray()))
+			.openTrades(List.of(trade))
 			.build();
-	
+
 	@BeforeEach
 	void prepare() {
 		repo = new SimAccountRepoAdapter(delegate);
 	}
-	
+
 	@Test
 	void testSave() {
 		repo.save(simAcc);

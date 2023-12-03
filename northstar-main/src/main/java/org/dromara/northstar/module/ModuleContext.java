@@ -396,8 +396,8 @@ public class ModuleContext implements IModuleContext{
 	@Override
 	public ModuleRuntimeDescription getRuntimeDescription(boolean fullDescription) {
 		ModulePositionDescription posDescription = ModulePositionDescription.builder()
-				.logicalPositions(moduleAccount.getPositions().stream().map(PositionField::toByteArray).toList())
-				.nonclosedTrades(moduleAccount.getNonclosedTrades().stream().map(TradeField::toByteArray).toList())
+				.logicalPositions(moduleAccount.getPositions())
+				.nonclosedTrades(moduleAccount.getNonclosedTrades())
 				.build();
 		ModuleAccountRuntimeDescription accRtDescription = ModuleAccountRuntimeDescription.builder()
 				.initBalance(moduleAccount.getInitBalance())

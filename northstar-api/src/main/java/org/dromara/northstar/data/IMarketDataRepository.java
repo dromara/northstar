@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import org.dromara.northstar.common.model.core.Bar;
-import org.dromara.northstar.common.model.core.Contract;
+import org.dromara.northstar.gateway.IContract;
 
 /**
  * 行情数据持久化
@@ -26,7 +26,7 @@ public interface IMarketDataRepository {
 	 * @param endDate
 	 * @return
 	 */
-	List<Bar> loadBars(Contract contract, LocalDate startDate, LocalDate endDate);
+	List<Bar> loadBars(IContract contract, LocalDate startDate, LocalDate endDate);
 	
 	
 	/**
@@ -36,6 +36,6 @@ public interface IMarketDataRepository {
 	 * @param endDate
 	 * @return
 	 */
-	List<Bar> loadDailyBars(Contract contract, LocalDate startDate, LocalDate endDate);
+	List<Bar> loadDailyBars(IContract contract, LocalDate startDate, LocalDate endDate);
 	
 }

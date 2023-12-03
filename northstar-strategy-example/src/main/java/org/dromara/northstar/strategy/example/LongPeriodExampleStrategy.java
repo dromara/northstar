@@ -35,8 +35,6 @@ public class LongPeriodExampleStrategy extends AbstractStrategy implements Trade
 		Contract c = ctx.getContract(params.indicatorSymbol);
 		ctx.registerIndicator(new SimpleValueIndicator(Configuration.builder().indicatorName("C").contract(c).period(PeriodUnit.DAY).build()));
 		ctx.registerIndicator(new SimpleValueIndicator(Configuration.builder().indicatorName("C").numOfUnits(2).contract(c).period(PeriodUnit.DAY).build()));
-		ctx.registerIndicator(new SimpleValueIndicator(Configuration.builder().indicatorName("C").contract(c).period(PeriodUnit.WEEK).build()));
-		ctx.registerIndicator(new SimpleValueIndicator(Configuration.builder().indicatorName("C").numOfUnits(2).contract(c).period(PeriodUnit.WEEK).build()));
 	}
 	
 	@Override

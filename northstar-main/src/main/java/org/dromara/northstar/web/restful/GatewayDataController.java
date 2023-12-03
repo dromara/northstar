@@ -52,7 +52,7 @@ public class GatewayDataController {
 		LocalDate end = utils.getCurrentTradeDay(refStartTimestamp, firstLoad);
 		List<Bar> result = Collections.emptyList();
 		for(int i=0; i<3; i++) {
-			result = mdRepo.loadBars(contract.contract(), start.minusWeeks(i), end.minusWeeks(i));
+			result = mdRepo.loadBars(contract, start.minusWeeks(i), end.minusWeeks(i));
 			if(!result.isEmpty()) {
 				break;
 			}

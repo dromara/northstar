@@ -262,7 +262,7 @@ public class ModuleService implements IModuleService, PostLoadAware {
 			for(ModuleAccountDescription mad : md.getModuleAccountSettingsDescription()) {
 				for(ContractSimpleInfo csi : mad.getBindedContracts()) {
 					IContract c = contractMgr.getContract(Identifier.of(csi.getValue()));
-					List<Bar> bars = mdRepo.loadBars(c.contract(), start, end);
+					List<Bar> bars = mdRepo.loadBars(c, start, end);
 					mergeList.addAll(bars);
 				}
 			}
@@ -380,7 +380,7 @@ public class ModuleService implements IModuleService, PostLoadAware {
 		IModule module = moduleMgr.get(Identifier.of(moduleName));
 		IContract c = contractMgr.getContract(Identifier.of(mockTrade.getContractId()));
 		Contract contract = c.contract();
-		IAccount account = module.getAccount(c);
+		IAccount account = module.getAccount(contract);
 		String tradingDay = StringUtils.hasText(mockTrade.getTradeDate()) ? mockTrade.getTradeDate() : LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER);
 
 		Trade trade = Trade.builder()

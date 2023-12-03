@@ -63,7 +63,7 @@ class GatewayDataControllerTest {
 	public void setUp() throws Exception {
 		IContract contract = mock(IContract.class);
 		when(contractMgr.getContract(any(), anyString())).thenReturn(contract);
-		when(contract.contractField()).thenReturn(ContractField.newBuilder().setChannelType("PLAYBACK").setUnifiedSymbol("rb2205@SHFE@FUTURES").build());
+		when(contract.contract()).thenReturn(ContractField.newBuilder().setChannelType("PLAYBACK").setUnifiedSymbol("rb2205@SHFE@FUTURES").build());
 		
 		when(gatewayRepo.findById(anyString())).thenReturn(GatewayDescription.builder().channelType(ChannelType.PLAYBACK).build());
 		

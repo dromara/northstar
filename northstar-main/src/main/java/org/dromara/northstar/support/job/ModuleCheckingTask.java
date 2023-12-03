@@ -114,7 +114,7 @@ public class ModuleCheckingTask implements InitializingBean {
 			for(ModuleAccountDescription mad : m.getModuleDescription().getModuleAccountSettingsDescription()) {
 				for(ContractSimpleInfo csi : mad.getBindedContracts()) {
 					IContract contract = contractMgr.getContract(Identifier.of(csi.getValue()));
-					IAccount account = m.getAccount(contract);
+					IAccount account = m.getAccount(contract.contract());
 					Position longPosPlaceholder = Position.builder()
 							.gatewayId(account.accountId())
 							.contract(contract.contract())

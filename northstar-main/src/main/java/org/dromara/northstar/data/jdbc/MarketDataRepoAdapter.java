@@ -1,6 +1,8 @@
 package org.dromara.northstar.data.jdbc;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -10,9 +12,12 @@ import org.dromara.northstar.common.IDataSource;
 import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.common.model.core.Bar;
 import org.dromara.northstar.common.model.core.Contract;
+import org.dromara.northstar.common.utils.CommonUtils;
 import org.dromara.northstar.data.IMarketDataRepository;
 import org.dromara.northstar.data.jdbc.entity.BarDO;
 import org.dromara.northstar.gateway.IContract;
+
+import com.alibaba.fastjson2.JSON;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -30,7 +35,8 @@ public class MarketDataRepoAdapter implements IMarketDataRepository{
 		delegate.save(BarDO.builder()
 				.unifiedSymbol(bar.contract().unifiedSymbol())
 				.tradingDay(bar.tradingDay().format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
-				.bar(bar)
+				.expiredAt(CommonUtils.localDateTimeToMills(LocalDateTime.of(bar.tradingDay(), LocalTime.of(20, 0))))
+				.barData(JSON.toJSONBytes(bar))
 				.build());
 	}
 
@@ -78,7 +84,8 @@ public class MarketDataRepoAdapter implements IMarketDataRepository{
 		try {
 			return delegate.findByUnifiedSymbolAndTradingDay(unifiedSymbol, tradingDay)
 					.stream()
-					.map(BarDO::getBar)
+					.map(BarDO::getBarData)
+					.map(data -> JSON.parseObject(data, Bar.class))
 					.filter(Objects::nonNull)
 					.toList();
 		} catch (Exception e) {

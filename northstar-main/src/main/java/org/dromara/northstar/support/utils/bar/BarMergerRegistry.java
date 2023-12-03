@@ -50,8 +50,6 @@ public class BarMergerRegistry implements BarDataAware{
 		case MINUTE -> new BarMerger(numOfUnit, contract);
 		case HOUR -> new BarMerger(numOfUnit * 60, contract);
 		case DAY -> new DailyBarMerger(numOfUnit, contract);
-		case WEEK -> new WeeklyBarMerger(numOfUnit, contract);
-		case MONTH -> new MonthlyBarMerger(numOfUnit, contract);
 		default -> throw new IllegalArgumentException("Unexpected value: " + unit);
 		};
 	}

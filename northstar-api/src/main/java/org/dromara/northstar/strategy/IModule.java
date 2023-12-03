@@ -4,7 +4,6 @@ import org.dromara.northstar.common.event.NorthstarEvent;
 import org.dromara.northstar.common.model.ModuleDescription;
 import org.dromara.northstar.common.model.ModuleRuntimeDescription;
 import org.dromara.northstar.common.model.core.Contract;
-import org.dromara.northstar.gateway.IContract;
 
 /**
  * 模组抽象接口
@@ -33,12 +32,6 @@ public interface IModule {
 	 * @param event
 	 */
 	void onEvent(NorthstarEvent event);
-	/**
-	 * 获取合约关联的交易账户
-	 * @param contract
-	 * @return
-	 */
-	IAccount getAccount(IContract contract);
 	/**
 	 * 获取合约关联的交易账户
 	 * @param contract

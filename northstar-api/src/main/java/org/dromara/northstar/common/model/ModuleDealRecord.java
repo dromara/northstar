@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.dromara.northstar.common.model.core.Trade;
 
 /**
  * 交易开平仓记录
@@ -34,11 +35,11 @@ public class ModuleDealRecord {
 	/**
 	 * 开仓成交
 	 */
-	private byte[] openTrade;
+	private Trade openTrade;
 	/**
 	 * 平仓成交
 	 */
-	private byte[] closeTrade;
+	private Trade closeTrade;
 	
 	
 }

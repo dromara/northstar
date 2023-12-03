@@ -1,19 +1,19 @@
 package org.dromara.northstar.module;
 
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.apache.commons.lang3.StringUtils;
 import org.dromara.northstar.common.exception.NoSuchElementException;
 import org.dromara.northstar.common.exception.TradeException;
 import org.dromara.northstar.common.model.ContractSimpleInfo;
+import org.dromara.northstar.common.model.core.Tick;
 import org.dromara.northstar.strategy.IModuleContext;
 import org.dromara.northstar.strategy.OrderRequestFilter;
 
 import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
-import xyz.redtorch.pb.CoreField.TickField;
 
 
 public class DefaultOrderFilter implements OrderRequestFilter {
@@ -22,7 +22,7 @@ public class DefaultOrderFilter implements OrderRequestFilter {
 	
 	private IModuleContext ctx;
 	
-	private String tradingDay;
+	private LocalDate tradingDay;
 	
 	private Map<String, AtomicInteger> contractReqCounterMap = new HashMap<>();
 	
@@ -32,9 +32,9 @@ public class DefaultOrderFilter implements OrderRequestFilter {
 	}
 
 	@Override
-	public void onTick(TickField tick) {
-		if(!StringUtils.equals(tradingDay, tick.getTradingDay())) {
-			tradingDay = tick.getTradingDay();
+	public void onTick(Tick tick) {
+		if(!tradingDay.equals(tick.tradingDay())) {
+			tradingDay = tick.tradingDay();
 			contractReqCounterMap.values().forEach(cnt -> cnt.set(0));
 		}
 	}

@@ -14,20 +14,20 @@ import org.dromara.northstar.common.model.ModuleAccountRuntimeDescription;
 import org.dromara.northstar.common.model.ModuleDealRecord;
 import org.dromara.northstar.common.model.ModuleDescription;
 import org.dromara.northstar.common.model.ModuleRuntimeDescription;
+import org.dromara.northstar.common.model.core.Contract;
+import org.dromara.northstar.common.model.core.Trade;
 import org.dromara.northstar.data.IModuleRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
-import test.common.TestFieldFactory;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
-import xyz.redtorch.pb.CoreField.TradeField;
 
 @DataJpaTest
 class ModuleRepoAdapterTest {
-	
+
 	@Autowired
 	ModuleDealRecordRepository mdrDelegate;
 	@Autowired
@@ -36,45 +36,60 @@ class ModuleRepoAdapterTest {
 	ModuleRuntimeDescriptionRepository mrdDelegate;
 
 	static IModuleRepository repo;
-	
-	TestFieldFactory fieldFactory = new TestFieldFactory("test");
-	
-	TradeField openTrade = fieldFactory.makeTradeField("rb2210", 1000, 1, DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open);
-	TradeField closeTrade = fieldFactory.makeTradeField("rb2210", 1000, 1, DirectionEnum.D_Sell, OffsetFlagEnum.OF_Close);
-	
+
+	//	TradeField openTrade = fieldFactory.makeTradeField("rb2210", 1000, 1, DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open);
+//	TradeField closeTrade = fieldFactory.makeTradeField("rb2210", 1000, 1, DirectionEnum.D_Sell, OffsetFlagEnum.OF_Close);
+
+	Contract contract = Contract.builder().unifiedSymbol("rb2210").build();
+	Trade openTrade = Trade.builder()
+			.contract(contract)
+			.volume(1000)
+			.price(1)
+			.direction(DirectionEnum.D_Buy)
+			.offsetFlag(OffsetFlagEnum.OF_Open)
+			.build();
+
+	Trade closeTrade = Trade.builder()
+			.contract(contract)
+			.volume(1000)
+			.price(1)
+			.direction(DirectionEnum.D_Sell)
+			.offsetFlag(OffsetFlagEnum.OF_Close)
+			.build();
+
 	String moduleName = "testModule";
-	
+
 	ModuleAccountDescription mad = ModuleAccountDescription.builder()
 			.accountGatewayId("testGateway")
 			.bindedContracts(List.of(ContractSimpleInfo.builder().value("rb2210@SHFE@FUTURES").build()))
 			.build();
-	
+
 	ModuleDescription md = ModuleDescription.builder()
 			.moduleName(moduleName)
 			.type(ModuleType.SPECULATION)
 			.moduleAccountSettingsDescription(List.of(mad))
 			.build();
-	
+
 	ModuleAccountRuntimeDescription mard = ModuleAccountRuntimeDescription.builder()
 			.initBalance(100000)
 			.build();
-	
+
 	ModuleRuntimeDescription mrd = ModuleRuntimeDescription.builder()
 			.moduleName(moduleName)
 			.moduleAccountRuntime(mard)
 			.build();
-	
+
 	ModuleDealRecord mdr = ModuleDealRecord.builder()
 			.moduleName(moduleName)
-			.openTrade(openTrade.toByteArray())
-			.closeTrade(closeTrade.toByteArray())
+			.openTrade(openTrade)
+			.closeTrade(closeTrade)
 			.build();
-	
+
 	@BeforeEach
 	void prepare() {
 		repo = new ModuleRepoAdapter(mdDelegate, mrdDelegate, mdrDelegate);
 	}
-	
+
 	@Test
 	void testSaveSettings() {
 		assertDoesNotThrow(() -> {

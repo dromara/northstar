@@ -13,6 +13,11 @@ import org.dromara.northstar.common.exception.NoSuchElementException;
 import org.dromara.northstar.common.model.Identifier;
 import org.dromara.northstar.common.model.ModuleDescription;
 import org.dromara.northstar.common.model.ModuleRuntimeDescription;
+import org.dromara.northstar.common.model.core.Bar;
+import org.dromara.northstar.common.model.core.Contract;
+import org.dromara.northstar.common.model.core.Order;
+import org.dromara.northstar.common.model.core.Tick;
+import org.dromara.northstar.common.model.core.Trade;
 import org.dromara.northstar.gateway.IContract;
 import org.dromara.northstar.gateway.IContractManager;
 import org.dromara.northstar.gateway.MarketGateway;
@@ -22,11 +27,6 @@ import org.dromara.northstar.strategy.IModule;
 import org.dromara.northstar.strategy.IModuleContext;
 
 import lombok.extern.slf4j.Slf4j;
-import xyz.redtorch.pb.CoreField.BarField;
-import xyz.redtorch.pb.CoreField.ContractField;
-import xyz.redtorch.pb.CoreField.OrderField;
-import xyz.redtorch.pb.CoreField.TickField;
-import xyz.redtorch.pb.CoreField.TradeField;
 
 /**
  * 交易模组
@@ -44,17 +44,14 @@ public class TradeModule implements IModule {
 	
 	private Set<String> accountIdSet = new HashSet<>();
 	
-	private Set<String> bindedSymbolSet = new HashSet<>();
+	private Set<Contract> bindedContractSet = new HashSet<>();
 	
 	private ModuleDescription md;
 	
-	private Map<IContract, IAccount> contractAccountMap = new HashMap<>();
-	
-	private IContractManager contractMgr;
+	private Map<Contract, IAccount> contractAccountMap = new HashMap<>();
 	
 	public TradeModule(ModuleDescription moduleDescription, IModuleContext ctx, AccountManager accountMgr, IContractManager contractMgr) {
 		this.ctx = ctx;
-		this.contractMgr = contractMgr;
 		this.md = moduleDescription;
 		moduleDescription.getModuleAccountSettingsDescription().forEach(mad -> { 
 			MarketGateway mktGateway = accountMgr.get(Identifier.of(mad.getAccountGatewayId())).getMarketGateway();
@@ -62,8 +59,8 @@ public class TradeModule implements IModule {
 			accountIdSet.add(mad.getAccountGatewayId());
 			mad.getBindedContracts().forEach(contract -> {
 				IContract c = contractMgr.getContract(Identifier.of(contract.getValue()));
-				bindedSymbolSet.add(contract.getUnifiedSymbol());
-				contractAccountMap.put(c, accountMgr.get(Identifier.of(mad.getAccountGatewayId())));
+				bindedContractSet.add(c.contract());
+				contractAccountMap.put(c.contract(), accountMgr.get(Identifier.of(mad.getAccountGatewayId())));
 			});
 		});
 		ctx.setModule(this);
@@ -100,13 +97,13 @@ public class TradeModule implements IModule {
 			return;
 		}
 		try {
-			if(data instanceof TickField tick && bindedSymbolSet.contains(tick.getUnifiedSymbol()) && mktGatewayIdSet.contains(tick.getGatewayId())) {
+			if(data instanceof Tick tick && bindedContractSet.contains(tick.contract()) && mktGatewayIdSet.contains(tick.gatewayId())) {
 				ctx.onTick(tick);
-			} else if (data instanceof BarField bar && bindedSymbolSet.contains(bar.getUnifiedSymbol()) && mktGatewayIdSet.contains(bar.getGatewayId())) {
+			} else if (data instanceof Bar bar && bindedContractSet.contains(bar.contract()) && mktGatewayIdSet.contains(bar.gatewayId())) {
 				ctx.onBar(bar);
-			} else if (data instanceof OrderField order && accountIdSet.contains(order.getGatewayId())) {
+			} else if (data instanceof Order order && accountIdSet.contains(order.gatewayId())) {
 				ctx.onOrder(order);
-			} else if (data instanceof TradeField trade && accountIdSet.contains(trade.getGatewayId())) {
+			} else if (data instanceof Trade trade && accountIdSet.contains(trade.gatewayId())) {
 				ctx.onTrade(trade);
 			}
 		} catch (Exception e) {
@@ -123,17 +120,11 @@ public class TradeModule implements IModule {
 	}
 
 	@Override
-	public IAccount getAccount(IContract contract) {
+	public IAccount getAccount(Contract contract) {
 		if(!contractAccountMap.containsKey(contract)) {
-			throw new NoSuchElementException("[" + contract.identifier().value() + "] 找不到绑定的账户");
+			throw new NoSuchElementException("[" + contract.contractId() + "] 找不到绑定的账户");
 		}
 		return contractAccountMap.get(contract);
-	}
-	
-	@Override
-	public IAccount getAccount(ContractField contract) {
-		IContract c = contractMgr.getContract(Identifier.of(contract.getContractId()));
-		return getAccount(c);
 	}
 
 	@Override

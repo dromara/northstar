@@ -2,7 +2,6 @@ package org.dromara.northstar.gateway.mktdata;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.ZoneOffset;
 import java.util.Objects;
 import java.util.function.Consumer;
 
@@ -10,6 +9,7 @@ import org.dromara.northstar.common.constant.TickType;
 import org.dromara.northstar.common.model.core.Bar;
 import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.common.model.core.Tick;
+import org.dromara.northstar.common.utils.CommonUtils;
 import org.dromara.northstar.common.utils.DateTimeUtils;
 
 import lombok.extern.slf4j.Slf4j;
@@ -115,7 +115,7 @@ public class MinuteBarGenerator {
 				.contract(proto.contract())
 				.actionDay(proto.actionDay())
 				.actionTime(proto.actionTime())
-				.actionTimestamp(LocalDateTime.of(proto.actionDay(), proto.actionTime()).toInstant(ZoneOffset.of(ZoneOffset.systemDefault().toString())).toEpochMilli())
+				.actionTimestamp(CommonUtils.localDateTimeToMills(LocalDateTime.of(proto.actionDay(), proto.actionTime())))
 				.tradingDay(proto.tradingDay())
 				.openPrice(open)
 				.highPrice(high)

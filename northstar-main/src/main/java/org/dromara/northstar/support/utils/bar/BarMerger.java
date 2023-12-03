@@ -5,13 +5,19 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
 import org.dromara.northstar.common.BarDataAware;
 import org.dromara.northstar.common.model.core.Bar;
 import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.common.model.core.TimeSlot;
+import org.dromara.northstar.common.utils.CommonUtils;
 import org.dromara.northstar.common.utils.DateTimeUtils;
 import org.dromara.northstar.strategy.MergedBarListener;
 
@@ -163,7 +169,7 @@ public class BarMerger implements BarDataAware{
 					.contract(contract)
 					.actionDay(cutoffDateTime.toLocalDate())
 					.actionTime(cutoffDateTime.toLocalTime())
-					.actionTimestamp(cutoffDateTime.toInstant(ZoneOffset.ofHours(8)).toEpochMilli())
+					.actionTimestamp(CommonUtils.localDateTimeToMills(cutoffDateTime))
 					.tradingDay(bar.tradingDay())
 					.channelType(bar.channelType())
 					.openPrice(bar.openPrice())

@@ -4,6 +4,7 @@ import java.util.Objects;
 import java.util.function.Predicate;
 
 import org.dromara.northstar.common.constant.SignalOperation;
+import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.common.utils.FieldUtils;
 import org.dromara.northstar.strategy.IDisposablePriceListener;
 import org.dromara.northstar.strategy.IModuleContext;
@@ -12,7 +13,6 @@ import org.dromara.northstar.strategy.model.TradeIntent;
 
 import lombok.Builder;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
-import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.TickField;
 
 /**
@@ -34,26 +34,26 @@ public final class DisposablePriceListener implements IDisposablePriceListener {
 	
 	private Runnable callback;
 	
-	public static DisposablePriceListener create(IModuleContext ctx, ContractField contract, DirectionEnum openDir, double basePrice, int numOfPriceTickToTrigger, int volume) {
+	public static DisposablePriceListener create(IModuleContext ctx, Contract contract, DirectionEnum openDir, double basePrice, int numOfPriceTickToTrigger, int volume) {
 		if(numOfPriceTickToTrigger == 0) {
 			throw new IllegalArgumentException("无效的止盈止损位");
 		}
 		int factor = FieldUtils.directionFactor(openDir);
-		double actionPrice = basePrice + factor * numOfPriceTickToTrigger * contract.getPriceTick();
+		double actionPrice = basePrice + factor * numOfPriceTickToTrigger * contract.priceTick();
 		SignalOperation closeOpr = factor > 0 ? SignalOperation.SELL_CLOSE : SignalOperation.BUY_CLOSE;
 		String desc = String.format("%s，%s", numOfPriceTickToTrigger < 0 ? "止损" : "止盈", actionPrice);
 		Predicate<TickField> testFunc;
 		if(numOfPriceTickToTrigger > 0) {
-			testFunc = t -> (int)(factor * (t.getLastPrice() - basePrice) / contract.getPriceTick()) >= numOfPriceTickToTrigger;
+			testFunc = t -> (int)(factor * (t.getLastPrice() - basePrice) / contract.priceTick()) >= numOfPriceTickToTrigger;
 		} else {
-			testFunc = t -> (int)(factor * (t.getLastPrice() - basePrice) / contract.getPriceTick()) <= numOfPriceTickToTrigger;
+			testFunc = t -> (int)(factor * (t.getLastPrice() - basePrice) / contract.priceTick()) <= numOfPriceTickToTrigger;
 		} 
 			
 		return DisposablePriceListener.builder()
 				.desc(desc)
 				.testFunc(testFunc) 	
 				.action(() -> {
-					if(ctx.getModuleAccount().getNonclosedPosition(contract.getUnifiedSymbol(), openDir) > 0) {
+					if(ctx.getModuleAccount().getNonclosedPosition(contract, openDir) > 0) {
 						ctx.submitOrderReq(TradeIntent.builder()
 								.contract(contract)
 								.operation(closeOpr)

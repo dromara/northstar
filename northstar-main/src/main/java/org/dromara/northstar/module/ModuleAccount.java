@@ -1,13 +1,12 @@
 package org.dromara.northstar.module;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.function.BiConsumer;
 
-import org.apache.commons.lang3.StringUtils;
 import org.dromara.northstar.common.constant.ModuleState;
 import org.dromara.northstar.common.exception.InsufficientException;
 import org.dromara.northstar.common.model.Identifier;
@@ -15,6 +14,13 @@ import org.dromara.northstar.common.model.ModuleAccountRuntimeDescription;
 import org.dromara.northstar.common.model.ModuleDealRecord;
 import org.dromara.northstar.common.model.ModuleDescription;
 import org.dromara.northstar.common.model.ModuleRuntimeDescription;
+import org.dromara.northstar.common.model.core.Contract;
+import org.dromara.northstar.common.model.core.ContractDefinition;
+import org.dromara.northstar.common.model.core.Order;
+import org.dromara.northstar.common.model.core.Position;
+import org.dromara.northstar.common.model.core.SubmitOrderReq;
+import org.dromara.northstar.common.model.core.Tick;
+import org.dromara.northstar.common.model.core.Trade;
 import org.dromara.northstar.common.utils.FieldUtils;
 import org.dromara.northstar.data.IModuleRepository;
 import org.dromara.northstar.gateway.IContract;
@@ -24,17 +30,9 @@ import org.slf4j.Logger;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
-import com.google.protobuf.InvalidProtocolBufferException;
 
 import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
-import xyz.redtorch.pb.CoreField.ContractField;
-import xyz.redtorch.pb.CoreField.OrderField;
-import xyz.redtorch.pb.CoreField.PositionField;
-import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
-import xyz.redtorch.pb.CoreField.TickField;
-import xyz.redtorch.pb.CoreField.TradeField;
 
 /**
  * 模组账户
@@ -42,7 +40,6 @@ import xyz.redtorch.pb.CoreField.TradeField;
  * @author KevinHuangwl
  *
  */
-@Slf4j
 public class ModuleAccount implements IModuleAccount{
 
 	private ModuleStateMachine stateMachine;
@@ -62,11 +59,11 @@ public class ModuleAccount implements IModuleAccount{
 	private double maxDrawbackPercentage;
 	
 	private double maxTotalBalance;
-	/* direction -> unifiedSymbol -> position */ 
-	private Table<DirectionEnum, String, ModulePosition> posTable = HashBasedTable.create();
-	private String tradingDay;
+	/* direction -> contract -> position */ 
+	private Table<DirectionEnum, Contract, ModulePosition> posTable = HashBasedTable.create();
+	private LocalDate tradingDay;
 	
-	private Set<String> bindedContracts = new HashSet<>();
+	private Set<Contract> bindedContracts = new HashSet<>();
 	
 	private Logger logger;
 	
@@ -75,15 +72,16 @@ public class ModuleAccount implements IModuleAccount{
 		this.stateMachine = stateMachine;
 		this.logger = moduleLogger;
 		stateMachine.setModuleAccount(this);
-		BiConsumer<TradeField, TradeField> onDealCallback = (openTrade, closeTrade) -> {
+		BiConsumer<Trade, Trade> onDealCallback = (openTrade, closeTrade) -> {
 			synchronized (this) {
-				int factor = FieldUtils.directionFactor(openTrade.getDirection());
-				ContractField contract = closeTrade.getContract();
-				double profit = factor * (closeTrade.getPrice() - openTrade.getPrice()) * closeTrade.getVolume() * contract.getMultiplier();
-				accDealVolume += closeTrade.getVolume();
+				int factor = FieldUtils.directionFactor(openTrade.direction());
+				Contract contract = closeTrade.contract();
+				double profit = factor * (closeTrade.price() - openTrade.price()) * closeTrade.volume() * contract.multiplier();
+				accDealVolume += closeTrade.volume();
 				accCloseProfit += profit;
-				double commission = contract.getCommissionFee() > 0 ? contract.getCommissionFee() : contract.getCommissionRate() * closeTrade.getPrice() * contract.getMultiplier();
-				double dealCommission = commission * 2 * closeTrade.getVolume(); // 乘2代表手续费双向计算
+				ContractDefinition cd = contract.contractDefinition();
+				double commission = cd.commissionFee() > 0 ? cd.commissionFee() : cd.commissionRate() * closeTrade.price() * contract.multiplier();
+				double dealCommission = commission * 2 * closeTrade.volume(); // 乘2代表手续费双向计算
 				accCommission += dealCommission;
 				maxProfit = Math.max(maxProfit, accCloseProfit - accCommission);
 				maxTotalBalance = Math.max(maxTotalBalance, initBalance + maxProfit);
@@ -92,11 +90,11 @@ public class ModuleAccount implements IModuleAccount{
 				maxDrawbackPercentage = Math.max(maxDrawbackPercentage, Math.abs(maxDrawback / maxTotalBalance));
 				moduleRepo.saveDealRecord(ModuleDealRecord.builder()
 						.moduleName(moduleDescription.getModuleName())
-						.moduleAccountId(closeTrade.getAccountId())
-						.contractName(contract.getName())
+						.moduleAccountId(closeTrade.gatewayId())
+						.contractName(contract.name())
 						.dealProfit(profit - dealCommission)
-						.openTrade(openTrade.toByteArray())
-						.closeTrade(closeTrade.toByteArray())
+						.openTrade(openTrade)
+						.closeTrade(closeTrade)
 						.build());
 			}
 		};
@@ -113,99 +111,80 @@ public class ModuleAccount implements IModuleAccount{
 			.flatMap(mad -> mad.getBindedContracts().stream())
 			.forEach(contractSimple -> {
 				IContract contract = contractMgr.getContract(Identifier.of(contractSimple.getValue()));
-				ContractField cf = contract.contractField();
+				Contract cf = contract.contract();
 				
 				ModulePosition buyPos = new ModulePosition(moduleRtDescription.getModuleName(), cf, DirectionEnum.D_Buy, moduleDescription.getClosingPolicy(), onDealCallback);
-				posTable.put(DirectionEnum.D_Buy, cf.getUnifiedSymbol(), buyPos);
+				posTable.put(DirectionEnum.D_Buy, cf, buyPos);
 				
 				ModulePosition sellPos = new ModulePosition(moduleRtDescription.getModuleName(), cf, DirectionEnum.D_Sell, moduleDescription.getClosingPolicy(), onDealCallback);
-				posTable.put(DirectionEnum.D_Sell, cf.getUnifiedSymbol(), sellPos);
+				posTable.put(DirectionEnum.D_Sell, cf, sellPos);
 				
-				bindedContracts.add(cf.getUnifiedSymbol());
+				bindedContracts.add(cf);
 			});
 		
-		mard.getPositionDescription().getNonclosedTrades().stream()
-			.map(this::parseFrom)
-			.filter(Objects::nonNull)
-			.forEach(this::onTrade);
+		mard.getPositionDescription().getNonclosedTrades().forEach(this::onTrade);
 		
 		stateMachine.updateState();
 	}
 	
-	private TradeField parseFrom(byte[] data) {
-		try {
-			return TradeField.parseFrom(data);
-		} catch (InvalidProtocolBufferException e) {
-			log.warn("", e);
-			return null;
-		}
-	}
-
 	@Override
-	public void onTick(TickField tick) {
-		if(!StringUtils.equals(tradingDay, tick.getTradingDay())) {
-			tradingDay = tick.getTradingDay();
+	public void onTick(Tick tick) {
+		if(!tradingDay.isEqual(tick.tradingDay())) {
+			tradingDay = tick.tradingDay();
 			tradeDayPreset();
 		}
 		posTable.values().stream().forEach(mp -> mp.onTick(tick));
 	}
 
 	@Override
-	public void onOrder(OrderField order) {
-		if(FieldUtils.isOpen(order.getOffsetFlag())) {
-			posTable.get(order.getDirection(), order.getContract().getUnifiedSymbol()).onOrder(order);
+	public void onOrder(Order order) {
+		if(FieldUtils.isOpen(order.offsetFlag())) {
+			posTable.get(order.direction(), order.contract()).onOrder(order);
 		} else {
-			posTable.get(FieldUtils.getOpposite(order.getDirection()), order.getContract().getUnifiedSymbol()).onOrder(order);
+			posTable.get(FieldUtils.getOpposite(order.direction()), order.contract()).onOrder(order);
 		}
 		stateMachine.onOrder(order);
 	}
 
 	@Override
-	public void onTrade(TradeField trade) {
-		if(!bindedContracts.contains(trade.getContract().getUnifiedSymbol())) {
-			throw new IllegalStateException("模组账户绑定的合约与成交记录不一致：" + String.format("成交记录为[%s]", trade.getContract().getUnifiedSymbol()));
+	public void onTrade(Trade trade) {
+		if(!bindedContracts.contains(trade.contract())) {
+			throw new IllegalStateException("模组账户绑定的合约与成交记录不一致：" + String.format("成交记录为[%s]", trade.contract().unifiedSymbol()));
 		}
-		if(FieldUtils.isOpen(trade.getOffsetFlag())) {
-			posTable.get(trade.getDirection(), trade.getContract().getUnifiedSymbol()).onTrade(trade);
+		if(FieldUtils.isOpen(trade.offsetFlag())) {
+			posTable.get(trade.direction(), trade.contract()).onTrade(trade);
 		} else {
-			posTable.get(FieldUtils.getOpposite(trade.getDirection()), trade.getContract().getUnifiedSymbol()).onTrade(trade);
+			posTable.get(FieldUtils.getOpposite(trade.direction()), trade.contract()).onTrade(trade);
 		}
 		stateMachine.onTrade(trade);
 	}
 
-	public List<PositionField> getPositions() {
-		List<PositionField> result = new ArrayList<>();
-		result.addAll(posTable.row(DirectionEnum.D_Buy).values().stream().map(ModulePosition::convertToPositionField).toList());
-		result.addAll(posTable.row(DirectionEnum.D_Sell).values().stream().map(ModulePosition::convertToPositionField).toList());
+	public List<Position> getPositions() {
+		List<Position> result = new ArrayList<>();
+		result.addAll(posTable.row(DirectionEnum.D_Buy).values().stream().map(ModulePosition::convertToPosition).toList());
+		result.addAll(posTable.row(DirectionEnum.D_Sell).values().stream().map(ModulePosition::convertToPosition).toList());
 		return result;
 	}
 
 	
-	public List<TradeField> getNonclosedTrades() {
-		List<TradeField> result = new ArrayList<>();
+	public List<Trade> getNonclosedTrades() {
+		List<Trade> result = new ArrayList<>();
 		result.addAll(posTable.row(DirectionEnum.D_Buy).values().stream().flatMap(mp -> mp.getNonclosedTrades().stream()).toList());
 		result.addAll(posTable.row(DirectionEnum.D_Sell).values().stream().flatMap(mp -> mp.getNonclosedTrades().stream()).toList());
 		return result;
 	}
 
-	public List<TradeField> getNonclosedTrades(String unifiedSymbol, DirectionEnum direction) {
-		return posTable.row(direction).values().stream()
-				.filter(mp -> StringUtils.equals(unifiedSymbol, mp.getContract().getUnifiedSymbol()))
-				.flatMap(mp -> mp.getNonclosedTrades().stream())
-				.toList();
-	}
-
 	@Override
-	public int getNonclosedPosition(String unifiedSymbol, DirectionEnum direction) {
-		if(!posTable.contains(direction, unifiedSymbol)) {
+	public int getNonclosedPosition(Contract contract, DirectionEnum direction) {
+		if(!posTable.contains(direction, contract)) {
 			return 0;
 		}
-		return posTable.get(direction, unifiedSymbol).totalVolume();
+		return posTable.get(direction, contract).totalVolume();
 	}
 	
 	@Override
-	public int getNonclosedPosition(String unifiedSymbol, DirectionEnum direction, boolean isPresentTradingDay) {
-		ModulePosition mp = posTable.get(direction, unifiedSymbol);
+	public int getNonclosedPosition(Contract contract, DirectionEnum direction, boolean isPresentTradingDay) {
+		ModulePosition mp = posTable.get(direction, contract);
 		if(mp == null) {
 			return 0;
 		}
@@ -213,9 +192,9 @@ public class ModuleAccount implements IModuleAccount{
 	}
 	
 	@Override
-	public int getNonclosedNetPosition(String unifiedSymbol) {
-		int longPos = getNonclosedPosition(unifiedSymbol, DirectionEnum.D_Buy);
-		int shortPos = getNonclosedPosition(unifiedSymbol, DirectionEnum.D_Sell);
+	public int getNonclosedNetPosition(Contract contract) {
+		int longPos = getNonclosedPosition(contract, DirectionEnum.D_Buy);
+		int shortPos = getNonclosedPosition(contract, DirectionEnum.D_Sell);
 		return longPos - shortPos;
 	}
 	
@@ -250,8 +229,8 @@ public class ModuleAccount implements IModuleAccount{
 		return posTable.values().stream().mapToDouble(ModulePosition::totalMargin).sum();
 	}
 	
-	public void onSubmitOrder(SubmitOrderReqField submitOrder) {
-		if(FieldUtils.isOpen(submitOrder.getOffsetFlag())) {
+	public void onSubmitOrder(SubmitOrderReq submitOrder) {
+		if(FieldUtils.isOpen(submitOrder.offsetFlag())) {
 			checkIfHasSufficientAmount(submitOrder);
 		} else {
 			checkIfHasSufficientPosition(submitOrder);
@@ -259,22 +238,22 @@ public class ModuleAccount implements IModuleAccount{
 		stateMachine.onSubmitReq();
 	}
 
-	private void checkIfHasSufficientPosition(SubmitOrderReqField submitOrder) {
-		ContractField contract =  submitOrder.getContract();
-		int available = posTable.get(FieldUtils.getOpposite(submitOrder.getDirection()), contract.getUnifiedSymbol()).totalAvailable();
-		if(available < submitOrder.getVolume()) {
-			logger.warn("模组账户可用持仓为：{}，委托手数：{}", available, submitOrder.getVolume());
+	private void checkIfHasSufficientPosition(SubmitOrderReq submitOrder) {
+		Contract contract =  submitOrder.contract();
+		int available = posTable.get(FieldUtils.getOpposite(submitOrder.direction()), contract).totalAvailable();
+		if(available < submitOrder.volume()) {
+			logger.warn("模组账户可用持仓为：{}，委托手数：{}", available, submitOrder.volume());
 			throw new InsufficientException("模组账户可用持仓不足，无法平仓");
 		}
 	}
 
-	private void checkIfHasSufficientAmount(SubmitOrderReqField submitOrder) {
-		double margin = switch(submitOrder.getDirection()) {
-		case D_Buy -> submitOrder.getContract().getLongMarginRatio();
-		case D_Sell -> submitOrder.getContract().getShortMarginRatio();
+	private void checkIfHasSufficientAmount(SubmitOrderReq submitOrder) {
+		double margin = switch(submitOrder.direction()) {
+		case D_Buy -> submitOrder.contract().longMarginRatio();
+		case D_Sell -> submitOrder.contract().shortMarginRatio();
 		default -> throw new IllegalStateException("开仓方向不合法");
 		};
-		double cost = submitOrder.getPrice() * submitOrder.getVolume() * submitOrder.getContract().getMultiplier() * margin;
+		double cost = submitOrder.price() * submitOrder.volume() * submitOrder.contract().multiplier() * margin;
 		if(availableAmount() < cost) {
 			logger.warn("模组账户可用资金为：{}，开仓成本为：{}", availableAmount(), cost);
 			throw new InsufficientException("模组账户可用资金不足，无法开仓");

@@ -8,8 +8,6 @@ import javax.persistence.Index;
 import javax.persistence.Lob;
 import javax.persistence.Table;
 
-import org.dromara.northstar.common.model.core.Bar;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -36,6 +34,6 @@ public class BarDO {
 	
 	private long expiredAt;
 	@Lob
-	private Bar bar;
+	private byte[] barData;
 
 }

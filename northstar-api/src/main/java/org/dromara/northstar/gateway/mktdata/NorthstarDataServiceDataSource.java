@@ -4,7 +4,6 @@ import java.net.URI;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -22,6 +21,7 @@ import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.common.model.core.Bar;
 import org.dromara.northstar.common.model.core.Contract;
+import org.dromara.northstar.common.utils.CommonUtils;
 import org.dromara.northstar.common.utils.DateTimeUtils;
 import org.dromara.northstar.common.utils.LocalEnvUtils;
 import org.springframework.http.HttpEntity;
@@ -265,7 +265,7 @@ public class NorthstarDataServiceDataSource implements IDataSource{
 				actionDay = dateTime.toLocalDate();
 				actionTime = dateTime.toLocalTime();
 				tradingDay = dateTimeUtils.convertTradingDayForCNMarket(actionDay, actionTime);
-				timestamp = dateTime.toInstant(ZoneOffset.ofHours(8)).toEpochMilli();
+				timestamp = CommonUtils.localDateTimeToMills(dateTime);
 			}
 			
 			if(StringUtils.isNotBlank(getValue("trade_date", fieldIndexMap, item, ""))) {
@@ -274,7 +274,7 @@ public class NorthstarDataServiceDataSource implements IDataSource{
 				actionDay = dateTime.toLocalDate();
 				actionTime = dateTime.toLocalTime();
 				tradingDay = actionDay;
-				timestamp = dateTime.toInstant(ZoneOffset.ofHours(8)).toEpochMilli();
+				timestamp = CommonUtils.localDateTimeToMills(dateTime);
 			}
 			
 			try {				
