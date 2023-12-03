@@ -8,7 +8,7 @@ import java.time.ZoneId;
 
 public class MarketDataLoadingUtils {
 	
-	private LocalTime breakingTime = LocalTime.of(20, 0);
+	private LocalTime breakingTime = DateTimeUtils.fromCacheTime(20, 0);
 
 	public LocalDate getCurrentTradeDay(long curTimestamp, boolean autoExtend) {
 		LocalDateTime ldt = LocalDateTime.ofInstant(Instant.ofEpochMilli(curTimestamp), ZoneId.systemDefault());

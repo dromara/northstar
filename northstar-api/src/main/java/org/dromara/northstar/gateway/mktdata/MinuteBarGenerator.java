@@ -10,13 +10,14 @@ import org.dromara.northstar.common.constant.TickType;
 import org.dromara.northstar.common.model.core.Bar;
 import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.common.model.core.Tick;
+import org.dromara.northstar.common.utils.DateTimeUtils;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class MinuteBarGenerator {
 	
-	private static final LocalTime MIDNIGHT = LocalTime.of(0, 0);
+	private static final LocalTime MIDNIGHT = DateTimeUtils.fromCacheTime(0, 0);
 
 	private LocalTime cutoffTime;
 	
@@ -75,7 +76,7 @@ public class MinuteBarGenerator {
 			finishOfBar();
 		}
 		if(Objects.isNull(proto)) {
-			cutoffTime = tick.actionTime().withSecond(0).withNano(0).plusMinutes(1);
+			cutoffTime = DateTimeUtils.fromCacheTime(tick.actionTime().withSecond(0).withNano(0).plusMinutes(1));
 			open = tick.lastPrice();
 			high = tick.lastPrice();
 			low = tick.lastPrice();

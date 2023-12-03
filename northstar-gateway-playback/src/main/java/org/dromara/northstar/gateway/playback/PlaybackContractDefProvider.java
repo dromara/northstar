@@ -1,6 +1,5 @@
 package org.dromara.northstar.gateway.playback;
 
-import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,6 +8,7 @@ import java.util.regex.Pattern;
 import org.dromara.northstar.common.model.core.ContractDefinition;
 import org.dromara.northstar.common.model.core.TimeSlot;
 import org.dromara.northstar.common.model.core.TradeTimeDefinition;
+import org.dromara.northstar.common.utils.DateTimeUtils;
 import org.springframework.stereotype.Component;
 
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
@@ -118,16 +118,16 @@ public class PlaybackContractDefProvider {
 		);
 	}
 	
-	private TimeSlot tsNight1 = TimeSlot.builder().start(LocalTime.of(21, 0)).end(LocalTime.of(23, 0)).build();
-	private TimeSlot tsNight2 = TimeSlot.builder().start(LocalTime.of(21, 0)).end(LocalTime.of(1, 0)).build();
-	private TimeSlot tsNight3 = TimeSlot.builder().start(LocalTime.of(21, 0)).end(LocalTime.of(2, 30)).build();
+	private TimeSlot tsNight1 = TimeSlot.builder().start(DateTimeUtils.fromCacheTime(21, 0)).end(DateTimeUtils.fromCacheTime(23, 0)).build();
+	private TimeSlot tsNight2 = TimeSlot.builder().start(DateTimeUtils.fromCacheTime(21, 0)).end(DateTimeUtils.fromCacheTime(1, 0)).build();
+	private TimeSlot tsNight3 = TimeSlot.builder().start(DateTimeUtils.fromCacheTime(21, 0)).end(DateTimeUtils.fromCacheTime(2, 30)).build();
 	
-	private TimeSlot tsDay1 = TimeSlot.builder().start(LocalTime.of(9, 0)).end(LocalTime.of(10, 15)).build();
-	private TimeSlot tsDay2 = TimeSlot.builder().start(LocalTime.of(10, 30)).end(LocalTime.of(11, 30)).build();
-	private TimeSlot tsDay3 = TimeSlot.builder().start(LocalTime.of(9, 30)).end(LocalTime.of(11, 30)).build();
+	private TimeSlot tsDay1 = TimeSlot.builder().start(DateTimeUtils.fromCacheTime(9, 0)).end(DateTimeUtils.fromCacheTime(10, 15)).build();
+	private TimeSlot tsDay2 = TimeSlot.builder().start(DateTimeUtils.fromCacheTime(10, 30)).end(DateTimeUtils.fromCacheTime(11, 30)).build();
+	private TimeSlot tsDay3 = TimeSlot.builder().start(DateTimeUtils.fromCacheTime(9, 30)).end(DateTimeUtils.fromCacheTime(11, 30)).build();
 	
-	private TimeSlot tsNoon1 = TimeSlot.builder().start(LocalTime.of(13, 30)).end(LocalTime.of(15, 00)).build();
-	private TimeSlot tsNoon2 = TimeSlot.builder().start(LocalTime.of(13, 30)).end(LocalTime.of(15, 15)).build();
+	private TimeSlot tsNoon1 = TimeSlot.builder().start(DateTimeUtils.fromCacheTime(13, 30)).end(DateTimeUtils.fromCacheTime(15, 00)).build();
+	private TimeSlot tsNoon2 = TimeSlot.builder().start(DateTimeUtils.fromCacheTime(13, 30)).end(DateTimeUtils.fromCacheTime(15, 15)).build();
 	
 	private Map<String, TradeTimeDefinition> timeDefMap = new HashMap<>() {
 		private static final long serialVersionUID = 1L;

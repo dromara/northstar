@@ -3,7 +3,6 @@ package org.dromara.northstar.gateway.playback;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.Objects;
 import java.util.Set;
 import java.util.Timer;
@@ -21,6 +20,7 @@ import org.dromara.northstar.common.model.PlaybackRuntimeDescription;
 import org.dromara.northstar.common.model.core.Bar;
 import org.dromara.northstar.common.model.core.Notice;
 import org.dromara.northstar.common.model.core.Tick;
+import org.dromara.northstar.common.utils.DateTimeUtils;
 import org.dromara.northstar.data.IPlaybackRuntimeRepository;
 import org.dromara.northstar.gateway.IContractManager;
 import org.dromara.northstar.gateway.playback.utils.ContractDataLoader;
@@ -103,7 +103,7 @@ public class PlaybackContextV2 implements IPlaybackContext{
 					playbackTradeDate = preloadEndDate.plusDays(1);
 					log.debug("回放网关 [{}] 正在加载预热数据，预热时间段：{} -> {}", gatewayId, preloadStartDate, preloadEndDate);
 					
-					playbackTimeState = LocalDateTime.of(preloadEndDate, LocalTime.of(21, 0));
+					playbackTimeState = LocalDateTime.of(preloadEndDate, DateTimeUtils.fromCacheTime(21, 0));
 					CountDownLatch cdl = new CountDownLatch(loaders.size());
 					
 					loaders.stream().forEach(loader -> 
