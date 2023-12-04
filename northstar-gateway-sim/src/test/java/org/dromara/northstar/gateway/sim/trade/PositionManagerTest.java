@@ -37,14 +37,14 @@ class PositionManagerTest {
 		posMgr.onTrade(openTrade);
 		posMgr.onOrder(order1);
 		
-		assertThat(posMgr.getAvailablePosition(DirectionEnum.D_Buy, openTrade.contract().unifiedSymbol())).isEqualTo(1);
+		assertThat(posMgr.getAvailablePosition(DirectionEnum.D_Buy, openTrade.contract())).isEqualTo(1);
 	}
 
 	@Test
 	void testOnTrade() {
 		posMgr.onTrade(openTrade);
 		
-		assertThat(posMgr.getAvailablePosition(DirectionEnum.D_Buy, openTrade.contract().unifiedSymbol())).isEqualTo(2);
+		assertThat(posMgr.getAvailablePosition(DirectionEnum.D_Buy, openTrade.contract())).isEqualTo(2);
 		assertThat(posMgr.totalMargin()).isCloseTo(8000, offset(1D));
 	}
 

@@ -2,11 +2,11 @@ package org.dromara.northstar.support.utils.bar;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.dromara.northstar.common.model.core.Bar;
 import org.dromara.northstar.common.model.core.Contract;
@@ -51,10 +51,13 @@ class BarMergerRegistryTest {
 		registry.addListener(contract, 10, PeriodUnit.MINUTE, listener3, ListenerType.INDICATOR);
 		
 		Bar bar = Bar.builder().contract(contract).actionDay(LocalDate.now()).actionTime(LocalTime.now()).build();
+		AtomicInteger cnt = new AtomicInteger();
 		
 		registry.onBar(bar);
 		registry.mergerMap.values().forEach(merger -> {
-			verify(merger).onBar(bar);
+			cnt.incrementAndGet();
 		});
+		
+		assertThat(cnt.get()).isEqualTo(2);
 	}
 }

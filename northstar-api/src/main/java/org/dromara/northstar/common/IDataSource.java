@@ -23,7 +23,7 @@ public interface IDataSource {
 	 * @return
 	 */
 	@Retryable
-	@Cacheable(cacheNames = "bars", key = "'Minutely_' + #contract.getUnifiedSymbol() + '_' + #startDate + '_' + #endDate")
+	@Cacheable(cacheNames = "bars", key = "'Minutely_' + #contract.unifiedSymbol() + '_' + #startDate + '_' + #endDate")
 	List<Bar> getMinutelyData(Contract contract, LocalDate startDate, LocalDate endDate);
 	
 	/**
@@ -34,7 +34,7 @@ public interface IDataSource {
 	 * @return
 	 */
 	@Retryable
-	@Cacheable(cacheNames = "bars", key = "'Quarterly_' + #contract.getUnifiedSymbol() + '_' + #startDate + '_' + #endDate")
+	@Cacheable(cacheNames = "bars", key = "'Quarterly_' + #contract.unifiedSymbol() + '_' + #startDate + '_' + #endDate")
 	List<Bar> getQuarterlyData(Contract contract, LocalDate startDate, LocalDate endDate);
 	
 	/**
@@ -45,7 +45,7 @@ public interface IDataSource {
 	 * @return
 	 */
 	@Retryable
-	@Cacheable(cacheNames = "bars", key = "'Hourly_' + #contract.getUnifiedSymbol() + '_' + #startDate + '_' + #endDate")
+	@Cacheable(cacheNames = "bars", key = "'Hourly_' + #contract.unifiedSymbol() + '_' + #startDate + '_' + #endDate")
 	List<Bar> getHourlyData(Contract contract, LocalDate startDate, LocalDate endDate);
 	
 	/**
@@ -56,7 +56,7 @@ public interface IDataSource {
 	 * @return
 	 */
 	@Retryable
-	@Cacheable(cacheNames = "bars", key = "'Daily_' + #contract.getUnifiedSymbol() + '_' + #startDate + '_' + #endDate")
+	@Cacheable(cacheNames = "bars", key = "'Daily_' + #contract.unifiedSymbol() + '_' + #startDate + '_' + #endDate")
 	List<Bar> getDailyData(Contract contract, LocalDate startDate, LocalDate endDate);
 	
 	/**

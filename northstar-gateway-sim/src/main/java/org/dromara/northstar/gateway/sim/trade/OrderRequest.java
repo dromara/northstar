@@ -113,7 +113,7 @@ public class OrderRequest implements TickDataAware{
 			}
 		} else {
 			DirectionEnum posDir = FieldUtils.getOpposite(submitOrderReq.direction());
-			int availablePos = account.getPositionManager().getAvailablePosition(posDir, submitOrderReq.contract().unifiedSymbol());
+			int availablePos = account.getPositionManager().getAvailablePosition(posDir, submitOrderReq.contract());
 			if(submitOrderReq.volume() > availablePos) {
 				log.warn("[{}] 可用持仓不足，无法平仓。可用：{}，实际平仓：{}", submitOrderReq.gatewayId(), availablePos, submitOrderReq.volume());
 				orderTemplate = orderTemplate.toBuilder().statusMsg("废单").orderStatus(OrderStatusEnum.OS_Rejected).build();

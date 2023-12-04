@@ -147,6 +147,7 @@ class ModuleControllerTest {
 		when(mktCenter.getContract(any(ChannelType.class), anyString())).thenReturn(c);
 		when(c.contract()).thenReturn(Contract.builder().channelType(ChannelType.PLAYBACK).unifiedSymbol("rb0000@SHFE@FUTURES")
 				.contractDefinition(cd)
+				.name("螺纹钢指数")
 				.build());
 		
 		long time = System.currentTimeMillis();

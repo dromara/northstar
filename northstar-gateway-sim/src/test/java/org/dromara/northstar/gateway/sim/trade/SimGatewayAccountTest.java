@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 import java.time.LocalDate;
 
 import org.dromara.northstar.common.model.core.Contract;
+import org.dromara.northstar.common.model.core.ContractDefinition;
 import org.dromara.northstar.common.model.core.Trade;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,7 +19,8 @@ import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 class SimGatewayAccountTest {
 
 	SimGatewayAccount account = new SimGatewayAccount("testAccount");
-	Contract c1 = Contract.builder().symbol("rb2205").multiplier(10).longMarginRatio(0.08).shortMarginRatio(0.08).build();
+	ContractDefinition cd = ContractDefinition.builder().commissionFee(5).build();
+	Contract c1 = Contract.builder().symbol("rb2205").multiplier(10).longMarginRatio(0.08).shortMarginRatio(0.08).contractDefinition(cd).build();
 
 	Trade openTrade = Trade.builder()
 			.contract(c1).price(5000).volume(2).direction(DirectionEnum.D_Buy)
