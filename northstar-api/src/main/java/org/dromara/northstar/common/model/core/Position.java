@@ -8,7 +8,6 @@ import xyz.redtorch.pb.CoreField.PositionField;
 @Builder(toBuilder = true)
 public record Position(
         String positionId,						// 仓位ID，通常是<合约代码@交易所代码@产品类型@方向@投机套保标志@账户@币种@网关>
-        String accountId,
         PositionDirectionEnum positionDirection,	// 仓位方向
         int position,							// 持仓数量
         int frozen,								// 冻结数量
@@ -32,7 +31,7 @@ public record Position(
 	public PositionField toPositionField() {
 		return PositionField.newBuilder()
 				.setPositionId(positionId)
-				.setAccountId(accountId)
+				.setAccountId(gatewayId)
 				.setPositionDirection(positionDirection)
 				.setPosition(position)
 				.setFrozen(frozen)

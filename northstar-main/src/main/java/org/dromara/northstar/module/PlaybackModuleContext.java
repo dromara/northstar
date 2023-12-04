@@ -146,7 +146,6 @@ public class PlaybackModuleContext extends ModuleContext implements IModuleConte
 				.price(lastTick.lastPrice())
 				.tradeTimestamp(lastTick.actionTimestamp())
 				.direction(OrderUtils.resolveDirection(operation))
-				.hedgeFlag(HedgeFlagEnum.HF_Speculation)
 				.offsetFlag(offsetFlag)
 				.priceSource(PriceSourceEnum.PSRC_LastPrice)
 				.tradeDate(lastTick.actionDay())

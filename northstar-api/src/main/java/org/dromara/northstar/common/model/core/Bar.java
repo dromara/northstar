@@ -5,6 +5,8 @@ import java.time.LocalTime;
 
 import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.constant.DateTimeConstant;
+import org.dromara.northstar.common.model.Identifier;
+import org.dromara.northstar.gateway.IContractManager;
 
 import lombok.Builder;
 import xyz.redtorch.pb.CoreField.BarField;
@@ -55,6 +57,31 @@ public record Bar(
 				.setPreClosePrice(preClosePrice)
 				.setPreSettlePrice(preSettlePrice)
 				.setChannelType(channelType.toString())
+				.build();
+	}
+	
+	public static Bar of(BarField bar, IContractManager contractMgr) {
+		return Bar.builder()
+				.gatewayId(bar.getGatewayId())
+				.contract(contractMgr.getContract(Identifier.of(bar.getUnifiedSymbol())).contract())
+				.actionDay(LocalDate.parse(bar.getActionDay(), DateTimeConstant.D_FORMAT_INT_FORMATTER))
+				.actionTime(LocalTime.parse(bar.getActionTime(), DateTimeConstant.T_FORMAT_FORMATTER))
+				.tradingDay(LocalDate.parse(bar.getTradingDay(), DateTimeConstant.D_FORMAT_INT_FORMATTER))
+				.actionTimestamp(bar.getActionTimestamp())
+				.openPrice(bar.getOpenPrice())
+				.highPrice(bar.getHighPrice())
+				.lowPrice(bar.getLowPrice())
+				.closePrice(bar.getClosePrice())
+				.openInterest(bar.getOpenInterest())
+				.openInterestDelta(bar.getOpenInterestDelta())
+				.volume(bar.getVolume())
+				.volumeDelta(bar.getVolumeDelta())
+				.turnover(bar.getTurnover())
+				.turnoverDelta(bar.getTurnoverDelta())
+				.preOpenInterest(bar.getPreOpenInterest())
+				.preClosePrice(bar.getPreClosePrice())
+				.preSettlePrice(bar.getPreSettlePrice())
+				.channelType(ChannelType.valueOf(bar.getChannelType()))
 				.build();
 	}
 }

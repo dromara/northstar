@@ -67,6 +67,7 @@ public class SimTickGenerator {
 				.askVolume(List.of(0, 0, 0, 0, 0))
 				.bidVolume(List.of(0, 0, 0, 0, 0))
 				.contract(contract)
+				.tradingDay(ldt.toLocalDate())
 				.actionDay(ldt.toLocalDate())
 				.actionTime(ldt.toLocalTime())
 				.openInterest(openInterest)

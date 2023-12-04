@@ -37,9 +37,6 @@ class ModuleRepoAdapterTest {
 
 	static IModuleRepository repo;
 
-	//	TradeField openTrade = fieldFactory.makeTradeField("rb2210", 1000, 1, DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open);
-//	TradeField closeTrade = fieldFactory.makeTradeField("rb2210", 1000, 1, DirectionEnum.D_Sell, OffsetFlagEnum.OF_Close);
-
 	Contract contract = Contract.builder().unifiedSymbol("rb2210").build();
 	Trade openTrade = Trade.builder()
 			.contract(contract)
@@ -69,7 +66,7 @@ class ModuleRepoAdapterTest {
 			.type(ModuleType.SPECULATION)
 			.moduleAccountSettingsDescription(List.of(mad))
 			.build();
-
+	
 	ModuleAccountRuntimeDescription mard = ModuleAccountRuntimeDescription.builder()
 			.initBalance(100000)
 			.build();

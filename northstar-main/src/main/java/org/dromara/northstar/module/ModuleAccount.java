@@ -31,9 +31,12 @@ import org.slf4j.Logger;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
+import com.google.protobuf.InvalidProtocolBufferException;
 
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
+import xyz.redtorch.pb.CoreField.TradeField;
 
 /**
  * 模组账户
@@ -41,6 +44,7 @@ import xyz.redtorch.pb.CoreEnum.DirectionEnum;
  * @author KevinHuangwl
  *
  */
+@Slf4j
 public class ModuleAccount implements IModuleAccount{
 
 	private ModuleStateMachine stateMachine;
@@ -114,18 +118,31 @@ public class ModuleAccount implements IModuleAccount{
 				IContract contract = contractMgr.getContract(Identifier.of(contractSimple.getValue()));
 				Contract cf = contract.contract();
 				
-				ModulePosition buyPos = new ModulePosition(moduleRtDescription.getModuleName(), cf, DirectionEnum.D_Buy, moduleDescription.getClosingPolicy(), onDealCallback);
+				ModulePosition buyPos = new ModulePosition(cf, DirectionEnum.D_Buy, moduleDescription.getClosingPolicy(), onDealCallback);
 				posTable.put(DirectionEnum.D_Buy, cf, buyPos);
 				
-				ModulePosition sellPos = new ModulePosition(moduleRtDescription.getModuleName(), cf, DirectionEnum.D_Sell, moduleDescription.getClosingPolicy(), onDealCallback);
+				ModulePosition sellPos = new ModulePosition(cf, DirectionEnum.D_Sell, moduleDescription.getClosingPolicy(), onDealCallback);
 				posTable.put(DirectionEnum.D_Sell, cf, sellPos);
 				
 				bindedContracts.add(cf);
 			});
 		
-		mard.getPositionDescription().getNonclosedTrades().forEach(this::onTrade);
+		mard.getPositionDescription().getNonclosedTrades()
+			.stream()
+			.map(this::convertFrom)
+			.map(t -> Trade.of(t, contractMgr))
+			.forEach(this::onTrade);
 		
 		stateMachine.updateState();
+	}
+	
+	private TradeField convertFrom(byte[] data) {
+		try {
+			return TradeField.parseFrom(data);
+		} catch (InvalidProtocolBufferException e) {
+			log.warn("", e);
+			return null;
+		}
 	}
 	
 	@Override

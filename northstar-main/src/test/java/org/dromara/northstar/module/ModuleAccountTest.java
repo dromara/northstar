@@ -107,7 +107,7 @@ class ModuleAccountTest {
 				.accCommission(10)
 				.accDealVolume(3)
 				.positionDescription(ModulePositionDescription.builder()
-						.nonclosedTrades(List.of(trade, trade2))
+						.nonclosedTrades(List.of(trade, trade2).stream().map(t -> t.toTradeField().toByteArray()).toList())
 						.build())
 				.build();
 

@@ -2,10 +2,12 @@ package org.dromara.northstar.common.model.core;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.Optional;
 
 import lombok.Builder;
+import org.dromara.northstar.common.model.Identifier;
+import org.dromara.northstar.gateway.IContractManager;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
-import xyz.redtorch.pb.CoreEnum.HedgeFlagEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreEnum.PriceSourceEnum;
 import xyz.redtorch.pb.CoreEnum.TradeTypeEnum;
@@ -18,7 +20,6 @@ public record Trade(
 		String orderId,				// 网关订单ID
 		DirectionEnum direction,      // 方向
 		OffsetFlagEnum offsetFlag,  // 开平
-		HedgeFlagEnum hedgeFlag, // 投机套保标识
 		double price,  // 价格
 		int volume,  // 数量
 		TradeTypeEnum tradeType, // 成交类型
@@ -32,21 +33,39 @@ public record Trade(
 
 	public TradeField toTradeField() {
 		return TradeField.newBuilder()
-				.setGatewayId(gatewayId)
-				.setOriginOrderId(originOrderId)
-				.setOrderId(orderId)
+				.setGatewayId(Optional.ofNullable(gatewayId).orElse(""))
+				.setOriginOrderId(Optional.ofNullable(originOrderId).orElse(""))
+				.setOrderId(Optional.ofNullable(orderId).orElse(""))
 				.setDirection(direction)
 				.setOffsetFlag(offsetFlag)
-				.setHedgeFlag(hedgeFlag)
 				.setPrice(price)
 				.setVolume(volume)
 				.setTradeType(tradeType)
 				.setPriceSource(priceSource)
-				.setTradingDay(tradingDay.toString())
-				.setTradeDate(tradeDate.toString())
-				.setTradeTime(tradeTime.toString())
+				.setTradingDay(Optional.ofNullable(tradingDay).orElse(LocalDate.MIN).toString())
+				.setTradeDate(Optional.ofNullable(tradeDate).orElse(LocalDate.MIN).toString())
+				.setTradeTime(Optional.ofNullable(tradeTime).orElse(LocalTime.MIN).toString())
 				.setTradeTimestamp(tradeTimestamp)
 				.setContract(contract.toContractField())
+				.build();
+	}
+
+	public static Trade of(TradeField trade, IContractManager contractManager){
+		return Trade.builder()
+				.gatewayId(trade.getGatewayId())
+				.originOrderId(trade.getOriginOrderId())
+				.orderId(trade.getOrderId())
+				.direction(trade.getDirection())
+				.offsetFlag(trade.getOffsetFlag())
+				.price(trade.getPrice())
+				.volume(trade.getVolume())
+				.tradeType(trade.getTradeType())
+				.priceSource(trade.getPriceSource())
+				.tradingDay(LocalDate.parse(trade.getTradingDay()))
+				.tradeDate(LocalDate.parse(trade.getTradeDate()))
+				.tradeTime(LocalTime.parse(trade.getTradeTime()))
+				.tradeTimestamp(trade.getTradeTimestamp())
+				.contract(contractManager.getContract(Identifier.of(trade.getContract().getUnifiedSymbol())).contract())
 				.build();
 	}
 }

@@ -16,18 +16,23 @@ import org.dromara.northstar.common.utils.CommonUtils;
 import org.dromara.northstar.data.IMarketDataRepository;
 import org.dromara.northstar.data.jdbc.entity.BarDO;
 import org.dromara.northstar.gateway.IContract;
+import org.dromara.northstar.gateway.IContractManager;
 
-import com.alibaba.fastjson2.JSON;
+import com.google.protobuf.InvalidProtocolBufferException;
 
 import lombok.extern.slf4j.Slf4j;
+import xyz.redtorch.pb.CoreField.BarField;
 
 @Slf4j
 public class MarketDataRepoAdapter implements IMarketDataRepository{
 
 	private MarketDataRepository delegate;
 	
-	public MarketDataRepoAdapter(MarketDataRepository delegate) {
+	private IContractManager contractMgr;
+	
+	public MarketDataRepoAdapter(MarketDataRepository delegate, IContractManager contractMgr) {
 		this.delegate = delegate;
+		this.contractMgr = contractMgr;
 	}
 	
 	@Override
@@ -36,7 +41,7 @@ public class MarketDataRepoAdapter implements IMarketDataRepository{
 				.unifiedSymbol(bar.contract().unifiedSymbol())
 				.tradingDay(bar.tradingDay().format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
 				.expiredAt(CommonUtils.localDateTimeToMills(LocalDateTime.of(bar.tradingDay(), LocalTime.of(20, 0))))
-				.barData(JSON.toJSONBytes(bar))
+				.barData(bar.toBarField().toByteArray())
 				.build());
 	}
 
@@ -85,12 +90,22 @@ public class MarketDataRepoAdapter implements IMarketDataRepository{
 			return delegate.findByUnifiedSymbolAndTradingDay(unifiedSymbol, tradingDay)
 					.stream()
 					.map(BarDO::getBarData)
-					.map(data -> JSON.parseObject(data, Bar.class))
+					.map(this::convertFrom)
 					.filter(Objects::nonNull)
+					.map(bar -> Bar.of(bar, contractMgr))
 					.toList();
 		} catch (Exception e) {
 			log.error("{}", e.getMessage());
 			return Collections.emptyList();
+		}
+	}
+	
+	private BarField convertFrom(byte[] data) {
+		try {
+			return BarField.parseFrom(data);
+		} catch (InvalidProtocolBufferException e) {
+			log.warn("", e);
+			return null;
 		}
 	}
 	
