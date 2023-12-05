@@ -39,7 +39,7 @@ class SimAccountRepoAdapterTest {
 			.gatewayId(accountId)
 			.totalDeposit(10000)
 			.totalCommission(30)
-			.openTrades(List.of(trade))
+			.openTrades(List.of(trade.toTradeField().toByteArray()))
 			.build();
 
 	@BeforeEach

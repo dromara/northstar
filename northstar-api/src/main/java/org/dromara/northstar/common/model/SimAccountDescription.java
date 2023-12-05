@@ -2,8 +2,6 @@ package org.dromara.northstar.common.model;
 
 import java.util.List;
 
-import org.dromara.northstar.common.model.core.Trade;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -42,6 +40,6 @@ public class SimAccountDescription {
 	/**
 	 * 未平仓（开仓）成交
 	 */
-	private List<Trade> openTrades;
+	private List<byte[]> openTrades;
 	
 }

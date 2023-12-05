@@ -4,12 +4,16 @@ import org.dromara.northstar.common.model.SimAccountDescription;
 import org.dromara.northstar.common.model.core.Account;
 import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.common.model.core.Trade;
+import org.dromara.northstar.gateway.IContractManager;
+
+import com.google.protobuf.InvalidProtocolBufferException;
 
 import cn.hutool.core.lang.Assert;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import xyz.redtorch.pb.CoreEnum.CurrencyEnum;
+import xyz.redtorch.pb.CoreField.TradeField;
 
 @Slf4j
 public class SimGatewayAccount {
@@ -33,13 +37,22 @@ public class SimGatewayAccount {
 		this.positionManager = new PositionManager(this);
 	}
 	
-	public SimGatewayAccount(SimAccountDescription accountDescription) {
+	public SimGatewayAccount(SimAccountDescription accountDescription, IContractManager contractMgr) {
 		this.gatewayId = accountDescription.getGatewayId();
-		this.positionManager = new PositionManager(this, accountDescription.getOpenTrades());
+		this.positionManager = new PositionManager(this, accountDescription.getOpenTrades().stream().map(this::parse).map(tf -> Trade.of(tf, contractMgr)).toList());
 		this.totalCloseProfit = accountDescription.getTotalCloseProfit();
 		this.totalCommission = accountDescription.getTotalCommission();
 		this.totalDeposit = accountDescription.getTotalDeposit();
 		this.totalWithdraw = accountDescription.getTotalWithdraw();
+	}
+	
+	private TradeField parse(byte[] data) {
+		try {
+			return TradeField.parseFrom(data);
+		} catch (InvalidProtocolBufferException e) {
+			log.warn("", e);
+			return null;
+		}
 	}
 	
 	public Account account() {
@@ -75,7 +88,7 @@ public class SimGatewayAccount {
 				.totalCommission(totalCommission)
 				.totalDeposit(totalDeposit)
 				.totalWithdraw(totalWithdraw)
-				.openTrades(positionManager.getNonclosedTrade())
+				.openTrades(positionManager.getNonclosedTrade().stream().map(t -> t.toTradeField().toByteArray()).toList())
 				.build();
 	}
 	

@@ -35,6 +35,7 @@ public record Position(
 		}
 		if(gatewayId != null) {
 			builder.setAccountId(gatewayId);
+			builder.setGatewayId(gatewayId);
 		}
 		if (positionDirection != null) {
 			builder.setPositionDirection(positionDirection);
