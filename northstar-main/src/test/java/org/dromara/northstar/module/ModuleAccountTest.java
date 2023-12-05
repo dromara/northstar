@@ -6,6 +6,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 import org.dromara.northstar.common.constant.ClosingPolicy;
@@ -57,6 +58,9 @@ class ModuleAccountTest {
 			.offsetFlag(CoreEnum.OffsetFlagEnum.OF_Open)
 			.price(1000)
 			.volume(2)
+			.tradeDate(LocalDate.now())
+			.tradingDay(LocalDate.now())
+			.tradeTime(LocalTime.now())
 			.build();
 	Trade trade2 = Trade.builder()
 			.contract(contract)
@@ -64,6 +68,9 @@ class ModuleAccountTest {
 			.offsetFlag(CoreEnum.OffsetFlagEnum.OF_Open)
 			.price(1000)
 			.volume(2)
+			.tradeDate(LocalDate.now())
+			.tradingDay(LocalDate.now())
+			.tradeTime(LocalTime.now())
 			.build();
 	Trade closeTrade = Trade.builder()
 			.contract(contract)
@@ -71,6 +78,9 @@ class ModuleAccountTest {
 			.offsetFlag(CoreEnum.OffsetFlagEnum.OF_Close)
 			.price(1200)
 			.volume(2)
+			.tradeDate(LocalDate.now())
+			.tradingDay(LocalDate.now())
+			.tradeTime(LocalTime.now())
 			.build();
 	Tick tick = Tick.builder()
 			.contract(contract)
