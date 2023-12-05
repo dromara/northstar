@@ -3,6 +3,8 @@ package org.dromara.northstar.common.model.core;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
+import org.dromara.northstar.common.constant.DateTimeConstant;
+
 import lombok.Builder;
 import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
@@ -43,28 +45,69 @@ public record Order(
 ) {
 
 	public OrderField toOrderField() {
-		return OrderField.newBuilder()
-				.setGatewayId(gatewayId)
-				.setOriginOrderId(originOrderId)
-				.setOrderId(orderId)
-				.setDirection(direction)
-				.setOffsetFlag(offsetFlag)
-				.setHedgeFlag(hedgeFlag)
-				.setOrderPriceType(orderPriceType)
-				.setOrderStatus(orderStatus)
+		OrderField.Builder builder = OrderField.newBuilder();
+		if (gatewayId != null) {
+			builder.setGatewayId(gatewayId);
+		}
+		if (originOrderId != null) {
+			builder.setOriginOrderId(originOrderId);
+		}
+		if (orderId != null) {
+			builder.setOrderId(orderId);
+		}
+		if (direction != null) {
+			builder.setDirection(direction);
+		}
+		if (offsetFlag != null) {
+			builder.setOffsetFlag(offsetFlag);
+		}
+		if (hedgeFlag != null) {
+			builder.setHedgeFlag(hedgeFlag);
+		}
+		if (orderPriceType != null) {
+			builder.setOrderPriceType(orderPriceType);
+		}
+		if (orderStatus != null) {
+			builder.setOrderStatus(orderStatus);
+		}
+		if (timeCondition != null) {
+			builder.setTimeCondition(timeCondition);
+		}
+		if (gtdDate != null) {
+			builder.setGtdDate(gtdDate);
+		}
+		if (volumeCondition != null) {
+			builder.setVolumeCondition(volumeCondition);
+		}
+		if (contingentCondition != null) {
+			builder.setContingentCondition(contingentCondition);
+		}
+		if (forceCloseReason != null) {
+			builder.setForceCloseReason(forceCloseReason);
+		}
+		if (tradingDay != null) {
+			builder.setTradingDay(tradingDay.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
+		}
+		if (updateDate != null) {
+			builder.setOrderDate(updateDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
+		}
+		if (updateTime != null) {
+			builder.setUpdateTime(updateTime.format(DateTimeConstant.T_FORMAT_FORMATTER));
+		}
+		if (statusMsg != null) {
+			builder.setStatusMsg(statusMsg);
+		}
+		if (contract != null) {
+			builder.setContract(contract.toContractField());
+		}
+
+		return builder
 				.setPrice(price)
 				.setTotalVolume(totalVolume)
 				.setTradedVolume(tradedVolume)
-				.setTimeCondition(timeCondition)
-				.setGtdDate(gtdDate)
-				.setVolumeCondition(volumeCondition)
 				.setMinVolume(minVolume)
-				.setContingentCondition(contingentCondition)
 				.setStopPrice(stopPrice)
-				.setForceCloseReason(forceCloseReason)
-				.setTradingDay(tradingDay.toString())
-				.setStatusMsg(statusMsg)
-				.setContract(contract.toContractField())
 				.build();
 	}
+
 }

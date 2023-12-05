@@ -2,11 +2,12 @@ package org.dromara.northstar.common.model.core;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.Optional;
 
-import lombok.Builder;
+import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.common.model.Identifier;
 import org.dromara.northstar.gateway.IContractManager;
+
+import lombok.Builder;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreEnum.PriceSourceEnum;
@@ -32,21 +33,45 @@ public record Trade(
 ) {
 
 	public TradeField toTradeField() {
-		return TradeField.newBuilder()
-				.setGatewayId(Optional.ofNullable(gatewayId).orElse(""))
-				.setOriginOrderId(Optional.ofNullable(originOrderId).orElse(""))
-				.setOrderId(Optional.ofNullable(orderId).orElse(""))
-				.setDirection(direction)
-				.setOffsetFlag(offsetFlag)
+		TradeField.Builder builder = TradeField.newBuilder();
+		if (gatewayId != null) {
+			builder.setGatewayId(gatewayId);
+		}
+		if (originOrderId != null) {
+			builder.setOriginOrderId(originOrderId);
+		}
+		if (orderId != null) {
+			builder.setOrderId(orderId);
+		}
+		if (direction != null) {
+			builder.setDirection(direction);
+		}
+		if (offsetFlag != null) {
+			builder.setOffsetFlag(offsetFlag);
+		}
+		if (tradeType != null) {
+			builder.setTradeType(tradeType);
+		}
+		if (priceSource != null) {
+			builder.setPriceSource(priceSource);
+		}
+		if (tradingDay != null) {
+			builder.setTradingDay(tradingDay.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
+		}
+		if (tradeDate != null) {
+			builder.setTradeDate(tradeDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
+		}
+		if (tradeTime != null) {
+			builder.setTradeTime(tradeTime.format(DateTimeConstant.T_FORMAT_FORMATTER));
+		}
+		if (contract != null) {
+			builder.setContract(contract.toContractField());
+		}
+
+		return builder
 				.setPrice(price)
 				.setVolume(volume)
-				.setTradeType(tradeType)
-				.setPriceSource(priceSource)
-				.setTradingDay(Optional.ofNullable(tradingDay).orElse(LocalDate.MIN).toString())
-				.setTradeDate(Optional.ofNullable(tradeDate).orElse(LocalDate.MIN).toString())
-				.setTradeTime(Optional.ofNullable(tradeTime).orElse(LocalTime.MIN).toString())
 				.setTradeTimestamp(tradeTimestamp)
-				.setContract(contract.toContractField())
 				.build();
 	}
 
@@ -61,11 +86,11 @@ public record Trade(
 				.volume(trade.getVolume())
 				.tradeType(trade.getTradeType())
 				.priceSource(trade.getPriceSource())
-				.tradingDay(LocalDate.parse(trade.getTradingDay()))
-				.tradeDate(LocalDate.parse(trade.getTradeDate()))
-				.tradeTime(LocalTime.parse(trade.getTradeTime()))
+				.tradingDay(LocalDate.parse(trade.getTradingDay(), DateTimeConstant.D_FORMAT_INT_FORMATTER))
+				.tradeDate(LocalDate.parse(trade.getTradeDate(), DateTimeConstant.D_FORMAT_INT_FORMATTER))
+				.tradeTime(LocalTime.parse(trade.getTradeTime(), DateTimeConstant.T_FORMAT_FORMATTER))
 				.tradeTimestamp(trade.getTradeTimestamp())
-				.contract(contractManager.getContract(Identifier.of(trade.getContract().getUnifiedSymbol())).contract())
+				.contract(contractManager.getContract(Identifier.of(trade.getContract().getContractId())).contract())
 				.build();
 	}
 }

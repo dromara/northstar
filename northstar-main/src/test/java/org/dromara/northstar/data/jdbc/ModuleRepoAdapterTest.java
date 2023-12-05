@@ -78,8 +78,8 @@ class ModuleRepoAdapterTest {
 
 	ModuleDealRecord mdr = ModuleDealRecord.builder()
 			.moduleName(moduleName)
-			.openTrade(openTrade)
-			.closeTrade(closeTrade)
+			.openTrade(openTrade.toTradeField().toByteArray())
+			.closeTrade(closeTrade.toTradeField().toByteArray())
 			.build();
 
 	@BeforeEach

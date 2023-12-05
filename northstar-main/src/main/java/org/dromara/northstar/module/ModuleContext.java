@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.dromara.northstar.common.constant.Constants;
+import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.common.constant.ModuleState;
 import org.dromara.northstar.common.constant.SignalOperation;
 import org.dromara.northstar.common.exception.InsufficientException;
@@ -78,6 +79,7 @@ import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
+import com.google.protobuf.InvalidProtocolBufferException;
 
 import cn.hutool.core.lang.Assert;
 import lombok.Getter;
@@ -87,6 +89,7 @@ import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreEnum.OrderPriceTypeEnum;
 import xyz.redtorch.pb.CoreEnum.TimeConditionEnum;
+import xyz.redtorch.pb.CoreField.TradeField;
 
 public class ModuleContext implements IModuleContext{
 	
@@ -424,8 +427,8 @@ public class ModuleContext implements IModuleContext{
 			double avgProfit = dealRecords.stream().mapToDouble(ModuleDealRecord::getDealProfit).average().orElse(0D);
 			double annualizedRateOfReturn = 0;
 			if(!dealRecords.isEmpty()) {
-				LocalDate startDate = dealRecords.get(0).getOpenTrade().tradeDate();
-				LocalDate endDate = dealRecords.get(dealRecords.size() - 1).getCloseTrade().tradeDate();
+				LocalDate startDate = LocalDate.parse(parse(dealRecords.get(0).getOpenTrade()).getTradeDate(), DateTimeConstant.D_FORMAT_INT_FORMATTER);
+				LocalDate endDate = LocalDate.parse(parse(dealRecords.get(dealRecords.size() - 1).getCloseTrade()).getTradeDate(), DateTimeConstant.D_FORMAT_INT_FORMATTER);
 				long days = ChronoUnit.DAYS.between(startDate, endDate);
 				double totalEarning = moduleAccount.getAccCloseProfit() - moduleAccount.getAccCommission();
 				annualizedRateOfReturn = (totalEarning / moduleAccount.getInitBalance()) / days * 365;  
@@ -473,6 +476,14 @@ public class ModuleContext implements IModuleContext{
 			mad.setDataMap(dataMap);
 		}
 		return mad;
+	}
+	
+	private TradeField parse(byte[] data) {
+		try {
+			return TradeField.parseFrom(data);
+		} catch (InvalidProtocolBufferException e) {
+			throw new IllegalStateException(e);
+		}
 	}
 	
 	private JSONObject assignBar(Bar bar) {

@@ -2,7 +2,6 @@ package org.dromara.northstar.common.model.core;
 
 import lombok.Builder;
 import xyz.redtorch.pb.CoreEnum.CurrencyEnum;
-import xyz.redtorch.pb.CoreField;
 import xyz.redtorch.pb.CoreField.AccountField;
 
 @Builder
@@ -22,9 +21,17 @@ public record Account(
 ) {
 
 	public AccountField toAccountField() {
-		return CoreField.AccountField.newBuilder()
-				.setAccountId(accountId)
-				.setCurrency(currency)
+		AccountField.Builder builder = AccountField.newBuilder();
+		if(accountId != null) {
+			builder.setAccountId(accountId);
+		}
+		if(gatewayId != null) {
+			builder.setGatewayId(gatewayId);
+		}
+		if (currency != null) {
+			builder.setCurrency(currency);
+		}
+		return builder
 				.setPreBalance(preBalance)
 				.setBalance(balance)
 				.setAvailable(available)
@@ -34,7 +41,7 @@ public record Account(
 				.setPositionProfit(positionProfit)
 				.setDeposit(deposit)
 				.setWithdraw(withdraw)
-				.setGatewayId(gatewayId)
 				.build();
 	}
+
 }

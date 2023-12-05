@@ -29,10 +29,23 @@ public record Position(
 ) {
 
 	public PositionField toPositionField() {
-		return PositionField.newBuilder()
-				.setPositionId(positionId)
-				.setAccountId(gatewayId)
-				.setPositionDirection(positionDirection)
+		PositionField.Builder builder = PositionField.newBuilder();
+		if(positionId != null) {
+			builder.setPositionId(positionId);
+		}
+		if(gatewayId != null) {
+			builder.setAccountId(gatewayId);
+		}
+		if (positionDirection != null) {
+			builder.setPositionDirection(positionDirection);
+		}
+		if (hedgeFlag != null) {
+			builder.setHedgeFlag(hedgeFlag);
+		}
+		if (contract != null) {
+			builder.setContract(contract.toContractField());
+		}
+		return builder
 				.setPosition(position)
 				.setFrozen(frozen)
 				.setYdPosition(ydPosition)
@@ -47,9 +60,6 @@ public record Position(
 				.setUseMargin(useMargin)
 				.setExchangeMargin(exchangeMargin)
 				.setContractValue(contractValue)
-				.setHedgeFlag(hedgeFlag)
-				.setContract(contract.toContractField())
-				.setGatewayId(gatewayId)
 				.build();
 	}
 }

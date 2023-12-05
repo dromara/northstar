@@ -46,35 +46,66 @@ public record Contract(
 	) {
 	
 	public ContractField toContractField() {
-		return ContractField.newBuilder()
-				.setGatewayId(gatewayId)
-				.setContractId(contractId)
-				.setName(name)
-				.setFullName(fullName)
-				.setThirdPartyId(thirdPartyId)
-				.setUnifiedSymbol(unifiedSymbol)
-				.setSymbol(symbol)
-				.setExchange(exchange)
-				.setProductClass(productClass)
-				.setCurrency(currency)
-				.setMultiplier(multiplier)
-				.setPriceTick(priceTick)
-				.setLongMarginRatio(longMarginRatio)
-				.setShortMarginRatio(shortMarginRatio)
-				.setUnderlyingSymbol(underlyingSymbol)
-				.setStrikePrice(strikePrice)
-				.setOptionsType(optionsType)
-				.setUnderlyingMultiplier(underlyingMultiplier)
-				.setLastTradeDateOrContractMonth(lastTradeDateOrContractMonth)
-				.setMaxMarketOrderVolume(maxMarketOrderVolume)
-				.setMinMarketOrderVolume(minMarketOrderVolume)
-				.setMaxLimitOrderVolume(maxLimitOrderVolume)
-				.setMinLimitOrderVolume(minLimitOrderVolume)
-				.setCombinationType(combinationType)
-				.setPricePrecision(pricePrecision)
-				.setQuantityPrecision(quantityPrecision)
-				.setChannelType(channelType.toString())
-				.build();
+		ContractField.Builder builder = ContractField.newBuilder();
+		if(gatewayId != null) {
+			builder.setGatewayId(gatewayId);
+		}
+		if(contractId != null) {
+			builder.setContractId(contractId);
+		}
+		if(name != null) {
+			builder.setName(name);
+		}
+		if(fullName != null) {
+			builder.setFullName(fullName);
+		}
+		if(thirdPartyId != null) {
+			builder.setThirdPartyId(thirdPartyId);
+		}
+		if(unifiedSymbol != null) {
+			builder.setUnifiedSymbol(unifiedSymbol);
+		}
+		if(symbol != null) {
+			builder.setSymbol(symbol);
+		}
+		if(exchange != null) {
+			builder.setExchange(exchange);
+		}
+		if(productClass != null) {
+			builder.setProductClass(productClass);
+		}
+		if(currency != null) {
+			builder.setCurrency(currency);
+		}
+		if(underlyingSymbol != null) {
+			builder.setUnderlyingSymbol(underlyingSymbol);
+		}
+		builder.setStrikePrice(strikePrice);
+		if(optionsType != null) {
+			builder.setOptionsType(optionsType);
+		}
+		if(lastTradeDateOrContractMonth != null) {
+			builder.setLastTradeDateOrContractMonth(lastTradeDateOrContractMonth);
+		}
+		if(combinationType != null) {
+			builder.setCombinationType(combinationType);
+		}
+		if(channelType != null) {
+			builder.setChannelType(channelType.toString());
+		}
+		builder.setUnderlyingMultiplier(underlyingMultiplier);
+		builder.setMaxMarketOrderVolume(maxMarketOrderVolume);
+		builder.setMinMarketOrderVolume(minMarketOrderVolume);
+		builder.setMaxLimitOrderVolume(maxLimitOrderVolume);
+		builder.setMinLimitOrderVolume(minLimitOrderVolume);
+		builder.setMultiplier(multiplier);
+		builder.setPriceTick(priceTick);
+		builder.setLongMarginRatio(longMarginRatio);
+		builder.setShortMarginRatio(shortMarginRatio);
+		builder.setPricePrecision(pricePrecision);
+		builder.setQuantityPrecision(quantityPrecision);
+
+		return builder.build();
 	}
 
 	@Override

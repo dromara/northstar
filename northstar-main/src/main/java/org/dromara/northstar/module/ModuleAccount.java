@@ -98,8 +98,8 @@ public class ModuleAccount implements IModuleAccount{
 						.moduleAccountId(closeTrade.gatewayId())
 						.contractName(contract.name())
 						.dealProfit(profit - dealCommission)
-						.openTrade(openTrade)
-						.closeTrade(closeTrade)
+						.openTrade(openTrade.toTradeField().toByteArray())
+						.closeTrade(closeTrade.toTradeField().toByteArray())
 						.build());
 			}
 		};
