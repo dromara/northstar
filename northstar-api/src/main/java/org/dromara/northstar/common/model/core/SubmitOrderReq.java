@@ -9,6 +9,7 @@ import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreEnum.OrderPriceTypeEnum;
 import xyz.redtorch.pb.CoreEnum.TimeConditionEnum;
+import xyz.redtorch.pb.CoreEnum.VolumeConditionEnum;
 
 @Builder(toBuilder = true)
 public record SubmitOrderReq(
@@ -22,6 +23,7 @@ public record SubmitOrderReq(
 		DirectionEnum direction,    // 买卖方向
 		OffsetFlagEnum offsetFlag,    // 开平标识
 		TimeConditionEnum timeCondition,    // 时效
+		VolumeConditionEnum volumeCondition, //成交条件
 		String gtdDate,                // GTD日期
 		int minVolume,                // 最小成交量
 		ContingentConditionEnum contingentCondition,    // 触发条件

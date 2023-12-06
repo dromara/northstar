@@ -89,6 +89,7 @@ import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreEnum.OrderPriceTypeEnum;
 import xyz.redtorch.pb.CoreEnum.TimeConditionEnum;
+import xyz.redtorch.pb.CoreEnum.VolumeConditionEnum;
 import xyz.redtorch.pb.CoreField.TradeField;
 
 public class ModuleContext implements IModuleContext{
@@ -540,6 +541,7 @@ public class ModuleContext implements IModuleContext{
 				.offsetFlag(tuple.t1())
 				.volume(tuple.t2())
 				.price(orderPrice + factor * plusPrice)	// 自动加上超价
+				.volumeCondition(VolumeConditionEnum.VC_AV)
 				.timeCondition(priceType == PriceType.ANY_PRICE ? TimeConditionEnum.TC_IOC : TimeConditionEnum.TC_GFD)
 				.orderPriceType(priceType == PriceType.ANY_PRICE ? OrderPriceTypeEnum.OPT_AnyPrice : OrderPriceTypeEnum.OPT_LimitPrice)
 				.contingentCondition(ContingentConditionEnum.CC_Immediately)
