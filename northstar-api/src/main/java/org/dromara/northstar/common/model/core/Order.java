@@ -39,7 +39,7 @@ public record Order(
 		ForceCloseReasonEnum forceCloseReason, // 强平原因
 		LocalDate tradingDay,       // 交易日
 		LocalDate orderDate,		// 下单日期
-		LocalDate orderTime,		// 下单时间
+		LocalTime orderTime,		// 下单时间
 		LocalDate updateDate,       // 更新日期
 		LocalTime updateTime,       // 更新时间
 		String statusMsg,           // 状态信息
