@@ -2,7 +2,6 @@ package org.dromara.northstar.gateway.sim.trade;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.UUID;
 import java.util.function.Consumer;
 
 import org.apache.commons.lang3.StringUtils;
@@ -43,11 +42,11 @@ public class OrderRequest implements TickDataAware{
 		this.onOrderCallback = onOrderCallback;
 		this.onTradeCallback = onTradeCallback;
 		this.orderTemplate = Order.builder()
-				.orderId(submitOrderReq.gatewayId() + "_" + UUID.randomUUID().toString())
+				.originOrderId(submitOrderReq.originOrderId())
+				.orderId(submitOrderReq.originOrderId())
 				.contract(submitOrderReq.contract())
 				.price(submitOrderReq.price())
 				.direction(submitOrderReq.direction())
-				.originOrderId(submitOrderReq.originOrderId())
 				.gatewayId(submitOrderReq.gatewayId())
 				.updateDate(LocalDate.now())
 				.updateTime(LocalTime.now())
