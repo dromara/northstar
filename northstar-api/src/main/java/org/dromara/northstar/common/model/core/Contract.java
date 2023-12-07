@@ -4,6 +4,8 @@ import java.util.Objects;
 
 import org.dromara.northstar.common.constant.ChannelType;
 
+import com.alibaba.fastjson.annotation.JSONField;
+
 import lombok.Builder;
 import xyz.redtorch.pb.CoreEnum.CombinationTypeEnum;
 import xyz.redtorch.pb.CoreEnum.CurrencyEnum;
@@ -38,6 +40,7 @@ public record Contract(
 		int maxLimitOrderVolume,  // 限价单最大下单量
 		int minLimitOrderVolume,  // 限价单最小下单量
 		CombinationTypeEnum combinationType, // 组合类型
+		@JSONField(serialize = false)
 		ContractDefinition contractDefinition,
 		int pricePrecision, 	// 价格精度(保留N位小数) 
 		int quantityPrecision,	// 成交量精度(保留N位小数)

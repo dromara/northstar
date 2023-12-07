@@ -26,6 +26,7 @@ import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreEnum.OrderPriceTypeEnum;
 import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
 import xyz.redtorch.pb.CoreEnum.TimeConditionEnum;
+import xyz.redtorch.pb.CoreEnum.VolumeConditionEnum;
 
 /**
  * 账户服务
@@ -90,6 +91,7 @@ public class AccountService {
 				.offsetFlag(OffsetFlagEnum.OF_Open)
 				.timeCondition(TimeConditionEnum.TC_GFD)
 				.contingentCondition(ContingentConditionEnum.CC_Immediately)
+				.volumeCondition(VolumeConditionEnum.VC_AV)
 				.minVolume(1)
 				.gatewayId(orderReq.getGatewayId())
 				.build();
@@ -122,6 +124,7 @@ public class AccountService {
 				.direction(orderDir)
 				.timeCondition(TimeConditionEnum.TC_GFD)
 				.contingentCondition(ContingentConditionEnum.CC_Immediately)
+				.volumeCondition(VolumeConditionEnum.VC_AV)
 				.minVolume(1)
 				.gatewayId(orderReq.getGatewayId())
 				.build();

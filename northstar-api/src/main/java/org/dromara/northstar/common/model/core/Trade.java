@@ -7,6 +7,8 @@ import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.common.model.Identifier;
 import org.dromara.northstar.gateway.IContractManager;
 
+import com.alibaba.fastjson.annotation.JSONField;
+
 import lombok.Builder;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
@@ -29,6 +31,7 @@ public record Trade(
 		LocalDate tradeDate,  // 成交日期
 		LocalTime tradeTime,  // 成交时间(HHmmssSSS)
 		long tradeTimestamp,  // 成交时间戳
+		@JSONField(serialize = false)
 		Contract contract  // 合约
 ) {
 

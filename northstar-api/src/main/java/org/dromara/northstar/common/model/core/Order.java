@@ -5,6 +5,8 @@ import java.time.LocalTime;
 
 import org.dromara.northstar.common.constant.DateTimeConstant;
 
+import com.alibaba.fastjson.annotation.JSONField;
+
 import lombok.Builder;
 import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
@@ -43,6 +45,7 @@ public record Order(
 		LocalDate updateDate,       // 更新日期
 		LocalTime updateTime,       // 更新时间
 		String statusMsg,           // 状态信息
+		@JSONField(serialize = false)
 		Contract contract           // 合约
 ) {
 

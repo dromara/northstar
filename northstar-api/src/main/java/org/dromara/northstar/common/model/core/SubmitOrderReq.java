@@ -1,6 +1,6 @@
 package org.dromara.northstar.common.model.core;
 
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.annotation.JSONField;
 
 import lombok.Builder;
 import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
@@ -15,6 +15,7 @@ import xyz.redtorch.pb.CoreEnum.VolumeConditionEnum;
 public record SubmitOrderReq(
 		String originOrderId,        // 本地订单ID
 		CurrencyEnum currency,        // 币种
+		@JSONField(serialize = false)
 		Contract contract,            // 合约
 		String gatewayId,
 		int volume,                    // 下单数量
@@ -28,7 +29,6 @@ public record SubmitOrderReq(
 		int minVolume,                // 最小成交量
 		ContingentConditionEnum contingentCondition,    // 触发条件
 		double stopPrice,            // 止损价
-		JSONObject extInfo,            // 扩展信息
 		long actionTimestamp        // 操作时间戳
 		) {
 

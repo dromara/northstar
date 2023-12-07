@@ -3,6 +3,7 @@ package org.dromara.northstar.common.model.core;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 
 import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.constant.DateTimeConstant;
@@ -50,7 +51,7 @@ public record Tick(
 
 	public TickField toTickField() {
 		return TickField.newBuilder()
-				.setGatewayId(gatewayId)
+				.setGatewayId(Optional.ofNullable(gatewayId).orElse(contract.gatewayId()))
 				.setUnifiedSymbol(contract.unifiedSymbol())
 				.setActionDay(actionDay.format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
 				.setActionTime(actionTime.format(DateTimeConstant.T_FORMAT_WITH_MS_INT_FORMATTER))

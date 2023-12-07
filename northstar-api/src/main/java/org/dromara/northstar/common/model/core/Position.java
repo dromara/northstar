@@ -1,5 +1,7 @@
 package org.dromara.northstar.common.model.core;
 
+import com.alibaba.fastjson.annotation.JSONField;
+
 import lombok.Builder;
 import xyz.redtorch.pb.CoreEnum.HedgeFlagEnum;
 import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
@@ -24,6 +26,7 @@ public record Position(
         double exchangeMargin,					// 交易所保证金
         double contractValue,					// 合约价值
         HedgeFlagEnum hedgeFlag,				// 投机套保标志
+        @JSONField(serialize = false)
         Contract contract,
         String gatewayId
 ) {
