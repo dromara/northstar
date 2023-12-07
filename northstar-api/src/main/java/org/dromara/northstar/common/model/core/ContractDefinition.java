@@ -2,6 +2,8 @@ package org.dromara.northstar.common.model.core;
 
 import java.util.regex.Pattern;
 
+import org.dromara.northstar.common.IDataSource;
+
 import lombok.Builder;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
@@ -32,6 +34,10 @@ public record ContractDefinition(
 		 * 交易时间
 		 */
 		TradeTimeDefinition tradeTimeDef,
+		/**
+		 * 合约的历史数据源
+		 */
+		IDataSource dataSource,
 		/**
 		 * 名称
 		 */

@@ -52,6 +52,10 @@ public class MarketDataRepoAdapter implements IMarketDataRepository{
 		LocalDate endDate = today.isAfter(endDate0) ? endDate0 : today;
 		LinkedList<Bar> resultList = new LinkedList<>();
 		IDataSource dataServiceDelegate = contract.dataSource();
+		if(dataServiceDelegate == null) {
+			log.warn("合约[{}] 没有提供历史数据源，无法加载历史数据", contract.name());
+			return List.of();
+		}
 		Contract cf = contract.contract();
 		if(endDate.isAfter(startDate)) {
 			List<Bar> list = dataServiceDelegate.getMinutelyData(cf, startDate, endDate)
