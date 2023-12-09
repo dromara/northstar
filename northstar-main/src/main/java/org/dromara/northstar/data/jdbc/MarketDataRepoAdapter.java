@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Objects;
 
 import org.dromara.northstar.common.IDataSource;
+import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.common.model.core.Bar;
 import org.dromara.northstar.common.model.core.Contract;
@@ -96,10 +97,10 @@ public class MarketDataRepoAdapter implements IMarketDataRepository{
 					.map(BarDO::getBarData)
 					.map(this::convertFrom)
 					.filter(Objects::nonNull)
-					.map(bar -> Bar.of(bar, contractMgr))
+					.map(bar -> Bar.of(bar, contractMgr.getContract(ChannelType.valueOf(bar.getChannelType()), bar.getUnifiedSymbol()).contract()))
 					.toList();
 		} catch (Exception e) {
-			log.error("{}", e.getMessage());
+			log.error("数据转换异常", e);
 			return Collections.emptyList();
 		}
 	}

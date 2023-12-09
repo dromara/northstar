@@ -2,6 +2,7 @@ package org.dromara.northstar.data.jdbc;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -9,8 +10,8 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
+import org.dromara.northstar.common.IDataSource;
 import org.dromara.northstar.common.constant.ChannelType;
-import org.dromara.northstar.common.model.Identifier;
 import org.dromara.northstar.common.model.core.Bar;
 import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.data.IMarketDataRepository;
@@ -79,7 +80,7 @@ class MarketDataRepoAdapterTest {
 		IContractManager contractMgr = mock(IContractManager.class);
 		IContract contract = mock(IContract.class);
 		when(contract.contract()).thenReturn(c);
-		when(contractMgr.getContract(any(Identifier.class))).thenReturn(contract);
+		when(contractMgr.getContract(any(ChannelType.class), anyString())).thenReturn(contract);
 		repo = new MarketDataRepoAdapter(delegate, contractMgr);
 	}
 
@@ -87,6 +88,7 @@ class MarketDataRepoAdapterTest {
 	void testInsert() {
 		IContract contract = mock(IContract.class);
 		when(contract.contract()).thenReturn(c);
+		when(contract.dataSource()).thenReturn(mock(IDataSource.class));
 
 		repo.insert(bar1);
 		repo.insert(bar2);

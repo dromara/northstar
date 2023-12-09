@@ -55,7 +55,34 @@ class BarTest {
 		assertEquals(bar.preOpenInterest(), barField.getPreOpenInterest());
 		assertEquals(bar.preSettlePrice(), barField.getPreSettlePrice());
 		assertEquals(bar.channelType().toString(), barField.getChannelType());
-
 	}
 
+	@Test
+	void testOf() {
+		Contract contract = Contract.builder().unifiedSymbol("testContract").build();
+		Bar bar = Bar.builder()
+				.gatewayId("gatewayId")
+				.contract(contract)
+				.actionDay(LocalDate.now())
+				.actionTime(LocalTime.now().withNano(0))
+				.tradingDay(LocalDate.now())
+				.actionTimestamp(1L)
+				.closePrice(1.0)
+				.highPrice(2.0)
+				.lowPrice(3.0)
+				.openPrice(4.0)
+				.turnoverDelta(1.0)
+				.turnover(2.0)
+				.volume(5)
+				.volumeDelta(6)
+				.openInterest(7.0)
+				.openInterestDelta(8.0)
+				.preSettlePrice(9.0)
+				.preOpenInterest(10.0)
+				.preSettlePrice(11.0)
+				.channelType(ChannelType.BIAN)
+				.build();
+		xyz.redtorch.pb.CoreField.BarField barField = bar.toBarField();
+		assertEquals(bar, Bar.of(barField, contract));
+	}
 }

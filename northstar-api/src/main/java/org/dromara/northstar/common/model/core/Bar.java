@@ -6,8 +6,7 @@ import java.util.Optional;
 
 import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.constant.DateTimeConstant;
-import org.dromara.northstar.common.model.Identifier;
-import org.dromara.northstar.gateway.IContractManager;
+import org.springframework.util.Assert;
 
 import lombok.Builder;
 import xyz.redtorch.pb.CoreField.BarField;
@@ -61,10 +60,11 @@ public record Bar(
 				.build();
 	}
 	
-	public static Bar of(BarField bar, IContractManager contractMgr) {
+	public static Bar of(BarField bar, Contract contract) {
+		Assert.isTrue(contract.unifiedSymbol().equals(bar.getUnifiedSymbol()), () -> String.format("合约信息不一致：期望%s 实际%s", bar.getUnifiedSymbol(), contract.unifiedSymbol()));
 		return Bar.builder()
 				.gatewayId(bar.getGatewayId())
-				.contract(contractMgr.getContract(Identifier.of(bar.getUnifiedSymbol())).contract())
+				.contract(contract)
 				.actionDay(LocalDate.parse(bar.getActionDay(), DateTimeConstant.D_FORMAT_INT_FORMATTER))
 				.actionTime(LocalTime.parse(bar.getActionTime(), DateTimeConstant.T_FORMAT_FORMATTER))
 				.tradingDay(LocalDate.parse(bar.getTradingDay(), DateTimeConstant.D_FORMAT_INT_FORMATTER))
