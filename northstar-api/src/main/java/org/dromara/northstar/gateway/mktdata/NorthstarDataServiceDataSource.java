@@ -182,12 +182,13 @@ public class NorthstarDataServiceDataSource implements IDataSource{
 						.currency(CurrencyEnum.CNY)
 						.name(name)
 						.fullName(name)
-						.lastTradeDateOrContractMonth(getValue("delist_date", fieldIndexMap, item, ""))
+						.lastTradeDate(LocalDate.parse(getValue("delist_date", fieldIndexMap, item, ""), DateTimeConstant.D_FORMAT_INT_FORMATTER))
 						.longMarginRatio(marginRate)
 						.shortMarginRatio(marginRate)
 						.productClass(productClass)
 						.multiplier(Double.parseDouble(getValue("per_unit", fieldIndexMap, item, "1")))
 						.priceTick(priceTick)
+						.tradable(true)
 						.build();
 				resultList.add(playbackContract);
 			} catch(Exception e) {

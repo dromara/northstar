@@ -1,5 +1,6 @@
 package org.dromara.northstar.gateway.contract;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 
@@ -65,7 +66,7 @@ public class IndexContract implements IContract, TickDataAware{
 				.symbol(symbol)
 				.thirdPartyId(thirdPartyId)
 				.contractId(contractId)
-				.lastTradeDateOrContractMonth("")
+				.lastTradeDate(LocalDate.MAX)
 				.unifiedSymbol(unifiedSymbol)
 				.fullName(fullName)
 				.longMarginRatio(proto.longMarginRatio())

@@ -162,7 +162,7 @@ public class ArbitrageModuleContext extends ModuleContext implements IModuleCont
 				Iterator<Contract> it = contractMap.values().iterator();
 				Contract c1 = it.next();
 				Contract c2 = it.next();
-				Contract nearMonth = Long.parseLong(c1.lastTradeDateOrContractMonth()) < Long.parseLong(c2.lastTradeDateOrContractMonth()) ? c1 : c2;
+				Contract nearMonth = c1.lastTradeDate().isBefore(c2.lastTradeDate()) ? c1 : c2;
 				Contract farMonth = c1 == nearMonth ? c2 : c1;
 				String combName = String.format("%s-%s", nearMonth.name(), farMonth.name());
 				Map<Long, Bar> timeBarMap = barBufQMap.get(nearMonth)

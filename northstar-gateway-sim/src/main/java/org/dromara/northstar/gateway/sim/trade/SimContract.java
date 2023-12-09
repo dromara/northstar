@@ -1,5 +1,6 @@
 package org.dromara.northstar.gateway.sim.trade;
 
+import java.time.LocalDate;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -48,7 +49,7 @@ public class SimContract implements Instrument{
 	private double strikePrice;                      // 执行价
 	private OptionsTypeEnum optionsType;              // 期权类型
 	private double underlyingMultiplier;              // 合约基础商品乘数
-	private String lastTradeDateOrContractMonth;      // 最后交易日或合约月
+	private LocalDate lastTradeDate;      // 最后交易日或合约月
 	private int maxMarketOrderVolume;                  // 市价单最大下单量
 	private int minMarketOrderVolume;                  // 市价单最小下单量
 	private int maxLimitOrderVolume;                  // 限价单最大下单量
@@ -95,7 +96,7 @@ public class SimContract implements Instrument{
 				.strikePrice(strikePrice)
 				.optionsType(Optional.ofNullable(optionsType).orElse(OptionsTypeEnum.O_Unknown))
 				.underlyingMultiplier(underlyingMultiplier)
-				.lastTradeDateOrContractMonth(Optional.ofNullable(lastTradeDateOrContractMonth).orElse(""))
+				.lastTradeDate(lastTradeDate)
 				.maxMarketOrderVolume(maxMarketOrderVolume)
 				.minMarketOrderVolume(minMarketOrderVolume)
 				.maxLimitOrderVolume(maxLimitOrderVolume)
