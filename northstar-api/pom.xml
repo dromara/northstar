@@ -85,8 +85,6 @@
 				<configuration>
 					<excludes>
 						<exclude>**/xyz/redtorch/pb/*</exclude>
-						<exclude>**/test/common/*</exclude>
-						<exclude>**/org/dromara/northstar/**</exclude>
 					</excludes>
 				</configuration>
 			</plugin>

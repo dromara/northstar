@@ -93,8 +93,11 @@ public record Order(
 		if (tradingDay != null) {
 			builder.setTradingDay(tradingDay.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
 		}
-		if (updateDate != null) {
-			builder.setOrderDate(updateDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
+		if (orderDate != null) {
+			builder.setOrderDate(orderDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
+		}
+		if (orderTime != null) {
+			builder.setOrderTime(orderTime.format(DateTimeConstant.T_FORMAT_FORMATTER));
 		}
 		if (updateTime != null) {
 			builder.setUpdateTime(updateTime.format(DateTimeConstant.T_FORMAT_FORMATTER));
