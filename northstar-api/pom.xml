@@ -85,6 +85,9 @@
 				<configuration>
 					<excludes>
 						<exclude>**/xyz/redtorch/pb/*</exclude>
+						<exclude>**/org/dromara/northstar/indicator/**</exclude>
+						<exclude>**/org/dromara/northstar/strategy/**</exclude>
+						<exclude>**/org/dromara/northstar/gateway/**</exclude>
 					</excludes>
 				</configuration>
 			</plugin>
