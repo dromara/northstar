@@ -28,6 +28,7 @@ public record Position(
         HedgeFlagEnum hedgeFlag,				// 投机套保标志
         @JSONField(serialize = false)
         Contract contract,
+        long updateTimestamp,
         String gatewayId
 ) {
 

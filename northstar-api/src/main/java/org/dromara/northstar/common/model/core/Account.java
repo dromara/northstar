@@ -17,6 +17,7 @@ public record Account(
         double positionProfit,	// 持仓盈亏
         double deposit,			// 入金金额
         double withdraw,		// 出金金额
+        long updateTimestamp,
         String gatewayId
 ) {
 

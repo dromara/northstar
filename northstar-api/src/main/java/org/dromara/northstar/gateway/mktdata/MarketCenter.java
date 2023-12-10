@@ -83,7 +83,7 @@ public class MarketCenter implements IMarketCenter{
 	@Override
 	public synchronized void addInstrument(Instrument ins) {
 		// 绑定合约定义
-		getDefinition(ins.exchange(), ins.productClass(), ins.contract().unifiedSymbol())
+		getDefinition(ins.exchange(), ins.productClass(), ins.identifier().value())
 			.ifPresent(def -> {
 				log.debug("[{}] 匹配合约定义 [{} {} {}]", ins.identifier().value(), def.exchange(), def.productClass(), def.symbolPattern().pattern());
 				ins.setContractDefinition(def);
@@ -104,13 +104,13 @@ public class MarketCenter implements IMarketCenter{
 	}
 	
 	@Override
-	public Optional<ContractDefinition> getDefinition(ExchangeEnum exchange, ProductClassEnum productClass, String unifiedSymbol){
+	public Optional<ContractDefinition> getDefinition(ExchangeEnum exchange, ProductClassEnum productClass, String identifier){
 		List<ContractDefinition> defList = contractDefTbl.get(exchange, productClass);
 		if(Objects.isNull(defList)) {
 			return Optional.empty();
 		}
 		for(ContractDefinition def : defList) {
-			if(def.symbolPattern().matcher(unifiedSymbol).matches()) {
+			if(def.symbolPattern().matcher(identifier).matches()) {
 				return Optional.of(def);
 			}
 		}
