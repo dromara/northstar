@@ -6,6 +6,11 @@ import java.util.Map;
 import java.util.Queue;
 
 import org.dromara.northstar.common.TickDataAware;
+import org.dromara.northstar.common.model.core.Bar;
+import org.dromara.northstar.common.model.core.Contract;
+import org.dromara.northstar.common.model.core.Order;
+import org.dromara.northstar.common.model.core.Tick;
+import org.dromara.northstar.common.model.core.Trade;
 import org.dromara.northstar.common.utils.FieldUtils;
 import org.slf4j.Logger;
 
@@ -13,10 +18,6 @@ import com.alibaba.fastjson.JSONObject;
 
 import lombok.Getter;
 import lombok.Setter;
-import xyz.redtorch.pb.CoreField.BarField;
-import xyz.redtorch.pb.CoreField.OrderField;
-import xyz.redtorch.pb.CoreField.TickField;
-import xyz.redtorch.pb.CoreField.TradeField;
 
 public abstract class AbstractStrategy implements TradeStrategy{
 	
@@ -27,30 +28,29 @@ public abstract class AbstractStrategy implements TradeStrategy{
 	// 模组上下文
 	protected IModuleStrategyContext ctx;
 	// 处理器，unifiedSymbol -> handler
-	protected Map<String, TickHandler> tickHandlerMap = new HashMap<>();
+	protected Map<Contract, TickHandler> tickHandlerMap = new HashMap<>();
 	// 处理器，unifiedSymbol -> handler
-	protected Map<String, BarHandler> barHandlerMap = new HashMap<>();
+	protected Map<Contract, BarHandler> barHandlerMap = new HashMap<>();
 	// 日志对象
 	protected Logger log;
 	// 预热K线数据量（该预热数据量与模组的设置并不相等，该属性用于策略内部判断接收了多少数据，而模组的预热设置用于外部投喂了多少数据）
 	protected int numOfBarsToPrepare;
 	
-	private Queue<BarField> barCache = new LinkedList<>();
+	private Queue<Bar> barCache = new LinkedList<>();
 	
 	@Override
-	public void onOrder(OrderField order) {
+	public void onOrder(Order order) {
 		// 如果策略不关心订单反馈，可以不重写
 	}
 
 	@Override
-	public void onTrade(TradeField trade) {
+	public void onTrade(Trade trade) {
 		// 如果策略不关心成交反馈，可以不重写
-		String unifiedSymbol = trade.getContract().getUnifiedSymbol();
 		if(log.isInfoEnabled()) {
-			log.info("模组成交 [{} {} {} 操作：{}{} {}手 {}]", unifiedSymbol,
-					trade.getTradeDate(), trade.getTradeTime(), FieldUtils.chn(trade.getDirection()), FieldUtils.chn(trade.getOffsetFlag()), 
-					trade.getVolume(), trade.getPrice());
-			log.info("当前模组净持仓：[{}]", ctx.getModuleAccount().getNonclosedNetPosition(unifiedSymbol));
+			log.info("模组成交 [{} {} {} 操作：{}{} {}手 {}]", trade.contract().unifiedSymbol(),
+					trade.tradeDate(), trade.tradeTime(), FieldUtils.chn(trade.direction()), FieldUtils.chn(trade.offsetFlag()), 
+					trade.volume(), trade.price());
+			log.info("当前模组净持仓：[{}]", ctx.getModuleAccount().getNonclosedNetPosition(trade.contract()));
 			log.info("当前模组状态：{}", ctx.getState());
 		}
 	}
@@ -83,22 +83,22 @@ public abstract class AbstractStrategy implements TradeStrategy{
 	 * 如果订阅了多个合约，则会有多个TICK，因此每个TICK时刻会触发多次
 	 */
 	@Override
-	public void onTick(TickField tick) {
+	public void onTick(Tick tick) {
 		if(!canProceed()) {
 			return;
 		}
-		if(tickHandlerMap.containsKey(tick.getUnifiedSymbol())) {
-			tickHandlerMap.get(tick.getUnifiedSymbol()).onTick(tick);
+		if(tickHandlerMap.containsKey(tick.contract())) {
+			tickHandlerMap.get(tick.contract()).onTick(tick);
 		}
 	}
 	
 	/**
 	 * 订阅多个合约时，可以加上各自的处理器来减少if...else代码
-	 * @param unifiedSymbol
+	 * @param contract
 	 * @param handler
 	 */
-	protected void addTickHandler(String unifiedSymbol, TickHandler handler) {
-		tickHandlerMap.put(unifiedSymbol, handler);
+	protected void addTickHandler(Contract contract, TickHandler handler) {
+		tickHandlerMap.put(contract, handler);
 	}
 
 	/**
@@ -107,12 +107,12 @@ public abstract class AbstractStrategy implements TradeStrategy{
 	 * 如果订阅了多个合约，则会有多个K线，因此每个K线时刻会触发多次
 	 */
 	@Override
-	public void onMergedBar(BarField bar) {
+	public void onMergedBar(Bar bar) {
 		if(!canProceed(bar)) {
 			return;
 		}
-		if(barHandlerMap.containsKey(bar.getUnifiedSymbol())) {
-			barHandlerMap.get(bar.getUnifiedSymbol()).onMergedBar(bar);
+		if(barHandlerMap.containsKey(bar.contract())) {
+			barHandlerMap.get(bar.contract()).onMergedBar(bar);
 		}
 	}
 	
@@ -120,9 +120,9 @@ public abstract class AbstractStrategy implements TradeStrategy{
 		return barCache.isEmpty() && numOfBarsToPrepare == 0;
 	}
 	
-	protected boolean canProceed(BarField bar) {
+	protected boolean canProceed(Bar bar) {
 		if(barCache.size() < numOfBarsToPrepare) {
-			if(barCache.isEmpty() || barCache.peek().getUnifiedSymbol().equals(bar.getUnifiedSymbol())) {
+			if(barCache.isEmpty() || barCache.peek().contract().equals(bar.contract())) {
 				barCache.offer(bar);
 			}
 			return false;
@@ -135,11 +135,11 @@ public abstract class AbstractStrategy implements TradeStrategy{
 	
 	/**
 	 * 订阅多个合约时，可以加上各自的处理器来减少if...else代码
-	 * @param unifiedSymbol
+	 * @param contract
 	 * @param handler
 	 */
-	protected void addBarHandler(String unifiedSymbol, BarHandler handler) {
-		barHandlerMap.put(unifiedSymbol, handler);
+	protected void addBarHandler(Contract contract, BarHandler handler) {
+		barHandlerMap.put(contract, handler);
 	}
 	
 	protected static interface TickHandler extends TickDataAware {}

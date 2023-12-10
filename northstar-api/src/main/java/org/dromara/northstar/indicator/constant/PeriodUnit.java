@@ -17,15 +17,7 @@ public enum PeriodUnit{
 	/**
 	 * 天
 	 */
-	DAY("d"),
-	/**
-	 * 周
-	 */
-	WEEK("wk"),
-	/**
-	 * 月
-	 */
-	MONTH("M");
+	DAY("d");
 	
 	String symbol;
 	private PeriodUnit(String unitSymbol) {

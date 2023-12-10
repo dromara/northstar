@@ -4,6 +4,9 @@ import org.dromara.northstar.common.constant.FieldType;
 import org.dromara.northstar.common.constant.SignalOperation;
 import org.dromara.northstar.common.model.DynamicParams;
 import org.dromara.northstar.common.model.Setting;
+import org.dromara.northstar.common.model.core.Bar;
+import org.dromara.northstar.common.model.core.Contract;
+import org.dromara.northstar.common.model.core.Tick;
 import org.dromara.northstar.indicator.Indicator;
 import org.dromara.northstar.indicator.model.Configuration;
 import org.dromara.northstar.indicator.trend.EMAIndicator;
@@ -13,10 +16,6 @@ import org.dromara.northstar.strategy.StrategicComponent;
 import org.dromara.northstar.strategy.TradeStrategy;
 import org.dromara.northstar.strategy.constant.PriceType;
 import org.dromara.northstar.strategy.model.TradeIntent;
-
-import xyz.redtorch.pb.CoreField.BarField;
-import xyz.redtorch.pb.CoreField.ContractField;
-import xyz.redtorch.pb.CoreField.TickField;
 
 /**
  * 本示例用于展示一个带指标的策略
@@ -43,9 +42,9 @@ public class IndicatorExampleStrategy extends AbstractStrategy	// 为了简化�
 	private Indicator macdDea;
 
 	@Override
-	public void onMergedBar(BarField bar) {
+	public void onMergedBar(Bar bar) {
 		log.debug("{} K线数据： 开 [{}], 高 [{}], 低 [{}], 收 [{}]",
-				bar.getUnifiedSymbol(), bar.getOpenPrice(), bar.getHighPrice(), bar.getLowPrice(), bar.getClosePrice());
+				bar.contract().unifiedSymbol(), bar.openPrice(), bar.highPrice(), bar.lowPrice(), bar.closePrice());
 		// 确保指标已经准备好再开始交易
 		if(!fastLine.isReady() || !slowLine.isReady()) {
 			log.debug("指标未准备就绪");
@@ -56,7 +55,7 @@ public class IndicatorExampleStrategy extends AbstractStrategy	// 为了简化�
 				// 快线在慢线之上开多，快线在慢线之下开空
 				if(shouldBuy()) {
 					ctx.submitOrderReq(TradeIntent.builder()
-							.contract(ctx.getContract(bar.getUnifiedSymbol()))
+							.contract(bar.contract())
 							.operation(SignalOperation.BUY_OPEN)
 							.priceType(PriceType.OPP_PRICE)
 							.volume(1)
@@ -66,7 +65,7 @@ public class IndicatorExampleStrategy extends AbstractStrategy	// 为了简化�
 				}
 				if(shouldSell()) {
 					ctx.submitOrderReq(TradeIntent.builder()
-							.contract(ctx.getContract(bar.getUnifiedSymbol()))
+							.contract(bar.contract())
 							.operation(SignalOperation.SELL_OPEN)
 							.priceType(PriceType.OPP_PRICE)
 							.volume(1)
@@ -79,7 +78,7 @@ public class IndicatorExampleStrategy extends AbstractStrategy	// 为了简化�
 			case HOLDING_LONG -> {
 				if(fastLine.value(0) < slowLine.value(0)) {
 					ctx.submitOrderReq(TradeIntent.builder()
-							.contract(ctx.getContract(bar.getUnifiedSymbol()))
+							.contract(bar.contract())
 							.operation(SignalOperation.SELL_CLOSE)
 							.priceType(PriceType.OPP_PRICE)
 							.volume(1)
@@ -91,7 +90,7 @@ public class IndicatorExampleStrategy extends AbstractStrategy	// 为了简化�
 			case HOLDING_SHORT -> {
 				if(fastLine.value(0) > slowLine.value(0)) {
 					ctx.submitOrderReq(TradeIntent.builder()
-							.contract(ctx.getContract(bar.getUnifiedSymbol()))
+							.contract(bar.contract())
 							.operation(SignalOperation.BUY_CLOSE)
 							.priceType(PriceType.OPP_PRICE)
 							.volume(1)
@@ -105,8 +104,8 @@ public class IndicatorExampleStrategy extends AbstractStrategy	// 为了简化�
 	}
 
 	@Override
-	public void onTick(TickField tick) {
-		log.info("时间：{} {} 价格：{} 指标值：{}", tick.getActionDay(), tick.getActionTime(), tick.getLastPrice(), fastLine.value(0));
+	public void onTick(Tick tick) {
+		log.info("时间：{} {} 价格：{} 指标值：{}", tick.actionDay(), tick.actionTime(), tick.lastPrice(), fastLine.value(0));
 	}
 
 	private boolean shouldBuy() {
@@ -129,7 +128,7 @@ public class IndicatorExampleStrategy extends AbstractStrategy	// 为了简化�
 
 	@Override
 	protected void initIndicators() {
-		ContractField c = ctx.getContract(params.indicatorSymbol);
+		Contract c = ctx.getContract(params.indicatorSymbol);
 		// 指标的创建
 		this.fastLine = new EMAIndicator(Configuration.builder()
 				.contract(c)

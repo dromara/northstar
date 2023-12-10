@@ -4,43 +4,44 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.offset;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
+import java.time.LocalDate;
+
+import org.dromara.northstar.common.model.core.Contract;
+import org.dromara.northstar.common.model.core.Order;
+import org.dromara.northstar.common.model.core.Tick;
+import org.dromara.northstar.common.model.core.Trade;
 import org.junit.jupiter.api.Test;
 
-import test.common.TestFieldFactory;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
-import xyz.redtorch.pb.CoreField.OrderField;
-import xyz.redtorch.pb.CoreField.TickField;
-import xyz.redtorch.pb.CoreField.TradeField;
 
 class TradePositionTest {
-
-	TestFieldFactory factory = new TestFieldFactory("testGateway");
 	
-	TradeField openTrade = factory.makeTradeField("rb2205@SHFE", 5000, 2, DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open, "20220404");
-	TradeField openTrade1 = factory.makeTradeField("rb2205@SHFE", 5300, 1, DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open);
-	TradeField openTrade2 = factory.makeTradeField("rb2210@SHFE", 5000, 2, DirectionEnum.D_Buy, OffsetFlagEnum.OF_Open);
-	TradeField openTrade10 = factory.makeTradeField("rb2205@SHFE", 5300, 1, DirectionEnum.D_Sell, OffsetFlagEnum.OF_Open);
-	TradeField openTrade11 = factory.makeTradeField("rb2205@SHFE", 5000, 1, DirectionEnum.D_Sell, OffsetFlagEnum.OF_Open);
-	TradeField closeTrade = factory.makeTradeField("rb2205@SHFE", 5200, 2, DirectionEnum.D_Sell, OffsetFlagEnum.OF_Close);
-
-	TickField tick1 = factory.makeTickField("rb2205@SHFE", 5111);
-	TickField tick2 = factory.makeTickField("rb2210@SHFE", 5111);
+	LocalDate today = LocalDate.now();
+	Contract c1 = Contract.builder().symbol("rb2205@SHFE").multiplier(10).longMarginRatio(0.08).shortMarginRatio(0.08).build();
+	Contract c2 = Contract.builder().symbol("rb2210@SHFE").multiplier(10).longMarginRatio(0.08).shortMarginRatio(0.08).build();
 	
-	OrderField order1 = factory.makeOrderField("rb2205@SHFE", 5300, 1, DirectionEnum.D_Sell, OffsetFlagEnum.OF_CloseToday);
-	OrderField order2 = factory.makeOrderField("rb2205@SHFE", 5300, 1, DirectionEnum.D_Sell, OffsetFlagEnum.OF_CloseYesterday);
+	Trade openTrade = Trade.builder().tradingDay(today.minusDays(1)).contract(c1).price(5000).volume(2).direction(DirectionEnum.D_Buy).offsetFlag(OffsetFlagEnum.OF_Open).build();
+	Trade openTrade1 = Trade.builder().tradingDay(today).contract(c1).price(5300).volume(1).direction(DirectionEnum.D_Buy).offsetFlag(OffsetFlagEnum.OF_Open).build();
+	Trade closeTrade = Trade.builder().tradingDay(today).contract(c1).price(5200).volume(2).direction(DirectionEnum.D_Sell).offsetFlag(OffsetFlagEnum.OF_Close).build();
+	Tick tick1 = Tick.builder().tradingDay(today).contract(c1).lastPrice(5111).build();
+	Tick tick2 = Tick.builder().tradingDay(today).contract(c2).lastPrice(5111).build();
+	
+	Order order1 = Order.builder().tradingDay(today).contract(c1).price(5300).totalVolume(1).direction(DirectionEnum.D_Sell).offsetFlag(OffsetFlagEnum.OF_CloseToday).build();
+	Order order2 = Order.builder().tradingDay(today).contract(c1).price(5300).totalVolume(1).direction(DirectionEnum.D_Sell).offsetFlag(OffsetFlagEnum.OF_CloseYesterday).build();
+
 	// 用例：初始化检验
 	@Test
 	void shouldInitSuccessfully() {
 		assertDoesNotThrow(() -> {
-			new TradePosition(openTrade.getContract(), DirectionEnum.D_Buy);
+			new TradePosition(openTrade.contract(), DirectionEnum.D_Buy);
 		});
 	}
 	
 	// 用例：行情更新，持仓利润更新
 	@Test
 	void shouldUpdateProfit() {
-		TradePosition tp = new TradePosition(openTrade.getContract(), DirectionEnum.D_Buy);
+		TradePosition tp = new TradePosition(openTrade.contract(), DirectionEnum.D_Buy);
 		tp.onTrade(openTrade);
 		tp.onTick(tick1);
 		assertThat(tp.profit()).isCloseTo(2220D, offset(1e-6));
@@ -49,7 +50,7 @@ class TradePositionTest {
 	// 用例：忽略非相关行情
 	@Test
 	void shouldNotUpdateProfit() {
-		TradePosition tp = new TradePosition(openTrade.getContract(), DirectionEnum.D_Buy);
+		TradePosition tp = new TradePosition(openTrade.contract(), DirectionEnum.D_Buy);
 		tp.onTrade(openTrade);
 		tp.onTick(tick2);
 		assertThat(tp.profit()).isCloseTo(0D, offset(1e-6));
@@ -58,7 +59,7 @@ class TradePositionTest {
 	// 用例：加仓
 	@Test
 	void shouldAddPosition() {
-		TradePosition tp = new TradePosition(openTrade.getContract(), DirectionEnum.D_Buy);
+		TradePosition tp = new TradePosition(openTrade.contract(), DirectionEnum.D_Buy);
 		tp.onTrade(openTrade);
 		tp.onTrade(openTrade1);
 		tp.onTick(tick1);
@@ -72,7 +73,7 @@ class TradePositionTest {
 	// 用例：平仓
 	@Test
 	void shouldClosePosition() {
-		TradePosition tp = new TradePosition(openTrade.getContract(), DirectionEnum.D_Buy);
+		TradePosition tp = new TradePosition(openTrade.contract(), DirectionEnum.D_Buy);
 		tp.onTrade(openTrade);
 		tp.onTrade(closeTrade);
 		assertThat(tp.tdAvailable()).isZero();
@@ -83,7 +84,7 @@ class TradePositionTest {
 	// 用例：减仓，先开先平
 	@Test
 	void shouldReduceYdPosition() {
-		TradePosition tp = new TradePosition(openTrade.getContract(), DirectionEnum.D_Buy);
+		TradePosition tp = new TradePosition(openTrade.contract(), DirectionEnum.D_Buy);
 		tp.onTrade(openTrade);
 		tp.onTrade(openTrade1);
 		tp.onTick(tick1);
@@ -98,7 +99,7 @@ class TradePositionTest {
 	// 用例：平仓委托，冻结持仓；撤销委托，解冻持仓
 	@Test
 	void shouldHandlerOrder() {
-		TradePosition tp = new TradePosition(openTrade.getContract(), DirectionEnum.D_Buy);
+		TradePosition tp = new TradePosition(openTrade.contract(), DirectionEnum.D_Buy);
 		tp.onTrade(openTrade);
 		tp.onTrade(openTrade1);
 		tp.onOrder(order1);
@@ -114,7 +115,7 @@ class TradePositionTest {
 	// 用例：平仓委托，冻结持仓；撤销委托，解冻持仓
 	@Test
 	void shouldHandlerOrder2() {
-		TradePosition tp = new TradePosition(openTrade.getContract(), DirectionEnum.D_Buy);
+		TradePosition tp = new TradePosition(openTrade.contract(), DirectionEnum.D_Buy);
 		tp.onTrade(openTrade);
 		tp.onTrade(openTrade1);
 		tp.onOrder(order2);
@@ -130,7 +131,7 @@ class TradePositionTest {
 	// 用例：占用保证金
 	@Test
 	void shouldTakeMargin() {
-		TradePosition tp = new TradePosition(openTrade.getContract(), DirectionEnum.D_Buy);
+		TradePosition tp = new TradePosition(openTrade.contract(), DirectionEnum.D_Buy);
 		tp.onTrade(openTrade);
 		tp.onTrade(openTrade1);
 		assertThat(tp.totalMargin()).isCloseTo(12240, offset(1e-6));

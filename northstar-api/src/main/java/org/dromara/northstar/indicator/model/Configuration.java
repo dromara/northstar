@@ -2,18 +2,17 @@ package org.dromara.northstar.indicator.model;
 
 import java.util.Optional;
 
+import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.indicator.constant.PeriodUnit;
 import org.dromara.northstar.indicator.constant.ValueType;
 import org.springframework.util.Assert;
-
-import xyz.redtorch.pb.CoreField.ContractField;
 
 /**
  * 指标配置类
  * @author KevinHuangwl
  *
  */
-public record Configuration(String indicatorName, ContractField contract, int numOfUnits, PeriodUnit period,
+public record Configuration(String indicatorName, Contract contract, int numOfUnits, PeriodUnit period,
 		ValueType valueType, int cacheLength, boolean ifPlotPerBar, boolean visible){
 	
 	public static Builder builder() {
@@ -40,7 +39,7 @@ public record Configuration(String indicatorName, ContractField contract, int nu
 		/**
 		 * 绑定合约
 		 */
-		private ContractField contract;
+		private Contract contract;
 		/**
 		 * N个周期
 		 */
@@ -71,7 +70,7 @@ public record Configuration(String indicatorName, ContractField contract, int nu
 			return this;
 		}
 		
-		public Builder contract(ContractField contract) {
+		public Builder contract(Contract contract) {
 			this.contract = contract;
 			return this;
 		}

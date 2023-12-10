@@ -12,6 +12,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.io.UnsupportedEncodingException;
+import java.time.LocalTime;
 import java.util.List;
 
 import org.dromara.northstar.NorthstarApplication;
@@ -30,19 +31,22 @@ import org.dromara.northstar.common.model.MockTradeDescription;
 import org.dromara.northstar.common.model.ModuleAccountDescription;
 import org.dromara.northstar.common.model.ModuleDescription;
 import org.dromara.northstar.common.model.NsUser;
+import org.dromara.northstar.common.model.core.Contract;
+import org.dromara.northstar.common.model.core.ContractDefinition;
+import org.dromara.northstar.common.model.core.TimeSlot;
+import org.dromara.northstar.common.model.core.TradeTimeDefinition;
 import org.dromara.northstar.data.jdbc.GatewayDescriptionRepository;
 import org.dromara.northstar.data.jdbc.ModuleDealRecordRepository;
 import org.dromara.northstar.data.jdbc.ModuleDescriptionRepository;
 import org.dromara.northstar.data.jdbc.ModuleRuntimeDescriptionRepository;
 import org.dromara.northstar.event.BroadcastHandler;
-import org.dromara.northstar.gateway.Contract;
 import org.dromara.northstar.gateway.GatewayMetaProvider;
+import org.dromara.northstar.gateway.IContract;
 import org.dromara.northstar.gateway.IMarketCenter;
-import org.dromara.northstar.gateway.playback.PlaybackDataServiceManager;
+import org.dromara.northstar.gateway.mktdata.NorthstarDataServiceDataSource;
 import org.dromara.northstar.gateway.playback.PlaybackGatewayFactory;
 import org.dromara.northstar.gateway.playback.PlaybackGatewaySettings;
 import org.dromara.northstar.gateway.sim.trade.SimGatewayFactory;
-import org.dromara.northstar.gateway.time.GenericTradeTime;
 import org.dromara.northstar.strategy.IMessageSender;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -62,10 +66,8 @@ import com.corundumstudio.socketio.SocketIOServer;
 import cn.hutool.crypto.digest.MD5;
 import common.TestGatewayFactory;
 import net.sf.ehcache.CacheManager;
-import test.common.TestFieldFactory;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
-import xyz.redtorch.pb.CoreField.ContractField;
 
 @SpringBootTest(classes = NorthstarApplication.class, value="spring.profiles.active=unittest")
 @AutoConfigureMockMvc
@@ -107,7 +109,7 @@ class ModuleControllerTest {
 	PlaybackGatewayFactory playbackGatewayFactory;
 	
 	@Autowired
-	PlaybackDataServiceManager dsMgr;
+	NorthstarDataServiceDataSource dsMgr;
 	
 	ModuleDescription md1;
 	
@@ -115,8 +117,6 @@ class ModuleControllerTest {
 	
 	String strategy = "{\"name\":\"示例信号策略\",\"className\":\"org.dromara.northstar.strategy.example.BeginnerExampleStrategy\"}";
 	String strategyParams = "{\"label\":\"操作间隔\",\"name\":\"actionInterval\",\"order\":10,\"type\":\"Number\",\"value\":60,\"unit\":\"秒\",\"options\":[]}";
-	
-	TestFieldFactory factory = new TestFieldFactory("CTP账户");
 	
 	MockTradeDescription mockTrade = MockTradeDescription.builder()
 			.gatewayId("CTP账户")
@@ -132,15 +132,23 @@ class ModuleControllerTest {
 	
 	@BeforeEach
 	public void setUp() throws Exception {
-		gatewayMetaProvider.add(ChannelType.PLAYBACK, new PlaybackGatewaySettings(), playbackGatewayFactory, dsMgr);
-		gatewayMetaProvider.add(ChannelType.SIM, null, simGatewayFactory, null);
+		gatewayMetaProvider.add(ChannelType.PLAYBACK, new PlaybackGatewaySettings(), playbackGatewayFactory);
+		gatewayMetaProvider.add(ChannelType.SIM, null, simGatewayFactory);
 		
-		Contract c = mock(Contract.class);
+		ContractDefinition cd = ContractDefinition.builder()
+				.tradeTimeDef(TradeTimeDefinition.builder()
+						.timeSlots(List.of(TimeSlot.builder().start(LocalTime.of(0, 0)).end(LocalTime.of(0, 0)).build()))
+						.build())
+				.build();
+		IContract c = mock(IContract.class);
+		when(c.dataSource()).thenReturn(dsMgr);
 		when(c.channelType()).thenReturn(ChannelType.PLAYBACK);
 		when(mktCenter.getContract(any(Identifier.class))).thenReturn(c);
 		when(mktCenter.getContract(any(ChannelType.class), anyString())).thenReturn(c);
-		when(c.contractField()).thenReturn(ContractField.newBuilder().setChannelType("PLAYBACK").setUnifiedSymbol("rb0000@SHFE@FUTURES").build());
-		when(c.tradeTimeDefinition()).thenReturn(new GenericTradeTime());
+		when(c.contract()).thenReturn(Contract.builder().channelType(ChannelType.PLAYBACK).unifiedSymbol("rb0000@SHFE@FUTURES")
+				.contractDefinition(cd)
+				.name("螺纹钢指数")
+				.build());
 		
 		long time = System.currentTimeMillis();
 		String token = MD5.create().digestHex("123456" + time);

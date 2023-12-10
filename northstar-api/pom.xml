@@ -16,6 +16,14 @@
 
 	<dependencies>
 		<dependency>
+		    <groupId>org.springframework</groupId>
+		    <artifactId>spring-web</artifactId>
+		</dependency>
+		<dependency>
+		    <groupId>org.springframework.retry</groupId>
+		    <artifactId>spring-retry</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
 		</dependency>
@@ -77,8 +85,9 @@
 				<configuration>
 					<excludes>
 						<exclude>**/xyz/redtorch/pb/*</exclude>
-						<exclude>**/test/common/*</exclude>
-						<exclude>**/org/dromara/northstar/**</exclude>
+						<exclude>**/org/dromara/northstar/indicator/**</exclude>
+						<exclude>**/org/dromara/northstar/strategy/**</exclude>
+						<exclude>**/org/dromara/northstar/gateway/**</exclude>
 					</excludes>
 				</configuration>
 			</plugin>

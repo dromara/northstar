@@ -1,7 +1,6 @@
 package org.dromara.northstar.module;
 
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -12,16 +11,18 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
-import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.common.constant.SignalOperation;
-import org.dromara.northstar.common.model.Identifier;
 import org.dromara.northstar.common.model.ModuleDescription;
 import org.dromara.northstar.common.model.ModuleRuntimeDescription;
 import org.dromara.northstar.common.model.Tuple;
+import org.dromara.northstar.common.model.core.Bar;
+import org.dromara.northstar.common.model.core.Contract;
+import org.dromara.northstar.common.model.core.Position;
+import org.dromara.northstar.common.model.core.SubmitOrderReq;
+import org.dromara.northstar.common.model.core.Tick;
 import org.dromara.northstar.common.utils.FieldUtils;
 import org.dromara.northstar.common.utils.OrderUtils;
 import org.dromara.northstar.data.IModuleRepository;
-import org.dromara.northstar.gateway.Contract;
 import org.dromara.northstar.gateway.IContractManager;
 import org.dromara.northstar.strategy.IModuleContext;
 import org.dromara.northstar.strategy.TradeStrategy;
@@ -36,18 +37,9 @@ import com.alibaba.fastjson2.JSONObject;
 import cn.hutool.core.lang.Assert;
 import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
-import xyz.redtorch.pb.CoreEnum.ForceCloseReasonEnum;
-import xyz.redtorch.pb.CoreEnum.HedgeFlagEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreEnum.OrderPriceTypeEnum;
 import xyz.redtorch.pb.CoreEnum.TimeConditionEnum;
-import xyz.redtorch.pb.CoreEnum.VolumeConditionEnum;
-import xyz.redtorch.pb.CoreField.BarField;
-import xyz.redtorch.pb.CoreField.CancelOrderReqField;
-import xyz.redtorch.pb.CoreField.ContractField;
-import xyz.redtorch.pb.CoreField.PositionField;
-import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
-import xyz.redtorch.pb.CoreField.TickField;
 
 public class ArbitrageModuleContext extends ModuleContext implements IModuleContext{
 	
@@ -72,13 +64,13 @@ public class ArbitrageModuleContext extends ModuleContext implements IModuleCont
 				}
 				return;
 			}
-			TickField tick = latestTickMap.get(tradeIntent.getContract().getUnifiedSymbol());
+			Tick tick = latestTickMap.get(tradeIntent.getContract());
 			if(Objects.isNull(tick)) {
 				getLogger().warn("没有TICK行情数据时，忽略下单请求");
 				return;
 			}
 			getLogger().info("收到下单意图：{}", tradeIntent);
-			tradeIntentMap.put(tradeIntent.getContract().getUnifiedSymbol(), tradeIntent);
+			tradeIntentMap.put(tradeIntent.getContract(), tradeIntent);
 			tradeIntent.setContext(this);
 			tradeIntent.onTick(tick);	
 		});
@@ -88,53 +80,50 @@ public class ArbitrageModuleContext extends ModuleContext implements IModuleCont
 	 * 套利模组上下文实际下单时，与投机模组上下文的区别在于，少了状态机的拦截，以实现同时下单
 	 */
 	@Override
-	public Optional<String> submitOrderReq(ContractField contract, SignalOperation operation, PriceType priceType, int volume, double price) {
+	public Optional<String> submitOrderReq(Contract contract, SignalOperation operation, PriceType priceType, int volume, double price) {
 		if(!module.isEnabled()) {
 			if(isReady()) {
 				getLogger().info("策略处于停用状态，忽略委托单");
 			}
 			return Optional.empty();
 		}
-		TickField tick = latestTickMap.get(contract.getUnifiedSymbol());
+		Tick tick = latestTickMap.get(contract);
 		Assert.notNull(tick, "没有行情时不应该发送订单");
 		Assert.isTrue(volume > 0, "下单手数应该为正数。当前为" + volume);
 		
 		double orderPrice = priceType.resolvePrice(tick, operation, price);
 		getLogger().info("[{} {}] 策略信号：合约【{}】，操作【{}】，价格【{}】，手数【{}】，类型【{}】", 
-				tick.getActionDay(), LocalTime.parse(tick.getActionTime(), DateTimeConstant.T_FORMAT_WITH_MS_INT_FORMATTER),
-				contract.getUnifiedSymbol(), operation.text(), orderPrice, volume, priceType);
+				tick.actionDay(), tick.actionTime(),
+				contract.unifiedSymbol(), operation.text(), orderPrice, volume, priceType);
 		
 		String id = UUID.randomUUID().toString();
 		String gatewayId = getAccount(contract).accountId();
 		DirectionEnum direction = OrderUtils.resolveDirection(operation);
 		int factor = FieldUtils.directionFactor(direction);
-		double plusPrice = module.getModuleDescription().getOrderPlusTick() * contract.getPriceTick(); // 超价设置
-		PositionField pos = getAccount(contract).getPosition(OrderUtils.getClosingDirection(direction), contract.getUnifiedSymbol())
-				.orElse(PositionField.newBuilder().setContract(contract).build());
+		double plusPrice = module.getModuleDescription().getOrderPlusTick() * contract.priceTick(); // 超价设置
+		Position pos = getAccount(contract).getPosition(OrderUtils.getClosingDirection(direction), contract)
+				.orElse(Position.builder().contract(contract).build());
 		Tuple<OffsetFlagEnum, Integer> tuple = module.getModuleDescription().getClosingPolicy().resolve(operation, pos, volume);
 		if(tuple.t1() == OffsetFlagEnum.OF_CloseToday) {
-			PositionField updatePos = pos.toBuilder().setTdFrozen(tuple.t2()).build();
+			Position updatePos = pos.toBuilder().tdFrozen(tuple.t2()).build();
 			getAccount(contract).onPosition(updatePos);
 		} else if(tuple.t1() == OffsetFlagEnum.OF_CloseYesterday) {
-			PositionField updatePos = pos.toBuilder().setYdFrozen(tuple.t2()).build();
+			Position updatePos = pos.toBuilder().ydFrozen(tuple.t2()).build();
 			getAccount(contract).onPosition(updatePos);
 		}
-		SubmitOrderReqField orderReq = SubmitOrderReqField.newBuilder()
-				.setOriginOrderId(id)
-				.setContract(contract)
-				.setGatewayId(gatewayId)
-				.setDirection(direction)
-				.setOffsetFlag(tuple.t1())
-				.setVolume(tuple.t2())		
-				.setPrice(orderPrice + factor * plusPrice)	// 自动加上超价
-				.setHedgeFlag(HedgeFlagEnum.HF_Speculation)
-				.setTimeCondition(priceType == PriceType.ANY_PRICE ? TimeConditionEnum.TC_IOC : TimeConditionEnum.TC_GFD)
-				.setOrderPriceType(priceType == PriceType.ANY_PRICE ? OrderPriceTypeEnum.OPT_AnyPrice : OrderPriceTypeEnum.OPT_LimitPrice)
-				.setVolumeCondition(VolumeConditionEnum.VC_AV)
-				.setForceCloseReason(ForceCloseReasonEnum.FCR_NotForceClose)
-				.setContingentCondition(ContingentConditionEnum.CC_Immediately)
-				.setActionTimestamp(System.currentTimeMillis())
-				.setMinVolume(1)
+		SubmitOrderReq orderReq = SubmitOrderReq.builder()
+				.originOrderId(id)
+				.contract(contract)
+				.gatewayId(gatewayId)
+				.direction(direction)
+				.offsetFlag(tuple.t1())
+				.volume(tuple.t2())
+				.price(orderPrice + factor * plusPrice)	// 自动加上超价
+				.timeCondition(priceType == PriceType.ANY_PRICE ? TimeConditionEnum.TC_IOC : TimeConditionEnum.TC_GFD)
+				.orderPriceType(priceType == PriceType.ANY_PRICE ? OrderPriceTypeEnum.OPT_AnyPrice : OrderPriceTypeEnum.OPT_LimitPrice)
+				.contingentCondition(ContingentConditionEnum.CC_Immediately)
+				.actionTimestamp(System.currentTimeMillis())
+				.minVolume(1)
 				.build();
 		try {
 			if(Objects.nonNull(orderReqFilter)) {
@@ -142,10 +131,10 @@ public class ArbitrageModuleContext extends ModuleContext implements IModuleCont
 			}
 		} catch (Exception e) {
 			getLogger().error("发单失败。原因：{}", e.getMessage());
-			tradeIntentMap.remove(orderReq.getContract().getUnifiedSymbol());
+			tradeIntentMap.remove(orderReq.contract());
 			return Optional.empty();
 		}
-		getLogger().info("发单：{}，{}", orderReq.getOriginOrderId(), LocalDateTime.now());
+		getLogger().info("发单：{}，{}", orderReq.originOrderId(), LocalDateTime.now());
 		String originOrderId = module.getAccount(contract).submitOrder(orderReq);
 		orderReqMap.put(originOrderId, orderReq);
 		return Optional.of(originOrderId);
@@ -161,13 +150,8 @@ public class ArbitrageModuleContext extends ModuleContext implements IModuleCont
 			return;
 		}
 		getLogger().info("撤单：{}", originOrderId);
-		ContractField contract = orderReqMap.get(originOrderId).getContract();
-		Contract c = contractMgr.getContract(Identifier.of(contract.getContractId()));
-		CancelOrderReqField cancelReq = CancelOrderReqField.newBuilder()
-				.setGatewayId(contract.getGatewayId())
-				.setOriginOrderId(originOrderId)
-				.build();
-		module.getAccount(c).cancelOrder(cancelReq);
+		Contract contract = orderReqMap.get(originOrderId).contract();
+		module.getAccount(contract).cancelOrder(originOrderId);
 	}
 
 	@Override
@@ -175,40 +159,40 @@ public class ArbitrageModuleContext extends ModuleContext implements IModuleCont
 		ModuleRuntimeDescription mrd = super.getRuntimeDescription(fullDescription);
 		if(fullDescription) {
 			if(contractMap.size() == 2) {
-				Iterator<ContractField> it = contractMap.values().iterator();
-				ContractField c1 = it.next();
-				ContractField c2 = it.next();
-				ContractField nearMonth = Long.valueOf(c1.getLastTradeDateOrContractMonth()) < Long.valueOf(c2.getLastTradeDateOrContractMonth()) ? c1 : c2;
-				ContractField farMonth = c1 == nearMonth ? c2 : c1;
-				String combName = String.format("%s-%s", nearMonth.getName(), farMonth.getName());
-				Map<Long, BarField> timeBarMap = barBufQMap.get(nearMonth.getUnifiedSymbol())
+				Iterator<Contract> it = contractMap.values().iterator();
+				Contract c1 = it.next();
+				Contract c2 = it.next();
+				Contract nearMonth = c1.lastTradeDate().isBefore(c2.lastTradeDate()) ? c1 : c2;
+				Contract farMonth = c1 == nearMonth ? c2 : c1;
+				String combName = String.format("%s-%s", nearMonth.name(), farMonth.name());
+				Map<Long, Bar> timeBarMap = barBufQMap.get(nearMonth)
 						.stream()
-						.collect(Collectors.toMap(BarField::getActionTimestamp, bar -> bar));
+						.collect(Collectors.toMap(Bar::actionTimestamp, bar -> bar));
 				JSONArray combBarArr = new JSONArray();
-				barBufQMap.get(farMonth.getUnifiedSymbol()).forEach(bar -> {
-					BarField nearBar = timeBarMap.get(bar.getActionTimestamp());
+				barBufQMap.get(farMonth).forEach(bar -> {
+					Bar nearBar = timeBarMap.get(bar.actionTimestamp());
 					if(Objects.nonNull(nearBar)) {
 						combBarArr.add(compute(nearBar, bar));
 					}
 				});
 				mrd.getDataMap().put(combName, combBarArr);
 			} else if (contractMap.size() == 3) {
-				List<ContractField> contracts = contractMap.values().stream()
-						.sorted((a,b) -> a.getUnifiedSymbol().compareTo(b.getUnifiedSymbol()))
+				List<Contract> contracts = contractMap.values().stream()
+						.sorted((a,b) -> a.unifiedSymbol().compareTo(b.unifiedSymbol()))
 						.toList();
-				ContractField near = contracts.get(0);
-				ContractField mid = contracts.get(1);
-				ContractField far = contracts.get(2);
-				Map<Long, BarField> midTimeBarMap = barBufQMap.get(mid.getUnifiedSymbol())
+				Contract near = contracts.get(0);
+				Contract mid = contracts.get(1);
+				Contract far = contracts.get(2);
+				Map<Long, Bar> midTimeBarMap = barBufQMap.get(mid)
 						.stream()
-						.collect(Collectors.toMap(BarField::getActionTimestamp, bar -> bar));
-				Map<Long, BarField> farTimeBarMap = barBufQMap.get(far.getUnifiedSymbol())
+						.collect(Collectors.toMap(Bar::actionTimestamp, bar -> bar));
+				Map<Long, Bar> farTimeBarMap = barBufQMap.get(far)
 						.stream()
-						.collect(Collectors.toMap(BarField::getActionTimestamp, bar -> bar));
+						.collect(Collectors.toMap(Bar::actionTimestamp, bar -> bar));
 				JSONArray combBarArr = new JSONArray();
-				barBufQMap.get(near.getUnifiedSymbol()).forEach(nearBar -> {
-					BarField midBar = midTimeBarMap.get(nearBar.getActionTimestamp());
-					BarField farBar = farTimeBarMap.get(nearBar.getActionTimestamp());
+				barBufQMap.get(near).forEach(nearBar -> {
+					Bar midBar = midTimeBarMap.get(nearBar.actionTimestamp());
+					Bar farBar = farTimeBarMap.get(nearBar.actionTimestamp());
 					if(Objects.nonNull(midBar) && Objects.nonNull(farBar)) {
 						combBarArr.add(compute(nearBar, midBar, farBar));
 					}
@@ -219,23 +203,23 @@ public class ArbitrageModuleContext extends ModuleContext implements IModuleCont
 		return mrd;
 	}
 	
-	private JSONObject compute(BarField bar1, BarField bar2) {
+	private JSONObject compute(Bar bar1, Bar bar2) {
 		JSONObject json = new JSONObject();
-		json.put("open", (bar1.getOpenPrice() - bar2.getOpenPrice()) / bar2.getOpenPrice() * 100);
-		json.put("low", (bar1.getLowPrice() - bar2.getLowPrice()) / bar2.getLowPrice() * 100);
-		json.put("high", (bar1.getHighPrice() - bar2.getHighPrice()) / bar2.getHighPrice() * 100);
-		json.put("close", (bar1.getClosePrice() - bar2.getClosePrice()) / bar2.getClosePrice() * 100);
-		json.put("timestamp", bar1.getActionTimestamp());
+		json.put("open", (bar1.openPrice() - bar2.openPrice()) / bar2.openPrice() * 100);
+		json.put("low", (bar1.lowPrice() - bar2.lowPrice()) / bar2.lowPrice() * 100);
+		json.put("high", (bar1.highPrice() - bar2.highPrice()) / bar2.highPrice() * 100);
+		json.put("close", (bar1.closePrice() - bar2.closePrice()) / bar2.closePrice() * 100);
+		json.put("timestamp", bar1.actionTimestamp());
 		return json;
 	}
 	
-	private JSONObject compute(BarField near, BarField mid, BarField far) {
+	private JSONObject compute(Bar near, Bar mid, Bar far) {
 		JSONObject json = new JSONObject();
-		json.put("open", (near.getOpenPrice() / mid.getOpenPrice() - mid.getOpenPrice() / far.getOpenPrice()) * 100);
-		json.put("low", (near.getLowPrice() / mid.getLowPrice() - mid.getLowPrice() / far.getLowPrice()) * 100);
-		json.put("high", (near.getHighPrice() / mid.getHighPrice() - mid.getHighPrice() / far.getHighPrice()) * 100);
-		json.put("close", (near.getClosePrice() / mid.getClosePrice() - mid.getClosePrice() / far.getClosePrice()) * 100);
-		json.put("timestamp", near.getActionTimestamp());
+		json.put("open", (near.openPrice() / mid.openPrice() - mid.openPrice() / far.openPrice()) * 100);
+		json.put("low", (near.lowPrice() / mid.lowPrice() - mid.lowPrice() / far.lowPrice()) * 100);
+		json.put("high", (near.highPrice() / mid.highPrice() - mid.highPrice() / far.highPrice()) * 100);
+		json.put("close", (near.closePrice() / mid.closePrice() - mid.closePrice() / far.closePrice()) * 100);
+		json.put("timestamp", near.actionTimestamp());
 		return json;
 	}
 }

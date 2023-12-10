@@ -9,14 +9,13 @@ import org.dromara.northstar.common.constant.ModuleState;
 import org.dromara.northstar.common.constant.SignalOperation;
 import org.dromara.northstar.common.model.DynamicParams;
 import org.dromara.northstar.common.model.Setting;
+import org.dromara.northstar.common.model.core.Contract;
+import org.dromara.northstar.common.model.core.Tick;
 import org.dromara.northstar.strategy.AbstractStrategy;
 import org.dromara.northstar.strategy.StrategicComponent;
 import org.dromara.northstar.strategy.TradeStrategy;
 import org.dromara.northstar.strategy.constant.PriceType;
 import org.dromara.northstar.strategy.model.TradeIntent;
-
-import xyz.redtorch.pb.CoreField.ContractField;
-import xyz.redtorch.pb.CoreField.TickField;
 
 @StrategicComponent(DualAccountExampleStrategy.NAME)		// 该注解是用于给策略命名用的，所有的策略都要带上这个注解
 public class DualAccountExampleStrategy extends AbstractStrategy implements TradeStrategy {
@@ -51,14 +50,14 @@ public class DualAccountExampleStrategy extends AbstractStrategy implements Trad
 
 	private long nextActionTime;
 	
-	private Set<String> symbolSet = new HashSet<>();
+	private Set<Contract> symbolSet = new HashSet<>();
 	
-	private ContractField chosen;
+	private Contract chosen;
 	
 	@Override
-	public void onTick(TickField tick) {
-		symbolSet.add(tick.getUnifiedSymbol());
-		long now = tick.getActionTimestamp();
+	public void onTick(Tick tick) {
+		symbolSet.add(tick.contract());
+		long now = tick.actionTimestamp();
 		// 启用后，等待10秒才开始交易
 		if(nextActionTime == 0) {
 			nextActionTime = now + 10000;
@@ -100,9 +99,9 @@ public class DualAccountExampleStrategy extends AbstractStrategy implements Trad
 		}
 	}
 	
-	private ContractField randomPick() {
+	private Contract randomPick() {
 		int index = ThreadLocalRandom.current().nextInt(symbolSet.size());
-		return ctx.getContract(symbolSet.stream().toList().get(index));
+		return symbolSet.stream().toList().get(index);
 	}
 
 }

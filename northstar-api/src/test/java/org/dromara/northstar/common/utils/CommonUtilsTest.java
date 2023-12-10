@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDateTime;
 
-import org.dromara.northstar.common.utils.CommonUtils;
 import org.junit.jupiter.api.Test;
 
 public class CommonUtilsTest {

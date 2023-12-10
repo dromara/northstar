@@ -3,9 +3,8 @@ package org.dromara.northstar.gateway.playback;
 import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.constant.ConnectionState;
 import org.dromara.northstar.common.model.GatewayDescription;
+import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.gateway.MarketGateway;
-
-import xyz.redtorch.pb.CoreField.ContractField;
 
 public class PlaybackGatewayAdapter implements MarketGateway {
 	
@@ -44,13 +43,13 @@ public class PlaybackGatewayAdapter implements MarketGateway {
 	}
 
 	@Override
-	public boolean subscribe(ContractField contract) {
+	public boolean subscribe(Contract contract) {
 		// 动态订阅不需要实现
 		return true;
 	}
 
 	@Override
-	public boolean unsubscribe(ContractField contract) {
+	public boolean unsubscribe(Contract contract) {
 		// 动态取消订阅不需要实现
 		return true;
 	}

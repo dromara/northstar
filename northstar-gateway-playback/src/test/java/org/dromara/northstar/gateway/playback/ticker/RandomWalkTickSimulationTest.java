@@ -5,11 +5,8 @@ import static org.assertj.core.api.Assertions.offset;
 
 import java.util.List;
 
-import org.dromara.northstar.gateway.playback.ticker.RandomWalkTickSimulation;
-import org.dromara.northstar.gateway.playback.ticker.TickEntry;
+import org.dromara.northstar.common.model.core.Bar;
 import org.junit.jupiter.api.Test;
-
-import xyz.redtorch.pb.CoreField.BarField;
 
 /**
  * 由于生成算法的随机性，本单元测试不排除出现失败的可能
@@ -24,13 +21,13 @@ class RandomWalkTickSimulationTest {
 	
 	@Test
 	void testSmallRange() {
-		BarField bar = BarField.newBuilder()
-				.setOpenPrice(5000)
-				.setHighPrice(5005)
-				.setLowPrice(4998)
-				.setClosePrice(5000)
-				.setOpenInterestDelta(31)
-				.setVolume(2000)
+		Bar bar = Bar.builder()
+				.openPrice(5000)
+				.highPrice(5005)
+				.lowPrice(4998)
+				.closePrice(5000)
+				.openInterestDelta(31)
+				.volume(2000)
 				.build();
 		
 		List<TickEntry> results = rws.generateFrom(bar);
@@ -48,13 +45,13 @@ class RandomWalkTickSimulationTest {
 	
 	@Test
 	void testLargeRange() {
-		BarField bar = BarField.newBuilder()
-				.setOpenPrice(5000)
-				.setHighPrice(5055)
-				.setLowPrice(4998)
-				.setClosePrice(5000)
-				.setOpenInterestDelta(500)
-				.setVolume(50000)
+		Bar bar = Bar.builder()
+				.openPrice(5000)
+				.highPrice(5055)
+				.lowPrice(4998)
+				.closePrice(5000)
+				.openInterestDelta(500)
+				.volume(50000)
 				.build();
 		
 		List<TickEntry> results = rws.generateFrom(bar);
@@ -72,13 +69,13 @@ class RandomWalkTickSimulationTest {
 	
 	@Test
 	void testSmallPriceTick() {
-		BarField bar = BarField.newBuilder()
-				.setOpenPrice(5000)
-				.setHighPrice(5005)
-				.setLowPrice(4998)
-				.setClosePrice(5000)
-				.setOpenInterestDelta(-50)
-				.setVolume(10000)
+		Bar bar = Bar.builder()
+				.openPrice(5000)
+				.highPrice(5005)
+				.lowPrice(4998)
+				.closePrice(5000)
+				.openInterestDelta(-50)
+				.volume(10000)
 				.build();
 		
 		List<TickEntry> results = rws2.generateFrom(bar);

@@ -1,7 +1,6 @@
 package org.dromara.northstar.gateway;
 
-import xyz.redtorch.pb.CoreField.CancelOrderReqField;
-import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
+import org.dromara.northstar.common.model.core.SubmitOrderReq;
 
 public interface TradeGateway extends Gateway {
 
@@ -11,7 +10,7 @@ public interface TradeGateway extends Gateway {
 	 * @param orderReq
 	 * @return
 	 */
-	String submitOrder(SubmitOrderReqField submitOrderReq);
+	String submitOrder(SubmitOrderReq submitOrderReq);
 
 	/**
 	 * 撤销定单
@@ -19,6 +18,6 @@ public interface TradeGateway extends Gateway {
 	 * @param cancelOrderReq
 	 * @return
 	 */
-	boolean cancelOrder(CancelOrderReqField cancelOrderReq);
+	boolean cancelOrder(String originOrderId);
 	
 }

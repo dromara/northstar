@@ -8,18 +8,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import org.apache.commons.lang3.StringUtils;
+import org.dromara.northstar.common.model.core.Contract;
+import org.dromara.northstar.common.model.core.Order;
+import org.dromara.northstar.common.model.core.Position;
+import org.dromara.northstar.common.model.core.Tick;
+import org.dromara.northstar.common.model.core.Trade;
 import org.dromara.northstar.common.utils.FieldUtils;
 
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreEnum.OrderStatusEnum;
 import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
-import xyz.redtorch.pb.CoreField.ContractField;
-import xyz.redtorch.pb.CoreField.OrderField;
-import xyz.redtorch.pb.CoreField.PositionField;
-import xyz.redtorch.pb.CoreField.TickField;
-import xyz.redtorch.pb.CoreField.TradeField;
 
 /**
  * 交易持仓，代表某个合约一个方向的持仓汇总信息
@@ -31,17 +30,17 @@ import xyz.redtorch.pb.CoreField.TradeField;
 public class TradePosition {
 
 	/* 旧成交在队首，新成交在队尾 */
-	private final LinkedList<TradeField> trades = new LinkedList<>();
+	private final LinkedList<Trade> trades = new LinkedList<>();
 	
-	private final Map<String, OrderField> pendingOrderMap = new HashMap<>();
+	private final Map<String, Order> pendingOrderMap = new HashMap<>();
 
 	private final DirectionEnum dir;
 	
-	private final ContractField contract;
+	private final Contract contract;
 	
-	private TickField lastTick;
+	private Tick lastTick;
 	
-	public TradePosition(ContractField contract, DirectionEnum direction) {
+	public TradePosition(Contract contract, DirectionEnum direction) {
 		this.contract = contract;
 		this.dir = direction;
 	}
@@ -50,8 +49,8 @@ public class TradePosition {
 	 * 更新行情
 	 * @param tick
 	 */
-	public void onTick(TickField tick) {
-		if(contract.getUnifiedSymbol().equals(tick.getUnifiedSymbol())) {
+	public void onTick(Tick tick) {
+		if(contract.equals(tick.contract())) {
 			lastTick = tick;
 		}
 	}
@@ -60,18 +59,18 @@ public class TradePosition {
 	 * 订单处理
 	 * @param order
 	 */
-	public void onOrder(OrderField order) {
-		if(!contract.getContractId().equals(order.getContract().getContractId())	//合约不一致 
-				|| !FieldUtils.isClose(order.getOffsetFlag())				//不是平仓订单 
-				|| !FieldUtils.isOpposite(dir, order.getDirection())		//不是反向订单
-				|| order.getOrderStatus() == OrderStatusEnum.OS_Rejected	//废单
+	public void onOrder(Order order) {
+		if(!contract.equals(order.contract())	//合约不一致 
+				|| !FieldUtils.isClose(order.offsetFlag())				//不是平仓订单 
+				|| !FieldUtils.isOpposite(dir, order.direction())		//不是反向订单
+				|| order.orderStatus() == OrderStatusEnum.OS_Rejected	//废单
 			) {
 			return;
 		}
-		if(order.getOrderStatus() == OrderStatusEnum.OS_AllTraded || order.getOrderStatus() == OrderStatusEnum.OS_Canceled) {
-			pendingOrderMap.remove(order.getOriginOrderId());
+		if(order.orderStatus() == OrderStatusEnum.OS_AllTraded || order.orderStatus() == OrderStatusEnum.OS_Canceled) {
+			pendingOrderMap.remove(order.originOrderId());
 		} else {
-			pendingOrderMap.put(order.getOriginOrderId(), order);
+			pendingOrderMap.put(order.originOrderId(), order);
 		}
 	}
 	
@@ -80,36 +79,36 @@ public class TradePosition {
 	 * @param trade
 	 * @return			返回平仓盈亏
 	 */
-	public List<Deal> onTrade(TradeField trade) {
-		if(!contract.getContractId().equals(trade.getContract().getContractId())) {
-			throw new IllegalArgumentException(String.format("不是同一个合约。期望：%s，实际：%s", contract.getContractId(), trade.getContract().getContractId()));
+	public List<Deal> onTrade(Trade trade) {
+		if(!contract.equals(trade.contract())) {
+			throw new IllegalArgumentException(String.format("不是同一个合约。期望：%s，实际：%s", contract.contractId(), trade.contract().contractId()));
 		}
-		if(FieldUtils.isClose(trade.getOffsetFlag()) && FieldUtils.isOpposite(dir, trade.getDirection()))	//平仓时，方向要反向
+		if(FieldUtils.isClose(trade.offsetFlag()) && FieldUtils.isOpposite(dir, trade.direction()))	//平仓时，方向要反向
 		{
 			return closingOpenTrade(trade);
 		}
-		if(FieldUtils.isOpen(trade.getOffsetFlag()) && trade.getDirection() == dir) //开仓时，方向要同向 
+		if(FieldUtils.isOpen(trade.offsetFlag()) && trade.direction() == dir) //开仓时，方向要同向 
 		{
 			trades.add(trade);
 		}
 		return Collections.emptyList();
 	}
 	
-	private List<Deal> closingOpenTrade(TradeField trade) {
+	private List<Deal> closingOpenTrade(Trade trade) {
 		List<Deal> resultList = new ArrayList<>();
-		int restVol = trade.getVolume();
+		int restVol = trade.volume();
 		while(restVol > 0 && !trades.isEmpty()) {
-			TradeField t = trades.pollFirst();
-			if(t.getVolume() > restVol) {
-				TradeField openTrade = t.toBuilder().setVolume(restVol).build();
-				TradeField restTrade = t.toBuilder().setVolume(t.getVolume() - restVol).build();
+			Trade t = trades.pollFirst();
+			if(t.volume() > restVol) {
+				Trade openTrade = t.toBuilder().volume(restVol).build();
+				Trade restTrade = t.toBuilder().volume(t.volume() - restVol).build();
 				trades.offerFirst(restTrade);
 				resultList.add(Deal.builder().openTrade(openTrade).closeTrade(trade).build());
 				restVol = 0;
 			} else {
-				restVol -= t.getVolume();
-				TradeField openTrade = t;
-				TradeField closeTrade = trade.toBuilder().setVolume(t.getVolume()).build();
+				restVol -= t.volume();
+				Trade openTrade = t;
+				Trade closeTrade = trade.toBuilder().volume(t.volume()).build();
 				resultList.add(Deal.builder().openTrade(openTrade).closeTrade(closeTrade).build());
 			}
 		}
@@ -120,7 +119,7 @@ public class TradePosition {
 	 * 获取未平仓原始成交
 	 * @return
 	 */
-	public List<TradeField> getUncloseTrades(){
+	public List<Trade> getUncloseTrades(){
 		return trades;
 	}
 	
@@ -130,7 +129,7 @@ public class TradePosition {
 	 */
 	public int totalVolume() {
 		return trades.stream()
-				.map(TradeField::getVolume)
+				.mapToInt(Trade::volume)
 				.reduce(0, Integer::sum);
 	}
 	
@@ -140,10 +139,9 @@ public class TradePosition {
 	 */
 	public int tdVolume() {
 		if(Objects.isNull(lastTick)) return 0;
-		String currentTradingDay = lastTick.getTradingDay();
 		return trades.stream()
-				.filter(t -> StringUtils.equals(currentTradingDay, t.getTradingDay()))
-				.map(TradeField::getVolume)
+				.filter(t -> Objects.equals(t.tradingDay(), lastTick.tradingDay()))
+				.mapToInt(Trade::volume)
 				.reduce(0, Integer::sum);
 	}
 	
@@ -153,10 +151,9 @@ public class TradePosition {
 	 */
 	public int ydVolume() {
 		if(Objects.isNull(lastTick)) return 0;
-		String currentTradingDay = lastTick.getTradingDay();
 		return trades.stream()
-				.filter(t -> !StringUtils.equals(currentTradingDay, t.getTradingDay()))
-				.map(TradeField::getVolume)
+				.filter(t -> !Objects.equals(t.tradingDay(), lastTick.tradingDay()))
+				.mapToInt(Trade::volume)
 				.reduce(0, Integer::sum);
 	}
 	
@@ -166,7 +163,7 @@ public class TradePosition {
 	 */
 	public int totalAvailable() {
 		int frozen = pendingOrderMap.values().stream()
-				.map(OrderField::getTotalVolume)
+				.mapToInt(Order::totalVolume)
 				.reduce(0, Integer::sum);
 		return totalVolume() - frozen;
 	}
@@ -177,8 +174,8 @@ public class TradePosition {
 	 */
 	public int tdAvailable() {
 		int tdFrozen = pendingOrderMap.values().stream()
-				.filter(order -> order.getOffsetFlag() == OffsetFlagEnum.OF_CloseToday)
-				.map(OrderField::getTotalVolume)
+				.filter(order -> order.offsetFlag() == OffsetFlagEnum.OF_CloseToday)
+				.mapToInt(Order::totalVolume)
 				.reduce(0, Integer::sum);
 		return tdVolume() - tdFrozen;
 	}
@@ -189,8 +186,8 @@ public class TradePosition {
 	 */
 	public int ydAvailable() {
 		int ydFrozen = pendingOrderMap.values().stream()
-				.filter(order -> order.getOffsetFlag() != OffsetFlagEnum.OF_CloseToday)
-				.map(OrderField::getTotalVolume)
+				.filter(order -> order.offsetFlag() != OffsetFlagEnum.OF_CloseToday)
+				.mapToInt(Order::totalVolume)
 				.reduce(0, Integer::sum);
 		return ydVolume() - ydFrozen;
 	}
@@ -203,7 +200,7 @@ public class TradePosition {
 		int totalVol = totalVolume();
 		if(totalVol == 0) 	return 0;
 		return trades.stream()
-				.map(t -> t.getVolume() * t.getPrice())
+				.mapToDouble(t -> t.volume() * t.price())
 				.reduce(0D, Double::sum) / totalVol;
 	}
 	
@@ -214,8 +211,8 @@ public class TradePosition {
 	public double profit() {
 		if(Objects.isNull(lastTick)) return 0;
 		int factor = FieldUtils.directionFactor(dir);
-		double priceDiff = factor * (lastTick.getLastPrice() - avgOpenPrice());
-		return priceDiff * totalVolume() * contract.getMultiplier();
+		double priceDiff = factor * (lastTick.lastPrice() - avgOpenPrice());
+		return priceDiff * totalVolume() * contract.multiplier();
 	}
 	
 	/**
@@ -223,39 +220,36 @@ public class TradePosition {
 	 * @return
 	 */
 	public double totalMargin() {
-		double ratio = FieldUtils.isBuy(dir) ? contract.getLongMarginRatio() : contract.getShortMarginRatio();
-		return totalVolume() * avgOpenPrice() * contract.getMultiplier() * ratio;
+		double ratio = FieldUtils.isBuy(dir) ? contract.longMarginRatio() : contract.shortMarginRatio();
+		return totalVolume() * avgOpenPrice() * contract.multiplier() * ratio;
 	}
 	
 	/**
 	 * 持仓信息汇总
 	 * @return
 	 */
-	public PositionField convertToPositionField(String gatewayId) {
+	public Position convertToPosition(String gatewayId) {
 		int factor = FieldUtils.directionFactor(dir);
-		double lastPrice = lastTick == null ? 0 : lastTick.getLastPrice();
-		double priceDiff = lastTick == null ? 0 : factor * (lastTick.getLastPrice() - avgOpenPrice());
+		double lastPrice = lastTick == null ? 0 : lastTick.lastPrice();
+		double priceDiff = lastTick == null ? 0 : factor * (lastTick.lastPrice() - avgOpenPrice());
 		PositionDirectionEnum posDir = FieldUtils.isBuy(dir) ? PositionDirectionEnum.PD_Long : PositionDirectionEnum.PD_Short;
-		return PositionField.newBuilder()
-				.setGatewayId(gatewayId)
-				.setPositionId(contract.getUnifiedSymbol() + "@" + posDir)
-				.setContract(contract)
-				.setFrozen(totalVolume() - totalAvailable())
-				.setTdFrozen(tdVolume() - tdAvailable())
-				.setYdFrozen(ydVolume() - ydAvailable())
-				.setPosition(totalVolume())
-				.setTdPosition(tdVolume())
-				.setYdPosition(ydVolume())
-				.setExchangeMargin(totalMargin())
-				.setUseMargin(totalMargin())
-				.setLastPrice(lastPrice)
-				.setOpenPrice(avgOpenPrice())
-				.setOpenPriceDiff(priceDiff)
-				.setPrice(avgOpenPrice())
-				.setPriceDiff(priceDiff)
-				.setPositionProfit(profit())
-				.setOpenPositionProfit(profit())
-				.setPositionDirection(posDir)
+		return Position.builder()
+				.gatewayId(gatewayId)
+				.positionId(contract.unifiedSymbol() + "@" + posDir)
+				.contract(contract)
+				.frozen(totalVolume() - totalAvailable())
+				.tdFrozen(tdVolume() - tdAvailable())
+				.ydFrozen(ydVolume() - ydAvailable())
+				.position(totalVolume())
+				.tdPosition(tdVolume())
+				.ydPosition(ydVolume())
+				.exchangeMargin(totalMargin())
+				.useMargin(totalMargin())
+				.lastPrice(lastPrice)
+				.openPrice(avgOpenPrice())
+				.openPriceDiff(priceDiff)
+				.positionProfit(profit())
+				.positionDirection(posDir)
 				.build();
 	}
 	

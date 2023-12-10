@@ -6,14 +6,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.dromara.northstar.common.TransactionAware;
 import org.dromara.northstar.common.constant.Constants;
 import org.dromara.northstar.common.constant.ModuleState;
+import org.dromara.northstar.common.model.core.Order;
+import org.dromara.northstar.common.model.core.Trade;
 import org.dromara.northstar.common.utils.OrderUtils;
 import org.dromara.northstar.strategy.IModuleContext;
 
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreEnum.OrderStatusEnum;
-import xyz.redtorch.pb.CoreField.OrderField;
-import xyz.redtorch.pb.CoreField.TradeField;
 
 /**
  * 模组状态机
@@ -36,44 +36,44 @@ public class ModuleStateMachine implements TransactionAware {
 	}
 
 	@Override
-	public void onOrder(OrderField order) {
-		ctx.getLogger().info("收到订单反馈：{} {} {}", order.getOriginOrderId(), order.getOrderStatus(), order.getStatusMsg());
-		if(order.getOrderStatus() == OrderStatusEnum.OS_Rejected || order.getOrderStatus() == OrderStatusEnum.OS_Canceled) {
+	public void onOrder(Order order) {
+		ctx.getLogger().info("收到订单反馈：{} {} {}", order.originOrderId(), order.orderStatus(), order.statusMsg());
+		if(order.orderStatus() == OrderStatusEnum.OS_Rejected || order.orderStatus() == OrderStatusEnum.OS_Canceled) {
 			updateState();
-		} else if(order.getOrderStatus() == OrderStatusEnum.OS_AllTraded) {
+		} else if(order.orderStatus() == OrderStatusEnum.OS_AllTraded) {
 			shouldUpdateState = true;
 		} else if(OrderUtils.isValidOrder(order)) {
 			setState(ModuleState.PENDING_ORDER);
 		} else {
-			throw new IllegalStateException(String.format("当前状态异常：%s，收到订单：%s %s", curState, order.getOrderStatus(), order.getStatusMsg()));
+			throw new IllegalStateException(String.format("当前状态异常：%s，收到订单：%s %s", curState, order.orderStatus(), order.statusMsg()));
 		}
 	}
 
 	@Override
-	public void onTrade(TradeField trade) {
-		if(trade.getDirection() == DirectionEnum.D_Unknown) {
+	public void onTrade(Trade trade) {
+		if(trade.direction() == DirectionEnum.D_Unknown) {
 			throw new IllegalArgumentException("成交方向不明确");
 		}
-		if(trade.getOffsetFlag() == OffsetFlagEnum.OF_Unknown) {
+		if(trade.offsetFlag() == OffsetFlagEnum.OF_Unknown) {
 			throw new IllegalArgumentException("操作意图不明确");
 		}
-		if(shouldUpdateState || StringUtils.equals(trade.getOriginOrderId(), Constants.MOCK_ORDER_ID)) {
+		if(shouldUpdateState || StringUtils.equals(trade.originOrderId(), Constants.MOCK_ORDER_ID)) {
 			updateState();
 			shouldUpdateState = false;
 		}
 	}
 	
 	public void updateState() {
-		List<TradeField> nonclosedTrade = moduleAccount.getNonclosedTrades();
+		List<Trade> nonclosedTrade = moduleAccount.getNonclosedTrades();
 		if(nonclosedTrade.isEmpty()) {
 			setState(ModuleState.EMPTY);
 		} else {
-			int buyPos = nonclosedTrade.stream().filter(t -> t.getDirection() == DirectionEnum.D_Buy).mapToInt(TradeField::getVolume).sum();
-			int sellPos = nonclosedTrade.stream().filter(t -> t.getDirection() == DirectionEnum.D_Sell).mapToInt(TradeField::getVolume).sum();
+			int buyPos = nonclosedTrade.stream().filter(t -> t.direction() == DirectionEnum.D_Buy).mapToInt(Trade::volume).sum();
+			int sellPos = nonclosedTrade.stream().filter(t -> t.direction() == DirectionEnum.D_Sell).mapToInt(Trade::volume).sum();
 			if(buyPos * sellPos > 0) {
-				TradeField longTrade = nonclosedTrade.stream().filter(t -> t.getDirection() == DirectionEnum.D_Buy).toList().get(0);
-				TradeField shortTrade = nonclosedTrade.stream().filter(t -> t.getDirection() == DirectionEnum.D_Sell).toList().get(0);
-				if(StringUtils.equals(longTrade.getContract().getContractId(), shortTrade.getContract().getContractId()) && buyPos == sellPos) {
+				Trade longTrade = nonclosedTrade.stream().filter(t -> t.direction() == DirectionEnum.D_Buy).toList().get(0);
+				Trade shortTrade = nonclosedTrade.stream().filter(t -> t.direction() == DirectionEnum.D_Sell).toList().get(0);
+				if(longTrade.contract().equals(shortTrade.contract()) && buyPos == sellPos) {
 					setState(ModuleState.EMPTY_HEDGE);
 				} else {
 					setState(ModuleState.HOLDING_HEDGE);

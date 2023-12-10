@@ -1,11 +1,10 @@
 package org.dromara.northstar.strategy;
 
 import org.dromara.northstar.common.constant.ModuleState;
+import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.indicator.Indicator;
 import org.dromara.northstar.strategy.model.TradeIntent;
 import org.slf4j.Logger;
-
-import xyz.redtorch.pb.CoreField.ContractField;
 
 public interface IModuleStrategyContext {
 	/**
@@ -21,7 +20,7 @@ public interface IModuleStrategyContext {
 	 * @param unifiedSymbol		合约编码
 	 * @return					返回合约信息
 	 */
-	ContractField getContract(String unifiedSymbol);
+	Contract getContract(String unifiedSymbol);
 	/**
 	 * 委托下单（根据配置自动处理撤单追单）
 	 * @param tradeIntent		交易意图
@@ -37,7 +36,7 @@ public interface IModuleStrategyContext {
 	 * @param contract
 	 * @return
 	 */
-	IAccount getAccount(ContractField contract);
+	IAccount getAccount(Contract contract);
 	/**
 	 * 获取模组账户
 	 * @param contract

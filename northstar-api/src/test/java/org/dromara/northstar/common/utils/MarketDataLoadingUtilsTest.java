@@ -7,7 +7,6 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneOffset;
 
-import org.dromara.northstar.common.utils.MarketDataLoadingUtils;
 import org.junit.jupiter.api.Test;
 
 class MarketDataLoadingUtilsTest {

@@ -3,8 +3,8 @@ package org.dromara.northstar.data;
 import java.time.LocalDate;
 import java.util.List;
 
-import xyz.redtorch.pb.CoreField.BarField;
-import xyz.redtorch.pb.CoreField.ContractField;
+import org.dromara.northstar.common.model.core.Bar;
+import org.dromara.northstar.gateway.IContract;
 
 /**
  * 行情数据持久化
@@ -17,7 +17,7 @@ public interface IMarketDataRepository {
 	 * 保存数据
 	 * @param bar
 	 */
-	void insert(BarField bar);
+	void insert(Bar bar);
 	
 	/**
 	 * 加载历史行情分钟K线数据
@@ -26,7 +26,7 @@ public interface IMarketDataRepository {
 	 * @param endDate
 	 * @return
 	 */
-	List<BarField> loadBars(ContractField contract, LocalDate startDate, LocalDate endDate);
+	List<Bar> loadBars(IContract contract, LocalDate startDate, LocalDate endDate);
 	
 	
 	/**
@@ -36,6 +36,6 @@ public interface IMarketDataRepository {
 	 * @param endDate
 	 * @return
 	 */
-	List<BarField> loadDailyBars(ContractField contract, LocalDate startDate, LocalDate endDate);
+	List<Bar> loadDailyBars(IContract contract, LocalDate startDate, LocalDate endDate);
 	
 }

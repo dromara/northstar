@@ -3,6 +3,7 @@ package org.dromara.northstar.strategy;
 import org.dromara.northstar.common.TickDataAware;
 import org.dromara.northstar.common.TransactionAware;
 import org.dromara.northstar.common.constant.ModuleState;
+import org.dromara.northstar.common.model.core.Contract;
 
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 
@@ -30,7 +31,7 @@ public interface IModuleAccount extends TickDataAware, TransactionAware {
 	 * @param direction
 	 * @return
 	 */
-	int getNonclosedPosition(String unifiedSymbol, DirectionEnum direction);
+	int getNonclosedPosition(Contract contract, DirectionEnum direction);
 	/**
 	 * 获取指定合约指定方向的持仓数
 	 * @param unifiedSymbol
@@ -38,13 +39,13 @@ public interface IModuleAccount extends TickDataAware, TransactionAware {
 	 * @param isPresentTradingDay	是否为今日仓
 	 * @return
 	 */
-	int getNonclosedPosition(String unifiedSymbol, DirectionEnum direction, boolean isPresentTradingDay);
+	int getNonclosedPosition(Contract contract, DirectionEnum direction, boolean isPresentTradingDay);
 	/**
 	 * 获取指定合约的净持仓数量
 	 * @param unifiedSymbol
 	 * @return				正数代表净多头持仓，负数代表净空头持仓
 	 */
-	int getNonclosedNetPosition(String unifiedSymbol);
+	int getNonclosedNetPosition(Contract contract);
 	/**
 	 * 获取模组状态
 	 * @return

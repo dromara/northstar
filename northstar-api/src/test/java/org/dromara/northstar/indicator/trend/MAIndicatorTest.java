@@ -5,16 +5,15 @@ import static org.assertj.core.api.Assertions.offset;
 
 import java.util.concurrent.ThreadLocalRandom;
 
+import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.indicator.Indicator;
 import org.dromara.northstar.indicator.model.Configuration;
 import org.dromara.northstar.indicator.model.Num;
 import org.junit.jupiter.api.Test;
 
-import xyz.redtorch.pb.CoreField.ContractField;
-
 class MAIndicatorTest {
 	
-	ContractField c = ContractField.newBuilder().build();
+	Contract c = Contract.builder().build();
 
 	@Test
 	void testMA() {

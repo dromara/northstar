@@ -3,7 +3,7 @@ package org.dromara.northstar.gateway.playback.ticker;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-import xyz.redtorch.pb.CoreField.BarField;
+import org.dromara.northstar.common.model.core.Bar;
 
 public class SimplePriceSimulation implements TickSimulationAlgorithm {
 
@@ -14,12 +14,12 @@ public class SimplePriceSimulation implements TickSimulationAlgorithm {
 	}
 	
 	@Override
-	public List<TickEntry> generateFrom(BarField bar) {
+	public List<TickEntry> generateFrom(Bar bar) {
 		return List.of(
-					randomAskBid(bar.getOpenPrice(), bar.getVolume() / 4, bar.getOpenInterestDelta() / 4, bar.getActionTimestamp() - 50000),
-					randomAskBid(bar.getHighPrice(), bar.getVolume() / 4, bar.getOpenInterestDelta() / 4, bar.getActionTimestamp() - 40000),
-					randomAskBid(bar.getLowPrice(), bar.getVolume() / 4, bar.getOpenInterestDelta() / 4, bar.getActionTimestamp() - 30000),
-					randomAskBid(bar.getClosePrice(), bar.getVolume() / 4, bar.getOpenInterestDelta() / 4, bar.getActionTimestamp() - 20000)
+					randomAskBid(bar.openPrice(), bar.volume() / 4, bar.openInterestDelta() / 4, bar.actionTimestamp() - 50000),
+					randomAskBid(bar.highPrice(), bar.volume() / 4, bar.openInterestDelta() / 4, bar.actionTimestamp() - 40000),
+					randomAskBid(bar.lowPrice(), bar.volume() / 4, bar.openInterestDelta() / 4, bar.actionTimestamp() - 30000),
+					randomAskBid(bar.closePrice(), bar.volume() / 4, bar.openInterestDelta() / 4, bar.actionTimestamp() - 20000)
 				);
 	}
 	

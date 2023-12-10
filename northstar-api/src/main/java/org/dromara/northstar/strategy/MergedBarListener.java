@@ -1,6 +1,6 @@
 package org.dromara.northstar.strategy;
 
-import xyz.redtorch.pb.CoreField.BarField;
+import org.dromara.northstar.common.model.core.Bar;
 
 /**
  * 复合行情BAR监听
@@ -9,5 +9,5 @@ import xyz.redtorch.pb.CoreField.BarField;
  */
 public interface MergedBarListener {
 
-	void onMergedBar(BarField bar);
+	void onMergedBar(Bar bar);
 }

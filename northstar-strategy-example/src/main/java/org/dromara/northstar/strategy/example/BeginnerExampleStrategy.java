@@ -12,6 +12,10 @@ import org.dromara.northstar.common.model.NumberValue;
 import org.dromara.northstar.common.model.Setting;
 import org.dromara.northstar.common.model.StringValue;
 import org.dromara.northstar.common.model.Value;
+import org.dromara.northstar.common.model.core.Bar;
+import org.dromara.northstar.common.model.core.Order;
+import org.dromara.northstar.common.model.core.Tick;
+import org.dromara.northstar.common.model.core.Trade;
 import org.dromara.northstar.strategy.IModuleContext;
 import org.dromara.northstar.strategy.IModuleStrategyContext;
 import org.dromara.northstar.strategy.StrategicComponent;
@@ -21,11 +25,6 @@ import org.dromara.northstar.strategy.model.TradeIntent;
 import org.slf4j.Logger;
 
 import com.alibaba.fastjson.JSONObject;
-
-import xyz.redtorch.pb.CoreField.BarField;
-import xyz.redtorch.pb.CoreField.OrderField;
-import xyz.redtorch.pb.CoreField.TickField;
-import xyz.redtorch.pb.CoreField.TradeField;
 
 /**
  * 本示例用于展示写一个策略的必要元素，以及最基本的开平仓操作、超时撤单操作
@@ -95,12 +94,12 @@ public class BeginnerExampleStrategy implements TradeStrategy{
 	private long nextActionTime;
 	
 	@Override
-	public void onTick(TickField tick) {
+	public void onTick(Tick tick) {
 		
 		log.debug("TICK触发: C:{} D:{} T:{} P:{} V:{} OI:{} OID:{}", 
-				tick.getUnifiedSymbol(), tick.getActionDay(), tick.getActionTime(), 
-				tick.getLastPrice(), tick.getVolume(), tick.getOpenInterest(), tick.getOpenInterestDelta());
-		long now = tick.getActionTimestamp();
+				tick.contract().unifiedSymbol(), tick.actionDay(), tick.actionTime(),
+				tick.lastPrice(), tick.volume(), tick.openInterest(), tick.openInterestDelta());
+		long now = tick.actionTimestamp();
 		// 启用后，等待10秒才开始交易
 		if(nextActionTime == 0) {
 			nextActionTime = now + 10000;
@@ -115,7 +114,7 @@ public class BeginnerExampleStrategy implements TradeStrategy{
 					op = flag ? SignalOperation.BUY_CLOSE : SignalOperation.SELL_CLOSE;
 				}
 				ctx.submitOrderReq(TradeIntent.builder()
-						.contract(ctx.getContract(tick.getUnifiedSymbol()))
+						.contract(tick.contract())
 						.operation(op)
 						.volume(ctx.getDefaultVolume())
 						.priceType(PriceType.valueOf(params.priceType))
@@ -126,7 +125,7 @@ public class BeginnerExampleStrategy implements TradeStrategy{
 			if(ctx.getState() == ModuleState.HOLDING_LONG) {
 				SignalOperation op = params.showHedge ? SignalOperation.SELL_OPEN : SignalOperation.SELL_CLOSE;
 				ctx.submitOrderReq(TradeIntent.builder()
-						.contract(ctx.getContract(tick.getUnifiedSymbol()))
+						.contract(tick.contract())
 						.operation(op)
 						.priceType(PriceType.valueOf(params.priceType))
 						.volume(ctx.getDefaultVolume())
@@ -136,7 +135,7 @@ public class BeginnerExampleStrategy implements TradeStrategy{
 			if(ctx.getState() == ModuleState.HOLDING_SHORT) {		
 				SignalOperation op = params.showHedge ? SignalOperation.BUY_OPEN : SignalOperation.BUY_CLOSE;
 				ctx.submitOrderReq(TradeIntent.builder()
-						.contract(ctx.getContract(tick.getUnifiedSymbol()))
+						.contract(tick.contract())
 						.operation(op)
 						.priceType(PriceType.valueOf(params.priceType))
 						.volume(ctx.getDefaultVolume())
@@ -147,17 +146,17 @@ public class BeginnerExampleStrategy implements TradeStrategy{
 	}
 
 	@Override
-	public void onMergedBar(BarField bar) {
+	public void onMergedBar(Bar bar) {
 		log.debug("策略每分钟触发");
 	}
 
 	@Override
-	public void onOrder(OrderField order) {
+	public void onOrder(Order order) {
 		// 委托单状态变动回调
 	}
 
 	@Override
-	public void onTrade(TradeField trade) {
+	public void onTrade(Trade trade) {
 		// 成交回调
 	}
 
@@ -171,5 +170,5 @@ public class BeginnerExampleStrategy implements TradeStrategy{
 				new ListValue("示例列表", List.of(new NumberValue("", 123), new NumberValue("", 456)))
 				);
 	}
-	
+
 }

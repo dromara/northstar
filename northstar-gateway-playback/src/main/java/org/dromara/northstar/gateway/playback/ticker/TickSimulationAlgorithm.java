@@ -2,7 +2,7 @@ package org.dromara.northstar.gateway.playback.ticker;
 
 import java.util.List;
 
-import xyz.redtorch.pb.CoreField.BarField;
+import org.dromara.northstar.common.model.core.Bar;
 
 /**
  * TICK生成算法
@@ -16,5 +16,5 @@ public interface TickSimulationAlgorithm {
 	 * @param bar
 	 * @return
 	 */
-	List<TickEntry> generateFrom(BarField bar);
+	List<TickEntry> generateFrom(Bar bar);
 }

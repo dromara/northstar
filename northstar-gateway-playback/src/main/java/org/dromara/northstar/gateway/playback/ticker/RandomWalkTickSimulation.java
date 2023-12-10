@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
 
-import xyz.redtorch.pb.CoreField.BarField;
+import org.dromara.northstar.common.model.core.Bar;
 
 /**
  * 随机漫步TICK仿真算法
@@ -25,19 +25,19 @@ public class RandomWalkTickSimulation implements TickSimulationAlgorithm {
 	}
 	
 	@Override
-	public List<TickEntry> generateFrom(BarField bar) {
-		boolean up = bar.getClosePrice() > bar.getOpenPrice();
+	public List<TickEntry> generateFrom(Bar bar) {
+		boolean up = bar.closePrice() > bar.openPrice();
 		List<Double> milestonePrices = List.of(
-				bar.getOpenPrice(),
-				up ? bar.getLowPrice() : bar.getHighPrice(),
-				up ? bar.getHighPrice() : bar.getLowPrice(),
-				bar.getClosePrice()
+				bar.openPrice(),
+				up ? bar.lowPrice() : bar.highPrice(),
+				up ? bar.highPrice() : bar.lowPrice(),
+				bar.closePrice()
 				);
-		double rangeFactor = (bar.getHighPrice() - bar.getLowPrice()) / bar.getClosePrice();
-		double actualDiffRatio = Math.abs(bar.getClosePrice() - bar.getOpenPrice()) / (bar.getHighPrice() - bar.getLowPrice());
+		double rangeFactor = (bar.highPrice() - bar.lowPrice()) / bar.closePrice();
+		double actualDiffRatio = Math.abs(bar.closePrice() - bar.openPrice()) / (bar.highPrice() - bar.lowPrice());
 		PriceRandomWalk pricer = new PriceRandomWalk(numOfTickPerBar, milestonePrices, priceTick);
-		VolumeRandomWalk voler = new VolumeRandomWalk(numOfTickPerBar, bar.getVolume());
-		OpenInterestRandomWalk oier = new OpenInterestRandomWalk(numOfTickPerBar, bar.getOpenInterestDelta(), rangeFactor, actualDiffRatio);
+		VolumeRandomWalk voler = new VolumeRandomWalk(numOfTickPerBar, bar.volume());
+		OpenInterestRandomWalk oier = new OpenInterestRandomWalk(numOfTickPerBar, bar.openInterestDelta(), rangeFactor, actualDiffRatio);
 		List<Double> prices = pricer.generate();
 		List<Long> volumes = voler.generate();
 		List<Double> openInterests = oier.generate();
@@ -53,7 +53,7 @@ public class RandomWalkTickSimulation implements TickSimulationAlgorithm {
 			} else {
 				askPrice = prices.get(i) + priceTick;	// 当价位下跌时，代表最新价=买一价，即卖一价要大于最新价
 			}
-			ticks.add(TickEntry.of(prices.get(i), askPrice, bidPrice, volumes.get(i), openInterests.get(i), bar.getActionTimestamp() - 60000 + i * 59990 / numOfTickPerBar));
+			ticks.add(TickEntry.of(prices.get(i), askPrice, bidPrice, volumes.get(i), openInterests.get(i), bar.actionTimestamp() - 60000 + i * 59990 / numOfTickPerBar));
 		}
 		return ticks;
 	}
