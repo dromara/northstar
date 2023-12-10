@@ -31,5 +31,19 @@ public record SubmitOrderReq(
 		double stopPrice,            // 止损价
 		long actionTimestamp        // 操作时间戳
 		) {
-
+	
+	@Override
+	public String toString() {
+		String unifiedSymbol = null;
+		if(contract != null) {
+			unifiedSymbol = contract.unifiedSymbol();
+		}
+		return "SubmitOrderReq [originOrderId=" + originOrderId + ", currency=" + currency + ", contract=" + unifiedSymbol
+				+ ", gatewayId=" + gatewayId + ", volume=" + volume + ", price=" + price + ", orderPriceType="
+				+ orderPriceType + ", direction=" + direction + ", offsetFlag=" + offsetFlag + ", timeCondition="
+				+ timeCondition + ", volumeCondition=" + volumeCondition + ", gtdDate=" + gtdDate + ", minVolume="
+				+ minVolume + ", contingentCondition=" + contingentCondition + ", stopPrice=" + stopPrice
+				+ ", actionTimestamp=" + actionTimestamp + "]";
+	}
+	
 }

@@ -174,7 +174,12 @@ public class NorthstarDataServiceDataSource implements IDataSource{
 			String unitDesc = getValue("quote_unit_desc", fieldIndexMap, item, "1");
 			double marginRate = ProductClassEnum.EQUITY == productClass ? 1 : 0.1;
 			double priceTick = ProductClassEnum.EQUITY == productClass ? 0.01 : Double.parseDouble(unitDesc.replaceAll("[^\\d\\.]+", ""));
-			try {				
+			try {		
+				LocalDate lastTradeDate = LocalDate.MAX;
+				String date = getValue("delist_date", fieldIndexMap, item, "");
+				if(StringUtils.isNotBlank(date)) {
+					lastTradeDate = LocalDate.parse(date, DateTimeConstant.D_FORMAT_INT_FORMATTER);
+				}
 				Contract playbackContract = Contract.builder()
 						.unifiedSymbol(unifiedSymbol)
 						.symbol(symbol)
@@ -182,7 +187,7 @@ public class NorthstarDataServiceDataSource implements IDataSource{
 						.currency(CurrencyEnum.CNY)
 						.name(name)
 						.fullName(name)
-						.lastTradeDate(LocalDate.parse(getValue("delist_date", fieldIndexMap, item, ""), DateTimeConstant.D_FORMAT_INT_FORMATTER))
+						.lastTradeDate(lastTradeDate)
 						.longMarginRatio(marginRate)
 						.shortMarginRatio(marginRate)
 						.productClass(productClass)
@@ -193,6 +198,7 @@ public class NorthstarDataServiceDataSource implements IDataSource{
 				resultList.add(playbackContract);
 			} catch(Exception e) {
 				log.warn("无效合约数据：{}", JSON.toJSONString(item));
+				log.warn("", e);
 			}
 		}
 		return resultList;
