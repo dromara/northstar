@@ -74,7 +74,7 @@ public class MarketDataRepoAdapter implements IMarketDataRepository{
 				localQueryDate = localQueryDate.plusDays(1);
 			}
 		} else {			
-			if(resultList.peekLast().tradingDay().equals(today)
+			if(Objects.equals(resultList.peekLast().tradingDay(), today)
 					|| today.getDayOfWeek().getValue() > 5) {
 				do {					
 					localQueryDate = localQueryDate.plusDays(1);

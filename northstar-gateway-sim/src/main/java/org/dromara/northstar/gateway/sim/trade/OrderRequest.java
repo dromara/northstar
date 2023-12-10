@@ -80,6 +80,10 @@ public class OrderRequest implements TickDataAware{
 				onOrderCallback.accept(orderTemplate.toBuilder()
 						.tradedVolume(submitOrderReq.volume())
 						.tradingDay(tick.tradingDay())
+						.orderDate(tick.actionDay())
+						.updateDate(tick.actionDay())
+						.orderTime(tick.actionTime())
+						.updateTime(tick.actionTime())
 						.statusMsg("全部成交")
 						.orderStatus(OrderStatusEnum.OS_AllTraded)
 						.build());

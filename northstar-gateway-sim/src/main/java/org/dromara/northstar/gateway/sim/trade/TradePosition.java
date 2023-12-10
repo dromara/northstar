@@ -140,7 +140,7 @@ public class TradePosition {
 	public int tdVolume() {
 		if(Objects.isNull(lastTick)) return 0;
 		return trades.stream()
-				.filter(t -> t.tradingDay().equals(lastTick.tradingDay()))
+				.filter(t -> Objects.equals(t.tradingDay(), lastTick.tradingDay()))
 				.mapToInt(Trade::volume)
 				.reduce(0, Integer::sum);
 	}
@@ -152,7 +152,7 @@ public class TradePosition {
 	public int ydVolume() {
 		if(Objects.isNull(lastTick)) return 0;
 		return trades.stream()
-				.filter(t -> !t.tradingDay().equals(lastTick.tradingDay()))
+				.filter(t -> !Objects.equals(t.tradingDay(), lastTick.tradingDay()))
 				.mapToInt(Trade::volume)
 				.reduce(0, Integer::sum);
 	}

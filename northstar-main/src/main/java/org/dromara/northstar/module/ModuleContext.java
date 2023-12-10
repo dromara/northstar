@@ -268,7 +268,7 @@ public class ModuleContext implements IModuleContext{
 				getLogger().debug("移除交易意图：{}", tick.contract().unifiedSymbol());
 			}
 		}
-		if(!tick.tradingDay().equals(tradingDay)) {
+		if(!Objects.equals(tick.tradingDay(), tradingDay)) {
 			tradingDay = tick.tradingDay();
 		}
 		indicatorHelperSet.forEach(helper -> helper.onTick(tick));

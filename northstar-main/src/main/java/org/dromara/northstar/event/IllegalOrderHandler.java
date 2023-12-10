@@ -2,6 +2,7 @@ package org.dromara.northstar.event;
 
 import java.util.Collection;
 import java.util.LinkedList;
+import java.util.Objects;
 import java.util.Queue;
 
 import org.dromara.northstar.common.event.AbstractEventHandler;
@@ -30,7 +31,7 @@ public class IllegalOrderHandler extends AbstractEventHandler implements Generic
 	@Override
 	protected void doHandle(NorthstarEvent e) {
 		Order order = (Order) e.getData();
-		if(!records.isEmpty() && !records.peek().tradingDay().equals(order.tradingDay())) {
+		if(!records.isEmpty() && !Objects.equals(order.tradingDay(), records.peek().tradingDay())) {
 			records.clear(); 	// 每日清零
 		}
 		if(order.orderStatus() == OrderStatusEnum.OS_Rejected) {

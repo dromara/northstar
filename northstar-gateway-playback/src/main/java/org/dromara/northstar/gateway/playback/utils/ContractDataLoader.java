@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Queue;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicLong;
@@ -72,7 +73,7 @@ public class ContractDataLoader {
 			if(i > 0) {
 				openInterestDelta = dailyData.get(i).openInterest() - dailyData.get(i - 1).openInterest();
 			}
-			if(dailyData.get(i).tradingDay().equals(tradingDay)) {
+			if(Objects.equals(dailyData.get(i).tradingDay(), tradingDay)) {
 				Bar srcBar = dailyData.get(i);
 				barQ.add(srcBar.toBuilder()
 						.gatewayId(gatewayId)
@@ -99,7 +100,7 @@ public class ContractDataLoader {
 		List<Bar> dailyData = Lists.reverse(dsMgr.getDailyData(contract.contract(), queryFrom, queryTo));
 		for(int i=1; i<dailyData.size(); i++) {
 			Bar dayBar = dailyData.get(dailyData.size() - i);
-			if(dayBar.tradingDay().equals(tradingDay)) {
+			if(Objects.equals(tradingDay, dayBar.tradingDay())) {
 				AtomicLong accVol = new AtomicLong();
 				barQ.forEach(bar -> 
 					tickGenAlgo.generateFrom(bar).forEach(tickEntry -> {
@@ -119,8 +120,8 @@ public class ContractDataLoader {
 								.actionTimestamp(tickEntry.timestamp())
 								.type(TickType.MARKET_TICK)
 								.lastPrice(tickEntry.price())
-								.askPrice(List.of(tickEntry.askPrice0(), 0D, 0D, 0D, 0D)) // 仅模拟卖一价
-								.bidPrice(List.of(tickEntry.bidPrice0(), 0D, 0D, 0D, 0D)) // 仅模拟买一价
+								.askPrice(List.of(tickEntry.askPrice0())) // 仅模拟卖一价
+								.bidPrice(List.of(tickEntry.bidPrice0())) // 仅模拟买一价
 								.askVolume(List.of(ThreadLocalRandom.current().nextInt(10,500))) // 随机模拟卖一量
 								.bidVolume(List.of(ThreadLocalRandom.current().nextInt(10,500))) // 随机模拟买一量
 								.gatewayId(gatewayId)

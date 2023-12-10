@@ -2,6 +2,10 @@ package org.dromara.northstar.common.constant;
 
 public interface Constants {
 	
+	Double ZERO_D = 0D;
+	
+	Integer ZERO = 0;
+	
 	String INDEX_SUFFIX = "0000";
 	
 	String PRIMARY_SUFFIX = "9999";

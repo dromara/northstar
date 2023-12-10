@@ -8,6 +8,7 @@ import java.util.function.Consumer;
 import java.util.function.ToDoubleFunction;
 import java.util.stream.Collectors;
 
+import org.dromara.northstar.common.constant.Constants;
 import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.common.model.core.Tick;
 import org.dromara.northstar.gateway.contract.IndexContract;
@@ -57,39 +58,39 @@ public class IndexTicker {
 			return;
 		}
 		// 如果有过期的TICK数据(例如不活跃的合约),则并入下个K线
-		if (lastTickTimestamp < tick.actionTimestamp()) {
-			if(lastTickTimestamp > 0) {
-				//进行运算
-				calculate();
-				onTickCallback.accept(Tick.builder()
-						.gatewayId(tick.gatewayId())
-						.contract(idxContract.contract())
-						.actionDay(tick.actionDay())
-						.actionTime(tick.actionTime())
-						.tradingDay(tick.tradingDay())
-						.actionTimestamp(tick.actionTimestamp())
-						.openPrice(openPrice)
-						.highPrice(highPrice)
-						.lowPrice(lowPrice)
-						.lastPrice(lastPrice)
-						.openInterest(totalOpenInterest)
-						.openInterestDelta(totalOpenInterestDelta)
-						.volume(totalVolume)
-						.volumeDelta(totalVolumeDelta)
-						.turnover(totalTurnover)
-						.turnoverDelta(totalTurnoverDelta)
-						.preClosePrice(preClose)
-						.preOpenInterest(preOpenInterest)
-						.preSettlePrice(preSettlePrice)
-						.settlePrice(settlePrice)
-						.askPrice(List.of(0D,0D,0D,0D,0D))
-						.bidPrice(List.of(0D,0D,0D,0D,0D))
-						.askVolume(List.of(0,0,0,0,0))
-						.bidVolume(List.of(0,0,0,0,0))
-						.type(tick.type())
-						.channelType(tick.channelType())
-						.build());
-			}
+		if (lastTickTimestamp < tick.actionTimestamp() && lastTickTimestamp > 0) {
+			final Double zeroD = Constants.ZERO_D;
+			final Integer zero = Constants.ZERO;
+			//进行运算
+			calculate();
+			onTickCallback.accept(Tick.builder()
+					.gatewayId(tick.gatewayId())
+					.contract(idxContract.contract())
+					.actionDay(tick.actionDay())
+					.actionTime(tick.actionTime())
+					.tradingDay(tick.tradingDay())
+					.actionTimestamp(tick.actionTimestamp())
+					.openPrice(openPrice)
+					.highPrice(highPrice)
+					.lowPrice(lowPrice)
+					.lastPrice(lastPrice)
+					.openInterest(totalOpenInterest)
+					.openInterestDelta(totalOpenInterestDelta)
+					.volume(totalVolume)
+					.volumeDelta(totalVolumeDelta)
+					.turnover(totalTurnover)
+					.turnoverDelta(totalTurnoverDelta)
+					.preClosePrice(preClose)
+					.preOpenInterest(preOpenInterest)
+					.preSettlePrice(preSettlePrice)
+					.settlePrice(settlePrice)
+					.askPrice(List.of(zeroD,zeroD,zeroD,zeroD,zeroD))
+					.bidPrice(List.of(zeroD,zeroD,zeroD,zeroD,zeroD))
+					.askVolume(List.of(zero,zero,zero,zero,zero))
+					.bidVolume(List.of(zero,zero,zero,zero,zero))
+					.type(tick.type())
+					.channelType(tick.channelType())
+					.build());
 			
 		}
 		// 同一个指数Tick
@@ -155,7 +156,7 @@ public class IndexTicker {
 		return weightedMap.reduceEntriesToDouble(
 				PARA_THRESHOLD,
 				transformer,
-				0D, 
+				0, 
 				(a, b) -> a + b);
 	}
 
