@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -82,13 +83,8 @@ public class MarketCenter implements IMarketCenter{
 	@Override
 	public synchronized void addInstrument(Instrument ins) {
 		// 绑定合约定义
-		List<ContractDefinition> defList = contractDefTbl.get(ins.exchange(), ins.productClass());
-		if(Objects.isNull(defList)) {
-			log.debug("未找到 [{}] 的合约定义，忽略该合约的注册", ins.identifier().value());
-			return;
-		}
-		for(ContractDefinition def : defList) {
-			if(def.symbolPattern().matcher(ins.identifier().value()).matches()) {
+		getDefinition(ins.exchange(), ins.productClass(), ins.contract().unifiedSymbol())
+			.ifPresent(def -> {
 				log.debug("[{}] 匹配合约定义 [{} {} {}]", ins.identifier().value(), def.exchange(), def.productClass(), def.symbolPattern().pattern());
 				ins.setContractDefinition(def);
 				IContract contract = new GatewayContract(this, feEngine, ins);
@@ -100,12 +96,25 @@ public class MarketCenter implements IMarketCenter{
 				channelDefContractGroups.get(ins.channelType(), def).add(contract);
 				channelSymbolContractTbl.put(contract.channelType(), contract.contract().symbol(), contract);
 				channelSymbolContractTbl.put(contract.channelType(), contract.contract().unifiedSymbol(), contract);
-			}
-		}
+			});
 
 		if(!contractMap.containsKey(ins.identifier())) {
 			log.debug("未找到 [{}] 的合约定义，忽略该合约的注册", ins.identifier().value());
 		}
+	}
+	
+	@Override
+	public Optional<ContractDefinition> getDefinition(ExchangeEnum exchange, ProductClassEnum productClass, String unifiedSymbol){
+		List<ContractDefinition> defList = contractDefTbl.get(exchange, productClass);
+		if(Objects.isNull(defList)) {
+			return Optional.empty();
+		}
+		for(ContractDefinition def : defList) {
+			if(def.symbolPattern().matcher(unifiedSymbol).matches()) {
+				return Optional.of(def);
+			}
+		}
+		return Optional.empty();
 	}
 
 	/**
