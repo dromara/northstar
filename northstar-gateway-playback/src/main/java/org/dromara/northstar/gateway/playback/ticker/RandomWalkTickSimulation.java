@@ -98,7 +98,7 @@ class PriceRandomWalk {
 					curStep -= priceTick;
 				}
 				pathway.add(curStep);
-			} while(!appxEquals(milestonePrice, curStep));
+			} while(!appxEquals(milestonePrice, curStep) && pathway.size() < numOfTickPerBar);
 		}
 		double stepSize = (double) pathway.size() / numOfTickPerBar;
 		double std = stepSize;
