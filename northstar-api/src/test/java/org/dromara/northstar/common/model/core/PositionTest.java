@@ -1,12 +1,11 @@
 package org.dromara.northstar.common.model.core;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+
 import org.junit.jupiter.api.Test;
 
-import xyz.redtorch.pb.CoreEnum.HedgeFlagEnum;
 import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
 import xyz.redtorch.pb.CoreField;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 class PositionTest {
 
@@ -21,7 +20,6 @@ class PositionTest {
 				.ydFrozen(4)
 				.tdPosition(5)
 				.tdFrozen(6)
-				.lastPrice(7)
 				.openPrice(11)
 				.openPriceDiff(12)
 				.positionProfit(13)
@@ -29,7 +27,6 @@ class PositionTest {
 				.useMargin(15)
 				.exchangeMargin(16)
 				.contractValue(17)
-				.hedgeFlag(HedgeFlagEnum.HF_Arbitrage)
 				.gatewayId("gatewayId")
 				.build();
 		CoreField.PositionField positionField = position.toPositionField();
@@ -41,7 +38,6 @@ class PositionTest {
 		assertThat(positionField.getYdFrozen()).isEqualTo(position.ydFrozen());
 		assertThat(positionField.getTdPosition()).isEqualTo(position.tdPosition());
 		assertThat(positionField.getTdFrozen()).isEqualTo(position.tdFrozen());
-		assertThat(positionField.getLastPrice()).isEqualTo(position.lastPrice());
 		assertThat(positionField.getOpenPrice()).isEqualTo(position.openPrice());
 		assertThat(positionField.getOpenPriceDiff()).isEqualTo(position.openPriceDiff());
 		assertThat(positionField.getPositionProfit()).isEqualTo(position.positionProfit());
@@ -49,7 +45,6 @@ class PositionTest {
 		assertThat(positionField.getUseMargin()).isEqualTo(position.useMargin());
 		assertThat(positionField.getExchangeMargin()).isEqualTo(position.exchangeMargin());
 		assertThat(positionField.getContractValue()).isEqualTo(position.contractValue());
-		assertThat(positionField.getHedgeFlag()).isEqualTo(position.hedgeFlag());
 		assertThat(positionField.getGatewayId()).isEqualTo(position.gatewayId());
 
 	}

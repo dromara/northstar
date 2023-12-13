@@ -264,7 +264,6 @@ public class ModulePosition implements TickDataAware, TransactionAware{
 	 */
 	public Position convertToPosition() {
 		int factor = FieldUtils.directionFactor(direction);
-		double lastPrice = lastTick == null ? 0 : lastTick.lastPrice();
 		double priceDiff = lastTick == null ? 0 : factor * (lastTick.lastPrice() - avgOpenPrice());
 		return Position.builder()
 				.gatewayId(contract.gatewayId())
@@ -277,7 +276,6 @@ public class ModulePosition implements TickDataAware, TransactionAware{
 				.ydPosition(ydVolume())
 				.exchangeMargin(totalMargin())
 				.useMargin(totalMargin())
-				.lastPrice(lastPrice)
 				.openPrice(avgOpenPrice())
 				.openPriceDiff(priceDiff)
 				.positionProfit(profit())

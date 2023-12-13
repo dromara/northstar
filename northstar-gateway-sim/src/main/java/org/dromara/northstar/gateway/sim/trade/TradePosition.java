@@ -230,7 +230,6 @@ public class TradePosition {
 	 */
 	public Position convertToPosition(String gatewayId) {
 		int factor = FieldUtils.directionFactor(dir);
-		double lastPrice = lastTick == null ? 0 : lastTick.lastPrice();
 		double priceDiff = lastTick == null ? 0 : factor * (lastTick.lastPrice() - avgOpenPrice());
 		PositionDirectionEnum posDir = FieldUtils.isBuy(dir) ? PositionDirectionEnum.PD_Long : PositionDirectionEnum.PD_Short;
 		return Position.builder()
@@ -245,7 +244,6 @@ public class TradePosition {
 				.ydPosition(ydVolume())
 				.exchangeMargin(totalMargin())
 				.useMargin(totalMargin())
-				.lastPrice(lastPrice)
 				.openPrice(avgOpenPrice())
 				.openPriceDiff(priceDiff)
 				.positionProfit(profit())
