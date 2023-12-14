@@ -194,6 +194,7 @@ public class NorthstarDataServiceDataSource implements IDataSource{
 						.multiplier(Double.parseDouble(getValue("per_unit", fieldIndexMap, item, "1")))
 						.priceTick(priceTick)
 						.tradable(true)
+						.pricePrecision(CommonUtils.precisionOf(priceTick))
 						.build();
 				resultList.add(playbackContract);
 			} catch(Exception e) {

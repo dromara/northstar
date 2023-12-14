@@ -10,6 +10,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 
 import org.apache.commons.io.FileUtils;
+import org.springframework.util.Assert;
 
 public class CommonUtils {
 	
@@ -22,8 +23,7 @@ public class CommonUtils {
 	 */
 	public static LocalDateTime millsToLocalDateTime(long millis) {
 		Instant instant = Instant.ofEpochMilli(millis);
-		LocalDateTime date = instant.atZone(ZoneId.systemDefault()).toLocalDateTime();
-		return date;
+		return instant.atZone(ZoneId.systemDefault()).toLocalDateTime();
 	}
 
 	/**
@@ -63,5 +63,19 @@ public class CommonUtils {
 		FileUtils.copyURLToFile(sourceURL, targetFile);
 
 		targetFile.deleteOnExit();
+	}
+	
+	/**
+	 * 计算价格精度
+	 * @return
+	 */
+	public static int precisionOf(double priceTick) {
+		Assert.isTrue(priceTick > 0, "最小变动价位应该为正数");
+		for(int i = 0; i<10; i++) {
+			if(priceTick * Math.pow(10, i) >= 1) {
+				return i;
+			}
+		}
+		throw new IllegalArgumentException("价格精度最多为小数点后九位");
 	}
 }

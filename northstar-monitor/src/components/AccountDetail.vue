@@ -26,10 +26,7 @@
           </el-table-column>
           <el-table-column prop="openprice" label="开仓均价" align="center">
             <template slot-scope="scope">
-              {{
-                parseInt(scope.row.openprice / scope.row.contract.pricetick) *
-                scope.row.contract.pricetick
-              }}
+              {{ scope.row.openprice.toFixed(scope.row.contract.priceprecision) }}
             </template>
           </el-table-column>
           <el-table-column prop="positionprofit" label="持仓盈亏" align="center">
@@ -61,7 +58,11 @@
               }}
             </template>
           </el-table-column>
-          <el-table-column prop="price" label="委托价" align="center"> </el-table-column>
+          <el-table-column prop="price" label="委托价" align="center">
+             <template slot-scope="scope">
+              {{ scope.row.price.toFixed(scope.row.contract.priceprecision) }}
+            </template>
+          </el-table-column>
           <el-table-column prop="totalvolume" label="委托量" width="60px" align="center">
           </el-table-column>
           <el-table-column prop="orderVolPending" label="挂单量" align="center" width="60px">
@@ -96,7 +97,11 @@
               }}
             </template>
           </el-table-column>
-          <el-table-column prop="price" label="委托价" align="center"> </el-table-column>
+          <el-table-column prop="price" label="委托价" align="center">
+            <template slot-scope="scope">
+              {{ scope.row.price.toFixed(scope.row.contract.priceprecision) }}
+            </template>
+          </el-table-column>
           <el-table-column prop="totalvolume" label="委托量" width="50px" align="center">
           </el-table-column>
           <el-table-column prop="tradedvolume" label="已成交" width="50px" align="center">
@@ -127,7 +132,11 @@
               }}
             </template>
           </el-table-column>
-          <el-table-column prop="price" label="成交价" align="center"> </el-table-column>
+          <el-table-column prop="price" label="成交价" align="center"> 
+            <template slot-scope="scope">
+              {{ scope.row.price.toFixed(scope.row.contract.priceprecision) }}
+            </template>
+          </el-table-column>
           <el-table-column prop="volume" label="成交量" align="center" width="50px">
           </el-table-column>
           <el-table-column prop="tradetime" label="成交时间" align="center">

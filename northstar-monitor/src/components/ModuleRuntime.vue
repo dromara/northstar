@@ -594,8 +594,8 @@ export default {
           item.closeTrade = TradeField.deserializeBinary(item.closeTrade).toObject()
           item.volume = item.closeTrade.volume
           item.direction = { 1: '多', 2: '空' }[item.openTrade.direction]
-          item.openPrice = item.openTrade.price
-          item.closePrice = item.closeTrade.price
+          item.openPrice = item.openTrade.price.toFixed(item.openTrade.contract.priceprecision)
+          item.closePrice = item.closeTrade.price.toFixed(item.closeTrade.contract.priceprecision)
           item.tradingDay = item.closeTrade.tradingday
           return item
         })
