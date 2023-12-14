@@ -450,11 +450,11 @@ public class ModuleContext implements IModuleContext{
 				Indicator in = e.getKey();
 				Configuration cfg = in.getConfiguration();
 				String indicatorName = String.format("%s_%d%s", cfg.indicatorName(), cfg.numOfUnits(), cfg.period().symbol());
-				indicatorMap.putIfAbsent(cfg.contract().unifiedSymbol(), new ArrayList<>());
+				indicatorMap.putIfAbsent(cfg.contract().name(), new ArrayList<>());
 				if(cfg.visible()) {
-					indicatorMap.get(cfg.contract().unifiedSymbol()).add(indicatorName);
+					indicatorMap.get(cfg.contract().name()).add(indicatorName);
 				}
-				Collections.sort(indicatorMap.get(cfg.contract().unifiedSymbol()));
+				Collections.sort(indicatorMap.get(cfg.contract().name()));
 				
 				e.getValue().forEach(tv -> {
 					if(!symbolTimeObject.containsKey(cfg.contract())
