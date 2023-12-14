@@ -32,17 +32,17 @@
               }}
             </template>
           </el-table-column>
-          <el-table-column prop="openpositionprofit" label="持仓盈亏" align="center">
+          <el-table-column prop="positionprofit" label="持仓盈亏" align="center">
             <template slot-scope="scope">
               <span
                 :class="
-                  scope.row.openpositionprofit > 0
+                  scope.row.positionprofit > 0
                     ? 'color-red'
-                    : scope.row.openpositionprofit < 0
+                    : scope.row.positionprofit < 0
                     ? 'color-green'
                     : ''
                 "
-                >{{ parseInt(scope.row.openpositionprofit) }}</span
+                >{{ parseInt(scope.row.positionprofit) }}</span
               >
             </template>
           </el-table-column>
