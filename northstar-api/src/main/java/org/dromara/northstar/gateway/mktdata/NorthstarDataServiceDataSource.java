@@ -279,7 +279,7 @@ public class NorthstarDataServiceDataSource implements IDataSource{
 				String tradingDate = getValue("trade_date", fieldIndexMap, item, "");
 				dateTime = LocalDateTime.parse(tradingDate + " 09:00:00", dtfmt2);
 				actionDay = dateTime.toLocalDate();
-				actionTime = dateTime.toLocalTime();
+				actionTime = DateTimeUtils.fromCacheTime(dateTime.toLocalTime());
 				tradingDay = actionDay;
 				timestamp = CommonUtils.localDateTimeToMills(dateTime);
 			}
@@ -304,8 +304,8 @@ public class NorthstarDataServiceDataSource implements IDataSource{
 						.channelType(ChannelType.PLAYBACK)
 						.openInterestDelta(openInterestDelta)
 						.openInterest(openInterest)
-						.volume((long) Double.parseDouble(getValue("vol", fieldIndexMap, item, "0")))
-						.turnover(Double.parseDouble(getValue("amount", fieldIndexMap, item, "0")))
+						.volumeDelta((long) Double.parseDouble(getValue("vol", fieldIndexMap, item, "0")))
+						.turnoverDelta(Double.parseDouble(getValue("amount", fieldIndexMap, item, "0")))
 						.preClosePrice(Double.parseDouble(getValue("pre_close", fieldIndexMap, item, "0")))
 						.preSettlePrice(Double.parseDouble(getValue("pre_settle", fieldIndexMap, item, "0")))
 						.preOpenInterest(openInterest - openInterestDelta)
