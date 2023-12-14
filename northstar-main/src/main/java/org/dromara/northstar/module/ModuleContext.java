@@ -540,6 +540,7 @@ public class ModuleContext implements IModuleContext{
 				.direction(direction)
 				.offsetFlag(tuple.t1())
 				.volume(tuple.t2())
+				.currency(contract.currency())
 				.price(orderPrice + factor * plusPrice)	// 自动加上超价
 				.volumeCondition(VolumeConditionEnum.VC_AV)
 				.timeCondition(priceType == PriceType.ANY_PRICE ? TimeConditionEnum.TC_IOC : TimeConditionEnum.TC_GFD)
