@@ -50,7 +50,7 @@ const marketCurrentDataModule = {
           openprice: tick.lastprice,
           closeprice: tick.lastprice,
           openinterest: tick.openinterest,
-          volume: tick.volume
+          volume: tick.volumedelta
         }
       }
       if(state.curBar){
