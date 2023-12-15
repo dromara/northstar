@@ -337,6 +337,7 @@ public class ModuleContext implements IModuleContext{
 		if(!orderReqMap.containsKey(order.originOrderId())) {
 			return;
 		}
+		getLogger().info("收到订单反馈：{} 合约：{} 订单状态：{} {}", order.originOrderId(), order.contract().name(), order.orderStatus(), order.statusMsg());
 		if(!OrderUtils.isValidOrder(order) || OrderUtils.isDoneOrder(order)) {
 			// 延时3秒再移除订单信息，避免移除了订单信息后，成交无法匹配的问题
 			CompletableFuture.runAsync(() -> orderReqMap.remove(order.originOrderId()), CompletableFuture.delayedExecutor(3, TimeUnit.SECONDS));
@@ -354,8 +355,8 @@ public class ModuleContext implements IModuleContext{
 		if(!orderReqMap.containsKey(trade.originOrderId()) && !StringUtils.equals(trade.originOrderId(), Constants.MOCK_ORDER_ID)) {
 			return;
 		} 
-		if(orderReqMap.containsKey(trade.originOrderId()) && getLogger().isInfoEnabled()) {
-			getLogger().info("成交：{}， 操作：{}{}，合约：{}，价格：{}， 手数：{}", trade.originOrderId(), FieldUtils.chn(trade.direction()),
+		if(getLogger().isInfoEnabled()) {
+			getLogger().info("收到成交反馈：{}， 操作：{}{}，合约：{}，价格：{}， 手数：{}", trade.originOrderId(), FieldUtils.chn(trade.direction()),
 					FieldUtils.chn(trade.offsetFlag()), trade.contract().name(), trade.price(), trade.volume());
 		}
 		moduleAccount.onTrade(trade);
