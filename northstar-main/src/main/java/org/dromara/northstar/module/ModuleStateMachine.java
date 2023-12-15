@@ -37,7 +37,7 @@ public class ModuleStateMachine implements TransactionAware {
 
 	@Override
 	public void onOrder(Order order) {
-		ctx.getLogger().info("收到订单反馈：{} {} {}", order.originOrderId(), order.orderStatus(), order.statusMsg());
+		ctx.getLogger().info("收到订单反馈：{} {} {} {}", order.originOrderId(), order.contract().name(), order.orderStatus(), order.statusMsg());
 		if(order.orderStatus() == OrderStatusEnum.OS_Rejected || order.orderStatus() == OrderStatusEnum.OS_Canceled) {
 			updateState();
 		} else if(order.orderStatus() == OrderStatusEnum.OS_AllTraded) {

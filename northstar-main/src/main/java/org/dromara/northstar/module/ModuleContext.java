@@ -355,8 +355,8 @@ public class ModuleContext implements IModuleContext{
 			return;
 		} 
 		if(orderReqMap.containsKey(trade.originOrderId()) && getLogger().isInfoEnabled()) {
-			getLogger().info("成交：{}， 操作：{}{}， 价格：{}， 手数：{}", trade.originOrderId(), FieldUtils.chn(trade.direction()),
-					FieldUtils.chn(trade.offsetFlag()), trade.price(), trade.volume());
+			getLogger().info("成交：{}， 操作：{}{}，合约：{}，价格：{}， 手数：{}", trade.originOrderId(), FieldUtils.chn(trade.direction()),
+					FieldUtils.chn(trade.offsetFlag()), trade.contract().name(), trade.price(), trade.volume());
 		}
 		moduleAccount.onTrade(trade);
 		tradeStrategy.onTrade(trade);
