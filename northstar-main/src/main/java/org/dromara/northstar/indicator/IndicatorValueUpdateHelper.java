@@ -9,6 +9,9 @@ import org.dromara.northstar.indicator.model.Configuration;
 import org.dromara.northstar.indicator.model.Num;
 import org.dromara.northstar.strategy.MergedBarListener;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class IndicatorValueUpdateHelper implements MergedBarListener, BarDataAware, TickDataAware{
 
 	private Indicator indicator;
@@ -58,6 +61,10 @@ public class IndicatorValueUpdateHelper implements MergedBarListener, BarDataAwa
 		for(Indicator dependencyIndicator: indicator.dependencies()) {
 			recursiveUpdate(dependencyIndicator, bar, unstable);
 		}
-		indicator.update(Num.of(indicator.getConfiguration().valueType().resolve(bar), bar.actionTimestamp(), unstable));
+		try {			
+			indicator.update(Num.of(indicator.getConfiguration().valueType().resolve(bar), bar.actionTimestamp(), unstable));
+		} catch(Exception e) {
+			log.error("指标[{}] 数值更新异常", indicator.getConfiguration().indicatorName(), e);
+		}
 	}
 }

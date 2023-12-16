@@ -72,7 +72,6 @@ import org.dromara.northstar.strategy.constant.PriceType;
 import org.dromara.northstar.strategy.model.TradeIntent;
 import org.dromara.northstar.support.log.ModuleLoggerFactory;
 import org.dromara.northstar.support.utils.bar.BarMergerRegistry;
-import org.dromara.northstar.support.utils.bar.BarMergerRegistry.ListenerType;
 import org.slf4j.Logger;
 
 import com.alibaba.fastjson2.JSONArray;
@@ -157,8 +156,8 @@ public class ModuleContext implements IModuleContext{
 					Contract cf = contract.contract();
 					contractMap.put(cf.unifiedSymbol(), cf);
 					barBufQMap.put(cf, new ConcurrentLinkedQueue<>());
-					registry.addListener(cf, moduleDescription.getNumOfMinPerBar(), PeriodUnit.MINUTE, tradeStrategy, ListenerType.STRATEGY);
-					registry.addListener(cf, moduleDescription.getNumOfMinPerBar(), PeriodUnit.MINUTE, this, ListenerType.CONTEXT);
+					registry.addListener(cf, moduleDescription.getNumOfMinPerBar(), PeriodUnit.MINUTE, tradeStrategy);
+					registry.addListener(cf, moduleDescription.getNumOfMinPerBar(), PeriodUnit.MINUTE, this);
 				}
 			});
 	}
@@ -235,7 +234,7 @@ public class ModuleContext implements IModuleContext{
 		Configuration cfg = indicator.getConfiguration();
 		IndicatorValueUpdateHelper helper = new IndicatorValueUpdateHelper(indicator);
 		indicatorHelperSet.add(helper);
-		registry.addListener(cfg.contract(), cfg.numOfUnits(), cfg.period(), helper, ListenerType.INDICATOR);
+		registry.addListener(cfg.contract(), cfg.numOfUnits(), cfg.period(), helper);
 	}
 	
 	public void checkIndicator(Indicator indicator) {

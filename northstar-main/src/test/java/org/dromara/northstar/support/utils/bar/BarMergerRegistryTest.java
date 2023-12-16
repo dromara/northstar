@@ -15,7 +15,6 @@ import org.dromara.northstar.common.model.core.TimeSlot;
 import org.dromara.northstar.common.model.core.TradeTimeDefinition;
 import org.dromara.northstar.indicator.constant.PeriodUnit;
 import org.dromara.northstar.strategy.MergedBarListener;
-import org.dromara.northstar.support.utils.bar.BarMergerRegistry.ListenerType;
 import org.junit.jupiter.api.Test;
 
 class BarMergerRegistryTest {
@@ -36,19 +35,19 @@ class BarMergerRegistryTest {
 	
 	@Test
 	void test() {
-		registry.addListener(contract, 5, PeriodUnit.MINUTE, listener1, ListenerType.INDICATOR);
-		registry.addListener(contract, 5, PeriodUnit.MINUTE, listener2, ListenerType.INDICATOR);
+		registry.addListener(contract, 5, PeriodUnit.MINUTE, listener1);
+		registry.addListener(contract, 5, PeriodUnit.MINUTE, listener2);
 		
 		assertThat(registry.mergerMap).hasSize(1);
 		
-		registry.addListener(contract, 10, PeriodUnit.MINUTE, listener3, ListenerType.INDICATOR);
+		registry.addListener(contract, 10, PeriodUnit.MINUTE, listener3);
 		assertThat(registry.mergerMap).hasSize(2);
 	}
 
 	@Test
 	void testBar() {
-		registry.addListener(contract, 5, PeriodUnit.MINUTE, listener1, ListenerType.INDICATOR);
-		registry.addListener(contract, 10, PeriodUnit.MINUTE, listener3, ListenerType.INDICATOR);
+		registry.addListener(contract, 5, PeriodUnit.MINUTE, listener1);
+		registry.addListener(contract, 10, PeriodUnit.MINUTE, listener3);
 		
 		Bar bar = Bar.builder().contract(contract).actionDay(LocalDate.now()).actionTime(LocalTime.now()).build();
 		AtomicInteger cnt = new AtomicInteger();

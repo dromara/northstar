@@ -27,9 +27,9 @@ public abstract class AbstractStrategy implements TradeStrategy{
 	protected JSONObject storeObject;
 	// 模组上下文
 	protected IModuleStrategyContext ctx;
-	// 处理器，unifiedSymbol -> handler
+	// 处理器，contract -> handler
 	protected Map<Contract, TickHandler> tickHandlerMap = new HashMap<>();
-	// 处理器，unifiedSymbol -> handler
+	// 处理器，contract -> handler
 	protected Map<Contract, BarHandler> barHandlerMap = new HashMap<>();
 	// 日志对象
 	protected Logger log;
