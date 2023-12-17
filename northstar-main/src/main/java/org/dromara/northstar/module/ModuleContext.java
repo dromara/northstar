@@ -247,7 +247,7 @@ public class ModuleContext implements IModuleContext{
 		logger.trace("检查指标配置信息：{}", indicatorName);
 		Assert.isTrue(cfg.numOfUnits() > 0, "周期数必须大于0，当前为：" + cfg.numOfUnits());
 		Assert.isTrue(cfg.cacheLength() > 0, "指标回溯长度必须大于0，当前为：" + cfg.cacheLength());
-		if(cfg.visible()) {		// 不显示的指标可以不做重名校验
+		if(Boolean.TRUE.equals(cfg.visible())) {		// 不显示的指标可以不做重名校验
 			Assert.isTrue(!indicatorNameTbl.contains(cfg.contract(), indicatorName) || indicator.equals(indicatorNameTbl.get(cfg.contract(), indicatorName)), "指标 [{} -> {}] 已存在。不能重名", cfg.contract().unifiedSymbol(), indicatorName);
 			indicatorNameTbl.put(cfg.contract(), indicatorName, indicator);
 		}
@@ -317,7 +317,7 @@ public class ModuleContext implements IModuleContext{
 		if(list.size() >= bufSize.intValue()) {
 			list.poll();
 		}
-		if(indicator.isReady() && indicator.getConfiguration().visible() && indicator.get(0).timestamp() == bar.actionTimestamp()
+		if(indicator.isReady() && Boolean.TRUE.equals(indicator.getConfiguration().visible()) && indicator.get(0).timestamp() == bar.actionTimestamp()
 				&& (list.isEmpty() || list.peekLast().getTimestamp() != bar.actionTimestamp())
 				&& (isEndOfTheTradingDay(bar) || indicator.getConfiguration().ifPlotPerBar() || !indicator.get(0).unstable())) {
 			list.offer(new TimeSeriesValue(indicator.get(0).value(), bar.actionTimestamp()));
@@ -451,7 +451,7 @@ public class ModuleContext implements IModuleContext{
 				Configuration cfg = in.getConfiguration();
 				String indicatorName = String.format("%s_%d%s", cfg.indicatorName(), cfg.numOfUnits(), cfg.period().symbol());
 				indicatorMap.putIfAbsent(cfg.contract().name(), new ArrayList<>());
-				if(cfg.visible()) {
+				if(Boolean.TRUE.equals(cfg.visible())) {
 					indicatorMap.get(cfg.contract().name()).add(indicatorName);
 				}
 				Collections.sort(indicatorMap.get(cfg.contract().name()));
