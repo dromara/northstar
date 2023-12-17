@@ -44,7 +44,6 @@
 <script>
 import SocketConnection from '@/components/SocketConnection'
 import MessageConfigForm from '@/components/MessageConfigForm'
-import packageJson from '@/../package.json'
 
 import loginApi from '@/api/loginApi'
 import MediaListener from '@/utils/media-utils'
@@ -70,7 +69,7 @@ export default {
     return {
       curPage: '0',
       mailSettingFormVisible: false,
-      version: packageJson.version
+      version: ''
     }
   },
   beforeRouteEnter(to, from, next){
@@ -85,6 +84,11 @@ export default {
       return
     }
     next()
+  },
+  created(){
+    fetch('/version').then(result => result.text()).then(v => {
+      this.version = v.replace(/"/g,"")
+    })
   },
   mounted() {
     this.curPage = pageOptsRevert[this.$route.name]
