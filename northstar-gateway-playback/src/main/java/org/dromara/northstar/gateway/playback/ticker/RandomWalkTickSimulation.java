@@ -85,20 +85,26 @@ class PriceRandomWalk {
 		this.walkingPath = getWalkingPath(milestonePrices);
 	}
 	
+	@SuppressWarnings("null")
 	private List<Double> getWalkingPath(List<Double> milestonePrices){
 		List<Double> pathway = new ArrayList<>();
 		Double curStep = null;
-		for(Double milestonePrice : milestonePrices) {
+		int maxStep = 0;
+		for(int i=0; i<milestonePrices.size(); i++) {
+			double milestonePrice = milestonePrices.get(i);
+			if(Objects.isNull(curStep)) {
+				curStep = milestonePrice;
+			}
+			// 加入最大步数，防止priceTick设置错误时，可能导致死循环问题
+			maxStep = (int) (Math.abs(curStep - milestonePrice) / priceTick) * 2; 
 			do {
-				if(Objects.isNull(curStep)) {
-					curStep = milestonePrice;
-				} else if(milestonePrice > curStep) {
+				if(milestonePrice > curStep) {
 					curStep += priceTick;
 				} else if(milestonePrice < curStep) {
 					curStep -= priceTick;
 				}
 				pathway.add(curStep);
-			} while(!appxEquals(milestonePrice, curStep) && pathway.size() < numOfTickPerBar);
+			} while(!appxEquals(milestonePrice, curStep) && maxStep-- > 0);
 		}
 		double stepSize = (double) pathway.size() / numOfTickPerBar;
 		double std = stepSize;
