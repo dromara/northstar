@@ -19,8 +19,8 @@ import lombok.NoArgsConstructor;
 @Data
 @Entity
 @Table(name="BAR", indexes = {
-		@Index(name="idx_unifiedSymbol", columnList = "unifiedSymbol"),
-		@Index(name="idx_tradingDay", columnList = "tradingDay")
+		@Index(name="idx_symbol_tradingDay", columnList = "unifiedSymbol, tradingDay"),
+		@Index(name="idx_expiredAt", columnList = "expiredAt")
 })
 public class BarDO {
 	
