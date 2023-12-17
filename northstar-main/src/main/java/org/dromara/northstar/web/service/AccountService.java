@@ -79,6 +79,10 @@ public class AccountService {
 			throw new InsufficientException("可用资金不足，无法开仓");
 		}
 		DirectionEnum orderDir = OrderUtils.resolveDirection(orderReq.getTradeOpr());
+		OrderPriceTypeEnum priceType = switch(orderReq.getPriceType()) {
+		case ANY_PRICE -> OrderPriceTypeEnum.OPT_AnyPrice;
+		default -> OrderPriceTypeEnum.OPT_LimitPrice;
+		};
 		double price = Double.parseDouble(orderReq.getPrice());
 		return SubmitOrderReq.builder()
 				.originOrderId(UUID.randomUUID().toString())
@@ -86,7 +90,7 @@ public class AccountService {
 				.currency(contract.currency())
 				.price(price)
 				.stopPrice(StringUtils.isNotBlank(orderReq.getStopPrice()) ? Double.parseDouble(orderReq.getStopPrice()) : 0D)
-				.orderPriceType(price <= 0 ? OrderPriceTypeEnum.OPT_AnyPrice : OrderPriceTypeEnum.OPT_LimitPrice)
+				.orderPriceType(priceType)
 				.direction(orderDir)
 				.volume(orderReq.getVolume())
 				.offsetFlag(OffsetFlagEnum.OF_Open)
@@ -115,6 +119,10 @@ public class AccountService {
 			throw new InsufficientException("持仓不足，无法平仓");
 		}
 		List<SubmitOrderReq> result = new ArrayList<>();
+		OrderPriceTypeEnum priceType = switch(orderReq.getPriceType()) {
+		case ANY_PRICE -> OrderPriceTypeEnum.OPT_AnyPrice;
+		default -> OrderPriceTypeEnum.OPT_LimitPrice;
+		};
 		double price = Double.parseDouble(orderReq.getPrice());
 		SubmitOrderReq proto = SubmitOrderReq.builder()
 				.originOrderId(UUID.randomUUID().toString())
@@ -122,7 +130,7 @@ public class AccountService {
 				.currency(contract.currency())
 				.price(price)
 				.stopPrice(StringUtils.isNotBlank(orderReq.getStopPrice()) ? Double.parseDouble(orderReq.getStopPrice()) : 0D)
-				.orderPriceType(price <= 0 ? OrderPriceTypeEnum.OPT_AnyPrice : OrderPriceTypeEnum.OPT_LimitPrice)
+				.orderPriceType(priceType)
 				.direction(orderDir)
 				.timeCondition(TimeConditionEnum.TC_GFD)
 				.contingentCondition(ContingentConditionEnum.CC_Immediately)

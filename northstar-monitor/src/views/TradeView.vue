@@ -84,7 +84,7 @@
               id="limitPrice"
               v-model="limitPrice"
               placeholder="委托价"
-              :disabled="dealPriceType !== 'CUSTOM_PRICE'"
+              :disabled="dealPriceType !== 'LIMIT_PRICE'"
               type="number"
             ></el-input>
           </div>
@@ -166,7 +166,7 @@ export default {
       priceOptionList: [
         {
           label: '对手价',
-          type: 'COUNTERPARTY_PRICE'
+          type: 'OPP_PRICE'
         },
         {
           label: '排队价',
@@ -174,11 +174,11 @@ export default {
         },
         {
           label: '市价',
-          type: 'FIGHTING_PRICE'
+          type: 'ANY_PRICE'
         },
         {
           label: '限价',
-          type: 'CUSTOM_PRICE'
+          type: 'LIMIT_PRICE'
         }
       ],
       contract: '',
@@ -223,7 +223,7 @@ export default {
       this.$store.commit('updateCurAccountId', this.chosenAccount.gatewayId)
     },
     handleContractChange() {
-      this.dealPriceType = 'COUNTERPARTY_PRICE'
+      this.dealPriceType = 'OPP_PRICE'
       this.$store.commit('updateFocusUnifiedSymbol', this.contract.unifiedSymbol)
     },
     searchContracts(query){
@@ -236,7 +236,7 @@ export default {
       }
     },
     handleDealPriceTypeChange() {
-      if (this.dealPriceType !== 'CUSTOM_PRICE') {
+      if (this.dealPriceType !== 'LIMIT_PRICE') {
         this.limitPrice = ''
       }
     },
@@ -259,7 +259,8 @@ export default {
         this.dealContractId,
         this.bkPrice,
         this.dealVol,
-        this.stopPrice
+        this.stopPrice,
+        this.dealPriceType
       )
     },
     sellOpen() {
@@ -271,7 +272,8 @@ export default {
         this.dealContractId,
         this.skPrice,
         this.dealVol,
-        this.stopPrice
+        this.stopPrice,
+        this.dealPriceType
       )
     },
     closePosition() {
@@ -280,7 +282,8 @@ export default {
           this.chosenAccount.gatewayId,
           this.dealContractId,
           this.closePrice,
-          this.dealVol
+          this.dealVol,
+          this.dealPriceType
         )
       }
       if (this.currentPosition.positiondirection === 3) {
@@ -288,7 +291,8 @@ export default {
           this.chosenAccount.gatewayId,
           this.dealContractId,
           this.closePrice,
-          this.dealVol
+          this.dealVol,
+          this.dealPriceType
         )
       }
       throw new Error('没有持仓')
@@ -338,18 +342,18 @@ export default {
     },
     bkPrice() {
       return {
-        COUNTERPARTY_PRICE: this.$store.state.marketCurrentDataModule.curTick.askpriceList[0],
+        OPP_PRICE: this.$store.state.marketCurrentDataModule.curTick.askpriceList[0],
         WAITING_PRICE: this.$store.state.marketCurrentDataModule.curTick.bidpriceList[0],
-        FIGHTING_PRICE: this.$store.state.marketCurrentDataModule.curTick.upperlimit,
-        CUSTOM_PRICE: this.limitPrice
+        ANY_PRICE: this.$store.state.marketCurrentDataModule.curTick.upperlimit || 0,
+        LIMIT_PRICE: this.limitPrice
       }[this.dealPriceType]
     },
     skPrice() {
       return {
-        COUNTERPARTY_PRICE: this.$store.state.marketCurrentDataModule.curTick.bidpriceList[0],
+        OPP_PRICE: this.$store.state.marketCurrentDataModule.curTick.bidpriceList[0],
         WAITING_PRICE: this.$store.state.marketCurrentDataModule.curTick.askpriceList[0],
-        FIGHTING_PRICE: this.$store.state.marketCurrentDataModule.curTick.lowerlimit,
-        CUSTOM_PRICE: this.limitPrice
+        ANY_PRICE: this.$store.state.marketCurrentDataModule.curTick.lowerlimit || 0,
+        LIMIT_PRICE: this.limitPrice
       }[this.dealPriceType]
     },
     closePrice() {
