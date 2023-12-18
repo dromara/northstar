@@ -1,19 +1,20 @@
+
+
 export default {
   accountingFormatter(val) {
     return val.toFixed(0).replace(/\d{1,3}(?=(\d{3})+(\.\d*)?$)/g, '$&,')
   },
   smartFormatter(val){
-    if(val === 0 || val === '0'){
+    if(val === 0 || val === '0' || isNaN(val)){
       return val
     }
-    if(parseInt(val) === val){
-      return val
+    let precision
+    for(precision = 0; precision<6; precision++) {
+      const number = val * Math.pow(10, precision)
+      if(parseInt(number) - number === 0){
+        break;
+      }
     }
-    const number = parseFloat(val)
-    if(isNaN(number)){
-      return val
-    }
-    return number.toFixed(2)
-    
+    return val.toFixed(precision)
   }
 }
