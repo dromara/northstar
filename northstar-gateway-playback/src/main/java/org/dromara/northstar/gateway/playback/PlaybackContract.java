@@ -2,6 +2,7 @@ package org.dromara.northstar.gateway.playback;
 
 import org.dromara.northstar.common.IDataSource;
 import org.dromara.northstar.common.constant.ChannelType;
+import org.dromara.northstar.common.constant.Constants;
 import org.dromara.northstar.common.model.Identifier;
 import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.common.model.core.ContractDefinition;
@@ -24,6 +25,7 @@ public class PlaybackContract implements Instrument {
 				.contractId(contract.unifiedSymbol() + "@" + ChannelType.PLAYBACK)
 				.channelType(ChannelType.PLAYBACK)
 				.thirdPartyId(contract.symbol() + "@" + ChannelType.PLAYBACK)
+				.tradable(!contract.symbol().contains(Constants.PRIMARY_SUFFIX) && !contract.symbol().contains("指数"))
 				.build();
 		this.dataSrc = dataSrc;
 	}

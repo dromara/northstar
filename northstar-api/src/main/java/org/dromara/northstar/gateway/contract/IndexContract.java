@@ -68,10 +68,10 @@ public class IndexContract implements IContract, TickDataAware{
 				.contractId(contractId)
 				.lastTradeDate(LocalDate.MAX)
 				.unifiedSymbol(unifiedSymbol)
+				.name(name)
 				.fullName(fullName)
 				.longMarginRatio(proto.longMarginRatio())
 				.shortMarginRatio(proto.shortMarginRatio())
-				.name(name)
 				.build();
 	}
 	
