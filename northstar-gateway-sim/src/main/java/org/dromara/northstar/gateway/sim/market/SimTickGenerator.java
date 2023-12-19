@@ -20,7 +20,7 @@ import org.dromara.northstar.gateway.Gateway;
  */
 public class SimTickGenerator {
 	
-	private Double lastPrice = 5000D + ThreadLocalRandom.current().nextDouble(-2000, 3000);
+	private Double lastPrice;
 	
 	private double openInterest = ThreadLocalRandom.current().nextDouble(10000, 30000);
 	
@@ -36,8 +36,12 @@ public class SimTickGenerator {
 	
 	private Contract contract;
 	
+	private final int amplifier;
+	
 	public SimTickGenerator(Contract contract) {
 		this.contract = contract;
+		this.lastPrice = (5000D + ThreadLocalRandom.current().nextDouble(-2000, 3000)) * contract.priceTick();
+		this.amplifier = (int) (1 / contract.priceTick());
 	}
 	
 	public String tickSymbol() {
@@ -47,7 +51,7 @@ public class SimTickGenerator {
 	public Tick generateNextTick(LocalDateTime ldt, Gateway gateway) {
 		double priceTick = contract.priceTick() == 0 ? 1 : contract.priceTick();
 		seed += Math.random();
-		int lastNumberOfTick = (int) (lastPrice * 100) / (int)(priceTick * 100);
+		int lastNumberOfTick = (int) (lastPrice * amplifier) / (int)(priceTick * amplifier);
 		int deltaTick = generateDeltaTick(seed);
 		double latestPrice = (lastNumberOfTick + deltaTick) * priceTick;
 		double bidPrice = (lastNumberOfTick + deltaTick - 1) * priceTick;

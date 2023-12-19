@@ -26,6 +26,14 @@ public class SimContractDefProvider {
 				.symbolPattern(Pattern.compile("sim[0-9]{3,4}@.+"))
 				.commissionFee(6)
 				.tradeTimeDef(TradeTimeDefinition.builder().timeSlots(List.of(allDay)).build())
+				.build(),
+			ContractDefinition.builder()
+				.name("模拟合约")
+				.exchange(ExchangeEnum.BINANCE)
+				.productClass(ProductClassEnum.FUTURES)
+				.symbolPattern(Pattern.compile("sim[0-9]{3,4}@.+"))
+				.commissionRate(3.0E-4)
+				.tradeTimeDef(TradeTimeDefinition.builder().timeSlots(List.of(allDay)).build())
 				.build()
 		);
 	}
