@@ -58,10 +58,6 @@ public enum ChannelType {
 		public GatewayUsage[] usage() {
 			return new GatewayUsage[] {GatewayUsage.MARKET_DATA, GatewayUsage.TRADE};
 		}
-		@Override
-		public boolean allowDuplication() {
-			return true;
-		}
 	};
 	public abstract GatewayUsage[] usage();
 
