@@ -21,8 +21,8 @@ import org.dromara.northstar.strategy.IModuleContext;
 import org.dromara.northstar.strategy.TradeStrategy;
 import org.dromara.northstar.strategy.constant.PriceType;
 import org.dromara.northstar.strategy.model.TradeIntent;
-import org.dromara.northstar.support.log.ModuleLoggerFactory;
 import org.dromara.northstar.support.utils.bar.BarMergerRegistry;
+import org.slf4j.Logger;
 
 import cn.hutool.core.lang.Assert;
 import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
@@ -38,10 +38,12 @@ public class PlaybackModuleContext extends ModuleContext implements IModuleConte
 	
 	public static final String PLAYBACK_GATEWAY = "回测账户";
 	
-	public PlaybackModuleContext(TradeStrategy tradeStrategy, ModuleDescription moduleDescription,
-			ModuleRuntimeDescription moduleRtDescription, IContractManager contractMgr, IModuleRepository moduleRepo,
-			ModuleLoggerFactory loggerFactory, BarMergerRegistry barMergerRegistry) {
-		super(tradeStrategy, moduleDescription, moduleRtDescription, contractMgr, new MockModuleRepository(moduleRepo), loggerFactory, barMergerRegistry);
+	private Logger logger;
+	
+	public PlaybackModuleContext(TradeStrategy tradeStrategy, ModuleDescription moduleDescription, 
+			ModuleRuntimeDescription moduleRtDescription, IContractManager contractMgr, IModuleRepository moduleRepo, BarMergerRegistry barMergerRegistry) {
+		super(tradeStrategy, moduleDescription, moduleRtDescription, contractMgr, new MockModuleRepository(moduleRepo), barMergerRegistry);
+		logger = getLogger(getClass());
 	}
 
 	@Override
@@ -81,17 +83,17 @@ public class PlaybackModuleContext extends ModuleContext implements IModuleConte
 	public synchronized Optional<String> submitOrderReq(Contract contract, SignalOperation operation, PriceType priceType, 
 			int volume, double price) {
 		if(!module.isEnabled()) {
-			getLogger().info("策略处于停用状态，忽略委托单");
+			logger.info("策略处于停用状态，忽略委托单");
 			return Optional.empty();
 		}
-		getLogger().debug("回测上下文收到下单请求");
+		logger.debug("回测上下文收到下单请求");
 		Tick lastTick = latestTickMap.get(contract);
 		Assert.notNull(lastTick, "没有行情时不应该发送订单");
 		Assert.isTrue(volume > 0, "下单手数应该为正数");
 		
 		double orderPrice = priceType.resolvePrice(lastTick, operation, price);
-		if(getLogger().isInfoEnabled()) {
-			getLogger().info("[{} {}] 策略信号：合约【{}】，操作【{}】，价格【{}】，手数【{}】，类型【{}】", 
+		if(logger.isInfoEnabled()) {
+			logger.info("[{} {}] 策略信号：合约【{}】，操作【{}】，价格【{}】，手数【{}】，类型【{}】", 
 					lastTick.actionDay(), lastTick.actionTime(),
 					contract.unifiedSymbol(), operation.text(), orderPrice, volume, priceType);
 		}
@@ -115,9 +117,9 @@ public class PlaybackModuleContext extends ModuleContext implements IModuleConte
 							.minVolume(1)
 							.build());
 		} catch (InsufficientException e) {
-			getLogger().error("发单失败。原因：{}", e.getMessage());
+			logger.error("发单失败。原因：{}", e.getMessage());
 			tradeIntentMap.remove(contract);
-			getLogger().warn("模组余额不足，主动停用模组");
+			logger.warn("模组余额不足，主动停用模组");
 			setEnabled(false);
 			return Optional.empty();
 		}

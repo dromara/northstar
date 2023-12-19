@@ -14,6 +14,7 @@ import org.dromara.northstar.strategy.StrategicComponent;
 import org.dromara.northstar.strategy.TradeStrategy;
 import org.dromara.northstar.strategy.constant.PriceType;
 import org.dromara.northstar.strategy.model.TradeIntent;
+import org.slf4j.Logger;
 
 /**
  * 本示例用于展示一个多周期指标的策略
@@ -37,14 +38,16 @@ public class MultiPeriodExampleStrategy extends AbstractStrategy	// 为了简化
 	private Indicator fastLine2;	// 参考周期快线
 	private Indicator slowLine2;	// 参考周期慢线 
 	
+	private Logger logger;
+	
 	@Override
 	public void onMergedBar(Bar bar) {
-		log.debug("{} K线数据： 开 [{}], 高 [{}], 低 [{}], 收 [{}]", 
+		logger.debug("{} K线数据： 开 [{}], 高 [{}], 低 [{}], 收 [{}]", 
 				bar.contract().unifiedSymbol(), bar.openPrice(), bar.highPrice(), bar.lowPrice(), bar.closePrice());
 		// 确保指标已经准备好再开始交易
 		boolean allLineReady = fastLine1.isReady() && slowLine1.isReady() && fastLine2.isReady() && slowLine2.isReady();
 		if(!allLineReady) {
-			log.debug("指标未准备就绪");
+			logger.debug("指标未准备就绪");
 			return;
 		}
 		switch (ctx.getState()) {
@@ -106,6 +109,7 @@ public class MultiPeriodExampleStrategy extends AbstractStrategy	// 为了简化
 	
 	@Override
 	protected void initIndicators() {
+		logger = ctx.getLogger(getClass());
 		Contract c = ctx.getContract(params.indicatorSymbol);
 		// 主周期线
 		this.fastLine1 = new MAIndicator(Configuration.builder()

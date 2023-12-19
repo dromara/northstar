@@ -25,6 +25,7 @@ import org.dromara.northstar.gateway.TradeGateway;
 import org.dromara.northstar.strategy.IAccount;
 import org.dromara.northstar.strategy.IModule;
 import org.dromara.northstar.strategy.IModuleContext;
+import org.slf4j.Logger;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -50,8 +51,11 @@ public class TradeModule implements IModule {
 	
 	private Map<Contract, IAccount> contractAccountMap = new HashMap<>();
 	
+	private Logger logger;
+	
 	public TradeModule(ModuleDescription moduleDescription, IModuleContext ctx, AccountManager accountMgr, IContractManager contractMgr) {
 		this.ctx = ctx;
+		this.logger = ctx.getLogger(getClass());
 		this.md = moduleDescription;
 		moduleDescription.getModuleAccountSettingsDescription().forEach(mad -> { 
 			MarketGateway mktGateway = accountMgr.get(Identifier.of(mad.getAccountGatewayId())).getMarketGateway();
@@ -107,7 +111,7 @@ public class TradeModule implements IModule {
 				ctx.onTrade(trade);
 			}
 		} catch (Exception e) {
-			ctx.getLogger().error(e.getMessage(), e);
+			logger.error(e.getMessage(), e);
 		}
 	}
 

@@ -56,7 +56,6 @@ import org.dromara.northstar.strategy.IModule;
 import org.dromara.northstar.strategy.IModuleContext;
 import org.dromara.northstar.strategy.StrategicComponent;
 import org.dromara.northstar.strategy.TradeStrategy;
-import org.dromara.northstar.support.log.ModuleLoggerFactory;
 import org.dromara.northstar.support.utils.bar.BarMergerRegistry;
 import org.dromara.northstar.web.PostLoadAware;
 import org.springframework.context.ApplicationContext;
@@ -87,8 +86,6 @@ public class ModuleService implements IModuleService, PostLoadAware {
 	private IMarketDataRepository mdRepo;
 
 	private MarketDataLoadingUtils utils = new MarketDataLoadingUtils();
-
-	private ModuleLoggerFactory moduleLoggerFactory = new ModuleLoggerFactory();
 
 	private AccountManager accountMgr;
 
@@ -238,12 +235,12 @@ public class ModuleService implements IModuleService, PostLoadAware {
 							.initBalance(md.getInitBalance())
 							.build())
 					.build();
-			moduleCtx = new PlaybackModuleContext(strategy, md, mrd, contractMgr, moduleRepo, moduleLoggerFactory, new BarMergerRegistry());
+			moduleCtx = new PlaybackModuleContext(strategy, md, mrd, contractMgr, moduleRepo, new BarMergerRegistry());
 		} else {
 			if(md.getType() == ModuleType.ARBITRAGE) {
-				moduleCtx = new ArbitrageModuleContext(strategy, md, mrd, contractMgr, moduleRepo, moduleLoggerFactory, new BarMergerRegistry());
+				moduleCtx = new ArbitrageModuleContext(strategy, md, mrd, contractMgr, moduleRepo, new BarMergerRegistry());
 			} else {
-				moduleCtx = new ModuleContext(strategy, md, mrd, contractMgr, moduleRepo, moduleLoggerFactory, new BarMergerRegistry());
+				moduleCtx = new ModuleContext(strategy, md, mrd, contractMgr, moduleRepo, new BarMergerRegistry());
 			}
 		}
 		moduleMgr.add(new TradeModule(md, moduleCtx, accountMgr, contractMgr));

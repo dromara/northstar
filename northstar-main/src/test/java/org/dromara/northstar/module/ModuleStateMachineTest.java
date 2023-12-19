@@ -1,6 +1,7 @@
 package org.dromara.northstar.module;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -116,7 +117,7 @@ class ModuleStateMachineTest {
 	
 	@BeforeEach
 	void prepare() {
-		when(ctx.getLogger()).thenReturn(mock(Logger.class));
+		when(ctx.getLogger(any())).thenReturn(mock(Logger.class));
 	}
 	
 	@Test

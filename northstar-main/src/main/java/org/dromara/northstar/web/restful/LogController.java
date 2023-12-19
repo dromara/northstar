@@ -34,7 +34,7 @@ public class LogController {
 	@GetMapping("/module")
 	public ResultBean<LogDescription> tailModuleLog(String name, long positionOffset, int tailNumOfLines) throws IOException{
 		File moduleLogPath = new File(System.getProperty("LOG_PATH"), name);
-		File moduleLogFile = new File(moduleLogPath, name + ".log");
+		File moduleLogFile = new File(moduleLogPath, "module.log");
 		return new ResultBean<>(service.tailLogFile(moduleLogFile, positionOffset, tailNumOfLines));
 	}
 	

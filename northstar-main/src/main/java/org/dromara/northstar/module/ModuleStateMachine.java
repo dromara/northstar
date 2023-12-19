@@ -10,6 +10,7 @@ import org.dromara.northstar.common.model.core.Order;
 import org.dromara.northstar.common.model.core.Trade;
 import org.dromara.northstar.common.utils.OrderUtils;
 import org.dromara.northstar.strategy.IModuleContext;
+import org.slf4j.Logger;
 
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
@@ -27,12 +28,12 @@ public class ModuleStateMachine implements TransactionAware {
 	
 	private ModuleAccount moduleAccount;
 	
-	private IModuleContext ctx;
+	private final Logger logger;
 	
 	private boolean shouldUpdateState;
 	
 	public ModuleStateMachine(IModuleContext ctx) {
-		this.ctx = ctx;
+		this.logger = ctx.getLogger(getClass());
 	}
 
 	@Override
@@ -93,7 +94,7 @@ public class ModuleStateMachine implements TransactionAware {
 		if(curState == newState) {
 			return;
 		}
-		ctx.getLogger().info("状态机切换：[{}] => [{}]", curState, newState);
+		logger.info("状态机切换：[{}] => [{}]", curState, newState);
 		this.curState = newState;
 	}
 

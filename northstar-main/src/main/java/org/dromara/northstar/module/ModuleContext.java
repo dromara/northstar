@@ -72,6 +72,7 @@ import org.dromara.northstar.strategy.constant.PriceType;
 import org.dromara.northstar.strategy.model.TradeIntent;
 import org.dromara.northstar.support.log.ModuleLoggerFactory;
 import org.dromara.northstar.support.utils.bar.BarMergerRegistry;
+import org.slf4j.ILoggerFactory;
 import org.slf4j.Logger;
 
 import com.alibaba.fastjson2.JSONArray;
@@ -97,7 +98,9 @@ public class ModuleContext implements IModuleContext{
 	@Setter
 	protected IModule module;
 	
-	protected Logger logger;
+	private final ModuleLoggerFactory loggerFactory;
+	
+	private final Logger logger;
 	
 	protected TradeStrategy tradeStrategy;
 	
@@ -140,14 +143,15 @@ public class ModuleContext implements IModuleContext{
 	protected OrderRequestFilter orderReqFilter;
 	
 	public ModuleContext(TradeStrategy tradeStrategy, ModuleDescription moduleDescription, ModuleRuntimeDescription moduleRtDescription,
-			IContractManager contractMgr, IModuleRepository moduleRepo, ModuleLoggerFactory loggerFactory, BarMergerRegistry barMergerRegistry) {
+			IContractManager contractMgr, IModuleRepository moduleRepo, BarMergerRegistry barMergerRegistry) {
 		this.tradeStrategy = tradeStrategy;
 		this.moduleRepo = moduleRepo;
 		this.contractMgr = contractMgr;
 		this.registry = barMergerRegistry;
-		this.logger = loggerFactory.getLogger(moduleDescription.getModuleName());
+		this.loggerFactory = new ModuleLoggerFactory(moduleDescription.getModuleName());
+		this.logger = loggerFactory.getLogger(getClass().getName());
 		this.bufSize.set(moduleDescription.getModuleCacheDataSize());
-		this.moduleAccount = new ModuleAccount(moduleDescription, moduleRtDescription, new ModuleStateMachine(this), moduleRepo, contractMgr, logger);
+		this.moduleAccount = new ModuleAccount(moduleDescription, moduleRtDescription, new ModuleStateMachine(this), moduleRepo, contractMgr, this);
 		this.orderReqFilter = new DefaultOrderFilter(moduleDescription.getModuleAccountSettingsDescription().stream().flatMap(mad -> mad.getBindedContracts().stream()).toList(), this);
 		moduleDescription.getModuleAccountSettingsDescription().stream()
 			.forEach(mad -> {
@@ -165,7 +169,7 @@ public class ModuleContext implements IModuleContext{
 	@Override
 	public boolean explain(boolean expression, String infoMessage, Object... args) {
 		if(expression) {
-			getLogger().info(infoMessage, args);
+			logger.info(infoMessage, args);
 		}
 		return expression;
 	}
@@ -182,18 +186,18 @@ public class ModuleContext implements IModuleContext{
 	public void submitOrderReq(TradeIntent tradeIntent) {
 		if(!module.isEnabled()) {
 			if(isReady()) {
-				getLogger().info("策略处于停用状态，忽略委托单");
+				logger.info("策略处于停用状态，忽略委托单");
 			}
 			return;
 		}
 		Tick tick = latestTickMap.get(tradeIntent.getContract());
 		if(Objects.isNull(tick)) {
-			getLogger().warn("没有TICK行情数据时，忽略下单请求");
+			logger.warn("没有TICK行情数据时，忽略下单请求");
 			return;
 		}
-		getLogger().info("收到下单意图：{}", tradeIntent);
-		tradeIntentMap.put(tradeIntent.getContract(), tradeIntent);
+		logger.info("收到下单意图：{}", tradeIntent);
 		tradeIntent.setContext(this);
+		tradeIntentMap.put(tradeIntent.getContract(), tradeIntent);
         tradeIntent.onTick(tick);
 	}
 
@@ -219,13 +223,18 @@ public class ModuleContext implements IModuleContext{
 
 	@Override
 	public void disabledModule() {
-		getLogger().warn("策略层主动停用模组");
+		logger.warn("策略层主动停用模组");
 		setEnabled(false);
 	}
 
 	@Override
-	public Logger getLogger() {
-		return logger;
+	public Logger getLogger(Class<?> clz) {
+		return loggerFactory.getLogger(clz.getName());
+	}
+	
+	@Override
+	public ILoggerFactory getLoggerFactory() {
+		return loggerFactory;
 	}
 
 	@Override
@@ -256,7 +265,7 @@ public class ModuleContext implements IModuleContext{
 	
 	@Override
 	public void onTick(Tick tick) {
-		getLogger().trace("TICK信息: {} {} {} {}，最新价：{}，累计成交：{}，成交量：{}，累计持仓：{}，持仓量：{}", 
+		logger.trace("TICK信息: {} {} {} {}，最新价：{}，累计成交：{}，成交量：{}，累计持仓：{}，持仓量：{}", 
 				tick.contract().unifiedSymbol(), tick.actionDay(), tick.actionTime(), tick.actionTimestamp(),
 				tick.lastPrice(), tick.volume(), tick.volumeDelta(), tick.openInterest(), tick.openInterestDelta());
 		if(tradeIntentMap.containsKey(tick.contract())) {
@@ -264,7 +273,7 @@ public class ModuleContext implements IModuleContext{
 			tradeIntent.onTick(tick);
 			if(tradeIntent.hasTerminated()) {
 				tradeIntentMap.remove(tick.contract());
-				getLogger().debug("移除交易意图：{}", tick.contract().unifiedSymbol());
+				logger.debug("移除交易意图：{}", tick.contract().unifiedSymbol());
 			}
 		}
 		if(!Objects.equals(tick.tradingDay(), tradingDay)) {
@@ -282,7 +291,7 @@ public class ModuleContext implements IModuleContext{
 			//过滤掉可能存在的重复数据
 			return;
 		}
-		getLogger().trace("分钟Bar信息: {} {} {} {}，最新价: {}，成交量：{}，累计持仓：{}，持仓量：{}", bar.contract().unifiedSymbol(), bar.actionDay(), bar.actionTime(), bar.actionTimestamp(),
+		logger.trace("分钟Bar信息: {} {} {} {}，最新价: {}，成交量：{}，累计持仓：{}，持仓量：{}", bar.contract().unifiedSymbol(), bar.actionDay(), bar.actionTime(), bar.actionTimestamp(),
 				bar.closePrice(), bar.volume(), bar.openInterest(), bar.openInterestDelta());
 		barFilterMap.put(bar.contract(), bar.actionTimestamp());
 		indicatorHelperSet.forEach(helper -> helper.onBar(bar));
@@ -291,11 +300,11 @@ public class ModuleContext implements IModuleContext{
 	
 	@Override
 	public void onMergedBar(Bar bar) {
-		getLogger().debug("合并Bar信息: {} {} {} {}，最新价: {}", bar.contract().unifiedSymbol(), bar.actionDay(), bar.actionTime(), bar.actionTimestamp(), bar.closePrice());
+		logger.debug("合并Bar信息: {} {} {} {}，最新价: {}", bar.contract().unifiedSymbol(), bar.actionDay(), bar.actionTime(), bar.actionTimestamp(), bar.closePrice());
 		try {			
 			indicatorHelperSet.stream().map(IndicatorValueUpdateHelper::getIndicator).forEach(indicator -> visualize(indicator, bar));
 		} catch(Exception e) {
-			getLogger().error(e.getMessage(), e);
+			logger.error(e.getMessage(), e);
 		}
 		if(barBufQMap.get(bar.contract()).size() >= bufSize.intValue()) {
 			barBufQMap.get(bar.contract()).poll();
@@ -336,7 +345,7 @@ public class ModuleContext implements IModuleContext{
 		if(!orderReqMap.containsKey(order.originOrderId())) {
 			return;
 		}
-		getLogger().info("收到订单反馈：{} 合约：{} 订单状态：{} {}", order.originOrderId(), order.contract().name(), order.orderStatus(), order.statusMsg());
+		logger.info("收到订单反馈：{} 合约：{} 订单状态：{} {}", order.originOrderId(), order.contract().name(), order.orderStatus(), order.statusMsg());
 		if(!OrderUtils.isValidOrder(order) || OrderUtils.isDoneOrder(order)) {
 			// 延时3秒再移除订单信息，避免移除了订单信息后，成交无法匹配的问题
 			CompletableFuture.runAsync(() -> orderReqMap.remove(order.originOrderId()), CompletableFuture.delayedExecutor(3, TimeUnit.SECONDS));
@@ -354,8 +363,8 @@ public class ModuleContext implements IModuleContext{
 		if(!orderReqMap.containsKey(trade.originOrderId()) && !StringUtils.equals(trade.originOrderId(), Constants.MOCK_ORDER_ID)) {
 			return;
 		} 
-		if(getLogger().isInfoEnabled()) {
-			getLogger().info("收到成交反馈：{}， 操作：{}{}，合约：{}，价格：{}， 手数：{}", trade.originOrderId(), FieldUtils.chn(trade.direction()),
+		if(logger.isInfoEnabled()) {
+			logger.info("收到成交反馈：{}， 操作：{}{}，合约：{}，价格：{}， 手数：{}", trade.originOrderId(), FieldUtils.chn(trade.direction()),
 					FieldUtils.chn(trade.offsetFlag()), trade.contract().name(), trade.price(), trade.volume());
 		}
 		moduleAccount.onTrade(trade);
@@ -374,11 +383,11 @@ public class ModuleContext implements IModuleContext{
 	@Override
 	public void initData(List<Bar> barData) {
 		if(barData.isEmpty()) {
-			getLogger().debug("初始化数据为空");
+			logger.debug("初始化数据为空");
 			return;
 		}
 		
-		getLogger().debug("合约{} 初始化数据 {} {} -> {} {}", barData.get(0).contract().unifiedSymbol(),
+		logger.debug("合约{} 初始化数据 {} {} -> {} {}", barData.get(0).contract().unifiedSymbol(),
 				barData.get(0).actionDay(), barData.get(0).actionTime(),
 				barData.get(barData.size() - 1).actionDay(), barData.get(barData.size() - 1).actionTime());
 		for(Bar bar : barData) {
@@ -504,7 +513,7 @@ public class ModuleContext implements IModuleContext{
 	public Optional<String> submitOrderReq(Contract contract, SignalOperation operation, PriceType priceType, int volume, double price) {
 		if(!module.isEnabled()) {
 			if(isReady()) {
-				getLogger().info("策略处于停用状态，忽略委托单");
+				logger.info("策略处于停用状态，忽略委托单");
 			}
 			return Optional.empty();
 		}
@@ -513,8 +522,8 @@ public class ModuleContext implements IModuleContext{
 		Assert.isTrue(volume > 0, "下单手数应该为正数。当前为" + volume);
 		
 		double orderPrice = priceType.resolvePrice(tick, operation, price);
-		if(getLogger().isInfoEnabled()) {
-			getLogger().info("[{} {}] 策略信号：合约【{}】，操作【{}】，价格【{}】，手数【{}】，类型【{}】", 
+		if(logger.isInfoEnabled()) {
+			logger.info("[{} {}] 策略信号：合约【{}】，操作【{}】，价格【{}】，手数【{}】，类型【{}】", 
 					tick.actionDay(), tick.actionTime(),
 					contract.unifiedSymbol(), operation.text(), orderPrice, volume, priceType);
 		}
@@ -552,15 +561,15 @@ public class ModuleContext implements IModuleContext{
 	}
 	
 	private String submitOrderReq(SubmitOrderReq orderReq) {
-		if(getLogger().isInfoEnabled()) {			
-			getLogger().info("发单：{}，{}", orderReq.originOrderId(), LocalDateTime.ofInstant(Instant.ofEpochMilli(orderReq.actionTimestamp()), ZoneId.systemDefault()));
+		if(logger.isInfoEnabled()) {			
+			logger.info("发单：{}，{}", orderReq.originOrderId(), LocalDateTime.ofInstant(Instant.ofEpochMilli(orderReq.actionTimestamp()), ZoneId.systemDefault()));
 		}
 		try {
 			moduleAccount.onSubmitOrder(orderReq);
 		} catch (InsufficientException e) {
-			getLogger().error("发单失败。原因：{}", e.getMessage());
+			logger.error("发单失败。原因：{}", e.getMessage());
 			tradeIntentMap.remove(orderReq.contract());
-			getLogger().warn("模组余额不足，主动停用模组");
+			logger.warn("模组余额不足，主动停用模组");
 			setEnabled(false);
 			return null;
 		}
@@ -569,7 +578,7 @@ public class ModuleContext implements IModuleContext{
 				orderReqFilter.doFilter(orderReq);
 			}
 		} catch (Exception e) {
-			getLogger().error("发单失败。原因：{}", e.getMessage());
+			logger.error("发单失败。原因：{}", e.getMessage());
 			tradeIntentMap.remove(orderReq.contract());
 			return null;
 		}
@@ -592,21 +601,21 @@ public class ModuleContext implements IModuleContext{
 	@Override
 	public void cancelOrder(String originOrderId) {
 		if(!orderReqMap.containsKey(originOrderId)) {
-			getLogger().debug("找不到订单：{}", originOrderId);
+			logger.debug("找不到订单：{}", originOrderId);
 			return;
 		}
 		if(!getState().isOrdering()) {
-			getLogger().info("非下单状态，忽略撤单请求：{}", originOrderId);
+			logger.info("非下单状态，忽略撤单请求：{}", originOrderId);
 			return;
 		}
-		getLogger().info("撤单：{}", originOrderId);
+		logger.info("撤单：{}", originOrderId);
 		Contract contract = orderReqMap.get(originOrderId).contract();
 		module.getAccount(contract).cancelOrder(originOrderId);
 	}
 
 	@Override
 	public void setEnabled(boolean enabled) {
-		getLogger().info("【{}】 模组", enabled ? "启用" : "停用");
+		logger.info("【{}】 模组", enabled ? "启用" : "停用");
 		this.enabled = enabled;
 		moduleRepo.saveRuntime(getRuntimeDescription(false));
 	}

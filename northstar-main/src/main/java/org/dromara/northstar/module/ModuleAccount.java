@@ -27,6 +27,7 @@ import org.dromara.northstar.data.IModuleRepository;
 import org.dromara.northstar.gateway.IContract;
 import org.dromara.northstar.gateway.IContractManager;
 import org.dromara.northstar.strategy.IModuleAccount;
+import org.dromara.northstar.strategy.IModuleContext;
 import org.slf4j.Logger;
 
 import com.google.common.collect.HashBasedTable;
@@ -73,9 +74,9 @@ public class ModuleAccount implements IModuleAccount{
 	private Logger logger;
 	
 	public ModuleAccount(ModuleDescription moduleDescription, ModuleRuntimeDescription moduleRtDescription, ModuleStateMachine stateMachine,
-			IModuleRepository moduleRepo, IContractManager contractMgr, Logger moduleLogger) {
+			IModuleRepository moduleRepo, IContractManager contractMgr, IModuleContext ctx) {
 		this.stateMachine = stateMachine;
-		this.logger = moduleLogger;
+		this.logger = ctx.getLogger(getClass());
 		stateMachine.setModuleAccount(this);
 		BiConsumer<Trade, Trade> onDealCallback = (openTrade, closeTrade) -> {
 			synchronized (this) {
