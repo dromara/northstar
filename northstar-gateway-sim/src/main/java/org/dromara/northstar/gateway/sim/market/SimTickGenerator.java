@@ -74,6 +74,7 @@ public class SimTickGenerator {
 				.tradingDay(ldt.toLocalDate())
 				.actionDay(ldt.toLocalDate())
 				.actionTime(ldt.toLocalTime())
+				.actionTimestamp(System.currentTimeMillis())
 				.openInterest(openInterest)
 				.openInterestDelta(deltaInterest)
 				.volume(volume)

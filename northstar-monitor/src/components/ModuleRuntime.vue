@@ -681,6 +681,8 @@ export default {
     updateChart() {
       if (this.contractNameOfChart && this.chart) {
         this.chart.clearData()
+        const contract = this.moduleBindedContracts.find(c => c.name === this.contractNameOfChart) || this.moduleBindedContracts[0]
+        this.chart.setPriceVolumePrecision(contract.precision, 0)
         this.chart.applyNewData(this.barDataMap[this.contractNameOfChart])
       }
     },
@@ -701,7 +703,8 @@ export default {
     },
     renderIndicator(indicator) {
       const colorIndex = Object.keys(this.indicatorMap).indexOf(indicator.name)
-      this.chart.addTechnicalIndicatorTemplate(simpleVal(indicator, colorIndex))
+      const contract = this.moduleBindedContracts.find(c => c.name === this.contractNameOfChart) || this.moduleBindedContracts[0]
+      this.chart.addTechnicalIndicatorTemplate(simpleVal(indicator, colorIndex, contract.precision))
       this.chart.createTechnicalIndicator('VAL_' + indicator.name, true, {
         id: indicator.paneId
       })
