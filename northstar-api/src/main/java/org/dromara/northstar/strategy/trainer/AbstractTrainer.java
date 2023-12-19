@@ -70,6 +70,7 @@ abstract class AbstractTrainer extends AbstractTester implements RLAgentTraining
 					.channelType(ChannelType.PLAYBACK)
 					.unifiedSymbol(c.unifiedSymbol())
 					.value(c.contractId())
+					.precision(c.pricePrecision())
 					.build())
 				.toList();
 	}

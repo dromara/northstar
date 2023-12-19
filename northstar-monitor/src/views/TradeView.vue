@@ -99,7 +99,7 @@
       <div class="ns-trade__trade-btn-wrap">
         <div class="ns-trade-button">
           <NsButton
-            :price="`${bkPrice || 0}`"
+            :price="bkPrice || 0"
             :color="'rgba(196, 68, 66, 1)'"
             :label="'买开'"
             @click.native="buyOpen"
@@ -107,7 +107,7 @@
         </div>
         <div class="ns-trade-button">
           <NsButton
-            :price="`${skPrice || 0}`"
+            :price="skPrice || 0"
             :color="'rgba(64, 158, 95, 1)'"
             :label="'卖开'"
             @click.native="sellOpen"

@@ -49,6 +49,7 @@ public class ContractController {
 						.unifiedSymbol(c.contract().unifiedSymbol())
 						.channelType(c.channelType())
 						.value(c.identifier().value())
+						.precision(c.contract().pricePrecision())
 						.build())
 				.toList(); 
 		return new ResultBean<>(filterAndSort(list, query));
@@ -72,6 +73,7 @@ public class ContractController {
 							.unifiedSymbol(c.contract().unifiedSymbol())
 							.channelType(c.channelType())
 							.value(c.identifier().value())
+							.precision(c.contract().pricePrecision())
 							.build())
 					.toList());
 			}
@@ -81,6 +83,7 @@ public class ContractController {
 								.name(c.name())
 								.unifiedSymbol(c.contract().unifiedSymbol())
 								.value(c.identifier().value())
+								.precision(c.contract().pricePrecision())
 								.build())
 						.toList());
 			}

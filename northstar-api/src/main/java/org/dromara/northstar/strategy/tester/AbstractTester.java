@@ -109,6 +109,7 @@ public abstract class AbstractTester implements ModuleTesterContext{
 					.channelType(ChannelType.PLAYBACK)
 					.unifiedSymbol(cf.unifiedSymbol())
 					.value(c.identifier().value())
+					.precision(cf.pricePrecision())
 					.build();
 			MarketGateway mktGateway = createPlaybackGateway(csi, this);
 			TradeGateway tdGateway = createSimGateway(mktGateway);

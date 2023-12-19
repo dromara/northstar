@@ -105,6 +105,7 @@ public class SimContract implements Instrument{
 				.gatewayId(Optional.ofNullable(gatewayId).orElse(""))
 				.channelType(ChannelType.SIM)
 				.contractDefinition(contractDef)
+				.pricePrecision((int)Math.log10(1 / priceTick))
 				.build();
 	}
 
