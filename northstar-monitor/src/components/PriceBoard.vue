@@ -143,7 +143,6 @@ export default {
   height: 100%;
   background-color: rgba(20, 20, 20, 0.4);
   color: lightgray;
-  padding: 0 10px;
 }
 .ns-price-board__row {
   display: flex;

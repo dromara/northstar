@@ -69,7 +69,7 @@ export default {
     return {
       curPage: '0',
       mailSettingFormVisible: false,
-      version: ''
+      version: '0.0.1'
     }
   },
   beforeRouteEnter(to, from, next){
@@ -86,7 +86,12 @@ export default {
     next()
   },
   created(){
-    fetch('/version').then(result => result.text()).then(v => {
+    fetch('/version').then(result => {
+      if(result.status === 200){
+        return result.text()
+      }
+      return Promise.reject()
+    }).then(v => {
       this.version = v.replace(/"/g,"")
     })
   },
