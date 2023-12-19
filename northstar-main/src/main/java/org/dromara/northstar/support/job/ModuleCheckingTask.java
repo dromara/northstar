@@ -26,6 +26,7 @@ import org.dromara.northstar.strategy.IMessageSender;
 import org.dromara.northstar.strategy.IModule;
 import org.dromara.northstar.support.utils.ExceptionLogChecker;
 import org.dromara.northstar.support.utils.PositionChecker;
+import org.slf4j.ILoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -149,7 +150,8 @@ public class ModuleCheckingTask implements InitializingBean {
 	public void checkModuleException() throws IOException {
 		log.debug("检查当天的模组日志中是否存在异常日志");
 		for(IModule module : moduleMgr.allModules()) {
-			Logger logger = (Logger) module.getModuleContext().getLogger();
+			ILoggerFactory factory = module.getModuleContext().getLoggerFactory();
+			Logger logger = (Logger) factory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
 			FileAppender<ILoggingEvent> fileAppender = (FileAppender<ILoggingEvent>) logger.getAppender(module.getName());
 			File logFile = new File(fileAppender.getFile());
 			FileReader fr = new FileReader(logFile);

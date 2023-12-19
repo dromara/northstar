@@ -18,12 +18,11 @@ import org.dromara.northstar.common.model.core.Trade;
 import org.dromara.northstar.common.utils.OrderUtils;
 import org.dromara.northstar.strategy.IModuleContext;
 import org.dromara.northstar.strategy.constant.PriceType;
+import org.slf4j.Logger;
 import org.springframework.util.Assert;
 
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NonNull;
-import lombok.Setter;
 
 
 /**
@@ -34,24 +33,20 @@ import lombok.Setter;
  */
 public class TradeIntent implements TransactionAware, TickDataAware {
 	
-	@Setter
 	private IModuleContext context;
 	/**
 	 * 合约
 	 */
 	@Getter
-	@NonNull
 	private final Contract contract;
 	/**
 	 * 操作
 	 */
 	@Getter
-	@NonNull
 	private final SignalOperation operation;
 	/**
 	 * 价格类型
 	 */
-	@NonNull
 	@Getter
 	private final PriceType priceType;
 	/**
@@ -76,6 +71,8 @@ public class TradeIntent implements TransactionAware, TickDataAware {
 	 * 意图初始价
 	 */
 	private Double initialPrice;
+	
+	private Logger logger;
 	
 	@Builder
 	public TradeIntent(Contract contract, SignalOperation operation, PriceType priceType, double price, int volume, 
@@ -107,25 +104,25 @@ public class TradeIntent implements TransactionAware, TickDataAware {
 		
 		if(Objects.isNull(initialPrice)) {
 			initialPrice = tick.lastPrice();
-			context.getLogger().debug("交易意图初始价位：{}", initialPrice);
+			logger.debug("交易意图初始价位：{}", initialPrice);
 		}
 		if(Objects.nonNull(priceDiffConditionToAbort)) {
 			double priceDiff = Math.abs(tick.lastPrice() - initialPrice);
 			terminated = priceDiffConditionToAbort.test(priceDiff);
 			if(terminated) {
-				context.getLogger().info("{} {} 价差过大中止交易意图，当前价差为{}", tick.actionDay(), tick.actionTime(), priceDiff);
+				logger.info("{} {} 价差过大中止交易意图，当前价差为{}", tick.actionDay(), tick.actionTime(), priceDiff);
 				orderIdRef.ifPresent(context::cancelOrder);
 			}
 		}
 		if(hasTerminated()) {
-			context.getLogger().debug("交易意图已终止");
+			logger.debug("交易意图已终止");
 			return;
 		}
 		if(orderIdRef.isEmpty() && !context.getState().isOrdering()) {
-			context.getLogger().debug("交易意图自动发单");
+			logger.debug("交易意图自动发单");
 			orderIdRef = context.submitOrderReq(contract, operation, priceType, restVol(), price);
 		} else if (orderIdRef.isPresent() && context.isOrderWaitTimeout(orderIdRef.get(), timeout) && tick.actionTimestamp() - lastCancelReqTime > 3000) {
-			context.getLogger().debug("交易意图自动撤单");
+			logger.debug("交易意图自动撤单");
 			context.cancelOrder(orderIdRef.get());
 			lastCancelReqTime = tick.actionTimestamp();
 		}
@@ -157,6 +154,11 @@ public class TradeIntent implements TransactionAware, TickDataAware {
 
 	public synchronized boolean hasTerminated() {
 		return terminated || accVol >= volume;
+	}
+	
+	public void setContext(IModuleContext ctx) {
+		this.context = ctx;
+		this.logger = ctx.getLogger(getClass());
 	}
 	
 	@Override

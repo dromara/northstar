@@ -4,6 +4,7 @@ import org.dromara.northstar.common.constant.ModuleState;
 import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.indicator.Indicator;
 import org.dromara.northstar.strategy.model.TradeIntent;
+import org.slf4j.ILoggerFactory;
 import org.slf4j.Logger;
 
 public interface IModuleStrategyContext {
@@ -57,7 +58,12 @@ public interface IModuleStrategyContext {
 	 * 获取日志对象
 	 * @return
 	 */
-	Logger getLogger();
+	Logger getLogger(Class<?> clz);
+	/**
+	 * 获取日志工厂
+	 * @return
+	 */
+	ILoggerFactory getLoggerFactory();
 	/**
 	 * 注册指标
 	 * @param indicator

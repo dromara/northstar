@@ -16,6 +16,7 @@ import org.dromara.northstar.strategy.StrategicComponent;
 import org.dromara.northstar.strategy.TradeStrategy;
 import org.dromara.northstar.strategy.constant.PriceType;
 import org.dromara.northstar.strategy.model.TradeIntent;
+import org.slf4j.Logger;
 
 /**
  * 本示例用于展示一个带指标的策略
@@ -40,14 +41,16 @@ public class IndicatorExampleStrategy extends AbstractStrategy	// 为了简化�
 	private Indicator macdDiff;
 
 	private Indicator macdDea;
-
+	
+	private Logger logger;
+	
 	@Override
 	public void onMergedBar(Bar bar) {
-		log.debug("{} K线数据： 开 [{}], 高 [{}], 低 [{}], 收 [{}]",
+		logger.debug("{} K线数据： 开 [{}], 高 [{}], 低 [{}], 收 [{}]",
 				bar.contract().unifiedSymbol(), bar.openPrice(), bar.highPrice(), bar.lowPrice(), bar.closePrice());
 		// 确保指标已经准备好再开始交易
 		if(!fastLine.isReady() || !slowLine.isReady()) {
-			log.debug("指标未准备就绪");
+			logger.debug("指标未准备就绪");
 			return;
 		}
 		switch (ctx.getState()) {
@@ -61,7 +64,7 @@ public class IndicatorExampleStrategy extends AbstractStrategy	// 为了简化�
 							.volume(1)
 							.timeout(5000)
 							.build());
-					log.info("多开");
+					logger.info("多开");
 				}
 				if(shouldSell()) {
 					ctx.submitOrderReq(TradeIntent.builder()
@@ -71,7 +74,7 @@ public class IndicatorExampleStrategy extends AbstractStrategy	// 为了简化�
 							.volume(1)
 							.timeout(5000)
 							.build());
-					log.info("空开");
+					logger.info("空开");
 				}
 
 			}
@@ -84,7 +87,7 @@ public class IndicatorExampleStrategy extends AbstractStrategy	// 为了简化�
 							.volume(1)
 							.timeout(5000)
 							.build());
-					log.info("平多");
+					logger.info("平多");
 				}
 			}
 			case HOLDING_SHORT -> {
@@ -96,7 +99,7 @@ public class IndicatorExampleStrategy extends AbstractStrategy	// 为了简化�
 							.volume(1)
 							.timeout(5000)
 							.build());
-					log.info("平空");
+					logger.info("平空");
 				}
 			}
 			default -> { /* 其他情况不处理 */}
@@ -105,7 +108,7 @@ public class IndicatorExampleStrategy extends AbstractStrategy	// 为了简化�
 
 	@Override
 	public void onTick(Tick tick) {
-		log.info("时间：{} {} 价格：{} 指标值：{}", tick.actionDay(), tick.actionTime(), tick.lastPrice(), fastLine.value(0));
+		logger.info("时间：{} {} 价格：{} 指标值：{}", tick.actionDay(), tick.actionTime(), tick.lastPrice(), fastLine.value(0));
 	}
 
 	private boolean shouldBuy() {
@@ -128,6 +131,7 @@ public class IndicatorExampleStrategy extends AbstractStrategy	// 为了简化�
 
 	@Override
 	protected void initIndicators() {
+		logger = ctx.getLogger(getClass());
 		Contract c = ctx.getContract(params.indicatorSymbol);
 		// 指标的创建
 		this.fastLine = new EMAIndicator(Configuration.builder()

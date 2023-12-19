@@ -44,7 +44,7 @@ public class BeginnerExampleStrategy implements TradeStrategy{
 	
 	private JSONObject storeObj = new JSONObject(); 	// 可透视状态计算信息
 	
-	private Logger log;
+	private Logger logger;
 	
 	/**
 	 * 定义该策略的参数。该类每个策略必须自己重写一个，类名必须为InitParams，必须继承DynamicParams，必须是个static类。
@@ -77,7 +77,7 @@ public class BeginnerExampleStrategy implements TradeStrategy{
 	@Override
 	public void setContext(IModuleContext context) {
 		ctx = context;
-		log = ctx.getLogger();
+		logger = ctx.getLogger(getClass());
 	}
 	
 	@Override
@@ -95,8 +95,7 @@ public class BeginnerExampleStrategy implements TradeStrategy{
 	
 	@Override
 	public void onTick(Tick tick) {
-		
-		log.debug("TICK触发: C:{} D:{} T:{} P:{} V:{} OI:{} OID:{}", 
+		logger.debug("TICK触发: C:{} D:{} T:{} P:{} V:{} OI:{} OID:{}", 
 				tick.contract().unifiedSymbol(), tick.actionDay(), tick.actionTime(),
 				tick.lastPrice(), tick.volume(), tick.openInterest(), tick.openInterestDelta());
 		long now = tick.actionTimestamp();
@@ -107,7 +106,7 @@ public class BeginnerExampleStrategy implements TradeStrategy{
 		boolean flag = ThreadLocalRandom.current().nextBoolean();
 		if(now > nextActionTime) {
 			nextActionTime = now + params.actionInterval * 1000;
-			log.info("开始交易");
+			logger.info("开始交易");
 			if(ctx.getState().isEmpty()) {
 				SignalOperation op = flag ? SignalOperation.BUY_OPEN : SignalOperation.SELL_OPEN;	// 随机开多或者开空
 				if(ctx.getState() == ModuleState.EMPTY_HEDGE) {
@@ -147,7 +146,7 @@ public class BeginnerExampleStrategy implements TradeStrategy{
 
 	@Override
 	public void onMergedBar(Bar bar) {
-		log.debug("策略每分钟触发");
+		logger.debug("策略每分钟触发");
 	}
 
 	@Override

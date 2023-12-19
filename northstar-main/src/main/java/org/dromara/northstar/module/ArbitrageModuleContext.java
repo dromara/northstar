@@ -28,8 +28,8 @@ import org.dromara.northstar.strategy.IModuleContext;
 import org.dromara.northstar.strategy.TradeStrategy;
 import org.dromara.northstar.strategy.constant.PriceType;
 import org.dromara.northstar.strategy.model.TradeIntent;
-import org.dromara.northstar.support.log.ModuleLoggerFactory;
 import org.dromara.northstar.support.utils.bar.BarMergerRegistry;
+import org.slf4j.Logger;
 
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
@@ -44,11 +44,13 @@ import xyz.redtorch.pb.CoreEnum.TimeConditionEnum;
 public class ArbitrageModuleContext extends ModuleContext implements IModuleContext{
 	
 	private ExecutorService exec = Executors.newFixedThreadPool(2);
+	
+	private final Logger logger;
 
 	public ArbitrageModuleContext(TradeStrategy tradeStrategy, ModuleDescription moduleDescription,
-			ModuleRuntimeDescription moduleRtDescription, IContractManager contractMgr, IModuleRepository moduleRepo,
-			ModuleLoggerFactory loggerFactory, BarMergerRegistry barMergerRegistry) {
-		super(tradeStrategy, moduleDescription, moduleRtDescription, contractMgr, moduleRepo, loggerFactory, barMergerRegistry);
+			ModuleRuntimeDescription moduleRtDescription, IContractManager contractMgr, IModuleRepository moduleRepo, BarMergerRegistry barMergerRegistry) {
+		super(tradeStrategy, moduleDescription, moduleRtDescription, contractMgr, moduleRepo, barMergerRegistry);
+		logger = getLogger(getClass());
 	}
 
 	/**
@@ -57,19 +59,19 @@ public class ArbitrageModuleContext extends ModuleContext implements IModuleCont
 	@Override
 	public void submitOrderReq(TradeIntent tradeIntent) {
 		exec.execute(() -> {
-			getLogger().info("下单交由子线程处理");
+			logger.info("下单交由子线程处理");
 			if(!module.isEnabled()) {
 				if(isReady()) {
-					getLogger().info("策略处于停用状态，忽略委托单");
+					logger.info("策略处于停用状态，忽略委托单");
 				}
 				return;
 			}
 			Tick tick = latestTickMap.get(tradeIntent.getContract());
 			if(Objects.isNull(tick)) {
-				getLogger().warn("没有TICK行情数据时，忽略下单请求");
+				logger.warn("没有TICK行情数据时，忽略下单请求");
 				return;
 			}
-			getLogger().info("收到下单意图：{}", tradeIntent);
+			logger.info("收到下单意图：{}", tradeIntent);
 			tradeIntentMap.put(tradeIntent.getContract(), tradeIntent);
 			tradeIntent.setContext(this);
 			tradeIntent.onTick(tick);	
@@ -83,7 +85,7 @@ public class ArbitrageModuleContext extends ModuleContext implements IModuleCont
 	public Optional<String> submitOrderReq(Contract contract, SignalOperation operation, PriceType priceType, int volume, double price) {
 		if(!module.isEnabled()) {
 			if(isReady()) {
-				getLogger().info("策略处于停用状态，忽略委托单");
+				logger.info("策略处于停用状态，忽略委托单");
 			}
 			return Optional.empty();
 		}
@@ -92,7 +94,7 @@ public class ArbitrageModuleContext extends ModuleContext implements IModuleCont
 		Assert.isTrue(volume > 0, "下单手数应该为正数。当前为" + volume);
 		
 		double orderPrice = priceType.resolvePrice(tick, operation, price);
-		getLogger().info("[{} {}] 策略信号：合约【{}】，操作【{}】，价格【{}】，手数【{}】，类型【{}】", 
+		logger.info("[{} {}] 策略信号：合约【{}】，操作【{}】，价格【{}】，手数【{}】，类型【{}】", 
 				tick.actionDay(), tick.actionTime(),
 				contract.unifiedSymbol(), operation.text(), orderPrice, volume, priceType);
 		
@@ -130,11 +132,11 @@ public class ArbitrageModuleContext extends ModuleContext implements IModuleCont
 				orderReqFilter.doFilter(orderReq);
 			}
 		} catch (Exception e) {
-			getLogger().error("发单失败。原因：{}", e.getMessage());
+			logger.error("发单失败。原因：{}", e.getMessage());
 			tradeIntentMap.remove(orderReq.contract());
 			return Optional.empty();
 		}
-		getLogger().info("发单：{}，{}", orderReq.originOrderId(), LocalDateTime.now());
+		logger.info("发单：{}，{}", orderReq.originOrderId(), LocalDateTime.now());
 		String originOrderId = module.getAccount(contract).submitOrder(orderReq);
 		orderReqMap.put(originOrderId, orderReq);
 		return Optional.of(originOrderId);
@@ -146,10 +148,10 @@ public class ArbitrageModuleContext extends ModuleContext implements IModuleCont
 	@Override
 	public void cancelOrder(String originOrderId) {
 		if(!orderReqMap.containsKey(originOrderId)) {
-			getLogger().debug("找不到订单：{}", originOrderId);
+			logger.debug("找不到订单：{}", originOrderId);
 			return;
 		}
-		getLogger().info("撤单：{}", originOrderId);
+		logger.info("撤单：{}", originOrderId);
 		Contract contract = orderReqMap.get(originOrderId).contract();
 		module.getAccount(contract).cancelOrder(originOrderId);
 	}

@@ -32,7 +32,7 @@ public abstract class AbstractStrategy implements TradeStrategy{
 	// 处理器，contract -> handler
 	protected Map<Contract, BarHandler> barHandlerMap = new HashMap<>();
 	// 日志对象
-	protected Logger log;
+	private Logger logger;
 	// 预热K线数据量（该预热数据量与模组的设置并不相等，该属性用于策略内部判断接收了多少数据，而模组的预热设置用于外部投喂了多少数据）
 	protected int numOfBarsToPrepare;
 	
@@ -46,19 +46,20 @@ public abstract class AbstractStrategy implements TradeStrategy{
 	@Override
 	public void onTrade(Trade trade) {
 		// 如果策略不关心成交反馈，可以不重写
-		if(log.isInfoEnabled()) {
-			log.info("模组成交 [{} {} {} 操作：{}{} {}手 {}]", trade.contract().unifiedSymbol(),
+		if(logger.isInfoEnabled()) {
+			logger.info("模组成交 [{} {} {} 操作：{}{} {}手 {}]", trade.contract().unifiedSymbol(),
 					trade.tradeDate(), trade.tradeTime(), FieldUtils.chn(trade.direction()), FieldUtils.chn(trade.offsetFlag()), 
 					trade.volume(), trade.price());
-			log.info("当前模组净持仓：[{}]", ctx.getModuleAccount().getNonclosedNetPosition(trade.contract()));
-			log.info("当前模组状态：{}", ctx.getState());
+			logger.info("当前模组净持仓：[{}]", ctx.getModuleAccount().getNonclosedNetPosition(trade.contract()));
+			logger.info("当前模组状态：{}", ctx.getState());
 		}
 	}
 
+	/* 该方法不应该被重写，但可以扩展 */
 	@Override
 	public void setContext(IModuleContext context) {
 		ctx = context;
-		log = ctx.getLogger();
+		logger = ctx.getLogger(getClass());
 		initIndicators();
 		initMultiContractHandler();
 	}
@@ -66,7 +67,7 @@ public abstract class AbstractStrategy implements TradeStrategy{
 	public IModuleContext getContext() {
 		return (IModuleContext) ctx;
 	}
-
+	
 	/**
 	 * 指标初始化
 	 */

@@ -40,8 +40,8 @@ public class ServiceConfig {
     }
 
     @Bean
-    LogService logService(LoggingSystem loggingSystem) {
-        return new LogService(loggingSystem);
+    LogService logService(LoggingSystem loggingSystem, ModuleManager moduleMgr) {
+        return new LogService(loggingSystem, moduleMgr);
     }
 	
 }
