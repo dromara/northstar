@@ -19,7 +19,7 @@ public class ModuleLoggerFactory implements ILoggerFactory {
 	private PatternLayoutEncoder encoder = new PatternLayoutEncoder();
 
 	public ModuleLoggerFactory(String moduleName) {
-		encoder.setPattern("%d - %-level - [%t][" + moduleName + "][%logger{10}] : %m%n");
+		encoder.setPattern("%d - %level - [%t][" + moduleName + "][%logger{10}] : %m%n");
 		encoder.setCharset(StandardCharsets.UTF_8);
 		encoder.setContext(loggerContext);
 		encoder.start();

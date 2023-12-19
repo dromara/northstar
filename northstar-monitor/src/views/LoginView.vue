@@ -37,11 +37,16 @@ export default {
       domain: '',
       showHost: false,
       isEE: false,
-      version: ''
+      version: '0.0.1'
     }
   },
   created(){
-    fetch('/version').then(result => result.text()).then(v => {
+    fetch('/version').then(result => {
+      if(result.status === 200){
+        return result.text()
+      }
+      return Promise.reject()
+    }).then(v => {
       this.version = v.replace(/"/g,"")
     })
   },
