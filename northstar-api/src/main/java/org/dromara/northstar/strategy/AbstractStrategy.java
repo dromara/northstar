@@ -68,6 +68,10 @@ public abstract class AbstractStrategy implements TradeStrategy{
 		return (IModuleContext) ctx;
 	}
 	
+	public boolean isEnabled() {
+		return getContext().isEnabled();
+	}
+	
 	/**
 	 * 指标初始化
 	 */
