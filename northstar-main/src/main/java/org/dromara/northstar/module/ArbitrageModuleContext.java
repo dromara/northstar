@@ -3,19 +3,16 @@ package org.dromara.northstar.module;
 import java.time.LocalDateTime;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
 
 import org.dromara.northstar.common.constant.SignalOperation;
 import org.dromara.northstar.common.model.ModuleDescription;
 import org.dromara.northstar.common.model.ModuleRuntimeDescription;
 import org.dromara.northstar.common.model.Tuple;
-import org.dromara.northstar.common.model.core.Bar;
 import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.common.model.core.Position;
 import org.dromara.northstar.common.model.core.SubmitOrderReq;
@@ -167,61 +164,63 @@ public class ArbitrageModuleContext extends ModuleContext implements IModuleCont
 				Contract nearMonth = c1.lastTradeDate().isBefore(c2.lastTradeDate()) ? c1 : c2;
 				Contract farMonth = c1 == nearMonth ? c2 : c1;
 				String combName = String.format("%s-%s", nearMonth.name(), farMonth.name());
-				Map<Long, Bar> timeBarMap = barBufQMap.get(nearMonth)
-						.stream()
-						.collect(Collectors.toMap(Bar::actionTimestamp, bar -> bar));
 				JSONArray combBarArr = new JSONArray();
-				barBufQMap.get(farMonth).forEach(bar -> {
-					Bar nearBar = timeBarMap.get(bar.actionTimestamp());
-					if(Objects.nonNull(nearBar)) {
-						combBarArr.add(compute(nearBar, bar));
+				JSONArray nearData = mrd.getDataMap().get(nearMonth.name());
+				JSONArray farData = mrd.getDataMap().get(farMonth.name());
+				if(nearData.size() == farData.size()) {
+					for(int i = 0; i < nearData.size(); i++) {
+						JSONObject near = nearData.getJSONObject(i);
+						JSONObject far = farData.getJSONObject(i);
+						combBarArr.add(compute(near, far));
 					}
-				});
-				mrd.getDataMap().put(combName, combBarArr);
+					mrd.getDataMap().put(combName, combBarArr);
+				} else {
+					logger.warn("近远月数据长度不一致，无法生成价差合约：{} {}", nearData.size(), farData.size());
+				}
 			} else if (contractMap.size() == 3) {
 				List<Contract> contracts = contractMap.values().stream()
 						.sorted((a,b) -> a.unifiedSymbol().compareTo(b.unifiedSymbol()))
 						.toList();
-				Contract near = contracts.get(0);
-				Contract mid = contracts.get(1);
-				Contract far = contracts.get(2);
-				Map<Long, Bar> midTimeBarMap = barBufQMap.get(mid)
-						.stream()
-						.collect(Collectors.toMap(Bar::actionTimestamp, bar -> bar));
-				Map<Long, Bar> farTimeBarMap = barBufQMap.get(far)
-						.stream()
-						.collect(Collectors.toMap(Bar::actionTimestamp, bar -> bar));
+				Contract nearMonth = contracts.get(0);
+				Contract midMonth = contracts.get(1);
+				Contract farMonth = contracts.get(2);
 				JSONArray combBarArr = new JSONArray();
-				barBufQMap.get(near).forEach(nearBar -> {
-					Bar midBar = midTimeBarMap.get(nearBar.actionTimestamp());
-					Bar farBar = farTimeBarMap.get(nearBar.actionTimestamp());
-					if(Objects.nonNull(midBar) && Objects.nonNull(farBar)) {
-						combBarArr.add(compute(nearBar, midBar, farBar));
+				JSONArray nearData = mrd.getDataMap().get(nearMonth.name());
+				JSONArray midData = mrd.getDataMap().get(midMonth.name());
+				JSONArray farData = mrd.getDataMap().get(farMonth.name());
+				if(nearData.size() == midData.size() && midData.size() == farData.size()) {
+					for(int i = 0; i < nearData.size(); i++) {
+						JSONObject near = nearData.getJSONObject(i);
+						JSONObject mid = midData.getJSONObject(i);
+						JSONObject far = farData.getJSONObject(i);
+						combBarArr.add(compute(near, mid, far));
 					}
-				});
-				mrd.getDataMap().put("蝶式价差率", combBarArr);
+					mrd.getDataMap().put("蝶式价差率", combBarArr);
+				} else {
+					logger.warn("近中远月数据长度不一致，无法生成价差合约：{} {} {}", nearData.size(), midData.size(), farData.size());
+				}
 			}
 		}
 		return mrd;
 	}
 	
-	private JSONObject compute(Bar bar1, Bar bar2) {
+	private JSONObject compute(JSONObject bar1, JSONObject bar2) {
 		JSONObject json = new JSONObject();
-		json.put("open", (bar1.openPrice() - bar2.openPrice()) / bar2.openPrice() * 100);
-		json.put("low", (bar1.lowPrice() - bar2.lowPrice()) / bar2.lowPrice() * 100);
-		json.put("high", (bar1.highPrice() - bar2.highPrice()) / bar2.highPrice() * 100);
-		json.put("close", (bar1.closePrice() - bar2.closePrice()) / bar2.closePrice() * 100);
-		json.put("timestamp", bar1.actionTimestamp());
+		json.put("open", (bar1.getDoubleValue("open") - bar2.getDoubleValue("open")) / bar2.getDoubleValue("open") * 100);
+		json.put("low", (bar1.getDoubleValue("low") - bar2.getDoubleValue("low")) / bar2.getDoubleValue("low") * 100);
+		json.put("high", (bar1.getDoubleValue("high") - bar2.getDoubleValue("high")) / bar2.getDoubleValue("high") * 100);
+		json.put("close", (bar1.getDoubleValue("close") - bar2.getDoubleValue("close")) / bar2.getDoubleValue("close") * 100);
+		json.put("timestamp", bar1.getLongValue("timestamp"));
 		return json;
 	}
 	
-	private JSONObject compute(Bar near, Bar mid, Bar far) {
+	private JSONObject compute(JSONObject near, JSONObject mid, JSONObject far) {
 		JSONObject json = new JSONObject();
-		json.put("open", (near.openPrice() / mid.openPrice() - mid.openPrice() / far.openPrice()) * 100);
-		json.put("low", (near.lowPrice() / mid.lowPrice() - mid.lowPrice() / far.lowPrice()) * 100);
-		json.put("high", (near.highPrice() / mid.highPrice() - mid.highPrice() / far.highPrice()) * 100);
-		json.put("close", (near.closePrice() / mid.closePrice() - mid.closePrice() / far.closePrice()) * 100);
-		json.put("timestamp", near.actionTimestamp());
+		json.put("open", (near.getDoubleValue("open") / mid.getDoubleValue("open") - mid.getDoubleValue("open") / far.getDoubleValue("open")) * 100);
+		json.put("low", (near.getDoubleValue("low") / mid.getDoubleValue("low") - mid.getDoubleValue("low") / far.getDoubleValue("low")) * 100);
+		json.put("high", (near.getDoubleValue("high") / mid.getDoubleValue("high") - mid.getDoubleValue("high") / far.getDoubleValue("high")) * 100);
+		json.put("close", (near.getDoubleValue("close") / mid.getDoubleValue("close") - mid.getDoubleValue("close") / far.getDoubleValue("close")) * 100);
+		json.put("timestamp", near.getLongValue("timestamp"));
 		return json;
 	}
 }

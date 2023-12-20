@@ -6,11 +6,8 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -20,7 +17,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
@@ -42,7 +38,6 @@ import org.dromara.northstar.common.model.ModuleDealRecord;
 import org.dromara.northstar.common.model.ModuleDescription;
 import org.dromara.northstar.common.model.ModulePositionDescription;
 import org.dromara.northstar.common.model.ModuleRuntimeDescription;
-import org.dromara.northstar.common.model.TimeSeriesValue;
 import org.dromara.northstar.common.model.Tuple;
 import org.dromara.northstar.common.model.core.Bar;
 import org.dromara.northstar.common.model.core.Contract;
@@ -116,12 +111,9 @@ public class ModuleContext implements IModuleContext{
 	
 	protected ConcurrentMap<Contract, Tick> latestTickMap = new ConcurrentHashMap<>();
 	
-	protected ConcurrentMap<Contract, Queue<Bar>> barBufQMap = new ConcurrentHashMap<>();
+	protected ConcurrentMap<Contract, Queue<JSONObject>> dataFrameQMap = new ConcurrentHashMap<>();
 	
 	protected ConcurrentMap<Contract, Long> barFilterMap = new ConcurrentHashMap<>();
-	
-	/* indicator -> values */
-	protected ConcurrentMap<Indicator, Queue<TimeSeriesValue>> indicatorValBufQMap = new ConcurrentHashMap<>(); 
 	
 	/* contract -> indicatorName -> indicator */
 	protected Table<Contract, String, Indicator> indicatorNameTbl = HashBasedTable.create();
@@ -159,7 +151,7 @@ public class ModuleContext implements IModuleContext{
 					IContract contract = contractMgr.getContract(Identifier.of(csi.getValue()));
 					Contract cf = contract.contract();
 					contractMap.put(cf.unifiedSymbol(), cf);
-					barBufQMap.put(cf, new ConcurrentLinkedQueue<>());
+					dataFrameQMap.put(cf, new ConcurrentLinkedQueue<>());
 					registry.addListener(cf, moduleDescription.getNumOfMinPerBar(), PeriodUnit.MINUTE, tradeStrategy);
 					registry.addListener(cf, moduleDescription.getNumOfMinPerBar(), PeriodUnit.MINUTE, this);
 				}
@@ -252,7 +244,7 @@ public class ModuleContext implements IModuleContext{
 			checkIndicator(in);
 		}
 		Configuration cfg = indicator.getConfiguration();
-		String indicatorName = String.format("%s_%d%s", cfg.indicatorName(), cfg.numOfUnits(), cfg.period().symbol());
+		String indicatorName = cfg.indicatorID();
 		logger.trace("检查指标配置信息：{}", indicatorName);
 		Assert.isTrue(cfg.numOfUnits() > 0, "周期数必须大于0，当前为：" + cfg.numOfUnits());
 		Assert.isTrue(cfg.cacheLength() > 0, "指标回溯长度必须大于0，当前为：" + cfg.cacheLength());
@@ -260,7 +252,6 @@ public class ModuleContext implements IModuleContext{
 			Assert.isTrue(!indicatorNameTbl.contains(cfg.contract(), indicatorName) || indicator.equals(indicatorNameTbl.get(cfg.contract(), indicatorName)), "指标 [{} -> {}] 已存在。不能重名", cfg.contract().unifiedSymbol(), indicatorName);
 			indicatorNameTbl.put(cfg.contract(), indicatorName, indicator);
 		}
-		indicatorValBufQMap.put(indicator, new ConcurrentLinkedDeque<>());
 	}
 	
 	@Override
@@ -301,35 +292,31 @@ public class ModuleContext implements IModuleContext{
 	@Override
 	public void onMergedBar(Bar bar) {
 		logger.debug("合并Bar信息: {} {} {} {}，最新价: {}", bar.contract().unifiedSymbol(), bar.actionDay(), bar.actionTime(), bar.actionTimestamp(), bar.closePrice());
+		JSONObject json = assignBar(bar);
 		try {			
-			indicatorHelperSet.stream().map(IndicatorValueUpdateHelper::getIndicator).forEach(indicator -> visualize(indicator, bar));
+			indicatorHelperSet.stream().map(IndicatorValueUpdateHelper::getIndicator).forEach(indicator -> visualize(indicator, bar, json));
 		} catch(Exception e) {
 			logger.error(e.getMessage(), e);
 		}
-		if(barBufQMap.get(bar.contract()).size() >= bufSize.intValue()) {
-			barBufQMap.get(bar.contract()).poll();
+		if(dataFrameQMap.get(bar.contract()).size() >= bufSize.intValue()) {
+			dataFrameQMap.get(bar.contract()).poll();
 		}
-		barBufQMap.get(bar.contract()).offer(bar);
+		dataFrameQMap.get(bar.contract()).offer(json);
 		if(isEnabled()) {
 			moduleRepo.saveRuntime(getRuntimeDescription(false));
 		}
 	}
 	
-	private void visualize(Indicator indicator, Bar bar) {
+	private void visualize(Indicator indicator, Bar bar, JSONObject json) {
 		for(Indicator in : indicator.dependencies()) {
-			visualize(in, bar);
+			visualize(in, bar, json);
 		}
 		if(!indicator.getConfiguration().contract().equals(bar.contract())) {
 			return;
 		}
-		ConcurrentLinkedDeque<TimeSeriesValue> list = (ConcurrentLinkedDeque<TimeSeriesValue>) indicatorValBufQMap.get(indicator);
-		if(list.size() >= bufSize.intValue()) {
-			list.poll();
-		}
 		if(indicator.isReady() && Boolean.TRUE.equals(indicator.getConfiguration().visible()) && indicator.get(0).timestamp() == bar.actionTimestamp()
-				&& (list.isEmpty() || list.peekLast().getTimestamp() != bar.actionTimestamp())
 				&& (isEndOfTheTradingDay(bar) || indicator.getConfiguration().ifPlotPerBar() || !indicator.get(0).unstable())) {
-			list.offer(new TimeSeriesValue(indicator.get(0).value(), bar.actionTimestamp()));
+			json.put(indicator.getConfiguration().indicatorID(), indicator.get(0).value());
 		}
 	}
 	
@@ -447,40 +434,9 @@ public class ModuleContext implements IModuleContext{
 			accRtDescription.setAnnualizedRateOfReturn(annualizedRateOfReturn);
 			
 			Map<String, List<String>> indicatorMap = new HashMap<>();
-			Map<Contract, LinkedHashMap<Long, JSONObject>> symbolTimeObject = new HashMap<>();
-			barBufQMap.entrySet().forEach(e -> 
-				e.getValue().forEach(bar -> {
-					symbolTimeObject.putIfAbsent(bar.contract(), new LinkedHashMap<>());
-					symbolTimeObject.get(bar.contract()).put(bar.actionTimestamp(), assignBar(bar));
-				})
-			);
-			
-			indicatorValBufQMap.entrySet().forEach(e -> {
-				Indicator in = e.getKey();
-				Configuration cfg = in.getConfiguration();
-				String indicatorName = String.format("%s_%d%s", cfg.indicatorName(), cfg.numOfUnits(), cfg.period().symbol());
-				indicatorMap.putIfAbsent(cfg.contract().name(), new ArrayList<>());
-				if(Boolean.TRUE.equals(cfg.visible())) {
-					indicatorMap.get(cfg.contract().name()).add(indicatorName);
-				}
-				Collections.sort(indicatorMap.get(cfg.contract().name()));
-				
-				e.getValue().forEach(tv -> {
-					if(!symbolTimeObject.containsKey(cfg.contract())
-							|| !symbolTimeObject.get(cfg.contract()).containsKey(tv.getTimestamp())) {
-						return;
-					}
-					symbolTimeObject.get(cfg.contract()).get(tv.getTimestamp()).put(indicatorName, tv.getValue());
-				});
-			});
-			Map<String, JSONArray> dataMap = barBufQMap.entrySet().stream().collect(Collectors.toMap(
-					e -> e.getKey().name(),
-					e -> {
-						if(!symbolTimeObject.containsKey(e.getKey())) 							
-							return new JSONArray();
-						return new JSONArray(symbolTimeObject.get(e.getKey()).values().stream().toList());
-					})
-			);
+			Map<String, JSONArray> dataMap = dataFrameQMap.entrySet()
+					.stream()
+					.collect(Collectors.toMap(e -> e.getKey().name(), e -> new JSONArray(e.getValue().stream().toList())));
 			
 			mad.setIndicatorMap(indicatorMap);
 			mad.setDataMap(dataMap);
