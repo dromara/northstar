@@ -6,9 +6,11 @@ import java.util.function.Predicate;
 import org.dromara.northstar.common.constant.SignalOperation;
 import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.common.model.core.Tick;
-import org.dromara.northstar.strategy.IModuleContext;
+import org.dromara.northstar.strategy.IModuleStrategyContext;
 import org.dromara.northstar.strategy.constant.PriceType;
 import org.dromara.northstar.strategy.model.TradeIntent;
+import org.slf4j.Logger;
+import org.springframework.util.Assert;
 
 import lombok.Builder;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
@@ -18,15 +20,26 @@ import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
  * 交易助手，简化开平仓代码
  * @auth KevinHuangwl
  */
-@Builder
 public class TradeHelper {
 
-	private IModuleContext context;
+	private final IModuleStrategyContext context;
+	private final Contract tradeContract;
+	private final long defaultTimeout;
+	private final Logger logger;
+	@Builder
+	public TradeHelper(IModuleStrategyContext context, Contract tradeContract) {
+		this(context, tradeContract, 5000);
+	}
 	
-	private Contract tradeContract;
-	
-	@Builder.Default
-	private long timeout = 5000;
+	@Builder
+	public TradeHelper(IModuleStrategyContext context, Contract tradeContract, long defaultTimeout) {
+		Assert.notNull(tradeContract, "交易合约不能为空");
+		Assert.notNull(context, "模组上下文不能为空");
+		this.context = context;
+		this.tradeContract = tradeContract;
+		this.defaultTimeout = defaultTimeout;
+		this.logger = context.getLogger(getClass());
+	}
 	
 	public int getCloseVolume(DirectionEnum holdingDirection) {
 		PositionDirectionEnum posDir = switch (holdingDirection) {
@@ -61,13 +74,15 @@ public class TradeHelper {
 	 * @param priceDiffConditionToAbort
 	 */
 	public void doBuyOpen(double price, int vol, long timeout, Predicate<Double> priceDiffConditionToAbort) {
+		logger.info("限价买开");
 		doAction(SignalOperation.BUY_OPEN, price, vol, timeout, priceDiffConditionToAbort);
 	}
 	/**
-	 * 买开
+	 * 对手价买开
 	 * @param vol
 	 */
 	public void doBuyOpen(int vol) {
+		logger.info("对手价买开");
 		doAction(SignalOperation.BUY_OPEN, vol);
 	}
 	/**
@@ -78,13 +93,15 @@ public class TradeHelper {
 	 * @param priceDiffConditionToAbort
 	 */
 	public void doSellOpen(double price, int vol, long timeout, Predicate<Double> priceDiffConditionToAbort) {
+		logger.info("限价卖开");
 		doAction(SignalOperation.SELL_OPEN, price, vol, timeout, priceDiffConditionToAbort);
 	}
 	/**
-	 * 卖开
+	 * 对手价卖开
 	 * @param vol
 	 */
 	public void doSellOpen(int vol) {
+		logger.info("对手价卖开");
 		doAction(SignalOperation.SELL_OPEN, vol);
 	}
 	/**
@@ -95,13 +112,15 @@ public class TradeHelper {
 	 * @param priceDiffConditionToAbort
 	 */
 	public void doBuyClose(double price, int vol, long timeout, Predicate<Double> priceDiffConditionToAbort) {
+		logger.info("限价买平");
 		doAction(SignalOperation.BUY_CLOSE, price, vol, timeout, priceDiffConditionToAbort);
 	}
 	/**
-	 * 买平
+	 * 对手价买平
 	 * @param vol
 	 */
 	public void doBuyClose(int vol) {
+		logger.info("对手价买平");
 		doAction(SignalOperation.BUY_CLOSE, vol);
 	}
 	/**
@@ -112,13 +131,15 @@ public class TradeHelper {
 	 * @param priceDiffConditionToAbort
 	 */
 	public void doSellClose(double price, int vol, long timeout, Predicate<Double> priceDiffConditionToAbort) {
+		logger.info("限价卖平");
 		doAction(SignalOperation.SELL_CLOSE, price, vol, timeout, priceDiffConditionToAbort);
 	}
 	/**
-	 * 卖平
+	 * 对手价卖平
 	 * @param vol
 	 */
 	public void doSellClose(int vol) {
+		logger.info("对手价卖平");
 		doAction(SignalOperation.SELL_CLOSE, vol);
 	}
 	
@@ -139,7 +160,7 @@ public class TradeHelper {
 				.contract(tradeContract)
 				.operation(operation)
 				.priceType(PriceType.OPP_PRICE)
-				.timeout(timeout)
+				.timeout(defaultTimeout)
 				.volume(vol)
 				.build());
 	}

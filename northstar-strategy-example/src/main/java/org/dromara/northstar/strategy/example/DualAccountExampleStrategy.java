@@ -19,6 +19,10 @@ import org.dromara.northstar.strategy.constant.PriceType;
 import org.dromara.northstar.strategy.model.TradeIntent;
 import org.slf4j.Logger;
 
+/**
+ * ## 风险提示：该策略仅作技术分享，据此交易，风险自担 ##
+ * @auth KevinHuangwl
+ */
 @StrategicComponent(DualAccountExampleStrategy.NAME)		// 该注解是用于给策略命名用的，所有的策略都要带上这个注解
 public class DualAccountExampleStrategy extends AbstractStrategy implements TradeStrategy {
 

@@ -1,19 +1,17 @@
 package org.dromara.northstar.strategy.example;
 
 import org.dromara.northstar.common.constant.FieldType;
-import org.dromara.northstar.common.constant.SignalOperation;
 import org.dromara.northstar.common.model.DynamicParams;
 import org.dromara.northstar.common.model.Setting;
 import org.dromara.northstar.common.model.core.Bar;
 import org.dromara.northstar.common.model.core.Contract;
+import org.dromara.northstar.common.utils.TradeHelper;
 import org.dromara.northstar.indicator.Indicator;
 import org.dromara.northstar.indicator.model.Configuration;
 import org.dromara.northstar.indicator.trend.MAIndicator;
 import org.dromara.northstar.strategy.AbstractStrategy;
 import org.dromara.northstar.strategy.StrategicComponent;
 import org.dromara.northstar.strategy.TradeStrategy;
-import org.dromara.northstar.strategy.constant.PriceType;
-import org.dromara.northstar.strategy.model.TradeIntent;
 import org.slf4j.Logger;
 
 /**
@@ -37,7 +35,7 @@ public class MultiPeriodExampleStrategy extends AbstractStrategy	// 为了简化
 	private Indicator slowLine1;	// 主周期慢线
 	private Indicator fastLine2;	// 参考周期快线
 	private Indicator slowLine2;	// 参考周期慢线 
-	
+	private TradeHelper helper;
 	private Logger logger;
 	
 	@Override
@@ -54,45 +52,21 @@ public class MultiPeriodExampleStrategy extends AbstractStrategy	// 为了简化
 			case EMPTY -> {
 				// 快线在慢线之上开多，快线在慢线之下开空
 				if(shouldBuy()) {					
-					ctx.submitOrderReq(TradeIntent.builder()
-							.contract(bar.contract())
-							.operation(SignalOperation.BUY_OPEN)
-							.priceType(PriceType.ANY_PRICE)
-							.volume(1)
-							.timeout(300000)
-							.build());
+					helper.doBuyOpen(1);
 				}
 				if(shouldSell()) {
-					ctx.submitOrderReq(TradeIntent.builder()
-							.contract(bar.contract())
-							.operation(SignalOperation.SELL_OPEN)
-							.priceType(PriceType.ANY_PRICE)
-							.volume(1)
-							.timeout(300000)
-							.build());
+					helper.doSellOpen(1);
 				}
 					
 			}
 			case HOLDING_LONG -> {
 				if(fastLine1.value(0) < slowLine1.value(0)) {
-					ctx.submitOrderReq(TradeIntent.builder()
-							.contract(bar.contract())
-							.operation(SignalOperation.SELL_CLOSE)
-							.priceType(PriceType.ANY_PRICE)
-							.volume(1)
-							.timeout(300000)
-							.build());
+					helper.doSellClose(1);
 				}
 			}
 			case HOLDING_SHORT -> {
 				if(fastLine1.value(0) > slowLine1.value(0)) {
-					ctx.submitOrderReq(TradeIntent.builder()
-							.contract(bar.contract())
-							.operation(SignalOperation.BUY_CLOSE)
-							.priceType(PriceType.ANY_PRICE)
-							.volume(1)
-							.timeout(300000)
-							.build());
+					helper.doBuyClose(1);
 				}
 			}
 			default -> { /* 其他情况不处理 */}
@@ -139,6 +113,8 @@ public class MultiPeriodExampleStrategy extends AbstractStrategy	// 为了简化
 		ctx.registerIndicator(fastLine2);
 		ctx.registerIndicator(slowLine1);
 		ctx.registerIndicator(slowLine2);
+		
+		helper = TradeHelper.builder().context(getContext()).tradeContract(c).build();
 	}
 	
 	@Override
