@@ -72,6 +72,7 @@ public class IndexContract implements IContract, TickDataAware{
 				.fullName(fullName)
 				.longMarginRatio(proto.longMarginRatio())
 				.shortMarginRatio(proto.shortMarginRatio())
+				.tradable(false)
 				.build();
 	}
 	
