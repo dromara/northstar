@@ -139,6 +139,7 @@ public class ModuleService implements IModuleService, PostLoadAware {
 	 */
 	@Override
 	public ModuleDescription createModule(ModuleDescription md) throws Exception {
+		Assert.isFalse(moduleMgr.contains(Identifier.of(md.getModuleName())), String.format("模组名[%s]已经存在，无法新建模组", md.getModuleName()));
 		log.info("增加模组 [{}]", md.getModuleName());
 		ModuleAccountRuntimeDescription mard = ModuleAccountRuntimeDescription.builder()
 				.initBalance(md.getInitBalance())
