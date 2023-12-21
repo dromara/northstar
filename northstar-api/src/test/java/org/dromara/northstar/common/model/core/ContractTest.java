@@ -1,5 +1,6 @@
 package org.dromara.northstar.common.model.core;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 import org.dromara.northstar.common.constant.ChannelType;
@@ -8,6 +9,8 @@ import org.junit.jupiter.api.Test;
 import xyz.redtorch.pb.CoreEnum;
 
 import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.Map;
 
 class ContractTest {
 
@@ -51,7 +54,21 @@ class ContractTest {
 		assertEquals(contract.symbol(), contractField.getSymbol());
 		assertEquals(contract.exchange().getNumber(), contractField.getExchange().getNumber());
 		assertEquals(contract.channelType().toString(), contractField.getChannelType());
-
 	}
 
+	@Test 
+	void testEquals() {
+		Contract c1 = Contract.builder().symbol("rb2401").unifiedSymbol("rb2401@SHFE@FUTURES").name("螺纹钢2401").build();
+		Contract c2 = Contract.builder().symbol("rb2401").unifiedSymbol("rb2401@SHFE@FUTURES").name("螺纹2401").build();
+		assertEquals(c1, c2);
+	}
+	
+	@Test
+	void testHashEquals() {
+		Contract c1 = Contract.builder().symbol("rb2401").unifiedSymbol("rb2401@SHFE@FUTURES").name("螺纹钢2401").build();
+		Contract c2 = Contract.builder().symbol("rb2401").unifiedSymbol("rb2401@SHFE@FUTURES").name("螺纹2401").build();
+		Map<Contract, String> map = new HashMap<>();
+		map.put(c1, c1.name());
+		assertThat(map).containsKey(c2);
+	}
 }
