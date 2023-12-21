@@ -86,7 +86,7 @@ export default {
     next()
   },
   created(){
-    fetch('/version').then(result => {
+    fetch(`${window.baseUrl || ''}/version`).then(result => {
       if(result.status === 200){
         return result.text()
       }
