@@ -85,8 +85,8 @@ export default {
     }
     next()
   },
-  created(){
-    fetch(`${window.baseUrl || ''}/version`).then(result => {
+  mounted() {
+    fetch(`${window.baseURL || ''}/version`).then(result => {
       if(result.status === 200){
         return result.text()
       }
@@ -94,8 +94,6 @@ export default {
     }).then(v => {
       this.version = v.replace(/"/g,"")
     })
-  },
-  mounted() {
     this.curPage = pageOptsRevert[this.$route.name]
     const resizeHandler = () => {
       if(this.listener.isMobile() && this.$route.name !== 'module' && this.$route.name !== 'manualfttd'){
