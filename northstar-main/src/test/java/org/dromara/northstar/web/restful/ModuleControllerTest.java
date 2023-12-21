@@ -47,6 +47,7 @@ import org.dromara.northstar.gateway.mktdata.NorthstarDataServiceDataSource;
 import org.dromara.northstar.gateway.playback.PlaybackGatewayFactory;
 import org.dromara.northstar.gateway.playback.PlaybackGatewaySettings;
 import org.dromara.northstar.gateway.sim.trade.SimGatewayFactory;
+import org.dromara.northstar.module.ModuleManager;
 import org.dromara.northstar.strategy.IMessageSender;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -110,6 +111,9 @@ class ModuleControllerTest {
 	
 	@Autowired
 	NorthstarDataServiceDataSource dsMgr;
+	
+	@Autowired
+	ModuleManager moduleMgr;
 	
 	ModuleDescription md1;
 	
@@ -199,6 +203,7 @@ class ModuleControllerTest {
 		mrdRepo.deleteAll();
 		mdrRepo.deleteAll();
 		gwRepo.deleteAll();
+		moduleMgr.remove(Identifier.of("testModule"));
 	}
 	
 	@AfterAll
