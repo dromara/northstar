@@ -220,7 +220,7 @@
           重置模组
         </el-button>
       </el-popconfirm>
-      <el-button @click="copyModule">复 制</el-button>
+      <el-button v-if="!!module" @click="copyModule">复 制</el-button>
       <el-button id="closeModuleSettings" @click="close">取 消</el-button>
       <el-button
         id="saveModuleSettings"
