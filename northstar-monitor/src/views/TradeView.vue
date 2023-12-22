@@ -93,7 +93,7 @@
           </div>
         </div>
         <div class="ns-trade-info">
-          <NsPriceBoard :tick="$store.state.marketCurrentDataModule.curTick" />
+          <NsPriceBoard :tick="$store.state.marketCurrentDataModule.curTick" :precision="precision" />
         </div>
       </div>
       <div class="ns-trade__trade-btn-wrap">
@@ -135,6 +135,7 @@
       <NsMarketData
         :marketGatewayId="marketDataGatewayId"
         :contractUnifiedSymbol="marketDataUnifiedSymbol"
+        :precision="precision"
         embededMode
       />
     </div>
@@ -242,8 +243,9 @@ export default {
     },
     onPositionChosen(pos) {
       this.dealVol = pos.position - pos.frozen
-      this.contract = {value: pos.contract.contractid, unifiedSymbol: pos.contract.unifiedsymbol, name: pos.contract.name}
-      this.symbolList = [this.contract]
+      const contract = {value: pos.contract.contractid, unifiedSymbol: pos.contract.unifiedsymbol, name: pos.contract.name, precision: pos.contract.priceprecision}
+      this.symbolList = [contract]
+      this.contract = contract
       this.currentPosition = pos
       this.handleContractChange()
     },
@@ -340,21 +342,29 @@ export default {
       if (this.accountInfo.available) return this.accountInfo.available
       return 0
     },
+    precision(){
+      if(this.contract){
+        return this.contract.precision
+      }
+      return 0
+    },
     bkPrice() {
-      return {
+      const price = {
         OPP_PRICE: this.$store.state.marketCurrentDataModule.curTick.askpriceList[0],
         WAITING_PRICE: this.$store.state.marketCurrentDataModule.curTick.bidpriceList[0],
         ANY_PRICE: this.$store.state.marketCurrentDataModule.curTick.upperlimit || 0,
         LIMIT_PRICE: this.limitPrice
       }[this.dealPriceType]
+      return typeof price === 'number' ? price.toFixed(this.precision) : price
     },
     skPrice() {
-      return {
+      const price = {
         OPP_PRICE: this.$store.state.marketCurrentDataModule.curTick.bidpriceList[0],
         WAITING_PRICE: this.$store.state.marketCurrentDataModule.curTick.askpriceList[0],
         ANY_PRICE: this.$store.state.marketCurrentDataModule.curTick.lowerlimit || 0,
         LIMIT_PRICE: this.limitPrice
       }[this.dealPriceType]
+      return typeof price === 'number' ? price.toFixed(this.precision) : price
     },
     closePrice() {
       if (this.currentPosition && this.currentPosition.positiondirection === 2) {

@@ -3,7 +3,7 @@
     <div class="ns-price-board__row" role="ask5">
       <div class="ns-price-board__cell ns-price-board__cell--left"></div>
       <div class="ns-price-board__cell ns-price-board__cell--mid">
-        {{ askPrice[4] | smartFormatter }}
+        {{ askPrice4 }}
       </div>
       <div class="ns-price-board__cell ns-price-board__cell--right">
         {{ askVol[4] }}
@@ -12,7 +12,7 @@
     <div class="ns-price-board__row" role="ask4">
       <div class="ns-price-board__cell ns-price-board__cell--left"></div>
       <div class="ns-price-board__cell ns-price-board__cell--mid">
-        {{ askPrice[3] | smartFormatter }}
+        {{ askPrice3 }}
       </div>
       <div class="ns-price-board__cell ns-price-board__cell--right">
         {{ askVol[3] }}
@@ -21,7 +21,7 @@
     <div class="ns-price-board__row" role="ask3">
       <div class="ns-price-board__cell ns-price-board__cell--left"></div>
       <div class="ns-price-board__cell ns-price-board__cell--mid">
-        {{ askPrice[2] | smartFormatter }}
+        {{ askPrice2 }}
       </div>
       <div class="ns-price-board__cell ns-price-board__cell--right">
         {{ askVol[2] }}
@@ -30,7 +30,7 @@
     <div class="ns-price-board__row" role="ask2">
       <div class="ns-price-board__cell ns-price-board__cell--left"></div>
       <div class="ns-price-board__cell ns-price-board__cell--mid">
-        {{ askPrice[1] | smartFormatter }}
+        {{ askPrice1 }}
       </div>
       <div class="ns-price-board__cell ns-price-board__cell--right">
         {{ askVol[1] }}
@@ -39,7 +39,7 @@
     <div class="ns-price-board__row" role="ask1">
       <div class="ns-price-board__cell ns-price-board__cell--left"></div>
       <div class="ns-price-board__cell ns-price-board__cell--mid">
-        {{ askPrice[0] | smartFormatter }}
+        {{ askPrice0 }}
       </div>
       <div class="ns-price-board__cell ns-price-board__cell--right">
         {{ askVol[0] }}
@@ -50,7 +50,7 @@
         {{ volume }}
       </div>
       <div class="ns-price-board__cell ns-price-board__cell--mid">
-        {{ lastPrice | smartFormatter }}
+        {{ lastPrice.toFixed(precision) }}
       </div>
       <div class="ns-price-board__cell ns-price-board__cell--right">
         {{ volume }}
@@ -61,7 +61,7 @@
         {{ bidVol[0] }}
       </div>
       <div class="ns-price-board__cell ns-price-board__cell--mid">
-        {{ bidPrice[0] | smartFormatter }}
+        {{ bidPrice0 }}
       </div>
       <div class="ns-price-board__cell ns-price-board__cell--right"></div>
     </div>
@@ -70,7 +70,7 @@
         {{ bidVol[1] }}
       </div>
       <div class="ns-price-board__cell ns-price-board__cell--mid">
-        {{ bidPrice[1] | smartFormatter }}
+        {{ bidPrice1 }}
       </div>
       <div class="ns-price-board__cell ns-price-board__cell--right"></div>
     </div>
@@ -79,7 +79,7 @@
         {{ bidVol[2] }}
       </div>
       <div class="ns-price-board__cell ns-price-board__cell--mid">
-        {{ bidPrice[2] | smartFormatter }}
+        {{ bidPrice2 }}
       </div>
       <div class="ns-price-board__cell ns-price-board__cell--right"></div>
     </div>
@@ -88,7 +88,7 @@
         {{ bidVol[3] }}
       </div>
       <div class="ns-price-board__cell ns-price-board__cell--mid">
-        {{ bidPrice[3] | smartFormatter }}
+        {{ bidPrice3 }}
       </div>
       <div class="ns-price-board__cell ns-price-board__cell--right"></div>
     </div>
@@ -97,7 +97,7 @@
         {{ bidVol[4] }}
       </div>
       <div class="ns-price-board__cell ns-price-board__cell--mid">
-        {{ bidPrice[4] | smartFormatter }}
+        {{ bidPrice4 }}
       </div>
       <div class="ns-price-board__cell ns-price-board__cell--right"></div>
     </div>
@@ -110,6 +110,10 @@ export default {
     tick: {
       type: Object,
       default: () => {}
+    },
+    precision: {
+      type: Number,
+      default: 0
     }
   },
   data() {
@@ -130,6 +134,38 @@ export default {
       this.bidVol = tick.bidvolumeList
       this.lastPrice = tick.lastprice
       this.volume = tick.volumedelta
+    }
+  },
+  computed: {
+    askPrice4(){
+      return this.askPrice[4].toFixed(this.precision)
+    },
+    askPrice3(){
+      return this.askPrice[3].toFixed(this.precision)
+    },
+    askPrice2(){
+      return this.askPrice[2].toFixed(this.precision)
+    },
+    askPrice1(){
+      return this.askPrice[1].toFixed(this.precision)
+    },
+    askPrice0(){
+      return this.askPrice[0].toFixed(this.precision)
+    },
+    bidPrice0(){
+      return this.bidPrice[0].toFixed(this.precision)
+    },
+    bidPrice1(){
+      return this.bidPrice[1].toFixed(this.precision)
+    },
+    bidPrice2(){
+      return this.bidPrice[2].toFixed(this.precision)
+    },
+    bidPrice3(){
+      return this.bidPrice[3].toFixed(this.precision)
+    },
+    bidPrice4(){
+      return this.bidPrice[4].toFixed(this.precision)
     }
   }
 }

@@ -6,7 +6,7 @@
   >
     <div class="ns-button__wrapper">
       <div class="ns-button__label ns-button--text-mid">
-        <span>{{ price | smartFormatter }}</span>
+        <span>{{ price }}</span>
       </div>
       <div class="ns-button__divider"></div>
       <div class="ns-button__label ns-button--text-mid">
