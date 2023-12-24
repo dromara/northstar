@@ -1,7 +1,7 @@
 package org.dromara.northstar.web.interceptor;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.dromara.northstar.common.constant.Constants;
 import org.springframework.http.HttpStatus;

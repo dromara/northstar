@@ -2,9 +2,9 @@ package org.dromara.northstar.data.jdbc.entity;
 
 import java.time.LocalDateTime;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
 import org.dromara.northstar.common.model.PlaybackRuntimeDescription;
 

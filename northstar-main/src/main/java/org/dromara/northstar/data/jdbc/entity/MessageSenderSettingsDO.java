@@ -1,8 +1,8 @@
 package org.dromara.northstar.data.jdbc.entity;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Lob;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Lob;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -7,7 +7,7 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Objects;
 
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 
 import org.dromara.northstar.data.jdbc.MarketDataRepository;
 import org.dromara.northstar.strategy.IMessageSender;
