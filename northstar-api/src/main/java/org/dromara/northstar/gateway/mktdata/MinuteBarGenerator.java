@@ -3,6 +3,9 @@ package org.dromara.northstar.gateway.mktdata;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Objects;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 import org.dromara.northstar.common.constant.TickType;
@@ -18,7 +21,8 @@ import lombok.extern.slf4j.Slf4j;
 public class MinuteBarGenerator {
 	
 	private static final LocalTime MIDNIGHT = DateTimeUtils.fromCacheTime(0, 0);
-
+	private static final ScheduledExecutorService exec = Executors.newScheduledThreadPool(1);
+	
 	private LocalTime cutoffTime;
 	
 	private Contract contract;
@@ -46,6 +50,12 @@ public class MinuteBarGenerator {
 	public MinuteBarGenerator(Contract contract, Consumer<Bar> onBarCallback) {
 		this.contract = contract;
 		this.onBarCallback = onBarCallback;
+		// 如果超过120秒内没有tick更新，则自动合成K线
+		exec.scheduleAtFixedRate(() -> {
+			if(proto != null && lastTick != null && System.currentTimeMillis() - lastTick.actionTimestamp() > 120) {
+				finishOfBar();
+			}
+		}, 60, 60, TimeUnit.MINUTES);
 	}
 	
 	/**
@@ -72,7 +82,7 @@ public class MinuteBarGenerator {
 		
 		lastTick = tick;
 		
-		if(Objects.nonNull(cutoffTime) && tick.actionTime().isAfter(cutoffTime)) {
+		if(Objects.nonNull(cutoffTime) && !tick.actionTime().isBefore(cutoffTime)) {
 			finishOfBar();
 		}
 		if(Objects.isNull(proto)) {
