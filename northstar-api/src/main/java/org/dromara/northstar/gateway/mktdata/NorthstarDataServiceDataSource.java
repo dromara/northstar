@@ -62,6 +62,7 @@ public class NorthstarDataServiceDataSource implements IDataSource{
 		this.baseUrl =  baseUrl;
 		this.userToken = secret;
 		this.restTemplate = restTemplate;
+		register();
 	}
 	
 	@PostConstruct
