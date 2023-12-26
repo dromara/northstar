@@ -52,7 +52,8 @@ public class MinuteBarGenerator {
 		this.onBarCallback = onBarCallback;
 		// 如果超过120秒内没有tick更新，则自动合成K线
 		exec.scheduleAtFixedRate(() -> {
-			if(proto != null && lastTick != null && System.currentTimeMillis() - lastTick.actionTimestamp() > 120) {
+			if(proto != null && lastTick != null && System.currentTimeMillis() - lastTick.actionTimestamp() > 120000) {
+				log.trace("强制K线收盘：{}", contract.name());
 				finishOfBar();
 			}
 		}, 60, 60, TimeUnit.MINUTES);
