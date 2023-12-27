@@ -83,7 +83,7 @@ public class MinuteBarGenerator {
 		
 		lastTick = tick;
 		
-		if(Objects.nonNull(cutoffTime) && !tick.actionTime().isBefore(cutoffTime)) {
+		if(Objects.nonNull(cutoffTime) && tick.actionTime().isAfter(cutoffTime)) {
 			finishOfBar();
 		}
 		if(Objects.isNull(proto)) {
