@@ -35,7 +35,7 @@ public class BroadcastHandler extends AbstractEventHandler implements GenericEve
 	
 	private SocketIOServer socketServer;
 	
-	private ExecutorService exec = Executors.newSingleThreadExecutor();
+	private ExecutorService exec = Executors.newVirtualThreadPerTaskExecutor();
 	
 	private static final Set<NorthstarEventType> TARGET_TYPE = EnumSet.of(
 			NorthstarEventType.TICK, 
