@@ -1,23 +1,41 @@
 package org.dromara.northstar.ai.rl.model;
 
-public record RLState() {
+import java.util.Arrays;
 
-	@Override
-	public boolean equals(Object obj) {
-		// TODO Auto-generated method stub
-		return false;
+/**
+ * 强化学习马可夫过程中的环境状态描述
+ * @auth KevinHuangwl
+ */
+
+public record RLState(double...values) {
+
+	public int dimension() {
+		return values.length;
 	}
 
 	@Override
 	public int hashCode() {
-		// TODO Auto-generated method stub
-		return 0;
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + Arrays.hashCode(values);
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		RLState other = (RLState) obj;
+		return Arrays.equals(values, other.values);
 	}
 
 	@Override
 	public String toString() {
-		// TODO Auto-generated method stub
-		return null;
+		return "RLState [values=" + Arrays.toString(values) + "]";
 	}
-
+	
 }
