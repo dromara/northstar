@@ -10,6 +10,7 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.classic.util.LogbackMDCAdapter;
 import ch.qos.logback.core.rolling.RollingFileAppender;
 import ch.qos.logback.core.rolling.TimeBasedRollingPolicy;
 
@@ -23,6 +24,8 @@ public class ModuleLoggerFactory implements ILoggerFactory {
 		encoder.setCharset(StandardCharsets.UTF_8);
 		encoder.setContext(loggerContext);
 		encoder.start();
+		
+		loggerContext.setMDCAdapter(new LogbackMDCAdapter());
 
 		String logPath = System.getProperty("LOG_PATH");
 		RollingFileAppender<ILoggingEvent> rollingFileAppender = new RollingFileAppender<>();
