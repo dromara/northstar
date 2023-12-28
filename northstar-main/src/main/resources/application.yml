@@ -30,7 +30,9 @@ spring:
     database-platform: org.hibernate.dialect.H2Dialect
   profiles:
     active: ${env:dev}
-
+  threads:
+    virtual:
+      enabled: true
 ---
 server:
   port: 443

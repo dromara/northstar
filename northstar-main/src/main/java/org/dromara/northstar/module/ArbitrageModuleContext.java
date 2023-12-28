@@ -40,7 +40,7 @@ import xyz.redtorch.pb.CoreEnum.TimeConditionEnum;
 
 public class ArbitrageModuleContext extends ModuleContext implements IModuleContext{
 	
-	private ExecutorService exec = Executors.newFixedThreadPool(2);
+	private ExecutorService exec = Executors.newVirtualThreadPerTaskExecutor();
 	
 	private final Logger logger;
 
