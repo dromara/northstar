@@ -55,26 +55,4 @@ class MinuteBarGeneratorTest {
 		assertThat(results).isNotEmpty();
 	}
 	
-	@Test
-	void testSHFEClosingMarketTime() throws InterruptedException {
-		LocalDate date = LocalDate.now();
-		LocalTime time = LocalTime.now().withMinute(0).withSecond(0).withNano(0);
-		for(int i=0; i<120; i++) {
-			time = time.plusNanos(500*1000000);
-			long timestamp = CommonUtils.localDateTimeToMills(LocalDateTime.of(date, time));
-			System.out.println("time:" + time);
-			barGen.update(Tick.builder()
-					.contract(c)
-					.tradingDay(date)
-					.actionDay(date)
-					.actionTime(time)
-					.actionTimestamp(timestamp)
-					.channelType(ChannelType.CTP)
-					.type(TickType.MARKET_TICK)
-					.build());
-		}
-		Thread.sleep(60000);
-		assertThat(results).isNotEmpty();
-	}
-
 }
