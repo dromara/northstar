@@ -3,6 +3,8 @@ package org.dromara.northstar.gateway.mktdata;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 import org.dromara.northstar.common.constant.TickType;
@@ -18,7 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 public class MinuteBarGenerator {
 	
 	private static final LocalTime MIDNIGHT = DateTimeUtils.fromCacheTime(0, 0);
-
+	
 	private LocalTime cutoffTime;
 	
 	private Contract contract;
@@ -36,6 +38,15 @@ public class MinuteBarGenerator {
 	private long volumeDelta;
 	private double openInterestDelta;
 	private double turnoverDelta;
+	
+	private Runnable forceCloseBar = () -> {
+		synchronized(MinuteBarGenerator.this) {			
+			if(proto != null && lastTick != null && System.currentTimeMillis() - lastTick.actionTimestamp() > TimeUnit.MINUTES.toMillis(1)) {
+				log.debug("强制K线收盘：{}", contract.name());
+				finishOfBar();
+			}
+		}
+	};
 	
 	/**
 	 * 用于实盘数据
@@ -99,6 +110,9 @@ public class MinuteBarGenerator {
 		openInterestDelta += tick.openInterestDelta();
 		volumeDelta += tick.volumeDelta();
 		turnoverDelta += tick.turnoverDelta();
+		
+		// 1分钟后检查
+		CompletableFuture.runAsync(forceCloseBar, CompletableFuture.delayedExecutor(1, TimeUnit.MINUTES));
 	}
 	
 	/**

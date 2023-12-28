@@ -38,7 +38,6 @@
 import { dispose, init } from 'klinecharts'
 import volumePure from '@/lib/indicator/volume-pure'
 import gatewayDataApi from '@/api/gatewayDataApi'
-import contractApi from '@/api/contractApi'
 
 import { mapGetters } from 'vuex'
 
@@ -59,6 +58,10 @@ export default {
     embededMode: {
       type: Boolean,
       default: false
+    },
+    precision: {
+      type: Number,
+      default: 0
     }
   },
   data() {
@@ -144,8 +147,7 @@ export default {
         })
       }
       if (val) {
-        const result = await contractApi.getSubscribedContracts(this.curMarketGatewayId, this.curUnifiedSymbol)
-        this.kLineChart.setPriceVolumePrecision(result[0].precision, 0)
+        this.kLineChart.setPriceVolumePrecision(this.precision, 0)
         this.kLineChart.clearData()
         this.kLineChart.applyNewData((await this.loadBars(new Date().getTime())) || [])
       }
