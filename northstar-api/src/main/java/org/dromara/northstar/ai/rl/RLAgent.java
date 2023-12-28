@@ -10,5 +10,11 @@ import org.dromara.northstar.ai.rl.model.RLState;
  */
 public interface RLAgent {
 	
+	/**
+	 * 响应环境状态
+	 * @param state
+	 * @param reward
+	 * @return
+	 */
 	RLAction react(RLState state, RLReward reward);
 }

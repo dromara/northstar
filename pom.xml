@@ -75,6 +75,11 @@
 			</dependency>
 			<dependency>
 				<groupId>org.dromara</groupId>
+				<artifactId>northstar-intelligence</artifactId>
+				<version>${northstar-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.dromara</groupId>
 				<artifactId>northstar-gateway-playback</artifactId>
 				<version>${northstar-version}</version>
 			</dependency>
