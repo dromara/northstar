@@ -17,7 +17,9 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 @Slf4j
-public class GymEnv implements RLEnvironment {
+public abstract class GymEnv implements RLEnvironment {
+	
+	private static final String BASE_URL = "http://localhost:5001";
 	
 	private boolean hasInit;
 	
@@ -25,11 +27,37 @@ public class GymEnv implements RLEnvironment {
 	
 	private OkHttpClient client = new OkHttpClient();
 	
-	private static final String BASE_URL = "http://localhost:5001";
+	private final String envID;
 	
-	public GymEnv() {
+	protected GymEnv(String envID) {
+		this.envID = envID;
+		checkPythonEnv();
 		start();
 	}
+	
+	private void checkPythonEnv() {
+		ProcessBuilder pb = new ProcessBuilder("python", "--version");
+		try {
+			Process p = pb.start();
+			if(p.waitFor() != 0) {
+				throw new IllegalStateException("缺少PYTHON环境，请自行安装");
+			}
+		} catch (Exception e) {
+			throw new IllegalStateException("", e);
+		}
+	}
+	
+	/**
+	 * 回合结束的最大累计奖励
+	 * @return
+	 */
+	public abstract int terminatedScore();
+	
+	/**
+	 * 最多尝试的回合数
+	 * @return
+	 */
+	public abstract int maxEpisodes();
 	
 	public void start() {
 		if(hasInit) {
@@ -40,9 +68,9 @@ public class GymEnv implements RLEnvironment {
 		String path = classLoader.getResource("org/dromara/northstar/rl/main.py").getFile().replaceFirst("/", "");
 		log.info("加载main.py的路径：{}", path);
 		try {
-		    ProcessBuilder pb = new ProcessBuilder("python", path);
+		    ProcessBuilder pb = new ProcessBuilder("python", path, envID);
 		    proc = pb.start();
-		    Thread.sleep(1000);
+		    log.info("启动gym环境");
 		} catch (Exception e) {
 		    log.error("", e);
 		}
@@ -50,6 +78,7 @@ public class GymEnv implements RLEnvironment {
 	
 	public void close() {
 		if(hasInit && Objects.nonNull(proc)) {
+			log.info("关闭gym环境");
 			proc.destroy();
 		}
 	}

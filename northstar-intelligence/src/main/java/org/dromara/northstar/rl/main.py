@@ -1,8 +1,10 @@
 import gym
+import sys
 from flask import Flask, request, jsonify
 
+envName = sys.argv[1]
 app = Flask(__name__)
-env = gym.make('CartPole-v0')
+env = gym.make(envName)
 
 @app.route("/interact", methods=["POST"])
 def interact():
