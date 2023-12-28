@@ -6,15 +6,10 @@
 	<artifactId>northstar</artifactId>
 	<version>7.0.0-Alpha4</version>
   </parent>
-  <artifactId>northstar-rl</artifactId>
+  <artifactId>northstar-intelligence</artifactId>
   <properties>
   </properties>
   <dependencies>
-	<dependency>
-		<groupId>org.apache.httpcomponents</groupId>
-		<artifactId>httpclient</artifactId>
-		<version>4.5.13</version>
-	</dependency>
 	<dependency>
 		<groupId>org.dromara</groupId>
 		<artifactId>northstar-api</artifactId>
@@ -22,16 +17,6 @@
 	<dependency>
 		<groupId>org.projectlombok</groupId>
 		<artifactId>lombok</artifactId>
-	</dependency>
-	<dependency>
-		<groupId>com.alibaba</groupId>
-		<artifactId>fastjson</artifactId>
-	</dependency>
-	<dependency>
-	    <groupId>org.junit.jupiter</groupId>
-	    <artifactId>junit-jupiter</artifactId>
-	    <version>5.8.2</version>
-	    <scope>test</scope>
 	</dependency>
   </dependencies>
 </project>
