@@ -3,8 +3,7 @@ package org.dromara.northstar.gateway.mktdata;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Objects;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
@@ -21,7 +20,6 @@ import lombok.extern.slf4j.Slf4j;
 public class MinuteBarGenerator {
 	
 	private static final LocalTime MIDNIGHT = DateTimeUtils.fromCacheTime(0, 0);
-	private static final ScheduledExecutorService exec = Executors.newScheduledThreadPool(1);
 	
 	private LocalTime cutoffTime;
 	
@@ -41,6 +39,15 @@ public class MinuteBarGenerator {
 	private double openInterestDelta;
 	private double turnoverDelta;
 	
+	private Runnable forceCloseBar = () -> {
+		synchronized(MinuteBarGenerator.this) {			
+			if(proto != null && lastTick != null && System.currentTimeMillis() - lastTick.actionTimestamp() > TimeUnit.MINUTES.toMillis(1)) {
+				log.debug("强制K线收盘：{}", contract.name());
+				finishOfBar();
+			}
+		}
+	};
+	
 	/**
 	 * 用于实盘数据
 	 * @param contract
@@ -50,13 +57,6 @@ public class MinuteBarGenerator {
 	public MinuteBarGenerator(Contract contract, Consumer<Bar> onBarCallback) {
 		this.contract = contract;
 		this.onBarCallback = onBarCallback;
-		// 如果超过120秒内没有tick更新，则自动合成K线
-		exec.scheduleAtFixedRate(() -> {
-			if(proto != null && lastTick != null && System.currentTimeMillis() - lastTick.actionTimestamp() > 120000) {
-				log.trace("强制K线收盘：{}", contract.name());
-				finishOfBar();
-			}
-		}, 60, 60, TimeUnit.MINUTES);
 	}
 	
 	/**
@@ -110,6 +110,9 @@ public class MinuteBarGenerator {
 		openInterestDelta += tick.openInterestDelta();
 		volumeDelta += tick.volumeDelta();
 		turnoverDelta += tick.turnoverDelta();
+		
+		// 1分钟后检查
+		CompletableFuture.runAsync(forceCloseBar, CompletableFuture.delayedExecutor(1, TimeUnit.MINUTES));
 	}
 	
 	/**
