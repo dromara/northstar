@@ -1,6 +1,10 @@
 package org.dromara.northstar.rl;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 import org.dromara.northstar.ai.rl.RLEnvironment;
 import org.dromara.northstar.ai.rl.model.RLAction;
@@ -29,7 +33,7 @@ public abstract class GymEnv implements RLEnvironment {
 	
 	private final String envID;
 	
-	protected GymEnv(String envID) {
+	protected GymEnv(String envID) throws Exception {
 		this.envID = envID;
 		checkPythonEnv();
 		start();
@@ -59,7 +63,7 @@ public abstract class GymEnv implements RLEnvironment {
 	 */
 	public abstract int maxEpisodes();
 	
-	public void start() {
+	public void start() throws IOException, InterruptedException {
 		if(hasInit) {
 			return;
 		}
@@ -67,15 +71,21 @@ public abstract class GymEnv implements RLEnvironment {
 		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 		String path = classLoader.getResource("org/dromara/northstar/rl/main.py").getFile().replaceFirst("/", "");
 		log.info("加载main.py的路径：{}", path);
-		try {
-		    ProcessBuilder pb = new ProcessBuilder("python", path, envID);
-		    proc = pb.start();
-		    log.info("启动gym环境");
-		} catch (Exception e) {
-		    log.error("", e);
-		}
+	    ProcessBuilder pb = new ProcessBuilder("python", path, envID);
+	    proc = pb.start();
+	    log.info("启动gym环境");
+	    if(proc.waitFor(2, TimeUnit.SECONDS)) {
+	    	BufferedReader errorReader = new BufferedReader(new InputStreamReader(proc.getErrorStream()));
+            String line = null;
+            StringBuilder sb = new StringBuilder();
+            while((line = errorReader.readLine()) != null) {
+            	sb.append(line).append("\n");
+            }
+            throw new IllegalStateException(sb.toString());
+	    }
 	}
 	
+	@Override
 	public void close() {
 		if(hasInit && Objects.nonNull(proc)) {
 			log.info("关闭gym环境");
@@ -84,33 +94,23 @@ public abstract class GymEnv implements RLEnvironment {
 	}
 
 	@Override
-	public RLEnvResponse interact(RLAction action) {
+	public RLEnvResponse interact(RLAction action) throws IOException {
 		MediaType mediaType = MediaType.get("application/json; charset=utf-8");
 		RequestBody body = RequestBody.create(JSON.toJSONString(action), mediaType);
 		Request request = new Request.Builder()
 				.url(BASE_URL + "/interact")
 				.post(body)
 				.build();
-		try {
-            Response response = client.newCall(request).execute();
-            return JSON.parseObject(response.body().bytes(), RLEnvResponse.class);
-        } catch (Exception e) {
-            log.error("", e);
-        }
-		return null;
+        Response response = client.newCall(request).execute();
+        return JSON.parseObject(response.body().bytes(), RLEnvResponse.class);
 	}
 
 	@Override
-	public RLState reset() {
+	public RLState reset() throws IOException {
 		Request request = new Request.Builder()
 				.url(BASE_URL + "/reset")
 				.build();
-		try {
-            Response response = client.newCall(request).execute();
-            return JSON.parseObject(response.body().bytes(), RLState.class);
-        } catch (Exception e) {
-            log.error("", e);
-        }
-		return null;
+        Response response = client.newCall(request).execute();
+        return JSON.parseObject(response.body().bytes(), RLState.class);
 	}
 }

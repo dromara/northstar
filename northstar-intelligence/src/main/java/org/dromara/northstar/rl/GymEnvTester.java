@@ -5,10 +5,8 @@ import org.dromara.northstar.ai.rl.model.RLAction;
 import org.dromara.northstar.ai.rl.model.RLEnvResponse;
 import org.dromara.northstar.ai.rl.model.RLReward;
 import org.dromara.northstar.ai.rl.model.RLState;
+import org.dromara.northstar.rl.agent.DQNAgent;
 import org.dromara.northstar.rl.env.CartPoleV0;
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.context.annotation.Profile;
-import org.springframework.stereotype.Component;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -18,18 +16,16 @@ import lombok.extern.slf4j.Slf4j;
  * @auth KevinHuangwl
  */
 @Slf4j
-@Component
-@Profile("test-agent")
-public class GymEnvTest implements CommandLineRunner{
+public class GymEnvTester {
 	
-	GymEnv env = new CartPoleV0();	// 可自行替换
-	RLAgent agent;		// 可自行替换
+			// 可自行替换
 	
-	int winCount;
+	static int winCount;
 	
-	@Override
-	public void run(String... args) throws Exception {
+	public static void main(String... args) throws Exception {
 		log.info("进行GYM环境测试");
+		GymEnv env = new CartPoleV0();	// 可自行替换
+		RLAgent agent = new DQNAgent();
 		
 		for(int i=0; i<env.maxEpisodes(); i++) {
 			RLState state = env.reset();

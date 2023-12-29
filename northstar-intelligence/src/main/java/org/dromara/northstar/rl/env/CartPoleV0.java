@@ -4,7 +4,7 @@ import org.dromara.northstar.rl.GymEnv;
 
 public class CartPoleV0 extends GymEnv{
 
-	public CartPoleV0() {
+	public CartPoleV0() throws Exception {
 		super("CartPole-v0");
 	}
 

@@ -16,6 +16,6 @@ public record RLEnvResponse(
 		/**
 		 * 是否结束
 		 */
-		boolean hasDone) {
-
-}
+		boolean hasDone
+	) 
+{}
