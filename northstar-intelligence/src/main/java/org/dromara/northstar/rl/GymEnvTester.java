@@ -18,14 +18,12 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class GymEnvTester {
 	
-			// 可自行替换
-	
 	static int winCount;
 	
 	public static void main(String... args) throws Exception {
 		log.info("进行GYM环境测试");
 		GymEnv env = new CartPoleV0();	// 可自行替换
-		RLAgent agent = new DQNAgent();
+		RLAgent agent = new DQNAgent(); // 可自行替换
 		
 		for(int i=0; i<env.maxEpisodes(); i++) {
 			RLState state = env.reset();

@@ -44,6 +44,9 @@ public class ReplayBuffer {
 	 * @return
 	 */
 	public List<RLExperience> sample(int batchSize){
+		if(batchSize > size()) {
+			throw new IllegalArgumentException("未有足够的样本可以进行随机采样");
+		}
 		Set<RLExperience> results = new HashSet<>();
 		int startIndex = ThreadLocalRandom.current().nextInt(maxSize);	// 随机起点
 		while(results.size() < batchSize) {
