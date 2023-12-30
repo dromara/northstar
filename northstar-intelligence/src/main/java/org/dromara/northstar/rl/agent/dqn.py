@@ -2,6 +2,7 @@ import os
 import numpy as np
 import logging
 import tensorflow as tf
+from waitress import serve
 from tensorflow.keras import layers, losses, Model
 from utils import ReplayBuffer
 from flask import Flask, request, jsonify
@@ -138,4 +139,4 @@ def load():
         return jsonify({"status": "error", "message": str(e)}), 500
 
 
-app.run(port=5002)
+serve(app, port=5002, threads=6)

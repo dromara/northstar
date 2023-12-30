@@ -1,5 +1,6 @@
 package org.dromara.northstar.rl;
 
+import org.apache.commons.lang3.time.StopWatch;
 import org.dromara.northstar.ai.rl.RLAgent;
 import org.dromara.northstar.ai.rl.model.RLAction;
 import org.dromara.northstar.ai.rl.model.RLEnvResponse;
@@ -32,7 +33,11 @@ public class GymEnvTester {
 					while(accScore < env.terminatedScore()) {
 						RLAction action = agent.react(state);
 						RLEnvResponse resp = env.interact(action);
+						StopWatch sw = new StopWatch();
+						sw.start();
 						agent.learn(new RLExperience(state, action, resp.reward(), resp.state(), resp.hasDone()));
+						sw.stop();
+						log.info("耗时：{}ms", sw.getTime()); 
 						accScore += resp.reward().value();
 						if(resp.hasDone()) {
 							break;

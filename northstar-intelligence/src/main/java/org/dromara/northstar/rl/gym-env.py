@@ -1,5 +1,6 @@
 import gym
 import sys
+from waitress import serve
 from flask import Flask, request, jsonify
 
 envName = sys.argv[1]
@@ -18,4 +19,4 @@ def reset():
     return {'values': env.reset()[0].tolist()}
     
     
-app.run(port=5001)
+serve(app, port=5001, threads=6)
