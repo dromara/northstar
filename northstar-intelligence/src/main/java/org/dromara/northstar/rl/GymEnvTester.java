@@ -22,36 +22,36 @@ public class GymEnvTester {
 	
 	public static void main(String... args) throws Exception {
 		log.info("进行GYM环境测试");
-		GymEnv env = new CartPoleV0();	// 可自行替换
-		RLAgent agent = new DQNAgent(); // 可自行替换
 		
-		for(int i=0; i<env.maxEpisodes(); i++) {
-			RLState state = env.reset();
-			double accScore = 0;
-			while(accScore < env.terminatedScore()) {
-				RLAction action = agent.react(state);
-				RLEnvResponse resp = env.interact(action);
-				agent.learn(new RLExperience(state, action, resp.reward(), resp.state(), resp.hasDone()));
-				accScore += resp.reward().value();
-				if(resp.hasDone()) {
-					break;
+		try (GymEnv env = new CartPoleV0()){		// 可自行替换
+			try(RLAgent agent = new DQNAgent()){	// 可自行替换
+				
+				for(int i=0; i<env.maxEpisodes(); i++) {
+					RLState state = env.reset();
+					double accScore = 0;
+					while(accScore < env.terminatedScore()) {
+						RLAction action = agent.react(state);
+						RLEnvResponse resp = env.interact(action);
+						agent.learn(new RLExperience(state, action, resp.reward(), resp.state(), resp.hasDone()));
+						accScore += resp.reward().value();
+						if(resp.hasDone()) {
+							break;
+						}
+					}
+					agent.update();
+					log.info("第{}回合，累计得分：{}", i+1, accScore);
+					if(accScore >= env.terminatedScore()) {
+						winCount++;
+						if(winCount == 3) {
+							// 连续三次达最高分则中止测试
+							break;
+						}
+					} else {
+						winCount = 0;
+					}
 				}
-			}
-			agent.update();
-			log.info("第{}回合，累计得分：{}", i+1, accScore);
-			if(accScore >= env.terminatedScore()) {
-				winCount++;
-				if(winCount == 3) {
-					// 连续三次达最高分则中止测试
-					break;
-				}
-			} else {
-				winCount = 0;
 			}
 		}
-		
-		agent.close();	// 关闭agent
-		env.close();	// 关闭Gym环境
 	}
 
 }

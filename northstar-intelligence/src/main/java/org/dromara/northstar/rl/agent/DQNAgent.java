@@ -52,7 +52,7 @@ public class DQNAgent extends AbstractAgent implements RLAgent{
 				.build();
         Response response = client.newCall(request).execute();
         if(!response.isSuccessful()) {
-        	throw new IllegalStateException(response.message());
+        	throw new IllegalStateException(response.body().string());
         }
         return response.body().bytes();
 	}
@@ -63,7 +63,7 @@ public class DQNAgent extends AbstractAgent implements RLAgent{
 				.build();
         Response response = client.newCall(request).execute();
         if(!response.isSuccessful()) {
-        	throw new IllegalStateException(response.message());
+        	throw new IllegalStateException(response.body().string());
         }
         return response.body().bytes(); 
 	}

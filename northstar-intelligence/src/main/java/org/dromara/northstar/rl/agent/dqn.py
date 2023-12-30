@@ -1,7 +1,8 @@
 import os
+import numpy as np
+import logging
 import tensorflow as tf
 from tensorflow.keras import layers, losses, Model
-import numpy as np
 from utils import ReplayBuffer
 from flask import Flask, request, jsonify
 
@@ -80,7 +81,8 @@ class DQNAgent:
         self.train_model.save_weights(path)
         self.target_model.save_weights(path)
 
-       
+
+logging.basicConfig(level=logging.DEBUG)
 app = Flask(__name__)
 model = DQNAgent(4, 2)
 
@@ -95,14 +97,13 @@ def react():
 def learn():
     data = request.json
 
-    state = (data.get('state') or {}).get('values')
-    action = (data.get('action') or {}).get('value')
-    reward = (data.get('reward') or {}).get('value')
-    next_state = (data.get('nextState') or {}).get('values')
-    done = data.get('terminated', False)
-
     # 处理数据和模型训练
     try:
+        state = (data.get('state') or {}).get('values')
+        action = (data.get('action') or {}).get('value')
+        reward = (data.get('reward') or {}).get('value')
+        next_state = (data.get('nextState') or {}).get('values')
+        done = data.get('terminated')
         model.remember(state, action, reward, next_state, done)
         model.train()
         return jsonify({"status": "success"}), 200
@@ -134,7 +135,6 @@ def load():
         model.load(name)
         return jsonify({"status": "success"}), 200
     except Exception as e:
-        print(e)
         return jsonify({"status": "error", "message": str(e)}), 500
 
 
