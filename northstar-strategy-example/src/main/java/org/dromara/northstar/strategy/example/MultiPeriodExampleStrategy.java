@@ -142,4 +142,9 @@ public class MultiPeriodExampleStrategy extends AbstractStrategy	// 为了简化
 		private int refPeriod = 15;
 	}
 
+	@Override
+	public String name() {
+		return NAME;
+	}
+
 }

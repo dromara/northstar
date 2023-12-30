@@ -53,4 +53,9 @@ public class LongPeriodExampleStrategy extends AbstractStrategy implements Trade
 		private String indicatorSymbol;
 		
 	}
+
+	@Override
+	public String name() {
+		return NAME;
+	}
 }

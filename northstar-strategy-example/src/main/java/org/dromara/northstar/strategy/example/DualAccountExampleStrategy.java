@@ -118,4 +118,9 @@ public class DualAccountExampleStrategy extends AbstractStrategy implements Trad
 		logger = context.getLogger(getClass());
 	}
 
+	@Override
+	public String name() {
+		return NAME;
+	}
+
 }

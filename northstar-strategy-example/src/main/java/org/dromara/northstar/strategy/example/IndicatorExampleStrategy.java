@@ -147,4 +147,9 @@ public class IndicatorExampleStrategy extends AbstractStrategy	// 为了简化�
 
 	}
 
+	@Override
+	public String name() {
+		return NAME;
+	}
+
 }

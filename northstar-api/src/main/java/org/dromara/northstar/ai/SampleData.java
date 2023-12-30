@@ -1,5 +1,8 @@
 package org.dromara.northstar.ai;
 
+import java.util.Arrays;
+import java.util.Objects;
+
 /**
  * 样本数据
  * @auth KevinHuangwl
@@ -20,10 +23,40 @@ public record SampleData(
 		/**
 		 * 环境状态
 		 */
-		RLState states,
+		double[] states,
 		/**
 		 * 市场价
 		 */
 		double marketPrice
-	) 
-{}
+	) {
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + Arrays.hashCode(states);
+		result = prime * result + Objects.hash(actionDate, actionTime, marketPrice, unifiedSymbol);
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		SampleData other = (SampleData) obj;
+		return Objects.equals(actionDate, other.actionDate) && Objects.equals(actionTime, other.actionTime)
+				&& Double.doubleToLongBits(marketPrice) == Double.doubleToLongBits(other.marketPrice)
+				&& Arrays.equals(states, other.states) && Objects.equals(unifiedSymbol, other.unifiedSymbol);
+	}
+
+	@Override
+	public String toString() {
+		return "SampleData [unifiedSymbol=" + unifiedSymbol + ", actionDate=" + actionDate + ", actionTime="
+				+ actionTime + ", states=" + Arrays.toString(states) + ", marketPrice=" + marketPrice + "]";
+	}
+	
+}

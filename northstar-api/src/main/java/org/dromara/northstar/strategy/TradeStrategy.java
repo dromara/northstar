@@ -53,4 +53,9 @@ public interface TradeStrategy extends TickDataAware, MergedBarListener, Transac
 	default List<Value> strategyInfos() {
 		return List.of();
 	}
+	/**
+	 * 策略名称
+	 * @return
+	 */
+	String name();
 }

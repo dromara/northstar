@@ -99,4 +99,9 @@ public class IndicatorDemoStrategy extends AbstractStrategy	// 为了简化代�
 		private String indicatorSymbol;
 		
 	}
+
+	@Override
+	public String name() {
+		return NAME;
+	}
 }

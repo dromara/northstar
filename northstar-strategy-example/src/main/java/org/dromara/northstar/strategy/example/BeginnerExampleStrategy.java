@@ -170,4 +170,9 @@ public class BeginnerExampleStrategy implements TradeStrategy{
 				);
 	}
 
+	@Override
+	public String name() {
+		return NAME;
+	}
+
 }
