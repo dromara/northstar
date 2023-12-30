@@ -17,7 +17,6 @@ class SampleDataWriterTest {
 			Random r = new Random();
 			for(int i=0; i<10; i++) {
 				sdw.append(SampleData.builder()
-						.unifiedSymbol("rb")
 						.actionDate("20231230")
 						.actionTime("00:00:02")
 						.states(new double[] {r.nextDouble(), r.nextDouble(), r.nextDouble()})

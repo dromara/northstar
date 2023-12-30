@@ -12,10 +12,6 @@ import lombok.Builder;
 @Builder
 public record SampleData(
 		/**
-		 * 合约标识
-		 */
-		String unifiedSymbol,
-		/**
 		 * 样本日期
 		 */
 		String actionDate,
@@ -38,7 +34,7 @@ public record SampleData(
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + Arrays.hashCode(states);
-		result = prime * result + Objects.hash(actionDate, actionTime, marketPrice, unifiedSymbol);
+		result = prime * result + Objects.hash(actionDate, actionTime, marketPrice);
 		return result;
 	}
 
@@ -53,12 +49,12 @@ public record SampleData(
 		SampleData other = (SampleData) obj;
 		return Objects.equals(actionDate, other.actionDate) && Objects.equals(actionTime, other.actionTime)
 				&& Double.doubleToLongBits(marketPrice) == Double.doubleToLongBits(other.marketPrice)
-				&& Arrays.equals(states, other.states) && Objects.equals(unifiedSymbol, other.unifiedSymbol);
+				&& Arrays.equals(states, other.states);
 	}
 
 	@Override
 	public String toString() {
-		return "SampleData [unifiedSymbol=" + unifiedSymbol + ", actionDate=" + actionDate + ", actionTime="
+		return "SampleData [actionDate=" + actionDate + ", actionTime="
 				+ actionTime + ", states=" + Arrays.toString(states) + ", marketPrice=" + marketPrice + "]";
 	}
 	
