@@ -75,4 +75,9 @@ public interface IModuleContext extends IModuleStrategyContext, MergedBarListene
 	 * 完成初始化
 	 */
 	void onReady();
+	/**
+	 * 获取交易策略
+	 * @return
+	 */
+	TradeStrategy getStrategy();
 }

@@ -603,4 +603,9 @@ public class ModuleContext implements IModuleContext{
 		return module.getModuleDescription().getDefaultVolume();
 	}
 
+	@Override
+	public TradeStrategy getStrategy() {
+		return tradeStrategy;
+	}
+
 }

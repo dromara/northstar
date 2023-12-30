@@ -53,4 +53,9 @@ public interface IModule {
 	 * @return
 	 */
 	IModuleContext getModuleContext();
+	/**
+	 * 获取交易策略
+	 * @return
+	 */
+	TradeStrategy getTradeStrategy();
 }

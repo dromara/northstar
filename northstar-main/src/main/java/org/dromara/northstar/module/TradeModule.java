@@ -25,6 +25,7 @@ import org.dromara.northstar.gateway.TradeGateway;
 import org.dromara.northstar.strategy.IAccount;
 import org.dromara.northstar.strategy.IModule;
 import org.dromara.northstar.strategy.IModuleContext;
+import org.dromara.northstar.strategy.TradeStrategy;
 import org.slf4j.Logger;
 
 import lombok.extern.slf4j.Slf4j;
@@ -139,6 +140,11 @@ public class TradeModule implements IModule {
 	@Override
 	public IModuleContext getModuleContext() {
 		return ctx;
+	}
+
+	@Override
+	public TradeStrategy getTradeStrategy() {
+		return ctx.getStrategy();
 	}
 
 }
