@@ -3,7 +3,7 @@ package org.dromara.northstar.rl;
 import org.dromara.northstar.ai.rl.RLAgent;
 import org.dromara.northstar.ai.rl.model.RLAction;
 import org.dromara.northstar.ai.rl.model.RLEnvResponse;
-import org.dromara.northstar.ai.rl.model.RLReward;
+import org.dromara.northstar.ai.rl.model.RLExperience;
 import org.dromara.northstar.ai.rl.model.RLState;
 import org.dromara.northstar.rl.agent.DQNAgent;
 import org.dromara.northstar.rl.env.CartPoleV0;
@@ -27,17 +27,17 @@ public class GymEnvTester {
 		
 		for(int i=0; i<env.maxEpisodes(); i++) {
 			RLState state = env.reset();
-			RLReward reward = new RLReward(0);
 			double accScore = 0;
 			while(accScore < env.terminatedScore()) {
-				RLAction action = agent.react(state, reward);
+				RLAction action = agent.react(state);
 				RLEnvResponse resp = env.interact(action);
-				
+				agent.learn(new RLExperience(state, action, resp.reward(), resp.state(), resp.hasDone()));
 				accScore += resp.reward().value();
 				if(resp.hasDone()) {
 					break;
 				}
 			}
+			agent.update();
 			log.info("第{}回合，累计得分：{}", i+1, accScore);
 			if(accScore >= env.terminatedScore()) {
 				winCount++;
@@ -50,8 +50,8 @@ public class GymEnvTester {
 			}
 		}
 		
-		// 关闭PYTHON GYM 环境
-		env.close();
+		agent.close();	// 关闭agent
+		env.close();	// 关闭Gym环境
 	}
 
 }

@@ -9,11 +9,8 @@ env = gym.make(envName)
 @app.route("/interact", methods=["POST"])
 def interact():
     data = request.json
-    print(data)
     action = data.get('value')
-    print(action)
     next_state, reward, done,_info, _ = env.step(action)
-    
     return {'state':{'values': next_state.tolist()}, 'reward':{'value': reward}, 'hasDone': done == 1}
 
 @app.route("/reset", methods=["GET"])

@@ -39,15 +39,11 @@ public abstract class GymEnv implements RLEnvironment {
 		start();
 	}
 	
-	private void checkPythonEnv() {
+	private void checkPythonEnv() throws IOException, InterruptedException {
 		ProcessBuilder pb = new ProcessBuilder("python", "--version");
-		try {
-			Process p = pb.start();
-			if(p.waitFor() != 0) {
-				throw new IllegalStateException("缺少PYTHON环境，请自行安装");
-			}
-		} catch (Exception e) {
-			throw new IllegalStateException("", e);
+		Process p = pb.start();
+		if(p.waitFor() != 0) {
+			throw new IllegalStateException("缺少PYTHON环境，请自行安装");
 		}
 	}
 	
@@ -69,7 +65,7 @@ public abstract class GymEnv implements RLEnvironment {
 		}
 		hasInit = true;
 		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-		String path = classLoader.getResource("org/dromara/northstar/rl/main.py").getFile().replaceFirst("/", "");
+		String path = classLoader.getResource("org/dromara/northstar/rl/gym-env.py").getFile().replaceFirst("/", "");
 		log.info("加载main.py的路径：{}", path);
 	    ProcessBuilder pb = new ProcessBuilder("python", path, envID);
 	    proc = pb.start();
