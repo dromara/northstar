@@ -137,9 +137,11 @@ public class ModuleService implements IModuleService, PostLoadAware {
 	 * @return
 	 * @throws Exception
 	 */
+	@Transactional
 	@Override
 	public ModuleDescription createModule(ModuleDescription md) throws Exception {
-		Assert.isFalse(moduleMgr.contains(Identifier.of(md.getModuleName())), String.format("模组名[%s]已经存在，无法新建模组", md.getModuleName()));
+		Identifier moduleID = Identifier.of(md.getModuleName());
+		Assert.isFalse(moduleMgr.contains(moduleID), String.format("模组名[%s]已经存在，无法新建模组", md.getModuleName()));
 		log.info("增加模组 [{}]", md.getModuleName());
 		ModuleAccountRuntimeDescription mard = ModuleAccountRuntimeDescription.builder()
 				.initBalance(md.getInitBalance())
@@ -152,9 +154,14 @@ public class ModuleService implements IModuleService, PostLoadAware {
 				.moduleAccountRuntime(mard)
 				.storeObject(new JSONObject())
 				.build();
-		loadModule(md, mrd);
-		moduleRepo.saveRuntime(mrd);
-		moduleRepo.saveSettings(md);
+		try {			
+			loadModule(md, mrd);
+			moduleRepo.saveRuntime(mrd);
+			moduleRepo.saveSettings(md);
+		} catch(Exception e) {
+			moduleMgr.remove(moduleID);
+			throw e;
+		}
 		return md;
 	}
 

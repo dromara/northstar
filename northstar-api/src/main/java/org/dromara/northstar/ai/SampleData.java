@@ -3,10 +3,13 @@ package org.dromara.northstar.ai;
 import java.util.Arrays;
 import java.util.Objects;
 
+import lombok.Builder;
+
 /**
  * 样本数据
  * @auth KevinHuangwl
  */
+@Builder
 public record SampleData(
 		/**
 		 * 合约标识

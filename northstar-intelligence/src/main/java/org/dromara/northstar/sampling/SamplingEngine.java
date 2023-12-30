@@ -1,24 +1,17 @@
 package org.dromara.northstar.sampling;
 
 import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.nio.charset.Charset;
 
-import org.dromara.northstar.ai.SampleData;
 import org.dromara.northstar.ai.SamplingAware;
 import org.dromara.northstar.common.ObjectManager;
 import org.dromara.northstar.strategy.IModule;
+import org.dromara.northstar.strategy.TradeStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
-
-import com.fasterxml.jackson.databind.SequenceWriter;
-import com.fasterxml.jackson.dataformat.csv.CsvMapper;
-import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -42,25 +35,21 @@ public class SamplingEngine implements CommandLineRunner {
 		moduleMgr.findAll()
 			.stream()
 			.filter(m -> m.getTradeStrategy() instanceof SamplingAware)
-			.map(SamplingAware.class::cast)
-			.forEach(sa -> {
-				IModule m = (IModule) sa;
-				CsvMapper mapper = new CsvMapper();
-				sa.setOnBarCallback(data -> {
-					File csvFile = new File(String.format("data/%s_%s.csv", m.getTradeStrategy().name(), data.unifiedSymbol()));
-					CsvSchema schema = mapper.schemaFor(SampleData.class).withHeader();	
-			        if (csvFile.exists() && csvFile.length() > 0) {
-			            schema = schema.withoutHeader();
-			        }
-			        try (FileWriter fileWriter = new FileWriter(csvFile, Charset.defaultCharset());
-			        		SequenceWriter seqWriter = mapper.writer(schema).writeValues(fileWriter)) {
-			        		seqWriter.write(data);
-			        		seqWriter.flush(); 
-			           } catch (IOException e) {
-			        	   log.error("", e);
-			           }
-				});
-			});
+			.forEach(m -> 
+				m.getModuleDescription().getModuleAccountSettingsDescription()
+					.stream()
+					.flatMap(mad -> mad.getBindedContracts().stream())
+					.filter(csi -> csi.getName().contains("指数"))
+					.findAny()
+					.ifPresent(csi -> {
+						TradeStrategy ts = m.getTradeStrategy();
+						SamplingAware sa = (SamplingAware) ts;
+						File csvFile = new File(String.format("data/%s_%dm_%s.csv", ts.name(), m.getModuleContext().numOfMinPerMergedBar(), csi.getName()));
+						SampleDataWriter writer = new SampleDataWriter(csvFile);
+						sa.setOnBarCallback(writer::append);
+						log.info("模组[{}] 注入数据采样器", m.getName());
+					})
+			);
 	}
 }
 
