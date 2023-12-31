@@ -55,7 +55,7 @@ public enum ValueType {
 		}
 	},
 	/**
-	 * 成交量
+	 * 当日累计成交量
 	 */
 	VOL {
 		@Override
@@ -64,7 +64,16 @@ public enum ValueType {
 		}
 	},
 	/**
-	 * 持仓量
+	 * K线成交量
+	 */
+	VOL_DELTA {
+		@Override
+		public double resolve(Bar bar) {
+			return bar.volumeDelta();
+		}
+	},
+	/**
+	 * 实际持仓量
 	 */
 	OI {
 		@Override
