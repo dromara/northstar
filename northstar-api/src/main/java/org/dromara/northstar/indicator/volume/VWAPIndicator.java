@@ -22,7 +22,7 @@ public class VWAPIndicator extends AbstractIndicator implements Indicator{
 	public VWAPIndicator(Configuration cfg, int barCount) {
 		super(cfg);
 		close = new SimpleValueIndicator(cfg.toBuilder().cacheLength(barCount).visible(false).build());
-		volume = new SimpleValueIndicator(cfg.toBuilder().cacheLength(barCount).valueType(ValueType.VOL).visible(false).build());
+		volume = new SimpleValueIndicator(cfg.toBuilder().cacheLength(barCount).valueType(ValueType.VOL_DELTA).visible(false).build());
 	}
 	
 	@Override

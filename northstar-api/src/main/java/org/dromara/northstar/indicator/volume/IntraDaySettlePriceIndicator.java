@@ -29,7 +29,7 @@ public class IntraDaySettlePriceIndicator extends AbstractIndicator implements I
 	public IntraDaySettlePriceIndicator(Configuration cfg) {
 		super(cfg.toBuilder().numOfUnits(1).period(PeriodUnit.MINUTE).valueType(ValueType.TRADE_DATE).build());		// 强制改变外部传入的配置
 		close = new SimpleValueIndicator(Configuration.builder().contract(cfg.contract()).valueType(ValueType.CLOSE).visible(false).build());
-		volume = new SimpleValueIndicator(Configuration.builder().contract(cfg.contract()).valueType(ValueType.VOL).visible(false).build());
+		volume = new SimpleValueIndicator(Configuration.builder().contract(cfg.contract()).valueType(ValueType.VOL_DELTA).visible(false).build());
 	}
 	
 	@Override
