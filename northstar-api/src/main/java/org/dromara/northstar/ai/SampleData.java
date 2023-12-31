@@ -22,7 +22,7 @@ public record SampleData(
 		/**
 		 * 环境状态
 		 */
-		double[] states,
+		float[] states,
 		/**
 		 * 市场价
 		 */

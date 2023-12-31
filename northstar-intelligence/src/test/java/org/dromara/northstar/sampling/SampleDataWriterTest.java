@@ -13,13 +13,13 @@ class SampleDataWriterTest {
 	@Test
 	void test() {
 		assertDoesNotThrow(() -> {
-			SampleDataWriter sdw = new SampleDataWriter(new File("data/test.csv"));
+			SampleDataWriter sdw = new SampleDataWriter(new File("data/test2.csv"));
 			Random r = new Random();
 			for(int i=0; i<10; i++) {
 				sdw.append(SampleData.builder()
 						.actionDate("20231230")
 						.actionTime("00:00:02")
-						.states(new double[] {r.nextDouble(), r.nextDouble(), r.nextDouble()})
+						.states(new float[] {r.nextFloat(), r.nextFloat(), r.nextFloat()})
 						.marketPrice(r.nextDouble())
 						.build());
 			}
