@@ -29,10 +29,6 @@
 			<artifactId>northstar-strategy-example</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.dromara</groupId>
-			<artifactId>northstar-intelligence</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>

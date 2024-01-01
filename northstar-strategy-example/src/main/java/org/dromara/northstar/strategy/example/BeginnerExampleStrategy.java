@@ -13,18 +13,19 @@ import org.dromara.northstar.common.model.Setting;
 import org.dromara.northstar.common.model.StringValue;
 import org.dromara.northstar.common.model.Value;
 import org.dromara.northstar.common.model.core.Bar;
+import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.common.model.core.Order;
 import org.dromara.northstar.common.model.core.Tick;
 import org.dromara.northstar.common.model.core.Trade;
-import org.dromara.northstar.strategy.IModuleContext;
-import org.dromara.northstar.strategy.IModuleStrategyContext;
+import org.dromara.northstar.indicator.Indicator;
+import org.dromara.northstar.indicator.helper.SimpleValueIndicator;
+import org.dromara.northstar.indicator.model.Configuration;
+import org.dromara.northstar.strategy.AbstractStrategy;
 import org.dromara.northstar.strategy.StrategicComponent;
 import org.dromara.northstar.strategy.TradeStrategy;
 import org.dromara.northstar.strategy.constant.PriceType;
 import org.dromara.northstar.strategy.model.TradeIntent;
 import org.slf4j.Logger;
-
-import com.alibaba.fastjson.JSONObject;
 
 /**
  * 本示例用于展示写一个策略的必要元素，以及最基本的开平仓操作、超时撤单操作
@@ -34,17 +35,16 @@ import com.alibaba.fastjson.JSONObject;
  *
  */
 @StrategicComponent(BeginnerExampleStrategy.NAME)		// 该注解是用于给策略命名用的，所有的策略都要带上这个注解
-public class BeginnerExampleStrategy implements TradeStrategy{
+public class BeginnerExampleStrategy extends AbstractStrategy	// 抽象类预实现了很多常用的方法 
+	implements TradeStrategy{
 	
 	protected static final String NAME = "示例-简单策略";	// 之所以要这样定义一个常量，是为了方便日志输出时可以带上策略名称
 	
 	private InitParams params;	// 策略的参数配置信息
 	
-	private IModuleStrategyContext ctx;		// 模组的操作上下文
-	
-	private JSONObject storeObj = new JSONObject(); 	// 可透视状态计算信息
-	
 	private Logger logger;
+	
+	private Indicator close;
 	
 	/**
 	 * 定义该策略的参数。该类每个策略必须自己重写一个，类名必须为InitParams，必须继承DynamicParams，必须是个static类。
@@ -74,25 +74,21 @@ public class BeginnerExampleStrategy implements TradeStrategy{
 		this.params = (InitParams) params;
 	}
 	
-	@Override
-	public void setContext(IModuleContext context) {
-		ctx = context;
-		logger = ctx.getLogger(getClass());
-	}
-	
-	@Override
-	public JSONObject getStoreObject() {
-		return storeObj;
-	}
-
-	@Override
-	public void setStoreObject(JSONObject storeObj) {
-		this.storeObj = storeObj;
-	}
 	/***************** 以上如果看不懂，基本可以照搬 *************************/
-
+	
 	private long nextActionTime;
 	
+	@Override
+	protected void initIndicators() {
+		// 在该方法中创建必要的指标实例
+		Contract contract = ctx.getContract(bindedContracts().get(0).getUnifiedSymbol());
+		close = new SimpleValueIndicator(Configuration.builder().indicatorName("C").contract(contract).numOfUnits(ctx.numOfMinPerMergedBar()).build());
+		
+		ctx.registerIndicator(close);
+		
+		logger = ctx.getLogger(getClass());
+	}
+
 	@Override
 	public void onTick(Tick tick) {
 		logger.debug("TICK触发: C:{} D:{} T:{} P:{} V:{} OI:{} OID:{}", 

@@ -2,10 +2,13 @@ package org.dromara.northstar.strategy;
 
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 
 import org.dromara.northstar.common.TickDataAware;
+import org.dromara.northstar.common.model.ContractSimpleInfo;
+import org.dromara.northstar.common.model.ModuleAccountDescription;
 import org.dromara.northstar.common.model.core.Bar;
 import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.common.model.core.Order;
@@ -68,8 +71,24 @@ public abstract class AbstractStrategy implements TradeStrategy{
 		return (IModuleContext) ctx;
 	}
 	
+	/**
+	 * 是否启用
+	 * @return
+	 */
 	public boolean isEnabled() {
 		return getContext().isEnabled();
+	}
+	
+	/**
+	 * 模组绑定的合约
+	 * @return
+	 */
+	protected List<ContractSimpleInfo> bindedContracts(){
+		return getContext().getModule().getModuleDescription().getModuleAccountSettingsDescription()
+				.stream()
+				.map(ModuleAccountDescription::getBindedContracts)
+				.flatMap(List::stream)
+				.toList();
 	}
 	
 	/**
