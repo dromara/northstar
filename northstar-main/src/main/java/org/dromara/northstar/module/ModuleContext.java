@@ -6,7 +6,6 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -433,7 +432,9 @@ public class ModuleContext implements IModuleContext{
 			accRtDescription.setAvgEarning(avgProfit);
 			accRtDescription.setAnnualizedRateOfReturn(annualizedRateOfReturn);
 			
-			Map<String, List<String>> indicatorMap = new HashMap<>();
+			Map<String, List<String>> indicatorMap = indicatorNameTbl.rowKeySet()
+					.stream()
+					.collect(Collectors.toMap(Contract::name, c -> indicatorNameTbl.row(c).keySet().stream().toList()));
 			Map<String, JSONArray> dataMap = dataFrameQMap.entrySet()
 					.stream()
 					.collect(Collectors.toMap(e -> e.getKey().name(), e -> new JSONArray(e.getValue().stream().toList())));
