@@ -261,7 +261,7 @@
           模组当前引用的K线数据（模组仅缓存最近的{{ module.moduleCacheDataSize }}根K线数据）
         </div>
         <div>
-          <el-select class="ml-10 mt-5" v-model="contractNameOfChart" placeholder="请选择合约">
+          <el-select id="selectContract" class="ml-10 mt-5" v-model="contractNameOfChart" placeholder="请选择合约">
             <el-option
               v-for="(item, i) in bindedContracts"
               :key="i"
@@ -270,6 +270,7 @@
             ></el-option>
           </el-select>
           <el-select
+            id="selectIndicator"
             class="ml-10 mt-5"
             v-model="indicator.name"
             filterable

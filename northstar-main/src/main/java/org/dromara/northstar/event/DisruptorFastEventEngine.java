@@ -8,6 +8,7 @@ import java.util.concurrent.Executors;
 import org.dromara.northstar.common.event.FastEventEngine;
 import org.dromara.northstar.common.event.NorthstarEvent;
 import org.dromara.northstar.common.event.NorthstarEventType;
+import org.dromara.northstar.common.model.core.Notice;
 import org.springframework.beans.factory.DisposableBean;
 
 import com.lmax.disruptor.BatchEventProcessor;
@@ -26,7 +27,6 @@ import com.lmax.disruptor.util.DaemonThreadFactory;
 
 import lombok.extern.slf4j.Slf4j;
 import xyz.redtorch.pb.CoreEnum.CommonStatusEnum;
-import xyz.redtorch.pb.CoreField.NoticeField;
 
 /**
  * 核心事件引擎
@@ -50,10 +50,9 @@ public class DisruptorFastEventEngine implements FastEventEngine, DisposableBean
 		@Override
 		public void handleEventException(Throwable ex, long sequence, NorthstarEvent event) {
 			log.warn("事件异常：事件类型【"+event+"】", ex);
-			emitEvent(NorthstarEventType.NOTICE, NoticeField.newBuilder()
-					.setContent(ex.toString())
-					.setStatus(CommonStatusEnum.COMS_ERROR)
-					.setTimestamp(System.currentTimeMillis())
+			emitEvent(NorthstarEventType.NOTICE, Notice.builder()
+					.content(ex.toString())
+					.status(CommonStatusEnum.COMS_ERROR)
 					.build());
 		}
 

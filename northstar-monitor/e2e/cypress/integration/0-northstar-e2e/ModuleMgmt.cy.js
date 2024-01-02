@@ -20,7 +20,7 @@ describe('模组管理-测试', () => {
         cy.get('.el-select-dropdown').contains('模拟合约').click()
         cy.get('.el-dialog').filter(':visible').find('button').last().click()
         cy.visit('https://localhost/#/tdgateway')
-        cy.wait(300)
+        cy.wait(1000)
         cy.get('button').contains('新建').click()
         cy.get('.el-dialog').contains('账户ID').parent().find('input').type('testAccount')
         cy.get('.el-dialog').contains('账户类型').parent().find('.el-select').click()
@@ -153,6 +153,14 @@ describe('模组管理-测试', () => {
             cy.get('.el-table__row').contains('运行状态').click()
             cy.wait('@getRtInfo').should('have.nested.property', 'response.statusCode', 200)
             cy.wait('@getRecord').should('have.nested.property', 'response.statusCode', 200)
+        })
+
+        it('模组图表的指标列表不为空', () => {
+            cy.get('#selectContract').click()
+            cy.get('.el-select-dropdown').filter(':visible').contains('模拟合约').click()
+            cy.wait(300)
+            cy.get('#selectIndicator').click()
+            cy.get('.el-select-dropdown__item').filter(':visible').should('have.length', 1)
         })
 
         it('可以手工增加模组持仓', () => {
