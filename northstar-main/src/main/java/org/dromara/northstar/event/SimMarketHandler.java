@@ -12,12 +12,13 @@ import org.dromara.northstar.common.event.NorthstarEvent;
 import org.dromara.northstar.common.event.NorthstarEventType;
 import org.dromara.northstar.common.model.Identifier;
 import org.dromara.northstar.common.model.core.Tick;
+import org.dromara.northstar.common.utils.CommonUtils;
 import org.dromara.northstar.gateway.MarketGateway;
 import org.dromara.northstar.gateway.sim.trade.SimTradeGateway;
 
 public class SimMarketHandler extends AbstractEventHandler implements GenericEventHandler{
 
-	private Executor exec = Executors.newVirtualThreadPerTaskExecutor();	// 增加一个工作线程解耦TICK事件可能导致的死锁问题
+	private Executor exec = Executors.newThreadPerTaskExecutor(CommonUtils.virtualThreadFactory(SimMarketHandler.class));	// 增加一个工作线程解耦TICK事件可能导致的死锁问题
 	
 	private GatewayManager gatewayMgr;
 	

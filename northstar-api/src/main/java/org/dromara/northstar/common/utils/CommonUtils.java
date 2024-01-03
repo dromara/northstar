@@ -8,6 +8,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
+import java.util.concurrent.ThreadFactory;
 
 import org.apache.commons.io.FileUtils;
 import org.springframework.util.Assert;
@@ -77,5 +78,20 @@ public class CommonUtils {
 			}
 		}
 		throw new IllegalArgumentException("价格精度最多为小数点后九位");
+	}
+
+	/**
+	 * @param c Class
+	 * @return ThreadFactory
+	 * 创建虚拟线程工厂并进行命名，类名前十位字符加-virtual
+	 */
+	public static ThreadFactory virtualThreadFactory(Class c) {
+		String className = c.getSimpleName(); // 获取MyClass类的类名
+		if (className.length() > 10) {
+			className = className.substring(0, 10);
+		}
+		className += "-virtual";
+		ThreadFactory factory = Thread.ofVirtual().name(className).factory();
+		return factory;
 	}
 }
