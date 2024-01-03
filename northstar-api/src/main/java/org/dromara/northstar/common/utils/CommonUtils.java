@@ -86,7 +86,7 @@ public class CommonUtils {
 	 * 创建虚拟线程工厂并进行命名，类名前十位字符加-virtual
 	 */
 	public static ThreadFactory virtualThreadFactory(Class c) {
-		String className = c.getSimpleName(); // 获取MyClass类的类名
+		String className = c.getSimpleName(); // 获取类名
 		if (className.length() > 10) {
 			className = className.substring(0, 10);
 		}
