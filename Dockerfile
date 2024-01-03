@@ -7,6 +7,7 @@ WORKDIR /northstar-dist
 
 # 复制当前目录下的所有*.jar文件到工作目录
 COPY ./*.jar ./
+COPY ./*.json ./
 
 # 添加启动脚本
 RUN echo 'java -Denv=prod -Dloader.path=/northstar-dist -jar /northstar-dist/northstar-*.jar' > /northstar-dist/entrypoint.sh
