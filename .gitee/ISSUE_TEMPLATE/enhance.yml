@@ -1,0 +1,34 @@
+name: 优化
+title: "[优化]: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    attributes:
+      label: 现存问题
+      description: 请详细说明问题，并附上必要的截图说明
+      placeholder: |
+        1. ...
+        2. ...
+        3. ...
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: 优化方案
+      description: 请说明优化方案。
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: 优化效果验证
+      description: 请告诉附上优化前后的效果对比。
+    validations:
+      required: true
+  - type: input
+    id: prevalence
+    attributes:
+      label: 问题版本号
+      description: 你当前正在使用我们软件的哪个版本/分支？
+      placeholder: v6.0.0
+    validations:
+      required: true
