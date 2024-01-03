@@ -49,6 +49,7 @@ public class IndexContract implements IContract, TickDataAware{
 		this.identifier = Identifier.of(contract.contractId());
 		this.barGen = new MinuteBarGenerator(contract, bar -> feEngine.emitEvent(NorthstarEventType.BAR, bar));
 		this.ticker = new IndexTicker(this, t -> {
+			log.debug("合成指数TICK：{} {} {} {} {}", t.contract().unifiedSymbol(), t.actionDay(), t.actionTime(), t.actionTimestamp(), t.tradingDay());
 			feEngine.emitEvent(NorthstarEventType.TICK, t);
 			barGen.update(t);
 		});
@@ -106,6 +107,7 @@ public class IndexContract implements IContract, TickDataAware{
 	
 	@Override
 	public void onTick(Tick tick) {
+		log.trace("{} 合约收到月份合约数据：{}", contract.unifiedSymbol(), tick.contract().unifiedSymbol());
 		ticker.update(tick);
 	}
 
