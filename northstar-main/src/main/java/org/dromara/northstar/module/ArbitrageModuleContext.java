@@ -17,6 +17,7 @@ import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.common.model.core.Position;
 import org.dromara.northstar.common.model.core.SubmitOrderReq;
 import org.dromara.northstar.common.model.core.Tick;
+import org.dromara.northstar.common.utils.CommonUtils;
 import org.dromara.northstar.common.utils.FieldUtils;
 import org.dromara.northstar.common.utils.OrderUtils;
 import org.dromara.northstar.data.IModuleRepository;
@@ -40,7 +41,7 @@ import xyz.redtorch.pb.CoreEnum.TimeConditionEnum;
 
 public class ArbitrageModuleContext extends ModuleContext implements IModuleContext{
 	
-	private ExecutorService exec = Executors.newVirtualThreadPerTaskExecutor();
+	private ExecutorService exec = Executors.newThreadPerTaskExecutor(CommonUtils.virtualThreadFactory(ArbitrageModuleContext.class));
 	
 	private final Logger logger;
 

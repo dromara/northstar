@@ -16,6 +16,7 @@ import org.dromara.northstar.common.model.core.Order;
 import org.dromara.northstar.common.model.core.Position;
 import org.dromara.northstar.common.model.core.Tick;
 import org.dromara.northstar.common.model.core.Trade;
+import org.dromara.northstar.common.utils.CommonUtils;
 
 import com.corundumstudio.socketio.SocketIOClient;
 import com.corundumstudio.socketio.SocketIOServer;
@@ -35,7 +36,7 @@ public class BroadcastHandler extends AbstractEventHandler implements GenericEve
 	
 	private SocketIOServer socketServer;
 	
-	private ExecutorService exec = Executors.newVirtualThreadPerTaskExecutor();
+	private ExecutorService exec = Executors.newThreadPerTaskExecutor(CommonUtils.virtualThreadFactory(BroadcastHandler.class));
 	
 	private static final Set<NorthstarEventType> TARGET_TYPE = EnumSet.of(
 			NorthstarEventType.TICK, 
