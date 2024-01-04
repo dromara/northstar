@@ -8,6 +8,8 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
 import org.apache.commons.io.FileUtils;
@@ -81,17 +83,25 @@ public class CommonUtils {
 	}
 
 	/**
-	 * @param c Class
-	 * @return ThreadFactory
 	 * 创建虚拟线程工厂并进行命名，类名前十位字符加-virtual
+	 * @param clz
+	 * @return
 	 */
-	public static ThreadFactory virtualThreadFactory(Class c) {
-		String className = c.getSimpleName(); // 获取类名
+	public static ThreadFactory virtualThreadFactory(Class<?> clz) {
+		String className = clz.getSimpleName(); // 获取类名
 		if (className.length() > 10) {
 			className = className.substring(0, 10);
 		}
 		className += "-virtual";
-		ThreadFactory factory = Thread.ofVirtual().name(className).factory();
-		return factory;
+		return Thread.ofVirtual().name(className).factory();
+	}
+	
+	/**
+	 * 创建虚拟线程池
+	 * @param clz
+	 * @return
+	 */
+	public static ExecutorService newThreadPerTaskExecutor(Class<?> clz) {
+		return Executors.newThreadPerTaskExecutor(virtualThreadFactory(clz));
 	}
 }

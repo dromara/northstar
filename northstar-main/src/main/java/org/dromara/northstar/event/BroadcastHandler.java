@@ -3,7 +3,6 @@ package org.dromara.northstar.event;
 import java.util.EnumSet;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import org.dromara.northstar.common.event.AbstractEventHandler;
 import org.dromara.northstar.common.event.GenericEventHandler;
@@ -36,7 +35,7 @@ public class BroadcastHandler extends AbstractEventHandler implements GenericEve
 	
 	private SocketIOServer socketServer;
 	
-	private ExecutorService exec = Executors.newThreadPerTaskExecutor(CommonUtils.virtualThreadFactory(BroadcastHandler.class));
+	private ExecutorService exec = CommonUtils.newThreadPerTaskExecutor(BroadcastHandler.class);
 	
 	private static final Set<NorthstarEventType> TARGET_TYPE = EnumSet.of(
 			NorthstarEventType.TICK, 

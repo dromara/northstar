@@ -3,7 +3,6 @@ package org.dromara.northstar.event;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import org.dromara.northstar.common.event.FastEventEngine;
 import org.dromara.northstar.common.event.NorthstarEvent;
@@ -37,7 +36,7 @@ import xyz.redtorch.pb.CoreField.NoticeField;
 @Slf4j
 public class DisruptorFastEventEngine implements FastEventEngine, DisposableBean {
 
-	private static final ExecutorService executor = Executors.newThreadPerTaskExecutor(CommonUtils.virtualThreadFactory(DisruptorFastEventEngine.class));
+	private static final ExecutorService executor = CommonUtils.newThreadPerTaskExecutor(DisruptorFastEventEngine.class);
 	private static final int BUF_SIZE = 65536;
 	
 	private final Map<EventHandler<NorthstarEvent>, BatchEventProcessor<NorthstarEvent>> handlerProcessorMap = new ConcurrentHashMap<>();

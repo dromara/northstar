@@ -1,7 +1,6 @@
 package org.dromara.northstar.event;
 
 import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.dromara.northstar.account.AccountManager;
@@ -18,7 +17,7 @@ import org.dromara.northstar.gateway.sim.trade.SimTradeGateway;
 
 public class SimMarketHandler extends AbstractEventHandler implements GenericEventHandler{
 
-	private Executor exec = Executors.newThreadPerTaskExecutor(CommonUtils.virtualThreadFactory(SimMarketHandler.class));	// 增加一个工作线程解耦TICK事件可能导致的死锁问题
+	private Executor exec = CommonUtils.newThreadPerTaskExecutor(SimMarketHandler.class);	// 增加一个工作线程解耦TICK事件可能导致的死锁问题
 	
 	private GatewayManager gatewayMgr;
 	

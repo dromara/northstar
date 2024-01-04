@@ -7,7 +7,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import org.dromara.northstar.common.constant.SignalOperation;
 import org.dromara.northstar.common.model.ModuleDescription;
@@ -41,7 +40,7 @@ import xyz.redtorch.pb.CoreEnum.TimeConditionEnum;
 
 public class ArbitrageModuleContext extends ModuleContext implements IModuleContext{
 	
-	private ExecutorService exec = Executors.newThreadPerTaskExecutor(CommonUtils.virtualThreadFactory(ArbitrageModuleContext.class));
+	private ExecutorService exec = CommonUtils.newThreadPerTaskExecutor(ArbitrageModuleContext.class);
 	
 	private final Logger logger;
 
