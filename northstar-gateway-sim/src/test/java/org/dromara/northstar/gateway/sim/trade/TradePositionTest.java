@@ -18,8 +18,8 @@ import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 class TradePositionTest {
 	
 	LocalDate today = LocalDate.now();
-	Contract c1 = Contract.builder().symbol("rb2205@SHFE").multiplier(10).longMarginRatio(0.08).shortMarginRatio(0.08).build();
-	Contract c2 = Contract.builder().symbol("rb2210@SHFE").multiplier(10).longMarginRatio(0.08).shortMarginRatio(0.08).build();
+	Contract c1 = Contract.builder().unifiedSymbol("rb2205@SHFE").multiplier(10).longMarginRatio(0.08).shortMarginRatio(0.08).build();
+	Contract c2 = Contract.builder().unifiedSymbol("rb2210@SHFE").multiplier(10).longMarginRatio(0.08).shortMarginRatio(0.08).build();
 	
 	Trade openTrade = Trade.builder().tradingDay(today.minusDays(1)).contract(c1).price(5000).volume(2).direction(DirectionEnum.D_Buy).offsetFlag(OffsetFlagEnum.OF_Open).build();
 	Trade openTrade1 = Trade.builder().tradingDay(today).contract(c1).price(5300).volume(1).direction(DirectionEnum.D_Buy).offsetFlag(OffsetFlagEnum.OF_Open).build();
