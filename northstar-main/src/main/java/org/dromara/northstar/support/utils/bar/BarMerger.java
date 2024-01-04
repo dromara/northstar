@@ -6,7 +6,6 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -20,10 +19,7 @@ import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.common.model.core.TimeSlot;
 import org.dromara.northstar.common.utils.CommonUtils;
 import org.dromara.northstar.common.utils.DateTimeUtils;
-import org.dromara.northstar.strategy.IModuleContext;
 import org.dromara.northstar.strategy.MergedBarListener;
-import org.dromara.northstar.strategy.TradeStrategy;
-import org.dromara.northstar.support.utils.bar.BarMergerRegistry.ListenerType;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -45,7 +41,7 @@ public class BarMerger implements BarDataAware{
 	
 	protected Bar protoBar;
 	
-	protected final Map<ListenerType, Set<MergedBarListener>> listenerMap = new EnumMap<>(ListenerType.class);
+	protected final Set<MergedBarListener> listeners = new HashSet<>();
 	
 	/**
 	 * 把分钟时间对齐，并保存一份映射表，以快速得到任意时刻的K线结算时间
@@ -56,9 +52,6 @@ public class BarMerger implements BarDataAware{
 		this.contract = contract;
 		this.numOfMinPerBar = numOfMinPerBar;
 		this.barTimeMap = genBarTimeMap();
-		listenerMap.put(ListenerType.INDICATOR, new HashSet<>());
-		listenerMap.put(ListenerType.CONTEXT, new HashSet<>());
-		listenerMap.put(ListenerType.STRATEGY, new HashSet<>());
 	}
 
 	// 该方法用于生成分钟线时间对齐的映射表
@@ -122,16 +115,6 @@ public class BarMerger implements BarDataAware{
 		return timeSlots.get(timeSlots.size() - 1).end();
 	}
 
-	public synchronized void addListener(MergedBarListener listener) {
-		ListenerType type = ListenerType.INDICATOR;
-		if(listener instanceof IModuleContext) {
-			type = ListenerType.CONTEXT;
-		} else if(listener instanceof TradeStrategy) {
-			type = ListenerType.STRATEGY;
-		}
-		listenerMap.get(type).add(listener);
-	}
-	
 	protected LocalDateTime toCutoffDateTime(Bar bar) {
 		LocalTime keyTime = bar.actionTime().withSecond(0).withNano(0);
 		if(!barTimeMap.containsKey(keyTime)) {
@@ -203,10 +186,12 @@ public class BarMerger implements BarDataAware{
 		}
 	}
 	
+	public synchronized void addListener(MergedBarListener listener) {
+		listeners.add(listener);
+	}
+	
 	protected void doGenerate() {
-		listenerMap.get(ListenerType.INDICATOR).forEach(listener -> listener.onMergedBar(protoBar));
-		listenerMap.get(ListenerType.STRATEGY).forEach(listener -> listener.onMergedBar(protoBar));
-		listenerMap.get(ListenerType.CONTEXT).forEach(listener -> listener.onMergedBar(protoBar));
+		listeners.forEach(listener -> listener.onMergedBar(protoBar));
 		protoBar = null;
 	}
 	
