@@ -115,7 +115,7 @@ public record Contract(
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(contractId, symbol, unifiedSymbol);
+		return Objects.hash(channelType, contractId, gatewayId, unifiedSymbol);
 	}
 
 	@Override
@@ -127,8 +127,8 @@ public record Contract(
 		if (getClass() != obj.getClass())
 			return false;
 		Contract other = (Contract) obj;
-		return Objects.equals(contractId, other.contractId) && Objects.equals(symbol, other.symbol)
-				&& Objects.equals(unifiedSymbol, other.unifiedSymbol);
+		return channelType == other.channelType && Objects.equals(contractId, other.contractId)
+				&& Objects.equals(gatewayId, other.gatewayId) && Objects.equals(unifiedSymbol, other.unifiedSymbol);
 	}
 
 }

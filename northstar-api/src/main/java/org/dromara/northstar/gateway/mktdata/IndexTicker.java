@@ -26,8 +26,8 @@ public class IndexTicker {
 	
 	private final Set<Contract> memberContracts;
 	
-	private ConcurrentHashMap<String, Tick> tickMap = new ConcurrentHashMap<>(20);
-	private ConcurrentHashMap<String, Double> weightedMap = new ConcurrentHashMap<>(20);
+	private ConcurrentHashMap<Contract, Tick> tickMap = new ConcurrentHashMap<>(20);
+	private ConcurrentHashMap<Contract, Double> weightedMap = new ConcurrentHashMap<>(20);
 	
 	private long lastTickTimestamp = -1;
 	
@@ -96,7 +96,7 @@ public class IndexTicker {
 			lastTickTimestamp = tick.actionTimestamp();
 		}
 		// 同一个指数Tick
-		tickMap.compute(tick.contract().unifiedSymbol(), (k, v) -> tick);
+		tickMap.compute(tick.contract(), (k, v) -> tick);
 	}
 	
 	private void calculate() {
@@ -154,7 +154,7 @@ public class IndexTicker {
 		settlePrice = weightedSettle;
 	}
 	
-	private double computeWeightedValue(ToDoubleFunction<Entry<String, Double>> transformer) {
+	private double computeWeightedValue(ToDoubleFunction<Entry<Contract, Double>> transformer) {
 		return weightedMap.reduceEntriesToDouble(
 				PARA_THRESHOLD,
 				transformer,
