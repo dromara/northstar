@@ -1,8 +1,6 @@
 package org.dromara.northstar.event;
 
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ExecutorService;
 
 import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.event.AbstractEventHandler;
@@ -10,6 +8,7 @@ import org.dromara.northstar.common.event.GenericEventHandler;
 import org.dromara.northstar.common.event.NorthstarEvent;
 import org.dromara.northstar.common.event.NorthstarEventType;
 import org.dromara.northstar.common.model.core.Bar;
+import org.dromara.northstar.common.utils.CommonUtils;
 import org.dromara.northstar.data.IMarketDataRepository;
 
 /**
@@ -21,7 +20,7 @@ public class MarketDataHandler extends AbstractEventHandler implements GenericEv
 
 	private IMarketDataRepository mdRepo;
 	
-	private ThreadPoolExecutor exec = new ThreadPoolExecutor(5, 10, 60, TimeUnit.SECONDS, new ArrayBlockingQueue<>(500));
+	private ExecutorService exec = CommonUtils.newThreadPerTaskExecutor(getClass());
 	
 	public MarketDataHandler(IMarketDataRepository mdRepo) {
 		this.mdRepo = mdRepo;
