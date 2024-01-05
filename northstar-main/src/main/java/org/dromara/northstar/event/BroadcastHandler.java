@@ -3,7 +3,6 @@ package org.dromara.northstar.event;
 import java.util.EnumSet;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import org.dromara.northstar.common.event.AbstractEventHandler;
 import org.dromara.northstar.common.event.GenericEventHandler;
@@ -16,6 +15,7 @@ import org.dromara.northstar.common.model.core.Order;
 import org.dromara.northstar.common.model.core.Position;
 import org.dromara.northstar.common.model.core.Tick;
 import org.dromara.northstar.common.model.core.Trade;
+import org.dromara.northstar.common.utils.CommonUtils;
 
 import com.corundumstudio.socketio.SocketIOClient;
 import com.corundumstudio.socketio.SocketIOServer;
@@ -35,7 +35,7 @@ public class BroadcastHandler extends AbstractEventHandler implements GenericEve
 	
 	private SocketIOServer socketServer;
 	
-	private ExecutorService exec = Executors.newVirtualThreadPerTaskExecutor();
+	private ExecutorService exec = CommonUtils.newThreadPerTaskExecutor(BroadcastHandler.class);
 	
 	private static final Set<NorthstarEventType> TARGET_TYPE = EnumSet.of(
 			NorthstarEventType.TICK, 

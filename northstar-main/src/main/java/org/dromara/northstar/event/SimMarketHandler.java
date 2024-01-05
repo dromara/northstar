@@ -17,7 +17,7 @@ import org.dromara.northstar.gateway.sim.trade.SimTradeGateway;
 
 public class SimMarketHandler extends AbstractEventHandler implements GenericEventHandler{
 
-	private Executor exec = Executors.newVirtualThreadPerTaskExecutor();	// 增加一个工作线程解耦TICK事件可能导致的死锁问题
+	private Executor exec = Executors.newSingleThreadExecutor();	// 增加一个工作线程解耦TICK事件可能导致的死锁问题
 	
 	private GatewayManager gatewayMgr;
 	

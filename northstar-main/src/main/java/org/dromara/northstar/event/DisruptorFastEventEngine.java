@@ -36,7 +36,7 @@ import xyz.redtorch.pb.CoreEnum.CommonStatusEnum;
 @Slf4j
 public class DisruptorFastEventEngine implements FastEventEngine, DisposableBean {
 
-	private static final ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
+	private static final ExecutorService executor = Executors.newCachedThreadPool(DaemonThreadFactory.INSTANCE);
 	private static final int BUF_SIZE = 65536;
 	
 	private final Map<EventHandler<NorthstarEvent>, BatchEventProcessor<NorthstarEvent>> handlerProcessorMap = new ConcurrentHashMap<>();
