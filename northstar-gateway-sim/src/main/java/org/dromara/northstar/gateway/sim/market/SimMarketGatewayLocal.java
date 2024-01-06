@@ -27,7 +27,7 @@ public class SimMarketGatewayLocal implements MarketGateway{
 	
 	private FastEventEngine feEngine;
 	
-	private ScheduledExecutorService scheduleExec = Executors.newScheduledThreadPool(0);
+	private ScheduledExecutorService scheduleExec = Executors.newScheduledThreadPool(1);
 	
 	private long lastActiveTime;
 	
