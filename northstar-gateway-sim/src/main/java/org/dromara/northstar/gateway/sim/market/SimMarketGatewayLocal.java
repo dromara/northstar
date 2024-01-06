@@ -3,10 +3,9 @@ package org.dromara.northstar.gateway.sim.market;
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import org.dromara.northstar.common.constant.ChannelType;
@@ -27,11 +26,9 @@ public class SimMarketGatewayLocal implements MarketGateway{
 	
 	private FastEventEngine feEngine;
 	
-	private ScheduledExecutorService scheduleExec = Executors.newScheduledThreadPool(1);
-	
 	private long lastActiveTime;
 	
-	private ScheduledFuture<?> task;
+	private Timer timer;
 	
 	private IMarketCenter mktCenter;
 	
@@ -71,19 +68,25 @@ public class SimMarketGatewayLocal implements MarketGateway{
 			return;
 		}
 		log.info("模拟行情连线");
-		task = scheduleExec.scheduleAtFixedRate(()->{
-			lastActiveTime = System.currentTimeMillis();
-			try {				
-				for(Entry<String, SimTickGenerator> e: tickGenMap.entrySet()) {
-					Tick tick = e.getValue().generateNextTick(LocalDateTime.now(), this);
-					feEngine.emitEvent(NorthstarEventType.TICK, tick);
-					GatewayContract contract = (GatewayContract) mktCenter.getContract(ChannelType.SIM, tick.contract().unifiedSymbol());
-					contract.onTick(tick);
-				}
-			} catch (Exception e) {
-				log.error("模拟行情TICK生成异常", e);
+		timer = new Timer("sim", true);
+		timer.scheduleAtFixedRate(new TimerTask() {
+			
+			@Override
+			public void run() {
+				lastActiveTime = System.currentTimeMillis();
+				try {				
+					for(Entry<String, SimTickGenerator> e: tickGenMap.entrySet()) {
+						Tick tick = e.getValue().generateNextTick(LocalDateTime.now(), SimMarketGatewayLocal.this);
+						feEngine.emitEvent(NorthstarEventType.TICK, tick);
+						GatewayContract contract = (GatewayContract) mktCenter.getContract(ChannelType.SIM, tick.contract().unifiedSymbol());
+						contract.onTick(tick);
+					}
+				} catch (Exception e) {
+					log.error("模拟行情TICK生成异常", e);
+				}				
 			}
-		}, 500, 500, TimeUnit.MILLISECONDS);
+			
+		}, 500L, 500L);
 		
 		connState = ConnectionState.CONNECTED;
 		CompletableFuture.runAsync(() -> feEngine.emitEvent(NorthstarEventType.GATEWAY_READY, gd.getGatewayId()), 
@@ -92,8 +95,9 @@ public class SimMarketGatewayLocal implements MarketGateway{
 
 	@Override
 	public void disconnect() {
-		if(task != null) {			
-			task.cancel(false);
+		if(timer != null) {			
+			timer.cancel();
+			timer = null;
 		}
 		log.info("模拟行情断开");
 		connState = ConnectionState.DISCONNECTED;

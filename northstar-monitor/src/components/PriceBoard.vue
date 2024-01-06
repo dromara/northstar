@@ -138,33 +138,63 @@ export default {
   },
   computed: {
     askPrice4(){
+      if(isNaN(this.askPrice[4])){
+        return this.askPrice[4]
+      }
       return this.askPrice[4].toFixed(this.precision)
     },
     askPrice3(){
+      if(isNaN(this.askPrice[3])){
+        return this.askPrice[3]
+      }
       return this.askPrice[3].toFixed(this.precision)
     },
     askPrice2(){
+      if(isNaN(this.askPrice[2])){
+        return this.askPrice[2]
+      }
       return this.askPrice[2].toFixed(this.precision)
     },
     askPrice1(){
+      if(isNaN(this.askPrice[1])){
+        return this.askPrice[1]
+      }
       return this.askPrice[1].toFixed(this.precision)
     },
     askPrice0(){
+      if(isNaN(this.askPrice[0])){
+        return this.askPrice[0]
+      }
       return this.askPrice[0].toFixed(this.precision)
     },
     bidPrice0(){
+      if(isNaN(this.bidPrice[0])){
+        return this.bidPrice[0]
+      }
       return this.bidPrice[0].toFixed(this.precision)
     },
     bidPrice1(){
+      if(isNaN(this.bidPrice[1])){
+        return this.bidPrice[1]
+      }
       return this.bidPrice[1].toFixed(this.precision)
     },
     bidPrice2(){
+      if(isNaN(this.bidPrice[2])){
+        return this.bidPrice[2]
+      }
       return this.bidPrice[2].toFixed(this.precision)
     },
     bidPrice3(){
+      if(isNaN(this.bidPrice[3])){
+        return this.bidPrice[3]
+      }
       return this.bidPrice[3].toFixed(this.precision)
     },
     bidPrice4(){
+      if(isNaN(this.bidPrice[4])){
+        return this.bidPrice[4]
+      }
       return this.bidPrice[4].toFixed(this.precision)
     }
   }
