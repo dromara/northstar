@@ -68,8 +68,7 @@ server:
     enabled: false
 spring:
   cache:
-    type: ehcache
-    ehcache:
+    jcache:
       config: classpath:ehcache.xml
   datasource:
     url: jdbc:h2:mem:testdb

@@ -45,7 +45,7 @@
 - 交互协议HTTP + websocket
 - 数据库采用H2（历史行情数据主要依赖数据服务，本地仅保存少量账户配置信息）
 - 前端监控台采用node14 + vue2.x
-- 服务端采用java17 + springboot2
+- 服务端采用java21 + springboot3
 
 项目架构采用事件驱动+插件式开发
 ![输入图片说明](https://foruda.gitee.com/images/1684034911905355451/683de173_1676852.png "总体架构图")
