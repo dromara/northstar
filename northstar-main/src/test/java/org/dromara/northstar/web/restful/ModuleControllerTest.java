@@ -49,7 +49,6 @@ import org.dromara.northstar.gateway.playback.PlaybackGatewaySettings;
 import org.dromara.northstar.gateway.sim.trade.SimGatewayFactory;
 import org.dromara.northstar.module.ModuleManager;
 import org.dromara.northstar.strategy.IMessageSender;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -66,7 +65,6 @@ import com.corundumstudio.socketio.SocketIOServer;
 
 import cn.hutool.crypto.digest.MD5;
 import common.TestGatewayFactory;
-import net.sf.ehcache.CacheManager;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 
@@ -204,11 +202,6 @@ class ModuleControllerTest {
 		mdrRepo.deleteAll();
 		gwRepo.deleteAll();
 		moduleMgr.remove(Identifier.of("testModule"));
-	}
-	
-	@AfterAll
-	static void clearCache() {
-		CacheManager.getInstance().shutdown();
 	}
 	
 	@Test

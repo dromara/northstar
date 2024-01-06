@@ -45,12 +45,9 @@
 		    <artifactId>spring-boot-starter-cache</artifactId>
 		</dependency>
 		<dependency>
-		    <groupId>net.sf.ehcache</groupId>
-			    <artifactId>ehcache</artifactId>
-		</dependency>
-		<dependency>
-		    <groupId>javax.cache</groupId>
-		    <artifactId>cache-api</artifactId>
+		  <groupId>org.ehcache</groupId>
+		  <artifactId>ehcache</artifactId>
+		  <classifier>jakarta</classifier>
 		</dependency>
 		<dependency>
 		    <groupId>com.corundumstudio.socketio</groupId>

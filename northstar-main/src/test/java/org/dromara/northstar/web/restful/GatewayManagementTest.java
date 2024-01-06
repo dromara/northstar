@@ -17,7 +17,6 @@ import org.dromara.northstar.data.jdbc.GatewayDescriptionRepository;
 import org.dromara.northstar.event.BroadcastHandler;
 import org.dromara.northstar.gateway.playback.PlaybackGatewaySettings;
 import org.dromara.northstar.strategy.IMessageSender;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,7 +33,6 @@ import com.corundumstudio.socketio.SocketIOServer;
 
 import cn.hutool.crypto.digest.MD5;
 import common.TestGatewayFactory;
-import net.sf.ehcache.CacheManager;
 
 /**
  * GatewayManagement接口黑盒测试类
@@ -74,11 +72,6 @@ class GatewayManagementTest {
 	@AfterEach
 	void cleanUp(){
 		repo.deleteAll();
-	}
-	
-	@AfterAll
-	static void clearCache() {
-		CacheManager.getInstance().shutdown();
 	}
 	
 	@Test

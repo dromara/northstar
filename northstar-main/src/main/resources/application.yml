@@ -55,8 +55,7 @@ server:
     enabled: false
 spring:
   cache:
-    type: ehcache
-    ehcache:
+    jcache:
       config: classpath:ehcache.xml
   config:
     activate:
