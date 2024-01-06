@@ -38,7 +38,7 @@ public class PlaybackGatewayFactory implements GatewayFactory{
 		LocalDateTime ldt = Objects.nonNull(playbackRt) 
 				? playbackRt.getPlaybackTimeState() 
 				: LocalDateTime.of(LocalDate.parse(settings.getStartDate(), DateTimeConstant.D_FORMAT_INT_FORMATTER), DateTimeUtils.fromCacheTime(20, 0));
-		IPlaybackContext context = new PlaybackContextV2(gatewayDescription, ldt, feEngine, rtRepo, contractMgr);
+		IPlaybackContext context = new PlaybackContext(gatewayDescription, ldt, feEngine, rtRepo, contractMgr);
 		return new PlaybackGatewayAdapter(context, gatewayDescription);
 	}
 	

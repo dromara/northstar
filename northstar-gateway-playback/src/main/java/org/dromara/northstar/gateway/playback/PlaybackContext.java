@@ -29,7 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 import xyz.redtorch.pb.CoreEnum.CommonStatusEnum;
 
 @Slf4j
-public class PlaybackContextV2 implements IPlaybackContext{
+public class PlaybackContext implements IPlaybackContext{
 	
 	private IPlaybackRuntimeRepository rtRepo;
 	
@@ -54,7 +54,7 @@ public class PlaybackContextV2 implements IPlaybackContext{
 	private boolean isRunning;
 	private Timer timer;
 	
-	public PlaybackContextV2(GatewayDescription gd, LocalDateTime currentTimeState, 
+	public PlaybackContext(GatewayDescription gd, LocalDateTime currentTimeState, 
 			FastEventEngine feEngine, IPlaybackRuntimeRepository rtRepo, IContractManager contractMgr) {
 		this.rtRepo = rtRepo;
 		this.feEngine = feEngine;
