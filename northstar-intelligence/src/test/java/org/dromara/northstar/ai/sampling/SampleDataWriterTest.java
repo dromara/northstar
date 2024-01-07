@@ -1,6 +1,6 @@
-package org.dromara.northstar.sampling;
+package org.dromara.northstar.ai.sampling;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import java.io.File;
 import java.util.Random;

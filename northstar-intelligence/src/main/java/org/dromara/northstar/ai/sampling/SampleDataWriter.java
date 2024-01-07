@@ -1,4 +1,4 @@
-package org.dromara.northstar.sampling;
+package org.dromara.northstar.ai.sampling;
 
 import java.io.File;
 import java.io.FileWriter;
