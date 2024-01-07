@@ -1,20 +1,26 @@
 package org.dromara.northstar;
 
-import java.util.Iterator;
+import java.util.concurrent.ThreadLocalRandom;
 
-import org.tensorflow.GraphOperation;
-import org.tensorflow.Operand;
-import org.tensorflow.Operation;
-import org.tensorflow.Result;
+import org.tensorflow.ConcreteFunction;
 import org.tensorflow.SavedModelBundle;
 import org.tensorflow.Session;
+import org.tensorflow.SessionFunction;
+import org.tensorflow.Signature;
 import org.tensorflow.Tensor;
+import org.tensorflow.ndarray.FloatNdArray;
+import org.tensorflow.ndarray.NdArrays;
 import org.tensorflow.ndarray.Shape;
+import org.tensorflow.ndarray.StdArrays;
+import org.tensorflow.ndarray.buffer.FloatDataBuffer;
+import org.tensorflow.ndarray.impl.buffer.raw.RawDataBufferFactory;
+import org.tensorflow.ndarray.impl.dense.FloatDenseNdArray;
+import org.tensorflow.op.core.Placeholder;
 import org.tensorflow.types.TFloat32;
 
 public class TensorflowModelLoader {
 	
-	static float[] input = new float[] {2.729812f  ,   1.958112f  ,   2.1268175f ,   2.6107285f ,
+	static float[] inputData = new float[] {2.729812f  ,   1.958112f  ,   2.1268175f ,   2.6107285f ,
 	         4.1623726f ,   2.9390707f ,  -1.1724995f ,   0.2440019f ,
 	         5.7644386f ,   4.4159517f ,   1.6132894f ,   1.0913455f ,
 	         1.7029684f ,  -3.8716962f ,  -3.0412815f ,  -5.487889f ,
@@ -34,47 +40,21 @@ public class TensorflowModelLoader {
 	public static void main(String[] args) {
 		// 加载模型
         try (SavedModelBundle model = SavedModelBundle.load("C:\\Users\\KevinHuangwl\\northstar\\model", "serve")) {
-        	Iterator<GraphOperation> it = model.graph().operations();
-        	while (it.hasNext()) {
-                System.out.println(it.next().name());
+        	// 获取默认的推理函数
+           SessionFunction function = model.function(Signature.DEFAULT_KEY);
+
+            // 准备输入数据，这里我们假设是一个浮点数的二维数组
+            FloatDataBuffer dataBuf = RawDataBufferFactory.create(inputData, true);
+            // 创建输入Tensor
+            try (Tensor inputTensor = TFloat32.tensorOf(NdArrays.wrap(Shape.of(1L, 64L), dataBuf))) {
+                // 运行模型并获取输出
+                try (Tensor outputTensor = function.call(inputTensor)) {
+                    // 获取输出数据
+                    // 打印输出结果，或者进行进一步的处理
+                    System.out.println("Model output: " + outputTensor.asRawTensor().data().asFloats().getFloat(0));
+                }
             }
-            // 创建会话
-//            try (Session session = model.session()) {
-//                
-////                // 准备模型的输入数据
-////                // 假设我们的模型输入是一个浮点数的二维张量（例如，1 x 64）
-////                float[][] inputData = new float[1][64];
-////                // ...在这里填充inputData...
-////                
-////                // 创建输入Tensor
-////                Tensor inputTensor = Tensor.create(inputData);
-////                
-////                // 运行模型，获取输出
-////                // "input"是输入的操作名称，"output"是输出的操作名称
-////                // 这些名称取决于你的模型，可能需要修改
-////                Tensor result = session.runner()
-////                        .feed("input", inputTensor)
-////                        .fetch("output")
-////                        .run()
-////                        .get(0);
-//            	Tensor output = null;
-//            	try(TFloat32 input = Tensor.of(TFloat32.class, Shape.of(64L))){
-//            		result = session
-//	            		.runner()
-//	            		.feed("input", input)
-//	            		.run()
-//	            		.get(0);
-//            	}
-//                
-//                // 处理模型的输出数据
-//                float[][] outputData = new float[1][1]; // 假设模型的输出是 1 x 1 的
-//                result.copyTo(outputData);
-                
-                // 使用输出数据
-//                float prediction = outputData[0][0];
-//                System.out.println("Prediction: " + prediction);
-            	
-//            }
+    		
         }
 	}
 }
