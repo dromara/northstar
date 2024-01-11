@@ -307,13 +307,13 @@ public class ModuleContext implements IModuleContext{
 	}
 	
 	private void visualize(Indicator indicator, Bar bar, JSONObject json) {
-		for(Indicator in : indicator.dependencies()) {
-			visualize(in, bar, json);
-		}
 		if(!indicator.getConfiguration().contract().equals(bar.contract())) {
 			return;
 		}
-		if(indicator.isReady() && Boolean.TRUE.equals(indicator.getConfiguration().visible()) && indicator.get(0).timestamp() == bar.actionTimestamp()
+		for(Indicator in : indicator.dependencies()) {
+			visualize(in, bar, json);
+		}
+		if(indicator.isReady() && Boolean.TRUE.equals(indicator.getConfiguration().visible()) && indicator.get(0).timestamp() == bar.actionTimestamp() 
 				&& (isEndOfTheTradingDay(bar) || indicator.getConfiguration().ifPlotPerBar() || !indicator.get(0).unstable())) {
 			json.put(indicator.getConfiguration().indicatorID(), indicator.get(0).value());
 		}

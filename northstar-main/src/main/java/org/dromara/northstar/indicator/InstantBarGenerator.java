@@ -1,6 +1,5 @@
 package org.dromara.northstar.indicator;
 
-import java.util.Objects;
 import java.util.Optional;
 
 import org.dromara.northstar.common.model.core.Bar;
@@ -15,8 +14,14 @@ import org.dromara.northstar.common.model.core.Tick;
  */
 public class InstantBarGenerator {
 
-	private Bar barProto;
 	private final Contract contract;
+	
+	private double openPrice;
+	private double highPrice;
+	private double lowPrice;
+	private long volDelta;
+	private long turnoverDelta;
+	private double openInterestDelta;
 	
 	public InstantBarGenerator(Contract contract) {
 		this.contract = contract;
@@ -27,39 +32,40 @@ public class InstantBarGenerator {
 			throw new IllegalArgumentException("合约不匹配，期望合约：" + contract.unifiedSymbol() + "，实际合约：" + tick.contract().unifiedSymbol());
 		}
 
-		if(Objects.nonNull(barProto) && tick.actionTimestamp() % 60000 == 0) {
-			barProto = null;
+		if(tick.actionTimestamp() % 60000 == 0) {
+			openPrice = tick.lastPrice();
+			highPrice = openPrice;
+			lowPrice = openPrice;
+			volDelta = 0;
+			turnoverDelta = 0;
+			openInterestDelta = 0;
 			return Optional.empty();
 		}
 		
-		if(barProto == null) {
-			barProto = Bar.builder()
-					.actionDay(tick.actionDay())
-					.actionTime(tick.actionTime())
-					.actionTimestamp(tick.actionTimestamp())
-					.tradingDay(tick.tradingDay())
-					.openPrice(tick.lastPrice())
-					.highPrice(tick.lastPrice())
-					.lowPrice(tick.lastPrice())
-					.closePrice(tick.lastPrice())
-					.contract(tick.contract())
-					.gatewayId(tick.gatewayId())
-					.build();
-		}
+		highPrice = Math.max(highPrice, tick.lastPrice());
+		lowPrice = Math.min(lowPrice, tick.lastPrice());
+		volDelta += tick.volumeDelta();
+		turnoverDelta += tick.turnoverDelta();
+		openInterestDelta += tick.openInterestDelta();
 		
-		barProto = barProto.toBuilder()
-				.highPrice(Math.max(barProto.highPrice(), tick.lastPrice()))
-				.lowPrice(Math.min(barProto.lowPrice(), tick.lastPrice()))
+		return Optional.of(Bar.builder()
+				.actionDay(tick.actionDay())
+				.actionTime(tick.actionTime())
+				.actionTimestamp(tick.actionTimestamp())
+				.tradingDay(tick.tradingDay())
+				.gatewayId(tick.gatewayId())
+				.contract(tick.contract())
+				.openPrice(openPrice)
+				.highPrice(highPrice)
+				.lowPrice(lowPrice)
 				.closePrice(tick.lastPrice())
-				.openInterest(tick.openInterest())
 				.volume(tick.volume())
-				.volumeDelta(barProto.volumeDelta() + tick.volumeDelta())
+				.volumeDelta(volDelta)
 				.turnover(tick.turnover())
-				.turnoverDelta(barProto.turnoverDelta() + tick.turnoverDelta())
+				.turnoverDelta(turnoverDelta)
 				.openInterest(tick.openInterest())
-				.openInterestDelta(barProto.openInterestDelta() + tick.openInterestDelta())
-				.build();
-		return Optional.of(barProto);
+				.openInterestDelta(openInterestDelta)
+				.build());
 	}
 	
 }

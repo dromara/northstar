@@ -1,7 +1,6 @@
 package org.dromara.northstar.gateway.mktdata;
 
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -12,24 +11,20 @@ import org.dromara.northstar.common.model.core.Bar;
 import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.common.model.core.Tick;
 import org.dromara.northstar.common.utils.CommonUtils;
-import org.dromara.northstar.common.utils.DateTimeUtils;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class MinuteBarGenerator {
 	
-	private static final LocalTime MIDNIGHT = DateTimeUtils.fromCacheTime(0, 0);
-	
-	private LocalTime cutoffTime;
+	private Long cutoffTime;
+	private LocalDateTime cutoffDT;
 	
 	private Contract contract;
 	
-	private Tick lastTick;
+	private Tick curTick;
 	
 	private Consumer<Bar> onBarCallback;
-	
-	private Bar proto;
 	
 	private double high;
 	private double low;
@@ -39,9 +34,11 @@ public class MinuteBarGenerator {
 	private double openInterestDelta;
 	private double turnoverDelta;
 	
+	private CompletableFuture<Void> asyncCheck;
+	
 	private Runnable forceCloseBar = () -> {
 		synchronized(MinuteBarGenerator.this) {			
-			if(proto != null && lastTick != null && System.currentTimeMillis() - lastTick.actionTimestamp() > TimeUnit.MINUTES.toMillis(1)) {
+			if(curTick != null && System.currentTimeMillis() - curTick.actionTimestamp() > TimeUnit.MINUTES.toMillis(1)) {
 				log.debug("强制K线收盘：{}", contract.name());
 				finishOfBar();
 			}
@@ -81,13 +78,15 @@ public class MinuteBarGenerator {
 			return;
 		}
 		
-		lastTick = tick;
+		curTick = tick;
 		
-		if(Objects.nonNull(cutoffTime) && tick.actionTime().isAfter(cutoffTime)) {
+		if(Objects.nonNull(cutoffTime) && cutoffTime < tick.actionTimestamp()) {
 			finishOfBar();
 		}
-		if(Objects.isNull(proto)) {
-			cutoffTime = DateTimeUtils.fromCacheTime(tick.actionTime().withSecond(0).withNano(0).plusMinutes(1));
+		if(Objects.isNull(cutoffTime)) {
+			cutoffDT = LocalDateTime.of(tick.actionDay(), tick.actionTime().withSecond(0).withNano(0)).plusMinutes(1);
+			// cutoffTime是下一个整数分钟前推100毫秒
+			cutoffTime = CommonUtils.localDateTimeToMills(cutoffDT) - 100;
 			open = tick.lastPrice();
 			high = tick.lastPrice();
 			low = tick.lastPrice();
@@ -95,14 +94,6 @@ public class MinuteBarGenerator {
 			openInterestDelta = 0;
 			volumeDelta = 0;
 			turnoverDelta = 0;
-			proto = Bar.builder()
-					.gatewayId(tick.gatewayId())
-					.channelType(tick.channelType())
-					.contract(tick.contract())
-					.actionDay(MIDNIGHT.equals(cutoffTime) ? tick.actionDay().plusDays(1) : tick.actionDay())
-					.actionTime(cutoffTime)
-					.tradingDay(tick.tradingDay())
-					.build();
 		}
 		high = Math.max(tick.lastPrice(), high);
 		low = Math.min(tick.lastPrice(), low);
@@ -111,8 +102,11 @@ public class MinuteBarGenerator {
 		volumeDelta += tick.volumeDelta();
 		turnoverDelta += tick.turnoverDelta();
 		
+		if(asyncCheck != null) {			
+			asyncCheck.cancel(false);
+		}
 		// 1分钟后检查
-		CompletableFuture.runAsync(forceCloseBar, CompletableFuture.delayedExecutor(1, TimeUnit.MINUTES));
+		asyncCheck = CompletableFuture.runAsync(forceCloseBar, CompletableFuture.delayedExecutor(1, TimeUnit.MINUTES));
 	}
 	
 	/**
@@ -120,32 +114,31 @@ public class MinuteBarGenerator {
 	 * @return
 	 */
 	public synchronized void finishOfBar() {
-		if(Objects.isNull(proto)) {
+		if(Objects.isNull(cutoffTime)) {
 			return;
 		}
 		onBarCallback.accept(Bar.builder()
-				.gatewayId(proto.gatewayId())
-				.channelType(proto.channelType())
-				.contract(proto.contract())
-				.actionDay(proto.actionDay())
-				.actionTime(proto.actionTime())
-				.actionTimestamp(CommonUtils.localDateTimeToMills(LocalDateTime.of(proto.actionDay(), proto.actionTime())))
-				.tradingDay(proto.tradingDay())
+				.gatewayId(curTick.gatewayId())
+				.channelType(curTick.channelType())
+				.contract(curTick.contract())
+				.actionDay(cutoffDT.toLocalDate())
+				.actionTime(cutoffDT.toLocalTime())
+				.actionTimestamp(CommonUtils.localDateTimeToMills(cutoffDT))
+				.tradingDay(curTick.tradingDay())
 				.openPrice(open)
 				.highPrice(high)
 				.lowPrice(low)
 				.closePrice(close)
-				.preClosePrice(lastTick.preClosePrice())
-				.preOpenInterest(lastTick.preOpenInterest())
-				.preSettlePrice(lastTick.preSettlePrice())
-				.volume(lastTick.volume())
+				.preClosePrice(curTick.preClosePrice())
+				.preOpenInterest(curTick.preOpenInterest())
+				.preSettlePrice(curTick.preSettlePrice())
+				.volume(curTick.volume())
 				.volumeDelta(Math.max(0, volumeDelta))
-				.openInterest(lastTick.openInterest())
+				.openInterest(curTick.openInterest())
 				.openInterestDelta(openInterestDelta)
-				.turnover(lastTick.turnover())
+				.turnover(curTick.turnover())
 				.turnoverDelta(turnoverDelta)
 				.build());
-		proto = null;
 		cutoffTime = null;
 	}
 	

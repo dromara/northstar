@@ -41,7 +41,6 @@ class MinuteBarGeneratorTest {
 		for(int i=0; i<=120; i++) {
 			time = time.plusNanos(500*1000000);
 			long timestamp = CommonUtils.localDateTimeToMills(LocalDateTime.of(date, time));
-			System.out.println("time:" + time);
 			barGen.update(Tick.builder()
 					.contract(c)
 					.tradingDay(date)
@@ -55,4 +54,31 @@ class MinuteBarGeneratorTest {
 		assertThat(results).isNotEmpty();
 	}
 	
+	
+	@Test
+	void testWholeDayFromNightToDay() {
+		LocalDateTime ldt = LocalDateTime.of(LocalDate.now(), LocalTime.of(21, 0));
+		LocalDateTime end = ldt.plusDays(1);
+		int count = 0;
+		while(ldt.isBefore(end)) {
+			LocalDate date = ldt.toLocalDate();
+			LocalTime time = ldt.toLocalTime();
+			for(int i=0; i<=120; i++) {
+				time = time.plusNanos(500*1000000);
+				long timestamp = CommonUtils.localDateTimeToMills(LocalDateTime.of(date, time));
+				barGen.update(Tick.builder()
+						.contract(c)
+						.tradingDay(date)
+						.actionDay(date)
+						.actionTime(time)
+						.actionTimestamp(timestamp)
+						.channelType(ChannelType.CTP)
+						.type(TickType.MARKET_TICK)
+						.build());
+			}
+			count++;
+			ldt = ldt.plusMinutes(1);
+		}
+		assertThat(results).hasSize(count);
+	}
 }

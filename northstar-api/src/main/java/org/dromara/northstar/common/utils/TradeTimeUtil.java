@@ -10,8 +10,9 @@ import org.dromara.northstar.common.model.core.TradeTimeDefinition;
 public class TradeTimeUtil {
 	
 	private static final int SEC_PER_MIN = 60;
+	private static final int MINS_OF_DAY = 1440;
 	
-	private BitSet tradeTimeBitmap = new BitSet(1440);
+	private BitSet tradeTimeBitmap = new BitSet(MINS_OF_DAY);
 	
 	private Set<LocalTime> endsOfSection = new HashSet<>();
 
@@ -19,7 +20,12 @@ public class TradeTimeUtil {
 		ttd.timeSlots().forEach(ts -> {
 			LocalTime start = ts.start();
 			LocalTime end = ts.end();
-			tradeTimeBitmap.set(start.plusMinutes(1).toSecondOfDay() / SEC_PER_MIN, end.toSecondOfDay() / SEC_PER_MIN);
+			if(end.isBefore(start)) {
+				tradeTimeBitmap.set(start.plusMinutes(1).toSecondOfDay() / SEC_PER_MIN, MINS_OF_DAY);
+				tradeTimeBitmap.set(0, end.toSecondOfDay() / SEC_PER_MIN);
+			} else {				
+				tradeTimeBitmap.set(start.plusMinutes(1).toSecondOfDay() / SEC_PER_MIN, end.toSecondOfDay() / SEC_PER_MIN);
+			}
 			endsOfSection.add(end);
 		});
 	}
