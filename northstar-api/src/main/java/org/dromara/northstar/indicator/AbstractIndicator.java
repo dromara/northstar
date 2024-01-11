@@ -30,8 +30,8 @@ public abstract class AbstractIndicator implements Indicator {
 	
 	@Override
 	public void update(Num num) {
-		if(ringBuf.size() > 0 && (num.timestamp() < get(0).timestamp() || num.timestamp() == get(0).timestamp() && !get(0).unstable())) {
-			return;	// 通过时间戳比对，确保同一个指标只能被同一个时间的值更新一次
+		if(ringBuf.size() > 0 && (num.timestamp() < get(0).timestamp() && num.unstable() == get(0).unstable() || num.timestamp() == get(0).timestamp() && !get(0).unstable())) {
+			return;	// 通过时间戳比对，确保同一个指标在同一种状态下只能被同一个时间的值更新一次
 		}
 		Num updateNum = evaluate(num);
 		if(!updateNum.isNaN()) {

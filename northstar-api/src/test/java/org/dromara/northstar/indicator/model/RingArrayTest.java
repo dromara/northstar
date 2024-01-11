@@ -1,4 +1,4 @@
-package org.dromara.northstar.indicator;
+package org.dromara.northstar.indicator.model;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -10,8 +10,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 
-import org.dromara.northstar.indicator.model.Num;
-import org.dromara.northstar.indicator.model.RingArray;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
