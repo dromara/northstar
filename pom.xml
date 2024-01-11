@@ -39,6 +39,7 @@
 		<byte-buddy-version>1.14.11</byte-buddy-version>
 		<netty-version>4.1.104.Final</netty-version>
 		<h2-version>2.2.224</h2-version>
+		<tensorflow-version>0.5.0</tensorflow-version>
 	</properties>
 
 	<modules>
@@ -159,6 +160,16 @@
 				<groupId>com.google.guava</groupId>
 				<artifactId>guava</artifactId>
 				<version>${guava-version}</version>
+			</dependency>
+			<dependency>
+			    <groupId>org.tensorflow</groupId>
+			    <artifactId>tensorflow-core-api</artifactId>
+			    <version>${tensorflow-version}</version>
+			</dependency>
+			<dependency>
+			    <groupId>org.tensorflow</groupId>
+			    <artifactId>tensorflow-core-platform</artifactId>
+			    <version>${tensorflow-version}</version>
 			</dependency>
 			<dependency>
 			    <groupId>org.springframework.retry</groupId>
