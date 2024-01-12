@@ -131,9 +131,11 @@
                 collapse-tags
                 :disabled="readOnly"
               >
-                <el-option v-for="(item, i) in param.options" :value="param.optionsVal[i]" :key="i">{{
-                  item
-                }}</el-option>
+                <el-option v-for="(item, i) in param.options" 
+                  :label="item"
+                  :value="param.optionsVal[i] || item" 
+                  :key="i">
+                </el-option>
               </el-select>
               <el-input
                 v-else
