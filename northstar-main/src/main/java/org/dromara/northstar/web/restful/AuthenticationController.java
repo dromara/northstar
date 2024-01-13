@@ -3,7 +3,7 @@ package org.dromara.northstar.web.restful;
 import java.time.LocalDate;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpSession;
 
 import org.apache.commons.lang3.StringUtils;
 import org.dromara.northstar.common.constant.Constants;

@@ -9,6 +9,12 @@ import java.util.Queue;
 import java.util.UUID;
 
 import org.dromara.northstar.common.model.GatewayDescription;
+import org.dromara.northstar.common.model.core.Account;
+import org.dromara.northstar.common.model.core.Contract;
+import org.dromara.northstar.common.model.core.Order;
+import org.dromara.northstar.common.model.core.Position;
+import org.dromara.northstar.common.model.core.SubmitOrderReq;
+import org.dromara.northstar.common.model.core.Trade;
 import org.dromara.northstar.common.utils.OrderUtils;
 import org.dromara.northstar.gateway.MarketGateway;
 import org.dromara.northstar.gateway.TradeGateway;
@@ -19,12 +25,6 @@ import com.google.common.collect.Table;
 
 import lombok.extern.slf4j.Slf4j;
 import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
-import xyz.redtorch.pb.CoreField.AccountField;
-import xyz.redtorch.pb.CoreField.CancelOrderReqField;
-import xyz.redtorch.pb.CoreField.OrderField;
-import xyz.redtorch.pb.CoreField.PositionField;
-import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
-import xyz.redtorch.pb.CoreField.TradeField;
 
 
 /**
@@ -43,19 +43,19 @@ public class TradeAccount implements IAccount {
 	private GatewayDescription gatewayDescription;
 	
 	/* 持仓信息 */
-	private Table<PositionDirectionEnum, String, PositionField> posTable = HashBasedTable.create();
+	private Table<PositionDirectionEnum, Contract, Position> posTable = HashBasedTable.create();
 	
 	/* 账户信息 */
-	private AccountField accountField;
+	private Account accountField;
 	
 	/* 成交信息 */
-	private Queue<TradeField> tradeRecords = new LinkedList<>();
+	private Queue<Trade> tradeRecords = new LinkedList<>();
 	
 	/* 挂单信息 */
-	private Map<String, OrderField> pendingOrderMap = new HashMap<>();
+	private Map<String, Order> pendingOrderMap = new HashMap<>();
 	
 	/* 订单信息 */
-	private Queue<OrderField> orderRecords = new LinkedList<>();
+	private Queue<Order> orderRecords = new LinkedList<>();
 	
 	/* 预锁定金额 */
 	private Map<UUID, Double> frozenAmountMap = new HashMap<>();
@@ -67,43 +67,43 @@ public class TradeAccount implements IAccount {
 	}
 
 	@Override
-	public synchronized void onOrder(OrderField order) {
+	public synchronized void onOrder(Order order) {
 		if(OrderUtils.isDoneOrder(order)) {
-			pendingOrderMap.remove(order.getOriginOrderId());
+			pendingOrderMap.remove(order.originOrderId());
 			orderRecords.add(order);
 		} else {
-			pendingOrderMap.put(order.getOriginOrderId(), order);
+			pendingOrderMap.put(order.originOrderId(), order);
 		}
 	}
 
 	@Override
-	public synchronized void onTrade(TradeField trade) {
+	public synchronized void onTrade(Trade trade) {
 		tradeRecords.add(trade);
 	}
 
 	@Override
-	public String submitOrder(SubmitOrderReqField orderReq) {
+	public String submitOrder(SubmitOrderReq orderReq) {
 		log.info("[{}] 收到委托请求", accountId());
 		return tradeGateway.submitOrder(orderReq);
 	}
 
 	@Override
-	public boolean cancelOrder(CancelOrderReqField cancelReq) {
-		return tradeGateway.cancelOrder(cancelReq);
+	public boolean cancelOrder(String originOrderId) {
+		return tradeGateway.cancelOrder(originOrderId);
 	}
 
 	@Override
 	public synchronized double accountBalance() {
 		if(Objects.isNull(accountField))
 			return 0;
-		return accountField.getBalance();
+		return accountField.balance();
 	}
 
 	@Override
 	public synchronized double availableAmount() {
 		if(Objects.isNull(accountField))
 			return 0;
-		return accountField.getAvailable();
+		return accountField.available();
 	}
 
 	@Override
@@ -133,13 +133,13 @@ public class TradeAccount implements IAccount {
 	}
 
 	@Override
-	public synchronized void onAccount(AccountField account) {
+	public synchronized void onAccount(Account account) {
 		accountField = account;
 	}
 
 	@Override
-	public synchronized void onPosition(PositionField position) {
-		posTable.put(position.getPositionDirection(), position.getContract().getUnifiedSymbol(), position);
+	public synchronized void onPosition(Position position) {
+		posTable.put(position.positionDirection(), position.contract(), position);
 	}
 
 	@Override
@@ -148,9 +148,9 @@ public class TradeAccount implements IAccount {
 	}
 
 	@Override
-	public synchronized int netPosition(String unifiedSymbol) {
-		int longPosition = posTable.contains(PositionDirectionEnum.PD_Long, unifiedSymbol) ? posTable.get(PositionDirectionEnum.PD_Long, unifiedSymbol).getPosition() : 0;
-		int shortPosition = posTable.contains(PositionDirectionEnum.PD_Short, unifiedSymbol) ? posTable.get(PositionDirectionEnum.PD_Short, unifiedSymbol).getPosition() : 0;
+	public synchronized int netPosition(Contract contract) {
+		int longPosition = posTable.contains(PositionDirectionEnum.PD_Long, contract) ? posTable.get(PositionDirectionEnum.PD_Long, contract).position() : 0;
+		int shortPosition = posTable.contains(PositionDirectionEnum.PD_Short, contract) ? posTable.get(PositionDirectionEnum.PD_Short, contract).position() : 0;
 		return longPosition - shortPosition;
 	}
 
@@ -164,11 +164,11 @@ public class TradeAccount implements IAccount {
 		return tradeGateway;
 	}
 
-	public synchronized Optional<PositionField> getPosition(PositionDirectionEnum posDirection, String unifiedSymbol) {
-		if(!posTable.contains(posDirection, unifiedSymbol)) {
+	public synchronized Optional<Position> getPosition(PositionDirectionEnum posDirection, Contract contract) {
+		if(!posTable.contains(posDirection, contract)) {
 			return Optional.empty();
 		}
-		return Optional.of(posTable.get(posDirection, unifiedSymbol));
+		return Optional.of(posTable.get(posDirection, contract));
 	}
 
 }

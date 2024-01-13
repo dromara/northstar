@@ -7,8 +7,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.LinkedList;
 
 import org.apache.commons.lang3.StringUtils;
+import org.dromara.northstar.common.model.Identifier;
 import org.dromara.northstar.common.model.LogDescription;
-import org.dromara.northstar.support.log.ModuleLoggerFactory;
+import org.dromara.northstar.module.ModuleManager;
+import org.dromara.northstar.strategy.IModule;
 import org.springframework.boot.logging.LogLevel;
 import org.springframework.boot.logging.LoggingSystem;
 
@@ -20,12 +22,13 @@ public class LogService {
 	
 	private static final String NORTHSTAR_ROOT = "org.dromara.northstar";
 	
-	private ModuleLoggerFactory moduleLoggerFactory = new ModuleLoggerFactory();
-	
 	private LoggingSystem loggingSystem;
 	
-	public LogService(LoggingSystem logginSystem) {
+	private ModuleManager moduleMgr;
+	
+	public LogService(LoggingSystem logginSystem, ModuleManager moduleMgr) {
 		this.loggingSystem = logginSystem;
+		this.moduleMgr = moduleMgr;
 	}
 	
 	public LogDescription tailLogFile(File logFile, long positionOffset, int tailNumOfLines) throws IOException {
@@ -54,7 +57,8 @@ public class LogService {
 	}
 	
 	public void setModuleLogLevel(String moduleName, LogLevel level) {
-		Logger logger = (Logger) moduleLoggerFactory.getLogger(moduleName);
+		IModule module = moduleMgr.get(Identifier.of(moduleName));
+		Logger logger = (Logger) module.getModuleContext().getLoggerFactory().getLogger(Logger.ROOT_LOGGER_NAME);
 		logger.setLevel(Level.toLevel(level.toString()));
 	}
 	
@@ -63,7 +67,8 @@ public class LogService {
 	}
 	
 	public LogLevel getModuleLogLevel(String moduleName) {
-		Logger logger = (Logger) moduleLoggerFactory.getLogger(moduleName);
+		IModule module = moduleMgr.get(Identifier.of(moduleName));
+		Logger logger = (Logger) module.getModuleContext().getLoggerFactory().getLogger(Logger.ROOT_LOGGER_NAME);
 		return LogLevel.valueOf(logger.getLevel().toString());
 	}
 }

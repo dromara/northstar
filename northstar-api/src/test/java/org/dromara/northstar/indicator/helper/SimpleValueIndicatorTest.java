@@ -2,15 +2,14 @@ package org.dromara.northstar.indicator.helper;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.indicator.model.Configuration;
 import org.dromara.northstar.indicator.model.Num;
 import org.junit.jupiter.api.Test;
 
-import xyz.redtorch.pb.CoreField.ContractField;
-
 class SimpleValueIndicatorTest {
 	
-	ContractField contract = ContractField.newBuilder().build();
+	Contract contract = Contract.builder().build();
 	SimpleValueIndicator in = new SimpleValueIndicator(Configuration.builder().contract(contract).build());
 
 	@Test

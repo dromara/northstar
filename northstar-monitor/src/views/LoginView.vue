@@ -23,7 +23,6 @@
 
 <script>
 import loginApi from '@/api/loginApi'
-import packageJson from '@/../package.json'
 import MediaListener from '@/utils/media-utils'
 
 const listener = new MediaListener(() => {})
@@ -38,8 +37,18 @@ export default {
       domain: '',
       showHost: false,
       isEE: false,
-      version: packageJson.version
+      version: '0.0.1'
     }
+  },
+  created(){
+    fetch('/version').then(result => {
+      if(result.status === 200){
+        return result.text()
+      }
+      return Promise.reject()
+    }).then(v => {
+      this.version = v.replace(/"/g,"")
+    })
   },
   mounted() {
     this.isEE = !!(window.require && window.require('electron'))

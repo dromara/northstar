@@ -1,20 +1,18 @@
 package org.dromara.northstar.strategy.example;
 
 import org.dromara.northstar.common.constant.FieldType;
-import org.dromara.northstar.common.constant.SignalOperation;
 import org.dromara.northstar.common.model.DynamicParams;
 import org.dromara.northstar.common.model.Setting;
+import org.dromara.northstar.common.model.core.Bar;
+import org.dromara.northstar.common.model.core.Contract;
+import org.dromara.northstar.common.utils.TradeHelper;
 import org.dromara.northstar.indicator.Indicator;
 import org.dromara.northstar.indicator.model.Configuration;
 import org.dromara.northstar.indicator.trend.MAIndicator;
 import org.dromara.northstar.strategy.AbstractStrategy;
 import org.dromara.northstar.strategy.StrategicComponent;
 import org.dromara.northstar.strategy.TradeStrategy;
-import org.dromara.northstar.strategy.constant.PriceType;
-import org.dromara.northstar.strategy.model.TradeIntent;
-
-import xyz.redtorch.pb.CoreField.BarField;
-import xyz.redtorch.pb.CoreField.ContractField;
+import org.slf4j.Logger;
 
 /**
  * 本示例用于展示一个多周期指标的策略
@@ -37,60 +35,38 @@ public class MultiPeriodExampleStrategy extends AbstractStrategy	// 为了简化
 	private Indicator slowLine1;	// 主周期慢线
 	private Indicator fastLine2;	// 参考周期快线
 	private Indicator slowLine2;	// 参考周期慢线 
+	private TradeHelper helper;
+	private Logger logger;
 	
 	@Override
-	public void onMergedBar(BarField bar) {
-		log.debug("{} K线数据： 开 [{}], 高 [{}], 低 [{}], 收 [{}]", 
-				bar.getUnifiedSymbol(), bar.getOpenPrice(), bar.getHighPrice(), bar.getLowPrice(), bar.getClosePrice());
+	public void onMergedBar(Bar bar) {
+		logger.debug("{} K线数据： 开 [{}], 高 [{}], 低 [{}], 收 [{}]", 
+				bar.contract().unifiedSymbol(), bar.openPrice(), bar.highPrice(), bar.lowPrice(), bar.closePrice());
 		// 确保指标已经准备好再开始交易
 		boolean allLineReady = fastLine1.isReady() && slowLine1.isReady() && fastLine2.isReady() && slowLine2.isReady();
 		if(!allLineReady) {
-			log.debug("指标未准备就绪");
+			logger.debug("指标未准备就绪");
 			return;
 		}
 		switch (ctx.getState()) {
 			case EMPTY -> {
 				// 快线在慢线之上开多，快线在慢线之下开空
 				if(shouldBuy()) {					
-					ctx.submitOrderReq(TradeIntent.builder()
-							.contract(ctx.getContract(bar.getUnifiedSymbol()))
-							.operation(SignalOperation.BUY_OPEN)
-							.priceType(PriceType.ANY_PRICE)
-							.volume(1)
-							.timeout(300000)
-							.build());
+					helper.doBuyOpen(1);
 				}
 				if(shouldSell()) {
-					ctx.submitOrderReq(TradeIntent.builder()
-							.contract(ctx.getContract(bar.getUnifiedSymbol()))
-							.operation(SignalOperation.SELL_OPEN)
-							.priceType(PriceType.ANY_PRICE)
-							.volume(1)
-							.timeout(300000)
-							.build());
+					helper.doSellOpen(1);
 				}
 					
 			}
 			case HOLDING_LONG -> {
 				if(fastLine1.value(0) < slowLine1.value(0)) {
-					ctx.submitOrderReq(TradeIntent.builder()
-							.contract(ctx.getContract(bar.getUnifiedSymbol()))
-							.operation(SignalOperation.SELL_CLOSE)
-							.priceType(PriceType.ANY_PRICE)
-							.volume(1)
-							.timeout(300000)
-							.build());
+					helper.doSellClose(1);
 				}
 			}
 			case HOLDING_SHORT -> {
 				if(fastLine1.value(0) > slowLine1.value(0)) {
-					ctx.submitOrderReq(TradeIntent.builder()
-							.contract(ctx.getContract(bar.getUnifiedSymbol()))
-							.operation(SignalOperation.BUY_CLOSE)
-							.priceType(PriceType.ANY_PRICE)
-							.volume(1)
-							.timeout(300000)
-							.build());
+					helper.doBuyClose(1);
 				}
 			}
 			default -> { /* 其他情况不处理 */}
@@ -107,7 +83,8 @@ public class MultiPeriodExampleStrategy extends AbstractStrategy	// 为了简化
 	
 	@Override
 	protected void initIndicators() {
-		ContractField c = ctx.getContract(params.indicatorSymbol);
+		logger = ctx.getLogger(getClass());
+		Contract c = ctx.getContract(params.indicatorSymbol);
 		// 主周期线
 		this.fastLine1 = new MAIndicator(Configuration.builder()
 				.indicatorName("快线")
@@ -136,6 +113,8 @@ public class MultiPeriodExampleStrategy extends AbstractStrategy	// 为了简化
 		ctx.registerIndicator(fastLine2);
 		ctx.registerIndicator(slowLine1);
 		ctx.registerIndicator(slowLine2);
+		
+		helper = TradeHelper.builder().context(getContext()).tradeContract(c).build();
 	}
 	
 	@Override
@@ -161,6 +140,11 @@ public class MultiPeriodExampleStrategy extends AbstractStrategy	// 为了简化
 		
 		@Setting(label="参考周期", type = FieldType.NUMBER, order=10)
 		private int refPeriod = 15;
+	}
+
+	@Override
+	public String name() {
+		return NAME;
 	}
 
 }

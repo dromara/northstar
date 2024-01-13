@@ -1,9 +1,14 @@
 package org.dromara.northstar.gateway;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.model.Identifier;
+import org.dromara.northstar.common.model.core.ContractDefinition;
+
+import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
+import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
 
 public interface IContractManager {
 
@@ -12,7 +17,7 @@ public interface IContractManager {
 	 * @param identifier
 	 * @return
 	 */
-	Contract getContract(Identifier identifier);
+	IContract getContract(Identifier identifier);
 	
 	/**
 	 * 根据网关与编码获取合约
@@ -20,19 +25,26 @@ public interface IContractManager {
 	 * @param symbol		可以是symbol或unifiedSymbol 
 	 * @return
 	 */
-	Contract getContract(ChannelType channelType, String symbol);
+	IContract getContract(ChannelType channelType, String symbol);
 	
 	/**
 	 * 根据网关ID获取合约
 	 * @param gatewayId
 	 * @return
 	 */
-	List<Contract> getContracts(String gatewayId);
+	List<IContract> getContracts(String gatewayId);
 	
 	/**
 	 * 根据网关渠道获取合约
 	 * @param channelType
 	 * @return
 	 */
-	List<Contract> getContracts(ChannelType channelType);
+	List<IContract> getContracts(ChannelType channelType);
+	
+	/**
+	 * 获取合约定义
+	 * @param unifiedSymbol
+	 * @return
+	 */
+	Optional<ContractDefinition> getDefinition(ExchangeEnum exchange, ProductClassEnum productClass, String unifiedSymbol);
 }

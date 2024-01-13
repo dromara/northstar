@@ -8,10 +8,11 @@ import java.util.List;
 import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.model.GatewayDescription;
 import org.dromara.northstar.common.model.ResultBean;
+import org.dromara.northstar.common.model.core.Bar;
 import org.dromara.northstar.common.utils.MarketDataLoadingUtils;
 import org.dromara.northstar.data.IGatewayRepository;
 import org.dromara.northstar.data.IMarketDataRepository;
-import org.dromara.northstar.gateway.Contract;
+import org.dromara.northstar.gateway.IContract;
 import org.dromara.northstar.gateway.IContractManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
@@ -43,13 +44,13 @@ public class GatewayDataController {
 		if(gd.getChannelType() == ChannelType.PLAYBACK || gd.getChannelType() == ChannelType.SIM) {
 			return new ResultBean<>(Collections.emptyList());
 		}
-		Contract contract = contractMgr.getContract(gd.getChannelType(), unifiedSymbol);
+		IContract contract = contractMgr.getContract(gd.getChannelType(), unifiedSymbol);
 		LocalDate start = utils.getFridayOfLastWeek(refStartTimestamp);
 		if(firstLoad && Period.between(start, LocalDate.now()).getDays() < 7) {
 			start = start.minusWeeks(1);
 		}
 		LocalDate end = utils.getCurrentTradeDay(refStartTimestamp, firstLoad);
-		List<BarField> result = Collections.emptyList();
+		List<Bar> result = Collections.emptyList();
 		for(int i=0; i<3; i++) {
 			result = mdRepo.loadBars(contract, start.minusWeeks(i), end.minusWeeks(i));
 			if(!result.isEmpty()) {
@@ -57,7 +58,10 @@ public class GatewayDataController {
 			}
 		}
 		
-		return new ResultBean<>(result.stream().map(BarField::toByteArray).toList());
+		return new ResultBean<>(result.stream()
+				.map(Bar::toBarField)
+				.map(BarField::toByteArray)
+				.toList());
 	}
 	
 }

@@ -10,6 +10,9 @@ module.exports = {
   devServer: {
 	  port: 8090,
     proxy: {
+      '/version': {
+        target: `http://localhost`
+      },
       '/northstar': {
         target: `http://localhost`
       },

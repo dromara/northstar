@@ -12,12 +12,12 @@ import org.dromara.northstar.NorthstarApplication;
 import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.model.GatewayDescription;
 import org.dromara.northstar.common.model.NsUser;
+import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.data.IGatewayRepository;
 import org.dromara.northstar.event.BroadcastHandler;
-import org.dromara.northstar.gateway.Contract;
+import org.dromara.northstar.gateway.IContract;
 import org.dromara.northstar.gateway.IMarketCenter;
 import org.dromara.northstar.strategy.IMessageSender;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,8 +32,6 @@ import com.alibaba.fastjson.JSON;
 import com.corundumstudio.socketio.SocketIOServer;
 
 import cn.hutool.crypto.digest.MD5;
-import net.sf.ehcache.CacheManager;
-import xyz.redtorch.pb.CoreField.ContractField;
 
 @SpringBootTest(classes = NorthstarApplication.class, value="spring.profiles.active=unittest")
 @AutoConfigureMockMvc
@@ -61,9 +59,9 @@ class GatewayDataControllerTest {
 	
 	@BeforeEach
 	public void setUp() throws Exception {
-		Contract contract = mock(Contract.class);
+		IContract contract = mock(IContract.class);
 		when(contractMgr.getContract(any(), anyString())).thenReturn(contract);
-		when(contract.contractField()).thenReturn(ContractField.newBuilder().setChannelType("PLAYBACK").setUnifiedSymbol("rb2205@SHFE@FUTURES").build());
+		when(contract.contract()).thenReturn(Contract.builder().channelType(ChannelType.PLAYBACK).unifiedSymbol("rb2205@SHFE@FUTURES").build());
 		
 		when(gatewayRepo.findById(anyString())).thenReturn(GatewayDescription.builder().channelType(ChannelType.PLAYBACK).build());
 		
@@ -71,11 +69,6 @@ class GatewayDataControllerTest {
 		String token = MD5.create().digestHex("123456" + time);
 		mockMvc.perform(post("/northstar/auth/login?timestamp="+time).contentType(MediaType.APPLICATION_JSON).content(JSON.toJSONString(new NsUser("admin",token))).session(session))
 			.andExpect(status().isOk());
-	}
-	
-	@AfterAll
-	static void clearCache() {
-		CacheManager.getInstance().shutdown();
 	}
 	
 	@Test

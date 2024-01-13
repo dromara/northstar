@@ -1,17 +1,16 @@
 package org.dromara.northstar.indicator.volume;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.indicator.Indicator;
 import org.dromara.northstar.indicator.model.Configuration;
 import org.dromara.northstar.indicator.model.Num;
 import org.junit.jupiter.api.Test;
 
-import xyz.redtorch.pb.CoreField.ContractField;
-
 class VWAPIndicatorTest {
 	
-	ContractField contract = ContractField.newBuilder().build();
+	Contract contract = Contract.builder().build();
 
 	@Test
 	void test() {

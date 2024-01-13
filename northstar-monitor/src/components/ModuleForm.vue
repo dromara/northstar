@@ -131,9 +131,11 @@
                 collapse-tags
                 :disabled="readOnly"
               >
-                <el-option v-for="(item, i) in param.options" :value="param.optionsVal[i]" :key="i">{{
-                  item
-                }}</el-option>
+                <el-option v-for="(item, i) in param.options" 
+                  :label="item"
+                  :value="param.optionsVal[i] || item" 
+                  :key="i">
+                </el-option>
               </el-select>
               <el-input
                 v-else
@@ -220,6 +222,7 @@
           重置模组
         </el-button>
       </el-popconfirm>
+      <el-button v-if="!!module" @click="copyModule">复 制</el-button>
       <el-button id="closeModuleSettings" @click="close">取 消</el-button>
       <el-button
         id="saveModuleSettings"
@@ -420,6 +423,12 @@ export default {
     close() {
       this.$emit('update:visible', false)
       this.activeIndex = '1'
+    },
+    copyModule(){
+      const protoModule = Object.assign({}, this.module)
+      this.$emit('copyModule')
+      this.form = protoModule
+      this.form.moduleName = ''
     },
     assertTrue(expression, errMsg) {
       if (!expression) {

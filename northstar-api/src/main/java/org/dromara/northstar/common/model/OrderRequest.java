@@ -1,5 +1,7 @@
 package org.dromara.northstar.common.model;
 
+import org.dromara.northstar.strategy.constant.PriceType;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -32,6 +34,10 @@ public class OrderRequest {
 	 * 委托数量
 	 */
 	private int volume;
+	/**
+	 * 价格类型
+	 */
+	private PriceType priceType;
 	/**
 	 * 买卖开平仓
 	 */

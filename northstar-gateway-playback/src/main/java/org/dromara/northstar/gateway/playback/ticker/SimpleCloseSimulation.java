@@ -2,7 +2,7 @@ package org.dromara.northstar.gateway.playback.ticker;
 
 import java.util.List;
 
-import xyz.redtorch.pb.CoreField.BarField;
+import org.dromara.northstar.common.model.core.Bar;
 
 /**
  * 收盘价生成策略
@@ -18,10 +18,10 @@ public class SimpleCloseSimulation implements TickSimulationAlgorithm {
 	}
 	
 	@Override
-	public List<TickEntry> generateFrom(BarField bar) {
-		double askPrice = bar.getClosePrice() > bar.getOpenPrice() ? bar.getClosePrice() : bar.getClosePrice() + priceTick;
-		double bidPrice = bar.getClosePrice() > bar.getOpenPrice() ? bar.getClosePrice() - priceTick : bar.getClosePrice();
-		return List.of(TickEntry.of(bar.getClosePrice(), askPrice, bidPrice, bar.getVolume(), bar.getOpenInterestDelta(), bar.getActionTimestamp() - 30000));
+	public List<TickEntry> generateFrom(Bar bar) {
+		double askPrice = bar.closePrice() > bar.openPrice() ? bar.closePrice() : bar.closePrice() + priceTick;
+		double bidPrice = bar.closePrice() > bar.openPrice() ? bar.closePrice() - priceTick : bar.closePrice();
+		return List.of(TickEntry.of(bar.closePrice(), askPrice, bidPrice, bar.volume(), bar.openInterestDelta(), bar.actionTimestamp() - 30000));
 	}
 	
 }

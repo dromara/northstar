@@ -2,7 +2,6 @@ package org.dromara.northstar.common.utils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.dromara.northstar.common.utils.FieldUtils;
 import org.junit.jupiter.api.Test;
 
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;

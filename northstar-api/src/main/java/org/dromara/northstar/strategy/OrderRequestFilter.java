@@ -1,8 +1,7 @@
 package org.dromara.northstar.strategy;
 
 import org.dromara.northstar.common.TickDataAware;
-
-import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
+import org.dromara.northstar.common.model.core.SubmitOrderReq;
 
 /**
  * 委托请求过滤器
@@ -15,5 +14,5 @@ public interface OrderRequestFilter extends TickDataAware {
 	 * 风控过滤
 	 * @param orderReq
 	 */
-	void doFilter(SubmitOrderReqField orderReq);
+	void doFilter(SubmitOrderReq orderReq);
 }

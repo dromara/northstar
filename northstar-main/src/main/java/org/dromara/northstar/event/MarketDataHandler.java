@@ -1,17 +1,15 @@
 package org.dromara.northstar.event;
 
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ExecutorService;
 
 import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.event.AbstractEventHandler;
 import org.dromara.northstar.common.event.GenericEventHandler;
 import org.dromara.northstar.common.event.NorthstarEvent;
 import org.dromara.northstar.common.event.NorthstarEventType;
+import org.dromara.northstar.common.model.core.Bar;
+import org.dromara.northstar.common.utils.CommonUtils;
 import org.dromara.northstar.data.IMarketDataRepository;
-
-import xyz.redtorch.pb.CoreField.BarField;
 
 /**
  * 处理K线数据持久化
@@ -22,7 +20,7 @@ public class MarketDataHandler extends AbstractEventHandler implements GenericEv
 
 	private IMarketDataRepository mdRepo;
 	
-	private ThreadPoolExecutor exec = new ThreadPoolExecutor(5, 10, 60, TimeUnit.SECONDS, new ArrayBlockingQueue<>(500));
+	private ExecutorService exec = CommonUtils.newThreadPerTaskExecutor(getClass());
 	
 	public MarketDataHandler(IMarketDataRepository mdRepo) {
 		this.mdRepo = mdRepo;
@@ -35,11 +33,8 @@ public class MarketDataHandler extends AbstractEventHandler implements GenericEv
 
 	@Override
 	protected void doHandle(NorthstarEvent e) {
-		if(e.getData() instanceof BarField bar && System.currentTimeMillis() - bar.getActionTimestamp() < 120000) {
-			ChannelType channelType = ChannelType.valueOf(bar.getChannelType());
-			if(channelType != ChannelType.SIM) {
-				exec.execute(() -> mdRepo.insert(bar)); 
-			}
+		if(e.getData() instanceof Bar bar && System.currentTimeMillis() - bar.actionTimestamp() < 120000 && bar.channelType() != ChannelType.SIM) {
+			exec.execute(() -> mdRepo.insert(bar)); 
 		}
 	}
 

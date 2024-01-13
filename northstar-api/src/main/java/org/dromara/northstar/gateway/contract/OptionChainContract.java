@@ -6,14 +6,13 @@ import java.util.Objects;
 import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.constant.Constants;
 import org.dromara.northstar.common.model.Identifier;
-import org.dromara.northstar.gateway.Contract;
-import org.dromara.northstar.gateway.TradeTimeDefinition;
+import org.dromara.northstar.common.model.core.Contract;
+import org.dromara.northstar.gateway.IContract;
 import org.springframework.util.Assert;
 
 import lombok.extern.slf4j.Slf4j;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
-import xyz.redtorch.pb.CoreField.ContractField;
 
 /**
  * 组合合约
@@ -21,15 +20,15 @@ import xyz.redtorch.pb.CoreField.ContractField;
  *
  */
 @Slf4j
-public class OptionChainContract implements Contract {
+public class OptionChainContract implements IContract {
 
 	private final String name;
 	
-	private final List<Contract> memberContracts;
+	private final List<IContract> memberContracts;
 	
 	private final Identifier identifier;
 	
-	public OptionChainContract(Contract underlyingContract, List<Contract> memberContracts) {
+	public OptionChainContract(IContract underlyingContract, List<IContract> memberContracts) {
 		Assert.notEmpty(memberContracts, "集合不能为空");
 		this.memberContracts = memberContracts;
 		this.identifier = Identifier.of(Constants.OPTION_CHAIN_PREFIX + underlyingContract.identifier().value());
@@ -38,9 +37,9 @@ public class OptionChainContract implements Contract {
 
 	@Override
 	public boolean subscribe() {
-		for(Contract c : memberContracts) {
+		for(IContract c : memberContracts) {
 			if(!c.subscribe()) {
-				log.warn("[{}] 合约订阅失败", c.contractField().getUnifiedSymbol());
+				log.warn("[{}] 合约订阅失败", c.contract().unifiedSymbol());
 			}
 		}
 		return true;
@@ -48,29 +47,29 @@ public class OptionChainContract implements Contract {
 
 	@Override
 	public boolean unsubscribe() {
-		for(Contract c : memberContracts) {
+		for(IContract c : memberContracts) {
 			if(!c.unsubscribe()) {
-				log.warn("[{}] 合约取消订阅失败", c.contractField().getUnifiedSymbol());
+				log.warn("[{}] 合约取消订阅失败", c.contract().unifiedSymbol());
 			}
 		}
 		return true;
 	}
 	
 	@Override
-	public List<Contract> memberContracts() {
+	public List<IContract> memberContracts() {
 		return memberContracts;
 	}
 
 	@Override
-	public ContractField contractField() {
-		ContractField seed = memberContracts.get(0).contractField();
-		String unifiedSymbol = String.format("%s@%s@%s", name, seed.getExchange(), seed.getProductClass());
-		return ContractField.newBuilder(seed)
-				.setName(name)
-				.setFullName(name)
-				.setUnifiedSymbol(unifiedSymbol)
-				.setSymbol(name)
-				.setContractId(identifier.value())
+	public Contract contract() {
+		Contract seed = memberContracts.get(0).contract();
+		String unifiedSymbol = String.format("%s@%s@%s", name, seed.exchange(), seed.productClass());
+		return seed.toBuilder()
+				.name(name)
+				.fullName(name)
+				.unifiedSymbol(unifiedSymbol)
+				.symbol(name)
+				.contractId(identifier.value())
 				.build();
 	}
 
@@ -99,11 +98,6 @@ public class OptionChainContract implements Contract {
 		return memberContracts.get(0).gatewayId();
 	}
 
-	@Override
-	public TradeTimeDefinition tradeTimeDefinition() {
-		return memberContracts.get(0).tradeTimeDefinition();
-	}
-	
 	@Override
 	public ChannelType channelType() {
 		return memberContracts.get(0).channelType();

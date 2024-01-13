@@ -1,5 +1,7 @@
 package org.dromara.northstar.gateway.sim.trade;
 
+import java.time.LocalDate;
+
 import org.dromara.northstar.gateway.Instrument;
 
 import xyz.redtorch.pb.CoreEnum.CurrencyEnum;
@@ -32,7 +34,7 @@ public class SimContractGenerator {
 				.priceTick(1)
 				.longMarginRatio(0.08)
 				.shortMarginRatio(0.08)
-				.lastTradeDateOrContractMonth("20990101")
+				.lastTradeDate(LocalDate.MAX)
 				.build();
 	}
 	
@@ -54,8 +56,29 @@ public class SimContractGenerator {
 				.priceTick(1)
 				.longMarginRatio(0.08)
 				.shortMarginRatio(0.08)
-				.lastTradeDateOrContractMonth("20990201")
+				.lastTradeDate(LocalDate.MAX)
 				.build();
 	}
 	
+	public Instrument getContract3() {
+		String symbol = "sim9903";
+		String name = "模拟合约9903";
+		return SimContract.builder()
+				.gatewayId("SIM")
+				.contractId(symbol + "@BINANCE@FUTURES@" + gatewayId)
+				.currency(CurrencyEnum.USDT)
+				.exchange(ExchangeEnum.BINANCE)
+				.fullName(name)
+				.name(name)
+				.unifiedSymbol(symbol + "@BINANCE@FUTURES")
+				.symbol(symbol)
+				.productClass(ProductClassEnum.FUTURES)
+				.thirdPartyId(symbol + "@SIM")
+				.multiplier(1)
+				.priceTick(1.0E-7)
+				.longMarginRatio(0.2)
+				.shortMarginRatio(0.2)
+				.lastTradeDate(LocalDate.MAX)
+				.build();
+	}
 }

@@ -1,10 +1,10 @@
 package org.dromara.northstar.common;
 
-import xyz.redtorch.pb.CoreField.ContractField;
+import org.dromara.northstar.common.model.core.Contract;
 
 public interface ContractBindedAware {
 
 	String bindedContractSymbol();
 	
-	void setBindedContract(ContractField contract);
+	void setBindedContract(Contract contract);
 }

@@ -84,7 +84,7 @@
               id="limitPrice"
               v-model="limitPrice"
               placeholder="委托价"
-              :disabled="dealPriceType !== 'CUSTOM_PRICE'"
+              :disabled="dealPriceType !== 'LIMIT_PRICE'"
               type="number"
             ></el-input>
           </div>
@@ -93,13 +93,13 @@
           </div>
         </div>
         <div class="ns-trade-info">
-          <NsPriceBoard :tick="$store.state.marketCurrentDataModule.curTick" />
+          <NsPriceBoard :tick="$store.state.marketCurrentDataModule.curTick" :precision="precision" />
         </div>
       </div>
       <div class="ns-trade__trade-btn-wrap">
         <div class="ns-trade-button">
           <NsButton
-            :price="`${bkPrice || 0}`"
+            :price="bkPrice || 0"
             :color="'rgba(196, 68, 66, 1)'"
             :label="'买开'"
             @click.native="buyOpen"
@@ -107,7 +107,7 @@
         </div>
         <div class="ns-trade-button">
           <NsButton
-            :price="`${skPrice || 0}`"
+            :price="skPrice || 0"
             :color="'rgba(64, 158, 95, 1)'"
             :label="'卖开'"
             @click.native="sellOpen"
@@ -135,6 +135,7 @@
       <NsMarketData
         :marketGatewayId="marketDataGatewayId"
         :contractUnifiedSymbol="marketDataUnifiedSymbol"
+        :precision="precision"
         embededMode
       />
     </div>
@@ -166,7 +167,7 @@ export default {
       priceOptionList: [
         {
           label: '对手价',
-          type: 'COUNTERPARTY_PRICE'
+          type: 'OPP_PRICE'
         },
         {
           label: '排队价',
@@ -174,11 +175,11 @@ export default {
         },
         {
           label: '市价',
-          type: 'FIGHTING_PRICE'
+          type: 'ANY_PRICE'
         },
         {
           label: '限价',
-          type: 'CUSTOM_PRICE'
+          type: 'LIMIT_PRICE'
         }
       ],
       contract: '',
@@ -223,7 +224,7 @@ export default {
       this.$store.commit('updateCurAccountId', this.chosenAccount.gatewayId)
     },
     handleContractChange() {
-      this.dealPriceType = 'COUNTERPARTY_PRICE'
+      this.dealPriceType = 'OPP_PRICE'
       this.$store.commit('updateFocusUnifiedSymbol', this.contract.unifiedSymbol)
     },
     searchContracts(query){
@@ -236,14 +237,15 @@ export default {
       }
     },
     handleDealPriceTypeChange() {
-      if (this.dealPriceType !== 'CUSTOM_PRICE') {
+      if (this.dealPriceType !== 'LIMIT_PRICE') {
         this.limitPrice = ''
       }
     },
     onPositionChosen(pos) {
       this.dealVol = pos.position - pos.frozen
-      this.contract = {value: pos.contract.contractid, unifiedSymbol: pos.contract.unifiedsymbol, name: pos.contract.name}
-      this.symbolList = [this.contract]
+      const contract = {value: pos.contract.contractid, unifiedSymbol: pos.contract.unifiedsymbol, name: pos.contract.name, precision: pos.contract.priceprecision}
+      this.symbolList = [contract]
+      this.contract = contract
       this.currentPosition = pos
       this.handleContractChange()
     },
@@ -259,7 +261,8 @@ export default {
         this.dealContractId,
         this.bkPrice,
         this.dealVol,
-        this.stopPrice
+        this.stopPrice,
+        this.dealPriceType
       )
     },
     sellOpen() {
@@ -271,7 +274,8 @@ export default {
         this.dealContractId,
         this.skPrice,
         this.dealVol,
-        this.stopPrice
+        this.stopPrice,
+        this.dealPriceType
       )
     },
     closePosition() {
@@ -280,7 +284,8 @@ export default {
           this.chosenAccount.gatewayId,
           this.dealContractId,
           this.closePrice,
-          this.dealVol
+          this.dealVol,
+          this.dealPriceType
         )
       }
       if (this.currentPosition.positiondirection === 3) {
@@ -288,7 +293,8 @@ export default {
           this.chosenAccount.gatewayId,
           this.dealContractId,
           this.closePrice,
-          this.dealVol
+          this.dealVol,
+          this.dealPriceType
         )
       }
       throw new Error('没有持仓')
@@ -336,21 +342,29 @@ export default {
       if (this.accountInfo.available) return this.accountInfo.available
       return 0
     },
+    precision(){
+      if(this.contract){
+        return this.contract.precision
+      }
+      return 0
+    },
     bkPrice() {
-      return {
-        COUNTERPARTY_PRICE: this.$store.state.marketCurrentDataModule.curTick.askpriceList[0],
+      const price = {
+        OPP_PRICE: this.$store.state.marketCurrentDataModule.curTick.askpriceList[0],
         WAITING_PRICE: this.$store.state.marketCurrentDataModule.curTick.bidpriceList[0],
-        FIGHTING_PRICE: this.$store.state.marketCurrentDataModule.curTick.upperlimit,
-        CUSTOM_PRICE: this.limitPrice
+        ANY_PRICE: this.$store.state.marketCurrentDataModule.curTick.upperlimit || 0,
+        LIMIT_PRICE: this.limitPrice
       }[this.dealPriceType]
+      return typeof price === 'number' ? price.toFixed(this.precision) : price
     },
     skPrice() {
-      return {
-        COUNTERPARTY_PRICE: this.$store.state.marketCurrentDataModule.curTick.bidpriceList[0],
+      const price = {
+        OPP_PRICE: this.$store.state.marketCurrentDataModule.curTick.bidpriceList[0],
         WAITING_PRICE: this.$store.state.marketCurrentDataModule.curTick.askpriceList[0],
-        FIGHTING_PRICE: this.$store.state.marketCurrentDataModule.curTick.lowerlimit,
-        CUSTOM_PRICE: this.limitPrice
+        ANY_PRICE: this.$store.state.marketCurrentDataModule.curTick.lowerlimit || 0,
+        LIMIT_PRICE: this.limitPrice
       }[this.dealPriceType]
+      return typeof price === 'number' ? price.toFixed(this.precision) : price
     },
     closePrice() {
       if (this.currentPosition && this.currentPosition.positiondirection === 2) {

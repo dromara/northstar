@@ -1,18 +1,15 @@
 package org.dromara.northstar.gateway.sim.market;
 
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
-import org.apache.commons.lang3.StringUtils;
 import org.dromara.northstar.common.constant.ChannelType;
-import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.common.constant.TickType;
-
-import xyz.redtorch.pb.CoreField.ContractField;
-import xyz.redtorch.pb.CoreField.TickField;
+import org.dromara.northstar.common.model.core.Contract;
+import org.dromara.northstar.common.model.core.Tick;
+import org.dromara.northstar.gateway.Gateway;
 
 /**
  * 该算法使用随机数、正弦函数、正态分布，生成正负概率及下一个TICK的差价，从而得到下一个TICK
@@ -23,41 +20,38 @@ import xyz.redtorch.pb.CoreField.TickField;
  */
 public class SimTickGenerator {
 	
-	private Double initPrice = 5000D + ThreadLocalRandom.current().nextDouble(-2000, 3000);
+	private Double lastPrice;
 	
-	private Double lastPrice = initPrice;
+	private double openInterest = ThreadLocalRandom.current().nextDouble(10000, 30000);
+	
+	private long volume;
+	
+	private double high = Double.MIN_VALUE;
+	
+	private double low = Double.MAX_VALUE;
 	
 	private Random rand = new Random();
 	
 	private double seed = Math.random();
 	
-	private ContractField contract;
+	private Contract contract;
 	
-	public SimTickGenerator(ContractField contract) {
+	private final int amplifier;
+	
+	public SimTickGenerator(Contract contract) {
 		this.contract = contract;
+		this.lastPrice = (5000D + ThreadLocalRandom.current().nextDouble(-2000, 3000)) * contract.priceTick();
+		this.amplifier = (int) (1 / contract.priceTick());
 	}
 	
-	public ContractField contract() {
-		return contract;
+	public String tickSymbol() {
+		return contract.unifiedSymbol();
 	}
 
-	public TickField generateNextTick(LocalDateTime ldt) {
-		double priceTick = contract.getPriceTick() == 0 ? 1 : contract.getPriceTick();
+	public Tick generateNextTick(LocalDateTime ldt, Gateway gateway) {
+		double priceTick = contract.priceTick() == 0 ? 1 : contract.priceTick();
 		seed += Math.random();
-		TickField.Builder tb = TickField.newBuilder()
-				.setLastPrice(lastPrice)
-				.setPreSettlePrice(lastPrice)
-				.setGatewayId(contract.getGatewayId())
-				.setChannelType(ChannelType.SIM.toString())
-				.addAllAskPrice(List.of(0D, 0D, 0D, 0D, 0D))
-				.addAllBidPrice(List.of(0D, 0D, 0D, 0D, 0D))
-				.addAllAskVolume(List.of(0, 0, 0, 0, 0))
-				.addAllBidVolume(List.of(0, 0, 0, 0, 0))
-				.setUnifiedSymbol(contract.getUnifiedSymbol())
-				.setActionDay(ldt.format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
-				.setActionTime(ldt.format(DateTimeConstant.T_FORMAT_WITH_MS_INT_FORMATTER))
-				.setActionTimestamp(ldt.toInstant(ZoneOffset.ofHours(8)).toEpochMilli());
-		int lastNumberOfTick = (int) (lastPrice * 100) / (int)(priceTick * 100);
+		int lastNumberOfTick = (int) (lastPrice * amplifier) / (int)(priceTick * amplifier);
 		int deltaTick = generateDeltaTick(seed);
 		double latestPrice = (lastNumberOfTick + deltaTick) * priceTick;
 		double bidPrice = (lastNumberOfTick + deltaTick - 1) * priceTick;
@@ -65,25 +59,30 @@ public class SimTickGenerator {
 		int deltaVol = generateDeltaVol(seed);
 		int deltaInterest = generateDeltaOpenInterest();
 		
-		String newActionDay = ldt.format(DateTimeConstant.D_FORMAT_INT_FORMATTER);
-		String oldActionDay = tb.getActionDay();
-		double high = StringUtils.equals(newActionDay, oldActionDay) ? Math.max(tb.getHighPrice(), latestPrice) : Math.max(0, latestPrice);
-		double low = StringUtils.equals(newActionDay, oldActionDay) ? Math.min(tb.getLowPrice(), latestPrice) : Math.min(Integer.MAX_VALUE, latestPrice);
-		lastPrice = latestPrice;
-		return tb.setActionDay(ldt.format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
-				.setTradingDay(ldt.format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
-				.setActionTime(ldt.format(DateTimeConstant.T_FORMAT_WITH_MS_INT_FORMATTER))
-				.setActionTimestamp(ldt.toInstant(ZoneOffset.ofHours(8)).toEpochMilli())
-				.setAskPrice(0, askPrice)
-				.setBidPrice(0, bidPrice)
-				.setOpenInterest(tb.getOpenInterest() + deltaInterest)
-				.setOpenInterestDelta(deltaInterest)
-				.setVolume(tb.getVolume() + deltaVol)
-				.setVolumeDelta(deltaVol)
-				.setHighPrice(high)
-				.setLowPrice(low)
-				.setStatus(TickType.NORMAL_TICK.getCode())
-				.setLastPrice(latestPrice)
+		openInterest += deltaInterest;
+		volume += deltaVol;
+		return Tick.builder()
+				.lastPrice(lastPrice)
+				.preSettlePrice(lastPrice)
+				.gatewayId(gateway.gatewayId())
+				.channelType(ChannelType.SIM)
+				.askPrice(List.of(askPrice))
+				.bidPrice(List.of(bidPrice))
+				.askVolume(List.of(0))
+				.bidVolume(List.of(0))
+				.contract(contract)
+				.tradingDay(ldt.toLocalDate())
+				.actionDay(ldt.toLocalDate())
+				.actionTime(ldt.toLocalTime())
+				.actionTimestamp(System.currentTimeMillis())
+				.openInterest(openInterest)
+				.openInterestDelta(deltaInterest)
+				.volume(volume)
+				.volumeDelta(deltaVol)
+				.highPrice(high)
+				.lowPrice(low)
+				.type(TickType.MARKET_TICK)
+				.lastPrice(latestPrice)
 				.build();
 	}
 	

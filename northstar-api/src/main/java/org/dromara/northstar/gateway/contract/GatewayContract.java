@@ -8,17 +8,16 @@ import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.event.FastEventEngine;
 import org.dromara.northstar.common.event.NorthstarEventType;
 import org.dromara.northstar.common.model.Identifier;
-import org.dromara.northstar.gateway.Contract;
+import org.dromara.northstar.common.model.core.Contract;
+import org.dromara.northstar.common.model.core.Tick;
+import org.dromara.northstar.gateway.IContract;
 import org.dromara.northstar.gateway.IMarketCenter;
 import org.dromara.northstar.gateway.Instrument;
-import org.dromara.northstar.gateway.TradeTimeDefinition;
 import org.dromara.northstar.gateway.mktdata.MinuteBarGenerator;
 
 import lombok.extern.slf4j.Slf4j;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
-import xyz.redtorch.pb.CoreField.ContractField;
-import xyz.redtorch.pb.CoreField.TickField;
 
 /**
  * 网关合约
@@ -26,11 +25,11 @@ import xyz.redtorch.pb.CoreField.TickField;
  *
  */
 @Slf4j
-public class GatewayContract implements Contract, TickDataAware{
+public class GatewayContract implements IContract, TickDataAware{
 
 	private MinuteBarGenerator barGen;
 	
-	private ContractField contract;
+	private Contract contract;
 	
 	private Instrument ins;
 	
@@ -39,8 +38,8 @@ public class GatewayContract implements Contract, TickDataAware{
 	public GatewayContract(IMarketCenter mktCenter, FastEventEngine feEngine, Instrument ins) {
 		this.ins = ins;
 		this.mktCenter = mktCenter;
-		this.contract = ins.contractField();
-		this.barGen = new MinuteBarGenerator(contract, tradeTimeDefinition(), bar -> feEngine.emitEvent(NorthstarEventType.BAR, bar));
+		this.contract = ins.contract();
+		this.barGen = new MinuteBarGenerator(contract, bar -> feEngine.emitEvent(NorthstarEventType.BAR, bar));
 	}
 	
 	@Override
@@ -50,31 +49,26 @@ public class GatewayContract implements Contract, TickDataAware{
 
 	@Override
 	public boolean subscribe() {
-		log.debug("订阅：{}", contract.getContractId());
+		log.debug("订阅：{}", contract.contractId());
 		return mktCenter.getGateway(channelType()).subscribe(contract);
 	}
 
 	@Override
 	public boolean unsubscribe() {
-		log.debug("退订：{}", contract.getContractId());
+		log.debug("退订：{}", contract.contractId());
 		return mktCenter.getGateway(channelType()).unsubscribe(contract);
 	}
 
 	@Override
-	public void onTick(TickField tick) {
+	public void onTick(Tick tick) {
 		barGen.update(tick);
 	}
 
 	@Override
-	public ContractField contractField() {
+	public Contract contract() {
 		return contract;
 	}
 
-	@Override
-	public boolean tradable() {
-		return true;
-	}
-	
 	@Override
 	public String name() {
 		return ins.name();
@@ -97,12 +91,7 @@ public class GatewayContract implements Contract, TickDataAware{
 
 	@Override
 	public String gatewayId() {
-		return contract.getGatewayId();
-	}
-
-	@Override
-	public TradeTimeDefinition tradeTimeDefinition() {
-		return ins.tradeTimeDefinition();
+		return contract.gatewayId();
 	}
 
 	@Override
@@ -111,13 +100,8 @@ public class GatewayContract implements Contract, TickDataAware{
 	}
 
 	@Override
-	public void endOfMarket() {
-		barGen.forceEndOfBar();
-	}
-
-	@Override
 	public int hashCode() {
-		return Objects.hash(contract.getContractId());
+		return Objects.hash(contract.contractId());
 	}
 
 	@Override
@@ -129,7 +113,7 @@ public class GatewayContract implements Contract, TickDataAware{
 		if (getClass() != obj.getClass())
 			return false;
 		GatewayContract other = (GatewayContract) obj;
-		return Objects.equals(contract.getContractId(), other.contract.getContractId());
+		return Objects.equals(contract.contractId(), other.contract.contractId());
 	}
 	
 }

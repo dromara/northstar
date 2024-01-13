@@ -3,9 +3,7 @@ package org.dromara.northstar.strategy;
 import org.dromara.northstar.common.event.NorthstarEvent;
 import org.dromara.northstar.common.model.ModuleDescription;
 import org.dromara.northstar.common.model.ModuleRuntimeDescription;
-import org.dromara.northstar.gateway.Contract;
-
-import xyz.redtorch.pb.CoreField.ContractField;
+import org.dromara.northstar.common.model.core.Contract;
 
 /**
  * 模组抽象接口
@@ -41,12 +39,6 @@ public interface IModule {
 	 */
 	IAccount getAccount(Contract contract);
 	/**
-	 * 获取合约关联的交易账户
-	 * @param contract
-	 * @return
-	 */
-	IAccount getAccount(ContractField contract);
-	/**
 	 * 获取模组状态描述
 	 * @return
 	 */
@@ -61,4 +53,9 @@ public interface IModule {
 	 * @return
 	 */
 	IModuleContext getModuleContext();
+	/**
+	 * 获取交易策略
+	 * @return
+	 */
+	TradeStrategy getTradeStrategy();
 }

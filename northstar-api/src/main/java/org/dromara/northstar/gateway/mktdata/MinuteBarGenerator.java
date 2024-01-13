@@ -1,38 +1,49 @@
 package org.dromara.northstar.gateway.mktdata;
 
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-import org.apache.commons.lang3.StringUtils;
-import org.dromara.northstar.common.constant.DateTimeConstant;
-import org.dromara.northstar.gateway.TradeTimeDefinition;
-import org.dromara.northstar.gateway.time.OpenningMinuteClock;
+import org.dromara.northstar.common.constant.TickType;
+import org.dromara.northstar.common.model.core.Bar;
+import org.dromara.northstar.common.model.core.Contract;
+import org.dromara.northstar.common.model.core.Tick;
+import org.dromara.northstar.common.utils.CommonUtils;
 
 import lombok.extern.slf4j.Slf4j;
-import xyz.redtorch.pb.CoreField.BarField;
-import xyz.redtorch.pb.CoreField.ContractField;
-import xyz.redtorch.pb.CoreField.TickField;
 
 @Slf4j
 public class MinuteBarGenerator {
-
-	private BarField.Builder barBuilder;
-
-	private static final long MAX_TIME_GAP = 15000; //15秒TICK过期判定
-
-	private LocalDateTime cutoffTime;
 	
-	private ContractField contract;
+	private Long cutoffTime;
+	private LocalDateTime cutoffDT;
 	
-	private OpenningMinuteClock clock;
+	private Contract contract;
 	
-	private TickField lastTick;
+	private Tick curTick;
 	
-	private Consumer<BarField> onBarCallback;
+	private Consumer<Bar> onBarCallback;
 	
-	private boolean allowHistoricTick;
+	private double high;
+	private double low;
+	private double close;
+	private double open;
+	private long volumeDelta;
+	private double openInterestDelta;
+	private double turnoverDelta;
+	
+	private CompletableFuture<Void> asyncCheck;
+	
+	private Runnable forceCloseBar = () -> {
+		synchronized(MinuteBarGenerator.this) {			
+			if(curTick != null && System.currentTimeMillis() - curTick.actionTimestamp() > TimeUnit.MINUTES.toMillis(1)) {
+				log.debug("强制K线收盘：{}", contract.name());
+				finishOfBar();
+			}
+		}
+	};
 	
 	/**
 	 * 用于实盘数据
@@ -40,22 +51,9 @@ public class MinuteBarGenerator {
 	 * @param tradeTimeDefinition
 	 * @param onBarCallback
 	 */
-	public MinuteBarGenerator(ContractField contract, TradeTimeDefinition tradeTimeDefinition, Consumer<BarField> onBarCallback) {
-		this(contract, tradeTimeDefinition, onBarCallback, false);
-	}
-	
-	/**
-	 * 用于仿真数据
-	 * @param contract
-	 * @param tradeTimeDefinition
-	 * @param onBarCallback
-	 * @param allowHistoricTick
-	 */
-	public MinuteBarGenerator(ContractField contract, TradeTimeDefinition tradeTimeDefinition, Consumer<BarField> onBarCallback, boolean allowHistoricTick) {
+	public MinuteBarGenerator(Contract contract, Consumer<Bar> onBarCallback) {
 		this.contract = contract;
 		this.onBarCallback = onBarCallback;
-		this.clock = new OpenningMinuteClock(tradeTimeDefinition);
-		this.allowHistoricTick = allowHistoricTick;
 	}
 	
 	/**
@@ -63,87 +61,85 @@ public class MinuteBarGenerator {
 	 * 
 	 * @param tick
 	 */
-	public synchronized void update(TickField tick) {
+	public synchronized void update(Tick tick) {
 		// 如果tick为空或者合约不匹配则返回
 		if (tick == null) {
 			return;
 		}
-		boolean sameSymbol = StringUtils.equals(contract.getUnifiedSymbol(), tick.getUnifiedSymbol());
-		boolean sameChannel = StringUtils.equals(contract.getChannelType(), tick.getChannelType());
+		boolean sameSymbol = contract.equals(tick.contract());
+		boolean sameChannel = contract.channelType() == tick.channelType();
 		if(!(sameSymbol && sameChannel)) {
-			if(!sameSymbol)	log.warn("合约不匹配，期望 [{}]，实际 [{}]", contract.getUnifiedSymbol(), tick.getUnifiedSymbol());
-			if(!sameChannel) log.warn("[{}] 合约渠道不匹配，期望 [{}]，实际 [{}]", contract.getUnifiedSymbol(), contract.getChannelType(), tick.getChannelType());
+			if(!sameSymbol)	log.warn("合约不匹配，期望 [{}]，实际 [{}]", contract.contractId(), tick.contract().contractId());
+			if(!sameChannel) log.warn("[{}] 合约渠道不匹配，期望 [{}]，实际 [{}]", contract.unifiedSymbol(), contract.channelType(), tick.channelType());
 			return;
 		}
-		if (System.currentTimeMillis() - tick.getActionTimestamp() > MAX_TIME_GAP && !allowHistoricTick) {
-			log.debug("忽略过期数据: {} {} {}", tick.getUnifiedSymbol(), tick.getActionDay(), tick.getActionTime());
-			return;
-		}
-		
 		// 忽略非行情数据
-		if(tick.getStatus() < 1 && !clock.isValidOpenningTick(tick)) {
+		if(tick.type() != TickType.MARKET_TICK) {
 			return;
 		}
 		
-		lastTick = tick;
+		curTick = tick;
 		
-		if(Objects.nonNull(cutoffTime) && tick.getActionTimestamp() >= cutoffTime.toInstant(ZoneOffset.ofHours(8)).toEpochMilli()
-				&& (!clock.isEndOfSection(cutoffTime.toLocalTime()) || allowHistoricTick)) {
+		if(Objects.nonNull(cutoffTime) && cutoffTime < tick.actionTimestamp()) {
 			finishOfBar();
 		}
-		if(Objects.isNull(barBuilder)) {
-			cutoffTime = clock.barMinute(tick);
-			barBuilder = BarField.newBuilder()
-					.setGatewayId(tick.getGatewayId())
-					.setChannelType(tick.getChannelType())
-					.setUnifiedSymbol(tick.getUnifiedSymbol())
-					.setTradingDay(tick.getTradingDay())
-					.setOpenPrice(tick.getLastPrice())
-					.setHighPrice(tick.getLastPrice())
-					.setLowPrice(tick.getLastPrice())
-					.setPreClosePrice(tick.getPreClosePrice())
-					.setPreOpenInterest(tick.getPreOpenInterest())
-					.setPreSettlePrice(tick.getPreSettlePrice())
-					.setActionDay(tick.getActionDay())
-					.setActionTime(cutoffTime.format(DateTimeConstant.T_FORMAT_FORMATTER))
-					.setActionTimestamp(cutoffTime.toInstant(ZoneOffset.ofHours(8)).toEpochMilli());
+		if(Objects.isNull(cutoffTime)) {
+			cutoffDT = LocalDateTime.of(tick.actionDay(), tick.actionTime().withSecond(0).withNano(0)).plusMinutes(1);
+			// cutoffTime是下一个整数分钟前推100毫秒
+			cutoffTime = CommonUtils.localDateTimeToMills(cutoffDT) - 100;
+			open = tick.lastPrice();
+			high = tick.lastPrice();
+			low = tick.lastPrice();
+			close = tick.lastPrice();
+			openInterestDelta = 0;
+			volumeDelta = 0;
+			turnoverDelta = 0;
 		}
+		high = Math.max(tick.lastPrice(), high);
+		low = Math.min(tick.lastPrice(), low);
+		close = tick.lastPrice();
+		openInterestDelta += tick.openInterestDelta();
+		volumeDelta += tick.volumeDelta();
+		turnoverDelta += tick.turnoverDelta();
 		
-		barBuilder.setHighPrice(Math.max(tick.getLastPrice(), barBuilder.getHighPrice()));
-		barBuilder.setLowPrice(Math.min(tick.getLastPrice(), barBuilder.getLowPrice()));
-		barBuilder.setClosePrice(tick.getLastPrice());
-		barBuilder.setOpenInterest(tick.getOpenInterest());
-		barBuilder.setOpenInterestDelta(tick.getOpenInterestDelta() + barBuilder.getOpenInterestDelta());
-		barBuilder.setVolume(tick.getVolumeDelta() + barBuilder.getVolume());
-		barBuilder.setTurnover(tick.getTurnoverDelta() + barBuilder.getTurnover());
-		barBuilder.setNumTrades(tick.getNumTradesDelta() + barBuilder.getNumTrades());
+		if(asyncCheck != null) {			
+			asyncCheck.cancel(false);
+		}
+		// 1分钟后检查
+		asyncCheck = CompletableFuture.runAsync(forceCloseBar, CompletableFuture.delayedExecutor(1, TimeUnit.MINUTES));
 	}
 	
 	/**
 	 * 分钟收盘生成
 	 * @return
 	 */
-	public synchronized BarField finishOfBar() {
-		if(Objects.isNull(barBuilder)) {
-			return null;
-		}
-		barBuilder.setVolume(Math.max(0, barBuilder.getVolume()));				// 防止vol为负数
-		
-		BarField lastBar = barBuilder.build();
-		onBarCallback.accept(lastBar);
-		barBuilder = null;
-		cutoffTime = null;
-		return lastBar;
-	}
-	
-	/**
-	 * 小节收盘检查
-	 */
-	public synchronized void forceEndOfBar() {
-		if(Objects.isNull(lastTick) || System.currentTimeMillis() - lastTick.getActionTimestamp() < MAX_TIME_GAP) {
+	public synchronized void finishOfBar() {
+		if(Objects.isNull(cutoffTime)) {
 			return;
 		}
-		finishOfBar();
+		onBarCallback.accept(Bar.builder()
+				.gatewayId(curTick.gatewayId())
+				.channelType(curTick.channelType())
+				.contract(curTick.contract())
+				.actionDay(cutoffDT.toLocalDate())
+				.actionTime(cutoffDT.toLocalTime())
+				.actionTimestamp(CommonUtils.localDateTimeToMills(cutoffDT))
+				.tradingDay(curTick.tradingDay())
+				.openPrice(open)
+				.highPrice(high)
+				.lowPrice(low)
+				.closePrice(close)
+				.preClosePrice(curTick.preClosePrice())
+				.preOpenInterest(curTick.preOpenInterest())
+				.preSettlePrice(curTick.preSettlePrice())
+				.volume(curTick.volume())
+				.volumeDelta(Math.max(0, volumeDelta))
+				.openInterest(curTick.openInterest())
+				.openInterestDelta(openInterestDelta)
+				.turnover(curTick.turnover())
+				.turnoverDelta(turnoverDelta)
+				.build());
+		cutoffTime = null;
 	}
 	
 }

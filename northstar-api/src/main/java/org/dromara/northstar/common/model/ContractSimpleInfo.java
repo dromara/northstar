@@ -33,6 +33,10 @@ public class ContractSimpleInfo {
 	 * 合约ID
 	 */
 	private String value;
+	/**
+	 * 合约价格精度
+	 */
+	private int precision;
 	
 	@Override
 	public boolean equals(Object obj) {

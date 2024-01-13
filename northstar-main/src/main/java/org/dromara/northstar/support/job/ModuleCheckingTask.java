@@ -16,8 +16,9 @@ import org.dromara.northstar.common.constant.ModuleState;
 import org.dromara.northstar.common.model.ContractSimpleInfo;
 import org.dromara.northstar.common.model.Identifier;
 import org.dromara.northstar.common.model.ModuleAccountDescription;
+import org.dromara.northstar.common.model.core.Position;
 import org.dromara.northstar.event.IllegalOrderHandler;
-import org.dromara.northstar.gateway.Contract;
+import org.dromara.northstar.gateway.IContract;
 import org.dromara.northstar.gateway.IContractManager;
 import org.dromara.northstar.module.ModuleManager;
 import org.dromara.northstar.strategy.IAccount;
@@ -25,6 +26,7 @@ import org.dromara.northstar.strategy.IMessageSender;
 import org.dromara.northstar.strategy.IModule;
 import org.dromara.northstar.support.utils.ExceptionLogChecker;
 import org.dromara.northstar.support.utils.PositionChecker;
+import org.slf4j.ILoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -35,7 +37,6 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.FileAppender;
 import lombok.extern.slf4j.Slf4j;
 import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
-import xyz.redtorch.pb.CoreField.PositionField;
 
 /**
  * 模组运行时检查任务
@@ -113,30 +114,30 @@ public class ModuleCheckingTask implements InitializingBean {
 		moduleMgr.allModules().forEach(m -> {
 			for(ModuleAccountDescription mad : m.getModuleDescription().getModuleAccountSettingsDescription()) {
 				for(ContractSimpleInfo csi : mad.getBindedContracts()) {
-					Contract contract = contractMgr.getContract(Identifier.of(csi.getValue()));
-					IAccount account = m.getAccount(contract);
-					PositionField longPosPlaceholder = PositionField.newBuilder()
-							.setGatewayId(account.accountId())
-							.setContract(contract.contractField())
-							.setPositionDirection(PositionDirectionEnum.PD_Long)
+					IContract contract = contractMgr.getContract(Identifier.of(csi.getValue()));
+					IAccount account = m.getAccount(contract.contract());
+					Position longPosPlaceholder = Position.builder()
+							.gatewayId(account.accountId())
+							.contract(contract.contract())
+							.positionDirection(PositionDirectionEnum.PD_Long)
 							.build();
-					PositionField shortPosPlaceholder = PositionField.newBuilder()
-							.setGatewayId(account.accountId())
-							.setContract(contract.contractField())
-							.setPositionDirection(PositionDirectionEnum.PD_Short)
+					Position shortPosPlaceholder = Position.builder()
+							.gatewayId(account.accountId())
+							.contract(contract.contract())
+							.positionDirection(PositionDirectionEnum.PD_Short)
 							.build();
-					account.getPosition(PositionDirectionEnum.PD_Long, csi.getUnifiedSymbol()).ifPresentOrElse(this::doCheckPosition, () -> this.doCheckPosition(longPosPlaceholder));
-					account.getPosition(PositionDirectionEnum.PD_Short, csi.getUnifiedSymbol()).ifPresentOrElse(this::doCheckPosition, () -> this.doCheckPosition(shortPosPlaceholder));
+					account.getPosition(PositionDirectionEnum.PD_Long, contract.contract()).ifPresentOrElse(this::doCheckPosition, () -> this.doCheckPosition(longPosPlaceholder));
+					account.getPosition(PositionDirectionEnum.PD_Short, contract.contract()).ifPresentOrElse(this::doCheckPosition, () -> this.doCheckPosition(shortPosPlaceholder));
 				}
 			}
 		});
 	}
 	
-	private void doCheckPosition(PositionField position) {
+	private void doCheckPosition(Position position) {
 		try {
 			posChkr.checkPositionEquivalence(position);
 		} catch (IllegalStateException e) {
-			doSmartSend(String.format("[持仓不匹配警报] %s %s", position.getContract().getName(), position.getPositionDirection()), e.getMessage());
+			doSmartSend(String.format("[持仓不匹配警报] %s %s", position.contract().name(), position.positionDirection()), e.getMessage());
 		}
 	}
 	
@@ -149,7 +150,8 @@ public class ModuleCheckingTask implements InitializingBean {
 	public void checkModuleException() throws IOException {
 		log.debug("检查当天的模组日志中是否存在异常日志");
 		for(IModule module : moduleMgr.allModules()) {
-			Logger logger = (Logger) module.getModuleContext().getLogger();
+			ILoggerFactory factory = module.getModuleContext().getLoggerFactory();
+			Logger logger = (Logger) factory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
 			FileAppender<ILoggingEvent> fileAppender = (FileAppender<ILoggingEvent>) logger.getAppender(module.getName());
 			File logFile = new File(fileAppender.getFile());
 			FileReader fr = new FileReader(logFile);
@@ -186,7 +188,7 @@ public class ModuleCheckingTask implements InitializingBean {
 		log.debug("检查废单");
 		StringBuilder sb = new StringBuilder();
 		illOrderHandler.getIllegalOrders().forEach(order -> 
-			sb.append(String.format("%s %s %s %s%n", order.getContract().getName(), order.getOrderDate(), order.getOrderTime(), order.getStatusMsg()))
+			sb.append(String.format("%s %s %s %s%n", order.contract().name(), order.updateDate(), order.updateTime(), order.statusMsg()))
 		);
 		
 		if(sb.length() > 0) {

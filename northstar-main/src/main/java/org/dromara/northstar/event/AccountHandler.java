@@ -12,11 +12,10 @@ import org.dromara.northstar.common.event.NorthstarEvent;
 import org.dromara.northstar.common.event.NorthstarEventType;
 import org.dromara.northstar.common.exception.NoSuchElementException;
 import org.dromara.northstar.common.model.Identifier;
-
-import xyz.redtorch.pb.CoreField.AccountField;
-import xyz.redtorch.pb.CoreField.OrderField;
-import xyz.redtorch.pb.CoreField.PositionField;
-import xyz.redtorch.pb.CoreField.TradeField;
+import org.dromara.northstar.common.model.core.Account;
+import org.dromara.northstar.common.model.core.Order;
+import org.dromara.northstar.common.model.core.Position;
+import org.dromara.northstar.common.model.core.Trade;
 
 /**
  * 处理账户相关操作
@@ -42,20 +41,20 @@ public class AccountHandler extends AbstractEventHandler implements GenericEvent
 	public synchronized void doHandle(NorthstarEvent e) {
 		switch(e.getEvent()) {
 		case ACCOUNT -> {
-			AccountField af = (AccountField) e.getData();
-			getAccount(af.getGatewayId()).onAccount(af);
+			Account af = (Account) e.getData();
+			getAccount(af.gatewayId()).onAccount(af);
 		}
 		case POSITION -> {
-			PositionField pf = (PositionField) e.getData();
-			getAccount(pf.getGatewayId()).onPosition(pf);
+			Position pf = (Position) e.getData();
+			getAccount(pf.gatewayId()).onPosition(pf);
 		}
 		case TRADE -> {
-			TradeField tf = (TradeField) e.getData();
-			getAccount(tf.getGatewayId()).onTrade(tf);
+			Trade tf = (Trade) e.getData();
+			getAccount(tf.gatewayId()).onTrade(tf);
 		}
 		case ORDER -> {
-			OrderField of = (OrderField) e.getData();
-			getAccount(of.getGatewayId()).onOrder(of);
+			Order of = (Order) e.getData();
+			getAccount(of.gatewayId()).onOrder(of);
 		}
 		default -> throw new IllegalArgumentException("Unexpected value: " + e.getEvent());
 		}

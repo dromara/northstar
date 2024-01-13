@@ -1,6 +1,6 @@
 package org.dromara.northstar.common;
 
-import xyz.redtorch.pb.CoreField.BarField;
+import org.dromara.northstar.common.model.core.Bar;
 
 /**
  * BAR行情组件
@@ -10,5 +10,5 @@ import xyz.redtorch.pb.CoreField.BarField;
 public interface BarDataAware {
 	
 	
-	void onBar(BarField bar);
+	void onBar(Bar bar);
 }

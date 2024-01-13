@@ -6,12 +6,14 @@ public interface IMessageSender {
 
 	/**
 	 * 发送信息
+	 * 该方法可以是阻塞方法
 	 * @param title		标题
 	 * @param message	内容
 	 */
 	void send(String title, String content);
 	/**
 	 * 发送信息
+	 * 该方法可以是阻塞方法
 	 * @param content	内容
 	 */
 	void send(String content);

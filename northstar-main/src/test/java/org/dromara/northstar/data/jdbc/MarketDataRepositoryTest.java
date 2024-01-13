@@ -19,9 +19,9 @@ class MarketDataRepositoryTest {
 	
 	String unifiedSymbol = "rb2310@SHFE@FUTURES";
 	
-	BarDO bar1 = new BarDO(unifiedSymbol, "20230430", 1, null);
-	BarDO bar2 = new BarDO(unifiedSymbol, "20230430", 2, null);
-	BarDO bar3 = new BarDO(unifiedSymbol, "20230503", 3, null);
+	BarDO bar1 = BarDO.builder().unifiedSymbol(unifiedSymbol).tradingDay("20230430").expiredAt(1).build();
+	BarDO bar2 = BarDO.builder().unifiedSymbol(unifiedSymbol).tradingDay("20230430").expiredAt(2).build();
+	BarDO bar3 = BarDO.builder().unifiedSymbol(unifiedSymbol).tradingDay("20230503").expiredAt(3).build();
 	
 	@BeforeEach
 	void prepare() {

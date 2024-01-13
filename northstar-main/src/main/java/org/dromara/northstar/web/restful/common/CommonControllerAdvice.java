@@ -1,6 +1,6 @@
 package org.dromara.northstar.web.restful.common;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 import org.dromara.northstar.common.constant.ReturnCode;

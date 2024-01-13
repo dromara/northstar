@@ -1,6 +1,7 @@
 package org.dromara.northstar.indicator.constant;
 
-import xyz.redtorch.pb.CoreField.BarField;
+import org.dromara.northstar.common.constant.DateTimeConstant;
+import org.dromara.northstar.common.model.core.Bar;
 
 /**
  * 指标取值类型
@@ -13,8 +14,8 @@ public enum ValueType {
 	 */
 	HIGH {
 		@Override
-		public double resolve(BarField bar) {
-			return bar.getHighPrice();
+		public double resolve(Bar bar) {
+			return bar.highPrice();
 		}
 	},
 	/**
@@ -22,8 +23,8 @@ public enum ValueType {
 	 */
 	LOW {
 		@Override
-		public double resolve(BarField bar) {
-			return bar.getLowPrice();
+		public double resolve(Bar bar) {
+			return bar.lowPrice();
 		}
 	},
 	/**
@@ -31,8 +32,8 @@ public enum ValueType {
 	 */
 	OPEN {
 		@Override
-		public double resolve(BarField bar) {
-			return bar.getOpenPrice();
+		public double resolve(Bar bar) {
+			return bar.openPrice();
 		}
 	},
 	/**
@@ -40,8 +41,8 @@ public enum ValueType {
 	 */
 	CLOSE {
 		@Override
-		public double resolve(BarField bar) {
-			return bar.getClosePrice();
+		public double resolve(Bar bar) {
+			return bar.closePrice();
 		}
 	},
 	/**
@@ -49,26 +50,35 @@ public enum ValueType {
 	 */
 	BARYCENTER {
 		@Override
-		public double resolve(BarField bar) {
-			return (bar.getHighPrice() + bar.getClosePrice() + bar.getClosePrice() * 2) / 4;
+		public double resolve(Bar bar) {
+			return (bar.highPrice() + bar.closePrice() + bar.closePrice() * 2) / 4;
 		}
 	},
 	/**
-	 * 成交量
+	 * 当日累计成交量
 	 */
 	VOL {
 		@Override
-		public double resolve(BarField bar) {
-			return bar.getVolume();
+		public double resolve(Bar bar) {
+			return bar.volume();
 		}
 	},
 	/**
-	 * 持仓量
+	 * K线成交量
+	 */
+	VOL_DELTA {
+		@Override
+		public double resolve(Bar bar) {
+			return bar.volumeDelta();
+		}
+	},
+	/**
+	 * 实际持仓量
 	 */
 	OI {
 		@Override
-		public double resolve(BarField bar) {
-			return bar.getOpenInterest();
+		public double resolve(Bar bar) {
+			return bar.openInterest();
 		}
 	},
 	/**
@@ -76,8 +86,8 @@ public enum ValueType {
 	 */
 	OI_DELTA {
 		@Override
-		public double resolve(BarField bar) {
-			return bar.getOpenInterestDelta();
+		public double resolve(Bar bar) {
+			return bar.openInterestDelta();
 		}
 	},
 	/**
@@ -85,10 +95,10 @@ public enum ValueType {
 	 */
 	TRADE_DATE {
 		@Override
-		public double resolve(BarField bar) {
-			return Double.valueOf(bar.getTradingDay());
+		public double resolve(Bar bar) {
+			return Double.parseDouble(bar.tradingDay().format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
 		}
 	};
 	
-	public abstract double resolve(BarField bar);
+	public abstract double resolve(Bar bar);
 }

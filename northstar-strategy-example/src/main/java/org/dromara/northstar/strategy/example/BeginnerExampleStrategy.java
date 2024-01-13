@@ -12,20 +12,20 @@ import org.dromara.northstar.common.model.NumberValue;
 import org.dromara.northstar.common.model.Setting;
 import org.dromara.northstar.common.model.StringValue;
 import org.dromara.northstar.common.model.Value;
-import org.dromara.northstar.strategy.IModuleContext;
-import org.dromara.northstar.strategy.IModuleStrategyContext;
+import org.dromara.northstar.common.model.core.Bar;
+import org.dromara.northstar.common.model.core.Contract;
+import org.dromara.northstar.common.model.core.Order;
+import org.dromara.northstar.common.model.core.Tick;
+import org.dromara.northstar.common.model.core.Trade;
+import org.dromara.northstar.indicator.Indicator;
+import org.dromara.northstar.indicator.helper.SimpleValueIndicator;
+import org.dromara.northstar.indicator.model.Configuration;
+import org.dromara.northstar.strategy.AbstractStrategy;
 import org.dromara.northstar.strategy.StrategicComponent;
 import org.dromara.northstar.strategy.TradeStrategy;
 import org.dromara.northstar.strategy.constant.PriceType;
 import org.dromara.northstar.strategy.model.TradeIntent;
 import org.slf4j.Logger;
-
-import com.alibaba.fastjson.JSONObject;
-
-import xyz.redtorch.pb.CoreField.BarField;
-import xyz.redtorch.pb.CoreField.OrderField;
-import xyz.redtorch.pb.CoreField.TickField;
-import xyz.redtorch.pb.CoreField.TradeField;
 
 /**
  * 本示例用于展示写一个策略的必要元素，以及最基本的开平仓操作、超时撤单操作
@@ -35,17 +35,16 @@ import xyz.redtorch.pb.CoreField.TradeField;
  *
  */
 @StrategicComponent(BeginnerExampleStrategy.NAME)		// 该注解是用于给策略命名用的，所有的策略都要带上这个注解
-public class BeginnerExampleStrategy implements TradeStrategy{
+public class BeginnerExampleStrategy extends AbstractStrategy	// 抽象类预实现了很多常用的方法 
+	implements TradeStrategy{
 	
 	protected static final String NAME = "示例-简单策略";	// 之所以要这样定义一个常量，是为了方便日志输出时可以带上策略名称
 	
 	private InitParams params;	// 策略的参数配置信息
 	
-	private IModuleStrategyContext ctx;		// 模组的操作上下文
+	private Logger logger;
 	
-	private JSONObject storeObj = new JSONObject(); 	// 可透视状态计算信息
-	
-	private Logger log;
+	private Indicator close;
 	
 	/**
 	 * 定义该策略的参数。该类每个策略必须自己重写一个，类名必须为InitParams，必须继承DynamicParams，必须是个static类。
@@ -75,32 +74,27 @@ public class BeginnerExampleStrategy implements TradeStrategy{
 		this.params = (InitParams) params;
 	}
 	
-	@Override
-	public void setContext(IModuleContext context) {
-		ctx = context;
-		log = ctx.getLogger();
-	}
-	
-	@Override
-	public JSONObject getStoreObject() {
-		return storeObj;
-	}
-
-	@Override
-	public void setStoreObject(JSONObject storeObj) {
-		this.storeObj = storeObj;
-	}
 	/***************** 以上如果看不懂，基本可以照搬 *************************/
-
+	
 	private long nextActionTime;
 	
 	@Override
-	public void onTick(TickField tick) {
+	protected void initIndicators() {
+		// 在该方法中创建必要的指标实例
+		Contract contract = ctx.getContract(bindedContracts().get(0).getUnifiedSymbol());
+		close = new SimpleValueIndicator(Configuration.builder().indicatorName("C").contract(contract).numOfUnits(ctx.numOfMinPerMergedBar()).build());
 		
-		log.debug("TICK触发: C:{} D:{} T:{} P:{} V:{} OI:{} OID:{}", 
-				tick.getUnifiedSymbol(), tick.getActionDay(), tick.getActionTime(), 
-				tick.getLastPrice(), tick.getVolume(), tick.getOpenInterest(), tick.getOpenInterestDelta());
-		long now = tick.getActionTimestamp();
+		ctx.registerIndicator(close);
+		
+		logger = ctx.getLogger(getClass());
+	}
+
+	@Override
+	public void onTick(Tick tick) {
+		logger.debug("TICK触发: C:{} D:{} T:{} P:{} V:{} OI:{} OID:{}", 
+				tick.contract().unifiedSymbol(), tick.actionDay(), tick.actionTime(),
+				tick.lastPrice(), tick.volume(), tick.openInterest(), tick.openInterestDelta());
+		long now = tick.actionTimestamp();
 		// 启用后，等待10秒才开始交易
 		if(nextActionTime == 0) {
 			nextActionTime = now + 10000;
@@ -108,14 +102,14 @@ public class BeginnerExampleStrategy implements TradeStrategy{
 		boolean flag = ThreadLocalRandom.current().nextBoolean();
 		if(now > nextActionTime) {
 			nextActionTime = now + params.actionInterval * 1000;
-			log.info("开始交易");
+			logger.info("开始交易");
 			if(ctx.getState().isEmpty()) {
 				SignalOperation op = flag ? SignalOperation.BUY_OPEN : SignalOperation.SELL_OPEN;	// 随机开多或者开空
 				if(ctx.getState() == ModuleState.EMPTY_HEDGE) {
 					op = flag ? SignalOperation.BUY_CLOSE : SignalOperation.SELL_CLOSE;
 				}
 				ctx.submitOrderReq(TradeIntent.builder()
-						.contract(ctx.getContract(tick.getUnifiedSymbol()))
+						.contract(tick.contract())
 						.operation(op)
 						.volume(ctx.getDefaultVolume())
 						.priceType(PriceType.valueOf(params.priceType))
@@ -126,7 +120,7 @@ public class BeginnerExampleStrategy implements TradeStrategy{
 			if(ctx.getState() == ModuleState.HOLDING_LONG) {
 				SignalOperation op = params.showHedge ? SignalOperation.SELL_OPEN : SignalOperation.SELL_CLOSE;
 				ctx.submitOrderReq(TradeIntent.builder()
-						.contract(ctx.getContract(tick.getUnifiedSymbol()))
+						.contract(tick.contract())
 						.operation(op)
 						.priceType(PriceType.valueOf(params.priceType))
 						.volume(ctx.getDefaultVolume())
@@ -136,7 +130,7 @@ public class BeginnerExampleStrategy implements TradeStrategy{
 			if(ctx.getState() == ModuleState.HOLDING_SHORT) {		
 				SignalOperation op = params.showHedge ? SignalOperation.BUY_OPEN : SignalOperation.BUY_CLOSE;
 				ctx.submitOrderReq(TradeIntent.builder()
-						.contract(ctx.getContract(tick.getUnifiedSymbol()))
+						.contract(tick.contract())
 						.operation(op)
 						.priceType(PriceType.valueOf(params.priceType))
 						.volume(ctx.getDefaultVolume())
@@ -147,17 +141,17 @@ public class BeginnerExampleStrategy implements TradeStrategy{
 	}
 
 	@Override
-	public void onMergedBar(BarField bar) {
-		log.debug("策略每分钟触发");
+	public void onMergedBar(Bar bar) {
+		logger.debug("策略每分钟触发");
 	}
 
 	@Override
-	public void onOrder(OrderField order) {
+	public void onOrder(Order order) {
 		// 委托单状态变动回调
 	}
 
 	@Override
-	public void onTrade(TradeField trade) {
+	public void onTrade(Trade trade) {
 		// 成交回调
 	}
 
@@ -171,5 +165,10 @@ public class BeginnerExampleStrategy implements TradeStrategy{
 				new ListValue("示例列表", List.of(new NumberValue("", 123), new NumberValue("", 456)))
 				);
 	}
-	
+
+	@Override
+	public String name() {
+		return NAME;
+	}
+
 }

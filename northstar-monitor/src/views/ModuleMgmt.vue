@@ -5,6 +5,7 @@
       :readOnly="curTableIndex > -1 && curModule.runtime && curModule.runtime.enabled"
       :module="curModule ? JSON.parse(JSON.stringify(curModule)) : null"
       @onSave="saveModule"
+      @copyModule="handleModuleCopy"
     />
     <ModuleRuntime
       :visible.sync="ModuleRuntimeVisible"
@@ -372,7 +373,6 @@ export default {
         this.$store.commit('updateList', modules.sort((a,b) => a.moduleName.localeCompare(b.moduleName)))
     },
     async saveModule(module) {
-      console.log(module)
       const rt = await moduleApi.getModuleRuntime(module.moduleName)
       module.runtime = rt
       if (this.curTableIndex < 0) {
@@ -386,6 +386,10 @@ export default {
         this.moduleList[this.curTableIndex] = module
       }
       this.$store.commit('updateList', [...this.moduleList])
+    },
+    handleModuleCopy(){
+      this.curTableIndex = -1 
+      this.curModule = null
     },
     resetAll(){
       this.moduleList.forEach(module => {

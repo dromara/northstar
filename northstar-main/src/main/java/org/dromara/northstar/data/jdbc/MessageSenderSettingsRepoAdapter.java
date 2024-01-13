@@ -10,8 +10,8 @@ import org.dromara.northstar.data.jdbc.entity.MessageSenderSettingsDO;
 import org.dromara.northstar.data.jdbc.entity.SubscriptionEventsDO;
 import org.springframework.beans.BeanUtils;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
+import com.alibaba.fastjson.JSON;
 
 
 public class MessageSenderSettingsRepoAdapter implements IMessageSenderRepository{
@@ -63,7 +63,7 @@ public class MessageSenderSettingsRepoAdapter implements IMessageSenderRepositor
 	public List<NorthstarEventType> getSubEvents() {
 		Optional<SubscriptionEventsDO> sub = notificationRepo.findById(SubscriptionEventsDO.FIXED_ID);
 		if(sub.isEmpty()) {
-			return null;
+			return null; // 故意与空列表区分开
 		}
 		String listStr = sub.get().getSubEvents();
 		return JSON.parseObject(listStr, new TypeReference<List<NorthstarEventType>>() {});

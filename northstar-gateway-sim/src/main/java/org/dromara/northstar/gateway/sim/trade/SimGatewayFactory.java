@@ -50,7 +50,7 @@ public class SimGatewayFactory implements GatewayFactory{
 		if(simAccountDescription == null) {
 			account = new SimGatewayAccount(accGatewayId);
 		} else {
-			account = new SimGatewayAccount(simAccountDescription);
+			account = new SimGatewayAccount(simAccountDescription, mktCenter);
 		}
 		return new SimTradeGatewayLocal(fastEventEngine, gatewayDescription, account, simAccountRepo);
 	}

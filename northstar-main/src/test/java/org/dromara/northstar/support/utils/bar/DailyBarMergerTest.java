@@ -1,96 +1,83 @@
 package org.dromara.northstar.support.utils.bar;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.offset;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.ArrayList;
+import java.time.ZoneOffset;
 import java.util.List;
-import java.util.Random;
 
-import org.dromara.northstar.common.constant.DateTimeConstant;
-import org.dromara.northstar.gateway.Contract;
-import org.dromara.northstar.gateway.TradeTimeDefinition;
-import org.dromara.northstar.gateway.model.PeriodSegment;
-import org.junit.jupiter.api.BeforeEach;
+import org.dromara.northstar.common.model.core.Bar;
+import org.dromara.northstar.common.model.core.Contract;
+import org.dromara.northstar.common.model.core.ContractDefinition;
+import org.dromara.northstar.common.model.core.TimeSlot;
+import org.dromara.northstar.common.model.core.TradeTimeDefinition;
+import org.dromara.northstar.strategy.MergedBarListener;
 import org.junit.jupiter.api.Test;
-
-import test.common.TestFieldFactory;
-import xyz.redtorch.pb.CoreField.BarField;
-import xyz.redtorch.pb.CoreField.ContractField;
+import org.mockito.Mockito;
 
 class DailyBarMergerTest {
+	
+	List<TimeSlot> times = List.of(
+			TimeSlot.builder().start(LocalTime.of(21, 0)).end(LocalTime.of(2, 30)).build(),
+			TimeSlot.builder().start(LocalTime.of(9, 0)).end(LocalTime.of(10, 15)).build(),
+			TimeSlot.builder().start(LocalTime.of(10, 30)).end(LocalTime.of(11, 30)).build(),
+			TimeSlot.builder().start(LocalTime.of(13, 30)).end(LocalTime.of(15, 0)).build()
+		);
 
-	TestFieldFactory factory = new TestFieldFactory("gateway");
-	
-	ContractField contract = factory.makeContract("rb2205");
-	
-	Contract c = mock(Contract.class);
-	
-	@BeforeEach
-	void prepare() {
-		when(c.contractField()).thenReturn(contract);
-		when(c.tradeTimeDefinition()).thenReturn(new TradeTimeDefinition() {
-			
-			@Override
-			public List<PeriodSegment> tradeTimeSegments() {
-				return List.of(new PeriodSegment(LocalTime.of(9, 0), LocalTime.of(15, 0)));
-			}
-		});
-	}
-	
+    Contract contract = Contract.builder()
+    		.unifiedSymbol("rb2401@SHFE@FUTURES")
+    		.contractDefinition(ContractDefinition.builder()
+    				.tradeTimeDef(TradeTimeDefinition.builder()
+    						.timeSlots(times)
+    						.build())
+    				.build())
+    		.build();
+
 	@Test
 	void test() {
-		List<BarField> samples = new ArrayList<>();
-		List<BarField> results = new ArrayList<>();
-		BarMerger bm = new DailyBarMerger(2, c, (merger,bar) -> results.add(bar));
-		Random rand = new Random();
-		LocalDate date = LocalDate.now();
-		for(int i=0; i<21; i++) {
-			BarField bar = BarField.newBuilder()
-					.setUnifiedSymbol("rb2205@SHFE@FUTURES")
-					.setActionDay(date.format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
-					.setActionTime("15:00:00")
-					.setActionTimestamp(i)
-					.setTradingDay(date.format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
-					.setOpenPrice(rand.nextDouble(5000))
-					.setClosePrice(rand.nextDouble(5000))
-					.setHighPrice(rand.nextDouble(5000))
-					.setLowPrice(rand.nextDouble(5000))
-					.setVolume(rand.nextLong(500000000))
-					.setVolumeDelta(rand.nextLong(50000))
-					.setOpenInterest(rand.nextDouble(50000000000L))
-					.setOpenInterestDelta(rand.nextDouble(5000000))
-					.setTurnover(rand.nextDouble(500000000))
-					.setTurnoverDelta(rand.nextDouble(50000000))
-					.setNumTrades(rand.nextLong(500000000))
-					.setNumTradesDelta(rand.nextLong(500000))
-					.build();
-			bm.onBar(bar);
-			samples.add(bar);
-			
-			date = date.plusDays(1);
-		}
+		DailyBarMerger merger = new DailyBarMerger(1, contract);
+		MergedBarListener listener = mock(MergedBarListener.class);
+		merger.addListener(listener);
+		merger.onBar(genBar(LocalDate.now(), LocalTime.of(14, 0), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+		merger.onBar(genBar(LocalDate.now(), LocalTime.of(15, 0), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+		merger.onBar(genBar(LocalDate.now().plusDays(1), LocalTime.of(15, 0), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
 		
-		assertThat(results).hasSize(10);
-		assertThat(results.get(9).getActionDay()).isEqualTo(samples.get(19).getActionDay());
-		assertThat(results.get(9).getActionTime()).isEqualTo(samples.get(19).getActionTime());
-		assertThat(results.get(9).getActionTimestamp()).isEqualTo(samples.get(19).getActionTimestamp());
-		assertThat(results.get(9).getOpenPrice()).isCloseTo(samples.get(18).getOpenPrice(), offset(1e-6));
-		assertThat(results.get(9).getClosePrice()).isCloseTo(samples.get(19).getClosePrice(), offset(1e-6));
-		assertThat(results.get(9).getHighPrice()).isCloseTo(Math.max(samples.get(18).getHighPrice(), samples.get(19).getHighPrice()) , offset(1e-6));
-		assertThat(results.get(9).getLowPrice()).isCloseTo(Math.min(samples.get(18).getLowPrice(), samples.get(19).getLowPrice()), offset(1e-6));
-		assertThat(results.get(9).getVolume()).isEqualTo(samples.get(18).getVolume() + samples.get(19).getVolume());
-		assertThat(results.get(9).getNumTrades()).isEqualTo(samples.get(18).getNumTrades() + samples.get(19).getNumTrades());
-		assertThat(results.get(9).getOpenInterest()).isCloseTo(samples.get(19).getOpenInterest(), offset(1e-6));
-		assertThat(results.get(9).getTurnover()).isCloseTo(samples.get(18).getTurnover() + samples.get(19).getTurnover(), offset(1e-6));
-		assertThat(results.get(9).getVolumeDelta()).isEqualTo(samples.get(18).getVolumeDelta() + samples.get(19).getVolumeDelta());
-		assertThat(results.get(9).getNumTradesDelta()).isEqualTo(samples.get(18).getNumTradesDelta() + samples.get(19).getNumTradesDelta());
-		assertThat(results.get(9).getOpenInterestDelta()).isCloseTo(samples.get(18).getOpenInterestDelta() + samples.get(19).getOpenInterestDelta(), offset(1e-6));
-		assertThat(results.get(9).getTurnoverDelta()).isCloseTo(samples.get(18).getTurnoverDelta() + samples.get(19).getTurnoverDelta(), offset(1e-6));
+		verify(listener, Mockito.times(2)).onMergedBar(any(Bar.class));
 	}
 
+	@Test
+	void test2() {
+		DailyBarMerger merger = new DailyBarMerger(2, contract);
+		MergedBarListener listener = mock(MergedBarListener.class);
+		merger.addListener(listener);
+		merger.onBar(genBar(LocalDate.now(), LocalTime.of(14, 0), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+		merger.onBar(genBar(LocalDate.now(), LocalTime.of(15, 0), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+		merger.onBar(genBar(LocalDate.now().plusDays(1), LocalTime.of(15, 0), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+		
+		verify(listener, Mockito.times(1)).onMergedBar(any(Bar.class));
+	}
+	
+	 Bar genBar(LocalDate date, LocalTime time, double h, double l, double o, double c, double op, double opDelta, long vol, long volDelta, double tr, double trDelta){
+	    	return Bar.builder()
+	    			.contract(contract)
+					.actionDay(date)
+					.actionTime(time)
+					.actionTimestamp(LocalDateTime.of(date, time).toInstant(ZoneOffset.ofHours(8)).toEpochMilli())
+					.openPrice(o)
+					.closePrice(c)
+					.highPrice(h)
+					.lowPrice(l)
+					.openInterest(op)
+					.openInterestDelta(opDelta)
+					.volume(vol)
+					.volumeDelta(volDelta)
+					.turnover(tr)
+					.turnoverDelta(trDelta)
+					.build();
+	 }
 }
+

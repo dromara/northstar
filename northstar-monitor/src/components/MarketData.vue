@@ -58,6 +58,10 @@ export default {
     embededMode: {
       type: Boolean,
       default: false
+    },
+    precision: {
+      type: Number,
+      default: 0
     }
   },
   data() {
@@ -121,6 +125,7 @@ export default {
     '$store.state.marketCurrentDataModule.curUnifiedSymbol': async function (val) {
       if (!this.kLineChart) {
         const kLineChart = init('update-k-line')
+        
         kLineChart.addTechnicalIndicatorTemplate(volumePure)
         kLineChart.createTechnicalIndicator('CJL', false)
         this.kLineChart = kLineChart
@@ -142,6 +147,7 @@ export default {
         })
       }
       if (val) {
+        this.kLineChart.setPriceVolumePrecision(this.precision, 0)
         this.kLineChart.clearData()
         this.kLineChart.applyNewData((await this.loadBars(new Date().getTime())) || [])
       }

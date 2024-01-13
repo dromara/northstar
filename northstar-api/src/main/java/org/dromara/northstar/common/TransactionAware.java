@@ -1,7 +1,7 @@
 package org.dromara.northstar.common;
 
-import xyz.redtorch.pb.CoreField.OrderField;
-import xyz.redtorch.pb.CoreField.TradeField;
+import org.dromara.northstar.common.model.core.Order;
+import org.dromara.northstar.common.model.core.Trade;
 
 public interface TransactionAware {
 	
@@ -9,11 +9,11 @@ public interface TransactionAware {
 	 * 响应订单事件
 	 * @param order
 	 */
-	void onOrder(OrderField order);
+	void onOrder(Order order);
 
 	/**
 	 * 响应成交事件
 	 * @param trade
 	 */
-	void onTrade(TradeField trade);
+	void onTrade(Trade trade);
 }

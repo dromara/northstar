@@ -1,78 +1,55 @@
 package org.dromara.northstar.gateway.playback;
 
-import java.util.Objects;
-
 import org.dromara.northstar.common.IDataSource;
 import org.dromara.northstar.common.constant.ChannelType;
+import org.dromara.northstar.common.constant.Constants;
 import org.dromara.northstar.common.model.Identifier;
+import org.dromara.northstar.common.model.core.Contract;
+import org.dromara.northstar.common.model.core.ContractDefinition;
 import org.dromara.northstar.gateway.Instrument;
-import org.dromara.northstar.gateway.TradeTimeDefinition;
-import org.dromara.northstar.gateway.model.ContractDefinition;
-import org.dromara.northstar.gateway.playback.time.CnFtBondTradeTime;
-import org.dromara.northstar.gateway.playback.time.CnFtComTradeTime1;
-import org.dromara.northstar.gateway.playback.time.CnFtComTradeTime2;
-import org.dromara.northstar.gateway.playback.time.CnFtComTradeTime3;
-import org.dromara.northstar.gateway.playback.time.CnFtComTradeTime4;
-import org.dromara.northstar.gateway.playback.time.CnFtIndexTradeTime;
 
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
-import xyz.redtorch.pb.CoreField.ContractField;
 
 public class PlaybackContract implements Instrument {
 	
-	private ContractField contract;
+	private Contract contract;
 	
 	private ContractDefinition contractDef;
 	
 	private IDataSource dataSrc;
 	
-	public PlaybackContract(ContractField contract, IDataSource dataSrc) {
+	public PlaybackContract(Contract contract, IDataSource dataSrc) {
 		this.contract = contract.toBuilder()
-				.setContractId(contract.getUnifiedSymbol() + "@" + ChannelType.PLAYBACK.toString())
-				.setChannelType(ChannelType.PLAYBACK.toString())
-				.setGatewayId(ChannelType.PLAYBACK.toString())
-				.setThirdPartyId(contract.getSymbol() + "@" + ChannelType.PLAYBACK.toString())
+				.gatewayId(ChannelType.PLAYBACK.toString())
+				.contractId(contract.unifiedSymbol() + "@" + ChannelType.PLAYBACK)
+				.channelType(ChannelType.PLAYBACK)
+				.thirdPartyId(contract.symbol() + "@" + ChannelType.PLAYBACK)
+				.tradable(!contract.symbol().contains(Constants.PRIMARY_SUFFIX) && !contract.symbol().contains("指数"))
 				.build();
 		this.dataSrc = dataSrc;
 	}
 
 	@Override
 	public String name() {
-		return contract.getName();
+		return contract.name();
 	}
 
 	@Override
 	public Identifier identifier() {
-		return Identifier.of(contract.getContractId());
+		return Identifier.of(contract.contractId());
 	}
 
 	@Override
 	public ProductClassEnum productClass() {
-		return contract.getProductClass();
+		return contract.productClass();
 	}
 
 	@Override
 	public ExchangeEnum exchange() {
-		return contract.getExchange();
+		return contract.exchange();
 	}
 
-	@Override
-	public TradeTimeDefinition tradeTimeDefinition() {
-		if(Objects.isNull(contractDef)) {
-			throw new IllegalStateException("没有合约定义信息");
-		}
-		return switch(contractDef.getTradeTimeType()) {
-		case "CN_FT_TT1" -> new CnFtComTradeTime1();
-		case "CN_FT_TT2" -> new CnFtComTradeTime2();
-		case "CN_FT_TT3" -> new CnFtComTradeTime3();
-		case "CN_FT_TT4" -> new CnFtComTradeTime4();
-		case "CN_FT_TT5","CN_STK_TT" -> new CnFtIndexTradeTime();
-		case "CN_FT_TT6" -> new CnFtBondTradeTime();
-		default -> throw new IllegalArgumentException("Unexpected value: " + contractDef.getTradeTimeType());
-		};
-	}
-	
 	@Override
 	public void setContractDefinition(ContractDefinition contractDef) {
 		this.contractDef = contractDef;
@@ -80,15 +57,14 @@ public class PlaybackContract implements Instrument {
 
 	@Override
 	public ChannelType channelType() {
-		return ChannelType.valueOf(contract.getChannelType());
+		return contract.channelType();
 	}
 
 	@Override
-	public ContractField contractField() {
-		return ContractField.newBuilder(contract)
-					.setCommissionFee(contractDef.getCommissionFee())
-					.setCommissionRate(contractDef.getCommissionRate())
-					.build();
+	public Contract contract() {
+		return contract.toBuilder()
+				.contractDefinition(contractDef)
+				.build();
 	}
 
 	@Override

@@ -30,7 +30,7 @@ public class RingArray<T> {
 	 * @param obj	返回旧值
 	 * @return
 	 */
-	public Optional<T> update(T obj, boolean unstable) {
+	public synchronized Optional<T> update(T obj, boolean unstable) {
 		if(unstable) {
 			int index = lastFlag != unstable ? 1 : 0;
 			lastFlag = unstable;

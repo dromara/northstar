@@ -4,15 +4,15 @@
 	<parent>
 		<groupId>org.dromara</groupId>
 		<artifactId>northstar</artifactId>
-		<version>6.3.0.RC</version>
+		<version>7.0.0-Beta.1</version>
 	</parent>
 	<artifactId>northstar-gateway-playback</artifactId>
 	<name>northstar-gateway-playback</name>
 	
 	<properties>
-    	<maven.deploy.skip>true</maven.deploy.skip>
+   		<maven.deploy.skip>true</maven.deploy.skip>
     </properties>
-
+    
 	<dependencies>
 		<dependency>
 			<groupId>org.dromara</groupId>
@@ -57,6 +57,11 @@
 		<dependency>
 			<groupId>cn.hutool</groupId>
 			<artifactId>hutool-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 

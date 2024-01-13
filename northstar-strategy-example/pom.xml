@@ -4,7 +4,7 @@
   <parent>
 	<groupId>org.dromara</groupId>
 	<artifactId>northstar</artifactId>
-	<version>6.3.0.RC</version>
+	<version>7.0.0-Beta.1</version>
   </parent>
   <artifactId>northstar-strategy-example</artifactId>
   <properties>
@@ -14,6 +14,11 @@
   	<dependency>
 		<groupId>org.dromara</groupId>
 		<artifactId>northstar-api</artifactId>
+	</dependency>
+	<dependency>
+		<groupId>org.dromara</groupId>
+		<artifactId>northstar-rl</artifactId>
+		<version>6.2.0.Alpha</version>
 	</dependency>
 	<dependency>
 	    <groupId>org.junit.jupiter</groupId>

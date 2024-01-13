@@ -1,18 +1,13 @@
 package org.dromara.northstar.support.utils.bar;
 
 import java.time.LocalTime;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
-import java.util.function.BiConsumer;
+import java.util.concurrent.atomic.AtomicInteger;
 
-import org.apache.commons.lang3.StringUtils;
-import org.dromara.northstar.common.constant.DateTimeConstant;
-import org.dromara.northstar.gateway.Contract;
-import org.dromara.northstar.gateway.model.PeriodSegment;
-
-import xyz.redtorch.pb.CoreField.BarField;
+import org.dromara.northstar.common.model.core.Bar;
+import org.dromara.northstar.common.model.core.Contract;
+import org.dromara.northstar.common.model.core.TimeSlot;
 
 /**
  * 日线合成器
@@ -23,45 +18,53 @@ public class DailyBarMerger extends BarMerger{
 
 	private final int numOfDayPerBar;
 	
-	private Set<String> tradingDaySet = new HashSet<>();
+	private final LocalTime dayEndTime;
 	
-	public DailyBarMerger(int numOfDayPerBar, Contract contract, BiConsumer<BarMerger, BarField> callback) {
-		super(0, contract, callback);
+	private AtomicInteger count;
+	
+	public DailyBarMerger(int numOfDayPerBar, Contract contract) {
+		super(0, contract);
 		this.numOfDayPerBar = numOfDayPerBar;
+		List<TimeSlot> times = contract.contractDefinition().tradeTimeDef().timeSlots();
+		this.dayEndTime = times.get(times.size() - 1).end();
 	}
 
 	@Override
-	public void onBar(BarField bar) {
-		if(!StringUtils.equals(bar.getUnifiedSymbol(), unifiedSymbol)) {
+	public synchronized void onBar(Bar bar) {
+		if(!contract.equals(bar.contract())) {
 			return;
 		}
-		
-		tradingDaySet.add(bar.getTradingDay());
-		
-		if(Objects.nonNull(barBuilder) && tradingDaySet.size() == numOfDayPerBar && isLastBarOfDay(bar)) {
-			doMerge(bar);
+
+		if(Objects.isNull(protoBar)) {
+			count = new AtomicInteger(0);
+			protoBar = Bar.builder()
+					.gatewayId(bar.gatewayId())
+					.contract(contract)
+					.actionDay(bar.actionDay())
+					.actionTime(bar.actionTime())
+					.actionTimestamp(bar.actionTimestamp())
+					.tradingDay(bar.tradingDay())
+					.channelType(bar.channelType())
+					.openPrice(bar.openPrice())
+					.highPrice(bar.highPrice())
+					.lowPrice(bar.lowPrice())
+					.closePrice(bar.closePrice())
+					.volumeDelta(bar.volumeDelta())
+					.openInterestDelta(bar.openInterestDelta())
+					.turnoverDelta(bar.turnoverDelta())
+					.preClosePrice(bar.preClosePrice())
+					.preOpenInterest(bar.preOpenInterest())
+					.preSettlePrice(bar.preSettlePrice())
+					.build();
+		}
+
+		if(bar.actionTime().equals(dayEndTime) && count.incrementAndGet() == numOfDayPerBar) {
 			doGenerate();
-			return;
-		}
-		
-		if(Objects.isNull(barBuilder)) {
-			barBuilder = bar.toBuilder();
 			return;
 		}
 		
 		doMerge(bar);
 	}
 
-	private boolean isLastBarOfDay(BarField bar) {
-		List<PeriodSegment> segments = contract.tradeTimeDefinition().tradeTimeSegments();
-		LocalTime time = segments.get(segments.size() - 1).endOfSegment();
-		return LocalTime.parse(bar.getActionTime(), DateTimeConstant.T_FORMAT_FORMATTER).equals(time);
-	}
-
-	@Override
-	protected void doGenerate() {
-		callback.accept(this, barBuilder.build());
-		barBuilder = null;
-		tradingDaySet.clear();
-	}
+	
 }

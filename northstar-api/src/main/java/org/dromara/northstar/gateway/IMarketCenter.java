@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.dromara.northstar.common.TickDataAware;
 import org.dromara.northstar.common.constant.ChannelType;
-import org.dromara.northstar.gateway.model.ContractDefinition;
+import org.dromara.northstar.common.model.core.ContractDefinition;
 
 public interface IMarketCenter extends IContractManager, TickDataAware {
 	
@@ -37,8 +37,4 @@ public interface IMarketCenter extends IContractManager, TickDataAware {
 	 */
 	void loadContractGroup(ChannelType channelType);
 	
-	/**
-	 * 停盘收尾处理
-	 */
-	void endOfMarketTime();
 }

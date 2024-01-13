@@ -11,14 +11,12 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.dromara.northstar.common.model.GatewayDescription;
+import org.dromara.northstar.common.model.core.Account;
+import org.dromara.northstar.common.model.core.SubmitOrderReq;
 import org.dromara.northstar.gateway.MarketGateway;
 import org.dromara.northstar.gateway.TradeGateway;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import xyz.redtorch.pb.CoreField.AccountField;
-import xyz.redtorch.pb.CoreField.CancelOrderReqField;
-import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 
 class TradeAccountTest {
 
@@ -37,43 +35,29 @@ class TradeAccountTest {
 
 	@Test
 	void testAccountBalance() {
-		AccountField accountField = AccountField.newBuilder()
-				.setBalance(1000.0)
-				.build();
-
-		tradeAccount.onAccount(accountField);
+		Account account = Account.builder().balance(1000.0).build();
+		tradeAccount.onAccount(account);
 		assertEquals(1000.0, tradeAccount.accountBalance());
 	}
 
 	@Test
 	void testAvailableAmount() {
-		AccountField accountField = AccountField.newBuilder()
-				.setAvailable(800)
-				.build();
-
-		tradeAccount.onAccount(accountField);
+		Account account = Account.builder().available(800).build();
+		tradeAccount.onAccount(account);
 		assertEquals(800.0, tradeAccount.availableAmount());
 	}
 
 	@Test
 	void testDegreeOfRisk() {
-		AccountField accountField = AccountField.newBuilder()
-				.setBalance(1000.0)
-				.setAvailable(800)
-				.build();
-
-		tradeAccount.onAccount(accountField);
+		Account account = Account.builder().balance(1000.0).available(800).build();
+		tradeAccount.onAccount(account);
 		assertThat(tradeAccount.degreeOfRisk()).isCloseTo(0.2, offset(1e-6));
 	}
 
 	@Test
 	void testTryLockAmount_success() {
-		AccountField accountField = AccountField.newBuilder()
-				.setBalance(1000.0)
-				.setAvailable(800)
-				.build();
-
-		tradeAccount.onAccount(accountField);
+		Account account = Account.builder().balance(1000.0).available(800).build();
+		tradeAccount.onAccount(account);
 
 		Optional<UUID> lockId = tradeAccount.tryLockAmount(500.0);
 
@@ -82,12 +66,8 @@ class TradeAccountTest {
 
 	@Test
 	void testTryLockAmount_failure() {
-		AccountField accountField = AccountField.newBuilder()
-				.setBalance(1000.0)
-				.setAvailable(800)
-				.build();
-
-		tradeAccount.onAccount(accountField);
+		Account account = Account.builder().balance(1000.0).available(800).build();
+		tradeAccount.onAccount(account);
 
 		Optional<UUID> lockId = tradeAccount.tryLockAmount(1000.0);
 
@@ -96,12 +76,8 @@ class TradeAccountTest {
 
 	@Test
 	void testUnlockAmount() {
-		AccountField accountField = AccountField.newBuilder()
-				.setBalance(1000.0)
-				.setAvailable(800)
-				.build();
-
-		tradeAccount.onAccount(accountField);
+		Account account = Account.builder().balance(1000.0).available(800).build();
+		tradeAccount.onAccount(account);
 
 		UUID lockId = tradeAccount.tryLockAmount(800.0).orElseThrow();
 		assertThat(tradeAccount.tryLockAmount(1)).isEmpty();
@@ -112,8 +88,8 @@ class TradeAccountTest {
 
 	@Test
 	void testSubmitOrder() {
-		SubmitOrderReqField orderReq = SubmitOrderReqField.newBuilder()
-				.setOriginOrderId("123")
+		SubmitOrderReq orderReq = SubmitOrderReq.builder()
+				.originOrderId("123")
 				.build();
 		when(tradeGateway.submitOrder(orderReq)).thenReturn("123");
 
@@ -125,13 +101,12 @@ class TradeAccountTest {
 
 	@Test
 	void testCancelOrder() {
-		CancelOrderReqField cancelReq = CancelOrderReqField.newBuilder().build();
-		when(tradeGateway.cancelOrder(cancelReq)).thenReturn(true);
+		when(tradeGateway.cancelOrder("orderId")).thenReturn(true);
 
-		boolean result = tradeAccount.cancelOrder(cancelReq);
+		boolean result = tradeAccount.cancelOrder("orderId");
 
 		assertTrue(result);
-		verify(tradeGateway).cancelOrder(cancelReq);
+		verify(tradeGateway).cancelOrder("orderId");
 	}
 
 	// Add more tests for other methods in the TradeAccount class.

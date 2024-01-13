@@ -6,6 +6,10 @@ import org.dromara.northstar.common.event.NorthstarEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+/**
+ * 此类为内部事件分发器，统一处理FastEventEngine的事件分发
+ * @auth KevinHuangwl
+ */
 @Component
 public class InternalDispatcher implements NorthstarEventDispatcher {
 
@@ -25,6 +29,7 @@ public class InternalDispatcher implements NorthstarEventDispatcher {
 	private BroadcastHandler bcHandler;
 	@Autowired
 	private IllegalOrderHandler illOrderHandler;
+	
 	
 	public InternalDispatcher(FastEventEngine feEngine) {
 		feEngine.addHandler(this);

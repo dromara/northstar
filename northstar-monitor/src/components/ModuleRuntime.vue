@@ -180,12 +180,12 @@
               <el-table-column prop="position" label="数量" align="center" min-width="46px" />
               <el-table-column v-if="!isMobile" prop="openprice" label="成本价" align="center">
                 <template slot-scope="scope">
-                  {{ scope.row.openprice | smartFormatter }}
+                  {{ scope.row.openprice.toFixed(scope.row.contract.priceprecision) }}
                 </template>
               </el-table-column>
               <el-table-column v-if="!isMobile" prop="lastprice" label="现价" align="center">
                 <template slot-scope="scope">
-                  {{ scope.row.lastprice | smartFormatter }}
+                  {{ scope.row.lastprice.toFixed(scope.row.contract.priceprecision) }}
                 </template>
               </el-table-column>
               <el-table-column prop="positionprofit" label="持仓盈亏" align="center">
@@ -261,7 +261,7 @@
           模组当前引用的K线数据（模组仅缓存最近的{{ module.moduleCacheDataSize }}根K线数据）
         </div>
         <div>
-          <el-select class="ml-10 mt-5" v-model="unifiedSymbolOfChart" placeholder="请选择合约">
+          <el-select id="selectContract" class="ml-10 mt-5" v-model="contractNameOfChart" placeholder="请选择合约">
             <el-option
               v-for="(item, i) in bindedContracts"
               :key="i"
@@ -270,6 +270,7 @@
             ></el-option>
           </el-select>
           <el-select
+            id="selectIndicator"
             class="ml-10 mt-5"
             v-model="indicator.name"
             filterable
@@ -415,7 +416,7 @@ export default {
       chart: null,
       loading: false,
       moduleRuntime: '',
-      unifiedSymbolOfChart: '',
+      contractNameOfChart: '',
       indicator: {
         name: '',
         paneId: 'candle_pane',
@@ -439,8 +440,6 @@ export default {
         localStorage.setItem(`autoUpdate_${this.module.moduleName}`, true)
       }
       if (val) {
-        this.isManualUpdate = localStorage.getItem(`autoUpdate_${this.module.moduleName}`) === 'true'
-        this.unifiedSymbolOfChart = localStorage.getItem(`chartSymbol_${this.module.moduleName}`) || ''
         this.isMobile = this.listener.isMobile()
         this.moduleRuntime = this.moduleRuntimeSrc
         if(this.isMobile){
@@ -450,6 +449,8 @@ export default {
         setTimeout(() => {
           this.initChart()
           this.refresh()
+          this.contractNameOfChart = localStorage.getItem(`chartSymbol_${this.module.moduleName}`) || ''
+          this.isManualUpdate = localStorage.getItem(`autoUpdate_${this.module.moduleName}`) === 'true'
         }, 100)
       }
     },
@@ -485,7 +486,7 @@ export default {
         }, 50)
       }
     },
-    unifiedSymbolOfChart: function (val) {
+    contractNameOfChart: function (val) {
       if (val) {
         this.updateChart()
         this.loadIndicators()
@@ -557,8 +558,8 @@ export default {
       return positions.filter((item) => item.position > 0)
     },
     indicatorOptions() {
-      if (!this.moduleRuntime.indicatorMap || !this.unifiedSymbolOfChart) return []
-      return this.moduleRuntime.indicatorMap[this.unifiedSymbolOfChart]
+      if (!this.moduleRuntime.indicatorMap || !this.contractNameOfChart) return []
+      return this.moduleRuntime.indicatorMap[this.contractNameOfChart]
     }
   },
   created() {
@@ -594,8 +595,8 @@ export default {
           item.closeTrade = TradeField.deserializeBinary(item.closeTrade).toObject()
           item.volume = item.closeTrade.volume
           item.direction = { 1: '多', 2: '空' }[item.openTrade.direction]
-          item.openPrice = item.openTrade.price
-          item.closePrice = item.closeTrade.price
+          item.openPrice = item.openTrade.price.toFixed(item.openTrade.contract.priceprecision)
+          item.closePrice = item.closeTrade.price.toFixed(item.closeTrade.contract.priceprecision)
           item.tradingDay = item.closeTrade.tradingday
           return item
         })
@@ -679,9 +680,11 @@ export default {
       setTimeout(this.refresh, 500)
     },
     updateChart() {
-      if (this.unifiedSymbolOfChart && this.chart) {
+      if (this.contractNameOfChart && this.chart) {
         this.chart.clearData()
-        this.chart.applyNewData(this.barDataMap[this.unifiedSymbolOfChart])
+        const contract = this.moduleBindedContracts.find(c => c.name === this.contractNameOfChart) || this.moduleBindedContracts[0]
+        this.chart.setPriceVolumePrecision(contract.precision, 0)
+        this.chart.applyNewData(this.barDataMap[this.contractNameOfChart])
       }
     },
     addIndicator() {
@@ -701,7 +704,8 @@ export default {
     },
     renderIndicator(indicator) {
       const colorIndex = Object.keys(this.indicatorMap).indexOf(indicator.name)
-      this.chart.addTechnicalIndicatorTemplate(simpleVal(indicator, colorIndex))
+      const contract = this.moduleBindedContracts.find(c => c.name === this.contractNameOfChart) || this.moduleBindedContracts[0]
+      this.chart.addTechnicalIndicatorTemplate(simpleVal(indicator, colorIndex, contract.precision))
       this.chart.createTechnicalIndicator('VAL_' + indicator.name, true, {
         id: indicator.paneId
       })
@@ -727,11 +731,11 @@ export default {
     visualizeTradeRecords() {
       this.chart.removeShape()
       this.dealRecords
-        .filter((deal) => deal.contractName === this.unifiedSymbolOfChart)
+        .filter((deal) => deal.contractName === this.contractNameOfChart)
         .filter((deal) => {
           const dealTime = deal.closeTrade.tradetimestamp
-          const dataHeadTime = this.barDataMap[this.unifiedSymbolOfChart].length
-            ? this.barDataMap[this.unifiedSymbolOfChart][0]['timestamp']
+          const dataHeadTime = this.barDataMap[this.contractNameOfChart].length
+            ? this.barDataMap[this.contractNameOfChart][0]['timestamp']
             : dealTime
           return dealTime > dataHeadTime
         })
@@ -747,14 +751,14 @@ export default {
     },
     loadIndicators() {
       const dataStr =
-        localStorage.getItem(`indicatorMap_${this.module.moduleName}_${this.unifiedSymbolOfChart}`) ||
+        localStorage.getItem(`indicatorMap_${this.module.moduleName}_${this.contractNameOfChart}`) ||
         '{}'
       this.indicatorMap = JSON.parse(dataStr)
       for (let i = 1; i < 6; i++) {
         const paneId = 'pane' + i
         Object.keys(this.indicatorMap).forEach((indicatorName) => {
           if (
-            this.moduleRuntime.indicatorMap[this.unifiedSymbolOfChart].indexOf(indicatorName) < 0
+            this.moduleRuntime.indicatorMap[this.contractNameOfChart].indexOf(indicatorName) < 0
           ) {
             return
           }
@@ -767,7 +771,7 @@ export default {
     },
     saveIndicators() {
       localStorage.setItem(
-        `indicatorMap_${this.module.moduleName}_${this.unifiedSymbolOfChart}`,
+        `indicatorMap_${this.module.moduleName}_${this.contractNameOfChart}`,
         JSON.stringify(this.indicatorMap)
       )
     },

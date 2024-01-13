@@ -16,6 +16,9 @@ logging:
     path: logs/
   
 spring:
+  cache:
+    jcache:
+      config: classpath:ehcache.xml
   h2:
     console:
       enabled: true
@@ -30,7 +33,9 @@ spring:
     database-platform: org.hibernate.dialect.H2Dialect
   profiles:
     active: ${env:dev}
-
+  threads:
+    virtual:
+      enabled: true
 ---
 server:
   port: 443
@@ -52,10 +57,6 @@ server:
   ssl:
     enabled: false
 spring:
-  cache:
-    type: ehcache
-    ehcache:
-      config: classpath:ehcache.xml
   config:
     activate:
       on-profile: dev
@@ -66,10 +67,6 @@ server:
   ssl:
     enabled: false
 spring:
-  cache:
-    type: ehcache
-    ehcache:
-      config: classpath:ehcache.xml
   datasource:
     url: jdbc:h2:mem:testdb
   config:

@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.dromara</groupId>
 		<artifactId>northstar</artifactId>
-		<version>6.3.0.RC</version>
+		<version>7.0.0-Beta.1</version>
 	</parent>
 	<artifactId>northstar-main</artifactId>
 	<name>northstar-main</name>
@@ -29,6 +29,10 @@
 			<artifactId>northstar-strategy-example</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.dromara</groupId>
+			<artifactId>northstar-intelligence</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
@@ -45,12 +49,9 @@
 		    <artifactId>spring-boot-starter-cache</artifactId>
 		</dependency>
 		<dependency>
-		    <groupId>net.sf.ehcache</groupId>
-			    <artifactId>ehcache</artifactId>
-		</dependency>
-		<dependency>
-		    <groupId>javax.cache</groupId>
-		    <artifactId>cache-api</artifactId>
+		  <groupId>org.ehcache</groupId>
+		  <artifactId>ehcache</artifactId>
+		  <classifier>jakarta</classifier>
 		</dependency>
 		<dependency>
 		    <groupId>com.corundumstudio.socketio</groupId>
@@ -90,12 +91,35 @@
 		    <artifactId>okhttp</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>commons-codec</groupId>
+			<artifactId>commons-codec</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-configuration-processor</artifactId>
 			<optional>true</optional>
 		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
+	<profiles>
+		<profile>
+			<id>smart</id>
+			<build>
+				<finalName>northstar-${project.version}-smart</finalName>
+			</build>
+			<dependencies>
+				<dependency>
+				    <groupId>org.tensorflow</groupId>
+				    <artifactId>tensorflow-core-platform</artifactId>
+				</dependency>
+			</dependencies>
+		</profile>
+	</profiles>
 	<build>
 		<finalName>northstar-${project.version}</finalName>
 		<plugins>

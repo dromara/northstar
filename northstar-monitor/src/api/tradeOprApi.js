@@ -1,42 +1,46 @@
 import baseService from './baseRequest'
 
 export default {
-  buyOpen(gatewayId, contractId, price, volume, stopPrice) {
+  buyOpen(gatewayId, contractId, price, volume, stopPrice, priceType) {
     return baseService.post('/trade/submit', {
       contractId: contractId,
       price: price,
       stopPrice: stopPrice,
       volume: volume,
       tradeOpr: 'BK',
-      gatewayId: gatewayId
+      gatewayId: gatewayId,
+      priceType: priceType
     })
   },
-  sellOpen(gatewayId, contractId, price, volume, stopPrice) {
+  sellOpen(gatewayId, contractId, price, volume, stopPrice, priceType) {
     return baseService.post('/trade/submit', {
       contractId: contractId,
       price: price,
       stopPrice: stopPrice,
       volume: volume,
       tradeOpr: 'SK',
-      gatewayId: gatewayId
+      gatewayId: gatewayId,
+      priceType: priceType
     })
   },
-  closeLongPosition(gatewayId, contractId, price, volume) {
+  closeLongPosition(gatewayId, contractId, price, volume, priceType) {
     return baseService.post('/trade/submit', {
       contractId: contractId,
       price: price,
       volume: volume,
       tradeOpr: 'SP',
-      gatewayId: gatewayId
+      gatewayId: gatewayId,
+      priceType: priceType
     })
   },
-  closeShortPosition(gatewayId, contractId, price, volume) {
+  closeShortPosition(gatewayId, contractId, price, volume, priceType) {
     return baseService.post('/trade/submit', {
       contractId: contractId,
       price: price,
       volume: volume,
       tradeOpr: 'BP',
-      gatewayId: gatewayId
+      gatewayId: gatewayId,
+      priceType: priceType
     })
   },
   cancelOrder(gatewayId, originOrderId) {

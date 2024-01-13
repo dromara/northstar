@@ -6,19 +6,18 @@ import org.dromara.northstar.common.IDataSource;
 import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.constant.Constants;
 import org.dromara.northstar.common.model.Identifier;
-import org.dromara.northstar.gateway.Contract;
-import org.dromara.northstar.gateway.TradeTimeDefinition;
+import org.dromara.northstar.common.model.core.Contract;
+import org.dromara.northstar.gateway.IContract;
 
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
-import xyz.redtorch.pb.CoreField.ContractField;
 
 /**
  * 主连合约
  * @author KevinHuangwl
  *
  */
-public class PrimaryContract implements Contract {
+public class PrimaryContract implements IContract {
 	
 	private IndexContract idxContract;
 	
@@ -65,11 +64,6 @@ public class PrimaryContract implements Contract {
 	}
 
 	@Override
-	public TradeTimeDefinition tradeTimeDefinition() {
-		return idxContract.tradeTimeDefinition();
-	}
-
-	@Override
 	public ChannelType channelType() {
 		return ChannelType.PLAYBACK;
 	}
@@ -80,15 +74,15 @@ public class PrimaryContract implements Contract {
 	}
 
 	@Override
-	public ContractField contractField() {
-		ContractField idxcf = idxContract.contractField();
-		return ContractField.newBuilder(idxcf)
-				.setName(name())
-				.setFullName(idxcf.getFullName().replace("指数", "主力"))
-				.setSymbol(idxcf.getSymbol().replace(Constants.INDEX_SUFFIX, Constants.PRIMARY_SUFFIX))
-				.setUnifiedSymbol(idxcf.getUnifiedSymbol().replace(Constants.INDEX_SUFFIX, Constants.PRIMARY_SUFFIX))
-				.setContractId(idxcf.getContractId().replace(Constants.INDEX_SUFFIX, Constants.PRIMARY_SUFFIX))
-				.setThirdPartyId(idxcf.getThirdPartyId().replace(Constants.INDEX_SUFFIX, Constants.PRIMARY_SUFFIX))
+	public Contract contract() {
+		Contract idxcf = idxContract.contract();
+		return idxcf.toBuilder()
+				.name(name())
+				.fullName(idxcf.fullName().replace("指数", "主力"))
+				.symbol(idxcf.symbol().replace(Constants.INDEX_SUFFIX, Constants.PRIMARY_SUFFIX))
+				.unifiedSymbol(idxcf.unifiedSymbol().replace(Constants.INDEX_SUFFIX, Constants.PRIMARY_SUFFIX))
+				.contractId(idxcf.contractId().replace(Constants.INDEX_SUFFIX, Constants.PRIMARY_SUFFIX))
+				.thirdPartyId(idxcf.thirdPartyId().replace(Constants.INDEX_SUFFIX, Constants.PRIMARY_SUFFIX))
 				.build();
 	}
 

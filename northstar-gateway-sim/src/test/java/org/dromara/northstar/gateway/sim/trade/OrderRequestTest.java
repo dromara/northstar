@@ -8,66 +8,66 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDate;
 import java.util.function.Consumer;
 
+import org.dromara.northstar.common.model.core.Contract;
+import org.dromara.northstar.common.model.core.Order;
+import org.dromara.northstar.common.model.core.SubmitOrderReq;
+import org.dromara.northstar.common.model.core.Tick;
 import org.junit.jupiter.api.Test;
 
-import test.common.TestFieldFactory;
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
 import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 import xyz.redtorch.pb.CoreEnum.OrderPriceTypeEnum;
-import xyz.redtorch.pb.CoreField.ContractField;
-import xyz.redtorch.pb.CoreField.OrderField;
-import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
-import xyz.redtorch.pb.CoreField.TickField;
 
 class OrderRequestTest {
 
 	OrderRequest orderRequest;
     SimGatewayAccount mockAccount = mock(SimGatewayAccount.class);
     @SuppressWarnings("unchecked")
-	Consumer<OrderField> mockOnOrderCallback = mock(Consumer.class);
+	Consumer<Order> mockOnOrderCallback = mock(Consumer.class);
     @SuppressWarnings("unchecked")
 	Consumer<Transaction> mockOnTradeCallback = mock(Consumer.class);
-	TestFieldFactory factory = new TestFieldFactory("testGateway");
-	TickField mockTick = factory.makeTickField("rb2205", 5111);
-    ContractField mockContract = factory.makeContract("rb2205");
-    
-    SubmitOrderReqField.Builder mockSubmitOrderReq = SubmitOrderReqField.newBuilder()
-			.setOriginOrderId("testId")
-			.setContract(mockContract)
-			.setVolume(10)
-			.setPrice(1000)
-			.setOrderPriceType(OrderPriceTypeEnum.OPT_AnyPrice);
+	LocalDate today = LocalDate.now();
+	Contract c1 = Contract.builder().symbol("rb2205@SHFE").multiplier(10).longMarginRatio(0.08).shortMarginRatio(0.08).build();
+	Tick tick1 = Tick.builder().tradingDay(today).contract(c1).lastPrice(5111).build();
+	SubmitOrderReq mockSubmitOrderReq = SubmitOrderReq.builder()
+			.originOrderId("testId")
+			.contract(c1)
+			.volume(10)
+			.price(1000)
+			.orderPriceType(OrderPriceTypeEnum.OPT_AnyPrice)
+			.build();
 
     @Test
     void testOriginOrderId() {
-    	SubmitOrderReqField req = mockSubmitOrderReq.setDirection(DirectionEnum.D_Buy).setOffsetFlag(OffsetFlagEnum.OF_Close).build();
+    	SubmitOrderReq req = mockSubmitOrderReq.toBuilder().direction(DirectionEnum.D_Buy).offsetFlag(OffsetFlagEnum.OF_Close).build();
     	orderRequest = new OrderRequest(mockAccount, req, mockOnOrderCallback, mockOnTradeCallback);
         String originOrderId = orderRequest.originOrderId();
-        assertEquals(mockSubmitOrderReq.getOriginOrderId(), originOrderId);
+        assertEquals(mockSubmitOrderReq.originOrderId(), originOrderId);
     }
 
     @Test
     void testOnTick() {
-    	SubmitOrderReqField req = mockSubmitOrderReq.setDirection(DirectionEnum.D_Buy).setOffsetFlag(OffsetFlagEnum.OF_Close).build();
+    	SubmitOrderReq req = mockSubmitOrderReq.toBuilder().direction(DirectionEnum.D_Buy).offsetFlag(OffsetFlagEnum.OF_Close).build();
     	orderRequest = new OrderRequest(mockAccount, req, mockOnOrderCallback, mockOnTradeCallback);
-        orderRequest.onTick(mockTick);
+        orderRequest.onTick(tick1);
 
-        verify(mockOnOrderCallback, times(1)).accept(any(OrderField.class));
+        verify(mockOnOrderCallback, times(1)).accept(any(Order.class));
         verify(mockOnTradeCallback, times(1)).accept(any(Transaction.class));
     }
     
     @Test 
     void testTotalVolume() {
-    	SubmitOrderReqField req = mockSubmitOrderReq.setDirection(DirectionEnum.D_Buy).setOffsetFlag(OffsetFlagEnum.OF_Close).build();
+    	SubmitOrderReq req = mockSubmitOrderReq.toBuilder().direction(DirectionEnum.D_Buy).offsetFlag(OffsetFlagEnum.OF_Close).build();
     	orderRequest = new OrderRequest(mockAccount, req, mockOnOrderCallback, mockOnTradeCallback);
-    	assertThat(req.getVolume()).isEqualTo(10);
+    	assertThat(req.volume()).isEqualTo(10);
     }
     
     @Test 
     void testValidate() {
-    	SubmitOrderReqField req = mockSubmitOrderReq.setDirection(DirectionEnum.D_Buy).setOffsetFlag(OffsetFlagEnum.OF_Open).build();
+    	SubmitOrderReq req = mockSubmitOrderReq.toBuilder().direction(DirectionEnum.D_Buy).offsetFlag(OffsetFlagEnum.OF_Open).build();
     	orderRequest = new OrderRequest(mockAccount, req, mockOnOrderCallback, mockOnTradeCallback);
     	when(mockAccount.available()).thenReturn(1000000D);
     	assertThat(orderRequest.validate()).isTrue();
@@ -75,14 +75,14 @@ class OrderRequestTest {
     
     @Test 
     void testValidateFailOpen() {
-    	SubmitOrderReqField req = mockSubmitOrderReq.setDirection(DirectionEnum.D_Buy).setOffsetFlag(OffsetFlagEnum.OF_Open).build();
+    	SubmitOrderReq req = mockSubmitOrderReq.toBuilder().direction(DirectionEnum.D_Buy).offsetFlag(OffsetFlagEnum.OF_Open).build();
     	orderRequest = new OrderRequest(mockAccount, req, mockOnOrderCallback, mockOnTradeCallback);
     	assertThat(orderRequest.validate()).isFalse();
     }
     
     @Test 
     void testValidateFailClose() {
-    	SubmitOrderReqField req = mockSubmitOrderReq.setDirection(DirectionEnum.D_Buy).setOffsetFlag(OffsetFlagEnum.OF_Close).build();
+    	SubmitOrderReq req = mockSubmitOrderReq.toBuilder().direction(DirectionEnum.D_Buy).offsetFlag(OffsetFlagEnum.OF_Close).build();
     	orderRequest = new OrderRequest(mockAccount, req, mockOnOrderCallback, mockOnTradeCallback);
     	PositionManager posMgr = mock(PositionManager.class);
     	when(mockAccount.getPositionManager()).thenReturn(posMgr);

@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -16,7 +17,9 @@ import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.event.FastEventEngine;
 import org.dromara.northstar.common.exception.NoSuchElementException;
 import org.dromara.northstar.common.model.Identifier;
-import org.dromara.northstar.gateway.Contract;
+import org.dromara.northstar.common.model.core.ContractDefinition;
+import org.dromara.northstar.common.model.core.Tick;
+import org.dromara.northstar.gateway.IContract;
 import org.dromara.northstar.gateway.IMarketCenter;
 import org.dromara.northstar.gateway.Instrument;
 import org.dromara.northstar.gateway.MarketGateway;
@@ -24,7 +27,6 @@ import org.dromara.northstar.gateway.contract.GatewayContract;
 import org.dromara.northstar.gateway.contract.IndexContract;
 import org.dromara.northstar.gateway.contract.OptionChainContract;
 import org.dromara.northstar.gateway.contract.PrimaryContract;
-import org.dromara.northstar.gateway.model.ContractDefinition;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
@@ -32,7 +34,6 @@ import com.google.common.collect.Table;
 import lombok.extern.slf4j.Slf4j;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
-import xyz.redtorch.pb.CoreField.TickField;
 
 /**
  * 市场中心
@@ -45,15 +46,15 @@ public class MarketCenter implements IMarketCenter{
 	
 	private static final int INIT_SIZE = 16384;
 	/* id -> 合约 */
-	private final ConcurrentMap<Identifier, Contract> contractMap = new ConcurrentHashMap<>(INIT_SIZE);
+	private final ConcurrentMap<Identifier, IContract> contractMap = new ConcurrentHashMap<>(INIT_SIZE);
 	/* 成份合约 -> 指数合约 */
-	private final ConcurrentMap<Contract, IndexContract> idxContractMap = new ConcurrentHashMap<>(INIT_SIZE);
+	private final ConcurrentMap<IContract, IndexContract> idxContractMap = new ConcurrentHashMap<>(INIT_SIZE);
 
-	private final Table<ChannelType, String, Contract> channelSymbolContractTbl = HashBasedTable.create();
+	private final Table<ChannelType, String, IContract> channelSymbolContractTbl = HashBasedTable.create();
 
 	private final Table<ExchangeEnum, ProductClassEnum, List<ContractDefinition>> contractDefTbl = HashBasedTable.create();
 	
-	private final Table<ChannelType, ContractDefinition, List<Contract>> channelDefContractGroups = HashBasedTable.create();
+	private final Table<ChannelType, ContractDefinition, List<IContract>> channelDefContractGroups = HashBasedTable.create();
 	
 	private final Map<ChannelType, MarketGateway> gatewayMap = new EnumMap<>(ChannelType.class);
 	
@@ -69,10 +70,10 @@ public class MarketCenter implements IMarketCenter{
 	@Override
 	public void addDefinitions(List<ContractDefinition> contractDefs) {
 		for(ContractDefinition def : contractDefs) {
-			if(!contractDefTbl.contains(def.getExchange(), def.getProductClass())) {				
-				contractDefTbl.put(def.getExchange(), def.getProductClass(), new ArrayList<>(512));
+			if(!contractDefTbl.contains(def.exchange(), def.productClass())) {				
+				contractDefTbl.put(def.exchange(), def.productClass(), new ArrayList<>(512));
 			}
-			contractDefTbl.get(def.getExchange(), def.getProductClass()).add(def);
+			contractDefTbl.get(def.exchange(), def.productClass()).add(def);
 		}
 	}
 	
@@ -82,30 +83,38 @@ public class MarketCenter implements IMarketCenter{
 	@Override
 	public synchronized void addInstrument(Instrument ins) {
 		// 绑定合约定义
-		List<ContractDefinition> defList = contractDefTbl.get(ins.exchange(), ins.productClass());
-		if(Objects.isNull(defList)) {
-			log.debug("未找到 [{}] 的合约定义，忽略该合约的注册", ins.identifier().value());
-			return;
-		}
-		for(ContractDefinition def : defList) {
-			if(def.getSymbolPattern().matcher(ins.identifier().value()).matches()) {
-				log.debug("[{}] 匹配合约定义 [{} {} {}]", ins.identifier().value(), def.getExchange(), def.getProductClass(), def.getSymbolPattern().pattern());
+		getDefinition(ins.exchange(), ins.productClass(), ins.identifier().value())
+			.ifPresent(def -> {
+				log.debug("[{}] 匹配合约定义 [{} {} {}]", ins.identifier().value(), def.exchange(), def.productClass(), def.symbolPattern().pattern());
 				ins.setContractDefinition(def);
-				Contract contract = new GatewayContract(this, feEngine, ins);
+				IContract contract = new GatewayContract(this, feEngine, ins);
 				contractMap.put(ins.identifier(), contract);
 				
 				if(!channelDefContractGroups.contains(ins.channelType(), def)) {					
 					channelDefContractGroups.put(ins.channelType(), def, new ArrayList<>());
 				}
 				channelDefContractGroups.get(ins.channelType(), def).add(contract);
-				channelSymbolContractTbl.put(contract.channelType(), contract.contractField().getSymbol(), contract);
-				channelSymbolContractTbl.put(contract.channelType(), contract.contractField().getUnifiedSymbol(), contract);
-			}
-		}
+				channelSymbolContractTbl.put(contract.channelType(), contract.contract().symbol(), contract);
+				channelSymbolContractTbl.put(contract.channelType(), contract.contract().unifiedSymbol(), contract);
+			});
 
 		if(!contractMap.containsKey(ins.identifier())) {
 			log.debug("未找到 [{}] 的合约定义，忽略该合约的注册", ins.identifier().value());
 		}
+	}
+	
+	@Override
+	public Optional<ContractDefinition> getDefinition(ExchangeEnum exchange, ProductClassEnum productClass, String identifier){
+		List<ContractDefinition> defList = contractDefTbl.get(exchange, productClass);
+		if(Objects.isNull(defList)) {
+			return Optional.empty();
+		}
+		for(ContractDefinition def : defList) {
+			if(def.symbolPattern().matcher(identifier).matches()) {
+				return Optional.of(def);
+			}
+		}
+		return Optional.empty();
 	}
 
 	/**
@@ -113,10 +122,10 @@ public class MarketCenter implements IMarketCenter{
 	 */
 	@Override
 	public synchronized void loadContractGroup(ChannelType channelType) {
-		List<Contract> gatewayContracts = getContracts(channelType);
-		Map<String, Contract> symbolContractMap = new HashMap<>();
-		for(Contract c : gatewayContracts) {
-			symbolContractMap.put(c.contractField().getSymbol(), c);
+		List<IContract> gatewayContracts = getContracts(channelType);
+		Map<String, IContract> symbolContractMap = new HashMap<>();
+		for(IContract c : gatewayContracts) {
+			symbolContractMap.put(c.contract().symbol(), c);
 		}
 		// 聚合期权合约
 		try {
@@ -134,45 +143,45 @@ public class MarketCenter implements IMarketCenter{
 		
 	}
 	
-	private void aggregateOptionContracts(List<Contract> optContracts, Map<String,Contract> symbolContractMap) {
-		Map<String, List<Contract>> symbolOptionsMap = new HashMap<>();
-		for(Contract c : optContracts) {
+	private void aggregateOptionContracts(List<IContract> optContracts, Map<String, IContract> symbolContractMap) {
+		Map<String, List<IContract>> symbolOptionsMap = new HashMap<>();
+		for(IContract c : optContracts) {
 			if(c instanceof OptionChainContract) {
 				continue;
 			}
-			String underlyingSymbol = c.contractField().getUnderlyingSymbol();
+			String underlyingSymbol = c.contract().underlyingSymbol();
 			symbolOptionsMap.computeIfAbsent(underlyingSymbol, key -> new ArrayList<>());
 			symbolOptionsMap.get(underlyingSymbol).add(c);
 		}
-		for(Entry<String, List<Contract>> e : symbolOptionsMap.entrySet()) {
+		for(Entry<String, List<IContract>> e : symbolOptionsMap.entrySet()) {
 			if(!symbolContractMap.containsKey(e.getKey())) {
 				log.warn("找不到{}对应的合约信息", e.getKey());
 				continue;
 			}
-			Contract c = new OptionChainContract(symbolContractMap.get(e.getKey()), e.getValue());
+			IContract c = new OptionChainContract(symbolContractMap.get(e.getKey()), e.getValue());
 			contractMap.put(c.identifier(), c);
 		}
 	}
 	
-	private void aggregateFutureIndexContracts(Map<ContractDefinition, List<Contract>> contractDefMap) {
-		for(Entry<ContractDefinition, List<Contract>> e : contractDefMap.entrySet()) {
-			if(e.getKey().getProductClass() != ProductClassEnum.FUTURES) {
+	private void aggregateFutureIndexContracts(Map<ContractDefinition, List<IContract>> contractDefMap) {
+		for(Entry<ContractDefinition, List<IContract>> e : contractDefMap.entrySet()) {
+			if(e.getKey().productClass() != ProductClassEnum.FUTURES) {
 				continue;
 			}
 			IndexContract c = new IndexContract(feEngine, e.getValue());
 			contractMap.put(c.identifier(), c);
-			for(Contract memberContract : c.memberContracts()) {
+			for(IContract memberContract : c.memberContracts()) {
 				idxContractMap.put(memberContract, c);
 			}
-			channelSymbolContractTbl.put(c.channelType(), c.contractField().getSymbol(), c);
-			channelSymbolContractTbl.put(c.channelType(), c.contractField().getUnifiedSymbol(), c);
+			channelSymbolContractTbl.put(c.channelType(), c.contract().symbol(), c);
+			channelSymbolContractTbl.put(c.channelType(), c.contract().unifiedSymbol(), c);
 			
 			// CTP主连合约生成 
 			if(c.channelType() == ChannelType.PLAYBACK) {
 				PrimaryContract pc = new PrimaryContract(c);
 				contractMap.put(pc.identifier(), pc);
-				channelSymbolContractTbl.put(pc.channelType(), pc.contractField().getSymbol(), pc);
-				channelSymbolContractTbl.put(pc.channelType(), pc.contractField().getUnifiedSymbol(), pc);
+				channelSymbolContractTbl.put(pc.channelType(), pc.contract().symbol(), pc);
+				channelSymbolContractTbl.put(pc.channelType(), pc.contract().unifiedSymbol(), pc);
 			}
 		}
 	}
@@ -181,7 +190,7 @@ public class MarketCenter implements IMarketCenter{
 	 * 查找合约
 	 */
 	@Override
-	public Contract getContract(Identifier identifier) {
+	public IContract getContract(Identifier identifier) {
 		if(!contractMap.containsKey(identifier)) {
 			throw new NoSuchElementException(String.format("找不到合约：%s", identifier.value()));
 		}
@@ -192,7 +201,7 @@ public class MarketCenter implements IMarketCenter{
 	 * 查询合约
 	 */
 	@Override
-	public Contract getContract(ChannelType channelType, String code) {
+	public IContract getContract(ChannelType channelType, String code) {
 		if(!channelSymbolContractTbl.contains(channelType, code)) {
 			throw new NoSuchElementException(String.format("找不到合约：%s -> %s", channelType, code));
 		}
@@ -203,7 +212,7 @@ public class MarketCenter implements IMarketCenter{
 	 * 获取网关合约
 	 */
 	@Override
-	public List<Contract> getContracts(String gatewayId) {
+	public List<IContract> getContracts(String gatewayId) {
 		if(StringUtils.isBlank(gatewayId)) {			
 			return contractMap.values().stream().toList();
 		}
@@ -217,7 +226,7 @@ public class MarketCenter implements IMarketCenter{
 	 * 获取网关合约
 	 */
 	@Override
-	public List<Contract> getContracts(ChannelType channelType) {
+	public List<IContract> getContracts(ChannelType channelType) {
 		return contractMap.values()
 				.stream()
 				.filter(c -> c.channelType() == channelType)
@@ -228,9 +237,9 @@ public class MarketCenter implements IMarketCenter{
 	 * 更新行情
 	 */
 	@Override
-	public void onTick(TickField tick) {
+	public void onTick(Tick tick) {
 		// 更新普通合约
-		Contract contract = getContract(ChannelType.valueOf(tick.getChannelType()), tick.getUnifiedSymbol());
+		IContract contract = getContract(tick.channelType(), tick.contract().unifiedSymbol());
 		if(contract instanceof TickDataAware tdAware) {
 			tdAware.onTick(tick);
 		}
@@ -242,14 +251,6 @@ public class MarketCenter implements IMarketCenter{
 		} else if(contract.productClass() == ProductClassEnum.FUTURES){
 			log.trace("没有找到 [{}] 对应的指数合约", contract.identifier());
 		}
-	}
-
-	@Override
-	public void endOfMarketTime() {
-		contractMap.values().stream()
-			.filter(TickDataAware.class::isInstance)
-			.map(TickDataAware.class::cast)
-			.forEach(TickDataAware::endOfMarket);
 	}
 
 	/**

@@ -44,7 +44,6 @@
 <script>
 import SocketConnection from '@/components/SocketConnection'
 import MessageConfigForm from '@/components/MessageConfigForm'
-import packageJson from '@/../package.json'
 
 import loginApi from '@/api/loginApi'
 import MediaListener from '@/utils/media-utils'
@@ -70,7 +69,7 @@ export default {
     return {
       curPage: '0',
       mailSettingFormVisible: false,
-      version: packageJson.version
+      version: '0.0.1'
     }
   },
   beforeRouteEnter(to, from, next){
@@ -87,6 +86,14 @@ export default {
     next()
   },
   mounted() {
+    fetch(`${window.baseURL || ''}/version`).then(result => {
+      if(result.status === 200){
+        return result.text()
+      }
+      return Promise.reject()
+    }).then(v => {
+      this.version = v.replace(/"/g,"")
+    })
     this.curPage = pageOptsRevert[this.$route.name]
     const resizeHandler = () => {
       if(this.listener.isMobile() && this.$route.name !== 'module' && this.$route.name !== 'manualfttd'){

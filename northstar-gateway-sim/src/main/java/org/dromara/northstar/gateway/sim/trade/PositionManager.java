@@ -9,13 +9,14 @@ import java.util.concurrent.ConcurrentMap;
 import org.dromara.northstar.common.TickDataAware;
 import org.dromara.northstar.common.TransactionAware;
 import org.dromara.northstar.common.exception.NoSuchElementException;
+import org.dromara.northstar.common.model.core.Contract;
+import org.dromara.northstar.common.model.core.Order;
+import org.dromara.northstar.common.model.core.Position;
+import org.dromara.northstar.common.model.core.Tick;
+import org.dromara.northstar.common.model.core.Trade;
 import org.dromara.northstar.common.utils.FieldUtils;
 
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
-import xyz.redtorch.pb.CoreField.OrderField;
-import xyz.redtorch.pb.CoreField.PositionField;
-import xyz.redtorch.pb.CoreField.TickField;
-import xyz.redtorch.pb.CoreField.TradeField;
 
 /**
  * 管理持仓
@@ -27,90 +28,89 @@ public class PositionManager implements TransactionAware, TickDataAware {
 	private SimGatewayAccount account;
 	
 	/* unifiedSymbol -> tick */
-	private ConcurrentMap<String, TradePosition> buyPosMap = new ConcurrentHashMap<>();
-	private ConcurrentMap<String, TradePosition> sellPosMap = new ConcurrentHashMap<>();
+	private ConcurrentMap<Contract, TradePosition> buyPosMap = new ConcurrentHashMap<>();
+	private ConcurrentMap<Contract, TradePosition> sellPosMap = new ConcurrentHashMap<>();
 	
 	public PositionManager(SimGatewayAccount account) {
 		this.account = account;
 	}
 	
-	public PositionManager(SimGatewayAccount account, List<TradeField> nonclosedTrade) {
+	public PositionManager(SimGatewayAccount account, List<Trade> nonclosedTrade) {
 		this.account = account;
 		nonclosedTrade.forEach(this::onTrade);
 	}
 
 	@Override
-	public void onTick(TickField tick) {
+	public void onTick(Tick tick) {
 		buyPosMap.values().forEach(tp -> tp.onTick(tick));
 		sellPosMap.values().forEach(tp -> tp.onTick(tick));
 	}
 
 	@Override
-	public void onOrder(OrderField order) {
-		if(FieldUtils.isClose(order.getOffsetFlag())) {
-			TradePosition pos = getPosition(order.getDirection(), order.getContract().getUnifiedSymbol(), true);
+	public void onOrder(Order order) {
+		if(FieldUtils.isClose(order.offsetFlag())) {
+			TradePosition pos = getPosition(order.direction(), order.contract(), true);
 			if(Objects.isNull(pos)) {
-				throw new NoSuchElementException(String.format("找不到%s头持仓：%s", FieldUtils.chn(order.getDirection()), order.getContract().getUnifiedSymbol()));
+				throw new NoSuchElementException(String.format("找不到%s头持仓：%s", FieldUtils.chn(order.direction()), order.contract().unifiedSymbol()));
 			}
 			pos.onOrder(order);
 		}
 	}
 
 	@Override
-	public void onTrade(TradeField trade) {
-		DirectionEnum dir = trade.getDirection();
-		String unifiedSymbol = trade.getContract().getUnifiedSymbol();
-		if(FieldUtils.isOpen(trade.getOffsetFlag())) {
-			TradePosition tp = getPosition(dir, unifiedSymbol, false);
+	public void onTrade(Trade trade) {
+		DirectionEnum dir = trade.direction();
+		if(FieldUtils.isOpen(trade.offsetFlag())) {
+			TradePosition tp = getPosition(dir, trade.contract(), false);
 			if(Objects.isNull(tp)) {
-				tp = new TradePosition(trade.getContract(), dir);
-				getPosMap(dir, false).put(unifiedSymbol, tp);
+				tp = new TradePosition(trade.contract(), dir);
+				getPosMap(dir, false).put(trade.contract(), tp);
 			}
 			tp.onTrade(trade);
 		} else {
-			TradePosition tp = getPosition(dir, unifiedSymbol, true);
+			TradePosition tp = getPosition(dir, trade.contract(), true);
 			if(Objects.isNull(tp)) {
-				throw new NoSuchElementException(String.format("找不到%s头持仓：%s", FieldUtils.chn(dir), unifiedSymbol));
+				throw new NoSuchElementException(String.format("找不到%s头持仓：%s", FieldUtils.chn(dir), trade.contract().unifiedSymbol()));
 			}
 			tp.onTrade(trade).forEach(account::onDeal);
 		}
 	}
 	
-	public List<PositionField> positionFields() {
-		List<PositionField> resultList = new ArrayList<>();
-		resultList.addAll(buyPosMap.values().stream().map(tp -> tp.convertToPositionField(account.getAccountDescription().getGatewayId())).toList());
-		resultList.addAll(sellPosMap.values().stream().map(tp -> tp.convertToPositionField(account.getAccountDescription().getGatewayId())).toList());
+	public List<Position> positionFields() {
+		List<Position> resultList = new ArrayList<>();
+		resultList.addAll(buyPosMap.values().stream().map(tp -> tp.convertToPosition(account.getAccountDescription().getGatewayId())).toList());
+		resultList.addAll(sellPosMap.values().stream().map(tp -> tp.convertToPosition(account.getAccountDescription().getGatewayId())).toList());
 		return resultList;
 	}
 	
-	public List<TradeField> getNonclosedTrade() {
-		List<TradeField> resultList = new ArrayList<>();
+	public List<Trade> getNonclosedTrade() {
+		List<Trade> resultList = new ArrayList<>();
 		resultList.addAll(buyPosMap.values().stream().flatMap(tp -> tp.getUncloseTrades().stream()).toList());
 		resultList.addAll(sellPosMap.values().stream().flatMap(tp -> tp.getUncloseTrades().stream()).toList());
 		return resultList;
 	}
 	
 	public double totalHoldingProfit() {
-		return positionFields().stream().mapToDouble(PositionField::getPositionProfit).sum();
+		return positionFields().stream().mapToDouble(Position::positionProfit).sum();
 	}
 	
 	public double totalMargin() {
-		return positionFields().stream().mapToDouble(PositionField::getExchangeMargin).sum();
+		return positionFields().stream().mapToDouble(Position::exchangeMargin).sum();
 	}
 
-	public int getAvailablePosition(DirectionEnum direction, String unifiedSymbol) {
-		TradePosition tp = getPosition(direction, unifiedSymbol, false);
+	public int getAvailablePosition(DirectionEnum direction, Contract contract) {
+		TradePosition tp = getPosition(direction, contract, false);
 		if(Objects.isNull(tp)) {
-			throw new NoSuchElementException(String.format("找不到%s头持仓：%s", FieldUtils.chn(direction), unifiedSymbol));
+			throw new NoSuchElementException(String.format("找不到%s头持仓：%s", FieldUtils.chn(direction), contract.unifiedSymbol()));
 		}		
 		return tp.totalAvailable();
 	}
 	
-	private TradePosition getPosition(DirectionEnum dir, String unifiedSymbol, boolean reverse){
-		return getPosMap(dir, reverse).get(unifiedSymbol);
+	private TradePosition getPosition(DirectionEnum dir, Contract contract, boolean reverse){
+		return getPosMap(dir, reverse).get(contract);
 	}
 	
-	private ConcurrentMap<String, TradePosition> getPosMap(DirectionEnum dir, boolean reverse){
+	private ConcurrentMap<Contract, TradePosition> getPosMap(DirectionEnum dir, boolean reverse){
 		return switch(dir) {
 		case D_Buy -> reverse ? sellPosMap : buyPosMap;
 		case D_Sell -> reverse ? buyPosMap : sellPosMap;

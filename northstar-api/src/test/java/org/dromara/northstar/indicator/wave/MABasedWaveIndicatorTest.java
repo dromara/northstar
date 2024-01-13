@@ -9,6 +9,7 @@ import java.time.LocalTime;
 import java.time.ZoneOffset;
 import java.util.function.Consumer;
 
+import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.indicator.Indicator;
 import org.dromara.northstar.indicator.helper.SimpleValueIndicator;
 import org.dromara.northstar.indicator.model.Configuration;
@@ -20,11 +21,8 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
-import xyz.redtorch.pb.CoreField.ContractField;
-
 class MABasedWaveIndicatorTest {
-	
-	ContractField contract = ContractField.newBuilder().build();
+	Contract contract = Contract.builder().build();
 	// 单元测试中的简化配置，不能在实际场景使用
 	Configuration cfg = Configuration.builder().contract(contract).cacheLength(3).build();
 	SimpleValueIndicator maLine = new SimpleValueIndicator(cfg);
