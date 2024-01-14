@@ -11,9 +11,11 @@ import org.dromara.northstar.common.exception.TradeException;
 import org.dromara.northstar.common.exception.ValueMismatchException;
 import org.dromara.northstar.common.model.ResultBean;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -32,6 +34,11 @@ public class CommonControllerAdvice {
 		String msg = StringUtils.isNotBlank(e.getMessage()) ? e.getMessage() : "遇到未知异常";
 		log.error(msg, e);
 		return new ResultBean<>(ReturnCode.ERROR, msg);
+	}
+	
+	@ExceptionHandler(NoResourceFoundException.class)
+	public ResponseEntity<Void> handleException(Exception e) {
+		return ResponseEntity.notFound().build();
 	}
 	
 	@ExceptionHandler(InsufficientException.class)
