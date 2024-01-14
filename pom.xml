@@ -5,7 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.dromara</groupId>
 	<artifactId>northstar</artifactId>
-	<version>7.0.0-Beta.1</version>
+	<version>${revision}</version>
 	<name>northstar</name>
 	<packaging>pom</packaging>
 	<description>盈富量化交易平台</description>
@@ -19,7 +19,8 @@
 		<maven.compiler.encoding>UTF-8</maven.compiler.encoding>
 		<maven.compiler.source>${java.version}</maven.compiler.source>
 		<maven.compiler.target>${java.version}</maven.compiler.target>
-		<northstar-version>${project.version}</northstar-version>
+		<revision>7.0.0-Beta.1</revision>
+		<northstar-version>${revision}</northstar-version>
 		<springboot-version>3.2.0</springboot-version>
 		<lombok-version>1.18.30</lombok-version>
 		<slf4j-version>2.0.9</slf4j-version>
