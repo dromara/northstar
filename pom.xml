@@ -3,6 +3,11 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<groupId>org.springframework.boot</groupId>
+		<version>3.2.0</version>
+	</parent>
 	<groupId>org.dromara</groupId>
 	<artifactId>northstar</artifactId>
 	<version>${revision}</version>
@@ -21,7 +26,6 @@
 		<maven.compiler.target>${java.version}</maven.compiler.target>
 		<revision>7.0.0-Beta.1</revision>
 		<northstar-version>${revision}</northstar-version>
-		<springboot-version>3.2.0</springboot-version>
 		<lombok-version>1.18.30</lombok-version>
 		<slf4j-version>2.0.9</slf4j-version>
 		<commons-lang3-version>3.7</commons-lang3-version>
@@ -92,46 +96,6 @@
 				<version>${northstar-version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-starter</artifactId>
-				<version>${springboot-version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-starter-aop</artifactId>
-				<version>${springboot-version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-starter-web</artifactId>
-				<version>${springboot-version}</version>
-			</dependency>
-			<dependency>
-			    <groupId>org.springframework.boot</groupId>
-			    <artifactId>spring-boot-starter-cache</artifactId>
-			    <version>${springboot-version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-starter-mail</artifactId>
-				<version>${springboot-version}</version>
-			</dependency>
-			<dependency>
-			   <groupId>org.springframework.boot</groupId>
-			   <artifactId>spring-boot-starter-data-jpa</artifactId>
-			   <version>${springboot-version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-configuration-processor</artifactId>
-				<version>${springboot-version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-starter-data-redis</artifactId>
-				<version>${springboot-version}</version>
-			</dependency>
-			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-lang3</artifactId>
 				<version>${commons-lang3-version}</version>
@@ -184,12 +148,6 @@
 			    <classifier>jakarta</classifier>
 			</dependency>
 			<dependency>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-starter-test</artifactId>
-				<version>${springboot-version}</version>
-				<scope>test</scope>
-			</dependency>
-			<dependency>
 				<groupId>org.apache.httpcomponents</groupId>
 				<artifactId>httpclient</artifactId>
 				<version>4.5.13</version>
@@ -203,11 +161,6 @@
 			    <groupId>javax.xml.bind</groupId>
 			    <artifactId>jaxb-api</artifactId>
 			    <version>2.3.1</version>
-			</dependency>
-			<dependency>
-			    <groupId>org.springframework</groupId>
-			    <artifactId>spring-web</artifactId>
-			    <version>6.1.2</version>
 			</dependency>
 			<dependency>
 			    <groupId>com.squareup.retrofit2</groupId>
