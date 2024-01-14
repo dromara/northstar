@@ -17,6 +17,7 @@ import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.event.FastEventEngine;
 import org.dromara.northstar.common.exception.NoSuchElementException;
 import org.dromara.northstar.common.model.Identifier;
+import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.common.model.core.ContractDefinition;
 import org.dromara.northstar.common.model.core.Tick;
 import org.dromara.northstar.gateway.IContract;
@@ -57,6 +58,8 @@ public class MarketCenter implements IMarketCenter{
 	private final Table<ChannelType, ContractDefinition, List<IContract>> channelDefContractGroups = HashBasedTable.create();
 	
 	private final Map<ChannelType, MarketGateway> gatewayMap = new EnumMap<>(ChannelType.class);
+	
+	private final ConcurrentMap<Contract, Tick> tickMap = new ConcurrentHashMap<>();
 	
 	private final FastEventEngine feEngine;
 	
@@ -238,6 +241,8 @@ public class MarketCenter implements IMarketCenter{
 	 */
 	@Override
 	public void onTick(Tick tick) {
+		tickMap.put(tick.contract(), tick);
+		
 		// 更新普通合约
 		IContract contract = getContract(tick.channelType(), tick.contract().unifiedSymbol());
 		if(contract instanceof TickDataAware tdAware) {
@@ -265,6 +270,11 @@ public class MarketCenter implements IMarketCenter{
 	@Override
 	public MarketGateway getGateway(ChannelType channelType) {
 		return gatewayMap.get(channelType);
+	}
+
+	@Override
+	public Optional<Tick> lastTick(Contract contract) {
+		return Optional.ofNullable(tickMap.get(contract));
 	}
 
 }
