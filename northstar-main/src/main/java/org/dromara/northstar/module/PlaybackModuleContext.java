@@ -74,7 +74,7 @@ public class PlaybackModuleContext extends ModuleContext implements IModuleConte
 		}
 		
 		SubmitOrderReq orderReq = orderReqMap.get(originOrderId);
-		Tick lastTick = latestTickMap.get(orderReq.contract());
+		Tick lastTick = mktCenter.lastTick(orderReq.contract()).get();
 		return lastTick.actionTimestamp() - orderReq.actionTimestamp() > timeout;
 	}
 	
@@ -87,9 +87,8 @@ public class PlaybackModuleContext extends ModuleContext implements IModuleConte
 			return Optional.empty();
 		}
 		logger.debug("回测上下文收到下单请求");
-		Tick lastTick = latestTickMap.get(contract);
-		Assert.notNull(lastTick, "没有行情时不应该发送订单");
-		Assert.isTrue(volume > 0, "下单手数应该为正数");
+		Assert.isTrue(volume > 0, "下单手数应该为正数。当前为" + volume);
+		Tick lastTick = mktCenter.lastTick(contract).orElseThrow(() -> new IllegalStateException("没有行情时不应该发送订单"));
 		
 		double orderPrice = priceType.resolvePrice(lastTick, operation, price);
 		if(logger.isInfoEnabled()) {
@@ -113,7 +112,7 @@ public class PlaybackModuleContext extends ModuleContext implements IModuleConte
 							.timeCondition(priceType == PriceType.ANY_PRICE ? TimeConditionEnum.TC_IOC : TimeConditionEnum.TC_GFD)
 							.orderPriceType(priceType == PriceType.ANY_PRICE ? OrderPriceTypeEnum.OPT_AnyPrice : OrderPriceTypeEnum.OPT_LimitPrice)
 							.contingentCondition(ContingentConditionEnum.CC_Immediately)
-							.actionTimestamp(latestTickMap.get(contract).actionTimestamp())
+							.actionTimestamp(lastTick.actionTimestamp())
 							.minVolume(1)
 							.build());
 		} catch (InsufficientException e) {

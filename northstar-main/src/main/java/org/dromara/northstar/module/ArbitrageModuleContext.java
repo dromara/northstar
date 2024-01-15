@@ -63,15 +63,12 @@ public class ArbitrageModuleContext extends ModuleContext implements IModuleCont
 				}
 				return;
 			}
-			Tick tick = latestTickMap.get(tradeIntent.getContract());
-			if(Objects.isNull(tick)) {
-				logger.warn("没有TICK行情数据时，忽略下单请求");
-				return;
-			}
-			logger.info("收到下单意图：{}", tradeIntent);
-			tradeIntentMap.put(tradeIntent.getContract(), tradeIntent);
-			tradeIntent.setContext(this);
-			tradeIntent.onTick(tick);	
+			mktCenter.lastTick(tradeIntent.getContract()).ifPresentOrElse(tick -> {
+				logger.info("收到下单意图：{}", tradeIntent);
+				tradeIntentMap.put(tradeIntent.getContract(), tradeIntent);
+				tradeIntent.setContext(this);
+				tradeIntent.onTick(tick);	
+			}, () -> logger.warn("没有TICK行情数据时，忽略下单请求"));
 		});
 	}
 
@@ -86,9 +83,8 @@ public class ArbitrageModuleContext extends ModuleContext implements IModuleCont
 			}
 			return Optional.empty();
 		}
-		Tick tick = latestTickMap.get(contract);
-		Assert.notNull(tick, "没有行情时不应该发送订单");
 		Assert.isTrue(volume > 0, "下单手数应该为正数。当前为" + volume);
+		Tick tick = mktCenter.lastTick(contract).orElseThrow(() -> new IllegalStateException("没有行情时不应该发送订单"));
 		
 		double orderPrice = priceType.resolvePrice(tick, operation, price);
 		logger.info("[{} {}] 策略信号：合约【{}】，操作【{}】，价格【{}】，手数【{}】，类型【{}】", 

@@ -52,6 +52,7 @@ import org.dromara.northstar.common.utils.OrderUtils;
 import org.dromara.northstar.data.IModuleRepository;
 import org.dromara.northstar.gateway.IContract;
 import org.dromara.northstar.gateway.IContractManager;
+import org.dromara.northstar.gateway.IMarketCenter;
 import org.dromara.northstar.indicator.Indicator;
 import org.dromara.northstar.indicator.IndicatorValueUpdateHelper;
 import org.dromara.northstar.indicator.constant.PeriodUnit;
@@ -108,8 +109,6 @@ public class ModuleContext implements IModuleContext{
 	/* unifiedSymbol -> contract */
 	protected ConcurrentMap<String, Contract> contractMap = new ConcurrentHashMap<>();
 	
-	protected ConcurrentMap<Contract, Tick> latestTickMap = new ConcurrentHashMap<>();
-	
 	protected ConcurrentMap<Contract, Queue<JSONObject>> dataFrameQMap = new ConcurrentHashMap<>();
 	
 	protected ConcurrentMap<Contract, Long> barFilterMap = new ConcurrentHashMap<>();
@@ -129,7 +128,7 @@ public class ModuleContext implements IModuleContext{
 	
 	protected LocalDate tradingDay;
 	
-	protected IContractManager contractMgr;
+	protected IMarketCenter mktCenter;
 	
 	protected OrderRequestFilter orderReqFilter;
 	
@@ -137,7 +136,7 @@ public class ModuleContext implements IModuleContext{
 			IContractManager contractMgr, IModuleRepository moduleRepo, BarMergerRegistry barMergerRegistry) {
 		this.tradeStrategy = tradeStrategy;
 		this.moduleRepo = moduleRepo;
-		this.contractMgr = contractMgr;
+		this.mktCenter = (IMarketCenter) contractMgr;
 		this.registry = barMergerRegistry;
 		this.loggerFactory = new ModuleLoggerFactory(moduleDescription.getModuleName());
 		this.logger = loggerFactory.getLogger(getClass().getName());
@@ -181,15 +180,12 @@ public class ModuleContext implements IModuleContext{
 			}
 			return;
 		}
-		Tick tick = latestTickMap.get(tradeIntent.getContract());
-		if(Objects.isNull(tick)) {
-			logger.warn("没有TICK行情数据时，忽略下单请求");
-			return;
-		}
-		logger.info("收到下单意图：{}", tradeIntent);
-		tradeIntent.setContext(this);
-		tradeIntentMap.put(tradeIntent.getContract(), tradeIntent);
-        tradeIntent.onTick(tick);
+		mktCenter.lastTick(tradeIntent.getContract()).ifPresentOrElse(tick -> {
+			logger.info("收到下单意图：{}", tradeIntent);
+			tradeIntent.setContext(this);
+			tradeIntentMap.put(tradeIntent.getContract(), tradeIntent);
+	        tradeIntent.onTick(tick);	
+		}, () -> logger.warn("没有TICK行情数据时，忽略下单请求"));
 	}
 
 	@Override
@@ -271,7 +267,6 @@ public class ModuleContext implements IModuleContext{
 		}
 		indicatorHelperSet.forEach(helper -> helper.onTick(tick));
 		moduleAccount.onTick(tick);
-		latestTickMap.put(tick.contract(), tick);
 		tradeStrategy.onTick(tick);
 	}
 
@@ -474,9 +469,8 @@ public class ModuleContext implements IModuleContext{
 			}
 			return Optional.empty();
 		}
-		Tick tick = latestTickMap.get(contract);
-		Assert.notNull(tick, "没有行情时不应该发送订单");
 		Assert.isTrue(volume > 0, "下单手数应该为正数。当前为" + volume);
+		Tick tick = mktCenter.lastTick(contract).orElseThrow(() -> new IllegalStateException("没有行情时不应该发送订单"));
 		
 		double orderPrice = priceType.resolvePrice(tick, operation, price);
 		if(logger.isInfoEnabled()) {

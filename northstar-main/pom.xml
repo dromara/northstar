@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.dromara</groupId>
 		<artifactId>northstar</artifactId>
-		<version>${revision}</version>
+		<version>7.0.0-Beta.2</version>
 	</parent>
 	<artifactId>northstar-main</artifactId>
 	<name>northstar-main</name>
