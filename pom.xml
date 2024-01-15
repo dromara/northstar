@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>org.dromara</groupId>
 	<artifactId>northstar</artifactId>
-	<version>7.0.0-Beta.2</version>
+	<version>${revision}</version>
 	<name>northstar</name>
 	<packaging>pom</packaging>
 	<description>盈富量化交易平台</description>
@@ -24,7 +24,8 @@
 		<maven.compiler.encoding>UTF-8</maven.compiler.encoding>
 		<maven.compiler.source>${java.version}</maven.compiler.source>
 		<maven.compiler.target>${java.version}</maven.compiler.target>
-		<northstar-version>${project.version}</northstar-version>
+		<revision>${northstar-version}</revision>
+		<northstar-version>7.0.0-Beta.2</northstar-version>
 		<lombok-version>1.18.30</lombok-version>
 		<slf4j-version>2.0.9</slf4j-version>
 		<commons-lang3-version>3.7</commons-lang3-version>
@@ -378,6 +379,32 @@
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>versions-maven-plugin</artifactId>
 				<version>2.16.2</version>
+			</plugin>
+			<!--解析${revision}版本号参数-->
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>flatten-maven-plugin</artifactId>
+				<version>1.2.5</version>
+				<configuration>
+					<updatePomFile>true</updatePomFile>
+					<flattenMode>resolveCiFriendliesOnly</flattenMode>
+				</configuration>
+				<executions>
+					<execution>
+						<id>flatten</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>flatten</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>flatten.clean</id>
+						<phase>clean</phase>
+						<goals>
+							<goal>clean</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 		<pluginManagement>
