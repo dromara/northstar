@@ -16,6 +16,8 @@ import org.dromara.northstar.common.model.core.Position;
 import org.dromara.northstar.common.model.core.Tick;
 import org.dromara.northstar.common.model.core.Trade;
 import org.dromara.northstar.common.utils.CommonUtils;
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.InitializingBean;
 
 import com.corundumstudio.socketio.SocketIOClient;
 import com.corundumstudio.socketio.SocketIOServer;
@@ -31,11 +33,11 @@ import xyz.redtorch.pb.CoreField.PositionField;
 import xyz.redtorch.pb.CoreField.TickField;
 
 @Slf4j
-public class BroadcastHandler extends AbstractEventHandler implements GenericEventHandler {
+public class BroadcastHandler extends AbstractEventHandler implements GenericEventHandler, InitializingBean, DisposableBean {
 	
 	private SocketIOServer socketServer;
 	
-	private ExecutorService exec = CommonUtils.newThreadPerTaskExecutor(BroadcastHandler.class);
+	private ExecutorService exec;
 	
 	private static final Set<NorthstarEventType> TARGET_TYPE = EnumSet.of(
 			NorthstarEventType.TICK, 
@@ -122,5 +124,15 @@ public class BroadcastHandler extends AbstractEventHandler implements GenericEve
 				log.error("数据分发异常", ex);
 			}
 		});
+	}
+
+	@Override
+	public void afterPropertiesSet() throws Exception {
+		exec = CommonUtils.newThreadPerTaskExecutor(getClass());
+	}
+	
+	@Override
+	public void destroy() throws Exception {
+		exec.close();
 	}
 }

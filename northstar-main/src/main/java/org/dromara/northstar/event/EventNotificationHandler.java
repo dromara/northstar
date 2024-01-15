@@ -14,14 +14,16 @@ import org.dromara.northstar.common.model.core.Trade;
 import org.dromara.northstar.common.utils.CommonUtils;
 import org.dromara.northstar.common.utils.OrderUtils;
 import org.dromara.northstar.strategy.IMessageSender;
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.InitializingBean;
 
-public class EventNotificationHandler extends AbstractEventHandler implements GenericEventHandler{
+public class EventNotificationHandler extends AbstractEventHandler implements GenericEventHandler, InitializingBean, DisposableBean{
 	
 	private IMessageSender sender;
 	
 	private Set<NorthstarEventType> subEvents;
 	
-	private ExecutorService exec = CommonUtils.newThreadPerTaskExecutor(getClass());
+	private ExecutorService exec;
 	
 	public EventNotificationHandler(IMessageSender sender, Set<NorthstarEventType> subEvents) {
 		this.sender = sender;
@@ -43,4 +45,15 @@ public class EventNotificationHandler extends AbstractEventHandler implements Ge
 		exec.execute(() -> sender.onEvent(e));
 	}
 
+
+
+	@Override
+	public void afterPropertiesSet() throws Exception {
+		exec = CommonUtils.newThreadPerTaskExecutor(getClass());
+	}
+	
+	@Override
+	public void destroy() throws Exception {
+		exec.close();
+	}
 }
