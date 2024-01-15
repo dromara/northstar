@@ -10,14 +10,13 @@
 	</parent>
 	<groupId>org.dromara</groupId>
 	<artifactId>northstar</artifactId>
-	<version>${revision}</version>
+	<version>7.0.0-Beta.2</version>
 	<name>northstar</name>
 	<packaging>pom</packaging>
 	<description>盈富量化交易平台</description>
 	<url>https://gitee.com/dromara/northstar</url>
 
 	<properties>
-		<revision>7.0.0-Beta.2</revision>
 		<java.version>21</java.version>
 		<argLine>-Dfile.encoding=UTF-8</argLine>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -25,7 +24,7 @@
 		<maven.compiler.encoding>UTF-8</maven.compiler.encoding>
 		<maven.compiler.source>${java.version}</maven.compiler.source>
 		<maven.compiler.target>${java.version}</maven.compiler.target>
-		<northstar-version>${revision}</northstar-version>
+		<northstar-version>${project.version}</northstar-version>
 		<lombok-version>1.18.30</lombok-version>
 		<slf4j-version>2.0.9</slf4j-version>
 		<commons-lang3-version>3.7</commons-lang3-version>
