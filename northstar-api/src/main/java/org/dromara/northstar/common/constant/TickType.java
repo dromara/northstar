@@ -6,6 +6,10 @@ public enum TickType {
 	 */
 	PLAYBACK_TICK,
 	/**
+	 * 非交易时间的信息行情
+	 */
+	INFO_TICK,
+	/**
 	 * 实时行情
 	 */
 	MARKET_TICK;
