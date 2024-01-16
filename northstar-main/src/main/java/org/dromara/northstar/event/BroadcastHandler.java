@@ -61,7 +61,7 @@ public class BroadcastHandler extends AbstractEventHandler implements GenericEve
 		if(event.getData() instanceof Tick t) {
 			TickField tick = t.toTickField();
 			String rmid = String.format("%s@%s", tick.getUnifiedSymbol(), tick.getGatewayId());
-			log.trace("TICK数据分发：[{} {} {} 价格：{}]", tick.getUnifiedSymbol(), tick.getActionDay(), tick.getActionTime(), tick.getLastPrice());
+			log.trace("TICK数据分发：[{} {} {} 价格：{} 持仓：{}]", tick.getUnifiedSymbol(), tick.getActionDay(), tick.getActionTime(), tick.getLastPrice(), tick.getOpenInterest());
 			socketServer.getRoomOperations(rmid).sendEvent(NorthstarEventType.TICK.toString(), Base64.encode(tick.toByteArray()));
 		} else if(event.getData() instanceof Bar b) {
 			BarField bar = b.toBarField();
