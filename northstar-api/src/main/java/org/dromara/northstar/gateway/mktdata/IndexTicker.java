@@ -9,6 +9,7 @@ import java.util.function.ToDoubleFunction;
 import java.util.stream.Collectors;
 
 import org.dromara.northstar.common.constant.Constants;
+import org.dromara.northstar.common.constant.TickType;
 import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.common.model.core.Tick;
 import org.dromara.northstar.gateway.contract.IndexContract;
@@ -57,10 +58,8 @@ public class IndexTicker {
 			log.warn("[{}]指数TICK生成器，无法处理 [{}] 的行情数据", idxContract.contract().unifiedSymbol(), tick.contract().unifiedSymbol());
 			return;
 		}
-		double confidenceRatio = (double) tickMap.size() / memberContracts.size();	// 通过计算可信度指标，可以防止初始化后只有个别活跃月份的数据，导致指数计算误差过大
 		// 如果有过期的TICK数据(例如不活跃的合约),则并入下个K线
-		if (lastTickTimestamp < tick.actionTimestamp()) {
-			if(lastTickTimestamp > 0 && confidenceRatio > 0.4) {				
+		if (0 < lastTickTimestamp && lastTickTimestamp < tick.actionTimestamp()) {
 				final Double zeroD = Constants.ZERO_D;
 				final Integer zero = Constants.ZERO;
 				//进行运算
@@ -93,7 +92,8 @@ public class IndexTicker {
 						.type(tick.type())
 						.channelType(tick.channelType())
 						.build());
-			}
+		}
+		if(tick.type() == TickType.MARKET_TICK) {			
 			lastTickTimestamp = tick.actionTimestamp();
 		}
 		// 同一个指数Tick
