@@ -43,3 +43,4 @@ build/
 
 **/__pycache__/
 northstar-rl/python-app/models
+.flattened-pom.xml

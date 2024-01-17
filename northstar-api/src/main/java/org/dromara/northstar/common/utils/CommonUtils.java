@@ -97,7 +97,7 @@ public class CommonUtils {
 	}
 	
 	/**
-	 * 创建虚拟线程池
+	 * 创建虚拟线程服务
 	 * @param clz
 	 * @return
 	 */
