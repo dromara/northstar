@@ -20,8 +20,8 @@ $DistPath = "c:\northstar_dist\"
 If(!(test-path $DistPath)){
 	New-Item -Path $DistPath -ItemType Directory
 }
-#JDK17下载地址
-$JDK17DownloadUrl = "https://download.oracle.com/java/17/latest/jdk-17_windows-x64_bin.msi"
+#JDK21下载地址
+$JDK21DownloadUrl = "https://download.oracle.com/java/21/latest/jdk-21_windows-x64_bin.msi"
 
 # 检查环境  
 function checkCommand([string] $name, [string] $checkPattern){
@@ -66,13 +66,13 @@ function getInstallPath([string] $basePath, [string] $pattern){
 	return $path.fullName
 }
 
-# JDK17环境安装  
-If(checkCommand java.exe 17*){
-    "JDK17 installed"
+# JDK21环境安装  
+If(checkCommand java.exe 21*){
+    "JDK21 installed"
 } else {
-	downloadAndInstallMSI $JDK17DownloadUrl $BasePath jdk-17_windows-x64_bin.msi
+	downloadAndInstallMSI $JDK21DownloadUrl $BasePath jdk-21_windows-x64_bin.msi
 	$programPath = "C:\Program Files\Java"
-	$jdkPath = getInstallPath $programPath jdk-17*
+	$jdkPath = getInstallPath $programPath jdk-21*
 	setEnvironment Java "$jdkPath\bin"
 }
 
