@@ -10,13 +10,13 @@ mkdir -p ~/northstar-env ~/northstar-dist
 # 检查JDK环境
 if [[ $(which java >/dev/null && echo $?) != 0 ]]; 
 then
-	echo "安装JDK17"
-	cd ~/northstar-env && wget --no-check-certificate https://download.oracle.com/java/17/archive/jdk-17.0.5_linux-x64_bin.tar.gz
-	tar -xvf jdk-17.0.5_linux-x64_bin.tar.gz
-	rm -f jdk-17.0.5_linux-x64_bin.tar.gz
+	echo "安装JDK21"
+	cd ~/northstar-env && wget --no-check-certificate https://aka.ms/download-jdk/microsoft-jdk-21.0.1-linux-x64.tar.gz
+	tar -xvf microsoft-jdk-21.0.1-linux-x64.tar.gz
+	rm -f microsoft-jdk-21.0.1-linux-x64.tar.gz
 	ln -sf ~/northstar-env/$(find jdk* -maxdepth 0 -type d)/bin/* /usr/local/bin/
 else
-	echo "JDK17已安装"
+	echo "JDK21已安装"
 	java -version
 fi
 
