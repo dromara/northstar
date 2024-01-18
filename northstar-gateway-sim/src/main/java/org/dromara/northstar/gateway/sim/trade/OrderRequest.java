@@ -140,7 +140,11 @@ public class OrderRequest implements TickDataAware{
 		return submitOrderReq.offsetFlag() == OffsetFlagEnum.OF_Open ? Type.OPEN : Type.CLOSE;
 	}
 	
-	public void cancelOrder() {
+	public synchronized void cancelOrder() {
+		if(hasDone()) {
+			log.warn("订单已成交，无法撤单");
+			return;
+		}
 		onOrderCallback.accept(orderTemplate.toBuilder().statusMsg("已撤单")
 										.orderStatus(OrderStatusEnum.OS_Canceled)
 										.updateTime(LocalTime.now())
