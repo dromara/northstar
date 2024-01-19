@@ -24,6 +24,7 @@ import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.common.utils.CommonUtils;
 import org.dromara.northstar.common.utils.DateTimeUtils;
 import org.dromara.northstar.common.utils.LocalEnvUtils;
+import org.dromara.northstar.gateway.IContractManager;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -58,6 +59,8 @@ public class NorthstarDataServiceDataSource implements IDataSource{
 	
 	private RestTemplate restTemplate;
 	
+	private IContractManager contractMgr;
+	
 	public NorthstarDataServiceDataSource(String baseUrl, String secret, RestTemplate restTemplate) {
 		this.baseUrl =  baseUrl;
 		this.userToken = secret;
@@ -88,9 +91,9 @@ public class NorthstarDataServiceDataSource implements IDataSource{
 	 * @return
 	 */
 	@Override
-	public List<Bar> getMinutelyData(Contract contract, LocalDate startDate, LocalDate endDate) {
-		log.debug("从数据服务加载历史行情1分钟数据：{}，{} -> {}", contract.unifiedSymbol(), startDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), endDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
-		return commonGetData("min", contract, startDate, endDate);
+	public List<Bar> getMinutelyData(String unifiedSymbol, LocalDate startDate, LocalDate endDate) {
+		log.debug("从数据服务加载历史行情1分钟数据：{}，{} -> {}", unifiedSymbol, startDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), endDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
+		return commonGetData("min", unifiedSymbol, startDate, endDate);
 	}
 	
 	/**
@@ -101,9 +104,9 @@ public class NorthstarDataServiceDataSource implements IDataSource{
 	 * @return
 	 */
 	@Override
-	public List<Bar> getQuarterlyData(Contract contract, LocalDate startDate, LocalDate endDate) {
-		log.debug("从数据服务加载历史行情15分钟数据：{}，{} -> {}", contract.unifiedSymbol(), startDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), endDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
-		return commonGetData("quarter", contract, startDate, endDate);
+	public List<Bar> getQuarterlyData(String unifiedSymbol, LocalDate startDate, LocalDate endDate) {
+		log.debug("从数据服务加载历史行情15分钟数据：{}，{} -> {}", unifiedSymbol, startDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), endDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
+		return commonGetData("quarter", unifiedSymbol, startDate, endDate);
 	}
 	
 	/**
@@ -114,9 +117,9 @@ public class NorthstarDataServiceDataSource implements IDataSource{
 	 * @return
 	 */
 	@Override
-	public List<Bar> getHourlyData(Contract contract, LocalDate startDate, LocalDate endDate) {
-		log.debug("从数据服务加载历史行情1小时数据：{}，{} -> {}", contract.unifiedSymbol(), startDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), endDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
-		return commonGetData("hour", contract, startDate, endDate);
+	public List<Bar> getHourlyData(String unifiedSymbol, LocalDate startDate, LocalDate endDate) {
+		log.debug("从数据服务加载历史行情1小时数据：{}，{} -> {}", unifiedSymbol, startDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), endDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
+		return commonGetData("hour", unifiedSymbol, startDate, endDate);
 	}
 	
 	/**
@@ -127,9 +130,9 @@ public class NorthstarDataServiceDataSource implements IDataSource{
 	 * @return
 	 */
 	@Override
-	public List<Bar> getDailyData(Contract contract, LocalDate startDate, LocalDate endDate) {
-		log.debug("从数据服务加载历史行情日线数据：{}，{} -> {}", contract.unifiedSymbol(), startDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), endDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
-		return commonGetData("day", contract, startDate, endDate);
+	public List<Bar> getDailyData(String unifiedSymbol, LocalDate startDate, LocalDate endDate) {
+		log.debug("从数据服务加载历史行情日线数据：{}，{} -> {}", unifiedSymbol, startDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), endDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
+		return commonGetData("day", unifiedSymbol, startDate, endDate);
 	}
 	
 
@@ -223,10 +226,10 @@ public class NorthstarDataServiceDataSource implements IDataSource{
 		return execute(uri, DataSet.class).getBody();
 	}
 	
-	private List<Bar> commonGetData(String type, Contract contract, LocalDate startDate, LocalDate endDate){
-		URI uri = URI.create(String.format("%s/data/%s?unifiedSymbol=%s&startDate=%s&endDate=%s", baseUrl, type, contract.unifiedSymbol(), 
+	private List<Bar> commonGetData(String type, String unifiedSymbol, LocalDate startDate, LocalDate endDate){
+		URI uri = URI.create(String.format("%s/data/%s?unifiedSymbol=%s&startDate=%s&endDate=%s", baseUrl, type, unifiedSymbol, 
 				startDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), endDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER)));
-		return convertDataSet(execute(uri, DataSet.class).getBody(), contract);
+		return convertDataSet(execute(uri, DataSet.class).getBody(), unifiedSymbol);
 	}
 	
 	private <T> ResponseEntity<T> execute(URI uri, Class<T> clz) {
@@ -250,11 +253,12 @@ public class NorthstarDataServiceDataSource implements IDataSource{
 		}
 	}
 	
-	private List<Bar> convertDataSet(DataSet dataSet, Contract contract) {
+	private List<Bar> convertDataSet(DataSet dataSet, String unifiedSymbol) {
 		if(Objects.isNull(dataSet.getFields())) {
 			log.warn("数据服务查询不到相关数据");
 			return Collections.emptyList();
 		}
+		Contract contract = contractMgr.getContract(ChannelType.PLAYBACK, unifiedSymbol).contract();
 		List<Bar> resultList = new ArrayList<>();
 		Map<String, Integer> fieldIndexMap = new HashMap<>();
 		for(int i=0; i<dataSet.getFields().length; i++) {

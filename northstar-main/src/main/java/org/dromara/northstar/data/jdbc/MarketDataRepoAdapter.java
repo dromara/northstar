@@ -59,7 +59,7 @@ public class MarketDataRepoAdapter implements IMarketDataRepository{
 		}
 		Contract cf = contract.contract();
 		if(endDate.isAfter(startDate)) {
-			List<Bar> list = dataServiceDelegate.getMinutelyData(cf, startDate, endDate)
+			List<Bar> list = dataServiceDelegate.getMinutelyData(cf.unifiedSymbol(), startDate, endDate)
 					.stream()
 					.sorted((a, b) -> a.actionTimestamp() < b.actionTimestamp() ? -1 : 1)
 					.toList();
@@ -118,7 +118,7 @@ public class MarketDataRepoAdapter implements IMarketDataRepository{
 	public List<Bar> loadDailyBars(IContract contract, LocalDate startDate, LocalDate endDate) {
 		IDataSource dataServiceDelegate = contract.dataSource();
 		try {
-			return dataServiceDelegate.getDailyData(contract.contract(), startDate, endDate);
+			return dataServiceDelegate.getDailyData(contract.contract().unifiedSymbol(), startDate, endDate);
 		} catch (Exception e) {
 			log.error("{}", e.getMessage());
 			return Collections.emptyList();

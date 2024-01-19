@@ -17,22 +17,22 @@ import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 public class EmptyDataSource implements IDataSource{
 
 	@Override
-	public List<Bar> getMinutelyData(Contract contract, LocalDate startDate, LocalDate endDate) {
+	public List<Bar> getMinutelyData(String unifiedSymbol, LocalDate startDate, LocalDate endDate) {
 		return Collections.emptyList();
 	}
 
 	@Override
-	public List<Bar> getQuarterlyData(Contract contract, LocalDate startDate, LocalDate endDate) {
+	public List<Bar> getQuarterlyData(String unifiedSymbol, LocalDate startDate, LocalDate endDate) {
 		return Collections.emptyList();
 	}
 
 	@Override
-	public List<Bar> getHourlyData(Contract contract, LocalDate startDate, LocalDate endDate) {
+	public List<Bar> getHourlyData(String unifiedSymbol, LocalDate startDate, LocalDate endDate) {
 		return Collections.emptyList();
 	}
 
 	@Override
-	public List<Bar> getDailyData(Contract contract, LocalDate startDate, LocalDate endDate) {
+	public List<Bar> getDailyData(String unifiedSymbol, LocalDate startDate, LocalDate endDate) {
 		return Collections.emptyList();
 	}
 

@@ -23,8 +23,8 @@ public interface IDataSource {
 	 * @return
 	 */
 	@Retryable
-	@Cacheable(cacheNames = "bars", key = "'Minutely_' + #contract.unifiedSymbol() + '_' + #startDate + '_' + #endDate")
-	List<Bar> getMinutelyData(Contract contract, LocalDate startDate, LocalDate endDate);
+	@Cacheable(cacheNames = "bars", key = "'Minutely_' + #unifiedSymbol + '_' + #startDate + '_' + #endDate")
+	List<Bar> getMinutelyData(String unifiedSymbol, LocalDate startDate, LocalDate endDate);
 	
 	/**
 	 * 获取15分钟K线数据
@@ -34,8 +34,8 @@ public interface IDataSource {
 	 * @return
 	 */
 	@Retryable
-	@Cacheable(cacheNames = "bars", key = "'Quarterly_' + #contract.unifiedSymbol() + '_' + #startDate + '_' + #endDate")
-	List<Bar> getQuarterlyData(Contract contract, LocalDate startDate, LocalDate endDate);
+	@Cacheable(cacheNames = "bars", key = "'Quarterly_' + #unifiedSymbol + '_' + #startDate + '_' + #endDate")
+	List<Bar> getQuarterlyData(String unifiedSymbol, LocalDate startDate, LocalDate endDate);
 	
 	/**
 	 * 获取1小时K线数据
@@ -45,8 +45,8 @@ public interface IDataSource {
 	 * @return
 	 */
 	@Retryable
-	@Cacheable(cacheNames = "bars", key = "'Hourly_' + #contract.unifiedSymbol() + '_' + #startDate + '_' + #endDate")
-	List<Bar> getHourlyData(Contract contract, LocalDate startDate, LocalDate endDate);
+	@Cacheable(cacheNames = "bars", key = "'Hourly_' + #unifiedSymbol + '_' + #startDate + '_' + #endDate")
+	List<Bar> getHourlyData(String unifiedSymbol, LocalDate startDate, LocalDate endDate);
 	
 	/**
 	 * 获取日K线数据
@@ -56,8 +56,8 @@ public interface IDataSource {
 	 * @return
 	 */
 	@Retryable
-	@Cacheable(cacheNames = "bars", key = "'Daily_' + #contract.unifiedSymbol() + '_' + #startDate + '_' + #endDate")
-	List<Bar> getDailyData(Contract contract, LocalDate startDate, LocalDate endDate);
+	@Cacheable(cacheNames = "bars", key = "'Daily_' + #unifiedSymbol + '_' + #startDate + '_' + #endDate")
+	List<Bar> getDailyData(String unifiedSymbol, LocalDate startDate, LocalDate endDate);
 	
 	/**
 	 * 获取查询范围内的节假日（包括周末）
