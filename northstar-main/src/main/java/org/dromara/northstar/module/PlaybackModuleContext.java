@@ -1,6 +1,8 @@
 package org.dromara.northstar.module;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -74,10 +76,20 @@ public class PlaybackModuleContext extends ModuleContext implements IModuleConte
 		}
 		
 		SubmitOrderReq orderReq = orderReqMap.get(originOrderId);
-		Tick lastTick = mktCenter.lastTick(orderReq.contract()).get();
+		Tick lastTick = tickMap.get(orderReq.contract());
 		return lastTick.actionTimestamp() - orderReq.actionTimestamp() > timeout;
 	}
 	
+	private Map<Contract, Tick> tickMap = new HashMap<>();
+	
+	@Override
+	public void onTick(Tick tick) {
+		synchronized (tickMap) {
+			tickMap.put(tick.contract(), tick);
+		}
+		super.onTick(tick);
+	}
+
 	// 所有的委托都会立马转为成交单
 	@Override
 	public synchronized Optional<String> submitOrderReq(Contract contract, SignalOperation operation, PriceType priceType, 
@@ -88,7 +100,7 @@ public class PlaybackModuleContext extends ModuleContext implements IModuleConte
 		}
 		logger.debug("回测上下文收到下单请求");
 		Assert.isTrue(volume > 0, "下单手数应该为正数。当前为" + volume);
-		Tick lastTick = mktCenter.lastTick(contract).orElseThrow(() -> new IllegalStateException("没有行情时不应该发送订单"));
+		Tick lastTick = Optional.ofNullable(tickMap.get(contract)).orElseThrow(() -> new IllegalStateException("没有行情时不应该发送订单"));
 		
 		double orderPrice = priceType.resolvePrice(lastTick, operation, price);
 		if(logger.isInfoEnabled()) {
