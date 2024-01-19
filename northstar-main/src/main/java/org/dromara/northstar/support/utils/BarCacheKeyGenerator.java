@@ -1,4 +1,4 @@
-package org.dromara.northstar.common.utils;
+package org.dromara.northstar.support.utils;
 
 import java.lang.reflect.Method;
 import java.time.LocalDate;
