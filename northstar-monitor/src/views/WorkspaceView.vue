@@ -30,6 +30,18 @@
           circle
         ></el-button>
         </el-popover>
+        <el-popover
+          class="mr-10"
+          placement="left"
+          trigger="click">
+          <img src="@/assets/知识星球.jpg" width="400px" />
+          <el-button
+            slot="reference"
+            icon="el-icon-s-help"
+            title="知识星球提问"
+            circle
+          ></el-button>
+        </el-popover>
         <el-button
           @click="mailSettingFormVisible = true"
           icon="el-icon-share"
