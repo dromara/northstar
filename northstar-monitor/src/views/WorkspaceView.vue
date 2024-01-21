@@ -18,6 +18,30 @@
         <el-menu-item id="tabLog" index="9" @click="systemLogger">日志跟踪</el-menu-item>
       </el-menu>
       <div class="ns-tools">
+        <el-popover
+          class="mr-10"
+          placement="left"
+          trigger="click">
+          <img src="@/assets/wx.jpg" width="400px" />
+          <el-button
+          slot="reference"
+          icon="el-icon-s-flag"
+          title="加入社群"
+          circle
+        ></el-button>
+        </el-popover>
+        <el-popover
+          class="mr-10"
+          placement="left"
+          trigger="click">
+          <img src="@/assets/知识星球.jpg" width="400px" />
+          <el-button
+            slot="reference"
+            icon="el-icon-s-help"
+            title="知识星球提问"
+            circle
+          ></el-button>
+        </el-popover>
         <el-button
           @click="mailSettingFormVisible = true"
           icon="el-icon-share"
