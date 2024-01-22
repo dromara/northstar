@@ -52,7 +52,7 @@ public class SimGatewayFactory implements GatewayFactory{
 		} else {
 			account = new SimGatewayAccount(simAccountDescription, mktCenter);
 		}
-		return new SimTradeGatewayLocal(fastEventEngine, gatewayDescription, account, simAccountRepo);
+		return new SimTradeGatewayLocal(fastEventEngine, gatewayDescription, account, simAccountRepo, mktCenter);
 	}
 
 }
