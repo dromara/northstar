@@ -16,6 +16,7 @@ import org.dromara.northstar.common.model.core.SubmitOrderReq;
 import org.dromara.northstar.common.model.core.Tick;
 import org.dromara.northstar.common.model.core.Trade;
 import org.dromara.northstar.data.ISimAccountRepository;
+import org.dromara.northstar.gateway.IMarketCenter;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -57,10 +58,14 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 	
 	private OrderReqManager orderReqMgr =  new OrderReqManager();
 	
-	public SimTradeGatewayLocal(FastEventEngine feEngine, GatewayDescription gd, SimGatewayAccount account, ISimAccountRepository simAccountRepo) {
+	private IMarketCenter mktCenter;
+	
+	public SimTradeGatewayLocal(FastEventEngine feEngine, GatewayDescription gd, SimGatewayAccount account, ISimAccountRepository simAccountRepo,
+			IMarketCenter mktCenter) {
 		this.feEngine = feEngine;
 		this.account = account;
 		this.gd = gd;
+		this.mktCenter = mktCenter;
 		this.simAccountRepo = simAccountRepo;
 		account.setOrderReqMgr(orderReqMgr);
 	}
@@ -151,6 +156,7 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 
 	@Override
 	public void onTick(Tick tick) {
+		mktCenter.onTick(tick);
 		orderReqMgr.onTick(tick);
 		account.getPositionManager().onTick(tick);
 	}

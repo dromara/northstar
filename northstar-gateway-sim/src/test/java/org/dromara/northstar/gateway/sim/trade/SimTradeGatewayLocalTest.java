@@ -15,6 +15,7 @@ import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.common.model.core.ContractDefinition;
 import org.dromara.northstar.common.model.core.SubmitOrderReq;
 import org.dromara.northstar.data.ISimAccountRepository;
+import org.dromara.northstar.gateway.IMarketCenter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -45,7 +46,7 @@ class SimTradeGatewayLocalTest {
 		PositionManager posMgr = mock(PositionManager.class);
 		when(simAccount.getPositionManager()).thenReturn(posMgr);
 		when(posMgr.positionFields()).thenReturn(List.of());
-		gateway = new SimTradeGatewayLocal(feEngine, gd, simAccount, mock(ISimAccountRepository.class));
+		gateway = new SimTradeGatewayLocal(feEngine, gd, simAccount, mock(ISimAccountRepository.class), mock(IMarketCenter.class));
 	}
 
 	@Test
