@@ -156,7 +156,9 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 
 	@Override
 	public void onTick(Tick tick) {
-		mktCenter.onTick(tick);
+		if(tick.contract().tradable()) {			
+			mktCenter.onTick(tick);
+		}
 		orderReqMgr.onTick(tick);
 		account.getPositionManager().onTick(tick);
 	}
