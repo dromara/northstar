@@ -30,6 +30,7 @@ const marketCurrentDataModule = {
       console.log('当前curMarketGatewayId', gatewayId)
     },
     updateFocusUnifiedSymbol(state, unifiedsymbol) {
+      state.curTick = marketCurrentDataModule.state().curTick
       state.lastBar = null
       state.curBar = null
       state.curUnifiedSymbol = unifiedsymbol
