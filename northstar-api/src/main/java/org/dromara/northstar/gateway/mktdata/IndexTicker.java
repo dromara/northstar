@@ -155,19 +155,19 @@ public class IndexTicker {
 
 	private double[] vectorize(Tick t) {
 	    return new double[] {
-	        t.openInterest(),
-	        t.openPrice(),
-	        t.highPrice(),
+	        t.openInterest(),			// 0
+	        t.openPrice(),				
+	        t.highPrice(),				// 2
 	        t.lowPrice(),
-	        t.lastPrice(),
+	        t.lastPrice(),				// 4
 	        t.settlePrice(),
-	        t.preClosePrice(),
-	        t.preSettlePrice(),
-	        t.volume(),
+	        t.preClosePrice(),			// 6
+	        t.preSettlePrice(),			
+	        t.volume(),					// 8
 	        t.volumeDelta(),
-	        t.turnover(),
+	        t.turnover(),				// 10
 	        t.turnoverDelta(),
-	        t.openInterestDelta(),
+	        t.openInterestDelta(),		// 12
 	        t.preOpenInterest()
 	    };
 	}
