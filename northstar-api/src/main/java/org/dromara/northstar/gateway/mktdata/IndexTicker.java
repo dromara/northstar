@@ -1,13 +1,14 @@
 package org.dromara.northstar.gateway.mktdata;
 
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
-import java.util.function.ToDoubleFunction;
 import java.util.stream.Collectors;
+import java.util.stream.DoubleStream;
 
+import org.apache.commons.math3.linear.Array2DRowRealMatrix;
+import org.apache.commons.math3.linear.RealMatrix;
 import org.dromara.northstar.common.constant.Constants;
 import org.dromara.northstar.common.constant.TickType;
 import org.dromara.northstar.common.model.core.Contract;
@@ -23,12 +24,9 @@ public class IndexTicker {
 	
 	private Consumer<Tick> onTickCallback;
 	
-	private static final long PARA_THRESHOLD = 2;
-	
 	private final Set<Contract> memberContracts;
 	
 	private ConcurrentHashMap<Contract, Tick> tickMap = new ConcurrentHashMap<>(20);
-	private ConcurrentHashMap<Contract, Double> weightedMap = new ConcurrentHashMap<>(20);
 	
 	private long lastTickTimestamp = -1;
 	
@@ -109,66 +107,79 @@ public class IndexTicker {
 	}
 	
 	private void calculate() {
+		List<Tick> ticks = tickMap.values().stream().toList();
+		RealMatrix priceMat = matrixOf(ticks);
+		RealMatrix oiWeight = oiWeighted(priceMat);
+		RealMatrix bcResult = new Array2DRowRealMatrix(priceMat.getRowDimension(), priceMat.getColumnDimension());
+		for(int i=0; i<priceMat.getRowDimension(); i++) {
+			double scalar = oiWeight.getEntry(i, 0);
+			bcResult.setRow(i, priceMat.getRowMatrix(i).scalarMultiply(scalar).getRow(0));
+		}
+		
+		preOpenInterest = DoubleStream.of(priceMat.getColumn(13)).sum();
+		
 		// 合计持仓量
-		totalOpenInterest = tickMap.reduceValuesToDouble(PARA_THRESHOLD, Tick::openInterest, 0, (a, b) -> a + b);
-		totalOpenInterestDelta = tickMap.reduceValuesToDouble(PARA_THRESHOLD, Tick::openInterestDelta, 0, (a, b) -> a + b);
-		// 合约权值计算
-		tickMap.forEachEntry(PARA_THRESHOLD, e -> weightedMap.compute(e.getKey(), (k,v) -> e.getValue().openInterest() * 1.0 / totalOpenInterest));
+		totalOpenInterest = DoubleStream.of(priceMat.getColumn(0)).sum();
+		totalOpenInterestDelta = DoubleStream.of(priceMat.getColumn(12)).sum();
 		
 		// 合计成交量
-		totalVolume = tickMap.reduceValuesToLong(PARA_THRESHOLD, Tick::volume, 0, (a, b) -> a + b);
-		totalVolumeDelta = tickMap.reduceValuesToLong(PARA_THRESHOLD, Tick::volumeDelta, 0, (a, b) -> a + b);
+		totalVolume = (long) DoubleStream.of(priceMat.getColumn(8)).sum();
+		totalVolumeDelta = (long) DoubleStream.of(priceMat.getColumn(9)).sum();
 		// 合计成交额
-		totalTurnover = tickMap.reduceValuesToDouble(PARA_THRESHOLD, Tick::turnover, 0, (a, b) -> a + b);
-		totalTurnoverDelta = tickMap.reduceValuesToDouble(PARA_THRESHOLD, Tick::turnoverDelta, 0, (a, b) -> a + b);
+		totalTurnover = (long) DoubleStream.of(priceMat.getColumn(10)).sum();
+		totalTurnoverDelta = (long) DoubleStream.of(priceMat.getColumn(11)).sum();
 		
-		//加权均价
-		double rawWeightedLastPrice = computeWeightedValue(e -> tickMap.get(e.getKey()).lastPrice() * e.getValue());
-		double weightedLastPrice = roundWithPriceTick(rawWeightedLastPrice);	//通过最小变动价位校准的加权均价
-		lastPrice = weightedLastPrice;
+		openPrice = roundWithPriceTick(DoubleStream.of(bcResult.getColumn(1)).sum());
+		highPrice = roundWithPriceTick(DoubleStream.of(bcResult.getColumn(2)).sum());
+		lowPrice = roundWithPriceTick(DoubleStream.of(bcResult.getColumn(3)).sum());
+		lastPrice = roundWithPriceTick(DoubleStream.of(bcResult.getColumn(4)).sum());
+		settlePrice = roundWithPriceTick(DoubleStream.of(bcResult.getColumn(5)).sum());
+		preClose = roundWithPriceTick(DoubleStream.of(bcResult.getColumn(6)).sum());
+		preSettlePrice = roundWithPriceTick(DoubleStream.of(bcResult.getColumn(7)).sum());
 		
-		//加权最高价
-		double rawWeightedHighPrice = computeWeightedValue(e -> tickMap.get(e.getKey()).highPrice() * e.getValue());
-		double weightedHighPrice = roundWithPriceTick(rawWeightedHighPrice);	//通过最小变动价位校准的加权均价
-		highPrice = weightedHighPrice;
-		
-		//加权最低价
-		double rawWeightedLowPrice = computeWeightedValue(e -> tickMap.get(e.getKey()).lowPrice() * e.getValue());
-		double weightedLowPrice = roundWithPriceTick(rawWeightedLowPrice);		//通过最小变动价位校准的加权均价
-		lowPrice = weightedLowPrice;
-		
-		//加权开盘价
-		double rawWeightedOpenPrice = computeWeightedValue(e -> tickMap.get(e.getKey()).openPrice() * e.getValue());
-		double weightedOpenPrice = roundWithPriceTick(rawWeightedOpenPrice);	//通过最小变动价位校准的加权均价
-		openPrice = weightedOpenPrice;
-		
-		//加权前收盘价
-		double rawWeightedPreClose = computeWeightedValue(e -> tickMap.get(e.getKey()).preClosePrice() * e.getValue());
-		double weightedPreClose = roundWithPriceTick(rawWeightedPreClose);
-		preClose = weightedPreClose;
-		
-		//加权前持仓量
-		double rawWeightedPreOpenInterest = computeWeightedValue(e -> tickMap.get(e.getKey()).preOpenInterest() * e.getValue());
-		double weightedPreOpenInterest = roundWithPriceTick(rawWeightedPreOpenInterest);
-		preOpenInterest = weightedPreOpenInterest;
-		
-		//加权前结算价
-		double rawWeightedPreSettle = computeWeightedValue(e -> tickMap.get(e.getKey()).preSettlePrice() * e.getValue());
-		double weightedPreSettle = roundWithPriceTick(rawWeightedPreSettle);
-		preSettlePrice = weightedPreSettle;
-		
-		//加权结算价
-		double rawWeightedSettle = computeWeightedValue(e -> tickMap.get(e.getKey()).settlePrice() * e.getValue());
-		double weightedSettle = roundWithPriceTick(rawWeightedSettle);
-		settlePrice = weightedSettle;
 	}
 	
-	private double computeWeightedValue(ToDoubleFunction<Entry<Contract, Double>> transformer) {
-		return weightedMap.reduceEntriesToDouble(
-				PARA_THRESHOLD,
-				transformer,
-				0, 
-				(a, b) -> a + b);
+	private RealMatrix matrixOf(List<Tick> ticks) {
+	    int numFeatures = 14; // Open Interest, Open, High, Low, Last, Settle, Pre-Close, Pre-Settle prices
+	    int numTicks = ticks.size();
+
+	    // 创建一个空的矩阵
+	    RealMatrix tickMatrix = new Array2DRowRealMatrix(numTicks, numFeatures);
+
+	    // 填充矩阵
+	    for (int i = 0; i < numTicks; i++) {
+	        tickMatrix.setRow(i, vectorize(ticks.get(i)));
+	    }
+	    return tickMatrix;
+	}
+
+	private double[] vectorize(Tick t) {
+	    return new double[] {
+	        t.openInterest(),
+	        t.openPrice(),
+	        t.highPrice(),
+	        t.lowPrice(),
+	        t.lastPrice(),
+	        t.settlePrice(),
+	        t.preClosePrice(),
+	        t.preSettlePrice(),
+	        t.volume(),
+	        t.volumeDelta(),
+	        t.turnover(),
+	        t.turnoverDelta(),
+	        t.openInterestDelta(),
+	        t.preOpenInterest()
+	    };
+	}
+
+	private RealMatrix oiWeighted(RealMatrix matrix) {
+	    RealMatrix oi = matrix.getColumnMatrix(0); // 获取第一列
+	    
+	    double sumOI = DoubleStream.of(oi.getColumn(0)).sum();
+	    for (int i = 0; i < oi.getRowDimension(); i++) {
+	        oi.setEntry(i, 0, oi.getEntry(i, 0) / sumOI);
+	    }
+	    return oi;
 	}
 
 	//四舍五入处理
@@ -178,6 +189,7 @@ public class IndexTicker {
 		int numOfTicks = enlargePrice / enlargePriceTick;
 		int tickCarry = (enlargePrice % enlargePriceTick) < (enlargePriceTick / 2) ? 0 : 1;
 		  
-		return  enlargePriceTick * (numOfTicks + tickCarry) * 1.0 / 1000;
+		return  idxContract.contract().priceTick() * (numOfTicks + tickCarry);
 	}
+	
 }
