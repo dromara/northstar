@@ -166,6 +166,7 @@ public class ModuleContext implements IModuleContext{
 
 	@Override
 	public Contract getContract(String unifiedSymbol) {
+		Assert.notBlank(unifiedSymbol, "合约编码不能为空");
 		if(!contractMap.containsKey(unifiedSymbol)) {
 			throw new NoSuchElementException("模组没有绑定合约：" + unifiedSymbol);
 		}

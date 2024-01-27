@@ -246,6 +246,11 @@ export default {
       const contract = {value: pos.contract.contractid, unifiedSymbol: pos.contract.unifiedsymbol, name: pos.contract.name, precision: pos.contract.priceprecision}
       this.symbolList = [contract]
       this.contract = contract
+      contractApi.getSubscribedContracts(this.chosenAccount.gatewayId, pos.contract.unifiedsymbol).then(result => {
+          if(!result.length){
+            this.$message.warning(`注意，合约 [${pos.contract.name}] 未被订阅，将获取不到行情数据`)
+          }
+        })
       this.currentPosition = pos
       this.handleContractChange()
     },

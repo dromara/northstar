@@ -112,6 +112,7 @@ public class DisruptorFastEventEngine implements FastEventEngine, DisposableBean
 	@Override
 	public void destroy() throws Exception {
 		disruptor.halt();
+		disruptor.shutdown();
 	}
 
 	@Override
