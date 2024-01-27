@@ -3,6 +3,7 @@ package org.dromara.northstar.event;
 import java.util.EnumSet;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.dromara.northstar.common.event.AbstractEventHandler;
 import org.dromara.northstar.common.event.GenericEventHandler;
@@ -38,6 +39,8 @@ public class BroadcastHandler extends AbstractEventHandler implements GenericEve
 	private SocketIOServer socketServer;
 	
 	private ExecutorService exec;
+	
+	private AtomicBoolean shutdown = new AtomicBoolean();
 	
 	private static final Set<NorthstarEventType> TARGET_TYPE = EnumSet.of(
 			NorthstarEventType.TICK, 
@@ -117,6 +120,9 @@ public class BroadcastHandler extends AbstractEventHandler implements GenericEve
 
 	@Override
 	protected void doHandle(NorthstarEvent e) {
+		if(shutdown.get()) {
+			return;
+		}
 		exec.execute(() -> {
 			try {
 				BroadcastHandler.this.emitEvent(e);
@@ -133,6 +139,7 @@ public class BroadcastHandler extends AbstractEventHandler implements GenericEve
 	
 	@Override
 	public void destroy() throws Exception {
+		shutdown.set(true);
 		exec.close();
 	}
 }
