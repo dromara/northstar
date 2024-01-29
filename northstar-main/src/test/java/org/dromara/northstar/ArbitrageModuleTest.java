@@ -36,7 +36,7 @@ import org.dromara.northstar.gateway.IMarketCenter;
 import org.dromara.northstar.gateway.sim.trade.SimTradeGateway;
 import org.dromara.northstar.module.ModuleManager;
 import org.dromara.northstar.strategy.IModule;
-import org.dromara.northstar.strategy.example.BeginnerExampleStrategy;
+import org.dromara.northstar.strategy.example.SimpleSpreadStrategy;
 import org.dromara.northstar.web.restful.GatewayManagementController;
 import org.dromara.northstar.web.restful.LogController;
 import org.dromara.northstar.web.restful.ModuleController;
@@ -52,15 +52,13 @@ import com.corundumstudio.socketio.BroadcastOperations;
 import com.corundumstudio.socketio.SocketIOServer;
 
 import io.netty.util.internal.ThreadLocalRandom;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * 模组集成测试
  * @auth KevinHuangwl
  */
-@Slf4j
 @SpringBootTest(classes = NorthstarApplication.class, value="spring.profiles.active=unittest")
-class CtaModuleTest {
+class ArbitrageModuleTest {
 	
 	@Autowired
 	GatewayManagementController gatewayCtlr;
@@ -85,11 +83,19 @@ class CtaModuleTest {
 	@Autowired
 	ModuleManager moduleMgr;
 	
-	List<ContractSimpleInfo> contracts = List.of(ContractSimpleInfo.builder()
+	ContractSimpleInfo cs1 = ContractSimpleInfo.builder()
 			.unifiedSymbol("sim9901@SHFE@FUTURES")
 			.value("sim9901@SHFE@FUTURES@SIM")
 			.channelType(ChannelType.SIM)
-			.build());
+			.build();
+	
+	ContractSimpleInfo cs2 = ContractSimpleInfo.builder()
+			.unifiedSymbol("sim9902@SHFE@FUTURES")
+			.value("sim9902@SHFE@FUTURES@SIM")
+			.channelType(ChannelType.SIM)
+			.build();
+	
+	List<ContractSimpleInfo> contracts = List.of(cs1, cs2);
 	
 	@BeforeEach
 	void prepare() throws Exception {
@@ -124,21 +130,23 @@ class CtaModuleTest {
 	
 	@AfterEach
 	void cleanup() {
-		moduleCtlr.removeModule("CTA测试");
+		moduleCtlr.removeModule("价差测试");
 		moduleCtlr.removeModule("K线测试");
 		gatewayCtlr.disconnect("模拟账户");
 		gatewayCtlr.remove("模拟账户");
 		gatewayCtlr.remove("SIM");
 	}
 	
-	// SIM行情 + 简单策略（模拟盘）
+	// SIM行情 + 简单策略（回测盘）
 	@Test
-	void testCTAModule() throws Exception {
+	void testPlaybackModule() throws Exception {
 		// 创建一个简单策略
 		ComponentMetaInfo cmi = new ComponentMetaInfo();
-		cmi.setName("示例-简单策略");
-		cmi.setClassName(BeginnerExampleStrategy.class.getName());
-		BeginnerExampleStrategy.InitParams params = new BeginnerExampleStrategy.InitParams();
+		cmi.setName("示例-简单价差策略");
+		cmi.setClassName(SimpleSpreadStrategy.class.getName());
+		SimpleSpreadStrategy.InitParams params = new SimpleSpreadStrategy.InitParams();
+		params.setUnifiedSymbol1("sim9901@SHFE@FUTURES");
+		params.setUnifiedSymbol2("sim9902@SHFE@FUTURES");
 		ComponentAndParamsPair strategySettings = ComponentAndParamsPair.builder()
 				.componentMeta(cmi)
 				.initParams(params.getMetaInfo().values().stream().toList())
@@ -148,28 +156,27 @@ class CtaModuleTest {
 				.accountGatewayId("模拟账户")
 				.build();
 		moduleCtlr.createModule(ModuleDescription.builder()
-				.moduleName("CTA测试")
+				.moduleName("价差测试")
 				.initBalance(100000)
 				.closingPolicy(ClosingPolicy.FIRST_IN_FIRST_OUT)
 				.defaultVolume(1)
 				.moduleCacheDataSize(500)
 				.numOfMinPerBar(1)
-				.type(ModuleType.SPECULATION)
+				.type(ModuleType.ARBITRAGE)
 				.usage(ModuleUsage.UAT)
 				.moduleAccountSettingsDescription(List.of(mad))
 				.strategySetting(strategySettings)
 				.build());
-		moduleCtlr.toggleModuleState("CTA测试");
-		logCtlr.setModuleLogLevel("CTA测试", LogLevel.TRACE);
+		moduleCtlr.toggleModuleState("价差测试");
+		logCtlr.setModuleLogLevel("价差测试", LogLevel.TRACE);
 		// 开始测试
-		log.info("开始测试");
 		SimTradeGateway simGateway = (SimTradeGateway) gatewayMgr.get(Identifier.of("模拟账户"));
-		IModule module = moduleMgr.get(Identifier.of("CTA测试"));
-		Contract c = contractMgr.getContract(ChannelType.SIM, "sim9901").contract();
+		IModule module = moduleMgr.get(Identifier.of("价差测试"));
+		Contract c1 = contractMgr.getContract(ChannelType.SIM, "sim9901").contract();
+		Contract c2 = contractMgr.getContract(ChannelType.SIM, "sim9901").contract();
 		long t = System.currentTimeMillis();
 		for(int i=0; i<4; i++) {
-			log.info("构造模拟TICK");
-			Tick tick = Tick.builder()
+			Tick tick1 = Tick.builder()
 					.actionDay(CommonUtils.millsToLocalDateTime(t).toLocalDate())
 					.actionTime(CommonUtils.millsToLocalDateTime(t).toLocalTime())
 					.tradingDay(LocalDate.now())
@@ -180,19 +187,34 @@ class CtaModuleTest {
 					.askVolume(List.of(10000))
 					.bidVolume(List.of(10000))
 					.channelType(ChannelType.SIM)
-					.contract(c)
+					.contract(c1)
 					.gatewayId("SIM")
 					.build();
-			mktCenter.onTick(tick);
-			module.getModuleContext().onTick(tick);
-			simGateway.onTick(tick);
+			Tick tick2 = Tick.builder()
+					.actionDay(CommonUtils.millsToLocalDateTime(t).toLocalDate())
+					.actionTime(CommonUtils.millsToLocalDateTime(t).toLocalTime())
+					.tradingDay(LocalDate.now())
+					.actionTimestamp(t)
+					.lastPrice(5000)
+					.askPrice(List.of(5001D))
+					.bidPrice(List.of(4999D))
+					.askVolume(List.of(10000))
+					.bidVolume(List.of(10000))
+					.channelType(ChannelType.SIM)
+					.contract(c2)
+					.gatewayId("SIM")
+					.build();
+			mktCenter.onTick(tick1);
+			mktCenter.onTick(tick2);
+			module.getModuleContext().onTick(tick1);
+			module.getModuleContext().onTick(tick2);
+			simGateway.onTick(tick1);
+			simGateway.onTick(tick2);
 			t += TimeUnit.MINUTES.toMillis(2);
 			Thread.sleep(1500);
 		}
-		log.info("等待成交");
-		
 		// 期望有正常成交
-		ResultBean<List<ModuleDealRecord>> dealRecordResult = moduleCtlr.getDealRecords("CTA测试");
+		ResultBean<List<ModuleDealRecord>> dealRecordResult = moduleCtlr.getDealRecords("价差测试");
 		assertThat(dealRecordResult.getData()).isNotEmpty();
 	}
 	
@@ -200,9 +222,11 @@ class CtaModuleTest {
 	void testGetRuntime() throws Exception {
 		// 创建一个简单策略
 		ComponentMetaInfo cmi = new ComponentMetaInfo();
-		cmi.setName("示例-简单策略");
-		cmi.setClassName(BeginnerExampleStrategy.class.getName());
-		BeginnerExampleStrategy.InitParams params = new BeginnerExampleStrategy.InitParams();
+		cmi.setName("示例-简单价差策略");
+		cmi.setClassName(SimpleSpreadStrategy.class.getName());
+		SimpleSpreadStrategy.InitParams params = new SimpleSpreadStrategy.InitParams();
+		params.setUnifiedSymbol1("sim9901@SHFE@FUTURES");
+		params.setUnifiedSymbol2("sim9902@SHFE@FUTURES");
 		ComponentAndParamsPair strategySettings = ComponentAndParamsPair.builder()
 				.componentMeta(cmi)
 				.initParams(params.getMetaInfo().values().stream().toList())
@@ -218,15 +242,16 @@ class CtaModuleTest {
 				.defaultVolume(1)
 				.moduleCacheDataSize(500)
 				.numOfMinPerBar(1)
-				.type(ModuleType.SPECULATION)
-				.usage(ModuleUsage.PLAYBACK)
+				.type(ModuleType.ARBITRAGE)
+				.usage(ModuleUsage.UAT)
 				.moduleAccountSettingsDescription(List.of(mad))
 				.strategySetting(strategySettings)
 				.build());
 		logCtlr.setModuleLogLevel("K线测试", LogLevel.TRACE);
 		// 开始测试
 		IModule module = moduleMgr.get(Identifier.of("K线测试"));
-		Contract c = contractMgr.getContract(ChannelType.SIM, "sim9901").contract();
+		Contract c1 = contractMgr.getContract(ChannelType.SIM, "sim9901").contract();
+		Contract c2 = contractMgr.getContract(ChannelType.SIM, "sim9902").contract();
 		LocalTime time = LocalTime.now().withSecond(0).withNano(0);
 		double price = ThreadLocalRandom.current().nextDouble(5000);
 		for(int i=0; i<100; i++) {
@@ -235,7 +260,7 @@ class CtaModuleTest {
 			double close = open + delta;
 			double high = open + ThreadLocalRandom.current().nextDouble(0, 50);
 			double low = open - ThreadLocalRandom.current().nextDouble(0, 50);
-			Bar bar = Bar.builder()
+			Bar bar1 = Bar.builder()
 					.actionDay(LocalDate.now())
 					.actionTime(time)
 					.tradingDay(LocalDate.now())
@@ -245,10 +270,24 @@ class CtaModuleTest {
 					.highPrice(high)
 					.lowPrice(low)
 					.channelType(ChannelType.SIM)
-					.contract(c)
+					.contract(c1)
 					.gatewayId("SIM")
 					.build();
-			module.getModuleContext().onBar(bar);
+			Bar bar2 = Bar.builder()
+					.actionDay(LocalDate.now())
+					.actionTime(time)
+					.tradingDay(LocalDate.now())
+					.actionTimestamp(CommonUtils.localDateTimeToMills(LocalDateTime.of(LocalDate.now(), time)))
+					.openPrice(open)
+					.closePrice(close)
+					.highPrice(high)
+					.lowPrice(low)
+					.channelType(ChannelType.SIM)
+					.contract(c2)
+					.gatewayId("SIM")
+					.build();
+			module.getModuleContext().onBar(bar1);
+			module.getModuleContext().onBar(bar2);
 			time = time.plusMinutes(1);
 		}
 		
@@ -257,5 +296,6 @@ class CtaModuleTest {
 		// 期望有K线数据
 		ResultBean<ModuleRuntimeDescription> result = moduleCtlr.getModuleRealTimeInfo("K线测试");
 		assertThat(result.getData().getDataMap().get("模拟合约9901")).isNotEmpty();
+		assertThat(result.getData().getDataMap().get("模拟合约9902")).isNotEmpty();
 	}
 }
