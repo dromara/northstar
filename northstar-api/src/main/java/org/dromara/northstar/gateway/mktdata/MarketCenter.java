@@ -14,6 +14,7 @@ import java.util.concurrent.ConcurrentMap;
 import org.apache.commons.lang3.StringUtils;
 import org.dromara.northstar.common.TickDataAware;
 import org.dromara.northstar.common.constant.ChannelType;
+import org.dromara.northstar.common.constant.Constants;
 import org.dromara.northstar.common.event.FastEventEngine;
 import org.dromara.northstar.common.exception.NoSuchElementException;
 import org.dromara.northstar.common.model.Identifier;
@@ -241,7 +242,12 @@ public class MarketCenter implements IMarketCenter{
 	 */
 	@Override
 	public void onTick(Tick tick) {
-		tickMap.put(tick.contract(), tick);
+		// 确保tickMap中仅保留最新数据，可以避免同时接收历史行情与实时行情时的数据混乱
+		tickMap.compute(tick.contract(), (k,v) -> Objects.isNull(v) || v.actionTimestamp() < tick.actionTimestamp() ? tick : v);
+		
+		if(tick.contract().unifiedSymbol().contains(Constants.INDEX_SUFFIX)) {
+			return; // 直接忽略指数TICK的后续处理
+		}
 		
 		// 更新普通合约
 		IContract contract = getContract(tick.channelType(), tick.contract().unifiedSymbol());

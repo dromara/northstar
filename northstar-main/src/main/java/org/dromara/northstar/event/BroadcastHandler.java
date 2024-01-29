@@ -74,17 +74,17 @@ public class BroadcastHandler extends AbstractEventHandler implements GenericEve
 		} else if(event.getData() instanceof Account acc) {
 			AccountField account = acc.toAccountField();
 			log.trace("账户信息分发: [{} {} {}]", account.getAccountId(), account.getGatewayId(), account.getBalance());
-			socketServer.getBroadcastOperations().sendEvent(event.getEvent().toString(), Base64.encode(account.toByteArray()));
+			socketServer.getBroadcastOperations().sendEvent(NorthstarEventType.ACCOUNT.toString(), Base64.encode(account.toByteArray()));
 		} else if(event.getData() instanceof Position pos) {
 			PositionField position = pos.toPositionField();
 			log.trace("持仓信息分发: [{} {} {}]", position.getAccountId(), position.getGatewayId(), position.getPositionId());
-			socketServer.getBroadcastOperations().sendEvent(event.getEvent().toString(), Base64.encode(position.toByteArray()));
+			socketServer.getBroadcastOperations().sendEvent(NorthstarEventType.POSITION.toString(), Base64.encode(position.toByteArray()));
 		} else if(event.getData() instanceof Order od) {
-			socketServer.getBroadcastOperations().sendEvent(event.getEvent().toString(), Base64.encode(od.toOrderField().toByteArray()));
+			socketServer.getBroadcastOperations().sendEvent(NorthstarEventType.ORDER.toString(), Base64.encode(od.toOrderField().toByteArray()));
 		} else if(event.getData() instanceof Trade tr) {
-			socketServer.getBroadcastOperations().sendEvent(event.getEvent().toString(), Base64.encode(tr.toTradeField().toByteArray()));
+			socketServer.getBroadcastOperations().sendEvent(NorthstarEventType.TRADE.toString(), Base64.encode(tr.toTradeField().toByteArray()));
 		} else if(event.getData() instanceof Notice note) {
-			socketServer.getBroadcastOperations().sendEvent(event.getEvent().toString(), Base64.encode(note.toNoticeField().toByteArray()));
+			socketServer.getBroadcastOperations().sendEvent(NorthstarEventType.NOTICE.toString(), Base64.encode(note.toNoticeField().toByteArray()));
 		} 
 	}
 	
