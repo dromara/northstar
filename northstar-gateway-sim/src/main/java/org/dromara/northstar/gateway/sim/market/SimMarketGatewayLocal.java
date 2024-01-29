@@ -77,6 +77,7 @@ public class SimMarketGatewayLocal implements MarketGateway{
 				try {				
 					for(Entry<String, SimTickGenerator> e: tickGenMap.entrySet()) {
 						Tick tick = e.getValue().generateNextTick(LocalDateTime.now(), SimMarketGatewayLocal.this);
+						mktCenter.onTick(tick);
 						feEngine.emitEvent(NorthstarEventType.TICK, tick);
 						GatewayContract contract = (GatewayContract) mktCenter.getContract(ChannelType.SIM, tick.contract().unifiedSymbol());
 						contract.onTick(tick);
