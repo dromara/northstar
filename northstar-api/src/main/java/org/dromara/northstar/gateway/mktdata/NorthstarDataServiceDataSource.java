@@ -153,7 +153,7 @@ public class NorthstarDataServiceDataSource implements IDataSource{
 				.map(dateStr -> LocalDate.parse(dateStr, DateTimeConstant.D_FORMAT_INT_FORMATTER))
 				.toList();
 	}
-
+	
 	@Override
 	public List<Contract> getAllContracts(ExchangeEnum exchange) {
 		ResponseEntity<DataSet> result = execute(URI.create(String.format("%s/contracts/?exchange=%s", baseUrl, exchange)), DataSet.class);
@@ -173,7 +173,7 @@ public class NorthstarDataServiceDataSource implements IDataSource{
 			String name = getValue("name", fieldIndexMap, item, "");
 			String unitDesc = getValue("quote_unit_desc", fieldIndexMap, item, "1");
 			double marginRate = ProductClassEnum.EQUITY == productClass ? 1 : 0.1;
-			double priceTick = ProductClassEnum.EQUITY == productClass ? 0.01 : Double.parseDouble(unitDesc.replaceAll("[^\\d\\.]+", ""));
+			double priceTick = ProductClassEnum.EQUITY == productClass ? 0.01 : Double.parseDouble(unitDesc.replaceAll("(\\d+(\\.\\d+)?).+", "$1"));
 			try {		
 				LocalDate lastTradeDate = LocalDate.MAX;
 				String date = getValue("delist_date", fieldIndexMap, item, "");
