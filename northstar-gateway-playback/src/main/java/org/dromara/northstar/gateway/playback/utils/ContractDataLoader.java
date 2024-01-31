@@ -118,7 +118,7 @@ public class ContractDataLoader {
 								.actionDay(bar.actionDay())
 								.actionTime(ldt.toLocalTime())
 								.actionTimestamp(tickEntry.timestamp())
-								.type(TickType.MARKET_TICK)
+								.type(TickType.PLAYBACK_TICK)
 								.lastPrice(tickEntry.price())
 								.askPrice(List.of(tickEntry.askPrice0())) // 仅模拟卖一价
 								.bidPrice(List.of(tickEntry.bidPrice0())) // 仅模拟买一价

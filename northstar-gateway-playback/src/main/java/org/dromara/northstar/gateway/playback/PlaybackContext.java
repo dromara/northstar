@@ -23,6 +23,7 @@ import org.dromara.northstar.common.model.core.Tick;
 import org.dromara.northstar.common.utils.DateTimeUtils;
 import org.dromara.northstar.data.IPlaybackRuntimeRepository;
 import org.dromara.northstar.gateway.IContractManager;
+import org.dromara.northstar.gateway.IMarketCenter;
 import org.dromara.northstar.gateway.playback.utils.ContractDataLoader;
 
 import lombok.extern.slf4j.Slf4j;
@@ -49,6 +50,8 @@ public class PlaybackContext implements IPlaybackContext{
 	
 	private Set<ContractDataLoader> loaders;
 	
+	private IMarketCenter mktCenter;
+	
 	private Runnable stopCallback;
 	
 	private boolean isRunning;
@@ -58,6 +61,7 @@ public class PlaybackContext implements IPlaybackContext{
 			FastEventEngine feEngine, IPlaybackRuntimeRepository rtRepo, IContractManager contractMgr) {
 		this.rtRepo = rtRepo;
 		this.feEngine = feEngine;
+		this.mktCenter = (IMarketCenter) contractMgr;
 		this.playbackTimeState = currentTimeState;
 		this.gatewayId = gd.getGatewayId();
 		this.settings = (PlaybackGatewaySettings) gd.getSettings();
@@ -169,7 +173,9 @@ public class PlaybackContext implements IPlaybackContext{
 					if(loader.hasMoreTick()) {
 						Tick tick = loader.nextTick(false);
 						if(tick.actionTimestamp() <= bar.actionTimestamp()) {
-							feEngine.emitEvent(NorthstarEventType.TICK, loader.nextTick(true));
+							Tick t = loader.nextTick(true);
+							mktCenter.onTick(t);
+							feEngine.emitEvent(NorthstarEventType.TICK, t);
 							return;
 						}
 					}

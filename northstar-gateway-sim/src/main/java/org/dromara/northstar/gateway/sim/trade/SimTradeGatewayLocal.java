@@ -87,7 +87,7 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 				account.getPositionManager().positionFields().forEach(pf -> feEngine.emitEvent(NorthstarEventType.POSITION, pf));
 			}
 			
-		}, 5000, 2000);
+		}, 0, 1000);
 	}
 
 	@Override

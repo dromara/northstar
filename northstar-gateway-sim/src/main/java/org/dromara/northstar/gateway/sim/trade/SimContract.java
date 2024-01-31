@@ -106,6 +106,7 @@ public class SimContract implements Instrument{
 				.channelType(ChannelType.SIM)
 				.contractDefinition(contractDef)
 				.pricePrecision((int)Math.log10(1 / priceTick))
+				.tradable(true)
 				.build();
 	}
 
