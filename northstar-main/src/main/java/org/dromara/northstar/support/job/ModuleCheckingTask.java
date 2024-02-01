@@ -188,7 +188,7 @@ public class ModuleCheckingTask implements InitializingBean {
 		log.debug("检查废单");
 		StringBuilder sb = new StringBuilder();
 		illOrderHandler.getIllegalOrders().forEach(order -> 
-			sb.append(String.format("%s %s %s %s%n", order.contract().name(), order.updateDate(), order.updateTime(), order.statusMsg()))
+			sb.append(String.format("%s %s %s %s%n", order.contract().name(), order.orderDate(), order.orderTime(), order.statusMsg()))
 		);
 		
 		if(sb.length() > 0) {
