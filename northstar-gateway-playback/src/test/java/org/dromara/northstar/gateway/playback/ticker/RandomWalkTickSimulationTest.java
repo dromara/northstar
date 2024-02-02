@@ -27,7 +27,7 @@ class RandomWalkTickSimulationTest {
 				.lowPrice(4998)
 				.closePrice(5000)
 				.openInterestDelta(31)
-				.volume(2000)
+				.volumeDelta(2000)
 				.build();
 		
 		List<TickEntry> results = rws.generateFrom(bar);
@@ -51,7 +51,7 @@ class RandomWalkTickSimulationTest {
 				.lowPrice(4998)
 				.closePrice(5000)
 				.openInterestDelta(500)
-				.volume(50000)
+				.volumeDelta(50000)
 				.build();
 		
 		List<TickEntry> results = rws.generateFrom(bar);
@@ -75,7 +75,7 @@ class RandomWalkTickSimulationTest {
 				.lowPrice(4998)
 				.closePrice(5000)
 				.openInterestDelta(-50)
-				.volume(10000)
+				.volumeDelta(10000)
 				.build();
 		
 		List<TickEntry> results = rws2.generateFrom(bar);
