@@ -21,7 +21,7 @@ public class SimpleCloseSimulation implements TickSimulationAlgorithm {
 	public List<TickEntry> generateFrom(Bar bar) {
 		double askPrice = bar.closePrice() > bar.openPrice() ? bar.closePrice() : bar.closePrice() + priceTick;
 		double bidPrice = bar.closePrice() > bar.openPrice() ? bar.closePrice() - priceTick : bar.closePrice();
-		return List.of(TickEntry.of(bar.closePrice(), askPrice, bidPrice, bar.volume(), bar.openInterestDelta(), bar.actionTimestamp() - 30000));
+		return List.of(TickEntry.of(bar.closePrice(), askPrice, bidPrice, bar.volumeDelta(), bar.openInterestDelta(), bar.actionTimestamp() - 30000));
 	}
 	
 }

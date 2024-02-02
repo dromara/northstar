@@ -16,17 +16,17 @@ public class SimplePriceSimulation implements TickSimulationAlgorithm {
 	@Override
 	public List<TickEntry> generateFrom(Bar bar) {
 		return List.of(
-					randomAskBid(bar.openPrice(), bar.volume() / 4, bar.openInterestDelta() / 4, bar.actionTimestamp() - 50000),
-					randomAskBid(bar.highPrice(), bar.volume() / 4, bar.openInterestDelta() / 4, bar.actionTimestamp() - 40000),
-					randomAskBid(bar.lowPrice(), bar.volume() / 4, bar.openInterestDelta() / 4, bar.actionTimestamp() - 30000),
-					randomAskBid(bar.closePrice(), bar.volume() / 4, bar.openInterestDelta() / 4, bar.actionTimestamp() - 20000)
+					randomAskBid(bar.openPrice(), bar.volumeDelta() / 4, bar.openInterestDelta() / 4, bar.actionTimestamp() - 50000),
+					randomAskBid(bar.highPrice(), bar.volumeDelta() / 4, bar.openInterestDelta() / 4, bar.actionTimestamp() - 40000),
+					randomAskBid(bar.lowPrice(), bar.volumeDelta() / 4, bar.openInterestDelta() / 4, bar.actionTimestamp() - 30000),
+					randomAskBid(bar.closePrice(), bar.volumeDelta() / 4, bar.openInterestDelta() / 4, bar.actionTimestamp() - 20000)
 				);
 	}
 	
-	private TickEntry randomAskBid(double price, long volume, double openInterestDelta, long tickTime) {
+	private TickEntry randomAskBid(double price, long volumeDelta, double openInterestDelta, long tickTime) {
 		double askPrice = price + ThreadLocalRandom.current().nextInt(2) * priceTick;
 		double bidPrice = askPrice - priceTick;
-		return TickEntry.of(price, askPrice, bidPrice, volume, openInterestDelta, tickTime);
+		return TickEntry.of(price, askPrice, bidPrice, volumeDelta, openInterestDelta, tickTime);
 	}
 
 }
