@@ -278,7 +278,7 @@ public class ModuleContext implements IModuleContext{
 			return;
 		}
 		logger.trace("分钟Bar信息: {} {} {} {}，最新价: {}，成交量：{}，累计持仓：{}，持仓量：{}", bar.contract().unifiedSymbol(), bar.actionDay(), bar.actionTime(), bar.actionTimestamp(),
-				bar.closePrice(), bar.volume(), bar.openInterest(), bar.openInterestDelta());
+				bar.closePrice(), bar.volumeDelta(), bar.openInterest(), bar.openInterestDelta());
 		barFilterMap.put(bar.contract(), bar.actionTimestamp());
 		indicatorHelperSet.forEach(helper -> helper.onBar(bar));
 		registry.onBar(bar);		
@@ -286,7 +286,8 @@ public class ModuleContext implements IModuleContext{
 	
 	@Override
 	public void onMergedBar(Bar bar) {
-		logger.debug("合并Bar信息: {} {} {} {}，最新价: {}", bar.contract().unifiedSymbol(), bar.actionDay(), bar.actionTime(), bar.actionTimestamp(), bar.closePrice());
+		logger.debug("合并Bar信息: {} {} {} {}，最新价: {}，成交量：{}，累计持仓：{}，持仓量：{}", bar.contract().unifiedSymbol(), bar.actionDay(), bar.actionTime(), bar.actionTimestamp(), 
+				bar.closePrice(), bar.volumeDelta(), bar.openInterest(), bar.openInterestDelta());
 		JSONObject json = assignBar(bar);
 		try {			
 			indicatorHelperSet.stream().map(IndicatorValueUpdateHelper::getIndicator).forEach(indicator -> visualize(indicator, bar, json));
