@@ -243,7 +243,11 @@ public class MarketCenter implements IMarketCenter{
 	@Override
 	public void onTick(Tick tick) {
 		// 确保tickMap中仅保留最新数据，可以避免同时接收历史行情与实时行情时的数据混乱
-		tickMap.compute(tick.contract(), (k,v) -> Objects.isNull(v) || v.actionTimestamp() < tick.actionTimestamp() ? tick : v);
+		// 此处需要进行重复过滤处理
+		if(tickMap.containsKey(tick.contract()) && tickMap.get(tick.contract()).actionTimestamp() >= tick.actionTimestamp()) {
+			return;
+		}
+		tickMap.put(tick.contract(), tick);
 		
 		if(tick.contract().unifiedSymbol().contains(Constants.INDEX_SUFFIX)) {
 			return; // 直接忽略指数TICK的后续处理
