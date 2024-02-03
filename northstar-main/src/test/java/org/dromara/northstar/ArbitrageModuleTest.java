@@ -173,7 +173,7 @@ class ArbitrageModuleTest {
 		SimTradeGateway simGateway = (SimTradeGateway) gatewayMgr.get(Identifier.of("模拟账户"));
 		IModule module = moduleMgr.get(Identifier.of("价差测试"));
 		Contract c1 = contractMgr.getContract(ChannelType.SIM, "sim9901").contract();
-		Contract c2 = contractMgr.getContract(ChannelType.SIM, "sim9901").contract();
+		Contract c2 = contractMgr.getContract(ChannelType.SIM, "sim9902").contract();
 		long t = System.currentTimeMillis();
 		for(int i=0; i<4; i++) {
 			Tick tick1 = Tick.builder()
@@ -208,14 +208,17 @@ class ArbitrageModuleTest {
 			mktCenter.onTick(tick2);
 			module.getModuleContext().onTick(tick1);
 			module.getModuleContext().onTick(tick2);
+			Thread.sleep(500);
 			simGateway.onTick(tick1);
 			simGateway.onTick(tick2);
 			t += TimeUnit.MINUTES.toMillis(2);
-			Thread.sleep(1500);
+			Thread.sleep(1000);
 		}
 		// 期望有正常成交
 		ResultBean<List<ModuleDealRecord>> dealRecordResult = moduleCtlr.getDealRecords("价差测试");
-		assertThat(dealRecordResult.getData()).isNotEmpty();
+		assertThat(dealRecordResult.getData()).hasSize(2);
+		assertThat(dealRecordResult.getData().stream().filter(r -> r.getContractName().equals(c1.name())).count()).isEqualTo(1);
+		assertThat(dealRecordResult.getData().stream().filter(r -> r.getContractName().equals(c2.name())).count()).isEqualTo(1);
 	}
 	
 	@Test
