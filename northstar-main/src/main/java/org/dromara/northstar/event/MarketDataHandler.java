@@ -1,6 +1,7 @@
 package org.dromara.northstar.event;
 
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.event.AbstractEventHandler;
@@ -22,6 +23,8 @@ public class MarketDataHandler extends AbstractEventHandler implements GenericEv
 
 	private IMarketDataRepository mdRepo;
 	
+	private AtomicBoolean shutdown = new AtomicBoolean();
+	
 	private ExecutorService exec;
 	
 	public MarketDataHandler(IMarketDataRepository mdRepo) {
@@ -35,6 +38,9 @@ public class MarketDataHandler extends AbstractEventHandler implements GenericEv
 
 	@Override
 	protected void doHandle(NorthstarEvent e) {
+		if(shutdown.get()) {
+			return;
+		}
 		if(e.getData() instanceof Bar bar && System.currentTimeMillis() - bar.actionTimestamp() < 120000 && bar.channelType() != ChannelType.SIM) {
 			exec.execute(() -> mdRepo.insert(bar)); 
 		}
@@ -47,6 +53,7 @@ public class MarketDataHandler extends AbstractEventHandler implements GenericEv
 	
 	@Override
 	public void destroy() throws Exception {
+		shutdown.set(true);
 		exec.close();
 	}
 }
