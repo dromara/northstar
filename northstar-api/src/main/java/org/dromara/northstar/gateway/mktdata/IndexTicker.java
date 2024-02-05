@@ -1,6 +1,7 @@
 package org.dromara.northstar.gateway.mktdata;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
@@ -45,6 +46,8 @@ public class IndexTicker {
 	private double preSettlePrice;
 	private double settlePrice;
 	
+	private Tick lastIdxTick;
+	
 	public IndexTicker(IndexContract idxContract, Consumer<Tick> onTickCallback) {
 		this.idxContract = idxContract;
 		this.memberContracts = idxContract.memberContracts().stream().map(c -> c.contract()).collect(Collectors.toSet());
@@ -67,7 +70,7 @@ public class IndexTicker {
 					final Integer zero = Constants.ZERO;
 					//进行运算
 					calculate();
-					onTickCallback.accept(Tick.builder()
+					lastIdxTick = Tick.builder()
 							.gatewayId(tick.gatewayId())
 							.contract(idxContract.contract())
 							.actionDay(tick.actionDay())
@@ -94,7 +97,8 @@ public class IndexTicker {
 							.bidVolume(List.of(zero,zero,zero,zero,zero))
 							.type(tick.type())
 							.channelType(tick.channelType())
-							.build());
+							.build();
+					onTickCallback.accept(lastIdxTick);
 				} else {
 					log.debug("{} 因月份数据不足，未达到指数合成条件，忽略指数TICK合成计算", idxContract.name());
 				}
@@ -120,14 +124,14 @@ public class IndexTicker {
 		
 		// 合计持仓量
 		totalOpenInterest = DoubleStream.of(priceMat.getColumn(0)).sum();
-		totalOpenInterestDelta = DoubleStream.of(priceMat.getColumn(12)).sum();
+		totalOpenInterestDelta = Objects.nonNull(lastIdxTick) ? totalOpenInterest - lastIdxTick.openInterest() : DoubleStream.of(priceMat.getColumn(12)).sum();
 		
 		// 合计成交量
 		totalVolume = (long) DoubleStream.of(priceMat.getColumn(8)).sum();
-		totalVolumeDelta = (long) DoubleStream.of(priceMat.getColumn(9)).sum();
+		totalVolumeDelta = Objects.nonNull(lastIdxTick) ? totalVolume - lastIdxTick.volume() : (long) DoubleStream.of(priceMat.getColumn(9)).sum();
 		// 合计成交额
 		totalTurnover = (long) DoubleStream.of(priceMat.getColumn(10)).sum();
-		totalTurnoverDelta = (long) DoubleStream.of(priceMat.getColumn(11)).sum();
+		totalTurnoverDelta = Objects.nonNull(lastIdxTick) ? totalTurnover - lastIdxTick.turnover() : (long) DoubleStream.of(priceMat.getColumn(11)).sum();
 		
 		openPrice = roundWithPriceTick(DoubleStream.of(bcResult.getColumn(1)).sum());
 		highPrice = roundWithPriceTick(DoubleStream.of(bcResult.getColumn(2)).sum());
