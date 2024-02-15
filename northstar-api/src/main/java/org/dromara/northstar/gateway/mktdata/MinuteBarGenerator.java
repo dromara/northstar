@@ -64,6 +64,7 @@ public class MinuteBarGenerator {
 	public synchronized void update(Tick tick) {
 		// 如果tick为空或者合约不匹配则返回
 		if (tick == null) {
+			log.trace("TICK数据为空，将被忽略");
 			return;
 		}
 		boolean sameSymbol = contract.equals(tick.contract());
@@ -75,6 +76,7 @@ public class MinuteBarGenerator {
 		}
 		// 忽略非行情数据
 		if(tick.type() != TickType.MARKET_TICK) {
+			log.trace("忽略非行情数据：{}", tick);
 			return;
 		}
 		

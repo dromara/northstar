@@ -3,11 +3,13 @@ package org.dromara.northstar.gateway.mktdata;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -63,6 +65,8 @@ public class MarketCenter implements IMarketCenter{
 	private final ConcurrentMap<Contract, Tick> tickMap = new ConcurrentHashMap<>();
 	
 	private final FastEventEngine feEngine;
+	
+	private Set<ChannelType> loadedGroupOfChannel = new HashSet<>();
 	
 	public MarketCenter(FastEventEngine feEngine) {
 		this.feEngine = feEngine;
@@ -145,6 +149,7 @@ public class MarketCenter implements IMarketCenter{
 			log.error("聚合期货指数合约时出错", e);
 		}
 		
+		loadedGroupOfChannel.add(channelType);
 	}
 	
 	private void aggregateOptionContracts(List<IContract> optContracts, Map<String, IContract> symbolContractMap) {
@@ -263,7 +268,7 @@ public class MarketCenter implements IMarketCenter{
 		IndexContract idxContract = idxContractMap.get(contract);
 		if(Objects.nonNull(idxContract)) {
 			idxContract.onTick(tick);
-		} else if(contract.productClass() == ProductClassEnum.FUTURES){
+		} else if(contract.productClass() == ProductClassEnum.FUTURES && loadedGroupOfChannel.contains(tick.channelType())){
 			log.trace("没有找到 [{}] 对应的指数合约", contract.identifier());
 		}
 	}
