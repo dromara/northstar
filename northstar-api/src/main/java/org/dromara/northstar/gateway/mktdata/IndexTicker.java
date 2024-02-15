@@ -54,8 +54,8 @@ public class IndexTicker {
 		this.onTickCallback = onTickCallback;
 	}
 	
-	private boolean isReady() {
-		return (double) tickMap.size() / memberContracts.size() > 0.9;
+	private double activeRate() {
+		return (double) tickMap.size() / memberContracts.size();
 	}
 
 	public synchronized void update(Tick tick) {
@@ -65,43 +65,45 @@ public class IndexTicker {
 		}
 		// 如果有过期的TICK数据(例如不活跃的合约),则并入下个K线
 		if (0 < lastTickTimestamp && lastTickTimestamp < tick.actionTimestamp()) {
-				if(isReady()) {					
-					final Double zeroD = Constants.ZERO_D;
-					final Integer zero = Constants.ZERO;
-					//进行运算
-					calculate();
-					lastIdxTick = Tick.builder()
-							.gatewayId(tick.gatewayId())
-							.contract(idxContract.contract())
-							.actionDay(tick.actionDay())
-							.actionTime(tick.actionTime())
-							.tradingDay(tick.tradingDay())
-							.actionTimestamp(lastTickTimestamp)
-							.openPrice(openPrice)
-							.highPrice(highPrice)
-							.lowPrice(lowPrice)
-							.lastPrice(lastPrice)
-							.openInterest(totalOpenInterest)
-							.openInterestDelta(totalOpenInterestDelta)
-							.volume(totalVolume)
-							.volumeDelta(totalVolumeDelta)
-							.turnover(totalTurnover)
-							.turnoverDelta(totalTurnoverDelta)
-							.preClosePrice(preClose)
-							.preOpenInterest(preOpenInterest)
-							.preSettlePrice(preSettlePrice)
-							.settlePrice(settlePrice)
-							.askPrice(List.of(zeroD,zeroD,zeroD,zeroD,zeroD))
-							.bidPrice(List.of(zeroD,zeroD,zeroD,zeroD,zeroD))
-							.askVolume(List.of(zero,zero,zero,zero,zero))
-							.bidVolume(List.of(zero,zero,zero,zero,zero))
-							.type(tick.type())
-							.channelType(tick.channelType())
-							.build();
-					onTickCallback.accept(lastIdxTick);
-				} else {
-					log.debug("{} 因月份数据不足，未达到指数合成条件，忽略指数TICK合成计算", idxContract.name());
-				}
+			boolean isReady = activeRate() > 0.7;
+			if(isReady) {					
+				final Double zeroD = Constants.ZERO_D;
+				final Integer zero = Constants.ZERO;
+				//进行运算
+				calculate();
+				lastIdxTick = Tick.builder()
+						.gatewayId(tick.gatewayId())
+						.contract(idxContract.contract())
+						.actionDay(tick.actionDay())
+						.actionTime(tick.actionTime())
+						.tradingDay(tick.tradingDay())
+						.actionTimestamp(lastTickTimestamp)
+						.openPrice(openPrice)
+						.highPrice(highPrice)
+						.lowPrice(lowPrice)
+						.lastPrice(lastPrice)
+						.openInterest(totalOpenInterest)
+						.openInterestDelta(totalOpenInterestDelta)
+						.volume(totalVolume)
+						.volumeDelta(totalVolumeDelta)
+						.turnover(totalTurnover)
+						.turnoverDelta(totalTurnoverDelta)
+						.preClosePrice(preClose)
+						.preOpenInterest(preOpenInterest)
+						.preSettlePrice(preSettlePrice)
+						.settlePrice(settlePrice)
+						.askPrice(List.of(zeroD,zeroD,zeroD,zeroD,zeroD))
+						.bidPrice(List.of(zeroD,zeroD,zeroD,zeroD,zeroD))
+						.askVolume(List.of(zero,zero,zero,zero,zero))
+						.bidVolume(List.of(zero,zero,zero,zero,zero))
+						.type(tick.type())
+						.channelType(tick.channelType())
+						.build();
+				onTickCallback.accept(lastIdxTick);
+			} else {
+				log.debug("{}因月份数据不足，未达到指数合成条件，忽略指数TICK合成计算：当前合约数[{}]，总合约数[{}]，活跃率[{}]", 
+						idxContract.contract().unifiedSymbol(), tickMap.size(), memberContracts.size(), activeRate());
+			}
 		}
 		if(tick.type() == TickType.MARKET_TICK) {			
 			lastTickTimestamp = tick.actionTimestamp();
