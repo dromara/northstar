@@ -18,7 +18,7 @@ public interface Constants {
 	
 	String APP_NAME ="NS:";
 	
-	// 监控台默认登陆信息
+	// 监控台默认登录信息
 	String DEFAULT_USERID = "admin";
 	String DEFAULT_PASSWORD = "123456";
 	

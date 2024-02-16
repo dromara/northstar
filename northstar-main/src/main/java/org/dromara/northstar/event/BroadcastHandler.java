@@ -106,7 +106,7 @@ public class BroadcastHandler extends AbstractEventHandler implements GenericEve
     
     @OnEvent("login")
     private void login(final SocketIOClient client, String room) {
-    	log.info("【登陆房间】-[{}]加入房间{}", client.getSessionId(), room);
+    	log.info("【登录房间】-[{}]加入房间{}", client.getSessionId(), room);
     	client.joinRoom(room);
     }
     
