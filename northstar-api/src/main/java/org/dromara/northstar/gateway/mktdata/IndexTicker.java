@@ -63,6 +63,9 @@ public class IndexTicker {
 			log.warn("[{}]指数TICK生成器，无法处理 [{}] 的行情数据", idxContract.contract().unifiedSymbol(), tick.contract().unifiedSymbol());
 			return;
 		}
+		if(log.isTraceEnabled()) {
+			log.trace("{}指数合成器收到TICK: {}", idxContract.contract().unifiedSymbol(), tick);
+		}
 		// 如果有过期的TICK数据(例如不活跃的合约),则并入下个K线
 		if (0 < lastTickTimestamp && lastTickTimestamp < tick.actionTimestamp()) {
 			boolean isReady = activeRate() > 0.7;
