@@ -55,7 +55,7 @@ public class AuthenticationController implements InitializingBean{
 		}
 		Assert.hasText(user.getUserName(), "用户名不能为空");
 		Assert.hasText(user.getPassword(), "密码不能为空");
-		Assert.isTrue(Math.abs(timestamp - System.currentTimeMillis()) < 30000, "使用了非法登录时间戳，请同步校准电脑时间");
+		Assert.isTrue(Math.abs(timestamp - System.currentTimeMillis()) < 60000, "使用了非法登录时间戳，请同步校准电脑时间");
 		String encodedPassword = MD5.create().digestHex((userInfo.getPassword() + timestamp));
 		if(StringUtils.equals(user.getUserName(), userInfo.getUserId()) && StringUtils.equals(user.getPassword(), encodedPassword)) {
 			session.setAttribute(Constants.KEY_USER, user);
