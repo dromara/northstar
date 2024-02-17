@@ -8,6 +8,7 @@ import java.util.concurrent.ExecutorService;
 import org.dromara.northstar.ai.infer.PretrainedModel;
 import org.dromara.northstar.common.utils.CommonUtils;
 import org.dromara.northstar.strategy.AbstractStrategy;
+import org.dromara.northstar.strategy.IModuleContext;
 import org.slf4j.Logger;
 
 /**
@@ -21,12 +22,12 @@ public abstract class AbstractModelBasedStrategy extends AbstractStrategy implem
 	
 	protected PretrainedModel model;
 	
-	private Logger logger;
-	
 	private ExecutorService exec = CommonUtils.newThreadPerTaskExecutor(getClass());
 	
-	protected AbstractModelBasedStrategy() {
-		logger = ctx.getLogger(getClass());
+	@Override
+	public void setContext(IModuleContext context) {
+		super.setContext(context);
+		Logger logger = context.getLogger(getClass());
 		// 处于非采样阶段时，需要检查预训练模型是否存在
 		if(!isSampling()) {
 			logger.info("准备从models目录加载预训练模型");
