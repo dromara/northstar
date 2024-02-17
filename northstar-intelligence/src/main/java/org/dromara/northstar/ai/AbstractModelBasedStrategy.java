@@ -14,7 +14,10 @@ import org.slf4j.Logger;
  * 实现了AI能力的抽象策略
  * @auth KevinHuangwl
  */
-public abstract class AbstractSmartStrategy extends AbstractStrategy implements SamplingAware {
+public abstract class AbstractModelBasedStrategy extends AbstractStrategy implements SamplingAware {
+	
+	protected static final String MODE_PREDICTING = "predicting";
+	protected static final String MODE_SAMPLING = "sampling";
 	
 	protected PretrainedModel model;
 	
@@ -22,7 +25,7 @@ public abstract class AbstractSmartStrategy extends AbstractStrategy implements 
 	
 	private ExecutorService exec = CommonUtils.newThreadPerTaskExecutor(getClass());
 	
-	protected AbstractSmartStrategy() {
+	protected AbstractModelBasedStrategy() {
 		logger = ctx.getLogger(getClass());
 		// 处于非采样阶段时，需要检查预训练模型是否存在
 		if(!isSampling()) {
