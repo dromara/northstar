@@ -45,6 +45,11 @@ public class ExternalSampleStrategy extends AbstractStrategy	// 为了简化代�
 	private Indicator macdDea;
 	
 	private Logger logger;
+	
+	@Override
+	public String name() {
+		return NAME;
+	}
 
 	@Override
 	public void onMergedBar(Bar bar) {
