@@ -95,6 +95,7 @@ public class SimTradeGatewayLocal implements SimTradeGateway{
 		log.debug("[{}] 模拟网关断开", gd.getGatewayId());
 		connected = false;
 		connState = ConnectionState.DISCONNECTED;
+		feEngine.emitEvent(NorthstarEventType.LOGGED_OUT, gd.getGatewayId());
 		statusReportTimer.cancel();
 	}
 	
