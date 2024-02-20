@@ -107,6 +107,9 @@ public class MarketCenter implements IMarketCenter{
 				channelDefContractGroups.get(ins.channelType(), def).add(contract);
 				channelSymbolContractTbl.put(contract.channelType(), contract.contract().symbol(), contract);
 				channelSymbolContractTbl.put(contract.channelType(), contract.contract().unifiedSymbol(), contract);
+				if(log.isTraceEnabled()) {					
+					log.trace("合约登记成功：{}", contract.contract());
+				}
 			});
 
 		if(!contractMap.containsKey(ins.identifier())) {
