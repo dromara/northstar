@@ -33,6 +33,7 @@ import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.PositionField;
 import xyz.redtorch.pb.CoreField.TickField;
 
+/* 注意，本类的日志输出在logs/DEBUG/BroadcastHandler_*.log文件 */
 @Slf4j
 public class BroadcastHandler extends AbstractEventHandler implements GenericEventHandler, InitializingBean, DisposableBean {
 	

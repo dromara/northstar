@@ -61,16 +61,16 @@
 		</encoder>
 	</appender>
 	
-	<logger name="org.dromara.northstar.event.BroadcastHandler">
+	<logger name="org.dromara.northstar.event.BroadcastHandler" additivity="false">
 		<appender-ref ref="BC"/>
 	</logger>
-	<logger name="org.dromara.northstar.gateway.mktdata.MarketCenter">
+	<logger name="org.dromara.northstar.gateway.mktdata.MarketCenter" additivity="false">
 		<appender-ref ref="MKT_DATA"/>
 	</logger>
-	<logger name="org.dromara.northstar.gateway.mktdata.IndexTicker">
+	<logger name="org.dromara.northstar.gateway.mktdata.IndexTicker" additivity="false">
 		<appender-ref ref="MKT_DATA"/>
 	</logger>
-	<logger name="org.dromara.northstar.gateway.mktdata.MinuteBarGenerator">
+	<logger name="org.dromara.northstar.gateway.mktdata.MinuteBarGenerator" additivity="false">
 		<appender-ref ref="MKT_DATA"/>
 	</logger>
 </configuration>  

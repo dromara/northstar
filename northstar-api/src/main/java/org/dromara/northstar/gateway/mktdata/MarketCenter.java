@@ -39,13 +39,16 @@ import lombok.extern.slf4j.Slf4j;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
 
+
+
 /**
  * 市场中心
  * 负责作为网关的防腐层，聚合合约管理以及指数TICK合成
  * @author KevinHuangwl
  *
  */
-@Slf4j
+/* 注意，本类的日志输出在logs/DEBUG/MarketData_*.log文件 */
+@Slf4j 
 public class MarketCenter implements IMarketCenter{
 	
 	private static final int INIT_SIZE = 16384;
@@ -104,6 +107,9 @@ public class MarketCenter implements IMarketCenter{
 				channelDefContractGroups.get(ins.channelType(), def).add(contract);
 				channelSymbolContractTbl.put(contract.channelType(), contract.contract().symbol(), contract);
 				channelSymbolContractTbl.put(contract.channelType(), contract.contract().unifiedSymbol(), contract);
+				if(log.isTraceEnabled()) {					
+					log.trace("合约登记成功：{}", contract.contract());
+				}
 			});
 
 		if(!contractMap.containsKey(ins.identifier())) {
@@ -247,11 +253,6 @@ public class MarketCenter implements IMarketCenter{
 	 */
 	@Override
 	public void onTick(Tick tick) {
-		// 确保tickMap中仅保留最新数据，可以避免同时接收历史行情与实时行情时的数据混乱
-		// 此处需要进行重复过滤处理
-		if(tickMap.containsKey(tick.contract()) && tickMap.get(tick.contract()).actionTimestamp() >= tick.actionTimestamp()) {
-			return;
-		}
 		tickMap.put(tick.contract(), tick);
 		
 		if(tick.contract().unifiedSymbol().contains(Constants.INDEX_SUFFIX)) {

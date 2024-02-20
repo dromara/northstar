@@ -492,6 +492,7 @@ public class ModuleContext implements IModuleContext{
 			logger.info("[{} {}] 策略信号：合约【{}】，操作【{}】，价格【{}】，手数【{}】，类型【{}】", 
 					tick.actionDay(), tick.actionTime(),
 					contract.unifiedSymbol(), operation.text(), orderPrice, volume, priceType);
+			logger.info("行情价格计算依据：{} {} {} 最新价：{}", tick.contract().name(), tick.actionDay(), tick.actionTime(), tick.lastPrice());
 		}
 		String id = UUID.randomUUID().toString();
 		String gatewayId = getAccount(contract).accountId();

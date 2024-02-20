@@ -18,6 +18,7 @@ import org.dromara.northstar.gateway.contract.IndexContract;
 
 import lombok.extern.slf4j.Slf4j;
 
+/* 注意，本类的日志输出在logs/DEBUG/MarketData_*.log文件 */
 @Slf4j
 public class IndexTicker {
 
