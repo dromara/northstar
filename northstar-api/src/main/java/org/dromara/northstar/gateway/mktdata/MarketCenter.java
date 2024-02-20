@@ -39,13 +39,16 @@ import lombok.extern.slf4j.Slf4j;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
 
+
+
 /**
  * 市场中心
  * 负责作为网关的防腐层，聚合合约管理以及指数TICK合成
  * @author KevinHuangwl
  *
  */
-@Slf4j
+/* 注意，本类的日志输出在logs/DEBUG/MarketData_*.log文件 */
+@Slf4j 
 public class MarketCenter implements IMarketCenter{
 	
 	private static final int INIT_SIZE = 16384;
