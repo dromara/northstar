@@ -253,6 +253,10 @@ public class MarketCenter implements IMarketCenter{
 	 */
 	@Override
 	public void onTick(Tick tick) {
+		// 避免同一个TICK进入两次
+		if(tickMap.containsKey(tick.contract()) && tickMap.get(tick.contract()) == tick) {
+			return; 
+		}
 		tickMap.put(tick.contract(), tick);
 		
 		if(tick.contract().unifiedSymbol().contains(Constants.INDEX_SUFFIX)) {

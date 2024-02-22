@@ -109,7 +109,7 @@ public class IndexTicker {
 						idxContract.contract().unifiedSymbol(), tickMap.size(), memberContracts.size(), activeRate());
 			}
 		}
-		if(tick.type() == TickType.MARKET_TICK) {			
+		if(tick.type() == TickType.MARKET_TICK && tick.actionTimestamp() > lastTickTimestamp) {			
 			lastTickTimestamp = tick.actionTimestamp();
 		}
 		// 同一个指数Tick
