@@ -47,6 +47,38 @@
 			    <groupId>org.codehaus.mojo</groupId>
 			    <artifactId>exec-maven-plugin</artifactId>
 			    <executions>
+				  <execution>
+			        <id>exec-npm-version</id>
+			        <phase>prepare-package</phase>
+			        <goals>
+			          <goal>exec</goal>
+			        </goals>
+			        <configuration>
+			          <executable>npm</executable>
+			          <arguments>
+			          	<argument>version</argument>
+			            <argument>${project.version}</argument>
+			            <argument>--allow-same-version</argument>
+			          </arguments>
+			        </configuration>
+			      </execution>
+			      <execution>
+			        <id>exec-npm-version2</id>
+			        <phase>prepare-package</phase>
+			        <goals>
+			          <goal>exec</goal>
+			        </goals>
+			        <configuration>
+			          <executable>npm</executable>
+			          <arguments>
+			          	<argument>run</argument>
+			          	<argument>version-ee</argument>
+			          	<argument>--</argument>
+			            <argument>${project.version}</argument>
+			            <argument>--allow-same-version</argument>
+			          </arguments>
+			        </configuration>
+			      </execution>
 			      <execution>
 			        <id>exec-npm-install</id>
 			        <phase>prepare-package</phase>
@@ -61,7 +93,6 @@
 			          </arguments>
 			        </configuration>
 			      </execution>
-			
 			      <execution>
 			        <id>exec-npm-run-build</id>
 			        <phase>prepare-package</phase>

@@ -14,6 +14,7 @@ import org.dromara.northstar.common.utils.CommonUtils;
 
 import lombok.extern.slf4j.Slf4j;
 
+/* 注意，本类的日志输出在logs/DEBUG/MarketData_*.log文件 */
 @Slf4j
 public class MinuteBarGenerator {
 	
@@ -64,6 +65,7 @@ public class MinuteBarGenerator {
 	public synchronized void update(Tick tick) {
 		// 如果tick为空或者合约不匹配则返回
 		if (tick == null) {
+			log.trace("TICK数据为空，将被忽略");
 			return;
 		}
 		boolean sameSymbol = contract.equals(tick.contract());
@@ -75,6 +77,7 @@ public class MinuteBarGenerator {
 		}
 		// 忽略非行情数据
 		if(tick.type() != TickType.MARKET_TICK) {
+			log.trace("忽略非行情数据：{}", tick);
 			return;
 		}
 		

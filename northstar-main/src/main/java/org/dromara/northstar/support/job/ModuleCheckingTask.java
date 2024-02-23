@@ -73,7 +73,7 @@ public class ModuleCheckingTask implements InitializingBean {
 	 * 如果模组状态不等于期望状态，则等待复查
 	 * 周一至周五，每隔一小时，在整点检查一次
 	 */
-	@Scheduled(cron="0 0 0/1 ? * 1-5")
+	@Scheduled(cron="0 0 0/1 ? * 1-7")
 	public void checkModuleState() {
 		log.debug("检查模组状态");
 		moduleMgr.allModules().forEach(m -> {
@@ -89,7 +89,7 @@ public class ModuleCheckingTask implements InitializingBean {
 	 * 如果模组复查状态仍不等于期望状态，则发出警报，待人为介入
 	 * 周一至周五，每隔一小时，在15分时检查一次
 	 */
-	@Scheduled(cron="0 15 0/1 ? * 1-5")
+	@Scheduled(cron="0 15 0/1 ? * 1-7")
 	public void doubleCheckModuleState() {
 		log.debug("模组状态复查");
 		moduleMgr.allModules().forEach(m -> {
@@ -108,7 +108,7 @@ public class ModuleCheckingTask implements InitializingBean {
 	 * 核对模组的逻辑持仓与物理持仓是否一致
 	 * 若不一致，则发出警报，待人为介入
 	 */
-	@Scheduled(cron="0 0 0/1 ? * 1-5")
+	@Scheduled(cron="0 0 0/1 ? * 1-7")
 	public void checkHoldingLogicalAndPhysical() {
 		log.debug("核对模组的逻辑持仓与物理持仓是否一致");
 		moduleMgr.allModules().forEach(m -> {
@@ -146,7 +146,7 @@ public class ModuleCheckingTask implements InitializingBean {
 	 * 周一至五，每隔一小时检查 
 	 * @throws IOException 
 	 */
-	@Scheduled(cron="0 0 0/1 ? * 1-5")
+	@Scheduled(cron="0 0 0/1 ? * 1-7")
 	public void checkModuleException() throws IOException {
 		log.debug("检查当天的模组日志中是否存在异常日志");
 		for(IModule module : moduleMgr.allModules()) {
@@ -171,7 +171,7 @@ public class ModuleCheckingTask implements InitializingBean {
 	 * 检查风险度，超过95%则发出警报
 	 * 每两小时检查一次
 	 */
-	@Scheduled(cron="0 0 0/2 ? * 1-5")
+	@Scheduled(cron="0 0 0/2 ? * 1-7")
 	public void checkDegreeOfRisk() {
 		log.debug("检查风险度");
 		accountMgr.allAccounts().stream()
@@ -183,12 +183,12 @@ public class ModuleCheckingTask implements InitializingBean {
 	/**
 	 * 检查废单
 	 */
-	@Scheduled(cron="0 0 0/1 ? * 1-5")
+	@Scheduled(cron="0 0 0/1 ? * 1-7")
 	public void checkIllegalOrder() {
 		log.debug("检查废单");
 		StringBuilder sb = new StringBuilder();
 		illOrderHandler.getIllegalOrders().forEach(order -> 
-			sb.append(String.format("%s %s %s %s%n", order.contract().name(), order.updateDate(), order.updateTime(), order.statusMsg()))
+			sb.append(String.format("%s %s %s %s%n", order.contract().name(), order.orderDate(), order.orderTime(), order.statusMsg()))
 		);
 		
 		if(sb.length() > 0) {
@@ -211,7 +211,7 @@ public class ModuleCheckingTask implements InitializingBean {
 	/**
 	 * 清除报警缓存
 	 */
-	@Scheduled(cron="0 45 8,12,20 ? * 1-5")
+	@Scheduled(cron="0 45 8,12,20 ? * 1-7")
 	public void resetWarningCache() {
 		log.debug("清除报警缓存");
 		warningCacheSet.clear();

@@ -3,6 +3,7 @@ package org.dromara.northstar.event;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.lang3.StringUtils;
 import org.dromara.northstar.common.event.AbstractEventHandler;
@@ -25,6 +26,8 @@ public class EventNotificationHandler extends AbstractEventHandler implements Ge
 	
 	private ExecutorService exec;
 	
+	private AtomicBoolean shutdown = new AtomicBoolean();
+	
 	public EventNotificationHandler(IMessageSender sender, Set<NorthstarEventType> subEvents) {
 		this.sender = sender;
 		this.subEvents = subEvents;
@@ -37,7 +40,7 @@ public class EventNotificationHandler extends AbstractEventHandler implements Ge
 
 	@Override
 	protected void doHandle(NorthstarEvent e) {
-		if(Objects.isNull(sender) 
+		if(shutdown.get() || Objects.isNull(sender) 
 				|| e.getData() instanceof Trade trade && StringUtils.isBlank(trade.originOrderId())
 				|| e.getData() instanceof Order order && (StringUtils.isBlank(order.originOrderId()) || !OrderUtils.isValidOrder(order))) {
 			return;
@@ -54,6 +57,7 @@ public class EventNotificationHandler extends AbstractEventHandler implements Ge
 	
 	@Override
 	public void destroy() throws Exception {
+		shutdown.set(true);
 		exec.close();
 	}
 }

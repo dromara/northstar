@@ -43,11 +43,11 @@ public enum NorthstarEventType {
 	 */
 	BALANCE,
 	/**
-	 * 登陆中
+	 * 登录中
 	 */
 	LOGGING_IN,
 	/**
-	 * 登陆成功
+	 * 登录成功
 	 */
 	LOGGED_IN,
 	/**

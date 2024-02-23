@@ -36,7 +36,7 @@ public class RandomWalkTickSimulation implements TickSimulationAlgorithm {
 		double rangeFactor = (bar.highPrice() - bar.lowPrice()) / bar.closePrice();
 		double actualDiffRatio = Math.abs(bar.closePrice() - bar.openPrice()) / (bar.highPrice() - bar.lowPrice());
 		PriceRandomWalk pricer = new PriceRandomWalk(numOfTickPerBar, milestonePrices, priceTick);
-		VolumeRandomWalk voler = new VolumeRandomWalk(numOfTickPerBar, bar.volume());
+		VolumeRandomWalk voler = new VolumeRandomWalk(numOfTickPerBar, bar.volumeDelta());
 		OpenInterestRandomWalk oier = new OpenInterestRandomWalk(numOfTickPerBar, bar.openInterestDelta(), rangeFactor, actualDiffRatio);
 		List<Double> prices = pricer.generate();
 		List<Long> volumes = voler.generate();

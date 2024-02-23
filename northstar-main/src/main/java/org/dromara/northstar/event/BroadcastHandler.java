@@ -33,6 +33,7 @@ import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.PositionField;
 import xyz.redtorch.pb.CoreField.TickField;
 
+/* 注意，本类的日志输出在logs/DEBUG/BroadcastHandler_*.log文件 */
 @Slf4j
 public class BroadcastHandler extends AbstractEventHandler implements GenericEventHandler, InitializingBean, DisposableBean {
 	
@@ -64,12 +65,15 @@ public class BroadcastHandler extends AbstractEventHandler implements GenericEve
 		if(event.getData() instanceof Tick t) {
 			TickField tick = t.toTickField();
 			String rmid = String.format("%s@%s", tick.getUnifiedSymbol(), tick.getGatewayId());
-			log.trace("TICK数据分发：[{} {} {} 价格：{} 持仓：{}]", tick.getUnifiedSymbol(), tick.getActionDay(), tick.getActionTime(), tick.getLastPrice(), tick.getOpenInterest());
+			log.trace("TICK数据分发：[{} {} {} 总仓：{} 仓：{} 总量：{} 量：{} 价：{} 类型：{}]", 
+					tick.getUnifiedSymbol(), tick.getActionDay(), tick.getActionTime(),
+					(long)tick.getOpenInterest(), (long)tick.getOpenInterestDelta(), tick.getVolume(), tick.getVolumeDelta(), tick.getLastPrice(), t.type());
 			socketServer.getRoomOperations(rmid).sendEvent(NorthstarEventType.TICK.toString(), Base64.encode(tick.toByteArray()));
 		} else if(event.getData() instanceof Bar b) {
 			BarField bar = b.toBarField();
 			String rmid = String.format("%s@%s", bar.getUnifiedSymbol(), bar.getGatewayId());
-			log.trace("BAR数据分发：[{} {} {} 价格：{}]", rmid, bar.getActionDay(), bar.getActionTime(), bar.getClosePrice());
+			log.trace("BAR数据分发：[{} {} {} 仓：{} 量：{} 价：{}]", rmid, bar.getActionDay(), bar.getActionTime(),
+					(long)bar.getOpenInterestDelta(), bar.getVolumeDelta(), bar.getClosePrice());
 			socketServer.getRoomOperations(rmid).sendEvent(NorthstarEventType.BAR.toString(), Base64.encode(bar.toByteArray()));
 		} else if(event.getData() instanceof Account acc) {
 			AccountField account = acc.toAccountField();
@@ -103,7 +107,7 @@ public class BroadcastHandler extends AbstractEventHandler implements GenericEve
     
     @OnEvent("login")
     private void login(final SocketIOClient client, String room) {
-    	log.info("【登陆房间】-[{}]加入房间{}", client.getSessionId(), room);
+    	log.info("【登录房间】-[{}]加入房间{}", client.getSessionId(), room);
     	client.joinRoom(room);
     }
     

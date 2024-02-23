@@ -51,11 +51,11 @@ public class AuthenticationController implements InitializingBean{
 	@PostMapping(value="/login", produces = "application/json")
 	public ResultBean<String> doAuth(long timestamp, @RequestBody NsUser user) {
 		if(errCnt.get() >= MAX_ATTEMPT) {
-			throw new AuthenticationException("超过重试限制，登陆受限");
+			throw new AuthenticationException("超过重试限制，登录受限");
 		}
 		Assert.hasText(user.getUserName(), "用户名不能为空");
 		Assert.hasText(user.getPassword(), "密码不能为空");
-		Assert.isTrue(Math.abs(timestamp - System.currentTimeMillis()) < 30000, "使用了非法登陆时间戳，请同步校准电脑时间");
+		Assert.isTrue(Math.abs(timestamp - System.currentTimeMillis()) < 60000, "使用了非法登录时间戳，请同步校准电脑时间");
 		String encodedPassword = MD5.create().digestHex((userInfo.getPassword() + timestamp));
 		if(StringUtils.equals(user.getUserName(), userInfo.getUserId()) && StringUtils.equals(user.getPassword(), encodedPassword)) {
 			session.setAttribute(Constants.KEY_USER, user);
@@ -93,6 +93,6 @@ public class AuthenticationController implements InitializingBean{
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		log.debug("监控台登陆信息：{} / {}", userInfo.getUserId(), userInfo.getPassword());
+		log.debug("监控台登录信息：{} / {}", userInfo.getUserId(), userInfo.getPassword());
 	}
 }

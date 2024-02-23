@@ -3,11 +3,13 @@ package org.dromara.northstar.gateway.mktdata;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -37,13 +39,16 @@ import lombok.extern.slf4j.Slf4j;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
 
+
+
 /**
  * 市场中心
  * 负责作为网关的防腐层，聚合合约管理以及指数TICK合成
  * @author KevinHuangwl
  *
  */
-@Slf4j
+/* 注意，本类的日志输出在logs/DEBUG/MarketData_*.log文件 */
+@Slf4j 
 public class MarketCenter implements IMarketCenter{
 	
 	private static final int INIT_SIZE = 16384;
@@ -63,6 +68,8 @@ public class MarketCenter implements IMarketCenter{
 	private final ConcurrentMap<Contract, Tick> tickMap = new ConcurrentHashMap<>();
 	
 	private final FastEventEngine feEngine;
+	
+	private Set<ChannelType> loadedGroupOfChannel = new HashSet<>();
 	
 	public MarketCenter(FastEventEngine feEngine) {
 		this.feEngine = feEngine;
@@ -100,6 +107,9 @@ public class MarketCenter implements IMarketCenter{
 				channelDefContractGroups.get(ins.channelType(), def).add(contract);
 				channelSymbolContractTbl.put(contract.channelType(), contract.contract().symbol(), contract);
 				channelSymbolContractTbl.put(contract.channelType(), contract.contract().unifiedSymbol(), contract);
+				if(log.isTraceEnabled()) {					
+					log.trace("合约登记成功：{}", contract.contract());
+				}
 			});
 
 		if(!contractMap.containsKey(ins.identifier())) {
@@ -145,6 +155,7 @@ public class MarketCenter implements IMarketCenter{
 			log.error("聚合期货指数合约时出错", e);
 		}
 		
+		loadedGroupOfChannel.add(channelType);
 	}
 	
 	private void aggregateOptionContracts(List<IContract> optContracts, Map<String, IContract> symbolContractMap) {
@@ -242,8 +253,11 @@ public class MarketCenter implements IMarketCenter{
 	 */
 	@Override
 	public void onTick(Tick tick) {
-		// 确保tickMap中仅保留最新数据，可以避免同时接收历史行情与实时行情时的数据混乱
-		tickMap.compute(tick.contract(), (k,v) -> Objects.isNull(v) || v.actionTimestamp() < tick.actionTimestamp() ? tick : v);
+		// 避免同一个TICK进入两次
+		if(tickMap.containsKey(tick.contract()) && tickMap.get(tick.contract()) == tick) {
+			return; 
+		}
+		tickMap.put(tick.contract(), tick);
 		
 		if(tick.contract().unifiedSymbol().contains(Constants.INDEX_SUFFIX)) {
 			return; // 直接忽略指数TICK的后续处理
@@ -259,7 +273,7 @@ public class MarketCenter implements IMarketCenter{
 		IndexContract idxContract = idxContractMap.get(contract);
 		if(Objects.nonNull(idxContract)) {
 			idxContract.onTick(tick);
-		} else if(contract.productClass() == ProductClassEnum.FUTURES){
+		} else if(contract.productClass() == ProductClassEnum.FUTURES && loadedGroupOfChannel.contains(tick.channelType())){
 			log.trace("没有找到 [{}] 对应的指数合约", contract.identifier());
 		}
 	}

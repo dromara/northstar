@@ -1,6 +1,7 @@
 package org.dromara.northstar.gateway.mktdata;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
@@ -17,6 +18,7 @@ import org.dromara.northstar.gateway.contract.IndexContract;
 
 import lombok.extern.slf4j.Slf4j;
 
+/* 注意，本类的日志输出在logs/DEBUG/MarketData_*.log文件 */
 @Slf4j
 public class IndexTicker {
 
@@ -45,14 +47,16 @@ public class IndexTicker {
 	private double preSettlePrice;
 	private double settlePrice;
 	
+	private Tick lastIdxTick;
+	
 	public IndexTicker(IndexContract idxContract, Consumer<Tick> onTickCallback) {
 		this.idxContract = idxContract;
 		this.memberContracts = idxContract.memberContracts().stream().map(c -> c.contract()).collect(Collectors.toSet());
 		this.onTickCallback = onTickCallback;
 	}
 	
-	private boolean isReady() {
-		return (double) tickMap.size() / memberContracts.size() > 0.9;
+	private double activeRate() {
+		return (double) tickMap.size() / memberContracts.size();
 	}
 
 	public synchronized void update(Tick tick) {
@@ -60,46 +64,52 @@ public class IndexTicker {
 			log.warn("[{}]指数TICK生成器，无法处理 [{}] 的行情数据", idxContract.contract().unifiedSymbol(), tick.contract().unifiedSymbol());
 			return;
 		}
+		if(log.isTraceEnabled()) {
+			log.trace("{}指数合成器收到TICK: {}", idxContract.contract().unifiedSymbol(), tick);
+		}
 		// 如果有过期的TICK数据(例如不活跃的合约),则并入下个K线
 		if (0 < lastTickTimestamp && lastTickTimestamp < tick.actionTimestamp()) {
-				if(isReady()) {					
-					final Double zeroD = Constants.ZERO_D;
-					final Integer zero = Constants.ZERO;
-					//进行运算
-					calculate();
-					onTickCallback.accept(Tick.builder()
-							.gatewayId(tick.gatewayId())
-							.contract(idxContract.contract())
-							.actionDay(tick.actionDay())
-							.actionTime(tick.actionTime())
-							.tradingDay(tick.tradingDay())
-							.actionTimestamp(lastTickTimestamp)
-							.openPrice(openPrice)
-							.highPrice(highPrice)
-							.lowPrice(lowPrice)
-							.lastPrice(lastPrice)
-							.openInterest(totalOpenInterest)
-							.openInterestDelta(totalOpenInterestDelta)
-							.volume(totalVolume)
-							.volumeDelta(totalVolumeDelta)
-							.turnover(totalTurnover)
-							.turnoverDelta(totalTurnoverDelta)
-							.preClosePrice(preClose)
-							.preOpenInterest(preOpenInterest)
-							.preSettlePrice(preSettlePrice)
-							.settlePrice(settlePrice)
-							.askPrice(List.of(zeroD,zeroD,zeroD,zeroD,zeroD))
-							.bidPrice(List.of(zeroD,zeroD,zeroD,zeroD,zeroD))
-							.askVolume(List.of(zero,zero,zero,zero,zero))
-							.bidVolume(List.of(zero,zero,zero,zero,zero))
-							.type(tick.type())
-							.channelType(tick.channelType())
-							.build());
-				} else {
-					log.debug("{} 因月份数据不足，未达到指数合成条件，忽略指数TICK合成计算", idxContract.name());
-				}
+			boolean isReady = activeRate() > 0.7;
+			if(isReady) {					
+				final Double zeroD = Constants.ZERO_D;
+				final Integer zero = Constants.ZERO;
+				//进行运算
+				calculate();
+				lastIdxTick = Tick.builder()
+						.gatewayId(tick.gatewayId())
+						.contract(idxContract.contract())
+						.actionDay(tick.actionDay())
+						.actionTime(tick.actionTime())
+						.tradingDay(tick.tradingDay())
+						.actionTimestamp(lastTickTimestamp)
+						.openPrice(openPrice)
+						.highPrice(highPrice)
+						.lowPrice(lowPrice)
+						.lastPrice(lastPrice)
+						.openInterest(totalOpenInterest)
+						.openInterestDelta(totalOpenInterestDelta)
+						.volume(totalVolume)
+						.volumeDelta(totalVolumeDelta)
+						.turnover(totalTurnover)
+						.turnoverDelta(totalTurnoverDelta)
+						.preClosePrice(preClose)
+						.preOpenInterest(preOpenInterest)
+						.preSettlePrice(preSettlePrice)
+						.settlePrice(settlePrice)
+						.askPrice(List.of(zeroD,zeroD,zeroD,zeroD,zeroD))
+						.bidPrice(List.of(zeroD,zeroD,zeroD,zeroD,zeroD))
+						.askVolume(List.of(zero,zero,zero,zero,zero))
+						.bidVolume(List.of(zero,zero,zero,zero,zero))
+						.type(tick.type())
+						.channelType(tick.channelType())
+						.build();
+				onTickCallback.accept(lastIdxTick);
+			} else {
+				log.debug("{}因月份数据不足，未达到指数合成条件，忽略指数TICK合成计算：当前合约数[{}]，总合约数[{}]，活跃率[{}]", 
+						idxContract.contract().unifiedSymbol(), tickMap.size(), memberContracts.size(), activeRate());
+			}
 		}
-		if(tick.type() == TickType.MARKET_TICK) {			
+		if(tick.type() == TickType.MARKET_TICK && tick.actionTimestamp() > lastTickTimestamp) {			
 			lastTickTimestamp = tick.actionTimestamp();
 		}
 		// 同一个指数Tick
@@ -120,14 +130,14 @@ public class IndexTicker {
 		
 		// 合计持仓量
 		totalOpenInterest = DoubleStream.of(priceMat.getColumn(0)).sum();
-		totalOpenInterestDelta = DoubleStream.of(priceMat.getColumn(12)).sum();
+		totalOpenInterestDelta = Objects.nonNull(lastIdxTick) ? totalOpenInterest - lastIdxTick.openInterest() : DoubleStream.of(priceMat.getColumn(12)).sum();
 		
 		// 合计成交量
 		totalVolume = (long) DoubleStream.of(priceMat.getColumn(8)).sum();
-		totalVolumeDelta = (long) DoubleStream.of(priceMat.getColumn(9)).sum();
+		totalVolumeDelta = Objects.nonNull(lastIdxTick) ? totalVolume - lastIdxTick.volume() : (long) DoubleStream.of(priceMat.getColumn(9)).sum();
 		// 合计成交额
 		totalTurnover = (long) DoubleStream.of(priceMat.getColumn(10)).sum();
-		totalTurnoverDelta = (long) DoubleStream.of(priceMat.getColumn(11)).sum();
+		totalTurnoverDelta = Objects.nonNull(lastIdxTick) ? totalTurnover - lastIdxTick.turnover() : (long) DoubleStream.of(priceMat.getColumn(11)).sum();
 		
 		openPrice = roundWithPriceTick(DoubleStream.of(bcResult.getColumn(1)).sum());
 		highPrice = roundWithPriceTick(DoubleStream.of(bcResult.getColumn(2)).sum());

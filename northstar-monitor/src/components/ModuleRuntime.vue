@@ -185,7 +185,7 @@
               </el-table-column>
               <el-table-column v-if="!isMobile" prop="lastprice" label="现价" align="center">
                 <template slot-scope="scope">
-                  {{ scope.row.lastprice.toFixed(scope.row.contract.priceprecision) }}
+                  {{ (scope.row.openprice + scope.row.openpricediff).toFixed(scope.row.contract.priceprecision) }}
                 </template>
               </el-table-column>
               <el-table-column prop="positionprofit" label="持仓盈亏" align="center">
