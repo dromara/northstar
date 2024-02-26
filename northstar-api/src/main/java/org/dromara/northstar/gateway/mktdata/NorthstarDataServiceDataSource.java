@@ -75,8 +75,8 @@ public class NorthstarDataServiceDataSource implements IDataSource{
 		try {			
 			ResponseEntity<String> respEntity = restTemplate.exchange(URI.create(baseUrl + "/reg"), HttpMethod.GET, reqEntity, String.class);
 			dummyToken = respEntity.getBody();
-		} catch (HttpServerErrorException e) {
-			throw new IllegalStateException("无法注册数据服务", e);
+		} catch (Exception e) {
+			log.error("无法注册数据服务");
 		}
 	}
 	
@@ -246,7 +246,9 @@ public class NorthstarDataServiceDataSource implements IDataSource{
 			JSONObject entity = JSON.parseObject(e.getResponseBodyAsString());
 			throw new IllegalStateException("第三方数据服务暂时不可用:" + entity.getString("message"));
 		} catch (Exception e) {
-			throw new IllegalStateException("数据服务连接异常", e);
+			log.error("数据服务连接异常", e);
+			// 返回一个空的ResponseEntity<T>
+			return ResponseEntity.ok().build();
 		}
 	}
 	
