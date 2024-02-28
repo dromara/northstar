@@ -74,8 +74,14 @@ public class IndicatorDemoStrategy extends AbstractStrategy	// 为了简化代�
 									makeConfig("WAVE"), 
 									new MAIndicator(makeConfig("MA10"), 10), 
 									2, 
-									EndpointType.HIGH_LOW)
-								);
+									EndpointType.HIGH_LOW));
+		
+		// 不同取值类型
+		ctx.registerIndicator(new SimpleValueIndicator(Configuration.builder().indicatorName("OI").contract(c).valueType(ValueType.OI).build()));
+		ctx.registerIndicator(new SimpleValueIndicator(Configuration.builder().indicatorName("OI_Del").contract(c).valueType(ValueType.OI_DELTA).build()));
+		ctx.registerIndicator(new SimpleValueIndicator(Configuration.builder().indicatorName("VOL").contract(c).valueType(ValueType.VOL).build()));
+		ctx.registerIndicator(new SimpleValueIndicator(Configuration.builder().indicatorName("VOL_Del").contract(c).valueType(ValueType.VOL_DELTA).build()));
+		ctx.registerIndicator(new SimpleValueIndicator(Configuration.builder().indicatorName("DATE").contract(c).valueType(ValueType.TRADE_DATE).build()));
 	}
 	
 	private Configuration makeConfig(String name) {
