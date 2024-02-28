@@ -1,5 +1,6 @@
 package org.dromara.northstar.module;
 
+import java.io.File;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -23,6 +24,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.dromara.northstar.ai.SampleData;
+import org.dromara.northstar.ai.SamplingAware;
+import org.dromara.northstar.ai.sampling.SampleDataWriter;
 import org.dromara.northstar.common.constant.Constants;
 import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.common.constant.ModuleState;
@@ -300,6 +304,15 @@ public class ModuleContext implements IModuleContext{
 		dataFrameQMap.get(bar.contract()).offer(json);
 		if(isEnabled()) {
 			moduleRepo.saveRuntime(getRuntimeDescription(false));
+		}
+		
+		// 执行采样逻辑
+		// 注意，只有在模组启用状态下，才会进行采样。这样是为了避免在模组预热时进行采样
+		if(tradeStrategy instanceof SamplingAware sa && isEnabled() && sa.isSampling()) {
+			SampleData sampleData = sa.sample();
+			File csvFile = new File(String.format("data/%s.csv", getModule().getName()));
+			SampleDataWriter writer = new SampleDataWriter(csvFile);
+			writer.append(sampleData);
 		}
 	}
 	

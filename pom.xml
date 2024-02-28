@@ -374,11 +374,6 @@
 	
 	<build>
 		<plugins>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>versions-maven-plugin</artifactId>
-				<version>2.16.2</version>
-			</plugin>
 			<!--解析${revision}版本号参数-->
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
