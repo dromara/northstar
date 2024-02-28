@@ -539,7 +539,6 @@ public class ModuleContext implements IModuleContext{
 		}
 		try {
 			moduleAccount.onSubmitOrder(orderReq);
-			moduleStateMachine.onSubmitReq();
 		} catch (InsufficientException e) {
 			logger.error("发单失败。原因：{}", e.getMessage());
 			tradeIntentMap.remove(orderReq.contract());
@@ -547,19 +546,21 @@ public class ModuleContext implements IModuleContext{
 			setEnabled(false);
 			return null;
 		}
+		moduleStateMachine.onSubmitReq();
 		try {
 			if(Objects.nonNull(orderReqFilter)) {
 				orderReqFilter.doFilter(orderReq);
 			}
+			Contract contract = orderReq.contract();
+			String originOrderId = module.getAccount(contract).submitOrder(orderReq);
+			orderReqMap.put(originOrderId, orderReq);
+			return originOrderId;
 		} catch (Exception e) {
 			logger.error("发单失败。原因：{}", e.getMessage());
 			tradeIntentMap.remove(orderReq.contract());
+			moduleStateMachine.onFailSubmitReq();
 			return null;
 		}
-		Contract contract = orderReq.contract();
-		String originOrderId = module.getAccount(contract).submitOrder(orderReq);
-		orderReqMap.put(originOrderId, orderReq);
-		return originOrderId;
 	}
 
 	@Override

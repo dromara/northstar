@@ -132,19 +132,13 @@ class ModuleAccountTest {
 		when(c.contract()).thenReturn(trade.contract());
 		when(contractMgr.getContract(any(Identifier.class))).thenReturn(c);
 		when(ctx.getLogger(any())).thenReturn(mock(Logger.class));
-		macc = new ModuleAccount(md, mrd, new ModuleStateMachine(ctx), moduleRepo, contractMgr, ctx);
-	}
-
-	@Test
-	void testGetModuleStateMachine() {
-		assertThat(macc.getModuleState()).isEqualTo(ModuleState.EMPTY_HEDGE);
+		macc = new ModuleAccount(md, mrd, moduleRepo, contractMgr, ctx);
 	}
 
 	@Test
 	void testOnTrade() {
 		macc.onOrder(order);
 		macc.onTrade(closeTrade);
-		assertThat(macc.getModuleState()).isEqualTo(ModuleState.HOLDING_SHORT);
 		assertThat(macc.getInitBalance()).isEqualTo(100000);
 		assertThat(macc.getAccCloseProfit()).isEqualTo(4200);
 		assertThat(macc.getAccDealVolume()).isEqualTo(5);
