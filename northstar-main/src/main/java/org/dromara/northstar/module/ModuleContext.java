@@ -192,8 +192,8 @@ public class ModuleContext implements IModuleContext{
 		mktCenter.lastTick(tradeIntent.getContract()).ifPresentOrElse(tick -> {
 			logger.info("收到下单意图：{}", tradeIntent);
 			tradeIntent.setContext(this);
+			tradeIntent.onTick(tick);	
 			tradeIntentMap.put(tradeIntent.getContract(), tradeIntent);
-	        tradeIntent.onTick(tick);	
 		}, () -> logger.warn("没有TICK行情数据时，忽略下单请求"));
 	}
 
