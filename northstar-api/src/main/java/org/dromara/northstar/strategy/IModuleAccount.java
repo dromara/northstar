@@ -2,7 +2,6 @@ package org.dromara.northstar.strategy;
 
 import org.dromara.northstar.common.TickDataAware;
 import org.dromara.northstar.common.TransactionAware;
-import org.dromara.northstar.common.constant.ModuleState;
 import org.dromara.northstar.common.model.core.Contract;
 
 import xyz.redtorch.pb.CoreEnum.DirectionEnum;
@@ -46,11 +45,5 @@ public interface IModuleAccount extends TickDataAware, TransactionAware {
 	 * @return				正数代表净多头持仓，负数代表净空头持仓
 	 */
 	int getNonclosedNetPosition(Contract contract);
-	/**
-	 * 获取模组状态
-	 * @return
-	 */
-	ModuleState getModuleState();
-	
 	
 }

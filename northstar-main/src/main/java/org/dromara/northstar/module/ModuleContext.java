@@ -136,6 +136,8 @@ public class ModuleContext implements IModuleContext{
 	
 	protected OrderRequestFilter orderReqFilter;
 	
+	protected ModuleStateMachine moduleStateMachine;
+	
 	public ModuleContext(TradeStrategy tradeStrategy, ModuleDescription moduleDescription, ModuleRuntimeDescription moduleRtDescription,
 			IContractManager contractMgr, IModuleRepository moduleRepo, BarMergerRegistry barMergerRegistry) {
 		this.tradeStrategy = tradeStrategy;
@@ -145,7 +147,9 @@ public class ModuleContext implements IModuleContext{
 		this.loggerFactory = new ModuleLoggerFactory(moduleDescription.getModuleName());
 		this.logger = loggerFactory.getLogger(getClass().getName());
 		this.bufSize.set(moduleDescription.getModuleCacheDataSize());
-		this.moduleAccount = new ModuleAccount(moduleDescription, moduleRtDescription, new ModuleStateMachine(this), moduleRepo, contractMgr, this);
+		this.moduleStateMachine = new ModuleStateMachine(this);
+		this.moduleAccount = new ModuleAccount(moduleDescription, moduleRtDescription, moduleRepo, contractMgr, this);
+		this.moduleStateMachine.setModuleAccount(this.moduleAccount);
 		this.orderReqFilter = new DefaultOrderFilter(moduleDescription.getModuleAccountSettingsDescription().stream().flatMap(mad -> mad.getBindedContracts().stream()).toList(), this);
 		moduleDescription.getModuleAccountSettingsDescription().stream()
 			.forEach(mad -> {
@@ -210,7 +214,7 @@ public class ModuleContext implements IModuleContext{
 
 	@Override
 	public ModuleState getState() {
-		return moduleAccount.getModuleState();
+		return moduleStateMachine.getState();
 	}
 
 	@Override
@@ -352,6 +356,7 @@ public class ModuleContext implements IModuleContext{
 			TradeIntent tradeIntent = tradeIntentMap.get(order.contract());
 			tradeIntent.onOrder(order);
 		}
+		moduleStateMachine.onOrder(order);
 	}
 
 	@Override
@@ -374,6 +379,7 @@ public class ModuleContext implements IModuleContext{
 				tradeIntentMap.remove(trade.contract());
 			}
 		}
+		moduleStateMachine.onTrade(trade);
 	}
 
 	@Override
@@ -421,7 +427,7 @@ public class ModuleContext implements IModuleContext{
 		ModuleRuntimeDescription mad = ModuleRuntimeDescription.builder()
 				.moduleName(module.getName())
 				.enabled(module.isEnabled())
-				.moduleState(moduleAccount.getModuleState())
+				.moduleState(getState())
 				.storeObject(tradeStrategy.getStoreObject())
 				.strategyInfos(tradeStrategy.strategyInfos())
 				.moduleAccountRuntime(accRtDescription)
@@ -533,6 +539,7 @@ public class ModuleContext implements IModuleContext{
 		}
 		try {
 			moduleAccount.onSubmitOrder(orderReq);
+			moduleStateMachine.onSubmitReq();
 		} catch (InsufficientException e) {
 			logger.error("发单失败。原因：{}", e.getMessage());
 			tradeIntentMap.remove(orderReq.contract());
@@ -568,7 +575,7 @@ public class ModuleContext implements IModuleContext{
 	@Override
 	public void cancelOrder(String originOrderId) {
 		if(!orderReqMap.containsKey(originOrderId)) {
-			logger.debug("找不到订单：{}", originOrderId);
+			logger.warn("找不到订单：{}", originOrderId);
 			return;
 		}
 		if(!getState().isOrdering()) {
