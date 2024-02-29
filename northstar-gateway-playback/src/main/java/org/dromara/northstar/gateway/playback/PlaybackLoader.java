@@ -18,41 +18,45 @@ import lombok.extern.slf4j.Slf4j;
 @Order(1)
 @Component
 public class PlaybackLoader implements CommandLineRunner{
-	
+
 	@Autowired
 	GatewayMetaProvider gatewayMetaProvider;
-	
+
 	@Autowired
 	PlaybackGatewayFactory playbackGatewayFactory;
-	
+
 	@Autowired
 	List<IDataSource> datasources;
-	
+
 	@Autowired
 	IMarketCenter mktCenter;
-	
+
 	@Autowired
 	PlaybackContractDefProvider contractDefPvd;
-	
+
 	@Override
 	public void run(String... args) throws Exception {
 		gatewayMetaProvider.add(ChannelType.PLAYBACK, new PlaybackGatewaySettings(), playbackGatewayFactory);
 		mktCenter.addDefinitions(contractDefPvd.get());
-		
+
 		log.debug("加载回测合约");
 		final LocalDate today = LocalDate.now();
 		// 加载CTP合约
-		datasources.forEach(ds -> 
-			ds.getUserAvailableExchanges().forEach(exchange -> {
-				ds.getAllContracts(exchange).stream()
-					//过滤掉过期合约
-					.filter(contract -> contract.lastTradeDate().isAfter(today))
-					.forEach(contract -> mktCenter.addInstrument(new PlaybackContract(contract, ds)));
-				log.info("预加载 [{}] 交易所合约信息", exchange);
-			})
-		);
-			
-		mktCenter.loadContractGroup(ChannelType.PLAYBACK);
+		try {
+			datasources.forEach(ds ->
+					ds.getUserAvailableExchanges().forEach(exchange -> {
+						ds.getAllContracts(exchange).stream()
+								//过滤掉过期合约
+								.filter(contract -> contract.lastTradeDate().isAfter(today))
+								.forEach(contract -> mktCenter.addInstrument(new PlaybackContract(contract, ds)));
+						log.info("预加载 [{}] 交易所合约信息", exchange);
+					})
+			);
+			mktCenter.loadContractGroup(ChannelType.PLAYBACK);
+		} catch (Exception e) {
+			log.error("加载回测合约异常", e);
+		}
+
 	}
 
 }

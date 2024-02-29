@@ -75,8 +75,8 @@ public class NorthstarDataServiceDataSource implements IDataSource{
 		try {			
 			ResponseEntity<String> respEntity = restTemplate.exchange(URI.create(baseUrl + "/reg"), HttpMethod.GET, reqEntity, String.class);
 			dummyToken = respEntity.getBody();
-		} catch (HttpServerErrorException e) {
-			throw new IllegalStateException("无法注册数据服务", e);
+		} catch (Exception e) {
+			log.error("无法注册数据服务", e);
 		}
 	}
 	
