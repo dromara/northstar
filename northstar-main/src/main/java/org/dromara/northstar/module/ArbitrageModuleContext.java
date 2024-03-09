@@ -94,7 +94,7 @@ public class ArbitrageModuleContext extends ModuleContext implements IModuleCont
 		String id = UUID.randomUUID().toString();
 		String gatewayId = getAccount(contract).accountId();
 		DirectionEnum direction = OrderUtils.resolveDirection(operation);
-		int factor = FieldUtils.directionFactor(direction);
+		int factor = priceType == PriceType.ANY_PRICE ? 0 : FieldUtils.directionFactor(direction);	// 市价时没有超价处理
 		double plusPrice = module.getModuleDescription().getOrderPlusTick() * contract.priceTick(); // 超价设置
 		Position pos = getAccount(contract).getPosition(OrderUtils.getClosingDirection(direction), contract)
 				.orElse(Position.builder().contract(contract).build());
