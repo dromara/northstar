@@ -26,6 +26,8 @@ public class TradeHelper {
 	private final Contract tradeContract;
 	private final long defaultTimeout;
 	private final Logger logger;
+	private PriceType priceType = PriceType.OPP_PRICE;
+	
 	@Builder
 	public TradeHelper(IModuleStrategyContext context, Contract tradeContract) {
 		this(context, tradeContract, 5000);
@@ -39,6 +41,10 @@ public class TradeHelper {
 		this.tradeContract = tradeContract;
 		this.defaultTimeout = defaultTimeout;
 		this.logger = context.getLogger(getClass());
+	}
+	
+	public void setPriceType(PriceType type) {
+		priceType = type;
 	}
 	
 	public int getCloseVolume(DirectionEnum holdingDirection) {
@@ -159,7 +165,7 @@ public class TradeHelper {
 		context.submitOrderReq(TradeIntent.builder()
 				.contract(tradeContract)
 				.operation(operation)
-				.priceType(PriceType.OPP_PRICE)
+				.priceType(priceType)
 				.timeout(defaultTimeout)
 				.volume(vol)
 				.build());
