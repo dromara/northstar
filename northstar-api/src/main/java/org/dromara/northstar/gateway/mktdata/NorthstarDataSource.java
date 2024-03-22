@@ -1,14 +1,21 @@
 package org.dromara.northstar.gateway.mktdata;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 import org.dromara.northstar.common.IDataSource;
 import org.dromara.northstar.common.constant.ChannelType;
+import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.common.model.ResultSet;
 import org.dromara.northstar.common.model.core.Bar;
 import org.dromara.northstar.common.model.core.Contract;
+import org.dromara.northstar.common.utils.CommonUtils;
 import org.springframework.util.Assert;
+
+import xyz.redtorch.pb.CoreEnum.CurrencyEnum;
+import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 
 /**
  * 数据源处理
@@ -42,26 +49,24 @@ public class NorthstarDataSource implements IDataSource{
 	private List<Bar> convertMinuteData(ResultSet rs, Contract contract){
 		return rs.toJSONList().stream()
 				.map(json -> Bar.builder()
-						.actionDay(null)
-						.actionTime(null)
-						.actionTimestamp(0)
-						.tradingDay(null)
+						.actionDay(LocalDate.parse(json.getString("trade_time").substring(0, 10)))
+						.actionTime(LocalTime.parse(json.getString("trade_time").substring(11)))
+						.actionTimestamp(CommonUtils.localDateTimeToMills(LocalDateTime.parse(json.getString("trade_time"), DateTimeConstant.DT_FORMAT_FORMATTER)))
+						.tradingDay(LocalDate.parse(json.getString("trading_day")))
 						.channelType(contract.channelType())
 						.contract(contract)
 						.gatewayId(contract.gatewayId())
-						.openPrice(0)
-						.closePrice(0)
-						.highPrice(0)
-						.lowPrice(0)
-						.openInterest(0)
-						.openInterestDelta(0)
-						.volume(0)
-						.volumeDelta(0)
-						.turnover(0)
-						.turnoverDelta(0)
-						.preClosePrice(0)
-						.preOpenInterest(0)
-						.preSettlePrice(0)
+						.openPrice(json.getDoubleValue("open"))
+						.closePrice(json.getDoubleValue("close"))
+						.highPrice(json.getDoubleValue("high"))
+						.lowPrice(json.getDoubleValue("low"))
+						.openInterest(json.getDoubleValue("oi"))
+						.openInterestDelta(json.getDoubleValue("oi_delta"))
+						.volume(json.getLongValue("vol"))
+						.volumeDelta(json.getLongValue("vol_delta"))
+						.turnover(json.getDoubleValue("amount"))
+						.turnoverDelta(json.getDoubleValue("amount_delta"))
+						.preOpenInterest(json.getDoubleValue("pre_oi"))
 						.build())
 				.toList();
 	}
@@ -72,26 +77,24 @@ public class NorthstarDataSource implements IDataSource{
 				.toJSONList()
 				.stream()
 				.map(json -> Bar.builder()
-						.actionDay(null)
-						.actionTime(null)
-						.actionTimestamp(0)
-						.tradingDay(null)
+						.actionDay(LocalDate.parse(json.getString("trade_date"), DateTimeConstant.D_FORMAT_INT_FORMATTER))
+						.tradingDay(LocalDate.parse(json.getString("trade_date"), DateTimeConstant.D_FORMAT_INT_FORMATTER))
 						.channelType(contract.channelType())
 						.contract(contract)
 						.gatewayId(contract.gatewayId())
-						.openPrice(0)
-						.closePrice(0)
-						.highPrice(0)
-						.lowPrice(0)
-						.openInterest(0)
-						.openInterestDelta(0)
-						.volume(0)
-						.volumeDelta(0)
-						.turnover(0)
-						.turnoverDelta(0)
-						.preClosePrice(0)
-						.preOpenInterest(0)
-						.preSettlePrice(0)
+						.openPrice(json.getDoubleValue("open"))
+						.closePrice(json.getDoubleValue("close"))
+						.highPrice(json.getDoubleValue("high"))
+						.lowPrice(json.getDoubleValue("low"))
+						.openInterest(json.getDoubleValue("oi"))
+						.openInterestDelta(json.getDoubleValue("oi_chg"))
+						.volume(json.getLongValue("vol"))
+						.volumeDelta(json.getLongValue("vol"))
+						.turnover(json.getDoubleValue("amount"))
+						.turnoverDelta(json.getDoubleValue("amount"))
+						.preOpenInterest(json.getDoubleValue("pre_oi"))
+						.preClosePrice(json.getDoubleValue("pre_close"))
+						.preSettlePrice(json.getDoubleValue("pre_settle"))
 						.build())
 				.toList();
 	}
@@ -103,8 +106,8 @@ public class NorthstarDataSource implements IDataSource{
 		return dataService.getCalendarCN(startDate.getYear())
 				.toJSONList()
 				.stream()
-				.map(json -> LocalDate.now())
-				.filter(date -> true)
+				.filter(json -> json.getIntValue("is_open") == 0)
+				.map(json -> LocalDate.parse(json.getString("date"), DateTimeConstant.D_FORMAT_INT_FORMATTER))
 				.toList();
 	}
 
@@ -114,7 +117,17 @@ public class NorthstarDataSource implements IDataSource{
 				.toJSONList()
 				.stream()
 				.map(json -> Contract.builder()
-						
+						.unifiedSymbol(json.getString("unifiedSymbol"))
+						.underlyingSymbol(json.getString("fut_code"))
+						.name(json.getString("name"))
+						.fullName(json.getString("name"))
+						.exchange(ExchangeEnum.valueOf(json.getString("exchange")))
+						.currency(CurrencyEnum.CNY)
+						.multiplier(json.getDoubleValue("multiplier"))
+						.priceTick(json.getDoubleValue("price_tick"))
+						.lastTradeDate(LocalDate.parse(json.getString("delist_date"), DateTimeConstant.D_FORMAT_INT_FORMATTER))
+						.longMarginRatio(0.1)
+						.shortMarginRatio(0.1)
 						.build())
 				.toList();
 		
