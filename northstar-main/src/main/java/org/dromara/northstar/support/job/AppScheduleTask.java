@@ -7,10 +7,7 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Objects;
 
-import jakarta.transaction.Transactional;
-
 import org.dromara.northstar.data.jdbc.MarketDataRepository;
-import org.dromara.northstar.gateway.mktdata.NorthstarDataServiceDataSource;
 import org.dromara.northstar.strategy.IMessageSender;
 import org.dromara.northstar.support.utils.ExceptionLogChecker;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +17,7 @@ import org.springframework.stereotype.Component;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.FileAppender;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -37,9 +35,6 @@ public class AppScheduleTask {
 	@Autowired(required = false)
 	private IMessageSender msgSender;
 	
-	@Autowired
-	private NorthstarDataServiceDataSource dataSource;
-
 	/**
 	 * 检查当天的程序日志中是否存在异常日志，如存在则转发报告
 	 * 周一至五，每隔一小时检查 
@@ -78,11 +73,4 @@ public class AppScheduleTask {
 		log.debug("移除过期行情数据");
 	}
 	
-	/**
-	 * 定时重新注册数据服务，避免会话失效
-	 */
-	@Scheduled(cron="0 0 0/12 * * *")
-	public void timelyRegister() {
-		dataSource.register();
-	}
 }

@@ -7,7 +7,7 @@ import org.dromara.northstar.common.model.core.ContractDefinition;
 import org.dromara.northstar.common.model.core.TimeSlot;
 import org.dromara.northstar.common.model.core.TradeTimeDefinition;
 import org.dromara.northstar.common.utils.DateTimeUtils;
-import org.dromara.northstar.gateway.mktdata.NorthstarDataServiceDataSource;
+import org.dromara.northstar.gateway.mktdata.NorthstarDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -18,7 +18,7 @@ import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
 public class PlaybackContractDefProvider {
 	
 	@Autowired
-	private NorthstarDataServiceDataSource dataSource;
+	private NorthstarDataSource dataSource;
 	
 	private static final ExchangeEnum SSE = ExchangeEnum.SSE;
 	private static final ExchangeEnum SZSE = ExchangeEnum.SZSE;

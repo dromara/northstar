@@ -43,7 +43,7 @@ import org.dromara.northstar.event.BroadcastHandler;
 import org.dromara.northstar.gateway.GatewayMetaProvider;
 import org.dromara.northstar.gateway.IContract;
 import org.dromara.northstar.gateway.IMarketCenter;
-import org.dromara.northstar.gateway.mktdata.NorthstarDataServiceDataSource;
+import org.dromara.northstar.gateway.mktdata.NorthstarDataSource;
 import org.dromara.northstar.gateway.playback.PlaybackGatewayFactory;
 import org.dromara.northstar.gateway.playback.PlaybackGatewaySettings;
 import org.dromara.northstar.gateway.sim.trade.SimGatewayFactory;
@@ -108,7 +108,7 @@ class ModuleControllerTest {
 	PlaybackGatewayFactory playbackGatewayFactory;
 	
 	@Autowired
-	NorthstarDataServiceDataSource dsMgr;
+	NorthstarDataSource dsMgr;
 	
 	@Autowired
 	ModuleManager moduleMgr;

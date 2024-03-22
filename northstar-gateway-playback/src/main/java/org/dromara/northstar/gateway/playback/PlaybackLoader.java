@@ -44,13 +44,10 @@ public class PlaybackLoader implements CommandLineRunner{
 		// 加载CTP合约
 		try {
 			datasources.forEach(ds ->
-					ds.getUserAvailableExchanges().forEach(exchange -> {
-						ds.getAllContracts(exchange).stream()
-								//过滤掉过期合约
-								.filter(contract -> contract.lastTradeDate().isAfter(today))
-								.forEach(contract -> mktCenter.addInstrument(new PlaybackContract(contract, ds)));
-						log.info("预加载 [{}] 交易所合约信息", exchange);
-					})
+				ds.getAllContracts().stream()
+					//过滤掉过期合约
+					.filter(contract -> contract.lastTradeDate().isAfter(today))
+					.forEach(contract -> mktCenter.addInstrument(new PlaybackContract(contract, ds)))
 			);
 			mktCenter.loadContractGroup(ChannelType.PLAYBACK);
 		} catch (Exception e) {
