@@ -16,7 +16,6 @@ import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.constant.PlaybackPrecision;
 import org.dromara.northstar.common.constant.TickType;
 import org.dromara.northstar.common.model.core.Bar;
-import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.common.model.core.Tick;
 import org.dromara.northstar.common.utils.MarketDataLoadingUtils;
 import org.dromara.northstar.gateway.IContract;
@@ -51,12 +50,11 @@ public class ContractDataLoader {
 		this.contract = contract;
 		this.dsMgr = contract.dataSource();
 		this.gatewayId = gatewayId;
-		Contract cf = contract.contract();
 		this.tickGenAlgo = switch(precision) {
-		case LITE -> new SimpleCloseSimulation(cf.priceTick());
-		case LOW -> new SimplePriceSimulation(cf.priceTick());
-		case MEDIUM -> new RandomWalkTickSimulation(30, cf.priceTick());
-		case HIGH -> new RandomWalkTickSimulation(120, cf.priceTick());
+		case LITE -> new SimpleCloseSimulation();
+		case LOW -> new SimplePriceSimulation();
+		case MEDIUM -> new RandomWalkTickSimulation(30);
+		case HIGH -> new RandomWalkTickSimulation(120);
 		default -> throw new IllegalArgumentException("Unexpected value: " + precision);
 		};
 	}

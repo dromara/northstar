@@ -17,16 +17,14 @@ public class RandomWalkTickSimulation implements TickSimulationAlgorithm {
 	
 	private int numOfTickPerBar;
 	
-	private double priceTick;
-	
-	public RandomWalkTickSimulation(int numOfTickPerBar, double priceTick) {
+	public RandomWalkTickSimulation(int numOfTickPerBar) {
 		this.numOfTickPerBar = numOfTickPerBar;
-		this.priceTick = priceTick;
 	}
 	
 	@Override
 	public List<TickEntry> generateFrom(Bar bar) {
 		boolean up = bar.closePrice() > bar.openPrice();
+		double priceTick = bar.contract().priceTick();
 		List<Double> milestonePrices = List.of(
 				bar.openPrice(),
 				up ? bar.lowPrice() : bar.highPrice(),
