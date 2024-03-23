@@ -5,6 +5,7 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
+import org.dromara.northstar.common.Timed;
 import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.common.constant.TickType;
@@ -47,7 +48,7 @@ public record Tick(
 		TickType type,			// 行情类型
 		JSONObject otherInfo,    // 额外信息
 		ChannelType channelType    // 渠道来源
-) {
+) implements Timed{
 
 	public TickField toTickField() {
 		return TickField.newBuilder()
@@ -81,5 +82,10 @@ public record Tick(
 				.addAllAskVolume(askVolume)
 				.setChannelType(channelType.toString())
 				.build();
+	}
+
+	@Override
+	public long getTimestamp() {
+		return actionTimestamp;
 	}
 }
