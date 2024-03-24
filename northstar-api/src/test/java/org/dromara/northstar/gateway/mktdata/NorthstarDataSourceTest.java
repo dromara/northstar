@@ -22,7 +22,8 @@ class NorthstarDataSourceTest {
 	NorthstarDataSource ds = new NorthstarDataSource(mgr);
 	
 	Contract c = Contract.builder()
-			.unifiedSymbol("rb0000@SHFE@FUTURES")
+			.unifiedSymbol("rb9999@SHFE@FUTURES")
+			.symbol("rb9999")
 			.build();
 
 	@Test
