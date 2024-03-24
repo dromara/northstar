@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.dromara.northstar.common.IDataSource;
 import org.dromara.northstar.common.constant.ChannelType;
+import org.dromara.northstar.common.constant.Constants;
 import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.common.model.ResultSet;
 import org.dromara.northstar.common.model.core.Bar;
@@ -57,10 +58,10 @@ public class NorthstarDataSource implements IDataSource{
 						.channelType(contract.channelType())
 						.contract(contract)
 						.gatewayId(contract.gatewayId())
-						.openPrice(json.getDoubleValue("open"))
-						.closePrice(json.getDoubleValue("close"))
-						.highPrice(json.getDoubleValue("high"))
-						.lowPrice(json.getDoubleValue("low"))
+						.openPrice(indexContractPriceEnhance(contract, json.getDoubleValue("open")))
+						.closePrice(indexContractPriceEnhance(contract, json.getDoubleValue("close")))
+						.highPrice(indexContractPriceEnhance(contract, json.getDoubleValue("high")))
+						.lowPrice(indexContractPriceEnhance(contract, json.getDoubleValue("low")))
 						.openInterest(json.getDoubleValue("oi"))
 						.openInterestDelta(json.getDoubleValue("oi_delta"))
 						.volume(json.getLongValue("vol"))
@@ -70,6 +71,14 @@ public class NorthstarDataSource implements IDataSource{
 						.preOpenInterest(json.getDoubleValue("pre_oi"))
 						.build())
 				.toList();
+	}
+	
+	private double indexContractPriceEnhance(Contract contract, double price) {
+		if(!contract.symbol().contains(Constants.INDEX_SUFFIX)) {
+			return price;
+		}
+		int numOfPriceTickInPrice = (int)(price * 1000) / (int)(contract.priceTick() * 1000);
+		return numOfPriceTickInPrice * contract.priceTick();
 	}
 
 	@Override
@@ -83,10 +92,10 @@ public class NorthstarDataSource implements IDataSource{
 						.channelType(contract.channelType())
 						.contract(contract)
 						.gatewayId(contract.gatewayId())
-						.openPrice(json.getDoubleValue("open"))
-						.closePrice(json.getDoubleValue("close"))
-						.highPrice(json.getDoubleValue("high"))
-						.lowPrice(json.getDoubleValue("low"))
+						.openPrice(indexContractPriceEnhance(contract, json.getDoubleValue("open")))
+						.closePrice(indexContractPriceEnhance(contract, json.getDoubleValue("close")))
+						.highPrice(indexContractPriceEnhance(contract, json.getDoubleValue("high")))
+						.lowPrice(indexContractPriceEnhance(contract, json.getDoubleValue("low")))
 						.openInterest(json.getDoubleValue("oi"))
 						.openInterestDelta(json.getDoubleValue("oi_chg"))
 						.volume(json.getLongValue("vol"))
@@ -94,7 +103,7 @@ public class NorthstarDataSource implements IDataSource{
 						.turnover(json.getDoubleValue("amount"))
 						.turnoverDelta(json.getDoubleValue("amount"))
 						.preOpenInterest(json.getDoubleValue("pre_oi"))
-						.preClosePrice(json.getDoubleValue("pre_close"))
+						.preClosePrice(indexContractPriceEnhance(contract, json.getDoubleValue("pre_close")))
 						.preSettlePrice(json.getDoubleValue("pre_settle"))
 						.build())
 				.toList();
