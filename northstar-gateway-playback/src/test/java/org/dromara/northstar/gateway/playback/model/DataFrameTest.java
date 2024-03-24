@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 
 class DataFrameTest {
 	
-	DataFrame<Bar> bars = new DataFrame<>(10, 50000);
+	DataFrame<Bar> bars = new DataFrame<>(50000);
 
 	@Test
 	void test() {

@@ -5,8 +5,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -43,8 +43,6 @@ import org.dromara.northstar.gateway.utils.DataLoadUtil;
  */
 public class PlaybackDataLoader {
 	
-	private static final int WK_MIN = 7 * 24 * 60; 
-	
 	private final Collection<IContract> contracts;
 	
 	private final TickSimulationAlgorithm tickGenAlgo;
@@ -79,18 +77,17 @@ public class PlaybackDataLoader {
 			util.splitByWeek(startDate, endDate, 
 					(start, end) -> loadBarDataFrame(start, end)
 							.stream()
-							.filter(df -> !df.items().isEmpty())
 							.forEach(onDataCallback::accept))
 		);
 	}
 	
 	// 把查询到的Bar数据按时间帧切片
 	private List<DataFrame<Bar>> loadBarDataFrame(LocalDate startDate, LocalDate endDate){
-		LocalDateTime ldt = LocalDateTime.of(startDate, LocalTime.of(0, 0));
+		LocalDateTime ldt = LocalDateTime.of(startDate.minusDays(3), LocalTime.of(0, 0));	// 要考虑周五夜盘的数据
 		LocalDateTime endDateTime = LocalDateTime.of(endDate.plusDays(1), LocalTime.of(0, 0));
-		List<DataFrame<Bar>> dataFrameList = new ArrayList<>(WK_MIN);
+		LinkedList<DataFrame<Bar>> dataFrameList = new LinkedList<>();
 		while(!ldt.isAfter(endDateTime)) {
-			dataFrameList.add(new DataFrame<>(16, CommonUtils.localDateTimeToMills(ldt)));
+			dataFrameList.add(new DataFrame<>(CommonUtils.localDateTimeToMills(ldt)));
 			ldt = ldt.plusMinutes(1);
 		}
 		Map<Long, DataFrame<Bar>> timeDataMap = dataFrameList.stream().collect(Collectors.toMap(DataFrame::getTimestamp, df -> df));
@@ -106,7 +103,7 @@ public class PlaybackDataLoader {
 						.build())
 				.forEach(bar -> timeDataMap.get(bar.actionTimestamp()).add(bar));
 		}
-		return dataFrameList;
+		return dataFrameList.stream().filter(df -> !df.isEmpty()).toList();
 	}
 	
 	public CompletableFuture<Void> load(LocalDate startDate, LocalDate endDate, BooleanSupplier interceptedFlagSupplier,
@@ -121,9 +118,6 @@ public class PlaybackDataLoader {
 				}
 				List<DataFrame<Bar>> dataBars = loadBarDataFrame(start, end);
 				for(DataFrame<Bar> df : dataBars) {
-					if(df.items().isEmpty()) {
-						continue;
-					}
 					generateTickFrames(df).forEach(onTickDataCallback::accept);
 					Bar bar = df.getSample();
 					boolean isLastBar = isLastBarOfTradeDay(bar);
@@ -144,7 +138,7 @@ public class PlaybackDataLoader {
 		Bar sample = barFrame.getSample();
 		List<DataFrame<Tick>> dfList = tickGenAlgo.generateFrom(sample)
 			.stream()
-			.map(e -> new DataFrame<Tick>(numOfTickPerBar, e.timestamp()))
+			.map(e -> new DataFrame<Tick>(e.timestamp()))
 			.toList();
 		Map<Long, DataFrame<Tick>> tickDataMap = dfList.stream().collect(Collectors.toMap(DataFrame::getTimestamp, df -> df));
 		barFrame.items().forEach(bar -> {

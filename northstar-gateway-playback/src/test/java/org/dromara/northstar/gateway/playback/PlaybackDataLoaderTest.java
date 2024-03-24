@@ -43,6 +43,10 @@ class PlaybackDataLoaderTest {
 			.actionTime(LocalTime.now().withSecond(0).withNano(0))
 			.actionTimestamp(CommonUtils.localDateTimeToMills(LocalDateTime.now().withSecond(0).withNano(0)))
 			.contract(c)
+			.openPrice(1000)
+			.closePrice(1050)
+			.highPrice(1100)
+			.lowPrice(1000)
 			.build();
 	
 	ContractDefinition cd = ContractDefinition.builder()

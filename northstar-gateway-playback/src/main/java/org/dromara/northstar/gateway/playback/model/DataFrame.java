@@ -11,22 +11,29 @@ import org.dromara.northstar.common.Timed;
  */
 public class DataFrame<T extends Timed> implements Timed{
 
-	private final Set<T> buf;
+	private Set<T> buf;
 	
 	private final long timestamp;
 	
 	private T sample;
 	
-	public DataFrame(int bufSize, long timestamp) {
-		this.buf = HashSet.newHashSet(bufSize);
+	public DataFrame(long timestamp) {
+		
 		this.timestamp = timestamp;
 	}
 	
 	public void add(T item) {
 		if(item.getTimestamp() == timestamp) {
+			if(isEmpty()) {
+				buf = new HashSet<>();
+			}
 			buf.add(item);
 			sample = item;
 		}
+	}
+	
+	public boolean isEmpty() {
+		return buf == null || buf.isEmpty();
 	}
 	
 	public Set<T> items(){
