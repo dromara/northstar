@@ -7,6 +7,7 @@ import org.dromara.northstar.common.model.core.Bar;
 import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.common.utils.TradeHelper;
 import org.dromara.northstar.indicator.Indicator;
+import org.dromara.northstar.indicator.constant.PeriodUnit;
 import org.dromara.northstar.indicator.model.Configuration;
 import org.dromara.northstar.indicator.trend.MAIndicator;
 import org.dromara.northstar.strategy.AbstractStrategy;
@@ -115,6 +116,15 @@ public class MultiPeriodExampleStrategy extends AbstractStrategy	// 为了简化
 		ctx.registerIndicator(slowLine2);
 		
 		helper = TradeHelper.builder().context(getContext()).tradeContract(c).build();
+		
+		// 注册不同周期的监听器
+		ctx.addMergedBarListener(c, 1, PeriodUnit.MINUTE, bar -> {
+			logger.info("1分钟周期监听器 {} {}", bar.actionDay(), bar.actionTime());
+		});
+		ctx.addMergedBarListener(c, 15, PeriodUnit.MINUTE, bar -> {
+			logger.info("15分钟周期监听器 {} {}", bar.actionDay(), bar.actionTime());
+		});
+		
 	}
 	
 	@Override
