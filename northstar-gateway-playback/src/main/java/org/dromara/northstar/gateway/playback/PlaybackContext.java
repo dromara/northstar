@@ -75,8 +75,8 @@ public class PlaybackContext implements IPlaybackContext{
 		this.dataLoader = new PlaybackDataLoader(gatewayId, contracts, settings.getPrecision());
 		int interval = switch (settings.getSpeed()) {
 			case NORMAL -> 500;
-			case SPRINT -> 25;
-			case RUSH -> 1;
+			case SPRINT -> 5;
+			case RUSH -> 0;
 			default -> throw new IllegalArgumentException("Unexpected value: " + settings.getSpeed());
 		};
 		this.pauseInterval.set(interval);
@@ -103,6 +103,7 @@ public class PlaybackContext implements IPlaybackContext{
 		// 收到检查点标志位时，保存回放状态
 		if(Boolean.TRUE.equals(flag)) {
 			playbackState = CommonUtils.millsToLocalDateTime(timestamp);
+			log.info("当前回放状态：{}", playbackState);
 			rtRepo.save(PlaybackRuntimeDescription.builder()
 					.gatewayId(gatewayId)
 					.playbackTimeState(playbackState)
