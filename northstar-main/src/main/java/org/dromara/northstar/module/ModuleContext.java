@@ -65,6 +65,7 @@ import org.dromara.northstar.strategy.IAccount;
 import org.dromara.northstar.strategy.IModule;
 import org.dromara.northstar.strategy.IModuleAccount;
 import org.dromara.northstar.strategy.IModuleContext;
+import org.dromara.northstar.strategy.MergedBarListener;
 import org.dromara.northstar.strategy.OrderRequestFilter;
 import org.dromara.northstar.strategy.TradeStrategy;
 import org.dromara.northstar.strategy.constant.PriceType;
@@ -625,6 +626,11 @@ public class ModuleContext implements IModuleContext{
 	@Override
 	public TradeStrategy getStrategy() {
 		return tradeStrategy;
+	}
+
+	@Override
+	public void addMergedBarListener(Contract contract, int numOfUnit, PeriodUnit unit, MergedBarListener listener) {
+		registry.addListener(contract, numOfUnit, unit, listener);
 	}
 
 }

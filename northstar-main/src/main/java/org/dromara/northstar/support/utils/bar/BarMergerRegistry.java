@@ -10,10 +10,10 @@ import org.dromara.northstar.common.BarDataAware;
 import org.dromara.northstar.common.model.Identifier;
 import org.dromara.northstar.common.model.core.Bar;
 import org.dromara.northstar.common.model.core.Contract;
+import org.dromara.northstar.indicator.IndicatorValueUpdateHelper;
 import org.dromara.northstar.indicator.constant.PeriodUnit;
 import org.dromara.northstar.strategy.IModuleContext;
 import org.dromara.northstar.strategy.MergedBarListener;
-import org.dromara.northstar.strategy.TradeStrategy;
 
 /**
  * K线合成中心
@@ -32,10 +32,12 @@ public class BarMergerRegistry implements BarDataAware{
 	}
 	
 	public void addListener(Contract contract, int numOfUnit, PeriodUnit unit, MergedBarListener listener) {
-		ListenerType type = ListenerType.INDICATOR;
+		ListenerType type;
 		if(listener instanceof IModuleContext) {
 			type = ListenerType.CONTEXT;
-		} else if(listener instanceof TradeStrategy) {
+		} else if(listener instanceof IndicatorValueUpdateHelper) {
+			type = ListenerType.INDICATOR;
+		} else {
 			type = ListenerType.STRATEGY;
 		}
 		Identifier identifier = makeIdentifier(type, contract, numOfUnit, unit);

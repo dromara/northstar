@@ -3,6 +3,7 @@ package org.dromara.northstar.strategy;
 import org.dromara.northstar.common.constant.ModuleState;
 import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.indicator.Indicator;
+import org.dromara.northstar.indicator.constant.PeriodUnit;
 import org.dromara.northstar.strategy.model.TradeIntent;
 import org.slf4j.ILoggerFactory;
 import org.slf4j.Logger;
@@ -79,4 +80,9 @@ public interface IModuleStrategyContext {
 	 * @return
 	 */
 	int getDefaultVolume();
+	/**
+	 * 注册周期监听器
+	 * @param listener
+	 */
+	void addMergedBarListener(Contract contract, int numOfUnit, PeriodUnit unit, MergedBarListener listener);
 }
