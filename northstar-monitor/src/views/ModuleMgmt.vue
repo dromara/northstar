@@ -239,6 +239,7 @@
             @click="handleRow(scope.$index, scope.row)"
             >{{ scope.row.runtime.enabled ? '查看' : '修改' }}</el-button
           >
+          <el-button v-else size="mini" @click="handleRow(scope.$index, scope.row)">修改</el-button>
           <el-popconfirm
             v-if="!scope.row.runtime || !scope.row.runtime.enabled"
             class="ml-10"
