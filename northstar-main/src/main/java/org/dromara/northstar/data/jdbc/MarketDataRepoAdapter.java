@@ -3,8 +3,8 @@ package org.dromara.northstar.data.jdbc;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
@@ -12,7 +12,6 @@ import org.dromara.northstar.common.IDataSource;
 import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.common.model.core.Bar;
-import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.common.utils.CommonUtils;
 import org.dromara.northstar.data.IMarketDataRepository;
 import org.dromara.northstar.data.jdbc.entity.BarDO;
@@ -23,6 +22,11 @@ import com.google.protobuf.InvalidProtocolBufferException;
 
 import lombok.extern.slf4j.Slf4j;
 import xyz.redtorch.pb.CoreField.BarField;
+
+/**
+ * 本地行情数据仓库
+ * @auth KevinHuangwl
+ */
 
 @Slf4j
 public class MarketDataRepoAdapter implements IMarketDataRepository{
@@ -47,44 +51,13 @@ public class MarketDataRepoAdapter implements IMarketDataRepository{
 	}
 
 	@Override
-	public List<Bar> loadBars(IContract contract, LocalDate startDate, LocalDate endDate0) {
-		log.debug("加载 [{}] 历史行情数据：{} -> {}", contract.contract().unifiedSymbol(), startDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), endDate0.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
-		LocalDate today = LocalDate.now();
-		LocalDate endDate = today.isAfter(endDate0) ? endDate0 : today;
-		LinkedList<Bar> resultList = new LinkedList<>();
-		IDataSource dataServiceDelegate = contract.dataSource();
-		if(dataServiceDelegate == null) {
-			log.warn("合约[{}] 没有提供历史数据源，无法加载历史数据", contract.name());
-			return List.of();
+	public List<Bar> loadBars(IContract contract, LocalDate startDate, LocalDate endDate) {
+		List<Bar> resultList = new ArrayList<>();
+		LocalDate date = startDate;
+		while(!date.isAfter(endDate)) {
+			resultList.addAll(findBarData(date, contract.contract().unifiedSymbol()));
+			date = date.plusDays(1);
 		}
-		Contract cf = contract.contract();
-		if(endDate.isAfter(startDate)) {
-			List<Bar> list = dataServiceDelegate.getMinutelyData(cf, startDate, endDate)
-					.stream()
-					.sorted((a, b) -> a.actionTimestamp() < b.actionTimestamp() ? -1 : 1)
-					.toList();
-			resultList.addAll(list);
-		}
-		if(today.isAfter(endDate0))	return resultList; 
-		
-		LocalDate localQueryDate = today;
-		if(resultList.isEmpty()) {
-			while(resultList.isEmpty() && endDate0.isAfter(localQueryDate)) {
-				resultList.addAll(findBarData(localQueryDate, cf.unifiedSymbol()));
-				localQueryDate = localQueryDate.plusDays(1);
-			}
-		} else {			
-			if(Objects.equals(resultList.peekLast().tradingDay(), today)
-					|| today.getDayOfWeek().getValue() > 5) {
-				do {					
-					localQueryDate = localQueryDate.plusDays(1);
-				} while(localQueryDate.getDayOfWeek().getValue() > 5);
-				resultList.addAll(findBarData(localQueryDate, cf.unifiedSymbol()));
-			} else {
-				resultList.addAll(findBarData(localQueryDate, cf.unifiedSymbol()));
-			}
-		}
-		
 		return resultList;
 	}
 	
