@@ -6,6 +6,7 @@ import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
 
 import org.dromara.northstar.common.model.core.Bar;
+import org.dromara.northstar.common.utils.CommonUtils;
 
 /**
  * 随机漫步TICK仿真算法
@@ -23,6 +24,10 @@ public class RandomWalkTickSimulation implements TickSimulationAlgorithm {
 	
 	@Override
 	public List<TickEntry> generateFrom(Bar bar) {
+		if(CommonUtils.isEquals(bar.openPrice(), bar.closePrice()) && CommonUtils.isEquals(bar.highPrice(), bar.lowPrice())) {
+			// 当开高低收为相同价位时
+			return List.of(TickEntry.of(bar.closePrice(), bar.closePrice(), bar.closePrice(), bar.volumeDelta(), bar.openInterestDelta(), bar.getTimestamp()));
+		}
 		boolean up = bar.closePrice() > bar.openPrice();
 		double priceTick = bar.contract().priceTick();
 		List<Double> milestonePrices = List.of(

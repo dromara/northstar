@@ -32,9 +32,13 @@ import org.dromara.northstar.gateway.playback.ticker.RandomWalkTickSimulation;
 import org.dromara.northstar.gateway.playback.ticker.SimpleCloseSimulation;
 import org.dromara.northstar.gateway.playback.ticker.SimplePriceSimulation;
 import org.dromara.northstar.gateway.playback.ticker.TickSimulationAlgorithm;
+import org.dromara.northstar.gateway.utils.DataLoadUtil;
 
 /**
  * 回测数据加载器
+ * 不止要负责加载历史数据，还要把数据分成数据帧供消费方消费
+ * 同时封装了Bar转TICK数据的处理
+ * 另外还要控制分发速度
  * @auth KevinHuangwl
  */
 public class PlaybackDataLoader {
@@ -48,6 +52,8 @@ public class PlaybackDataLoader {
 	private final int numOfTickPerBar;
 	
 	private final String gatewayId;
+	
+	private final DataLoadUtil util = new DataLoadUtil();
 	
 	public PlaybackDataLoader(String gatewayId, Collection<IContract> contracts, PlaybackPrecision precision) {
 		this.gatewayId = gatewayId;
@@ -70,7 +76,7 @@ public class PlaybackDataLoader {
 	public CompletableFuture<Void> preload(LocalDate startDate, LocalDate endDate, Consumer<DataFrame<Bar>> onDataCallback) {
 		return CompletableFuture.runAsync(() -> 
 			// 切分为按周查询
-			splitByWeek(startDate, endDate, 
+			util.splitByWeek(startDate, endDate, 
 					(start, end) -> loadBarDataFrame(start, end)
 							.stream()
 							.filter(df -> !df.items().isEmpty())
@@ -103,24 +109,12 @@ public class PlaybackDataLoader {
 		return dataFrameList;
 	}
 	
-	// 把查询范围切分为按周查询
-	private void splitByWeek(LocalDate startDate, LocalDate endDate, BiConsumer<LocalDate, LocalDate> queryExecutor) {
-		LocalDate date = startDate;
-		while(!date.isAfter(endDate)) {
-			LocalDate start = date;
-			LocalDate endOfThisWeek = date.plusDays(7L - date.getDayOfWeek().getValue());
-			LocalDate end = endDate.isBefore(endOfThisWeek) ? endDate : endOfThisWeek;
-			queryExecutor.accept(start, end);
-			date = end.plusDays(1);
-		}
-	}
-	
 	public CompletableFuture<Void> load(LocalDate startDate, LocalDate endDate, BooleanSupplier interceptedFlagSupplier,
 			Consumer<DataFrame<Tick>> onTickDataCallback,
 			BiConsumer<DataFrame<Bar>, Boolean> onBarDataCallback) {
 		return CompletableFuture.runAsync(() -> 
 			// 切分为按周查询
-			splitByWeek(startDate, endDate, (start, end) -> {
+			util.splitByWeek(startDate, endDate, (start, end) -> {
 				// 中断信号检测，确保能正常中断
 				if(interceptedFlagSupplier.getAsBoolean()) {
 					return;
