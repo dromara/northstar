@@ -1,17 +1,11 @@
 package org.dromara.northstar.config;
 
 import java.io.IOException;
-import java.security.cert.CertificateException;
 import java.time.Duration;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 
 import org.apache.commons.lang3.StringUtils;
 import org.dromara.northstar.common.constant.GlobalSpringContext;
@@ -32,7 +26,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
-import org.springframework.http.client.OkHttp3ClientHttpRequestFactory;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
@@ -45,7 +38,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import com.corundumstudio.socketio.SocketIOServer;
 
 import lombok.extern.slf4j.Slf4j;
-import okhttp3.OkHttpClient;
 
 /**
  * 配置转换器
@@ -65,6 +57,9 @@ public class AppConfig implements WebMvcConfigurer, InitializingBean, Disposable
 	
 	@Autowired
 	private Environment env;
+	
+	@Value("${northstar.data-service.baseUrl}")
+	private String baseUrl;
 	
 	@Autowired
 	private ApplicationContext springCtx;
@@ -118,47 +113,13 @@ public class AppConfig implements WebMvcConfigurer, InitializingBean, Disposable
         return new MarketCenter(fastEventEngine);
     }
 
-	private static OkHttpClient getUnsafeOkHttpClient() {
-		try {
-			// Create a trust manager that does not validate certificate chains
-			final TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
-				@Override
-				public void checkClientTrusted(java.security.cert.X509Certificate[] chain, String authType)
-						throws CertificateException {
-				}
-
-				@Override
-				public void checkServerTrusted(java.security.cert.X509Certificate[] chain, String authType)
-						throws CertificateException {
-				}
-
-				@Override
-				public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-					return new java.security.cert.X509Certificate[] {};
-				}
-			} };
-
-			// Install the all-trusting trust manager
-			final SSLContext sslContext = SSLContext.getInstance("TLSv1.3");
-			sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
-			// Create an ssl socket factory with our all-trusting manager
-			final SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
-			return new OkHttpClient.Builder()
-					.sslSocketFactory(sslSocketFactory, (X509TrustManager) trustAllCerts[0])
-					.hostnameVerifier((host, session) -> true)
-					.retryOnConnectionFailure(true)
-					.build();
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
-
     @Bean
     RestTemplate restTemplate() {
         return new RestTemplateBuilder()
-                .requestFactory(() -> new OkHttp3ClientHttpRequestFactory(getUnsafeOkHttpClient()))
                 .setReadTimeout(Duration.ofSeconds(60))
                 .setConnectTimeout(Duration.ofSeconds(10))
+                .rootUri(baseUrl)
+				.defaultHeader("Authorization", String.format("Bearer %s", System.getenv("NS_DS_SECRET")))
                 .build();
     }
 

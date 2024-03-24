@@ -39,7 +39,7 @@ public class PlaybackLoader implements CommandLineRunner{
 		gatewayMetaProvider.add(ChannelType.PLAYBACK, new PlaybackGatewaySettings(), playbackGatewayFactory);
 		mktCenter.addDefinitions(contractDefPvd.get());
 
-		log.debug("加载回测合约");
+		log.info("加载回测合约");
 		final LocalDate today = LocalDate.now();
 		// 加载CTP合约
 		try {

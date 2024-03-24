@@ -16,6 +16,7 @@ import org.springframework.util.Assert;
 
 import xyz.redtorch.pb.CoreEnum.CurrencyEnum;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
+import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
 
 /**
  * 数据源处理
@@ -118,9 +119,11 @@ public class NorthstarDataSource implements IDataSource{
 				.stream()
 				.map(json -> Contract.builder()
 						.unifiedSymbol(json.getString("unifiedSymbol"))
+						.symbol(json.getString("unifiedSymbol").replaceAll("@.+$", ""))
 						.underlyingSymbol(json.getString("fut_code"))
 						.name(json.getString("name"))
 						.fullName(json.getString("name"))
+						.productClass(ProductClassEnum.valueOf(json.getString("unifiedSymbol").replaceAll("^.+@.+@(.+)$", "$1")))
 						.exchange(ExchangeEnum.valueOf(json.getString("exchange")))
 						.currency(CurrencyEnum.CNY)
 						.multiplier(json.getDoubleValue("multiplier"))

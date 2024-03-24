@@ -15,9 +15,9 @@ import org.junit.jupiter.api.Test;
  */
 class RandomWalkTickSimulationTest {
 
-	RandomWalkTickSimulation rws = new RandomWalkTickSimulation(30, 1);
+	RandomWalkTickSimulation rws = new RandomWalkTickSimulation(30);
 	
-	RandomWalkTickSimulation rws2 = new RandomWalkTickSimulation(120, 0.2);
+	RandomWalkTickSimulation rws2 = new RandomWalkTickSimulation(120);
 	
 	@Test
 	void testSmallRange() {
