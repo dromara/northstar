@@ -633,4 +633,13 @@ public class ModuleContext implements IModuleContext{
 		registry.addListener(contract, numOfUnit, unit, listener);
 	}
 
+	@Override
+	public List<Contract> bindedContracts() {
+		return getModule().getModuleDescription().getModuleAccountSettingsDescription()
+				.stream()
+				.flatMap(mad -> mad.getBindedContracts().stream())
+				.map(csi -> getContract(csi.getUnifiedSymbol()))
+				.toList();
+	}
+
 }

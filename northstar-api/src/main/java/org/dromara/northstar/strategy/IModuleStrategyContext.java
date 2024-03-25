@@ -1,5 +1,7 @@
 package org.dromara.northstar.strategy;
 
+import java.util.List;
+
 import org.dromara.northstar.common.constant.ModuleState;
 import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.indicator.Indicator;
@@ -23,6 +25,11 @@ public interface IModuleStrategyContext {
 	 * @return					返回合约信息
 	 */
 	Contract getContract(String unifiedSymbol);
+	/**
+	 * 获取模组绑定的全部合约
+	 * @return
+	 */
+	List<Contract> bindedContracts();
 	/**
 	 * 委托下单（根据配置自动处理撤单追单）
 	 * @param tradeIntent		交易意图
