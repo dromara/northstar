@@ -103,7 +103,7 @@ public class TradeIntent implements TransactionAware, TickDataAware {
 			return;
 		
 		if(Objects.isNull(initialPrice)) {
-			initialPrice = tick.lastPrice();
+			initialPrice = price == 0 ? tick.lastPrice() : price;
 			logger.debug("交易意图初始价位：{}", initialPrice);
 		}
 		if(Objects.nonNull(priceDiffConditionToAbort)) {
