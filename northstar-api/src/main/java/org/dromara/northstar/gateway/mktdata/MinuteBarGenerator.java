@@ -39,7 +39,7 @@ public class MinuteBarGenerator {
 	
 	private Runnable forceCloseBar = () -> {
 		synchronized(MinuteBarGenerator.this) {			
-			if(curTick != null && System.currentTimeMillis() - curTick.actionTimestamp() > TimeUnit.MINUTES.toMillis(1)) {
+			if(curTick != null && System.currentTimeMillis() - curTick.actionTimestamp() > TimeUnit.MINUTES.toMillis(2)) {
 				log.debug("强制K线收盘：{}", contract.name());
 				finishOfBar();
 			}
@@ -88,8 +88,6 @@ public class MinuteBarGenerator {
 		}
 		if(Objects.isNull(cutoffTime)) {
 			cutoffDT = LocalDateTime.of(tick.actionDay(), tick.actionTime().withSecond(0).withNano(0)).plusMinutes(1);
-			// cutoffTime是下一个整数分钟前推100毫秒
-			cutoffTime = CommonUtils.localDateTimeToMills(cutoffDT) - 100;
 			open = tick.lastPrice();
 			high = tick.lastPrice();
 			low = tick.lastPrice();
