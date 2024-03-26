@@ -114,12 +114,13 @@ public class AppConfig implements WebMvcConfigurer, InitializingBean, Disposable
     }
 
     @Bean
-    RestTemplate restTemplate() {
+    RestTemplate restTemplate(BuildProperties buildProperties) {
         return new RestTemplateBuilder()
                 .setReadTimeout(Duration.ofSeconds(60))
                 .setConnectTimeout(Duration.ofSeconds(10))
                 .rootUri(baseUrl)
 				.defaultHeader("Authorization", String.format("Bearer %s", System.getenv("NS_DS_SECRET")))
+				.defaultHeader("NS_Version", buildProperties.getVersion())
                 .build();
     }
 
