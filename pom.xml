@@ -17,7 +17,7 @@
 	<url>https://gitee.com/dromara/northstar</url>
 
 	<properties>
-		<northstar-version>7.1.0-SNAPSHOT</northstar-version>
+		<northstar-version>7.1.0-RC1</northstar-version>
 		<java.version>21</java.version>
 		<argLine>-Dfile.encoding=UTF-8</argLine>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
