@@ -48,7 +48,6 @@ public class OrderingTestStrategy extends AbstractStrategy implements TradeStrat
 					.priceType(PriceType.LIMIT_PRICE)
 					.operation(SignalOperation.BUY_OPEN)
 					.volume(ctx.getDefaultVolume())
-					.priceDiffConditionToAbort(priceDiff -> priceDiff > 0)
 					.timeout(10000)
 					.build());
 		}

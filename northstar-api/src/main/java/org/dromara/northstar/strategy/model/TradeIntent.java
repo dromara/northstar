@@ -125,6 +125,9 @@ public class TradeIntent implements TransactionAware, TickDataAware {
 			logger.debug("交易意图自动撤单");
 			context.cancelOrder(orderIdRef.get());
 			lastCancelReqTime = tick.actionTimestamp();
+			if(!context.isEnabled()) {
+				terminated = true;	// 当模组停用后，交易意图自动终止
+			}
 		}
 	}
 	
