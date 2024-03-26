@@ -108,8 +108,8 @@ public class MinuteBarGenerator {
 		if(asyncCheck != null) {			
 			asyncCheck.cancel(false);
 		}
-		// 1分钟后检查
-		asyncCheck = CompletableFuture.runAsync(forceCloseBar, CompletableFuture.delayedExecutor(1, TimeUnit.MINUTES));
+		// 2分钟后检查
+		asyncCheck = CompletableFuture.runAsync(forceCloseBar, CompletableFuture.delayedExecutor(2, TimeUnit.MINUTES));
 	}
 	
 	/**

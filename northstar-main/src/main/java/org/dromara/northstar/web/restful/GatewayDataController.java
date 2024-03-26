@@ -21,8 +21,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import lombok.extern.slf4j.Slf4j;
 import xyz.redtorch.pb.CoreField.BarField;
 
+@Slf4j
 @RequestMapping("/northstar/data")
 @RestController
 public class GatewayDataController {
@@ -38,6 +40,7 @@ public class GatewayDataController {
 	
 	@GetMapping("/bar/min")
 	public ResultBean<List<byte[]>> loadWeeklyBarData(String gatewayId, String unifiedSymbol, long refStartTimestamp, boolean firstLoad){
+		log.info("查询{} 1分钟数据，回溯时间{}，首次加载{}", unifiedSymbol, CommonUtils.millsToLocalDateTime(refStartTimestamp), firstLoad);
 		Assert.notNull(unifiedSymbol, "合约代码不能为空");
 		GatewayDescription gd = gatewayRepo.findById(gatewayId);
 		if(gd.getChannelType() == ChannelType.PLAYBACK || gd.getChannelType() == ChannelType.SIM) {
@@ -46,7 +49,7 @@ public class GatewayDataController {
 		IContract ic = contractMgr.getContract(gd.getChannelType(), unifiedSymbol);
 		IDataSource ds = ic.dataSource();
 		LocalDate refDate = CommonUtils.millsToLocalDateTime(refStartTimestamp).toLocalDate();
-		List<Bar> dsData = ds.getMinutelyData(ic.contract(), refDate.minusDays(refDate.getDayOfWeek().getValue() - 1L), refDate);
+		List<Bar> dsData = ds.getMinutelyData(ic.contract(), refDate.minusWeeks(1), refDate);
 		LocalDate queryStart = refDate;
 		if(!dsData.isEmpty()) {
 			queryStart = dsData.get(0).tradingDay().plusDays(1);
