@@ -44,17 +44,18 @@ public class GatewayDataController {
 			return new ResultBean<>(Collections.emptyList());
 		}
 		IContract ic = contractMgr.getContract(gd.getChannelType(), unifiedSymbol);
+		IDataSource ds = ic.dataSource();
 		LocalDate refDate = CommonUtils.millsToLocalDateTime(refStartTimestamp).toLocalDate();
+		List<Bar> dsData = ds.getMinutelyData(ic.contract(), refDate.minusDays(refDate.getDayOfWeek().getValue() - 1L), refDate);
+		LocalDate queryStart = refDate;
+		if(!dsData.isEmpty()) {
+			queryStart = dsData.get(0).tradingDay().plusDays(1);
+		}
 		List<Bar> localData = new ArrayList<>();
 		if(firstLoad) {
-			localData.addAll(mdRepo.loadBars(ic, refDate, refDate.plusDays(3)));
+			localData.addAll(mdRepo.loadBars(ic, queryStart, queryStart.plusDays(3)));
 		}
-		IDataSource ds = ic.dataSource();
-		LocalDate queryEnd = refDate;
-		if(!localData.isEmpty()) {
-			queryEnd = localData.get(0).tradingDay().minusDays(1);
-		}
-		List<Bar> dsData = ds.getMinutelyData(ic.contract(), queryEnd.minusDays(queryEnd.getDayOfWeek().getValue() - 1), queryEnd);
+		
 		List<Bar> result = new ArrayList<>();
 		result.addAll(dsData.reversed());
 		result.addAll(localData);

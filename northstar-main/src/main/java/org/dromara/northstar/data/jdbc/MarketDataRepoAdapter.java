@@ -42,6 +42,7 @@ public class MarketDataRepoAdapter implements IMarketDataRepository{
 	
 	@Override
 	public void insert(Bar bar) {
+		log.trace("持久化行情数据：{} {} {} {}", bar.contract().name(), bar.actionDay(), bar.actionTime(), bar.actionTimestamp());
 		delegate.save(BarDO.builder()
 				.unifiedSymbol(bar.contract().unifiedSymbol())
 				.tradingDay(bar.tradingDay().format(DateTimeConstant.D_FORMAT_INT_FORMATTER))

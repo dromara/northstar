@@ -21,7 +21,7 @@ import org.springframework.util.Assert;
 @StrategicComponent(OrderingTestStrategy.NAME)
 public class OrderingTestStrategy extends AbstractStrategy implements TradeStrategy{
 	
-	private static final String NAME = "示例-实盘下单测试";
+	protected static final String NAME = "示例-实盘下单测试";
 	
 	private Contract c;
 	
