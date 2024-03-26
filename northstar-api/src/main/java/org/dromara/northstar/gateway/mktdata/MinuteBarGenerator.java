@@ -88,6 +88,7 @@ public class MinuteBarGenerator {
 		}
 		if(Objects.isNull(cutoffTime)) {
 			cutoffDT = LocalDateTime.of(tick.actionDay(), tick.actionTime().withSecond(0).withNano(0)).plusMinutes(1);
+			cutoffTime = CommonUtils.localDateTimeToMills(cutoffDT);
 			open = tick.lastPrice();
 			high = tick.lastPrice();
 			low = tick.lastPrice();
