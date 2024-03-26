@@ -1,8 +1,10 @@
 package org.dromara.northstar.strategy.model;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
@@ -74,6 +76,8 @@ public class TradeIntent implements TransactionAware, TickDataAware {
 	
 	private Logger logger;
 	
+	private Set<Trade> trades = new HashSet<>();
+	
 	@Builder
 	public TradeIntent(Contract contract, SignalOperation operation, PriceType priceType, double price, int volume, 
 			long timeout, Predicate<Double> priceDiffConditionToAbort) {
@@ -116,6 +120,8 @@ public class TradeIntent implements TransactionAware, TickDataAware {
 		}
 		if(hasTerminated()) {
 			logger.debug("交易意图已终止");
+			double avgDealPrice = trades.stream().mapToDouble(tr -> tr.price() * tr.volume()).sum() / volume;
+			logger.info("交易滑点为：[{}]个价位", (int)(Math.abs(avgDealPrice - price) / contract.priceTick()));
 			return;
 		}
 		if(orderIdRef.isEmpty() && !context.getState().isOrdering()) {
@@ -152,7 +158,10 @@ public class TradeIntent implements TransactionAware, TickDataAware {
 	public synchronized void onTrade(Trade trade) {
 		orderIdRef
 			.filter(id -> StringUtils.equals(id, trade.originOrderId()))
-			.ifPresent(id -> accVol += trade.volume());
+			.ifPresent(id -> {
+				accVol += trade.volume();
+				trades.add(trade);
+			});
 	}
 
 	public synchronized boolean hasTerminated() {
