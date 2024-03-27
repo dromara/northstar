@@ -120,10 +120,6 @@ public class TradeIntent implements TransactionAware, TickDataAware {
 		}
 		if(hasTerminated()) {
 			logger.debug("交易意图已终止");
-			if(!trades.isEmpty()) {
-				double avgDealPrice = trades.stream().mapToDouble(tr -> tr.price() * tr.volume()).sum() / volume;
-				logger.info("交易滑点为：[{}]个价位", (int)(Math.abs(avgDealPrice - price) / contract.priceTick()));
-			}
 			return;
 		}
 		if(orderIdRef.isEmpty() && !context.getState().isOrdering()) {
@@ -163,6 +159,10 @@ public class TradeIntent implements TransactionAware, TickDataAware {
 			.ifPresent(id -> {
 				accVol += trade.volume();
 				trades.add(trade);
+				if(hasTerminated()) {
+					double avgDealPrice = trades.stream().mapToDouble(tr -> tr.price() * tr.volume()).sum() / volume;
+					logger.info("交易滑点为：[{}]个价位", (int)(Math.abs(avgDealPrice - price) / contract.priceTick()));
+				}
 			});
 	}
 
