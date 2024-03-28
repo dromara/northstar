@@ -1,6 +1,6 @@
 {
   "name": "northstar-desktop",
-  "version": "7.1.0-RC1",
+  "version": "7.1.0-RC2",
   "description": "A fast, desktop software development framework",
   "main": "main.js",
   "scripts": {
