@@ -161,7 +161,8 @@ public class TradeIntent implements TransactionAware, TickDataAware {
 				trades.add(trade);
 				if(hasTerminated()) {
 					double avgDealPrice = trades.stream().mapToDouble(tr -> tr.price() * tr.volume()).sum() / volume;
-					logger.info("交易滑点为：[{}]个价位", (int)(Math.abs(avgDealPrice - price) / contract.priceTick()));
+					logger.info("初始下单价为：{}，最终成交均价：{}，交易滑点为：[{}]个价位", 
+							initialPrice, avgDealPrice, Math.round((Math.abs(avgDealPrice - initialPrice) / contract.priceTick())));
 				}
 			});
 	}
