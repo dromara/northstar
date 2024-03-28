@@ -315,7 +315,11 @@ public class ModuleContext implements IModuleContext{
 		// 注意，只有在模组启用状态下，才会进行采样。这样是为了避免在模组预热时进行采样
 		if(tradeStrategy instanceof SamplingAware sa && isEnabled() && sa.isSampling()) {
 			SampleData sampleData = sa.sample();
-			File csvFile = new File(String.format("data/%s.csv", getModule().getName()));
+			File folder = new File("data/sampling");
+			if(!folder.exists()) {
+				folder.mkdir();
+			}
+			File csvFile = new File(folder, String.format("%s.csv", getModule().getName()));
 			SampleDataWriter writer = new SampleDataWriter(csvFile);
 			writer.append(sampleData);
 		}
