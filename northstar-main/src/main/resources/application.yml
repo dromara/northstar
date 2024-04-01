@@ -7,7 +7,7 @@ server:
 northstar: 
   socketio: 51688
   data-service:
-    baseUrl: https://service.quantit.tech:44388
+    baseUrl: https://marketplace.quantit.tech
     
 logging:
   level: 

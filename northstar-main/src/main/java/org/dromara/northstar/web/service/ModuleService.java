@@ -1,10 +1,8 @@
 package org.dromara.northstar.web.service;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,9 +11,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import jakarta.transaction.Transactional;
-
 import org.dromara.northstar.account.AccountManager;
+import org.dromara.northstar.common.IDataSource;
 import org.dromara.northstar.common.IModuleService;
 import org.dromara.northstar.common.constant.Constants;
 import org.dromara.northstar.common.constant.DateTimeConstant;
@@ -40,11 +37,11 @@ import org.dromara.northstar.common.model.ModuleRuntimeDescription;
 import org.dromara.northstar.common.model.core.Bar;
 import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.common.model.core.Trade;
-import org.dromara.northstar.common.utils.MarketDataLoadingUtils;
 import org.dromara.northstar.data.IMarketDataRepository;
 import org.dromara.northstar.data.IModuleRepository;
 import org.dromara.northstar.gateway.IContract;
 import org.dromara.northstar.gateway.IContractManager;
+import org.dromara.northstar.gateway.mktdata.DataSourceDataLoader;
 import org.dromara.northstar.module.ArbitrageModuleContext;
 import org.dromara.northstar.module.ModuleContext;
 import org.dromara.northstar.module.ModuleManager;
@@ -63,8 +60,8 @@ import org.springframework.util.StringUtils;
 
 import com.alibaba.fastjson.JSONObject;
 
-import cn.hutool.core.date.LocalDateTimeUtil;
 import cn.hutool.core.lang.Assert;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -84,8 +81,6 @@ public class ModuleService implements IModuleService, PostLoadAware {
 	private IModuleRepository moduleRepo;
 
 	private IMarketDataRepository mdRepo;
-
-	private MarketDataLoadingUtils utils = new MarketDataLoadingUtils();
 
 	private AccountManager accountMgr;
 
@@ -254,32 +249,38 @@ public class ModuleService implements IModuleService, PostLoadAware {
 		moduleMgr.add(new TradeModule(md, moduleCtx, accountMgr, contractMgr));
 		strategy.setContext(moduleCtx);
 		log.info("模组[{}] 初始化数据起始计算日为：{}", md.getModuleName(), date);
-		LocalDateTime nowDateTime = LocalDateTime.now();
-		LocalDate now = nowDateTime.getDayOfWeek().getValue() > 5 || nowDateTime.getDayOfWeek().getValue() == 5 && nowDateTime.toLocalTime().isAfter(LocalTime.of(20, 30))
-				? LocalDate.now().plusWeeks(1)
-				: LocalDate.now();
-		// 模组数据初始化
-		while(weeksOfDataForPreparation > 0
-				&& toYearWeekVal(now) >= toYearWeekVal(date)) {
-			LocalDate start = utils.getFridayOfThisWeek(date.minusWeeks(1));
-			LocalDate end = utils.getFridayOfThisWeek(date);
-			List<Bar> mergeList = new ArrayList<>();
+		
+		final IModuleContext mctx = moduleCtx;
+		if(md.getUsage() != ModuleUsage.PLAYBACK) {
+			// 只有在非回测状态下，才需要预热数据
 			for(ModuleAccountDescription mad : md.getModuleAccountSettingsDescription()) {
 				for(ContractSimpleInfo csi : mad.getBindedContracts()) {
 					IContract c = contractMgr.getContract(Identifier.of(csi.getValue()));
-					List<Bar> bars = mdRepo.loadBars(c, start, end);
-					mergeList.addAll(bars);
+					IDataSource dataSrc = c.dataSource();
+					if(dataSrc == null) {
+						log.warn("合约 [{}] 缺少数据源配置，无法加载历史数据", c.name());
+					} else {
+						DataSourceDataLoader dataLoader = new DataSourceDataLoader(dataSrc);
+						// 历史数据从数据源加载，避免本地数据有问题
+						dataLoader.loadMinutelyData(c.contract(), LocalDate.now().minusWeeks(weeksOfDataForPreparation), LocalDate.now(), 
+								bars -> {
+									List<Bar> data = bars.reversed()
+											.stream()
+											.map(bar -> bar.toBuilder().gatewayId(null).build())
+											.toList();
+									mctx.initData(data);
+								});
+						// 本地仅加载最近的数据
+						List<Bar> data = mdRepo.loadBars(c, LocalDate.now(), LocalDate.now().plusDays(3));
+						mctx.initData(data);
+					}
 				}
 			}
-			moduleCtx.initData(mergeList.parallelStream().sorted(sortFunction).toList());
-			date = date.plusWeeks(1);
 		}
+		
 		moduleCtx.setEnabled(mrd.isEnabled());
 		moduleCtx.onReady();
 	}
-
-	private Comparator<Bar> sortFunction = (a, b) -> a.actionTimestamp() < b.actionTimestamp() ? -1
-			: a.actionTimestamp() > b.actionTimestamp() ? 1 : 0;
 
 	@SuppressWarnings("unchecked")
 	private <T extends DynamicParamsAware> T resolveComponent(ComponentAndParamsPair metaInfo) throws Exception {
@@ -297,12 +298,6 @@ public class ModuleService implements IModuleService, PostLoadAware {
 		obj.initWithParams(paramObj);
 		return (T) obj;
 	}
-
-	// 把日期转换成年周，例如2022年第二周为202202
-	private int toYearWeekVal(LocalDate date) {
-		return date.getYear() * 100 + LocalDateTimeUtil.weekOfYear(date);
-	}
-
 
 	private void unloadModule(String moduleName) {
 		moduleMgr.remove(Identifier.of(moduleName));

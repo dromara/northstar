@@ -65,14 +65,14 @@ public class BroadcastHandler extends AbstractEventHandler implements GenericEve
 		if(event.getData() instanceof Tick t) {
 			TickField tick = t.toTickField();
 			String rmid = String.format("%s@%s", tick.getUnifiedSymbol(), tick.getGatewayId());
-			log.trace("TICK数据分发：[{} {} {} 总仓：{} 仓：{} 总量：{} 量：{} 价：{} 类型：{}]", 
-					tick.getUnifiedSymbol(), tick.getActionDay(), tick.getActionTime(),
+			log.trace("TICK数据分发：[{} {} {} {} 总仓：{} 仓：{} 总量：{} 量：{} 价：{} 类型：{}]", 
+					tick.getUnifiedSymbol(), tick.getActionDay(), tick.getActionTime(), tick.getActionTimestamp(),
 					(long)tick.getOpenInterest(), (long)tick.getOpenInterestDelta(), tick.getVolume(), tick.getVolumeDelta(), tick.getLastPrice(), t.type());
 			socketServer.getRoomOperations(rmid).sendEvent(NorthstarEventType.TICK.toString(), Base64.encode(tick.toByteArray()));
 		} else if(event.getData() instanceof Bar b) {
 			BarField bar = b.toBarField();
 			String rmid = String.format("%s@%s", bar.getUnifiedSymbol(), bar.getGatewayId());
-			log.trace("BAR数据分发：[{} {} {} 仓：{} 量：{} 价：{}]", rmid, bar.getActionDay(), bar.getActionTime(),
+			log.trace("BAR数据分发：[{} {} {} {} 仓：{} 量：{} 价：{}]", rmid, bar.getActionDay(), bar.getActionTime(), bar.getActionTimestamp(),
 					(long)bar.getOpenInterestDelta(), bar.getVolumeDelta(), bar.getClosePrice());
 			socketServer.getRoomOperations(rmid).sendEvent(NorthstarEventType.BAR.toString(), Base64.encode(bar.toByteArray()));
 		} else if(event.getData() instanceof Account acc) {

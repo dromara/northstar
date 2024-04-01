@@ -1,6 +1,7 @@
 package org.dromara.northstar.event;
 
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.dromara.northstar.common.constant.ChannelType;
@@ -41,7 +42,7 @@ public class MarketDataHandler extends AbstractEventHandler implements GenericEv
 		if(shutdown.get()) {
 			return;
 		}
-		if(e.getData() instanceof Bar bar && System.currentTimeMillis() - bar.actionTimestamp() < 120000 && bar.channelType() != ChannelType.SIM) {
+		if(e.getData() instanceof Bar bar && System.currentTimeMillis() - bar.actionTimestamp() < TimeUnit.MINUTES.toMillis(5) && bar.channelType() != ChannelType.SIM) {
 			exec.execute(() -> mdRepo.insert(bar)); 
 		}
 	}

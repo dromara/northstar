@@ -23,23 +23,29 @@ public class InstantBarGenerator {
 	private long turnoverDelta;
 	private double openInterestDelta;
 	
+	private Bar.BarBuilder protoBar;
+	
 	public InstantBarGenerator(Contract contract) {
 		this.contract = contract;
 	}
-
+	
+	public void reset() {
+		protoBar = null;
+	}
+	
 	public synchronized Optional<Bar> update(Tick tick) {
 		if (!contract.equals(tick.contract())) {
 			throw new IllegalArgumentException("合约不匹配，期望合约：" + contract.unifiedSymbol() + "，实际合约：" + tick.contract().unifiedSymbol());
 		}
 
-		if(tick.actionTimestamp() % 60000 == 0) {
+		if(protoBar == null) {
 			openPrice = tick.lastPrice();
 			highPrice = openPrice;
 			lowPrice = openPrice;
 			volDelta = 0;
 			turnoverDelta = 0;
 			openInterestDelta = 0;
-			return Optional.empty();
+			protoBar = Bar.builder();
 		}
 		
 		highPrice = Math.max(highPrice, tick.lastPrice());
@@ -48,7 +54,11 @@ public class InstantBarGenerator {
 		turnoverDelta += tick.turnoverDelta();
 		openInterestDelta += tick.openInterestDelta();
 		
-		return Optional.of(Bar.builder()
+		if(tick.actionTimestamp() % 60000 == 0) {
+			return Optional.empty();
+		}
+		
+		return Optional.of(protoBar
 				.actionDay(tick.actionDay())
 				.actionTime(tick.actionTime())
 				.actionTimestamp(tick.actionTimestamp())

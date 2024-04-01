@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Optional;
 
+import org.dromara.northstar.common.Timed;
 import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.springframework.util.Assert;
@@ -33,7 +34,7 @@ public record Bar(
 		double preClosePrice,  		// 前收盘价
 		double preSettlePrice,  	// 昨结算价
 		ChannelType channelType		// 渠道来源
-	) {
+	) implements Timed{
 
 	public BarField toBarField() {
 		return BarField.newBuilder()
@@ -84,5 +85,10 @@ public record Bar(
 				.preSettlePrice(bar.getPreSettlePrice())
 				.channelType(ChannelType.valueOf(bar.getChannelType()))
 				.build();
+	}
+
+	@Override
+	public long getTimestamp() {
+		return actionTimestamp;
 	}
 }

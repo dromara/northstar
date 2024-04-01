@@ -43,7 +43,7 @@ import org.dromara.northstar.event.BroadcastHandler;
 import org.dromara.northstar.gateway.GatewayMetaProvider;
 import org.dromara.northstar.gateway.IContract;
 import org.dromara.northstar.gateway.IMarketCenter;
-import org.dromara.northstar.gateway.mktdata.NorthstarDataServiceDataSource;
+import org.dromara.northstar.gateway.mktdata.NorthstarDataSource;
 import org.dromara.northstar.gateway.playback.PlaybackGatewayFactory;
 import org.dromara.northstar.gateway.playback.PlaybackGatewaySettings;
 import org.dromara.northstar.gateway.sim.trade.SimGatewayFactory;
@@ -108,7 +108,7 @@ class ModuleControllerTest {
 	PlaybackGatewayFactory playbackGatewayFactory;
 	
 	@Autowired
-	NorthstarDataServiceDataSource dsMgr;
+	NorthstarDataSource dsMgr;
 	
 	@Autowired
 	ModuleManager moduleMgr;
@@ -123,7 +123,7 @@ class ModuleControllerTest {
 	MockTradeDescription mockTrade = MockTradeDescription.builder()
 			.gatewayId("CTP账户")
 			.offsetFlag(OffsetFlagEnum.OF_Open)
-			.contractId("rb0000@SHFE@FUTURES")
+			.contractId("rb9999@SHFE@FUTURES")
 			.direction(DirectionEnum.D_Buy)
 			.price(2000)
 			.volume(1)
@@ -147,9 +147,10 @@ class ModuleControllerTest {
 		when(c.channelType()).thenReturn(ChannelType.PLAYBACK);
 		when(mktCenter.getContract(any(Identifier.class))).thenReturn(c);
 		when(mktCenter.getContract(any(ChannelType.class), anyString())).thenReturn(c);
-		when(c.contract()).thenReturn(Contract.builder().channelType(ChannelType.PLAYBACK).unifiedSymbol("rb0000@SHFE@FUTURES")
+		when(c.contract()).thenReturn(Contract.builder().channelType(ChannelType.PLAYBACK).unifiedSymbol("rb9999@SHFE@FUTURES")
+				.symbol("rb9999")
 				.contractDefinition(cd)
-				.name("螺纹钢指数")
+				.name("螺纹钢主力")
 				.build());
 		
 		long time = System.currentTimeMillis();
@@ -174,7 +175,7 @@ class ModuleControllerTest {
 				.closingPolicy(ClosingPolicy.FIRST_IN_FIRST_OUT)
 				.moduleAccountSettingsDescription(List.of(ModuleAccountDescription.builder()
 						.accountGatewayId("CTP账户")
-						.bindedContracts(List.of(ContractSimpleInfo.builder().unifiedSymbol("rb0000@SHFE@FUTURES").value("rb0000@SHFE@FUTURES@CTP").build()))
+						.bindedContracts(List.of(ContractSimpleInfo.builder().unifiedSymbol("rb9999@SHFE@FUTURES").value("rb9999@SHFE@FUTURES@CTP").build()))
 						.build()))
 				.numOfMinPerBar(1)
 				.weeksOfDataForPreparation(1)
@@ -188,7 +189,7 @@ class ModuleControllerTest {
 				.closingPolicy(ClosingPolicy.FIRST_IN_FIRST_OUT)
 				.moduleAccountSettingsDescription(List.of(ModuleAccountDescription.builder()
 						.accountGatewayId("CTP账户")
-						.bindedContracts(List.of(ContractSimpleInfo.builder().unifiedSymbol("rb0000@SHFE@FUTURES").value("rb0000@SHFE@FUTURES@CTP").build()))
+						.bindedContracts(List.of(ContractSimpleInfo.builder().unifiedSymbol("rb9999@SHFE@FUTURES").value("rb9999@SHFE@FUTURES@CTP").build()))
 						.build()))
 				.numOfMinPerBar(10)
 				.weeksOfDataForPreparation(1)

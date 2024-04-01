@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.offset;
 import java.util.List;
 
 import org.dromara.northstar.common.model.core.Bar;
+import org.dromara.northstar.common.model.core.Contract;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -15,13 +16,18 @@ import org.junit.jupiter.api.Test;
  */
 class RandomWalkTickSimulationTest {
 
-	RandomWalkTickSimulation rws = new RandomWalkTickSimulation(30, 1);
+	RandomWalkTickSimulation rws = new RandomWalkTickSimulation(30);
 	
-	RandomWalkTickSimulation rws2 = new RandomWalkTickSimulation(120, 0.2);
+	RandomWalkTickSimulation rws2 = new RandomWalkTickSimulation(120);
+	
+	Contract c = Contract.builder()
+			.priceTick(1)
+			.build();
 	
 	@Test
 	void testSmallRange() {
 		Bar bar = Bar.builder()
+				.contract(c)
 				.openPrice(5000)
 				.highPrice(5005)
 				.lowPrice(4998)
@@ -46,6 +52,7 @@ class RandomWalkTickSimulationTest {
 	@Test
 	void testLargeRange() {
 		Bar bar = Bar.builder()
+				.contract(c)
 				.openPrice(5000)
 				.highPrice(5055)
 				.lowPrice(4998)
@@ -70,6 +77,7 @@ class RandomWalkTickSimulationTest {
 	@Test
 	void testSmallPriceTick() {
 		Bar bar = Bar.builder()
+				.contract(c)
 				.openPrice(5000)
 				.highPrice(5005)
 				.lowPrice(4998)

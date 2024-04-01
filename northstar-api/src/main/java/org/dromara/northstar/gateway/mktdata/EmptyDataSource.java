@@ -5,10 +5,9 @@ import java.util.Collections;
 import java.util.List;
 
 import org.dromara.northstar.common.IDataSource;
+import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.model.core.Bar;
 import org.dromara.northstar.common.model.core.Contract;
-
-import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 
 /**
  * 空数据源，用于占位
@@ -37,17 +36,12 @@ public class EmptyDataSource implements IDataSource{
 	}
 
 	@Override
-	public List<LocalDate> getHolidays(ExchangeEnum exchange, LocalDate startDate, LocalDate endDate) {
+	public List<LocalDate> getHolidays(ChannelType channelType, LocalDate startDate, LocalDate endDate) {
 		return Collections.emptyList();
 	}
 
 	@Override
-	public List<Contract> getAllContracts(ExchangeEnum exchange) {
-		return Collections.emptyList();
-	}
-
-	@Override
-	public List<ExchangeEnum> getUserAvailableExchanges() {
+	public List<Contract> getAllContracts() {
 		return Collections.emptyList();
 	}
 

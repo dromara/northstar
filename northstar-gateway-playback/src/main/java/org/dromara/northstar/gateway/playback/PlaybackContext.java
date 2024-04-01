@@ -1,16 +1,18 @@
 package org.dromara.northstar.gateway.playback;
 
-import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.StringUtils;
 import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.common.event.FastEventEngine;
@@ -20,11 +22,12 @@ import org.dromara.northstar.common.model.PlaybackRuntimeDescription;
 import org.dromara.northstar.common.model.core.Bar;
 import org.dromara.northstar.common.model.core.Notice;
 import org.dromara.northstar.common.model.core.Tick;
-import org.dromara.northstar.common.utils.DateTimeUtils;
+import org.dromara.northstar.common.utils.CommonUtils;
 import org.dromara.northstar.data.IPlaybackRuntimeRepository;
+import org.dromara.northstar.gateway.IContract;
 import org.dromara.northstar.gateway.IContractManager;
 import org.dromara.northstar.gateway.IMarketCenter;
-import org.dromara.northstar.gateway.playback.utils.ContractDataLoader;
+import org.dromara.northstar.gateway.playback.model.DataFrame;
 
 import lombok.extern.slf4j.Slf4j;
 import xyz.redtorch.pb.CoreEnum.CommonStatusEnum;
@@ -36,164 +39,145 @@ public class PlaybackContext implements IPlaybackContext{
 	
 	private FastEventEngine feEngine;
 	
-	private PlaybackGatewaySettings settings;
-	
 	private String gatewayId;
 	
-	private boolean hasPreLoaded;	// 预加载是否被执行过
+	private AtomicBoolean hasPreLoaded = new AtomicBoolean();	// 预加载是否被执行过
+	private AtomicBoolean isRunning = new AtomicBoolean();
 	
 	// 回放时间戳状态
-	private LocalDate playbackTradeDate;
-	private LocalDateTime playbackTimeState;
+	private LocalDateTime playbackState;
 	
-	private final LocalDate playbackEndDate;
-	
-	private Set<ContractDataLoader> loaders;
+	private Set<IContract> contracts;
 	
 	private IMarketCenter mktCenter;
 	
 	private Runnable stopCallback;
 	
-	private boolean isRunning;
-	private Timer timer;
+	private PlaybackDataLoader dataLoader;
+	
+	private final AtomicLong pauseInterval = new AtomicLong();
+	
+	private final PlaybackGatewaySettings settings;
+	
+	private ExecutorService exec = CommonUtils.newThreadPerTaskExecutor(getClass());
 	
 	public PlaybackContext(GatewayDescription gd, LocalDateTime currentTimeState, 
 			FastEventEngine feEngine, IPlaybackRuntimeRepository rtRepo, IContractManager contractMgr) {
 		this.rtRepo = rtRepo;
 		this.feEngine = feEngine;
 		this.mktCenter = (IMarketCenter) contractMgr;
-		this.playbackTimeState = currentTimeState;
+		this.playbackState = currentTimeState;
 		this.gatewayId = gd.getGatewayId();
 		this.settings = (PlaybackGatewaySettings) gd.getSettings();
-		this.playbackEndDate = LocalDate.parse(settings.getEndDate(), DateTimeConstant.D_FORMAT_INT_FORMATTER);
-		this.loaders = settings.getPlayContracts().stream()
+		this.contracts = settings.getPlayContracts().stream()
 				.map(csi -> contractMgr.getContract(ChannelType.PLAYBACK, csi.getUnifiedSymbol()))
-				.map(c -> new ContractDataLoader(gatewayId, c, settings.getPrecision()))
 				.collect(Collectors.toSet());
+		this.dataLoader = new PlaybackDataLoader(gatewayId, contracts, settings.getPrecision());
+		int interval = switch (settings.getSpeed()) {
+			case NORMAL -> 500;
+			case SPRINT -> 5;
+			case RUSH -> 0;
+			default -> throw new IllegalArgumentException("Unexpected value: " + settings.getSpeed());
+		};
+		this.pauseInterval.set(interval);
 	}
+	
+	// 如何处理TICK数据帧
+	private Consumer<DataFrame<Tick>> onTickDataCallback = dft -> {
+		dft.items().forEach(tick -> {
+			mktCenter.onTick(tick);
+			feEngine.emitEvent(NorthstarEventType.TICK, tick);
+		});
+		try {
+			Thread.sleep(pauseInterval.get());
+		} catch (InterruptedException e) {
+			log.error("等待中断", e);
+		}
+	};
+	
+	// 如何处理BAR数据帧
+	private BiConsumer<DataFrame<Bar>, Boolean> onBarDataCallback = (df, flag) -> {
+		long timestamp = df.getTimestamp();
+		df.items().forEach(bar -> feEngine.emitEvent(NorthstarEventType.BAR, bar));
+		
+		// 收到检查点标志位时，保存回放状态
+		if(Boolean.TRUE.equals(flag)) {
+			playbackState = CommonUtils.millsToLocalDateTime(timestamp);
+			log.info("当前回放状态：{}", playbackState);
+			rtRepo.save(PlaybackRuntimeDescription.builder()
+					.gatewayId(gatewayId)
+					.playbackTimeState(playbackState)
+					.build());
+		}
+	};
+	
+	// 如何处理预加载的BAR数据帧
+	private Consumer<DataFrame<Bar>> onPreLoadBarDataCallback = df -> 
+		df.items().forEach(bar -> feEngine.emitEvent(NorthstarEventType.BAR, bar));
+	
 	
 	@Override
 	public void start() {
-		isRunning = true;
-		long rate = switch (settings.getSpeed()) {
-		case NORMAL -> 500;
-		case SPRINT -> 25;
-		case RUSH -> 1;
-		default -> throw new IllegalArgumentException("Unexpected value: " + settings.getSpeed());
-		};
+		CompletableFuture<Void> runningJob;
+		isRunning.set(true);
+		log.info("回放网关 [{}] 连线。当前回放时间状态：{}", gatewayId, playbackState);
 		
-		log.info("回放网关 [{}] 连线。当前回放时间状态：{}", gatewayId, playbackTimeState);
-		timer = new Timer("Playback", true);
-		timer.scheduleAtFixedRate(new TimerTask() {
+		LocalDate preStart = LocalDate.parse(settings.getPreStartDate(), DateTimeConstant.D_FORMAT_INT_FORMATTER);
+		LocalDate playStart = playbackState.toLocalDate();
+		
+		if(!hasPreLoaded.get() && preStart.isBefore(playStart)) {
+			log.info("回放网关 [{}] 正在加载预热数据，预热时间段：{} -> {}", gatewayId, preStart, playStart);
+			feEngine.emitEvent(NorthstarEventType.NOTICE, Notice.builder()
+				.content(String.format("[%s]-当前处于预热阶段，请稍等……", gatewayId))
+				.status(CommonStatusEnum.COMS_WARN)
+				.build());
+			runningJob = dataLoader.preload(preStart, playStart, onPreLoadBarDataCallback);
+			hasPreLoaded.set(true);
 			
-			@Override
-			public void run() {
-				if(!isRunning()) {
-					return;
+			// 预热完毕的处理
+			exec.execute(() -> {
+				try {
+					runningJob.get();
+				} catch (InterruptedException | ExecutionException e) {
+					log.warn("预热加载等待被中断", e);
 				}
-				// 预加载数据
-				if(!hasPreLoaded) {
-					if(StringUtils.equals(settings.getStartDate(), settings.getPreStartDate())) {
-						hasPreLoaded = true;
-						playbackTradeDate = LocalDate.parse(settings.getStartDate(), DateTimeConstant.D_FORMAT_INT_FORMATTER);
-						return;
-					}
-					feEngine.emitEvent(NorthstarEventType.NOTICE, Notice.builder()
-							.content(String.format("[%s]-当前处于预热阶段，请稍等……", gatewayId))
-							.status(CommonStatusEnum.COMS_WARN)
-							.build());
-					LocalDate preloadStartDate = LocalDate.parse(settings.getPreStartDate(), DateTimeConstant.D_FORMAT_INT_FORMATTER);
-					LocalDate preloadEndDate = playbackTimeState.toLocalDate();
-					playbackTradeDate = preloadEndDate.plusDays(1);
-					log.debug("回放网关 [{}] 正在加载预热数据，预热时间段：{} -> {}", gatewayId, preloadStartDate, preloadEndDate);
-					
-					playbackTimeState = LocalDateTime.of(preloadEndDate, DateTimeUtils.fromCacheTime(21, 0));
-					CountDownLatch cdl = new CountDownLatch(loaders.size());
-					
-					loaders.stream().forEach(loader -> 
-						new Thread(() -> {
-							LocalDate loadDate = preloadStartDate;
-							while(!loadDate.isAfter(preloadEndDate)) {
-								if(loadDate.getDayOfWeek() == DayOfWeek.SATURDAY || loadDate.getDayOfWeek() == DayOfWeek.SUNDAY) {
-									loadDate = loadDate.plusDays(1);
-									continue;
-								}
-								loader.loadBars(loadDate);
-								while(loader.hasMoreBar()) {
-									Bar bar = loader.nextBar(true);
-									feEngine.emitEvent(NorthstarEventType.BAR, bar);
-								}
-								loadDate = loadDate.plusDays(1);
-							}
-							log.debug("回放网关 [{}] 合约 {} 数据预热完毕", gatewayId, loader.getContract().contract().unifiedSymbol());
-							cdl.countDown();
-						}).start()
-					);
-					
-					try {
-						cdl.await();
-						hasPreLoaded = true;
-					} catch (InterruptedException e) {
-						log.warn("预热加载等待被中断", e);
-					} finally {
-						feEngine.emitEvent(NorthstarEventType.NOTICE, Notice.builder()
-								.content(String.format("[%s]-预热阶段结束，请重新连线，正式开始回放。", gatewayId))
-								.status(CommonStatusEnum.COMS_WARN)
-								.build());
-						stop();
-					}
-					return;
-				}
-				
-				// 加载数据
-				if(loaders.stream().filter(ContractDataLoader::hasMoreBar).count() == 0) {
-					rtRepo.save(PlaybackRuntimeDescription.builder()
-							.gatewayId(gatewayId)
-							.playbackTimeState(playbackTimeState)
-							.build());
-					
-					if(playbackTradeDate.isAfter(playbackEndDate)) {
-						stop();
-						String infoMsg = String.format("[%s]-历史行情回放已经结束，可通过【复位】重置", gatewayId);
-						log.info(infoMsg);
-						feEngine.emitEvent(NorthstarEventType.NOTICE, Notice.builder()
-								.content(infoMsg)
-								.status(CommonStatusEnum.COMS_WARN)
-								.build());
-						return;
-					}
-					
-					loaders.forEach(loader -> loader.loadBarsAndTicks(playbackTradeDate));
-					playbackTradeDate = playbackTradeDate.plusDays(1);
-				}
-
-				// 回放数据
-				loaders.stream().filter(ContractDataLoader::hasMoreBar).forEach(loader -> {
-					Bar bar = loader.nextBar(false);
-					if(loader.hasMoreTick()) {
-						Tick tick = loader.nextTick(false);
-						if(tick.actionTimestamp() <= bar.actionTimestamp()) {
-							Tick t = loader.nextTick(true);
-							mktCenter.onTick(t);
-							feEngine.emitEvent(NorthstarEventType.TICK, t);
-							return;
-						}
-					}
-					feEngine.emitEvent(NorthstarEventType.BAR, loader.nextBar(true));
-					LocalDateTime ldt = LocalDateTime.of(bar.actionDay(), bar.actionTime());
-					if(playbackTimeState.isBefore(ldt)) {
-						playbackTimeState = ldt;
-					}
-				});
+				log.debug("回放网关 [{}] 数据预热完毕", gatewayId);
+				feEngine.emitEvent(NorthstarEventType.NOTICE, Notice.builder()
+						.content(String.format("[%s]-预热阶段结束，请重新连线，正式开始回放。", gatewayId))
+						.status(CommonStatusEnum.COMS_WARN)
+						.build());
+				stop();
+			});
+			
+			return;		//若进入预加载，则需要二次连线才能进入回放
+		}
+		
+		LocalDate start = playbackState.toLocalDate();
+		LocalDate end = LocalDate.parse(settings.getEndDate(), DateTimeConstant.D_FORMAT_INT_FORMATTER);
+		log.info("数据回放阶段：{} -> {}", start, end);
+		runningJob = dataLoader.load(start, end, () -> !isRunning.get(), onTickDataCallback, onBarDataCallback);
+		
+		// 回放结束的处理
+		exec.execute(() -> {
+			try {
+				runningJob.get();
+			} catch (InterruptedException | ExecutionException e) {
+				log.warn("回放等待被中断", e);
 			}
-		}, 0, rate);
+			String infoMsg = String.format("[%s]-历史行情回放已经结束，可通过【复位】重置", gatewayId);
+			log.info(infoMsg);
+			feEngine.emitEvent(NorthstarEventType.NOTICE, Notice.builder()
+					.content(infoMsg)
+					.status(CommonStatusEnum.COMS_WARN)
+					.build());
+			stop();
+		});
 	}
 	
 	@Override
 	public void stop() {
-		isRunning = false;
-		timer.cancel();
-		log.info("回放网关 [{}] 断开。当前回放时间状态：{}", gatewayId, playbackTimeState);
+		isRunning.set(false);
+		log.info("回放网关 [{}] 断开。当前回放时间状态：{}", gatewayId, playbackState);
 		if(Objects.nonNull(stopCallback)) {
 			stopCallback.run();
 		}
@@ -201,7 +185,7 @@ public class PlaybackContext implements IPlaybackContext{
 	
 	@Override
 	public boolean isRunning() {
-		return isRunning;
+		return isRunning.get();
 	}
 
 	@Override

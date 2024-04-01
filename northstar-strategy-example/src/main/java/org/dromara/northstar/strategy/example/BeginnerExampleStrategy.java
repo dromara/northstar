@@ -58,7 +58,7 @@ public class BeginnerExampleStrategy extends AbstractStrategy	// 抽象类预实
 		@Setting(label="锁仓演示", type = FieldType.SELECT, options = {"启用","禁用"}, optionsVal = {"true","false"}, order = 20)
 		private boolean showHedge;
 		
-		@Setting(label="价格类型", type = FieldType.SELECT, options = {"对手价","排队价"}, optionsVal = {"OPP_PRICE", "WAITING_PRICE"}, order = 30)
+		@Setting(label="价格类型", type = FieldType.SELECT, options = {"市价","对手价","排队价"}, optionsVal = {"ANY_PRICE", "OPP_PRICE", "WAITING_PRICE"}, order = 30)
 		private String priceType = "OPP_PRICE";
 		
 	}

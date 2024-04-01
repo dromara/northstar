@@ -684,7 +684,7 @@ export default {
         this.chart.clearData()
         const contract = this.moduleBindedContracts.find(c => c.name === this.contractNameOfChart) || this.moduleBindedContracts[0]
         this.chart.setPriceVolumePrecision(contract.precision, 0)
-        this.chart.applyNewData(this.barDataMap[this.contractNameOfChart])
+        this.chart.applyNewData(this.barDataMap[this.contractNameOfChart] || [])
       }
     },
     addIndicator() {
@@ -758,7 +758,7 @@ export default {
         const paneId = 'pane' + i
         Object.keys(this.indicatorMap).forEach((indicatorName) => {
           if (
-            this.moduleRuntime.indicatorMap[this.contractNameOfChart].indexOf(indicatorName) < 0
+            !this.contractNameOfChart || this.moduleRuntime.indicatorMap[this.contractNameOfChart].indexOf(indicatorName) < 0
           ) {
             return
           }

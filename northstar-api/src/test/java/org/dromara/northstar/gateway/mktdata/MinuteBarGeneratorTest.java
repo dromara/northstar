@@ -16,6 +16,9 @@ import org.dromara.northstar.common.utils.CommonUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 class MinuteBarGeneratorTest {
 	
 	MinuteBarGenerator barGen;
@@ -41,7 +44,7 @@ class MinuteBarGeneratorTest {
 		for(int i=0; i<=120; i++) {
 			time = time.plusNanos(500*1000000);
 			long timestamp = CommonUtils.localDateTimeToMills(LocalDateTime.of(date, time));
-			barGen.update(Tick.builder()
+			Tick t = Tick.builder()
 					.contract(c)
 					.tradingDay(date)
 					.actionDay(date)
@@ -49,7 +52,9 @@ class MinuteBarGeneratorTest {
 					.actionTimestamp(timestamp)
 					.channelType(ChannelType.CTP)
 					.type(TickType.MARKET_TICK)
-					.build());
+					.build();
+			log.info("{} {} {}", date, time, timestamp);
+			barGen.update(t);
 		}
 		assertThat(results).isNotEmpty();
 	}

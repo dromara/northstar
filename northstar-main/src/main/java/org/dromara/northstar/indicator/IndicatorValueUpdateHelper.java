@@ -32,6 +32,7 @@ public class IndicatorValueUpdateHelper implements MergedBarListener, BarDataAwa
 			return;
 		}
 		recursiveUpdate(indicator, bar, false);
+		inbarGen.reset();
 	}
 
 	@Override

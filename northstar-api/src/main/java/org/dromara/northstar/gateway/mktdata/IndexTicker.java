@@ -65,7 +65,8 @@ public class IndexTicker {
 			return;
 		}
 		if(log.isTraceEnabled()) {
-			log.trace("{}指数合成器收到TICK: {}", idxContract.contract().unifiedSymbol(), tick);
+			log.trace("{}指数合成器收到TICK: {} {} {} {}", idxContract.contract().unifiedSymbol(), tick.contract().symbol(), 
+					tick.actionDay(), tick.actionTime(), tick.actionTimestamp());
 		}
 		// 如果有过期的TICK数据(例如不活跃的合约),则并入下个K线
 		if (0 < lastTickTimestamp && lastTickTimestamp < tick.actionTimestamp()) {

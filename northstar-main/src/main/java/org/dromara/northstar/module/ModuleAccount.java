@@ -8,7 +8,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.BiConsumer;
 
-import org.dromara.northstar.common.constant.ModuleState;
 import org.dromara.northstar.common.exception.InsufficientException;
 import org.dromara.northstar.common.model.Identifier;
 import org.dromara.northstar.common.model.ModuleAccountRuntimeDescription;
@@ -48,7 +47,6 @@ import xyz.redtorch.pb.CoreField.TradeField;
 @Slf4j
 public class ModuleAccount implements IModuleAccount{
 
-	private ModuleStateMachine stateMachine;
 	@Getter
 	private double initBalance;
 	@Getter
@@ -73,11 +71,9 @@ public class ModuleAccount implements IModuleAccount{
 	
 	private Logger logger;
 	
-	public ModuleAccount(ModuleDescription moduleDescription, ModuleRuntimeDescription moduleRtDescription, ModuleStateMachine stateMachine,
-			IModuleRepository moduleRepo, IContractManager contractMgr, IModuleContext ctx) {
-		this.stateMachine = stateMachine;
+	public ModuleAccount(ModuleDescription moduleDescription, ModuleRuntimeDescription moduleRtDescription, IModuleRepository moduleRepo,
+			IContractManager contractMgr, IModuleContext ctx) {
 		this.logger = ctx.getLogger(getClass());
-		stateMachine.setModuleAccount(this);
 		BiConsumer<Trade, Trade> onDealCallback = (openTrade, closeTrade) -> {
 			synchronized (this) {
 				int factor = FieldUtils.directionFactor(openTrade.direction());
@@ -133,8 +129,6 @@ public class ModuleAccount implements IModuleAccount{
 			.map(this::convertFrom)
 			.map(t -> Trade.of(t, contractMgr))
 			.forEach(this::onTrade);
-		
-		stateMachine.updateState();
 	}
 	
 	private TradeField convertFrom(byte[] data) {
@@ -162,7 +156,6 @@ public class ModuleAccount implements IModuleAccount{
 		} else {
 			posTable.get(FieldUtils.getOpposite(order.direction()), order.contract()).onOrder(order);
 		}
-		stateMachine.onOrder(order);
 	}
 
 	@Override
@@ -175,7 +168,6 @@ public class ModuleAccount implements IModuleAccount{
 		} else {
 			posTable.get(FieldUtils.getOpposite(trade.direction()), trade.contract()).onTrade(trade);
 		}
-		stateMachine.onTrade(trade);
 	}
 
 	public List<Position> getPositions() {
@@ -228,11 +220,6 @@ public class ModuleAccount implements IModuleAccount{
 		posTable.values().stream().forEach(ModulePosition::releaseOrder);
 	}
 
-	@Override
-	public ModuleState getModuleState() {
-		return stateMachine.getState();
-	}
-	
 	/**
 	 * 模组账户可用金额（近似计算）
 	 * @return
@@ -254,7 +241,6 @@ public class ModuleAccount implements IModuleAccount{
 		} else {
 			checkIfHasSufficientPosition(submitOrder);
 		}
-		stateMachine.onSubmitReq();
 	}
 
 	private void checkIfHasSufficientPosition(SubmitOrderReq submitOrder) {
