@@ -42,6 +42,7 @@ class PlaybackDataLoaderTest {
 			.actionDay(LocalDate.now())
 			.actionTime(LocalTime.now().withSecond(0).withNano(0))
 			.actionTimestamp(CommonUtils.localDateTimeToMills(LocalDateTime.now().withSecond(0).withNano(0)))
+			.tradingDay(LocalDate.now())
 			.contract(c)
 			.openPrice(1000)
 			.closePrice(1050)
@@ -69,7 +70,7 @@ class PlaybackDataLoaderTest {
 	@Test
 	void testPreload() throws InterruptedException, ExecutionException {
 		AtomicInteger cnt = new AtomicInteger();
-		CompletableFuture<Void> cf = loader.preload(LocalDate.now().minusDays(1), LocalDate.now(), df -> {
+		CompletableFuture<Void> cf = loader.preload(LocalDate.now(), LocalDate.now(), df -> {
 			try {
 				Thread.sleep(500);
 				assertThat(df.items()).isNotEmpty();
@@ -90,7 +91,7 @@ class PlaybackDataLoaderTest {
 		AtomicInteger cnt = new AtomicInteger();
 		Consumer<Object> dummyObj = mock(Consumer.class);
 		Consumer<Object> dummyObj2 = mock(Consumer.class);
-		CompletableFuture<Void> cf = loader.load(LocalDate.now().minusDays(1), LocalDate.now(), () -> false, 
+		CompletableFuture<Void> cf = loader.load(LocalDate.now(), LocalDate.now(), () -> false, 
 				tdf -> {
 					assertThat(cnt.getAndIncrement()).isLessThanOrEqualTo(30);
 					dummyObj.accept(cnt);
