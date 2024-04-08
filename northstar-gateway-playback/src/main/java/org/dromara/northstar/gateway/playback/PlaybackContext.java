@@ -164,12 +164,14 @@ public class PlaybackContext implements IPlaybackContext{
 			} catch (InterruptedException | ExecutionException e) {
 				log.warn("回放等待被中断", e);
 			}
-			String infoMsg = String.format("[%s]-历史行情回放已经结束，可通过【复位】重置", gatewayId);
-			log.info(infoMsg);
-			feEngine.emitEvent(NorthstarEventType.NOTICE, Notice.builder()
-					.content(infoMsg)
-					.status(CommonStatusEnum.COMS_WARN)
-					.build());
+			if(isRunning.get()) {				
+				String infoMsg = String.format("[%s]-历史行情回放已经结束，可通过【复位】重置", gatewayId);
+				log.info(infoMsg);
+				feEngine.emitEvent(NorthstarEventType.NOTICE, Notice.builder()
+						.content(infoMsg)
+						.status(CommonStatusEnum.COMS_WARN)
+						.build());
+			}
 			stop();
 		});
 	}
