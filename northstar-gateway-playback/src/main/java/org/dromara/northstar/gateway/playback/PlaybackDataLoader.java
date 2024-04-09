@@ -38,7 +38,6 @@ import org.dromara.northstar.gateway.utils.DataLoadUtil;
  * 回测数据加载器
  * 不止要负责加载历史数据，还要把数据分成数据帧供消费方消费
  * 同时封装了Bar转TICK数据的处理
- * 另外还要控制分发速度
  * @auth KevinHuangwl
  */
 public class PlaybackDataLoader {
@@ -141,7 +140,7 @@ public class PlaybackDataLoader {
 			.map(e -> new DataFrame<Tick>(e.timestamp()))
 			.toList();
 		Map<Long, DataFrame<Tick>> tickDataMap = dfList.stream().collect(Collectors.toMap(DataFrame::getTimestamp, df -> df));
-		barFrame.items().forEach(bar -> {
+		barFrame.items().forEach(bar -> 
 			tickGenAlgo.generateFrom(bar).forEach(tickEntry -> {
 				LocalDateTime ldt = LocalDateTime.ofInstant(Instant.ofEpochMilli(tickEntry.timestamp()), ZoneId.systemDefault());
 				Tick tick = Tick.builder()
@@ -171,8 +170,8 @@ public class PlaybackDataLoader {
 						.turnover(bar.turnover())							// 采用分钟K线的模糊值
 						.build();
 				tickDataMap.get(tick.actionTimestamp()).add(tick);
-			});
-		});
+			})
+		);
 		
 		return dfList;
 	}
