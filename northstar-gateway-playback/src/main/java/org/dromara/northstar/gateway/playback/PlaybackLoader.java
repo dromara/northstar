@@ -40,13 +40,13 @@ public class PlaybackLoader implements CommandLineRunner{
 		mktCenter.addDefinitions(contractDefPvd.get());
 
 		log.info("加载回测合约");
-		final LocalDate today = LocalDate.now();
+		final LocalDate startDate = LocalDate.of(2020, 5, 1);	// 2020年5月1日前的数据会缺少持仓数据，故不建议使用
 		// 加载CTP合约
 		try {
 			datasources.forEach(ds ->
 				ds.getAllContracts().stream()
 					//过滤掉过期合约
-					.filter(contract -> contract.lastTradeDate().isAfter(today))
+					.filter(contract -> contract.lastTradeDate().isAfter(startDate))
 					.forEach(contract -> mktCenter.addInstrument(new PlaybackContract(contract, ds)))
 			);
 			mktCenter.loadContractGroup(ChannelType.PLAYBACK);
