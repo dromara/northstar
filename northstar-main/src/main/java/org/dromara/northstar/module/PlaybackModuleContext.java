@@ -152,8 +152,8 @@ public class PlaybackModuleContext extends ModuleContext implements IModuleConte
 				.orderStatus(OrderStatusEnum.OS_AllTraded)
 				.build();
 		moduleAccount.onOrder(order);
-		tradeStrategy.onOrder(order);
 		moduleStateMachine.onOrder(order);
+		tradeStrategy.onOrder(order);
 		
 		Trade trade = Trade.builder()
 				.gatewayId(PLAYBACK_GATEWAY)
@@ -169,8 +169,8 @@ public class PlaybackModuleContext extends ModuleContext implements IModuleConte
 				.tradeTime(lastTick.actionTime())
 				.build();
 		moduleAccount.onTrade(trade);
-		tradeStrategy.onTrade(trade);
 		moduleStateMachine.onTrade(trade);
+		tradeStrategy.onTrade(trade);
 		return Optional.of(id);
 	}
 

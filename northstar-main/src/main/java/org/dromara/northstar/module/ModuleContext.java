@@ -356,12 +356,12 @@ public class ModuleContext implements IModuleContext{
 			CompletableFuture.runAsync(() -> orderReqMap.remove(order.originOrderId()), CompletableFuture.delayedExecutor(3, TimeUnit.SECONDS));
 		}
 		moduleAccount.onOrder(order);
-		tradeStrategy.onOrder(order);
+		moduleStateMachine.onOrder(order);
 		if(tradeIntentMap.containsKey(order.contract())) {
 			TradeIntent tradeIntent = tradeIntentMap.get(order.contract());
 			tradeIntent.onOrder(order);
 		}
-		moduleStateMachine.onOrder(order);
+		tradeStrategy.onOrder(order);
 	}
 
 	@Override
@@ -374,9 +374,8 @@ public class ModuleContext implements IModuleContext{
 					FieldUtils.chn(trade.offsetFlag()), trade.contract().name(), trade.price(), trade.volume());
 		}
 		moduleAccount.onTrade(trade);
-		tradeStrategy.onTrade(trade);
+		moduleStateMachine.onTrade(trade);
 		moduleRepo.saveRuntime(getRuntimeDescription(false));
-		
 		if(tradeIntentMap.containsKey(trade.contract())) {
 			TradeIntent tradeIntent = tradeIntentMap.get(trade.contract());
 			tradeIntent.onTrade(trade);
@@ -384,7 +383,7 @@ public class ModuleContext implements IModuleContext{
 				tradeIntentMap.remove(trade.contract());
 			}
 		}
-		moduleStateMachine.onTrade(trade);
+		tradeStrategy.onTrade(trade);
 	}
 
 	@Override
