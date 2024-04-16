@@ -93,6 +93,11 @@ public class MarketCenter implements IMarketCenter{
 	 */
 	@Override
 	public synchronized void addInstrument(Instrument ins) {
+		if(contractMap.containsKey(ins.identifier())) {
+			log.debug("[{}] 合约已注册，不需要重复注册", ins.identifier().value());
+			return;
+		}
+		
 		// 绑定合约定义
 		getDefinition(ins.exchange(), ins.productClass(), ins.identifier().value())
 			.ifPresent(def -> {
