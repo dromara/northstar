@@ -3,6 +3,7 @@ package org.dromara.northstar.gateway.mktdata;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.dromara.northstar.common.IDataSource;
@@ -17,6 +18,7 @@ import org.springframework.util.Assert;
 
 import xyz.redtorch.pb.CoreEnum.CurrencyEnum;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
+import xyz.redtorch.pb.CoreEnum.OptionsTypeEnum;
 import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
 
 /**
@@ -123,16 +125,16 @@ public class NorthstarDataSource implements IDataSource{
 
 	@Override
 	public List<Contract> getAllContracts() {
-		return dataService.getAllFutureContracts()
+		List<Contract> futures = dataService.getAllFutureContracts()
 				.toJSONList()
 				.stream()
 				.map(json -> Contract.builder()
 						.unifiedSymbol(json.getString("unifiedSymbol"))
-						.symbol(json.getString("unifiedSymbol").replaceAll("@.+$", ""))
+						.symbol(json.getString("symbol"))
 						.underlyingSymbol(json.getString("fut_code"))
 						.name(json.getString("name"))
 						.fullName(json.getString("name"))
-						.productClass(ProductClassEnum.valueOf(json.getString("unifiedSymbol").replaceAll("^.+@.+@(.+)$", "$1")))
+						.productClass(ProductClassEnum.FUTURES)
 						.exchange(ExchangeEnum.valueOf(json.getString("exchange")))
 						.currency(CurrencyEnum.CNY)
 						.multiplier(json.getDoubleValue("multiplier"))
@@ -142,7 +144,35 @@ public class NorthstarDataSource implements IDataSource{
 						.shortMarginRatio(0.1)
 						.build())
 				.toList();
-		
+		List<Contract> options = dataService.getAllOptionContracts()
+				.toJSONList()
+				.stream()
+				.map(json -> Contract.builder()
+						.unifiedSymbol(json.getString("unifiedSymbol"))
+						.symbol(json.getString("symbol"))
+						.underlyingSymbol(json.getString("fut_code"))
+						.name(json.getString("name"))
+						.fullName(json.getString("name"))
+						.productClass(ProductClassEnum.OPTION)
+						.exchange(ExchangeEnum.valueOf(json.getString("exchange")))
+						.currency(CurrencyEnum.CNY)
+						.multiplier(json.getDoubleValue("multiplier"))
+						.priceTick(json.getDoubleValue("price_tick"))
+						.lastTradeDate(LocalDate.parse(json.getString("delist_date"), DateTimeConstant.D_FORMAT_INT_FORMATTER))
+						.strikePrice(json.getDoubleValue("strike_price"))
+						.optionsType(switch(json.getString("call_put")) {
+							case "C" -> OptionsTypeEnum.O_CallOptions;
+							case "P" -> OptionsTypeEnum.O_PutOptions;
+							default -> throw new IllegalArgumentException("Unexpected value: " + json.getString("call_put"));
+						})
+						.longMarginRatio(1)
+						.shortMarginRatio(1)
+						.build())
+				.toList();
+		List<Contract> results = new ArrayList<>(futures.size() + options.size());
+		results.addAll(futures);
+		results.addAll(options);
+		return results;
 	}
 
 }

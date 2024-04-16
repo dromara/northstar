@@ -22,6 +22,10 @@ public class QuantitDataServiceManager {
 		return restTemplate.getForObject("/dataservice/contracts/future", ResultSet.class);
 	}
 	
+	public ResultSet getAllOptionContracts() {
+		return restTemplate.getForObject("/dataservice/contracts/option", ResultSet.class);
+	}
+	
 	public ResultSet getCalendarCN(int year) {
 		return restTemplate.getForObject("/dataservice/calendar/cn?year={year}", ResultSet.class, year);
 	}
