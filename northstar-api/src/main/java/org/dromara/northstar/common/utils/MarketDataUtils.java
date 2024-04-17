@@ -24,6 +24,21 @@ public class MarketDataUtils {
 	}
 	
 	/**
+	 * 判断Bar是否为小节开盘K线
+	 * @param bar
+	 * @return
+	 */
+	public static boolean isStartingBar(Bar bar) {
+		TradeTimeDefinition ttd = bar.contract().contractDefinition().tradeTimeDef();
+		for(TimeSlot ts : ttd.timeSlots()) {
+			if(ts.start().equals(bar.actionTime())) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/**
 	 * 判断Bar是否为小节收盘K线
 	 * @param bar
 	 * @return
