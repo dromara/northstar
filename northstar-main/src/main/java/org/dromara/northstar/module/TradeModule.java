@@ -22,6 +22,7 @@ import org.dromara.northstar.gateway.IContract;
 import org.dromara.northstar.gateway.IContractManager;
 import org.dromara.northstar.gateway.MarketGateway;
 import org.dromara.northstar.gateway.TradeGateway;
+import org.dromara.northstar.gateway.contract.OptionChainContract;
 import org.dromara.northstar.strategy.IAccount;
 import org.dromara.northstar.strategy.IModule;
 import org.dromara.northstar.strategy.IModuleContext;
@@ -63,9 +64,13 @@ public class TradeModule implements IModule {
 			mktGatewayIdSet.add(mktGateway.gatewayId());
 			accountIdSet.add(mad.getAccountGatewayId());
 			mad.getBindedContracts().forEach(contract -> {
-				IContract c = contractMgr.getContract(Identifier.of(contract.getValue()));
-				bindedContractSet.add(c.contract());
-				contractAccountMap.put(c.contract(), accountMgr.get(Identifier.of(mad.getAccountGatewayId())));
+				IContract ic = contractMgr.getContract(Identifier.of(contract.getValue()));
+				Contract c = ic.contract();
+				bindedContractSet.add(c);
+				if(ic instanceof OptionChainContract) {
+					ic.memberContracts().forEach(cont -> bindedContractSet.add(cont.contract()));
+				}
+				contractAccountMap.put(c, accountMgr.get(Identifier.of(mad.getAccountGatewayId())));
 			});
 		});
 		ctx.setModule(this);
