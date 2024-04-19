@@ -262,7 +262,7 @@ public class ModuleService implements IModuleService, PostLoadAware {
 					DataSourceDataLoader dataLoader = new DataSourceDataLoader(dataSrc);
 					if(c instanceof OptionChainContract) {
 						// 对于期权链合约，要加载的是成员合约
-						c.memberContracts().forEach(rc -> loadDataForInit(rc, dataLoader, weeksOfDataForPreparation, mctx));
+						c.memberContracts().parallelStream().forEach(rc -> loadDataForInit(rc, dataLoader, weeksOfDataForPreparation, mctx));
 					} else {
 						loadDataForInit(c, dataLoader, weeksOfDataForPreparation, mctx);
 					}

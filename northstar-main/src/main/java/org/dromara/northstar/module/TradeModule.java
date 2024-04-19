@@ -66,10 +66,16 @@ public class TradeModule implements IModule {
 			mad.getBindedContracts().forEach(contract -> {
 				IContract ic = contractMgr.getContract(Identifier.of(contract.getValue()));
 				Contract c = ic.contract();
-				bindedContractSet.add(c);
 				if(ic instanceof OptionChainContract) {
-					ic.memberContracts().forEach(cont -> bindedContractSet.add(cont.contract()));
-				}
+					ic.memberContracts()
+						.stream()
+						.map(IContract::contract)
+						.forEach(cc -> {
+							bindedContractSet.add(cc);
+							contractAccountMap.put(cc, accountMgr.get(Identifier.of(mad.getAccountGatewayId())));
+					});
+				} 
+				bindedContractSet.add(c);
 				contractAccountMap.put(c, accountMgr.get(Identifier.of(mad.getAccountGatewayId())));
 			});
 		});

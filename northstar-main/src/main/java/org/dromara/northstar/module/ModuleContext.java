@@ -57,6 +57,7 @@ import org.dromara.northstar.data.IModuleRepository;
 import org.dromara.northstar.gateway.IContract;
 import org.dromara.northstar.gateway.IContractManager;
 import org.dromara.northstar.gateway.IMarketCenter;
+import org.dromara.northstar.gateway.contract.OptionChainContract;
 import org.dromara.northstar.indicator.Indicator;
 import org.dromara.northstar.indicator.IndicatorValueUpdateHelper;
 import org.dromara.northstar.indicator.constant.PeriodUnit;
@@ -156,13 +157,22 @@ public class ModuleContext implements IModuleContext{
 			.forEach(mad -> {
 				for(ContractSimpleInfo csi : mad.getBindedContracts()) {
 					IContract contract = contractMgr.getContract(Identifier.of(csi.getValue()));
-					Contract cf = contract.contract();
-					contractMap.put(cf.unifiedSymbol(), cf);
-					dataFrameQMap.put(cf, new ConcurrentLinkedQueue<>());
-					registry.addListener(cf, moduleDescription.getNumOfMinPerBar(), PeriodUnit.MINUTE, tradeStrategy);
-					registry.addListener(cf, moduleDescription.getNumOfMinPerBar(), PeriodUnit.MINUTE, this);
+					if(contract instanceof OptionChainContract) {
+						Contract cf = contract.contract();
+						contractMap.put(cf.unifiedSymbol(), cf);
+						contract.memberContracts().forEach(c -> initForContract(c.contract(), moduleDescription.getNumOfMinPerBar()));
+					} else {
+						initForContract(contract.contract(), moduleDescription.getNumOfMinPerBar());
+					}
 				}
 			});
+	}
+	
+	private void initForContract(Contract cf, int numOfMinPerBar) {
+		contractMap.put(cf.unifiedSymbol(), cf);
+		dataFrameQMap.put(cf, new ConcurrentLinkedQueue<>());
+		registry.addListener(cf, numOfMinPerBar, PeriodUnit.MINUTE, tradeStrategy);
+		registry.addListener(cf, numOfMinPerBar, PeriodUnit.MINUTE, this);
 	}
 	
 	@Override
