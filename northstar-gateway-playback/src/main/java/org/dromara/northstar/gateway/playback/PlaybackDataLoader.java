@@ -27,6 +27,7 @@ import org.dromara.northstar.common.model.core.TimeSlot;
 import org.dromara.northstar.common.model.core.TradeTimeDefinition;
 import org.dromara.northstar.common.utils.CommonUtils;
 import org.dromara.northstar.gateway.IContract;
+import org.dromara.northstar.gateway.contract.OptionChainContract;
 import org.dromara.northstar.gateway.playback.model.DataFrame;
 import org.dromara.northstar.gateway.playback.ticker.RandomWalkTickSimulation;
 import org.dromara.northstar.gateway.playback.ticker.SimpleCloseSimulation;
@@ -95,15 +96,29 @@ public class PlaybackDataLoader {
 		Map<Long, DataFrame<Bar>> timeDataMap = dataFrameList.stream().collect(Collectors.toMap(DataFrame::getTimestamp, df -> df));
 		
 		for(IContract ic : contracts) {
-			Contract c = ic.contract();
 			IDataSource ds = ic.dataSource();
-			ds.getMinutelyData(c, startDate, endDate)
-				.stream()
-				.map(bar -> bar.toBuilder()
-						.gatewayId(gatewayId)
-						.channelType(ChannelType.PLAYBACK)
-						.build())
-				.forEach(bar -> timeDataMap.get(bar.actionTimestamp()).add(bar));
+			if(ic instanceof OptionChainContract) {
+				ic.memberContracts().parallelStream()
+					.map(IContract::contract)
+					.forEach(c -> 
+						ds.getMinutelyData(c, startDate, endDate)
+							.stream()
+							.map(bar -> bar.toBuilder()
+									.gatewayId(gatewayId)
+									.channelType(ChannelType.PLAYBACK)
+									.build())
+							.forEach(bar -> timeDataMap.get(bar.actionTimestamp()).add(bar))
+					);
+			} else {
+				Contract c = ic.contract();
+				ds.getMinutelyData(c, startDate, endDate)
+					.stream()
+					.map(bar -> bar.toBuilder()
+							.gatewayId(gatewayId)
+							.channelType(ChannelType.PLAYBACK)
+							.build())
+					.forEach(bar -> timeDataMap.get(bar.actionTimestamp()).add(bar));
+			}
 		}
 		return dataFrameList.stream().filter(df -> !df.isEmpty()).toList();
 	}

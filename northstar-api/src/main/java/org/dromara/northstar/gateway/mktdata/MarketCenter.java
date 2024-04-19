@@ -179,7 +179,10 @@ public class MarketCenter implements IMarketCenter{
 				continue;
 			}
 			IContract c = new OptionChainContract(symbolContractMap.get(e.getKey()), e.getValue());
+			Contract cc = c.contract();
 			contractMap.put(c.identifier(), c);
+			channelSymbolContractTbl.put(c.channelType(), cc.symbol(), c);
+			channelSymbolContractTbl.put(c.channelType(), cc.unifiedSymbol(), c);
 		}
 	}
 	
