@@ -20,7 +20,7 @@ import org.dromara.northstar.indicator.model.Num;
  * @author KevinHuangwl
  *
  */
-public class ExpandedVolumeThresholdIndicator extends AbstractIndicator implements Indicator{
+public class VolBoostingIndicator extends AbstractIndicator implements Indicator{
 	
 	private int countOfDays;
 	
@@ -36,10 +36,10 @@ public class ExpandedVolumeThresholdIndicator extends AbstractIndicator implemen
 	
 	private double threshold;
 	
-	public ExpandedVolumeThresholdIndicator(Configuration cfg, int countOfDays) {
+	public VolBoostingIndicator(Configuration cfg, int countOfDays) {
 		super(cfg.toBuilder().valueType(ValueType.TRADE_DATE).build());
 		this.countOfDays = countOfDays;
-		this.volume = new SimpleValueIndicator(cfg.toBuilder().indicatorName("VOL_origin").valueType(ValueType.VOL_DELTA).build());
+		this.volume = new SimpleValueIndicator(cfg.toBuilder().indicatorName("VOL_origin").visible(false).valueType(ValueType.VOL_DELTA).build());
 	}
 	
 	@Override
