@@ -509,7 +509,7 @@ export default {
   },
   computed: {
     bindedContracts() {
-      return Object.keys(this.barDataMap) || []
+      return Object.keys(this.barDataMap).sort((a, b) => a.localeCompare(b)) || []
     },
     strategyInfo(){
       return this.moduleRuntime.strategyInfos || []
@@ -559,7 +559,7 @@ export default {
     },
     indicatorOptions() {
       if (!this.moduleRuntime.indicatorMap || !this.contractNameOfChart) return []
-      return this.moduleRuntime.indicatorMap[this.contractNameOfChart]
+      return [...this.moduleRuntime.indicatorMap[this.contractNameOfChart]].sort((a,b) => a.localeCompare(b))
     }
   },
   created() {
