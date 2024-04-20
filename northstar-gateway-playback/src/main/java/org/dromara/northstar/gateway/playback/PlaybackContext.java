@@ -123,15 +123,15 @@ public class PlaybackContext implements IPlaybackContext{
 		log.info("回放网关 [{}] 连线。当前回放时间状态：{}", gatewayId, playbackState);
 		
 		LocalDate preStart = LocalDate.parse(settings.getPreStartDate(), DateTimeConstant.D_FORMAT_INT_FORMATTER);
-		LocalDate playStart = playbackState.toLocalDate();
+		LocalDate preEnd = playbackState.toLocalDate().minusDays(1);
 		
-		if(!hasPreLoaded.get() && preStart.isBefore(playStart)) {
-			log.info("回放网关 [{}] 正在加载预热数据，预热时间段：{} -> {}", gatewayId, preStart, playStart);
+		if(!hasPreLoaded.get() && preStart.isBefore(preEnd)) {
+			log.info("回放网关 [{}] 正在加载预热数据，预热时间段：{} -> {}", gatewayId, preStart, preEnd);
 			feEngine.emitEvent(NorthstarEventType.NOTICE, Notice.builder()
 				.content(String.format("[%s]-当前处于预热阶段，请稍等……", gatewayId))
 				.status(CommonStatusEnum.COMS_WARN)
 				.build());
-			runningJob = dataLoader.preload(preStart, playStart, onPreLoadBarDataCallback);
+			runningJob = dataLoader.preload(preStart, preEnd, onPreLoadBarDataCallback);
 			hasPreLoaded.set(true);
 			
 			// 预热完毕的处理
