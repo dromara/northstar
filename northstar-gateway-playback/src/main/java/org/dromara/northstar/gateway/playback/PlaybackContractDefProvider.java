@@ -151,6 +151,7 @@ public class PlaybackContractDefProvider {
 			build("集运欧线", SHFE, FUT, "ec[0-9]{3,4}@.+", List.of(t0900_1015, t1030_1130, t1330_1500), 2.0),
 			/* 日盘2品种 */
 			build("碳酸锂", GFEX, FUT, "lc[0-9]{3,4}@.+", List.of(t0900_1130, t1330_1500), 0.8),
+			build("碳酸锂", GFEX, OPT, "lc[0-9]{3,4}[^@].+", List.of(t0900_1130, t1330_1500), 300),
 			build("工业硅", GFEX, FUT, "si[0-9]{3,4}@.+", List.of(t0900_1130, t1330_1500), 1.5),
 			build("工业硅", GFEX, OPT, "si[0-9]{3,4}[^@].+", List.of(t0900_1130, t1330_1500), 200),
 			/* 股指品种 */

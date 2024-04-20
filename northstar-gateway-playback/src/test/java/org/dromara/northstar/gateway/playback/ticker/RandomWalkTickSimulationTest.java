@@ -3,10 +3,14 @@ package org.dromara.northstar.gateway.playback.ticker;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.offset;
 
+import java.time.LocalTime;
 import java.util.List;
 
 import org.dromara.northstar.common.model.core.Bar;
 import org.dromara.northstar.common.model.core.Contract;
+import org.dromara.northstar.common.model.core.ContractDefinition;
+import org.dromara.northstar.common.model.core.TimeSlot;
+import org.dromara.northstar.common.model.core.TradeTimeDefinition;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -20,8 +24,18 @@ class RandomWalkTickSimulationTest {
 	
 	RandomWalkTickSimulation rws2 = new RandomWalkTickSimulation(120);
 	
+	ContractDefinition cd = ContractDefinition.builder()
+			.tradeTimeDef(TradeTimeDefinition.builder()
+					.timeSlots(List.of(TimeSlot.builder()
+							.start(LocalTime.of(0, 0))
+							.end(LocalTime.of(23, 59))
+							.build()))
+					.build())
+			.build();
+	
 	Contract c = Contract.builder()
 			.priceTick(1)
+			.contractDefinition(cd)
 			.build();
 	
 	@Test

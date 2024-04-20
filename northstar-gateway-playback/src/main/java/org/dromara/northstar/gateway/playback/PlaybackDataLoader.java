@@ -27,6 +27,7 @@ import org.dromara.northstar.common.model.core.TimeSlot;
 import org.dromara.northstar.common.model.core.TradeTimeDefinition;
 import org.dromara.northstar.common.utils.CommonUtils;
 import org.dromara.northstar.gateway.IContract;
+import org.dromara.northstar.gateway.contract.OptionChainContract;
 import org.dromara.northstar.gateway.playback.model.DataFrame;
 import org.dromara.northstar.gateway.playback.ticker.RandomWalkTickSimulation;
 import org.dromara.northstar.gateway.playback.ticker.SimpleCloseSimulation;
@@ -34,12 +35,15 @@ import org.dromara.northstar.gateway.playback.ticker.SimplePriceSimulation;
 import org.dromara.northstar.gateway.playback.ticker.TickSimulationAlgorithm;
 import org.dromara.northstar.gateway.utils.DataLoadUtil;
 
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * 回测数据加载器
  * 不止要负责加载历史数据，还要把数据分成数据帧供消费方消费
  * 同时封装了Bar转TICK数据的处理
  * @auth KevinHuangwl
  */
+@Slf4j
 public class PlaybackDataLoader {
 	
 	private final Collection<IContract> contracts;
@@ -92,15 +96,29 @@ public class PlaybackDataLoader {
 		Map<Long, DataFrame<Bar>> timeDataMap = dataFrameList.stream().collect(Collectors.toMap(DataFrame::getTimestamp, df -> df));
 		
 		for(IContract ic : contracts) {
-			Contract c = ic.contract();
 			IDataSource ds = ic.dataSource();
-			ds.getMinutelyData(c, startDate, endDate)
-				.stream()
-				.map(bar -> bar.toBuilder()
-						.gatewayId(gatewayId)
-						.channelType(ChannelType.PLAYBACK)
-						.build())
-				.forEach(bar -> timeDataMap.get(bar.actionTimestamp()).add(bar));
+			if(ic instanceof OptionChainContract) {
+				ic.memberContracts().parallelStream()
+					.map(IContract::contract)
+					.forEach(c -> 
+						ds.getMinutelyData(c, startDate, endDate)
+							.stream()
+							.map(bar -> bar.toBuilder()
+									.gatewayId(gatewayId)
+									.channelType(ChannelType.PLAYBACK)
+									.build())
+							.forEach(bar -> timeDataMap.get(bar.actionTimestamp()).add(bar))
+					);
+			} else {
+				Contract c = ic.contract();
+				ds.getMinutelyData(c, startDate, endDate)
+					.stream()
+					.map(bar -> bar.toBuilder()
+							.gatewayId(gatewayId)
+							.channelType(ChannelType.PLAYBACK)
+							.build())
+					.forEach(bar -> timeDataMap.get(bar.actionTimestamp()).add(bar));
+			}
 		}
 		return dataFrameList.stream().filter(df -> !df.isEmpty()).toList();
 	}
@@ -169,6 +187,11 @@ public class PlaybackDataLoader {
 						.turnoverDelta(bar.turnoverDelta())					// 采用分钟K线的模糊值
 						.turnover(bar.turnover())							// 采用分钟K线的模糊值
 						.build();
+				if(!tickDataMap.containsKey(tick.actionTimestamp())) {
+					log.warn("Bar: {}", bar);
+					log.warn("SampleBar: {}", sample);
+					log.warn("ticks: {}", tickEntry);
+				}
 				tickDataMap.get(tick.actionTimestamp()).add(tick);
 			})
 		);

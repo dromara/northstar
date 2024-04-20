@@ -3,6 +3,7 @@ package org.dromara.northstar.gateway.contract;
 import java.util.List;
 import java.util.Objects;
 
+import org.dromara.northstar.common.IDataSource;
 import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.constant.Constants;
 import org.dromara.northstar.common.model.Identifier;
@@ -58,6 +59,12 @@ public class OptionChainContract implements IContract {
 	@Override
 	public List<IContract> memberContracts() {
 		return memberContracts;
+	}
+	
+	@Override
+	public IDataSource dataSource() {
+		IContract seed = memberContracts.get(0);
+		return seed.dataSource();
 	}
 
 	@Override

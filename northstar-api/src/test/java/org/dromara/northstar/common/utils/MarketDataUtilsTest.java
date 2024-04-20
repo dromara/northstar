@@ -49,6 +49,33 @@ class MarketDataUtilsTest {
 		assertThat(MarketDataUtils.isOpenningBar(b1)).isTrue();
 		assertThat(MarketDataUtils.isOpenningBar(b2)).isFalse();
 	}
+	
+	@Test
+	void testIsStartingBar() {
+		LocalTime t1 = LocalTime.of(21, 0);
+		LocalTime t2 = LocalTime.of(9, 0);
+		LocalTime t3 = LocalTime.of(9, 1);
+		
+		Bar b1 = Bar.builder()
+				.actionDay(LocalDate.now())
+				.actionTime(t1)
+				.contract(c)
+				.build();
+		Bar b2 = Bar.builder()
+				.actionDay(LocalDate.now())
+				.actionTime(t2)
+				.contract(c)
+				.build();
+		Bar b3 = Bar.builder()
+				.actionDay(LocalDate.now())
+				.actionTime(t3)
+				.contract(c)
+				.build();
+		
+		assertThat(MarketDataUtils.isStartingBar(b1)).isTrue();
+		assertThat(MarketDataUtils.isStartingBar(b2)).isTrue();
+		assertThat(MarketDataUtils.isStartingBar(b3)).isFalse();
+	}
 
 	@Test
 	void testIsEndingBar() {

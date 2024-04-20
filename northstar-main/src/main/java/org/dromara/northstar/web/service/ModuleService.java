@@ -41,6 +41,7 @@ import org.dromara.northstar.data.IMarketDataRepository;
 import org.dromara.northstar.data.IModuleRepository;
 import org.dromara.northstar.gateway.IContract;
 import org.dromara.northstar.gateway.IContractManager;
+import org.dromara.northstar.gateway.contract.OptionChainContract;
 import org.dromara.northstar.gateway.mktdata.DataSourceDataLoader;
 import org.dromara.northstar.module.ArbitrageModuleContext;
 import org.dromara.northstar.module.ModuleContext;
@@ -251,28 +252,19 @@ public class ModuleService implements IModuleService, PostLoadAware {
 		log.info("模组[{}] 初始化数据起始计算日为：{}", md.getModuleName(), date);
 		
 		final IModuleContext mctx = moduleCtx;
-		if(md.getUsage() != ModuleUsage.PLAYBACK) {
+		if(md.getUsage() != ModuleUsage.PLAYBACK && weeksOfDataForPreparation > 0) {
 			// 只有在非回测状态下，才需要预热数据
 			for(ModuleAccountDescription mad : md.getModuleAccountSettingsDescription()) {
 				for(ContractSimpleInfo csi : mad.getBindedContracts()) {
 					IContract c = contractMgr.getContract(Identifier.of(csi.getValue()));
 					IDataSource dataSrc = c.dataSource();
-					if(dataSrc == null) {
-						log.warn("合约 [{}] 缺少数据源配置，无法加载历史数据", c.name());
+					Assert.notNull(dataSrc, "合约 [{}] 缺少数据源配置，无法加载历史数据", c.name());
+					DataSourceDataLoader dataLoader = new DataSourceDataLoader(dataSrc);
+					if(c instanceof OptionChainContract) {
+						// 对于期权链合约，要加载的是成员合约
+						c.memberContracts().parallelStream().forEach(rc -> loadDataForInit(rc, dataLoader, weeksOfDataForPreparation, mctx));
 					} else {
-						DataSourceDataLoader dataLoader = new DataSourceDataLoader(dataSrc);
-						// 历史数据从数据源加载，避免本地数据有问题
-						dataLoader.loadMinutelyData(c.contract(), LocalDate.now().minusWeeks(weeksOfDataForPreparation), LocalDate.now(), 
-								bars -> {
-									List<Bar> data = bars.reversed()
-											.stream()
-											.map(bar -> bar.toBuilder().gatewayId(null).build())
-											.toList();
-									mctx.initData(data);
-								});
-						// 本地仅加载最近的数据
-						List<Bar> data = mdRepo.loadBars(c, LocalDate.now(), LocalDate.now().plusDays(3));
-						mctx.initData(data);
+						loadDataForInit(c, dataLoader, weeksOfDataForPreparation, mctx);
 					}
 				}
 			}
@@ -280,6 +272,15 @@ public class ModuleService implements IModuleService, PostLoadAware {
 		
 		moduleCtx.setEnabled(mrd.isEnabled());
 		moduleCtx.onReady();
+	}
+	
+	private void loadDataForInit(IContract c, DataSourceDataLoader loader, int weeks, IModuleContext mctx) {
+		LocalDate from = LocalDate.now().minusWeeks(weeks);
+		LocalDate to = LocalDate.now();
+		loader.loadMinutelyData(c.contract(), from, to, bars -> mctx.initData(bars.reversed()));
+		// 本地仅加载最近的数据
+		List<Bar> data = mdRepo.loadBars(c, LocalDate.now(), LocalDate.now().plusDays(3));
+		mctx.initData(data);
 	}
 
 	@SuppressWarnings("unchecked")
