@@ -4,6 +4,10 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+/**
+ * 这是一个环型数组，能简单地实现一个滑动窗口的数据结构
+ * @auth KevinHuangwl
+ */
 public class RingArray<T> {
 
 	private T[] array;
@@ -21,6 +25,13 @@ public class RingArray<T> {
 		return get(0);
 	}
 	
+	/**
+	 * get(0) 是访问队头（最新的）数据
+	 * get(-1) 是访问队头第二个数据
+	 * get(1) 是访问队尾数据
+	 * @param index
+	 * @return
+	 */
 	public T get(int index) {
 		return array[getIndex(index)];
 	}
