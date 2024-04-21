@@ -57,11 +57,11 @@ import org.dromara.northstar.strategy.TradeStrategy;
 import org.dromara.northstar.support.utils.bar.BarMergerRegistry;
 import org.dromara.northstar.web.PostLoadAware;
 import org.springframework.context.ApplicationContext;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 import com.alibaba.fastjson.JSONObject;
 
-import cn.hutool.core.lang.Assert;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 
@@ -137,7 +137,7 @@ public class ModuleService implements IModuleService, PostLoadAware {
 	@Override
 	public ModuleDescription createModule(ModuleDescription md) throws Exception {
 		Identifier moduleID = Identifier.of(md.getModuleName());
-		Assert.isFalse(moduleMgr.contains(moduleID), String.format("模组名[%s]已经存在，无法新建模组", md.getModuleName()));
+		Assert.isTrue(!moduleMgr.contains(moduleID), String.format("模组名[%s]已经存在，无法新建模组", md.getModuleName()));
 		log.info("增加模组 [{}]", md.getModuleName());
 		ModuleAccountRuntimeDescription mard = ModuleAccountRuntimeDescription.builder()
 				.initBalance(md.getInitBalance())
@@ -227,7 +227,7 @@ public class ModuleService implements IModuleService, PostLoadAware {
 
 		ComponentAndParamsPair strategyComponent = md.getStrategySetting();
 		TradeStrategy strategy = resolveComponent(strategyComponent);
-		Assert.isTrue(strategy.type() == md.getType(), "该策略只能用于类型为[{}]的模组", strategy.type());
+		Assert.isTrue(strategy.type() == md.getType(), () -> String.format("该策略只能用于类型为[%s]的模组", strategy.type()));
 		strategy.setStoreObject(mrd.getStoreObject());
 		IModuleContext moduleCtx = null;
 		if(md.getUsage() == ModuleUsage.PLAYBACK) {
@@ -258,7 +258,7 @@ public class ModuleService implements IModuleService, PostLoadAware {
 				for(ContractSimpleInfo csi : mad.getBindedContracts()) {
 					IContract c = contractMgr.getContract(Identifier.of(csi.getValue()));
 					IDataSource dataSrc = c.dataSource();
-					Assert.notNull(dataSrc, "合约 [{}] 缺少数据源配置，无法加载历史数据", c.name());
+					Assert.notNull(dataSrc, () -> String.format("合约 [%s] 缺少数据源配置，无法加载历史数据", c.name()));
 					DataSourceDataLoader dataLoader = new DataSourceDataLoader(dataSrc);
 					if(c instanceof OptionChainContract) {
 						// 对于期权链合约，要加载的是成员合约

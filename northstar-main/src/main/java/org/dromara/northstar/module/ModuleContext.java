@@ -75,6 +75,7 @@ import org.dromara.northstar.support.log.ModuleLoggerFactory;
 import org.dromara.northstar.support.utils.bar.BarMergerRegistry;
 import org.slf4j.ILoggerFactory;
 import org.slf4j.Logger;
+import org.springframework.util.Assert;
 
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
@@ -82,7 +83,6 @@ import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import com.google.protobuf.InvalidProtocolBufferException;
 
-import cn.hutool.core.lang.Assert;
 import lombok.Getter;
 import lombok.Setter;
 import xyz.redtorch.pb.CoreEnum.ContingentConditionEnum;
@@ -185,7 +185,7 @@ public class ModuleContext implements IModuleContext{
 
 	@Override
 	public Contract getContract(String unifiedSymbol) {
-		Assert.notBlank(unifiedSymbol, "合约编码不能为空");
+		Assert.hasText(unifiedSymbol, "合约编码不能为空");
 		if(!contractMap.containsKey(unifiedSymbol)) {
 			throw new NoSuchElementException("模组没有绑定合约：" + unifiedSymbol);
 		}
@@ -264,7 +264,8 @@ public class ModuleContext implements IModuleContext{
 		Assert.isTrue(cfg.numOfUnits() > 0, "周期数必须大于0，当前为：" + cfg.numOfUnits());
 		Assert.isTrue(cfg.cacheLength() > 0, "指标回溯长度必须大于0，当前为：" + cfg.cacheLength());
 		if(Boolean.TRUE.equals(cfg.visible())) {		// 不显示的指标可以不做重名校验
-			Assert.isTrue(!indicatorNameTbl.contains(cfg.contract(), indicatorName) || indicator.equals(indicatorNameTbl.get(cfg.contract(), indicatorName)), "指标 [{} -> {}] 已存在。不能重名", cfg.contract().unifiedSymbol(), indicatorName);
+			Assert.isTrue(!indicatorNameTbl.contains(cfg.contract(), indicatorName) || indicator.equals(indicatorNameTbl.get(cfg.contract(), indicatorName)), 
+					() -> String.format("指标 [%s -> %s] 已存在。不能重名", cfg.contract().unifiedSymbol(), indicatorName));
 			indicatorNameTbl.put(cfg.contract(), indicatorName, indicator);
 		}
 	}
