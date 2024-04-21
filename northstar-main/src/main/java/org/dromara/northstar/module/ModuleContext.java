@@ -31,6 +31,7 @@ import org.dromara.northstar.common.constant.Constants;
 import org.dromara.northstar.common.constant.DateTimeConstant;
 import org.dromara.northstar.common.constant.ModuleState;
 import org.dromara.northstar.common.constant.SignalOperation;
+import org.dromara.northstar.common.constant.TickType;
 import org.dromara.northstar.common.exception.InsufficientException;
 import org.dromara.northstar.common.exception.NoSuchElementException;
 import org.dromara.northstar.common.model.AccountRuntimeDescription;
@@ -408,8 +409,34 @@ public class ModuleContext implements IModuleContext{
 				barData.get(0).actionDay(), barData.get(0).actionTime(),
 				barData.get(barData.size() - 1).actionDay(), barData.get(barData.size() - 1).actionTime());
 		for(Bar bar : barData) {
+			dummyTickOfBar(bar).forEach(this::onTick);
 			onBar(bar);
 		}
+	}
+	
+	private List<Tick> dummyTickOfBar(Bar bar){
+		Tick.TickBuilder builder = Tick.builder()
+				.gatewayId(bar.gatewayId())
+				.contract(bar.contract())
+				.actionDay(bar.actionDay())
+				.actionTime(bar.actionTime())
+				.actionTimestamp(bar.actionTimestamp())
+				.tradingDay(bar.tradingDay())
+				.channelType(bar.channelType())
+				.type(TickType.INFO_TICK)
+				.volume(bar.volume())
+				.volumeDelta(bar.volumeDelta())
+				.openInterest(bar.openInterest())
+				.openInterestDelta(bar.openInterestDelta())
+				.turnover(bar.turnover())
+				.turnoverDelta(bar.turnoverDelta());
+	
+		return List.of(
+					builder.lastPrice(bar.openPrice()).build(),
+					builder.lastPrice(bar.highPrice()).build(),
+					builder.lastPrice(bar.lowPrice()).build(),
+					builder.lastPrice(bar.closePrice()).build()
+				);
 	}
 
 	@Override
