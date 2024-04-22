@@ -43,7 +43,7 @@ public class SimMarketHandler extends AbstractEventHandler implements GenericEve
 					.map(SimTradeGateway.class::cast)
 					.forEach(gw -> {
 						MarketGateway mktGateway = accountMgr.get(Identifier.of(gw.gatewayId())).getMarketGateway();
-						if(StringUtils.equals(mktGateway.gatewayId(), tick.gatewayId())) {
+						if(mktGateway != null && StringUtils.equals(mktGateway.gatewayId(), tick.gatewayId())) {
 							gw.onTick(tick);
 						}
 					})

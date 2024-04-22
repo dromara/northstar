@@ -2,6 +2,7 @@ package org.dromara.northstar.ai.infer;
 
 import java.nio.file.Path;
 
+import org.springframework.util.Assert;
 import org.tensorflow.SavedModelBundle;
 import org.tensorflow.SessionFunction;
 import org.tensorflow.Signature;
@@ -13,7 +14,6 @@ import org.tensorflow.ndarray.buffer.FloatDataBuffer;
 import org.tensorflow.ndarray.impl.buffer.raw.RawDataBufferFactory;
 import org.tensorflow.types.TFloat32;
 
-import cn.hutool.core.lang.Assert;
 
 /**
  * 预训练模型
@@ -47,7 +47,7 @@ public class PretrainedModel {
 	 * @return
 	 */
 	public float[] predict(float... inputs) {
-		Assert.isTrue(inputs.length == inputDim, "输入层的维度与期望不一致。期望{}，实际{}", inputDim, inputs.length);
+		Assert.isTrue(inputs.length == inputDim, () -> String.format("输入层的维度与期望不一致。期望%s，实际%s", inputDim, inputs.length));
 		float[] result = new float[outputDim];
 		try (SavedModelBundle model = loader.load()) {
 			// 获取默认的推理函数

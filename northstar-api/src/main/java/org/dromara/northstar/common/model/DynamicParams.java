@@ -9,8 +9,8 @@ import java.util.Objects;
 
 import org.dromara.northstar.common.SettingOptionsProvider;
 import org.dromara.northstar.common.constant.FieldType;
+import org.dromara.northstar.common.utils.ReflectionUtil;
 
-import cn.hutool.core.bean.BeanUtil;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +29,7 @@ public abstract class DynamicParams {
 			Field f = this.getClass().getDeclaredField(e.getKey());
 			ComponentField cf = e.getValue();
 			if(Objects.nonNull(cf.getValue())) {
-				BeanUtil.setFieldValue(this, f.getName(), cf.getValue());
+				ReflectionUtil.setFieldValue(this, f.getName(), cf.getValue());
 			}
 		}
 		
@@ -68,7 +68,13 @@ public abstract class DynamicParams {
 				FieldType type = anno.type();
 				String placeholder = anno.placeholder();
 				boolean required = anno.required();
-				Object value = BeanUtil.getFieldValue(this, f.getName());
+				Object value;
+				try {
+					value = ReflectionUtil.getFieldValue(this, f.getName());
+				} catch (NoSuchFieldException | IllegalAccessException e) {
+					log.warn(f.getName() + "字段获取失败", e);
+					value = null;
+				}
 				fieldMap.put(fieldName, new ComponentField(label,fieldName, order, type, value, unit, options, optionsVal, placeholder, required));
 			}
 		}

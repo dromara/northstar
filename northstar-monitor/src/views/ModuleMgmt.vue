@@ -341,6 +341,9 @@ export default {
         'updateList',
         this.moduleList.filter((item) => item.moduleName !== row.moduleName)
       )
+      // 移除模组时，要把模组图表的指标设置从localStorage移除
+      localStorage.removeItem(`autoUpdate_${row.moduleName}`)
+      localStorage.removeItem(`chartSymbol_${row.moduleName}`)
     },
     async autoRefreshList() {
       moduleApi.getAllModules().then(modules => {

@@ -5,10 +5,10 @@ import org.dromara.northstar.common.model.core.Account;
 import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.common.model.core.Trade;
 import org.dromara.northstar.gateway.IContractManager;
+import org.springframework.util.Assert;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 
-import cn.hutool.core.lang.Assert;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;

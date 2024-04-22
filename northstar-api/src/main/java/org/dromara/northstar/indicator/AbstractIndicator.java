@@ -8,8 +8,8 @@ import java.util.stream.Stream;
 import org.dromara.northstar.indicator.model.Configuration;
 import org.dromara.northstar.indicator.model.Num;
 import org.dromara.northstar.indicator.model.RingArray;
+import org.springframework.util.Assert;
 
-import cn.hutool.core.lang.Assert;
 
 /**
  * 抽象的指标

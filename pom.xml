@@ -17,7 +17,7 @@
 	<url>https://gitee.com/dromara/northstar</url>
 
 	<properties>
-		<northstar-version>7.2.0-RC</northstar-version>
+		<northstar-version>7.2.0-RC2</northstar-version>
 		<java.version>21</java.version>
 		<argLine>-Dfile.encoding=UTF-8</argLine>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -235,11 +235,6 @@
 			<dependency>
 				<groupId>cn.hutool</groupId>
 				<artifactId>hutool-crypto</artifactId>
-				<version>${hutool-version}</version>
-			</dependency>
-			<dependency>
-				<groupId>cn.hutool</groupId>
-				<artifactId>hutool-core</artifactId>
 				<version>${hutool-version}</version>
 			</dependency>
 			<!-- https://mvnrepository.com/artifact/net.bytebuddy/byte-buddy -->
