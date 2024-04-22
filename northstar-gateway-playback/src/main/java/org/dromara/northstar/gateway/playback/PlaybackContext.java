@@ -2,6 +2,8 @@ package org.dromara.northstar.gateway.playback;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -15,6 +17,7 @@ import java.util.stream.Collectors;
 
 import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.constant.DateTimeConstant;
+import org.dromara.northstar.common.constant.TickType;
 import org.dromara.northstar.common.event.FastEventEngine;
 import org.dromara.northstar.common.event.NorthstarEventType;
 import org.dromara.northstar.common.model.GatewayDescription;
@@ -112,9 +115,39 @@ public class PlaybackContext implements IPlaybackContext{
 	};
 	
 	// 如何处理预加载的BAR数据帧
-	private Consumer<DataFrame<Bar>> onPreLoadBarDataCallback = df -> 
-		df.items().forEach(bar -> feEngine.emitEvent(NorthstarEventType.BAR, bar));
+	private Consumer<DataFrame<Bar>> onPreLoadBarDataCallback = df -> df.items().forEach(bar -> {
+		this.dummyTickOfBar(bar).forEach(tick -> feEngine.emitEvent(NorthstarEventType.TICK, tick));
+		feEngine.emitEvent(NorthstarEventType.BAR, bar);
+	});
 	
+	private List<Tick> dummyTickOfBar(Bar bar){
+		Tick.TickBuilder builder = Tick.builder()
+				.gatewayId(bar.gatewayId())
+				.contract(bar.contract())
+				.actionDay(bar.actionDay())
+				.actionTime(bar.actionTime())
+				.actionTimestamp(bar.actionTimestamp())
+				.tradingDay(bar.tradingDay())
+				.channelType(bar.channelType())
+				.type(TickType.PLAYBACK_TICK)
+				.bidPrice(Collections.emptyList())
+				.bidVolume(Collections.emptyList())
+				.askPrice(Collections.emptyList())
+				.askVolume(Collections.emptyList())
+				.volume(bar.volume())
+				.volumeDelta(bar.volumeDelta())
+				.openInterest(bar.openInterest())
+				.openInterestDelta(bar.openInterestDelta())
+				.turnover(bar.turnover())
+				.turnoverDelta(bar.turnoverDelta());
+	
+		return List.of(
+					builder.lastPrice(bar.openPrice()).build(),
+					builder.lastPrice(bar.highPrice()).build(),
+					builder.lastPrice(bar.lowPrice()).build(),
+					builder.lastPrice(bar.closePrice()).build()
+				);
+	}
 	
 	@Override
 	public void start() {
