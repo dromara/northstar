@@ -26,6 +26,7 @@ import com.corundumstudio.socketio.annotation.OnConnect;
 import com.corundumstudio.socketio.annotation.OnDisconnect;
 import com.corundumstudio.socketio.annotation.OnEvent;
 
+import cn.hutool.core.codec.Base64;
 import lombok.extern.slf4j.Slf4j;
 import xyz.redtorch.pb.CoreField.AccountField;
 import xyz.redtorch.pb.CoreField.BarField;
@@ -67,27 +68,27 @@ public class BroadcastHandler extends AbstractEventHandler implements GenericEve
 			log.trace("TICK数据分发：[{} {} {} {} 总仓：{} 仓：{} 总量：{} 量：{} 价：{} 类型：{}]", 
 					tick.getUnifiedSymbol(), tick.getActionDay(), tick.getActionTime(), tick.getActionTimestamp(),
 					(long)tick.getOpenInterest(), (long)tick.getOpenInterestDelta(), tick.getVolume(), tick.getVolumeDelta(), tick.getLastPrice(), t.type());
-			socketServer.getRoomOperations(rmid).sendEvent(NorthstarEventType.TICK.toString(), tick.toByteArray());
+			socketServer.getRoomOperations(rmid).sendEvent(NorthstarEventType.TICK.toString(), Base64.encode(tick.toByteArray()));
 		} else if(event.getData() instanceof Bar b) {
 			BarField bar = b.toBarField();
 			String rmid = String.format("%s@%s", bar.getUnifiedSymbol(), bar.getGatewayId());
 			log.trace("BAR数据分发：[{} {} {} {} 仓：{} 量：{} 价：{}]", rmid, bar.getActionDay(), bar.getActionTime(), bar.getActionTimestamp(),
 					(long)bar.getOpenInterestDelta(), bar.getVolumeDelta(), bar.getClosePrice());
-			socketServer.getRoomOperations(rmid).sendEvent(NorthstarEventType.BAR.toString(), bar.toByteArray());
+			socketServer.getRoomOperations(rmid).sendEvent(NorthstarEventType.BAR.toString(), Base64.encode(bar.toByteArray()));
 		} else if(event.getData() instanceof Account acc) {
 			AccountField account = acc.toAccountField();
 			log.trace("账户信息分发: [{} {} {}]", account.getAccountId(), account.getGatewayId(), account.getBalance());
-			socketServer.getBroadcastOperations().sendEvent(NorthstarEventType.ACCOUNT.toString(), account.toByteArray());
+			socketServer.getBroadcastOperations().sendEvent(NorthstarEventType.ACCOUNT.toString(), Base64.encode(account.toByteArray()));
 		} else if(event.getData() instanceof Position pos) {
 			PositionField position = pos.toPositionField();
 			log.trace("持仓信息分发: [{} {} {}]", position.getAccountId(), position.getGatewayId(), position.getPositionId());
-			socketServer.getBroadcastOperations().sendEvent(NorthstarEventType.POSITION.toString(), position.toByteArray());
+			socketServer.getBroadcastOperations().sendEvent(NorthstarEventType.POSITION.toString(), Base64.encode(position.toByteArray()));
 		} else if(event.getData() instanceof Order od) {
-			socketServer.getBroadcastOperations().sendEvent(NorthstarEventType.ORDER.toString(), od.toOrderField().toByteArray());
+			socketServer.getBroadcastOperations().sendEvent(NorthstarEventType.ORDER.toString(), Base64.encode(od.toOrderField().toByteArray()));
 		} else if(event.getData() instanceof Trade tr) {
-			socketServer.getBroadcastOperations().sendEvent(NorthstarEventType.TRADE.toString(), tr.toTradeField().toByteArray());
+			socketServer.getBroadcastOperations().sendEvent(NorthstarEventType.TRADE.toString(), Base64.encode(tr.toTradeField().toByteArray()));
 		} else if(event.getData() instanceof Notice note) {
-			socketServer.getBroadcastOperations().sendEvent(NorthstarEventType.NOTICE.toString(), note.toNoticeField().toByteArray());
+			socketServer.getBroadcastOperations().sendEvent(NorthstarEventType.NOTICE.toString(), Base64.encode(note.toNoticeField().toByteArray()));
 		} 
 	}
 	
