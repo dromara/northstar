@@ -558,7 +558,7 @@ export default {
       return positions.filter((item) => item.position > 0)
     },
     indicatorOptions() {
-      if (!this.moduleRuntime.indicatorMap || !this.contractNameOfChart) return []
+      if (!this.moduleRuntime.indicatorMap || !this.contractNameOfChart || !this.moduleRuntime.indicatorMap[this.contractNameOfChart]) return []
       return [...this.moduleRuntime.indicatorMap[this.contractNameOfChart]].sort((a,b) => a.localeCompare(b))
     }
   },
