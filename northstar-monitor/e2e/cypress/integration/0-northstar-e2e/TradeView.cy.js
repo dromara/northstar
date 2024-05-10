@@ -161,7 +161,7 @@ describe('回放测试——期货合约', () => {
         cy.get('.el-dialog').contains('账户类型').parent().find('.el-select').click()
         cy.get('.el-select-dropdown').filter(':visible').contains('SIM').click()
         cy.get('.el-dialog').contains('行情网关').parent().find('.el-select').click()
-        cy.get('.el-select-dropdown').filter(':visible').last().contains('行情回放').click()
+        cy.get('#bindedGatewayOption_行情回放').click()
         cy.get('.el-dialog').filter(':visible').find('button').last().click()
         cy.get('.el-table__row').first().contains('连线').click()
         cy.wait(1000)
