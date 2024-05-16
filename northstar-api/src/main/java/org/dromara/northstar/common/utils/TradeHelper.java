@@ -148,6 +148,22 @@ public class TradeHelper {
 		logger.info("对手价卖平");
 		doAction(SignalOperation.SELL_CLOSE, vol);
 	}
+	/**
+	 * 反手买
+	 * @param vol
+	 */
+	public void buyReverse(int vol) {
+		logger.info("反手买");
+		doAction(SignalOperation.BUY_REVERSE, vol);
+	}
+	/**
+	 * 反手卖
+	 * @param vol
+	 */
+	public void sellReverse(int vol) {
+		logger.info("反手卖");
+		doAction(SignalOperation.SELL_REVERSE, vol);
+	}
 	
 	private void doAction(SignalOperation operation, double price, int vol, long timeout, Predicate<Double> priceDiffConditionToAbort) {
 		context.submitOrderReq(TradeIntent.builder()

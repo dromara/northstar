@@ -55,8 +55,11 @@ public class BeginnerExampleStrategy extends AbstractStrategy	// 抽象类预实
 		@Setting(label="操作间隔", type = FieldType.NUMBER, order = 10, unit = "秒")		// Label注解用于定义属性的元信息。可以声明单位
 		private int actionInterval = 60;						// 属性可以为任意多个，当元素为多个时order值用于控制前端的显示顺序
 		
-		@Setting(label="锁仓演示", type = FieldType.SELECT, options = {"启用","禁用"}, optionsVal = {"true","false"}, order = 20)
+		@Setting(label="锁仓演示", type = FieldType.SELECT, options = {"true","false"}, order = 20)
 		private boolean showHedge;
+		
+		@Setting(label="反手演示", type = FieldType.SELECT, options = {"true","false"}, order = 21)
+		private boolean showReverse;
 		
 		@Setting(label="价格类型", type = FieldType.SELECT, options = {"市价","对手价","排队价"}, optionsVal = {"ANY_PRICE", "OPP_PRICE", "WAITING_PRICE"}, order = 30)
 		private String priceType = "OPP_PRICE";
@@ -119,6 +122,9 @@ public class BeginnerExampleStrategy extends AbstractStrategy	// 抽象类预实
 			}
 			if(ctx.getState() == ModuleState.HOLDING_LONG) {
 				SignalOperation op = params.showHedge ? SignalOperation.SELL_OPEN : SignalOperation.SELL_CLOSE;
+				if(params.showReverse) {
+					op = SignalOperation.SELL_REVERSE;
+				}
 				ctx.submitOrderReq(TradeIntent.builder()
 						.contract(tick.contract())
 						.operation(op)
@@ -129,6 +135,9 @@ public class BeginnerExampleStrategy extends AbstractStrategy	// 抽象类预实
 			}
 			if(ctx.getState() == ModuleState.HOLDING_SHORT) {		
 				SignalOperation op = params.showHedge ? SignalOperation.BUY_OPEN : SignalOperation.BUY_CLOSE;
+				if(params.showReverse) {
+					op = SignalOperation.BUY_REVERSE;
+				}
 				ctx.submitOrderReq(TradeIntent.builder()
 						.contract(tick.contract())
 						.operation(op)
