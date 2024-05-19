@@ -48,7 +48,8 @@ public class ReflectionUtil {
      * @param fieldType 字段类型
      * @return 转换后的值
      */
-    private static Object convertValueToFieldType(Object value, Class<?> fieldType) {
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+	private static Object convertValueToFieldType(Object value, Class<?> fieldType) {
         if (value == null) {
             return null;
         }
@@ -73,6 +74,8 @@ public class ReflectionUtil {
             return Short.parseShort(value.toString());
         } else if (fieldType == char.class || fieldType == Character.class) {
             return value.toString().charAt(0);
+        } else if(fieldType.isEnum()) {
+        	return fieldType.cast(Enum.valueOf((Class<Enum>)fieldType, value.toString()));
         } else {
             throw new IllegalArgumentException("No conversion rule for " + fieldType);
         }
