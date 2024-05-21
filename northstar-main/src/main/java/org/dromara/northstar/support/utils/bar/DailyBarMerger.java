@@ -1,13 +1,14 @@
 package org.dromara.northstar.support.utils.bar;
 
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.dromara.northstar.common.model.core.Bar;
 import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.common.model.core.TimeSlot;
+import org.dromara.northstar.common.utils.CommonUtils;
 
 /**
  * 日线合成器
@@ -16,15 +17,12 @@ import org.dromara.northstar.common.model.core.TimeSlot;
  */
 public class DailyBarMerger extends BarMerger{
 
-	private final int numOfDayPerBar;
-	
 	private final LocalTime dayEndTime;
 	
-	private AtomicInteger count;
+	private long cutoffTime;
 	
 	public DailyBarMerger(int numOfDayPerBar, Contract contract) {
 		super(0, contract);
-		this.numOfDayPerBar = numOfDayPerBar;
 		List<TimeSlot> times = contract.contractDefinition().tradeTimeDef().timeSlots();
 		this.dayEndTime = times.get(times.size() - 1).end();
 	}
@@ -36,7 +34,7 @@ public class DailyBarMerger extends BarMerger{
 		}
 
 		if(Objects.isNull(protoBar)) {
-			count = new AtomicInteger(0);
+			cutoffTime = CommonUtils.localDateTimeToMills(LocalDateTime.of(bar.tradingDay(), dayEndTime));
 			protoBar = Bar.builder()
 					.gatewayId(bar.gatewayId())
 					.contract(contract)
@@ -58,13 +56,12 @@ public class DailyBarMerger extends BarMerger{
 					.build();
 		}
 
-		if(bar.actionTime().equals(dayEndTime) && count.incrementAndGet() == numOfDayPerBar) {
+		if(bar.getTimestamp() >= cutoffTime) {
 			doGenerate();
 			return;
 		}
 		
 		doMerge(bar);
 	}
-
 	
 }

@@ -33,6 +33,34 @@ public class InstantBarGenerator {
 		protoBar = null;
 	}
 	
+	public synchronized Bar update(Bar bar) {
+		if (!contract.equals(bar.contract())) {
+			throw new IllegalArgumentException("合约不匹配，期望合约：" + contract.unifiedSymbol() + "，实际合约：" + bar.contract().unifiedSymbol());
+		}
+		
+		highPrice = Math.max(highPrice, bar.highPrice());
+		lowPrice = Math.min(lowPrice, bar.lowPrice());
+		
+		return protoBar
+				.actionDay(bar.actionDay())
+				.actionTime(bar.actionTime())
+				.actionTimestamp(bar.actionTimestamp())
+				.tradingDay(bar.tradingDay())
+				.gatewayId(bar.gatewayId())
+				.contract(bar.contract())
+				.openPrice(openPrice)
+				.highPrice(highPrice)
+				.lowPrice(lowPrice)
+				.closePrice(bar.closePrice())
+				.volume(bar.volume())
+				.volumeDelta(volDelta)
+				.turnover(bar.turnover())
+				.turnoverDelta(turnoverDelta)
+				.openInterest(bar.openInterest())
+				.openInterestDelta(openInterestDelta)
+				.build();
+	}
+	
 	public synchronized Optional<Bar> update(Tick tick) {
 		if (!contract.equals(tick.contract())) {
 			throw new IllegalArgumentException("合约不匹配，期望合约：" + contract.unifiedSymbol() + "，实际合约：" + tick.contract().unifiedSymbol());
