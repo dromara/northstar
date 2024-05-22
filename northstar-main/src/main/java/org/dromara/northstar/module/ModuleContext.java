@@ -147,7 +147,7 @@ public class ModuleContext implements IModuleContext{
 		this.moduleRepo = moduleRepo;
 		this.mktCenter = (IMarketCenter) contractMgr;
 		this.registry = barMergerRegistry;
-		this.loggerFactory = new ModuleLoggerFactory(moduleDescription.getModuleName());
+		this.loggerFactory = new ModuleLoggerFactory(moduleDescription.getModuleName(), moduleDescription.getLogLevel());
 		this.logger = loggerFactory.getLogger(getClass().getName());
 		this.bufSize.set(moduleDescription.getModuleCacheDataSize());
 		this.moduleStateMachine = new ModuleStateMachine(this);

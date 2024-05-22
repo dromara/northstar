@@ -10,7 +10,7 @@ class ModuleLoggerFactoryTest {
 	static {
 		System.setProperty("LOG_PATH", "logs");
 	}
-	ModuleLoggerFactory factory = new ModuleLoggerFactory("单元测试");
+	ModuleLoggerFactory factory = new ModuleLoggerFactory("单元测试", "INFO");
 
 	@Test
 	void test() {

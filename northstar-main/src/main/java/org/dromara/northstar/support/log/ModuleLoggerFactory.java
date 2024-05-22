@@ -19,7 +19,7 @@ public class ModuleLoggerFactory implements ILoggerFactory {
 	private LoggerContext loggerContext = new LoggerContext();
 	private PatternLayoutEncoder encoder = new PatternLayoutEncoder();
 
-	public ModuleLoggerFactory(String moduleName) {
+	public ModuleLoggerFactory(String moduleName, String logLevel) {
 		encoder.setPattern("%d - %level - [%t][" + moduleName + "][%logger{10}] : %m%n");
 		encoder.setCharset(StandardCharsets.UTF_8);
 		encoder.setContext(loggerContext);
@@ -49,7 +49,7 @@ public class ModuleLoggerFactory implements ILoggerFactory {
 		}
 
 		ch.qos.logback.classic.Logger rootLogger = loggerContext.getLogger(Logger.ROOT_LOGGER_NAME);
-		rootLogger.setLevel(Level.INFO);
+		rootLogger.setLevel(Level.valueOf(logLevel));
 		rootLogger.addAppender(rollingFileAppender);
 	}
 

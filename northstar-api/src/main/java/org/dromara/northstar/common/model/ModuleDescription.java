@@ -64,6 +64,10 @@ public class ModuleDescription {
 	 */
 	private int orderPlusTick;
 	/**
+	 * 日志级别
+	 */
+	private String logLevel;
+	/**
 	 * 模组账户配置信息 
 	 */
 	private List<ModuleAccountDescription> moduleAccountSettingsDescription;
