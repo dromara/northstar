@@ -20,7 +20,7 @@ public class InstantBarGenerator {
 	private double highPrice;
 	private double lowPrice;
 	private long volDelta;
-	private long turnoverDelta;
+	private double turnoverDelta;
 	private double openInterestDelta;
 	
 	private Bar.BarBuilder protoBar;
@@ -31,6 +31,44 @@ public class InstantBarGenerator {
 	
 	public void reset() {
 		protoBar = null;
+	}
+	
+	public synchronized Bar update(Bar bar) {
+		if (!contract.equals(bar.contract())) {
+			throw new IllegalArgumentException("合约不匹配，期望合约：" + contract.unifiedSymbol() + "，实际合约：" + bar.contract().unifiedSymbol());
+		}
+		
+		if(protoBar == null) {
+			openPrice = bar.openPrice();
+			highPrice = bar.highPrice();
+			lowPrice = bar.lowPrice();
+			volDelta = bar.volumeDelta();
+			turnoverDelta = bar.turnoverDelta();
+			openInterestDelta = bar.openInterestDelta();
+			protoBar = Bar.builder();
+		}
+		
+		highPrice = Math.max(highPrice, bar.highPrice());
+		lowPrice = Math.min(lowPrice, bar.lowPrice());
+		
+		return protoBar
+				.actionDay(bar.actionDay())
+				.actionTime(bar.actionTime())
+				.actionTimestamp(bar.actionTimestamp())
+				.tradingDay(bar.tradingDay())
+				.gatewayId(bar.gatewayId())
+				.contract(bar.contract())
+				.openPrice(openPrice)
+				.highPrice(highPrice)
+				.lowPrice(lowPrice)
+				.closePrice(bar.closePrice())
+				.volume(bar.volume())
+				.volumeDelta(volDelta)
+				.turnover(bar.turnover())
+				.turnoverDelta(turnoverDelta)
+				.openInterest(bar.openInterest())
+				.openInterestDelta(openInterestDelta)
+				.build();
 	}
 	
 	public synchronized Optional<Bar> update(Tick tick) {

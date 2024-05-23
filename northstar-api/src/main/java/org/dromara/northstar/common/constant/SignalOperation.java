@@ -1,8 +1,5 @@
 package org.dromara.northstar.common.constant;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  *  
  * @author KevinHuangwl
@@ -24,7 +21,15 @@ public enum SignalOperation {
 	/**
 	 * 空平，发出空单委托，结果为多头持仓-1；
 	 */
-	SELL_CLOSE("空平");
+	SELL_CLOSE("空平"),
+	/**
+	 * 先多平，再多开
+	 */
+	BUY_REVERSE("反手多"),
+	/**
+	 * 先空平，再空开
+	 */
+	SELL_REVERSE("反手空");
 	
 	private String text;
 	private SignalOperation(String text) {
@@ -40,31 +45,15 @@ public enum SignalOperation {
 	}
 	
 	public boolean isSell() {
-		return this == SELL_OPEN || this == SELL_CLOSE;
+		return this == SELL_OPEN || this == SELL_CLOSE || this == SELL_REVERSE;
 	}
 	
 	public boolean isBuy() {
-		return this == BUY_OPEN || this == BUY_CLOSE;
+		return this == BUY_OPEN || this == BUY_CLOSE || this == BUY_REVERSE;
 	}
 	
 	public boolean isClose() {
 		return this == BUY_CLOSE || this == SELL_CLOSE;
-	}
-	
-	private static final Map<String, SignalOperation> enumMap = new HashMap<>();
-	
-	static {
-		enumMap.put("多开", BUY_OPEN);
-		enumMap.put("空开", SELL_OPEN);
-		enumMap.put("多平", BUY_CLOSE);
-		enumMap.put("空平", SELL_CLOSE);
-	}
-	
-	public static SignalOperation parse(String val) {
-		if(enumMap.containsKey(val)) {
-			return enumMap.get(val);
-		}
-		throw new IllegalArgumentException("未知信号：" + val);
 	}
 	
 }

@@ -72,6 +72,15 @@
                 ></el-option>
               </el-select>
             </el-form-item>
+            <el-form-item v-if="!module" label="日志级别">
+              <el-select v-model="form.logLevel" :disabled="readOnly">
+                <el-option label="INFO" value="INFO"></el-option>
+                <el-option label="DEBUG" value="DEBUG"></el-option>
+                <el-option label="TRACE" value="TRACE"></el-option>
+                <el-option label="WARN" value="WARN"></el-option>
+                <el-option label="ERROR" value="ERROR"></el-option>
+              </el-select>
+            </el-form-item>
             <el-form-item label="K线周期">
               <el-input-number :disabled="readOnly" v-model="form.numOfMinPerBar" :min="1" />
               <span class="ml-10">分钟</span>
@@ -291,6 +300,7 @@ export default {
         defaultVolume: 1,
         orderPlusTick: 0,
         moduleAccountSettingsDescription: [],
+        logLevel: 'INFO',
         strategySetting: {
           componentMeta: {},
           initParams: [],

@@ -1,9 +1,11 @@
 package org.dromara.northstar.strategy.model;
 
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -78,6 +80,8 @@ public class TradeIntent implements TransactionAware, TickDataAware {
 	
 	private Set<Trade> trades = new HashSet<>();
 	
+	private Queue<SignalOperation> pendingOperation = new LinkedList<>();
+	
 	@Builder
 	public TradeIntent(Contract contract, SignalOperation operation, PriceType priceType, double price, int volume, 
 			long timeout, Predicate<Double> priceDiffConditionToAbort) {
@@ -91,6 +95,12 @@ public class TradeIntent implements TransactionAware, TickDataAware {
 		this.volume = volume;
 		this.timeout = timeout;
 		this.priceDiffConditionToAbort = priceDiffConditionToAbort;
+		if(isReverse(operation)) {
+			pendingOperation.offer(operation.isBuy() ? SignalOperation.BUY_CLOSE : SignalOperation.SELL_CLOSE);
+			pendingOperation.offer(operation.isBuy() ? SignalOperation.BUY_OPEN : SignalOperation.SELL_OPEN);
+		} else {
+			pendingOperation.offer(operation);
+		}
 	}
 	
 	private Optional<String> orderIdRef = Optional.empty();
@@ -124,7 +134,7 @@ public class TradeIntent implements TransactionAware, TickDataAware {
 		}
 		if(orderIdRef.isEmpty() && !context.getState().isOrdering()) {
 			logger.debug("交易意图自动发单");
-			orderIdRef = context.submitOrderReq(contract, operation, priceType, restVol(), price);
+			orderIdRef = context.submitOrderReq(contract, pendingOperation.peek(), priceType, restVol(), price);
 		} else if (orderIdRef.isPresent() && context.isOrderWaitTimeout(orderIdRef.get(), timeout) && tick.actionTimestamp() - lastCancelReqTime > 3000) {
 			logger.debug("交易意图自动撤单");
 			context.cancelOrder(orderIdRef.get());
@@ -133,6 +143,10 @@ public class TradeIntent implements TransactionAware, TickDataAware {
 				terminated = true;	// 当模组停用后，交易意图自动终止
 			}
 		}
+	}
+	
+	private boolean isReverse(SignalOperation operation) {
+		return operation == SignalOperation.BUY_REVERSE || operation == SignalOperation.SELL_REVERSE;
 	}
 	
 	private int restVol() {
@@ -146,8 +160,8 @@ public class TradeIntent implements TransactionAware, TickDataAware {
 			.filter(id -> StringUtils.equals(id, order.originOrderId()))
 			.ifPresent(id -> {
 				if(OrderUtils.isDoneOrder(order)) {
-					// 延时3秒再移除订单信息，避免移除了订单信息后，成交无法匹配的问题
-					CompletableFuture.runAsync(() -> orderIdRef = Optional.empty(), CompletableFuture.delayedExecutor(3, TimeUnit.SECONDS));
+					// 延时一点再移除订单信息，避免移除了订单信息后，成交无法匹配的问题
+					CompletableFuture.runAsync(() -> orderIdRef = Optional.empty(), CompletableFuture.delayedExecutor(50, TimeUnit.MILLISECONDS));
 				}
 			});
 	}
@@ -160,7 +174,8 @@ public class TradeIntent implements TransactionAware, TickDataAware {
 				accVol += trade.volume();
 				trades.add(trade);
 				if(hasTerminated()) {
-					double avgDealPrice = trades.stream().mapToDouble(tr -> tr.price() * tr.volume()).sum() / volume;
+					int multiplier = isReverse(operation) ? 2 : 1;
+					double avgDealPrice = trades.stream().mapToDouble(tr -> tr.price() * tr.volume()).sum() / (volume * multiplier);
 					logger.info("初始下单价为：{}，最终成交均价：{}，交易滑点为：[{}]个价位", 
 							initialPrice, avgDealPrice, Math.round((Math.abs(avgDealPrice - initialPrice) / contract.priceTick())));
 				}
@@ -168,6 +183,10 @@ public class TradeIntent implements TransactionAware, TickDataAware {
 	}
 
 	public synchronized boolean hasTerminated() {
+		if(accVol >= volume && isReverse(operation) && pendingOperation.size() == 2) {
+			pendingOperation.poll();
+			accVol = 0;
+		}
 		return terminated || accVol >= volume;
 	}
 	
