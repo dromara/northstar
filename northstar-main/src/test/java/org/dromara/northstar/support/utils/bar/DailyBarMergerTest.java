@@ -58,7 +58,7 @@ class DailyBarMergerTest {
 		merger.onBar(genBar(LocalDate.now(), LocalTime.of(15, 0), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
 		merger.onBar(genBar(LocalDate.now().plusDays(1), LocalTime.of(15, 0), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
 		
-		verify(listener, Mockito.times(1)).onMergedBar(any(Bar.class));
+		verify(listener, Mockito.times(2)).onMergedBar(any(Bar.class));
 	}
 	
 	 Bar genBar(LocalDate date, LocalTime time, double h, double l, double o, double c, double op, double opDelta, long vol, long volDelta, double tr, double trDelta){
@@ -67,6 +67,7 @@ class DailyBarMergerTest {
 					.actionDay(date)
 					.actionTime(time)
 					.actionTimestamp(LocalDateTime.of(date, time).toInstant(ZoneOffset.ofHours(8)).toEpochMilli())
+					.tradingDay(date)
 					.openPrice(o)
 					.closePrice(c)
 					.highPrice(h)

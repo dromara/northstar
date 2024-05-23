@@ -21,9 +21,4 @@ public class SimpleValueIndicator extends AbstractIndicator implements Indicator
 		return num;
 	}
 
-	@Override
-	public boolean isReady() {
-		return true;
-	}
-	
 }
