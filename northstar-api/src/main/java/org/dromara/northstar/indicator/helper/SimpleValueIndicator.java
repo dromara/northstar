@@ -20,5 +20,10 @@ public class SimpleValueIndicator extends AbstractIndicator implements Indicator
 	protected Num evaluate(Num num) {
 		return num;
 	}
+
+	@Override
+	public boolean isReady() {
+		return true;
+	}
 	
 }

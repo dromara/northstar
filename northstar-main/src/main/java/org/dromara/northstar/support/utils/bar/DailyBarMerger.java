@@ -55,13 +55,14 @@ public class DailyBarMerger extends BarMerger{
 					.preSettlePrice(bar.preSettlePrice())
 					.build();
 		}
+	
+		if(bar.getTimestamp() <= cutoffTime) {			
+			doMerge(bar);
+		}
 
 		if(bar.getTimestamp() >= cutoffTime) {
 			doGenerate();
-			return;
 		}
-		
-		doMerge(bar);
 	}
 	
 }
