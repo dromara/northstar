@@ -278,6 +278,7 @@ public class ModulePosition implements TickDataAware, TransactionAware{
 				.useMargin(totalMargin())
 				.openPrice(avgOpenPrice())
 				.openPriceDiff(priceDiff)
+				.lastTick(lastTick)
 				.positionProfit(profit())
 				.positionDirection(FieldUtils.isBuy(direction) ? PositionDirectionEnum.PD_Long : PositionDirectionEnum.PD_Short)
 				.build();

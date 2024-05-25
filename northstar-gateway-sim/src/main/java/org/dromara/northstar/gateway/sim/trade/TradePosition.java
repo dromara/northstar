@@ -26,7 +26,6 @@ import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
  * @author KevinHuangwl
  *
  */
-
 public class TradePosition {
 
 	/* 旧成交在队首，新成交在队尾 */
@@ -246,6 +245,7 @@ public class TradePosition {
 				.useMargin(totalMargin())
 				.openPrice(avgOpenPrice())
 				.openPriceDiff(priceDiff)
+				.lastTick(lastTick)
 				.positionProfit(profit())
 				.positionDirection(posDir)
 				.build();
