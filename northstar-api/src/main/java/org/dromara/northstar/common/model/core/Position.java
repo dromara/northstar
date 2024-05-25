@@ -26,6 +26,8 @@ public record Position(
         @JSONField(serialize = false)
         Contract contract,
         long updateTimestamp,
+        @JSONField(serialize = false)
+        Tick lastTick,
         String gatewayId
 ) {
 
@@ -43,6 +45,9 @@ public record Position(
 		}
 		if (contract != null) {
 			builder.setContract(contract.toContractField());
+		}
+		if (lastTick != null) {
+			builder.setLastPrice(lastTick.lastPrice());
 		}
 		return builder
 				.setPosition(position)
