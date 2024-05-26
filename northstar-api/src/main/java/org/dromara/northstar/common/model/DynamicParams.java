@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Optional;
 
 import org.dromara.northstar.common.SettingOptionsProvider;
 import org.dromara.northstar.common.constant.FieldType;
@@ -70,7 +71,7 @@ public abstract class DynamicParams {
 				boolean required = anno.required();
 				Object value;
 				try {
-					value = ReflectionUtil.getFieldValue(this, f.getName());
+					value = Optional.ofNullable(ReflectionUtil.getFieldValue(this, f.getName())).orElse("").toString();
 				} catch (NoSuchFieldException | IllegalAccessException e) {
 					log.warn(f.getName() + "字段获取失败", e);
 					value = null;
