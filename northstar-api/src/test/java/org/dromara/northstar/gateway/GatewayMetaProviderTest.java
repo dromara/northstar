@@ -64,7 +64,7 @@ class GatewayMetaProviderTest {
 	    void testResolve() throws Exception {
 	    	Map<String, ComponentField> fieldMap = ((DynamicParams)mockSettings).getMetaInfo();
 	    	
-	    	assertThat(fieldMap.get("openSpreadRate").getValue()).isEqualTo(1D);
+	    	assertThat(fieldMap.get("openSpreadRate").getValue()).isEqualTo("1.0");
 	    	assertThat(fieldMap.get("indicatorSymbol").getValue()).isEqualTo("test1");
 	    	
 	    	fieldMap.get("openSpreadRate").setValue(5D);
