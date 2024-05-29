@@ -127,16 +127,16 @@
               </el-select>
             </el-form-item>
             <el-form-item
-              v-for="(param, index) in form.strategySetting.initParams"
+              v-for="param in form.strategySetting.initParams"
               :label="param.label"
               :key="param.field"
             >
               <el-select
                 v-if="['SELECT', 'MULTI_SELECT'].indexOf(param.type) > -1"
-                v-model="form.strategySetting.initParams[index]['value']"
+                v-model="param.value"
                 :class="param.unit ? 'with-unit' : ''"
                 :multiple="param.type === 'MULTI_SELECT'"
-                :placeholder="form.strategySetting.initParams[index]['placeholder']"
+                :placeholder="param.placeholder"
                 collapse-tags
                 :disabled="readOnly"
               >
@@ -148,10 +148,10 @@
               </el-select>
               <el-input
                 v-else
-                v-model="form.strategySetting.initParams[index]['value']"
+                v-model="param.value"
                 :class="param.unit ? 'with-unit' : ''"
                 :type="param.type.toLowerCase()"
-                :placeholder="form.strategySetting.initParams[index]['placeholder']"
+                :placeholder="param.placeholder"
                 :disabled="readOnly"
               />
               <span v-if="param.unit" class="value-unit"> {{ param.unit }}</span>

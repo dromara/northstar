@@ -28,9 +28,9 @@ class DynamicParamsTest {
 		
 		Map<String, ComponentField> resultMap = params.getMetaInfo();
 		assertThat(resultMap).hasSize(3);
-		assertThat(resultMap.get("actionInterval").getValue()).isEqualTo(60);
+		assertThat(resultMap.get("actionInterval").getValue()).isEqualTo("60");
 		assertThat(resultMap.get("priceType").getValue()).isEqualTo("OPP_PRICE");
-		assertThat(resultMap.get("showHedge").getValue()).isEqualTo(false);
+		assertThat(resultMap.get("showHedge").getValue()).isEqualTo("false");
 	}
 	
 	@Data
