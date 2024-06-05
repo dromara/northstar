@@ -87,6 +87,11 @@ public class PlaybackContext implements IPlaybackContext{
 	
 	// 如何处理TICK数据帧
 	private Consumer<DataFrame<Tick>> onTickDataCallback = dft -> {
+		long timestamp = dft.getTimestamp();
+		LocalDateTime curState = CommonUtils.millsToLocalDateTime(timestamp);
+		if(curState.isBefore(playbackState) || !isRunning()) {
+			return;
+		}
 		dft.items().forEach(tick -> {
 			mktCenter.onTick(tick);
 			feEngine.emitEvent(NorthstarEventType.TICK, tick);
@@ -101,11 +106,15 @@ public class PlaybackContext implements IPlaybackContext{
 	// 如何处理BAR数据帧
 	private BiConsumer<DataFrame<Bar>, Boolean> onBarDataCallback = (df, flag) -> {
 		long timestamp = df.getTimestamp();
+		LocalDateTime curState = CommonUtils.millsToLocalDateTime(timestamp);
+		if(curState.isBefore(playbackState) || !isRunning()) {
+			return;
+		}
 		df.items().forEach(bar -> feEngine.emitEvent(NorthstarEventType.BAR, bar));
 		
+		playbackState = curState;
 		// 收到检查点标志位时，保存回放状态
 		if(Boolean.TRUE.equals(flag)) {
-			playbackState = CommonUtils.millsToLocalDateTime(timestamp);
 			log.info("当前回放状态：{}", playbackState);
 			rtRepo.save(PlaybackRuntimeDescription.builder()
 					.gatewayId(gatewayId)
