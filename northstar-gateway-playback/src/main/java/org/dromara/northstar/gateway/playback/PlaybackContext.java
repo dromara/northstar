@@ -165,7 +165,7 @@ public class PlaybackContext implements IPlaybackContext{
 		log.info("回放网关 [{}] 连线。当前回放时间状态：{}", gatewayId, playbackState);
 		
 		LocalDate preStart = LocalDate.parse(settings.getPreStartDate(), DateTimeConstant.D_FORMAT_INT_FORMATTER);
-		LocalDate preEnd = playbackState.toLocalDate().minusDays(1);
+		LocalDate preEnd = playbackState.toLocalDate();
 		
 		if(!hasPreLoaded.get() && preStart.isBefore(preEnd)) {
 			log.info("回放网关 [{}] 正在加载预热数据，预热时间段：{} -> {}", gatewayId, preStart, preEnd);
