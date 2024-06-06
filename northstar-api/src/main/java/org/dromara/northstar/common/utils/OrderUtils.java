@@ -18,8 +18,8 @@ public class OrderUtils {
 	
 	public static DirectionEnum resolveDirection(SignalOperation opr) {
 		return switch(opr) {
-		case BUY_CLOSE, BUY_OPEN -> DirectionEnum.D_Buy;
-		case SELL_CLOSE, SELL_OPEN -> DirectionEnum.D_Sell;
+		case BUY_CLOSE, BUY_OPEN, BUY_REVERSE -> DirectionEnum.D_Buy;
+		case SELL_CLOSE, SELL_OPEN, SELL_REVERSE -> DirectionEnum.D_Sell;
 		default -> DirectionEnum.D_Unknown;
 		};
 	}

@@ -1,6 +1,6 @@
 {
   "name": "northstar-monitor",
-  "version": "7.3.0",
+  "version": "7.3.1",
   "private": true,
   "main": "electron/main.js",
   "scripts": {
