@@ -152,6 +152,7 @@ public class TradeHelper {
 	 * 反手买
 	 * @param vol
 	 */
+	@Deprecated
 	public void buyReverse(int vol) {
 		logger.info("反手买");
 		doAction(SignalOperation.BUY_REVERSE, vol);
@@ -160,7 +161,24 @@ public class TradeHelper {
 	 * 反手卖
 	 * @param vol
 	 */
+	@Deprecated
 	public void sellReverse(int vol) {
+		logger.info("反手卖");
+		doAction(SignalOperation.SELL_REVERSE, vol);
+	}
+	/**
+	 * 反手买
+	 * @param vol
+	 */
+	public void doBuyReverse(int vol) {
+		logger.info("反手买");
+		doAction(SignalOperation.BUY_REVERSE, vol);
+	}
+	/**
+	 * 反手卖
+	 * @param vol
+	 */
+	public void doSellReverse(int vol) {
 		logger.info("反手卖");
 		doAction(SignalOperation.SELL_REVERSE, vol);
 	}

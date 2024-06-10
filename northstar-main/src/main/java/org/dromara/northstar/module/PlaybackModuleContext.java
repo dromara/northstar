@@ -53,13 +53,13 @@ public class PlaybackModuleContext extends ModuleContext implements IModuleConte
 		// 回测时直接成交，没有撤单追单逻辑
 		SignalOperation operation = tradeIntent.getOperation();
 		if(operation == SignalOperation.BUY_REVERSE) {
-			submitOrderReq(tradeIntent.getContract(), SignalOperation.BUY_CLOSE, tradeIntent.getPriceType(), tradeIntent.getVolume(), 0);
-			submitOrderReq(tradeIntent.getContract(), SignalOperation.BUY_OPEN, tradeIntent.getPriceType(), tradeIntent.getVolume(), 0);
+			submitOrderReq(tradeIntent.getContract(), SignalOperation.BUY_CLOSE, tradeIntent.getPriceType(), tradeIntent.getVolume(), tradeIntent.getPrice());
+			submitOrderReq(tradeIntent.getContract(), SignalOperation.BUY_OPEN, tradeIntent.getPriceType(), tradeIntent.getVolume(), tradeIntent.getPrice());
 		} else if (operation == SignalOperation.SELL_REVERSE) {
-			submitOrderReq(tradeIntent.getContract(), SignalOperation.SELL_CLOSE, tradeIntent.getPriceType(), tradeIntent.getVolume(), 0);
-			submitOrderReq(tradeIntent.getContract(), SignalOperation.SELL_OPEN, tradeIntent.getPriceType(), tradeIntent.getVolume(), 0);
+			submitOrderReq(tradeIntent.getContract(), SignalOperation.SELL_CLOSE, tradeIntent.getPriceType(), tradeIntent.getVolume(), tradeIntent.getPrice());
+			submitOrderReq(tradeIntent.getContract(), SignalOperation.SELL_OPEN, tradeIntent.getPriceType(), tradeIntent.getVolume(), tradeIntent.getPrice());
 		} else {
-			submitOrderReq(tradeIntent.getContract(), tradeIntent.getOperation(), tradeIntent.getPriceType(), tradeIntent.getVolume(), 0);
+			submitOrderReq(tradeIntent.getContract(), tradeIntent.getOperation(), tradeIntent.getPriceType(), tradeIntent.getVolume(), tradeIntent.getPrice());
 		}
 	}
 	
