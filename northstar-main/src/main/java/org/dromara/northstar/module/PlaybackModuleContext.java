@@ -42,6 +42,10 @@ public class PlaybackModuleContext extends ModuleContext implements IModuleConte
 	
 	private Logger logger;
 	
+	private Optional<TradeIntent> pendingTrade = Optional.empty();
+	
+	private long signalTime;
+	
 	public PlaybackModuleContext(TradeStrategy tradeStrategy, ModuleDescription moduleDescription, 
 			ModuleRuntimeDescription moduleRtDescription, IContractManager contractMgr, IModuleRepository moduleRepo, BarMergerRegistry barMergerRegistry) {
 		super(tradeStrategy, moduleDescription, moduleRtDescription, contractMgr, new MockModuleRepository(moduleRepo), barMergerRegistry);
@@ -50,6 +54,13 @@ public class PlaybackModuleContext extends ModuleContext implements IModuleConte
 
 	@Override
 	public void submitOrderReq(TradeIntent tradeIntent) {
+		pendingTrade = Optional.of(tradeIntent);
+		Tick lastTick = Optional.ofNullable(tickMap.get(tradeIntent.getContract())).orElseThrow(() -> new IllegalStateException("没有行情时不应该发送订单"));
+		signalTime = lastTick.actionTimestamp();
+	}
+	
+	private void doTrade() {
+		TradeIntent tradeIntent = pendingTrade.get();
 		// 回测时直接成交，没有撤单追单逻辑
 		SignalOperation operation = tradeIntent.getOperation();
 		if(operation == SignalOperation.BUY_REVERSE) {
@@ -97,6 +108,12 @@ public class PlaybackModuleContext extends ModuleContext implements IModuleConte
 			tickMap.put(tick.contract(), tick);
 		}
 		super.onTick(tick);
+		pendingTrade.ifPresent(intent -> {
+			if(tick.contract().equals(intent.getContract()) && tick.getTimestamp() > signalTime) {
+				doTrade();
+				pendingTrade = Optional.empty();
+			}
+		});
 	}
 
 	// 所有的委托都会立马转为成交单
