@@ -53,7 +53,7 @@ public class PlaybackModuleContext extends ModuleContext implements IModuleConte
 	}
 
 	@Override
-	public void submitOrderReq(TradeIntent tradeIntent) {
+	public synchronized void submitOrderReq(TradeIntent tradeIntent) {
 		pendingTrade = Optional.of(tradeIntent);
 		Tick lastTick = Optional.ofNullable(tickMap.get(tradeIntent.getContract())).orElseThrow(() -> new IllegalStateException("没有行情时不应该发送订单"));
 		signalTime = lastTick.actionTimestamp();
@@ -104,16 +104,16 @@ public class PlaybackModuleContext extends ModuleContext implements IModuleConte
 	
 	@Override
 	public void onTick(Tick tick) {
-		synchronized (tickMap) {
-			tickMap.put(tick.contract(), tick);
-		}
-		super.onTick(tick);
 		pendingTrade.ifPresent(intent -> {
 			if(tick.contract().equals(intent.getContract()) && tick.getTimestamp() > signalTime) {
 				doTrade();
 				pendingTrade = Optional.empty();
 			}
 		});
+		synchronized (tickMap) {
+			tickMap.put(tick.contract(), tick);
+		}
+		super.onTick(tick);
 	}
 
 	// 所有的委托都会立马转为成交单
