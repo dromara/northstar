@@ -55,7 +55,7 @@ public class MarketDataUtils {
 	
 	/**
 	 * 判断TICK是否为开盘范围内的TICK
-	 * 比如要判断一个tick是否为开盘10秒以内的tick，则调用 isOpenningTick(tick, 10000) 来进行判断
+	 * 比如要判断一个tick是否为开盘10秒以内的tick，则调用 isOpenningTick(tick, 10) 来进行判断
 	 * @param tick
 	 * @param seconds	开盘范围
 	 * @return
