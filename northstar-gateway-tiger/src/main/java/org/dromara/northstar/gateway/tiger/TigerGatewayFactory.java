@@ -5,7 +5,6 @@ import org.dromara.northstar.common.event.FastEventEngine;
 import org.dromara.northstar.common.model.GatewayDescription;
 import org.dromara.northstar.gateway.Gateway;
 import org.dromara.northstar.gateway.GatewayFactory;
-import org.dromara.northstar.gateway.IContractManager;
 import org.dromara.northstar.gateway.IMarketCenter;
 
 public class TigerGatewayFactory implements GatewayFactory {
@@ -29,7 +28,7 @@ public class TigerGatewayFactory implements GatewayFactory {
         TigerGatewaySettings settings = JSON.parseObject(JSON.toJSONString(gatewayDescription.getSettings()), TigerGatewaySettings.class);
         gatewayDescription.setSettings(settings);
         if (!contractLoaded) {
-            new TigerContractProvider(settings, mktCenter,dataMgr).loadContractOptions();
+            new TigerContractProvider(settings, mktCenter, dataMgr).loadContractOptions();
             contractLoaded = true;
         }
 

@@ -27,4 +27,9 @@ public class TigerConfig {
                                             @Qualifier("tigerDataServiceManager") TigerDataServiceManager dataMgr) {
         return new TigerGatewayFactory(feEngine, marketCenter, dataMgr);
     }
+
+    @Bean
+    TigerGatewaySettings tigerGatewaySettings() {
+        return new TigerGatewaySettings();
+    }
 }

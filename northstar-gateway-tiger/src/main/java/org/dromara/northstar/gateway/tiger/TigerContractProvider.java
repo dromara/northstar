@@ -15,7 +15,6 @@ import org.dromara.northstar.common.model.core.TimeSlot;
 import org.dromara.northstar.common.model.core.TradeTimeDefinition;
 import org.dromara.northstar.common.utils.DateTimeUtils;
 import org.dromara.northstar.gateway.IMarketCenter;
-import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
