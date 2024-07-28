@@ -1,5 +1,6 @@
 package org.dromara.northstar.gateway.tiger;
 
+import com.google.common.util.concurrent.RateLimiter;
 import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.https.domain.contract.model.ContractsModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.quote.item.SymbolNameItem;
@@ -15,9 +16,11 @@ import org.dromara.northstar.common.model.core.TimeSlot;
 import org.dromara.northstar.common.model.core.TradeTimeDefinition;
 import org.dromara.northstar.common.utils.DateTimeUtils;
 import org.dromara.northstar.gateway.IMarketCenter;
+import org.dromara.northstar.gateway.tiger.util.CollUtil;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -51,8 +54,8 @@ public class TigerContractProvider {
         clientConfig.language = Language.zh_CN;
         TigerHttpClient client = TigerHttpClient.getInstance().clientConfig(clientConfig);
         doLoadContracts(Market.CN, client);
-        doLoadContracts(Market.HK, client);
-        doLoadContracts(Market.US, client);
+        //doLoadContracts(Market.HK, client);
+        //doLoadContracts(Market.US, client);
     }
 
     private void doLoadContracts(Market market, TigerHttpClient client) {
@@ -63,34 +66,41 @@ public class TigerContractProvider {
         }
         Map<String, String> symbolNameMap = response.getSymbolNameItems().stream().collect(Collectors.toMap(SymbolNameItem::getSymbol, SymbolNameItem::getName));
         List<String> symbols = response.getSymbolNameItems().stream().map(SymbolNameItem::getSymbol).collect(Collectors.toList());
-        ContractsRequest contractsRequest = ContractsRequest.newRequest(new ContractsModel(symbols));
-        ContractsResponse contractsResponse = client.execute(contractsRequest);
+        List<List<String>> split = CollUtil.split(symbols, 50);
+        AtomicInteger count = new AtomicInteger();
+        // 创建一个RateLimiter实例，每秒允许1次请求（每分钟60次）
+        RateLimiter rateLimiter = RateLimiter.create(1.0); // 每秒1次
+        split.stream().forEach(strings -> {
+            // 在进行每次请求前，调用rateLimiter.acquire()进行限流控制
+            rateLimiter.acquire();
+            ContractsRequest contractsRequest = ContractsRequest.newRequest(new ContractsModel(strings));
+            ContractsResponse contractsResponse = client.execute(contractsRequest);
+            // 创建合约定义列表
+            List<ContractDefinition> contractDefs = contractsResponse.getItems().stream().map(item -> {
+                item.setName(symbolNameMap.get(item.getSymbol()));
+                TigerContract contract = new TigerContract(item, dataMgr);
+                return ContractDefinition.builder()
+                        .name(contract.name())
+                        .exchange(contract.exchange())
+                        .productClass(contract.productClass())
+                        .symbolPattern(Pattern.compile(contract.name() + "@[A-Z]+@[A-Z]+@[A-Z]+$"))
+                        .commissionRate(3 / 10000D)
+                        .dataSource(contract.dataSource())
+                        .tradeTimeDef(TradeTimeDefinition.builder().timeSlots(List.of(allDay)).build())
+                        .build();
+            }).collect(Collectors.toList());
 
-        // 创建合约定义列表
-        List<ContractDefinition> contractDefs = contractsResponse.getItems().stream().map(item -> {
-            item.setName(symbolNameMap.get(item.getSymbol()));
-            TigerContract contract = new TigerContract(item, dataMgr);
-            return ContractDefinition.builder()
-                    .name(contract.name())
-                    .exchange(contract.exchange())
-                    .productClass(contract.productClass())
-                    .symbolPattern(Pattern.compile(contract.name() + "@[A-Z]+@[A-Z]+@[A-Z]+$"))
-                    .commissionRate(3 / 10000D)
-                    .dataSource(contract.dataSource())
-                    .tradeTimeDef(TradeTimeDefinition.builder().timeSlots(List.of(allDay)).build())
-                    .build();
-        }).collect(Collectors.toList());
+            // 增加合约定义
+            mktCenter.addDefinitions(contractDefs);
 
-        // 增加合约定义
-        mktCenter.addDefinitions(contractDefs);
-
-        // 注册合约
-        contractsResponse.getItems().forEach(item -> {
-            TigerContract contract = new TigerContract(item, dataMgr);
-            mktCenter.addInstrument(contract);
+            // 注册合约
+            contractsResponse.getItems().forEach(item -> {
+                TigerContract contract = new TigerContract(item, dataMgr);
+                mktCenter.addInstrument(contract);
+            });
+            count.addAndGet(contractsResponse.getItems().size());
         });
-
-        log.info("加载TIGER网关 [{}] 的合约{}个", market, contractsResponse.getItems().size());
+        log.info("加载TIGER网关 [{}] 的合约{}个", market, count.get());
     }
 
 }

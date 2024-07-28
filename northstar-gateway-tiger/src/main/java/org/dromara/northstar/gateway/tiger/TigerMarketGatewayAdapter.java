@@ -8,6 +8,7 @@ import com.tigerbrokers.stock.openapi.client.socket.data.pb.*;
 import com.tigerbrokers.stock.openapi.client.struct.SubscribedSymbol;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Language;
 import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
+import io.netty.handler.ssl.SslProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.constant.ConnectionState;
@@ -63,6 +64,7 @@ public class TigerMarketGatewayAdapter implements MarketGateway {
         clientConfig.license = settings.getLicense();
         clientConfig.secretKey = settings.getSecretKey();
         clientConfig.language = Language.zh_CN;
+        clientConfig.setSslProvider(SslProvider.JDK);
         this.client = WebSocketClient.getInstance().clientConfig(clientConfig).apiComposeCallback(spi);
         ApiLogger.setEnabled(true, "logs/");
     }
@@ -93,7 +95,7 @@ public class TigerMarketGatewayAdapter implements MarketGateway {
     @Override
     public boolean subscribe(Contract contract) {
         if (contract.productClass() == ProductClassEnum.EQUITY) {
-            client.cancelSubscribeKline(Set.of(contract.symbol()));
+            client.subscribeKline(Set.of(contract.symbol()));
             log.info("TIGER网关订阅合约 {} {}", contract.name(), contract.unifiedSymbol());
         }
         // TODO 期货期权暂没实现
