@@ -8,6 +8,7 @@ import com.tigerbrokers.stock.openapi.client.socket.data.pb.*;
 import com.tigerbrokers.stock.openapi.client.struct.SubscribedSymbol;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Language;
 import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
+import com.tigerbrokers.stock.openapi.client.util.ProtoMessageUtil;
 import io.netty.handler.ssl.SslProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.northstar.common.constant.ChannelType;
@@ -95,7 +96,7 @@ public class TigerMarketGatewayAdapter implements MarketGateway {
     @Override
     public boolean subscribe(Contract contract) {
         if (contract.productClass() == ProductClassEnum.EQUITY) {
-            client.subscribeKline(Set.of(contract.symbol()));
+            client.subscribeQuote(Set.of(contract.symbol()));
             log.info("TIGER网关订阅合约 {} {}", contract.name(), contract.unifiedSymbol());
         }
         // TODO 期货期权暂没实现
@@ -174,6 +175,17 @@ public class TigerMarketGatewayAdapter implements MarketGateway {
             // TODO Auto-generated method stub
 
         }
+/**
+ * symbol: "300454"
+ * type: BASIC
+ * timestamp: 1722393313358
+ * serverTimestamp: 1722393313348
+ * latestPrice: 48.87
+ * latestPriceTimestamp: 1722393313358
+ * latestTime: "07-31 10:35:12"
+ * preClose: 47.55
+ * volume: 0
+ */
 
         @Override
         public void quoteChange(QuoteBasicData quoteBasicData) {
@@ -233,9 +245,10 @@ public class TigerMarketGatewayAdapter implements MarketGateway {
             }
         }
 
+        /*股票最优买卖价行情回调*/
         @Override
-        public void quoteAskBidChange(QuoteBBOData quoteBBOData) {
-
+        public void quoteAskBidChange(QuoteBBOData data) {
+            ApiLogger.info("quoteAskBidChange:" + ProtoMessageUtil.toJson(data));
         }
 
 
@@ -272,6 +285,7 @@ public class TigerMarketGatewayAdapter implements MarketGateway {
 
         @Override
         public void depthQuoteChange(QuoteDepthData quoteDepthData) {
+            ApiLogger.info("depthQuoteChange:" + ProtoMessageUtil.toJson(quoteDepthData));
         }
 
         @Override

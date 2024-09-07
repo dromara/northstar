@@ -54,8 +54,8 @@ public class TigerContractProvider {
         clientConfig.language = Language.zh_CN;
         TigerHttpClient client = TigerHttpClient.getInstance().clientConfig(clientConfig);
         doLoadContracts(Market.CN, client);
-        //doLoadContracts(Market.HK, client);
-        //doLoadContracts(Market.US, client);
+        doLoadContracts(Market.HK, client);
+        doLoadContracts(Market.US, client);
     }
 
     private void doLoadContracts(Market market, TigerHttpClient client) {

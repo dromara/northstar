@@ -144,16 +144,17 @@ public class TigerTradeGatewayAdapter implements TradeGateway {
         //查询账号中美元相关资产信息
         if (segment != null) {
             PrimeAssetItem.CurrencyAssets assetByCurrency = segment.getAssetByCurrency(Currency.USD);
-            feEngine.emitEvent(NorthstarEventType.ACCOUNT, AccountField.newBuilder()
-                    .setAccountId(settings.getAccountId())
-                    .setGatewayId(gatewayId())
-                    .setAvailable(assetByCurrency.getCashBalance())
-                    .setMargin(segment.getGrossPositionValue())
-                    .setBalance(segment.getNetLiquidation())
-                    .setPositionProfit(segment.getUnrealizedPL())
-                    .setCloseProfit(segment.getRealizedPL())
-                    .setCurrency(CurrencyEnum.USD)
-                    .build());
+            Account build = Account.builder()
+                    .accountId(settings.getAccountId())
+                    .gatewayId(gatewayId())
+                    .available(assetByCurrency.getCashBalance())
+                    .margin(segment.getGrossPositionValue())
+                    .balance(segment.getNetLiquidation())
+                    .positionProfit(segment.getUnrealizedPL())
+                    .closeProfit(segment.getRealizedPL())
+                    .currency(CurrencyEnum.USD)
+                    .build();
+            feEngine.emitEvent(NorthstarEventType.ACCOUNT, build);
         }
     }
 
@@ -180,12 +181,12 @@ public class TigerTradeGatewayAdapter implements TradeGateway {
             String positionId = String.format("%s@%s@%s", contract.unifiedSymbol(), PositionDirectionEnum.PD_Long, gatewayId());
             double openPrice = (int) (json.getDoubleValue("averageCost") / contract.priceTick()) * contract.priceTick();
             Position pos = Position.builder()
+                    .positionId(positionId)
                     .gatewayId(gd.getGatewayId())
-                    .positionId(settings.getAccountId())
-                    .contract(contract)
-                    .positionProfit(json.getDoubleValue("unrealizedPnl"))
                     .positionDirection(PositionDirectionEnum.PD_Long)
                     .position(json.getIntValue("position"))
+                    .contract(contract)
+                    .positionProfit(json.getDoubleValue("unrealizedPnl"))
                     //.frozen(frozen)
                     //.tdFrozen(tdFrozen)
                     //.ydFrozen(ydFrozen)
