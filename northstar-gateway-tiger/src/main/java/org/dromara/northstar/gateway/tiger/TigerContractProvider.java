@@ -65,6 +65,15 @@ public class TigerContractProvider {
     }
 
     private void doLoadContracts(Market market, TigerHttpClient client) {
+        QuoteSymbolNameResponse response = client.execute(QuoteSymbolNameRequest.newRequest(market));
+        if (!response.isSuccess()) {
+            log.warn("TIGER 加载 [{}] 市场合约失败", market);
+            return;
+        }
+
+        Map<String, String> symbolNameMap = response.getSymbolNameItems().stream()
+                .collect(Collectors.toMap(SymbolNameItem::getSymbol, SymbolNameItem::getName));
+
         // 缓存文件路径
         String cacheFilePath = "northstar-gateway-tiger/contracts_cache_" + market + ".json";
         List<ContractItem> allContracts = new ArrayList<>();
@@ -85,15 +94,6 @@ public class TigerContractProvider {
 
         // 如果缓存为空，才从网络加载
         if (allContracts.isEmpty()) {
-            QuoteSymbolNameResponse response = client.execute(QuoteSymbolNameRequest.newRequest(market));
-            if (!response.isSuccess()) {
-                log.warn("TIGER 加载 [{}] 市场合约失败", market);
-                return;
-            }
-
-            Map<String, String> symbolNameMap = response.getSymbolNameItems().stream()
-                    .collect(Collectors.toMap(SymbolNameItem::getSymbol, SymbolNameItem::getName));
-
             List<String> symbols = response.getSymbolNameItems().stream()
                     .filter(x -> !x.getSymbol().contains(".SH"))
                     .map(SymbolNameItem::getSymbol)
@@ -150,6 +150,30 @@ public class TigerContractProvider {
             } catch (IOException e) {
                 log.warn("保存合约到缓存文件失败: {}", cacheFilePath, e);
             }
+        }else {
+            // 创建合约定义列表
+            List<ContractDefinition> contractDefs = allContracts.stream().map(item -> {
+                item.setName(symbolNameMap.get(item.getSymbol()));
+                TigerContract contract = new TigerContract(item, dataMgr);
+                return ContractDefinition.builder()
+                        .name(contract.name())
+                        .exchange(contract.exchange())
+                        .productClass(contract.productClass())
+                        .symbolPattern(Pattern.compile(contract.name() + "@[A-Z]+@[A-Z]+@[A-Z]+$"))
+                        .commissionRate(3 / 10000D)
+                        .dataSource(contract.dataSource())
+                        .tradeTimeDef(TradeTimeDefinition.builder().timeSlots(List.of(allDay)).build())
+                        .build();
+            }).collect(Collectors.toList());
+
+            // 增加合约定义
+            mktCenter.addDefinitions(contractDefs);
+
+            // 注册合约
+            allContracts.forEach(item -> {
+                TigerContract contract = new TigerContract(item, dataMgr);
+                mktCenter.addInstrument(contract);
+            });
         }
 
         // 最后可以输出或使用 `allContracts` 数据
