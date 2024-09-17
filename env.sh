@@ -10,7 +10,7 @@ mkdir -p ~/northstar-env ~/northstar-dist
 JAVA_VERSION=$(java -version 2>&1 | awk -F '"' '/version/ {print $2}' | cut -d. -f1)
 
 # 检查JDK环境
-if [ "$JAVA_VERSION" -ne 21 ]; 
+if [[ "$JAVA_VERSION" -ne 21 ]]; 
 then
 	echo "安装JDK21"
 	cd ~/northstar-env && wget --no-check-certificate -O jdk-21_linux-x64_bin.tar.gz https://gitee.com/dromara/northstar/attach_files/1903632/download
