@@ -18,17 +18,19 @@ public class TigerLoader implements CommandLineRunner {
     private IMarketCenter mktCenter;
 
     @Autowired
-    private TigerDataServiceManager dsMgr;
-
-    @Autowired
     private GatewayMetaProvider gatewayMetaProvider;
 
     @Autowired
     private TigerGatewayFactory tigerFactory;
 
+    @Autowired
+    private TigerContractProvider tigerContractProvider;
+
     public void run(String... args) throws Exception {
         gatewayMetaProvider.add(ChannelType.TIGER, new TigerGatewaySettings(), tigerFactory);
-
+        log.info("增加[TIGER]合约定义");
+        // 增加合约定义
+        mktCenter.addDefinitions(tigerContractProvider.get());
     }
 
 }

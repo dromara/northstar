@@ -12,6 +12,7 @@ import xyz.redtorch.pb.CoreEnum.CurrencyEnum;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -83,10 +84,13 @@ public class TigerContract implements Instrument {
         } else if (minTick == null && tickSizes != null) {
             minTick = tickSizes.getFirst().getTickSize();
         }
+        String minTickStr = String.valueOf(minTick);
+        int pricePrecision = minTickStr.contains(".") ? minTickStr.length() - minTickStr.indexOf('.') - 1 : 0;
+
         return Contract.builder()
                 .gatewayId(ChannelType.TIGER.toString())
                 .symbol(item.getSymbol())
-                .unifiedSymbol(String.format("%s@%s@%s", item.getSymbol(), exchange(), productClass()))
+                .unifiedSymbol(String.format("%s-%s@%s@%s", item.getSymbol(), item.getName(), exchange(), productClass()))
                 .name(item.getName())
                 .fullName(item.getName())
                 .currency(CurrencyEnum.valueOf(item.getCurrency()))
@@ -95,9 +99,10 @@ public class TigerContract implements Instrument {
                 .contractId(identifier().value())
                 .multiplier(Optional.ofNullable(item.getMultiplier()).orElse(1D))
                 .priceTick(minTick)
+                .pricePrecision(pricePrecision)
                 .longMarginRatio(Optional.ofNullable(item.getLongInitialMargin()).orElse(0D))
                 .shortMarginRatio(Optional.ofNullable(item.getShortInitialMargin()).orElse(0D))
-                //.lastTradeDate(LocalDate.parse(Optional.ofNullable(item.getContractMonth()).orElse("")))
+                .lastTradeDate(LocalDate.parse(Optional.ofNullable(item.getContractMonth()).orElse(String.valueOf(LocalDate.now()))))
                 //.strikePrice(Optional.ofNullable(item.getStrike()).orElse(0D))
                 .thirdPartyId(String.format("%s@TIGER", item.getSymbol()))
                 .build();

@@ -8,15 +8,18 @@ import com.tigerbrokers.stock.openapi.client.socket.data.pb.*;
 import com.tigerbrokers.stock.openapi.client.struct.SubscribedSymbol;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Language;
 import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
+import com.tigerbrokers.stock.openapi.client.util.ProtoMessageUtil;
 import io.netty.handler.ssl.SslProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.constant.ConnectionState;
 import org.dromara.northstar.common.constant.DateTimeConstant;
+import org.dromara.northstar.common.constant.TickType;
 import org.dromara.northstar.common.event.FastEventEngine;
 import org.dromara.northstar.common.event.NorthstarEventType;
 import org.dromara.northstar.common.model.GatewayDescription;
 import org.dromara.northstar.common.model.core.Contract;
+import org.dromara.northstar.common.model.core.Tick;
 import org.dromara.northstar.gateway.IContractManager;
 import org.dromara.northstar.gateway.MarketGateway;
 import xyz.redtorch.pb.CoreEnum.CommonStatusEnum;
@@ -24,10 +27,8 @@ import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
 import xyz.redtorch.pb.CoreField.NoticeField;
 import xyz.redtorch.pb.CoreField.TickField;
 
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
+import java.time.*;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -95,7 +96,7 @@ public class TigerMarketGatewayAdapter implements MarketGateway {
     @Override
     public boolean subscribe(Contract contract) {
         if (contract.productClass() == ProductClassEnum.EQUITY) {
-            client.subscribeKline(Set.of(contract.symbol()));
+            client.subscribeQuote(Set.of(contract.symbol()));
             log.info("TIGER网关订阅合约 {} {}", contract.name(), contract.unifiedSymbol());
         }
         // TODO 期货期权暂没实现
@@ -140,7 +141,7 @@ public class TigerMarketGatewayAdapter implements MarketGateway {
         static final String BID_P = "bidPrice";
         static final String BID_V = "bidSize";
 
-        private ConcurrentMap<String, TickField.Builder> tickBuilderMap = new ConcurrentHashMap<>();
+        private ConcurrentMap<String, Tick.TickBuilder> tickBuilderMap = new ConcurrentHashMap<>();
 
         private FastEventEngine feEngine;
         private IContractManager contractMgr;
@@ -174,6 +175,17 @@ public class TigerMarketGatewayAdapter implements MarketGateway {
             // TODO Auto-generated method stub
 
         }
+/**
+ * symbol: "300454"
+ * type: BASIC
+ * timestamp: 1722393313358
+ * serverTimestamp: 1722393313348
+ * latestPrice: 48.87
+ * latestPriceTimestamp: 1722393313358
+ * latestTime: "07-31 10:35:12"
+ * preClose: 47.55
+ * volume: 0
+ */
 
         @Override
         public void quoteChange(QuoteBasicData quoteBasicData) {
@@ -186,45 +198,51 @@ public class TigerMarketGatewayAdapter implements MarketGateway {
             }
             try {
                 String symbol = quoteBasicData.getSymbol();
+                QuoteData.Minute mi = quoteBasicData.getMi();
+                double a = mi.getA();
+                Contract contract = contractMgr.getContract(ChannelType.TIGER, symbol).contract();
                 long timestamp = quoteBasicData.getTimestamp();
                 LocalDateTime ldt = LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneId.systemDefault());
+                Instant e = Instant.ofEpochMilli(timestamp);
+                LocalTime actionTime = e.atZone(ZoneId.systemDefault()).toLocalTime();
+                LocalDate tradingDay = e.atZone(ZoneId.systemDefault()).toLocalDate();
                 ZoneId londonTimeZone = ZoneId.of(ZoneOffset.UTC.getId());
-                tickBuilderMap.computeIfAbsent(symbol, key -> TickField.newBuilder()
-                        .setGatewayId(gd.getGatewayId())
-                        .addAllAskPrice(List.of(0D))
-                        .addAllAskVolume(List.of(0))
-                        .addAllBidPrice(List.of(0D))
-                        .addAllBidVolume(List.of(0))
-                        .setUnifiedSymbol(contractMgr.getContract(ChannelType.TIGER, symbol).contract().unifiedSymbol()));
+                tickBuilderMap.computeIfAbsent(symbol, key -> Tick.builder()
+                        .contract(contract)
+                        .gatewayId(gd.getGatewayId())
+                        .tradingDay(tradingDay)
+                        .actionDay(tradingDay)
+                        .actionTime(actionTime)
+                        .actionTimestamp(timestamp)
+                        .avgPrice(quoteBasicData.getAvgPrice())
+                        .highPrice(quoteBasicData.getHigh())
+                        .lowPrice(quoteBasicData.getLow())
+                        .openPrice(quoteBasicData.getOpen())
+                        .lastPrice(quoteBasicData.getLatestPrice())
+                        .volume(quoteBasicData.getVolume())
+                        .channelType(ChannelType.TIGER)
+                        .type(TickType.MARKET_TICK)
+                        .askPrice(List.of(0D))
+                        .askVolume(List.of(0))
+                        .bidPrice(List.of(0D))
+                        .bidVolume(List.of(0))
 
-                // Example: replace with actual fields
-                // Assuming `quoteBasicData` has methods like `getAskPrice`, `getBidPrice`, etc.
-                tickBuilderMap.get(symbol).setAskPrice(0, quoteBasicData.getAvgPrice()); // Example field
-                tickBuilderMap.get(symbol).setBidPrice(0, quoteBasicData.getAvgPrice()); // Example field
-                tickBuilderMap.get(symbol).setAskVolume(0, (int) quoteBasicData.getVolume()); // Example field
-                tickBuilderMap.get(symbol).setBidVolume(0, (int) quoteBasicData.getVolume()); // Example field
+                );
 
-                if (quoteBasicData.getMarketStatus() != null && quoteBasicData.getMarketStatus().equals("交易中")) {
+                if (quoteBasicData.getMarketStatus() != null && quoteBasicData.getMarketStatus().equals("Trading")) {
                     // 交易数据更新
                     feEngine.emitEvent(NorthstarEventType.TICK, tickBuilderMap.get(symbol)
-                            .setActionDay(ldt.toLocalDate().format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
-                            .setActionTime(ldt.toLocalTime().format(DateTimeConstant.T_FORMAT_WITH_MS_INT_FORMATTER))
-                            .setTradingDay(LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), londonTimeZone).toLocalDate().format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
-                            .setActionTimestamp(timestamp)
-                            .setPreClosePrice(quoteBasicData.getPreClose())
-                            .setLastPrice(quoteBasicData.getLatestPrice())
-                            .setHighPrice(quoteBasicData.getHigh())
-                            .setLowPrice(quoteBasicData.getLow())
-                            .setOpenPrice(quoteBasicData.getOpen())
-                            .setVolume(quoteBasicData.getVolume())
+                            .preClosePrice(quoteBasicData.getPreClose())
+                            .lastPrice(quoteBasicData.getLatestPrice())
+                            .highPrice(quoteBasicData.getHigh())
+                            .lowPrice(quoteBasicData.getLow())
+                            .openPrice(quoteBasicData.getOpen())
+                            .volume(quoteBasicData.getVolume())
                             .build());
                 } else if (quoteBasicData.getMarketStatus() == null || quoteBasicData.getMarketStatus().isEmpty()) {
                     // 盘口数据更新
                     feEngine.emitEvent(NorthstarEventType.TICK, tickBuilderMap.get(symbol)
-                            .setActionDay(ldt.toLocalDate().format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
-                            .setActionTime(ldt.toLocalTime().format(DateTimeConstant.T_FORMAT_WITH_MS_INT_FORMATTER))
-                            .setTradingDay(LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), londonTimeZone).toLocalDate().format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
-                            .setActionTimestamp(timestamp)
+                            .actionTimestamp(timestamp)
                             .build());
                 }
             } catch (Exception e) {
@@ -233,9 +251,30 @@ public class TigerMarketGatewayAdapter implements MarketGateway {
             }
         }
 
-        @Override
-        public void quoteAskBidChange(QuoteBBOData quoteBBOData) {
+        /**
+         * symbol: "600588"
+         * type: BBO
+         * timestamp: 1725949796603
+         * askPrice: 8.63
+         * askSize: 313
+         * askTimestamp: 1725949795000
+         * bidPrice: 8.61
+         * bidSize: 193
+         * bidTimestamp: 1725949795000
+         */
 
+        /*股票最优买卖价行情回调*/
+        @Override
+        public void quoteAskBidChange(QuoteBBOData data) {
+            String symbol = data.getSymbol();
+            if (tickBuilderMap.get(symbol) != null){
+                // Example: replace with actual fields
+                // Assuming `quoteBasicData` has methods like `getAskPrice`, `getBidPrice`, etc.
+                tickBuilderMap.get(symbol).askPrice(Collections.singletonList(data.getAskPrice())); // Example field
+                tickBuilderMap.get(symbol).bidPrice(Collections.singletonList(data.getBidPrice())); // Example field
+                tickBuilderMap.get(symbol).askVolume(Collections.singletonList(Math.toIntExact(data.getAskSize()))); // Example field
+                tickBuilderMap.get(symbol).bidVolume(Collections.singletonList(Math.toIntExact(data.getBidSize()))); // Example field
+            }
         }
 
 
@@ -272,6 +311,7 @@ public class TigerMarketGatewayAdapter implements MarketGateway {
 
         @Override
         public void depthQuoteChange(QuoteDepthData quoteDepthData) {
+            ApiLogger.info("depthQuoteChange:" + ProtoMessageUtil.toJson(quoteDepthData));
         }
 
         @Override
