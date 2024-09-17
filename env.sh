@@ -13,7 +13,7 @@ JAVA_VERSION=$(java -version 2>&1 | awk -F '"' '/version/ {print $2}' | cut -d. 
 if [ "$JAVA_VERSION" -ne 21 ]; 
 then
 	echo "安装JDK21"
-	cd ~/northstar-env && wget --no-check-certificate -o jdk-21_linux-x64_bin.tar.gz https://gitee.com/dromara/northstar/attach_files/1903632/download
+	cd ~/northstar-env && wget --no-check-certificate -O jdk-21_linux-x64_bin.tar.gz https://gitee.com/dromara/northstar/attach_files/1903632/download
 	tar -xvf jdk-21_linux-x64_bin.tar.gz
 	rm -f jdk-21_linux-x64_bin.tar.gz
 	ln -sf ~/northstar-env/$(find jdk* -maxdepth 0 -type d)/bin/* /usr/local/bin/
