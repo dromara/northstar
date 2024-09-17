@@ -72,13 +72,7 @@ public class TigerTradeGatewayAdapter implements TradeGateway {
 
     @Override
     public synchronized void connect() {
-        ClientConfig clientConfig = ClientConfig.DEFAULT_CONFIG;
-        clientConfig.tigerId = settings.getTigerId();
-        clientConfig.defaultAccount = settings.getAccountId();
-        clientConfig.privateKey = settings.getPrivateKey();
-        clientConfig.license = settings.getLicense();
-        clientConfig.secretKey = settings.getSecretKey();
-        clientConfig.language = Language.zh_CN;
+        ClientConfig clientConfig = TigerContractProvider.getTigerHttpClient(settings);
         client = TigerHttpClient.getInstance().clientConfig(clientConfig);
         proxy = new OrderTradeQueryProxy(client, contractMgr, gatewayId(), settings.getAccountId());
         List<Order> orders = proxy.getDeltaOrder();
@@ -106,7 +100,7 @@ public class TigerTradeGatewayAdapter implements TradeGateway {
                     log.error("", e);
                 }
             }
-        }, 3000, 1500);
+        }, 3000, 2000);
     }
 
     private void doQueryOrderAndTrade() {

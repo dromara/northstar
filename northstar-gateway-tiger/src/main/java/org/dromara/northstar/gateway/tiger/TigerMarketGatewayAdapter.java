@@ -198,6 +198,8 @@ public class TigerMarketGatewayAdapter implements MarketGateway {
             }
             try {
                 String symbol = quoteBasicData.getSymbol();
+                QuoteData.Minute mi = quoteBasicData.getMi();
+                double a = mi.getA();
                 Contract contract = contractMgr.getContract(ChannelType.TIGER, symbol).contract();
                 long timestamp = quoteBasicData.getTimestamp();
                 LocalDateTime ldt = LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneId.systemDefault());
@@ -220,10 +222,10 @@ public class TigerMarketGatewayAdapter implements MarketGateway {
                         .volume(quoteBasicData.getVolume())
                         .channelType(ChannelType.TIGER)
                         .type(TickType.MARKET_TICK)
-                        /*.allAskPrice(List.of(0D))
-                        .allAskVolume(List.of(0))
-                        .allBidPrice(List.of(0D))
-                        .allBidVolume(List.of(0))*/
+                        .askPrice(List.of(0D))
+                        .askVolume(List.of(0))
+                        .bidPrice(List.of(0D))
+                        .bidVolume(List.of(0))
 
                 );
 

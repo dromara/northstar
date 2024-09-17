@@ -18,12 +18,16 @@ import org.dromara.northstar.common.model.core.ContractDefinition;
 import org.dromara.northstar.common.model.core.TimeSlot;
 import org.dromara.northstar.common.model.core.TradeTimeDefinition;
 import org.dromara.northstar.common.utils.DateTimeUtils;
+import org.dromara.northstar.gateway.GatewayMetaProvider;
 import org.dromara.northstar.gateway.IMarketCenter;
 import org.dromara.northstar.gateway.tiger.util.CollUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.io.*;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -31,13 +35,17 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Slf4j
+@Component
 public class TigerContractProvider {
 
+    @Autowired
     private TigerGatewaySettings settings;
 
     private TigerDataServiceManager dataMgr;
 
     private IMarketCenter mktCenter;
+
+    private Map<String, String> symbolNameMap = new HashMap<>();
 
     private TimeSlot allDay = TimeSlot.builder().start(DateTimeUtils.fromCacheTime(0, 0)).end(DateTimeUtils.fromCacheTime(0, 0)).build();
 
@@ -51,6 +59,14 @@ public class TigerContractProvider {
      * 加载可用合约
      */
     public void loadContractOptions() {
+        ClientConfig clientConfig = getTigerHttpClient(settings);
+        TigerHttpClient client = TigerHttpClient.getInstance().clientConfig(clientConfig);
+        doLoadContracts(Market.CN, client);
+        doLoadContracts(Market.HK, client);
+        doLoadContracts(Market.US, client);
+    }
+
+    static ClientConfig getTigerHttpClient(TigerGatewaySettings settings) {
         ClientConfig clientConfig = ClientConfig.DEFAULT_CONFIG;
         clientConfig.tigerId = settings.getTigerId();
         clientConfig.defaultAccount = settings.getAccountId();
@@ -58,25 +74,24 @@ public class TigerContractProvider {
         clientConfig.license = settings.getLicense();
         clientConfig.secretKey = settings.getSecretKey();
         clientConfig.language = Language.zh_CN;
-        TigerHttpClient client = TigerHttpClient.getInstance().clientConfig(clientConfig);
-        doLoadContracts(Market.CN, client);
-        doLoadContracts(Market.HK, client);
-        doLoadContracts(Market.US, client);
+        return clientConfig;
     }
 
-    private void doLoadContracts(Market market, TigerHttpClient client) {
+    private List<ContractItem> doLoadContracts(Market market, TigerHttpClient client) {
+        List<ContractItem> allContracts = new ArrayList<>();
         QuoteSymbolNameResponse response = client.execute(QuoteSymbolNameRequest.newRequest(market));
         if (!response.isSuccess()) {
             log.warn("TIGER 加载 [{}] 市场合约失败", market);
-            return;
+            return allContracts;
         }
 
-        Map<String, String> symbolNameMap = response.getSymbolNameItems().stream()
+        Map<String, String> map = response.getSymbolNameItems().stream()
                 .collect(Collectors.toMap(SymbolNameItem::getSymbol, SymbolNameItem::getName));
+        symbolNameMap.putAll(map);
 
         // 缓存文件路径
         String cacheFilePath = "northstar-gateway-tiger/contracts_cache_" + market + ".json";
-        List<ContractItem> allContracts = new ArrayList<>();
+
 
         // 先尝试从缓存文件中读取数据
         File cacheFile = new File(cacheFilePath);
@@ -113,30 +128,6 @@ public class TigerContractProvider {
                 // 将请求到的合约加入全局合约列表
                 allContracts.addAll(contractsResponse.getItems());
 
-                // 创建合约定义列表
-                List<ContractDefinition> contractDefs = contractsResponse.getItems().stream().map(item -> {
-                    item.setName(symbolNameMap.get(item.getSymbol()));
-                    TigerContract contract = new TigerContract(item, dataMgr);
-                    return ContractDefinition.builder()
-                            .name(contract.name())
-                            .exchange(contract.exchange())
-                            .productClass(contract.productClass())
-                            .symbolPattern(Pattern.compile(contract.name() + "@[A-Z]+@[A-Z]+@[A-Z]+$"))
-                            .commissionRate(3 / 10000D)
-                            .dataSource(contract.dataSource())
-                            .tradeTimeDef(TradeTimeDefinition.builder().timeSlots(List.of(allDay)).build())
-                            .build();
-                }).collect(Collectors.toList());
-
-                // 增加合约定义
-                mktCenter.addDefinitions(contractDefs);
-
-                // 注册合约
-                contractsResponse.getItems().forEach(item -> {
-                    TigerContract contract = new TigerContract(item, dataMgr);
-                    mktCenter.addInstrument(contract);
-                });
-
                 count.addAndGet(contractsResponse.getItems().size());
             }
 
@@ -150,34 +141,48 @@ public class TigerContractProvider {
             } catch (IOException e) {
                 log.warn("保存合约到缓存文件失败: {}", cacheFilePath, e);
             }
-        }else {
-            // 创建合约定义列表
-            List<ContractDefinition> contractDefs = allContracts.stream().map(item -> {
-                item.setName(symbolNameMap.get(item.getSymbol()));
-                TigerContract contract = new TigerContract(item, dataMgr);
-                return ContractDefinition.builder()
-                        .name(contract.name())
-                        .exchange(contract.exchange())
-                        .productClass(contract.productClass())
-                        .symbolPattern(Pattern.compile(contract.name() + "@[A-Z]+@[A-Z]+@[A-Z]+$"))
-                        .commissionRate(3 / 10000D)
-                        .dataSource(contract.dataSource())
-                        .tradeTimeDef(TradeTimeDefinition.builder().timeSlots(List.of(allDay)).build())
-                        .build();
-            }).collect(Collectors.toList());
-
-            // 增加合约定义
-            mktCenter.addDefinitions(contractDefs);
-
-            // 注册合约
-            allContracts.forEach(item -> {
-                TigerContract contract = new TigerContract(item, dataMgr);
-                mktCenter.addInstrument(contract);
-            });
         }
+        // 注册合约
+        allContracts.forEach(item -> {
+            TigerContract contract = new TigerContract(item, dataMgr);
+            mktCenter.addInstrument(contract);
+        });
 
         // 最后可以输出或使用 `allContracts` 数据
         log.info("合约加载完毕，市场 [{}] 的合约总数：{}", market, allContracts.size());
+        return allContracts;
     }
 
+    public List<ContractDefinition> get() {
+        ClientConfig clientConfig = getTigerHttpClient(settings);
+        TigerHttpClient client = TigerHttpClient.getInstance().clientConfig(clientConfig);
+
+        // 获取不同市场的合约数据
+        List<ContractItem> contractsCN = doLoadContracts(Market.CN, client);
+        List<ContractItem> contractsHK = doLoadContracts(Market.HK, client);
+        List<ContractItem> contractsUS = doLoadContracts(Market.US, client);
+
+        // 合并所有市场的合约数据
+        List<ContractItem> allContracts = new ArrayList<>();
+        allContracts.addAll(contractsCN);
+        allContracts.addAll(contractsHK);
+        allContracts.addAll(contractsUS);
+
+
+        // 转换 ContractItem 为 ContractDefinition 并返回
+        List<ContractDefinition> contractDefs = allContracts.stream().map(item -> {
+            item.setName(symbolNameMap.get(item.getSymbol()));
+            TigerContract contract = new TigerContract(item, dataMgr);
+            return ContractDefinition.builder()
+                    .name(contract.name())
+                    .exchange(contract.exchange())
+                    .productClass(contract.productClass())
+                    .symbolPattern(Pattern.compile(contract.name() + "@[A-Z]+@[A-Z]+@[A-Z]+$"))
+                    .commissionRate(3 / 10000D)
+                    .dataSource(contract.dataSource())
+                    .tradeTimeDef(TradeTimeDefinition.builder().timeSlots(List.of(allDay)).build())
+                    .build();
+        }).collect(Collectors.toList());
+        return contractDefs;
+    }
 }
