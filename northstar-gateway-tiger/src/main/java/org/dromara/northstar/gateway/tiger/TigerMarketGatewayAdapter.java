@@ -199,7 +199,9 @@ public class TigerMarketGatewayAdapter implements MarketGateway {
             try {
                 String symbol = quoteBasicData.getSymbol();
                 QuoteData.Minute mi = quoteBasicData.getMi();
-                double a = mi.getA();
+                if (mi.getL() == 0){
+                    return;
+                }
                 Contract contract = contractMgr.getContract(ChannelType.TIGER, symbol).contract();
                 long timestamp = quoteBasicData.getTimestamp();
                 LocalDateTime ldt = LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneId.systemDefault());
@@ -214,12 +216,13 @@ public class TigerMarketGatewayAdapter implements MarketGateway {
                         .actionDay(tradingDay)
                         .actionTime(actionTime)
                         .actionTimestamp(timestamp)
-                        .avgPrice(quoteBasicData.getAvgPrice())
-                        .highPrice(quoteBasicData.getHigh())
-                        .lowPrice(quoteBasicData.getLow())
-                        .openPrice(quoteBasicData.getOpen())
-                        .lastPrice(quoteBasicData.getLatestPrice())
+                        .avgPrice(mi.getA())
+                        .highPrice(mi.getH())
+                        .lowPrice(mi.getL())
+                        .openPrice(mi.getO())
+                        .lastPrice(mi.getP())
                         .volume(quoteBasicData.getVolume())
+                        .volumeDelta(mi.getV())
                         .channelType(ChannelType.TIGER)
                         .type(TickType.MARKET_TICK)
                         .askPrice(List.of(0D))
@@ -232,12 +235,18 @@ public class TigerMarketGatewayAdapter implements MarketGateway {
                 if (quoteBasicData.getMarketStatus() != null && quoteBasicData.getMarketStatus().equals("Trading")) {
                     // 交易数据更新
                     feEngine.emitEvent(NorthstarEventType.TICK, tickBuilderMap.get(symbol)
+                            .tradingDay(tradingDay)
+                            .actionDay(tradingDay)
+                            .actionTime(actionTime)
+                            .actionTimestamp(timestamp)
                             .preClosePrice(quoteBasicData.getPreClose())
-                            .lastPrice(quoteBasicData.getLatestPrice())
-                            .highPrice(quoteBasicData.getHigh())
-                            .lowPrice(quoteBasicData.getLow())
-                            .openPrice(quoteBasicData.getOpen())
+                            .avgPrice(mi.getA())
+                            .highPrice(mi.getH())
+                            .lowPrice(mi.getL())
+                            .openPrice(mi.getO())
+                            .lastPrice(mi.getP())
                             .volume(quoteBasicData.getVolume())
+                            .volumeDelta(mi.getV())
                             .build());
                 } else if (quoteBasicData.getMarketStatus() == null || quoteBasicData.getMarketStatus().isEmpty()) {
                     // 盘口数据更新

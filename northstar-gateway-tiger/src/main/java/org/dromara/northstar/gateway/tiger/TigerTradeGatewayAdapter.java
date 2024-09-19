@@ -81,7 +81,10 @@ public class TigerTradeGatewayAdapter implements TradeGateway {
         connState = ConnectionState.CONNECTED;
         feEngine.emitEvent(NorthstarEventType.LOGGED_IN, gatewayId());
 
-        orders.forEach(order -> feEngine.emitEvent(NorthstarEventType.ORDER, order));
+        orders.forEach(order ->{
+            orderIdMap.put(Long.valueOf(order.orderId()),order.orderId());
+            feEngine.emitEvent(NorthstarEventType.ORDER, order.toBuilder().originOrderId(order.orderId()).build());
+        } );
         symbols.forEach(symbol -> {
             List<Trade> trades = proxy.getTrades(symbol);
             trades.forEach(trade -> feEngine.emitEvent(NorthstarEventType.TRADE, trade));
@@ -107,7 +110,7 @@ public class TigerTradeGatewayAdapter implements TradeGateway {
         proxy.getDeltaOrder().forEach(order -> {
             Long id = Long.valueOf(order.orderId());
             String originOrderId = orderIdMap.get(id);
-            feEngine.emitEvent(NorthstarEventType.ORDER, order.toBuilder().originOrderId(Optional.ofNullable(originOrderId).orElse("")).build());
+            feEngine.emitEvent(NorthstarEventType.ORDER, order.toBuilder().originOrderId(Optional.ofNullable(originOrderId).orElse(order.orderId())).build());
             if (order.tradedVolume() > 0) {
                 proxy.getDeltaTrade(Long.valueOf(order.orderId()))
                         .forEach(trade -> feEngine.emitEvent(NorthstarEventType.TRADE, trade.toBuilder().originOrderId(Optional.ofNullable(originOrderId).orElse("")).build()));

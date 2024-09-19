@@ -290,7 +290,7 @@ public class TigerHttpClient implements TigerClient {
             if (apiModel instanceof BatchApiModel) {
                 params.put(BIZ_CONTENT, JSONObject.toJSONString(((BatchApiModel) apiModel).getItems(), SerializerFeature.WriteEnumUsingToString));
             } else if (apiModel instanceof TradeOrderModel) {
-                params.put(BIZ_CONTENT, JSONObject.toJSONString(apiModel));
+                    params.put(BIZ_CONTENT, JSONObject.toJSONString(apiModel, SerializerFeature.WriteEnumUsingToString));
             } else {
                 params.put(BIZ_CONTENT, JSONObject.toJSONString(apiModel, SerializerFeature.WriteEnumUsingToString));
             }
