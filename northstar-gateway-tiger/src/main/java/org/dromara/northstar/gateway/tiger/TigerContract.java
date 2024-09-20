@@ -105,6 +105,9 @@ public class TigerContract implements Instrument {
                 .lastTradeDate(LocalDate.parse(Optional.ofNullable(item.getContractMonth()).orElse(String.valueOf(LocalDate.now()))))
                 //.strikePrice(Optional.ofNullable(item.getStrike()).orElse(0D))
                 .thirdPartyId(String.format("%s@TIGER", item.getSymbol()))
+                .channelType(ChannelType.TIGER)
+                .tradable(true)
+                .contractDefinition(contractDef)
                 .build();
     }
 

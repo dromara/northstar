@@ -61,9 +61,9 @@ public class TigerContractProvider {
     public void loadContractOptions() {
         ClientConfig clientConfig = getTigerHttpClient(settings);
         TigerHttpClient client = TigerHttpClient.getInstance().clientConfig(clientConfig);
-        doLoadContracts(Market.CN, client);
-        doLoadContracts(Market.HK, client);
-        doLoadContracts(Market.US, client);
+        doLoadContracts(Market.CN, client, true);
+        doLoadContracts(Market.HK, client, true);
+        doLoadContracts(Market.US, client, true);
     }
 
     static ClientConfig getTigerHttpClient(TigerGatewaySettings settings) {
@@ -77,7 +77,7 @@ public class TigerContractProvider {
         return clientConfig;
     }
 
-    private List<ContractItem> doLoadContracts(Market market, TigerHttpClient client) {
+    private List<ContractItem> doLoadContracts(Market market, TigerHttpClient client, boolean addInstrument) {
         List<ContractItem> allContracts = new ArrayList<>();
         QuoteSymbolNameResponse response = client.execute(QuoteSymbolNameRequest.newRequest(market));
         if (!response.isSuccess()) {
@@ -142,12 +142,13 @@ public class TigerContractProvider {
                 log.warn("保存合约到缓存文件失败: {}", cacheFilePath, e);
             }
         }
-        // 注册合约
-        allContracts.forEach(item -> {
-            TigerContract contract = new TigerContract(item, dataMgr);
-            mktCenter.addInstrument(contract);
-        });
-
+        if (addInstrument){
+            // 注册合约
+            allContracts.forEach(item -> {
+                TigerContract contract = new TigerContract(item, dataMgr);
+                mktCenter.addInstrument(contract);
+            });
+        }
         // 最后可以输出或使用 `allContracts` 数据
         log.info("合约加载完毕，市场 [{}] 的合约总数：{}", market, allContracts.size());
         return allContracts;
@@ -158,9 +159,9 @@ public class TigerContractProvider {
         TigerHttpClient client = TigerHttpClient.getInstance().clientConfig(clientConfig);
 
         // 获取不同市场的合约数据
-        List<ContractItem> contractsCN = doLoadContracts(Market.CN, client);
-        List<ContractItem> contractsHK = doLoadContracts(Market.HK, client);
-        List<ContractItem> contractsUS = doLoadContracts(Market.US, client);
+        List<ContractItem> contractsCN = doLoadContracts(Market.CN, client, false);
+        List<ContractItem> contractsHK = doLoadContracts(Market.HK, client, false);
+        List<ContractItem> contractsUS = doLoadContracts(Market.US, client, false);
 
         // 合并所有市场的合约数据
         List<ContractItem> allContracts = new ArrayList<>();
@@ -177,7 +178,7 @@ public class TigerContractProvider {
                     .name(contract.name())
                     .exchange(contract.exchange())
                     .productClass(contract.productClass())
-                    .symbolPattern(Pattern.compile(contract.name() + "@[A-Z]+@[A-Z]+@[A-Z]+$"))
+                    .symbolPattern(Pattern.compile(contract.name() + ".*"))
                     .commissionRate(3 / 10000D)
                     .dataSource(contract.dataSource())
                     .tradeTimeDef(TradeTimeDefinition.builder().timeSlots(List.of(allDay)).build())

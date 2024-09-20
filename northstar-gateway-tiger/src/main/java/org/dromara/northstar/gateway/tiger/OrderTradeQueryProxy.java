@@ -23,6 +23,7 @@ import xyz.redtorch.pb.CoreEnum.OrderStatusEnum;
 import xyz.redtorch.pb.CoreEnum.TimeConditionEnum;
 
 import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Slf4j
@@ -127,6 +128,7 @@ public class OrderTradeQueryProxy {
                 log.warn("废单信息：{} {} {}", ldt, contract.name(), orderMsg);
             }
         }
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");  // Define the pattern
         Instant ins = Instant.ofEpochMilli(getOpenTime(json));
         String tradingDay = LocalDateTime.ofInstant(ins, ZoneOffset.ofHours(0)).toLocalDate().format(DateTimeConstant.D_FORMAT_INT_FORMATTER);
         String orderDate = LocalDateTime.ofInstant(ins, ZoneId.systemDefault()).toLocalDate().format(DateTimeConstant.D_FORMAT_INT_FORMATTER);
@@ -140,11 +142,11 @@ public class OrderTradeQueryProxy {
                 .orderId(orderId)
                 .direction(direction)
                 .offsetFlag(offset)
-                .orderDate(LocalDate.parse(orderDate))
+                .orderDate(LocalDate.parse(orderDate, formatter))
                 .totalVolume(totalVol)
                 .tradedVolume(tradedVol)
                 .price(price)
-                .tradingDay(LocalDate.parse(tradingDay))
+                .tradingDay(LocalDate.parse(tradingDay, formatter))
                 .orderTime(LocalTime.parse(LocalDateTime.ofInstant(ins, ZoneId.systemDefault()).toLocalTime().format(DateTimeConstant.T_FORMAT_FORMATTER)))
                 .timeCondition(timeCondition)
                 .orderStatus(orderStatus).build();
