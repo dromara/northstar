@@ -177,7 +177,7 @@ public class ModuleCheckingTask implements InitializingBean {
 		accountMgr.allAccounts().stream()
 			.filter(account -> account.degreeOfRisk() > 0.95)
 			.forEach(account -> 
-				doSmartSend("[账户风险度警报]：" + account.accountId(), String.format("当前账户风险率为：%d%", (int)(account.degreeOfRisk() * 100)))
+				doSmartSend("[账户风险度警报]：" + account.accountId(), String.format("当前账户风险率为：%d%%", (int)(account.degreeOfRisk() * 100)))
 			);
 	}
 	/**
