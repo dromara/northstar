@@ -63,23 +63,6 @@
 			        </configuration>
 			      </execution>
 			      <execution>
-			        <id>exec-npm-version2</id>
-			        <phase>prepare-package</phase>
-			        <goals>
-			          <goal>exec</goal>
-			        </goals>
-			        <configuration>
-			          <executable>npm</executable>
-			          <arguments>
-			          	<argument>run</argument>
-			          	<argument>version-ee</argument>
-			          	<argument>--</argument>
-			            <argument>${project.version}</argument>
-			            <argument>--allow-same-version</argument>
-			          </arguments>
-			        </configuration>
-			      </execution>
-			      <execution>
 			        <id>exec-npm-install</id>
 			        <phase>prepare-package</phase>
 			        <goals>
@@ -88,8 +71,7 @@
 			        <configuration>
 			          <executable>npm</executable>
 			          <arguments>
-			          	<argument>run</argument>
-			            <argument>install-all</argument>
+			            <argument>install</argument>
 			          </arguments>
 			        </configuration>
 			      </execution>
@@ -103,7 +85,7 @@
 			          <executable>npm</executable>
 			          <arguments>
 			            <argument>run</argument>
-			            <argument>build-all</argument>
+			            <argument>build</argument>
 			          </arguments>
 			        </configuration>
 			      </execution>
