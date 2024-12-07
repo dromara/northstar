@@ -17,7 +17,7 @@
 	<url>https://gitee.com/dromara/northstar</url>
 
 	<properties>
-		<northstar-version>7.3.4</northstar-version>
+		<northstar-version>7.3.5</northstar-version>
 		<java.version>21</java.version>
 		<argLine>-Dfile.encoding=UTF-8</argLine>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -25,7 +25,7 @@
 		<maven.compiler.source>${java.version}</maven.compiler.source>
 		<maven.compiler.target>${java.version}</maven.compiler.target>
 		<revision>${northstar-version}</revision>
-		<lombok-version>1.18.30</lombok-version>
+		<lombok-version>1.18.36</lombok-version>
 		<slf4j-version>2.0.9</slf4j-version>
 		<commons-lang3-version>3.7</commons-lang3-version>
 		<commons-codec-version>1.16.0</commons-codec-version>
