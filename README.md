@@ -3,15 +3,15 @@
 **免责声明：**  
 **本项目仅属于技术分享，不构成任何交易建议。使用者自身在交易前，需要清楚其可能面对的交易风险与相关法律规定，并为自身行为负责！**
 
-![输入图片说明](https://foruda.gitee.com/images/1681303466386742642/f1c0a30e_1676852.jpeg "GVP.jpg")
+#### 用户监控台效果（监控台为用户提供一个可视化窗口，以方便进行程序的监控与管理）：
+![输入图片说明](https://www.quantit.tech/assets/screenshot/preview-feature.gif "屏幕截图.png")
+#### 策略可视化研发（可进行多周期叠加及自定义指标）：
+![输入图片说明](https://www.quantit.tech/assets/screenshot/preview-strategy-study.gif "屏幕截图.png")
+#### 策略回测：
+![输入图片说明](https://www.quantit.tech/assets/screenshot/preview-playback.gif "屏幕截图.png")
 
 ## 产品简介
-这是一个面向程序员的专业级量化交易软件，用于期货、股票、外汇、炒币等多种交易场景，实现自动交易。
-
-已对接的网关示例：
-- CTP网关：[https://gitee.com/NorthstarQuant/northstar-gateway-ctp](https://gitee.com/NorthstarQuant/northstar-gateway-ctp)
-- 老虎网关：[https://gitee.com/NorthstarQuant/northstar-gateway-tiger](https://gitee.com/NorthstarQuant/northstar-gateway-tiger)
-- 币安网关：[https://gitee.com/NorthstarQuant/northstar-gateway-binance](https://gitee.com/NorthstarQuant/northstar-gateway-binance)
+这是一个专业级量化交易软件，用于期货、股票、外汇、币圈等多种交易场景，实现自动交易。
 
 **功能特性：**
 - 一站式平台，可适配对接不同的交易所；
@@ -23,13 +23,6 @@
 - 自然易操作的自动化模组管理，轻松掌握与管理自动化策略的运行状态；
 - 可实现完全自主的风控手段；
 - 私有化部署，确保策略安全；
-
-#### 用户监控台效果（监控台为用户提供一个可视化窗口，以方便进行程序的监控与管理）：
-![输入图片说明](https://www.quantit.tech/assets/screenshot/preview-feature.gif "屏幕截图.png")
-#### 策略可视化研发（可进行多周期叠加及自定义指标）：
-![输入图片说明](https://www.quantit.tech/assets/screenshot/preview-strategy-study.gif "屏幕截图.png")
-#### 策略回测：
-![输入图片说明](https://www.quantit.tech/assets/screenshot/preview-playback.gif "屏幕截图.png")
 
 ## 适用人群
 专业量化操盘手、全栈技术爱好者、小型私募技术团队
