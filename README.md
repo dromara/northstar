@@ -8,6 +8,8 @@
 ## 产品简介
 这是一个面向程序员的专业级量化交易软件，用于期货、股票、外汇、炒币等多种交易场景，实现自动交易。
 
+**该开源版本仅提供自动交易功能，更多丰富的功能请移步[【PRO版演示】](https://northstar.quantit.tech:8443/#/)  [【PRO版文档】](https://pro.quantit.tech/guide/introduction.html)**
+
 已对接的网关示例：
 - CTP网关：[https://gitee.com/NorthstarQuant/northstar-gateway-ctp](https://gitee.com/NorthstarQuant/northstar-gateway-ctp)
 - 老虎网关：[https://gitee.com/NorthstarQuant/northstar-gateway-tiger](https://gitee.com/NorthstarQuant/northstar-gateway-tiger)
