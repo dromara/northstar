@@ -1,4 +1,4 @@
-# Northstar盈富量化平台
+ Northstar盈富量化平台
 
 **免责声明：**  
 **本项目仅属于技术分享，不构成任何交易建议。使用者自身在交易前，需要清楚其可能面对的交易风险与相关法律规定，并为自身行为负责！**
@@ -6,18 +6,67 @@
 ![输入图片说明](https://foruda.gitee.com/images/1681303466386742642/f1c0a30e_1676852.jpeg "GVP.jpg")
 
 ## 产品简介
-这是一个面向程序员的专业级量化交易软件，用于期货、股票、外汇、炒币等多种交易场景，实现自动交易。
-
-**该开源版本仅提供自动交易功能，更多丰富的功能请移步[【PRO版演示】](https://northstar.quantit.tech:8443/#/)  [【PRO版文档】](https://pro.quantit.tech/guide/introduction.html) 或关注视频号【盈富量化】获取更多介绍**
+专业级量化交易软件，用于期货、股票、外汇、炒币等多种交易场景，实现自动交易。
 
 已对接的网关示例：
 - CTP网关：[https://gitee.com/NorthstarQuant/northstar-gateway-ctp](https://gitee.com/NorthstarQuant/northstar-gateway-ctp)
 - 老虎网关：[https://gitee.com/NorthstarQuant/northstar-gateway-tiger](https://gitee.com/NorthstarQuant/northstar-gateway-tiger)
 - 币安网关：[https://gitee.com/NorthstarQuant/northstar-gateway-binance](https://gitee.com/NorthstarQuant/northstar-gateway-binance)
 
-**功能特性：**
+**程序化交易**  
+● 模组管理  
+● 策略编写  
+● 指标框架  
+● 运行状态可视化  
+● 自动风控  
+● 资金隔离  
+● 策略绩效  
+● 策略熔断  
+
+**模拟账户交易**  
+● 支持实时行情的本地模拟（同时支持手工及程序化交易）  
+● 支持历史回放的本地模拟（相当于复盘训练）  
+● 提供账户绩效统计  
+
+**历史行情回放**  
+● 对接了六大主流交易市场（国内期货、A股、港股、美股、币圈、外汇）  
+● 提供分钟级精度历史行情  
+
+**前端GUI监控台**  
+● 提供单租户的监控台  
+● 方便配置网关、模组信息  
+● 提供图表可视化  
+● 方便日志查询  
+● 支持中英文切换  
+
+**AI助手**  
+● 可对接主流的大模型平台API  
+● 已有Deepseek及Kimi的对接案例  
+
+**日志分析**  
+● 隔离平台日志与模组日志  
+● 可通过监控台实时控制日志打印级别  
+
+**策略回测**  
+● 可实现大规模的批量回测  
+● 可实现快速回测  
+● 可实现高精度的回测
+
+**图表分析**  
+● 提供多图同列  
+● 提供多周期联动  
+● 提供常用指标与画线工具  
+● 支持画线下单
+
+**报警通知**  
+● 对接了企业微信与邮件通知
+
+**自定义网关**  
+● 可扩展自行对接更多交易所
+
+
+### 技术特性
 - 一站式平台，可适配对接不同的交易所；
-- 集成了Tensorflow框架，可以运行预训练模型以指导交易，提高交易成功率；  
 - 灵活多变的自动化策略框架，能实现复杂的个性化交易逻辑，如多合约价差交易，算法高频交易，CTA交易，期权期货混合交易等等；
 - 支持多账户交易，能实现跨市套利等复杂逻辑；
 - 直观易理解的API编程接口，并且提供了多种策略的编写范例，只需要掌握最基本的JAVA编程知识便可以上手编写自己的交易策略；
@@ -26,12 +75,6 @@
 - 可实现完全自主的风控手段；
 - 私有化部署，确保策略安全；
 
-#### 用户监控台效果（监控台为用户提供一个可视化窗口，以方便进行程序的监控与管理）：
-![输入图片说明](https://www.quantit.tech/assets/screenshot/preview-feature.gif "屏幕截图.png")
-#### 策略可视化研发（可进行多周期叠加及自定义指标）：
-![输入图片说明](https://www.quantit.tech/assets/screenshot/preview-strategy-study.gif "屏幕截图.png")
-#### 策略回测：
-![输入图片说明](https://www.quantit.tech/assets/screenshot/preview-playback.gif "屏幕截图.png")
 
 ## 适用人群
 专业量化操盘手、全栈技术爱好者、小型私募技术团队
@@ -46,8 +89,6 @@
 - northstar项目为服务端（包含了web网页监控端）
 - 交互协议HTTP + websocket
 - 数据库采用H2（历史行情数据主要依赖数据服务，本地仅保存少量账户配置信息）
-- 前端监控台采用node14 + vue2.x
-- 服务端采用java21 + springboot3
 
 项目架构采用事件驱动+插件式开发
 ![输入图片说明](https://foruda.gitee.com/images/1684034911905355451/683de173_1676852.png "总体架构图")
@@ -64,10 +105,6 @@
 - 本项目为技术分享，对交易行为并不负责
 - 使用者需要自行开发交易策略并需要一定的JAVA基础
 
-## 如何贡献代码
-本项目欢迎提PR，可先fork到自己的项目中，然后提PR。为避免PR被拒绝，建议PR之前与作者进行充分的沟通
-
 ## 特别鸣谢
 [redtorch](https://github.com/sun0x00/redtorch)作者，本项目保留了小部分其源码，同时感谢redtorch作者的技术分享。  
-[klinechart](https://klinecharts.com/zh-CN)作者，提供了优秀的K线前端库，并提供了相关的技术支持。  
-[electron-egg](https://www.yuque.com/u34495/mivcfg)作者，提供了简便易于上手的桌面化生成方案，并提供了相关的技术支持。  
+[klinechart](https://klinecharts.com/zh-CN)作者，提供了优秀的K线前端库，并提供了相关的技术支持。    
