@@ -1,0 +1,94 @@
+server:
+  ssl:
+    key-store-type: JKS
+    key-store: classpath:keystore/northstar.quantit.tech.jks
+    key-store-password: s20ku0o017
+    enabled-protocols: TLSv1.2,TLSv1.3
+  servlet:
+    session:
+      cookie:
+        same-site: strict
+        secure: true
+  compression:
+    enabled: true
+    mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json
+    min-response-size: 1024
+northstar: 
+  data-service:
+    #baseUrl: http://127.0.0.1:443
+    baseUrl: https://marketplace.quantit.tech
+    
+logging:
+  level: 
+     root: info
+     '[org.dromara.northstar]': info
+  file:
+    path: logs/
+  
+spring:
+  messages:
+    basename: i18n/messages
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  datasource:
+    url: jdbc:h2:file:./data/storage;DB_CLOSE_ON_EXIT=FALSE;
+    driverClassName: org.h2.Driver
+    username: sa
+  jpa:
+    hibernate:
+      ddl-auto: update
+    database-platform: org.hibernate.dialect.H2Dialect
+  profiles:
+    active: ${env:prod}
+  threads:
+    virtual:
+      enabled: true
+---
+server:
+  port: 443
+  ssl:
+    enabled: true
+spring:
+  config:
+    activate:
+      on-profile: prod,demo
+      
+---
+server:
+  port: 80
+  ssl:
+    enabled: false
+spring:
+  threads:
+    virtual:
+      enabled: false
+  config:
+    activate:
+      on-profile: dev
+
+---
+server:
+  port: 80
+  ssl:
+    enabled: false
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb
+  config:
+    activate:
+      on-profile: test,unittest,train,devtest
+      
+---
+server:
+  port: 443
+  ssl:
+    enabled: true
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb
+  config:
+    activate:
+      on-profile: e2e
+

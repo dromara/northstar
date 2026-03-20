@@ -1,16 +1,10 @@
 HELP.md
 target/
-deploy/
 logs/
-**/.mvn/**
+test-output/
+.mvn/**
 !**/src/main/**
 !**/src/test/**
-release.properties
-*.releaseBackup
-**/*.releaseBackup
-*.versionsBackup
-**/*.versionsBackup
-.lh
 
 ### STS ###
 .apt_generated
@@ -37,11 +31,7 @@ build/
 
 ### VS Code ###
 .vscode/
-/pom.xml.versionsBackup
-/northstar-dist/
-/.metadata/
-
-**/__pycache__/
-northstar-rl/python-app/models
-.flattened-pom.xml
+/null/
 /data/
+/.flattened-pom.xml
+/northstar-dist/

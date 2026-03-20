@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en" class="layout-theme-light">
+  <head>
+    <script>self["MonacoEnvironment"] = (function (paths) {
+          return {
+            globalAPI: false,
+            getWorkerUrl : function (moduleId, label) {
+              var result =  paths[label];
+              if (/^((http:)|(https:)|(file:)|(\/\/))/.test(result)) {
+                var currentUrl = String(window.location);
+                var currentOrigin = currentUrl.substr(0, currentUrl.length - window.location.hash.length - window.location.search.length - window.location.pathname.length);
+                if (result.substring(0, currentOrigin.length) !== currentOrigin) {
+                  var js = '/*' + label + '*/importScripts("' + result + '");';
+                  var blob = new Blob([js], { type: 'application/javascript' });
+                  return URL.createObjectURL(blob);
+                }
+              }
+              return result;
+            }
+          };
+        })({
+  "editorWorkerService": "/monacoeditorwork/editor.worker.bundle.js",
+  "typescript": "/monacoeditorwork/ts.worker.bundle.js",
+  "javascript": "/monacoeditorwork/ts.worker.bundle.js"
+});</script>
+
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="renderer" content="webkit" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=0"
+    />
+    <title>Northstar盈富量化平台</title>
+    <link rel="icon" href="/ns.ico" />
+    <script defer src="https://hm.baidu.com/hm.js?b24f5e1285644aaa1012a62c9fdf9866"></script>
+    <script>
+      window.process = {};
+    </script>
+    <script type="module" crossorigin src="/static/js/index-CtKSTuto.js"></script>
+    <link rel="stylesheet" crossorigin href="/static/css/index-BAyqZtS3.css">
+    <link rel="stylesheet" href="/assets/layout-theme-light.css" id="theme-link-tag">
+  </head>
+
+  <body>
+    <div id="app">
+      <style>#app,body,html{align-items:center;display:flex;height:100%;justify-content:center;overflow:hidden;position:relative;width:100%}.loader,.loader:after,.loader:before{animation:load-animation 1.8s ease-in-out infinite;animation-fill-mode:both;border-radius:50%;height:2.5em;width:2.5em}.loader{animation-delay:-.16s;color:#406eeb;font-size:10px;margin:80px auto;position:relative;text-indent:-9999em;top:0;transform:translateZ(0);transform:translate(-50%)}.loader:after,.loader:before{content:"";position:absolute;top:0}.loader:before{animation-delay:-.32s;left:-3.5em}.loader:after{left:3.5em}@keyframes load-animation{0%,80%,to{box-shadow:0 2.5em 0 -1.3em}40%{box-shadow:0 2.5em 0 0}}</style>
+      <div class="loader"></div>
+    </div>
+  </body>
+</html>

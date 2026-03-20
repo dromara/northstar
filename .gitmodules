@@ -1,0 +1,6 @@
+[submodule "northstar-external"]
+	path = northstar-external
+	url = git@gitee.com:kevinhuangwl/northstar-external.git
+[submodule "northstar-monitor-next"]
+	path = northstar-monitor-next
+	url = git@gitee.com:kevinhuangwl/northstar-monitor-next.git
