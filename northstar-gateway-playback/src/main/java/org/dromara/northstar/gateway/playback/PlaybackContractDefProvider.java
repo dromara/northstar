@@ -64,7 +64,7 @@ public class PlaybackContractDefProvider implements IContractDefinitionProvider{
 			build("白糖", CZCE, OPT, "SR[0-9]{3,4}[^@].+", List.of(t2100_2300, t0900_1015, t1030_1130, t1330_1500), 200),
 			build("棉花", CZCE, FUT, "CF[0-9]{3,4}@.+", List.of(t2100_2300, t0900_1015, t1030_1130, t1330_1500), 1000),
 			build("棉花", CZCE, OPT, "CF[0-9]{3,4}[^@].+", List.of(t2100_2300, t0900_1015, t1030_1130, t1330_1500), 200),
-			build("玻璃", CZCE, FUT, "FG[0-9]{3,4}@.+", List.of(t2100_2300, t0900_1015, t1030_1130, t1330_1500), 10000),
+			build("玻璃", CZCE, FUT, "FG[0-9]{3,4}@.+", List.of(t2100_2300, t0900_1015, t1030_1130, t1330_1500), 1000),
 			build("菜油", CZCE, FUT, "OI[0-9]{3,4}@.+", List.of(t2100_2300, t0900_1015, t1030_1130, t1330_1500), 500),
 			build("菜油", CZCE, OPT, "OI[0-9]{3,4}[^@].+", List.of(t2100_2300, t0900_1015, t1030_1130, t1330_1500), 200),
 			build("PTA", CZCE, FUT, "TA[0-9]{3,4}@.+", List.of(t2100_2300, t0900_1015, t1030_1130, t1330_1500), 600),
