@@ -7,9 +7,9 @@
 
 ![历史回放](https://foruda.gitee.com/images/1774059802333287433/2cd1aef0_1676852.gif "屏幕截图")
 
-![自动化](https://foruda.gitee.com/images/1774060070004167314/f5b33b09_1676852.png "屏幕截图")
+![自动化](https://foruda.gitee.com/images/1774060471531122258/c86a5fd5_1676852.png "屏幕截图")
 
-![策略监控](https://foruda.gitee.com/images/1774060162621471617/83f6d643_1676852.png "屏幕截图")
+![策略监控](https://foruda.gitee.com/images/1774060637481944200/93d230bb_1676852.png "屏幕截图")
 
 ## 产品简介
 专业级量化交易软件，用于期货、股票、外汇、炒币等多种交易场景，实现自动交易。  
