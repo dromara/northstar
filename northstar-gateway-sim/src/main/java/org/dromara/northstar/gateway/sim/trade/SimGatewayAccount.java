@@ -1,5 +1,7 @@
 package org.dromara.northstar.gateway.sim.trade;
 
+import java.util.Optional;
+
 import org.dromara.northstar.common.model.ModuleDealRecord;
 import org.dromara.northstar.common.model.SimAccountDescription;
 import org.dromara.northstar.common.model.core.Account;
@@ -89,8 +91,9 @@ public class SimGatewayAccount {
 	public void onTrade(Trade trade) {
 		// 计算手续费
 		Contract contract = trade.contract();
-		double commission = contract.contractDefinition().commissionFee() > 0
-				? contract.contractDefinition().commissionFee() : contract.contractDefinition().commissionRate() * trade.price() * trade.contract().multiplier();
+		double commission = contract.contractDefinition().commissionFee() != null
+				? contract.contractDefinition().commissionFee() 
+				: Optional.ofNullable(contract.contractDefinition().commissionRate()).orElse(0D) * trade.price() * trade.contract().multiplier();
 		double sumCommission = trade.volume() * commission;
 		totalCommission += sumCommission;
 		log.info("[{}] {} {} {} {}手 单边交易手续费：{}", gatewayId, trade.tradeDate(), trade.tradeTime(), trade.contract().name(), 
@@ -108,8 +111,9 @@ public class SimGatewayAccount {
 		log.info("[{}] 累计平仓盈亏：{}，累计手续费：{}，当前持仓盈亏：{}，累计净出入金：{}，账户余额：{}", gatewayId, (int)totalCloseProfit, (int)totalCommission, 
 				(int)positionManager.totalHoldingProfit(), (int)(totalDeposit - totalWithdraw), (int)balance());
 		Contract contract = deal.getCloseTrade().contract();
-		double commission = contract.contractDefinition().commissionFee() > 0
-				? contract.contractDefinition().commissionFee() : contract.contractDefinition().commissionRate() * trade.price() * trade.contract().multiplier();
+		double commission = contract.contractDefinition().commissionFee() != null
+				? contract.contractDefinition().commissionFee() 
+				: Optional.ofNullable(contract.contractDefinition().commissionRate()).orElse(0D) * trade.price() * trade.contract().multiplier();
 		double sumFee = trade.volume() * commission * 2; // 手续费按双边计
 		moduleRepo.saveDealRecord(ModuleDealRecord.builder()
 				.moduleName(gatewayId)
