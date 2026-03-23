@@ -1,1 +1,0 @@
-import{d as o,u as s,O as a,aD as n,aE as r,c,o as u}from"./index-CtKSTuto.js";const m={class:"dark:!text-white"},p=o({name:"Reset",__name:"index",setup(_){const t=s();let e;return a(()=>{e=setTimeout(()=>{t.push("/welcome")},3e3),n()}),r(()=>{clearTimeout(e)}),(i,d)=>(u(),c("h1",m,"正在重置系统..."))}});export{p as default};
