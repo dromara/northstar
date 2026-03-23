@@ -24,8 +24,8 @@ import xyz.redtorch.pb.CoreEnum.OrderStatusEnum;
 
 class ModuleStateMachineTest {
 
-	ContractDefinition cd = ContractDefinition.builder().commissionFee(0).build();
-	Contract contract = Contract.builder().unifiedSymbol("rb2205@SHFE@FUTURES").contractDefinition(cd).multiplier(10).longMarginRatio(0.08).shortMarginRatio(0.08).build();
+	ContractDefinition cd = ContractDefinition.builder().commissionFee(0D).marginRatio(0.08).build();
+	Contract contract = Contract.builder().unifiedSymbol("rb2205@SHFE@FUTURES").contractDefinition(cd).multiplier(10).build();
 	SubmitOrderReq orderReq = SubmitOrderReq.builder()
 			.contract(contract)
 			.direction(DirectionEnum.D_Buy)

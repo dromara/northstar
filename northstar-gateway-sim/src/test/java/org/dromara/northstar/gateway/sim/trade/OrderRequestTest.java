@@ -12,6 +12,7 @@ import java.time.LocalDate;
 import java.util.function.Consumer;
 
 import org.dromara.northstar.common.model.core.Contract;
+import org.dromara.northstar.common.model.core.ContractDefinition;
 import org.dromara.northstar.common.model.core.Order;
 import org.dromara.northstar.common.model.core.SubmitOrderReq;
 import org.dromara.northstar.common.model.core.Tick;
@@ -30,7 +31,7 @@ class OrderRequestTest {
     @SuppressWarnings("unchecked")
 	Consumer<Transaction> mockOnTradeCallback = mock(Consumer.class);
 	LocalDate today = LocalDate.now();
-	Contract c1 = Contract.builder().symbol("rb2205@SHFE").multiplier(10).longMarginRatio(0.08).shortMarginRatio(0.08).build();
+	Contract c1 = Contract.builder().symbol("rb2205@SHFE").multiplier(10).contractDefinition(ContractDefinition.builder().marginRatio(0.08).build()).build();
 	Tick tick1 = Tick.builder().tradingDay(today).contract(c1).lastPrice(5111).build();
 	SubmitOrderReq mockSubmitOrderReq = SubmitOrderReq.builder()
 			.originOrderId("testId")

@@ -343,8 +343,6 @@ public class NorthstarDataSource implements IDataSource{
 				.currency(currency)
 				.lastTradeDate(LocalDate.parse(dto.getLastTradeDate(), DateTimeConstant.D_FORMAT_INT_FORMATTER))
 				.onboardingDate(StringUtils.isBlank(dto.getOnboardingDate()) ? null : LocalDate.parse(dto.getOnboardingDate(), DateTimeConstant.D_FORMAT_INT_FORMATTER))
-				.longMarginRatio(dto.getMarginRate())
-				.shortMarginRatio(dto.getMarginRate())
 				.usingStartTimeInBarTime(dto.getUsingStartTimeInBar())
 				.build();
 	}

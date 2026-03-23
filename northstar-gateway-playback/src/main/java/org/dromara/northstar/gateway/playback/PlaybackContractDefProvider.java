@@ -201,7 +201,7 @@ public class PlaybackContractDefProvider implements IContractDefinitionProvider{
 			build("港股", SEHK, STK, ".+@SEHK@.+", List.of(t0930_1600), 100),
 			
 			/* 外汇品种 */
-			build("外汇", FXCM, FX, ".+@FOREX.+", List.of(t0800_0800), 0.01),
+			build("外汇", FXCM, FX, ".+@FOREX.+", List.of(t0000_t0000), 0.01),
 			
 			/* 加密货币 */
 			buildCryptos("币安现货", BIAN, SPO, ".+@BINANCE@SPOT.+"),
@@ -228,29 +228,27 @@ public class PlaybackContractDefProvider implements IContractDefinitionProvider{
 	/* 港股交易时间 */
 	private final TimeSlot t0930_1600 = TimeSlot.builder().start(DateTimeUtils.fromCacheTime(9, 30)).end(DateTimeUtils.fromCacheTime(16, 00)).build();
 	
-	/* 外汇品种交易时间 */
-	private final TimeSlot t0800_0800 = TimeSlot.builder().start(DateTimeUtils.fromCacheTime(8, 00)).end(LocalTime.of(8, 00)).build();
-	
 	/* 币圈交易时间 */
 	private final TimeSlot t0000_t0000 = TimeSlot.builder().start(DateTimeUtils.fromCacheTime(8, 00)).end(LocalTime.of(7, 59, 59)).build();
 	
 	private ContractDefinition buildCryptos(String name, ExchangeEnum exchange, ProductClassEnum productClass, String pattern) {
 		TradeTimeDefinition tradeTimeDef = TradeTimeDefinition.builder().timeSlots(List.of(t0000_t0000)).weekendClosure(false).build();
 		return ContractDefinition.builder().name(name).exchange(exchange).productClass(productClass).dataSource(dataSource)
+				.marginRatio(0.1)
 				.symbolPattern(Pattern.compile(pattern)).tradeTimeDef(tradeTimeDef).build();
 	}
 	
 	private ContractDefinition build(String name, ExchangeEnum exchange, ProductClassEnum productClass, String pattern, 
 			List<TimeSlot> times, double commissionInBP){
 		TradeTimeDefinition tradeTimeDef = TradeTimeDefinition.builder().timeSlots(times).build();
-		return ContractDefinition.builder().name(name).exchange(exchange).productClass(productClass).dataSource(dataSource)
+		return ContractDefinition.builder().name(name).exchange(exchange).productClass(productClass).dataSource(dataSource).marginRatio(0.1)
 				.symbolPattern(Pattern.compile(pattern)).tradeTimeDef(tradeTimeDef).commissionRate(commissionInBP / 10000D).build();
 	}
 	
 	private ContractDefinition build(String name, ExchangeEnum exchange, ProductClassEnum productClass, String pattern, 
 			List<TimeSlot> times, int commissionInCent){
 		TradeTimeDefinition tradeTimeDef = TradeTimeDefinition.builder().timeSlots(times).build();
-		return ContractDefinition.builder().name(name).exchange(exchange).productClass(productClass).dataSource(dataSource)
+		return ContractDefinition.builder().name(name).exchange(exchange).productClass(productClass).dataSource(dataSource).marginRatio(0.1)
 				.symbolPattern(Pattern.compile(pattern)).tradeTimeDef(tradeTimeDef).commissionFee(commissionInCent / 100D).build();
 	}
 }

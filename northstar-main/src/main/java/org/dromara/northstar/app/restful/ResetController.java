@@ -1,5 +1,6 @@
 package org.dromara.northstar.app.restful;
 
+import org.dromara.northstar.app.service.ContractConfigService;
 import org.dromara.northstar.app.service.CustomIndicatorService;
 import org.dromara.northstar.app.service.GatewayService;
 import org.dromara.northstar.app.service.ModuleService;
@@ -30,6 +31,9 @@ public class ResetController {
 	
 	@Autowired
 	private CustomIndicatorService customIndicatorService;
+	
+	@Autowired
+	private ContractConfigService contractConfigService;
 
 	@DeleteMapping
 	public void reset() {
@@ -55,6 +59,10 @@ public class ResetController {
 		// 移除自定义指标
 		customIndicatorService.findAll().stream()
 			.forEach(ind -> customIndicatorService.delete(ind.getId()));
+		
+		// 移除合约配置
+		contractConfigService.findAll("", true).stream().forEach(vo -> contractConfigService.resetToDefault(vo.getContractId()));
+		
 		broadcastHandler.resetCache();
 	}
 }

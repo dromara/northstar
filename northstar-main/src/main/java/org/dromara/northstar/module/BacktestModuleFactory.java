@@ -74,7 +74,7 @@ public class BacktestModuleFactory {
 				Contract contract = mktCenter.getContract(Identifier.of(c.getId())).contract();
 				List<Bar> preloadBars = dataSource.getDailyData(contract, startDate.minusMonths(1), startDate);
 				double avgPrice = preloadBars.stream().mapToDouble(Bar::closePrice).average().getAsDouble();
-				double costPerShare = avgPrice * contract.multiplier() * Math.max(contract.longMarginRatio(), contract.shortMarginRatio());	// 每手成本
+				double costPerShare = avgPrice * contract.multiplier() * contract.contractDefinition().marginRatio();	// 每手成本
 				// 在初始资金的一半决定默认仓位
 				int defaultVol = Math.max(1, (int) (task.getInitBalance() / (2 * costPerShare)));
 				ModuleDescription md = ModuleDescription.builder()

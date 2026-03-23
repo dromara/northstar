@@ -161,7 +161,7 @@ public class OrderRequest implements TickDataAware{
 		int vol = pendingVolume();
 		double multiplier = contract.multiplier();
 		double price = submitOrderReq.price();
-		double marginRatio = FieldUtils.isBuy(submitOrderReq.direction()) ? contract.longMarginRatio() : contract.shortMarginRatio();
+		double marginRatio = contract.contractDefinition().marginRatio();
 		return price * vol * multiplier * marginRatio * Math.pow(10, -1 * contract.quantityPrecision());
 	}
 	

@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.Mockito.mock;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -32,7 +33,7 @@ class MarketCenterTest {
 		}
 	};
 	
-	MarketCenter mktCenter = new MarketCenter(mock(FastEventEngine.class), List.of(pvider));
+	MarketCenter mktCenter = new MarketCenter(mock(FastEventEngine.class), List.of(pvider), new HashMap<>());
 	
 	@Test
 	void testAddAndGetDefinitions() {

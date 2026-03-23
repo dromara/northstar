@@ -77,7 +77,7 @@ public class ModuleAccount implements IModuleAccount, ModuleLoggerAware {
 				double profit = factor * (closeTrade.price() - openTrade.price()) * closeTrade.volume() * contract.multiplier();
 				accCloseProfit += profit;
 				ContractDefinition cd = contract.contractDefinition();
-				double commission = cd.commissionFee() > 0 ? cd.commissionFee() : cd.commissionRate() * closeTrade.price() * contract.multiplier();
+				double commission = cd.commissionFee() != null ? cd.commissionFee() : cd.commissionRate() * closeTrade.price() * contract.multiplier();
 				double dealCommission = commission * 2 * closeTrade.volume(); // 乘2代表手续费双向计算
 				accCommission += dealCommission;
 				maxProfit = Math.max(maxProfit, accCloseProfit - accCommission);
@@ -244,11 +244,7 @@ public class ModuleAccount implements IModuleAccount, ModuleLoggerAware {
 	}
 
 	private void checkIfHasSufficientAmount(SubmitOrderReq submitOrder) {
-		double margin = switch(submitOrder.direction()) {
-		case D_Buy -> submitOrder.contract().longMarginRatio();
-		case D_Sell -> submitOrder.contract().shortMarginRatio();
-		default -> throw new IllegalStateException("开仓方向不合法");
-		};
+		double margin = submitOrder.contract().contractDefinition().marginRatio();
 		double cost = submitOrder.price() * submitOrder.volume() * submitOrder.contract().multiplier() * margin;
 		if(availableAmount() < cost) {
 			logger.warn("模组账户可用资金为：{}，开仓成本为：{}", availableAmount(), cost);

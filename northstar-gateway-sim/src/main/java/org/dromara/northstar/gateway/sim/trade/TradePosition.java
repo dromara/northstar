@@ -219,7 +219,7 @@ public class TradePosition {
 	 * @return
 	 */
 	public double totalMargin() {
-		double ratio = FieldUtils.isBuy(dir) ? contract.longMarginRatio() : contract.shortMarginRatio();
+		double ratio = contract.contractDefinition().marginRatio();
 		return totalVolume() * avgOpenPrice() * contract.multiplier() * ratio * Math.pow(10, -1 * contract.quantityPrecision());
 	}
 	

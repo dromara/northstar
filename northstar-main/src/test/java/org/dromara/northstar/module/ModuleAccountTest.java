@@ -33,7 +33,7 @@ import xyz.redtorch.pb.CoreEnum;
 
 class ModuleAccountTest {
 
-	ContractDefinition cd = ContractDefinition.builder().commissionFee(0).build();
+	ContractDefinition cd = ContractDefinition.builder().commissionFee(0D).marginRatio(0.08).build();
 	Contract contract = Contract.builder().unifiedSymbol("rb2205@SHFE@FUTURES").contractDefinition(cd).multiplier(10).build();
 	Order order = Order.builder()
 			.contract(contract)

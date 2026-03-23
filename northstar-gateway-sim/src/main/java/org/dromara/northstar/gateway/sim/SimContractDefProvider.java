@@ -29,7 +29,8 @@ public class SimContractDefProvider implements IContractDefinitionProvider {
 				.exchange(ExchangeEnum.SHFE)
 				.productClass(ProductClassEnum.FUTURES)
 				.symbolPattern(Pattern.compile("sim[0-9]{3,4}@.+"))
-				.commissionFee(6)
+				.commissionFee(6D)
+				.marginRatio(0.1)
 				.tradeTimeDef(TradeTimeDefinition.builder().timeSlots(List.of(allDay)).build())
 				.dataSource(dummyDS)
 				.build(),
@@ -39,6 +40,7 @@ public class SimContractDefProvider implements IContractDefinitionProvider {
 				.productClass(ProductClassEnum.FUTURES)
 				.symbolPattern(Pattern.compile("sim[0-9]{3,4}@.+"))
 				.commissionRate(3.0E-4)
+				.marginRatio(0.1)
 				.tradeTimeDef(TradeTimeDefinition.builder().timeSlots(List.of(allDay)).build())
 				.dataSource(dummyDS)
 				.build()

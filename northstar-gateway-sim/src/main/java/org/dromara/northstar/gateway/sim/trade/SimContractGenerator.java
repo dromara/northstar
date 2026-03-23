@@ -32,8 +32,6 @@ public class SimContractGenerator {
 				.thirdPartyId(symbol + "@SIM")
 				.multiplier(10)
 				.priceTick(1)
-				.longMarginRatio(0.08)
-				.shortMarginRatio(0.08)
 				.lastTradeDate(LocalDate.MAX)
 				.build();
 	}
@@ -54,8 +52,6 @@ public class SimContractGenerator {
 				.thirdPartyId(symbol + "@SIM")
 				.multiplier(10)
 				.priceTick(1)
-				.longMarginRatio(0.08)
-				.shortMarginRatio(0.08)
 				.lastTradeDate(LocalDate.MAX)
 				.build();
 	}
@@ -76,8 +72,6 @@ public class SimContractGenerator {
 				.thirdPartyId(symbol + "@SIM")
 				.multiplier(1)
 				.priceTick(1.0E-7)
-				.longMarginRatio(0.2)
-				.shortMarginRatio(0.2)
 				.lastTradeDate(LocalDate.MAX)
 				.build();
 	}

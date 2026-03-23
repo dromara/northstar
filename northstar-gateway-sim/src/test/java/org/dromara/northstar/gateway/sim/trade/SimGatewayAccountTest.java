@@ -20,8 +20,8 @@ import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 class SimGatewayAccountTest {
 
 	SimGatewayAccount account = new SimGatewayAccount("testAccount", mock(IModuleRepository.class));
-	ContractDefinition cd = ContractDefinition.builder().commissionFee(5).build();
-	Contract c1 = Contract.builder().symbol("rb2205").multiplier(10).longMarginRatio(0.08).shortMarginRatio(0.08).contractDefinition(cd).build();
+	ContractDefinition cd = ContractDefinition.builder().commissionFee(5D).marginRatio(0.08).build();
+	Contract c1 = Contract.builder().symbol("rb2205").multiplier(10).contractDefinition(cd).build();
 
 	Trade openTrade = Trade.builder()
 			.contract(c1).price(5000).volume(2).direction(DirectionEnum.D_Buy)

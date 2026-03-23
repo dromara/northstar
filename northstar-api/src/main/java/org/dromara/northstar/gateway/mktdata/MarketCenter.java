@@ -20,6 +20,7 @@ import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.constant.Constants;
 import org.dromara.northstar.common.event.FastEventEngine;
 import org.dromara.northstar.common.exception.NoSuchContractException;
+import org.dromara.northstar.common.model.ContractConfigDTO;
 import org.dromara.northstar.common.model.Identifier;
 import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.common.model.core.ContractDefinition;
@@ -74,8 +75,12 @@ public class MarketCenter implements IMarketCenter, IContractManager{
 	
 	private Set<ChannelType> loadedGroupOfChannel = new HashSet<>();
 	
-	public MarketCenter(FastEventEngine feEngine, List<IContractDefinitionProvider> contractDefProviders) {
+	private final Map<Identifier, ContractConfigDTO> contractConfigMap;
+	
+	public MarketCenter(FastEventEngine feEngine, List<IContractDefinitionProvider> contractDefProviders, 
+			Map<Identifier, ContractConfigDTO> contractConfigMap) {
 		this.feEngine = feEngine;
+		this.contractConfigMap = contractConfigMap;
 		contractDefProviders.forEach(pvd -> addDefinitions(pvd.get()));
 	}
 	
@@ -105,7 +110,25 @@ public class MarketCenter implements IMarketCenter, IContractManager{
 		getDefinition(ins.exchange(), ins.productClass(), ins.identifier().value())
 			.ifPresent(def -> {
 				log.debug("[{}] 匹配合约定义 [{} {} {}]", ins.identifier().value(), def.exchange(), def.productClass(), def.symbolPattern().pattern());
-				ins.setContractDefinition(def);
+				ContractConfigDTO config = contractConfigMap.get(ins.identifier());
+				if(config != null) {
+					// 使用用户自定义合约
+					ContractDefinition customDef = ContractDefinition.builder()
+							.commissionFee(config.getCommissionFee())
+							.commissionRate(config.getCommissionRate())
+							.marginRatio(config.getMarginRatio())
+							.productClass(def.productClass())
+							.dataSource(def.dataSource())
+							.exchange(def.exchange())
+							.tradeTimeDef(def.tradeTimeDef())
+							.name(ins.identifier().toString() + "自定义")
+							.build();
+					ins.setContractDefinition(customDef);
+				} else {
+					// 使用默认合约定义
+					ins.setContractDefinition(def);
+				}
+				
 				IContract contract = new GatewayContract(this, feEngine, ins);
 				contractMap.put(ins.identifier(), contract);
 				

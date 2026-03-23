@@ -25,11 +25,15 @@ public record ContractDefinition(
 		/**
 		 * 手续费（单位：元）
 		 */
-		double commissionFee,
+		Double commissionFee,
 		/**
 		 * 手续费率
 		 */
-		double commissionRate,
+		Double commissionRate,
+		/**
+		 * 保证金比率
+		 */
+		Double marginRatio,
 		/**
 		 * 交易时间
 		 */

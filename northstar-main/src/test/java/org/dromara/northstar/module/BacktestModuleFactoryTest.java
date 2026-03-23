@@ -5,6 +5,7 @@ import static org.mockito.Mockito.mock;
 
 import java.time.Duration;
 import java.time.LocalTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -51,6 +52,7 @@ class BacktestModuleFactoryTest {
 			.build();
 	ContractDefinition cd = ContractDefinition.builder()
 			.symbolPattern(Pattern.compile("ao.+"))
+			.marginRatio(0.08)
 			.exchange(ExchangeEnum.SHFE)
 			.productClass(ProductClassEnum.FUTURES)
 			.tradeTimeDef(TradeTimeDefinition.builder()
@@ -66,7 +68,8 @@ class BacktestModuleFactoryTest {
 			return List.of(cd);
 		}
 	});
-	private MarketCenter mktCenter = new MarketCenter(mock(FastEventEngine.class), providers);
+	
+	private MarketCenter mktCenter = new MarketCenter(mock(FastEventEngine.class), providers, new HashMap<>());
 	
 	private BacktestModuleFactory factory = new BacktestModuleFactory();
 	

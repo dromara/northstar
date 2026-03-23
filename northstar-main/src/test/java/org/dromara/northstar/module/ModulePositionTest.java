@@ -21,9 +21,10 @@ import xyz.redtorch.pb.CoreEnum.OffsetFlagEnum;
 
 class ModulePositionTest {
 
-	ContractDefinition cd = ContractDefinition.builder().commissionFee(0).build();
-	Contract contract = Contract.builder().unifiedSymbol("rb2205@SHFE@FUTURES").contractDefinition(cd).multiplier(10).longMarginRatio(0.08).shortMarginRatio(0.08).build();
-	Contract contract2 = Contract.builder().unifiedSymbol("rb2210@SHFE@FUTURES").contractDefinition(cd).multiplier(10).longMarginRatio(0.08).shortMarginRatio(0.08).build();
+	ContractDefinition cd = ContractDefinition.builder().commissionFee(0D).marginRatio(0.08).build();
+	
+	Contract contract = Contract.builder().unifiedSymbol("rb2205@SHFE@FUTURES").contractDefinition(cd).multiplier(10).build();
+	Contract contract2 = Contract.builder().unifiedSymbol("rb2210@SHFE@FUTURES").contractDefinition(cd).multiplier(10).build();
 	LocalDate today = LocalDate.now();
 	Tick tick1 = Tick.builder().tradingDay(today).contract(contract).lastPrice(5111).build();
 	Tick tick2 = Tick.builder().tradingDay(today).contract(contract2).lastPrice(5111).build();

@@ -26,12 +26,10 @@ class ContractTest {
 				.productClass(CoreEnum.ProductClassEnum.FUTURES)
 				.multiplier(1.0)
 				.priceTick(2.0)
-				.longMarginRatio(3.0)
-				.shortMarginRatio(4.0)
 				.thirdPartyId("thirdPartyId")
 				.underlyingSymbol("underlyingSymbol")
 				.lastTradeDate(LocalDate.now())
-				.contractDefinition(ContractDefinition.builder().commissionFee(100).build())
+				.contractDefinition(ContractDefinition.builder().commissionFee(100D).build())
 				.symbol("symbol")
 				.exchange(CoreEnum.ExchangeEnum.SHFE)
 				.channelType(ChannelType.BIAN)
@@ -46,8 +44,6 @@ class ContractTest {
 		assertEquals(contract.productClass().getNumber(), contractField.getProductClass().getNumber());
 		assertEquals(contract.multiplier(), contractField.getMultiplier());
 		assertEquals(contract.priceTick(), contractField.getPriceTick());
-		assertEquals(contract.longMarginRatio(), contractField.getLongMarginRatio());
-		assertEquals(contract.shortMarginRatio(), contractField.getShortMarginRatio());
 		assertEquals(contract.thirdPartyId(), contractField.getThirdPartyId());
 		assertEquals(contract.underlyingSymbol(), contractField.getUnderlyingSymbol());
 		assertEquals(contract.lastTradeDate().format(DateTimeConstant.D_FORMAT_INT_FORMATTER), contractField.getLastTradeDateOrContractMonth());

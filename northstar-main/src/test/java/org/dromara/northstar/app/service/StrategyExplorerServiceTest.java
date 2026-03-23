@@ -65,6 +65,7 @@ class StrategyExplorerServiceTest {
     		.gatewayId("CTP")
     		.lastTradeDate(LocalDate.of(2026, 1, 1))
     		.contractDefinition(ContractDefinition.builder()
+    				.marginRatio(0.08)
     				.tradeTimeDef(TradeTimeDefinition.builder()
     						.timeSlots(List.of(TimeSlot.builder()
     								.start(LocalTime.of(9, 0))

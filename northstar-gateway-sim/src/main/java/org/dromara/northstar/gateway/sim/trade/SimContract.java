@@ -42,8 +42,6 @@ public class SimContract implements Instrument{
 	private CurrencyEnum currency;                  // 币种
 	private double multiplier;                      // 合约乘数
 	private double priceTick;                          // 最小变动价位
-	private double longMarginRatio;                  // 多头保证金率
-	private double shortMarginRatio;                  // 空头保证金率
 	private boolean maxMarginSideAlgorithm;          // 最大单边保证金算法
 	private String underlyingSymbol;                  // 基础商品代码
 	private double strikePrice;                      // 执行价
@@ -90,8 +88,6 @@ public class SimContract implements Instrument{
 				.currency(Optional.ofNullable(currency).orElse(CurrencyEnum.CNY))
 				.multiplier(multiplier)
 				.priceTick(priceTick)
-				.longMarginRatio(longMarginRatio)
-				.shortMarginRatio(shortMarginRatio)
 				.underlyingSymbol(Optional.ofNullable(underlyingSymbol).orElse(""))
 				.strikePrice(strikePrice)
 				.optionsType(Optional.ofNullable(optionsType).orElse(OptionsTypeEnum.O_Unknown))

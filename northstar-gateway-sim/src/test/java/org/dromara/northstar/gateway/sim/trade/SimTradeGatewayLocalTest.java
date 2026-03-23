@@ -28,8 +28,8 @@ class SimTradeGatewayLocalTest {
 	
 	private SimTradeGatewayLocal gateway;
 	
-	Contract c1 = Contract.builder().symbol("rb2205@SHFE").multiplier(10).longMarginRatio(0.08).shortMarginRatio(0.08)
-			.contractDefinition(ContractDefinition.builder().commissionFee(2).build()).build();
+	Contract c1 = Contract.builder().symbol("rb2205@SHFE").multiplier(10)
+			.contractDefinition(ContractDefinition.builder().commissionFee(2D).marginRatio(0.08).build()).build();
 	SubmitOrderReq submitOrder = SubmitOrderReq.builder()
 			.contract(c1)
 			.direction(DirectionEnum.D_Buy)

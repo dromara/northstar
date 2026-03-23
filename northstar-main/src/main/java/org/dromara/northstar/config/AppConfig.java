@@ -5,14 +5,20 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.dromara.northstar.app.auth.AuthCheckerInterceptor;
 import org.dromara.northstar.app.security.MaliciousIPCollector;
 import org.dromara.northstar.app.security.MaliciousRequestFilter;
 import org.dromara.northstar.common.event.FastEventEngine;
+import org.dromara.northstar.common.model.ContractConfigDTO;
+import org.dromara.northstar.common.model.Identifier;
 import org.dromara.northstar.common.utils.LocalEnvUtils;
 import org.dromara.northstar.common.utils.MessageSourceHolder;
+import org.dromara.northstar.data.jdbc.ContractConfigRepository;
+import org.dromara.northstar.data.jdbc.entity.ContractConfigDO;
 import org.dromara.northstar.gateway.IContractDefinitionProvider;
 import org.dromara.northstar.gateway.mktdata.MarketCenter;
 import org.dromara.northstar.gateway.mktdata.NorthstarDataSource;
@@ -131,13 +137,17 @@ public class AppConfig implements WebMvcConfigurer, InitializingBean {
     }
 
     @Bean
-    MarketCenter marketCenter(FastEventEngine fastEventEngine, List<IContractDefinitionProvider> contractDefProviders) {
-        return new MarketCenter(fastEventEngine, contractDefProviders);
+    MarketCenter marketCenter(FastEventEngine fastEventEngine, List<IContractDefinitionProvider> contractDefProviders, 
+    		ContractConfigRepository repo) {
+    		List<ContractConfigDTO> configDTOs = repo.findAll().stream().map(ContractConfigDO::convertTo).toList();
+    		Map<Identifier, ContractConfigDTO> configMap = configDTOs
+    				.stream().collect(Collectors.toMap(item -> Identifier.of(item.getContractId()), item -> item));
+        return new MarketCenter(fastEventEngine, contractDefProviders, configMap);
     }
     
     @Bean
     EventEmitterHolder sseEmitter() {
-    	return new EventEmitterHolder();
+    		return new EventEmitterHolder();
     }
     
     @Bean

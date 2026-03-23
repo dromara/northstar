@@ -8,8 +8,6 @@ import org.dromara.northstar.common.constant.DateTimeConstant;
 
 import com.alibaba.fastjson2.annotation.JSONField;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.Builder;
 import xyz.redtorch.pb.CoreEnum.CombinationTypeEnum;
@@ -33,8 +31,6 @@ public record Contract(
 		CurrencyEnum currency,  // 币种
 		double multiplier,    // 合约乘数
 		double priceTick,        // 最小变动价位
-		double longMarginRatio,  // 多头保证金率
-		double shortMarginRatio,  // 空头保证金率
 		String underlyingSymbol,  // 基础商品代码
 		double strikePrice,  // 执行价
 		OptionsTypeEnum optionsType,  // 期权类型
@@ -114,8 +110,6 @@ public record Contract(
 		builder.setMinLimitOrderVolume(minLimitOrderVolume);
 		builder.setMultiplier(multiplier);
 		builder.setPriceTick(priceTick);
-		builder.setLongMarginRatio(longMarginRatio);
-		builder.setShortMarginRatio(shortMarginRatio);
 		builder.setPricePrecision(pricePrecision);
 		builder.setQuantityPrecision(quantityPrecision);
 
@@ -140,8 +134,4 @@ public record Contract(
 				&& Objects.equals(gatewayId, other.gatewayId) && Objects.equals(unifiedSymbol, other.unifiedSymbol);
 	}
 
-	public static void main(String[] args) throws JsonProcessingException {
-		ObjectMapper mapper = new ObjectMapper();
-		System.out.println(mapper.writeValueAsString(Contract.builder().lastTradeDate(LocalDate.now()).build()));
-	}
 }

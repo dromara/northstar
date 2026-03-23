@@ -254,7 +254,7 @@ public class ModulePosition implements TickDataAware, TransactionAware{
 	 * @return
 	 */
 	public double totalMargin() {
-		double ratio = FieldUtils.isBuy(direction) ? contract.longMarginRatio() : contract.shortMarginRatio();
+		double ratio = contract.contractDefinition().marginRatio();
 		return totalVolume() * avgOpenPrice() * contract.multiplier() * ratio;
 	}
 

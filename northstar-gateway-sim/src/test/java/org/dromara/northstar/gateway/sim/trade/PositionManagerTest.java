@@ -7,6 +7,7 @@ import static org.mockito.Mockito.mock;
 import java.time.LocalDate;
 
 import org.dromara.northstar.common.model.core.Contract;
+import org.dromara.northstar.common.model.core.ContractDefinition;
 import org.dromara.northstar.common.model.core.Order;
 import org.dromara.northstar.common.model.core.Tick;
 import org.dromara.northstar.common.model.core.Trade;
@@ -22,8 +23,8 @@ class PositionManagerTest {
 	PositionManager posMgr = new PositionManager(account);
 	
 	LocalDate today = LocalDate.now();
-	Contract c1 = Contract.builder().unifiedSymbol("rb2205@SHFE").multiplier(10).longMarginRatio(0.08).shortMarginRatio(0.08).build();
-	Contract c2 = Contract.builder().unifiedSymbol("rb2210@SHFE").multiplier(10).longMarginRatio(0.08).shortMarginRatio(0.08).build();
+	Contract c1 = Contract.builder().unifiedSymbol("rb2205@SHFE").multiplier(10).contractDefinition(ContractDefinition.builder().marginRatio(0.08).build()).build();
+	Contract c2 = Contract.builder().unifiedSymbol("rb2210@SHFE").multiplier(10).contractDefinition(ContractDefinition.builder().marginRatio(0.08).build()).build();
 	
 	Trade openTrade = Trade.builder().tradingDay(today.minusDays(1)).contract(c1).price(5000).volume(2).direction(DirectionEnum.D_Buy).offsetFlag(OffsetFlagEnum.OF_Open).build();
 	Trade openTrade1 = Trade.builder().tradingDay(today).contract(c1).price(5300).volume(1).direction(DirectionEnum.D_Buy).offsetFlag(OffsetFlagEnum.OF_Open).build();
