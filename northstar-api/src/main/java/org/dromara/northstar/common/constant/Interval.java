@@ -20,5 +20,7 @@ public enum Interval {
 	
 	H4,
 	
-	D1
+	D1,
+	
+	WK1
 }
