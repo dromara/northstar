@@ -10,14 +10,13 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Objects;
 
+import org.dromara.northstar.common.constant.Interval;
 import org.dromara.northstar.common.constant.TickType;
 import org.dromara.northstar.common.model.core.Bar;
 import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.common.model.core.Tick;
 import org.dromara.northstar.common.model.core.TimeSlot;
 import org.dromara.northstar.common.utils.CommonUtils;
-
-import xyz.redtorch.pb.CoreEnum.BarCycleEnum;
 
 public class WeeklyBarMerger extends BarMerger{
 	
@@ -28,10 +27,9 @@ public class WeeklyBarMerger extends BarMerger{
 	private ZonedDateTime cutoffDateTime;
 	
 	public WeeklyBarMerger(Contract contract) {
-		super(0, contract);
+		super(Interval.WK1, contract);
 		List<TimeSlot> times = contract.contractDefinition().tradeTimeDef().timeSlots();
 		this.dayEndTime = times.getLast().end();
-		this.barPeriod = BarCycleEnum.B_1Wk;
 	}
 
 	@Override
@@ -74,7 +72,7 @@ public class WeeklyBarMerger extends BarMerger{
 					.preClosePrice(bar.preClosePrice())
 					.preOpenInterest(bar.preOpenInterest())
 					.preSettlePrice(bar.preSettlePrice())
-					.barPeriod(barPeriod)
+					.interval(Interval.WK1)
 					.build();
 		}
 	
@@ -108,7 +106,7 @@ public class WeeklyBarMerger extends BarMerger{
 					.preClosePrice(tick.preClosePrice())
 					.preOpenInterest(tick.preOpenInterest())
 					.preSettlePrice(tick.preSettlePrice())
-					.barPeriod(barPeriod)
+					.interval(Interval.WK1)
 					.build();
 		}
 		

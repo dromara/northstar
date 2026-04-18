@@ -9,6 +9,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.dromara.northstar.common.constant.Interval;
 import org.dromara.northstar.common.model.core.Bar;
 import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.common.model.core.Tick;
@@ -28,12 +29,12 @@ public class BarTimePadding {
 
 	protected final List<MinuteEntry> entryTimeList = new ArrayList<>();
 
-	protected final int numOfMinPerBar;
+	protected final int barInterval;
 
 	protected final Contract contract;
 
-	public BarTimePadding(int numOfMinPerBar, Contract contract) {
-		this.numOfMinPerBar = numOfMinPerBar;
+	public BarTimePadding(Interval interval, Contract contract) {
+		this.barInterval = interval.getMinutes();
 		this.contract = contract;
 		genBarTimeMap();
 	}
@@ -63,14 +64,14 @@ public class BarTimePadding {
 		}
 		// 把分钟切分为段
 		for (int i = 0; i < entryTimeList.size();) {
-			int end = Math.min(i + numOfMinPerBar, entryTimeList.size());
+			int end = Math.min(i + barInterval, entryTimeList.size());
 			List<MinuteEntry> section = entryTimeList.subList(i, end);
 			if (section.isEmpty()) {
 				break;
 			}
 			LocalTime cutoffTime = section.getLast().end;
 			section.forEach(me -> barTimeEntryMap.put(me, cutoffTime));
-			i += numOfMinPerBar;
+			i += barInterval;
 		}
 
 	}

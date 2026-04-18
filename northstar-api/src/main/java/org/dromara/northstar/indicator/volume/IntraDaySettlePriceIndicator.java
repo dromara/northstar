@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.dromara.northstar.indicator.AbstractIndicator;
 import org.dromara.northstar.indicator.Indicator;
-import org.dromara.northstar.indicator.constant.PeriodUnit;
 import org.dromara.northstar.indicator.constant.ValueType;
 import org.dromara.northstar.indicator.helper.SimpleValueIndicator;
 import org.dromara.northstar.indicator.model.Configuration;
@@ -27,7 +26,7 @@ public class IntraDaySettlePriceIndicator extends AbstractIndicator implements I
 	private long tradingDayIntFormat;
 	
 	public IntraDaySettlePriceIndicator(Configuration cfg) {
-		super(cfg.toBuilder().numOfUnits(1).period(PeriodUnit.MINUTE).valueType(ValueType.TRADE_DATE).build());		// 强制改变外部传入的配置
+		super(cfg.toBuilder().valueType(ValueType.TRADE_DATE).build());		// 强制改变外部传入的配置
 		close = new SimpleValueIndicator(Configuration.builder().contract(cfg.contract()).valueType(ValueType.CLOSE).visible(false).build());
 		volume = new SimpleValueIndicator(Configuration.builder().contract(cfg.contract()).valueType(ValueType.VOL_DELTA).visible(false).build());
 	}

@@ -10,7 +10,6 @@ import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.common.model.core.Order;
 import org.dromara.northstar.common.model.core.Tick;
 import org.dromara.northstar.common.model.core.Trade;
-import org.dromara.northstar.indicator.constant.PeriodUnit;
 import org.dromara.northstar.strategy.IAccount;
 import org.dromara.northstar.strategy.IModule;
 import org.dromara.northstar.strategy.IModuleContext;
@@ -32,7 +31,7 @@ public class BacktestModule implements IModule{
 		this.logger = ctx.getLogger(getClass());
 		
 		Contract c = ctx.bindedContracts().getFirst();
-		ctx.addMergedBarListener(c, ctx.numOfMinPerMergedBar(), PeriodUnit.MINUTE, bar -> {
+		ctx.addMergedBarListener(c, ctx.moduleBarInterval(), bar -> {
 			if(barCounter.incrementAndGet() == BacktestModuleFactory.BUF_SIZE) {
 				barCounter.set(0);
 				if(chartCallbackHandler != null) {

@@ -231,7 +231,7 @@ message BarField {
 	double preClosePrice = 20;  // 前收盘价
 	double preSettlePrice = 21;  // 昨结算价
 	string channelType = 22;	// 渠道来源
-	BarCycleEnum barPeriod = 23;	// K线周期
+	string interval = 23;	// K线周期
 	bool unstable = 24; 	// 未确定标识
 }
 

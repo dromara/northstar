@@ -22,7 +22,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
-import xyz.redtorch.pb.CoreEnum.BarCycleEnum;
+import org.dromara.northstar.common.constant.Interval;
 
 @DataJpaTest
 class MarketDataRepoAdapterTest {
@@ -59,7 +59,7 @@ class MarketDataRepoAdapterTest {
 			.preOpenInterest(12)
 			.preSettlePrice(13)
 			.channelType(ChannelType.SIM)
-			.barPeriod(BarCycleEnum.B_1Min)
+			.interval(Interval.M1)
 			.build();
 	Bar bar2 = Bar.builder()
 			.gatewayId("CTP")
@@ -68,7 +68,7 @@ class MarketDataRepoAdapterTest {
 			.actionTime(LocalTime.of(21, 1))
 			.tradingDay(date)
 			.channelType(ChannelType.SIM)
-			.barPeriod(BarCycleEnum.B_1Min)
+			.interval(Interval.M1)
 			.build();
 	Bar bar3 = Bar.builder()
 			.gatewayId("CTP")
@@ -77,7 +77,7 @@ class MarketDataRepoAdapterTest {
 			.actionTime(LocalTime.of(21, 2))
 			.tradingDay(date)
 			.channelType(ChannelType.SIM)
-			.barPeriod(BarCycleEnum.B_1Min)
+			.interval(Interval.M1)
 			.build();
 
 	@BeforeEach

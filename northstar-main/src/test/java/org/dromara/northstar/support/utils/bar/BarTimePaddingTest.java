@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
+import org.dromara.northstar.common.constant.Interval;
 import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.common.model.core.ContractDefinition;
 import org.dromara.northstar.common.model.core.TimeSlot;
@@ -34,7 +35,7 @@ class BarTimePaddingTest {
 	
 	@Test
 	void test1() {
-		BarTimePadding padding = new BarTimePadding(60, contract);
+		BarTimePadding padding = new BarTimePadding(Interval.H1, contract);
 		LocalDateTime ldt1 = LocalDateTime.of(LocalDate.now(), LocalTime.of(11, 25));
 		LocalDateTime expDt1 = LocalDateTime.of(LocalDate.now(), LocalTime.of(14, 15));
 		assertTrue(padding.cutoffTimeInMinute(CommonUtils.localDateTimeToMills(ldt1)).isEqual(expDt1));
@@ -42,18 +43,10 @@ class BarTimePaddingTest {
 	
 	@Test
 	void test2() {
-		BarTimePadding padding = new BarTimePadding(240, contract);
+		BarTimePadding padding = new BarTimePadding(Interval.H4, contract);
 		LocalDateTime ldt1 = LocalDateTime.of(LocalDate.now(), LocalTime.of(11, 25));
 		LocalDateTime expDt1 = LocalDateTime.of(LocalDate.now(), LocalTime.of(15, 00));
 		assertTrue(padding.cutoffTimeInMinute(CommonUtils.localDateTimeToMills(ldt1)).isEqual(expDt1));
 	}
 	
-	@Test
-	void test3() {
-		BarTimePadding padding = new BarTimePadding(480, contract);
-		LocalDateTime ldt1 = LocalDateTime.of(LocalDate.now(), LocalTime.of(11, 25));
-		LocalDateTime expDt1 = LocalDateTime.of(LocalDate.now(), LocalTime.of(15, 00));
-		assertTrue(padding.cutoffTimeInMinute(CommonUtils.localDateTimeToMills(ldt1)).isEqual(expDt1));
-	}
-
 }

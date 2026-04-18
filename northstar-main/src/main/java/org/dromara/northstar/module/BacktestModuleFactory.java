@@ -10,6 +10,7 @@ import java.util.Map;
 import org.dromara.northstar.account.AccountManager;
 import org.dromara.northstar.common.constant.ClosingPolicy;
 import org.dromara.northstar.common.constant.DateTimeConstant;
+import org.dromara.northstar.common.constant.Interval;
 import org.dromara.northstar.common.constant.ModuleType;
 import org.dromara.northstar.common.constant.ModuleUsage;
 import org.dromara.northstar.common.model.ContractSimpleInfo;
@@ -69,8 +70,9 @@ public class BacktestModuleFactory {
 		LocalDate startDate = LocalDate.parse(task.getStartDate(), DateTimeConstant.D_FORMAT_FORMATTER);
 		LocalDate endDate = LocalDate.parse(task.getEndDate(), DateTimeConstant.D_FORMAT_FORMATTER);
 		task.getContracts().forEach(c -> {
-			task.getPeriods().forEach(p -> {
-				String moduleName = moduleName(task.getTaskName(), c, p);
+			task.getIntervals().forEach(interval -> {
+				Interval barInterval = Interval.fromAlias(interval);
+				String moduleName = moduleName(task.getTaskName(), c, barInterval);
 				Contract contract = mktCenter.getContract(Identifier.of(c.getId())).contract();
 				List<Bar> preloadBars = dataSource.getDailyData(contract, startDate.minusMonths(1), startDate);
 				double avgPrice = preloadBars.stream().mapToDouble(Bar::closePrice).average().getAsDouble();
@@ -86,7 +88,7 @@ public class BacktestModuleFactory {
 						.bindedAccounts(Collections.emptyList())
 						.bindedContracts(List.of(c))
 						.moduleCacheDataSize(BUF_SIZE)
-						.numOfMinPerBar(p)
+						.klineInterval(barInterval.getAlias())
 						.defaultVolume(defaultVol)
 						.build();
 				ModuleRuntimeDescription mrd = ModuleRuntimeDescription.builder()
@@ -127,8 +129,8 @@ public class BacktestModuleFactory {
 				.build();
 	}
 	
-	private String moduleName(String taskName, ContractSimpleInfo c, int period) {
-		return String.format("Test_%s_%s_%dm", taskName, c.getName(), period);
+	private String moduleName(String taskName, ContractSimpleInfo c, Interval barInterval) {
+		return String.format("Test_%s_%s_%s", taskName, c.getName(), barInterval.getAlias());
 	}
 	
 	@SuppressWarnings("unchecked")

@@ -4,6 +4,7 @@ import java.util.Set;
 
 import org.dromara.northstar.account.GatewayManager;
 import org.dromara.northstar.common.constant.ChannelType;
+import org.dromara.northstar.common.constant.Interval;
 import org.dromara.northstar.common.event.AbstractEventHandler;
 import org.dromara.northstar.common.event.GenericEventHandler;
 import org.dromara.northstar.common.event.NorthstarEvent;
@@ -25,7 +26,6 @@ import com.google.common.collect.Table;
 
 import cn.hutool.core.codec.Base64;
 import lombok.extern.slf4j.Slf4j;
-import xyz.redtorch.pb.CoreEnum.BarCycleEnum;
 import xyz.redtorch.pb.CoreField.BarField;
 
 @Slf4j
@@ -37,7 +37,7 @@ public class BarAggregationHandler extends AbstractEventHandler implements Gener
 
 	private GatewayManager gatewayMgr;
 	
-	private Table<Contract, BarCycleEnum, BarMerger> mergers = HashBasedTable.create();
+	private Table<Contract, Interval, BarMerger> mergers = HashBasedTable.create();
 	
 	private GlobalPlaybackDataDetector playbackDataDetector;
 	
@@ -61,13 +61,13 @@ public class BarAggregationHandler extends AbstractEventHandler implements Gener
 		}
 	}
 	
-	public synchronized boolean containsMerger(Contract contract, BarCycleEnum period) {
-		return mergers.contains(contract, period);
+	public synchronized boolean containsMerger(Contract contract, Interval interval) {
+		return mergers.contains(contract, interval);
 	}
 	
-	public synchronized void register(Contract contract, BarCycleEnum period, BarMerger merger) {
-		if(!containsMerger(contract, period)) {			
-			mergers.put(contract, period, merger);
+	public synchronized void register(Contract contract, Interval interval, BarMerger merger) {
+		if(!containsMerger(contract, interval)) {			
+			mergers.put(contract, interval, merger);
 			merger.addListener(this);
 		}
 	}
@@ -76,8 +76,8 @@ public class BarAggregationHandler extends AbstractEventHandler implements Gener
 		return mergers.rowKeySet();
 	}
 	
-	public synchronized void unregister(Contract contract, BarCycleEnum period) {
-		mergers.remove(contract, period);
+	public synchronized void unregister(Contract contract, Interval interval) {
+		mergers.remove(contract, interval);
 	}
 	
 	public synchronized void clearMerger() {

@@ -12,6 +12,7 @@ import org.dromara.northstar.common.IDataSource;
 import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.constant.Constants;
 import org.dromara.northstar.common.constant.DateTimeConstant;
+import org.dromara.northstar.common.constant.Interval;
 import org.dromara.northstar.common.exception.QuantitDataSourceException;
 import org.dromara.northstar.common.exception.UnauthorizedException;
 import org.dromara.northstar.common.model.core.Bar;
@@ -26,7 +27,6 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.ResourceAccessException;
 
 import lombok.extern.slf4j.Slf4j;
-import xyz.redtorch.pb.CoreEnum.BarCycleEnum;
 import xyz.redtorch.pb.CoreEnum.CurrencyEnum;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
@@ -63,7 +63,7 @@ public class NorthstarDataSource implements IDataSource{
 	@Override
 	public List<Bar> getMinutelyData(Contract contract, LocalDate startDate, LocalDate endDate) {
 		try {
-			return convertMinuteData(dataService.getMinutelyData(contract.unifiedSymbol(), startDate, endDate), contract, BarCycleEnum.B_1Min);
+			return convertMinuteData(dataService.getMinutelyData(contract.unifiedSymbol(), startDate, endDate), contract, Interval.M1);
 		} catch (ResourceAccessException e) {
 			throw new QuantitDataSourceException(e);
 		} catch (HttpClientErrorException e) {
@@ -77,7 +77,7 @@ public class NorthstarDataSource implements IDataSource{
 	@Override
 	public List<Bar> getQuarterlyData(Contract contract, LocalDate startDate, LocalDate endDate) {
 		try {
-			return convertMinuteData(dataService.getQuarterlyData(contract.unifiedSymbol(), startDate, endDate), contract, BarCycleEnum.B_15Min);
+			return convertMinuteData(dataService.getQuarterlyData(contract.unifiedSymbol(), startDate, endDate), contract, Interval.M15);
 		} catch (ResourceAccessException e) {
 			throw new QuantitDataSourceException(e);
 		} catch (HttpClientErrorException e) {
@@ -91,7 +91,7 @@ public class NorthstarDataSource implements IDataSource{
 	@Override
 	public List<Bar> getHourlyData(Contract contract, LocalDate startDate, LocalDate endDate) {
 		try {
-			return convertMinuteData(dataService.getHourlyData(contract.unifiedSymbol(), startDate, endDate), contract, BarCycleEnum.B_1Hr);
+			return convertMinuteData(dataService.getHourlyData(contract.unifiedSymbol(), startDate, endDate), contract, Interval.H1);
 		} catch (ResourceAccessException e) {
 			throw new QuantitDataSourceException(e);
 		} catch (HttpClientErrorException e) {
@@ -102,7 +102,7 @@ public class NorthstarDataSource implements IDataSource{
 		}
 	}
 	
-	private List<Bar> convertMinuteData(List<AggBarDTO> data, Contract contract, BarCycleEnum barPeriod){
+	private List<Bar> convertMinuteData(List<AggBarDTO> data, Contract contract, Interval interval){
 		return data.stream()
 				.map(dto -> Bar.builder()
 						.actionDay(CommonUtils.millsToLocalDateTime(dto.getTimestamp()).toLocalDate())
@@ -123,7 +123,7 @@ public class NorthstarDataSource implements IDataSource{
 						.turnover(dto.getTurnover())
 						.turnoverDelta(dto.getTurnoverDelta())
 						.preOpenInterest(dto.getPreOI())
-						.barPeriod(barPeriod)
+						.interval(interval)
 						.build())
 				.toList();
 	}
@@ -162,7 +162,7 @@ public class NorthstarDataSource implements IDataSource{
 							.turnover(dto.getTurnover())
 							.turnoverDelta(dto.getTurnoverDelta())
 							.preOpenInterest(dto.getPreOI())
-							.barPeriod(BarCycleEnum.B_1Day)						
+							.interval(Interval.D1)
 							.build())
 					.toList();
 		} catch (ResourceAccessException e) {

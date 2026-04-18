@@ -36,7 +36,7 @@ public class ExplorerTaskDescription {
 	/**
 	 * 测试周期
 	 */
-	private List<Integer> periods; 
+	private List<String> intervals; 
 	
 	/**
 	 * 测试合约

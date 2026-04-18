@@ -11,6 +11,7 @@ import java.util.Set;
 
 import org.dromara.northstar.common.IDataSource;
 import org.dromara.northstar.common.constant.DateTimeConstant;
+import org.dromara.northstar.common.constant.Interval;
 import org.dromara.northstar.common.model.BarVO;
 import org.dromara.northstar.common.model.Identifier;
 import org.dromara.northstar.common.model.TickVO;
@@ -30,7 +31,6 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson2.JSON;
 
 import lombok.extern.slf4j.Slf4j;
-import xyz.redtorch.pb.CoreEnum.BarCycleEnum;
 import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
 
 @Slf4j
@@ -48,7 +48,7 @@ public class MarketDataService {
 	
 	private static final LocalDate SINCE_DATE = LocalDate.of(2021, 1, 1);
 	
-	public List<BarVO> getRangeBars(String contractId, BarCycleEnum barPeriod, long fromTime, long toTime){
+	public List<BarVO> getRangeBars(String contractId, Interval interval, long fromTime, long toTime){
 		LocalDate toDate = CommonUtils.millsToLocalDateTime(toTime).toLocalDate();
 		LocalDate fromDate = CommonUtils.millsToLocalDateTime(fromTime).toLocalDate();
 		if(!contractId.contains(ProductClassEnum.EQUITY.toString())) {
@@ -58,7 +58,7 @@ public class MarketDataService {
 			log.warn("历史回溯不能早于2021年1月1日，当前查询范围：{} -> {}", fromDate, toDate);
 			return Collections.emptyList();
 		}
-		log.info("查询历史数据，合约{}，周期{}，{} -> {}", contractId, barPeriod, fromDate, toDate);
+		log.info("查询历史数据，合约{}，周期{}，{} -> {}", contractId, interval.getAlias(), fromDate, toDate);
 		IContract ic = marketCenter.getContract(Identifier.of(contractId));
 		Contract contract = ic.contract();
 		
@@ -67,7 +67,7 @@ public class MarketDataService {
 			return Collections.emptyList();
 		}
 		
-		List<Bar> bars = smartLoad(contract, barPeriod, dataSource, fromDate, toDate);
+		List<Bar> bars = smartLoad(contract, interval, dataSource, fromDate, toDate);
 		List<Bar> mergedBars = new LinkedList<>();
 		// 本地仅加载最近的数据
 		List<Bar> data = mdRepo.loadBars(ic, LocalDate.now(), LocalDate.now().plusDays(3));
@@ -75,9 +75,9 @@ public class MarketDataService {
 			long endTime = bars.getLast().actionTimestamp();
 			data = data.stream().filter(b -> b.actionTimestamp() > endTime).toList();
 		}
-		if (barPeriod != BarCycleEnum.B_1Min) {
+		if (interval != Interval.M1) {
 			// 合成处理
-			BarMerger merger = BarMergerFactory.newInstance(barPeriod, contract);
+			BarMerger merger = BarMergerFactory.newInstance(interval, contract);
 			merger.addListener(mergedBars::add);
 			bars.stream().forEach(merger::onBar);
 			data.stream().forEach(merger::onBar);
@@ -98,30 +98,25 @@ public class MarketDataService {
 						.volume(bar.volumeDelta())
 						.oi(bar.openInterest())
 						.tradingDay(bar.tradingDay().format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
-						.period(barPeriod)
+						.interval(interval.getAlias())
 						.build())
 				.toList();
 	}
 	
-	public List<Bar> smartLoad(Contract contract, BarCycleEnum barPeriod, IDataSource ds, LocalDate loadStartDate, LocalDate loadEndDate) {
+	public List<Bar> smartLoad(Contract contract, Interval interval, IDataSource ds, LocalDate loadStartDate, LocalDate loadEndDate) {
 		DataSourceDataLoader loader = new DataSourceDataLoader(ds);
 		LinkedList<Bar> aggResult = new LinkedList<>();
-		switch(barPeriod) {
-			case B_1Min,B_3Min,B_5Min,B_10Min,B_Custom -> 
-				loader.loadMinutelyData(contract, loadStartDate, loadEndDate, list -> aggResult.addAll(0, list));
-			case B_15Min,B_30Min -> 
-				loader.loadQuarterlyData(contract, loadStartDate, loadEndDate, list -> aggResult.addAll(0, list));
-			case B_1Hr,B_2Hr,B_4Hr -> 
-				loader.loadHourlyData(contract, loadStartDate, loadEndDate, list -> aggResult.addAll(0, list));
-			case B_1Day, B_1Wk ->
-				loader.loadDailyData(contract, loadStartDate, loadEndDate, list -> aggResult.addAll(0, list));
-			default -> throw new IllegalStateException();
+		if(interval.getMinutes() < 15) {
+			loader.loadMinutelyData(contract, loadStartDate, loadEndDate, list -> aggResult.addAll(0, list));
+		} else if (interval.getMinutes() < 60) {
+			loader.loadQuarterlyData(contract, loadStartDate, loadEndDate, list -> aggResult.addAll(0, list));
+		} else if (interval.getMinutes() < 24 * 60) {
+			loader.loadHourlyData(contract, loadStartDate, loadEndDate, list -> aggResult.addAll(0, list));
+		} else {
+			loader.loadDailyData(contract, loadStartDate, loadEndDate, list -> aggResult.addAll(0, list));
 		}
 		return aggResult.reversed();
 	}
-	
-	private static final List<BarCycleEnum> PERIODS = List.of(BarCycleEnum.B_1Min, BarCycleEnum.B_3Min, BarCycleEnum.B_5Min, BarCycleEnum.B_10Min, 
-			BarCycleEnum.B_15Min,BarCycleEnum.B_30Min, BarCycleEnum.B_1Hr, BarCycleEnum.B_2Hr, BarCycleEnum.B_4Hr, BarCycleEnum.B_1Day, BarCycleEnum.B_1Wk);
 	
 	public void subscribe(List<String> contractIds) {
 		log.info("订阅K线，合约 {}", JSON.toJSONString(contractIds));
@@ -130,12 +125,16 @@ public class MarketDataService {
 		contractIds.forEach(contractId -> {
 			final Contract contract = marketCenter.getContract(Identifier.of(contractId)).contract();
 			newSubscribedContracts.add(contract);
-			PERIODS.forEach(barPeriod -> barAggHandler.register(contract, barPeriod, BarMergerFactory.newInstance(barPeriod, contract)));
+			for(Interval barInterval : Interval.values()) {
+				barAggHandler.register(contract, barInterval, BarMergerFactory.newInstance(barInterval, contract));
+			}
 		});
 		
-		unsubscribedContracts(newSubscribedContracts, barAggHandler.registeredContracts()).forEach(contract -> 
-			PERIODS.forEach(barPeriod -> barAggHandler.unregister(contract,  barPeriod))
-		);
+		unsubscribedContracts(newSubscribedContracts, barAggHandler.registeredContracts()).forEach(contract -> {
+			for(Interval barInterval : Interval.values()) {				
+				barAggHandler.unregister(contract,  barInterval);
+			}
+		});
 	}
 	
 	private Set<Contract> unsubscribedContracts(Set<Contract> newSet, Set<Contract> oldSet){

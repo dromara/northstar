@@ -1,8 +1,8 @@
 package org.dromara.northstar.indicator.model;
 
+import org.dromara.northstar.common.constant.Interval;
 import org.dromara.northstar.common.constant.LineStyle;
 import org.dromara.northstar.common.model.core.Contract;
-import org.dromara.northstar.indicator.constant.PeriodUnit;
 import org.dromara.northstar.indicator.constant.ValueType;
 
 import lombok.Builder;
@@ -24,13 +24,9 @@ public record Configuration(
 		 */
 		Contract contract,
 		/**
-		 * N个周期
+		 * K线周期
 		 */
-		Integer numOfUnits,
-		/**
-		 * 周期单位
-		 */
-		PeriodUnit period,
+		Interval interval,
 		/**
 		 * 值类型
 		 */
@@ -52,10 +48,8 @@ public record Configuration(
 		Boolean visible) {
 
 	public Configuration {
-		if (numOfUnits == null)
-			numOfUnits = 1;
-		if (period == null)
-			period = PeriodUnit.MINUTE;
+		if (interval == null)
+			interval = Interval.M1;
 		if (valueType == null)
 			valueType = ValueType.CLOSE;
 		if (cacheLength == null)
@@ -73,6 +67,6 @@ public record Configuration(
 	}
 
 	public String indicatorID() {
-		return String.format("%s_%d%s", indicatorName(), numOfUnits(), period().symbol());
+		return String.format("%s_%s", indicatorName(), interval().getAlias());
 	}
 }

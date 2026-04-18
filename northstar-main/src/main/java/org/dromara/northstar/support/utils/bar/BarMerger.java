@@ -1,16 +1,5 @@
 package org.dromara.northstar.support.utils.bar;
 
-import static xyz.redtorch.pb.CoreEnum.BarCycleEnum.B_10Min;
-import static xyz.redtorch.pb.CoreEnum.BarCycleEnum.B_15Min;
-import static xyz.redtorch.pb.CoreEnum.BarCycleEnum.B_1Hr;
-import static xyz.redtorch.pb.CoreEnum.BarCycleEnum.B_1Min;
-import static xyz.redtorch.pb.CoreEnum.BarCycleEnum.B_2Hr;
-import static xyz.redtorch.pb.CoreEnum.BarCycleEnum.B_30Min;
-import static xyz.redtorch.pb.CoreEnum.BarCycleEnum.B_3Min;
-import static xyz.redtorch.pb.CoreEnum.BarCycleEnum.B_4Hr;
-import static xyz.redtorch.pb.CoreEnum.BarCycleEnum.B_5Min;
-import static xyz.redtorch.pb.CoreEnum.BarCycleEnum.B_Custom;
-
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -22,6 +11,7 @@ import java.util.Set;
 
 import org.dromara.northstar.common.BarDataAware;
 import org.dromara.northstar.common.TickDataAware;
+import org.dromara.northstar.common.constant.Interval;
 import org.dromara.northstar.common.constant.TickType;
 import org.dromara.northstar.common.model.core.Bar;
 import org.dromara.northstar.common.model.core.Contract;
@@ -29,9 +19,7 @@ import org.dromara.northstar.common.model.core.Tick;
 import org.dromara.northstar.common.utils.CommonUtils;
 import org.dromara.northstar.strategy.MergedBarListener;
 
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import xyz.redtorch.pb.CoreEnum.BarCycleEnum;
 
 /**
  * 分钟线合成器
@@ -47,16 +35,11 @@ public class BarMerger implements BarDataAware, TickDataAware {
 	
 	protected long curBarTimestamp;
 	
-	@Getter
-	private final int numOfMinPerBar;
-	
 	private LocalDateTime cutoffDateTime;
 	
 	protected Bar protoBar;
 	
 	protected final Set<MergedBarListener> listeners = new HashSet<>();
-	
-	protected BarCycleEnum barPeriod;
 	
 	protected int volDelta;
 	protected int oiDelta;
@@ -70,26 +53,12 @@ public class BarMerger implements BarDataAware, TickDataAware {
 	protected double low = Double.MAX_VALUE;
 	
 	protected BarTimePadding barTimePadding;
+	private Interval barInterval;
 	
-	public BarMerger(int numOfMinPerBar, Contract contract) { 
-		if(numOfMinPerBar > 240) {
-			throw new IllegalArgumentException("不能大于240分钟");
-		}
+	public BarMerger(Interval interval, Contract contract) { 
 		this.contract = contract;
-		this.numOfMinPerBar = numOfMinPerBar;
-		this.barPeriod = switch (numOfMinPerBar) {
-		case 1 -> B_1Min;
-		case 3 -> B_3Min;
-		case 5 -> B_5Min;
-		case 10 -> B_10Min;
-		case 15 -> B_15Min;
-		case 30 -> B_30Min;
-		case 60 -> B_1Hr;
-		case 120 -> B_2Hr;
-		case 240 -> B_4Hr;
-		default -> B_Custom;
-		};
-		this.barTimePadding = new BarTimePadding(numOfMinPerBar, contract);
+		this.barInterval = interval;
+		this.barTimePadding = new BarTimePadding(interval, contract);
 	}
 
 	@Override
@@ -104,19 +73,7 @@ public class BarMerger implements BarDataAware, TickDataAware {
 		LocalDateTime barEndDateTime = LocalDateTime.of(bar.actionDay(), bar.actionTime());
 		if(contract.usingStartTimeInBarTime()) {
 			LocalDateTime barStartDateTime = barEndDateTime;
-			int interval = switch(bar.barPeriod()) {
-			case B_1Min -> 1;
-			case B_3Min -> 3;
-			case B_5Min -> 5;
-			case B_10Min -> 10;
-			case B_15Min -> 15;
-			case B_30Min -> 30;
-			case B_1Hr -> 60;
-			case B_2Hr -> 120;
-			case B_4Hr -> 240;
-			default -> throw new IllegalArgumentException("Unexpected value: " + bar.barPeriod());
-			};
-			barEndDateTime = barStartDateTime.plusMinutes(interval);
+			barEndDateTime = barStartDateTime.plusMinutes(bar.interval().getMinutes());
 		}
 		if(Objects.isNull(cutoffDateTime)) {			
 			try {
@@ -179,7 +136,7 @@ public class BarMerger implements BarDataAware, TickDataAware {
 					.preClosePrice(bar.preClosePrice())
 					.preOpenInterest(bar.preOpenInterest())
 					.preSettlePrice(bar.preSettlePrice())
-					.barPeriod(barPeriod)
+					.interval(barInterval)
 					.build();
 			
 			if(barEndDateTime.isEqual(cutoffDateTime)){
@@ -271,7 +228,7 @@ public class BarMerger implements BarDataAware, TickDataAware {
 					.preClosePrice(tick.preClosePrice())
 					.preOpenInterest(tick.preOpenInterest())
 					.preSettlePrice(tick.preSettlePrice())
-					.barPeriod(barPeriod)
+					.interval(barInterval)
 					.build();
 		}
 		

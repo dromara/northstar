@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.dromara.northstar.NorthstarApplication;
 import org.dromara.northstar.app.service.MultichartsService;
+import org.dromara.northstar.common.constant.Interval;
 import org.dromara.northstar.common.model.OverlayVO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,8 +20,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import com.alibaba.fastjson2.JSON;
-
-import xyz.redtorch.pb.CoreEnum.BarCycleEnum;
 
 @SpringBootTest(classes = NorthstarApplication.class, value="spring.profiles.active=unittest")
 @AutoConfigureMockMvc
@@ -39,7 +38,7 @@ class MultichartsControllerTest {
 	
 	@BeforeEach
 	void setUp() {
-		when(service.getOverlays("BTCUSDT@BINANCE@SPOT@PLAYBACK", BarCycleEnum.B_10Min)).thenReturn(List.of(overlay));
+		when(service.getOverlays("BTCUSDT@BINANCE@SPOT@PLAYBACK", Interval.M10)).thenReturn(List.of(overlay));
 	}
 	
 	@Test
@@ -52,7 +51,7 @@ class MultichartsControllerTest {
 
 	@Test
 	void testGetOverlays() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.get("/northstar/multicharts/overlay/BTCUSDT@BINANCE@SPOT@PLAYBACK/5"))
+		mvc.perform(MockMvcRequestBuilders.get("/northstar/multicharts/overlay/BTCUSDT@BINANCE@SPOT@PLAYBACK/10m"))
 			.andExpect(status().isOk());
 	}
 

@@ -27018,19 +27018,20 @@ public final class CoreField {
      * K线周期
      * </pre>
      *
-     * <code>.xyz.redtorch.pb.BarCycleEnum barPeriod = 23;</code>
-     * @return The enum numeric value on the wire for barPeriod.
+     * <code>string interval = 23;</code>
+     * @return The interval.
      */
-    int getBarPeriodValue();
+    java.lang.String getInterval();
     /**
      * <pre>
      * K线周期
      * </pre>
      *
-     * <code>.xyz.redtorch.pb.BarCycleEnum barPeriod = 23;</code>
-     * @return The barPeriod.
+     * <code>string interval = 23;</code>
+     * @return The bytes for interval.
      */
-    xyz.redtorch.pb.CoreEnum.BarCycleEnum getBarPeriod();
+    com.google.protobuf.ByteString
+        getIntervalBytes();
 
     /**
      * <pre>
@@ -27074,7 +27075,7 @@ public final class CoreField {
       actionDay_ = "";
       actionTime_ = "";
       channelType_ = "";
-      barPeriod_ = 0;
+      interval_ = "";
     }
 
     public static final com.google.protobuf.Descriptors.Descriptor
@@ -27612,30 +27613,51 @@ public final class CoreField {
       }
     }
 
-    public static final int BARPERIOD_FIELD_NUMBER = 23;
-    private int barPeriod_ = 0;
+    public static final int INTERVAL_FIELD_NUMBER = 23;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object interval_ = "";
     /**
      * <pre>
      * K线周期
      * </pre>
      *
-     * <code>.xyz.redtorch.pb.BarCycleEnum barPeriod = 23;</code>
-     * @return The enum numeric value on the wire for barPeriod.
+     * <code>string interval = 23;</code>
+     * @return The interval.
      */
-    @java.lang.Override public int getBarPeriodValue() {
-      return barPeriod_;
+    @java.lang.Override
+    public java.lang.String getInterval() {
+      java.lang.Object ref = interval_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        interval_ = s;
+        return s;
+      }
     }
     /**
      * <pre>
      * K线周期
      * </pre>
      *
-     * <code>.xyz.redtorch.pb.BarCycleEnum barPeriod = 23;</code>
-     * @return The barPeriod.
+     * <code>string interval = 23;</code>
+     * @return The bytes for interval.
      */
-    @java.lang.Override public xyz.redtorch.pb.CoreEnum.BarCycleEnum getBarPeriod() {
-      xyz.redtorch.pb.CoreEnum.BarCycleEnum result = xyz.redtorch.pb.CoreEnum.BarCycleEnum.forNumber(barPeriod_);
-      return result == null ? xyz.redtorch.pb.CoreEnum.BarCycleEnum.UNRECOGNIZED : result;
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getIntervalBytes() {
+      java.lang.Object ref = interval_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        interval_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
     }
 
     public static final int UNSTABLE_FIELD_NUMBER = 24;
@@ -27733,8 +27755,8 @@ public final class CoreField {
       if (!com.google.protobuf.GeneratedMessage.isStringEmpty(channelType_)) {
         com.google.protobuf.GeneratedMessage.writeString(output, 22, channelType_);
       }
-      if (barPeriod_ != xyz.redtorch.pb.CoreEnum.BarCycleEnum.B_5Sec.getNumber()) {
-        output.writeEnum(23, barPeriod_);
+      if (!com.google.protobuf.GeneratedMessage.isStringEmpty(interval_)) {
+        com.google.protobuf.GeneratedMessage.writeString(output, 23, interval_);
       }
       if (unstable_ != false) {
         output.writeBool(24, unstable_);
@@ -27830,9 +27852,8 @@ public final class CoreField {
       if (!com.google.protobuf.GeneratedMessage.isStringEmpty(channelType_)) {
         size += com.google.protobuf.GeneratedMessage.computeStringSize(22, channelType_);
       }
-      if (barPeriod_ != xyz.redtorch.pb.CoreEnum.BarCycleEnum.B_5Sec.getNumber()) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeEnumSize(23, barPeriod_);
+      if (!com.google.protobuf.GeneratedMessage.isStringEmpty(interval_)) {
+        size += com.google.protobuf.GeneratedMessage.computeStringSize(23, interval_);
       }
       if (unstable_ != false) {
         size += com.google.protobuf.CodedOutputStream
@@ -27907,7 +27928,8 @@ public final class CoreField {
               other.getPreSettlePrice())) return false;
       if (!getChannelType()
           .equals(other.getChannelType())) return false;
-      if (barPeriod_ != other.barPeriod_) return false;
+      if (!getInterval()
+          .equals(other.getInterval())) return false;
       if (getUnstable()
           != other.getUnstable()) return false;
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
@@ -27978,8 +28000,8 @@ public final class CoreField {
           java.lang.Double.doubleToLongBits(getPreSettlePrice()));
       hash = (37 * hash) + CHANNELTYPE_FIELD_NUMBER;
       hash = (53 * hash) + getChannelType().hashCode();
-      hash = (37 * hash) + BARPERIOD_FIELD_NUMBER;
-      hash = (53 * hash) + barPeriod_;
+      hash = (37 * hash) + INTERVAL_FIELD_NUMBER;
+      hash = (53 * hash) + getInterval().hashCode();
       hash = (37 * hash) + UNSTABLE_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
           getUnstable());
@@ -28140,7 +28162,7 @@ public final class CoreField {
         preClosePrice_ = 0D;
         preSettlePrice_ = 0D;
         channelType_ = "";
-        barPeriod_ = 0;
+        interval_ = "";
         unstable_ = false;
         return this;
       }
@@ -28242,7 +28264,7 @@ public final class CoreField {
           result.channelType_ = channelType_;
         }
         if (((from_bitField0_ & 0x00400000) != 0)) {
-          result.barPeriod_ = barPeriod_;
+          result.interval_ = interval_;
         }
         if (((from_bitField0_ & 0x00800000) != 0)) {
           result.unstable_ = unstable_;
@@ -28339,8 +28361,10 @@ public final class CoreField {
           bitField0_ |= 0x00200000;
           onChanged();
         }
-        if (other.barPeriod_ != 0) {
-          setBarPeriodValue(other.getBarPeriodValue());
+        if (!other.getInterval().isEmpty()) {
+          interval_ = other.interval_;
+          bitField0_ |= 0x00400000;
+          onChanged();
         }
         if (other.getUnstable() != false) {
           setUnstable(other.getUnstable());
@@ -28481,11 +28505,11 @@ public final class CoreField {
                 bitField0_ |= 0x00200000;
                 break;
               } // case 178
-              case 184: {
-                barPeriod_ = input.readEnum();
+              case 186: {
+                interval_ = input.readStringRequireUtf8();
                 bitField0_ |= 0x00400000;
                 break;
-              } // case 184
+              } // case 186
               case 192: {
                 unstable_ = input.readBool();
                 bitField0_ |= 0x00800000;
@@ -29764,61 +29788,62 @@ public final class CoreField {
         return this;
       }
 
-      private int barPeriod_ = 0;
+      private java.lang.Object interval_ = "";
       /**
        * <pre>
        * K线周期
        * </pre>
        *
-       * <code>.xyz.redtorch.pb.BarCycleEnum barPeriod = 23;</code>
-       * @return The enum numeric value on the wire for barPeriod.
+       * <code>string interval = 23;</code>
+       * @return The interval.
        */
-      @java.lang.Override public int getBarPeriodValue() {
-        return barPeriod_;
-      }
-      /**
-       * <pre>
-       * K线周期
-       * </pre>
-       *
-       * <code>.xyz.redtorch.pb.BarCycleEnum barPeriod = 23;</code>
-       * @param value The enum numeric value on the wire for barPeriod to set.
-       * @return This builder for chaining.
-       */
-      public Builder setBarPeriodValue(int value) {
-        barPeriod_ = value;
-        bitField0_ |= 0x00400000;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * K线周期
-       * </pre>
-       *
-       * <code>.xyz.redtorch.pb.BarCycleEnum barPeriod = 23;</code>
-       * @return The barPeriod.
-       */
-      @java.lang.Override
-      public xyz.redtorch.pb.CoreEnum.BarCycleEnum getBarPeriod() {
-        xyz.redtorch.pb.CoreEnum.BarCycleEnum result = xyz.redtorch.pb.CoreEnum.BarCycleEnum.forNumber(barPeriod_);
-        return result == null ? xyz.redtorch.pb.CoreEnum.BarCycleEnum.UNRECOGNIZED : result;
-      }
-      /**
-       * <pre>
-       * K线周期
-       * </pre>
-       *
-       * <code>.xyz.redtorch.pb.BarCycleEnum barPeriod = 23;</code>
-       * @param value The barPeriod to set.
-       * @return This builder for chaining.
-       */
-      public Builder setBarPeriod(xyz.redtorch.pb.CoreEnum.BarCycleEnum value) {
-        if (value == null) {
-          throw new NullPointerException();
+      public java.lang.String getInterval() {
+        java.lang.Object ref = interval_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          interval_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
         }
+      }
+      /**
+       * <pre>
+       * K线周期
+       * </pre>
+       *
+       * <code>string interval = 23;</code>
+       * @return The bytes for interval.
+       */
+      public com.google.protobuf.ByteString
+          getIntervalBytes() {
+        java.lang.Object ref = interval_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          interval_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * K线周期
+       * </pre>
+       *
+       * <code>string interval = 23;</code>
+       * @param value The interval to set.
+       * @return This builder for chaining.
+       */
+      public Builder setInterval(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        interval_ = value;
         bitField0_ |= 0x00400000;
-        barPeriod_ = value.getNumber();
         onChanged();
         return this;
       }
@@ -29827,12 +29852,30 @@ public final class CoreField {
        * K线周期
        * </pre>
        *
-       * <code>.xyz.redtorch.pb.BarCycleEnum barPeriod = 23;</code>
+       * <code>string interval = 23;</code>
        * @return This builder for chaining.
        */
-      public Builder clearBarPeriod() {
+      public Builder clearInterval() {
+        interval_ = getDefaultInstance().getInterval();
         bitField0_ = (bitField0_ & ~0x00400000);
-        barPeriod_ = 0;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * K线周期
+       * </pre>
+       *
+       * <code>string interval = 23;</code>
+       * @param value The bytes for interval to set.
+       * @return This builder for chaining.
+       */
+      public Builder setIntervalBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        interval_ = value;
+        bitField0_ |= 0x00400000;
         onChanged();
         return this;
       }
@@ -40438,7 +40481,7 @@ public final class CoreField {
       "lowPrice\030\036 \001(\001\022\022\n\nupperLimit\030\037 \001(\001\022\022\n\nlo" +
       "werLimit\030  \001(\001\022\020\n\010bidPrice\030! \003(\001\022\020\n\010askP" +
       "rice\030\" \003(\001\022\021\n\tbidVolume\030# \003(\007\022\021\n\taskVolu" +
-      "me\030$ \003(\007\022\023\n\013channelType\030% \001(\t\"\237\004\n\010BarFie" +
+      "me\030$ \003(\007\022\023\n\013channelType\030% \001(\t\"\377\003\n\010BarFie" +
       "ld\022\025\n\runifiedSymbol\030\001 \001(\t\022\021\n\tgatewayId\030\002" +
       " \001(\t\022\022\n\ntradingDay\030\003 \001(\t\022\021\n\tactionDay\030\004 " +
       "\001(\t\022\022\n\nactionTime\030\005 \001(\t\022\027\n\017actionTimesta" +
@@ -40450,56 +40493,55 @@ public final class CoreField {
       "Delta\030\020 \001(\001\022\021\n\tnumTrades\030\021 \001(\005\022\026\n\016numTra" +
       "desDelta\030\022 \001(\005\022\027\n\017preOpenInterest\030\023 \001(\006\022" +
       "\025\n\rpreClosePrice\030\024 \001(\001\022\026\n\016preSettlePrice" +
-      "\030\025 \001(\001\022\023\n\013channelType\030\026 \001(\t\0220\n\tbarPeriod" +
-      "\030\027 \001(\0162\035.xyz.redtorch.pb.BarCycleEnum\022\020\n" +
-      "\010unstable\030\030 \001(\010\"\300\006\n\023SubmitOrderReqField\022" +
-      "\025\n\roriginOrderId\030\001 \001(\t\022\023\n\013accountCode\030\002 " +
-      "\001(\t\022/\n\010currency\030\003 \001(\0162\035.xyz.redtorch.pb." +
-      "CurrencyEnum\0220\n\010contract\030\004 \001(\0132\036.xyz.red" +
-      "torch.pb.ContractField\022\021\n\tgatewayId\030\005 \001(" +
-      "\t\022\016\n\006volume\030\006 \001(\001\022\r\n\005price\030\007 \001(\001\022;\n\016orde" +
-      "rPriceType\030\010 \001(\0162#.xyz.redtorch.pb.Order" +
-      "PriceTypeEnum\0221\n\tdirection\030\t \001(\0162\036.xyz.r" +
-      "edtorch.pb.DirectionEnum\0223\n\noffsetFlag\030\n" +
-      " \001(\0162\037.xyz.redtorch.pb.OffsetFlagEnum\0221\n" +
-      "\thedgeFlag\030\013 \001(\0162\036.xyz.redtorch.pb.Hedge" +
-      "FlagEnum\0229\n\rtimeCondition\030\014 \001(\0162\".xyz.re" +
-      "dtorch.pb.TimeConditionEnum\022\017\n\007gtdDate\030\r" +
-      " \001(\t\022=\n\017volumeCondition\030\016 \001(\0162$.xyz.redt" +
-      "orch.pb.VolumeConditionEnum\022\021\n\tminVolume" +
-      "\030\017 \001(\007\022E\n\023contingentCondition\030\020 \001(\0162(.xy" +
-      "z.redtorch.pb.ContingentConditionEnum\022\021\n" +
-      "\tstopPrice\030\021 \001(\001\022?\n\020forceCloseReason\030\022 \001" +
-      "(\0162%.xyz.redtorch.pb.ForceCloseReasonEnu" +
-      "m\022\023\n\013autoSuspend\030\023 \001(\007\022\026\n\016userForceClose" +
-      "\030\024 \001(\007\022\021\n\tswapOrder\030\025 \001(\007\022\027\n\017actionTimes" +
-      "tamp\030\026 \001(\006\"P\n\023CancelOrderReqField\022\021\n\tgat" +
-      "ewayId\030\001 \001(\t\022\017\n\007orderId\030\002 \001(\t\022\025\n\roriginO" +
-      "rderId\030\003 \001(\t\"\373\005\n\023GatewaySettingField\022\021\n\t" +
-      "gatewayId\030\001 \001(\t\022\023\n\013gatewayName\030\002 \001(\t\022\032\n\022" +
-      "gatewayDescription\030\004 \001(\t\022\032\n\022implementCla" +
-      "ssName\030\005 \001(\t\0225\n\013gatewayType\030\006 \001(\0162 .xyz." +
-      "redtorch.pb.GatewayTypeEnum\022C\n\022gatewayAd" +
-      "apterType\030\007 \001(\0162\'.xyz.redtorch.pb.Gatewa" +
-      "yAdapterTypeEnum\022N\n\rctpApiSetting\030\010 \001(\0132" +
-      "7.xyz.redtorch.pb.GatewaySettingField.Ct" +
-      "pApiSettingField\022L\n\014ibApiSetting\030\t \001(\01326" +
-      ".xyz.redtorch.pb.GatewaySettingField.IbA" +
-      "piSettingField\0222\n\006status\030\n \001(\0162\".xyz.red" +
-      "torch.pb.ConnectStatusEnum\022\017\n\007version\030\013 " +
-      "\001(\006\022\035\n\025autoConnectTimeRanges\030\014 \001(\t\032\302\001\n\022C" +
-      "tpApiSettingField\022\016\n\006userId\030\001 \001(\t\022\020\n\010pas" +
-      "sword\030\002 \001(\t\022\020\n\010brokerId\030\003 \001(\t\022\016\n\006tdHost\030" +
-      "\004 \001(\t\022\016\n\006tdPort\030\005 \001(\t\022\016\n\006mdHost\030\006 \001(\t\022\016\n" +
-      "\006mdPort\030\007 \001(\t\022\020\n\010authCode\030\010 \001(\t\022\027\n\017userP" +
-      "roductInfo\030\t \001(\t\022\r\n\005appId\030\n \001(\t\032A\n\021IbApi" +
-      "SettingField\022\014\n\004host\030\001 \001(\t\022\014\n\004port\030\002 \001(\007" +
-      "\022\020\n\010clientId\030\003 \001(\007\"_\n\010LogField\022/\n\010logLev" +
-      "el\030\001 \001(\0162\035.xyz.redtorch.pb.LogLevelEnum\022" +
-      "\021\n\ttimestamp\030\002 \001(\006\022\017\n\007content\030\003 \001(\t\"d\n\013N" +
-      "oticeField\0221\n\006status\030\001 \001(\0162!.xyz.redtorc" +
-      "h.pb.CommonStatusEnum\022\021\n\ttimestamp\030\002 \001(\006" +
-      "\022\017\n\007content\030\003 \001(\tb\006proto3"
+      "\030\025 \001(\001\022\023\n\013channelType\030\026 \001(\t\022\020\n\010interval\030" +
+      "\027 \001(\t\022\020\n\010unstable\030\030 \001(\010\"\300\006\n\023SubmitOrderR" +
+      "eqField\022\025\n\roriginOrderId\030\001 \001(\t\022\023\n\013accoun" +
+      "tCode\030\002 \001(\t\022/\n\010currency\030\003 \001(\0162\035.xyz.redt" +
+      "orch.pb.CurrencyEnum\0220\n\010contract\030\004 \001(\0132\036" +
+      ".xyz.redtorch.pb.ContractField\022\021\n\tgatewa" +
+      "yId\030\005 \001(\t\022\016\n\006volume\030\006 \001(\001\022\r\n\005price\030\007 \001(\001" +
+      "\022;\n\016orderPriceType\030\010 \001(\0162#.xyz.redtorch." +
+      "pb.OrderPriceTypeEnum\0221\n\tdirection\030\t \001(\016" +
+      "2\036.xyz.redtorch.pb.DirectionEnum\0223\n\noffs" +
+      "etFlag\030\n \001(\0162\037.xyz.redtorch.pb.OffsetFla" +
+      "gEnum\0221\n\thedgeFlag\030\013 \001(\0162\036.xyz.redtorch." +
+      "pb.HedgeFlagEnum\0229\n\rtimeCondition\030\014 \001(\0162" +
+      "\".xyz.redtorch.pb.TimeConditionEnum\022\017\n\007g" +
+      "tdDate\030\r \001(\t\022=\n\017volumeCondition\030\016 \001(\0162$." +
+      "xyz.redtorch.pb.VolumeConditionEnum\022\021\n\tm" +
+      "inVolume\030\017 \001(\007\022E\n\023contingentCondition\030\020 " +
+      "\001(\0162(.xyz.redtorch.pb.ContingentConditio" +
+      "nEnum\022\021\n\tstopPrice\030\021 \001(\001\022?\n\020forceCloseRe" +
+      "ason\030\022 \001(\0162%.xyz.redtorch.pb.ForceCloseR" +
+      "easonEnum\022\023\n\013autoSuspend\030\023 \001(\007\022\026\n\016userFo" +
+      "rceClose\030\024 \001(\007\022\021\n\tswapOrder\030\025 \001(\007\022\027\n\017act" +
+      "ionTimestamp\030\026 \001(\006\"P\n\023CancelOrderReqFiel" +
+      "d\022\021\n\tgatewayId\030\001 \001(\t\022\017\n\007orderId\030\002 \001(\t\022\025\n" +
+      "\roriginOrderId\030\003 \001(\t\"\373\005\n\023GatewaySettingF" +
+      "ield\022\021\n\tgatewayId\030\001 \001(\t\022\023\n\013gatewayName\030\002" +
+      " \001(\t\022\032\n\022gatewayDescription\030\004 \001(\t\022\032\n\022impl" +
+      "ementClassName\030\005 \001(\t\0225\n\013gatewayType\030\006 \001(" +
+      "\0162 .xyz.redtorch.pb.GatewayTypeEnum\022C\n\022g" +
+      "atewayAdapterType\030\007 \001(\0162\'.xyz.redtorch.p" +
+      "b.GatewayAdapterTypeEnum\022N\n\rctpApiSettin" +
+      "g\030\010 \001(\01327.xyz.redtorch.pb.GatewaySetting" +
+      "Field.CtpApiSettingField\022L\n\014ibApiSetting" +
+      "\030\t \001(\01326.xyz.redtorch.pb.GatewaySettingF" +
+      "ield.IbApiSettingField\0222\n\006status\030\n \001(\0162\"" +
+      ".xyz.redtorch.pb.ConnectStatusEnum\022\017\n\007ve" +
+      "rsion\030\013 \001(\006\022\035\n\025autoConnectTimeRanges\030\014 \001" +
+      "(\t\032\302\001\n\022CtpApiSettingField\022\016\n\006userId\030\001 \001(" +
+      "\t\022\020\n\010password\030\002 \001(\t\022\020\n\010brokerId\030\003 \001(\t\022\016\n" +
+      "\006tdHost\030\004 \001(\t\022\016\n\006tdPort\030\005 \001(\t\022\016\n\006mdHost\030" +
+      "\006 \001(\t\022\016\n\006mdPort\030\007 \001(\t\022\020\n\010authCode\030\010 \001(\t\022" +
+      "\027\n\017userProductInfo\030\t \001(\t\022\r\n\005appId\030\n \001(\t\032" +
+      "A\n\021IbApiSettingField\022\014\n\004host\030\001 \001(\t\022\014\n\004po" +
+      "rt\030\002 \001(\007\022\020\n\010clientId\030\003 \001(\007\"_\n\010LogField\022/" +
+      "\n\010logLevel\030\001 \001(\0162\035.xyz.redtorch.pb.LogLe" +
+      "velEnum\022\021\n\ttimestamp\030\002 \001(\006\022\017\n\007content\030\003 " +
+      "\001(\t\"d\n\013NoticeField\0221\n\006status\030\001 \001(\0162!.xyz" +
+      ".redtorch.pb.CommonStatusEnum\022\021\n\ttimesta" +
+      "mp\030\002 \001(\006\022\017\n\007content\030\003 \001(\tb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -40553,7 +40595,7 @@ public final class CoreField {
     internal_static_xyz_redtorch_pb_BarField_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_xyz_redtorch_pb_BarField_descriptor,
-        new java.lang.String[] { "UnifiedSymbol", "GatewayId", "TradingDay", "ActionDay", "ActionTime", "ActionTimestamp", "OpenPrice", "HighPrice", "LowPrice", "ClosePrice", "OpenInterest", "OpenInterestDelta", "Volume", "VolumeDelta", "Turnover", "TurnoverDelta", "NumTrades", "NumTradesDelta", "PreOpenInterest", "PreClosePrice", "PreSettlePrice", "ChannelType", "BarPeriod", "Unstable", });
+        new java.lang.String[] { "UnifiedSymbol", "GatewayId", "TradingDay", "ActionDay", "ActionTime", "ActionTimestamp", "OpenPrice", "HighPrice", "LowPrice", "ClosePrice", "OpenInterest", "OpenInterestDelta", "Volume", "VolumeDelta", "Turnover", "TurnoverDelta", "NumTrades", "NumTradesDelta", "PreOpenInterest", "PreClosePrice", "PreSettlePrice", "ChannelType", "Interval", "Unstable", });
     internal_static_xyz_redtorch_pb_SubmitOrderReqField_descriptor =
       getDescriptor().getMessageTypes().get(8);
     internal_static_xyz_redtorch_pb_SubmitOrderReqField_fieldAccessorTable = new

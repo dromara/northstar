@@ -4,6 +4,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.dromara.northstar.common.constant.ChannelType;
+import org.dromara.northstar.common.constant.Interval;
 import org.dromara.northstar.common.event.AbstractEventHandler;
 import org.dromara.northstar.common.event.GenericEventHandler;
 import org.dromara.northstar.common.event.NorthstarEvent;
@@ -13,8 +14,6 @@ import org.dromara.northstar.common.utils.CommonUtils;
 import org.dromara.northstar.data.IMarketDataRepository;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
-
-import xyz.redtorch.pb.CoreEnum.BarCycleEnum;
 
 /**
  * 处理K线数据持久化
@@ -44,7 +43,7 @@ public class MarketDataPersistanceHandler extends AbstractEventHandler implement
 			return;
 		}
 		if(e.getData() instanceof Bar bar) {
-			if(bar.barPeriod() != BarCycleEnum.B_1Min
+			if(bar.interval() != Interval.M1
 					|| bar.channelType() == ChannelType.PLAYBACK
 					|| bar.channelType() == ChannelType.SIM) {
 				return;

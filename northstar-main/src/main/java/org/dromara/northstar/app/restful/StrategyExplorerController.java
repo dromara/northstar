@@ -41,7 +41,7 @@ public class StrategyExplorerController {
 		Assert.hasText(task.getEndDate(), () -> MessageSourceHolder.getMessageSource().getMessage("explorer.error.endDateNotEmpty", null, LocaleContextHolder.getLocale()));
 		Assert.hasText(task.getPreloadFrom(), () -> MessageSourceHolder.getMessageSource().getMessage("explorer.error.preloadDateNotEmpty", null, LocaleContextHolder.getLocale()));
 		Assert.notEmpty(task.getContracts(), () -> MessageSourceHolder.getMessageSource().getMessage("explorer.error.contractsNotEmpty", null, LocaleContextHolder.getLocale()));
-		Assert.notEmpty(task.getPeriods(), () -> MessageSourceHolder.getMessageSource().getMessage("explorer.error.periodsNotEmpty", null, LocaleContextHolder.getLocale()));
+		Assert.notEmpty(task.getIntervals(), () -> MessageSourceHolder.getMessageSource().getMessage("explorer.error.periodsNotEmpty", null, LocaleContextHolder.getLocale()));
 		Assert.notNull(task.getStrategySetting(), MessageSourceHolder.getMessageSource().getMessage("explorer.error.strategyNotNull", null, LocaleContextHolder.getLocale()));
 		return service.createTask(task);
 	}

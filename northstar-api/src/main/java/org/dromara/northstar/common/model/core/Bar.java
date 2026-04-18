@@ -7,10 +7,10 @@ import java.util.Optional;
 import org.dromara.northstar.common.Timed;
 import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.constant.DateTimeConstant;
+import org.dromara.northstar.common.constant.Interval;
 import org.springframework.util.Assert;
 
 import lombok.Builder;
-import xyz.redtorch.pb.CoreEnum.BarCycleEnum;
 import xyz.redtorch.pb.CoreField.BarField;
 
 @Builder(toBuilder = true)
@@ -34,7 +34,7 @@ public record Bar(
 		long preOpenInterest,		// 昨持仓
 		double preClosePrice,  		// 前收盘价
 		double preSettlePrice,  	// 昨结算价
-		BarCycleEnum barPeriod,		// K线周期
+		Interval interval,		// K线周期
 		boolean unstable,			// 未确定标识
 		ChannelType channelType		// 渠道来源
 	) implements Timed{
@@ -61,7 +61,7 @@ public record Bar(
 				.setPreClosePrice(preClosePrice)
 				.setPreSettlePrice(preSettlePrice)
 				.setChannelType(channelType.toString())
-				.setBarPeriod(barPeriod)
+				.setInterval(interval.getAlias())
 				.setUnstable(unstable)
 				.build();
 	}
@@ -89,7 +89,7 @@ public record Bar(
 				.preClosePrice(bar.getPreClosePrice())
 				.preSettlePrice(bar.getPreSettlePrice())
 				.channelType(ChannelType.valueOf(bar.getChannelType()))
-				.barPeriod(bar.getBarPeriod())
+				.interval(Interval.fromAlias(bar.getInterval()))
 				.unstable(bar.getUnstable())
 				.build();
 	}

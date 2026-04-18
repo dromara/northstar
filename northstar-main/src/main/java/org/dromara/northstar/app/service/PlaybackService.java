@@ -13,6 +13,7 @@ import java.util.function.Consumer;
 
 import org.dromara.northstar.account.GatewayManager;
 import org.dromara.northstar.common.constant.DateTimeConstant;
+import org.dromara.northstar.common.constant.Interval;
 import org.dromara.northstar.common.constant.ModuleUsage;
 import org.dromara.northstar.common.model.BarVO;
 import org.dromara.northstar.common.model.Identifier;
@@ -37,7 +38,6 @@ import org.springframework.util.Assert;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import lombok.extern.slf4j.Slf4j;
-import xyz.redtorch.pb.CoreEnum.BarCycleEnum;
 
 @Slf4j
 @Service
@@ -126,24 +126,24 @@ public class PlaybackService {
 		getPlaybackContext().getPlaybackStatus().setRunningDateTime(LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneId.systemDefault()));
 	}
 	
-	public void playNext(BarCycleEnum period) {
-		getPlaybackContext().playNext(period);
+	public void playNext(Interval interval) {
+		getPlaybackContext().playNext(interval);
 	}
 	
-	public List<BarVO> getRangeBars(String contractId, BarCycleEnum barPeriod, long from, long to){
+	public List<BarVO> getRangeBars(String contractId, Interval interval, long from, long to){
 		long playbackTime = CommonUtils.localDateTimeToMills(getPlaybackContext().getPlaybackStatus().getRunningDateTime());
 		if(from >= playbackTime) {
 			return Collections.emptyList();
 		}
-		return dataService.getRangeBars(contractId, barPeriod, from, Math.min(playbackTime, to));
+		return dataService.getRangeBars(contractId, interval, from, Math.min(playbackTime, to));
 	}
 	
-	public List<BarVO> getPreloadBars(String contractId, BarCycleEnum barPeriod){
-		log.info("预加载数据，合约{}，周期{} ", contractId, barPeriod);
+	public List<BarVO> getPreloadBars(String contractId, Interval interval){
+		log.info("预加载数据，合约{}，周期{} ", contractId, interval.getAlias());
 		
 		// 预加载数据时，需要先暂停回放进度
 		Contract contract = mktCenter.getContract(Identifier.of(contractId)).contract();
-		BarMerger merger = BarMergerFactory.newInstance(barPeriod, contract);
+		BarMerger merger = BarMergerFactory.newInstance(interval, contract);
 		getPlaybackContext().suspend();
 		if(getPlaybackContext().getPlaybackStatus().getState() == PlaybackStatus.State.INITIAL) {
 			getPlaybackContext().getPlaybackStatus().setState(PlaybackStatus.State.PRELOADED);
@@ -152,29 +152,29 @@ public class PlaybackService {
 		long endTime = to;
 		LocalDate toDate = CommonUtils.millsToLocalDateTime(to).toLocalDate().plusDays(3);	// 考虑到CTP周五夜盘的情况，因此要多加载三天的冗余数据
 		LocalDate fromDate = null;
-		switch(barPeriod) {
-		case B_1Min, B_3Min -> {fromDate = toDate.minusWeeks(1).plusDays(1);}
-		case B_5Min,B_10Min -> {fromDate = toDate.minusWeeks(2).plusDays(1);}
-		case B_15Min, B_30Min -> {fromDate = toDate.minusWeeks(3).plusDays(1);}
-		case B_1Hr, B_2Hr -> {fromDate = toDate.minusWeeks(12).plusDays(1);}
-		case B_4Hr, B_1Day -> {fromDate = toDate.minusYears(1).plusDays(1);}
-		case B_1Wk -> {fromDate = toDate.minusYears(2).plusDays(1);}
-		default -> throw new IllegalArgumentException("未定义周期处理：" + barPeriod);
+		switch(interval) {
+		case M1, M3 -> {fromDate = toDate.minusWeeks(1).plusDays(1);}
+		case M5, M10 -> {fromDate = toDate.minusWeeks(2).plusDays(1);}
+		case M15, M30 -> {fromDate = toDate.minusWeeks(3).plusDays(1);}
+		case H1, H2 -> {fromDate = toDate.minusWeeks(12).plusDays(1);}
+		case H4, D1 -> {fromDate = toDate.minusYears(1).plusDays(1);}
+		case WK1 -> {fromDate = toDate.minusYears(2).plusDays(1);}
+		default -> throw new IllegalArgumentException("未定义周期处理：" + interval.getAlias());
 		};
 		
 		List<Bar> mergedBars = new LinkedList<>();
 		MergedBarListener tempListener = mergedBars::add;
 		merger.addListener(tempListener);
-		dataService.smartLoad(contract, barPeriod, contract.contractDefinition().dataSource(), fromDate, toDate)
+		dataService.smartLoad(contract, interval, contract.contractDefinition().dataSource(), fromDate, toDate)
 			.stream()
 			.filter(bar -> bar.actionTimestamp() <= endTime)
 			.forEach(merger::onBar);
-		List<BarVO> resultList = mergedBars.stream().map(bar -> toVO(bar, barPeriod)).toList();
+		List<BarVO> resultList = mergedBars.stream().map(bar -> toVO(bar, interval)).toList();
 		getPlaybackContext().resume();
 		return resultList;
 	}
 	
-	private BarVO toVO(Bar bar, BarCycleEnum barPeriod) {
+	private BarVO toVO(Bar bar, Interval interval) {
 		return BarVO.builder()
 				.timestamp(bar.actionTimestamp())
 				.open(bar.openPrice())
@@ -184,7 +184,7 @@ public class PlaybackService {
 				.volume(bar.volumeDelta())
 				.oi(bar.openInterest())
 				.tradingDay(bar.tradingDay().format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
-				.period(barPeriod)
+				.interval(interval.getAlias())				
 				.build();
 	}
 	

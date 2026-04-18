@@ -1,21 +1,18 @@
 package org.dromara.northstar.support.utils.bar;
 
-import static xyz.redtorch.pb.CoreEnum.BarCycleEnum.B_1Day;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Objects;
 
+import org.dromara.northstar.common.constant.Interval;
 import org.dromara.northstar.common.constant.TickType;
 import org.dromara.northstar.common.model.core.Bar;
 import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.common.model.core.Tick;
 import org.dromara.northstar.common.model.core.TimeSlot;
 import org.dromara.northstar.common.utils.CommonUtils;
-
-import xyz.redtorch.pb.CoreEnum.BarCycleEnum;
 
 /**
  * 日线合成器
@@ -29,19 +26,18 @@ public class DailyBarMerger extends BarMerger{
 	private LocalTime dayEndTime;
 	
 	public DailyBarMerger(Contract contract) {
-		super(0, contract);
-		this.barPeriod = B_1Day;
+		super(Interval.D1, contract);
 		List<TimeSlot> times = contract.contractDefinition().tradeTimeDef().timeSlots();
 		this.dayEndTime = times.get(times.size() - 1).end();
 	}
 
 	@Override
 	public synchronized void onBar(Bar bar) {
-		if(!contract.equals(bar.contract()) || bar.barPeriod() == BarCycleEnum.B_1Wk) {
+		if(!contract.equals(bar.contract()) || bar.interval() == Interval.WK1) {
 			return;
 		}
 		
-		if(bar.barPeriod() == BarCycleEnum.B_1Day) {
+		if(bar.interval() == Interval.D1) {
 			Bar b = bar.toBuilder()
 					.actionTime(dayEndTime)
 					.actionTimestamp(CommonUtils.localDateTimeToMills(LocalDateTime.of(bar.tradingDay(), dayEndTime)))
@@ -82,7 +78,7 @@ public class DailyBarMerger extends BarMerger{
 					.preClosePrice(bar.preClosePrice())
 					.preOpenInterest(bar.preOpenInterest())
 					.preSettlePrice(bar.preSettlePrice())
-					.barPeriod(barPeriod)
+					.interval(Interval.D1)
 					.build();
 			
 			if(bar.tradingDay().equals(tradingDay) && bar.actionTime().equals(dayEndTime)) {				
@@ -117,7 +113,7 @@ public class DailyBarMerger extends BarMerger{
 					.preClosePrice(tick.preClosePrice())
 					.preOpenInterest(tick.preOpenInterest())
 					.preSettlePrice(tick.preSettlePrice())
-					.barPeriod(barPeriod)
+					.interval(Interval.D1)
 					.build();
 		}
 		

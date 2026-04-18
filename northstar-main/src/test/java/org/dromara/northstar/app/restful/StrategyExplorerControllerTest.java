@@ -51,7 +51,7 @@ public class StrategyExplorerControllerTest {
     		.startDate("2025-04-01")
     		.endDate("2025-06-30")
     		.contracts(List.of(ContractSimpleInfo.builder().id("ao0000@SHFE@FUTURES@PLAYBACK").unifiedSymbol("ao0000@SHFE@FUTURES").name("ao0000").build()))
-    		.periods(List.of(10))
+    		.intervals(List.of("10m"))
     		.strategySetting(StrategyMetaInfo.builder()
     				.className(DualAccountExampleStrategy.class.getName())
     				.settings(Collections.emptyList())

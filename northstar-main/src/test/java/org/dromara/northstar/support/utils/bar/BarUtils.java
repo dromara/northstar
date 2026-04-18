@@ -9,7 +9,7 @@ import java.util.Random;
 import org.dromara.northstar.common.model.core.Bar;
 import org.dromara.northstar.common.model.core.Contract;
 
-import xyz.redtorch.pb.CoreEnum.BarCycleEnum;
+import org.dromara.northstar.common.constant.Interval;
 
 public class BarUtils {
 	
@@ -19,14 +19,14 @@ public class BarUtils {
 	
 	private Contract contract;
 	
-	private BarCycleEnum period;
+	private Interval interval;
 	
 	private Random rand;
 	
-	public BarUtils(int priceSeed, Contract contract, BarCycleEnum period) {
+	public BarUtils(int priceSeed, Contract contract, Interval interval) {
 		this.priceSeed = priceSeed;
 		this.contract = contract;
-		this.period = period;
+		this.interval = interval;
 		this.rand = new Random(priceSeed);
 	}
 	
@@ -58,7 +58,7 @@ public class BarUtils {
 				.volumeDelta((int) volDelta)
 				.turnover(to)
 				.turnoverDelta(toDelta)
-				.barPeriod(period)
+				.interval(interval)
 				.build();
 	}
 }

@@ -16,7 +16,7 @@ import org.dromara.northstar.common.model.core.TradeTimeDefinition;
 import org.dromara.northstar.common.utils.DateTimeUtils;
 import org.junit.jupiter.api.Test;
 
-import xyz.redtorch.pb.CoreEnum.BarCycleEnum;
+import org.dromara.northstar.common.constant.Interval;
 
 class BarMergerCnFuture4HrTest {
 	
@@ -82,8 +82,8 @@ class BarMergerCnFuture4HrTest {
     
 	@Test
 	void test4HrNormal1DayC1() {
-		BarUtils utils = new BarUtils(5000, contract, BarCycleEnum.B_1Hr);
-		BarMerger merger = new BarMerger(240, contract);
+		BarUtils utils = new BarUtils(5000, contract, Interval.H1);
+		BarMerger merger = new BarMerger(Interval.H4, contract);
 		LocalDateTime ldt = LocalDateTime.of(LocalDate.of(2024, 12, 10), LocalTime.of(21, 0));
 		List<Bar> results = new LinkedList<>();
     	merger.addListener(bar -> results.add(bar));
@@ -104,8 +104,8 @@ class BarMergerCnFuture4HrTest {
 	
 	@Test
 	void test4HrNormal1DayC2() {
-		BarUtils utils = new BarUtils(5000, contract2, BarCycleEnum.B_1Hr);
-		BarMerger merger = new BarMerger(240, contract2);
+		BarUtils utils = new BarUtils(5000, contract2, Interval.H1);
+		BarMerger merger = new BarMerger(Interval.H4, contract2);
 		LocalDateTime ldt = LocalDateTime.of(LocalDate.of(2024, 12, 10), LocalTime.of(21, 0));
 		List<Bar> results = new LinkedList<>();
     	merger.addListener(bar -> results.add(bar));
@@ -124,8 +124,8 @@ class BarMergerCnFuture4HrTest {
 	
 	@Test
 	void test4HrNormal1DayC3() {
-		BarUtils utils = new BarUtils(5000, contract3, BarCycleEnum.B_1Hr);
-		BarMerger merger = new BarMerger(240, contract3);
+		BarUtils utils = new BarUtils(5000, contract3, Interval.H1);
+		BarMerger merger = new BarMerger(Interval.H4, contract3);
 		LocalDateTime ldt = LocalDateTime.of(LocalDate.of(2024, 12, 10), LocalTime.of(21, 0));
 		List<Bar> results = new LinkedList<>();
     	merger.addListener(bar -> results.add(bar));
@@ -144,8 +144,8 @@ class BarMergerCnFuture4HrTest {
 
 	@Test
 	void test4HrNormal1DayCrossWeekendC1() {
-		BarUtils utils = new BarUtils(5000, contract, BarCycleEnum.B_1Hr);
-		BarMerger merger = new BarMerger(240, contract);
+		BarUtils utils = new BarUtils(5000, contract, Interval.H1);
+		BarMerger merger = new BarMerger(Interval.H4, contract);
 		LocalDateTime ldt = LocalDateTime.of(LocalDate.of(2024, 12, 6), LocalTime.of(21, 0));
 		List<Bar> results = new LinkedList<>();
     	merger.addListener(bar -> results.add(bar));
@@ -173,8 +173,8 @@ class BarMergerCnFuture4HrTest {
 	
 	@Test
 	void test4HrNormal2DayCrossWeekendC1() {
-		BarUtils utils = new BarUtils(5000, contract, BarCycleEnum.B_1Hr);
-		BarMerger merger = new BarMerger(240, contract);
+		BarUtils utils = new BarUtils(5000, contract, Interval.H1);
+		BarMerger merger = new BarMerger(Interval.H4, contract);
 		LocalDateTime ldt = LocalDateTime.of(LocalDate.of(2024, 12, 5), LocalTime.of(21, 0));
 		List<Bar> results = new LinkedList<>();
     	merger.addListener(bar -> results.add(bar));
@@ -208,8 +208,8 @@ class BarMergerCnFuture4HrTest {
 	
 	@Test
 	void test4HrNormal1DayCrossWeekendC2() {
-		BarUtils utils = new BarUtils(5000, contract2, BarCycleEnum.B_1Hr);
-		BarMerger merger = new BarMerger(240, contract2);
+		BarUtils utils = new BarUtils(5000, contract2, Interval.H1);
+		BarMerger merger = new BarMerger(Interval.H4, contract2);
 		LocalDateTime ldt = LocalDateTime.of(LocalDate.of(2024, 12, 6), LocalTime.of(21, 0));
 		List<Bar> results = new LinkedList<>();
     	merger.addListener(bar -> results.add(bar));
@@ -235,8 +235,8 @@ class BarMergerCnFuture4HrTest {
 	
 	@Test
 	void test4HrNormal2DayCrossWeekendC2() {
-		BarUtils utils = new BarUtils(5000, contract2, BarCycleEnum.B_1Hr);
-		BarMerger merger = new BarMerger(240, contract2);
+		BarUtils utils = new BarUtils(5000, contract2, Interval.H1);
+		BarMerger merger = new BarMerger(Interval.H4, contract2);
 		LocalDateTime ldt = LocalDateTime.of(LocalDate.of(2024, 12, 5), LocalTime.of(21, 0));
 		List<Bar> results = new LinkedList<>();
     	merger.addListener(bar -> results.add(bar));
@@ -266,8 +266,8 @@ class BarMergerCnFuture4HrTest {
 	
 	@Test
 	void test4HrNormal1DayCrossWeekendC3() {
-		BarUtils utils = new BarUtils(5000, contract3, BarCycleEnum.B_1Hr);
-		BarMerger merger = new BarMerger(240, contract3);
+		BarUtils utils = new BarUtils(5000, contract3, Interval.H1);
+		BarMerger merger = new BarMerger(Interval.H4, contract3);
 		LocalDateTime ldt = LocalDateTime.of(LocalDate.of(2024, 12, 6), LocalTime.of(21, 0));
 		List<Bar> results = new LinkedList<>();
     	merger.addListener(bar -> results.add(bar));
@@ -293,8 +293,8 @@ class BarMergerCnFuture4HrTest {
 	
 	@Test
 	void test4HrNormal2DayCrossWeekendC3() {
-		BarUtils utils = new BarUtils(5000, contract3, BarCycleEnum.B_1Hr);
-		BarMerger merger = new BarMerger(240, contract3);
+		BarUtils utils = new BarUtils(5000, contract3, Interval.H1);
+		BarMerger merger = new BarMerger(Interval.H4, contract3);
 		LocalDateTime ldt = LocalDateTime.of(LocalDate.of(2024, 12, 5), LocalTime.of(21, 0));
 		List<Bar> results = new LinkedList<>();
     	merger.addListener(bar -> results.add(bar));
@@ -324,8 +324,8 @@ class BarMergerCnFuture4HrTest {
 	
 	@Test
 	void test4HrNormal1DayCrossHolidayC1() {
-		BarUtils utils = new BarUtils(5000, contract, BarCycleEnum.B_1Hr);
-		BarMerger merger = new BarMerger(240, contract);
+		BarUtils utils = new BarUtils(5000, contract, Interval.H1);
+		BarMerger merger = new BarMerger(Interval.H4, contract);
 		List<Bar> results = new LinkedList<>();
     	merger.addListener(bar -> results.add(bar));
 		
@@ -345,8 +345,8 @@ class BarMergerCnFuture4HrTest {
 	
 	@Test
 	void test4HrNormalWeekC4() {
-		BarUtils utils = new BarUtils(5000, contract4, BarCycleEnum.B_15Min);
-		BarMerger merger = new BarMerger(240, contract4);
+		BarUtils utils = new BarUtils(5000, contract4, Interval.M15);
+		BarMerger merger = new BarMerger(Interval.H4, contract4);
 		List<Bar> results = new LinkedList<>();
     	merger.addListener(bar -> results.add(bar));
 		

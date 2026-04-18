@@ -23,7 +23,7 @@ import org.dromara.northstar.strategy.MergedBarListener;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import xyz.redtorch.pb.CoreEnum.BarCycleEnum;
+import org.dromara.northstar.common.constant.Interval;
 
 class WeeklyBarMergerTest {
 
@@ -90,8 +90,8 @@ class WeeklyBarMergerTest {
 		merger.onTick(genTick(LocalDate.of(2024, 9, 19), LocalTime.of(15, 0), 120, 85, 115, 116, 0, 0, 0, 0, 0, 0));
 		
 		assertThat(result).hasSize(3);
-		assertThat(result.get(0).barPeriod()).isEqualTo(BarCycleEnum.B_1Wk);
-		assertThat(result.get(1).barPeriod()).isEqualTo(BarCycleEnum.B_1Wk);
+		assertThat(result.get(0).interval()).isEqualTo(Interval.WK1);
+		assertThat(result.get(1).interval()).isEqualTo(Interval.WK1);
 		assertThat(result.get(0).unstable()).isTrue();
 		assertThat(result.get(1).unstable()).isFalse();
 		

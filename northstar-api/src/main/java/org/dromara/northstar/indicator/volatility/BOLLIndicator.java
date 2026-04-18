@@ -26,10 +26,10 @@ public class BOLLIndicator extends AbstractIndicator implements Indicator{
 	
 	public BOLLIndicator(Configuration cfg, int barCount, double multipler) {
 		super(cfg.toBuilder().visible(false).build());
-		mid = new MAIndicator(cfg.toBuilder().indicatorName("BOLL_mid").numOfUnits(barCount).build(), barCount);
+		mid = new MAIndicator(cfg.toBuilder().indicatorName("BOLL_mid").build(), barCount);
 		std = new StandardDeviationIndicator(cfg.toBuilder().indicatorName("BOLL_std").build(), barCount);
-		upper = new SumIndicator(cfg.toBuilder().indicatorName("BOLL_upper").numOfUnits(barCount).build(), mid, 1, std, multipler);
-		lower = new DiffIndicator(cfg.toBuilder().indicatorName("BOLL_lower").numOfUnits(barCount).build(), mid, 1, std, multipler);
+		upper = new SumIndicator(cfg.toBuilder().indicatorName("BOLL_upper").build(), mid, 1, std, multipler);
+		lower = new DiffIndicator(cfg.toBuilder().indicatorName("BOLL_lower").build(), mid, 1, std, multipler);
 	}
 	
 	@Override

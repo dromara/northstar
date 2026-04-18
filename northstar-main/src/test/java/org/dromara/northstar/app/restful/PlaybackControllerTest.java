@@ -72,7 +72,7 @@ class PlaybackControllerTest {
 	@Test
 	void testPreLoadWeeklyCrypto() throws Exception {
 		String result = mvc
-				.perform(MockMvcRequestBuilders.get("/northstar/playback/history/BTCUSDT@BINANCE@SPOT@PLAYBACK/11"))
+				.perform(MockMvcRequestBuilders.get("/northstar/playback/history/BTCUSDT@BINANCE@SPOT@PLAYBACK/1wk"))
 				.andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
 		ObjectMapper mapper = new ObjectMapper();
 		List<BarVO> bars = mapper.readValue(result, new TypeReference<List<BarVO>>() {
@@ -91,7 +91,7 @@ class PlaybackControllerTest {
 	@Test
 	void testPreLoadDailyCrypto() throws Exception {
 		String result = mvc
-				.perform(MockMvcRequestBuilders.get("/northstar/playback/history/BTCUSDT@BINANCE@SPOT@PLAYBACK/10"))
+				.perform(MockMvcRequestBuilders.get("/northstar/playback/history/BTCUSDT@BINANCE@SPOT@PLAYBACK/1d"))
 				.andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
 		ObjectMapper mapper = new ObjectMapper();
 		List<BarVO> bars = mapper.readValue(result, new TypeReference<List<BarVO>>() {
@@ -108,7 +108,7 @@ class PlaybackControllerTest {
 	@Test
 	void testPreLoadQuarterlyCrypto() throws Exception {
 		String result = mvc
-				.perform(MockMvcRequestBuilders.get("/northstar/playback/history/BTCUSDT@BINANCE@SPOT@PLAYBACK/5"))
+				.perform(MockMvcRequestBuilders.get("/northstar/playback/history/BTCUSDT@BINANCE@SPOT@PLAYBACK/15m"))
 				.andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
 		ObjectMapper mapper = new ObjectMapper();
 		List<BarVO> bars = mapper.readValue(result, new TypeReference<List<BarVO>>() {
@@ -125,7 +125,7 @@ class PlaybackControllerTest {
 	@Test
 	void testPreLoadHourlyForex() throws Exception {
 		String result = mvc
-				.perform(MockMvcRequestBuilders.get("/northstar/playback/history/XAUUSD@FXCM@FOREX@PLAYBACK/9"))
+				.perform(MockMvcRequestBuilders.get("/northstar/playback/history/XAUUSD@FXCM@FOREX@PLAYBACK/4h"))
 				.andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
 		ObjectMapper mapper = new ObjectMapper();
 		List<BarVO> bars = mapper.readValue(result, new TypeReference<List<BarVO>>() {

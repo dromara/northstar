@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import xyz.redtorch.pb.CoreEnum.BarCycleEnum;
 
 @Builder
 @AllArgsConstructor
@@ -28,6 +27,6 @@ public class BarVO {
 	
 	private String tradingDay;
 	
-	private BarCycleEnum period; // 周期分钟
+	private String interval; // 周期分钟
 	
 }

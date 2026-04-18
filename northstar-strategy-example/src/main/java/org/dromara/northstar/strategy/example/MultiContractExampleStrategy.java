@@ -1,8 +1,8 @@
 package org.dromara.northstar.strategy.example;
 
+import org.dromara.northstar.common.constant.Interval;
 import org.dromara.northstar.common.model.DynamicParams;
 import org.dromara.northstar.common.model.core.Contract;
-import org.dromara.northstar.indicator.constant.PeriodUnit;
 import org.dromara.northstar.indicator.model.Configuration;
 import org.dromara.northstar.indicator.trend.PBXIndicator;
 import org.dromara.northstar.strategy.AbstractStrategy;
@@ -36,20 +36,17 @@ public class MultiContractExampleStrategy extends AbstractStrategy implements Tr
 				c1 = c;
 				pbx11 = new PBXIndicator(Configuration.builder()
 						.contract(c1)
-						.numOfUnits(10)
-						.period(PeriodUnit.MINUTE)
+						.interval(Interval.M10)
 						.indicatorName("PBX1-1")
 						.build());
 				pbx12 = new PBXIndicator(Configuration.builder()
 						.contract(c1)
-						.numOfUnits(1)
-						.period(PeriodUnit.HOUR)
+						.interval(Interval.H1)
 						.indicatorName("PBX1-2")
 						.build());
 				pbx13 = new PBXIndicator(Configuration.builder()
 						.contract(c1)
-						.numOfUnits(1)
-						.period(PeriodUnit.DAY)
+						.interval(Interval.D1)
 						.indicatorName("PBX1-3")
 						.build());
 				
@@ -57,20 +54,17 @@ public class MultiContractExampleStrategy extends AbstractStrategy implements Tr
 				c2 = c;
 				pbx21 = new PBXIndicator(Configuration.builder()
 						.contract(c2)
-						.numOfUnits(10)
-						.period(PeriodUnit.MINUTE)
+						.interval(Interval.M10)
 						.indicatorName("PBX2-1")
 						.build());
 				pbx22 = new PBXIndicator(Configuration.builder()
 						.contract(c2)
-						.numOfUnits(1)
-						.period(PeriodUnit.HOUR)
+						.interval(Interval.H1)
 						.indicatorName("PBX2-2")
 						.build());
 				pbx23 = new PBXIndicator(Configuration.builder()
 						.contract(c2)
-						.numOfUnits(1)
-						.period(PeriodUnit.DAY)
+						.interval(Interval.D1)
 						.indicatorName("PBX2-3")
 						.build());
 			}

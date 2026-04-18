@@ -8,12 +8,12 @@ import java.util.Map;
 
 import org.dromara.northstar.common.BarDataAware;
 import org.dromara.northstar.common.TickDataAware;
+import org.dromara.northstar.common.constant.Interval;
 import org.dromara.northstar.common.model.Identifier;
 import org.dromara.northstar.common.model.core.Bar;
 import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.common.model.core.Tick;
 import org.dromara.northstar.indicator.IndicatorValueUpdateHelper;
-import org.dromara.northstar.indicator.constant.PeriodUnit;
 import org.dromara.northstar.module.ModuleContext;
 import org.dromara.northstar.strategy.AbstractStrategy.BarHandler;
 import org.dromara.northstar.strategy.IModuleContext;
@@ -39,7 +39,7 @@ public class BarMergerRegistry implements BarDataAware, TickDataAware{
 		listenTypeMap.put(ListenerType.STRATEGY, new ArrayList<>());
 	}
 	
-	public void addListener(Contract contract, int numOfUnit, PeriodUnit unit, MergedBarListener listener) {
+	public void addListener(Contract contract, Interval interval, MergedBarListener listener) {
 		ListenerType type;
 		if(listener instanceof IModuleContext) {
 			type = ListenerType.CONTEXT;
@@ -50,32 +50,20 @@ public class BarMergerRegistry implements BarDataAware, TickDataAware{
 		} else {
 			type = ListenerType.STRATEGY;
 		}
-		Identifier identifier = makeIdentifier(type, contract, numOfUnit, unit);
+		Identifier identifier = makeIdentifier(type, contract, interval);
 		BarMerger merger = mergerMap.get(identifier);
 		if(merger == null) {
-			merger = makeBarMerger(contract, numOfUnit, unit);
+			merger = BarMergerFactory.newInstance(interval, contract);
 			mergerMap.put(identifier, merger);
 		}
 		listenTypeMap.get(type).add(merger);
 		merger.addListener(listener);
 	}
 	
-	private Identifier makeIdentifier(ListenerType type, Contract contract, int numOfUnit, PeriodUnit unit) {
-		return Identifier.of(String.format("%s_%s_%d_%s", type, contract.unifiedSymbol(), numOfUnit, unit.symbol()));
+	private Identifier makeIdentifier(ListenerType type, Contract contract, Interval interval) {
+		return Identifier.of(String.format("%s_%s_%s", type, contract.unifiedSymbol(), interval.getAlias()));
 	}
 	
-	private BarMerger makeBarMerger(Contract contract, int numOfUnit, PeriodUnit unit) {
-		if(unit == PeriodUnit.DAY && numOfUnit > 1) {
-			throw new IllegalArgumentException("日线合成器只能合成1日K线");
-		}
-		return switch(unit) {
-		case MINUTE -> new BarMerger(numOfUnit, contract);
-		case HOUR -> new BarMerger(numOfUnit * 60, contract);
-		case DAY -> new DailyBarMerger(contract);
-		default -> throw new IllegalArgumentException("Unexpected value: " + unit);
-		};
-	}
-
 	@Override
 	public void onBar(Bar bar) {
 		listenTypeMap.get(ListenerType.INDICATOR).forEach(merger -> merger.onBar(bar));

@@ -362,19 +362,6 @@ public interface Indicator {
 }
 ```
 
-**Configuration** 配置示例：
-```java
-Configuration.builder()
-    .contract(contract)          // 绑定合约
-    .indicatorName("EMA10")      // 指标名称
-    .numOfUnits(5)               // 周期数
-    .period(PeriodUnit.MINUTE)   // 周期单位
-    .valueType(ValueType.CLOSE)  // 值类型
-    .cacheLength(16)             // 缓存长度
-    .visible(true)               // 是否可见
-    .build();
-```
-
 **Num Record** - 指标值包装：
 ```java
 public record Num(double value, long timestamp, boolean unstable)

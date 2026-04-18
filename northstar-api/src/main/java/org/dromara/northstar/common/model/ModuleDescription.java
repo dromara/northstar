@@ -37,7 +37,7 @@ public class ModuleDescription {
 	/**
 	 * K线周期数
 	 */
-	private int numOfMinPerBar;
+	private String klineInterval;
 	/**
 	 * 预热数据量（单位：周）
 	 */

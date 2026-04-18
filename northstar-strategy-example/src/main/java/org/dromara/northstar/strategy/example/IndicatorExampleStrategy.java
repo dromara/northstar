@@ -113,15 +113,15 @@ public class IndicatorExampleStrategy extends AbstractStrategy	// 为了简化�
 		this.fastLine = new EMAIndicator(Configuration.builder()
 				.contract(c)
 				.indicatorName("EMA10")
-				.numOfUnits(ctx.numOfMinPerMergedBar()).build(), 10);
+				.interval(ctx.moduleBarInterval()).build(), 10);
 		this.slowLine = new EMAIndicator(Configuration.builder()
 				.contract(c)
 				.indicatorName("EMA20")
-				.numOfUnits(ctx.numOfMinPerMergedBar()).build(), 20);
+				.interval(ctx.moduleBarInterval()).build(), 20);
 		MACDIndicator macd = new MACDIndicator(Configuration.builder()
 				.contract(c)
 				.indicatorName("MACD")
-				.numOfUnits(ctx.numOfMinPerMergedBar())
+				.interval(ctx.moduleBarInterval())
 				.build(), 12, 26, 9);
 		this.macdDiff = macd.getDiffLine();
 		this.macdDea = macd.getDeaLine();

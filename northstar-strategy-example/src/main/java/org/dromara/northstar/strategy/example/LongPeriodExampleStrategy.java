@@ -1,13 +1,11 @@
 package org.dromara.northstar.strategy.example;
 
-import java.util.Set;
-
+import org.dromara.northstar.common.constant.Interval;
 import org.dromara.northstar.common.model.DynamicParams;
 import org.dromara.northstar.common.model.Setting;
 import org.dromara.northstar.common.model.core.Bar;
 import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.indicator.Indicator;
-import org.dromara.northstar.indicator.constant.PeriodUnit;
 import org.dromara.northstar.indicator.constant.ValueType;
 import org.dromara.northstar.indicator.helper.SimpleValueIndicator;
 import org.dromara.northstar.indicator.model.Configuration;
@@ -27,22 +25,20 @@ public class LongPeriodExampleStrategy extends AbstractStrategy implements Trade
 	
 	private InitParams params;	// 策略的参数配置信息
 	
-	private Set<Integer> validPeriod = Set.of(60,120);
-	
 	private Indicator c1;
 	private Indicator h1;
 	private Indicator l1;
 	
 	@Override
 	protected void initIndicators() {
-		if(!validPeriod.contains(ctx.numOfMinPerMergedBar())) {
+		if(Interval.H1 != ctx.moduleBarInterval() || Interval.H2 != ctx.moduleBarInterval()) {
 			throw new IllegalArgumentException("只能设置60分钟或120分钟作为K线周期");
 		}
 		
 		Contract c = ctx.getContract(params.indicatorSymbol);
-		c1 = new SimpleValueIndicator(Configuration.builder().indicatorName("C").contract(c).period(PeriodUnit.DAY).ifPlotPerBar(true).build());
-		h1 = new SimpleValueIndicator(Configuration.builder().indicatorName("H").contract(c).period(PeriodUnit.DAY).ifPlotPerBar(true).valueType(ValueType.HIGH).build());
-		l1 = new SimpleValueIndicator(Configuration.builder().indicatorName("L").contract(c).period(PeriodUnit.DAY).ifPlotPerBar(true).valueType(ValueType.LOW).build());
+		c1 = new SimpleValueIndicator(Configuration.builder().indicatorName("C").contract(c).interval(Interval.D1).ifPlotPerBar(true).build());
+		h1 = new SimpleValueIndicator(Configuration.builder().indicatorName("H").contract(c).interval(Interval.D1).ifPlotPerBar(true).valueType(ValueType.HIGH).build());
+		l1 = new SimpleValueIndicator(Configuration.builder().indicatorName("L").contract(c).interval(Interval.D1).ifPlotPerBar(true).valueType(ValueType.LOW).build());
 		
 		ctx.registerIndicator(c1);
 		ctx.registerIndicator(h1);

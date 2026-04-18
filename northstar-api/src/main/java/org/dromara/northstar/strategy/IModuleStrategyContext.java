@@ -3,11 +3,11 @@ package org.dromara.northstar.strategy;
 import java.util.List;
 import java.util.Optional;
 
+import org.dromara.northstar.common.constant.Interval;
 import org.dromara.northstar.common.constant.ModuleState;
 import org.dromara.northstar.common.constant.SignalOperation;
 import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.indicator.Indicator;
-import org.dromara.northstar.indicator.constant.PeriodUnit;
 import org.dromara.northstar.strategy.constant.PriceType;
 import org.dromara.northstar.strategy.model.TradeIntent;
 import org.slf4j.Logger;
@@ -77,7 +77,7 @@ public interface IModuleStrategyContext {
 	 * 获取模组周期设置
 	 * @return
 	 */
-	int numOfMinPerMergedBar();
+	Interval moduleBarInterval();
 	/**
 	 * 获取默认交易交易量
 	 * @return
@@ -102,5 +102,5 @@ public interface IModuleStrategyContext {
 	 * 注册周期监听器
 	 * @param listener
 	 */
-	void addMergedBarListener(Contract contract, int numOfUnit, PeriodUnit unit, MergedBarListener listener);
+	void addMergedBarListener(Contract contract, Interval interval, MergedBarListener listener);
 }

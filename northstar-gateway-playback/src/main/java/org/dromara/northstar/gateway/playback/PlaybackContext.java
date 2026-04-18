@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 
 import org.dromara.northstar.common.constant.ConnectionState;
 import org.dromara.northstar.common.constant.DateTimeConstant;
+import org.dromara.northstar.common.constant.Interval;
 import org.dromara.northstar.common.constant.TickType;
 import org.dromara.northstar.common.event.FastEventEngine;
 import org.dromara.northstar.common.event.NorthstarEventType;
@@ -39,7 +40,6 @@ import org.springframework.util.Assert;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import xyz.redtorch.pb.CoreEnum.BarCycleEnum;
 import xyz.redtorch.pb.CoreEnum.CommonStatusEnum;
 
 @Slf4j
@@ -280,55 +280,25 @@ public class PlaybackContext {
 		});
 	}
 	
-	public synchronized void playNext(BarCycleEnum barCycle) {
+	public synchronized void playNext(Interval interval) {
 		LocalDateTime runningDateTime = playbackStatus.getRunningDateTime();
-		switch (barCycle) {
-			case B_1Min -> {
-				numOfMinutesToPlay = new AtomicInteger(1);
+		switch (interval) {
+			case M1 -> {
 				roundingInt = 1;
+				numOfMinutesToPlay = new AtomicInteger(1);
 			}
-			case B_3Min -> {
-				int carry = runningDateTime.getMinute() % 3;
-				numOfMinutesToPlay = new AtomicInteger(3 - carry);
-				roundingInt = 3;
+			case M3, M5, M10, M15, M30, H1 -> {
+				roundingInt = interval.getMinutes();
+				int carry = runningDateTime.getMinute() % roundingInt;
+				numOfMinutesToPlay = new AtomicInteger(roundingInt - carry);
 			}
-			case B_5Min -> {
-				int carry = runningDateTime.getMinute() % 5;
-				numOfMinutesToPlay = new AtomicInteger(5 - carry);
-				roundingInt = 5;
-			}
-			case B_10Min -> {
-				int carry = runningDateTime.getMinute() % 10;
-				numOfMinutesToPlay = new AtomicInteger(10 - carry);
-				roundingInt = 10;
-			}
-			case B_15Min -> {
-				int carry = runningDateTime.getMinute() % 15;
-				numOfMinutesToPlay = new AtomicInteger(15 - carry);
-				roundingInt = 15;
-			}
-			case B_30Min -> {
-				int carry = runningDateTime.getMinute() % 30;
-				numOfMinutesToPlay = new AtomicInteger(30 - carry);
-				roundingInt = 30;
-			}
-			case B_1Hr -> {
-				int carry = runningDateTime.getMinute() % 60;
-				numOfMinutesToPlay = new AtomicInteger(60 - carry);
+			case H2, H4 -> {
 				roundingInt = 60;
-			}
-			case B_2Hr -> {
-				int carry = runningDateTime.getMinute() % 60;
-				numOfMinutesToPlay = new AtomicInteger(120 - carry);
-				roundingInt = 60;
-			}
-			case B_4Hr -> {
-				int carry = runningDateTime.getMinute() % 60;
-				numOfMinutesToPlay = new AtomicInteger(240 - carry);
-				roundingInt = 60;
+				int carry = runningDateTime.getMinute() % roundingInt;
+				numOfMinutesToPlay = new AtomicInteger(interval.getMinutes() - carry);
 			}
 			default -> {
-				log.warn("无法处理周期{}的逐K回放", barCycle);
+				log.warn("无法处理周期{}的逐K回放", interval);
 				throw new IllegalArgumentException();
 			}
 		}

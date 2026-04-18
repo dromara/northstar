@@ -2,6 +2,7 @@ package org.dromara.northstar.indicator;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.dromara.northstar.common.constant.Interval;
 import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.indicator.model.Configuration;
 import org.dromara.northstar.indicator.model.Num;
@@ -11,7 +12,7 @@ class AbstractIndicatorTest {
 	
 	Contract c = Contract.builder().unifiedSymbol("rb2401@Test").build();
 	
-	TestIndicator tester = new TestIndicator(Configuration.builder().indicatorName("test").contract(c).numOfUnits(5).build());
+	TestIndicator tester = new TestIndicator(Configuration.builder().indicatorName("test").contract(c).interval(Interval.M5).build());
 
 	@Test
 	void test() {

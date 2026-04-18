@@ -7,9 +7,8 @@ import java.time.LocalTime;
 
 import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.constant.DateTimeConstant;
+import org.dromara.northstar.common.constant.Interval;
 import org.junit.jupiter.api.Test;
-
-import xyz.redtorch.pb.CoreEnum.BarCycleEnum;
 
 class BarTest {
 
@@ -36,7 +35,7 @@ class BarTest {
 				.preOpenInterest(10L)
 				.preSettlePrice(11.0)
 				.channelType(ChannelType.BIAN)
-				.barPeriod(BarCycleEnum.B_1Min)
+				.interval(Interval.M1)
 				.build();
 		xyz.redtorch.pb.CoreField.BarField barField = bar.toBarField();
 		assertEquals(bar.gatewayId(), barField.getGatewayId());
@@ -84,7 +83,7 @@ class BarTest {
 				.preOpenInterest(10L)
 				.preSettlePrice(11.0)
 				.channelType(ChannelType.BIAN)
-				.barPeriod(BarCycleEnum.B_1Min)
+				.interval(Interval.M1)
 				.build();
 		xyz.redtorch.pb.CoreField.BarField barField = bar.toBarField();
 		assertEquals(bar, Bar.of(barField, contract));

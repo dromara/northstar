@@ -893,226 +893,6 @@ public final class CoreEnum {
 
   /**
    * <pre>
-   * Bar周期
-   * </pre>
-   *
-   * Protobuf enum {@code xyz.redtorch.pb.BarCycleEnum}
-   */
-  public enum BarCycleEnum
-      implements com.google.protobuf.ProtocolMessageEnum {
-    /**
-     * <code>B_5Sec = 0;</code>
-     */
-    B_5Sec(0),
-    /**
-     * <code>B_1Min = 1;</code>
-     */
-    B_1Min(1),
-    /**
-     * <code>B_3Min = 2;</code>
-     */
-    B_3Min(2),
-    /**
-     * <code>B_5Min = 3;</code>
-     */
-    B_5Min(3),
-    /**
-     * <code>B_10Min = 4;</code>
-     */
-    B_10Min(4),
-    /**
-     * <code>B_15Min = 5;</code>
-     */
-    B_15Min(5),
-    /**
-     * <code>B_30Min = 6;</code>
-     */
-    B_30Min(6),
-    /**
-     * <code>B_1Hr = 7;</code>
-     */
-    B_1Hr(7),
-    /**
-     * <code>B_2Hr = 8;</code>
-     */
-    B_2Hr(8),
-    /**
-     * <code>B_4Hr = 9;</code>
-     */
-    B_4Hr(9),
-    /**
-     * <code>B_1Day = 10;</code>
-     */
-    B_1Day(10),
-    /**
-     * <code>B_1Wk = 11;</code>
-     */
-    B_1Wk(11),
-    /**
-     * <code>B_Custom = 12;</code>
-     */
-    B_Custom(12),
-    UNRECOGNIZED(-1),
-    ;
-
-    static {
-      com.google.protobuf.RuntimeVersion.validateProtobufGencodeVersion(
-        com.google.protobuf.RuntimeVersion.RuntimeDomain.PUBLIC,
-        /* major= */ 4,
-        /* minor= */ 28,
-        /* patch= */ 3,
-        /* suffix= */ "",
-        BarCycleEnum.class.getName());
-    }
-    /**
-     * <code>B_5Sec = 0;</code>
-     */
-    public static final int B_5Sec_VALUE = 0;
-    /**
-     * <code>B_1Min = 1;</code>
-     */
-    public static final int B_1Min_VALUE = 1;
-    /**
-     * <code>B_3Min = 2;</code>
-     */
-    public static final int B_3Min_VALUE = 2;
-    /**
-     * <code>B_5Min = 3;</code>
-     */
-    public static final int B_5Min_VALUE = 3;
-    /**
-     * <code>B_10Min = 4;</code>
-     */
-    public static final int B_10Min_VALUE = 4;
-    /**
-     * <code>B_15Min = 5;</code>
-     */
-    public static final int B_15Min_VALUE = 5;
-    /**
-     * <code>B_30Min = 6;</code>
-     */
-    public static final int B_30Min_VALUE = 6;
-    /**
-     * <code>B_1Hr = 7;</code>
-     */
-    public static final int B_1Hr_VALUE = 7;
-    /**
-     * <code>B_2Hr = 8;</code>
-     */
-    public static final int B_2Hr_VALUE = 8;
-    /**
-     * <code>B_4Hr = 9;</code>
-     */
-    public static final int B_4Hr_VALUE = 9;
-    /**
-     * <code>B_1Day = 10;</code>
-     */
-    public static final int B_1Day_VALUE = 10;
-    /**
-     * <code>B_1Wk = 11;</code>
-     */
-    public static final int B_1Wk_VALUE = 11;
-    /**
-     * <code>B_Custom = 12;</code>
-     */
-    public static final int B_Custom_VALUE = 12;
-
-
-    public final int getNumber() {
-      if (this == UNRECOGNIZED) {
-        throw new java.lang.IllegalArgumentException(
-            "Can't get the number of an unknown enum value.");
-      }
-      return value;
-    }
-
-    /**
-     * @param value The numeric wire value of the corresponding enum entry.
-     * @return The enum associated with the given numeric wire value.
-     * @deprecated Use {@link #forNumber(int)} instead.
-     */
-    @java.lang.Deprecated
-    public static BarCycleEnum valueOf(int value) {
-      return forNumber(value);
-    }
-
-    /**
-     * @param value The numeric wire value of the corresponding enum entry.
-     * @return The enum associated with the given numeric wire value.
-     */
-    public static BarCycleEnum forNumber(int value) {
-      switch (value) {
-        case 0: return B_5Sec;
-        case 1: return B_1Min;
-        case 2: return B_3Min;
-        case 3: return B_5Min;
-        case 4: return B_10Min;
-        case 5: return B_15Min;
-        case 6: return B_30Min;
-        case 7: return B_1Hr;
-        case 8: return B_2Hr;
-        case 9: return B_4Hr;
-        case 10: return B_1Day;
-        case 11: return B_1Wk;
-        case 12: return B_Custom;
-        default: return null;
-      }
-    }
-
-    public static com.google.protobuf.Internal.EnumLiteMap<BarCycleEnum>
-        internalGetValueMap() {
-      return internalValueMap;
-    }
-    private static final com.google.protobuf.Internal.EnumLiteMap<
-        BarCycleEnum> internalValueMap =
-          new com.google.protobuf.Internal.EnumLiteMap<BarCycleEnum>() {
-            public BarCycleEnum findValueByNumber(int number) {
-              return BarCycleEnum.forNumber(number);
-            }
-          };
-
-    public final com.google.protobuf.Descriptors.EnumValueDescriptor
-        getValueDescriptor() {
-      if (this == UNRECOGNIZED) {
-        throw new java.lang.IllegalStateException(
-            "Can't get the descriptor of an unrecognized enum value.");
-      }
-      return getDescriptor().getValues().get(ordinal());
-    }
-    public final com.google.protobuf.Descriptors.EnumDescriptor
-        getDescriptorForType() {
-      return getDescriptor();
-    }
-    public static final com.google.protobuf.Descriptors.EnumDescriptor
-        getDescriptor() {
-      return xyz.redtorch.pb.CoreEnum.getDescriptor().getEnumTypes().get(6);
-    }
-
-    private static final BarCycleEnum[] VALUES = values();
-
-    public static BarCycleEnum valueOf(
-        com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
-      if (desc.getType() != getDescriptor()) {
-        throw new java.lang.IllegalArgumentException(
-          "EnumValueDescriptor is not for this type.");
-      }
-      if (desc.getIndex() == -1) {
-        return UNRECOGNIZED;
-      }
-      return VALUES[desc.getIndex()];
-    }
-
-    private final int value;
-
-    private BarCycleEnum(int value) {
-      this.value = value;
-    }
-
-    // @@protoc_insertion_point(enum_scope:xyz.redtorch.pb.BarCycleEnum)
-  }
-
-  /**
-   * <pre>
    * 连接状态
    * </pre>
    *
@@ -1273,7 +1053,7 @@ public final class CoreEnum {
     }
     public static final com.google.protobuf.Descriptors.EnumDescriptor
         getDescriptor() {
-      return xyz.redtorch.pb.CoreEnum.getDescriptor().getEnumTypes().get(7);
+      return xyz.redtorch.pb.CoreEnum.getDescriptor().getEnumTypes().get(6);
     }
 
     private static final ConnectStatusEnum[] VALUES = values();
@@ -1444,7 +1224,7 @@ public final class CoreEnum {
     }
     public static final com.google.protobuf.Descriptors.EnumDescriptor
         getDescriptor() {
-      return xyz.redtorch.pb.CoreEnum.getDescriptor().getEnumTypes().get(8);
+      return xyz.redtorch.pb.CoreEnum.getDescriptor().getEnumTypes().get(7);
     }
 
     private static final OrderActionStatusTyp[] VALUES = values();
@@ -1717,7 +1497,7 @@ public final class CoreEnum {
     }
     public static final com.google.protobuf.Descriptors.EnumDescriptor
         getDescriptor() {
-      return xyz.redtorch.pb.CoreEnum.getDescriptor().getEnumTypes().get(9);
+      return xyz.redtorch.pb.CoreEnum.getDescriptor().getEnumTypes().get(8);
     }
 
     private static final OrderStatusEnum[] VALUES = values();
@@ -1956,7 +1736,7 @@ public final class CoreEnum {
     }
     public static final com.google.protobuf.Descriptors.EnumDescriptor
         getDescriptor() {
-      return xyz.redtorch.pb.CoreEnum.getDescriptor().getEnumTypes().get(10);
+      return xyz.redtorch.pb.CoreEnum.getDescriptor().getEnumTypes().get(9);
     }
 
     private static final OrderSubmitStatusEnum[] VALUES = values();
@@ -2331,7 +2111,7 @@ public final class CoreEnum {
     }
     public static final com.google.protobuf.Descriptors.EnumDescriptor
         getDescriptor() {
-      return xyz.redtorch.pb.CoreEnum.getDescriptor().getEnumTypes().get(11);
+      return xyz.redtorch.pb.CoreEnum.getDescriptor().getEnumTypes().get(10);
     }
 
     private static final ProductClassEnum[] VALUES = values();
@@ -2481,7 +2261,7 @@ public final class CoreEnum {
     }
     public static final com.google.protobuf.Descriptors.EnumDescriptor
         getDescriptor() {
-      return xyz.redtorch.pb.CoreEnum.getDescriptor().getEnumTypes().get(12);
+      return xyz.redtorch.pb.CoreEnum.getDescriptor().getEnumTypes().get(11);
     }
 
     private static final DirectionEnum[] VALUES = values();
@@ -2635,7 +2415,7 @@ public final class CoreEnum {
     }
     public static final com.google.protobuf.Descriptors.EnumDescriptor
         getDescriptor() {
-      return xyz.redtorch.pb.CoreEnum.getDescriptor().getEnumTypes().get(13);
+      return xyz.redtorch.pb.CoreEnum.getDescriptor().getEnumTypes().get(12);
     }
 
     private static final PositionTypeEnum[] VALUES = values();
@@ -2806,7 +2586,7 @@ public final class CoreEnum {
     }
     public static final com.google.protobuf.Descriptors.EnumDescriptor
         getDescriptor() {
-      return xyz.redtorch.pb.CoreEnum.getDescriptor().getEnumTypes().get(14);
+      return xyz.redtorch.pb.CoreEnum.getDescriptor().getEnumTypes().get(13);
     }
 
     private static final PositionDirectionEnum[] VALUES = values();
@@ -3028,7 +2808,7 @@ public final class CoreEnum {
     }
     public static final com.google.protobuf.Descriptors.EnumDescriptor
         getDescriptor() {
-      return xyz.redtorch.pb.CoreEnum.getDescriptor().getEnumTypes().get(15);
+      return xyz.redtorch.pb.CoreEnum.getDescriptor().getEnumTypes().get(14);
     }
 
     private static final HedgeFlagEnum[] VALUES = values();
@@ -3420,7 +3200,7 @@ public final class CoreEnum {
     }
     public static final com.google.protobuf.Descriptors.EnumDescriptor
         getDescriptor() {
-      return xyz.redtorch.pb.CoreEnum.getDescriptor().getEnumTypes().get(16);
+      return xyz.redtorch.pb.CoreEnum.getDescriptor().getEnumTypes().get(15);
     }
 
     private static final OrderPriceTypeEnum[] VALUES = values();
@@ -3659,7 +3439,7 @@ public final class CoreEnum {
     }
     public static final com.google.protobuf.Descriptors.EnumDescriptor
         getDescriptor() {
-      return xyz.redtorch.pb.CoreEnum.getDescriptor().getEnumTypes().get(17);
+      return xyz.redtorch.pb.CoreEnum.getDescriptor().getEnumTypes().get(16);
     }
 
     private static final OffsetFlagEnum[] VALUES = values();
@@ -3915,7 +3695,7 @@ public final class CoreEnum {
     }
     public static final com.google.protobuf.Descriptors.EnumDescriptor
         getDescriptor() {
-      return xyz.redtorch.pb.CoreEnum.getDescriptor().getEnumTypes().get(18);
+      return xyz.redtorch.pb.CoreEnum.getDescriptor().getEnumTypes().get(17);
     }
 
     private static final ForceCloseReasonEnum[] VALUES = values();
@@ -4137,7 +3917,7 @@ public final class CoreEnum {
     }
     public static final com.google.protobuf.Descriptors.EnumDescriptor
         getDescriptor() {
-      return xyz.redtorch.pb.CoreEnum.getDescriptor().getEnumTypes().get(19);
+      return xyz.redtorch.pb.CoreEnum.getDescriptor().getEnumTypes().get(18);
     }
 
     private static final OrderTypeEnum[] VALUES = values();
@@ -4359,7 +4139,7 @@ public final class CoreEnum {
     }
     public static final com.google.protobuf.Descriptors.EnumDescriptor
         getDescriptor() {
-      return xyz.redtorch.pb.CoreEnum.getDescriptor().getEnumTypes().get(20);
+      return xyz.redtorch.pb.CoreEnum.getDescriptor().getEnumTypes().get(19);
     }
 
     private static final TimeConditionEnum[] VALUES = values();
@@ -4530,7 +4310,7 @@ public final class CoreEnum {
     }
     public static final com.google.protobuf.Descriptors.EnumDescriptor
         getDescriptor() {
-      return xyz.redtorch.pb.CoreEnum.getDescriptor().getEnumTypes().get(21);
+      return xyz.redtorch.pb.CoreEnum.getDescriptor().getEnumTypes().get(20);
     }
 
     private static final VolumeConditionEnum[] VALUES = values();
@@ -4956,7 +4736,7 @@ public final class CoreEnum {
     }
     public static final com.google.protobuf.Descriptors.EnumDescriptor
         getDescriptor() {
-      return xyz.redtorch.pb.CoreEnum.getDescriptor().getEnumTypes().get(22);
+      return xyz.redtorch.pb.CoreEnum.getDescriptor().getEnumTypes().get(21);
     }
 
     private static final ContingentConditionEnum[] VALUES = values();
@@ -5110,7 +4890,7 @@ public final class CoreEnum {
     }
     public static final com.google.protobuf.Descriptors.EnumDescriptor
         getDescriptor() {
-      return xyz.redtorch.pb.CoreEnum.getDescriptor().getEnumTypes().get(23);
+      return xyz.redtorch.pb.CoreEnum.getDescriptor().getEnumTypes().get(22);
     }
 
     private static final ActionFlagEnum[] VALUES = values();
@@ -5281,7 +5061,7 @@ public final class CoreEnum {
     }
     public static final com.google.protobuf.Descriptors.EnumDescriptor
         getDescriptor() {
-      return xyz.redtorch.pb.CoreEnum.getDescriptor().getEnumTypes().get(24);
+      return xyz.redtorch.pb.CoreEnum.getDescriptor().getEnumTypes().get(23);
     }
 
     private static final TradingRightEnum[] VALUES = values();
@@ -5435,7 +5215,7 @@ public final class CoreEnum {
     }
     public static final com.google.protobuf.Descriptors.EnumDescriptor
         getDescriptor() {
-      return xyz.redtorch.pb.CoreEnum.getDescriptor().getEnumTypes().get(25);
+      return xyz.redtorch.pb.CoreEnum.getDescriptor().getEnumTypes().get(24);
     }
 
     private static final OrderSourceEnum[] VALUES = values();
@@ -5674,7 +5454,7 @@ public final class CoreEnum {
     }
     public static final com.google.protobuf.Descriptors.EnumDescriptor
         getDescriptor() {
-      return xyz.redtorch.pb.CoreEnum.getDescriptor().getEnumTypes().get(26);
+      return xyz.redtorch.pb.CoreEnum.getDescriptor().getEnumTypes().get(25);
     }
 
     private static final TradeTypeEnum[] VALUES = values();
@@ -5862,7 +5642,7 @@ public final class CoreEnum {
     }
     public static final com.google.protobuf.Descriptors.EnumDescriptor
         getDescriptor() {
-      return xyz.redtorch.pb.CoreEnum.getDescriptor().getEnumTypes().get(27);
+      return xyz.redtorch.pb.CoreEnum.getDescriptor().getEnumTypes().get(26);
     }
 
     private static final PriceSourceEnum[] VALUES = values();
@@ -6526,7 +6306,7 @@ public final class CoreEnum {
     }
     public static final com.google.protobuf.Descriptors.EnumDescriptor
         getDescriptor() {
-      return xyz.redtorch.pb.CoreEnum.getDescriptor().getEnumTypes().get(28);
+      return xyz.redtorch.pb.CoreEnum.getDescriptor().getEnumTypes().get(27);
     }
 
     private static final CurrencyEnum[] VALUES = values();
@@ -7156,7 +6936,7 @@ public final class CoreEnum {
     }
     public static final com.google.protobuf.Descriptors.EnumDescriptor
         getDescriptor() {
-      return xyz.redtorch.pb.CoreEnum.getDescriptor().getEnumTypes().get(29);
+      return xyz.redtorch.pb.CoreEnum.getDescriptor().getEnumTypes().get(28);
     }
 
     private static final ExchangeEnum[] VALUES = values();
@@ -7310,7 +7090,7 @@ public final class CoreEnum {
     }
     public static final com.google.protobuf.Descriptors.EnumDescriptor
         getDescriptor() {
-      return xyz.redtorch.pb.CoreEnum.getDescriptor().getEnumTypes().get(30);
+      return xyz.redtorch.pb.CoreEnum.getDescriptor().getEnumTypes().get(29);
     }
 
     private static final OptionsTypeEnum[] VALUES = values();
@@ -7481,7 +7261,7 @@ public final class CoreEnum {
     }
     public static final com.google.protobuf.Descriptors.EnumDescriptor
         getDescriptor() {
-      return xyz.redtorch.pb.CoreEnum.getDescriptor().getEnumTypes().get(31);
+      return xyz.redtorch.pb.CoreEnum.getDescriptor().getEnumTypes().get(30);
     }
 
     private static final StrikeModeEnum[] VALUES = values();
@@ -7720,7 +7500,7 @@ public final class CoreEnum {
     }
     public static final com.google.protobuf.Descriptors.EnumDescriptor
         getDescriptor() {
-      return xyz.redtorch.pb.CoreEnum.getDescriptor().getEnumTypes().get(32);
+      return xyz.redtorch.pb.CoreEnum.getDescriptor().getEnumTypes().get(31);
     }
 
     private static final CombinationTypeEnum[] VALUES = values();
@@ -7767,125 +7547,121 @@ public final class CoreEnum {
       "\022\016\n\010LL_Error\020\300\270\002\022\r\n\007LL_Warn\020\260\352\001\022\r\n\007LL_In" +
       "fo\020\240\234\001\022\r\n\010LL_Debug\020\220N\022\r\n\010LL_Trace\020\210\'*@\n\024" +
       "MarketDataDBTypeEnum\022\014\n\010MDDT_MIX\020\000\022\013\n\007MD" +
-      "DT_TD\020\001\022\r\n\tMDDT_HIST\020\002*\253\001\n\014BarCycleEnum\022" +
-      "\n\n\006B_5Sec\020\000\022\n\n\006B_1Min\020\001\022\n\n\006B_3Min\020\002\022\n\n\006B" +
-      "_5Min\020\003\022\013\n\007B_10Min\020\004\022\013\n\007B_15Min\020\005\022\013\n\007B_3" +
-      "0Min\020\006\022\t\n\005B_1Hr\020\007\022\t\n\005B_2Hr\020\010\022\t\n\005B_4Hr\020\t\022" +
-      "\n\n\006B_1Day\020\n\022\t\n\005B_1Wk\020\013\022\014\n\010B_Custom\020\014*s\n\021" +
-      "ConnectStatusEnum\022\016\n\nCS_Unknown\020\000\022\023\n\017CS_" +
-      "Disconnected\020\001\022\020\n\014CS_Connected\020\002\022\024\n\020CS_D" +
-      "isconnecting\020\003\022\021\n\rCS_Connecting\020\004*^\n\024Ord" +
-      "erActionStatusTyp\022\017\n\013OAS_Unknown\020\000\022\021\n\rOA" +
-      "S_Submitted\020\001\022\020\n\014OAS_Accepted\020\002\022\020\n\014OAS_R" +
-      "ejected\020\003*\344\001\n\017OrderStatusEnum\022\016\n\nOS_Unkn" +
-      "own\020\000\022\020\n\014OS_AllTraded\020\001\022\031\n\025OS_PartTraded" +
-      "Queueing\020\002\022\034\n\030OS_PartTradedNotQueueing\020\003" +
-      "\022\026\n\022OS_NoTradeQueueing\020\004\022\031\n\025OS_NoTradeNo" +
-      "tQueueing\020\005\022\017\n\013OS_Canceled\020\006\022\021\n\rOS_NotTo" +
-      "uched\020\007\022\016\n\nOS_Touched\020\010\022\017\n\013OS_Rejected\020\t" +
-      "*\315\001\n\025OrderSubmitStatusEnum\022\017\n\013OSS_Unknow" +
-      "n\020\000\022\027\n\023OSS_InsertSubmitted\020\001\022\027\n\023OSS_Canc" +
-      "elSubmitted\020\002\022\027\n\023OSS_ModifySubmitted\020\003\022\020" +
-      "\n\014OSS_Accepted\020\004\022\026\n\022OSS_InsertRejected\020\005" +
-      "\022\026\n\022OSS_CancelRejected\020\006\022\026\n\022OSS_ModifyRe" +
-      "jected\020\007*\334\001\n\020ProductClassEnum\022\027\n\023Unknown" +
-      "ProductClass\020\000\022\n\n\006EQUITY\020\001\022\013\n\007FUTURES\020\002\022" +
-      "\n\n\006OPTION\020\003\022\t\n\005INDEX\020\004\022\017\n\013COMBINATION\020\005\022" +
-      "\010\n\004BOND\020\006\022\t\n\005FOREX\020\007\022\010\n\004SPOT\020\010\022\t\n\005DEFER\020" +
-      "\t\022\007\n\003ETF\020\n\022\014\n\010WARRANTS\020\013\022\n\n\006SPREAD\020\014\022\010\n\004" +
-      "FUND\020\r\022\007\n\003EFP\020\016\022\016\n\nSPOTOPTION\020\017*5\n\rDirec" +
-      "tionEnum\022\r\n\tD_Unknown\020\000\022\t\n\005D_Buy\020\001\022\n\n\006D_" +
-      "Sell\020\002*<\n\020PositionTypeEnum\022\016\n\nPT_Unknown" +
-      "\020\000\022\n\n\006PT_Net\020\001\022\014\n\010PT_Gross\020\002*N\n\025Position" +
-      "DirectionEnum\022\016\n\nPD_Unknown\020\000\022\n\n\006PD_Net\020" +
-      "\001\022\013\n\007PD_Long\020\002\022\014\n\010PD_Short\020\003*\213\001\n\rHedgeFl" +
-      "agEnum\022\016\n\nHF_Unknown\020\000\022\022\n\016HF_Speculation" +
-      "\020\001\022\020\n\014HF_Arbitrage\020\002\022\014\n\010HF_Hedge\020\003\022\022\n\016HF" +
-      "_MarketMaker\020\004\022\020\n\014HF_SpecHedge\020\005\022\020\n\014HF_H" +
-      "edgeSpec\020\006*\314\003\n\022OrderPriceTypeEnum\022\017\n\013OPT" +
-      "_Unknown\020\000\022\020\n\014OPT_AnyPrice\020\001\022\022\n\016OPT_Limi" +
-      "tPrice\020\002\022\021\n\rOPT_BestPrice\020\003\022\021\n\rOPT_LastP" +
-      "rice\020\004\022\035\n\031OPT_LastPricePlusOneTicks\020\005\022\035\n" +
-      "\031OPT_LastPricePlusTwoTicks\020\006\022\037\n\033OPT_Last" +
-      "PricePlusThreeTicks\020\007\022\021\n\rOPT_AskPrice1\020\010" +
-      "\022\035\n\031OPT_AskPrice1PlusOneTicks\020\t\022\035\n\031OPT_A" +
-      "skPrice1PlusTwoTicks\020\n\022\037\n\033OPT_AskPrice1P" +
-      "lusThreeTicks\020\013\022\021\n\rOPT_BidPrice1\020\014\022\035\n\031OP" +
-      "T_BidPrice1PlusOneTicks\020\r\022\035\n\031OPT_BidPric" +
-      "e1PlusTwoTicks\020\016\022\037\n\033OPT_BidPrice1PlusThr" +
-      "eeTicks\020\017\022\026\n\022OPT_FiveLevelPrice\020\020*\241\001\n\016Of" +
-      "fsetFlagEnum\022\016\n\nOF_Unknown\020\000\022\013\n\007OF_Open\020" +
-      "\001\022\014\n\010OF_Close\020\002\022\021\n\rOF_ForceClose\020\003\022\021\n\rOF" +
-      "_CloseToday\020\004\022\025\n\021OF_CloseYesterday\020\005\022\017\n\013" +
-      "OF_ForceOff\020\006\022\026\n\022OF_LocalForceClose\020\007*\343\001" +
-      "\n\024ForceCloseReasonEnum\022\017\n\013FCR_Unknown\020\000\022" +
-      "\025\n\021FCR_NotForceClose\020\001\022\023\n\017FCR_LackDeposi" +
-      "t\020\002\022\037\n\033FCR_ClientOverPositionLimit\020\003\022\037\n\033" +
-      "FCR_MemberOverPositionLimit\020\004\022\023\n\017FCR_Not" +
-      "Multiple\020\005\022\021\n\rFCR_Violation\020\006\022\r\n\tFCR_Oth" +
-      "er\020\007\022\025\n\021FCR_PersonDeliver\020\010*\236\001\n\rOrderTyp" +
-      "eEnum\022\016\n\nOT_Unknown\020\000\022\r\n\tOT_Normal\020\001\022\026\n\022" +
-      "OT_DeriveFromQuote\020\002\022\034\n\030OT_DeriveFromCom" +
-      "bination\020\003\022\022\n\016OT_Combination\020\004\022\027\n\023OT_Con" +
-      "ditionalOrder\020\005\022\013\n\007OT_Swap\020\006*k\n\021TimeCond" +
-      "itionEnum\022\016\n\nTC_Unknown\020\000\022\n\n\006TC_IOC\020\001\022\n\n" +
-      "\006TC_GFS\020\002\022\n\n\006TC_GFD\020\003\022\n\n\006TC_GTD\020\004\022\n\n\006TC_" +
-      "GTC\020\005\022\n\n\006TC_GFA\020\006*F\n\023VolumeConditionEnum" +
-      "\022\016\n\nVC_Unknown\020\000\022\t\n\005VC_AV\020\001\022\t\n\005VC_MV\020\002\022\t" +
-      "\n\005VC_CV\020\003*\212\005\n\027ContingentConditionEnum\022\016\n" +
-      "\nCC_Unknown\020\000\022\022\n\016CC_Immediately\020\001\022\014\n\010CC_" +
-      "Touch\020\002\022\022\n\016CC_TouchProfit\020\003\022\022\n\016CC_Parked" +
-      "Order\020\004\022$\n CC_LastPriceGreaterThanStopPr" +
-      "ice\020\005\022%\n!CC_LastPriceGreaterEqualStopPri" +
-      "ce\020\006\022#\n\037CC_LastPriceLesserThanStopPrice\020" +
-      "\007\022$\n CC_LastPriceLesserEqualStopPrice\020\010\022" +
-      "#\n\037CC_AskPriceGreaterThanStopPrice\020\t\022$\n " +
-      "CC_AskPriceGreaterEqualStopPrice\020\n\022\"\n\036CC" +
-      "_AskPriceLesserThanStopPrice\020\013\022#\n\037CC_Ask" +
-      "PriceLesserEqualStopPrice\020\014\022#\n\037CC_BidPri" +
-      "ceGreaterThanStopPrice\020\r\022$\n CC_BidPriceG" +
-      "reaterEqualStopPrice\020\016\022\"\n\036CC_BidPriceLes" +
-      "serThanStopPrice\020\017\022#\n\037CC_BidPriceLesserE" +
-      "qualStopPrice\020\020\022)\n%CC_LocalLastPriceLess" +
-      "erEqualStopPrice\020\021\022*\n&CC_LocalLastPriceG" +
-      "reaterEqualStopPrice\020\022*>\n\016ActionFlagEnum" +
-      "\022\016\n\nAF_Unknown\020\000\022\r\n\tAF_Delete\020\001\022\r\n\tAF_Mo" +
-      "dify\020\002*T\n\020TradingRightEnum\022\016\n\nTR_Unknown" +
-      "\020\000\022\014\n\010TR_Allow\020\001\022\020\n\014TR_CloseOnly\020\002\022\020\n\014TR" +
-      "_Forbidden\020\003*N\n\017OrderSourceEnum\022\017\n\013ODS_U" +
-      "nknown\020\000\022\023\n\017ODS_Participant\020\001\022\025\n\021ODS_Adm" +
-      "inistrator\020\002*\255\001\n\rTradeTypeEnum\022\016\n\nTT_Unk" +
-      "nown\020\000\022\027\n\023TT_SplitCombination\020\001\022\r\n\tTT_Co" +
-      "mmon\020\002\022\027\n\023TT_OptionsExecution\020\003\022\n\n\006TT_OT" +
-      "C\020\004\022\021\n\rTT_EFPDerived\020\005\022\031\n\025TT_Combination" +
-      "Derived\020\006\022\021\n\rTT_BlockTrade\020\007*b\n\017PriceSou" +
-      "rceEnum\022\020\n\014PSRC_Unknown\020\000\022\022\n\016PSRC_LastPr" +
-      "ice\020\001\022\014\n\010PSRC_Buy\020\002\022\r\n\tPSRC_Sell\020\003\022\014\n\010PS" +
-      "RC_OTC\020\004*\306\002\n\014CurrencyEnum\022\023\n\017UnknownCurr" +
-      "ency\020\000\022\007\n\003USD\020\001\022\007\n\003CNY\020\002\022\007\n\003CNH\020\003\022\007\n\003HKD" +
-      "\020\004\022\007\n\003JPY\020\005\022\007\n\003EUR\020\006\022\007\n\003GBP\020\007\022\007\n\003DEM\020\010\022\007" +
-      "\n\003CHF\020\t\022\007\n\003FRF\020\n\022\007\n\003CAD\020\013\022\007\n\003AUD\020\014\022\007\n\003AT" +
-      "S\020\r\022\007\n\003FIM\020\016\022\007\n\003BEF\020\017\022\007\n\003THB\020\020\022\007\n\003IEP\020\021\022" +
-      "\007\n\003ITL\020\022\022\007\n\003LUF\020\023\022\007\n\003NLG\020\024\022\007\n\003PTE\020\025\022\007\n\003E" +
-      "SP\020\026\022\007\n\003IDR\020\027\022\007\n\003MYR\020\030\022\007\n\003NZD\020\031\022\007\n\003PHP\020\032" +
-      "\022\007\n\003SUR\020\033\022\007\n\003SGD\020\034\022\007\n\003KRW\020\035\022\010\n\004USDT\020\036\022\010\n" +
-      "\004BUSD\020\037\022\010\n\004USDC\020 *\323\002\n\014ExchangeEnum\022\023\n\017Un" +
-      "knownExchange\020\000\022\007\n\003SSE\020\001\022\010\n\004SZSE\020\002\022\t\n\005CF" +
-      "FEX\020\003\022\010\n\004SHFE\020\004\022\010\n\004CZCE\020\005\022\007\n\003DCE\020\006\022\007\n\003SG" +
-      "E\020\007\022\007\n\003INE\020\010\022\010\n\004SEHK\020\t\022\010\n\004HKFE\020\n\022\007\n\003SGX\020" +
-      "\013\022\t\n\005NYBOT\020\014\022\t\n\005NYMEX\020\r\022\t\n\005COMEX\020\016\022\007\n\003CM" +
-      "E\020\017\022\007\n\003CFE\020\020\022\n\n\006GLOBEX\020\021\022\007\n\003ICE\020\022\022\007\n\003IPE" +
-      "\020\023\022\007\n\003LME\020\024\022\014\n\010IDEALPRO\020\025\022\t\n\005OANDA\020\026\022\010\n\004" +
-      "FXCM\020\027\022\t\n\005SMART\020\030\022\010\n\004GFEX\020\031\022\013\n\007BINANCE\020\032" +
-      "\022\007\n\003OKX\020\033\022\010\n\004GATE\020\034\022\007\n\003BSE\020\035\022\t\n\005NSDQX\020\036*" +
-      "E\n\017OptionsTypeEnum\022\r\n\tO_Unknown\020\000\022\021\n\rO_C" +
-      "allOptions\020\001\022\020\n\014O_PutOptions\020\002*Y\n\016Strike" +
-      "ModeEnum\022\017\n\013STM_Unknown\020\000\022\023\n\017STM_Contine" +
-      "ntal\020\001\022\020\n\014STM_American\020\002\022\017\n\013STM_Bermuda\020" +
-      "\003*\224\001\n\023CombinationTypeEnum\022\021\n\rCOMBT_Unkno" +
-      "wn\020\000\022\020\n\014COMBT_Future\020\001\022\r\n\tCOMBT_BUL\020\002\022\r\n" +
-      "\tCOMBT_BER\020\003\022\r\n\tCOMBT_STD\020\004\022\r\n\tCOMBT_STG" +
-      "\020\005\022\r\n\tCOMBT_PRT\020\006\022\r\n\tCOMBT_CLD\020\007b\006proto3"
+      "DT_TD\020\001\022\r\n\tMDDT_HIST\020\002*s\n\021ConnectStatusE" +
+      "num\022\016\n\nCS_Unknown\020\000\022\023\n\017CS_Disconnected\020\001" +
+      "\022\020\n\014CS_Connected\020\002\022\024\n\020CS_Disconnecting\020\003" +
+      "\022\021\n\rCS_Connecting\020\004*^\n\024OrderActionStatus" +
+      "Typ\022\017\n\013OAS_Unknown\020\000\022\021\n\rOAS_Submitted\020\001\022" +
+      "\020\n\014OAS_Accepted\020\002\022\020\n\014OAS_Rejected\020\003*\344\001\n\017" +
+      "OrderStatusEnum\022\016\n\nOS_Unknown\020\000\022\020\n\014OS_Al" +
+      "lTraded\020\001\022\031\n\025OS_PartTradedQueueing\020\002\022\034\n\030" +
+      "OS_PartTradedNotQueueing\020\003\022\026\n\022OS_NoTrade" +
+      "Queueing\020\004\022\031\n\025OS_NoTradeNotQueueing\020\005\022\017\n" +
+      "\013OS_Canceled\020\006\022\021\n\rOS_NotTouched\020\007\022\016\n\nOS_" +
+      "Touched\020\010\022\017\n\013OS_Rejected\020\t*\315\001\n\025OrderSubm" +
+      "itStatusEnum\022\017\n\013OSS_Unknown\020\000\022\027\n\023OSS_Ins" +
+      "ertSubmitted\020\001\022\027\n\023OSS_CancelSubmitted\020\002\022" +
+      "\027\n\023OSS_ModifySubmitted\020\003\022\020\n\014OSS_Accepted" +
+      "\020\004\022\026\n\022OSS_InsertRejected\020\005\022\026\n\022OSS_Cancel" +
+      "Rejected\020\006\022\026\n\022OSS_ModifyRejected\020\007*\334\001\n\020P" +
+      "roductClassEnum\022\027\n\023UnknownProductClass\020\000" +
+      "\022\n\n\006EQUITY\020\001\022\013\n\007FUTURES\020\002\022\n\n\006OPTION\020\003\022\t\n" +
+      "\005INDEX\020\004\022\017\n\013COMBINATION\020\005\022\010\n\004BOND\020\006\022\t\n\005F" +
+      "OREX\020\007\022\010\n\004SPOT\020\010\022\t\n\005DEFER\020\t\022\007\n\003ETF\020\n\022\014\n\010" +
+      "WARRANTS\020\013\022\n\n\006SPREAD\020\014\022\010\n\004FUND\020\r\022\007\n\003EFP\020" +
+      "\016\022\016\n\nSPOTOPTION\020\017*5\n\rDirectionEnum\022\r\n\tD_" +
+      "Unknown\020\000\022\t\n\005D_Buy\020\001\022\n\n\006D_Sell\020\002*<\n\020Posi" +
+      "tionTypeEnum\022\016\n\nPT_Unknown\020\000\022\n\n\006PT_Net\020\001" +
+      "\022\014\n\010PT_Gross\020\002*N\n\025PositionDirectionEnum\022" +
+      "\016\n\nPD_Unknown\020\000\022\n\n\006PD_Net\020\001\022\013\n\007PD_Long\020\002" +
+      "\022\014\n\010PD_Short\020\003*\213\001\n\rHedgeFlagEnum\022\016\n\nHF_U" +
+      "nknown\020\000\022\022\n\016HF_Speculation\020\001\022\020\n\014HF_Arbit" +
+      "rage\020\002\022\014\n\010HF_Hedge\020\003\022\022\n\016HF_MarketMaker\020\004" +
+      "\022\020\n\014HF_SpecHedge\020\005\022\020\n\014HF_HedgeSpec\020\006*\314\003\n" +
+      "\022OrderPriceTypeEnum\022\017\n\013OPT_Unknown\020\000\022\020\n\014" +
+      "OPT_AnyPrice\020\001\022\022\n\016OPT_LimitPrice\020\002\022\021\n\rOP" +
+      "T_BestPrice\020\003\022\021\n\rOPT_LastPrice\020\004\022\035\n\031OPT_" +
+      "LastPricePlusOneTicks\020\005\022\035\n\031OPT_LastPrice" +
+      "PlusTwoTicks\020\006\022\037\n\033OPT_LastPricePlusThree" +
+      "Ticks\020\007\022\021\n\rOPT_AskPrice1\020\010\022\035\n\031OPT_AskPri" +
+      "ce1PlusOneTicks\020\t\022\035\n\031OPT_AskPrice1PlusTw" +
+      "oTicks\020\n\022\037\n\033OPT_AskPrice1PlusThreeTicks\020" +
+      "\013\022\021\n\rOPT_BidPrice1\020\014\022\035\n\031OPT_BidPrice1Plu" +
+      "sOneTicks\020\r\022\035\n\031OPT_BidPrice1PlusTwoTicks" +
+      "\020\016\022\037\n\033OPT_BidPrice1PlusThreeTicks\020\017\022\026\n\022O" +
+      "PT_FiveLevelPrice\020\020*\241\001\n\016OffsetFlagEnum\022\016" +
+      "\n\nOF_Unknown\020\000\022\013\n\007OF_Open\020\001\022\014\n\010OF_Close\020" +
+      "\002\022\021\n\rOF_ForceClose\020\003\022\021\n\rOF_CloseToday\020\004\022" +
+      "\025\n\021OF_CloseYesterday\020\005\022\017\n\013OF_ForceOff\020\006\022" +
+      "\026\n\022OF_LocalForceClose\020\007*\343\001\n\024ForceCloseRe" +
+      "asonEnum\022\017\n\013FCR_Unknown\020\000\022\025\n\021FCR_NotForc" +
+      "eClose\020\001\022\023\n\017FCR_LackDeposit\020\002\022\037\n\033FCR_Cli" +
+      "entOverPositionLimit\020\003\022\037\n\033FCR_MemberOver" +
+      "PositionLimit\020\004\022\023\n\017FCR_NotMultiple\020\005\022\021\n\r" +
+      "FCR_Violation\020\006\022\r\n\tFCR_Other\020\007\022\025\n\021FCR_Pe" +
+      "rsonDeliver\020\010*\236\001\n\rOrderTypeEnum\022\016\n\nOT_Un" +
+      "known\020\000\022\r\n\tOT_Normal\020\001\022\026\n\022OT_DeriveFromQ" +
+      "uote\020\002\022\034\n\030OT_DeriveFromCombination\020\003\022\022\n\016" +
+      "OT_Combination\020\004\022\027\n\023OT_ConditionalOrder\020" +
+      "\005\022\013\n\007OT_Swap\020\006*k\n\021TimeConditionEnum\022\016\n\nT" +
+      "C_Unknown\020\000\022\n\n\006TC_IOC\020\001\022\n\n\006TC_GFS\020\002\022\n\n\006T" +
+      "C_GFD\020\003\022\n\n\006TC_GTD\020\004\022\n\n\006TC_GTC\020\005\022\n\n\006TC_GF" +
+      "A\020\006*F\n\023VolumeConditionEnum\022\016\n\nVC_Unknown" +
+      "\020\000\022\t\n\005VC_AV\020\001\022\t\n\005VC_MV\020\002\022\t\n\005VC_CV\020\003*\212\005\n\027" +
+      "ContingentConditionEnum\022\016\n\nCC_Unknown\020\000\022" +
+      "\022\n\016CC_Immediately\020\001\022\014\n\010CC_Touch\020\002\022\022\n\016CC_" +
+      "TouchProfit\020\003\022\022\n\016CC_ParkedOrder\020\004\022$\n CC_" +
+      "LastPriceGreaterThanStopPrice\020\005\022%\n!CC_La" +
+      "stPriceGreaterEqualStopPrice\020\006\022#\n\037CC_Las" +
+      "tPriceLesserThanStopPrice\020\007\022$\n CC_LastPr" +
+      "iceLesserEqualStopPrice\020\010\022#\n\037CC_AskPrice" +
+      "GreaterThanStopPrice\020\t\022$\n CC_AskPriceGre" +
+      "aterEqualStopPrice\020\n\022\"\n\036CC_AskPriceLesse" +
+      "rThanStopPrice\020\013\022#\n\037CC_AskPriceLesserEqu" +
+      "alStopPrice\020\014\022#\n\037CC_BidPriceGreaterThanS" +
+      "topPrice\020\r\022$\n CC_BidPriceGreaterEqualSto" +
+      "pPrice\020\016\022\"\n\036CC_BidPriceLesserThanStopPri" +
+      "ce\020\017\022#\n\037CC_BidPriceLesserEqualStopPrice\020" +
+      "\020\022)\n%CC_LocalLastPriceLesserEqualStopPri" +
+      "ce\020\021\022*\n&CC_LocalLastPriceGreaterEqualSto" +
+      "pPrice\020\022*>\n\016ActionFlagEnum\022\016\n\nAF_Unknown" +
+      "\020\000\022\r\n\tAF_Delete\020\001\022\r\n\tAF_Modify\020\002*T\n\020Trad" +
+      "ingRightEnum\022\016\n\nTR_Unknown\020\000\022\014\n\010TR_Allow" +
+      "\020\001\022\020\n\014TR_CloseOnly\020\002\022\020\n\014TR_Forbidden\020\003*N" +
+      "\n\017OrderSourceEnum\022\017\n\013ODS_Unknown\020\000\022\023\n\017OD" +
+      "S_Participant\020\001\022\025\n\021ODS_Administrator\020\002*\255" +
+      "\001\n\rTradeTypeEnum\022\016\n\nTT_Unknown\020\000\022\027\n\023TT_S" +
+      "plitCombination\020\001\022\r\n\tTT_Common\020\002\022\027\n\023TT_O" +
+      "ptionsExecution\020\003\022\n\n\006TT_OTC\020\004\022\021\n\rTT_EFPD" +
+      "erived\020\005\022\031\n\025TT_CombinationDerived\020\006\022\021\n\rT" +
+      "T_BlockTrade\020\007*b\n\017PriceSourceEnum\022\020\n\014PSR" +
+      "C_Unknown\020\000\022\022\n\016PSRC_LastPrice\020\001\022\014\n\010PSRC_" +
+      "Buy\020\002\022\r\n\tPSRC_Sell\020\003\022\014\n\010PSRC_OTC\020\004*\306\002\n\014C" +
+      "urrencyEnum\022\023\n\017UnknownCurrency\020\000\022\007\n\003USD\020" +
+      "\001\022\007\n\003CNY\020\002\022\007\n\003CNH\020\003\022\007\n\003HKD\020\004\022\007\n\003JPY\020\005\022\007\n" +
+      "\003EUR\020\006\022\007\n\003GBP\020\007\022\007\n\003DEM\020\010\022\007\n\003CHF\020\t\022\007\n\003FRF" +
+      "\020\n\022\007\n\003CAD\020\013\022\007\n\003AUD\020\014\022\007\n\003ATS\020\r\022\007\n\003FIM\020\016\022\007" +
+      "\n\003BEF\020\017\022\007\n\003THB\020\020\022\007\n\003IEP\020\021\022\007\n\003ITL\020\022\022\007\n\003LU" +
+      "F\020\023\022\007\n\003NLG\020\024\022\007\n\003PTE\020\025\022\007\n\003ESP\020\026\022\007\n\003IDR\020\027\022" +
+      "\007\n\003MYR\020\030\022\007\n\003NZD\020\031\022\007\n\003PHP\020\032\022\007\n\003SUR\020\033\022\007\n\003S" +
+      "GD\020\034\022\007\n\003KRW\020\035\022\010\n\004USDT\020\036\022\010\n\004BUSD\020\037\022\010\n\004USD" +
+      "C\020 *\323\002\n\014ExchangeEnum\022\023\n\017UnknownExchange\020" +
+      "\000\022\007\n\003SSE\020\001\022\010\n\004SZSE\020\002\022\t\n\005CFFEX\020\003\022\010\n\004SHFE\020" +
+      "\004\022\010\n\004CZCE\020\005\022\007\n\003DCE\020\006\022\007\n\003SGE\020\007\022\007\n\003INE\020\010\022\010" +
+      "\n\004SEHK\020\t\022\010\n\004HKFE\020\n\022\007\n\003SGX\020\013\022\t\n\005NYBOT\020\014\022\t" +
+      "\n\005NYMEX\020\r\022\t\n\005COMEX\020\016\022\007\n\003CME\020\017\022\007\n\003CFE\020\020\022\n" +
+      "\n\006GLOBEX\020\021\022\007\n\003ICE\020\022\022\007\n\003IPE\020\023\022\007\n\003LME\020\024\022\014\n" +
+      "\010IDEALPRO\020\025\022\t\n\005OANDA\020\026\022\010\n\004FXCM\020\027\022\t\n\005SMAR" +
+      "T\020\030\022\010\n\004GFEX\020\031\022\013\n\007BINANCE\020\032\022\007\n\003OKX\020\033\022\010\n\004G" +
+      "ATE\020\034\022\007\n\003BSE\020\035\022\t\n\005NSDQX\020\036*E\n\017OptionsType" +
+      "Enum\022\r\n\tO_Unknown\020\000\022\021\n\rO_CallOptions\020\001\022\020" +
+      "\n\014O_PutOptions\020\002*Y\n\016StrikeModeEnum\022\017\n\013ST" +
+      "M_Unknown\020\000\022\023\n\017STM_Continental\020\001\022\020\n\014STM_" +
+      "American\020\002\022\017\n\013STM_Bermuda\020\003*\224\001\n\023Combinat" +
+      "ionTypeEnum\022\021\n\rCOMBT_Unknown\020\000\022\020\n\014COMBT_" +
+      "Future\020\001\022\r\n\tCOMBT_BUL\020\002\022\r\n\tCOMBT_BER\020\003\022\r" +
+      "\n\tCOMBT_STD\020\004\022\r\n\tCOMBT_STG\020\005\022\r\n\tCOMBT_PR" +
+      "T\020\006\022\r\n\tCOMBT_CLD\020\007b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,

@@ -1,5 +1,7 @@
 package org.dromara.northstar.common.model;
 
+import org.dromara.northstar.indicator.model.Num;
+
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
@@ -20,6 +22,11 @@ public class TimeSeriesValue implements Comparable<TimeSeriesValue> {
 	public TimeSeriesValue(double value, long timestamp) {
 		this.value = value;
 		this.timestamp = timestamp;
+	}
+	
+	public TimeSeriesValue(Num num) {
+		this.value = num.value();
+		this.timestamp = num.timestamp();
 	}
 
 	/**

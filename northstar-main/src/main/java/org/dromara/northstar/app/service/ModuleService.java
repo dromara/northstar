@@ -18,6 +18,7 @@ import org.dromara.northstar.app.restful.SseStreamController;
 import org.dromara.northstar.common.IDataSource;
 import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.constant.Constants;
+import org.dromara.northstar.common.constant.Interval;
 import org.dromara.northstar.common.constant.ModuleState;
 import org.dromara.northstar.common.constant.ModuleType;
 import org.dromara.northstar.common.constant.ModuleUsage;
@@ -342,7 +343,7 @@ public class ModuleService implements CommandLineRunner {
 		
 		AtomicReference<LocalDate> yearMonth = new AtomicReference<>(preloadStartDate); 
 		IModuleContext ctx = m.getModuleContext();
-		
+		Interval barInterval = Interval.fromAlias(md.getKlineInterval());
 		DataSourceDataLoader loader = new DataSourceDataLoader(ds);
 		Consumer<List<Bar>> handler = bars -> bars.reversed()
 				.stream()
@@ -378,9 +379,9 @@ public class ModuleService implements CommandLineRunner {
 							.build());
 					ctx.onBar(bar);
 				});
-		if(md.getNumOfMinPerBar() < 15) {
+		if(barInterval.getMinutes() < 15) {
 			loader.loadMinutelyData(c, preloadStartDate, endDate, handler);
-		} else if(md.getNumOfMinPerBar() < 60) {
+		} else if(barInterval.getMinutes() < 60) {
 			loader.loadQuarterlyData(c, preloadStartDate, endDate, handler);
 		} else {
 			loader.loadHourlyData(c, preloadStartDate, endDate, handler);

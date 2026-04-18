@@ -1,13 +1,13 @@
 package org.dromara.northstar.strategy.example;
 
 import org.dromara.northstar.common.constant.FieldType;
+import org.dromara.northstar.common.constant.Interval;
 import org.dromara.northstar.common.model.DynamicParams;
 import org.dromara.northstar.common.model.Setting;
 import org.dromara.northstar.common.model.core.Bar;
 import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.common.utils.TradeHelper;
 import org.dromara.northstar.indicator.Indicator;
-import org.dromara.northstar.indicator.constant.PeriodUnit;
 import org.dromara.northstar.indicator.model.Configuration;
 import org.dromara.northstar.indicator.trend.MAIndicator;
 import org.dromara.northstar.strategy.AbstractStrategy;
@@ -90,24 +90,25 @@ public class MultiPeriodExampleStrategy extends AbstractStrategy	// 为了简化
 		this.fastLine1 = new MAIndicator(Configuration.builder()
 				.indicatorName("快线")
 				.contract(c)
-				.numOfUnits(ctx.numOfMinPerMergedBar())
+				.interval(ctx.moduleBarInterval())
 				.build(), params.fast);
 		this.slowLine1 = new MAIndicator(Configuration.builder()
 				.indicatorName("慢线")
 				.contract(c)
-				.numOfUnits(ctx.numOfMinPerMergedBar())
+				.interval(ctx.moduleBarInterval())
 				.build(), params.slow);
 		
 		// 参考周期线
 		this.fastLine2 = new MAIndicator(Configuration.builder()
 				.indicatorName("快线")
 				.contract(c)
-				.numOfUnits(params.refPeriod)
+				.interval(Interval.fromAlias(params.refPeriod))
+				.interval(ctx.moduleBarInterval())
 				.build(), params.fast);
 		this.slowLine2 = new MAIndicator(Configuration.builder()
 				.indicatorName("慢线")
 				.contract(c)
-				.numOfUnits(params.refPeriod)
+				.interval(Interval.fromAlias(params.refPeriod))
 				.build(), params.slow);
 		
 		ctx.registerIndicator(fastLine1);
@@ -118,10 +119,10 @@ public class MultiPeriodExampleStrategy extends AbstractStrategy	// 为了简化
 		helper = TradeHelper.builder().context(ctx).tradeContract(c).build();
 		
 		// 注册不同周期的监听器
-		ctx.addMergedBarListener(c, 1, PeriodUnit.MINUTE, bar -> {
+		ctx.addMergedBarListener(c, Interval.M1, bar -> {
 			logger.info("1分钟周期监听器 {} {}", bar.actionDay(), bar.actionTime());
 		});
-		ctx.addMergedBarListener(c, 15, PeriodUnit.MINUTE, bar -> {
+		ctx.addMergedBarListener(c, Interval.M15, bar -> {
 			logger.info("15分钟周期监听器 {} {}", bar.actionDay(), bar.actionTime());
 		});
 		
@@ -148,8 +149,8 @@ public class MultiPeriodExampleStrategy extends AbstractStrategy	// 为了简化
 		@Setting(label="慢线周期", type = FieldType.NUMBER, order=2)		
 		private int slow = 10;
 		
-		@Setting(label="参考周期", type = FieldType.NUMBER, order=10)
-		private int refPeriod = 15;
+		@Setting(label="参考周期", order=10)
+		private String refPeriod = "15m";
 	}
 
 	@Override

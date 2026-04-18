@@ -200,7 +200,7 @@ public class BacktestRunner {
 					return BacktestModuleVO.builder()
 							.moduleName(moduleName)
 							.contract(ContractSimpleInfo.from(m.getModuleContext().bindedContracts().getFirst()))
-							.period(ctx.numOfMinPerMergedBar())
+							.barInterval(ctx.moduleBarInterval().getAlias())
 							.tradeSize(ctx.getDefaultVolume())
 							.balance(balance)
 							.transactionFees((int)totalFees)

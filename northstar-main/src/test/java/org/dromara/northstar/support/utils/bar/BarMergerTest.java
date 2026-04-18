@@ -33,7 +33,7 @@ import org.dromara.northstar.support.utils.bar.BarTimePadding.MinuteEntry;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import xyz.redtorch.pb.CoreEnum.BarCycleEnum;
+import org.dromara.northstar.common.constant.Interval;
 
 class BarMergerTest {
 	
@@ -106,7 +106,7 @@ class BarMergerTest {
     @SuppressWarnings({ "unchecked", "rawtypes" })
 	@Test
     void testMapping1Min(){
-        BarMerger merger = new BarMerger(1, contract);
+        BarMerger merger = new BarMerger(Interval.M1, contract);
         for(Entry<MinuteEntry, LocalTime> e : merger.barTimePadding.barTimeEntryMap.entrySet()) {
         	System.out.println(String.format("%s -> %s", e.getKey(), e.getValue()));
         }
@@ -117,7 +117,7 @@ class BarMergerTest {
     @SuppressWarnings({ "unchecked", "rawtypes" })
 	@Test
     void testMapping5Min(){
-        BarMerger merger = new BarMerger(5, contract);
+        BarMerger merger = new BarMerger(Interval.M5, contract);
         for(Entry<MinuteEntry, LocalTime> e : merger.barTimePadding.barTimeEntryMap.entrySet()) {
         	System.out.println(String.format("%s -> %s", e.getKey(), e.getValue()));
         }
@@ -128,7 +128,7 @@ class BarMergerTest {
     @SuppressWarnings({ "unchecked", "rawtypes" })
 	@Test
     void testMapping120Min(){
-        BarMerger merger = new BarMerger(120, contract);
+        BarMerger merger = new BarMerger(Interval.H2, contract);
         for(Entry<MinuteEntry, LocalTime> e : merger.barTimePadding.barTimeEntryMap.entrySet()) {
         	System.out.println(String.format("%s -> %s", e.getKey(), e.getValue()));
         }
@@ -139,7 +139,7 @@ class BarMergerTest {
     @SuppressWarnings({ "unchecked", "rawtypes" })
 	@Test
     void testMapping240Min(){
-        BarMerger merger = new BarMerger(240, contract3);
+        BarMerger merger = new BarMerger(Interval.H4, contract3);
         for(Entry<MinuteEntry, LocalTime> e : merger.barTimePadding.barTimeEntryMap.entrySet()) {
         	System.out.println(String.format("%s -> %s", e.getKey(), e.getValue()));
         }
@@ -150,7 +150,7 @@ class BarMergerTest {
     @SuppressWarnings({ "unchecked", "rawtypes" })
 	@Test
     void testWholeDayMapping1Min(){
-        BarMerger merger = new BarMerger(1, contract2);
+        BarMerger merger = new BarMerger(Interval.M1, contract2);
         for(Entry<MinuteEntry, LocalTime> e : merger.barTimePadding.barTimeEntryMap.entrySet()) {
         	System.out.println(String.format("%s -> %s", e.getKey(), e.getValue()));
         }
@@ -161,7 +161,7 @@ class BarMergerTest {
     @SuppressWarnings({ "unchecked", "rawtypes" })
 	@Test
     void testWholeDayMapping60Min(){
-        BarMerger merger = new BarMerger(60, contract2);
+        BarMerger merger = new BarMerger(Interval.H1, contract2);
         for(Entry<MinuteEntry, LocalTime> e : merger.barTimePadding.barTimeEntryMap.entrySet()) {
         	System.out.println(String.format("%s -> %s", e.getKey(), e.getValue()));
         }
@@ -171,7 +171,7 @@ class BarMergerTest {
 
     @Test
     void test1MinCount(){
-    	BarMerger merger = new BarMerger(1, contract);
+    	BarMerger merger = new BarMerger(Interval.M1, contract);
     	List<Bar> results = new ArrayList<Bar>(555);
     	MergedBarListener listener = bar -> {
     		System.out.println(String.format("actionDay:%s  actionTime: %s", bar.actionDay(), bar.actionTime()));
@@ -186,7 +186,7 @@ class BarMergerTest {
 
     @Test
     void test3MinCount(){
-    	BarMerger merger = new BarMerger(3, contract);
+    	BarMerger merger = new BarMerger(Interval.M3, contract);
     	MergedBarListener listener = mock(MergedBarListener.class);
     	merger.addListener(listener);
     	for(Bar bar : sampling(LocalTime.of(21, 0))) {
@@ -197,7 +197,7 @@ class BarMergerTest {
 
     @Test
     void test1HourCount(){
-    	BarMerger merger = new BarMerger(60, contract);
+    	BarMerger merger = new BarMerger(Interval.H1, contract);
     	MergedBarListener listener = mock(MergedBarListener.class);
     	merger.addListener(listener);
     	for(Bar bar : sampling(LocalTime.of(21, 0))) {
@@ -212,7 +212,7 @@ class BarMergerTest {
     	Bar b2 = genBar(LocalDate.now(), LocalTime.of(21, 1), 5600, 4800, 5100, 5200, 10020, 10, 20400, 200, 30002, 2);
     	Bar b3 = genBar(LocalDate.now(), LocalTime.of(21, 2), 5400, 4900, 5200, 5100, 10030, 10, 20600, 200, 30002, 0);
     	Bar b4 = genBar(LocalDate.now(), LocalTime.of(21, 3), 5300, 4600, 5300, 5150, 10040, 10, 20800, 200, 30003, 1);
-    	BarMerger merger = new BarMerger(3, contract);
+    	BarMerger merger = new BarMerger(Interval.M3, contract);
     	MergedBarListener listener = new MergedBarListener() {
 			
 			@Override
@@ -239,16 +239,16 @@ class BarMergerTest {
     
     @Test
     void test240MinMergingOnSunday() {
-    	Bar b1 = genBar(contract5, LocalDate.of(2024, 12, 2), LocalTime.of(6, 0), BarCycleEnum.B_1Hr, 5500, 4500, 5000, 5100, 10010, 10, 20200, 200, 30001, 1);
-    	Bar b2 = genBar(contract5, LocalDate.of(2024, 12, 2), LocalTime.of(7, 0), BarCycleEnum.B_1Hr, 5600, 4800, 5100, 5200, 10020, 10, 20400, 200, 30002, 2);
-    	Bar b3 = genBar(contract5, LocalDate.of(2024, 12, 2), LocalTime.of(8, 0), BarCycleEnum.B_1Hr, 5400, 4900, 5200, 5100, 10030, 10, 20600, 200, 30002, 0);
-    	Bar b4 = genBar(contract5, LocalDate.of(2024, 12, 2), LocalTime.of(9, 0), BarCycleEnum.B_1Hr, 5400, 4900, 5200, 5100, 10030, 10, 20600, 200, 30002, 0);
-    	Bar b5 = genBar(contract5, LocalDate.of(2024, 12, 2), LocalTime.of(10, 0), BarCycleEnum.B_1Hr, 5400, 4900, 5200, 5100, 10030, 10, 20600, 200, 30002, 0);
-    	Bar b6 = genBar(contract5, LocalDate.of(2024, 12, 2), LocalTime.of(11, 0), BarCycleEnum.B_1Hr, 5400, 4900, 5200, 5100, 10030, 10, 20600, 200, 30002, 0);
-    	Bar b7 = genBar(contract5, LocalDate.of(2024, 12, 2), LocalTime.of(12, 0), BarCycleEnum.B_1Hr, 5400, 4900, 5200, 5100, 10030, 10, 20600, 200, 30002, 0);
-    	Bar b8 = genBar(contract5, LocalDate.of(2024, 12, 2), LocalTime.of(13, 0), BarCycleEnum.B_1Hr, 5400, 4900, 5200, 5100, 10030, 10, 20600, 200, 30002, 0);
+    	Bar b1 = genBar(contract5, LocalDate.of(2024, 12, 2), LocalTime.of(6, 0), Interval.H1, 5500, 4500, 5000, 5100, 10010, 10, 20200, 200, 30001, 1);
+    	Bar b2 = genBar(contract5, LocalDate.of(2024, 12, 2), LocalTime.of(7, 0), Interval.H1, 5600, 4800, 5100, 5200, 10020, 10, 20400, 200, 30002, 2);
+    	Bar b3 = genBar(contract5, LocalDate.of(2024, 12, 2), LocalTime.of(8, 0), Interval.H1, 5400, 4900, 5200, 5100, 10030, 10, 20600, 200, 30002, 0);
+    	Bar b4 = genBar(contract5, LocalDate.of(2024, 12, 2), LocalTime.of(9, 0), Interval.H1, 5400, 4900, 5200, 5100, 10030, 10, 20600, 200, 30002, 0);
+    	Bar b5 = genBar(contract5, LocalDate.of(2024, 12, 2), LocalTime.of(10, 0), Interval.H1, 5400, 4900, 5200, 5100, 10030, 10, 20600, 200, 30002, 0);
+    	Bar b6 = genBar(contract5, LocalDate.of(2024, 12, 2), LocalTime.of(11, 0), Interval.H1, 5400, 4900, 5200, 5100, 10030, 10, 20600, 200, 30002, 0);
+    	Bar b7 = genBar(contract5, LocalDate.of(2024, 12, 2), LocalTime.of(12, 0), Interval.H1, 5400, 4900, 5200, 5100, 10030, 10, 20600, 200, 30002, 0);
+    	Bar b8 = genBar(contract5, LocalDate.of(2024, 12, 2), LocalTime.of(13, 0), Interval.H1, 5400, 4900, 5200, 5100, 10030, 10, 20600, 200, 30002, 0);
     	
-    	BarMerger merger = new BarMerger(240, contract5);
+    	BarMerger merger = new BarMerger(Interval.H4, contract5);
     	List<Bar> results = new LinkedList<>();
     	merger.addListener(bar -> results.add(bar));
     	List.of(b1,b2,b3,b4,b5,b6,b7,b8).stream().forEach(merger::onBar);
@@ -271,7 +271,7 @@ class BarMergerTest {
     	Bar b7 = genBar(LocalDate.of(2024, 11, 25), LocalTime.of(14, 0), 5300, 4600, 5300, 5150, 10040, 10, 20800, 200, 30003, 1);
     	Bar b8 = genBar(LocalDate.of(2024, 11, 25), LocalTime.of(15, 0), 5300, 4600, 5300, 5150, 10040, 10, 20800, 200, 30003, 1);
     	
-    	BarMerger merger = new BarMerger(240, contract3);
+    	BarMerger merger = new BarMerger(Interval.H4, contract3);
     	List<Bar> results = new LinkedList<>();
     	merger.addListener(bar -> results.add(bar));
     	List.of(b1,b2,b3,b4,b5,b6,b7,b8).stream().forEach(merger::onBar);
@@ -286,11 +286,11 @@ class BarMergerTest {
     void test240MinMergingWithWeekend() {
     	LocalDateTime ldt = LocalDateTime.of(LocalDate.of(2024, 11, 20), LocalTime.of(21, 0));
     	
-    	BarMerger merger = new BarMerger(240, contract4);
+    	BarMerger merger = new BarMerger(Interval.H4, contract4);
     	List<Bar> results = new LinkedList<>();
     	merger.addListener(bar -> results.add(bar));
     	for(int i=0; i<24; i++) {
-    		Bar bar = genBar(contract4, ldt.toLocalDate(), ldt.toLocalTime(), BarCycleEnum.B_1Hr, 5500, 4500, 5000, 5100, 10010, 10, 20200, 200, 30001, 1);
+    		Bar bar = genBar(contract4, ldt.toLocalDate(), ldt.toLocalTime(), Interval.H1, 5500, 4500, 5000, 5100, 10010, 10, 20200, 200, 30001, 1);
     		merger.onBar(bar);
     		ldt = ldt.plusHours(1);
     	}
@@ -309,7 +309,7 @@ class BarMergerTest {
     void test60MinMerging() {
     	LocalDateTime ldt = LocalDateTime.of(LocalDate.of(2024, 11, 22), LocalTime.of(21, 0));
     	
-    	BarMerger merger = new BarMerger(60, contract3);
+    	BarMerger merger = new BarMerger(Interval.H1, contract3);
     	List<Bar> results = new LinkedList<>();
     	merger.addListener(bar -> results.add(bar));
     	for(int i=0; i<5; i++) {
@@ -327,12 +327,12 @@ class BarMergerTest {
     @Test
     void test1MinTicking() {
     	SimplePriceSimulation sps = new SimplePriceSimulation();
-    	BarUtils utils = new BarUtils(5000, contract, BarCycleEnum.B_1Min);
+    	BarUtils utils = new BarUtils(5000, contract, Interval.M1);
     	Bar b0 = utils.genBar(LocalDate.now(), LocalTime.of(21, 0));
     	Bar b1 = utils.genBar(LocalDate.now(), LocalTime.of(21, 1));
     	Bar b2 = utils.genBar(LocalDate.now(), LocalTime.of(21, 2));
     	List<Bar> result = new ArrayList<>();
-    	BarMerger merger = new BarMerger(1, contract);
+    	BarMerger merger = new BarMerger(Interval.M1, contract);
     	MergedBarListener listener = new MergedBarListener() {
 			
 			@Override
@@ -421,7 +421,7 @@ class BarMergerTest {
     	Tick t2 = genTick(LocalDate.now(), LocalTime.of(21, 1, 10), 5500, 4500, 5000, 5066, 10000, 10, 20000, 200, 30001, 300);
     	Bar b1 = genBar(LocalDate.now(), LocalTime.of(21, 1, 0), 5500, 4500, 5000, 5100, 10000, 10, 20000, 200, 30001, 300);
     	List<Bar> result = new ArrayList<>();
-    	BarMerger merger = new BarMerger(3, contract);
+    	BarMerger merger = new BarMerger(Interval.M3, contract);
     	MergedBarListener listener = new MergedBarListener() {
 			
 			@Override
@@ -493,7 +493,7 @@ class BarMergerTest {
 				.build();
     }
     
-    Bar genBar(Contract contract, LocalDate date, LocalTime time, BarCycleEnum period, double h, double l, double o, double c, long op, int opDelta, long vol, int volDelta, double tr, double trDelta){
+    Bar genBar(Contract contract, LocalDate date, LocalTime time, Interval period, double h, double l, double o, double c, long op, int opDelta, long vol, int volDelta, double tr, double trDelta){
     	return Bar.builder()
     			.contract(contract)
 				.actionDay(date)
@@ -509,7 +509,7 @@ class BarMergerTest {
 				.volumeDelta(volDelta)
 				.turnover(tr)
 				.turnoverDelta(trDelta)
-				.barPeriod(period)
+				.interval(period)
 				.build();
     }
 }

@@ -80,7 +80,7 @@ public class BeginnerExampleStrategy extends AbstractStrategy	// 抽象类预实
 	protected void initIndicators() {
 		// 在该方法中创建必要的指标实例
 		Contract contract = ctx.bindedContracts().get(0);
-		close = new SimpleValueIndicator(Configuration.builder().indicatorName("C").contract(contract).numOfUnits(ctx.numOfMinPerMergedBar()).build());
+		close = new SimpleValueIndicator(Configuration.builder().indicatorName("C").contract(contract).interval(ctx.moduleBarInterval()).build());
 		
 		ctx.registerIndicator(close);
 		

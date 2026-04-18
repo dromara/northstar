@@ -6,6 +6,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
+import org.dromara.northstar.common.constant.Interval;
 import org.dromara.northstar.common.constant.TickType;
 import org.dromara.northstar.common.model.core.Bar;
 import org.dromara.northstar.common.model.core.Contract;
@@ -13,7 +14,6 @@ import org.dromara.northstar.common.model.core.Tick;
 import org.dromara.northstar.common.utils.CommonUtils;
 
 import lombok.extern.slf4j.Slf4j;
-import xyz.redtorch.pb.CoreEnum.BarCycleEnum;
 
 /* 注意，本类的日志输出在logs/DEBUG/MarketData_*.log文件 */
 @Slf4j
@@ -141,7 +141,7 @@ public class MinuteBarGenerator {
 				.openInterestDelta(openInterestDelta)
 				.turnover(curTick.turnover())
 				.turnoverDelta(turnoverDelta)
-				.barPeriod(BarCycleEnum.B_1Min)
+				.interval(Interval.M1)
 				.build());
 		cutoffTime = null;
 	}

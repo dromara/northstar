@@ -86,7 +86,7 @@ public class IndicatorDemoStrategy extends AbstractStrategy	// 为了简化代�
 	
 	private Configuration makeConfig(String name) {
 		Contract c = ctx.getContract(params.indicatorSymbol);
-		return Configuration.builder().contract(c).indicatorName(name).numOfUnits(ctx.numOfMinPerMergedBar()).build();
+		return Configuration.builder().contract(c).indicatorName(name).interval(ctx.moduleBarInterval()).build();
 	}
 	
 	@Override

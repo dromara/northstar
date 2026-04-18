@@ -23,6 +23,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.StringUtils;
 import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.constant.Constants;
+import org.dromara.northstar.common.constant.Interval;
 import org.dromara.northstar.common.constant.ModuleState;
 import org.dromara.northstar.common.constant.ModuleUsage;
 import org.dromara.northstar.common.constant.SignalOperation;
@@ -59,7 +60,6 @@ import org.dromara.northstar.gateway.IMarketCenter;
 import org.dromara.northstar.gateway.contract.OptionChainContract;
 import org.dromara.northstar.indicator.Indicator;
 import org.dromara.northstar.indicator.IndicatorValueUpdateHelper;
-import org.dromara.northstar.indicator.constant.PeriodUnit;
 import org.dromara.northstar.indicator.model.Configuration;
 import org.dromara.northstar.strategy.IAccount;
 import org.dromara.northstar.strategy.IModule;
@@ -146,12 +146,13 @@ public class ModuleContext implements IModuleContext{
 			.forEach(csi -> {
 				IContract contract = contractMgr.getContract(Identifier.of(csi.getId()));
 				Contract cf = contract.contract();
-				barTimePaddingMap.put(cf, new BarTimePadding(moduleDescription.getNumOfMinPerBar(), cf));
+				Interval barInterval = Interval.fromAlias(moduleDescription.getKlineInterval());
+				barTimePaddingMap.put(cf, new BarTimePadding(barInterval, cf));
 				if(contract instanceof OptionChainContract) {
 					contractMap.put(cf.unifiedSymbol(), cf);
-					contract.memberContracts().forEach(c -> initForContract(c.contract(), moduleDescription.getNumOfMinPerBar()));
+					contract.memberContracts().forEach(c -> initForContract(c.contract(), barInterval));
 				} else {
-					initForContract(contract.contract(), moduleDescription.getNumOfMinPerBar());
+					initForContract(contract.contract(), barInterval);
 				}
 			});
 		String name = moduleDescription.getName();
@@ -161,10 +162,10 @@ public class ModuleContext implements IModuleContext{
 		moduleStateMachine.setModuleAccount(moduleAccount);
 	}
 	
-	private void initForContract(Contract cf, int numOfMinPerBar) {
+	private void initForContract(Contract cf, Interval interval) {
 		contractMap.put(cf.unifiedSymbol(), cf);
-		registry.addListener(cf, numOfMinPerBar, PeriodUnit.MINUTE, tradeStrategy);
-		registry.addListener(cf, numOfMinPerBar, PeriodUnit.MINUTE, this);
+		registry.addListener(cf, interval, tradeStrategy);
+		registry.addListener(cf, interval, this);
 	}
 
 	@Override
@@ -193,8 +194,8 @@ public class ModuleContext implements IModuleContext{
 	}
 
 	@Override
-	public int numOfMinPerMergedBar() {
-		return moduleDescription.getNumOfMinPerBar();
+	public Interval moduleBarInterval() {
+		return Interval.fromAlias(moduleDescription.getKlineInterval());
 	}
 
 	@Override
@@ -229,7 +230,7 @@ public class ModuleContext implements IModuleContext{
 		Configuration cfg = indicator.getConfiguration();
 		IndicatorValueUpdateHelper helper = new IndicatorValueUpdateHelper(indicator);
 		indicatorHelperSet.add(helper);
-		registry.addListener(cfg.contract(), cfg.numOfUnits(), cfg.period(), helper);
+		registry.addListener(cfg.contract(), cfg.interval(), helper);
 		// 递归子指标
 		for(Indicator in : indicator.dependencies()) {
 			registerIndicator(in);
@@ -240,7 +241,6 @@ public class ModuleContext implements IModuleContext{
 		Configuration cfg = indicator.getConfiguration();
 		String indicatorName = cfg.indicatorID();
 		logger.trace("检查指标配置信息：{}", indicatorName);
-		Assert.isTrue(cfg.numOfUnits() > 0, "周期数必须大于0，当前为：" + cfg.numOfUnits());
 		Assert.isTrue(cfg.cacheLength() > 0, "指标回溯长度必须大于0，当前为：" + cfg.cacheLength());
 		if(Boolean.TRUE.equals(cfg.visible())) {		// 不显示的指标可以不做重名校验
 			Assert.isTrue(!indicatorNameTbl.contains(cfg.contract(), indicatorName) || indicator.equals(indicatorNameTbl.get(cfg.contract(), indicatorName)), 
@@ -644,8 +644,8 @@ public class ModuleContext implements IModuleContext{
 	}
 
 	@Override
-	public void addMergedBarListener(Contract contract, int numOfUnit, PeriodUnit unit, MergedBarListener listener) {
-		registry.addListener(contract, numOfUnit, unit, listener);
+	public void addMergedBarListener(Contract contract, Interval interval, MergedBarListener listener) {
+		registry.addListener(contract, interval, listener);
 	}
 
 	@Override

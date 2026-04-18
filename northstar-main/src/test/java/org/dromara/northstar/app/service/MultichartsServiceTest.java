@@ -11,7 +11,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import xyz.redtorch.pb.CoreEnum.BarCycleEnum;
+import org.dromara.northstar.common.constant.Interval;
 
 @ExtendWith(MockitoExtension.class)
 class MultichartsServiceTest {
@@ -38,11 +38,11 @@ class MultichartsServiceTest {
 
     @Test
     void testGetOverlays() {
-        Mockito.when(service.getOverlays("BTCUSDT@BINANCE@SPOT@PLAYBACK", BarCycleEnum.B_10Min))
+        Mockito.when(service.getOverlays("BTCUSDT@BINANCE@SPOT@PLAYBACK", Interval.M10))
                .thenReturn(List.of(overlay));
-        List<OverlayVO> vos = service.getOverlays("BTCUSDT@BINANCE@SPOT@PLAYBACK", BarCycleEnum.B_10Min);
+        List<OverlayVO> vos = service.getOverlays("BTCUSDT@BINANCE@SPOT@PLAYBACK", Interval.M10);
         assertEquals(1, vos.size());
-        Mockito.verify(service).getOverlays("BTCUSDT@BINANCE@SPOT@PLAYBACK", BarCycleEnum.B_10Min);
+        Mockito.verify(service).getOverlays("BTCUSDT@BINANCE@SPOT@PLAYBACK", Interval.M10);
     }
 
 }
