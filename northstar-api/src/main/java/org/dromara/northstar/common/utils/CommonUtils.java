@@ -104,12 +104,12 @@ public class CommonUtils {
 	 */
 	public static int precisionOf(double priceTick) {
 		Assert.isTrue(priceTick > 0, "最小变动价位应该为正数");
-		for(int i = 0; i<10; i++) {
+		for(int i = 0; i<15; i++) {
 			if(priceTick * Math.pow(10, i) >= 1) {
 				return i;
 			}
 		}
-		throw new IllegalArgumentException("价格精度最多为小数点后九位");
+		throw new IllegalArgumentException("价格精度最多为小数点后十四位");
 	}
 
 	/**
