@@ -106,6 +106,7 @@ enum ProductClassEnum {
     FUND = 13;  // 基金
     EFP = 14;  // 期转现
 	SPOTOPTION = 15;  // 现货期权
+	SWAP = 16;  // 互换或永续合约
 }
 
 enum DirectionEnum{

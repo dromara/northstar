@@ -1899,6 +1899,14 @@ public final class CoreEnum {
      * <code>SPOTOPTION = 15;</code>
      */
     SPOTOPTION(15),
+    /**
+     * <pre>
+     * 互换或永续合约
+     * </pre>
+     *
+     * <code>SWAP = 16;</code>
+     */
+    SWAP(16),
     UNRECOGNIZED(-1),
     ;
 
@@ -2039,6 +2047,14 @@ public final class CoreEnum {
      * <code>SPOTOPTION = 15;</code>
      */
     public static final int SPOTOPTION_VALUE = 15;
+    /**
+     * <pre>
+     * 互换或永续合约
+     * </pre>
+     *
+     * <code>SWAP = 16;</code>
+     */
+    public static final int SWAP_VALUE = 16;
 
 
     public final int getNumber() {
@@ -2081,6 +2097,7 @@ public final class CoreEnum {
         case 13: return FUND;
         case 14: return EFP;
         case 15: return SPOTOPTION;
+        case 16: return SWAP;
         default: return null;
       }
     }
@@ -7563,105 +7580,105 @@ public final class CoreEnum {
       "ertSubmitted\020\001\022\027\n\023OSS_CancelSubmitted\020\002\022" +
       "\027\n\023OSS_ModifySubmitted\020\003\022\020\n\014OSS_Accepted" +
       "\020\004\022\026\n\022OSS_InsertRejected\020\005\022\026\n\022OSS_Cancel" +
-      "Rejected\020\006\022\026\n\022OSS_ModifyRejected\020\007*\334\001\n\020P" +
+      "Rejected\020\006\022\026\n\022OSS_ModifyRejected\020\007*\346\001\n\020P" +
       "roductClassEnum\022\027\n\023UnknownProductClass\020\000" +
       "\022\n\n\006EQUITY\020\001\022\013\n\007FUTURES\020\002\022\n\n\006OPTION\020\003\022\t\n" +
       "\005INDEX\020\004\022\017\n\013COMBINATION\020\005\022\010\n\004BOND\020\006\022\t\n\005F" +
       "OREX\020\007\022\010\n\004SPOT\020\010\022\t\n\005DEFER\020\t\022\007\n\003ETF\020\n\022\014\n\010" +
       "WARRANTS\020\013\022\n\n\006SPREAD\020\014\022\010\n\004FUND\020\r\022\007\n\003EFP\020" +
-      "\016\022\016\n\nSPOTOPTION\020\017*5\n\rDirectionEnum\022\r\n\tD_" +
-      "Unknown\020\000\022\t\n\005D_Buy\020\001\022\n\n\006D_Sell\020\002*<\n\020Posi" +
-      "tionTypeEnum\022\016\n\nPT_Unknown\020\000\022\n\n\006PT_Net\020\001" +
-      "\022\014\n\010PT_Gross\020\002*N\n\025PositionDirectionEnum\022" +
-      "\016\n\nPD_Unknown\020\000\022\n\n\006PD_Net\020\001\022\013\n\007PD_Long\020\002" +
-      "\022\014\n\010PD_Short\020\003*\213\001\n\rHedgeFlagEnum\022\016\n\nHF_U" +
-      "nknown\020\000\022\022\n\016HF_Speculation\020\001\022\020\n\014HF_Arbit" +
-      "rage\020\002\022\014\n\010HF_Hedge\020\003\022\022\n\016HF_MarketMaker\020\004" +
-      "\022\020\n\014HF_SpecHedge\020\005\022\020\n\014HF_HedgeSpec\020\006*\314\003\n" +
-      "\022OrderPriceTypeEnum\022\017\n\013OPT_Unknown\020\000\022\020\n\014" +
-      "OPT_AnyPrice\020\001\022\022\n\016OPT_LimitPrice\020\002\022\021\n\rOP" +
-      "T_BestPrice\020\003\022\021\n\rOPT_LastPrice\020\004\022\035\n\031OPT_" +
-      "LastPricePlusOneTicks\020\005\022\035\n\031OPT_LastPrice" +
-      "PlusTwoTicks\020\006\022\037\n\033OPT_LastPricePlusThree" +
-      "Ticks\020\007\022\021\n\rOPT_AskPrice1\020\010\022\035\n\031OPT_AskPri" +
-      "ce1PlusOneTicks\020\t\022\035\n\031OPT_AskPrice1PlusTw" +
-      "oTicks\020\n\022\037\n\033OPT_AskPrice1PlusThreeTicks\020" +
-      "\013\022\021\n\rOPT_BidPrice1\020\014\022\035\n\031OPT_BidPrice1Plu" +
-      "sOneTicks\020\r\022\035\n\031OPT_BidPrice1PlusTwoTicks" +
-      "\020\016\022\037\n\033OPT_BidPrice1PlusThreeTicks\020\017\022\026\n\022O" +
-      "PT_FiveLevelPrice\020\020*\241\001\n\016OffsetFlagEnum\022\016" +
-      "\n\nOF_Unknown\020\000\022\013\n\007OF_Open\020\001\022\014\n\010OF_Close\020" +
-      "\002\022\021\n\rOF_ForceClose\020\003\022\021\n\rOF_CloseToday\020\004\022" +
-      "\025\n\021OF_CloseYesterday\020\005\022\017\n\013OF_ForceOff\020\006\022" +
-      "\026\n\022OF_LocalForceClose\020\007*\343\001\n\024ForceCloseRe" +
-      "asonEnum\022\017\n\013FCR_Unknown\020\000\022\025\n\021FCR_NotForc" +
-      "eClose\020\001\022\023\n\017FCR_LackDeposit\020\002\022\037\n\033FCR_Cli" +
-      "entOverPositionLimit\020\003\022\037\n\033FCR_MemberOver" +
-      "PositionLimit\020\004\022\023\n\017FCR_NotMultiple\020\005\022\021\n\r" +
-      "FCR_Violation\020\006\022\r\n\tFCR_Other\020\007\022\025\n\021FCR_Pe" +
-      "rsonDeliver\020\010*\236\001\n\rOrderTypeEnum\022\016\n\nOT_Un" +
-      "known\020\000\022\r\n\tOT_Normal\020\001\022\026\n\022OT_DeriveFromQ" +
-      "uote\020\002\022\034\n\030OT_DeriveFromCombination\020\003\022\022\n\016" +
-      "OT_Combination\020\004\022\027\n\023OT_ConditionalOrder\020" +
-      "\005\022\013\n\007OT_Swap\020\006*k\n\021TimeConditionEnum\022\016\n\nT" +
-      "C_Unknown\020\000\022\n\n\006TC_IOC\020\001\022\n\n\006TC_GFS\020\002\022\n\n\006T" +
-      "C_GFD\020\003\022\n\n\006TC_GTD\020\004\022\n\n\006TC_GTC\020\005\022\n\n\006TC_GF" +
-      "A\020\006*F\n\023VolumeConditionEnum\022\016\n\nVC_Unknown" +
-      "\020\000\022\t\n\005VC_AV\020\001\022\t\n\005VC_MV\020\002\022\t\n\005VC_CV\020\003*\212\005\n\027" +
-      "ContingentConditionEnum\022\016\n\nCC_Unknown\020\000\022" +
-      "\022\n\016CC_Immediately\020\001\022\014\n\010CC_Touch\020\002\022\022\n\016CC_" +
-      "TouchProfit\020\003\022\022\n\016CC_ParkedOrder\020\004\022$\n CC_" +
-      "LastPriceGreaterThanStopPrice\020\005\022%\n!CC_La" +
-      "stPriceGreaterEqualStopPrice\020\006\022#\n\037CC_Las" +
-      "tPriceLesserThanStopPrice\020\007\022$\n CC_LastPr" +
-      "iceLesserEqualStopPrice\020\010\022#\n\037CC_AskPrice" +
-      "GreaterThanStopPrice\020\t\022$\n CC_AskPriceGre" +
-      "aterEqualStopPrice\020\n\022\"\n\036CC_AskPriceLesse" +
-      "rThanStopPrice\020\013\022#\n\037CC_AskPriceLesserEqu" +
-      "alStopPrice\020\014\022#\n\037CC_BidPriceGreaterThanS" +
-      "topPrice\020\r\022$\n CC_BidPriceGreaterEqualSto" +
-      "pPrice\020\016\022\"\n\036CC_BidPriceLesserThanStopPri" +
-      "ce\020\017\022#\n\037CC_BidPriceLesserEqualStopPrice\020" +
-      "\020\022)\n%CC_LocalLastPriceLesserEqualStopPri" +
-      "ce\020\021\022*\n&CC_LocalLastPriceGreaterEqualSto" +
-      "pPrice\020\022*>\n\016ActionFlagEnum\022\016\n\nAF_Unknown" +
-      "\020\000\022\r\n\tAF_Delete\020\001\022\r\n\tAF_Modify\020\002*T\n\020Trad" +
-      "ingRightEnum\022\016\n\nTR_Unknown\020\000\022\014\n\010TR_Allow" +
-      "\020\001\022\020\n\014TR_CloseOnly\020\002\022\020\n\014TR_Forbidden\020\003*N" +
-      "\n\017OrderSourceEnum\022\017\n\013ODS_Unknown\020\000\022\023\n\017OD" +
-      "S_Participant\020\001\022\025\n\021ODS_Administrator\020\002*\255" +
-      "\001\n\rTradeTypeEnum\022\016\n\nTT_Unknown\020\000\022\027\n\023TT_S" +
-      "plitCombination\020\001\022\r\n\tTT_Common\020\002\022\027\n\023TT_O" +
-      "ptionsExecution\020\003\022\n\n\006TT_OTC\020\004\022\021\n\rTT_EFPD" +
-      "erived\020\005\022\031\n\025TT_CombinationDerived\020\006\022\021\n\rT" +
-      "T_BlockTrade\020\007*b\n\017PriceSourceEnum\022\020\n\014PSR" +
-      "C_Unknown\020\000\022\022\n\016PSRC_LastPrice\020\001\022\014\n\010PSRC_" +
-      "Buy\020\002\022\r\n\tPSRC_Sell\020\003\022\014\n\010PSRC_OTC\020\004*\306\002\n\014C" +
-      "urrencyEnum\022\023\n\017UnknownCurrency\020\000\022\007\n\003USD\020" +
-      "\001\022\007\n\003CNY\020\002\022\007\n\003CNH\020\003\022\007\n\003HKD\020\004\022\007\n\003JPY\020\005\022\007\n" +
-      "\003EUR\020\006\022\007\n\003GBP\020\007\022\007\n\003DEM\020\010\022\007\n\003CHF\020\t\022\007\n\003FRF" +
-      "\020\n\022\007\n\003CAD\020\013\022\007\n\003AUD\020\014\022\007\n\003ATS\020\r\022\007\n\003FIM\020\016\022\007" +
-      "\n\003BEF\020\017\022\007\n\003THB\020\020\022\007\n\003IEP\020\021\022\007\n\003ITL\020\022\022\007\n\003LU" +
-      "F\020\023\022\007\n\003NLG\020\024\022\007\n\003PTE\020\025\022\007\n\003ESP\020\026\022\007\n\003IDR\020\027\022" +
-      "\007\n\003MYR\020\030\022\007\n\003NZD\020\031\022\007\n\003PHP\020\032\022\007\n\003SUR\020\033\022\007\n\003S" +
-      "GD\020\034\022\007\n\003KRW\020\035\022\010\n\004USDT\020\036\022\010\n\004BUSD\020\037\022\010\n\004USD" +
-      "C\020 *\323\002\n\014ExchangeEnum\022\023\n\017UnknownExchange\020" +
-      "\000\022\007\n\003SSE\020\001\022\010\n\004SZSE\020\002\022\t\n\005CFFEX\020\003\022\010\n\004SHFE\020" +
-      "\004\022\010\n\004CZCE\020\005\022\007\n\003DCE\020\006\022\007\n\003SGE\020\007\022\007\n\003INE\020\010\022\010" +
-      "\n\004SEHK\020\t\022\010\n\004HKFE\020\n\022\007\n\003SGX\020\013\022\t\n\005NYBOT\020\014\022\t" +
-      "\n\005NYMEX\020\r\022\t\n\005COMEX\020\016\022\007\n\003CME\020\017\022\007\n\003CFE\020\020\022\n" +
-      "\n\006GLOBEX\020\021\022\007\n\003ICE\020\022\022\007\n\003IPE\020\023\022\007\n\003LME\020\024\022\014\n" +
-      "\010IDEALPRO\020\025\022\t\n\005OANDA\020\026\022\010\n\004FXCM\020\027\022\t\n\005SMAR" +
-      "T\020\030\022\010\n\004GFEX\020\031\022\013\n\007BINANCE\020\032\022\007\n\003OKX\020\033\022\010\n\004G" +
-      "ATE\020\034\022\007\n\003BSE\020\035\022\t\n\005NSDQX\020\036*E\n\017OptionsType" +
-      "Enum\022\r\n\tO_Unknown\020\000\022\021\n\rO_CallOptions\020\001\022\020" +
-      "\n\014O_PutOptions\020\002*Y\n\016StrikeModeEnum\022\017\n\013ST" +
-      "M_Unknown\020\000\022\023\n\017STM_Continental\020\001\022\020\n\014STM_" +
-      "American\020\002\022\017\n\013STM_Bermuda\020\003*\224\001\n\023Combinat" +
-      "ionTypeEnum\022\021\n\rCOMBT_Unknown\020\000\022\020\n\014COMBT_" +
-      "Future\020\001\022\r\n\tCOMBT_BUL\020\002\022\r\n\tCOMBT_BER\020\003\022\r" +
-      "\n\tCOMBT_STD\020\004\022\r\n\tCOMBT_STG\020\005\022\r\n\tCOMBT_PR" +
-      "T\020\006\022\r\n\tCOMBT_CLD\020\007b\006proto3"
+      "\016\022\016\n\nSPOTOPTION\020\017\022\010\n\004SWAP\020\020*5\n\rDirection" +
+      "Enum\022\r\n\tD_Unknown\020\000\022\t\n\005D_Buy\020\001\022\n\n\006D_Sell" +
+      "\020\002*<\n\020PositionTypeEnum\022\016\n\nPT_Unknown\020\000\022\n" +
+      "\n\006PT_Net\020\001\022\014\n\010PT_Gross\020\002*N\n\025PositionDire" +
+      "ctionEnum\022\016\n\nPD_Unknown\020\000\022\n\n\006PD_Net\020\001\022\013\n" +
+      "\007PD_Long\020\002\022\014\n\010PD_Short\020\003*\213\001\n\rHedgeFlagEn" +
+      "um\022\016\n\nHF_Unknown\020\000\022\022\n\016HF_Speculation\020\001\022\020" +
+      "\n\014HF_Arbitrage\020\002\022\014\n\010HF_Hedge\020\003\022\022\n\016HF_Mar" +
+      "ketMaker\020\004\022\020\n\014HF_SpecHedge\020\005\022\020\n\014HF_Hedge" +
+      "Spec\020\006*\314\003\n\022OrderPriceTypeEnum\022\017\n\013OPT_Unk" +
+      "nown\020\000\022\020\n\014OPT_AnyPrice\020\001\022\022\n\016OPT_LimitPri" +
+      "ce\020\002\022\021\n\rOPT_BestPrice\020\003\022\021\n\rOPT_LastPrice" +
+      "\020\004\022\035\n\031OPT_LastPricePlusOneTicks\020\005\022\035\n\031OPT" +
+      "_LastPricePlusTwoTicks\020\006\022\037\n\033OPT_LastPric" +
+      "ePlusThreeTicks\020\007\022\021\n\rOPT_AskPrice1\020\010\022\035\n\031" +
+      "OPT_AskPrice1PlusOneTicks\020\t\022\035\n\031OPT_AskPr" +
+      "ice1PlusTwoTicks\020\n\022\037\n\033OPT_AskPrice1PlusT" +
+      "hreeTicks\020\013\022\021\n\rOPT_BidPrice1\020\014\022\035\n\031OPT_Bi" +
+      "dPrice1PlusOneTicks\020\r\022\035\n\031OPT_BidPrice1Pl" +
+      "usTwoTicks\020\016\022\037\n\033OPT_BidPrice1PlusThreeTi" +
+      "cks\020\017\022\026\n\022OPT_FiveLevelPrice\020\020*\241\001\n\016Offset" +
+      "FlagEnum\022\016\n\nOF_Unknown\020\000\022\013\n\007OF_Open\020\001\022\014\n" +
+      "\010OF_Close\020\002\022\021\n\rOF_ForceClose\020\003\022\021\n\rOF_Clo" +
+      "seToday\020\004\022\025\n\021OF_CloseYesterday\020\005\022\017\n\013OF_F" +
+      "orceOff\020\006\022\026\n\022OF_LocalForceClose\020\007*\343\001\n\024Fo" +
+      "rceCloseReasonEnum\022\017\n\013FCR_Unknown\020\000\022\025\n\021F" +
+      "CR_NotForceClose\020\001\022\023\n\017FCR_LackDeposit\020\002\022" +
+      "\037\n\033FCR_ClientOverPositionLimit\020\003\022\037\n\033FCR_" +
+      "MemberOverPositionLimit\020\004\022\023\n\017FCR_NotMult" +
+      "iple\020\005\022\021\n\rFCR_Violation\020\006\022\r\n\tFCR_Other\020\007" +
+      "\022\025\n\021FCR_PersonDeliver\020\010*\236\001\n\rOrderTypeEnu" +
+      "m\022\016\n\nOT_Unknown\020\000\022\r\n\tOT_Normal\020\001\022\026\n\022OT_D" +
+      "eriveFromQuote\020\002\022\034\n\030OT_DeriveFromCombina" +
+      "tion\020\003\022\022\n\016OT_Combination\020\004\022\027\n\023OT_Conditi" +
+      "onalOrder\020\005\022\013\n\007OT_Swap\020\006*k\n\021TimeConditio" +
+      "nEnum\022\016\n\nTC_Unknown\020\000\022\n\n\006TC_IOC\020\001\022\n\n\006TC_" +
+      "GFS\020\002\022\n\n\006TC_GFD\020\003\022\n\n\006TC_GTD\020\004\022\n\n\006TC_GTC\020" +
+      "\005\022\n\n\006TC_GFA\020\006*F\n\023VolumeConditionEnum\022\016\n\n" +
+      "VC_Unknown\020\000\022\t\n\005VC_AV\020\001\022\t\n\005VC_MV\020\002\022\t\n\005VC" +
+      "_CV\020\003*\212\005\n\027ContingentConditionEnum\022\016\n\nCC_" +
+      "Unknown\020\000\022\022\n\016CC_Immediately\020\001\022\014\n\010CC_Touc" +
+      "h\020\002\022\022\n\016CC_TouchProfit\020\003\022\022\n\016CC_ParkedOrde" +
+      "r\020\004\022$\n CC_LastPriceGreaterThanStopPrice\020" +
+      "\005\022%\n!CC_LastPriceGreaterEqualStopPrice\020\006" +
+      "\022#\n\037CC_LastPriceLesserThanStopPrice\020\007\022$\n" +
+      " CC_LastPriceLesserEqualStopPrice\020\010\022#\n\037C" +
+      "C_AskPriceGreaterThanStopPrice\020\t\022$\n CC_A" +
+      "skPriceGreaterEqualStopPrice\020\n\022\"\n\036CC_Ask" +
+      "PriceLesserThanStopPrice\020\013\022#\n\037CC_AskPric" +
+      "eLesserEqualStopPrice\020\014\022#\n\037CC_BidPriceGr" +
+      "eaterThanStopPrice\020\r\022$\n CC_BidPriceGreat" +
+      "erEqualStopPrice\020\016\022\"\n\036CC_BidPriceLesserT" +
+      "hanStopPrice\020\017\022#\n\037CC_BidPriceLesserEqual" +
+      "StopPrice\020\020\022)\n%CC_LocalLastPriceLesserEq" +
+      "ualStopPrice\020\021\022*\n&CC_LocalLastPriceGreat" +
+      "erEqualStopPrice\020\022*>\n\016ActionFlagEnum\022\016\n\n" +
+      "AF_Unknown\020\000\022\r\n\tAF_Delete\020\001\022\r\n\tAF_Modify" +
+      "\020\002*T\n\020TradingRightEnum\022\016\n\nTR_Unknown\020\000\022\014" +
+      "\n\010TR_Allow\020\001\022\020\n\014TR_CloseOnly\020\002\022\020\n\014TR_For" +
+      "bidden\020\003*N\n\017OrderSourceEnum\022\017\n\013ODS_Unkno" +
+      "wn\020\000\022\023\n\017ODS_Participant\020\001\022\025\n\021ODS_Adminis" +
+      "trator\020\002*\255\001\n\rTradeTypeEnum\022\016\n\nTT_Unknown" +
+      "\020\000\022\027\n\023TT_SplitCombination\020\001\022\r\n\tTT_Common" +
+      "\020\002\022\027\n\023TT_OptionsExecution\020\003\022\n\n\006TT_OTC\020\004\022" +
+      "\021\n\rTT_EFPDerived\020\005\022\031\n\025TT_CombinationDeri" +
+      "ved\020\006\022\021\n\rTT_BlockTrade\020\007*b\n\017PriceSourceE" +
+      "num\022\020\n\014PSRC_Unknown\020\000\022\022\n\016PSRC_LastPrice\020" +
+      "\001\022\014\n\010PSRC_Buy\020\002\022\r\n\tPSRC_Sell\020\003\022\014\n\010PSRC_O" +
+      "TC\020\004*\306\002\n\014CurrencyEnum\022\023\n\017UnknownCurrency" +
+      "\020\000\022\007\n\003USD\020\001\022\007\n\003CNY\020\002\022\007\n\003CNH\020\003\022\007\n\003HKD\020\004\022\007" +
+      "\n\003JPY\020\005\022\007\n\003EUR\020\006\022\007\n\003GBP\020\007\022\007\n\003DEM\020\010\022\007\n\003CH" +
+      "F\020\t\022\007\n\003FRF\020\n\022\007\n\003CAD\020\013\022\007\n\003AUD\020\014\022\007\n\003ATS\020\r\022" +
+      "\007\n\003FIM\020\016\022\007\n\003BEF\020\017\022\007\n\003THB\020\020\022\007\n\003IEP\020\021\022\007\n\003I" +
+      "TL\020\022\022\007\n\003LUF\020\023\022\007\n\003NLG\020\024\022\007\n\003PTE\020\025\022\007\n\003ESP\020\026" +
+      "\022\007\n\003IDR\020\027\022\007\n\003MYR\020\030\022\007\n\003NZD\020\031\022\007\n\003PHP\020\032\022\007\n\003" +
+      "SUR\020\033\022\007\n\003SGD\020\034\022\007\n\003KRW\020\035\022\010\n\004USDT\020\036\022\010\n\004BUS" +
+      "D\020\037\022\010\n\004USDC\020 *\323\002\n\014ExchangeEnum\022\023\n\017Unknow" +
+      "nExchange\020\000\022\007\n\003SSE\020\001\022\010\n\004SZSE\020\002\022\t\n\005CFFEX\020" +
+      "\003\022\010\n\004SHFE\020\004\022\010\n\004CZCE\020\005\022\007\n\003DCE\020\006\022\007\n\003SGE\020\007\022" +
+      "\007\n\003INE\020\010\022\010\n\004SEHK\020\t\022\010\n\004HKFE\020\n\022\007\n\003SGX\020\013\022\t\n" +
+      "\005NYBOT\020\014\022\t\n\005NYMEX\020\r\022\t\n\005COMEX\020\016\022\007\n\003CME\020\017\022" +
+      "\007\n\003CFE\020\020\022\n\n\006GLOBEX\020\021\022\007\n\003ICE\020\022\022\007\n\003IPE\020\023\022\007" +
+      "\n\003LME\020\024\022\014\n\010IDEALPRO\020\025\022\t\n\005OANDA\020\026\022\010\n\004FXCM" +
+      "\020\027\022\t\n\005SMART\020\030\022\010\n\004GFEX\020\031\022\013\n\007BINANCE\020\032\022\007\n\003" +
+      "OKX\020\033\022\010\n\004GATE\020\034\022\007\n\003BSE\020\035\022\t\n\005NSDQX\020\036*E\n\017O" +
+      "ptionsTypeEnum\022\r\n\tO_Unknown\020\000\022\021\n\rO_CallO" +
+      "ptions\020\001\022\020\n\014O_PutOptions\020\002*Y\n\016StrikeMode" +
+      "Enum\022\017\n\013STM_Unknown\020\000\022\023\n\017STM_Continental" +
+      "\020\001\022\020\n\014STM_American\020\002\022\017\n\013STM_Bermuda\020\003*\224\001" +
+      "\n\023CombinationTypeEnum\022\021\n\rCOMBT_Unknown\020\000" +
+      "\022\020\n\014COMBT_Future\020\001\022\r\n\tCOMBT_BUL\020\002\022\r\n\tCOM" +
+      "BT_BER\020\003\022\r\n\tCOMBT_STD\020\004\022\r\n\tCOMBT_STG\020\005\022\r" +
+      "\n\tCOMBT_PRT\020\006\022\r\n\tCOMBT_CLD\020\007b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
