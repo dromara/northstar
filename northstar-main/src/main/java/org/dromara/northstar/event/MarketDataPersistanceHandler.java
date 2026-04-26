@@ -43,11 +43,10 @@ public class MarketDataPersistanceHandler extends AbstractEventHandler implement
 			return;
 		}
 		if(e.getData() instanceof Bar bar) {
-			if(bar.interval() != Interval.M1
-					|| bar.channelType() == ChannelType.PLAYBACK
-					|| bar.channelType() == ChannelType.SIM) {
+			if(bar.interval() != Interval.M1 || bar.unstable() || bar.channelType() != ChannelType.CTP) {
 				return;
 			}
+			// 仅保存CTP的1分钟K线数据
 			exec.execute(() -> mdRepo.insert(bar)); 
 		}
 	}
