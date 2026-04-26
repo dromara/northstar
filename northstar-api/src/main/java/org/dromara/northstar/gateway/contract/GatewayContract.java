@@ -63,7 +63,9 @@ public class GatewayContract implements IContract, TickDataAware{
 
 	@Override
 	public void onTick(Tick tick) {
-		barGen.update(tick);
+		if(barGen != null) {			
+			barGen.update(tick);
+		}
 	}
 
 	@Override
