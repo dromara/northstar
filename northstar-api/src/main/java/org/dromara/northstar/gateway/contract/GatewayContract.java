@@ -39,7 +39,9 @@ public class GatewayContract implements IContract, TickDataAware{
 		this.ins = ins;
 		this.mktCenter = mktCenter;
 		this.contract = ins.contract();
-		this.barGen = new MinuteBarGenerator(contract, bar -> feEngine.emitEvent(NorthstarEventType.BAR, bar));
+		if(ins.barGeneraterRequired()) {			
+			this.barGen = new MinuteBarGenerator(contract, bar -> feEngine.emitEvent(NorthstarEventType.BAR, bar));
+		}
 	}
 	
 	@Override
