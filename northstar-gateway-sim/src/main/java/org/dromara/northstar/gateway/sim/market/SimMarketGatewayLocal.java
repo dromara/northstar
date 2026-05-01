@@ -15,7 +15,6 @@ import org.dromara.northstar.common.constant.ConnectionState;
 import org.dromara.northstar.common.event.FastEventEngine;
 import org.dromara.northstar.common.event.NorthstarEventType;
 import org.dromara.northstar.common.model.GatewayDescription;
-import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.common.model.core.Tick;
 import org.dromara.northstar.gateway.MarketGateway;
 import org.dromara.northstar.gateway.contract.GatewayContract;
@@ -46,19 +45,27 @@ public class SimMarketGatewayLocal extends MarketGateway{
 	}
 
 	@Override
-	public boolean subscribe(Contract contract) {
-		log.info("模拟订阅合约：{}", contract.symbol());
-		if(tickGenMap.containsKey(contract.unifiedSymbol())) {
-			subContractsGen.add(tickGenMap.get(contract.unifiedSymbol()));
+	public boolean subscribe() {
+		synchronized (subContractsGen) {			
+			getDescription().getSubscribedContracts().forEach(csi -> {
+				log.info("模拟订阅合约：{}", csi.getSymbol());
+				if(tickGenMap.containsKey(csi.getUnifiedSymbol())) {
+					subContractsGen.add(tickGenMap.get(csi.getUnifiedSymbol()));
+				}
+			});
 		}
 		return true;
 	}
 
 	@Override
-	public boolean unsubscribe(Contract contract) {
-		log.info("模拟退订合约：{}", contract.symbol());
-		if(tickGenMap.containsKey(contract.unifiedSymbol())) {
-			subContractsGen.remove(tickGenMap.get(contract.unifiedSymbol()));
+	public boolean unsubscribe() {
+		synchronized (subContractsGen) {
+			getDescription().getSubscribedContracts().forEach(csi -> {
+				log.info("模拟退订合约：{}", csi.getSymbol());
+				if(tickGenMap.containsKey(csi.getUnifiedSymbol())) {
+					subContractsGen.remove(tickGenMap.get(csi.getUnifiedSymbol()));
+				}
+			});
 		}
 		return true;
 	}
@@ -80,14 +87,16 @@ public class SimMarketGatewayLocal extends MarketGateway{
 			@Override
 			public void run() {
 				try {				
-					for(SimTickGenerator gen: subContractsGen) {
-						lastActiveTime.set(System.currentTimeMillis()); 
-						Tick tick = gen.generateNextTick(LocalDateTime.now(), SimMarketGatewayLocal.this);
-						mktCenter.onTick(tick);
-						feEngine.emitEvent(NorthstarEventType.TICK, tick);
-						GatewayContract contract = (GatewayContract) mktCenter.getContract(ChannelType.SIM, tick.contract().unifiedSymbol());
-						contract.onTick(tick);
-						log.trace("模拟行情TICK：{} {} {} {}", tick.contract().name(), tick.actionDay(), tick.actionTime(), tick.lastPrice());
+					synchronized (subContractsGen) {
+						for(SimTickGenerator gen: subContractsGen) {
+							lastActiveTime.set(System.currentTimeMillis()); 
+							Tick tick = gen.generateNextTick(LocalDateTime.now(), SimMarketGatewayLocal.this);
+							mktCenter.onTick(tick);
+							feEngine.emitEvent(NorthstarEventType.TICK, tick);
+							GatewayContract contract = (GatewayContract) mktCenter.getContract(ChannelType.SIM, tick.contract().unifiedSymbol());
+							contract.onTick(tick);
+							log.trace("模拟行情TICK：{} {} {} {}", tick.contract().name(), tick.actionDay(), tick.actionTime(), tick.lastPrice());
+						}
 					}
 				} catch (Exception e) {
 					log.error("模拟行情TICK生成异常", e);

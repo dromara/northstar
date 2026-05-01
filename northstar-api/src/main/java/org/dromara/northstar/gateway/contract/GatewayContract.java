@@ -11,7 +11,6 @@ import org.dromara.northstar.common.model.Identifier;
 import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.common.model.core.Tick;
 import org.dromara.northstar.gateway.IContract;
-import org.dromara.northstar.gateway.IMarketCenter;
 import org.dromara.northstar.gateway.Instrument;
 import org.dromara.northstar.gateway.mktdata.MinuteBarGenerator;
 
@@ -33,11 +32,8 @@ public class GatewayContract implements IContract, TickDataAware{
 	
 	private Instrument ins;
 	
-	private IMarketCenter mktCenter;
-	
-	public GatewayContract(IMarketCenter mktCenter, FastEventEngine feEngine, Instrument ins) {
+	public GatewayContract(FastEventEngine feEngine, Instrument ins) {
 		this.ins = ins;
-		this.mktCenter = mktCenter;
 		this.contract = ins.contract();
 		if(ins.barGeneraterRequired()) {			
 			this.barGen = new MinuteBarGenerator(contract, bar -> feEngine.emitEvent(NorthstarEventType.BAR, bar));
@@ -47,18 +43,6 @@ public class GatewayContract implements IContract, TickDataAware{
 	@Override
 	public IDataSource dataSource() {
 		return ins.dataSource();
-	}
-
-	@Override
-	public boolean subscribe() {
-		log.debug("订阅：{}", contract.contractId());
-		return mktCenter.getGateway(channelType()).subscribe(contract);
-	}
-
-	@Override
-	public boolean unsubscribe() {
-		log.debug("退订：{}", contract.contractId());
-		return mktCenter.getGateway(channelType()).unsubscribe(contract);
 	}
 
 	@Override

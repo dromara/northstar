@@ -129,7 +129,7 @@ public class MarketCenter implements IMarketCenter, IContractManager{
 					ins.setContractDefinition(def);
 				}
 				
-				IContract contract = new GatewayContract(this, feEngine, ins);
+				IContract contract = new GatewayContract(feEngine, ins);
 				contractMap.put(ins.identifier(), contract);
 				
 				if(!channelDefContractGroups.contains(ins.channelType(), def)) {					

@@ -42,8 +42,7 @@ public class ConnectionHandler extends AbstractEventHandler implements GenericEv
 		log.info("[{}]-已可用", gatewayId);
 		Gateway gateway = gatewayMgr.get(id);
 		if(gateway instanceof MarketGateway mktGateway) {
-			mktGateway.getDescription().getSubscribedContracts()
-				.forEach(csi -> contractMgr.getContract(Identifier.of(csi.getId())).subscribe());
+			mktGateway.subscribe();
 		}
 	}
 	

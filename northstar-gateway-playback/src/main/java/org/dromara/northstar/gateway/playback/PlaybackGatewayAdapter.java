@@ -2,7 +2,6 @@ package org.dromara.northstar.gateway.playback;
 
 import org.dromara.northstar.common.event.FastEventEngine;
 import org.dromara.northstar.common.model.GatewayDescription;
-import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.gateway.MarketGateway;
 import org.dromara.northstar.gateway.mktdata.MarketCenter;
 import org.dromara.northstar.gateway.mktdata.QuantitDataServiceManager;
@@ -31,13 +30,13 @@ public class PlaybackGatewayAdapter extends MarketGateway {
 	}
 	
 	@Override
-	public boolean subscribe(Contract contract) {
+	public boolean subscribe() {
 		// 动态订阅不需要实现
 		return true;
 	}
 
 	@Override
-	public boolean unsubscribe(Contract contract) {
+	public boolean unsubscribe() {
 		// 动态取消订阅不需要实现
 		return true;
 	}

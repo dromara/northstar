@@ -37,26 +37,6 @@ public class OptionChainContract implements IContract {
 	}
 
 	@Override
-	public boolean subscribe() {
-		for(IContract c : memberContracts) {
-			if(!c.subscribe()) {
-				log.warn("[{}] 合约订阅失败", c.contract().unifiedSymbol());
-			}
-		}
-		return true;
-	}
-
-	@Override
-	public boolean unsubscribe() {
-		for(IContract c : memberContracts) {
-			if(!c.unsubscribe()) {
-				log.warn("[{}] 合约取消订阅失败", c.contract().unifiedSymbol());
-			}
-		}
-		return true;
-	}
-	
-	@Override
 	public List<IContract> memberContracts() {
 		return memberContracts;
 	}

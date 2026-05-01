@@ -33,18 +33,6 @@ public class PrimaryContract implements IContract {
 	}
 
 	@Override
-	public boolean subscribe() {
-		// 主力合约仅作为合约符号用于回测，不能订阅
-		return true;
-	}
-
-	@Override
-	public boolean unsubscribe() {
-		// 主力合约仅作为合约符号用于回测，不能退订
-		return true;
-	}
-
-	@Override
 	public String name() {
 		return idxContract.name().replace("指数", "主连");
 	}

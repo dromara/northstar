@@ -83,28 +83,6 @@ public class IndexContract implements IContract, TickDataAware{
 	}
 
 	@Override
-	public boolean subscribe() {
-		log.debug("订阅：{}", identifier.value());
-		for(IContract c : monthContracts) {
-			if(!c.subscribe()) {
-				log.warn("[{}] 合约订阅失败", c.contract().unifiedSymbol());
-			}
-		}
-		return true;
-	}
-
-	@Override
-	public boolean unsubscribe() {
-		log.debug("退订：{}", identifier.value());
-		for(IContract c : monthContracts) {
-			if(!c.unsubscribe()) {
-				log.warn("[{}] 合约取消订阅失败", c.contract().unifiedSymbol());
-			}
-		}
-		return true;
-	}
-	
-	@Override
 	public void onTick(Tick tick) {
 		ticker.update(tick);
 	}

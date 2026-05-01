@@ -155,18 +155,18 @@ class MarketCenterTest {
 		public void disconnect() {}
 
 		@Override
-		public boolean subscribe(Contract contract) {
-			return false;
-		}
-
-		@Override
-		public boolean unsubscribe(Contract contract) {
-			return false;
-		}
-
-		@Override
 		public boolean isActive() {
 			return false;
+		}
+
+		@Override
+		public boolean subscribe() {
+			return true;
+		}
+
+		@Override
+		public boolean unsubscribe() {
+			return true;
 		}
 	}
 }

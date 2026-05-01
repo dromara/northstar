@@ -2,14 +2,12 @@ package org.dromara.northstar.gateway;
 
 import java.util.List;
 
-import org.dromara.northstar.common.Subscribable;
-
 /**
  * 抽象合约
  * @author KevinHuangwl
  *
  */
-public interface IContract extends Subscribable, Instrument {
+public interface IContract extends Instrument {
 	
 	/**
 	 * 网关ID

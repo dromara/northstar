@@ -1,13 +1,7 @@
 package org.dromara.northstar.gateway;
 
 import org.dromara.northstar.common.model.GatewayDescription;
-import org.dromara.northstar.common.model.core.Contract;
 
-import lombok.Getter;
-import lombok.Setter;
-
-@Getter
-@Setter
 public abstract class MarketGateway extends Gateway {
 	
 	protected MarketGateway(GatewayDescription description) {
@@ -24,12 +18,12 @@ public abstract class MarketGateway extends Gateway {
 	 * 订阅
 	 * @param subscribeReq
 	 */
-	public abstract boolean subscribe(Contract contract);
+	public abstract boolean subscribe();
 
 	/**
 	 * 退订
 	 * @param subscribeReq
 	 */
-	public abstract boolean unsubscribe(Contract contract);
+	public abstract boolean unsubscribe();
 	
 }
