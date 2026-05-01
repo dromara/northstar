@@ -58,9 +58,9 @@ class CommonUtilsTest {
 		assertThat(CommonUtils.precisionOf(0.05)).isEqualTo(2);
 		assertThat(CommonUtils.precisionOf(0.01)).isEqualTo(2);
 		assertThat(CommonUtils.precisionOf(0.0001)).isEqualTo(4);
-		assertThat(CommonUtils.precisionOf(0.000000001)).isEqualTo(9);
+		assertThat(CommonUtils.precisionOf(0.00000000000001)).isEqualTo(14);
 		assertThrows(IllegalArgumentException.class, () -> {
-			CommonUtils.precisionOf(0.0000000001);
+			CommonUtils.precisionOf(0.000000000000001);
 		});
 	}
 }
