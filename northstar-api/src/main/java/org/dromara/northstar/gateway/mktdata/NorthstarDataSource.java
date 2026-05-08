@@ -294,21 +294,14 @@ public class NorthstarDataSource implements IDataSource{
 		if(has(CRYPTO)) {
 			Thread.startVirtualThread(() -> {
 				try {
-					Function<ContractDTO, Contract> futMapper = makeConvertFn(ProductClassEnum.FUTURES, CurrencyEnum.USDT);
-					Function<ContractDTO, Contract> spotMapper = makeConvertFn(ProductClassEnum.SPOT, CurrencyEnum.USDT);
-					List<Contract> futResult = dataService.getCryptoContracts()
+					Function<ContractDTO, Contract> futMapper = makeConvertFn(ProductClassEnum.SWAP, CurrencyEnum.USDT);
+					List<Contract> swapResult = dataService.getCryptoContracts()
 							.stream()
 							.filter(dto -> dto.getSymbol().equals(dto.getName()))
 							.map(futMapper)
 							.toList();
-					List<Contract> spotResult = dataService.getCryptoContracts()
-							.stream()
-							.filter(dto -> !dto.getSymbol().equals(dto.getName()))
-							.map(spotMapper)
-							.toList();
-					results.addAll(futResult);
-					results.addAll(spotResult);
-					log.info("加载加密货币合约：{}个", futResult.size() + spotResult.size());
+					results.addAll(swapResult);
+					log.info("加载加密货币合约：{}个", swapResult.size());
 				} catch(Exception e) {
 					log.warn("加密货币合约加载失败：{}", e.getMessage());
 				} finally {
