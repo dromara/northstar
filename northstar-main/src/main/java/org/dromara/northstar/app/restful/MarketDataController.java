@@ -25,7 +25,7 @@ public class MarketDataController {
 	/**
 	 * 获取历史行情
 	 * @param contractId
-	 * @param barPeriod
+	 * @param interval
 	 * @param fromTime
 	 * @param toTime
 	 * @return
@@ -51,7 +51,7 @@ public class MarketDataController {
 	/**
 	 * 订阅BAR行情
 	 * @param contractId
-	 * @param barPeriod
+	 * @param interval
 	 */
 	@GetMapping("subscribe")
 	public void subscribe(String[] contractIds) {
