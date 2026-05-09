@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.dromara.northstar.common.IDataSource;
 import org.dromara.northstar.common.constant.ChannelType;
+import org.dromara.northstar.common.constant.Interval;
 import org.dromara.northstar.common.model.core.Bar;
 import org.dromara.northstar.common.model.core.Contract;
 
@@ -16,22 +17,7 @@ import org.dromara.northstar.common.model.core.Contract;
 public class EmptyDataSource implements IDataSource{
 
 	@Override
-	public List<Bar> getMinutelyData(Contract contract, LocalDate startDate, LocalDate endDate) {
-		return Collections.emptyList();
-	}
-
-	@Override
-	public List<Bar> getQuarterlyData(Contract contract, LocalDate startDate, LocalDate endDate) {
-		return Collections.emptyList();
-	}
-
-	@Override
-	public List<Bar> getHourlyData(Contract contract, LocalDate startDate, LocalDate endDate) {
-		return Collections.emptyList();
-	}
-
-	@Override
-	public List<Bar> getDailyData(Contract contract, LocalDate startDate, LocalDate endDate) {
+	public List<Bar> getData(Contract contract, Interval interval, LocalDate startDate, LocalDate endDate) {
 		return Collections.emptyList();
 	}
 

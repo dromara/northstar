@@ -19,6 +19,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import org.dromara.northstar.common.constant.ChannelType;
+import org.dromara.northstar.common.constant.Interval;
 import org.dromara.northstar.common.constant.PlaybackPrecision;
 import org.dromara.northstar.common.constant.TickType;
 import org.dromara.northstar.common.model.core.Bar;
@@ -102,7 +103,7 @@ public class PlaybackDataLoader {
 		
 		for(IContract ic : contracts) {
 			Contract c = ic.contract();
-			ds.getMinutelyData(c, realStartDate, realEndDate)
+			ds.getData(c, Interval.M1, realStartDate, realEndDate)
 			.stream()
 			.map(bar -> bar.toBuilder()
 					.gatewayId(gatewayId)

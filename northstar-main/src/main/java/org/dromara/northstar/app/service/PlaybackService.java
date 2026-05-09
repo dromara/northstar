@@ -150,24 +150,27 @@ public class PlaybackService {
 		}
 		long to = CommonUtils.localDateTimeToMills(getPlaybackContext().getPlaybackStatus().getRunningDateTime());
 		long endTime = to;
-		LocalDate toDate = CommonUtils.millsToLocalDateTime(to).toLocalDate().plusDays(3);	// 考虑到CTP周五夜盘的情况，因此要多加载三天的冗余数据
-		LocalDate fromDate = null;
-		switch(interval) {
-		case M1, M3 -> {fromDate = toDate.minusWeeks(1).plusDays(1);}
-		case M5, M10 -> {fromDate = toDate.minusWeeks(2).plusDays(1);}
-		case M15, M30 -> {fromDate = toDate.minusWeeks(3).plusDays(1);}
-		case H1, H2 -> {fromDate = toDate.minusWeeks(12).plusDays(1);}
-		case H4, D1 -> {fromDate = toDate.minusYears(1).plusDays(1);}
-		case WK1 -> {fromDate = toDate.minusYears(2).plusDays(1);}
-		default -> throw new IllegalArgumentException("未定义周期处理：" + interval.getAlias());
-		};
+		LocalDateTime toDateTime = CommonUtils.millsToLocalDateTime(to).plusDays(3);	// 考虑到CTP周五夜盘的情况，因此要多加载三天的冗余数据
 		
 		List<Bar> mergedBars = new LinkedList<>();
 		MergedBarListener tempListener = mergedBars::add;
 		merger.addListener(tempListener);
-		dataService.smartLoad(contract, interval, contract.contractDefinition().dataSource(), fromDate, toDate)
+		dataService.getRangeBars(contractId, interval, null, CommonUtils.localDateTimeToMills(toDateTime))
 			.stream()
-			.filter(bar -> bar.actionTimestamp() <= endTime)
+			.filter(bar -> bar.getTimestamp() <= endTime)
+			.map(vo -> Bar.builder()
+					.actionDay(LocalDateTime.ofInstant(Instant.ofEpochMilli(vo.getTimestamp()), ZoneId.systemDefault()).toLocalDate())
+					.actionTime(LocalDateTime.ofInstant(Instant.ofEpochMilli(vo.getTimestamp()), ZoneId.systemDefault()).toLocalTime())
+					.actionTimestamp(vo.getTimestamp())
+					.tradingDay(LocalDate.parse(vo.getTradingDay(), DateTimeConstant.D_FORMAT_INT_FORMATTER))
+					.contract(contract)
+					.highPrice(vo.getHigh())
+					.lowPrice(vo.getLow())
+					.openPrice(vo.getOpen())
+					.closePrice(vo.getClose())
+					.volumeDelta(vo.getVolume())
+					.openInterest(vo.getOi())
+					.build())
 			.forEach(merger::onBar);
 		List<BarVO> resultList = mergedBars.stream().map(bar -> toVO(bar, interval)).toList();
 		getPlaybackContext().resume();

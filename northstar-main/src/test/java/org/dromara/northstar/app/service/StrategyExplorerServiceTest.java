@@ -103,7 +103,7 @@ class StrategyExplorerServiceTest {
     	service.repo = repo;
     	when(ic.contract()).thenReturn(contract);
     	when(mktCenter.getContract(any())).thenReturn(ic);
-        when(ds.getDailyData(any(), any(), any())).thenReturn(List.of(Bar.builder().closePrice(1000D).build(), Bar.builder().closePrice(1000D).build()));
+        when(ds.getData(any(), any(), any(), any())).thenReturn(List.of(Bar.builder().closePrice(1000D).build(), Bar.builder().closePrice(1000D).build()));
 //        when(dealRepo.findByModuleName(any())).thenReturn(Collections.emptyList());
     }
 

@@ -16,6 +16,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.dromara.northstar.common.constant.ChannelType;
+import org.dromara.northstar.common.constant.Interval;
 import org.dromara.northstar.common.constant.TickType;
 import org.dromara.northstar.common.model.BacktestModuleTradeDetailsVO;
 import org.dromara.northstar.common.model.BacktestModuleVO;
@@ -118,7 +119,7 @@ public class BacktestRunner {
 			LocalDate loadStart = cursorDate;
 			LocalDate loadEnd = cursorDate.plusDays(6);
 			for(Contract contract : contractModulesMap.keySet()) {
-				List<Bar> bars = dataSource.getMinutelyData(contract, loadStart, loadEnd);
+				List<Bar> bars = dataSource.getData(contract, Interval.M1, loadStart, loadEnd);
 				List<IModule> modules = contractModulesMap.get(contract);
 				for(Bar bar : bars.reversed()) {
 					if(bar.actionDay().isAfter(to)) {

@@ -1,7 +1,6 @@
 package org.dromara.northstar.gateway.mktdata;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
@@ -17,7 +16,6 @@ import org.dromara.northstar.common.exception.QuantitDataSourceException;
 import org.dromara.northstar.common.exception.UnauthorizedException;
 import org.dromara.northstar.common.model.core.Bar;
 import org.dromara.northstar.common.model.core.Contract;
-import org.dromara.northstar.common.model.core.TimeSlot;
 import org.dromara.northstar.common.utils.CommonUtils;
 import org.dromara.northstar.datasource.dto.DataSourceMessage.AggBarDTO;
 import org.dromara.northstar.datasource.dto.DataSourceMessage.ContractDTO;
@@ -61,37 +59,9 @@ public class NorthstarDataSource implements IDataSource{
 	}
 	
 	@Override
-	public List<Bar> getMinutelyData(Contract contract, LocalDate startDate, LocalDate endDate) {
+	public List<Bar> getData(Contract contract, Interval interval, LocalDate startDate, LocalDate endDate) {
 		try {
-			return convertMinuteData(dataService.getMinutelyData(contract.unifiedSymbol(), startDate, endDate), contract, Interval.M1);
-		} catch (ResourceAccessException e) {
-			throw new QuantitDataSourceException(e);
-		} catch (HttpClientErrorException e) {
-			if(e.getStatusCode() == HttpStatus.FORBIDDEN) {
-				throw new UnauthorizedException(contract.name());
-			}
-			throw e;
-		}
-	}
-
-	@Override
-	public List<Bar> getQuarterlyData(Contract contract, LocalDate startDate, LocalDate endDate) {
-		try {
-			return convertMinuteData(dataService.getQuarterlyData(contract.unifiedSymbol(), startDate, endDate), contract, Interval.M15);
-		} catch (ResourceAccessException e) {
-			throw new QuantitDataSourceException(e);
-		} catch (HttpClientErrorException e) {
-			if(e.getStatusCode() == HttpStatus.FORBIDDEN) {
-				throw new UnauthorizedException(contract.name());
-			}
-			throw e;
-		}
-	}
-
-	@Override
-	public List<Bar> getHourlyData(Contract contract, LocalDate startDate, LocalDate endDate) {
-		try {
-			return convertMinuteData(dataService.getHourlyData(contract.unifiedSymbol(), startDate, endDate), contract, Interval.H1);
+			return enhanceData(dataService.getData(contract.unifiedSymbol(), interval, startDate, endDate), contract, interval);
 		} catch (ResourceAccessException e) {
 			throw new QuantitDataSourceException(e);
 		} catch (HttpClientErrorException e) {
@@ -102,7 +72,7 @@ public class NorthstarDataSource implements IDataSource{
 		}
 	}
 	
-	private List<Bar> convertMinuteData(List<AggBarDTO> data, Contract contract, Interval interval){
+	private List<Bar> enhanceData(List<AggBarDTO> data, Contract contract, Interval interval){
 		return data.stream()
 				.map(dto -> Bar.builder()
 						.actionDay(CommonUtils.millsToLocalDateTime(dto.getTimestamp()).toLocalDate())
@@ -134,45 +104,6 @@ public class NorthstarDataSource implements IDataSource{
 		}
 		int numOfPriceTickInPrice = (int)(price * 1000) / (int)(contract.priceTick() * 1000);
 		return numOfPriceTickInPrice * contract.priceTick();
-	}
-
-	@Override
-	public List<Bar> getDailyData(Contract contract, LocalDate startDate, LocalDate endDate) {
-		List<TimeSlot> times = contract.contractDefinition().tradeTimeDef().timeSlots();
-		LocalTime dayEndTime = times.get(times.size() - 1).end();
-		try {
-			return dataService.getDailyData(contract.unifiedSymbol(), startDate, endDate)
-					.stream()
-					.map(dto -> Bar.builder()
-							.actionDay(LocalDate.parse(dto.getTradingDay()))
-							.actionTime(dto.getTimestamp() == 0 ? dayEndTime : CommonUtils.millsToLocalDateTime(dto.getTimestamp()).toLocalTime())
-							.actionTimestamp(dto.getTimestamp())
-							.tradingDay(LocalDate.parse(dto.getTradingDay()))
-							.channelType(contract.channelType())
-							.gatewayId(contract.channelType() + "")
-							.contract(contract)
-							.openPrice(indexContractPriceEnhance(contract, dto.getOpen()))
-							.closePrice(indexContractPriceEnhance(contract, dto.getClose()))
-							.highPrice(indexContractPriceEnhance(contract, dto.getHigh()))
-							.lowPrice(indexContractPriceEnhance(contract, dto.getLow()))
-							.openInterest(dto.getOpenInterest())
-							.openInterestDelta((int)dto.getOpenInterestDelta())
-							.volume(dto.getVolume())
-							.volumeDelta(dto.getVolumeDelta())
-							.turnover(dto.getTurnover())
-							.turnoverDelta(dto.getTurnoverDelta())
-							.preOpenInterest(dto.getPreOI())
-							.interval(Interval.D1)
-							.build())
-					.toList();
-		} catch (ResourceAccessException e) {
-			throw new QuantitDataSourceException(e);
-		} catch (HttpClientErrorException e) {
-			if(e.getStatusCode() == HttpStatus.FORBIDDEN) {
-				throw new UnauthorizedException(contract.name());
-			}
-			throw e;
-		}
 	}
 
 	@Override

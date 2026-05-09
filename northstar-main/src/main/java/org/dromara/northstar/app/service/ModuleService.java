@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import org.dromara.northstar.account.AccountManager;
@@ -50,9 +49,7 @@ import org.dromara.northstar.data.IModuleRepository;
 import org.dromara.northstar.gateway.IContract;
 import org.dromara.northstar.gateway.TradeGateway;
 import org.dromara.northstar.gateway.contract.OptionChainContract;
-import org.dromara.northstar.gateway.mktdata.DataSourceDataLoader;
 import org.dromara.northstar.gateway.mktdata.MarketCenter;
-import org.dromara.northstar.gateway.mktdata.NorthstarDataSource;
 import org.dromara.northstar.module.ArbitrageModuleContext;
 import org.dromara.northstar.module.ModuleContext;
 import org.dromara.northstar.module.ModuleManager;
@@ -98,9 +95,6 @@ public class ModuleService implements CommandLineRunner {
 	
 	@Autowired
 	private MarketCenter mktCenter;
-	
-	@Autowired
-	private NorthstarDataSource ds;
 	
 	@Autowired
 	private SseStreamController sseController;
@@ -238,12 +232,11 @@ public class ModuleService implements CommandLineRunner {
 				IContract c = mktCenter.getContract(Identifier.of(csi.getId()));
 				IDataSource dataSrc = c.dataSource();
 				Assert.notNull(dataSrc, () -> String.format("合约 [%s] 缺少数据源配置，无法加载历史数据", c.name()));
-				DataSourceDataLoader dataLoader = new DataSourceDataLoader(dataSrc);
 				if(c instanceof OptionChainContract) {
 					// 对于期权链合约，要加载的是成员合约
-					c.memberContracts().parallelStream().forEach(rc -> loadDataForInit(rc, dataLoader, weeksOfDataForPreparation, mctx));
+					c.memberContracts().parallelStream().forEach(rc -> loadDataForInit(rc, weeksOfDataForPreparation, mctx));
 				} else {
-					loadDataForInit(c, dataLoader, weeksOfDataForPreparation, mctx);
+					loadDataForInit(c, weeksOfDataForPreparation, mctx);
 				}
 			}
 		}
@@ -263,10 +256,11 @@ public class ModuleService implements CommandLineRunner {
 		return (T) obj;
 	}
 	
-	private void loadDataForInit(IContract c, DataSourceDataLoader loader, int weeks, IModuleContext mctx) {
+	private void loadDataForInit(IContract c, int weeks, IModuleContext mctx) {
 		LocalDate from = LocalDate.now().minusWeeks(weeks);
 		LocalDate to = LocalDate.now();
-		loader.loadMinutelyData(c.contract(), from, to, bars -> mctx.initData(bars.reversed()));
+		List<Bar> bars = c.dataSource().getData(c.contract(), Interval.M1, from, to);
+		mctx.initData(bars.reversed());
 		// 本地仅加载最近的数据
 		List<Bar> data = mdRepo.loadBars(c, LocalDate.now(), LocalDate.now().plusDays(3));
 		mctx.initData(data);
@@ -343,49 +337,39 @@ public class ModuleService implements CommandLineRunner {
 		
 		AtomicReference<LocalDate> yearMonth = new AtomicReference<>(preloadStartDate); 
 		IModuleContext ctx = m.getModuleContext();
-		Interval barInterval = Interval.fromAlias(md.getKlineInterval());
-		DataSourceDataLoader loader = new DataSourceDataLoader(ds);
-		Consumer<List<Bar>> handler = bars -> bars.reversed()
-				.stream()
-				.forEach(bar -> {
-					if(!bar.tradingDay().isBefore(startDate) && !ctx.isEnabled()) {
-						ctx.setEnabled(true);
-					}
-					if(!yearMonth.get().isAfter(bar.tradingDay())) {
-						yearMonth.set(yearMonth.get().plusWeeks(1));
-						log.info("当前回测至：{}", bar.tradingDay());
-					}
-					
-					ctx.onTick(Tick.builder()
-							.gatewayId(bar.gatewayId())
-							.contract(c)
-							.tradingDay(bar.tradingDay())
-							.actionDay(bar.actionDay())
-							.actionTime(bar.actionTime())
-							.actionTimestamp(bar.actionTimestamp())
-							.channelType(bar.channelType())
-							.preClosePrice(bar.preClosePrice())
-							.preOpenInterest(bar.preOpenInterest())
-							.preSettlePrice(bar.preSettlePrice())
-							.volume(bar.volume())
-							.volumeDelta(bar.volumeDelta())
-							.openInterest(bar.openInterest())
-							.openInterestDelta(bar.openInterestDelta())
-							.turnover(bar.turnover())
-							.turnoverDelta(bar.turnoverDelta())
-							.lastPrice(bar.closePrice())
-							.bidPrice(List.of(bar.closePrice()))
-							.askPrice(List.of(bar.closePrice()))
-							.build());
-					ctx.onBar(bar);
-				});
-		if(barInterval.getMinutes() < 15) {
-			loader.loadMinutelyData(c, preloadStartDate, endDate, handler);
-		} else if(barInterval.getMinutes() < 60) {
-			loader.loadQuarterlyData(c, preloadStartDate, endDate, handler);
-		} else {
-			loader.loadHourlyData(c, preloadStartDate, endDate, handler);
-		}
+		c.contractDefinition().dataSource().getData(c, Interval.fromAlias(md.getKlineInterval()), preloadStartDate, endDate)
+			.reversed().stream().forEach(bar -> {
+				if(!bar.tradingDay().isBefore(startDate) && !ctx.isEnabled()) {
+					ctx.setEnabled(true);
+				}
+				if(!yearMonth.get().isAfter(bar.tradingDay())) {
+					yearMonth.set(yearMonth.get().plusWeeks(1));
+					log.info("当前回测至：{}", bar.tradingDay());
+				}
+				
+				ctx.onTick(Tick.builder()
+						.gatewayId(bar.gatewayId())
+						.contract(c)
+						.tradingDay(bar.tradingDay())
+						.actionDay(bar.actionDay())
+						.actionTime(bar.actionTime())
+						.actionTimestamp(bar.actionTimestamp())
+						.channelType(bar.channelType())
+						.preClosePrice(bar.preClosePrice())
+						.preOpenInterest(bar.preOpenInterest())
+						.preSettlePrice(bar.preSettlePrice())
+						.volume(bar.volume())
+						.volumeDelta(bar.volumeDelta())
+						.openInterest(bar.openInterest())
+						.openInterestDelta(bar.openInterestDelta())
+						.turnover(bar.turnover())
+						.turnoverDelta(bar.turnoverDelta())
+						.lastPrice(bar.closePrice())
+						.bidPrice(List.of(bar.closePrice()))
+						.askPrice(List.of(bar.closePrice()))
+						.build());
+				ctx.onBar(bar);
+			});
 		log.info("回测结束");
 		ctx.setEnabled(false);
 	}

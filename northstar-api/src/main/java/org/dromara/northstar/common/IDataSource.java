@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import org.dromara.northstar.common.constant.ChannelType;
+import org.dromara.northstar.common.constant.Interval;
 import org.dromara.northstar.common.model.core.Bar;
 import org.dromara.northstar.common.model.core.Contract;
 import org.springframework.retry.annotation.Retryable;
@@ -14,44 +15,15 @@ import org.springframework.retry.annotation.Retryable;
 public interface IDataSource {
 
 	/**
-	 * 获取1分钟K线数据
+	 * 获取指定周期K线数据
 	 * @param contract
-	 * @param startDate		开始日（交易日）
-	 * @param endDate		结束日（交易日）
+	 * @param interval
+	 * @param startDate
+	 * @param endDate
 	 * @return
 	 */
 	@Retryable
-	List<Bar> getMinutelyData(Contract contract, LocalDate startDate, LocalDate endDate);
-	
-	/**
-	 * 获取15分钟K线数据
-	 * @param contract
-	 * @param startDate		开始日（交易日）
-	 * @param endDate		结束日（交易日）
-	 * @return
-	 */
-	@Retryable
-	List<Bar> getQuarterlyData(Contract contract, LocalDate startDate, LocalDate endDate);
-	
-	/**
-	 * 获取1小时K线数据
-	 * @param contract
-	 * @param startDate		开始日（交易日）
-	 * @param endDate		结束日（交易日）
-	 * @return
-	 */
-	@Retryable
-	List<Bar> getHourlyData(Contract contract, LocalDate startDate, LocalDate endDate);
-	
-	/**
-	 * 获取日K线数据
-	 * @param contract
-	 * @param startDate		开始日（交易日）
-	 * @param endDate		结束日（交易日）
-	 * @return
-	 */
-	@Retryable
-	List<Bar> getDailyData(Contract contract, LocalDate startDate, LocalDate endDate);
+	List<Bar> getData(Contract contract, Interval interval, LocalDate startDate, LocalDate endDate);
 	
 	/**
 	 * 获取查询范围内的节假日（包括周末）

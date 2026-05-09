@@ -64,7 +64,7 @@ class PlaybackDataLoaderTest {
 		when(ic.dataSource()).thenReturn(ds);
 		when(ic.contract()).thenReturn(c);
 		when(c.contractDefinition()).thenReturn(cd);
-		when(ds.getMinutelyData(any(), any(), any())).thenReturn(List.of(bar));
+		when(ds.getData(any(), any(), any(), any())).thenReturn(List.of(bar));
 	}
 
 	@Test

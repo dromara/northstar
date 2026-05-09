@@ -7,6 +7,7 @@ import java.time.LocalTime;
 import java.util.List;
 
 import org.dromara.northstar.common.constant.ChannelType;
+import org.dromara.northstar.common.constant.Interval;
 import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.common.model.core.ContractDefinition;
 import org.dromara.northstar.common.model.core.TimeSlot;
@@ -41,22 +42,22 @@ class NorthstarDataSourceTest {
 	
 	@Test
 	void testGetMinutelyData() {
-		assertThat(ds.getMinutelyData(c, LocalDate.of(2024, 3, 22), LocalDate.of(2024, 3, 22))).isNotEmpty();
+		assertThat(ds.getData(c, Interval.M1, LocalDate.of(2024, 3, 22), LocalDate.of(2024, 3, 22))).isNotEmpty();
 	}
 
 	@Test
 	void testGetQuarterlyData() {
-		assertThat(ds.getQuarterlyData(c, LocalDate.of(2024, 3, 22), LocalDate.of(2024, 3, 22))).isNotEmpty();
+		assertThat(ds.getData(c, Interval.M15, LocalDate.of(2024, 3, 22), LocalDate.of(2024, 3, 22))).isNotEmpty();
 	}
 
 	@Test
 	void testGetHourlyData() {
-		assertThat(ds.getHourlyData(c, LocalDate.of(2024, 3, 22), LocalDate.of(2024, 3, 22))).isNotEmpty();
+		assertThat(ds.getData(c, Interval.H1, LocalDate.of(2024, 3, 22), LocalDate.of(2024, 3, 22))).isNotEmpty();
 	}
 
 	@Test
 	void testGetDailyData() {
-		assertThat(ds.getDailyData(c, LocalDate.of(2024, 3, 22), LocalDate.of(2024, 3, 22))).isNotEmpty();
+		assertThat(ds.getData(c, Interval.D1, LocalDate.of(2024, 3, 22), LocalDate.of(2024, 3, 22))).isNotEmpty();
 	}
 
 	@Test

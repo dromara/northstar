@@ -6,6 +6,7 @@ import static org.mockito.Mockito.mock;
 import java.time.LocalDate;
 
 import org.dromara.northstar.common.constant.ChannelType;
+import org.dromara.northstar.common.constant.Interval;
 import org.dromara.northstar.common.model.core.Contract;
 import org.junit.jupiter.api.Test;
 
@@ -15,10 +16,7 @@ class EmptyDataSourceTest {
 	void test() {
 		EmptyDataSource source = new EmptyDataSource();
 		assertThat(source.getAllContracts()).isEmpty();
-		assertThat(source.getMinutelyData(mock(Contract.class), LocalDate.now(), LocalDate.now())).isEmpty();
-		assertThat(source.getQuarterlyData(mock(Contract.class), LocalDate.now(), LocalDate.now())).isEmpty();
-		assertThat(source.getHourlyData(mock(Contract.class), LocalDate.now(), LocalDate.now())).isEmpty();
-		assertThat(source.getDailyData(mock(Contract.class), LocalDate.now(), LocalDate.now())).isEmpty();
+		assertThat(source.getData(mock(Contract.class), Interval.M1, LocalDate.now(), LocalDate.now())).isEmpty();
 		assertThat(source.getHolidays(ChannelType.SIM, LocalDate.now(), LocalDate.now())).isEmpty();
 	}
 

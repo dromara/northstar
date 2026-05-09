@@ -11,6 +11,7 @@ import java.util.Objects;
 import org.dromara.northstar.common.IDataSource;
 import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.constant.DateTimeConstant;
+import org.dromara.northstar.common.constant.Interval;
 import org.dromara.northstar.common.model.core.Bar;
 import org.dromara.northstar.common.utils.CommonUtils;
 import org.dromara.northstar.data.IMarketDataRepository;
@@ -92,7 +93,7 @@ public class MarketDataRepoAdapter implements IMarketDataRepository{
 	public List<Bar> loadDailyBars(IContract contract, LocalDate startDate, LocalDate endDate) {
 		IDataSource dataServiceDelegate = contract.dataSource();
 		try {
-			return dataServiceDelegate.getDailyData(contract.contract(), startDate, endDate);
+			return dataServiceDelegate.getData(contract.contract(), Interval.D1, startDate, endDate);
 		} catch (Exception e) {
 			log.error("{}", e.getMessage());
 			return Collections.emptyList();

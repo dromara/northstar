@@ -5,6 +5,7 @@ import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 
+import org.dromara.northstar.common.constant.Interval;
 import org.dromara.northstar.datasource.dto.DataSourceMessage.AggBarDTO;
 import org.dromara.northstar.datasource.dto.DataSourceMessage.ContractDTO;
 import org.dromara.northstar.datasource.dto.DataSourceMessage.HolidayDTO;
@@ -122,6 +123,14 @@ public class QuantitDataServiceManager {
 		log.info("请求数据服务1d数据：{} {} -> {}", unifiedSymbol, start, end);
 		ResponseEntity<List<String>> resp = restTemplate.exchange("/dataservice/data/pb/day?unifiedSymbol={unifiedSymbol}&startDate={start}&endDate={end}",
 				HttpMethod.GET, null, GENIC_MSG_TYPE, unifiedSymbol, start, end);
+		return extract(resp, AggBarDTO.class);
+	}
+	
+	@Retryable(maxAttempts = 2, backoff = @Backoff(delay = 1000))
+	public List<AggBarDTO> getData(String unifiedSymbol, Interval interval, LocalDate start, LocalDate end) {
+		log.info("请求数据服务{}数据：{} {} -> {}", interval.getAlias(), unifiedSymbol, start, end);
+		ResponseEntity<List<String>> resp = restTemplate.exchange("/dataservice/data/pb/{interval}?unifiedSymbol={unifiedSymbol}&startDate={start}&endDate={end}",
+				HttpMethod.GET, null, GENIC_MSG_TYPE, interval, unifiedSymbol, start, end);
 		return extract(resp, AggBarDTO.class);
 	}
 }

@@ -74,7 +74,7 @@ public class BacktestModuleFactory {
 				Interval barInterval = Interval.fromAlias(interval);
 				String moduleName = moduleName(task.getTaskName(), c, barInterval);
 				Contract contract = mktCenter.getContract(Identifier.of(c.getId())).contract();
-				List<Bar> preloadBars = dataSource.getDailyData(contract, startDate.minusMonths(1), startDate);
+				List<Bar> preloadBars = dataSource.getData(contract, Interval.D1, startDate.minusMonths(1), startDate);
 				double avgPrice = preloadBars.stream().mapToDouble(Bar::closePrice).average().getAsDouble();
 				double costPerShare = avgPrice * contract.multiplier() * contract.contractDefinition().marginRatio();	// 每手成本
 				// 在初始资金的一半决定默认仓位
