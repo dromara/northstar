@@ -48,8 +48,8 @@ class PlaybackControllerTest {
 
 	GatewayDescription gd = GatewayDescription.builder().gatewayId("PLAYBACK").channelType(ChannelType.PLAYBACK)
 			.gatewayUsage(GatewayUsage.MARKET_DATA)
-			.subscribedContracts(List.of(ContractSimpleInfo.builder().id("BTCUSDT@BINANCE@SPOT@PLAYBACK")
-					.unifiedSymbol("BTCUSDT@BINANCE@SPOT").channelType(ChannelType.PLAYBACK).build()))
+			.subscribedContracts(List.of(ContractSimpleInfo.builder().id("BTCUSDT@BINANCE@SWAP@PLAYBACK")
+					.unifiedSymbol("BTCUSDT@BINANCE@SWAP").channelType(ChannelType.PLAYBACK).build()))
 			.settings(PlaybackGatewaySettings.builder()
 					.startDate(LocalDate.now().minusWeeks(1).format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
 					.endDate(LocalDate.now().format(DateTimeConstant.D_FORMAT_INT_FORMATTER))
@@ -72,7 +72,7 @@ class PlaybackControllerTest {
 	@Test
 	void testPreLoadWeeklyCrypto() throws Exception {
 		String result = mvc
-				.perform(MockMvcRequestBuilders.get("/northstar/playback/history/BTCUSDT@BINANCE@SPOT@PLAYBACK/1wk"))
+				.perform(MockMvcRequestBuilders.get("/northstar/playback/history/BTCUSDT@BINANCE@SWAP@PLAYBACK/1wk"))
 				.andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
 		ObjectMapper mapper = new ObjectMapper();
 		List<BarVO> bars = mapper.readValue(result, new TypeReference<List<BarVO>>() {
@@ -91,7 +91,7 @@ class PlaybackControllerTest {
 	@Test
 	void testPreLoadDailyCrypto() throws Exception {
 		String result = mvc
-				.perform(MockMvcRequestBuilders.get("/northstar/playback/history/BTCUSDT@BINANCE@SPOT@PLAYBACK/1d"))
+				.perform(MockMvcRequestBuilders.get("/northstar/playback/history/BTCUSDT@BINANCE@SWAP@PLAYBACK/1d"))
 				.andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
 		ObjectMapper mapper = new ObjectMapper();
 		List<BarVO> bars = mapper.readValue(result, new TypeReference<List<BarVO>>() {
@@ -108,7 +108,7 @@ class PlaybackControllerTest {
 	@Test
 	void testPreLoadQuarterlyCrypto() throws Exception {
 		String result = mvc
-				.perform(MockMvcRequestBuilders.get("/northstar/playback/history/BTCUSDT@BINANCE@SPOT@PLAYBACK/15m"))
+				.perform(MockMvcRequestBuilders.get("/northstar/playback/history/BTCUSDT@BINANCE@SWAP@PLAYBACK/15m"))
 				.andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
 		ObjectMapper mapper = new ObjectMapper();
 		List<BarVO> bars = mapper.readValue(result, new TypeReference<List<BarVO>>() {

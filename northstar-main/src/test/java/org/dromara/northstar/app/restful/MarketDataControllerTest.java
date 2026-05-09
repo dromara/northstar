@@ -48,8 +48,8 @@ class MarketDataControllerTest {
 			.channelType(ChannelType.PLAYBACK)
 			.gatewayUsage(GatewayUsage.MARKET_DATA)
 			.subscribedContracts(List.of(ContractSimpleInfo.builder()
-					.id("BTCUSDT@BINANCE@SPOT@PLAYBACK")
-					.unifiedSymbol("BTCUSDT@BINANCE@SPOT")
+					.id("BTCUSDT@BINANCE@SWAP@PLAYBACK")
+					.unifiedSymbol("BTCUSDT@BINANCE@SWAP")
 					.channelType(ChannelType.PLAYBACK)
 					.build()))
 			.settings(PlaybackGatewaySettings.builder()
@@ -72,7 +72,7 @@ class MarketDataControllerTest {
 	
 	@Test
 	void testRange() throws Exception {
-		String result = mvc.perform(MockMvcRequestBuilders.get("/northstar/marketdata/range/BTCUSDT@BINANCE@SPOT@PLAYBACK/15m?fromTime=&toTime="))
+		String result = mvc.perform(MockMvcRequestBuilders.get("/northstar/marketdata/range/BTCUSDT@BINANCE@SWAP@PLAYBACK/15m?fromTime=&toTime="))
 		.andExpect(status().isOk())
 		.andReturn().getResponse().getContentAsString();
 		ObjectMapper mapper = new ObjectMapper();
@@ -86,7 +86,7 @@ class MarketDataControllerTest {
 		LocalDateTime now = LocalDateTime.now();
 		LocalDateTime lastWeek = now.minusWeeks(2);
 		String timeRange = String.format("?fromTime=%d&toTime=%d", CommonUtils.localDateTimeToMills(lastWeek), CommonUtils.localDateTimeToMills(now));
-		String result = mvc.perform(MockMvcRequestBuilders.get("/northstar/marketdata/range/BTCUSDT@BINANCE@SPOT@PLAYBACK/1wk" + timeRange))
+		String result = mvc.perform(MockMvcRequestBuilders.get("/northstar/marketdata/range/BTCUSDT@BINANCE@SWAP@PLAYBACK/1wk" + timeRange))
 		.andExpect(status().isOk())
 		.andReturn().getResponse().getContentAsString();
 		ObjectMapper mapper = new ObjectMapper();
@@ -106,7 +106,7 @@ class MarketDataControllerTest {
 		LocalDateTime now = LocalDateTime.now();
 		LocalDateTime lastWeek = now.minusWeeks(1);
 		String timeRange = String.format("?fromTime=%d&toTime=%d", CommonUtils.localDateTimeToMills(lastWeek), CommonUtils.localDateTimeToMills(now));
-		String result = mvc.perform(MockMvcRequestBuilders.get("/northstar/marketdata/range/BTCUSDT@BINANCE@SPOT@PLAYBACK/1d" + timeRange))
+		String result = mvc.perform(MockMvcRequestBuilders.get("/northstar/marketdata/range/BTCUSDT@BINANCE@SWAP@PLAYBACK/1d" + timeRange))
 		.andExpect(status().isOk())
 		.andReturn().getResponse().getContentAsString();
 		ObjectMapper mapper = new ObjectMapper();
@@ -125,7 +125,7 @@ class MarketDataControllerTest {
 		LocalDateTime now = LocalDateTime.now();
 		LocalDateTime lastWeek = now.minusWeeks(1);
 		String timeRange = String.format("?fromTime=%d&toTime=%d", CommonUtils.localDateTimeToMills(lastWeek), CommonUtils.localDateTimeToMills(now));
-		String result = mvc.perform(MockMvcRequestBuilders.get("/northstar/marketdata/range/BTCUSDT@BINANCE@SPOT@PLAYBACK/1m" + timeRange))
+		String result = mvc.perform(MockMvcRequestBuilders.get("/northstar/marketdata/range/BTCUSDT@BINANCE@SWAP@PLAYBACK/1m" + timeRange))
 		.andExpect(status().isOk())
 		.andReturn().getResponse().getContentAsString();
 		ObjectMapper mapper = new ObjectMapper();
@@ -144,7 +144,7 @@ class MarketDataControllerTest {
 		LocalDateTime now = LocalDateTime.now();
 		LocalDateTime lastWeek = now.minusWeeks(1);
 		String timeRange = String.format("?fromTime=%d&toTime=%d", CommonUtils.localDateTimeToMills(lastWeek), CommonUtils.localDateTimeToMills(now));
-		String result = mvc.perform(MockMvcRequestBuilders.get("/northstar/marketdata/range/BTCUSDT@BINANCE@SPOT@PLAYBACK/15m" + timeRange))
+		String result = mvc.perform(MockMvcRequestBuilders.get("/northstar/marketdata/range/BTCUSDT@BINANCE@SWAP@PLAYBACK/15m" + timeRange))
 		.andExpect(status().isOk())
 		.andReturn().getResponse().getContentAsString();
 		ObjectMapper mapper = new ObjectMapper();

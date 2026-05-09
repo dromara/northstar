@@ -38,6 +38,7 @@ public class PlaybackContractDefProvider implements IContractDefinitionProvider{
 	private static final ProductClassEnum FX = ProductClassEnum.FOREX;
 	private static final ProductClassEnum SPO = ProductClassEnum.SPOT;
 	private static final ProductClassEnum ETF = ProductClassEnum.ETF;
+	private static final ProductClassEnum SWAP = ProductClassEnum.SWAP;
 	
 	private static final ExchangeEnum CFFEX = ExchangeEnum.CFFEX;
 	private static final ExchangeEnum CZCE = ExchangeEnum.CZCE;
@@ -205,7 +206,7 @@ public class PlaybackContractDefProvider implements IContractDefinitionProvider{
 			
 			/* 加密货币 */
 			buildCryptos("币安现货", BIAN, SPO, ".+@BINANCE@SPOT.+"),
-			buildCryptos("币安代币合约", BIAN, FUT, ".+@BINANCE@FUTURES.+")
+			buildCryptos("币安代币合约", BIAN, SWAP, ".+@BINANCE@SWAP.+")
 		);
 	}
 	
