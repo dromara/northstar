@@ -147,65 +147,65 @@ public class NorthstarDataSource implements IDataSource{
 			});
 		}
 		
-		if(has(US_STOCKS)) {
-			Thread.startVirtualThread(() -> {
-				try {
-					Function<ContractDTO, Contract> mapper = makeConvertFn(ProductClassEnum.EQUITY, CurrencyEnum.USD);
-					List<Contract> result = dataService.getUsStocksContracts().stream().map(mapper).toList();
-					results.addAll(result);
-					log.info("加载美股合约：{}个", result.size());
-				} catch(Exception e) {
-					log.warn("美股合约加载失败：{}", e.getMessage());
-				} finally {
-					cdl.countDown();
-				}
-			});
-		}
-		
-		if(has(US_ETF)) {
-			Thread.startVirtualThread(() -> {
-				try {
-					Function<ContractDTO, Contract> mapper = makeConvertFn(ProductClassEnum.ETF, CurrencyEnum.USD);
-					List<Contract> result = dataService.getUsETFContracts().stream().map(mapper).toList();
-					results.addAll(result);
-					log.info("加载美股ETF合约：{}个", result.size());
-				} catch(Exception e) {
-					log.warn("美股ETF合约加载失败：{}", e.getMessage());
-				} finally {
-					cdl.countDown();
-				}
-			});
-		}
-		
-		if(has(FOREX)) {
-			Thread.startVirtualThread(() -> {
-				try {
-					Function<ContractDTO, Contract> mapper = makeConvertFn(ProductClassEnum.FOREX, CurrencyEnum.USD);
-					List<Contract> result = dataService.getForexContracts().stream().map(mapper).toList();
-					results.addAll(result);
-					log.info("加载外汇合约：{}个", result.size());
-				} catch(Exception e) {
-					log.warn("外汇合约加载失败：{}", e.getMessage());
-				} finally {
-					cdl.countDown();
-				}
-			});
-		}
-		
-		if(has(HK_STOCKS)) {
-			Thread.startVirtualThread(() -> {
-				try {
-					Function<ContractDTO, Contract> mapper = makeConvertFn(ProductClassEnum.EQUITY, CurrencyEnum.HKD);
-					List<Contract> result = dataService.getHkStocksContracts().stream().map(mapper).toList();
-					results.addAll(result);
-					log.info("加载港股合约：{}个", result.size());
-				} catch(Exception e) {
-					log.warn("港股合约加载失败：{}", e.getMessage());
-				} finally {
-					cdl.countDown();
-				}
-			});
-		}
+//		if(has(US_STOCKS)) {
+//			Thread.startVirtualThread(() -> {
+//				try {
+//					Function<ContractDTO, Contract> mapper = makeConvertFn(ProductClassEnum.EQUITY, CurrencyEnum.USD);
+//					List<Contract> result = dataService.getUsStocksContracts().stream().map(mapper).toList();
+//					results.addAll(result);
+//					log.info("加载美股合约：{}个", result.size());
+//				} catch(Exception e) {
+//					log.warn("美股合约加载失败：{}", e.getMessage());
+//				} finally {
+//					cdl.countDown();
+//				}
+//			});
+//		}
+//		
+//		if(has(US_ETF)) {
+//			Thread.startVirtualThread(() -> {
+//				try {
+//					Function<ContractDTO, Contract> mapper = makeConvertFn(ProductClassEnum.ETF, CurrencyEnum.USD);
+//					List<Contract> result = dataService.getUsETFContracts().stream().map(mapper).toList();
+//					results.addAll(result);
+//					log.info("加载美股ETF合约：{}个", result.size());
+//				} catch(Exception e) {
+//					log.warn("美股ETF合约加载失败：{}", e.getMessage());
+//				} finally {
+//					cdl.countDown();
+//				}
+//			});
+//		}
+//		
+//		if(has(FOREX)) {
+//			Thread.startVirtualThread(() -> {
+//				try {
+//					Function<ContractDTO, Contract> mapper = makeConvertFn(ProductClassEnum.FOREX, CurrencyEnum.USD);
+//					List<Contract> result = dataService.getForexContracts().stream().map(mapper).toList();
+//					results.addAll(result);
+//					log.info("加载外汇合约：{}个", result.size());
+//				} catch(Exception e) {
+//					log.warn("外汇合约加载失败：{}", e.getMessage());
+//				} finally {
+//					cdl.countDown();
+//				}
+//			});
+//		}
+//		
+//		if(has(HK_STOCKS)) {
+//			Thread.startVirtualThread(() -> {
+//				try {
+//					Function<ContractDTO, Contract> mapper = makeConvertFn(ProductClassEnum.EQUITY, CurrencyEnum.HKD);
+//					List<Contract> result = dataService.getHkStocksContracts().stream().map(mapper).toList();
+//					results.addAll(result);
+//					log.info("加载港股合约：{}个", result.size());
+//				} catch(Exception e) {
+//					log.warn("港股合约加载失败：{}", e.getMessage());
+//				} finally {
+//					cdl.countDown();
+//				}
+//			});
+//		}
 		
 		if(has(CN_STOCKS)) {
 			Thread.startVirtualThread(() -> {
