@@ -130,7 +130,7 @@ public class QuantitDataServiceManager {
 	public List<AggBarDTO> getData(String unifiedSymbol, Interval interval, LocalDate start, LocalDate end) {
 		log.info("请求数据服务{}数据：{} {} -> {}", interval.getAlias(), unifiedSymbol, start, end);
 		ResponseEntity<List<String>> resp = restTemplate.exchange("/dataservice/data/pb/{interval}?unifiedSymbol={unifiedSymbol}&startDate={start}&endDate={end}",
-				HttpMethod.GET, null, GENIC_MSG_TYPE, interval, unifiedSymbol, start, end);
+				HttpMethod.GET, null, GENIC_MSG_TYPE, interval.getAlias(), unifiedSymbol, start, end);
 		return extract(resp, AggBarDTO.class);
 	}
 }

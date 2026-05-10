@@ -87,7 +87,7 @@ public class MarketDataService {
 			return Collections.emptyList();
 		}
 		
-		List<Bar> bars = dataSource.getData(contract, interval, fromDate, toDate).reversed();
+		List<Bar> bars = new LinkedList<>(dataSource.getData(contract, interval, fromDate, toDate).reversed());
 		List<Bar> mergedBars = new LinkedList<>();
 		// 本地仅加载最近的数据
 		List<Bar> data = mdRepo.loadBars(ic, LocalDate.now(), LocalDate.now().plusDays(3));

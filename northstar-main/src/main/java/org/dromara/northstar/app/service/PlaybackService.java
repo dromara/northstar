@@ -151,11 +151,24 @@ public class PlaybackService {
 		long to = CommonUtils.localDateTimeToMills(getPlaybackContext().getPlaybackStatus().getRunningDateTime());
 		long endTime = to;
 		LocalDateTime toDateTime = CommonUtils.millsToLocalDateTime(to).plusDays(3);	// 考虑到CTP周五夜盘的情况，因此要多加载三天的冗余数据
-		
+		int dayDif = switch (interval) {
+			case M1,M3 -> 3;
+			case M5 -> 5;
+			case M10 -> 10;
+			case M15 -> 15;
+			case M30 -> 30;
+			case H1 -> 60;
+			case H2 -> 120;
+			case H4 -> 240;
+			case D1 -> 300;
+			case WK1 -> 1500;
+			default -> throw new IllegalArgumentException("不支持的周期类型：" + interval);
+		};
+		LocalDateTime fromDateTime = getPlaybackContext().getPlaybackStatus().getRunningDateTime().minusDays(dayDif);
 		List<Bar> mergedBars = new LinkedList<>();
 		MergedBarListener tempListener = mergedBars::add;
 		merger.addListener(tempListener);
-		dataService.getRangeBars(contractId, interval, null, CommonUtils.localDateTimeToMills(toDateTime))
+		dataService.getRangeBars(contractId, interval, CommonUtils.localDateTimeToMills(fromDateTime), CommonUtils.localDateTimeToMills(toDateTime))
 			.stream()
 			.filter(bar -> bar.getTimestamp() <= endTime)
 			.map(vo -> Bar.builder()
