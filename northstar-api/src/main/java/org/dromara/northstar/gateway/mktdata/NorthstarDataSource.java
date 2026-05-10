@@ -47,7 +47,7 @@ public class NorthstarDataSource implements IDataSource{
 	public static final int CRYPTO = 32;
 	public static final int US_ETF = 64;
 	
-	private int defaultMode = CN_FUTURES | CN_STOCKS | HK_STOCKS | US_STOCKS | FOREX | CRYPTO | US_ETF;
+	private int defaultMode = CN_FUTURES | CN_STOCKS | CRYPTO; // | HK_STOCKS | US_STOCKS | FOREX | US_ETF;
 	
 	public NorthstarDataSource(QuantitDataServiceManager dataService) {
 		this.dataService = dataService;
