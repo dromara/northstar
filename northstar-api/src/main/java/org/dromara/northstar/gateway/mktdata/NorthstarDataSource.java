@@ -228,7 +228,6 @@ public class NorthstarDataSource implements IDataSource{
 					Function<ContractDTO, Contract> futMapper = makeConvertFn(ProductClassEnum.SWAP, CurrencyEnum.USDT);
 					List<Contract> swapResult = dataService.getCryptoContracts()
 							.stream()
-							.filter(dto -> dto.getSymbol().equals(dto.getName()))
 							.map(futMapper)
 							.toList();
 					results.addAll(swapResult);

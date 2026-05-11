@@ -160,8 +160,7 @@ public class PlaybackService {
 			case H1 -> 60;
 			case H2 -> 120;
 			case H4 -> 240;
-			case D1 -> 300;
-			case WK1 -> 1500;
+			case D1,WK1 -> 300;
 			default -> throw new IllegalArgumentException("不支持的周期类型：" + interval);
 		};
 		LocalDateTime fromDateTime = getPlaybackContext().getPlaybackStatus().getRunningDateTime().minusDays(dayDif);
