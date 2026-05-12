@@ -1,6 +1,8 @@
 package org.dromara.northstar.app.service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -64,8 +66,7 @@ public class MarketDataService {
 			case H1 -> 60;
 			case H2 -> 120;
 			case H4 -> 240;
-			case D1 -> 300;
-			case WK1 -> 1500;
+			case D1,WK1 -> 300;
 			default -> throw new IllegalArgumentException("不支持的周期类型：" + interval);
 		};
 		
@@ -106,7 +107,7 @@ public class MarketDataService {
 			mergedBars = bars;
 		}
 		
-		return mergedBars.stream()
+		List<BarVO> resultList = mergedBars.stream()
 				.filter(bar -> bar.actionTimestamp() < Optional.ofNullable(toTime).orElse(System.currentTimeMillis()))
 				.filter(bar -> bar.actionTimestamp() > Optional.ofNullable(fromTime).orElse(0L))
 				.map(bar -> BarVO.builder()
@@ -121,6 +122,12 @@ public class MarketDataService {
 						.interval(interval.getAlias())
 						.build())
 				.toList();
+		if(resultList.isEmpty()) {
+			log.info("查询结果为空，合约{}，周期{}，{} -> {}，尝试扩大查询范围", contractId, interval.getAlias(), fromDate, toDate);
+			long fromTime2 = CommonUtils.localDateTimeToMills(LocalDateTime.of(fromDate.minusDays(7), LocalTime.of(0, 0)));
+			return getRangeBars(contractId, interval, fromTime2, toTime);
+		}
+		return resultList;
 	}
 	
 	public void subscribe(List<String> contractIds) {
