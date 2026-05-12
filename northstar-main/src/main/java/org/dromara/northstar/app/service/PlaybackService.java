@@ -182,6 +182,7 @@ public class PlaybackService {
 					.closePrice(vo.getClose())
 					.volumeDelta(vo.getVolume())
 					.openInterest(vo.getOi())
+					.interval(interval)
 					.build())
 			.forEach(merger::onBar);
 		List<BarVO> resultList = mergedBars.stream().map(bar -> toVO(bar, interval)).toList();
