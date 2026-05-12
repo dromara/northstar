@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 import org.dromara.northstar.common.IDataSource;
@@ -58,17 +60,33 @@ public class NorthstarDataSource implements IDataSource{
 		this.defaultMode = subscription;
 	}
 	
+	private static final Pattern MESSAGE_PATTERN = Pattern.compile(
+        "[\"']?message[\"']?\\s*:\\s*[\"'](.*?)[\"'](?=,|\\s*}|\\s*$)",
+        Pattern.CASE_INSENSITIVE
+    );
+    
+    public static String extractMessage(String text) {
+        if (text == null) return null;
+        
+        Matcher matcher = MESSAGE_PATTERN.matcher(text);
+        return matcher.find() ? matcher.group(1) : "请查看日志的具体错误信息";
+    }
+	
 	@Override
 	public List<Bar> getData(Contract contract, Interval interval, LocalDate startDate, LocalDate endDate) {
 		try {
 			return enhanceData(dataService.getData(contract.unifiedSymbol(), interval, startDate, endDate), contract, interval);
-		} catch (ResourceAccessException e) {
-			throw new QuantitDataSourceException(e);
 		} catch (HttpClientErrorException e) {
 			if(e.getStatusCode() == HttpStatus.FORBIDDEN) {
 				throw new UnauthorizedException(contract.name());
 			}
-			throw e;
+			if(e.getStatusCode() == HttpStatus.BAD_REQUEST) {
+				log.warn("{}", e.getMessage());
+				throw new IllegalArgumentException(extractMessage(e.getMessage()));
+			}
+			throw new QuantitDataSourceException(e);
+		} catch (Exception e) {
+			throw new QuantitDataSourceException(e);
 		}
 	}
 	
