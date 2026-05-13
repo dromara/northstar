@@ -56,7 +56,7 @@ public class ContractSimpleInfo {
 				.unifiedSymbol(c.unifiedSymbol())
 				.channelType(c.channelType())
 				.precision(c.pricePrecision())
-				.dueDate(c.lastTradeDate().format(DateTimeConstant.D_FORMAT_FORMATTER))
+				.dueDate(Objects.isNull(c.lastTradeDate()) ? null : c.lastTradeDate().format(DateTimeConstant.D_FORMAT_FORMATTER))
 				.build();
 	}
 	
