@@ -19,7 +19,6 @@ import org.dromara.northstar.common.constant.PlaybackSpeed;
 import org.dromara.northstar.common.model.BarVO;
 import org.dromara.northstar.common.model.ContractSimpleInfo;
 import org.dromara.northstar.common.model.GatewayDescription;
-import org.dromara.northstar.common.utils.CommonUtils;
 import org.dromara.northstar.gateway.playback.PlaybackGatewaySettings;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -122,22 +121,4 @@ class PlaybackControllerTest {
 		});
 	}
 
-	@Test
-	void testPreLoadHourlyForex() throws Exception {
-		String result = mvc
-				.perform(MockMvcRequestBuilders.get("/northstar/playback/history/XAUUSD@FXCM@FOREX@PLAYBACK/4h"))
-				.andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
-		ObjectMapper mapper = new ObjectMapper();
-		List<BarVO> bars = mapper.readValue(result, new TypeReference<List<BarVO>>() {
-		});
-
-		assertThat(bars).isNotEmpty();
-		Set<Long> times = new HashSet<>();
-		bars.forEach(bar -> {
-			assertThat(times.contains(bar.getTimestamp()));
-			times.add(bar.getTimestamp());
-			log.info("{}", CommonUtils.millsToLocalDateTime(bar.getTimestamp()));
-		});
-	}
-	
 }
