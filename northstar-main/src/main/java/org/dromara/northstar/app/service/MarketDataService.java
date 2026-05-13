@@ -1,8 +1,6 @@
 package org.dromara.northstar.app.service;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -107,7 +105,7 @@ public class MarketDataService {
 			mergedBars = bars;
 		}
 		
-		List<BarVO> resultList = mergedBars.stream()
+		return mergedBars.stream()
 				.filter(bar -> bar.actionTimestamp() < Optional.ofNullable(toTime).orElse(System.currentTimeMillis()))
 				.filter(bar -> bar.actionTimestamp() > Optional.ofNullable(fromTime).orElse(0L))
 				.map(bar -> BarVO.builder()
@@ -122,12 +120,6 @@ public class MarketDataService {
 						.interval(interval.getAlias())
 						.build())
 				.toList();
-		if(resultList.isEmpty()) {
-			log.info("查询结果为空，合约{}，周期{}，{} -> {}，尝试扩大查询范围", contractId, interval.getAlias(), fromDate, toDate);
-			long fromTime2 = CommonUtils.localDateTimeToMills(LocalDateTime.of(fromDate.minusDays(7), LocalTime.of(0, 0)));
-			return getRangeBars(contractId, interval, fromTime2, toTime);
-		}
-		return resultList;
 	}
 	
 	public void subscribe(List<String> contractIds) {
