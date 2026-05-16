@@ -95,7 +95,7 @@ public class PlaybackContext {
 		Assert.isTrue(!startDate().isBefore(preloadDate()), "预热开始日不能迟于回放开始日");
 		this.dataLoader = new PlaybackDataLoader(gateway.getDescription().getGatewayId(), contracts, settings().getPrecision(), ds);
 		
-		klineGeneratorMap = contracts.stream().collect(Collectors.toMap(c -> c, c -> new KlineGenerator(c, feEngine)));
+		klineGeneratorMap = contracts.stream().collect(Collectors.toMap(c -> c, c -> new KlineGenerator(c, feEngine, false)));
 		// 初始化回放状态
 		reset();
 	}
