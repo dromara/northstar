@@ -10,14 +10,12 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.constant.ConnectionState;
 import org.dromara.northstar.common.event.FastEventEngine;
 import org.dromara.northstar.common.event.NorthstarEventType;
 import org.dromara.northstar.common.model.GatewayDescription;
 import org.dromara.northstar.common.model.core.Tick;
 import org.dromara.northstar.gateway.MarketGateway;
-import org.dromara.northstar.gateway.contract.GatewayContract;
 import org.dromara.northstar.gateway.mktdata.MarketCenter;
 
 import lombok.extern.slf4j.Slf4j;
@@ -93,8 +91,6 @@ public class SimMarketGatewayLocal extends MarketGateway{
 							Tick tick = gen.generateNextTick(LocalDateTime.now(), SimMarketGatewayLocal.this);
 							mktCenter.onTick(tick);
 							feEngine.emitEvent(NorthstarEventType.TICK, tick);
-							GatewayContract contract = (GatewayContract) mktCenter.getContract(ChannelType.SIM, tick.contract().unifiedSymbol());
-							contract.onTick(tick);
 							log.trace("模拟行情TICK：{} {} {} {}", tick.contract().name(), tick.actionDay(), tick.actionTime(), tick.lastPrice());
 						}
 					}

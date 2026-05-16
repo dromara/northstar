@@ -6,17 +6,11 @@ import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
 import org.dromara.northstar.common.IDataSource;
-import org.dromara.northstar.common.TickDataAware;
 import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.constant.Constants;
-import org.dromara.northstar.common.event.FastEventEngine;
-import org.dromara.northstar.common.event.NorthstarEventType;
 import org.dromara.northstar.common.model.Identifier;
 import org.dromara.northstar.common.model.core.Contract;
-import org.dromara.northstar.common.model.core.Tick;
 import org.dromara.northstar.gateway.IContract;
-import org.dromara.northstar.gateway.mktdata.IndexTicker;
-import org.dromara.northstar.gateway.mktdata.MinuteBarGenerator;
 
 import lombok.extern.slf4j.Slf4j;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
@@ -28,13 +22,9 @@ import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
  *
  */
 @Slf4j
-public class IndexContract implements IContract, TickDataAware{
+public class IndexContract implements IContract {
 
 	private final List<IContract> monthContracts;
-	
-	private final MinuteBarGenerator barGen;
-	
-	private final IndexTicker ticker;
 	
 	private final Contract contract;
 	
@@ -42,17 +32,11 @@ public class IndexContract implements IContract, TickDataAware{
 	
 	private final IDataSource dataSrc;
 	
-	public IndexContract(FastEventEngine feEngine, List<IContract> monthContracts) {
+	public IndexContract(List<IContract> monthContracts) {
 		this.monthContracts = monthContracts;
 		this.contract = makeIndexContractField(monthContracts.get(0).contract());
 		this.dataSrc = monthContracts.get(0).dataSource();
 		this.identifier = Identifier.of(contract.contractId());
-		this.barGen = new MinuteBarGenerator(contract, bar -> feEngine.emitEvent(NorthstarEventType.BAR, bar));
-		this.ticker = new IndexTicker(this, t -> {
-			log.trace("合成指数TICK：{} {} {} {} {}", t.contract().unifiedSymbol(), t.actionDay(), t.actionTime(), t.actionTimestamp(), t.tradingDay());
-			feEngine.emitEvent(NorthstarEventType.TICK, t);
-			barGen.update(t);
-		});
 	}
 	
 	private Contract makeIndexContractField(Contract proto) {
@@ -80,11 +64,6 @@ public class IndexContract implements IContract, TickDataAware{
 	@Override
 	public IDataSource dataSource() {
 		return dataSrc;
-	}
-
-	@Override
-	public void onTick(Tick tick) {
-		ticker.update(tick);
 	}
 
 	@Override

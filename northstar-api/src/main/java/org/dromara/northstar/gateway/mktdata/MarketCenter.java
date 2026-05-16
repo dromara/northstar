@@ -15,10 +15,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-import org.dromara.northstar.common.TickDataAware;
 import org.dromara.northstar.common.constant.ChannelType;
-import org.dromara.northstar.common.constant.Constants;
-import org.dromara.northstar.common.event.FastEventEngine;
 import org.dromara.northstar.common.exception.NoSuchContractException;
 import org.dromara.northstar.common.model.ContractConfigDTO;
 import org.dromara.northstar.common.model.Identifier;
@@ -71,15 +68,11 @@ public class MarketCenter implements IMarketCenter, IContractManager{
 	
 	private final ConcurrentMap<Contract, Tick> tickMap = new ConcurrentHashMap<>();
 	
-	private final FastEventEngine feEngine;
-	
 	private Set<ChannelType> loadedGroupOfChannel = new HashSet<>();
 	
 	private final Map<Identifier, ContractConfigDTO> contractConfigMap;
 	
-	public MarketCenter(FastEventEngine feEngine, List<IContractDefinitionProvider> contractDefProviders, 
-			Map<Identifier, ContractConfigDTO> contractConfigMap) {
-		this.feEngine = feEngine;
+	public MarketCenter(List<IContractDefinitionProvider> contractDefProviders, Map<Identifier, ContractConfigDTO> contractConfigMap) {
 		this.contractConfigMap = contractConfigMap;
 		contractDefProviders.forEach(pvd -> addDefinitions(pvd.get()));
 	}
@@ -129,7 +122,7 @@ public class MarketCenter implements IMarketCenter, IContractManager{
 					ins.setContractDefinition(def);
 				}
 				
-				IContract contract = new GatewayContract(feEngine, ins);
+				IContract contract = new GatewayContract(ins);
 				contractMap.put(ins.identifier(), contract);
 				
 				if(!channelDefContractGroups.contains(ins.channelType(), def)) {					
@@ -217,7 +210,7 @@ public class MarketCenter implements IMarketCenter, IContractManager{
 			if(e.getKey().productClass() != ProductClassEnum.FUTURES) {
 				continue;
 			}
-			IndexContract c = new IndexContract(feEngine, e.getValue());
+			IndexContract c = new IndexContract(e.getValue());
 			contractMap.put(c.identifier(), c);
 			for(IContract memberContract : c.memberContracts()) {
 				idxContractMap.put(memberContract, c);
@@ -299,24 +292,6 @@ public class MarketCenter implements IMarketCenter, IContractManager{
 			return; 
 		}
 		tickMap.put(tick.contract(), tick);
-		
-		if(tick.contract().unifiedSymbol().contains(Constants.INDEX_SUFFIX)) {
-			return; // 直接忽略指数TICK的后续处理
-		}
-		
-		// 更新普通合约
-		IContract contract = getContract(tick.channelType(), tick.contract().unifiedSymbol());
-		if(contract instanceof TickDataAware tdAware) {
-			tdAware.onTick(tick);
-		}
-		
-		// 更新指数合约
-		IndexContract idxContract = idxContractMap.get(contract);
-		if(Objects.nonNull(idxContract)) {
-			idxContract.onTick(tick);
-		} else if(contract.productClass() == ProductClassEnum.FUTURES && loadedGroupOfChannel.contains(tick.channelType())){
-			log.trace("没有找到 [{}] 对应的指数合约", contract.identifier());
-		}
 	}
 
 	/**

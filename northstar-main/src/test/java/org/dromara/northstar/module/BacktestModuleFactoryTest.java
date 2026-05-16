@@ -11,7 +11,6 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 import org.dromara.northstar.account.AccountManager;
-import org.dromara.northstar.common.event.FastEventEngine;
 import org.dromara.northstar.common.model.ContractSimpleInfo;
 import org.dromara.northstar.common.model.ExplorerTaskDescription;
 import org.dromara.northstar.common.model.StrategyMetaInfo;
@@ -69,7 +68,7 @@ class BacktestModuleFactoryTest {
 		}
 	});
 	
-	private MarketCenter mktCenter = new MarketCenter(mock(FastEventEngine.class), providers, new HashMap<>());
+	private MarketCenter mktCenter = new MarketCenter(providers, new HashMap<>());
 	
 	private BacktestModuleFactory factory = new BacktestModuleFactory();
 	

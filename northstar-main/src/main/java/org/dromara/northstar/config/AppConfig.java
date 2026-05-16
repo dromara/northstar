@@ -12,7 +12,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.dromara.northstar.app.auth.AuthCheckerInterceptor;
 import org.dromara.northstar.app.security.MaliciousIPCollector;
 import org.dromara.northstar.app.security.MaliciousRequestFilter;
-import org.dromara.northstar.common.event.FastEventEngine;
 import org.dromara.northstar.common.model.ContractConfigDTO;
 import org.dromara.northstar.common.model.Identifier;
 import org.dromara.northstar.common.utils.LocalEnvUtils;
@@ -137,12 +136,11 @@ public class AppConfig implements WebMvcConfigurer, InitializingBean {
     }
 
     @Bean
-    MarketCenter marketCenter(FastEventEngine fastEventEngine, List<IContractDefinitionProvider> contractDefProviders, 
-    		ContractConfigRepository repo) {
+    MarketCenter marketCenter(List<IContractDefinitionProvider> contractDefProviders, ContractConfigRepository repo) {
     		List<ContractConfigDTO> configDTOs = repo.findAll().stream().map(ContractConfigDO::convertTo).toList();
     		Map<Identifier, ContractConfigDTO> configMap = configDTOs
     				.stream().collect(Collectors.toMap(item -> Identifier.of(item.getContractId()), item -> item));
-        return new MarketCenter(fastEventEngine, contractDefProviders, configMap);
+        return new MarketCenter(contractDefProviders, configMap);
     }
     
     @Bean

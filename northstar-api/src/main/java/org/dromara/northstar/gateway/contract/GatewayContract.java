@@ -3,16 +3,11 @@ package org.dromara.northstar.gateway.contract;
 import java.util.Objects;
 
 import org.dromara.northstar.common.IDataSource;
-import org.dromara.northstar.common.TickDataAware;
 import org.dromara.northstar.common.constant.ChannelType;
-import org.dromara.northstar.common.event.FastEventEngine;
-import org.dromara.northstar.common.event.NorthstarEventType;
 import org.dromara.northstar.common.model.Identifier;
 import org.dromara.northstar.common.model.core.Contract;
-import org.dromara.northstar.common.model.core.Tick;
 import org.dromara.northstar.gateway.IContract;
 import org.dromara.northstar.gateway.Instrument;
-import org.dromara.northstar.gateway.mktdata.MinuteBarGenerator;
 
 import lombok.extern.slf4j.Slf4j;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
@@ -24,32 +19,20 @@ import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
  *
  */
 @Slf4j
-public class GatewayContract implements IContract, TickDataAware{
+public class GatewayContract implements IContract {
 
-	private MinuteBarGenerator barGen;
-	
 	private Contract contract;
 	
 	private Instrument ins;
 	
-	public GatewayContract(FastEventEngine feEngine, Instrument ins) {
+	public GatewayContract(Instrument ins) {
 		this.ins = ins;
 		this.contract = ins.contract();
-		if(ins.barGeneraterRequired()) {			
-			this.barGen = new MinuteBarGenerator(contract, bar -> feEngine.emitEvent(NorthstarEventType.BAR, bar));
-		}
 	}
 	
 	@Override
 	public IDataSource dataSource() {
 		return ins.dataSource();
-	}
-
-	@Override
-	public void onTick(Tick tick) {
-		if(barGen != null) {			
-			barGen.update(tick);
-		}
 	}
 
 	@Override
