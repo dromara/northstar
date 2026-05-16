@@ -150,7 +150,7 @@ public class PlaybackService {
 		}
 		long to = CommonUtils.localDateTimeToMills(getPlaybackContext().getPlaybackStatus().getRunningDateTime());
 		long endTime = to;
-		LocalDateTime toDateTime = CommonUtils.millsToLocalDateTime(to).plusDays(3);	// 考虑到CTP周五夜盘的情况，因此要多加载三天的冗余数据
+		LocalDateTime toDateTime = CommonUtils.millsToLocalDateTime(to);	
 		int dayDif = switch (interval) {
 			case M1,M3 -> 3;
 			case M5 -> 5;

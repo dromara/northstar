@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -35,6 +36,7 @@ import org.dromara.northstar.gateway.mktdata.QuantitDataServiceManager;
 import org.dromara.northstar.gateway.playback.PlaybackStatus.State;
 import org.dromara.northstar.gateway.playback.model.DataFrame;
 import org.dromara.northstar.gateway.playback.model.DataFrame.TimeEntry;
+import org.dromara.northstar.kline.KlineGenerator;
 import org.springframework.util.Assert;
 
 import lombok.Getter;
@@ -71,6 +73,8 @@ public class PlaybackContext {
 	
 	private NorthstarDataSource ds;
 	
+	private Map<Contract, KlineGenerator> klineGeneratorMap;
+	
 	public PlaybackContext(PlaybackGatewayAdapter gateway, FastEventEngine feEngine, MarketCenter mktCenter, QuantitDataServiceManager dsMgr,
 			GlobalPlaybackDataDetector dataDetector) {
 		this.ds = new NorthstarDataSource(dsMgr);
@@ -83,12 +87,15 @@ public class PlaybackContext {
 	
 	public void init() {
 		playbackStatus = null;
-		Set<IContract> contracts = this.gateway.getDescription().getSubscribedContracts()
+		Set<Contract> contracts = this.gateway.getDescription().getSubscribedContracts()
 				.stream()
 				.map(csi -> mktCenter.getContract(Identifier.of(csi.getId())))
+				.map(IContract::contract)
 				.collect(Collectors.toSet());
 		Assert.isTrue(!startDate().isBefore(preloadDate()), "预热开始日不能迟于回放开始日");
 		this.dataLoader = new PlaybackDataLoader(gateway.getDescription().getGatewayId(), contracts, settings().getPrecision(), ds);
+		
+		klineGeneratorMap = contracts.stream().collect(Collectors.toMap(c -> c, c -> new KlineGenerator(c, feEngine)));
 		// 初始化回放状态
 		reset();
 	}
@@ -130,6 +137,7 @@ public class PlaybackContext {
 		}
 		dft.items().forEach(tick -> {
 			mktCenter.onTick(tick);
+			klineGeneratorMap.get(tick.contract()).updateTick(tick);
 			feEngine.emitEvent(NorthstarEventType.TICK, tick);
 		});
 		try {
@@ -140,12 +148,15 @@ public class PlaybackContext {
 	};
 	
 	// 如何处理BAR数据帧
-	private Consumer<DataFrame<Bar>> onBarDataCallback = (df) -> {
+	private Consumer<DataFrame<Bar>> onBarDataCallback = df -> {
 		TimeEntry timeEntry = df.getTime();
 		if(timeEntry.getStart().isBefore(playbackStatus.getRunningDateTime()) || !isRunning.get()) {
 			return;
 		}
-		df.items().forEach(bar -> feEngine.emitEvent(NorthstarEventType.BAR, bar));
+		df.items().forEach(bar -> {
+			feEngine.emitEvent(NorthstarEventType.BAR, bar);
+			klineGeneratorMap.get(bar.contract()).updateBar(bar);
+		});
 		
 		playbackStatus.setRunningDateTime(timeEntry.getEnd());
 		if(onStatusChangeCallback != null) {
@@ -169,10 +180,12 @@ public class PlaybackContext {
 		}
 		df.items().forEach(bar -> {
 			this.dummyTickOfBar(bar).forEach(tick -> {
-				feEngine.emitEvent(NorthstarEventType.TICK, tick);
 				mktCenter.onTick(tick);
+				feEngine.emitEvent(NorthstarEventType.TICK, tick);
 			});
+			
 			feEngine.emitEvent(NorthstarEventType.BAR, bar);
+			klineGeneratorMap.get(bar.contract()).updateBar(bar);
 		});
 		playbackStatus.setRunningDateTime(timeEntry.getEnd());
 		if(onStatusChangeCallback != null) {
