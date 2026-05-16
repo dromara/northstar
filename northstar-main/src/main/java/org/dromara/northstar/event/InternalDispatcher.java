@@ -30,8 +30,6 @@ public class InternalDispatcher implements NorthstarEventDispatcher {
 	@Autowired
 	private IllegalOrderHandler illOrderHandler;
 	@Autowired
-	private BarAggregationHandler barAggHandler;
-	@Autowired
 	private PlannedTradeHandler plannedTradeHandler;
 	
 	public InternalDispatcher(FastEventEngine feEngine) {
@@ -44,7 +42,6 @@ public class InternalDispatcher implements NorthstarEventDispatcher {
 		plannedTradeHandler.onEvent(event);
 		moduleHandler.onEvent(event);
 		simMarketHandler.onEvent(event);
-		barAggHandler.onEvent(event);
 		bcHandler.onEvent(event);
 		accountHandler.onEvent(event);
 		connHandler.onEvent(event);

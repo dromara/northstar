@@ -2,7 +2,6 @@ package org.dromara.northstar.app.service;
 
 import java.time.LocalDate;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -18,7 +17,7 @@ import org.dromara.northstar.common.model.core.Bar;
 import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.common.utils.CommonUtils;
 import org.dromara.northstar.data.IMarketDataRepository;
-import org.dromara.northstar.event.BarAggregationHandler;
+import org.dromara.northstar.event.KlineDispatcher;
 import org.dromara.northstar.gateway.IContract;
 import org.dromara.northstar.gateway.mktdata.MarketCenter;
 import org.dromara.northstar.kline.BarMerger;
@@ -39,7 +38,7 @@ public class MarketDataService {
 	private MarketCenter marketCenter;
 	
 	@Autowired
-	private BarAggregationHandler barAggHandler;
+	private KlineDispatcher klineDispatcher;
 	
 	@Autowired
 	private IMarketDataRepository mdRepo;
@@ -122,29 +121,15 @@ public class MarketDataService {
 				.toList();
 	}
 	
-	public void subscribe(List<String> contractIds) {
-		log.info("订阅K线，合约 {}", JSON.toJSONString(contractIds));
-		
-		Set<Contract> newSubscribedContracts = new HashSet<>();
+	public void subscribe(List<String> contractIds, List<Interval> intervals) {
+		log.info("订阅K线，合约 {}，周期 {}", JSON.toJSONString(contractIds), JSON.toJSONString(intervals));
+		klineDispatcher.unregisterAll();
 		contractIds.forEach(contractId -> {
 			final Contract contract = marketCenter.getContract(Identifier.of(contractId)).contract();
-			newSubscribedContracts.add(contract);
-			for(Interval barInterval : Interval.values()) {
-				barAggHandler.register(contract, barInterval, BarMergerFactory.newInstance(barInterval, contract));
+			for(Interval barInterval : intervals) {
+				klineDispatcher.register(contract, barInterval);
 			}
 		});
-		
-		unsubscribedContracts(newSubscribedContracts, barAggHandler.registeredContracts()).forEach(contract -> {
-			for(Interval barInterval : Interval.values()) {				
-				barAggHandler.unregister(contract,  barInterval);
-			}
-		});
-	}
-	
-	private Set<Contract> unsubscribedContracts(Set<Contract> newSet, Set<Contract> oldSet){
-		return oldSet.stream()
-				.filter(c -> !newSet.contains(c))
-				.collect(java.util.stream.Collectors.toSet());
 	}
 	
 	public List<TickVO> getActiveTicks() {
