@@ -39,7 +39,7 @@ import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
 @Slf4j
 public class NorthstarDataSource implements IDataSource{
 	
-	private QuantitDataServiceManager dataService;
+	private QuantitDataServiceManager dataMgr;
 	
 	public static final int CN_FUTURES = 1;
 	public static final int CN_STOCKS = 2;
@@ -51,12 +51,12 @@ public class NorthstarDataSource implements IDataSource{
 	
 	private int defaultMode = CN_FUTURES | CN_STOCKS | CRYPTO; // | HK_STOCKS | US_STOCKS | FOREX | US_ETF;
 	
-	public NorthstarDataSource(QuantitDataServiceManager dataService) {
-		this.dataService = dataService;
+	public NorthstarDataSource(QuantitDataServiceManager dataMgr) {
+		this.dataMgr = dataMgr;
 	}
 	
-	public NorthstarDataSource(QuantitDataServiceManager dataService, int subscription) {
-		this.dataService = dataService;
+	public NorthstarDataSource(QuantitDataServiceManager dataMgr, int subscription) {
+		this.dataMgr = dataMgr;
 		this.defaultMode = subscription;
 	}
 	
@@ -75,7 +75,7 @@ public class NorthstarDataSource implements IDataSource{
 	@Override
 	public List<Bar> getData(Contract contract, Interval interval, LocalDate startDate, LocalDate endDate) {
 		try {
-			return enhanceData(dataService.getData(contract.unifiedSymbol(), interval, startDate, endDate), contract, interval);
+			return enhanceData(dataMgr.getData(contract.unifiedSymbol(), interval, startDate, endDate), contract, interval);
 		} catch (HttpClientErrorException e) {
 			if(e.getStatusCode() == HttpStatus.FORBIDDEN) {
 				throw new UnauthorizedException(contract.name());
@@ -129,7 +129,7 @@ public class NorthstarDataSource implements IDataSource{
 		Assert.isTrue(channelType == ChannelType.CTP, "只能查询CTP的交易日");
 		Assert.isTrue(startDate.getYear() == endDate.getYear(), "只能查询同一年的交易日");
 		try {
-			return dataService.getHolidays(startDate.getYear())
+			return dataMgr.getHolidays(startDate.getYear())
 					.stream()
 					.filter(dto -> dto.getIsCnHoliday())
 					.map(dto -> LocalDate.parse(dto.getCalendarDate(), DateTimeConstant.D_FORMAT_INT_FORMATTER))
@@ -154,7 +154,7 @@ public class NorthstarDataSource implements IDataSource{
 			Thread.startVirtualThread(() -> {
 				try {
 					Function<ContractDTO, Contract> mapper = makeConvertFn(ProductClassEnum.FUTURES, CurrencyEnum.CNY);
-					List<Contract> result = dataService.getCnFutureContracts().stream().map(mapper).toList();
+					List<Contract> result = dataMgr.getCnFutureContracts().stream().map(mapper).toList();
 					results.addAll(result);
 					log.info("加载国内期货合约：{}个", result.size());
 				} catch(Exception e) {
@@ -169,7 +169,7 @@ public class NorthstarDataSource implements IDataSource{
 //			Thread.startVirtualThread(() -> {
 //				try {
 //					Function<ContractDTO, Contract> mapper = makeConvertFn(ProductClassEnum.EQUITY, CurrencyEnum.USD);
-//					List<Contract> result = dataService.getUsStocksContracts().stream().map(mapper).toList();
+//					List<Contract> result = dataMgr.getUsStocksContracts().stream().map(mapper).toList();
 //					results.addAll(result);
 //					log.info("加载美股合约：{}个", result.size());
 //				} catch(Exception e) {
@@ -184,7 +184,7 @@ public class NorthstarDataSource implements IDataSource{
 //			Thread.startVirtualThread(() -> {
 //				try {
 //					Function<ContractDTO, Contract> mapper = makeConvertFn(ProductClassEnum.ETF, CurrencyEnum.USD);
-//					List<Contract> result = dataService.getUsETFContracts().stream().map(mapper).toList();
+//					List<Contract> result = dataMgr.getUsETFContracts().stream().map(mapper).toList();
 //					results.addAll(result);
 //					log.info("加载美股ETF合约：{}个", result.size());
 //				} catch(Exception e) {
@@ -199,7 +199,7 @@ public class NorthstarDataSource implements IDataSource{
 //			Thread.startVirtualThread(() -> {
 //				try {
 //					Function<ContractDTO, Contract> mapper = makeConvertFn(ProductClassEnum.FOREX, CurrencyEnum.USD);
-//					List<Contract> result = dataService.getForexContracts().stream().map(mapper).toList();
+//					List<Contract> result = dataMgr.getForexContracts().stream().map(mapper).toList();
 //					results.addAll(result);
 //					log.info("加载外汇合约：{}个", result.size());
 //				} catch(Exception e) {
@@ -214,7 +214,7 @@ public class NorthstarDataSource implements IDataSource{
 //			Thread.startVirtualThread(() -> {
 //				try {
 //					Function<ContractDTO, Contract> mapper = makeConvertFn(ProductClassEnum.EQUITY, CurrencyEnum.HKD);
-//					List<Contract> result = dataService.getHkStocksContracts().stream().map(mapper).toList();
+//					List<Contract> result = dataMgr.getHkStocksContracts().stream().map(mapper).toList();
 //					results.addAll(result);
 //					log.info("加载港股合约：{}个", result.size());
 //				} catch(Exception e) {
@@ -229,7 +229,7 @@ public class NorthstarDataSource implements IDataSource{
 			Thread.startVirtualThread(() -> {
 				try {
 					Function<ContractDTO, Contract> mapper = makeConvertFn(ProductClassEnum.EQUITY, CurrencyEnum.CNY);
-					List<Contract> result = dataService.getCnStocksContracts().stream().map(mapper).toList();
+					List<Contract> result = dataMgr.getCnStocksContracts().stream().map(mapper).toList();
 					results.addAll(result);
 					log.info("加载A股合约：{}个", result.size());
 				} catch(Exception e) {
@@ -244,7 +244,7 @@ public class NorthstarDataSource implements IDataSource{
 			Thread.startVirtualThread(() -> {
 				try {
 					Function<ContractDTO, Contract> futMapper = makeConvertFn(ProductClassEnum.SWAP, CurrencyEnum.USDT);
-					List<Contract> swapResult = dataService.getCryptoContracts()
+					List<Contract> swapResult = dataMgr.getCryptoContracts()
 							.stream()
 							.map(futMapper)
 							.toList();
