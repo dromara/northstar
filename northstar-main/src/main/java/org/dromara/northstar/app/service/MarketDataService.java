@@ -106,7 +106,7 @@ public class MarketDataService {
 		}
 		
 		return mergedBars.stream()
-				.filter(bar -> bar.actionTimestamp() < CommonUtils.localDateTimeToMills(toDateTime))
+				.filter(bar -> bar.actionTimestamp() <= CommonUtils.localDateTimeToMills(toDateTime))
 				.filter(bar -> bar.actionTimestamp() > CommonUtils.localDateTimeToMills(fromDateTime))
 				.map(bar -> BarVO.builder()
 						.timestamp(bar.actionTimestamp())
