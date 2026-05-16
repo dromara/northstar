@@ -61,6 +61,7 @@ import org.dromara.northstar.gateway.contract.OptionChainContract;
 import org.dromara.northstar.indicator.Indicator;
 import org.dromara.northstar.indicator.IndicatorValueUpdateHelper;
 import org.dromara.northstar.indicator.model.Configuration;
+import org.dromara.northstar.kline.BarTimePadding;
 import org.dromara.northstar.strategy.IAccount;
 import org.dromara.northstar.strategy.IModule;
 import org.dromara.northstar.strategy.IModuleAccount;
@@ -71,7 +72,6 @@ import org.dromara.northstar.strategy.TradeStrategy;
 import org.dromara.northstar.strategy.constant.PriceType;
 import org.dromara.northstar.strategy.model.TradeIntent;
 import org.dromara.northstar.support.utils.bar.BarMergerRegistry;
-import org.dromara.northstar.support.utils.bar.BarTimePadding;
 import org.slf4j.Logger;
 import org.springframework.util.Assert;
 

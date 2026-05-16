@@ -1,4 +1,4 @@
-package org.dromara.northstar.support.utils.bar;
+package org.dromara.northstar.kline;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -8,14 +8,13 @@ import java.time.LocalTime;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.dromara.northstar.common.constant.Interval;
 import org.dromara.northstar.common.model.core.Bar;
 import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.common.model.core.ContractDefinition;
 import org.dromara.northstar.common.model.core.TimeSlot;
 import org.dromara.northstar.common.model.core.TradeTimeDefinition;
 import org.junit.jupiter.api.Test;
-
-import org.dromara.northstar.common.constant.Interval;
 
 class BarMergerCrypto4HrTest {
 	

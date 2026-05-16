@@ -1,4 +1,4 @@
-package org.dromara.northstar.support.utils.bar;
+package org.dromara.northstar.kline;
 
 import org.dromara.northstar.common.constant.Interval;
 import org.dromara.northstar.common.model.core.Contract;

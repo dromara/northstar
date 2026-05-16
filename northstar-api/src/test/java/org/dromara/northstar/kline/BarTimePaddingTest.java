@@ -1,6 +1,6 @@
-package org.dromara.northstar.support.utils.bar;
+package org.dromara.northstar.kline;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;

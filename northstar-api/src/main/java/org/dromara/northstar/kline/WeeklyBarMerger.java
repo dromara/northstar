@@ -1,4 +1,4 @@
-package org.dromara.northstar.support.utils.bar;
+package org.dromara.northstar.kline;
 
 import java.time.Instant;
 import java.time.LocalDate;

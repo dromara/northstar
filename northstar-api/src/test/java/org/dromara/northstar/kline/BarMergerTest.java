@@ -1,4 +1,4 @@
-package org.dromara.northstar.support.utils.bar;
+package org.dromara.northstar.kline;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.offset;
@@ -6,34 +6,27 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.concurrent.ThreadLocalRandom;
 
-import org.dromara.northstar.common.constant.ChannelType;
-import org.dromara.northstar.common.constant.TickType;
+import org.dromara.northstar.common.constant.Interval;
 import org.dromara.northstar.common.model.core.Bar;
 import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.common.model.core.ContractDefinition;
 import org.dromara.northstar.common.model.core.Tick;
 import org.dromara.northstar.common.model.core.TimeSlot;
 import org.dromara.northstar.common.model.core.TradeTimeDefinition;
-import org.dromara.northstar.gateway.playback.ticker.SimplePriceSimulation;
+import org.dromara.northstar.kline.BarTimePadding.MinuteEntry;
 import org.dromara.northstar.strategy.MergedBarListener;
-import org.dromara.northstar.support.utils.bar.BarTimePadding.MinuteEntry;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-
-import org.dromara.northstar.common.constant.Interval;
 
 class BarMergerTest {
 	
@@ -322,97 +315,6 @@ class BarMergerTest {
     	assertThat(results.get(0).actionTime()).isEqualTo("22:00");
     	assertThat(results.get(1).actionDay()).isEqualTo("2024-11-22");
     	assertThat(results.get(1).actionTime()).isEqualTo("23:00");
-    }
-    
-    @Test
-    void test1MinTicking() {
-    	SimplePriceSimulation sps = new SimplePriceSimulation();
-    	BarUtils utils = new BarUtils(5000, contract, Interval.M1);
-    	Bar b0 = utils.genBar(LocalDate.now(), LocalTime.of(21, 0));
-    	Bar b1 = utils.genBar(LocalDate.now(), LocalTime.of(21, 1));
-    	Bar b2 = utils.genBar(LocalDate.now(), LocalTime.of(21, 2));
-    	List<Bar> result = new ArrayList<>();
-    	BarMerger merger = new BarMerger(Interval.M1, contract);
-    	MergedBarListener listener = new MergedBarListener() {
-			
-			@Override
-			public void onMergedBar(Bar bar) {
-				result.add(bar);
-			}
-			
-		};
-		merger.addListener(listener);
-		
-    	List.of(b0, b1, b2).forEach(bar -> {
-    		sps.generateFrom(bar).stream()
-    			.map(tickEntry -> {
-    				LocalDateTime ldt = LocalDateTime.ofInstant(Instant.ofEpochMilli(tickEntry.timestamp()), ZoneId.systemDefault());
-    				Tick tick = Tick.builder()
-    						.preClosePrice(bar.preClosePrice())		// 采用分钟K线的模糊值
-    						.preOpenInterest(bar.preOpenInterest())	// 采用分钟K线的模糊值
-    						.preSettlePrice(bar.preSettlePrice())	// 采用分钟K线的模糊值
-    						.highPrice(bar.highPrice())				// 采用分钟K线的模糊值
-    						.lowPrice(bar.lowPrice())				// 采用分钟K线的模糊值
-    						.contract(bar.contract())
-    						.gatewayId("unittest")
-    						.tradingDay(bar.tradingDay())
-    						.actionDay(bar.actionDay())
-    						.actionTime(ldt.toLocalTime())
-    						.actionTimestamp(tickEntry.timestamp())
-    						.type(TickType.PLAYBACK_TICK)
-    						.lastPrice(tickEntry.price())
-    						.askPrice(List.of(tickEntry.askPrice0())) // 仅模拟卖一价
-    						.bidPrice(List.of(tickEntry.bidPrice0())) // 仅模拟买一价
-    						.askVolume(List.of(ThreadLocalRandom.current().nextInt(10,500))) // 随机模拟卖一量
-    						.bidVolume(List.of(ThreadLocalRandom.current().nextInt(10,500))) // 随机模拟买一量
-    						.channelType(ChannelType.PLAYBACK)
-    						.volume(bar.volume())								// 采用分钟K线的模糊值
-    						.volumeDelta(Math.max(1, tickEntry.volume()))		// 采用模拟随机值
-    						.openInterest(bar.openInterest())					// 采用分钟K线的模糊值
-    						.openInterestDelta(tickEntry.openInterestDelta())	// 采用模拟随机值
-    						.turnoverDelta(bar.turnoverDelta())					// 采用分钟K线的模糊值
-    						.turnover(bar.turnover())							// 采用分钟K线的模糊值
-    						.build();
-    				return tick;
-    			})
-    			.forEach(tick -> merger.onTick(tick));
-    		merger.onBar(bar);
-    	});;
-		
-		assertThat(result).hasSize(10);
-		assertThat(result.get(0).unstable()).isTrue();
-		assertThat(result.get(1).unstable()).isTrue();
-		assertThat(result.get(2).unstable()).isTrue();
-		assertThat(result.get(3).unstable()).isTrue();
-		assertThat(result.get(4).unstable()).isFalse();
-		assertThat(result.get(5).unstable()).isTrue();
-		assertThat(result.get(6).unstable()).isTrue();
-		assertThat(result.get(7).unstable()).isTrue();
-		assertThat(result.get(8).unstable()).isTrue();
-		assertThat(result.get(9).unstable()).isFalse();
-		
-		assertThat(result.get(0).actionTime()).isEqualTo(LocalTime.of(21, 1));
-		assertThat(result.get(1).actionTime()).isEqualTo(LocalTime.of(21, 1));
-		assertThat(result.get(2).actionTime()).isEqualTo(LocalTime.of(21, 1));
-		assertThat(result.get(3).actionTime()).isEqualTo(LocalTime.of(21, 1));
-		assertThat(result.get(4).actionTime()).isEqualTo(LocalTime.of(21, 1));
-		assertThat(result.get(5).actionTime()).isEqualTo(LocalTime.of(21, 2));
-		assertThat(result.get(6).actionTime()).isEqualTo(LocalTime.of(21, 2));
-		assertThat(result.get(7).actionTime()).isEqualTo(LocalTime.of(21, 2));
-		assertThat(result.get(8).actionTime()).isEqualTo(LocalTime.of(21, 2));
-		assertThat(result.get(9).actionTime()).isEqualTo(LocalTime.of(21, 2));
-		
-		assertThat(result.get(4).actionTimestamp()).isEqualTo(b1.actionTimestamp());
-		assertThat(result.get(4).openPrice()).isEqualTo(b1.openPrice());
-		assertThat(result.get(4).closePrice()).isEqualTo(b1.closePrice());
-		assertThat(result.get(4).highPrice()).isEqualTo(Math.max(b0.highPrice(), b1.highPrice()));
-		assertThat(result.get(4).lowPrice()).isEqualTo(Math.min(b0.lowPrice(), b1.lowPrice()));
-		
-		assertThat(result.get(9).actionTimestamp()).isEqualTo(b2.actionTimestamp());
-		assertThat(result.get(9).openPrice()).isEqualTo(b2.openPrice());
-		assertThat(result.get(9).closePrice()).isEqualTo(b2.closePrice());
-		assertThat(result.get(9).highPrice()).isEqualTo(b2.highPrice());
-		assertThat(result.get(9).lowPrice()).isEqualTo(b2.lowPrice());
     }
     
     @Test

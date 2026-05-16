@@ -21,8 +21,8 @@ import org.dromara.northstar.data.IMarketDataRepository;
 import org.dromara.northstar.event.BarAggregationHandler;
 import org.dromara.northstar.gateway.IContract;
 import org.dromara.northstar.gateway.mktdata.MarketCenter;
-import org.dromara.northstar.support.utils.bar.BarMerger;
-import org.dromara.northstar.support.utils.bar.BarMergerFactory;
+import org.dromara.northstar.kline.BarMerger;
+import org.dromara.northstar.kline.BarMergerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

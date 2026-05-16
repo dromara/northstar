@@ -14,6 +14,8 @@ import org.dromara.northstar.common.model.core.Bar;
 import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.common.model.core.Tick;
 import org.dromara.northstar.indicator.IndicatorValueUpdateHelper;
+import org.dromara.northstar.kline.BarMerger;
+import org.dromara.northstar.kline.BarMergerFactory;
 import org.dromara.northstar.module.ModuleContext;
 import org.dromara.northstar.strategy.AbstractStrategy.BarHandler;
 import org.dromara.northstar.strategy.IModuleContext;

@@ -16,9 +16,9 @@ import org.dromara.northstar.common.model.core.Tick;
 import org.dromara.northstar.gateway.playback.GlobalPlaybackDataDetector;
 import org.dromara.northstar.gateway.playback.PlaybackGatewayAdapter;
 import org.dromara.northstar.gateway.playback.PlaybackStatus.State;
+import org.dromara.northstar.kline.BarMerger;
 import org.dromara.northstar.strategy.MergedBarListener;
 import org.dromara.northstar.support.utils.EventEmitterHolder;
-import org.dromara.northstar.support.utils.bar.BarMerger;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import com.google.common.collect.HashBasedTable;
