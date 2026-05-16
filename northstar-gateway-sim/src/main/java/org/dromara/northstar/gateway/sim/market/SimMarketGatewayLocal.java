@@ -1,6 +1,7 @@
 package org.dromara.northstar.gateway.sim.market;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -10,13 +11,16 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.constant.ConnectionState;
 import org.dromara.northstar.common.event.FastEventEngine;
 import org.dromara.northstar.common.event.NorthstarEventType;
 import org.dromara.northstar.common.model.GatewayDescription;
+import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.common.model.core.Tick;
 import org.dromara.northstar.gateway.MarketGateway;
 import org.dromara.northstar.gateway.mktdata.MarketCenter;
+import org.dromara.northstar.kline.KlineGenerator;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -35,6 +39,8 @@ public class SimMarketGatewayLocal extends MarketGateway{
 	
 	private Set<SimTickGenerator> subContractsGen = new HashSet<>();
 	
+	private final Map<Contract, KlineGenerator> klineGenMap = new HashMap<>();
+	
 	public SimMarketGatewayLocal(GatewayDescription gd, FastEventEngine feEngine, MarketCenter mktCenter, Map<String, SimTickGenerator> tickGenMap) {
 		super(gd);
 		this.feEngine = feEngine;
@@ -49,6 +55,9 @@ public class SimMarketGatewayLocal extends MarketGateway{
 				log.info("模拟订阅合约：{}", csi.getSymbol());
 				if(tickGenMap.containsKey(csi.getUnifiedSymbol())) {
 					subContractsGen.add(tickGenMap.get(csi.getUnifiedSymbol()));
+					Contract c = mktCenter.getContract(ChannelType.SIM, csi.getSymbol()).contract();
+					
+					klineGenMap.put(c, new KlineGenerator(c, feEngine));
 				}
 			});
 		}
@@ -65,6 +74,7 @@ public class SimMarketGatewayLocal extends MarketGateway{
 				}
 			});
 		}
+		klineGenMap.clear();
 		return true;
 	}
 
@@ -90,8 +100,11 @@ public class SimMarketGatewayLocal extends MarketGateway{
 							lastActiveTime.set(System.currentTimeMillis()); 
 							Tick tick = gen.generateNextTick(LocalDateTime.now(), SimMarketGatewayLocal.this);
 							mktCenter.onTick(tick);
+							
 							feEngine.emitEvent(NorthstarEventType.TICK, tick);
 							log.trace("模拟行情TICK：{} {} {} {}", tick.contract().name(), tick.actionDay(), tick.actionTime(), tick.lastPrice());
+							
+							klineGenMap.get(tick.contract()).updateTick(tick);
 						}
 					}
 				} catch (Exception e) {
@@ -112,6 +125,7 @@ public class SimMarketGatewayLocal extends MarketGateway{
 			timer.cancel();
 			timer = null;
 		}
+		unsubscribe();
 		log.info("模拟行情断开");
 		connection = ConnectionState.DISCONNECTED;
 		feEngine.emitEvent(NorthstarEventType.LOGGED_OUT, description.getGatewayId());

@@ -11,6 +11,7 @@ import org.dromara.northstar.strategy.MergedBarListener;
 
 public class KlineGenerator {
 	
+	private BarMerger merger1m;
 	private BarMerger merger3m;
 	private BarMerger merger5m;
 	private BarMerger merger10m;
@@ -28,6 +29,7 @@ public class KlineGenerator {
 	
 	public KlineGenerator(Contract contract, FastEventEngine feEngine) {
 		this.feEngine = feEngine;
+		merger1m = new BarMerger(Interval.M1, contract);
 		merger3m = new BarMerger(Interval.M3, contract);
 		merger5m = new BarMerger(Interval.M5, contract);
 		merger10m = new BarMerger(Interval.M10, contract);
@@ -39,6 +41,10 @@ public class KlineGenerator {
 		merger1d = new DailyBarMerger(contract);
 		merger1w = new WeeklyBarMerger(contract);
 		
+		merger1m.addListener(bar -> {
+			feEngine.emitEvent(NorthstarEventType.BAR, bar);
+			updateBar(bar);
+		});
 		merger3m.addListener(listener);
 		merger5m.addListener(listener);
 		merger10m.addListener(listener);
@@ -56,6 +62,7 @@ public class KlineGenerator {
 			throw new IllegalArgumentException("不接受此类型的Tick数据：" + tick.type());
 		}
 		
+		merger1m.onTick(tick);
 		merger3m.onTick(tick);
 		merger5m.onTick(tick);
 		merger10m.onTick(tick);
