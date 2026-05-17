@@ -105,7 +105,7 @@ public class ModuleContext implements IModuleContext{
 	/* unifiedSymbol -> contract */
 	protected ConcurrentMap<String, Contract> contractMap = new ConcurrentHashMap<>();
 	
-	protected ConcurrentMap<Contract, Long> barFilterMap = new ConcurrentHashMap<>();
+	protected Table<Contract, Interval, Long> barFilterMap = HashBasedTable.create();
 	
 	/* contract -> indicatorName -> indicator */
 	protected Table<Contract, String, Indicator> indicatorNameTbl = HashBasedTable.create();
@@ -251,7 +251,7 @@ public class ModuleContext implements IModuleContext{
 	
 	@Override
 	public void onTick(Tick tick) {
-		logger.trace("TICK信息: {} {} {} {}，最新价：{}，累计成交：{}，成交量：{}，累计持仓：{}，持仓量：{}", 
+		logger.trace("TICK数据: {} {} {} {}，最新价：{}，累计成交：{}，成交量：{}，累计持仓：{}，持仓量：{}", 
 				tick.contract().unifiedSymbol(), tick.actionDay(), tick.actionTime(), tick.actionTimestamp(),
 				tick.lastPrice(), tick.volume(), tick.volumeDelta(), tick.openInterest(), tick.openInterestDelta());
 		if(tradeIntentMap.containsKey(tick.contract())) {
@@ -265,20 +265,18 @@ public class ModuleContext implements IModuleContext{
 		if(!Objects.equals(tick.tradingDay(), tradingDay)) {
 			tradingDay = tick.tradingDay();
 		}
-		registry.onTick(tick);
 		moduleAccount.onTick(tick);
 		tradeStrategy.onTick(tick);
 	}
 
 	@Override
 	public void onBar(Bar bar) {
-		if(barFilterMap.containsKey(bar.contract()) && barFilterMap.get(bar.contract()) >= bar.actionTimestamp()) {
+		if(barFilterMap.contains(bar.contract(), bar.interval()) && barFilterMap.get(bar.contract(), bar.interval()) >= bar.actionTimestamp()) {
 			//过滤掉可能存在的重复数据
 			return;
 		}
-		logger.trace("分钟Bar信息: {} {} {} {}，最新价: {}，成交量：{}，累计持仓：{}，持仓量：{}", bar.contract().unifiedSymbol(), bar.actionDay(), bar.actionTime(), bar.actionTimestamp(),
-				bar.closePrice(), bar.volumeDelta(), bar.openInterest(), bar.openInterestDelta());
-		barFilterMap.put(bar.contract(), bar.actionTimestamp());
+		logger.trace("Bar数据: {} {} {} {} {} unstable:{}", bar.contract().name(), bar.interval(), bar.actionDay(), bar.actionTime(), bar.actionTimestamp(), bar.unstable());
+		barFilterMap.put(bar.contract(), bar.interval(), bar.actionTimestamp());
 		registry.onBar(bar);		
 	}
 	
