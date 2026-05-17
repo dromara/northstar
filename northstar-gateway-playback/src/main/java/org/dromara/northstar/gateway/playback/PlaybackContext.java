@@ -22,6 +22,7 @@ import org.dromara.northstar.common.constant.Interval;
 import org.dromara.northstar.common.constant.TickType;
 import org.dromara.northstar.common.event.FastEventEngine;
 import org.dromara.northstar.common.event.NorthstarEventType;
+import org.dromara.northstar.common.exception.OperationException;
 import org.dromara.northstar.common.model.ContractSimpleInfo;
 import org.dromara.northstar.common.model.Identifier;
 import org.dromara.northstar.common.model.core.Bar;
@@ -320,7 +321,7 @@ public class PlaybackContext {
 	
 	public synchronized void preload() {
 		if(playbackStatus.getState() != State.INITIAL) {
-			throw new IllegalStateException("需要先重置状态，才能进行数据预加载");
+			throw new OperationException("error.illegalStateForPreload");
 		}
 		playbackStatus.setState(State.PRELOADING);
 		if(onStatusChangeCallback != null) {
