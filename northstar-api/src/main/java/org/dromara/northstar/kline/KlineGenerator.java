@@ -11,6 +11,8 @@ import org.dromara.northstar.strategy.MergedBarListener;
 
 public class KlineGenerator {
 	
+	private MinuteBarGenerator minBarGen;
+	
 	private BarMerger merger1m;
 	private BarMerger merger3m;
 	private BarMerger merger5m;
@@ -27,16 +29,11 @@ public class KlineGenerator {
 	
 	private MergedBarListener listener = bar -> feEngine.emitEvent(NorthstarEventType.BAR, bar);
 	
-	public KlineGenerator(Contract contract, FastEventEngine feEngine, boolean gen1mBar) {
+	public KlineGenerator(Contract contract, FastEventEngine feEngine) {
 		this.feEngine = feEngine;
 		
-		if(gen1mBar) {			
-			merger1m = new BarMerger(Interval.M1, contract);
-			merger1m.addListener(bar -> {
-				feEngine.emitEvent(NorthstarEventType.BAR, bar);
-				updateBar(bar);
-			});
-		}
+		minBarGen = new MinuteBarGenerator(contract, this::updateBar);
+		merger1m = new BarMerger(Interval.M1, contract);
 		merger3m = new BarMerger(Interval.M3, contract);
 		merger5m = new BarMerger(Interval.M5, contract);
 		merger10m = new BarMerger(Interval.M10, contract);
@@ -48,6 +45,7 @@ public class KlineGenerator {
 		merger1d = new DailyBarMerger(contract);
 		merger1w = new WeeklyBarMerger(contract);
 		
+		merger1m.addListener(listener);
 		merger3m.addListener(listener);
 		merger5m.addListener(listener);
 		merger10m.addListener(listener);
@@ -60,18 +58,13 @@ public class KlineGenerator {
 		merger1w.addListener(listener);
 	}
 	
-	public KlineGenerator(Contract contract, FastEventEngine feEngine) {
-		this(contract, feEngine, true);
-	}
-	
 	public void updateTick(Tick tick) {
 		if(tick.type() != TickType.MARKET_TICK && tick.type() != TickType.PLAYBACK_TICK) {
 			throw new IllegalArgumentException("不接受此类型的Tick数据：" + tick.type());
 		}
 		
-		if(merger1m != null) {			
-			merger1m.onTick(tick);
-		}
+		minBarGen.update(tick);
+		merger1m.onTick(tick);
 		merger3m.onTick(tick);
 		merger5m.onTick(tick);
 		merger10m.onTick(tick);
@@ -85,10 +78,7 @@ public class KlineGenerator {
 	}
 
 	public void updateBar(Bar minuteBar) {
-		if(minuteBar.interval() != Interval.M1) {
-			throw new IllegalArgumentException("KlineGenerator只能接受1分钟线数据");
-		}
-		
+		merger1m.onBar(minuteBar);
 		merger3m.onBar(minuteBar);
 		merger5m.onBar(minuteBar);
 		merger10m.onBar(minuteBar);

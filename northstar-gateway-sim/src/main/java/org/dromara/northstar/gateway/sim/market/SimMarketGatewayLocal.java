@@ -57,7 +57,7 @@ public class SimMarketGatewayLocal extends MarketGateway{
 					subContractsGen.add(tickGenMap.get(csi.getUnifiedSymbol()));
 					Contract c = mktCenter.getContract(ChannelType.SIM, csi.getSymbol()).contract();
 					
-					klineGenMap.put(c, new KlineGenerator(c, feEngine, true));
+					klineGenMap.put(c, new KlineGenerator(c, feEngine));
 				}
 			});
 		}

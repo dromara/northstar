@@ -96,7 +96,7 @@ public class PlaybackContext {
 		Assert.isTrue(!startDate().isBefore(preloadDate()), "预热开始日不能迟于回放开始日");
 		this.dataLoader = new PlaybackDataLoader(gateway.getDescription().getGatewayId(), contracts, settings().getPrecision(), ds);
 		
-		klineGeneratorMap = contracts.stream().collect(Collectors.toMap(c -> c, c -> new KlineGenerator(c, feEngine, false)));
+		klineGeneratorMap = contracts.stream().collect(Collectors.toMap(c -> c, c -> new KlineGenerator(c, feEngine)));
 		// 初始化回放状态
 		reset();
 	}
@@ -155,7 +155,7 @@ public class PlaybackContext {
 			return;
 		}
 		df.items().forEach(bar -> {
-			feEngine.emitEvent(NorthstarEventType.BAR, bar);
+//			feEngine.emitEvent(NorthstarEventType.BAR, bar);
 			klineGeneratorMap.get(bar.contract()).updateBar(bar);
 		});
 		
