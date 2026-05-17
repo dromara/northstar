@@ -43,9 +43,10 @@ public class KlineDispatcher implements NorthstarEventDispatcher{
 	@Override
 	public void onEvent(NorthstarEvent event, long sequence, boolean endOfBatch) throws Exception {
 		if(event.getData() instanceof Bar bar) {
-			log.trace("Bar event received: {} {} {} {} unstable:{}", bar.contract().name(), bar.interval(), bar.actionDay(), bar.actionTime(), bar.unstable());
+			log.trace("Emitting Bar: {} {} {} {} unstable:{}", bar.contract().name(), bar.interval(), bar.actionDay(), bar.actionTime(), bar.unstable());
 			Tuple<Contract, Interval> key = Tuple.of(bar.contract(), bar.interval());
 			if(registered.contains(key)) {
+				log.debug("Dispatching Bar: {} {} {} {} unstable:{}", bar.contract().name(), bar.interval(), bar.actionDay(), bar.actionTime(), bar.unstable());
 				emitterHolder.send(SseEmitter.event()
 						.name(NorthstarEventType.BAR.toString())
 						.data(Base64.encode(bar.toBarField().toByteArray())));
