@@ -136,7 +136,7 @@ public class ModuleContext implements IModuleContext{
 		this.tradeStrategy = tradeStrategy;
 		this.moduleRepo = moduleRepo;
 		this.mktCenter = (IMarketCenter) contractMgr;
-		this.registry = new BarMergerRegistry(this);
+		this.registry = new BarMergerRegistry();
 		this.logger = getLogger(getClass());
 		this.chartBuffer = new ChartBuffer(moduleDescription.getModuleCacheDataSize());
 		this.moduleStateMachine = new ModuleStateMachine();

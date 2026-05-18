@@ -2,8 +2,6 @@ package org.dromara.northstar.kline;
 
 import org.dromara.northstar.common.constant.Interval;
 import org.dromara.northstar.common.constant.TickType;
-import org.dromara.northstar.common.event.FastEventEngine;
-import org.dromara.northstar.common.event.NorthstarEventType;
 import org.dromara.northstar.common.model.core.Bar;
 import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.common.model.core.Tick;
@@ -25,13 +23,7 @@ public class KlineGenerator {
 	private DailyBarMerger merger1d;
 	private WeeklyBarMerger merger1w;
 	
-	private FastEventEngine feEngine;
-	
-	private MergedBarListener listener = bar -> feEngine.emitEvent(NorthstarEventType.BAR, bar);
-	
-	public KlineGenerator(Contract contract, FastEventEngine feEngine) {
-		this.feEngine = feEngine;
-		
+	public KlineGenerator(Contract contract, MergedBarListener listener) {
 		minBarGen = new MinuteBarGenerator(contract, this::updateBar);
 		merger1m = new BarMerger(Interval.M1, contract);
 		merger3m = new BarMerger(Interval.M3, contract);
@@ -45,17 +37,7 @@ public class KlineGenerator {
 		merger1d = new DailyBarMerger(contract);
 		merger1w = new WeeklyBarMerger(contract);
 		
-		merger1m.addListener(listener);
-		merger3m.addListener(listener);
-		merger5m.addListener(listener);
-		merger10m.addListener(listener);
-		merger15m.addListener(listener);
-		merger30m.addListener(listener);
-		merger1h.addListener(listener);
-		merger2h.addListener(listener);
-		merger4h.addListener(listener);
-		merger1d.addListener(listener);
-		merger1w.addListener(listener);
+		setListener(listener);
 	}
 	
 	public void updateTick(Tick tick) {
@@ -90,4 +72,19 @@ public class KlineGenerator {
 		merger1d.onBar(minuteBar);
 		merger1w.onBar(minuteBar);
 	}
+	
+	public void setListener(MergedBarListener listener) {
+		merger1m.addListener(listener);
+		merger3m.addListener(listener);
+		merger5m.addListener(listener);
+		merger10m.addListener(listener);
+		merger15m.addListener(listener);
+		merger30m.addListener(listener);
+		merger1h.addListener(listener);
+		merger2h.addListener(listener);
+		merger4h.addListener(listener);
+		merger1d.addListener(listener);
+		merger1w.addListener(listener);
+	}
+	
 }

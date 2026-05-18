@@ -12,7 +12,6 @@ import org.dromara.northstar.common.constant.Interval;
 import org.dromara.northstar.common.model.core.Bar;
 import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.indicator.IndicatorValueUpdateHelper;
-import org.dromara.northstar.module.ModuleContext;
 import org.dromara.northstar.strategy.AbstractStrategy.BarHandler;
 import org.dromara.northstar.strategy.IModuleContext;
 import org.dromara.northstar.strategy.MergedBarListener;
@@ -42,12 +41,6 @@ public class BarMergerRegistry implements BarDataAware {
 		listenTypeMap.put(ListenerType.STRATEGY, strategyListeners);
 	}
 	
-	private ModuleContext ctx;
-	
-	public BarMergerRegistry(ModuleContext ctx) {
-		this.ctx = ctx;
-	}
-	
 	public void addListener(Contract contract, Interval interval, MergedBarListener listener) {
 		ListenerType type;
 		if(listener instanceof IModuleContext) {
@@ -70,7 +63,7 @@ public class BarMergerRegistry implements BarDataAware {
 		Optional.ofNullable(indicatorListeners.get(bar.contract(), bar.interval())).orElse(EMPTY_SET)
 			.forEach(listener -> listener.onMergedBar(bar));
 		
-		if(bar.unstable() || !ctx.isReady()) {
+		if(bar.unstable()) {
 			return;	// 未收盘的K线数据不传递到后面的监听器
 		}
 		
