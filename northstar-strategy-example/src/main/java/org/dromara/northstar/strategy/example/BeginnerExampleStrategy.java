@@ -89,7 +89,7 @@ public class BeginnerExampleStrategy extends AbstractStrategy	// 抽象类预实
 
 	@Override
 	public void onTick(Tick tick) {
-		logger.info("TICK触发: C:{} D:{} T:{} P:{} V:{} OI:{} OID:{}", 
+		logger.debug("TICK触发: C:{} D:{} T:{} P:{} V:{} OI:{} OID:{}", 
 				tick.contract().unifiedSymbol(), tick.actionDay(), tick.actionTime(),
 				tick.lastPrice(), tick.volume(), tick.openInterest(), tick.openInterestDelta());
 		long now = tick.actionTimestamp();
@@ -146,7 +146,7 @@ public class BeginnerExampleStrategy extends AbstractStrategy	// 抽象类预实
 
 	@Override
 	public void onMergedBar(Bar bar) {
-		logger.info("策略每分钟触发：{} {} {} {}", bar.contract().name(), bar.interval(), bar.actionDay(), bar.actionTime());
+		logger.debug("策略每分钟触发：{} {} {} {}", bar.contract().name(), bar.interval(), bar.actionDay(), bar.actionTime());
 	}
 
 	@Override
