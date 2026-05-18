@@ -53,9 +53,6 @@ public class BacktestModule implements IModule{
 	@Override
 	public void onEvent(NorthstarEvent event) {
 		Object data = event.getData();
-		if(!ctx.isReady()) {
-			return;
-		}
 		try {
 			if(data instanceof Tick tick) {
 				ctx.onTick(tick);

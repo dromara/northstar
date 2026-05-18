@@ -25,9 +25,7 @@ import org.dromara.northstar.common.constant.ChannelType;
 import org.dromara.northstar.common.constant.Constants;
 import org.dromara.northstar.common.constant.Interval;
 import org.dromara.northstar.common.constant.ModuleState;
-import org.dromara.northstar.common.constant.ModuleUsage;
 import org.dromara.northstar.common.constant.SignalOperation;
-import org.dromara.northstar.common.constant.TickType;
 import org.dromara.northstar.common.exception.NoSuchContractException;
 import org.dromara.northstar.common.model.ContractChartDescription;
 import org.dromara.northstar.common.model.ContractSimpleInfo;
@@ -180,9 +178,7 @@ public class ModuleContext implements IModuleContext{
 	@Override
 	public void submitOrderReq(TradeIntent tradeIntent) {
 		if(!isEnabled()) {
-			if(isReady()) {
-				logger.info("策略处于停用状态，忽略委托单");
-			}
+			logger.info("策略处于停用状态，忽略委托单");
 			return;
 		}
 		mktCenter.lastTick(tradeIntent.getContract()).ifPresentOrElse(tick -> {
@@ -334,49 +330,6 @@ public class ModuleContext implements IModuleContext{
 	}
 
 	@Override
-	public void initData(List<Bar> barData) {
-		if(barData.isEmpty()) {
-			logger.debug("初始化数据为空");
-			return;
-		}
-		
-		logger.debug("合约{} 初始化数据 {} {} -> {} {}", barData.getFirst().contract().unifiedSymbol(),
-				barData.getFirst().actionDay(), barData.getFirst().actionTime(),
-				barData.getLast().actionDay(), barData.getLast().actionTime());
-		for(Bar bar : barData) {
-			dummyTickOfBar(bar).forEach(this::onTick);
-			onBar(bar);
-		}
-
-		isReady = true;
-	}
-	
-	private List<Tick> dummyTickOfBar(Bar bar){
-		Tick.TickBuilder builder = Tick.builder()
-				.gatewayId(bar.gatewayId())
-				.contract(bar.contract())
-				.actionDay(bar.actionDay())
-				.actionTime(bar.actionTime())
-				.actionTimestamp(bar.actionTimestamp())
-				.tradingDay(bar.tradingDay())
-				.channelType(bar.channelType())
-				.type(TickType.INFO_TICK)
-				.volume(bar.volume())
-				.volumeDelta(bar.volumeDelta())
-				.openInterest(bar.openInterest())
-				.openInterestDelta(bar.openInterestDelta())
-				.turnover(bar.turnover())
-				.turnoverDelta(bar.turnoverDelta());
-	
-		return List.of(
-					builder.lastPrice(bar.openPrice()).build(),
-					builder.lastPrice(bar.highPrice()).build(),
-					builder.lastPrice(bar.lowPrice()).build(),
-					builder.lastPrice(bar.closePrice()).build()
-				);
-	}
-
-	@Override
 	public ModuleRuntimeDescription getRuntimeDescription() {
 		ModulePositionDescription posDescription = ModulePositionDescription.builder()
 				.logicalPositions(moduleAccount.getPositions().stream().map(p -> p.toPositionField().toByteArray()).toList())
@@ -502,9 +455,7 @@ public class ModuleContext implements IModuleContext{
 	@Override
 	public Optional<String> submitOrderReq(Contract contract, SignalOperation operation, PriceType priceType, int volume, double price) {
 		if(!isEnabled()) {
-			if(isReady()) {
-				logger.info("策略处于停用状态，忽略委托单");
-			}
+			logger.info("策略处于停用状态，忽略委托单");
 			return Optional.empty();
 		}
 		Assert.isTrue(volume > 0, "下单交易量应该为正数。当前为" + volume);
@@ -624,13 +575,6 @@ public class ModuleContext implements IModuleContext{
 		this.orderReqFilter = filter;
 	}
 
-	private boolean isReady;
-	
-	@Override
-	public boolean isReady() {
-		return isReady || moduleDescription.getUsage() == ModuleUsage.PLAYBACK;
-	}
-	
 	@Override
 	public int getDefaultVolume() {
 		return moduleDescription.getDefaultVolume();
@@ -661,7 +605,6 @@ public class ModuleContext implements IModuleContext{
 
 	public void setModule(IModule module) {
 		this.module = module;
-		isReady = true;
 	}
 
 }
