@@ -267,11 +267,12 @@ public class ModuleContext implements IModuleContext{
 
 	@Override
 	public void onBar(Bar bar) {
-		if(barFilterMap.contains(bar.contract(), bar.interval()) && barFilterMap.get(bar.contract(), bar.interval()) >= bar.actionTimestamp()) {
+		logger.trace("Bar数据: {} {} {} {} {} unstable:{}", bar.contract().name(), bar.interval(), bar.actionDay(), bar.actionTime(), bar.actionTimestamp(), bar.unstable());
+		if(barFilterMap.contains(bar.contract(), bar.interval()) && barFilterMap.get(bar.contract(), bar.interval()) > bar.actionTimestamp()) {
 			//过滤掉可能存在的重复数据
+			logger.trace("Bar数据被过滤：当前 {} 最新K线的时间为 {}", bar.interval(), CommonUtils.millsToLocalDateTime(barFilterMap.get(bar.contract(), bar.interval())));
 			return;
 		}
-		logger.trace("Bar数据: {} {} {} {} {} unstable:{}", bar.contract().name(), bar.interval(), bar.actionDay(), bar.actionTime(), bar.actionTimestamp(), bar.unstable());
 		barFilterMap.put(bar.contract(), bar.interval(), bar.actionTimestamp());
 		registry.onBar(bar);		
 	}
