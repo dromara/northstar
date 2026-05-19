@@ -67,10 +67,10 @@ public class IndexTicker {
 		if(tick.type() == TickType.INFO_TICK) {
 			return;
 		}
-		if(log.isTraceEnabled()) {
-			log.trace("{}指数合成器收到TICK: 月份合约{} 数据类型{} {} {} {}", idxContract.contract().unifiedSymbol(), tick.contract().symbol(), 
-					tick.type(), tick.actionDay(), tick.actionTime(), tick.actionTimestamp());
-		}
+//		if(log.isTraceEnabled()) {
+//			log.trace("{}指数合成器收到TICK: 月份合约{} 数据类型{} {} {} {}", idxContract.contract().unifiedSymbol(), tick.contract().symbol(), 
+//					tick.type(), tick.actionDay(), tick.actionTime(), tick.actionTimestamp());
+//		}
 		// 如果有过期的TICK数据(例如不活跃的合约),则并入下个K线
 		if (0 < lastTickTimestamp && lastTickTimestamp < tick.actionTimestamp()) {
 			boolean isReady = activeRate() > 0.7;
