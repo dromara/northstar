@@ -40,7 +40,7 @@ public class SimTickGenerator {
 	
 	public SimTickGenerator(Contract contract) {
 		this.contract = contract;
-		this.lastPrice = (5000D + ThreadLocalRandom.current().nextLong(-2000, 3000)) * contract.priceTick();
+		this.lastPrice = (10000D + ThreadLocalRandom.current().nextLong(-2000, 3000)) * contract.priceTick();
 		this.amplifier = (int) (1 / contract.priceTick());
 	}
 	

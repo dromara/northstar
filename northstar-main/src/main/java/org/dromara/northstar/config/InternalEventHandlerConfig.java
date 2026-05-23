@@ -5,7 +5,6 @@ import org.dromara.northstar.account.GatewayManager;
 import org.dromara.northstar.data.IGatewayRepository;
 import org.dromara.northstar.data.IMarketDataRepository;
 import org.dromara.northstar.event.AccountHandler;
-import org.dromara.northstar.event.BarAggregationHandler;
 import org.dromara.northstar.event.ConnectionHandler;
 import org.dromara.northstar.event.EventNotificationHandler;
 import org.dromara.northstar.event.IllegalOrderHandler;
@@ -16,7 +15,6 @@ import org.dromara.northstar.event.SimMarketHandler;
 import org.dromara.northstar.event.SseBroadcastHandler;
 import org.dromara.northstar.gateway.IContractManager;
 import org.dromara.northstar.gateway.mktdata.MarketCenter;
-import org.dromara.northstar.gateway.playback.GlobalPlaybackDataDetector;
 import org.dromara.northstar.module.ModuleManager;
 import org.dromara.northstar.support.utils.EventEmitterHolder;
 import org.dromara.northstar.support.utils.MessageSenderFacade;
@@ -75,12 +73,6 @@ class InternalEventHandlerConfig {
 	IllegalOrderHandler illegalOrderHandler() {
 		log.debug("注册：IllegalOrderHandler");
 		return new IllegalOrderHandler();
-	}
-	
-	@Bean
-	BarAggregationHandler barAggregationHandler(EventEmitterHolder emitterHolder, GatewayManager gatewayMgr, GlobalPlaybackDataDetector dataDetector) {
-		log.debug("注册：barAggregationHandler");
-		return new BarAggregationHandler(emitterHolder, gatewayMgr, dataDetector);
 	}
 	
 	@Bean

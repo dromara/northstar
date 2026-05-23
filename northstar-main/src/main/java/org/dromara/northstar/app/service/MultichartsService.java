@@ -13,7 +13,7 @@ import org.dromara.northstar.data.jdbc.OverlayRepository;
 import org.dromara.northstar.data.jdbc.entity.OverlayDO;
 import org.dromara.northstar.gateway.IContract;
 import org.dromara.northstar.gateway.mktdata.MarketCenter;
-import org.dromara.northstar.support.utils.bar.BarTimePadding;
+import org.dromara.northstar.kline.BarTimePadding;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

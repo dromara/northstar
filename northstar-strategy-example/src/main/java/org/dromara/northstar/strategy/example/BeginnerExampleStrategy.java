@@ -146,7 +146,7 @@ public class BeginnerExampleStrategy extends AbstractStrategy	// 抽象类预实
 
 	@Override
 	public void onMergedBar(Bar bar) {
-		logger.debug("策略每分钟触发");
+		logger.debug("策略每分钟触发：{} {} {} {}", bar.contract().name(), bar.interval(), bar.actionDay(), bar.actionTime());
 	}
 
 	@Override

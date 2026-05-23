@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.Period;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -50,6 +51,7 @@ import org.dromara.northstar.gateway.IContract;
 import org.dromara.northstar.gateway.TradeGateway;
 import org.dromara.northstar.gateway.contract.OptionChainContract;
 import org.dromara.northstar.gateway.mktdata.MarketCenter;
+import org.dromara.northstar.kline.KlineGenerator;
 import org.dromara.northstar.module.ArbitrageModuleContext;
 import org.dromara.northstar.module.ModuleContext;
 import org.dromara.northstar.module.ModuleManager;
@@ -260,10 +262,16 @@ public class ModuleService implements CommandLineRunner {
 		LocalDate from = LocalDate.now().minusWeeks(weeks);
 		LocalDate to = LocalDate.now();
 		List<Bar> bars = c.dataSource().getData(c.contract(), Interval.M1, from, to);
-		mctx.initData(bars.reversed());
 		// 本地仅加载最近的数据
 		List<Bar> data = mdRepo.loadBars(c, LocalDate.now(), LocalDate.now().plusDays(3));
-		mctx.initData(data);
+		List<Bar> minuteBars = new LinkedList<>();
+		minuteBars.addAll(bars.reversed());
+		minuteBars.addAll(data);
+		
+		KlineGenerator kg = new KlineGenerator(c.contract(), mctx::onBar);
+		for(Bar bar : minuteBars) {
+			kg.updateBar(bar);
+		}
 	}
 	
 	public List<ModuleVO> getModules() {

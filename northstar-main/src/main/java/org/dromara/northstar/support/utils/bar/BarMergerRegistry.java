@@ -1,42 +1,44 @@
 package org.dromara.northstar.support.utils.bar;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 import org.dromara.northstar.common.BarDataAware;
-import org.dromara.northstar.common.TickDataAware;
 import org.dromara.northstar.common.constant.Interval;
-import org.dromara.northstar.common.model.Identifier;
 import org.dromara.northstar.common.model.core.Bar;
 import org.dromara.northstar.common.model.core.Contract;
-import org.dromara.northstar.common.model.core.Tick;
 import org.dromara.northstar.indicator.IndicatorValueUpdateHelper;
-import org.dromara.northstar.module.ModuleContext;
 import org.dromara.northstar.strategy.AbstractStrategy.BarHandler;
 import org.dromara.northstar.strategy.IModuleContext;
 import org.dromara.northstar.strategy.MergedBarListener;
+
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.Table;
 
 /**
  * K线合成中心
  * @author KevinHuangwl
  *
  */
-public class BarMergerRegistry implements BarDataAware, TickDataAware{
+public class BarMergerRegistry implements BarDataAware {
+
+	private static final Set<MergedBarListener> EMPTY_SET = Collections.emptySet();
 	
-	protected Map<Identifier, BarMerger> mergerMap = new HashMap<>();
-	protected Map<ListenerType, List<BarMerger>> listenTypeMap = new EnumMap<>(ListenerType.class);
+	private Table<Contract, Interval, Set<MergedBarListener>> indicatorListeners = HashBasedTable.create();
+	private Table<Contract, Interval, Set<MergedBarListener>> contextListeners = HashBasedTable.create();
+	private Table<Contract, Interval, Set<MergedBarListener>> handlerListeners = HashBasedTable.create();
+	private Table<Contract, Interval, Set<MergedBarListener>> strategyListeners = HashBasedTable.create();
 	
-	private ModuleContext ctx;
-	
-	public BarMergerRegistry(ModuleContext ctx) {
-		this.ctx = ctx;
-		listenTypeMap.put(ListenerType.INDICATOR, new ArrayList<>());
-		listenTypeMap.put(ListenerType.CONTEXT, new ArrayList<>());
-		listenTypeMap.put(ListenerType.HANDLER, new ArrayList<>());
-		listenTypeMap.put(ListenerType.STRATEGY, new ArrayList<>());
+	private Map<ListenerType, Table<Contract, Interval, Set<MergedBarListener>>> listenTypeMap = new EnumMap<>(ListenerType.class);
+	{
+		listenTypeMap.put(ListenerType.INDICATOR, indicatorListeners);
+		listenTypeMap.put(ListenerType.CONTEXT, contextListeners);
+		listenTypeMap.put(ListenerType.HANDLER, handlerListeners);
+		listenTypeMap.put(ListenerType.STRATEGY, strategyListeners);
 	}
 	
 	public void addListener(Contract contract, Interval interval, MergedBarListener listener) {
@@ -50,28 +52,27 @@ public class BarMergerRegistry implements BarDataAware, TickDataAware{
 		} else {
 			type = ListenerType.STRATEGY;
 		}
-		Identifier identifier = makeIdentifier(type, contract, interval);
-		BarMerger merger = mergerMap.get(identifier);
-		if(merger == null) {
-			merger = BarMergerFactory.newInstance(interval, contract);
-			mergerMap.put(identifier, merger);
+		if(listenTypeMap.get(type).get(contract, interval) == null) {
+			listenTypeMap.get(type).put(contract, interval, new HashSet<>());
 		}
-		listenTypeMap.get(type).add(merger);
-		merger.addListener(listener);
-	}
-	
-	private Identifier makeIdentifier(ListenerType type, Contract contract, Interval interval) {
-		return Identifier.of(String.format("%s_%s_%s", type, contract.unifiedSymbol(), interval.getAlias()));
+		listenTypeMap.get(type).get(contract, interval).add(listener);
 	}
 	
 	@Override
 	public void onBar(Bar bar) {
-		listenTypeMap.get(ListenerType.INDICATOR).forEach(merger -> merger.onBar(bar));
-		listenTypeMap.get(ListenerType.HANDLER).forEach(merger -> merger.onBar(bar));
-		if(ctx.isReady()) {			
-			listenTypeMap.get(ListenerType.STRATEGY).forEach(merger -> merger.onBar(bar));
+		Optional.ofNullable(indicatorListeners.get(bar.contract(), bar.interval())).orElse(EMPTY_SET)
+			.forEach(listener -> listener.onMergedBar(bar));
+		
+		if(bar.unstable()) {
+			return;	// 未收盘的K线数据不传递到后面的监听器
 		}
-		listenTypeMap.get(ListenerType.CONTEXT).forEach(merger -> merger.onBar(bar));
+		
+		Optional.ofNullable(handlerListeners.get(bar.contract(), bar.interval())).orElse(EMPTY_SET)
+			.forEach(listener -> listener.onMergedBar(bar));
+		Optional.ofNullable(strategyListeners.get(bar.contract(), bar.interval())).orElse(EMPTY_SET)
+			.forEach(listener -> listener.onMergedBar(bar));
+		Optional.ofNullable(contextListeners.get(bar.contract(), bar.interval())).orElse(EMPTY_SET)
+			.forEach(listener -> listener.onMergedBar(bar));
 	}
 	
 	public enum ListenerType {
@@ -81,8 +82,4 @@ public class BarMergerRegistry implements BarDataAware, TickDataAware{
 		STRATEGY;
 	}
 
-	@Override
-	public void onTick(Tick tick) {
-		listenTypeMap.get(ListenerType.INDICATOR).forEach(merger -> merger.onTick(tick));
-	}
 }

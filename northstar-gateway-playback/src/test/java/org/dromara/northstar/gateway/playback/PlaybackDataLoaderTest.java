@@ -23,7 +23,6 @@ import org.dromara.northstar.common.model.core.ContractDefinition;
 import org.dromara.northstar.common.model.core.TimeSlot;
 import org.dromara.northstar.common.model.core.TradeTimeDefinition;
 import org.dromara.northstar.common.utils.CommonUtils;
-import org.dromara.northstar.gateway.IContract;
 import org.dromara.northstar.gateway.mktdata.NorthstarDataSource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,11 +31,9 @@ class PlaybackDataLoaderTest {
 	
 	NorthstarDataSource ds = mock(NorthstarDataSource.class);
 	
-	IContract ic = mock(IContract.class);
-	
 	Contract c = mock(Contract.class);
 	
-	PlaybackDataLoader loader = new PlaybackDataLoader("testGateway", List.of(ic), PlaybackPrecision.MEDIUM, ds);
+	PlaybackDataLoader loader = new PlaybackDataLoader("testGateway", List.of(c), PlaybackPrecision.MEDIUM, ds);
 	
 	Bar bar = Bar.builder()
 			.actionDay(LocalDate.now())
@@ -61,8 +58,6 @@ class PlaybackDataLoaderTest {
 	
 	@BeforeEach
 	void prepare() {
-		when(ic.dataSource()).thenReturn(ds);
-		when(ic.contract()).thenReturn(c);
 		when(c.contractDefinition()).thenReturn(cd);
 		when(ds.getData(any(), any(), any(), any())).thenReturn(List.of(bar));
 	}

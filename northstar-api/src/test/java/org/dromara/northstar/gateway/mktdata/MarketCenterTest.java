@@ -2,14 +2,12 @@ package org.dromara.northstar.gateway.mktdata;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.mockito.Mockito.mock;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Pattern;
 
 import org.dromara.northstar.common.constant.ChannelType;
-import org.dromara.northstar.common.event.FastEventEngine;
 import org.dromara.northstar.common.model.GatewayDescription;
 import org.dromara.northstar.common.model.Identifier;
 import org.dromara.northstar.common.model.core.Contract;
@@ -33,7 +31,7 @@ class MarketCenterTest {
 		}
 	};
 	
-	MarketCenter mktCenter = new MarketCenter(mock(FastEventEngine.class), List.of(pvider), new HashMap<>());
+	MarketCenter mktCenter = new MarketCenter(List.of(pvider), new HashMap<>());
 	
 	@Test
 	void testAddAndGetDefinitions() {

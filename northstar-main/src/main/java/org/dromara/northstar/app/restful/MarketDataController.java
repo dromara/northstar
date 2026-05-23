@@ -39,8 +39,8 @@ public class MarketDataController {
 	 * @param interval
 	 */
 	@GetMapping("subscribe")
-	public void subscribe(String[] contractIds) {
-		service.subscribe(Arrays.asList(contractIds));
+	public void subscribe(String[] contractIds, String[] intervals) {
+		service.subscribe(Arrays.asList(contractIds), Arrays.asList(intervals).stream().map(Interval::fromAlias).toList());
 	}
 	
 	/**

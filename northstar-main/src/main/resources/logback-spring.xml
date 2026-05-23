@@ -59,11 +59,11 @@
 			<charset>UTF-8</charset>
 		</encoder>
 	</appender>
-	<appender name="MKT_DATA"
+	<appender name="KlineData"
 		class="ch.qos.logback.core.rolling.RollingFileAppender">
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
 			<!--日志文件输出的文件名 -->
-			<FileNamePattern>${LOG_PATH}DEBUG/MarketData_%d{yyyy-MM-dd}.log
+			<FileNamePattern>${LOG_PATH}DEBUG/KlineData_%d{yyyy-MM-dd}.log
 			</FileNamePattern>
 			<!--日志文件保留天数 -->
 			<MaxHistory>3</MaxHistory>
@@ -82,10 +82,7 @@
 	<logger name="org.dromara.northstar.gateway.mktdata.MarketCenter" additivity="false">
 		<appender-ref ref="MC"/>
 	</logger>
-	<logger name="org.dromara.northstar.gateway.mktdata.IndexTicker" additivity="false">
-		<appender-ref ref="MKT_DATA"/>
-	</logger>
-	<logger name="org.dromara.northstar.gateway.mktdata.MinuteBarGenerator" additivity="false">
-		<appender-ref ref="MKT_DATA"/>
+	<logger name="org.dromara.northstar.event.KlineDispatcher" additivity="false">
+		<appender-ref ref="KlineData"/>
 	</logger>
 </configuration>  

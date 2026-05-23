@@ -79,7 +79,7 @@ public class SimTradeGatewayLocal extends TradeGateway{
 			
 			@Override
 			public void run() {
-				log.trace("账户 [{}] 定时反馈", description.getGatewayId());
+//				log.trace("账户 [{}] 定时反馈", description.getGatewayId());
 				try {					
 					feEngine.emitEvent(NorthstarEventType.ACCOUNT, account.account());
 					account.getPositionManager().positionFields().forEach(pf -> feEngine.emitEvent(NorthstarEventType.POSITION, pf));

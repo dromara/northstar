@@ -47,14 +47,6 @@ public interface Instrument {
 	ChannelType channelType();
 	
 	/**
-	 * 是否需要系统合成K线
-	 * @return
-	 */
-	default boolean barGeneraterRequired() {
-		return true;
-	}
-	
-	/**
 	 * 数据源
 	 * @return
 	 */

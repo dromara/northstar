@@ -1,8 +1,8 @@
 package org.dromara.northstar.app.service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -18,11 +18,11 @@ import org.dromara.northstar.common.model.core.Bar;
 import org.dromara.northstar.common.model.core.Contract;
 import org.dromara.northstar.common.utils.CommonUtils;
 import org.dromara.northstar.data.IMarketDataRepository;
-import org.dromara.northstar.event.BarAggregationHandler;
+import org.dromara.northstar.event.KlineDispatcher;
 import org.dromara.northstar.gateway.IContract;
 import org.dromara.northstar.gateway.mktdata.MarketCenter;
-import org.dromara.northstar.support.utils.bar.BarMerger;
-import org.dromara.northstar.support.utils.bar.BarMergerFactory;
+import org.dromara.northstar.kline.BarMerger;
+import org.dromara.northstar.kline.BarMergerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -39,7 +39,7 @@ public class MarketDataService {
 	private MarketCenter marketCenter;
 	
 	@Autowired
-	private BarAggregationHandler barAggHandler;
+	private KlineDispatcher klineDispatcher;
 	
 	@Autowired
 	private IMarketDataRepository mdRepo;
@@ -68,17 +68,17 @@ public class MarketDataService {
 			default -> throw new IllegalArgumentException("不支持的周期类型：" + interval);
 		};
 		
-		LocalDate toDate = CommonUtils.millsToLocalDateTime(Optional.ofNullable(toTime).orElse(System.currentTimeMillis())).toLocalDate();
-		LocalDate fromDate = fromTime == null ? toDate.minusDays(dayDif) : CommonUtils.millsToLocalDateTime(fromTime).toLocalDate();
+		LocalDateTime toDateTime = CommonUtils.millsToLocalDateTime(Optional.ofNullable(toTime).orElse(System.currentTimeMillis()));
+		LocalDateTime fromDateTime = fromTime == null ? toDateTime.minusDays(dayDif) : CommonUtils.millsToLocalDateTime(fromTime);
 		
-		if(toDate.isBefore(SINCE_DATE) && cnFutEx.contains(contract.exchange())) {
-			log.warn("国内期货行情历史回溯不能早于2021年1月1日，当前查询范围：{} -> {}", fromDate, toDate);
+		if(toDateTime.toLocalDate().isBefore(SINCE_DATE) && cnFutEx.contains(contract.exchange())) {
+			log.warn("国内期货行情历史回溯不能早于2021年1月1日，当前查询范围：{} -> {}", fromDateTime, toDateTime);
 			return Collections.emptyList();
-		} else if(toDate.isBefore(SINCE_DATE2)) {
-			log.warn("行情历史回溯不能早于2010年1月1日，当前查询范围：{} -> {}", fromDate, toDate);
+		} else if(toDateTime.toLocalDate().isBefore(SINCE_DATE2)) {
+			log.warn("行情历史回溯不能早于2010年1月1日，当前查询范围：{} -> {}", fromDateTime, toDateTime);
 			return Collections.emptyList();
 		}
-		log.info("查询历史数据，合约{}，周期{}，{} -> {}", contractId, interval.getAlias(), fromDate, toDate);
+		log.info("查询历史数据，合约{}，周期{}，{} -> {}", contractId, interval.getAlias(), fromDateTime, toDateTime);
 		
 		
 		IDataSource dataSource = contract.contractDefinition().dataSource();
@@ -86,7 +86,7 @@ public class MarketDataService {
 			return Collections.emptyList();
 		}
 		
-		List<Bar> bars = new LinkedList<>(dataSource.getData(contract, interval, fromDate, toDate).reversed());
+		List<Bar> bars = new LinkedList<>(dataSource.getData(contract, interval, fromDateTime.minusDays(1).toLocalDate(), toDateTime.plusDays(3).toLocalDate()).reversed());
 		List<Bar> mergedBars = new LinkedList<>();
 		// 本地仅加载最近的数据
 		List<Bar> data = mdRepo.loadBars(ic, LocalDate.now(), LocalDate.now().plusDays(3));
@@ -106,8 +106,8 @@ public class MarketDataService {
 		}
 		
 		return mergedBars.stream()
-				.filter(bar -> bar.actionTimestamp() < Optional.ofNullable(toTime).orElse(System.currentTimeMillis()))
-				.filter(bar -> bar.actionTimestamp() > Optional.ofNullable(fromTime).orElse(0L))
+				.filter(bar -> bar.actionTimestamp() <= CommonUtils.localDateTimeToMills(toDateTime))
+				.filter(bar -> bar.actionTimestamp() > CommonUtils.localDateTimeToMills(fromDateTime))
 				.map(bar -> BarVO.builder()
 						.timestamp(bar.actionTimestamp())
 						.open(bar.openPrice())
@@ -122,29 +122,15 @@ public class MarketDataService {
 				.toList();
 	}
 	
-	public void subscribe(List<String> contractIds) {
-		log.info("订阅K线，合约 {}", JSON.toJSONString(contractIds));
-		
-		Set<Contract> newSubscribedContracts = new HashSet<>();
+	public void subscribe(List<String> contractIds, List<Interval> intervals) {
+		log.info("订阅K线，合约 {}，周期 {}", JSON.toJSONString(contractIds), JSON.toJSONString(intervals));
+		klineDispatcher.unregisterAll();
 		contractIds.forEach(contractId -> {
 			final Contract contract = marketCenter.getContract(Identifier.of(contractId)).contract();
-			newSubscribedContracts.add(contract);
-			for(Interval barInterval : Interval.values()) {
-				barAggHandler.register(contract, barInterval, BarMergerFactory.newInstance(barInterval, contract));
+			for(Interval barInterval : intervals) {
+				klineDispatcher.register(contract, barInterval);
 			}
 		});
-		
-		unsubscribedContracts(newSubscribedContracts, barAggHandler.registeredContracts()).forEach(contract -> {
-			for(Interval barInterval : Interval.values()) {				
-				barAggHandler.unregister(contract,  barInterval);
-			}
-		});
-	}
-	
-	private Set<Contract> unsubscribedContracts(Set<Contract> newSet, Set<Contract> oldSet){
-		return oldSet.stream()
-				.filter(c -> !newSet.contains(c))
-				.collect(java.util.stream.Collectors.toSet());
 	}
 	
 	public List<TickVO> getActiveTicks() {

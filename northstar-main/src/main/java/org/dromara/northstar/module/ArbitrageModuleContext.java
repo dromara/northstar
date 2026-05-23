@@ -52,9 +52,7 @@ public class ArbitrageModuleContext extends ModuleContext implements IModuleCont
 		exec.execute(() -> {
 			logger.info("下单交由子线程处理");
 			if(!isEnabled()) {
-				if(isReady()) {
-					logger.info("策略处于停用状态，忽略委托单");
-				}
+				logger.info("策略处于停用状态，忽略委托单");
 				return;
 			}
 			mktCenter.lastTick(tradeIntent.getContract()).ifPresentOrElse(tick -> {
@@ -72,9 +70,7 @@ public class ArbitrageModuleContext extends ModuleContext implements IModuleCont
 	@Override
 	public Optional<String> submitOrderReq(Contract contract, SignalOperation operation, PriceType priceType, int volume, double price) {
 		if(!isEnabled()) {
-			if(isReady()) {
-				logger.info("策略处于停用状态，忽略委托单");
-			}
+			logger.info("策略处于停用状态，忽略委托单");
 			return Optional.empty();
 		}
 		Assert.isTrue(volume > 0, "下单交易量应该为正数。当前为" + volume);
@@ -143,74 +139,4 @@ public class ArbitrageModuleContext extends ModuleContext implements IModuleCont
 		getAccount(contract).cancelOrder(originOrderId);
 	}
 
-//	@Override
-//	public ModuleRuntimeDescription getRuntimeDescription(boolean fullDescription) {
-//		ModuleRuntimeDescription mrd = super.getRuntimeDescription(fullDescription);
-//		if(fullDescription) {
-//			if(contractMap.size() == 2) {
-//				Iterator<Contract> it = contractMap.values().iterator();
-//				Contract c1 = it.next();
-//				Contract c2 = it.next();
-//				Contract nearMonth = c1.lastTradeDate().isBefore(c2.lastTradeDate()) ? c1 : c2;
-//				Contract farMonth = c1 == nearMonth ? c2 : c1;
-//				String combName = String.format("%s-%s", nearMonth.name(), farMonth.name());
-//				JSONArray combBarArr = new JSONArray();
-//				JSONArray nearData = mrd.getDataMap().get(nearMonth.name());
-//				JSONArray farData = mrd.getDataMap().get(farMonth.name());
-//				if(nearData.size() == farData.size()) {
-//					for(int i = 0; i < nearData.size(); i++) {
-//						JSONObject near = nearData.getJSONObject(i);
-//						JSONObject far = farData.getJSONObject(i);
-//						combBarArr.add(compute(near, far));
-//					}
-//					mrd.getDataMap().put(combName, combBarArr);
-//				} else {
-//					logger.warn("近远月数据长度不一致，无法生成价差合约：{} {}", nearData.size(), farData.size());
-//				}
-//			} else if (contractMap.size() == 3) {
-//				List<Contract> contracts = contractMap.values().stream()
-//						.sorted((a,b) -> a.unifiedSymbol().compareTo(b.unifiedSymbol()))
-//						.toList();
-//				Contract nearMonth = contracts.get(0);
-//				Contract midMonth = contracts.get(1);
-//				Contract farMonth = contracts.get(2);
-//				JSONArray combBarArr = new JSONArray();
-//				JSONArray nearData = mrd.getDataMap().get(nearMonth.name());
-//				JSONArray midData = mrd.getDataMap().get(midMonth.name());
-//				JSONArray farData = mrd.getDataMap().get(farMonth.name());
-//				if(nearData.size() == midData.size() && midData.size() == farData.size()) {
-//					for(int i = 0; i < nearData.size(); i++) {
-//						JSONObject near = nearData.getJSONObject(i);
-//						JSONObject mid = midData.getJSONObject(i);
-//						JSONObject far = farData.getJSONObject(i);
-//						combBarArr.add(compute(near, mid, far));
-//					}
-//					mrd.getDataMap().put("蝶式价差率", combBarArr);
-//				} else {
-//					logger.warn("近中远月数据长度不一致，无法生成价差合约：{} {} {}", nearData.size(), midData.size(), farData.size());
-//				}
-//			}
-//		}
-//		return mrd;
-//	}
-	
-//	private JSONObject compute(JSONObject bar1, JSONObject bar2) {
-//		JSONObject json = new JSONObject();
-//		json.put("open", (bar1.getDoubleValue("open") - bar2.getDoubleValue("open")) / bar2.getDoubleValue("open") * 100);
-//		json.put("low", (bar1.getDoubleValue("low") - bar2.getDoubleValue("low")) / bar2.getDoubleValue("low") * 100);
-//		json.put("high", (bar1.getDoubleValue("high") - bar2.getDoubleValue("high")) / bar2.getDoubleValue("high") * 100);
-//		json.put("close", (bar1.getDoubleValue("close") - bar2.getDoubleValue("close")) / bar2.getDoubleValue("close") * 100);
-//		json.put("timestamp", bar1.getLongValue("timestamp"));
-//		return json;
-//	}
-//	
-//	private JSONObject compute(JSONObject near, JSONObject mid, JSONObject far) {
-//		JSONObject json = new JSONObject();
-//		json.put("open", (near.getDoubleValue("open") / mid.getDoubleValue("open") - mid.getDoubleValue("open") / far.getDoubleValue("open")) * 100);
-//		json.put("low", (near.getDoubleValue("low") / mid.getDoubleValue("low") - mid.getDoubleValue("low") / far.getDoubleValue("low")) * 100);
-//		json.put("high", (near.getDoubleValue("high") / mid.getDoubleValue("high") - mid.getDoubleValue("high") / far.getDoubleValue("high")) * 100);
-//		json.put("close", (near.getDoubleValue("close") / mid.getDoubleValue("close") - mid.getDoubleValue("close") / far.getDoubleValue("close")) * 100);
-//		json.put("timestamp", near.getLongValue("timestamp"));
-//		return json;
-//	}
 }

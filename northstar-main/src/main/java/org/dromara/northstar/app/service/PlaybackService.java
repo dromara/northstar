@@ -27,11 +27,11 @@ import org.dromara.northstar.gateway.playback.PlaybackContext;
 import org.dromara.northstar.gateway.playback.PlaybackGatewayAdapter;
 import org.dromara.northstar.gateway.playback.PlaybackStatus;
 import org.dromara.northstar.gateway.playback.PlaybackStatus.State;
+import org.dromara.northstar.kline.BarMerger;
+import org.dromara.northstar.kline.BarMergerFactory;
 import org.dromara.northstar.module.ModuleManager;
 import org.dromara.northstar.strategy.MergedBarListener;
 import org.dromara.northstar.support.utils.EventEmitterHolder;
-import org.dromara.northstar.support.utils.bar.BarMerger;
-import org.dromara.northstar.support.utils.bar.BarMergerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -150,7 +150,7 @@ public class PlaybackService {
 		}
 		long to = CommonUtils.localDateTimeToMills(getPlaybackContext().getPlaybackStatus().getRunningDateTime());
 		long endTime = to;
-		LocalDateTime toDateTime = CommonUtils.millsToLocalDateTime(to).plusDays(3);	// 考虑到CTP周五夜盘的情况，因此要多加载三天的冗余数据
+		LocalDateTime toDateTime = CommonUtils.millsToLocalDateTime(to);	
 		int dayDif = switch (interval) {
 			case M1,M3 -> 3;
 			case M5 -> 5;
