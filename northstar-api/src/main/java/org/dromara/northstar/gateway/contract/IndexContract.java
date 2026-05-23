@@ -34,12 +34,12 @@ public class IndexContract implements IContract {
 	
 	public IndexContract(List<IContract> monthContracts) {
 		this.monthContracts = monthContracts;
-		this.contract = makeIndexContractField(monthContracts.get(0).contract());
+		this.contract = makeIndexContract(monthContracts.get(0).contract());
 		this.dataSrc = monthContracts.get(0).dataSource();
 		this.identifier = Identifier.of(contract.contractId());
 	}
 	
-	private Contract makeIndexContractField(Contract proto) {
+	private Contract makeIndexContract(Contract proto) {
 		String name = proto.name().replaceAll("\\d+$", "指数");
 		String fullName = proto.fullName().replaceAll("\\d+$", "指数");
 		String originSymbol = proto.symbol();
